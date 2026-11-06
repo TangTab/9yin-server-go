@@ -91,10 +91,10 @@ const (
 	// 共用。其租约在出生时以及每次 215 响应时都从权威装备状态续期。
 	innerPowerBuffLease = 24 * time.Hour
 
-	// SP 是当前现代客户端的怒气资源。已安装的技能定义和现网 211 处理
-	// 都以 100 作为本地测试的满池值。所有 GM 及后续战斗获取路径都经由
-	// 这些辅助函数，客户端属性永远不会成为该资源的权威。
-	maxPlayerSP int32 = 100
+	// SP 是当前现代客户端的怒气资源。满池值对齐 fork 抓包实证
+	// (49840 帧 #16 登录全量批 MaxSP=80);所有 GM 及战斗获取路径都
+	// 经由这些辅助函数,客户端属性永远不会成为该资源的权威。
+	maxPlayerSP int32 = 80
 
 	// 本地测试的打坐恢复按现有的服务器秒每秒结算一次。用户规则：存活
 	// 的角色无论装备或内功推导出的总量如何，都在十秒内回满
@@ -1061,6 +1061,20 @@ func (p *playerActor) vitalUpdate() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, p.stateProperties())
 }
 
+// loginVitalUpdate 是登录/切图链的首个权威 0x10,也是 MaxSP 唯一的
+// 下发点:fork 抓包实证(49840 帧全场 5181 帧仅 #16 一处,121 属性全量
+// 批携带,fork 值 80;Java 参考服同为登录一次),之后的恢复批/事件批
+// 都不再携带,MaxSPAdd 则从不发送。把上限塞进 0x0D 归档或周期批会让
+// 客户端在进世界时崩溃。SP(467) 本就在 stateProperties 大批内,无独立
+// 登录怒气帧;这里只是在同一批上补一次上限声明。
+func (p *playerActor) loginVitalUpdate() ([]byte, error) {
+	properties := p.stateProperties()
+	properties = append(properties, clientdata.IndexedProperty{
+		Index: 580, Name: "MaxSP", Value: clientdata.Int32Value(maxPlayerSP),
+	})
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, properties)
+}
+
 // sitcrossTick 只推进服务器持有的 HP/MP 状态。调用方会发送生成的常规
 // 0x10 档案，因此客户端绝不会自行凭 HPHeartSpeed/MPHeartSpeed 虚构
 // 资源值。
@@ -1409,7 +1423,7 @@ func sendPlayerLocationAndVitals(conn sceneMessageConnection, player *playerActo
 	if err := conn.WriteFrame(serverLocation(playerObjectID, playerOwnerID, worldTransform(location))); err != nil {
 		return err
 	}
-	vitals, err := player.vitalUpdate()
+	vitals, err := player.loginVitalUpdate()
 	if err != nil {
 		return err
 	}

@@ -77,9 +77,9 @@ func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 
 func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
-	// 官方方言:常规属性档案(0x0D 与所有 0x10 批)一律不得携带
-	// MaxSP(580)/MaxSPAdd(583)——新版服务端反汇编零引用,客户端按
-	// SP 满值 100 本地呈现怒气球。
+	// 官方方言:常规属性档案(0x0D 与所有周期 0x10 批)不得携带
+	// MaxSP/MaxSPAdd——上限只在登录/切图全量批出现一次(49840 帧实证
+	// 仅 #16 一处)。
 	regular := make(map[string]int32)
 	for _, property := range player.stateProperties() {
 		regular[property.Name] = property.Value.I32
@@ -93,23 +93,35 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	if _, exists := regular["MaxSPAdd"]; exists {
 		t.Fatal("regular property profile must not carry MaxSPAdd")
 	}
-	// 登录链没有独立的怒气帧:SP(467) 随 stateProperties 大批下发,
-	// 值为满值 100(登录即满)。
-	frame, err := player.vitalUpdate()
+	// 登录/切图链的首个权威 0x10(=stateProperties 大批 + MaxSP 一次,
+	// 无独立怒气帧):SP(467)=满值 100,MaxSP(580)=100 恰好一次,
+	// MaxSPAdd 永不出现。
+	frame, err := player.loginVitalUpdate()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if frame[0] != 0x10 {
-		t.Fatalf("vital frame opcode=%#x", frame[0])
+		t.Fatalf("login vital frame opcode=%#x", frame[0])
 	}
 	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), 0, 0, 0}
 	if !bytes.Contains(frame, spNeedle) {
-		t.Fatalf("vitals batch misses SP=%d at index %d: %x", maxPlayerSP, propSP, frame)
+		t.Fatalf("login vital batch misses SP=%d at index %d: %x", maxPlayerSP, propSP, frame)
 	}
-	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8)}
+	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(maxPlayerSP), 0, 0, 0}
+	if !bytes.Contains(frame, maxSPNeedle) {
+		t.Fatalf("login vital batch misses MaxSP=%d at index 580: %x", maxPlayerSP, frame)
+	}
 	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8)}
-	if bytes.Contains(frame, maxSPNeedle) || bytes.Contains(frame, maxSPAddNeedle) {
-		t.Fatal("vitals batch must not carry MaxSP/MaxSPAdd")
+	if bytes.Contains(frame, maxSPAddNeedle) {
+		t.Fatal("MaxSPAdd is never sent on the wire")
+	}
+	// 常规批不再携带上限。
+	regularFrame, err := player.vitalUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(regularFrame, []byte{byte(580 & 0xff), byte(580 >> 8)}) {
+		t.Fatal("regular vitals batch must not carry MaxSP")
 	}
 }
 

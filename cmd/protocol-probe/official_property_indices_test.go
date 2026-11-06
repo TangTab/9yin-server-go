@@ -104,10 +104,11 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 	}
 }
 
-// TestOfficialDialectNeverSendsMaxSP 官方方言下 MaxSP(580)/MaxSPAdd(583)
-// 永不下发:新版服务端反汇编实证 exe 代码零引用;客户端按 SP 满值本地
-// 呈现。登录链所有 0x10 帧按官方线型逐项走帧,断言索引集不含 580/583。
-func TestOfficialDialectNeverSendsMaxSP(t *testing.T) {
+// TestOfficialDialectMaxSPLonginOnly 官方方言下 MaxSP(580) 只在登录/切图
+// 链首个权威 0x10 全量批出现一次(fork 49840 实证:全场 5181 帧仅 #16 一处,
+// 121 属性批携带);恢复批/事件批/0x0D 归档都不得再携带,MaxSPAdd(583) 则
+// 从不发送。塞错位置会让客户端在进世界时崩溃。
+func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 	for _, name := range []string{"MaxSP", "MaxSPAdd"} {
 		entry, ok := clientdata.PlayerProperty(name)
 		if !ok {
@@ -118,27 +119,52 @@ func TestOfficialDialectNeverSendsMaxSP(t *testing.T) {
 		}
 	}
 	player := newPlayerActor("本地角色", 0)
-	vitals, err := player.vitalUpdate()
+	// 登录批:stateProperties 大批 + MaxSP 一次(值=maxPlayerSP)。
+	login, err := player.loginVitalUpdate()
 	if err != nil {
 		t.Fatal(err)
 	}
-	indices, walkErr := propertyFrameIndices(vitals)
+	loginIndices, walkErr := propertyFrameIndices(login)
 	if walkErr != nil {
-		t.Fatalf("walk vitals 0x10 frame: %v", walkErr)
+		t.Fatalf("walk login 0x10 frame: %v", walkErr)
 	}
-	for _, index := range indices {
-		if index == 580 || index == 583 {
-			t.Fatalf("login vitals 0x10 carries forbidden index %d (MaxSP/MaxSPAdd)", index)
+	maxSPCount := 0
+	for _, index := range loginIndices {
+		if index == 580 {
+			maxSPCount++
+		}
+		if index == 583 {
+			t.Fatal("MaxSPAdd(583) is never sent on the wire")
 		}
 	}
-	// SP(467) 必须随登录 vitals 大批出现,且值为满值 100(登录即满)。
-	vitalIndices, _ := propertyFrameIndices(vitals)
-	if !containsIndex(vitalIndices, propSP) {
-		t.Fatalf("vitals batch misses SP at index %d", propSP)
+	if maxSPCount != 1 {
+		t.Fatalf("login batch carries MaxSP %d times, want exactly 1", maxSPCount)
+	}
+	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(maxPlayerSP), 0, 0, 0}
+	if !bytes.Contains(login, maxSPNeedle) {
+		t.Fatalf("login batch MaxSP slot is not %d: %x", maxPlayerSP, login)
+	}
+	// SP(467) 随同一大批出现且为满值(登录即满)。
+	if !containsIndex(loginIndices, propSP) {
+		t.Fatalf("login batch misses SP at index %d", propSP)
 	}
 	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), 0, 0, 0}
-	if !bytes.Contains(vitals, spNeedle) {
-		t.Fatalf("vitals batch SP slot is not %d: %x", maxPlayerSP, vitals)
+	if !bytes.Contains(login, spNeedle) {
+		t.Fatalf("login batch SP slot is not %d: %x", maxPlayerSP, login)
+	}
+	// 常规批(恢复/事件)不得携带 MaxSP/MaxSPAdd。
+	regular, err := player.vitalUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	regularIndices, walkErr := propertyFrameIndices(regular)
+	if walkErr != nil {
+		t.Fatalf("walk regular 0x10 frame: %v", walkErr)
+	}
+	for _, index := range regularIndices {
+		if index == 580 || index == 583 {
+			t.Fatalf("regular vitals batch carries forbidden index %d (MaxSP/MaxSPAdd)", index)
+		}
 	}
 }
 

@@ -22,10 +22,10 @@
         "resource": "city05"
       },
       "position": {
-        "x": 618.9511,
-        "y": 23.061,
-        "z": 757.9974,
-        "orient": 2.5381856
+        "x": 613.9133,
+        "y": 23.065,
+        "z": 761.37195,
+        "orient": 2.2301636
       }
     },
     "acct:v1:1b19908b5200163f322b30bbb4bf8b134f35bce64cb7995542435e1d8f7c67d0": {
@@ -430,7 +430,7 @@
       "account_version": 1,
       "role_version": 1,
       "appearance_version": 49,
-      "location_version": 17456
+      "location_version": 17477
     },
     "acct:v1:1b19908b5200163f322b30bbb4bf8b134f35bce64cb7995542435e1d8f7c67d0": {
       "account_id": 17,

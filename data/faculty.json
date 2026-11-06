@@ -11785,11 +11785,11 @@
     "2": {
       "cur_neigong": "ng_wd_001",
       "faculty": 1382559,
-      "faculty_state": 0,
+      "faculty_state": 2,
       "faculty_style": 1,
       "faculty_name": "ng_jh_001",
-      "fill_speed": 0,
-      "last_advance_utc": "2026-11-06T11:42:46.8583431Z",
+      "fill_speed": 200,
+      "last_advance_utc": "2026-11-06T14:18:52.9851791Z",
       "books": [
         {
           "config_id": "ng_wd_001",
@@ -11825,11 +11825,11 @@
         },
         {
           "config_id": "ng_jh_001",
-          "level": 1,
-          "fill": 0,
-          "total": 700,
-          "power": 120,
-          "max_power": 120
+          "level": 12,
+          "fill": 1300,
+          "total": 2900,
+          "power": 340,
+          "max_power": 340
         },
         {
           "config_id": "ng_em_001",

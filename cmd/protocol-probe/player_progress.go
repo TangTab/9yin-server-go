@@ -54,9 +54,9 @@ const (
 	propMinMagicDefAdd uint16 = 597
 )
 
-// MaxSP(580)/MaxSPAdd(583) 官方表存在但新版服务端从不下发(反汇编实证:
-// exe 代码零引用)。怒气上限由客户端按 SP 满值 100 本地呈现,服务端
-// 只下发 SP 当前值(467)。不定义常量,防止误用。
+// MaxSP(580)/MaxSPAdd(583) 官方表存在。MaxSP 只在登录/切图全量批由
+// player_actor.go 的 loginVitalUpdate 携带一次(49840 帧实证仅 #16 一处),
+// 其余任何批次不得携带;MaxSPAdd 从不下发。这里不定义常量,防止误用。
 
 // activeFacultyCardReward 刻意只在玩家从三张卡中选出一张（C->S 1006/23）
 // 之后才发放。主动页面并不是一个按分钟计的修炼计时器。
