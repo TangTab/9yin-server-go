@@ -94,6 +94,9 @@ type combatTickOutcome struct {
 	moves   []npcMoveUpdate
 	updates []npcPropertyUpdate
 	changed map[uint32]bool
+	// rageFrames 是受击得怒(格挡被揍 +2/直接被揍 +1)产生的 18 字节
+	// SP 单帧,按受击成员收集,锁外写给属主连接。
+	rageFrames map[uint32][]byte
 }
 
 func (r *sceneRun) combatTick(now time.Time) {
@@ -101,9 +104,14 @@ func (r *sceneRun) combatTick(now time.Time) {
 	if outcome == nil {
 		return
 	}
-	// 锁外帧写入：受击成员的 vitalUpdate、其远程属性帧扇出、
-	// 以及 NPC 移动/属性帧扇出。
+	// 锁外帧写入：受击得怒 SP 单帧、受击成员的 vitalUpdate、
+	// 其远程属性帧扇出、以及 NPC 移动/属性帧扇出。
 	for _, member := range outcome.members {
+		if frame, has := outcome.rageFrames[member.objectID]; has && member.view != nil {
+			if err := member.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: publish rage gain: %v", member.view.remote, err)
+			}
+		}
 		if !outcome.changed[member.objectID] {
 			continue
 		}
@@ -161,6 +169,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 	updates := make([]npcPropertyUpdate, 0, 2)
 	aggressors := 0
 	threatened := make(map[uint32]bool, len(targets))
+	var rage map[uint32][]byte
 	// eachCombatNPCFullLocked 以 EntityID 升序一次遍历交付全部组件指针；
 	// 分支逻辑与单连接时代逐行等价，就地修改即生效。
 	r.eachCombatNPCFullLocked(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
@@ -241,6 +250,14 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 		state.NextAttack = now.Add(state.AttackEvery)
 		outcome := target.player.resolveNPCAttack(meta.id, state.Damage, now)
+		if outcome.rageDelta != 0 {
+			if _, spFrame, spErr := target.player.addSP(outcome.rageDelta); spErr == nil && spFrame != nil {
+				if rage == nil {
+					rage = map[uint32][]byte{}
+				}
+				rage[target.objectID] = spFrame
+			}
+		}
 		remote := target.view.remote
 		if outcome.innerPowerTriggered {
 			log.Printf("%s: inner-power incoming passive triggered id=%d config=%s", remote, meta.id, meta.configID)
@@ -270,7 +287,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 	}
 	r.mu.Unlock()
-	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed}
+	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage}
 }
 
 // nearestTargetLocked 返回 aggroRange 内最近的存活目标；没有则返回 0。
@@ -438,12 +455,12 @@ func (r *sceneRun) setNPCTransformLocked(id worldcore.EntityID, destination worl
 func npcCombatProperties(state entity.ActorState) []clientdata.IndexedProperty {
 	hpRatio := int32(int64(state.HP) * 100 / int64(state.MaxHP))
 	return []clientdata.IndexedProperty{
-		{Index: 21, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
 		{Index: 28, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
 		{Index: 30, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
 		{Index: 32, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: 112, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
-		{Index: propDead, Name: "Dead", Value: clientdata.Int32Value(boolInt32(state.HP <= 0))},
+		{Index: 481, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
+		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
 	}
 }
 

@@ -105,6 +105,13 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	buffInfo := player.releaseParryBuff()
 	if engage {
 		buffInfo = player.engageParryBuff(now)
+		// 格挡清怒(官方 §3:msg54 手动格挡开启时任意当前值→0,
+		// 55866 四次 SP→0 单帧同构)。格挡态本身按"格挡被揍 +2"攒怒。
+		if _, spFrame, spErr := player.setSP(0); spErr == nil && spFrame != nil {
+			if writeErr := link.WriteFrame(spFrame); writeErr != nil {
+				return writeErr
+			}
+		}
 	}
 	name := player.snapshotName()
 	notice, err := serverCustomIntMessage(169,

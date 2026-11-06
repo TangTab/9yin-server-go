@@ -66,14 +66,16 @@ func starterSkillViewFrames() ([][]byte, error) {
 	}
 	for index, skill := range starterSkillViews {
 		frame, err := serverViewAdd(viewportSkill, uint16(index+1), []serverViewProperty{
-			viewString(7, skill.configID),
+			// 视图行取官方表玩家域(末现):ConfigID@1440(String)、
+			// Level@1465(Byte)、PauseTime@2240(Int32)。
+			viewString(1440, skill.configID),
 			viewInt(propStaticData, skill.staticData),
 			viewInt(propItemType, skill.itemType),
-			viewInt(6, skill.level),
+			viewByte(1465, byte(skill.level)),
 			viewInt(propMaxLevel, skill.maxLevel),
 			viewInt(propCurFillValue, skill.fill),
 			viewInt(propTotalFillValue, skill.total),
-			viewFloat(propPauseTime, skill.pauseTime),
+			viewInt(propPauseTime, int32(skill.pauseTime)),
 			viewByte(propSkillCanUse, 1),
 		})
 		if err != nil {

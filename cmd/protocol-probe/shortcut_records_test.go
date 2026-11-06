@@ -202,7 +202,7 @@ func TestSitcrossTickRestoresAuthoritativeHPAndMP(t *testing.T) {
 	properties := player.stateProperties()
 	gotRates := map[uint16]int32{}
 	for _, property := range properties {
-		if property.Index >= propHPHeartSpeed && property.Index <= propMPUpSpeedAdd {
+		if property.Index >= propHPUpSpeed && property.Index <= propMPHeartSpeedAdd {
 			gotRates[property.Index] = property.Value.I32
 		}
 	}

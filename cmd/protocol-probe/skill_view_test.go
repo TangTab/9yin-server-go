@@ -30,14 +30,14 @@ func TestStarterSkillViewUsesNativeSkillContainer(t *testing.T) {
 		}
 		for _, expected := range [][]byte{
 			[]byte(skill.configID + "\x00"),
-			{byte(propStaticData), byte(propStaticData >> 8)},
-			{byte(propItemType), byte(propItemType >> 8)},
-			{6, 0},
-			{byte(propMaxLevel), byte(propMaxLevel >> 8)},
-			{byte(propCurFillValue), byte(propCurFillValue >> 8)},
-			{byte(propTotalFillValue), byte(propTotalFillValue >> 8)},
-			{byte(propPauseTime), byte(propPauseTime >> 8)},
-			{byte(propSkillCanUse), byte(propSkillCanUse >> 8), 1},
+			{byte(propStaticData & 0xff), byte(propStaticData >> 8)},
+			{byte(propItemType & 0xff), byte(propItemType >> 8)},
+			{byte(1465 & 0xff), byte(1465 >> 8), 1}, // Level(官方玩家域,Byte)
+			{byte(propMaxLevel & 0xff), byte(propMaxLevel >> 8)},
+			{byte(propCurFillValue & 0xff), byte(propCurFillValue >> 8)},
+			{byte(propTotalFillValue & 0xff), byte(propTotalFillValue >> 8)},
+			{byte(propPauseTime & 0xff), byte(propPauseTime >> 8)},
+			{byte(propSkillCanUse & 0xff), byte(propSkillCanUse >> 8), 1},
 		} {
 			if !bytes.Contains(frame, expected) {
 				t.Fatalf("%s ViewAdd lacks %x: %x", skill.configID, expected, frame)

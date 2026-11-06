@@ -5,8 +5,6 @@ import (
 	"encoding/binary"
 	"testing"
 	"time"
-
-	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
 func TestPlayerActorPublishesYiHuaFactionAsSchool(t *testing.T) {
@@ -60,7 +58,7 @@ func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 	if sp != maxPlayerSP || player.skillSP() != maxPlayerSP {
 		t.Fatalf("set SP=%d actor=%d, want %d", sp, player.skillSP(), maxPlayerSP)
 	}
-	saturatedSP := []byte{byte(propSP), byte(propSP >> 8), byte(maxPlayerSP), byte(maxPlayerSP >> 8), 0, 0}
+	saturatedSP := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), byte(maxPlayerSP >> 8), 0, 0}
 	if frame[0] != 0x10 || !bytes.Contains(frame, saturatedSP) {
 		t.Fatalf("set SP frame=%x", frame)
 	}
@@ -79,9 +77,9 @@ func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 
 func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
-	// 常规属性档案（0x0D 归档与所有周期 0x10 批）不得携带 MaxSP/MaxSPAdd：
-	// 真机与新版服务端实证上限只在登录全量批出现一次，塞进归档或周期批
-	// 会让客户端进世界时崩溃。
+	// 官方方言:常规属性档案(0x0D 与所有 0x10 批)一律不得携带
+	// MaxSP(580)/MaxSPAdd(583)——新版服务端反汇编零引用,客户端按
+	// SP 满值 100 本地呈现怒气球。
 	regular := make(map[string]int32)
 	for _, property := range player.stateProperties() {
 		regular[property.Name] = property.Value.I32
@@ -95,27 +93,23 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	if _, exists := regular["MaxSPAdd"]; exists {
 		t.Fatal("regular property profile must not carry MaxSPAdd")
 	}
-	// 登录链的首个权威 0x10 是 MaxSP 唯一的下发点。
-	frame, err := player.loginVitalUpdate()
+	// 登录链没有独立的怒气帧:SP(467) 随 stateProperties 大批下发,
+	// 值为满值 100(登录即满)。
+	frame, err := player.vitalUpdate()
 	if err != nil {
 		t.Fatal(err)
 	}
-	maxSPNeedle := []byte{byte(propMaxSP), byte(propMaxSP >> 8), byte(maxPlayerSP), 0, 0, 0}
-	if frame[0] != 0x10 || !bytes.Contains(frame, maxSPNeedle) {
-		t.Fatalf("login vital frame misses MaxSP=%d at index %d: %x", maxPlayerSP, propMaxSP, frame)
+	if frame[0] != 0x10 {
+		t.Fatalf("vital frame opcode=%#x", frame[0])
 	}
-	maxSPAddNeedle := []byte{byte(propMaxSPAdd), byte(propMaxSPAdd >> 8)}
-	if bytes.Contains(frame, maxSPAddNeedle) {
-		t.Fatal("MaxSPAdd is never sent on the wire")
+	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), 0, 0, 0}
+	if !bytes.Contains(frame, spNeedle) {
+		t.Fatalf("vitals batch misses SP=%d at index %d: %x", maxPlayerSP, propSP, frame)
 	}
-	// 协商出的 0x09 属性表必须命名 MaxSP，客户端才能按位置绑定索引。
-	// 其 FieldSpec 位于全表末尾（0x09 表按位置定索引，不能插中段）。
-	named := make(map[string]bool)
-	for _, field := range sceneVisiblePropertyFields(clientdata.VisibleNPCModernV1().Fields) {
-		named[field.Name] = true
-	}
-	if !named["MaxSP"] {
-		t.Fatal("property table misses MaxSP")
+	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8)}
+	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8)}
+	if bytes.Contains(frame, maxSPNeedle) || bytes.Contains(frame, maxSPAddNeedle) {
+		t.Fatal("vitals batch must not carry MaxSP/MaxSPAdd")
 	}
 }
 
@@ -166,11 +160,11 @@ func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 	}
 	for _, expected := range [][]byte{
 		[]byte("ng_wd_001\x00"),
-		{byte(propStaticData), byte(propStaticData >> 8)},
-		{byte(propItemType), byte(propItemType >> 8)},
-		{byte(propMaxLevel), byte(propMaxLevel >> 8)},
-		{byte(propCurFillValue), byte(propCurFillValue >> 8)},
-		{byte(propMaxPowerValue), byte(propMaxPowerValue >> 8)},
+		{byte(propStaticData & 0xff), byte(propStaticData >> 8)},
+		{byte(propItemType & 0xff), byte(propItemType >> 8)},
+		{byte(propMaxLevel & 0xff), byte(propMaxLevel >> 8)},
+		{byte(propCurFillValue & 0xff), byte(propCurFillValue >> 8)},
+		{byte(propMaxPowerValue & 0xff), byte(propMaxPowerValue >> 8)},
 	} {
 		if !bytes.Contains(first, expected) {
 			t.Fatalf("first inner-power ViewAdd lacks %x: %x", expected, first)
@@ -286,7 +280,7 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	if len(refreshFrames) != 2 {
 		t.Fatalf("1006/24 refresh frames=%d want clear+restore", len(refreshFrames))
 	}
-	emptyFacultyName := []byte{byte(propFacultyName), byte(propFacultyName >> 8), 1, 0, 0, 0, 0}
+	emptyFacultyName := []byte{byte(propFacultyName & 0xff), byte(propFacultyName >> 8), 1, 0, 0, 0, 0}
 	if !bytes.Contains(refreshFrames[0], emptyFacultyName) {
 		t.Fatalf("1006/24 first frame must clear FacultyName: %x", refreshFrames[0])
 	}

@@ -20,49 +20,42 @@ const (
 	playerObjectID uint32 = 1
 	playerOwnerID  uint32 = 1
 
-	// 这些属性紧跟在 playerProgressFields（171..207）之后追加。其顺序
-	// 必须与 sceneVisiblePropertyFields 保持一致，因为 FxNet2 属性档案
-	// 只携带数字索引，不携带名称。228 起已被 player_progress.go 的
-	// MaxSP/MaxSPAdd 占用；新增属性只能取更高且未被占用的索引。
-	propNeigongPKStatus uint16 = 208
-	propDead            uint16 = 209
-	propCantUseSkill    uint16 = 210
-	propCurSkillID      uint16 = 211
-	propPauseTime       uint16 = 212
+	// 官方属性表(2370 项)玩家域索引(同名多处取末现)。官方表没有的
+	// 旧私有属性(CantUseSkill/CurSkillEffectID/CurSkillLevel)已删除,
+	// 不再下发。official_property_indices_test.go 按名断言防漂移。
+	propNeigongPKStatus uint16 = 85  // NeigongPKStatus Word(官方线型 2)
+	propDead            uint16 = 464 // Dead Byte(官方线型 1)
+	propCurSkillID      uint16 = 460 // CurSkillID String
+	propPauseTime       uint16 = 2240
 	// 原生主角 UI 将这些属性绑定为整数。它们描述的是对外通告的恢复
 	// 速率；真正的 HP/MP 变动仍以服务器为来源。
-	propHPHeartSpeed    uint16 = 213
-	propHPHeartSpeedAdd uint16 = 214
-	propMPHeartSpeed    uint16 = 215
-	propMPHeartSpeedAdd uint16 = 216
+	propHPHeartSpeed    uint16 = 617
+	propHPHeartSpeedAdd uint16 = 621
+	propMPHeartSpeed    uint16 = 618
+	propMPHeartSpeedAdd uint16 = 622
 	// form_main_player 的恢复提示框从这些独立属性获取实际恢复量，而不
 	// 是从 *HeartSpeed 读取。
-	propHPUpSpeed    uint16 = 217
-	propHPUpSpeedAdd uint16 = 218
-	propMPUpSpeed    uint16 = 219
-	propMPUpSpeedAdd uint16 = 220
-	// 常规的服务器技能状态会发布完整的公开用技元组。FxGameLogic 在判定
-	// 一个指向自身的技能能否进入其原生动作时，也会直接读取
-	// ModifySkillLockTime。
-	propCurSkillEffectID    uint16 = 221
-	propCurSkillLevel       uint16 = 222
-	propCurSkillTarget      uint16 = 223
-	propModifySkillLockTime uint16 = 224
+	propHPUpSpeed           uint16 = 615
+	propHPUpSpeedAdd        uint16 = 619
+	propMPUpSpeed           uint16 = 616
+	propMPUpSpeedAdd        uint16 = 620
+	propCurSkillTarget      uint16 = 627 // CurSkillTarget Object
+	propModifySkillLockTime uint16 = 221
 	// 已学技能对象对这个字节的使用独立于服务器的请求受理。现代快捷栏
 	// UI 直接读取 CanUse；当它缺失时，即使受保护的战斗请求路径仍能到达
 	// C2S 211，图标也会被渲染为不可用。
-	propSkillCanUse uint16 = 225
+	propSkillCanUse uint16 = 2236 // CanUse Byte(官服怒气灰化心跳簇同索引)
 	// 当前客户端并不通过 School 表达所有归属关系。其角色面板依次选用
 	// Force，再 NewSchool，最后 School。因此必须让这些协商属性保持显式，
 	// 后期势力和隐藏门派才不会被渲染成 \"无门派\"。
-	propForce     uint16 = 226
-	propNewSchool uint16 = 227
+	propForce     uint16 = 194 // Force String(玩家域)
+	propNewSchool uint16 = 190 // NewSchool String
 
 	// BufferListStr 是原生玩法的 BuffContainer 快照。BufferInfo 槽位是
 	// 原生视觉存储的投影。两者必须描述同一批活动 Buff：仅有 UI 的
 	// BufferInfo 不足以通过 qinggong_3 的原生 HasBuff("buf_qg_drift") 门控。
-	bufferListPropertyIndex      uint16 = 143
-	bufferInfoFirstPropertyIndex uint16 = bufferListPropertyIndex + 1
+	bufferListPropertyIndex      uint16 = 143 // BufferListStr String(全表唯一)
+	bufferInfoFirstPropertyIndex uint16 = 629 // BufferInfo1
 	bufferInfoSlotCount          uint16 = 24
 
 	redSuperArmorBuffSlot uint16 = 1
@@ -82,12 +75,12 @@ const (
 	// StaticData 4558、24h 租约。按下挂槽、松开清槽。
 	parryBuffSlot       uint16 = 11
 	parryBuffStaticData uint32 = 4558
-	// 格挡族属性（官方表 InParry@88/ParryValue@475；本仓协商表按
-	// 表尾追加 231..233，顺序与 sceneVisiblePropertyFields 一致）。
+	// 格挡族属性(官方表玩家域):InParry@471/InManualParry@474/
+	// ParryValue@475(场景域基块的 InParry@88 属 NPC 帧)。
 	// ParryValue 取参考帧基础值 100（无运功书/装备加成系统）。
-	propInParry         uint16 = 231
-	propInManualParry   uint16 = 232
-	propParryValue      uint16 = 233
+	propInParry         uint16 = 471
+	propInManualParry   uint16 = 474
+	propParryValue      uint16 = 475
 	parryValueReference int32  = 100
 
 	redSuperArmorStaticData uint32 = 8682
@@ -99,9 +92,9 @@ const (
 	innerPowerBuffLease = 24 * time.Hour
 
 	// SP 是当前现代客户端的怒气资源。已安装的技能定义和现网 211 处理
-	// 都以 80 作为本地测试的满池值。所有 GM 及后续战斗获取路径都经由
+	// 都以 100 作为本地测试的满池值。所有 GM 及后续战斗获取路径都经由
 	// 这些辅助函数，客户端属性永远不会成为该资源的权威。
-	maxPlayerSP int32 = 80
+	maxPlayerSP int32 = 100
 
 	// 本地测试的打坐恢复按现有的服务器秒每秒结算一次。用户规则：存活
 	// 的角色无论装备或内功推导出的总量如何，都在十秒内回满
@@ -113,7 +106,12 @@ const (
 	// HitHP-HP 瘀血层。
 	combatBruiseRecoveryPerSecond int32 = 10
 
-	// 战斗怒气恢复：战斗中的角色每个权威服务器秒回复五点 SP，直到 80
+	// 怒气事件得怒(官方规则,用户钉死):格挡状态被揍 +2、直接被揍 +1、
+	// 实招命中(目标未格挡)+2、攻击被招架 0。NPC 无格挡态,命中即 +2。
+	ragGainParriedHit   int32 = 2
+	ragGainUnparriedHit int32 = 1
+	ragGainCleanHit     int32 = 2
+	// 战斗怒气恢复：战斗中的角色每个权威服务器秒回复五点 SP，直到 100
 	// 上限为止，与正式服战斗中的缓慢回复一致。
 	combatRageRecoveryPerSecond int32 = 5
 )
@@ -326,7 +324,7 @@ func factionProperties(faction string) []clientdata.IndexedProperty {
 		school, newSchool = "", faction
 	}
 	return []clientdata.IndexedProperty{
-		{Index: 53, Name: "School", Value: clientdata.StringValue(school)},
+		{Index: 189, Name: "School", Value: clientdata.StringValue(school)},
 		{Index: propForce, Name: "Force", Value: clientdata.StringValue(force)},
 		{Index: propNewSchool, Name: "NewSchool", Value: clientdata.StringValue(newSchool)},
 	}
@@ -355,6 +353,10 @@ type npcAttackOutcome struct {
 	dead                bool
 	innerPowerTriggered bool
 	innerPowerHeal      int32
+	// rageDelta 是本次受击裁定的怒气增量(官方规则:格挡状态被揍 +2、
+	// 直接受击 +1;主动招架窗口等同格挡态)。由调用方在锁外编码成
+	// 18 字节 SP 单帧。
+	rageDelta int32
 }
 
 // resolveNPCAttack 是服务器权威的受击裁定。当前客户端已提供 C2S 的
@@ -370,7 +372,8 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 	}
 	parry := p.activeParrySnapshot()
 	if !parry.At.IsZero() && now.Sub(parry.At) >= 0 && now.Sub(parry.At) <= 600*time.Millisecond {
-		return npcAttackOutcome{parried: true}
+		// 主动招架窗口内的攻击按"格挡状态被揍"得怒。
+		return npcAttackOutcome{parried: true, rageDelta: ragGainParriedHit}
 	}
 	profile, hasProfile := p.equippedInnerPowerPassive()
 	activePassive, triggered := false, false
@@ -394,6 +397,11 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		}
 		return npcAttackOutcome{stateChanged: triggered || healed > 0, dodged: true, innerPowerTriggered: triggered, innerPowerHeal: healed}
 	}
+	// 手动格挡(msg54)状态下的实伤同样按格挡态得怒 +2,未格挡 +1。
+	ragGain := ragGainUnparriedHit
+	if p.parryingSnapshot() {
+		ragGain = ragGainParriedHit
+	}
 	p.mu.Lock()
 	changed := p.vitals.ApplyDamage(damage)
 	if !changed {
@@ -411,7 +419,7 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		p.skillLockUntil = now.Add(500 * time.Millisecond)
 		p.mu.Unlock()
 	}
-	return npcAttackOutcome{stateChanged: true, dead: dead}
+	return npcAttackOutcome{stateChanged: true, dead: dead, rageDelta: ragGain}
 }
 
 // combatPercentRoll 对同一攻击者和同一服务器 tick 是确定性的。它让
@@ -631,35 +639,32 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	now := time.Now()
 	hpRecovery := sitcrossRecoveryPerSecond(state.MaxHP)
 	mpRecovery := sitcrossRecoveryPerSecond(state.MaxMP)
-	currentSkillID, currentSkillEffectID, currentSkillLevel, currentSkillTarget := p.currentSkillID, p.currentSkillEffectID, p.currentSkillLevel, p.currentSkillTarget
+	currentSkillID, currentSkillTarget := p.currentSkillID, p.currentSkillTarget
 	hpRatio := int32(int64(state.HP) * 100 / int64(state.MaxHP))
 	hitHPRatio := int32(int64(state.HitHP) * 100 / int64(state.MaxHP))
 	mpRatio := int32(int64(state.MP) * 100 / int64(state.MaxMP))
 	properties := []clientdata.IndexedProperty{
-		{Index: 21, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
-		{Index: 28, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
-		{Index: 29, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
+		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: 469, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		{Index: 470, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
 		// 客户端用这些基础值加上 MaxHPAdd/MaxMPAdd 推导显示的总量。
 		// Actor.Max* 仍是服务器侧的总上限。
-		{Index: 30, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
-		{Index: 31, Name: "MaxMP", Value: clientdata.Int32Value(state.BaseMaxMP)},
-		{Index: 32, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: 33, Name: "MP", Value: clientdata.Int32Value(state.MP)},
-		{Index: 26, Name: "SpeedRatio", Value: clientdata.Int32Value(state.SpeedRatio)},
-		{Index: 112, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
-		{Index: 113, Name: "HitHPRatio", Value: clientdata.Int32Value(hitHPRatio)},
-		{Index: 114, Name: "QingGongPoint", Value: clientdata.Int32Value(state.QingGongPoint)},
-		{Index: 115, Name: "MaxQingGongPoint", Value: clientdata.Int32Value(state.MaxQingGongPoint)},
-		{Index: 116, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
-		{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Value: clientdata.Int32Value(0)},
-		{Index: propDead, Name: "Dead", Value: clientdata.Int32Value(boolInt32(state.HP <= 0))},
+		{Index: 578, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
+		{Index: 579, Name: "MaxMP", Value: clientdata.Int32Value(state.BaseMaxMP)},
+		{Index: 465, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		{Index: 466, Name: "MP", Value: clientdata.Int32Value(state.MP)},
+		{Index: 390, Name: "SpeedRatio", Value: clientdata.Int32Value(state.SpeedRatio)},
+		{Index: 481, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
+		{Index: 482, Name: "HitHPRatio", Value: clientdata.Int32Value(hitHPRatio)},
+		{Index: 692, Name: "QingGongPoint", Value: clientdata.Int32Value(state.QingGongPoint)},
+		{Index: 693, Name: "MaxQingGongPoint", Value: clientdata.Int32Value(state.MaxQingGongPoint)},
+		{Index: 694, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
+		{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Value: clientdata.WordValue(0)},
+		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
 		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
 		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
 		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryValueReference)},
-		{Index: propCantUseSkill, Name: "CantUseSkill", Value: clientdata.Int32Value(boolInt32(p.skillLockUntil.After(now)))},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue(currentSkillID)},
-		{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Value: clientdata.StringValue(currentSkillEffectID)},
-		{Index: propCurSkillLevel, Name: "CurSkillLevel", Value: clientdata.Int32Value(currentSkillLevel)},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.Value{Type: clientdata.WireObject, U64: currentSkillTarget}},
 		// 本地回环绝不应因某个属性缺失（为零）而无法通过客户端的技能/
 		// 动作同步容差检查。
@@ -672,8 +677,10 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propHPUpSpeedAdd, Name: "HPUpSpeedAdd", Value: clientdata.Int32Value(0)},
 		{Index: propMPUpSpeed, Name: "MPUpSpeed", Value: clientdata.Int32Value(mpRecovery)},
 		{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Value: clientdata.Int32Value(0)},
-		{Index: 36, Name: "Name", Value: clientdata.WideStringValue(state.Name)},
-		{Index: 111, Name: "CapitalType1", Value: clientdata.Int32Value(p.silver)},
+		{Index: 178, Name: "Name", Value: clientdata.WideStringValue(state.Name)},
+		// 官方玩家域 CapitalType1@417 线型 4(int64):货币按小端
+		// 八字节编码(真机抓包实证)。
+		{Index: 417, Name: "CapitalType1", Value: clientdata.Int64Value(int64(p.silver))},
 		{Index: bufferListPropertyIndex, Name: "BufferListStr", Value: clientdata.StringValue(p.bufferListStringLocked(now))},
 	}
 	properties = append(properties, factionProperties(p.faction)...)
@@ -694,19 +701,26 @@ func boolInt32(value bool) int32 {
 	return 0
 }
 
+func boolByte(value bool) byte {
+	if value {
+		return 1
+	}
+	return 0
+}
+
 // baseMotionProperties 提供 FxGameLogic 在创建普通跳跃动作时读取的
 // 玩家物理参数。客户端对 Gravity 没有服务器侧的兜底来源：只有当这个
 // 协商属性存在时它才会应用该值。9.8 是当前客户端使用的
 // 标准跳跃重力。
 func baseMotionProperties(motion playerMotion) []clientdata.IndexedProperty {
 	return []clientdata.IndexedProperty{
-		{Index: 168, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
-		{Index: 169, Name: "GravityAdd", Value: clientdata.Float32Value(0)},
+		{Index: 677, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
+		{Index: 678, Name: "GravityAdd", Value: clientdata.Float32Value(0)},
 		// 现代 FxGameLogic 的 FallDownManager 会从本地玩家对象查询
 		// DropHeightPub。它的兜底值只有 5.0 个世界单位；这里刻意使用
 		// 偏高的本地测试安全阈值，让普通的地形降落退出回着地动作，而非
 		// 进入倒地动作。 TODO: 后面改GM参数控制，默认 5.0
-		{Index: 170, Name: "DropHeightPub", Value: clientdata.Float32Value(100000)},
+		{Index: 389, Name: "DropHeightPub", Value: clientdata.Float32Value(100000)},
 	}
 }
 
@@ -725,8 +739,8 @@ func (p *playerActor) setMoveSpeed(value float32) ([]byte, error) {
 	motion := p.motion
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 23, Name: "MoveSpeed", Value: clientdata.Float32Value(motion.moveSpeed)},
-		{Index: 25, Name: "RunSpeed", Value: clientdata.Float32Value(motion.runSpeed)},
+		{Index: 384, Name: "MoveSpeed", Value: clientdata.Float32Value(motion.moveSpeed)},
+		{Index: 386, Name: "RunSpeed", Value: clientdata.Float32Value(motion.runSpeed)},
 	})
 }
 
@@ -736,7 +750,7 @@ func (p *playerActor) setGravity(value float32) ([]byte, error) {
 	motion := p.motion
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 168, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
+		{Index: 677, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
 	})
 }
 
@@ -1027,19 +1041,19 @@ func qinggongMotionProperties() []clientdata.IndexedProperty {
 		return clientdata.IndexedProperty{Index: index, Name: name, Value: clientdata.Float32Value(value)}
 	}
 	return []clientdata.IndexedProperty{
-		f(117, "RunSpeedAdd", 0), f(118, "JumpSpeedAdd", 0),
-		f(119, "DriftSpeed", waterSpeed), f(120, "DriftSpeedAdd", 0),
-		f(121, "DriftJumpSpeed", waterJumpSpeed), f(122, "DriftJumpSpeedAdd", 0),
-		f(123, "SndJumpSpeed", secondJumpSpeed), f(124, "SndJumpSpeedAdd", 0),
-		f(125, "ThdJumpSpeed", thirdJumpSpeed), f(126, "ThdJumpSpeedAdd", 0),
-		f(127, "AirRushSpeed", airRushSpeed), f(128, "AirRushSpeedAdd", 0),
-		f(129, "AirRushDist", airRushDist), f(130, "AirRushDistAdd", 0),
-		f(131, "LandRushSpeed", landRushSpeed), f(132, "LandRushSpeedAdd", 0),
-		f(133, "LandRushDist", landRushDist), f(134, "LandRushDistAdd", 0),
-		f(135, "ClimbSpeed", climbSpeed), f(136, "ClimbSpeedAdd", 0),
-		f(137, "GRushRange", groundRushRange), f(138, "GRushRangeAdd", groundRushRangeAdd),
-		f(139, "ARushRange", airRushRange), f(140, "ARushRangeAdd", airRushRangeAdd),
-		f(141, "WRushRange", waterRushRange), f(142, "WRushRangeAdd", waterRushRangeAdd),
+		f(388, "RunSpeedAdd", 0), f(682, "JumpSpeedAdd", 0),
+		f(655, "DriftSpeed", waterSpeed), f(656, "DriftSpeedAdd", 0),
+		f(659, "DriftJumpSpeed", waterJumpSpeed), f(660, "DriftJumpSpeedAdd", 0),
+		f(661, "SndJumpSpeed", secondJumpSpeed), f(662, "SndJumpSpeedAdd", 0),
+		f(663, "ThdJumpSpeed", thirdJumpSpeed), f(664, "ThdJumpSpeedAdd", 0),
+		f(665, "AirRushSpeed", airRushSpeed), f(666, "AirRushSpeedAdd", 0),
+		f(667, "AirRushDist", airRushDist), f(668, "AirRushDistAdd", 0),
+		f(669, "LandRushSpeed", landRushSpeed), f(670, "LandRushSpeedAdd", 0),
+		f(671, "LandRushDist", landRushDist), f(672, "LandRushDistAdd", 0),
+		f(679, "ClimbSpeed", climbSpeed), f(680, "ClimbSpeedAdd", 0),
+		f(873, "GRushRange", groundRushRange), f(876, "GRushRangeAdd", groundRushRangeAdd),
+		f(874, "ARushRange", airRushRange), f(877, "ARushRangeAdd", airRushRangeAdd),
+		f(875, "WRushRange", waterRushRange), f(878, "WRushRangeAdd", waterRushRangeAdd),
 	}
 }
 
@@ -1074,32 +1088,18 @@ func (p *playerActor) combatBruiseTick() bool {
 	return p.vitals.RecoverBruisedHPWhileFighting(combatBruiseRecoveryPerSecond)
 }
 
-// combatRageTick 在角色仍处于战斗中时结算固定的每秒 +5 怒气恢复。任何
-// 进入战斗的转换——使用技能或残留的 NPC 仇恨——都会让角色保持资格；
-// 打坐和死亡则永远不算。常规的属性档案更新已包含 SP，因此这里与其他
-// tick 层一样，沿用同一条已被验证的常规 0x10 属性路由。
-func (p *playerActor) combatRageTick() bool {
+// rageRecoveryTick 结算固定的每秒 +5 怒气恢复。官方模型(rage-recovery-
+// frames.md §5,55866 实证):不限战斗态,脱战照样回复;到 100 即停,
+// 满值期不再推送任何维持帧。tick 相位由调用方(1s facultyTicker)决定。
+func (p *playerActor) rageRecoveryTick() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.vitals.Logic != entity.LogicStateFighting {
+	if p.vitals.Logic == entity.LogicStateDied {
 		return false
 	}
 	before := p.progress.attributes.sp
 	p.progress.attributes.sp = clampPlayerSP(before + combatRageRecoveryPerSecond)
 	return p.progress.attributes.sp != before
-}
-
-// loginVitalUpdate 是登录/切图链的首个权威 0x10，也是 MaxSP 唯一的
-// 下发点：真机与新版服务端全量帧实证，怒气上限只在登录全量批出现一次
-//（61653 抓包全场 3964 帧仅 #88 一处，值 80），之后的任何恢复批/事件批
-// 都不再携带，MaxSPAdd 则从不发送。把上限塞进 0x0D 归档或周期批会让
-// 客户端在进世界时崩溃。
-func (p *playerActor) loginVitalUpdate() ([]byte, error) {
-	properties := p.stateProperties()
-	properties = append(properties, clientdata.IndexedProperty{
-		Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(maxPlayerSP),
-	})
-	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, properties)
 }
 
 // setCombatPresence 负责本地敌对 AI 的玩家侧生命周期。任何残留的 NPC
@@ -1158,10 +1158,8 @@ func (p *playerActor) clearCurrentSkill(expected string) bool {
 
 func (p *playerActor) currentSkillClearUpdate() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 21, Name: "LogicState", Value: clientdata.ByteValue(0)},
+		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(0)},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue("")},
-		{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Value: clientdata.StringValue("")},
-		{Index: propCurSkillLevel, Name: "CurSkillLevel", Value: clientdata.Int32Value(0)},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.ObjectValue(0, 0)},
 	})
 }
@@ -1215,9 +1213,13 @@ func (p *playerActor) setSP(value int32) (int32, []byte, error) {
 
 // addSP 是战斗/技能怒气奖励以及 GM 调整未来唯一的入口。在这里做饱和
 // 处理可保证 211 的消耗检查读到的正是客户端刚显示过的值。
+// addSP 是战斗/技能怒气奖励以及 GM 调整未来唯一的入口。饱和 [0,100];
+// 值未变化(已在边界)时不重推帧——官方满值停推,纯 SP 事件走 18 字节
+// 单帧 `10 00 01 00 00 11 0B 5C 7A 00 01 00 D3 01 <i32>`。
 func (p *playerActor) addSP(delta int32) (int32, []byte, error) {
 	p.mu.Lock()
-	next := int64(p.progress.attributes.sp) + int64(delta)
+	before := p.progress.attributes.sp
+	next := int64(before) + int64(delta)
 	if next < 0 {
 		next = 0
 	}
@@ -1227,6 +1229,9 @@ func (p *playerActor) addSP(delta int32) (int32, []byte, error) {
 	p.progress.attributes.sp = int32(next)
 	sp := p.progress.attributes.sp
 	p.mu.Unlock()
+	if sp == before {
+		return sp, nil, nil
+	}
 	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
 		{Index: propSP, Name: "SP", Value: clientdata.Int32Value(sp)},
 	})
@@ -1249,7 +1254,7 @@ func (p *playerActor) silverUpdate() ([]byte, error) {
 	silver := p.silver
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 111, Name: "CapitalType1", Value: clientdata.Int32Value(silver)},
+		{Index: 417, Name: "CapitalType1", Value: clientdata.Int64Value(int64(silver))},
 	})
 }
 
@@ -1293,6 +1298,16 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		msg = binary.LittleEndian.AppendUint32(msg, math.Float32bits(value))
 		count++
 	}
+	addWord := func(index uint16, value uint16) {
+		msg = binary.LittleEndian.AppendUint16(msg, index)
+		msg = binary.LittleEndian.AppendUint16(msg, value)
+		count++
+	}
+	addInt64 := func(index uint16, value int64) {
+		msg = binary.LittleEndian.AppendUint16(msg, index)
+		msg = binary.LittleEndian.AppendUint64(msg, uint64(value))
+		count++
+	}
 	addString := func(index uint16, value string) { msg = appendStringProperty(msg, index, value); count++ }
 	addObject := func(index uint16, value uint64) {
 		msg = binary.LittleEndian.AppendUint16(msg, index)
@@ -1300,49 +1315,48 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		count++
 	}
 
-	addByte(0, 2) // Type = TYPE_PLAYER
-	addByte(1, visual.sex)
-	addString(2, visual.photo)
-	addInt(3, 0) // Camp
-	addInt(4, 0) // Race
-	addInt(5, 0) // Job
-	addInt(6, 1) // Level
+	addByte(181, 2) // Type = TYPE_PLAYER(玩家域 181,Byte)
+	addByte(182, visual.sex)
+	addString(184, visual.photo)
+	addByte(174, 0)     // Camp(玩家域 174,官方线型 Byte)
+	addInt(4, 0)        // Race(全表唯一@4)
+	addString(1588, "") // Job(玩家域 1588,官方线型 String)
+	addByte(1465, 1)    // Level(玩家域 1465,官方线型 Byte)
 	addFloat(9, location.X)
 	addFloat(10, location.Y)
 	addFloat(11, location.Z)
 	addFloat(12, location.Orient)
-	addString(13, visual.hair)
-	addString(14, visual.face)
-	addString(15, visual.cloth)
-	addString(16, visual.pants)
-	addString(17, visual.shoes)
-	addString(18, visual.actionSet)
-	addString(19, "stand")
-	addInt(20, 0)
-	addByte(21, state.LogicState)
-	addFloat(22, 8.0)
-	addFloat(23, motion.moveSpeed)
-	addFloat(24, 7.5)
-	addFloat(25, motion.runSpeed)
-	addInt(26, state.SpeedRatio)
-	addByte(27, 0)
-	addInt(28, int32(int64(state.HP)*100/int64(state.MaxHP)))
-	addInt(29, int32(int64(state.MP)*100/int64(state.MaxMP)))
-	addInt(30, state.BaseMaxHP)
-	addInt(31, state.BaseMaxMP)
-	addInt(32, state.HP)
-	addInt(33, state.MP)
-	addInt(112, state.HitHP)
-	addInt(113, int32(int64(state.HitHP)*100/int64(state.MaxHP)))
-	addInt(114, state.QingGongPoint)
-	addInt(115, state.MaxQingGongPoint)
-	addInt(116, state.MaxQingGongPointAdd)
-	addInt(propNeigongPKStatus, 0)
-	addInt(propDead, boolInt32(state.HP <= 0))
-	addInt(propCantUseSkill, boolInt32(p.skillLockUntil.After(now)))
+	addString(188, visual.hair)
+	addString(185, visual.face)
+	addString(393, visual.cloth)
+	addString(394, visual.pants)
+	addString(395, visual.shoes)
+	addString(406, visual.actionSet)
+	addString(183, "stand")
+	addInt(20, 0) // FloatingState(全表唯一@20)
+	addByte(463, state.LogicState)
+	addFloat(681, 8.0)
+	addFloat(384, motion.moveSpeed)
+	addFloat(385, 7.5)
+	addFloat(386, motion.runSpeed)
+	addInt(390, state.SpeedRatio)
+	addByte(27, 0) // CantJump(全表唯一@27)
+	addInt(469, int32(int64(state.HP)*100/int64(state.MaxHP)))
+	addInt(470, int32(int64(state.MP)*100/int64(state.MaxMP)))
+	addInt(578, state.BaseMaxHP)
+	addInt(579, state.BaseMaxMP)
+	addInt(465, state.HP)
+	addInt(466, state.MP)
+	addInt(481, state.HitHP)
+	addInt(482, int32(int64(state.HitHP)*100/int64(state.MaxHP)))
+	addInt(692, state.QingGongPoint)
+	addInt(693, state.MaxQingGongPoint)
+	addInt(694, state.MaxQingGongPointAdd)
+	addWord(propNeigongPKStatus, 0)            // 官方线型 Word
+	addByte(propDead, boolByte(state.HP <= 0)) // 官方线型 Byte
+	// CantUseSkill:官方 2370 项表无此名,不再下发。
 	addString(propCurSkillID, p.currentSkillID)
-	addString(propCurSkillEffectID, p.currentSkillEffectID)
-	addInt(propCurSkillLevel, p.currentSkillLevel)
+	// CurSkillEffectID/CurSkillLevel:官方表无此名,不再下发。
 	addObject(propCurSkillTarget, p.currentSkillTarget)
 	addInt(propModifySkillLockTime, 5000)
 	addString(bufferListPropertyIndex, p.bufferListStringLocked(now))
@@ -1352,7 +1366,7 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	for _, property := range qinggongMotionProperties() {
 		addFloat(property.Index, property.Value.F32)
 	}
-	addInt(111, p.silver) // CapitalType1: 碎银；已在场景属性表中协商。
+	addInt64(417, int64(p.silver)) // CapitalType1(玩家域,官方线型 Int64):碎银
 	for _, slot := range nativeBuffSlots {
 		addString(bufferInfoPropertyIndex(slot), p.bufferInfoLocked(slot, now))
 	}
@@ -1360,10 +1374,10 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		msg = appendNPCProperty(msg, property)
 		count++
 	}
-	addString(35, visual.hair)
-	msg = appendWideStringProperty(msg, 36, state.Name)
+	addString(391, visual.hair) // Hat
+	msg = appendWideStringProperty(msg, 178, state.Name)
 	count++
-	msg = appendObjectProperty(msg, 100, 0, 0)
+	msg = appendObjectProperty(msg, 414, 0, 0) // LastObject(玩家域)
 	count++
 	binary.LittleEndian.PutUint16(msg[0x3d:], count)
 	p.mu.Unlock()
@@ -1387,11 +1401,15 @@ func sendPlayerAddObject(conn sceneMessageConnection, player *playerActor, locat
 	return conn.WriteFrame(player.addObject(location, visual))
 }
 
+// sendPlayerLocationAndVitals 发 0x1F 重定位 + 常规 vitals 大批 0x10。
+// 官方方言下没有独立的登录怒气帧:SP(467) 随 stateProperties 大批下发,
+// MaxSP/MaxSPAdd 永不下发(新版服务端反汇编实证,exe 零引用 580/583),
+// 客户端按 SP 满值 100 本地呈现怒气球。
 func sendPlayerLocationAndVitals(conn sceneMessageConnection, player *playerActor, location role.Position) error {
 	if err := conn.WriteFrame(serverLocation(playerObjectID, playerOwnerID, worldTransform(location))); err != nil {
 		return err
 	}
-	vitals, err := player.loginVitalUpdate()
+	vitals, err := player.vitalUpdate()
 	if err != nil {
 		return err
 	}

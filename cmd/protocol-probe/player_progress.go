@@ -7,63 +7,56 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
-// 这些字段刻意追加在已上线的动作/Buff schema 之后。现代客户端按协商的
-// 属性名解析角色绑定，但索引绝不能复用已在工作的轻功或 BuffStore
-// 槽位。
+// 官方属性表(2370 项)玩家域索引(同名多处取末现)。0x09 表按位置绑定,
+// 这些值必须与 internal/clientdata/official_property_table.txt 逐项一致;
+// official_property_indices_test.go 按名断言防漂移。
 const (
-	propCurNeiGong uint16 = 171 + iota
-	propFaculty
-	propFacultyState
-	propFacultyStyle
-	propFacultyName
-	propCurFillValue
-	propTotalFillValue
-	propCurLevel
-	propFillSpeed
-	propPowerValue
-	propMaxPowerValue
-	propSP
-	propStr
-	propSta
-	propDex
-	propIng
-	propSpi
-	propMeleePower
-	propMagicPower
-	propPhyHit
-	propMagicHit
-	propDodge
-	propMaxParry
-	propPhyDef
-	propStiDef
-	propNegDef
-	propMasDef
-	propJujDef
-	propMinMeleeDamage
-	propMaxMeleeDamage
-	propMaxHPAdd
-	propMaxMPAdd
-	propMaxLevel
+	propCurNeiGong     uint16 = 653 // CurNeiGong String
+	propFaculty        uint16 = 798 // Faculty Int32
+	propFacultyState   uint16 = 758
+	propFacultyStyle   uint16 = 759
+	propFacultyName    uint16 = 760
+	propCurFillValue   uint16 = 764
+	propTotalFillValue uint16 = 765
+	propCurLevel       uint16 = 763
+	propFillSpeed      uint16 = 773
+	propPowerValue     uint16 = 2287
+	propMaxPowerValue  uint16 = 2288
+	propSP             uint16 = 467 // SP Int32:怒气
+	propStr            uint16 = 485
+	propSta            uint16 = 489
+	propDex            uint16 = 487
+	propIng            uint16 = 486
+	propSpi            uint16 = 488
+	propMeleePower     uint16 = 500
+	propMagicPower     uint16 = 502
+	propPhyHit         uint16 = 556
+	propMagicHit       uint16 = 559
+	propDodge          uint16 = 562
+	propMaxParry       uint16 = 476
+	propPhyDef         uint16 = 584
+	propStiDef         uint16 = 586
+	propNegDef         uint16 = 588
+	propMasDef         uint16 = 589
+	propJujDef         uint16 = 587
+	propMinMeleeDamage uint16 = 510
+	propMaxMeleeDamage uint16 = 509
+	propMaxHPAdd       uint16 = 581
+	propMaxMPAdd       uint16 = 582
+	propMaxLevel       uint16 = 2083
 	// View 43 的条目是普通客户端对象。GoodsGrid 读取这两个属性来解析
 	// 当前的内功静态记录及其图片；对现代客户端而言仅有 ConfigID 是
 	// 不够的。
-	propStaticData
-	propItemType
-	// 装备内功的 PropModify 加成。保持追加在末尾，让已上线的 View=43
-	// 字段索引保持稳定。
-	propMaxParryAdd
-	propMinMagicDefAdd
+	propStaticData uint16 = 2237
+	propItemType   uint16 = 1889
+	// 装备内功的 PropModify 加成。
+	propMaxParryAdd    uint16 = 477
+	propMinMagicDefAdd uint16 = 597
 )
 
-// MaxSP/MaxSPAdd 与 SP 同批下发。官方 0x09 表索引是 580/583。这里必须
-// 显式取值而不能挂进上面的 iota：iota 末尾是 208/209，会与 player_actor.go
-// 的 propNeigongPKStatus(208)/propDead(209) 撞索引——FxNet2 属性档案只带
-// 数字索引不带名字，0x09 表一旦出现重复索引，客户端按索引解析到错误
-// 绑定（Dead 是进图前的无保护读取闸门），进游戏即崩。
-const (
-	propMaxSP    uint16 = 228
-	propMaxSPAdd uint16 = 229
-)
+// MaxSP(580)/MaxSPAdd(583) 官方表存在但新版服务端从不下发(反汇编实证:
+// exe 代码零引用)。怒气上限由客户端按 SP 满值 100 本地呈现,服务端
+// 只下发 SP 当前值(467)。不定义常量,防止误用。
 
 // activeFacultyCardReward 刻意只在玩家从三张卡中选出一张（C->S 1006/23）
 // 之后才发放。主动页面并不是一个按分钟计的修炼计时器。
@@ -248,48 +241,6 @@ func (p *playerProgress) refreshAllModernEffects() {
 	}
 }
 
-func playerProgressFields() []clientdata.FieldSpec {
-	return []clientdata.FieldSpec{
-		{Index: propCurNeiGong, Name: "CurNeiGong", Type: clientdata.WireString},
-		{Index: propFaculty, Name: "Faculty", Type: clientdata.WireInt32},
-		{Index: propFacultyState, Name: "FacultyState", Type: clientdata.WireInt32},
-		{Index: propFacultyStyle, Name: "FacultyStyle", Type: clientdata.WireInt32},
-		{Index: propFacultyName, Name: "FacultyName", Type: clientdata.WireString},
-		{Index: propCurFillValue, Name: "CurFillValue", Type: clientdata.WireInt32},
-		{Index: propTotalFillValue, Name: "TotalFillValue", Type: clientdata.WireInt32},
-		{Index: propCurLevel, Name: "CurLevel", Type: clientdata.WireInt32},
-		{Index: propFillSpeed, Name: "FillSpeed", Type: clientdata.WireInt32},
-		{Index: propPowerValue, Name: "PowerValue", Type: clientdata.WireInt32},
-		{Index: propMaxPowerValue, Name: "MaxPowerValue", Type: clientdata.WireInt32},
-		{Index: propSP, Name: "SP", Type: clientdata.WireInt32},
-		{Index: propStr, Name: "Str", Type: clientdata.WireInt32},
-		{Index: propSta, Name: "Sta", Type: clientdata.WireInt32},
-		{Index: propDex, Name: "Dex", Type: clientdata.WireInt32},
-		{Index: propIng, Name: "Ing", Type: clientdata.WireInt32},
-		{Index: propSpi, Name: "Spi", Type: clientdata.WireInt32},
-		{Index: propMeleePower, Name: "MeleePower", Type: clientdata.WireInt32},
-		{Index: propMagicPower, Name: "MagicPower", Type: clientdata.WireInt32},
-		{Index: propPhyHit, Name: "PhyHit", Type: clientdata.WireInt32},
-		{Index: propMagicHit, Name: "MagicHit", Type: clientdata.WireInt32},
-		{Index: propDodge, Name: "Dodge", Type: clientdata.WireInt32},
-		{Index: propMaxParry, Name: "MaxParry", Type: clientdata.WireInt32},
-		{Index: propPhyDef, Name: "PhyDef", Type: clientdata.WireInt32},
-		{Index: propStiDef, Name: "StiDef", Type: clientdata.WireInt32},
-		{Index: propNegDef, Name: "NegDef", Type: clientdata.WireInt32},
-		{Index: propMasDef, Name: "MasDef", Type: clientdata.WireInt32},
-		{Index: propJujDef, Name: "JujDef", Type: clientdata.WireInt32},
-		{Index: propMinMeleeDamage, Name: "MinMeleeDamage", Type: clientdata.WireInt32},
-		{Index: propMaxMeleeDamage, Name: "MaxMeleeDamage", Type: clientdata.WireInt32},
-		{Index: propMaxHPAdd, Name: "MaxHPAdd", Type: clientdata.WireInt32},
-		{Index: propMaxMPAdd, Name: "MaxMPAdd", Type: clientdata.WireInt32},
-		{Index: propMaxLevel, Name: "MaxLevel", Type: clientdata.WireInt32},
-		{Index: propStaticData, Name: "StaticData", Type: clientdata.WireInt32},
-		{Index: propItemType, Name: "ItemType", Type: clientdata.WireInt32},
-		{Index: propMaxParryAdd, Name: "MaxParryAdd", Type: clientdata.WireInt32},
-		{Index: propMinMagicDefAdd, Name: "MinMagicDefAdd", Type: clientdata.WireInt32},
-	}
-}
-
 func (p *playerProgress) book(id string) *learnedNeiGong {
 	for index := range p.books {
 		if p.books[index].configID == id {
@@ -386,10 +337,10 @@ func (p *playerProgress) bookFrame(slot uint16) ([]byte, error) {
 	}
 	book := p.books[slot-1]
 	return serverViewAdd(viewportNeiGong, slot, []serverViewProperty{
-		viewString(7, book.configID),
+		viewString(1440, book.configID),
 		viewInt(propStaticData, book.staticData),
 		viewInt(propItemType, book.itemType),
-		viewInt(6, book.level),
+		viewByte(1465, byte(book.level)),
 		viewInt(propMaxLevel, book.maxLevel),
 		viewInt(propCurFillValue, book.fill),
 		viewInt(propTotalFillValue, book.total),

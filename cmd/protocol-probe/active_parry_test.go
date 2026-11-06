@@ -50,15 +50,23 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 		}}
 	}
 
-	// 按下（0=engage）：msg169 + 0x10 两帧，槽 11 激活。
+	// 按下（0=engage）：官方 §3 同构三帧——SP=0 单帧(格挡清怒) +
+	// msg169 + 0x10 格挡属性帧，槽 11 激活。
 	if err := handleBlockStateCustom(conn, player, blockMsg(0), "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 2 {
-		t.Fatalf("engage frames=%d, want notice+state", len(frames))
+	if len(frames) != 3 {
+		t.Fatalf("engage frames=%d, want rage-clear+notice+state", len(frames))
 	}
-	notice, state := frames[0], frames[1]
+	spClear, notice, state := frames[0], frames[1], frames[2]
+	if spClear[0] != 0x10 {
+		t.Fatalf("rage clear frame=%x", spClear)
+	}
+	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), 0, 0, 0, 0}
+	if !bytes.Contains(spClear, spNeedle) {
+		t.Fatalf("engage must clear SP to 0 (index %d): %x", propSP, spClear)
+	}
 	if notice[0] != 0x1E || binary.LittleEndian.Uint16(notice[1:]) != 9 {
 		t.Fatalf("parry notice header=%x", notice)
 	}
@@ -85,7 +93,7 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if err := handleBlockStateCustom(conn, player, blockMsg(0), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 2 {
+	if got := len(conn.Frames()); got != 3 {
 		t.Fatalf("duplicate engage appended frames: %d", got)
 	}
 
@@ -93,7 +101,7 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if err := handleBlockStateCustom(conn, player, blockMsg(1), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 4 {
+	if got := len(conn.Frames()); got != 5 {
 		t.Fatalf("release frames=%d", got)
 	}
 	if player.parryingSnapshot() {
@@ -104,7 +112,7 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if err := handleBlockStateCustom(conn, player, blockMsg(1), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 5 {
+	if got := len(conn.Frames()); got != 6 {
 		t.Fatalf("stray release frames=%d, want one resync frame", got)
 	}
 	if player.parryingSnapshot() {

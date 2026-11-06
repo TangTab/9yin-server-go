@@ -21,6 +21,7 @@ type Value struct {
 func ByteValue(value uint8) Value        { return Value{Type: WireByte, U8: value} }
 func WordValue(value uint16) Value       { return Value{Type: WireWord, U16: value} }
 func Int32Value(value int32) Value       { return Value{Type: WireInt32, I32: value} }
+func Int64Value(value int64) Value       { return Value{Type: WireInt64, U64: uint64(value)} }
 func Float32Value(value float32) Value   { return Value{Type: WireFloat32, F32: value} }
 func StringValue(value string) Value     { return Value{Type: WireString, Text: value} }
 func WideStringValue(value string) Value { return Value{Type: WireWideString, Text: value} }
@@ -36,6 +37,8 @@ func (v Value) Native() any {
 		return v.U16
 	case WireInt32:
 		return v.I32
+	case WireInt64:
+		return int64(v.U64)
 	case WireFloat32:
 		return v.F32
 	case WireString, WireWideString:
@@ -80,15 +83,18 @@ type IndexedProperty struct {
 	Value Value
 }
 
-func (r ResolvedNPC) OrderedProperties(schema Schema) ([]IndexedProperty, error) {
+// OrderedProperties 按官方属性表顺序(每名取首现,即场景域)产出已解析属性。
+// 官方方言不认识的名字(旧兼容私有属性)会被静默丢弃——0x09 表是客户端
+// 位置绑定的唯一真源,缺席名字无法编码下发。
+func (r ResolvedNPC) OrderedProperties() ([]IndexedProperty, error) {
 	result := make([]IndexedProperty, 0, len(r.Properties))
-	for _, field := range schema.Fields {
+	for _, field := range officialSceneFields() {
 		property, exists := r.Properties[field.Name]
 		if !exists {
 			continue
 		}
 		if property.Value.Type != field.Type {
-			return nil, fmt.Errorf("clientdata: resolved NPC property %q type=%s, schema wants %s", field.Name, property.Value.Type, field.Type)
+			return nil, fmt.Errorf("clientdata: resolved NPC property %q type=%s, official table wants %s", field.Name, property.Value.Type, field.Type)
 		}
 		result = append(result, IndexedProperty{Index: field.Index, Name: field.Name, Value: property.Value})
 	}
@@ -108,6 +114,13 @@ var npcTemplateAliases = map[string]templateColumnBinding{
 	"StopTime": {Name: "StopTime", Occurrence: 1},
 }
 
+// npcTemplateStructuralFields 是模板表的结构列,只经由 npcTemplateAliases
+// 审定绑定(如 ConfigID→ID),不参与官方表同名直连——官方表玩家块的
+// "ID"@1462 是 Int32,直连会把字符串型模板 ID 列当整数解析而失败。
+var npcTemplateStructuralFields = map[string]struct{}{
+	"ID": {},
+}
+
 var creatorStructuralAttributes = map[string]struct{}{
 	"No": {}, "id": {},
 	"x": {}, "y": {}, "z": {},
@@ -115,12 +128,12 @@ var creatorStructuralAttributes = map[string]struct{}{
 	"sx": {}, "sy": {}, "sz": {},
 }
 
-func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInstance, options ResolveOptions) (ResolvedNPC, error) {
+func ResolveNPC(table *NPCTemplateTable, instance NPCCreatorInstance, options ResolveOptions) (ResolvedNPC, error) {
 	if table == nil {
 		return ResolvedNPC{}, fmt.Errorf("clientdata: resolve NPC %q with nil template table", instance.TemplateID)
 	}
-	if len(schema.Fields) == 0 {
-		return ResolvedNPC{}, errorsf("resolve NPC %q with empty schema", instance.TemplateID)
+	if OfficialPropertyCount() == 0 {
+		return ResolvedNPC{}, errorsf("resolve NPC %q with empty official property table", instance.TemplateID)
 	}
 	row, err := table.Lookup(instance.TemplateID)
 	if err != nil {
@@ -134,12 +147,15 @@ func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInsta
 		Properties:  make(map[string]PropertyValue),
 		Extensions:  make(map[string]string),
 	}
-	if err := applyValueLayer(schema, resolved.Properties, options.Defaults, Provenance{Layer: "default", Source: schema.ID}); err != nil {
+	if err := applyValueLayer(resolved.Properties, options.Defaults, Provenance{Layer: "default", Source: "official-property-table"}); err != nil {
 		return ResolvedNPC{}, err
 	}
 
 	consumedTemplate := make(map[int]struct{})
-	for _, field := range schema.Fields {
+	for _, field := range officialSceneFields() {
+		if _, structural := npcTemplateStructuralFields[field.Name]; structural {
+			continue
+		}
 		binding, explicit := npcTemplateAliases[field.Name]
 		if !explicit {
 			binding.Name = field.Name
@@ -177,7 +193,7 @@ func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInsta
 	}
 
 	consumedCreator := make(map[string]struct{})
-	for _, field := range schema.Fields {
+	for _, field := range officialSceneFields() {
 		raw, exists := instance.Attributes[field.Name]
 		if !exists || !raw.Present {
 			continue
@@ -200,13 +216,13 @@ func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInsta
 	if instance.Transform.AY != nil {
 		placement["Orient"] = Float32Value(*instance.Transform.AY)
 	}
-	if err := applyValueLayer(schema, resolved.Properties, placement, Provenance{Layer: "runtime", Source: instance.Source, Record: instance.Ordinal, Field: "transform"}); err != nil {
+	if err := applyValueLayer(resolved.Properties, placement, Provenance{Layer: "runtime", Source: instance.Source, Record: instance.Ordinal, Field: "transform"}); err != nil {
 		return ResolvedNPC{}, err
 	}
-	if err := applyValueLayer(schema, resolved.Properties, options.Runtime, Provenance{Layer: "runtime", Source: "resolve-options"}); err != nil {
+	if err := applyValueLayer(resolved.Properties, options.Runtime, Provenance{Layer: "runtime", Source: "resolve-options"}); err != nil {
 		return ResolvedNPC{}, err
 	}
-	if err := applyValueLayer(schema, resolved.Properties, options.Persisted, Provenance{Layer: "persisted", Source: "resolve-options"}); err != nil {
+	if err := applyValueLayer(resolved.Properties, options.Persisted, Provenance{Layer: "persisted", Source: "resolve-options"}); err != nil {
 		return ResolvedNPC{}, err
 	}
 
@@ -248,7 +264,7 @@ func occurrenceAt(indices []int, target int) int {
 	return -1
 }
 
-func applyValueLayer(schema Schema, target map[string]PropertyValue, values map[string]Value, provenance Provenance) error {
+func applyValueLayer(target map[string]PropertyValue, values map[string]Value, provenance Provenance) error {
 	keys := make([]string, 0, len(values))
 	for name := range values {
 		keys = append(keys, name)
@@ -256,12 +272,12 @@ func applyValueLayer(schema Schema, target map[string]PropertyValue, values map[
 	sort.Strings(keys)
 	for _, name := range keys {
 		value := values[name]
-		field, exists := schema.Field(name)
+		field, exists := SceneProperty(name)
 		if !exists {
-			return fmt.Errorf("clientdata: layer %s sets property %q absent from schema %s", provenance.Layer, name, schema.ID)
+			return fmt.Errorf("clientdata: layer %s sets property %q absent from official property table", provenance.Layer, name)
 		}
 		if value.Type != field.Type {
-			return fmt.Errorf("clientdata: layer %s property %q type=%s, schema wants %s", provenance.Layer, name, value.Type, field.Type)
+			return fmt.Errorf("clientdata: layer %s property %q type=%s, official table wants %s", provenance.Layer, name, value.Type, field.Type)
 		}
 		if value.Type == WireFloat32 && (math.IsNaN(float64(value.F32)) || math.IsInf(float64(value.F32), 0)) {
 			return fmt.Errorf("clientdata: layer %s property %q is not finite", provenance.Layer, name)
@@ -327,6 +343,9 @@ func parseIntegralInt32(raw string) (int32, error) {
 // VisibleNPCSpawnDefaultsCompatV1 单独收纳了原先在 protocol-probe 中
 // 与模板值混在一起的兼容性默认值。新版客户端数据与 creator
 // 属性仍然会覆盖这份默认配置。
+//
+// 官方属性表迁移(2026-11):旧兼容私有名 VisType/ExtraInfo/EscortFlag
+// 在官方 2370 项表中不存在,无法编码下发,已从默认值移除。
 func VisibleNPCSpawnDefaultsCompatV1() map[string]Value {
 	return map[string]Value{
 		"Type":             ByteValue(4),
@@ -350,14 +369,11 @@ func VisibleNPCSpawnDefaultsCompatV1() map[string]Value {
 		"Force":            Int32Value(0),
 		"MotionNoRotate":   ByteValue(0),
 		"CanPick":          ByteValue(0),
-		"VisType":          Int32Value(0),
 		"VisDataInt":       Int32Value(0),
 		"VisDataStr":       WideStringValue(""),
 		"HeadEffect":       Int32Value(0),
 		"NpcNickName":      WideStringValue(""),
-		"ExtraInfo":        StringValue(""),
 		"RoleHide":         Int32Value(0),
-		"EscortFlag":       Int32Value(0),
 		"SpringEffect":     StringValue(""),
 		"Material":         StringValue(""),
 		"WeaponName":       StringValue(""),

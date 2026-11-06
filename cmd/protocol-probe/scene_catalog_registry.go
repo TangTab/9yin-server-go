@@ -18,7 +18,6 @@ import (
 type sceneNPCRegistry struct {
 	tables   []*clientdata.NPCTemplateTable
 	root     string
-	schema   clientdata.Schema
 	dirs     map[string]string
 	mu       sync.Mutex
 	catalogs map[string][]npcSpawn
@@ -44,7 +43,7 @@ func normalizeClientScene(scene role.Scene) role.Scene {
 	return scene
 }
 
-func newSceneNPCRegistry(tableDir, creatorRoot string, schema clientdata.Schema) (*sceneNPCRegistry, error) {
+func newSceneNPCRegistry(tableDir, creatorRoot string) (*sceneNPCRegistry, error) {
 	tables, err := loadNPCTemplateTables(tableDir)
 	if err != nil {
 		return nil, err
@@ -62,7 +61,6 @@ func newSceneNPCRegistry(tableDir, creatorRoot string, schema clientdata.Schema)
 	return &sceneNPCRegistry{
 		tables:   tables,
 		root:     creatorRoot,
-		schema:   schema,
 		dirs:     dirs,
 		catalogs: make(map[string][]npcSpawn),
 		stats:    make(map[string]npcCatalogStats),
@@ -79,7 +77,7 @@ func (r *sceneNPCRegistry) catalogFor(scene role.Scene) ([]npcSpawn, npcCatalogS
 	if catalog, ok := r.catalogs[folder]; ok {
 		return catalog, r.stats[folder], nil
 	}
-	catalog, stats, err := loadNPCSceneSpawnsFromTables(r.tables, filepath.Join(r.root, folder), r.schema)
+	catalog, stats, err := loadNPCSceneSpawnsFromTables(r.tables, filepath.Join(r.root, folder))
 	if err != nil {
 		return nil, stats, fmt.Errorf("load NPC catalog for scene %s (%s): %w", scene.Resource, folder, err)
 	}

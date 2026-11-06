@@ -169,8 +169,7 @@ func TestResolveNPCLayeringAndRepeatedStopTimeBinding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	schema := VisibleNPCModernV1()
-	resolved, err := ResolveNPC(schema, table, catalog.Instances[0], ResolveOptions{
+	resolved, err := ResolveNPC(table, catalog.Instances[0], ResolveOptions{
 		Defaults:  map[string]Value{"NotPositive": Int32Value(9), "HP": Int32Value(100)},
 		Runtime:   map[string]Value{"HP": Int32Value(80)},
 		Persisted: map[string]Value{"HP": Int32Value(75)},
@@ -210,7 +209,7 @@ func TestResolveNPCSingleStopTimeBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 	instance := NPCCreatorInstance{TemplateID: "city_npc", Source: "city.xml", Ordinal: 1}
-	resolved, err := ResolveNPC(VisibleNPCModernV1(), table, instance, ResolveOptions{Defaults: VisibleNPCSpawnDefaultsCompatV1()})
+	resolved, err := ResolveNPC(table, instance, ResolveOptions{Defaults: VisibleNPCSpawnDefaultsCompatV1()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -237,37 +236,6 @@ func TestWireValueValidation(t *testing.T) {
 	value, err := parseWireValue(WireInt32, "30000.0")
 	if err != nil || value.I32 != 30000 {
 		t.Fatalf("integral decimal=%v err=%v", value.Native(), err)
-	}
-}
-
-func TestModernNPCSchemaRetainsNpcTypesAboveByteRange(t *testing.T) {
-	compat, _ := VisibleNPCCompatV1().Field("NpcType")
-	modern, _ := VisibleNPCModernV1().Field("NpcType")
-	if compat.Type != WireByte || modern.Type != WireInt32 {
-		t.Fatalf("NpcType schema compat=%s modern=%s", compat.Type, modern.Type)
-	}
-	value, err := parseWireValue(modern.Type, "1228")
-	if err != nil || value.I32 != 1228 {
-		t.Fatalf("modern NpcType 1228=%v err=%v", value.Native(), err)
-	}
-}
-
-func TestVisibleNPCSchemaGoldens(t *testing.T) {
-	for _, test := range []struct {
-		schema Schema
-		want   string
-	}{
-		{VisibleNPCCompatV1(), "aacd3667bfe351ce472c5b3ca12547cd6ab46aee512db44999b8e9442a6eb71d"},
-		{VisibleNPCModernV1(), "9d4abf699557c65e71a7384f93a4faa9cd178b4ea067390382d78b97c1ef3ad3"},
-	} {
-		var canonical strings.Builder
-		for _, field := range test.schema.Fields {
-			fmt.Fprintf(&canonical, "%d:%s:%d;", field.Index, field.Name, field.Type)
-		}
-		got := fmt.Sprintf("%x", sha256.Sum256([]byte(canonical.String())))
-		if got != test.want {
-			t.Fatalf("schema %s golden=%s, want %s", test.schema.ID, got, test.want)
-		}
 	}
 }
 
@@ -383,8 +351,7 @@ func TestFuncNpc01608GoldenAgainstModernClientData(t *testing.T) {
 			t.Fatalf("creator attribute %s=%#v, want %q", name, got, want)
 		}
 	}
-	modernSchema := VisibleNPCModernV1()
-	resolved, err := ResolveNPC(modernSchema, table, instance, ResolveOptions{Defaults: VisibleNPCSpawnDefaultsCompatV1()})
+	resolved, err := ResolveNPC(table, instance, ResolveOptions{Defaults: VisibleNPCSpawnDefaultsCompatV1()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -402,12 +369,14 @@ func TestFuncNpc01608GoldenAgainstModernClientData(t *testing.T) {
 			t.Fatalf("resolved %s provenance=%#v, want %s", name, actual.Provenance, expected.Source)
 		}
 	}
-	ordered, err := resolved.OrderedProperties(modernSchema)
+	ordered, err := resolved.OrderedProperties()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ordered) != 83 {
-		t.Fatalf("materialized compatibility properties=%d, want 83", len(ordered))
+	// 官方方言:Order 按官方 2370 项表场景域(首现)产出;旧兼容私有名
+	// VisType/ExtraInfo/EscortFlag 官方表缺席,不再物化(83 → 80)。
+	if len(ordered) != 80 {
+		t.Fatalf("materialized official-dialect properties=%d, want 80", len(ordered))
 	}
 }
 

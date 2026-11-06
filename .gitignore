@@ -2,6 +2,7 @@
 
 /artifacts/
 /build/
+/artifacts/
 /logs/
 /resources/
 *.exe

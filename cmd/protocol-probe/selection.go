@@ -14,9 +14,9 @@ import (
 // docs/combat-traffic-compare.md（49840 抓包钉死帧形）。
 const clientCustomSelectTarget int32 = 431
 
-// AutoSelectObject 与 LastObject（表位 100）配对：fork 每次选择目标
-// 回两帧属性（官方表 414/415；本仓协商表按追加约定放在表尾 230）。
-const propAutoSelectObject uint16 = 230
+// AutoSelectObject 与 LastObject 配对：fork 每次选择目标回两帧属性
+// (官方表玩家域 414/415)。
+const propAutoSelectObject uint16 = 415
 
 // handleSelectTargetCustom 还原 fork selection.go:102-129：
 // packed raw16 = objId(低 32) | owner(高 32)。清零目标走
@@ -69,7 +69,7 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 // 属性帧（fork scene_lifecycle.go:1090-1094 writePlayerTargetLocked；
 // 49840 抓包 s2c 0x10 双帧逐字节对应）。
 func (s *sceneLifecycle) writePlayerTargetLocked(targetID, targetOwner uint32) error {
-	if err := s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, 100, targetID, targetOwner)); err != nil {
+	if err := s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, 414, targetID, targetOwner)); err != nil {
 		return err
 	}
 	return s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, uint32(propAutoSelectObject), targetID, targetOwner))

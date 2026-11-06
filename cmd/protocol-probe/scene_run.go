@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/ecs"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
@@ -312,7 +311,7 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 		position := npc.schedule.positionAt(time.Now().UnixMilli())
 		npc.x, npc.y, npc.z, npc.orient = position.x, position.y, position.z, position.orient
 	}
-	orderedProperties, err := npc.resolved.OrderedProperties(clientdata.VisibleNPCModernV1())
+	orderedProperties, err := npc.resolved.OrderedProperties()
 	if err != nil {
 		return fmt.Errorf("resolve NPC %s properties: %w", npc.resolved.ConfigID, err)
 	}

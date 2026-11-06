@@ -41,10 +41,10 @@ func TestCaptureSessionPrefixMatchesReferenceNaming(t *testing.T) {
 }
 
 // TestCapturedConnectionDumpsReferenceCompatibleStream 验证三个契约：
-// 1. 文件名与参考服抓包一致（<ip-pid>_c2s.bin / _s2c.bin）；
-// 2. 记录的是 socket 上的最终线上字节（XOR+转义+EE EE 帧尾），而不是明文；
-// 3. 生成的 .bin 能被参考解析器的规则（EE EE 切帧 → 去转义 → 帧内偏移
-//    XOR KEY=CC 3B 6D FA）解回原始明文帧。
+//  1. 文件名与参考服抓包一致（<ip-pid>_c2s.bin / _s2c.bin）；
+//  2. 记录的是 socket 上的最终线上字节（XOR+转义+EE EE 帧尾），而不是明文；
+//  3. 生成的 .bin 能被参考解析器的规则（EE EE 切帧 → 去转义 → 帧内偏移
+//     XOR KEY=CC 3B 6D FA）解回原始明文帧。
 func TestCapturedConnectionDumpsReferenceCompatibleStream(t *testing.T) {
 	dir := t.TempDir()
 	stream := &fakeCaptureStream{in: bytes.NewBuffer(nil), out: bytes.NewBuffer(nil)}

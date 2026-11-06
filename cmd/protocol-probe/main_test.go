@@ -50,118 +50,65 @@ func TestStarterNPCUsesClientResourceIdentity(t *testing.T) {
 	}
 }
 
-func TestModernVisiblePropertyTableNegotiatesInt32NpcType(t *testing.T) {
-	schema := clientdata.VisibleNPCModernV1()
-	msg := visiblePropertyTable(schema.Fields)
-	if got := binary.LittleEndian.Uint16(msg[1:]); got != 99 {
-		t.Fatalf("visible property count=%d, want 99", got)
+// TestOfficialPropertyTableFrameIsVerbatim 官方 0x09 表(2370 项)逐行
+// 透传:计数、NpcType@34 官方即 Int32(旧 ModernV1 协商 hack 退役)、
+// 玩家域关键锚点全部按位置出现。帧内容必须与官方方言逐字节一致。
+func TestOfficialPropertyTableFrameIsVerbatim(t *testing.T) {
+	msg := officialPropertyTableFrame()
+	if msg[0] != 0x09 {
+		t.Fatalf("property table opcode=%#x", msg[0])
 	}
-	needle := append([]byte("NpcType"), 0, byte(clientdata.WireInt32))
-	if !bytes.Contains(msg, needle) {
-		t.Fatalf("property table does not negotiate NpcType as int32: %x", needle)
+	if got := binary.LittleEndian.Uint16(msg[1:]); got != 2370 {
+		t.Fatalf("official property count=%d, want 2370", got)
 	}
-}
-
-// TestSceneVisiblePropertyIndicesAreUnique 守护 0x09 协商表的核心不变量。
-// 0x09 的线上格式只有 (name, type) 对，客户端按条目位置赋予数字索引；
-// FieldSpec.Index 必须恒等于条目的 0 基位置。一旦有字段插进表中段
-// （或 Index 声明与位置不符），0x10 帧携带的数字索引就会整体错绑
-// （Dead 等属性被客户端无保护读取），进游戏即崩。MaxSP 曾两次踩中：
-// 先是与 208/209 撞索引，后是 FieldSpec 插在 playerProgressFields 末尾
-// 让 actor 段整体偏移 +2。
-func TestSceneVisiblePropertyIndicesAreUnique(t *testing.T) {
-	fields := sceneVisiblePropertyFields(clientdata.VisibleNPCModernV1().Fields)
-	for position, field := range fields {
-		if int(field.Index) != position {
-			t.Fatalf("property %q declares Index=%d but sits at table position %d; the 0x09 wire table is positional, move the FieldSpec to the end of sceneVisiblePropertyFields and use the next free index",
-				field.Name, field.Index, position)
-		}
+	npcType := append([]byte("NpcType"), 0, byte(clientdata.WireInt32))
+	if !bytes.Contains(msg, npcType) {
+		t.Fatal("official table does not negotiate NpcType as int32")
 	}
-}
-
-func TestSceneVisiblePropertyTableIncludesMaxVisuals(t *testing.T) {
-	schema := clientdata.VisibleNPCModernV1()
-	msg := visiblePropertyTable(sceneVisiblePropertyFields(schema.Fields))
-	if got := binary.LittleEndian.Uint16(msg[1:]); got != 234 {
-		t.Fatalf("scene visible property count=%d, want 234", got)
+	sp := append([]byte("SP"), 0, byte(clientdata.WireInt32))
+	if !bytes.Contains(msg, sp) {
+		t.Fatal("official table does not declare SP as int32")
 	}
-	needle := append([]byte("MaxVisuals"), 0, byte(clientdata.WireInt32))
-	if !bytes.Contains(msg, needle) {
-		t.Fatalf("scene property table does not negotiate MaxVisuals: %x", needle)
-	}
-	lastObject := append([]byte("LastObject"), 0, byte(clientdata.WireObject))
-	if !bytes.Contains(msg, lastObject) {
-		t.Fatalf("scene property table does not negotiate LastObject: %x", lastObject)
-	}
-	autoSelect := append([]byte("AutoSelectObject"), 0, byte(clientdata.WireObject))
-	if !bytes.Contains(msg, autoSelect) {
-		t.Fatalf("scene property table does not negotiate AutoSelectObject: %x", autoSelect)
+	maxSP := append([]byte("MaxSP"), 0, byte(clientdata.WireInt32))
+	if !bytes.Contains(msg, maxSP) {
+		t.Fatal("official table does not declare MaxSP")
 	}
 	inParry := append([]byte("InParry"), 0, byte(clientdata.WireInt32))
 	if !bytes.Contains(msg, inParry) {
-		t.Fatalf("scene property table does not negotiate InParry: %x", inParry)
+		t.Fatal("official table does not declare InParry as int32")
 	}
-	for _, field := range []struct {
-		name   string
-		typeID clientdata.WireType
-	}{
-		{"ShopID", clientdata.WireString},
-		{"PageNum", clientdata.WireInt32},
-		{"PageCount", clientdata.WireInt32},
-		{"ShopType", clientdata.WireInt32},
-		{"ConfigID", clientdata.WireString},
-		{"Amount", clientdata.WireInt32},
-		{"SellPrice0", clientdata.WireInt32},
-		{"SellPrice1", clientdata.WireInt32},
-		{"SellPrice2", clientdata.WireInt32},
-		{"MaxAmount", clientdata.WireInt32},
-		{"CanUse", clientdata.WireByte},
-		{"Force", clientdata.WireString},
-		{"NewSchool", clientdata.WireString},
-		{"CapitalType1", clientdata.WireInt32},
-		{"HitHP", clientdata.WireInt32},
-		{"HitHPRatio", clientdata.WireInt32},
-		{"QingGongPoint", clientdata.WireInt32},
-		{"MaxQingGongPoint", clientdata.WireInt32},
-		{"MaxQingGongPointAdd", clientdata.WireInt32},
-		{"LandRushSpeed", clientdata.WireFloat32},
-		{"LandRushDist", clientdata.WireFloat32},
-		{"DriftSpeed", clientdata.WireFloat32},
-		{"ClimbSpeed", clientdata.WireFloat32},
-		{"Gravity", clientdata.WireFloat32},
-		{"GravityAdd", clientdata.WireFloat32},
-		{"DropHeightPub", clientdata.WireFloat32},
-		{"BufferListStr", clientdata.WireString},
-		{"BufferInfo1", clientdata.WireString},
-		{"BufferInfo24", clientdata.WireString},
-		{"CurNeiGong", clientdata.WireString},
-		{"Faculty", clientdata.WireInt32},
-		{"FacultyState", clientdata.WireInt32},
-		{"Str", clientdata.WireInt32},
-		{"MeleePower", clientdata.WireInt32},
-		{"MaxLevel", clientdata.WireInt32},
-		{"NeigongPKStatus", clientdata.WireInt32},
-		{"Dead", clientdata.WireInt32},
-		{"CantUseSkill", clientdata.WireInt32},
-		{"CurSkillID", clientdata.WireString},
-		{"PauseTime", clientdata.WireFloat32},
-		{"HPHeartSpeed", clientdata.WireInt32},
-		{"HPHeartSpeedAdd", clientdata.WireInt32},
-		{"MPHeartSpeed", clientdata.WireInt32},
-		{"MPHeartSpeedAdd", clientdata.WireInt32},
-		{"HPUpSpeed", clientdata.WireInt32},
-		{"HPUpSpeedAdd", clientdata.WireInt32},
-		{"MPUpSpeed", clientdata.WireInt32},
-		{"MPUpSpeedAdd", clientdata.WireInt32},
-		{"CurSkillEffectID", clientdata.WireString},
-		{"CurSkillLevel", clientdata.WireInt32},
-		{"CurSkillTarget", clientdata.WireObject},
-		{"ModifySkillLockTime", clientdata.WireInt32},
-	} {
-		needle := append([]byte(field.name), 0, byte(field.typeID))
-		if !bytes.Contains(msg, needle) {
-			t.Fatalf("scene property table does not negotiate %s: %x", field.name, needle)
+	autoSelect := append([]byte("AutoSelectObject"), 0, byte(clientdata.WireObject))
+	if !bytes.Contains(msg, autoSelect) {
+		t.Fatal("official table does not declare AutoSelectObject as object")
+	}
+	// 行位置即索引:重走一遍帧体,断言第 467 项是 SP、第 463 项是
+	// LogicState(0x09 表位置绑定的硬语义)。
+	offset := 3
+	for position := 0; position < 2370; position++ {
+		endByte := bytes.IndexByte(msg[offset:], 0)
+		if endByte < 0 {
+			t.Fatalf("entry %d has no NUL terminator", position)
 		}
+		name := string(msg[offset : offset+endByte])
+		code := msg[offset+endByte+1]
+		switch position {
+		case 463:
+			if name != "LogicState" || code != byte(clientdata.WireByte) {
+				t.Fatalf("entry 463 = (%q,%d), want (LogicState,byte)", name, code)
+			}
+		case 467:
+			if name != "SP" || code != byte(clientdata.WireInt32) {
+				t.Fatalf("entry 467 = (%q,%d), want (SP,int32)", name, code)
+			}
+		case 580:
+			if name != "MaxSP" {
+				t.Fatalf("entry 580 = %q, want MaxSP", name)
+			}
+		}
+		offset = offset + endByte + 2
+	}
+	if offset != len(msg) {
+		t.Fatalf("frame walk consumed %d of %d bytes", offset, len(msg))
 	}
 }
 
@@ -356,7 +303,7 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 		t.Fatalf("selection frames=%d, want LastObject+AutoSelectObject + cinematic menu: %x", len(frames), frames)
 	}
 	frame := frames[0]
-	if len(frame) != 22 || frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != 1 || binary.LittleEndian.Uint16(frame[12:]) != 100 {
+	if len(frame) != 22 || frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != 1 || binary.LittleEndian.Uint16(frame[12:]) != 414 { // LastObject(官方玩家域)
 		t.Fatalf("LastObject frame=%x", frame)
 	}
 	if got := binary.LittleEndian.Uint64(frame[14:]); got != uint64(3494)|uint64(1)<<32 {

@@ -69,7 +69,6 @@ func main() {
 		}
 		switchDestination = &parsed
 	}
-	npcSchema := clientdata.VisibleNPCModernV1()
 	// 触发资源仓初始化（本地 > patch > base，带读缓存），启动日志
 	// 会给出各层条目与缓存上限；不可用时回退直接文件访问。
 	resourceAccessorOf()
@@ -119,7 +118,7 @@ func main() {
 		}
 	}
 	if *npcAuditAll {
-		entries, auditErr := auditNPCSceneRoot(defaultNPCTableDir, filepath.Dir(defaultNPCCreatorDir), npcSchema)
+		entries, auditErr := auditNPCSceneRoot(defaultNPCTableDir, filepath.Dir(defaultNPCCreatorDir))
 		if auditErr != nil {
 			log.Fatal(auditErr)
 		}
@@ -150,12 +149,12 @@ func main() {
 	var sceneRegistry *sceneNPCRegistry
 	var err error
 	if *allChengduNPCs {
-		sceneRegistry, err = newSceneNPCRegistry(defaultNPCTableDir, filepath.Dir(defaultNPCCreatorDir), npcSchema)
+		sceneRegistry, err = newSceneNPCRegistry(defaultNPCTableDir, filepath.Dir(defaultNPCCreatorDir))
 		if err == nil {
 			log.Printf("modern scene NPC registry ready template_tables=%d creator_root=%s", len(sceneRegistry.tables), sceneRegistry.root)
 		}
 	} else {
-		staticNPCs, err = loadNPCSpawns(*npcTablePath, *npcCreatorPath, *npcConfigID, npcSchema)
+		staticNPCs, err = loadNPCSpawns(*npcTablePath, *npcCreatorPath, *npcConfigID)
 		if err == nil {
 			// 单目录回退模式同样绑定 mappath 巡逻（mappath 在 npc_creator
 			// 的兄弟目录，与注册表模式同一布局）。
@@ -195,7 +194,7 @@ func main() {
 		return
 	}
 	for _, npc := range staticNPCs {
-		_, propertyErr := npc.resolved.OrderedProperties(npcSchema)
+		_, propertyErr := npc.resolved.OrderedProperties()
 		if propertyErr != nil {
 			log.Fatalf("validate modern NPC %s: %v", npc.resolved.ConfigID, propertyErr)
 		}
@@ -227,11 +226,11 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
+		go handle(conn, store, facultyStore, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
 	if captureDir != "" {
 		var tap *captureTap
 		conn, tap = newCapturedConn(conn, captureDir)
@@ -651,7 +650,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			innerPowerPassiveExpired := player.expireInnerPowerPassive(now)
 			sitcrossAdvanced := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
-			combatRageAdvanced := player.combatRageTick()
+			combatRageAdvanced := player.rageRecoveryTick()
 			// NPC 战斗模拟已上移到场景运行时的中央 tick；
 			// 连接循环只保留玩家侧结算与复活。
 			combatAdvanced := false
@@ -805,7 +804,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			// CClassSet::InitTableMessage 将它们构建为 opcode 0x09 和 0x0A。
 			// 若缺少 0x09，客户端就没有权威的索引/类型映射，
 			// 对象创建会在解码属性时于不同坐标处失败。
-			propertyTable := visiblePropertyTable(sceneVisiblePropertyFields(npcSchema.Fields))
+			propertyTable := officialPropertyTableFrame()
 			if err := link.WriteFrame(propertyTable); err != nil {
 				log.Printf("%s: write property table: %v", conn.RemoteAddr(), err)
 				return
@@ -1468,7 +1467,7 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 	// 13 值变换/移动头部。对象类别属于下方协商的
 	// Type 属性；不要把猜测的类别塞进尾部。
 	_ = probeIndex
-	properties, err := npc.resolved.OrderedProperties(clientdata.VisibleNPCModernV1())
+	properties, err := npc.resolved.OrderedProperties()
 	if err != nil {
 		return nil, err
 	}
@@ -1552,159 +1551,22 @@ func sceneObjectObjectProperty(objectID, ownerID, propertyIndex, targetID, targe
 	return appendObjectProperty(msg, uint16(propertyIndex), targetID, targetOwnerID)
 }
 
-func visiblePropertyTable(properties []clientdata.FieldSpec) []byte {
-	msg := make([]byte, 3, 3+len(properties)*12)
+// officialPropertyTableFrame 逐行透传内嵌的官方 0x09 属性表
+// (internal/clientdata/official_property_table.txt,2370 项)。
+// 帧体 = [0x09][u16 count](name\0 u8 type)*;客户端按位置绑定索引,
+// 因此表内容必须与官方方言逐字节一致,不做任何删改。
+// 来源:F 盘新版服务端 exe 抓包提取(tools/export_official_table.py),
+// 与 Java 参考服 official_property_table.txt 三方比对 0 差异。
+func officialPropertyTableFrame() []byte {
+	entries := clientdata.OfficialPropertyEntries()
+	msg := make([]byte, 3, 3+64*1024)
 	msg[0] = 0x09
-	binary.LittleEndian.PutUint16(msg[1:], uint16(len(properties)))
-	for _, property := range properties {
-		msg = append(msg, property.Name...)
-		msg = append(msg, 0, byte(property.Type))
+	binary.LittleEndian.PutUint16(msg[1:], uint16(len(entries)))
+	for _, entry := range entries {
+		msg = append(msg, entry.Name...)
+		msg = append(msg, 0, byte(entry.TypeCode))
 	}
 	return msg
-}
-
-func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.FieldSpec {
-	fields := append([]clientdata.FieldSpec(nil), npcFields...)
-	fields = append(fields, clientdata.FieldSpec{Index: 99, Name: "MaxVisuals", Type: clientdata.WireInt32})
-	fields = append(fields, clientdata.FieldSpec{Index: 100, Name: "LastObject", Type: clientdata.WireObject})
-	// View 归档与场景对象使用同一张协商属性表。
-	// 这些字段由当前 form_shop.lua 的 createview
-	// 分支直接读取，因此必须在发送商店 View=61 之前完成协商。
-	fields = append(fields,
-		clientdata.FieldSpec{Index: 101, Name: "ShopID", Type: clientdata.WireString},
-		clientdata.FieldSpec{Index: 102, Name: "PageNum", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 103, Name: "PageCount", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 104, Name: "ShopType", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 105, Name: "ConfigID", Type: clientdata.WireString},
-		clientdata.FieldSpec{Index: 106, Name: "Amount", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 107, Name: "SellPrice0", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 108, Name: "SellPrice1", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 109, Name: "SellPrice2", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 110, Name: "MaxAmount", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 111, Name: "CapitalType1", Type: clientdata.WireInt32},
-		// 这些活体玩家字段按最新的 Lua 属性绑定命名；
-		// 它们追加在现代场景 schema 之后，使 0x10 在初始
-		// 0x0D 归档之后仍能携带同等的权威数据。
-		clientdata.FieldSpec{Index: 112, Name: "HitHP", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 113, Name: "HitHPRatio", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 114, Name: "QingGongPoint", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 115, Name: "MaxQingGongPoint", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: 116, Name: "MaxQingGongPointAdd", Type: clientdata.WireInt32},
-		// 当前客户端的轻功移动输入。这些是普通玩家
-		// 属性，而非动作包：FxGameLogic 在解析冲刺、水上、
-		// 空中和攀爬动作时读取它们。特别地，缺失的
-		// LandRushDist 会被客户端显示并当作零使用。
-		clientdata.FieldSpec{Index: 117, Name: "RunSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 118, Name: "JumpSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 119, Name: "DriftSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 120, Name: "DriftSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 121, Name: "DriftJumpSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 122, Name: "DriftJumpSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 123, Name: "SndJumpSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 124, Name: "SndJumpSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 125, Name: "ThdJumpSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 126, Name: "ThdJumpSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 127, Name: "AirRushSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 128, Name: "AirRushSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 129, Name: "AirRushDist", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 130, Name: "AirRushDistAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 131, Name: "LandRushSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 132, Name: "LandRushSpeedAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 133, Name: "LandRushDist", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 134, Name: "LandRushDistAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 135, Name: "ClimbSpeed", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 136, Name: "ClimbSpeedAdd", Type: clientdata.WireFloat32},
-		// 原生移动代码在解析三系冲刺时
-		// 还会查询这些距离别名。
-		clientdata.FieldSpec{Index: 137, Name: "GRushRange", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 138, Name: "GRushRangeAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 139, Name: "ARushRange", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 140, Name: "ARushRangeAdd", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 141, Name: "WRushRange", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 142, Name: "WRushRangeAdd", Type: clientdata.WireFloat32},
-		// Buff 状态是原生玩家对象状态。FxGameLogic 的 form_main_buff
-		// 读取并绑定该字符串；它不是 0x1E 的 Lua 自定义消息。
-		clientdata.FieldSpec{Index: 143, Name: "BufferListStr", Type: clientdata.WireString},
-	)
-	for slot := uint16(1); slot <= bufferInfoSlotCount; slot++ {
-		fields = append(fields, clientdata.FieldSpec{
-			Index: bufferInfoPropertyIndex(slot), Name: bufferInfoPropertyName(slot), Type: clientdata.WireString,
-		})
-	}
-	// 基础跳跃物理由原生玩家动作对象读取，而非从
-	// 轻功动作包推导而来。保持追加在末尾：前面的
-	// 字段顺序在现代客户端上已经生效。
-	fields = append(fields,
-		clientdata.FieldSpec{Index: 168, Name: "Gravity", Type: clientdata.WireFloat32},
-		clientdata.FieldSpec{Index: 169, Name: "GravityAdd", Type: clientdata.WireFloat32},
-		// FallDownManager 直接读取该玩家属性。当它
-		// 缺失时，现代客户端将安全坠落阈值默认为 5.0，
-		// 这会使本地测试中普通的地形落差进入倒地
-		// 状态，而不是回到落地动作。
-		clientdata.FieldSpec{Index: 170, Name: "DropHeightPub", Type: clientdata.WireFloat32},
-	)
-	// 内功与角色面板字段刻意追加在所有已生效的
-	// 移动/Buff 字段之后。View 43 使用同一份协商
-	// 归档，因此其每本内功的取值必须在 ViewAdd 之前在此命名。
-	fields = append(fields, playerProgressFields()...)
-	// Fight::UseShortcutMain 在能发出 C2S 211 之前会先到达 sub_127FE280。
-	// 那里读取 NeigongPKStatus 时没有 HasProp 保护，因此不协商它
-	// 并不等价于一个显式的正常值。Dead 也属于
-	// 同一发送前闸门；两者都保留为普通 actor 属性。
-	fields = append(fields,
-		clientdata.FieldSpec{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propDead, Name: "Dead", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propCantUseSkill, Name: "CantUseSkill", Type: clientdata.WireInt32},
-		// USE_SKILL（C2S 211）只是请求。FxGameLogic 要等待这个
-		// 权威的玩家属性回调，之后才刷新快捷栏
-		// 冷却状态并暂存原生 Fight 动作。
-		clientdata.FieldSpec{Index: propCurSkillID, Name: "CurSkillID", Type: clientdata.WireString},
-		// 已学习的 View=40 对象通过这张共享
-		// 属性表暴露动作租约。原生 Fight 管理器把毫秒按 float 读取。
-		clientdata.FieldSpec{Index: propPauseTime, Name: "PauseTime", Type: clientdata.WireFloat32},
-		// 原生主角 HUD 绑定这四个恢复速率字段。它们的取值
-		// 仅供展示；HP/MP 仍只在服务器 tick 之后才会变化。
-		clientdata.FieldSpec{Index: propHPHeartSpeed, Name: "HPHeartSpeed", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propHPHeartSpeedAdd, Name: "HPHeartSpeedAdd", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propMPHeartSpeed, Name: "MPHeartSpeed", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propMPHeartSpeedAdd, Name: "MPHeartSpeedAdd", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propHPUpSpeed, Name: "HPUpSpeed", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propHPUpSpeedAdd, Name: "HPUpSpeedAdd", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propMPUpSpeed, Name: "MPUpSpeed", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Type: clientdata.WireInt32},
-		// 一次正常的技能接受会发布这组完整的公开元组。
-		// 自身目标的动作闸门还会把 ModifySkillLockTime 按
-		// 整数毫秒容差读取。
-		clientdata.FieldSpec{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Type: clientdata.WireString},
-		clientdata.FieldSpec{Index: propCurSkillLevel, Name: "CurSkillLevel", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propCurSkillTarget, Name: "CurSkillTarget", Type: clientdata.WireObject},
-		clientdata.FieldSpec{Index: propModifySkillLockTime, Name: "ModifySkillLockTime", Type: clientdata.WireInt32},
-		// Skillbase 将 CanUse 声明为私有字节，当前 FxGameLogic
-		// 在展示/使用技能前会从已学习的 View=40 对象读取它。
-		clientdata.FieldSpec{Index: propSkillCanUse, Name: "CanUse", Type: clientdata.WireByte},
-		// 后期的门派归属会先从 Force/NewSchool 原生选择，
-		// 然后才看 School。它们必须在 PlayerAdd 之前纳入协商表。
-		clientdata.FieldSpec{Index: propForce, Name: "Force", Type: clientdata.WireString},
-		clientdata.FieldSpec{Index: propNewSchool, Name: "NewSchool", Type: clientdata.WireString},
-	)
-	// 0x09 表的线上格式只有 (name, type)，索引由条目位置隐式决定——
-	// FieldSpec.Index 必须恒等于条目在整张表中的 0 基位置。因此新增字段
-	// 的 FieldSpec 只能追加在 sceneVisiblePropertyFields 的最末尾，绝不能
-	// 插进 playerProgressFields 或上面的 actor 段中段（那会让之后所有条目
-	// 的位置偏移，0x10 数字索引整体错绑，进游戏即崩）。
-	fields = append(fields,
-		clientdata.FieldSpec{Index: propMaxSP, Name: "MaxSP", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propMaxSPAdd, Name: "MaxSPAdd", Type: clientdata.WireInt32},
-		// AutoSelectObject 与 LastObject（表位 100）配对：fork 每次目标
-		// 选择回双属性帧（官方表位 414/415）。按表尾追加约定放 230。
-		clientdata.FieldSpec{Index: propAutoSelectObject, Name: "AutoSelectObject", Type: clientdata.WireObject},
-		// 格挡族（msg54 手动格挡）：官方表 InParry@88/ParryValue@475，
-		// 按表尾追加约定放 231..233。
-		clientdata.FieldSpec{Index: propInParry, Name: "InParry", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propInManualParry, Name: "InManualParry", Type: clientdata.WireInt32},
-		clientdata.FieldSpec{Index: propParryValue, Name: "ParryValue", Type: clientdata.WireInt32},
-	)
-	return fields
 }
 
 func appendStringProperty(msg []byte, index uint16, value string) []byte {

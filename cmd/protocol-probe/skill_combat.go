@@ -160,8 +160,8 @@ func nativeSkillActionFrame(skillID string, targetID, targetOwnerID uint32) ([]b
 // 可以弥补这个时序缺口，且不会改变选定的外观。
 func skillActionPreparationFrame() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 18, Name: "ActionSet", Value: clientdata.StringValue("0h")},
-		{Index: 19, Name: "State", Value: clientdata.StringValue("stand")},
+		{Index: 406, Name: "ActionSet", Value: clientdata.StringValue("0h")},
+		{Index: 183, Name: "State", Value: clientdata.StringValue("stand")},
 	})
 }
 
@@ -174,7 +174,7 @@ func playerActionStateFrame(action string) ([]byte, error) {
 		return nil, fmt.Errorf("player action state is empty")
 	}
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 19, Name: "State", Value: clientdata.StringValue(action)},
+		{Index: 183, Name: "State", Value: clientdata.StringValue(action)},
 	})
 }
 
@@ -591,6 +591,15 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				if err := link.WriteFrame(targetFrame); err != nil {
 					return true, err
 				}
+				// 实招命中(目标未格挡;NPC 无格挡态)→ 攻击者 +2 怒,
+				// 18 字节 SP 单帧,满值不重推。
+				if _, spFrame, spErr := player.addSP(ragGainCleanHit); spErr != nil {
+					return true, spErr
+				} else if spFrame != nil {
+					if err := link.WriteFrame(spFrame); err != nil {
+						return true, err
+					}
+				}
 			}
 			if killed {
 				totalLoot += loot
@@ -626,6 +635,14 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				}
 				if result.killed {
 					totalLoot += result.loot
+				}
+				// 群体技能同样按命中逐跳 +2(与单体一致)。
+				if _, spFrame, spErr := player.addSP(ragGainCleanHit); spErr != nil {
+					return true, spErr
+				} else if spFrame != nil {
+					if err := link.WriteFrame(spFrame); err != nil {
+						return true, err
+					}
 				}
 			}
 			log.Printf("%s: settled compiled area skill id=%s mode=%d center=(%.2f,%.2f,%.2f) radius=%.1f angle=%.1f width=%.1f hits=%d damage_each=%d",

@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
 )
 
@@ -81,7 +80,7 @@ func TestCurrentCitySceneRegistryMaterializesModernCreatorCatalog(t *testing.T) 
 	if _, err := os.Stat(defaultNPCTableDir); err != nil {
 		t.Skipf("modern client data unavailable: %v", err)
 	}
-	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"), clientdata.VisibleNPCModernV1())
+	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +97,7 @@ func TestShenJiHuiCatalogSkipsMissingOptionalCreators(t *testing.T) {
 	if _, err := os.Stat(defaultNPCTableDir); err != nil {
 		t.Skipf("modern client data unavailable: %v", err)
 	}
-	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"), clientdata.VisibleNPCModernV1())
+	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,7 +114,7 @@ func TestYanYuZhuangCatalogSkipsEmptyZeroAmountCreatorPlaceholder(t *testing.T) 
 	if _, err := os.Stat(defaultNPCTableDir); err != nil {
 		t.Skipf("modern client data unavailable: %v", err)
 	}
-	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"), clientdata.VisibleNPCModernV1())
+	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"))
 	if err != nil {
 		t.Fatal(err)
 	}

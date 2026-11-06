@@ -42,12 +42,12 @@ type npcSceneAuditEntry struct {
 	Error            string   `json:"error,omitempty"`
 }
 
-func loadChengduNPCSpawns(tableDir, creatorDir string, schema clientdata.Schema) ([]npcSpawn, npcCatalogStats, error) {
+func loadChengduNPCSpawns(tableDir, creatorDir string) ([]npcSpawn, npcCatalogStats, error) {
 	tables, err := loadNPCTemplateTables(tableDir)
 	if err != nil {
 		return nil, npcCatalogStats{}, err
 	}
-	return loadNPCSceneSpawnsFromTables(tables, creatorDir, schema)
+	return loadNPCSceneSpawnsFromTables(tables, creatorDir)
 }
 
 // loadNPCTemplateTables 一次性加载共享的现代 NPC 模板。场景
@@ -91,7 +91,7 @@ func loadNPCTemplateTables(tableDir string) ([]*clientdata.NPCTemplateTable, err
 // 每个现代场景都带有 file.ini，因为其 creator 子集各不相同；旁边的
 // XML 例如 eventtrigger.xml 并非 NPC creator，也没有 id/x/y/z
 // 字段，因此无差别扫描所有 XML 会破坏目录数据。
-func loadNPCSceneSpawnsFromTables(tables []*clientdata.NPCTemplateTable, creatorDir string, schema clientdata.Schema) ([]npcSpawn, npcCatalogStats, error) {
+func loadNPCSceneSpawnsFromTables(tables []*clientdata.NPCTemplateTable, creatorDir string) ([]npcSpawn, npcCatalogStats, error) {
 	creatorPaths, err := sceneCreatorPaths(creatorDir)
 	if err != nil {
 		return nil, npcCatalogStats{}, err
@@ -120,7 +120,7 @@ func loadNPCSceneSpawnsFromTables(tables []*clientdata.NPCTemplateTable, creator
 				appendNPCStatSample(&stats, fmt.Sprintf("%s:%s has no unique template", creatorName, instance.TemplateID))
 				continue
 			}
-			resolved, resolveErr := clientdata.ResolveNPC(schema, table, instance, clientdata.ResolveOptions{
+			resolved, resolveErr := clientdata.ResolveNPC(table, instance, clientdata.ResolveOptions{
 				Defaults: clientdata.VisibleNPCSpawnDefaultsCompatV1(),
 			})
 			if resolveErr != nil {
@@ -214,7 +214,7 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 // auditNPCSceneRoot 独立解析每个直接子场景目录。
 // 损坏或过时的 creator 文件只会记在其所属场景上，
 // 而不会妨碍其余现代资源的清点。
-func auditNPCSceneRoot(tableDir, creatorRoot string, schema clientdata.Schema) ([]npcSceneAuditEntry, error) {
+func auditNPCSceneRoot(tableDir, creatorRoot string) ([]npcSceneAuditEntry, error) {
 	tables, err := loadNPCTemplateTables(tableDir)
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func auditNPCSceneRoot(tableDir, creatorRoot string, schema clientdata.Schema) (
 			continue
 		}
 		name := directory.Name()
-		_, stats, loadErr := loadNPCSceneSpawnsFromTables(tables, filepath.Join(creatorRoot, name), schema)
+		_, stats, loadErr := loadNPCSceneSpawnsFromTables(tables, filepath.Join(creatorRoot, name))
 		entry := npcSceneAuditEntry{
 			Scene:            name,
 			CreatorInstances: stats.CreatorInstances,
@@ -289,7 +289,7 @@ func appendNPCStatSample(stats *npcCatalogStats, sample string) {
 	}
 }
 
-func loadNPCSpawns(tablePath, creatorPath, configID string, schema clientdata.Schema) ([]npcSpawn, error) {
+func loadNPCSpawns(tablePath, creatorPath, configID string) ([]npcSpawn, error) {
 	tableFile, err := openResourceReader(tablePath)
 	if err != nil {
 		return nil, fmt.Errorf("open template table %s: %w", tablePath, err)
@@ -314,7 +314,7 @@ func loadNPCSpawns(tablePath, creatorPath, configID string, schema clientdata.Sc
 	}
 	spawns := make([]npcSpawn, 0, len(instances))
 	for _, instance := range instances {
-		resolved, resolveErr := clientdata.ResolveNPC(schema, table, instance, clientdata.ResolveOptions{
+		resolved, resolveErr := clientdata.ResolveNPC(table, instance, clientdata.ResolveOptions{
 			Defaults: clientdata.VisibleNPCSpawnDefaultsCompatV1(),
 		})
 		if resolveErr != nil {
@@ -374,6 +374,9 @@ func appendNPCProperty(msg []byte, property clientdata.IndexedProperty) []byte {
 	case clientdata.WireInt32:
 		value := uint32(property.Value.I32)
 		msg = append(msg, byte(value), byte(value>>8), byte(value>>16), byte(value>>24))
+	case clientdata.WireInt64:
+		// 官方表线型码 4:货币/时间戳行按小端 int64 编码(真机抓包实证)。
+		msg = binary.LittleEndian.AppendUint64(msg, property.Value.U64)
 	case clientdata.WireFloat32:
 		msg = appendFloat32(msg, property.Value.F32)
 	case clientdata.WireString:

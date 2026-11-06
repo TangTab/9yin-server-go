@@ -55,6 +55,25 @@
 （objectRequest，33B）、0x09、0x18 ping、msg9 登录握手、msg15 移动上报、
 msg298 刷新 NPC 任务特效、msg924 MSG_DELAY 心跳。
 
+## 一·五、.data 静态属性 spec 池（已导出）
+
+`9yin-game-native-menu.exe` file@0xaa3660，2426 项 × 24B，
+条目 `{u64 name_ptr, u64 name_len, u64 wire_type}`，字符串区
+VA→file delta=0x140001000。抽检位置与官方表逐一命中（LastObject=414、
+AutoSelectObject=415、SP=467、MaxSP=580、MaxSPAdd=583、Dead=464、
+LogicState=463、InParry=471、ParryValue=475）。注意：**池不是 0x09 的
+发送源**——fork 运行时由 sceneVisiblePropertyFields +
+playerIdentityFields/playerProgressFields + sort.Slice 组装线缆表，
+与官方 2370 项 txt 0 diff；此池是内置的 name→wire_type 字典/超集。
+相对 Java `official_property_table.txt`（2370 项）：+227 新属性
+（EgWar* 战场统计、DigTreasure*、CurHome* 家园、ZhenFa* 阵法…）、
+-62 旧属性（BufferListStr、PatrolRange、Orient…），wire 类型零冲突。
+type 枚举：1=byte 2=word 3=int32 4=int64 5=float32 7=string
+8=widestring 9=object（6 出现 36 次，本地 WireType 未定义，疑似 float64）。
+
+- 导出：`data/fork_property_table.txt`（idx\tname\ttype，带注释头）
+- 提取器：`tools/extract_fork_spec_pool.py`（`python -I` 运行）
+
 ## 二、选择目标链路（selection.go:102-129 已还原）
 
 ```go

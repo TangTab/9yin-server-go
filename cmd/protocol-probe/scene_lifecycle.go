@@ -660,19 +660,22 @@ func (s *sceneLifecycle) openDepotLocked() error {
 // 目录在服务器侧解析，每条真实物品行都物化为一个 ViewAdd 对象。
 func (s *sceneLifecycle) openShopLocked(shopID string) error {
 	const (
-		viewportShop    = 61
-		shopPageSize    = 10
-		shopCapacity    = 100
-		propShopID      = 101
-		propPageNum     = 102
-		propPageCount   = 103
-		propShopType    = 104
-		propConfigID    = 105
-		propAmount      = 106
-		propPriceGold   = 107
-		propPriceSilver = 108
-		propPriceCard   = 109
-		propMaxAmount   = 110
+		viewportShop = 61
+		shopPageSize = 10
+		shopCapacity = 100
+		// 官方表玩家/视图域(视图行取末现):ShopID@2219、PageNum@2220、
+		// PageCount@2221、ShopType@2222、ConfigID@1440、Amount@1894、
+		// SellPrice0/1/2@1900-1902、MaxAmount@1895。
+		propShopID      = 2219
+		propPageNum     = 2220
+		propPageCount   = 2221
+		propShopType    = 2222
+		propConfigID    = 1440
+		propAmount      = 1894
+		propPriceGold   = 1900
+		propPriceSilver = 1901
+		propPriceCard   = 1902
+		propMaxAmount   = 1895
 		maxBuyAmount    = 99
 	)
 	items, shopType, pageCount, err := loadShopCatalogSection(defaultShopINIPath, shopID)

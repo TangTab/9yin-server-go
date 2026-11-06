@@ -39,7 +39,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		t.Fatalf("select target frames=%x, want LastObject+AutoSelectObject", frames)
 	}
 	lastObject, autoSelect := frames[0], frames[1]
-	if lastObject[0] != 0x10 || binary.LittleEndian.Uint16(lastObject[12:]) != 100 ||
+	if lastObject[0] != 0x10 || binary.LittleEndian.Uint16(lastObject[12:]) != 414 ||
 		binary.LittleEndian.Uint64(lastObject[14:]) != uint64(4456)|uint64(1)<<32 {
 		t.Fatalf("LastObject frame=%x", lastObject)
 	}
