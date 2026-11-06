@@ -56,7 +56,7 @@ func buildNPCServiceAudit(scene role.Scene, stats npcCatalogStats, catalog []npc
 			ScriptClass: npc.resolved.ScriptClass,
 			Position:    npcServiceAuditPosition{X: npc.x, Y: npc.y, Z: npc.z},
 		}
-		for _, service := range modernNPCServices(npc) {
+		for _, service := range modernNPCServices(npc, taskCatalog) {
 			implemented, ready, issue := auditNPCServiceReadiness(service)
 			entry.Services = append(entry.Services, npcServiceAuditService{
 				Mark:        service.mark,

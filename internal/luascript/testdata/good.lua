@@ -14,5 +14,9 @@ end)
 game.on("echo_player", function(ctx)
   local p = ctx:player()
   game.log("player=%s silver=%d scene=%s x=%.1f", p.name, p.silver, p.scene, p.x)
+  local tasks = ctx:tasks()
+  local first = "none"
+  if #tasks > 0 then first = tasks[1].id .. ":" .. tasks[1].title end
+  game.log("tasks=%d first=%s", #tasks, first)
   return true
 end)

@@ -340,7 +340,7 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 	}); err != nil {
 		return err
 	}
-	services := modernNPCServices(npc)
+	services := modernNPCServices(npc, taskCatalog)
 	portal, hasPortal, portalErr := doorPortalRoute(npc)
 	if portalErr != nil {
 		return fmt.Errorf("resolve portal %s: %w", npc.resolved.ConfigID, portalErr)

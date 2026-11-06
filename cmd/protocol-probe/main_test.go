@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math"
 	"net"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/luascript"
 	"github.com/local/9yin-go-server/internal/sim"
+	"github.com/local/9yin-go-server/internal/taskdata"
 	"github.com/local/9yin-go-server/internal/transport"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -554,7 +556,7 @@ func TestModernNPCServiceMenuUsesTemplateBusinessFields(t *testing.T) {
 		"template.DepotID":     "1",
 		"template.TransFuncID": "37",
 	}
-	services := modernNPCServices(npc)
+	services := modernNPCServices(npc, nil)
 	items := npcServiceMenu(services, nil)
 	if len(items) != 4 || items[0].Content != "商店" || items[1].Content != "仓库" || items[2].Content != "传送" {
 		t.Fatalf("modern services menu = %#v", items)
@@ -567,9 +569,103 @@ func TestModernNPCServiceCreatorOverrideWinsOverTemplate(t *testing.T) {
 		"template.ShopID": "Shop_yaopin_00100",
 		"creator.ShopID":  "Shop_chengdu_002",
 	}
-	services := modernNPCServices(npc)
+	services := modernNPCServices(npc, nil)
 	if len(services) != 1 || services[0].value != "Shop_chengdu_002" || services[0].source != "creator.ShopID" {
 		t.Fatalf("creator override lost: %#v", services)
+	}
+}
+
+func TestModernNPCServicesDeriveTaskServiceFromCatalog(t *testing.T) {
+	catalog := taskdata.NewCatalog(
+		map[int]taskdata.Task{75730: {Title: "虎啸疑云"}},
+		[]taskdata.Binding{
+			{TaskID: 75731, NPCConfigID: "FuncNpc01608", Source: "storytasklist"},
+			{TaskID: 75730, NPCConfigID: "funcnpc01608", Source: "storytasklist"},
+		}, nil)
+	npc := testNPCSpawn()
+	npc.resolved.Extensions = nil // testNPCSpawn 自带 ShopID 演示扩展，这里只看任务
+	services := modernNPCServices(npc, catalog)
+	if len(services) != 1 {
+		t.Fatalf("services = %#v", services)
+	}
+	service := services[0]
+	if service.mark != markTask || service.label != "任务" {
+		t.Fatalf("task service = %#v", service)
+	}
+	if service.value != "75730,75731" || service.source != "taskcatalog.storytasklist" {
+		t.Fatalf("task service value/source = %q/%q", service.value, service.source)
+	}
+	// 未绑定任务的 NPC 不产生任务服务（大小写不敏感查询）。
+	unbound := testNPCSpawn()
+	unbound.resolved.ConfigID = "npc_without_tasks"
+	unbound.resolved.Extensions = nil
+	if got := modernNPCServices(unbound, catalog); len(got) != 0 {
+		t.Fatalf("unbound npc services = %#v", got)
+	}
+}
+
+func TestOpenTaskCatalogAtPrefersUsableSnapshot(t *testing.T) {
+	catalog := taskdata.NewCatalog(
+		map[int]taskdata.Task{75730: {Title: "虎啸疑云"}},
+		[]taskdata.Binding{{TaskID: 75730, NPCConfigID: "FuncNpc01608", Source: "storytasklist"}},
+		nil)
+	data, err := taskdata.MarshalSnapshot(catalog.SnapshotAt(time.Unix(1700000000, 0).UTC()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(t.TempDir(), "tasks.json")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	loaded := openTaskCatalogAt(path)
+	if loaded.Count() != 1 || loaded.BindingCount() != 1 {
+		t.Fatalf("snapshot load counts tasks=%d bindings=%d", loaded.Count(), loaded.BindingCount())
+	}
+	if tasks := loaded.TasksForNPC("FuncNpc01608"); len(tasks) != 1 || tasks[0].Title != "虎啸疑云" {
+		t.Fatalf("tasks from snapshot = %#v", tasks)
+	}
+}
+
+func TestNpcServiceScriptSeesBoundTasks(t *testing.T) {
+	previous := taskCatalog
+	taskCatalog = taskdata.NewCatalog(
+		map[int]taskdata.Task{75730: {Title: "<font face=\"Default\">虎啸疑云</font>"}},
+		[]taskdata.Binding{{TaskID: 75730, NPCConfigID: "FuncNpc01608", Source: "storytasklist"}},
+		nil)
+	t.Cleanup(func() { taskCatalog = previous })
+
+	var logs []string
+	dir := t.TempDir()
+	script := `game.on("npc_service", function(ctx)
+	local tasks = ctx:tasks()
+	local first = "none"
+	if #tasks > 0 then first = tasks[1].id .. ":" .. tasks[1].title end
+	game.log("bound tasks=%d first=%s", #tasks, first)
+	return true
+end)
+`
+	if err := os.WriteFile(filepath.Join(dir, "task.lua"), []byte(script), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	host := luascript.New(dir, func(format string, args ...any) {
+		logs = append(logs, strings.TrimSpace(fmt.Sprintf(format, args...)))
+	})
+	if _, err := host.LoadDir(); err != nil {
+		t.Fatal(err)
+	}
+	defer host.Close()
+
+	conn := &captureMessageConnection{}
+	lifecycle := newTaskServiceLifecycle(t, conn, host)
+	lifecycle.run.mu.Lock()
+	err := lifecycle.openSelectedServiceLocked(mustEntity(t, lifecycle), npcService{mark: markTask, label: "任务", source: "taskcatalog.storytasklist", value: "75730"})
+	lifecycle.run.mu.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := strings.Join(logs, "\n")
+	if !strings.Contains(joined, "bound tasks=1 first=75730:虎啸疑云") {
+		t.Fatalf("script log missing bound task: %q", joined)
 	}
 }
 

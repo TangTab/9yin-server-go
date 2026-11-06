@@ -59,12 +59,23 @@ type ServiceSnapshot struct {
 	Source string
 }
 
+// TaskSnapshot 是脚本可见的任务快照（ctx:tasks() 的元素）。文本为
+// 去除富文本标记后的纯文本。
+type TaskSnapshot struct {
+	ID            int
+	Title         string
+	Target        string
+	CanAcceptMenu string
+}
+
 // EventContext 描述一次事件调用的环境数据与副作用回调。回调由调用方
 // 提供，并在调用方的锁纪律下执行（例如已持 run.mu 时直接写帧）。
 type EventContext struct {
 	Player  PlayerSnapshot
 	NPC     NPCSnapshot
 	Service ServiceSnapshot
+	// Tasks 是本次事件 NPC 绑定且已加载文本的任务（npc_service 事件）。
+	Tasks []TaskSnapshot
 	// Notify 发送剧情提示卡（服务端 custom 383 路线）。
 	Notify func(brief, chapterName string) error
 	// Bubble 发送 NPC 说话气泡（服务端 custom 43 路线）。
@@ -373,6 +384,19 @@ func newEventTable(v *vm.VM, ec *EventContext) *vm.Table {
 		setString(t, "value", ec.Service.Value)
 		setString(t, "source", ec.Service.Source)
 		l.Set(0, vm.NewTable(t))
+		return 1
+	}))
+	ctx.SetString("tasks", vm.NewNativeFunc(func(l *vm.VM) int {
+		tasks := vm.NewEmptyTable()
+		for i, task := range ec.Tasks {
+			entry := vm.NewEmptyTable()
+			entry.SetString("id", vm.NewInt(int64(task.ID)))
+			setString(entry, "title", task.Title)
+			setString(entry, "target", task.Target)
+			setString(entry, "can_accept_menu", task.CanAcceptMenu)
+			tasks.SetInt(i+1, vm.NewTable(entry))
+		}
+		l.Set(0, vm.NewTable(tasks))
 		return 1
 	}))
 	ctx.SetString("notify", vm.NewNativeFunc(func(l *vm.VM) int {

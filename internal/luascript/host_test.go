@@ -67,6 +67,39 @@ func TestCallNPCService(t *testing.T) {
 	}
 }
 
+func TestCallExposesBoundTasks(t *testing.T) {
+	sink := &logSink{}
+	host := newTestHost(t, "testdata", sink)
+	ec := testEvent()
+	ec.Tasks = []TaskSnapshot{
+		{ID: 75730, Title: "虎啸疑云"},
+		{ID: 75731, Title: "旧日仇恨", Target: "击败旧敌"},
+	}
+	if _, err := host.Call("echo_player", ec); err != nil {
+		t.Fatal(err)
+	}
+	// tasks 为空时 ctx:tasks() 必须返回空表而不是 nil。
+	empty := testEvent()
+	if _, err := host.Call("echo_player", empty); err != nil {
+		t.Fatal(err)
+	}
+	var taskLines []string
+	for _, line := range sink.lines {
+		if strings.Contains(line, "tasks=") {
+			taskLines = append(taskLines, line)
+		}
+	}
+	if len(taskLines) != 2 {
+		t.Fatalf("expected task log lines for both calls, got %q", sink.lines)
+	}
+	if !strings.Contains(taskLines[0], "tasks=2 first=75730:虎啸疑云") {
+		t.Fatalf("tasks line = %q", taskLines[0])
+	}
+	if !strings.Contains(taskLines[1], "tasks=0") {
+		t.Fatalf("empty tasks line = %q", taskLines[1])
+	}
+}
+
 func TestCallDeclinesAndMissing(t *testing.T) {
 	host := newTestHost(t, "testdata", &logSink{})
 	if handled, err := host.Call("decline", testEvent()); handled || err != nil {

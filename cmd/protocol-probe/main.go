@@ -92,6 +92,9 @@ func main() {
 	} else {
 		log.Printf("Npc_Func menu registry ready configured_npcs=%d path=%s", npcFuncs.Count(), *npcFuncPath)
 	}
+	// 任务目录是进程级静态配置（快照或资源派生，见 task_catalog.go）；
+	// 在任何连接进入前装配。
+	taskCatalog = openTaskCatalog()
 	scriptHost := luascript.New(*scriptsPath, log.Printf)
 	if *scriptsPath != "" {
 		loaded, scriptErr := scriptHost.LoadDir()
@@ -551,6 +554,18 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 			gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d", loaded))
 			log.Printf("%s: GM lua_reload count=%d", conn.RemoteAddr(), loaded)
+		case "task_rebuild":
+			// 只重派生并覆写快照；运行中的场景继续使用装配时的目录，
+			// 新目录在下次启动经 openTaskCatalog 生效。
+			_, stats, rebuildErr := rebuildTaskSnapshot()
+			if rebuildErr != nil {
+				gmSession.setAction("任务快照重建失败：" + rebuildErr.Error())
+				return rebuildErr
+			}
+			gmSession.setAction(fmt.Sprintf("任务快照已重建：任务 %d、绑定 %d、NPC %d（重启后生效）",
+				stats.Tasks, stats.Bindings, stats.BoundNPCs))
+			log.Printf("%s: GM task_rebuild tasks=%d bindings=%d npcs=%d",
+				conn.RemoteAddr(), stats.Tasks, stats.Bindings, stats.BoundNPCs)
 		default:
 			return fmt.Errorf("unsupported GM action %q", command.action)
 		}

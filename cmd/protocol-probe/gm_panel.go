@@ -302,7 +302,7 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 				return
 			}
 			command.code = body.Code
-		case "lua_reload":
+		case "lua_reload", "task_rebuild":
 		default:
 			writeGMError(writer, http.StatusBadRequest, "unsupported action")
 			return

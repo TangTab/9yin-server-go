@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
+	"github.com/local/9yin-go-server/internal/taskdata"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -916,6 +918,15 @@ func (s *sceneLifecycle) runNpcServiceScriptLocked(entity sceneEntity, service n
 			Source: service.source,
 		},
 	}
+	// 该 NPC 绑定且有文本的任务（纯文本），供脚本列出任务用。
+	for _, task := range taskCatalog.TasksForNPC(entity.configID) {
+		ec.Tasks = append(ec.Tasks, luascript.TaskSnapshot{
+			ID:            task.ID,
+			Title:         taskdata.StripRichText(task.Title),
+			Target:        taskdata.StripRichText(task.Target),
+			CanAcceptMenu: taskdata.StripRichText(task.CanAcceptMenu),
+		})
+	}
 	if member := s.run.members[s.wireID]; member != nil {
 		ec.Player.ID = member.objectID
 		ec.Player.Scene = s.run.key.config
@@ -1132,7 +1143,7 @@ func legacyTalkTextID(funcID int) string {
 // 在 Extensions 中，因为它们是服务器业务配置，不是可见的 0x09 属性。
 // creator 值优先于模板对应值：creator 是实例级覆盖，而模板是共享默认值。
 // 这些 mark 刻意占用与旧 FuncID 值不同的独立区间。
-func modernNPCServices(npc npcSpawn) []npcService {
+func modernNPCServices(npc npcSpawn, tasks *taskdata.Catalog) []npcService {
 	value := func(key string) (string, string) { return effectiveNPCBusinessValue(npc, key) }
 	add := func(items []npcService, mark uint16, label, key string) []npcService {
 		if configured, source := value(key); configured != "" && configured != "0" {
@@ -1150,14 +1161,20 @@ func modernNPCServices(npc npcSpawn) []npcService {
 	if job := npc.int32Property("Job"); job != 0 {
 		items = append(items, npcService{mark: markJob, label: "生活职业", value: fmt.Sprintf("%d", job), source: "Job"})
 	}
-	_, acceptSource := value("table@TaskCanAccept")
-	_, submitSource := value("table@TaskCanSubmit")
-	if acceptSource != "" || submitSource != "" {
-		source := acceptSource
-		if source == "" {
-			source = submitSource
+	// 任务绑定来自任务目录（storytasklist/qianjiu 派生）。旧探测键
+	// table@TaskCanAccept 在资源中并不存在，已由真实数据取代；value
+	// 携带逗号连接的任务 ID，供审计与 Lua npc_service 钩子使用。
+	if bindings := tasks.BindingsForNPC(npc.resolved.ConfigID); len(bindings) > 0 {
+		ids := make([]string, 0, len(bindings))
+		for _, binding := range bindings {
+			ids = append(ids, strconv.Itoa(binding.TaskID))
 		}
-		items = append(items, npcService{mark: markTask, label: "任务", source: source})
+		items = append(items, npcService{
+			mark:   markTask,
+			label:  "任务",
+			value:  strings.Join(ids, ","),
+			source: "taskcatalog." + bindings[0].Source,
+		})
 	}
 	return items
 }

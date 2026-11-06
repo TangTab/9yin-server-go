@@ -32,6 +32,8 @@ game.log("格式 %s=%d", "键", 42)   -- 进服务端日志，带 lua: 前缀
 - `ctx:player()` → `{ id, name, faction, silver, sp, scene, x, y, z }`
 - `ctx:npc()` → `{ id, config_id, name }`
 - `ctx:service()` → `{ mark, label, value, source }`
+- `ctx:tasks()` → 该 NPC 绑定的任务数组（来自 `data/tasks.json` 任务目录，
+  纯文本）：`{ id, title, target, can_accept_menu }`
 - `ctx:notify(brief, chapter_name?)` → 给玩家发剧情提示卡
   （chapter_name 缺省 `ui_shop`，须是客户端已装的文本 ID；brief 可为任意文本）
 - `ctx:bubble(text_id)` → 让该 NPC 头顶冒五秒说话气泡（text_id 须已装）

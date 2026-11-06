@@ -11,9 +11,14 @@ game.on("npc_service", function(ctx)
 	end
 	local player = ctx:player()
 	local npc = ctx:npc()
-	game.log("task service opened by %s at npc %s in scene %s",
-		player.name, npc.config_id, player.scene)
-	ctx:notify("任务系统尚未开放，侠士且先行游历江湖。", "ui_shop")
+	local tasks = ctx:tasks()
+	game.log("task service opened by %s at npc %s in scene %s: %d bound task(s)",
+		player.name, npc.config_id, player.scene, #tasks)
+	for i = 1, #tasks do
+		local task = tasks[i]
+		game.log("  task %d: %s", task.id, task.title)
+	end
+	ctx:notify(string.format("侠士眼前有 %d 桩江湖事，接取尚未开放。", #tasks), "ui_shop")
 	-- 也可以让 NPC 头顶冒气泡（需客户端已装的文本 ID）：
 	-- ctx:bubble("ui_talk")
 	return true
