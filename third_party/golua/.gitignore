@@ -1,0 +1,30 @@
+# IDE
+.gocache/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Claude
+CLAUDE.md
+.claude/
+proposed_tests/
+
+# Testing
+a.lua
+test.lua
+/lua
+cmd/lua/lua
+cmd/lua/golua
+ref/
+EXTENDED_TESTING_PLAN.md

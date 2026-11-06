@@ -6,12 +6,16 @@ import (
 	"errors"
 	"math"
 	"net"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 	"unicode/utf16"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/luascript"
 	"github.com/local/9yin-go-server/internal/sim"
 	"github.com/local/9yin-go-server/internal/transport"
 	worldcore "github.com/local/9yin-go-server/internal/world"
@@ -772,5 +776,80 @@ func TestSceneRemoveObject(t *testing.T) {
 	}
 	if got := binary.LittleEndian.Uint32(message[5:]); got != 1 {
 		t.Fatalf("owner ID = %d", got)
+	}
+}
+
+// newTaskServiceLifecycle 构造一个只挂"任务"服务的可交互 NPC 视图，
+// 供 Lua npc_service 钩子测试复用。
+func newTaskServiceLifecycle(t *testing.T, conn *captureMessageConnection, host *luascript.Host) *sceneLifecycle {
+	t.Helper()
+	lifecycle := newSceneLifecycle("test", conn)
+	lifecycle.scripts = host
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := lifecycle.registerNPCOnRun(3494, testNPCSpawn()); err != nil {
+		t.Fatal(err)
+	}
+	entity, _ := lifecycle.npcMeta(3494)
+	entity.services = []npcService{{mark: markTask, label: "任务", source: "task"}}
+	lifecycle.writeNpcMeta(3494, entity)
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 3494, OwnerID: 1}); err != nil {
+		t.Fatal(err)
+	}
+	return lifecycle
+}
+
+func TestNpcServiceScriptHandlesTaskMark(t *testing.T) {
+	dir := t.TempDir()
+	script := `game.on("npc_service", function(ctx)
+	if ctx:service().mark ~= 0x1008 then return false end
+	ctx:notify("任务暂未开放", "ui_shop")
+	return true
+end)
+`
+	if err := os.WriteFile(filepath.Join(dir, "task.lua"), []byte(script), 0644); err != nil {
+		t.Fatal(err)
+	}
+	host := luascript.New(dir, nil)
+	if _, err := host.LoadDir(); err != nil {
+		t.Fatal(err)
+	}
+	defer host.Close()
+
+	conn := &captureMessageConnection{}
+	lifecycle := newTaskServiceLifecycle(t, conn, host)
+	menuFrames := len(conn.Frames())
+	// 直接驱动服务打开路径：菜单选择状态机（cinematic 只映射商店/仓库）
+	// 与本钩子无关，openSelectedServiceLocked 才是接入点。
+	lifecycle.run.mu.Lock()
+	err := lifecycle.openSelectedServiceLocked(mustEntity(t, lifecycle), npcService{mark: markTask, label: "任务", source: "task"})
+	lifecycle.run.mu.Unlock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	frames := conn.Frames()
+	if len(frames) != menuFrames+1 || frames[menuFrames][0] != 0x1E {
+		t.Fatalf("task service via script must send one drama prompt frame: %x", frames[menuFrames:])
+	}
+}
+
+func mustEntity(t *testing.T, lifecycle *sceneLifecycle) sceneEntity {
+	t.Helper()
+	entity, ok := lifecycle.npcMeta(3494)
+	if !ok {
+		t.Fatal("npc 3494 not registered")
+	}
+	return entity
+}
+
+func TestNpcServiceWithoutScriptStaysUnimplemented(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newTaskServiceLifecycle(t, conn, nil)
+	lifecycle.run.mu.Lock()
+	err := lifecycle.openSelectedServiceLocked(mustEntity(t, lifecycle), npcService{mark: markTask, label: "任务", source: "task"})
+	lifecycle.run.mu.Unlock()
+	if err == nil || !strings.Contains(err.Error(), "not yet implemented") {
+		t.Fatalf("without script the task service must stay unimplemented, got %v", err)
 	}
 }

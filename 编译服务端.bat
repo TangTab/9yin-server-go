@@ -6,7 +6,7 @@ cd /d "%~dp0"
 where go >nul 2>&1
 if errorlevel 1 (
   echo ERROR: Go was not found in PATH.
-  echo Install Go 1.23 or newer, then run this script again.
+  echo Install Go 1.24 or newer, then run this script again.
   pause
   exit /b 1
 )

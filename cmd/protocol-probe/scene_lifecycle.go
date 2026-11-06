@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/luascript"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
@@ -46,6 +47,10 @@ type sceneLifecycle struct {
 
 	run      *sceneRun
 	registry bool // 生产连接经全局注册表共享场景；测试默认独占
+
+	// scripts 是可选的服务端 Lua 脚本宿主。nil 表示禁用；
+	// npc_service 等未实现的原生 NPC 服务会交给脚本处理器。
+	scripts *luascript.Host
 
 	armed          bool
 	viewport       *worldcore.Viewport
@@ -866,11 +871,91 @@ func (s *sceneLifecycle) openSelectedServiceLocked(entity sceneEntity, service n
 			return err
 		}
 	default:
-		// 菜单对每项现有服务都保持数据驱动。在传送/任务/职业各自的现代
-		// 业务包和持久化数据得到验证之前，不要凭空发明客户端动作。
+		// 菜单对每项现有服务都保持数据驱动。原生实现缺席时先交给
+		// Lua npc_service 处理器；脚本也没有接手才维持"未实现"。
+		if s.runNpcServiceScriptLocked(entity, service) {
+			return nil
+		}
+		// 在传送/任务/职业各自的现代业务包和持久化数据得到验证之前，
+		// 不要凭空发明客户端动作。
 		return fmt.Errorf("NPC %s service %q (mark=%d) is discovered but not yet implemented", entity.configID, service.source, service.mark)
 	}
 	return nil
+}
+
+// luaEventNpcService 是 NPC 服务脚本事件名：原生实现缺席的 NPC 菜单
+// 服务（markTask 等）会以该事件调用 scripts/ 目录下注册的处理器。
+const luaEventNpcService = "npc_service"
+
+// runNpcServiceScriptLocked 把一次 NPC 服务选择交给 Lua npc_service
+// 处理器。返回脚本是否接手：处理器返回 false（显式拒绝）或没有注册
+// 处理器时返回 false，调用方走默认的"未实现"路径。处理器出错同样
+// 视为已接手——菜单已被清除，错误已记录日志，不应再向客户端暴露
+// 协议层错误。
+//
+// 调用方持有 run.mu；脚本侧副作用（notify/bubble）在本锁下直接
+// 写帧，与 openShopLocked 的写帧行为一致。
+func (s *sceneLifecycle) runNpcServiceScriptLocked(entity sceneEntity, service npcService) bool {
+	if s.scripts == nil || !s.scripts.HasHandler(luaEventNpcService) {
+		return false
+	}
+	ec := &luascript.EventContext{
+		NPC: luascript.NPCSnapshot{
+			ID:       entity.id,
+			ConfigID: entity.configID,
+			Name:     entity.description,
+		},
+		Service: luascript.ServiceSnapshot{
+			Mark:   service.mark,
+			Label:  service.label,
+			Value:  service.value,
+			Source: service.source,
+		},
+	}
+	if member := s.run.members[s.wireID]; member != nil {
+		ec.Player.ID = member.objectID
+		ec.Player.Scene = s.run.key.config
+		ec.Player.X, ec.Player.Y, ec.Player.Z = float64(member.position.X), float64(member.position.Y), float64(member.position.Z)
+		if member.player != nil {
+			// 锁序 run.mu -> player.mu 与全仓纪律一致。
+			member.player.mu.Lock()
+			ec.Player.Name = member.player.name
+			ec.Player.Faction = member.player.faction
+			ec.Player.Silver = int64(member.player.silver)
+			ec.Player.SP = int64(member.player.progress.attributes.sp)
+			member.player.mu.Unlock()
+		}
+	}
+	ec.Notify = func(brief, chapterName string) error {
+		frame, err := encodeDramaPrompt(dramaPrompt{Chapter: 1, ChapterName: chapterName, Explore: 1, Challenge: 1, Brief: brief})
+		if err != nil {
+			return err
+		}
+		if err := s.conn.WriteFrame(frame); err != nil {
+			return fmt.Errorf("send drama prompt: %w", err)
+		}
+		return nil
+	}
+	ec.Bubble = func(textID string) error {
+		frame, err := encodeNPCBubble(entity.id, entity.ownerID, textID)
+		if err != nil {
+			return err
+		}
+		if err := s.conn.WriteFrame(frame); err != nil {
+			return fmt.Errorf("send NPC bubble: %w", err)
+		}
+		return nil
+	}
+	handled, err := s.scripts.Call(luaEventNpcService, ec)
+	if err != nil {
+		log.Printf("%s: lua npc_service script failed npc=%s mark=%d: %v", s.remote, entity.configID, service.mark, err)
+		return true
+	}
+	if !handled {
+		return false
+	}
+	log.Printf("%s: lua npc_service handled npc=%d config=%s mark=%d source=%s", s.remote, entity.id, entity.configID, service.mark, service.source)
+	return true
 }
 
 func (s *sceneLifecycle) clearMenuLocked() error {

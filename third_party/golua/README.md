@@ -1,0 +1,841 @@
+<p align="center">
+  <img src="docs/contrib/logo2.png" alt="GoLua" width="640">
+</p>
+
+# GoLua
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/iceisfun/golua/v2.svg)](https://pkg.go.dev/github.com/iceisfun/golua/v2)
+
+> [!IMPORTANT]
+> **You're viewing GoLua v2 — Lua 5.5.0** (branch `master`, the default).
+> - Starting fresh or want the latest Lua language features? → stay here — `github.com/iceisfun/golua/v2`
+> - Need maximum compatibility with existing Lua 5.4 code or bytecode? → **[v1 on `lua_5_4_8`](https://github.com/iceisfun/golua/tree/lua_5_4_8)** — `github.com/iceisfun/golua` (no `/vN` suffix; v0/v1 share one path per Go module rules)
+>
+> See [Versions](#versions) for the full comparison.
+
+An embeddable, sandbox-first Lua 5.5 runtime for Go applications. Pure Go, zero dependencies, no cgo.
+
+Good fits include plugin systems, user scripting, game logic, automation, and controlled configuration runtimes.
+
+## Features
+
+- **Lua 5.5 language support** including:
+  - `global` declarations (soft keyword, compile-time checking)
+  - Named vararg parameters (`... name`)
+  - `local<const>` and `local<close>` prefix-attribute syntax
+  - `table.create(narr, nrec)` for pre-allocated tables
+  - Float-to-string shortest round-trip representation
+  - `__call` chain depth limit (15)
+  - For-loop read-only control variables
+  - `utf8.offset` second return value
+  - `error(nil)` returns `"<no error object>"`
+  - Removed deprecated math functions (`atan2`, `cosh`, `sinh`, `tanh`, `log10`, `pow`)
+  - Removed `debug.setcstacklimit`
+- Coroutines with yield/resume
+- Complete metamethod system (`__index`, `__newindex`, `__call`, `__close`, `__eq`, `__lt`, `__le`, `__add`, `__concat`, `__len`, `__tostring`, etc.)
+- Module system (`require`, `package.loaded`, `package.preload`, `package.searchers`, `package.searchpath`)
+- Pattern matching (`string.match`, `string.gsub`, `string.find`, `string.gmatch`)
+- Binary data packing (`string.pack`, `string.unpack`, `string.packsize`)
+- Function serialization (`string.dump` / `load` round-trip)
+- Go-style glob matching (`glob.match`, `glob.match_words`, `glob.match_named`)
+- `<const>` and `<close>` variable attributes (including `local<const>`/`local<close>` prefix syntax) with to-be-closed support
+- Bitwise operators (`&`, `|`, `~`, `<<`, `>>`) and `bit32` compat library
+- Integer division (`//`) and full integer/float numeric model
+- UTF-8 library (`utf8.char`, `utf8.codepoint`, `utf8.codes`, `utf8.len`, `utf8.offset`)
+- Deterministic `math.random` per VM instance (seeding one VM does not affect others)
+- Full debug library (`debug.getinfo`, `debug.traceback`, `debug.sethook`, `debug.getlocal`, `debug.setlocal`, `debug.getupvalue`, `debug.setupvalue`, `debug.upvalueid`, `debug.upvaluejoin`)
+- Go interop (call Lua from Go, expose Go functions to Lua)
+- Sandboxed code loading via [`LuaCodeProvider`](docs/code_provider.md) (controls `dofile`, `loadfile`, and `require`)
+- Sandboxed IO via [`LuaIoProvider`](docs/io_provider.md) (includes `JailedIoProvider` for read-only, directory-confined access)
+- Sandboxed OS via [`LuaOsProvider`](docs/os_provider.md) (includes `DefaultOsProvider` with optional env filtering)
+- Capability-gated channels for Go↔Lua message passing via [`LuaChanProvider`](docs/chan.md)
+- Millisecond-precision timing via [`LuaTimeProvider`](docs/time.md) (`time.now`, `time.since`, `time.tick`)
+- Optional HTTP client module (`http.get`, `http.post`, `http.fetch`) with automatic JSON coercion
+- Modern process execution via [`LuaProcessProvider`](docs/exec.md) (`exec.run`, `exec.spawn` with streaming I/O, stdin, kill, timed waits)
+- Output interception via [`LuaPrintProvider`](docs/print_provider.md) (redirect `print()`/`warn()` to logging, per-VM warn isolation)
+- Context cancellation and execution limits (call depth, stack, instructions)
+- Source-level header directive parser (`directives.Parse`) for embedder metadata like `-- @tick 30s` (non-standard, encoded as ordinary comments so source remains portable to reference Lua)
+- No cgo, no C dependencies, no shared object (.so/.dll) loading
+- Single static binary when compiled
+
+## Versions
+
+GoLua is published as two Go module major versions, tracked on separate branches. Per Go module rules, v0/v1 share the unsuffixed module path; only v2+ takes a `/vN` suffix.
+
+| | **v1 — Lua 5.4.8** (`lua_5_4_8`) | **v2 — Lua 5.5.0** (`master`) |
+|---|---|---|
+| Import | `github.com/iceisfun/golua` | `github.com/iceisfun/golua/v2` |
+| Install | `go get github.com/iceisfun/golua@v1` | `go get github.com/iceisfun/golua/v2` |
+| Lua compat | PUC-Rio 5.4.8 | PUC-Rio 5.5.0 |
+| Binary format | Lua 5.4 bytecode | Lua 5.5 bytecode |
+
+### v1 — Lua 5.4.8
+
+- Battle-tested language spec with the widest ecosystem of Lua libraries and documentation
+- Binary chunk format matches PUC-Rio 5.4.8
+- Stable API — no breaking changes planned
+- Best choice when you need maximum compatibility with existing Lua code or bytecode
+
+### v2 — Lua 5.5.0 (this branch)
+
+- Latest language features: `global` declarations, named varargs (`... name`), `local<const>`/`local<close>` prefix syntax, `table.create`, `debug.getinfo` `extraargs` field
+- Stricter compile-time checking (undeclared globals are errors unless opted out)
+- Removed deprecated math functions (`atan2`, `cosh`, `sinh`, `tanh`, `log10`, `pow`)
+- `LUA_PATH_5_5` / `LUA_CPATH_5_5` env var precedence for module paths
+- Best choice for new projects that don't need to load existing 5.4 bytecode or libraries that depend on removed APIs
+
+Both versions share the same provider architecture, sandbox model, and Go interop patterns. Code using the embedding API migrates between versions with only import-path changes.
+
+## Installation
+
+### Library
+
+```bash
+# Lua 5.5.0 (this branch)
+go get github.com/iceisfun/golua/v2
+
+# Lua 5.4.8
+go get github.com/iceisfun/golua@v1
+```
+
+### CLI
+
+```bash
+# Lua 5.5.0 (this branch)
+go install github.com/iceisfun/golua/v2/cmd/lua@latest
+go install github.com/iceisfun/golua/v2/cmd/luac@latest
+
+# Lua 5.4.8
+go install github.com/iceisfun/golua/cmd/lua@v1
+go install github.com/iceisfun/golua/cmd/luac@v1
+```
+
+GoLua is pure Go and does not require cgo.
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "fmt"
+    "log"
+
+    "github.com/iceisfun/golua/v2/compiler"
+    "github.com/iceisfun/golua/v2/parser"
+    "github.com/iceisfun/golua/v2/stdlib"
+    "github.com/iceisfun/golua/v2/vm"
+)
+
+func main() {
+    source := `return 1 + 2`
+    block, err := parser.Parse("example", source)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    proto, err := compiler.Compile("example", block)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    v := vm.New()
+    stdlib.Open(v)
+
+    results, err := v.Run(proto)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println(results[0].AsInt())
+}
+```
+
+Core embedding flow: `parser.Parse` -> `compiler.Compile` -> `vm.New` -> `stdlib.Open` -> `v.Run`.
+
+`vm.New()` defaults to `context.Background()`. Use `vm.WithContext(ctx)` to pass a custom context. Call `v.Close(ctx)` when done to shut down any providers that implement `Shutdownable`.
+
+## Develop Locally
+
+```bash
+go run ./cmd/lua script.lua
+go run ./cmd/lua -e "print(1 + 1)"
+go run ./examples/basic
+go test ./...
+go test ./tests/...
+```
+
+## Architecture
+
+GoLua is organized into layered packages with no circular dependencies:
+
+```
+Source → Lexer → Parser → AST → Compiler → Proto (bytecode)
+                                                ↓
+                                    VM (executes bytecode)
+                                    ↑           ↑
+                                stdlib      Providers
+```
+
+| Package       | Purpose                                                                     |
+| ------------- | --------------------------------------------------------------------------- |
+| `lexer`       | Tokenizes Lua source into a stream of tokens                                |
+| `parser`      | Parses tokens into an AST                                                   |
+| `ast`         | Abstract syntax tree node definitions                                       |
+| `compiler`    | Compiles AST into Lua 5.5 bytecode (`Proto`)                                |
+| `vm`          | Executes bytecode, manages stack/coroutines, defines `Value` and `LuaTable` |
+| `stdlib`      | Registers standard library functions (`string`, `math`, `table`, etc.)      |
+| `check`       | Static diagnostics for editor integration                                   |
+| `glob`        | Go-style pattern matching (non-standard extension)                          |
+| `stdlib/http` | Optional HTTP client module (non-standard extension)                        |
+
+**Provider interfaces** (`vm` package) control host-system access:
+
+| Interface            | Controls                                      | Implementation                       |
+| -------------------- | --------------------------------------------- | ------------------------------------ |
+| [`LuaCodeProvider`](docs/code_provider.md)    | `dofile`, `loadfile`, `require` file searcher | `DirCodeProvider`                    |
+| [`LuaIoProvider`](docs/io_provider.md)      | `io.*` file operations                        | `JailedIoProvider`, `FullIoProvider` |
+| [`LuaOsProvider`](docs/os_provider.md)      | `os.*` core (`clock`, `time`, `date`, `getenv`, `setlocale`) | `DefaultOsProvider`   |
+| [`LuaExecProvider`](docs/exec_provider.md)    | `os.execute` command execution                | `DefaultExecProvider`                |
+| [`LuaExitHandler`](docs/exit_handler.md)     | `os.exit` VM termination                      | `DefaultExitHandler`                 |
+| [`LuaDebugProvider`](docs/debug_provider.md)   | `debug.*` capability gating                   | `DefaultDebugProvider`               |
+| [`LuaChanProvider`](docs/chan.md)    | `chan.*` Go↔Lua channels                      | `DefaultChanProvider`                |
+| [`LuaTimeProvider`](docs/time.md)    | `time.*` millisecond timing                   | `DefaultTimeProvider`                |
+| [`LuaPrintProvider`](docs/print_provider.md)   | `print()`/`warn()` output routing             | `DefaultPrintProvider`               |
+| [`LuaProcessProvider`](docs/exec.md) | `exec.*` process spawning and streaming       | `DefaultProcessProvider`             |
+| [`LuaLoadLibProvider`](docs/loadlib_provider.md) | `package.loadlib` native module hook          | custom host implementation           |
+
+All provider interface methods receive `ctx context.Context` as their first parameter, carrying the VM's context for cancellation and deadline propagation. Providers may optionally implement [`Initializable` or `Shutdownable`](docs/lifecycle.md) (called when set on a VM / by `vm.Close(ctx)`) for lifecycle management.
+
+## Examples
+
+See the `examples/` directory for complete examples:
+
+### Start Here
+
+- **[basic](examples/basic/)** - minimal Lua execution from Go
+- **[expose_go](examples/expose_go/)** - expose Go functions and tables to Lua
+- **[call_lua](examples/call_lua/)** - call Lua functions from Go and read results back
+- **[capture_output](examples/capture_output/)** - capture `print()` output in-memory
+- **[print_provider](examples/print_provider/)** - route `print()` and `warn()` through host logging
+
+### Lua 5.5 Features
+
+- **[lua55_globals](examples/lua55_globals/)** - global declarations, const globals, wildcard mode, compile-time checking
+- **[lua55_features](examples/lua55_features/)** - named varargs, prefix attributes, table.create, read-only for-loops, error(nil)
+
+### Sandboxing And Host Integration
+
+- **[code_provider](examples/code_provider/)** - sandboxed file/module loading with `LuaCodeProvider`
+- **[jailed_io](examples/jailed_io/)** - confined filesystem and OS access
+- **[table](examples/table/)** - `LuaTable` interop and deterministic iteration
+- **[chan](examples/chan/)** - Go<->Lua channels with `chan.select`
+- **[glob](examples/glob/)** - Go-style pattern matching from Go and Lua
+
+### Advanced And Optional Modules
+
+- **[exec](examples/exec/)** - process execution, streaming I/O, stdin, and timeouts
+- **[time](examples/time/)** - millisecond timing with `time.now`, `time.since`, `time.tick`, and `time.once`
+- **[http](examples/http/)** - optional HTTP client module with a dedicated example runner
+- **[check](examples/check/)** - diagnostics as JSON for editor integrations
+- **[editor](examples/editor/)** - Monaco editor with live diagnostics and sandboxed execution
+- **[editor_advanced](examples/editor_advanced/)** - browser IDE with completion, hover, diagnostics, and execution
+- **[expose_object](examples/expose_object/)** - Go-backed objects with an explicit adapter layer
+- **[context](examples/context/)** - context cancellation stops a runaway Lua script
+- **[directives](examples/directives/)** - parse `@`-prefixed metadata from a Lua source header (non-standard, source-level)
+- **[directive_loader](examples/directive_loader/)** - directive-driven script loader: scan a directory, honor `@disabled`/`@scope`/`@tick`, then run
+
+## Go Interop
+
+### Comparing Values
+
+`vm.Value` is **not comparable with Go's `==`**, by design: strings are stored unboxed as a data pointer plus a length, so `==` would compare pointers and answer string equality wrongly for equal strings built different ways. Value carries a zero-width non-comparable field, so `==` and `map[vm.Value]T` fail to compile.
+
+```go
+a == b                 // compile error: struct containing [0]func() cannot be compared
+a.Equal(b)             // content equality, including int/float cross-type comparison
+a.IsNil()              // instead of a == vm.Nil
+
+map[vm.Value]int{}     // compile error: invalid map key type
+map[string]int{}       // key on the extracted Go value: v.AsString(), v.AsInt(), ...
+```
+
+`RawEqual` is an alias for `Equal`. Neither invokes an `__eq` metamethod — that
+dispatch happens in the VM, not on the value.
+
+One case the compiler cannot catch: once a Value is stored in an `interface{}`,
+`==` compiles and panics at run time with *comparing uncomparable type vm.Value*.
+That is loud rather than silent, but if you hold Values in `any`, compare them
+by extracting the Value first.
+
+### Exposing Go Functions to Lua
+
+```go
+v := vm.New()
+stdlib.Open(v)
+
+// Register a Go function
+v.SetGlobal("add", vm.NewNativeFunc(func(v *vm.VM) int {
+    a := v.Get(1).AsInt()
+    b := v.Get(2).AsInt()
+    v.Set(0, vm.NewInt(a + b))
+    return 1 // number of return values
+}))
+```
+
+### Calling Lua Functions from Go
+
+```go
+// Get a Lua function
+fn := v.GetGlobal("myFunction")
+
+// Call it with arguments
+results, err := v.ProtectedCall(fn, []vm.Value{
+    vm.NewInt(10),
+    vm.NewString("hello"),
+})
+```
+
+### Sandboxed Code Loading
+
+Implement [`LuaCodeProvider`](docs/code_provider.md) to control what Lua can load. All provider interface methods take `ctx context.Context` as their first parameter:
+
+```go
+type MyProvider struct{}
+
+func (p *MyProvider) LoadChunk(ctx context.Context, name string, caller *vm.LuaCallerContext) ([]byte, string, error) {
+    // Validate and load the requested chunk
+    // Return source, display name, and error
+}
+
+func (p *MyProvider) Capabilities(ctx context.Context) vm.LuaLoaderCaps {
+    return vm.LuaLoaderCaps{
+        AllowDofile:   true,
+        AllowLoadfile: true,
+    }
+}
+
+// Use it
+v := vm.New()
+if err := v.SetCodeProvider(&MyProvider{}); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+```
+
+### package.loadlib Hook
+
+`package.loadlib` is always exposed but returns Lua's standard "absent" failure
+triple by default. Standard C Lua modules (.so/.dll) are compiled against the
+PUC-Rio C API (`lua_State*`, `lua_push*`, etc.) and cannot be loaded directly
+into GoLua. Setting a `LuaLoadLibProvider` lets the host implement its own native
+module strategy — for example, mapping module names to Go-implemented bindings or
+using cgo to bridge platform-specific libraries.
+
+```go
+type MyLoadLibProvider struct{}
+
+func (p *MyLoadLibProvider) LoadLib(ctx context.Context, path, init string, caller *vm.LuaCallerContext) (vm.NativeFunc, string, string) {
+    // The host decides how to interpret path and init — they need not
+    // refer to actual .so/.dll files. Return errmsg + where to deny loading.
+    // where is one of "open", "init", or "absent".
+    if path == "mylib" && init == "luaopen_mylib" {
+        return func(v *vm.VM) int {
+            lib := vm.NewEmptyTable()
+            lib.SetString("greet", vm.NewNativeFunc(func(v *vm.VM) int {
+                v.Set(0, vm.NewString("hello from Go"))
+                return 1
+            }))
+            v.Set(0, vm.NewTable(lib))
+            return 1
+        }, "", ""
+    }
+    return nil, path + ": module not available", "absent"
+}
+
+v := vm.New()
+if err := v.SetLoadLibProvider(&MyLoadLibProvider{}); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+```
+
+### Sandboxed IO and OS
+
+```go
+v := vm.New()
+
+// Read-only file access, confined to a directory
+if err := v.SetIoProvider(vm.NewJailedIoProvider("/path/to/allowed/dir")); err != nil {
+    log.Fatal(err)
+}
+
+// OS functions (clock, time, date, getenv, setlocale)
+if err := v.SetOsProvider(vm.NewDefaultOsProvider()); err != nil {
+    log.Fatal(err)
+}
+
+// Command execution (os.execute)
+if err := v.SetExecProvider(vm.NewDefaultExecProvider()); err != nil {
+    log.Fatal(err)
+}
+
+// VM termination (os.exit)
+if err := v.SetExitHandler(vm.NewDefaultExitHandler()); err != nil {
+    log.Fatal(err)
+}
+
+// Or restrict which env vars are visible
+if err := v.SetOsProvider(vm.NewFilteredOsProvider(func(name string) bool {
+    return name == "USER" || name == "HOME"
+})); err != nil {
+    log.Fatal(err)
+}
+
+stdlib.Open(v)
+```
+
+### Process Execution
+
+The [`exec`](docs/exec.md) module provides modern process control beyond `os.execute`:
+
+```go
+v := vm.New()
+if err := v.SetProcessProvider(vm.NewDefaultProcessProvider()); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+```
+
+```lua
+-- Simple run with captured output
+local result = exec.run("ls", "-al")
+print(result.stdout)
+
+-- Spawn for streaming and interaction
+local p = exec.spawn("sort")
+p:write("banana\napple\n")
+p:close_stdin()
+for line in p:readlines() do print(line) end
+p:wait()
+
+-- Shell mode with pipes
+local r = exec.run_shell("cat /etc/hosts | grep localhost")
+```
+
+See [docs/exec.md](docs/exec.md) for the full API reference.
+
+### Debug Library
+
+The full Lua debug library, gated by [`LuaDebugProvider`](docs/debug_provider.md) capabilities:
+
+```go
+v := vm.New()
+if err := v.SetDebugProvider(vm.NewDefaultDebugProvider()); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+// Lua now has: debug.getinfo, debug.traceback, debug.sethook, debug.gethook,
+// debug.getlocal, debug.setlocal, debug.getupvalue, debug.setupvalue,
+// debug.upvalueid, debug.upvaluejoin, debug.getmetatable, debug.setmetatable,
+// debug.getregistry
+```
+
+Individual capabilities can be enabled/disabled via [`LuaDebugCaps`](docs/debug_provider.md) fields (e.g. `AllowSetHook`, `AllowSetLocal`, `AllowUpvalueJoin`).
+
+### Print Interception
+
+Route `print()` and `warn()` output through your logging infrastructure:
+
+```go
+type LoggingProvider struct{ Name string }
+
+func (p *LoggingProvider) Print(ctx context.Context, msg string) {
+    log.Printf("[%s] %s", p.Name, msg)
+}
+func (p *LoggingProvider) Warn(ctx context.Context, msg string) {
+    log.Printf("[%s] WARN: %s", p.Name, msg)
+}
+
+v := vm.New()
+if err := v.SetPrintProvider(&LoggingProvider{Name: "inventory.lua"}); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+```
+
+Without a provider, `print()` writes to stdout (or the `WithCaptureOutput` buffer) and `warn()` writes to stderr — matching standard Lua behavior.
+
+The `warn("@on")`/`warn("@off")` flag is per-VM, so disabling warnings in one VM does not affect others.
+
+### Context Cancellation and Execution Limits
+
+Stop runaway scripts with cooperative context cancellation and execution limits:
+
+```go
+// Cancel infinite loops via context
+ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+defer cancel()
+
+v := vm.New(vm.WithContext(ctx))
+stdlib.Open(v)
+
+// Or use setters
+v.SetContext(ctx)
+
+// Limit call depth, stack size, and instructions
+v.SetLimits(vm.Limits{
+    MaxCallDepth:    200,     // Prevent deep recursion
+    MaxStackSlots:   10000,   // Bound memory growth
+    MaxInstructions: 1000000, // Bound CPU (checkpoint visits)
+    MaxMetaDepth:    500,     // Limit __index/__newindex chain depth (default: 2000)
+    CompilerLimits: compiler.CompilerLimits{
+        MaxVars:   200, // Max locals per function (default: 200)
+        MaxRegs:   249, // Max registers per function (default: 249, hard cap: 249)
+        MaxUpvals: 255, // Max upvalues per function (default: 255, hard cap: 255)
+    },
+})
+
+// Or configure metatable depth independently
+v = vm.New(vm.WithMaxMetaDepth(500))
+v.SetMaxMetaDepth(500) // runtime setter equivalent
+```
+
+The VM checks for cancellation at backedges (loop iterations), function calls, and tail calls. No per-instruction overhead is added unless `MaxInstructions` is set. Context and limits are inherited by coroutine VMs. Errors from limits are catchable by `pcall`.
+
+`MaxMetaDepth` bounds the length of `__index` and `__newindex` table-to-table chains to prevent infinite loops from metatable cycles. The default is 2000, matching Lua's `MAXTAGLOOP`. A value of 0 means "use the default". Function metamethods are not affected by this limit.
+
+`CompilerLimits` enforces compile-time limits on locals, registers, and upvalues per function. These apply to `load()` and `dofile()` calls within the VM. Zero values use defaults. Limits can also be passed directly to `compiler.Compile()` via `compiler.WithLimits()`.
+
+### Channels (Go↔Lua Message Passing)
+
+Channels provide safe, capability-gated communication between Go and running Lua scripts. No goroutines or shared memory are exposed to Lua.
+
+```go
+// Create a provider and channel on the Go side
+provider := vm.NewDefaultChanProvider()
+events := provider.NewChannel(0) // unbuffered
+
+// Set up the VM
+v := vm.New()
+if err := v.SetChanProvider(provider); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+
+// Pass the channel into Lua
+v.SetGlobal("events", stdlib.WrapChannel(v, events))
+
+// Go goroutine sends events
+go func() {
+    events.Send(nil, vm.NewString("hello from Go"))
+    events.Close()
+}()
+
+v.Run(proto) // Lua reads with events:recv()
+```
+
+Lua API:
+
+| Function                          | Description                                                              |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `chan.make(size?)`                | Create a new channel (0 = unbuffered)                                    |
+| `chan.select(ch1, ..., timeout?)` | Receive from any ready channel; returns `idx, val, ok`                   |
+| `ch:send(val)`                    | Blocking send (panics on interrupt or closed channel)                    |
+| `ch:recv()`                       | Blocking receive; returns `val, ok` (`ok=false` when closed and drained) |
+| `ch:close()`                      | Close the channel (panics if already closed)                             |
+| `ch:try_send(val)`                | Non-blocking send; returns `bool`                                        |
+| `ch:try_recv()`                   | Non-blocking receive; returns `val, ok, received`                        |
+
+`chan.select` returns a 1-based index of the channel that fired, or `0` on timeout. Blocking operations respect context cancellation and call `CheckInterrupt()` after waking.
+
+The `chan` table is **absent by default** (`chan == nil`). It only appears when the host sets a `LuaChanProvider` before calling `stdlib.Open()`. Channels from different providers are rejected by `chan.select` (VM boundary safety). The convenience function `stdlib.ProvideChan(v)` sets up a `DefaultChanProvider` and opens the module in one call.
+
+### Time (Non-Standard)
+
+Millisecond-precision timing for benchmarking and periodic triggers:
+
+```go
+v := vm.New()
+if err := v.SetTimeProvider(vm.NewDefaultTimeProvider()); err != nil {
+    log.Fatal(err)
+}
+stdlib.Open(v)
+```
+
+```lua
+local start = time.now()           -- current time in ms
+-- ... work ...
+print(time.since(start) .. "ms")   -- elapsed ms
+
+-- periodic trigger: true once per interval, false otherwise
+for i = 1, math.huge do
+    if time.tick(1000) then print("once per second") end
+end
+
+-- explicit key (shared across callsites)
+if time.tick("heartbeat", 500) then send_heartbeat() end
+
+-- one-time initialization guard
+if time.once() then load_resources() end
+```
+
+| Function                | Description                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `time.now()`            | Current time in milliseconds (integer)                                            |
+| `time.since(t)`         | Milliseconds elapsed since `t`                                                    |
+| `time.tick([name,] ms)` | Returns `true` once per `ms` interval, `false` otherwise                          |
+| `time.once([name])`     | Returns `true` on the first call for a given key, `false` on all subsequent calls |
+
+`time.tick` and `time.once` are **GoLua extensions** (not part of standard Lua). When `name` is omitted, both functions auto-key by callsite — the VM inspects the calling function's source file and line number (`source:line`) so each call location gets independent state. Pass an explicit `name` string to share state across call locations. The `time` table is **absent by default** and only appears when the host sets a `LuaTimeProvider`.
+
+### Source Directives (Non-Standard)
+
+A common embedder pattern is annotating Lua scripts with host-meaningful metadata in their header — scheduler intervals, scope names, enable/disable flags, registration hints. The `directives` sub-package factors that out into a single source-level parser:
+
+```go
+import "github.com/iceisfun/golua/v2/directives"
+
+f, _ := directives.Parse(source)
+if f.Has("disabled") { return }
+tick, _ := f.Get("tick")           // "30s"
+scope, _ := f.Get("scope")         // "alias_expander"
+imports := f.Lookup("import")      // ["shared/util", "shared/log"]
+```
+
+```lua
+-- @tick 30s
+-- @scope alias_expander
+-- @disabled
+-- @import shared/util
+-- @import shared/log
+
+local function run() return 42 end
+return run()
+```
+
+| Method                | Description                                                                  |
+| --------------------- | ---------------------------------------------------------------------------- |
+| `Parse(src)`          | Returns `*File` with the parsed header (always non-nil)                      |
+| `(*File) Get(k)`      | Last value for key `k` (last-wins for repeated keys); flags return `("", true)` |
+| `(*File) Has(k)`      | Whether key `k` was present at least once                                    |
+| `(*File) Lookup(k)`   | Every value for key `k`, in source order                                     |
+| `(*File) Keys()`      | Distinct keys in first-occurrence order                                      |
+| `(*File) All()`       | Range-over-func iterator over every `(key, value)` pair, including duplicates |
+
+Header directives (`-- @key value`) are a **golua-specific extension** for embedders. They are **not** part of the Lua language as specified by Lua 5.4 / Lua 5.5; the reference Lua interpreter sees them as ordinary comments. This is by design:
+
+1. **Reference Lua executes the same source unchanged.** A `.lua` file with a directive header runs identically under `lua` / `lua5.5.0` and under GoLua.
+2. **The lexer, parser, compiler, and VM are unaffected.** Directives are scanned by a standalone source-level parser; there is no grammar change, no new tokens, no new AST nodes, and no bytecode change.
+3. **Stripped / source-less execution is unaffected.** Directives never enter the bytecode pipeline; a precompiled `*compiler.Proto` carries no directive data.
+
+The `directives` package has no opinion about which keys are valid — `@tick`, `@scope`, `@disabled`, `@import` are **embedder conventions**, not GoLua features. The parser identifies header-position directives only (a contiguous prefix of shebang, blank lines, and `--` short comments); long comments (`--[[ ]]`) terminate the header without being scanned.
+
+See [examples/directives](examples/directives/) for a minimal API demo and [examples/directive_loader](examples/directive_loader/) for the realistic embedder pattern of scanning a directory of scripts and applying policy from their headers.
+
+### LuaTable Interface
+
+Tables implement the `LuaTable` interface, which is the contract used by the VM and stdlib:
+
+```go
+type LuaTable interface {
+    Get(key Value) Value
+    Set(key Value, val Value) error
+    Delete(key Value) error
+    Next(key Value) (nextKey Value, val Value, err error)
+    Len() int
+    Metatable() LuaTable
+    SetMetatable(mt LuaTable)
+    IsThread() bool  // Whether this table represents a coroutine thread
+    VMRef() *VM      // Coroutine VM reference, or nil
+}
+```
+
+`LuaTable.Get()` performs **raw access** (equivalent to Lua's `rawget()`) — it does not invoke `__index` metamethods. To get Lua-style indexing that walks the `__index` chain, use `v.TableGet(tbl, key)` or `v.TableGetInt(tbl, n)` instead. Similarly, `v.SetIndexValue()` respects `__newindex`. This distinction matters when reading from class instances created via `setmetatable`.
+
+The default `*Table` implementation uses an ordered keys slice for the hash part, so `next()`/`pairs()` iteration is deterministic (insertion-ordered). This avoids the non-deterministic `range map` behavior in Go. Mutation during iteration is not safe; inserting or deleting keys may skip entries or produce duplicates. Tables have no implicit thread safety -- concurrent read+write requires external synchronization.
+
+## Standard Library
+
+`stdlib.Open(v)` registers all standard modules. Capability-gated modules only appear when their provider is set.
+
+Standard Lua modules are available by default. GoLua-specific extensions and host-facing capabilities include `glob`, `chan`, `time`, `exec`, and the separate `stdlib/http` module.
+
+| Module      | Requires Provider    | Description                                                                                   |
+| ----------- | -------------------- | --------------------------------------------------------------------------------------------- |
+| `string`    | No                   | Pattern matching, formatting, byte manipulation, `pack`/`unpack`, `dump`                      |
+| `math`      | No                   | Math functions with per-VM deterministic random                                               |
+| `table`     | No                   | Table manipulation (sort, concat, insert, remove, move, pack, unpack)                         |
+| `coroutine` | No                   | Coroutine creation and control                                                                |
+| `utf8`      | No                   | UTF-8 encoding/decoding (strict mode)                                                         |
+| `bit32`     | No                   | Lua 5.2 bitwise compat library                                                                |
+| `glob`      | No                   | Case-insensitive Go-style pattern matching (`match`, `match_words`, `match_named`)            |
+| `io`        | [`LuaIoProvider`](docs/io_provider.md)      | File I/O (absent by default)                                                                  |
+| `os`        | [`LuaOsProvider`](docs/os_provider.md)      | OS core: `clock`, `time`, `date`, `difftime`, `getenv`, `setlocale` (`execute`/`exit`/`rename` also require their own providers) |
+| `package`   | No*                  | Module system: `require`, `package.loaded`, `package.preload`, `package.searchers`, `searchpath` |
+| `debug`     | [`LuaDebugProvider`](docs/debug_provider.md)   | Full Lua debug library: getinfo, hooks, locals, upvalues (absent by default)                  |
+| `chan`      | [`LuaChanProvider`](docs/chan.md)    | Go↔Lua message passing channels (absent by default)                                           |
+| `time`      | [`LuaTimeProvider`](docs/time.md)    | Millisecond timing: now, since, periodic tick (absent by default)                             |
+| `exec`      | [`LuaProcessProvider`](docs/exec.md) | Process execution: run, spawn, streaming I/O, stdin, kill ([docs](docs/exec.md))              |
+| `http`      | Separate module      | HTTP client: get, post, put, patch, delete, fetch ([docs](docs/http.md))                      |
+
+\* `package.loadlib` is nil by default; set `LuaLoadLibProvider` to provide host-defined native module loading.
+
+## Security Model
+
+GoLua is sandboxed by default. The VM starts with no access to the host system. Capabilities are granted explicitly by the host via providers.
+
+A fresh `vm.New()` instance has no file, network, process, or debug access unless the host opts in.
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────────┐
+│                                    Host (Go)                                          │
+│                                                                                       │
+│  ┌────────────┐ ┌──────────┐ ┌──────────┐ ┌─────────────┐ ┌────────────┐ ┌──────────┐ │
+│  │CodeProvider│ │IoProvider│ │OsProvider│ │DebugProvider│ │ChanProvider│ │  Time    │ │
+│  │ (optional) │ │(optional)│ │(optional)│ │ (optional)  │ │ (optional) │ │(optional)│ │
+│  │            │ │          │ │ExecProv. │ │             │ │            │ │          │ │
+│  │            │ │          │ │ExitHndlr │ │             │ │            │ │          │ │
+│  │            │ │          │ │ProcessP. │ │             │ │            │ │          │ │
+│  └─────┬──────┘ └────┬─────┘ └────┬─────┘ └──────┬──────┘ └─────┬──────┘ └────┬─────┘ │
+│        │             │            │              │              │             │       │
+│  ┌─────▼─────────────▼────────────▼──────────────▼──────────────▼─────────────▼──┐    │
+│  │                              VM  (sandbox)                                    │    │
+│  │                                                                               │    │
+│  │  string, math, table, coroutine, utf8, bit32, glob, package                   │    │
+│  │  io*, os*, debug*, chan*, time*, exec*           (* = provider-gated)         │    │
+│  │  require → CodeProvider (Lua file searcher)                                   │    │
+│  │  print/warn → PrintProvider (or stdout/stderr fallback)                       │    │
+│  └───────────────────────────────────────────────────────────────────────────────┘    │
+└───────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+- No filesystem access unless explicitly provided
+- No OS access unless explicitly provided
+- No native code loading (C Lua modules are incompatible; host can provide Go-native bindings via [`LuaLoadLibProvider`](docs/loadlib_provider.md))
+- No ambient authority
+
+The default IO provider ([`JailedIoProvider`](docs/io_provider.md)) enforces:
+
+- root confinement
+- read-only access
+- path traversal prevention
+
+### Runtime safety guarantee — and its one limit
+
+Beyond capability gating, GoLua guarantees that **sandboxed Lua *source* cannot
+crash or hang the host process**. This is continuously fuzzed (see
+[`golua-conformance`](https://github.com/iceisfun/golua-conformance)) and holds
+because Go failure modes that don't exist in C Lua are defended at every boundary:
+
+- A Go native function that panics — including a `nil` dereference or other
+  runtime panic — surfaces as a **catchable Lua error** (`pcall` returns
+  `false`), and the VM stays usable. It does **not** propagate out of `pcall`.
+  (At the top level, `vm.Run` *does* propagate a native panic — wrap host entry
+  points in `ProtectedCall` or recover if you call untrusted code outside `pcall`.)
+- Every unbounded string/table builder (`string.rep`, `..`, `string.gsub`,
+  `string.pack`, `table.concat`, `io:read(n)`) is capped (~`1<<30`) and raises a
+  *catchable* error rather than an uncatchable Go `runtime.throw` OOM.
+- Deeply nested source and adversarial bytecode-loader inputs yield catchable
+  errors, not fatal stack/OOM aborts.
+
+**The one limit:** executing an untrusted **binary chunk** is *not* safe — in
+GoLua or in reference Lua (no Lua ships a bytecode verifier; the manual says a
+crafted chunk "can crash the interpreter"). *Loading* a malformed chunk is a
+catchable error, but a crafted-but-valid chunk can loop or misbehave. When you
+expose `load` to untrusted code, **restrict it to text mode** (`load(src, name,
+"t")`), which rejects binary input. See
+[`wontfix/untrusted-binary-chunks`](wontfix/untrusted-binary-chunks/).
+
+### Coroutine resource lifecycle
+
+GoLua backs each coroutine with a goroutine. A coroutine driven to completion or
+`coroutine.close()`-d is fully reclaimed. An **abandoned *suspended* coroutine**
+(never resumed to the end and never closed) keeps its goroutine parked — Go
+cannot reap a parked goroutine. **`VM.Close(ctx)` reaps the goroutines of all
+still-suspended coroutines**, so the standard `v := vm.New(); defer v.Close(ctx)`
+lifecycle reclaims them; only a single long-lived VM that is never closed and
+keeps abandoning suspended coroutines accumulates them (close or complete each
+one there). See
+[`wontfix/coroutine-goroutine-leak`](wontfix/coroutine-goroutine-leak/).
+
+### Known divergences from reference Lua
+
+A small set of behaviors deliberately differ from PUC-Rio Lua — IEEE-754
+correctness, Go-vs-C-library/platform quirks, or sandbox/design choices — and
+are documented once in [`wontfix/`](wontfix/) so they aren't re-reported (e.g.
+signed-zero constant folding, last-ULP transcendentals, the `#` border on holey
+tables, weak-table/GC timing). If you hit a difference, check there first; the
+remainder of GoLua is validated byte-for-byte against `lua5.5.0` / `lua5.4.8`.
+
+## Running Tests
+
+```bash
+go test ./...           # All tests
+go test ./tests/...     # Lua script tests only
+go test -v ./tests/...  # Verbose output
+```
+
+## Project Structure
+
+```
+├── ast/           # Abstract syntax tree definitions
+├── check/         # Lua source diagnostics for editor integration
+├── compiler/      # Bytecode compiler
+├── docs/          # Additional documentation
+├── glob/          # Go-style glob matching package, diverges from standard lua
+├── lexer/         # Lexical analyzer
+├── parser/        # Lua parser
+├── stdlib/        # Standard library implementation
+├── token/         # Token definitions
+├── vm/            # Virtual machine
+├── tests/         # Lua test files
+├── examples/      # Usage examples
+└── cmd/
+    ├── ast/       # AST printer/debugger CLI
+    ├── lua/       # Lua interpreter CLI
+    └── luac/      # Bytecode compiler CLI
+```
+
+## CLI Usage
+
+```bash
+# Run a Lua script
+go run ./cmd/lua script.lua
+
+# Execute inline code
+go run ./cmd/lua -e "print(1 + 1)"
+
+# Run with a 500ms execution timeout
+go run ./cmd/lua --timeout 500 script.lua
+
+# Pass arguments to a script (available as `arg[1]`, `arg[2]`, ...)
+go run ./cmd/lua script.lua foo bar
+
+# Run with test mode (enables debug provider, jailed IO, code provider)
+go run ./cmd/lua --test script.lua
+
+# Compile and show bytecode
+go run ./cmd/luac script.lua
+```
+
+## Limitations
+
+Current compatibility notes and intentional boundaries:
+
+- The CLI enables a practical host-facing set of providers by default: `DefaultOsProvider`, `FullIoProvider`, `DirCodeProvider`, `DefaultExecProvider`, `DefaultExitHandler`, and `DefaultDebugProvider`. `--test` switches to a more test-like environment with `JailedIoProvider`, `DirCodeProvider`, and `DefaultDebugProvider`, without enabling `os.execute` or `os.exit`.
+- No C module loading — standard C Lua modules (.so/.dll) are compiled against the PUC-Rio C API and are not compatible with GoLua's VM. `package.loadlib` is nil by default; setting a [`LuaLoadLibProvider`](docs/loadlib_provider.md) lets the host provide Go-native bindings or cgo-bridged libraries under the same API surface. `require` loads Lua modules via `LuaCodeProvider`.
+- No `io.stdin`/`io.stdout`/`io.stderr` in the library by default (the CLI at `cmd/lua` provides full stdio via its environment, but `vm.New()` does not to maintain the sandbox)
+- No `io.write` in `JailedIoProvider` (read-only by design; use `FullIoProvider` for read-write access)
+- `load(string.dump(f))` round-tripping works within GoLua. Binary chunk format targets Lua 5.5; cross-loading with other Lua implementations may not work due to bytecode differences.
+- `os.setlocale` only supports the `"C"` locale — Go has no native locale support. Queries return `"C"` and setting any other locale returns `nil`.
+- GC behavior differs from C Lua — GoLua delegates garbage collection entirely to Go's runtime GC. `collectgarbage("collect")` triggers `runtime.GC()` but Go's GC timing is non-deterministic, so tests that depend on exact finalization order or count may not pass.
+- VM instances are isolated but not safe for concurrent mutation from multiple goroutines without external synchronization.
+
+## Contributing
+
+PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. Run `go test ./...` before submitting.
+
+## License
+
+MIT

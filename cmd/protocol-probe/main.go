@@ -19,6 +19,7 @@ import (
 
 	"github.com/local/9yin-go-server/internal/auth"
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/luascript"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/qinggong"
 	"github.com/local/9yin-go-server/internal/role"
@@ -40,6 +41,7 @@ func main() {
 	gmListen := flag.String("gm-listen", "127.0.0.1:19062", "local GM HTTP listen address (empty disables)")
 	logFile := flag.String("log-file", runtimeProjectPath("artifacts", "local", "logs", "protocol-probe-live.log"), "append runtime log to this local file")
 	npcFuncPath := flag.String("npc-func", defaultLegacyNPCFuncPath, "Npc_Func.xml used to build per-NPC service menus")
+	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts"), "server-side Lua scripts directory (empty disables)")
 	switchScene := flag.String("switch-scene", "", "test-only live destination: config,resource,x,y,z,orient (empty disables it)")
 	npcAuditAll := flag.Bool("npc-audit-all", false, "inventory every modern NPC creator scene and exit")
 	npcServiceAuditScene := flag.String("npc-service-audit-scene", "", "write effective NPC service audit for config,resource,x,y,z,orient and exit")
@@ -75,6 +77,15 @@ func main() {
 		log.Printf("Npc_Func menu registry unavailable (%s): %v; NPCs without this table will expose no fabricated service menu", *npcFuncPath, npcFuncErr)
 	} else {
 		log.Printf("Npc_Func menu registry ready configured_npcs=%d path=%s", npcFuncs.Count(), *npcFuncPath)
+	}
+	scriptHost := luascript.New(*scriptsPath, log.Printf)
+	if *scriptsPath != "" {
+		loaded, scriptErr := scriptHost.LoadDir()
+		if scriptErr != nil {
+			log.Printf("Lua scripts partially loaded count=%d path=%s: %v", loaded, *scriptsPath, scriptErr)
+		} else {
+			log.Printf("Lua scripts ready count=%d path=%s", loaded, *scriptsPath)
+		}
 	}
 	if *npcAuditAll {
 		entries, auditErr := auditNPCSceneRoot(defaultNPCTableDir, filepath.Dir(defaultNPCCreatorDir), npcSchema)
@@ -179,11 +190,11 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), *npcPatrolCount, int32(*demoDamage), int32(*starterSilver), switchDestination, gm)
+		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), *npcPatrolCount, int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost)
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, npcPatrolCount int, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, npcPatrolCount int, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host) {
 	config := transport.DefaultConnectionConfig()
 	config.MaxFrameSize = 64 << 10
 	link, err := transport.NewConnection(conn, config)
@@ -201,6 +212,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 		log.Printf("session=%d remote=%s closed phase=%s", machine.ID(), conn.RemoteAddr(), machine.Phase())
 	}()
 	world := newSharedSceneLifecycle(conn.RemoteAddr().String(), link, npcFuncs)
+	world.scripts = scriptHost
 	world.radius = npcRadius
 	defer world.close()
 	ctx := context.Background()
@@ -489,6 +501,36 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 			gmSession.setAction("已通过 State 恢复 stand")
 			log.Printf("%s: GM action probe route=State action=stand", conn.RemoteAddr())
+		case "lua_eval":
+			if !scriptHost.Enabled() {
+				gmSession.setAction("Lua 脚本未启用（-scripts 为空）")
+				return fmt.Errorf("lua scripts are disabled")
+			}
+			result, evalErr := scriptHost.Eval(command.code)
+			if evalErr != nil {
+				gmSession.setAction("Lua 执行失败：" + evalErr.Error())
+				return evalErr
+			}
+			if result == "" {
+				result = "(无返回值)"
+			}
+			if len(result) > 512 {
+				result = result[:512] + "…"
+			}
+			gmSession.setAction("Lua 结果：" + result)
+			log.Printf("%s: GM lua_eval ok", conn.RemoteAddr())
+		case "lua_reload":
+			if !scriptHost.Enabled() {
+				gmSession.setAction("Lua 脚本未启用（-scripts 为空）")
+				return fmt.Errorf("lua scripts are disabled")
+			}
+			loaded, reloadErr := scriptHost.Reload()
+			if reloadErr != nil {
+				gmSession.setAction(fmt.Sprintf("Lua 重载完成但有失败脚本 count=%d：%v", loaded, reloadErr))
+				return reloadErr
+			}
+			gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d", loaded))
+			log.Printf("%s: GM lua_reload count=%d", conn.RemoteAddr(), loaded)
 		default:
 			return fmt.Errorf("unsupported GM action %q", command.action)
 		}

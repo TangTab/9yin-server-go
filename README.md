@@ -30,8 +30,16 @@ go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
 - `cmd`：服务端和配套命令
 - `internal`：协议、角色、资源及网络实现
 - `migrations`：MySQL 表结构迁移
+- `scripts`：服务端 Lua 脚本（见下节）
 - `spec`：协议生成规格
 - `testdata`：测试所需的最小协议夹具
+
+## Lua 脚本
+
+服务端内嵌 Lua 5.5 运行时（纯 Go，见 `third_party/golua`）。`scripts/`
+目录下的脚本在启动时加载，GM 面板可执行任意 Lua 代码并热重载脚本目录。
+脚本运行在沙盒内（无 io/os，500ms 超时），目前用于编写原生未实现的
+NPC 服务（如"任务"）逻辑。API 参考见 [scripts/README.md](scripts/README.md)。
 
 
 
@@ -43,6 +51,11 @@ go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
   框架源码，保持上游原样、不做修改，遵循其上游 MIT License 许可证
   （随附原文件 [internal/ecs/LICENSE](internal/ecs/LICENSE)，
   不继承根工程的 BSD-3）。
+- `third_party/golua/` 目录为内嵌的 [iceisfun/golua](https://github.com/iceisfun/golua)
+  v2（Lua 5.5 运行时）源码，遵循其上游 MIT License 许可证（随附原文件
+  [third_party/golua/LICENSE](third_party/golua/LICENSE)）。相对上游仅打了
+  Windows 进程组编译兼容补丁，差异与来源见
+  [third_party/golua/FORK.md](third_party/golua/FORK.md)，不继承根工程的 BSD-3。
 
   
 <strong>注意：本项目仅限于研究，严禁用于商用。游戏版权归蜗牛游戏公司所有。</strong>

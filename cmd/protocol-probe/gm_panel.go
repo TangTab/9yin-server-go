@@ -54,6 +54,7 @@ type gmCommand struct {
 	destination sceneDestination
 	position    role.Position
 	faction     string
+	code        string // lua_eval 的 Lua 源码
 	// reply 带缓冲，使会话循环总能完成其帧的写入，
 	// 即便浏览器在等待 HTTP 响应期间断开连接。
 	reply chan error
@@ -215,6 +216,7 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 			Preset      string  `json:"preset"`
 			Position    string  `json:"position"`
 			Faction     string  `json:"faction"`
+			Code        string  `json:"code"`
 		}
 		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
 			writeGMError(writer, http.StatusBadRequest, "invalid JSON body")
@@ -288,6 +290,19 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 			"action_native_fishing", "action_state_stop":
 			// 只测试已注册的客户端原生剧情路由。负载由服务器
 			// 持有，因此面板无法提交格式错误的自定义值。
+		case "lua_eval":
+			// Lua 源码在会话循环内经沙盒执行（超时+指令预算），
+			// 这里只做长度闸门，16KB 与 internal/luascript 一致。
+			if strings.TrimSpace(body.Code) == "" {
+				writeGMError(writer, http.StatusBadRequest, "lua_eval requires non-empty code")
+				return
+			}
+			if len(body.Code) > 16<<10 {
+				writeGMError(writer, http.StatusBadRequest, "lua_eval code exceeds 16KB")
+				return
+			}
+			command.code = body.Code
+		case "lua_reload":
 		default:
 			writeGMError(writer, http.StatusBadRequest, "unsupported action")
 			return
