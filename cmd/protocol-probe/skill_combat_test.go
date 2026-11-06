@@ -279,11 +279,11 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if got := world.combatActors[91].Snapshot().HP; got != 0 {
-		t.Fatalf("inside NPC HP=%d, want 0 after 1304 damage", got)
+	if inside, _ := world.combat.Vitals(91); inside.HP != 0 {
+		t.Fatalf("inside NPC HP=%d, want 0 after 1304 damage", inside.HP)
 	}
-	if got := world.combatActors[92].Snapshot().HP; got <= 0 {
-		t.Fatalf("outside NPC HP=%d, want alive outside five metres", got)
+	if outside, _ := world.combat.Vitals(92); outside.HP <= 0 {
+		t.Fatalf("outside NPC HP=%d, want alive outside five metres", outside.HP)
 	}
 }
 
@@ -319,11 +319,11 @@ func TestCompiledSectorDamageUsesC2S211CasterOrientation(t *testing.T) {
 	if len(results) != 1 || results[0].id != 93 {
 		t.Fatalf("sector results=%+v, want only facing NPC 93", results)
 	}
-	if got := world.combatActors[93].Snapshot().HP; got != 900 {
-		t.Fatalf("front NPC HP=%d, want 900", got)
+	if front, _ := world.combat.Vitals(93); front.HP != 900 {
+		t.Fatalf("front NPC HP=%d, want 900", front.HP)
 	}
-	if got := world.combatActors[94].Snapshot().HP; got != 1000 {
-		t.Fatalf("back NPC HP=%d, want untouched 1000", got)
+	if back, _ := world.combat.Vitals(94); back.HP != 1000 {
+		t.Fatalf("back NPC HP=%d, want untouched 1000", back.HP)
 	}
 }
 

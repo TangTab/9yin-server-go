@@ -1,7 +1,7 @@
 package ecs
 
 import (
-	"github.com/unitoftime/ecs/internal/intmap"
+	"github.com/local/9yin-go-server/internal/ecs/internal/intmap"
 )
 
 type intkey interface {

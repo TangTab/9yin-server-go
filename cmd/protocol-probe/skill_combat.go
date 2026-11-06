@@ -9,6 +9,7 @@ import (
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/entity"
+	"github.com/local/9yin-go-server/internal/sim"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -282,8 +283,8 @@ func (s *sceneLifecycle) selectedCombatTarget() (uint32, uint32, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
-	actor := s.combatActors[id]
-	if actor == nil || actor.Snapshot().HP <= 0 {
+	vitals, hasVitals := s.combat.Vitals(id)
+	if !hasVitals || vitals.HP <= 0 {
 		return 0, 0, false
 	}
 	meta, exists := s.entities[id]
@@ -297,23 +298,23 @@ func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
-	actor := s.combatActors[id]
+	vitals, hasVitals := s.combat.Vitals(id)
 	meta, exists := s.entities[id]
-	if actor == nil || !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat || actor.Snapshot().HP <= 0 {
+	if !hasVitals || !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
 		return nil, 0, 0, false, nil
 	}
-	if !actor.ApplyDamage(amount) {
+	if !vitals.ApplyDamage(amount) {
 		return nil, uint32(id), 0, false, nil
 	}
-	state := actor.Snapshot()
-	combat, isCombat := s.combatStates[id]
-	if isCombat {
-		combat.threat += amount
+	s.combat.WriteVitals(id, vitals)
+	state := vitals.ActorState(uint32(id), meta.ownerID)
+	if brain, isCombat := s.combat.Brain(id); isCombat {
+		brain.Threat += amount
 		if state.HP <= 0 {
-			combat.threat = 0
-			combat.respawnAt = now.Add(combat.respawnAfter)
+			brain.Threat = 0
+			brain.RespawnAt = now.Add(brain.RespawnAfter)
 		}
-		s.combatStates[id] = combat
+		s.combat.WriteBrain(id, brain)
 	}
 	frame, err := sceneObjectProperties(uint32(id), meta.ownerID, 0, npcCombatProperties(state))
 	loot := int32(0)
@@ -348,11 +349,13 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 	defer s.mu.Unlock()
 
 	radiusSquared := radius * radius
-	ids := make([]int, 0, len(s.combatActors))
-	for id, actor := range s.combatActors {
+	// 只有 attacknpc/bossnpc 携带 Brain，与旧循环中
+	// interaction == npcInteractionCombat 的过滤等价。
+	ids := make([]int, 0, s.combat.CombatCount())
+	s.combat.EachCombatNPC(func(id worldcore.EntityID, vitals *sim.Vitals, _ *sim.Brain) {
 		meta, exists := s.entities[id]
-		if actor == nil || !exists || meta.interaction != npcInteractionCombat || actor.Snapshot().HP <= 0 {
-			continue
+		if !exists || vitals.HP <= 0 {
+			return
 		}
 		dx := meta.transform.X - center.X
 		dz := meta.transform.Z - center.Z
@@ -361,46 +364,50 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 			dy = -dy
 		}
 		if height > 0 && dy > height {
-			continue
+			return
 		}
 		if rectangleWidth > 0 {
 			facingX, facingZ := math.Cos(float64(center.Orient)), math.Sin(float64(center.Orient))
 			forward := float64(dx)*facingX + float64(dz)*facingZ
 			side := -float64(dx)*facingZ + float64(dz)*facingX
 			if forward < 0 || forward > float64(radius) || math.Abs(side) > float64(rectangleWidth)/2 {
-				continue
+				return
 			}
 		} else if dx*dx+dz*dz > radiusSquared {
-			continue
+			return
 		} else if sectorAngle > 0 {
 			targetAngle := math.Atan2(float64(dz), float64(dx))
 			delta := math.Atan2(math.Sin(targetAngle-float64(center.Orient)), math.Cos(targetAngle-float64(center.Orient)))
 			if math.Abs(delta) > float64(sectorAngle)*math.Pi/360 {
-				continue
+				return
 			}
 		}
-		{
-			ids = append(ids, int(id))
-		}
-	}
+		ids = append(ids, int(id))
+	})
+	// EachCombatNPC 本身按 EntityID 升序回调，这里的排序是
+	// 对该保证的显式防御。
 	sort.Ints(ids)
 
 	results := make([]areaSkillDamageResult, 0, len(ids))
 	for _, rawID := range ids {
 		id := worldcore.EntityID(rawID)
-		actor := s.combatActors[id]
-		meta := s.entities[id]
-		if !actor.ApplyDamage(amount) {
+		vitals, ok := s.combat.Vitals(id)
+		if !ok {
 			continue
 		}
-		state := actor.Snapshot()
-		if combat, exists := s.combatStates[id]; exists {
-			combat.threat += amount
+		meta := s.entities[id]
+		if !vitals.ApplyDamage(amount) {
+			continue
+		}
+		s.combat.WriteVitals(id, vitals)
+		state := vitals.ActorState(uint32(id), meta.ownerID)
+		if brain, exists := s.combat.Brain(id); exists {
+			brain.Threat += amount
 			if state.HP <= 0 {
-				combat.threat = 0
-				combat.respawnAt = now.Add(combat.respawnAfter)
+				brain.Threat = 0
+				brain.RespawnAt = now.Add(brain.RespawnAfter)
 			}
-			s.combatStates[id] = combat
+			s.combat.WriteBrain(id, brain)
 		}
 		frame, err := sceneObjectProperties(uint32(id), meta.ownerID, 0, npcCombatProperties(state))
 		if err != nil {
@@ -431,8 +438,8 @@ func (s *sceneLifecycle) selectedCombatTargetTransform() (worldcore.Transform, b
 	defer s.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
 	meta, exists := s.entities[id]
-	actor := s.combatActors[id]
-	return meta.transform, exists && actor != nil && actor.Snapshot().HP > 0
+	vitals, hasVitals := s.combat.Vitals(id)
+	return meta.transform, exists && hasVitals && vitals.HP > 0
 }
 
 func (s *sceneLifecycle) applyNPCControl(ids []uint32, lifetime time.Duration, now time.Time) {
@@ -444,13 +451,13 @@ func (s *sceneLifecycle) applyNPCControl(ids []uint32, lifetime time.Duration, n
 	until := now.Add(lifetime)
 	for _, rawID := range ids {
 		id := worldcore.EntityID(rawID)
-		state, exists := s.combatStates[id]
+		brain, exists := s.combat.Brain(id)
 		if !exists {
 			continue
 		}
-		if until.After(state.controlledUntil) {
-			state.controlledUntil = until
-			s.combatStates[id] = state
+		if until.After(brain.ControlledUntil) {
+			brain.ControlledUntil = until
+			s.combat.WriteBrain(id, brain)
 		}
 	}
 }

@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
-	"github.com/local/9yin-go-server/internal/entity"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
+	"github.com/local/9yin-go-server/internal/sim"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -25,16 +25,18 @@ type sceneMessageConnection interface {
 // 的子集。它刻意与 NPC 行为解耦，使怪物、采集物和远端玩家可以走同
 // 一条路径。
 type sceneLifecycle struct {
-	remote         string
-	conn           sceneMessageConnection
-	mu             sync.Mutex
-	armed          bool
-	combatActive   bool
-	scene          *worldcore.Scene
-	viewport       *worldcore.Viewport
-	entities       map[worldcore.EntityID]sceneEntity
-	combatActors   map[worldcore.EntityID]*entity.Actor
-	combatStates   map[worldcore.EntityID]npcCombatState
+	remote       string
+	conn         sceneMessageConnection
+	mu           sync.Mutex
+	armed        bool
+	combatActive bool
+	scene        *worldcore.Scene
+	viewport     *worldcore.Viewport
+	entities     map[worldcore.EntityID]sceneEntity
+	// combat 以 ECS 组件存储持有全部已注册 NPC 的模拟态：
+	// 平民只有 Vitals，敌对 NPC 另带 Brain。所有访问必须在
+	// s.mu 临界区内，纪律与被替换的两张平行 map 完全一致。
+	combat         *sim.World
 	closed         bool
 	epoch          uint64
 	timers         []*time.Timer
@@ -132,14 +134,13 @@ func newSceneLifecycle(remote string, conn sceneMessageConnection, registries ..
 		funcs = registries[0]
 	}
 	return &sceneLifecycle{
-		remote:       remote,
-		conn:         conn,
-		scene:        worldcore.NewScene(),
-		viewport:     worldcore.NewViewport(),
-		entities:     make(map[worldcore.EntityID]sceneEntity),
-		combatActors: make(map[worldcore.EntityID]*entity.Actor),
-		combatStates: make(map[worldcore.EntityID]npcCombatState),
-		npcFuncs:     funcs,
+		remote:   remote,
+		conn:     conn,
+		scene:    worldcore.NewScene(),
+		viewport: worldcore.NewViewport(),
+		entities: make(map[worldcore.EntityID]sceneEntity),
+		combat:   sim.New(),
+		npcFuncs: funcs,
 	}
 }
 
@@ -153,8 +154,7 @@ func (s *sceneLifecycle) begin(config, resource string) error {
 		return err
 	}
 	clear(s.entities)
-	clear(s.combatActors)
-	clear(s.combatStates)
+	s.combat.Reset()
 	s.armed = false
 	s.combatActive = false
 	s.patrolStarted = false
@@ -229,13 +229,9 @@ func (s *sceneLifecycle) registerNPC(id uint32, npc npcSpawn) error {
 		sceneMeta.portal = &portal
 	}
 	s.entities[entityID] = sceneMeta
-	name, maxHP, maxMP := npc.resolved.ConfigID, int32(1000), int32(100)
+	maxHP, maxMP := int32(1000), int32(100)
 	for _, property := range orderedProperties {
 		switch property.Name {
-		case "Name":
-			if property.Value.Text != "" {
-				name = property.Value.Text
-			}
 		case "MaxHP":
 			if property.Value.I32 > 0 {
 				maxHP = property.Value.I32
@@ -246,9 +242,11 @@ func (s *sceneLifecycle) registerNPC(id uint32, npc npcSpawn) error {
 			}
 		}
 	}
-	s.combatActors[entityID] = entity.NewActor(id, 1, name, maxHP, maxMP)
+	vitals := sim.NewVitals(maxHP, maxMP)
 	if interaction == npcInteractionCombat {
-		s.combatStates[entityID] = newNPCCombatState(npc, worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient})
+		s.combat.SpawnCombatNPC(entityID, vitals, newNPCCombatState(npc, worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient}))
+	} else {
+		s.combat.SpawnNPC(entityID, vitals)
 	}
 	return nil
 }
@@ -322,8 +320,7 @@ func (s *sceneLifecycle) unregister(id uint32) error {
 		return err
 	}
 	delete(s.entities, entityID)
-	delete(s.combatActors, entityID)
-	delete(s.combatStates, entityID)
+	s.combat.Remove(entityID)
 	return nil
 }
 

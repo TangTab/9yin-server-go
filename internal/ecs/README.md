@@ -2,6 +2,13 @@
 [![Build](https://github.com/unitoftime/ecs/actions/workflows/build.yml/badge.svg)](https://github.com/unitoftime/ecs/actions/workflows/build.yml)
 [![Go Coverage](https://github.com/unitoftime/ecs/wiki/coverage.svg)](https://raw.githack.com/wiki/unitoftime/ecs/coverage.html)
 
+> **本地归一化说明**：本包 fork 自 [unitoftime/ecs](https://github.com/lizhanyin/ecs)（master@3a5d30d，MIT），
+> 已并入主模块 `github.com/local/9yin-go-server`。相对上游的改动：
+> 移除嵌套 `go.mod`/`go.sum`；删除 `cod_encode.go`（消除唯一的 `unitoftime/cod` 外部依赖，
+> 全库无调用者）；删除 `examples/`、`bench/` 演示程序；`hashmap.go` 的 intmap import
+> 改写为本模块路径。`internal/gen`（view_gen.go 生成器）与 `internal/intmap`（核心依赖）保留；
+> 另删除 world.go 中无调用者的调试函数 `print()`（go vet 报告其拷贝含 atomic 锁的 World 值）。
+
 
 This is an ecs library I wrote for doing game development in Go. I'm actively using it and its pretty stable, but I do find bugs every once in a while. I might vary the APIs in the future if native iterators are added.
 

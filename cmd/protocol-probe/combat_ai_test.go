@@ -100,18 +100,25 @@ func TestCombatTickRespawnsDeadHostileAtHome(t *testing.T) {
 	}
 	registerTestCombatNPC(t, lifecycle, 83)
 	id := worldcore.EntityID(83)
-	actor := lifecycle.combatActors[id]
-	actor.ApplyDamage(999999)
-	state := lifecycle.combatStates[id]
+	vitals, ok := lifecycle.combat.Vitals(id)
+	if !ok {
+		t.Fatal("combat NPC must have vitals")
+	}
+	vitals.ApplyDamage(999999)
+	lifecycle.combat.WriteVitals(id, vitals)
+	brain, ok := lifecycle.combat.Brain(id)
+	if !ok {
+		t.Fatal("combat NPC must have a brain")
+	}
 	now := time.Unix(3000, 0)
-	state.respawnAt = now
-	lifecycle.combatStates[id] = state
+	brain.RespawnAt = now
+	lifecycle.combat.WriteBrain(id, brain)
 	player := newPlayerActor("tester", 0)
 	if _, err := lifecycle.combatTick(player, role.Position{X: 999, Y: 0, Z: 999}, now); err != nil {
 		t.Fatal(err)
 	}
-	if got := actor.Snapshot(); got.HP != got.MaxHP || got.LogicState != entity.LogicStateNormal {
-		t.Fatalf("respawn actor=%+v", got)
+	if revived, _ := lifecycle.combat.Vitals(id); revived.HP != revived.MaxHP || revived.Logic != entity.LogicStateNormal {
+		t.Fatalf("respawn vitals=%+v", revived)
 	}
 	frames := conn.Frames()
 	if len(frames) != 2 || frames[0][0] != 0x20 || frames[1][0] != 0x10 {

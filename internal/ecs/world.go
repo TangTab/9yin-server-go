@@ -1,7 +1,6 @@
 package ecs
 
 import (
-	"fmt"
 	"math"
 	"sync/atomic"
 	"time"
@@ -47,12 +46,6 @@ func NewWorld() *World {
 	world.cmd = GetInjectable[*CommandQueue](world)
 
 	return world
-}
-
-func (w *World) print() {
-	fmt.Printf("%+v\n", *w)
-
-	w.engine.print()
 }
 
 // Returns the command queue for the world
