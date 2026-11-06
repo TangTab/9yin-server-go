@@ -7,8 +7,33 @@ import (
 	"testing"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/ecs"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
+
+// benchMeta 以接近 sceneEntity 的尺寸模拟注册元数据组件，
+// 使 tick 基准反映迁移后的四组件遍历。
+type benchMeta struct {
+	id, ownerID uint32
+	description string
+	payload     []byte
+	patrolSign  float32
+	configID    string
+	scriptClass string
+	services    [2]struct {
+		mark  uint16
+		value string
+	}
+}
+
+func benchSpawnNPC(world *World, id worldcore.EntityID, i int, withBrain bool) {
+	meta := benchMeta{id: uint32(id), ownerID: 1, description: "npc", configID: "cfg", scriptClass: "AttackNpc"}
+	if withBrain {
+		ecs.Write(world.Raw(), ecs.Id(id), ecs.C(NewVitals(1000, 100)), ecs.C(benchTransform(i)), ecs.C(meta), ecs.C(benchBrain(i)))
+	} else {
+		ecs.Write(world.Raw(), ecs.Id(id), ecs.C(NewVitals(1000, 100)), ecs.C(benchTransform(i)), ecs.C(meta))
+	}
+}
 
 // legacyActor 在基准内复现迁移前 entity.Actor 的热路径形态
 // （每对象一把互斥锁 + Snapshot 拷贝），作为对照组。它随
@@ -100,38 +125,55 @@ func benchHorizontalDistance(a, b worldcore.Transform) float32 {
 
 var benchPlayerTransform = worldcore.Transform{X: 0, Y: 0, Z: 0}
 
+// combatBenchEntry 镜像 probe 侧 eachCombatNPCFull 的收集形态。
+type combatBenchEntry struct {
+	id        worldcore.EntityID
+	vitals    *Vitals
+	brain     *Brain
+	transform *worldcore.Transform
+	meta      *benchMeta
+}
+
 // BenchmarkCombatTickECS 是迁移后的存储路径。
 func BenchmarkCombatTickECS(b *testing.B) {
 	world := New()
-	transforms := make([]worldcore.Transform, benchNPCCount)
 	for i := 0; i < benchNPCCount; i++ {
-		id := worldcore.EntityID(i + 2)
-		transforms[i] = benchTransform(i)
-		world.SpawnCombatNPC(id, NewVitals(1000, 100), benchBrain(i))
+		benchSpawnNPC(world, worldcore.EntityID(i+2), i, true)
 	}
 	now := time.Unix(10000, 0)
 	b.ReportAllocs()
 	b.ResetTimer()
+	collect := func() []combatBenchEntry {
+		entries := make([]combatBenchEntry, 0)
+		// 与真实 combatTick 相同的单次 Query4 遍历（Vitals/Brain/
+		// Transform/Meta 四组件一次拿全）。
+		ecs.Query4[Vitals, Brain, worldcore.Transform, benchMeta](world.Raw()).MapId(func(id ecs.Id, v *Vitals, s *Brain, t *worldcore.Transform, m *benchMeta) {
+			entries = append(entries, combatBenchEntry{id: worldcore.EntityID(id), vitals: v, brain: s, transform: t, meta: m})
+		})
+		sort.Slice(entries, func(i, j int) bool { return entries[i].id < entries[j].id })
+		return entries
+	}
 	for n := 0; n < b.N; n++ {
-		world.EachCombatNPC(func(id worldcore.EntityID, v *Vitals, s *Brain) {
-			meta := transforms[int(id)-2]
-			distance := benchHorizontalDistance(meta, benchPlayerTransform)
+		for _, entry := range collect() {
+			s, transform := entry.brain, entry.transform
+			_ = entry.vitals
+			_ = entry.meta
+			distance := benchHorizontalDistance(*transform, benchPlayerTransform)
 			if s.Threat == 0 && distance <= s.AggroRange {
 				s.Threat = 1
 			}
 			if s.Threat == 0 {
-				return
+				continue
 			}
 			if distance > s.ChaseRange {
 				s.Threat = 0
-				return
+				continue
 			}
 			if now.Before(s.NextAttack) {
-				return
+				continue
 			}
 			s.NextAttack = now.Add(s.AttackEvery)
-			_ = v
-		})
+		}
 	}
 }
 
@@ -217,7 +259,7 @@ func BenchmarkPopulateECS(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		world := New()
 		for i := 0; i < benchNPCCount; i++ {
-			world.SpawnCombatNPC(worldcore.EntityID(i+2), NewVitals(1000, 100), benchBrain(i))
+			benchSpawnNPC(world, worldcore.EntityID(i+2), i, true)
 		}
 	}
 }

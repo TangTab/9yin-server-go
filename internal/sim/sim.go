@@ -45,6 +45,14 @@ func (s *World) Remove(id worldcore.EntityID) {
 	ecs.Delete(s.world, ecs.Id(id))
 }
 
+// Raw 暴露底层 ECS 世界，供调用方把本地组件类型（如 protocol-probe
+// 的 sceneEntity）挂到同一批实体上。约定：调用方的注册必须在一次
+// ecs.Write 中写入全部组件——分次补写会让实体在 archetype 间来回
+// 搬移。除注册外，请优先使用本类型的类型化访问器。
+func (s *World) Raw() *ecs.World {
+	return s.world
+}
+
 func (s *World) Vitals(id worldcore.EntityID) (Vitals, bool) {
 	return ecs.Read[Vitals](s.world, ecs.Id(id))
 }
@@ -75,6 +83,27 @@ type combatEntry struct {
 	id     worldcore.EntityID
 	vitals *Vitals
 	brain  *Brain
+}
+
+type combatTransformEntry struct {
+	id        worldcore.EntityID
+	vitals    *Vitals
+	brain     *Brain
+	transform *worldcore.Transform
+}
+
+// EachCombatNPCTransform 在 EachCombatNPC 之上附带 Transform 组件
+// 指针，供选靶几何等需要坐标的战斗路径单次遍历使用，
+// 避免逐 ID Read 的双哈希查找。契约同 EachCombatNPC。
+func (s *World) EachCombatNPCTransform(fn func(id worldcore.EntityID, v *Vitals, b *Brain, t *worldcore.Transform)) {
+	entries := make([]combatTransformEntry, 0)
+	ecs.Query3[Brain, Vitals, worldcore.Transform](s.world).MapId(func(id ecs.Id, b *Brain, v *Vitals, t *worldcore.Transform) {
+		entries = append(entries, combatTransformEntry{id: worldcore.EntityID(id), vitals: v, brain: b, transform: t})
+	})
+	sort.Slice(entries, func(i, j int) bool { return entries[i].id < entries[j].id })
+	for i := range entries {
+		fn(entries[i].id, entries[i].vitals, entries[i].brain, entries[i].transform)
+	}
 }
 
 // EachCombatNPC 以 EntityID 升序回调全部敌对 NPC，回调收到

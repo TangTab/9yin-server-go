@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/ecs"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
@@ -32,10 +33,10 @@ type sceneLifecycle struct {
 	combatActive bool
 	scene        *worldcore.Scene
 	viewport     *worldcore.Viewport
-	entities     map[worldcore.EntityID]sceneEntity
-	// combat 以 ECS 组件存储持有全部已注册 NPC 的模拟态：
-	// 平民只有 Vitals，敌对 NPC 另带 Brain。所有访问必须在
-	// s.mu 临界区内，纪律与被替换的两张平行 map 完全一致。
+	// combat 以 ECS 组件存储持有全部已注册 NPC 的模拟态与注册元数据：
+	// 平民 = Vitals+Transform+sceneEntity，敌对 NPC 另带 Brain。高频
+	// 空间态在独立的 Transform 组件。所有访问必须在 s.mu 临界区内，
+	// 纪律与被替换的平行 map 完全一致。
 	combat         *sim.World
 	closed         bool
 	epoch          uint64
@@ -51,12 +52,16 @@ type sceneLifecycle struct {
 	portalCooldown time.Time
 }
 
+// sceneEntity 是 NPC 的注册元数据组件：模板面（configID/scriptClass/
+// interaction/services/portal/funcs）、协议面（payload 物化字节、
+// properties）与低频空间态（patrolSign）。高频空间态在独立的
+// worldcore.Transform 组件中。作为 ECS 组件存于 s.combat，与
+// Vitals/Brain 同实体。
 type sceneEntity struct {
 	id          uint32
 	description string
-	payload     func() []byte
+	payload     []byte
 	ownerID     uint32
-	transform   worldcore.Transform
 	properties  []clientdata.IndexedProperty
 	patrolSign  float32
 	configID    string
@@ -65,6 +70,87 @@ type sceneEntity struct {
 	funcs       []npcfunc.Binding
 	services    []npcService
 	portal      *scenePortalRoute
+}
+
+// ---- sceneEntity / Transform 组件访问器 ----
+// 全部方法要求调用方已持有 s.mu；组件存储与 Vitals/Brain 同一世界。
+
+// spawnSceneEntityLocked 用一次 ecs.Write 写入实体的全部组件
+// （Vitals/Transform/sceneEntity，敌对另加 Brain），避免分次补写
+// 造成 archetype 搬移。registerNPC 与测试共用。
+// 调用方必须已持有 s.mu。
+func (s *sceneLifecycle) spawnSceneEntityLocked(id worldcore.EntityID, vitals sim.Vitals, transform worldcore.Transform, meta sceneEntity, brain *sim.Brain) {
+	raw := s.combat.Raw()
+	if brain != nil {
+		ecs.Write(raw, ecs.Id(id), ecs.C(vitals), ecs.C(transform), ecs.C(meta), ecs.C(*brain))
+		return
+	}
+	ecs.Write(raw, ecs.Id(id), ecs.C(vitals), ecs.C(transform), ecs.C(meta))
+}
+
+func (s *sceneLifecycle) npcMeta(id worldcore.EntityID) (sceneEntity, bool) {
+	return ecs.Read[sceneEntity](s.combat.Raw(), ecs.Id(id))
+}
+
+// writeNpcMeta 写回注册元数据（含 patrolSign 翻转等低频变更）。
+// 调用方必须已持有 s.mu。
+func (s *sceneLifecycle) writeNpcMeta(id worldcore.EntityID, meta sceneEntity) {
+	ecs.Write(s.combat.Raw(), ecs.Id(id), ecs.C(meta))
+}
+
+func (s *sceneLifecycle) npcTransform(id worldcore.EntityID) (worldcore.Transform, bool) {
+	return ecs.Read[worldcore.Transform](s.combat.Raw(), ecs.Id(id))
+}
+
+// writeNpcTransform 是 NPC 权威坐标的唯一写点；Scene 实体的
+// Transform/Posi* 同步由 setNPCTransformLocked/moveNPC 负责对账。
+// 调用方必须已持有 s.mu。
+func (s *sceneLifecycle) writeNpcTransform(id worldcore.EntityID, transform worldcore.Transform) {
+	ecs.Write(s.combat.Raw(), ecs.Id(id), ecs.C(transform))
+}
+
+type npcEntry struct {
+	id        worldcore.EntityID
+	meta      sceneEntity
+	transform worldcore.Transform
+}
+
+// eachNPC 以 EntityID 升序回调全部已注册 NPC（平民与敌对均含）。
+// 回调收到的是组件副本，修改后经 writeNpcMeta/writeNpcTransform 写回。
+func (s *sceneLifecycle) eachNPC(fn func(id worldcore.EntityID, meta *sceneEntity, transform *worldcore.Transform)) {
+	entries := make([]npcEntry, 0)
+	ecs.Query3[sceneEntity, worldcore.Transform, sim.Vitals](s.combat.Raw()).MapId(func(id ecs.Id, meta *sceneEntity, transform *worldcore.Transform, _ *sim.Vitals) {
+		entries = append(entries, npcEntry{id: worldcore.EntityID(id), meta: *meta, transform: *transform})
+	})
+	sort.Slice(entries, func(i, j int) bool { return entries[i].id < entries[j].id })
+	for i := range entries {
+		fn(entries[i].id, &entries[i].meta, &entries[i].transform)
+	}
+}
+
+type combatNPCEntry struct {
+	id        worldcore.EntityID
+	vitals    *sim.Vitals
+	brain     *sim.Brain
+	transform *worldcore.Transform
+	meta      *sceneEntity
+}
+
+// eachCombatNPCFull 以 EntityID 升序一次遍历敌对 NPC 的全部四个
+// 组件（Vitals/Brain/Transform/sceneEntity），回调收到直指组件
+// 存储的指针——就地修改即生效，无需逐 ID Read。
+// 契约同 sim.World.EachCombatNPC：回调期间禁止一切结构性 ECS 操作；
+// 对已有组件的值写入（如 writeNpcTransform）会使指针所指的值更新。
+// 调用方必须已持有 s.mu。
+func (s *sceneLifecycle) eachCombatNPCFull(fn func(id worldcore.EntityID, vitals *sim.Vitals, brain *sim.Brain, transform *worldcore.Transform, meta *sceneEntity)) {
+	entries := make([]combatNPCEntry, 0)
+	ecs.Query4[sim.Vitals, sim.Brain, worldcore.Transform, sceneEntity](s.combat.Raw()).MapId(func(id ecs.Id, vitals *sim.Vitals, brain *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
+		entries = append(entries, combatNPCEntry{id: worldcore.EntityID(id), vitals: vitals, brain: brain, transform: transform, meta: meta})
+	})
+	sort.Slice(entries, func(i, j int) bool { return entries[i].id < entries[j].id })
+	for i := range entries {
+		fn(entries[i].id, entries[i].vitals, entries[i].brain, entries[i].transform, entries[i].meta)
+	}
 }
 
 // npcInteraction 是一个服务器侧的路由决策，由现代模板 ScriptClass 加上
@@ -138,7 +224,6 @@ func newSceneLifecycle(remote string, conn sceneMessageConnection, registries ..
 		conn:     conn,
 		scene:    worldcore.NewScene(),
 		viewport: worldcore.NewViewport(),
-		entities: make(map[worldcore.EntityID]sceneEntity),
 		combat:   sim.New(),
 		npcFuncs: funcs,
 	}
@@ -153,7 +238,6 @@ func (s *sceneLifecycle) begin(config, resource string) error {
 	if _, err := s.scene.Begin(config, resource); err != nil {
 		return err
 	}
-	clear(s.entities)
 	s.combat.Reset()
 	s.armed = false
 	s.combatActive = false
@@ -214,21 +298,17 @@ func (s *sceneLifecycle) registerNPC(id uint32, npc npcSpawn) error {
 		id:          id,
 		description: "npc:" + npc.resolved.ConfigID,
 		ownerID:     1,
-		transform:   worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient},
 		configID:    npc.resolved.ConfigID,
 		scriptClass: npc.resolved.ScriptClass,
 		interaction: interaction,
 		funcs:       funcs,
 		services:    services,
 		properties:  cloneIndexedProperties(orderedProperties),
-		payload: func() []byte {
-			return append([]byte(nil), payload...)
-		},
+		payload:     payload,
 	}
 	if hasPortal {
 		sceneMeta.portal = &portal
 	}
-	s.entities[entityID] = sceneMeta
 	maxHP, maxMP := int32(1000), int32(100)
 	for _, property := range orderedProperties {
 		switch property.Name {
@@ -242,11 +322,13 @@ func (s *sceneLifecycle) registerNPC(id uint32, npc npcSpawn) error {
 			}
 		}
 	}
+	transform := worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient}
 	vitals := sim.NewVitals(maxHP, maxMP)
 	if interaction == npcInteractionCombat {
-		s.combat.SpawnCombatNPC(entityID, vitals, newNPCCombatState(npc, worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient}))
+		brain := newNPCCombatState(npc, transform)
+		s.spawnSceneEntityLocked(entityID, vitals, transform, sceneMeta, &brain)
 	} else {
-		s.combat.SpawnNPC(entityID, vitals)
+		s.spawnSceneEntityLocked(entityID, vitals, transform, sceneMeta, nil)
 	}
 	return nil
 }
@@ -260,7 +342,7 @@ func (s *sceneLifecycle) portalRoute(request clientObjectRequest) (scenePortalRo
 	if s.closed {
 		return scenePortalRoute{}, false, nil
 	}
-	entity, exists := s.entities[worldcore.EntityID(request.ObjectID)]
+	entity, exists := s.npcMeta(worldcore.EntityID(request.ObjectID))
 	if !exists || entity.ownerID != request.OwnerID {
 		return scenePortalRoute{}, false, fmt.Errorf("unknown scene object id=%d owner=%d", request.ObjectID, request.OwnerID)
 	}
@@ -280,16 +362,21 @@ func (s *sceneLifecycle) portalAt(position role.Position, now time.Time) (sceneP
 	if s.closed || now.Before(s.portalCooldown) {
 		return scenePortalRoute{}, false
 	}
-	for _, entity := range s.entities {
-		if entity.portal == nil {
-			continue
+	portalFound := false
+	var route scenePortalRoute
+	s.eachNPC(func(_ worldcore.EntityID, meta *sceneEntity, _ *worldcore.Transform) {
+		if portalFound || meta.portal == nil {
+			return
 		}
-		route := *entity.portal
-		dx := position.X - route.trigger.X
-		dz := position.Z - route.trigger.Z
-		if dx*dx+dz*dz > route.triggerRadius*route.triggerRadius {
-			continue
+		dx := position.X - meta.portal.trigger.X
+		dz := position.Z - meta.portal.trigger.Z
+		if dx*dx+dz*dz > meta.portal.triggerRadius*meta.portal.triggerRadius {
+			return
 		}
+		route = *meta.portal
+		portalFound = true
+	})
+	if portalFound {
 		s.portalCooldown = now.Add(2 * time.Second)
 		return route, true
 	}
@@ -319,7 +406,6 @@ func (s *sceneLifecycle) unregister(id uint32) error {
 	if err := s.scene.Remove(entityID); err != nil {
 		return err
 	}
-	delete(s.entities, entityID)
 	s.combat.Remove(entityID)
 	return nil
 }
@@ -364,14 +450,18 @@ func (s *sceneLifecycle) reconcileViewport() error {
 func (s *sceneLifecycle) reconcileViewportLocked() error {
 	delta := s.viewport.Plan(s.scene.Snapshot())
 	for _, update := range delta.Updates {
-		entity, exists := s.entities[update.Entity.ID]
+		entity, exists := s.npcMeta(update.Entity.ID)
 		if !exists {
 			return fmt.Errorf("missing property encoder for scene object %d", update.Entity.ID)
+		}
+		transform, transformOK := s.npcTransform(update.Entity.ID)
+		if !transformOK {
+			return fmt.Errorf("missing transform for scene object %d", update.Entity.ID)
 		}
 		// Transform 是目前巡逻循环唯一会改变的状态。在这里重放所有外观/
 		// AI 字段会让当前客户端重建它的 Actor2。请使用紧凑的协商坐标更新；
 		// sceneObjectProperties 仍留作未来真正变更时的编码器。
-		properties := sceneObjectTransformProperties(entity.id, entity.ownerID, entity.transform)
+		properties := sceneObjectTransformProperties(entity.id, entity.ownerID, transform)
 		if err := s.conn.WriteFrame(properties); err != nil {
 			return fmt.Errorf("update scene object %d: %w", entity.id, err)
 		}
@@ -396,11 +486,17 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 	locationReplays := make([]sceneLocationReplay, 0, len(delta.Adds))
 	for _, addition := range delta.Adds {
 		id := addition.Entity.ID
-		entity, exists := s.entities[id]
+		entity, exists := s.npcMeta(id)
 		if !exists {
 			return fmt.Errorf("missing payload encoder for scene object %d", id)
 		}
-		payload := entity.payload()
+		transform, transformOK := s.npcTransform(id)
+		if !transformOK {
+			return fmt.Errorf("missing transform for scene object %d", id)
+		}
+		// payload 在注册时已物化；防御性拷贝保持重进视口反复 Add 的
+		// 语义与原先的闭包完全一致。
+		payload := append([]byte(nil), entity.payload...)
 		digest := sha256.Sum256(payload)
 		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
 			s.remote, id, entity.description, payload[0], len(payload), digest)
@@ -408,7 +504,7 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			return fmt.Errorf("add scene object %d: %w", id, err)
 		}
 		if entity.ownerID != 0 {
-			location := serverLocation(entity.id, entity.ownerID, entity.transform)
+			location := serverLocation(entity.id, entity.ownerID, transform)
 			if err := s.conn.WriteFrame(location); err != nil {
 				return fmt.Errorf("locate scene object %d: %w", id, err)
 			}
@@ -436,7 +532,7 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 	if s.closed {
 		return "", nil
 	}
-	entity, exists := s.entities[worldcore.EntityID(request.ObjectID)]
+	entity, exists := s.npcMeta(worldcore.EntityID(request.ObjectID))
 	if !exists || entity.ownerID != request.OwnerID {
 		return "", fmt.Errorf("unknown scene object id=%d owner=%d", request.ObjectID, request.OwnerID)
 	}
@@ -636,7 +732,7 @@ func encodeCinematicTalkMenu(objectID, ownerID uint32, titleID string, items []t
 func (s *sceneLifecycle) selectNPCMenu(request clientObjectRequest) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	entity, exists := s.entities[worldcore.EntityID(request.ObjectID)]
+	entity, exists := s.npcMeta(worldcore.EntityID(request.ObjectID))
 	if !exists || entity.ownerID != request.OwnerID {
 		return fmt.Errorf("select unknown scene object id=%d owner=%d", request.ObjectID, request.OwnerID)
 	}
@@ -991,7 +1087,7 @@ func (s *sceneLifecycle) moveNPC(id uint32, destination worldcore.Transform, arr
 		return nil
 	}
 	entityID := worldcore.EntityID(id)
-	meta, exists := s.entities[entityID]
+	meta, exists := s.npcMeta(entityID)
 	if !exists {
 		return fmt.Errorf("move unknown scene object %d", id)
 	}
@@ -1011,8 +1107,7 @@ func (s *sceneLifecycle) moveNPC(id uint32, destination worldcore.Transform, arr
 	if err := s.scene.Replace(current.Entity); err != nil {
 		return err
 	}
-	meta.transform = destination
-	s.entities[entityID] = meta
+	s.writeNpcTransform(entityID, destination)
 	if err := s.conn.WriteFrame(serverMoving(meta.id, meta.ownerID, motionFromDest(destination))); err != nil {
 		return fmt.Errorf("send NPC moving %d: %w", id, err)
 	}
@@ -1029,15 +1124,19 @@ func (s *sceneLifecycle) moveNPC(id uint32, destination worldcore.Transform, arr
 		if s.closed || s.epoch != epoch {
 			return
 		}
-		current, exists := s.entities[entityID]
+		meta, exists := s.npcMeta(entityID)
 		if !exists {
 			return
 		}
-		if err := s.conn.WriteFrame(serverLocation(current.id, current.ownerID, current.transform)); err != nil {
-			log.Printf("%s: confirm NPC move id=%d: %v", s.remote, current.id, err)
+		transform, transformOK := s.npcTransform(entityID)
+		if !transformOK {
 			return
 		}
-		log.Printf("%s: NPC id=%d arrived at (%.2f, %.2f, %.2f)", s.remote, current.id, current.transform.X, current.transform.Y, current.transform.Z)
+		if err := s.conn.WriteFrame(serverLocation(meta.id, meta.ownerID, transform)); err != nil {
+			log.Printf("%s: confirm NPC move id=%d: %v", s.remote, meta.id, err)
+			return
+		}
+		log.Printf("%s: NPC id=%d arrived at (%.2f, %.2f, %.2f)", s.remote, meta.id, transform.X, transform.Y, transform.Z)
 	})
 	s.timers = append(s.timers, timer)
 	log.Printf("%s: NPC id=%d moving to (%.2f, %.2f, %.2f)", s.remote, id, destination.X, destination.Y, destination.Z)
@@ -1057,15 +1156,14 @@ func (s *sceneLifecycle) startPatrol(count int) {
 		return
 	}
 	s.patrolStarted = true
-	ids := make([]int, 0, len(s.entities))
-	for id, meta := range s.entities {
+	ids := make([]int, 0, 16)
+	s.eachNPC(func(id worldcore.EntityID, meta *sceneEntity, _ *worldcore.Transform) {
 		// 敌对角色的移动由战斗 tick 掌管。让旧的装饰性巡逻定时器并发地
 		// 移动它们会覆盖追击目的地，使它们的仇恨行为变得不确定。
 		if meta.interaction != npcInteractionCombat {
 			ids = append(ids, int(id))
 		}
-	}
-	sort.Ints(ids)
+	})
 	if count > len(ids) {
 		count = len(ids)
 	}
@@ -1094,18 +1192,23 @@ func (s *sceneLifecycle) schedulePatrolStep(id uint32, delay time.Duration) {
 			return
 		}
 		entityID := worldcore.EntityID(id)
-		meta, exists := s.entities[entityID]
+		meta, exists := s.npcMeta(entityID)
 		if !exists {
+			s.mu.Unlock()
+			return
+		}
+		transform, transformOK := s.npcTransform(entityID)
+		if !transformOK {
 			s.mu.Unlock()
 			return
 		}
 		if meta.patrolSign == 0 {
 			meta.patrolSign = 1
 		}
-		destination := meta.transform
+		destination := transform
 		destination.X += meta.patrolSign * 1.5
 		meta.patrolSign = -meta.patrolSign
-		s.entities[entityID] = meta
+		s.writeNpcMeta(entityID, meta)
 		s.mu.Unlock()
 		if err := s.moveNPC(id, destination, 1500*time.Millisecond); err != nil {
 			log.Printf("%s: patrol move id=%d: %v", s.remote, id, err)
@@ -1115,23 +1218,6 @@ func (s *sceneLifecycle) schedulePatrolStep(id uint32, delay time.Duration) {
 	})
 	s.timers = append(s.timers, timer)
 	s.mu.Unlock()
-}
-
-func (entity sceneEntity) propertiesForTransform() []clientdata.IndexedProperty {
-	properties := cloneIndexedProperties(entity.properties)
-	for index := range properties {
-		switch properties[index].Name {
-		case "PosiX":
-			properties[index].Value = clientdata.Float32Value(entity.transform.X)
-		case "PosiY":
-			properties[index].Value = clientdata.Float32Value(entity.transform.Y)
-		case "PosiZ":
-			properties[index].Value = clientdata.Float32Value(entity.transform.Z)
-		case "Orient":
-			properties[index].Value = clientdata.Float32Value(entity.transform.Orient)
-		}
-	}
-	return properties
 }
 
 func cloneIndexedProperties(source []clientdata.IndexedProperty) []clientdata.IndexedProperty {
@@ -1173,7 +1259,7 @@ func (s *sceneLifecycle) scheduleLocationReplaysLocked(replays []sceneLocationRe
 			}
 			sent := 0
 			for _, replay := range batch {
-				if _, exists := s.entities[worldcore.EntityID(replay.id)]; !exists {
+				if _, exists := s.npcMeta(worldcore.EntityID(replay.id)); !exists {
 					continue
 				}
 				if err := s.conn.WriteFrame(replay.payload); err != nil {

@@ -111,15 +111,11 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 	updates := make([]npcPropertyUpdate, 0, 2)
 	aggressors := 0
 	threatened := false
-	// EachCombatNPC 以 EntityID 升序回调并交付组件指针；分支逻辑
-	// 与迁移前的 map 版本逐行等价，就地修改即生效。
+	// eachCombatNPCFull 以 EntityID 升序一次遍历交付全部组件指针；
+	// 分支逻辑与迁移前的 map 版本逐行等价，就地修改即生效。
 	var loopErr error
-	s.combat.EachCombatNPC(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain) {
+	s.eachCombatNPCFull(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
 		if loopErr != nil {
-			return
-		}
-		meta, exists := s.entities[id]
-		if !exists {
 			return
 		}
 		actorState := vitals.ActorState(meta.id, meta.ownerID)
@@ -133,14 +129,13 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 					loopErr = err
 					return
 				}
-				meta = s.entities[id]
 				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
 				updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcCombatProperties(vitals.ActorState(meta.id, meta.ownerID))})
 			}
 			return
 		}
 
-		distance := horizontalDistance(meta.transform, worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient})
+		distance := horizontalDistance(*transform, worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient})
 		if state.Threat == 0 && distance <= state.AggroRange {
 			state.Threat = 1
 		}
@@ -149,7 +144,7 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 		}
 		if distance > state.ChaseRange {
 			state.Threat = 0
-			if horizontalDistance(meta.transform, state.Home) > 0.25 {
+			if horizontalDistance(*transform, state.Home) > 0.25 {
 				if err := s.setNPCTransformLocked(id, state.Home); err != nil {
 					loopErr = err
 					return
@@ -169,7 +164,7 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 		}
 		aggressors++
 		if distance > state.AttackRange {
-			destination := stepToward(meta.transform, worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient}, minFloat32(state.MoveSpeed, distance-state.AttackRange))
+			destination := stepToward(*transform, worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient}, minFloat32(state.MoveSpeed, distance-state.AttackRange))
 			if err := s.setNPCTransformLocked(id, destination); err != nil {
 				loopErr = err
 				return
@@ -256,11 +251,15 @@ func (s *sceneLifecycle) scheduleCombatMoveArrival(move npcMoveUpdate, delay tim
 		if s.closed || s.epoch != epoch {
 			return
 		}
-		meta, exists := s.entities[worldcore.EntityID(move.id)]
-		if !exists || meta.ownerID != move.ownerID || !sameCombatTransform(meta.transform, move.destination) {
+		meta, exists := s.npcMeta(worldcore.EntityID(move.id))
+		if !exists || meta.ownerID != move.ownerID {
 			return
 		}
-		if err := s.conn.WriteFrame(serverLocation(meta.id, meta.ownerID, meta.transform)); err != nil {
+		transform, transformOK := s.npcTransform(worldcore.EntityID(move.id))
+		if !transformOK || !sameCombatTransform(transform, move.destination) {
+			return
+		}
+		if err := s.conn.WriteFrame(serverLocation(meta.id, meta.ownerID, transform)); err != nil {
 			log.Printf("%s: confirm combat NPC move id=%d: %v", s.remote, meta.id, err)
 		}
 	})
@@ -277,8 +276,7 @@ func sameCombatTransform(a, b worldcore.Transform) bool {
 }
 
 func (s *sceneLifecycle) setNPCTransformLocked(id worldcore.EntityID, destination worldcore.Transform) error {
-	meta, exists := s.entities[id]
-	if !exists {
+	if _, exists := s.npcMeta(id); !exists {
 		return fmt.Errorf("set transform for unknown NPC %d", id)
 	}
 	current, err := s.scene.Get(id)
@@ -297,8 +295,7 @@ func (s *sceneLifecycle) setNPCTransformLocked(id worldcore.EntityID, destinatio
 	if err := s.scene.Replace(current.Entity); err != nil {
 		return err
 	}
-	meta.transform = destination
-	s.entities[id] = meta
+	s.writeNpcTransform(id, destination)
 	return nil
 }
 

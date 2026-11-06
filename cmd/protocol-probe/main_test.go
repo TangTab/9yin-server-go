@@ -13,6 +13,7 @@ import (
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
+	"github.com/local/9yin-go-server/internal/sim"
 	"github.com/local/9yin-go-server/internal/transport"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -211,7 +212,7 @@ func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
 	if err := world.scene.Add(entity); err != nil {
 		t.Fatal(err)
 	}
-	world.entities[2] = sceneEntity{id: 2, payload: func() []byte { return want }}
+	world.spawnSceneEntityLocked(2, sim.NewVitals(10, 10), worldcore.Transform{}, sceneEntity{id: 2, payload: want}, nil)
 
 	if err := world.clientReady(); err != nil {
 		t.Fatalf("ClientReady arm: %v", err)
@@ -364,7 +365,8 @@ func TestObjectRequestSelectsCombatNPCWithoutDialogue(t *testing.T) {
 	if err := lifecycle.registerNPC(4455, npc); err != nil {
 		t.Fatal(err)
 	}
-	if got := lifecycle.entities[4455].interaction; got != npcInteractionCombat {
+	meta4455, _ := lifecycle.npcMeta(4455)
+	if got := meta4455.interaction; got != npcInteractionCombat {
 		t.Fatalf("combat interaction=%s", got)
 	}
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 4455, OwnerID: 1}); err != nil {
@@ -396,7 +398,8 @@ func TestObjectRequestDoesNotFabricateDialogueForUnconfiguredCivilian(t *testing
 	if err := lifecycle.registerNPC(4456, npc); err != nil {
 		t.Fatal(err)
 	}
-	if got := lifecycle.entities[4456].interaction; got != npcInteractionSelectOnly {
+	meta4456, _ := lifecycle.npcMeta(4456)
+	if got := meta4456.interaction; got != npcInteractionSelectOnly {
 		t.Fatalf("civilian interaction=%s", got)
 	}
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 4456, OwnerID: 1}); err != nil {
@@ -420,9 +423,9 @@ func TestObjectRequestOpensDepotViewAfterCinematicSelection(t *testing.T) {
 	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
-	entity := lifecycle.entities[3494]
+	entity, _ := lifecycle.npcMeta(3494)
 	entity.services = []npcService{{mark: 0x1002, label: "仓库", value: "1", source: "DepotID"}}
-	lifecycle.entities[3494] = entity
+	lifecycle.writeNpcMeta(3494, entity)
 
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 3494, OwnerID: 1}); err != nil {
 		t.Fatal(err)
@@ -452,9 +455,9 @@ func TestObjectRequestOpensShopViewAfterCinematicSelection(t *testing.T) {
 	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
-	entity := lifecycle.entities[3494]
+	entity, _ := lifecycle.npcMeta(3494)
 	entity.services = []npcService{{mark: 0x1001, label: "商店", value: "Shop_yaopin_00100", source: "ShopID"}}
-	lifecycle.entities[3494] = entity
+	lifecycle.writeNpcMeta(3494, entity)
 
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 3494, OwnerID: 1}); err != nil {
 		t.Fatal(err)
@@ -497,12 +500,12 @@ func TestMultiServiceNPCUsesNativeMenuThenSelectedShopView(t *testing.T) {
 	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
-	entity := lifecycle.entities[3494]
+	entity, _ := lifecycle.npcMeta(3494)
 	entity.services = []npcService{
 		{mark: markShop, label: "商店", value: "Shop_yaopin_00100", source: "ShopID"},
 		{mark: markDepot, label: "仓库", value: "1", source: "DepotID"},
 	}
-	lifecycle.entities[3494] = entity
+	lifecycle.writeNpcMeta(3494, entity)
 
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 3494, OwnerID: 1}); err != nil {
 		t.Fatal(err)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	worldcore "github.com/local/9yin-go-server/internal/world"
@@ -84,7 +83,7 @@ func encodeDramaPrompt(prompt dramaPrompt) ([]byte, error) {
 func (s *sceneLifecycle) sendNPCBubble(objectID, ownerID uint32, textID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	entity, exists := s.entities[worldcore.EntityID(objectID)]
+	entity, exists := s.npcMeta(worldcore.EntityID(objectID))
 	if !exists || entity.ownerID != ownerID {
 		return fmt.Errorf("NPC bubble target %s is not in this scene", sceneIdent(objectID, ownerID))
 	}
@@ -103,15 +102,17 @@ func (s *sceneLifecycle) sendNPCBubble(objectID, ownerID uint32, textID string) 
 func (s *sceneLifecycle) sendGMNPCBubble(textID string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	ids := make([]int, 0, len(s.entities))
-	for id := range s.entities {
-		ids = append(ids, int(id))
-	}
-	if len(ids) == 0 {
+	// eachNPC 已按 EntityID 升序回调，取首个即最小 id。
+	var first *sceneEntity
+	s.eachNPC(func(_ worldcore.EntityID, meta *sceneEntity, _ *worldcore.Transform) {
+		if first == nil {
+			first = meta
+		}
+	})
+	if first == nil {
 		return "", fmt.Errorf("no scene NPC is available for bubble test")
 	}
-	sort.Ints(ids)
-	entity := s.entities[worldcore.EntityID(ids[0])]
+	entity := *first
 	frame, err := encodeNPCBubble(entity.id, entity.ownerID, textID)
 	if err != nil {
 		return "", err

@@ -262,12 +262,8 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	registerTestCombatNPC(t, world, 91)
 	registerTestCombatNPC(t, world, 92)
 
-	inside := world.entities[91]
-	inside.transform.X = 4
-	world.entities[91] = inside
-	outside := world.entities[92]
-	outside.transform.X = 6
-	world.entities[92] = outside
+	placeTestNPC(t, world, 91, 4, 0)
+	placeTestNPC(t, world, 92, 6, 0)
 
 	handled, err := handleSkillCustom(
 		conn,
@@ -295,14 +291,8 @@ func TestCompiledSectorDamageUsesC2S211CasterOrientation(t *testing.T) {
 	}
 	registerTestCombatNPC(t, world, 93)
 	registerTestCombatNPC(t, world, 94)
-	front := world.entities[93]
-	front.transform.X = 4
-	front.transform.Z = 0
-	world.entities[93] = front
-	back := world.entities[94]
-	back.transform.X = -4
-	back.transform.Z = 0
-	world.entities[94] = back
+	placeTestNPC(t, world, 93, 4, 0)
+	placeTestNPC(t, world, 94, -4, 0)
 
 	results, err := world.applyShapedSkillDamage(
 		worldcore.Transform{Orient: 0},
@@ -336,15 +326,9 @@ func TestCompiledRectangleDamageUsesLengthWidthAndOrientation(t *testing.T) {
 	for _, id := range []uint32{95, 96, 97} {
 		registerTestCombatNPC(t, world, id)
 	}
-	inside := world.entities[95]
-	inside.transform.X, inside.transform.Z = 8, 1
-	world.entities[95] = inside
-	tooWide := world.entities[96]
-	tooWide.transform.X, tooWide.transform.Z = 8, 3
-	world.entities[96] = tooWide
-	behind := world.entities[97]
-	behind.transform.X, behind.transform.Z = -2, 0
-	world.entities[97] = behind
+	placeTestNPC(t, world, 95, 8, 1)
+	placeTestNPC(t, world, 96, 8, 3)
+	placeTestNPC(t, world, 97, -2, 0)
 
 	results, err := world.applyShapedSkillDamage(
 		worldcore.Transform{Orient: 0},

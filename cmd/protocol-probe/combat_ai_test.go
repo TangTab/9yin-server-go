@@ -21,6 +21,19 @@ func registerTestCombatNPC(t *testing.T, lifecycle *sceneLifecycle, id uint32) {
 	lifecycle.combatActive = true
 }
 
+// placeTestNPC 把已注册的测试 NPC 摆到指定 X/Z。注册点固定为
+// (1,0,0)，因此显式写全两个坐标与原先只改 transform.X 的戳点
+// 行为一致。
+func placeTestNPC(t *testing.T, lifecycle *sceneLifecycle, id uint32, x, z float32) {
+	t.Helper()
+	transform, ok := lifecycle.npcTransform(worldcore.EntityID(id))
+	if !ok {
+		t.Fatalf("NPC %d has no transform", id)
+	}
+	transform.X, transform.Z = x, z
+	lifecycle.writeNpcTransform(worldcore.EntityID(id), transform)
+}
+
 func TestCombatTickAggroesAndDamagesNearbyPlayer(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)

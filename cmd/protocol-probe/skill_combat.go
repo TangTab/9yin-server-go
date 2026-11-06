@@ -287,7 +287,7 @@ func (s *sceneLifecycle) selectedCombatTarget() (uint32, uint32, bool) {
 	if !hasVitals || vitals.HP <= 0 {
 		return 0, 0, false
 	}
-	meta, exists := s.entities[id]
+	meta, exists := s.npcMeta(id)
 	if !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat {
 		return 0, 0, false
 	}
@@ -299,7 +299,7 @@ func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (
 	defer s.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
 	vitals, hasVitals := s.combat.Vitals(id)
-	meta, exists := s.entities[id]
+	meta, exists := s.npcMeta(id)
 	if !hasVitals || !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
 		return nil, 0, 0, false, nil
 	}
@@ -350,16 +350,16 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 
 	radiusSquared := radius * radius
 	// 只有 attacknpc/bossnpc 携带 Brain，与旧循环中
-	// interaction == npcInteractionCombat 的过滤等价。
+	// interaction == npcInteractionCombat 的过滤等价。单次遍历直接
+	// 拿到 Transform 指针，无需逐 ID Read。
 	ids := make([]int, 0, s.combat.CombatCount())
-	s.combat.EachCombatNPC(func(id worldcore.EntityID, vitals *sim.Vitals, _ *sim.Brain) {
-		meta, exists := s.entities[id]
-		if !exists || vitals.HP <= 0 {
+	s.combat.EachCombatNPCTransform(func(id worldcore.EntityID, vitals *sim.Vitals, _ *sim.Brain, transform *worldcore.Transform) {
+		if vitals.HP <= 0 {
 			return
 		}
-		dx := meta.transform.X - center.X
-		dz := meta.transform.Z - center.Z
-		dy := meta.transform.Y - center.Y
+		dx := transform.X - center.X
+		dz := transform.Z - center.Z
+		dy := transform.Y - center.Y
 		if dy < 0 {
 			dy = -dy
 		}
@@ -395,7 +395,8 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 		if !ok {
 			continue
 		}
-		meta := s.entities[id]
+		// 第一段筛选已保证存在；与原 map 直读的零检查语义保持一致。
+		meta, _ := s.npcMeta(id)
 		if !vitals.ApplyDamage(amount) {
 			continue
 		}
@@ -437,9 +438,9 @@ func (s *sceneLifecycle) selectedCombatTargetTransform() (worldcore.Transform, b
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
-	meta, exists := s.entities[id]
+	transform, exists := s.npcTransform(id)
 	vitals, hasVitals := s.combat.Vitals(id)
-	return meta.transform, exists && hasVitals && vitals.HP > 0
+	return transform, exists && hasVitals && vitals.HP > 0
 }
 
 func (s *sceneLifecycle) applyNPCControl(ids []uint32, lifetime time.Duration, now time.Time) {

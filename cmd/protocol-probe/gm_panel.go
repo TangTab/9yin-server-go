@@ -1,9 +1,10 @@
 package main
 
 import (
-	_ "embed"
+	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"math"
 	"net/http"
@@ -168,7 +169,24 @@ func (session *gmSession) setLocation(location role.Location, action string) {
 }
 
 func serveGM(listen string, hub *gmHub) {
+	server := &http.Server{Addr: listen, Handler: newGMMux(hub), ReadHeaderTimeout: 5 * time.Second}
+	log.Printf("GM panel listening on http://%s (localhost only)", listen)
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Printf("GM panel stopped: %v", err)
+	}
+}
+
+// newGMMux 组装 GM 面板的全部 HTTP 路由。独立成函数后，
+// 测试可以直接把路由挂到 httptest 上验证，而不必真的监听端口。
+func newGMMux(hub *gmHub) *http.ServeMux {
 	mux := http.NewServeMux()
+	// gm.css / gm.js 等静态资源来自编译期嵌入的 web 目录，
+	// 页面可以像普通网站一样引用外部文件，同时保持单二进制分发。
+	static, err := fs.Sub(gmWebAssets, "web")
+	if err != nil {
+		log.Fatalf("GM static assets unavailable: %v", err)
+	}
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 	mux.HandleFunc("/", gmIndex)
 	mux.HandleFunc("/api/sessions", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodGet {
@@ -291,11 +309,7 @@ func serveGM(listen string, hub *gmHub) {
 			writeGMError(writer, http.StatusGatewayTimeout, "game session did not confirm the frame send")
 		}
 	})
-	server := &http.Server{Addr: listen, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
-	log.Printf("GM panel listening on http://%s (localhost only)", listen)
-	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Printf("GM panel stopped: %v", err)
-	}
+	return mux
 }
 
 func writeGMJSON(writer http.ResponseWriter, status int, value any) {
@@ -313,9 +327,17 @@ func gmIndex(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusNotFound)
 		return
 	}
+	index, err := gmWebAssets.ReadFile("web/index.html")
+	if err != nil {
+		http.Error(writer, "GM panel index missing", http.StatusInternalServerError)
+		return
+	}
 	writer.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = writer.Write([]byte(gmPanelHTML))
+	_, _ = writer.Write(index)
 }
 
-//go:embed gm_panel.html
-var gmPanelHTML string
+// gmWebAssets 编译期嵌入 GM 面板的全部网页文件（web/index.html、
+// gm.css、gm.js），运行期不依赖磁盘上的任何前端资源。
+//
+//go:embed web
+var gmWebAssets embed.FS

@@ -7,6 +7,8 @@ import (
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
+	"github.com/local/9yin-go-server/internal/sim"
+	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
 func TestDoorPackageRouteUsesInstalledDoorData(t *testing.T) {
@@ -38,9 +40,9 @@ func TestDoorPackageRouteUsesInstalledDoorData(t *testing.T) {
 
 func TestPortalAtUsesMoveTargetRadiusAndCooldown(t *testing.T) {
 	world := newSceneLifecycle("test", nil)
-	world.entities[2] = sceneEntity{id: 2, ownerID: 1, portal: &scenePortalRoute{
+	world.spawnSceneEntityLocked(2, sim.NewVitals(10, 10), worldcore.Transform{}, sceneEntity{id: 2, ownerID: 1, portal: &scenePortalRoute{
 		trigger: role.Position{X: 100, Z: 200}, triggerRadius: 8, source: "DoorPackageID=13",
-	}}
+	}}, nil)
 	now := time.Date(2026, 7, 26, 18, 30, 0, 0, time.UTC)
 	if _, entered := world.portalAt(role.Position{X: 108.01, Z: 200}, now); entered {
 		t.Fatal("position outside trigger radius entered portal")
