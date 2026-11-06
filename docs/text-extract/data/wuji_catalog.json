@@ -1,0 +1,2954 @@
+{
+ "source": "res1/share/skill/jingmai/wuji*.ini",
+ "arts": [
+  {
+   "art_id": 1,
+   "combo_id": "wj_combo_CS_sl_djgq0203",
+   "raw": "wj_combo_CS_sl_djgq0203,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 2,
+   "combo_id": "wj_combo_CS_sl_dmgf0702",
+   "raw": "wj_combo_CS_sl_dmgf0702,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 3,
+   "combo_id": "wj_combo_CS_sl_wtgf0301",
+   "raw": "wj_combo_CS_sl_wtgf0301,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 4,
+   "combo_id": "wj_combo_CS_wd_lyjf0407",
+   "raw": "wj_combo_CS_wd_lyjf0407,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 5,
+   "combo_id": "wj_combo_CS_wd_qfjf0401",
+   "raw": "wj_combo_CS_wd_qfjf0401,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 6,
+   "combo_id": "wj_combo_CS_wd_tjj0804",
+   "raw": "wj_combo_CS_wd_tjj0804,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 7,
+   "combo_id": "wj_combo_CS_em_jdmz0305",
+   "raw": "wj_combo_CS_em_jdmz0305,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 8,
+   "combo_id": "wj_combo_CS_em_lbc0402",
+   "raw": "wj_combo_CS_em_lbc0402,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 9,
+   "combo_id": "wj_combo_CS_em_yxc0307",
+   "raw": "wj_combo_CS_em_yxc0307,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 10,
+   "combo_id": "wj_combo_CS_gb_ksbf0203",
+   "raw": "wj_combo_CS_gb_ksbf0203,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 11,
+   "combo_id": "wj_combo_CS_gb_lhz0408",
+   "raw": "wj_combo_CS_gb_lhz0408,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 12,
+   "combo_id": "wj_combo_CS_gb_lsbf0401",
+   "raw": "wj_combo_CS_gb_lsbf0401,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 13,
+   "combo_id": "wj_combo_CS_jz_lyfh0102",
+   "raw": "wj_combo_CS_jz_lyfh0102,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 14,
+   "combo_id": "wj_combo_CS_jz_wyjf0402",
+   "raw": "wj_combo_CS_jz_wyjf0402,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 15,
+   "combo_id": "wj_combo_CS_jz_xytf0102",
+   "raw": "wj_combo_CS_jz_xytf0102,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 16,
+   "combo_id": "wj_combo_CS_tm_fgzyc0302",
+   "raw": "wj_combo_CS_tm_fgzyc0302,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 17,
+   "combo_id": "wj_combo_CS_tm_jsc0301",
+   "raw": "wj_combo_CS_tm_jsc0301,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 18,
+   "combo_id": "wj_combo_CS_tm_mhb0402",
+   "raw": "wj_combo_CS_tm_mhb0402,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 19,
+   "combo_id": "wj_combo_CS_jy_shd0402",
+   "raw": "wj_combo_CS_jy_shd0402,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 20,
+   "combo_id": "wj_combo_CS_jy_yzq0301",
+   "raw": "wj_combo_CS_jy_yzq0301,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 21,
+   "combo_id": "wj_combo_CS_jh_dldm0607",
+   "raw": "wj_combo_CS_jh_dldm0607,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 22,
+   "combo_id": "wj_combo_CS_jl_fgz0302",
+   "raw": "wj_combo_CS_jl_fgz0302,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 23,
+   "combo_id": "wj_combo_CS_jl_shuangci0703",
+   "raw": "wj_combo_CS_jl_shuangci0703,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 24,
+   "combo_id": "wj_combo_CS_jl_zfd0407",
+   "raw": "wj_combo_CS_jl_zfd0407,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 25,
+   "combo_id": "wj_combo_CS_jh_ldg0104",
+   "raw": "wj_combo_CS_jh_ldg0104,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 26,
+   "combo_id": "wj_combo_CS_jh_mjh0203",
+   "raw": "wj_combo_CS_jh_mjh0203,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 27,
+   "combo_id": "wj_combo_CS_jh_lydgd0307",
+   "raw": "wj_combo_CS_jh_lydgd0307,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 28,
+   "combo_id": "wj_combo_CS_ts_wcjf0405",
+   "raw": "wj_combo_CS_ts_wcjf0405,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 29,
+   "combo_id": "wj_combo_CS_jh_jyjf0607",
+   "raw": "wj_combo_CS_jh_jyjf0607,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 30,
+   "combo_id": "wj_combo_CS_jh_wlp0301",
+   "raw": "wj_combo_CS_jh_wlp0301,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 31,
+   "combo_id": "wj_combo_CS_kl_wltf0604",
+   "raw": "wj_combo_CS_kl_wltf0604,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 32,
+   "combo_id": "wj_combo_CS_kl_hyjf0605",
+   "raw": "wj_combo_CS_kl_hyjf0605,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 33,
+   "combo_id": "wj_combo_CS_kl_hqxxp0107",
+   "raw": "wj_combo_CS_kl_hqxxp0107,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 34,
+   "combo_id": "wj_combo_CS_xt_jtq0102",
+   "raw": "wj_combo_CS_xt_jtq0102,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 35,
+   "combo_id": "wj_combo_CS_xt_xjj0407",
+   "raw": "wj_combo_CS_xt_xjj0407,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 36,
+   "combo_id": "wj_combo_CS_xt_yjjx0607",
+   "raw": "wj_combo_CS_xt_yjjx0607,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 37,
+   "combo_id": "wj_combo_CS_jh_jymg0704",
+   "raw": "wj_combo_CS_jh_jymg0704,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 38,
+   "combo_id": "wj_combo_CS_jh_yss0601",
+   "raw": "wj_combo_CS_jh_yss0601,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 39,
+   "combo_id": "wj_combo_CS_jh_tsz0601",
+   "raw": "wj_combo_CS_jh_tsz0601,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 70,
+   "combo_id": "wj_combo_CS_jh_cqgf0104",
+   "raw": "wj_combo_CS_jh_cqgf0104,1,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 74,
+   "combo_id": "wj_combo_CS_jh_cqgf01",
+   "raw": "wj_combo_CS_jh_cqgf01,4,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 100,
+   "combo_id": "wj_combo_CS_gb_lhz03_power",
+   "raw": "wj_combo_CS_gb_lhz03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 101,
+   "combo_id": "wj_combo_CS_gb_lhz07_power",
+   "raw": "wj_combo_CS_gb_lhz07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 102,
+   "combo_id": "wj_combo_CS_gb_lhz08_power",
+   "raw": "wj_combo_CS_gb_lhz08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 111,
+   "combo_id": "wj_combo_CS_jy_yzq07_power",
+   "raw": "wj_combo_CS_jy_yzq07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 112,
+   "combo_id": "wj_combo_CS_jy_yzq08_power",
+   "raw": "wj_combo_CS_jy_yzq08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 121,
+   "combo_id": "wj_combo_CS_wd_qfjf02_power",
+   "raw": "wj_combo_CS_wd_qfjf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 122,
+   "combo_id": "wj_combo_CS_wd_qfjf04_power",
+   "raw": "wj_combo_CS_wd_qfjf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 123,
+   "combo_id": "wj_combo_CS_wd_qfjf06_power",
+   "raw": "wj_combo_CS_wd_qfjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 131,
+   "combo_id": "wj_combo_CS_sl_djgq02_power",
+   "raw": "wj_combo_CS_sl_djgq02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 132,
+   "combo_id": "wj_combo_CS_sl_djgq03_power",
+   "raw": "wj_combo_CS_sl_djgq03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 133,
+   "combo_id": "wj_combo_CS_sl_djgq04_power",
+   "raw": "wj_combo_CS_sl_djgq04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 141,
+   "combo_id": "wj_combo_CS_jl_zfd01_power",
+   "raw": "wj_combo_CS_jl_zfd01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 142,
+   "combo_id": "wj_combo_CS_jl_zfd02_power",
+   "raw": "wj_combo_CS_jl_zfd02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 151,
+   "combo_id": "wj_combo_CS_jz_lyfh04_power",
+   "raw": "wj_combo_CS_jz_lyfh04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 152,
+   "combo_id": "wj_combo_CS_jz_lyfh05_power",
+   "raw": "wj_combo_CS_jz_lyfh05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 153,
+   "combo_id": "wj_combo_CS_jz_lyfh07_power",
+   "raw": "wj_combo_CS_jz_lyfh07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 161,
+   "combo_id": "wj_combo_CS_tm_jsc03_power",
+   "raw": "wj_combo_CS_tm_jsc03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 162,
+   "combo_id": "wj_combo_CS_tm_jsc04_power",
+   "raw": "wj_combo_CS_tm_jsc04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 163,
+   "combo_id": "wj_combo_CS_tm_jsc06_power",
+   "raw": "wj_combo_CS_tm_jsc06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 171,
+   "combo_id": "wj_combo_CS_em_jdmz01_power",
+   "raw": "wj_combo_CS_em_jdmz01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 172,
+   "combo_id": "wj_combo_CS_em_jdmz02_power",
+   "raw": "wj_combo_CS_em_jdmz02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 173,
+   "combo_id": "wj_combo_CS_em_jdmz03_power",
+   "raw": "wj_combo_CS_em_jdmz03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 175,
+   "combo_id": "wj_combo_CS_jh_ldg02_power",
+   "raw": "wj_combo_CS_jh_ldg02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 176,
+   "combo_id": "wj_combo_CS_jh_ldg05_power",
+   "raw": "wj_combo_CS_jh_ldg05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 177,
+   "combo_id": "wj_combo_CS_jh_ldg01_power",
+   "raw": "wj_combo_CS_jh_ldg01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 181,
+   "combo_id": "wj_combo_CS_jh_liusha03_power",
+   "raw": "wj_combo_CS_jh_liusha03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 182,
+   "combo_id": "wj_combo_CS_jh_liusha09_power",
+   "raw": "wj_combo_CS_jh_liusha09_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 183,
+   "combo_id": "wj_combo_CS_jh_liusha08_power",
+   "raw": "wj_combo_CS_jh_liusha08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 191,
+   "combo_id": "wj_combo_CS_jh_cyjf02_power",
+   "raw": "wj_combo_CS_jh_cyjf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 192,
+   "combo_id": "wj_combo_CS_jh_cyjf05_power",
+   "raw": "wj_combo_CS_jh_cyjf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 193,
+   "combo_id": "wj_combo_CS_jh_cyjf06_power",
+   "raw": "wj_combo_CS_jh_cyjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 201,
+   "combo_id": "wj_combo_CS_jh_hyjf03_power",
+   "raw": "wj_combo_CS_jh_hyjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 202,
+   "combo_id": "wj_combo_CS_jh_hyjf04_power",
+   "raw": "wj_combo_CS_jh_hyjf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 203,
+   "combo_id": "wj_combo_CS_jh_hyjf07_power",
+   "raw": "wj_combo_CS_jh_hyjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 221,
+   "combo_id": "wj_combo_CS_jy_dqd02_power",
+   "raw": "wj_combo_CS_jy_dqd02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 222,
+   "combo_id": "wj_combo_CS_jy_dqd06_power",
+   "raw": "wj_combo_CS_jy_dqd06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 223,
+   "combo_id": "wj_combo_CS_jy_dqd04_power",
+   "raw": "wj_combo_CS_jy_dqd04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 301,
+   "combo_id": "wj_combo_CS_sl_lhq02_power",
+   "raw": "wj_combo_CS_sl_lhq02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 302,
+   "combo_id": "wj_combo_CS_sl_lhq03_power",
+   "raw": "wj_combo_CS_sl_lhq03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 303,
+   "combo_id": "wj_combo_CS_sl_lhq06_power",
+   "raw": "wj_combo_CS_sl_lhq06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 311,
+   "combo_id": "wj_combo_CS_gb_dgbf02_power",
+   "raw": "wj_combo_CS_gb_dgbf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 312,
+   "combo_id": "wj_combo_CS_gb_dgbf07_power",
+   "raw": "wj_combo_CS_gb_dgbf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 313,
+   "combo_id": "wj_combo_CS_gb_dgbf08_power",
+   "raw": "wj_combo_CS_gb_dgbf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 321,
+   "combo_id": "wj_combo_CS_jh_slbwj03_power",
+   "raw": "wj_combo_CS_jh_slbwj03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 322,
+   "combo_id": "wj_combo_CS_jh_slbwj04_power",
+   "raw": "wj_combo_CS_jh_slbwj04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 323,
+   "combo_id": "wj_combo_CS_jh_slbwj06_power",
+   "raw": "wj_combo_CS_jh_slbwj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 331,
+   "combo_id": "wj_combo_CS_jh_lyjf03_power",
+   "raw": "wj_combo_CS_jh_lyjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 332,
+   "combo_id": "wj_combo_CS_jh_lyjf04_power",
+   "raw": "wj_combo_CS_jh_lyjf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 333,
+   "combo_id": "wj_combo_CS_jh_lyjf07_power",
+   "raw": "wj_combo_CS_jh_lyjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 341,
+   "combo_id": "wj_combo_CS_wd_tjq03_power",
+   "raw": "wj_combo_CS_wd_tjq03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 342,
+   "combo_id": "wj_combo_CS_wd_tjq06_power",
+   "raw": "wj_combo_CS_wd_tjq06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 343,
+   "combo_id": "wj_combo_CS_wd_tjq08_power",
+   "raw": "wj_combo_CS_wd_tjq08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 351,
+   "combo_id": "wj_combo_CS_sl_lzs04_power",
+   "raw": "wj_combo_CS_sl_lzs04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 352,
+   "combo_id": "wj_combo_CS_sl_lzs06_power",
+   "raw": "wj_combo_CS_sl_lzs06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 353,
+   "combo_id": "wj_combo_CS_sl_lzs07_power",
+   "raw": "wj_combo_CS_sl_lzs07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 361,
+   "combo_id": "wj_combo_CS_xy_jlsd04_power",
+   "raw": "wj_combo_CS_xy_jlsd04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 362,
+   "combo_id": "wj_combo_CS_xy_jlsd06_power",
+   "raw": "wj_combo_CS_xy_jlsd06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 363,
+   "combo_id": "wj_combo_CS_xy_jlsd07_power",
+   "raw": "wj_combo_CS_xy_jlsd07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 371,
+   "combo_id": "wj_combo_CS_jh_myjf03_power",
+   "raw": "wj_combo_CS_jh_myjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 372,
+   "combo_id": "wj_combo_CS_jh_myjf06_power",
+   "raw": "wj_combo_CS_jh_myjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 373,
+   "combo_id": "wj_combo_CS_jh_myjf08_power",
+   "raw": "wj_combo_CS_jh_myjf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 401,
+   "combo_id": "wj_combo_CS_jy_xsd02_power",
+   "raw": "wj_combo_CS_jy_xsd02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 402,
+   "combo_id": "wj_combo_CS_jy_xsd03_power",
+   "raw": "wj_combo_CS_jy_xsd03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 403,
+   "combo_id": "wj_combo_CS_jy_xsd07_power",
+   "raw": "wj_combo_CS_jy_xsd07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 411,
+   "combo_id": "wj_combo_CS_wdzp_tjq02_power",
+   "raw": "wj_combo_CS_wdzp_tjq02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 412,
+   "combo_id": "wj_combo_CS_wdzp_tjq06_power",
+   "raw": "wj_combo_CS_wdzp_tjq06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 413,
+   "combo_id": "wj_combo_CS_wdzp_tjq08_power",
+   "raw": "wj_combo_CS_wdzp_tjq08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 421,
+   "combo_id": "wj_combo_CS_jl_dmssj01_power",
+   "raw": "wj_combo_CS_jl_dmssj01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 422,
+   "combo_id": "wj_combo_CS_jl_dmssj07_power",
+   "raw": "wj_combo_CS_jl_dmssj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 423,
+   "combo_id": "wj_combo_CS_jl_dmssj09_power",
+   "raw": "wj_combo_CS_jl_dmssj09_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 431,
+   "combo_id": "wj_combo_CS_slzp_lzs03_power",
+   "raw": "wj_combo_CS_slzp_lzs03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 432,
+   "combo_id": "wj_combo_CS_slzp_lzs05_power",
+   "raw": "wj_combo_CS_slzp_lzs05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 433,
+   "combo_id": "wj_combo_CS_slzp_lzs06_power",
+   "raw": "wj_combo_CS_slzp_lzs06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 441,
+   "combo_id": "wj_combo_CS_jz_yxjf04_power",
+   "raw": "wj_combo_CS_jz_yxjf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 442,
+   "combo_id": "wj_combo_CS_jz_yxjf06_power",
+   "raw": "wj_combo_CS_jz_yxjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 443,
+   "combo_id": "wj_combo_CS_jz_yxjf07_power",
+   "raw": "wj_combo_CS_jz_yxjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 444,
+   "combo_id": "wj_combo_CS_jz_yxjf03_power",
+   "raw": "wj_combo_CS_jz_yxjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 451,
+   "combo_id": "wj_combo_CS_em_ynjf01_power",
+   "raw": "wj_combo_CS_em_ynjf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 452,
+   "combo_id": "wj_combo_CS_em_ynjf04_power",
+   "raw": "wj_combo_CS_em_ynjf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 453,
+   "combo_id": "wj_combo_CS_em_ynjf07_power",
+   "raw": "wj_combo_CS_em_ynjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 461,
+   "combo_id": "wj_combo_CS_tm_ywt03_power",
+   "raw": "wj_combo_CS_tm_ywt03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 462,
+   "combo_id": "wj_combo_CS_tm_ywt05_power",
+   "raw": "wj_combo_CS_tm_ywt05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 463,
+   "combo_id": "wj_combo_CS_tm_ywt07_power",
+   "raw": "wj_combo_CS_tm_ywt07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 464,
+   "combo_id": "wj_combo_CS_tm_ywt04_power",
+   "raw": "wj_combo_CS_tm_ywt04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 465,
+   "combo_id": "wj_combo_CS_tm_ywt06_power",
+   "raw": "wj_combo_CS_tm_ywt06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 471,
+   "combo_id": "wj_combo_CS_gbzp_dgbf02_power",
+   "raw": "wj_combo_CS_gbzp_dgbf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 472,
+   "combo_id": "wj_combo_CS_gbzp_dgbf07_power",
+   "raw": "wj_combo_CS_gbzp_dgbf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 473,
+   "combo_id": "wj_combo_CS_gbzp_dgbf08_power",
+   "raw": "wj_combo_CS_gbzp_dgbf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 481,
+   "combo_id": "wj_combo_CS_jh_sjjc02_power",
+   "raw": "wj_combo_CS_jh_sjjc02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 482,
+   "combo_id": "wj_combo_CS_jh_sjjc05_power",
+   "raw": "wj_combo_CS_jh_sjjc05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 483,
+   "combo_id": "wj_combo_CS_jh_sjjc06_power",
+   "raw": "wj_combo_CS_jh_sjjc06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 491,
+   "combo_id": "wj_combo_CS_jh_tlq02_power",
+   "raw": "wj_combo_CS_jh_tlq02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 492,
+   "combo_id": "wj_combo_CS_jh_tlq03_power",
+   "raw": "wj_combo_CS_jh_tlq03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 493,
+   "combo_id": "wj_combo_CS_jh_tlq04_power",
+   "raw": "wj_combo_CS_jh_tlq04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 494,
+   "combo_id": "wj_combo_CS_xy_ktdj01_power",
+   "raw": "wj_combo_CS_xy_ktdj01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 495,
+   "combo_id": "wj_combo_CS_xy_ktdj06_power",
+   "raw": "wj_combo_CS_xy_ktdj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 496,
+   "combo_id": "wj_combo_CS_xy_ktdj07_power",
+   "raw": "wj_combo_CS_xy_ktdj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 501,
+   "combo_id": "wj_combo_CS_ts_wcjf01_power",
+   "raw": "wj_combo_CS_ts_wcjf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 502,
+   "combo_id": "wj_combo_CS_ts_wcjf05_power",
+   "raw": "wj_combo_CS_ts_wcjf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 503,
+   "combo_id": "wj_combo_CS_ts_wcjf07_power",
+   "raw": "wj_combo_CS_ts_wcjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 504,
+   "combo_id": "wj_combo_CS_ts_tsjf01_power",
+   "raw": "wj_combo_CS_ts_tsjf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 505,
+   "combo_id": "wj_combo_CS_ts_tsjf03_power",
+   "raw": "wj_combo_CS_ts_tsjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 506,
+   "combo_id": "wj_combo_CS_ts_tsjf06_power",
+   "raw": "wj_combo_CS_ts_tsjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 511,
+   "combo_id": "wj_combo_CS_xy_nrjbd01_power",
+   "raw": "wj_combo_CS_xy_nrjbd01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 512,
+   "combo_id": "wj_combo_CS_xy_nrjbd04_power",
+   "raw": "wj_combo_CS_xy_nrjbd04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 513,
+   "combo_id": "wj_combo_CS_xy_nrjbd07_power",
+   "raw": "wj_combo_CS_xy_nrjbd07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 514,
+   "combo_id": "wj_combo_CS_jh_whjf02_power",
+   "raw": "wj_combo_CS_jh_whjf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 515,
+   "combo_id": "wj_combo_CS_jh_whjf03_power",
+   "raw": "wj_combo_CS_jh_whjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 516,
+   "combo_id": "wj_combo_CS_jh_whjf06_power",
+   "raw": "wj_combo_CS_jh_whjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 517,
+   "combo_id": "wj_combo_CS_by_xlxf01_power",
+   "raw": "wj_combo_CS_by_xlxf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 518,
+   "combo_id": "wj_combo_CS_by_xlxf03_power",
+   "raw": "wj_combo_CS_by_xlxf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 519,
+   "combo_id": "wj_combo_CS_by_xlxf07_power",
+   "raw": "wj_combo_CS_by_xlxf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 526,
+   "combo_id": "wj_combo_CS_sj_syxz02_power",
+   "raw": "wj_combo_CS_sj_syxz02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 527,
+   "combo_id": "wj_combo_CS_sj_syxz05_power",
+   "raw": "wj_combo_CS_sj_syxz05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 528,
+   "combo_id": "wj_combo_CS_sj_syxz08_power",
+   "raw": "wj_combo_CS_sj_syxz08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 531,
+   "combo_id": "wj_combo_CS_jh_lhbwq02_power",
+   "raw": "wj_combo_CS_jh_lhbwq02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 532,
+   "combo_id": "wj_combo_CS_jh_lhbwq03_power",
+   "raw": "wj_combo_CS_jh_lhbwq03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 533,
+   "combo_id": "wj_combo_CS_jh_lhbwq07_power",
+   "raw": "wj_combo_CS_jh_lhbwq07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 536,
+   "combo_id": "wj_combo_CS_xjz_wmcf07_power",
+   "raw": "wj_combo_CS_xjz_wmcf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 537,
+   "combo_id": "wj_combo_CS_xjz_wmcf03_power",
+   "raw": "wj_combo_CS_xjz_wmcf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 538,
+   "combo_id": "wj_combo_CS_xjz_wmcf06_power",
+   "raw": "wj_combo_CS_xjz_wmcf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 541,
+   "combo_id": "wj_combo_CS_jh_bxjf01_power",
+   "raw": "wj_combo_CS_jh_bxjf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 542,
+   "combo_id": "wj_combo_CS_jh_bxjf04_power",
+   "raw": "wj_combo_CS_jh_bxjf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 543,
+   "combo_id": "wj_combo_CS_jh_bxjf08_power",
+   "raw": "wj_combo_CS_jh_bxjf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 544,
+   "combo_id": "wj_combo_CS_yh_hsqs03_power",
+   "raw": "wj_combo_CS_yh_hsqs03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 545,
+   "combo_id": "wj_combo_CS_yh_hsqs05_power",
+   "raw": "wj_combo_CS_yh_hsqs05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 546,
+   "combo_id": "wj_combo_CS_yh_hsqs07_power",
+   "raw": "wj_combo_CS_yh_hsqs07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 547,
+   "combo_id": "wj_combo_CS_th_bhcs04_power",
+   "raw": "wj_combo_CS_th_bhcs04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 548,
+   "combo_id": "wj_combo_CS_th_bhcs06_power",
+   "raw": "wj_combo_CS_th_bhcs06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 549,
+   "combo_id": "wj_combo_CS_th_bhcs07_power",
+   "raw": "wj_combo_CS_th_bhcs07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 551,
+   "combo_id": "wj_combo_CS_mj_typzd01_power",
+   "raw": "wj_combo_CS_mj_typzd01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 552,
+   "combo_id": "wj_combo_CS_mj_typzd02_power",
+   "raw": "wj_combo_CS_mj_typzd02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 553,
+   "combo_id": "wj_combo_CS_mj_typzd04_power",
+   "raw": "wj_combo_CS_mj_typzd04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 554,
+   "combo_id": "wj_combo_CS_by_wgl01_power",
+   "raw": "wj_combo_CS_by_wgl01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 555,
+   "combo_id": "wj_combo_CS_by_wgl02_power",
+   "raw": "wj_combo_CS_by_wgl02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 556,
+   "combo_id": "wj_combo_CS_by_wgl06_power",
+   "raw": "wj_combo_CS_by_wgl06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 557,
+   "combo_id": "wj_combo_CS_kl_ymchj05_power",
+   "raw": "wj_combo_CS_kl_ymchj05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 558,
+   "combo_id": "wj_combo_CS_kl_ymchj06_power",
+   "raw": "wj_combo_CS_kl_ymchj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 559,
+   "combo_id": "wj_combo_CS_kl_ymchj07_power",
+   "raw": "wj_combo_CS_kl_ymchj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 561,
+   "combo_id": "wj_combo_CS_kl_hqxxp01_power",
+   "raw": "wj_combo_CS_kl_hqxxp01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 562,
+   "combo_id": "wj_combo_CS_kl_hqxxp07_power",
+   "raw": "wj_combo_CS_kl_hqxxp07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 563,
+   "combo_id": "wj_combo_CS_kl_hqxxp08_power",
+   "raw": "wj_combo_CS_kl_hqxxp08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 571,
+   "combo_id": "wj_combo_CS_jh_fmzf06_power",
+   "raw": "wj_combo_CS_jh_fmzf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 572,
+   "combo_id": "wj_combo_CS_jh_fmzf08_power",
+   "raw": "wj_combo_CS_jh_fmzf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 573,
+   "combo_id": "wj_combo_CS_jh_fmzf09_power",
+   "raw": "wj_combo_CS_jh_fmzf09_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 576,
+   "combo_id": "wj_combo_CS_single_jctq_power",
+   "raw": "wj_combo_CS_single_jctq_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 581,
+   "combo_id": "wj_combo_CS_tls_xycd04_power",
+   "raw": "wj_combo_CS_tls_xycd04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 582,
+   "combo_id": "wj_combo_CS_tls_xycd06_power",
+   "raw": "wj_combo_CS_tls_xycd06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 583,
+   "combo_id": "wj_combo_CS_tls_xycd07_power",
+   "raw": "wj_combo_CS_tls_xycd07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 588,
+   "combo_id": "wj_combo_CS_qy_lyjyj03_power",
+   "raw": "wj_combo_CS_qy_lyjyj03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 589,
+   "combo_id": "wj_combo_CS_qy_lyjyj04_power",
+   "raw": "wj_combo_CS_qy_lyjyj04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 590,
+   "combo_id": "wj_combo_CS_qy_lyjyj06_power",
+   "raw": "wj_combo_CS_qy_lyjyj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 596,
+   "combo_id": "wj_combo_CS_yhwq_hsqs03_power",
+   "raw": "wj_combo_CS_yhwq_hsqs03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 597,
+   "combo_id": "wj_combo_CS_xt_yjjx01_power",
+   "raw": "wj_combo_CS_xt_yjjx01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 598,
+   "combo_id": "wj_combo_CS_xt_yjjx07_power",
+   "raw": "wj_combo_CS_xt_yjjx07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 599,
+   "combo_id": "wj_combo_CS_xt_yjjx08_power",
+   "raw": "wj_combo_CS_xt_yjjx08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 600,
+   "combo_id": "wj_combo_CS_xt_gqml03_power",
+   "raw": "wj_combo_CS_xt_gqml03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 601,
+   "combo_id": "wj_combo_CS_xt_gqml05_power",
+   "raw": "wj_combo_CS_xt_gqml05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 602,
+   "combo_id": "wj_combo_CS_xt_gqml06_power",
+   "raw": "wj_combo_CS_xt_gqml06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 603,
+   "combo_id": "wj_combo_CS_jhgp_gxfhj06_power",
+   "raw": "wj_combo_CS_jhgp_gxfhj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 604,
+   "combo_id": "wj_combo_CS_xmg_xtxjf01_power",
+   "raw": "wj_combo_CS_xmg_xtxjf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 605,
+   "combo_id": "wj_combo_CS_xmg_xtxjf05_power",
+   "raw": "wj_combo_CS_xmg_xtxjf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 606,
+   "combo_id": "wj_combo_CS_xmg_xtxjf08_power",
+   "raw": "wj_combo_CS_xmg_xtxjf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 607,
+   "combo_id": "wj_combo_CS_dm_fmgf01_power",
+   "raw": "wj_combo_CS_dm_fmgf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 608,
+   "combo_id": "wj_combo_CS_dm_fmgf07_power",
+   "raw": "wj_combo_CS_dm_fmgf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 609,
+   "combo_id": "wj_combo_CS_dm_fmgf08_power",
+   "raw": "wj_combo_CS_dm_fmgf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 610,
+   "combo_id": "wj_combo_CS_tyhg_yszyq03_power",
+   "raw": "wj_combo_CS_tyhg_yszyq03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 611,
+   "combo_id": "wj_combo_CS_tyhg_yszyq05_power",
+   "raw": "wj_combo_CS_tyhg_yszyq05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 612,
+   "combo_id": "wj_combo_CS_tyhg_yszyq07_power",
+   "raw": "wj_combo_CS_tyhg_yszyq07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 613,
+   "combo_id": "wj_combo_CS_sjy_klbx04_power",
+   "raw": "wj_combo_CS_sjy_klbx04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 614,
+   "combo_id": "wj_combo_CS_sjy_klbx06_power",
+   "raw": "wj_combo_CS_sjy_klbx06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 615,
+   "combo_id": "wj_combo_CS_sjy_klbx08_power",
+   "raw": "wj_combo_CS_sjy_klbx08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 616,
+   "combo_id": "wj_combo_CS_xd_xdj03_power",
+   "raw": "wj_combo_CS_xd_xdj03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 617,
+   "combo_id": "wj_combo_CS_xd_xdj06_power",
+   "raw": "wj_combo_CS_xd_xdj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 618,
+   "combo_id": "wj_combo_CS_xd_xdj07_power",
+   "raw": "wj_combo_CS_xd_xdj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 619,
+   "combo_id": "wj_combo_CS_wxj_gyxhj02_power",
+   "raw": "wj_combo_CS_wxj_gyxhj02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 620,
+   "combo_id": "wj_combo_CS_wxj_gyxhj03_power",
+   "raw": "wj_combo_CS_wxj_gyxhj03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 621,
+   "combo_id": "wj_combo_CS_wxj_gyxhj06_power",
+   "raw": "wj_combo_CS_wxj_gyxhj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 622,
+   "combo_id": "wj_combo_CS_ssg_jxc01_power",
+   "raw": "wj_combo_CS_ssg_jxc01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 623,
+   "combo_id": "wj_combo_CS_ssg_jxc06_power",
+   "raw": "wj_combo_CS_ssg_jxc06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 624,
+   "combo_id": "wj_combo_CS_ssg_jxc07_power",
+   "raw": "wj_combo_CS_ssg_jxc07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 625,
+   "combo_id": "wj_combo_CS_gm_ynsxj02_power",
+   "raw": "wj_combo_CS_gm_ynsxj02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 626,
+   "combo_id": "wj_combo_CS_gm_ynsxj06_power",
+   "raw": "wj_combo_CS_gm_ynsxj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 627,
+   "combo_id": "wj_combo_CS_gm_ynsxj07_power",
+   "raw": "wj_combo_CS_gm_ynsxj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 628,
+   "combo_id": "wj_combo_CS_em_yxc02_power",
+   "raw": "wj_combo_CS_em_yxc02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 629,
+   "combo_id": "wj_combo_CS_em_yxc03_power",
+   "raw": "wj_combo_CS_em_yxc03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 630,
+   "combo_id": "wj_combo_CS_em_yxc06_power",
+   "raw": "wj_combo_CS_em_yxc06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 631,
+   "combo_id": "wj_combo_CS_jh_mjh01_power",
+   "raw": "wj_combo_CS_jh_mjh01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 632,
+   "combo_id": "wj_combo_CS_jh_mjh02_power",
+   "raw": "wj_combo_CS_jh_mjh02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 633,
+   "combo_id": "wj_combo_CS_jh_mjh05_power",
+   "raw": "wj_combo_CS_jh_mjh05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 634,
+   "combo_id": "wj_combo_CS_sl_dmgf01_power",
+   "raw": "wj_combo_CS_sl_dmgf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 635,
+   "combo_id": "wj_combo_CS_sl_dmgf02_power",
+   "raw": "wj_combo_CS_sl_dmgf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 636,
+   "combo_id": "wj_combo_CS_sl_dmgf03_power",
+   "raw": "wj_combo_CS_sl_dmgf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 637,
+   "combo_id": "wj_combo_CS_nlb_yzx02_power",
+   "raw": "wj_combo_CS_nlb_yzx02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 638,
+   "combo_id": "wj_combo_CS_nlb_yzx04_power",
+   "raw": "wj_combo_CS_nlb_yzx04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 639,
+   "combo_id": "wj_combo_CS_nlb_yzx06_power",
+   "raw": "wj_combo_CS_nlb_yzx06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 640,
+   "combo_id": "wj_combo_CS_cf_yjqf03_power",
+   "raw": "wj_combo_CS_cf_yjqf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 641,
+   "combo_id": "wj_combo_CS_cf_yjqf04_power",
+   "raw": "wj_combo_CS_cf_yjqf04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 642,
+   "combo_id": "wj_combo_CS_cf_yjqf05_power",
+   "raw": "wj_combo_CS_cf_yjqf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 643,
+   "combo_id": "wj_combo_CS_jl_fgz02_power",
+   "raw": "wj_combo_CS_jl_fgz02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 644,
+   "combo_id": "wj_combo_CS_jl_fgz05_power",
+   "raw": "wj_combo_CS_jl_fgz05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 645,
+   "combo_id": "wj_combo_CS_jl_fgz06_power",
+   "raw": "wj_combo_CS_jl_fgz06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 646,
+   "combo_id": "wj_combo_CS_jy_shd01_power",
+   "raw": "wj_combo_CS_jy_shd01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 647,
+   "combo_id": "wj_combo_CS_jy_shd02_power",
+   "raw": "wj_combo_CS_jy_shd02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 648,
+   "combo_id": "wj_combo_CS_jy_shd07_power",
+   "raw": "wj_combo_CS_jy_shd07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 649,
+   "combo_id": "wj_combo_CS_jz_wyjf02_power",
+   "raw": "wj_combo_CS_jz_wyjf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 650,
+   "combo_id": "wj_combo_CS_jz_wyjf05_power",
+   "raw": "wj_combo_CS_jz_wyjf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 651,
+   "combo_id": "wj_combo_CS_jz_wyjf07_power",
+   "raw": "wj_combo_CS_jz_wyjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 652,
+   "combo_id": "wj_combo_CS_xt_xjj02_power",
+   "raw": "wj_combo_CS_xt_xjj02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 653,
+   "combo_id": "wj_combo_CS_xt_xjj05_power",
+   "raw": "wj_combo_CS_xt_xjj05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 654,
+   "combo_id": "wj_combo_CS_xt_xjj06_power",
+   "raw": "wj_combo_CS_xt_xjj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 655,
+   "combo_id": "wj_combo_CS_kl_hyjf05_power",
+   "raw": "wj_combo_CS_kl_hyjf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 656,
+   "combo_id": "wj_combo_CS_kl_hyjf06_power",
+   "raw": "wj_combo_CS_kl_hyjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 657,
+   "combo_id": "wj_combo_CS_kl_hyjf07_power",
+   "raw": "wj_combo_CS_kl_hyjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 658,
+   "combo_id": "wj_combo_CS_jh_jyjf01_power",
+   "raw": "wj_combo_CS_jh_jyjf01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 659,
+   "combo_id": "wj_combo_CS_jh_jyjf05_power",
+   "raw": "wj_combo_CS_jh_jyjf05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 660,
+   "combo_id": "wj_combo_CS_jh_jyjf06_power",
+   "raw": "wj_combo_CS_jh_jyjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 661,
+   "combo_id": "wj_combo_CS_gb_lsbf02_power",
+   "raw": "wj_combo_CS_gb_lsbf02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 662,
+   "combo_id": "wj_combo_CS_gb_lsbf03_power",
+   "raw": "wj_combo_CS_gb_lsbf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 663,
+   "combo_id": "wj_combo_CS_gb_lsbf06_power",
+   "raw": "wj_combo_CS_gb_lsbf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 664,
+   "combo_id": "wj_combo_CS_wd_lyjf03_power",
+   "raw": "wj_combo_CS_wd_lyjf03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 665,
+   "combo_id": "wj_combo_CS_wd_lyjf06_power",
+   "raw": "wj_combo_CS_wd_lyjf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 666,
+   "combo_id": "wj_combo_CS_wd_lyjf07_power",
+   "raw": "wj_combo_CS_wd_lyjf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 667,
+   "combo_id": "wj_combo_CS_tm_fgzyc02_power",
+   "raw": "wj_combo_CS_tm_fgzyc02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 668,
+   "combo_id": "wj_combo_CS_tm_fgzyc05_power",
+   "raw": "wj_combo_CS_tm_fgzyc05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 669,
+   "combo_id": "wj_combo_CS_tm_fgzyc07_power",
+   "raw": "wj_combo_CS_tm_fgzyc07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 670,
+   "combo_id": "wj_combo_CS_hs_kfkj03_power",
+   "raw": "wj_combo_CS_hs_kfkj03_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 671,
+   "combo_id": "wj_combo_CS_hs_kfkj07_power",
+   "raw": "wj_combo_CS_hs_kfkj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 672,
+   "combo_id": "wj_combo_CS_hs_kfkj08_power",
+   "raw": "wj_combo_CS_hs_kfkj08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 673,
+   "combo_id": "wj_combo_CS_wh_hyj02_power",
+   "raw": "wj_combo_CS_wh_hyj02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 674,
+   "combo_id": "wj_combo_CS_wh_hyj06_power",
+   "raw": "wj_combo_CS_wh_hyj06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 675,
+   "combo_id": "wj_combo_CS_wh_hyj07_power",
+   "raw": "wj_combo_CS_wh_hyj07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 676,
+   "combo_id": "wj_combo_CS_jh_lldf06_power",
+   "raw": "wj_combo_CS_jh_lldf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 677,
+   "combo_id": "wj_combo_CS_jh_lldf07_power",
+   "raw": "wj_combo_CS_jh_lldf07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 678,
+   "combo_id": "wj_combo_CS_jh_lldf08_power",
+   "raw": "wj_combo_CS_jh_lldf08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 679,
+   "combo_id": "wj_combo_CS_jh_mqc04_power",
+   "raw": "wj_combo_CS_jh_mqc04_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 680,
+   "combo_id": "wj_combo_CS_jh_mqc05_power",
+   "raw": "wj_combo_CS_jh_mqc05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 681,
+   "combo_id": "wj_combo_CS_jh_mqc08_power",
+   "raw": "wj_combo_CS_jh_mqc08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 682,
+   "combo_id": "wj_combo_CS_jh_jymg05_power",
+   "raw": "wj_combo_CS_jh_jymg05_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 683,
+   "combo_id": "wj_combo_CS_jh_jymg06_power",
+   "raw": "wj_combo_CS_jh_jymg06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 684,
+   "combo_id": "wj_combo_CS_jh_jymg07_power",
+   "raw": "wj_combo_CS_jh_jymg07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 685,
+   "combo_id": "wj_combo_CS_jh_tsz01_power",
+   "raw": "wj_combo_CS_jh_tsz01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 686,
+   "combo_id": "wj_combo_CS_jh_tsz02_power",
+   "raw": "wj_combo_CS_jh_tsz02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 687,
+   "combo_id": "wj_combo_CS_jh_tsz07_power",
+   "raw": "wj_combo_CS_jh_tsz07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 688,
+   "combo_id": "wj_combo_CS_jh_jgsj01_power",
+   "raw": "wj_combo_CS_jh_jgsj01_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 689,
+   "combo_id": "wj_combo_CS_jh_jgsj02_power",
+   "raw": "wj_combo_CS_jh_jgsj02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 690,
+   "combo_id": "wj_combo_CS_jh_jgsj08_power",
+   "raw": "wj_combo_CS_jh_jgsj08_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 691,
+   "combo_id": "wj_combo_CS_bg_wch02_power",
+   "raw": "wj_combo_CS_bg_wch02_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 692,
+   "combo_id": "wj_combo_CS_bg_wch06_power",
+   "raw": "wj_combo_CS_bg_wch06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 693,
+   "combo_id": "wj_combo_CS_bg_wch07_power",
+   "raw": "wj_combo_CS_bg_wch07_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 694,
+   "combo_id": "wj_combo_CS_gb_dgbf06_power",
+   "raw": "wj_combo_CS_gb_dgbf06_power,3,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 1400,
+   "combo_id": "wj_combo_CS_jh_hyjf01",
+   "raw": "wj_combo_CS_jh_hyjf01,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1401,
+   "combo_id": "wj_combo_CS_jh_hyjf02",
+   "raw": "wj_combo_CS_jh_hyjf02,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1402,
+   "combo_id": "wj_combo_CS_jh_hyjf03",
+   "raw": "wj_combo_CS_jh_hyjf03,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1403,
+   "combo_id": "wj_combo_CS_jh_hyjf04",
+   "raw": "wj_combo_CS_jh_hyjf04,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1404,
+   "combo_id": "wj_combo_CS_jh_hyjf05",
+   "raw": "wj_combo_CS_jh_hyjf05,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1405,
+   "combo_id": "wj_combo_CS_jh_hyjf06",
+   "raw": "wj_combo_CS_jh_hyjf06,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1406,
+   "combo_id": "wj_combo_CS_jh_hyjf07",
+   "raw": "wj_combo_CS_jh_hyjf07,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 1407,
+   "combo_id": "wj_combo_CS_jh_hyjf08",
+   "raw": "wj_combo_CS_jh_hyjf08,4,0,0",
+   "quality": "5"
+  },
+  {
+   "art_id": 2001,
+   "combo_id": "fwz_CS_jh_yydld2001",
+   "raw": "fwz_CS_jh_yydld2001,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2002,
+   "combo_id": "fwz_CS_jh_qxj2002",
+   "raw": "fwz_CS_jh_qxj2002,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2003,
+   "combo_id": "fwz_CS_jy_xsd2003",
+   "raw": "fwz_CS_jy_xsd2003,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2004,
+   "combo_id": "fwz_CS_wd_qfjf2004",
+   "raw": "fwz_CS_wd_qfjf2004,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2005,
+   "combo_id": "fwz_CS_em_jdmz2005",
+   "raw": "fwz_CS_em_jdmz2005,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2006,
+   "combo_id": "fwz_CS_jh_sjjc2006",
+   "raw": "fwz_CS_jh_sjjc2006,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2007,
+   "combo_id": "fwz_CS_jh_bxjf2007",
+   "raw": "fwz_CS_jh_bxjf2007,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2008,
+   "combo_id": "fwz_CS_sl_dmgf2008",
+   "raw": "fwz_CS_sl_dmgf2008,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2009,
+   "combo_id": "fwz_CS_gb_lsbf2009",
+   "raw": "fwz_CS_gb_lsbf2009,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2010,
+   "combo_id": "fwz_CS_jh_chz2010",
+   "raw": "fwz_CS_jh_chz2010,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2011,
+   "combo_id": "fwz_CS_kl_ymchj2011",
+   "raw": "fwz_CS_kl_ymchj2011,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2012,
+   "combo_id": "fwz_CS_by_xhmdl2012",
+   "raw": "fwz_CS_by_xhmdl2012,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2013,
+   "combo_id": "fwz_CS_jl_shuangci2013",
+   "raw": "fwz_CS_jl_shuangci2013,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2014,
+   "combo_id": "fwz_CS_tm_ywt2014",
+   "raw": "fwz_CS_tm_ywt2014,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2015,
+   "combo_id": "fwz_CS_xt_gqml2015",
+   "raw": "fwz_CS_xt_gqml2015,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2016,
+   "combo_id": "fwz_CS_jz_yxjf2016",
+   "raw": "fwz_CS_jz_yxjf2016,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2017,
+   "combo_id": "fwz_CS_ts_tsjf2017",
+   "raw": "fwz_CS_ts_tsjf2017,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2018,
+   "combo_id": "fwz_CS_jl_dmssj2018",
+   "raw": "fwz_CS_jl_dmssj2018,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2019,
+   "combo_id": "fwz_CS_jh_sjjc2019",
+   "raw": "fwz_CS_jh_sjjc2019,4,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 2020,
+   "combo_id": "fwz_CS_jy_xsd2020",
+   "raw": "fwz_CS_jy_xsd2020,4,0,0",
+   "quality": ""
+  },
+  {
+   "art_id": 2021,
+   "combo_id": "fwz_CS_em_ynjf2021",
+   "raw": "fwz_CS_em_ynjf2021,4,0,0",
+   "quality": "6"
+  },
+  {
+   "art_id": 2022,
+   "combo_id": "fwz_CS_cf_yjqf2022",
+   "raw": "fwz_CS_cf_yjqf2022,4,0,0",
+   "quality": "6"
+  }
+ ],
+ "reset_costs": {
+  "resetcost": "100000",
+  "resetwuji": "30000",
+  "resetslot": "100000",
+  "resetsingle": "5000"
+ },
+ "wear_types": {
+  "1": "1",
+  "2": "1",
+  "3": "2",
+  "4": "3"
+ },
+ "wujibox_need": {
+  "1": "0",
+  "2": "0",
+  "3": "0",
+  "4": "0",
+  "5": "0",
+  "6": "0",
+  "7": "1",
+  "8": "2",
+  "9": "2",
+  "10": "2",
+  "11": "2",
+  "12": "2",
+  "13": "2",
+  "14": "2",
+  "15": "2",
+  "16": "2",
+  "17": "2",
+  "18": "2",
+  "19": "2",
+  "20": "2",
+  "21": "2",
+  "22": "2",
+  "23": "2",
+  "24": "2",
+  "25": "2",
+  "26": "2",
+  "27": "2",
+  "28": "2",
+  "29": "2",
+  "30": "2",
+  "31": "2",
+  "32": "2",
+  "33": "4",
+  "34": "4",
+  "35": "4",
+  "36": "4",
+  "37": "4",
+  "38": "4",
+  "39": "4",
+  "40": "4",
+  "41": "4",
+  "42": "4",
+  "43": "4",
+  "44": "4",
+  "45": "4",
+  "46": "4",
+  "47": "4",
+  "48": "4",
+  "49": "4",
+  "50": "4",
+  "51": "4",
+  "52": "4",
+  "53": "4",
+  "54": "4",
+  "55": "4",
+  "56": "4",
+  "57": "4",
+  "58": "4",
+  "59": "8",
+  "60": "8",
+  "61": "8",
+  "62": "8",
+  "63": "8",
+  "64": "8"
+ },
+ "activates": [
+  {
+   "action_id": 74,
+   "seq": "43",
+   "variants": [
+    {
+     "static_data": "4401",
+     "buff": "WJ_CS_jh_cqgf01"
+    }
+   ]
+  },
+  {
+   "action_id": 622,
+   "seq": "1",
+   "variants": [
+    {
+     "static_data": "3928",
+     "buff": "WJ_CS_sl_djgq02"
+    }
+   ]
+  },
+  {
+   "action_id": 623,
+   "seq": "2",
+   "variants": [
+    {
+     "static_data": "4075",
+     "buff": "WJ_CS_sl_dmgf05"
+    }
+   ]
+  },
+  {
+   "action_id": 624,
+   "seq": "3",
+   "variants": [
+    {
+     "static_data": "4716",
+     "buff": "WJ_CS_sl_wtgf05"
+    }
+   ]
+  },
+  {
+   "action_id": 625,
+   "seq": "4",
+   "variants": [
+    {
+     "static_data": "6871",
+     "buff": "WJ_CS_slzp_lzs06"
+    }
+   ]
+  },
+  {
+   "action_id": 626,
+   "seq": "5",
+   "variants": [
+    {
+     "static_data": "3934",
+     "buff": "WJ_CS_wd_tjj02"
+    }
+   ]
+  },
+  {
+   "action_id": 627,
+   "seq": "6",
+   "variants": [
+    {
+     "static_data": "3935",
+     "buff": "WJ_CS_wd_tjj03"
+    }
+   ]
+  },
+  {
+   "action_id": 628,
+   "seq": "7",
+   "variants": [
+    {
+     "static_data": "4387",
+     "buff": "WJ_CS_wd_qfjf03"
+    }
+   ]
+  },
+  {
+   "action_id": 629,
+   "seq": "8",
+   "variants": [
+    {
+     "static_data": "4412",
+     "buff": "WJ_CS_wd_lyjf01"
+    }
+   ]
+  },
+  {
+   "action_id": 630,
+   "seq": "9",
+   "variants": [
+    {
+     "static_data": "6888",
+     "buff": "WJ_CS_wdzp_tjq08"
+    }
+   ]
+  },
+  {
+   "action_id": 631,
+   "seq": "10",
+   "variants": [
+    {
+     "static_data": "3942",
+     "buff": "WJ_CS_em_jdmz01"
+    }
+   ]
+  },
+  {
+   "action_id": 632,
+   "seq": "11",
+   "variants": [
+    {
+     "static_data": "5524",
+     "buff": "WJ_CS_em_jdmz07"
+    }
+   ]
+  },
+  {
+   "action_id": 633,
+   "seq": "12",
+   "variants": [
+    {
+     "static_data": "4042",
+     "buff": "WJ_CS_em_yxc06"
+    }
+   ]
+  },
+  {
+   "action_id": 634,
+   "seq": "13",
+   "variants": [
+    {
+     "static_data": "5218",
+     "buff": "WJ_CS_em_lbc08"
+    }
+   ]
+  },
+  {
+   "action_id": 635,
+   "seq": "14",
+   "variants": [
+    {
+     "static_data": "6595",
+     "buff": "WJ_CS_em_ynjf05"
+    }
+   ]
+  },
+  {
+   "action_id": 636,
+   "seq": "15",
+   "variants": [
+    {
+     "static_data": "4259",
+     "buff": "WJ_CS_jz_wyjf06"
+    }
+   ]
+  },
+  {
+   "action_id": 637,
+   "seq": "16",
+   "variants": [
+    {
+     "static_data": "4418",
+     "buff": "WJ_CS_jz_xytf06"
+    },
+    {
+     "static_data": "5287",
+     "buff": "WJ_CS_jz_xytf06"
+    }
+   ]
+  },
+  {
+   "action_id": 638,
+   "seq": "17",
+   "variants": [
+    {
+     "static_data": "5269",
+     "buff": "WJ_CS_jz_lyfh07"
+    }
+   ]
+  },
+  {
+   "action_id": 639,
+   "seq": "18",
+   "variants": [
+    {
+     "static_data": "6241",
+     "buff": "WJ_CS_jz_yxjf07"
+    }
+   ]
+  },
+  {
+   "action_id": 640,
+   "seq": "19",
+   "variants": [
+    {
+     "static_data": "5255",
+     "buff": "WJ_CS_gb_lhz08"
+    }
+   ]
+  },
+  {
+   "action_id": 641,
+   "seq": "20",
+   "variants": [
+    {
+     "static_data": "4026",
+     "buff": "WJ_CS_gb_ksbf03"
+    }
+   ]
+  },
+  {
+   "action_id": 642,
+   "seq": "21",
+   "variants": [
+    {
+     "static_data": "5224",
+     "buff": "WJ_CS_gb_lsbf07"
+    }
+   ]
+  },
+  {
+   "action_id": 643,
+   "seq": "22",
+   "variants": [
+    {
+     "static_data": "6879",
+     "buff": "WJ_CS_gbzp_dgbf07"
+    }
+   ]
+  },
+  {
+   "action_id": 644,
+   "seq": "23",
+   "variants": [
+    {
+     "static_data": "4241",
+     "buff": "WJ_CS_tm_jsc06"
+    }
+   ]
+  },
+  {
+   "action_id": 645,
+   "seq": "24",
+   "variants": [
+    {
+     "static_data": "4269",
+     "buff": "WJ_CS_tm_mhb02"
+    }
+   ]
+  },
+  {
+   "action_id": 646,
+   "seq": "25",
+   "variants": [
+    {
+     "static_data": "4708",
+     "buff": "WJ_CS_tm_fgzyc06"
+    }
+   ]
+  },
+  {
+   "action_id": 647,
+   "seq": "26",
+   "variants": [
+    {
+     "static_data": "4440",
+     "buff": "WJ_CS_jy_shd02"
+    }
+   ]
+  },
+  {
+   "action_id": 648,
+   "seq": "27",
+   "variants": [
+    {
+     "static_data": "5520",
+     "buff": "WJ_CS_jy_yzq07"
+    },
+    {
+     "static_data": "635",
+     "buff": "WJ_CS_jy_yzq07"
+    }
+   ]
+  },
+  {
+   "action_id": 649,
+   "seq": "28",
+   "variants": [
+    {
+     "static_data": "5608",
+     "buff": "WJ_CS_jh_dldm06"
+    }
+   ]
+  },
+  {
+   "action_id": 650,
+   "seq": "29",
+   "variants": [
+    {
+     "static_data": "6713",
+     "buff": "WJ_CS_jy_xsd01"
+    }
+   ]
+  },
+  {
+   "action_id": 651,
+   "seq": "30",
+   "variants": [
+    {
+     "static_data": "6078",
+     "buff": "WJ_CS_jl_zfd07"
+    },
+    {
+     "static_data": "6043",
+     "buff": "WJ_CS_jl_zfd07_sky"
+    }
+   ]
+  },
+  {
+   "action_id": 652,
+   "seq": "31",
+   "variants": [
+    {
+     "static_data": "5821",
+     "buff": "WJ_CS_jl_fgz05"
+    }
+   ]
+  },
+  {
+   "action_id": 653,
+   "seq": "32",
+   "variants": [
+    {
+     "static_data": "4082",
+     "buff": "WJ_CS_jl_shuangci07"
+    }
+   ]
+  },
+  {
+   "action_id": 654,
+   "seq": "33",
+   "variants": [
+    {
+     "static_data": "6313",
+     "buff": "WJ_CS_jl_dmssj05"
+    }
+   ]
+  },
+  {
+   "action_id": 675,
+   "seq": "34",
+   "variants": [
+    {
+     "static_data": "6508",
+     "buff": "WJ_CS_tm_ywt07"
+    }
+   ]
+  },
+  {
+   "action_id": 1400,
+   "seq": "35",
+   "variants": [
+    {
+     "static_data": "7555",
+     "buff": "WJ_CS_jh_hyjf01"
+    }
+   ]
+  },
+  {
+   "action_id": 1401,
+   "seq": "36",
+   "variants": [
+    {
+     "static_data": "7565",
+     "buff": "WJ_CS_jh_hyjf02"
+    }
+   ]
+  },
+  {
+   "action_id": 1402,
+   "seq": "37",
+   "variants": [
+    {
+     "static_data": "7584",
+     "buff": "WJ_CS_jh_hyjf03"
+    },
+    {
+     "static_data": "17528",
+     "buff": "WJ_CS_jh_hyjf03"
+    }
+   ]
+  },
+  {
+   "action_id": 1403,
+   "seq": "38",
+   "variants": [
+    {
+     "static_data": "7597",
+     "buff": "WJ_CS_jh_hyjf04"
+    },
+    {
+     "static_data": "17537",
+     "buff": "WJ_CS_jh_hyjf04"
+    }
+   ]
+  },
+  {
+   "action_id": 1404,
+   "seq": "39",
+   "variants": [
+    {
+     "static_data": "7606",
+     "buff": "WJ_CS_jh_hyjf05"
+    }
+   ]
+  },
+  {
+   "action_id": 1405,
+   "seq": "40",
+   "variants": [
+    {
+     "static_data": "7607",
+     "buff": "WJ_CS_jh_hyjf06"
+    }
+   ]
+  },
+  {
+   "action_id": 1406,
+   "seq": "41",
+   "variants": [
+    {
+     "static_data": "7648",
+     "buff": "WJ_CS_jh_hyjf07"
+    },
+    {
+     "static_data": "17536",
+     "buff": "WJ_CS_jh_hyjf07"
+    }
+   ]
+  },
+  {
+   "action_id": 1407,
+   "seq": "42",
+   "variants": [
+    {
+     "static_data": "7649",
+     "buff": "WJ_CS_jh_hyjf08"
+    }
+   ]
+  },
+  {
+   "action_id": 2001,
+   "seq": "44",
+   "variants": [
+    {
+     "static_data": "15599",
+     "buff": "fwz_CS_jh_yydld2001"
+    }
+   ]
+  },
+  {
+   "action_id": 2002,
+   "seq": "45",
+   "variants": [
+    {
+     "static_data": "13299",
+     "buff": "fwz_CS_jh_qxj2002"
+    }
+   ]
+  },
+  {
+   "action_id": 2003,
+   "seq": "46",
+   "variants": [
+    {
+     "static_data": "6713",
+     "buff": "fwz_CS_jy_xsd2003"
+    }
+   ]
+  },
+  {
+   "action_id": 2004,
+   "seq": "47",
+   "variants": [
+    {
+     "static_data": "4219",
+     "buff": "fwz_CS_wd_qfjf2004"
+    }
+   ]
+  },
+  {
+   "action_id": 2005,
+   "seq": "48",
+   "variants": [
+    {
+     "static_data": "3942",
+     "buff": "fwz_CS_em_jdmz2005"
+    }
+   ]
+  },
+  {
+   "action_id": 2006,
+   "seq": "49",
+   "variants": [
+    {
+     "static_data": "18331",
+     "buff": "fwz_CS_jh_sjjc2006"
+    }
+   ]
+  },
+  {
+   "action_id": 2007,
+   "seq": "50",
+   "variants": [
+    {
+     "static_data": "19224",
+     "buff": "fwz_CS_jh_bxjf2007"
+    }
+   ]
+  },
+  {
+   "action_id": 2008,
+   "seq": "51",
+   "variants": [
+    {
+     "static_data": "4071",
+     "buff": "fwz_CS_sl_dmgf2008"
+    }
+   ]
+  },
+  {
+   "action_id": 2009,
+   "seq": "52",
+   "variants": [
+    {
+     "static_data": "4270",
+     "buff": "fwz_CS_gb_lsbf2009"
+    }
+   ]
+  },
+  {
+   "action_id": 2010,
+   "seq": "53",
+   "variants": [
+    {
+     "static_data": "12221",
+     "buff": "fwz_CS_jh_chz2010"
+    }
+   ]
+  },
+  {
+   "action_id": 2011,
+   "seq": "54",
+   "variants": [
+    {
+     "static_data": "19574",
+     "buff": "fwz_CS_kl_ymchj2011"
+    }
+   ]
+  },
+  {
+   "action_id": 2012,
+   "seq": "55",
+   "variants": [
+    {
+     "static_data": "13765",
+     "buff": "fwz_CS_by_xhmdl2012"
+    }
+   ]
+  },
+  {
+   "action_id": 2013,
+   "seq": "56",
+   "variants": [
+    {
+     "static_data": "3943",
+     "buff": "fwz_CS_jl_shuangci2013"
+    }
+   ]
+  },
+  {
+   "action_id": 2014,
+   "seq": "57",
+   "variants": [
+    {
+     "static_data": "6504",
+     "buff": "fwz_CS_tm_ywt2014"
+    }
+   ]
+  },
+  {
+   "action_id": 2015,
+   "seq": "58",
+   "variants": [
+    {
+     "static_data": "20191",
+     "buff": "fwz_CS_xt_gqml2015"
+    }
+   ]
+  },
+  {
+   "action_id": 2016,
+   "seq": "59",
+   "variants": [
+    {
+     "static_data": "5156",
+     "buff": "fwz_CS_jz_yxjf2016"
+    }
+   ]
+  },
+  {
+   "action_id": 2017,
+   "seq": "60",
+   "variants": [
+    {
+     "static_data": "18931",
+     "buff": "fwz_CS_ts_tsjf2017"
+    }
+   ]
+  },
+  {
+   "action_id": 2018,
+   "seq": "61",
+   "variants": [
+    {
+     "static_data": "6305",
+     "buff": "fwz_CS_jl_dmssj2018"
+    }
+   ]
+  },
+  {
+   "action_id": 2019,
+   "seq": "49",
+   "variants": [
+    {
+     "static_data": "18331",
+     "buff": "fwz_CS_jh_sjjc2019"
+    }
+   ]
+  },
+  {
+   "action_id": 2020,
+   "seq": "46",
+   "variants": [
+    {
+     "static_data": "6713",
+     "buff": "fwz_CS_jy_xsd2020"
+    }
+   ]
+  },
+  {
+   "action_id": 2021,
+   "seq": "62",
+   "variants": [
+    {
+     "static_data": "5420",
+     "buff": "fwz_CS_em_ynjf2021"
+    }
+   ]
+  },
+  {
+   "action_id": 2022,
+   "seq": "63",
+   "variants": [
+    {
+     "static_data": "14764",
+     "buff": "fwz_CS_cf_yjqf2022"
+    }
+   ]
+  }
+ ],
+ "skills_with_relevance": [
+  "CS_bg_wch02",
+  "CS_bg_wch06",
+  "CS_bg_wch07",
+  "CS_by_wgl01",
+  "CS_by_wgl02",
+  "CS_by_wgl06",
+  "CS_by_xlxf01",
+  "CS_by_xlxf03",
+  "CS_by_xlxf07",
+  "CS_cf_yjqf03",
+  "CS_cf_yjqf04",
+  "CS_cf_yjqf05",
+  "CS_dm_fmgf01",
+  "CS_dm_fmgf07",
+  "CS_dm_fmgf08",
+  "CS_em_jdmz01",
+  "CS_em_jdmz02",
+  "CS_em_jdmz03",
+  "CS_em_ynjf01",
+  "CS_em_ynjf04",
+  "CS_em_ynjf07",
+  "CS_em_yxc02",
+  "CS_em_yxc03",
+  "CS_em_yxc06",
+  "CS_gb_dgbf02",
+  "CS_gb_dgbf06",
+  "CS_gb_dgbf07",
+  "CS_gb_dgbf08",
+  "CS_gb_lhz01",
+  "CS_gb_lhz03",
+  "CS_gb_lhz07",
+  "CS_gb_lhz08",
+  "CS_gb_lsbf02",
+  "CS_gb_lsbf03",
+  "CS_gb_lsbf06",
+  "CS_gbzp_dgbf02",
+  "CS_gbzp_dgbf07",
+  "CS_gbzp_dgbf08",
+  "CS_gm_ynsxj02",
+  "CS_gm_ynsxj06",
+  "CS_gm_ynsxj07",
+  "CS_hs_kfkj03",
+  "CS_hs_kfkj07",
+  "CS_hs_kfkj08",
+  "CS_jh_bxjf01",
+  "CS_jh_bxjf04",
+  "CS_jh_bxjf08",
+  "CS_jh_cljf03",
+  "CS_jh_cljf05",
+  "CS_jh_cljf06",
+  "CS_jh_cljf07",
+  "CS_jh_cyjf02",
+  "CS_jh_cyjf05",
+  "CS_jh_cyjf06",
+  "CS_jh_fmzf06",
+  "CS_jh_fmzf08",
+  "CS_jh_fmzf09",
+  "CS_jh_hyjf03",
+  "CS_jh_hyjf04",
+  "CS_jh_hyjf07",
+  "CS_jh_jgsj01",
+  "CS_jh_jgsj08",
+  "CS_jh_jyjf01",
+  "CS_jh_jyjf05",
+  "CS_jh_jyjf06",
+  "CS_jh_jymg05",
+  "CS_jh_jymg07",
+  "CS_jh_ldg01",
+  "CS_jh_ldg05",
+  "CS_jh_lhbwq02",
+  "CS_jh_lhbwq07",
+  "CS_jh_liusha03",
+  "CS_jh_liusha08",
+  "CS_jh_liusha09",
+  "CS_jh_lldf06",
+  "CS_jh_lldf07",
+  "CS_jh_lyjf03",
+  "CS_jh_lyjf04",
+  "CS_jh_lyjf07",
+  "CS_jh_mjh01",
+  "CS_jh_mjh02",
+  "CS_jh_mjh05",
+  "CS_jh_mqc04",
+  "CS_jh_mqc05",
+  "CS_jh_mqc08",
+  "CS_jh_myjf03",
+  "CS_jh_myjf06",
+  "CS_jh_myjf08",
+  "CS_jh_sjjc02",
+  "CS_jh_sjjc05",
+  "CS_jh_sjjc06",
+  "CS_jh_slbwj03",
+  "CS_jh_slbwj04",
+  "CS_jh_slbwj06",
+  "CS_jh_tlq02",
+  "CS_jh_tlq03",
+  "CS_jh_tlq04",
+  "CS_jh_tlq04_sky",
+  "CS_jh_tsz01",
+  "CS_jh_tsz02",
+  "CS_jh_tsz07",
+  "CS_jh_whjf02",
+  "CS_jh_whjf03",
+  "CS_jh_whjf06",
+  "CS_jhgp_gxfhj06",
+  "CS_jl_dmssj01",
+  "CS_jl_dmssj07",
+  "CS_jl_dmssj09",
+  "CS_jl_fgz02",
+  "CS_jl_fgz05",
+  "CS_jl_fgz06",
+  "CS_jl_zfd01",
+  "CS_jl_zfd02",
+  "CS_jlqj_zfd01",
+  "CS_jlqj_zfd02",
+  "CS_jy_dqd02",
+  "CS_jy_dqd04",
+  "CS_jy_dqd06",
+  "CS_jy_shd01",
+  "CS_jy_shd02",
+  "CS_jy_shd07",
+  "CS_jy_xsd02",
+  "CS_jy_xsd03",
+  "CS_jy_xsd07",
+  "CS_jy_yzq07",
+  "CS_jy_yzq07_sky",
+  "CS_jy_yzq08",
+  "CS_jz_lyfh04",
+  "CS_jz_lyfh05",
+  "CS_jz_lyfh07",
+  "CS_jz_wyjf02",
+  "CS_jz_wyjf05",
+  "CS_jz_wyjf07",
+  "CS_jz_yxjf03",
+  "CS_jz_yxjf04",
+  "CS_jz_yxjf06",
+  "CS_jz_yxjf07",
+  "CS_kl_hqxxp01",
+  "CS_kl_hqxxp07",
+  "CS_kl_hqxxp08",
+  "CS_kl_hyjf05",
+  "CS_kl_hyjf06",
+  "CS_kl_hyjf07",
+  "CS_kl_ymchj05",
+  "CS_kl_ymchj06",
+  "CS_kl_ymchj07",
+  "CS_lzy_jlqj_zfd01",
+  "CS_lzy_jlqj_zfd02",
+  "CS_mj_typzd01",
+  "CS_mj_typzd02",
+  "CS_mj_typzd04",
+  "CS_nlb_yzx02",
+  "CS_nlb_yzx04",
+  "CS_nlb_yzx06",
+  "CS_qjss_wd01",
+  "CS_qy_lyjyj03",
+  "CS_qy_lyjyj04",
+  "CS_qy_lyjyj06",
+  "CS_single_jctq",
+  "CS_sj_syxz02",
+  "CS_sj_syxz05",
+  "CS_sj_syxz08",
+  "CS_sjy_klbx04",
+  "CS_sjy_klbx06",
+  "CS_sjy_klbx08",
+  "CS_sl_djgq02",
+  "CS_sl_djgq03",
+  "CS_sl_djgq04",
+  "CS_sl_dmgf01",
+  "CS_sl_dmgf02",
+  "CS_sl_dmgf03",
+  "CS_sl_lhq02",
+  "CS_sl_lhq03",
+  "CS_sl_lhq06",
+  "CS_sl_lzs04",
+  "CS_sl_lzs06",
+  "CS_sl_lzs07",
+  "CS_slqj_djgq02",
+  "CS_slqj_djgq03",
+  "CS_slqj_djgq04",
+  "CS_slzp_lzs03",
+  "CS_slzp_lzs05",
+  "CS_slzp_lzs06",
+  "CS_ssg_jxc01",
+  "CS_ssg_jxc06",
+  "CS_ssg_jxc07",
+  "CS_th_bhcs04",
+  "CS_th_bhcs06",
+  "CS_th_bhcs07",
+  "CS_tls_xycd04",
+  "CS_tls_xycd06",
+  "CS_tls_xycd07",
+  "CS_tm_fgzyc02",
+  "CS_tm_fgzyc05",
+  "CS_tm_fgzyc07",
+  "CS_tm_jsc03",
+  "CS_tm_jsc04",
+  "CS_tm_jsc06",
+  "CS_tm_ywt03",
+  "CS_tm_ywt04",
+  "CS_tm_ywt05",
+  "CS_tm_ywt06",
+  "CS_tm_ywt07",
+  "CS_ts_tsjf01",
+  "CS_ts_tsjf03",
+  "CS_ts_tsjf06",
+  "CS_ts_wcjf01",
+  "CS_ts_wcjf05",
+  "CS_ts_wcjf07",
+  "CS_tyhg_yszyq03",
+  "CS_tyhg_yszyq05",
+  "CS_tyhg_yszyq07",
+  "CS_wd_lyjf03",
+  "CS_wd_lyjf06",
+  "CS_wd_lyjf07",
+  "CS_wd_qfjf02",
+  "CS_wd_qfjf02_sky",
+  "CS_wd_qfjf04",
+  "CS_wd_qfjf06",
+  "CS_wd_qfjf06_sky",
+  "CS_wd_tjq03",
+  "CS_wd_tjq06",
+  "CS_wd_tjq08",
+  "CS_wdzp_tjq02",
+  "CS_wdzp_tjq06",
+  "CS_wdzp_tjq08",
+  "CS_wh_hyj02",
+  "CS_wh_hyj06",
+  "CS_wh_hyj07",
+  "CS_wxj_gyxhj02",
+  "CS_wxj_gyxhj03",
+  "CS_wxj_gyxhj06",
+  "CS_xd_xdj03",
+  "CS_xd_xdj06",
+  "CS_xd_xdj07",
+  "CS_xjz_wmcf06",
+  "CS_xjz_wmcf07",
+  "CS_xmg_xtxjf01",
+  "CS_xmg_xtxjf05",
+  "CS_xmg_xtxjf08",
+  "CS_xt_gqml06",
+  "CS_xt_xjj02",
+  "CS_xt_xjj05",
+  "CS_xt_xjj06",
+  "CS_xt_yjjx08",
+  "CS_xy_jlsd06",
+  "CS_xy_ktdj01",
+  "CS_xy_ktdj06",
+  "CS_xy_ktdj07",
+  "CS_xy_nrjbd01",
+  "CS_xy_nrjbd04",
+  "CS_xy_nrjbd07",
+  "CS_yh_hsqs03",
+  "CS_yh_hsqs05",
+  "CS_yh_hsqs07",
+  "CS_yhwq_hsqs03",
+  "wuji_CS_em_jdmz03",
+  "wuji_CS_slzp_lzs05"
+ ],
+ "combo_skills": [
+  "CS_jh_myjf08"
+ ]
+}

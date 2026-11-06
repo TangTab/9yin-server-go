@@ -12,6 +12,6 @@
 *.i64
 *.pdb
 *.dmp
-
+*.7z
 
 resources
