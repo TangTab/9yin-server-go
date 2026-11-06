@@ -207,10 +207,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer store.Close()
-	facultyStore, err := openFacultyProgressStore()
-	if err != nil {
-		log.Fatal(err)
-	}
+	facultyStore := newFacultyDBStore(store.db)
 	gm := newGMHub()
 	if *gmListen != "" {
 		go serveGM(*gmListen, gm)
@@ -230,7 +227,7 @@ func main() {
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
 	if captureDir != "" {
 		var tap *captureTap
 		conn, tap = newCapturedConn(conn, captureDir)

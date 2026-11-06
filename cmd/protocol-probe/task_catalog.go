@@ -31,8 +31,9 @@ var (
 	defaultTaskDramaCitePath = runtimeProjectPath("resources", "modern", "share", "task", "task", "task_drama_cite.ini")
 )
 
-// taskCatalogPath 是任务快照的固定落盘位置。
-func taskCatalogPath() string { return runtimeProjectPath("data", "tasks.json") }
+// taskCatalogPath 是任务快照的固定落盘位置（派生缓存，与运行日志
+// 同住 artifacts/local；缺失时从 resources/ 自动重扫重建）。
+func taskCatalogPath() string { return runtimeProjectPath("artifacts", "local", "tasks.json") }
 
 // taskCatalog 是进程级任务目录：与资源仓、Npc_Func 同类的静态配置，
 // main 在任何连接进入前装配一次，之后只读。nil 的查询语义由

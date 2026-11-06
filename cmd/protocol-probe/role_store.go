@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/role"
@@ -15,25 +17,85 @@ const defaultRoleFaction = "force_yihua"
 type roleStore struct {
 	accounts role.AccountRepository
 	roles    role.RoleRepository
-	close    func() error
+	// db 为 MySQL 仓库的连接池，供 faculty 等同库存储共用；
+	// JSON 仓库（仅测试）下为 nil。
+	db    *sql.DB
+	close func() error
 }
 
+// openRoleStore 打开 MySQL 角色仓库（唯一生产后端）。data/roles.json
+// 已废弃：DSN 缺失、连不上或缺必需表都直接失败，提示配置 env.server
+// 或重放 migrations/ 权威存档（upgrade-db.bat）。
 func openRoleStore() (*roleStore, error) {
-	if dsn := os.Getenv("NINEYIN_MYSQL_DSN"); dsn != "" {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		repository, err := role.OpenMySQLRepository(ctx, dsn, role.MySQLConfig{})
-		if err != nil {
-			return nil, err
-		}
-		return &roleStore{accounts: repository, roles: repository, close: repository.Close}, nil
+	dsn := strings.TrimSpace(os.Getenv("NINEYIN_MYSQL_DSN"))
+	if dsn == "" {
+		return nil, errors.New("NINEYIN_MYSQL_DSN 未配置：角色存储已切换为 MySQL（data/roles.json 已废弃）。" +
+			"请在环境变量或 env.server 中配置，例如 nineyin:nineyin123@tcp(127.0.0.1:3306)/nineyin")
 	}
-	path := runtimeProjectPath("data", "roles.json")
-	repository, err := role.OpenJSONRepository(path)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	repository, err := role.OpenMySQLRepository(ctx, dsn, role.MySQLConfig{})
 	if err != nil {
 		return nil, err
 	}
-	return &roleStore{accounts: repository, roles: repository, close: func() error { return nil }}, nil
+	db := repository.DB()
+	if err := verifyRequiredTables(ctx, db); err != nil {
+		_ = repository.Close()
+		return nil, err
+	}
+	return &roleStore{accounts: repository, roles: repository, db: db, close: repository.Close}, nil
+}
+
+// requiredStoreTables 是游戏服运行所需的全部表。accounts/roles/
+// role_appearances/role_locations 属 M2 角色仓库；role_faculty 为内功
+// 进度快照（Java FacultyStore 与新版服 data-migrate 共用同表）。
+var requiredStoreTables = []string{
+	"accounts",
+	"roles",
+	"role_appearances",
+	"role_locations",
+	"role_faculty",
+}
+
+// verifyRequiredTables 只读检查必需表是否齐全；缺表直接报错退出，
+// 建表权威在 migrations/ 权威存档重放（upgrade-db.bat），服务器
+// 启动绝不执行 DDL。
+func verifyRequiredTables(ctx context.Context, db *sql.DB) error {
+	placeholders := make([]string, 0, len(requiredStoreTables))
+	args := make([]any, 0, len(requiredStoreTables)+1)
+	for _, name := range requiredStoreTables {
+		placeholders = append(placeholders, "?")
+		args = append(args, name)
+	}
+	query := "SELECT table_name FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN (" +
+		strings.Join(placeholders, ", ") + ")"
+	rows, err := db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("role store: inspect schema: %w", err)
+	}
+	defer rows.Close()
+	present := make(map[string]bool, len(requiredStoreTables))
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return fmt.Errorf("role store: inspect schema row: %w", err)
+		}
+		present[strings.ToLower(name)] = true
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("role store: inspect schema: %w", err)
+	}
+	var missing []string
+	for _, name := range requiredStoreTables {
+		if !present[strings.ToLower(name)] {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("role store: 数据库缺必需表 %s：请先运行 upgrade-db.bat 重放 migrations/ 权威存档",
+			strings.Join(missing, ", "))
+	}
+	return nil
 }
 
 func (store *roleStore) Close() error {

@@ -1,8 +1,12 @@
+
+gmtest-sandbox/
 .zcode
 
 /artifacts/
 /build/
 /captures/
+/data/
+/data-legacy-*.tar.gz
 /logs/
 /resources/
 *.exe
@@ -14,5 +18,6 @@
 *.pdb
 *.dmp
 *.7z
+
 
 env.server

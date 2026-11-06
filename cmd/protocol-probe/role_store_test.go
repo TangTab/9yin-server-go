@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/DATA-DOG/go-sqlmock"
 
 	"github.com/local/9yin-go-server/internal/role"
 )
@@ -69,5 +72,33 @@ func TestRoleStoreIsolatesAccountsAndPersistsLocationVersion(t *testing.T) {
 	}
 	if other == nil || other.Name != "乙" {
 		t.Fatalf("second account role = %#v", other)
+	}
+}
+
+func TestOpenRoleStoreRequiresDSN(t *testing.T) {
+	t.Setenv("NINEYIN_MYSQL_DSN", "")
+	_, err := openRoleStore()
+	if err == nil || !strings.Contains(err.Error(), "NINEYIN_MYSQL_DSN") {
+		t.Fatalf("expected DSN requirement error, got %v", err)
+	}
+}
+
+func TestVerifyRequiredTablesFailsFastOnMissing(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherRegexp))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = db.Close() })
+	// 仅返回 accounts/roles；缺 role_appearances/role_locations/role_faculty。
+	rows := sqlmock.NewRows([]string{"table_name"}).
+		AddRow("accounts").
+		AddRow("roles")
+	mock.ExpectQuery(`SELECT table_name FROM information_schema\.tables`).WillReturnRows(rows)
+	err = verifyRequiredTables(context.Background(), db)
+	if err == nil || !strings.Contains(err.Error(), "role_faculty") || !strings.Contains(err.Error(), "upgrade-db.bat") {
+		t.Fatalf("expected missing-table error, got %v", err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error(err)
 	}
 }

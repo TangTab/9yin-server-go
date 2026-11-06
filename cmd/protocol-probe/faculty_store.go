@@ -1,21 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync"
+	"sort"
 	"time"
-
-	"github.com/local/9yin-go-server/internal/role"
 )
 
-const facultyStoreVersion = 1
-
+// facultyProgressSnapshot 是内功/进阶进度的持久化快照（现落
+// role_faculty.snapshot）。字段集为 Java 参考服 PlayerProgress.Snapshot
+// 的子集；Java/新版服写入的超集字段（vitals、生活槽位、基础五维等）
+// 经 extras 原样 passthrough，Go 写回时不丢失。
+// facultyBookSnapshot 的已知键；书内其余键（如新版服的 max_level）
+// 同样经 extras passthrough。
 type facultyBookSnapshot struct {
 	ConfigID string `json:"config_id"`
 	Level    int32  `json:"level"`
@@ -23,6 +20,79 @@ type facultyBookSnapshot struct {
 	Total    int32  `json:"total"`
 	Power    int32  `json:"power"`
 	MaxPower int32  `json:"max_power"`
+
+	extras map[string]json.RawMessage
+}
+
+var facultyBookJSONKeys = map[string]bool{
+	"config_id": true,
+	"level":     true,
+	"fill":      true,
+	"total":     true,
+	"power":     true,
+	"max_power": true,
+}
+
+func (book *facultyBookSnapshot) UnmarshalJSON(data []byte) error {
+	type bookFields facultyBookSnapshot
+	var fields bookFields
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	*book = facultyBookSnapshot(fields)
+	var all map[string]json.RawMessage
+	if err := json.Unmarshal(data, &all); err != nil {
+		return err
+	}
+	for key, value := range all {
+		if facultyBookJSONKeys[key] {
+			continue
+		}
+		if book.extras == nil {
+			book.extras = make(map[string]json.RawMessage)
+		}
+		book.extras[key] = value
+	}
+	return nil
+}
+
+func (book facultyBookSnapshot) MarshalJSON() ([]byte, error) {
+	type bookFields facultyBookSnapshot
+	base, err := json.Marshal(bookFields(book))
+	if err != nil {
+		return nil, err
+	}
+	if len(book.extras) == 0 {
+		return base, nil
+	}
+	var merged map[string]json.RawMessage
+	if err := json.Unmarshal(base, &merged); err != nil {
+		return nil, err
+	}
+	for key, value := range book.extras {
+		merged[key] = value
+	}
+	keys := make([]string, 0, len(merged))
+	for key := range merged {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	var out bytes.Buffer
+	out.WriteByte('{')
+	for index, key := range keys {
+		if index > 0 {
+			out.WriteByte(',')
+		}
+		keyJSON, err := json.Marshal(key)
+		if err != nil {
+			return nil, err
+		}
+		out.Write(keyJSON)
+		out.WriteByte(':')
+		out.Write(merged[key])
+	}
+	out.WriteByte('}')
+	return out.Bytes(), nil
 }
 
 type facultyProgressSnapshot struct {
@@ -34,127 +104,102 @@ type facultyProgressSnapshot struct {
 	FillSpeed      int32                 `json:"fill_speed"`
 	LastAdvanceUTC time.Time             `json:"last_advance_utc"`
 	Books          []facultyBookSnapshot `json:"books"`
+
+	// extras 保存解码时遇到的本结构未知字段（非导出，encoding/json
+	// 不直接编解码），编码时按 key 排序原样回写。
+	extras map[string]json.RawMessage
 }
 
-type facultyStoreFile struct {
-	Version int                                `json:"version"`
-	Roles   map[string]facultyProgressSnapshot `json:"roles"`
+// facultySnapshotJSONKeys 是本结构已显式建模的 JSON 键；其余键进 extras。
+var facultySnapshotJSONKeys = map[string]bool{
+	"cur_neigong":      true,
+	"faculty":          true,
+	"faculty_state":    true,
+	"faculty_style":    true,
+	"faculty_name":     true,
+	"fill_speed":       true,
+	"last_advance_utc": true,
+	"books":            true,
 }
 
-type facultyProgressStore struct {
-	mu    sync.Mutex
-	path  string
-	roles map[string]facultyProgressSnapshot
-}
-
-func openFacultyProgressStore() (*facultyProgressStore, error) {
-	return openFacultyProgressStoreAt(runtimeProjectPath("data", "faculty.json"))
-}
-
-func openFacultyProgressStoreAt(path string) (*facultyProgressStore, error) {
-	if strings.TrimSpace(path) == "" {
-		return nil, errors.New("faculty store: empty path")
-	}
-	store := &facultyProgressStore{
-		path:  filepath.Clean(path),
-		roles: make(map[string]facultyProgressSnapshot),
-	}
-	data, err := os.ReadFile(store.path)
-	if errors.Is(err, os.ErrNotExist) {
-		return store, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("read faculty store: %w", err)
-	}
-	var document facultyStoreFile
-	if err := json.Unmarshal(data, &document); err != nil {
-		return nil, fmt.Errorf("decode faculty store: %w", err)
-	}
-	if document.Version != facultyStoreVersion {
-		return nil, fmt.Errorf("decode faculty store: unsupported version %d", document.Version)
-	}
-	if document.Roles != nil {
-		store.roles = document.Roles
-	}
-	return store, nil
-}
-
-func (store *facultyProgressStore) Load(roleID role.RoleID) (facultyProgressSnapshot, bool) {
-	if store == nil || roleID == 0 {
-		return facultyProgressSnapshot{}, false
-	}
-	store.mu.Lock()
-	defer store.mu.Unlock()
-	value, exists := store.roles[strconv.FormatUint(uint64(roleID), 10)]
-	return cloneFacultyProgress(value), exists
-}
-
-func (store *facultyProgressStore) Save(roleID role.RoleID, value facultyProgressSnapshot) error {
-	if store == nil {
-		return nil
-	}
-	if roleID == 0 {
-		return errors.New("faculty store: zero role id")
-	}
-	store.mu.Lock()
-	defer store.mu.Unlock()
-	key := strconv.FormatUint(uint64(roleID), 10)
-	previous, existed := store.roles[key]
-	store.roles[key] = cloneFacultyProgress(value)
-	if err := store.persistLocked(); err != nil {
-		if existed {
-			store.roles[key] = previous
-		} else {
-			delete(store.roles, key)
-		}
+func (snapshot *facultyProgressSnapshot) UnmarshalJSON(data []byte) error {
+	type snapshotFields facultyProgressSnapshot
+	var fields snapshotFields
+	if err := json.Unmarshal(data, &fields); err != nil {
 		return err
 	}
+	*snapshot = facultyProgressSnapshot(fields)
+	var all map[string]json.RawMessage
+	if err := json.Unmarshal(data, &all); err != nil {
+		return err
+	}
+	for key, value := range all {
+		if facultySnapshotJSONKeys[key] {
+			continue
+		}
+		if snapshot.extras == nil {
+			snapshot.extras = make(map[string]json.RawMessage)
+		}
+		snapshot.extras[key] = value
+	}
 	return nil
 }
 
-func (store *facultyProgressStore) persistLocked() error {
-	document := facultyStoreFile{Version: facultyStoreVersion, Roles: store.roles}
-	data, err := json.MarshalIndent(document, "", "  ")
+func (snapshot facultyProgressSnapshot) MarshalJSON() ([]byte, error) {
+	type snapshotFields facultyProgressSnapshot
+	base, err := json.Marshal(snapshotFields(snapshot))
 	if err != nil {
-		return fmt.Errorf("encode faculty store: %w", err)
+		return nil, err
 	}
-	data = append(data, '\n')
-	directory := filepath.Dir(store.path)
-	if err := os.MkdirAll(directory, 0o755); err != nil {
-		return fmt.Errorf("create faculty store directory: %w", err)
+	if len(snapshot.extras) == 0 {
+		return base, nil
 	}
-	temporary, err := os.CreateTemp(directory, ".faculty-*.tmp")
-	if err != nil {
-		return fmt.Errorf("create faculty store temporary: %w", err)
+	var merged map[string]json.RawMessage
+	if err := json.Unmarshal(base, &merged); err != nil {
+		return nil, err
 	}
-	temporaryPath := temporary.Name()
-	committed := false
-	defer func() {
-		_ = temporary.Close()
-		if !committed {
-			_ = os.Remove(temporaryPath)
+	for key, value := range snapshot.extras {
+		merged[key] = value
+	}
+	keys := make([]string, 0, len(merged))
+	for key := range merged {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	var out bytes.Buffer
+	out.WriteByte('{')
+	for index, key := range keys {
+		if index > 0 {
+			out.WriteByte(',')
 		}
-	}()
-	if err := temporary.Chmod(0o600); err != nil {
-		return fmt.Errorf("set faculty store temporary permissions: %w", err)
+		keyJSON, err := json.Marshal(key)
+		if err != nil {
+			return nil, err
+		}
+		out.Write(keyJSON)
+		out.WriteByte(':')
+		out.Write(merged[key])
 	}
-	if _, err := temporary.Write(data); err != nil {
-		return fmt.Errorf("write faculty store temporary: %w", err)
-	}
-	if err := temporary.Sync(); err != nil {
-		return fmt.Errorf("sync faculty store temporary: %w", err)
-	}
-	if err := temporary.Close(); err != nil {
-		return fmt.Errorf("close faculty store temporary: %w", err)
-	}
-	if err := os.Rename(temporaryPath, store.path); err != nil {
-		return fmt.Errorf("replace faculty store: %w", err)
-	}
-	committed = true
-	return nil
+	out.WriteByte('}')
+	return out.Bytes(), nil
 }
 
 func cloneFacultyProgress(value facultyProgressSnapshot) facultyProgressSnapshot {
 	value.Books = append([]facultyBookSnapshot(nil), value.Books...)
+	for index, book := range value.Books {
+		if source := book.extras; source != nil {
+			book.extras = make(map[string]json.RawMessage, len(source))
+			for key, raw := range source {
+				book.extras[key] = raw
+			}
+		}
+		value.Books[index] = book
+	}
+	if source := value.extras; source != nil {
+		value.extras = make(map[string]json.RawMessage, len(source))
+		for key, raw := range source {
+			value.extras[key] = raw
+		}
+	}
 	return value
 }

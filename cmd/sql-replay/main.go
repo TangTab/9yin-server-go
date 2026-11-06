@@ -28,7 +28,8 @@ func main() {
 	dir := flag.String("dir", "migrations", "磁盘上的 migrations 目录")
 	embedded := flag.Bool("embedded", false, "改用编译时嵌入的迁移集合（忽略 -dir）")
 	list := flag.Bool("list", false, "列出迁移版本、文件名与校验和，不连接数据库")
-	status := flag.Bool("status", false, "对照 schema_migrations 台账显示已应用/待应用，只读不修改")
+	status := flag.Bool("status", false, "对照台账显示已应用/待应用，只读不修改")
+	force := flag.Bool("force", false, "无视台账全量重放（存档文件幂等；用于缺表补建、按存档恢复配置）")
 	timeout := flag.Duration("timeout", 2*time.Minute, "整体超时")
 	flag.Parse()
 
@@ -67,7 +68,7 @@ func main() {
 		log.Fatalf("sql-replay: ping: %v", err)
 	}
 
-	runner := migrations.Runner{DB: db, Migrations: all}
+	runner := migrations.Runner{DB: db, Migrations: all, Force: *force}
 	fmt.Printf("sql-replay: target %s@%s/%s (DSN from %s)\n", config.User, config.Addr, config.DBName, dsnSource)
 	states, err := runner.Status(ctx, all)
 	if err != nil {

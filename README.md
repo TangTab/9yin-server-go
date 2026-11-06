@@ -9,7 +9,7 @@
 
 - 区服列表：`127.0.0.1:4000`
 - 游戏服务：`127.0.0.1:19061`
-- GM 页面：`http://127.0.0.1:19062/`
+- GM 页面：`http://127.0.0.1:19062/`（概览）→ `http://127.0.0.1:19062/console.html`（控制台）
 
 账号：test001
 密码：test001
@@ -36,12 +36,21 @@ go build -trimpath -o .\build\9yin-game-server.exe ./cmd/protocol-probe
 
 ## 数据库迁移重放
 
-`cmd/sql-replay` 按版本序重放 `migrations/*.sql`（幂等：`schema_migrations`
-台账中已应用且校验和一致的版本自动跳过，改动已应用版本会拒绝执行）：
+`cmd/sql-replay` 按版本序重放 `migrations/` 下的迁移（文件约定见
+`migrations/README.md`，沿用 Java 服务端权威存档）：
+
+- `NNNN_*.sql.gz` — tar+gzip 单成员存档（mysqldump 风格多语句，文件自身
+  幂等），校验和取内部 SQL 文本
+- `NNNN_*.sql` — 本仓库手写增量，语句以 `-- migrate:statement` 分隔
+
+台账记在独立的 `sql_replay_ledger` 表（`schema_migrations` 是随 0002
+配置数据 `REPLACE INTO` 的普通表，不承载版本判定）；已应用且校验和一致
+的版本自动跳过，改动已应用版本会拒绝执行。
 
 ```powershell
 go run ./cmd/sql-replay -status   # 对照台账查看已应用/待应用（只读）
 go run ./cmd/sql-replay           # 重放待应用版本
+go run ./cmd/sql-replay -force    # 无视台账全量重放（缺表补建、按存档恢复配置）
 go run ./cmd/sql-replay -list     # 不连库，列出文件与校验和
 ```
 

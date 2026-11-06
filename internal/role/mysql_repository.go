@@ -102,6 +102,9 @@ func NewMySQLRepository(db *sql.DB, config MySQLConfig) *MySQLRepository {
 
 func (repository *MySQLRepository) Close() error { return repository.db.Close() }
 
+// DB 暴露底层连接池，供 faculty 等同库存储共用（只读用途由调用方自律）。
+func (repository *MySQLRepository) DB() *sql.DB { return repository.db }
+
 func (repository *MySQLRepository) FindByKey(ctx context.Context, key AccountKey) (Account, error) {
 	if err := ValidateAccountKey(key); err != nil {
 		return Account{}, err

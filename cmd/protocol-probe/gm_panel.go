@@ -181,9 +181,10 @@ func serveGM(listen string, hub *gmHub) {
 // 测试可以直接把路由挂到 httptest 上验证，而不必真的监听端口。
 func newGMMux(hub *gmHub) *http.ServeMux {
 	mux := http.NewServeMux()
-	// gm.css / gm.js 等静态资源来自编译期嵌入的 web 目录，
-	// 页面可以像普通网站一样引用外部文件，同时保持单二进制分发。
-	static, err := fs.Sub(gmWebAssets, "web")
+	// console.css / console-*.js 等静态资源来自编译期嵌入的
+	// web/static 目录，页面可以像普通网站一样引用外部文件，
+	// 同时保持单二进制分发。
+	static, err := fs.Sub(gmWebAssets, "web/static")
 	if err != nil {
 		log.Fatalf("GM static assets unavailable: %v", err)
 	}
@@ -338,11 +339,15 @@ func writeGMError(writer http.ResponseWriter, status int, message string) {
 }
 
 func gmIndex(writer http.ResponseWriter, request *http.Request) {
-	if request.URL.Path != "/" {
+	page, known := map[string]string{
+		"/":             "web/index.html",
+		"/console.html": "web/console.html",
+	}[request.URL.Path]
+	if !known {
 		writer.WriteHeader(http.StatusNotFound)
 		return
 	}
-	index, err := gmWebAssets.ReadFile("web/index.html")
+	index, err := gmWebAssets.ReadFile(page)
 	if err != nil {
 		http.Error(writer, "GM panel index missing", http.StatusInternalServerError)
 		return
@@ -352,7 +357,7 @@ func gmIndex(writer http.ResponseWriter, request *http.Request) {
 }
 
 // gmWebAssets 编译期嵌入 GM 面板的全部网页文件（web/index.html、
-// gm.css、gm.js），运行期不依赖磁盘上的任何前端资源。
+// web/console.html 与 static/ 样式脚本），运行期不依赖磁盘上的任何前端资源。
 //
 //go:embed web
 var gmWebAssets embed.FS

@@ -1,20 +1,255 @@
-<!doctype html><meta charset="utf-8"><title>九阴本地 GM</title>
-<link rel="stylesheet" href="/static/gm.css">
-<h1>九阴本地 GM</h1><p class="muted">仅监听 127.0.0.1。每次点击会交给游戏主循环直接写入一帧；会话忙碌时会报失败，不会排队保留。</p>
-<section><h2>在线角色</h2><pre id="state">读取中…</pre><button onclick="refresh()">刷新</button></section>
-<section><h2>碎银</h2><input id="silver" type="number" value="99999" min="0"><button onclick="silver()">设置碎银</button></section>
-<section><h2>怒气</h2><p class="muted">服务端权威 <code>SP</code>（0–100）。技能消耗已读取同一数值；战斗获得规则后续也会走同一入口。</p><input id="sp" type="number" value="100" min="0" max="100"><button onclick="setSP()">设置怒气</button><button onclick="addSP(10)">+10</button><button onclick="addSP(50)">+50</button><button onclick="fillSP()">回满</button></section>
-<section><h2>移动与下落</h2><p class="muted">移动速度同时更新 MoveSpeed 与 RunSpeed；下落速度更新 Gravity，数值越大下落越快，下一次起跳生效。</p><label>移动速度 <input id="move-speed" type="number" value="25" min="0.1" max="100" step="0.5"></label><button onclick="setMoveSpeed()">应用移动速度</button><br><label>下落重力 <input id="gravity" type="number" value="9.8" min="0.1" max="100" step="0.1"></label><button onclick="setGravity()">应用下落速度</button></section>
-<section><h2>主城传送</h2><p class="muted">使用安装资源的场景名和原始门点坐标；按钮走受限预设，避免手输时误切到没有资源的地图。</p><button onclick="preset('yanjing')">燕京</button><button onclick="preset('suzhou')">苏州</button><button onclick="preset('jinling')">金陵</button><button onclick="preset('luoyang')">洛阳</button><button onclick="preset('chengdu')">成都</button><br><button onclick="preset('jimingyi')">鸡鸣驿</button><button onclick="preset('yanyuzhuang')">烟雨庄</button><button onclick="preset('qiandengzhen')">千灯镇</button></section>
-<section><h2>八大门派传送</h2><button onclick="preset('jinyiwei')">锦衣卫</button><button onclick="preset('gaibang')">丐帮</button><button onclick="preset('junzitang')">君子堂</button><button onclick="preset('jilegu')">极乐谷</button><br><button onclick="preset('tangmen')">唐门</button><button onclick="preset('emei')">峨眉</button><button onclick="preset('wudang')">武当</button><button onclick="preset('shaolin')">少林</button></section>
-<section><h2>江湖势力传送</h2><p class="muted">使用各势力在当前资源中的 Safe HomePoint；徐家庄、金针沈家在成都，万兽山庄在丐帮地图，天轮寺和青衣阁为独立场景。</p><button onclick="preset('yihuagong')">移花宫</button><button onclick="preset('taohuadao')">桃花岛</button><button onclick="preset('wugenmen')">无根门</button><br><button onclick="preset('xujia')">徐家庄</button><button onclick="preset('jinzhen')">金针沈家</button><button onclick="preset('wanshou')">万兽山庄</button><button onclick="preset('tianlun')">天轮寺</button><button onclick="preset('qingyi')">青衣阁</button></section>
-<section><h2>隐世宗门传送</h2><p class="muted">全部使用各宗门在安装资源中标记为 Safe=1 的默认出生点；长风镖局在金陵，血刀门在恶人谷，其余为对应宗门地图。</p><button onclick="preset('xuedao')">血刀门</button><button onclick="preset('huashan')">华山派</button><button onclick="preset('gumu')">古墓派</button><button onclick="preset('damo')">达摩派</button><button onclick="preset('shenshui')">神水宫</button><br><button onclick="preset('changfeng')">长风镖局</button><button onclick="preset('nianluo')">念萝坝</button><button onclick="preset('wuxian')">无仙教</button><button onclick="preset('shenji')">神机营</button><button onclick="preset('xingmiao')">星渺阁</button><br><button onclick="preset('tianya')">天涯海阁</button><button onclick="preset('wanghui')">王回洲</button><button onclick="preset('shenjihui')">神机汇</button><button onclick="preset('wuxu')">无虚门</button></section>
-<section><h2>选择门派 / 宗门 / 势力</h2><p class="muted">修改角色原生 <code>School</code> 属性并持久化；不自动赠送对应套路或任务线。</p><select id="faction"><optgroup label="八大门派"><option value="shaolin">少林</option><option value="wudang">武当</option><option value="emei">峨眉</option><option value="gaibang">丐帮</option><option value="tangmen">唐门</option><option value="junzitang">君子堂</option><option value="jinyiwei">锦衣卫</option><option value="jilegu">极乐谷</option></optgroup><optgroup label="江湖势力"><option value="yihuagong">移花宫</option><option value="taohuadao">桃花岛</option><option value="wugenmen">无根门</option><option value="xujia">徐家庄</option><option value="wanshou">万兽山庄</option><option value="jinzhen">金针沈家</option><option value="tianlun">天轮寺</option><option value="qingyi">青衣阁</option></optgroup><optgroup label="宗门"><option value="xuedao">血刀门</option><option value="huashan">华山派</option><option value="gumu">古墓派</option><option value="damo">达摩派</option><option value="shenshui">神水宫</option><option value="changfeng">长风镖局</option><option value="nianluo">念萝坝</option><option value="wuxian">无仙教</option><option value="shenji">神机营</option><option value="xingmiao">星渺阁</option><option value="tianya">天涯海阁</option><option value="wanghui">王回洲</option><option value="shenjihui">神机汇</option></optgroup></select><button onclick="setFaction()">应用门派</button></section>
-<section><h2>自定义切图</h2><input id="destination" value="ini\scene\city04_LuoYang,city04,243.387,43.277,403.821,5.024"><button onclick="scene(document.querySelector('#destination').value)">按自定义坐标切换</button></section>
-<section><h2>场景内瞬移</h2><p class="muted">只发送 ServerLocation（0x1F），不退场、不读图；格式为 X,Y,Z,朝向。先“填入当前坐标”，再只改目标位置。</p><input id="teleport" placeholder="X,Y,Z,朝向"><button onclick="useCurrentPosition()">填入当前坐标</button><button onclick="teleportPlayer()">瞬移到坐标</button></section>
-<section><h2>状态 / Buff</h2><p class="muted">红霸体：服务端写入玩家 <code>BufferInfo1</code> 原生 BuffStore 槽；20 秒后移除。</p><button onclick="story('red_super_armor')">施加红霸体（20 秒）</button></section>
-<section><h2>人物动作通道测试</h2><p class="muted"><code>State</code> 已验证可以播放有限时长的身体动作。神鬼莫敌·无缺使用单段 <code>hsqs_07</code>（147 帧）；第五招使用 <code>hsqs_05_h</code> 起手并在 0.24 秒后衔接主段。</p><button onclick="story('action_state_sgmd')">播放神鬼莫敌动作</button><button onclick="story('action_state_hsqs05')">播放第五招起手</button><button onclick="story('action_state_fishing')">钓鱼持续姿势对照</button><button onclick="story('action_native_fishing')">字符串 action 对照</button><button onclick="story('action_state_stop')">恢复待机</button></section>
-<section><h2>剧情通道验证</h2><p class="muted">仅验证现代客户端原生显示链：气泡对白会显示在当前场景首个 NPC 头顶；章节提示卡使用已安装的 ui_shop 文本 ID，不会写入任务进度。</p><button onclick="story('npc_bubble')">测试 NPC 气泡</button><button onclick="story('drama_prompt')">测试章节提示卡</button></section>
-<section><h2>Lua 调试</h2><p class="muted">在服务端沙盒内执行 Lua 5.5 代码（无 io/os，500ms 超时）；最后一个表达式的返回值显示在状态区。重载会重新读取 scripts/ 目录下的全部脚本。</p><textarea id="lua-code" rows="4" spellcheck="false">return 1 + 2</textarea><br><button onclick="luaEval()">执行 Lua</button><button onclick="luaReload()">重载脚本目录</button></section>
-<section><h2>任务快照</h2><p class="muted">从客户端资源重建 data\tasks.json（任务文本 + NPC 绑定）；新目录在服务端重启后生效，运行中的场景继续使用旧目录。</p><button onclick="taskRebuild()">重建任务快照</button></section>
-<script src="/static/gm.js"></script>
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>九阴 GM · 服务器概览</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #1a1d23;
+      --card2: #20242c;
+      --line: #2a2f3a;
+      --accent: #e8b34b;
+      --accent2: #4ba3e8;
+      --text: #e6e9ef;
+      --muted: #8b93a3;
+      --ok: #3fbf6f;
+      --bad: #6a7283;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 14px/1.6 "Segoe UI", system-ui, "Microsoft YaHei", sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      background: linear-gradient(90deg, #14171d, #1c2027);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+      color: var(--accent);
+    }
+
+    header .muted {
+      font-size: 12px;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 24px auto;
+      padding: 0 20px;
+    }
+
+    .srv {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .srv.offline {
+      opacity: 0.62;
+    }
+
+    .srv-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bad);
+      flex: none;
+    }
+
+    .dot.on {
+      background: var(--ok);
+      box-shadow: 0 0 6px var(--ok);
+    }
+
+    .srv-name {
+      font-weight: 600;
+      font-size: 15px;
+      flex: 1;
+    }
+
+    .srv-addr {
+      color: var(--accent2);
+      font-size: 12px;
+      font-family: Consolas, monospace;
+    }
+
+    .srv-stats {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 8px 0 12px;
+      min-height: 20px;
+    }
+
+    .srv-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      background: var(--card2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #17130a;
+      font-weight: 600;
+    }
+
+    button:hover {
+      filter: brightness(1.15);
+    }
+
+    .players {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .players li {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .players li:last-child {
+      border-bottom: none;
+    }
+
+    .players .p-name {
+      color: var(--accent);
+      font-weight: 600;
+      min-width: 90px;
+    }
+
+    .players .p-scene {
+      color: var(--accent2);
+      min-width: 150px;
+    }
+
+    .players .p-action {
+      color: var(--muted);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>九阴 GM · 服务器概览</h1>
+    <span class="muted">当前游戏服（本机 GM 面板），实时轮询在线会话</span>
+  </header>
+  <main>
+    <div class="srv" id="srv-card">
+      <div class="srv-head">
+        <span class="dot" id="srv-dot"></span>
+        <span class="srv-name">九阴当前服</span>
+        <span class="srv-addr" id="srv-addr">127.0.0.1:19062</span>
+      </div>
+      <div class="srv-stats" id="srv-stats">连接中……</div>
+      <ul class="players" id="srv-players"></ul>
+      <div class="srv-actions">
+        <button class="primary" onclick="location.href='console.html'">进入控制台</button>
+        <button onclick="refresh()">刷新</button>
+      </div>
+    </div>
+    <p class="hint">
+      GM 面板由游戏服进程自带（-gm-listen，默认 127.0.0.1:19062，仅监听本机）；
+      命令直接交给在线游戏会话执行，会话忙碌时会报失败，不会排队保留。
+    </p>
+  </main>
+  <script>
+    const POLL_MS = 3000;
+    let sessions = [];
+
+    document.querySelector("#srv-addr").textContent = location.host || "127.0.0.1:19062";
+
+    async function refresh() {
+      let dot = document.querySelector("#srv-dot");
+      let stats = document.querySelector("#srv-stats");
+      let players = document.querySelector("#srv-players");
+      let card = document.querySelector("#srv-card");
+      try {
+        let r = await fetch("/api/sessions");
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        sessions = await r.json();
+        if (!Array.isArray(sessions)) sessions = [];
+      } catch (e) {
+        sessions = [];
+        dot.classList.remove("on");
+        card.classList.add("offline");
+        stats.textContent = "面板无法访问 /api/sessions（游戏服是否在运行？）";
+        players.innerHTML = "";
+        return;
+      }
+      dot.classList.add("on");
+      card.classList.remove("offline");
+      stats.textContent =
+        "面板在线 · " + sessions.length + " 个在线角色" +
+        (sessions.length ? " · 点击「进入控制台」发送 GM 命令" : " —— 先登录游戏");
+      players.innerHTML = "";
+      for (let s of sessions) {
+        let li = document.createElement("li");
+        let scene = s.scene && (s.scene.name || s.scene.config);
+        li.innerHTML =
+          '<span class="p-name"></span>' +
+          '<span class="p-scene"></span>' +
+          '<span class="p-action"></span>';
+        li.querySelector(".p-name").textContent = s.name || "-";
+        li.querySelector(".p-scene").textContent = scene || "-";
+        li.querySelector(".p-action").textContent =
+          "碎银 " + (s.silver != null ? s.silver : "-") +
+          " · 怒气 " + (s.sp != null ? s.sp : "-") +
+          " · " + (s.lastAction || "-");
+        players.appendChild(li);
+      }
+    }
+
+    refresh();
+    setInterval(refresh, POLL_MS);
+  </script>
+</body>
+
+</html>
