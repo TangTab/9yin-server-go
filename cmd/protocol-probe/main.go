@@ -540,6 +540,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			innerPowerPassiveExpired := player.expireInnerPowerPassive(now)
 			sitcrossAdvanced := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
+			combatRageAdvanced := player.combatRageTick()
 			combatAdvanced := false
 			if runtime != nil {
 				combat, combatErr := world.combatTick(player, runtime.activeRole.Location.Position, now)
@@ -560,7 +561,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					tickErr = link.WriteFrame(frame)
 				}
 			}
-			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatAdvanced || innerPowerPassiveExpired) {
+			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired) {
 				var state []byte
 				state, tickErr = player.vitalUpdate()
 				if tickErr == nil {
@@ -582,6 +583,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			if combatBruiseAdvanced {
 				state := player.actor.Snapshot()
 				log.Printf("%s: settled combat bruised blood HP=%d HitHP=%d", conn.RemoteAddr(), state.HP, state.HitHP)
+			}
+			if combatRageAdvanced {
+				log.Printf("%s: settled combat rage SP=%d/%d", conn.RemoteAddr(), player.skillSP(), maxPlayerSP)
 			}
 			continue
 		case received := <-inbound:

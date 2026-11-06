@@ -103,6 +103,10 @@ const (
 	// Combat recovery never restores real HP.  It only reduces the native
 	// HitHP-HP bruised-blood layer once per authoritative server second.
 	combatBruiseRecoveryPerSecond int32 = 10
+
+	// Combat rage recovery: a fighting actor regains five SP per authoritative
+	// server second until the 100 cap, mirroring the retail in-combat trickle.
+	combatRageRecoveryPerSecond int32 = 5
 )
 
 var nativeBuffSlots = func() []uint16 {
@@ -925,6 +929,22 @@ func sitcrossRecoveryPerSecond(maximum int32) int32 {
 // HitHPRatio, so this uses the proven normal 0x10 property route.
 func (p *playerActor) combatBruiseTick() bool {
 	return p.actor.RecoverBruisedHPWhileFighting(combatBruiseRecoveryPerSecond)
+}
+
+// combatRageTick settles the fixed +5/second rage recovery while the actor
+// remains in combat. Any fighting transition — skill use or retained NPC
+// threat — keeps the actor eligible; sitting and death never are. The
+// ordinary vital update already contains SP, so this uses the same proven
+// normal 0x10 property route as the other tick layers.
+func (p *playerActor) combatRageTick() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.actor.Snapshot().LogicState != entity.LogicStateFighting {
+		return false
+	}
+	before := p.progress.attributes.sp
+	p.progress.attributes.sp = clampPlayerSP(before + combatRageRecoveryPerSecond)
+	return p.progress.attributes.sp != before
 }
 
 // setCombatPresence owns the player-side lifecycle for the local hostile AI.
