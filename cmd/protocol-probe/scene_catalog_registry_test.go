@@ -77,7 +77,7 @@ func TestNormalizeClientSceneUsesInstalledYanmenPassResource(t *testing.T) {
 }
 
 func TestCurrentCitySceneRegistryMaterializesModernCreatorCatalog(t *testing.T) {
-	if _, err := os.Stat(defaultNPCTableDir); err != nil {
+	if _, err := statResourcePath(defaultNPCTableDir); err != nil {
 		t.Skipf("modern client data unavailable: %v", err)
 	}
 	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"))
@@ -94,7 +94,7 @@ func TestCurrentCitySceneRegistryMaterializesModernCreatorCatalog(t *testing.T) 
 }
 
 func TestShenJiHuiCatalogSkipsMissingOptionalCreators(t *testing.T) {
-	if _, err := os.Stat(defaultNPCTableDir); err != nil {
+	if _, err := statResourcePath(defaultNPCTableDir); err != nil {
 		t.Skipf("modern client data unavailable: %v", err)
 	}
 	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"))
@@ -111,7 +111,7 @@ func TestShenJiHuiCatalogSkipsMissingOptionalCreators(t *testing.T) {
 }
 
 func TestYanYuZhuangCatalogSkipsEmptyZeroAmountCreatorPlaceholder(t *testing.T) {
-	if _, err := os.Stat(defaultNPCTableDir); err != nil {
+	if _, err := statResourcePath(defaultNPCTableDir); err != nil {
 		t.Skipf("modern client data unavailable: %v", err)
 	}
 	registry, err := newSceneNPCRegistry(defaultNPCTableDir, filepath.Join(defaultModernShareRoot, "creator", "npc_creator"))

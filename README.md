@@ -16,11 +16,11 @@
 
 ## 编译
 
-双击 `编译服务端.bat`，或在本目录运行：
+双击 `build.bat`，或在本目录运行：
 
 ```powershell
 go test ./...
-go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
+go build -trimpath -o .\build\9yin-game-server.exe ./cmd/protocol-probe
 ```
 
 编译产物写入 `build`，不会自动覆盖根目录中正在测试的服务端 EXE。
@@ -33,6 +33,20 @@ go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
 - `scripts`：服务端 Lua 脚本（见下节）
 - `docs`：研究笔记与协议知识库（原 `spec/` 现为 `docs/spec/`，文本抽取数据在 `docs/text-extract/`）
 - `testdata`：测试所需的最小协议夹具
+
+## 数据库迁移重放
+
+`cmd/sql-replay` 按版本序重放 `migrations/*.sql`（幂等：`schema_migrations`
+台账中已应用且校验和一致的版本自动跳过，改动已应用版本会拒绝执行）：
+
+```powershell
+go run ./cmd/sql-replay -status   # 对照台账查看已应用/待应用（只读）
+go run ./cmd/sql-replay           # 重放待应用版本
+go run ./cmd/sql-replay -list     # 不连库，列出文件与校验和
+```
+
+DSN 依次取 `-dsn` 参数、`NINEYIN_MYSQL_DSN` 环境变量、`env.server`。
+`-embedded` 可改用编译时嵌入的副本（默认读磁盘上的 `migrations/`）。
 
 ## Lua 脚本
 

@@ -15,5 +15,4 @@
 *.dmp
 *.7z
 
-resources
-res-*
+env.server

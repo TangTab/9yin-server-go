@@ -22,7 +22,7 @@ if errorlevel 1 (
 )
 
 echo Building server...
-go build -trimpath -o "%~dp0build\9yin-game-native-menu.exe" ./cmd/protocol-probe
+go build -trimpath -o "%~dp0build\9yin-game-server.exe" ./cmd/protocol-probe
 if errorlevel 1 (
   echo ERROR: build failed.
   pause
@@ -31,5 +31,5 @@ if errorlevel 1 (
 
 echo.
 echo Build completed:
-echo %~dp0build\9yin-game-native-menu.exe
+echo %~dp0build\9yin-game-server.exe
 pause

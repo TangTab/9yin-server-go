@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //go:embed *.sql
@@ -31,8 +32,15 @@ type Migration struct {
 	SQL      []string
 }
 
+// Embedded 返回编译时嵌入的迁移集合。
 func Embedded() ([]Migration, error) {
-	entries, err := fs.Glob(files, "*.sql")
+	return Load(files)
+}
+
+// Load 从任意文件系统解析迁移集合（文件名形如 NNNN_name.sql，
+// 语句以 “-- migrate:statement” 分隔），按版本升序返回。
+func Load(fsys fs.FS) ([]Migration, error) {
+	entries, err := fs.Glob(fsys, "*.sql")
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +55,7 @@ func Embedded() ([]Migration, error) {
 		if err != nil {
 			return nil, fmt.Errorf("migration: invalid version in %q: %w", base, err)
 		}
-		data, err := files.ReadFile(name)
+		data, err := fs.ReadFile(fsys, name)
 		if err != nil {
 			return nil, err
 		}
@@ -90,10 +98,20 @@ type Runner struct {
 	DB       *sql.DB
 	LockName string
 	Timeout  int
+	// Migrations 为待应用集合；nil 表示使用编译时嵌入的 Embedded()。
+	Migrations []Migration
+}
+
+// source 返回待应用的迁移集合。
+func (runner Runner) source() ([]Migration, error) {
+	if runner.Migrations != nil {
+		return runner.Migrations, nil
+	}
+	return Embedded()
 }
 
 func (runner Runner) Up(ctx context.Context) error {
-	migrations, err := Embedded()
+	migrations, err := runner.source()
 	if err != nil {
 		return err
 	}
@@ -173,6 +191,80 @@ func loadApplied(ctx context.Context, conn *sql.Conn) (map[uint64][32]byte, erro
 		var checksum [32]byte
 		copy(checksum[:], raw)
 		result[version] = checksum
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("migration: read ledger: %w", err)
+	}
+	return result, nil
+}
+
+// MigrationStatus 是 Status 对照台账得出的单条迁移状态。
+type MigrationStatus struct {
+	Version    uint64
+	Name       string
+	Checksum   [32]byte
+	Applied    bool
+	ChecksumOK bool
+	// AppliedAt 为台账记录的应用时刻（未应用时为零值）。
+	AppliedAt time.Time
+}
+
+type ledgerEntry struct {
+	checksum  [32]byte
+	appliedAt time.Time
+}
+
+// Status 对照 schema_migrations 台账列出迁移状态；只读、不加锁、不修改。
+// 台账表尚不存在时，所有迁移均报告为未应用。
+func (runner Runner) Status(ctx context.Context, list []Migration) ([]MigrationStatus, error) {
+	ledger, err := readLedger(ctx, runner.DB)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]MigrationStatus, 0, len(list))
+	for _, migration := range list {
+		status := MigrationStatus{Version: migration.Version, Name: migration.Name, Checksum: migration.Checksum}
+		if entry, exists := ledger[migration.Version]; exists {
+			status.Applied = true
+			status.ChecksumOK = entry.checksum == migration.Checksum
+			status.AppliedAt = entry.appliedAt
+		}
+		result = append(result, status)
+	}
+	return result, nil
+}
+
+// readLedger 读取台账（表不存在时返回空映射）。UNIX_TIMESTAMP 取 epoch，
+// 避免依赖 DSN 的 parseTime 参数。
+func readLedger(ctx context.Context, db *sql.DB) (map[uint64]ledgerEntry, error) {
+	var exists int
+	if err := db.QueryRowContext(ctx, `
+SELECT COUNT(*) FROM information_schema.tables
+WHERE table_schema = DATABASE() AND table_name = 'schema_migrations'`).Scan(&exists); err != nil {
+		return nil, fmt.Errorf("migration: probe ledger: %w", err)
+	}
+	if exists == 0 {
+		return map[uint64]ledgerEntry{}, nil
+	}
+	rows, err := db.QueryContext(ctx, `SELECT version, checksum, CAST(UNIX_TIMESTAMP(applied_at) AS SIGNED) FROM schema_migrations ORDER BY version`)
+	if err != nil {
+		return nil, fmt.Errorf("migration: read ledger: %w", err)
+	}
+	defer rows.Close()
+	result := make(map[uint64]ledgerEntry)
+	for rows.Next() {
+		var version uint64
+		var raw []byte
+		var seconds sql.NullInt64
+		if err := rows.Scan(&version, &raw, &seconds); err != nil {
+			return nil, fmt.Errorf("migration: scan ledger: %w", err)
+		}
+		if len(raw) != sha256.Size {
+			return nil, fmt.Errorf("migration: invalid checksum length for version %d", version)
+		}
+		entry := ledgerEntry{appliedAt: time.Unix(seconds.Int64, 0)}
+		copy(entry.checksum[:], raw)
+		result[version] = entry
 	}
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("migration: read ledger: %w", err)

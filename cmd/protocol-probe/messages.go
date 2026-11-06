@@ -42,7 +42,12 @@ func createRoleName(msg []byte) string {
 	return string(utf16.Decode(units))
 }
 
-func oneRoleLoginSuccess(now time.Time, name string, appearance []string) []byte {
+// oneRoleLoginSuccess 选角列表 0x04 帧。f23/f24/f25 为选人界面的
+// 实力称号/所在场景/剧本标题（Java LoginMessages.oneRoleLoginSuccess 生产
+// 重载）：f23=roleListTitle 档位键、f24=sceneDisplayName 真实场景名、
+// f25=bookIntroKey 剧本标题键，客户端 form_roles.lua 分别按 desc_ 前缀、
+// 原键、原键查表本地化，查不到才回退显示原码。
+func oneRoleLoginSuccess(now time.Time, name string, appearance []string, sceneConfig, sceneResource string) []byte {
 	msg := noRoleLoginSuccess(now)
 	binary.LittleEndian.PutUint32(msg[0x25:], 1)
 	appendByte := func(v byte) { msg = append(msg, v) }
@@ -84,8 +89,10 @@ func oneRoleLoginSuccess(now time.Time, name string, appearance []string) []byte
 	fields[6] = "1"
 	fields[7] = visual.hair
 	fields[9], fields[10], fields[11] = visual.cloth, visual.pants, visual.shoes
-	fields[21], fields[22], fields[23], fields[24] = "stand", "127.0.0.1", "title001", "scene_name_017"
-	fields[25] = get(0, "book1")
+	fields[21], fields[22] = "stand", "127.0.0.1"
+	fields[23] = roleListTitle(roleListPowerLevel)
+	fields[24] = sceneDisplayName(sceneConfig, sceneResource)
+	fields[25] = bookIntroKey(get(0, "book1"))
 	fields[31] = "0"
 	fields[32] = get(0, "book1")
 	fields[33] = get(4, `obj\char\b_hair\b_hair1`)

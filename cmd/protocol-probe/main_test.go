@@ -741,7 +741,7 @@ func TestWorldInfo(t *testing.T) {
 }
 
 func TestCreatedRoleList(t *testing.T) {
-	msg := oneRoleLoginSuccess(time.Date(2026, 7, 11, 12, 0, 0, 0, time.Local), "本地角色", nil)
+	msg := oneRoleLoginSuccess(time.Date(2026, 7, 11, 12, 0, 0, 0, time.Local), "本地角色", nil, "", "")
 	if got := binary.LittleEndian.Uint32(msg[0x25:]); got != 1 {
 		t.Fatalf("role count=%d, want 1", got)
 	}

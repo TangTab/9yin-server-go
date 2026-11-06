@@ -731,7 +731,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			exists := selected != nil
 			payload := noRoleLoginSuccess(time.Now())
 			if exists {
-				payload = oneRoleLoginSuccess(time.Now(), selected.Name, selected.Appearance.Values)
+				payload = oneRoleLoginSuccess(time.Now(), selected.Name, selected.Appearance.Values,
+					selected.Location.Scene.Config, selected.Location.Scene.Resource)
 			}
 			if err := link.WriteFrame(payload); err != nil {
 				log.Printf("%s: write no-role login success: %v", conn.RemoteAddr(), err)
@@ -762,7 +763,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				log.Printf("%s: persist created role: %v", conn.RemoteAddr(), err)
 				return
 			}
-			if err := link.WriteFrame(oneRoleLoginSuccess(time.Now(), name, selected.Appearance.Values)); err != nil {
+			if err := link.WriteFrame(oneRoleLoginSuccess(time.Now(), name, selected.Appearance.Values,
+				selected.Location.Scene.Config, selected.Location.Scene.Resource)); err != nil {
 				log.Printf("%s: write created role list: %v", conn.RemoteAddr(), err)
 				return
 			}
