@@ -35,7 +35,6 @@ func main() {
 	npcTablePath := flag.String("npc-table", defaultNPCTablePath, "modern client NPC template table")
 	npcCreatorPath := flag.String("npc-creator", defaultNPCCreatorPath, "modern client scene NPC creator")
 	npcConfigID := flag.String("npc-config", "Relivecity05B", "NPC template ID to materialize")
-	npcPatrolCount := flag.Int("npc-patrol-count", 3, "nearby NPCs simulated by the low-rate server patrol loop (0 disables it)")
 	demoDamage := flag.Int("demo-damage", 0, "test-only damage applied once after the player reaches the active scene (0 disables it)")
 	starterSilver := flag.Int("starter-silver", 99999, "test-only starting CapitalType1 (碎银) for the active player")
 	gmListen := flag.String("gm-listen", "127.0.0.1:19062", "local GM HTTP listen address (empty disables)")
@@ -125,6 +124,12 @@ func main() {
 		}
 	} else {
 		staticNPCs, err = loadNPCSpawns(*npcTablePath, *npcCreatorPath, *npcConfigID, npcSchema)
+		if err == nil {
+			// 单目录回退模式同样绑定 mappath 巡逻（mappath 在 npc_creator
+			// 的兄弟目录，与注册表模式同一布局）。
+			creatorDir := filepath.Dir(*npcCreatorPath)
+			bindPatrolRoutes(staticNPCs, loadPatrolRoutes(filepath.Join(filepath.Dir(creatorDir), "mappath"), filepath.Base(creatorDir)), time.Now().UnixMilli())
+		}
 	}
 	if err != nil {
 		log.Fatalf("load modern NPC catalog: %v", err)
@@ -190,11 +195,11 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), *npcPatrolCount, int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost)
+		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost)
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, npcPatrolCount int, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host) {
 	config := transport.DefaultConnectionConfig()
 	config.MaxFrameSize = 64 << 10
 	link, err := transport.NewConnection(conn, config)
@@ -861,9 +866,6 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					}
 					log.Printf("%s: enabled native skill-action switch=%d via modern S2C 0x27 message=%d after re-entry", conn.RemoteAddr(), skillActionInputSwitch, serverSwitchControlMessage)
 				}
-				if npcPatrolCount > 0 {
-					world.startPatrol(npcPatrolCount)
-				}
 				runtime.awaitingStableReentryReady = false
 				log.Printf("%s: target scene confirmed by 0x09; activated deferred target NPCs", conn.RemoteAddr())
 				continue
@@ -983,9 +985,6 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				if err := world.clientActivity(); err != nil {
 					log.Printf("%s: activate ready scene objects: %v", conn.RemoteAddr(), err)
 					return
-				}
-				if npcPatrolCount > 0 {
-					world.startPatrol(npcPatrolCount)
 				}
 			}
 			if err := machine.Activity(); err != nil {
@@ -1341,6 +1340,11 @@ func handleActiveQingGongCustom(link sceneMessageConnection, player *playerActor
 type npcSpawn struct {
 	resolved        clientdata.ResolvedNPC
 	x, y, z, orient float32
+	// mappath 巡逻绑定结果（bindPatrolRoutes 在目录加载后写入）：
+	// schedule 非 nil 即在巡（spawn 坐标已被吸附改写到最近路点）。
+	route         *patrolRoute
+	routeStartIdx int
+	schedule      *patrolSchedule
 }
 
 func countNPCsWithin(catalog []npcSpawn, position role.Position, radius float32) int {

@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
@@ -83,6 +84,10 @@ func (r *sceneNPCRegistry) catalogFor(scene role.Scene) ([]npcSpawn, npcCatalogS
 	if err != nil {
 		return nil, stats, fmt.Errorf("load NPC catalog for scene %s (%s): %w", scene.Resource, folder, err)
 	}
+	// 官方 mappath 巡逻路线：PathId 绑定 + 就近吸附（目录缓存内一次完成，
+	// epoch 进缓存 → 场景运行时重建后 NPC 从时间表当前处续走）。
+	// mappath 表在 npc_creator 的兄弟目录（share/creator/mappath）。
+	bindPatrolRoutes(catalog, loadPatrolRoutes(filepath.Join(filepath.Dir(r.root), "mappath"), folder), time.Now().UnixMilli())
 	r.catalogs[folder] = catalog
 	r.stats[folder] = stats
 	return catalog, stats, nil

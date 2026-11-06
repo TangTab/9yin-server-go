@@ -66,16 +66,16 @@ type sceneLifecycle struct {
 
 // sceneEntity 是 NPC 的注册元数据组件：模板面（configID/scriptClass/
 // interaction/services/portal/funcs）、协议面（payload 物化字节、
-// properties）与低频空间态（patrolSign）。高频空间态在独立的
-// worldcore.Transform 组件中。作为 ECS 组件存于 s.combat，与
-// Vitals/Brain 同实体。
+// properties）与巡逻面（schedule，目录缓存内共享的绝对时间表；nil 即
+// 原地站立）。高频空间态在独立的 worldcore.Transform 组件中。作为
+// ECS 组件存于 s.combat，与 Vitals/Brain 同实体。
 type sceneEntity struct {
 	id          uint32
 	description string
 	payload     []byte
 	ownerID     uint32
 	properties  []clientdata.IndexedProperty
-	patrolSign  float32
+	schedule    *patrolSchedule
 	configID    string
 	scriptClass string
 	interaction npcInteraction
@@ -100,7 +100,7 @@ func (s *sceneLifecycle) npcMeta(id worldcore.EntityID) (sceneEntity, bool) {
 	return s.run.npcMeta(id)
 }
 
-// writeNpcMeta 写回注册元数据（含 patrolSign 翻转等低频变更）。
+// writeNpcMeta 写回注册元数据。
 // 调用方必须已持有 s.run.mu。
 func (s *sceneLifecycle) writeNpcMeta(id worldcore.EntityID, meta sceneEntity) {
 	s.run.writeNpcMeta(id, meta)
@@ -545,8 +545,12 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			return fmt.Errorf("missing transform for scene object %d", id)
 		}
 		// payload 在注册时已物化；防御性拷贝保持重进视口反复 Add 的
-		// 语义与原先的闭包完全一致。
+		// 语义与原先的闭包完全一致。巡逻 NPC 的 0x0D 落点重打为当前
+		// 权威 Transform（巡逻 tick 每秒插值），从时间表当前位置续走。
 		payload := append([]byte(nil), entity.payload...)
+		if entity.schedule != nil {
+			patchAddObjectTransform(payload, transform)
+		}
 		digest := sha256.Sum256(payload)
 		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
 			s.remote, id, entity.description, payload[0], len(payload), digest)
@@ -1205,18 +1209,6 @@ func npcFuncIDs(bindings []npcfunc.Binding) []int {
 		ids = append(ids, binding.FuncID)
 	}
 	return ids
-}
-
-// moveNPC 修改权威的世界变换，发出已验证的现代 0x20 目的地并用 0x1F
-// 确认到达。motion 尾部保持为零，直到其动画专属语义从现代客户端代码
-// 中得到验证；目的地和生命周期都不是猜测。
-// startPatrol 启动本场景的低频装饰性巡逻（按发起成员位置就近
-// 挑选）。巡逻定时器与移动帧扇出归场景运行时所有。
-func (s *sceneLifecycle) startPatrol(count int) {
-	s.mu.Lock()
-	center := s.center
-	s.mu.Unlock()
-	s.run.startPatrol(count, center)
 }
 
 // npcVisible 报告该 NPC 是否在本视图视口内（帧扇出过滤）。

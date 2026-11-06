@@ -34,7 +34,7 @@ type sceneRun struct {
 	epoch          uint64
 	timers         []*time.Timer
 	portalCooldown time.Time
-	patrolStarted  bool
+	patrolIDs      []uint32 // 在巡 NPC 的场景 ID（populate 按目录序即 ID 序追加）
 	closed         bool
 	ticking        bool
 	tickStop       chan struct{}
@@ -61,6 +61,9 @@ type sceneMember struct {
 	position role.Position
 	active   bool
 	visual   roleVisual
+	// patrolReadyAt：clientActivity 后的 0x1F 重放窗口（250ms..5s）内
+	// 不向该成员发巡逻 0x21，防重放帧把走动 NPC 拽回物化位置。
+	patrolReadyAt time.Time
 }
 
 type sceneKey struct {
@@ -237,6 +240,9 @@ func (r *sceneRun) activateMember(objectID uint32) {
 	defer r.mu.Unlock()
 	if member, exists := r.members[objectID]; exists {
 		member.active = true
+		// 巡逻首拍延迟：clientActivity 刚做完视口对账并排布 0x1F 重放
+		// （250ms..5s），5s 后才开始向该成员广播 0x21。
+		member.patrolReadyAt = time.Now().Add(patrolFirstBroadcastDelay)
 	}
 }
 
@@ -284,11 +290,12 @@ func (r *sceneRun) startTickLocked() {
 	}()
 }
 
-// tickOnce 是每秒一次的权威 NPC 模拟入口。战斗结算在 run.mu 内
-// 完成，帧写入在锁外进行（transport.WriteFrame 线程安全；跨写者
-// 的相对顺序不保证，这是本轮已接受的权衡）。
+// tickOnce 是每秒一次的权威 NPC 模拟入口：战斗结算与巡逻采样各为一段，
+// 均在 run.mu 内完成，帧写入在锁外进行（transport.WriteFrame 线程安全；
+// 跨写者的相对顺序不保证，这是本轮已接受的权衡）。
 func (r *sceneRun) tickOnce(now time.Time) {
 	r.combatTick(now)
+	r.patrolTick(now)
 }
 
 // ---- NPC 注册（自 sceneLifecycle.registerNPC 迁入）----
@@ -298,6 +305,12 @@ func (r *sceneRun) tickOnce(now time.Time) {
 func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 	if id == 0 || id == 1 {
 		return fmt.Errorf("NPC scene identity %d collides with reserved player identity", id)
+	}
+	if npc.schedule != nil && !patrolCombatScriptClass(npc.resolved.ScriptClass) {
+		// 巡逻 NPC 按共同时钟采样当前时刻位置：0x0D 载荷与初始
+		// Transform 即时间表当前位置（场景运行时重建后续走）。
+		position := npc.schedule.positionAt(time.Now().UnixMilli())
+		npc.x, npc.y, npc.z, npc.orient = position.x, position.y, position.z, position.orient
 	}
 	orderedProperties, err := npc.resolved.OrderedProperties(clientdata.VisibleNPCModernV1())
 	if err != nil {
@@ -348,6 +361,10 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 	}
 	if hasPortal {
 		meta.portal = &portal
+	}
+	meta.schedule = npc.schedule
+	if meta.schedule != nil {
+		r.patrolIDs = append(r.patrolIDs, id)
 	}
 	maxHP, maxMP := int32(1000), int32(100)
 	for _, property := range orderedProperties {
@@ -464,99 +481,7 @@ func (r *sceneRun) eachCombatNPCFullLocked(fn func(id worldcore.EntityID, vitals
 	}
 }
 
-// ---- 巡逻（自 sceneLifecycle 迁入，帧扇出 + run epoch）----
-
-// startPatrol 运行一组刻意很小且确定性的装饰性巡逻：按发起成员
-// 位置就近挑选非战斗 NPC。敌对角色的移动由战斗 tick 掌管。
-func (r *sceneRun) startPatrol(count int, center role.Position) {
-	if count <= 0 {
-		return
-	}
-	r.mu.Lock()
-	if r.closed || r.patrolStarted {
-		r.mu.Unlock()
-		return
-	}
-	r.patrolStarted = true
-	type candidate struct {
-		id        uint32
-		distance2 float32
-	}
-	candidates := make([]candidate, 0, 16)
-	r.eachNPCLocked(func(id worldcore.EntityID, meta *sceneEntity, transform *worldcore.Transform) {
-		if meta.interaction == npcInteractionCombat {
-			return
-		}
-		dx := transform.X - center.X
-		dz := transform.Z - center.Z
-		candidates = append(candidates, candidate{id: uint32(id), distance2: dx*dx + dz*dz})
-	})
-	sort.Slice(candidates, func(i, j int) bool { return candidates[i].distance2 < candidates[j].distance2 })
-	if count > len(candidates) {
-		count = len(candidates)
-	}
-	selected := make([]uint32, count)
-	for index := range selected {
-		selected[index] = candidates[index].id
-	}
-	r.mu.Unlock()
-	for index, id := range selected {
-		r.schedulePatrolStep(id, 3*time.Second+time.Duration(index)*700*time.Millisecond)
-	}
-	log.Printf("scene %s/%s: started low-rate patrol for %d NPCs", r.key.config, r.key.resource, len(selected))
-}
-
-func (r *sceneRun) schedulePatrolStep(id uint32, delay time.Duration) {
-	r.mu.Lock()
-	if r.closed {
-		r.mu.Unlock()
-		return
-	}
-	epoch := r.epoch
-	timer := time.AfterFunc(delay, func() {
-		r.patrolStepOnce(id, epoch)
-		r.schedulePatrolStep(id, 5*time.Second)
-	})
-	r.timers = append(r.timers, timer)
-	r.mu.Unlock()
-}
-
-// patrolStepOnce 执行一步巡逻：翻转 patrolSign、计算目的地并
-// 权威移动，帧在锁内直发扇出。
-func (r *sceneRun) patrolStepOnce(id uint32, epoch uint64) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if r.closed || r.epoch != epoch {
-		return
-	}
-	entityID := worldcore.EntityID(id)
-	meta, exists := r.npcMeta(entityID)
-	if !exists {
-		return
-	}
-	transform, transformOK := r.npcTransform(entityID)
-	if !transformOK {
-		return
-	}
-	if meta.patrolSign == 0 {
-		meta.patrolSign = 1
-	}
-	destination := transform
-	destination.X += meta.patrolSign * 1.5
-	meta.patrolSign = -meta.patrolSign
-	r.writeNpcMeta(entityID, meta)
-	if err := r.setNPCTransformLocked(entityID, destination); err != nil {
-		log.Printf("scene %s/%s: patrol move id=%d: %v", r.key.config, r.key.resource, id, err)
-		return
-	}
-	// 旧 moveNPC 在移动后做全量对账；共享场景下改为直发 0x20 并
-	// 抬升 revision，出/入视口的 Updates 由各成员自己的 reconcile
-	// 在下一次移动时结算（与战斗移动同一节奏）。
-	if err := r.broadcastNPCLocked(meta.id, serverMoving(meta.id, meta.ownerID, motionFromDest(destination))); err != nil {
-		log.Printf("scene %s/%s: patrol send id=%d: %v", r.key.config, r.key.resource, id, err)
-	}
-	r.scheduleMoveArrivalLocked(entityID, meta, destination, 1500*time.Millisecond, epoch)
-}
+// ---- 帧扇出 ----
 
 // broadcastNPCLocked 把单帧扇出给可见该 NPC 的成员。
 // 调用方必须已持有 r.mu。
@@ -570,26 +495,4 @@ func (r *sceneRun) broadcastNPCLocked(id uint32, frame []byte) error {
 		}
 	}
 	return nil
-}
-
-// scheduleMoveArrivalLocked 排布巡逻移动的到达确认（0x1F），
-// 与战斗移动共用 transform 取消令牌语义。
-// 调用方必须已持有 r.mu。
-func (r *sceneRun) scheduleMoveArrivalLocked(entityID worldcore.EntityID, meta sceneEntity, destination worldcore.Transform, delay time.Duration, epoch uint64) {
-	if delay <= 0 {
-		delay = 1500 * time.Millisecond
-	}
-	timer := time.AfterFunc(delay, func() {
-		r.mu.Lock()
-		defer r.mu.Unlock()
-		if r.closed || r.epoch != epoch {
-			return
-		}
-		transform, transformOK := r.npcTransform(entityID)
-		if !transformOK || !sameCombatTransform(transform, destination) {
-			return
-		}
-		_ = r.broadcastNPCLocked(meta.id, serverLocation(meta.id, meta.ownerID, transform))
-	})
-	r.timers = append(r.timers, timer)
 }
