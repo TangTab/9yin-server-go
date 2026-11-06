@@ -34,3 +34,15 @@ go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
 - `testdata`：测试所需的最小协议夹具
 
 
+
+## 许可证
+
+- 本仓库的初始代码来源自论坛，其真实作者未知，亦未声明许可证。故本仓库自有代码（`cmd/`、`internal/(!ecs)`、及根工程配置）以
+  [BSD 3-Clause](LICENSE.txt) 许可发布。
+- `internal/ecs/` 目录为内嵌的 [unitoftime/ecs](https://github.com/unitoftime/ecs)
+  框架源码，保持上游原样、不做修改，遵循其上游 MIT License 许可证
+  （随附原文件 [internal/ecs/LICENSE](internal/ecs/LICENSE)，
+  不继承根工程的 BSD-3）。
+
+  
+<strong>注意：本项目仅限于研究，严禁用于商用。游戏版权归蜗牛游戏公司所有。</strong>
