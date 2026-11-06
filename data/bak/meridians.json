@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "roles": {
+    "1": {
+      "cur_jingmai": "",
+      "last_jingmai": "",
+      "pl_day": "2026-11-05",
+      "pl_value": 0,
+      "cap_enabled": false,
+      "cap_value": 500,
+      "meridians": [
+      {
+        "config_id": "jm_dantian",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_zuyangming",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_zushaoyin",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_shoutaiyin",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_shoutaiyang",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_zutaiyin",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_zushaoyang",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_zujueyin",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_shoushaoyang",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_shouyangming",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_zutaiyang",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_shoushaoyin",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_yinqiao_wei",
+        "level": 1,
+        "fill": 0
+      },
+      {
+        "config_id": "jm_yangqiao_wei",
+        "level": 1,
+        "fill": 0
+      }
+    ]
+    }
+  }
+}

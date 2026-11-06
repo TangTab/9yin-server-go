@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "roles": {
+    "10": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "11": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "12": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "14": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "15": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "16": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "17": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "2": {
+      "gold": 999990931,
+      "guan_yin": 999991111,
+      "vip_valid_until": 1887803362,
+      "vip_total_time": 101088000,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "3": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "4": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "5": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "6": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "7": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "8": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    },
+    "9": {
+      "gold": 0,
+      "vip_valid_until": 0,
+      "vip_total_time": 0,
+      "vip_flag": 0,
+      "vip_prize_time": 0
+    }
+  }
+}

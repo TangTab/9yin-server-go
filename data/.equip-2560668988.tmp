@@ -1,0 +1,2174 @@
+{
+  "version": 1,
+  "roles": {
+    "2": {
+      "equip": [
+        {
+          "slot": 1,
+          "config_id": "helmet_60702",
+          "amount": 1,
+          "item_type": 140,
+          "equip_type": "Hat",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 3,
+          "config_id": "cloth_60702",
+          "amount": 1,
+          "item_type": 141,
+          "equip_type": "Cloth",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 4,
+          "config_id": "pants_60702",
+          "amount": 1,
+          "item_type": 142,
+          "equip_type": "Pants",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 6,
+          "config_id": "wrist_60501",
+          "amount": 1,
+          "item_type": 145,
+          "equip_type": "Wrist",
+          "affixes": [
+            {
+              "pack_rec": 95006,
+              "prop_built": 95006
+            },
+            {
+              "pack_rec": 95016,
+              "prop_built": 95016
+            },
+            {
+              "pack_rec": 64135,
+              "prop_built": 64135
+            },
+            {
+              "pack_rec": 64137,
+              "prop_built": 64137
+            },
+            {
+              "pack_rec": 64137,
+              "prop_built": 64137
+            }
+          ],
+          "skill_pack_recs": [
+            30233,
+            27866,
+            23195
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 7,
+          "config_id": "leg_60702",
+          "amount": 1,
+          "item_type": 144,
+          "equip_type": "Leg",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 8,
+          "config_id": "shoes_60702",
+          "amount": 1,
+          "item_type": 143,
+          "equip_type": "Shoes",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 11,
+          "config_id": "ear_60702",
+          "amount": 1,
+          "item_type": 161,
+          "equip_type": "Earring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 12,
+          "config_id": "ear_60702",
+          "amount": 1,
+          "item_type": 161,
+          "equip_type": "Earring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 13,
+          "config_id": "amulet_60702",
+          "amount": 1,
+          "item_type": 160,
+          "equip_type": "Necklace",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 14,
+          "config_id": "ring_60702",
+          "amount": 1,
+          "item_type": 162,
+          "equip_type": "Fingerring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 15,
+          "config_id": "ring_60702",
+          "amount": 1,
+          "item_type": 162,
+          "equip_type": "Fingerring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 16,
+          "config_id": "s_whui_1_b",
+          "amount": 1,
+          "item_type": 180,
+          "equip_type": "NewSuit",
+          "bind_status": 1
+        },
+        {
+          "slot": 22,
+          "config_id": "sword_10101",
+          "amount": 1,
+          "item_type": 102,
+          "equip_type": "Weapon",
+          "bind_status": 1
+        },
+        {
+          "slot": 25,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1738,
+              "prop_built": 1738
+            },
+            {
+              "pack_rec": 11536,
+              "prop_built": 11536
+            },
+            {
+              "pack_rec": 2447,
+              "prop_built": 2447
+            },
+            {
+              "pack_rec": 20206,
+              "prop_built": 20206
+            },
+            {
+              "pack_rec": 19281,
+              "prop_built": 19281
+            },
+            {
+              "pack_rec": 8493,
+              "prop_built": 8493
+            },
+            {
+              "pack_rec": 1866,
+              "prop_built": 1866
+            }
+          ],
+          "skill_pack_recs": [
+            28988,
+            29020,
+            29043,
+            28986
+          ],
+          "bind_status": 1,
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 436
+            },
+            {
+              "id": 4,
+              "value": 169
+            },
+            {
+              "id": 9,
+              "value": 17
+            },
+            {
+              "id": 42,
+              "value": 18
+            },
+            {
+              "id": 2,
+              "value": 26
+            },
+            {
+              "id": 25,
+              "value": 747
+            },
+            {
+              "id": 1,
+              "value": 152
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 1208,
+              "skill_id": 0,
+              "value": 46
+            },
+            {
+              "id": 1209,
+              "skill_id": 0,
+              "value": 31
+            },
+            {
+              "id": 1210,
+              "skill_id": 0,
+              "value": 41
+            },
+            {
+              "id": 1207,
+              "skill_id": 0,
+              "value": 64
+            }
+          ]
+        },
+        {
+          "slot": 26,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1678,
+              "prop_built": 1678
+            },
+            {
+              "pack_rec": 11479,
+              "prop_built": 11479
+            },
+            {
+              "pack_rec": 20192,
+              "prop_built": 20192
+            },
+            {
+              "pack_rec": 19979,
+              "prop_built": 19979
+            },
+            {
+              "pack_rec": 48049,
+              "prop_built": 48049
+            },
+            {
+              "pack_rec": 19281,
+              "prop_built": 19281
+            },
+            {
+              "pack_rec": 48029,
+              "prop_built": 48029
+            }
+          ],
+          "skill_pack_recs": [
+            14860,
+            14838,
+            14890,
+            14822
+          ],
+          "bind_status": 1,
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 398
+            },
+            {
+              "id": 4,
+              "value": 384
+            },
+            {
+              "id": 42,
+              "value": 16
+            },
+            {
+              "id": 39,
+              "value": 17
+            },
+            {
+              "id": 11,
+              "value": 3
+            },
+            {
+              "id": 2,
+              "value": 27
+            },
+            {
+              "id": 15,
+              "value": 8
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 525,
+              "skill_id": 0,
+              "value": 50
+            },
+            {
+              "id": 524,
+              "skill_id": 0,
+              "value": 78
+            },
+            {
+              "id": 526,
+              "skill_id": 0,
+              "value": 12
+            },
+            {
+              "id": 523,
+              "skill_id": 0,
+              "value": 11
+            }
+          ]
+        },
+        {
+          "slot": 27,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1615,
+              "prop_built": 1615
+            },
+            {
+              "pack_rec": 11540,
+              "prop_built": 11540
+            },
+            {
+              "pack_rec": 19475,
+              "prop_built": 19475
+            },
+            {
+              "pack_rec": 19472,
+              "prop_built": 19472
+            },
+            {
+              "pack_rec": 2387,
+              "prop_built": 2387
+            },
+            {
+              "pack_rec": 48029,
+              "prop_built": 48029
+            },
+            {
+              "pack_rec": 48024,
+              "prop_built": 48024
+            }
+          ],
+          "skill_pack_recs": [
+            16532,
+            16492,
+            16604,
+            16576
+          ],
+          "bind_status": 1,
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 176
+            },
+            {
+              "id": 4,
+              "value": 213
+            },
+            {
+              "id": 8,
+              "value": 14
+            },
+            {
+              "id": 7,
+              "value": 3
+            },
+            {
+              "id": 9,
+              "value": 7
+            },
+            {
+              "id": 15,
+              "value": 11
+            },
+            {
+              "id": 47,
+              "value": 4
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 559,
+              "skill_id": 0,
+              "value": 57
+            },
+            {
+              "id": 557,
+              "skill_id": 0,
+              "value": 40
+            },
+            {
+              "id": 562,
+              "skill_id": 0,
+              "value": 30
+            },
+            {
+              "id": 561,
+              "skill_id": 0,
+              "value": 12
+            }
+          ]
+        },
+        {
+          "slot": 28,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1763,
+              "prop_built": 1763
+            },
+            {
+              "pack_rec": 11681,
+              "prop_built": 11681
+            },
+            {
+              "pack_rec": 4158,
+              "prop_built": 4158
+            },
+            {
+              "pack_rec": 20186,
+              "prop_built": 20186
+            },
+            {
+              "pack_rec": 19774,
+              "prop_built": 19774
+            },
+            {
+              "pack_rec": 48039,
+              "prop_built": 48039
+            },
+            {
+              "pack_rec": 48028,
+              "prop_built": 48028
+            }
+          ],
+          "skill_pack_recs": [
+            12446,
+            12479,
+            12414,
+            12679
+          ],
+          "bind_status": 1,
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 376
+            },
+            {
+              "id": 4,
+              "value": 197
+            },
+            {
+              "id": 32,
+              "value": 56
+            },
+            {
+              "id": 42,
+              "value": 2
+            },
+            {
+              "id": 17,
+              "value": 2
+            },
+            {
+              "id": 18,
+              "value": 12
+            },
+            {
+              "id": 15,
+              "value": 8
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 417,
+              "skill_id": 0,
+              "value": 25
+            },
+            {
+              "id": 418,
+              "skill_id": 0,
+              "value": 45
+            },
+            {
+              "id": 416,
+              "skill_id": 0,
+              "value": 11
+            },
+            {
+              "id": 420,
+              "skill_id": 0,
+              "value": 47
+            }
+          ]
+        },
+        {
+          "slot": 29,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1603,
+              "prop_built": 1603
+            },
+            {
+              "pack_rec": 11550,
+              "prop_built": 11550
+            },
+            {
+              "pack_rec": 19295,
+              "prop_built": 19295
+            },
+            {
+              "pack_rec": 3957,
+              "prop_built": 3957
+            },
+            {
+              "pack_rec": 20221,
+              "prop_built": 20221
+            },
+            {
+              "pack_rec": 19779,
+              "prop_built": 19779
+            },
+            {
+              "pack_rec": 19322,
+              "prop_built": 19322
+            }
+          ],
+          "skill_pack_recs": [
+            9476,
+            9517,
+            9442,
+            9489
+          ],
+          "bind_status": 1,
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 336
+            },
+            {
+              "id": 4,
+              "value": 290
+            },
+            {
+              "id": 2,
+              "value": 28
+            },
+            {
+              "id": 30,
+              "value": 322
+            },
+            {
+              "id": 46,
+              "value": 2
+            },
+            {
+              "id": 24,
+              "value": 3
+            },
+            {
+              "id": 3,
+              "value": 2
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 162,
+              "skill_id": 0,
+              "value": 14
+            },
+            {
+              "id": 164,
+              "skill_id": 0,
+              "value": 65
+            },
+            {
+              "id": 161,
+              "skill_id": 0,
+              "value": 78
+            },
+            {
+              "id": 163,
+              "skill_id": 0,
+              "value": 68
+            }
+          ]
+        },
+        {
+          "slot": 30,
+          "config_id": "newtreasure_grow_6_02",
+          "amount": 1,
+          "item_type": 193,
+          "equip_type": "NewTreasure",
+          "bind_status": 1
+        }
+      ],
+      "bag": [
+        {
+          "slot": 1,
+          "config_id": "yaopin_00100",
+          "amount": 23,
+          "item_type": 1
+        },
+        {
+          "slot": 2,
+          "config_id": "yaopin_00300",
+          "amount": 10,
+          "item_type": 1
+        },
+        {
+          "slot": 3,
+          "config_id": "qy_suzhou_toulu",
+          "amount": 2,
+          "item_type": 2102
+        },
+        {
+          "slot": 4,
+          "config_id": "item_zhounian_001",
+          "amount": 1,
+          "item_type": 62
+        },
+        {
+          "slot": 5,
+          "config_id": "mount_hawk_001",
+          "amount": 1,
+          "item_type": 200
+        },
+        {
+          "slot": 6,
+          "config_id": "book_CS_jh_lhbwq0503",
+          "amount": 3,
+          "item_type": 2017
+        },
+        {
+          "slot": 9,
+          "config_id": "yaopin_10500",
+          "amount": 4,
+          "item_type": 2
+        }
+      ],
+      "equip_bag": [
+        {
+          "slot": 1,
+          "config_id": "blade_60501",
+          "amount": 1,
+          "item_type": 101,
+          "equip_type": "Weapon",
+          "affixes": [
+            {
+              "pack_rec": 13264,
+              "prop_built": 13264
+            },
+            {
+              "pack_rec": 13050,
+              "prop_built": 13050
+            },
+            {
+              "pack_rec": 13049,
+              "prop_built": 13049
+            }
+          ],
+          "skill_pack_recs": [
+            18497,
+            17255,
+            24372
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 2,
+          "config_id": "sthorn_wyjt_60701",
+          "amount": 1,
+          "item_type": 106,
+          "equip_type": "Weapon"
+        },
+        {
+          "slot": 3,
+          "config_id": "sthorn_wyjt_60701",
+          "amount": 1,
+          "item_type": 106,
+          "equip_type": "Weapon"
+        },
+        {
+          "slot": 4,
+          "config_id": "ring_10102",
+          "amount": 1,
+          "item_type": 162,
+          "equip_type": "Fingerring"
+        },
+        {
+          "slot": 5,
+          "config_id": "ear_10102",
+          "amount": 1,
+          "item_type": 161,
+          "equip_type": "Earring"
+        },
+        {
+          "slot": 6,
+          "config_id": "cloth_60702",
+          "amount": 1,
+          "item_type": 141,
+          "equip_type": "Cloth",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 7,
+          "config_id": "treasure_10758",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 19980,
+              "prop_built": 19980
+            },
+            {
+              "pack_rec": 48027,
+              "prop_built": 48027
+            },
+            {
+              "pack_rec": 3981,
+              "prop_built": 3981
+            },
+            {
+              "pack_rec": 19287,
+              "prop_built": 19287
+            },
+            {
+              "pack_rec": 48052,
+              "prop_built": 48052
+            },
+            {
+              "pack_rec": 48024,
+              "prop_built": 48024
+            },
+            {
+              "pack_rec": 48009,
+              "prop_built": 48009
+            }
+          ],
+          "skill_pack_recs": [
+            16195,
+            24256,
+            18441,
+            11880,
+            30415
+          ],
+          "treasure_props": [
+            {
+              "id": 39,
+              "value": 12
+            },
+            {
+              "id": 15,
+              "value": 4
+            },
+            {
+              "id": 30,
+              "value": 226
+            },
+            {
+              "id": 2,
+              "value": 13
+            },
+            {
+              "id": 11,
+              "value": 1
+            },
+            {
+              "id": 47,
+              "value": 4
+            },
+            {
+              "id": 12,
+              "value": 4
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 566,
+              "skill_id": 0,
+              "value": 5
+            },
+            {
+              "id": 982,
+              "skill_id": 0,
+              "value": 12
+            },
+            {
+              "id": 694,
+              "skill_id": 0,
+              "value": 35
+            },
+            {
+              "id": 401,
+              "skill_id": 0,
+              "value": 59
+            },
+            {
+              "id": 1444,
+              "skill_id": 0,
+              "value": 39
+            }
+          ]
+        },
+        {
+          "slot": 9,
+          "config_id": "pants_gb_10101",
+          "amount": 1,
+          "item_type": 142,
+          "equip_type": "Pants",
+          "affixes": [
+            {
+              "pack_rec": 95061,
+              "prop_built": 95061
+            },
+            {
+              "pack_rec": 13904,
+              "prop_built": 13904
+            }
+          ]
+        },
+        {
+          "slot": 11,
+          "config_id": "cloth_21103",
+          "amount": 1,
+          "item_type": 141,
+          "equip_type": "Cloth",
+          "affixes": [
+            {
+              "pack_rec": 95022,
+              "prop_built": 95022
+            }
+          ]
+        },
+        {
+          "slot": 14,
+          "config_id": "treasure_22470",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 19766,
+              "prop_built": 19766
+            },
+            {
+              "pack_rec": 19321,
+              "prop_built": 19321
+            },
+            {
+              "pack_rec": 8479,
+              "prop_built": 8479
+            },
+            {
+              "pack_rec": 19485,
+              "prop_built": 19485
+            },
+            {
+              "pack_rec": 19956,
+              "prop_built": 19956
+            },
+            {
+              "pack_rec": 48036,
+              "prop_built": 48036
+            },
+            {
+              "pack_rec": 19449,
+              "prop_built": 19449
+            }
+          ],
+          "skill_pack_recs": [
+            3540,
+            30395,
+            9428,
+            10614,
+            28546
+          ],
+          "treasure_props": [
+            {
+              "id": 14,
+              "value": 1
+            },
+            {
+              "id": 3,
+              "value": 16
+            },
+            {
+              "id": 25,
+              "value": 984
+            },
+            {
+              "id": 8,
+              "value": 15
+            },
+            {
+              "id": 39,
+              "value": 19
+            },
+            {
+              "id": 18,
+              "value": 8
+            },
+            {
+              "id": 7,
+              "value": 2
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 70,
+              "skill_id": 0,
+              "value": 48
+            },
+            {
+              "id": 1424,
+              "skill_id": 0,
+              "value": 16
+            },
+            {
+              "id": 160,
+              "skill_id": 0,
+              "value": 64
+            },
+            {
+              "id": 336,
+              "skill_id": 0,
+              "value": 7
+            },
+            {
+              "id": 1180,
+              "skill_id": 0,
+              "value": 57
+            }
+          ]
+        },
+        {
+          "slot": 15,
+          "config_id": "treasure_wd_17096",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 3580,
+              "prop_built": 3580
+            },
+            {
+              "pack_rec": 8462,
+              "prop_built": 8462
+            },
+            {
+              "pack_rec": 19306,
+              "prop_built": 19306
+            },
+            {
+              "pack_rec": 11591,
+              "prop_built": 11591
+            },
+            {
+              "pack_rec": 20191,
+              "prop_built": 20191
+            },
+            {
+              "pack_rec": 48023,
+              "prop_built": 48023
+            },
+            {
+              "pack_rec": 20100,
+              "prop_built": 20100
+            }
+          ],
+          "skill_pack_recs": [
+            30350,
+            27306,
+            21577,
+            30141,
+            11474
+          ],
+          "treasure_props": [
+            {
+              "id": 29,
+              "value": 207
+            },
+            {
+              "id": 25,
+              "value": 332
+            },
+            {
+              "id": 3,
+              "value": 18
+            },
+            {
+              "id": 4,
+              "value": 224
+            },
+            {
+              "id": 42,
+              "value": 4
+            },
+            {
+              "id": 47,
+              "value": 6
+            },
+            {
+              "id": 41,
+              "value": 14
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 1368,
+              "skill_id": 0,
+              "value": 50
+            },
+            {
+              "id": 1117,
+              "skill_id": 0,
+              "value": 22
+            },
+            {
+              "id": 848,
+              "skill_id": 0,
+              "value": 51
+            },
+            {
+              "id": 1245,
+              "skill_id": 0,
+              "value": 77
+            },
+            {
+              "id": 384,
+              "skill_id": 0,
+              "value": 49
+            }
+          ]
+        },
+        {
+          "slot": 16,
+          "config_id": "pz_CS_jy_yzq01",
+          "amount": 1,
+          "item_type": 191,
+          "equip_type": "FacultyPaint"
+        },
+        {
+          "slot": 20,
+          "config_id": "cosh_50405",
+          "amount": 1,
+          "item_type": 108,
+          "equip_type": "Weapon"
+        },
+        {
+          "slot": 33,
+          "config_id": "sword_60501",
+          "amount": 1,
+          "item_type": 102,
+          "equip_type": "Weapon",
+          "affixes": [
+            {
+              "pack_rec": 13264,
+              "prop_built": 13264
+            },
+            {
+              "pack_rec": 13256,
+              "prop_built": 13256
+            },
+            {
+              "pack_rec": 13252,
+              "prop_built": 13252
+            }
+          ],
+          "skill_pack_recs": [
+            19532,
+            30365,
+            18294
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 34,
+          "config_id": "shoes_40701",
+          "amount": 1,
+          "item_type": 143,
+          "equip_type": "Shoes",
+          "affixes": [
+            {
+              "pack_rec": 95104,
+              "prop_built": 95104
+            },
+            {
+              "pack_rec": 95114,
+              "prop_built": 95114
+            }
+          ]
+        },
+        {
+          "slot": 35,
+          "config_id": "taohua06",
+          "amount": 1,
+          "item_type": 180,
+          "equip_type": "Suit"
+        },
+        {
+          "slot": 39,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1600,
+              "prop_built": 1600
+            },
+            {
+              "pack_rec": 11710,
+              "prop_built": 11710
+            },
+            {
+              "pack_rec": 19298,
+              "prop_built": 19298
+            },
+            {
+              "pack_rec": 20222,
+              "prop_built": 20222
+            },
+            {
+              "pack_rec": 4627,
+              "prop_built": 4627
+            },
+            {
+              "pack_rec": 48039,
+              "prop_built": 48039
+            },
+            {
+              "pack_rec": 19748,
+              "prop_built": 19748
+            }
+          ],
+          "skill_pack_recs": [
+            14512,
+            14489,
+            14411
+          ],
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 134
+            },
+            {
+              "id": 4,
+              "value": 147
+            },
+            {
+              "id": 2,
+              "value": 14
+            },
+            {
+              "id": 46,
+              "value": 8
+            },
+            {
+              "id": 36,
+              "value": 195
+            },
+            {
+              "id": 18,
+              "value": 8
+            },
+            {
+              "id": 20,
+              "value": 1
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 507,
+              "skill_id": 0,
+              "value": 24
+            },
+            {
+              "id": 506,
+              "skill_id": 0,
+              "value": 26
+            },
+            {
+              "id": 504,
+              "skill_id": 0,
+              "value": 34
+            }
+          ]
+        },
+        {
+          "slot": 40,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1762,
+              "prop_built": 1762
+            },
+            {
+              "pack_rec": 11494,
+              "prop_built": 11494
+            },
+            {
+              "pack_rec": 8042,
+              "prop_built": 8042
+            },
+            {
+              "pack_rec": 19771,
+              "prop_built": 19771
+            },
+            {
+              "pack_rec": 4182,
+              "prop_built": 4182
+            },
+            {
+              "pack_rec": 19415,
+              "prop_built": 19415
+            },
+            {
+              "pack_rec": 19297,
+              "prop_built": 19297
+            }
+          ],
+          "skill_pack_recs": [
+            8069,
+            8130,
+            8092,
+            8158
+          ],
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 380
+            },
+            {
+              "id": 4,
+              "value": 326
+            },
+            {
+              "id": 27,
+              "value": 16
+            },
+            {
+              "id": 17,
+              "value": 2
+            },
+            {
+              "id": 32,
+              "value": 387
+            },
+            {
+              "id": 6,
+              "value": 10
+            },
+            {
+              "id": 2,
+              "value": 20
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 127,
+              "skill_id": 0,
+              "value": 26
+            },
+            {
+              "id": 130,
+              "skill_id": 0,
+              "value": 17
+            },
+            {
+              "id": 128,
+              "skill_id": 0,
+              "value": 23
+            },
+            {
+              "id": 131,
+              "skill_id": 0,
+              "value": 62
+            }
+          ]
+        },
+        {
+          "slot": 41,
+          "config_id": "treasure_31111",
+          "amount": 1,
+          "item_type": 146,
+          "equip_type": "Treasure",
+          "affixes": [
+            {
+              "pack_rec": 1562,
+              "prop_built": 1562
+            },
+            {
+              "pack_rec": 11576,
+              "prop_built": 11576
+            },
+            {
+              "pack_rec": 1824,
+              "prop_built": 1824
+            },
+            {
+              "pack_rec": 48025,
+              "prop_built": 48025
+            },
+            {
+              "pack_rec": 20040,
+              "prop_built": 20040
+            },
+            {
+              "pack_rec": 19781,
+              "prop_built": 19781
+            },
+            {
+              "pack_rec": 19750,
+              "prop_built": 19750
+            }
+          ],
+          "skill_pack_recs": [
+            27647,
+            27738,
+            27671
+          ],
+          "treasure_props": [
+            {
+              "id": 0,
+              "value": 451
+            },
+            {
+              "id": 4,
+              "value": 208
+            },
+            {
+              "id": 1,
+              "value": 233
+            },
+            {
+              "id": 47,
+              "value": 5
+            },
+            {
+              "id": 40,
+              "value": 19
+            },
+            {
+              "id": 24,
+              "value": 1
+            },
+            {
+              "id": 20,
+              "value": 2
+            }
+          ],
+          "treasure_skills": [
+            {
+              "id": 1142,
+              "skill_id": 0,
+              "value": 20
+            },
+            {
+              "id": 1146,
+              "skill_id": 0,
+              "value": 45
+            },
+            {
+              "id": 1143,
+              "skill_id": 0,
+              "value": 45
+            }
+          ]
+        },
+        {
+          "slot": 53,
+          "config_id": "thorn_devote_tm_0012",
+          "amount": 1,
+          "item_type": 103,
+          "equip_type": "Weapon",
+          "affixes": [
+            {
+              "pack_rec": 13228,
+              "prop_built": 13228
+            },
+            {
+              "pack_rec": 13043,
+              "prop_built": 13043
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "equip": [
+        {
+          "slot": 1,
+          "config_id": "helmet_60702",
+          "amount": 1,
+          "item_type": 140,
+          "equip_type": "Hat",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 3,
+          "config_id": "cloth_60702",
+          "amount": 1,
+          "item_type": 141,
+          "equip_type": "Cloth",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 4,
+          "config_id": "pants_60702",
+          "amount": 1,
+          "item_type": 142,
+          "equip_type": "Pants",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 6,
+          "config_id": "wrist_60702",
+          "amount": 1,
+          "item_type": 145,
+          "equip_type": "Wrist",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 7,
+          "config_id": "leg_60702",
+          "amount": 1,
+          "item_type": 144,
+          "equip_type": "Leg",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 8,
+          "config_id": "shoes_60702",
+          "amount": 1,
+          "item_type": 143,
+          "equip_type": "Shoes",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 11,
+          "config_id": "ear_60702",
+          "amount": 1,
+          "item_type": 161,
+          "equip_type": "Earring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 12,
+          "config_id": "ear_60702",
+          "amount": 1,
+          "item_type": 161,
+          "equip_type": "Earring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 13,
+          "config_id": "amulet_60702",
+          "amount": 1,
+          "item_type": 160,
+          "equip_type": "Necklace",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 14,
+          "config_id": "ring_60702",
+          "amount": 1,
+          "item_type": 162,
+          "equip_type": "Fingerring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 15,
+          "config_id": "ring_60702",
+          "amount": 1,
+          "item_type": 162,
+          "equip_type": "Fingerring",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        }
+      ],
+      "bag": [
+        {
+          "slot": 1,
+          "config_id": "yaopin_00100",
+          "amount": 1,
+          "item_type": 1
+        },
+        {
+          "slot": 2,
+          "config_id": "yaopin_00300",
+          "amount": 1,
+          "item_type": 1
+        }
+      ],
+      "equip_bag": [
+        {
+          "slot": 1,
+          "config_id": "sthorn_wyjt_60701",
+          "amount": 1,
+          "item_type": 106,
+          "equip_type": "Weapon",
+          "bind_status": 1
+        },
+        {
+          "slot": 2,
+          "config_id": "sword_10101",
+          "amount": 1,
+          "item_type": 102,
+          "equip_type": "Weapon",
+          "bind_status": 1
+        },
+        {
+          "slot": 3,
+          "config_id": "sword_60701",
+          "amount": 1,
+          "item_type": 102,
+          "equip_type": "Weapon",
+          "skill_pack_recs": [
+            30374,
+            30379,
+            7806
+          ],
+          "bind_status": 1
+        },
+        {
+          "slot": 4,
+          "config_id": "ring_10102",
+          "amount": 1,
+          "item_type": 162,
+          "equip_type": "Fingerring"
+        },
+        {
+          "slot": 5,
+          "config_id": "ear_10102",
+          "amount": 1,
+          "item_type": 161,
+          "equip_type": "Earring"
+        },
+        {
+          "slot": 6,
+          "config_id": "cloth_60702",
+          "amount": 1,
+          "item_type": 141,
+          "equip_type": "Cloth",
+          "affixes": [
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 12492,
+              "prop_built": 12592
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            },
+            {
+              "pack_rec": 62995,
+              "prop_built": 62995
+            }
+          ]
+        },
+        {
+          "slot": 7,
+          "config_id": "sthorn_wyjt_60701",
+          "amount": 1,
+          "item_type": 106,
+          "equip_type": "Weapon"
+        }
+      ]
+    }
+  }
+}

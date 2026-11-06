@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "roles": {
+    "2": {
+      "blend": {
+        "4d0982915b1394d1": "Tab_b_cloth_60604",
+        "Cloth": "Tab_b_cloth_battlefield_60601",
+        "Hat": "Tab_b_helmet_xmg_50701",
+        "Pants": "Tab_b_pants_10402",
+        "Shoes": "Tab_b_shoes_20205",
+        "feb90f7c034c0cc3": "Tab_b_head_088_b"
+      },
+      "show_type": 2
+    },
+    "3": {
+      "blend": {
+        "33996ca0151ba1f5": "Tab_g_shoes_039",
+        "4d0982915b1394d1": "Tab_g_cloth_039",
+        "85677b3c85a52675": "Tab_g_pants_039",
+        "Cloth": "Tab_g_cloth_whz_50701",
+        "Hat": "Tab_g_head_112_b",
+        "Pants": "Tab_g_pants_10204",
+        "c1ac6fe2e644cfb2": "Tab_g_cloth_gumu_50301",
+        "feb90f7c034c0cc3": "Tab_g_head_111_b"
+      },
+      "show_type": 2
+    },
+    "4": {
+      "blend": {
+        "1b9ae8a66febefc0": "Tab_b_head_245_b",
+        "33996ca0151ba1f5": "Tab_b_shoes_040",
+        "4d0982915b1394d1": "Tab_b_cloth_040",
+        "85677b3c85a52675": "Tab_b_pants_040",
+        "feb90f7c034c0cc3": "Tab_b_head_161_b"
+      },
+      "show_type": 2
+    },
+    "5": {}
+  }
+}

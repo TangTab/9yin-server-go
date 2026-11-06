@@ -1,0 +1,374 @@
+package clientdata
+
+import (
+	"fmt"
+	"math"
+	"sort"
+	"strconv"
+	"strings"
+)
+
+type Value struct {
+	Type WireType
+	U8   uint8
+	U16  uint16
+	I32  int32
+	F32  float32
+	U64  uint64
+	Text string
+}
+
+func ByteValue(value uint8) Value        { return Value{Type: WireByte, U8: value} }
+func WordValue(value uint16) Value       { return Value{Type: WireWord, U16: value} }
+func Int32Value(value int32) Value       { return Value{Type: WireInt32, I32: value} }
+func Float32Value(value float32) Value   { return Value{Type: WireFloat32, F32: value} }
+func StringValue(value string) Value     { return Value{Type: WireString, Text: value} }
+func WideStringValue(value string) Value { return Value{Type: WireWideString, Text: value} }
+func ObjectValue(objectID, ownerID uint32) Value {
+	return Value{Type: WireObject, U64: uint64(objectID) | uint64(ownerID)<<32}
+}
+
+func (v Value) Native() any {
+	switch v.Type {
+	case WireByte:
+		return v.U8
+	case WireWord:
+		return v.U16
+	case WireInt32:
+		return v.I32
+	case WireFloat32:
+		return v.F32
+	case WireString, WireWideString:
+		return v.Text
+	case WireObject:
+		return v.U64
+	default:
+		return nil
+	}
+}
+
+type Provenance struct {
+	Layer  string
+	Source string
+	Record int
+	Field  string
+}
+
+type PropertyValue struct {
+	Value      Value
+	Provenance Provenance
+}
+
+type ResolveOptions struct {
+	Defaults  map[string]Value
+	Runtime   map[string]Value
+	Persisted map[string]Value
+}
+
+type ResolvedNPC struct {
+	InstanceKey string
+	ConfigID    string
+	ScriptClass string
+	Transform   NPCTransform
+	Properties  map[string]PropertyValue
+	Extensions  map[string]string
+}
+
+type IndexedProperty struct {
+	Index uint16
+	Name  string
+	Value Value
+}
+
+func (r ResolvedNPC) OrderedProperties(schema Schema) ([]IndexedProperty, error) {
+	result := make([]IndexedProperty, 0, len(r.Properties))
+	for _, field := range schema.Fields {
+		property, exists := r.Properties[field.Name]
+		if !exists {
+			continue
+		}
+		if property.Value.Type != field.Type {
+			return nil, fmt.Errorf("clientdata: resolved NPC property %q type=%s, schema wants %s", field.Name, property.Value.Type, field.Type)
+		}
+		result = append(result, IndexedProperty{Index: field.Index, Name: field.Name, Value: property.Value})
+	}
+	return result, nil
+}
+
+type templateColumnBinding struct {
+	Name       string
+	Occurrence int
+}
+
+var npcTemplateAliases = map[string]templateColumnBinding{
+	"ConfigID": {Name: "ID"},
+	"Sex":      {Name: "Gender"},
+	// The modern table repeats StopTime. The NPC combat stop-time column is
+	// the second occurrence (physical column 87, zero based).
+	"StopTime": {Name: "StopTime", Occurrence: 1},
+}
+
+var creatorStructuralAttributes = map[string]struct{}{
+	"No": {}, "id": {},
+	"x": {}, "y": {}, "z": {},
+	"ax": {}, "ay": {}, "az": {},
+	"sx": {}, "sy": {}, "sz": {},
+}
+
+func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInstance, options ResolveOptions) (ResolvedNPC, error) {
+	if table == nil {
+		return ResolvedNPC{}, fmt.Errorf("clientdata: resolve NPC %q with nil template table", instance.TemplateID)
+	}
+	if len(schema.Fields) == 0 {
+		return ResolvedNPC{}, errorsf("resolve NPC %q with empty schema", instance.TemplateID)
+	}
+	row, err := table.Lookup(instance.TemplateID)
+	if err != nil {
+		return ResolvedNPC{}, err
+	}
+	resolved := ResolvedNPC{
+		InstanceKey: instance.InstanceKey(),
+		ConfigID:    instance.TemplateID,
+		ScriptClass: row.ScriptClass,
+		Transform:   instance.Transform,
+		Properties:  make(map[string]PropertyValue),
+		Extensions:  make(map[string]string),
+	}
+	if err := applyValueLayer(schema, resolved.Properties, options.Defaults, Provenance{Layer: "default", Source: schema.ID}); err != nil {
+		return ResolvedNPC{}, err
+	}
+
+	consumedTemplate := make(map[int]struct{})
+	for _, field := range schema.Fields {
+		binding, explicit := npcTemplateAliases[field.Name]
+		if !explicit {
+			binding.Name = field.Name
+		}
+		indices := table.ColumnIndices(binding.Name)
+		if len(indices) == 0 {
+			continue
+		}
+		if !explicit && len(indices) != 1 {
+			// Repeated names require a reviewed binding. Never guess first/last.
+			continue
+		}
+		// City tables contain only the combat StopTime column, while school
+		// tables also contain an earlier movement StopTime column. The reviewed
+		// binding selects the second occurrence when it exists and the sole
+		// occurrence otherwise.
+		occurrence := binding.Occurrence
+		if explicit && binding.Name == "StopTime" && occurrence == 1 && len(indices) == 1 {
+			occurrence = 0
+		}
+		if occurrence < 0 || occurrence >= len(indices) {
+			return ResolvedNPC{}, fmt.Errorf("clientdata: NPC template binding %q occurrence %d not present in %s", binding.Name, binding.Occurrence, table.Source)
+		}
+		columnIndex := indices[occurrence]
+		consumedTemplate[columnIndex] = struct{}{}
+		cell := row.Cells[columnIndex]
+		if !cell.Set {
+			continue
+		}
+		value, parseErr := parseWireValue(field.Type, cell.Raw)
+		if parseErr != nil {
+			return ResolvedNPC{}, fmt.Errorf("clientdata: NPC template %s logical record %d field %s=%q: %w", row.Source, row.LogicalRecord, cell.ColumnName, cell.Raw, parseErr)
+		}
+		resolved.Properties[field.Name] = PropertyValue{Value: value, Provenance: Provenance{Layer: "template", Source: row.Source, Record: row.LogicalRecord, Field: cell.ColumnName}}
+	}
+
+	consumedCreator := make(map[string]struct{})
+	for _, field := range schema.Fields {
+		raw, exists := instance.Attributes[field.Name]
+		if !exists || !raw.Present {
+			continue
+		}
+		value, parseErr := parseWireValue(field.Type, raw.Raw)
+		if parseErr != nil {
+			return ResolvedNPC{}, fmt.Errorf("clientdata: NPC creator %s item %d field %s=%q: %w", instance.Source, instance.Ordinal, field.Name, raw.Raw, parseErr)
+		}
+		resolved.Properties[field.Name] = PropertyValue{Value: value, Provenance: Provenance{Layer: "creator", Source: instance.Source, Record: instance.Ordinal, Field: field.Name}}
+		consumedCreator[field.Name] = struct{}{}
+	}
+
+	// Placement coordinates are runtime object state derived from creator data,
+	// not template properties. Explicit runtime values may override them below.
+	placement := map[string]Value{
+		"PosiX": Float32Value(instance.Transform.X),
+		"PosiY": Float32Value(instance.Transform.Y),
+		"PosiZ": Float32Value(instance.Transform.Z),
+	}
+	if instance.Transform.AY != nil {
+		placement["Orient"] = Float32Value(*instance.Transform.AY)
+	}
+	if err := applyValueLayer(schema, resolved.Properties, placement, Provenance{Layer: "runtime", Source: instance.Source, Record: instance.Ordinal, Field: "transform"}); err != nil {
+		return ResolvedNPC{}, err
+	}
+	if err := applyValueLayer(schema, resolved.Properties, options.Runtime, Provenance{Layer: "runtime", Source: "resolve-options"}); err != nil {
+		return ResolvedNPC{}, err
+	}
+	if err := applyValueLayer(schema, resolved.Properties, options.Persisted, Provenance{Layer: "persisted", Source: "resolve-options"}); err != nil {
+		return ResolvedNPC{}, err
+	}
+
+	for index, cell := range row.Cells {
+		if !cell.Set {
+			continue
+		}
+		if _, consumed := consumedTemplate[index]; consumed {
+			continue
+		}
+		key := "template." + cell.ColumnName
+		if len(table.ColumnIndices(cell.ColumnName)) > 1 {
+			key = fmt.Sprintf("%s[%d]", key, occurrenceAt(table.ColumnIndices(cell.ColumnName), index))
+		}
+		resolved.Extensions[key] = cell.Raw
+	}
+	for name, raw := range instance.Attributes {
+		if _, consumed := consumedCreator[name]; consumed {
+			continue
+		}
+		if _, structural := creatorStructuralAttributes[name]; structural {
+			continue
+		}
+		resolved.Extensions["creator."+name] = raw.Raw
+	}
+	return resolved, nil
+}
+
+func errorsf(format string, args ...any) error {
+	return fmt.Errorf("clientdata: "+format, args...)
+}
+
+func occurrenceAt(indices []int, target int) int {
+	for occurrence, index := range indices {
+		if index == target {
+			return occurrence
+		}
+	}
+	return -1
+}
+
+func applyValueLayer(schema Schema, target map[string]PropertyValue, values map[string]Value, provenance Provenance) error {
+	keys := make([]string, 0, len(values))
+	for name := range values {
+		keys = append(keys, name)
+	}
+	sort.Strings(keys)
+	for _, name := range keys {
+		value := values[name]
+		field, exists := schema.Field(name)
+		if !exists {
+			return fmt.Errorf("clientdata: layer %s sets property %q absent from schema %s", provenance.Layer, name, schema.ID)
+		}
+		if value.Type != field.Type {
+			return fmt.Errorf("clientdata: layer %s property %q type=%s, schema wants %s", provenance.Layer, name, value.Type, field.Type)
+		}
+		if value.Type == WireFloat32 && (math.IsNaN(float64(value.F32)) || math.IsInf(float64(value.F32), 0)) {
+			return fmt.Errorf("clientdata: layer %s property %q is not finite", provenance.Layer, name)
+		}
+		propertyProvenance := provenance
+		propertyProvenance.Field = name
+		target[name] = PropertyValue{Value: value, Provenance: propertyProvenance}
+	}
+	return nil
+}
+
+func parseWireValue(wireType WireType, raw string) (Value, error) {
+	switch wireType {
+	case WireByte:
+		value, err := strconv.ParseUint(strings.TrimSpace(raw), 10, 8)
+		if err != nil {
+			return Value{}, err
+		}
+		return ByteValue(uint8(value)), nil
+	case WireWord:
+		value, err := strconv.ParseUint(strings.TrimSpace(raw), 10, 16)
+		if err != nil {
+			return Value{}, err
+		}
+		return WordValue(uint16(value)), nil
+	case WireInt32:
+		value, err := parseIntegralInt32(raw)
+		if err != nil {
+			return Value{}, err
+		}
+		return Int32Value(value), nil
+	case WireFloat32:
+		parsed, err := strconv.ParseFloat(strings.TrimSpace(raw), 32)
+		if err != nil {
+			return Value{}, err
+		}
+		value := float32(parsed)
+		if math.IsNaN(float64(value)) || math.IsInf(float64(value), 0) {
+			return Value{}, fmt.Errorf("not a finite float32")
+		}
+		return Float32Value(value), nil
+	case WireString:
+		return StringValue(raw), nil
+	case WireWideString:
+		return WideStringValue(raw), nil
+	default:
+		return Value{}, fmt.Errorf("unsupported wire type %d", wireType)
+	}
+}
+
+func parseIntegralInt32(raw string) (int32, error) {
+	text := strings.TrimSpace(raw)
+	if value, err := strconv.ParseInt(text, 10, 32); err == nil {
+		return int32(value), nil
+	}
+	value, err := strconv.ParseFloat(text, 64)
+	if err != nil || math.IsNaN(value) || math.IsInf(value, 0) || math.Trunc(value) != value || value < math.MinInt32 || value > math.MaxInt32 {
+		return 0, fmt.Errorf("%q is not an integral int32", raw)
+	}
+	return int32(value), nil
+}
+
+// VisibleNPCSpawnDefaultsCompatV1 isolates the compatibility defaults that
+// were previously interleaved with template values in protocol-probe. Modern
+// client data and creator attributes still override this profile.
+func VisibleNPCSpawnDefaultsCompatV1() map[string]Value {
+	return map[string]Value{
+		"Type":             ByteValue(4),
+		"Sex":              ByteValue(0),
+		"ActionSet":        StringValue(""),
+		"State":            StringValue("stand"),
+		"LogicState":       ByteValue(0),
+		"HPRatio":          Int32Value(100),
+		"MaxHP":            Int32Value(1000),
+		"HP":               Int32Value(1000),
+		"Scale":            StringValue(""),
+		"CollideType":      Int32Value(0),
+		"CantShowHeadInfo": ByteValue(0),
+		"NPCCanSelect":     WordValue(1),
+		"RotatePara":       StringValue(""),
+		"NeedRotate":       Int32Value(0),
+		"Collide":          Int32Value(0),
+		"CollideRadius":    Float32Value(0.905),
+		"CantAttack":       Int32Value(0),
+		"CantBeAttack":     Int32Value(0),
+		"Force":            Int32Value(0),
+		"MotionNoRotate":   ByteValue(0),
+		"CanPick":          ByteValue(0),
+		"VisType":          Int32Value(0),
+		"VisDataInt":       Int32Value(0),
+		"VisDataStr":       WideStringValue(""),
+		"HeadEffect":       Int32Value(0),
+		"NpcNickName":      WideStringValue(""),
+		"ExtraInfo":        StringValue(""),
+		"RoleHide":         Int32Value(0),
+		"EscortFlag":       Int32Value(0),
+		"SpringEffect":     StringValue(""),
+		"Material":         StringValue(""),
+		"WeaponName":       StringValue(""),
+		"BornAction":       StringValue(""),
+		"ActionSoundMode":  Int32Value(0),
+		"Fixed":            Int32Value(0),
+		"FixedBeHitAct":    StringValue(""),
+		"DirectSpring":     Int32Value(0),
+		"NpcTalkType":      Int32Value(0),
+		"PreLoad":          Int32Value(0),
+		"OnlyCareDistance": Int32Value(0),
+		"RefreshAtOnce":    Int32Value(0),
+	}
+}

@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "revision": 83,
+  "next_id": 2,
+  "bots": [
+    {
+      "key": "public-chengdu-companion-v1",
+      "enabled": true,
+      "id": 1,
+      "revision": 83,
+      "name": "江湖伙伴·与子偕老",
+      "appearance": [
+        "0"
+      ],
+      "scene": {
+        "config": "ini\\scene\\city05_ChengDu",
+        "resource": "city05",
+        "instance": "public"
+      },
+      "position": {
+        "X": 911.41376,
+        "Y": 31.192,
+        "Z": 535.3792,
+        "Orient": 1.742
+      },
+      "equipment": [
+        {
+          "slot": 3,
+          "item": {
+            "ConfigID": "cloth_60604",
+            "Amount": 1,
+            "ItemType": 141,
+            "EquipType": "Cloth",
+            "ColorLevel": 1,
+            "Level": 0,
+            "Hardiness": 100,
+            "MaxHardiness": 100,
+            "MaxAmount": 1,
+            "is_can_build": 0,
+            "MaxBuildCount": 0,
+            "CurBuildCount": 0,
+            "RecoverFlag": 0
+          }
+        },
+        {
+          "slot": 4,
+          "item": {
+            "ConfigID": "pants_60604",
+            "Amount": 1,
+            "ItemType": 142,
+            "EquipType": "Pants",
+            "ColorLevel": 1,
+            "Level": 0,
+            "Hardiness": 100,
+            "MaxHardiness": 100,
+            "MaxAmount": 1,
+            "is_can_build": 0,
+            "MaxBuildCount": 0,
+            "CurBuildCount": 0,
+            "RecoverFlag": 0
+          }
+        },
+        {
+          "slot": 8,
+          "item": {
+            "ConfigID": "shoes_60604",
+            "Amount": 1,
+            "ItemType": 143,
+            "EquipType": "Shoes",
+            "ColorLevel": 1,
+            "Level": 0,
+            "Hardiness": 100,
+            "MaxHardiness": 100,
+            "MaxAmount": 1,
+            "is_can_build": 0,
+            "MaxBuildCount": 0,
+            "CurBuildCount": 0,
+            "RecoverFlag": 0
+          }
+        }
+      ],
+      "skills": {
+        "CS_em_jdmz06": 1,
+        "CS_jh_cqgf02": 1,
+        "CS_jh_xfz01": 1,
+        "CS_jh_xfz02": 1,
+        "CS_jh_xfz03": 1,
+        "CS_jh_xfz04": 1,
+        "CS_jh_xfz05": 1,
+        "CS_jh_xfz06": 1,
+        "CS_jh_xfz07": 1,
+        "CS_jz_wyjf06": 1,
+        "CS_sj_syxz08": 1
+      },
+      "combat": {
+        "max_hp": 1000,
+        "max_mp": 1000,
+        "inner_power": "ng_tm_002",
+        "inner_power_level": 36
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "next_id": 31,
+  "teams": [
+    {
+      "id": 29,
+      "captain_id": 14,
+      "members": [
+        14
+      ],
+      "pick_mode": 0,
+      "pick_quality": 0,
+      "sign": "",
+      "created_at": 1793357447
+    },
+    {
+      "id": 30,
+      "captain_id": 16,
+      "members": [
+        16
+      ],
+      "pick_mode": 0,
+      "pick_quality": 0,
+      "sign": "",
+      "created_at": 1793357839
+    }
+  ]
+}

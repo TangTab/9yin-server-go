@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "default_level": 1,
+  "accounts": {
+    "acct:v1:112cd36f1e1d2bac408e0428aabef6e399080c2bc33407de6677e60dec97c2a6": 51,
+    "acct:v1:65daca6d1ba1b1c0f3d8e1517a41c9fe8a49789c29bb8bfae6eb04bf5de2947b": 51,
+    "acct:v1:7046dbf3fce483cb1ef2d7b92a7c73e5cc1ebe198af5d6ea0333b5654e8ccf24": 51,
+    "acct:v1:7d64230a3c7db5df4a6fa89aeeb780aebf96cb54c240001c2bdbbd1c6579ad87": 51,
+    "acct:v1:eb0fa13fdde93f24162199300510621d3d7979f18931e64682acea704a0191b8": 51,
+    "local_default": 51
+  },
+  "roles": {
+    "1": 51,
+    "2": 51,
+    "3": 51,
+    "4": 51,
+    "5": 51,
+    "6": 1,
+    "与夫偕老": 51,
+    "冒烟侠": 51,
+    "商弘": 51,
+    "徐小宝": 51,
+    "是的": 51,
+    "邢军": 51,
+    "阿啊啊啊": 51
+  }
+}

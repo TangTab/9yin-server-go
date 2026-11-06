@@ -1,0 +1,2580 @@
+﻿{
+  "version": "1.0",
+  "description": "九阴真经功能开关配置。id 来自 desc2.idres 中 desc_switch_<id> 的数字部分；enabled=false 即关闭该功能。",
+  "switches": [
+    {
+      "id": 1,
+      "desc_key": "desc_switch_1",
+      "label": "GPK直接踢人",
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "desc_key": "desc_switch_2",
+      "label": "线下交易",
+      "enabled": true
+    },
+    {
+      "id": 3,
+      "desc_key": "desc_switch_3",
+      "label": "经脉系统",
+      "enabled": true
+    },
+    {
+      "id": 4,
+      "desc_key": "desc_switch_4",
+      "label": "战场",
+      "enabled": true
+    },
+    {
+      "id": 5,
+      "desc_key": "desc_switch_5",
+      "label": "副本修罗难度",
+      "enabled": true
+    },
+    {
+      "id": 6,
+      "desc_key": "desc_switch_6",
+      "label": "世界Boss刷新",
+      "enabled": true
+    },
+    {
+      "id": 7,
+      "desc_key": "desc_switch_7",
+      "label": "经脉多开启5条可激活，默认可达到8条",
+      "enabled": true
+    },
+    {
+      "id": 12,
+      "desc_key": "desc_switch_12",
+      "label": "团购",
+      "enabled": true
+    },
+    {
+      "id": 19,
+      "desc_key": "desc_switch_19",
+      "label": "实力赎回活动",
+      "enabled": true
+    },
+    {
+      "id": 24,
+      "desc_key": "desc_switch_24",
+      "label": "华山论剑MVP评选系统是否开启",
+      "enabled": true
+    },
+    {
+      "id": 37,
+      "desc_key": "desc_switch_37",
+      "label": "跨服战场",
+      "enabled": true
+    },
+    {
+      "id": 45,
+      "desc_key": "desc_switch_45",
+      "label": "专家点休闲点功能开关",
+      "enabled": true
+    },
+    {
+      "id": 74,
+      "desc_key": "desc_switch_74",
+      "label": "天梯赛开关",
+      "enabled": true
+    },
+    {
+      "id": 82,
+      "desc_key": "desc_switch_82",
+      "label": "天梯战力荣誉开关",
+      "enabled": true
+    },
+    {
+      "id": 114,
+      "desc_key": "desc_switch_114",
+      "label": "奇遇开关",
+      "enabled": true
+    },
+    {
+      "id": 131,
+      "desc_key": "desc_switch_131",
+      "label": "年兽活动开关",
+      "enabled": true
+    },
+    {
+      "id": 149,
+      "desc_key": "desc_switch_149",
+      "label": "泡温泉日常开关",
+      "enabled": true
+    },
+    {
+      "id": 150,
+      "desc_key": "desc_switch_150",
+      "label": "泡温泉活动开关",
+      "enabled": true
+    },
+    {
+      "id": 152,
+      "desc_key": "desc_switch_152",
+      "label": "“新年迎珍兽 麋鹿闹金陵”活动开关",
+      "enabled": true
+    },
+    {
+      "id": 155,
+      "desc_key": "desc_switch_155",
+      "label": "离线银子异常开关",
+      "enabled": true
+    },
+    {
+      "id": 165,
+      "desc_key": "desc_switch_165",
+      "label": "技能遗忘功能",
+      "enabled": true
+    },
+    {
+      "id": 187,
+      "desc_key": "desc_switch_187",
+      "label": "赶羊玩法开关  ",
+      "enabled": true
+    },
+    {
+      "id": 188,
+      "desc_key": "desc_switch_188",
+      "label": "剧情赶羊玩法开关 (无效)",
+      "enabled": true
+    },
+    {
+      "id": 189,
+      "desc_key": "desc_switch_189",
+      "label": "开匣子玩法开关 ",
+      "enabled": true
+    },
+    {
+      "id": 190,
+      "desc_key": "desc_switch_190",
+      "label": "考古玩法开关 ",
+      "enabled": true
+    },
+    {
+      "id": 191,
+      "desc_key": "desc_switch_191",
+      "label": "挖宝开关 ",
+      "enabled": true
+    },
+    {
+      "id": 192,
+      "desc_key": "desc_switch_192",
+      "label": "刷怪玩法开关 ",
+      "enabled": true
+    },
+    {
+      "id": 193,
+      "desc_key": "desc_switch_193",
+      "label": "剧情事件开关 ",
+      "enabled": true
+    },
+    {
+      "id": 204,
+      "desc_key": "desc_switch_204",
+      "label": "新江湖补给点开关",
+      "enabled": true
+    },
+    {
+      "id": 205,
+      "desc_key": "desc_switch_205",
+      "label": "新江湖隐匿玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 218,
+      "desc_key": "desc_switch_218",
+      "label": "是否需要开始版本验证功能",
+      "enabled": true
+    },
+    {
+      "id": 256,
+      "desc_key": "desc_switch_256",
+      "label": "传统中国年-拜大年活动",
+      "enabled": true
+    },
+    {
+      "id": 258,
+      "desc_key": "desc_switch_258",
+      "label": "神水被盗",
+      "enabled": true
+    },
+    {
+      "id": 270,
+      "desc_key": "desc_switch_270",
+      "label": "苗人来袭",
+      "enabled": true
+    },
+    {
+      "id": 285,
+      "desc_key": "desc_switch_285",
+      "label": "君子传奇第三章",
+      "enabled": true
+    },
+    {
+      "id": 286,
+      "desc_key": "desc_switch_286",
+      "label": "天山洗剑录第三章",
+      "enabled": true
+    },
+    {
+      "id": 287,
+      "desc_key": "desc_switch_287",
+      "label": "凤凰誓第三章",
+      "enabled": true
+    },
+    {
+      "id": 288,
+      "desc_key": "desc_switch_288",
+      "label": "剑无名第三章",
+      "enabled": true
+    },
+    {
+      "id": 289,
+      "desc_key": "desc_switch_289",
+      "label": "6内直升功能",
+      "enabled": true
+    },
+    {
+      "id": 290,
+      "desc_key": "desc_switch_290",
+      "label": "6内直升非名俊",
+      "enabled": true
+    },
+    {
+      "id": 291,
+      "desc_key": "desc_switch_291",
+      "label": "清除叛师CD",
+      "enabled": true
+    },
+    {
+      "id": 296,
+      "desc_key": "desc_switch_296",
+      "label": "结拜系统开关",
+      "enabled": true
+    },
+    {
+      "id": 297,
+      "desc_key": "desc_switch_297",
+      "label": "结拜系统-30天自动解散开关",
+      "enabled": true
+    },
+    {
+      "id": 300,
+      "desc_key": "desc_switch_300",
+      "label": "神行百变奇遇控制开关",
+      "enabled": true
+    },
+    {
+      "id": 304,
+      "desc_key": "desc_switch_304",
+      "label": "新体型开关",
+      "enabled": true
+    },
+    {
+      "id": 329,
+      "desc_key": "desc_switch_329",
+      "label": "第五套武学兑换商店开关",
+      "enabled": true
+    },
+    {
+      "id": 339,
+      "desc_key": "desc_switch_339",
+      "label": "打造台精铸功能",
+      "enabled": true
+    },
+    {
+      "id": 342,
+      "desc_key": "desc_switch_342",
+      "label": "降龙掌法（绝世）参悟开关",
+      "enabled": true
+    },
+    {
+      "id": 343,
+      "desc_key": "desc_switch_343",
+      "label": "谋夺神水开关",
+      "enabled": true
+    },
+    {
+      "id": 357,
+      "desc_key": "desc_switch_357",
+      "label": "凌霄仙城总开关",
+      "enabled": true
+    },
+    {
+      "id": 359,
+      "desc_key": "desc_switch_359",
+      "label": "正修经脉6内开穴位道具兑换",
+      "enabled": true
+    },
+    {
+      "id": 362,
+      "desc_key": "desc_switch_362",
+      "label": "凌霄城兑换界面开关",
+      "enabled": true
+    },
+    {
+      "id": 363,
+      "desc_key": "desc_switch_363",
+      "label": "江湖历程界面五仙教按钮开关",
+      "enabled": true
+    },
+    {
+      "id": 369,
+      "desc_key": "desc_switch_369",
+      "label": "达摩派单人试炼",
+      "enabled": true
+    },
+    {
+      "id": 385,
+      "desc_key": "desc_switch_385",
+      "label": "江湖历练界面达摩派按钮",
+      "enabled": true
+    },
+    {
+      "id": 389,
+      "desc_key": "desc_switch_389",
+      "label": "运镖防外挂小游戏",
+      "enabled": true
+    },
+    {
+      "id": 391,
+      "desc_key": "desc_switch_391",
+      "label": "腊八节豪华礼包开关",
+      "enabled": true
+    },
+    {
+      "id": 506,
+      "desc_key": "desc_switch_506",
+      "label": "是否开启华山论剑功能",
+      "enabled": true
+    },
+    {
+      "id": 507,
+      "desc_key": "desc_switch_507",
+      "label": "是否开启华山论剑观战功能",
+      "enabled": true
+    },
+    {
+      "id": 510,
+      "desc_key": "desc_switch_510",
+      "label": "三盟争霸“天魔八音”参悟开关",
+      "enabled": true
+    },
+    {
+      "id": 511,
+      "desc_key": "desc_switch_511",
+      "label": "武道赐福开关",
+      "enabled": true
+    },
+    {
+      "id": 513,
+      "desc_key": "desc_switch_513",
+      "label": "家园养殖场功能",
+      "enabled": true
+    },
+    {
+      "id": 515,
+      "desc_key": "desc_switch_515",
+      "label": "神机营入门开启开关",
+      "enabled": true
+    },
+    {
+      "id": 516,
+      "desc_key": "desc_switch_516",
+      "label": "神机营出师",
+      "enabled": true
+    },
+    {
+      "id": 517,
+      "desc_key": "desc_switch_517",
+      "label": "神机营判师",
+      "enabled": true
+    },
+    {
+      "id": 520,
+      "desc_key": "desc_switch_520",
+      "label": "九阴通用红包功能",
+      "enabled": true
+    },
+    {
+      "id": 522,
+      "desc_key": "desc_switch_522",
+      "label": "星渺阁入门",
+      "enabled": true
+    },
+    {
+      "id": 525,
+      "desc_key": "desc_switch_525",
+      "label": "泰山封武研修前三发降龙邮件开关",
+      "enabled": true
+    },
+    {
+      "id": 526,
+      "desc_key": "desc_switch_526",
+      "label": "豪侠馈赠活动开关",
+      "enabled": true
+    },
+    {
+      "id": 527,
+      "desc_key": "desc_switch_527",
+      "label": "启用聊天服开关",
+      "enabled": true
+    },
+    {
+      "id": 528,
+      "desc_key": "desc_switch_528",
+      "label": "新-12门派叛师功能",
+      "enabled": true
+    },
+    {
+      "id": 606,
+      "desc_key": "desc_switch_606",
+      "label": "大江湖道具回收开关",
+      "enabled": true
+    },
+    {
+      "id": 611,
+      "desc_key": "desc_switch_611",
+      "label": "隐士教诲开关",
+      "enabled": true
+    },
+    {
+      "id": 625,
+      "desc_key": "desc_switch_625",
+      "label": "四大世家成就奖励领取开关",
+      "enabled": true
+    },
+    {
+      "id": 631,
+      "desc_key": "desc_switch_631",
+      "label": "88版本开篇事件",
+      "enabled": true
+    },
+    {
+      "id": 632,
+      "desc_key": "desc_switch_632",
+      "label": "慕容世家花园开关",
+      "enabled": true
+    },
+    {
+      "id": 638,
+      "desc_key": "desc_switch_638",
+      "label": "帮会运镖开关",
+      "enabled": true
+    },
+    {
+      "id": 639,
+      "desc_key": "desc_switch_639",
+      "label": "帮会祈福开关\t",
+      "enabled": true
+    },
+    {
+      "id": 640,
+      "desc_key": "desc_switch_640",
+      "label": "帮会祭天开关",
+      "enabled": true
+    },
+    {
+      "id": 641,
+      "desc_key": "desc_switch_641",
+      "label": "帮会任务开关",
+      "enabled": true
+    },
+    {
+      "id": 643,
+      "desc_key": "desc_switch_643",
+      "label": "帮主操作限制二级密码功能开关",
+      "enabled": true
+    },
+    {
+      "id": 650,
+      "desc_key": "desc_switch_650",
+      "label": "实名注册弹窗控制开关",
+      "enabled": true
+    },
+    {
+      "id": 651,
+      "desc_key": "desc_switch_651",
+      "label": "实名注册总开关",
+      "enabled": true
+    },
+    {
+      "id": 230,
+      "desc_key": "desc_switch_230",
+      "label": "宝物洗炼技能/套路页签开关",
+      "enabled": true
+    },
+    {
+      "id": 231,
+      "desc_key": "desc_switch_231",
+      "label": "宝物追加洗炼功能开关",
+      "enabled": true
+    },
+    {
+      "id": 655,
+      "desc_key": "desc_switch_655",
+      "label": "宝物修复功能控制开关",
+      "enabled": true
+    },
+    {
+      "id": 2892,
+      "desc_key": "desc_switch_2892",
+      "label": "宝物第二套路开关",
+      "enabled": true
+    },
+    {
+      "id": 657,
+      "desc_key": "desc_switch_657",
+      "label": "逆修开穴位道具开关",
+      "enabled": true
+    },
+    {
+      "id": 659,
+      "desc_key": "desc_switch_659",
+      "label": "四大世家传送开关",
+      "enabled": true
+    },
+    {
+      "id": 661,
+      "desc_key": "desc_switch_661",
+      "label": "四大世家主界面开关",
+      "enabled": true
+    },
+    {
+      "id": 665,
+      "desc_key": "desc_switch_665",
+      "label": "新师徒主体功能开关",
+      "enabled": true
+    },
+    {
+      "id": 667,
+      "desc_key": "desc_switch_667",
+      "label": "分组进入人数上限开关",
+      "enabled": true
+    },
+    {
+      "id": 669,
+      "desc_key": "desc_switch_669",
+      "label": "运镖劫匪开启开关，需要先开启389开关",
+      "enabled": true
+    },
+    {
+      "id": 670,
+      "desc_key": "desc_switch_670",
+      "label": "师徒日常五行试炼开关",
+      "enabled": true
+    },
+    {
+      "id": 674,
+      "desc_key": "desc_switch_674",
+      "label": "伴侣商店单独开关",
+      "enabled": true
+    },
+    {
+      "id": 696,
+      "desc_key": "desc_switch_696",
+      "label": "帮会追杀复仇",
+      "enabled": true
+    },
+    {
+      "id": 698,
+      "desc_key": "desc_switch_698",
+      "label": "家具回收功能开关",
+      "enabled": true
+    },
+    {
+      "id": 701,
+      "desc_key": "desc_switch_701",
+      "label": "南宫世家-水牢玩法，0表示关闭，1表示开启",
+      "enabled": true
+    },
+    {
+      "id": 703,
+      "desc_key": "desc_switch_703",
+      "label": "南宫世家后花园玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 717,
+      "desc_key": "desc_switch_717",
+      "label": "慕容世家-寻书玩法",
+      "enabled": true
+    },
+    {
+      "id": 728,
+      "desc_key": "desc_switch_728",
+      "label": "南宫世家酒幻财气玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 729,
+      "desc_key": "desc_switch_729",
+      "label": "燕门世家剧情任务",
+      "enabled": true
+    },
+    {
+      "id": 730,
+      "desc_key": "desc_switch_730",
+      "label": "东方世家剧情任务",
+      "enabled": true
+    },
+    {
+      "id": 731,
+      "desc_key": "desc_switch_731",
+      "label": "南宫世家剧情任务",
+      "enabled": true
+    },
+    {
+      "id": 732,
+      "desc_key": "desc_switch_732",
+      "label": "慕容世家剧情任务",
+      "enabled": true
+    },
+    {
+      "id": 746,
+      "desc_key": "desc_switch_746",
+      "label": "新师徒发奖开关",
+      "enabled": true
+    },
+    {
+      "id": 747,
+      "desc_key": "desc_switch_747",
+      "label": "师徒恩师榜发奖开关",
+      "enabled": true
+    },
+    {
+      "id": 749,
+      "desc_key": "desc_switch_749",
+      "label": "出师领悟技能开关",
+      "enabled": true
+    },
+    {
+      "id": 750,
+      "desc_key": "desc_switch_750",
+      "label": "三盟界面商店开关",
+      "enabled": true
+    },
+    {
+      "id": 752,
+      "desc_key": "desc_switch_752",
+      "label": "结拜界面商店开关",
+      "enabled": true
+    },
+    {
+      "id": 753,
+      "desc_key": "desc_switch_753",
+      "label": "帮会联盟、帮会联盟频道开关",
+      "enabled": true
+    },
+    {
+      "id": 766,
+      "desc_key": "desc_switch_766",
+      "label": "琴类武学兑换开关",
+      "enabled": true
+    },
+    {
+      "id": 775,
+      "desc_key": "desc_switch_775",
+      "label": "武道大会极效开关",
+      "enabled": true
+    },
+    {
+      "id": 781,
+      "desc_key": "desc_switch_781",
+      "label": "通用成就奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 785,
+      "desc_key": "desc_switch_785",
+      "label": "武道大会邮件奖励发放开关",
+      "enabled": true
+    },
+    {
+      "id": 788,
+      "desc_key": "desc_switch_788",
+      "label": "夫妻剑法招式替换开关",
+      "enabled": true
+    },
+    {
+      "id": 790,
+      "desc_key": "desc_switch_790",
+      "label": "群锋问武战场开关",
+      "enabled": true
+    },
+    {
+      "id": 800,
+      "desc_key": "desc_switch_800",
+      "label": "风物志收集活动暂未开启",
+      "enabled": true
+    },
+    {
+      "id": 801,
+      "desc_key": "desc_switch_801",
+      "label": "该风物志收集活动暂未开启，请关注官网公告活动时间。",
+      "enabled": true
+    },
+    {
+      "id": 802,
+      "desc_key": "desc_switch_802",
+      "label": "风物志收集锦绣团花开关",
+      "enabled": true
+    },
+    {
+      "id": 803,
+      "desc_key": "desc_switch_803",
+      "label": "风物志收集银烛莲炬开关",
+      "enabled": true
+    },
+    {
+      "id": 804,
+      "desc_key": "desc_switch_804",
+      "label": "风物志收集百胜刀鞘开关",
+      "enabled": true
+    },
+    {
+      "id": 805,
+      "desc_key": "desc_switch_805",
+      "label": "风物志收集韶华流紫衣开关",
+      "enabled": true
+    },
+    {
+      "id": 806,
+      "desc_key": "desc_switch_806",
+      "label": "风物志收集金甲战披开关",
+      "enabled": true
+    },
+    {
+      "id": 807,
+      "desc_key": "desc_switch_807",
+      "label": "风物志收集离魂珠影.孽开关",
+      "enabled": true
+    },
+    {
+      "id": 809,
+      "desc_key": "desc_switch_809",
+      "label": "江湖闯荡日常任务开关",
+      "enabled": true
+    },
+    {
+      "id": 813,
+      "desc_key": "desc_switch_813",
+      "label": "奇遇：神行百变残卷（掉落：4天1个）开关",
+      "enabled": true
+    },
+    {
+      "id": 814,
+      "desc_key": "desc_switch_814",
+      "label": "名俊精修自动弹琴",
+      "enabled": true
+    },
+    {
+      "id": 818,
+      "desc_key": "desc_switch_818",
+      "label": "天梯ban选开关",
+      "enabled": true
+    },
+    {
+      "id": 821,
+      "desc_key": "desc_switch_821",
+      "label": "三爪雪猿刷新开关",
+      "enabled": true
+    },
+    {
+      "id": 851,
+      "desc_key": "desc_switch_851",
+      "label": "单人天梯胜场奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 855,
+      "desc_key": "desc_switch_855",
+      "label": "九阴志控制兵录伤害上限",
+      "enabled": true
+    },
+    {
+      "id": 858,
+      "desc_key": "desc_switch_858",
+      "label": "我要变强界面",
+      "enabled": true
+    },
+    {
+      "id": 860,
+      "desc_key": "desc_switch_860",
+      "label": "武道大会-古墓场景",
+      "enabled": true
+    },
+    {
+      "id": 861,
+      "desc_key": "desc_switch_861",
+      "label": "武道大会-雁门关场景",
+      "enabled": true
+    },
+    {
+      "id": 882,
+      "desc_key": "desc_switch_882",
+      "label": "许愿结活动开关",
+      "enabled": true
+    },
+    {
+      "id": 884,
+      "desc_key": "desc_switch_884",
+      "label": "明教场景开关",
+      "enabled": true
+    },
+    {
+      "id": 886,
+      "desc_key": "desc_switch_886",
+      "label": "集卡领奖糖鲤鱼开关",
+      "enabled": true
+    },
+    {
+      "id": 894,
+      "desc_key": "desc_switch_894",
+      "label": "江湖至宝额外修炼值获取玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 897,
+      "desc_key": "desc_switch_897",
+      "label": "花无缺额外购买绣球开关",
+      "enabled": true
+    },
+    {
+      "id": 899,
+      "desc_key": "desc_switch_899",
+      "label": "签到抽奖活动开关",
+      "enabled": true
+    },
+    {
+      "id": 900,
+      "desc_key": "desc_switch_900",
+      "label": "签到抽奖发奖开关",
+      "enabled": true
+    },
+    {
+      "id": 904,
+      "desc_key": "desc_switch_904",
+      "label": "武道演武堂",
+      "enabled": true
+    },
+    {
+      "id": 906,
+      "desc_key": "desc_switch_906",
+      "label": "帮会战3.0玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 907,
+      "desc_key": "desc_switch_907",
+      "label": "帮会战3.0驻地奖励，每周目标奖励",
+      "enabled": true
+    },
+    {
+      "id": 924,
+      "desc_key": "desc_switch_924",
+      "label": "新战斗规则开关",
+      "enabled": true
+    },
+    {
+      "id": 925,
+      "desc_key": "desc_switch_925",
+      "label": "新宗派战（2.0版本）-本服宗派战开关（和926只能同时打开一个）",
+      "enabled": true
+    },
+    {
+      "id": 926,
+      "desc_key": "desc_switch_926",
+      "label": "新宗派战（2.0版本）-跨服宗派战开关（和925只能同时打开一个）",
+      "enabled": true
+    },
+    {
+      "id": 927,
+      "desc_key": "desc_switch_927",
+      "label": "新宗派战（2.0版本）-踢人开关",
+      "enabled": true
+    },
+    {
+      "id": 930,
+      "desc_key": "desc_switch_930",
+      "label": "天山总开关",
+      "enabled": true
+    },
+    {
+      "id": 951,
+      "desc_key": "desc_switch_951",
+      "label": "帮会战3.0王旗文字设置",
+      "enabled": true
+    },
+    {
+      "id": 952,
+      "desc_key": "desc_switch_952",
+      "label": "永夜城梦境玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 955,
+      "desc_key": "desc_switch_955",
+      "label": "天梯奖励每日首胜邮件",
+      "enabled": true
+    },
+    {
+      "id": 958,
+      "desc_key": "desc_switch_958",
+      "label": "神机营场景开关",
+      "enabled": true
+    },
+    {
+      "id": 961,
+      "desc_key": "desc_switch_961",
+      "label": "新奇遇古谱残卷投放",
+      "enabled": true
+    },
+    {
+      "id": 964,
+      "desc_key": "desc_switch_964",
+      "label": "家园树屋道具兑换开关",
+      "enabled": true
+    },
+    {
+      "id": 965,
+      "desc_key": "desc_switch_965",
+      "label": "家园寻宝（矿区）",
+      "enabled": true
+    },
+    {
+      "id": 968,
+      "desc_key": "desc_switch_968",
+      "label": "新服帮会成员实力认证活动",
+      "enabled": true
+    },
+    {
+      "id": 972,
+      "desc_key": "desc_switch_972",
+      "label": "天山派场景总开关",
+      "enabled": true
+    },
+    {
+      "id": 975,
+      "desc_key": "desc_switch_975",
+      "label": "集卡领奖月兔红笼开关",
+      "enabled": true
+    },
+    {
+      "id": 977,
+      "desc_key": "desc_switch_977",
+      "label": "禁地低阶武学商店开关",
+      "enabled": true
+    },
+    {
+      "id": 978,
+      "desc_key": "desc_switch_978",
+      "label": "10月新武技投放开关（螳螂拳、困天刀诀、忘川剑法、天山剑法）",
+      "enabled": true
+    },
+    {
+      "id": 980,
+      "desc_key": "desc_switch_980",
+      "label": "三盟争霸本地战-战场开关（不能与663开关同开）",
+      "enabled": true
+    },
+    {
+      "id": 982,
+      "desc_key": "desc_switch_982",
+      "label": "星渺阁师门大会",
+      "enabled": true
+    },
+    {
+      "id": 983,
+      "desc_key": "desc_switch_983",
+      "label": "星渺阁师门大会场景",
+      "enabled": true
+    },
+    {
+      "id": 984,
+      "desc_key": "desc_switch_984",
+      "label": "星渺阁周常-观潮练剑",
+      "enabled": true
+    },
+    {
+      "id": 986,
+      "desc_key": "desc_switch_986",
+      "label": "灵运卜算开关",
+      "enabled": true
+    },
+    {
+      "id": 987,
+      "desc_key": "desc_switch_987",
+      "label": "群锋问武节日赠礼",
+      "enabled": true
+    },
+    {
+      "id": 989,
+      "desc_key": "desc_switch_989",
+      "label": "永夜城-冥岳势力玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 990,
+      "desc_key": "desc_switch_990",
+      "label": "隐王峰风物志必定掉落",
+      "enabled": true
+    },
+    {
+      "id": 991,
+      "desc_key": "desc_switch_991",
+      "label": "禁地超员踢出禁地",
+      "enabled": true
+    },
+    {
+      "id": 992,
+      "desc_key": "desc_switch_992",
+      "label": "退出传记剧情开关",
+      "enabled": true
+    },
+    {
+      "id": 993,
+      "desc_key": "desc_switch_993",
+      "label": "完颜拉索活动开关",
+      "enabled": true
+    },
+    {
+      "id": 994,
+      "desc_key": "desc_switch_994",
+      "label": "化地老祖活动开关",
+      "enabled": true
+    },
+    {
+      "id": 996,
+      "desc_key": "desc_switch_996",
+      "label": "五一活动-打扫家园",
+      "enabled": true
+    },
+    {
+      "id": 1003,
+      "desc_key": "desc_switch_1003",
+      "label": "生活技能大挑战",
+      "enabled": true
+    },
+    {
+      "id": 1004,
+      "desc_key": "desc_switch_1004",
+      "label": "苦心修炼争第一",
+      "enabled": true
+    },
+    {
+      "id": 1005,
+      "desc_key": "desc_switch_1005",
+      "label": "帮派风云,开帮立派结兄弟",
+      "enabled": true
+    },
+    {
+      "id": 1006,
+      "desc_key": "desc_switch_1006",
+      "label": "轻功初体验,飞檐走壁闯武林",
+      "enabled": true
+    },
+    {
+      "id": 1014,
+      "desc_key": "desc_switch_1014",
+      "label": "入门派，送豪礼",
+      "enabled": true
+    },
+    {
+      "id": 1022,
+      "desc_key": "desc_switch_1022",
+      "label": "砸蛋活动",
+      "enabled": true
+    },
+    {
+      "id": 1027,
+      "desc_key": "desc_switch_1027",
+      "label": "种植玫瑰花 浪漫情人节",
+      "enabled": true
+    },
+    {
+      "id": 1028,
+      "desc_key": "desc_switch_1028",
+      "label": "赠送采集体验书",
+      "enabled": true
+    },
+    {
+      "id": 1029,
+      "desc_key": "desc_switch_1029",
+      "label": "巨兽精华兑换商店",
+      "enabled": true
+    },
+    {
+      "id": 1036,
+      "desc_key": "desc_switch_1036",
+      "label": "仗剑同行活动",
+      "enabled": true
+    },
+    {
+      "id": 1045,
+      "desc_key": "desc_switch_1045",
+      "label": "传统中国年·杀年猪活动开关",
+      "enabled": true
+    },
+    {
+      "id": 1046,
+      "desc_key": "desc_switch_1046",
+      "label": "传统中国年·驱年兽活动开关",
+      "enabled": true
+    },
+    {
+      "id": 1069,
+      "desc_key": "desc_switch_1069",
+      "label": "跨服失败时删除本服跨服信息",
+      "enabled": true
+    },
+    {
+      "id": 1070,
+      "desc_key": "desc_switch_1070",
+      "label": "跨服时进行异步等待",
+      "enabled": true
+    },
+    {
+      "id": 1073,
+      "desc_key": "desc_switch_1073",
+      "label": "永夜城剧情任务开关",
+      "enabled": true
+    },
+    {
+      "id": 1075,
+      "desc_key": "desc_switch_1075",
+      "label": "永夜城-双子BOSS",
+      "enabled": true
+    },
+    {
+      "id": 1076,
+      "desc_key": "desc_switch_1076",
+      "label": "永夜城-场景开关",
+      "enabled": true
+    },
+    {
+      "id": 1077,
+      "desc_key": "desc_switch_1077",
+      "label": "永夜城-独夜行",
+      "enabled": true
+    },
+    {
+      "id": 1078,
+      "desc_key": "desc_switch_1078",
+      "label": "永夜城主线第七章沼泽玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 1082,
+      "desc_key": "desc_switch_1082",
+      "label": "鬼市拍卖行",
+      "enabled": true
+    },
+    {
+      "id": 1083,
+      "desc_key": "desc_switch_1083",
+      "label": "世界BOSS伤害统计日志",
+      "enabled": true
+    },
+    {
+      "id": 1084,
+      "desc_key": "desc_switch_1084",
+      "label": "闯荡四海功能未开启，敬请期待！",
+      "enabled": true
+    },
+    {
+      "id": 1086,
+      "desc_key": "desc_switch_1086",
+      "label": "闯荡四海-99进阶兑换开关",
+      "enabled": true
+    },
+    {
+      "id": 1087,
+      "desc_key": "desc_switch_1087",
+      "label": "鬼市玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 1089,
+      "desc_key": "desc_switch_1089",
+      "label": "世界竞拍审核",
+      "enabled": true
+    },
+    {
+      "id": 1090,
+      "desc_key": "desc_switch_1090",
+      "label": "自动关闭阴影质量开关",
+      "enabled": true
+    },
+    {
+      "id": 1091,
+      "desc_key": "desc_switch_1091",
+      "label": "勇闯禁地获萌宠活动",
+      "enabled": true
+    },
+    {
+      "id": 1093,
+      "desc_key": "desc_switch_1093",
+      "label": "云峰决战开关",
+      "enabled": true
+    },
+    {
+      "id": 1094,
+      "desc_key": "desc_switch_1094",
+      "label": "武道争锋悟道等级",
+      "enabled": true
+    },
+    {
+      "id": 1096,
+      "desc_key": "desc_switch_1096",
+      "label": "净天宫--修行检验",
+      "enabled": true
+    },
+    {
+      "id": 1099,
+      "desc_key": "desc_switch_1099",
+      "label": "防心魔无限刷外挂开关",
+      "enabled": true
+    },
+    {
+      "id": 1101,
+      "desc_key": "desc_switch_1101",
+      "label": "英雄帖功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1102,
+      "desc_key": "desc_switch_1102",
+      "label": "武道梳妆阁",
+      "enabled": true
+    },
+    {
+      "id": 1104,
+      "desc_key": "desc_switch_1104",
+      "label": "英雄帖禁言",
+      "enabled": true
+    },
+    {
+      "id": 1106,
+      "desc_key": "desc_switch_1106",
+      "label": "天弈谷传送门开关",
+      "enabled": true
+    },
+    {
+      "id": 1107,
+      "desc_key": "desc_switch_1107",
+      "label": "英雄帖禁言拦截",
+      "enabled": true
+    },
+    {
+      "id": 1108,
+      "desc_key": "desc_switch_1108",
+      "label": "英雄帖发言手机验证",
+      "enabled": true
+    },
+    {
+      "id": 1109,
+      "desc_key": "desc_switch_1109",
+      "label": "隐鳞棋局玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 1110,
+      "desc_key": "desc_switch_1110",
+      "label": "隐鳞棋局红包功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1113,
+      "desc_key": "desc_switch_1113",
+      "label": "宗门双倍助修行开关",
+      "enabled": true
+    },
+    {
+      "id": 1114,
+      "desc_key": "desc_switch_1114",
+      "label": "造化点迷津开关",
+      "enabled": true
+    },
+    {
+      "id": 1115,
+      "desc_key": "desc_switch_1115",
+      "label": "夺书护书手机验证（无效）",
+      "enabled": true
+    },
+    {
+      "id": 1116,
+      "desc_key": "desc_switch_1116",
+      "label": "昆仑派总开关",
+      "enabled": true
+    },
+    {
+      "id": 1121,
+      "desc_key": "desc_switch_1121",
+      "label": "玩家累计消费金额统计功能（包含火浣台洗练）",
+      "enabled": true
+    },
+    {
+      "id": 1122,
+      "desc_key": "desc_switch_1122",
+      "label": "手机号禁止参加活动开关",
+      "enabled": true
+    },
+    {
+      "id": 1123,
+      "desc_key": "desc_switch_1123",
+      "label": "十二生肖任务开关",
+      "enabled": true
+    },
+    {
+      "id": 1124,
+      "desc_key": "desc_switch_1124",
+      "label": "昆仑派场景传送门开关",
+      "enabled": true
+    },
+    {
+      "id": 1125,
+      "desc_key": "desc_switch_1125",
+      "label": "帮会多宝格分配功能",
+      "enabled": true
+    },
+    {
+      "id": 1127,
+      "desc_key": "desc_switch_1127",
+      "label": "豪侠成长-锦绣江山",
+      "enabled": true
+    },
+    {
+      "id": 1128,
+      "desc_key": "desc_switch_1128",
+      "label": "十二生肖奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 1130,
+      "desc_key": "desc_switch_1130",
+      "label": "手机号禁止发邮件开关",
+      "enabled": true
+    },
+    {
+      "id": 1131,
+      "desc_key": "desc_switch_1131",
+      "label": "师徒推送开关",
+      "enabled": true
+    },
+    {
+      "id": 1135,
+      "desc_key": "desc_switch_1135",
+      "label": "鼠咬开天剧情开关",
+      "enabled": true
+    },
+    {
+      "id": 1136,
+      "desc_key": "desc_switch_1136",
+      "label": "邮件禁止编辑英文",
+      "enabled": true
+    },
+    {
+      "id": 1138,
+      "desc_key": "desc_switch_1138",
+      "label": "天涯海阁师门大会开关",
+      "enabled": true
+    },
+    {
+      "id": 1141,
+      "desc_key": "desc_switch_1141",
+      "label": "帮会参战列表",
+      "enabled": true
+    },
+    {
+      "id": 1142,
+      "desc_key": "desc_switch_1142",
+      "label": "天涯海阁出师",
+      "enabled": true
+    },
+    {
+      "id": 1143,
+      "desc_key": "desc_switch_1143",
+      "label": "天涯海阁判师",
+      "enabled": true
+    },
+    {
+      "id": 1149,
+      "desc_key": "desc_switch_1149",
+      "label": "天涯海阁海阁试炼开关",
+      "enabled": true
+    },
+    {
+      "id": 1150,
+      "desc_key": "desc_switch_1150",
+      "label": "天涯海阁入门",
+      "enabled": true
+    },
+    {
+      "id": 1151,
+      "desc_key": "desc_switch_1151",
+      "label": "天涯海阁场景开关",
+      "enabled": true
+    },
+    {
+      "id": 1154,
+      "desc_key": "desc_switch_1154",
+      "label": "豪侠成长-天心取米",
+      "enabled": true
+    },
+    {
+      "id": 1156,
+      "desc_key": "desc_switch_1156",
+      "label": "豪侠成长-洛阳蛊劫",
+      "enabled": true
+    },
+    {
+      "id": 1157,
+      "desc_key": "desc_switch_1157",
+      "label": "豪侠成长-界面显示",
+      "enabled": true
+    },
+    {
+      "id": 1162,
+      "desc_key": "desc_switch_1162",
+      "label": "牛气冲天好运来",
+      "enabled": true
+    },
+    {
+      "id": 1163,
+      "desc_key": "desc_switch_1163",
+      "label": "千万灌注赠豪杰开关",
+      "enabled": true
+    },
+    {
+      "id": 1165,
+      "desc_key": "desc_switch_1165",
+      "label": "四内阶段通用隐世奇遇入门任务",
+      "enabled": true
+    },
+    {
+      "id": 1166,
+      "desc_key": "desc_switch_1166",
+      "label": "GMCC客服联系凭证发放功能",
+      "enabled": true
+    },
+    {
+      "id": 1167,
+      "desc_key": "desc_switch_1167",
+      "label": "21年4月剧情",
+      "enabled": true
+    },
+    {
+      "id": 1168,
+      "desc_key": "desc_switch_1168",
+      "label": "ai长时间无法攻击自动脱战(默认开启)",
+      "enabled": true
+    },
+    {
+      "id": 1169,
+      "desc_key": "desc_switch_1169",
+      "label": "GMCC总开关",
+      "enabled": true
+    },
+    {
+      "id": 1170,
+      "desc_key": "desc_switch_1170",
+      "label": "修正切换装备卡顿开关",
+      "enabled": true
+    },
+    {
+      "id": 1172,
+      "desc_key": "desc_switch_1172",
+      "label": "天轮寺身份晋级开关",
+      "enabled": true
+    },
+    {
+      "id": 1173,
+      "desc_key": "desc_switch_1173",
+      "label": "天轮寺-禅杖来也活动开关",
+      "enabled": true
+    },
+    {
+      "id": 1174,
+      "desc_key": "desc_switch_1174",
+      "label": "新手机助手连接集市APP开关",
+      "enabled": true
+    },
+    {
+      "id": 1181,
+      "desc_key": "desc_switch_1181",
+      "label": "天轮寺--是美酒先动的手",
+      "enabled": true
+    },
+    {
+      "id": 1182,
+      "desc_key": "desc_switch_1182",
+      "label": "天轮寺--天轮寺双倍声望活动",
+      "enabled": true
+    },
+    {
+      "id": 1183,
+      "desc_key": "desc_switch_1183",
+      "label": "天轮寺场景开关",
+      "enabled": true
+    },
+    {
+      "id": 1184,
+      "desc_key": "desc_switch_1184",
+      "label": "天轮寺叛师、出师开关",
+      "enabled": true
+    },
+    {
+      "id": 1185,
+      "desc_key": "desc_switch_1185",
+      "label": "天轮寺入门",
+      "enabled": true
+    },
+    {
+      "id": 1186,
+      "desc_key": "desc_switch_1186",
+      "label": "全服禁言功能（慎用、应急）",
+      "enabled": true
+    },
+    {
+      "id": 1187,
+      "desc_key": "desc_switch_1187",
+      "label": "开关控制世界BOSS类型没开不处理 开了会强制改类型WorldBossBornFix",
+      "enabled": true
+    },
+    {
+      "id": 1188,
+      "desc_key": "desc_switch_1188",
+      "label": "检测客户端文件MD5信息",
+      "enabled": true
+    },
+    {
+      "id": 1192,
+      "desc_key": "desc_switch_1192",
+      "label": "版本推送界面开关",
+      "enabled": true
+    },
+    {
+      "id": 1193,
+      "desc_key": "desc_switch_1193",
+      "label": "帮会追击功能",
+      "enabled": true
+    },
+    {
+      "id": 1194,
+      "desc_key": "desc_switch_1194",
+      "label": "帮会追击悬赏分红",
+      "enabled": true
+    },
+    {
+      "id": 1205,
+      "desc_key": "desc_switch_1205",
+      "label": "部分聊天频道禁言",
+      "enabled": true
+    },
+    {
+      "id": 1206,
+      "desc_key": "desc_switch_1206",
+      "label": "青衣阁判师、出师开关",
+      "enabled": true
+    },
+    {
+      "id": 1208,
+      "desc_key": "desc_switch_1208",
+      "label": "青衣阁-“惩恶扬善”活动开关",
+      "enabled": true
+    },
+    {
+      "id": 1210,
+      "desc_key": "desc_switch_1210",
+      "label": "青衣阁-场景开关",
+      "enabled": true
+    },
+    {
+      "id": 1211,
+      "desc_key": "desc_switch_1211",
+      "label": "青衣阁-外敌来袭开关",
+      "enabled": true
+    },
+    {
+      "id": 1212,
+      "desc_key": "desc_switch_1212",
+      "label": "青衣阁-阁内试炼开关",
+      "enabled": true
+    },
+    {
+      "id": 1213,
+      "desc_key": "desc_switch_1213",
+      "label": "青衣阁双倍声望活动",
+      "enabled": true
+    },
+    {
+      "id": 1214,
+      "desc_key": "desc_switch_1214",
+      "label": "青衣阁-入门任务开关",
+      "enabled": true
+    },
+    {
+      "id": 1215,
+      "desc_key": "desc_switch_1215",
+      "label": "帮会追击免戕屠开关",
+      "enabled": true
+    },
+    {
+      "id": 1217,
+      "desc_key": "desc_switch_1217",
+      "label": "帮会对决开关",
+      "enabled": true
+    },
+    {
+      "id": 1219,
+      "desc_key": "desc_switch_1219",
+      "label": "帮会对决新年奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 1222,
+      "desc_key": "desc_switch_1222",
+      "label": "宗派职位权限控制功能",
+      "enabled": true
+    },
+    {
+      "id": 1224,
+      "desc_key": "desc_switch_1224",
+      "label": "望辉洲师门大会",
+      "enabled": true
+    },
+    {
+      "id": 1251,
+      "desc_key": "desc_switch_1251",
+      "label": "“天涯比邻”玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 1253,
+      "desc_key": "desc_switch_1253",
+      "label": "新成长助力-装备",
+      "enabled": true
+    },
+    {
+      "id": 1254,
+      "desc_key": "desc_switch_1254",
+      "label": "新成长助力-宝物",
+      "enabled": true
+    },
+    {
+      "id": 1256,
+      "desc_key": "desc_switch_1256",
+      "label": "新成长助力-娃娃",
+      "enabled": true
+    },
+    {
+      "id": 1257,
+      "desc_key": "desc_switch_1257",
+      "label": "新成长助力-总开关",
+      "enabled": true
+    },
+    {
+      "id": 1259,
+      "desc_key": "desc_switch_1259",
+      "label": "全服排行榜",
+      "enabled": true
+    },
+    {
+      "id": 1260,
+      "desc_key": "desc_switch_1260",
+      "label": "全服排行榜奖励",
+      "enabled": true
+    },
+    {
+      "id": 1261,
+      "desc_key": "desc_switch_1261",
+      "label": "万影镜天全服活动",
+      "enabled": true
+    },
+    {
+      "id": 1262,
+      "desc_key": "desc_switch_1262",
+      "label": "势力绘卷",
+      "enabled": true
+    },
+    {
+      "id": 1264,
+      "desc_key": "desc_switch_1264",
+      "label": "角色助力全禁地开关",
+      "enabled": true
+    },
+    {
+      "id": 1265,
+      "desc_key": "desc_switch_1265",
+      "label": "战令",
+      "enabled": true
+    },
+    {
+      "id": 1266,
+      "desc_key": "desc_switch_1266",
+      "label": "授业丹",
+      "enabled": true
+    },
+    {
+      "id": 1267,
+      "desc_key": "desc_switch_1267",
+      "label": "跨服BOSS-荒原苍狼开关",
+      "enabled": true
+    },
+    {
+      "id": 1268,
+      "desc_key": "desc_switch_1268",
+      "label": "家园-新衣架",
+      "enabled": true
+    },
+    {
+      "id": 1269,
+      "desc_key": "desc_switch_1269",
+      "label": "九宫探宝",
+      "enabled": true
+    },
+    {
+      "id": 1272,
+      "desc_key": "desc_switch_1272",
+      "label": "刑天城宗门大会",
+      "enabled": true
+    },
+    {
+      "id": 1277,
+      "desc_key": "desc_switch_1277",
+      "label": "包裹助手",
+      "enabled": true
+    },
+    {
+      "id": 1278,
+      "desc_key": "desc_switch_1278",
+      "label": "3V3拭剑问道",
+      "enabled": true
+    },
+    {
+      "id": 1284,
+      "desc_key": "desc_switch_1284",
+      "label": "挑战禁地开启开关",
+      "enabled": true
+    },
+    {
+      "id": 1285,
+      "desc_key": "desc_switch_1285",
+      "label": "望辉洲出师、叛师开关",
+      "enabled": true
+    },
+    {
+      "id": 1287,
+      "desc_key": "desc_switch_1287",
+      "label": "望辉洲双倍奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 1290,
+      "desc_key": "desc_switch_1290",
+      "label": "望辉洲奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 1291,
+      "desc_key": "desc_switch_1291",
+      "label": "望辉洲事件开关",
+      "enabled": true
+    },
+    {
+      "id": 1292,
+      "desc_key": "desc_switch_1292",
+      "label": "望辉洲场景开关",
+      "enabled": true
+    },
+    {
+      "id": 1294,
+      "desc_key": "desc_switch_1294",
+      "label": "官银消耗条件判断",
+      "enabled": true
+    },
+    {
+      "id": 1296,
+      "desc_key": "desc_switch_1296",
+      "label": "浮花诀（墨玦）竞拍开关",
+      "enabled": true
+    },
+    {
+      "id": 1299,
+      "desc_key": "desc_switch_1299",
+      "label": "张丹灵传",
+      "enabled": true
+    },
+    {
+      "id": 1301,
+      "desc_key": "desc_switch_1301",
+      "label": "追杀目标最低实力设置开关",
+      "enabled": true
+    },
+    {
+      "id": 1303,
+      "desc_key": "desc_switch_1303",
+      "label": "逐鹿金乌",
+      "enabled": true
+    },
+    {
+      "id": 1304,
+      "desc_key": "desc_switch_1304",
+      "label": "帮会禅让强制1分钟CD开关",
+      "enabled": true
+    },
+    {
+      "id": 1305,
+      "desc_key": "desc_switch_1305",
+      "label": "取消帮会踢人限制开关",
+      "enabled": true
+    },
+    {
+      "id": 1306,
+      "desc_key": "desc_switch_1306",
+      "label": "世界宝箱玩法",
+      "enabled": true
+    },
+    {
+      "id": 1309,
+      "desc_key": "desc_switch_1309",
+      "label": "精绝古国—异教侵蚀",
+      "enabled": true
+    },
+    {
+      "id": 1310,
+      "desc_key": "desc_switch_1310",
+      "label": "精绝古国—马贼突袭",
+      "enabled": true
+    },
+    {
+      "id": 1311,
+      "desc_key": "desc_switch_1311",
+      "label": "新世界boss玩法",
+      "enabled": true
+    },
+    {
+      "id": 1312,
+      "desc_key": "desc_switch_1312",
+      "label": "新世界boss玩法-团队（酒狂）",
+      "enabled": true
+    },
+    {
+      "id": 1313,
+      "desc_key": "desc_switch_1313",
+      "label": "新世界boss玩法-小队（金乌岛精英）",
+      "enabled": true
+    },
+    {
+      "id": 1314,
+      "desc_key": "desc_switch_1314",
+      "label": "金乌岛突袭玩法",
+      "enabled": true
+    },
+    {
+      "id": 1317,
+      "desc_key": "desc_switch_1317",
+      "label": "天势逆境-万年火龟",
+      "enabled": true
+    },
+    {
+      "id": 1318,
+      "desc_key": "desc_switch_1318",
+      "label": "天势逆境-姑苏密藏",
+      "enabled": true
+    },
+    {
+      "id": 1320,
+      "desc_key": "desc_switch_1320",
+      "label": "战斗状态下远距离移动moveto日志记录",
+      "enabled": true
+    },
+    {
+      "id": 1321,
+      "desc_key": "desc_switch_1321",
+      "label": "战斗状态下切场景switch日志记录",
+      "enabled": true
+    },
+    {
+      "id": 1322,
+      "desc_key": "desc_switch_1322",
+      "label": "虚无之境功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1326,
+      "desc_key": "desc_switch_1326",
+      "label": "佳肴美宴助修行",
+      "enabled": true
+    },
+    {
+      "id": 1329,
+      "desc_key": "desc_switch_1329",
+      "label": "邮件锁(开关开启，防止邮件丢失)",
+      "enabled": true
+    },
+    {
+      "id": 1330,
+      "desc_key": "desc_switch_1330",
+      "label": "新武林争锋功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1334,
+      "desc_key": "desc_switch_1334",
+      "label": "新武林争锋挂机惩罚检测功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1337,
+      "desc_key": "desc_switch_1337",
+      "label": "精绝古城跨服主逻辑功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1342,
+      "desc_key": "desc_switch_1342",
+      "label": "真武风华节界面开关",
+      "enabled": true
+    },
+    {
+      "id": 1344,
+      "desc_key": "desc_switch_1344",
+      "label": "古墓房间分配开关",
+      "enabled": true
+    },
+    {
+      "id": 1345,
+      "desc_key": "desc_switch_1345",
+      "label": "邮件一键领取、删除开关",
+      "enabled": true
+    },
+    {
+      "id": 1354,
+      "desc_key": "desc_switch_1354",
+      "label": "黄金兑换整银手机验证开关",
+      "enabled": true
+    },
+    {
+      "id": 1361,
+      "desc_key": "desc_switch_1361",
+      "label": "宝藏岛开关",
+      "enabled": true
+    },
+    {
+      "id": 1362,
+      "desc_key": "desc_switch_1362",
+      "label": "“侠路相逢”功能开关",
+      "enabled": true
+    },
+    {
+      "id": 1365,
+      "desc_key": "desc_switch_1365",
+      "label": "结伴同行系统",
+      "enabled": true
+    },
+    {
+      "id": 1370,
+      "desc_key": "desc_switch_1370",
+      "label": "巫墟师门大会开关",
+      "enabled": true
+    },
+    {
+      "id": 1376,
+      "desc_key": "desc_switch_1376",
+      "label": "风华节活动弹窗",
+      "enabled": true
+    },
+    {
+      "id": 1377,
+      "desc_key": "desc_switch_1377",
+      "label": "打狗古朴签到活动商店开关",
+      "enabled": true
+    },
+    {
+      "id": 1384,
+      "desc_key": "desc_switch_1384",
+      "label": "帮会联赛3龙争虎斗",
+      "enabled": true
+    },
+    {
+      "id": 1386,
+      "desc_key": "desc_switch_1386",
+      "label": "新长乐坊师门大会开关",
+      "enabled": true
+    },
+    {
+      "id": 1388,
+      "desc_key": "desc_switch_1388",
+      "label": "帮会繁荣度人数加成生效开关",
+      "enabled": true
+    },
+    {
+      "id": 1391,
+      "desc_key": "desc_switch_1391",
+      "label": "沧海一笑合服补偿",
+      "enabled": true
+    },
+    {
+      "id": 1392,
+      "desc_key": "desc_switch_139_2",
+      "label": "恭喜您所在的服务器获得奖励buff，请注意运营活动说明",
+      "enabled": true
+    },
+    {
+      "id": 1402,
+      "desc_key": "desc_switch_140_2",
+      "label": "<s>百万巨奖全新赛制，《九阴真经》第二届武林大会12月全面开启，邀你一起武动全球！<br><s>12月1日起，第二届武林大会豪杰赛和精英赛海选分别依托游戏内天梯擂台和八派会武 同步开启，神州群侠争天下第一，百万级现金大奖，江湖至尊屠龙刀鞘、倚天剑鞘馈赠 豪侠！第二届武林大会邀你共战江湖！现在打开天梯排行即可查看最新排名。",
+      "enabled": true
+    },
+    {
+      "id": 1413,
+      "desc_key": "desc_switch_141_3",
+      "label": "普天同庆，开服登录历练转换欢乐送，期间在线历练转换速度提升100%！",
+      "enabled": true
+    },
+    {
+      "id": 2002,
+      "desc_key": "desc_switch_2002",
+      "label": "盛大客户端开启帮会YY",
+      "enabled": true
+    },
+    {
+      "id": 2003,
+      "desc_key": "desc_switch_2003",
+      "label": "欢乐周末禁地伤害翻倍",
+      "enabled": true
+    },
+    {
+      "id": 2008,
+      "desc_key": "desc_switch_2008",
+      "label": "夫妻奇遇武学投放",
+      "enabled": true
+    },
+    {
+      "id": 2017,
+      "desc_key": "desc_switch_2017",
+      "label": "月签到",
+      "enabled": true
+    },
+    {
+      "id": 2021,
+      "desc_key": "desc_switch_2021",
+      "label": "移花宫双倍声望活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2022,
+      "desc_key": "desc_switch_2022",
+      "label": "第一轩双倍声望活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2023,
+      "desc_key": "desc_switch_2023",
+      "label": "徐家庄双倍声望活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2024,
+      "desc_key": "desc_switch_2024",
+      "label": "万兽双倍声望活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2025,
+      "desc_key": "desc_switch_2025",
+      "label": "金针双倍声望活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2026,
+      "desc_key": "desc_switch_2026",
+      "label": "无根门双倍声望活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2027,
+      "desc_key": "desc_switch_2027",
+      "label": "安全月活动(账号安全登陆推广)",
+      "enabled": true
+    },
+    {
+      "id": 2028,
+      "desc_key": "desc_switch_2028",
+      "label": "在线答题活动",
+      "enabled": true
+    },
+    {
+      "id": 2029,
+      "desc_key": "desc_switch_2029",
+      "label": "心魔4内经脉开启道具兑换商店开关",
+      "enabled": true
+    },
+    {
+      "id": 2037,
+      "desc_key": "desc_switch_2037",
+      "label": "活动：舌尖上的中国活动",
+      "enabled": true
+    },
+    {
+      "id": 2092,
+      "desc_key": "desc_switch_2092",
+      "label": "清明节祭拜先皇",
+      "enabled": true
+    },
+    {
+      "id": 2111,
+      "desc_key": "desc_switch_2111",
+      "label": "极效运营活动界面开关",
+      "enabled": true
+    },
+    {
+      "id": 2113,
+      "desc_key": "desc_switch_2113",
+      "label": "清明纸鸢活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2115,
+      "desc_key": "desc_switch_2115",
+      "label": "明教对练玩法开关",
+      "enabled": true
+    },
+    {
+      "id": 2116,
+      "desc_key": "desc_switch_2116",
+      "label": "夺书玩法总开关",
+      "enabled": true
+    },
+    {
+      "id": 2119,
+      "desc_key": "desc_switch_2119",
+      "label": "重阳节采茱萸采菊花开关",
+      "enabled": true
+    },
+    {
+      "id": 2120,
+      "desc_key": "desc_switch_2120",
+      "label": "重阳节四季老人兑换商店开关",
+      "enabled": true
+    },
+    {
+      "id": 2121,
+      "desc_key": "desc_switch_2121",
+      "label": "隐世门派【除望辉洲】新日常周常双倍奖励开关",
+      "enabled": true
+    },
+    {
+      "id": 2126,
+      "desc_key": "desc_switch_2126",
+      "label": "千锤百炼活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2127,
+      "desc_key": "desc_switch_2127",
+      "label": "逆境训练活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2128,
+      "desc_key": "desc_switch_2128",
+      "label": "守卫大营活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2129,
+      "desc_key": "desc_switch_2129",
+      "label": "挂机答题处罚开关",
+      "enabled": true
+    },
+    {
+      "id": 2130,
+      "desc_key": "desc_switch_2130",
+      "label": "挂机极效处罚开关",
+      "enabled": true
+    },
+    {
+      "id": 2131,
+      "desc_key": "desc_switch_2131",
+      "label": "江南烟云剧情开关",
+      "enabled": true
+    },
+    {
+      "id": 2132,
+      "desc_key": "desc_switch_2132",
+      "label": "星渺阁周常-演武台挑战开关",
+      "enabled": true
+    },
+    {
+      "id": 2134,
+      "desc_key": "desc_switch_2134",
+      "label": "星渺阁周常-门派巡视开关",
+      "enabled": true
+    },
+    {
+      "id": 2135,
+      "desc_key": "desc_switch_2135",
+      "label": "星渺阁出师",
+      "enabled": true
+    },
+    {
+      "id": 2136,
+      "desc_key": "desc_switch_2136",
+      "label": "星渺阁判师",
+      "enabled": true
+    },
+    {
+      "id": 2137,
+      "desc_key": "desc_switch_2137",
+      "label": "星渺阁剧情任务开关",
+      "enabled": true
+    },
+    {
+      "id": 2138,
+      "desc_key": "desc_switch_2138",
+      "label": "新旧勤修界面切换开关",
+      "enabled": true
+    },
+    {
+      "id": 2139,
+      "desc_key": "desc_switch_2139",
+      "label": "手机号月签到开关",
+      "enabled": true
+    },
+    {
+      "id": 2140,
+      "desc_key": "desc_switch_2140",
+      "label": "萧别情传记第一章",
+      "enabled": true
+    },
+    {
+      "id": 2141,
+      "desc_key": "desc_switch_2141",
+      "label": "萧别情传记第二章",
+      "enabled": true
+    },
+    {
+      "id": 2142,
+      "desc_key": "desc_switch_2142",
+      "label": "萧别情传记第三章",
+      "enabled": true
+    },
+    {
+      "id": 2143,
+      "desc_key": "desc_switch_2143",
+      "label": "萧别情传记第四章",
+      "enabled": true
+    },
+    {
+      "id": 2146,
+      "desc_key": "desc_switch_2146",
+      "label": "帮会积分分红",
+      "enabled": true
+    },
+    {
+      "id": 2147,
+      "desc_key": "desc_switch_2147",
+      "label": "年猪讨彩开关",
+      "enabled": true
+    },
+    {
+      "id": 2148,
+      "desc_key": "desc_switch_2148",
+      "label": "签到送江湖内75和隐士81兑换",
+      "enabled": true
+    },
+    {
+      "id": 2505,
+      "desc_key": "desc_switch_2505",
+      "label": "鸳鸯双刀武学典藏礼花兑换开关",
+      "enabled": true
+    },
+    {
+      "id": 2506,
+      "desc_key": "desc_switch_2506",
+      "label": "九宫剑法武学典藏礼花兑换开关",
+      "enabled": true
+    },
+    {
+      "id": 2811,
+      "desc_key": "desc_switch_2811",
+      "label": "三盟争霸伤害统计表功能日志开关",
+      "enabled": true
+    },
+    {
+      "id": 2819,
+      "desc_key": "desc_switch_2819",
+      "label": "周末活跃度活动开关",
+      "enabled": true
+    },
+    {
+      "id": 2820,
+      "desc_key": "desc_switch_2820",
+      "label": "套路团练功能",
+      "enabled": true
+    },
+    {
+      "id": 2821,
+      "desc_key": "desc_switch_2821",
+      "label": "星渺阁活动-迷阵狩猎开关",
+      "enabled": true
+    },
+    {
+      "id": 2822,
+      "desc_key": "desc_switch_2822",
+      "label": "星渺阁-场景开关",
+      "enabled": true
+    },
+    {
+      "id": 2823,
+      "desc_key": "desc_switch_2823",
+      "label": "星渺阁活动-星渺试炼开关",
+      "enabled": true
+    },
+    {
+      "id": 2824,
+      "desc_key": "desc_switch_2824",
+      "label": "星渺阁日常-冥思垂钓开关",
+      "enabled": true
+    },
+    {
+      "id": 2831,
+      "desc_key": "desc_switch_2831",
+      "label": "古谱武技分解功能开关",
+      "enabled": true
+    },
+    {
+      "id": 2837,
+      "desc_key": "desc_switch_2837",
+      "label": "属性奖励通用功能开关",
+      "enabled": true
+    },
+    {
+      "id": 2838,
+      "desc_key": "desc_switch_2838",
+      "label": "永夜城主界面开关",
+      "enabled": true
+    },
+    {
+      "id": 2840,
+      "desc_key": "desc_switch_2840",
+      "label": "心魔活动额外掉落通用开关控制",
+      "enabled": true
+    },
+    {
+      "id": 2841,
+      "desc_key": "desc_switch_2841",
+      "label": "使用技能二级密码限制",
+      "enabled": true
+    },
+    {
+      "id": 2842,
+      "desc_key": "desc_switch_2842",
+      "label": "宝物、娃娃、装备洗炼扣除道具二级密码限制",
+      "enabled": true
+    },
+    {
+      "id": 2843,
+      "desc_key": "desc_switch_2843",
+      "label": "世界BOSS记录附伤日志",
+      "enabled": true
+    },
+    {
+      "id": 2845,
+      "desc_key": "desc_switch_2845",
+      "label": "生活BOSS开关",
+      "enabled": true
+    },
+    {
+      "id": 2846,
+      "desc_key": "desc_switch_2846",
+      "label": "鸠毒王刷新开关",
+      "enabled": true
+    },
+    {
+      "id": 2850,
+      "desc_key": "desc_switch_2850",
+      "label": "净天宫传送门开关",
+      "enabled": true
+    },
+    {
+      "id": 2854,
+      "desc_key": "desc_switch_2854",
+      "label": "隐世灌顶武道升开关",
+      "enabled": true
+    },
+    {
+      "id": 2860,
+      "desc_key": "desc_switch_2860",
+      "label": "降龙十二层官银直升开关",
+      "enabled": true
+    },
+    {
+      "id": 2865,
+      "desc_key": "desc_switch_2865",
+      "label": "擂台争锋",
+      "enabled": true
+    },
+    {
+      "id": 2869,
+      "desc_key": "desc_switch_2869",
+      "label": "江湖助力（默认需要开启）",
+      "enabled": true
+    },
+    {
+      "id": 2870,
+      "desc_key": "desc_switch_2870",
+      "label": "会意功修炼VIP双倍灌注",
+      "enabled": true
+    },
+    {
+      "id": 2872,
+      "desc_key": "desc_switch_2872",
+      "label": "天轮寺狂傲点",
+      "enabled": true
+    },
+    {
+      "id": 2873,
+      "desc_key": "desc_switch_2873",
+      "label": "战斗统计2.0",
+      "enabled": true
+    },
+    {
+      "id": 2874,
+      "desc_key": "desc_switch_2874",
+      "label": "评估系统",
+      "enabled": true
+    },
+    {
+      "id": 2875,
+      "desc_key": "desc_switch_2875",
+      "label": "马不停蹄馈群侠 ",
+      "enabled": true
+    },
+    {
+      "id": 2877,
+      "desc_key": "desc_switch_2877",
+      "label": "青衣阁-贡献值开关",
+      "enabled": true
+    },
+    {
+      "id": 2881,
+      "desc_key": "desc_switch_2881",
+      "label": "虎气冲天",
+      "enabled": true
+    },
+    {
+      "id": 2882,
+      "desc_key": "desc_switch_2882",
+      "label": "大侠很忙折扣券",
+      "enabled": true
+    },
+    {
+      "id": 2884,
+      "desc_key": "desc_switch_2884",
+      "label": "实力评估日志开关",
+      "enabled": true
+    },
+    {
+      "id": 2889,
+      "desc_key": "desc_switch_2889",
+      "label": "新建角色起名允许服务器后缀",
+      "enabled": true
+    },
+    {
+      "id": 2893,
+      "desc_key": "desc_switch_2893",
+      "label": "望辉洲随机事件5开关",
+      "enabled": true
+    },
+    {
+      "id": 2894,
+      "desc_key": "desc_switch_2894",
+      "label": "禁地商店开关",
+      "enabled": true
+    },
+    {
+      "id": 2895,
+      "desc_key": "desc_switch_2895",
+      "label": "守签待兔活动",
+      "enabled": true
+    },
+    {
+      "id": 2896,
+      "desc_key": "desc_switch_2896",
+      "label": "新古谱参悟开关",
+      "enabled": true
+    },
+    {
+      "id": 2897,
+      "desc_key": "desc_switch_2897",
+      "label": "奇遇邮件",
+      "enabled": true
+    },
+    {
+      "id": 2899,
+      "desc_key": "desc_switch_2899",
+      "label": "750火浣台宝物相关功能开关",
+      "enabled": true
+    },
+    {
+      "id": 2906,
+      "desc_key": "desc_switch_2906",
+      "label": "至宝云集签到活动",
+      "enabled": true
+    },
+    {
+      "id": 2912,
+      "desc_key": "desc_switch_2912",
+      "label": "龙年灵宠签到",
+      "enabled": true
+    },
+    {
+      "id": 2914,
+      "desc_key": "desc_switch_2914",
+      "label": "精绝古城-瀚海寻宝功能开关",
+      "enabled": true
+    },
+    {
+      "id": 2915,
+      "desc_key": "desc_switch_2915",
+      "label": "精绝古城-绝境逃生功能开关",
+      "enabled": true
+    },
+    {
+      "id": 2916,
+      "desc_key": "desc_switch_2916",
+      "label": "精绝宝箱",
+      "enabled": true
+    },
+    {
+      "id": 2925,
+      "desc_key": "desc_switch_2925",
+      "label": "包裹有效期合并功能",
+      "enabled": true
+    },
+    {
+      "id": 2020910,
+      "desc_key": "desc_switch_2020910",
+      "label": "江湖易名任我行",
+      "enabled": true
+    },
+    {
+      "id": 20201026,
+      "desc_key": "desc_switch_20201026",
+      "label": "盟主助力入隐世",
+      "enabled": true
+    },
+    {
+      "id": 26001,
+      "desc_key": "desc_switch_26001",
+      "label": "form_main rbtn_fight/life/jianghu 显示开关（实验性）",
+      "enabled": true
+    }
+  ]
+}
