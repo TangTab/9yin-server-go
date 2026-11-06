@@ -21,6 +21,7 @@ import (
 	"github.com/local/9yin-go-server/internal/auth"
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/luascript"
+	"github.com/local/9yin-go-server/internal/neigong"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/qinggong"
 	"github.com/local/9yin-go-server/internal/role"
@@ -41,7 +42,8 @@ func main() {
 	gmListen := flag.String("gm-listen", "127.0.0.1:19062", "local GM HTTP listen address (empty disables)")
 	logFile := flag.String("log-file", runtimeProjectPath("artifacts", "local", "logs", "protocol-probe-live.log"), "append runtime log to this local file")
 	npcFuncPath := flag.String("npc-func", defaultLegacyNPCFuncPath, "Npc_Func.xml used to build per-NPC service menus")
-	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts"), "server-side Lua scripts directory (empty disables)")
+	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts", "host"), "server-side event Lua scripts directory (game.on contract; empty disables)")
+	neigongScriptsPath := flag.String("neigong-scripts", runtimeProjectPath("scripts", "module", "neigong"), "neigong effect module scripts directory (buf_ng_*.lua; empty disables)")
 	switchScene := flag.String("switch-scene", "", "test-only live destination: config,resource,x,y,z,orient (empty disables it)")
 	npcAuditAll := flag.Bool("npc-audit-all", false, "inventory every modern NPC creator scene and exit")
 	npcServiceAuditScene := flag.String("npc-service-audit-scene", "", "write effective NPC service audit for config,resource,x,y,z,orient and exit")
@@ -102,6 +104,17 @@ func main() {
 			log.Printf("Lua scripts partially loaded count=%d path=%s: %v", loaded, *scriptsPath, scriptErr)
 		} else {
 			log.Printf("Lua scripts ready count=%d path=%s", loaded, *scriptsPath)
+		}
+	}
+	// 内功特效模块脚本（scripts/module/neigong）：独立 VM、单本禁用隔离；
+	// 战斗二期接线前仅装载建目录，钩子调用桥见 internal/neigong。
+	neigongEffects := neigong.New(*neigongScriptsPath, log.Printf)
+	if *neigongScriptsPath != "" {
+		loaded, neigongErr := neigongEffects.Load()
+		if neigongErr != nil {
+			log.Printf("内功特效脚本 partially loaded count=%d path=%s: %v", loaded, *neigongScriptsPath, neigongErr)
+		} else {
+			log.Printf("内功特效脚本 ready count=%d path=%s", loaded, *neigongScriptsPath)
 		}
 	}
 	if *npcAuditAll {
@@ -213,11 +226,11 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost)
+		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects)
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects) {
 	config := transport.DefaultConnectionConfig()
 	config.MaxFrameSize = 64 << 10
 	link, err := transport.NewConnection(conn, config)
@@ -551,6 +564,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			if reloadErr != nil {
 				gmSession.setAction(fmt.Sprintf("Lua 重载完成但有失败脚本 count=%d：%v", loaded, reloadErr))
 				return reloadErr
+			}
+			// 内功特效模块一并热重载；失败只回报原因，不影响事件脚本结果。
+			if neigongEffects.Enabled() {
+				neigongLoaded, neigongErr := neigongEffects.Reload()
+				if neigongErr != nil {
+					gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d；内功特效部分失败 count=%d：%v", loaded, neigongLoaded, neigongErr))
+					return neigongErr
+				}
+				gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d；内功特效 count=%d", loaded, neigongLoaded))
+				log.Printf("%s: GM lua_reload host=%d neigong=%d", conn.RemoteAddr(), loaded, neigongLoaded)
+				break
 			}
 			gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d", loaded))
 			log.Printf("%s: GM lua_reload count=%d", conn.RemoteAddr(), loaded)

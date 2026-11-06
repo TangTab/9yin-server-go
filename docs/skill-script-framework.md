@@ -253,3 +253,30 @@ item=2 `r_drop/r_proc`、neigong=1）。Lua 侧无回掷通道：不暴露 Java 
 - `M.on_hit(ctx)`：出招倍率钩子（上文 skill 节；`SkillCastHandler.rollDamage` 接线，
   每调用 Java 预掷 1 枚 `r_adjust`，掷骰序固定在 miss/crit/区间掷值之后——无钩子
   技能 RNG 序列零扰动）。CS_wd_tjq04.lua 的注释示例可参考。
+
+## Go 服务端接入状态（2026-11-06）
+
+本仓（9yin-go-server1）本期接入 **neigong 脚本层**（装载 + 目录 + 钩子调用桥），
+战斗分发（SkillCastHandler/NpcCombatAi 等价物）留待战斗二期：
+
+- **脚本入仓**：参考服 `scripts/{combat,item,neigong,skill}` 四类拷贝至本仓
+  `scripts/module/` 下（combat/item/skill 备用未装载）；事件脚本迁至
+  `scripts/host/`（`-scripts` 默认改指该目录，见 scripts/README.md）。
+- **装载器**：`internal/neigong`（`neigong.Effects`）。与事件宿主
+  （`internal/luascript`，game.on/整机重建）分立：**独立 VM**、模块式装载
+  （捕获 `return M` 表）、`M.meta` 建目录（`Books/Book/ByBook`）、
+  **运行期坏脚本只禁用该本**（VM 不重建、指令预算按调用重置——
+  多人下一次坏调用最坏一次 ≤500ms 持锁停顿后即隔离）。
+- **调用桥**：`Hook(buffID, event, ctx) *Effect`（事件别名链
+  on_attack→on_hit / on_victim→on_be_hit / on_periodic→on_tick；返回白名单
+  同上节，reflect 兼容数值与 {amount,kind} 双形态）、
+  `Passive(buffID, ctx) map[string]float64`（扁平数值属性表）、
+  `Broken()`（禁用清单）。ctx 字段集同上节，另含脚本实测消费的
+  `controlled`；`on_attack` 必带 target、`on_victim`/`on_parry` 必带
+  attacker 的分发契约由调用方保证（buf_ng_nl_001 无保护读 `ctx.attacker.oid`）。
+- **接线**：`cmd/protocol-probe` 新增 `-neigong-scripts`（默认
+  `scripts/module/neigong`，空禁用）；启动日志 `内功特效脚本 ready count=155`；
+  GM `lua_reload` 连同内功目录一并重载并回报两个计数。
+- **测试**：`internal/neigong`（探针：白名单全形态/别名/state 回写/档位门/
+  单本禁用隔离/超时；真实目录冒烟：155 本 × 4 事件 × 双 r_proc 档全量调用
+  零禁用 + 坐忘功 passive/周期盾行为钉子）。
