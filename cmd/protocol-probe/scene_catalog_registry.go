@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -50,7 +49,7 @@ func newSceneNPCRegistry(tableDir, creatorRoot string, schema clientdata.Schema)
 	if err != nil {
 		return nil, err
 	}
-	entries, err := os.ReadDir(creatorRoot)
+	entries, err := readResourceDirEntries(creatorRoot)
 	if err != nil {
 		return nil, fmt.Errorf("list scene NPC creators %s: %w", creatorRoot, err)
 	}

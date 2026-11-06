@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -34,7 +33,7 @@ type iniField struct {
 type iniTable map[string][]iniField
 
 func loadINISections(path string) (iniTable, error) {
-	file, err := os.Open(path)
+	file, err := openResourceReader(path)
 	if err != nil {
 		return nil, err
 	}

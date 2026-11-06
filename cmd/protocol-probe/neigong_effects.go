@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -212,7 +211,7 @@ func (c *modernNeiGongCatalog) effect(staticData, level int32) (modernNeiGongEff
 }
 
 func parseModernINI(path string, consume func(section, key, value string) error) error {
-	file, err := os.Open(path)
+	file, err := openResourceReader(path)
 	if err != nil {
 		return err
 	}

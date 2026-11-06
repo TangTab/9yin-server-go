@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -25,7 +24,7 @@ type shopCatalogItem struct {
 }
 
 func loadShopCatalogSection(path, shopID string) ([]shopCatalogItem, int32, int32, error) {
-	file, err := os.Open(path)
+	file, err := openResourceReader(path)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("open shop catalog %s: %w", path, err)
 	}

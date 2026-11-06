@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -122,7 +121,7 @@ func loadInnerPowerPassiveCatalog() (*innerPowerPassiveCatalog, error) {
 }
 
 func loadInnerPowerDescriptions() (map[string]map[int32]innerPowerDescription, error) {
-	content, err := os.ReadFile(modernInnerPowerDescriptionPath)
+	content, err := readResourceBytes(modernInnerPowerDescriptionPath)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +238,7 @@ func loadInnerPowerNativeBuffLevels(definitions map[string]nativeBuffDefinition,
 			definitions[configID] = definition
 		}
 	}
-	file, err := os.Open(modernBuffVarPropPath)
+	file, err := openResourceReader(modernBuffVarPropPath)
 	if err != nil {
 		return nil, err
 	}

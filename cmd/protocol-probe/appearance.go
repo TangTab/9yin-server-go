@@ -42,7 +42,7 @@ func loadEquipmentResolver() *equipmentResolver {
 }
 
 func parseINI(path string, consume func(section, key, value string)) {
-	f, err := os.Open(path)
+	f, err := openResourceReader(path)
 	if err != nil {
 		return
 	}

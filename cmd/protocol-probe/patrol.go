@@ -83,7 +83,7 @@ func patrolSceneShortName(sceneFolder string) string {
 // offline 的 .ini（GBK）。目录缺失/无匹配 → 空表（该场景无巡逻，不报错）。
 func loadPatrolRoutes(mappathDir, sceneFolder string) map[string]*patrolRoute {
 	table := make(map[string]*patrolRoute)
-	entries, err := os.ReadDir(mappathDir)
+	entries, err := readResourceDirEntries(mappathDir)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			log.Printf("mappath scan error: %s: %v", mappathDir, err)
@@ -113,7 +113,7 @@ func loadPatrolRoutes(mappathDir, sceneFolder string) map[string]*patrolRoute {
 
 // loadPatrolRouteFile 解析单个 mappath ini：节名 = PathId，每行 r= 一个路点。
 func loadPatrolRouteFile(path string, table map[string]*patrolRoute) {
-	data, err := os.ReadFile(path)
+	data, err := readResourceBytes(path)
 	if err != nil {
 		log.Printf("mappath read failed: %s: %v", path, err)
 		return

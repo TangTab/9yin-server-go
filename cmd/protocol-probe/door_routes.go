@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -102,7 +101,7 @@ func loadModernDoorTargets() (map[string]doorDataTarget, error) {
 }
 
 func loadDoorTargets(path string) (map[string]doorDataTarget, error) {
-	file, err := os.Open(path)
+	file, err := openResourceReader(path)
 	if err != nil {
 		return nil, fmt.Errorf("open door data %s: %w", path, err)
 	}

@@ -34,6 +34,12 @@ func Load(path string) (*Registry, error) {
 	if err != nil {
 		return nil, fmt.Errorf("npcfunc: read %s: %w", path, err)
 	}
+	return LoadFromBytes(raw, path)
+}
+
+// LoadFromBytes 解析已读入的字节（例如经由 MPQ 资源仓取得的
+// 内容）；source 仅用于报错定位。
+func LoadFromBytes(raw []byte, source string) (*Registry, error) {
 	reg := &Registry{byNPC: make(map[string][]Binding)}
 	for _, tag := range propertyTag.FindAllString(string(raw), -1) {
 		attrs := make(map[string]string)
@@ -64,7 +70,7 @@ func Load(path string) (*Registry, error) {
 		reg.byNPC[key] = append(reg.byNPC[key], Binding{NPCID: npcID, FuncID: funcID, Extra: extra})
 	}
 	if len(reg.byNPC) == 0 {
-		return nil, fmt.Errorf("npcfunc: %s contains no NpcID/FuncID bindings", path)
+		return nil, fmt.Errorf("npcfunc: %s contains no NpcID/FuncID bindings", source)
 	}
 	return reg, nil
 }

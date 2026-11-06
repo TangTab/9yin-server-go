@@ -5,6 +5,7 @@ package qinggong
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -23,15 +24,22 @@ type Definition struct {
 
 type Catalog struct{ byID map[string]Definition }
 
+// Load 直接从文件系统读取；资源经由 MPQ 资源仓的调用方
+// 应先取字节再走 LoadFromReader。
 func Load(path string) (*Catalog, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
+	return LoadFromReader(file, path)
+}
+
+// LoadFromReader 从任意来源解析（source 仅用于报错定位）。
+func LoadFromReader(r io.Reader, source string) (*Catalog, error) {
 	catalog := &Catalog{byID: make(map[string]Definition)}
 	var current *Definition
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(r)
 	scanner.Buffer(make([]byte, 16<<10), 1<<20)
 	lineNumber := 0
 	for scanner.Scan() {
@@ -43,7 +51,7 @@ func Load(path string) (*Catalog, error) {
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
 			id := strings.TrimSpace(line[1 : len(line)-1])
 			if id == "" {
-				return nil, fmt.Errorf("%s:%d: empty section", path, lineNumber)
+				return nil, fmt.Errorf("%s:%d: empty section", source, lineNumber)
 			}
 			entry := Definition{ID: id}
 			catalog.byID[id] = entry
@@ -62,19 +70,19 @@ func Load(path string) (*Catalog, error) {
 		case "Consume":
 			amount, parseErr := strconv.ParseInt(strings.TrimSpace(value), 10, 32)
 			if parseErr != nil || amount < 0 {
-				return nil, fmt.Errorf("%s:%d: invalid Consume %q", path, lineNumber, value)
+				return nil, fmt.Errorf("%s:%d: invalid Consume %q", source, lineNumber, value)
 			}
 			entry.Consume = int32(amount)
 		case "Type":
 			value, parseErr := strconv.ParseInt(strings.TrimSpace(value), 10, 32)
 			if parseErr != nil {
-				return nil, fmt.Errorf("%s:%d: invalid Type", path, lineNumber)
+				return nil, fmt.Errorf("%s:%d: invalid Type", source, lineNumber)
 			}
 			entry.Type = int32(value)
 		case "UseType":
 			value, parseErr := strconv.ParseInt(strings.TrimSpace(value), 10, 32)
 			if parseErr != nil {
-				return nil, fmt.Errorf("%s:%d: invalid UseType", path, lineNumber)
+				return nil, fmt.Errorf("%s:%d: invalid UseType", source, lineNumber)
 			}
 			entry.UseType = int32(value)
 		case "BufferID":
@@ -86,7 +94,7 @@ func Load(path string) (*Catalog, error) {
 		return nil, err
 	}
 	if len(catalog.byID) == 0 {
-		return nil, fmt.Errorf("%s: no qinggong definitions", path)
+		return nil, fmt.Errorf("%s: no qinggong definitions", source)
 	}
 	return catalog, nil
 }

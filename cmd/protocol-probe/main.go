@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"encoding/hex"
@@ -66,12 +67,26 @@ func main() {
 		switchDestination = &parsed
 	}
 	npcSchema := clientdata.VisibleNPCModernV1()
-	qingGongCatalog, qingGongErr := qinggong.Load(*qingGongDefinePath)
+	// 触发资源仓初始化（本地 > patch > base，带读缓存），启动日志
+	// 会给出各层条目与缓存上限；不可用时回退直接文件访问。
+	resourceAccessorOf()
+	qingGongDefine, qingGongReadErr := readResourceBytes(*qingGongDefinePath)
+	if qingGongReadErr != nil {
+		log.Fatalf("read current-client qinggong definitions %s: %v", *qingGongDefinePath, qingGongReadErr)
+	}
+	qingGongCatalog, qingGongErr := qinggong.LoadFromReader(bytes.NewReader(qingGongDefine), *qingGongDefinePath)
 	if qingGongErr != nil {
 		log.Fatalf("load current-client qinggong definitions: %v", qingGongErr)
 	}
 	log.Printf("qinggong catalog ready definitions=%d path=%s", qingGongCatalog.Count(), *qingGongDefinePath)
-	npcFuncs, npcFuncErr := npcfunc.Load(*npcFuncPath)
+	npcFuncRaw, npcFuncReadErr := readResourceBytes(*npcFuncPath)
+	var npcFuncs *npcfunc.Registry
+	var npcFuncErr error
+	if npcFuncReadErr != nil {
+		npcFuncErr = npcFuncReadErr
+	} else {
+		npcFuncs, npcFuncErr = npcfunc.LoadFromBytes(npcFuncRaw, *npcFuncPath)
+	}
 	if npcFuncErr != nil {
 		log.Printf("Npc_Func menu registry unavailable (%s): %v; NPCs without this table will expose no fabricated service menu", *npcFuncPath, npcFuncErr)
 	} else {

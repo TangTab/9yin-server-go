@@ -55,7 +55,7 @@ func loadChengduNPCSpawns(tableDir, creatorDir string, schema clientdata.Schema)
 // 都对这同一套模板表进行解析。
 func loadNPCTemplateTables(tableDir string) ([]*clientdata.NPCTemplateTable, error) {
 	var tablePaths []string
-	err := filepath.WalkDir(tableDir, func(path string, entry os.DirEntry, walkErr error) error {
+	err := walkResourceTree(tableDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
@@ -73,7 +73,7 @@ func loadNPCTemplateTables(tableDir string) ([]*clientdata.NPCTemplateTable, err
 	sort.Strings(tablePaths)
 	tables := make([]*clientdata.NPCTemplateTable, 0, len(tablePaths))
 	for _, tablePath := range tablePaths {
-		file, openErr := os.Open(tablePath)
+		file, openErr := openResourceReader(tablePath)
 		if openErr != nil {
 			return nil, fmt.Errorf("open template table %s: %w", tablePath, openErr)
 		}
@@ -100,7 +100,7 @@ func loadNPCSceneSpawnsFromTables(tables []*clientdata.NPCTemplateTable, creator
 	spawns := make([]npcSpawn, 0, 4096)
 	for _, creatorPath := range creatorPaths {
 		creatorName := filepath.Base(creatorPath)
-		file, openErr := os.Open(creatorPath)
+		file, openErr := openResourceReader(creatorPath)
 		if openErr != nil {
 			return nil, stats, fmt.Errorf("open creator %s: %w", creatorPath, openErr)
 		}
@@ -144,7 +144,7 @@ func loadNPCSceneSpawnsFromTables(tables []*clientdata.NPCTemplateTable, creator
 
 func sceneCreatorPaths(creatorDir string) ([]string, error) {
 	manifestPath := filepath.Join(creatorDir, "file.ini")
-	manifest, readErr := os.ReadFile(manifestPath)
+	manifest, readErr := readResourceBytes(manifestPath)
 	if readErr == nil {
 		seen := make(map[string]struct{})
 		var creatorPaths []string
@@ -164,7 +164,7 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 			if _, duplicate := seen[key]; duplicate {
 				continue
 			}
-			if _, statErr := os.Stat(path); statErr != nil {
+			if _, statErr := statResourcePath(path); statErr != nil {
 				// 现代资源包对部分场景刻意不完整：其
 				// file.ini 仍会列出 AttackNpc_Creator.xml 之类的
 				// creator 变体，即使该可选文件已被省略。
@@ -192,7 +192,7 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 	// 保守：已知的事件触发器文档不是
 	// 生成来源，绝不能进入 NPC 解析器。
 	var creatorPaths []string
-	err := filepath.WalkDir(creatorDir, func(path string, entry os.DirEntry, walkErr error) error {
+	err := walkResourceTree(creatorDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
@@ -219,7 +219,7 @@ func auditNPCSceneRoot(tableDir, creatorRoot string, schema clientdata.Schema) (
 	if err != nil {
 		return nil, err
 	}
-	directories, err := os.ReadDir(creatorRoot)
+	directories, err := readResourceDirEntries(creatorRoot)
 	if err != nil {
 		return nil, fmt.Errorf("list NPC creator root %s: %w", creatorRoot, err)
 	}
@@ -290,7 +290,7 @@ func appendNPCStatSample(stats *npcCatalogStats, sample string) {
 }
 
 func loadNPCSpawns(tablePath, creatorPath, configID string, schema clientdata.Schema) ([]npcSpawn, error) {
-	tableFile, err := os.Open(tablePath)
+	tableFile, err := openResourceReader(tablePath)
 	if err != nil {
 		return nil, fmt.Errorf("open template table %s: %w", tablePath, err)
 	}
@@ -299,7 +299,7 @@ func loadNPCSpawns(tablePath, creatorPath, configID string, schema clientdata.Sc
 	if err != nil {
 		return nil, err
 	}
-	creatorFile, err := os.Open(creatorPath)
+	creatorFile, err := openResourceReader(creatorPath)
 	if err != nil {
 		return nil, fmt.Errorf("open creator %s: %w", creatorPath, err)
 	}

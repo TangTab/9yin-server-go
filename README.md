@@ -31,7 +31,7 @@ go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
 - `internal`：协议、角色、资源及网络实现
 - `migrations`：MySQL 表结构迁移
 - `scripts`：服务端 Lua 脚本（见下节）
-- `spec`：协议生成规格
+- `docs`：研究笔记与协议知识库（原 `spec/` 现为 `docs/spec/`，文本抽取数据在 `docs/text-extract/`）
 - `testdata`：测试所需的最小协议夹具
 
 ## Lua 脚本
@@ -41,7 +41,32 @@ go build -trimpath -o .\build\9yin-game-native-menu.exe ./cmd/protocol-probe
 脚本运行在沙盒内（无 io/os，500ms 超时），目前用于编写原生未实现的
 NPC 服务（如"任务"）逻辑。API 参考见 [scripts/README.md](scripts/README.md)。
 
+## 资源读取（MPQ 三层仓 + 读缓存）
 
+游戏资源经 MPQ 三层资源仓读取（`internal/mpq/res`），根目录布局：
+
+- `res-base.rep`：全量基础层（MPQ 归档，必需）
+- `res-patch.rep`：覆盖层（可选）
+- `res-manifest.json`：外置清单（补丁版本与墓碑）
+- `resources/`：本地散文件层
+
+查找顺序为 **本地散文件 > patch > base**，第一个命中生效；读取结果
+进入读缓存（LRU，缺省 256 MiB），同一文件只解压一次。本地未解包
+的文件（如各场景 `map/ter/*/terrain.ini`）会直接从 `res-base.rep`
+提供，无需完整解包客户端资源。
+
+命令行工具（`cmd/mpq`）支持查看 / 解包 / 打包 / 增删：
+
+```powershell
+go run ./cmd/mpq store info .          # 三层仓概览
+go run ./cmd/mpq store list . prefix   # 按前缀列文件（含所在层）
+go run ./cmd/mpq store read . <名字>   # 读单个文件并预览
+```
+
+环境变量（`cmd/protocol-probe`）：
+
+- `NINEYIN_RESOURCE_STORE=off`：禁用资源仓，回退直接文件访问（排查用）
+- `NINEYIN_RESOURCE_CACHE_MB=<n>`：读缓存上限（MiB，缺省 256）
 
 ## 许可证
 
