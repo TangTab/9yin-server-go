@@ -82,8 +82,8 @@ func TestSceneVisiblePropertyIndicesAreUnique(t *testing.T) {
 func TestSceneVisiblePropertyTableIncludesMaxVisuals(t *testing.T) {
 	schema := clientdata.VisibleNPCModernV1()
 	msg := visiblePropertyTable(sceneVisiblePropertyFields(schema.Fields))
-	if got := binary.LittleEndian.Uint16(msg[1:]); got != 231 {
-		t.Fatalf("scene visible property count=%d, want 231", got)
+	if got := binary.LittleEndian.Uint16(msg[1:]); got != 234 {
+		t.Fatalf("scene visible property count=%d, want 234", got)
 	}
 	needle := append([]byte("MaxVisuals"), 0, byte(clientdata.WireInt32))
 	if !bytes.Contains(msg, needle) {
@@ -96,6 +96,10 @@ func TestSceneVisiblePropertyTableIncludesMaxVisuals(t *testing.T) {
 	autoSelect := append([]byte("AutoSelectObject"), 0, byte(clientdata.WireObject))
 	if !bytes.Contains(msg, autoSelect) {
 		t.Fatalf("scene property table does not negotiate AutoSelectObject: %x", autoSelect)
+	}
+	inParry := append([]byte("InParry"), 0, byte(clientdata.WireInt32))
+	if !bytes.Contains(msg, inParry) {
+		t.Fatalf("scene property table does not negotiate InParry: %x", inParry)
 	}
 	for _, field := range []struct {
 		name   string

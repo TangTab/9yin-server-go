@@ -1156,7 +1156,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -1196,6 +1196,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
 					}
+				case clientCustomBlockState:
+					if handleErr := handleBlockStateCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle block state: %v", conn.RemoteAddr(), handleErr)
+					}
 				case 215, 1006:
 					if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
 						log.Printf("%s: handle activity inner-power msg=%d: %v", conn.RemoteAddr(), custom.Values[0].Int32, handleErr)
@@ -1203,6 +1207,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					}
 					persistFaculty()
 				}
+			}
+		} else if plain[0] == 0x18 {
+			// 客户端 ~1s 一发的 12B ping。fork（49840 抓包 326 对
+			// 逐帧验证）回 0x38 纯回显：整帧拷贝、仅换 opcode。
+			// 无回包时客户端 RTT 配对恒超时，时序补偿劣化
+			//（真机：出招特效延迟出现 / HUD 延时封顶，见
+			// docs/combat-traffic-compare.md D11）。
+			if err := link.WriteFrame(heartbeatReply(plain)); err != nil {
+				log.Printf("%s: heartbeat reply: %v", conn.RemoteAddr(), err)
+				return
 			}
 		} else if plain[0] == 0x07 {
 			request, ok := parseClientObjectRequest(plain)
@@ -1313,6 +1327,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			case clientCustomSelectTarget:
 				if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomBlockState:
+				if handleErr := handleBlockStateCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle block state: %v", conn.RemoteAddr(), handleErr)
 				}
 			case 215, 1006: // 内功穿戴 / faculty 状态机
 				if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -1680,6 +1698,11 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 		// AutoSelectObject 与 LastObject（表位 100）配对：fork 每次目标
 		// 选择回双属性帧（官方表位 414/415）。按表尾追加约定放 230。
 		clientdata.FieldSpec{Index: propAutoSelectObject, Name: "AutoSelectObject", Type: clientdata.WireObject},
+		// 格挡族（msg54 手动格挡）：官方表 InParry@88/ParryValue@475，
+		// 按表尾追加约定放 231..233。
+		clientdata.FieldSpec{Index: propInParry, Name: "InParry", Type: clientdata.WireInt32},
+		clientdata.FieldSpec{Index: propInManualParry, Name: "InManualParry", Type: clientdata.WireInt32},
+		clientdata.FieldSpec{Index: propParryValue, Name: "ParryValue", Type: clientdata.WireInt32},
 	)
 	return fields
 }

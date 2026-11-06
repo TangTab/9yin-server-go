@@ -195,11 +195,12 @@ func serverMenu(objectID, ownerID uint32, items []serverMenuItem) ([]byte, error
 // serverCustomValue 是自定义消息外层 opcode 下的一个类型化
 // TVarList 值。当前客户端同时接受 0x1E 及其现代别名 0x27。
 type serverCustomValue struct {
-	text    *string
-	int32   *int32
-	int64   *int64
-	float32 *float32
-	object  *serverCustomObject
+	text     *string
+	wideText *string
+	int32    *int32
+	int64    *int64
+	float32  *float32
+	object   *serverCustomObject
 }
 
 func customString(value string) serverCustomValue { return serverCustomValue{text: &value} }
@@ -207,6 +208,13 @@ func customInt(value int32) serverCustomValue     { return serverCustomValue{int
 func customInt64(value int64) serverCustomValue   { return serverCustomValue{int64: &value} }
 func customFloat32(value float32) serverCustomValue {
 	return serverCustomValue{float32: &value}
+}
+
+// customWideString 是 TVarList tag7 宽字符串：u32(字节数+2) +
+// UTF-16LE 文本 + u16 NUL（F 盘抓包 msg169 双角色名实证，
+// Java CustomMessages.ofWideString 同形）。
+func customWideString(value string) serverCustomValue {
+	return serverCustomValue{wideText: &value}
 }
 
 // serverCustomObject 是 TVarList 类型 8 携带的 PERSISTID。其两个
@@ -290,6 +298,16 @@ func encodeServerCustomValuesWithOpcode(opcode byte, args []serverCustomValue, l
 		switch {
 		case value.text != nil:
 			appendText(*value.text)
+		case value.wideText != nil:
+			units := utf16.Encode([]rune(*value.wideText))
+			data := make([]byte, 0, len(units)*2+2)
+			for _, unit := range units {
+				data = binary.LittleEndian.AppendUint16(data, unit)
+			}
+			msg = append(msg, 7)
+			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(data)+2))
+			msg = append(msg, data...)
+			msg = binary.LittleEndian.AppendUint16(msg, 0)
 		case value.int32 != nil:
 			msg = append(msg, 2)
 			msg = binary.LittleEndian.AppendUint32(msg, uint32(*value.int32))
@@ -421,4 +439,15 @@ func noRoleLoginSuccess(now time.Time) []byte {
 	put(0x19, uint32(now.Minute()))
 	put(0x1D, uint32(now.Second()))
 	return msg
+}
+
+// heartbeatReply 把客户端 12B 0x18 ping 转成 0x38 回显帧：
+// 整帧拷贝仅换 opcode（fork 49840 抓包 326 对逐帧验证；
+// 客户端用回显的 tick/seq 做 RTT 配对，缺帧致 HUD 延时封顶）。
+func heartbeatReply(ping []byte) []byte {
+	reply := append([]byte(nil), ping...)
+	if len(reply) > 0 {
+		reply[0] = 0x38
+	}
+	return reply
 }

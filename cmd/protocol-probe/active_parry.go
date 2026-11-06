@@ -47,3 +47,89 @@ func handleActiveParryCustom(player *playerActor, custom clientCustomMessage, re
 	log.Printf("%s: accepted active parry subtype=%d argument=%s", remote, subtype, request.Argument)
 	return true, nil
 }
+
+// CLIENT_CUSTOMMSG_BLOCK_STATE（fork handleBlockStateCustom：值 0=按下
+// 格挡、非 0=松开；Java handleManualParry engage==0 同义）。
+const clientCustomBlockState int32 = 54
+
+// handleBlockStateCustom 还原手动格挡（Java handleManualParry +
+// sendParryStateFrames 同源）：状态变化时挂/清槽 11 的 BuffInParry，
+// 回 msg169（BuffInParry 事件，双宽串角色名）+ 0x10 InParry 属性帧。
+// 重复按下静默；重复松开仍回帧（客户端状态重同步，78 发按值去重
+// =50 沿=50 回帧的 F 盘实证）。非战斗也可按格挡（不切 LogicState）。
+func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) error {
+	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomBlockState {
+		return nil
+	}
+	if player == nil {
+		return fmt.Errorf("block state before scene player exists")
+	}
+	if len(custom.Values) < 2 {
+		return fmt.Errorf("block state requires a value, got %d values", len(custom.Values))
+	}
+	// fork 的 tag2/tag3 双编码：i32 与 i64 都按数值比较 0。
+	state := custom.Values[1]
+	engage := false
+	switch state.Type {
+	case 2:
+		engage = state.Int32 == 0
+	case 3:
+		engage = state.Int64 == 0
+	case 4, 5:
+		number, ok := state.exactInt32()
+		if !ok {
+			return fmt.Errorf("block state value is not integral: %s", state)
+		}
+		engage = number == 0
+	default:
+		return fmt.Errorf("block state value must be numeric, got %s", state)
+	}
+
+	alreadyParrying := player.parryingSnapshot()
+	if alreadyParrying == engage {
+		if !engage {
+			// 游离的重复松开：客户端可能错过上一次回帧，重推空态。
+			if frame, err := player.parryStateFrame(false, ""); err == nil {
+				if writeErr := link.WriteFrame(frame); writeErr != nil {
+					return writeErr
+				}
+			} else {
+				return err
+			}
+			log.Printf("%s: ack stray manual parry release (client state resync)", remote)
+		}
+		return nil
+	}
+
+	now := time.Now().UTC()
+	buffInfo := player.releaseParryBuff()
+	if engage {
+		buffInfo = player.engageParryBuff(now)
+	}
+	name := player.snapshotName()
+	notice, err := serverCustomIntMessage(169,
+		customInt(boolInt32(!engage)),
+		customString("BuffInParry"),
+		customObject(playerObjectID, playerOwnerID),
+		customObject(playerObjectID, playerOwnerID),
+		customWideString(name),
+		customWideString(name),
+		customInt64(now.UnixMilli()),
+		customInt(0),
+	)
+	if err != nil {
+		return fmt.Errorf("encode parry notice: %w", err)
+	}
+	if err := link.WriteFrame(notice); err != nil {
+		return err
+	}
+	frame, err := player.parryStateFrame(engage, buffInfo)
+	if err != nil {
+		return fmt.Errorf("encode parry state: %w", err)
+	}
+	if err := link.WriteFrame(frame); err != nil {
+		return err
+	}
+	log.Printf("%s: manual parry engage=%t buff_slot=%d", remote, engage, parryBuffSlot)
+	return nil
+}

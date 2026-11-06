@@ -78,6 +78,18 @@ const (
 	// Buff，也不能挤占轻功/技能 Buff 的槽位。
 	yihuaPassiveBuffSlot uint16 = 10
 
+	// 右键格挡 BuffInParry（Java PlayerActor 同源）：槽 11、
+	// StaticData 4558、24h 租约。按下挂槽、松开清槽。
+	parryBuffSlot       uint16 = 11
+	parryBuffStaticData uint32 = 4558
+	// 格挡族属性（官方表 InParry@88/ParryValue@475；本仓协商表按
+	// 表尾追加 231..233，顺序与 sceneVisiblePropertyFields 一致）。
+	// ParryValue 取参考帧基础值 100（无运功书/装备加成系统）。
+	propInParry         uint16 = 231
+	propInManualParry   uint16 = 232
+	propParryValue      uint16 = 233
+	parryValueReference int32  = 100
+
 	redSuperArmorStaticData uint32 = 8682
 	waterDriftStaticData    uint32 = 216
 	waterJumpStaticData     uint32 = 5786
@@ -157,6 +169,7 @@ type playerActor struct {
 	currentSkillLevel     int32
 	currentSkillTarget    uint64
 	activeParry           activeParryRequest
+	parrying              bool
 	skillLockUntil        time.Time
 	reviveAt              time.Time
 	innerPowerProcReadyAt time.Time
@@ -640,6 +653,9 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: 116, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
 		{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Value: clientdata.Int32Value(0)},
 		{Index: propDead, Name: "Dead", Value: clientdata.Int32Value(boolInt32(state.HP <= 0))},
+		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
+		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
+		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryValueReference)},
 		{Index: propCantUseSkill, Name: "CantUseSkill", Value: clientdata.Int32Value(boolInt32(p.skillLockUntil.After(now)))},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue(currentSkillID)},
 		{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Value: clientdata.StringValue(currentSkillEffectID)},
@@ -903,6 +919,61 @@ func (p *playerActor) clearBuff(slot uint16, expectedStaticData uint32) (string,
 	}
 	delete(p.buffs, slot)
 	return "", true
+}
+
+// --- 手动格挡（msg54；Java PlayerActor engage/releaseParryBuff 同源） ---
+
+func (p *playerActor) parryingSnapshot() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.parrying
+}
+
+// snapshotName 供 msg169 双宽串等帧使用。
+func (p *playerActor) snapshotName() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.name
+}
+
+// engageParryBuff 按下格挡：挂 BuffInParry 到槽 11。已在格挡时保留
+// 原到期时间（幂等由调用方的状态变化检查保证，这里再防一层）。
+func (p *playerActor) engageParryBuff(now time.Time) string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if !p.parrying {
+		p.buffs[parryBuffSlot] = activePlayerBuff{
+			staticData: parryBuffStaticData,
+			expiresUTC: now.UTC().Add(24 * time.Hour),
+			level:      1,
+		}
+		p.parrying = true
+	}
+	return p.bufferInfoLocked(parryBuffSlot, now)
+}
+
+// releaseParryBuff 松开格挡：清槽 11，返回空 BufferInfo 串。
+func (p *playerActor) releaseParryBuff() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	delete(p.buffs, parryBuffSlot)
+	p.parrying = false
+	return ""
+}
+
+// parryStateFrame 回格挡属性帧（0x10）：InParry/InManualParry 置位 +
+// BufferInfo11 槽串 + 当前格挡值（Java parryStateFrame 同形）。
+func (p *playerActor) parryStateFrame(engage bool, buffInfo string) ([]byte, error) {
+	flag := int32(0)
+	if engage {
+		flag = 1
+	}
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(flag)},
+		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(flag)},
+		{Index: bufferInfoPropertyIndex(parryBuffSlot), Name: bufferInfoPropertyName(parryBuffSlot), Value: clientdata.StringValue(buffInfo)},
+		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryValueReference)},
+	})
 }
 
 // expireBuff 只清除创建此定时器的那份确切租约。后续的刷新绝不会被一个
