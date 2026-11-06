@@ -241,7 +241,7 @@ func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uin
 	if ready := p.skillTeamCooldowns[teamKey]; ready.After(now) {
 		return false, fmt.Sprintf("public cooldown team=%d remaining=%s", teamKey, ready.Sub(now).Round(time.Millisecond))
 	}
-	state := p.actor.Snapshot()
+	state := p.snapshotLocked()
 	if state.LogicState == entity.LogicStateDied || state.HP <= 0 {
 		return false, "player is dead"
 	}
@@ -252,11 +252,11 @@ func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uin
 		return false, fmt.Sprintf("SP %d < %d", p.progress.attributes.sp, definition.spCost)
 	}
 	if definition.qgCost > 0 {
-		if cost, ok := p.actor.UseQingGong(definition.qgCost, now); !ok {
+		if cost, ok := p.qinggong.Use(definition.qgCost, now); !ok {
 			return false, fmt.Sprintf("QingGongPoint cannot pay %d (resolved cost %d)", definition.qgCost, cost)
 		}
 	}
-	if !p.actor.SpendMP(definition.mpCost) {
+	if !p.vitals.SpendMP(definition.mpCost) {
 		return false, "MP spend rejected"
 	}
 	p.progress.attributes.sp -= definition.spCost
@@ -266,7 +266,7 @@ func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uin
 	p.currentSkillEffectID = definition.id
 	p.currentSkillLevel = definition.level
 	p.currentSkillTarget = target
-	p.actor.SetLogicState(entity.LogicStateFighting)
+	p.vitals.SetLogicState(entity.LogicStateFighting)
 	return true, ""
 }
 
@@ -654,7 +654,7 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 		schedulePlayerBuffExpiry(link, player, buff.slot, buff.staticData, buff.expires)
 	}
 	scheduleCurrentSkillClear(link, player, definition)
-	state := player.actor.Snapshot()
+	state := player.stateSnapshot()
 	log.Printf("%s: accepted skill id=%s mp=%d sp=%d qg=%d damage=%d target=%d targets=%d personal_cd=%s public_cd=%s",
 		remote, definition.id, state.MP, player.skillSP(), state.QingGongPoint, definition.baseDamage, damageTargetID, damageTargetCount, definition.personalCD, definition.publicCD)
 	return true, nil

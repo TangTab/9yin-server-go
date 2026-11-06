@@ -577,11 +577,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				log.Printf("%s: settled inner cultivation role=%d slot=%d", conn.RemoteAddr(), selected.ID, slot)
 			}
 			if sitcrossAdvanced {
-				state := player.actor.Snapshot()
+				state := player.stateSnapshot()
 				log.Printf("%s: settled sitcross HP=%d/%d MP=%d/%d", conn.RemoteAddr(), state.HP, state.MaxHP, state.MP, state.MaxMP)
 			}
 			if combatBruiseAdvanced {
-				state := player.actor.Snapshot()
+				state := player.stateSnapshot()
 				log.Printf("%s: settled combat bruised blood HP=%d HitHP=%d", conn.RemoteAddr(), state.HP, state.HitHP)
 			}
 			if combatRageAdvanced {
@@ -958,7 +958,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				log.Printf("%s: complete client-activity transition: %v", conn.RemoteAddr(), err)
 				return
 			}
-			if demoDamage > 0 && player != nil && player.actor.ApplyDamage(demoDamage) {
+			if demoDamage > 0 && player != nil && player.applyDamage(demoDamage) {
 				vitals, syncErr := player.vitalUpdate()
 				if syncErr != nil {
 					log.Printf("%s: encode demo damage update: %v", conn.RemoteAddr(), syncErr)
@@ -1257,9 +1257,9 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 		log.Printf("%s: ignore duplicate qinggong start id=%s", remote, definition.ID)
 		return true, nil
 	}
-	cost, accepted := player.actor.UseQingGong(definition.Consume, now)
+	cost, accepted := player.useQingGong(definition.Consume, now)
 	if !accepted {
-		state := player.actor.Snapshot()
+		state := player.stateSnapshot()
 		log.Printf("%s: reject qinggong id=%s cost=%d point=%d", remote, definition.ID, cost, state.QingGongPoint)
 		return true, nil
 	}
@@ -1278,7 +1278,7 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 		spec, _ := qinggongBuffFor(definition)
 		schedulePlayerBuffExpiry(link, player, spec.slot, spec.staticData, expires)
 	}
-	state := player.actor.Snapshot()
+	state := player.stateSnapshot()
 	log.Printf("%s: accepted qinggong id=%s type=%d cost=%d point=%d/%d", remote, definition.ID, definition.Type, cost, state.QingGongPoint, state.MaxQingGongPoint+state.MaxQingGongPointAdd)
 	return true, nil
 }

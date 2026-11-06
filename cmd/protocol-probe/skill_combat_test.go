@@ -29,7 +29,7 @@ func useSkillMessageAt(id string, x, y, z float32) clientCustomMessage {
 
 func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	beforeMP := player.actor.Snapshot().MP
+	beforeMP := player.stateSnapshot().MP
 	conn := &captureMessageConnection{}
 	handled, err := handleSkillCustom(conn, player, nil, useSkillMessage("CS_yhwq_hsqs05"), "test")
 	if err != nil {
@@ -38,7 +38,7 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	if !handled {
 		t.Fatal("skill 211 was not handled")
 	}
-	if got := player.actor.Snapshot().MP; got != beforeMP-11 {
+	if got := player.stateSnapshot().MP; got != beforeMP-11 {
 		t.Fatalf("MP=%d, want %d", got, beforeMP-11)
 	}
 	frames := conn.Frames()
@@ -77,7 +77,7 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	if err != nil || !handled {
 		t.Fatalf("second handle handled=%t err=%v", handled, err)
 	}
-	if got := player.actor.Snapshot().MP; got != beforeMP-11 {
+	if got := player.stateSnapshot().MP; got != beforeMP-11 {
 		t.Fatalf("cooldown rejection still spent MP: %d", got)
 	}
 	deadline := time.Now().Add(time.Second)
@@ -443,14 +443,14 @@ func TestSkillSevenSpendsSP(t *testing.T) {
 
 func TestAttackSkillRequiresSelectedTarget(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	beforeMP := player.actor.Snapshot().MP
+	beforeMP := player.stateSnapshot().MP
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
 	handled, err := handleSkillCustom(conn, player, world, useSkillMessage("CS_yhwq_hsqs01"), "test")
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if got := player.actor.Snapshot().MP; got != beforeMP {
+	if got := player.stateSnapshot().MP; got != beforeMP {
 		t.Fatalf("target rejection spent MP: %d", got)
 	}
 	if len(conn.frames) != 0 {

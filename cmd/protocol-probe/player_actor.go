@@ -12,6 +12,7 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/entity"
 	"github.com/local/9yin-go-server/internal/role"
+	"github.com/local/9yin-go-server/internal/sim"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -130,11 +131,19 @@ func bufferInfoPropertyName(slot uint16) string {
 // 可见属性 schema。对当前本地测试服务器而言，货币的权威属于会话；
 // 一旦引入物品/货币存储，购买事务将成为
 // 它的持久化所有者。
+//
+// 锁纪律：p.mu 是玩家状态（下方全部字段，含三份 sim 组件值）的
+// 唯一锁。跨对象锁序恒为 sceneLifecycle.mu（外）→ p.mu（内）；
+// 持 p.mu 期间不得调用 sceneLifecycle 的任何加锁方法。异步 timer
+// 路径（技能清除、buff 到期）一律经由本类型的持锁方法访问状态。
 type playerActor struct {
-	actor                 *entity.Actor
+	mu                    sync.Mutex
+	name                  string
+	vitals                sim.Vitals
+	qinggong              sim.QingGong
+	speed                 sim.Motion
 	silver                int32
 	faction               string
-	mu                    sync.Mutex
 	motion                playerMotion
 	buffs                 map[uint16]activePlayerBuff
 	activeQingGong        map[string]struct{}
@@ -186,8 +195,12 @@ func newPlayerActor(name string, silver int32) *playerActor {
 	for _, skill := range starterSkillViews {
 		learnedSkills[skill.configID] = skill.level
 	}
+	now := time.Now()
 	p := &playerActor{
-		actor:              entity.NewPlayer(playerObjectID, playerOwnerID, name),
+		name:               name,
+		vitals:             sim.NewVitals(1000, 500),
+		qinggong:           sim.NewQingGong(now),
+		speed:              sim.NewMotion(),
 		silver:             silver,
 		faction:            defaultRoleFaction,
 		motion:             playerMotion{moveSpeed: 25, runSpeed: 25, gravity: 9.8},
@@ -198,9 +211,61 @@ func newPlayerActor(name string, silver int32) *playerActor {
 		skillTeamCooldowns: make(map[int32]time.Time),
 		progress:           newPlayerProgress(),
 	}
-	p.syncEquippedNeiGongBuffLocked(time.Now())
+	p.syncEquippedNeiGongBuffLocked(now)
 	p.syncEquippedNeiGongResourcesLocked()
 	return p
+}
+
+// snapshotLocked 把三份组件值组合为协议层消费的 entity.ActorState
+// DTO，保证 0x10/0x0D 属性投影与迁移前字节一致。
+// 调用方必须已持有 p.mu。
+func (p *playerActor) snapshotLocked() entity.ActorState {
+	state := p.vitals.ActorState(playerObjectID, playerOwnerID)
+	state.Name = p.name
+	state.QingGongPoint = p.qinggong.Point
+	state.MaxQingGongPoint = p.qinggong.Max
+	state.MaxQingGongPointAdd = p.qinggong.MaxAdd
+	state.QingGongConsumeMul = p.qinggong.ConsumeMul
+	state.SpeedRatio = p.speed.SpeedRatio
+	return state
+}
+
+// stateSnapshot 供不持 p.mu 的调用方（连接循环、combatTick 的
+// 日志路径）获取一份一致快照。
+func (p *playerActor) stateSnapshot() entity.ActorState {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.snapshotLocked()
+}
+
+func (p *playerActor) logicState() uint8 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.vitals.Logic
+}
+
+func (p *playerActor) setLogicState(state uint8) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.vitals.SetLogicState(state)
+}
+
+func (p *playerActor) applyDamage(amount int32) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.vitals.ApplyDamage(amount)
+}
+
+func (p *playerActor) spendMP(cost int32) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.vitals.SpendMP(cost)
+}
+
+func (p *playerActor) useQingGong(baseCost int32, now time.Time) (int32, bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.qinggong.Use(baseCost, now)
 }
 
 func (p *playerActor) learnedSkillLevel(configID string) (int32, bool) {
@@ -283,7 +348,10 @@ type npcAttackOutcome struct {
 // 每条新的 218 请求都授予一个 600ms 的招架窗口。闪避按攻击者和秒
 // 确定性生成，重连无法重掷已接受的判定结果。
 func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time.Time) npcAttackOutcome {
-	if damage <= 0 || p.actor.Snapshot().HP <= 0 {
+	p.mu.Lock()
+	deadAlready := p.vitals.HP <= 0
+	p.mu.Unlock()
+	if damage <= 0 || deadAlready {
 		return npcAttackOutcome{}
 	}
 	parry := p.activeParrySnapshot()
@@ -302,29 +370,31 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 	if combatPercentRoll(attackerID, now, 18) < dodgeChance {
 		healed := int32(0)
 		if hasProfile && profile.mode == innerPowerModeIncomingDodgeHeal && !p.innerPowerHealCoolingDown(now) {
-			state := p.actor.Snapshot()
-			amount := (state.MaxHP*profile.healPercent + 99) / 100
-			if p.actor.ApplyHeal(amount) {
+			p.mu.Lock()
+			amount := (p.vitals.MaxHP*profile.healPercent + 99) / 100
+			if p.vitals.ApplyHeal(amount) {
 				healed = amount
 			}
-			p.setInnerPowerHealCooldown(now.Add(profile.healCooldown))
+			p.setInnerPowerHealCooldownLocked(now.Add(profile.healCooldown))
+			p.mu.Unlock()
 		}
 		return npcAttackOutcome{stateChanged: triggered || healed > 0, dodged: true, innerPowerTriggered: triggered, innerPowerHeal: healed}
 	}
-	changed := p.actor.ApplyDamage(damage)
+	p.mu.Lock()
+	changed := p.vitals.ApplyDamage(damage)
 	if !changed {
+		p.mu.Unlock()
 		return npcAttackOutcome{}
 	}
+	dead := p.vitals.HP <= 0
+	if dead {
+		p.reviveAt = now.Add(playerAutoReviveDelay)
+	}
+	p.mu.Unlock()
 	rules := p.buffRules(now)
 	if !rules.CantBeSkillLocked {
 		p.mu.Lock()
 		p.skillLockUntil = now.Add(500 * time.Millisecond)
-		p.mu.Unlock()
-	}
-	dead := p.actor.Snapshot().HP <= 0
-	if dead {
-		p.mu.Lock()
-		p.reviveAt = now.Add(playerAutoReviveDelay)
 		p.mu.Unlock()
 	}
 	return npcAttackOutcome{stateChanged: true, dead: dead}
@@ -362,8 +432,14 @@ func (p *playerActor) innerPowerHealCoolingDown(now time.Time) bool {
 
 func (p *playerActor) setInnerPowerHealCooldown(next time.Time) {
 	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.setInnerPowerHealCooldownLocked(next)
+}
+
+// setInnerPowerHealCooldownLocked 供已持 p.mu 的受击裁定路径使用。
+// 调用方必须已持有 p.mu。
+func (p *playerActor) setInnerPowerHealCooldownLocked(next time.Time) {
 	p.innerPowerHealReadyAt = next
-	p.mu.Unlock()
 }
 
 // expireInnerPowerPassive 只清除料敌先机。随后常规的连接 tick 会发送
@@ -396,8 +472,12 @@ func (p *playerActor) reviveWhenDue(now time.Time) bool {
 	}
 	p.reviveAt = time.Time{}
 	p.skillLockUntil = time.Time{}
+	// 完整复活迁移：数值回满 + 轻功条回满 + 速度比重置，
+	// 等价于原 entity.Actor.Revive 的全语义。
+	p.vitals.Revive()
+	p.qinggong.Reset(now)
+	p.speed = sim.NewMotion()
 	p.mu.Unlock()
-	p.actor.Revive()
 	return true
 }
 
@@ -427,8 +507,7 @@ func (p *playerActor) equipNeiGong(id string) error {
 // 调用方必须已持有 p.mu。
 func (p *playerActor) syncEquippedNeiGongResourcesLocked() {
 	hpAdd, mpAddRaw := p.progress.equippedResourceAdds()
-	base := p.actor.Snapshot()
-	p.actor.SetDerivedMaxima(base.BaseMaxHP+hpAdd, base.BaseMaxMP+mpAddRaw)
+	p.vitals.SetDerivedMaxima(p.vitals.BaseMaxHP+hpAdd, p.vitals.BaseMaxMP+mpAddRaw)
 }
 
 // syncEquippedNeiGongBuffLocked 将已装备秘籍由已安装 varprop 推导出的
@@ -464,18 +543,18 @@ func (p *playerActor) facultyBegin(style int32) (uint16, bool, error) {
 	// 普通内修是一种持久的后台转换，不得强制角色进入 LS_FACULTY。只有
 	// 主动的演武路径才拥有那个可见的逻辑/动作状态。
 	if style == facultyStyleAct {
-		p.actor.SetLogicState(logicStateFaculty)
+		p.vitals.SetLogicState(logicStateFaculty)
 	} else {
-		p.actor.SetLogicState(0)
+		p.vitals.SetLogicState(0)
 	}
 	return 0, false, nil
 }
 
 func (p *playerActor) facultyExit() {
 	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.progress.facultyExit()
-	p.mu.Unlock()
-	p.actor.SetLogicState(0)
+	p.vitals.SetLogicState(0)
 }
 
 func (p *playerActor) progressBookFrame(slot uint16) ([]byte, error) {
@@ -510,9 +589,9 @@ func (p *playerActor) restoreFaculty(value facultyProgressSnapshot, now time.Tim
 	defer p.mu.Unlock()
 	p.progress.restore(value, now)
 	if p.progress.facultyState == facultyStateConvert && p.progress.facultyStyle == facultyStyleAct {
-		p.actor.SetLogicState(logicStateFaculty)
+		p.vitals.SetLogicState(logicStateFaculty)
 	} else {
-		p.actor.SetLogicState(0)
+		p.vitals.SetLogicState(0)
 	}
 	p.syncEquippedNeiGongBuffLocked(now)
 	p.syncEquippedNeiGongResourcesLocked()
@@ -532,10 +611,13 @@ func (p *playerActor) activateQingGong(id string) bool {
 }
 
 func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
-	state := p.actor.Snapshot()
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	state := p.snapshotLocked()
+	now := time.Now()
 	hpRecovery := sitcrossRecoveryPerSecond(state.MaxHP)
 	mpRecovery := sitcrossRecoveryPerSecond(state.MaxMP)
-	currentSkillID, currentSkillEffectID, currentSkillLevel, currentSkillTarget := p.currentSkillStateSnapshot()
+	currentSkillID, currentSkillEffectID, currentSkillLevel, currentSkillTarget := p.currentSkillID, p.currentSkillEffectID, p.currentSkillLevel, p.currentSkillTarget
 	hpRatio := int32(int64(state.HP) * 100 / int64(state.MaxHP))
 	hitHPRatio := int32(int64(state.HitHP) * 100 / int64(state.MaxHP))
 	mpRatio := int32(int64(state.MP) * 100 / int64(state.MaxMP))
@@ -557,7 +639,7 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: 116, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
 		{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Value: clientdata.Int32Value(0)},
 		{Index: propDead, Name: "Dead", Value: clientdata.Int32Value(boolInt32(state.HP <= 0))},
-		{Index: propCantUseSkill, Name: "CantUseSkill", Value: clientdata.Int32Value(boolInt32(p.skillLocked(time.Now())))},
+		{Index: propCantUseSkill, Name: "CantUseSkill", Value: clientdata.Int32Value(boolInt32(p.skillLockUntil.After(now)))},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue(currentSkillID)},
 		{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Value: clientdata.StringValue(currentSkillEffectID)},
 		{Index: propCurSkillLevel, Name: "CurSkillLevel", Value: clientdata.Int32Value(currentSkillLevel)},
@@ -575,17 +657,17 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Value: clientdata.Int32Value(0)},
 		{Index: 36, Name: "Name", Value: clientdata.WideStringValue(state.Name)},
 		{Index: 111, Name: "CapitalType1", Value: clientdata.Int32Value(p.silver)},
-		{Index: bufferListPropertyIndex, Name: "BufferListStr", Value: clientdata.StringValue(p.bufferListString(time.Now()))},
+		{Index: bufferListPropertyIndex, Name: "BufferListStr", Value: clientdata.StringValue(p.bufferListStringLocked(now))},
 	}
 	properties = append(properties, factionProperties(p.faction)...)
 	for _, slot := range nativeBuffSlots {
 		properties = append(properties, clientdata.IndexedProperty{
-			Index: bufferInfoPropertyIndex(slot), Name: bufferInfoPropertyName(slot), Value: clientdata.StringValue(p.bufferInfo(slot, time.Now())),
+			Index: bufferInfoPropertyIndex(slot), Name: bufferInfoPropertyName(slot), Value: clientdata.StringValue(p.bufferInfoLocked(slot, now)),
 		})
 	}
-	properties = append(properties, baseMotionProperties(p.motionSnapshot())...)
+	properties = append(properties, baseMotionProperties(p.motion)...)
 	properties = append(properties, qinggongMotionProperties()...)
-	return append(properties, p.progressProperties()...)
+	return append(properties, p.progress.properties()...)
 }
 
 func boolInt32(value bool) int32 {
@@ -897,8 +979,9 @@ func (p *playerActor) vitalUpdate() ([]byte, error) {
 // 0x10 档案，因此客户端绝不会自行凭 HPHeartSpeed/MPHeartSpeed 虚构
 // 资源值。
 func (p *playerActor) sitcrossTick() bool {
-	state := p.actor.Snapshot()
-	return p.actor.RestoreWhileSit(sitcrossRecoveryPerSecond(state.MaxHP), sitcrossRecoveryPerSecond(state.MaxMP))
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.vitals.RestoreWhileSit(sitcrossRecoveryPerSecond(p.vitals.MaxHP), sitcrossRecoveryPerSecond(p.vitals.MaxMP))
 }
 
 // sitcrossRecoveryPerSecond 向上取整，使无法整除的推导上限仍能在至多
@@ -914,7 +997,9 @@ func sitcrossRecoveryPerSecond(maximum int32) int32 {
 // 属性档案更新已包含 HitHP 和 HitHPRatio，因此这里沿用已被验证的常规
 // 0x10 属性路由。
 func (p *playerActor) combatBruiseTick() bool {
-	return p.actor.RecoverBruisedHPWhileFighting(combatBruiseRecoveryPerSecond)
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.vitals.RecoverBruisedHPWhileFighting(combatBruiseRecoveryPerSecond)
 }
 
 // combatRageTick 在角色仍处于战斗中时结算固定的每秒 +5 怒气恢复。任何
@@ -924,7 +1009,7 @@ func (p *playerActor) combatBruiseTick() bool {
 func (p *playerActor) combatRageTick() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.actor.Snapshot().LogicState != entity.LogicStateFighting {
+	if p.vitals.Logic != entity.LogicStateFighting {
 		return false
 	}
 	before := p.progress.attributes.sp
@@ -937,21 +1022,22 @@ func (p *playerActor) combatRageTick() bool {
 // 恢复常规状态。这使恢复、伤害和客户端 LogicState 保持在同一个权威
 // 转换之上。
 func (p *playerActor) setCombatPresence(active bool) bool {
-	state := p.actor.Snapshot()
-	if state.HP <= 0 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.vitals.HP <= 0 {
 		return false
 	}
 	if active {
-		if state.LogicState == entity.LogicStateFighting {
+		if p.vitals.Logic == entity.LogicStateFighting {
 			return false
 		}
-		p.actor.SetLogicState(entity.LogicStateFighting)
+		p.vitals.SetLogicState(entity.LogicStateFighting)
 		return true
 	}
-	if state.LogicState != entity.LogicStateFighting {
+	if p.vitals.Logic != entity.LogicStateFighting {
 		return false
 	}
-	p.actor.SetLogicState(entity.LogicStateNormal)
+	p.vitals.SetLogicState(entity.LogicStateNormal)
 	return true
 }
 
@@ -978,8 +1064,10 @@ func (p *playerActor) clearCurrentSkill(expected string) bool {
 	p.currentSkillEffectID = ""
 	p.currentSkillLevel = 0
 	p.currentSkillTarget = 0
+	// 技能清除定时器在独立 goroutine 触发；状态字段与 LogicState
+	// 必须在同一临界区内落定，这与锁纪律注释一致。
+	p.vitals.SetLogicState(0)
 	p.mu.Unlock()
-	p.actor.SetLogicState(0)
 	return true
 }
 
@@ -1081,8 +1169,10 @@ func (p *playerActor) silverUpdate() ([]byte, error) {
 }
 
 func (p *playerActor) addObject(location role.Position, visual roleVisual) []byte {
-	state := p.actor.Snapshot()
-	motion := p.motionSnapshot()
+	p.mu.Lock()
+	state := p.snapshotLocked()
+	motion := p.motion
+	now := time.Now()
 	msg := make([]byte, 0x3f, 0x120)
 	msg[0] = 0x0D
 	binary.LittleEndian.PutUint32(msg[1:], state.ObjectID)
@@ -1154,14 +1244,13 @@ func (p *playerActor) addObject(location role.Position, visual roleVisual) []byt
 	addInt(116, state.MaxQingGongPointAdd)
 	addInt(propNeigongPKStatus, 0)
 	addInt(propDead, boolInt32(state.HP <= 0))
-	addInt(propCantUseSkill, boolInt32(p.skillLocked(time.Now())))
-	currentSkillID, currentSkillEffectID, currentSkillLevel, currentSkillTarget := p.currentSkillStateSnapshot()
-	addString(propCurSkillID, currentSkillID)
-	addString(propCurSkillEffectID, currentSkillEffectID)
-	addInt(propCurSkillLevel, currentSkillLevel)
-	addObject(propCurSkillTarget, currentSkillTarget)
+	addInt(propCantUseSkill, boolInt32(p.skillLockUntil.After(now)))
+	addString(propCurSkillID, p.currentSkillID)
+	addString(propCurSkillEffectID, p.currentSkillEffectID)
+	addInt(propCurSkillLevel, p.currentSkillLevel)
+	addObject(propCurSkillTarget, p.currentSkillTarget)
 	addInt(propModifySkillLockTime, 5000)
-	addString(bufferListPropertyIndex, p.bufferListString(time.Now()))
+	addString(bufferListPropertyIndex, p.bufferListStringLocked(now))
 	for _, property := range baseMotionProperties(motion) {
 		addFloat(property.Index, property.Value.F32)
 	}
@@ -1170,9 +1259,9 @@ func (p *playerActor) addObject(location role.Position, visual roleVisual) []byt
 	}
 	addInt(111, p.silver) // CapitalType1: 碎银；已在场景属性表中协商。
 	for _, slot := range nativeBuffSlots {
-		addString(bufferInfoPropertyIndex(slot), p.bufferInfo(slot, time.Now()))
+		addString(bufferInfoPropertyIndex(slot), p.bufferInfoLocked(slot, now))
 	}
-	for _, property := range p.progressProperties() {
+	for _, property := range p.progress.properties() {
 		msg = appendNPCProperty(msg, property)
 		count++
 	}
@@ -1182,6 +1271,7 @@ func (p *playerActor) addObject(location role.Position, visual roleVisual) []byt
 	msg = appendObjectProperty(msg, 100, 0, 0)
 	count++
 	binary.LittleEndian.PutUint16(msg[0x3d:], count)
+	p.mu.Unlock()
 	return msg
 }
 

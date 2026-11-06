@@ -49,6 +49,158 @@ func TestVitalsApplyDamageTransitions(t *testing.T) {
 	}
 }
 
+// 以下用例自 internal/entity/actor_test.go 原样移植（玩家路径），
+// 与上面的 NPC 子集共同构成原语行为的完整 oracle。
+
+func newPlayerVitals() Vitals { return NewVitals(1000, 500) }
+
+func TestVitalsHealManaAndRevive(t *testing.T) {
+	v := newPlayerVitals()
+	if !v.ApplyDamage(250) || !v.ApplyHeal(100) {
+		t.Fatal("damage then heal must change the vitals")
+	}
+	if v.HP != 850 || v.HitHP != 1000 || v.Logic != entity.LogicStateFighting {
+		t.Fatalf("healed state = %+v", v)
+	}
+	if !v.SpendMP(500) || v.SpendMP(1) {
+		t.Fatal("MP spending must be bounded by the vitals state")
+	}
+	v.ApplyDamage(5000)
+	if v.ApplyHeal(100) {
+		t.Fatal("healing must not implicitly revive a dead actor")
+	}
+	v.Revive()
+	if v.HP != 1000 || v.HitHP != 1000 || v.MP != 500 || v.Logic != entity.LogicStateNormal {
+		t.Fatalf("revived state = %+v", v)
+	}
+}
+
+func TestVitalsFightingRecoveryOnlySettlesBruisedBlood(t *testing.T) {
+	v := newPlayerVitals()
+	v.ApplyDamage(200)
+	if changed := v.RecoverBruisedHPWhileFighting(50); !changed {
+		t.Fatal("fighting actor did not settle bruised blood")
+	}
+	if v.HP != 800 || v.HitHP != 950 || v.Logic != entity.LogicStateFighting {
+		t.Fatalf("first bruised-blood settlement=%+v", v)
+	}
+	if changed := v.RecoverBruisedHPWhileFighting(500); !changed {
+		t.Fatal("remaining bruised blood did not settle")
+	}
+	if v.HP != 800 || v.HitHP != 800 {
+		t.Fatalf("bruise must clamp at real HP, got=%+v", v)
+	}
+	if changed := v.RecoverBruisedHPWhileFighting(1); changed {
+		t.Fatal("fully settled bruised layer changed again")
+	}
+	v.SetLogicState(entity.LogicStateNormal)
+	if changed := v.RecoverBruisedHPWhileFighting(1); changed {
+		t.Fatal("non-fighting actor recovered bruised blood")
+	}
+}
+
+func TestVitalsRestoreWhileSitOnlyChangesLivingSitcrossActor(t *testing.T) {
+	v := newPlayerVitals()
+	v.ApplyDamage(200)
+	v.SpendMP(100)
+	if changed := v.RestoreWhileSit(20, 30); changed {
+		t.Fatal("normal actor recovered outside sitcross")
+	}
+	v.SetLogicState(entity.LogicStateSitcross)
+	if changed := v.RestoreWhileSit(20, 30); !changed {
+		t.Fatal("sitcross actor did not recover")
+	}
+	if v.HP != 820 || v.MP != 430 || v.HitHP != 1000 {
+		t.Fatalf("recovery state=%+v", v)
+	}
+	v.SetLogicState(entity.LogicStateDied)
+	if changed := v.RestoreWhileSit(20, 30); changed {
+		t.Fatal("dead actor recovered while sitcross unavailable")
+	}
+}
+
+func TestVitalsDerivedMaximaKeepBaseProtocolValuesAndResourceRules(t *testing.T) {
+	v := newPlayerVitals()
+	if changed := v.SetDerivedMaxima(2630, 1480); !changed {
+		t.Fatal("derived maxima did not change")
+	}
+	if v.BaseMaxHP != 1000 || v.MaxHP != 2630 || v.HP != 2630 || v.BaseMaxMP != 500 || v.MaxMP != 1480 || v.MP != 1480 {
+		t.Fatalf("derived full state=%+v", v)
+	}
+	v.ApplyDamage(1000)
+	v.SpendMP(1000)
+	v.SetDerivedMaxima(1200, 600)
+	if v.HP != 1200 || v.MP != 480 || v.MaxHP != 1200 || v.MaxMP != 600 {
+		t.Fatalf("derived clamp state=%+v", v)
+	}
+}
+
+func TestQingGongCostMultiplierAndRecovery(t *testing.T) {
+	q := NewQingGong(time.Now())
+	start := time.Now()
+	q.SetConsumeMultiplier(-0.2)
+	cost, ok := q.Use(25, start)
+	if !ok || cost != 20 {
+		t.Fatalf("cost=%d ok=%t, want 20 true", cost, ok)
+	}
+	if q.Point != 130 {
+		t.Fatalf("points after use=%d, want 130", q.Point)
+	}
+	if !q.Restore(start.Add(2 * time.Second)) {
+		t.Fatal("expected server-side qinggong recovery")
+	}
+	if q.Point != 150 {
+		t.Fatalf("points after recovery=%d, want 150", q.Point)
+	}
+}
+
+func TestQingGongSuccessfulUseRefillsBelowFifty(t *testing.T) {
+	q := NewQingGong(time.Now())
+	start := time.Now()
+
+	// 四次被接受的 25 点动作恰好剩 50 点：阈值是严格小于 50，
+	// 所以此时还不应回满。
+	for i := 0; i < 4; i++ {
+		if _, ok := q.Use(25, start); !ok {
+			t.Fatalf("use %d was rejected", i+1)
+		}
+	}
+	if q.Point != 50 {
+		t.Fatalf("points at threshold=%d, want 50", q.Point)
+	}
+
+	// 下一次被接受的使用剩 25 点，因此本地测试的回满必须
+	// 体现在随后的 0x10 更新所发送的同一份状态快照中。
+	if cost, ok := q.Use(25, start); !ok || cost != 25 {
+		t.Fatalf("below-threshold use cost=%d ok=%t, want 25 true", cost, ok)
+	}
+	if q.Point != 150 {
+		t.Fatalf("points after below-threshold refill=%d, want 150", q.Point)
+	}
+}
+
+func TestQingGongResetFillsToMaxPlusAdd(t *testing.T) {
+	q := NewQingGong(time.Now())
+	q.Use(100, time.Now())
+	q.MaxAdd = 30
+	now := time.Now()
+	q.Reset(now)
+	if q.Point != 180 || !q.UpdatedAt.Equal(now) {
+		t.Fatalf("reset state=%+v", q)
+	}
+}
+
+func TestMotionDefaultsAndClamp(t *testing.T) {
+	m := NewMotion()
+	if m.SpeedRatio != 100 {
+		t.Fatalf("default speed ratio=%d, want 100", m.SpeedRatio)
+	}
+	m.SetSpeedRatio(-5)
+	if m.SpeedRatio != 0 {
+		t.Fatalf("negative ratio must clamp to 0, got %d", m.SpeedRatio)
+	}
+}
+
 func TestVitalsReviveResetsToFull(t *testing.T) {
 	v := NewVitals(100, 50)
 	v.ApplyDamage(120)

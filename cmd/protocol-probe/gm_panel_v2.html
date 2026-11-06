@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script>if(location.protocol==='https:'){location.href='http://'+location.host+location.pathname;}</script>
+<title>九阴本地 GM</title>
+<style>
+:root{--bg:#0f1115;--card:#1a1d23;--card2:#20242c;--line:#2a2f3a;--accent:#e8b34b;--accent2:#4ba3e8;--text:#e6e9ef;--muted:#8b93a3}
+*{box-sizing:border-box}
+body{font:14px/1.6 "Segoe UI",system-ui,"Microsoft YaHei",sans-serif;margin:0;background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,#14171d,#1c2027);border-bottom:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;color:var(--accent);white-space:nowrap}
+.player-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1}
+.chip{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:3px 12px;font-size:13px;white-space:nowrap}
+.chip b{color:var(--accent2);font-weight:600;margin-right:4px}
+#command-status{color:#7fd88f;font-size:13px;white-space:nowrap}
+.layout{display:flex;align-items:flex-start}
+#gm-nav{position:sticky;top:57px;flex:0 0 172px;max-height:calc(100vh - 57px);overflow:auto;padding:12px 8px;border-right:1px solid var(--line)}
+#gm-nav a{display:block;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:6px;font-size:13px;cursor:pointer}
+#gm-nav a:hover{background:var(--card2);color:var(--accent)}
+#gm-nav a.active{background:var(--card2);color:var(--accent);border-left:3px solid var(--accent);padding-left:7px}
+main.grid{flex:1;padding:16px;min-width:0}
+main.grid>section{display:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:0 auto;max-width:980px;scroll-margin-top:70px;overflow:auto}
+main.grid>section.active{display:block;border-color:#3a4150}
+h2{font-size:15px;margin:0 0 8px;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:6px}
+h1{font-size:18px}
+.muted{color:var(--muted);font-size:12.5px;line-height:1.5}
+button{padding:6px 12px;margin:3px 4px 3px 0;border-radius:6px;border:1px solid #3a4150;background:var(--card2);color:var(--text);cursor:pointer;font-size:13px}
+button:hover{background:#2a3040;border-color:var(--accent2)}
+input,select{padding:6px 8px;margin:3px 4px 3px 0;border-radius:6px;border:1px solid #3a4150;background:#12141a;color:var(--text);font-size:13px}
+input,select{min-width:0}
+#item-query,#card-query,#title-query,#chat-text,#gift-filter,#item-config,#destination,#teleport{width:100%;max-width:420px}
+.status{color:#7fd88f}
+pre{white-space:pre-wrap;background:#12141a;border:1px solid var(--line);border-radius:6px;padding:8px;max-height:200px;overflow:auto;font-size:12px}
+hr{border:none;border-top:1px solid var(--line);margin:10px 0}
+label{white-space:nowrap}
+select[size]{background:#12141a}
+@media (max-width:760px){#gm-nav{display:none}}
+</style></head><body>
+<header>
+<h1>九阴本地 GM</h1>
+<div id="player-card" class="player-chips">读取中……</div>
+<span id="command-status" class="status"></span>
+</header>
+<div class="layout">
+<nav id="gm-nav"></nav>
+<main class="grid">
+<section id="sec-player"><h2>在线角色</h2><p class="muted">仅监听 127.0.0.1。命令直接交给在线游戏会话执行；顶部实时显示当前角色状态。</p><pre id="state">读取中……</pre><button onclick="popupGMPanel()">弹出游戏GM面板</button><button onclick="refresh()">刷新</button></section>
+<section><h2>伙伴系统</h2><p class="muted">伙伴操作直接作用于当前在线角色；拉伙伴不要求重新邀请，且会使用当前场景。</p><button onclick="botCommand('bot_ensure')">创建 / 校验青禾</button><button onclick="botCommand('bot_pull_here')">拉伙伴到我身边</button><button onclick="botCommand('bot_follow_start')">开始跟随</button><button onclick="botCommand('bot_follow_stop')">停止跟随</button><button onclick="botCommand('bot_revive')">复活回满血</button><button onclick="botCommand('bot_support_configure')">配置辅助技能</button><pre id="bot-state">读取伙伴状态中……</pre></section>
+<section><h2>所有道具与换装</h2>
+<p class="muted">中文名来自 stringname.idres；目录合并 equipment.ini 与 tool_item.ini。ViewID 会把道具分别放入普通、装备、材料、任务背包。</p>
+<input id="item-query" placeholder="输入中文名或 ConfigID，例如：久仙刀、药、礼包">
+<select id="item-view"><option value="0">全部分类</option><option value="1">普通道具</option><option value="2">装备</option><option value="3">材料</option><option value="4">任务物品</option></select>
+<button onclick="searchItems()">搜索</button><br>
+<select id="item-result"><option value="">请先搜索道具</option></select>
+<input id="item-amount" type="number" value="1" min="1" max="9999" style="min-width:90px;width:90px">
+<button onclick="grantItem(false)">加入对应背包</button><button onclick="grantItem(true)">立即穿戴</button>
+<div id="item-hint" class="muted"></div>
+</section>
+<section><h2>时装 / 身份装发放</h2>
+<p class="muted">目录按 equipment.ini EquipType 分类：时装帽子/衣服/鞋子为分件，时装套装（FashionCoat）与身份装套装（Suit）为整套。「立即穿戴」直接穿进人物属性面板身份装/时装栏位（16-19，自动镜像新面板 40-43）并同步外观与发型；「加入装备背包」由玩家自己穿。时装裤子暂无数据（九阴时装没有独立裤子分件，裤外观由套装自带）。</p>
+<label>分类 <select id="fashion-cat"></select></label>
+<input id="fashion-query" placeholder="按中文名或 ConfigID 过滤（可留空）" oninput="renderFashionItems()"><br>
+<select id="fashion-result" size="10" style="width:100%;max-width:560px;height:220px"><option value="">目录读取中……</option></select><br>
+<button onclick="grantFashion(true)">立即穿戴</button><button onclick="grantFashion(false)">加入装备背包</button>
+<div id="fashion-hint" class="muted"></div>
+</section>
+<section><h2>碎银 / 官银 / 黄金 / 怒气</h2>
+<p class="muted">重制服务（重置属性）扣的是<b>官银</b>（senior_prop_cost type=2），缺钱报"您的银两不足"就设官银；黄金=商城元宝。两者随设置写入 vip.json 存档。</p>
+<input id="silver" type="number" value="99999" min="0"><button onclick="silver()">设置碎银</button><br>
+<input id="guanyin" type="number" value="99999" min="0"><button onclick="guanyinSet()">设置官银</button><br>
+<input id="gold" type="number" value="9999" min="0"><button onclick="goldSet()">设置黄金</button><br>
+<input id="sp" type="number" value="100" min="0" max="100"><button onclick="setSP()">设置怒气</button><button onclick="addSP(10)">+10</button><button onclick="addSP(50)">+50</button><button onclick="fillSP()">回满</button>
+</section>
+<section><h2>洗练（身上装备 · 指定部位）</h2>
+<p class="muted">先选部位再点功能：<b>随机洗练</b>=词条属性+数值全随机重掷（op3）；<b>定向洗练</b>=保持现有词条属性不变，只在同属性族内随机重掷数值（op4）；<b>抛光</b>=保持词条属性不变，把每条数值拉到该属性族的最高档（组内最大值）。招式开光随机洗练已学招式词条。词条是全局属性包，穿在任何部位都生效；武器走 senior_weapon 专属池，防具/首饰走 senior_prop 专属池（防具定向/抛光在同内功同属性族内重掷），没有专属段时按家族前缀回退、仍没有才兜底全池。结果立即重刷装备视图、战斗加成并写入 equip.json。定向/抛光需要该部位已有词条。</p>
+<label>目标部位 <select id="recast-target-slot"></select></label>
+<button onclick="gmRecast('recast_slot_prop')">随机洗练</button>
+<button onclick="gmRecast('recast_slot_dire')">定向洗练</button>
+<button onclick="gmRecast('recast_slot_polish')">抛光</button>
+<button onclick="gmRecast('recast_slot_skill')">招式开光</button>
+<span id="recast-result" class="muted"></span>
+<div style="margin-top:8px"><b>自定义词条</b> <span class="muted">（追加写入，不替换现有词条）</span><br>
+<button onclick="toggleAffixList()">全部词条列表</button>
+<button onclick="recastChecked('prop')">加入词条（普通）</button>
+<button onclick="recastChecked('skill')">加入词条（招式）</button>
+<button onclick="recastClearAffix()">清空装备词条</button>
+<span id="recast-affix-hint" class="muted"></span><br>
+<input id="affix-filter" type="text" placeholder="输入 名称/ID 筛选…" style="display:none;min-width:180px;width:180px" oninput="filterAffixList()">
+<label id="affix-weapon-label" style="display:none">武器类型 <select id="affix-weapon-filter" onchange="filterAffixList()" style="min-width:90px;width:90px"></select></label>
+<div id="affix-list-box" style="display:none">
+<details open><summary>普通词条（PropBuilt）</summary><div id="recast-prop-list" class="affix-list"></div></details>
+<details><summary>招式词条（SkillPack）</summary><div id="recast-skill-list" class="affix-list"></div></details>
+</div>
+</div>
+<style>.affix-list{display:flex;flex-wrap:wrap;gap:4px 14px;max-height:260px;overflow:auto;padding:8px;background:#161a20;border-radius:8px}.affix-item{display:inline-flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap}</style>
+<script>
+const RECAST_SLOTS=[["武器",22,"武器"],["防具",1,"头发"],["防具",3,"衣服"],["防具",6,"护腕"],["防具",4,"裤子"],["防具",7,"绑腿"],["防具",8,"鞋子"],["首饰",11,"耳环1"],["首饰",12,"耳环2"],["首饰",13,"项链"],["首饰",14,"戒指1"],["首饰",15,"戒指2"],["宝物",25,"宝物1"],["宝物",26,"宝物2"],["宝物",27,"宝物3"],["宝物",28,"宝物4"],["宝物",29,"宝物5"],["娃娃",44,"娃娃1"],["娃娃",45,"娃娃2"],["娃娃",46,"娃娃3"],["娃娃",47,"娃娃4"],["娃娃",48,"娃娃5"]];
+(function(){let sel=document.querySelector('#recast-target-slot');if(!sel)return;for(let s of RECAST_SLOTS){let o=document.createElement('option');o.value=s[1];o.textContent='['+s[0]+'] '+s[2]+' (槽'+s[1]+')';sel.appendChild(o)}})();
+function gmRecast(action){let sel=document.querySelector('#recast-target-slot');let slot=sel?+sel.value:0;if(!slot)return alert('请先选择目标部位');let hint=document.querySelector('#recast-result');if(hint)hint.textContent='洗练中…';command({action:action,slot:slot});}
+async function loadRecastAffixes(){try{let j=await (await fetch('/api/recast-affixes')).json();let ph=document.querySelector('#recast-affix-hint');if(ph&&j.loaded===false)ph.textContent='洗练资源未加载（缺少 senior_weapon_*.ini），词条列表为空';function fill(id,arr,label,kind){let box=document.querySelector(id);if(!box)return;box.innerHTML='';if(!arr||!arr.length){box.textContent='（无'+label+'）';return}for(let e of arr){let lab=document.createElement('label');lab.className='affix-item';lab.setAttribute('data-weapon',e.weapon||'');let title,text;if(kind==='prop'){title='ID '+e.id+(e.source?' ['+e.source+']':'')+(e.name?' '+e.name:'');text=e.name||('ID '+e.id);if(e.source)text+=' <span class="muted">['+e.source+']</span>'}else{title='ID '+e.id+(e.source?' '+e.source:'')+(e.detail?' '+e.detail:'');text=e.detail||e.name||e.source||('ID '+e.id);if(e.taolu)text+='<span class="muted"> ['+e.taolu+']</span>'}lab.title=title;lab.innerHTML='<input type="checkbox" value="'+e.id+'"> '+text;box.appendChild(lab)}}fill('#recast-prop-list',j.prop,'普通词条','prop');fill('#recast-skill-list',j.skill,'招式词条','skill');buildWeaponFilter(j.skill||[])}catch(e){let ph=document.querySelector('#recast-affix-hint');if(ph)ph.textContent='加载词条列表失败：'+e.message}}
+function buildWeaponFilter(skillArr){let sel=document.querySelector('#affix-weapon-filter');if(!sel)return;let seen={};for(let e of skillArr){if(e.weapon)seen[e.weapon]=1}let groups=['剑','刀','刺','棍','棒','枪','徒手'].filter(function(g){return seen[g]});let others=[];for(let k in seen){if(['剑','刀','刺','棍','棒','枪','徒手'].indexOf(k)<0)others.push(k)}let opts=[['all','全部']].concat(groups.map(function(g){return [g,g]}));if(others.length)opts.push(['其他','其他']);sel.innerHTML='';for(let o of opts){let el=document.createElement('option');el.value=o[0];el.textContent=o[1];sel.appendChild(el)}}
+function toggleAffixList(){let box=document.querySelector('#affix-list-box'),flt=document.querySelector('#affix-filter'),wlb=document.querySelector('#affix-weapon-label');if(!box)return;let show=box.style.display==='none';box.style.display=show?'block':'none';if(flt)flt.style.display=show?'inline-block':'none';if(wlb)wlb.style.display=show?'inline-block':'none';if(show)loadRecastAffixes()}
+function filterAffixList(){let kw=(document.querySelector('#affix-filter')||{}).value||'';kw=kw.toLowerCase();let wp=(document.querySelector('#affix-weapon-filter')||{}).value||'all';document.querySelectorAll('#recast-prop-list .affix-item').forEach(function(lab){let okK=!kw||lab.textContent.toLowerCase().indexOf(kw)>=0;lab.style.display=okK?'inline-flex':'none'});document.querySelectorAll('#recast-skill-list .affix-item').forEach(function(lab){let okK=!kw||lab.textContent.toLowerCase().indexOf(kw)>=0;let okW=wp==='all'||lab.getAttribute('data-weapon')===wp;lab.style.display=(okK&&okW)?'inline-flex':'none'})}
+function recastChecked(kind){let sel=document.querySelector('#recast-target-slot');let slot=sel?+sel.value:0;if(!slot)return alert('请先在上面选择目标部位');let ids=[];document.querySelectorAll('#recast-'+kind+'-list input:checked').forEach(function(c){ids.push(+c.value)});if(!ids.length)return alert('请先在列表里勾选要加入的'+(kind==='prop'?'普通':'招式')+'词条');let hint=document.querySelector('#recast-result');if(hint)hint.textContent='加入词条中…';command({action:'recast_add_affix',slot:slot,packIDs:ids,affixKind:kind})}
+function recastClearAffix(){let sel=document.querySelector('#recast-target-slot');let slot=sel?+sel.value:0;if(!slot)return alert('请先在上面选择目标部位');if(!confirm('确定清空该装备的全部词条（普通+招式）？此操作不可恢复。'))return;let hint=document.querySelector('#recast-result');if(hint)hint.textContent='清空词条中…';command({action:'recast_clear_affix',slot:slot})}
+</script>
+</section>
+<section><h2>模板生成（带词条装备）</h2>
+<p class="muted">按官方生活技能模板生成 51 级金色装备（60501 家族基座）并放入装备背包：<b>厨师</b>=6 条属性词条（武器伤害/破防族随机档，对应"已经过专业匠师加工"模板）；<b>铁匠</b>=3 条属性词条 + 3 条招式词条（与官方淬炼同规则：已学套路、按兵器限制匹配所选武器类型）。<b>护腕</b>=3 条阳刚臂力（+33/+35/+35）+ 3 条招式词条（按身上武器类型）。<b>防具 8 部位</b>=固定 5 条红词条（外功防御能力+46/+47、阴柔 体魄+29/内息+39/臂力+35，绿色招架词条由装备配置自动附带）。词条数值取自 senior_weapon_rand 官方洗练池，生成后立即持久化。</p>
+<label>武器类型 <select id="tpl-weapon-type">
+<option value="101">单刀</option><option value="102" selected>单剑</option><option value="103">匕首</option><option value="104">双刀</option>
+<option value="105">双剑</option><option value="106">双刺</option><option value="107">长棍</option><option value="108">短棍</option><option value="122">重剑</option>
+</select></label>
+<label>职业 <select id="tpl-crafter"><option value="cook">厨师（6 属性词条）</option><option value="smith">铁匠（3 属性 + 3 招式）</option></select></label>
+<button onclick="gmTemplateWeapon()">生成武器</button><br>
+<label>防具部位 <select id="tpl-armor-slot">
+<option value="helmet">帽子</option><option value="amulet">项链</option><option value="cloth">衣服</option><option value="pants">裤子</option>
+<option value="leg">绑腿</option><option value="shoes">鞋子</option><option value="ear">耳环</option><option value="ring">戒指</option>
+</select></label>
+<button onclick="gmTemplateArmor()">生成防具</button>
+<button onclick="gmTemplateBracer()">生成带技能词条的护腕</button>
+<script>
+function gmTemplateWeapon(){command({action:'gm_generate_weapon',weaponType:+document.querySelector('#tpl-weapon-type').value,crafter:document.querySelector('#tpl-crafter').value})}
+function gmTemplateArmor(){command({action:'gm_generate_armor',armorSlot:document.querySelector('#tpl-armor-slot').value})}
+function gmTemplateBracer(){command({action:'gm_generate_bracer'})}
+</script>
+</section>
+<section><h2>移动参数</h2>
+<label>移动速度 <input id="move-speed" type="number" value="25" min="0.1" max="100" step="0.5"></label><button onclick="setMoveSpeed()">应用</button><br>
+<label>下落重力 <input id="gravity" type="number" value="9.8" min="0.1" max="100" step="0.1"></label><button onclick="setGravity()">应用</button><br>
+<button onclick="command({action:'fightword_probe'})">测试伤害飘字 24680</button>
+</section>
+<section><h2>训练木桩</h2>
+<p class="muted">在角色当前位置生成一只纯沙包怪物：移动速度 0、不会还手、血量自定义，打空即死（可反复生成）。测输出/测技能专用。</p>
+<label>血量 <input id="dummy-hp" type="number" value="100000" min="1" style="min-width:120px;width:120px"></label>
+<button onclick="spawnDummy()">生成木桩</button>
+<button onclick="spawnDummy(1000000)">生成 100 万血木桩</button>
+</section>
+<section><h2>添加假人（战斗）</h2>
+<p class="muted">在角色面前生成一只玩家造型的可战斗假人：出生即锁定并攻击你（按所选套路轮换出招、距离远会追击/冲锋），打死后 4 秒消失。⚠️ 假人是玩家档案目标——攻击它前先在下方「攻击模式（PVP）」切到「江湖」或「戕屠」（客户端设定面板的切换开关也已同步解锁）；假人已带杀戮值 8000（红名）与敌对势力 ForceRec，非和平模式下选中即显示敌方红名外观。招式按「招式中文名」从客户端技能名表（string_skill_desc CS_*）反查并编译，回执会列出实际生效的招式与未识别的名字。</p>
+<label>名字 <input id="cd-name" value="战斗假人" style="min-width:140px;width:160px"></label>
+<label>血量 <input id="cd-hp" type="number" value="50000" min="1" style="min-width:110px;width:110px"></label>
+<label>单段伤害(0=按技能表) <input id="cd-dmg" type="number" value="0" min="0" style="min-width:90px;width:90px"></label><br>
+<label>预设套路：
+<select id="cd-preset" onchange="cdPreset(this.value)">
+<option value="random">随机套路</option>
+</select></label><br>
+<label>招式（顿号/逗号分隔，可自行增删）<br><textarea id="cd-skills" rows="3" style="min-width:340px;width:360px"></textarea></label><br>
+<button onclick="spawnCombatDummy()">生成战斗假人</button>
+<button onclick="clearCombatDummies()">清除全部战斗假人</button>
+</section>
+<section><h2>世界宝箱</h2>
+<p class="muted">在角色当前位置生成一个「镀银宝箱」（BoxNpc10006，洛阳同款）：点击开箱 → 蹲下拾取动作 + 开盖动画 + 拾取框（随机装备/礼包/带词条宝物），拾取完宝箱自动消失。可反复生成。</p>
+<button onclick="spawnChest()">生成镀银宝箱</button>
+</section>
+<section><h2>常用传送</h2>
+	<p class="muted">主城 / 新手村：</p>
+	<button onclick="preset('yanjing')">燕京</button><button onclick="preset('suzhou')">苏州</button><button onclick="preset('jinling')">金陵</button><button onclick="preset('luoyang')">洛阳</button><button onclick="preset('chengdu')">成都</button>
+<button onclick="preset('jimingyi')">鸡鸣驿</button><button onclick="preset('yanyuzhuang')">烟雨庄</button><button onclick="preset('qiandengzhen')">千灯镇</button><button onclick="preset('erengu')">恶人谷</button><br>
+	<p class="muted">八大门派：</p>
+<button onclick="preset('jinyiwei')">锦衣卫</button><button onclick="preset('gaibang')">丐帮</button><button onclick="preset('junzitang')">君子堂</button><button onclick="preset('jilegu')">极乐谷</button>
+<button onclick="preset('tangmen')">唐门</button><button onclick="preset('emei')">峨眉</button><button onclick="preset('wudang')">武当</button><button onclick="preset('shaolin')">少林</button><br>
+<p class="muted">江湖势力：</p>
+<button onclick="preset('yihuagong')">移花宫</button><button onclick="preset('taohuadao')">桃花岛</button><button onclick="preset('wugenmen')">无根门</button>
+<button onclick="preset('xujia')">徐家庄</button><button onclick="preset('jinzhen')">金针沈家</button><button onclick="preset('wanshou')">万兽山庄</button><button onclick="preset('tianlun')">天轮寺</button><button onclick="preset('qingyi')">青衣楼</button><br>
+<p class="muted">隐世宗门：</p>
+<button onclick="preset('xuedao')">血刀门</button><button onclick="preset('huashan')">华山派</button><button onclick="preset('gumu')">古墓派</button><button onclick="preset('damo')">达摩宗</button><button onclick="preset('shenshui')">神水宫</button>
+<button onclick="preset('changfeng')">长风镖局</button><button onclick="preset('nianluo')">念萝崖</button><button onclick="preset('wuxian')">无仙教</button><button onclick="preset('shenji')">神机营</button><button onclick="preset('xingmiao')">星渺阁</button><br>
+<button onclick="preset('tianya')">天涯海阁</button><button onclick="preset('wanghui')">王回庄</button><button onclick="preset('wuxu')">无虚</button><button onclick="preset('shenjihui')">神机营</button>
+<button onclick="preset('kunlunpai')">昆仑派</button><button onclick="preset('xingtianbao')">刑天堡</button><button onclick="preset('tianshanpai')">天山派</button><button onclick="preset('mingjiao')">明教</button><br>
+<p class="muted">野外世界场景：</p>
+<button onclick="preset('scene01')">游云十六洲</button><button onclick="preset('scene02')">蓬莱仙境</button><button onclick="preset('scene03')">泛黄平原</button><button onclick="preset('scene04')">襄阳坡</button><button onclick="preset('scene04b')">向阳坡北</button>
+<button onclick="preset('scene05')">念萝坝</button><button onclick="preset('scene06')">凌霄城</button><button onclick="preset('scene07')">梅花岭</button><button onclick="preset('scene08')">塞外大漠</button><button onclick="preset('scene09')">塞北草原</button><br>
+<button onclick="preset('scene10')">华山论剑</button><button onclick="preset('scene11')">快活岛</button><button onclick="preset('scene16')">蓬莱岛</button><button onclick="preset('scene17')">侠客岛</button><button onclick="preset('scene19')">无寂道</button>
+<button onclick="preset('scene32')">永夜城</button><button onclick="preset('scene33')">鬼市</button><button onclick="preset('scene14')">场景14</button><button onclick="preset('scene15')">场景15</button><br>
+<p class="muted">江湖禁地 / 副本入口：</p>
+<button onclick="preset('jindi_klsg')">孔雀山庄</button><button onclick="preset('jindi_lmkc')">龙门客栈</button><button onclick="preset('jindi_qingy')">青云堡</button><button onclick="preset('jindi_yamg')">雁门关</button>
+<button onclick="preset('jindi_sjd')">神机岛</button><button onclick="preset('jindi_xyg')">血影宫</button><button onclick="preset('jindi_ysg')">阎王阁</button><button onclick="preset('jindi_zyg')">紫云宫</button><br>
+<button onclick="preset('jindi_shg')">森罗殿</button><button onclick="preset('jindi_ysl')">药王谷</button><button onclick="preset('jindi_xyu')">星月湖</button><button onclick="preset('jindi_hlg')">火麟洞</button>
+<button onclick="preset('jindi_qlg')">七里谷</button><button onclick="preset('jindi_dmgc')">大漠鬼城</button><button onclick="preset('jindi_qcxi')">千苍峡</button><button onclick="preset('jindi_hygu')">横云谷</button><br>
+<button onclick="preset('jindi_tsha')">天山海岛</button><button onclick="preset('jindi_ywf')">隐王峰</button><button onclick="preset('jindi_wxtg')">五行天宫</button><button onclick="preset('jindi_gshe')">鬼市蛇王</button>
+<button onclick="preset('jindi_gwng')">鬼市鬼王</button><button onclick="preset('jindi_sdmz')">十大试炼</button><button onclick="preset('jindi_nzyhb')">逆转阴阳堡</button><button onclick="preset('jindi_czx')">潮之巷</button><br>
+<button onclick="preset('jindi_csyt')">春山隐庭</button><button onclick="preset('jindi_mx')">溟墟</button>
+<button onclick="preset('jindi_qyb')">竞速·青云堡</button><button onclick="preset('jindi_kssg')">竞速·孔雀山庄</button><button onclick="preset('jindi_lmkc2')">竞速·龙门客栈</button><button onclick="preset('jindi_dmgc2')">竞速·大漠鬼城</button><br>
+<p class="muted">跨服 / 活动场景：</p>
+<button onclick="preset('worldwar01')">世界战场(一)</button><button onclick="preset('worldwar02')">世界战场(二)</button><button onclick="preset('battle_myz')">牧云泽</button><button onclick="preset('battle_gmp')">古墓坡</button>
+<button onclick="preset('battle_myz2')">牧云泽(二)</button><button onclick="preset('tianlundb')">天伦夺宝</button><button onclick="preset('schoolwar5')">门派战·锦衣卫</button><button onclick="preset('schoolwar6')">门派战·丐帮</button><br>
+<button onclick="preset('schoolwar7')">门派战·君子堂</button><button onclick="preset('schoolwar8')">门派战·极乐谷</button><button onclick="preset('schoolwar9')">门派战·唐门</button><button onclick="preset('schoolwar10')">门派战·峨眉</button>
+<button onclick="preset('schoolwar11')">门派战·武当</button><button onclick="preset('schoolwar12')">门派战·少林</button><button onclick="preset('schoolwar20')">门派战·明教</button><button onclick="preset('schoolwar22')">门派战·天山</button><br>
+<p class="muted">冒险场景 / 秘境：</p>
+<button onclick="preset('adv024')">万象门</button><button onclick="preset('adv023')">千机阁</button><button onclick="preset('adv032')">玄冰洞</button><button onclick="preset('adv011')">玄冥洞</button>
+<button onclick="preset('adv033')">烈焰洞</button><button onclick="preset('adv100')">藏经阁</button><button onclick="preset('adv101')">天机阁</button><button onclick="preset('adv041')">碧波潭</button><br>
+<button onclick="preset('adv045')">桃花谷</button><button onclick="preset('adv052')">寒冰洞</button><button onclick="preset('adv053')">火焰洞</button><button onclick="preset('adv054')">白雾谷</button>
+<button onclick="preset('adv055')">青竹谷</button><button onclick="preset('adv057')">迷踪林</button><button onclick="preset('adv102')">天武阁</button><button onclick="preset('adv106')">望月台</button><br>
+<button onclick="preset('adv120')">凌云台</button><button onclick="preset('adv121')">千雪峰</button><button onclick="preset('adv122')">望月崖</button><button onclick="preset('adv123')">观星台</button>
+<button onclick="preset('adv148')">明月(冥岳)</button><button onclick="preset('adv152')">五行天宫</button><button onclick="preset('adv153')">净天宫</button><button onclick="preset('adv199')">宝藏岛</button><br>
+<p class="muted">江湖险境：</p>
+<button onclick="preset('jianghu_hole01')">险境一</button><button onclick="preset('jianghu_hole02')">险境二</button><button onclick="preset('jianghu_hole03')">险境三</button><button onclick="preset('jianghu_hole04')">险境四</button>
+<button onclick="preset('jianghu_hole05')">险境五</button><button onclick="preset('jianghu_hole06')">险境六</button><button onclick="preset('jianghu_newtype01')">新境一</button><button onclick="preset('jianghu_newtype02')">新境二</button><br>
+<p class="muted">内景 / 其它：</p>
+<button onclick="preset('groupscene045')">天隐谷</button><button onclick="preset('prison')">监狱</button><button onclick="preset('fight05')">比武场五</button><button onclick="preset('fight06')">比武场六</button>
+<button onclick="preset('fight08')">比武场八</button><button onclick="preset('loading01')">世界王场景</button><button onclick="preset('scene12')">场景12</button><button onclick="preset('scene13')">场景13</button>
+</section>
+	<section><h2>踢馆传送</h2>
+	<p class="muted">点击对应踢馆名称，传送到入口NPC面前。共35个踢馆。</p>
+	<p class="muted">成都场景：</p>
+	<button onclick="preset('tiguan_1')">浣花剑派</button><button onclick="preset('tiguan_3')">沈家堡</button><button onclick="preset('tiguan_4')">徐家庄</button><button onclick="preset('tiguan_5')">南宫世家</button><br>
+	<p class="muted">烟雨庄：</p>
+	<button onclick="preset('tiguan_7')">盐帮</button><button onclick="preset('tiguan_13')">神风帮</button><button onclick="preset('tiguan_25')">天外天</button><br>
+	<p class="muted">燕京：</p>
+	<button onclick="preset('tiguan_15')">古墓派</button><button onclick="preset('tiguan_18')">东方世家</button><button onclick="preset('tiguan_23')">杀人庄</button><br>
+	<p class="muted">洛阳：</p>
+	<button onclick="preset('tiguan_20')">燕门世家</button><button onclick="preset('tiguan_28')">抱犊寨</button><button onclick="preset('tiguan_26')">秦王府</button><br>
+	<p class="muted">唐门：</p>
+	<button onclick="preset('tiguan_16')">沐云庄</button><button onclick="preset('tiguan_17')">十二连环坞</button><button onclick="preset('tiguan_29')">天宝寨</button><br>
+	<p class="muted">恶人谷：</p>
+	<button onclick="preset('tiguan_6')">星宿派</button><button onclick="preset('tiguan_21')">素云宫</button><br>
+	<p class="muted">塞外大漠：</p>
+	<button onclick="preset('tiguan_24')">大漠鬼城</button><button onclick="preset('tiguan_32')">天罗教</button><br>
+	<p class="muted">其他场景：</p>
+	<button onclick="preset('tiguan_2')">天香茶林(千灯镇)</button><button onclick="preset('tiguan_8')">仙霞派(蓬莱仙境)</button><button onclick="preset('tiguan_9')">霓裳宫(念萝坝)</button><button onclick="preset('tiguan_10')">霹雳堂(梅花岭)</button><button onclick="preset('tiguan_11')">万兽山庄(丐帮)</button><button onclick="preset('tiguan_12')">嵩山派(少林)</button><button onclick="preset('tiguan_14')">幽冥宫(泛黄平原)</button><button onclick="preset('tiguan_22')">凌霄城</button><button onclick="preset('tiguan_27')">恶虎山寨(漠河镇)</button><button onclick="preset('tiguan_30')">虎啸山庄(武当)</button><button onclick="preset('tiguan_31')">幽灵山庄(锦衣卫)</button><button onclick="preset('tiguan_33')">双龙堡(峨眉)</button><button onclick="preset('tiguan_34')">冥岳</button><button onclick="preset('tiguan_35')">净天宫</button>
+	</section>
+	<section><h2>副本</h2>
+	<p class="muted">列表来自服务端已安装的 cloneinfo、clonecolset 与首领配置。进入时走每日次数、切场景、首领波次和退出回原场景的完整链路。</p>
+<select id="clone-config"><option value="ini\scene\clone003">读取副本列表中……</option></select>
+<select id="clone-fun"><option value="1">普通</option><option value="2">困难</option><option value="3">地狱</option><option value="4">炼狱</option></select>
+<button onclick="enterClone()">创建并进入副本</button>
+<button onclick="reenterClone()">进入已打开副本</button>
+<button onclick="destroyClone()">销毁副本</button>
+</section>
+<section><h2>自定义切图与场景内瞬移</h2>
+<input id="destination" value="ini\scene\city04_LuoYang,city04,243.387,43.277,403.821,5.024"><button onclick="scene(document.querySelector('#destination').value)">切换场景</button><br>
+<input id="teleport" placeholder="X,Y,Z,朝向"><button onclick="useCurrentPosition()">填入当前坐标</button><button onclick="teleportPlayer()">场景内瞬移</button>
+</section>
+<section><h2>门派</h2>
+<select id="faction">
+<optgroup label="八大门派"><option value="shaolin">少林</option><option value="wudang">武当</option><option value="emei">峨眉</option><option value="gaibang">丐帮</option><option value="tangmen">唐门</option><option value="junzitang">君子堂</option><option value="jinyiwei">锦衣卫</option><option value="jilegu">极乐谷</option></optgroup>
+<optgroup label="江湖势力"><option value="yihuagong">移花宫</option><option value="taohuadao">桃花岛</option><option value="wugenmen">无根门</option><option value="xujia">徐家庄</option><option value="wanshou">万兽山庄</option><option value="jinzhen">金针沈家</option><option value="tianlun">天轮寺</option><option value="qingyi">青衣楼</option></optgroup>
+<optgroup label="宗门"><option value="xuedao">血刀门</option><option value="huashan">华山派</option><option value="gumu">古墓派</option><option value="damo">达摩宗</option><option value="shenshui">神水宫</option><option value="changfeng">长风镖局</option><option value="nianluo">念萝崖</option><option value="wuxian">无仙教</option><option value="shenji">神机营</option><option value="xingmiao">星渺阁</option><option value="tianya">天涯海阁</option><option value="wanghui">王回庄</option><option value="shenjihui">神机营</option><option value="wuxu">无虚</option></optgroup>
+</select>
+<button onclick="setFaction()">应用门派</button>
+<button onclick="command({action:'learn_all_neigong'})">一键学会全部内功</button>
+</section>
+<section><h2>武学套路</h2>
+<p class="muted">把玩家已学会的全部武学套路（View=40 技能目录）一次性升到满级并填满修为，立即重推技能视图并刷新面板。</p>
+<button onclick="if(confirm('确定把全部武学套路升到满级？'))command({action:'learn_all_taolu'})">一键学满武学套路等级</button>
+<button onclick="if(confirm('确定删除全部已学武学套路（重置为初始状态）？'))command({action:'forget_all_taolu'})">删除全部武学</button>
+</section>
+<section><h2>风物志卡牌</h2>
+<p class="muted">基于 CardRec（按位记录收集）与 UseCardRec（已装备卡牌）。数据来自 data/card_models.json。点击卡牌名即可装备（ShowEquipType=2，优先显示卡牌模型）。</p>
+<button onclick="command({action:'grant_all_cards'})">一键获取全部风物志</button>
+<button onclick="command({action:'unequip_card'})">卸下全部风物志</button><br>
+<select id="card-category"><option value="">全部分类</option></select>
+<input id="card-query" placeholder="搜索中文名或卡牌ID，例如：屠龙刀鞘、1">
+<button onclick="searchCards()">搜索</button>
+<button onclick="loadAllCards()">显示全部</button>
+<select id="card-result" size="8" style="min-width:420px;width:420px;display:block;margin:8px 0"></select>
+<button onclick="equipSelectedCard()">装备选中卡牌</button>
+<div id="card-hint" class="muted"></div>
+</section>
+<section><h2>风物志头发</h2>
+<p class="muted">仅列出只含 Hat 部件的纯发型卡牌（helmet 头模，不含 Cloth/Pants/Shoes/Weapon）。点击「装备选中发型」会叠加在已有风物志之上，已装备的衣服/武器外形不会被替换。</p>
+<select id="hair-result" size="10" style="min-width:420px;width:420px;display:block;margin:8px 0"></select>
+<button onclick="equipSelectedHair()">装备选中发型</button>
+<button onclick="command({action:'unequip_card'})">卸下全部风物志</button>
+<button onclick="command({action:'grant_all_cards'})">一键获取全部风物志</button>
+<div id="hair-hint" class="muted"></div>
+</section>
+<section><h2>五维属性</h2>
+<p class="muted">直接修改角色五维（臂力/体魄/身法/内息/罡气），改动后立即重算派生战斗属性并实时刷新客户端面板。留空或填 0 表示该维不修改。属性为覆盖式写入（非累加）。</p>
+<label>臂力 <input id="attr-str" type="number" value="0" min="0"></label>
+<label>体魄 <input id="attr-sta" type="number" value="0" min="0"></label>
+<label>身法 <input id="attr-dex" type="number" value="0" min="0"></label>
+<label>内息 <input id="attr-ing" type="number" value="0" min="0"></label>
+<label>罡气 <input id="attr-spi" type="number" value="0" min="0"></label>
+<button onclick="setFiveAttributes()">应用五维并刷新</button>
+<div id="attr-hint" class="muted"></div>
+</section>
+<section><h2>称号管理</h2>
+<p class="muted">玩家初始无任何称号；发放/佩戴/取消均经服务端校验。称号 ID 与名称取自 data/称号数据.json 总表（客户端 role_title_* 文本）。佩戴即写入 TitleID 属性并刷新界面。</p>
+<input id="title-query" placeholder="搜索称号中文名或 ID，例如：隐士高人、9193">
+<button onclick="searchTitles()">搜索</button>
+<button onclick="loadAllTitles()">显示全部</button>
+<select id="title-result" size="8" style="min-width:420px;width:420px;display:block;margin:8px 0"></select>
+<button onclick="grantSelectedTitle()">发放选中称号</button>
+<button onclick="wearSelectedTitle()">佩戴选中称号</button>
+<button onclick="command({action:'cancel_title'})">取消佩戴</button>
+<button onclick="if(confirm('确定清空该角色全部称号并取消佩戴？'))command({action:'clear_titles'})">清空全部称号</button>
+<div id="title-hint" class="muted"></div>
+</section>
+<section><h2>快捷栏位</h2>
+<p class="muted">存档/恢复玩家的快捷栏布局（数字键1-0、Ctrl+1-0、F1-F5等）。每次登录自动从 data/快捷栏位按键.json 读取；游戏内拖放技能时自动保存。</p>
+<button onclick="command({action:'save_shortcuts'})">💾 保存当前快捷栏到文件</button>
+<div id="shortcut-hint" class="muted"></div>
+</section>
+<section><h2>实力等级</h2>
+<p class="muted">设置玩家 PowerLevel（0–160），服务端自动按功力等级映射称号 LevelTitle 并刷新界面。</p>
+<input id="power-level" type="number" value="0" min="0" max="160"><button onclick="setPowerLevel()">设置实力等级</button>
+</section>
+<section><h2>性格善恶</h2>
+<p class="muted">设置玩家 善值/恶值/基础狂邪，服务端自动计算性格标签（0正常 1侠 2恶 3狂 4邪）与性格数值并刷新界面。</p>
+<label>善值 <input id="justice" type="number" value="0"></label>
+<label>恶值 <input id="evil" type="number" value="0"></label>
+<label>基础狂邪 <input id="free-base" type="number" value="0"></label>
+<button onclick="setAlignment()">设置性格善恶</button>
+</section>
+<section><h2>体力 / 饱食 / 杀戮 / 酒量</h2>
+<p class="muted">一次性设置 9 项活力属性；当前体力/饱食默认填满至上限，上限加成默认 0。服务端刷新界面并持久化 save=true 项（体力/饱食/杀戮值/酒量等级）。</p>
+<label>当前体力 Ene <input id="vit-ene" type="number" value="123"></label>
+<label>体力上限 MaxEne <input id="vit-maxene" type="number" value="123"></label>
+<label>体力上限加成 <input id="vit-maxeneadd" type="number" value="0"></label>
+<label>体力恢复/秒 <input id="vit-resumeene" type="number" value="0"></label>
+<label>当前饱食 Sat <input id="vit-sat" type="number" value="123"></label>
+<label>饱食上限 MaxSat <input id="vit-maxsat" type="number" value="123"></label>
+<label>饱食上限加成 <input id="vit-maxsatadd" type="number" value="0"></label>
+<label>杀戮值 PKValue <input id="vit-pk" type="number" value="0"></label>
+<label>酒量等级 DrunkLevel <input id="vit-drunk" type="number" value="1"></label>
+<button onclick="setVitals()">设置活力属性</button>
+</section>
+<section><h2>动作与剧情测试</h2>
+<button onclick="story('red_super_armor')">红霸体 20 秒</button><button onclick="story('action_state_sgmd')">神鬼莫敌动作</button><button onclick="story('action_state_hsqs05')">第五招动作</button><button onclick="story('action_state_stop')">恢复待机</button>
+<button onclick="story('npc_bubble')">NPC 气泡</button><button onclick="story('drama_prompt')">章节提示</button>
+</section>
+<section><h2>御风神水（大轻功）</h2>
+<p class="muted">大轻功（百鸟凌云系列）一/二/三段冲刺的客户端原生条件包要求 BuffStore 存在 buf_ride_yufeng（御风状态）。先点「添加御风状态」（持续 10 分钟，可重复点击刷新），再上马/起跳后按轻功冲刺键即可施展大轻功；不需要时点「取消」。</p>
+<button onclick="story('yufeng_add')">添加御风状态</button>
+<button onclick="story('yufeng_remove')">取消御风状态</button><br>
+<p class="muted">真实道具路线（官服玩法）：发放御风神水到背包 → 右键使用 → 弹蓄力条 → 蓄力条走完才加御风状态（buff 时长按道具天数）。</p>
+<button onclick="addYufengItem('ride_windrunner_002')">发放御风道具（3天）</button>
+<button onclick="addYufengItem('ride_windrunner_004')">发放御风神水（7天）</button>
+<button onclick="addYufengItem('ride_windrunner_003')">发放御风神水（10天）</button>
+<button onclick="addYufengItem('ride_windrunner_005')">发放御风神水（14天）</button>
+</section>
+<section><h2>待机站姿（持久化）</h2>
+<p class="muted">切换玩家待机站姿并按角色持久化到 data/待机站姿.json：重登、过图、受击/挖矿/技能结束后的回站都会保持所选站姿。动作名来自客户端 index.ini 节名。</p>
+<button onclick="story('idle_stance_stand')">默认站姿 [stand]</button><button onclick="story('idle_stance_khbd')">葵花站姿 [khbd_stand_01]</button><button onclick="story('idle_stance_tj')">无根站姿 [TJstand]</button><button onclick="story('action_state_stop')">恢复当前站姿</button><br>
+<label>全部站姿 <select id="idle-stance-list" size="8" style="min-width:360px;height:180px"><option>读取站姿列表中……</option></select></label>
+<button onclick="setIdleStance()">切换到选中站姿</button>
+<div id="idle-stance-hint" class="muted"></div>
+</section>
+<section><h2>冶炼（已对齐 D:\ 参考端）</h2>
+<p class="muted">打开冶炼只发 466 open_id=2 + 570 util_show_form，全链路零 413/416/gamestep/825 应答；九阴志整套系统与功能开关注册表已删除（2026-09-08）。仍报「当前活动未开启」时：(1) 先完整重启 FxGame.exe 清原生 SwitchManager 缓存；(2) 切下方「最小登录模式」再重登一次（与 D:\ 字节级对齐），若冶炼恢复即说明 H 某条登录推送污染了客户端原生 SwitchManager 表——把日志发我定位。</p>
+<button onclick="toggleMinimalLogin()">最小登录模式（对齐 D:\）</button><span id="minimal-login-state" class="muted">读取中……</span>
+</section>
+<section><h2>身份系统（一键激活全部）</h2>
+<p class="muted">数据来源 <code>data/origin/origins.json</code>（1197 条）+ <code>conditions.json</code>（2004 条），导出自 <code>身份领取条件全表.xlsx</code>。C2S 协议：700 激活 / 701 展示 / 702 领奖（真发奖：按 prize_item/prize_title 把物品放进背包并授予称号）/ 705 真正领取 / 706 请求刷新。点击下方按钮：把全部身份一次性加入【已激活】集合，【未领取】状态保持不变，玩家手动点 702 才会标记"已领奖"并实际拿到奖励（去重依据 prizeGranted，历史只标记未发放的身份会在下次点击时补发）。</p>
+<button onclick="originActivateAll()">一键激活全部身份</button><span id="origin-state" class="muted">状态读取中……</span>
+</section>
+<section>
+<h2>门派声望（自定义）</h2>
+<p class="muted">覆盖全部八大门派、江湖势力与隐世宗门（含隐士、江湖声望）：直接写入角色在 <code>data/repute</code> 的声望进度，并即时刷新客户端 <code>Repute_Record</code> 表，供「身份条件需要声望」的场景验证。</p>
+<select id="repute-name"><option value="all">全部（含隐士、江湖）</option></select>
+<label>点数 <input id="repute-value" type="number" value="5000" min="0" max="9999999" style="width:110px"></label>
+<button onclick="reputeApply('set')">设定为该值</button>
+<button onclick="reputeApply('add')">累加该值</button>
+<button onclick="loadReputeStatus()">刷新声望列表</button>
+<div id="repute-state" class="muted">状态读取中……</div>
+</section>
+<section><h2>场景天气</h2>
+<p class="muted">通过场景对象 WeatherRec 驱动新版原生 WeatherTimeManager。雨粒子还要求客户端画面设置中开启天气，并使用高或极高画质。</p>
+<select id="weather"><option value="clear">读取天气列表中……</option></select><button onclick="setWeather()">切换天气</button>
+</section>
+<section><h2>礼包与物品</h2>
+<p class="muted">礼包列表来自 tool_item.ini（ItemType 2102/2103 开箱类）。标 <b>有内容</b> 的打开会出真物品：内容来自 drop 目录已有的包，或 data\giftbox.json 自配表；其余打开时会提示内容未配置。通用输入框可发任意物品 ConfigID。</p>
+<button onclick="story('giftbox_merchant_here')">把礼包测试商人拉到身边</button><br>
+<input id="gift-filter" placeholder="搜索礼包名字或ID（可选）" style="max-width:420px" oninput="filterGifts()"><br>
+<select id="gift-box" size="6" style="min-width:420px;height:150px"><option>读取礼包列表中……</option></select><br>
+<button onclick="addGiftBox()">加入背包 ×</button><input id="gift-amount" type="number" value="1" min="1" max="99" style="min-width:70px"><br>
+<input id="item-config" placeholder="任意物品 ConfigID（如 yaopin_00100）"><input id="item-amount" type="number" value="1" min="1" max="9999" style="min-width:90px"><button onclick="addItem()">通用添加物品</button>
+<button onclick="sendTestMail()">作为系统邮件附件发送</button>
+</section>
+<section><h2>场景任务验证</h2>
+<p class="muted">场景任务测试：前往成都厨师钱安康，点击 NPC 后选择任务项；该次真实 SelectMenu 会创建 Task_Accepted/Task_Record 并刷新任务栏。</p>
+<button onclick="story('scene_task_start')">开始成都场景任务测试 791</button>
+<button onclick="story('scene_task_submit_ready')">直接完成采集并返回钱安康交付</button>
+<button onclick="story('scene_task_remove')">清理场景任务测试 791</button>
+<hr>
+<p class="muted">全场景任务全流程验证：填写任意任务 ID（任务目录含全部 task_*.txt 任务线），走「接取 → 推进全部步骤 → 交付 → 奖励」完整链路。任务 ID 留空时，推进/清理/奖励默认作用于最早的活跃任务。</p>
+<label>任务ID <input id="authored-task-id" type="number" value="791" min="0" style="min-width:90px"></label><br>
+<button onclick="authoredTask('authored_task_start')">接取任务</button>
+<button onclick="authoredTask('authored_task_submit_ready')">推进全部步骤（可交付）</button>
+<button onclick="authoredTask('authored_task_remove')">清理任务</button>
+<button onclick="authoredTask('authored_task_reward')">补发任务奖励</button>
+<div id="authored-task-hint" class="muted"></div>
+</section>
+<section><h2>暮色剧情验证</h2>
+<p class="muted">第一步生成暮色原版“满是灰尘的盒子”，真实确认“拿出钥匙”后完成任务并获得旧钥匙；第二步生成躲藏村民，点击后说“跟我走”并移动到固定点。</p>
+<button onclick="story('twilight_mechanism_start')">开始灰尘盒子机关任务</button>
+<button onclick="story('twilight_mechanism_remove')">清理机关任务</button><br>
+<button onclick="story('twilight_npc_move_start')">开始点击 NPC 定点移动</button>
+<button onclick="story('twilight_npc_move_remove')">清理移动 NPC</button>
+<hr>
+<p class="muted">暮色剧情坐标归位验证：进入暮色之村后启动。正式 5 组 10 只小怪、周厉风、村门、栅栏、赵大妈、五个宝箱、钱昔之、寺庙道具区和赵家院门都使用场景固定坐标，不再跟随玩家生成。</p>
+<button onclick="story('twilight_stages_start')">开始暮色剧情归位验证</button>
+<button onclick="story('twilight_stages_remove')">重置/清理暮色剧情验证</button>
+</section>
+<section><h2>九阴志全局门控</h2>
+<p class="muted">九阴志阶段是<b>全服唯一</b>的单向刻度：1=1内 … 9=6内（对应客户端 power_guide.ini 的 step 主步骤 1…6）。阶段只增不减——设置小于当前值的阶段会被忽略；需要回退请用「重置阶段」。每次生效都会向全服在线连接广播 419 阶段帧。</p>
+<label>目标阶段
+  <select id="ninjiuzhi-stage">
+    <option value="1">1 — 1内</option>
+    <option value="2">2 — 2内</option>
+    <option value="3">3 — 3内</option>
+    <option value="4">4 — 4内</option>
+    <option value="5">5 — 5内</option>
+    <option value="6">6 — 5内后期</option>
+    <option value="7">7 — 6内前期</option>
+    <option value="8">8 — 6内中期</option>
+    <option value="9">9 — 6内</option>
+  </select>
+</label>
+<button onclick="ninJiuZhiSet()">设置阶段（单向递增）</button>
+<button onclick="ninJiuZhiReset()">重置阶段</button>
+<button onclick="ninJiuZhiStatus()">查询状态</button>
+<hr>
+<p class="muted">事件点注入（全服累计）：击杀 / 任务接取事件累计到阈值会自动推进阶段，用于本地验证门禁开放节奏。</p>
+<button onclick="ninJiuZhiEvent('kill')">击杀事件 +1</button>
+<button onclick="ninJiuZhiEvent('task')">任务事件 +1</button>
+<div id="ninjiuzhi-hint" class="muted"></div>
+</section>
+<section><h2>S2C 自定义消息探针</h2>
+<p class="muted">向当前角色发送一条数字型 S2C custom 消息（客户端槽位 = 2×ID+15）。subType 默认 899000000（精炼窗）。已验证：517=on_custom_show_tersure（宝物精炼/重制/洗炼，sub_type 899000000/1/8）、526=on_custom_itemexchange（兑换）、688=on_table_info（打造台，会报错）、111=custom_show_offline_job_daily、287=踢馆、191=教习、250=时限、4-8=对话菜单。</p>
+<label>msgId <input id="probe-msgid" type="number" value="517" min="1" max="764"></label>
+<label>subType <input id="probe-subtype" type="number" value="899000000"></label>
+<button onclick="customProbe()">发送探针</button>
+<button onclick="customProbe(517)">517 精炼</button><button onclick="customProbe(517, 899000001)">517 重制</button><button onclick="customProbe(517, 899000008)">517 洗炼</button><button onclick="customProbe(526)">526 兑换</button><button onclick="customProbe(514)">514</button><button onclick="customProbe(515)">515</button><button onclick="customProbe(516)">516</button><button onclick="customProbe(620)">620</button><button onclick="customProbe(621)">621</button><button onclick="customProbe(736)">736</button><button onclick="customProbe(737)">737</button><button onclick="customProbe(764)">764</button><button onclick="customProbe(688)">688 打造台</button>
+<button onclick="customProbe(419)">419 九阴志步数</button><button onclick="customProbe(413)">413 开关开启</button><button onclick="customProbe(417)">417 九阴志高亮</button><button onclick="customProbe(418)">418 地图图标</button><button onclick="customProbe(416, 2)">416 空事件</button>
+<div id="probe-hint" class="muted"></div>
+</section>
+<section><h2>聊天与气泡调试</h2>
+<p class="muted">聊天 C2S(1 = CLIENT_CUSTOMMSG_CHAT) 已接入：游戏内聊天框发送会触发此消息并回显为头顶气泡 + 面板「名字: 内容」。下方按钮直接走 0x1A 广播链路，用于验证气泡/面板显示。</p>
+<input id="chat-text" placeholder="输入要广播的聊天内容，例如：大家好">
+<button onclick="chatBroadcast()">聊天广播(真实链路)</button>
+<button onclick="speechLen()">气泡(长度前缀)</button>
+<button onclick="speechNul()">气泡(空终止)</button>
+<div id="chat-hint" class="muted"></div>
+</section>
+<section><h2>经脉周天设置</h2>
+<p class="muted">所有正经默认已开通为 216 周天。客户端可直接点击“激活/关闭”来生效或取消属性加成。此处仅用于把选中经脉的周天档位改为 36/72/108/144/180/216（同时改最大层数和当前层数），改完重推 View 45 并刷新五维。</p>
+<select id="jingmai-id"></select>
+<select id="jingmai-tier">
+  <option value="36">36 周天</option>
+  <option value="72">72 周天</option>
+  <option value="108">108 周天</option>
+  <option value="144">144 周天</option>
+  <option value="180">180 周天</option>
+  <option value="216" selected>216 周天</option>
+</select>
+<button onclick="setJingMaiTier()">设置周天</button>
+<div id="jingmai-hint" class="muted"></div>
+	</section>
+	<section><h2>坐骑管理</h2>
+	<p class="muted">选择坐骑后点击"骑乘"即可直接激活并骑乘。已激活的坐骑再次使用不会消耗道具。</p>
+	<select id="mount-result" size="8" style="width:100%;max-width:600px;background:#1a1a1e;color:#eee"></select>
+	<div id="mount-hint" class="muted"></div>
+	<div style="margin-top:6px"><button onclick="mountSelected()">骑乘</button></div>
+	</section>
+	<section><h2>快捷键方案</h2>
+	<p class="muted">游戏内按键设置窗口点【确定/应用/恢复默认】或切换 3D/2.5D 时，客户端会通过 1425 自动上传整套配置，服务端落盘 data/快捷键方案.json，下次登录自动恢复（含操作模式）。此处可手动调试：绑定需按键 ID（7=跳跃、1=前进、2=后退…详见 ui_Jump 等文本）。</p>
+	<label>键位ID <input id="kb-id" type="number" value="7" style="width:70px"></label>
+	<label>按键 <input id="kb-key" value="Space" style="width:90px"></label>
+	<label><input type="checkbox" id="kb-ctrl">Ctrl</label>
+	<label><input type="checkbox" id="kb-shift">Shift</label>
+	<label><input type="checkbox" id="kb-alt">Alt</label>
+	<button onclick="keybindBind()">绑定</button>
+	<button onclick="keybindBind(true)">强制覆盖</button>
+	<button onclick="keybind('unbind '+document.querySelector('#kb-id').value)">解绑</button>
+	<br>
+	<button onclick="keybind('mode 0')">3D 模式</button>
+	<button onclick="keybind('mode 1')">2.5D 模式</button>
+	<button onclick="keybind('default')">恢复默认</button>
+	<button onclick="keybind('undo')">撤销</button>
+	<button onclick="keybind('redo')">重做</button>
+	<br>
+	<button onclick="keybind('save 1')">保存到方案1</button>
+	<button onclick="keybind('save 2')">保存到方案2</button>
+	<button onclick="keybind('load 1')">加载方案1</button>
+	<button onclick="keybind('load 2')">加载方案2</button>
+	</section>
+	<section><h2>兵录设置</h2>
+	<p class="muted">直接修改角色兵录（百晓生兵录集）：等级=伤害提高、进度=x/y、上限。修改即时落盘 data/binglu.json 并实时推送到客户端面板。登录时若角色无存档会自动初始化全部 12 行。</p>
+	<select id="binglu-row">
+	  <option value="0">徒手</option>
+	  <option value="1" selected>单刀</option>
+	  <option value="2">单剑</option>
+	  <option value="3">匕首</option>
+	  <option value="4">双刀</option>
+	  <option value="5">双剑</option>
+	  <option value="6">双刺</option>
+	  <option value="7">长棍</option>
+	  <option value="8">短棍</option>
+	  <option value="10">暗器</option>
+	  <option value="11">奇门</option>
+	</select>
+	<label>等级 <input id="binglu-cur" type="number" value="9" min="0" style="width:70px"></label>
+	<label>进度 <input id="binglu-fill" type="number" value="0" min="0" style="width:70px"></label>
+	<label>上限 <input id="binglu-max" type="number" placeholder="默认不改" min="0" style="width:70px"></label>
+	<button onclick="bingluSet()">设置</button>
+	<button onclick="bingluMax()">单行升满</button>
+	<button onclick="binglu('max')">全部升满</button>
+	</section>
+	<section id="sec-fashion"><h2>时装</h2>
+	<p class="muted">一键激活当前角色的全部服装（时装）。数据来自装备配置中 EquipType=FashionCoat 的服装（共 525 套），激活后属性面板「时装」页签会显示为已激活，并写入 data/新版服装数据.json 永久存档。</p>
+	<button onclick="command({action:'grant_all_fashion'})">一键激活全部服装</button>
+	</section>
+	</main>
+	</div>
+	<script>
+	let sessions=[],cloneOptions=[];
+async function refresh(){sessions=await (await fetch('/api/sessions')).json();let st=document.querySelector('#state');if(st)st.textContent=JSON.stringify(sessions,null,2);renderPlayerCard();refreshBots()}
+function renderPlayerCard(){let box=document.querySelector('#player-card');if(!box)return;if(!sessions.length){box.innerHTML='<span class="chip"><b>状态</b>没有在线角色——请先登录游戏</span>';return}let p=sessions[0];let pos=(p.position&&typeof p.position.x==='number')?(p.position.x.toFixed(1)+', '+p.position.y.toFixed(1)+', '+p.position.z.toFixed(1)):'-';let scene=(p.scene&&p.scene.config)?p.scene.config:'-';box.innerHTML='<span class="chip"><b>角色</b>'+(p.name||'-')+'</span>'
++'<span class="chip"><b>门派</b>'+(p.faction||'-')+'</span>'
++'<span class="chip"><b>场景</b>'+scene+'</span>'
++'<span class="chip"><b>坐标</b>'+pos+'</span>'
++'<span class="chip"><b>碎银</b>'+(p.silver!=null?p.silver:'-')+'</span>'
++'<span class="chip"><b>官银</b>'+(p.guanYin!=null?p.guanYin:'-')+'</span>'
++'<span class="chip"><b>黄金</b>'+(p.gold!=null?p.gold:'-')+'</span>'
++'<span class="chip"><b>怒气</b>'+(p.sp!=null?p.sp:'-')+'</span>'
++'<span class="chip"><b>最近操作</b>'+(p.lastAction||'-')+'</span>'}
+function buildNav(){let nav=document.querySelector('#gm-nav');if(!nav)return;let links=[];document.querySelectorAll('main.grid > section').forEach(function(sec,i){let h=sec.querySelector('h2');if(!h)return;if(!sec.id)sec.id='sec-'+i;let a=document.createElement('a');a.textContent=h.textContent;a.dataset.target=sec.id;a.onclick=function(){showSection(sec.id)};nav.appendChild(a);links.push(a)});let saved=localStorage.getItem('gm-tab');let target=links.find(function(a){return a.dataset.target===saved})||links[0];if(target)showSection(target.dataset.target)}
+function showSection(id){document.querySelectorAll('main.grid > section').forEach(function(sec){sec.classList.toggle('active',sec.id===id)});document.querySelectorAll('#gm-nav a').forEach(function(a){a.classList.toggle('active',a.dataset.target===id)});localStorage.setItem('gm-tab',id)}
+async function loadClones(){cloneOptions=await (await fetch('/api/clones')).json();let s=document.querySelector('#clone-config');s.innerHTML='';for(let c of cloneOptions){let o=document.createElement('option');o.value=c.config;o.textContent=c.config+(c.description?' — '+c.description:'');s.appendChild(o)}syncCloneFun()}
+function syncCloneFun(){let c=cloneOptions.find(x=>x.config===document.querySelector('#clone-config').value);let allowed=c?c.difficulties:[1];for(let o of document.querySelector('#clone-fun').options)o.disabled=!allowed.includes(+o.value);let current=document.querySelector('#clone-fun');if(current.selectedOptions[0].disabled)current.value=String(allowed[0])}
+async function command(payload){await refresh();if(!sessions.length)return alert('没有在线角色');let status=document.querySelector('#command-status');status.textContent='发送中……';let r=await fetch('/api/sessions/'+sessions[0].sessionId+'/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});let j=await r.json();if(!r.ok){status.textContent='失败：'+(j.error||'命令失败');return alert(j.error||'命令失败')}await refresh();status.textContent=(sessions[0]&&sessions[0].lastAction)||'已发送'}
+function silver(){command({action:'set_silver',silver:+document.querySelector('#silver').value})}
+function guanyinSet(){command({action:'set_guanyin',guanYin:+document.querySelector('#guanyin').value})}
+function goldSet(){command({action:'set_gold',gold:+document.querySelector('#gold').value})}
+function popupGMPanel(){command({action:'popup_gm_panel'})}
+// 伙伴：botCommand 走与 command() 相同的会话通道，只是动作名为 bot_*；
+// refreshBots 刷新 /api/bots 的伙伴状态面板。
+async function refreshBots(){try{let b=await (await fetch('/api/bots')).json();let el=document.querySelector('#bot-state');if(el)el.textContent=JSON.stringify(b,null,2)}catch(e){}}
+function botCommand(action){command({action}).then(refreshBots)}
+function authoredTask(action){command({action,taskId:+document.querySelector('#authored-task-id').value||0})}
+function setSP(){command({action:'set_sp',sp:+document.querySelector('#sp').value})}
+function addSP(sp){command({action:'add_sp',sp})}function fillSP(){command({action:'fill_sp'})}
+function setMoveSpeed(){command({action:'set_move_speed',value:+document.querySelector('#move-speed').value})}
+function setGravity(){command({action:'set_gravity',value:+document.querySelector('#gravity').value})}
+function spawnDummy(hp){command({action:'spawn_dummy',dummyHp:hp||+document.querySelector('#dummy-hp').value||0})}
+function spawnChest(){command({action:'spawn_chest'})}
+let CD_TAOLUS=[];
+async function loadCombatDummyTaolus(){try{CD_TAOLUS=await (await fetch('/api/combat-dummy/taolus')).json();let s=document.querySelector('#cd-preset');if(!s)return;s.innerHTML='<option value="random">随机套路</option>';for(let t of CD_TAOLUS){let o=document.createElement('option');o.value=t.key;o.textContent=t.label+'（'+t.skills.length+'招）';s.appendChild(o)}}catch(e){}}
+function cdPreset(key){if(key==='random'){if(!CD_TAOLUS.length)return;let t=CD_TAOLUS[Math.floor(Math.random()*CD_TAOLUS.length)];document.querySelector('#cd-skills').value=t.skills.join('、');return}let t=CD_TAOLUS.find(function(x){return x.key===key});document.querySelector('#cd-skills').value=t?t.skills.join('、'):''}
+function spawnCombatDummy(){command({action:'spawn_combat_dummy',dummyName:document.querySelector('#cd-name').value.trim(),dummyHp:+document.querySelector('#cd-hp').value||0,dummyDamage:+document.querySelector('#cd-dmg').value||0,dummySkills:document.querySelector('#cd-skills').value.trim()})}
+function clearCombatDummies(){if(confirm('确定清除当前场景的全部战斗假人？'))command({action:'clear_combat_dummies'})}
+function setPKMode(mode){command({action:'set_pk_mode',pkMode:mode})}
+function setWeather(){command({action:'set_weather',weather:document.querySelector('#weather').value})}
+function scene(destination){command({action:'switch_scene',destination})}function preset(key){command({action:'switch_scene_preset',preset:key})}
+function setFaction(){command({action:'set_faction',faction:document.querySelector('#faction').value})}
+function setPowerLevel(){command({action:'set_power_level',value:+document.querySelector('#power-level').value})}
+function setAlignment(){command({action:'set_alignment',justice:+document.querySelector('#justice').value,evil:+document.querySelector('#evil').value,freeBase:+document.querySelector('#free-base').value})}
+function setVitals(){command({action:'set_vitals',ene:+document.querySelector('#vit-ene').value,maxEne:+document.querySelector('#vit-maxene').value,maxEneAdd:+document.querySelector('#vit-maxeneadd').value,resumeEne:+document.querySelector('#vit-resumeene').value,sat:+document.querySelector('#vit-sat').value,maxSat:+document.querySelector('#vit-maxsat').value,maxSatAdd:+document.querySelector('#vit-maxsatadd').value,pkValue:+document.querySelector('#vit-pk').value,drunkLevel:+document.querySelector('#vit-drunk').value})}
+function useCurrentPosition(){if(!sessions.length)return alert('没有在线角色');let p=sessions[0].position;document.querySelector('#teleport').value=[p.x,p.y,p.z,p.orient].join(',')}
+function teleportPlayer(){command({action:'teleport',position:document.querySelector('#teleport').value})}
+function enterClone(){command({action:'enter_clone',cloneConfig:document.querySelector('#clone-config').value,value:+document.querySelector('#clone-fun').value})}
+function reenterClone(){command({action:'reenter_clone'})}
+function destroyClone(){if(confirm('确定销毁当前已打开副本及其未结算进度？'))command({action:'destroy_clone'})}
+function story(action){command({action})}
+function ninJiuZhiSet(){let stage=+document.querySelector('#ninjiuzhi-stage').value;command({action:'ninjiuzhi_set',stage})}
+function ninJiuZhiEvent(kind){command({action:'ninjiuzhi_event',eventKind:kind})}
+function ninJiuZhiReset(){if(confirm('重置九阴志全局阶段？全服九阴志章节会退回起点，事件点数清零。'))command({action:'ninjiuzhi_reset'})}
+function ninJiuZhiStatus(){command({action:'ninjiuzhi_status'})}
+let giftBoxes=[];
+async function loadGiftBoxes(){giftBoxes=await (await fetch('/api/giftboxes')).json();let s=document.querySelector('#gift-box');s.innerHTML='';for(let b of giftBoxes){let o=document.createElement('option');o.value=b.config;o.textContent=(b.hasContent?'[有内容] ':'[未配置] ')+b.config+(b.name?' — '+b.name:'');s.appendChild(o)}}
+async function loadWeather(){let options=await (await fetch('/api/weather')).json();let s=document.querySelector('#weather');s.innerHTML='';for(let w of options){let o=document.createElement('option');o.value=w.Key;o.textContent=w.Label+(w.TXID?' — '+w.TXID:'');s.appendChild(o)}}
+function filterGifts(){let kw=document.querySelector('#gift-filter').value.toLowerCase();let s=document.querySelector('#gift-box');let i=0;for(let b of giftBoxes){let text=(b.config+' '+(b.name||'')).toLowerCase();s.options[i++].hidden=kw&&!text.includes(kw)}}
+function addGiftBox(){command({action:'add_item',itemConfig:document.querySelector('#gift-box').value,amount:+document.querySelector('#gift-amount').value})}
+function addItem(){command({action:'add_item',itemConfig:document.querySelector('#item-config').value.trim(),amount:+document.querySelector('#item-amount').value})}
+function addYufengItem(id){command({action:'add_item',itemConfig:id,amount:1})}
+function sendTestMail(){command({action:'send_test_mail',itemConfig:document.querySelector('#item-config').value.trim(),amount:+document.querySelector('#item-amount').value})}
+function chatBroadcast(){let t=document.querySelector('#chat-text').value.trim();if(!t)return alert('请输入聊天内容');command({action:'chat_broadcast',speechText:t})}
+function speechLen(){let t=document.querySelector('#chat-text').value.trim();command({action:'speech_len',speechText:t})}
+function speechNul(){let t=document.querySelector('#chat-text').value.trim();command({action:'speech_nul',speechText:t})}
+function equipCard(){command({action:'equip_card',cardId:+document.querySelector('#card-id').value})}
+async function loadCardCategories(){try{let rows=await (await fetch('/api/cards')).json();let cats=new Set();for(let c of rows)cats.add(c.category);let s=document.querySelector('#card-category');for(let cat of Array.from(cats).sort()){let o=document.createElement('option');o.value=cat;o.textContent=cat;s.appendChild(o)}}catch(e){}}
+async function renderCards(rows){let s=document.querySelector('#card-result');s.innerHTML='';for(let c of rows){let o=document.createElement('option');o.value=c.id;o.textContent=c.name+' — ID '+c.id+' ['+c.category+']';s.appendChild(o)}document.querySelector('#card-hint').textContent=rows.length?('共 '+rows.length+' 张卡牌'):'没有匹配的卡牌'}
+async function loadAllCards(){try{let rows=await (await fetch('/api/cards')).json();renderCards(rows)}catch(e){document.querySelector('#card-hint').textContent='加载失败：'+e.message}}
+async function searchCards(){let q=document.querySelector('#card-query').value.trim().toLowerCase();let cat=document.querySelector('#card-category').value;try{let rows=await (await fetch('/api/cards')).json();let filtered=rows.filter(c=>(!cat||c.category===cat)&&(!q||c.name.toLowerCase().includes(q)||String(c.id)===q||String(c.config_id)===q));renderCards(filtered)}catch(e){document.querySelector('#card-hint').textContent='搜索失败：'+e.message}}
+function equipSelectedCard(){let sel=document.querySelector('#card-result');if(!sel.value)return alert('请先选择一张卡牌');command({action:'equip_card',cardId:+sel.value})}
+async function loadHairCards(){try{let rows=await (await fetch('/api/hair-cards')).json();let s=document.querySelector('#hair-result');s.innerHTML='';for(let c of rows){let o=document.createElement('option');o.value=c.id;o.textContent=c.name+' — ID '+c.id+' ['+c.category+']';s.appendChild(o)}document.querySelector('#hair-hint').textContent=rows.length?('共 '+rows.length+' 个发型卡牌'):'没有匹配的发型卡牌'}catch(e){document.querySelector('#hair-hint').textContent='加载失败：'+e.message}}
+function equipSelectedHair(){let sel=document.querySelector('#hair-result');if(!sel.value)return alert('请先选择一个发型卡牌');command({action:'equip_hair',cardId:+sel.value})}
+let fashionCatalog=[];let fashionItems=[];
+async function loadFashionCatalog(){try{fashionCatalog=await (await fetch('/api/fashion-catalog')).json();let s=document.querySelector('#fashion-cat');s.innerHTML='';for(let c of fashionCatalog){let o=document.createElement('option');o.value=c.key;o.textContent=c.label+' ('+c.items.length+')';s.appendChild(o)}s.onchange=renderFashionItems;renderFashionItems()}catch(e){document.querySelector('#fashion-hint').textContent='目录加载失败：'+e.message}}
+function renderFashionItems(){let key=document.querySelector('#fashion-cat').value;let cat=fashionCatalog.find(function(c){return c.key===key})||{label:'',items:[]};let q=document.querySelector('#fashion-query').value.trim().toLowerCase();fashionItems=cat.items.filter(function(it){return !q||it.name.toLowerCase().includes(q)||it.configId.toLowerCase().includes(q)});let s=document.querySelector('#fashion-result');s.innerHTML='';for(let it of fashionItems){let o=document.createElement('option');o.value=it.configId;o.textContent=it.name+' — '+it.configId;s.appendChild(o)}document.querySelector('#fashion-hint').textContent=cat.label+'：共 '+cat.items.length+' 件'+(q?('，当前匹配 '+fashionItems.length+' 件'):'')}
+function grantFashion(wearNow){let sel=document.querySelector('#fashion-result');if(!sel.value)return alert('请先选择一件时装/身份装');command({action:'grant_item',itemConfig:sel.value,amount:1,wearNow})}
+function setFiveAttributes(){command({action:'set_five_attributes',attrStr:+document.querySelector('#attr-str').value||0,attrSta:+document.querySelector('#attr-sta').value||0,attrDex:+document.querySelector('#attr-dex').value||0,attrIng:+document.querySelector('#attr-ing').value||0,attrSpi:+document.querySelector('#attr-spi').value||0})}
+async function searchItems(){let q=document.querySelector('#item-query').value.trim();if(!q)return alert('请输入中文名或 ConfigID');let view=+document.querySelector('#item-view').value;let s=document.querySelector('#item-result');s.innerHTML='';try{let rows=await (await fetch('/api/items?q='+encodeURIComponent(q)+'&view='+view)).json();let labels=['','普通','装备','材料','任务'];for(let x of rows){let o=document.createElement('option');o.value=x.configId;let sex=x.needSex===0?'男':x.needSex===1?'女':'通用';let detail=x.wearable?(x.equipType+'/'+sex):(x.script||'道具');o.textContent=x.name+' — '+x.configId+' ['+labels[x.viewId]+'/'+detail+'/堆叠'+x.maxAmount+'/品质'+x.colorLevel+']';s.appendChild(o)}document.querySelector('#item-hint').textContent=rows.length?'找到 '+rows.length+' 件；同名道具请按 ConfigID 区分':'没有在 equipment.ini / tool_item.ini 找到匹配项'}catch(e){document.querySelector('#item-hint').textContent='搜索失败：'+e.message}}
+function grantItem(wearNow){let selected=document.querySelector('#item-result').value;let typed=document.querySelector('#item-query').value.trim();let amount=+document.querySelector('#item-amount').value||1;if(wearNow)amount=1;if(!selected&&!typed)return alert('请先搜索并选择一件道具，或直接输入 ConfigID');command({action:'grant_item',itemConfig:selected||typed,amount,wearNow})}
+async function loadAllTitles(){try{let rows=await (await fetch('/api/titles')).json();renderTitles(rows)}catch(e){document.querySelector('#title-hint').textContent='加载失败：'+e.message}}
+async function searchTitles(){let q=document.querySelector('#title-query').value.trim().toLowerCase();try{let rows=await (await fetch('/api/titles')).json();let filtered=rows.filter(t=>(!q||t.name.toLowerCase().includes(q)||String(t.id)===q));renderTitles(filtered)}catch(e){document.querySelector('#title-hint').textContent='搜索失败：'+e.message}}
+async function renderTitles(rows){let s=document.querySelector('#title-result');s.innerHTML='';for(let t of rows){let o=document.createElement('option');o.value=t.id;o.textContent=t.id+' — '+t.name+(t.type?(' [类型'+t.type+']'):'');s.appendChild(o)}document.querySelector('#title-hint').textContent=rows.length?('共 '+rows.length+' 个称号'):'没有匹配的称号'}
+function grantSelectedTitle(){let sel=document.querySelector('#title-result');if(!sel.value)return alert('请先选择一个称号');command({action:'grant_title',titleId:+sel.value})}
+function wearSelectedTitle(){let sel=document.querySelector('#title-result');if(!sel.value)return alert('请先选择一个称号');command({action:'wear_title',titleId:+sel.value})}
+async function loadMeridians(){try{let rows=await (await fetch('/api/meridians')).json();let s=document.querySelector('#jingmai-id');s.innerHTML='';for(let m of rows){let o=document.createElement('option');o.value=m.id;o.textContent=m.name+' — '+m.id+' [默认'+m.defaultMax+'周天]';s.appendChild(o)}document.querySelector('#jingmai-hint').textContent=rows.length?('共 '+rows.length+' 条可设置经脉'):'经脉数据未加载'}catch(e){document.querySelector('#jingmai-hint').textContent='加载失败：'+e.message}}
+function setJingMaiTier(){let id=document.querySelector('#jingmai-id').value;let tier=+document.querySelector('#jingmai-tier').value;if(!id)return alert('请先选择一条经脉');command({action:'set_jingmai_tier',jingMaiId:id,jingMaiTier:tier})}
+function customProbe(msgId,subType){let id=msgId||+document.querySelector('#probe-msgid').value;let sub=(subType!=null)?subType:+document.querySelector('#probe-subtype').value;document.querySelector('#probe-hint').textContent='发送 msgId='+id+' subType='+sub+'，观察客户端是否弹出对应窗口或报错';command({action:'custom_probe',msgId:id,subType:sub})}
+function keybind(args){command({action:'keybind',keyArgs:args})}
+function keybindBind(force){let flags=[];if(document.querySelector('#kb-ctrl').checked)flags.push('ctrl');if(document.querySelector('#kb-shift').checked)flags.push('shift');if(document.querySelector('#kb-alt').checked)flags.push('alt');if(force)flags.push('force');keybind(('bind '+document.querySelector('#kb-id').value+' '+document.querySelector('#kb-key').value.trim()+' '+flags.join(' ')).trim())}
+function binglu(args){command({action:'binglu',bingluArgs:args})}
+function bingluSet(){let row=document.querySelector('#binglu-row').value;let cur=+document.querySelector('#binglu-cur').value;let fill=+document.querySelector('#binglu-fill').value;let max=document.querySelector('#binglu-max').value.trim();binglu('set '+row+' '+cur+' '+fill+(max!==''?' '+max:''))}
+function bingluMax(){binglu('max '+document.querySelector('#binglu-row').value)}
+	async function loadMounts(){try{let rows=await (await fetch('/api/mounts')).json();let s=document.querySelector('#mount-result');s.innerHTML='';for(let m of rows){let o=document.createElement('option');o.value=m.configID;o.textContent=m.name+' — '+m.configID+' [ArtPack='+m.artPack+']';s.appendChild(o)}document.querySelector('#mount-hint').textContent=rows.length?('共 '+rows.length+' 个坐骑'):'没有加载到坐骑'}catch(e){document.querySelector('#mount-hint').textContent='加载失败：'+e.message}}
+	async function originActivateAll(){await command({action:'origin_activate_all'});loadOriginStatus()}
+	async function loadReputeStatus(){try{let j=await (await fetch('/api/repute/status')).json();let s=document.querySelector('#repute-name');let el=document.querySelector('#repute-state');if(s){let keep=s.value;s.innerHTML='<option value="all">全部（含隐士、江湖）</option>';for(let r of (j.reputes||[])){let o=document.createElement('option');o.value=r.name;o.textContent=r.display+' ['+r.name+'] 上限'+r.maxValue;s.appendChild(o)}if(keep)s.value=keep}if(el)el.textContent=j.loaded?('已加载 '+j.reputes.length+' 项门派/势力声望'):'声望表未加载'}catch(e){let el=document.querySelector('#repute-state');if(el)el.textContent='读取失败：'+e.message}}
+	async function reputeApply(mode){let sel=document.querySelector('#repute-name');let name=sel?sel.value:'all';let value=+document.querySelector('#repute-value').value||0;await command({action:'repute_apply',reputeName:name,reputeMode:mode,reputeValue:value});loadReputeStatus()}
+	async function loadOriginStatus(){try{let j=await (await fetch('/api/origin/status')).json();let el=document.querySelector('#origin-state');if(!el)return;el.textContent=j.loaded?('已加载 '+j.total+' 个身份（C2S 协议 700/701/702/705/706 已挂载）'):'身份数据未加载：缺少 data/origin/origins.json'}catch(e){let el=document.querySelector('#origin-state');if(el)el.textContent='读取失败：'+e.message}}
+	async function loadMinimalLogin(){try{let j=await (await fetch('/api/minimal-login')).json();let el=document.querySelector('#minimal-login-state');if(!el)return;el.textContent=j.enabled?'当前：开启（下次重登录生效，H-only 推送全部跳过，与 D:\\ 字节级对齐）':'当前：关闭（默认，H 全量登录推送）'}catch(e){let el=document.querySelector('#minimal-login-state');if(el)el.textContent='读取失败：'+e.message}}
+	async function toggleMinimalLogin(){await command({action:'minimal_login'});loadMinimalLogin()}
+	async function loadIdleStances(){try{let rows=await (await fetch('/api/idle-stances')).json();let s=document.querySelector('#idle-stance-list');s.innerHTML='';for(let m of rows){let o=document.createElement('option');o.value=m.action;o.textContent=m.skeleton?m.skeleton+' ['+m.action+']':m.action;s.appendChild(o)}document.querySelector('#idle-stance-hint').textContent='共 '+rows.length+' 个站姿候选（来源：b_action_index.ini 全部含 stand 节）'}catch(e){document.querySelector('#idle-stance-hint').textContent='加载失败：'+e.message}}
+	function setIdleStance(){let s=document.querySelector('#idle-stance-list');if(!s.value)return alert('请先选择一个站姿');command({action:'idle_stance_set',stanceAction:s.value})}
+	function mountSelected(){let sel=document.querySelector('#mount-result');if(!sel.value)return alert('请先选择一个坐骑');command({action:'mount_ride',mountConfig:sel.value})}
+	document.querySelector('#clone-config').addEventListener('change',syncCloneFun);buildNav();refresh();loadReputeStatus();loadClones();loadGiftBoxes();loadWeather();loadCardCategories();loadAllCards();loadAllTitles();loadMeridians();loadHairCards();loadFashionCatalog();loadMounts();loadIdleStances();loadMinimalLogin();loadOriginStatus();loadCombatDummyTaolus();setInterval(refresh,2500)
+</script></body></html>

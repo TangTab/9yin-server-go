@@ -3,12 +3,56 @@ package sim
 import (
 	"math"
 	"sort"
+	"sync"
 	"testing"
 	"time"
 
-	"github.com/local/9yin-go-server/internal/entity"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
+
+// legacyActor 在基准内复现迁移前 entity.Actor 的热路径形态
+// （每对象一把互斥锁 + Snapshot 拷贝），作为对照组。它随
+// entity.Actor 一并退役，仅存于此。
+type legacyActor struct {
+	mu        sync.Mutex
+	hp, hitHP int32
+	maxHP     int32
+	logic     uint8
+}
+
+type legacyActorState struct {
+	HP int32
+}
+
+func newLegacyActor(maxHP int32) *legacyActor {
+	return &legacyActor{hp: maxHP, hitHP: maxHP, maxHP: maxHP}
+}
+
+func (a *legacyActor) Snapshot() legacyActorState {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return legacyActorState{HP: a.hp}
+}
+
+func (a *legacyActor) ApplyDamage(amount int32) bool {
+	if amount <= 0 {
+		return false
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.hp == 0 {
+		return false
+	}
+	if a.hitHP < a.hp {
+		a.hitHP = a.hp
+	}
+	a.hp -= amount
+	if a.hp <= 0 {
+		a.hp = 0
+		a.hitHP = 0
+	}
+	return true
+}
 
 // 本文件对比同一战斗 tick 负载在两套存储上的开销：
 //   - ECS：sim.World（Vitals+Brain 组件，EachCombatNPC 迭代）
@@ -93,13 +137,13 @@ func BenchmarkCombatTickECS(b *testing.B) {
 
 // BenchmarkCombatTickLegacy 复现迁移前 combatTick 的存储访问形态。
 func BenchmarkCombatTickLegacy(b *testing.B) {
-	actors := make(map[worldcore.EntityID]*entity.Actor, benchNPCCount)
+	actors := make(map[worldcore.EntityID]*legacyActor, benchNPCCount)
 	states := make(map[worldcore.EntityID]legacyState, benchNPCCount)
 	transforms := make([]worldcore.Transform, benchNPCCount)
 	for i := 0; i < benchNPCCount; i++ {
 		id := worldcore.EntityID(i + 2)
 		transforms[i] = benchTransform(i)
-		actors[id] = entity.NewActor(uint32(id), 1, "npc", 1000, 100)
+		actors[id] = newLegacyActor(1000)
 		brain := benchBrain(i)
 		states[id] = legacyState{
 			home: brain.Home, aggroRange: brain.AggroRange, chaseRange: brain.ChaseRange,
@@ -160,7 +204,7 @@ func BenchmarkApplyDamageECS(b *testing.B) {
 }
 
 func BenchmarkApplyDamageLegacy(b *testing.B) {
-	a := entity.NewActor(1, 1, "npc", 1<<30, 100)
+	a := newLegacyActor(1 << 30)
 	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		a.ApplyDamage(20)
@@ -180,11 +224,11 @@ func BenchmarkPopulateECS(b *testing.B) {
 
 func BenchmarkPopulateLegacy(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		actors := make(map[worldcore.EntityID]*entity.Actor, benchNPCCount)
+		actors := make(map[worldcore.EntityID]*legacyActor, benchNPCCount)
 		states := make(map[worldcore.EntityID]legacyState, benchNPCCount)
 		for i := 0; i < benchNPCCount; i++ {
 			id := worldcore.EntityID(i + 2)
-			actors[id] = entity.NewActor(uint32(id), 1, "npc", 1000, 100)
+			actors[id] = newLegacyActor(1000)
 			brain := benchBrain(i)
 			states[id] = legacyState{home: brain.Home, aggroRange: brain.AggroRange}
 		}

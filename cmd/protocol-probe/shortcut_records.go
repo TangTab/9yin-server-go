@@ -249,7 +249,7 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 		return true, nil
 	}
 
-	current := player.actor.Snapshot().LogicState
+	current := player.logicState()
 	if current == entity.LogicStateDied {
 		log.Printf("%s: reject sitcross while dead", remote)
 		return true, nil
@@ -261,7 +261,7 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 		return true, nil
 	}
 
-	player.actor.SetLogicState(next)
+	player.setLogicState(next)
 	frame, err := player.vitalUpdate()
 	if err != nil {
 		return true, fmt.Errorf("encode sitcross state=%d: %w", next, err)

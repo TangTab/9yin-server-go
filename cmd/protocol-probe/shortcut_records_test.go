@@ -150,7 +150,7 @@ func TestSitcrossUsesCapturedStartArgumentAndNormalPropertyUpdate(t *testing.T) 
 	if err != nil || !handled {
 		t.Fatalf("start handled=%t err=%v", handled, err)
 	}
-	if got := player.actor.Snapshot().LogicState; got != entity.LogicStateSitcross {
+	if got := player.stateSnapshot().LogicState; got != entity.LogicStateSitcross {
 		t.Fatalf("LogicState=%d, want sitcross=%d", got, entity.LogicStateSitcross)
 	}
 	if frames := conn.Frames(); len(frames) != 1 || frames[0][0] != 0x10 {
@@ -166,34 +166,34 @@ func TestSitcrossUsesCapturedStartArgumentAndNormalPropertyUpdate(t *testing.T) 
 
 	stop := shortcutCustom(clientCustomSitCross, clientCustomValue{Type: 2, Int32: 0})
 	handled, err = handleSitcrossCustom(conn, player, stop, "test")
-	if err != nil || !handled || player.actor.Snapshot().LogicState != entity.LogicStateNormal || len(conn.Frames()) != 2 {
-		t.Fatalf("stop handled=%t err=%v state=%d frames=%d", handled, err, player.actor.Snapshot().LogicState, len(conn.Frames()))
+	if err != nil || !handled || player.stateSnapshot().LogicState != entity.LogicStateNormal || len(conn.Frames()) != 2 {
+		t.Fatalf("stop handled=%t err=%v state=%d frames=%d", handled, err, player.stateSnapshot().LogicState, len(conn.Frames()))
 	}
 
 	// 真实客户端抓包：敌方打断会发出 240,2 而不是旧版的
 	// 取消值 0。此时必须停止打坐，
 	// 而不能关闭连接。
 	handled, err = handleSitcrossCustom(conn, player, start, "test")
-	if err != nil || !handled || player.actor.Snapshot().LogicState != entity.LogicStateSitcross {
-		t.Fatalf("second start handled=%t err=%v state=%d", handled, err, player.actor.Snapshot().LogicState)
+	if err != nil || !handled || player.stateSnapshot().LogicState != entity.LogicStateSitcross {
+		t.Fatalf("second start handled=%t err=%v state=%d", handled, err, player.stateSnapshot().LogicState)
 	}
 	interrupted := shortcutCustom(clientCustomSitCross, clientCustomValue{Type: 2, Int32: 2})
 	handled, err = handleSitcrossCustom(conn, player, interrupted, "test")
-	if err != nil || !handled || player.actor.Snapshot().LogicState != entity.LogicStateNormal {
-		t.Fatalf("interruption handled=%t err=%v state=%d", handled, err, player.actor.Snapshot().LogicState)
+	if err != nil || !handled || player.stateSnapshot().LogicState != entity.LogicStateNormal {
+		t.Fatalf("interruption handled=%t err=%v state=%d", handled, err, player.stateSnapshot().LogicState)
 	}
 }
 
 func TestSitcrossTickRestoresAuthoritativeHPAndMP(t *testing.T) {
 	player := newPlayerActor("测试", 0)
-	before := player.actor.Snapshot()
-	player.actor.ApplyDamage(100)
-	player.actor.SpendMP(100)
-	player.actor.SetLogicState(entity.LogicStateSitcross)
+	before := player.stateSnapshot()
+	player.applyDamage(100)
+	player.spendMP(100)
+	player.setLogicState(entity.LogicStateSitcross)
 	if changed := player.sitcrossTick(); !changed {
 		t.Fatal("sitcross tick did not change damaged actor")
 	}
-	state := player.actor.Snapshot()
+	state := player.stateSnapshot()
 	wantHP := minInt32(before.MaxHP, before.HP-100+sitcrossRecoveryPerSecond(before.MaxHP))
 	wantMP := minInt32(before.MaxMP, before.MP-100+sitcrossRecoveryPerSecond(before.MaxMP))
 	if state.HP != wantHP || state.MP != wantMP {
@@ -214,14 +214,14 @@ func TestSitcrossTickRestoresAuthoritativeHPAndMP(t *testing.T) {
 
 func TestSitcrossFullyRestoresAnyDerivedPoolWithinTenTicks(t *testing.T) {
 	player := newPlayerActor("测试", 0)
-	before := player.actor.Snapshot()
-	player.actor.ApplyDamage(before.MaxHP - 1)
-	player.actor.SpendMP(before.MaxMP - 1)
-	player.actor.SetLogicState(entity.LogicStateSitcross)
+	before := player.stateSnapshot()
+	player.applyDamage(before.MaxHP - 1)
+	player.spendMP(before.MaxMP - 1)
+	player.setLogicState(entity.LogicStateSitcross)
 	for tick := 0; tick < int(sitcrossFullRecoverySeconds); tick++ {
 		player.sitcrossTick()
 	}
-	state := player.actor.Snapshot()
+	state := player.stateSnapshot()
 	if state.HP != before.MaxHP || state.MP != before.MaxMP {
 		t.Fatalf("ten-second recovery HP=%d/%d MP=%d/%d", state.HP, before.MaxHP, state.MP, before.MaxMP)
 	}
@@ -236,12 +236,12 @@ func minInt32(a, b int32) int32 {
 
 func TestCombatBruiseTickDoesNotRestoreRealHP(t *testing.T) {
 	player := newPlayerActor("测试", 0)
-	player.actor.ApplyDamage(100)
-	before := player.actor.Snapshot()
+	player.applyDamage(100)
+	before := player.stateSnapshot()
 	if changed := player.combatBruiseTick(); !changed {
 		t.Fatal("combat tick did not settle bruised blood")
 	}
-	state := player.actor.Snapshot()
+	state := player.stateSnapshot()
 	if state.HP != before.HP || state.HitHP != before.HitHP-combatBruiseRecoveryPerSecond {
 		t.Fatalf("combat tick HP=%d HitHP=%d, want %d/%d", state.HP, state.HitHP, before.HP, before.HitHP-combatBruiseRecoveryPerSecond)
 	}

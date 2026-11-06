@@ -37,15 +37,15 @@ func TestYihuaPassiveTriggersNativeBuffAndHealsOnDodge(t *testing.T) {
 		if err := player.equipNeiGong("ng_yh_001"); err != nil {
 			t.Fatalf("equip 明玉神功: %v", err)
 		}
-		player.actor.ApplyDamage(1_000)
-		before := player.actor.Snapshot().HP
+		player.applyDamage(1_000)
+		before := player.stateSnapshot().HP
 		now := start.Add(time.Duration(second) * time.Second)
 		outcome := player.resolveNPCAttack(77, 10, now)
 		if !outcome.innerPowerTriggered || !outcome.dodged {
 			continue
 		}
-		if outcome.innerPowerHeal <= 0 || player.actor.Snapshot().HP <= before {
-			t.Fatalf("移花接玉 did not heal: outcome=%+v before=%d after=%d", outcome, before, player.actor.Snapshot().HP)
+		if outcome.innerPowerHeal <= 0 || player.stateSnapshot().HP <= before {
+			t.Fatalf("移花接玉 did not heal: outcome=%+v before=%d after=%d", outcome, before, player.stateSnapshot().HP)
 		}
 		if got := player.bufferInfo(yihuaPassiveBuffSlot, now); !strings.HasPrefix(got, "3333,") {
 			t.Fatalf("料敌先机 BufferInfo=%q, want StaticData 0x3333", got)

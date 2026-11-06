@@ -97,7 +97,7 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 		result.playerStateChanged = true
 		result.playerRevived = true
 	}
-	playerState := player.actor.Snapshot()
+	playerState := player.stateSnapshot()
 	if playerState.HP <= 0 {
 		return result, nil
 	}
@@ -188,14 +188,14 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 		}
 		if outcome.dodged {
 			if outcome.innerPowerHeal > 0 {
-				playerState := player.actor.Snapshot()
+				playerState := player.stateSnapshot()
 				log.Printf("%s: NPC attack dodged id=%d config=%s inner-power dodge-heal=%d player_hp=%d/%d", s.remote, meta.id, meta.configID, outcome.innerPowerHeal, playerState.HP, playerState.MaxHP)
 			} else {
 				log.Printf("%s: NPC attack dodged id=%d config=%s", s.remote, meta.id, meta.configID)
 			}
 		} else if outcome.stateChanged {
 			result.playerStateChanged = true
-			playerState := player.actor.Snapshot()
+			playerState := player.stateSnapshot()
 			log.Printf("%s: NPC attack id=%d config=%s damage=%d player_hp=%d/%d", s.remote, meta.id, meta.configID, state.Damage, playerState.HP, playerState.MaxHP)
 		} else if outcome.parried {
 			log.Printf("%s: NPC attack parried id=%d config=%s", s.remote, meta.id, meta.configID)

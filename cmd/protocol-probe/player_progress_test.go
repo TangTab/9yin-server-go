@@ -9,7 +9,7 @@ import (
 
 func TestPlayerActorPublishesYiHuaFactionAsSchool(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
-	if got := player.actor.Snapshot().LogicState; got != 0 {
+	if got := player.stateSnapshot().LogicState; got != 0 {
 		t.Fatalf("persistent normal faculty starts LogicState=%d, want background state 0", got)
 	}
 	if player.progress.facultyState != facultyStateConvert || player.progress.facultyStyle != facultyStyleNormal || player.progress.facultyName == "" {
@@ -76,7 +76,7 @@ func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 
 func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
-	if got := player.actor.Snapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 2630 || got.BaseMaxMP != 500 || got.MaxMP != 990 {
+	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 2630 || got.BaseMaxMP != 500 || got.MaxMP != 990 {
 		t.Fatalf("两仪护心功 server caps=%+v, want base 1000/500 total 2630/990", got)
 	}
 	if got := player.progress.books[0].staticData; got != 5 {
@@ -162,7 +162,7 @@ func TestYiHuaInnerPowerUsesSharedClassicVisibleRoute(t *testing.T) {
 	if err := player.equipNeiGong("ng_yh_001"); err != nil {
 		t.Fatal(err)
 	}
-	if got := player.actor.Snapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 5050 || got.BaseMaxMP != 500 || got.MaxMP != 1630 {
+	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 5050 || got.BaseMaxMP != 500 || got.MaxMP != 1630 {
 		t.Fatalf("明玉神功 server caps=%+v, want base 1000/500 total 5050/1630", got)
 	}
 	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("3311,1,1,3,")) {
@@ -254,7 +254,7 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	if err != nil || !handled {
 		t.Fatalf("1006/11 handled=%v err=%v", handled, err)
 	}
-	if got := player.actor.Snapshot().LogicState; got != 0 {
+	if got := player.stateSnapshot().LogicState; got != 0 {
 		t.Fatalf("normal faculty LogicState=%d, want background state 0", got)
 	}
 	if player.progress.facultyState != facultyStateConvert || player.progress.facultyStyle != facultyStyleNormal {
@@ -278,7 +278,7 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	if err != nil {
 		t.Fatalf("1006/12: %v", err)
 	}
-	if got := player.actor.Snapshot().LogicState; got != 0 {
+	if got := player.stateSnapshot().LogicState; got != 0 {
 		t.Fatalf("LogicState after exit=%d, want 0", got)
 	}
 	if got := player.progress.facultyState; got != facultyStateNone {
@@ -296,7 +296,7 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	if got := player.progress.facultyStyle; got != facultyStyleAct {
 		t.Fatalf("FacultyStyle after 1006/21=%d, want active=%d", got, facultyStyleAct)
 	}
-	if got := player.actor.Snapshot().LogicState; got != logicStateFaculty {
+	if got := player.stateSnapshot().LogicState; got != logicStateFaculty {
 		t.Fatalf("LogicState after 1006/21=%d, want faculty=%d", got, logicStateFaculty)
 	}
 }

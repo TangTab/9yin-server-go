@@ -37,18 +37,18 @@ func TestCombatRageTickAddsFivePerSecondWhileFighting(t *testing.T) {
 	if player.combatRageTick() {
 		t.Fatal("normal-state actor must not recover rage")
 	}
-	player.actor.SetLogicState(entity.LogicStateFighting)
+	player.setLogicState(entity.LogicStateFighting)
 	if !player.combatRageTick() {
 		t.Fatal("fighting actor should recover rage")
 	}
 	if got := player.skillSP(); got != 40+combatRageRecoveryPerSecond {
 		t.Fatalf("SP after one combat tick = %d, want %d", got, 40+combatRageRecoveryPerSecond)
 	}
-	player.actor.SetLogicState(entity.LogicStateDied)
+	player.setLogicState(entity.LogicStateDied)
 	if player.combatRageTick() {
 		t.Fatal("dead actor must not recover rage")
 	}
-	player.actor.SetLogicState(entity.LogicStateSitcross)
+	player.setLogicState(entity.LogicStateSitcross)
 	if player.combatRageTick() {
 		t.Fatal("sitting actor must not recover rage")
 	}
@@ -56,7 +56,7 @@ func TestCombatRageTickAddsFivePerSecondWhileFighting(t *testing.T) {
 
 func TestCombatRageTickSaturatesAtMaxPlayerSP(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	player.actor.SetLogicState(entity.LogicStateFighting)
+	player.setLogicState(entity.LogicStateFighting)
 	if _, _, err := player.setSP(maxPlayerSP - 3); err != nil {
 		t.Fatalf("stage partial SP: %v", err)
 	}

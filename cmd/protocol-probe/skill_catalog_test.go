@@ -72,13 +72,13 @@ func TestInstalledButUnlearnedSkillCannotUseUniversalExecutor(t *testing.T) {
 	if unlearned == "" {
 		t.Fatal("full catalog has no unlearned skill for permission test")
 	}
-	before := player.actor.Snapshot()
+	before := player.stateSnapshot()
 	conn := &captureMessageConnection{}
 	handled, err := handleSkillCustom(conn, player, nil, useSkillMessage(unlearned), "test")
 	if err != nil || !handled {
 		t.Fatalf("unlearned installed skill handled=%t err=%v", handled, err)
 	}
-	after := player.actor.Snapshot()
+	after := player.stateSnapshot()
 	if after.MP != before.MP || player.skillSP() != 100 || len(conn.Frames()) != 0 {
 		t.Fatalf("unlearned skill mutated state before=%+v after=%+v frames=%d", before, after, len(conn.Frames()))
 	}

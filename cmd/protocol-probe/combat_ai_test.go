@@ -29,7 +29,7 @@ func TestCombatTickAggroesAndDamagesNearbyPlayer(t *testing.T) {
 	}
 	registerTestCombatNPC(t, lifecycle, 81)
 	player := newPlayerActor("tester", 0)
-	before := player.actor.Snapshot().HP
+	before := player.stateSnapshot().HP
 	result, err := lifecycle.combatTick(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(1000, 0))
 	if err != nil {
 		t.Fatal(err)
@@ -37,7 +37,7 @@ func TestCombatTickAggroesAndDamagesNearbyPlayer(t *testing.T) {
 	if !result.playerStateChanged {
 		t.Fatal("nearby hostile did not produce a player state update")
 	}
-	if after := player.actor.Snapshot().HP; after >= before {
+	if after := player.stateSnapshot().HP; after >= before {
 		t.Fatalf("NPC attack HP=%d, want below %d", after, before)
 	}
 }
@@ -52,16 +52,16 @@ func TestCombatTickHonorsFreshActiveParry(t *testing.T) {
 	player := newPlayerActor("tester", 0)
 	now := time.Unix(2000, 0)
 	player.setActiveParry(activeParryRequest{Subtype: 0, At: now})
-	before := player.actor.Snapshot().HP
+	before := player.stateSnapshot().HP
 	result, err := lifecycle.combatTick(player, role.Position{X: 1, Y: 0, Z: 0}, now)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if after := player.actor.Snapshot().HP; after != before {
+	if after := player.stateSnapshot().HP; after != before {
 		t.Fatalf("parry HP=%d, want %d", after, before)
 	}
-	if !result.playerStateChanged || player.actor.Snapshot().LogicState != entity.LogicStateFighting {
-		t.Fatalf("fresh parry must still enter combat, result=%+v actor=%+v", result, player.actor.Snapshot())
+	if !result.playerStateChanged || player.stateSnapshot().LogicState != entity.LogicStateFighting {
+		t.Fatalf("fresh parry must still enter combat, result=%+v actor=%+v", result, player.stateSnapshot())
 	}
 }
 
@@ -73,21 +73,21 @@ func TestCombatThreatInterruptsSitcrossAndClearsAfterLeash(t *testing.T) {
 	}
 	registerTestCombatNPC(t, lifecycle, 83)
 	player := newPlayerActor("tester", 0)
-	player.actor.SetLogicState(entity.LogicStateSitcross)
+	player.setLogicState(entity.LogicStateSitcross)
 	now := time.Unix(2500, 0)
 	result, err := lifecycle.combatTick(player, role.Position{X: 1, Y: 0, Z: 0}, now)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !result.playerStateChanged || player.actor.Snapshot().LogicState != entity.LogicStateFighting {
-		t.Fatalf("aggro state result=%+v actor=%+v", result, player.actor.Snapshot())
+	if !result.playerStateChanged || player.stateSnapshot().LogicState != entity.LogicStateFighting {
+		t.Fatalf("aggro state result=%+v actor=%+v", result, player.stateSnapshot())
 	}
 	result, err = lifecycle.combatTick(player, role.Position{X: 100, Y: 0, Z: 0}, now.Add(time.Second))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !result.playerStateChanged || player.actor.Snapshot().LogicState != entity.LogicStateNormal {
-		t.Fatalf("leash state result=%+v actor=%+v", result, player.actor.Snapshot())
+	if !result.playerStateChanged || player.stateSnapshot().LogicState != entity.LogicStateNormal {
+		t.Fatalf("leash state result=%+v actor=%+v", result, player.stateSnapshot())
 	}
 	lifecycle.close()
 }
