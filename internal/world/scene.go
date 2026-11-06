@@ -134,15 +134,19 @@ func (scene *Scene) Snapshot() Snapshot {
 }
 
 // SnapshotWithin 返回水平距离 (x,z) 不超过 radius 的实体快照，
+// excludeID（非 0 时）被排除——供视口属主过滤掉自己的远程实体。
 // 其余语义与 Snapshot 完全一致。它供共享场景下每连接视口做
 // 空间过滤：已物化但滑出半径的实体会被 Viewport.Plan 归入
 // Removes，从而在不改动 Viewport 语义的前提下实现按视口可见。
-func (scene *Scene) SnapshotWithin(x, z, radius float32) Snapshot {
+func (scene *Scene) SnapshotWithin(x, z, radius float32, excludeID EntityID) Snapshot {
 	scene.mu.RLock()
 	defer scene.mu.RUnlock()
 	radiusSquared := radius * radius
 	ids := make([]int, 0, len(scene.entities))
 	for id, entry := range scene.entities {
+		if excludeID != 0 && id == excludeID {
+			continue
+		}
 		dx := entry.Entity.Transform.X - x
 		dz := entry.Entity.Transform.Z - z
 		if dx*dx+dz*dz > radiusSquared {

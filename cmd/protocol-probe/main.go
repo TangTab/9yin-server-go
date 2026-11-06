@@ -740,7 +740,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			// 但在客户端就绪屏障之前不将其发送上线。
 			// 加载场景会清空客户端的原生对象表。因此在
 			// ClientReady 之前发送的对象会闪现一次随即被移除。
-			world.attachMember(player, activeRole.Location.Position)
+			world.attachMember(player, activeRole.Location.Position, resolveRoleVisual(activeRole.Appearance.Values))
 			world.refreshVisibility(sceneNPCs, activeRole.Location.Position)
 			nearbyCount := countNPCsWithin(sceneNPCs, activeRole.Location.Position, npcRadius)
 			if err := machine.RoleChosen(); err != nil {

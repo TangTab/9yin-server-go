@@ -1169,8 +1169,18 @@ func (p *playerActor) silverUpdate() ([]byte, error) {
 }
 
 func (p *playerActor) addObject(location role.Position, visual roleVisual) []byte {
+	// 本机视角的玩家对象恒为 1-1：stage_main 开图与 0x11 记录绑定
+	// 都依赖这一身份。
+	return p.addObjectAs(playerObjectID, playerOwnerID, location, visual)
+}
+
+// addObjectAs 以给定的线上对象身份生成 0x0D 玩家档案。远程玩家
+// 的物化走本入口：帧头换成其在场景内的 wire objectID，帧体仍是
+// 该玩家（p 自身）的实时状态快照。
+func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Position, visual roleVisual) []byte {
 	p.mu.Lock()
 	state := p.snapshotLocked()
+	state.ObjectID, state.OwnerID = objectID, ownerID
 	motion := p.motion
 	now := time.Now()
 	msg := make([]byte, 0x3f, 0x120)

@@ -101,15 +101,32 @@ func (r *sceneRun) combatTick(now time.Time) {
 	if outcome == nil {
 		return
 	}
-	// 锁外帧写入：受击成员的 vitalUpdate 与 NPC 移动/属性帧扇出。
+	// 锁外帧写入：受击成员的 vitalUpdate、其远程属性帧扇出、
+	// 以及 NPC 移动/属性帧扇出。
 	for _, member := range outcome.members {
-		if outcome.changed[member.objectID] {
-			if frame, err := member.player.vitalUpdate(); err == nil {
-				if err := member.view.conn.WriteFrame(frame); err != nil {
-					log.Printf("%s: publish combat vitals: %v", member.view.remote, err)
+		if !outcome.changed[member.objectID] {
+			continue
+		}
+		if frame, err := member.player.vitalUpdate(); err == nil {
+			if err := member.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: publish combat vitals: %v", member.view.remote, err)
+			}
+		} else {
+			log.Printf("%s: encode combat vitals: %v", member.view.remote, err)
+		}
+		// 远程可见者收到该玩家的战斗属性子集（掉血/死亡/状态）。
+		// 连接循环驱动的状态变化（打坐/技能/复活）的远程广播
+		// 属于下一轮范围。
+		state := member.player.stateSnapshot()
+		state.ObjectID, state.OwnerID = member.objectID, 1
+		if frame, err := sceneObjectProperties(member.objectID, 1, 0, npcCombatProperties(state)); err == nil {
+			for _, observer := range outcome.members {
+				if observer == member || observer.view == nil || !observer.view.npcVisible(member.objectID) {
+					continue
 				}
-			} else {
-				log.Printf("%s: encode combat vitals: %v", member.view.remote, err)
+				if err := observer.view.conn.WriteFrame(frame); err != nil {
+					log.Printf("%s: relay combat vitals for %d: %v", observer.view.remote, member.objectID, err)
+				}
 			}
 		}
 	}
@@ -281,7 +298,10 @@ func (s *sceneLifecycle) combatTickForTest(player *playerActor, position role.Po
 		return combatTickResult{}
 	}
 	before := player.stateSnapshot()
-	s.run.attachMember(&sceneMember{objectID: s.memberID, player: player, view: s, position: position, active: true})
+	wireID := s.run.attachMember(&sceneMember{selfID: playerObjectID, player: player, view: s, position: position, active: true})
+	s.mu.Lock()
+	s.wireID = wireID
+	s.mu.Unlock()
 	// 独占测试视图没有目录驱动的可见集；按旧行为把全部已注册
 	// NPC 视为可见（帧无过滤直发）。
 	s.run.mu.Lock()

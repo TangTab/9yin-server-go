@@ -149,7 +149,7 @@ func (r *sceneRuntime) SwitchScene(destination sceneDestination) error {
 	if err := sendPlayerAddObject(r.conn, r.player, destination.location.Position, resolveRoleVisual(r.activeRole.Appearance.Values)); err != nil {
 		return fmt.Errorf("write player re-entry archive: %w", err)
 	}
-	r.world.attachMember(r.player, destination.location.Position)
+	r.world.attachMember(r.player, destination.location.Position, resolveRoleVisual(r.activeRole.Appearance.Values))
 	r.world.refreshVisibility(catalog, destination.location.Position)
 	r.npcCatalog = catalog
 	r.awaitingStableReentryReady = true

@@ -49,7 +49,8 @@ type sceneLifecycle struct {
 
 	armed          bool
 	viewport       *worldcore.Viewport
-	memberID       uint32
+	memberID       uint32 // 本机 1-1 身份（恒 1）
+	wireID         uint32 // 场景内远程可见身份（attach 时由 run 分配）
 	selectedObject uint32
 	selectedOwner  uint32
 	lastMenuObject uint32
@@ -227,27 +228,29 @@ func newSharedSceneLifecycle(remote string, conn sceneMessageConnection, funcs *
 }
 
 // attachMember 把本视图的玩家登记进场景运行时并启动中央 tick。
-// player 为 nil 的测试视图不会成为 NPC 仇恨目标。
-func (s *sceneLifecycle) attachMember(player *playerActor, position role.Position) {
-	s.mu.Lock()
-	center := s.center
-	s.mu.Unlock()
-	s.run.attachMember(&sceneMember{
-		objectID: s.memberID, player: player, view: s, position: position,
-		active: s.combatActive(),
+// 带 player 的成员会被物化为远程可见实体；visual 来自角色外观，
+// 供其他客户端的 0x0D 物化使用。
+func (s *sceneLifecycle) attachMember(player *playerActor, position role.Position, visual roleVisual) {
+	s.wireID = s.run.attachMember(&sceneMember{
+		selfID: playerObjectID, player: player, view: s, position: position,
+		active: s.combatActive(), visual: visual,
 	})
-	_ = center
 }
 
 // detachMember 注销成员；末成员离开会关闭整个场景运行时。
 func (s *sceneLifecycle) detachMember() {
-	s.run.detachMember(s.memberID)
+	if s.wireID != 0 {
+		s.run.detachMember(s.wireID)
+		s.wireID = 0
+	}
 }
 
 // updateMemberPosition 同步场景侧权威位置并刷新本视图可见集。
 // 返回可见集是否发生变化（调用方据此触发 reconcile）。
 func (s *sceneLifecycle) updateMemberPosition(position role.Position, catalog []npcSpawn) bool {
-	s.run.updateMemberPosition(s.memberID, position)
+	if s.wireID != 0 {
+		s.run.updateMemberPosition(s.wireID, position)
+	}
 	return s.refreshVisibility(catalog, position)
 }
 
@@ -259,7 +262,10 @@ func (s *sceneLifecycle) combatActive() bool {
 func (s *sceneLifecycle) runActive() bool {
 	s.run.mu.Lock()
 	defer s.run.mu.Unlock()
-	member, exists := s.run.members[s.memberID]
+	if s.wireID == 0 {
+		return false
+	}
+	member, exists := s.run.members[s.wireID]
 	return exists && member.active
 }
 
@@ -279,6 +285,19 @@ func (s *sceneLifecycle) refreshVisibility(catalog []npcSpawn, position role.Pos
 		}
 		next[uint32(index)+2] = struct{}{}
 	}
+	// 其他成员的远程实体与 NPC 共用同一可见集（帧扇出过滤统一）。
+	s.run.mu.Lock()
+	for wireID, member := range s.run.members {
+		if wireID == s.wireID || member.player == nil {
+			continue
+		}
+		dx := member.position.X - position.X
+		dz := member.position.Z - position.Z
+		if dx*dx+dz*dz <= radiusSquared {
+			next[wireID] = struct{}{}
+		}
+	}
+	s.run.mu.Unlock()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.center = position
@@ -457,7 +476,9 @@ func (s *sceneLifecycle) clientActivity() error {
 		return err
 	}
 	s.armed = false
-	s.run.activateMember(s.memberID)
+	if s.wireID != 0 {
+		s.run.activateMember(s.wireID)
+	}
 	return nil
 }
 
@@ -472,7 +493,7 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 	center := s.center
 	radius := s.radius
 	s.mu.Unlock()
-	delta := s.viewport.Plan(s.run.scene.SnapshotWithin(center.X, center.Z, radius))
+	delta := s.viewport.Plan(s.run.scene.SnapshotWithin(center.X, center.Z, radius, worldcore.EntityID(s.wireID)))
 	for _, update := range delta.Updates {
 		entity, exists := s.npcMeta(update.Entity.ID)
 		if !exists {

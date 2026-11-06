@@ -40,17 +40,27 @@ type sceneRun struct {
 	tickStop       chan struct{}
 	tickDone       chan struct{}
 	npcFuncs       *npcfunc.Registry
+	nextWireID     uint32
 }
 
 // sceneMember 是挂靠场景的一个连接成员。position 是场景侧的
 // 权威位置（由 0x0A/传送路径更新），active 在就绪屏障
 // （clientActivity）之后置位，NPC 仇恨只考虑 active 成员。
+//
+// objectID 是该玩家在场景内的 wire 身份（其他客户端看到的远程
+// 对象）；selfID 恒为 1——本机客户端自己的对象必须是 1-1
+// （stage_main 开图与 0x11 记录绑定）。带 player 的成员会被
+// 实体化进可视权威 Scene（Kind=EntityPlayer，两组件
+// Transform+sceneEntity，不带 Vitals——因此被所有 NPC 遍历与
+// PvP 选靶闸门天然排除）。
 type sceneMember struct {
-	objectID uint32
+	objectID uint32 // 场景内 wire objectID（其他客户端可见）
+	selfID   uint32 // 本机 1-1 身份
 	player   *playerActor
 	view     *sceneLifecycle
 	position role.Position
 	active   bool
+	visual   roleVisual
 }
 
 type sceneKey struct {
@@ -116,6 +126,9 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 		}
 		registered++
 	}
+	// NPC 占用 2..len(catalog)+1；玩家 wireID 从其上界之后分配，
+	// 两个 ID 空间永不碰撞。
+	r.nextWireID = uint32(len(catalog)) + 2
 	log.Printf("scene run populated config=%s resource=%s registered=%d skipped=%d", r.key.config, r.key.resource, registered, len(catalog)-registered)
 	return nil
 }
@@ -128,33 +141,95 @@ func npcSpawnEligible(npc npcSpawn) bool {
 
 // ---- 成员管理 ----
 
-// attachMember 登记成员并按需启动场景 tick。重复 attach 幂等覆盖。
-func (r *sceneRun) attachMember(member *sceneMember) {
+// attachMember 登记成员并按需启动场景 tick；带 player 的成员会被
+// 实体化进可视权威 Scene，从而对其他客户端可见。重复 attach 时
+// 沿用已分配的 wireID。返回该成员的 wire objectID。
+func (r *sceneRun) attachMember(member *sceneMember) uint32 {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.closed {
-		return
+		return member.objectID
 	}
-	r.members[member.objectID] = member
+	if member.objectID != 0 {
+		if existing, ok := r.members[member.objectID]; ok {
+			member = existing
+		}
+	} else {
+		if r.nextWireID == 0 {
+			r.nextWireID = 2
+		}
+		member.objectID = r.nextWireID
+		r.nextWireID++
+		r.members[member.objectID] = member
+		if member.player != nil {
+			r.materializeMemberLocked(member)
+		}
+	}
 	r.startTickLocked()
+	return member.objectID
 }
 
-// detachMember 注销成员；末成员离开时关闭整个运行时。
+// materializeMemberLocked 把成员物化为场景实体（0x0D payload 一次
+// 性物化；后续 HP 变化经战斗 tick 的远程属性帧传播）。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) materializeMemberLocked(member *sceneMember) {
+	wireID := member.objectID
+	entityID := worldcore.EntityID(wireID)
+	transform := worldcore.Transform{X: member.position.X, Y: member.position.Y, Z: member.position.Z, Orient: member.position.Orient}
+	payload := member.player.addObjectAs(wireID, 1, member.position, member.visual)
+	meta := sceneEntity{
+		id:          wireID,
+		description: "player:" + member.player.stateSnapshot().Name,
+		ownerID:     1,
+		configID:    "player",
+		scriptClass: "Player",
+		// 远程玩家可选中（LastObject/选靶前提），但绝不弹 NPC 菜单。
+		interaction: npcInteractionSelectOnly,
+		payload:     payload,
+	}
+	_ = r.scene.Add(worldcore.Entity{ID: entityID, OwnerID: 1, Kind: worldcore.EntityPlayer, Transform: transform})
+	raw := r.combat.Raw()
+	ecs.Write(raw, ecs.Id(entityID), ecs.C(transform), ecs.C(meta))
+}
+
+// detachMember 注销成员并移除其实体（其他客户端的 0x0E 由各自
+// 下一次 reconcile 结算）；末成员离开时关闭整个运行时。
 func (r *sceneRun) detachMember(objectID uint32) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if _, exists := r.members[objectID]; !exists {
+		return
+	}
 	delete(r.members, objectID)
+	entityID := worldcore.EntityID(objectID)
+	if _, err := r.scene.Get(entityID); err == nil {
+		_ = r.scene.Remove(entityID)
+	}
+	r.combat.Remove(entityID)
 	if len(r.members) == 0 && !r.closed {
 		r.shutdownLocked()
 	}
 }
 
+// updateMemberPosition 同步场景侧权威位置：成员表、Transform 组件、
+// 可视权威 Scene（revision，供新进入视口者对账），并向可见该玩家
+// 的其他成员直发 0x20 移动帧。
 func (r *sceneRun) updateMemberPosition(objectID uint32, position role.Position) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if member, exists := r.members[objectID]; exists {
-		member.position = position
+	member, exists := r.members[objectID]
+	if !exists {
+		return
 	}
+	member.position = position
+	transform := worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient}
+	entityID := worldcore.EntityID(objectID)
+	r.writeNpcTransform(entityID, transform)
+	if current, err := r.scene.Get(entityID); err == nil {
+		current.Entity.Transform = transform
+		_ = r.scene.Replace(current.Entity)
+	}
+	_ = r.broadcastNPCLocked(objectID, serverMoving(objectID, 1, motionFromDest(transform)))
 }
 
 func (r *sceneRun) activateMember(objectID uint32) {
