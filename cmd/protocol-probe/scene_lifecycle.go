@@ -596,7 +596,10 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 		log.Printf("%s: coalesced duplicate object request sequence=%d id=%d owner=%d", s.remote, request.Sequence, entity.id, entity.ownerID)
 		return entity.description, nil
 	}
-	if err := s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, 100, entity.id, entity.ownerID)); err != nil {
+	// 0x07 点击与 msg431 选目标共用同一条回帧路径：
+	// LastObject(100) + AutoSelectObject(230) 双属性帧（49840 抓包
+	// 证实客户端点击后服务端回 414/415 两帧）。
+	if err := s.writePlayerTargetLocked(entity.id, entity.ownerID); err != nil {
 		return "", fmt.Errorf("set player LastObject=%d-%d: %w", entity.id, entity.ownerID, err)
 	}
 	// LastObject 是对象选择属性，不是对话属性。它的服务器侧镜像要与

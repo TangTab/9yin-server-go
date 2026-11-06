@@ -55,6 +55,16 @@ const (
 	propMinMagicDefAdd
 )
 
+// MaxSP/MaxSPAdd 与 SP 同批下发。官方 0x09 表索引是 580/583。这里必须
+// 显式取值而不能挂进上面的 iota：iota 末尾是 208/209，会与 player_actor.go
+// 的 propNeigongPKStatus(208)/propDead(209) 撞索引——FxNet2 属性档案只带
+// 数字索引不带名字，0x09 表一旦出现重复索引，客户端按索引解析到错误
+// 绑定（Dead 是进图前的无保护读取闸门），进游戏即崩。
+const (
+	propMaxSP    uint16 = 228
+	propMaxSPAdd uint16 = 229
+)
+
 // activeFacultyCardReward 刻意只在玩家从三张卡中选出一张（C->S 1006/23）
 // 之后才发放。主动页面并不是一个按分钟计的修炼计时器。
 const activeFacultyCardReward int32 = 20_000
@@ -186,7 +196,7 @@ func newPlayerProgress() playerProgress {
 		fillSpeed:    200,
 		lastAdvance:  time.Now().UTC(),
 		attributes: playerAttributes{
-			sp: 100, str: 30, sta: 30, dex: 30, ing: 30, spi: 30,
+			sp: maxPlayerSP, str: 30, sta: 30, dex: 30, ing: 30, spi: 30,
 			meleePower: 80, magicPower: 80, phyHit: 50, magicHit: 50,
 			dodge: 35, maxParry: 100, phyDef: 60, stiDef: 50, negDef: 50,
 			masDef: 50, jujDef: 50, minMeleeDamage: 20, maxMeleeDamage: 35,

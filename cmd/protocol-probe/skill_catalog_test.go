@@ -79,7 +79,7 @@ func TestInstalledButUnlearnedSkillCannotUseUniversalExecutor(t *testing.T) {
 		t.Fatalf("unlearned installed skill handled=%t err=%v", handled, err)
 	}
 	after := player.stateSnapshot()
-	if after.MP != before.MP || player.skillSP() != 100 || len(conn.Frames()) != 0 {
+	if after.MP != before.MP || player.skillSP() != maxPlayerSP || len(conn.Frames()) != 0 {
 		t.Fatalf("unlearned skill mutated state before=%+v after=%+v frames=%d", before, after, len(conn.Frames()))
 	}
 }

@@ -4,7 +4,7 @@ title Nine Yin Portable Server
 
 set "ROOT=%~dp0"
 set "NINEYIN_SERVER_ROOT=%ROOT%"
-set "SERVER=%ROOT%9yin-game-native-menu.exe"
+set "SERVER=%ROOT%build\9yin-game-native-menu.exe"
 set "LOGDIR=%ROOT%logs"
 set "LISTER=%ROOT%loopback-lister.ps1"
 
@@ -68,4 +68,4 @@ timeout /t 2 /nobreak >nul
 start "Nine Yin GM Panel" http://127.0.0.1:19062/
 
 echo Launcher finished. Keep the two server windows open.
-pause
+rem pause

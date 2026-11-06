@@ -22,7 +22,8 @@ const (
 
 	// 这些属性紧跟在 playerProgressFields（171..207）之后追加。其顺序
 	// 必须与 sceneVisiblePropertyFields 保持一致，因为 FxNet2 属性档案
-	// 只携带数字索引，不携带名称。
+	// 只携带数字索引，不携带名称。228 起已被 player_progress.go 的
+	// MaxSP/MaxSPAdd 占用；新增属性只能取更高且未被占用的索引。
 	propNeigongPKStatus uint16 = 208
 	propDead            uint16 = 209
 	propCantUseSkill    uint16 = 210
@@ -86,9 +87,9 @@ const (
 	innerPowerBuffLease = 24 * time.Hour
 
 	// SP 是当前现代客户端的怒气资源。已安装的技能定义和现网 211 处理
-	// 都以 100 作为本地测试的满池值。所有 GM 及后续战斗获取路径都经由
+	// 都以 80 作为本地测试的满池值。所有 GM 及后续战斗获取路径都经由
 	// 这些辅助函数，客户端属性永远不会成为该资源的权威。
-	maxPlayerSP int32 = 100
+	maxPlayerSP int32 = 80
 
 	// 本地测试的打坐恢复按现有的服务器秒每秒结算一次。用户规则：存活
 	// 的角色无论装备或内功推导出的总量如何，都在十秒内回满
@@ -100,7 +101,7 @@ const (
 	// HitHP-HP 瘀血层。
 	combatBruiseRecoveryPerSecond int32 = 10
 
-	// 战斗怒气恢复：战斗中的角色每个权威服务器秒回复五点 SP，直到 100
+	// 战斗怒气恢复：战斗中的角色每个权威服务器秒回复五点 SP，直到 80
 	// 上限为止，与正式服战斗中的缓慢回复一致。
 	combatRageRecoveryPerSecond int32 = 5
 )
@@ -1017,6 +1018,19 @@ func (p *playerActor) combatRageTick() bool {
 	return p.progress.attributes.sp != before
 }
 
+// loginVitalUpdate 是登录/切图链的首个权威 0x10，也是 MaxSP 唯一的
+// 下发点：真机与新版服务端全量帧实证，怒气上限只在登录全量批出现一次
+//（61653 抓包全场 3964 帧仅 #88 一处，值 80），之后的任何恢复批/事件批
+// 都不再携带，MaxSPAdd 则从不发送。把上限塞进 0x0D 归档或周期批会让
+// 客户端在进世界时崩溃。
+func (p *playerActor) loginVitalUpdate() ([]byte, error) {
+	properties := p.stateProperties()
+	properties = append(properties, clientdata.IndexedProperty{
+		Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(maxPlayerSP),
+	})
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, properties)
+}
+
 // setCombatPresence 负责本地敌对 AI 的玩家侧生命周期。任何残留的 NPC
 // 仇恨都会在首次受击结算之前打断打坐；只有当每个仇恨都已清除后才
 // 恢复常规状态。这使恢复、伤害和客户端 LogicState 保持在同一个权威
@@ -1306,7 +1320,7 @@ func sendPlayerLocationAndVitals(conn sceneMessageConnection, player *playerActo
 	if err := conn.WriteFrame(serverLocation(playerObjectID, playerOwnerID, worldTransform(location))); err != nil {
 		return err
 	}
-	vitals, err := player.vitalUpdate()
+	vitals, err := player.loginVitalUpdate()
 	if err != nil {
 		return err
 	}

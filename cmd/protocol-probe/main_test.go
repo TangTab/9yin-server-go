@@ -62,11 +62,28 @@ func TestModernVisiblePropertyTableNegotiatesInt32NpcType(t *testing.T) {
 	}
 }
 
+// TestSceneVisiblePropertyIndicesAreUnique 守护 0x09 协商表的核心不变量。
+// 0x09 的线上格式只有 (name, type) 对，客户端按条目位置赋予数字索引；
+// FieldSpec.Index 必须恒等于条目的 0 基位置。一旦有字段插进表中段
+// （或 Index 声明与位置不符），0x10 帧携带的数字索引就会整体错绑
+// （Dead 等属性被客户端无保护读取），进游戏即崩。MaxSP 曾两次踩中：
+// 先是与 208/209 撞索引，后是 FieldSpec 插在 playerProgressFields 末尾
+// 让 actor 段整体偏移 +2。
+func TestSceneVisiblePropertyIndicesAreUnique(t *testing.T) {
+	fields := sceneVisiblePropertyFields(clientdata.VisibleNPCModernV1().Fields)
+	for position, field := range fields {
+		if int(field.Index) != position {
+			t.Fatalf("property %q declares Index=%d but sits at table position %d; the 0x09 wire table is positional, move the FieldSpec to the end of sceneVisiblePropertyFields and use the next free index",
+				field.Name, field.Index, position)
+		}
+	}
+}
+
 func TestSceneVisiblePropertyTableIncludesMaxVisuals(t *testing.T) {
 	schema := clientdata.VisibleNPCModernV1()
 	msg := visiblePropertyTable(sceneVisiblePropertyFields(schema.Fields))
-	if got := binary.LittleEndian.Uint16(msg[1:]); got != 228 {
-		t.Fatalf("scene visible property count=%d, want 228", got)
+	if got := binary.LittleEndian.Uint16(msg[1:]); got != 231 {
+		t.Fatalf("scene visible property count=%d, want 231", got)
 	}
 	needle := append([]byte("MaxVisuals"), 0, byte(clientdata.WireInt32))
 	if !bytes.Contains(msg, needle) {
@@ -75,6 +92,10 @@ func TestSceneVisiblePropertyTableIncludesMaxVisuals(t *testing.T) {
 	lastObject := append([]byte("LastObject"), 0, byte(clientdata.WireObject))
 	if !bytes.Contains(msg, lastObject) {
 		t.Fatalf("scene property table does not negotiate LastObject: %x", lastObject)
+	}
+	autoSelect := append([]byte("AutoSelectObject"), 0, byte(clientdata.WireObject))
+	if !bytes.Contains(msg, autoSelect) {
+		t.Fatalf("scene property table does not negotiate AutoSelectObject: %x", autoSelect)
 	}
 	for _, field := range []struct {
 		name   string
@@ -326,9 +347,9 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	// LastObject 0x10 + 数值型 custom begin/add/end 序列。
-	if len(frames) != 5 {
-		t.Fatalf("selection frames=%d, want LastObject + cinematic menu: %x", len(frames), frames)
+	// LastObject + AutoSelectObject 双 0x10 + 数值型 custom begin/add/end 序列。
+	if len(frames) != 6 {
+		t.Fatalf("selection frames=%d, want LastObject+AutoSelectObject + cinematic menu: %x", len(frames), frames)
 	}
 	frame := frames[0]
 	if len(frame) != 22 || frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != 1 || binary.LittleEndian.Uint16(frame[12:]) != 100 {
@@ -337,8 +358,12 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 	if got := binary.LittleEndian.Uint64(frame[14:]); got != uint64(3494)|uint64(1)<<32 {
 		t.Fatalf("LastObject reference=%#x", got)
 	}
-	if got := binary.LittleEndian.Uint32(frames[1][4:]); frames[1][0] != 0x1E || frames[1][3] != 2 || got != 4 {
-		t.Fatalf("cinematic begin frame=%x", frames[1])
+	if auto := frames[1]; len(auto) != 22 || binary.LittleEndian.Uint16(auto[12:]) != propAutoSelectObject ||
+		binary.LittleEndian.Uint64(auto[14:]) != uint64(3494)|uint64(1)<<32 {
+		t.Fatalf("AutoSelectObject frame=%x", auto)
+	}
+	if got := binary.LittleEndian.Uint32(frames[2][4:]); frames[2][0] != 0x1E || frames[2][3] != 2 || got != 4 {
+		t.Fatalf("cinematic begin frame=%x", frames[2])
 	}
 	if got := binary.LittleEndian.Uint32(frames[len(frames)-1][4:]); frames[len(frames)-1][0] != 0x1E || frames[len(frames)-1][3] != 2 || got != 7 {
 		t.Fatalf("cinematic end frame=%x", frames[len(frames)-1])
@@ -346,7 +371,7 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 2, ObjectID: 3494, OwnerID: 1}); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 5 {
+	if got := len(conn.Frames()); got != 6 {
 		t.Fatalf("duplicate selection frames=%d, want no duplicate menu", got)
 	}
 }
@@ -371,11 +396,19 @@ func TestObjectRequestSelectsCombatNPCWithoutDialogue(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 1 || frames[0][0] != 0x10 {
-		t.Fatalf("combat click frames=%x; want only LastObject", frames)
+	// 0x07 点击回 LastObject(100) + AutoSelectObject(230) 双帧
+	//（与 msg431 同路径；49840 抓包 414/415 对应）。
+	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
+		t.Fatalf("combat click frames=%x; want LastObject+AutoSelectObject", frames)
 	}
 	if got := binary.LittleEndian.Uint64(frames[0][14:]); got != uint64(4455)|uint64(1)<<32 {
 		t.Fatalf("combat LastObject=%#x", got)
+	}
+	if got := binary.LittleEndian.Uint16(frames[1][12:]); got != propAutoSelectObject {
+		t.Fatalf("combat AutoSelectObject property index=%d", got)
+	}
+	if got := binary.LittleEndian.Uint64(frames[1][14:]); got != uint64(4455)|uint64(1)<<32 {
+		t.Fatalf("combat AutoSelectObject=%#x", got)
 	}
 	if lifecycle.lastMenuObject != 0 {
 		t.Fatalf("combat click opened menu for object=%d", lifecycle.lastMenuObject)
@@ -404,8 +437,8 @@ func TestObjectRequestDoesNotFabricateDialogueForUnconfiguredCivilian(t *testing
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 1 || frames[0][0] != 0x10 {
-		t.Fatalf("unconfigured civilian click frames=%x; want only LastObject", frames)
+	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
+		t.Fatalf("unconfigured civilian click frames=%x; want LastObject+AutoSelectObject", frames)
 	}
 	if _, _, ok := lifecycle.selectedCombatTarget(); ok {
 		t.Fatal("civilian selection became a combat target")
@@ -429,18 +462,18 @@ func TestObjectRequestOpensDepotViewAfterCinematicSelection(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 5 || frames[0][0] != 0x10 || frames[1][0] != 0x1E {
-		t.Fatalf("depot click frames=%d, want LastObject + cinematic talk: %x", len(frames), frames)
+	if len(frames) != 6 || frames[0][0] != 0x10 || frames[2][0] != 0x1E {
+		t.Fatalf("depot click frames=%d, want LastObject+AutoSelectObject + cinematic talk: %x", len(frames), frames)
 	}
 	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: 3494, OwnerID: 1, FuncID: 807000000}); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
-	if got := frames[6]; len(got) != 7 || got[0] != 0x15 || binary.LittleEndian.Uint16(got[1:]) != 4 || binary.LittleEndian.Uint16(got[3:]) != 18 {
+	if got := frames[7]; len(got) != 7 || got[0] != 0x15 || binary.LittleEndian.Uint16(got[1:]) != 4 || binary.LittleEndian.Uint16(got[3:]) != 18 {
 		t.Fatalf("depot CreateView=%x", got)
 	}
-	if got := binary.LittleEndian.Uint32(frames[5][4:]); frames[5][0] != 0x1E || frames[5][3] != 2 || got != 8 {
-		t.Fatalf("depot close frame=%x", frames[5])
+	if got := binary.LittleEndian.Uint32(frames[6][4:]); frames[6][0] != 0x1E || frames[6][3] != 2 || got != 8 {
+		t.Fatalf("depot close frame=%x", frames[6])
 	}
 }
 
@@ -461,17 +494,17 @@ func TestObjectRequestOpensShopViewAfterCinematicSelection(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 5 || frames[0][0] != 0x10 || frames[1][0] != 0x1E {
-		t.Fatalf("shop click frames=%d, want LastObject + cinematic talk: %x", len(frames), frames)
+	if len(frames) != 6 || frames[0][0] != 0x10 || frames[2][0] != 0x1E {
+		t.Fatalf("shop click frames=%d, want LastObject+AutoSelectObject + cinematic talk: %x", len(frames), frames)
 	}
 	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: 3494, OwnerID: 1, FuncID: 805000000}); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
-	if len(frames) != 13 || frames[5][0] != 0x1E {
+	if len(frames) != 14 || frames[6][0] != 0x1E {
 		t.Fatalf("shop selection frames=%d, want cinematic close + shop view: %x", len(frames), frames)
 	}
-	shop := frames[6]
+	shop := frames[7]
 	if shop[0] != 0x15 || binary.LittleEndian.Uint16(shop[1:]) != 61 || binary.LittleEndian.Uint16(shop[3:]) != 100 || binary.LittleEndian.Uint16(shop[5:]) != 4 {
 		t.Fatalf("shop CreateView header=%x", shop)
 	}
@@ -479,7 +512,7 @@ func TestObjectRequestOpensShopViewAfterCinematicSelection(t *testing.T) {
 		t.Fatalf("shop CreateView missing ShopID: %x", shop)
 	}
 	for i, configID := range []string{"yaopin_00100", "yaopin_00300", "yaopin_00500", "yaopin_10100", "yaopin_10300", "yaopin_10500"} {
-		row := frames[i+7]
+		row := frames[i+8]
 		if row[0] != 0x18 || binary.LittleEndian.Uint16(row[1:]) != 61 || binary.LittleEndian.Uint16(row[3:]) != uint16(i+1) || binary.LittleEndian.Uint16(row[5:]) != 6 {
 			t.Fatalf("shop row %d header=%x", i, row)
 		}
@@ -509,14 +542,14 @@ func TestMultiServiceNPCUsesNativeMenuThenSelectedShopView(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 6 || frames[0][0] != 0x10 || frames[1][0] != 0x1E {
-		t.Fatalf("multi-service click must send LastObject + cinematic menu: %x", frames)
+	if len(frames) != 7 || frames[0][0] != 0x10 || frames[2][0] != 0x1E {
+		t.Fatalf("multi-service click must send LastObject+AutoSelectObject + cinematic menu: %x", frames)
 	}
 	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: 3494, OwnerID: 1, FuncID: 805000000}); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
-	if len(frames) != 14 || frames[6][0] != 0x1E || frames[7][0] != 0x15 || binary.LittleEndian.Uint16(frames[7][1:]) != 61 {
+	if len(frames) != 15 || frames[7][0] != 0x1E || frames[8][0] != 0x15 || binary.LittleEndian.Uint16(frames[8][1:]) != 61 {
 		t.Fatalf("multi-service shop selection did not close cinematic menu and create View 61: %x", frames)
 	}
 }

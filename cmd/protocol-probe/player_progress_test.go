@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"testing"
 	"time"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
 func TestPlayerActorPublishesYiHuaFactionAsSchool(t *testing.T) {
@@ -58,7 +60,8 @@ func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 	if sp != maxPlayerSP || player.skillSP() != maxPlayerSP {
 		t.Fatalf("set SP=%d actor=%d, want %d", sp, player.skillSP(), maxPlayerSP)
 	}
-	if frame[0] != 0x10 || !bytes.Contains(frame, []byte{byte(propSP), byte(propSP >> 8), 100, 0, 0, 0}) {
+	saturatedSP := []byte{byte(propSP), byte(propSP >> 8), byte(maxPlayerSP), byte(maxPlayerSP >> 8), 0, 0}
+	if frame[0] != 0x10 || !bytes.Contains(frame, saturatedSP) {
 		t.Fatalf("set SP frame=%x", frame)
 	}
 	sp, _, err = player.addSP(-150)
@@ -71,6 +74,48 @@ func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 	sp, _, err = player.addSP(15)
 	if err != nil || sp != 15 || player.skillSP() != 15 {
 		t.Fatalf("added SP=%d actor=%d err=%v, want 15", sp, player.skillSP(), err)
+	}
+}
+
+func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
+	player := newPlayerActor("本地角色", 0)
+	// 常规属性档案（0x0D 归档与所有周期 0x10 批）不得携带 MaxSP/MaxSPAdd：
+	// 真机与新版服务端实证上限只在登录全量批出现一次，塞进归档或周期批
+	// 会让客户端进世界时崩溃。
+	regular := make(map[string]int32)
+	for _, property := range player.stateProperties() {
+		regular[property.Name] = property.Value.I32
+	}
+	if got := regular["SP"]; got != maxPlayerSP {
+		t.Fatalf("SP=%d, want %d", got, maxPlayerSP)
+	}
+	if _, exists := regular["MaxSP"]; exists {
+		t.Fatal("regular property profile must not carry MaxSP")
+	}
+	if _, exists := regular["MaxSPAdd"]; exists {
+		t.Fatal("regular property profile must not carry MaxSPAdd")
+	}
+	// 登录链的首个权威 0x10 是 MaxSP 唯一的下发点。
+	frame, err := player.loginVitalUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	maxSPNeedle := []byte{byte(propMaxSP), byte(propMaxSP >> 8), byte(maxPlayerSP), 0, 0, 0}
+	if frame[0] != 0x10 || !bytes.Contains(frame, maxSPNeedle) {
+		t.Fatalf("login vital frame misses MaxSP=%d at index %d: %x", maxPlayerSP, propMaxSP, frame)
+	}
+	maxSPAddNeedle := []byte{byte(propMaxSPAdd), byte(propMaxSPAdd >> 8)}
+	if bytes.Contains(frame, maxSPAddNeedle) {
+		t.Fatal("MaxSPAdd is never sent on the wire")
+	}
+	// 协商出的 0x09 属性表必须命名 MaxSP，客户端才能按位置绑定索引。
+	// 其 FieldSpec 位于全表末尾（0x09 表按位置定索引，不能插中段）。
+	named := make(map[string]bool)
+	for _, field := range sceneVisiblePropertyFields(clientdata.VisibleNPCModernV1().Fields) {
+		named[field.Name] = true
+	}
+	if !named["MaxSP"] {
+		t.Fatal("property table misses MaxSP")
 	}
 }
 

@@ -236,12 +236,12 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 			}
 		case "set_sp":
 			if body.SP < 0 || body.SP > maxPlayerSP {
-				writeGMError(writer, http.StatusBadRequest, "SP must be between 0 and 100")
+				writeGMError(writer, http.StatusBadRequest, fmt.Sprintf("SP must be between 0 and %d", maxPlayerSP))
 				return
 			}
 		case "add_sp":
 			if body.SP < 1 || body.SP > maxPlayerSP {
-				writeGMError(writer, http.StatusBadRequest, "SP addition must be between 1 and 100")
+				writeGMError(writer, http.StatusBadRequest, fmt.Sprintf("SP addition must be between 1 and %d", maxPlayerSP))
 				return
 			}
 		case "fill_sp":

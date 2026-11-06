@@ -43,6 +43,7 @@ func main() {
 	logFile := flag.String("log-file", runtimeProjectPath("artifacts", "local", "logs", "protocol-probe-live.log"), "append runtime log to this local file")
 	npcFuncPath := flag.String("npc-func", defaultLegacyNPCFuncPath, "Npc_Func.xml used to build per-NPC service menus")
 	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts", "host"), "server-side event Lua scripts directory (game.on contract; empty disables)")
+	captureDir := flag.String("capture-dir", runtimeProjectPath("captures", "local"), "dump raw wire bytes of every session to <dir>/<ip-pid>_c2s.bin and _s2c.bin (empty disables)")
 	neigongScriptsPath := flag.String("neigong-scripts", runtimeProjectPath("scripts", "module", "neigong"), "neigong effect module scripts directory (buf_ng_*.lua; empty disables)")
 	switchScene := flag.String("switch-scene", "", "test-only live destination: config,resource,x,y,z,orient (empty disables it)")
 	npcAuditAll := flag.Bool("npc-audit-all", false, "inventory every modern NPC creator scene and exit")
@@ -226,11 +227,20 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects)
+		go handle(conn, store, facultyStore, npcSchema, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore, npcSchema clientdata.Schema, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
+	if captureDir != "" {
+		var tap *captureTap
+		conn, tap = newCapturedConn(conn, captureDir)
+		if tap != nil {
+			// defer link.Close()（更晚注册、先执行）会经由 capturedConn.Close
+			// 落盘并关闭这对文件；此处只负责宣告文件位置。
+			log.Printf("capture session=%s prefix=%s", conn.RemoteAddr(), tap.logName(captureDir))
+		}
+	}
 	config := transport.DefaultConnectionConfig()
 	config.MaxFrameSize = 64 << 10
 	link, err := transport.NewConnection(conn, config)
@@ -1146,7 +1156,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -1181,6 +1191,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				case clientCustomActiveParry:
 					if _, handleErr := handleActiveParryCustom(player, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle active parry: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomSelectTarget:
+					if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
 					}
 				case 215, 1006:
 					if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -1295,6 +1309,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			case clientCustomActiveParry:
 				if _, handleErr := handleActiveParryCustom(player, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle active parry: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomSelectTarget:
+				if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
 				}
 			case 215, 1006: // 内功穿戴 / faculty 状态机
 				if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -1650,6 +1668,18 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 		// 然后才看 School。它们必须在 PlayerAdd 之前纳入协商表。
 		clientdata.FieldSpec{Index: propForce, Name: "Force", Type: clientdata.WireString},
 		clientdata.FieldSpec{Index: propNewSchool, Name: "NewSchool", Type: clientdata.WireString},
+	)
+	// 0x09 表的线上格式只有 (name, type)，索引由条目位置隐式决定——
+	// FieldSpec.Index 必须恒等于条目在整张表中的 0 基位置。因此新增字段
+	// 的 FieldSpec 只能追加在 sceneVisiblePropertyFields 的最末尾，绝不能
+	// 插进 playerProgressFields 或上面的 actor 段中段（那会让之后所有条目
+	// 的位置偏移，0x10 数字索引整体错绑，进游戏即崩）。
+	fields = append(fields,
+		clientdata.FieldSpec{Index: propMaxSP, Name: "MaxSP", Type: clientdata.WireInt32},
+		clientdata.FieldSpec{Index: propMaxSPAdd, Name: "MaxSPAdd", Type: clientdata.WireInt32},
+		// AutoSelectObject 与 LastObject（表位 100）配对：fork 每次目标
+		// 选择回双属性帧（官方表位 414/415）。按表尾追加约定放 230。
+		clientdata.FieldSpec{Index: propAutoSelectObject, Name: "AutoSelectObject", Type: clientdata.WireObject},
 	)
 	return fields
 }

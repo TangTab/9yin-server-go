@@ -237,8 +237,8 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if got := player.skillSP(); got != 50 {
-		t.Fatalf("SP=%d, want 50 after 开太极", got)
+	if got, want := player.skillSP(), maxPlayerSP-taiJiQuanGuPuCombatSkills["CS_wd_tjq08"].spCost; got != want {
+		t.Fatalf("SP=%d, want %d after 开太极", got, want)
 	}
 	if got := player.bufferInfo(redSuperArmorBuffSlot, time.Now()); got == "" {
 		t.Fatal("开太极 did not stage action-bound buf_fixed_red")
@@ -420,8 +420,8 @@ func TestSkillSevenSpendsSP(t *testing.T) {
 	if !ok {
 		t.Fatalf("begin skill seven: %s", reason)
 	}
-	if got := player.progress.attributes.sp; got != 50 {
-		t.Fatalf("SP=%d, want 50", got)
+	if got, want := player.progress.attributes.sp, maxPlayerSP-definition.spCost; got != want {
+		t.Fatalf("SP=%d, want %d", got, want)
 	}
 }
 
