@@ -132,3 +132,28 @@ func (scene *Scene) Snapshot() Snapshot {
 	}
 	return result
 }
+
+// SnapshotWithin 返回水平距离 (x,z) 不超过 radius 的实体快照，
+// 其余语义与 Snapshot 完全一致。它供共享场景下每连接视口做
+// 空间过滤：已物化但滑出半径的实体会被 Viewport.Plan 归入
+// Removes，从而在不改动 Viewport 语义的前提下实现按视口可见。
+func (scene *Scene) SnapshotWithin(x, z, radius float32) Snapshot {
+	scene.mu.RLock()
+	defer scene.mu.RUnlock()
+	radiusSquared := radius * radius
+	ids := make([]int, 0, len(scene.entities))
+	for id, entry := range scene.entities {
+		dx := entry.Entity.Transform.X - x
+		dz := entry.Entity.Transform.Z - z
+		if dx*dx+dz*dz > radiusSquared {
+			continue
+		}
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+	result := Snapshot{Generation: scene.generation, Config: scene.config, Resource: scene.resource, Entities: make([]VersionedEntity, 0, len(ids))}
+	for _, id := range ids {
+		result.Entities = append(result.Entities, scene.entities[EntityID(id)].clone())
+	}
+	return result
+}

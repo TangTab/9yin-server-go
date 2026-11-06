@@ -1,0 +1,520 @@
+package main
+
+import (
+	"fmt"
+	"log"
+	"sort"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/ecs"
+	"github.com/local/9yin-go-server/internal/npcfunc"
+	"github.com/local/9yin-go-server/internal/role"
+	"github.com/local/9yin-go-server/internal/sim"
+	worldcore "github.com/local/9yin-go-server/internal/world"
+)
+
+// sceneRun 是一个场景的共享权威运行时：sim 世界、可视权威 Scene、
+// 定时器与中央战斗 tick 都归它所有，多个连接以 sceneLifecycle
+// 视图的形式挂靠同一份 NPC 模拟。本轮玩家之间互不可见；
+// NPC 仇恨目标取"最近存活成员（粘性）"。
+//
+// 锁纪律：run.mu 即全局锁序中的 scene.mu（外层），p.mu 为内层。
+// 视图自身的状态（armed/selected*/viewport 等）只被其属主连接
+// goroutine 访问，不需要锁；run 的定时器与 tick goroutine 只触
+// run 状态与各视图的 conn（transport 写帧自带互斥）。
+type sceneRun struct {
+	mu             sync.Mutex
+	key            sceneKey
+	combat         *sim.World
+	scene          *worldcore.Scene
+	members        map[uint32]*sceneMember
+	epoch          uint64
+	timers         []*time.Timer
+	portalCooldown time.Time
+	patrolStarted  bool
+	closed         bool
+	ticking        bool
+	tickStop       chan struct{}
+	tickDone       chan struct{}
+	npcFuncs       *npcfunc.Registry
+}
+
+// sceneMember 是挂靠场景的一个连接成员。position 是场景侧的
+// 权威位置（由 0x0A/传送路径更新），active 在就绪屏障
+// （clientActivity）之后置位，NPC 仇恨只考虑 active 成员。
+type sceneMember struct {
+	objectID uint32
+	player   *playerActor
+	view     *sceneLifecycle
+	position role.Position
+	active   bool
+}
+
+type sceneKey struct {
+	config, resource string
+}
+
+var (
+	sceneRegistryMu sync.Mutex
+	sceneRegistry   = map[sceneKey]*sceneRun{}
+)
+
+// acquireSceneRun 返回 (config, resource) 对应的共享场景运行时，
+// 首次进入时按目录一次性注册全部合格 NPC。目录排除 EventNpc：
+// 它们没有任务归属者，绝不应进入共享世界。
+func acquireSceneRun(key sceneKey, catalog []npcSpawn, funcs *npcfunc.Registry) (*sceneRun, error) {
+	sceneRegistryMu.Lock()
+	run, exists := sceneRegistry[key]
+	if !exists {
+		run = newSceneRun(key, funcs)
+		sceneRegistry[key] = run
+	}
+	sceneRegistryMu.Unlock()
+	if !exists {
+		if err := run.populate(catalog); err != nil {
+			sceneRegistryMu.Lock()
+			delete(sceneRegistry, key)
+			sceneRegistryMu.Unlock()
+			run.mu.Lock()
+			run.closed = true
+			run.mu.Unlock()
+			return nil, err
+		}
+		log.Printf("scene run created config=%s resource=%s npcs=%d", key.config, key.resource, run.combat.CombatCount())
+	}
+	return run, nil
+}
+
+func newSceneRun(key sceneKey, funcs *npcfunc.Registry) *sceneRun {
+	return &sceneRun{
+		key:      key,
+		combat:   sim.New(),
+		scene:    worldcore.NewScene(),
+		members:  make(map[uint32]*sceneMember),
+		npcFuncs: funcs,
+	}
+}
+
+// populate 一次性注册全量目录。实体 ID = 目录下标 + 2，
+// 与单连接时代的分配规则保持一致（0/1 保留给玩家）。
+func (r *sceneRun) populate(catalog []npcSpawn) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, err := r.scene.Begin(r.key.config, r.key.resource); err != nil {
+		return err
+	}
+	registered := 0
+	for index, npc := range catalog {
+		if !npcSpawnEligible(npc) {
+			continue
+		}
+		if err := r.registerNPCLocked(uint32(index)+2, npc); err != nil {
+			return fmt.Errorf("register NPC %s: %w", npc.resolved.ConfigID, err)
+		}
+		registered++
+	}
+	log.Printf("scene run populated config=%s resource=%s registered=%d skipped=%d", r.key.config, r.key.resource, registered, len(catalog)-registered)
+	return nil
+}
+
+// npcSpawnEligible 前移了原按视口注册时的 EventNpc 闸门：
+// 没有 TaskOwner 的 EventNpc 永不进入共享世界。
+func npcSpawnEligible(npc npcSpawn) bool {
+	return !strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc")
+}
+
+// ---- 成员管理 ----
+
+// attachMember 登记成员并按需启动场景 tick。重复 attach 幂等覆盖。
+func (r *sceneRun) attachMember(member *sceneMember) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.closed {
+		return
+	}
+	r.members[member.objectID] = member
+	r.startTickLocked()
+}
+
+// detachMember 注销成员；末成员离开时关闭整个运行时。
+func (r *sceneRun) detachMember(objectID uint32) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	delete(r.members, objectID)
+	if len(r.members) == 0 && !r.closed {
+		r.shutdownLocked()
+	}
+}
+
+func (r *sceneRun) updateMemberPosition(objectID uint32, position role.Position) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if member, exists := r.members[objectID]; exists {
+		member.position = position
+	}
+}
+
+func (r *sceneRun) activateMember(objectID uint32) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if member, exists := r.members[objectID]; exists {
+		member.active = true
+	}
+}
+
+// shutdownLocked 停止 tick 与全部定时器，并把自己从注册表摘除。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) shutdownLocked() {
+	r.closed = true
+	r.epoch++
+	for _, timer := range r.timers {
+		timer.Stop()
+	}
+	r.timers = nil
+	if r.ticking {
+		close(r.tickStop)
+		r.ticking = false
+	}
+	sceneRegistryMu.Lock()
+	if sceneRegistry[r.key] == r {
+		delete(sceneRegistry, r.key)
+	}
+	sceneRegistryMu.Unlock()
+}
+
+// ---- 中央 tick ----
+
+func (r *sceneRun) startTickLocked() {
+	if r.ticking || r.closed {
+		return
+	}
+	r.ticking = true
+	r.tickStop = make(chan struct{})
+	r.tickDone = make(chan struct{})
+	go func() {
+		defer close(r.tickDone)
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-r.tickStop:
+				return
+			case now := <-ticker.C:
+				r.tickOnce(now)
+			}
+		}
+	}()
+}
+
+// tickOnce 是每秒一次的权威 NPC 模拟入口。战斗结算在 run.mu 内
+// 完成，帧写入在锁外进行（transport.WriteFrame 线程安全；跨写者
+// 的相对顺序不保证，这是本轮已接受的权衡）。
+func (r *sceneRun) tickOnce(now time.Time) {
+	r.combatTick(now)
+}
+
+// ---- NPC 注册（自 sceneLifecycle.registerNPC 迁入）----
+
+// registerNPCLocked 注册单个 NPC：可视权威实体 + 四组件一次成型。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
+	if id == 0 || id == 1 {
+		return fmt.Errorf("NPC scene identity %d collides with reserved player identity", id)
+	}
+	orderedProperties, err := npc.resolved.OrderedProperties(clientdata.VisibleNPCModernV1())
+	if err != nil {
+		return fmt.Errorf("resolve NPC %s properties: %w", npc.resolved.ConfigID, err)
+	}
+	payload, err := npcAddObject(id, npc, 0)
+	if err != nil {
+		return fmt.Errorf("encode NPC %s: %w", npc.resolved.ConfigID, err)
+	}
+	properties := worldcore.PropertyArchive{}
+	for _, property := range orderedProperties {
+		value, err := worldValue(property.Value)
+		if err != nil {
+			return fmt.Errorf("convert NPC %s property %s: %w", npc.resolved.ConfigID, property.Name, err)
+		}
+		if err := properties.Set(property.Name, value); err != nil {
+			return err
+		}
+	}
+	entityID := worldcore.EntityID(id)
+	if err := r.scene.Add(worldcore.Entity{
+		ID:         entityID,
+		OwnerID:    1,
+		Kind:       worldcore.EntityNPC,
+		Transform:  worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient},
+		Properties: properties,
+	}); err != nil {
+		return err
+	}
+	services := modernNPCServices(npc)
+	portal, hasPortal, portalErr := doorPortalRoute(npc)
+	if portalErr != nil {
+		return fmt.Errorf("resolve portal %s: %w", npc.resolved.ConfigID, portalErr)
+	}
+	funcs := r.npcFuncs.FuncsForNPC(npc.resolved.ConfigID)
+	interaction := npcInteractionFor(npc.resolved.ScriptClass, services)
+	meta := sceneEntity{
+		id:          id,
+		description: "npc:" + npc.resolved.ConfigID,
+		ownerID:     1,
+		configID:    npc.resolved.ConfigID,
+		scriptClass: npc.resolved.ScriptClass,
+		interaction: interaction,
+		funcs:       funcs,
+		services:    services,
+		properties:  cloneIndexedProperties(orderedProperties),
+		payload:     payload,
+	}
+	if hasPortal {
+		meta.portal = &portal
+	}
+	maxHP, maxMP := int32(1000), int32(100)
+	for _, property := range orderedProperties {
+		switch property.Name {
+		case "MaxHP":
+			if property.Value.I32 > 0 {
+				maxHP = property.Value.I32
+			}
+		case "MaxMP":
+			if property.Value.I32 > 0 {
+				maxMP = property.Value.I32
+			}
+		}
+	}
+	transform := worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient}
+	vitals := sim.NewVitals(maxHP, maxMP)
+	if interaction == npcInteractionCombat {
+		brain := newNPCCombatState(npc, transform)
+		r.spawnSceneEntityLocked(entityID, vitals, transform, meta, &brain)
+	} else {
+		r.spawnSceneEntityLocked(entityID, vitals, transform, meta, nil)
+	}
+	return nil
+}
+
+// ---- 组件访问器（自 sceneLifecycle 迁入，供视图委托）----
+
+func (r *sceneRun) spawnSceneEntityLocked(id worldcore.EntityID, vitals sim.Vitals, transform worldcore.Transform, meta sceneEntity, brain *sim.Brain) {
+	raw := r.combat.Raw()
+	if brain != nil {
+		ecs.Write(raw, ecs.Id(id), ecs.C(vitals), ecs.C(transform), ecs.C(meta), ecs.C(*brain))
+		return
+	}
+	ecs.Write(raw, ecs.Id(id), ecs.C(vitals), ecs.C(transform), ecs.C(meta))
+}
+
+func (r *sceneRun) npcMeta(id worldcore.EntityID) (sceneEntity, bool) {
+	return ecs.Read[sceneEntity](r.combat.Raw(), ecs.Id(id))
+}
+
+func (r *sceneRun) writeNpcMeta(id worldcore.EntityID, meta sceneEntity) {
+	ecs.Write(r.combat.Raw(), ecs.Id(id), ecs.C(meta))
+}
+
+func (r *sceneRun) npcTransform(id worldcore.EntityID) (worldcore.Transform, bool) {
+	return ecs.Read[worldcore.Transform](r.combat.Raw(), ecs.Id(id))
+}
+
+func (r *sceneRun) writeNpcTransform(id worldcore.EntityID, transform worldcore.Transform) {
+	ecs.Write(r.combat.Raw(), ecs.Id(id), ecs.C(transform))
+}
+
+func (r *sceneRun) unregisterNPC(id worldcore.EntityID) error {
+	if err := r.scene.Remove(id); err != nil {
+		return err
+	}
+	r.combat.Remove(id)
+	return nil
+}
+
+// sortedMembersLocked 返回按 objectID 升序的成员切片。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) sortedMembersLocked() []*sceneMember {
+	members := make([]*sceneMember, 0, len(r.members))
+	for _, member := range r.members {
+		members = append(members, member)
+	}
+	sort.Slice(members, func(i, j int) bool { return members[i].objectID < members[j].objectID })
+	return members
+}
+
+type npcEntry struct {
+	id        worldcore.EntityID
+	meta      sceneEntity
+	transform worldcore.Transform
+}
+
+// eachNPCLocked 以 EntityID 升序回调全部已注册 NPC（平民与敌对
+// 均含）。回调收到的是组件副本，修改后经 writeNpcMeta/
+// writeNpcTransform 写回。调用方必须已持有 r.mu。
+func (r *sceneRun) eachNPCLocked(fn func(id worldcore.EntityID, meta *sceneEntity, transform *worldcore.Transform)) {
+	entries := make([]npcEntry, 0)
+	ecs.Query3[sceneEntity, worldcore.Transform, sim.Vitals](r.combat.Raw()).MapId(func(id ecs.Id, meta *sceneEntity, transform *worldcore.Transform, _ *sim.Vitals) {
+		entries = append(entries, npcEntry{id: worldcore.EntityID(id), meta: *meta, transform: *transform})
+	})
+	sort.Slice(entries, func(i, j int) bool { return entries[i].id < entries[j].id })
+	for i := range entries {
+		fn(entries[i].id, &entries[i].meta, &entries[i].transform)
+	}
+}
+
+type combatNPCEntry struct {
+	id        worldcore.EntityID
+	vitals    *sim.Vitals
+	brain     *sim.Brain
+	transform *worldcore.Transform
+	meta      *sceneEntity
+}
+
+// eachCombatNPCFullLocked 以 EntityID 升序一次遍历敌对 NPC 的全部
+// 四个组件（Vitals/Brain/Transform/sceneEntity），回调收到直指组件
+// 存储的指针——就地修改即生效，无需逐 ID Read。
+// 契约同 sim.World.EachCombatNPC：回调期间禁止一切结构性 ECS 操作；
+// 对已有组件的值写入会使指针所指的值更新。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) eachCombatNPCFullLocked(fn func(id worldcore.EntityID, vitals *sim.Vitals, brain *sim.Brain, transform *worldcore.Transform, meta *sceneEntity)) {
+	entries := make([]combatNPCEntry, 0)
+	ecs.Query4[sim.Vitals, sim.Brain, worldcore.Transform, sceneEntity](r.combat.Raw()).MapId(func(id ecs.Id, vitals *sim.Vitals, brain *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
+		entries = append(entries, combatNPCEntry{id: worldcore.EntityID(id), vitals: vitals, brain: brain, transform: transform, meta: meta})
+	})
+	sort.Slice(entries, func(i, j int) bool { return entries[i].id < entries[j].id })
+	for i := range entries {
+		fn(entries[i].id, entries[i].vitals, entries[i].brain, entries[i].transform, entries[i].meta)
+	}
+}
+
+// ---- 巡逻（自 sceneLifecycle 迁入，帧扇出 + run epoch）----
+
+// startPatrol 运行一组刻意很小且确定性的装饰性巡逻：按发起成员
+// 位置就近挑选非战斗 NPC。敌对角色的移动由战斗 tick 掌管。
+func (r *sceneRun) startPatrol(count int, center role.Position) {
+	if count <= 0 {
+		return
+	}
+	r.mu.Lock()
+	if r.closed || r.patrolStarted {
+		r.mu.Unlock()
+		return
+	}
+	r.patrolStarted = true
+	type candidate struct {
+		id        uint32
+		distance2 float32
+	}
+	candidates := make([]candidate, 0, 16)
+	r.eachNPCLocked(func(id worldcore.EntityID, meta *sceneEntity, transform *worldcore.Transform) {
+		if meta.interaction == npcInteractionCombat {
+			return
+		}
+		dx := transform.X - center.X
+		dz := transform.Z - center.Z
+		candidates = append(candidates, candidate{id: uint32(id), distance2: dx*dx + dz*dz})
+	})
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].distance2 < candidates[j].distance2 })
+	if count > len(candidates) {
+		count = len(candidates)
+	}
+	selected := make([]uint32, count)
+	for index := range selected {
+		selected[index] = candidates[index].id
+	}
+	r.mu.Unlock()
+	for index, id := range selected {
+		r.schedulePatrolStep(id, 3*time.Second+time.Duration(index)*700*time.Millisecond)
+	}
+	log.Printf("scene %s/%s: started low-rate patrol for %d NPCs", r.key.config, r.key.resource, len(selected))
+}
+
+func (r *sceneRun) schedulePatrolStep(id uint32, delay time.Duration) {
+	r.mu.Lock()
+	if r.closed {
+		r.mu.Unlock()
+		return
+	}
+	epoch := r.epoch
+	timer := time.AfterFunc(delay, func() {
+		r.patrolStepOnce(id, epoch)
+		r.schedulePatrolStep(id, 5*time.Second)
+	})
+	r.timers = append(r.timers, timer)
+	r.mu.Unlock()
+}
+
+// patrolStepOnce 执行一步巡逻：翻转 patrolSign、计算目的地并
+// 权威移动，帧在锁内直发扇出。
+func (r *sceneRun) patrolStepOnce(id uint32, epoch uint64) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.closed || r.epoch != epoch {
+		return
+	}
+	entityID := worldcore.EntityID(id)
+	meta, exists := r.npcMeta(entityID)
+	if !exists {
+		return
+	}
+	transform, transformOK := r.npcTransform(entityID)
+	if !transformOK {
+		return
+	}
+	if meta.patrolSign == 0 {
+		meta.patrolSign = 1
+	}
+	destination := transform
+	destination.X += meta.patrolSign * 1.5
+	meta.patrolSign = -meta.patrolSign
+	r.writeNpcMeta(entityID, meta)
+	if err := r.setNPCTransformLocked(entityID, destination); err != nil {
+		log.Printf("scene %s/%s: patrol move id=%d: %v", r.key.config, r.key.resource, id, err)
+		return
+	}
+	// 旧 moveNPC 在移动后做全量对账；共享场景下改为直发 0x20 并
+	// 抬升 revision，出/入视口的 Updates 由各成员自己的 reconcile
+	// 在下一次移动时结算（与战斗移动同一节奏）。
+	if err := r.broadcastNPCLocked(meta.id, serverMoving(meta.id, meta.ownerID, motionFromDest(destination))); err != nil {
+		log.Printf("scene %s/%s: patrol send id=%d: %v", r.key.config, r.key.resource, id, err)
+	}
+	r.scheduleMoveArrivalLocked(entityID, meta, destination, 1500*time.Millisecond, epoch)
+}
+
+// broadcastNPCLocked 把单帧扇出给可见该 NPC 的成员。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) broadcastNPCLocked(id uint32, frame []byte) error {
+	for _, member := range r.sortedMembersLocked() {
+		if member.view == nil || !member.view.npcVisible(id) {
+			continue
+		}
+		if err := member.view.conn.WriteFrame(frame); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// scheduleMoveArrivalLocked 排布巡逻移动的到达确认（0x1F），
+// 与战斗移动共用 transform 取消令牌语义。
+// 调用方必须已持有 r.mu。
+func (r *sceneRun) scheduleMoveArrivalLocked(entityID worldcore.EntityID, meta sceneEntity, destination worldcore.Transform, delay time.Duration, epoch uint64) {
+	if delay <= 0 {
+		delay = 1500 * time.Millisecond
+	}
+	timer := time.AfterFunc(delay, func() {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		if r.closed || r.epoch != epoch {
+			return
+		}
+		transform, transformOK := r.npcTransform(entityID)
+		if !transformOK || !sameCombatTransform(transform, destination) {
+			return
+		}
+		_ = r.broadcastNPCLocked(meta.id, serverLocation(meta.id, meta.ownerID, transform))
+	})
+	r.timers = append(r.timers, timer)
+}

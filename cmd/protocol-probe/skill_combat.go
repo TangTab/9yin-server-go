@@ -280,10 +280,10 @@ func (s *sceneLifecycle) selectedCombatTarget() (uint32, uint32, bool) {
 	if s == nil {
 		return 0, 0, false
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
-	vitals, hasVitals := s.combat.Vitals(id)
+	vitals, hasVitals := s.run.combat.Vitals(id)
 	if !hasVitals || vitals.HP <= 0 {
 		return 0, 0, false
 	}
@@ -295,10 +295,10 @@ func (s *sceneLifecycle) selectedCombatTarget() (uint32, uint32, bool) {
 }
 
 func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) ([]byte, uint32, int32, bool, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
-	vitals, hasVitals := s.combat.Vitals(id)
+	vitals, hasVitals := s.run.combat.Vitals(id)
 	meta, exists := s.npcMeta(id)
 	if !hasVitals || !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
 		return nil, 0, 0, false, nil
@@ -306,15 +306,15 @@ func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (
 	if !vitals.ApplyDamage(amount) {
 		return nil, uint32(id), 0, false, nil
 	}
-	s.combat.WriteVitals(id, vitals)
+	s.run.combat.WriteVitals(id, vitals)
 	state := vitals.ActorState(uint32(id), meta.ownerID)
-	if brain, isCombat := s.combat.Brain(id); isCombat {
+	if brain, isCombat := s.run.combat.Brain(id); isCombat {
 		brain.Threat += amount
 		if state.HP <= 0 {
 			brain.Threat = 0
 			brain.RespawnAt = now.Add(brain.RespawnAfter)
 		}
-		s.combat.WriteBrain(id, brain)
+		s.run.combat.WriteBrain(id, brain)
 	}
 	frame, err := sceneObjectProperties(uint32(id), meta.ownerID, 0, npcCombatProperties(state))
 	loot := int32(0)
@@ -345,15 +345,15 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 	if s == nil || radius <= 0 || amount <= 0 {
 		return nil, nil
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
 
 	radiusSquared := radius * radius
 	// 只有 attacknpc/bossnpc 携带 Brain，与旧循环中
 	// interaction == npcInteractionCombat 的过滤等价。单次遍历直接
 	// 拿到 Transform 指针，无需逐 ID Read。
-	ids := make([]int, 0, s.combat.CombatCount())
-	s.combat.EachCombatNPCTransform(func(id worldcore.EntityID, vitals *sim.Vitals, _ *sim.Brain, transform *worldcore.Transform) {
+	ids := make([]int, 0, s.run.combat.CombatCount())
+	s.run.combat.EachCombatNPCTransform(func(id worldcore.EntityID, vitals *sim.Vitals, _ *sim.Brain, transform *worldcore.Transform) {
 		if vitals.HP <= 0 {
 			return
 		}
@@ -391,7 +391,7 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 	results := make([]areaSkillDamageResult, 0, len(ids))
 	for _, rawID := range ids {
 		id := worldcore.EntityID(rawID)
-		vitals, ok := s.combat.Vitals(id)
+		vitals, ok := s.run.combat.Vitals(id)
 		if !ok {
 			continue
 		}
@@ -400,15 +400,15 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 		if !vitals.ApplyDamage(amount) {
 			continue
 		}
-		s.combat.WriteVitals(id, vitals)
+		s.run.combat.WriteVitals(id, vitals)
 		state := vitals.ActorState(uint32(id), meta.ownerID)
-		if brain, exists := s.combat.Brain(id); exists {
+		if brain, exists := s.run.combat.Brain(id); exists {
 			brain.Threat += amount
 			if state.HP <= 0 {
 				brain.Threat = 0
 				brain.RespawnAt = now.Add(brain.RespawnAfter)
 			}
-			s.combat.WriteBrain(id, brain)
+			s.run.combat.WriteBrain(id, brain)
 		}
 		frame, err := sceneObjectProperties(uint32(id), meta.ownerID, 0, npcCombatProperties(state))
 		if err != nil {
@@ -435,11 +435,11 @@ func (s *sceneLifecycle) selectedCombatTargetTransform() (worldcore.Transform, b
 	if s == nil {
 		return worldcore.Transform{}, false
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
 	transform, exists := s.npcTransform(id)
-	vitals, hasVitals := s.combat.Vitals(id)
+	vitals, hasVitals := s.run.combat.Vitals(id)
 	return transform, exists && hasVitals && vitals.HP > 0
 }
 
@@ -447,18 +447,18 @@ func (s *sceneLifecycle) applyNPCControl(ids []uint32, lifetime time.Duration, n
 	if s == nil || lifetime <= 0 || len(ids) == 0 {
 		return
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
 	until := now.Add(lifetime)
 	for _, rawID := range ids {
 		id := worldcore.EntityID(rawID)
-		brain, exists := s.combat.Brain(id)
+		brain, exists := s.run.combat.Brain(id)
 		if !exists {
 			continue
 		}
 		if until.After(brain.ControlledUntil) {
 			brain.ControlledUntil = until
-			s.combat.WriteBrain(id, brain)
+			s.run.combat.WriteBrain(id, brain)
 		}
 	}
 }

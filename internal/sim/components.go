@@ -224,6 +224,7 @@ type Brain struct {
 	RespawnAfter time.Duration
 
 	Threat          int32
+	TargetMember    uint32
 	NextAttack      time.Time
 	RespawnAt       time.Time
 	ControlledUntil time.Time

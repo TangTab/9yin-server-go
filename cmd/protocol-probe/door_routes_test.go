@@ -40,7 +40,7 @@ func TestDoorPackageRouteUsesInstalledDoorData(t *testing.T) {
 
 func TestPortalAtUsesMoveTargetRadiusAndCooldown(t *testing.T) {
 	world := newSceneLifecycle("test", nil)
-	world.spawnSceneEntityLocked(2, sim.NewVitals(10, 10), worldcore.Transform{}, sceneEntity{id: 2, ownerID: 1, portal: &scenePortalRoute{
+	world.spawnTestNPC(2, sim.NewVitals(10, 10), worldcore.Transform{}, sceneEntity{id: 2, ownerID: 1, portal: &scenePortalRoute{
 		trigger: role.Position{X: 100, Z: 200}, triggerRadius: 8, source: "DoorPackageID=13",
 	}}, nil)
 	now := time.Date(2026, 7, 26, 18, 30, 0, 0, time.UTC)

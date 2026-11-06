@@ -256,7 +256,7 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	player := newPlayerActor("tester", 0)
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
-	if err := world.begin("scene", "resource"); err != nil {
+	if err := world.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	registerTestCombatNPC(t, world, 91)
@@ -275,10 +275,10 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if inside, _ := world.combat.Vitals(91); inside.HP != 0 {
+	if inside, _ := world.run.combat.Vitals(91); inside.HP != 0 {
 		t.Fatalf("inside NPC HP=%d, want 0 after 1304 damage", inside.HP)
 	}
-	if outside, _ := world.combat.Vitals(92); outside.HP <= 0 {
+	if outside, _ := world.run.combat.Vitals(92); outside.HP <= 0 {
 		t.Fatalf("outside NPC HP=%d, want alive outside five metres", outside.HP)
 	}
 }
@@ -286,7 +286,7 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 func TestCompiledSectorDamageUsesC2S211CasterOrientation(t *testing.T) {
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
-	if err := world.begin("scene", "resource"); err != nil {
+	if err := world.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	registerTestCombatNPC(t, world, 93)
@@ -309,10 +309,10 @@ func TestCompiledSectorDamageUsesC2S211CasterOrientation(t *testing.T) {
 	if len(results) != 1 || results[0].id != 93 {
 		t.Fatalf("sector results=%+v, want only facing NPC 93", results)
 	}
-	if front, _ := world.combat.Vitals(93); front.HP != 900 {
+	if front, _ := world.run.combat.Vitals(93); front.HP != 900 {
 		t.Fatalf("front NPC HP=%d, want 900", front.HP)
 	}
-	if back, _ := world.combat.Vitals(94); back.HP != 1000 {
+	if back, _ := world.run.combat.Vitals(94); back.HP != 1000 {
 		t.Fatalf("back NPC HP=%d, want untouched 1000", back.HP)
 	}
 }
@@ -320,7 +320,7 @@ func TestCompiledSectorDamageUsesC2S211CasterOrientation(t *testing.T) {
 func TestCompiledRectangleDamageUsesLengthWidthAndOrientation(t *testing.T) {
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
-	if err := world.begin("scene", "resource"); err != nil {
+	if err := world.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	for _, id := range []uint32{95, 96, 97} {

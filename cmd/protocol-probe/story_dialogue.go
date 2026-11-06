@@ -81,8 +81,8 @@ func encodeDramaPrompt(prompt dramaPrompt) ([]byte, error) {
 }
 
 func (s *sceneLifecycle) sendNPCBubble(objectID, ownerID uint32, textID string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
 	entity, exists := s.npcMeta(worldcore.EntityID(objectID))
 	if !exists || entity.ownerID != ownerID {
 		return fmt.Errorf("NPC bubble target %s is not in this scene", sceneIdent(objectID, ownerID))
@@ -100,12 +100,13 @@ func (s *sceneLifecycle) sendNPCBubble(objectID, ownerID uint32, textID string) 
 // sendGMNPCBubble 以第一个稳定的场景 NPC 为目标。它是仅供 GM 使用的
 // 协议探针，不是游戏玩法使用的 NPC 选择规则。
 func (s *sceneLifecycle) sendGMNPCBubble(textID string) (string, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	// eachNPC 已按 EntityID 升序回调，取首个即最小 id。
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
+	// 按本视图可见集过滤后取最小 id：共享场景下全量注册的
+	// 最小 id NPC 可能远在本视口之外。
 	var first *sceneEntity
 	s.eachNPC(func(_ worldcore.EntityID, meta *sceneEntity, _ *worldcore.Transform) {
-		if first == nil {
+		if first == nil && s.npcVisible(meta.id) {
 			first = meta
 		}
 	})

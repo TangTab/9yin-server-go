@@ -200,7 +200,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 		machine.Close()
 		log.Printf("session=%d remote=%s closed phase=%s", machine.ID(), conn.RemoteAddr(), machine.Phase())
 	}()
-	world := newSceneLifecycle(conn.RemoteAddr().String(), link, npcFuncs)
+	world := newSharedSceneLifecycle(conn.RemoteAddr().String(), link, npcFuncs)
+	world.radius = npcRadius
 	defer world.close()
 	ctx := context.Background()
 	var accountKey role.AccountKey
@@ -283,7 +284,6 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 	// 更早的 0x0A 包属于客户端常规自定义/活动流量，
 	// 可能在首个 ServerAddObject 尚未处理完时就到达。
 	explicitSceneReady := false
-	activeNPCs := make(map[int]struct{})
 	lastPositionSave := time.Time{}
 	var pendingLocation *role.Location
 	defer func() {
@@ -541,17 +541,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			sitcrossAdvanced := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
 			combatRageAdvanced := player.combatRageTick()
+			// NPC 战斗模拟已上移到场景运行时的中央 tick；
+			// 连接循环只保留玩家侧结算与复活。
 			combatAdvanced := false
-			if runtime != nil {
-				combat, combatErr := world.combatTick(player, runtime.activeRole.Location.Position, now)
-				if combatErr != nil {
-					log.Printf("%s: run NPC combat tick: %v", conn.RemoteAddr(), combatErr)
-					return
-				}
-				combatAdvanced = combat.playerStateChanged
-				if combat.playerRevived {
-					log.Printf("%s: auto-revived player after NPC defeat", conn.RemoteAddr())
-				}
+			if player.reviveWhenDue(now) {
+				combatAdvanced = true
+				log.Printf("%s: auto-revived player after NPC defeat", conn.RemoteAddr())
 			}
 			var tickErr error
 			if advanced {
@@ -726,7 +721,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 			log.Printf("%s: created %d empty starter bag views", conn.RemoteAddr(), len(starterBagViews()))
 
-			if err := world.begin(activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource); err != nil {
+			if err := world.begin(activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource, sceneNPCs); err != nil {
 				log.Printf("%s: begin scene generation: %v", conn.RemoteAddr(), err)
 				return
 			}
@@ -745,19 +740,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			// 但在客户端就绪屏障之前不将其发送上线。
 			// 加载场景会清空客户端的原生对象表。因此在
 			// ClientReady 之前发送的对象会闪现一次随即被移除。
-			clear(activeNPCs)
-			nearbyCount, _, err := synchronizeNPCViewport(world, sceneNPCs, activeNPCs, activeRole.Location.Position, npcRadius)
-			if err != nil {
-				log.Printf("%s: register scene NPC viewport: %v", conn.RemoteAddr(), err)
-				return
-			}
+			world.attachMember(player, activeRole.Location.Position)
+			world.refreshVisibility(sceneNPCs, activeRole.Location.Position)
+			nearbyCount := countNPCsWithin(sceneNPCs, activeRole.Location.Position, npcRadius)
 			if err := machine.RoleChosen(); err != nil {
 				log.Printf("%s: complete choose-role transition: %v", conn.RemoteAddr(), err)
 				return
 			}
 			runtime = &sceneRuntime{
 				conn: link, world: world, machine: machine, registry: sceneRegistry,
-				staticNPCs: staticNPCs, radius: npcRadius, activeNPCs: activeNPCs,
+				staticNPCs: staticNPCs, radius: npcRadius,
 				player: player, activeRole: activeRole, npcCatalog: sceneNPCs,
 			}
 			gmSession = gm.attach(machine.ID(), conn.RemoteAddr().String(), activeRole, roleFaction(activeRole.Appearance.Values), starterSilver, player.skillSP())
@@ -995,11 +987,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				}
 				location := selected.Location
 				location.Position = role.Position{X: x, Y: y, Z: z, Orient: orient}
-				nearbyCount, changed, syncErr := synchronizeNPCViewport(world, sceneNPCs, activeNPCs, location.Position, npcRadius)
-				if syncErr != nil {
-					log.Printf("%s: synchronize moving NPC viewport: %v", conn.RemoteAddr(), syncErr)
-					return
-				}
+				changed := world.updateMemberPosition(location.Position, sceneNPCs)
+				nearbyCount := countNPCsWithin(sceneNPCs, location.Position, npcRadius)
 				if changed {
 					if reconcileErr := world.reconcileViewport(); reconcileErr != nil {
 						log.Printf("%s: reconcile moving NPC viewport: %v", conn.RemoteAddr(), reconcileErr)
@@ -1312,58 +1301,11 @@ type npcSpawn struct {
 	x, y, z, orient float32
 }
 
-func synchronizeNPCViewport(world *sceneLifecycle, catalog []npcSpawn, active map[int]struct{}, position role.Position, radius float32) (int, bool, error) {
-	radiusSquared := radius * radius
-	desired := make(map[int]struct{})
-	for i := range catalog {
-		// EventNpc 实例是任务/事件触发器，而非场景常驻
-		// 居民。正式服务器只在该玩家的任务/事件状态
-		// 拥有某个 EventNpc 时才把它下发给玩家。本地服务器尚未
-		// 持久化这种归属关系，因此安全的默认做法是完全省略
-		// 该对象：没有 0x0D，客户端就绝不会为它构造
-		// 可视对象。待实现任务状态后，这个辅助函数是选择性地
-		// 允许匹配 EventNpc 重新进入此视口的
-		// 唯一准入点。
-		if !npcVisibleInLocalViewport(catalog[i]) {
-			continue
-		}
-		dx := catalog[i].x - position.X
-		dz := catalog[i].z - position.Z
-		if dx*dx+dz*dz <= radiusSquared {
-			desired[i] = struct{}{}
-		}
-	}
-	changed := false
-	for i := range active {
-		if _, keep := desired[i]; keep {
-			continue
-		}
-		if err := world.unregister(uint32(i + 2)); err != nil {
-			return len(active), changed, err
-		}
-		delete(active, i)
-		changed = true
-	}
-	for i := range desired {
-		if _, exists := active[i]; exists {
-			continue
-		}
-		npc := catalog[i].clone()
-		npc.synchronizeTransform()
-		if err := world.registerNPC(uint32(i+2), npc); err != nil {
-			return len(active), changed, err
-		}
-		active[i] = struct{}{}
-		changed = true
-	}
-	return len(active), changed, nil
-}
-
 func countNPCsWithin(catalog []npcSpawn, position role.Position, radius float32) int {
 	radiusSquared := radius * radius
 	count := 0
 	for i := range catalog {
-		if !npcVisibleInLocalViewport(catalog[i]) {
+		if !npcSpawnEligible(catalog[i]) {
 			continue
 		}
 		dx := catalog[i].x - position.X
@@ -1373,16 +1315,6 @@ func countNPCsWithin(catalog []npcSpawn, position role.Position, radius float32)
 		}
 	}
 	return count
-}
-
-// npcVisibleInLocalViewport 刻意充当服务器侧的准入闸门。
-// 现代 creator 模板会将真实的触发器对象编码为
-// ScriptClass=EventNpc（例如 EventNpc_gmpzyb_028 被描述为
-// 古墓派事件触发点）。只有在服务器将它们绑定到
-// 玩家的活动任务/事件之后才有意义。本地角色模型中尚不存在
-// 这种绑定，因此 EventNpc 没有合格的观看者。
-func npcVisibleInLocalViewport(npc npcSpawn) bool {
-	return !strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc")
 }
 
 func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error) {

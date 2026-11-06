@@ -688,7 +688,7 @@ func baseMotionProperties(motion playerMotion) []clientdata.IndexedProperty {
 		// 现代 FxGameLogic 的 FallDownManager 会从本地玩家对象查询
 		// DropHeightPub。它的兜底值只有 5.0 个世界单位；这里刻意使用
 		// 偏高的本地测试安全阈值，让普通的地形降落退出回着地动作，而非
-		// 进入倒地动作。
+		// 进入倒地动作。 TODO: 后面改GM参数控制，默认 5.0
 		{Index: 170, Name: "DropHeightPub", Value: clientdata.Float32Value(100000)},
 	}
 }

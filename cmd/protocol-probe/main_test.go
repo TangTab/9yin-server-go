@@ -12,7 +12,6 @@ import (
 	"unicode/utf16"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
-	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
 	"github.com/local/9yin-go-server/internal/transport"
 	worldcore "github.com/local/9yin-go-server/internal/world"
@@ -165,30 +164,23 @@ func TestEventNPCIsNotMaterializedWithoutTaskOwnership(t *testing.T) {
 	event.resolved.ScriptClass = "EventNpc"
 	event.x = 2
 
-	if npcVisibleInLocalViewport(event) {
+	if npcSpawnEligible(event) {
 		t.Fatal("EventNpc without local task ownership must be excluded")
 	}
-	if !npcVisibleInLocalViewport(ordinary) {
-		t.Fatal("ordinary NPC must remain visible")
+	if !npcSpawnEligible(ordinary) {
+		t.Fatal("ordinary NPC must remain eligible")
 	}
 
+	// 共享场景的准入闸门在目录装载层：EventNpc 绝不进入世界。
 	lifecycle := newSceneLifecycle("test", discardMessageConnection{})
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", []npcSpawn{ordinary, event}); err != nil {
 		t.Fatal(err)
 	}
-	active := make(map[int]struct{})
-	count, changed, err := synchronizeNPCViewport(lifecycle, []npcSpawn{ordinary, event}, active, role.Position{X: 1}, 10)
-	if err != nil {
-		t.Fatal(err)
+	if _, ok := lifecycle.npcMetaByID(2); !ok {
+		t.Fatal("ordinary NPC was not registered into the run")
 	}
-	if !changed || count != 1 {
-		t.Fatalf("visible viewport count=%d changed=%t, want one ordinary NPC", count, changed)
-	}
-	if _, ok := active[0]; !ok {
-		t.Fatal("ordinary NPC was not registered")
-	}
-	if _, ok := active[1]; ok {
-		t.Fatal("EventNpc entered active viewport")
+	if _, ok := lifecycle.npcMetaByID(3); ok {
+		t.Fatal("EventNpc entered the shared scene world")
 	}
 }
 
@@ -204,15 +196,15 @@ func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
 		t.Fatal(err)
 	}
 	world := newSceneLifecycle("pipe", link)
-	if err := world.begin("scene", "resource"); err != nil {
+	if err := world.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	want := []byte{0x0D, 2, 0, 0, 0}
 	entity := testWorldEntity(2)
-	if err := world.scene.Add(entity); err != nil {
+	if err := world.run.scene.Add(entity); err != nil {
 		t.Fatal(err)
 	}
-	world.spawnSceneEntityLocked(2, sim.NewVitals(10, 10), worldcore.Transform{}, sceneEntity{id: 2, payload: want}, nil)
+	world.spawnTestNPC(2, sim.NewVitals(10, 10), worldcore.Transform{}, sceneEntity{id: 2, payload: want}, nil)
 
 	if err := world.clientReady(); err != nil {
 		t.Fatalf("ClientReady arm: %v", err)
@@ -236,7 +228,7 @@ func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
 	if err := <-done; err != nil {
 		t.Fatalf("post-ready client activity: %v", err)
 	}
-	if delta := world.viewport.Plan(world.scene.Snapshot()); len(delta.Adds)+len(delta.Updates)+len(delta.Removes) != 0 {
+	if delta := world.viewport.Plan(world.run.scene.Snapshot()); len(delta.Adds)+len(delta.Updates)+len(delta.Removes) != 0 {
 		t.Fatalf("scene object was not committed to viewport: %#v", delta)
 	}
 }
@@ -251,14 +243,14 @@ func (discardMessageConnection) WriteFrame([]byte) error { return nil }
 
 func TestSceneLifecycleRejectsDuplicateIdentityWithoutPanic(t *testing.T) {
 	lifecycle := newSceneLifecycle("test", discardMessageConnection{})
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	npc := testNPCSpawn()
-	if err := lifecycle.registerNPC(2, npc); err != nil {
+	if err := lifecycle.registerNPCOnRun(2, npc); err != nil {
 		t.Fatal(err)
 	}
-	if err := lifecycle.registerNPC(2, npc); !errors.Is(err, worldcore.ErrDuplicateEntity) {
+	if err := lifecycle.registerNPCOnRun(2, npc); !errors.Is(err, worldcore.ErrDuplicateEntity) {
 		t.Fatalf("duplicate register error = %v", err)
 	}
 }
@@ -318,10 +310,10 @@ func TestServerMovingLayout(t *testing.T) {
 func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
+	if err := lifecycle.registerNPCOnRun(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: 3494, OwnerID: 1}); err != nil {
@@ -356,13 +348,13 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 func TestObjectRequestSelectsCombatNPCWithoutDialogue(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	npc := testNPCSpawn()
 	npc.resolved.ConfigID = "AttackNPC_test"
 	npc.resolved.ScriptClass = "AttackNpc"
-	if err := lifecycle.registerNPC(4455, npc); err != nil {
+	if err := lifecycle.registerNPCOnRun(4455, npc); err != nil {
 		t.Fatal(err)
 	}
 	meta4455, _ := lifecycle.npcMeta(4455)
@@ -390,12 +382,12 @@ func TestObjectRequestSelectsCombatNPCWithoutDialogue(t *testing.T) {
 func TestObjectRequestDoesNotFabricateDialogueForUnconfiguredCivilian(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
 	npc := testNPCSpawn()
 	npc.resolved.Extensions = nil
-	if err := lifecycle.registerNPC(4456, npc); err != nil {
+	if err := lifecycle.registerNPCOnRun(4456, npc); err != nil {
 		t.Fatal(err)
 	}
 	meta4456, _ := lifecycle.npcMeta(4456)
@@ -417,10 +409,10 @@ func TestObjectRequestDoesNotFabricateDialogueForUnconfiguredCivilian(t *testing
 func TestObjectRequestOpensDepotViewAfterCinematicSelection(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
+	if err := lifecycle.registerNPCOnRun(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
 	entity, _ := lifecycle.npcMeta(3494)
@@ -449,10 +441,10 @@ func TestObjectRequestOpensDepotViewAfterCinematicSelection(t *testing.T) {
 func TestObjectRequestOpensShopViewAfterCinematicSelection(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
+	if err := lifecycle.registerNPCOnRun(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
 	entity, _ := lifecycle.npcMeta(3494)
@@ -494,10 +486,10 @@ func TestObjectRequestOpensShopViewAfterCinematicSelection(t *testing.T) {
 func TestMultiServiceNPCUsesNativeMenuThenSelectedShopView(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
-	if err := lifecycle.begin("scene", "resource"); err != nil {
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := lifecycle.registerNPC(3494, testNPCSpawn()); err != nil {
+	if err := lifecycle.registerNPCOnRun(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
 	entity, _ := lifecycle.npcMeta(3494)

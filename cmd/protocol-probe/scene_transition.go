@@ -24,7 +24,9 @@ func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 	entry = appendStringProperty(entry, 7, scene.Config)
 	entry = appendStringProperty(entry, 8, scene.Resource)
 	entry = binary.LittleEndian.AppendUint16(entry, 99)
-	entry = binary.LittleEndian.AppendUint32(entry, 1000000)
+	// MaxVisuals 官方语义=最大可见对象数（u16，官方真服发 100；capture-fxgame-op2 0x0B 实证），取值范围是 0 到 65535（即 0 到 2¹⁶-1）?,
+	// 这里设置 1000000 ?
+	entry = binary.LittleEndian.AppendUint32(entry, 200)
 	return conn.WriteFrame(entry)
 }
 
@@ -84,7 +86,6 @@ type sceneRuntime struct {
 	registry   *sceneNPCRegistry
 	staticNPCs []npcSpawn
 	radius     float32
-	activeNPCs map[int]struct{}
 	player     *playerActor
 	activeRole *role.RoleSnapshot
 	npcCatalog []npcSpawn
@@ -133,7 +134,9 @@ func (r *sceneRuntime) SwitchScene(destination sceneDestination) error {
 		r.activeRole.Location = previous
 		return fmt.Errorf("write ExitScene: %w", err)
 	}
-	if err := r.world.begin(destination.location.Scene.Config, destination.location.Scene.Resource); err != nil {
+	if err := r.world.begin(destination.location.Scene.Config, destination.location.Scene.Resource, catalog); err != nil {
+		// 共享场景下 begin 失败只回滚本视图的位置与世界挂靠。
+		r.activeRole.Location = previous
 		return fmt.Errorf("begin replacement scene: %w", err)
 	}
 	// 实测客户端抓包：EntryScene 在 ExitScene 之后 12ms 到达。这正处在
@@ -146,10 +149,8 @@ func (r *sceneRuntime) SwitchScene(destination sceneDestination) error {
 	if err := sendPlayerAddObject(r.conn, r.player, destination.location.Position, resolveRoleVisual(r.activeRole.Appearance.Values)); err != nil {
 		return fmt.Errorf("write player re-entry archive: %w", err)
 	}
-	clear(r.activeNPCs)
-	if _, _, err := synchronizeNPCViewport(r.world, catalog, r.activeNPCs, destination.location.Position, r.radius); err != nil {
-		return fmt.Errorf("register replacement NPC viewport: %w", err)
-	}
+	r.world.attachMember(r.player, destination.location.Position)
+	r.world.refreshVisibility(catalog, destination.location.Position)
 	r.npcCatalog = catalog
 	r.awaitingStableReentryReady = true
 	return nil
@@ -171,11 +172,7 @@ func (r *sceneRuntime) TeleportWithinScene(position role.Position) error {
 		r.activeRole.Location.Position = previous
 		return fmt.Errorf("write same-scene ServerLocation: %w", err)
 	}
-	_, changed, err := synchronizeNPCViewport(r.world, r.npcCatalog, r.activeNPCs, position, r.radius)
-	if err != nil {
-		return fmt.Errorf("synchronize teleported NPC viewport: %w", err)
-	}
-	if changed {
+	if changed := r.world.updateMemberPosition(position, r.npcCatalog); changed {
 		if err := r.world.reconcileViewport(); err != nil {
 			return fmt.Errorf("reconcile teleported NPC viewport: %w", err)
 		}

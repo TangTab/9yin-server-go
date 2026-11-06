@@ -82,51 +82,81 @@ func (n npcSpawn) float32Property(name string) float32 {
 	return n.resolved.Properties[name].Value.F32
 }
 
-// combatTick 在所属连接的循环上每秒执行一次。它只
-// 发送当前客户端已会消费的包：NPC 0x20/0x1F 移动
-// 以及普通的 0x10 属性包。不涉及任何已过时的 S->C 自定义消息。
-func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position, now time.Time) (combatTickResult, error) {
-	if s == nil || player == nil {
-		return combatTickResult{}, nil
-	}
-	result := combatTickResult{}
-	if player.expireInnerPowerPassive(now) {
-		result.playerStateChanged = true
-	}
-	if player.reviveWhenDue(now) {
-		result.playerStateChanged = true
-		result.playerRevived = true
-	}
-	playerState := player.stateSnapshot()
-	if playerState.HP <= 0 {
-		return result, nil
-	}
+// combatTick 是场景运行时的每秒权威 NPC 模拟。它只发送当前客户端
+// 已会消费的包：NPC 0x20/0x1F 移动以及普通的 0x10 属性包。
+// 仇恨目标取"最近存活成员"并经 Brain.TargetMember 粘性保持，
+// 直到目标死亡或被拉出栓绳距离。
+//
+// 锁内结算（run.mu → p.mu，锁序与全局规则一致），帧写入在锁外
+// 经各成员视图的 conn 完成（transport 写帧线程安全）。
+type combatTickOutcome struct {
+	members []*sceneMember
+	moves   []npcMoveUpdate
+	updates []npcPropertyUpdate
+	changed map[uint32]bool
+}
 
-	s.mu.Lock()
-	if s.closed || !s.combatActive || s.combat.CombatCount() == 0 {
-		s.mu.Unlock()
-		return result, nil
+func (r *sceneRun) combatTick(now time.Time) {
+	outcome := r.simulateLocked(now)
+	if outcome == nil {
+		return
+	}
+	// 锁外帧写入：受击成员的 vitalUpdate 与 NPC 移动/属性帧扇出。
+	for _, member := range outcome.members {
+		if outcome.changed[member.objectID] {
+			if frame, err := member.player.vitalUpdate(); err == nil {
+				if err := member.view.conn.WriteFrame(frame); err != nil {
+					log.Printf("%s: publish combat vitals: %v", member.view.remote, err)
+				}
+			} else {
+				log.Printf("%s: encode combat vitals: %v", member.view.remote, err)
+			}
+		}
+	}
+	r.broadcastNPCFrames(outcome.members, outcome.moves, outcome.updates)
+}
+
+// simulateLocked 是 combatTick 的锁内结算段，独立出来供测试路径
+// 复用（测试只消费 NPC 帧，不写玩家 vital 帧）。
+func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
+	r.mu.Lock()
+	if r.closed || len(r.members) == 0 || r.combat.CombatCount() == 0 {
+		r.mu.Unlock()
+		return nil
+	}
+	members := r.sortedMembersLocked()
+	memberByID := make(map[uint32]*sceneMember, len(members))
+	targets := make(map[uint32]worldcore.Transform, len(members))
+	for _, member := range members {
+		memberByID[member.objectID] = member
+		if !member.active || member.player == nil {
+			continue
+		}
+		// 死亡成员不是仇恨目标；其复活由属主连接循环负责。
+		if member.player.stateSnapshot().HP <= 0 {
+			continue
+		}
+		targets[member.objectID] = worldcore.Transform{
+			X: member.position.X, Y: member.position.Y, Z: member.position.Z, Orient: member.position.Orient,
+		}
 	}
 	moves := make([]npcMoveUpdate, 0, combatTickMaxAggressors)
 	updates := make([]npcPropertyUpdate, 0, 2)
 	aggressors := 0
-	threatened := false
-	// eachCombatNPCFull 以 EntityID 升序一次遍历交付全部组件指针；
-	// 分支逻辑与迁移前的 map 版本逐行等价，就地修改即生效。
-	var loopErr error
-	s.eachCombatNPCFull(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
-		if loopErr != nil {
-			return
-		}
+	threatened := make(map[uint32]bool, len(targets))
+	// eachCombatNPCFullLocked 以 EntityID 升序一次遍历交付全部组件指针；
+	// 分支逻辑与单连接时代逐行等价，就地修改即生效。
+	r.eachCombatNPCFullLocked(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
 		actorState := vitals.ActorState(meta.id, meta.ownerID)
 		if actorState.HP <= 0 {
 			if !state.RespawnAt.IsZero() && !now.Before(state.RespawnAt) {
 				vitals.Revive()
 				state.Threat = 0
+				state.TargetMember = 0
 				state.NextAttack = time.Time{}
 				state.RespawnAt = time.Time{}
-				if err := s.setNPCTransformLocked(id, state.Home); err != nil {
-					loopErr = err
+				if err := r.setNPCTransformLocked(id, state.Home); err != nil {
+					log.Printf("scene %s/%s: respawn transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
 					return
 				}
 				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
@@ -135,18 +165,34 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 			return
 		}
 
-		distance := horizontalDistance(*transform, worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient})
-		if state.Threat == 0 && distance <= state.AggroRange {
+		if state.Threat == 0 || state.TargetMember == 0 {
+			state.TargetMember = nearestTargetLocked(targets, *transform, state.AggroRange)
+			if state.TargetMember == 0 {
+				return
+			}
 			state.Threat = 1
 		}
-		if state.Threat == 0 {
+		position, engaged := targets[state.TargetMember]
+		if !engaged {
+			// 目标死亡或离场：清除仇恨并按栓绳规则回位。
+			state.Threat = 0
+			state.TargetMember = 0
+			if horizontalDistance(*transform, state.Home) > 0.25 {
+				if err := r.setNPCTransformLocked(id, state.Home); err != nil {
+					log.Printf("scene %s/%s: leash transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
+					return
+				}
+				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
+			}
 			return
 		}
+		distance := horizontalDistance(*transform, position)
 		if distance > state.ChaseRange {
 			state.Threat = 0
+			state.TargetMember = 0
 			if horizontalDistance(*transform, state.Home) > 0.25 {
-				if err := s.setNPCTransformLocked(id, state.Home); err != nil {
-					loopErr = err
+				if err := r.setNPCTransformLocked(id, state.Home); err != nil {
+					log.Printf("scene %s/%s: leash transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
 					return
 				}
 				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
@@ -155,7 +201,7 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 		}
 		// 该 NPC 仍持有有效目标，即便它此刻正在等待
 		// 攻击冷却结束，或已超出本 tick 的攻击者数量上限。
-		threatened = true
+		threatened[state.TargetMember] = true
 		if now.Before(state.ControlledUntil) {
 			return
 		}
@@ -163,10 +209,11 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 			return
 		}
 		aggressors++
+		target := memberByID[state.TargetMember]
 		if distance > state.AttackRange {
-			destination := stepToward(*transform, worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient}, minFloat32(state.MoveSpeed, distance-state.AttackRange))
-			if err := s.setNPCTransformLocked(id, destination); err != nil {
-				loopErr = err
+			destination := stepToward(*transform, position, minFloat32(state.MoveSpeed, distance-state.AttackRange))
+			if err := r.setNPCTransformLocked(id, destination); err != nil {
+				log.Printf("scene %s/%s: chase transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
 				return
 			}
 			moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: destination})
@@ -176,95 +223,161 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 			return
 		}
 		state.NextAttack = now.Add(state.AttackEvery)
-		outcome := player.resolveNPCAttack(meta.id, state.Damage, now)
+		outcome := target.player.resolveNPCAttack(meta.id, state.Damage, now)
+		remote := target.view.remote
 		if outcome.innerPowerTriggered {
-			result.playerStateChanged = true
-			log.Printf("%s: inner-power incoming passive triggered id=%d config=%s", s.remote, meta.id, meta.configID)
+			log.Printf("%s: inner-power incoming passive triggered id=%d config=%s", remote, meta.id, meta.configID)
 		}
 		if outcome.dodged {
 			if outcome.innerPowerHeal > 0 {
-				playerState := player.stateSnapshot()
-				log.Printf("%s: NPC attack dodged id=%d config=%s inner-power dodge-heal=%d player_hp=%d/%d", s.remote, meta.id, meta.configID, outcome.innerPowerHeal, playerState.HP, playerState.MaxHP)
+				playerState := target.player.stateSnapshot()
+				log.Printf("%s: NPC attack dodged id=%d config=%s inner-power dodge-heal=%d player_hp=%d/%d", remote, meta.id, meta.configID, outcome.innerPowerHeal, playerState.HP, playerState.MaxHP)
 			} else {
-				log.Printf("%s: NPC attack dodged id=%d config=%s", s.remote, meta.id, meta.configID)
+				log.Printf("%s: NPC attack dodged id=%d config=%s", remote, meta.id, meta.configID)
 			}
 		} else if outcome.stateChanged {
-			result.playerStateChanged = true
-			playerState := player.stateSnapshot()
-			log.Printf("%s: NPC attack id=%d config=%s damage=%d player_hp=%d/%d", s.remote, meta.id, meta.configID, state.Damage, playerState.HP, playerState.MaxHP)
+			playerState := target.player.stateSnapshot()
+			log.Printf("%s: NPC attack id=%d config=%s damage=%d player_hp=%d/%d", remote, meta.id, meta.configID, state.Damage, playerState.HP, playerState.MaxHP)
 		} else if outcome.parried {
-			log.Printf("%s: NPC attack parried id=%d config=%s", s.remote, meta.id, meta.configID)
-		}
-		if outcome.dead {
-			result.playerStateChanged = true
+			log.Printf("%s: NPC attack parried id=%d config=%s", remote, meta.id, meta.configID)
 		}
 	})
-	if loopErr != nil {
-		s.mu.Unlock()
-		return result, loopErr
+	// 玩家侧战斗临场感（Fighting/Normal 迁移）按成员分别结算。
+	changed := make(map[uint32]bool, len(members))
+	for _, member := range members {
+		if member.player == nil {
+			continue
+		}
+		if member.player.setCombatPresence(threatened[member.objectID]) {
+			changed[member.objectID] = true
+		}
 	}
-	if player.setCombatPresence(threatened) {
-		result.playerStateChanged = true
-	}
-	s.mu.Unlock()
+	r.mu.Unlock()
+	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed}
+}
 
-	for _, move := range moves {
-		if err := s.conn.WriteFrame(serverMoving(move.id, move.ownerID, motionFromDest(move.destination))); err != nil {
-			return result, fmt.Errorf("combat move NPC %d: %w", move.id, err)
-		}
-		// ServerLocation 在当前客户端中是到达确认。不要
-		// 在同一个战斗 tick 中让它与 ServerMoving 成对发送：那样会使
-		// actor 瞬移到目的地而不是播放移动动作。之后
-		// 的追击目的地会在该定时器执行之前更改权威
-		// transform，从而令此次确认失效。
-		s.scheduleCombatMoveArrival(move, time.Second)
-	}
-	for _, update := range updates {
-		frame, err := sceneObjectProperties(update.id, update.ownerID, 0, update.properties)
-		if err != nil {
-			return result, err
-		}
-		if err := s.conn.WriteFrame(frame); err != nil {
-			return result, fmt.Errorf("combat NPC state %d: %w", update.id, err)
+// nearestTargetLocked 返回 aggroRange 内最近的存活目标；没有则返回 0。
+func nearestTargetLocked(targets map[uint32]worldcore.Transform, from worldcore.Transform, aggroRange float32) uint32 {
+	best := uint32(0)
+	bestDistance := aggroRange
+	for memberID, position := range targets {
+		distance := horizontalDistance(from, position)
+		if distance <= bestDistance {
+			// 同距离时取成员 ID 较小者，保证线上行为确定。
+			if distance == bestDistance && best != 0 && memberID > best {
+				continue
+			}
+			best = memberID
+			bestDistance = distance
 		}
 	}
-	return result, nil
+	return best
+}
+
+// combatTickForTest 保留单视图独占场景的测试语义：把玩家登记为
+// 唯一成员（位置即其坐标）后同步驱动一次场景 tick。
+func (s *sceneLifecycle) combatTickForTest(player *playerActor, position role.Position, now time.Time) combatTickResult {
+	if s == nil || player == nil {
+		return combatTickResult{}
+	}
+	before := player.stateSnapshot()
+	s.run.attachMember(&sceneMember{objectID: s.memberID, player: player, view: s, position: position, active: true})
+	// 独占测试视图没有目录驱动的可见集；按旧行为把全部已注册
+	// NPC 视为可见（帧无过滤直发）。
+	s.run.mu.Lock()
+	s.run.eachNPCLocked(func(id worldcore.EntityID, meta *sceneEntity, _ *worldcore.Transform) {
+		s.mu.Lock()
+		s.visibleNPCs[meta.id] = struct{}{}
+		s.mu.Unlock()
+	})
+	s.run.mu.Unlock()
+	outcome := s.run.simulateLocked(now)
+	if outcome != nil {
+		s.run.broadcastNPCFrames(outcome.members, outcome.moves, outcome.updates)
+	}
+	after := player.stateSnapshot()
+	return combatTickResult{playerStateChanged: after.LogicState != before.LogicState || after.HP != before.HP}
 }
 
 // scheduleCombatMoveArrival 只在客户端拥有一个移动间隔
 // 来朝目的地播放动画之后，才确认最终位置。transform
 // 比较即是取消令牌：持续追击每 tick 都会更新它，
 // 因此过期的定时器绝不会确认一个陈旧的目的地。
-func (s *sceneLifecycle) scheduleCombatMoveArrival(move npcMoveUpdate, delay time.Duration) {
+// 定时器归场景运行时所有（epoch 防护），确认帧扇出给
+// 当前视口内可见该 NPC 的成员。
+func (r *sceneRun) scheduleCombatMoveArrival(members []*sceneMember, move npcMoveUpdate, delay time.Duration) {
 	if delay <= 0 {
 		delay = time.Second
 	}
-	s.mu.Lock()
-	if s.closed {
-		s.mu.Unlock()
+	r.mu.Lock()
+	if r.closed {
+		r.mu.Unlock()
 		return
 	}
-	epoch := s.epoch
+	epoch := r.epoch
 	timer := time.AfterFunc(delay, func() {
-		s.mu.Lock()
-		defer s.mu.Unlock()
-		if s.closed || s.epoch != epoch {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		if r.closed || r.epoch != epoch {
 			return
 		}
-		meta, exists := s.npcMeta(worldcore.EntityID(move.id))
+		meta, exists := r.npcMeta(worldcore.EntityID(move.id))
 		if !exists || meta.ownerID != move.ownerID {
 			return
 		}
-		transform, transformOK := s.npcTransform(worldcore.EntityID(move.id))
+		transform, transformOK := r.npcTransform(worldcore.EntityID(move.id))
 		if !transformOK || !sameCombatTransform(transform, move.destination) {
 			return
 		}
-		if err := s.conn.WriteFrame(serverLocation(meta.id, meta.ownerID, transform)); err != nil {
-			log.Printf("%s: confirm combat NPC move id=%d: %v", s.remote, meta.id, err)
+		frame := serverLocation(meta.id, meta.ownerID, transform)
+		for _, member := range members {
+			if member.view == nil || !member.view.npcVisible(move.id) {
+				continue
+			}
+			if err := member.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: confirm combat NPC move id=%d: %v", member.view.remote, meta.id, err)
+			}
 		}
 	})
-	s.timers = append(s.timers, timer)
-	s.mu.Unlock()
+	r.timers = append(r.timers, timer)
+	r.mu.Unlock()
+}
+
+// broadcastNPCFrames 在锁外把战斗 tick 产出的 NPC 移动/属性帧
+// 扇出给视口内可见对应 NPC 的成员，并排布到达确认定时器。
+func (r *sceneRun) broadcastNPCFrames(members []*sceneMember, moves []npcMoveUpdate, updates []npcPropertyUpdate) {
+	for _, move := range moves {
+		frame := serverMoving(move.id, move.ownerID, motionFromDest(move.destination))
+		for _, member := range members {
+			if member.view == nil || !member.view.npcVisible(move.id) {
+				continue
+			}
+			if err := member.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: combat move NPC %d: %v", member.view.remote, move.id, err)
+			}
+		}
+		// ServerLocation 在当前客户端中是到达确认。不要
+		// 在同一个战斗 tick 中让它与 ServerMoving 成对发送：那样会使
+		// actor 瞬移到目的地而不是播放移动动作。之后
+		// 的追击目的地会在该定时器执行之前更改权威
+		// transform，从而令此次确认失效。
+		r.scheduleCombatMoveArrival(members, move, time.Second)
+	}
+	for _, update := range updates {
+		frame, err := sceneObjectProperties(update.id, update.ownerID, 0, update.properties)
+		if err != nil {
+			log.Printf("scene %s/%s: encode combat NPC state %d: %v", r.key.config, r.key.resource, update.id, err)
+			continue
+		}
+		for _, member := range members {
+			if member.view == nil || !member.view.npcVisible(update.id) {
+				continue
+			}
+			if err := member.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: combat NPC state %d: %v", member.view.remote, update.id, err)
+			}
+		}
+	}
 }
 
 func sameCombatTransform(a, b worldcore.Transform) bool {
@@ -275,11 +388,14 @@ func sameCombatTransform(a, b worldcore.Transform) bool {
 		math.Abs(float64(a.Orient-b.Orient)) < epsilon
 }
 
-func (s *sceneLifecycle) setNPCTransformLocked(id worldcore.EntityID, destination worldcore.Transform) error {
-	if _, exists := s.npcMeta(id); !exists {
+// setNPCTransformLocked 更新 NPC 权威坐标：可视权威 Scene 实体
+// （revision 抬升，供各视图下一次 reconcile 出 Updates）与
+// Transform 组件同步写。调用方必须已持有 r.mu。
+func (r *sceneRun) setNPCTransformLocked(id worldcore.EntityID, destination worldcore.Transform) error {
+	if _, exists := r.npcMeta(id); !exists {
 		return fmt.Errorf("set transform for unknown NPC %d", id)
 	}
-	current, err := s.scene.Get(id)
+	current, err := r.scene.Get(id)
 	if err != nil {
 		return err
 	}
@@ -292,10 +408,10 @@ func (s *sceneLifecycle) setNPCTransformLocked(id worldcore.EntityID, destinatio
 			return err
 		}
 	}
-	if err := s.scene.Replace(current.Entity); err != nil {
+	if err := r.scene.Replace(current.Entity); err != nil {
 		return err
 	}
-	s.writeNpcTransform(id, destination)
+	r.writeNpcTransform(id, destination)
 	return nil
 }
 
