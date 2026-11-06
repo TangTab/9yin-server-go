@@ -95,7 +95,7 @@ func oneRoleLoginSuccess(now time.Time, name string, appearance []string, sceneC
 	fields[25] = bookIntroKey(get(0, "book1"))
 	fields[31] = "0"
 	fields[32] = get(0, "book1")
-	fields[33] = get(4, `obj\char\b_hair\b_hair1`)
+		fields[33] = visual.hair // 客户端 form_roles.lua [34]=hair，随性别取默认发型
 	fields[35] = "0"
 	rolePara := strings.Join(fields, ",")
 	appendWord(6)
