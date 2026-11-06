@@ -157,8 +157,8 @@ func TestSitcrossUsesCapturedStartArgumentAndNormalPropertyUpdate(t *testing.T) 
 		t.Fatalf("expected one normal 0x10 property update, got %x", frames)
 	}
 
-	// Holding the key yields repeated 240,1 packets.  It must stay in state
-	// 102 instead of behaving as a toggle.
+	// 按住按键会产生重复的 240,1 数据包。此时必须保持在状态
+	// 102，而不是表现为切换开关。
 	handled, err = handleSitcrossCustom(conn, player, start, "test")
 	if err != nil || !handled || len(conn.Frames()) != 1 {
 		t.Fatalf("duplicate handled=%t err=%v frames=%d", handled, err, len(conn.Frames()))
@@ -170,9 +170,9 @@ func TestSitcrossUsesCapturedStartArgumentAndNormalPropertyUpdate(t *testing.T) 
 		t.Fatalf("stop handled=%t err=%v state=%d frames=%d", handled, err, player.actor.Snapshot().LogicState, len(conn.Frames()))
 	}
 
-	// Live client capture: a hostile interruption emits 240,2 rather than the
-	// older cancellation value 0. It must stop sitting without closing the
-	// connection.
+	// 真实客户端抓包：敌方打断会发出 240,2 而不是旧版的
+	// 取消值 0。此时必须停止打坐，
+	// 而不能关闭连接。
 	handled, err = handleSitcrossCustom(conn, player, start, "test")
 	if err != nil || !handled || player.actor.Snapshot().LogicState != entity.LogicStateSitcross {
 		t.Fatalf("second start handled=%t err=%v state=%d", handled, err, player.actor.Snapshot().LogicState)

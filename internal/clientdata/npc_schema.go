@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// WireType is the type tag used by the visible-property schema negotiated in
-// the scene bootstrap. Its values intentionally match the current protocol.
+// WireType 是场景引导阶段协商的可见属性 schema 所使用的类型标记。
+// 其取值有意与当前协议保持一致。
 type WireType uint8
 
 const (
@@ -16,8 +16,8 @@ const (
 	WireFloat32    WireType = 5
 	WireString     WireType = 7
 	WireWideString WireType = 8
-	// WireObject is the native 64-bit scene-object reference.  The client
-	// uses it for properties such as the player's LastObject selection.
+	// WireObject 是原生的 64 位场景对象引用。客户端将其
+	// 用于玩家 LastObject 选中目标之类的属性。
 	WireObject WireType = 9
 )
 
@@ -194,8 +194,8 @@ var visibleNPCCompatV1 = mustSchema("visible-npc-compat-v1", []FieldSpec{
 	{98, "RefreshAtOnce", WireInt32},
 })
 
-// VisibleNPCCompatV1 returns a copy of the 99-field schema accepted by the
-// current modern client. Callers may retain it without sharing mutable slices.
+// VisibleNPCCompatV1 返回当前新版客户端所接受的 99 字段 schema 的副本。
+// 调用方可以放心持有它，不会共享可变切片。
 func VisibleNPCCompatV1() Schema {
 	copySchema, err := NewSchema(visibleNPCCompatV1.ID, visibleNPCCompatV1.Fields)
 	if err != nil {
@@ -206,16 +206,16 @@ func VisibleNPCCompatV1() Schema {
 
 var visibleNPCModernV1 = func() Schema {
 	fields := append([]FieldSpec(nil), visibleNPCCompatV1.Fields...)
-	// The residual 2014 schema called NpcType a byte, but current client data
-	// contains values through 1228 and current FxGameLogic compares it with
-	// values such as 371 and 401. The modern negotiated property must retain the
-	// full int32 value.
+	// 2014 年的遗留 schema 把 NpcType 定义为 byte，但当前客户端数据中
+	// 出现了最大到 1228 的值，而且当前 FxGameLogic 会拿它与 371、401
+	// 之类的值做比较。现代协商属性必须保留完整的 int32
+	// 数值。
 	fields[34].Type = WireInt32
 	return mustSchema("visible-npc-modern-v1", fields)
 }()
 
-// VisibleNPCModernV1 is the schema for materializing modern client templates.
-// CompatV1 remains available solely to characterize the existing probe wire.
+// VisibleNPCModernV1 是用于物化新版客户端模板的 schema。
+// CompatV1 保留至今，仅用于刻画现有探测用的线上格式。
 func VisibleNPCModernV1() Schema {
 	copySchema, err := NewSchema(visibleNPCModernV1.ID, visibleNPCModernV1.Fields)
 	if err != nil {

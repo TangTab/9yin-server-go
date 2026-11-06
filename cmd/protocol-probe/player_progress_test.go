@@ -194,8 +194,8 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
 	conn := &captureMessageConnection{}
 
-	// 215 must accept only learned View=43 books and reply with the normal
-	// property archive that the CurNeiGong bind consumes.
+	// 215 必须只接受已学习的 View=43 秘籍，并用 CurNeiGong 绑定消费的
+	// 常规属性档案回复。
 	handled, err := handlePlayerProgressCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 215}, {Type: 6, Text: "ng_jh_001"},
 	}})
@@ -207,8 +207,8 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 		t.Fatalf("215 reply=%x", frames)
 	}
 
-	// 1006/1 chooses a book; 1006/11 starts persistent background conversion
-	// without entering the visible 演武 LogicState=108 route.
+	// 1006/1 选择一本秘籍；1006/11 启动持久的后台转换，而不进入可见的
+	// 演武 LogicState=108 路线。
 	handled, err = handlePlayerProgressCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 1006}, {Type: 2, Int32: 1}, {Type: 6, Text: "ng_wd_001"},
 	}})
@@ -285,8 +285,8 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 		t.Fatalf("FacultyState after exit=%d, want client-rendered idle=%d", got, facultyStateNone)
 	}
 
-	// The faculty-panel 演武 button emits the same C->S 1006 bus with sub=21,
-	// but its native display state is FacultyStyle=2 rather than normal=1.
+	// 修炼面板的演武按钮同样向 C->S 1006 总线发出 sub=21，但其原生显示
+	// 状态是 FacultyStyle=2 而非 normal=1。
 	handled, err = handlePlayerProgressCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 1006}, {Type: 2, Int32: 21},
 	}})
@@ -427,9 +427,9 @@ func TestActiveFacultyLevelUpNotifiesClientAfterStateAndViewRefresh(t *testing.T
 	if !found {
 		t.Fatalf("level-up reply is missing faculty sub=14: %x", frames)
 	}
-	// A level-up must first refresh the faculty dialog from the authoritative
-	// View=43 and role properties.  Only then may the active page close; its
-	// native exit_flag still suppresses the stale C2S 1006/22 callback.
+	// 升级必须先从权威的 View=43 和角色属性刷新修炼对话框。之后才能
+	// 关闭主动页面；其原生的 exit_flag 仍会抑制过期的 C2S 1006/22
+	// 回调。
 	exit := []byte{2, 23, 0, 0, 0, 2, 0, 0, 0, 0}
 	play := []byte{2, 24, 0, 0, 0, 2, 0, 0, 0, 0}
 	exitIndex, levelIndex := -1, -1
@@ -457,8 +457,8 @@ func TestEncodeFacultyActiveBeginUsesRegisteredHandlerAndActBegin(t *testing.T) 
 	if len(frame) < 3 || frame[0] != 0x1E || binary.LittleEndian.Uint16(frame[1:]) != 3 {
 		t.Fatalf("active faculty frame header=%x", frame)
 	}
-	// The first typed value is the derived current C++ receiver ID.  The next
-	// two are Lua faculty.on_msg's arg1=22 (open act form) and arg2=0.
+	// 第一个类型化值是推导出的当前 C++ 接收器 ID。后两个是 Lua
+	// faculty.on_msg 的 arg1=22（打开主动表单）和 arg2=0。
 	needleID := []byte{2, byte(S2CFacultyMessage), 0, 0, 0}
 	if !bytes.Contains(frame, needleID) {
 		t.Fatalf("active faculty frame misses message id %d: %x", S2CFacultyMessage, frame)

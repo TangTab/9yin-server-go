@@ -2,9 +2,9 @@ package main
 
 import "fmt"
 
-// gmFactionPreset is deliberately a closed list of IDs that the installed
-// modern client recognizes in form_main_player.ini.  GM may change the
-// character's School property, but it must never accept arbitrary strings.
+// gmFactionPreset 刻意采用封闭的 ID 列表，即已安装的
+// 现代客户端在 form_main_player.ini 中能识别的标识。GM 可以更改
+// 角色的 School 属性，但绝不能接受任意字符串。
 type gmFactionPreset struct {
 	Label   string
 	Faction string

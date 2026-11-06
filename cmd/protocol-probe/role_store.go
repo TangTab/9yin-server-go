@@ -139,8 +139,8 @@ func (store *roleStore) saveFaction(ctx context.Context, snapshot *role.RoleSnap
 func defaultRoleLocation() role.Location {
 	return role.Location{
 		Scene: role.Scene{Config: `ini\scene\school09_YiHuaGong`, Resource: "school09"},
-		// res/share/relive/relive_info.ini declares this as force_yihua's
-		// authoritative land spawn (HomePointschool09A).
+		// res/share/relive/relive_info.ini 将此处声明为 force_yihua 的
+		// 权威落地出生点（HomePointschool09A）。
 		Position: role.Position{X: 340.160, Y: 47.979, Z: 657.284, Orient: 2.588},
 		Version:  1,
 	}

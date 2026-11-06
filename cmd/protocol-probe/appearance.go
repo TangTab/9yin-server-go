@@ -94,7 +94,7 @@ func resolveRoleVisual(appearance []string) roleVisual {
 		}
 		return fallback
 	}
-	sex := byte(0) // The current create-role capture is the male path.
+	sex := byte(0) // 目前抓到的创建角色流量走的是男性路径。
 	return roleVisual{
 		sex:       sex,
 		photo:     get(1, `icon\players\boy01_create.png`),

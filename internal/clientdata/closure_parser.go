@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-// dependencyKey describes the resource references understood by the modern
-// composite/action loader. Keeping this parser separate from the filesystem
-// index makes it possible to test the expansion rules without package files.
+// dependencyKey 描述现代 composite/action 加载器所识别的资源引用。
+// 将该解析器与文件系统索引分开维护，使得无需包文件
+// 即可测试这些展开规则。
 type dependencyKey struct {
 	Key      string
 	Relation string
@@ -35,14 +35,14 @@ type parsedReference struct {
 	Kind     ResourceKind
 }
 
-// parseINIReferences deliberately preserves duplicate keys. Some action files
-// have multiple ACTION_CHILD_FILE entries and a map-based INI reader silently
-// loses all but one of them.
+// parseINIReferences 有意保留重复键。某些 action 文件含有多个
+// ACTION_CHILD_FILE 条目，基于 map 的 INI 读取器会悄悄丢弃
+// 其中除一条之外的全部条目。
 func parseINIReferences(data []byte, keys map[string]dependencyKey) []parsedReference {
 	var refs []parsedReference
 	s := bufio.NewScanner(bytes.NewReader(stripUTF8BOM(data)))
-	// Asset INI lines can contain long action lists. Do not inherit Scanner's
-	// small default token limit.
+	// 资源 INI 行可能包含很长的 action 列表。不要继承 Scanner
+	// 较小的默认 token 上限。
 	s.Buffer(make([]byte, 4096), 4<<20)
 	for s.Scan() {
 		line := strings.TrimSpace(s.Text())
@@ -62,9 +62,9 @@ func parseINIReferences(data []byte, keys map[string]dependencyKey) []parsedRefe
 		if value == "" {
 			continue
 		}
-		// Child files are found both as repeated keys and as pipe/comma/semicolon
-		// lists in client data. Splitting is restricted to CHILD_FILE so ordinary
-		// Windows paths are never changed.
+		// 客户端数据中的子文件既以重复键的形式出现，也以竖线/逗号/分号
+		// 列表的形式出现。拆分仅限于 CHILD_FILE，因此普通的
+		// Windows 路径不会被改动。
 		values := []string{value}
 		if strings.EqualFold(spec.Key, "ACTION_CHILD_FILE") {
 			values = splitChildFiles(value)
@@ -84,8 +84,8 @@ func stripUTF8BOM(b []byte) []byte {
 
 func trimINIValue(value string) string {
 	value = strings.TrimSpace(value)
-	// The game data uses semicolon comments after whitespace. A semicolon in a
-	// CHILD_FILE list is handled before this only when it has no leading space.
+	// 游戏数据在空白字符后使用分号注释。CHILD_FILE 列表中的分号
+	// 只有在前面没有空格时，才会在进入此处之前先被处理。
 	if i := strings.Index(value, " ;"); i >= 0 {
 		value = strings.TrimSpace(value[:i])
 	}
@@ -101,10 +101,10 @@ func splitChildFiles(value string) []string {
 	return parts
 }
 
-// resolveReference follows FxModelAdv's observed action-file behavior: a path
-// with an explicit virtual-root prefix is kept absolute; all other paths are
-// expanded relative to the referring file. It intentionally retains the input
-// separator style so the report can expose '/' versus '\\' lookup failures.
+// resolveReference 遵循从 FxModelAdv 观察到的 action 文件行为：带显式
+// 虚拟根前缀的路径保持绝对路径；其余路径一律相对引用文件展开。
+// 这里有意保留输入的分隔符风格，以便报告能够暴露 '/' 与 '\\'
+// 两种查找失败的区别。
 func resolveReference(from, raw string, virtualRoots map[string]bool) string {
 	raw = strings.TrimSpace(strings.Trim(raw, "\"'"))
 	if raw == "" {

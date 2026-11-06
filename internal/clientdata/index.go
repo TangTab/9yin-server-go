@@ -1,9 +1,9 @@
-// Package clientdata indexes files extracted from modern client packages.
+// Package clientdata 对从现代客户端包中解包出的文件建立索引。
 //
-// It intentionally models FxPackage's virtual-name rules instead of applying
-// filepath.Clean: ASCII letters are case-insensitive, but slash and backslash
-// remain different bytes. Entries from earlier mounts shadow equal names from
-// later mounts.
+// 它有意模拟 FxPackage 的虚拟名称规则，而不是套用
+// filepath.Clean：ASCII 字母不区分大小写，但斜杠与
+// 反斜杠仍是不同的字节。较早挂载的条目会遮蔽
+// 较晚挂载中的同名条目。
 package clientdata
 
 import (
@@ -19,11 +19,11 @@ import (
 
 var ErrNotFound = errors.New("clientdata: virtual file not found")
 
-// Mount describes one extracted package tree. Directory must be the directory
-// corresponding to the package's virtual root (for the usual extractor output,
-// this is <name>.package.files\res). VirtualPrefix is prepended without changing
-// its separator style. Mount order is package load order and therefore shadow
-// priority.
+// Mount 描述一个已解包的资源目录树。Directory 必须是包虚拟根
+// 对应的目录（对常见的解包器输出而言，就是
+// <name>.package.files\res）。VirtualPrefix 会原样前置，不改变
+// 其分隔符风格。挂载顺序即包加载顺序，因此也是
+// 遮蔽优先级。
 type Mount struct {
 	Name          string
 	Directory     string
@@ -35,9 +35,9 @@ type Config struct {
 	FailOnRootError bool
 }
 
-// ExtractedPackageMount adapts the directory emitted by the current unpacker.
-// The unpacker stores package payload below a physical "res" directory while
-// "res" itself is not part of the package's virtual file name.
+// ExtractedPackageMount 适配当前解包器输出的目录。
+// 解包器把包内容存放在物理上的 "res" 目录之下，而 "res" 本身
+// 并不属于包的虚拟文件名。
 func ExtractedPackageMount(name, extractionDirectory string) Mount {
 	return Mount{Name: name, Directory: filepath.Join(extractionDirectory, "res")}
 }
@@ -51,9 +51,9 @@ const (
 	DiagnosticShadowed   DiagnosticKind = "shadowed"
 )
 
-// Diagnostic is a non-fatal indexing observation unless FailOnRootError makes
-// root and walk failures fatal. Error text is retained rather than an error
-// value so an Index stays immutable and easy to serialize in tooling.
+// Diagnostic 表示一条非致命的索引观察记录，除非 FailOnRootError 将
+// root 和 walk 失败升级为致命错误。这里保留错误文本而非 error
+// 值，使 Index 保持不可变，且便于在工具中序列化。
 type Diagnostic struct {
 	Kind         DiagnosticKind
 	Mount        string
@@ -72,8 +72,8 @@ type Source struct {
 	ReadError    string
 }
 
-// Entry contains every source of one engine-equivalent virtual name. Sources
-// are in mount priority order; Sources[0] is the effective source.
+// Entry 包含同一个引擎等价虚拟名称的全部来源。Sources 按
+// 挂载优先级排序；Sources[0] 即生效来源。
 type Entry struct {
 	VirtualPath string
 	Sources     []Source
@@ -88,8 +88,8 @@ type LookupResult struct {
 	SeparatorCandidates []string
 }
 
-// Found reports a strict FxPackage-style match. SeparatorCandidates are only
-// diagnostics and never make Found true.
+// Found 报告是否符合严格的 FxPackage 风格匹配。SeparatorCandidates
+// 仅用于诊断，绝不会令 Found 变为 true。
 func (r LookupResult) Found() bool { return r.Entry != nil }
 
 type Index struct {
@@ -99,9 +99,9 @@ type Index struct {
 	diagnostics  []Diagnostic
 }
 
-// Build recursively scans configured mounts without modifying any client file.
-// Missing roots are recorded as diagnostics by default so a partial extraction
-// can still be inspected. Set FailOnRootError for startup validation.
+// Build 递归扫描已配置的挂载，不修改任何客户端文件。默认情况下，
+// 缺失的根目录会记录为诊断信息，这样部分解包的结果仍可检查。
+// 启动校验时可设置 FailOnRootError。
 func Build(config Config) (*Index, error) {
 	return build(config, probeReadable)
 }
@@ -173,8 +173,8 @@ func build(config Config, probe readabilityProbe) (*Index, error) {
 			if relErr != nil {
 				return relErr
 			}
-			// Extracted package names are recorded with Windows separators. Do
-			// not normalize lookup input later: slash inequality is intentional.
+			// 解包出的包名以 Windows 分隔符记录。后续不要对查找输入做
+			// 归一化：斜杠不相等是有意为之。
 			relative = strings.ReplaceAll(relative, "/", `\`)
 			virtualPath := relative
 			if prefix != "" {
@@ -239,7 +239,7 @@ func probeReadable(path string) error {
 	var one [1]byte
 	_, readErr := file.Read(one[:])
 	if errors.Is(readErr, io.EOF) {
-		readErr = nil // An empty regular file is readable.
+		readErr = nil // 空的常规文件视为可读。
 	}
 	closeErr := file.Close()
 	if readErr != nil {

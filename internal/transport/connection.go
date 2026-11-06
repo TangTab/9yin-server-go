@@ -20,9 +20,9 @@ func DefaultConnectionConfig() ConnectionConfig {
 	}
 }
 
-// Connection owns framing state and directional keys. Read and write keys are
-// intentionally separate because the negotiated protocol can rotate them at
-// different points in the session state machine.
+// Connection 持有成帧状态和方向性密钥。读写密钥有意
+// 分开，因为协商出的协议可能在会话状态机的不同节点
+// 轮换它们。
 type Connection struct {
 	stream io.ReadWriteCloser
 	reader *FrameReader

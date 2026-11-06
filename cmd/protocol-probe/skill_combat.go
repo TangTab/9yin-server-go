@@ -15,27 +15,27 @@ import (
 const (
 	clientCustomUseSkill int32 = 211
 
-	// Current FxGameLogic GameMessageHandler binding constructor stores
-	// sub_110120E4 -> sub_129C0330 at pair 55/56, so its modern numeric
-	// message is (55-15)/2 == 20. The recovered receiver reads:
-	// [2] caster object, [3] skill-action ConfigID, [4] target object,
-	// then enters the SkillEffect/CurSkillCanNoLimit continuation. Unlike
-	// message 18, this is the skill-action route rather than generic DoAction.
+	// 当前 FxGameLogic 的 GameMessageHandler 绑定构造函数把
+	// sub_110120E4 -> sub_129C0330 存放在配对 55/56 处，
+	// 因此其现代数字消息号为 (55-15)/2 == 20。还原出的接收端读取：
+	// [2] 施法者对象、[3] 招式 ConfigID、[4] 目标对象，
+	// 然后进入 SkillEffect/CurSkillCanNoLimit 的后续流程。与
+	// 消息 18 不同，这是招式动作路线而不是通用 DoAction。
 	serverNativeSkillActionMessage int32 = 20
 
-	// Installed buff_new.ini/buff_static.ini:
-	// buf_CS_yhwq_hsqs04 -> StaticData 15101, visible self Buff.
-	// Its level-one hidden re-trigger lease is 35 seconds (StaticData 15104).
+	// 已安装的 buff_new.ini/buff_static.ini：
+	// buf_CS_yhwq_hsqs04 -> StaticData 15101，可见的自身 Buff。
+	// 其一级的隐藏重触发租期为 35 秒（StaticData 15104）。
 	yiHuaSkill04BuffStaticData uint32 = 15101
 	yiHuaSkill04BuffLease             = 35 * time.Second
-	// buff_new.ini/buff_static.ini/buff_varprop.ini level one:
-	// buf_CS_yhwq_hsqs05 -> StaticData 15105, visible, LifeTime 5000 ms.
+	// buff_new.ini/buff_static.ini/buff_varprop.ini 一级：
+	// buf_CS_yhwq_hsqs05 -> StaticData 15105，可见，LifeTime 5000 ms。
 	yiHuaSkill05BuffStaticData uint32 = 15105
 	yiHuaSkill05BuffLease             = 5 * time.Second
 
-	// Installed 太极拳(古谱) Buff routes. Skill 04 alternates its two
-	// persistent visible stance records; skill 05 and 07 use their exact
-	// level-one buff_varprop lifetimes.
+	// 已安装的 太极拳(古谱) Buff 路线。招式 04 在两条
+	// 持久可见的架势记录之间轮换；招式 05 和 07 使用其
+	// 精确的一级 buff_varprop 生存期。
 	taiJiDefenceStanceBuffStaticData uint32 = 6013
 	taiJiAttackStanceBuffStaticData  uint32 = 6055
 	taiJiSkill05BuffStaticData       uint32 = 6043
@@ -143,21 +143,20 @@ func nativeSkillActionFrame(skillID string, targetID, targetOwnerID uint32) ([]b
 		customObject(playerObjectID, playerOwnerID),
 		customString(skillID),
 		customObject(targetID, targetOwnerID),
-		// The protected receiver accepts both optional fields. Supplying the
-		// complete modern form makes the per-row show runner preserve actor
-		// translation and action timing instead of relying on omitted defaults.
+		// 受保护的接收端接受这两个可选字段。提供完整的
+		// 现代形态可以让逐行的 show runner 保留角色
+		// 位移和动作时序，而不是依赖省略字段时的默认值。
 		customInt(1),
 		customFloat32(1),
 	)
 }
 
-// skillActionPreparationFrame replays the two native player-action properties
-// immediately before ID20. The client registers a real on_actionset callback:
-// it enters the fight action service and rebuilds the action prefix/current
-// action state synchronously. PlayerAddObject already carries the same values,
-// but that initial archive can arrive before the asynchronous role model/action
-// component is ready; an explicit object-property refresh after ClientReady
-// closes that ordering gap without changing the selected appearance.
+// skillActionPreparationFrame 在 ID20 之前立即重放两条原生玩家动作属性。
+// 客户端注册了真实的 on_actionset 回调：它会进入战斗动作服务
+// 并同步重建动作前缀/当前动作状态。PlayerAddObject 已携带相同的值，
+// 但那份初始归档可能在异步的角色模型/动作组件就绪之前到达；
+// 在 ClientReady 之后显式刷新一次对象属性
+// 可以弥补这个时序缺口，且不会改变选定的外观。
 func skillActionPreparationFrame() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
 		{Index: 18, Name: "ActionSet", Value: clientdata.StringValue("0h")},
@@ -165,10 +164,10 @@ func skillActionPreparationFrame() ([]byte, error) {
 	})
 }
 
-// playerActionStateFrame drives the ordinary player State property callback.
-// This is intentionally separate from skill_action: installed life-skill Lua
-// uses the same action names (for example interact268 for fishing) against the
-// player's action component, so it is a useful standalone reachability probe.
+// playerActionStateFrame 驱动普通的玩家 State 属性回调。
+// 它与 skill_action 刻意分离：已安装的生活技能 Lua 会对
+// 玩家动作组件使用相同的动作名（例如钓鱼的 interact268），
+// 因此它是一个有用的独立可达性探针。
 func playerActionStateFrame(action string) ([]byte, error) {
 	if action == "" {
 		return nil, fmt.Errorf("player action state is empty")
@@ -178,11 +177,11 @@ func playerActionStateFrame(action string) ([]byte, error) {
 	})
 }
 
-// nativeGenericActionFrame reaches the current client's generic "action"
-// command receiver (sub_129C0E90). Its native implementation reads the target
-// from TVarList[2], the action from [3], optionally clears the current action,
-// and calls the action service. The registration-table slot is not a numeric
-// wire ID: the leading TVarList value must be the string command name.
+// nativeGenericActionFrame 触达当前客户端的通用 "action"
+// 命令接收端（sub_129C0E90）。其原生实现从 TVarList[2] 读取目标、
+// 从 [3] 读取动作，可选择清除当前动作，
+// 然后调用动作服务。注册表槽位并不是数字形式的线上传输 ID：
+// TVarList 的首个值必须是字符串形式的命令名。
 func nativeGenericActionFrame(action string) ([]byte, error) {
 	if action == "" {
 		return nil, fmt.Errorf("native generic action is empty")
@@ -217,8 +216,8 @@ func useSkillCastTransform(custom clientCustomMessage) (worldcore.Transform, boo
 		Y: custom.Values[3].Float32,
 		Z: custom.Values[4].Float32,
 	}
-	// Modern C2S 211 continues with caster orientation before the optional
-	// target position. Sector skills need this value for their facing test.
+	// 现代版 C2S 211 在可选的目标位置之前还跟随施法者朝向。
+	// 扇形技能的朝向判定需要这个值。
 	if len(custom.Values) > 5 && custom.Values[5].Type == 4 {
 		transform.Orient = custom.Values[5].Float32
 	}

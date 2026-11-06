@@ -1,4 +1,4 @@
-// Package entity contains the authoritative runtime state for world objects.
+// Package entity 包含世界对象的权威运行时状态。
 package entity
 
 import (
@@ -10,14 +10,14 @@ import (
 const (
 	LogicStateNormal   uint8 = 0
 	LogicStateFighting uint8 = 1
-	// LogicStateSitcross is the modern native LS_SITCROSS state.  The client
-	// owns the animation, while the server owns when this state may be entered.
+	// LogicStateSitcross 是新版原生的 LS_SITCROSS 状态。动画由客户端
+	// 负责，而何时允许进入该状态由服务器决定。
 	LogicStateSitcross uint8 = 102
 	LogicStateDied     uint8 = 120
 )
 
-// Actor is server authority for a character's combat state.  The client may
-// render it from ServerObjectProperty (0x10), but it never owns the values.
+// Actor 是角色战斗状态的服务器权威。客户端可以从
+// ServerObjectProperty (0x10) 渲染这些数值，但绝不拥有它们。
 type Actor struct {
 	mu sync.RWMutex
 
@@ -61,8 +61,8 @@ func NewActor(objectID, ownerID uint32, name string, maxHP, maxMP int32) *Actor 
 	if maxMP < 1 {
 		maxMP = 1
 	}
-	// Current retail gameplay documentation describes the normal full bar as
-	// 150. Equipment/buff additions are represented separately below.
+	// 现行正式服玩法文档将正常的满条描述为
+	// 150。装备/buff 加成在下方单独表示。
 	const defaultMaxQingGong = 150
 	return &Actor{
 		objectID: objectID, ownerID: ownerID, name: name,
@@ -73,9 +73,9 @@ func NewActor(objectID, ownerID uint32, name string, maxHP, maxMP int32) *Actor 
 	}
 }
 
-// NewPlayer constructs the default, living player state used by a new scene
-// session.  Keeping these values here prevents the spawn and later 0x10
-// updates from drifting into separate sources of truth.
+// NewPlayer 构造新场景会话使用的默认存活玩家状态。
+// 把这些数值放在这里，可以避免出生（spawn）与后续 0x10
+// 更新各自为政、变成多份事实来源。
 func NewPlayer(objectID, ownerID uint32, name string) *Actor {
 	return NewActor(objectID, ownerID, name, 1000, 500)
 }
@@ -93,8 +93,8 @@ func (a *Actor) Snapshot() ActorState {
 	}
 }
 
-// ApplyDamage returns true when the actor state changed.  Death is a state
-// transition, not a client-side interpretation of HP == 0.
+// ApplyDamage 在 actor 状态发生变化时返回 true。死亡是一次
+// 状态迁移，而不是客户端对 HP == 0 的解释。
 func (a *Actor) ApplyDamage(amount int32) bool {
 	if amount <= 0 {
 		return false
@@ -118,8 +118,8 @@ func (a *Actor) ApplyDamage(amount int32) bool {
 	return true
 }
 
-// ApplyHeal restores HP up to MaxHP.  Death is intentionally not cleared by
-// healing: a future revive flow must make that state transition explicitly.
+// ApplyHeal 恢复 HP，上限为 MaxHP。治疗有意不清除
+// 死亡状态：未来的复活流程必须显式完成那次状态迁移。
 func (a *Actor) ApplyHeal(amount int32) bool {
 	if amount <= 0 {
 		return false
@@ -140,12 +140,12 @@ func (a *Actor) ApplyHeal(amount int32) bool {
 	return a.hp != before
 }
 
-// RecoverBruisedHPWhileFighting settles only the bruised-blood layer during
-// combat.  HitHP is the pre-hit/secondary bar, so reducing it toward HP makes
-// the visible bruise (HitHP-HP) dissipate without granting any real HP.
+// RecoverBruisedHPWhileFighting 只结算战斗期间的瘀血层。
+// HitHP 是受击前/第二根血条，因此让它向 HP 回落可以使可见的
+// 瘀血（HitHP-HP）消散，而不给予任何真实 HP。
 //
-// This deliberately does nothing in other LogicState values: sitting and
-// explicit healing own real HP recovery, while a dead actor cannot recover.
+// 在其他 LogicState 值下该方法有意不做任何事：真实 HP 的恢复
+// 由打坐和显式治疗负责，而死亡的 actor 无法恢复。
 func (a *Actor) RecoverBruisedHPWhileFighting(amount int32) bool {
 	if amount <= 0 {
 		return false
@@ -162,9 +162,9 @@ func (a *Actor) RecoverBruisedHPWhileFighting(amount int32) bool {
 	return true
 }
 
-// RestoreWhileSit applies one authoritative sitting-recovery settlement. It
-// never revives a dead actor and does nothing outside LS_SITCROSS; UI rate
-// properties are therefore never mistaken for actual healing.
+// RestoreWhileSit 执行一次权威的打坐恢复结算。它绝不会
+// 复活死亡的 actor，在 LS_SITCROSS 之外也不做任何事；因此 UI 的
+// 恢复速率属性绝不会被误当作实际治疗。
 func (a *Actor) RestoreWhileSit(hpAmount, mpAmount int32) bool {
 	if hpAmount < 0 || mpAmount < 0 {
 		return false
@@ -195,12 +195,12 @@ func (a *Actor) RestoreWhileSit(hpAmount, mpAmount int32) bool {
 	return changed
 }
 
-// SetDerivedMaxima installs the authoritative total resource caps after the
-// role's equipped inner power has been evaluated. Base maxima never change;
-// they remain available for the client protocol's MaxHP/MaxMP + Add display.
-// A fully recovered actor stays full when a cap grows, while a partially
-// depleted actor keeps its current absolute resource and is only clamped when
-// a cap shrinks.
+// SetDerivedMaxima 在角色的已装备内功评定完成后，
+// 设置权威的资源总量上限。基础上限永不改变；
+// 它们仍可供客户端协议的 MaxHP/MaxMP + Add 显示使用。
+// 上限增大时，已完全恢复的 actor 保持满值；而部分消耗的
+// actor 保留其当前的绝对资源量，仅在上限
+// 缩小时才会被钳制。
 func (a *Actor) SetDerivedMaxima(maxHP, maxMP int32) bool {
 	if maxHP < 1 {
 		maxHP = 1
@@ -233,7 +233,7 @@ func (a *Actor) SetDerivedMaxima(maxHP, maxMP int32) bool {
 	return true
 }
 
-// SpendMP is the authoritative resource gate for future skill handling.
+// SpendMP 是后续技能处理的权威资源闸门。
 func (a *Actor) SpendMP(cost int32) bool {
 	if cost < 0 {
 		return false
@@ -247,9 +247,9 @@ func (a *Actor) SpendMP(cost int32) bool {
 	return true
 }
 
-// UseQingGong applies the current server-authoritative lightweight-resource
-// cost. The multiplier is a fractional modifier: -0.20 means 80% cost and
-// +0.20 means 120% cost. Costs cannot become negative.
+// UseQingGong 施加当前由服务器权威判定的轻功资源
+// 消耗。乘数是一个小数修正：-0.20 表示 80% 消耗，
+// +0.20 表示 120% 消耗。消耗不会变为负数。
 func (a *Actor) UseQingGong(baseCost int32, now time.Time) (cost int32, ok bool) {
 	if baseCost < 0 {
 		return 0, false
@@ -261,17 +261,17 @@ func (a *Actor) UseQingGong(baseCost int32, now time.Time) (cost int32, ok bool)
 	if multiplier < 0 {
 		multiplier = 0
 	}
-	// qingGongConsumeMul is persisted as float32; remove representational dust
-	// before rounding so -0.2 on a 25-point skill remains 20, not 21.
+	// qingGongConsumeMul 以 float32 持久化；取整前先消除表示误差，
+	// 这样 25 点的技能在 -0.2 之下消耗仍是 20 而不是 21。
 	cost = int32(math.Ceil(float64(baseCost)*multiplier - 1e-6))
 	if a.qingGong < cost {
 		return cost, false
 	}
 	a.qingGong -= cost
-	// Local-test rule: do not let repeated movement verification strand the
-	// player with an unusable lightness bar.  The refill is deliberately after
-	// the authoritative cost/gate, so an action still has to be affordable to
-	// start; only a successful action that leaves fewer than 50 points refills.
+	// 本地测试规则：不要让反复的移动校验把玩家困在
+	// 无法使用的轻功条上。回满被有意放在权威扣费/判定之后，
+	// 因此动作仍须支付得起才能
+	// 开始；只有成功后剩余不足 50 点的动作才触发回满。
 	if a.qingGong < 50 {
 		a.qingGong = a.maxQingGong + a.maxQingGongAdd
 		a.qingGongUpdatedAt = now
@@ -279,8 +279,8 @@ func (a *Actor) UseQingGong(baseCost int32, now time.Time) (cost int32, ok bool)
 	return cost, true
 }
 
-// RestoreQingGong advances the local-test resource timer. The rate is kept
-// here (rather than client Lua) so later buffs can modify it authoritatively.
+// RestoreQingGong 推进本地测试的资源计时器。恢复速率保留在这里
+// （而不是客户端 Lua），以便后续 buff 能够权威地修改它。
 func (a *Actor) RestoreQingGong(now time.Time) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -291,8 +291,8 @@ func (a *Actor) restoreQingGongLocked(now time.Time) bool {
 	if now.Before(a.qingGongUpdatedAt) {
 		return false
 	}
-	// Local baseline: 10 points per second. Official config supplies the
-	// per-skill cost; regeneration modifiers are future buff effects.
+	// 本地基准：每秒 10 点。各技能的消耗由官方配置提供；
+	// 回复修正属于未来的 buff 效果。
 	points := int32(now.Sub(a.qingGongUpdatedAt) / (100 * time.Millisecond))
 	if points <= 0 {
 		return false
@@ -322,15 +322,15 @@ func (a *Actor) SetSpeedRatio(ratio int32) {
 	a.mu.Unlock()
 }
 
-// SetLogicState changes only the current state; HP and MP remain owned by the
-// same actor and are synchronised together by the player adapter.
+// SetLogicState 只改变当前状态；HP 和 MP 仍由同一个 actor 持有，
+// 并由玩家适配器一并进行同步。
 func (a *Actor) SetLogicState(state uint8) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.logic = state
 }
 
-// Revive is the minimal authoritative revival transition.
+// Revive 是最小化的权威复活状态迁移。
 func (a *Actor) Revive() {
 	a.mu.Lock()
 	defer a.mu.Unlock()

@@ -8,17 +8,17 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-// These IDs are registered by the current FxGameLogic GameMessageHandler.
-// They are distinct from the 4..8 face-to-face menu route: 43 is a short
-// speaker bubble and 383 opens the client-owned drama/chapter prompt.
+// 这些 ID 由当前 FxGameLogic 的 GameMessageHandler 注册。
+// 它们与 4..8 的面对面菜单路线不同：43 是短暂的
+// 说话者气泡，383 打开客户端自带的剧情/章节提示。
 const (
 	customNPCTalk    int32 = 43
 	customBeginDrama int32 = 383
 )
 
-// dramaPrompt is deliberately data-only. Story definitions can later live in
-// Creator/NpcFunc-derived data or a persisted quest table without changing the
-// protocol encoder below.
+// dramaPrompt 刻意只包含数据。剧情定义之后可以放在
+// 由 Creator/NpcFunc 派生的数据或持久化的任务表中，
+// 而无需改动下面的协议编码器。
 type dramaPrompt struct {
 	Chapter      int32
 	ChapterName  string
@@ -46,9 +46,9 @@ func (p dramaPrompt) validate() error {
 	return nil
 }
 
-// encodeNPCBubble maps to custom_handler.on_npc_talk. Mode zero intentionally
-// suppresses its secondary systems/chat routes while retaining the five-second
-// HeadGame bubble. The scene object must be an existing "object-owner" key.
+// encodeNPCBubble 对应 custom_handler.on_npc_talk。模式零刻意
+// 抑制其次要的系统/聊天路线，同时保留五秒的
+// HeadGame 气泡。场景对象必须是已存在的 "object-owner" 键。
 func encodeNPCBubble(objectID, ownerID uint32, textID string) ([]byte, error) {
 	if objectID == 0 || strings.TrimSpace(textID) == "" {
 		return nil, fmt.Errorf("NPC bubble requires object and text ID")
@@ -57,14 +57,14 @@ func encodeNPCBubble(objectID, ownerID uint32, textID string) ([]byte, error) {
 		customString(sceneIdent(objectID, ownerID)),
 		customString(textID),
 		customInt(0), // stage
-		customInt(0), // mode: bubble only
+		customInt(0), // mode：仅气泡
 	)
 }
 
-// encodeDramaPrompt maps to custom_handler.on_begin_drama, then
-// form_task/form_drama_tips.show_begin_drama_info. Empty Detail selects the
-// no-art card layout; non-empty Detail additionally needs the matching client
-// drama image assets named by Title.
+// encodeDramaPrompt 对应 custom_handler.on_begin_drama，再到
+// form_task/form_drama_tips.show_begin_drama_info。空的 Detail 会选择
+// 无插图的卡片布局；非空 Detail 还需要 Title 所指的
+// 相应客户端剧情图片资源。
 func encodeDramaPrompt(prompt dramaPrompt) ([]byte, error) {
 	if err := prompt.validate(); err != nil {
 		return nil, err
@@ -98,8 +98,8 @@ func (s *sceneLifecycle) sendNPCBubble(objectID, ownerID uint32, textID string) 
 	return nil
 }
 
-// sendGMNPCBubble targets the first stable scene NPC. It is a GM-only
-// protocol probe, not an NPC selection rule used by gameplay.
+// sendGMNPCBubble 以第一个稳定的场景 NPC 为目标。它是仅供 GM 使用的
+// 协议探针，不是游戏玩法使用的 NPC 选择规则。
 func (s *sceneLifecycle) sendGMNPCBubble(textID string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -133,8 +133,8 @@ func (s *sceneLifecycle) sendDramaPrompt(prompt dramaPrompt) error {
 	return nil
 }
 
-// gmDramaProbe deliberately uses installed UI text IDs only. It validates the
-// protocol/form route without pretending to be authored quest content.
+// gmDramaProbe 刻意只使用已安装的 UI 文本 ID。它验证
+// 协议/表单路线，而不会伪装成正式编写的任务内容。
 func gmDramaProbe() dramaPrompt {
 	return dramaPrompt{
 		Chapter: 1, ChapterName: "ui_shop", Explore: 1, Challenge: 1,

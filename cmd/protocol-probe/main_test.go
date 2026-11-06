@@ -327,7 +327,7 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	// LastObject 0x10 + numeric custom begin/add/end sequence.
+	// LastObject 0x10 + 数值型 custom begin/add/end 序列。
 	if len(frames) != 5 {
 		t.Fatalf("selection frames=%d, want LastObject + cinematic menu: %x", len(frames), frames)
 	}

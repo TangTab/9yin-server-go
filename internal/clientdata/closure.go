@@ -30,9 +30,9 @@ const (
 	ResourceMissing             ResourceStatus = "missing"
 )
 
-// KnownPackage records packages.ini knowledge even when its package has not
-// been extracted. Prefixes are audit hints, not lookup aliases: the strict
-// FxPackage separator behavior still comes exclusively from Index.Lookup.
+// KnownPackage 记录 packages.ini 中的包信息，即使该包尚未解包。
+// Prefixes 只是审计提示，不是查找别名：严格的 FxPackage 分隔符行为
+// 仍然完全来自 Index.Lookup。
 type KnownPackage struct {
 	Name        string   `json:"name"`
 	File        string   `json:"file"`
@@ -103,11 +103,11 @@ type ClosureReport struct {
 	Summary       ClosureSummary `json:"summary"`
 }
 
-// AuditResourceClosure follows the dependency subset observed in the modern
-// model stack: COMPOSITE Action/Model/main_model and action file
-// ACTION_BASE_FILE/ACTION_CHILD_FILE/Skeleton. Model and skeleton binaries are
-// intentionally reported as leaves; parsing proprietary xmod geometry chunks
-// belongs to a separate binary-format pass.
+// AuditResourceClosure 按现代模型资源栈中观察到的依赖子集进行跟踪：
+// COMPOSITE 的 Action/Model/main_model，以及 action 文件的
+// ACTION_BASE_FILE/ACTION_CHILD_FILE/Skeleton。Model 和 skeleton 二进制文件
+// 有意报告为叶子节点；解析专有的 xmod 几何数据块
+// 属于另一个独立的二进制格式处理环节。
 func AuditResourceClosure(index *Index, options ClosureOptions) (ClosureReport, error) {
 	if index == nil {
 		return ClosureReport{}, fmt.Errorf("clientdata: nil index")
@@ -182,8 +182,8 @@ func AuditResourceClosure(index *Index, options ClosureOptions) (ClosureReport, 
 			childID, exists := ids[childKey]
 			if !exists {
 				childID = len(report.Resources) + len(queue)
-				// Multiple parents may enqueue the same child. The final ID is fixed
-				// after traversal, so edges are repaired below by resolved path.
+				// 多个父节点可能会把同一个子节点入队。最终 ID 要到遍历
+				// 结束后才确定，因此下面按解析后的路径修复这些边。
 				queue = append(queue, pending{path: resolved, kind: ref.Kind})
 			}
 			report.Edges = append(report.Edges, ResourceEdge{
@@ -192,8 +192,8 @@ func AuditResourceClosure(index *Index, options ClosureOptions) (ClosureReport, 
 			})
 		}
 	}
-	// Repair speculative child IDs after breadth-first traversal and stable-sort
-	// edges so JSON diffs remain deterministic.
+	// 广度优先遍历结束后修复推测性的子节点 ID，并对边做稳定排序，
+	// 使 JSON diff 结果保持确定性。
 	for i := range report.Edges {
 		report.Edges[i].To = ids[foldASCII(report.Edges[i].Resolved)]
 	}

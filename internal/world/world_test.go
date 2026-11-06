@@ -44,7 +44,7 @@ func TestViewportDoesNotCommitFailedPlan(t *testing.T) {
 	if len(first.Adds) != 1 {
 		t.Fatalf("adds = %d", len(first.Adds))
 	}
-	// Simulate a network failure by not committing first.
+	// 通过不提交 first 来模拟网络失败。
 	retry := viewport.Plan(scene.Snapshot())
 	if len(retry.Adds) != 1 {
 		t.Fatalf("retry adds = %d, want 1", len(retry.Adds))

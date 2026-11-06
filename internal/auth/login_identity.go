@@ -1,5 +1,5 @@
-// Package auth contains the compatibility identity boundary for the modern
-// client login message. It never exposes password authentication material.
+// Package auth 包含现代客户端登录消息的兼容身份边界。
+// 它从不暴露密码认证材料。
 package auth
 
 import (
@@ -70,7 +70,7 @@ func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
 		return AccountIdentity{}, fmt.Errorf("%w: truncated password slot", ErrInvalidLogin)
 	}
 
-	// client-system/type. Its value is not an account identity component.
+	// client-system/type。其值不属于账号身份的组成部分。
 	if _, next, ok = readLength(message, cursor); !ok {
 		return AccountIdentity{}, fmt.Errorf("%w: missing client type", ErrInvalidLogin)
 	}
@@ -88,8 +88,8 @@ func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
 		return AccountIdentity{}, fmt.Errorf("%w: truncated login-string slot", ErrInvalidLogin)
 	}
 
-	// login type is the final u32. Reject tails so two layouts cannot share one
-	// identity parser interpretation.
+	// login type 是最后一个 u32。拒绝尾部数据，使两种布局无法共用同一种
+	// 身份解析器的解释。
 	if _, next, ok = readLength(message, cursor); !ok {
 		return AccountIdentity{}, fmt.Errorf("%w: missing login type", ErrInvalidLogin)
 	}

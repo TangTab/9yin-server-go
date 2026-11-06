@@ -1,5 +1,5 @@
-// Command protocol-smoke replays one captured first-flight frame against a
-// running local server and decodes its first response with the real transport.
+// Command protocol-smoke 将一个抓包得到的首个 flight 帧重放到本地运行中的
+// 服务器，并使用真实的 transport 解码其第一个响应。
 package main
 
 import (

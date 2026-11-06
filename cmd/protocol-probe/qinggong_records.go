@@ -10,10 +10,10 @@ import (
 	"github.com/local/9yin-go-server/internal/qinggong"
 )
 
-// A record schema is negotiated once for a scene connection by opcode 0x0A.
-// The current client uses QingGongRec (not QingGongPoint) to answer
-// WuXueQuery:CheckLearn_QingGong, so the lightness resource and the learned
-// skill list deliberately travel on separate protocol paths.
+// 记录 schema 由操作码 0x0A 在场景连接上协商一次。当前客户端用
+// QingGongRec（而非 QingGongPoint）来应答
+// WuXueQuery:CheckLearn_QingGong，因此轻功值资源和已学技能列表刻意
+// 走各自独立的协议路径。
 type recordSchema struct {
 	name     string
 	colTypes []byte
@@ -26,9 +26,9 @@ type qinggongBuffSpec struct {
 	clearOnEnd bool
 }
 
-// qinggongBuffFor derives native movement state from the installed modern
-// QGDefine.ini BufferID.  These BuffStore entries are what the client needs
-// in addition to movement stats and the accepted 216 resource charge.
+// qinggongBuffFor 根据已安装的现代 QGDefine.ini BufferID 推导原生移动
+// 状态。这些 BuffStore 条目是客户端在移动数值和已受理的 216 资源扣费
+// 之外还需要的东西。
 func qinggongBuffFor(definition qinggong.Definition) (qinggongBuffSpec, bool) {
 	switch definition.BufferID {
 	case "buf_qg_drift":
@@ -41,20 +41,20 @@ func qinggongBuffFor(definition qinggong.Definition) (qinggongBuffSpec, bool) {
 }
 
 const (
-	// FxNet2!GameReceiver::RecvRecordRow (0x1060BC40) decodes schema type 1
-	// as one byte, type 2 as two bytes, and type 3 as a four-byte integer.
-	// Record rows below encode their integer cells with AppendUint32, including
-	// Task_Completed's 32-bit bitset; they must therefore be declared as type 3.
+	// FxNet2!GameReceiver::RecvRecordRow (0x1060BC40) 将 schema 类型 1
+	// 解码为一个字节，类型 2 为两个字节，类型 3 为四字节整数。下面的
+	// 记录行都用 AppendUint32 编码其整型单元格，包括 Task_Completed 的
+	// 32 位位集；因此它们必须声明为类型 3。
 	recordColumnInt = byte(3)
 
-	// FxNet2!GameReceiver::RecvRecordRow decodes schema type 4 as a signed
-	// eight-byte integer.  cooldown_rec uses this for its start/end columns.
+	// FxNet2!GameReceiver::RecvRecordRow 将 schema 类型 4 解码为带符号的
+	// 八字节整数。cooldown_rec 的起始/结束列使用该类型。
 	recordColumnInt64 = byte(4)
 
-	// FxNet2!ServerRecordGrid (0x1060BC40) parses schema type 7 as a
-	// length-prefixed, NUL-terminated narrow string. Type 6 is an IEEE-754
-	// double, so declaring this column as 6 makes the client consume the first
-	// eight bytes of "qinggong_*" as a number and discard the row semantically.
+	// FxNet2!ServerRecordGrid (0x1060BC40) 把 schema 类型 7 解析为带长度
+	// 前缀、以 NUL 结尾的窄字符串。类型 6 是 IEEE-754 double，因此把此列
+	// 声明为 6 会让客户端把 "qinggong_*" 的前八个字节当作数字消费，并在
+	// 语义上丢弃该行。
 	recordColumnString = byte(7)
 
 	recordQingGong       uint16 = 0
@@ -64,42 +64,40 @@ const (
 	recordShortcut       uint16 = 4
 	recordCooldown       uint16 = 5
 	viewportQingGong     uint16 = 46
-	// View objects use the original scene-property ConfigID field.  The later
-	// shop-only compatibility field 105 has the same display name but is not
-	// what QingGongContainer's native lookup reads.
+	// View 对象使用原始的场景属性 ConfigID 字段。后续仅商店用的兼容字段
+	// 105 有相同的显示名，但 QingGongContainer 的原生查找读取的不是它。
 	qingGongConfigProperty uint16 = 7
 )
 
 var qingGongRecordSchemas = []recordSchema{
 	{name: "QingGongRec", colTypes: []byte{recordColumnString}},
 	{name: "ActiveQGSkillRec", colTypes: []byte{recordColumnString}},
-	// This is deliberately the seven-column compatibility prefix consumed by
-	// condition 23614: id through status.  The client negotiates record width
-	// from this table; declaring the unrecovered 26-column task runtime while
-	// sending only this prefix makes RecvRecordRow commit these seven cells and
-	// then throw Out range on column 7.
+	// 这刻意采用条件 23614 消费的七列兼容前缀：从 id 到 status。客户端
+	// 根据此表协商记录宽度；若声明未还原的 26 列任务运行时却只发送这个
+	// 前缀，RecvRecordRow 会提交这七个单元格，
+	// 然后在第 7 列上抛出 Out range。
 	{name: "Task_Accepted", colTypes: []byte{
 		recordColumnInt, recordColumnInt, recordColumnInt,
 		recordColumnString, recordColumnString, recordColumnString,
 		recordColumnInt,
 	}},
 	{name: "Task_Completed", colTypes: []byte{recordColumnInt}},
-	// shortcut_game.lua looks this record up before it calls
-	// custom_set_shortcut(200). Without the record itself, the drag operation
-	// is rejected locally and no request ever reaches the server.
+	// shortcut_game.lua 在调用 custom_set_shortcut(200) 之前会查找这条
+	// 记录。若没有这条记录本身，拖拽操作会在本地被拒绝，任何请求都
+	// 到达不了服务器。
 	{name: "shortcut_rec", colTypes: []byte{
 		recordColumnInt, recordColumnString, recordColumnString,
 	}},
-	// CoolLogicManager registers a native callback for this player record.
-	// Each added row becomes StartACool(category, end-start, team, 0).
+	// CoolLogicManager 为这条玩家记录注册了原生回调。每个添加的行都会
+	// 成为 StartACool(category, end-start, team, 0)。
 	{name: "cooldown_rec", colTypes: []byte{
 		recordColumnInt, recordColumnInt64, recordColumnInt64, recordColumnInt,
 	}},
 }
 
-// starterQingGongIDs are the current client's base categories.  They are
-// deliberately config IDs, not visual labels, so the local client resolves
-// their current QGDefine/QGSkill data itself.
+// starterQingGongIDs 是当前客户端的基础类别。它们刻意使用 config ID
+// 而非视觉标签，让本地客户端自行解析其当前的 QGDefine/QGSkill
+// 数据。
 var starterQingGongIDs = []string{
 	"qinggong_1", "qinggong_2", "qinggong_3", "qinggong_4", "qinggong_5",
 	"qinggong_6", "qinggong_7", "qinggong_8", "qinggong_9", "qinggong_10",
@@ -107,9 +105,9 @@ var starterQingGongIDs = []string{
 	"qinggong_17", "qinggong_26", "qinggong_gaojie",
 }
 
-// starterQingGongSkillIDs are actual QG skill instances, not the category
-// IDs above. QingGongRec unlocks a category, while WuXueQuery:GetLearnID_QGSkill
-// reads these objects from QingGongContainer (View 46) to populate the cards.
+// starterQingGongSkillIDs 是实际的轻功技能实例，不是上面的类别 ID。
+// QingGongRec 解锁一个类别，而 WuXueQuery:GetLearnID_QGSkill 从
+// QingGongContainer（View 46）读取这些对象来填充卡片。
 var starterQingGongSkillIDs = []string{
 	"QG_JH_001", "QG_JH_002", "QG_JH_003", "QG_JH_004", "QG_JH_005", "QG_JH_006", "QG_JH_007", "QG_JH_008", "QG_JH_009", "QG_JH_010",
 	"QG_JH_011", "QG_JH_012", "QG_JH_013", "QG_JH_014", "QG_JH_015", "QG_JH_016", "QG_JH_017", "QG_JH_018", "QG_JH_019", "QG_JH_020",
@@ -118,8 +116,8 @@ var starterQingGongSkillIDs = []string{
 	"QG_JH_03_001", "QG_JH_040", "QG_JH_041", "QG_JH_04_001", "QG_JH_05_001", "QG_JH_06_001", "QG_JH_gj_001", "QG_JH_gj_002", "QG_JH_gj_003", "QG_JH_gj_004", "QG_JH_gj_006", "QG_JH_gjskill_001",
 }
 
-// serverRecordTable is the current FxNet2 record schema packet:
-// 0x0A | u16 count | (C string name | u16 column count | type bytes)*.
+// serverRecordTable 是当前 FxNet2 的记录 schema 包：
+// 0x0A | u16 count | (C string name | u16 column count | type bytes)*。
 func serverRecordTable(schemas []recordSchema) ([]byte, error) {
 	if len(schemas) > math.MaxUint16 {
 		return nil, fmt.Errorf("record schema count %d exceeds u16", len(schemas))
@@ -142,34 +140,34 @@ func serverRecordTable(schemas []recordSchema) ([]byte, error) {
 	return msg, nil
 }
 
-// serverRecordAddString encodes SERVER_RECORD_ADD (0x11) for a one-column
-// scene-object record.  Player identity must match the 0x0D object identity
-// (1-1), otherwise GetPlayer()/QueryRecord cannot see the new row.
+// serverRecordAddString 为单列的场景对象记录编码 SERVER_RECORD_ADD
+// (0x11)。玩家标识必须与 0x0D 对象标识（1-1）一致，否则
+// GetPlayer()/QueryRecord 看不到新行。
 func serverRecordAddString(objectID, ownerID uint32, recordIndex uint16, value string) []byte {
 	msg := make([]byte, 16, 16+len(value)+5)
 	msg[0] = 0x11
-	msg[1] = 0 // scene object
+	msg[1] = 0 // 场景对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
-	binary.LittleEndian.PutUint16(msg[12:], 0) // first column
-	binary.LittleEndian.PutUint16(msg[14:], 1) // one string column
+	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一列
+	binary.LittleEndian.PutUint16(msg[14:], 1) // 一个字符串列
 	msg = binary.LittleEndian.AppendUint32(msg, uint32(len(value)+1))
 	msg = append(msg, value...)
 	return append(msg, 0)
 }
 
-// serverRecordAddInt32 encodes one integer record cell. SERVER_RECORD_ADD
-// appends a row, so callers which need a sparse row must emit earlier rows.
+// serverRecordAddInt32 编码一个整型记录单元格。SERVER_RECORD_ADD 追加
+// 行，因此需要稀疏行的调用方必须先发出更早的行。
 func serverRecordAddInt32(objectID, ownerID uint32, recordIndex uint16, value uint32) []byte {
 	msg := make([]byte, 20)
 	msg[0] = 0x11
-	msg[1] = 0 // scene object
+	msg[1] = 0 // 场景对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
-	binary.LittleEndian.PutUint16(msg[12:], 0) // first column
-	binary.LittleEndian.PutUint16(msg[14:], 1) // one int column
+	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一列
+	binary.LittleEndian.PutUint16(msg[14:], 1) // 一个整型列
 	binary.LittleEndian.PutUint32(msg[16:], value)
 	return msg
 }
@@ -184,10 +182,10 @@ func recordInt(value uint32) recordCell    { return recordCell{intValue: &value}
 func recordInt64(value int64) recordCell   { return recordCell{int64Value: &value} }
 func recordString(value string) recordCell { return recordCell{text: &value} }
 
-// serverRecordAddCells writes one complete row using the negotiated schema.
-// Packet +0x0C/+0x0E are the source row start/count consumed by
-// FxNet2::RecvRecordRow, not a column start/count pair.  Every call here
-// carries exactly one full row, so the count must remain 1.
+// serverRecordAddCells 按协商的 schema 写入一整行。包内 +0x0C/+0x0E 是
+// FxNet2::RecvRecordRow 消费的源行起始/数量，不是列的起始/数量对。
+// 这里的每次调用都恰好携带一整行，因此该数量
+// 必须保持为 1。
 func serverRecordAddCells(objectID, ownerID uint32, recordIndex uint16, cells []recordCell) ([]byte, error) {
 	if int(recordIndex) >= len(qingGongRecordSchemas) {
 		return nil, fmt.Errorf("record index %d has no negotiated schema", recordIndex)
@@ -202,8 +200,8 @@ func serverRecordAddCells(objectID, ownerID uint32, recordIndex uint16, cells []
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
-	binary.LittleEndian.PutUint16(msg[12:], 0) // first source row
-	binary.LittleEndian.PutUint16(msg[14:], 1) // one complete row
+	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一个源行
+	binary.LittleEndian.PutUint16(msg[14:], 1) // 一整行
 	for column, cell := range cells {
 		switch colTypes[column] {
 		case recordColumnInt:
@@ -233,26 +231,25 @@ func serverRecordAddCells(objectID, ownerID uint32, recordIndex uint16, cells []
 const (
 	functionUnlockTaskID uint32 = 1346
 
-	// The direct branches of condition 23614 read Task_Accepted status column
-	// 6 for 1069--1073 and 1344.  The completed-task branch (26303) covers the
-	// same family, so the compatibility server exposes both proven sources.
+	// 条件 23614 的直连分支针对 1069--1073 和 1344 读取 Task_Accepted 的
+	// 状态列 6。已完成任务分支（26303）覆盖同一家族，因此兼容服务器把
+	// 两个已验证的来源都暴露出来。
 	facultyGuideTaskFirst uint32 = 1069
 	facultyGuideTaskLast  uint32 = 1073
 	facultyAltTaskID      uint32 = 1344
 
-	// Condition 23613 gates the 内功面板的演武 button before it emits the
-	// 1006/21 request.  Its direct branches read Task_Accepted status column 6
-	// for 1140--1147 and 51002; nested formula 23647 checks their completed
-	// bits.  Keep both because live evidence showed the completed bits alone
-	// did not enable btn_act.
+	// 条件 23613 在内功面板的演武按钮发出 1006/21 请求之前对其门控。其
+	// 直连分支针对 1140--1147 和 51002 读取 Task_Accepted 的状态列 6；
+	// 嵌套公式 23647 检查它们的已完成位。两者都要保留，因为实机证据
+	// 表明仅已完成位无法启用 btn_act。
 	facultyActTaskFirst uint32 = 1140
 	facultyActTaskLast  uint32 = 1147
 	facultyActAltTaskID uint32 = 51002
 )
 
-// taskCompletedBit follows the modern FxGameLogic predicate at 0x11854870.
-// It maps one-based task serials to 32-bit Task_Completed record rows/bits.
-// Task 1346 resolves to row 42, bit 3: mask 0x00000004.
+// taskCompletedBit 遵循 0x11854870 处的现代 FxGameLogic 谓词。它把一
+// 起始的任务序号映射到 32 位的 Task_Completed 记录行/位。任务 1346
+// 解析为第 42 行第 3 位：掩码 0x00000004。
 func taskCompletedBit(taskID uint32) (row uint32, mask uint32) {
 	serial := taskID + 1
 	row = serial / 32
@@ -289,12 +286,11 @@ func facultyAcceptedTaskIDs() []uint32 {
 	return append(taskIDs, facultyActAltTaskID)
 }
 
-// grantFunctionUnlock completes the standard main-function prerequisite and
-// both modern faculty prerequisite families.  The bounded seven-column
-// Task_Accepted rows attach the active-task gates to the player, while the
-// verified Task_Completed bitset retains their alternate completed branches.
-// Because Task_Completed is append-only, every preceding row must be emitted,
-// including zero rows before the rows that contain the required bits.
+// grantFunctionUnlock 补齐标准的主功能前置条件以及两个现代修炼前置
+// 家族。有界的七列 Task_Accepted 行把活动任务门控挂到玩家身上，而
+// 已验证的 Task_Completed 位集保留它们对应的已完成分支。由于
+// Task_Completed 只能追加，前面的每一行都必须发出，包括包含所需位
+// 的各行之前的零值行。
 func grantFunctionUnlock(conn sceneMessageConnection) error {
 	taskIDs := []uint32{functionUnlockTaskID, facultyAltTaskID, facultyActAltTaskID}
 	for taskID := facultyGuideTaskFirst; taskID <= facultyGuideTaskLast; taskID++ {
@@ -328,9 +324,9 @@ func grantFunctionUnlock(conn sceneMessageConnection) error {
 	return nil
 }
 
-// grantStarterQingGong writes both client-side truth sources after ClientReady:
-// QingGongRec powers CheckLearn_QingGong while View 46 backs condition checks
-// against QingGongContainer.
+// grantStarterQingGong 在 ClientReady 之后写入两个客户端侧的事实来源：
+// QingGongRec 驱动 CheckLearn_QingGong，而 View 46 支撑针对
+// QingGongContainer 的条件检查。
 func grantStarterQingGong(conn sceneMessageConnection) error {
 	for _, id := range starterQingGongIDs {
 		if err := conn.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordQingGong, id)); err != nil {
@@ -356,11 +352,10 @@ func grantStarterQingGong(conn sceneMessageConnection) error {
 	return nil
 }
 
-// activateQingGongRecord implements CLIENT_CUSTOMMSG_ACTIVE_QINGGONG (217).
-// The current Lua UI's check_qgskill_is_avtive queries ActiveQGSkillRec
-// before it permits an equipped qinggong_gaojie action. This is distinct from
-// 216, which spends the movement resource only after an action is already
-// active.
+// activateQingGongRecord 实现 CLIENT_CUSTOMMSG_ACTIVE_QINGGONG (217)。
+// 当前 Lua UI 的 check_qgskill_is_avtive 在允许已装备的 qinggong_gaojie
+// 动作之前会查询 ActiveQGSkillRec。这与 216 不同，后者只在动作已经
+// 激活之后才消耗移动资源。
 func activateQingGongRecord(conn sceneMessageConnection, player *playerActor, id string) (bool, error) {
 	if player == nil {
 		return false, fmt.Errorf("character has not entered a scene")
@@ -377,8 +372,8 @@ func activateQingGongRecord(conn sceneMessageConnection, player *playerActor, id
 	return true, nil
 }
 
-// grantRedSuperArmor updates BufferInfo1, which enters FxGameLogic's native
-// BuffStore setter. S->C custom 0x1E is not this server-to-client route.
+// grantRedSuperArmor 更新 BufferInfo1，它进入 FxGameLogic 的原生
+// BuffStore 设置器。S->C 自定义 0x1E 并不是这条服务器到客户端的路由。
 func grantRedSuperArmor(conn sceneMessageConnection, player *playerActor) (time.Time, error) {
 	if player == nil {
 		return time.Time{}, fmt.Errorf("character has not entered a scene")
@@ -428,7 +423,7 @@ func endQingGongBuff(conn sceneMessageConnection, player *playerActor, definitio
 	return nil
 }
 
-// scheduleRedSuperArmorExpiry clears the same native state at expiry.
+// scheduleRedSuperArmorExpiry 在到期时清除同一份原生状态。
 func scheduleRedSuperArmorExpiry(conn sceneMessageConnection, player *playerActor, expires time.Time) {
 	schedulePlayerBuffExpiry(conn, player, redSuperArmorBuffSlot, redSuperArmorStaticData, expires)
 }

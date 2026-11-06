@@ -14,9 +14,9 @@ import (
 
 var defaultDoorDataPath = filepath.Join(defaultModernShareRoot, "rule", "door_data.ini")
 
-// scenePortalRoute describes only routes that are fully present in the
-// installed modern resources. Adventure/instance doors intentionally do not
-// use this type: their clone admission contract is not yet recovered.
+// scenePortalRoute 只描述在已安装的现代资源中完整存在的路线。
+// 奇遇/副本传送门有意不
+// 使用此类型：它们的副本准入契约尚未被还原。
 type scenePortalRoute struct {
 	sameScene     bool
 	destination   sceneDestination
@@ -67,9 +67,9 @@ func doorPortalRoute(npc npcSpawn) (scenePortalRoute, bool, error) {
 			source:        "DoorPackageID=" + packageID,
 		}, true, nil
 	case "gotodoor":
-		// GotoDoor's installed PlayerTransferPosition carries an exact local
-		// transform and no target scene. It is a same-scene portal, not a clone
-		// entry or a generic external transport.
+		// GotoDoor 安装的 PlayerTransferPosition 携带精确的本地
+		// transform 且不含目标场景。它是同场景传送门，不是副本
+		// 入口，也不是通用的外部传送。
 		positionText, _ := effectiveNPCBusinessValue(npc, "PlayerTransferPosition")
 		position, ok := parseDoorPosition(positionText)
 		if !ok {
@@ -169,10 +169,10 @@ func parseDoorCoordinates(x, y, z, orient string) (role.Position, bool) {
 	return role.Position{X: parsed[0], Y: parsed[1], Z: parsed[2], Orient: parsed[3]}, true
 }
 
-// resourceForDoorScene derives the installed terrain name from the modern
-// scene config. DoorData's TargetScene carries only the config; EntryScene
-// additionally requires the terrain resource. Mainline city/school/born
-// maps use their numeric prefix, while clone maps use their full config name.
+// resourceForDoorScene 从现代场景配置推导已安装的地形名。
+// DoorData 的 TargetScene 只携带配置名；EntryScene
+// 还额外需要地形资源。主线的 city/school/born
+// 地图使用其数字前缀，而副本地图使用完整配置名。
 func resourceForDoorScene(config string) (string, error) {
 	config = strings.ReplaceAll(strings.TrimSpace(config), "/", `\`)
 	base := strings.TrimSuffix(filepath.Base(config), filepath.Ext(config))
@@ -188,6 +188,6 @@ func resourceForDoorScene(config string) (string, error) {
 			}
 		}
 	}
-	// Clone and special scenes generally name terrain after their whole config.
+	// 副本地图和特殊场景通常直接以完整配置名作为地形名。
 	return lower, nil
 }

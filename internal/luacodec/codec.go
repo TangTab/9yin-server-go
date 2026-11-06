@@ -9,16 +9,16 @@ import (
 
 var defaultKey = []byte("snailgame")
 
-// Transform converts between a standard Lua 5.1 chunk and the FxCore game
-// representation. The operation is symmetric: FxCore XORs every LoadBlock
-// independently, restarting the key for each block, while leaving the header
-// untouched.
+// Transform 在标准 Lua 5.1 二进制块与 FxCore 游戏表示之间
+// 互相转换。该操作是对称的：FxCore 对每个 LoadBlock 独立做 XOR，
+// 每个块都重新从头应用密钥，而头部保持
+// 不动。
 func Transform(src []byte) ([]byte, error) {
 	return TransformWithKey(src, defaultKey)
 }
 
-// TransformWithKey converts a chunk using the runtime key embedded in the
-// matching fxgame.exe build.
+// TransformWithKey 使用对应 fxgame.exe 版本内嵌的运行时密钥
+// 转换二进制块。
 func TransformWithKey(src, key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, fmt.Errorf("empty key")
@@ -29,8 +29,8 @@ func TransformWithKey(src, key []byte) ([]byte, error) {
 	if src[6] != 1 || src[7] != 4 || src[8] != 8 || src[9] != 4 || src[10] != 8 {
 		return nil, fmt.Errorf("unsupported chunk layout: endian=%d int=%d size_t=%d instruction=%d number=%d", src[6], src[7], src[8], src[9], src[10])
 	}
-	// The first post-header field is a size_t source-string length. Use it to
-	// distinguish standard input from game input so parsing uses plain values.
+	// 头部之后的第一个字段是 size_t 类型的源字符串长度。利用它
+	// 区分标准输入与游戏输入，使解析过程始终使用明文值。
 	rawSize := binary.LittleEndian.Uint64(src[12:20])
 	x := append([]byte(nil), src[12:20]...)
 	for i := range x {
@@ -60,9 +60,9 @@ type codec struct {
 	key          []byte
 }
 
-// block toggles one FxCore LoadBlock and returns its decoded bytes. The input
-// may be either standard or game form; callers determine direction by whether
-// parsed values are sensible.
+// block 翻转一个 FxCore LoadBlock 并返回解码后的字节。输入
+// 既可以是标准形式也可以是游戏形式；调用方根据解析出的值是否
+// 合理来判断转换方向。
 func (c *codec) block(n int) ([]byte, error) {
 	if n < 0 || c.off+n > len(c.src) {
 		return nil, io.ErrUnexpectedEOF
@@ -139,11 +139,11 @@ func (c *codec) function() error {
 	}
 	if _, err := c.u32(); err != nil {
 		return err
-	} // line defined
+	} // 起始定义行
 	if _, err := c.u32(); err != nil {
 		return err
-	} // last line defined
-	for i := 0; i < 4; i++ { // nups, params, vararg, max stack
+	} // 末尾定义行
+	for i := 0; i < 4; i++ { // 依次为 nups、params、vararg、max stack
 		if _, err := c.u8(); err != nil {
 			return err
 		}

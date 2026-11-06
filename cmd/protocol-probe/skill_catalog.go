@@ -144,8 +144,8 @@ func loadSkillResourceTables() (skillResourceTables, error) {
 			return result, loadErr
 		}
 		for section, fields := range actionTable {
-			// zhaoshi_list.ini includes these files as one logical action
-			// namespace. A later duplicate section follows the include order.
+			// zhaoshi_list.ini 把这些文件包含进同一个逻辑动作
+			// 命名空间。后出现的重名小节遵循 include 顺序。
 			result.actions[section] = fields
 		}
 	}
@@ -252,8 +252,8 @@ func compileSkillActions(fields []iniField) (string, time.Duration, []skillActio
 		followups = append(followups, skillActionSegment{
 			action: raw[i].action,
 			at:     at,
-			// State plays the complete named resource. It cannot select the
-			// start/end slice encoded in zhaoshi_player.ini.
+			// State 会播放完整的具名资源。它无法选择
+			// zhaoshi_player.ini 中编码的起止片段。
 			duration: time.Duration(raw[i].endFrame / 30 * float64(time.Second)),
 		})
 	}

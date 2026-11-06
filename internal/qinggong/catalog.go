@@ -1,5 +1,5 @@
-// Package qinggong loads the current-client lightness-skill definitions used
-// by the server to validate and charge C2S USE_QINGGONG (216) requests.
+// Package qinggong 加载当前客户端的轻功定义，供服务端
+// 校验并扣除 C2S USE_QINGGONG (216) 请求。
 package qinggong
 
 import (
@@ -10,9 +10,9 @@ import (
 	"strings"
 )
 
-// Definition is the server-relevant part of one QGDefine.ini section.
-// Para fields describe client movement performance; Consume is the resource
-// amount the server must charge when the client requests this qinggong ID.
+// Definition 是 QGDefine.ini 某个小节中与服务端相关的部分。
+// Para 字段描述客户端的移动表现；Consume 是客户端请求该轻功 ID 时
+// 服务端必须扣除的资源量。
 type Definition struct {
 	ID       string
 	Type     int32

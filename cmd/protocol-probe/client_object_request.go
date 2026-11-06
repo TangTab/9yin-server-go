@@ -2,10 +2,10 @@ package main
 
 import "encoding/binary"
 
-// clientObjectRequest is the observed fixed C2S 0x07 reference packet. The
-// client sends it when an in-world object is clicked. Its surrounding request
-// type has not yet been named by the modern client, so only the proven identity
-// fields are exposed here rather than pretending it is a dialogue packet.
+// clientObjectRequest 是已观察到的固定 C2S 0x07 参考包。
+// 客户端在点击场景内的对象时发送此包。其所属的请求类型
+// 在现代客户端中尚未得到命名，因此这里只暴露已被证实的身份
+// 字段，而不是伪装成对话包。
 type clientObjectRequest struct {
 	Sequence uint32
 	ObjectID uint32
@@ -14,8 +14,8 @@ type clientObjectRequest struct {
 }
 
 func parseClientObjectRequest(message []byte) (clientObjectRequest, bool) {
-	// Captures are exactly 33 bytes. The identity begins at offsets 21 and 25;
-	// accept a longer compatible packet but never inspect an incomplete one.
+	// 抓包恒为 33 字节。身份字段起始于偏移 21 和 25；
+	// 接受更长的兼容包，但绝不解析不完整的包。
 	if len(message) < 29 || message[0] != 0x07 {
 		return clientObjectRequest{}, false
 	}

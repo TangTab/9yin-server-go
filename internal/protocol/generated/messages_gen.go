@@ -17,7 +17,7 @@ func getF32(b []byte, off int) float32 { return math.Float32frombits(getU32(b, o
 func putU32(b []byte, off int, v uint32) { binary.LittleEndian.PutUint32(b[off:], v) }
 func putF32(b []byte, off int, v float32) { putU32(b, off, math.Float32bits(v)) }
 
-// ServerLocation is S2C 0x1F (exact 25 bytes).
+// ServerLocation 是 S2C 0x1F（固定 25 字节）。
 type ServerLocation struct {
 	ObjectID uint32
 	OwnerID  uint32
@@ -73,7 +73,7 @@ func (m ServerRemoveObject) Encode() []byte {
 	return b
 }
 
-// ServerAddObjectHeader is the fixed prefix of S2C 0x0D (min 63 bytes + archive).
+// ServerAddObjectHeader 是 S2C 0x0D 的固定前缀（最少 63 字节 + 属性档案）。
 type ServerAddObjectHeader struct {
 	IdentLow, IdentHigh uint32
 	X, Y, Z, Orient float32
@@ -110,15 +110,15 @@ func (m ServerAddObjectHeader) EncodeHeader() []byte {
 	return b
 }
 
-// PropertyCell is one entry in a property archive.
+// PropertyCell 是属性档案中的一个条目。
 type PropertyCell struct {
 	Index uint16
 	Type  uint8
 	Raw   []byte
 }
 
-// ParsePropertyArchive walks a modern property archive after a count.
-// Value payload layout depends on Type; unknown types leave Raw as remaining best-effort.
+// ParsePropertyArchive 在 count 之后遍历现代属性档案。
+// 值负载的布局取决于 Type；未知类型时尽最大努力把剩余字节留在 Raw 中。
 func ParsePropertyArchive(b []byte, count int) (cells []PropertyCell, err error) {
 	off := 0
 	for i := 0; i < count; i++ {
@@ -136,7 +136,7 @@ func ParsePropertyArchive(b []byte, count int) (cells []PropertyCell, err error)
 			n = 4
 		case 3: // int64/double
 			n = 8
-		case 4: // string with u32 length prefix (common modern form)
+		case 4: // 带 u32 长度前缀的字符串（现代客户端常见形式）
 			if off+4 > len(b) { return cells, ErrShortBuffer }
 			n = int(getU32(b, off))
 			off += 4

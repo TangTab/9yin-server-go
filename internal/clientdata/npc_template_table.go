@@ -88,8 +88,8 @@ func (t *NPCTemplateTable) Lookup(configID string) (NPCTemplateRow, error) {
 	}
 }
 
-// LoadNPCTemplateTable reads the client's GBK-encoded, quoted TSV format.
-// encoding/csv is deliberate: some fields contain quoted embedded newlines.
+// LoadNPCTemplateTable 读取客户端的 GBK 编码带引号 TSV 格式。
+// 使用 encoding/csv 是有意为之：某些字段含有被引号包裹的换行符。
 func LoadNPCTemplateTable(r io.Reader, source string) (*NPCTemplateTable, error) {
 	if r == nil {
 		return nil, errors.New("clientdata: nil NPC template reader")
@@ -163,8 +163,8 @@ func LoadNPCTemplateTable(r io.Reader, source string) (*NPCTemplateTable, error)
 				break
 			}
 		}
-		// The shipped table contains separator rows made entirely of empty TSV
-		// cells. They are layout, not logical data records.
+		// 随客户端发布的表格中存在完全由空 TSV 单元格组成的分隔行。
+		// 它们属于排版结构，不是逻辑数据记录。
 		if allEmpty {
 			continue
 		}

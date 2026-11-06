@@ -278,10 +278,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			gm.detach(gmSession.id)
 		}
 	}()
-	// Only the one-byte ClientReady sent by stage_main after the original
-	// player archive has completed is a safe boundary for a live 0x0C test.
-	// Earlier 0x0A packets are normal client custom/activity traffic and can
-	// arrive while the initial ServerAddObject is still being processed.
+	// 只有 stage_main 在原始玩家归档完成后发出的一字节
+	// ClientReady 才是实机 0x0C 测试的安全边界。
+	// 更早的 0x0A 包属于客户端常规自定义/活动流量，
+	// 可能在首个 ServerAddObject 尚未处理完时就到达。
 	explicitSceneReady := false
 	activeNPCs := make(map[int]struct{})
 	lastPositionSave := time.Time{}
@@ -494,11 +494,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 		}
 		return nil
 	}
-	// Keep exactly one goroutine in ReadFrame, then multiplex its completed
-	// frames with GM commands below.  Reading directly in the main loop made a
-	// quiet client block GM commands indefinitely until it next moved or sent a
-	// heartbeat.  A read deadline is deliberately not used here: timing out in
-	// the middle of an escaped transport frame could discard its partial body.
+	// 只保留一个 goroutine 阻塞在 ReadFrame 上，
+	// 再将其完成的帧与下方的 GM 命令多路复用。
+	// 若在主循环中直接读取，一个安静的客户端会无限期阻塞
+	// GM 命令，直到它下次移动或发送心跳。这里刻意不设读取超时：
+	// 在带转义传输帧的中途超时可能丢弃其不完整的包体。
 	type inboundFrame struct {
 		plain []byte
 		err   error
@@ -638,8 +638,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 			log.Printf("%s: sent ServerPlayerRoles(opcode=0x04, role_exists=%t)", conn.RemoteAddr(), exists)
 		} else if plain[0] == 0x03 {
-			// ClientMsgWorldInfo. The old world server replies with opcode
-			// 0x05, uint16 info type, and a NUL-terminated UCS-2 string.
+			// ClientMsgWorldInfo。旧的世界服务器以 opcode
+			// 0x05、uint16 信息类型以及 NUL 结尾的 UCS-2 字符串应答。
 			if err := link.WriteFrame(worldInfo(0, "0,book1,0,book2,0,book4,0,book5,0,book8,0,0")); err != nil {
 				log.Printf("%s: write empty world info: %v", conn.RemoteAddr(), err)
 				return
@@ -694,20 +694,20 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				persistFaculty()
 				log.Printf("%s: initialized persistent normal faculty role=%d name=%s", conn.RemoteAddr(), activeRole.ID, player.progress.facultyName)
 			}
-			// The scene server must define the visible-property and visible-record
-			// schemas before it sends any object archives. CClassSet::InitTableMessage
-			// in the reference server builds these as opcodes 0x09 and 0x0A.
-			// Without 0x09 the client has no authoritative index/type mapping and
-			// object creation fails at varying coordinates while decoding attrs.
+			// 场景服务器在发送任何对象归档之前，必须先定义
+			// 可见属性和可见记录两种 schema。参考服务器中的
+			// CClassSet::InitTableMessage 将它们构建为 opcode 0x09 和 0x0A。
+			// 若缺少 0x09，客户端就没有权威的索引/类型映射，
+			// 对象创建会在解码属性时于不同坐标处失败。
 			propertyTable := visiblePropertyTable(sceneVisiblePropertyFields(npcSchema.Fields))
 			if err := link.WriteFrame(propertyTable); err != nil {
 				log.Printf("%s: write property table: %v", conn.RemoteAddr(), err)
 				return
 			}
-			// QingGongRec is a player record, not a visible object property.  The
-			// current client refuses to treat a lightness skill as learned until
-			// this schema has been negotiated, even when its energy properties
-			// (QingGongPoint/MaxQingGongPoint) are already present.
+			// QingGongRec 是玩家记录，而非可见对象属性。当前
+			// 客户端在该 schema 完成协商之前拒绝将轻功视为已学习，
+			// 即使其能量属性（QingGongPoint/MaxQingGongPoint）
+			// 已经存在。
 			recordTable, recordErr := serverRecordTable(qingGongRecordSchemas)
 			if recordErr != nil {
 				log.Printf("%s: encode record table: %v", conn.RemoteAddr(), recordErr)
@@ -741,10 +741,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				return
 			}
 			log.Printf("%s: sent player 0x0D + 0x1F + authoritative vital 0x10", conn.RemoteAddr())
-			// Register the initial nearby slice of the complete scene catalog now,
-			// but do not put it on the wire until the client readiness barrier.
-			// Loading a scene clears the client's native object table. Objects sent
-			// before ClientReady therefore flash once and are immediately removed.
+			// 现在就注册完整场景目录中初始的邻近切片，
+			// 但在客户端就绪屏障之前不将其发送上线。
+			// 加载场景会清空客户端的原生对象表。因此在
+			// ClientReady 之前发送的对象会闪现一次随即被移除。
 			clear(activeNPCs)
 			nearbyCount, _, err := synchronizeNPCViewport(world, sceneNPCs, activeNPCs, activeRole.Location.Position, npcRadius)
 			if err != nil {
@@ -764,20 +764,20 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			log.Printf("%s: registered %d nearby NPC objects from catalog=%d; waiting for ClientReady", conn.RemoteAddr(), nearbyCount, len(sceneNPCs))
 
 		} else if plain[0] == 0x09 {
-			// A live 0x0C scene replacement produces an early 0x0A while the
-			// old stage is still unwinding.  The later 0x09 is the first point
-			// at which the target scene's native object table survives writes.
-			// Materialize the deferred player/NPC generation here, rather than
-			// treating that earlier activity packet as readiness.
+			// 实机 0x0C 场景替换会在旧 stage 尚在收尾时
+			// 产生一个较早的 0x0A。随后的 0x09 才是目标场景
+			// 原生对象表能承受写入的第一个时点。
+			// 在此处落实被延迟的玩家/NPC 生成，
+			// 而不是把那个更早的活动包当作就绪信号。
 			if runtime != nil && runtime.awaitingStableReentryReady {
 				if err := world.clientReady(); err != nil {
 					log.Printf("%s: arm stable re-entry barrier: %v", conn.RemoteAddr(), err)
 					return
 				}
-				// Target stage_main requires its 1-1 player object before it opens
-				// the scene, so 0x0D was already sent after EntryScene. Delay only
-				// 0x1F ServerLocation (the native visual move) until this target
-				// ClientReady boundary.
+				// 目标 stage_main 在打开场景之前需要它的 1-1 玩家对象，
+				// 因此 0x0D 已在 EntryScene 之后发送。只把
+				// 0x1F ServerLocation（原生视觉移动）延迟到这个目标
+				// ClientReady 边界。
 				if err := sendPlayerLocationAndVitals(link, runtime.player, runtime.activeRole.Location.Position); err != nil {
 					log.Printf("%s: write deferred player location/vitals: %v", conn.RemoteAddr(), err)
 					return
@@ -795,10 +795,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					log.Printf("%s: complete stable re-entry activity: %v", conn.RemoteAddr(), err)
 					return
 				}
-				// ServerExitScene clears the native player object, including its
-				// attached records and View 46 contents. The schemas remain
-				// connection-scoped, but the rows must be restored for the newly
-				// created 1-1 player object after every completed 0x0C re-entry.
+				// ServerExitScene 会清除原生玩家对象，包括其挂载的记录和
+				// View 46 内容。各 schema 仍为连接级作用域，
+				// 但每次完成 0x0C 重入后，必须为新创建的 1-1 玩家对象
+				// 恢复这些行。
 				if player != nil {
 					if grantErr := grantStarterQingGong(link); grantErr != nil {
 						log.Printf("%s: restore qinggong after stable re-entry: %v", conn.RemoteAddr(), grantErr)
@@ -810,12 +810,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					}
 					qingGongGranted = true
 					log.Printf("%s: restored %d QingGongRec rows and %d View=46 items after 0x0C re-entry", conn.RemoteAddr(), len(starterQingGongIDs), len(starterQingGongIDs)+len(starterQingGongSkillIDs))
-					// ServerExitScene removes View 43 together with the player object.
-					// neigongGranted only describes the old scene, so it must never
-					// suppress this restore for a new native player object. Without
-					// the View 43 entries faculty.lua can receive 1006/1 but cannot
-					// resolve FacultyName to a wuxue object, and consequently leaves
-					// the normal-begin button disabled (no 1006/11 is emitted).
+					// ServerExitScene 会连同玩家对象一起移除 View 43。
+					// neigongGranted 只描述旧场景，因此绝不能让它
+					// 抑制新原生玩家对象的这次恢复。
+					// 若缺少 View 43 条目，faculty.lua 能收到 1006/1
+					// 却无法将 FacultyName 解析为 wuxue 对象，
+					// 从而导致普通开始按钮保持禁用（不会发出 1006/11）。
 					if progressErr := grantStarterProgress(); progressErr != nil {
 						log.Printf("%s: restore inner-power/attributes after 0x0C re-entry: %v", conn.RemoteAddr(), progressErr)
 						return
@@ -836,9 +836,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 			explicitSceneReady = true
 			log.Printf("%s: observed explicit stage_main ClientReady (0x09)", conn.RemoteAddr())
-			// On the current client the initial 0x0A arrives before the native
-			// stage finishes constructing and clears learned-skill state later.
-			// Only the explicit stage_main 0x09 is safe for QingGongRec/View=46.
+			// 在当前客户端上，初始 0x0A 会在原生 stage 构造完成之前到达，
+			// 而后者稍后还会清除已学习技能状态。
+			// 只有显式的 stage_main 0x09 对 QingGongRec/View=46 是安全的。
 			if player != nil && !qingGongGranted {
 				if grantErr := grantStarterQingGong(link); grantErr != nil {
 					log.Printf("%s: grant stable starter qinggong: %v", conn.RemoteAddr(), grantErr)
@@ -869,16 +869,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				}
 				log.Printf("%s: enabled native skill-action switch=%d via modern S2C 0x27 message=%d", conn.RemoteAddr(), skillActionInputSwitch, serverSwitchControlMessage)
 			}
-			// Current retail traffic can repeat ClientReady after a scene has
-			// already become active (for example after a late UI/stage callback).
-			// It is not a request to create a new scene generation; rejecting it
-			// tears down an otherwise healthy connection.
+			// 当前正式服流量可能在场景已经激活后重复发送 ClientReady
+			// （例如在较晚的 UI/stage 回调之后）。
+			// 这不是创建新场景世代的请求；拒绝它会拆掉一个
+			// 本来健康的连接。
 			if machine.Phase() == session.PhaseInWorld {
 				log.Printf("%s: ignored duplicate ClientReady in active scene", conn.RemoteAddr())
 				continue
 			}
-			// ClientReady is the boundary at which the native scene and its
-			// object manager are stable. Reconcile the player's viewport here.
+			// ClientReady 是原生场景及其对象管理器稳定下来的边界，
+			// 在此处校正玩家的视口。
 			if err := world.clientReady(); err != nil {
 				log.Printf("%s: reconcile ready viewport: %v", conn.RemoteAddr(), err)
 				return
@@ -900,17 +900,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 		} else if plain[0] == 0x0A {
 			if runtime != nil && runtime.awaitingStableReentryReady {
-				// This packet is emitted just after 0x0C/0x0B, before the target
-				// terrain finishes. It belongs to the old stage and must not open
-				// the new scene's object barrier.
+				// 这个包紧随 0x0C/0x0B 之后发出，此时目标地形尚未
+				// 加载完成。它属于旧 stage，绝不能用来打开
+				// 新场景的对象屏障。
 				log.Printf("%s: ignored early 0x0A while target scene is loading", conn.RemoteAddr())
 				continue
 			}
-			// The current retail client sometimes omits the one-byte 0x09 that
-			// older captures called ClientReady and sends its first 0x0A directly
-			// after the entry chain. Treat that observed packet as the explicit
-			// compatibility barrier, rather than attempting a re-entry while the
-			// session is still PhaseEnteringWorld.
+			// 当前正式服客户端有时会省略旧抓包中称为
+			// ClientReady 的单字节 0x09，而在进入链之后
+			// 直接发送第一个 0x0A。将该观测到的包视为显式
+			// 兼容屏障，而不是在会话仍处于
+			// PhaseEnteringWorld 时尝试重入。
 			if machine.Phase() == session.PhaseEnteringWorld {
 				if err := world.clientReady(); err != nil {
 					log.Printf("%s: arm compatibility ready barrier: %v", conn.RemoteAddr(), err)
@@ -938,12 +938,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				}
 				log.Printf("%s: promoted observed 0x0A to compatibility ClientReady", conn.RemoteAddr())
 			}
-			// A requested live transition takes priority over materializing the
-			// old scene.  Sending hundreds of old NPC objects immediately before
-			// ExitScene both wastes bandwidth and races the native teardown.
-			// Never start a live scene switch from the compatibility 0x0A.
-			// The concrete stage_main ClientReady above is emitted only after
-			// the current scene's player/archive processing has settled.
+			// 请求的实机切图优先于旧场景的实体化。
+			// 在 ExitScene 之前立刻发送数百个旧 NPC 对象
+			// 既浪费带宽，又会与原生拆除流程竞态。
+			// 绝不从兼容 0x0A 启动实机切图。
+			// 上面具体的 stage_main ClientReady 只在当前场景的
+			// 玩家/归档处理落定之后才会发出。
 			switchAfterActivity := switchDestination != nil && runtime != nil && explicitSceneReady && (machine.Phase() == session.PhaseAwaitingActivity || machine.Phase() == session.PhaseInWorld)
 			if !switchAfterActivity {
 				if err := world.clientActivity(); err != nil {
@@ -973,7 +973,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 			}
 			if switchAfterActivity {
 				destination := *switchDestination
-				switchDestination = nil // one explicit test transition per connection
+				switchDestination = nil // 每个连接只执行一次显式测试切图
 				neigongGranted = false
 				if err := runtime.SwitchScene(destination); err != nil {
 					log.Printf("%s: live scene switch: %v", conn.RemoteAddr(), err)
@@ -1007,10 +1007,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					}
 					log.Printf("%s: NPC viewport moved center=(%.2f,%.2f) active=%d", conn.RemoteAddr(), x, z, nearbyCount)
 				}
-				// Retail Door objects activate as the role crosses their installed
-				// MoveTarget/SpringRange, not only after a manual click. Detect that
-				// boundary after this motion update has been accepted by the server,
-				// then reuse the exact same portal execution/persistence path.
+				// 正式服 Door 对象在角色越过其配置的
+				// MoveTarget/SpringRange 时激活，而不仅在手动点击之后。在
+				// 本次移动更新被服务器接受后检测该边界，
+				// 再复用完全相同的传送门执行/持久化路径。
 				if portal, enteredPortal := world.portalAt(location.Position, time.Now()); enteredPortal {
 					if runtime == nil {
 						log.Printf("%s: ignore proximity portal %s before scene runtime", conn.RemoteAddr(), portal.source)
@@ -1057,11 +1057,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 					}
 				}
 			}
-			// The current client places GameVisual:CustomSend inside its 0x0A
-			// activity envelope.  In particular, real qinggong actions arrive
-			// here as TVarList(216, qinggong_id, begin_or_end), rather than as a
-			// top-level 0x1E frame.  Parse only a complete typed list so other
-			// activity/motion packets keep their existing lifecycle behaviour.
+			// 当前客户端把 GameVisual:CustomSend 放在其 0x0A
+			// 活动信封内。尤其是真实的轻功动作在此以
+			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
+			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
+			// 活动/移动包保持原有的生命周期行为。
 			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
@@ -1118,10 +1118,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				}
 				continue
 			}
-			// Doors are direct object interactions, not NPC menus. The target
-			// route comes solely from the installed DoorPackageID/door_data.ini
-			// or GotoDoor PlayerTransferPosition data; unrecovered plot/clone
-			// doors deliberately fall through to ordinary selection.
+			// 门是直接的对象交互，而非 NPC 菜单。目标
+			// 路线只来自已安装的 DoorPackageID/door_data.ini
+			// 或 GotoDoor PlayerTransferPosition 数据；未还原的剧情/克隆
+			// 门刻意回落到普通选择处理。
 			portal, isPortal, portalErr := world.portalRoute(request)
 			if portalErr != nil {
 				log.Printf("%s: resolve portal id=%d owner=%d: %v", conn.RemoteAddr(), request.ObjectID, request.OwnerID, portalErr)
@@ -1212,7 +1212,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 				if _, handleErr := handleActiveParryCustom(player, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle active parry: %v", conn.RemoteAddr(), handleErr)
 				}
-			case 215, 1006: // inner-power equip / faculty state machine
+			case 215, 1006: // 内功穿戴 / faculty 状态机
 				if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
 					log.Printf("%s: handle inner-power msg=%d: %v", conn.RemoteAddr(), custom.Values[0].Int32, handleErr)
 					return
@@ -1223,11 +1223,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyProgressStore,
 	}
 }
 
-// handleQingGongCustom applies a verified current-client 216 request. The
-// third value in the captured 0x0A form is a begin/end marker: continuous
-// qinggong types send 1 when starting and 0 when stopping.  Charging both
-// would make a single hold/release cost twice, so only a begin marker spends
-// the authoritative point resource.
+// handleQingGongCustom 处理一个经核实的当前客户端 216 请求。抓包
+// 0x0A 形态中的第三个值是开始/结束标记：连续型
+// 轻功在启动时发 1、停止时发 0。两次都扣费会让
+// 一次按住/释放消耗双倍，因此只有开始标记才扣减
+// 权威的点数资源。
 func handleQingGongCustom(link sceneMessageConnection, player *playerActor, catalog *qinggong.Catalog, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != 216 {
 		return false, nil
@@ -1316,14 +1316,14 @@ func synchronizeNPCViewport(world *sceneLifecycle, catalog []npcSpawn, active ma
 	radiusSquared := radius * radius
 	desired := make(map[int]struct{})
 	for i := range catalog {
-		// EventNpc instances are mission/event triggers, not ambient scene
-		// residents.  The production server only gives a player an EventNpc
-		// when that player's task/event state owns it.  This local server does
-		// not yet persist that ownership, so the safe default is to omit the
-		// object completely: no 0x0D means the client never constructs a
-		// visual object for it.  When task state is implemented, this helper is
-		// the single admission point for selectively allowing the matching
-		// EventNpc back into this viewport.
+		// EventNpc 实例是任务/事件触发器，而非场景常驻
+		// 居民。正式服务器只在该玩家的任务/事件状态
+		// 拥有某个 EventNpc 时才把它下发给玩家。本地服务器尚未
+		// 持久化这种归属关系，因此安全的默认做法是完全省略
+		// 该对象：没有 0x0D，客户端就绝不会为它构造
+		// 可视对象。待实现任务状态后，这个辅助函数是选择性地
+		// 允许匹配 EventNpc 重新进入此视口的
+		// 唯一准入点。
 		if !npcVisibleInLocalViewport(catalog[i]) {
 			continue
 		}
@@ -1375,12 +1375,12 @@ func countNPCsWithin(catalog []npcSpawn, position role.Position, radius float32)
 	return count
 }
 
-// npcVisibleInLocalViewport is deliberately a server-side admission gate.
-// The modern creator templates encode actual trigger objects with
-// ScriptClass=EventNpc (for example, EventNpc_gmpzyb_028 is described as a
-// 古墓派事件触发 point).  These are only meaningful after the server has bound
-// them to a player's active task/event.  No such binding exists in the local
-// role model yet, so an EventNpc has no eligible viewer.
+// npcVisibleInLocalViewport 刻意充当服务器侧的准入闸门。
+// 现代 creator 模板会将真实的触发器对象编码为
+// ScriptClass=EventNpc（例如 EventNpc_gmpzyb_028 被描述为
+// 古墓派事件触发点）。只有在服务器将它们绑定到
+// 玩家的活动任务/事件之后才有意义。本地角色模型中尚不存在
+// 这种绑定，因此 EventNpc 没有合格的观看者。
 func npcVisibleInLocalViewport(npc npcSpawn) bool {
 	return !strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc")
 }
@@ -1389,16 +1389,16 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 	msg := make([]byte, 0x3f, 256)
 	msg[0] = 0x0D
 	binary.LittleEndian.PutUint32(msg[1:], objectID)
-	// This field is the current scene/owner identity, not the viewport slot.
-	// The player entry establishes scene identity 1 for this connection.
+	// 该字段是当前场景/所有者标识，而非视口槽位。
+	// 玩家入场为该连接确立了场景标识 1。
 	binary.LittleEndian.PutUint32(msg[5:], 1)
 	binary.LittleEndian.PutUint32(msg[0x09:], math.Float32bits(npc.x))
 	binary.LittleEndian.PutUint32(msg[0x0D:], math.Float32bits(npc.y))
 	binary.LittleEndian.PutUint32(msg[0x11:], math.Float32bits(npc.z))
 	binary.LittleEndian.PutUint32(msg[0x15:], math.Float32bits(npc.orient))
-	// Offsets 0x09..0x3c are the 13-value transform/motion header copied by
-	// current FxNet2::ServerAddObject. Object kind belongs in the negotiated
-	// Type property below; do not smuggle a speculative kind into the tail.
+	// 偏移 0x09..0x3c 是当前 FxNet2::ServerAddObject 复制的
+	// 13 值变换/移动头部。对象类别属于下方协商的
+	// Type 属性；不要把猜测的类别塞进尾部。
 	_ = probeIndex
 	properties, err := npc.resolved.OrderedProperties(clientdata.VisibleNPCModernV1())
 	if err != nil {
@@ -1414,7 +1414,7 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 func sceneObjectByteProperty(objectID, ownerID uint32, propertyIndex uint16, value byte) []byte {
 	msg := make([]byte, 12, 15)
 	msg[0] = 0x10 // SERVER_OBJECT_PROPERTY
-	msg[1] = 0    // scene object, not view object
+	msg[1] = 0    // 场景对象，而非视图对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], 1)
@@ -1426,7 +1426,7 @@ func sceneObjectByteProperty(objectID, ownerID uint32, propertyIndex uint16, val
 func sceneObjectTransformProperties(objectID, ownerID uint32, transform worldcore.Transform) []byte {
 	msg := make([]byte, 12, 36)
 	msg[0] = 0x10 // SERVER_OBJECT_PROPERTY
-	msg[1] = 0    // scene object, not view object
+	msg[1] = 0    // 场景对象，而非视图对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], 4)
@@ -1445,10 +1445,10 @@ func sceneObjectTransformProperties(objectID, ownerID uint32, transform worldcor
 	return msg
 }
 
-// serverLocation encodes FxNet2's modern ServerLocation message. Unlike a
-// ServerObjectProperty update, opcode 0x1F updates the object's native Posi
-// and Dest transforms and raises on_location, which is the path used by the
-// game client to place an already-created asynchronous Actor2 visual.
+// serverLocation 编码 FxNet2 现代 ServerLocation 消息。与
+// ServerObjectProperty 更新不同，opcode 0x1F 更新对象原生的 Posi
+// 和 Dest 变换并触发 on_location，这正是游戏客户端
+// 放置一个已创建的异步 Actor2 可视对象所用的路径。
 func serverLocation(objectID, ownerID uint32, transform worldcore.Transform) []byte {
 	msg := make([]byte, 25)
 	msg[0] = 0x1F
@@ -1464,20 +1464,20 @@ func serverLocation(objectID, ownerID uint32, transform worldcore.Transform) []b
 func sceneObjectStringProperty(objectID, ownerID uint32, propertyIndex uint16, value string) []byte {
 	msg := make([]byte, 12, 18+len(value))
 	msg[0] = 0x10 // SERVER_OBJECT_PROPERTY
-	msg[1] = 0    // scene object, not view object
+	msg[1] = 0    // 场景对象，而非视图对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], 1)
 	return appendStringProperty(msg, propertyIndex, value)
 }
 
-// sceneObjectObjectProperty updates a property whose negotiated type is the
-// native eight-byte object reference.  FxNet2 identifies a scene object as
-// the low-word object ID followed by the high-word owner ID.
+// sceneObjectObjectProperty 更新一个协商类型为
+// 原生八字节对象引用的属性。FxNet2 将场景对象标识为
+// 低字对象 ID 后跟高字所有者 ID。
 func sceneObjectObjectProperty(objectID, ownerID, propertyIndex, targetID, targetOwnerID uint32) []byte {
 	msg := make([]byte, 12, 22)
 	msg[0] = 0x10 // SERVER_OBJECT_PROPERTY
-	msg[1] = 0    // scene object, not view object
+	msg[1] = 0    // 场景对象，而非视图对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], 1)
@@ -1499,9 +1499,9 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 	fields := append([]clientdata.FieldSpec(nil), npcFields...)
 	fields = append(fields, clientdata.FieldSpec{Index: 99, Name: "MaxVisuals", Type: clientdata.WireInt32})
 	fields = append(fields, clientdata.FieldSpec{Index: 100, Name: "LastObject", Type: clientdata.WireObject})
-	// View archives use the same negotiated property table as scene objects.
-	// These fields are read directly by the current form_shop.lua createview
-	// branch, so they must be negotiated before a shop View=61 is sent.
+	// View 归档与场景对象使用同一张协商属性表。
+	// 这些字段由当前 form_shop.lua 的 createview
+	// 分支直接读取，因此必须在发送商店 View=61 之前完成协商。
 	fields = append(fields,
 		clientdata.FieldSpec{Index: 101, Name: "ShopID", Type: clientdata.WireString},
 		clientdata.FieldSpec{Index: 102, Name: "PageNum", Type: clientdata.WireInt32},
@@ -1514,18 +1514,18 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 		clientdata.FieldSpec{Index: 109, Name: "SellPrice2", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: 110, Name: "MaxAmount", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: 111, Name: "CapitalType1", Type: clientdata.WireInt32},
-		// These live-player fields are named by the latest Lua property binds;
-		// they are appended beyond the modern scene schema so 0x10 can carry
-		// the same authority after the initial 0x0D archive.
+		// 这些活体玩家字段按最新的 Lua 属性绑定命名；
+		// 它们追加在现代场景 schema 之后，使 0x10 在初始
+		// 0x0D 归档之后仍能携带同等的权威数据。
 		clientdata.FieldSpec{Index: 112, Name: "HitHP", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: 113, Name: "HitHPRatio", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: 114, Name: "QingGongPoint", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: 115, Name: "MaxQingGongPoint", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: 116, Name: "MaxQingGongPointAdd", Type: clientdata.WireInt32},
-		// Current-client QingGong motion inputs.  These are ordinary player
-		// properties, not action packets: FxGameLogic reads them when resolving
-		// rush, water, air and climb actions.  In particular, a missing
-		// LandRushDist is displayed and used as zero by the client.
+		// 当前客户端的轻功移动输入。这些是普通玩家
+		// 属性，而非动作包：FxGameLogic 在解析冲刺、水上、
+		// 空中和攀爬动作时读取它们。特别地，缺失的
+		// LandRushDist 会被客户端显示并当作零使用。
 		clientdata.FieldSpec{Index: 117, Name: "RunSpeedAdd", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 118, Name: "JumpSpeedAdd", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 119, Name: "DriftSpeed", Type: clientdata.WireFloat32},
@@ -1546,16 +1546,16 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 		clientdata.FieldSpec{Index: 134, Name: "LandRushDistAdd", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 135, Name: "ClimbSpeed", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 136, Name: "ClimbSpeedAdd", Type: clientdata.WireFloat32},
-		// The native movement code also queries these range aliases while
-		// resolving the three rush families.
+		// 原生移动代码在解析三系冲刺时
+		// 还会查询这些距离别名。
 		clientdata.FieldSpec{Index: 137, Name: "GRushRange", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 138, Name: "GRushRangeAdd", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 139, Name: "ARushRange", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 140, Name: "ARushRangeAdd", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 141, Name: "WRushRange", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 142, Name: "WRushRangeAdd", Type: clientdata.WireFloat32},
-		// Buff state is native player-object state. FxGameLogic's form_main_buff
-		// reads and binds this string; it is not a 0x1E Lua custom message.
+		// Buff 状态是原生玩家对象状态。FxGameLogic 的 form_main_buff
+		// 读取并绑定该字符串；它不是 0x1E 的 Lua 自定义消息。
 		clientdata.FieldSpec{Index: 143, Name: "BufferListStr", Type: clientdata.WireString},
 	)
 	for slot := uint16(1); slot <= bufferInfoSlotCount; slot++ {
@@ -1563,39 +1563,39 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 			Index: bufferInfoPropertyIndex(slot), Name: bufferInfoPropertyName(slot), Type: clientdata.WireString,
 		})
 	}
-	// Base jump physics is read by the native player action object, rather
-	// than derived from the qinggong action packet.  Keep these appended: the
-	// preceding field order is already live on the modern client.
+	// 基础跳跃物理由原生玩家动作对象读取，而非从
+	// 轻功动作包推导而来。保持追加在末尾：前面的
+	// 字段顺序在现代客户端上已经生效。
 	fields = append(fields,
 		clientdata.FieldSpec{Index: 168, Name: "Gravity", Type: clientdata.WireFloat32},
 		clientdata.FieldSpec{Index: 169, Name: "GravityAdd", Type: clientdata.WireFloat32},
-		// FallDownManager reads this player property directly.  When it is
-		// absent the modern client defaults its safe-drop threshold to 5.0,
-		// which makes ordinary local-test terrain drops enter the fall-down
-		// state instead of returning to the grounded action.
+		// FallDownManager 直接读取该玩家属性。当它
+		// 缺失时，现代客户端将安全坠落阈值默认为 5.0，
+		// 这会使本地测试中普通的地形落差进入倒地
+		// 状态，而不是回到落地动作。
 		clientdata.FieldSpec{Index: 170, Name: "DropHeightPub", Type: clientdata.WireFloat32},
 	)
-	// Inner-power and role-panel fields are deliberately appended after every
-	// already-live movement/Buff field.  View 43 uses the same negotiated
-	// archive, so its per-book values must be named here before ViewAdd.
+	// 内功与角色面板字段刻意追加在所有已生效的
+	// 移动/Buff 字段之后。View 43 使用同一份协商
+	// 归档，因此其每本内功的取值必须在 ViewAdd 之前在此命名。
 	fields = append(fields, playerProgressFields()...)
-	// Fight::UseShortcutMain reaches sub_127FE280 before it can emit C2S 211.
-	// NeigongPKStatus is read there without a HasProp guard, so leaving it
-	// unnegotiated is not equivalent to an explicit normal value. Dead is also
-	// part of the same pre-send gate; keep both as ordinary actor properties.
+	// Fight::UseShortcutMain 在能发出 C2S 211 之前会先到达 sub_127FE280。
+	// 那里读取 NeigongPKStatus 时没有 HasProp 保护，因此不协商它
+	// 并不等价于一个显式的正常值。Dead 也属于
+	// 同一发送前闸门；两者都保留为普通 actor 属性。
 	fields = append(fields,
 		clientdata.FieldSpec{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propDead, Name: "Dead", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propCantUseSkill, Name: "CantUseSkill", Type: clientdata.WireInt32},
-		// USE_SKILL (C2S 211) is only the request. FxGameLogic waits for this
-		// authoritative player-property callback before refreshing shortcut
-		// cooldown state and staging the native Fight action.
+		// USE_SKILL（C2S 211）只是请求。FxGameLogic 要等待这个
+		// 权威的玩家属性回调，之后才刷新快捷栏
+		// 冷却状态并暂存原生 Fight 动作。
 		clientdata.FieldSpec{Index: propCurSkillID, Name: "CurSkillID", Type: clientdata.WireString},
-		// Learned View=40 objects expose the action lease through this shared
-		// property table. The native Fight manager reads milliseconds as float.
+		// 已学习的 View=40 对象通过这张共享
+		// 属性表暴露动作租约。原生 Fight 管理器把毫秒按 float 读取。
 		clientdata.FieldSpec{Index: propPauseTime, Name: "PauseTime", Type: clientdata.WireFloat32},
-		// Native main-role HUD binds the four recovery-rate fields. Their values
-		// are informational; HP/MP still change only after a server tick.
+		// 原生主角 HUD 绑定这四个恢复速率字段。它们的取值
+		// 仅供展示；HP/MP 仍只在服务器 tick 之后才会变化。
 		clientdata.FieldSpec{Index: propHPHeartSpeed, Name: "HPHeartSpeed", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propHPHeartSpeedAdd, Name: "HPHeartSpeedAdd", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propMPHeartSpeed, Name: "MPHeartSpeed", Type: clientdata.WireInt32},
@@ -1604,18 +1604,18 @@ func sceneVisiblePropertyFields(npcFields []clientdata.FieldSpec) []clientdata.F
 		clientdata.FieldSpec{Index: propHPUpSpeedAdd, Name: "HPUpSpeedAdd", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propMPUpSpeed, Name: "MPUpSpeed", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Type: clientdata.WireInt32},
-		// A normal skill acceptance publishes this complete public tuple. The
-		// self-target action gate additionally reads ModifySkillLockTime as an
-		// integer tolerance in milliseconds.
+		// 一次正常的技能接受会发布这组完整的公开元组。
+		// 自身目标的动作闸门还会把 ModifySkillLockTime 按
+		// 整数毫秒容差读取。
 		clientdata.FieldSpec{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Type: clientdata.WireString},
 		clientdata.FieldSpec{Index: propCurSkillLevel, Name: "CurSkillLevel", Type: clientdata.WireInt32},
 		clientdata.FieldSpec{Index: propCurSkillTarget, Name: "CurSkillTarget", Type: clientdata.WireObject},
 		clientdata.FieldSpec{Index: propModifySkillLockTime, Name: "ModifySkillLockTime", Type: clientdata.WireInt32},
-		// Skillbase declares CanUse as a private byte, and current FxGameLogic
-		// reads it from learned View=40 objects before presenting/using a skill.
+		// Skillbase 将 CanUse 声明为私有字节，当前 FxGameLogic
+		// 在展示/使用技能前会从已学习的 View=40 对象读取它。
 		clientdata.FieldSpec{Index: propSkillCanUse, Name: "CanUse", Type: clientdata.WireByte},
-		// Later affiliations are selected natively from Force/NewSchool before
-		// School. These must be part of the negotiated table before PlayerAdd.
+		// 后期的门派归属会先从 Force/NewSchool 原生选择，
+		// 然后才看 School。它们必须在 PlayerAdd 之前纳入协商表。
 		clientdata.FieldSpec{Index: propForce, Name: "Force", Type: clientdata.WireString},
 		clientdata.FieldSpec{Index: propNewSchool, Name: "NewSchool", Type: clientdata.WireString},
 	)

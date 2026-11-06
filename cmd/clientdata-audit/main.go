@@ -1,6 +1,6 @@
-// Command clientdata-audit builds a machine-readable recursive resource
-// closure from extracted Nine Yin package trees. It never opens or modifies the
-// live .package files.
+// Command clientdata-audit 基于解包后的九阴 package 目录树，构建机器可读的
+// 递归资源闭包。它从不打开或修改
+// 实际使用的 .package 文件。
 package main
 
 import (

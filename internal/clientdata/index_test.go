@@ -42,7 +42,7 @@ func TestLookupUsesASCIIInsensitiveCaseButStrictSeparators(t *testing.T) {
 		t.Fatalf("separator candidates = %#v", wrongSlash.SeparatorCandidates)
 	}
 
-	// FxPackage only folds ASCII. Unicode case mappings must not leak in.
+	// FxPackage 只折叠 ASCII 字母。Unicode 大小写映射不得混入。
 	writeFixture(t, root, "配置/数据.ini", "data")
 	index, err = Build(Config{Mounts: []Mount{{Name: "ini", Directory: root}}})
 	if err != nil {

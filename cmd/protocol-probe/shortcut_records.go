@@ -11,21 +11,21 @@ import (
 const (
 	clientCustomSetShortcut    int32 = 200
 	clientCustomRemoveShortcut int32 = 201
-	// CLIENT_CUSTOMMSG_SITCROSS in the current modern client.  This is a
-	// native sit/stand toggle, not a combat-skill ConfigID.
+	// 当前现代客户端中的 CLIENT_CUSTOMMSG_SITCROSS。这是一个
+	// 原生的坐下/起立切换，并非战斗技能的 ConfigID。
 	clientCustomSitCross int32 = 240
 
-	// Keep the test on Ctrl+0 (shortcut index 9), away from the two starter
-	// combat slots the local test character normally uses. The native animation
-	// string `sitdown` is not a FuncManager record; the learned skill is.
+	// 把测试放在 Ctrl+0（快捷栏索引 9）上，避开本地测试角色通常
+	// 使用的两个初始战斗槽位。原生动画串 `sitdown` 不是
+	// FuncManager 记录；已学习的技能才是。
 	sitcrossShortcutIndex int32 = 9
 	sitcrossShortcutKind        = "skill"
 	sitcrossShortcutID          = "zs_default_01"
 
-	// grid_shortcut_1 is the lower numeric shortcut bar.  It has ten cells per
-	// page, so its second page begins at index 10.  grid_shortcut_2 is the
-	// separate upper Ctrl+number auxiliary bar; it begins at 200 and is not the
-	// user-requested second numeric shortcut page.
+	// grid_shortcut_1 是下方的数字快捷栏。它每页有十个格子，
+	// 因此第二页从索引 10 开始。grid_shortcut_2 是独立的
+	// 上方 Ctrl+数字辅助栏；它从 200 开始，并不是用户
+	// 要求的第二个数字快捷栏页。
 	heartBuddhaPalmShortcutBaseIndex int32 = 10
 	heartBuddhaPalmShortcutKind            = "skill"
 	taiJiQuanGuPuShortcutBaseIndex   int32 = 20
@@ -42,21 +42,21 @@ var taiJiQuanGuPuShortcutIDs = []string{
 	"CS_wd_tjq05", "CS_wd_tjq06", "CS_wd_tjq07", "CS_wd_tjq08",
 }
 
-// playerShortcut mirrors one row of shortcut_rec:
-// shortcut index, shortcut kind ("skill", "item", ...), and config ID.
+// playerShortcut 对应 shortcut_rec 的一行数据：
+// 快捷栏索引、快捷栏类型（"skill"、"item" 等）以及 config ID。
 type playerShortcut struct {
 	index int32
 	kind  string
 	id    string
 }
 
-// serverRecordDelRow encodes FxNet2 ServerRecordDelRow (0x12). The current
-// receiver requires exactly 14 bytes and interprets the final u16 as the
-// zero-based row number in the named record.
+// serverRecordDelRow 编码 FxNet2 ServerRecordDelRow (0x12)。当前的
+// 接收端要求恰好 14 字节，并把末尾的 u16 解释为
+// 指定记录中从 0 开始计数的行号。
 func serverRecordDelRow(objectID, ownerID uint32, recordIndex, row uint16) []byte {
 	msg := make([]byte, 14)
 	msg[0] = 0x12
-	msg[1] = 0 // scene object
+	msg[1] = 0 // 场景对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
@@ -110,9 +110,9 @@ func shortcutAddFrame(shortcut playerShortcut) ([]byte, error) {
 	})
 }
 
-// grantShortcutRows restores the player-attached record after a live scene
-// transition. ServerExitScene destroys the native player object and all of
-// its record rows even though the connection-level schema remains alive.
+// grantShortcutRows 在一次实际场景切换之后恢复挂在玩家身上的记录。
+// ServerExitScene 会销毁原生玩家对象及其全部记录行，
+// 即使连接层面的 schema 仍然存活。
 func grantShortcutRows(conn sceneMessageConnection, player *playerActor) error {
 	if player == nil {
 		return nil
@@ -129,9 +129,9 @@ func grantShortcutRows(conn sceneMessageConnection, player *playerActor) error {
 	return nil
 }
 
-// grantSitcrossShortcut installs the learned native sitcross shortcut after
-// ClientReady. The client recognizes zs_default_01 as a special native action
-// and uses CustomSend 240 instead of the 211 combat route.
+// grantSitcrossShortcut 在 ClientReady 之后安装已学习的原生打坐快捷栏条目。
+// 客户端把 zs_default_01 识别为一种特殊的原生动作，
+// 并使用 CustomSend 240 而不是 211 战斗路线。
 func grantSitcrossShortcut(conn sceneMessageConnection, player *playerActor) (bool, error) {
 	if player == nil {
 		return false, nil
@@ -158,9 +158,9 @@ func grantSitcrossShortcut(conn sceneMessageConnection, player *playerActor) (bo
 	return true, nil
 }
 
-// grantHeartBuddhaPalmShortcuts fills cells 1..7 of the lower numeric
-// shortcut bar's second page with the complete 心佛掌 set through the native
-// shortcut_rec record. Each requested destination is authoritative.
+// grantHeartBuddhaPalmShortcuts 通过原生 shortcut_rec 记录，用完整的
+// 心佛掌套路填满下方数字快捷栏第二页的 1..7 格。
+// 每个请求的目标槽位均为权威设置。
 func grantHeartBuddhaPalmShortcuts(conn sceneMessageConnection, player *playerActor) (int, error) {
 	if player == nil {
 		return 0, nil
@@ -189,8 +189,8 @@ func grantHeartBuddhaPalmShortcuts(conn sceneMessageConnection, player *playerAc
 	return granted, nil
 }
 
-// grantTaiJiQuanGuPuShortcuts fills cells 1..8 of numeric page three with
-// the complete learned 太极拳(古谱) routine.
+// grantTaiJiQuanGuPuShortcuts 用完整已学习的 太极拳(古谱) 套路
+// 填满数字快捷栏第三页的 1..8 格。
 func grantTaiJiQuanGuPuShortcuts(conn sceneMessageConnection, player *playerActor) (int, error) {
 	if player == nil {
 		return 0, nil
@@ -219,9 +219,9 @@ func grantTaiJiQuanGuPuShortcuts(conn sceneMessageConnection, player *playerActo
 	return granted, nil
 }
 
-// handleSitcrossCustom handles the observed modern native sitcross request:
-// activity TVarList(240, int startOrStop).  It deliberately returns ordinary
-// 0x10 role properties rather than a legacy S->C 0x1E custom notification.
+// handleSitcrossCustom 处理观测到的现代原生打坐请求：
+// activity TVarList(240, int startOrStop)。它刻意返回普通的
+// 0x10 角色属性，而不是旧版的 S->C 0x1E 自定义通知。
 func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomSitCross {
 		return false, nil
@@ -236,13 +236,13 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 
 	var next uint8
 	switch custom.Values[1].Int32 {
-	case 1: // captured from pressing the learned zs_default_01 shortcut
+	case 1: // 从按下已学习的 zs_default_01 快捷键的抓包中捕获
 		next = entity.LogicStateSitcross
 	case 0, 2:
-		// The current client sends 2 after a local interruption (including an
-		// incoming hostile hit).  Treat both observed cancellation forms as a
-		// normal stop: rejecting it tears down the whole session just when the
-		// actor must leave LS_SITCROSS for combat.
+		// 当前客户端在本地被打断（包括被敌方攻击命中）之后发送 2。
+		// 把观测到的两种取消形式都当作正常停止处理：
+		// 拒绝它会在角色正要离开 LS_SITCROSS 转入战斗的
+		// 关头拆掉整个会话。
 		next = entity.LogicStateNormal
 	default:
 		log.Printf("%s: ignore unknown sitcross start_or_stop=%d", remote, custom.Values[1].Int32)
@@ -255,8 +255,8 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 		return true, nil
 	}
 	if current == next {
-		// The client repeats start while the key remains held.  Do not turn a
-		// repeated start into a toggle or flood it with identical 0x10 frames.
+		// 按住按键期间客户端会重复发送 start。不要把重复的
+		// start 变成切换开关，也不要用相同的 0x10 帧去淹没它。
 		log.Printf("%s: sitcross state already %d; duplicate request ignored", remote, next)
 		return true, nil
 	}
@@ -273,9 +273,9 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 	return true, nil
 }
 
-// handleShortcutCustom implements the modern shortcut_game.lua contract.
-// Set uses shortcut index/kind/config ID. Remove uses the current record row,
-// not the visible shortcut index.
+// handleShortcutCustom 实现现代版 shortcut_game.lua 的约定。
+// Set 使用快捷栏索引/类型/config ID。Remove 使用当前的记录行，
+// 而不是可见的快捷栏索引。
 func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 {
 		return false, nil

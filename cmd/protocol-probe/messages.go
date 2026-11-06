@@ -118,10 +118,10 @@ func worldInfo(infoType uint16, text string) []byte {
 	return msg
 }
 
-// serverMenu encodes the modern FxNet2 SERVER_MENU (0x1C) packet. Its layout
-// is taken directly from the current client's sub_10617490 receiver:
-// object/owner, a u16 item count, then (u8 type, u16 mark, u32 UTF-16LE byte
-// length including NUL, UTF-16LE content including NUL) for each item.
+// serverMenu 编码现代 FxNet2 SERVER_MENU（0x1C）包。其布局
+// 直接取自当前客户端的 sub_10617490 接收器：
+// object/owner、u16 条目数，随后每个条目为（u8 type、u16 mark、
+// u32 含 NUL 的 UTF-16LE 字节数、含 NUL 的 UTF-16LE 内容）。
 type serverMenuItem struct {
 	Type    byte
 	Mark    uint16
@@ -133,9 +133,9 @@ type serverViewSpec struct {
 	Capacity uint16
 }
 
-// serverViewProperty is a property archive entry for SERVER_CREATE_VIEW.  The
-// value encoding is selected by the property's type already negotiated in
-// opcode 0x09; it is not self-describing on the wire.
+// serverViewProperty 是 SERVER_CREATE_VIEW 的属性归档条目。
+// 其取值编码由 opcode 0x09 中已协商的属性类型决定；
+// 在线缆格式上并不自描述。
 type serverViewProperty struct {
 	index  uint16
 	byte1  *byte
@@ -192,8 +192,8 @@ func serverMenu(objectID, ownerID uint32, items []serverMenuItem) ([]byte, error
 	return msg, nil
 }
 
-// serverCustomValue is one typed TVarList value for a custom-message outer
-// opcode. The current client accepts both 0x1E and its modern 0x27 alias.
+// serverCustomValue 是自定义消息外层 opcode 下的一个类型化
+// TVarList 值。当前客户端同时接受 0x1E 及其现代别名 0x27。
 type serverCustomValue struct {
 	text    *string
 	int32   *int32
@@ -209,8 +209,8 @@ func customFloat32(value float32) serverCustomValue {
 	return serverCustomValue{float32: &value}
 }
 
-// serverCustomObject is the PERSISTID carried by TVarList type 8. Its two
-// u32 words are the same object/owner pair used in SceneObj identifiers.
+// serverCustomObject 是 TVarList 类型 8 携带的 PERSISTID。其两个
+// u32 字就是 SceneObj 标识中所用的同一对 object/owner。
 type serverCustomObject struct {
 	objectID uint32
 	ownerID  uint32
@@ -220,14 +220,14 @@ func customObject(objectID, ownerID uint32) serverCustomValue {
 	return serverCustomValue{object: &serverCustomObject{objectID: objectID, ownerID: ownerID}}
 }
 
-// serverCustomStringMessage retains the legacy 0x1E string-command shell.
+// serverCustomStringMessage 保留旧版 0x1E 字符串命令外壳。
 func serverCustomStringMessage(messageName string, values ...serverCustomValue) ([]byte, error) {
 	return serverCustomStringMessageWithOpcode(0x1E, messageName, values...)
 }
 
-// serverModernCustomStringMessage uses the FxNet2 0x27 shell while preserving
-// the command name as TVarList[0]. Modern native action receivers still use
-// names such as "action"; their registration-table slot is not a wire ID.
+// serverModernCustomStringMessage 使用 FxNet2 的 0x27 外壳，同时把
+// 命令名保留为 TVarList[0]。现代原生动作接收器仍使用诸如
+// "action" 的名字；其注册表槽位并不是线缆 ID。
 func serverModernCustomStringMessage(messageName string, values ...serverCustomValue) ([]byte, error) {
 	return serverCustomStringMessageWithOpcode(0x27, messageName, values...)
 }
@@ -242,16 +242,16 @@ func serverCustomStringMessageWithOpcode(opcode byte, messageName string, values
 	return encodeServerCustomValuesWithOpcode(opcode, args, messageName)
 }
 
-// serverCustomIntMessage encodes a numeric C++ GameMessageHandler route only
-// after its active registration and argument contract have been verified.
-// It is not a fallback for native object state such as Buffs.
+// serverCustomIntMessage 只在其激活注册和参数契约都得到核实之后，
+// 才编码数值型 C++ GameMessageHandler 路由。
+// 它不是 Buff 之类原生对象状态的兜底方案。
 func serverCustomIntMessage(messageID int32, values ...serverCustomValue) ([]byte, error) {
 	return serverCustomIntMessageWithOpcode(0x1E, messageID, values...)
 }
 
-// serverModernCustomIntMessage uses the modern FxNet2 custom-message alias.
-// Keep the older 0x1E encoder for routes already verified on that shell; new
-// native GameMessageHandler routes should use 0x27 when proven by the client.
+// serverModernCustomIntMessage 使用现代 FxNet2 自定义消息别名。
+// 已在该外壳上核实过的路由保留旧的 0x1E 编码器；新的
+// 原生 GameMessageHandler 路由在客户端验证后应使用 0x27。
 func serverModernCustomIntMessage(messageID int32, values ...serverCustomValue) ([]byte, error) {
 	return serverCustomIntMessageWithOpcode(0x27, messageID, values...)
 }
@@ -310,10 +310,10 @@ func encodeServerCustomValuesWithOpcode(opcode byte, args []serverCustomValue, l
 	return msg, nil
 }
 
-// serverCreateView encodes the current FxNet2 SERVER_CREATE_VIEW (0x15)
-// layout: u16 view id, u16 capacity, u16 property count, then that archive.
-// Empty container views have no view-level properties, so their archive is
-// exactly the seven-byte header.
+// serverCreateView 编码当前 FxNet2 SERVER_CREATE_VIEW（0x15）
+// 布局：u16 view id、u16 capacity、u16 属性数，随后是属性归档。
+// 空容器视图没有视图级属性，因此其归档
+// 恰好就是这七字节头部。
 func serverCreateView(spec serverViewSpec) []byte {
 	msg, err := serverCreateViewWithProperties(spec, nil)
 	if err != nil {
@@ -322,9 +322,9 @@ func serverCreateView(spec serverViewSpec) []byte {
 	return msg
 }
 
-// serverCreateViewWithProperties encodes the proven 0x15 header followed by
-// a negotiated property archive. Empty container views retain the seven-byte
-// representation emitted by serverCreateView.
+// serverCreateViewWithProperties 编码经核实的 0x15 头部，其后是
+// 协商属性归档。空容器视图保留由 serverCreateView
+// 输出的七字节表示。
 func serverCreateViewWithProperties(spec serverViewSpec, properties []serverViewProperty) ([]byte, error) {
 	if len(properties) > math.MaxUint16 {
 		return nil, fmt.Errorf("view %d property count %d exceeds u16", spec.ID, len(properties))
@@ -357,9 +357,9 @@ func serverCreateViewWithProperties(spec serverViewSpec, properties []serverView
 	return msg, nil
 }
 
-// serverViewAdd encodes SERVER_VIEW_ADD (0x18). View objects use the same
-// negotiated property archive as their parent view. The shop form reads these
-// objects directly; it deliberately does not load share/trade/shop.ini.
+// serverViewAdd 编码 SERVER_VIEW_ADD（0x18）。View 对象使用与其
+// 父视图相同的协商属性归档。商店窗体直接读取这些
+// 对象；它刻意不加载 share/trade/shop.ini。
 func serverViewAdd(viewID, objectIndex uint16, properties []serverViewProperty) ([]byte, error) {
 	if len(properties) > math.MaxUint16 {
 		return nil, fmt.Errorf("view %d object %d property count %d exceeds u16", viewID, objectIndex, len(properties))
@@ -393,12 +393,12 @@ func serverViewAdd(viewID, objectIndex uint16, properties []serverViewProperty) 
 }
 
 func starterBagViews() []serverViewSpec {
-	// IDs are defined by the current client share/view_define.lua. The four
-	// primary views back the visible bag tabs; the four AddToolBox views back
-	// their expansion slots. Capacity is an upper bound in the client view;
-	// the GUI itself supplies the fixed grid layout.
+	// 这些 ID 由当前客户端 share/view_define.lua 定义。四个
+	// 主视图支撑可见的背包页签；四个 AddToolBox 视图支撑
+	// 各自的扩展槽位。Capacity 只是客户端视图中的上限；
+	// 固定的网格布局由 GUI 自行提供。
 	return []serverViewSpec{
-		{ID: 121, Capacity: 132}, // VIEWPORT_EQUIP_TOOL: 36 base + 16*6 expansion
+		{ID: 121, Capacity: 132}, // VIEWPORT_EQUIP_TOOL：基础 36 + 16*6 扩展
 		{ID: 2, Capacity: 132},   // VIEWPORT_TOOL
 		{ID: 123, Capacity: 132}, // VIEWPORT_MATERIAL_TOOL
 		{ID: 125, Capacity: 132}, // VIEWPORT_TASK_TOOL

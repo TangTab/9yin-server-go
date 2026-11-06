@@ -26,9 +26,9 @@ type MySQLRepository struct {
 	maxSlots uint16
 }
 
-// ProductionDSN applies the connection invariants needed by the repository.
-// Explicit non-zero timeouts are retained; missing safety parameters receive
-// conservative defaults.
+// ProductionDSN 应用仓库所需的连接不变量。
+// 显式指定的非零超时会被保留；缺失的安全参数会得到
+// 保守的默认值。
 func ProductionDSN(raw string) (string, error) {
 	config, err := mysql.ParseDSN(raw)
 	if err != nil {
@@ -57,8 +57,8 @@ func ProductionDSN(raw string) (string, error) {
 	return config.FormatDSN(), nil
 }
 
-// OpenMySQLRepository opens and verifies a production MySQL repository. The
-// caller owns the returned repository and must Close it during shutdown.
+// OpenMySQLRepository 打开并校验一个生产 MySQL 仓库。
+// 调用者拥有返回的仓库，并须在停机时将其 Close。
 func OpenMySQLRepository(ctx context.Context, dsn string, config MySQLConfig) (*MySQLRepository, error) {
 	if strings.TrimSpace(dsn) == "" {
 		return nil, fmt.Errorf("%w: empty MySQL DSN", ErrInvalidArgument)
@@ -90,8 +90,8 @@ func OpenMySQLRepository(ctx context.Context, dsn string, config MySQLConfig) (*
 	return NewMySQLRepository(db, config), nil
 }
 
-// NewMySQLRepository binds an already-open database. It is primarily useful
-// for dependency injection and tests; it does not ping or take DB ownership.
+// NewMySQLRepository 绑定一个已打开的数据库。它主要用于
+// 依赖注入和测试；它不会 ping，也不接管数据库的所有权。
 func NewMySQLRepository(db *sql.DB, config MySQLConfig) *MySQLRepository {
 	maxSlots := config.MaxRoleSlots
 	if maxSlots == 0 {

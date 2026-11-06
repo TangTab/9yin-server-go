@@ -12,10 +12,9 @@ import (
 	"github.com/local/9yin-go-server/internal/role"
 )
 
-// sceneNPCRegistry keeps the shared template tables in memory and lazily
-// materializes one scene's creator catalog for each active world. Loading all
-// 224k resolved spawns for every client would be wasteful and would mix NPCs
-// from unrelated maps into one coordinate system.
+// sceneNPCRegistry 将共享的模板表保存在内存中，并为每个活动世界惰性
+// 物化单个场景的 creator 目录。为每个客户端加载全部 22.4 万个已解析
+// 出生点既浪费，又会把无关地图的 NPC 混进同一个坐标系。
 type sceneNPCRegistry struct {
 	tables   []*clientdata.NPCTemplateTable
 	root     string
@@ -26,13 +25,12 @@ type sceneNPCRegistry struct {
 	stats    map[string]npcCatalogStats
 }
 
-// normalizeClientScene repairs legacy persisted scene aliases before they are
-// sent to the client. clone004_wl_1 is a gameplay-instance identifier, but
-// the current client has no matching terrain directory; its installed terrain
-// and base scene resources are named clone004_wl.
+// normalizeClientScene 在旧持久化场景别名发送给客户端之前将其修复。
+// clone004_wl_1 是玩法副本标识，但当前客户端没有对应的地形目录；它
+// 安装的地形和基础场景资源名为 clone004_wl。
 func normalizeClientScene(scene role.Scene) role.Scene {
-	// scene09's logical configuration has a descriptive suffix, whereas the
-	// installed terrain bundle is literally res/map/ter/scene09.
+	// scene09 的逻辑配置带有一个描述性后缀，而已安装的地形包则直接叫
+	// res/map/ter/scene09。
 	if strings.EqualFold(scene.Config, `ini\scene\scene09_SaiBeiCaoYuan`) {
 		scene.Resource = "scene09"
 	}
@@ -145,14 +143,14 @@ func sceneResourceCandidates(scene role.Scene) []string {
 	return result
 }
 
-// The client resource ids for the main schools do not include their displayed
-// school name, while the creator directories do. These are data aliases, not
-// fallbacks: each pair is visible in the current extracted client tree.
+// 主要门派的客户端资源 ID 不含显示的门派名，而 creator 目录包含。这些
+// 是数据别名而非兜底：每一对映射都能在当前解包的客户端目录树中
+// 看到。
 var primarySceneFolder = map[string]string{
 	// 幽云十六州的客户端资源目录为 scene01，creator 目录使用完整显示名。
 	"scene01": "scene01_youyunshiliuzhou",
-	// Compatibility for pre-normalization persisted values of the Yanmen Pass
-	// instance id; its creator data is stored under the base resource name.
+	// 兼容雁门关副本 ID 在规范化之前持久化的旧值；其 creator 数据存放
+	// 在基础资源名之下。
 	"clone004_wl_1": "clone004_wl",
 	"city01":        "city01_yanjing",
 	"city02":        "city02_suzhou",
@@ -189,9 +187,9 @@ var primarySceneFolder = map[string]string{
 	"school31":      "school31_shenjihui",
 }
 
-// Some dungeon variants share one client terrain resource but have distinct
-// creator data. Resolve those by their authoritative scene config before the
-// generic resource name can select a different variant.
+// 某些副本变体共用一个客户端地形资源，但拥有不同的 creator 数据。要
+// 在通用资源名可能选中其他变体之前，先按其权威场景配置解析这些
+// 变体。
 var preferredSceneConfigFolder = map[string]string{
-	`ini\scene\clone002_yx`: "clone002_yx", // 龙门客栈 → client resource clone002
+	`ini\scene\clone002_yx`: "clone002_yx", // 龙门客栈 → 客户端资源 clone002
 }

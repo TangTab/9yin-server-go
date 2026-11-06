@@ -127,11 +127,11 @@ func LoadNPCCreator(r io.Reader, source string) (*NPCCreatorCatalog, error) {
 	return catalog, nil
 }
 
-// isEmptyNPCCreatorPlaceholder recognises an exporter placeholder rather than
-// an NPC with incomplete data. Some modern creator files carry an extra item
-// with an empty template id and amount=0 solely to hold unused random-spawn
-// positions. It must not abort the entire scene catalog. A missing id on any
-// nonzero/invalid item remains a data error.
+// isEmptyNPCCreatorPlaceholder 识别的是导出器占位符，而不是
+// 数据不完整的 NPC。某些新版 creator 文件会带一个额外的 item，
+// 其模板 id 为空且 amount=0，仅用于存放未使用的随机刷新点。
+// 它不应导致整个场景目录解析中止。而任何非零/非法 item 上
+// 缺失 id 仍然属于数据错误。
 func isEmptyNPCCreatorPlaceholder(attributes map[string]RawValue) bool {
 	if strings.TrimSpace(attributeText(attributes, "id")) != "" {
 		return false

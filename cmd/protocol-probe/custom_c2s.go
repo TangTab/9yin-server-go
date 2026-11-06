@@ -7,10 +7,10 @@ import (
 	"unicode/utf16"
 )
 
-// clientCustomMessage is the decoded form of a C2S GameVisual:CustomSend.
-// Retail clients can send a direct TVarList (0x1E/0x27) or a TVarList carried
-// by the C2S 0x0A activity envelope.  The latter has a 21-byte opaque header
-// before the same u16-count typed-list body.
+// clientCustomMessage 是 C2S GameVisual:CustomSend 解码后的形式。
+// 正式服客户端可能直接发送 TVarList（0x1E/0x27），也可能发送由
+// C2S 0x0A 活动信封携带的 TVarList。后者在相同的 u16 计数
+// 类型列表体之前还有一个 21 字节的不透明头部。
 type clientCustomMessage struct {
 	Opcode byte
 	Values []clientCustomValue
@@ -26,11 +26,11 @@ type clientCustomValue struct {
 	Raw     [8]byte
 }
 
-// exactInt32 accepts the numeric representations the modern TVarList writer
-// actually uses for enum-like activity arguments.  Some native forms encode
-// their selection values as doubles (for example faculty 1006/23 sends
-// double:0, double:1), even though those values are semantically integers.
-// Never silently truncate a fractional, NaN, or out-of-range value.
+// exactInt32 接受现代 TVarList 写入方在枚举式活动参数上
+// 实际使用的数值表示。一些原生表单会
+// 把选择值编码为 double（例如门派 1006/23 发送的是
+// double:0、double:1），尽管这些值在语义上是整数。
+// 绝不静默截断带小数、NaN 或超出范围的值。
 func (value clientCustomValue) exactInt32() (int32, bool) {
 	switch value.Type {
 	case 2:
@@ -77,9 +77,9 @@ func (value clientCustomValue) String() string {
 	}
 }
 
-// parseClientCustomMessage decodes a direct 0x1E/0x27 TVarList. Its first
-// value is always the C2S custom message ID for messages created by
-// game_visual:CustomSend.
+// parseClientCustomMessage 解码直接的 0x1E/0x27 TVarList。其第一个
+// 值始终是 C2S 自定义消息 ID，这些消息由
+// game_visual:CustomSend 创建。
 func parseClientCustomMessage(frame []byte) (clientCustomMessage, error) {
 	if len(frame) < 3 || (frame[0] != 0x1E && frame[0] != 0x27) {
 		return clientCustomMessage{}, fmt.Errorf("not a custom frame")
@@ -87,10 +87,10 @@ func parseClientCustomMessage(frame []byte) (clientCustomMessage, error) {
 	return parseClientCustomValues(frame[0], frame[1:])
 }
 
-// parseClientActivityCustomMessage decodes the current client's observed
-// 0x0A envelope: 0x0A | 16-byte session area | u32 sequence | TVarList.
-// It returns ok=false when the packet is not a complete typed list, because
-// 0x0A also carries non-custom activity traffic.
+// parseClientActivityCustomMessage 解码在当前客户端中观察到的
+// 0x0A 信封：0x0A | 16 字节会话区 | u32 序列号 | TVarList。
+// 当数据包不是完整的类型列表时返回 ok=false，因为
+// 0x0A 还承载非自定义的活动流量。
 func parseClientActivityCustomMessage(frame []byte) (message clientCustomMessage, ok bool, err error) {
 	const activityHeaderSize = 21
 	if len(frame) < activityHeaderSize+3 || frame[0] != 0x0A {

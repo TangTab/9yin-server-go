@@ -6,28 +6,28 @@ import (
 	"time"
 )
 
-// CLIENT_CUSTOMMSG_ACTIVE_PARRY is the shared C->S ingress used by the
-// modern client for active-parry controls.  It is deliberately separate from
-// 211: individual routines supply the attack data, while parry is a player
-// combat-state request that must later be evaluated when an incoming hit is
-// resolved.
+// CLIENT_CUSTOMMSG_ACTIVE_PARRY 是现代客户端用于主动招架控制的共享 C->S 入口。
+// 它被刻意与 211 分开：
+// 各个套路用于提交攻击数据，而招架则是玩家的战斗状态请求，
+// 该请求必须等到后续处理来袭攻击的命中判定时
+// 再进行求值。
 const clientCustomActiveParry int32 = 218
 
-// activeParryRequest is intentionally lossless for the two fields known from
-// custom_sender: subtype and its accompanying argument.  We retain the
-// original TVarList values rather than coercing the second value to a guessed
-// enum; the live capture will determine its exact gameplay meaning.
+// activeParryRequest 刻意对 custom_sender 已知的两个字段做无损保留：
+// 子类型（subtype）及其随附参数（argument）。我们保留原始的
+// TVarList 值，而不是把第二个值强转成猜测的
+// 枚举；其确切的游戏内含义将由实机抓包来判定。
 type activeParryRequest struct {
 	Subtype  int32
 	Argument clientCustomValue
 	At       time.Time
 }
 
-// handleActiveParryCustom establishes the authoritative ingress boundary.
-// It accepts all integral encodings used by modern TVarList writers (the
-// faculty UI has already demonstrated that some forms emit double enum
-// values).  It does not fabricate a visual action or a fixed parry window:
-// those depend on the native hit-result path, which has not yet been proven.
+// handleActiveParryCustom 确立权威的入口边界。
+// 它接受现代 TVarList 写入方使用的所有整数编码（门派
+// UI 已经证明某些表单会把枚举值以 double 类型发出）。
+// 它不虚构视觉动作，也不虚构固定的招架窗口：
+// 这些取决于原生的命中结果路径，而该路径尚未得到验证。
 func handleActiveParryCustom(player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomActiveParry {
 		return false, nil

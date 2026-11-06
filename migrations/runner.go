@@ -1,5 +1,5 @@
-// Package migrations embeds and applies the database schema with an advisory
-// lock and immutable SHA-256 checksums.
+// Package migrations 以 advisory lock 和不可变的 SHA-256 校验和
+// 来嵌入并应用数据库 schema。
 package migrations
 
 import (

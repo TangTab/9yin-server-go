@@ -21,9 +21,9 @@ type sceneMessageConnection interface {
 	WriteFrame([]byte) error
 }
 
-// sceneLifecycle owns the server-side scene objects and the subset currently
-// linked to one client's viewport. It is deliberately independent of NPC
-// behaviour so monsters, gatherables and remote players can use the same path.
+// sceneLifecycle 持有服务器侧的场景对象以及当前关联到单个客户端视口
+// 的子集。它刻意与 NPC 行为解耦，使怪物、采集物和远端玩家可以走同
+// 一条路径。
 type sceneLifecycle struct {
 	remote         string
 	conn           sceneMessageConnection
@@ -65,11 +65,10 @@ type sceneEntity struct {
 	portal      *scenePortalRoute
 }
 
-// npcInteraction is a server-side routing decision, derived from the modern
-// template ScriptClass plus the business fields that are actually implemented
-// by this local server.  It deliberately keeps target selection separate from
-// opening an NPC dialogue: combat targets still need LastObject for skill
-// targeting, but must never receive a fabricated conversation window.
+// npcInteraction 是一个服务器侧的路由决策，由现代模板 ScriptClass 加上
+// 本地服务器实际实现的业务字段推导而来。它刻意把目标选择与打开 NPC
+// 对话分开：战斗目标仍需要 LastObject 来做技能选靶，但绝不能收到一个
+// 虚构的对话窗口。
 type npcInteraction uint8
 
 const (
@@ -89,9 +88,9 @@ func (kind npcInteraction) String() string {
 	}
 }
 
-// npcService is derived from the modern template row itself. Unlike the
-// legacy Npc_Func table, these values use the exact ConfigID referenced by the
-// current creator XML and are therefore valid for the local modern client.
+// npcService 直接由现代模板行推导而来。与旧的 Npc_Func 表不同，这些值
+// 使用当前 creator XML 引用的确切 ConfigID，因此对本地现代客户端
+// 有效。
 type npcService struct {
 	mark   uint16
 	label  string
@@ -99,10 +98,10 @@ type npcService struct {
 	source string
 }
 
-// Service marks are server-local routing IDs carried by the current client's
-// native 0x1C SERVER_MENU. They deliberately do not reuse the legacy Npc_Func
-// integer namespace: a selected mark always resolves against the NPC that
-// emitted the menu.
+// 服务 mark 是随当前客户端原生 0x1C SERVER_MENU 携带的服务器本地路由
+// ID。它们刻意不复用旧 Npc_Func 的整数命名空间：被选中的 mark 总是
+// 相对于发出该菜单的 NPC
+// 进行解析。
 const (
 	markShop      uint16 = 0x1001
 	markDepot     uint16 = 0x1002
@@ -254,10 +253,9 @@ func (s *sceneLifecycle) registerNPC(id uint32, npc npcSpawn) error {
 	return nil
 }
 
-// portalRoute verifies an incoming direct Select against the live viewport
-// and returns only a resource-backed Door/GotoDoor route. It deliberately
-// excludes AdventureDoor and plot doors, whose clone/task admission protocol
-// has not yet been recovered.
+// portalRoute 对传入的直接 Select 按活动视口进行校验，只返回有资源
+// 支撑的 Door/GotoDoor 路线。它刻意排除 AdventureDoor 和剧情门，这些
+// 门对应的副本/任务准入协议尚未还原。
 func (s *sceneLifecycle) portalRoute(request clientObjectRequest) (scenePortalRoute, bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -274,11 +272,10 @@ func (s *sceneLifecycle) portalRoute(request clientObjectRequest) (scenePortalRo
 	return *entity.portal, true, nil
 }
 
-// portalAt activates an installed portal by proximity, mirroring the normal
-// door walk-through behaviour. It intentionally uses X/Z only: doors on
-// slopes and stairways often have a small creator/MoveTarget Y difference.
-// A short server-side cooldown prevents a local same-scene endpoint from
-// immediately retriggering another nearby portal on the next movement tick.
+// portalAt 按距离激活已安装的传送门，模拟正常的穿门行为。它刻意只使用
+// X/Z：坡道和楼梯上的门的 creator/MoveTarget Y 值常有微小差异。一段
+// 短暂的服务器侧冷却可防止同场景的本地端点在下一个移动 tick 立即再次
+// 触发附近另一个传送门。
 func (s *sceneLifecycle) portalAt(position role.Position, now time.Time) (scenePortalRoute, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -301,12 +298,11 @@ func (s *sceneLifecycle) portalAt(position role.Position, now time.Time) (sceneP
 	return scenePortalRoute{}, false
 }
 
-// npcInteractionFor makes ScriptClass the first gate.  The modern city05
-// catalog contains AttackNpc and BossNpc alongside CommonNpc, so treating all
-// of them as generic talkers is wrong even when the client sends the same
-// initial Select packet.  For civilian/service NPCs we only open a dialogue
-// if a service can actually be fulfilled locally; otherwise the selection is
-// retained for inspection/targeting without inventing an empty "交谈" menu.
+// npcInteractionFor 把 ScriptClass 作为第一道门控。现代 city05 目录在
+// CommonNpc 之外还包含 AttackNpc 和 BossNpc，因此即使客户端发送相同的
+// 初始 Select 包，把它们全部当作通用对话对象也是错的。对平民/服务类
+// NPC，只有当某项服务确实能在本地履约时才打开对话；否则仅保留选择
+// 供查看/选靶，而不是凭空造出一个空的“交谈”菜单。
 func npcInteractionFor(scriptClass string, services []npcService) npcInteraction {
 	switch strings.ToLower(strings.TrimSpace(scriptClass)) {
 	case "attacknpc", "bossnpc":
@@ -331,10 +327,9 @@ func (s *sceneLifecycle) unregister(id uint32) error {
 	return nil
 }
 
-// clientReady arms a fresh generation but deliberately does not write objects.
-// The current client sends ClientReady before stage_main calls
-// scene_obj:RegisterCallBack. A localhost response can otherwise create the
-// logical object in that small gap without ever invoking its visual callback.
+// clientReady 只为新一代布防，刻意不写入对象。当前客户端在 stage_main
+// 调用 scene_obj:RegisterCallBack 之前就发送 ClientReady。若立即响应，
+// 本机连接可能在这段小空窗内创建逻辑对象，却从不调用其视觉回调。
 func (s *sceneLifecycle) clientReady() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -346,9 +341,8 @@ func (s *sceneLifecycle) clientReady() error {
 	return nil
 }
 
-// clientActivity is the current-client readiness barrier. The first custom
-// message after ClientReady arrives after the Lua entry function has progressed
-// past scene_obj:RegisterCallBack.
+// clientActivity 是当前客户端的就绪屏障。ClientReady 之后的第一条自定义
+// 消息到达时，Lua 入口函数已经越过 scene_obj:RegisterCallBack。
 func (s *sceneLifecycle) clientActivity() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -377,19 +371,17 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		if !exists {
 			return fmt.Errorf("missing property encoder for scene object %d", update.Entity.ID)
 		}
-		// Transform is the only state currently changed by the patrol loop.
-		// Replaying every appearance/AI field here makes the current client
-		// recreate its Actor2. Use the compact, negotiated coordinate update;
-		// sceneObjectProperties remains the encoder for actual future changes.
+		// Transform 是目前巡逻循环唯一会改变的状态。在这里重放所有外观/
+		// AI 字段会让当前客户端重建它的 Actor2。请使用紧凑的协商坐标更新；
+		// sceneObjectProperties 仍留作未来真正变更时的编码器。
 		properties := sceneObjectTransformProperties(entity.id, entity.ownerID, entity.transform)
 		if err := s.conn.WriteFrame(properties); err != nil {
 			return fmt.Errorf("update scene object %d: %w", entity.id, err)
 		}
 		log.Printf("%s: updated scene object transform id=%d kind=%s", s.remote, entity.id, entity.description)
 	}
-	// A generation change means the client has already replaced its native
-	// scene/object manager. Sending old-generation removals could target a newly
-	// reused ID, so only emit 0x0E inside the same generation.
+	// 世代变更意味着客户端已经替换了原生场景/对象管理器。发送旧世代的
+	// 移除消息可能命中新近复用的 ID，因此只在同一世代内发出 0x0E。
 	if delta.PreviousGeneration == delta.Generation {
 		for _, removal := range delta.Removes {
 			payload := sceneRemoveObject(uint32(removal.Entity.ID), uint32(removal.Entity.OwnerID))
@@ -398,8 +390,8 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			}
 		}
 	}
-	// Snapshot order is deterministic, but keep this defensive sort because the
-	// wire object order is part of the captured compatibility baseline.
+	// 快照顺序是确定性的，但仍保留这个防御性排序，因为线上对象顺序是
+	// 已采集兼容基线的一部分。
 	sort.Slice(delta.Adds, func(i, j int) bool { return delta.Adds[i].Entity.ID < delta.Adds[j].Entity.ID })
 	if len(delta.Adds) != 0 || len(delta.Removes) != 0 {
 		log.Printf("%s: scene viewport delta adds=%d removes=%d", s.remote, len(delta.Adds), len(delta.Removes))
@@ -438,10 +430,9 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 	return nil
 }
 
-// objectRequest accepts C2S 0x07 (Select / object click) with FuncID==0.
-// It sets LastObject, then uses the current client's numeric custom-message
-// route to open the face-to-face NPC dialog.  A selected dialog entry, not the
-// initial NPC click, creates the business view.
+// objectRequest 接受 FuncID==0 的 C2S 0x07（Select/对象点击）。它先设置
+// LastObject，再用当前客户端的数字自定义消息路由打开面对面 NPC 对话。
+// 创建业务 View 的是被选中的对话条目，而不是最初的 NPC 点击。
 func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -459,25 +450,24 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 	if err := s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, 100, entity.id, entity.ownerID)); err != nil {
 		return "", fmt.Errorf("set player LastObject=%d-%d: %w", entity.id, entity.ownerID, err)
 	}
-	// LastObject is an object-selection property, not a dialogue property.
-	// Keep its server-side mirror independently from lastMenu*: attack targets
-	// never open a talk window, but the 211 combat handler still needs to
-	// resolve the same selected hostile actor.
+	// LastObject 是对象选择属性，不是对话属性。它的服务器侧镜像要与
+	// lastMenu* 分开保存：攻击目标从不打开对话窗口，但 211 战斗处理仍需
+	// 解析同一个被选中的敌对角色。
 	s.selectedObject = entity.id
 	s.selectedOwner = entity.ownerID
-	// AttackNpc/BossNpc and unsupported scene objects still become the player's
-	// LastObject. That is the target selection used by the combat ingress, but
-	// they must not receive the generic cinematic conversation that was formerly
-	// sent for every spawned object.
+	// AttackNpc/BossNpc 以及不支持的场景对象仍然会成为玩家的 LastObject。
+	// 那是战斗入口使用的目标选择，但这些对象绝不能收到以前对每个出生
+	// 对象都发送的
+	// 通用剧情对话。
 	if entity.interaction != npcInteractionTalk {
 		log.Printf("%s: object request sequence=%d id=%d config=%s script_class=%s interaction=%s; selected without dialogue",
 			s.remote, request.Sequence, entity.id, entity.configID, entity.scriptClass, entity.interaction)
 		return entity.description, nil
 	}
-	// Creator/template configuration is authoritative for the modern client.
-	// The residual Npc_Func table is retained for offline auditing only: its
-	// Chengdu bindings do not match the current Creator ConfigIDs, so exposing
-	// them as live menu items creates actions this server cannot route.
+	// 对现代客户端而言，creator/模板配置才是权威。遗留的 Npc_Func 表仅
+	// 保留用于离线审计：它的成都绑定与当前 Creator ConfigID 不匹配，将其
+	// 暴露为可用菜单项会产生
+	// 本服务器无法路由的动作。
 	items := talkMenuItems(playableNPCServices(entity.services), nil)
 	frames, err := encodeCinematicTalkMenu(entity.id, entity.ownerID, "", items)
 	if err != nil {
@@ -497,16 +487,15 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 	return entity.description, nil
 }
 
-// openDepotLocked starts the retail depot flow.  The current Lua has no
-// Lua-level "open depot" receiver: form_depot.on_server_msg only refreshes an
-// existing form.  Its form is therefore opened by the client's native handling
-// of SERVER_CREATE_VIEW for VIEWPORT_DEPOT (4).  Once open, main_form_open
-// emits C2S CLIENT_CUSTOMMSG_DEPOT_MSG (307, submessage 4), which the caller's
-// normal frame log records for the next server-side handler step.
+// openDepotLocked 启动正式服的仓库流程。当前 Lua 没有 Lua 层的“打开
+// 仓库”接收器：form_depot.on_server_msg 只会刷新已存在的表单。因此其
+// 表单由客户端对 VIEWPORT_DEPOT (4) 的 SERVER_CREATE_VIEW 原生处理来
+// 打开。打开后 main_form_open 会发出 C2S CLIENT_CUSTOMMSG_DEPOT_MSG
+// （307，子消息 4），调用方的常规帧日志会为下一步服务器处理记录它。
 func (s *sceneLifecycle) openDepotLocked() error {
 	const (
 		viewportDepot = 4
-		depotCapacity = 18 // current share/Rule/depotbox.ini StartCap
+		depotCapacity = 18 // 当前 share/Rule/depotbox.ini 的 StartCap
 	)
 	if err := s.conn.WriteFrame(serverCreateView(serverViewSpec{ID: viewportDepot, Capacity: depotCapacity})); err != nil {
 		return fmt.Errorf("create depot view: %w", err)
@@ -514,10 +503,9 @@ func (s *sceneLifecycle) openDepotLocked() error {
 	return nil
 }
 
-// openShopLocked starts the native shop viewport flow. form_shop.lua obtains
-// all four settings below from the View=61 createview callback; it does not
-// load the NPC template itself. The catalog is therefore parsed server-side
-// and every true item line is materialized as a ViewAdd object.
+// openShopLocked 启动原生商店视口流程。form_shop.lua 从 View=61 的
+// createview 回调获取下面全部四项设置；它自己不加载 NPC 模板。因此
+// 目录在服务器侧解析，每条真实物品行都物化为一个 ViewAdd 对象。
 func (s *sceneLifecycle) openShopLocked(shopID string) error {
 	const (
 		viewportShop    = 61
@@ -587,12 +575,12 @@ type talkMenuItem struct {
 	textID string
 }
 
-// sceneIdent is the client object key used by GetSceneObj / Select / 0x1C header.
+// sceneIdent 是 GetSceneObj / Select / 0x1C 头部使用的客户端对象键。
 func sceneIdent(objectID, ownerID uint32) string {
 	return fmt.Sprintf("%d-%d", objectID, ownerID)
 }
 
-// sendTalkMenuLocked sends native 0x1C SERVER_MENU for modern open_npc_talk.
+// sendTalkMenuLocked 为现代 open_npc_talk 发送原生 0x1C SERVER_MENU。
 func (s *sceneLifecycle) sendTalkMenuLocked(objectID, ownerID uint32, items []serverMenuItem) error {
 	frame, err := serverMenu(objectID, ownerID, items)
 	if err != nil {
@@ -604,11 +592,10 @@ func (s *sceneLifecycle) sendTalkMenuLocked(objectID, ownerID uint32, items []se
 	return nil
 }
 
-// encodeCinematicTalkMenu uses the current C++ GameMessageHandler's custom
-// receiver table.  The table begins at custom ID 1 (custom_sysinfo); its menu
-// entries are therefore 4..8, rather than the raw object-slot offsets 49..53
-// that an earlier experiment incorrectly inferred.  String aliases are not
-// accepted by this client, so the numeric first TVarList value is required.
+// encodeCinematicTalkMenu 使用当前 C++ GameMessageHandler 的自定义接收器
+// 表。该表从 custom ID 1（custom_sysinfo）开始；因此其菜单条目是 4..8，
+// 而不是早期实验错误推断的原始对象槽位偏移 49..53。该客户端不接受字符
+// 串别名，所以第一个 TVarList 值必须使用数字。
 func encodeCinematicTalkMenu(objectID, ownerID uint32, titleID string, items []talkMenuItem) ([][]byte, error) {
 	if len(items) == 0 {
 		return nil, fmt.Errorf("talk menu has no items")
@@ -645,11 +632,10 @@ func encodeCinematicTalkMenu(objectID, ownerID uint32, titleID string, items []t
 	return out, nil
 }
 
-// selectNPCMenu handles the second C2S Select: a non-zero FuncID/mark emitted
-// from a previously sent native menu. It resolves the mark only within that
-// NPC's configured modern services, clears the menu, then opens the requested
-// business view. This is the same two-stage ownership boundary as the live
-// server: click NPC -> SERVER_MENU -> choose mark -> business protocol.
+// selectNPCMenu 处理第二条 C2S Select：由先前发送的原生菜单产出的非零
+// FuncID/mark。它只在该 NPC 已配置的现代服务内解析 mark，清除菜单，然后
+// 打开请求的业务 View。这与正式服的两段式所有权边界一致：点击 NPC ->
+// SERVER_MENU -> 选择 mark -> 业务协议。
 func (s *sceneLifecycle) selectNPCMenu(request clientObjectRequest) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -742,9 +728,8 @@ func (s *sceneLifecycle) openSelectedServiceLocked(entity sceneEntity, service n
 			return err
 		}
 	default:
-		// The menu remains data-driven for every current service. Do not invent
-		// a client-side action for transports/tasks/jobs before their respective
-		// modern business packets and persisted data are proven.
+		// 菜单对每项现有服务都保持数据驱动。在传送/任务/职业各自的现代
+		// 业务包和持久化数据得到验证之前，不要凭空发明客户端动作。
 		return fmt.Errorf("NPC %s service %q (mark=%d) is discovered but not yet implemented", entity.configID, service.source, service.mark)
 	}
 	return nil
@@ -784,9 +769,9 @@ func findNPCService(services []npcService, mark uint16) (npcService, bool) {
 	return npcService{}, false
 }
 
-// npcServiceMenu is deliberately derived solely from the selected NPC's
-// Npc_Func rows.  The old universal “与我交谈 / 离开” pair made a depot,
-// ferryman, trainer and ordinary citizen indistinguishable.
+// npcServiceMenu 刻意只从所选 NPC 的 Npc_Func 行推导。旧的那种通用
+// “与我交谈 / 离开”组合让仓库、船夫、训练师和普通市民变得无法
+// 区分。
 func npcServiceMenu(services []npcService, bindings []npcfunc.Binding) []serverMenuItem {
 	if len(services) != 0 {
 		items := make([]serverMenuItem, 0, len(services)+1)
@@ -835,21 +820,21 @@ func talkMenuItems(services []npcService, bindings []npcfunc.Binding) []talkMenu
 func modernTalkFuncID(mark uint16) int32 {
 	switch mark {
 	case 0x1001:
-		return 805000000 // shop
+		return 805000000 // 商店
 	case 0x1002:
-		return 807000000 // depot
+		return 807000000 // 仓库
 	case 0x1003:
-		return 860000022 // transport
+		return 860000022 // 传送
 	case 0x1004:
-		return 806000036 // life job
+		return 806000036 // 生活职业
 	case 0x1005:
-		return 806000013 // gem service
+		return 806000013 // 宝石服务
 	case 0x1006:
-		return 809000000 // guild
+		return 809000000 // 帮会
 	case 0x1007:
-		return 881000001 // home point
+		return 881000001 // 回城点
 	case 0x1008:
-		return 100000001 // task offer placeholder until task state is persisted
+		return 100000001 // 任务入口占位，待任务状态持久化后替换
 	default:
 		return 860000000 + int32(mark)
 	}
@@ -916,12 +901,10 @@ func legacyTalkTextID(funcID int) string {
 	}
 }
 
-// modernNPCServices extracts business identifiers from the resolved modern
-// NPC configuration. Values are retained in Extensions because they are server
-// business configuration, not visual 0x09 properties. Creator values take
-// precedence over their template counterpart: a creator is an instance-level
-// override, while a template is the shared default. The marks deliberately
-// occupy a separate range from legacy FuncID values.
+// modernNPCServices 从解析后的现代 NPC 配置中提取业务标识。这些值保留
+// 在 Extensions 中，因为它们是服务器业务配置，不是可见的 0x09 属性。
+// creator 值优先于模板对应值：creator 是实例级覆盖，而模板是共享默认值。
+// 这些 mark 刻意占用与旧 FuncID 值不同的独立区间。
 func modernNPCServices(npc npcSpawn) []npcService {
 	value := func(key string) (string, string) { return effectiveNPCBusinessValue(npc, key) }
 	add := func(items []npcService, mark uint16, label, key string) []npcService {
@@ -952,11 +935,10 @@ func modernNPCServices(npc npcSpawn) []npcService {
 	return items
 }
 
-// playableNPCServices is intentionally narrower than modernNPCServices.
-// The latter reports every configured capability; this function exposes only
-// capabilities that have both a proven S2C handler and complete local data.
-// Pending task/transport/guild configuration remains visible in the audit
-// artifact, not as a button that fails after the player clicks it.
+// playableNPCServices 刻意比 modernNPCServices 更窄。后者报告每一项已
+// 配置的能力；本函数只暴露同时具备已验证 S2C 处理器和完整本地数据的
+// 能力。待定的任务/传送/帮会配置保留在审计产物中可见，而不是变成一个
+// 玩家点了之后才失败的按钮。
 func playableNPCServices(services []npcService) []npcService {
 	playable := make([]npcService, 0, len(services))
 	for _, service := range services {
@@ -972,10 +954,9 @@ func playableNPCServices(services []npcService) []npcService {
 	return playable
 }
 
-// effectiveNPCBusinessValue resolves non-visual configuration fields with the
-// same precedence as NPC instance configuration: creator override first,
-// template default second. Empty strings do not erase a configured default;
-// extracted creator XML routinely contains unrelated optional empty fields.
+// effectiveNPCBusinessValue 按 NPC 实例配置的同一优先级解析非可见配置
+// 字段：先 creator 覆盖，后模板默认。空字符串不会抹掉已配置的默认值；
+// 解包出的 creator XML 经常含有无关的可选空字段。
 func effectiveNPCBusinessValue(npc npcSpawn, key string) (value, source string) {
 	for _, prefix := range []string{"creator.", "template."} {
 		if configured := strings.TrimSpace(npc.resolved.Extensions[prefix+key]); configured != "" {
@@ -1003,10 +984,9 @@ func npcFuncIDs(bindings []npcfunc.Binding) []int {
 	return ids
 }
 
-// moveNPC changes the authoritative world transform, emits a proven modern
-// 0x20 destination and confirms arrival with 0x1F. The motion tail remains
-// zero until its animation-specific semantics are proven from modern client
-// code; the destination and lifecycle are not speculative.
+// moveNPC 修改权威的世界变换，发出已验证的现代 0x20 目的地并用 0x1F
+// 确认到达。motion 尾部保持为零，直到其动画专属语义从现代客户端代码
+// 中得到验证；目的地和生命周期都不是猜测。
 func (s *sceneLifecycle) moveNPC(id uint32, destination worldcore.Transform, arrival time.Duration) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -1067,10 +1047,9 @@ func (s *sceneLifecycle) moveNPC(id uint32, destination worldcore.Transform, arr
 	return nil
 }
 
-// startPatrol runs a deliberately small, deterministic simulation set. A
-// Chengdu viewport can contain hundreds of objects; moving all of them before
-// behaviour/routing is implemented would only make the client stutter. Zero
-// disables it through -npc-patrol-count.
+// startPatrol 运行一组刻意很小且确定性的模拟集合。成都的视口可能包含
+// 数百个对象；在行为/路由实现之前全都在动只会让客户端卡顿。可通过
+// -npc-patrol-count 传零来禁用。
 func (s *sceneLifecycle) startPatrol(count int) {
 	if count <= 0 {
 		return
@@ -1083,9 +1062,8 @@ func (s *sceneLifecycle) startPatrol(count int) {
 	s.patrolStarted = true
 	ids := make([]int, 0, len(s.entities))
 	for id, meta := range s.entities {
-		// Hostile actors own their movement through the combat tick. Letting the
-		// old decorative patrol timer move them concurrently would overwrite a
-		// chase destination and make their aggro behaviour nondeterministic.
+		// 敌对角色的移动由战斗 tick 掌管。让旧的装饰性巡逻定时器并发地
+		// 移动它们会覆盖追击目的地，使它们的仇恨行为变得不确定。
 		if meta.interaction != npcInteractionCombat {
 			ids = append(ids, int(id))
 		}

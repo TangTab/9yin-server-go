@@ -13,10 +13,10 @@ import (
 	"time"
 )
 
-// The installed modern text is the source of a passive's per-stage numbers;
-// buff_static/buff_varprop/proppack identify the native state which represents
-// that effect. No inner-power ConfigID appears in this engine as a special
-// case: all definitions are grouped by their equipped BufferID family.
+// 已安装的现代文本是被动效果各阶数值的来源；
+// buff_static/buff_varprop/proppack 负责识别表示该效果的
+// 原生状态。此引擎中没有任何内功 ConfigID 作为特例出现：
+// 所有定义都按其装备的 BufferID 家族分组。
 var (
 	modernInnerPowerDescriptionPath = filepath.Join(defaultModernTextRoot, "chineses", "desc2.idres")
 	modernBuffStaticPath            = filepath.Join(defaultModernShareRoot, "skill", "buff_static.ini")
@@ -29,9 +29,9 @@ type innerPowerMode uint8
 
 const (
 	innerPowerModeNone innerPowerMode = iota
-	// Attacked -> chance to stage a native DodgeProb buff -> dodge -> heal.
-	// This is currently proven by the 明玉 family, but its compiler is based
-	// solely on description grammar plus the matching child-buff properties.
+	// 被攻击 -> 有几率挂载原生 DodgeProb Buff -> 闪避 -> 治疗。
+	// 目前由明玉家族验证，但其编译器仅依据
+	// 描述语法加上匹配的子 Buff 属性。
 	innerPowerModeIncomingDodgeHeal
 )
 
@@ -70,9 +70,9 @@ type nativeBuffDefinition struct {
 }
 
 type innerPowerPassiveCatalog struct {
-	// All currently installed inner-power descriptions, including modes not
-	// implemented by the local combat engine yet. This preserves the source
-	// data and lets new mode compilers be added without book-by-book wiring.
+	// 当前已安装的全部内功描述，包括本地战斗引擎尚未
+	// 实现的模式。这样既保留了源数据，
+	// 也允许新增模式编译器而无需逐本内功接线。
 	descriptions map[string]map[int32]innerPowerDescription
 	profiles     map[string]map[int32]innerPowerPassiveProfile
 }
@@ -152,8 +152,8 @@ func loadInnerPowerDescriptions() (map[string]map[int32]innerPowerDescription, e
 	return entries, nil
 }
 
-// loadInnerPowerNativeBuffs limits its scan to child Buffs of installed
-// inner-power families. This is a resource compiler, not a handwritten map.
+// loadInnerPowerNativeBuffs 将扫描范围限定为已安装内功
+// 家族的子 Buff。这是一个资源编译器，而非手写映射表。
 func loadInnerPowerNativeBuffs(descriptions map[string]map[int32]innerPowerDescription) (map[string]nativeBuffDefinition, error) {
 	modernCatalog, err := loadModernNeiGongCatalog()
 	if err != nil {
@@ -204,8 +204,8 @@ func loadInnerPowerNativeBuffs(descriptions map[string]map[int32]innerPowerDescr
 	if len(definitions) == 0 {
 		return definitions, nil
 	}
-	// Read target ranges as complete sections so Level/LifeTime/PropModify stay
-	// together; `parseModernINI` intentionally yields one field at a time.
+	// 将目标范围作为完整 section 读取，使 Level/LifeTime/PropModify 保持
+	// 在一起；`parseModernINI` 刻意一次只产出一个字段。
 	return loadInnerPowerNativeBuffLevels(definitions, modernCatalog)
 }
 

@@ -7,10 +7,10 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-// MotionState is the nine-slot ServerMoving (0x20) payload recovered from the
-// current FxNet2 receiver. The final five fields are deliberately raw/minimal:
-// their animation semantics are not yet proven, while the destination layout
-// is. A following ServerLocation is the authoritative arrival acknowledgement.
+// MotionState 是从当前 FxNet2 接收端还原出的九槽位
+// ServerMoving (0x20) 负载。最后五个字段刻意保持原始/最简形态：
+// 它们的动画语义尚未证实，而目的坐标部分的布局已经证实。
+// 随后跟进的 ServerLocation 才是权威的到达确认。
 type MotionState struct {
 	DestX, DestY, DestZ, DestOrient    float32
 	Motion0, Motion1, Motion2, Motion3 float32
@@ -21,7 +21,7 @@ func motionFromDest(dest worldcore.Transform) MotionState {
 	return MotionState{DestX: dest.X, DestY: dest.Y, DestZ: dest.Z, DestOrient: dest.Orient}
 }
 
-// serverMoving encodes the exact 45-byte GameReceiver::ServerMoving packet.
+// serverMoving 编码精确 45 字节的 GameReceiver::ServerMoving 数据包。
 func serverMoving(objectID, ownerID uint32, state MotionState) []byte {
 	payload := make([]byte, 45)
 	payload[0] = 0x20

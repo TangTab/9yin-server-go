@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// This contract test is opt-in because it writes test rows. Point it only at a
-// disposable, already-migrated database; never at the user's game database.
+// 该契约测试需要显式启用，因为它会写入测试行。只将其指向
+// 一次性的、已完成迁移的数据库；绝不指向用户的游戏数据库。
 func TestMySQLRepositoryIntegrationContract(t *testing.T) {
 	dsn := os.Getenv("NINEYIN_TEST_MYSQL_DSN")
 	if dsn == "" {

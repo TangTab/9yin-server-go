@@ -46,8 +46,8 @@ func NewScene() *Scene {
 	return &Scene{entities: make(map[EntityID]VersionedEntity)}
 }
 
-// Begin starts a new scene generation. Old entities cannot leak into the new
-// generation even if a client sends delayed activity from the previous scene.
+// Begin 开启新的场景世代。即使客户端延迟发送上一场景的
+// 活动，旧实体也不会泄漏到新世代。
 func (scene *Scene) Begin(config, resource string) (Generation, error) {
 	config, resource = strings.TrimSpace(config), strings.TrimSpace(resource)
 	if config == "" || resource == "" {
@@ -95,9 +95,9 @@ func (scene *Scene) Replace(entity Entity) error {
 	return nil
 }
 
-// Get returns the authoritative entity snapshot for a targeted action or a
-// server-side simulation tick. Callers receive a clone and cannot mutate scene
-// state without going through Replace.
+// Get 返回用于定向操作或服务端模拟 tick 的权威实体快照。
+// 调用者收到的是克隆，无法绕过 Replace
+// 修改场景状态。
 func (scene *Scene) Get(id EntityID) (VersionedEntity, error) {
 	scene.mu.RLock()
 	defer scene.mu.RUnlock()

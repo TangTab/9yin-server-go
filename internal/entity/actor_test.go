@@ -130,8 +130,8 @@ func TestActorQingGongSuccessfulUseRefillsBelowFifty(t *testing.T) {
 	a := NewPlayer(1, 1, "测试")
 	start := time.Now()
 
-	// Four accepted 25-point actions leave 50 exactly: the threshold is
-	// strictly below 50, so this must not refill yet.
+	// 四次被接受的 25 点动作恰好剩 50 点：阈值是严格小于 50，
+	// 所以此时还不应回满。
 	for i := 0; i < 4; i++ {
 		if _, ok := a.UseQingGong(25, start); !ok {
 			t.Fatalf("use %d was rejected", i+1)
@@ -141,8 +141,8 @@ func TestActorQingGongSuccessfulUseRefillsBelowFifty(t *testing.T) {
 		t.Fatalf("points at threshold=%d, want 50", got)
 	}
 
-	// The next accepted use leaves 25, so the local-test refill must be
-	// reflected by the same state snapshot sent in the following 0x10 update.
+	// 下一次被接受的使用剩 25 点，因此本地测试的回满必须
+	// 体现在随后的 0x10 更新所发送的同一份状态快照中。
 	if cost, ok := a.UseQingGong(25, start); !ok || cost != 25 {
 		t.Fatalf("below-threshold use cost=%d ok=%t, want 25 true", cost, ok)
 	}

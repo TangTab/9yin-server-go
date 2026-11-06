@@ -13,9 +13,9 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-// npcCombatState is deliberately small and server-owned. The creator/template
-// still determines which object is hostile; this state only holds the runtime
-// decisions that a live server must not delegate to the client.
+// npcCombatState 刻意保持精简且由服务器持有。创建者/模板
+// 仍然决定哪个对象是敌对的；此状态只保存运行期决策，而这些决策
+// 是正式服务器绝不能下放给客户端的。
 type npcCombatState struct {
 	home         worldcore.Transform
 	aggroRange   float32
@@ -98,9 +98,9 @@ func (n npcSpawn) float32Property(name string) float32 {
 	return n.resolved.Properties[name].Value.F32
 }
 
-// combatTick runs on the owning connection loop once per second. It only
-// writes packets the current client already consumes: NPC 0x20/0x1F movement
-// and ordinary 0x10 properties. No obsolete S->C custom message is involved.
+// combatTick 在所属连接的循环上每秒执行一次。它只
+// 发送当前客户端已会消费的包：NPC 0x20/0x1F 移动
+// 以及普通的 0x10 属性包。不涉及任何已过时的 S->C 自定义消息。
 func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position, now time.Time) (combatTickResult, error) {
 	if s == nil || player == nil {
 		return combatTickResult{}, nil
@@ -181,8 +181,8 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 			s.combatStates[id] = state
 			continue
 		}
-		// This NPC retains a valid target, even if it is currently waiting for
-		// its attack cooldown or exceeds the per-tick attacker cap.
+		// 该 NPC 仍持有有效目标，即便它此刻正在等待
+		// 攻击冷却结束，或已超出本 tick 的攻击者数量上限。
 		threatened = true
 		if now.Before(state.controlledUntil) {
 			s.combatStates[id] = state
@@ -241,11 +241,11 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 		if err := s.conn.WriteFrame(serverMoving(move.id, move.ownerID, motionFromDest(move.destination))); err != nil {
 			return result, fmt.Errorf("combat move NPC %d: %w", move.id, err)
 		}
-		// ServerLocation is an arrival confirmation in the current client.  Do
-		// not pair it with ServerMoving in the same combat tick: doing so makes
-		// the actor snap to the destination instead of playing the move.  A
-		// later chase destination invalidates this confirmation by changing the
-		// authoritative transform before this timer executes.
+		// ServerLocation 在当前客户端中是到达确认。不要
+		// 在同一个战斗 tick 中让它与 ServerMoving 成对发送：那样会使
+		// actor 瞬移到目的地而不是播放移动动作。之后
+		// 的追击目的地会在该定时器执行之前更改权威
+		// transform，从而令此次确认失效。
 		s.scheduleCombatMoveArrival(move, time.Second)
 	}
 	for _, update := range updates {
@@ -260,10 +260,10 @@ func (s *sceneLifecycle) combatTick(player *playerActor, position role.Position,
 	return result, nil
 }
 
-// scheduleCombatMoveArrival confirms the final location only after the
-// client has had one movement interval to animate toward it. The transform
-// comparison is the cancellation token: continuous chasing updates it every
-// tick, so an obsolete timer never confirms a stale destination.
+// scheduleCombatMoveArrival 只在客户端拥有一个移动间隔
+// 来朝目的地播放动画之后，才确认最终位置。transform
+// 比较即是取消令牌：持续追击每 tick 都会更新它，
+// 因此过期的定时器绝不会确认一个陈旧的目的地。
 func (s *sceneLifecycle) scheduleCombatMoveArrival(move npcMoveUpdate, delay time.Duration) {
 	if delay <= 0 {
 		delay = time.Second

@@ -10,7 +10,7 @@ const InitialMessageKey uint32 = 0xFA6D3BCC
 
 var ErrFrameTooLarge = errors.New("protocol frame too large")
 
-// ReadWireFrame reads bytes through the unescaped EE EE terminator.
+// ReadWireFrame 读取字节直到未转义的 EE EE 终止符。
 func ReadWireFrame(r io.Reader, limit int) ([]byte, error) {
 	br := bufio.NewReader(r)
 	out := make([]byte, 0, 256)

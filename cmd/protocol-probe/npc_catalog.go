@@ -17,9 +17,9 @@ import (
 var (
 	defaultNPCTablePath   = filepath.Join(defaultModernShareRoot, "npc", "npcconfig", "worldnpc", "city_commonnpc.txt")
 	defaultNPCCreatorPath = filepath.Join(defaultModernShareRoot, "creator", "npc_creator", "city05_chengdu", "funcnpc.xml")
-	// All scene families share the modern npcconfig root. Restricting this to
-	// worldnpc silently drops clone, adventure and battle templates even though
-	// their creator files and coordinates are present.
+	// 所有场景家族共享现代 npcconfig 根目录。若将其限定为
+	// worldnpc，会静默丢弃克隆、冒险和战斗模板，尽管
+	// 它们的 creator 文件和坐标都存在。
 	defaultNPCTableDir   = filepath.Join(defaultModernShareRoot, "npc", "npcconfig")
 	defaultNPCCreatorDir = filepath.Join(defaultModernShareRoot, "creator", "npc_creator", "city05_chengdu")
 )
@@ -50,18 +50,18 @@ func loadChengduNPCSpawns(tableDir, creatorDir string, schema clientdata.Schema)
 	return loadNPCSceneSpawnsFromTables(tables, creatorDir, schema)
 }
 
-// loadNPCTemplateTables loads the shared modern NPC templates once. Scene
-// creators only hold placement and per-instance overrides; all scene folders
-// resolve against this same table set.
+// loadNPCTemplateTables 一次性加载共享的现代 NPC 模板。场景
+// creator 只保存摆放位置和逐实例覆盖；所有场景目录
+// 都对这同一套模板表进行解析。
 func loadNPCTemplateTables(tableDir string) ([]*clientdata.NPCTemplateTable, error) {
 	var tablePaths []string
 	err := filepath.WalkDir(tableDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
-		// npcconfig/npc_type.txt is a category dictionary rather than an NPC
-		// template. Actual template rows live in the world/clone/battle/life
-		// subdirectories and have the required ID column.
+		// npcconfig/npc_type.txt 是类别字典，而不是 NPC
+		// 模板。真正的模板行位于 world/clone/battle/life
+		// 子目录中，并带有所需的 ID 列。
 		if !entry.IsDir() && filepath.Dir(path) != tableDir && strings.EqualFold(filepath.Ext(entry.Name()), ".txt") {
 			tablePaths = append(tablePaths, path)
 		}
@@ -87,10 +87,10 @@ func loadNPCTemplateTables(tableDir string) ([]*clientdata.NPCTemplateTable, err
 	return tables, nil
 }
 
-// loadNPCSceneSpawnsFromTables reads the scene's declared NPC creator set.
-// Each modern scene carries file.ini because its creator subset differs; XML
-// beside it such as eventtrigger.xml is not an NPC creator and has no id/x/y/z
-// fields, so indiscriminately scanning every XML corrupts the catalog.
+// loadNPCSceneSpawnsFromTables 读取场景声明的 NPC creator 集合。
+// 每个现代场景都带有 file.ini，因为其 creator 子集各不相同；旁边的
+// XML 例如 eventtrigger.xml 并非 NPC creator，也没有 id/x/y/z
+// 字段，因此无差别扫描所有 XML 会破坏目录数据。
 func loadNPCSceneSpawnsFromTables(tables []*clientdata.NPCTemplateTable, creatorDir string, schema clientdata.Schema) ([]npcSpawn, npcCatalogStats, error) {
 	creatorPaths, err := sceneCreatorPaths(creatorDir)
 	if err != nil {
@@ -153,9 +153,9 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 			if !found || !strings.EqualFold(filepath.Ext(rawName), ".xml") {
 				continue
 			}
-			// EventTrigger.xml is declared by some later school manifests, but
-			// its <triggercreator> rows describe scene events and intentionally
-			// have no NPC template id. It must never enter the NPC parser.
+			// 一些后期门派的清单会声明 EventTrigger.xml，但
+			// 其 <triggercreator> 行描述的是场景事件，刻意
+			// 不带 NPC 模板 id。它绝不能进入 NPC 解析器。
 			if strings.EqualFold(filepath.Base(rawName), "eventtrigger.xml") {
 				continue
 			}
@@ -165,11 +165,11 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 				continue
 			}
 			if _, statErr := os.Stat(path); statErr != nil {
-				// Modern resource packages are intentionally partial for some
-				// scenes: their file.ini still lists creator variants such as
-				// AttackNpc_Creator.xml even when that optional file was omitted.
-				// Other declared creators are authoritative and sufficient to
-				// enter the scene, so only a real stat failure is fatal.
+				// 现代资源包对部分场景刻意不完整：其
+				// file.ini 仍会列出 AttackNpc_Creator.xml 之类的
+				// creator 变体，即使该可选文件已被省略。
+				// 其余声明的 creator 已是权威且足以进入
+				// 场景，因此只有真正的 stat 失败才是致命的。
 				if errors.Is(statErr, os.ErrNotExist) {
 					continue
 				}
@@ -188,9 +188,9 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 		return nil, fmt.Errorf("read scene creator manifest %s: %w", manifestPath, readErr)
 	}
 
-	// Older or custom directories may not ship file.ini. Keep the fallback
-	// intentionally conservative: the known event trigger document is not a
-	// spawn source and must never enter the NPC parser.
+	// 较旧或自定义的目录可能不带 file.ini。回退逻辑刻意保持
+	// 保守：已知的事件触发器文档不是
+	// 生成来源，绝不能进入 NPC 解析器。
 	var creatorPaths []string
 	err := filepath.WalkDir(creatorDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -211,9 +211,9 @@ func sceneCreatorPaths(creatorDir string) ([]string, error) {
 	return creatorPaths, nil
 }
 
-// auditNPCSceneRoot resolves every immediate scene directory independently.
-// A broken or obsolete creator file is reported on its own scene instead of
-// preventing the remaining modern resources from being inventoried.
+// auditNPCSceneRoot 独立解析每个直接子场景目录。
+// 损坏或过时的 creator 文件只会记在其所属场景上，
+// 而不会妨碍其余现代资源的清点。
 func auditNPCSceneRoot(tableDir, creatorRoot string, schema clientdata.Schema) ([]npcSceneAuditEntry, error) {
 	tables, err := loadNPCTemplateTables(tableDir)
 	if err != nil {

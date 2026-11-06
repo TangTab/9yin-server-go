@@ -1,5 +1,5 @@
-// Package world owns server-side scene entities independently of their wire
-// encoding. Protocol handlers translate these typed values to client archives.
+// Package world 独立于线上编码拥有服务端的场景实体。
+// 协议处理器负责把这些类型化的值转换为客户端档案。
 package world
 
 import (
@@ -67,9 +67,9 @@ func (v Value) validate() error {
 	}
 }
 
-// PropertyArchive is keyed by the stable client property name. Numeric visible
-// indices belong to the negotiated wire schema and are intentionally not part
-// of the world model.
+// PropertyArchive 以稳定的客户端属性名作为键。数字形式的可见
+// 索引属于协商出的线上 schema，有意不作为
+// world 模型的一部分。
 type PropertyArchive map[string]Value
 
 func (archive PropertyArchive) Set(name string, value Value) error {

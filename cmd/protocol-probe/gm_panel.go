@@ -14,9 +14,9 @@ import (
 	"github.com/local/9yin-go-server/internal/role"
 )
 
-// gmHub deliberately listens only on localhost. Commands are executed by the
-// owning game-session loop, rather than from the HTTP handler, so two goroutines
-// never write interleaved FxNet2 frames to the same client connection.
+// gmHub 刻意只监听 localhost。命令由所属的游戏会话循环
+// 执行，而不是在 HTTP handler 中执行，这样两个 goroutine
+// 绝不会向同一个客户端连接交叉写入 FxNet2 帧。
 type gmHub struct {
 	mu       sync.RWMutex
 	sessions map[uint64]*gmSession
@@ -52,8 +52,8 @@ type gmCommand struct {
 	destination sceneDestination
 	position    role.Position
 	faction     string
-	// reply is buffered so the session loop can always finish writing its frame
-	// even if the browser disconnects while waiting for the HTTP response.
+	// reply 带缓冲，使会话循环总能完成其帧的写入，
+	// 即便浏览器在等待 HTTP 响应期间断开连接。
 	reply chan error
 }
 
@@ -69,8 +69,8 @@ func (hub *gmHub) attach(id uint64, remote string, active *role.RoleSnapshot, fa
 	session := &gmSession{
 		id:     id,
 		remote: remote,
-		// An unbuffered hand-off is intentional: a GM click means "send on the
-		// next game-loop turn", never "save this for some later scene".
+		// 刻意使用无缓冲交接：GM 的点击意味着“在游戏循环的
+		// 下一轮发送”，而不是“留着等到之后某个场景再发”。
 		commands: make(chan gmCommand),
 		state: gmPlayerState{
 			SessionID: id, Remote: remote, Name: active.Name, Scene: active.Location.Scene,
@@ -201,10 +201,10 @@ func serveGM(listen string, hub *gmHub) {
 			writeGMError(writer, http.StatusBadRequest, "invalid JSON body")
 			return
 		}
-		// Keep an HTTP-side trace separate from the game-session trace below.
-		// A browser can keep an old panel page alive after the server restarts;
-		// without this line, a missing POST is indistinguishable from a command
-		// that was queued but not delivered to the live session.
+		// 将 HTTP 侧的追踪与下方游戏会话的追踪区分开。
+		// 服务器重启后，浏览器可能还保留着旧的面板页面；
+		// 没有这条日志，就无法区分 POST 丢失与命令
+		// 已入队但未送达活跃会话这两种情况。
 		log.Printf("GM API command received: session=%d action=%q", id, body.Action)
 		command := gmCommand{action: body.Action, silver: body.Silver, sp: body.SP, value: body.Value, faction: body.Faction, reply: make(chan error, 1)}
 		switch body.Action {
@@ -247,9 +247,9 @@ func serveGM(listen string, hub *gmHub) {
 				writeGMError(writer, http.StatusBadRequest, presetErr.Error())
 				return
 			}
-			// The session loop owns the established switch_scene execution path.
-			// A preset is only HTTP-side input validation and must be translated
-			// before the command reaches that loop.
+			// 会话循环拥有既有的 switch_scene 执行路径。
+			// 预设只是 HTTP 侧的输入校验，必须在命令
+			// 到达该循环之前完成转换。
 			command.action = "switch_scene"
 			command.destination = destination
 		case "teleport":
@@ -267,8 +267,8 @@ func serveGM(listen string, hub *gmHub) {
 		case "npc_bubble", "drama_prompt", "red_super_armor",
 			"action_state_fishing", "action_state_hsqs05", "action_state_sgmd",
 			"action_native_fishing", "action_state_stop":
-			// Test only registered client-native story routes. The server owns the
-			// payload so the panel cannot submit malformed custom values.
+			// 只测试已注册的客户端原生剧情路由。负载由服务器
+			// 持有，因此面板无法提交格式错误的自定义值。
 		default:
 			writeGMError(writer, http.StatusBadRequest, "unsupported action")
 			return
@@ -285,8 +285,8 @@ func serveGM(listen string, hub *gmHub) {
 			}
 			writeGMJSON(writer, http.StatusOK, map[string]string{"status": "sent"})
 		case <-time.After(2 * time.Second):
-			// The command was accepted by the game loop, but a frame write did not
-			// finish promptly. Do not describe that as queued or successful.
+			// 命令已被游戏循环接受，但帧写入未能
+			// 及时完成。不要把这种情况描述为已排队或成功。
 			writeGMError(writer, http.StatusGatewayTimeout, "game session did not confirm the frame send")
 		}
 	})

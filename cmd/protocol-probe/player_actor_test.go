@@ -30,7 +30,7 @@ func TestQingGongMotionPropertiesUseModernRushRangeConfig(t *testing.T) {
 
 func TestCombatRageTickAddsFivePerSecondWhileFighting(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	// Spawn defaults to a full SP pool, so start from a drained, known value.
+	// 出生时默认 SP 为满池，因此先设为一个已耗尽的已知值。
 	if _, _, err := player.setSP(40); err != nil {
 		t.Fatalf("stage drained SP: %v", err)
 	}

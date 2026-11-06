@@ -19,49 +19,46 @@ const (
 	playerObjectID uint32 = 1
 	playerOwnerID  uint32 = 1
 
-	// These are appended immediately after playerProgressFields (171..207).
-	// Their order must stay identical to sceneVisiblePropertyFields because
-	// FxNet2 property archives carry only the numeric index, not the name.
+	// 这些属性紧跟在 playerProgressFields（171..207）之后追加。其顺序
+	// 必须与 sceneVisiblePropertyFields 保持一致，因为 FxNet2 属性档案
+	// 只携带数字索引，不携带名称。
 	propNeigongPKStatus uint16 = 208
 	propDead            uint16 = 209
 	propCantUseSkill    uint16 = 210
 	propCurSkillID      uint16 = 211
 	propPauseTime       uint16 = 212
-	// Native main-role UI binds these as ints. They describe the advertised
-	// recovery rate; the server remains the source of actual HP/MP changes.
+	// 原生主角 UI 将这些属性绑定为整数。它们描述的是对外通告的恢复
+	// 速率；真正的 HP/MP 变动仍以服务器为来源。
 	propHPHeartSpeed    uint16 = 213
 	propHPHeartSpeedAdd uint16 = 214
 	propMPHeartSpeed    uint16 = 215
 	propMPHeartSpeedAdd uint16 = 216
-	// form_main_player's recovery tooltip gets the actual restored amount from
-	// these separate properties, not from *HeartSpeed.
+	// form_main_player 的恢复提示框从这些独立属性获取实际恢复量，而不
+	// 是从 *HeartSpeed 读取。
 	propHPUpSpeed    uint16 = 217
 	propHPUpSpeedAdd uint16 = 218
 	propMPUpSpeed    uint16 = 219
 	propMPUpSpeedAdd uint16 = 220
-	// The normal server skill state publishes the complete public skill-use
-	// tuple.  FxGameLogic also reads ModifySkillLockTime directly while
-	// deciding whether a self-target skill may enter its native action.
+	// 常规的服务器技能状态会发布完整的公开用技元组。FxGameLogic 在判定
+	// 一个指向自身的技能能否进入其原生动作时，也会直接读取
+	// ModifySkillLockTime。
 	propCurSkillEffectID    uint16 = 221
 	propCurSkillLevel       uint16 = 222
 	propCurSkillTarget      uint16 = 223
 	propModifySkillLockTime uint16 = 224
-	// Learned skill objects use this byte independently from the server's
-	// request acceptance. The modern shortcut UI reads CanUse directly; when
-	// it is absent the icon is rendered unavailable even though the guarded
-	// combat request path can still reach C2S 211.
+	// 已学技能对象对这个字节的使用独立于服务器的请求受理。现代快捷栏
+	// UI 直接读取 CanUse；当它缺失时，即使受保护的战斗请求路径仍能到达
+	// C2S 211，图标也会被渲染为不可用。
 	propSkillCanUse uint16 = 225
-	// The current client does not represent every affiliation through School.
-	// Its role panel chooses Force, then NewSchool, then School.  Keeping these
-	// negotiated and explicit is therefore required for the later factions and
-	// hidden schools to avoid being rendered as \"无门派\".
+	// 当前客户端并不通过 School 表达所有归属关系。其角色面板依次选用
+	// Force，再 NewSchool，最后 School。因此必须让这些协商属性保持显式，
+	// 后期势力和隐藏门派才不会被渲染成 \"无门派\"。
 	propForce     uint16 = 226
 	propNewSchool uint16 = 227
 
-	// BufferListStr is the native gameplay BuffContainer snapshot. BufferInfo
-	// slots are the native visual-store projection. Both must describe the same
-	// active Buffs: UI-only BufferInfo is insufficient for qinggong_3's native
-	// HasBuff("buf_qg_drift") gate.
+	// BufferListStr 是原生玩法的 BuffContainer 快照。BufferInfo 槽位是
+	// 原生视觉存储的投影。两者必须描述同一批活动 Buff：仅有 UI 的
+	// BufferInfo 不足以通过 qinggong_3 的原生 HasBuff("buf_qg_drift") 门控。
 	bufferListPropertyIndex      uint16 = 143
 	bufferInfoFirstPropertyIndex uint16 = bufferListPropertyIndex + 1
 	bufferInfoSlotCount          uint16 = 24
@@ -83,29 +80,27 @@ const (
 	waterDriftStaticData    uint32 = 216
 	waterJumpStaticData     uint32 = 5786
 
-	// Equipped inner power uses the same native BuffStore, but must not share
-	// a temporary combat/qinggong slot.  Its lease is renewed from the
-	// authoritative equip state on spawn and every 215 response.
+	// 装备中的内功使用同一个原生 BuffStore，但不得与临时战斗/轻功槽位
+	// 共用。其租约在出生时以及每次 215 响应时都从权威装备状态续期。
 	innerPowerBuffLease = 24 * time.Hour
 
-	// SP is the current modern client rage resource.  The installed skill
-	// definitions and live 211 handling use 100 as the full local-test pool.
-	// All GM and future combat gain paths go through these helpers so a client
-	// property can never become the authority for the resource.
+	// SP 是当前现代客户端的怒气资源。已安装的技能定义和现网 211 处理
+	// 都以 100 作为本地测试的满池值。所有 GM 及后续战斗获取路径都经由
+	// 这些辅助函数，客户端属性永远不会成为该资源的权威。
 	maxPlayerSP int32 = 100
 
-	// Local-test sitting recovery is settled once per existing server second.
-	// User rule: a living actor recovers a full MaxHP/MaxMP pool within ten
-	// seconds, regardless of equipment or inner-power-derived totals.
+	// 本地测试的打坐恢复按现有的服务器秒每秒结算一次。用户规则：存活
+	// 的角色无论装备或内功推导出的总量如何，都在十秒内回满
+	// MaxHP/MaxMP。
 	sitcrossFullRecoverySeconds int32 = 10
 	sitcrossHeartMillis         int32 = 1000
 
-	// Combat recovery never restores real HP.  It only reduces the native
-	// HitHP-HP bruised-blood layer once per authoritative server second.
+	// 战斗恢复从不恢复真实 HP。它只在每个权威服务器秒内削减一次原生
+	// HitHP-HP 瘀血层。
 	combatBruiseRecoveryPerSecond int32 = 10
 
-	// Combat rage recovery: a fighting actor regains five SP per authoritative
-	// server second until the 100 cap, mirroring the retail in-combat trickle.
+	// 战斗怒气恢复：战斗中的角色每个权威服务器秒回复五点 SP，直到 100
+	// 上限为止，与正式服战斗中的缓慢回复一致。
 	combatRageRecoveryPerSecond int32 = 5
 )
 
@@ -131,10 +126,10 @@ func bufferInfoPropertyName(slot uint16) string {
 	return fmt.Sprintf("BufferInfo%d", slot)
 }
 
-// playerActor bridges the authoritative runtime actor to the current client's
-// negotiated visible-property schema. Currency is session-authoritative for
-// the current local-test server; the purchase transaction will become its
-// persistent owner once inventory/currency storage is introduced.
+// playerActor 将权威运行时角色桥接到当前客户端协商出的
+// 可见属性 schema。对当前本地测试服务器而言，货币的权威属于会话；
+// 一旦引入物品/货币存储，购买事务将成为
+// 它的持久化所有者。
 type playerActor struct {
 	actor                 *entity.Actor
 	silver                int32
@@ -159,17 +154,17 @@ type playerActor struct {
 	progress              playerProgress
 }
 
-// playerMotion is deliberately server-owned GM state.  Its values are sent
-// over the normal modern object-property receiver, never through S->C 0x1E.
+// playerMotion 是刻意由服务器持有的 GM 状态。其值通过常规的现代对象
+// 属性接收端发送，绝不通过 S->C 0x1E 发送。
 type playerMotion struct {
 	moveSpeed float32
 	runSpeed  float32
 	gravity   float32
 }
 
-// activePlayerBuff is the server-side counterpart to one native BufferInfo
-// slot.  The client owns rendering, but gameplay decisions must read this
-// state instead of trusting a client-side icon.
+// activePlayerBuff 是单个原生 BufferInfo 槽位在服务器侧的对应物。渲染
+// 归客户端所有，但玩法决策必须读取这份状态，而不是信任客户端侧的
+// 图标。
 type activePlayerBuff struct {
 	staticData uint32
 	expiresUTC time.Time
@@ -177,10 +172,10 @@ type activePlayerBuff struct {
 	level      int32
 }
 
-// playerBuffRules mirrors buf_fixed_red -> proppack 9679.  It deliberately
-// does not claim damage immunity: the current config grants hit-effect and
-// skill-lock immunity only.  Combat/control ingress will consult this state
-// when those C2S paths are introduced.
+// playerBuffRules 镜像 buf_fixed_red -> proppack 9679。它刻意不声明
+// 伤害免疫：当前配置只授予受击特效免疫和技能锁定免疫。战斗/控制
+// 入口将在这些 C2S 路径引入时
+// 查询这份状态。
 type playerBuffRules struct {
 	CantHitEffect     bool
 	CantBeSkillLocked bool
@@ -230,9 +225,9 @@ func (p *playerActor) progressProperties() []clientdata.IndexedProperty {
 	return p.progress.properties()
 }
 
-// setFaction changes the native School property only after the GM whitelist
-// and persistent appearance update have succeeded.  The modern client uses
-// that one property for original schools, forces and new schools alike.
+// setFaction 只在 GM 白名单和持久化外观更新都成功后才修改原生的
+// School 属性。现代客户端对初始门派、势力和新门派统一使用这一个
+// 属性。
 func (p *playerActor) setFaction(faction string) ([]byte, error) {
 	p.mu.Lock()
 	p.faction = faction
@@ -240,9 +235,9 @@ func (p *playerActor) setFaction(faction string) ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, factionProperties(faction))
 }
 
-// factionProperties mirrors form_main_player.refresh_role_changed: original
-// schools populate School, 江湖势力 populate Force, and later schools populate
-// NewSchool.  Empty companion fields deliberately clear a previous GM choice.
+// factionProperties 镜像 form_main_player.refresh_role_changed 的逻辑：
+// 初始门派填充 School，江湖势力填充 Force，后期门派填充 NewSchool。
+// 留空的伴随字段用于刻意清除先前的 GM 选择。
 func factionProperties(faction string) []clientdata.IndexedProperty {
 	school, force, newSchool := faction, "", ""
 	switch {
@@ -258,10 +253,10 @@ func factionProperties(faction string) []clientdata.IndexedProperty {
 	}
 }
 
-// setActiveParry records a client-originated 218 request for the future
-// authoritative incoming-hit resolver.  It has no client-side visual side
-// effect by itself: visual parry/hit actions are selected only after an NPC
-// or player attack reaches that resolver.
+// setActiveParry 记录一条客户端发起的 218 请求，供未来权威的受击裁定
+// 器使用。它自身没有任何客户端视觉副作用：视觉上的招架/受击动作要等
+// NPC 或玩家的攻击到达该裁定器之后
+// 才会被选定。
 func (p *playerActor) setActiveParry(value activeParryRequest) {
 	p.mu.Lock()
 	p.activeParry = value
@@ -283,11 +278,10 @@ type npcAttackOutcome struct {
 	innerPowerHeal      int32
 }
 
-// resolveNPCAttack is the server-authoritative incoming-hit decision. The
-// current client already supplies the C2S active-parry ingress (218), but its
-// exact combat enum is not recovered; for the local server every fresh 218
-// request grants one 600ms parry window. Dodge is deterministic per attacker
-// and second so a reconnect cannot reroll an accepted outcome.
+// resolveNPCAttack 是服务器权威的受击裁定。当前客户端已提供 C2S 的
+// 主动招架入口（218），但其确切的战斗枚举尚未还原；对本地服务器而言，
+// 每条新的 218 请求都授予一个 600ms 的招架窗口。闪避按攻击者和秒
+// 确定性生成，重连无法重掷已接受的判定结果。
 func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time.Time) npcAttackOutcome {
 	if damage <= 0 || p.actor.Snapshot().HP <= 0 {
 		return npcAttackOutcome{}
@@ -336,17 +330,16 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 	return npcAttackOutcome{stateChanged: true, dead: dead}
 }
 
-// combatPercentRoll is deterministic for the same attacker and server tick.
-// It keeps local testing reproducible without letting reconnects reroll an
-// already-settled NPC attack.
+// combatPercentRoll 对同一攻击者和同一服务器 tick 是确定性的。它让
+// 本地测试保持可复现，同时不让重连重掷一次已经结算的 NPC 攻击。
 func combatPercentRoll(attackerID uint32, now time.Time, salt uint64) int32 {
 	value := uint64(attackerID)*1103515245 + uint64(now.Unix())*2654435761 + salt*97
 	return int32(value % 100)
 }
 
-// applyIncomingDodgePassive is the generic event-mode executor for an
-// inner-power profile compiled from its installed description and child Buff.
-// Other passive modes plug into the same pre-hit dispatch point.
+// applyIncomingDodgePassive 是内功档案的事件模式通用执行器，该档案由其
+// 已安装的描述和子 Buff 编译而来。其他被动模式都接入同一个受击前的
+// 派发点。
 func (p *playerActor) applyIncomingDodgePassive(profile innerPowerPassiveProfile, attackerID uint32, now time.Time) (active, triggered bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -373,9 +366,9 @@ func (p *playerActor) setInnerPowerHealCooldown(next time.Time) {
 	p.mu.Unlock()
 }
 
-// expireInnerPowerPassive clears only 料敌先机. The ordinary connection tick
-// then sends one normal 0x10 vital archive, removing BufferInfo10 and the
-// matching BufferListStr entry together.
+// expireInnerPowerPassive 只清除料敌先机。随后常规的连接 tick 会发送
+// 一个常规 0x10 属性档案，同时移除 BufferInfo10 和与之匹配的
+// BufferListStr 条目。
 func (p *playerActor) expireInnerPowerPassive(now time.Time) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -393,9 +386,8 @@ func (p *playerActor) skillLocked(now time.Time) bool {
 	return p.skillLockUntil.After(now)
 }
 
-// reviveWhenDue implements the local-test respawn policy. It intentionally
-// uses normal actor properties; the exact official relive UI/teleport route is
-// a separate protocol feature and is not fabricated here.
+// reviveWhenDue 实现本地测试的复活策略。它刻意使用常规角色属性；官方
+// 确切的复活 UI/传送路由是一个独立的协议特性，此处不做虚构。
 func (p *playerActor) reviveWhenDue(now time.Time) bool {
 	p.mu.Lock()
 	if p.reviveAt.IsZero() || now.Before(p.reviveAt) {
@@ -426,24 +418,23 @@ func (p *playerActor) equipNeiGong(id string) error {
 	return nil
 }
 
-// syncEquippedNeiGongResourcesLocked applies the equipped book's resource
-// modifiers to the real server Actor. The visible protocol continues to send
-// base MaxHP/MaxMP plus raw *Add fields, but all server costs, damage, and
-// recovery use Actor.MaxHP/MaxMP (the total derived caps). The current modern
-// client refreshes MP as MaxMP + MaxMPAdd directly; there is no multiplier on
-// the wire value.
+// syncEquippedNeiGongResourcesLocked 将已装备秘籍的资源修正值应用到
+// 真正的服务器 Actor 上。可见协议仍会发送基础 MaxHP/MaxMP 加原始的
+// *Add 字段，但所有服务器端的消耗、伤害和恢复都使用 Actor.MaxHP/
+// MaxMP（即推导后的总上限）。当前现代客户端直接按 MaxMP + MaxMPAdd
+// 刷新 MP；线上值没有乘数。
 //
-// p.mu must be held by the caller.
+// 调用方必须已持有 p.mu。
 func (p *playerActor) syncEquippedNeiGongResourcesLocked() {
 	hpAdd, mpAddRaw := p.progress.equippedResourceAdds()
 	base := p.actor.Snapshot()
 	p.actor.SetDerivedMaxima(base.BaseMaxHP+hpAdd, base.BaseMaxMP+mpAddRaw)
 }
 
-// syncEquippedNeiGongBuffLocked mirrors the exact installed varprop-derived
-// effect of the equipped book into a dedicated native BufferInfo slot.  This
-// is deliberately not a server-originated 0x1E custom: FxGameLogic consumes
-// BufferInfo and BufferListStr through ordinary object properties.
+// syncEquippedNeiGongBuffLocked 将已装备秘籍由已安装 varprop 推导出的
+// 确切效果镜像到一个专用原生 BufferInfo 槽位。这刻意不用服务器发起的
+// 0x1E 自定义消息：FxGameLogic 通过普通对象属性消费 BufferInfo 和
+// BufferListStr。
 func (p *playerActor) syncEquippedNeiGongBuffLocked(now time.Time) {
 	book := p.progress.book(p.progress.curNeiGong)
 	if book == nil || book.buffID == "" || book.buffStaticData == 0 || book.buffLevel <= 0 {
@@ -470,9 +461,8 @@ func (p *playerActor) facultyBegin(style int32) (uint16, bool, error) {
 	if err := p.progress.facultyBegin(style, time.Now()); err != nil {
 		return 0, false, err
 	}
-	// Ordinary inner cultivation is a persistent background conversion and
-	// must not force the actor into LS_FACULTY. Only the active 演武 path owns
-	// that visible logic/action state.
+	// 普通内修是一种持久的后台转换，不得强制角色进入 LS_FACULTY。只有
+	// 主动的演武路径才拥有那个可见的逻辑/动作状态。
 	if style == facultyStyleAct {
 		p.actor.SetLogicState(logicStateFaculty)
 	} else {
@@ -499,10 +489,10 @@ func (p *playerActor) facultyTick(now time.Time) (uint16, bool) {
 	defer p.mu.Unlock()
 	slot, changed := p.progress.advanceFaculty(now)
 	if changed {
-		// A settlement may have crossed one or more levels.  The exact
-		// varprop record is already re-evaluated by advanceFaculty; publish
-		// its native BuffStore state and make the new derived caps authoritative
-		// before the caller sends the normal role-property/View refresh.
+		// 一次结算可能跨越一级或多级。确切的 varprop 记录已由
+		// advanceFaculty 重新求值；在调用方发送常规的角色属性/View 刷新
+		// 之前，先发布它的原生 BuffStore 状态，并让新的推导上限
+		// 成为权威值。
 		p.syncEquippedNeiGongBuffLocked(now)
 		p.syncEquippedNeiGongResourcesLocked()
 	}
@@ -528,9 +518,9 @@ func (p *playerActor) restoreFaculty(value facultyProgressSnapshot, now time.Tim
 	p.syncEquippedNeiGongResourcesLocked()
 }
 
-// activateQingGong remembers one server-approved ActiveQGSkillRec entry for
-// this scene session. The client checks this table before enabling an equipped
-// qinggong_gaojie (advanced-qinggong) skill.
+// activateQingGong 为本场景会话记住一条服务器批准的 ActiveQGSkillRec
+// 条目。客户端在启用已装备的 qinggong_gaojie（高级轻功）技能之前会
+// 检查这张表。
 func (p *playerActor) activateQingGong(id string) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -553,8 +543,8 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: 21, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
 		{Index: 28, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
 		{Index: 29, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
-		// The client derives its displayed totals from these base values plus
-		// MaxHPAdd/MaxMPAdd. Actor.Max* remains the server-side total cap.
+		// 客户端用这些基础值加上 MaxHPAdd/MaxMPAdd 推导显示的总量。
+		// Actor.Max* 仍是服务器侧的总上限。
 		{Index: 30, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
 		{Index: 31, Name: "MaxMP", Value: clientdata.Int32Value(state.BaseMaxMP)},
 		{Index: 32, Name: "HP", Value: clientdata.Int32Value(state.HP)},
@@ -572,8 +562,8 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propCurSkillEffectID, Name: "CurSkillEffectID", Value: clientdata.StringValue(currentSkillEffectID)},
 		{Index: propCurSkillLevel, Name: "CurSkillLevel", Value: clientdata.Int32Value(currentSkillLevel)},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.Value{Type: clientdata.WireObject, U64: currentSkillTarget}},
-		// Local loopback should never fail the client's skill/action
-		// synchronization tolerance check because of a missing property (zero).
+		// 本地回环绝不应因某个属性缺失（为零）而无法通过客户端的技能/
+		// 动作同步容差检查。
 		{Index: propModifySkillLockTime, Name: "ModifySkillLockTime", Value: clientdata.Int32Value(5000)},
 		{Index: propHPHeartSpeed, Name: "HPHeartSpeed", Value: clientdata.Int32Value(sitcrossHeartMillis)},
 		{Index: propHPHeartSpeedAdd, Name: "HPHeartSpeedAdd", Value: clientdata.Int32Value(0)},
@@ -605,18 +595,18 @@ func boolInt32(value bool) int32 {
 	return 0
 }
 
-// baseMotionProperties supplies the player physics that FxGameLogic reads
-// while creating the ordinary jump action.  The client has no fallback
-// server-side source for Gravity: it only applies it when this negotiated
-// property exists.  9.8 is the current client's standard jump gravity.
+// baseMotionProperties 提供 FxGameLogic 在创建普通跳跃动作时读取的
+// 玩家物理参数。客户端对 Gravity 没有服务器侧的兜底来源：只有当这个
+// 协商属性存在时它才会应用该值。9.8 是当前客户端使用的
+// 标准跳跃重力。
 func baseMotionProperties(motion playerMotion) []clientdata.IndexedProperty {
 	return []clientdata.IndexedProperty{
 		{Index: 168, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
 		{Index: 169, Name: "GravityAdd", Value: clientdata.Float32Value(0)},
-		// Modern FxGameLogic FallDownManager queries DropHeightPub from the
-		// local player object. Its fallback is only 5.0 world units; use a
-		// deliberately high local-test safe threshold so normal terrain
-		// descent exits back to the grounded action rather than fall-down.
+		// 现代 FxGameLogic 的 FallDownManager 会从本地玩家对象查询
+		// DropHeightPub。它的兜底值只有 5.0 个世界单位；这里刻意使用
+		// 偏高的本地测试安全阈值，让普通的地形降落退出回着地动作，而非
+		// 进入倒地动作。
 		{Index: 170, Name: "DropHeightPub", Value: clientdata.Float32Value(100000)},
 	}
 }
@@ -627,9 +617,8 @@ func (p *playerActor) motionSnapshot() playerMotion {
 	return p.motion
 }
 
-// setMoveSpeed and setGravity return a single normal 0x10 update archive.
-// MoveSpeed and RunSpeed are changed together so the GM control has one
-// unambiguous meaning for walking and running.
+// setMoveSpeed 和 setGravity 返回单个常规 0x10 更新档案。MoveSpeed 与
+// RunSpeed 一并修改，使 GM 控制对行走和奔跑只有一个明确的含义。
 func (p *playerActor) setMoveSpeed(value float32) ([]byte, error) {
 	p.mu.Lock()
 	p.motion.moveSpeed = value
@@ -652,10 +641,9 @@ func (p *playerActor) setGravity(value float32) ([]byte, error) {
 	})
 }
 
-// activateRedSuperArmor begins one authoritative red-super-armor lease. Its
-// return value is the native BufferInfo1 payload consumed by FxGameLogic's
-// BuffStore setter:
-// StaticData,OwnerID,OwnerSerial,Level,EndTimeMs,Count (all hexadecimal).
+// activateRedSuperArmor 开启一段权威的红色霸体租约。其返回值是供
+// FxGameLogic 的 BuffStore 设置器消费的原生 BufferInfo1 载荷：
+// StaticData,OwnerID,OwnerSerial,Level,EndTimeMs,Count（均为十六进制）。
 func (p *playerActor) activateRedSuperArmor(now time.Time) (string, time.Time) {
 	return p.activateBuff(redSuperArmorBuffSlot, redSuperArmorStaticData, 20*time.Second, now)
 }
@@ -688,9 +676,9 @@ func (p *playerActor) activateNamedBuffAtLevel(slot uint16, staticData uint32, c
 	return p.bufferInfoLocked(slot, now), expires
 }
 
-// activateSkillBuff projects resource-compiled skill Buffs into the native
-// BufferInfo1..24 store. System leases keep slots 1..10; routine Buffs reuse
-// their existing ConfigID slot or allocate from 11..24.
+// activateSkillBuff 将由资源编译出的技能 Buff 投影到原生 BufferInfo1..24
+// 存储中。系统租约保留 1..10 槽位；常规 Buff 复用其现有 ConfigID 槽位，
+// 否则从 11..24 分配。
 func (p *playerActor) activateSkillBuff(definition skillBuffDefinition, now time.Time) (uint16, string, time.Time, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -770,10 +758,10 @@ func (p *playerActor) bufferInfoLocked(slot uint16, now time.Time) string {
 	return fmt.Sprintf("%X,%X,%X,%X,%X,%X", buff.staticData, playerObjectID, playerOwnerID, level, buff.expiresUTC.UnixMilli(), 1)
 }
 
-// bufferListString follows the retained BufferModule::RefreshBuffersInfo
-// layout: ConfigID,UniqueID,Level,OwnerIdent-OwnerSerial,EndTime,EffectType,
-// OverlayRows|. It is deliberately generated from the same server-authoritative
-// leases as BufferInfo, so gameplay and visual Buff state cannot diverge.
+// bufferListString 遵循已保留的 BufferModule::RefreshBuffersInfo 布局：
+// ConfigID,UniqueID,Level,OwnerIdent-OwnerSerial,EndTime,EffectType,
+// OverlayRows|。它与 BufferInfo 刻意由同一批服务器权威租约生成，因此
+// 玩法与视觉的 Buff 状态不会分叉。
 func (p *playerActor) bufferListString(now time.Time) string {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -834,8 +822,8 @@ func (p *playerActor) clearBuff(slot uint16, expectedStaticData uint32) (string,
 	return "", true
 }
 
-// expireBuff clears only the exact lease that created this timer.  A later
-// refresh is never removed by an obsolete timer.
+// expireBuff 只清除创建此定时器的那份确切租约。后续的刷新绝不会被一个
+// 已过期的定时器移除。
 func (p *playerActor) expireBuff(slot uint16, expectedStaticData uint32, expected time.Time, now time.Time) (string, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -852,11 +840,10 @@ func (p *playerActor) buffRules(now time.Time) playerBuffRules {
 	return playerBuffRules{CantHitEffect: red, CantBeSkillLocked: red}
 }
 
-// qinggongMotionProperties is sourced from the currently installed
-// share/Skill/QingGong/QGDefine.ini.  The client does not derive these values
-// from the 216 action request: it reads them from its player object before
-// resolving the motion.  Keep base and Add properties separate because Lua
-// and FxGameLogic both query the pair.
+// qinggongMotionProperties 的取值来源是当前已安装的
+// share/Skill/QingGong/QGDefine.ini。客户端不会从 216 动作请求推导
+// 这些值：它在解析动作之前先从自己的玩家对象读取。请保持基础属性与
+// Add 属性分离，因为 Lua 和 FxGameLogic 都会成对查询两者。
 func qinggongMotionProperties() []clientdata.IndexedProperty {
 	const (
 		waterSpeed      float32 = 7.5 // qinggong_2 Para1
@@ -865,17 +852,16 @@ func qinggongMotionProperties() []clientdata.IndexedProperty {
 		thirdJumpSpeed  float32 = 6.0 // qinggong_5 Para1
 		airRushSpeed    float32 = 15  // qinggong_6 Para1
 		airRushDist     float32 = 12  // qinggong_6 Para2
-		// The live test confirms the type-7 Para order is speed, then range:
-		// Para1=25 produces the intended fast 雁行功 rush, while Para2=6.5 is
-		// its travel range.  This differs from the type-6 air-rush ordering.
+		// 实机测试确认类型 7 的 Para 顺序是先速度、后距离：Para1=25 产生
+		// 预期的快速雁行功冲刺，而 Para2=6.5 是它的行进距离。这与类型 6
+		// 的空中冲刺参数顺序不同。
 		landRushSpeed float32 = 25  // qinggong_7 Para1
 		landRushDist  float32 = 6.5 // qinggong_7 Para2
 		climbSpeed    float32 = 7.5 // qinggong_11 Para1
-		// These are not aliases for the three action-speed values above.
-		// FxGameLogic uses share/Skill/rush_range.ini during the rush action
-		// gates, including qinggong_3 / 点水跳.  Keeping the historical
-		// speed-as-range placeholders here makes that native gate evaluate
-		// against the wrong water range.
+		// 这些并不是上面三个动作速度值的别名。FxGameLogic 在冲刺动作的
+		// 门控中使用 share/Skill/rush_range.ini，包括 qinggong_3 / 点水跳。
+		// 在这里保留历史上以速度冒充距离的占位值，会让那个原生门控按
+		// 错误的水上距离求值。
 		groundRushRange    float32 = 5.0 // rush_range.ini GRushRange
 		airRushRange       float32 = 8.0 // rush_range.ini ARushRange
 		waterRushRange     float32 = 8.0 // rush_range.ini WRushRange
@@ -907,16 +893,16 @@ func (p *playerActor) vitalUpdate() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, p.stateProperties())
 }
 
-// sitcrossTick advances only the server-owned HP/MP state. The caller sends
-// the resulting normal 0x10 archive, so the client never invents resources
-// from HPHeartSpeed/MPHeartSpeed by itself.
+// sitcrossTick 只推进服务器持有的 HP/MP 状态。调用方会发送生成的常规
+// 0x10 档案，因此客户端绝不会自行凭 HPHeartSpeed/MPHeartSpeed 虚构
+// 资源值。
 func (p *playerActor) sitcrossTick() bool {
 	state := p.actor.Snapshot()
 	return p.actor.RestoreWhileSit(sitcrossRecoveryPerSecond(state.MaxHP), sitcrossRecoveryPerSecond(state.MaxMP))
 }
 
-// sitcrossRecoveryPerSecond rounds upward so non-divisible derived maxima
-// still reach their full value in no more than ten one-second settlements.
+// sitcrossRecoveryPerSecond 向上取整，使无法整除的推导上限仍能在至多
+// 十次一秒结算内回满。
 func sitcrossRecoveryPerSecond(maximum int32) int32 {
 	if maximum <= 0 {
 		return 0
@@ -924,18 +910,17 @@ func sitcrossRecoveryPerSecond(maximum int32) int32 {
 	return (maximum + sitcrossFullRecoverySeconds - 1) / sitcrossFullRecoverySeconds
 }
 
-// combatBruiseTick settles the secondary HitHP layer while the actor remains
-// in combat. The ordinary vital update already contains HitHP and
-// HitHPRatio, so this uses the proven normal 0x10 property route.
+// combatBruiseTick 在角色仍处于战斗中时结算次要的 HitHP 层。常规的
+// 属性档案更新已包含 HitHP 和 HitHPRatio，因此这里沿用已被验证的常规
+// 0x10 属性路由。
 func (p *playerActor) combatBruiseTick() bool {
 	return p.actor.RecoverBruisedHPWhileFighting(combatBruiseRecoveryPerSecond)
 }
 
-// combatRageTick settles the fixed +5/second rage recovery while the actor
-// remains in combat. Any fighting transition — skill use or retained NPC
-// threat — keeps the actor eligible; sitting and death never are. The
-// ordinary vital update already contains SP, so this uses the same proven
-// normal 0x10 property route as the other tick layers.
+// combatRageTick 在角色仍处于战斗中时结算固定的每秒 +5 怒气恢复。任何
+// 进入战斗的转换——使用技能或残留的 NPC 仇恨——都会让角色保持资格；
+// 打坐和死亡则永远不算。常规的属性档案更新已包含 SP，因此这里与其他
+// tick 层一样，沿用同一条已被验证的常规 0x10 属性路由。
 func (p *playerActor) combatRageTick() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -947,10 +932,10 @@ func (p *playerActor) combatRageTick() bool {
 	return p.progress.attributes.sp != before
 }
 
-// setCombatPresence owns the player-side lifecycle for the local hostile AI.
-// Any retained NPC threat interrupts sitting before the first hit is settled;
-// ordinary state is restored only after every threat has cleared. This keeps
-// recovery, damage and the client LogicState on one authoritative transition.
+// setCombatPresence 负责本地敌对 AI 的玩家侧生命周期。任何残留的 NPC
+// 仇恨都会在首次受击结算之前打断打坐；只有当每个仇恨都已清除后才
+// 恢复常规状态。这使恢复、伤害和客户端 LogicState 保持在同一个权威
+// 转换之上。
 func (p *playerActor) setCombatPresence(active bool) bool {
 	state := p.actor.Snapshot()
 	if state.HP <= 0 {
@@ -981,8 +966,8 @@ func (p *playerActor) currentSkillStateSnapshot() (string, string, int32, uint64
 	return p.currentSkillID, p.currentSkillEffectID, p.currentSkillLevel, p.currentSkillTarget
 }
 
-// clearCurrentSkill clears only the exact skill invocation that scheduled the
-// timer. A later invocation must not be cancelled by an older timer.
+// clearCurrentSkill 只清除调度该定时器的那一次确切技能调用。后续的调用
+// 绝不能被更早的定时器取消。
 func (p *playerActor) clearCurrentSkill(expected string) bool {
 	p.mu.Lock()
 	if p.currentSkillID != expected {
@@ -1008,12 +993,11 @@ func (p *playerActor) currentSkillClearUpdate() ([]byte, error) {
 	})
 }
 
-// facultyNameResetFrame clears only the client-side FacultyName property.
-// Opening form_wuxue_faculty happens after the 1006/1 selection response, so
-// its FacultyName binder can miss the original value change.  A 1006/24
-// refresh sends this clear frame immediately before the normal vital update;
-// restoring the real name then reliably runs set_control_state without
-// changing the server-owned selection or pretending that 演武 has started.
+// facultyNameResetFrame 只清除客户端侧的 FacultyName 属性。打开
+// form_wuxue_faculty 发生在 1006/1 选择响应之后，因此它的 FacultyName
+// 绑定器可能错过最初的值变更。1006/24 刷新会在常规的属性档案更新之前
+// 立即发送这个清空帧；随后恢复真实名称即可可靠地执行
+// set_control_state，既不改变服务器持有的选择，也不假装演武已经开始。
 func (p *playerActor) facultyNameResetFrame() ([]byte, bool, error) {
 	p.mu.Lock()
 	hasFacultyName := p.progress.facultyName != ""
@@ -1043,8 +1027,8 @@ func clampPlayerSP(value int32) int32 {
 	return value
 }
 
-// setSP changes the server-authoritative rage value and immediately returns
-// the ordinary 0x10 property update consumed by the main-role UI.
+// setSP 修改服务器权威的怒气值，并立即返回主角 UI 消费的常规 0x10
+// 属性更新。
 func (p *playerActor) setSP(value int32) (int32, []byte, error) {
 	p.mu.Lock()
 	p.progress.attributes.sp = clampPlayerSP(value)
@@ -1056,9 +1040,8 @@ func (p *playerActor) setSP(value int32) (int32, []byte, error) {
 	return sp, frame, err
 }
 
-// addSP is the single future entry point for combat/skill rage awards as well
-// as GM adjustments.  Saturating here guarantees that 211 cost checks read
-// exactly the value the client was just shown.
+// addSP 是战斗/技能怒气奖励以及 GM 调整未来唯一的入口。在这里做饱和
+// 处理可保证 211 的消耗检查读到的正是客户端刚显示过的值。
 func (p *playerActor) addSP(delta int32) (int32, []byte, error) {
 	p.mu.Lock()
 	next := int64(p.progress.attributes.sp) + int64(delta)
@@ -1185,7 +1168,7 @@ func (p *playerActor) addObject(location role.Position, visual roleVisual) []byt
 	for _, property := range qinggongMotionProperties() {
 		addFloat(property.Index, property.Value.F32)
 	}
-	addInt(111, p.silver) // CapitalType1: 碎银; negotiated in scene property table.
+	addInt(111, p.silver) // CapitalType1: 碎银；已在场景属性表中协商。
 	for _, slot := range nativeBuffSlots {
 		addString(bufferInfoPropertyIndex(slot), p.bufferInfo(slot, time.Now()))
 	}
@@ -1203,8 +1186,8 @@ func (p *playerActor) addObject(location role.Position, visual roleVisual) []byt
 }
 
 func sendPlayerSpawn(conn sceneMessageConnection, player *playerActor, location role.Position, visual roleVisual) error {
-	// Preserve any still-active native BuffStore state in a newly created
-	// player object. BufferInfo is handled by the client's C++ property binder.
+	// 在新建的玩家对象中保留仍处于活动状态的原生 BuffStore 状态。
+	// BufferInfo 由客户端的 C++ 属性绑定器处理。
 	log.Printf("native Buff spawn player=%d-%d red=%q drift=%q jump=%q neigong=%q", playerObjectID, playerOwnerID, player.bufferInfo(redSuperArmorBuffSlot, time.Now()), player.bufferInfo(waterDriftBuffSlot, time.Now()), player.bufferInfo(waterJumpBuffSlot, time.Now()), player.bufferInfo(innerPowerBuffSlot, time.Now()))
 	if err := sendPlayerAddObject(conn, player, location, visual); err != nil {
 		return err
@@ -1212,10 +1195,9 @@ func sendPlayerSpawn(conn sceneMessageConnection, player *playerActor, location 
 	return sendPlayerLocationAndVitals(conn, player, location)
 }
 
-// sendPlayerAddObject creates the native player object without issuing the
-// separate ServerLocation motion update. Live scene replacement needs this
-// split: stage_main requires 1-1 before it opens the target scene, while the
-// 0x1F visual relocation must wait until target ClientReady.
+// sendPlayerAddObject 创建原生玩家对象，但不发出单独的 ServerLocation
+// 移动更新。现场场景替换需要这个拆分：stage_main 要求先收到 1-1 才
+// 会打开目标场景，而 0x1F 视觉重定位必须等到目标 ClientReady 之后。
 func sendPlayerAddObject(conn sceneMessageConnection, player *playerActor, location role.Position, visual roleVisual) error {
 	return conn.WriteFrame(player.addObject(location, visual))
 }

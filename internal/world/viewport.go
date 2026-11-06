@@ -30,9 +30,9 @@ func NewViewport() *Viewport {
 	return &Viewport{materialized: make(map[EntityID]VersionedEntity)}
 }
 
-// Plan computes a delta without committing it. Callers commit only after all
-// corresponding network writes succeed; a failed send leaves the old snapshot
-// intact so the next reconcile can retry.
+// Plan 计算增量但不提交。调用者仅在所有对应的网络写入
+// 成功后才提交；发送失败时旧快照保持
+// 原样，以便下次对账时重试。
 func (viewport *Viewport) Plan(snapshot Snapshot) Delta {
 	viewport.mu.Lock()
 	defer viewport.mu.Unlock()

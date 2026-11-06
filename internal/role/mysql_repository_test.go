@@ -183,4 +183,4 @@ func TestProductionDSNAppliesRequiredSafetyParameters(t *testing.T) {
 	}
 }
 
-var _ *sql.DB // retain database/sql compile coverage for injected DB contract
+var _ *sql.DB // 保留 database/sql 的编译覆盖，用于注入 DB 的契约

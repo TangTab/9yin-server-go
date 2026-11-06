@@ -46,8 +46,8 @@ func TestParseClientCustomMessageRejectsTrailingBytes(t *testing.T) {
 }
 
 func TestParseClientActivityCustomMessageQingGong(t *testing.T) {
-	// Captured current-client shape: 0x0A + opaque 20-byte activity header +
-	// TVarList(216, "qinggong_8", 1).
+	// 抓包得到的当前客户端形态：0x0A + 不透明的 20 字节活动头部 +
+	// TVarList(216, "qinggong_8", 1)。
 	frame := make([]byte, 21)
 	frame[0] = 0x0A
 	frame = binary.LittleEndian.AppendUint16(frame, 3)

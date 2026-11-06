@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-// This is deliberately resource-backed: it protects the real modern chain
-// StaticData -> exact current-level varprop -> PropModify packs, rather than
-// preserving the old level-30 starter-book constants.
+// 这里刻意依赖真实资源：它保护真实的现代链条
+// StaticData -> 精确当前等级 varprop -> PropModify 包，而不是
+// 保留旧的 30 级入门内功常量。
 func TestModernNeiGongEffectUsesCurrentLevelVarProp(t *testing.T) {
 	catalog, err := loadModernNeiGongCatalog()
 	if err != nil {
 		t.Fatalf("load modern inner-power catalog: %v", err)
 	}
-	effect, err := catalog.effect(114, 32) // ng_yh_001 / 明玉神功, role 2's persisted level.
+	effect, err := catalog.effect(114, 32) // ng_yh_001 / 明玉神功，角色 2 持久化的等级。
 	if err != nil {
 		t.Fatalf("evaluate ng_yh_001 level 32: %v", err)
 	}

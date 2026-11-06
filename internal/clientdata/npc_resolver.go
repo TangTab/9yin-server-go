@@ -103,8 +103,8 @@ type templateColumnBinding struct {
 var npcTemplateAliases = map[string]templateColumnBinding{
 	"ConfigID": {Name: "ID"},
 	"Sex":      {Name: "Gender"},
-	// The modern table repeats StopTime. The NPC combat stop-time column is
-	// the second occurrence (physical column 87, zero based).
+	// 新版表格中 StopTime 重复出现。NPC 战斗停止时间对应的是
+	// 第二次出现（物理列 87，从零开始计数）。
 	"StopTime": {Name: "StopTime", Occurrence: 1},
 }
 
@@ -149,13 +149,13 @@ func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInsta
 			continue
 		}
 		if !explicit && len(indices) != 1 {
-			// Repeated names require a reviewed binding. Never guess first/last.
+			// 重名需要经过人工审定的绑定。绝不猜测取第一个或最后一个。
 			continue
 		}
-		// City tables contain only the combat StopTime column, while school
-		// tables also contain an earlier movement StopTime column. The reviewed
-		// binding selects the second occurrence when it exists and the sole
-		// occurrence otherwise.
+		// 城市表只包含战斗 StopTime 列，而门派表
+		// 还包含一个更早出现的移动 StopTime 列。审定绑定的策略是：
+		// 第二次出现存在时选用第二次出现，
+		// 否则选用唯一的那次出现。
 		occurrence := binding.Occurrence
 		if explicit && binding.Name == "StopTime" && occurrence == 1 && len(indices) == 1 {
 			occurrence = 0
@@ -190,8 +190,8 @@ func ResolveNPC(schema Schema, table *NPCTemplateTable, instance NPCCreatorInsta
 		consumedCreator[field.Name] = struct{}{}
 	}
 
-	// Placement coordinates are runtime object state derived from creator data,
-	// not template properties. Explicit runtime values may override them below.
+	// 摆放坐标是由 creator 数据派生的运行时对象状态，
+	// 不是模板属性。下方显式传入的运行时值可以覆盖它们。
 	placement := map[string]Value{
 		"PosiX": Float32Value(instance.Transform.X),
 		"PosiY": Float32Value(instance.Transform.Y),
@@ -324,9 +324,9 @@ func parseIntegralInt32(raw string) (int32, error) {
 	return int32(value), nil
 }
 
-// VisibleNPCSpawnDefaultsCompatV1 isolates the compatibility defaults that
-// were previously interleaved with template values in protocol-probe. Modern
-// client data and creator attributes still override this profile.
+// VisibleNPCSpawnDefaultsCompatV1 单独收纳了原先在 protocol-probe 中
+// 与模板值混在一起的兼容性默认值。新版客户端数据与 creator
+// 属性仍然会覆盖这份默认配置。
 func VisibleNPCSpawnDefaultsCompatV1() map[string]Value {
 	return map[string]Value{
 		"Type":             ByteValue(4),

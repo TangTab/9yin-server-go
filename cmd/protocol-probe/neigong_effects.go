@@ -10,9 +10,9 @@ import (
 	"sync"
 )
 
-// Modern inner-power effects are data, not a hand-written list of a few
-// starter books.  These are the installed modern-client tables that define
-// StaticData -> level varprop -> PropModify/SkillModify/Buffer.
+// 现代内功效果是数据驱动的，而不是手写的几本
+// 入门内功清单。这些是已安装的现代客户端配置表，定义了
+// StaticData -> level varprop -> PropModify/SkillModify/Buffer。
 var (
 	modernNeiGongStaticPath  = filepath.Join(defaultModernShareRoot, "skill", "neigong", "neigong_static.ini")
 	modernNeiGongVarPropPath = filepath.Join(defaultModernShareRoot, "skill", "neigong", "neigong_varprop.ini")
@@ -265,8 +265,8 @@ func parseModernModifier(value string) (modernNeiGongModifier, bool) {
 	if len(parts) < 3 {
 		return modernNeiGongModifier{}, false
 	}
-	// Prop packs have Name,Value,Mode; skill packs have
-	// SkillID,Name,Value,Mode.  The third token disambiguates them.
+	// 属性包为 Name,Value,Mode；技能包为
+	// SkillID,Name,Value,Mode。第三个字段用于区分二者。
 	if _, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64); err == nil {
 		amount, _ := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
 		mode, _ := strconv.ParseInt(strings.TrimSpace(parts[2]), 10, 32)

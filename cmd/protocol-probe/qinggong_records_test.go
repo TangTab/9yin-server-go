@@ -77,16 +77,16 @@ func TestFacultyGuideCompletedTaskRows(t *testing.T) {
 	if finalRow != 1593 {
 		t.Fatalf("final completed-task row = %d, want 1593", finalRow)
 	}
-	// 1069-1073 occupy bits 13-17 in row 33.  1344 and 1346 occupy
-	// bits 0 and 2 in row 42.
+	// 1069-1073 占据第 33 行的第 13-17 位。1344 和 1346 占据第 42 行的
+	// 第 0 位和第 2 位。
 	if got := rows[33]; got != 0x0003E000 {
 		t.Fatalf("guide row 33 = 0x%08X, want 0x0003E000", got)
 	}
 	if got := rows[42]; got != 0x00000005 {
 		t.Fatalf("unlock row 42 = 0x%08X, want 0x00000005", got)
 	}
-	// The complete 23613 branch comprises tasks 1140--1147 (row 35) plus
-	// 51002 (row 1593); together they gate the faculty-panel 演武 button.
+	// 完整的 23613 分支由任务 1140--1147（第 35 行）加上 51002（第 1593
+	// 行）组成；它们共同门控修炼面板的演武按钮。
 	if got := rows[35]; got != 0x0FF00000 {
 		t.Fatalf("activity-faculty row 35 = 0x%08X, want 0x0FF00000", got)
 	}

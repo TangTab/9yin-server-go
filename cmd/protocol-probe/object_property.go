@@ -7,9 +7,9 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
-// sceneObjectProperties encodes the current client's ServerObjectProperty
-// (0x10) archive. Values carry no type byte: the visible-property table sent
-// in 0x09 remains the sole source of each property's wire type.
+// sceneObjectProperties 编码当前客户端的 ServerObjectProperty
+// （0x10）归档。各取值不带类型字节：以 0x09 发送的可见属性表
+// 仍是每个属性线缆类型的唯一来源。
 func sceneObjectProperties(objectID, ownerID uint32, isViewObject byte, properties []clientdata.IndexedProperty) ([]byte, error) {
 	if len(properties) > 0xffff {
 		return nil, fmt.Errorf("object property count %d overflows u16", len(properties))

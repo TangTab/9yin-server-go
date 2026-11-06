@@ -5,9 +5,9 @@ import (
 	"fmt"
 )
 
-// The methods in this file make JSONRepository a complete development backend
-// for the M2 contracts. Its stable IDs and CAS versions are persisted alongside
-// the compatibility account map; MySQL remains the only production backend.
+// 本文件中的方法使 JSONRepository 成为 M2 契约的完整开发后端。
+// 其稳定 ID 与 CAS 版本号随兼容账号映射一起持久化；
+// MySQL 仍是唯一的生产后端。
 
 func (repository *JSONRepository) FindByKey(ctx context.Context, key AccountKey) (Account, error) {
 	if err := ctx.Err(); err != nil {

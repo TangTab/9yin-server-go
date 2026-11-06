@@ -6,10 +6,10 @@ import (
 )
 
 func parseMotionPosition(msg []byte) (x, y, z, orient float32, ok bool) {
-	// The 67-byte position update has one stable four-float run at 0x26:
-	// X, Y, Z and orientation. Longer motion packets contain destination X/Z,
-	// speed and angle in the same tagged format; scanning those packets can form
-	// a plausible but false coordinate tuple, so they must not update storage.
+	// 67 字节的坐标更新包在 0x26 处有一段稳定的三十二字节连续浮点：
+	// X、Y、Z 和朝向。更长的移动包以同样的带标签格式包含目的地 X/Z、
+	// 速度和角度；扫描这类包可能拼出一个貌似合理却错误的坐标元组，
+	// 因此绝不能让它们更新存储。
 	if len(msg) != 67 {
 		return 0, 0, 0, 0, false
 	}

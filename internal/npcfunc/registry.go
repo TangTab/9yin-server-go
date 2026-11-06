@@ -1,5 +1,5 @@
-// Package npcfunc reads the server-side Npc_Func table and exposes the
-// per-NPC functional configuration needed to build a non-generic menu.
+// Package npcfunc 读取服务端的 Npc_Func 表，并公开构建非通用菜单所需的
+// 逐 NPC 功能配置。
 package npcfunc
 
 import (
@@ -26,9 +26,9 @@ var (
 	attribute   = regexp.MustCompile(`(?i)\b([A-Za-z][A-Za-z0-9_]*)\s*=\s*"([^"]*)"`)
 )
 
-// Load parses ASCII attribute names and values directly.  This is deliberate:
-// Npc_Func.xml is GBK on this installation, while the IDs needed for protocol
-// decisions are ASCII.  It avoids converting unrelated Chinese descriptions.
+// Load 直接解析 ASCII 属性名和属性值。这是有意为之：
+// 在本安装中 Npc_Func.xml 为 GBK 编码，而协议决策所需的 ID 均为 ASCII。
+// 这样可以避免转换无关的中文描述。
 func Load(path string) (*Registry, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {

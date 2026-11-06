@@ -14,8 +14,8 @@ import (
 
 const (
 	jsonFormatVersion = 1
-	// LegacyDefaultAccount is the account used when importing the former
-	// process-wide, single-role roles.json document.
+	// LegacyDefaultAccount 是导入旧的进程级、单角色 roles.json 文档
+	// 时所用的账号。
 	LegacyDefaultAccount AccountKey = "local_default"
 )
 
@@ -39,9 +39,9 @@ type jsonIdentity struct {
 	DeleteRequested   bool          `json:"delete_requested,omitempty"`
 }
 
-// legacyRole is the exact on-disk shape written by cmd/protocol-probe before
-// roles became account-scoped. PosX through Orient intentionally use their old
-// exported Go field names.
+// legacyRole 是 cmd/protocol-probe 在角色改为账号作用域之前
+// 写入磁盘的准确结构。PosX 到 Orient 有意沿用
+// 旧的导出 Go 字段名。
 type legacyRole struct {
 	Name          string   `json:"name"`
 	Appearance    []string `json:"appearance"`
@@ -53,9 +53,9 @@ type legacyRole struct {
 	Orient        float32  `json:"Orient"`
 }
 
-// JSONRepository stores all account roles in one JSON document. Operations on
-// the in-memory snapshot and its corresponding disk replacement are serialized
-// so concurrent callers cannot overwrite a newer account snapshot.
+// JSONRepository 将所有账号角色存储在一个 JSON 文档中。对内存快照及其
+// 对应磁盘替换的操作都做了串行化，使并发调用者无法
+// 覆盖较新的账号快照。
 type JSONRepository struct {
 	mu            sync.RWMutex
 	path          string
@@ -65,8 +65,8 @@ type JSONRepository struct {
 	nextRoleID    RoleID
 }
 
-// OpenJSONRepository opens path. A missing file represents an empty repository.
-// Both the current account map format and the old single-role format are read.
+// OpenJSONRepository 打开 path。文件缺失视为空仓库。
+// 当前账号映射格式和旧的单角色格式均可读取。
 func OpenJSONRepository(path string) (*JSONRepository, error) {
 	if strings.TrimSpace(path) == "" {
 		return nil, errors.New("role: empty repository path")
@@ -136,7 +136,7 @@ func (repository *JSONRepository) decode(data []byte) error {
 	if err := json.Unmarshal(data, &old); err != nil {
 		return fmt.Errorf("decode legacy role repository: %w", err)
 	}
-	// The old store considered Name != "" to be the sole existence flag.
+	// 旧存储仅以 Name != "" 作为角色存在的唯一标志。
 	if old.Name != "" {
 		repository.accounts[string(LegacyDefaultAccount)] = normalize(Role{
 			Name:       old.Name,
@@ -333,7 +333,7 @@ func clone(value Role) Role {
 	return value
 }
 
-// normalize preserves the compatibility defaults of the former roleStore.
+// normalize 保留旧 roleStore 的兼容性默认值。
 func normalize(value Role) Role {
 	for strings.Contains(value.Scene.Config, `\\`) {
 		value.Scene.Config = strings.ReplaceAll(value.Scene.Config, `\\`, `\`)

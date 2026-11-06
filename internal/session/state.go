@@ -6,9 +6,9 @@ import (
 	"sync/atomic"
 )
 
-// Phase is the server-side view of one client connection. It deliberately
-// models protocol readiness, not UI form names, so world services can depend on
-// it without importing client presentation details.
+// Phase 是服务端对单个客户端连接的视角。它刻意建模
+// 协议就绪状态而非 UI 表单名称，使 world 服务可以依赖它
+// 而不必导入客户端表现层的细节。
 type Phase uint8
 
 const (
@@ -54,9 +54,9 @@ const (
 var ErrInvalidTransition = errors.New("invalid session transition")
 var ErrInvalidMessage = errors.New("invalid session message")
 
-// TransitionError means that a known handshake opcode arrived in a phase in
-// which accepting it would corrupt the connection state. Unknown gameplay
-// opcodes are intentionally left to the owning subsystem.
+// TransitionError 表示一个已知的握手操作码到达了某个阶段，若在该阶段
+// 接受它会破坏连接状态。未知的玩法操作码
+// 有意留给所属子系统处理。
 type TransitionError struct {
 	Phase  Phase
 	Opcode byte
@@ -93,9 +93,9 @@ func (m *Machine) ID() uint64 { return m.id }
 
 func (m *Machine) Phase() Phase { return m.phase }
 
-// Validate checks only the handshake opcodes whose ordering is already backed
-// by the modern Lua flow and the working loopback server. Business opcodes are
-// not rejected here merely because they have not been classified yet.
+// Validate 只校验那些顺序已由现代客户端 Lua 流程和可用的回环服务器
+// 证实的握手操作码。业务操作码不会仅因
+// 尚未分类而在此被拒绝。
 func (m *Machine) Validate(opcode byte) error {
 	if m.phase == PhaseClosed {
 		return &TransitionError{Phase: m.phase, Opcode: opcode}
@@ -112,20 +112,20 @@ func (m *Machine) Validate(opcode byte) error {
 	case ClientChooseRole:
 		allowed = m.phase == PhaseRoleSelection
 	case ClientReady:
-		// The current client may repeat its one-byte ready notification after
-		// it is already in the scene. The owner can treat that as idempotent;
-		// rejecting it here would close a healthy game connection before the
-		// business dispatcher sees it.
+		// 当前客户端在进入场景后可能重复发送其单字节 ready 通知。
+		// 所有者可将其视为幂等操作；
+		// 若在此拒绝，会在业务分发器看到它之前
+		// 关闭一个健康的游戏连接。
 		allowed = m.phase == PhaseEnteringWorld || m.phase == PhaseInWorld
 	case ClientActivity:
-		// Captured modern-client sessions send several 0x0A custom messages
-		// after ChooseRole and before the one-byte ClientReady. They are valid
-		// pre-ready traffic but must not open the scene-object barrier.
+		// 抓包的现代客户端会话会在 ChooseRole 之后、单字节 ClientReady 之前
+		// 发送若干 0x0A 自定义消息。它们是有效的
+		// ready 前流量，但不得打开场景对象屏障。
 		allowed = m.phase == PhaseEnteringWorld || m.phase == PhaseAwaitingActivity || m.phase == PhaseInWorld
 	default:
-		// Runtime captures also contain opcode 0x18 in RoleSelection and
-		// EnteringWorld. Until its layout is classified, preserve the working
-		// client's traffic and leave it to the business dispatcher.
+		// 运行时抓包中还包含 RoleSelection 和 EnteringWorld 阶段的
+		// 操作码 0x18。在其布局被分类之前，保留可用
+		// 客户端的流量并留给业务分发器处理。
 		return nil
 	}
 	if !allowed {
@@ -134,9 +134,9 @@ func (m *Machine) Validate(opcode byte) error {
 	return nil
 }
 
-// ValidateMessage applies the fixed or minimum lengths directly proven by the
-// current sender implementations. It intentionally does not invent layouts
-// for 0x03, 0x0A, or unclassified gameplay messages.
+// ValidateMessage 应用由当前发送方实现直接证实的固定或最小长度。
+// 它有意不为 0x03、0x0A 或未分类的玩法消息
+// 臆造布局。
 func (m *Machine) ValidateMessage(message []byte) error {
 	if len(message) == 0 {
 		return &MessageError{Length: 0, Rule: "message must contain an opcode"}
@@ -212,9 +212,9 @@ func (m *Machine) Activity() error {
 	return nil
 }
 
-// ReenterScene starts a new scene generation without recreating the network
-// session or role. The next ClientReady/ClientActivity pair uses the same
-// conservative object-materialization barrier as the first scene entry.
+// ReenterScene 在不重建网络会话或角色的前提下开启新的场景世代。
+// 下一对 ClientReady/ClientActivity 使用与首次进入场景
+// 相同的保守对象实体化屏障。
 func (m *Machine) ReenterScene() error {
 	if err := m.require(PhaseInWorld, 0x0C); err != nil {
 		return err

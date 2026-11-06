@@ -11,10 +11,10 @@ import (
 
 var defaultShopINIPath = filepath.Join(defaultModernShareRoot, "trade", "shop.ini")
 
-// shopCatalogItem is one retail listing from the modern share/trade/shop.ini
-// section. The file intentionally repeats the key "0", so a conventional INI
-// reader would lose all but the final item; scan the selected section line by
-// line instead.
+// shopCatalogItem 是现代版 share/trade/shop.ini 中某个小节的
+// 一条出售条目。该文件刻意重复使用键 "0"，常规 INI 读取器
+// 只会保留最后一条条目而丢失其余条目；因此改为对选中的
+// 小节逐行扫描。
 type shopCatalogItem struct {
 	configID    string
 	amount      int32
@@ -68,7 +68,7 @@ func loadShopCatalogSection(path, shopID string) ([]shopCatalogItem, int32, int3
 			shopType = int32(parsed)
 			continue
 		}
-		// Item rows use an intentionally repeated numeric key (normally 0).
+		// 物品行使用刻意重复的数字键（通常为 0）。
 		if _, parseErr := strconv.ParseInt(key, 10, 32); parseErr != nil {
 			continue
 		}

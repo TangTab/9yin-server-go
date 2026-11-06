@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// This opt-in test validates the index against locally extracted client data:
+// 本可选测试基于本地解包出的客户端数据验证索引：
 //
 //	NINEYIN_EXTRACTED_ROOT=E:\jiuyin go test -run TestLocalExtractedPackages ./internal/clientdata
 func TestLocalExtractedPackages(t *testing.T) {

@@ -8,10 +8,10 @@ import (
 	"github.com/local/9yin-go-server/internal/role"
 )
 
-// npcServiceAuditReport is a data-only inventory. It deliberately separates
-// configuration discovered from an NPC from functionality implemented by this
-// server, so a menu cannot silently turn an unimplemented service into a fake
-// shop or transport action.
+// npcServiceAuditReport 是纯数据清点。它刻意把从 NPC 发现的
+// 配置与本服务器已实现的功能分开，
+// 这样菜单就不能悄悄把未实现的服务变成假的
+// 商店或传送动作。
 type npcServiceAuditReport struct {
 	Scene role.Scene           `json:"scene"`
 	Stats npcCatalogStats      `json:"catalog_stats"`

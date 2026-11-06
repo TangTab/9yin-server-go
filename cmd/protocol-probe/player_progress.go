@@ -7,9 +7,9 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
-// These fields are deliberately appended after the live motion/Buff schema.
-// The modern client resolves role binds by the negotiated property name, but
-// the index must never reuse the already-working qinggong or BuffStore slots.
+// 这些字段刻意追加在已上线的动作/Buff schema 之后。现代客户端按协商的
+// 属性名解析角色绑定，但索引绝不能复用已在工作的轻功或 BuffStore
+// 槽位。
 const (
 	propCurNeiGong uint16 = 171 + iota
 	propFaculty
@@ -44,20 +44,19 @@ const (
 	propMaxHPAdd
 	propMaxMPAdd
 	propMaxLevel
-	// View 43 items are normal client objects.  GoodsGrid reads these two
-	// properties to resolve the current neigong static record and its photo;
-	// ConfigID alone is not sufficient for the modern client.
+	// View 43 的条目是普通客户端对象。GoodsGrid 读取这两个属性来解析
+	// 当前的内功静态记录及其图片；对现代客户端而言仅有 ConfigID 是
+	// 不够的。
 	propStaticData
 	propItemType
-	// Equipped inner-power PropModify additions. Keep these appended so the
-	// already-live View=43 field indices remain stable.
+	// 装备内功的 PropModify 加成。保持追加在末尾，让已上线的 View=43
+	// 字段索引保持稳定。
 	propMaxParryAdd
 	propMinMagicDefAdd
 )
 
-// activeFacultyCardReward is deliberately applied only after the player has
-// selected one of the three cards (C->S 1006/23).  The active page is not a
-// per-minute cultivation timer.
+// activeFacultyCardReward 刻意只在玩家从三张卡中选出一张（C->S 1006/23）
+// 之后才发放。主动页面并不是一个按分钟计的修炼计时器。
 const activeFacultyCardReward int32 = 20_000
 
 const (
@@ -89,9 +88,8 @@ type learnedNeiGong struct {
 	total      int32
 	power      int32
 	maxPower   int32
-	// These are the equipped-level effects read from the modern
-	// neigong_varprop.ini record.  They are server state: the UI must not be
-	// the only place that knows an equipped inner power has an effect.
+	// 这些是从现代 neigong_varprop.ini 记录读取的装备等级效果。它们是
+	// 服务器状态：不能只有 UI 一个地方知道装备内功产生了效果。
 	buffID         string
 	buffStaticData uint32
 	buffLevel      int32
@@ -104,16 +102,16 @@ type learnedNeiGong struct {
 	maxMPAdd       int32
 	maxParryAdd    int32
 	minMagicDefAdd int32
-	// skillModifiers are the current level's exact SkillModifyPack rows,
-	// indexed by the target SkillID. They are kept on the equipped-book state
-	// so the 211 resolver can apply only the modifier that names the cast.
+	// skillModifiers 是当前等级确切的 SkillModifyPack 行，按目标 SkillID
+	// 索引。它们保存在已装备秘籍的状态上，让 211 裁定器只应用点名该次
+	// 施放的修正项。
 	skillModifiers map[string][]modernNeiGongModifier
 }
 
-// playerProgress is intentionally a modest server-owned state model.  Its
-// ConfigIDs come from the installed modern share/skill/neigong/neigong.ini;
-// values are local-test starter values until the per-level varprop loader is
-// added.  The wire-facing names are the ones bound by the current Lua/C++ UI.
+// playerProgress 刻意是一个轻量的服务器持有状态模型。其 ConfigID 来自
+// 已安装的现代 share/skill/neigong/neigong.ini；在逐级 varprop 加载器
+// 加入之前，数值都是本地测试的初始值。线上名称采用当前 Lua/C++ UI
+// 绑定的那些名字。
 type playerProgress struct {
 	books        []learnedNeiGong
 	curNeiGong   string
@@ -133,10 +131,10 @@ type playerAttributes struct {
 	minMeleeDamage, maxMeleeDamage, maxHPAdd, maxMPAdd int32
 }
 
-// equippedResourceAdds returns exactly the resource additions carried by the
-// equipped inner-power varprop. The current modern client consumes MaxMPAdd
-// directly as MaxMP + MaxMPAdd, so the same raw value is authoritative for
-// the server Actor's total resource cap.
+// equippedResourceAdds 返回的正是已装备内功 varprop 携带的资源加成。
+// 当前现代客户端直接以 MaxMP + MaxMPAdd 的方式消费 MaxMPAdd，因此对
+// 服务器 Actor 的总资源上限而言，同一个原始值
+// 就是权威值。
 func (p *playerProgress) equippedResourceAdds() (maxHPAdd, maxMPAddRaw int32) {
 	if equipped := p.book(p.curNeiGong); equipped != nil {
 		return equipped.maxHPAdd, equipped.maxMPAdd
@@ -146,23 +144,21 @@ func (p *playerProgress) equippedResourceAdds() (maxHPAdd, maxMPAddRaw int32) {
 
 func newPlayerProgress() playerProgress {
 	books := []learnedNeiGong{
-		// Values are from the installed modern
-		// share/skill/neigong/neigong.ini, not old-server aliases.
-		// Two Instruments Heart-Protection Skill: level 30 is a deliberate
-		// local-test baseline.  Its progress value is the installed modern
-		// wuxuelevelinfo.ini [ng_wd_001] row 30 (273200), not a legacy value.
-		// The installed file contains two records with the same QName. The
-		// classic record (StaticData 5 / varprop 220130) is the official
-		// visible operation-buff route; the mind_ duplicate uses an explicitly
-		// hidden buff (Visible=0). Both rows carry the same level-30 stats.
+		// 数值取自已安装的现代
+		// share/skill/neigong/neigong.ini，而非旧服务器的别名。
+		// 两仪护心功：30 级是刻意设定的本地测试基线。其进度值是已安装
+		// 现代 wuxuelevelinfo.ini [ng_wd_001] 第 30 行（273200），不是
+		// 遗留数值。已安装文件中有两条同名 QName 的记录。经典记录
+		// （StaticData 5 / varprop 220130）是官方的可见运行 Buff 路线；
+		// mind_ 重复项使用明确隐藏的 Buff（Visible=0）。两行的 30 级
+		// 属性完全相同。
 		{configID: "ng_wd_001", staticData: 5, itemType: 1002, level: 30, maxLevel: 36, total: 273200, power: 4550, maxPower: 4550,
 			buffID: "buf_ng_wd_001", buffStaticData: 5954, buffLevel: 3,
 			strAdd: 45, staAdd: 31, dexAdd: 13, ingAdd: 46, spiAdd: 13,
 			maxHPAdd: 1630, maxMPAdd: 490, maxParryAdd: 840, minMagicDefAdd: 45},
-		// 移花宫 and its 花无缺 route share 明玉神功.  There is no separate
-		// 花无缺 inner-power ConfigID; CS_yhwq_hsqs is the male-version
-		// routine. Use the classic visible-buff record and exact level-30 row
-		// 810630 rather than its hidden mind_ duplicate.
+		// 移花宫及其花无缺路线共用明玉神功。不存在单独的花无缺内功
+		// ConfigID；CS_yhwq_hsqs 是男性版本的套路。使用经典的可见 Buff
+		// 记录和确切的 30 级行 810630，而不是它隐藏的 mind_ 重复项。
 		{configID: "ng_yh_001", staticData: 114, itemType: 1002, level: 30, maxLevel: 71, total: 579600, power: 8180, maxPower: 8180,
 			buffID: "buf_ng_yh_001", buffStaticData: 13073, buffLevel: 3,
 			strAdd: 55, staAdd: 57, dexAdd: 70, ingAdd: 97, spiAdd: 67,
@@ -174,8 +170,8 @@ func newPlayerProgress() playerProgress {
 			buffID: "buf_ng_th_001", buffStaticData: 13434, buffLevel: 3,
 			strAdd: 66, staAdd: 56, dexAdd: 52, ingAdd: 103, spiAdd: 68,
 			maxHPAdd: 4050, maxMPAdd: 1135, maxParryAdd: 5070, minMagicDefAdd: 100},
-		// Use the classic, visible records here as well.  1006/1008 are the
-		// mind_ duplicates: their displayed buff route is explicitly hidden.
+		// 这里同样使用经典的可见记录。1006/1008 是 mind_ 重复项：它们
+		// 显示的 Buff 路线被明确隐藏。
 		{configID: "ng_wd_002", staticData: 6, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
 		{configID: "ng_jh_001", staticData: 1, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
 		{configID: "ng_em_001", staticData: 8, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
@@ -196,9 +192,8 @@ func newPlayerProgress() playerProgress {
 			masDef: 50, jujDef: 50, minMeleeDamage: 20, maxMeleeDamage: 35,
 		},
 	}
-	// The inline values above are only a no-resource fallback. Every installed
-	// modern book is immediately replaced by its StaticData/current-level
-	// varprop and PropModify result.
+	// 上面的内联值只是无资源时的兜底。每本已安装的现代秘籍都会立即被
+	// 其 StaticData/当前等级的 varprop 和 PropModify 结果替换。
 	progress.refreshAllModernEffects()
 	return progress
 }
@@ -231,11 +226,10 @@ func (book *learnedNeiGong) applyModernEffect() error {
 	return nil
 }
 
-// refreshAllModernEffects is intentionally best-effort only for startup
-// portability. Production uses the fixed modern-resource directory above;
-// retaining the previous values on a missing local package lets unit-level
-// protocol work remain usable without replacing an actual game effect with
-// zeroes.
+// refreshAllModernEffects 刻意做成尽力而为，只为保证启动可移植性。生产
+// 环境使用上面固定的现代资源目录；在本地缺少资源包时保留旧值，让单元
+// 级别的协议工作保持可用，而不是把实际游戏效果替换成
+// 零值。
 func (p *playerProgress) refreshAllModernEffects() {
 	for index := range p.books {
 		if err := p.books[index].applyModernEffect(); err != nil {
@@ -312,9 +306,8 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 	}
 	a := p.attributes
 	maxParryAdd, minMagicDefAdd := int32(0), int32(0)
-	// Apply the currently equipped inner power to the server-owned role
-	// state.  The matching BuffStore entry is installed by playerActor; the
-	// visible primary attributes must follow the same authoritative source.
+	// 将当前装备的内功应用到服务器持有的角色状态上。对应的 BuffStore
+	// 条目由 playerActor 安装；可见的主属性必须遵循同一个权威来源。
 	if equipped := p.book(p.curNeiGong); equipped != nil {
 		a.str += equipped.strAdd
 		a.sta += equipped.staAdd
@@ -415,11 +408,10 @@ func (p *playerProgress) facultyReady(id string) (uint16, error) {
 		return 0, fmt.Errorf("not learned neigong %q", id)
 	}
 	p.facultyName = id
-	// form_wuxue_faculty.prop_callback_ConvertState only renders state 0
-	// (idle, show the normal-start button) and state 2 (converting).  Sending
-	// the client constant READY=1 here leaves the controls in their XML
-	// defaults until an 演武 request changes the state to 2, which is why a
-	// player had to click 演武 once before 内修 appeared usable.
+	// form_wuxue_faculty.prop_callback_ConvertState 只渲染状态 0（空闲，
+	// 显示普通开始按钮）和状态 2（转换中）。这里发送客户端常量 READY=1
+	// 会让控件停留在 XML 默认状态，直到某个演武请求把状态改为 2——这
+	// 正是玩家必须先点一次演武、内修才显示为可用的原因。
 	p.facultyState = facultyStateNone
 	p.facultyStyle = facultyStyleNormal
 	p.fillSpeed = 0
@@ -438,9 +430,8 @@ func (p *playerProgress) facultyBegin(style int32, now time.Time) error {
 	p.facultyStyle = style
 	p.fillSpeed = normalFacultyFillPerMinute
 	if style == facultyStyleAct {
-		// 演武 pays out after the card selection.  Advertising a minute rate
-		// here caused the server to advance progress even when no card page
-		// had been opened.
+		// 演武在选卡之后才结算收益。这里若通告每分钟速率，会导致服务器
+		// 在卡牌页面尚未打开时也推进进度。
 		p.fillSpeed = 0
 	}
 	p.lastAdvance = now.UTC()
@@ -454,12 +445,10 @@ func (p *playerProgress) facultyExit() {
 	p.lastAdvance = time.Now().UTC()
 }
 
-// advanceFaculty settles whole elapsed minutes at the advertised FillSpeed.
-// The remainder stays in lastAdvance so a reconnect or restart cannot lose
-// partial time.  Both normal cultivation and the active 演武 state consume
-// the same authoritative inner-power progress; restore deliberately resets
-// an active session's clock, so 演武 accrues only while that live session is
-// running and never receives offline progress.
+// advanceFaculty 按通告的 FillSpeed 结算整分钟数。余数保留在 lastAdvance
+// 中，重连或重启都不会丢失部分时间。普通修炼和主动的演武状态消费同一
+// 份权威内功进度；restore 刻意重置活动会话的时钟，因此演武只在该活动
+// 会话运行期间累积，绝不会获得离线进度。
 func (p *playerProgress) advanceFaculty(now time.Time) (uint16, bool) {
 	if p.facultyState != facultyStateConvert || p.facultyStyle != facultyStyleNormal || p.fillSpeed <= 0 {
 		p.lastAdvance = now.UTC()
@@ -500,8 +489,8 @@ func (p *playerProgress) advanceFaculty(now time.Time) (uint16, bool) {
 			book.maxPower += 20
 			book.power = book.maxPower
 		}
-		// A level changes its selected varprop, BufferLevel, PropModify packs
-		// and SkillModify packs. Re-evaluate before the next 0x10/View update.
+		// 升级会改变所选 varprop、BufferLevel、PropModify 包和
+		// SkillModify 包。在下一次 0x10/View 更新前重新求值。
 		_ = book.applyModernEffect()
 		if book.level >= book.maxLevel {
 			book.fill = 0
@@ -513,16 +502,14 @@ func (p *playerProgress) advanceFaculty(now time.Time) (uint16, bool) {
 	return 0, false
 }
 
-// awardActiveFaculty settles exactly one 演武 card.  The selection index and
-// payment source are validated at the protocol boundary; the local test realm
-// currently uses a fixed 20,000-point card result while the runtime is kept
-// in active state for the client's two-second card animation/cooldown.
+// awardActiveFaculty 恰好结算一张演武卡。选择索引和支付来源在协议边界
+// 校验；本地测试领域当前使用固定的 20000 点卡牌结果，同时让运行时保持
+// 主动状态，以配合客户端两秒的卡牌动画/冷却。
 func (p *playerProgress) awardActiveFaculty() (slot uint16, awarded, levelUp, maxLevel bool, err error) {
 	if p.facultyState != facultyStateConvert || p.facultyStyle != facultyStyleAct {
-		// The current form can leave one delayed SUB_CLIENT_ACT_PAY in its UI
-		// queue when the player closes or changes the faculty mode. It is a
-		// stale business request, not a malformed transport message, and must
-		// not tear down the complete game connection.
+		// 当前表单在玩家关闭或切换修炼模式时，可能在 UI 队列里留下一条
+		// 延迟的 SUB_CLIENT_ACT_PAY。它是一条过期的业务请求，不是畸形
+		// 的传输消息，绝不能因此拆除整个游戏连接。
 		return 0, false, false, false, nil
 	}
 	for index := range p.books {
@@ -608,17 +595,16 @@ func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
 	p.refreshAllModernEffects()
 }
 
-// S2CFacultyMessage is the numeric C++ GameMessageHandler entry for the
-// current table's custom_faculty_msg receiver.  The table uses the layout
-// slot = 2*messageID + 15: its entry is slot 397, hence ID 191.  This same
-// formula is independently grounded by the live NPC-talk and drama entries:
-// slots 101/781 resolve to their working IDs 43/383.
+// S2CFacultyMessage 是当前表 custom_faculty_msg 接收器对应的 C++
+// GameMessageHandler 数字入口。该表采用 slot = 2*messageID + 15 的布局：
+// 其条目是槽位 397，因此 ID 为 191。同一公式还被现网的 NPC 对话和剧情
+// 条目独立印证：槽位 101/781 分别解析为其可用 ID 43/383。
 const S2CFacultyMessage int32 = 191
 
-// encodeFacultyMessage goes through the modern numeric GameMessageHandler
-// dispatcher.  It resolves ID 191 to custom_handler.custom_faculty_msg, then
-// faculty.on_msg(subcommand, arg2).  Sending the Lua function name as a
-// string is rejected by the current client.
+// encodeFacultyMessage 走现代的数字 GameMessageHandler 分发器。它把
+// ID 191 解析到 custom_handler.custom_faculty_msg，再调用
+// faculty.on_msg(subcommand, arg2)。以字符串形式发送 Lua 函数名会被
+// 当前客户端拒绝。
 func encodeFacultyMessage(subcommand int32, arg2 int32) ([]byte, error) {
 	return serverCustomIntMessage(S2CFacultyMessage,
 		customInt(subcommand),
@@ -630,7 +616,7 @@ func encodeFacultyActiveBegin() ([]byte, error) {
 	return encodeFacultyMessage(22, 0) // faculty.SUB_SERVER_ACT_BEGIN
 }
 
-// handlePlayerProgressCustom accepts client-originated TVarList requests.
+// handlePlayerProgressCustom 接受客户端发起的 TVarList 请求。
 func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 {
 		return false, nil
@@ -670,16 +656,15 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			}
 			slot, err := player.facultyReady(custom.Values[2].Text)
 			if err != nil {
-				// View=43 selection traffic can arrive while the client is changing
-				// another wuxue panel.  A non-neigong ConfigID is not a corrupt
-				// game session and must never disconnect the player.
+				// View=43 的选择流量可能在客户端切换其他武学面板期间到达。
+				// 一个非内功的 ConfigID 并不意味着游戏会话损坏，绝不能
+				// 因此断开玩家。
 				return true, nil
 			}
-			// Refresh the selected View=43 object before FacultyName reaches
-			// the client.  set_control_state immediately resolves the wuxue
-			// object and reads Level/MaxLevel; previously this refresh happened
-			// only after 1006/21, which is why clicking 演武 once appeared to
-			// unlock the normal 内修 button.
+			// 在 FacultyName 到达客户端之前刷新所选的 View=43 对象。
+			// set_control_state 会立即解析武学对象并读取 Level/MaxLevel；
+			// 此前这个刷新只在 1006/21 之后发生，这正是为什么先点一次演武
+			// 看起来像是解锁了普通的内修按钮。
 			frame, err := player.progressBookFrame(slot)
 			if err != nil {
 				return true, err
@@ -737,13 +722,13 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 		case 22: // SUB_CLIENT_ACT_EXIT
 			player.facultyExit()
 			return true, syncState()
-		case 23: // SUB_CLIENT_ACT_PAY: card index + payment type
+		case 23: // SUB_CLIENT_ACT_PAY: 卡牌索引 + 支付类型
 			if len(custom.Values) < 4 {
 				return true, nil
 			}
-			// The live modern client emits both choices as TVarList doubles:
-			// 1006, 23, double:0, double:1.  They are enum values, not
-			// quantities, so accept only exact integral numeric values.
+			// 现网现代客户端把两个选择都以 TVarList double 发出：
+			// 1006, 23, double:0, double:1。它们是枚举值而不是数量，因此
+			// 只接受精确的整型数值。
 			card, cardOK := custom.Values[2].exactInt32()
 			payment, paymentOK := custom.Values[3].exactInt32()
 			if !cardOK || !paymentOK {
@@ -760,10 +745,10 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				return true, err
 			}
 			if awarded {
-				// The faculty panel reads Level/Fill from its View=43 goods object.
-				// Send that object first, while the active form is still present;
-				// otherwise the close path can leave the panel's default level-one
-				// object bound when it reopens.
+				// 修炼面板从它的 View=43 物品对象读取 Level/Fill。请在主动
+				// 表单仍然存在时先发送该对象；否则关闭路径可能让面板默认的
+				// 一级对象在重新打开时
+				// 仍然处于绑定状态。
 				frame, err := player.progressBookFrame(slot)
 				if err != nil {
 					return true, err
@@ -776,9 +761,9 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				return true, err
 			}
 			if levelUp {
-				// The client does not infer a level transition from View=43 alone.
-				// faculty.lua maps sub=14 to on_msg_level_up(), which reads the
-				// already-synchronized CurLevel and refreshes the panel/notification.
+				// 客户端不会仅凭 View=43 推断出升级。faculty.lua 把 sub=14 映射
+				// 到 on_msg_level_up()，后者读取已同步的 CurLevel 并刷新面板/
+				// 通知。
 				levelFrame, err := encodeFacultyMessage(14, facultyBool(maxLevel))
 				if err != nil {
 					return true, err
@@ -788,10 +773,10 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				}
 			}
 			if levelUp || maxLevel {
-				// The full authoritative level state is now on the client: first the
-				// View=43 book, then role properties, then the native level notice.
-				// Only now close the active page.  exit_flag inside the client form
-				// still suppresses its stale C2S 1006/22 callback.
+				// 完整的权威等级状态现已到达客户端：先是 View=43 秘籍，然后
+				// 是角色属性，最后是原生升级通知。直到现在才关闭主动页面。
+				// 客户端表单内部的 exit_flag 仍会抑制其过期的 C2S 1006/22
+				// 回调。
 				exitFrame, err := encodeFacultyMessage(23, 0) // SUB_SERVER_ACT_EXIT
 				if err != nil {
 					return true, err
@@ -813,9 +798,9 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			}
 			return true, nil
 		case 24:
-			// The faculty form binds FacultyName only after the earlier 1006/1
-			// selection reply.  Pulse the client property before restoring the
-			// authoritative state so set_control_state runs on every open.
+			// 修炼表单只在较早的 1006/1 选择回复之后才绑定 FacultyName。在
+			// 恢复权威状态之前先脉冲这个客户端属性，让 set_control_state
+			// 在每次打开时都会执行。
 			if frame, needed, err := player.facultyNameResetFrame(); err != nil {
 				return true, err
 			} else if needed {
@@ -828,9 +813,8 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			}
 			return true, nil
 		case 31, 32:
-			// These are client reports/open requests for meridian flows. Their
-			// deep business systems are intentionally not faked, but accepting
-			// them keeps the shared 1006 bus well-formed.
+			// 这些是客户端针对经脉流转的上报/打开请求。它们的深层业务系统
+			// 刻意不做伪造，但接受它们可以让共享的 1006 总线保持规整。
 			if err := syncState(); err != nil {
 				return true, err
 			}

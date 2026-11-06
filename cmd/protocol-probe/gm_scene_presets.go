@@ -2,20 +2,20 @@ package main
 
 import "fmt"
 
-// gmScenePreset is a named, resource-backed live scene destination.  Keep
-// these separately from the free-form GM field: each entry is taken from the
-// installed scenes.ini and door_data.ini, so a button cannot accidentally
-// send a stale terrain alias or a coordinate from a different map.
+// gmScenePreset 是具名的、有资源依据的实机场景目的地。
+// 将其与自由填写的 GM 字段分开维护：每个条目都取自
+// 已安装的 scenes.ini 和 door_data.ini，
+// 这样按钮就不会误发过期的地形别名或来自其他地图的坐标。
 type gmScenePreset struct {
 	Label       string
 	Destination string // config,resource,x,y,z,orient
 }
 
-// gmScenePresets covers the eight common city/starter hubs, the original
-// eight schools, and the eight 江湖势力. The scene config names are from
-// res/ini/scenes.ini; spawn coordinates are their installed door_data.ini
-// Target* values or force-specific safe HomePoints. 鸡鸣驿 is the modern
-// born01_MoHeZhen resource.
+// gmScenePresets 覆盖八座常用主城/新手出生城镇、最初的
+// 八大门派以及八大江湖势力。场景配置名取自
+// res/ini/scenes.ini；出生坐标取自各场景已安装 door_data.ini 的
+// Target* 值或各势力专属的安全 HomePoint。鸡鸣驿使用现代的
+// born01_MoHeZhen 资源。
 var gmScenePresets = map[string]gmScenePreset{
 	// 主城 / 常用城镇
 	"yanjing":      {Label: "燕京", Destination: `ini\scene\city01_YanJing,city01,837.625,-35.939,-750.860,0.680`},
@@ -39,17 +39,17 @@ var gmScenePresets = map[string]gmScenePreset{
 
 	// 江湖势力
 	"yihuagong": {Label: "移花宫", Destination: `ini\scene\school09_YiHuaGong,school09,340.160,47.979,657.284,2.588`},
-	// These are installed terrain placements, not exterior Relive NPCs.  The
-	// 桃花岛 preset intentionally spawns beside the island's principal NPC
-	// thd_001 (黄古萧) in commonnpc.xml; the Suzhou door target is a water
-	// landing in this local client build.  无根门 is door_data:[2132] (the
-	// direct “传送去无根门” route), next to the resident NPC cluster.
+	// 这些是已安装的地形摆放点，而非外部的 Relive 复活 NPC。
+	// 桃花岛预设刻意生成在该岛主 NPC
+	// thd_001（黄古萧，见 commonnpc.xml）旁边；苏州传送门目标点在本
+	// 客户端版本中是一处水域落点。无根门对应 door_data:[2132]（即
+	// 直达“传送去无根门”路线），紧邻常驻 NPC 聚集处。
 	"taohuadao": {Label: "桃花岛", Destination: `ini\scene\school10_taohuadao,school10,-603.500,95.779,-259.100,0.255`},
 	"wugenmen":  {Label: "无根门", Destination: `ini\scene\school11_wugenmen,school11,34.200,4.600,245.500,1.500`},
-	// The remaining force homes are all marked Safe=1 in the extracted
-	// homepoint.ini. 徐家庄 and 金针沈家 share the 成都 terrain; 万兽山庄
-	// shares 丐帮 terrain. 天轮寺、青衣阁 use their own installed adv156/adv158
-	// scene configs and creator catalogs.
+	// 其余江湖势力驻地均已在解包出的
+	// homepoint.ini 中标注 Safe=1。徐家庄与金针沈家共用成都地形；万兽山庄
+	// 共用丐帮地形。天轮寺、青衣阁使用各自已安装的 adv156/adv158
+	// 场景配置与 creator 清单。
 	"xujia":   {Label: "徐家庄", Destination: `ini\scene\city05_ChengDu,city05,569.750,39.045,272.750,0.000`},
 	"jinzhen": {Label: "金针沈家", Destination: `ini\scene\city05_ChengDu,city05,354.750,81.061,800.000,0.000`},
 	"wanshou": {Label: "万兽山庄", Destination: `ini\scene\school02_GaiBang,school02,338.321,87.146,1016.193,2.927`},
