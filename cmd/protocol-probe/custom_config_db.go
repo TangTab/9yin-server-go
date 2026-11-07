@@ -12,7 +12,7 @@ import (
 )
 
 // 自定义配置域的三个 MySQL 存储，读写与 Java 参考服逐字对齐
-//（docs/customizing-shortcut-persist.md 定稿），共享 nineyin 库可与其
+// （docs/customizing-shortcut-persist.md 定稿），共享 nineyin 库可与其
 // 多服务端共存。降级语义与 facultyDBStore 一致：缺表/坏行读作
 // 「无存档」，登录链走默认初始化；写入错误由调用方决定是否降级日志。
 const customConfigQueryTimeout = 5 * time.Second
@@ -45,7 +45,7 @@ func newCustomizingDBStore(db *sql.DB) *customizingDBStore {
 }
 
 // Load 读取角色个性配置；无行、DB 错误都按「无存档」处理并记日志
-//（无存档时客户端保持本地默认并在登录期上传基线）。
+// （无存档时客户端保持本地默认并在登录期上传基线）。
 func (store *customizingDBStore) Load(roleID role.RoleID) (string, bool) {
 	if store == nil || store.db == nil || roleID == 0 {
 		return "", false
@@ -88,8 +88,8 @@ ON DUPLICATE KEY UPDATE customizing_value = VALUES(customizing_value)`,
 }
 
 // keybindDBStore 持久化键位主串/方案一/方案二与操作模式
-//（role_keybinds 单行）。bind_value NOT NULL 且无默认值：任何不含
-// bind_value 的首插都必须补 ''，否则整行插入失败——Java 参考服真机
+// （role_keybinds 单行）。bind_value NOT NULL 且无默认值：任何不含
+// bind_value 的首插都必须补 ”，否则整行插入失败——Java 参考服真机
 // 踩实过的坑（RoleInventoryStore.saveKeybindScheme）。
 type keybindDBStore struct {
 	db *sql.DB

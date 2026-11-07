@@ -115,7 +115,23 @@
           设置黄金</button><br />
         <input id="sp" type="number" value="100" min="0" max="100" /><button onclick="setSP()">
           设置怒气</button><button onclick="addSP(10)">+10</button><button onclick="addSP(50)">+50</button><button
-          onclick="fillSP()">回满</button>
+          onclick="fillSP()">回满</button><br />
+          <label>自动回复/秒
+          <input id="rage-recovery" type="number" value="0" min="0" max="1000" style="min-width: 110px; width: 110px" /></label><button
+            onclick="setRageRecovery()">应用</button><span class="muted">（0=关闭；官方满档 5；会话级，重登归零）</span>
+      </section>
+      <section>
+        <h2>怪物刷新</h2>
+        <p class="muted">
+          <b>批量刷新</b>：每到间隔统一重生所有<b>已死亡</b>怪物（回出生点满血），活怪一律不动；0=关闭批量，回到每怪独立
+          RefreshTime 计时。<b>尸体清除</b>：死亡超过该秒数后尸体消失（0x0E），重生时在出生点重新物化；0=尸体保留到重生。任务怪（EventNpc/事件触发生成器）从不生成，也永不进入刷新循环。杀怪掉落宝箱 60 秒未拾自动消失。
+        </p>
+        <label>批量间隔/秒
+          <input id="respawn-interval" type="number" value="30" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
+          onclick="setRespawnInterval()">应用</button>
+        <label style="margin-left: 12px">尸体清除/秒
+          <input id="corpse-ttl" type="number" value="10" min="0" max="3600" style="min-width: 110px; width: 110px" /></label><button
+          onclick="setCorpseTTL()">应用</button>
       </section>
       <section>
         <h2>经脉</h2>

@@ -21,6 +21,11 @@ type shopCatalogItem struct {
 	price       int32
 	page        int32
 	position    int32
+	// exchangeID（第 8 列）：capitalType=3 时指向 item/exchangeitem.ini
+	// 的小节（fork shop_buy.go case 3 → exchangeCatalogFor）。
+	// conditionID（第 9 列）：随行条件号，语义未证仅留存。
+	exchangeID  int32
+	conditionID int32
 }
 
 func loadShopCatalogSection(path, shopID string) ([]shopCatalogItem, int32, int32, error) {
@@ -102,12 +107,25 @@ func loadShopCatalogSection(path, shopID string) ([]shopCatalogItem, int32, int3
 		if parseErr != nil {
 			return nil, 0, 0, parseErr
 		}
+		// 第 8/9 列（兑换/条件）为可选扩展：截尾空列保持 0。
+		optionalColumn := func(column int) int32 {
+			if column >= len(parts) {
+				return 0
+			}
+			parsed, parseErr := strconv.ParseInt(strings.TrimSpace(parts[column]), 10, 32)
+			if parseErr != nil {
+				return 0
+			}
+			return int32(parsed)
+		}
 		if page < 1 || position < 0 {
 			return nil, 0, 0, fmt.Errorf("shop %s line %d: invalid page=%d position=%d", shopID, lineNumber, page, position)
 		}
 		items = append(items, shopCatalogItem{
 			configID: strings.TrimSpace(parts[0]), amount: amount, capitalType: capitalType,
 			price: price, page: page, position: position,
+			exchangeID:  optionalColumn(7),
+			conditionID: optionalColumn(8),
 		})
 		if page > maxPage {
 			maxPage = page

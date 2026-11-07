@@ -155,13 +155,11 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	buffInfo := player.releaseParryBuff()
 	if engage {
 		buffInfo = player.engageParryBuff(now)
-		// 格挡清怒(官方 §3:msg54 手动格挡开启时任意当前值→0,
-		// 55866 四次 SP→0 单帧同构)。格挡态本身按"格挡被揍 +2"攒怒。
-		if _, spFrame, spErr := player.setSP(0); spErr == nil && spFrame != nil {
-			if writeErr := link.WriteFrame(spFrame); writeErr != nil {
-				return writeErr
-			}
-		}
+		// 格挡不清怒(2026-11-07 撤销):Java handleManualParry 不动 SP,
+		// 55866 复核四次 SP→0 单帧全部嵌在出招序列(294/337/20/24/CanUse)
+		// 里、无一先于 msg169 格挡通告(按下帧甚至更靠后),且战斗态/
+		// 非战斗态各占一半——"格挡开启清怒"系误读。格挡态本身按
+		// "格挡被揍 +2"攒怒。
 	}
 	name := player.snapshotName()
 	notice, err := serverCustomIntMessage(169,

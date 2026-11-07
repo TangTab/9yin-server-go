@@ -65,7 +65,7 @@ func TestGMIndexIsLocalServerOverview(t *testing.T) {
 // 网关时代的 ?s= 入口门禁与 __s 转发参数。
 func TestGMConsolePageServedAndAdapted(t *testing.T) {
 	server := gmPanelTestServer(t)
-	page, contentType, status := gmGetBody(t, server.URL + "/console.html")
+	page, contentType, status := gmGetBody(t, server.URL+"/console.html")
 	if status != http.StatusOK {
 		t.Fatalf("console status=%d want=%d", status, http.StatusOK)
 	}
@@ -78,12 +78,12 @@ func TestGMConsolePageServedAndAdapted(t *testing.T) {
 		`src="/static/console-features.js"`,
 		"九阴本地 GM",
 		// 功能面抽查：面板功能全量保留，后续服务端实现后直接可用。
-		`onclick="preset('yanjing')"`,  // 常用传送
-		`id="recast-target-slot"`,      // 洗练
-		`id="clone-config"`,            // 副本
-		`id="mount-result"`,            // 坐骑
-		`id="guanyin"`,                 // 官银
-		`id="faction"`,                 // 门派
+		`onclick="preset('yanjing')"`, // 常用传送
+		`id="recast-target-slot"`,     // 洗练
+		`id="clone-config"`,           // 副本
+		`id="mount-result"`,           // 坐骑
+		`id="guanyin"`,                // 官银
+		`id="faction"`,                // 门派
 	} {
 		if !strings.Contains(page, reference) {
 			t.Fatalf("console.html missing %q", reference)
@@ -105,9 +105,9 @@ func TestGMServesEmbeddedStaticAssets(t *testing.T) {
 	}{
 		// Go 1.23 的 mime 表把 .js 标为 application/javascript，
 		// 与 text/javascript 等价，浏览器均接受。
-		"css":      {"/static/console.css", "text/css", "--accent"},
-		"core-js":  {"/static/console-core.js", "javascript", "async function command("},
-		"feat-js":  {"/static/console-features.js", "javascript", "function preset(key)"},
+		"css":     {"/static/console.css", "text/css", "--accent"},
+		"core-js": {"/static/console-core.js", "javascript", "async function command("},
+		"feat-js": {"/static/console-features.js", "javascript", "function preset(key)"},
 	}
 	for name, testCase := range cases {
 		body, contentType, status := gmGetBody(t, server.URL+testCase.url)
@@ -145,5 +145,30 @@ func TestGMSessionsAPIReturnsJSON(t *testing.T) {
 	var sessions []gmPlayerState
 	if err := json.Unmarshal([]byte(body), &sessions); err != nil {
 		t.Fatalf("sessions body is not a JSON array: %v", err)
+	}
+}
+
+// TestGMWeatherCatalogAPI 面板天气下拉目录（set_weather 闭名单同源）：
+// 大写字段名 Key/Label/TXID 与 Java gm-web 目录同形；静态表无需 DB。
+func TestGMWeatherCatalogAPI(t *testing.T) {
+	server := gmPanelTestServer(t)
+	body, _, status := gmGetBody(t, server.URL+"/api/weather")
+	if status != http.StatusOK {
+		t.Fatalf("weather status=%d want=%d", status, http.StatusOK)
+	}
+	var rows []struct {
+		Key   string `json:"Key"`
+		Label string `json:"Label"`
+		TXID  string `json:"TXID"`
+	}
+	if err := json.Unmarshal([]byte(body), &rows); err != nil {
+		t.Fatalf("weather body not JSON: %v (%s)", err, body)
+	}
+	if len(rows) != 49 {
+		t.Fatalf("weather rows=%d want 49", len(rows))
+	}
+	first := rows[0]
+	if first.Key != "light_rain_001" || first.Label == "" || first.TXID != "" {
+		t.Fatalf("first row=%+v", first)
 	}
 }

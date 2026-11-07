@@ -146,36 +146,81 @@ func TestQingGongCostMultiplierAndRecovery(t *testing.T) {
 	if q.Point != 130 {
 		t.Fatalf("points after use=%d, want 130", q.Point)
 	}
-	if !q.Restore(start.Add(2 * time.Second)) {
-		t.Fatal("expected server-side qinggong recovery")
+	// 官方分档回复（Java Actor.recoverQingGongTiered 同款）：余量 130
+	// 落在 101..上限 档，一步 +10；满条后不再涨。
+	if !q.RecoverTiered() {
+		t.Fatal("expected tiered qinggong recovery")
+	}
+	if q.Point != 140 {
+		t.Fatalf("points after recovery=%d, want 140", q.Point)
+	}
+	q.Point = 150
+	if q.RecoverTiered() {
+		t.Fatal("recovery must stop at cap")
 	}
 	if q.Point != 150 {
-		t.Fatalf("points after recovery=%d, want 150", q.Point)
+		t.Fatalf("points above cap=%d, want 150", q.Point)
 	}
 }
 
-func TestQingGongSuccessfulUseRefillsBelowFifty(t *testing.T) {
+func TestQingGongSuccessfulUseNeverRefills(t *testing.T) {
+	// 2026-11-07 对齐 Java：官方轻功回复是分档慢回复，「余量 <50
+	// 自动回满」本地规则是真机无限跳的根因，已删除（Java
+	// Actor.useQingGong 2026-11-03 同款删除）。
 	q := NewQingGong(time.Now())
 	start := time.Now()
-
-	// 四次被接受的 25 点动作恰好剩 50 点：阈值是严格小于 50，
-	// 所以此时还不应回满。
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 5; i++ {
 		if _, ok := q.Use(25, start); !ok {
 			t.Fatalf("use %d was rejected", i+1)
 		}
 	}
-	if q.Point != 50 {
-		t.Fatalf("points at threshold=%d, want 50", q.Point)
+	if q.Point != 25 {
+		t.Fatalf("points after five uses=%d, want 25 (no auto refill)", q.Point)
 	}
+	// 第六次恰好付得起（剩 0）；第七次才付不起。
+	if _, ok := q.Use(25, start); !ok || q.Point != 0 {
+		t.Fatalf("sixth use ok=%t point=%d, want true 0", ok, q.Point)
+	}
+	if _, ok := q.Use(25, start); ok {
+		t.Fatal("seventh use must be rejected")
+	}
+	// 低档回复一步 +3。
+	if !q.RecoverTiered() || q.Point != 3 {
+		t.Fatalf("low-tier recovery state=%d, want 3", q.Point)
+	}
+}
 
-	// 下一次被接受的使用剩 25 点，因此本地测试的回满必须
-	// 体现在随后的 0x10 更新所发送的同一份状态快照中。
-	if cost, ok := q.Use(25, start); !ok || cost != 25 {
-		t.Fatalf("below-threshold use cost=%d ok=%t, want 25 true", cost, ok)
+func TestQingGongTieredRecoverySteps(t *testing.T) {
+	q := NewQingGong(time.Now())
+	q.Point = 100
+	if !q.RecoverTiered() || q.Point != 105 {
+		t.Fatalf("mid tier (51..100) gain state=%d, want 105", q.Point)
 	}
-	if q.Point != 150 {
-		t.Fatalf("points after below-threshold refill=%d, want 150", q.Point)
+	q.Point = 50
+	if !q.RecoverTiered() || q.Point != 53 {
+		t.Fatalf("low tier (0..50) gain state=%d, want 53", q.Point)
+	}
+	q.Point = 101
+	q.MaxAdd = 49 // cap 199
+	if !q.RecoverTiered() || q.Point != 111 {
+		t.Fatalf("high tier (>=101) gain state=%d, want 111", q.Point)
+	}
+}
+
+func TestQingGongDrainForSustainedLease(t *testing.T) {
+	// 持续租约扣点（Java Actor.drainQingGong）：不触发回满，
+	// 付不起清零并返回 false（调用方强摘租约）。
+	q := NewQingGong(time.Now())
+	q.Point = 25
+	if !q.Drain(7) || q.Point != 18 {
+		t.Fatalf("drain state=%d, want 18", q.Point)
+	}
+	q.Point = 3
+	if q.Drain(7) || q.Point != 0 {
+		t.Fatalf("exhausted drain state=%d ok, want 0 false", q.Point)
+	}
+	if !q.Drain(0) || q.Point != 0 {
+		t.Fatalf("zero drain on empty pool must succeed without change, state=%d", q.Point)
 	}
 }
 

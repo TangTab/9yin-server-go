@@ -4,6 +4,46 @@ import "fmt"
 
 const viewportSkill uint16 = 40
 
+// View40 行官方补集属性索引（official_property_table.txt 玩家域，均唯一名）：
+// UseLimit@2238/VarPropNo@2239/AConsumeHP@2245/AConsumeMP@2246/AConsumeSP@2252/
+// AConsumeQGP@2254/TargetShapePara2@2260/HitShapePara1@2261/HitShapePara2@2262/
+// HPHealMul@2265/MPHealMul@2266/Flow@2267/LeadTime@2270/LeadSepTime@2271（Int32）；
+// Quality@2119(Byte)；CoolDownTime@2034(Int32)；五系 DamageMul@518..522(Float32)。
+const (
+	propSkillUseLimit    uint16 = 2238
+	propVarPropNo        uint16 = 2239
+	propAConsumeHP       uint16 = 2245
+	propAConsumeMP       uint16 = 2246
+	propAConsumeSP       uint16 = 2252
+	propAConsumeQGP      uint16 = 2254
+	propTargetShapePara2 uint16 = 2260
+	propHitShapePara1    uint16 = 2261
+	propHitShapePara2    uint16 = 2262
+	propHPHealMul        uint16 = 2265
+	propMPHealMul        uint16 = 2266
+	propFlow             uint16 = 2267
+	propLeadTime         uint16 = 2270
+	propLeadSepTime      uint16 = 2271
+	propQuality          uint16 = 2119
+	propCoolDownTime     uint16 = 2034
+	propPhyDamageMul     uint16 = 518
+	propStiDamageMul     uint16 = 519
+	propJujDamageMul     uint16 = 520
+	propNegDamageMul     uint16 = 521
+	propMasDamageMul     uint16 = 522
+)
+
+// starterSkillRowIDs 标记 starter 基线行：这些行走 Java StarterSkills.skillRowProperties
+// 方言（UseLimit 回落 9、加发 LeadTime/LeadSepTime 固定族）；DB 追加行走
+// StarterGrants.dbSkillViewAdd 方言（UseLimit 仅 >0 稀疏发，Lead 系不发）。
+var starterSkillRowIDs = func() map[string]bool {
+	ids := make(map[string]bool, len(starterSkillViews))
+	for _, skill := range starterSkillViews {
+		ids[skill.configID] = true
+	}
+	return ids
+}()
+
 // learnedSkillView 是现代版 SkillContainer 使用的权威最小集。
 // 套路本身没有单独的视图对象：客户端按 skill_static.ini 的
 // TaoLu 字段对这些已学习的武学进行分组。
@@ -18,13 +58,19 @@ type learnedSkillView struct {
 	pauseTime  float32
 }
 
-// starterSkillViews 是当前已学习的武学集合。zs_default_01 是已安装的
-// 现代版原生 打坐 前置（StaticData=22，ItemType=1000，
-// 最高等级=1）；它的使用路径是特殊的原生 240 路线，而不是常规的
-// 211 战斗路线。其余条目是既有的 花神七式 以及
-// 已安装的 心佛掌 七式 TaoLu。
+// starterSkillViews 是当前已学习的武学集合。前五件是默认分类
+// 「基础武学 → 三脚猫招式」五件套（bug.txt：官服全角色默认已学，
+// Java StarterSkills.DEFAULT_BASIC_SKILLS 对拍）：剑普攻 / 飞刀普攻 /
+// 打坐调息 / 自断经脉 / 骑术精通。普攻族固定发剑+飞刀两件（官方观测
+// 同款，不随门派变——其余武器普攻 zs_normal_ 与 hw_normal_ 族官方未授）。
+// zs_default_01 的使用路径是特殊的原生 240 路线，而不是常规的 211 战斗
+// 路线。其余条目是既有的 花神七式、心佛掌 七式与太极拳(古谱) TaoLu。
 var starterSkillViews = []learnedSkillView{
+	{configID: "zs_normal_02", staticData: 15, itemType: 1000, level: 1, maxLevel: 1},
+	{configID: "hw_normal_fd", staticData: 626, itemType: 1000, level: 1, maxLevel: 1},
 	{configID: "zs_default_01", staticData: 22, itemType: 1000, level: 1, maxLevel: 1},
+	{configID: "zs_suicide", staticData: 55, itemType: 1000, level: 1, maxLevel: 1},
+	{configID: "riding_start", staticData: 21515, itemType: 1000, level: 1, maxLevel: 1},
 	{configID: "CS_yhwq_hsqs01", staticData: 12636, itemType: 1000, level: 1, maxLevel: 11, total: 156550, pauseTime: 43 * 1000.0 / 30},
 	{configID: "CS_yhwq_hsqs02", staticData: 12637, itemType: 1001, level: 1, maxLevel: 11, total: 156550, pauseTime: 65 * 1000.0 / 30},
 	{configID: "CS_yhwq_hsqs03", staticData: 12638, itemType: 1000, level: 1, maxLevel: 11, total: 156550, pauseTime: 30 * 1000.0 / 30},
@@ -57,8 +103,9 @@ var starterSkillViews = []learnedSkillView{
 }
 
 // mergeLearnedSkills 合并 starter 基线与 DB 已学集（Java
-// StarterSkills.withDefaultBasics 同口径的并集语义）。starter 在前、
-// 顺序与数值不变：心佛掌/太极拳快捷栏的行号锚定在 starter 顺序上；
+// StarterSkills.withDefaultBasics 同口径的并集语义：老角色 DB 行缺
+// 三脚猫五件套时由 starter 基线自动补齐，内存合成不落库，幂等可重放）。
+// starter 在前、顺序与数值不变：心佛掌/太极拳快捷栏的行号锚定在 starter 顺序上；
 // DB 行按 configID 去重追加，与 starter 重叠时 starter 条目优先。
 func mergeLearnedSkills(dbRows []learnedSkillView) []learnedSkillView {
 	if len(dbRows) == 0 {
@@ -93,23 +140,107 @@ func learnedSkillViewFrames(skills []learnedSkillView) ([][]byte, error) {
 		serverCreateView(serverViewSpec{ID: viewportSkill, Capacity: uint16(len(skills))}),
 	}
 	for index, skill := range skills {
-		frame, err := serverViewAdd(viewportSkill, uint16(index+1), []serverViewProperty{
-			// 视图行取官方表玩家域(末现):ConfigID@1440(String)、
-			// Level@1465(Byte)、PauseTime@2240(Int32)。
-			viewString(1440, skill.configID),
-			viewInt(propStaticData, skill.staticData),
-			viewInt(propItemType, skill.itemType),
-			viewByte(1465, byte(skill.level)),
-			viewInt(propMaxLevel, skill.maxLevel),
-			viewInt(propCurFillValue, skill.fill),
-			viewInt(propTotalFillValue, skill.total),
-			viewInt(propPauseTime, int32(skill.pauseTime)),
-			viewByte(propSkillCanUse, 1),
-		})
+		frame, err := serverViewAdd(viewportSkill, uint16(index+1), skillRowProperties(skill))
 		if err != nil {
 			return nil, fmt.Errorf("encode SkillContainer %s: %w", skill.configID, err)
 		}
 		frames = append(frames, frame)
 	}
 	return frames, nil
+}
+
+// skillRowProperties 构建单条 View40 行的属性集：最小集 + 官方补集（Java
+// StarterSkills.skillRowProperties / StarterGrants.dbSkillViewAdd 对齐，登录
+// merge 集与秘籍学技能 rebuild 共用本入口）。
+//
+// 补集语义（参考服 207 行 View40 对拍实证 2026-11-05）：VarPropNo/CoolDownTime
+// 每行必发（CoolDownTime 即客户端技能 CD 文本源，缺 0 兜底显示 1s）；AConsume
+// 族仅 >0 才发（怒招由此带出 AConsumeSP → 客户端显示怒气消耗并在怒气不足时灰
+// 图标）；TargetShapePara2 即技能最大射程（快捷栏 tooltip 距离/施法限距读它）、
+// HitShapePara1/2 地面圈指示，均仅 >0 才发；Quality/恢复与五系伤害倍率=1、
+// Flow=5 固定族——缺席会让面板显示空/零。starter 行加发 UseLimit（回落 9）与
+// LeadTime/LeadSepTime（Java starter 方言；官方 DB 行从不发）。
+func skillRowProperties(skill learnedSkillView) []serverViewProperty {
+	starterRow := starterSkillRowIDs[skill.configID]
+	var supplement *skillRowSupplement
+	if catalog := installedCombatSkillCatalog; catalog != nil {
+		supplement = catalog.skillRowData(skill.configID, skill.level)
+	}
+	var varPropNo, coolDownMs, useLimit int32
+	if supplement != nil {
+		varPropNo, coolDownMs, useLimit = supplement.varPropNo, supplement.coolDownMs, supplement.useLimit
+	}
+	properties := []serverViewProperty{
+		// 视图行取官方表玩家域(末现):ConfigID@1440(String)、
+		// Level@1465(Byte)、PauseTime@2240(Int32)。
+		viewString(1440, skill.configID),
+		viewInt(propStaticData, skill.staticData),
+		viewInt(propItemType, skill.itemType),
+		viewByte(1465, byte(skill.level)),
+		viewInt(propMaxLevel, skill.maxLevel),
+		viewInt(propCurFillValue, skill.fill),
+		viewInt(propTotalFillValue, skill.total),
+		viewInt(propPauseTime, int32(skill.pauseTime)),
+		viewByte(propSkillCanUse, 1),
+		viewInt(propVarPropNo, varPropNo),
+		viewByte(propQuality, 1),
+		viewInt(propWuXing, skillWuXing(skill.configID)),
+		viewInt(propCoolDownTime, coolDownMs),
+		viewFloat(propHPHealMul, 1),
+		viewFloat(propMPHealMul, 1),
+		viewFloat(propPhyDamageMul, 1),
+		viewFloat(propStiDamageMul, 1),
+		viewFloat(propJujDamageMul, 1),
+		viewFloat(propNegDamageMul, 1),
+		viewFloat(propMasDamageMul, 1),
+		viewInt(propFlow, 5),
+	}
+	if starterRow {
+		properties = append(properties,
+			viewInt(propLeadTime, 10000),
+			viewInt(propLeadSepTime, 1500))
+	}
+	if useLimit > 0 {
+		properties = append(properties, viewInt(propSkillUseLimit, useLimit))
+	} else if starterRow {
+		properties = append(properties, viewInt(propSkillUseLimit, 9))
+	}
+	if supplement == nil {
+		return properties
+	}
+	if supplement.aConsumeHP > 0 {
+		properties = append(properties, viewInt(propAConsumeHP, supplement.aConsumeHP))
+	}
+	if supplement.aConsumeMP > 0 {
+		properties = append(properties, viewInt(propAConsumeMP, supplement.aConsumeMP))
+	}
+	if supplement.aConsumeSP > 0 {
+		properties = append(properties, viewInt(propAConsumeSP, supplement.aConsumeSP))
+	}
+	if supplement.aConsumeQGP > 0 {
+		properties = append(properties, viewInt(propAConsumeQGP, supplement.aConsumeQGP))
+	}
+	if supplement.targetShapePara2 > 0 {
+		properties = append(properties, viewFloat(propTargetShapePara2, supplement.targetShapePara2))
+	}
+	if supplement.hitShapePara1 > 0 {
+		properties = append(properties, viewFloat(propHitShapePara1, supplement.hitShapePara1))
+	}
+	if supplement.hitShapePara2 > 0 {
+		properties = append(properties, viewFloat(propHitShapePara2, supplement.hitShapePara2))
+	}
+	return properties
+}
+
+// skillWuXing 是技能行五行/属性（官服 55866 抓包实证 View40 每行都带
+// WuXing@2243）：wuxuebaseinfo.ini 目录值（刚1/柔2/阴3/阳4），缺行回退
+// 5=太极——Java StarterSkills.skillWuXing 同款，客户端对 ≤0/>7 才退回
+// ui_train_elemt 缺省文案。
+func skillWuXing(configID string) int32 {
+	if catalog, err := loadModernNeiGongCatalog(); err == nil {
+		if value := catalog.wuXingOf(configID); value != 0 {
+			return value
+		}
+	}
+	return wuxingTaiJi
 }

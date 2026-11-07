@@ -19,7 +19,15 @@ var (
 	modernBuffNewPath        = filepath.Join(defaultModernShareRoot, "skill", "buff_new.ini")
 	modernPropPackPath       = filepath.Join(defaultModernShareRoot, "modifypack", "proppack.ini")
 	modernSkillPackPath      = filepath.Join(defaultModernShareRoot, "modifypack", "skillpack.ini")
+	modernWuXueBaseInfoPath  = filepath.Join(defaultModernShareRoot, "faculty", "wuxuebaseinfo.ini")
+	modernWuXueLevelInfoPath = filepath.Join(defaultModernShareRoot, "faculty", "wuxuelevelinfo.ini")
 )
+
+// 五行/属性枚举语义（Java NeiGongCatalog.WUXING_*，客户端本地化键
+// ui_wuxue_prop_{N}）：技能 1=刚 / 2=柔 / 3=阴 / 4=阳；内功 5=太极 /
+// 6=阴柔 / 7=阳刚（BelongType ng_mp_tj/yr/yg 全量交叉验证吻合）。
+// 目录缺行的技能按 5（太极）下发，与 Java StarterSkills.skillWuXing 同款。
+const wuxingTaiJi int32 = 5
 
 type modernNeiGongModifier struct {
 	Target string
@@ -66,6 +74,14 @@ type modernNeiGongCatalog struct {
 	buffStatic map[string]uint32
 	propPacks  map[int32][]modernNeiGongModifier
 	skillPacks map[int32][]modernNeiGongModifier
+	// wuXing 是 faculty/wuxuebaseinfo.ini 的 configId→nWuXing 表
+	//（Java NeiGongCatalog.wuXing 同源；内功书与套路技能共用同一目录，
+	// mind_ 重复节按节名收录互不冲突）。缺行 0。
+	wuXing map[string]int32
+	// levelTotals 是 faculty/wuxuelevelinfo.ini 的 ng_* 官方每级修炼
+	// 曲线（r=等级,修炼度,速度；Java 注释同源）：configId→level→total。
+	// 全部内功书（含江湖 ng_jh_*）统一走此表。
+	levelTotals map[string]map[int32]int32
 }
 
 var (
@@ -77,12 +93,14 @@ var (
 func loadModernNeiGongCatalog() (*modernNeiGongCatalog, error) {
 	modernNeiGongCatalogOnce.Do(func() {
 		catalog := &modernNeiGongCatalog{
-			ranges:     make(map[int32]modernNeiGongRange),
-			varProps:   make(map[int32]modernNeiGongVarProp),
-			books:      make(map[string]modernNeiGongBook),
-			buffStatic: make(map[string]uint32),
-			propPacks:  make(map[int32][]modernNeiGongModifier),
-			skillPacks: make(map[int32][]modernNeiGongModifier),
+			ranges:      make(map[int32]modernNeiGongRange),
+			varProps:    make(map[int32]modernNeiGongVarProp),
+			books:       make(map[string]modernNeiGongBook),
+			buffStatic:  make(map[string]uint32),
+			propPacks:   make(map[int32][]modernNeiGongModifier),
+			skillPacks:  make(map[int32][]modernNeiGongModifier),
+			wuXing:      make(map[string]int32),
+			levelTotals: make(map[string]map[int32]int32),
 		}
 		if err := catalog.load(); err != nil {
 			modernNeiGongCatalogErr = err
@@ -171,7 +189,91 @@ func (c *modernNeiGongCatalog) load() error {
 	if err := loadModernModifierPacks(modernSkillPackPath, c.skillPacks); err != nil {
 		return err
 	}
+	c.loadWuXing()
+	c.loadLevelTotals()
 	return nil
+}
+
+// loadWuXing 解析 wuxuebaseinfo.ini 的 nWuXing 列（Java NeiGongCatalog
+// loadAll 末段同源）。best-effort：夹具仓/精简部署缺该文件时保持空表，
+// 不让整个内功目录装载失败——WuXing 下发退回缺省值，其余链路不受影响。
+func (c *modernNeiGongCatalog) loadWuXing() {
+	_ = parseModernINI(modernWuXueBaseInfoPath, func(section, key, value string) error {
+		if key != "nWuXing" {
+			return nil
+		}
+		parsed, err := parseModernInt32(value)
+		if err != nil {
+			return nil
+		}
+		c.wuXing[section] = parsed
+		return nil
+	})
+}
+
+// wuXingOf 返回 configId 的五行/属性 int（未收录 0；值语义见
+// wuxingTaiJi 处注释）。内修面板 form_wuxue_faculty 按它显示
+// 太极/阴柔/阳刚（ui_wuxue_prop_N）。
+func (c *modernNeiGongCatalog) wuXingOf(configID string) int32 {
+	return c.wuXing[configID]
+}
+
+// loadLevelTotals 解析 wuxuelevelinfo.ini 的 ng_* 每级修炼曲线
+// （r=level,total,speed；只取 total 列）。best-effort：夹具仓/精简部署
+// 缺该文件时保持空表——每级消耗回退 +200/层自然曲线，其余链路不受影响。
+func (c *modernNeiGongCatalog) loadLevelTotals() {
+	_ = parseModernINI(modernWuXueLevelInfoPath, func(section, key, value string) error {
+		if key != "r" || !strings.HasPrefix(section, "ng_") {
+			return nil
+		}
+		parts := strings.Split(value, ",")
+		if len(parts) < 2 {
+			return nil
+		}
+		level, err := parseModernInt32(parts[0])
+		if err != nil || level <= 0 {
+			return nil
+		}
+		total, err := parseModernInt32(parts[1])
+		if err != nil || total <= 0 {
+			return nil
+		}
+		curve, exists := c.levelTotals[section]
+		if !exists {
+			curve = make(map[int32]int32)
+			c.levelTotals[section] = curve
+		}
+		curve[level] = total
+		return nil
+	})
+}
+
+// levelTotalOf 返回官方 wuxuelevelinfo.ini 曲线里 configId 在 level 层的
+// 每级修炼消耗；未收录返回 ok=false。
+func (c *modernNeiGongCatalog) levelTotalOf(configID string, level int32) (int32, bool) {
+	curve, exists := c.levelTotals[configID]
+	if !exists {
+		return 0, false
+	}
+	total, exists := curve[level]
+	return total, exists && total > 0
+}
+
+// resolveNeiGongLevelTotal 返回 configId 在 level 层的每级修炼消耗
+// （TotalFillValue@765，客户端内修进度条/内功提示的每级消耗显示源）。
+// 全部内功书（含江湖内功）统一走 wuxuelevelinfo.ini 官方曲线——参考服
+// 9yin_server1 抓包里的江湖内功 750×2^(L-1) 翻倍曲线（ng_jh_001 L7=
+// 48000、ng_jh_201 L14=6144000）数值过于夸张，刻意不镜像（2026-11-07
+// 用户拍板）。ok=false = 无曲线依据（缺资源目录/缺行），调用方保留既有
+// 自然曲线。
+func resolveNeiGongLevelTotal(configID string, level int32) (int32, bool) {
+	if level <= 0 {
+		return 0, false
+	}
+	if catalog, err := loadModernNeiGongCatalog(); err == nil {
+		return catalog.levelTotalOf(configID, level)
+	}
+	return 0, false
 }
 
 // loadBooks 解析 neigong.ini 的书目录（QName → StaticData/ItemType/

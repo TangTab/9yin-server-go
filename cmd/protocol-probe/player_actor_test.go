@@ -28,13 +28,23 @@ func TestQingGongMotionPropertiesUseModernRushRangeConfig(t *testing.T) {
 	}
 }
 
-func TestRageRecoveryTickAddsFivePerSecondRegardlessOfCombatState(t *testing.T) {
+func TestRageRecoveryTickDisabledByDefaultAndFollowsGMRate(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	// 出生时默认 SP 为满池,先设为一个已耗尽的已知值。
+	// 默认 0:不自动回复,满池期/非满池期都不推帧。
 	if _, _, err := player.setSP(40); err != nil {
 		t.Fatalf("stage drained SP: %v", err)
 	}
-	// 官方模型(rage-recovery-frames.md §5):回复不限战斗态,脱战照样 +5。
+	if player.rageRecoveryTick() {
+		t.Fatal("default rate 0 must not recover rage")
+	}
+	if got := player.skillSP(); got != 40 {
+		t.Fatalf("SP mutated at rate 0: %d", got)
+	}
+	// GM 设为官方满档 5 后,回复不限战斗态,脱战照样 +5/秒
+	// (rage-recovery-frames.md §5)。
+	if got := player.setRageRecovery(5); got != 5 {
+		t.Fatalf("setRageRecovery=%d, want 5", got)
+	}
 	if !player.rageRecoveryTick() {
 		t.Fatal("normal-state actor must recover rage")
 	}
@@ -42,8 +52,8 @@ func TestRageRecoveryTickAddsFivePerSecondRegardlessOfCombatState(t *testing.T) 
 	if !player.rageRecoveryTick() {
 		t.Fatal("fighting actor should recover rage")
 	}
-	if got := player.skillSP(); got != 40+2*combatRageRecoveryPerSecond {
-		t.Fatalf("SP after two ticks = %d, want %d", got, 40+2*combatRageRecoveryPerSecond)
+	if got := player.skillSP(); got != 40+2*5 {
+		t.Fatalf("SP after two ticks = %d, want %d", got, 40+2*5)
 	}
 	player.setLogicState(entity.LogicStateSitcross)
 	if !player.rageRecoveryTick() {
@@ -53,20 +63,58 @@ func TestRageRecoveryTickAddsFivePerSecondRegardlessOfCombatState(t *testing.T) 
 	if player.rageRecoveryTick() {
 		t.Fatal("dead actor must not recover rage")
 	}
+	// 负值护栏:钳到 0。
+	if got := player.setRageRecovery(-3); got != 0 {
+		t.Fatalf("setRageRecovery(-3)=%d, want 0", got)
+	}
 }
 
 func TestRageRecoveryTickSaturatesAtMaxPlayerSP(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	if _, _, err := player.setSP(maxPlayerSP - 3); err != nil {
+	player.setRageRecovery(5)
+	if _, _, err := player.setSP(player.rageCap() - 3); err != nil {
 		t.Fatalf("stage partial SP: %v", err)
 	}
 	if !player.rageRecoveryTick() {
 		t.Fatal("partial rage should still advance toward the cap")
 	}
-	if got := player.skillSP(); got != maxPlayerSP {
-		t.Fatalf("SP must saturate at %d, got %d", maxPlayerSP, got)
+	if got := player.skillSP(); got != player.rageCap() {
+		t.Fatalf("SP must saturate at %d, got %d", player.rageCap(), got)
 	}
 	if player.rageRecoveryTick() {
 		t.Fatal("capped rage must not report progress")
+	}
+}
+
+// 释放闸内存表必须与 View40 的 merge 集同口径：DB 新行补齐可施放，
+// 与 starter 重叠的 configID 保持 starter 条目（不被 DB 覆盖）。
+// 回归背景：登录只把 role_skills 行喂给 View40、没并入
+// learnedSkills，导致 DB 学的技能客户端可拖栏但服务端按「未学」拒绝。
+func TestMergeDBLearnedSkillsFeedsCastGate(t *testing.T) {
+	player := newPlayerActor("tester", 0)
+	// 与真实 learnedSkills 查询同口径：非空 ID、level 恒 1（dbSkillViewRow）。
+	dbRows := []learnedSkillView{
+		{configID: "CS_jh_hyjf01", staticData: 13821, itemType: 1000, level: 1}, // DB 新行
+		{configID: "CS_wd_tjq01", staticData: 4057, itemType: 1000, level: 1},   // 与 starter 重叠
+		{configID: "CS_jh_tslyz01", staticData: 13851, itemType: 1000, level: 1},
+	}
+	player.mergeDBLearnedSkills(dbRows)
+	if _, ok := player.learnedSkillLevel("CS_jh_hyjf01"); !ok {
+		t.Fatal("db row CS_jh_hyjf01 must satisfy the cast gate after merge")
+	}
+	if level, ok := player.learnedSkillLevel("CS_wd_tjq01"); !ok || level != 1 {
+		t.Fatalf("overlap row must keep starter entry, got level=%d ok=%v", level, ok)
+	}
+	// View40 行数与内存表口径一致性：merge 集去重后每行都应过闸。
+	merged := mergeLearnedSkills(dbRows)
+	for _, row := range merged {
+		if _, ok := player.learnedSkillLevel(row.configID); !ok {
+			t.Fatalf("merged view row %s missing from cast gate", row.configID)
+		}
+	}
+	// 防御性边界：空 ID 与非法等级不入闸。
+	player.mergeDBLearnedSkills([]learnedSkillView{{configID: "", level: 1}, {configID: "CS_bad", level: 0}})
+	if _, ok := player.learnedSkillLevel("CS_bad"); ok {
+		t.Fatal("level 0 row must be dropped")
 	}
 }

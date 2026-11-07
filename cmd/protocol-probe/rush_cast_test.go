@@ -176,8 +176,10 @@ func TestDashLandingResumesPendingSelfSkill(t *testing.T) {
 		t.Fatalf("landing handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 6 {
-		t.Fatalf("landing frames=%d, want 337+26+cooldown+vital+state+msg20", len(frames))
+	// 337 回显 + 26 解除 + CD 双行夹 active_skill 行（0x11×3）+
+	// vital + 施法 337 回显 + State + msg20。
+	if len(frames) != 9 {
+		t.Fatalf("landing frames=%d, want 337+26+cooldown×3+vital+337+state+msg20", len(frames))
 	}
 	if frames[0][0] != 0x1E || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 337 {
 		t.Fatalf("echo frame=%x", frames[0])
@@ -188,8 +190,14 @@ func TestDashLandingResumesPendingSelfSkill(t *testing.T) {
 	if frames[2][0] != 0x11 || binary.LittleEndian.Uint16(frames[2][10:]) != recordCooldown {
 		t.Fatalf("resumed cooldown frame=%x", frames[2])
 	}
-	if frames[5][0] != 0x27 {
-		t.Fatalf("resumed msg20 frame=%x", frames[5])
+	if frames[3][0] != 0x11 || binary.LittleEndian.Uint16(frames[3][10:]) != recordActiveSkill {
+		t.Fatalf("resumed active skill row=%x", frames[3])
+	}
+	if frames[4][0] != 0x11 || binary.LittleEndian.Uint16(frames[4][10:]) != recordCooldown {
+		t.Fatalf("resumed GCD row=%x", frames[4])
+	}
+	if frames[8][0] != 0x27 {
+		t.Fatalf("resumed msg20 frame=%x", frames[8])
 	}
 	if got := player.stateSnapshot().MP; got != beforeMP-11 {
 		t.Fatalf("resume MP=%d, want %d (settled on landing)", got, beforeMP-11)
@@ -208,7 +216,7 @@ func TestDashLandingResumesPendingSelfSkill(t *testing.T) {
 	if handled, err := handleCastDashLanding(conn, player, nil, dashLandingMessage(6, 0, 7, 0), "test"); err != nil || !handled {
 		t.Fatalf("repeat landing handled=%t err=%v", handled, err)
 	}
-	if got := len(conn.Frames()); got != 7 {
+	if got := len(conn.Frames()); got != 10 {
 		t.Fatalf("repeat landing frames=%d, want one more echo", got)
 	}
 }

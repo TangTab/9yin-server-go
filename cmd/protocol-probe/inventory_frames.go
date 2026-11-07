@@ -61,10 +61,10 @@ const (
 	propBeginPos       uint16 = 2013 // BeginPos Word
 	propEndPos         uint16 = 2014 // EndPos Word
 	propBaseCap        uint16 = 2215 // BaseCap Int32
-	propPlayerWeapon   uint16 = 396   // Weapon String
-	propPlayerShotWpn  uint16 = 398   // ShotWeapon String
-	propPlayerActionSt uint16 = 406   // ActionSet String
-	propItemPhoto      uint16 = 184   // Photo String（玩家/视图域末次出现）
+	propPlayerWeapon   uint16 = 396  // Weapon String
+	propPlayerShotWpn  uint16 = 398  // ShotWeapon String
+	propPlayerActionSt uint16 = 406  // ActionSet String
+	propItemPhoto      uint16 = 184  // Photo String（玩家/视图域末次出现）
 )
 
 // serverViewRemove 编码 SERVER_VIEW_REMOVE（0x19）：u16 视图 + u16 槽位。
@@ -184,9 +184,9 @@ func md5Hex16(seed string) string {
 // 官服真机 0x10 帧实证：引擎按 Weapon 裸模型名挂 obj\weapon\<名>\<名>.xmod，
 // ActionSet 驱动持械动画组。
 type weaponVisual struct {
-	weapon    string
+	weapon     string
 	shotWeapon string
-	actionSet string
+	actionSet  string
 }
 
 func (w weaponVisual) armed() bool {

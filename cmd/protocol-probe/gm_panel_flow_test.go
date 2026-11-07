@@ -30,7 +30,7 @@ func gmFlowHarness(t *testing.T) (*httptest.Server, *gmSession, *gmHub) {
 			Scene:    role.Scene{Config: `ini\scene\city04_LuoYang`, Resource: "city04"},
 			Position: role.Position{X: 243.4, Y: 43.3, Z: 403.8, Orient: 5.0},
 		},
-	}, "少林", 50, 10)
+	}, "少林", 50, 0, 0, 10, 9_999_999)
 	server := httptest.NewServer(newGMMux(hub))
 	t.Cleanup(server.Close)
 	return server, session, hub
@@ -122,8 +122,43 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		status  int
 	}{
 		{`{"action":"learn_all_taolu"}`, http.StatusBadRequest}, // 网关时代的动作，当前服已不支持
-		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest},  // 超过 maxPlayerSP
-		{`{"action":"set_silver"}`, http.StatusOK},                // silver 缺省 0，合法
+		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest}, // 超过 maxPlayerSP
+		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},     // 怒气自动回复速率（官方满档 5）
+		{`{"action":"set_rage_recovery","value":3.5}`, http.StatusBadRequest}, // 必须整数
+		{`{"action":"set_rage_recovery","value":-1}`, http.StatusBadRequest}, // 负数拒绝
+		{`{"action":"set_silver"}`, http.StatusOK},              // silver 缺省 0，合法
+
+		// —— 货币/属性/状态批次：合法负载过白名单（会话循环侧会取走）——
+		{`{"action":"set_guanyin","guanYin":888}`, http.StatusOK},
+		{`{"action":"set_power_level","value":126}`, http.StatusOK},
+		{`{"action":"set_alignment","justice":10,"evil":0,"freeBase":5}`, http.StatusOK},
+		{`{"action":"set_pk_mode","pkMode":3}`, http.StatusOK},
+		{`{"action":"set_vitals","ene":80,"maxEne":100,"resumeEne":1,"sat":60,"maxSat":100,"pkValue":0,"drunkLevel":2}`, http.StatusOK},
+		{`{"action":"set_faculty","value":123456}`, http.StatusOK},
+		{`{"action":"set_five_attributes","attrStr":100,"attrSta":0,"attrDex":80,"attrIng":0,"attrSpi":90}`, http.StatusOK},
+		{`{"action":"set_fill_speed","base":200,"multiplier":1.5}`, http.StatusOK},
+		{`{"action":"set_act_day_limit","value":500}`, http.StatusOK},
+		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":5}`, http.StatusOK},
+		{`{"action":"popup_gm_panel"}`, http.StatusOK},
+		{`{"action":"custom_probe","msgId":517,"subType":899000000}`, http.StatusOK},
+
+		// —— 界外/缺值负载：照搬 Java GmRemote 的闸门 ——
+		{`{"action":"set_guanyin","guanYin":-1}`, http.StatusBadRequest},
+		{`{"action":"set_power_level","value":-3}`, http.StatusBadRequest},
+		{`{"action":"set_alignment"}`, http.StatusBadRequest}, // 三值全 0=全跳过
+		{`{"action":"set_pk_mode","pkMode":9}`, http.StatusBadRequest},
+		{`{"action":"set_vitals","ene":-1}`, http.StatusBadRequest},
+		{`{"action":"set_vitals","maxEneAdd":50}`, http.StatusBadRequest}, // 仅 Add 字段（官方表无，忽略后全 0）
+		{`{"action":"set_faculty","value":3000000000}`, http.StatusBadRequest},
+		{`{"action":"set_five_attributes","attrStr":1000001}`, http.StatusBadRequest},
+		{`{"action":"set_five_attributes"}`, http.StatusBadRequest},
+		{`{"action":"set_fill_speed","base":0,"multiplier":1}`, http.StatusBadRequest},
+		{`{"action":"set_fill_speed","base":200,"multiplier":0.05}`, http.StatusBadRequest},
+		{`{"action":"set_act_day_limit","value":1000000}`, http.StatusBadRequest},
+		{`{"action":"set_weather","weather":"..\\..\\evil"}`, http.StatusBadRequest}, // 闭名单拒绝路径注入
+		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":601}`, http.StatusBadRequest},
+		{`{"action":"custom_probe","msgId":0,"subType":1}`, http.StatusBadRequest},
+		{`{"action":"custom_probe","msgId":800,"subType":1}`, http.StatusBadRequest},
 	}
 	for _, testCase := range cases {
 		body, status := post(testCase.payload)

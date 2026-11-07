@@ -233,14 +233,84 @@ func pushWearFrames(link sceneMessageConnection, roleID role.RoleID, sex byte, s
 
 // itemSession 是四件套 handler 的会话上下文（customConfig 惯例的参数包）。
 type itemSession struct {
-	link   sceneMessageConnection
-	player *playerActor
-	store  *inventoryStore // 可为 nil（纯内存降级）
-	skins  *skinDBStore    // 风物志衣橱存档（card 收录链用；可为 nil）
-	ctx    context.Context
-	roleID role.RoleID
-	remote string
-	now    func() time.Time
+	link     sceneMessageConnection
+	player   *playerActor
+	store    *inventoryStore  // 可为 nil（纯内存降级）
+	skins    *skinDBStore     // 风物志衣橱存档（card 收录链用；可为 nil）
+	currency *currencyDBStore // 碎银存档（商店购销后落库；可为 nil）
+	ctx      context.Context
+	roleID   role.RoleID
+	remote   string
+	now      func() time.Time
+}
+
+// persistCurrency 商店购销后的碎银落库（fork "persist currency after
+// shop buy/sell" 同口径；失败只记日志不影响内存权威）。
+func (h *itemSession) persistCurrency(reason string) {
+	if h.currency == nil || h.roleID == 0 {
+		return
+	}
+	if err := h.currency.Save(h.roleID, h.player.currencySnapshotOf()); err != nil {
+		log.Printf("%s: persist currency after %s: %v", h.remote, reason, err)
+	}
+}
+
+// stackTargetFor 找同 configID 的可叠堆背包行（同页同类；槽位>0）。
+func (p *playerActor) stackTargetFor(configID string) (bagRow, bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	for _, row := range p.bag {
+		if row.configID == configID && row.slot > 0 {
+			return row, true
+		}
+	}
+	return bagRow{}, false
+}
+
+// countBagConfig 按 configID 全包求和（exchange 兑换计价的数量校验；
+// fork (*playerActor).countBagConfig 同义）。
+func (p *playerActor) countBagConfig(configID string) int32 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	total := int32(0)
+	for _, row := range p.bag {
+		if row.configID == configID {
+			total += row.amount
+		}
+	}
+	return total
+}
+
+// consumeBagConfig 跨行按 configID 扣减（exchange 按物扣费）：逐行走
+// consumeBagItemCount（DB 写穿+帧同步），行快照遍历防删行迭代错位。
+// 调用方须先以 countBagConfig 校验总量（DB 并发竞态导致的半途失败只
+// 记日志，与 fork "material lost after check" TOCTOU 同口径）。
+func (h *itemSession) consumeBagConfig(configID string, count int32) bool {
+	if h.player == nil {
+		return false
+	}
+	h.player.mu.Lock()
+	rows := append([]bagRow(nil), h.player.bag...)
+	h.player.mu.Unlock()
+	remaining := count
+	for _, row := range rows {
+		if remaining <= 0 {
+			break
+		}
+		if row.configID != configID || row.amount <= 0 {
+			continue
+		}
+		take := row.amount
+		if take > remaining {
+			take = remaining
+		}
+		if !h.consumeBagItemCount(row, take) {
+			log.Printf("%s: exchange consume %s row slot=%d db failed", h.remote, configID, row.slot)
+			return false
+		}
+		remaining -= take
+	}
+	return remaining <= 0
 }
 
 // consumeBagItemCount 消耗背包道具 count 个并同步客户端行
@@ -287,6 +357,37 @@ func (h *itemSession) consumeBagItemCount(item bagRow, count int32) bool {
 				log.Printf("%s: mirror clear consumed row: %v", h.remote, err)
 			}
 		}
+	}
+	return true
+}
+
+// addToBagItemCount 行内加数并同步客户端行（consumeBagItemCount 的
+// 逆操作；商店购买叠堆用）。返回 false=DB 失败拒绝。
+func (h *itemSession) addToBagItemCount(item bagRow, count int32) bool {
+	total := item.amount + count
+	if h.store != nil {
+		dbTotal, err := h.store.increaseBagItem(h.ctx, h.roleID, item.viewID, item.slot, count)
+		if err != nil {
+			log.Printf("%s: stack %s x%d db: %v", h.remote, item.configID, count, err)
+			return false
+		}
+		if dbTotal < 0 {
+			return false
+		}
+		total = dbTotal
+	}
+	h.player.mu.Lock()
+	for index := range h.player.bag {
+		if h.player.bag[index].slot == item.slot && h.player.bag[index].viewID == item.viewID {
+			h.player.bag[index].amount = total
+			break
+		}
+	}
+	h.player.mu.Unlock()
+	updated := item
+	updated.amount = total
+	if err := pushBagItemFrames(h.link, h.roleID, updated); err != nil {
+		log.Printf("%s: push stacked row: %v", h.remote, err)
 	}
 	return true
 }

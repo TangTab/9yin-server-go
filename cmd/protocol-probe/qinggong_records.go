@@ -6,18 +6,11 @@ import (
 	"log"
 	"math"
 	"time"
+	"unicode/utf16"
 
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/qinggong"
 )
-
-// 记录 schema 由操作码 0x0A 在场景连接上协商一次。当前客户端用
-// QingGongRec（而非 QingGongPoint）来应答
-// WuXueQuery:CheckLearn_QingGong，因此轻功值资源和已学技能列表刻意
-// 走各自独立的协议路径。
-type recordSchema struct {
-	name     string
-	colTypes []byte
-}
 
 type qinggongBuffSpec struct {
 	slot       uint16
@@ -26,96 +19,170 @@ type qinggongBuffSpec struct {
 	clearOnEnd bool
 }
 
+// init 自检：记录下标字面值必须与官方表按名解析一致，防止
+// official_record_table.bin 更新后常量静默漂移。
+func init() {
+	for name, want := range map[string]uint16{
+		"Task_Accepted":      recordTaskAccepted,
+		"Task_Completed":     recordTaskCompleted,
+		"shortcut_rec":       recordShortcut,
+		"title_rec":          recordTitle,
+		"cooldown_rec":       recordCooldown,
+		"fight_relation_rec": recordFightRelation,
+		"active_skill_rec":   recordActiveSkill,
+		"QingGongRec":        recordQingGong,
+		"ActiveQGSkillRec":   recordActiveQingGong,
+		"active_jingmai_rec": recordActiveJingMai,
+		"FashionSuitRec":     recordFashionSuit,
+		"CardRec":            recordCard,
+		"UseCardRec":         recordUseCard,
+		"NewRideRec":         recordNewRide,
+		"RecvLetterRec":      recordRecvLetter,
+	} {
+		if got := clientdata.MustRecordIndexByName(name); got != want {
+			panic(fmt.Sprintf("record index for %s drifted: official=%d constant=%d", name, got, want))
+		}
+	}
+}
+
 // qinggongBuffFor 根据已安装的现代 QGDefine.ini BufferID 推导原生移动
 // 状态。这些 BuffStore 条目是客户端在移动数值和已受理的 216 资源扣费
-// 之外还需要的东西。
+// 之外还需要的东西。2026-11-07 跳段限制批次补齐高阶轻功链：StaticData/
+// LifeTime 出自 F: 部署 buff_new.ini 实证（buf_DHadd_2rd=1578、
+// buf_DHadd_3rd=1579 均无 LifeTime=常驻；buf_qg_airrush=6894 LifeTime
+// 100ms；buf_qg_fast=217 / buf_qg_climb=219 10min；buf_qg_gliding=23070、
+// buf_qg_dive=23292 无 LifeTime=持续到 end）。
 func qinggongBuffFor(definition qinggong.Definition) (qinggongBuffSpec, bool) {
 	switch definition.BufferID {
 	case "buf_qg_drift":
 		return qinggongBuffSpec{slot: waterDriftBuffSlot, staticData: waterDriftStaticData, duration: 10 * time.Minute, clearOnEnd: true}, true
 	case "buf_qg_dst":
 		return qinggongBuffSpec{slot: waterJumpBuffSlot, staticData: waterJumpStaticData, duration: 3 * time.Second}, true
+	case "buf_qg_airrush": // qinggong_6 穿云纵 / 高阶 21-23 冲刺
+		return qinggongBuffSpec{slot: qgAirRushBuffSlot, staticData: 6894, duration: 100 * time.Millisecond}, true
+	case "buf_qg_fast": // qinggong_8 神行无踪
+		return qinggongBuffSpec{slot: qgFastBuffSlot, staticData: 217, duration: 10 * time.Minute}, true
+	case "buf_qg_climb": // qinggong_10 壁虎游墙 / qinggong_11 上天梯
+		return qinggongBuffSpec{slot: qgClimbBuffSlot, staticData: 219, duration: 10 * time.Minute, clearOnEnd: true}, true
+	case "buf_qg_gliding": // 高阶 24 滑翔
+		return qinggongBuffSpec{slot: qgGlidingBuffSlot, staticData: 23070, duration: 10 * time.Minute, clearOnEnd: true}, true
+	case "buf_qg_dive": // 高阶 25 急降
+		return qinggongBuffSpec{slot: qgDiveBuffSlot, staticData: 23292, duration: 3 * time.Second}, true
+	default:
+		// qinggong_20 大跳的 BufferID=buf_DHadd_2rd 与激活能力 Buff
+		// 共槽（17）：使用路径不重复挂（能力已在，activateQingGongBuff
+		// 的重复闸自然短路），更不能带 clearOnEnd——end 清槽会连能力
+		// Buff 一起摘掉。能力链只经 qingGongCapabilityBuff 挂/摘。
+		return qinggongBuffSpec{}, false
+	}
+}
+
+// qingGongCapabilityBuffLease 是激活轻功记录挂的能力 Buff 租约：
+// activateBuff 的 lifetime=0 会立即过期，常驻语义用内功槽同款 24h
+// （会话级——activeQingGong 本就不跨登录持久）。
+const qingGongCapabilityBuffLease = 24 * time.Hour
+
+// qingGongCapabilityBuff 是激活轻功记录（217）挂的常驻能力 Buff
+// （native-menu qinggongBuffFor 硬编码同款映射）：激活
+// qinggong_15（纤云步法·凌空踏虚）→ buf_DHadd_2rd（二段跳存在），
+// qinggong_17（纤云步法·穿云纵）→ buf_DHadd_3rd（三段跳存在）。
+func qingGongCapabilityBuff(qingGongID string) (qinggongBuffSpec, bool) {
+	switch qingGongID {
+	case "qinggong_15":
+		return qinggongBuffSpec{slot: qgDHadd2rdBuffSlot, staticData: 1578, duration: qingGongCapabilityBuffLease}, true
+	case "qinggong_17":
+		return qinggongBuffSpec{slot: qgDHadd3rdBuffSlot, staticData: 1579, duration: qingGongCapabilityBuffLease}, true
 	default:
 		return qinggongBuffSpec{}, false
 	}
 }
 
+// isJumpStageQingGong 判定 216 begin 是否计入腾空跳段（服务端
+// 反作弊计段集合）：凌空踏虚（Type 4，二段跳）、扶摇步法（Type 5，
+// 三段跳）、高阶 20 大跳。健步功（Type 1）客户端不发 216 或免费，
+// 不计段——服务端对不发 216 的动作看不见落地，计段会误伤地面连跳。
+// 冲刺类（6/21-23）已有 500ms 重报闸+扣费约束，不进本集合。
+func isJumpStageQingGong(definition qinggong.Definition) bool {
+	switch definition.Type {
+	case 4, 5, 20:
+		return true
+	default:
+		return false
+	}
+}
+
+// qingGongExistBuffSpec 解析 ExistBufID 能力门槛：仅对已实现能力来源
+// 的 Buff（buf_DHadd_2rd/3rd，激活 qinggong_15/17 常驻挂）设门槛；
+// 其余（如 qinggong_9 的 buf_DHadd_light，能力来源未实现）返回
+// known=false 不设门槛，保旧表/缓降链现状。
+func qingGongExistBuffSpec(existBufID string) (qinggongBuffSpec, bool) {
+	switch existBufID {
+	case "buf_DHadd_2rd":
+		return qinggongBuffSpec{slot: qgDHadd2rdBuffSlot, staticData: 1578}, true
+	case "buf_DHadd_3rd":
+		return qinggongBuffSpec{slot: qgDHadd3rdBuffSlot, staticData: 1579}, true
+	default:
+		return qinggongBuffSpec{}, false
+	}
+}
+
+// qingGongDrainPerSecond 是持续型轻功（UseType=1）租约的每秒扣点量，
+// = qgdefine BufferID → buff_new/buff_static/buff_varprop 的 |CCQGP|
+// （Java CombatSkillCatalog.qingGongDrainPerSecond 运行时读表；本服
+// 未装载 buff 表，按 Java 已实证值内联——玩家资料：踏波行/上天梯
+// 开局 10 点、其后每秒 7 点；qinggong_9 缓降每秒 10 点）。
+// 表缺 CCQGP 返回 0：租约仍挂（保续约/回复暂停语义）。
+func qingGongDrainPerSecond(definition qinggong.Definition) int32 {
+	switch definition.BufferID {
+	case "buf_qg_light": // qinggong_9 轻身缓降（buff_varprop[23001] L1 CCQGP=-10）
+		return 10
+	case "buf_qg_drift": // qinggong_2 踏波行
+		return 7
+	case "buf_qg_climb": // qinggong_10 壁虎游墙 / qinggong_11 上天梯
+		return 7
+	default:
+		return 0
+	}
+}
+
 const (
-	// FxNet2!GameReceiver::RecvRecordRow (0x1060BC40) 将 schema 类型 1
-	// 解码为一个字节，类型 2 为两个字节，类型 3 为四字节整数。下面的
-	// 记录行都用 AppendUint32 编码其整型单元格，包括 Task_Completed 的
-	// 32 位位集；因此它们必须声明为类型 3。
-	recordColumnInt = byte(3)
-
-	// FxNet2 将 schema 类型 2 解码为两字节 Word（UseCardRec 两列
-	// [皮肤号, 显示类型] 官方线型）。
-	recordColumnWord = byte(2)
-
-	// FxNet2!GameReceiver::RecvRecordRow 将 schema 类型 4 解码为带符号的
-	// 八字节整数。cooldown_rec 的起始/结束列使用该类型。
-	recordColumnInt64 = byte(4)
-
-	// FxNet2!ServerRecordGrid (0x1060BC40) 把 schema 类型 7 解析为带长度
-	// 前缀、以 NUL 结尾的窄字符串。类型 6 是 IEEE-754 double，因此把此列
-	// 声明为 6 会让客户端把 "qinggong_*" 的前八个字节当作数字消费，并在
-	// 语义上丢弃该行。
+	// FxNet2!GameReceiver::RecvRecordRow (0x1060BC40) 的列线型码，
+	// 与官方 0x0A 表声明一致：1=byte、2=u16 Word、3=int32、
+	// 4=int64、6=IEEE-754 double、7=窄字符串、8=宽字符串
+	// （UTF-16LE，u32 字节数+2 + 尾 u16 NUL——RecvLetterRec col0/3/4）。
+	recordColumnByte   = byte(1)
+	recordColumnWord   = byte(2)
+	recordColumnInt    = byte(3)
+	recordColumnInt64  = byte(4)
+	recordColumnDouble = byte(6)
 	recordColumnString = byte(7)
 
-	recordQingGong       uint16 = 0
-	recordActiveQingGong uint16 = 1
-	recordTaskAccepted   uint16 = 2
-	recordTaskCompleted  uint16 = 3
-	recordShortcut       uint16 = 4
-	recordCooldown       uint16 = 5
-	recordFashionSuit    uint16 = 6
-	recordCard           uint16 = 7
-	recordUseCard        uint16 = 8
+	recordColumnWideString = byte(8)
+
+	// 记录下标 = 官方 447 schema 表的帧内位置（Java RecordSchemas
+	// official_record_table.bin 同源）。此前本服自协商 11 张表
+	// （shortcut_rec 落在自定下标 4），真机客户端的原生记录消费者
+	// （CoolLogicManager、快捷栏等）按官方下标绑定——行帧字节级
+	// 正确却不上显的根因。改为整表透传官方方言（Java 同款）。
+	// 字面值须与 official_record_table.bin 一致（init 自检）。
+	recordTaskAccepted   uint16 = 29  // Task_Accepted（28 列）
+	recordTaskCompleted  uint16 = 31  // Task_Completed
+	recordShortcut       uint16 = 93  // shortcut_rec（[3,7,7]）
+	recordTitle          uint16 = 98  // title_rec（[3,1,4]）
+	recordCooldown       uint16 = 109 // cooldown_rec（[3,4,4,2]）
+	recordFightRelation  uint16 = 114 // fight_relation_rec（[9,2]，0x13 战斗关系格）
+	recordQingGong       uint16 = 116 // QingGongRec（[7]）
+	recordActiveQingGong uint16 = 117 // ActiveQGSkillRec（[7,1]）
+	recordActiveSkill    uint16 = 446 // active_skill_rec（[7]，出招行，动作总时长后 0x12 删）
+	recordActiveJingMai  uint16 = 162 // active_jingmai_rec（[7]）
+	recordFashionSuit    uint16 = 315 // FashionSuitRec（[7,3,3,4,3,3]）
+	recordCard           uint16 = 322 // CardRec（[3]）
+	recordUseCard        uint16 = 324 // UseCardRec（[2,2]）
 	viewportQingGong     uint16 = 46
 	// View 对象使用原始的场景属性 ConfigID 字段。后续仅商店用的兼容字段
 	// 105 有相同的显示名，但 QingGongContainer 的原生查找读取的不是它。
 	qingGongConfigProperty uint16 = 7
 )
-
-var qingGongRecordSchemas = []recordSchema{
-	{name: "QingGongRec", colTypes: []byte{recordColumnString}},
-	{name: "ActiveQGSkillRec", colTypes: []byte{recordColumnString}},
-	// 这刻意采用条件 23614 消费的七列兼容前缀：从 id 到 status。客户端
-	// 根据此表协商记录宽度；若声明未还原的 26 列任务运行时却只发送这个
-	// 前缀，RecvRecordRow 会提交这七个单元格，
-	// 然后在第 7 列上抛出 Out range。
-	{name: "Task_Accepted", colTypes: []byte{
-		recordColumnInt, recordColumnInt, recordColumnInt,
-		recordColumnString, recordColumnString, recordColumnString,
-		recordColumnInt,
-	}},
-	{name: "Task_Completed", colTypes: []byte{recordColumnInt}},
-	// shortcut_game.lua 在调用 custom_set_shortcut(200) 之前会查找这条
-	// 记录。若没有这条记录本身，拖拽操作会在本地被拒绝，任何请求都
-	// 到达不了服务器。
-	{name: "shortcut_rec", colTypes: []byte{
-		recordColumnInt, recordColumnString, recordColumnString,
-	}},
-	// CoolLogicManager 为这条玩家记录注册了原生回调。每个添加的行都会
-	// 成为 StartACool(category, end-start, team, 0)。
-	{name: "cooldown_rec", colTypes: []byte{
-		recordColumnInt, recordColumnInt64, recordColumnInt64, recordColumnInt,
-	}},
-	// 时装页签（docs/装备外观与风物志挂载.md V4；官方 schema
-	// FashionSuitRec [7,3,3,4,3,3]，数值列语义未校准保持零填充）。
-	// 行 = 已激活套装 configId + 5 个零值数值列；ClientReady 推、
-	// 购买补行，0x0C 重入随玩家对象清空后重推。
-	{name: "FashionSuitRec", colTypes: []byte{
-		recordColumnString, recordColumnInt, recordColumnInt,
-		recordColumnInt64, recordColumnInt, recordColumnInt,
-	}},
-	// 风物志收集位图（官方 schema CardRec [3]：每行 32 皮肤，serial=
-	// 皮肤号+1，显式行号全推含零行；0x12 倒序删行）。
-	{name: "CardRec", colTypes: []byte{recordColumnInt}},
-	// 风物志挂载行（官方 schema UseCardRec [2,2]：皮肤号 + 显示类型 0，
-	// 两列均 u16 Word 线型——Java SkinMessagesTest 实证首列 u16@帧内
-	// [16..17]）。
-	{name: "UseCardRec", colTypes: []byte{recordColumnWord, recordColumnWord}},
-}
 
 // starterQingGongIDs 是当前客户端的基础类别。它们刻意使用 config ID
 // 而非视觉标签，让本地客户端自行解析其当前的 QGDefine/QGSkill
@@ -138,28 +205,16 @@ var starterQingGongSkillIDs = []string{
 	"QG_JH_03_001", "QG_JH_040", "QG_JH_041", "QG_JH_04_001", "QG_JH_05_001", "QG_JH_06_001", "QG_JH_gj_001", "QG_JH_gj_002", "QG_JH_gj_003", "QG_JH_gj_004", "QG_JH_gj_006", "QG_JH_gjskill_001",
 }
 
-// serverRecordTable 是当前 FxNet2 的记录 schema 包：
-// 0x0A | u16 count | (C string name | u16 column count | type bytes)*。
-func serverRecordTable(schemas []recordSchema) ([]byte, error) {
-	if len(schemas) > math.MaxUint16 {
-		return nil, fmt.Errorf("record schema count %d exceeds u16", len(schemas))
+// serverRecordTable 逐字节透传官方 0x0A 记录表协商帧
+// （clientdata.OfficialRecordTableFrame，447 schema）。客户端按
+// 官方方言绑定记录下标，自建子表会让行帧错绑——与 0x09 属性表
+// 同一透明策略。
+func serverRecordTable() ([]byte, error) {
+	frame := clientdata.OfficialRecordTableFrame()
+	if len(frame) < 3 || frame[0] != 0x0A {
+		return nil, fmt.Errorf("official record table frame malformed (%d bytes)", len(frame))
 	}
-	msg := make([]byte, 3)
-	msg[0] = 0x0A
-	binary.LittleEndian.PutUint16(msg[1:], uint16(len(schemas)))
-	for _, schema := range schemas {
-		if schema.name == "" {
-			return nil, fmt.Errorf("record schema name is empty")
-		}
-		if len(schema.colTypes) > math.MaxUint16 {
-			return nil, fmt.Errorf("record schema %q columns %d exceeds u16", schema.name, len(schema.colTypes))
-		}
-		msg = append(msg, schema.name...)
-		msg = append(msg, 0)
-		msg = binary.LittleEndian.AppendUint16(msg, uint16(len(schema.colTypes)))
-		msg = append(msg, schema.colTypes...)
-	}
-	return msg, nil
+	return frame, nil
 }
 
 // serverRecordAddString 为单列的场景对象记录编码 SERVER_RECORD_ADD
@@ -201,26 +256,32 @@ func serverRecordAddInt32Row(objectID, ownerID uint32, recordIndex uint16, row, 
 }
 
 type recordCell struct {
-	intValue   *uint32
-	int64Value *int64
-	text       *string
+	intValue    *uint32
+	int64Value  *int64
+	byteValue   *uint32
+	doubleValue *float64
+	text        *string
 }
 
-func recordInt(value uint32) recordCell    { return recordCell{intValue: &value} }
-func recordInt64(value int64) recordCell   { return recordCell{int64Value: &value} }
-func recordString(value string) recordCell { return recordCell{text: &value} }
+func recordInt(value uint32) recordCell      { return recordCell{intValue: &value} }
+func recordInt64(value int64) recordCell     { return recordCell{int64Value: &value} }
+func recordByte(value uint32) recordCell     { return recordCell{byteValue: &value} }
+func recordFloat64(value float64) recordCell { return recordCell{doubleValue: &value} }
+func recordString(value string) recordCell   { return recordCell{text: &value} }
 
-// serverRecordAddCells 按协商的 schema 写入一整行。包内 +0x0C/+0x0E 是
+// serverRecordAddCells 按官方 schema 写满一整行。包内 +0x0C/+0x0E 是
 // FxNet2::RecvRecordRow 消费的源行起始/数量，不是列的起始/数量对。
-// 这里的每次调用都恰好携带一整行，因此该数量
-// 必须保持为 1。
+// 调用方可给前缀列（窄于官方声明宽度时缺失尾列按线型补零/空串——
+// Java RecordMessages.recordAddCells 同语义，Task_Accepted 官方
+// 28 列而功能解锁只填前 7 列）；超出声明宽度报错。
 func serverRecordAddCells(objectID, ownerID uint32, recordIndex uint16, cells []recordCell) ([]byte, error) {
-	if int(recordIndex) >= len(qingGongRecordSchemas) {
-		return nil, fmt.Errorf("record index %d has no negotiated schema", recordIndex)
+	schema, ok := clientdata.RecordSchemaByIndex(int(recordIndex))
+	if !ok {
+		return nil, fmt.Errorf("record index %d outside official table", recordIndex)
 	}
-	colTypes := qingGongRecordSchemas[recordIndex].colTypes
-	if len(cells) != len(colTypes) {
-		return nil, fmt.Errorf("record %q has %d cells, want complete row of %d", qingGongRecordSchemas[recordIndex].name, len(cells), len(colTypes))
+	colTypes := schema.ColumnTypes
+	if len(cells) > len(colTypes) {
+		return nil, fmt.Errorf("record %q has %d cells, want at most %d", schema.Name, len(cells), len(colTypes))
 	}
 	msg := make([]byte, 16)
 	msg[0] = 0x11
@@ -230,38 +291,117 @@ func serverRecordAddCells(objectID, ownerID uint32, recordIndex uint16, cells []
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
 	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一个源行
 	binary.LittleEndian.PutUint16(msg[14:], 1) // 一整行
-	for column, cell := range cells {
+	for column := range colTypes {
+		var cell *recordCell
+		if column < len(cells) {
+			cell = &cells[column]
+		}
 		switch colTypes[column] {
 		case recordColumnInt:
-			if cell.intValue == nil || cell.int64Value != nil || cell.text != nil {
-				return nil, fmt.Errorf("record column %d requires int32", column)
+			if cell == nil || cell.intValue == nil {
+				msg = binary.LittleEndian.AppendUint32(msg, 0)
+				continue
+			}
+			if !cell.onlyInt() {
+				return nil, fmt.Errorf("record %q column %d requires int32", schema.Name, column)
 			}
 			msg = binary.LittleEndian.AppendUint32(msg, *cell.intValue)
 		case recordColumnWord:
-			if cell.intValue == nil || cell.int64Value != nil || cell.text != nil {
-				return nil, fmt.Errorf("record column %d requires word", column)
+			if cell == nil || cell.intValue == nil {
+				msg = binary.LittleEndian.AppendUint16(msg, 0)
+				continue
 			}
-			if *cell.intValue < 0 || *cell.intValue > math.MaxUint16 {
-				return nil, fmt.Errorf("record column %d word %d out of range", column, *cell.intValue)
+			if !cell.onlyInt() {
+				return nil, fmt.Errorf("record %q column %d requires word", schema.Name, column)
 			}
-			msg = binary.LittleEndian.AppendUint16(msg, uint16(*cell.intValue))
+			// 与 Java recordAddCells case2 相同的低 16 位截断
+			// （cooldown_rec 第 4 列 team 0xFFFF 个人行等负值口径）。
+			msg = binary.LittleEndian.AppendUint16(msg, uint16(*cell.intValue&0xFFFF))
+		case recordColumnByte:
+			if cell == nil || cell.byteValue == nil {
+				msg = append(msg, 0)
+				continue
+			}
+			if !cell.onlyByte() {
+				return nil, fmt.Errorf("record %q column %d requires byte", schema.Name, column)
+			}
+			if *cell.byteValue > math.MaxUint8 {
+				return nil, fmt.Errorf("record %q column %d byte %d out of range", schema.Name, column, *cell.byteValue)
+			}
+			msg = append(msg, byte(*cell.byteValue))
 		case recordColumnInt64:
-			if cell.int64Value == nil || cell.intValue != nil || cell.text != nil {
-				return nil, fmt.Errorf("record column %d requires int64", column)
+			if cell == nil || cell.int64Value == nil {
+				msg = binary.LittleEndian.AppendUint64(msg, 0)
+				continue
+			}
+			if !cell.onlyInt64() {
+				return nil, fmt.Errorf("record %q column %d requires int64", schema.Name, column)
 			}
 			msg = binary.LittleEndian.AppendUint64(msg, uint64(*cell.int64Value))
+		case recordColumnDouble:
+			if cell == nil || cell.doubleValue == nil {
+				msg = binary.LittleEndian.AppendUint64(msg, 0)
+				continue
+			}
+			if !cell.onlyDouble() {
+				return nil, fmt.Errorf("record %q column %d requires double", schema.Name, column)
+			}
+			msg = binary.LittleEndian.AppendUint64(msg, math.Float64bits(*cell.doubleValue))
 		case recordColumnString:
-			if cell.text == nil || cell.intValue != nil || cell.int64Value != nil {
-				return nil, fmt.Errorf("record column %d requires string", column)
+			if cell == nil || cell.text == nil {
+				msg = binary.LittleEndian.AppendUint32(msg, 1)
+				msg = append(msg, 0)
+				continue
+			}
+			if !cell.onlyText() {
+				return nil, fmt.Errorf("record %q column %d requires string", schema.Name, column)
 			}
 			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(*cell.text)+1))
 			msg = append(msg, (*cell.text)...)
 			msg = append(msg, 0)
+		case recordColumnWideString:
+			if cell == nil || cell.text == nil {
+				msg = binary.LittleEndian.AppendUint32(msg, 2)
+				msg = binary.LittleEndian.AppendUint16(msg, 0)
+				continue
+			}
+			if !cell.onlyText() {
+				return nil, fmt.Errorf("record %q column %d requires wide string", schema.Name, column)
+			}
+			// Java RecordMessages case 8 同构：u32(UTF-16LE 字节数+2) +
+			// 宽串字节 + 尾 u16 NUL。
+			wide := utf16.Encode([]rune(*cell.text))
+			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(wide)*2+2))
+			for _, unit := range wide {
+				msg = binary.LittleEndian.AppendUint16(msg, unit)
+			}
+			msg = binary.LittleEndian.AppendUint16(msg, 0)
 		default:
-			return nil, fmt.Errorf("record column %d has unsupported negotiated type %d", column, colTypes[column])
+			return nil, fmt.Errorf("record %q column %d has unsupported official type %d", schema.Name, column, colTypes[column])
 		}
 	}
 	return msg, nil
+}
+
+// only* 谓词保证每个 recordCell 恰好携带一种类型的值。
+func (c recordCell) onlyInt() bool {
+	return c.int64Value == nil && c.byteValue == nil && c.doubleValue == nil && c.text == nil
+}
+
+func (c recordCell) onlyByte() bool {
+	return c.intValue == nil && c.int64Value == nil && c.doubleValue == nil && c.text == nil
+}
+
+func (c recordCell) onlyInt64() bool {
+	return c.intValue == nil && c.byteValue == nil && c.doubleValue == nil && c.text == nil
+}
+
+func (c recordCell) onlyDouble() bool {
+	return c.intValue == nil && c.int64Value == nil && c.byteValue == nil && c.text == nil
+}
+
+func (c recordCell) onlyText() bool {
+	return c.intValue == nil && c.int64Value == nil && c.byteValue == nil && c.doubleValue == nil
 }
 
 const (
@@ -337,9 +477,13 @@ func grantFunctionUnlock(conn sceneMessageConnection) error {
 	}
 
 	for _, taskID := range facultyAcceptedTaskIDs() {
+		// 官方 28 列方言的前 7 列（id,line,server,submit_scene,submit_npc,
+		// title,status），尾列由 serverRecordAddCells 按线型补零——与 Java
+		// StarterQingGong.functionUnlockFrames / 52795 抓包 task 1069 行
+		// 144B 全零形状逐列对齐。
 		frame, err := serverRecordAddCells(playerObjectID, playerOwnerID, recordTaskAccepted, []recordCell{
-			recordInt(taskID), recordInt(9), recordInt(0),
-			recordString(""), recordString(""), recordString(""), recordInt(0),
+			recordInt(taskID), recordInt(0), recordString(""),
+			recordInt(0), recordString(""), recordString(""), recordInt(0),
 		})
 		if err != nil {
 			return fmt.Errorf("encode Task_Accepted task %d: %w", taskID, err)
@@ -402,8 +546,29 @@ func activateQingGongRecord(conn sceneMessageConnection, player *playerActor, id
 	if !player.activateQingGong(id) {
 		return false, nil
 	}
-	if err := conn.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordActiveQingGong, id)); err != nil {
+	// 官方 ActiveQGSkillRec 是 [string, byte] 两列：只填 id，尾列 byte
+	// 由 serverRecordAddCells 补零（此前自协商单列表下用
+	// serverRecordAddString，官方方言下会变成短行触发 Out range）。
+	frame, err := serverRecordAddCells(playerObjectID, playerOwnerID, recordActiveQingGong, []recordCell{recordString(id)})
+	if err != nil {
+		return false, fmt.Errorf("encode ActiveQGSkillRec %s: %w", id, err)
+	}
+	if err := conn.WriteFrame(frame); err != nil {
 		return false, fmt.Errorf("add ActiveQGSkillRec %s: %w", id, err)
+	}
+	// 能力 Buff 链（2026-11-07 跳段限制批次）：激活 qinggong_15/17 挂
+	// buf_DHadd_2rd/3rd 常驻（24h 会话租约）——这是 qinggong_4/5 的
+	// ExistBufID 能力门槛来源，也是客户端跳段物理读的存在 Buff。
+	if spec, known := qingGongCapabilityBuff(id); known && !player.hasActiveBuff(spec.slot, spec.staticData, time.Now()) {
+		buffState, expires := player.activateBuff(spec.slot, spec.staticData, spec.duration, time.Now())
+		update, err := player.vitalUpdate()
+		if err != nil {
+			return true, fmt.Errorf("encode qinggong capability Buff %s: %w", id, err)
+		}
+		if err := conn.WriteFrame(update); err != nil {
+			return true, fmt.Errorf("write qinggong capability Buff %s: %w", id, err)
+		}
+		log.Printf("QingGong capability Buff staged id=%s property=%d value=%q expiry=%d", id, bufferInfoPropertyIndex(spec.slot), buffState, expires.UnixMilli())
 	}
 	return true, nil
 }

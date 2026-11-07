@@ -26,7 +26,12 @@ const (
 	propNeigongPKStatus uint16 = 85  // NeigongPKStatus Word(官方线型 2)
 	propDead            uint16 = 464 // Dead Byte(官方线型 1)
 	propCurSkillID      uint16 = 460 // CurSkillID String
-	propPauseTime       uint16 = 2240
+	// 收招清除帧（exe #2014 六项形态）后三项归零通道，官方线型均 1：
+	propCurSkillCanNoLimit    uint16 = 624 // CurSkillCanNoLimit Byte
+	propCantBeSkillLocked     uint16 = 208 // CantBeSkillLocked Byte
+	propCantBeSkillMustLocked uint16 = 209 // CantBeSkillMustLocked Byte
+	propState                 uint16 = 19  // State String（动作总时长后 stand 复位帧用）
+	propPauseTime             uint16 = 2240
 	// 原生主角 UI 将这些属性绑定为整数。它们描述的是对外通告的恢复
 	// 速率；真正的 HP/MP 变动仍以服务器为来源。
 	propHPHeartSpeed    uint16 = 617
@@ -71,17 +76,36 @@ const (
 	// Buff，也不能挤占轻功/技能 Buff 的槽位。
 	yihuaPassiveBuffSlot uint16 = 10
 
+	// 轻功使用型/能力型 Buff 槽（qgdefine BufferID/ExistBufID 链，
+	// StaticData 出自 F: 部署 resources/modern/share/skill/buff_new.ini
+	// 实证；DHadd 两槽是激活 qinggong_15/17 记录期间的常驻能力 Buff，
+	// 其余为 216 begin 的使用型 Buff）。
+	qgAirRushBuffSlot  uint16 = 12 // buf_qg_airrush  StaticData 6894（LifeTime 100ms）
+	qgFastBuffSlot     uint16 = 13 // buf_qg_fast     StaticData 217（10min）
+	qgClimbBuffSlot    uint16 = 14 // buf_qg_climb    StaticData 219（10min）
+	qgGlidingBuffSlot  uint16 = 15 // buf_qg_gliding  StaticData 23070
+	qgDiveBuffSlot     uint16 = 16 // buf_qg_dive     StaticData 23292
+	qgDHadd2rdBuffSlot uint16 = 17 // buf_DHadd_2rd   StaticData 1578（常驻）
+	qgDHadd3rdBuffSlot uint16 = 18 // buf_DHadd_3rd   StaticData 1579（常驻）
+
 	// 右键格挡 BuffInParry（Java PlayerActor 同源）：槽 11、
 	// StaticData 4558、24h 租约。按下挂槽、松开清槽。
 	parryBuffSlot       uint16 = 11
 	parryBuffStaticData uint32 = 4558
 	// 格挡族属性(官方表玩家域):InParry@471/InManualParry@474/
 	// ParryValue@475(场景域基块的 InParry@88 属 NPC 帧)。
-	// ParryValue 取参考帧基础值 100（无运功书/装备加成系统）。
-	propInParry         uint16 = 471
-	propInManualParry   uint16 = 474
-	propParryValue      uint16 = 475
-	parryValueReference int32  = 100
+	// ParryValue 是 MaxParry+MaxParryAdd 的推导和（progress.
+	// parryValueTotal，官方抓包 116/157 逐点吻合）。
+	propInParry       uint16 = 471
+	propInManualParry uint16 = 474
+	propParryValue    uint16 = 475
+	// 登录首批补位（55866/49840/62311 三方抓包一致）：官方首帧 0x10
+	// 一律带 CantParry@472=0、ParryRatio@478=100、ParryUpSpeed@479=4，
+	// NPC 则在 0x0D 建对象即带 478。缺这三位时客户端格挡值 HUD/面板
+	// 显示为空——引擎侧格挡 UI 绑定整族，非仅 ParryValue。
+	propCantParry    uint16 = 472
+	propParryRatio   uint16 = 478
+	propParryUpSpeed uint16 = 479
 
 	redSuperArmorStaticData uint32 = 8682
 	waterDriftStaticData    uint32 = 216
@@ -91,9 +115,11 @@ const (
 	// 共用。其租约在出生时以及每次 215 响应时都从权威装备状态续期。
 	innerPowerBuffLease = 24 * time.Hour
 
-	// SP 是当前现代客户端的怒气资源。满池值对齐 fork 抓包实证
-	// (49840 帧 #16 登录全量批 MaxSP=80);所有 GM 及战斗获取路径都
-	// 经由这些辅助函数,客户端属性永远不会成为该资源的权威。
+	// SP 是当前现代客户端的怒气资源。基础满池值对齐 fork 抓包实证
+	// (49840 帧 #16 登录全量批 MaxSP=80);有效上限 = 基础 80 + 当前
+	// 运行内功的档位加成(playerProgress.rageCap,2026-11-07 客户端已
+	// 实证消费 MaxSP+MaxSPAdd 口径)。所有 GM 及战斗获取路径都经由
+	// 这些辅助函数,客户端属性永远不会成为该资源的权威。
 	maxPlayerSP int32 = 80
 
 	// 本地测试的打坐恢复按现有的服务器秒每秒结算一次。用户规则：存活
@@ -111,9 +137,6 @@ const (
 	ragGainParriedHit   int32 = 2
 	ragGainUnparriedHit int32 = 1
 	ragGainCleanHit     int32 = 2
-	// 战斗怒气恢复：战斗中的角色每个权威服务器秒回复五点 SP，直到 100
-	// 上限为止，与正式服战斗中的缓慢回复一致。
-	combatRageRecoveryPerSecond int32 = 5
 )
 
 var nativeBuffSlots = func() []uint16 {
@@ -148,14 +171,20 @@ func bufferInfoPropertyName(slot uint16) string {
 // 持 p.mu 期间不得调用 sceneLifecycle 的任何加锁方法。异步 timer
 // 路径（技能清除、buff 到期）一律经由本类型的持锁方法访问状态。
 type playerActor struct {
-	mu                    sync.Mutex
-	name                  string
-	vitals                sim.Vitals
-	qinggong              sim.QingGong
-	speed                 sim.Motion
-	silver                int32
-	faction               string
-	motion                playerMotion
+	mu       sync.Mutex
+	name     string
+	vitals   sim.Vitals
+	qinggong sim.QingGong
+	speed    sim.Motion
+	silver   int32
+	faction  string
+	motion   playerMotion
+	// lastCombatAt 是最近一次战斗活动时刻（命中敌人/被命中），
+	// 驱动 setCombatPresence 的 10s 脱战迟滞窗口。p.mu 保护。
+	lastCombatAt time.Time
+	// rageRecoveryPerSecond 是 1s ticker 的怒气自动回复速率（GM
+	// set_rage_recovery 会话级设置；默认 0=不自动回复，官方满档 5）。
+	rageRecoveryPerSecond int32
 	buffs                 map[uint16]activePlayerBuff
 	activeQingGong        map[string]struct{}
 	shortcuts             []playerShortcut
@@ -174,6 +203,11 @@ type playerActor struct {
 	innerPowerProcReadyAt time.Time
 	innerPowerHealReadyAt time.Time
 	progress              playerProgress
+	// GM 面板域（货币/属性/状态批次，gm_stats.go）：官银为会话级货币
+	//（Java PlayerActor 同口径，不落库）；gm 是实力等级/善恶/PK 模式/
+	// 生存属性的会话权威，spawn 后按需补推。
+	guanYin int32
+	gm      gmPanelDomain
 	// 冲锋暂存链（fork qinggong_gj.go / Java SkillCastHandler 同源）：
 	// 211 越程按下时暂存出招，msg15/212 探测到位后续招。
 	// 与同名方法 logicState() 区分：权威运行状态在 vitals.Logic。
@@ -190,6 +224,24 @@ type playerActor struct {
 	visualSex     byte // 武器外观解析用（登录装载时回填）
 	lastItemUseAt time.Time
 	qingGongExtra map[string]struct{} // 秘籍习得的非 starter 轻功（View46 追加行去重）
+	// 轻功经济域（fork Java QingGongHandler/PlayerActor，2026-11-07）：
+	// 持续型轻功（UseType=1：踏波行/上天梯/壁虎游墙/轻身缓降）挂秒耗
+	// 租约，官方 3s 分档回复在租约期暂停；即时型（UseType=0）引擎逐帧
+	// 重发 begin，500ms 同 id 重报闸拦掉重复扣费。
+	qingGongLease      *qingGongLease
+	qingGongRecoveryMs int64
+	instantQingGongAt  map[string]time.Time
+	// 跳段反作弊域（2026-11-07 跳段限制批次）：按空格跳跃经 buff 链
+	// 限段是客户端机制（学到的轻功决定段数上限，落地重置循环）；服务端
+	// 对计段轻功（isJumpStageQingGong：Type 4/5/20）再按腾空计段兜底——
+	// 同一腾空内同 id 只放行一次，落地（0x0A 位移 y 回落到着地基准
+	// 1m 内）或超时后恢复，技能重置只给一段。
+	airborne     bool
+	airJumpsUsed map[string]bool
+	airJumpGrant int // 技能重置授予的额外段（腾空中放技能 +1，落地清零）
+	groundY      float32
+	hasGroundY   bool
+	lastJumpAt   time.Time
 	// 外观域会话状态（docs/装备外观与风物志挂载.md V4）：
 	// 显示类型偏好（custom 61 三 radio，role_appearance 持久化）、
 	// 时装/身份装激活集（role_fashion_suits）、皮肤衣橱（role_skins）、
@@ -203,6 +255,15 @@ type playerActor struct {
 	skinRows         uint32 // 已推 CardRec 位图行数（整刷前先倒序删）
 	skinMountedRows  uint32 // 已推 UseCardRec 挂载行数
 	gold             int32  // CapitalType0（会话级；购买扣 1 金）
+	silverCard       int32  // CapitalType2（会话级；fork 同口径不落库）
+	// 称号域（msg295）：佩戴位挂在玩家对象 TitleID@360；拥有集合与佩戴
+	// 状态持久化 role_titles（title_db.go），title_rec 记录行进世界重放。
+	titleID     int32
+	ownedTitles []int32
+	// 经脉域（msg150/161，jingmai_progress.go）：逐经脉进度、修炼位、
+	// 激活序（active_jingmai_rec 行镜像）与真气池；快照持久化
+	// role_meridians（migrations/0004）。
+	jingmai jingMaiState
 }
 
 // playerMotion 是刻意由服务器持有的 GM 状态。其值通过常规的现代对象
@@ -211,6 +272,15 @@ type playerMotion struct {
 	moveSpeed float32
 	runSpeed  float32
 	gravity   float32
+}
+
+// qingGongLease 是持续型轻功的秒耗租约（Java PlayerActor
+// drifting/driftQingGongId/driftDrainPerSecond 三字段合并）：
+// 216 begin 已扣 qgdefine Consume，此后每秒按 CCQGP 扣点，
+// end/耗尽摘除。
+type qingGongLease struct {
+	qingGongID     string
+	drainPerSecond int32
 }
 
 // activePlayerBuff 是单个原生 BufferInfo 槽位在服务器侧的对应物。渲染
@@ -251,7 +321,14 @@ func newPlayerActor(name string, silver int32) *playerActor {
 		learnedSkills:      learnedSkills,
 		skillCooldowns:     make(map[string]time.Time),
 		skillTeamCooldowns: make(map[int32]time.Time),
+		instantQingGongAt:  make(map[string]time.Time),
+		airJumpsUsed:       make(map[string]bool),
 		progress:           newPlayerProgress(),
+		// GM 面板域以种子起步（Java PanelState 同口径）：实力 151 与
+		// 选人界面 f23 同档（title027 返璞归真），其余零值合法即下发。
+		gm: gmPanelDomain{
+			powerLevel: roleListPowerLevel,
+		},
 	}
 	p.syncEquippedNeiGongBuffLocked(now)
 	p.syncEquippedNeiGongResourcesLocked()
@@ -314,6 +391,165 @@ func (p *playerActor) useQingGong(baseCost int32, now time.Time) (int32, bool) {
 	return p.qinggong.Use(baseCost, now)
 }
 
+// engageDrift 挂持续轻功秒耗租约（Java PlayerActor.engageDrift 同款）。
+// 同 id 续约返回 false——客户端按住冲刺时引擎逐帧重发 begin，
+// 逐条扣费会秒清轻功条（2026-11-03 Java 真机反馈同根因）。异 id 新
+// begin 直接顶替旧租约（踏波行→上天梯切换不叠加双份秒耗）。
+func (p *playerActor) engageDrift(qingGongID string, drainPerSecond int32) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.qingGongLease != nil && p.qingGongLease.qingGongID == qingGongID {
+		return false
+	}
+	if drainPerSecond < 0 {
+		drainPerSecond = 0
+	}
+	p.qingGongLease = &qingGongLease{qingGongID: qingGongID, drainPerSecond: drainPerSecond}
+	return true
+}
+
+// releaseDriftIfOwned 仅当租约确属该轻功 id 时摘除（Java handle 在
+// flag=0 end 只对同 id 租约有摘除意义；冲刺类引擎每次使用也发 end）。
+func (p *playerActor) releaseDriftIfOwned(qingGongID string) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.qingGongLease == nil || p.qingGongLease.qingGongID != qingGongID {
+		return false
+	}
+	p.qingGongLease = nil
+	return true
+}
+
+// engagedDriftID 当前持续轻功租约的轻功 id（无租约空串）。
+func (p *playerActor) engagedDriftID() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.qingGongLease == nil {
+		return ""
+	}
+	return p.qingGongLease.qingGongID
+}
+
+// instantQingGongRechargeable 即时型轻功（UseType=0）同 id 重报闸
+// （Java INSTANT_QINGGONG_REFIRE_GUARD=500ms）：窗口内的重发视为
+// 引擎重报不扣费（人手极限 ~4 次/秒，引擎逐帧重发 10-30/s）。
+func (p *playerActor) instantQingGongRechargeable(qingGongID string, now time.Time) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if last, exists := p.instantQingGongAt[qingGongID]; exists && now.Sub(last) < 500*time.Millisecond {
+		return false
+	}
+	p.instantQingGongAt[qingGongID] = now
+	return true
+}
+
+// 跳段闸参数：落地判定取「腾空后 y 回落到着地基准 1m 内」（0x0A 位移
+// 包每帧喂 observePositionY）；腾空超时兜底 15s——重力必然使客户端
+// 在数秒内落地，超时仍未观测到回落（位移包缺失/壁虎游墙滞空）时强制
+// 重置，防状态卡死误伤下一次地面起跳。
+const (
+	airJumpLandingEpsilon  = 1.0
+	airJumpLandingFallback = 15 * time.Second
+)
+
+// beginAirJump 是 216 begin 的服务端跳段闸：同一腾空内同 id 的跳跃型
+// 轻功只放行一次；腾空开始时清计数。技能重置（airJumpGrant>0）期间
+// 放行并消耗一段——「重置后也只能再跳一段」。
+func (p *playerActor) beginAirJump(qingGongID string, now time.Time) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if !p.airborne {
+		p.airborne = true
+		p.airJumpsUsed = make(map[string]bool)
+		p.airJumpGrant = 0
+	} else if p.airJumpsUsed[qingGongID] {
+		if p.airJumpGrant <= 0 {
+			return false
+		}
+		p.airJumpGrant--
+	}
+	p.airJumpsUsed[qingGongID] = true
+	p.lastJumpAt = now
+	return true
+}
+
+// grantAirJumpReset 技能施放成功时对腾空玩家的跳跃重置：只授予一段
+// （下一次 beginAirJump 放行后恢复拒绝）。着地状态下无意义（落地已
+// 全量重置）。
+func (p *playerActor) grantAirJumpReset() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.airborne {
+		p.airJumpGrant++
+	}
+}
+
+// observePositionY 由 0x0A 位移路径逐帧喂入：着地时持续校准 groundY
+// 基准；腾空中 y 回落到基准 1m 内即视为落地——清空跳段计数进入
+// 新循环。跳崖（y 瞬间低于基准）也按落地处理：宁可早重置也不误伤。
+func (p *playerActor) observePositionY(y float32, now time.Time) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if !p.airborne {
+		p.groundY = y
+		p.hasGroundY = true
+		return
+	}
+	if p.hasGroundY && y <= p.groundY+airJumpLandingEpsilon {
+		p.landResetLocked(y)
+	}
+}
+
+// landResetLocked 清空腾空跳段态并校准着地基准。调用方必须已持 p.mu。
+func (p *playerActor) landResetLocked(groundY float32) {
+	p.airborne = false
+	p.airJumpsUsed = make(map[string]bool)
+	p.airJumpGrant = 0
+	p.groundY = groundY
+	p.hasGroundY = true
+}
+
+// qingGongTick 是 1s ticker 的轻功结算（Java qingGongRecoveryTick +
+// driftTick 合并，facultyTicker 同拍）：持有秒耗租约时按 CCQGP 扣点、
+// 回复暂停；无租约时累积 3s 推一步官方分档回复（101..上限 +10 /
+// 51..100 +5 / 0..50 +3）。返回 QingGongPoint 是否变化（调用方推
+// 单属性帧）。点耗尽时强摘租约——客户端物理本地收势。
+func (p *playerActor) qingGongTick(now time.Time) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.airborne && now.Sub(p.lastJumpAt) > airJumpLandingFallback {
+		// 落地观测兜底：位移包缺失/长时间滞空时强制重置跳段，
+		// 防止腾空标志卡死误伤下一次地面起跳。
+		p.landResetLocked(p.groundY)
+	}
+	if p.qingGongLease != nil {
+		p.qingGongRecoveryMs = 0 // 消耗期不累积（档位按余量瞬时判定）
+		before := p.qinggong.Point
+		drain := p.qingGongLease.drainPerSecond
+		id := p.qingGongLease.qingGongID
+		if !p.qinggong.Drain(drain) {
+			p.qingGongLease = nil
+			log.Printf("qinggong hold lease ended: point exhausted id=%s", id)
+		}
+		return p.qinggong.Point != before
+	}
+	p.qingGongRecoveryMs += 1000
+	if p.qingGongRecoveryMs < 3000 {
+		return false
+	}
+	p.qingGongRecoveryMs -= 3000
+	return p.qinggong.RecoverTiered()
+}
+
+// qingGongPointFrame 轻功值单属性帧（Java qingGongPointFrame 同款：
+// 秒耗/分档回复的逐秒推送；QingGongPoint@692 全表唯一）。
+func (p *playerActor) qingGongPointFrame() []byte {
+	p.mu.Lock()
+	point := p.qinggong.Point
+	p.mu.Unlock()
+	return sceneObjectIntProperty(playerObjectID, playerOwnerID, 692, point)
+}
+
 func (p *playerActor) learnedSkillLevel(configID string) (int32, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -330,10 +566,36 @@ func (p *playerActor) learnSkill(configID string, level int32) {
 	p.learnedSkills[configID] = level
 }
 
+// mergeDBLearnedSkills 把登录装载的 role_skills 已学集并入释放闸
+// 内存表，语义与 mergeLearnedSkills 的并集同口径（starter 优先、
+// DB 新行补齐）。View40 下发与 learnedSkillLevel 判定必须出自同一
+// 集合，否则 DB 学的技能（如江湖套路）客户端可拖栏施放，服务端
+// 却按「未学」拒绝。
+func (p *playerActor) mergeDBLearnedSkills(rows []learnedSkillView) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	for _, row := range rows {
+		if row.configID == "" || row.level < 1 {
+			continue
+		}
+		if _, exists := p.learnedSkills[row.configID]; exists {
+			continue
+		}
+		p.learnedSkills[row.configID] = row.level
+	}
+}
+
 func (p *playerActor) progressProperties() []clientdata.IndexedProperty {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.progress.properties()
+}
+
+// factionValue 会话门派读侧（msg973/997 joinFaction 链测试与日志用）。
+func (p *playerActor) factionValue() string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.faction
 }
 
 // setFaction 只在 GM 白名单和持久化外观更新都成功后才修改原生的
@@ -442,6 +704,8 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		p.mu.Unlock()
 		return npcAttackOutcome{}
 	}
+	// 实际吃到伤害即战斗活动：驱动 10s 脱战迟滞窗口。
+	p.lastCombatAt = now
 	dead := p.vitals.HP <= 0
 	if dead {
 		p.reviveAt = now.Add(playerAutoReviveDelay)
@@ -529,9 +793,12 @@ func (p *playerActor) reviveWhenDue(now time.Time) bool {
 	p.reviveAt = time.Time{}
 	p.skillLockUntil = time.Time{}
 	// 完整复活迁移：数值回满 + 轻功条回满 + 速度比重置，
-	// 等价于原 entity.Actor.Revive 的全语义。
+	// 等价于原 entity.Actor.Revive 的全语义。持续轻功租约一并
+	// 摘除（复活点数已回满，旧租约会立刻再抽干）。
 	p.vitals.Revive()
 	p.qinggong.Reset(now)
+	p.qingGongLease = nil
+	p.qingGongRecoveryMs = 0
 	p.speed = sim.NewMotion()
 	p.mu.Unlock()
 	return true
@@ -554,15 +821,17 @@ func (p *playerActor) equipNeiGong(id string) error {
 	return nil
 }
 
-// syncEquippedNeiGongResourcesLocked 将已装备秘籍的资源修正值应用到
+// syncEquippedNeiGongResourcesLocked 将官方全量资源 Add（五维属性分量
+// + 已装备秘籍 pack 分量，playerProgress.derivedResourceAdds）应用到
 // 真正的服务器 Actor 上。可见协议仍会发送基础 MaxHP/MaxMP 加原始的
 // *Add 字段，但所有服务器端的消耗、伤害和恢复都使用 Actor.MaxHP/
 // MaxMP（即推导后的总上限）。当前现代客户端直接按 MaxMP + MaxMPAdd
 // 刷新 MP；线上值没有乘数。
 //
-// 调用方必须已持有 p.mu。
+// 调用方必须已持有 p.mu。五维基础值（GM set_five_attributes）或装备
+// 内功变化后都必须重调。
 func (p *playerActor) syncEquippedNeiGongResourcesLocked() {
-	hpAdd, mpAddRaw := p.progress.equippedResourceAdds()
+	hpAdd, mpAddRaw := p.progress.derivedResourceAdds()
 	p.vitals.SetDerivedMaxima(p.vitals.BaseMaxHP+hpAdd, p.vitals.BaseMaxMP+mpAddRaw)
 }
 
@@ -637,13 +906,31 @@ func (p *playerActor) facultyTick(now time.Time) (uint16, bool) {
 func (p *playerActor) facultySnapshot() facultyProgressSnapshot {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.progress.snapshot()
+	value := p.progress.snapshot()
+	// GM set_vitals 的生存属性层随 role_faculty 快照走（Java vitals 节点
+	// 同口径）：仅本会话设置过后才落节点，旧档保持 nil。
+	if p.gm.vitalsSet {
+		value.Vitals = &facultyVitalsSnapshot{
+			Ene: p.gm.vitals.ene, MaxEne: p.gm.vitals.maxEne, ResumeEne: p.gm.vitals.resumeEne,
+			Sat: p.gm.vitals.sat, MaxSat: p.gm.vitals.maxSat,
+			PKValue: p.gm.vitals.pkValue, DrunkLevel: p.gm.vitals.drunkLevel,
+		}
+	}
+	return value
 }
 
 func (p *playerActor) restoreFaculty(value facultyProgressSnapshot, now time.Time) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.progress.restore(value, now)
+	if value.Vitals != nil {
+		p.gm.vitals = gmVitalsState{
+			ene: value.Vitals.Ene, maxEne: value.Vitals.MaxEne, resumeEne: value.Vitals.ResumeEne,
+			sat: value.Vitals.Sat, maxSat: value.Vitals.MaxSat,
+			pkValue: value.Vitals.PKValue, drunkLevel: value.Vitals.DrunkLevel,
+		}
+		p.gm.vitalsSet = true
+	}
 	if p.progress.facultyState == facultyStateConvert && p.progress.facultyStyle == facultyStyleAct {
 		p.vitals.SetLogicState(logicStateFaculty)
 	} else {
@@ -673,6 +960,13 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	now := time.Now()
 	hpRecovery := sitcrossRecoveryPerSecond(state.MaxHP)
 	mpRecovery := sitcrossRecoveryPerSecond(state.MaxMP)
+	// 官方 *UpSpeedAdd 位是五维的分数系数分量（12173/55866 抓包：
+	// round(0.07·Sta)、round(0.2·Spi)），*UpSpeed 基础位则是总上限的
+	// ceil(总/10)——sitcrossRecoveryPerSecond 已是同式。
+	_, staEff, _, _, spiEff := p.progress.effectiveFive()
+	hpUpSpeedAdd := staHundredthsAdd(staEff)
+	mpUpSpeedAdd := spiTenthsAdd(spiEff)
+	parryTotal := p.progress.parryValueTotal()
 	currentSkillID, currentSkillTarget := p.currentSkillID, p.currentSkillTarget
 	hpRatio := int32(int64(state.HP) * 100 / int64(state.MaxHP))
 	hitHPRatio := int32(int64(state.HitHP) * 100 / int64(state.MaxHP))
@@ -697,7 +991,15 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
 		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
 		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
-		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryValueReference)},
+		// 格挡族登录补位：官方首帧 0x10 同拍必发（472=0/478=100/479=4，
+		// 三台官方系抓包逐点一致）。ParryRatio/ParryUpSpeed 官方只此
+		// 一发、之后不再重推，公式未定位（样本恒 100/4）。
+		{Index: propCantParry, Name: "CantParry", Value: clientdata.Int32Value(0)},
+		{Index: propParryRatio, Name: "ParryRatio", Value: clientdata.Int32Value(100)},
+		{Index: propParryUpSpeed, Name: "ParryUpSpeed", Value: clientdata.Int32Value(4)},
+		// ParryValue@475 官方为 MaxParry(100)+MaxParryAdd 的推导和
+		//（抓包 116/157 逐点吻合），不再用静态参考值。
+		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryTotal)},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue(currentSkillID)},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.Value{Type: clientdata.WireObject, U64: currentSkillTarget}},
 		// 本地回环绝不应因某个属性缺失（为零）而无法通过客户端的技能/
@@ -708,9 +1010,9 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propMPHeartSpeed, Name: "MPHeartSpeed", Value: clientdata.Int32Value(sitcrossHeartMillis)},
 		{Index: propMPHeartSpeedAdd, Name: "MPHeartSpeedAdd", Value: clientdata.Int32Value(0)},
 		{Index: propHPUpSpeed, Name: "HPUpSpeed", Value: clientdata.Int32Value(hpRecovery)},
-		{Index: propHPUpSpeedAdd, Name: "HPUpSpeedAdd", Value: clientdata.Int32Value(0)},
+		{Index: propHPUpSpeedAdd, Name: "HPUpSpeedAdd", Value: clientdata.Int32Value(hpUpSpeedAdd)},
 		{Index: propMPUpSpeed, Name: "MPUpSpeed", Value: clientdata.Int32Value(mpRecovery)},
-		{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Value: clientdata.Int32Value(0)},
+		{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Value: clientdata.Int32Value(mpUpSpeedAdd)},
 		{Index: 178, Name: "Name", Value: clientdata.WideStringValue(state.Name)},
 		// 官方玩家域 CapitalType1@417 线型 4(int64):货币按小端
 		// 八字节编码(真机抓包实证)。
@@ -725,7 +1027,11 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	}
 	properties = append(properties, baseMotionProperties(p.motion)...)
 	properties = append(properties, qinggongMotionProperties()...)
-	return append(properties, p.progress.properties()...)
+	properties = append(properties, p.progress.properties()...)
+	// 经脉面板 8 属性（Java PlayerActor.stateProperties 同位，progress 块
+	// 之后）：进对象属性批即带，面板首开就有 CurJingMai/总等级，不必等
+	// ClientReady 后 pushJingMaiFrames 的独立 0x10。
+	return append(properties, p.jingMaiPropsLocked()...)
 }
 
 func boolInt32(value bool) int32 {
@@ -1020,7 +1326,7 @@ func (p *playerActor) parryStateFrame(engage bool, buffInfo string) ([]byte, err
 		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(flag)},
 		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(flag)},
 		{Index: bufferInfoPropertyIndex(parryBuffSlot), Name: bufferInfoPropertyName(parryBuffSlot), Value: clientdata.StringValue(buffInfo)},
-		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryValueReference)},
+		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(p.progress.parryValueTotal())},
 	})
 }
 
@@ -1095,17 +1401,50 @@ func (p *playerActor) vitalUpdate() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, p.stateProperties())
 }
 
-// loginVitalUpdate 是登录/切图链的首个权威 0x10,也是 MaxSP 唯一的
-// 下发点:fork 抓包实证(49840 帧全场 5181 帧仅 #16 一处,121 属性全量
-// 批携带,fork 值 80;Java 参考服同为登录一次),之后的恢复批/事件批
-// 都不再携带,MaxSPAdd 则从不发送。把上限塞进 0x0D 归档或周期批会让
-// 客户端在进世界时崩溃。SP(467) 本就在 stateProperties 大批内,无独立
-// 登录怒气帧;这里只是在同一批上补一次上限声明。
+// rageCapSnapshot 返回当前怒气上限对:基础 MaxSP(恒 80)与运行内功的
+// MaxSPAdd 档位加成。调用方自行持锁。
+func (p *playerActor) rageCapSnapshot() (base, add int32) {
+	return maxPlayerSP, p.progress.rageCapAdd()
+}
+
+// rageCap 是服务器侧怒气饱和用的有效上限(基础+加成)。GM 满怒与
+// 战斗日志消费同一入口。
+func (p *playerActor) rageCap() int32 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.progress.rageCap()
+}
+
+// rageCapUpdate 生成只含上限对(MaxSP/MaxSPAdd)的单次 0x10 专帧,
+// 与纯 SP 事件帧同形。用于 215 换书后向客户端刷新怒气球分母——上限
+// 对不得进入常规大批/0x0D 归档,专帧是登录全量批之外唯一的合法载体。
+func (p *playerActor) rageCapUpdate() ([]byte, error) {
+	p.mu.Lock()
+	base, add := p.rageCapSnapshot()
+	p.mu.Unlock()
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(base)},
+		{Index: propMaxSPAdd, Name: "MaxSPAdd", Value: clientdata.Int32Value(add)},
+	})
+}
+
+// loginVitalUpdate 是登录/切图链的首个权威 0x10,也是 MaxSP/MaxSPAdd
+// 全量批形态的唯一下发点:MaxSP 为 fork 抓包实证(49840 帧全场 5181 帧
+// 仅 #16 一处,121 属性全量批携带,fork 值 80;Java 参考服同为登录一次),
+// MaxSPAdd 是本服实现(官方从未发送;客户端已实证按 MaxSP+MaxSPAdd
+// 呈现怒气球,值=当前运行内功档位加成)。之后的恢复批/事件批都不再
+// 携带二者;把上限塞进 0x0D 归档或周期批会让客户端在进世界时崩溃。
+// SP(467) 本就在 stateProperties 大批内,无独立登录怒气帧;这里只是
+// 在同一批上补一次上限声明。
 func (p *playerActor) loginVitalUpdate() ([]byte, error) {
 	properties := p.stateProperties()
-	properties = append(properties, clientdata.IndexedProperty{
-		Index: 580, Name: "MaxSP", Value: clientdata.Int32Value(maxPlayerSP),
-	})
+	p.mu.Lock()
+	base, add := p.rageCapSnapshot()
+	p.mu.Unlock()
+	properties = append(properties,
+		clientdata.IndexedProperty{Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(base)},
+		clientdata.IndexedProperty{Index: propMaxSPAdd, Name: "MaxSPAdd", Value: clientdata.Int32Value(add)},
+	)
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, properties)
 }
 
@@ -1136,30 +1475,62 @@ func (p *playerActor) combatBruiseTick() bool {
 	return p.vitals.RecoverBruisedHPWhileFighting(combatBruiseRecoveryPerSecond)
 }
 
-// rageRecoveryTick 结算固定的每秒 +5 怒气恢复。官方模型(rage-recovery-
-// frames.md §5,55866 实证):不限战斗态,脱战照样回复;到 100 即停,
-// 满值期不再推送任何维持帧。tick 相位由调用方(1s facultyTicker)决定。
+// setRageRecovery 设定 1s ticker 的怒气自动回复速率（GM 会话级设置；
+// 0=关闭）。纯服务器侧状态，无客户端帧；后续 tick 自然按新速率结算。
+func (p *playerActor) setRageRecovery(perSecond int32) int32 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if perSecond < 0 {
+		perSecond = 0
+	}
+	p.rageRecoveryPerSecond = perSecond
+	return perSecond
+}
+
+// rageRecoveryTick 结算每秒怒气自动回复,速率为 GM 会话级设置
+// rageRecoveryPerSecond(默认 0=不回复;官方满档 5,55866 实证)。官方模型
+// (rage-recovery-frames.md §5):不限战斗态,脱战照样回复;到有效上限
+// 即停(基础 80 + 运行内功加成),满值期不再推送任何维持帧。tick 相位
+// 由调用方(1s facultyTicker)决定。
 func (p *playerActor) rageRecoveryTick() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	if p.rageRecoveryPerSecond <= 0 {
+		return false
+	}
 	if p.vitals.Logic == entity.LogicStateDied {
 		return false
 	}
 	before := p.progress.attributes.sp
-	p.progress.attributes.sp = clampPlayerSP(before + combatRageRecoveryPerSecond)
+	p.progress.attributes.sp = p.progress.clampSP(before + p.rageRecoveryPerSecond)
 	return p.progress.attributes.sp != before
 }
 
-// setCombatPresence 负责本地敌对 AI 的玩家侧生命周期。任何残留的 NPC
-// 仇恨都会在首次受击结算之前打断打坐；只有当每个仇恨都已清除后才
-// 恢复常规状态。这使恢复、伤害和客户端 LogicState 保持在同一个权威
-// 转换之上。
-func (p *playerActor) setCombatPresence(active bool) bool {
+// combatPresenceIdleExit 是脱战迟滞窗口：官方抓包规则「命中入战，
+// 10s 无战斗活动才退出」（combat-skill-211.md §9.1）。没有这个窗口，
+// 逐 tick 重建的威胁表在击杀清仇恨/栓绳回家/攻击冷却间隙会闪断，
+// 战斗中频繁发出 LogicState 0/1 抖动帧。
+const combatPresenceIdleExit = 10 * time.Second
+
+// noteCombatActivity 记录一次战斗活动（命中敌人或被敌人命中），
+// 是 10s 迟滞窗口的驱动源。调用方无需持 p.mu。
+func (p *playerActor) noteCombatActivity(now time.Time) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.lastCombatAt = now
+}
+
+// setCombatPresence 负责本地敌对 AI 的玩家侧生命周期。威胁（NPC
+// 持有自己为目标）或 10s 内的战斗活动都保持 Fighting；两者都消失
+// 才恢复 Normal。这使恢复、伤害和客户端 LogicState 保持在同一个
+// 权威转换之上，且击杀/栓绳间隙不再闪发脱战帧。
+func (p *playerActor) setCombatPresence(threatened bool, now time.Time) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.vitals.HP <= 0 {
 		return false
 	}
+	active := threatened || now.Before(p.lastCombatAt.Add(combatPresenceIdleExit))
 	if active {
 		if p.vitals.Logic == entity.LogicStateFighting {
 			return false
@@ -1186,29 +1557,38 @@ func (p *playerActor) currentSkillStateSnapshot() (string, string, int32, uint64
 }
 
 // clearCurrentSkill 只清除调度该定时器的那一次确切技能调用。后续的调用
-// 绝不能被更早的定时器取消。
+// 绝不能被更早的定时器取消。LogicState 不在此处落 0：战斗存在性唯一
+// 权威是 setCombatPresence（威胁/10s 迟滞），收招帧只回显当前值——
+// 62433 战斗抓包 LogicState 跨招恒 1 实证（combat-skill-211.md §对齐表，
+// exe #2014 六项形态），硬编 0 会在面对面战斗中每招收尾闪发脱战帧。
 func (p *playerActor) clearCurrentSkill(expected string) bool {
 	p.mu.Lock()
+	defer p.mu.Unlock()
 	if p.currentSkillID != expected {
-		p.mu.Unlock()
 		return false
 	}
 	p.currentSkillID = ""
 	p.currentSkillEffectID = ""
 	p.currentSkillLevel = 0
 	p.currentSkillTarget = 0
-	// 技能清除定时器在独立 goroutine 触发；状态字段与 LogicState
-	// 必须在同一临界区内落定，这与锁纪律注释一致。
-	p.vitals.SetLogicState(0)
-	p.mu.Unlock()
 	return true
 }
 
+// currentSkillClearUpdate 是收招技能状态清除帧（参考服 exe #2014 六项
+// 形态，Java skillStateClearUpdate 同源）：LogicState 回显当前权威值，
+// CurSkillID/Target 清空，CurSkillCanNoLimit/CantBe(,)SkillMustLocked
+// 归零。
 func (p *playerActor) currentSkillClearUpdate() ([]byte, error) {
+	p.mu.Lock()
+	logic := p.vitals.Logic
+	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(0)},
+		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(logic)},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue("")},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.ObjectValue(0, 0)},
+		{Index: propCurSkillCanNoLimit, Name: "CurSkillCanNoLimit", Value: clientdata.ByteValue(0)},
+		{Index: propCantBeSkillLocked, Name: "CantBeSkillLocked", Value: clientdata.ByteValue(0)},
+		{Index: propCantBeSkillMustLocked, Name: "CantBeSkillMustLocked", Value: clientdata.ByteValue(0)},
 	})
 }
 
@@ -1230,27 +1610,11 @@ func (p *playerActor) facultyNameResetFrame() ([]byte, bool, error) {
 	return frame, true, err
 }
 
-func (p *playerActor) setSilver(value int32) {
-	p.mu.Lock()
-	p.silver = value
-	p.mu.Unlock()
-}
-
-func clampPlayerSP(value int32) int32 {
-	if value < 0 {
-		return 0
-	}
-	if value > maxPlayerSP {
-		return maxPlayerSP
-	}
-	return value
-}
-
 // setSP 修改服务器权威的怒气值，并立即返回主角 UI 消费的常规 0x10
-// 属性更新。
+// 属性更新。饱和到 [0, 有效上限]。
 func (p *playerActor) setSP(value int32) (int32, []byte, error) {
 	p.mu.Lock()
-	p.progress.attributes.sp = clampPlayerSP(value)
+	p.progress.attributes.sp = p.progress.clampSP(value)
 	sp := p.progress.attributes.sp
 	p.mu.Unlock()
 	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
@@ -1261,9 +1625,10 @@ func (p *playerActor) setSP(value int32) (int32, []byte, error) {
 
 // addSP 是战斗/技能怒气奖励以及 GM 调整未来唯一的入口。在这里做饱和
 // 处理可保证 211 的消耗检查读到的正是客户端刚显示过的值。
-// addSP 是战斗/技能怒气奖励以及 GM 调整未来唯一的入口。饱和 [0,100];
-// 值未变化(已在边界)时不重推帧——官方满值停推,纯 SP 事件走 18 字节
-// 单帧 `10 00 01 00 00 11 0B 5C 7A 00 01 00 D3 01 <i32>`。
+// addSP 是战斗/技能怒气奖励以及 GM 调整未来唯一的入口。饱和
+// [0, 有效上限](基础 80 + 运行内功加成);值未变化(已在边界)时不
+// 重推帧——官方满值停推,纯 SP 事件走 18 字节单帧
+// `10 00 01 00 00 11 0B 5C 7A 00 01 00 D3 01 <i32>`。
 func (p *playerActor) addSP(delta int32) (int32, []byte, error) {
 	p.mu.Lock()
 	before := p.progress.attributes.sp
@@ -1271,8 +1636,8 @@ func (p *playerActor) addSP(delta int32) (int32, []byte, error) {
 	if next < 0 {
 		next = 0
 	}
-	if next > int64(maxPlayerSP) {
-		next = int64(maxPlayerSP)
+	if cap := int64(p.progress.rageCap()); next > cap {
+		next = cap
 	}
 	p.progress.attributes.sp = int32(next)
 	sp := p.progress.attributes.sp
@@ -1409,6 +1774,10 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addInt(692, state.QingGongPoint)
 	addInt(693, state.MaxQingGongPoint)
 	addInt(694, state.MaxQingGongPointAdd)
+	// ParryRatio 建对象即带：官方 NPC 0x0D 同款（三方抓包 NPC 帧均含
+	// 478=100）。引擎建对象时即读格挡族，post-ready 0x10 补推可能太晚
+	// （2026-11-04 键位域同教训）；玩家侧值恒 100。
+	addInt(propParryRatio, 100)
 	addWord(propNeigongPKStatus, 0)            // 官方线型 Word
 	addByte(propDead, boolByte(state.HP <= 0)) // 官方线型 Byte
 	// CantUseSkill:官方 2370 项表无此名,不再下发。
@@ -1428,6 +1797,12 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		addString(bufferInfoPropertyIndex(slot), p.bufferInfoLocked(slot, now))
 	}
 	for _, property := range p.progress.properties() {
+		msg = appendNPCProperty(msg, property)
+		count++
+	}
+	// 经脉 8 属性（Java addObject 同位）：0x0D 建对象即带，客户端面板
+	// 首开即有值；post-ready 0x10 补推太晚（键位域同教训）。
+	for _, property := range p.jingMaiPropsLocked() {
 		msg = appendNPCProperty(msg, property)
 		count++
 	}
@@ -1460,8 +1835,9 @@ func sendPlayerAddObject(conn sceneMessageConnection, player *playerActor, locat
 
 // sendPlayerLocationAndVitals 发 0x1F 重定位 + 常规 vitals 大批 0x10。
 // 官方方言下没有独立的登录怒气帧:SP(467) 随 stateProperties 大批下发,
-// MaxSP/MaxSPAdd 永不下发(新版服务端反汇编实证,exe 零引用 580/583),
-// 客户端按 SP 满值 100 本地呈现怒气球。
+// MaxSP/MaxSPAdd 只由 loginVitalUpdate 在这批全量档携带一次(新服 exe
+// 反汇编零引用 580/583,客户端疑似按本地口径呈现怒气球,MaxSPAdd 为
+// 验证该口径的实验下发)。
 func sendPlayerLocationAndVitals(conn sceneMessageConnection, player *playerActor, location role.Position) error {
 	if err := conn.WriteFrame(serverLocation(playerObjectID, playerOwnerID, worldTransform(location))); err != nil {
 		return err

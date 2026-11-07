@@ -49,7 +49,11 @@ func main() {
 	npcAuditAll := flag.Bool("npc-audit-all", false, "inventory every modern NPC creator scene and exit")
 	npcServiceAuditScene := flag.String("npc-service-audit-scene", "", "write effective NPC service audit for config,resource,x,y,z,orient and exit")
 	qingGongDefinePath := flag.String("qinggong-define", filepath.Join(defaultModernShareRoot, "skill", "qinggong", "qgdefine.ini"), "current-client QGDefine.ini used to validate and charge 216")
+	respawnInterval := flag.Int("respawn-interval", 30, "batch monster respawn interval in seconds: every interval all DEAD combat NPCs revive at their spawn points, alive ones untouched (0 disables batching and falls back to per-NPC RefreshTime)")
+	corpseTTL := flag.Int("corpse-ttl", 10, "corpse removal delay in seconds: dead monster corpses are removed (0x0E) after this long and rematerialize on respawn (0 keeps corpses until revive)")
 	flag.Parse()
+	setNpcRespawnBatchInterval(time.Duration(*respawnInterval) * time.Second)
+	setNpcCorpseTTL(time.Duration(*corpseTTL) * time.Second)
 	if *logFile != "" {
 		if err := os.MkdirAll(filepath.Dir(*logFile), 0755); err != nil {
 			log.Fatalf("create log directory: %v", err)
@@ -282,6 +286,57 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		}
 	}
 	defer persistFaculty()
+	// P2 域 store（msg70/71 货币、msg295 称号、msg150/161 经脉）：缺表/
+	// 缺库一律降级会话态（建表权威在 migrations/，运行时不做 DDL）。
+	currencyStore := newCurrencyDBStore(store.db)
+	titleStore := newTitleDBStore(store.db)
+	jingMaiStore := newJingMaiDBStore(store.db)
+	jingMaiCatalog, jingMaiCatalogErr := loadJingMaiCatalog(defaultJingMaiINIPath, defaultJingMaiStaticINIPath)
+	if jingMaiCatalogErr != nil {
+		log.Printf("%s: jingmai catalog unavailable (msg150/161 degrade): %v", conn.RemoteAddr(), jingMaiCatalogErr)
+	}
+	persistJingMai := func() {
+		if jingMaiStore == nil || selected == nil || player == nil {
+			return
+		}
+		if err := jingMaiStore.Save(selected.ID, player.jingMaiSnapshotOf()); err != nil {
+			log.Printf("%s: persist jingmai progress: %v", conn.RemoteAddr(), err)
+		}
+	}
+	defer persistJingMai()
+	// 邮件/坐骑域（Java lettersGranted/mountsPushed 同位）：role_letters/
+	// role_mounts 快照读档 → ClientReady 整表重放；无存档零帧。
+	letterStore := newLetterDBStore(store.db)
+	mountStore := newMountDBStore(store.db)
+	mountCatalog := loadMountCatalog(defaultToolItemINIPath, defaultItemArtStaticPath, defaultNewRideINIPath)
+	sessionLetters := []letterEntry(nil)
+	sessionMounts := []mountEntry(nil)
+	lettersPushed := false
+	mountsPushed := false
+	mountSentRows := 0
+	pushLetters := func() error {
+		lettersPushed = true
+		if len(sessionLetters) == 0 {
+			return nil
+		}
+		if err := pushLetterFrames(link, sessionLetters); err != nil {
+			return fmt.Errorf("replay RecvLetterRec rows: %w", err)
+		}
+		log.Printf("%s: replayed %d RecvLetterRec rows", conn.RemoteAddr(), len(sessionLetters))
+		return nil
+	}
+	pushMounts := func() error {
+		mountsPushed = true
+		rows, err := pushMountFrames(link, sessionMounts, mountCatalog, mountSentRows)
+		if err != nil {
+			return fmt.Errorf("replay NewRideRec rows: %w", err)
+		}
+		mountSentRows = rows
+		if len(sessionMounts) > 0 {
+			log.Printf("%s: pushed saved mounts owned=%d current=%d", conn.RemoteAddr(), len(sessionMounts), mountCurrentPack(sessionMounts))
+		}
+		return nil
+	}
 	qingGongGranted := false
 	neigongGranted := false
 	// dbLearnedSkills 是 0x0C 装载的 role_skills 已学集（wuxue/anqi）。
@@ -295,6 +350,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	customizingSess := customizingSession{}
 	customizingPushed := false
 	keybindPushed := false
+	// SwitchManager 批量开关（0x1E 414 "sync"）连接级只发一次：引擎开关
+	// 树不随场景代际清空，0x0C 重入不重放（Java switchSyncPushed 同口径）。
+	switchSyncPushed := false
 	currentRoleID := func() role.RoleID {
 		if selected != nil {
 			return selected.ID
@@ -305,7 +363,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	newItemSession := func() *itemSession {
 		return &itemSession{
 			link: link, player: player, store: inventory, skins: appearanceCfg.skins,
-			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
+			currency: currencyStore,
+			ctx:      ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
 			now: time.Now,
 		}
 	}
@@ -338,6 +397,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if err := link.WriteFrame(frame); err != nil {
 				return fmt.Errorf("write View=40: %w", err)
 			}
+		}
+		// 经脉域（msg150/161）：View45 容器+全行 + 面板属性帧 +
+		// active_jingmai_rec 记录行。0x0C 重入随玩家对象清空，本函数
+		// 在重入分支同样会被调用，记录行随之重放。
+		if err := pushJingMaiFrames(link, player, jingMaiCatalog); err != nil {
+			return fmt.Errorf("grant jingmai view: %w", err)
+		}
+		// 称号域（msg295）：title_rec 拥有行 + 佩戴位 0x10（无档零帧）。
+		if err := pushTitleFrames(link, player); err != nil {
+			return fmt.Errorf("push title frames: %w", err)
 		}
 		// 套路快捷栏授予是 starter 回退：DB 有玩家编辑基线时让位，
 		// 否则每次重入都会复活玩家已删除的条目。
@@ -423,7 +492,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			case "add_sp":
 				sp, update, updateErr = player.addSP(command.sp)
 			default:
-				sp, update, updateErr = player.setSP(maxPlayerSP)
+				sp, update, updateErr = player.setSP(player.rageCap())
 			}
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
@@ -432,8 +501,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("怒气设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setSP(sp, fmt.Sprintf("怒气设为 %d/%d", sp, maxPlayerSP))
+			gmSession.setSP(sp, fmt.Sprintf("怒气设为 %d/%d", sp, player.rageCap()))
 			log.Printf("%s: GM %s SP=%d", conn.RemoteAddr(), command.action, sp)
+		case "set_rage_recovery":
+			rate := player.setRageRecovery(int32(command.value))
+			gmSession.setRageRecovery(rate, fmt.Sprintf("怒气自动回复设为 %d/秒", rate))
+			log.Printf("%s: GM set rage recovery=%d/s", conn.RemoteAddr(), rate)
 		case "set_move_speed":
 			update, updateErr := player.setMoveSpeed(command.value)
 			if updateErr == nil {
@@ -456,6 +529,24 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			gmSession.setAction(fmt.Sprintf("下落重力设为 %.2f", command.value))
 			log.Printf("%s: GM set Gravity=%.2f", conn.RemoteAddr(), command.value)
+		case "set_respawn_interval":
+			seconds := int32(command.value)
+			setNpcRespawnBatchInterval(time.Duration(seconds) * time.Second)
+			if seconds > 0 {
+				gmSession.setAction(fmt.Sprintf("批量刷新间隔设为 %d 秒（死了的统一重生，活怪不动）", seconds))
+			} else {
+				gmSession.setAction("批量刷新已关闭：回到每怪独立 RefreshTime 计时")
+			}
+			log.Printf("%s: GM set respawn interval=%ds", conn.RemoteAddr(), seconds)
+		case "set_corpse_ttl":
+			seconds := int32(command.value)
+			setNpcCorpseTTL(time.Duration(seconds) * time.Second)
+			if seconds > 0 {
+				gmSession.setAction(fmt.Sprintf("尸体清除延迟设为 %d 秒（超时 0x0E，重生时重新物化）", seconds))
+			} else {
+				gmSession.setAction("尸体清除已关闭：尸体保留到重生")
+			}
+			log.Printf("%s: GM set corpse ttl=%ds", conn.RemoteAddr(), seconds)
 		case "set_faction":
 			preset, presetErr := gmFactionPresetByKey(command.faction)
 			if presetErr != nil {
@@ -531,8 +622,170 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("金币设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("金币设为 %d（会话级）", command.gold))
+			gmSession.setGold(command.gold)
 			log.Printf("%s: GM set CapitalType0=%d", conn.RemoteAddr(), command.gold)
+		case "set_guanyin":
+			player.setGuanYin(command.guanYin)
+			update, updateErr := player.guanYinUpdate()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("官银设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setGuanYin(command.guanYin)
+			log.Printf("%s: GM set CapitalType2=%d", conn.RemoteAddr(), command.guanYin)
+		case "set_power_level":
+			update, updateErr := player.setPowerLevel(int32(command.value))
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("实力等级设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction(fmt.Sprintf("实力等级设为 %d（%s）", int32(command.value), roleListTitle(int(command.value))))
+			log.Printf("%s: GM set PowerLevel=%d", conn.RemoteAddr(), int32(command.value))
+		case "set_alignment":
+			update, updateErr := player.setAlignment(command.justice, command.evil, command.freeBase)
+			if updateErr == nil && update != nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("性格善恶设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction(fmt.Sprintf("性格设为 善 %d / 恶 %d / 基数 %d", command.justice, command.evil, command.freeBase))
+			log.Printf("%s: GM set Justice=%d Evil=%d FreeBase=%d", conn.RemoteAddr(), command.justice, command.evil, command.freeBase)
+		case "set_pk_mode":
+			update, updateErr := player.setPKMode(command.pkMode)
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("PK 模式设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction(fmt.Sprintf("PK 模式设为 %d", command.pkMode))
+			log.Printf("%s: GM set PKMode=%d", conn.RemoteAddr(), command.pkMode)
+		case "set_vitals":
+			update, updateErr := player.setGMVitals(gmVitalsState{
+				ene: command.ene, maxEne: command.maxEne, resumeEne: command.resumeEne,
+				sat: command.sat, maxSat: command.maxSat,
+				pkValue: command.pkValue, drunkLevel: command.drunkLevel,
+			})
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("生存属性设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction(fmt.Sprintf("体力 %d/%d 饱食 %d/%d 杀戮 %d 酒量 %d",
+				command.ene, command.maxEne, command.sat, command.maxSat, command.pkValue, command.drunkLevel))
+			log.Printf("%s: GM set vitals ene=%d/%d sat=%d/%d pk=%d drunk=%d", conn.RemoteAddr(),
+				command.ene, command.maxEne, command.sat, command.maxSat, command.pkValue, command.drunkLevel)
+		case "set_faculty":
+			update, updateErr := player.setFacultyValue(int32(command.value))
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("修为设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setFaculty(int32(command.value))
+			gmSession.setAction(fmt.Sprintf("修为设为 %d", int32(command.value)))
+			log.Printf("%s: GM set Faculty=%d", conn.RemoteAddr(), int32(command.value))
+		case "set_five_attributes":
+			update, updateErr := player.setBaseAttributes(command.attrStr, command.attrSta, command.attrDex, command.attrIng, command.attrSpi)
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("五维属性设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction(fmt.Sprintf("五维设为 臂 %d 身 %d 内 %d 罡 %d 体 %d",
+				command.attrStr, command.attrSta, command.attrIng, command.attrSpi, command.attrDex))
+			log.Printf("%s: GM set base attributes str=%d sta=%d dex=%d ing=%d spi=%d", conn.RemoteAddr(),
+				command.attrStr, command.attrSta, command.attrDex, command.attrIng, command.attrSpi)
+		case "set_fill_speed":
+			actual, update, updateErr := player.setFillSpeed(command.facultyBase, command.fillMultiplier)
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("修炼速度设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction(fmt.Sprintf("修炼速度设为 %d（%d × %.2f）", actual, command.facultyBase, command.fillMultiplier))
+			log.Printf("%s: GM set FillSpeed=%d base=%d multiplier=%.2f", conn.RemoteAddr(), actual, command.facultyBase, command.fillMultiplier)
+		case "set_act_day_limit":
+			display, update, updateErr := player.setActDayLimit(int32(command.value))
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("演武上限设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			if int32(command.value) <= 0 {
+				gmSession.setAction("演武每日上限已解除（不限制）")
+			} else {
+				gmSession.setAction(fmt.Sprintf("演武每日上限设为 %d 两", display))
+			}
+			log.Printf("%s: GM set ActDayValueMax=%d", conn.RemoteAddr(), int32(command.value))
+		case "set_weather":
+			preset, presetErr := gmWeatherPresetByKey(command.weather)
+			if presetErr != nil {
+				return presetErr
+			}
+			// Java modernCustomCommandMessage("on_weather_sky", 4, key,
+			// fade, "") 同形：0x27 命令名寻址，客户端 ChangeWeatherEffect。
+			update, updateErr := serverModernCustomStringMessage("on_weather_sky",
+				customInt(4), customString(preset.Key), customInt(command.fadeSec), customString(""))
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("天气切换失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction(fmt.Sprintf("天气已切为 %s（过渡 %d 秒）", preset.Label, command.fadeSec))
+			log.Printf("%s: GM set weather=%s fade=%ds", conn.RemoteAddr(), preset.Key, command.fadeSec)
+		case "popup_gm_panel":
+			// 客户端 custom_handler close_gmcc_form msg_id=2 → 弹出
+			// GMCC 聊天面板（Java applyPopupGmPanel 同帧）。
+			update, updateErr := serverModernCustomStringMessage("close_gmcc_form", customInt(2))
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("GM 面板弹出失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction("已请求客户端弹出 GM 面板")
+			log.Printf("%s: GM popup client gm panel", conn.RemoteAddr())
+		case "custom_probe":
+			// 数值寻址探针（Go 原生补齐，Java 无 GM 侧对应）：
+			// 0x27 [msgId, subType]，用于面板预置消息号的客户端行为观察。
+			update, updateErr := serverModernCustomIntMessage(command.msgID, customInt(command.subType))
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("探针发送失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction(fmt.Sprintf("已发送探针 msgId=%d subType=%d", command.msgID, command.subType))
+			log.Printf("%s: GM custom probe msgId=%d subType=%d", conn.RemoteAddr(), command.msgID, command.subType)
 		case "grant_identity_suits":
 			before := len(player.fashionSuitSnapshot())
 			grantIdentitySuitsAtLogin(&appearanceSession{
@@ -869,6 +1122,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			sitcrossAdvanced := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
 			combatRageAdvanced := player.rageRecoveryTick()
+			// 轻功结算（Java facultyTicker 同拍）：租约秒耗 / 3s 分档
+			// 回复；点变化才推 QingGongPoint 单属性帧。
+			qingGongPointChanged := player.qingGongTick(now)
 			// NPC 战斗模拟已上移到场景运行时的中央 tick；
 			// 连接循环只保留玩家侧结算与复活。
 			combatAdvanced := false
@@ -883,6 +1139,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if tickErr == nil {
 					tickErr = link.WriteFrame(frame)
 				}
+			}
+			if tickErr == nil && qingGongPointChanged {
+				tickErr = link.WriteFrame(player.qingGongPointFrame())
 			}
 			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired) {
 				var state []byte
@@ -908,7 +1167,18 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: settled combat bruised blood HP=%d HitHP=%d", conn.RemoteAddr(), state.HP, state.HitHP)
 			}
 			if combatRageAdvanced {
-				log.Printf("%s: settled combat rage SP=%d/%d", conn.RemoteAddr(), player.skillSP(), maxPlayerSP)
+				log.Printf("%s: settled combat rage SP=%d/%d", conn.RemoteAddr(), player.skillSP(), player.rageCap())
+			}
+			// 经脉修炼结算（msg150/1 起）：整分钟 +43 真气/分钟，750/周天
+			// 升级；变化才发 View45 行帧并落库（fork jingMaiCultivateTick）。
+			if frames := player.jingMaiCultivateTick(jingMaiCatalog, now); len(frames) > 0 {
+				for _, frame := range frames {
+					if err := link.WriteFrame(frame); err != nil {
+						log.Printf("%s: publish jingmai tick frame: %v", conn.RemoteAddr(), err)
+						return
+					}
+				}
+				persistJingMai()
 			}
 			continue
 		case received := <-inbound:
@@ -1043,12 +1313,39 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				persistFaculty()
 				log.Printf("%s: initialized persistent normal faculty role=%d name=%s", conn.RemoteAddr(), activeRole.ID, player.progress.facultyName)
 			}
+			// P2 域登录装载（msg70/71 货币、msg295 称号、msg150/161 经脉）：
+			// 无存档=starter/空态，缺表降级只记日志，不阻塞登录。
+			if saved, exists := currencyStore.Load(activeRole.ID); exists {
+				player.setSilver(saved.Silver)
+				log.Printf("%s: restored currency role=%d silver=%d", conn.RemoteAddr(), activeRole.ID, saved.Silver)
+			}
+			if titles := titleStore.Load(activeRole.ID); len(titles) > 0 {
+				player.restoreTitles(titles)
+				log.Printf("%s: restored titles role=%d owned=%d", conn.RemoteAddr(), activeRole.ID, len(titles))
+			}
+			if saved, exists := jingMaiStore.Load(activeRole.ID); exists {
+				player.restoreJingMai(saved, time.Now())
+				log.Printf("%s: restored jingmai role=%d cur=%s activated=%d", conn.RemoteAddr(), activeRole.ID, saved.Cur, len(saved.Activated))
+			}
+			// 邮件/坐骑镜像装载（Java LoginFlow restorePanel 同位）：
+			// 无存档零帧，缺表降级只记日志，不阻塞登录。
+			if letters := letterStore.Load(activeRole.ID); len(letters) > 0 {
+				sessionLetters = letters
+				log.Printf("%s: restored letters role=%d count=%d", conn.RemoteAddr(), activeRole.ID, len(letters))
+			}
+			if mounts := mountStore.Load(activeRole.ID); len(mounts) > 0 {
+				sessionMounts = mounts
+				log.Printf("%s: restored mounts role=%d owned=%d current=%d", conn.RemoteAddr(), activeRole.ID, len(mounts), mountCurrentPack(mounts))
+			}
 			// 已学技能装载（Java LoginFlow.loadDbSkills 同口径）：读库失败
 			// 或空表只记日志回退 starter 集，不阻塞登录。
 			if dbSkills, skillErr := skills.learnedSkills(ctx, activeRole.ID); skillErr != nil {
 				log.Printf("%s: load learned skills (skip to starter set) role=%d: %v", conn.RemoteAddr(), activeRole.ID, skillErr)
 			} else {
 				dbLearnedSkills = dbSkills
+				// 与 View40 的 merge 集同步进释放闸内存表，否则
+				// DB 学的技能会被 learnedSkillLevel 判「未学」拒绝。
+				player.mergeDBLearnedSkills(dbSkills)
 				log.Printf("%s: learned skills role=%d db_rows=%d starter=%d merged=%d", conn.RemoteAddr(), activeRole.ID, len(dbSkills), len(starterSkillViews), len(mergeLearnedSkills(dbSkills)))
 			}
 			// 自定义配置域装载：键位/操作模式必须在 sendPlayerSpawn 之前
@@ -1080,8 +1377,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// QingGongRec 是玩家记录，而非可见对象属性。当前
 			// 客户端在该 schema 完成协商之前拒绝将轻功视为已学习，
 			// 即使其能量属性（QingGongPoint/MaxQingGongPoint）
-			// 已经存在。
-			recordTable, recordErr := serverRecordTable(qingGongRecordSchemas)
+			// 已经存在。记录表逐字节透传官方 447 schema 方言
+			// （客户端原生消费者按官方下标绑定，自建子表会错绑）。
+			recordTable, recordErr := serverRecordTable()
 			if recordErr != nil {
 				log.Printf("%s: encode record table: %v", conn.RemoteAddr(), recordErr)
 				return
@@ -1090,7 +1388,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: write record table: %v", conn.RemoteAddr(), err)
 				return
 			}
-			log.Printf("%s: sent property table (%d entries) and record table (%d entries, QingGongRec)", conn.RemoteAddr(), binary.LittleEndian.Uint16(propertyTable[1:]), len(qingGongRecordSchemas))
+			log.Printf("%s: sent property table (%d entries) and official record table (%d entries)", conn.RemoteAddr(), binary.LittleEndian.Uint16(propertyTable[1:]), binary.LittleEndian.Uint16(recordTable[1:]))
 			// 三期官方方言：17 视图容器（8 主页 BaseCap=18 + 8 扩展页 +
 			// View1 纸娃娃），随后按 DB 扩容锚点行下发扩展槽位。
 			for _, frame := range bagViewCreateFrames() {
@@ -1141,6 +1439,14 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			log.Printf("%s: sent player 0x0D + 0x1F + authoritative vital 0x10", conn.RemoteAddr())
+			// 面板身份/域块补推（Java PanelState.identityProperties/
+			// domainProperties 随 0x0D 档下发的对应物，走独立瘦帧不动
+			// 档形）：实力 151 种子 + 称号/性格/侠恶/生存属性零值常发
+			//——缺发则人物面板整块空白（实力一行不显示的根因）；vitals
+			// 由 role_faculty 快照在 restoreFaculty 时播种。
+			if err := gmWritePanelFrames(link, player); err != nil {
+				log.Printf("%s: push panel identity/domain frames: %v", conn.RemoteAddr(), err)
+			}
 			if equipErr == nil && bagErr == nil && (len(equips) > 0 || len(bagItems) > 0) {
 				frames, frameErr := inventoryFrames(activeRole.ID, visual.sex, equips, bagItems)
 				if frameErr != nil {
@@ -1179,7 +1485,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				staticNPCs: staticNPCs, radius: npcRadius,
 				player: player, activeRole: activeRole, npcCatalog: sceneNPCs,
 			}
-			gmSession = gm.attach(machine.ID(), conn.RemoteAddr().String(), activeRole, roleFaction(activeRole.Appearance.Values), starterSilver, player.skillSP())
+			gmSession = gm.attach(machine.ID(), conn.RemoteAddr().String(), activeRole, roleFaction(activeRole.Appearance.Values), starterSilver, player.guanYinValue(), player.goldSnapshot(), player.skillSP(), player.facultyValue())
 			log.Printf("%s: registered %d nearby NPC objects from catalog=%d; waiting for ClientReady", conn.RemoteAddr(), nearbyCount, len(sceneNPCs))
 
 		} else if plain[0] == 0x09 {
@@ -1202,6 +1508,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 				log.Printf("%s: target ClientReady; sent deferred player 0x1F + vital state", conn.RemoteAddr())
+				// 切图重进同口径补推 GM 面板域（会话级状态在 world.begin
+				// 的对象代际重置中保留，客户端对象表则被清空）。
+				if err := gmWritePanelFrames(link, runtime.player); err != nil {
+					log.Printf("%s: push GM panel replay frames: %v", conn.RemoteAddr(), err)
+				}
 				if err := machine.Ready(); err != nil {
 					log.Printf("%s: complete stable re-entry ready: %v", conn.RemoteAddr(), err)
 					return
@@ -1264,6 +1575,20 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						return
 					}
 					log.Printf("%s: restored View=43 inner-power and View=40 花无缺七招 after 0x0C re-entry", conn.RemoteAddr())
+					// 邮件/坐骑记录行挂玩家对象，0x0C 已随对象清空——重入后
+					// 整表重放（镜像计数先归零：客户端已无旧行可删，外观域
+					// 同口径；Java lettersGranted/mountsPushed 重入复位）。
+					lettersPushed = false
+					if err := pushLetters(); err != nil {
+						log.Printf("%s: %v", conn.RemoteAddr(), err)
+						return
+					}
+					mountsPushed = false
+					mountSentRows = 0
+					if err := pushMounts(); err != nil {
+						log.Printf("%s: %v", conn.RemoteAddr(), err)
+						return
+					}
 					if switchErr := enableSkillActionSwitch(link); switchErr != nil {
 						log.Printf("%s: restore native skill-action switch after 0x0C re-entry: %v", conn.RemoteAddr(), switchErr)
 						return
@@ -1338,12 +1663,40 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 			}
+			if player != nil && !lettersPushed {
+				// 邮件行（Java lettersGranted，位于 43/40 之前）：空邮箱零帧。
+				if err := pushLetters(); err != nil {
+					log.Printf("%s: %v", conn.RemoteAddr(), err)
+					return
+				}
+			}
 			if player != nil && !neigongGranted {
 				if progressErr := grantStarterProgress(); progressErr != nil {
 					log.Printf("%s: grant stable inner-power/player attributes: %v", conn.RemoteAddr(), progressErr)
 					return
 				}
 				log.Printf("%s: granted View=43 inner-power and View=40 花无缺七招 after explicit ClientReady", conn.RemoteAddr())
+			}
+			if player != nil && !mountsPushed {
+				// 坐骑（Java mountsPushed，43/40 之后、switch 同步之前）：
+				// NewRideRec 拥有行 + 骑乘态帧（重登步行口径）。
+				if err := pushMounts(); err != nil {
+					log.Printf("%s: %v", conn.RemoteAddr(), err)
+					return
+				}
+			}
+			if player != nil && !switchSyncPushed {
+				// 参考服 pushSwitchSync：ClientReady 收尾一次性批量开
+				// 客户端 SwitchManager（0x1E 414 "sync" ×203）。2919 在列
+				// ——人物面板「切换新版」按钮的显示门槛；缺此帧按钮不出现。
+				// 必须先于 enableSkillActionSwitch：sync 清空整棵开关树后
+				// 重设，1223 随后走 reset 单开。
+				switchSyncPushed = true
+				if syncErr := pushSwitchSync(link); syncErr != nil {
+					log.Printf("%s: push switch sync: %v", conn.RemoteAddr(), syncErr)
+					return
+				}
+				log.Printf("%s: pushed switch sync switches=%d via S2C 0x1E message=%d", conn.RemoteAddr(), len(switchSyncIDs), serverSwitchControlMessage)
 			}
 			if player != nil {
 				if switchErr := enableSkillActionSwitch(link); switchErr != nil {
@@ -1418,6 +1771,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						return
 					}
 					log.Printf("%s: enabled native skill-action switch=%d via compatibility ClientReady", conn.RemoteAddr(), skillActionInputSwitch)
+					if !switchSyncPushed {
+						// 兼容 0x0A 晋升的 ClientReady 同样要开开关树
+						//（该客户端路径不经过显式 0x09 分支时兜底）。
+						switchSyncPushed = true
+						if syncErr := pushSwitchSync(link); syncErr != nil {
+							log.Printf("%s: push compatibility switch sync: %v", conn.RemoteAddr(), syncErr)
+							return
+						}
+						log.Printf("%s: pushed switch sync switches=%d via compatibility ClientReady", conn.RemoteAddr(), len(switchSyncIDs))
+					}
 				}
 				log.Printf("%s: promoted observed 0x0A to compatibility ClientReady", conn.RemoteAddr())
 			}
@@ -1475,6 +1838,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				}
 				location := selected.Location
 				location.Position = role.Position{X: x, Y: y, Z: z, Orient: orient}
+				// 跳段落地探测（2026-11-07 跳段限制批次）：0x0A 位移包
+				// 逐帧喂 y——着地时校准基准，腾空回落到基准 1m 内即清
+				// 跳段计数进入新循环（observePositionY 内含互斥锁）。
+				if runtime != nil && runtime.player != nil {
+					runtime.player.observePositionY(y, time.Now())
+				}
 				changed := world.updateMemberPosition(location.Position, sceneNPCs)
 				nearbyCount := countNPCsWithin(sceneNPCs, location.Position, npcRadius)
 				if changed {
@@ -1539,7 +1908,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -1638,6 +2007,50 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				case clientCustomWardrobeCard:
 					if _, handleErr := handleWardrobeCardCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity wardrobe card: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomShopBuy:
+					if _, handleErr := handleShopBuyCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity shop buy: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomShopSell:
+					if _, handleErr := handleShopSellCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity shop sell: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomSetTitle:
+					if _, handleErr := handleSetTitleCustom(link, player, custom, conn.RemoteAddr().String(), titleStore, currentRoleID()); handleErr != nil {
+						log.Printf("%s: handle activity set title: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomJingMaiCultivate:
+					if _, handleErr := handleJingMaiCultivateCustom(link, player, jingMaiCatalog, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity jingmai cultivate: %v", conn.RemoteAddr(), handleErr)
+					} else {
+						persistJingMai()
+					}
+				case clientCustomJingMaiActive:
+					if _, handleErr := handleJingMaiActiveCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity jingmai active: %v", conn.RemoteAddr(), handleErr)
+					} else {
+						persistJingMai()
+					}
+				case clientCustomFreshManChoice:
+					if _, handleErr := handleFreshManChoice(custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity fresh-man choice: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomGuideAddSchool:
+					if _, handleErr := handleGuideAddSchoolCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity guide add school: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomSchoolMessage:
+					if _, handleErr := handleSchoolCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity school message: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomPickupDropItem:
+					if _, handleErr := handlePickupDropItemCustom(world, newItemSession(), custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity pickup drop item: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomCloseDropBox:
+					if _, handleErr := handleCloseDropBoxCustom(world, custom); handleErr != nil {
+						log.Printf("%s: handle activity close drop box: %v", conn.RemoteAddr(), handleErr)
 					}
 				case 215, 1006:
 					if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -1830,6 +2243,50 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if _, handleErr := handleWardrobeCardCustom(newItemSession(), custom); handleErr != nil {
 					log.Printf("%s: handle wardrobe card: %v", conn.RemoteAddr(), handleErr)
 				}
+			case clientCustomShopBuy:
+				if _, handleErr := handleShopBuyCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle shop buy: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomShopSell:
+				if _, handleErr := handleShopSellCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle shop sell: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomSetTitle:
+				if _, handleErr := handleSetTitleCustom(link, player, custom, conn.RemoteAddr().String(), titleStore, currentRoleID()); handleErr != nil {
+					log.Printf("%s: handle set title: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomJingMaiCultivate:
+				if _, handleErr := handleJingMaiCultivateCustom(link, player, jingMaiCatalog, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle jingmai cultivate: %v", conn.RemoteAddr(), handleErr)
+				} else {
+					persistJingMai()
+				}
+			case clientCustomJingMaiActive:
+				if _, handleErr := handleJingMaiActiveCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle jingmai active: %v", conn.RemoteAddr(), handleErr)
+				} else {
+					persistJingMai()
+				}
+			case clientCustomFreshManChoice:
+				if _, handleErr := handleFreshManChoice(custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle fresh-man choice: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomGuideAddSchool:
+				if _, handleErr := handleGuideAddSchoolCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle guide add school: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomSchoolMessage:
+				if _, handleErr := handleSchoolCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle school message: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomPickupDropItem:
+				if _, handleErr := handlePickupDropItemCustom(world, newItemSession(), custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle pickup drop item: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomCloseDropBox:
+				if _, handleErr := handleCloseDropBoxCustom(world, custom); handleErr != nil {
+					log.Printf("%s: handle close drop box: %v", conn.RemoteAddr(), handleErr)
+				}
 			case 215, 1006: // 内功穿戴 / faculty 状态机
 				if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
 					log.Printf("%s: handle inner-power msg=%d: %v", conn.RemoteAddr(), custom.Values[0].Int32, handleErr)
@@ -1864,6 +2321,12 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 		return true, nil
 	}
 	if custom.Values[2].Int32 == 0 {
+		// end：持续型租约摘除（点数不再扣——begin 已付全程开局费，
+		// 双扣=一次按放双倍耗）。冲刺类引擎每次使用也发 flag=0，
+		// 只有真持有同 id 租约时才有摘除意义（Java QingGongHandler 同款）。
+		if definition.UseType == 1 && player.releaseDriftIfOwned(definition.ID) {
+			log.Printf("%s: qinggong hold end id=%s", remote, definition.ID)
+		}
 		if err := endQingGongBuff(link, player, definition); err != nil {
 			return true, err
 		}
@@ -1871,15 +2334,60 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 		return true, nil
 	}
 	now := time.Now()
+	// begin 重报闸（Java 2026-11-03 真机「按住 Shift 轻功条秒清」根因）：
+	// ①持续型：同 id 续约不重复扣开局费；②即时型：500ms 重报闸拦
+	// 引擎逐帧重发（人手 ~4/s 以下）。
+	if definition.UseType == 1 && player.engagedDriftID() == definition.ID {
+		log.Printf("%s: qinggong begin repeat id=%s suppressed (renewal)", remote, definition.ID)
+		return true, nil
+	}
+	if definition.UseType != 1 && !player.instantQingGongRechargeable(definition.ID, now) {
+		log.Printf("%s: qinggong begin repeat id=%s suppressed (instant_guard)", remote, definition.ID)
+		return true, nil
+	}
 	if spec, hasBuff := qinggongBuffFor(definition); hasBuff && spec.clearOnEnd && player.hasActiveBuff(spec.slot, spec.staticData, now) {
 		log.Printf("%s: ignore duplicate qinggong start id=%s", remote, definition.ID)
 		return true, nil
 	}
-	cost, accepted := player.useQingGong(definition.Consume, now)
-	if !accepted {
-		state := player.stateSnapshot()
-		log.Printf("%s: reject qinggong id=%s cost=%d point=%d", remote, definition.ID, cost, state.QingGongPoint)
+	// ExistBufID 能力门槛（2026-11-07 跳段限制批次，用户钉死语义）：
+	// 未挂对应能力 Buff（qinggong_4→buf_DHadd_2rd / qinggong_5→
+	// buf_DHadd_3rd，激活 qinggong_15/17 挂）→ 拒绝——没学没激活就
+	// 不能二/三段跳；已挂 → 免 Consume（native-menu 反编译实证的免费
+	// 分支）。未知的 ExistBufID（如 qinggong_9 的 buf_DHadd_light，
+	// 能力来源未实现）不设门槛，保旧表/缓降链现状。
+	capabilityFree := false
+	if spec, known := qingGongExistBuffSpec(definition.ExistBufID); known {
+		if !player.hasActiveBuff(spec.slot, spec.staticData, now) {
+			log.Printf("%s: reject qinggong id=%s missing capability buff %s", remote, definition.ID, definition.ExistBufID)
+			return true, nil
+		}
+		capabilityFree = true
+	}
+	// 跳段闸：同一腾空内同 id 计段轻功（Type 4/5/20）只放行一次；
+	// 落地（observePositionY）/超时（qingGongTick 兜底）/技能重置
+	// （grantAirJumpReset 只给一段）后恢复。拒绝不回滚段位——客户端
+	// 物理照跳（Java 口径），段位跟随消耗防蹭跳。
+	if isJumpStageQingGong(definition) && !player.beginAirJump(definition.ID, now) {
+		log.Printf("%s: reject qinggong id=%s air jump stage exhausted", remote, definition.ID)
 		return true, nil
+	}
+	var cost int32
+	if !capabilityFree {
+		var accepted bool
+		cost, accepted = player.useQingGong(definition.Consume, now)
+		if !accepted {
+			state := player.stateSnapshot()
+			log.Printf("%s: reject qinggong id=%s cost=%d point=%d", remote, definition.ID, cost, state.QingGongPoint)
+			return true, nil
+		}
+	}
+	// 持续型（UseType=1，含 qinggong_9 缓降）：挂秒耗租约（CCQGP 每秒
+	// 扣，回复暂停；表缺 CCQGP 时 drain=0 仍挂租约保续约/暂停语义——
+	// Java 同口径）。异 id 新 begin 由 engageDrift 直接顶替旧租约。
+	if definition.UseType == 1 {
+		drain := qingGongDrainPerSecond(definition)
+		player.engageDrift(definition.ID, drain)
+		log.Printf("%s: qinggong hold begin id=%s consume=%d drain/s=%d", remote, definition.ID, cost, drain)
 	}
 	alreadyActive, expires, err := activateQingGongBuff(player, definition, now)
 	if err != nil {
@@ -1987,6 +2495,19 @@ func sceneObjectByteProperty(objectID, ownerID uint32, propertyIndex uint16, val
 	msg = binary.LittleEndian.AppendUint16(msg, propertyIndex)
 	msg = append(msg, value)
 	return msg
+}
+
+// sceneObjectIntProperty 更新一个协商为四字节有符号整数的场景
+// 对象属性（如轻功值 QingGongPoint@692 的秒级单帧推送）。
+func sceneObjectIntProperty(objectID, ownerID uint32, propertyIndex uint16, value int32) []byte {
+	msg := make([]byte, 12, 18)
+	msg[0] = 0x10 // SERVER_OBJECT_PROPERTY
+	msg[1] = 0    // 场景对象，而非视图对象
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], 1)
+	msg = binary.LittleEndian.AppendUint16(msg, propertyIndex)
+	return binary.LittleEndian.AppendUint32(msg, uint32(value))
 }
 
 func sceneObjectTransformProperties(objectID, ownerID uint32, transform worldcore.Transform) []byte {

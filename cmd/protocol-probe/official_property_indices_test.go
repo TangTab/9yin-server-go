@@ -53,9 +53,12 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 		{"MaxMeleeDamage", propMaxMeleeDamage, clientdata.WireInt32},
 		{"MaxHPAdd", propMaxHPAdd, clientdata.WireInt32},
 		{"MaxMPAdd", propMaxMPAdd, clientdata.WireInt32},
+		{"MaxSP", propMaxSP, clientdata.WireInt32},
+		{"MaxSPAdd", propMaxSPAdd, clientdata.WireInt32},
 		{"MaxLevel", propMaxLevel, clientdata.WireInt32},
 		{"StaticData", propStaticData, clientdata.WireInt32},
 		{"ItemType", propItemType, clientdata.WireInt32},
+		{"WuXing", propWuXing, clientdata.WireInt32},
 		{"MaxParryAdd", propMaxParryAdd, clientdata.WireInt32},
 		{"MinMagicDefAdd", propMinMagicDefAdd, clientdata.WireInt32},
 		// player_actor.go:技能/恢复/格挡段
@@ -72,6 +75,10 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 		{"MPUpSpeed", propMPUpSpeed, clientdata.WireInt32},
 		{"MPUpSpeedAdd", propMPUpSpeedAdd, clientdata.WireInt32},
 		{"CurSkillTarget", propCurSkillTarget, clientdata.WireObject},
+		// 收招清除帧归零通道（exe #2014 六项形态）
+		{"CurSkillCanNoLimit", propCurSkillCanNoLimit, clientdata.WireByte},
+		{"CantBeSkillLocked", propCantBeSkillLocked, clientdata.WireByte},
+		{"CantBeSkillMustLocked", propCantBeSkillMustLocked, clientdata.WireByte},
 		{"ModifySkillLockTime", propModifySkillLockTime, clientdata.WireInt32},
 		{"CanUse", propSkillCanUse, clientdata.WireByte},
 		{"Force", propForce, clientdata.WireString},
@@ -84,6 +91,37 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 		{"BufferInfo1", bufferInfoFirstPropertyIndex, clientdata.WireString},
 		// selection.go
 		{"AutoSelectObject", propAutoSelectObject, clientdata.WireObject},
+		// gm_stats.go:GM 面板域（货币/属性/状态批次）
+		{"CapitalType2", propCapitalType2, clientdata.WireInt64},
+		{"PowerLevel", propPowerLevel, clientdata.WireInt32},
+		{"LevelTitle", propLevelTitle, clientdata.WireString},
+		{"CharacterFlag", propCharacterFlag, clientdata.WireInt32},
+		{"CharacterValue", propCharacterValue, clientdata.WireInt32},
+		{"Justice", propJustice, clientdata.WireInt32},
+		{"Evil", propEvil, clientdata.WireInt32},
+		{"FreeBase", propFreeBase, clientdata.WireInt32},
+		{"PKValue", propPKValue, clientdata.WireInt32},
+		{"PKMode", propPKMode, clientdata.WireByte},
+		{"Ene", propEne, clientdata.WireInt32},
+		{"MaxEne", propMaxEne, clientdata.WireInt32},
+		{"ResumeEne", propResumeEne, clientdata.WireInt32},
+		{"Sat", propSat, clientdata.WireInt32},
+		{"MaxSat", propMaxSat, clientdata.WireInt32},
+		{"DrunkLevel", propDrunkLevel, clientdata.WireInt32},
+		{"NorFacultyAdd", propNorFacultyAdd, clientdata.WireInt32},
+		{"ActDayValue", propActDayValue, clientdata.WireInt32},
+		{"ActCostSuiYin", propActCostSuiYin, clientdata.WireInt32},
+		{"ActDayValueLast", propActDayValueLast, clientdata.WireInt32},
+		{"ActDayValueUsed", propActDayValueUsed, clientdata.WireInt32},
+		{"ActDayValueMax", propActDayValueMax, clientdata.WireInt32},
+		// gm_stats.go:面板域块（称号/坐骑/兵录/声望；TitleID 归
+		// title_system.go 声明，此处一并钉线型）
+		{"TitleID", propTitleID, clientdata.WireInt32},
+		{"Mount", propMount, clientdata.WireString},
+		{"CurRideMount", propCurRideMount, clientdata.WireObject},
+		{"PrestigeExp", propPrestigeExp, clientdata.WireInt32},
+		{"BingLuType", propBingLuType, clientdata.WireInt32},
+		{"MaxBingLuLevel", propMaxBingLuLevel, clientdata.WireInt32},
 	}
 	for _, anchor := range playerAnchors {
 		entry, ok := clientdata.PlayerProperty(anchor.name)
@@ -106,8 +144,9 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 
 // TestOfficialDialectMaxSPLonginOnly 官方方言下 MaxSP(580) 只在登录/切图
 // 链首个权威 0x10 全量批出现一次(fork 49840 实证:全场 5181 帧仅 #16 一处,
-// 121 属性批携带);恢复批/事件批/0x0D 归档都不得再携带,MaxSPAdd(583) 则
-// 从不发送。塞错位置会让客户端在进世界时崩溃。
+// 121 属性批携带);MaxSPAdd(583) 官方从未发送,本服在同一登录批实验性
+// 携带一次(验证客户端怒气球口径,后续按内功档位计算);恢复批/事件批/
+// 0x0D 归档都不得再携带二者。塞错位置会让客户端在进世界时崩溃。
 func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 	for _, name := range []string{"MaxSP", "MaxSPAdd"} {
 		entry, ok := clientdata.PlayerProperty(name)
@@ -119,7 +158,7 @@ func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 		}
 	}
 	player := newPlayerActor("本地角色", 0)
-	// 登录批:stateProperties 大批 + MaxSP 一次(值=maxPlayerSP)。
+	// 登录批:stateProperties 大批 + MaxSP/MaxSPAdd 各一次。
 	login, err := player.loginVitalUpdate()
 	if err != nil {
 		t.Fatal(err)
@@ -128,29 +167,39 @@ func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 	if walkErr != nil {
 		t.Fatalf("walk login 0x10 frame: %v", walkErr)
 	}
-	maxSPCount := 0
+	maxSPCount, maxSPAddCount := 0, 0
 	for _, index := range loginIndices {
 		if index == 580 {
 			maxSPCount++
 		}
 		if index == 583 {
-			t.Fatal("MaxSPAdd(583) is never sent on the wire")
+			maxSPAddCount++
 		}
 	}
 	if maxSPCount != 1 {
 		t.Fatalf("login batch carries MaxSP %d times, want exactly 1", maxSPCount)
 	}
+	if maxSPAddCount != 1 {
+		t.Fatalf("login batch carries MaxSPAdd %d times, want exactly 1", maxSPAddCount)
+	}
 	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(maxPlayerSP), 0, 0, 0}
 	if !bytes.Contains(login, maxSPNeedle) {
 		t.Fatalf("login batch MaxSP slot is not %d: %x", maxPlayerSP, login)
 	}
-	// SP(467) 随同一大批出现且为满值(登录即满)。
+	// MaxSPAdd = 当前运行内功的档位加成(默认 ng_wd_001 武当一内 +10)。
+	_, rageAdd := player.rageCapSnapshot()
+	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8), byte(rageAdd), 0, 0, 0}
+	if !bytes.Contains(login, maxSPAddNeedle) {
+		t.Fatalf("login batch MaxSPAdd slot is not %d: %x", rageAdd, login)
+	}
+	// SP(467) 随同一大批出现且为满值(登录即满 = 有效上限)。
 	if !containsIndex(loginIndices, propSP) {
 		t.Fatalf("login batch misses SP at index %d", propSP)
 	}
-	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), 0, 0, 0}
+	rageCap := player.rageCap()
+	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(rageCap), 0, 0, 0}
 	if !bytes.Contains(login, spNeedle) {
-		t.Fatalf("login batch SP slot is not %d: %x", maxPlayerSP, login)
+		t.Fatalf("login batch SP slot is not %d: %x", rageCap, login)
 	}
 	// 常规批(恢复/事件)不得携带 MaxSP/MaxSPAdd。
 	regular, err := player.vitalUpdate()

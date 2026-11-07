@@ -42,7 +42,7 @@ func newMockCustomizingDB(t *testing.T) (*customizingDBStore, sqlmock.Sqlmock) {
 
 // role_keybinds UPSERT 的两个已踩实的坑（Java RoleInventoryStore）：
 // scheme 0 的目标列即 INSERT 列单里的 bind_value（不得出现两次）；
-// 其它列首插必须补 bind_value=''（NOT NULL 无默认值）。
+// 其它列首插必须补 bind_value=”（NOT NULL 无默认值）。
 func TestKeybindDBSaveSchemeJavaParitySQL(t *testing.T) {
 	mock, stores := newCustomConfigMockDB(t)
 	mock.ExpectExec(`INSERT INTO role_keybinds \(role_id, bind_value\) VALUES \(\?, \?\)`+

@@ -261,6 +261,12 @@
     function fillSP() {
       command({ action: "fill_sp" });
     }
+    function setRageRecovery() {
+      command({
+        action: "set_rage_recovery",
+        value: +document.querySelector("#rage-recovery").value,
+      });
+    }
     function setMoveSpeed() {
       command({
         action: "set_move_speed",
@@ -271,6 +277,18 @@
       command({
         action: "set_gravity",
         value: +document.querySelector("#gravity").value,
+      });
+    }
+    function setRespawnInterval() {
+      command({
+        action: "set_respawn_interval",
+        value: +document.querySelector("#respawn-interval").value,
+      });
+    }
+    function setCorpseTTL() {
+      command({
+        action: "set_corpse_ttl",
+        value: +document.querySelector("#corpse-ttl").value,
       });
     }
     function setFaculty() {

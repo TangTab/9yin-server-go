@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/entity"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -42,8 +43,14 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 		t.Fatalf("MP=%d, want %d", got, beforeMP-11)
 	}
 	frames := conn.Frames()
-	if len(frames) != 4 || frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x27 {
-		t.Fatalf("frames=%d, want 0x11 cooldown, 0x10 player update, 0x10 verified State action, then 0x27 msg20", len(frames))
+	if len(frames) != 6 || frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x10 || frames[5][0] != 0x27 {
+		t.Fatalf("frames=%d, want 0x11 cooldown/personal+active+GCD, 0x10 player update, 0x10 State action, then 0x27 msg20", len(frames))
+	}
+	if got := binary.LittleEndian.Uint16(frames[1][10:]); got != recordActiveSkill {
+		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
+	}
+	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordCooldown {
+		t.Fatalf("GCD record index=%d, want %d", got, recordCooldown)
 	}
 	if got := binary.LittleEndian.Uint16(frames[0][10:]); got != recordCooldown {
 		t.Fatalf("cooldown record index=%d, want %d", got, recordCooldown)
@@ -81,11 +88,11 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 		t.Fatalf("cooldown rejection still spent MP: %d", got)
 	}
 	deadline := time.Now().Add(time.Second)
-	for len(conn.Frames()) < 5 && time.Now().Before(deadline) {
+	for len(conn.Frames()) < 7 && time.Now().Before(deadline) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	frames = conn.Frames()
-	if len(frames) != 5 || frames[4][0] != 0x10 {
+	if len(frames) != 7 || frames[6][0] != 0x10 {
 		t.Fatalf("frames after follow-up=%d, want one delayed 0x10 State action", len(frames))
 	}
 }
@@ -107,6 +114,84 @@ func TestCurrentSkillClearRejectsStaleTimer(t *testing.T) {
 	}
 }
 
+// TestCurrentSkillClearEchoesCombatLogicState 复刻真机 61512 抓包脱战闪断
+// （2026-11-07）：面对面战斗中每招收尾都发出 LogicState=0——旧实现既在
+// clearCurrentSkill 里硬编落 0、清除帧又硬编发 0，双双绕过 setCombatPresence
+// 权威。官方收招帧（62433 抓包跨招恒 1；exe #2014 六项形态）只回显当前
+// 权威值，战斗存在性独归威胁/10s 迟滞窗口管。
+func TestCurrentSkillClearEchoesCombatLogicState(t *testing.T) {
+	player := newPlayerActor("tester", 0)
+	// 命中入战：无威胁但 10s 迟滞窗口内 Fighting。
+	player.noteCombatActivity(time.Unix(1, 0))
+	if changed := player.setCombatPresence(false, time.Unix(2, 0)); !changed {
+		t.Fatal("presence did not enter Fighting after combat activity")
+	}
+	player.currentSkillID = "CS_jh_myjf03"
+	if !player.clearCurrentSkill("CS_jh_myjf03") {
+		t.Fatal("matching skill timer did not clear current skill")
+	}
+	// 收招不得改动战斗存在性。
+	if got := player.stateSnapshot().LogicState; got != entity.LogicStateFighting {
+		t.Fatalf("LogicState=%d after skill clear, want Fighting", got)
+	}
+	frame, err := player.currentSkillClearUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 0x10 | isView | u32 obj | u32 owner | u16 n | (u16 idx + 值)*
+	if frame[0] != 0x10 {
+		t.Fatalf("clear frame opcode=%#x, want 0x10", frame[0])
+	}
+	if got := binary.LittleEndian.Uint16(frame[10:12]); got != 6 {
+		t.Fatalf("clear frame props=%d, want 6 (exe #2014 六项形态)", got)
+	}
+	wantIndices := []uint16{463, propCurSkillID, propCurSkillTarget, propCurSkillCanNoLimit, propCantBeSkillLocked, propCantBeSkillMustLocked}
+	off := 12
+	for i, want := range wantIndices {
+		if got := binary.LittleEndian.Uint16(frame[off : off+2]); got != want {
+			t.Fatalf("prop[%d] index=%d, want %d", i, got, want)
+		}
+		off += 2
+		switch want {
+		case 463:
+			if got := frame[off]; got != entity.LogicStateFighting {
+				t.Fatalf("LogicState echo=%d, want Fighting(1)", got)
+			}
+			off++
+		case propCurSkillID:
+			// 线型：u32(len+1) + 内容 + NUL；空串即 u32(1)+0x00。
+			if got := binary.LittleEndian.Uint32(frame[off : off+4]); got != 1 {
+				t.Fatalf("CurSkillID len=%d, want 1 (empty + NUL)", got)
+			}
+			if got := frame[off+4]; got != 0 {
+				t.Fatalf("CurSkillID bytes=%#x, want NUL", got)
+			}
+			off += 5
+		case propCurSkillTarget:
+			off += 8
+		default:
+			if got := frame[off]; got != 0 {
+				t.Fatalf("prop %d =%d, want 0", want, got)
+			}
+			off++
+		}
+	}
+	if off != len(frame) {
+		t.Fatalf("clear frame len=%d, parsed=%d (layout drift)", len(frame), off)
+	}
+	// 脱战后收招同样回显 0：普通态清招不清战斗存在性，也不误报战斗。
+	if changed := player.setCombatPresence(false, time.Unix(1+int64(combatPresenceIdleExit/time.Second)+3, 0)); !changed {
+		t.Fatal("presence did not exit after idle window")
+	}
+	frame, err = player.currentSkillClearUpdate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := frame[14]; got != entity.LogicStateNormal {
+		t.Fatalf("out-of-combat LogicState echo=%d, want 0", got)
+	}
+}
+
 func TestHandleSkillFourStagesNativeVisibleBuff(t *testing.T) {
 	player := newPlayerActor("tester", 0)
 	conn := &captureMessageConnection{}
@@ -121,8 +206,14 @@ func TestHandleSkillFourStagesNativeVisibleBuff(t *testing.T) {
 		t.Fatalf("BufferListStr=%q, want buf_CS_yhwq_hsqs04", got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 4 || frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x27 {
-		t.Fatalf("frames=%d, want 0x11 cooldown, 0x10 player update, 0x10 State action, then 0x27 msg20", len(frames))
+	if len(frames) != 6 || frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x10 || frames[5][0] != 0x27 {
+		t.Fatalf("frames=%d, want 0x11 cooldown/personal+active+GCD, 0x10 player update, 0x10 State action, then 0x27 msg20", len(frames))
+	}
+	if got := binary.LittleEndian.Uint16(frames[1][10:]); got != recordActiveSkill {
+		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
+	}
+	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordCooldown {
+		t.Fatalf("GCD record index=%d, want %d", got, recordCooldown)
 	}
 }
 
@@ -237,7 +328,7 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if got, want := player.skillSP(), maxPlayerSP-taiJiQuanGuPuCombatSkills["CS_wd_tjq08"].spCost; got != want {
+	if got, want := player.skillSP(), player.rageCap()-taiJiQuanGuPuCombatSkills["CS_wd_tjq08"].spCost; got != want {
 		t.Fatalf("SP=%d, want %d after 开太极", got, want)
 	}
 	if got := player.bufferInfo(redSuperArmorBuffSlot, time.Now()); got == "" {
@@ -246,9 +337,13 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 	if got := player.bufferListString(time.Now()); !strings.Contains(got, "buf_fixed_red") {
 		t.Fatalf("BufferListStr=%q, want buf_fixed_red", got)
 	}
-	if frames := conn.Frames(); len(frames) != 4 ||
-		frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x27 {
+	frames := conn.Frames()
+	if len(frames) != 6 ||
+		frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x10 || frames[5][0] != 0x27 {
 		t.Fatalf("开太极 initial frames=%x", frames)
+	}
+	if got := binary.LittleEndian.Uint16(frames[1][10:]); got != recordActiveSkill {
+		t.Fatalf("开太极 active skill record=%d, want %d", got, recordActiveSkill)
 	}
 }
 
@@ -374,12 +469,17 @@ func TestSkillCompletionClearsStateAndRestoresStand(t *testing.T) {
 
 	scheduleCurrentSkillClear(conn, player, definition)
 	deadline := time.Now().Add(time.Second)
-	for len(conn.Frames()) < 2 && time.Now().Before(deadline) {
+	// §3 行 9：0x12 删 active_skill 行 + CurSkill 清除 + State(183)
+	// stand + State(19) stand，共 4 帧。
+	for len(conn.Frames()) < 4 && time.Now().Before(deadline) {
 		time.Sleep(time.Millisecond)
 	}
 	frames := conn.Frames()
-	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
-		t.Fatalf("completion frames=%d, want CurSkill clear then State stand", len(frames))
+	if len(frames) != 4 || frames[0][0] != 0x12 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x10 {
+		t.Fatalf("completion frames=%d, want 0x12 del row, CurSkill clear, State stand ×2", len(frames))
+	}
+	if got := binary.LittleEndian.Uint16(frames[0][10:]); got != recordActiveSkill {
+		t.Fatalf("delete record=%d, want %d", got, recordActiveSkill)
 	}
 	if got := player.currentSkillSnapshot(); got != "" {
 		t.Fatalf("CurSkillID=%q after completion", got)
@@ -389,26 +489,39 @@ func TestSkillCompletionClearsStateAndRestoresStand(t *testing.T) {
 func TestSkillFourCooldownRecordMatchesInstalledStaticData(t *testing.T) {
 	definition := yiHuaWuQueCombatSkills["CS_yhwq_hsqs04"]
 	start := time.UnixMilli(123456)
-	frame, err := skillCooldownFrame(definition, start)
+	personal, public, err := skillCooldownFrames(definition, start)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(frame) != 40 || frame[0] != 0x11 {
-		t.Fatalf("cooldown frame=%x", frame)
+	// 官方 cooldown_rec [3,4,4,2]：16 头 + 4+8+8+2 = 38 字节，
+	// 末列 team 是 u16。双行：个人行 team 恒 0xFFFF；GCD 行类别
+	// 固定 50000、team 取 skill_static CoolDownTeam。
+	for _, frame := range [][]byte{personal, public} {
+		if len(frame) != 38 || frame[0] != 0x11 {
+			t.Fatalf("cooldown frame=%x", frame)
+		}
+		if got := binary.LittleEndian.Uint16(frame[10:]); got != recordCooldown {
+			t.Fatalf("record index=%d, want %d", got, recordCooldown)
+		}
+		begin := int64(binary.LittleEndian.Uint64(frame[20:]))
+		if begin != start.UnixMilli() {
+			t.Fatalf("cooldown begin=%d", begin)
+		}
 	}
-	if got := binary.LittleEndian.Uint16(frame[10:]); got != recordCooldown {
-		t.Fatalf("record index=%d, want %d", got, recordCooldown)
+	if got := binary.LittleEndian.Uint32(personal[16:]); got != 12445 {
+		t.Fatalf("personal category=%d, want 12445", got)
 	}
-	if got := binary.LittleEndian.Uint32(frame[16:]); got != 12445 {
-		t.Fatalf("category=%d, want 12445", got)
+	if end := int64(binary.LittleEndian.Uint64(personal[28:])); end-start.UnixMilli() != 1000 {
+		t.Fatalf("personal duration=%d ms, want 1000", end-start.UnixMilli())
 	}
-	begin := int64(binary.LittleEndian.Uint64(frame[20:]))
-	end := int64(binary.LittleEndian.Uint64(frame[28:]))
-	if begin != start.UnixMilli() || end-begin != 1000 {
-		t.Fatalf("cooldown begin=%d end=%d", begin, end)
+	if got := binary.LittleEndian.Uint16(personal[36:]); got != 0xFFFF {
+		t.Fatalf("personal team=%d, want 0xFFFF", got)
 	}
-	if got := binary.LittleEndian.Uint32(frame[36:]); got != 50267 {
-		t.Fatalf("team=%d, want 50267", got)
+	if got := binary.LittleEndian.Uint32(public[16:]); got != 50000 {
+		t.Fatalf("GCD category=%d, want 50000", got)
+	}
+	if got := binary.LittleEndian.Uint16(public[36:]); got != 50267 {
+		t.Fatalf("GCD team=%d, want 50267", got)
 	}
 }
 
@@ -420,7 +533,7 @@ func TestSkillSevenSpendsSP(t *testing.T) {
 	if !ok {
 		t.Fatalf("begin skill seven: %s", reason)
 	}
-	if got, want := player.progress.attributes.sp, maxPlayerSP-definition.spCost; got != want {
+	if got, want := player.progress.attributes.sp, player.rageCap()-definition.spCost; got != want {
 		t.Fatalf("SP=%d, want %d", got, want)
 	}
 }

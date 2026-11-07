@@ -185,6 +185,37 @@ func (s *inventoryStore) consumeBagItem(ctx context.Context, roleID role.RoleID,
 	return 0, nil
 }
 
+// increaseBagItem 行内加数（商店购买叠堆路径）：无行返回 -1；返回新额。
+func (s *inventoryStore) increaseBagItem(ctx context.Context, roleID role.RoleID, category, slot, count int32) (int32, error) {
+	if s == nil || s.db == nil {
+		return 0, nil
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return -1, err
+	}
+	defer func() { _ = tx.Rollback() }()
+	var amount int32
+	err = tx.QueryRowContext(ctx,
+		"SELECT amount FROM role_bag_items WHERE role_id = ? AND slot = ? AND view_id = ?",
+		roleID, slot, category).Scan(&amount)
+	if err == sql.ErrNoRows {
+		return -1, nil
+	}
+	if err != nil {
+		return -1, err
+	}
+	if _, err = tx.ExecContext(ctx,
+		"UPDATE role_bag_items SET amount = ? WHERE role_id = ? AND slot = ? AND view_id = ?",
+		amount+count, roleID, slot, category); err != nil {
+		return -1, err
+	}
+	if err = tx.Commit(); err != nil {
+		return -1, err
+	}
+	return amount + count, nil
+}
+
 // insertBagItem 新行入包：slot<=0 自动取 1..90 首空格；返回落库行
 // （seq/uid 回填，调用方以返回值为帧与内存的权威）。
 func (s *inventoryStore) insertBagItem(ctx context.Context, roleID role.RoleID, item bagRow) (bagRow, error) {

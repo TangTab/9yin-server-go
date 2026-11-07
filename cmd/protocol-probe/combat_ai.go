@@ -74,8 +74,19 @@ func newNPCCombatState(npc npcSpawn, home worldcore.Transform) sim.Brain {
 	return sim.Brain{
 		Home: home, AggroRange: aggro, ChaseRange: chase,
 		AttackRange: defaultAttackRange, MoveSpeed: move, Damage: damage,
-		AttackEvery: defaultAttackEvery, RespawnAfter: defaultNPCRespawn,
+		AttackEvery: defaultAttackEvery, RespawnAfter: npcRespawnAfter(npc),
 	}
+}
+
+// npcRespawnAfter 取模板官方字段 RefreshTime（VisibleNPCModernV1 idx 93，
+// 单位秒）作为死亡→重生间隔；worldnpc/bossnpc 实测数据该列基本为空，
+// 空值/越界（<=0 或 >1 小时）一律回落默认 15s。只有 AttackNpc/BossNpc
+// 挂 Brain，因此平民与任务怪（EventNpc 从不注册）天然不进入刷新循环。
+func npcRespawnAfter(npc npcSpawn) time.Duration {
+	if seconds := npc.int32Property("RefreshTime"); seconds > 0 && seconds <= 3600 {
+		return time.Duration(seconds) * time.Second
+	}
+	return defaultNPCRespawn
 }
 
 func (n npcSpawn) float32Property(name string) float32 {
@@ -97,6 +108,24 @@ type combatTickOutcome struct {
 	// rageFrames 是受击得怒(格挡被揍 +2/直接被揍 +1)产生的 18 字节
 	// SP 单帧,按受击成员收集,锁外写给属主连接。
 	rageFrames map[uint32][]byte
+	// attacks 是本 tick 发生的 NPC 攻击表现素材（F 盘参考服
+	// writeNPCAttackFrames 三段式：msg337 预备→msg20 动作→msg24 命中）。
+	// 伤害结算仍在锁内同步完成；这里只携带锁外补发表帧所需的只读快照。
+	attacks []npcAttackPresentation
+}
+
+// npcAttackPresentation 是一次 NPC 攻击的表现快照。transform 已带
+// 朝向目标后的 Orient；landed=false（被闪避/招架）时锁外只发预备+
+// 动作两帧。victim 用于命中帧（obj(玩家) 用受害者本地身份 1-1）。
+type npcAttackPresentation struct {
+	npcID          uint32
+	ownerID        uint32
+	transform      worldcore.Transform
+	landed         bool
+	model          string
+	playerWideName string
+	npcWideName    string
+	victim         *sceneMember
 }
 
 func (r *sceneRun) combatTick(now time.Time) {
@@ -139,6 +168,51 @@ func (r *sceneRun) combatTick(now time.Time) {
 		}
 	}
 	r.broadcastNPCFrames(outcome.members, outcome.moves, outcome.updates)
+	r.broadcastNPCAttacks(outcome.attacks)
+}
+
+// broadcastNPCAttacks 补发本 tick 的 NPC 攻击三段表现帧（F 盘
+// writeNPCAttackFrames 同构，同 tick 三连发）：msg337 预备（NPC 坐标/
+// 朝向）→ msg20 动作（施法者=NPC）→ msg24 命中（仅实际命中时；obj
+// 用受害者本地玩家身份 1-1，故只写受害者自己的连接，不中继）。预备
+// 与动作帧以 NPC 为中心，受害者首发后对视口内可见该 NPC 的其他
+// 成员中继。伤害已在锁内同步结算，这里纯表现。
+func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
+	for _, attack := range attacks {
+		if attack.victim == nil || attack.victim.view == nil {
+			continue
+		}
+		prepFrame, err := npcCastPreparationFrame(attack.npcID, attack.ownerID,
+			attack.transform.X, attack.transform.Y, attack.transform.Z, attack.transform.Orient)
+		if err != nil {
+			log.Printf("%s: encode NPC cast preparation %d: %v", attack.victim.view.remote, attack.npcID, err)
+			continue
+		}
+		animFrame, err := nativeSkillActionFrameFor(attack.npcID, attack.ownerID, npcDefaultAttackSkill, playerObjectID, playerOwnerID)
+		if err != nil {
+			log.Printf("%s: encode NPC attack action %d: %v", attack.victim.view.remote, attack.npcID, err)
+			continue
+		}
+		for _, frame := range [][]byte{prepFrame, animFrame} {
+			if err := attack.victim.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: write NPC attack frame %d: %v", attack.victim.view.remote, attack.npcID, err)
+			}
+		}
+		r.relayCombatFrame(attack.npcID, prepFrame, attack.victim.view, "NPC attack")
+		r.relayCombatFrame(attack.npcID, animFrame, attack.victim.view, "NPC attack")
+		if !attack.landed {
+			continue
+		}
+		hitFrame, err := npcAttackHitFrame(playerObjectID, playerOwnerID,
+			attack.npcID, attack.ownerID, attack.model, attack.playerWideName, attack.npcWideName)
+		if err != nil {
+			log.Printf("%s: encode NPC attack hit %d: %v", attack.victim.view.remote, attack.npcID, err)
+			continue
+		}
+		if err := attack.victim.view.conn.WriteFrame(hitFrame); err != nil {
+			log.Printf("%s: write NPC attack hit %d: %v", attack.victim.view.remote, attack.npcID, err)
+		}
+	}
 }
 
 // simulateLocked 是 combatTick 的锁内结算段，独立出来供测试路径
@@ -170,11 +244,17 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 	aggressors := 0
 	threatened := make(map[uint32]bool, len(targets))
 	var rage map[uint32][]byte
+	attacks := make([]npcAttackPresentation, 0, 2)
 	// eachCombatNPCFullLocked 以 EntityID 升序一次遍历交付全部组件指针；
 	// 分支逻辑与单连接时代逐行等价，就地修改即生效。
 	r.eachCombatNPCFullLocked(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
 		actorState := vitals.ActorState(meta.id, meta.ownerID)
 		if actorState.HP <= 0 {
+			if npcRespawnBatchInterval() > 0 {
+				// 批量刷新模式：重生归 refreshTick 周期扫描统一结算
+				//（尸体 TTL 清除 + 批量复活），这里只保留尸体。
+				return
+			}
 			if !state.RespawnAt.IsZero() && !now.Before(state.RespawnAt) {
 				vitals.Revive()
 				state.Threat = 0
@@ -250,6 +330,21 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 		state.NextAttack = now.Add(state.AttackEvery)
 		outcome := target.player.resolveNPCAttack(meta.id, state.Damage, now)
+		// 三段攻击表现素材（锁外补发 msg337/msg20/msg24）；朝向重算
+		// 为面向目标。素材取自 NPC meta 与受害者成员，全部只读。
+		attacks = append(attacks, npcAttackPresentation{
+			npcID:   meta.id,
+			ownerID: meta.ownerID,
+			transform: worldcore.Transform{
+				X: transform.X, Y: transform.Y, Z: transform.Z,
+				Orient: float32(math.Atan2(float64(position.Z-transform.Z), float64(position.X-transform.X))),
+			},
+			landed:         !outcome.dodged && !outcome.parried,
+			model:          meta.model,
+			playerWideName: target.player.snapshotName(),
+			npcWideName:    meta.wideName,
+			victim:         target,
+		})
 		if outcome.rageDelta != 0 {
 			if _, spFrame, spErr := target.player.addSP(outcome.rageDelta); spErr == nil && spFrame != nil {
 				if rage == nil {
@@ -277,17 +372,18 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 	})
 	// 玩家侧战斗临场感（Fighting/Normal 迁移）按成员分别结算。
+	// 威胁或 10s 内战斗活动（noteCombatActivity）都保持 Fighting。
 	changed := make(map[uint32]bool, len(members))
 	for _, member := range members {
 		if member.player == nil {
 			continue
 		}
-		if member.player.setCombatPresence(threatened[member.objectID]) {
+		if member.player.setCombatPresence(threatened[member.objectID], now) {
 			changed[member.objectID] = true
 		}
 	}
 	r.mu.Unlock()
-	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage}
+	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage, attacks: attacks}
 }
 
 // nearestTargetLocked 返回 aggroRange 内最近的存活目标；没有则返回 0。
@@ -331,6 +427,7 @@ func (s *sceneLifecycle) combatTickForTest(player *playerActor, position role.Po
 	outcome := s.run.simulateLocked(now)
 	if outcome != nil {
 		s.run.broadcastNPCFrames(outcome.members, outcome.moves, outcome.updates)
+		s.run.broadcastNPCAttacks(outcome.attacks)
 	}
 	after := player.stateSnapshot()
 	return combatTickResult{playerStateChanged: after.LogicState != before.LogicState || after.HP != before.HP}
@@ -415,6 +512,53 @@ func (r *sceneRun) broadcastNPCFrames(members []*sceneMember, moves []npcMoveUpd
 			}
 		}
 	}
+}
+
+// relayNPCPropertyFrame 把连接循环里产生的单条 NPC 属性帧（目前只有
+// 击杀致死帧）中继给视口内可见该 NPC 的其他成员；击杀者自己的视图经
+// exclude 指针跳过——首发帧已由其连接循环写入。普通掉血帧仍仅击杀者
+// 可见（完整战斗可见性是独立专题，不并入重生批次）。
+func (r *sceneRun) relayNPCPropertyFrame(id uint32, frame []byte, exclude *sceneLifecycle) {
+	r.relayCombatFrame(id, frame, exclude, "NPC property")
+}
+
+// relayCombatFrame 是通用战斗帧中继：把首发成员连接循环已写入的帧
+// 原样发给视口内可见该 NPC 的其他成员。命中表现帧族（msg24/0x2D/
+// msg18/msg205、NPC 三段攻击帧）与致死帧共用同一条扇出路径。
+func (r *sceneRun) relayCombatFrame(id uint32, frame []byte, exclude *sceneLifecycle, kind string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.closed {
+		return
+	}
+	for _, member := range r.members {
+		if member.view == nil || member.view == exclude {
+			continue
+		}
+		if !member.view.npcVisible(id) {
+			continue
+		}
+		if err := member.view.conn.WriteFrame(frame); err != nil {
+			log.Printf("%s: relay %s %d: %v", member.view.remote, kind, id, err)
+		}
+	}
+}
+
+// fightRelationAddLocked 累计「玩家→受害 NPC」伤害并返回新累计值
+// （0x13 fight_relation_rec 单格语义：抓包每击 +固定伤害 递增）。
+// 要求调用方已持 r.mu。NPC 死亡走 fightRelationResetLocked 清零。
+func (r *sceneRun) fightRelationAddLocked(victimID uint32, damage int32) int32 {
+	if r.fightRelation == nil {
+		r.fightRelation = make(map[uint32]int32)
+	}
+	r.fightRelation[victimID] += damage
+	return r.fightRelation[victimID]
+}
+
+// fightRelationResetLocked 清除受害 NPC 的战斗关系累计格（致死/
+// 注销时调用，重生后从零累计）。
+func (r *sceneRun) fightRelationResetLocked(victimID uint32) {
+	delete(r.fightRelation, victimID)
 }
 
 func sameCombatTransform(a, b worldcore.Transform) bool {

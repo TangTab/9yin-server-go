@@ -136,7 +136,8 @@ resource_store（MPQ 三层仓）、ecs/world 架构、server_moving、内功特
 | P1 | 15 移动上报全量（冲锋落地续招 212） | 冲锋暂存探测到位逻辑 | ✅ 2026-11-07（211 三层距离闸 TSP2/8m 回落+暂存带≤15m+静默拒；暂存=CurSkillID+msg25+msg24-c61 档2；msg15 到位探测 3m 半径+疾跑转冲刺 msg24 档1+0x1F 锚；212/msg15 共用 resume=337 回显+msg26+重组 10 值短式 211 重入受理链；msg20 非 lock 族已接、lock 族真实 NPC 目标走 msg19 仍缺） |
 | P1 | 54 格挡 / 218 招架 / 292 预警 | active_parry 三件套 | 54 ✅ 2026-11-06（槽11+msg169 宽串+InParry 帧表位 231..233）；218 已有占位；292 ✅ 2026-11-07（零参 0↔2 翻转+单帧 0x10 idx463 byte；出招/格挡中拒绝） |
 | P1 | 30/31/34/36 背包装备四件套 | equip_wear.go 同源，一次还原 | ✅ 2026-11-07（30 移动/穿脱/换装 + 34 丢弃 + 36 同类聚合压缩；31 全链=穿戴分支+秘籍 SkillBook/Page/Scroll 学习（门槛 condition.ini Type1/3/19、wuxue/anqi 直达层+View40 重开、neigong 抬上限+View43、qinggong View46 追加）+开箱三源（box_contents 描述对照→drops_mvp 权重包→缺包阶梯兜底）+药品回血阶梯+Lua 钩子预留；写穿 MySQL（uid/affixes 缺列降级）；会话模型 playerActor.bag/equip）。简化：皮肤卡（fwz 域）、选择箱 389、temp_stat 实施、zhenfa、886-889 一键配装、arrange 不落盘（fork 同款） |
-| P2 | 70/71 商店 + 180 风物志 + 295 称号 | 经济/收集 | ⬜ |
-| P2 | 150/161 经脉 + 240 打坐 + 216/217 轻功激活 | 修炼闭环 | ⬜ |
-| P3 | 861 淬火 / 933-938 重铸 / 864 生活职业 / 972-997 门派新手 | 深度玩法 | ⬜ |
+| P2 | 70/71 商店 + 180 风物志 + 295 称号 | 经济/收集 | ✅ 2026-11-07（70/71 购销+role_currency/0014；295 TitleID@360+role_titles+title_rec 记录行；180 已随外观移植先行落地——docs/fork-p2-shop-title-jingmai.md） |
+| P2 | 150/161 经脉 + 240 打坐 + 216/217 轻功激活 | 修炼闭环 | ✅ 2026-11-07（150 sub1/2+161 [sub1/2,str] active_jingmai_rec 增删行+View45+43/min·750/周天·日500 ticker+role_meridians；240/216/217 此前已实现——docs/fork-p2-shop-title-jingmai.md） |
+| P3 | 861 淬火 / 933-938 重铸 / 864 生活职业 / 972-997 门派新手 | 深度玩法 | 🔶 2026-11-07 第一批：70 type-3 兑换闭环（88% 商店条目复活，openShop 不再半截报错）+ 972 新手选择 + 973/997 加入门派（joinFaction 会话级）——docs/fork-p3-exchange-school.md；861/933-938/864/997 完整族仍 ⬜ |
 | P3 | MySQL 持久化层 | 需求驱动再定 | ⬜ |
+| P1 | 命中表现帧族 0x13/msg24(技能11值+NPC 9值)/0x2D/msg18/msg205 + NPC 三段攻击帧(337/20/24) + CD 双行 + active_skill_rec + 337 施法回显 | combat-gap-audit 核心缺口；F 盘 native-menu.exe 反汇编 + Java 仓 combat-skill-211.md §3/§4 双源逐字节钉死 | ✅ 2026-11-07（skill_hit_frames.go 帧族；handleSkillCustom 每目标 0x10→0x13→24→0x2D→18→205 序列+旁观者 relayCombatFrame 中继；fightRelation 累计表 sceneRun；NPC 攻击 broadcastNPCAttacks 同 tick 三连发，未命中只发预备+动作；CD 个人+GCD 双行夹 active_skill_rec(446) 行、动作总时长后 0x12 删+State(19) stand；msg337 施法回显复用 casterTransformSyncFrame。0x13 row/col 恒 1/1 按抓包字面复刻） |

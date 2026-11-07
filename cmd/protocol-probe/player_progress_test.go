@@ -52,14 +52,15 @@ func TestPlayerActorPublishesNewSchoolSeparately(t *testing.T) {
 
 func TestPlayerActorSPAuthorityClampsAndPublishesCurrentValue(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
+	rageCap := player.rageCap()
 	sp, frame, err := player.setSP(999)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if sp != maxPlayerSP || player.skillSP() != maxPlayerSP {
-		t.Fatalf("set SP=%d actor=%d, want %d", sp, player.skillSP(), maxPlayerSP)
+	if sp != rageCap || player.skillSP() != rageCap {
+		t.Fatalf("set SP=%d actor=%d, want %d", sp, player.skillSP(), rageCap)
 	}
-	saturatedSP := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), byte(maxPlayerSP >> 8), 0, 0}
+	saturatedSP := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(rageCap), byte(rageCap >> 8), 0, 0}
 	if frame[0] != 0x10 || !bytes.Contains(frame, saturatedSP) {
 		t.Fatalf("set SP frame=%x", frame)
 	}
@@ -85,8 +86,9 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	for _, property := range player.stateProperties() {
 		regular[property.Name] = property.Value.I32
 	}
-	if got := regular["SP"]; got != maxPlayerSP {
-		t.Fatalf("SP=%d, want %d", got, maxPlayerSP)
+	rageCap := player.rageCap()
+	if got := regular["SP"]; got != rageCap {
+		t.Fatalf("SP=%d, want %d", got, rageCap)
 	}
 	if _, exists := regular["MaxSP"]; exists {
 		t.Fatal("regular property profile must not carry MaxSP")
@@ -94,9 +96,9 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	if _, exists := regular["MaxSPAdd"]; exists {
 		t.Fatal("regular property profile must not carry MaxSPAdd")
 	}
-	// 登录/切图链的首个权威 0x10(=stateProperties 大批 + MaxSP 一次,
-	// 无独立怒气帧):SP(467)=满值 100,MaxSP(580)=100 恰好一次,
-	// MaxSPAdd 永不出现。
+	// 登录/切图链的首个权威 0x10(=stateProperties 大批 + MaxSP/MaxSPAdd
+	// 各一次,无独立怒气帧):SP(467)=满值(有效上限),MaxSP(580)=80,
+	// MaxSPAdd(583)=当前运行内功档位加成。
 	frame, err := player.loginVitalUpdate()
 	if err != nil {
 		t.Fatal(err)
@@ -104,17 +106,18 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	if frame[0] != 0x10 {
 		t.Fatalf("login vital frame opcode=%#x", frame[0])
 	}
-	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(maxPlayerSP), 0, 0, 0}
+	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(rageCap), 0, 0, 0}
 	if !bytes.Contains(frame, spNeedle) {
-		t.Fatalf("login vital batch misses SP=%d at index %d: %x", maxPlayerSP, propSP, frame)
+		t.Fatalf("login vital batch misses SP=%d at index %d: %x", rageCap, propSP, frame)
 	}
 	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(maxPlayerSP), 0, 0, 0}
 	if !bytes.Contains(frame, maxSPNeedle) {
 		t.Fatalf("login vital batch misses MaxSP=%d at index 580: %x", maxPlayerSP, frame)
 	}
-	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8)}
-	if bytes.Contains(frame, maxSPAddNeedle) {
-		t.Fatal("MaxSPAdd is never sent on the wire")
+	_, rageAdd := player.rageCapSnapshot()
+	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8), byte(rageAdd), 0, 0, 0}
+	if !bytes.Contains(frame, maxSPAddNeedle) {
+		t.Fatalf("login vital batch misses MaxSPAdd=%d at index 583: %x", rageAdd, frame)
 	}
 	// 常规批不再携带上限。
 	regularFrame, err := player.vitalUpdate()
@@ -128,8 +131,8 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 
 func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 	player := newPlayerActor("本地角色", 0)
-	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 2630 || got.BaseMaxMP != 500 || got.MaxMP != 990 {
-		t.Fatalf("两仪护心功 server caps=%+v, want base 1000/500 total 2630/990", got)
+	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 3207 || got.BaseMaxMP != 500 || got.MaxMP != 1337 {
+		t.Fatalf("两仪护心功 server caps=%+v, want base 1000/500 total 3207/1337", got)
 	}
 	if got := player.progress.books[0].staticData; got != 5 {
 		t.Fatalf("ng_wd_001 StaticData=%d, want classic visible-buff value 5", got)
@@ -140,11 +143,15 @@ func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_wd_001,local-4,3,1-1,")) {
 		t.Fatalf("level-30 neigong BufferListStr=%q", got)
 	}
+	// 官方全量公式（55866/12173 抓包解出的系数）：属性分量 + 内功 pack。
+	// 五维线上值 75/61/43/76/43（base 30 + L30 varprop）：
+	// MaxHPAdd=2·75+7·61+1630=2207、MaxMPAdd=4·76+43+490=837、
+	// MinMagicDefAdd=round(0.2·43)+45=54。
 	wantAdds := map[string]int32{
-		"MaxHPAdd":       1630,
-		"MaxMPAdd":       490,
+		"MaxHPAdd":       2207,
+		"MaxMPAdd":       837,
 		"MaxParryAdd":    840,
-		"MinMagicDefAdd": 45,
+		"MinMagicDefAdd": 54,
 	}
 	for _, property := range player.progressProperties() {
 		if want, ok := wantAdds[property.Name]; ok {
@@ -178,10 +185,49 @@ func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 		{byte(propMaxLevel & 0xff), byte(propMaxLevel >> 8)},
 		{byte(propCurFillValue & 0xff), byte(propCurFillValue >> 8)},
 		{byte(propMaxPowerValue & 0xff), byte(propMaxPowerValue >> 8)},
+		// 内修面板属性列（太极/阴柔/阳刚）的显示来源：目录可用时
+		// ng_wd_001→5；缺目录环境回 0（客户端退缺省文案），两者都合法。
+		{byte(propWuXing & 0xff), byte(propWuXing >> 8)},
 	} {
 		if !bytes.Contains(first, expected) {
 			t.Fatalf("first inner-power ViewAdd lacks %x: %x", expected, first)
 		}
+	}
+}
+
+// TestNeiGongBooksBackfillWuXingFromCatalog 钉死书行五行值来自
+// wuxuebaseinfo.ini（Java NeiGongCatalog.wuXingOf 同源）：两仪护心功/
+// 碧波心法=5 太极，明玉神功=6 阴柔。缺目录的夹具环境跳过值断言，
+// 只验帧不崩。
+func TestNeiGongBooksBackfillWuXingFromCatalog(t *testing.T) {
+	catalog, err := loadModernNeiGongCatalog()
+	if err != nil {
+		t.Skipf("modern neigong catalog unavailable: %v", err)
+	}
+	if catalog.wuXingOf("ng_wd_001") == 0 {
+		t.Skip("wuxuebaseinfo.ini not in resource store; catalog wuXing empty")
+	}
+	progress := newPlayerProgress()
+	want := map[string]int32{
+		"ng_wd_001": 5, // 两仪护心功：太极
+		"ng_yh_001": 6, // 明玉神功：阴柔
+		"ng_th_001": 5, // 碧波心法：太极
+		"ng_jh_001": 6,
+		"ng_em_001": 6,
+		"ng_wd_002": 5,
+	}
+	for _, book := range progress.books {
+		if got, ok := want[book.configID]; ok && book.wuXing != got {
+			t.Errorf("%s wuXing=%d, want %d", book.configID, book.wuXing, got)
+		}
+	}
+	frame, err := progress.bookFrame(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := []byte{byte(propWuXing & 0xff), byte(propWuXing >> 8), 5, 0, 0, 0}
+	if !bytes.Contains(frame, expected) {
+		t.Fatalf("ng_wd_001 ViewAdd lacks WuXing=5: %x", frame)
 	}
 }
 
@@ -214,8 +260,8 @@ func TestYiHuaInnerPowerUsesSharedClassicVisibleRoute(t *testing.T) {
 	if err := player.equipNeiGong("ng_yh_001"); err != nil {
 		t.Fatal(err)
 	}
-	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 5050 || got.BaseMaxMP != 500 || got.MaxMP != 1630 {
-		t.Fatalf("明玉神功 server caps=%+v, want base 1000/500 total 5050/1630", got)
+	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 5829 || got.BaseMaxMP != 500 || got.MaxMP != 2235 {
+		t.Fatalf("明玉神功 server caps=%+v, want base 1000/500 total 5829/2235", got)
 	}
 	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("3311,1,1,3,")) {
 		t.Fatalf("明玉神功 BufferInfo=%q", got)
@@ -223,11 +269,13 @@ func TestYiHuaInnerPowerUsesSharedClassicVisibleRoute(t *testing.T) {
 	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_yh_001,local-4,3,1-1,")) {
 		t.Fatalf("明玉神功 BufferListStr=%q", got)
 	}
+	// 五维线上值 85/87/100/127/97：MaxHPAdd=2·85+7·87+4050=4829、
+	// MaxMPAdd=4·127+97+1130=1735、MinMagicDefAdd=round(0.2·97)+100=119。
 	wantAdds := map[string]int32{
-		"MaxHPAdd":       4050,
-		"MaxMPAdd":       1130,
+		"MaxHPAdd":       4829,
+		"MaxMPAdd":       1735,
 		"MaxParryAdd":    5040,
-		"MinMagicDefAdd": 100,
+		"MinMagicDefAdd": 119,
 	}
 	for _, property := range player.progressProperties() {
 		if want, ok := wantAdds[property.Name]; ok {
@@ -247,7 +295,8 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	conn := &captureMessageConnection{}
 
 	// 215 必须只接受已学习的 View=43 秘籍，并用 CurNeiGong 绑定消费的
-	// 常规属性档案回复。
+	// 常规属性档案回复;换书改变怒气上限,故回复是两帧——先上限对
+	// (MaxSP/MaxSPAdd 专帧,ng_jh_001 坐忘功 +10),再常规状态批。
 	handled, err := handlePlayerProgressCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 215}, {Type: 6, Text: "ng_jh_001"},
 	}})
@@ -255,8 +304,15 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 		t.Fatalf("215 handled=%v err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 1 || frames[0][0] != 0x10 || !bytes.Contains(frames[0], []byte("ng_jh_001\x00")) {
+	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
 		t.Fatalf("215 reply=%x", frames)
+	}
+	capNeedle := []byte{byte(propMaxSPAdd & 0xff), byte(propMaxSPAdd >> 8), 10, 0, 0, 0}
+	if !bytes.Contains(frames[0], capNeedle) {
+		t.Fatalf("215 first reply must carry MaxSPAdd=10 (坐忘功): %x", frames[0])
+	}
+	if !bytes.Contains(frames[1], []byte("ng_jh_001\x00")) {
+		t.Fatalf("215 second reply must bind CurNeiGong: %x", frames[1])
 	}
 
 	// 1006/1 选择一本秘籍；1006/11 启动持久的后台转换，而不进入可见的
@@ -536,9 +592,10 @@ func TestFacultyRestoreSettlesOfflineProgress(t *testing.T) {
 	}
 }
 
-// 快照携带 starter 目录之外的书（Java 服学会的 ng_jh_201 无妄神功，
-// 取自线上 role 674 的真实快照值）：从 neigong.ini 目录回填身份后追加，
-// 进度按快照覆盖，且 snapshot() 回写不丢。
+// 快照携带 starter 目录之外的书（ng_jh_201，快照值取自参考服抓包：
+// L7/total 48000）：从 neigong.ini 目录回填身份后追加，进度按快照覆盖；
+// 每级消耗随后对齐 wuxuelevelinfo.ini 官方曲线（L7 → r=7=184400，
+// 48000 是参考服翻倍曲线值，不采用），且 snapshot() 回写不丢。
 func TestFacultyRestoreAppendsCatalogBackfilledBooks(t *testing.T) {
 	catalog, err := loadModernNeiGongCatalog()
 	if err != nil {
@@ -547,6 +604,10 @@ func TestFacultyRestoreAppendsCatalogBackfilledBooks(t *testing.T) {
 	entry, ok := catalog.book("ng_jh_201")
 	if !ok {
 		t.Skip("neigong.ini has no ng_jh_201 (catalog drifted)")
+	}
+	wantTotal, curveOK := resolveNeiGongLevelTotal("ng_jh_201", 7)
+	if !curveOK {
+		wantTotal = 48000 // 缺曲线环境保留快照值
 	}
 	progress := newPlayerProgress()
 	starterCount := len(progress.books)
@@ -567,7 +628,7 @@ func TestFacultyRestoreAppendsCatalogBackfilledBooks(t *testing.T) {
 	if book.staticData != entry.staticData || book.itemType != entry.itemType {
 		t.Fatalf("backfilled identity=%+v, want catalog entry %+v", book, entry)
 	}
-	if book.level != 7 || book.fill != 44254 || book.total != 48000 || book.power != 240 {
+	if book.level != 7 || book.fill != 44254 || book.total != wantTotal || book.power != 240 {
 		t.Fatalf("snapshot progress must overlay: %+v", book)
 	}
 	if book.maxLevel < 7 {
@@ -579,7 +640,7 @@ func TestFacultyRestoreAppendsCatalogBackfilledBooks(t *testing.T) {
 	roundTrip := progress.snapshot()
 	found := false
 	for _, savedBook := range roundTrip.Books {
-		if savedBook.ConfigID == "ng_jh_201" && savedBook.Level == 7 && savedBook.Total == 48000 {
+		if savedBook.ConfigID == "ng_jh_201" && savedBook.Level == 7 && savedBook.Total == wantTotal {
 			found = true
 		}
 	}
@@ -630,5 +691,198 @@ func TestSnapshotExtraInt(t *testing.T) {
 	}
 	if got := snapshotExtraInt(parsed, "missing"); got != 0 {
 		t.Fatalf("missing extra must read 0, got %d", got)
+	}
+}
+
+// 每级修炼消耗统一走 wuxuelevelinfo.ini 官方曲线（含江湖内功；参考服
+// 9yin_server1 的 750×2^(L-1) 翻倍曲线数值夸张，刻意不镜像）。锚点：
+// ng_jh_001 L1=750/L2=1650/L7=13950、ng_jh_201 L1=92900/L14=330750、
+// ng_wd_001 L30=273200。夹具仓缺 wuxuelevelinfo.ini 时跳过。
+func TestNeiGongLevelCurveFollowsOfficialINI(t *testing.T) {
+	if _, ok := resolveNeiGongLevelTotal("ng_jh_001", 7); !ok {
+		t.Skip("wuxuelevelinfo.ini absent from resource store")
+	}
+	cases := []struct {
+		configID string
+		level    int32
+		want     int32
+	}{
+		{"ng_jh_001", 1, 750},
+		{"ng_jh_001", 2, 1650},
+		{"ng_jh_001", 7, 13950},
+		{"ng_jh_201", 1, 92900},
+		{"ng_jh_201", 14, 330750},
+		{"ng_jh_201", 25, 642100},
+		{"ng_wd_001", 30, 273200},
+		{"ng_yh_001", 30, 579600},
+	}
+	for _, tc := range cases {
+		got, ok := resolveNeiGongLevelTotal(tc.configID, tc.level)
+		if !ok || got != tc.want {
+			t.Fatalf("%s L%d total=%d ok=%t, want %d", tc.configID, tc.level, got, ok, tc.want)
+		}
+	}
+}
+
+// 升层结算把每级消耗推进到曲线值（ng_jh_001 L2=1650），与 +200 自然
+// 曲线（缺曲线环境 950）明确区分。
+func TestAdvanceFacultyLevelsJiangHuBookAlongCurve(t *testing.T) {
+	progress := newPlayerProgress()
+	book := progress.book("ng_jh_001")
+	if book == nil {
+		t.Fatal("starter must include ng_jh_001")
+	}
+	wantL2 := int32(950) // 缺曲线回退：750+200
+	if _, ok := resolveNeiGongLevelTotal("ng_jh_001", 2); ok {
+		wantL2 = 1650 // 官方曲线 wuxuelevelinfo r=2
+	}
+	if got, want := book.total, int32(750); got != want {
+		t.Fatalf("ng_jh_001 L1 total=%d, want 750 (官方曲线 r=1)", got)
+	}
+	start := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	progress.facultyName = book.configID
+	progress.facultyState = facultyStateConvert
+	progress.facultyStyle = facultyStyleNormal
+	progress.fillSpeed = 200
+	progress.lastAdvance = start
+	book.fill = book.total - 200 // 一分钟修炼正好攒满本层。
+	progress.advanceFaculty(start.Add(time.Minute))
+	if got, want := book.level, int32(2); got != want {
+		t.Fatalf("level=%d, want %d", got, want)
+	}
+	if got, want := book.total, wantL2; got != want {
+		t.Fatalf("L2 total=%d, want %d", got, want)
+	}
+	if book.fill != 0 {
+		t.Fatalf("fill=%d, want 0 (fill 750 正好攒满本层)", book.fill)
+	}
+}
+
+// 快照 total 可能来自旧 +200 自然曲线/旧服写盘：restore 后按曲线权威
+// 值重求再下发（ng_jh_001 L7=13950）；缺曲线环境保留快照值（1900）。
+// fill 进度保留。
+func TestFacultyRestoreRealignsLevelTotalsToCurve(t *testing.T) {
+	progress := newPlayerProgress()
+	restoreAt := time.Date(2026, 11, 7, 12, 0, 0, 0, time.UTC)
+	saved := progress.snapshot()
+	saved.LastAdvanceUTC = restoreAt // 结算 0 分钟，别让计时器动 fill。
+	for index := range saved.Books {
+		if saved.Books[index].ConfigID == "ng_jh_001" {
+			saved.Books[index].Level = 7
+			saved.Books[index].Total = 1900 // 旧 +200 自然曲线值
+			saved.Books[index].Fill = 13950 // 官方 L7 整层，重求后正好攒满。
+		}
+	}
+	progress.restore(saved, restoreAt)
+	book := progress.book("ng_jh_001")
+	if _, ok := resolveNeiGongLevelTotal("ng_jh_001", 7); ok {
+		if book.level != 7 || book.total != 13950 {
+			t.Fatalf("ng_jh_001 restored level=%d total=%d, want 7/13950 (wuxuelevelinfo.ini r=7)", book.level, book.total)
+		}
+	} else if book.total != 1900 {
+		t.Fatalf("缺曲线环境须保留快照 total，got %d", book.total)
+	}
+	if book.fill != 13950 {
+		t.Fatalf("fill=%d, want snapshot progress preserved", book.fill)
+	}
+}
+
+// 官方抓包黄金对齐：五维→衍生 *Add 位的系数由 55866 系列抓包逐点解出
+// （base 30×5 + ng_jh_001 装备）。两组真机状态：
+//
+//	12173（创角会话）: L1 线上五维 32/33/32/32/32 → MaxHPAdd=335、
+//	  MaxMPAdd=170、MinMagicDefAdd=6、HPUpSpeed=134、MPUpSpeed=67、
+//	  HPUpSpeedAdd=2、MPUpSpeedAdd=6；
+//	55866（myjf01）: L7 线上五维 36/39/35/36/35 → MaxHPAdd=495、
+//	  MaxMPAdd=204、MinMagicDefAdd=7、HPUpSpeed=150、MPUpSpeed=71、
+//	  HPUpSpeedAdd=3、MPUpSpeedAdd=7。
+//
+// 官方 MaxParryAdd 另有 16/57 的未定位分量（非 ng_jh_001 varprop/pack，
+// 疑门派被动），本服 ParryValue 仅 100+装备书分量，该差已知不在此断言。
+func TestAttributeDerivedAddsMatchOfficialCapture(t *testing.T) {
+	cases := []struct {
+		name        string
+		level       int32
+		five        map[string]int32
+		derivedAdds map[string]int32
+		maxHP       int32
+		maxMP       int32
+		hpUpSpeed   int32
+		mpUpSpeed   int32
+		hpUpAdd     int32
+		mpUpAdd     int32
+	}{
+		{
+			name:  "12173 创角 ng_jh_001 L1",
+			level: 1,
+			five:  map[string]int32{"Str": 32, "Sta": 33, "Dex": 32, "Ing": 32, "Spi": 32},
+			derivedAdds: map[string]int32{
+				"MeleePowerAdd": 32, "ShotPowerAdd": 32, "MagicPowerAdd": 32,
+				"PhyHitAdd": 32, "MagicHitAdd": 32, "DodgeAdd": 32,
+				"PhyVaAdd": 32, "MagicVaAdd": 32,
+				"MaxHPAdd": 335, "MaxMPAdd": 170, "MinMagicDefAdd": 6,
+			},
+			maxHP: 1335, maxMP: 670, hpUpSpeed: 134, mpUpSpeed: 67, hpUpAdd: 2, mpUpAdd: 6,
+		},
+		{
+			name:  "55866 myjf01 ng_jh_001 L7",
+			level: 7,
+			five:  map[string]int32{"Str": 36, "Sta": 39, "Dex": 35, "Ing": 36, "Spi": 35},
+			derivedAdds: map[string]int32{
+				"MeleePowerAdd": 36, "ShotPowerAdd": 35, "MagicPowerAdd": 36,
+				"PhyHitAdd": 35, "MagicHitAdd": 35, "DodgeAdd": 35,
+				"PhyVaAdd": 36, "MagicVaAdd": 35,
+				"MaxHPAdd": 495, "MaxMPAdd": 204, "MinMagicDefAdd": 7,
+			},
+			maxHP: 1495, maxMP: 704, hpUpSpeed: 150, mpUpSpeed: 71, hpUpAdd: 3, mpUpAdd: 7,
+		},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			player := newPlayerActor("本地角色", 0)
+			player.mu.Lock()
+			book := player.progress.book("ng_jh_001")
+			if book == nil {
+				player.mu.Unlock()
+				t.Fatal("starter must include ng_jh_001")
+			}
+			book.level = testCase.level
+			applyNeiGongLevelTotal(book)
+			_ = book.applyModernEffect()
+			player.mu.Unlock()
+			if err := player.equipNeiGong("ng_jh_001"); err != nil {
+				t.Fatal(err)
+			}
+			got := map[string]int32{}
+			for _, property := range player.progressProperties() {
+				got[property.Name] = property.Value.I32
+			}
+			for name, want := range testCase.five {
+				if got[name] != want {
+					t.Errorf("%s=%d, want %d", name, got[name], want)
+				}
+			}
+			for name, want := range testCase.derivedAdds {
+				if got[name] != want {
+					t.Errorf("%s=%d, want %d", name, got[name], want)
+				}
+			}
+			state := player.stateSnapshot()
+			if state.MaxHP != testCase.maxHP || state.MaxMP != testCase.maxMP {
+				t.Errorf("vitals derived caps HP=%d MP=%d, want %d/%d", state.MaxHP, state.MaxMP, testCase.maxHP, testCase.maxMP)
+			}
+			stateValues := map[string]int32{}
+			for _, property := range player.stateProperties() {
+				stateValues[property.Name] = property.Value.I32
+			}
+			for name, want := range map[string]int32{
+				"HPUpSpeed": testCase.hpUpSpeed, "MPUpSpeed": testCase.mpUpSpeed,
+				"HPUpSpeedAdd": testCase.hpUpAdd, "MPUpSpeedAdd": testCase.mpUpAdd,
+			} {
+				if stateValues[name] != want {
+					t.Errorf("%s=%d, want %d", name, stateValues[name], want)
+				}
+			}
+		})
 	}
 }

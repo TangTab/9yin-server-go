@@ -34,7 +34,7 @@ func TestCustomizingFrameMatchesJavaLayout(t *testing.T) {
 }
 
 // 0x10 键位单属性帧：scheme 0/1/2 → 198/199/200，串 = value + " " 尾空格
-//（参考端 60310 抓包范本；0x0D 档内 198 无尾空格，勿混用）。
+// （参考端 60310 抓包范本；0x0D 档内 198 无尾空格，勿混用）。
 func TestKeybindSchemePropertyFrameAddsTrailingSpace(t *testing.T) {
 	for scheme, wantIndex := range map[int32]uint16{0: 198, 1: 199, 2: 200} {
 		frame, err := keybindSchemePropertyFrame(scheme, "1,87;2,83")
@@ -169,9 +169,9 @@ func TestHandleKeybindCustomValidatesAndEchoes(t *testing.T) {
 
 	for name, upload := range map[string]clientCustomMessage{
 		"scheme out of range": keybindUploadCustom(5, "1,87"),
-		"empty string":       keybindUploadCustom(0, ""),
-		"control byte":       keybindUploadCustom(0, "1,87;\x1F"),
-		"non-ascii":          keybindUploadCustom(0, "1,键"),
+		"empty string":        keybindUploadCustom(0, ""),
+		"control byte":        keybindUploadCustom(0, "1,87;\x1F"),
+		"non-ascii":           keybindUploadCustom(0, "1,键"),
 	} {
 		conn := &captureMessageConnection{}
 		handled, err := handleKeybindCustom(conn, player, upload, "test", nil, 0)

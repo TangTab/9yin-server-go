@@ -27,8 +27,16 @@ func TestInstalledCatalogCompilesEveryLearnedCombatSkill(t *testing.T) {
 		t.Fatalf("compiled families flower=%d taiJi=%d heartBuddha=%d",
 			len(yiHuaWuQueCombatSkills), len(taiJiQuanGuPuCombatSkills), len(heartBuddhaPalmCombatSkills))
 	}
+	// 三脚猫五件套是基础武学原生动作族（Java CombatSkillCatalog 同口径）：
+	// zhaoshi_player* 只有 _NN 连击段子节、无裸 ID 节，均按
+	// missing_player_action 不入编译目录（打坐走原生 240，普攻为客户端
+	// 本地连击族）——View40/已学表照发，但 211 编译路径不覆盖。
+	nativeBasicSkills := map[string]bool{
+		"zs_normal_02": true, "hw_normal_fd": true, "zs_default_01": true,
+		"zs_suicide": true, "riding_start": true,
+	}
 	for _, learned := range starterSkillViews {
-		if learned.configID == "zs_default_01" {
+		if nativeBasicSkills[learned.configID] {
 			continue
 		}
 		definition, exists := combatSkills[learned.configID]
@@ -79,7 +87,7 @@ func TestInstalledButUnlearnedSkillCannotUseUniversalExecutor(t *testing.T) {
 		t.Fatalf("unlearned installed skill handled=%t err=%v", handled, err)
 	}
 	after := player.stateSnapshot()
-	if after.MP != before.MP || player.skillSP() != maxPlayerSP || len(conn.Frames()) != 0 {
+	if after.MP != before.MP || player.skillSP() != player.rageCap() || len(conn.Frames()) != 0 {
 		t.Fatalf("unlearned skill mutated state before=%+v after=%+v frames=%d", before, after, len(conn.Frames()))
 	}
 }

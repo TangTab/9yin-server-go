@@ -117,8 +117,17 @@ func TestFacultySnapshotPassthroughSupersetFields(t *testing.T) {
 			t.Fatalf("passthrough field %q lost in %s", key, rendered)
 		}
 	}
-	if string(round["vitals"]) != `{"ene":100,"max_ene":200}` {
-		t.Fatalf("vitals passthrough=%s", round["vitals"])
+	// vitals 已显式建模（GM set_vitals 批次）：不再 extras 原样透传，
+	// 而是规范化为 Java FacultyStore 的全 9 字段方言。
+	if loaded.Vitals == nil || loaded.Vitals.Ene != 100 || loaded.Vitals.MaxEne != 200 {
+		t.Fatalf("modeled vitals=%+v", loaded.Vitals)
+	}
+	var vitalsNode map[string]json.RawMessage
+	if err := json.Unmarshal(round["vitals"], &vitalsNode); err != nil {
+		t.Fatal(err)
+	}
+	if len(vitalsNode) != 9 || string(vitalsNode["ene"]) != "100" || string(vitalsNode["max_ene"]) != "200" {
+		t.Fatalf("vitals rendered=%s want Java 9-field dialect", round["vitals"])
 	}
 	var books []map[string]json.RawMessage
 	if err := json.Unmarshal(round["books"], &books); err != nil {
@@ -149,7 +158,13 @@ func TestFacultySnapshotSubsetMarshalStable(t *testing.T) {
 	if err := json.Unmarshal(rendered, &fields); err != nil {
 		t.Fatal(err)
 	}
-	if len(fields) != len(facultySnapshotJSONKeys) {
-		t.Fatalf("field count=%d want %d: %s", len(fields), len(facultySnapshotJSONKeys), rendered)
+	// vitals 是 omitempty 指针：未设置（nil）时不落节点，与 Java
+	// “null = 旧档未设置，不落节点”同口径；其余键恒输出。
+	want := len(facultySnapshotJSONKeys)
+	if snapshot.Vitals == nil {
+		want--
+	}
+	if len(fields) != want {
+		t.Fatalf("field count=%d want %d: %s", len(fields), want, rendered)
 	}
 }

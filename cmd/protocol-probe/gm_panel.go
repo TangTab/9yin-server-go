@@ -43,27 +43,54 @@ type gmPlayerState struct {
 	Scene      role.Scene    `json:"scene"`
 	Position   role.Position `json:"position"`
 	Silver     int32         `json:"silver"`
+	GuanYin    int32         `json:"guanYin"`
+	Gold       int32         `json:"gold"`
 	SP         int32         `json:"sp"`
+	RageRecovery int32       `json:"rageRecovery"`
+	Faculty    int32         `json:"faculty"`
 	Faction    string        `json:"faction"`
 	LastAction string        `json:"lastAction"`
 	UpdatedAt  time.Time     `json:"updatedAt"`
 }
 
 type gmCommand struct {
-	action        string
-	silver        int32
-	sp            int32
-	value         float32
-	destination   sceneDestination
-	position      role.Position
-	faction       string
-	code          string // lua_eval 的 Lua 源码
-	itemConfig    string // grant_item/add_item 的物品配置 ID
-	amount        int32  // grant_item 数量
-	wearNow       bool   // grant_item 穿戴形态（否则入背包）
-	cardId        int32  // equip_card/equip_hair 皮肤号
-	showEquipType int32  // set_showequip_type 0/1/2
-	gold          int32  // set_gold（会话级 CapitalType0）
+	action         string
+	silver         int32
+	sp             int32
+	value          float32
+	destination    sceneDestination
+	position       role.Position
+	faction        string
+	code           string // lua_eval 的 Lua 源码
+	itemConfig     string // grant_item/add_item 的物品配置 ID
+	amount         int32  // grant_item 数量
+	wearNow        bool   // grant_item 穿戴形态（否则入背包）
+	cardId         int32  // equip_card/equip_hair 皮肤号
+	showEquipType  int32  // set_showequip_type 0/1/2
+	gold           int32  // set_gold（会话级 CapitalType0）
+	guanYin        int32  // set_guanyin（会话级 CapitalType2）
+	pkMode         int32  // set_pk_mode 0..8
+	justice        int32  // set_alignment 三值（0=跳过，前端 +v||0 折叠语义）
+	evil           int32
+	freeBase       int32
+	ene            int32 // set_vitals 生存属性层（0=跳过；Add 字段官方表无，忽略）
+	maxEne         int32
+	resumeEne      int32
+	sat            int32
+	maxSat         int32
+	pkValue        int32
+	drunkLevel     int32
+	attrStr        int32 // set_five_attributes 基础五维（0=跳过该维）
+	attrSta        int32
+	attrDex        int32
+	attrIng        int32
+	attrSpi        int32
+	facultyBase    int32   // set_fill_speed 基数
+	fillMultiplier float32 // set_fill_speed 倍率
+	msgID          int32   // custom_probe 数值寻址消息号
+	subType        int32   // custom_probe 探针参数
+	weather        string  // set_weather 闭名单键
+	fadeSec        int32   // set_weather 过渡秒
 	// reply 带缓冲，使会话循环总能完成其帧的写入，
 	// 即便浏览器在等待 HTTP 响应期间断开连接。
 	reply chan error
@@ -77,7 +104,7 @@ func (command gmCommand) complete(err error) {
 
 func newGMHub() *gmHub { return &gmHub{sessions: make(map[uint64]*gmSession)} }
 
-func (hub *gmHub) attach(id uint64, remote string, active *role.RoleSnapshot, faction string, silver, sp int32) *gmSession {
+func (hub *gmHub) attach(id uint64, remote string, active *role.RoleSnapshot, faction string, silver, guanYin, gold, sp, faculty int32) *gmSession {
 	session := &gmSession{
 		id:     id,
 		remote: remote,
@@ -86,7 +113,8 @@ func (hub *gmHub) attach(id uint64, remote string, active *role.RoleSnapshot, fa
 		commands: make(chan gmCommand),
 		state: gmPlayerState{
 			SessionID: id, Remote: remote, Name: active.Name, Scene: active.Location.Scene,
-			Position: active.Location.Position, Silver: silver, SP: sp, Faction: faction, LastAction: "在线", UpdatedAt: time.Now(),
+			Position: active.Location.Position, Silver: silver, GuanYin: guanYin, Gold: gold,
+			SP: sp, Faculty: faculty, Faction: faction, LastAction: "在线", UpdatedAt: time.Now(),
 		},
 	}
 	hub.mu.Lock()
@@ -153,9 +181,40 @@ func (session *gmSession) setSilver(value int32) {
 	session.mu.Unlock()
 }
 
+func (session *gmSession) setGuanYin(value int32) {
+	session.mu.Lock()
+	session.state.GuanYin = value
+	session.state.LastAction = fmt.Sprintf("官银设为 %d", value)
+	session.state.UpdatedAt = time.Now()
+	session.mu.Unlock()
+}
+
+func (session *gmSession) setGold(value int32) {
+	session.mu.Lock()
+	session.state.Gold = value
+	session.state.LastAction = fmt.Sprintf("金币设为 %d（会话级）", value)
+	session.state.UpdatedAt = time.Now()
+	session.mu.Unlock()
+}
+
+func (session *gmSession) setFaculty(value int32) {
+	session.mu.Lock()
+	session.state.Faculty = value
+	session.state.UpdatedAt = time.Now()
+	session.mu.Unlock()
+}
+
 func (session *gmSession) setSP(value int32, action string) {
 	session.mu.Lock()
 	session.state.SP = value
+	session.state.LastAction = action
+	session.state.UpdatedAt = time.Now()
+	session.mu.Unlock()
+}
+
+func (session *gmSession) setRageRecovery(value int32, action string) {
+	session.mu.Lock()
+	session.state.RageRecovery = value
 	session.state.LastAction = action
 	session.state.UpdatedAt = time.Now()
 	session.mu.Unlock()
@@ -209,6 +268,7 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 	mux.HandleFunc("/api/fashion-catalog", hub.fashionCatalogHandler)
 	mux.HandleFunc("/api/cards", hub.cardsHandler)
 	mux.HandleFunc("/api/hair-cards", hub.hairCardsHandler)
+	mux.HandleFunc("/api/weather", gmWeatherCatalogHandler)
 	mux.HandleFunc("/api/sessions/", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodPost || !strings.HasSuffix(request.URL.Path, "/command") {
 			writer.WriteHeader(http.StatusNotFound)
@@ -236,6 +296,29 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 			WearNow     bool    `json:"wearNow"`
 			CardId      int32   `json:"cardId"`
 			Gold        int32   `json:"gold"`
+			GuanYin     int32   `json:"guanYin"`
+			PkMode      int32   `json:"pkMode"`
+			Justice     int32   `json:"justice"`
+			Evil        int32   `json:"evil"`
+			FreeBase    int32   `json:"freeBase"`
+			Ene         int32   `json:"ene"`
+			MaxEne      int32   `json:"maxEne"`
+			ResumeEne   int32   `json:"resumeEne"`
+			Sat         int32   `json:"sat"`
+			MaxSat      int32   `json:"maxSat"`
+			PkValue     int32   `json:"pkValue"`
+			DrunkLevel  int32   `json:"drunkLevel"`
+			AttrStr     int32   `json:"attrStr"`
+			AttrSta     int32   `json:"attrSta"`
+			AttrDex     int32   `json:"attrDex"`
+			AttrIng     int32   `json:"attrIng"`
+			AttrSpi     int32   `json:"attrSpi"`
+			Base        int32   `json:"base"`
+			Multiplier  float32 `json:"multiplier"`
+			MsgId       int32   `json:"msgId"`
+			SubType     int32   `json:"subType"`
+			Weather     string  `json:"weather"`
+			FadeSec     int32   `json:"fadeSec"`
 		}
 		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
 			writeGMError(writer, http.StatusBadRequest, "invalid JSON body")
@@ -254,16 +337,26 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 				return
 			}
 		case "set_sp":
-			if body.SP < 0 || body.SP > maxPlayerSP {
-				writeGMError(writer, http.StatusBadRequest, fmt.Sprintf("SP must be between 0 and %d", maxPlayerSP))
+			// HTTP 侧读不到会话内的当前运行内功,按最大可达上限校验;
+			// 实际写入仍由 setSP 按当前有效上限饱和。
+			if bound := maxPlayerSP + maxNeiGongRageCapAdd; body.SP < 0 || body.SP > bound {
+				writeGMError(writer, http.StatusBadRequest, fmt.Sprintf("SP must be between 0 and %d", bound))
 				return
 			}
 		case "add_sp":
-			if body.SP < 1 || body.SP > maxPlayerSP {
-				writeGMError(writer, http.StatusBadRequest, fmt.Sprintf("SP addition must be between 1 and %d", maxPlayerSP))
+			if bound := maxPlayerSP + maxNeiGongRageCapAdd; body.SP < 1 || body.SP > bound {
+				writeGMError(writer, http.StatusBadRequest, fmt.Sprintf("SP addition must be between 1 and %d", bound))
 				return
 			}
 		case "fill_sp":
+		case "set_rage_recovery":
+			// 怒气自动回复速率（1s ticker；会话级，重登归零）。
+			// 0=关闭；上界 1000 只是护栏，官方满档 5。
+			if math.IsNaN(float64(body.Value)) || math.IsInf(float64(body.Value), 0) ||
+				float64(body.Value) != float64(int32(body.Value)) || body.Value < 0 || body.Value > 1000 {
+				writeGMError(writer, http.StatusBadRequest, "rage recovery must be an integer between 0 and 1000")
+				return
+			}
 		case "set_move_speed":
 			if math.IsNaN(float64(body.Value)) || math.IsInf(float64(body.Value), 0) || body.Value < 0.1 || body.Value > 100 {
 				writeGMError(writer, http.StatusBadRequest, "move speed must be between 0.1 and 100")
@@ -272,6 +365,20 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 		case "set_gravity":
 			if math.IsNaN(float64(body.Value)) || math.IsInf(float64(body.Value), 0) || body.Value < 0.1 || body.Value > 100 {
 				writeGMError(writer, http.StatusBadRequest, "gravity must be between 0.1 and 100")
+				return
+			}
+		case "set_respawn_interval":
+			// 批量刷新间隔（秒）：0=关闭批量，回到每怪独立 RefreshTime 计时。
+			if math.IsNaN(float64(body.Value)) || math.IsInf(float64(body.Value), 0) ||
+				float64(body.Value) != float64(int32(body.Value)) || body.Value < 0 || body.Value > 86400 {
+				writeGMError(writer, http.StatusBadRequest, "respawn interval must be an integer between 0 and 86400 seconds")
+				return
+			}
+		case "set_corpse_ttl":
+			// 尸体清除延迟（秒）：0=尸体保留到重生。
+			if math.IsNaN(float64(body.Value)) || math.IsInf(float64(body.Value), 0) ||
+				float64(body.Value) != float64(int32(body.Value)) || body.Value < 0 || body.Value > 3600 {
+				writeGMError(writer, http.StatusBadRequest, "corpse ttl must be an integer between 0 and 3600 seconds")
 				return
 			}
 		case "switch_scene":
@@ -316,6 +423,115 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 				return
 			}
 			command.gold = body.Gold
+		case "set_guanyin":
+			if body.GuanYin < 0 {
+				writeGMError(writer, http.StatusBadRequest, "guanYin must be non-negative")
+				return
+			}
+			command.guanYin = body.GuanYin
+		case "set_power_level":
+			if body.Value < 0 {
+				writeGMError(writer, http.StatusBadRequest, "power level must be non-negative")
+				return
+			}
+			command.value = body.Value
+		case "set_alignment":
+			// 前端 +v||0 折叠：0=跳过该值，三者全 0 拒绝（Java 同口径）。
+			if body.Justice < 0 || body.Evil < 0 || body.FreeBase < 0 {
+				writeGMError(writer, http.StatusBadRequest, "alignment values must be non-negative")
+				return
+			}
+			if body.Justice == 0 && body.Evil == 0 && body.FreeBase == 0 {
+				writeGMError(writer, http.StatusBadRequest, "set_alignment requires at least one of justice/evil/freeBase")
+				return
+			}
+			command.justice, command.evil, command.freeBase = body.Justice, body.Evil, body.FreeBase
+		case "set_pk_mode":
+			if body.PkMode < 0 || body.PkMode > 8 {
+				writeGMError(writer, http.StatusBadRequest, "pkMode must be between 0 and 8")
+				return
+			}
+			command.pkMode = body.PkMode
+		case "set_vitals":
+			// maxEneAdd/maxSatAdd 官方表无此二属性，忽略（Java applyVitals 同）。
+			values := []int32{body.Ene, body.MaxEne, body.ResumeEne, body.Sat, body.MaxSat, body.PkValue, body.DrunkLevel}
+			for _, value := range values {
+				if value < 0 {
+					writeGMError(writer, http.StatusBadRequest, "vital values must be non-negative")
+					return
+				}
+			}
+			if body.Ene == 0 && body.MaxEne == 0 && body.ResumeEne == 0 && body.Sat == 0 &&
+				body.MaxSat == 0 && body.PkValue == 0 && body.DrunkLevel == 0 {
+				writeGMError(writer, http.StatusBadRequest, "set_vitals requires at least one non-zero vital")
+				return
+			}
+			command.ene, command.maxEne, command.resumeEne = body.Ene, body.MaxEne, body.ResumeEne
+			command.sat, command.maxSat, command.pkValue, command.drunkLevel = body.Sat, body.MaxSat, body.PkValue, body.DrunkLevel
+		case "set_faculty":
+			if body.Value < 0 || body.Value > 2_000_000_000 {
+				writeGMError(writer, http.StatusBadRequest, "faculty value must be between 0 and 2000000000")
+				return
+			}
+			command.value = body.Value
+		case "set_five_attributes":
+			attrs := []int32{body.AttrStr, body.AttrSta, body.AttrDex, body.AttrIng, body.AttrSpi}
+			anySet := false
+			for _, attr := range attrs {
+				if attr < 0 || attr > gmBaseAttributeCap {
+					writeGMError(writer, http.StatusBadRequest, "attributes must be between 0 and 1000000")
+					return
+				}
+				if attr > 0 {
+					anySet = true
+				}
+			}
+			if !anySet {
+				writeGMError(writer, http.StatusBadRequest, "set_five_attributes requires at least one non-zero attribute")
+				return
+			}
+			command.attrStr, command.attrSta, command.attrDex, command.attrIng, command.attrSpi = body.AttrStr, body.AttrSta, body.AttrDex, body.AttrIng, body.AttrSpi
+		case "set_fill_speed":
+			if math.IsNaN(float64(body.Multiplier)) || math.IsInf(float64(body.Multiplier), 0) {
+				writeGMError(writer, http.StatusBadRequest, "multiplier must be a finite number")
+				return
+			}
+			if body.Base < 1 || body.Base > 1_000_000 {
+				writeGMError(writer, http.StatusBadRequest, "fill speed base must be between 1 and 1000000")
+				return
+			}
+			if body.Multiplier < 0.1 || body.Multiplier > 100 {
+				writeGMError(writer, http.StatusBadRequest, "fill speed multiplier must be between 0.1 and 100")
+				return
+			}
+			command.facultyBase, command.fillMultiplier = body.Base, body.Multiplier
+		case "set_act_day_limit":
+			if body.Value < 0 || body.Value > 999_999 {
+				writeGMError(writer, http.StatusBadRequest, "act day limit must be between 0 and 999999 (0 = unlimited)")
+				return
+			}
+			command.value = body.Value
+		case "set_weather":
+			if _, presetErr := gmWeatherPresetByKey(body.Weather); presetErr != nil {
+				writeGMError(writer, http.StatusBadRequest, presetErr.Error())
+				return
+			}
+			command.weather = body.Weather
+			command.fadeSec = 10
+			if body.FadeSec != 0 {
+				if body.FadeSec < 0 || body.FadeSec > 600 {
+					writeGMError(writer, http.StatusBadRequest, "weather fade must be between 0 and 600 seconds")
+					return
+				}
+				command.fadeSec = body.FadeSec
+			}
+		case "popup_gm_panel":
+		case "custom_probe":
+			if body.MsgId < 1 || body.MsgId > 764 {
+				writeGMError(writer, http.StatusBadRequest, "probe msgId must be between 1 and 764")
+				return
+			}
+			command.msgID, command.subType = body.MsgId, body.SubType
 		case "grant_item", "add_item":
 			if strings.TrimSpace(body.ItemConfig) == "" {
 				writeGMError(writer, http.StatusBadRequest, "itemConfig is required")

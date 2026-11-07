@@ -143,15 +143,66 @@ func (definition combatSkillDefinition) totalActionDuration() time.Duration {
 	return duration
 }
 
-func skillCooldownFrame(definition combatSkillDefinition, now time.Time) ([]byte, error) {
+// skillCooldownFrames 产出出招 CD 双行（§3 行 1/3 顺序，中间夹
+// active_skill_rec 行由调用方写入）：个人行 team 恒 0xFFFF；GCD 行
+// 类别固定 50000、时长取 varprop AddCoolDownTime（publicCD）、team 取
+// skill_static CoolDownTeam。
+func skillCooldownFrames(definition combatSkillDefinition, now time.Time) (personal, public []byte, err error) {
 	start := now.UnixMilli()
-	end := start + definition.personalCD.Milliseconds()
-	return serverRecordAddCells(playerObjectID, playerOwnerID, recordCooldown, []recordCell{
+	// 官方 cooldown_rec 第 4 列 team 是 u16（0xFFFF 个人行 /
+	// CoolDownTeam GCD 行），此前自协商方言误声明为 u32。
+	personal, err = serverRecordAddCells(playerObjectID, playerOwnerID, recordCooldown, []recordCell{
 		recordInt(uint32(definition.cooldownCategory)),
 		recordInt64(start),
-		recordInt64(end),
+		recordInt64(start + definition.personalCD.Milliseconds()),
+		recordInt(uint32(0xFFFF)),
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	public, err = serverRecordAddCells(playerObjectID, playerOwnerID, recordCooldown, []recordCell{
+		recordInt(uint32(50000)),
+		recordInt64(start),
+		recordInt64(start + definition.publicCD.Milliseconds()),
 		recordInt(uint32(definition.cooldownTeam)),
 	})
+	return personal, public, err
+}
+
+// writeSkillHitEventFrames 按 §4 每目标序列补发命中表现帧族：
+// 0x13 战斗关系（玩家对象上的记录格，仅施法者自己）→ msg24 伤害
+// 飘字 → 0x2D 受击特效 → msg18 受击动作 → msg205 命中确认。
+// 后四帧经 link 首发后对视口内可见受害 NPC 的其他成员中继。
+func writeSkillHitEventFrames(link sceneMessageConnection, world *sceneLifecycle, definition combatSkillDefinition, player *playerActor, victimID, victimOwner uint32, damage, hpRatio int32, victimModel string, cumulative int32) error {
+	if err := link.WriteFrame(fightRelationDamageFrame(playerObjectID, playerOwnerID, cumulative)); err != nil {
+		return fmt.Errorf("write fight relation frame: %w", err)
+	}
+	hitFrame, err := skillHitDamageFrame(victimID, victimOwner, damage, definition.id, victimModel, player.snapshotName())
+	if err != nil {
+		return fmt.Errorf("encode skill hit frame: %w", err)
+	}
+	effectFrame := hurtEffectFrame(victimID, victimOwner, hpRatio)
+	hurtFrame, err := skillHurtActionFrame(victimID, victimOwner, playerObjectID, playerOwnerID)
+	if err != nil {
+		return fmt.Errorf("encode skill hurt frame: %w", err)
+	}
+	confirmFrame, err := skillHitConfirmFrame(playerObjectID, playerOwnerID, definition.id, victimID, victimOwner)
+	if err != nil {
+		return fmt.Errorf("encode skill confirm frame: %w", err)
+	}
+	for _, frame := range [][]byte{hitFrame, effectFrame, hurtFrame, confirmFrame} {
+		if err := link.WriteFrame(frame); err != nil {
+			return fmt.Errorf("write skill hit event frame: %w", err)
+		}
+	}
+	// 命中表现帧族中继：飘字/受击特效/动作/确认对可见受害 NPC 的
+	// 旁观者原样转发（0x13 是玩家私有记录格，不中继）。
+	if world != nil && world.run != nil {
+		for _, frame := range [][]byte{hitFrame, effectFrame, hurtFrame, confirmFrame} {
+			world.run.relayCombatFrame(victimID, frame, world, "skill hit")
+		}
+	}
+	return nil
 }
 
 func nativeSkillActionFrame(skillID string, targetID, targetOwnerID uint32) ([]byte, error) {
@@ -334,17 +385,33 @@ func (s *sceneLifecycle) selectedCombatTarget() (uint32, uint32, bool) {
 	return uint32(id), meta.ownerID, true
 }
 
-func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) ([]byte, uint32, int32, bool, error) {
+// skillDamageOutcome 是一次技能伤害结算的完整产物：除扣血 0x10 帧
+// （frame）与掉落外，还携带命中表现帧族所需的素材——受击后
+// HPRatio（0x2D 两次）、受害 NPC 模型/宽名（msg24）、以及 0x13
+// fight_relation_rec 的最新累计伤害。
+type skillDamageOutcome struct {
+	frame      []byte
+	id         uint32
+	ownerID    uint32
+	loot       int32
+	killed     bool
+	hpRatio    int32
+	model      string
+	wideName   string
+	cumulative int32
+}
+
+func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (skillDamageOutcome, error) {
 	s.run.mu.Lock()
 	defer s.run.mu.Unlock()
 	id := worldcore.EntityID(s.selectedObject)
 	vitals, hasVitals := s.run.combat.Vitals(id)
 	meta, exists := s.npcMeta(id)
 	if !hasVitals || !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
-		return nil, 0, 0, false, nil
+		return skillDamageOutcome{}, nil
 	}
 	if !vitals.ApplyDamage(amount) {
-		return nil, uint32(id), 0, false, nil
+		return skillDamageOutcome{}, nil
 	}
 	s.run.combat.WriteVitals(id, vitals)
 	state := vitals.ActorState(uint32(id), meta.ownerID)
@@ -352,11 +419,20 @@ func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (
 		brain.Threat += amount
 		if state.HP <= 0 {
 			brain.Threat = 0
-			brain.RespawnAt = now.Add(brain.RespawnAfter)
+			if npcRespawnBatchInterval() > 0 {
+				// 批量刷新：不设每怪计时，refreshTick 扫描统一复活。
+				brain.RespawnAt = time.Time{}
+			} else {
+				brain.RespawnAt = now.Add(brain.RespawnAfter)
+			}
+			s.run.recordNPCDeathLocked(uint32(id), meta.ownerID, brain, now)
 		}
 		s.run.combat.WriteBrain(id, brain)
 	}
 	frame, err := sceneObjectProperties(uint32(id), meta.ownerID, 0, npcCombatProperties(state))
+	if err != nil {
+		return skillDamageOutcome{}, err
+	}
 	loot := int32(0)
 	if state.HP <= 0 {
 		loot = state.MaxHP / 100
@@ -367,14 +443,41 @@ func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (
 			loot = 99
 		}
 	}
-	return frame, uint32(id), loot, state.HP <= 0, err
+	outcome := skillDamageOutcome{
+		frame: frame, id: uint32(id), ownerID: meta.ownerID,
+		loot: loot, killed: state.HP <= 0,
+		hpRatio: int32(int64(state.HP) * 100 / int64(state.MaxHP)),
+		model:   meta.model, wideName: meta.wideName,
+		cumulative: s.run.fightRelationAddLocked(uint32(id), amount),
+	}
+	if outcome.killed {
+		s.run.fightRelationResetLocked(uint32(id))
+	}
+	return outcome, nil
 }
 
 type areaSkillDamageResult struct {
-	frame  []byte
-	id     uint32
-	loot   int32
-	killed bool
+	frame      []byte
+	id         uint32
+	ownerID    uint32
+	loot       int32
+	killed     bool
+	hpRatio    int32
+	model      string
+	wideName   string
+	cumulative int32
+}
+
+// relayNPCKillFrame 把致死 0x10 帧转发给同场景其他可见成员，让旁观者
+// 与迟到者看到一致的死亡/重生周期；随后把击杀点排队的掉落宝箱物化
+// 帧（0x0D+0x1F）锁外扇出。apply* 内部自持 run.mu，调用点在锁外，
+// 两个扇出各自加锁安全。
+func (s *sceneLifecycle) relayNPCKillFrame(id uint32, frame []byte) {
+	if s == nil || s.run == nil || frame == nil {
+		return
+	}
+	s.run.relayNPCPropertyFrame(id, frame, s)
+	s.run.flushPendingObjectFrames()
 }
 
 func (s *sceneLifecycle) applyAreaSkillDamage(center worldcore.Transform, radius, height float32, amount int32, now time.Time) ([]areaSkillDamageResult, error) {
@@ -446,7 +549,13 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 			brain.Threat += amount
 			if state.HP <= 0 {
 				brain.Threat = 0
-				brain.RespawnAt = now.Add(brain.RespawnAfter)
+				if npcRespawnBatchInterval() > 0 {
+					// 批量刷新：不设每怪计时，refreshTick 扫描统一复活。
+					brain.RespawnAt = time.Time{}
+				} else {
+					brain.RespawnAt = now.Add(brain.RespawnAfter)
+				}
+				s.run.recordNPCDeathLocked(uint32(id), meta.ownerID, brain, now)
 			}
 			s.run.combat.WriteBrain(id, brain)
 		}
@@ -464,9 +573,16 @@ func (s *sceneLifecycle) applyShapedSkillDamage(center worldcore.Transform, radi
 				loot = 99
 			}
 		}
-		results = append(results, areaSkillDamageResult{
-			frame: frame, id: uint32(id), loot: loot, killed: state.HP <= 0,
-		})
+		result := areaSkillDamageResult{
+			frame: frame, id: uint32(id), ownerID: meta.ownerID, loot: loot, killed: state.HP <= 0,
+			hpRatio: int32(int64(state.HP) * 100 / int64(state.MaxHP)),
+			model:   meta.model, wideName: meta.wideName,
+			cumulative: s.run.fightRelationAddLocked(uint32(id), amount),
+		}
+		if result.killed {
+			s.run.fightRelationResetLocked(uint32(id))
+		}
+		results = append(results, result)
 	}
 	return results, nil
 }
@@ -604,11 +720,19 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 		return true, nil
 	}
 	appliedBuffs := stagePlayerSkillEffects(player, definition, now, remote)
-	cooldownFrame, err := skillCooldownFrame(definition, now)
+	// §3 出招帧序：个人 CD 行 → active_skill_rec 行（动作总时长后
+	// 0x12 删）→ GCD 行 → 玩家全量 → msg337 施法回显 → msg20。
+	personalCDFrame, publicCDFrame, err := skillCooldownFrames(definition, now)
 	if err != nil {
 		return true, fmt.Errorf("encode skill cooldown %s: %w", definition.id, err)
 	}
-	if err := link.WriteFrame(cooldownFrame); err != nil {
+	if err := link.WriteFrame(personalCDFrame); err != nil {
+		return true, err
+	}
+	if err := link.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordActiveSkill, definition.id)); err != nil {
+		return true, fmt.Errorf("write active skill row %s: %w", definition.id, err)
+	}
+	if err := link.WriteFrame(publicCDFrame); err != nil {
 		return true, err
 	}
 	playerFrame, err := player.vitalUpdate()
@@ -617,6 +741,16 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	}
 	if err := link.WriteFrame(playerFrame); err != nil {
 		return true, err
+	}
+	// msg337 施法者位置/朝向回显（值取 211 请求；缺省坐标不回显）。
+	if castAt, ok := useSkillCastTransform(custom); ok {
+		syncFrame, syncErr := casterTransformSyncFrame(castAt.X, castAt.Y, castAt.Z, castAt.Orient)
+		if syncErr != nil {
+			return true, fmt.Errorf("encode caster transform sync %s: %w", definition.id, syncErr)
+		}
+		if err := link.WriteFrame(syncFrame); err != nil {
+			return true, err
+		}
 	}
 	if definition.actionName != "" {
 		actionFrame, err := playerActionStateFrame(definition.actionName)
@@ -660,14 +794,19 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 		}
 		switch definition.targetMode {
 		case skillTargetSelected:
-			targetFrame, id, loot, killed, err := world.applySelectedSkillDamage(effect.amount, now)
+			outcome, err := world.applySelectedSkillDamage(effect.amount, now)
 			if err != nil {
 				return true, err
 			}
-			if targetFrame != nil {
-				damageTargetID, damageTargetCount = id, damageTargetCount+1
-				hitIDs = append(hitIDs, id)
-				if err := link.WriteFrame(targetFrame); err != nil {
+			if outcome.frame != nil {
+				damageTargetID, damageTargetCount = outcome.id, damageTargetCount+1
+				hitIDs = append(hitIDs, outcome.id)
+				if err := link.WriteFrame(outcome.frame); err != nil {
+					return true, err
+				}
+				// 命中表现帧族（0x13/24/0x2D/18/205）。
+				if err := writeSkillHitEventFrames(link, world, definition, player,
+					outcome.id, outcome.ownerID, effect.amount, outcome.hpRatio, outcome.model, outcome.cumulative); err != nil {
 					return true, err
 				}
 				// 实招命中(目标未格挡;NPC 无格挡态)→ 攻击者 +2 怒,
@@ -679,9 +818,13 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 						return true, err
 					}
 				}
+				if outcome.killed {
+					// 致死帧对视口内其他可见成员中继,死亡表现全场景一致。
+					world.relayNPCKillFrame(outcome.id, outcome.frame)
+				}
 			}
-			if killed {
-				totalLoot += loot
+			if outcome.killed {
+				totalLoot += outcome.loot
 			}
 		case skillTargetCasterCircle, skillTargetCasterSector, skillTargetCasterRectangle, skillTargetSelectedArea:
 			center, ok := useSkillCastTransform(custom)
@@ -712,8 +855,15 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				if err := link.WriteFrame(result.frame); err != nil {
 					return true, err
 				}
+				// 群体命中同样走完整表现帧族（§4 逐目标序列）。
+				if err := writeSkillHitEventFrames(link, world, definition, player,
+					result.id, result.ownerID, effect.amount, result.hpRatio, result.model, result.cumulative); err != nil {
+					return true, err
+				}
 				if result.killed {
 					totalLoot += result.loot
+					// 群杀致死帧同样中继给其他可见成员。
+					world.relayNPCKillFrame(result.id, result.frame)
 				}
 				// 群体技能同样按命中逐跳 +2(与单体一致)。
 				if _, spFrame, spErr := player.addSP(ragGainCleanHit); spErr != nil {
@@ -750,6 +900,15 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	for _, buff := range appliedBuffs {
 		schedulePlayerBuffExpiry(link, player, buff.slot, buff.staticData, buff.expires)
 	}
+	// 命中过敌人即战斗活动（官方 §9.1「命中入战」）：驱动 10s 脱战
+	// 迟滞窗口，击杀清仇恨/怪未及锁定自己时不再闪回 Normal。
+	if damageTargetCount > 0 {
+		player.noteCombatActivity(now)
+	}
+	// 技能重置跳跃（2026-11-07 跳段限制批次，用户钉死规则）：腾空中
+	// 施放技能成功 → 跳段计数重置但只授予一段（grantAirJumpReset 内部
+	// 仅对腾空状态生效；着地本就全量重置）。
+	player.grantAirJumpReset()
 	scheduleCurrentSkillClear(link, player, definition)
 	state := player.stateSnapshot()
 	log.Printf("%s: accepted skill id=%s mp=%d sp=%d qg=%d damage=%d target=%d targets=%d personal_cd=%s public_cd=%s",
@@ -788,6 +947,11 @@ func scheduleCurrentSkillClear(conn sceneMessageConnection, player *playerActor,
 		if !player.clearCurrentSkill(definition.id) {
 			return
 		}
+		// §3 行 9：动作总时长后 0x12 删 active_skill_rec 行 0 +
+		// State(idx19)="stand"（183 是我方已验证的动作段复位通道，并行保留）。
+		if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordActiveSkill, 0)); err != nil {
+			log.Printf("skill active row delete id=%s: %v", definition.id, err)
+		}
 		update, err := player.currentSkillClearUpdate()
 		if err != nil {
 			log.Printf("skill state clear encode id=%s: %v", definition.id, err)
@@ -805,6 +969,11 @@ func scheduleCurrentSkillClear(conn sceneMessageConnection, player *playerActor,
 		if err := conn.WriteFrame(stand); err != nil {
 			log.Printf("skill stand restore write id=%s: %v", definition.id, err)
 			return
+		}
+		if standState, err := playerStandStateFrame(); err == nil {
+			if err := conn.WriteFrame(standState); err != nil {
+				log.Printf("skill stand state write id=%s: %v", definition.id, err)
+			}
 		}
 		log.Printf("skill state cleared and stand restored id=%s total_action=%s", definition.id, delay)
 	})

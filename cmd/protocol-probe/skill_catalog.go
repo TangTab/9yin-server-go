@@ -186,6 +186,13 @@ func loadSkillResourceTables() (skillResourceTables, error) {
 }
 
 func levelVarProp(static []iniField, script string, level int32, tables skillResourceTables) []iniField {
+	_, fields := findVarPropRow(static, script, level, tables)
+	return fields
+}
+
+// findVarPropRow 是 levelVarProp 的带行号版（Java findVarProp 同构）：返回
+// 匹配 varprop 的节号——View40 行 VarPropNo 与客户端 varpkg 取同值。
+func findVarPropRow(static []iniField, script string, level int32, tables skillResourceTables) (int32, []iniField) {
 	var table iniTable
 	if strings.EqualFold(script, "SkillLock") {
 		table = tables.lockVar
@@ -197,10 +204,10 @@ func levelVarProp(static []iniField, script string, level int32, tables skillRes
 	for id := minimum; id <= maximum && id > 0; id++ {
 		fields := table[strconv.FormatInt(int64(id), 10)]
 		if iniInt(fields, "Level") == level {
-			return fields
+			return id, fields
 		}
 	}
-	return nil
+	return 0, nil
 }
 
 func compileSkillDamage(fields []iniField) int32 {
@@ -528,6 +535,71 @@ func (catalog *combatSkillCatalog) definition(id string, level int32) (combatSki
 	catalog.cache[key] = definition
 	catalog.cacheMu.Unlock()
 	return definition, true
+}
+
+// skillRowSupplement 是 View40 技能行的官方补集（Java CombatSkillCatalog.SkillRowData
+// 同构，另折入 personalCdMs 的 CoolDownTime 显示值）：官方行携带而最小集未发的
+// VarPropNo/UseLimit/消耗族/形状参数——快捷栏 tooltip 的消耗与最大射程、施法限距、
+// 怒招怒气不足灰图标、CD 文本都读它们（bug.txt「怒招的消耗没有下发」项）。
+type skillRowSupplement struct {
+	varPropNo        int32
+	useLimit         int32
+	aConsumeHP       int32
+	aConsumeMP       int32
+	aConsumeSP       int32
+	aConsumeQGP      int32
+	targetShapePara2 float32
+	hitShapePara1    float32
+	hitShapePara2    float32
+	coolDownMs       int32
+}
+
+// skillRowData 按 (id, level) 取 View40 行补集；查不到链路返回 nil，调用方回落。
+// 不走完整 compile——缺动作/伤害表的技术也能取值（打坐调息等）。发射侧沿用
+// 官方稀疏风格（参考服 207 行抓包分桶实证 2026-11-05）：VarPropNo/CoolDownTime
+// 每行必发；消耗/射程/UseLimit 仅 >0 才发；HitShapePara1 仅扇形族
+// （HitShape=3/9/10）发、HitShapePara2 仅 HitShape>0 发（htype=0 无形状不发）；
+// TargetShapePara1 官方从不发（207 行 0 次），不取。
+func (catalog *combatSkillCatalog) skillRowData(id string, level int32) *skillRowSupplement {
+	if catalog == nil || id == "" || level < 1 {
+		return nil
+	}
+	newFields, indexed := catalog.tables.skillNew[id]
+	if !indexed {
+		return nil
+	}
+	static, ok := catalog.tables.skillStatic[strconv.FormatInt(int64(iniInt(newFields, "StaticData")), 10)]
+	if !ok {
+		return nil
+	}
+	rowNo, varProp := findVarPropRow(static, iniValue(newFields, "script"), level, catalog.tables)
+	if varProp == nil {
+		return nil
+	}
+	consume := catalog.tables.consume[strconv.FormatInt(int64(iniInt(varProp, "Consume")), 10)]
+	targetShape := catalog.tables.targetShape[strconv.FormatInt(int64(iniInt(varProp, "TargetShapePkg")), 10)]
+	hitShape := catalog.tables.hitShape[strconv.FormatInt(int64(iniInt(varProp, "HitShapePkg")), 10)]
+	hitShapeType := iniInt(hitShape, "HitShape")
+	supplement := &skillRowSupplement{
+		varPropNo:        rowNo,
+		useLimit:         iniInt(newFields, "UseLimit"),
+		aConsumeHP:       iniInt(consume, "AConsumeHP"),
+		aConsumeMP:       iniInt(consume, "AConsumeMP"),
+		aConsumeSP:       iniInt(consume, "AConsumeSP"),
+		aConsumeQGP:      iniInt(consume, "AConsumeQGP"),
+		targetShapePara2: iniFloat(targetShape, "TargetShapePara2"),
+		// 个人 CD 显示值：varprop 按级 CoolDownTime 毫秒（skill_init.ini cooldown
+		// 官方全 0 不作源——下发 0 客户端 CD 文本兜底显示 1s；127-0-0-1-59719
+		// View40 行抓包 17/17 与 varprop 对齐）。
+		coolDownMs: iniInt(varProp, "CoolDownTime"),
+	}
+	if hitShapeType == 3 || hitShapeType == 9 || hitShapeType == 10 {
+		supplement.hitShapePara1 = iniFloat(hitShape, "HitShapePara1")
+	}
+	if hitShapeType > 0 {
+		supplement.hitShapePara2 = iniFloat(hitShape, "HitShapePara2")
+	}
+	return supplement
 }
 
 // maxLevelOf 技能满级（秘籍书直达层夹制用；Java maxLevelOf 同构）：

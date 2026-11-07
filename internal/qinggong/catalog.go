@@ -13,13 +13,17 @@ import (
 
 // Definition 是 QGDefine.ini 某个小节中与服务端相关的部分。
 // Para 字段描述客户端的移动表现；Consume 是客户端请求该轻功 ID 时
-// 服务端必须扣除的资源量。
+// 服务端必须扣除的资源量。ExistBufID 是能力门槛（qinggong_4 凌空踏虚/
+// qinggong_5 扶摇步法指向 buf_DHadd_2rd/3rd）：未挂该 buff 的使用被拒，
+// 已挂则免 Consume（native-menu 反编译实证的免费分支）；旧表缺该键
+// 为空串=无门槛，按现状放行。
 type Definition struct {
-	ID       string
-	Type     int32
-	UseType  int32
-	Consume  int32
-	BufferID string
+	ID         string
+	Type       int32
+	UseType    int32
+	Consume    int32
+	BufferID   string
+	ExistBufID string
 }
 
 type Catalog struct{ byID map[string]Definition }
@@ -87,6 +91,8 @@ func LoadFromReader(r io.Reader, source string) (*Catalog, error) {
 			entry.UseType = int32(value)
 		case "BufferID":
 			entry.BufferID = strings.TrimSpace(value)
+		case "ExistBufID":
+			entry.ExistBufID = strings.TrimSpace(value)
 		}
 		catalog.byID[current.ID] = entry
 	}

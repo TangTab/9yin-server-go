@@ -39,50 +39,64 @@ func (q *QingGong) SetConsumeMultiplier(multiplier float32) {
 	q.ConsumeMul = multiplier
 }
 
-// Use 施加当前由服务器权威判定的轻功资源消耗。本本地测试规则：
-// 回满被有意放在权威扣费/判定之后，因此动作仍须支付得起才能开始；
-// 只有成功后剩余不足 50 点的动作才触发回满。
+// Use 施加服务器权威判定的轻功一次性消耗（216 begin 的 qgdefine
+// Consume / 技能 AConsumeQGP）。2026-11-07 对齐 Java Actor.useQingGong
+// 去掉「余量 <50 自动回满」本地测试规则——官方轻功回复是分档慢回复
+// （见 RecoverTiered），回满会让消耗经济失去意义（真机「无限跳」根因）。
+// 消耗系数档保留：ConsumeMul 以 float32 持久化，取整前先消除表示误差，
+// 这样 25 点的技能在 -0.2 之下消耗仍是 20 而不是 21。
 func (q *QingGong) Use(baseCost int32, now time.Time) (cost int32, ok bool) {
 	if baseCost < 0 {
 		return 0, false
 	}
-	q.Restore(now)
 	multiplier := float64(1 + q.ConsumeMul)
 	if multiplier < 0 {
 		multiplier = 0
 	}
-	// ConsumeMul 以 float32 持久化；取整前先消除表示误差，
-	// 这样 25 点的技能在 -0.2 之下消耗仍是 20 而不是 21。
 	cost = int32(math.Ceil(float64(baseCost)*multiplier - 1e-6))
 	if q.Point < cost {
 		return cost, false
 	}
 	q.Point -= cost
-	if q.Point < 50 {
-		q.Point = q.Max + q.MaxAdd
-		q.UpdatedAt = now
-	}
+	q.UpdatedAt = now
 	return cost, true
 }
 
-// Restore 推进本地测试的资源计时器。本地基准：每秒 10 点
-// （100ms 一点）；各技能的消耗由官方配置提供。
-func (q *QingGong) Restore(now time.Time) bool {
-	if now.Before(q.UpdatedAt) {
+// Drain 持续态扣点（缓降/踏波行等租约的每秒消耗）：不触发任何回满，
+// 付不起返回 false（调用方强摘租约）。Java Actor.drainQingGong 同口径。
+func (q *QingGong) Drain(cost int32) bool {
+	if cost < 0 {
+		cost = 0
+	}
+	if q.Point < cost {
+		q.Point = 0
 		return false
 	}
-	points := int32(now.Sub(q.UpdatedAt) / (100 * time.Millisecond))
-	if points <= 0 {
+	q.Point -= cost
+	return true
+}
+
+// RecoverTiered 官方分档回复一步（玩家资料实测口径，Java
+// Actor.recoverQingGongTiered 同款）：按回复前余量取档——
+// 101..上限 → +10、51..100 → +5、0..50 → +3；封顶 max+add。
+// 由 1s ticker 每 3s 推进一步，消耗期（缓降/持续轻功租约）暂停。
+func (q *QingGong) RecoverTiered() bool {
+	cap := q.Max + q.MaxAdd
+	if q.Point >= cap {
 		return false
 	}
-	q.UpdatedAt = q.UpdatedAt.Add(time.Duration(points) * 100 * time.Millisecond)
-	before := q.Point
-	q.Point += points
-	max := q.Max + q.MaxAdd
-	if q.Point > max {
-		q.Point = max
+	gain := int32(3)
+	switch {
+	case q.Point >= 101:
+		gain = 10
+	case q.Point >= 51:
+		gain = 5
 	}
-	return q.Point != before
+	q.Point += gain
+	if q.Point > cap {
+		q.Point = cap
+	}
+	return true
 }
 
 // Motion 是移动修正组件。SpeedRatio 当前恒为 100（百分比），

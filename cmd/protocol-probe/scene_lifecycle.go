@@ -60,6 +60,9 @@ type sceneLifecycle struct {
 	wireID         uint32 // 场景内远程可见身份（attach 时由 run 分配）
 	selectedObject uint32
 	selectedOwner  uint32
+	// openDropBox 是当前打开的掉落箱窗口（View 80，loot_box.go）；
+	// 仅属主连接 goroutine 访问，无需锁。
+	openDropBox    *openDropBoxState
 	lastMenuObject uint32
 	lastMenuOwner  uint32
 	lastMenuAt     time.Time
@@ -84,6 +87,12 @@ type sceneEntity struct {
 	funcs       []npcfunc.Binding
 	services    []npcService
 	portal      *scenePortalRoute
+	// model/wideName 供 msg24 战斗帧携带：模型窄串（Material 列）与
+	// 宽串名（NpcNickName 列）。官方表缺列时为空串，帧仍发。
+	model    string
+	wideName string
+	// lootBox 非 nil 表示这是掉落宝箱（点击开 View 80，不走对话/选靶）。
+	lootBox *lootBoxRuntime
 }
 
 // ---- sceneEntity / Transform 组件访问器（委托场景运行时） ----
@@ -304,6 +313,18 @@ func (s *sceneLifecycle) refreshVisibility(catalog []npcSpawn, position role.Pos
 			next[wireID] = struct{}{}
 		}
 	}
+	// 动态掉落宝箱共用同一可见集（物化/0x0E 扇出过滤统一）。
+	for id := range s.run.lootBoxes {
+		transform, ok := s.run.npcTransform(worldcore.EntityID(id))
+		if !ok {
+			continue
+		}
+		dx := transform.X - position.X
+		dz := transform.Z - position.Z
+		if dx*dx+dz*dz <= radiusSquared {
+			next[id] = struct{}{}
+		}
+	}
 	s.run.mu.Unlock()
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -358,6 +379,7 @@ func (s *sceneLifecycle) begin(config, resource string, catalog []npcSpawn) erro
 	s.mu.Unlock()
 	s.selectedObject = 0
 	s.selectedOwner = 0
+	s.openDropBox = nil
 	s.lastMenuObject = 0
 	s.lastMenuOwner = 0
 	s.lastMenuAt = time.Time{}
@@ -562,11 +584,25 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		if entity.ownerID != 0 {
 			location := serverLocation(entity.id, entity.ownerID, transform)
 			if err := s.conn.WriteFrame(location); err != nil {
-				return fmt.Errorf("locate scene object %d: %w", id, err)
+				return fmt.Errorf("locate scene object %d: %w", entity.id, err)
 			}
 			locationReplays = append(locationReplays, sceneLocationReplay{
 				id: uint32(id), payload: append([]byte(nil), location...),
 			})
+		}
+		// 重放的 0x0D 是注册期快照（满血活怪）。若该 NPC 当前是尸体
+		// （被杀后等待重生），紧补一帧 0x10 死亡属性，让迟到的客户端
+		// 立即转入死亡表现，而不是渲染一头无法选中的"活怪"。
+		if vitals, hasVitals := s.run.npcVitals(id); hasVitals {
+			if state := vitals.ActorState(entity.id, entity.ownerID); state.HP <= 0 {
+				deadFrame, err := sceneObjectProperties(entity.id, entity.ownerID, 0, npcCombatProperties(state))
+				if err != nil {
+					return fmt.Errorf("encode dead scene object %d: %w", entity.id, err)
+				}
+				if err := s.conn.WriteFrame(deadFrame); err != nil {
+					return fmt.Errorf("correct dead scene object %d: %w", entity.id, err)
+				}
+			}
 		}
 		log.Printf("%s: sent modern scene object id=%d via ServerAddObject", s.remote, id)
 	}
@@ -607,6 +643,13 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 	// 解析同一个被选中的敌对角色。
 	s.selectedObject = entity.id
 	s.selectedOwner = entity.ownerID
+	// 掉落宝箱：点击即开掉落箱窗口（View 80），不走对话/选靶语义。
+	if entity.lootBox != nil {
+		if err := s.openDropBoxLocked(entity); err != nil {
+			return "", err
+		}
+		return entity.description, nil
+	}
 	// AttackNpc/BossNpc 以及不支持的场景对象仍然会成为玩家的 LastObject。
 	// 那是战斗入口使用的目标选择，但这些对象绝不能收到以前对每个出生
 	// 对象都发送的
@@ -711,6 +754,12 @@ func (s *sceneLifecycle) openShopLocked(shopID string) error {
 			properties[3] = viewInt(propPriceSilver, item.price)
 		case 2:
 			properties[4] = viewInt(propPriceCard, item.price)
+		case 3:
+			// 兑换类（shop.ini 约 88% 条目）：三价全 0 物化——成本由
+			// msg70 的 exchangeitem.ini 分支校验（fork 9/14 openShop
+			// 同样支持 capitalType 0..3；此前这里报错会让客户端拿到
+			// 半截商店）。View61 行显示为兑换（Java Shop_menpai_xtc_01
+			// 同款零价形态，客户端兼容已验证）。
 		default:
 			return fmt.Errorf("shop %q item %q has unsupported capital type %d", shopID, item.configID, item.capitalType)
 		}

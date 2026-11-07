@@ -62,3 +62,36 @@ func TestEveryStarterBookResolvesItsExactModernLevel(t *testing.T) {
 		}
 	}
 }
+
+// TestModernNeiGongCatalogWuXingFromWuXueBaseInfo 钉死五行表装载：
+// faculty/wuxuebaseinfo.ini 的 nWuXing（Java NeiGongCatalog.wuXing 同源）。
+// 套路与内功共用同一目录（CS_yhwq_hsqs01=2 柔 / ng_yh_001=6 阴柔）；
+// mind_ 重复节按节名收录，不污染 ng_* 主键。夹具缺该文件时跳过。
+func TestModernNeiGongCatalogWuXingFromWuXueBaseInfo(t *testing.T) {
+	catalog, err := loadModernNeiGongCatalog()
+	if err != nil {
+		t.Skipf("load modern inner-power catalog: %v", err)
+	}
+	if catalog.wuXingOf("ng_wd_001") == 0 {
+		t.Skip("wuxuebaseinfo.ini absent from resource store")
+	}
+	want := map[string]int32{
+		"ng_wd_001":      5,
+		"ng_yh_001":      6,
+		"ng_th_001":      5,
+		"CS_yhwq_hsqs01": 2,
+		"CS_wd_tjq01":    5,
+		"zs_default_01":  5,
+	}
+	for configID, value := range want {
+		if got := catalog.wuXingOf(configID); got != value {
+			t.Errorf("wuXingOf(%s)=%d, want %d", configID, got, value)
+		}
+	}
+	if got := catalog.wuXingOf("mind_ng_wd_001"); got != 5 {
+		t.Errorf("mind_ duplicate section key =%d, want 5", got)
+	}
+	if got := catalog.wuXingOf("no_such_config"); got != 0 {
+		t.Errorf("wuXingOf(unknown)=%d, want 0", got)
+	}
+}

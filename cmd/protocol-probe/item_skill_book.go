@@ -216,6 +216,9 @@ func useSkillBook(h *itemSession, item bagRow, script string) {
 		for _, def := range newNeigong {
 			h.player.progress.learnOrRaiseBook(def, neigongCap(def.staticData), addMax, addLevel)
 		}
+		// 传承直升可能抬的就是当前装备书：varprop 加成变了，官方
+		// MaxHPAdd/MaxMPAdd 公式的内功分量随之变化，推导上限须重算。
+		h.player.syncEquippedNeiGongResourcesLocked()
 		h.player.mu.Unlock()
 		if err := rebuildNeiGongView(h); err != nil {
 			log.Printf("%s: rebuild neigong view: %v", h.remote, err)
@@ -246,8 +249,9 @@ func useSkillBook(h *itemSession, item bagRow, script string) {
 }
 
 // learnOrRaiseBook 内功建书/抬上限（Java PlayerProgress.learnOrRaiseBook 同构；
-// 新书 total/power 走 Go starter 新书基线 700/120，传承直升层按 total+200/
-// maxPower+20 自然曲线）。调用方持有 p.mu。
+// 新书 total 走每级消耗曲线（江湖内功参考服修改曲线 / wuxuelevelinfo.ini），
+// 缺曲线回退 starter 基线 700+(L-1)*200；power 走 120+(L-1)*20；传承直升层
+// 由 levelUpNeiGongTotal 按曲线推进）。调用方持有 p.mu。
 func (p *playerProgress) learnOrRaiseBook(def modernNeiGongBook, capLevel, addMax, addLevel int32) {
 	target := p.book(def.configID)
 	if target == nil {
@@ -272,6 +276,7 @@ func (p *playerProgress) learnOrRaiseBook(def modernNeiGongBook, capLevel, addMa
 			total: 700 + (initialLevel-1)*200, power: 120 + (initialLevel-1)*20,
 			maxPower: 120 + (initialLevel-1)*20,
 		}
+		applyNeiGongLevelTotal(&book)
 		if err := book.applyModernEffect(); err != nil {
 			log.Printf("learn neigong %s effect: %v", def.configID, err)
 		}
@@ -290,7 +295,7 @@ func (p *playerProgress) learnOrRaiseBook(def modernNeiGongBook, capLevel, addMa
 	if addMax > 0 {
 		for target.level < want {
 			target.level++
-			target.total += 200
+			levelUpNeiGongTotal(target)
 			target.maxPower += 20
 			target.power = target.maxPower
 			changed = true

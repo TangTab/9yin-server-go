@@ -40,6 +40,17 @@ type sceneRun struct {
 	tickDone       chan struct{}
 	npcFuncs       *npcfunc.Registry
 	nextWireID     uint32
+	// 刷新域（npc_refresh.go）：目录保留供尸体清除后的重注册；
+	// deadNPCs 登记等待批量/定时重生的尸体；lootBoxes 是在场掉落宝箱。
+	catalog             []npcSpawn
+	deadNPCs            map[uint32]deadNPCRecord
+	lootBoxes           map[uint32]*lootBoxRuntime
+	nextSweepAt         time.Time
+	pendingObjectFrames []pendingObjectFrame
+	// fightRelation 是 0x13 fight_relation_rec 单格累计伤害的权威表：
+	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
+	// NPC 死亡清除，重生后从零累计。run.mu 保护。
+	fightRelation map[uint32]int32
 }
 
 // sceneMember 是挂靠场景的一个连接成员。position 是场景侧的
@@ -102,11 +113,15 @@ func acquireSceneRun(key sceneKey, catalog []npcSpawn, funcs *npcfunc.Registry) 
 
 func newSceneRun(key sceneKey, funcs *npcfunc.Registry) *sceneRun {
 	return &sceneRun{
-		key:      key,
-		combat:   sim.New(),
-		scene:    worldcore.NewScene(),
-		members:  make(map[uint32]*sceneMember),
-		npcFuncs: funcs,
+		key:       key,
+		combat:    sim.New(),
+		scene:     worldcore.NewScene(),
+		members:   make(map[uint32]*sceneMember),
+		npcFuncs:  funcs,
+		deadNPCs:  make(map[uint32]deadNPCRecord),
+		lootBoxes: make(map[uint32]*lootBoxRuntime),
+		// fightRelation 惰性建表即可，但预分配免去首击路径的判空。
+		fightRelation: make(map[uint32]int32),
 	}
 }
 
@@ -119,6 +134,8 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 		return err
 	}
 	registered := 0
+	// 目录保留在运行时上：尸体 TTL 清除后的重生需要按原下标重注册。
+	r.catalog = catalog
 	for index, npc := range catalog {
 		if !npcSpawnEligible(npc) {
 			continue
@@ -136,7 +153,10 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 }
 
 // npcSpawnEligible 前移了原按视口注册时的 EventNpc 闸门：
-// 没有 TaskOwner 的 EventNpc 永不进入共享世界。
+// EventNpc = 任务/事件触发器（触发某个任务才刷新的任务怪口径），
+// 与 Java 参考 NpcViewport.visibleInLocalViewport 同规则——不注册、
+// 不物化、无 Vitals/Brain，因此也永不进入死亡→重生刷新循环。
+// eventtrigger.xml（任务触发生成器）另在 npc_catalog.go 装载期排除。
 func npcSpawnEligible(npc npcSpawn) bool {
 	return !strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc")
 }
@@ -289,12 +309,14 @@ func (r *sceneRun) startTickLocked() {
 	}()
 }
 
-// tickOnce 是每秒一次的权威 NPC 模拟入口：战斗结算与巡逻采样各为一段，
-// 均在 run.mu 内完成，帧写入在锁外进行（transport.WriteFrame 线程安全；
-// 跨写者的相对顺序不保证，这是本轮已接受的权衡）。
+// tickOnce 是每秒一次的权威 NPC 模拟入口：战斗结算、巡逻采样与刷新
+// 周期（尸体 TTL/批量重生/宝箱过期）各为一段，均在 run.mu 内完成，
+// 帧写入在锁外进行（transport.WriteFrame 线程安全；跨写者的相对顺序
+// 不保证，这是本轮已接受的权衡）。
 func (r *sceneRun) tickOnce(now time.Time) {
 	r.combatTick(now)
 	r.patrolTick(now)
+	r.refreshTick(now)
 }
 
 // ---- NPC 注册（自 sceneLifecycle.registerNPC 迁入）----
@@ -358,12 +380,29 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 		properties:  cloneIndexedProperties(orderedProperties),
 		payload:     payload,
 	}
+	// msg24 战斗帧素材：Material/NpcNickName 缺列时保持空串（帧仍发）。
+	if property, ok := npc.resolved.Properties["Material"]; ok {
+		meta.model = property.Value.Text
+	}
+	if property, ok := npc.resolved.Properties["NpcNickName"]; ok {
+		meta.wideName = property.Value.Text
+	}
 	if hasPortal {
 		meta.portal = &portal
 	}
 	meta.schedule = npc.schedule
 	if meta.schedule != nil {
-		r.patrolIDs = append(r.patrolIDs, id)
+		// 幂等：尸体 TTL 清除后重注册会再次走到这里，在巡表不得重复。
+		onPatrol := false
+		for _, existing := range r.patrolIDs {
+			if existing == id {
+				onPatrol = true
+				break
+			}
+		}
+		if !onPatrol {
+			r.patrolIDs = append(r.patrolIDs, id)
+		}
 	}
 	maxHP, maxMP := int32(1000), int32(100)
 	for _, property := range orderedProperties {
@@ -410,6 +449,12 @@ func (r *sceneRun) writeNpcMeta(id worldcore.EntityID, meta sceneEntity) {
 
 func (r *sceneRun) npcTransform(id worldcore.EntityID) (worldcore.Transform, bool) {
 	return ecs.Read[worldcore.Transform](r.combat.Raw(), ecs.Id(id))
+}
+
+// npcVitals 读取 NPC 当前生命组件（调用方必须已持有 r.mu，与
+// npcMeta/npcTransform 同契约）。重放 0x0D 后用它判断尸体状态。
+func (r *sceneRun) npcVitals(id worldcore.EntityID) (sim.Vitals, bool) {
+	return ecs.Read[sim.Vitals](r.combat.Raw(), ecs.Id(id))
 }
 
 func (r *sceneRun) writeNpcTransform(id worldcore.EntityID, transform worldcore.Transform) {

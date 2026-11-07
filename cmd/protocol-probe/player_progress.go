@@ -31,10 +31,21 @@ const (
 	propIng            uint16 = 486
 	propSpi            uint16 = 488
 	propMeleePower     uint16 = 500
+	propShotPower      uint16 = 501
 	propMagicPower     uint16 = 502
+	propMeleePowerAdd  uint16 = 503
+	propShotPowerAdd   uint16 = 504
+	propMagicPowerAdd  uint16 = 505
 	propPhyHit         uint16 = 556
+	propPhyHitAdd      uint16 = 557
 	propMagicHit       uint16 = 559
+	propMagicHitAdd    uint16 = 560
 	propDodge          uint16 = 562
+	propDodgeAdd       uint16 = 563
+	propPhyVa          uint16 = 565
+	propPhyVaAdd       uint16 = 566
+	propMagicVa        uint16 = 569
+	propMagicVaAdd     uint16 = 570
 	propMaxParry       uint16 = 476
 	propPhyDef         uint16 = 584
 	propStiDef         uint16 = 586
@@ -45,20 +56,28 @@ const (
 	propMaxMeleeDamage uint16 = 509
 	propMaxHPAdd       uint16 = 581
 	propMaxMPAdd       uint16 = 582
+	propMaxSP          uint16 = 580
+	propMaxSPAdd       uint16 = 583
 	propMaxLevel       uint16 = 2083
 	// View 43 的条目是普通客户端对象。GoodsGrid 读取这两个属性来解析
 	// 当前的内功静态记录及其图片；对现代客户端而言仅有 ConfigID 是
 	// 不够的。
 	propStaticData uint16 = 2237
 	propItemType   uint16 = 1889
+	// WuXing(玩家域末现)是内修面板 form_wuxue_faculty 属性列
+	//（太极/阴柔/阳刚，ui_wuxue_prop_N）的显示来源：面板按 FacultyName
+	// 取武学对象后 QueryProp("WuXing")，缺省时整列退回 ui_train_elemt。
+	propWuXing uint16 = 2243
 	// 装备内功的 PropModify 加成。
 	propMaxParryAdd    uint16 = 477
 	propMinMagicDefAdd uint16 = 597
 )
 
-// MaxSP(580)/MaxSPAdd(583) 官方表存在。MaxSP 只在登录/切图全量批由
-// player_actor.go 的 loginVitalUpdate 携带一次(49840 帧实证仅 #16 一处),
-// 其余任何批次不得携带;MaxSPAdd 从不下发。这里不定义常量,防止误用。
+// MaxSP(580)/MaxSPAdd(583) 官方表存在,二者都只在登录/切图全量批由
+// player_actor.go 的 loginVitalUpdate 携带一次(MaxSP 为 49840 帧实证
+// 仅 #16 一处;MaxSPAdd 官方抓包从未出现,现随登录批一并下发做客户端
+// 效果验证,后续改由当前运行内功的怒气上限加成计算),其余任何批次
+// (恢复批/事件批/0x0D 归档)不得携带。
 
 // activeFacultyCardReward 刻意只在玩家从三张卡中选出一张（C->S 1006/23）
 // 之后才发放。主动页面并不是一个按分钟计的修炼计时器。
@@ -116,6 +135,9 @@ type learnedNeiGong struct {
 	// 索引。它们保存在已装备秘籍的状态上，让 211 裁定器只应用点名该次
 	// 施放的修正项。
 	skillModifiers map[string][]modernNeiGongModifier
+	// wuXing 是五行/属性 int（wuxuebaseinfo.ini nWuXing；Java Book.wuXing
+	// 同源），View 43 书行下发，内修面板属性列的显示来源。
+	wuXing int32
 }
 
 // playerProgress 刻意是一个轻量的服务器持有状态模型。其 ConfigID 来自
@@ -132,14 +154,63 @@ type playerProgress struct {
 	fillSpeed    int32
 	lastAdvance  time.Time
 	attributes   playerAttributes
+	// 修速拆分层（GM set_fill_speed；Java PlayerProgress 同名）：
+	// FillSpeed@773=round(base×multiplier)，NorFacultyAdd@774=base。
+	// 旧档缺省 200×1，与 normalFacultyFillPerMinute 基准一致。
+	fillSpeedBase       int32
+	fillSpeedMultiplier float32
+	// 演武每日碎银额度层（GM set_act_day_limit；0x09 表 790-797）。
+	// 单位为“文”（1 两=1000 文）；不限模式 Max=0、Value/Last 发
+	// 999999999 占位（Java UNLIMITED_ACT_DAY_VALUE 同值）。
+	actDayValue     int32
+	actCostSuiYin   int32
+	actDayValueMax  int32
+	actDayValueUsed int32
+	actDayValueLast int32
 }
 
 type playerAttributes struct {
-	sp, str, sta, dex, ing, spi                        int32
-	meleePower, magicPower, phyHit, magicHit, dodge    int32
-	maxParry, phyDef, stiDef, negDef, masDef, jujDef   int32
-	minMeleeDamage, maxMeleeDamage, maxHPAdd, maxMPAdd int32
+	sp, str, sta, dex, ing, spi                      int32
+	meleePower, shotPower, magicPower                int32
+	phyVa, magicVa                                   int32
+	phyHit, magicHit, dodge                          int32
+	maxParry, phyDef, stiDef, negDef, masDef, jujDef int32
+	minMeleeDamage, maxMeleeDamage                   int32
 }
+
+// 官方 55866/12173 抓包（base 30×5 + ng_jh_001 L1/L7）逐点解出的五维
+// 衍生系数：属性分量进 *Add 位，基础位保持白板初值（武器/词缀分量
+// 属装备专项，未移植）。
+//
+//	MaxHPAdd   = 2·Str + 7·Sta + 装备内功 pack HP
+//	MaxMPAdd   = 4·Ing + 1·Spi + 装备内功 pack MP（攻略常写的"内息 3 蓝"
+//	            是旧版口径；抓包与客户端 form_rp_arm tooltip 均为 ×4）
+//	MinMagicDefAdd = round(0.2·Spi) + 装备内功分量
+//	Melee/Shot/MagicPowerAdd、PhyHit/Dodge/Add = 1·对应维
+//	PhyVaAdd = 1·Str、MagicVaAdd = 1·Spi
+//	HPUpSpeedAdd = round(0.07·Sta)、MPUpSpeedAdd = round(0.2·Spi)
+//	HPUpSpeed = ceil(HP总/10)、MPUpSpeed = ceil(MP总/10)（stateProperties
+//	的 sitcrossRecoveryPerSecond 已是同式）
+const (
+	attrHPPerStr int32 = 2
+	attrHPPerSta int32 = 7
+	attrMPPerIng int32 = 4
+	attrMPPerSpi int32 = 1
+)
+
+// roundShifted 实现 round(coeff·value) 的整数化：numerator 已放大
+// 10/100 倍（如 0.07·Sta 记作 7·Sta/100）。负值护栏到 0。
+func roundShifted(numerator, denominator int32) int32 {
+	if numerator <= 0 {
+		return 0
+	}
+	return (numerator + denominator/2) / denominator
+}
+
+// spiMagicDefAdd / staHPResumeAdd / spiMPResumeAdd 三个分数系数的
+// 换算入口（0.2 与 0.07）。
+func spiTenthsAdd(spi int32) int32     { return roundShifted(2*spi, 10) }
+func staHundredthsAdd(sta int32) int32 { return roundShifted(7*sta, 100) }
 
 // equippedResourceAdds 返回的正是已装备内功 varprop 携带的资源加成。
 // 当前现代客户端直接以 MaxMP + MaxMPAdd 的方式消费 MaxMPAdd，因此对
@@ -150,6 +221,77 @@ func (p *playerProgress) equippedResourceAdds() (maxHPAdd, maxMPAddRaw int32) {
 		return equipped.maxHPAdd, equipped.maxMPAdd
 	}
 	return 0, 0
+}
+
+// rageCapAdd 是当前运行内功的怒气上限分档加成（官方口径 10~50,
+// 见 neigong_rage_cap.go 的档位表;未装备/无依据书目为 0）。客户端
+// 怒气球分母 = MaxSP(580) + MaxSPAdd(583),2026-11-07 已实证消费。
+func (p *playerProgress) rageCapAdd() int32 {
+	if equipped := p.book(p.curNeiGong); equipped != nil {
+		return neiGongRageCapAdd(equipped.configID)
+	}
+	return 0
+}
+
+// rageCap 是怒气的有效饱和上限:基础 80 + 运行内功档位加成。
+func (p *playerProgress) rageCap() int32 {
+	return maxPlayerSP + p.rageCapAdd()
+}
+
+// clampSP 把怒气值收敛到 [0, 有效上限]。
+func (p *playerProgress) clampSP(value int32) int32 {
+	if value < 0 {
+		return 0
+	}
+	if cap := p.rageCap(); value > cap {
+		return cap
+	}
+	return value
+}
+
+// effectiveFive 返回基础五维 + 装备内功加成的线上总值（0x10 485-489
+// 下发的同一数值，官方 wire 即总值）。
+func (p *playerProgress) effectiveFive() (str, sta, dex, ing, spi int32) {
+	a := p.attributes
+	if equipped := p.book(p.curNeiGong); equipped != nil {
+		return a.str + equipped.strAdd, a.sta + equipped.staAdd, a.dex + equipped.dexAdd,
+			a.ing + equipped.ingAdd, a.spi + equipped.spiAdd
+	}
+	return a.str, a.sta, a.dex, a.ing, a.spi
+}
+
+// derivedResourceAdds 是官方 MaxHPAdd@581/MaxMPAdd@582 的全量公式
+// （属性分量 + 装备内功 pack 分量）。vitals 的 SetDerivedMaxima 与
+// properties() 的 581/582 必须消费同一来源，客户端显示总量才能与
+// 服务器端消耗/恢复使用的总上限一致。
+func (p *playerProgress) derivedResourceAdds() (maxHPAdd, maxMPAdd int32) {
+	str, sta, _, ing, spi := p.effectiveFive()
+	bookHP, bookMP := p.equippedResourceAdds()
+	return str*attrHPPerStr + sta*attrHPPerSta + bookHP,
+		ing*attrMPPerIng + spi*attrMPPerSpi + bookMP
+}
+
+// derivedMinMagicDefAdd 是 MinMagicDefAdd@597 全量：round(0.2·Spi)
+// 属性分量 + 装备内功 varprop 分量。
+func (p *playerProgress) derivedMinMagicDefAdd() int32 {
+	_, _, _, _, spi := p.effectiveFive()
+	add := spiTenthsAdd(spi)
+	if equipped := p.book(p.curNeiGong); equipped != nil {
+		add += equipped.minMagicDefAdd
+	}
+	return add
+}
+
+// parryValueTotal 是 ParryValue@475 官方式：MaxParry 基础位 + MaxParryAdd。
+// （官方新建角色 100+16=116、55866 会话 100+57=157 逐点吻合；16/57 的
+// MaxParryAdd 官方来源未定位——非 ng_jh_001 varprop/pack，疑门派被动，
+// 本服 MaxParryAdd 仍只取装备内功分量，此差已知。）
+func (p *playerProgress) parryValueTotal() int32 {
+	add := int32(0)
+	if equipped := p.book(p.curNeiGong); equipped != nil {
+		add = equipped.maxParryAdd
+	}
+	return p.attributes.maxParry + add
 }
 
 func newPlayerProgress() playerProgress {
@@ -181,9 +323,11 @@ func newPlayerProgress() playerProgress {
 			strAdd: 66, staAdd: 56, dexAdd: 52, ingAdd: 103, spiAdd: 68,
 			maxHPAdd: 4050, maxMPAdd: 1135, maxParryAdd: 5070, minMagicDefAdd: 100},
 		// 这里同样使用经典的可见记录。1006/1008 是 mind_ 重复项：它们
-		// 显示的 Buff 路线被明确隐藏。
+		// 显示的 Buff 路线被明确隐藏。ng_jh_001 的 total=750 恰与
+		// wuxuelevelinfo.ini r=1 行同值；下方 alignLevelTotals 会按官方
+		// 曲线重求全部初值（无资源目录时保留本表兜底）。
 		{configID: "ng_wd_002", staticData: 6, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
-		{configID: "ng_jh_001", staticData: 1, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
+		{configID: "ng_jh_001", staticData: 1, itemType: 1002, level: 1, maxLevel: 36, total: 750, power: 120, maxPower: 120},
 		{configID: "ng_em_001", staticData: 8, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
 	}
 	progress := playerProgress{
@@ -194,24 +338,70 @@ func newPlayerProgress() playerProgress {
 		facultyStyle: facultyStyleNormal,
 		facultyName:  books[0].configID,
 		fillSpeed:    200,
-		lastAdvance:  time.Now().UTC(),
+		// 修速拆分与演武额度的新建默认（Java 过渡契约构造同口径）：
+		// 200×1；额度层不限模式占位。
+		fillSpeedBase:       200,
+		fillSpeedMultiplier: 1,
+		actDayValue:         actDayUnlimitedSentinel,
+		actDayValueLast:     actDayUnlimitedSentinel,
+		lastAdvance:         time.Now().UTC(),
 		attributes: playerAttributes{
 			sp: maxPlayerSP, str: 30, sta: 30, dex: 30, ing: 30, spi: 30,
-			meleePower: 80, magicPower: 80, phyHit: 50, magicHit: 50,
+			meleePower: 80, shotPower: 80, magicPower: 80,
+			phyVa: 16, magicVa: 16,
+			phyHit: 50, magicHit: 50,
 			dodge: 35, maxParry: 100, phyDef: 60, stiDef: 50, negDef: 50,
 			masDef: 50, jujDef: 50, minMeleeDamage: 20, maxMeleeDamage: 35,
 		},
 	}
 	// 上面的内联值只是无资源时的兜底。每本已安装的现代秘籍都会立即被
-	// 其 StaticData/当前等级的 varprop 和 PropModify 结果替换。
+	// 其 StaticData/当前等级的 varprop 和 PropModify 结果替换；每级
+	// 消耗同样按曲线对齐（ng_wd_001@30=273200、ng_yh/th@30=579600 本
+	// 就取自 wuxuelevelinfo.ini，此处只是把 1 级书的 700 兜底也归位）。
+	progress.alignLevelTotals()
 	progress.refreshAllModernEffects()
+	// 登录即满怒:满值 = 基础 80 + 当前运行内功档位加成(默认 ng_wd_001
+	// 武当一内 +10 → 90)。
+	progress.attributes.sp = progress.rageCap()
 	return progress
+}
+
+// alignLevelTotals 把每本书的每级修炼消耗（TotalFillValue）重求成曲线
+// 权威值：全部内功书（含江湖 ng_jh_*）统一走 wuxuelevelinfo.ini 官方
+// 曲线；无曲线依据的书保留现值（自然曲线/快照兜底）。
+func (p *playerProgress) alignLevelTotals() {
+	for index := range p.books {
+		applyNeiGongLevelTotal(&p.books[index])
+	}
+}
+
+// applyNeiGongLevelTotal 按 configId/level 的曲线值覆盖 book.total。
+// 无曲线依据（缺资源目录/缺行）时不改动。
+func applyNeiGongLevelTotal(book *learnedNeiGong) {
+	if total, ok := resolveNeiGongLevelTotal(book.configID, book.level); ok {
+		book.total = total
+	}
+}
+
+// levelUpNeiGongTotal 升层后的每级修炼消耗：曲线（wuxuelevelinfo.ini
+// 官方曲线）优先，缺曲线回退 Java 同款的自然曲线 +200/层。
+func levelUpNeiGongTotal(book *learnedNeiGong) {
+	if total, ok := resolveNeiGongLevelTotal(book.configID, book.level); ok {
+		book.total = total
+		return
+	}
+	book.total += 200
 }
 
 func (book *learnedNeiGong) applyModernEffect() error {
 	catalog, err := loadModernNeiGongCatalog()
 	if err != nil {
 		return err
+	}
+	// 五行不依赖 varprop 行（Java applyModernEffect 同款：查到非零才
+	// 覆盖），缺目录环境保持 0，客户端按缺省文案显示。
+	if wuXing := catalog.wuXingOf(book.configID); wuXing != 0 {
+		book.wuXing = wuXing
 	}
 	effect, err := catalog.effect(book.staticData, book.level)
 	if err != nil {
@@ -273,7 +463,7 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		level, maxLevel, fill, total, power, maxPower = book.level, book.maxLevel, book.fill, book.total, book.power, book.maxPower
 	}
 	a := p.attributes
-	maxParryAdd, minMagicDefAdd := int32(0), int32(0)
+	maxParryAdd := int32(0)
 	// 将当前装备的内功应用到服务器持有的角色状态上。对应的 BuffStore
 	// 条目由 playerActor 安装；可见的主属性必须遵循同一个权威来源。
 	if equipped := p.book(p.curNeiGong); equipped != nil {
@@ -282,11 +472,12 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		a.dex += equipped.dexAdd
 		a.ing += equipped.ingAdd
 		a.spi += equipped.spiAdd
-		a.maxHPAdd += equipped.maxHPAdd
-		a.maxMPAdd += equipped.maxMPAdd
 		maxParryAdd = equipped.maxParryAdd
-		minMagicDefAdd = equipped.minMagicDefAdd
 	}
+	// 资源/内防 Add 走官方全量公式（属性分量 + 内功 pack 分量），
+	// 与 vitals SetDerivedMaxima 的 derivedResourceAdds 同源。
+	maxHPAdd, maxMPAdd := p.derivedResourceAdds()
+	minMagicDefAdd := p.derivedMinMagicDefAdd()
 	return []clientdata.IndexedProperty{
 		{Index: propCurNeiGong, Name: "CurNeiGong", Value: clientdata.StringValue(p.curNeiGong)},
 		{Index: propFaculty, Name: "Faculty", Value: clientdata.Int32Value(p.faculty)},
@@ -306,10 +497,21 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propIng, Name: "Ing", Value: clientdata.Int32Value(a.ing)},
 		{Index: propSpi, Name: "Spi", Value: clientdata.Int32Value(a.spi)},
 		{Index: propMeleePower, Name: "MeleePower", Value: clientdata.Int32Value(a.meleePower)},
+		{Index: propShotPower, Name: "ShotPower", Value: clientdata.Int32Value(a.shotPower)},
 		{Index: propMagicPower, Name: "MagicPower", Value: clientdata.Int32Value(a.magicPower)},
+		{Index: propMeleePowerAdd, Name: "MeleePowerAdd", Value: clientdata.Int32Value(a.str)},
+		{Index: propShotPowerAdd, Name: "ShotPowerAdd", Value: clientdata.Int32Value(a.dex)},
+		{Index: propMagicPowerAdd, Name: "MagicPowerAdd", Value: clientdata.Int32Value(a.ing)},
 		{Index: propPhyHit, Name: "PhyHit", Value: clientdata.Int32Value(a.phyHit)},
+		{Index: propPhyHitAdd, Name: "PhyHitAdd", Value: clientdata.Int32Value(a.dex)},
 		{Index: propMagicHit, Name: "MagicHit", Value: clientdata.Int32Value(a.magicHit)},
+		{Index: propMagicHitAdd, Name: "MagicHitAdd", Value: clientdata.Int32Value(a.spi)},
 		{Index: propDodge, Name: "Dodge", Value: clientdata.Int32Value(a.dodge)},
+		{Index: propDodgeAdd, Name: "DodgeAdd", Value: clientdata.Int32Value(a.dex)},
+		{Index: propPhyVa, Name: "PhyVa", Value: clientdata.Int32Value(a.phyVa)},
+		{Index: propPhyVaAdd, Name: "PhyVaAdd", Value: clientdata.Int32Value(a.str)},
+		{Index: propMagicVa, Name: "MagicVa", Value: clientdata.Int32Value(a.magicVa)},
+		{Index: propMagicVaAdd, Name: "MagicVaAdd", Value: clientdata.Int32Value(a.spi)},
 		{Index: propMaxParry, Name: "MaxParry", Value: clientdata.Int32Value(a.maxParry)},
 		{Index: propPhyDef, Name: "PhyDef", Value: clientdata.Int32Value(a.phyDef)},
 		{Index: propStiDef, Name: "StiDef", Value: clientdata.Int32Value(a.stiDef)},
@@ -318,8 +520,8 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propJujDef, Name: "JujDef", Value: clientdata.Int32Value(a.jujDef)},
 		{Index: propMinMeleeDamage, Name: "MinMeleeDamage", Value: clientdata.Int32Value(a.minMeleeDamage)},
 		{Index: propMaxMeleeDamage, Name: "MaxMeleeDamage", Value: clientdata.Int32Value(a.maxMeleeDamage)},
-		{Index: propMaxHPAdd, Name: "MaxHPAdd", Value: clientdata.Int32Value(a.maxHPAdd)},
-		{Index: propMaxMPAdd, Name: "MaxMPAdd", Value: clientdata.Int32Value(a.maxMPAdd)},
+		{Index: propMaxHPAdd, Name: "MaxHPAdd", Value: clientdata.Int32Value(maxHPAdd)},
+		{Index: propMaxMPAdd, Name: "MaxMPAdd", Value: clientdata.Int32Value(maxMPAdd)},
 		{Index: propMaxParryAdd, Name: "MaxParryAdd", Value: clientdata.Int32Value(maxParryAdd)},
 		{Index: propMinMagicDefAdd, Name: "MinMagicDefAdd", Value: clientdata.Int32Value(minMagicDefAdd)},
 		{Index: propMaxLevel, Name: "MaxLevel", Value: clientdata.Int32Value(maxLevel)},
@@ -353,6 +555,7 @@ func (p *playerProgress) bookFrame(slot uint16) ([]byte, error) {
 		viewInt(propTotalFillValue, book.total),
 		viewInt(propPowerValue, book.power),
 		viewInt(propMaxPowerValue, book.maxPower),
+		viewInt(propWuXing, book.wuXing),
 	})
 }
 
@@ -361,6 +564,9 @@ func (p *playerProgress) equip(id string) error {
 		return fmt.Errorf("not learned neigong %q", id)
 	}
 	p.curNeiGong = id
+	// 换书可能收缩上限(如 +40 书切回 +10 书):把存量怒气收敛到新的
+	// 有效上限,之后的 vitalUpdate 大批会把收敛后的 SP 一并下发。
+	p.attributes.sp = p.clampSP(p.attributes.sp)
 	return nil
 }
 
@@ -453,7 +659,7 @@ func (p *playerProgress) advanceFaculty(now time.Time) (uint16, bool) {
 		for book.fill >= book.total && book.level < book.maxLevel {
 			book.fill -= book.total
 			book.level++
-			book.total += 200
+			levelUpNeiGongTotal(book)
 			book.maxPower += 20
 			book.power = book.maxPower
 		}
@@ -493,7 +699,7 @@ func (p *playerProgress) awardActiveFaculty() (slot uint16, awarded, levelUp, ma
 		for book.fill >= book.total && book.level < book.maxLevel {
 			book.fill -= book.total
 			book.level++
-			book.total += 200
+			levelUpNeiGongTotal(book)
 			book.maxPower += 20
 			book.power = book.maxPower
 		}
@@ -516,6 +722,19 @@ func (p *playerProgress) snapshot() facultyProgressSnapshot {
 		FillSpeed:      p.fillSpeed,
 		LastAdvanceUTC: p.lastAdvance.UTC(),
 		Books:          make([]facultyBookSnapshot, 0, len(p.books)),
+		// GM 面板域（货币/属性/状态批次）：键名对齐 Java FacultyStore。
+		FillSpeedBase:       p.fillSpeedBase,
+		FillSpeedMultiplier: p.fillSpeedMultiplier,
+		ActDayValue:         p.actDayValue,
+		ActCostSuiYin:       p.actCostSuiYin,
+		ActDayValueMax:      p.actDayValueMax,
+		ActDayValueUsed:     p.actDayValueUsed,
+		ActDayValueLast:     p.actDayValueLast,
+		BaseStr:             p.attributes.str,
+		BaseSta:             p.attributes.sta,
+		BaseDex:             p.attributes.dex,
+		BaseIng:             p.attributes.ing,
+		BaseSpi:             p.attributes.spi,
 	}
 	for _, book := range p.books {
 		value.Books = append(value.Books, facultyBookSnapshot{
@@ -547,6 +766,41 @@ func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
 	}
 	p.fillSpeed = value.FillSpeed
 	p.lastAdvance = value.LastAdvanceUTC.UTC()
+	// GM 面板域还原（Java FacultyStore restore 同口径的缺省回退）：
+	// 修速拆分旧档 0 → 200×1；演武额度层旧档 0 → 不限占位；基础
+	// 五维旧档 0 → 不覆盖运行时值（保留 starter 目录初值）。
+	p.fillSpeedBase, p.fillSpeedMultiplier = 200, float32(1)
+	if value.FillSpeedBase > 0 {
+		p.fillSpeedBase = value.FillSpeedBase
+	}
+	if value.FillSpeedMultiplier > 0 {
+		p.fillSpeedMultiplier = value.FillSpeedMultiplier
+	}
+	p.actDayValue, p.actCostSuiYin = actDayUnlimitedSentinel, 0
+	p.actDayValueMax, p.actDayValueUsed = 0, 0
+	p.actDayValueLast = actDayUnlimitedSentinel
+	if value.ActDayValue > 0 || value.ActDayValueMax > 0 || value.ActDayValueUsed > 0 || value.ActCostSuiYin > 0 {
+		p.actDayValue = value.ActDayValue
+		p.actCostSuiYin = value.ActCostSuiYin
+		p.actDayValueMax = value.ActDayValueMax
+		p.actDayValueUsed = value.ActDayValueUsed
+		p.actDayValueLast = value.ActDayValueLast
+	}
+	if value.BaseStr > 0 {
+		p.attributes.str = value.BaseStr
+	}
+	if value.BaseSta > 0 {
+		p.attributes.sta = value.BaseSta
+	}
+	if value.BaseDex > 0 {
+		p.attributes.dex = value.BaseDex
+	}
+	if value.BaseIng > 0 {
+		p.attributes.ing = value.BaseIng
+	}
+	if value.BaseSpi > 0 {
+		p.attributes.spi = value.BaseSpi
+	}
 	for _, saved := range value.Books {
 		book := p.book(saved.ConfigID)
 		if book == nil || saved.Level <= 0 || saved.Level > book.maxLevel || saved.Total <= 0 || saved.Fill < 0 {
@@ -558,12 +812,22 @@ func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
 		book.power = saved.Power
 		book.maxPower = saved.MaxPower
 	}
+	// 每级消耗对齐曲线权威值：快照 total 可能来自旧 +200 自然曲线（或
+	// 旧服写盘），全部内功书（含江湖 ng_jh_*）按 wuxuelevelinfo.ini 官方
+	// 曲线重求后下发；fill 进度保留，溢出的层数由下方 advanceFaculty
+	// 立即结算。无曲线依据的书保留快照值。
+	p.alignLevelTotals()
 	if p.facultyState == facultyStateConvert && p.facultyStyle == facultyStyleNormal {
 		_, _ = p.advanceFaculty(now)
 	} else {
 		p.lastAdvance = now.UTC()
 	}
 	p.refreshAllModernEffects()
+	// 快照恢复的 CurNeiGong 可能比 starter 默认档位低:把构造时写满的
+	// 怒气收敛到恢复后的有效上限。
+	if p.attributes.sp > p.rageCap() {
+		p.attributes.sp = p.rageCap()
+	}
 }
 
 // restoreExtraBooks 把快照中超出 starter 目录的书从 neigong.ini 目录
@@ -596,6 +860,9 @@ func (p *playerProgress) restoreExtraBooks(value facultyProgressSnapshot) {
 			power:      defaultExtraNeiGongPower,
 			maxPower:   defaultExtraNeiGongPower,
 		})
+		// 回填种子同样按官方曲线取 L1 消耗（wuxuelevelinfo r=1 行）；
+		// 公共覆盖循环随后仍按快照值校验写入。
+		applyNeiGongLevelTotal(&p.books[len(p.books)-1])
 		appended = append(appended, saved.ConfigID)
 	}
 	if len(appended) > 0 {
@@ -674,6 +941,17 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			return true, fmt.Errorf("215 requires a learned neigong ConfigID string")
 		}
 		if err := player.equipNeiGong(custom.Values[1].Text); err != nil {
+			return true, err
+		}
+		// 换书会改变怒气有效上限。上限对(580/583)不进常规批/0x0D
+		// 归档,但客户端已实证消费 MaxSP+MaxSPAdd 口径,这里用与纯 SP
+		// 事件帧同形的单次 0x10 专帧先行刷新分母,再发含收敛后 SP 的
+		// 常规大批。
+		capFrame, capErr := player.rageCapUpdate()
+		if capErr != nil {
+			return true, capErr
+		}
+		if err := link.WriteFrame(capFrame); err != nil {
 			return true, err
 		}
 		return true, syncState()

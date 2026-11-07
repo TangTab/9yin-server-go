@@ -225,3 +225,113 @@ func TestRemotePlayerVisibility(t *testing.T) {
 	viewA.close()
 	viewB.close()
 }
+
+// TestKillFrameRelayReachesVisibleBystanders 致死 0x10 帧必须中继给视口
+// 内可见该 NPC 的其他成员：击杀者已有首发帧不重发，远处不可见者不收。
+func TestKillFrameRelayReachesVisibleBystanders(t *testing.T) {
+	connKiller := &captureMessageConnection{}
+	connBystander := &captureMessageConnection{}
+	connFar := &captureMessageConnection{}
+	killer := newSceneLifecycle("killer", connKiller)
+	bystander := newSceneLifecycle("bystander", connBystander)
+	far := newSceneLifecycle("far", connFar)
+	killer.radius, bystander.radius, far.radius = 50, 50, 50
+
+	catalog := []npcSpawn{testCombatCatalogNPC(2)}
+	run := newSceneRun(sceneKey{config: "scene", resource: "resource"}, nil)
+	if err := run.populate(catalog); err != nil {
+		t.Fatal(err)
+	}
+	killer.run, bystander.run, far.run = run, run, run
+
+	killer.attachMember(newPlayerActor("k", 0), role.Position{X: 1}, roleVisual{})
+	bystander.attachMember(newPlayerActor("s", 0), role.Position{X: 2}, roleVisual{})
+	far.attachMember(newPlayerActor("f", 0), role.Position{X: 400}, roleVisual{})
+	run.activateMember(killer.wireID)
+	run.activateMember(bystander.wireID)
+	run.activateMember(far.wireID)
+	killer.refreshVisibility(catalog, role.Position{X: 1})
+	bystander.refreshVisibility(catalog, role.Position{X: 2})
+	far.refreshVisibility(catalog, role.Position{X: 400})
+	if !bystander.npcVisible(2) || far.npcVisible(2) {
+		t.Fatal("visibility setup mismatch")
+	}
+
+	killer.selectedObject, killer.selectedOwner = 2, 1
+	outcome, err := killer.applySelectedSkillDamage(999999, time.Unix(7000, 0))
+	frame, id, killed := outcome.frame, outcome.id, outcome.killed
+	if err != nil || !killed || frame == nil {
+		t.Fatalf("kill settlement frame=%v id=%d killed=%t err=%v", frame, id, killed, err)
+	}
+	if brain, ok := run.combat.Brain(2); !ok || brain.RespawnAt.IsZero() {
+		t.Fatalf("kill must schedule respawn, brain=%+v ok=%t", brain, ok)
+	}
+	killer.relayNPCKillFrame(id, frame)
+
+	if frames := connKiller.Frames(); len(frames) != 0 {
+		t.Fatalf("killer must not receive relayed duplicate: %d frames", len(frames))
+	}
+	if frames := connBystander.Frames(); len(frames) != 1 || frames[0][0] != 0x10 {
+		t.Fatalf("bystander frames=%x", frames)
+	}
+	if frames := connFar.Frames(); len(frames) != 0 {
+		t.Fatalf("out-of-view member must not receive relay: %d frames", len(frames))
+	}
+	killer.close()
+	bystander.close()
+	far.close()
+}
+
+// TestViewportReconcileCorrectsCorpseForLateEntrant 迟到进入尸体视口的
+// 客户端：0x0D 是注册期满血快照，必须紧跟 0x1F 权威坐标与 0x10 死亡
+// 修正帧，否则走近的玩家会看到一头无法选中的"活怪"。
+func TestViewportReconcileCorrectsCorpseForLateEntrant(t *testing.T) {
+	connA := &captureMessageConnection{}
+	connB := &captureMessageConnection{}
+	viewA := newSceneLifecycle("a", connA)
+	viewB := newSceneLifecycle("b", connB)
+	viewA.radius, viewB.radius = 50, 50
+
+	catalog := []npcSpawn{testCombatCatalogNPC(2)}
+	run := newSceneRun(sceneKey{config: "scene", resource: "resource"}, nil)
+	if err := run.populate(catalog); err != nil {
+		t.Fatal(err)
+	}
+	viewA.run, viewB.run = run, run
+	viewA.attachMember(newPlayerActor("a", 0), role.Position{X: 1}, roleVisual{})
+	run.activateMember(viewA.wireID)
+
+	// A 侧击杀 NPC：尸体保留在世界（官方抓包 0x0E=0，不删除实体）。
+	vitals, ok := run.combat.Vitals(2)
+	if !ok {
+		t.Fatal("NPC 2 must have vitals")
+	}
+	for vitals.HP > 0 {
+		vitals.ApplyDamage(500)
+		run.combat.WriteVitals(2, vitals)
+	}
+
+	// B 从远处进场后走近尸体并触发对账。
+	viewB.attachMember(newPlayerActor("b", 0), role.Position{X: 400}, roleVisual{})
+	run.activateMember(viewB.wireID)
+	viewB.updateMemberPosition(role.Position{X: 2}, catalog)
+	if !viewB.npcVisible(2) {
+		t.Fatal("corpse must be visible to the approaching view")
+	}
+	if err := viewB.reconcileViewport(); err != nil {
+		t.Fatal(err)
+	}
+	// NPC（实体 2）先于玩家实体（3+）下发：0x0D → 0x1F → 0x10 死亡修正。
+	frames := connB.Frames()
+	want := []byte{0x0D, 0x1F, 0x10}
+	if len(frames) < len(want) {
+		t.Fatalf("late entrant frames=%x", frames)
+	}
+	for i, opcode := range want {
+		if frames[i][0] != opcode {
+			t.Fatalf("late entrant frame %d = %#x, want %#x (all=%x)", i, frames[i][0], opcode, frames)
+		}
+	}
+	viewA.close()
+	viewB.close()
+}

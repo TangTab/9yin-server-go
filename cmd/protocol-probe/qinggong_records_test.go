@@ -6,53 +6,51 @@ import (
 	"testing"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/qinggong"
 )
 
 func TestQingGongRecordSchemaAndRowLayout(t *testing.T) {
-	table, err := serverRecordTable(qingGongRecordSchemas)
+	table, err := serverRecordTable()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if table[0] != 0x0A || binary.LittleEndian.Uint16(table[1:]) != 9 {
-		t.Fatalf("record table header=%x", table)
+	// 官方 447 schema 方言整表透传：帧头 + 关键下标按名可解析。
+	if table[0] != 0x0A || binary.LittleEndian.Uint16(table[1:]) != 447 {
+		t.Fatalf("record table header=%x", table[:3])
 	}
-	wantPrefix := []byte{0x0A, 9, 0,
-		'Q', 'i', 'n', 'g', 'G', 'o', 'n', 'g', 'R', 'e', 'c', 0, 1, 0, 7,
-		'A', 'c', 't', 'i', 'v', 'e', 'Q', 'G', 'S', 'k', 'i', 'l', 'l', 'R', 'e', 'c', 0, 1, 0, 7}
-	if len(table) < len(wantPrefix) || string(table[:len(wantPrefix)]) != string(wantPrefix) {
-		t.Fatalf("record table prefix=%x want=%x", table, wantPrefix)
+	for name, want := range map[string]uint16{
+		"Task_Accepted":      recordTaskAccepted,
+		"Task_Completed":     recordTaskCompleted,
+		"shortcut_rec":       recordShortcut,
+		"title_rec":          recordTitle,
+		"cooldown_rec":       recordCooldown,
+		"QingGongRec":        recordQingGong,
+		"ActiveQGSkillRec":   recordActiveQingGong,
+		"active_jingmai_rec": recordActiveJingMai,
+		"FashionSuitRec":     recordFashionSuit,
+		"CardRec":            recordCard,
+		"UseCardRec":         recordUseCard,
+	} {
+		if got := clientdata.MustRecordIndexByName(name); got != want {
+			t.Fatalf("record %s official index=%d constant=%d", name, got, want)
+		}
 	}
-	if got := len(qingGongRecordSchemas[recordTaskAccepted].colTypes); got != 7 {
-		t.Fatalf("Task_Accepted compatibility column count=%d, want 7", got)
+	// 官方列型抽查：Task_Accepted 28 列、cooldown_rec 末列 u16、
+	// title_rec [3,1,4]、ActiveQGSkillRec [7,1]。
+	if schema, _ := clientdata.RecordSchemaByIndex(int(recordTaskAccepted)); len(schema.ColumnTypes) != 28 {
+		t.Fatalf("Task_Accepted official columns=%d, want 28", len(schema.ColumnTypes))
 	}
-	if schema := qingGongRecordSchemas[recordShortcut]; schema.name != "shortcut_rec" || len(schema.colTypes) != 3 ||
-		schema.colTypes[0] != recordColumnInt || schema.colTypes[1] != recordColumnString || schema.colTypes[2] != recordColumnString {
-		t.Fatalf("shortcut schema=%+v", schema)
-	}
-	if schema := qingGongRecordSchemas[recordCooldown]; schema.name != "cooldown_rec" ||
-		len(schema.colTypes) != 4 || schema.colTypes[0] != recordColumnInt ||
-		schema.colTypes[1] != recordColumnInt64 || schema.colTypes[2] != recordColumnInt64 ||
-		schema.colTypes[3] != recordColumnInt {
+	if schema, _ := clientdata.RecordSchemaByIndex(int(recordCooldown)); len(schema.ColumnTypes) != 4 || schema.ColumnTypes[3] != recordColumnWord {
 		t.Fatalf("cooldown schema=%+v", schema)
 	}
-	// 外观域三记录（docs/装备外观与风物志挂载.md：FashionSuitRec
-	// [7,3,3,4,3,3] / CardRec [3] 位图 / UseCardRec [2,2] Word 双列）。
-	if schema := qingGongRecordSchemas[recordFashionSuit]; schema.name != "FashionSuitRec" ||
-		len(schema.colTypes) != 6 || schema.colTypes[0] != recordColumnString ||
-		schema.colTypes[1] != recordColumnInt || schema.colTypes[2] != recordColumnInt ||
-		schema.colTypes[3] != recordColumnInt64 || schema.colTypes[4] != recordColumnInt ||
-		schema.colTypes[5] != recordColumnInt {
-		t.Fatalf("fashion suit schema=%+v", schema)
+	if schema, _ := clientdata.RecordSchemaByIndex(int(recordTitle)); len(schema.ColumnTypes) != 3 ||
+		schema.ColumnTypes[0] != recordColumnInt || schema.ColumnTypes[1] != recordColumnByte || schema.ColumnTypes[2] != recordColumnInt64 {
+		t.Fatalf("title schema=%+v", schema)
 	}
-	if schema := qingGongRecordSchemas[recordCard]; schema.name != "CardRec" ||
-		len(schema.colTypes) != 1 || schema.colTypes[0] != recordColumnInt {
-		t.Fatalf("card schema=%+v", schema)
-	}
-	if schema := qingGongRecordSchemas[recordUseCard]; schema.name != "UseCardRec" ||
-		len(schema.colTypes) != 2 || schema.colTypes[0] != recordColumnWord ||
-		schema.colTypes[1] != recordColumnWord {
-		t.Fatalf("use card schema=%+v", schema)
+	if schema, _ := clientdata.RecordSchemaByIndex(int(recordActiveQingGong)); len(schema.ColumnTypes) != 2 ||
+		schema.ColumnTypes[0] != recordColumnString || schema.ColumnTypes[1] != recordColumnByte {
+		t.Fatalf("active qinggong schema=%+v", schema)
 	}
 	row := serverRecordAddString(1, 1, recordQingGong, "qinggong_8")
 	if len(row) != 16+4+len("qinggong_8")+1 || row[0] != 0x11 || row[1] != 0 {
@@ -113,11 +111,24 @@ func TestFacultyGuideCompletedTaskRows(t *testing.T) {
 	}
 }
 
-func TestRecordTableExcludesUnrecoveredReputeRecord(t *testing.T) {
-	for _, schema := range qingGongRecordSchemas {
-		if schema.name == "Repute_Record" {
-			t.Fatalf("unrecovered condition record leaked into current schema: %s", schema.name)
+func TestRecordTablePassesThroughOfficialSchemas(t *testing.T) {
+	// 整表透传后官方 447 schema 全量在场（含 Repute_Record 等
+	// 未消费记录）——行帧下标才有官方口径可绑定。
+	frame, err := serverRecordTable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(frame) != string(clientdata.OfficialRecordTableFrame()) {
+		t.Fatal("negotiated record table diverged from official frame")
+	}
+	found := false
+	for _, schema := range clientdata.OfficialRecordSchemas() {
+		if schema.Name == "Repute_Record" {
+			found = true
 		}
+	}
+	if !found {
+		t.Fatal("official table missing Repute_Record")
 	}
 }
 

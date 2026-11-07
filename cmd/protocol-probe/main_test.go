@@ -160,6 +160,11 @@ func TestEventNPCIsNotMaterializedWithoutTaskOwnership(t *testing.T) {
 	if _, ok := lifecycle.npcMetaByID(3); ok {
 		t.Fatal("EventNpc entered the shared scene world")
 	}
+	// 不注册即无 Vitals/Brain——任务怪（触发任务才刷新）永不进入
+	// 死亡→重生循环，重生批次不对其做任何事。
+	if _, ok := lifecycle.run.combat.Vitals(3); ok {
+		t.Fatal("EventNpc must never gain combat vitals or a respawn cycle")
+	}
 }
 
 func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
