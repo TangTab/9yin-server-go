@@ -40,8 +40,12 @@ func fightRelationDamageFrame(playerObjectID, playerOwnerID uint32, cumulativeDa
 // skillHitDamageFrame 即 msg24 技能形态伤害飘字（11 值）：
 //
 //	[24, obj(受害者), i32 17, i32 伤害值, i32 0, i32 0,
-//	 窄串技能ID, 窄串"SkillNormal", 窄串受害者模型, 宽串攻击者名, i32 0]
-func skillHitDamageFrame(victimID, victimOwner uint32, damage int32, skillID, victimModel, attackerWideName string) ([]byte, error) {
+//	 窄串技能ID, 窄串script标签("SkillLock"/"SkillNormal"), 窄串受害者模型,
+//	 宽串攻击者名, i32 0]
+//
+// script 标签取技能编译口径 scriptLabel()（锁定族一律 SkillLock——
+// 52905 抓包 myjf01 系 'SkillLock' 实证；此前恒 "SkillNormal" 是占位）。
+func skillHitDamageFrame(victimID, victimOwner uint32, damage int32, skillID, scriptLabel, victimModel, attackerWideName string) ([]byte, error) {
 	return serverCustomIntMessage(24,
 		customObject(victimID, victimOwner),
 		customInt(17),
@@ -49,7 +53,7 @@ func skillHitDamageFrame(victimID, victimOwner uint32, damage int32, skillID, vi
 		customInt(0),
 		customInt(0),
 		customString(skillID),
-		customString("SkillNormal"),
+		customString(scriptLabel),
 		customString(victimModel),
 		customWideString(attackerWideName),
 		customInt(0),
@@ -112,28 +116,37 @@ func npcCastPreparationFrame(npcID, npcOwner uint32, x, y, z, orient float32) ([
 
 // nativeSkillActionFrameFor 是 nativeSkillActionFrame 的施法者泛化版：
 // NPC 攻击动画帧需要以 NPC 为施法者走同一条 msg20 路线。
+//
+// 2026-11-07 战斗重写对齐（Java FightMessages.skillAction + 抓包 52905
+// #3005 逐字节）：外壳一律 0x1E（抓包 42 份 0 次 msg20 走 0x27），尾两值
+// 官方恒 i32 0 / f32 0.0（此前 1/1 是本地占位）。
 func nativeSkillActionFrameFor(casterID, casterOwner uint32, skillID string, targetID, targetOwnerID uint32) ([]byte, error) {
 	if skillID == "" {
 		return nil, fmt.Errorf("native skill action ID is empty")
 	}
-	return serverModernCustomIntMessage(
+	return serverCustomIntMessage(
 		serverNativeSkillActionMessage,
 		customObject(casterID, casterOwner),
 		customString(skillID),
 		customObject(targetID, targetOwnerID),
-		customInt(1),
-		customFloat32(1),
+		customInt(0),
+		customFloat32(0),
 	)
 }
 
-// npcAttackHitFrame 即 msg24 NPC 攻击形态（9 值）：
+// npcAttackHitFrame 即 msg24 NPC 攻击形态（九值）：
 //
-//	[24, obj(玩家), 7, 1, obj(NPC), 窄串NPC模型, 宽串玩家名, 宽串NPC名, 20]
-func npcAttackHitFrame(playerID, playerOwner, npcID, npcOwner uint32, npcModel, playerWideName, npcWideName string) ([]byte, error) {
+//	[24, obj(玩家), 7, i32 伤害, obj(NPC), 窄串NPC模型, 宽串玩家名,
+//	 宽串NPC名, i32 20(名义攻击力)]
+//
+// 伤害=实扣值（参考服折算恒 1）、尾值 20=名义攻击力（Java
+// npcDamageFloat、55866 抓包实证；NPC 名 Java/官方走宽串——抓包
+// 12141 的窄串方言是另一台参考服的分歧，按 Java 口径）。
+func npcAttackHitFrame(playerID, playerOwner uint32, damage int32, npcID, npcOwner uint32, npcModel, playerWideName, npcWideName string) ([]byte, error) {
 	return serverCustomIntMessage(24,
 		customObject(playerID, playerOwner),
 		customInt(7),
-		customInt(1),
+		customInt(damage),
 		customObject(npcID, npcOwner),
 		customString(npcModel),
 		customWideString(playerWideName),
@@ -142,9 +155,93 @@ func npcAttackHitFrame(playerID, playerOwner, npcID, npcOwner uint32, npcModel, 
 	)
 }
 
-// npcDefaultAttackSkill 是 NPC 攻击动画帧携带的招式串。官方表无
-// NPC 专属攻击技能列，F 盘参考服对普攻动画统一走 SkillNormal 脚本。
-const npcDefaultAttackSkill = "SkillNormal"
+// npcAttackSkillJN 是 NPC 攻击动画帧携带的招式串（Java NpcCombatAi.
+// NPC_ATTACK_SKILL 同值；参考服 55866 追风士 jn_mon053_02 逐位对齐。
+// 抓包 12141 另见 jn_mon043_02（按 NPC 模型取招式的官方列未定位，
+// 统一走 Java 常量）。此前 Go 发 "SkillNormal" 是本地占位——msg20 的
+// 技能串要能索引客户端招式动画表，"SkillNormal" 不是招式 ID。
+const npcAttackSkillJN = "jn_mon053_02"
+
+// skillBuffFrame 即 msg169 技能 buff 九值形态（Java FightMessages.skillBuff）：
+//
+//	[169, i32 addRemove(0=摘/1=挂), 窄串buffConfigId, obj(施法者), obj(承载者),
+//	 宽串名, 宽串名, i32 0, i32 0]
+//
+// 武技族首跳摘 buf_<技能>_01（addRemove=0）与击杀红名标记（addRemove=1,
+// buf_fixed_red）共用本形态。
+func skillBuffFrame(addRemove int32, casterID, casterOwner, bearerID, bearerOwner uint32, buffConfigID, playerName string) ([]byte, error) {
+	return serverCustomIntMessage(169,
+		customInt(addRemove),
+		customString(buffConfigID),
+		customObject(casterID, casterOwner),
+		customObject(bearerID, bearerOwner),
+		customWideString(playerName),
+		customWideString(playerName),
+		customInt(0),
+		customInt(0),
+	)
+}
+
+// targetDebuffTimedFrame 即 msg169 目标 debuff 时间形态（Java
+// FightMessages.targetDebuffTimed；参考服 55866 myjf08 每跳实证）：
+//
+//	[169, i32 1, 窄串buff串, obj(承载NPC), obj(施法者玩家), 宽串"",
+//	 宽串施法者名, i64 到期unix毫秒, i32 0]
+func targetDebuffTimedFrame(buffConfigID string, bearerID, bearerOwner, casterID, casterOwner uint32, casterName string, endEpochMs int64) ([]byte, error) {
+	return serverCustomIntMessage(169,
+		customInt(1),
+		customString(buffConfigID),
+		customObject(bearerID, bearerOwner),
+		customObject(casterID, casterOwner),
+		customWideString(""),
+		customWideString(casterName),
+		customInt64(endEpochMs),
+		customInt(0),
+	)
+}
+
+// glideTimedBuffFrame 即 msg169 缓降九值时间形态（Java
+// FightMessages.timedBuff；52795 抓包 buf_qg_light 实证）：
+//
+//	[169, i32 addRemove, 窄串"buf_qg_light", obj(施), obj(承),
+//	 宽名, 宽名, i64 到期unix毫秒, i32 2048]
+//
+// ⚠️ addRemove 极性与六值 skillBuffFrame 相反：本形态 0=挂/1=摘。
+// v7 是普通 Unix 毫秒（非 BufferInfo 槽串的 FILETIME 口径），v8 是
+// buff_static[218].Category。
+func glideTimedBuffFrame(addRemove int32, endEpochMs int64, bearerID, bearerOwner uint32, playerName string) ([]byte, error) {
+	return serverCustomIntMessage(169,
+		customInt(addRemove),
+		customString(qingGongGlideBuffID),
+		customObject(bearerID, bearerOwner),
+		customObject(bearerID, bearerOwner),
+		customWideString(playerName),
+		customWideString(playerName),
+		customInt64(endEpochMs),
+		customInt(glideBuffCategory),
+	)
+}
+
+// wujiComboFloatFrame 即 msg24 武技连击段（c1=71 十值形态；Java
+// FightMessages.wujiComboFloat、参考服 55866 myjf08 实证）：
+//
+//	[24, obj(受害), 71, obj(第二目标), 窄串"", i32 1, obj(攻击者),
+//	 f64 30.0, f64 0.0, 窄串段名("" / "<LevelupRelevance>_2/_3/_4")]
+//
+// 30.0 常量含义未钉死（疑似段间隔秒），逐字节复刻官方。
+func wujiComboFloatFrame(victimID, victimOwner, secondID, secondOwner, casterID, casterOwner uint32, wujiName string) ([]byte, error) {
+	return serverCustomIntMessage(24,
+		customObject(victimID, victimOwner),
+		customInt(71),
+		customObject(secondID, secondOwner),
+		customString(""),
+		customInt(1),
+		customObject(casterID, casterOwner),
+		customFloat64(30.0),
+		customFloat64(0.0),
+		customString(wujiName),
+	)
+}
 
 // playerStandStateFrame 是动作总时长后的 State(idx19)="stand" 复位帧
 // （§3 行 9；区别于 idx183 的动作段 State 帧）。

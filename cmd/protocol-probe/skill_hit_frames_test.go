@@ -95,7 +95,7 @@ func decodeCustomValuesFrame(t *testing.T, frame []byte) []clientCustomValue {
 }
 
 func TestSkillHitDamageFrameElevenValues(t *testing.T) {
-	frame, err := skillHitDamageFrame(7, 1, 143, "sfgp01", "monv030101", "测试侠客")
+	frame, err := skillHitDamageFrame(7, 1, 143, "sfgp01", "SkillLock", "monv030101", "测试侠客")
 	if err != nil {
 		t.Fatalf("encode skill hit frame: %v", err)
 	}
@@ -112,8 +112,8 @@ func TestSkillHitDamageFrameElevenValues(t *testing.T) {
 	if values[1].Type != 8 || values[1].Raw != packTestObject(7, 1) {
 		t.Fatalf("value[1] victim object mismatch: %+v", values[1])
 	}
-	if values[6].Text != "sfgp01" || values[7].Text != "SkillNormal" || values[8].Text != "monv030101" {
-		t.Fatalf("narrow strings = %q/%q/%q, want sfgp01/SkillNormal/monv030101", values[6].Text, values[7].Text, values[8].Text)
+	if values[6].Text != "sfgp01" || values[7].Text != "SkillLock" || values[8].Text != "monv030101" {
+		t.Fatalf("narrow strings = %q/%q/%q, want sfgp01/SkillLock/monv030101", values[6].Text, values[7].Text, values[8].Text)
 	}
 	if values[9].Type != 7 || values[9].Text != "测试侠客" {
 		t.Fatalf("attacker wide name = type %d %q, want wide 测试侠客", values[9].Type, values[9].Text)
@@ -121,7 +121,7 @@ func TestSkillHitDamageFrameElevenValues(t *testing.T) {
 }
 
 func TestNPCAttackHitFrameNineValues(t *testing.T) {
-	frame, err := npcAttackHitFrame(playerObjectID, playerOwnerID, 7, 1, "monv030101", "受害者", "野怪")
+	frame, err := npcAttackHitFrame(playerObjectID, playerOwnerID, 1, 7, 1, "monv030101", "受害者", "野怪")
 	if err != nil {
 		t.Fatalf("encode NPC attack hit frame: %v", err)
 	}

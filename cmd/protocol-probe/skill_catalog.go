@@ -210,7 +210,10 @@ func findVarPropRow(static []iniField, script string, level int32, tables skillR
 	return 0, nil
 }
 
-func compileSkillDamage(fields []iniField) int32 {
+// compileSkillDamage 返回 damage_calculate 行的伤害编译对：baseDamage=
+// 全部 r 字段第 3 段正值之和；waves=正 r 段数（Java damageWaves——多段
+// 技能的倍率分母）。
+func compileSkillDamage(fields []iniField) (baseDamage, waves int32) {
 	var total float64
 	for _, field := range fields {
 		if !strings.EqualFold(field.key, "r") {
@@ -223,9 +226,10 @@ func compileSkillDamage(fields []iniField) int32 {
 		value, err := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
 		if err == nil && value > 0 {
 			total += value
+			waves++
 		}
 	}
-	return int32(math.Round(total))
+	return int32(math.Round(total)), waves
 }
 
 func compileTargetMode(fields []iniField, isDamage bool) (skillTargetMode, float32, float32, float32) {
@@ -253,26 +257,65 @@ type rawActionSegment struct {
 	inBlend  float64
 }
 
-func compileSkillActions(fields []iniField) (string, time.Duration, []skillActionSegment) {
+// compileSkillActions 编译 zhaoshi 时间线：动作段（此前已有）+ 多段判定
+// 时刻 hitFrames（Java CombatSkillCatalog.compileSkillActions 同构）。
+// trigger_custom_N=段号;trigger_effect;帧号;效果名，过滤序（52795 抓包
+// 实证）：①效果名含 _hurt 的帧=伤害段（gxfhj02 的 ×4=每招 4 段）；②无
+// hurt 帧时取效果名以技能核心名（尾段去数字取前 3 字母，如 sfgp01→sfg）
+// 开头的帧（shl08 的 shl08_NN×6=6 段）；刀光/fly/特效帧与技能全名施法帧
+// 剔除；皆无 → 单段即时结算。
+func compileSkillActions(fields []iniField, skillID string) (string, time.Duration, []skillActionSegment, []time.Duration) {
 	raw := make([]rawActionSegment, 0, 3)
+	hurtFrames := make([]float64, 0, 4)
+	coreFrames := make([]float64, 0, 4)
+	corePrefix := skillCorePrefix(skillID)
 	for _, field := range fields {
-		order, err := strconv.Atoi(field.key)
-		if err != nil {
+		if order, err := strconv.Atoi(field.key); err == nil {
+			parts := strings.Split(field.value, ";")
+			if len(parts) < 5 || strings.TrimSpace(parts[0]) == "" {
+				continue
+			}
+			endFrame, _ := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
+			inBlend, _ := strconv.ParseFloat(strings.TrimSpace(parts[3]), 64)
+			raw = append(raw, rawActionSegment{
+				order: order, action: strings.TrimSpace(parts[0]), endFrame: endFrame, inBlend: inBlend,
+			})
+			continue
+		}
+		if !strings.HasPrefix(field.key, "trigger_custom_") {
 			continue
 		}
 		parts := strings.Split(field.value, ";")
-		if len(parts) < 5 || strings.TrimSpace(parts[0]) == "" {
+		// 布局：段号;trigger_effect;帧号;效果名
+		if len(parts) < 4 || !strings.EqualFold(strings.TrimSpace(parts[1]), "trigger_effect") {
 			continue
 		}
-		endFrame, _ := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
-		inBlend, _ := strconv.ParseFloat(strings.TrimSpace(parts[3]), 64)
-		raw = append(raw, rawActionSegment{
-			order: order, action: strings.TrimSpace(parts[0]), endFrame: endFrame, inBlend: inBlend,
-		})
+		effectName := strings.TrimSpace(parts[3])
+		if effectName == "" || effectName == skillID {
+			continue // 施法特效帧（与技能同名）不是伤害段
+		}
+		frame, err := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
+		if err != nil || frame < 0 {
+			continue
+		}
+		if strings.Contains(effectName, "_hurt") {
+			hurtFrames = append(hurtFrames, frame)
+		} else if corePrefix != "" && strings.HasPrefix(effectName, corePrefix) {
+			coreFrames = append(coreFrames, frame)
+		}
+	}
+	hitFrames := hurtFrames
+	if len(hitFrames) == 0 {
+		hitFrames = coreFrames
+	}
+	sort.Float64s(hitFrames)
+	hitFrameMs := make([]time.Duration, len(hitFrames))
+	for i, frame := range hitFrames {
+		hitFrameMs[i] = time.Duration(frame / 30 * float64(time.Second))
 	}
 	sort.Slice(raw, func(i, j int) bool { return raw[i].order < raw[j].order })
 	if len(raw) == 0 {
-		return "", 0, nil
+		return "", 0, nil, hitFrameMs
 	}
 	duration := time.Duration(raw[0].endFrame / 30 * float64(time.Second))
 	at := time.Duration(0)
@@ -288,7 +331,39 @@ func compileSkillActions(fields []iniField) (string, time.Duration, []skillActio
 			duration: time.Duration(raw[i].endFrame / 30 * float64(time.Second)),
 		})
 	}
-	return raw[0].action, duration, followups
+	return raw[0].action, duration, followups, hitFrameMs
+}
+
+// skillCorePrefix 技能核心名前缀（CS_jh_sfgp01→"sfg"、CS_jhgp_gxfhj02→
+// "gxf"、CS_xy_shl08→"shl"；Java skillCorePrefix 同构）：最后一个含字母
+// 且含数字的分段，剔数字后取前 3 字母。
+func skillCorePrefix(skillID string) string {
+	segments := strings.Split(skillID, "_")
+	for i := len(segments) - 1; i >= 0; i-- {
+		hasLetter, hasDigit := false, false
+		for _, r := range segments[i] {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+				hasLetter = true
+			}
+			if r >= '0' && r <= '9' {
+				hasDigit = true
+			}
+		}
+		if !hasLetter || !hasDigit {
+			continue
+		}
+		letters := strings.Map(func(r rune) rune {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') {
+				return r
+			}
+			return -1
+		}, segments[i])
+		if len(letters) >= 3 {
+			return letters[:3]
+		}
+		return letters
+	}
+	return ""
 }
 
 func compileExactSkillBuff(skillID string, level int32, tables skillResourceTables) (skillBuffDefinition, bool, bool) {
@@ -364,11 +439,11 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		return combatSkillDefinition{}, fmt.Errorf("%s has no level-%d varprop", skillID, level)
 	}
 	consume := tables.consume[strconv.FormatInt(int64(iniInt(varProp, "Consume")), 10)]
-	damage := compileSkillDamage(tables.damage[strconv.FormatInt(int64(iniInt(varProp, "DamageCalculate")), 10)])
+	damage, damageWaves := compileSkillDamage(tables.damage[strconv.FormatInt(int64(iniInt(varProp, "DamageCalculate")), 10)])
 	isDamage := iniInt(static, "IsDamage") != 0
 	hitShape := tables.hitShape[strconv.FormatInt(int64(iniInt(varProp, "HitShapePkg")), 10)]
 	targetMode, radius, angle, width := compileTargetMode(hitShape, isDamage)
-	action, actionDuration, followups := compileSkillActions(tables.actions[skillID])
+	action, actionDuration, followups, hitFrameMs := compileSkillActions(tables.actions[skillID], skillID)
 	if action == "" {
 		return combatSkillDefinition{}, fmt.Errorf("%s has no player action timeline", skillID)
 	}
@@ -405,6 +480,10 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		spCost:           iniInt(consume, "AConsumeSP"),
 		qgCost:           iniInt(consume, "AConsumeQGP"),
 		baseDamage:       damage,
+		damageWaves:      damageWaves,
+		hitFrameMs:       hitFrameMs,
+		levelupRelevance: iniValue(newFields, "LevelupRelevance"),
+		packCategory:     iniInt(newFields, "PackCategory"),
 		requiresTarget:   targetMode == skillTargetSelected || targetMode == skillTargetSelectedArea,
 		targetMode:       targetMode, areaRadius: radius, areaHeight: iniFloat(varProp, "HeightDiff"),
 		sectorAngle: angle, areaWidth: width,

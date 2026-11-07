@@ -19,6 +19,15 @@ type qinggongBuffSpec struct {
 	clearOnEnd bool
 }
 
+// qinggong_9 轻身缓降的 msg169 链常量（Java PlayerActor.GLIDE_BUFF_*
+// 同源）：BufferID=buff_qg_light、buff_static[218].Category=2048。
+// 52795 抓包实证缓降挂/摘走 msg169 九值时间形态，而非其余轻功族的
+// 纯槽帧路径。
+const (
+	qingGongGlideBuffID = "buf_qg_light"
+	glideBuffCategory   = int32(2048)
+)
+
 // init 自检：记录下标字面值必须与官方表按名解析一致，防止
 // official_record_table.bin 更新后常量静默漂移。
 func init() {
@@ -61,13 +70,22 @@ func qinggongBuffFor(definition qinggong.Definition) (qinggongBuffSpec, bool) {
 	case "buf_qg_airrush": // qinggong_6 穿云纵 / 高阶 21-23 冲刺
 		return qinggongBuffSpec{slot: qgAirRushBuffSlot, staticData: 6894, duration: 100 * time.Millisecond}, true
 	case "buf_qg_fast": // qinggong_8 神行无踪
-		return qinggongBuffSpec{slot: qgFastBuffSlot, staticData: 217, duration: 10 * time.Minute}, true
+		// UseType=1 持续型（同踏波行/上天梯族）：buff_new LifeTime 10min
+		// 只是兜底寿命，end 帧必须摘——漏 clearOnEnd 会把神行表现钉满
+		// 10 分钟（2026-11-07 真机「可进入不可退出」根因）。
+		return qinggongBuffSpec{slot: qgFastBuffSlot, staticData: 217, duration: 10 * time.Minute, clearOnEnd: true}, true
 	case "buf_qg_climb": // qinggong_10 壁虎游墙 / qinggong_11 上天梯
 		return qinggongBuffSpec{slot: qgClimbBuffSlot, staticData: 219, duration: 10 * time.Minute, clearOnEnd: true}, true
 	case "buf_qg_gliding": // 高阶 24 滑翔
 		return qinggongBuffSpec{slot: qgGlidingBuffSlot, staticData: 23070, duration: 10 * time.Minute, clearOnEnd: true}, true
 	case "buf_qg_dive": // 高阶 25 急降
 		return qinggongBuffSpec{slot: qgDiveBuffSlot, staticData: 23292, duration: 3 * time.Second}, true
+	case qingGongGlideBuffID: // qinggong_9 轻身缓降（buff_static[218]）
+		// Java GLIDE_BUFF_LIFETIME_MS=600s（buff_new LifeTime）；UseType=1
+		// 秒耗 10/s 下点耗尽必然先到，10min 只是槽租约兜底寿命。end/
+		// 耗尽两条既有清槽路径之外，还各伴随一帧 msg169 九值摘帧
+		//（writeGlideTimedBuff*，52795 抓包 buf_qg_light 实证）。
+		return qinggongBuffSpec{slot: qgLightBuffSlot, staticData: glideBuffStaticData, duration: 10 * time.Minute, clearOnEnd: true}, true
 	default:
 		// qinggong_20 大跳的 BufferID=buf_DHadd_2rd 与激活能力 Buff
 		// 共槽（17）：使用路径不重复挂（能力已在，activateQingGongBuff
@@ -130,13 +148,16 @@ func qingGongExistBuffSpec(existBufID string) (qinggongBuffSpec, bool) {
 // = qgdefine BufferID → buff_new/buff_static/buff_varprop 的 |CCQGP|
 // （Java CombatSkillCatalog.qingGongDrainPerSecond 运行时读表；本服
 // 未装载 buff 表，按 Java 已实证值内联——玩家资料：踏波行/上天梯
-// 开局 10 点、其后每秒 7 点；qinggong_9 缓降每秒 10 点）。
+// 开局 10 点、其后每秒 7 点；qinggong_9 缓降每秒 10 点。神行无踪
+// buf_qg_fast=7 出自官方 buff_varprop[22001] L1 CCQGP=-7 实证）。
 // 表缺 CCQGP 返回 0：租约仍挂（保续约/回复暂停语义）。
 func qingGongDrainPerSecond(definition qinggong.Definition) int32 {
 	switch definition.BufferID {
 	case "buf_qg_light": // qinggong_9 轻身缓降（buff_varprop[23001] L1 CCQGP=-10）
 		return 10
 	case "buf_qg_drift": // qinggong_2 踏波行
+		return 7
+	case "buf_qg_fast": // qinggong_8 神行无踪（buff_varprop[22001] L1 CCQGP=-7）
 		return 7
 	case "buf_qg_climb": // qinggong_10 壁虎游墙 / qinggong_11 上天梯
 		return 7
@@ -624,6 +645,48 @@ func endQingGongBuff(conn sceneMessageConnection, player *playerActor, definitio
 	return nil
 }
 
+// writeGlideTimedBuffAdd 推 msg169 缓降挂帧（addRemove=0，v7=租约到期
+// Unix 毫秒）。帧序对齐 Java engageGlide：msg169 先于槽帧（vitalUpdate）。
+func writeGlideTimedBuffAdd(conn sceneMessageConnection, player *playerActor, expires time.Time) error {
+	frame, err := glideTimedBuffFrame(0, expires.UnixMilli(), playerObjectID, playerOwnerID, player.snapshotName())
+	if err != nil {
+		return fmt.Errorf("encode glide buff add: %w", err)
+	}
+	if err := conn.WriteFrame(frame); err != nil {
+		return fmt.Errorf("write glide buff add: %w", err)
+	}
+	return nil
+}
+
+// writeGlideTimedBuffRemove 推 msg169 缓降摘帧（addRemove=1）。endAt
+// 取租约原到期（buffExpiry 命中时），游离摘（租约已不在）回落当前
+// 时刻但仍回帧——客户端状态重同步（Java releaseGlide 同口径）。
+func writeGlideTimedBuffRemove(conn sceneMessageConnection, player *playerActor, now time.Time) error {
+	endAt := now
+	if expires, ok := player.buffExpiry(qgLightBuffSlot, glideBuffStaticData, now); ok {
+		endAt = expires
+	}
+	frame, err := glideTimedBuffFrame(1, endAt.UnixMilli(), playerObjectID, playerOwnerID, player.snapshotName())
+	if err != nil {
+		return fmt.Errorf("encode glide buff removal: %w", err)
+	}
+	if err := conn.WriteFrame(frame); err != nil {
+		return fmt.Errorf("write glide buff removal: %w", err)
+	}
+	return nil
+}
+
+// writeGlideBuffRemovalFor 耗尽强摘/槽租约到期共用的摘帧入口：先读
+// buffExpiry 再清槽（endQingGongBuff 清槽后到期时刻就丢了）。
+func writeGlideBuffRemovalFor(conn sceneMessageConnection, player *playerActor, definition qinggong.Definition, now time.Time) {
+	if definition.BufferID != qingGongGlideBuffID {
+		return
+	}
+	if err := writeGlideTimedBuffRemove(conn, player, now); err != nil {
+		log.Printf("glide buff removal frame: %v", err)
+	}
+}
+
 // scheduleRedSuperArmorExpiry 在到期时清除同一份原生状态。
 func scheduleRedSuperArmorExpiry(conn sceneMessageConnection, player *playerActor, expires time.Time) {
 	schedulePlayerBuffExpiry(conn, player, redSuperArmorBuffSlot, redSuperArmorStaticData, expires)
@@ -648,5 +711,16 @@ func schedulePlayerBuffExpiry(conn sceneMessageConnection, player *playerActor, 
 			return
 		}
 		log.Printf("Buff remove state player=%d-%d property=%d expiry=%d", playerObjectID, playerOwnerID, bufferInfoPropertyIndex(slot), expires.UnixMilli())
+		// 缓降槽租约到期（Java glideTick lease-expired → releaseGlide）：
+		// 空槽帧之后补 msg169 摘帧，v7 取本定时器钉死的原到期时刻。
+		if slot == qgLightBuffSlot && staticData == glideBuffStaticData {
+			if frame, err := glideTimedBuffFrame(1, expires.UnixMilli(), playerObjectID, playerOwnerID, player.snapshotName()); err == nil {
+				if err := conn.WriteFrame(frame); err != nil {
+					log.Printf("glide buff removal state: %v", err)
+				}
+			} else {
+				log.Printf("glide buff removal encode: %v", err)
+			}
+		}
 	})
 }

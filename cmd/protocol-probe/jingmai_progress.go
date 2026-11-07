@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -54,17 +55,21 @@ const (
 	// View45 经脉容器（View43 内功 / View46 轻功同族）。
 	viewportJingMai uint16 = 45
 
-	zhenQiPerWeek       = 750 // 周天（升 1 级所需真气）
-	zhenQiPerMinute     = 43  // 修炼速度（真气/分钟）
-	zhenQiDayValueMax   = 500 // ZhenQiDayValue 缺省（Java 同值）
-	propCurJingMai      = 849 // string 当前修炼经脉
-	propLastJingMai     = 850 // string 上次修炼经脉
-	propJingMaiTotLevel = 819
-	propJMActCount      = 851 // 可激活条数（恒 1）
-	propZhenQiDayValue  = 852
-	propZQPLValue       = 855 // 今日真气
-	propZQActlValue     = 856 // 恒 0
-	propZQUnUsedValue   = 857 // 恒 0
+	zhenQiPerWeek     = 750 // 周天（升 1 级所需真气）
+	zhenQiPerMinute   = 43  // 修炼速度（真气/分钟）
+	zhenQiDayValueMax = 500 // ZhenQiDayValue 缺省（Java 同值）
+	// jingMaiCombatZhenQiRatio 战斗真气折算比（Java MeridianCatalog.
+	// COMBAT_ZHENQI_RATIO；zhenqi.ini damage_ratio=0.1——伤害合计×0.1
+	// 向下取整保底 1 折真气）。
+	jingMaiCombatZhenQiRatio = 0.1
+	propCurJingMai           = 849 // string 当前修炼经脉
+	propLastJingMai          = 850 // string 上次修炼经脉
+	propJingMaiTotLevel      = 819
+	propJMActCount           = 851 // 可激活条数（恒 1）
+	propZhenQiDayValue       = 852
+	propZQPLValue            = 855 // 今日真气
+	propZQActlValue          = 856 // 恒 0
+	propZQUnUsedValue        = 857 // 恒 0
 
 	propJMStaticData = 2237
 	propJMItemType   = 1889
@@ -110,6 +115,10 @@ type jingMaiDef struct {
 	staticData int32
 	maxLevel   int32 // jingmai_static.ini 区间宽
 }
+
+// globalJingMaiCatalog 是目录的包级缓存（main.handle 每连接装载成功后
+// 刷新；战斗真气入账等无连接上下文的路径取这里）。
+var globalJingMaiCatalog *jingMaiCatalog
 
 type jingMaiCatalog struct {
 	order []jingMaiDef
@@ -568,6 +577,76 @@ func (p *playerActor) jingMaiCultivateTick(catalog *jingMaiCatalog, now time.Tim
 		row.Level++
 		frame, err := jingMaiViewUpdateFrame(uint16(slot), row, true)
 		if err == nil {
+			frames = append(frames, frame)
+		}
+	}
+	if consumed <= 0 {
+		return nil
+	}
+	row.Total += int32(consumed)
+	if state.progress == nil {
+		state.progress = make(map[string]jingMaiProgressRow)
+	}
+	state.progress[state.cur] = row
+	state.zhenQi.Used += int32(consumed)
+	return frames
+}
+
+// jingMaiCombatFeed 战斗真气入账（Java PlayerMeridian.addCombatZhenQi：
+// 伤害合计 × zhenqi.ini damage_ratio=0.1，向下取整保底 1；溢出连升封顶
+// maxLevel，日预算 500 截断）。命中结算后按整招累计调用，返回 View45
+// 行帧（CurFillValue/升级帧）。变化才产帧。
+func (p *playerActor) jingMaiCombatFeed(damage int32) [][]byte {
+	if damage <= 0 || globalJingMaiCatalog == nil {
+		return nil
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	state := &p.jingmai
+	if state.cur == "" {
+		return nil
+	}
+	now := time.Now()
+	today := now.Format("2006-01-02")
+	if state.zhenQi.Day != today {
+		state.zhenQi.Day = today
+		state.zhenQi.Used = 0
+	}
+	slot := p.jingMaiRowLocked(state.cur)
+	if slot == 0 {
+		return nil
+	}
+	def, ok := globalJingMaiCatalog.def(state.cur)
+	if !ok || def.maxLevel <= 0 {
+		return nil
+	}
+	accrue := int64(math.Max(1, math.Floor(float64(damage)*jingMaiCombatZhenQiRatio)))
+	budget := int64(zhenQiDayValueMax) - int64(state.zhenQi.Used)
+	if budget <= 0 {
+		return nil
+	}
+	if accrue > budget {
+		accrue = budget
+	}
+	row := state.progress[state.cur]
+	var frames [][]byte
+	consumed := int64(0)
+	for accrue > 0 && row.Level < def.maxLevel {
+		need := int64(zhenQiPerWeek - row.Fill)
+		if accrue < need {
+			row.Fill += int32(accrue)
+			consumed += accrue
+			accrue = 0
+			if frame, err := jingMaiViewUpdateFrame(uint16(slot), row, false); err == nil {
+				frames = append(frames, frame)
+			}
+			break
+		}
+		accrue -= need
+		consumed += need
+		row.Fill = 0
+		row.Level++
+		if frame, err := jingMaiViewUpdateFrame(uint16(slot), row, true); err == nil {
 			frames = append(frames, frame)
 		}
 	}

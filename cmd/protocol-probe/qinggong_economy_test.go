@@ -106,7 +106,7 @@ func TestQingGongSustainedLeaseBeginDrainRelease(t *testing.T) {
 
 	// 秒耗租约：每拍 -10（qinggong_9 缓降 CCQGP）。
 	now := time.Now()
-	if !player.qingGongTick(now) {
+	if changed, _ := player.qingGongTick(now); !changed {
 		t.Fatal("first drain tick must change the point")
 	}
 	if got := player.stateSnapshot().QingGongPoint; got != base-20 {
@@ -152,8 +152,8 @@ func TestQingGongLeaseExhaustsAndRecoveryResumes(t *testing.T) {
 	if got := player.stateSnapshot().QingGongPoint; got != 2 {
 		t.Fatalf("points after begin=%d, want 2", got)
 	}
-	if !player.qingGongTick(now) {
-		t.Fatal("exhausting tick must report change")
+	if changed, forceEnded := player.qingGongTick(now); !changed || forceEnded != "qinggong_glide" {
+		t.Fatalf("exhausting tick changed=%t forceEnded=%q, want true/qinggong_glide", changed, forceEnded)
 	}
 	if got := player.stateSnapshot().QingGongPoint; got != 0 {
 		t.Fatalf("points after exhaustion=%d, want 0", got)
@@ -163,10 +163,13 @@ func TestQingGongLeaseExhaustsAndRecoveryResumes(t *testing.T) {
 	}
 
 	// 租约摘除后回复恢复：三拍一分档（0..50 档 +3）。
-	if player.qingGongTick(now) || player.qingGongTick(now) {
-		t.Fatal("first two ticks only accumulate the 3s window")
+	if changed, _ := player.qingGongTick(now); changed {
+		t.Fatal("first tick after release only accumulates the 3s window")
 	}
-	if !player.qingGongTick(now) {
+	if changed, _ := player.qingGongTick(now); changed {
+		t.Fatal("second tick after release only accumulates the 3s window")
+	}
+	if changed, _ := player.qingGongTick(now); !changed {
 		t.Fatal("third tick must recover")
 	}
 	if got := player.stateSnapshot().QingGongPoint; got != 3 {
@@ -211,11 +214,12 @@ func TestQingGongPointFrameShape(t *testing.T) {
 	}
 }
 
-// 秒耗表与 Java 实证值一致（CCQGP：light=10、drift/climb=7、其余 0）。
+// 秒耗表与 Java 实证值一致（CCQGP：light=10、drift/fast/climb=7、其余 0）。
 func TestQingGongDrainPerSecondMatchesJavaEvidence(t *testing.T) {
 	cases := map[string]int32{
 		"buf_qg_light": 10,
 		"buf_qg_drift": 7,
+		"buf_qg_fast":  7, // 官方 buff_varprop[22001] L1 CCQGP=-7
 		"buf_qg_climb": 7,
 		"buf_unknown":  0,
 	}
@@ -223,6 +227,68 @@ func TestQingGongDrainPerSecondMatchesJavaEvidence(t *testing.T) {
 		if got := qingGongDrainPerSecond(qinggong.Definition{ID: "x", BufferID: bufferID}); got != want {
 			t.Fatalf("drain(%s)=%d, want %d", bufferID, got, want)
 		}
+	}
+}
+
+// 神行无踪（qinggong_8，UseType=1 持续型）：begin 挂 buf_qg_fast 槽，
+// end 必须同步摘 Buff——漏摘会把神行表现钉满 buff LifeTime 10 分钟
+// （2026-11-07 真机「可进入不可退出」根因）。
+func TestQingGongFastEndClearsBuff(t *testing.T) {
+	ini := `
+[qinggong_8]
+Name=神行无踪
+Type=8
+UseType=1
+Consume=10
+BufferID=buf_qg_fast
+`
+	catalog, err := qinggong.LoadFromReader(strings.NewReader(ini), "test-qgdefine.ini")
+	if err != nil {
+		t.Fatal(err)
+	}
+	player := newPlayerActor("测试", 0)
+	conn := &captureMessageConnection{}
+	now := time.Now()
+
+	if handled, err := handleQingGongCustom(conn, player, catalog, useQingGongMessage("qinggong_8", 1), "test"); err != nil || !handled {
+		t.Fatalf("begin handled=%t err=%v", handled, err)
+	}
+	if !player.hasActiveBuff(qgFastBuffSlot, 217, now) {
+		t.Fatal("begin must stage buf_qg_fast buff")
+	}
+	if got := player.engagedDriftID(); got != "qinggong_8" {
+		t.Fatalf("lease id=%q, want qinggong_8", got)
+	}
+
+	// 引擎重报 begin（续约）：不重复扣开局费、不清 buff。
+	base := player.stateSnapshot().QingGongPoint
+	if handled, err := handleQingGongCustom(conn, player, catalog, useQingGongMessage("qinggong_8", 1), "test"); err != nil || !handled {
+		t.Fatalf("renewal begin handled=%t err=%v", handled, err)
+	}
+	if got := player.stateSnapshot().QingGongPoint; got != base {
+		t.Fatalf("points after renewal begin=%d, want %d", got, base)
+	}
+
+	// end：摘租约 + 摘 buff（退出神行的关键路径）。
+	if handled, err := handleQingGongCustom(conn, player, catalog, useQingGongMessage("qinggong_8", 0), "test"); err != nil || !handled {
+		t.Fatalf("end handled=%t err=%v", handled, err)
+	}
+	if got := player.engagedDriftID(); got != "" {
+		t.Fatalf("lease id after end=%q, want empty", got)
+	}
+	if player.hasActiveBuff(qgFastBuffSlot, 217, now) {
+		t.Fatal("end must clear buf_qg_fast buff (qinggong stuck-on root cause)")
+	}
+
+	// end 后重新 begin：buff 重复闸不得拦截（buff 已清，全额重扣）。
+	if handled, err := handleQingGongCustom(conn, player, catalog, useQingGongMessage("qinggong_8", 1), "test"); err != nil || !handled {
+		t.Fatalf("re-begin handled=%t err=%v", handled, err)
+	}
+	if got := player.stateSnapshot().QingGongPoint; got != base-10 {
+		t.Fatalf("points after re-begin=%d, want %d", got, base-10)
+	}
+	if !player.hasActiveBuff(qgFastBuffSlot, 217, now) {
+		t.Fatal("re-begin must re-stage buf_qg_fast buff")
 	}
 }
 

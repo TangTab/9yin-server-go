@@ -259,6 +259,32 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		return
 	}
 	defer link.Close()
+	// msg294 对钟帧 1s 一发（Java LoginFlow 1s scheduler、52905 抓包
+	// 747 条计数器恒 +1000 实证）：cooldown_rec 的 start/end 是绝对
+	// unix 毫秒，客户端靠它对齐本机时钟偏移；随连接生命周期启停。
+	timeSyncStop := make(chan struct{})
+	timeSyncStart := time.Now()
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-timeSyncStop:
+				return
+			case now := <-ticker.C:
+				uptime := int32(now.Sub(timeSyncStart).Milliseconds())
+				frame, err := timeSyncFrame(uptime, now)
+				if err != nil {
+					log.Printf("%s: encode time sync: %v", conn.RemoteAddr(), err)
+					continue
+				}
+				if err := link.WriteFrame(frame); err != nil {
+					return
+				}
+			}
+		}
+	}()
+	defer close(timeSyncStop)
 	machine := session.New()
 	var sceneNPCs []npcSpawn
 	log.Printf("session=%d remote=%s opened phase=%s", machine.ID(), conn.RemoteAddr(), machine.Phase())
@@ -292,6 +318,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	titleStore := newTitleDBStore(store.db)
 	jingMaiStore := newJingMaiDBStore(store.db)
 	jingMaiCatalog, jingMaiCatalogErr := loadJingMaiCatalog(defaultJingMaiINIPath, defaultJingMaiStaticINIPath)
+	if jingMaiCatalogErr == nil {
+		// 包级缓存刷新（战斗真气入账等无连接上下文路径取 globalJingMaiCatalog）。
+		globalJingMaiCatalog = jingMaiCatalog
+	}
 	if jingMaiCatalogErr != nil {
 		log.Printf("%s: jingmai catalog unavailable (msg150/161 degrade): %v", conn.RemoteAddr(), jingMaiCatalogErr)
 	}
@@ -389,7 +419,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return fmt.Errorf("write View=43: %w", err)
 			}
 		}
-		skillFrames, err := learnedSkillViewFrames(mergeLearnedSkills(dbLearnedSkills))
+		learnedRows := mergeLearnedSkills(dbLearnedSkills)
+		// View40 行号映射进内存（出招 CanUse 行帧寻址；Java skillRows 同构）。
+		player.noteSkillViewRows(learnedRows)
+		skillFrames, err := learnedSkillViewFrames(learnedRows)
 		if err != nil {
 			return fmt.Errorf("encode View=40: %w", err)
 		}
@@ -1123,8 +1156,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			combatBruiseAdvanced := player.combatBruiseTick()
 			combatRageAdvanced := player.rageRecoveryTick()
 			// 轻功结算（Java facultyTicker 同拍）：租约秒耗 / 3s 分档
-			// 回复；点变化才推 QingGongPoint 单属性帧。
-			qingGongPointChanged := player.qingGongTick(now)
+			// 回复；点变化才推 QingGongPoint 单属性帧。点耗尽强摘时
+			// 同步摘对应 clearOnEnd Buff（神行/踏波行/上天梯），否则
+			// 租约已停而客户端表现钉到 buff 寿命尽头。
+			qingGongPointChanged, qingGongForceEnded := player.qingGongTick(now)
 			// NPC 战斗模拟已上移到场景运行时的中央 tick；
 			// 连接循环只保留玩家侧结算与复活。
 			combatAdvanced := false
@@ -1142,6 +1177,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			if tickErr == nil && qingGongPointChanged {
 				tickErr = link.WriteFrame(player.qingGongPointFrame())
+			}
+		if tickErr == nil && qingGongForceEnded != "" {
+			// 点耗尽强摘：与 216 end 同口径清轻功 Buff 后推全量
+			// 状态（vitalUpdate 会带上空掉的 BufferInfo 槽）。
+			if definition, exists := qingGongCatalog.Lookup(qingGongForceEnded); exists {
+				// 缓降先补 msg169 摘帧（v7 需在清槽前读租约原到期）。
+				writeGlideBuffRemovalFor(link, player, definition, now)
+				if err := endQingGongBuff(link, player, definition); err != nil {
+						log.Printf("%s: clear exhausted qinggong buff id=%s: %v", conn.RemoteAddr(), qingGongForceEnded, err)
+					}
+				}
 			}
 			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired) {
 				var state []byte
@@ -2327,6 +2373,9 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 		if definition.UseType == 1 && player.releaseDriftIfOwned(definition.ID) {
 			log.Printf("%s: qinggong hold end id=%s", remote, definition.ID)
 		}
+		// 缓降摘帧先于清槽（msg169 v7 取租约原到期）；游离 end 也回帧
+		// ——客户端状态重同步（Java releaseGlide 同口径）。
+		writeGlideBuffRemovalFor(link, player, definition, time.Now())
 		if err := endQingGongBuff(link, player, definition); err != nil {
 			return true, err
 		}
@@ -2392,6 +2441,13 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 	alreadyActive, expires, err := activateQingGongBuff(player, definition, now)
 	if err != nil {
 		return true, err
+	}
+	// 缓降（buf_qg_light）：msg169 九值挂帧先于槽帧（Java engageGlide
+	// 帧序 ②169 ③BufferInfoN；点数随 vitalUpdate 同批下发）。
+	if definition.BufferID == qingGongGlideBuffID && !alreadyActive && !expires.IsZero() {
+		if err := writeGlideTimedBuffAdd(link, player, expires); err != nil {
+			return true, err
+		}
 	}
 	update, err := player.vitalUpdate()
 	if err != nil {

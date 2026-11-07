@@ -87,6 +87,12 @@ const (
 	qgDiveBuffSlot     uint16 = 16 // buf_qg_dive     StaticData 23292
 	qgDHadd2rdBuffSlot uint16 = 17 // buf_DHadd_2rd   StaticData 1578（常驻）
 	qgDHadd3rdBuffSlot uint16 = 18 // buf_DHadd_3rd   StaticData 1579（常驻）
+	// qinggong_9 轻身缓降使用型 Buff（Java GLIDE_BUFF_* 同源：buff_static
+	// [218]、buff_new LifeTime 600000；槽取 qg 族块首位空闲，对齐 Java
+	// freeBuffSlot 从 12 起扫的首个可得位）。挂/摘除槽帧外还伴随
+	// msg169 九值 timedBuff 对（见 qinggong_records.go）。
+	qgLightBuffSlot     uint16 = 19 // buf_qg_light  StaticData 218（10min）
+	glideBuffStaticData uint32 = 218
 
 	// 右键格挡 BuffInParry（Java PlayerActor 同源）：槽 11、
 	// StaticData 4558、24h 租约。按下挂槽、松开清槽。
@@ -191,11 +197,22 @@ type playerActor struct {
 	keybind               playerKeybind
 	learnedSkills         map[string]int32
 	skillCooldowns        map[string]time.Time
-	skillTeamCooldowns    map[int32]time.Time
-	currentSkillID        string
-	currentSkillEffectID  string
-	currentSkillLevel     int32
-	currentSkillTarget    uint64
+	// 公共 GCD（跨套路切换锁，bug.txt 官方规则；Java publicCdUntil/
+	// publicCdTaolu 同构）：到期时刻 + 发起套路串——同套路连招与出招者
+	// 自身只走个人 CD，切套路才付 7s；每次受理都刷新窗口（连招把切换
+	// 锁后推是官方语义）。p.mu 保护。
+	publicCDUntil        time.Time
+	publicCDTaolu        string
+	currentSkillID       string
+	currentSkillEffectID string
+	currentSkillLevel    int32
+	currentSkillTarget   uint64
+	// currentSkillEpoch 是出招代次（Java castEpoch 同构）：收尾定时器按
+	// (id, epoch) 配对，新招顶掉旧招时旧定时器空转，add/del 恒 1:1。
+	currentSkillEpoch uint64
+	// skillViewRows 是 View40 行号映射（configID → 行号，出招 CanUse
+	// 行帧寻址用；登录 merge 与秘籍重建时随视图帧一起刷新）。
+	skillViewRows         map[string]uint16
 	activeParry           activeParryRequest
 	parrying              bool
 	skillLockUntil        time.Time
@@ -309,21 +326,20 @@ func newPlayerActor(name string, silver int32) *playerActor {
 	}
 	now := time.Now()
 	p := &playerActor{
-		name:               name,
-		vitals:             sim.NewVitals(1000, 500),
-		qinggong:           sim.NewQingGong(now),
-		speed:              sim.NewMotion(),
-		silver:             silver,
-		faction:            defaultRoleFaction,
-		motion:             playerMotion{moveSpeed: 25, runSpeed: 25, gravity: 9.8},
-		buffs:              make(map[uint16]activePlayerBuff),
-		activeQingGong:     make(map[string]struct{}),
-		learnedSkills:      learnedSkills,
-		skillCooldowns:     make(map[string]time.Time),
-		skillTeamCooldowns: make(map[int32]time.Time),
-		instantQingGongAt:  make(map[string]time.Time),
-		airJumpsUsed:       make(map[string]bool),
-		progress:           newPlayerProgress(),
+		name:              name,
+		vitals:            sim.NewVitals(1000, 500),
+		qinggong:          sim.NewQingGong(now),
+		speed:             sim.NewMotion(),
+		silver:            silver,
+		faction:           defaultRoleFaction,
+		motion:            playerMotion{moveSpeed: 25, runSpeed: 25, gravity: 9.8},
+		buffs:             make(map[uint16]activePlayerBuff),
+		activeQingGong:    make(map[string]struct{}),
+		learnedSkills:     learnedSkills,
+		skillCooldowns:    make(map[string]time.Time),
+		instantQingGongAt: make(map[string]time.Time),
+		airJumpsUsed:      make(map[string]bool),
+		progress:          newPlayerProgress(),
 		// GM 面板域以种子起步（Java PanelState 同口径）：实力 151 与
 		// 选人界面 f23 同档（title027 返璞归真），其余零值合法即下发。
 		gm: gmPanelDomain{
@@ -513,8 +529,9 @@ func (p *playerActor) landResetLocked(groundY float32) {
 // driftTick 合并，facultyTicker 同拍）：持有秒耗租约时按 CCQGP 扣点、
 // 回复暂停；无租约时累积 3s 推一步官方分档回复（101..上限 +10 /
 // 51..100 +5 / 0..50 +3）。返回 QingGongPoint 是否变化（调用方推
-// 单属性帧）。点耗尽时强摘租约——客户端物理本地收势。
-func (p *playerActor) qingGongTick(now time.Time) bool {
+// 单属性帧）与耗尽强摘的轻功 id（无强摘为空串——调用方须同步摘
+// 对应 clearOnEnd Buff，否则客户端表现钉到 buff 寿命尽头）。
+func (p *playerActor) qingGongTick(now time.Time) (bool, string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.airborne && now.Sub(p.lastJumpAt) > airJumpLandingFallback {
@@ -530,15 +547,16 @@ func (p *playerActor) qingGongTick(now time.Time) bool {
 		if !p.qinggong.Drain(drain) {
 			p.qingGongLease = nil
 			log.Printf("qinggong hold lease ended: point exhausted id=%s", id)
+			return p.qinggong.Point != before, id
 		}
-		return p.qinggong.Point != before
+		return p.qinggong.Point != before, ""
 	}
 	p.qingGongRecoveryMs += 1000
 	if p.qingGongRecoveryMs < 3000 {
-		return false
+		return false, ""
 	}
 	p.qingGongRecoveryMs -= 3000
-	return p.qinggong.RecoverTiered()
+	return p.qinggong.RecoverTiered(), ""
 }
 
 // qingGongPointFrame 轻功值单属性帧（Java qingGongPointFrame 同款：
@@ -1002,9 +1020,10 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parryTotal)},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue(currentSkillID)},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.Value{Type: clientdata.WireObject, U64: currentSkillTarget}},
-		// 本地回环绝不应因某个属性缺失（为零）而无法通过客户端的技能/
-		// 动作同步容差检查。
-		{Index: propModifySkillLockTime, Name: "ModifySkillLockTime", Value: clientdata.Int32Value(5000)},
+		// ModifySkillLockTime 官方口径 200（Java PlayerActor #2014 exe
+		// 反汇编钉死；此前 5000 是「本地容差兜底」占位，会拉长客户端
+		// 技能锁定窗口）。
+		{Index: propModifySkillLockTime, Name: "ModifySkillLockTime", Value: clientdata.Int32Value(200)},
 		{Index: propHPHeartSpeed, Name: "HPHeartSpeed", Value: clientdata.Int32Value(sitcrossHeartMillis)},
 		{Index: propHPHeartSpeedAdd, Name: "HPHeartSpeedAdd", Value: clientdata.Int32Value(0)},
 		{Index: propMPHeartSpeed, Name: "MPHeartSpeed", Value: clientdata.Int32Value(sitcrossHeartMillis)},
@@ -1262,6 +1281,19 @@ func (p *playerActor) hasActiveBuff(slot uint16, staticData uint32, now time.Tim
 	defer p.mu.Unlock()
 	buff, ok := p.buffs[slot]
 	return ok && buff.staticData == staticData && buff.expiresUTC.After(now.UTC())
+}
+
+// buffExpiry 读取槽位租约的到期时刻（msg169 缓降摘帧 v7 取租约原到期
+// 而非当前时刻——Java releaseGlide 的 glideEndsAt 同口径）；无匹配
+// 活跃租约返回 ok=false，调用方回落 now。
+func (p *playerActor) buffExpiry(slot uint16, staticData uint32, now time.Time) (time.Time, bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	buff, ok := p.buffs[slot]
+	if !ok || buff.staticData != staticData || !buff.expiresUTC.After(now.UTC()) {
+		return time.Time{}, false
+	}
+	return buff.expiresUTC, true
 }
 
 func (p *playerActor) clearBuff(slot uint16, expectedStaticData uint32) (string, bool) {
@@ -1556,15 +1588,16 @@ func (p *playerActor) currentSkillStateSnapshot() (string, string, int32, uint64
 	return p.currentSkillID, p.currentSkillEffectID, p.currentSkillLevel, p.currentSkillTarget
 }
 
-// clearCurrentSkill 只清除调度该定时器的那一次确切技能调用。后续的调用
-// 绝不能被更早的定时器取消。LogicState 不在此处落 0：战斗存在性唯一
-// 权威是 setCombatPresence（威胁/10s 迟滞），收招帧只回显当前值——
-// 62433 战斗抓包 LogicState 跨招恒 1 实证（combat-skill-211.md §对齐表，
-// exe #2014 六项形态），硬编 0 会在面对面战斗中每招收尾闪发脱战帧。
-func (p *playerActor) clearCurrentSkill(expected string) bool {
+// clearCurrentSkill 只清除调度该定时器的那一次确切技能调用（按
+// (id, epoch) 配对——Java clearCurrentSkill(id, castEpoch) 同构：新招
+// 顶掉旧招时旧定时器失配空转，不会误删新招的 active_skill_rec 行）。
+// 后续的调用绝不能被更早的定时器取消。LogicState 不在此处落 0：战斗
+// 存在性唯一权威是 setCombatPresence（威胁/10s 迟滞），收招帧只回显
+// 当前值——62433 战斗抓包 LogicState 跨招恒 1 实证。
+func (p *playerActor) clearCurrentSkill(expected string, epoch uint64) bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.currentSkillID != expected {
+	if p.currentSkillID != expected || p.currentSkillEpoch != epoch {
 		return false
 	}
 	p.currentSkillID = ""
@@ -1572,6 +1605,40 @@ func (p *playerActor) clearCurrentSkill(expected string) bool {
 	p.currentSkillLevel = 0
 	p.currentSkillTarget = 0
 	return true
+}
+
+// currentSkillEpochSnapshot 返回当前出招代次（收尾定时器闭包捕获用）。
+func (p *playerActor) currentSkillEpochSnapshot() uint64 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.currentSkillEpoch
+}
+
+// noteSkillViewRows 记录 View40 行号映射（登录 merge / 秘籍重建视图时
+// 调用；CanUse 行帧按 configID 寻址行号）。
+func (p *playerActor) noteSkillViewRows(rows []learnedSkillView) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.skillViewRows = make(map[string]uint16, len(rows))
+	for index, row := range rows {
+		p.skillViewRows[row.configID] = uint16(index + 1)
+	}
+}
+
+// skillViewRow 返回技能的 View40 行号（0=不在已学容器，不发行帧）。
+func (p *playerActor) skillViewRow(configID string) uint16 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.skillViewRows[configID]
+}
+
+// meleeDamageRange 是伤害公式攻方掷值区间（Java PlayerProgress.
+// meleeDamageRange 同口径：基础 + 装备外功 + 内功 Min/MaxMeleeDamage；
+// Go 装备/内功外功分量未移植，当前=基础 20-35，接入后在此叠加）。
+func (p *playerActor) meleeDamageRange() (int32, int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.progress.attributes.minMeleeDamage, p.progress.attributes.maxMeleeDamage
 }
 
 // currentSkillClearUpdate 是收招技能状态清除帧（参考服 exe #2014 六项
@@ -1784,7 +1851,7 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addString(propCurSkillID, p.currentSkillID)
 	// CurSkillEffectID/CurSkillLevel:官方表无此名,不再下发。
 	addObject(propCurSkillTarget, p.currentSkillTarget)
-	addInt(propModifySkillLockTime, 5000)
+	addInt(propModifySkillLockTime, 200) // 官方口径 200（Java #2014 exe；旧 5000 为本地占位）
 	addString(bufferListPropertyIndex, p.bufferListStringLocked(now))
 	for _, property := range baseMotionProperties(motion) {
 		addFloat(property.Index, property.Value.F32)

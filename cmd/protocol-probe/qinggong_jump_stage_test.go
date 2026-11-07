@@ -156,7 +156,9 @@ func TestAirJumpLandingTimeoutFallback(t *testing.T) {
 	if player.beginAirJump("qinggong_4", now.Add(5*time.Second)) {
 		t.Fatal("5s without motion must not reset the stage")
 	}
-	player.qingGongTick(now.Add(16 * time.Second))
+	if _, forceEnded := player.qingGongTick(now.Add(16 * time.Second)); forceEnded != "" {
+		t.Fatalf("landing fallback must not report a drift lease, got %q", forceEnded)
+	}
 	if !player.beginAirJump("qinggong_4", now.Add(16*time.Second)) {
 		t.Fatal("15s fallback must reset the airtime")
 	}

@@ -34,11 +34,17 @@ const (
 	combatTickMaxAggressors = 4
 	defaultAggroRange       = float32(12)
 	defaultChaseRange       = float32(30)
-	defaultAttackRange      = float32(3.5)
 	defaultNPCMoveSpeed     = float32(4.5)
-	defaultAttackEvery      = 1500 * time.Millisecond
 	defaultNPCRespawn       = 15 * time.Second
 	playerAutoReviveDelay   = 8 * time.Second
+
+	// NPC 攻击三常量（Java NpcCombatAi 逐值对齐、参考服 55866 实证）：
+	// 反击近身 6m、周期 2.2s（抓包 12141 实测 ~2s 一轮）、每击实伤 1
+	// （名义攻击力 20 经玩家防御折算恒 1，只出现在 msg24 c1=7 尾值）。
+	// 此前 Go 用 MaxHP/50(≥10, Boss×2)/1500ms/3.5m 属本地自造，整体废弃。
+	npcAttackRangeMeters = float32(6.0)
+	npcAttackEvery       = 2200 * time.Millisecond
+	npcAttackDamage      = int32(1)
 )
 
 // newNPCCombatState 从模板属性构造敌对 NPC 的战斗决策组件。
@@ -60,21 +66,10 @@ func newNPCCombatState(npc npcSpawn, home worldcore.Transform) sim.Brain {
 	if move <= 0 {
 		move = defaultNPCMoveSpeed
 	}
-	maxHP := npc.int32Property("MaxHP")
-	if maxHP <= 0 {
-		maxHP = 1000
-	}
-	damage := maxHP / 50
-	if damage < 10 {
-		damage = 10
-	}
-	if npc.resolved.ScriptClass == "BossNpc" {
-		damage *= 2
-	}
 	return sim.Brain{
 		Home: home, AggroRange: aggro, ChaseRange: chase,
-		AttackRange: defaultAttackRange, MoveSpeed: move, Damage: damage,
-		AttackEvery: defaultAttackEvery, RespawnAfter: npcRespawnAfter(npc),
+		AttackRange: npcAttackRangeMeters, MoveSpeed: move, Damage: npcAttackDamage,
+		AttackEvery: npcAttackEvery, RespawnAfter: npcRespawnAfter(npc),
 	}
 }
 
@@ -116,12 +111,15 @@ type combatTickOutcome struct {
 
 // npcAttackPresentation 是一次 NPC 攻击的表现快照。transform 已带
 // 朝向目标后的 Orient；landed=false（被闪避/招架）时锁外只发预备+
-// 动作两帧。victim 用于命中帧（obj(玩家) 用受害者本地身份 1-1）。
+// 动作两帧（Java：格挡零帧静默，Go 保留 337/20 预备表现）。victim
+// 用于命中帧（obj(玩家) 用受害者本地身份 1-1）；hpRatio 是受击后
+// 玩家血量百分比（0x2D 双写值）。
 type npcAttackPresentation struct {
 	npcID          uint32
 	ownerID        uint32
 	transform      worldcore.Transform
 	landed         bool
+	hpRatio        int32
 	model          string
 	playerWideName string
 	npcWideName    string
@@ -171,12 +169,13 @@ func (r *sceneRun) combatTick(now time.Time) {
 	r.broadcastNPCAttacks(outcome.attacks)
 }
 
-// broadcastNPCAttacks 补发本 tick 的 NPC 攻击三段表现帧（F 盘
-// writeNPCAttackFrames 同构，同 tick 三连发）：msg337 预备（NPC 坐标/
-// 朝向）→ msg20 动作（施法者=NPC）→ msg24 命中（仅实际命中时；obj
-// 用受害者本地玩家身份 1-1，故只写受害者自己的连接，不中继）。预备
-// 与动作帧以 NPC 为中心，受害者首发后对视口内可见该 NPC 的其他
-// 成员中继。伤害已在锁内同步结算，这里纯表现。
+// broadcastNPCAttacks 补发本 tick 的 NPC 攻击表现帧（Java NpcCombatAi
+// 出招簇 + 抓包 12141 四连实证）：msg337 预备（NPC 坐标/朝向）→ msg20
+// 动作（施法者=NPC，招式 jn_mon053_02）→ msg24 命中（c1=7，仅实际命中；
+// obj 用受害者本地玩家身份 1-1，只写受害者连接）→ 0x2D 受击特效（玩家
+// 受击后 HPRatio——官方血条由 0x2D 驱动，参考服不随 NPC 命中发玩家
+// HP 面板）。预备与动作帧以 NPC 为中心，受害者首发后对视口内可见该
+// NPC 的其他成员中继。伤害已在锁内同步结算，这里纯表现。
 func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
 	for _, attack := range attacks {
 		if attack.victim == nil || attack.victim.view == nil {
@@ -188,7 +187,7 @@ func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
 			log.Printf("%s: encode NPC cast preparation %d: %v", attack.victim.view.remote, attack.npcID, err)
 			continue
 		}
-		animFrame, err := nativeSkillActionFrameFor(attack.npcID, attack.ownerID, npcDefaultAttackSkill, playerObjectID, playerOwnerID)
+		animFrame, err := nativeSkillActionFrameFor(attack.npcID, attack.ownerID, npcAttackSkillJN, playerObjectID, playerOwnerID)
 		if err != nil {
 			log.Printf("%s: encode NPC attack action %d: %v", attack.victim.view.remote, attack.npcID, err)
 			continue
@@ -204,13 +203,16 @@ func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
 			continue
 		}
 		hitFrame, err := npcAttackHitFrame(playerObjectID, playerOwnerID,
-			attack.npcID, attack.ownerID, attack.model, attack.playerWideName, attack.npcWideName)
+			npcAttackDamage, attack.npcID, attack.ownerID, attack.model, attack.playerWideName, attack.npcWideName)
 		if err != nil {
 			log.Printf("%s: encode NPC attack hit %d: %v", attack.victim.view.remote, attack.npcID, err)
 			continue
 		}
-		if err := attack.victim.view.conn.WriteFrame(hitFrame); err != nil {
-			log.Printf("%s: write NPC attack hit %d: %v", attack.victim.view.remote, attack.npcID, err)
+		effectFrame := hurtEffectFrame(playerObjectID, playerOwnerID, attack.hpRatio)
+		for _, frame := range [][]byte{hitFrame, effectFrame} {
+			if err := attack.victim.view.conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: write NPC attack hit %d: %v", attack.victim.view.remote, attack.npcID, err)
+			}
 		}
 	}
 }
@@ -330,8 +332,14 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 		state.NextAttack = now.Add(state.AttackEvery)
 		outcome := target.player.resolveNPCAttack(meta.id, state.Damage, now)
-		// 三段攻击表现素材（锁外补发 msg337/msg20/msg24）；朝向重算
+		// 攻击表现素材（锁外补发 msg337/msg20/msg24/0x2D）；朝向重算
 		// 为面向目标。素材取自 NPC meta 与受害者成员，全部只读。
+		// hpRatio 取受击后玩家血量百分比（0x2D 双写值；maxHP 兜底 1）。
+		playerState := target.player.stateSnapshot()
+		hpRatio := int32(0)
+		if playerState.MaxHP > 0 {
+			hpRatio = int32(int64(playerState.HP) * 100 / int64(playerState.MaxHP))
+		}
 		attacks = append(attacks, npcAttackPresentation{
 			npcID:   meta.id,
 			ownerID: meta.ownerID,
@@ -340,6 +348,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 				Orient: float32(math.Atan2(float64(position.Z-transform.Z), float64(position.X-transform.X))),
 			},
 			landed:         !outcome.dodged && !outcome.parried,
+			hpRatio:        hpRatio,
 			model:          meta.model,
 			playerWideName: target.player.snapshotName(),
 			npcWideName:    meta.wideName,
@@ -596,14 +605,25 @@ func (r *sceneRun) setNPCTransformLocked(id worldcore.EntityID, destination worl
 	return nil
 }
 
+// npcCombatProperties 是 NPC 战斗面板 0x10 属性集（抓包 52905 #3027
+// 实证 9 属性 57B 逐字节对齐；Java npcCombatFrame 只发其中 HP 族 5 项，
+// 抓包口径是双索引族超集——新旧两域 HP/HPRatio/MaxHP 各发一遍 + 恒 1
+// 的 Prop21[Byte]。玩家瘀血 HitHP@481 不在官方 NPC 帧（抓包 0 次），
+// 归玩家面板专属）。
 func npcCombatProperties(state entity.ActorState) []clientdata.IndexedProperty {
-	hpRatio := int32(int64(state.HP) * 100 / int64(state.MaxHP))
+	hpRatio := int32(0)
+	if state.MaxHP > 0 {
+		hpRatio = int32(int64(state.HP) * 100 / int64(state.MaxHP))
+	}
 	return []clientdata.IndexedProperty{
-		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: 21, Name: "Prop21", Value: clientdata.ByteValue(1)},
 		{Index: 28, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
 		{Index: 30, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
 		{Index: 32, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: 481, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
+		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: 465, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		{Index: 469, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		{Index: 578, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
 		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
 	}
 }

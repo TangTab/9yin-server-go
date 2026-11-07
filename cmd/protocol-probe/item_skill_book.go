@@ -426,6 +426,8 @@ func rebuildWuxueSkillView(h *itemSession, skillRows map[string]gameSkillRow) er
 	if err := h.link.WriteFrame(serverDeleteView(viewportSkill)); err != nil {
 		return err
 	}
+	// 重建后的行号映射刷新（出招 CanUse 行帧寻址与新视图一致）。
+	h.player.noteSkillViewRows(views)
 	frames, err := learnedSkillViewFrames(views)
 	if err != nil {
 		return err

@@ -6,6 +6,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -103,6 +104,16 @@ type combatSkillDefinition struct {
 	spCost           int32
 	qgCost           int32
 	baseDamage       int32
+	// damageWaves 是 damage_calculate 正 r 段数（伤害倍率分母：
+	// ratio = baseDamage/100/waves，Java CombatSkill.damageRatio 同式）。
+	// hitFrameMs 是 zhaoshi trigger_custom_N（段号;trigger_effect;帧号;
+	// 效果名）编译出的多段判定时刻（30fps 换算毫秒），空表=单段即时
+	// 结算。levelupRelevance（wuji_* 前缀=武技族，出招链带 169 段）与
+	// packCategory（2=怒招）驱动武技连击段下发。
+	damageWaves      int32
+	hitFrameMs       []time.Duration
+	levelupRelevance string
+	packCategory     int32
 	requiresTarget   bool
 	targetMode       skillTargetMode
 	areaRadius       float32
@@ -131,6 +142,36 @@ type combatSkillDefinition struct {
 // Java 语义 canRush && script=="skilllock"（大小写不敏感）。
 func (definition combatSkillDefinition) stagedRushFamily() bool {
 	return definition.canRush && strings.EqualFold(definition.script, "skilllock")
+}
+
+// scriptLabel 是 msg24 飘字第 7 值（Java CombatSkill.scriptLabel）：锁定族
+// 一律 "SkillLock"，其余原样 script。抓包 52905：myjf01 系 'SkillLock'、
+// 其余 'SkillNormal'——此前 Go 恒发 "SkillNormal" 属本地占位。
+func (definition combatSkillDefinition) scriptLabel() string {
+	if definition.lockSkill {
+		return "SkillLock"
+	}
+	return definition.script
+}
+
+// damageRatio 是公式倍率（formula.lua 的 ratio；<=0 由公式按 1.0 处理）。
+func (definition combatSkillDefinition) damageRatio() float64 {
+	if definition.damageWaves <= 0 {
+		return 0
+	}
+	return float64(definition.baseDamage) / 100 / float64(definition.damageWaves)
+}
+
+// wujiRelevance 报告武技族（LevelupRelevance=wuji_* 前缀）：出招链带
+// 169 buff 段（首跳摘 buf_<技能>_01）。
+func (definition combatSkillDefinition) wujiRelevance() bool {
+	return strings.HasPrefix(strings.ToLower(definition.levelupRelevance), "wuji_")
+}
+
+// wujiCombo 报告武技连击段（wuji_* 且 PackCategory=2 怒招）：每跳对每个
+// 受害 NPC 追加目标 debuff 169（带到期）+ msg24 c1=71 连击段飘字。
+func (definition combatSkillDefinition) wujiCombo() bool {
+	return definition.wujiRelevance() && definition.packCategory == 2
 }
 
 func (definition combatSkillDefinition) totalActionDuration() time.Duration {
@@ -177,7 +218,7 @@ func writeSkillHitEventFrames(link sceneMessageConnection, world *sceneLifecycle
 	if err := link.WriteFrame(fightRelationDamageFrame(playerObjectID, playerOwnerID, cumulative)); err != nil {
 		return fmt.Errorf("write fight relation frame: %w", err)
 	}
-	hitFrame, err := skillHitDamageFrame(victimID, victimOwner, damage, definition.id, victimModel, player.snapshotName())
+	hitFrame, err := skillHitDamageFrame(victimID, victimOwner, damage, definition.id, definition.scriptLabel(), victimModel, player.snapshotName())
 	if err != nil {
 		return fmt.Errorf("encode skill hit frame: %w", err)
 	}
@@ -209,16 +250,16 @@ func nativeSkillActionFrame(skillID string, targetID, targetOwnerID uint32) ([]b
 	if skillID == "" {
 		return nil, fmt.Errorf("native skill action ID is empty")
 	}
-	return serverModernCustomIntMessage(
+	// 外壳 0x1E、尾两值 0/0.0（Java FightMessages.skillAction + 抓包
+	// 52905 #3005 逐字节；42 份抓包 msg20 从未走 0x27，尾值恒 0——
+	// 此前 0x27+1/1 是本地占位）。
+	return serverCustomIntMessage(
 		serverNativeSkillActionMessage,
 		customObject(playerObjectID, playerOwnerID),
 		customString(skillID),
 		customObject(targetID, targetOwnerID),
-		// 受保护的接收端接受这两个可选字段。提供完整的
-		// 现代形态可以让逐行的 show runner 保留角色
-		// 位移和动作时序，而不是依赖省略字段时的默认值。
-		customInt(1),
-		customFloat32(1),
+		customInt(0),
+		customFloat32(0),
 	)
 }
 
@@ -325,12 +366,15 @@ func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uin
 	if ready := p.skillCooldowns[definition.id]; ready.After(now) {
 		return false, fmt.Sprintf("personal cooldown remaining=%s", ready.Sub(now).Round(time.Millisecond))
 	}
-	teamKey := definition.cooldownTeam
-	if teamKey == 0 {
-		teamKey = -definition.cooldownCategory
-	}
-	if ready := p.skillTeamCooldowns[teamKey]; ready.After(now) {
-		return false, fmt.Sprintf("public cooldown team=%d remaining=%s", teamKey, ready.Sub(now).Round(time.Millisecond))
+	// 公共 GCD 只拦套路切换（Java PlayerActor.beginSkillUse:1061-1064
+	// 同构、bug.txt:8「同套路不在触发公共7秒冷却，不同套路会看到7秒CD
+	// 转圈回复」）：同套路连招与出招者自身永不拦——个人 CD<7s 的技能
+	// 不再被压到 7s。此前 per-team 硬闸（skillTeamCooldowns[CoolDownTeam]）
+	// 把同套路五招（共享 CoolDownTeam）连同施法者全部锁 7s，是本地自造
+	// 模型，已废弃。
+	if p.publicCDUntil.After(now) && definition.taoLu != p.publicCDTaolu {
+		return false, fmt.Sprintf("public cooldown (taolu switch from=%s) remaining=%s",
+			p.publicCDTaolu, p.publicCDUntil.Sub(now).Round(time.Millisecond))
 	}
 	state := p.snapshotLocked()
 	if state.LogicState == entity.LogicStateDied || state.HP <= 0 {
@@ -352,12 +396,18 @@ func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uin
 	}
 	p.progress.attributes.sp -= definition.spCost
 	p.skillCooldowns[definition.id] = now.Add(definition.personalCD)
-	p.skillTeamCooldowns[teamKey] = now.Add(definition.publicCD)
+	// 每次受理都刷新 GCD 窗口与发起套路（62433 抓包：每招恒发个人+GCD
+	// 双行；客户端按 team 列过滤，同套路技能不显示 7s——服务端同样只拦
+	// 跨套路）。连续同套路连招会把切换锁窗口后推，Java 同款。
+	p.publicCDUntil = now.Add(definition.publicCD)
+	p.publicCDTaolu = definition.taoLu
 	p.currentSkillID = definition.id
 	p.currentSkillEffectID = definition.id
 	p.currentSkillLevel = definition.level
 	p.currentSkillTarget = target
-	p.vitals.SetLogicState(entity.LogicStateFighting)
+	// 出招代次自增（Java beginSkillUse 同构）：收尾定时器按 (id, epoch)
+	// 配对，旧招定时器失配空转。
+	p.currentSkillEpoch++
 	return true, ""
 }
 
@@ -401,59 +451,14 @@ type skillDamageOutcome struct {
 	cumulative int32
 }
 
+// applySelectedSkillDamage 是 applySkillDamageToNPC 的选中目标快捷方式
+// （历史测试路径保留：伤害直落选中战斗 NPC）。
 func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (skillDamageOutcome, error) {
-	s.run.mu.Lock()
-	defer s.run.mu.Unlock()
-	id := worldcore.EntityID(s.selectedObject)
-	vitals, hasVitals := s.run.combat.Vitals(id)
-	meta, exists := s.npcMeta(id)
-	if !hasVitals || !exists || meta.ownerID != s.selectedOwner || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
+	id, ownerID, ok := s.selectedCombatTarget()
+	if !ok {
 		return skillDamageOutcome{}, nil
 	}
-	if !vitals.ApplyDamage(amount) {
-		return skillDamageOutcome{}, nil
-	}
-	s.run.combat.WriteVitals(id, vitals)
-	state := vitals.ActorState(uint32(id), meta.ownerID)
-	if brain, isCombat := s.run.combat.Brain(id); isCombat {
-		brain.Threat += amount
-		if state.HP <= 0 {
-			brain.Threat = 0
-			if npcRespawnBatchInterval() > 0 {
-				// 批量刷新：不设每怪计时，refreshTick 扫描统一复活。
-				brain.RespawnAt = time.Time{}
-			} else {
-				brain.RespawnAt = now.Add(brain.RespawnAfter)
-			}
-			s.run.recordNPCDeathLocked(uint32(id), meta.ownerID, brain, now)
-		}
-		s.run.combat.WriteBrain(id, brain)
-	}
-	frame, err := sceneObjectProperties(uint32(id), meta.ownerID, 0, npcCombatProperties(state))
-	if err != nil {
-		return skillDamageOutcome{}, err
-	}
-	loot := int32(0)
-	if state.HP <= 0 {
-		loot = state.MaxHP / 100
-		if loot < 1 {
-			loot = 1
-		}
-		if loot > 99 {
-			loot = 99
-		}
-	}
-	outcome := skillDamageOutcome{
-		frame: frame, id: uint32(id), ownerID: meta.ownerID,
-		loot: loot, killed: state.HP <= 0,
-		hpRatio: int32(int64(state.HP) * 100 / int64(state.MaxHP)),
-		model:   meta.model, wideName: meta.wideName,
-		cumulative: s.run.fightRelationAddLocked(uint32(id), amount),
-	}
-	if outcome.killed {
-		s.run.fightRelationResetLocked(uint32(id))
-	}
-	return outcome, nil
+	return s.applySkillDamageToNPC(id, ownerID, amount, now)
 }
 
 type areaSkillDamageResult struct {
@@ -658,6 +663,409 @@ func stagePlayerSkillEffects(player *playerActor, definition combatSkillDefiniti
 	return applied
 }
 
+// skillDamageTargetRef 是出招时刻解析出的伤害目标引用（Java
+// FightState.HitTarget 的 Go 对应物；多段路径按此快照逐段结算，段间
+// 新进范围的 NPC 不追补——Java 语义）。
+type skillDamageTargetRef struct {
+	id      uint32
+	ownerID uint32
+}
+
+// skillSettleHit 是单次结算批里的一条命中（Java Hit + 结算产物合体）。
+type skillSettleHit struct {
+	ref     skillDamageTargetRef
+	damage  int32
+	outcome skillDamageOutcome
+}
+
+// skillRowCanUseFrame 是 View40 技能行可用性行帧（Java FightMessages.
+// skillRowCanUse、62433 抓包 2159 帧实证）：0x10 | isView=1 | u32 40 |
+// u32 行号 | u16 1 | u16 CanUse(2236) | u8 0/1。出招置 0、个人 CD 尽时
+// 置 1——不置则真机技能图标恒灰；官方值恒 1 不按资源门控，资源灰由
+// 客户端按 SP+AConsumeSP 自算。
+func skillRowCanUseFrame(row uint16, canUse bool) ([]byte, error) {
+	value := byte(0)
+	if canUse {
+		value = 1
+	}
+	return sceneObjectProperties(uint32(viewportSkill), uint32(row), 1, []clientdata.IndexedProperty{
+		{Index: propSkillCanUse, Name: "CanUse", Value: clientdata.ByteValue(value)},
+	})
+}
+
+// resolveSkillDamageTargets 出招时刻的目标解析（Java resolveTargets 同
+// 构）：无伤害效果返回空表；单体=选中目标；以己形状=211 上报坐标为
+// 中心；以目标为中心=选中 NPC 位置为圆心。只解析引用不落伤害。
+func (s *sceneLifecycle) resolveSkillDamageTargets(definition combatSkillDefinition, custom clientCustomMessage, selectedID, selectedOwner uint32) []skillDamageTargetRef {
+	hasDamage := false
+	for _, effect := range definition.effects {
+		if effect.kind == skillEffectDamage && effect.amount > 0 {
+			hasDamage = true
+			break
+		}
+	}
+	if !hasDamage || s == nil {
+		return nil
+	}
+	switch definition.targetMode {
+	case skillTargetSelected:
+		if selectedID != 0 && selectedID != playerObjectID {
+			return []skillDamageTargetRef{{id: selectedID, ownerID: selectedOwner}}
+		}
+		return nil
+	case skillTargetCasterCircle, skillTargetCasterSector, skillTargetCasterRectangle:
+		center, ok := useSkillCastTransform(custom)
+		if !ok {
+			return nil
+		}
+		return s.queryShapedSkillTargets(center, definition.areaRadius, definition.areaHeight,
+			definition.sectorAngleForShape(), definition.areaWidthForShape())
+	case skillTargetSelectedArea:
+		center, ok := s.selectedCombatTargetTransform()
+		if !ok {
+			return nil
+		}
+		return s.queryShapedSkillTargets(center, definition.areaRadius, definition.areaHeight, 0, 0)
+	default:
+		return nil
+	}
+}
+
+// sectorAngleForShape / areaWidthForShape：形状查询参数收口（扇形取
+// sectorAngle、矩形取 areaWidth，其余 0——与 applyShapedSkillDamage
+// 的旧分支语义一致）。
+func (definition combatSkillDefinition) sectorAngleForShape() float32 {
+	if definition.targetMode == skillTargetCasterSector {
+		return definition.sectorAngle
+	}
+	return 0
+}
+
+func (definition combatSkillDefinition) areaWidthForShape() float32 {
+	if definition.targetMode == skillTargetCasterRectangle {
+		return definition.areaWidth
+	}
+	return 0
+}
+
+// queryShapedSkillTargets 是 applyShapedSkillDamage 的只查询形态：
+// 返回形状命中的存活战斗 NPC 引用（EntityID 升序），不落伤害。
+func (s *sceneLifecycle) queryShapedSkillTargets(center worldcore.Transform, radius, height, sectorAngle, rectangleWidth float32) []skillDamageTargetRef {
+	if s == nil || radius <= 0 {
+		return nil
+	}
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
+	radiusSquared := radius * radius
+	refs := make([]skillDamageTargetRef, 0, 4)
+	s.run.combat.EachCombatNPCTransform(func(id worldcore.EntityID, vitals *sim.Vitals, _ *sim.Brain, transform *worldcore.Transform) {
+		if vitals.HP <= 0 {
+			return
+		}
+		dx := transform.X - center.X
+		dz := transform.Z - center.Z
+		dy := transform.Y - center.Y
+		if dy < 0 {
+			dy = -dy
+		}
+		if height > 0 && dy > height {
+			return
+		}
+		if rectangleWidth > 0 {
+			facingX, facingZ := math.Cos(float64(center.Orient)), math.Sin(float64(center.Orient))
+			forward := float64(dx)*facingX + float64(dz)*facingZ
+			side := -float64(dx)*facingZ + float64(dz)*facingX
+			if forward < 0 || forward > float64(radius) || math.Abs(side) > float64(rectangleWidth)/2 {
+				return
+			}
+		} else if dx*dx+dz*dz > radiusSquared {
+			return
+		} else if sectorAngle > 0 {
+			targetAngle := math.Atan2(float64(dz), float64(dx))
+			delta := math.Atan2(math.Sin(targetAngle-float64(center.Orient)), math.Cos(targetAngle-float64(center.Orient)))
+			if math.Abs(delta) > float64(sectorAngle)*math.Pi/360 {
+				return
+			}
+		}
+		if meta, exists := s.npcMeta(id); exists {
+			refs = append(refs, skillDamageTargetRef{id: uint32(id), ownerID: meta.ownerID})
+		}
+	})
+	sort.Slice(refs, func(i, j int) bool { return refs[i].id < refs[j].id })
+	return refs
+}
+
+// applySkillDamageToNPC 对指定战斗 NPC 落一击伤害（Java FightState.
+// applyDamage + applySelectedSkillDamage 合并的参数化形态）：目标失效/
+// 已死/未命中 ApplyDamage 拒绝时返回零值 outcome（frame=nil，发帧阶段
+// 整段跳过）。累计威胁进 0x13，死亡清仇恨排重生。
+func (s *sceneLifecycle) applySkillDamageToNPC(id, ownerID uint32, amount int32, now time.Time) (skillDamageOutcome, error) {
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
+	entityID := worldcore.EntityID(id)
+	vitals, hasVitals := s.run.combat.Vitals(entityID)
+	meta, exists := s.npcMeta(entityID)
+	if !hasVitals || !exists || meta.ownerID != ownerID || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
+		return skillDamageOutcome{}, nil
+	}
+	if !vitals.ApplyDamage(amount) {
+		return skillDamageOutcome{}, nil
+	}
+	s.run.combat.WriteVitals(entityID, vitals)
+	state := vitals.ActorState(id, ownerID)
+	if brain, isCombat := s.run.combat.Brain(entityID); isCombat {
+		brain.Threat += amount
+		if state.HP <= 0 {
+			brain.Threat = 0
+			if npcRespawnBatchInterval() > 0 {
+				// 批量刷新：不设每怪计时，refreshTick 扫描统一复活。
+				brain.RespawnAt = time.Time{}
+			} else {
+				brain.RespawnAt = now.Add(brain.RespawnAfter)
+			}
+			s.run.recordNPCDeathLocked(id, ownerID, brain, now)
+		}
+		s.run.combat.WriteBrain(entityID, brain)
+	}
+	frame, err := sceneObjectProperties(id, ownerID, 0, npcCombatProperties(state))
+	if err != nil {
+		return skillDamageOutcome{}, err
+	}
+	loot := int32(0)
+	if state.HP <= 0 {
+		loot = state.MaxHP / 100
+		if loot < 1 {
+			loot = 1
+		}
+		if loot > 99 {
+			loot = 99
+		}
+	}
+	outcome := skillDamageOutcome{
+		frame: frame, id: id, ownerID: ownerID,
+		loot: loot, killed: state.HP <= 0,
+		hpRatio:    int32(int64(state.HP) * 100 / int64(state.MaxHP)),
+		model:      meta.model,
+		wideName:   meta.wideName,
+		cumulative: s.run.fightRelationAddLocked(id, amount),
+	}
+	if outcome.killed {
+		s.run.fightRelationResetLocked(id)
+	}
+	return outcome, nil
+}
+
+// skillHitTimes 多段调度时刻（Java hitTimes 同构）：trigger_effect 帧位
+// 毫秒升序、去重，首段至少 1ms 后落拍。
+func skillHitTimes(definition combatSkillDefinition) []time.Duration {
+	times := make([]time.Duration, 0, len(definition.hitFrameMs))
+	var previous time.Duration = -1
+	for _, frameMs := range definition.hitFrameMs {
+		at := frameMs
+		if at < time.Millisecond {
+			at = time.Millisecond
+		}
+		if at == previous {
+			continue
+		}
+		times = append(times, at)
+		previous = at
+	}
+	return times
+}
+
+// writeSkillSettleFrames 写一批命中的全套帧（Java emitPerTargetSequence
+// 同序）：逐目标 [0x10 NPC 面板 → 0x13 → msg24(17) → 0x2D → msg18 →
+// msg205]，致死帧中继；随后按命中数一次性 +2/跳 回怒（官方按打击次数
+// 不按伤害，多段招每段每目标各算）。掉银与击杀中继随批结算。
+func writeSkillSettleFrames(link sceneMessageConnection, world *sceneLifecycle, definition combatSkillDefinition, player *playerActor, hits []skillSettleHit, remote string) (totalLoot int32, err error) {
+	for _, hit := range hits {
+		if err := link.WriteFrame(hit.outcome.frame); err != nil {
+			return totalLoot, err
+		}
+		if err := writeSkillHitEventFrames(link, world, definition, player,
+			hit.ref.id, hit.ref.ownerID, hit.damage, hit.outcome.hpRatio, hit.outcome.model, hit.outcome.cumulative); err != nil {
+			return totalLoot, err
+		}
+		if hit.outcome.killed {
+			totalLoot += hit.outcome.loot
+			world.relayNPCKillFrame(hit.ref.id, hit.outcome.frame)
+		}
+	}
+	if len(hits) > 0 {
+		if _, spFrame, spErr := player.addSP(int32(len(hits)) * ragGainCleanHit); spErr != nil {
+			return totalLoot, spErr
+		} else if spFrame != nil {
+			if err := link.WriteFrame(spFrame); err != nil {
+				return totalLoot, err
+			}
+		}
+	}
+	return totalLoot, nil
+}
+
+// writeWujiSequenceFrames 武技族出招附加帧（Java emitWujiSequence、
+// 参考服 55866 myjf03/myjf08 实证）：wuji_* 族首跳摘玩家自身
+// buf_<技能>_01（169 v0=0）；wuji_* + 怒招（PackCategory=2）每跳对每个
+// 受害 NPC 发目标 debuff 169（v0=1 带到期）+ 一条 msg24 c1=71 连击段
+// （段名 ”/“_2”/“_3”/“_4”上限四段，受害/第二目标轮转）。
+func writeWujiSequenceFrames(link sceneMessageConnection, definition combatSkillDefinition, player *playerActor, hits []skillSettleHit, tickIndex int) error {
+	if !definition.wujiRelevance() || len(hits) == 0 {
+		return nil
+	}
+	playerName := player.snapshotName()
+	if tickIndex == 0 {
+		frame, err := skillBuffFrame(0, playerObjectID, playerOwnerID, playerObjectID, playerOwnerID,
+			"buf_"+definition.id+"_01", playerName)
+		if err != nil {
+			return err
+		}
+		if err := link.WriteFrame(frame); err != nil {
+			return err
+		}
+	}
+	if !definition.wujiCombo() {
+		return nil
+	}
+	// 武技连击 NPC debuff 租约 ~2s 量级（参考服 55866 逐跳滚动）。
+	const wujiDebuffLease = 2 * time.Second
+	now := time.Now()
+	for _, hit := range hits {
+		frame, err := targetDebuffTimedFrame("buf_"+definition.id,
+			hit.ref.id, hit.ref.ownerID, playerObjectID, playerOwnerID, playerName,
+			now.Add(wujiDebuffLease).UnixMilli())
+		if err != nil {
+			return err
+		}
+		if err := link.WriteFrame(frame); err != nil {
+			return err
+		}
+	}
+	if tickIndex > 3 {
+		return nil
+	}
+	stage := ""
+	if tickIndex > 0 {
+		stage = fmt.Sprintf("%s_%d", definition.levelupRelevance, tickIndex+1)
+	}
+	first := hits[0]
+	second := hits[0]
+	if len(hits) > 1 {
+		second = hits[1]
+	}
+	frame, err := wujiComboFloatFrame(first.ref.id, first.ref.ownerID,
+		second.ref.id, second.ref.ownerID, playerObjectID, playerOwnerID, stage)
+	if err != nil {
+		return err
+	}
+	return link.WriteFrame(frame)
+}
+
+// awardSettleLoot 把击杀掉银入账并推货币帧（Go 本地特色，Java 无此
+// 路径——保留既有经济特性）。
+func awardSettleLoot(link sceneMessageConnection, player *playerActor, totalLoot int32, targets, remote string) {
+	if totalLoot <= 0 {
+		return
+	}
+	player.addSilver(totalLoot)
+	silverFrame, err := player.silverUpdate()
+	if err == nil {
+		if err := link.WriteFrame(silverFrame); err != nil {
+			log.Printf("%s: write silver update: %v", remote, err)
+		}
+	}
+	log.Printf("%s: skill defeated NPCs %s silver_drop=%d", remote, targets, totalLoot)
+}
+
+// scheduleSkillMultiHits 多段结算（Java scheduleMultiHits、52795 抓包
+// 实证形态）：出招时掷一次伤害值（同招各段各目标同值），按
+// trigger_effect 帧位逐段调度——每段对仍存活目标发全套命中帧；首段
+// 命中进战斗+目标控制，后续段刷新战斗活跃时刻；每段每目标 +2 回怒；
+// 末段后按整招累计伤害喂经脉真气。
+func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, definition combatSkillDefinition,
+	player *playerActor, targets []skillDamageTargetRef, roll combatRoll, remote string) {
+	if len(targets) == 0 || roll.damage <= 0 {
+		return
+	}
+	times := skillHitTimes(definition)
+	if len(times) == 0 {
+		return
+	}
+	lastAt := times[len(times)-1]
+	// 段间可能并发到达（帧位相近时）：跨段共享态用原子量（firstTick 防重
+	// 复入战、landedTotal 汇总喂真气）。
+	var landedTotal atomic.Int64
+	var firstTick atomic.Bool
+	for tickIndex, at := range times {
+		tick := tickIndex
+		lastTick := at == lastAt
+		time.AfterFunc(at, func() {
+			now := time.Now()
+			hits := make([]skillSettleHit, 0, len(targets))
+			killed := false
+			for _, ref := range targets {
+				outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, now)
+				if err != nil {
+					log.Printf("%s: multi-hit stage %d apply id=%d: %v", remote, tick, ref.id, err)
+					continue
+				}
+				if outcome.frame == nil {
+					continue // 前段已击杀/目标失效：本段跳过（不发帧）
+				}
+				hits = append(hits, skillSettleHit{ref: ref, damage: roll.damage, outcome: outcome})
+				if outcome.killed {
+					killed = true
+				}
+			}
+			if len(hits) == 0 {
+				return
+			}
+			// 命中/每段都刷新战斗活跃时刻（Java enterCombat/touchCombat），
+			// 防段间 10s 闲退。
+			player.noteCombatActivity(now)
+			if firstTick.CompareAndSwap(true, false) {
+				for _, effect := range definition.effects {
+					if effect.kind == skillEffectTargetControl && effect.buff.lifetime > 0 {
+						ids := make([]uint32, 0, len(hits))
+						for _, hit := range hits {
+							ids = append(ids, hit.ref.id)
+						}
+						world.applyNPCControl(ids, effect.buff.lifetime, now)
+					}
+				}
+			}
+			totalLoot, err := writeSkillSettleFrames(link, world, definition, player, hits, remote)
+			if err != nil {
+				log.Printf("%s: multi-hit stage %d frames: %v", remote, tick, err)
+			}
+			awardSettleLoot(link, player, totalLoot, fmt.Sprintf("stage=%d targets=%d", tick, len(hits)), remote)
+			if err := writeWujiSequenceFrames(link, definition, player, hits, tick); err != nil {
+				log.Printf("%s: multi-hit stage %d wuji frames: %v", remote, tick, err)
+			}
+			if killed && definition.wujiCombo() {
+				// 击杀红名标记（参考服 55866：myjf08 击杀后 [1, buf_fixed_red]）。
+				if frame, err := skillBuffFrame(1, playerObjectID, playerOwnerID, playerObjectID, playerOwnerID,
+					"buf_fixed_red", player.snapshotName()); err == nil {
+					if err := link.WriteFrame(frame); err != nil {
+						log.Printf("%s: write kill red marker: %v", remote, err)
+					}
+				}
+			}
+			for _, hit := range hits {
+				landedTotal.Add(int64(hit.damage))
+			}
+			if lastTick && landedTotal.Load() > 0 {
+				for _, frame := range player.jingMaiCombatFeed(int32(landedTotal.Load())) {
+					if err := link.WriteFrame(frame); err != nil {
+						log.Printf("%s: write combat zhenqi frame: %v", remote, err)
+					}
+				}
+			}
+			log.Printf("%s: multi-hit stage %d/%d skill=%s hits=%d damage_each=%d", remote, tick+1, len(times), definition.id, len(hits), roll.damage)
+		})
+	}
+}
+
 func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomUseSkill {
 		return false, nil
@@ -715,13 +1123,30 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	}
 	now := time.Now()
 	target := uint64(targetID) | uint64(targetOwnerID)<<32
+	// 顶掉补删（Java §D8 对拍）：GCD 不硬闸，连招会把上一招的收尾定时器
+	// 顶掉；新招受理时上一招仍挂着的，立即补发它的 0x12+清除帧——
+	// active_skill_rec 的 add/del 恒 1:1（参考服 8/8、52905 14/14）。
+	superseded := player.currentSkillSnapshot()
 	if ok, reason := player.beginSkillUse(definition, target, now); !ok {
 		log.Printf("%s: reject skill id=%s: %s", remote, definition.id, reason)
 		return true, nil
 	}
+	castEpoch := player.currentSkillEpochSnapshot()
+	if superseded != "" {
+		if err := link.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordActiveSkill, 0)); err != nil {
+			log.Printf("%s: close superseded skill row %s: %v", remote, superseded, err)
+		}
+		if clear, err := player.currentSkillClearUpdate(); err == nil {
+			if err := link.WriteFrame(clear); err != nil {
+				log.Printf("%s: close superseded skill clear %s: %v", remote, superseded, err)
+			}
+		}
+		log.Printf("%s: close superseded skill id=%s early (delete row + clear frame)", remote, superseded)
+	}
 	appliedBuffs := stagePlayerSkillEffects(player, definition, now, remote)
-	// §3 出招帧序：个人 CD 行 → active_skill_rec 行（动作总时长后
-	// 0x12 删）→ GCD 行 → 玩家全量 → msg337 施法回显 → msg20。
+	// §3 出招帧序（Java handleValues 逐位同序）：个人 CD 行 →
+	// active_skill_rec 行 → GCD 行 → View40 行 CanUse=0 → 玩家全量 →
+	// msg337 施法回显 → msg20。
 	personalCDFrame, publicCDFrame, err := skillCooldownFrames(definition, now)
 	if err != nil {
 		return true, fmt.Errorf("encode skill cooldown %s: %w", definition.id, err)
@@ -734,6 +1159,26 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	}
 	if err := link.WriteFrame(publicCDFrame); err != nil {
 		return true, err
+	}
+	// CanUse 置 0（View40 行；不置则真机技能图标恒灰）；个人 CD 尽时
+	// 置 1（官方 SP 变化不触发行帧，图标点亮由客户端按 SP 自算）。
+	if row := player.skillViewRow(definition.id); row > 0 {
+		if frame, canUseErr := skillRowCanUseFrame(row, false); canUseErr == nil {
+			if err := link.WriteFrame(frame); err != nil {
+				return true, err
+			}
+		}
+		restore := definition.personalCD
+		if restore < time.Millisecond {
+			restore = time.Millisecond
+		}
+		time.AfterFunc(restore, func() {
+			if frame, canUseErr := skillRowCanUseFrame(row, true); canUseErr == nil {
+				if err := link.WriteFrame(frame); err != nil {
+					log.Printf("skill CanUse restore id=%s: %v", definition.id, err)
+				}
+			}
+		})
 	}
 	playerFrame, err := player.vitalUpdate()
 	if err != nil {
@@ -752,203 +1197,114 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 			return true, err
 		}
 	}
-	if definition.actionName != "" {
-		actionFrame, err := playerActionStateFrame(definition.actionName)
-		if err != nil {
-			return true, fmt.Errorf("encode skill State action %s (%s): %w", definition.id, definition.actionName, err)
-		}
-		if err := link.WriteFrame(actionFrame); err != nil {
-			return true, err
-		}
-		if len(definition.followupActions) > 0 {
-			scheduleSkillFollowupActions(link, definition)
-		}
-	}
-	// msg20 技能动作帧（官服 out2 时间线定谳的两分规则）：锁定族
-	// （SkillLock/CanRush）带真实 NPC 目标走 msg19 锁定帧（24 值大帧，
-	// combat-gap 后续项——本轮不发，避免「无冲刺动画」回归）；其余
-	// （非锁定技/自增益/无目标）走 msg20，目标对象按三分：自增益招
-	// （IsDamage=0）=施法者自己，其余伤害技=空对象（57378/52795 实证）。
+	// msg20 技能动作帧：目标对象三分（resolveSkillActionTarget——锁定族
+	// =211 瞄准/选中目标、自增益=自己、其余=空对象）。锁定族官方走
+	// msg19 锁定帧（c61 冲刺+0x1F+24 值大帧），但 42 份抓包 0 次出现且
+	// 此前实现有「无冲刺动画」回归史——继续 msg20 路线（分歧记录在
+	// docs/combat-rewrite-hardcoded-audit.md）。
 	actionTargetID, actionTargetOwner := resolveSkillActionTarget(definition, custom, world, targetID, targetOwnerID)
-	lockCastPending := definition.lockSkill &&
-		actionTargetID != 0 && actionTargetID != playerObjectID
-	if !lockCastPending {
-		actionFrame, err := nativeSkillActionFrame(definition.id, actionTargetID, actionTargetOwner)
-		if err != nil {
-			return true, fmt.Errorf("encode native skill action %s: %w", definition.id, err)
-		}
-		if err := link.WriteFrame(actionFrame); err != nil {
-			return true, err
-		}
+	actionFrame, err := nativeSkillActionFrame(definition.id, actionTargetID, actionTargetOwner)
+	if err != nil {
+		return true, fmt.Errorf("encode native skill action %s: %w", definition.id, err)
 	}
-	log.Printf("%s: started verified State skill action skill=%s action=%s followups=%d total=%s caster=%d-%d target=%d-%d",
-		remote, definition.id, definition.actionName, len(definition.followupActions), definition.totalActionDuration(),
-		playerObjectID, playerOwnerID, targetID, targetOwnerID)
-	damageTargetID := uint32(0)
-	damageTargetCount := 0
-	hitIDs := make([]uint32, 0, 8)
-	var totalLoot int32
-	for _, effect := range definition.effects {
-		if effect.kind != skillEffectDamage || effect.amount <= 0 || world == nil {
-			continue
-		}
-		switch definition.targetMode {
-		case skillTargetSelected:
-			outcome, err := world.applySelectedSkillDamage(effect.amount, now)
-			if err != nil {
-				return true, err
-			}
-			if outcome.frame != nil {
-				damageTargetID, damageTargetCount = outcome.id, damageTargetCount+1
-				hitIDs = append(hitIDs, outcome.id)
-				if err := link.WriteFrame(outcome.frame); err != nil {
-					return true, err
-				}
-				// 命中表现帧族（0x13/24/0x2D/18/205）。
-				if err := writeSkillHitEventFrames(link, world, definition, player,
-					outcome.id, outcome.ownerID, effect.amount, outcome.hpRatio, outcome.model, outcome.cumulative); err != nil {
-					return true, err
-				}
-				// 实招命中(目标未格挡;NPC 无格挡态)→ 攻击者 +2 怒,
-				// 18 字节 SP 单帧,满值不重推。
-				if _, spFrame, spErr := player.addSP(ragGainCleanHit); spErr != nil {
-					return true, spErr
-				} else if spFrame != nil {
-					if err := link.WriteFrame(spFrame); err != nil {
-						return true, err
-					}
-				}
-				if outcome.killed {
-					// 致死帧对视口内其他可见成员中继,死亡表现全场景一致。
-					world.relayNPCKillFrame(outcome.id, outcome.frame)
-				}
-			}
-			if outcome.killed {
-				totalLoot += outcome.loot
-			}
-		case skillTargetCasterCircle, skillTargetCasterSector, skillTargetCasterRectangle, skillTargetSelectedArea:
-			center, ok := useSkillCastTransform(custom)
-			if definition.targetMode == skillTargetSelectedArea {
-				center, ok = world.selectedCombatTargetTransform()
-			}
-			if !ok {
-				log.Printf("%s: compiled area skill id=%s has no center; no targets settled", remote, definition.id)
+	if err := link.WriteFrame(actionFrame); err != nil {
+		return true, err
+	}
+	log.Printf("%s: started skill action skill=%s script=%s total=%s caster=%d-%d target=%d-%d waves=%d ticks=%d",
+		remote, definition.id, definition.scriptLabel(), definition.totalActionDuration(),
+		playerObjectID, playerOwnerID, targetID, targetOwnerID, definition.damageWaves, len(definition.hitFrameMs))
+	// 出招时刻解析目标快照（多段按此逐段结算，段间不追补新目标）。
+	targets := world.resolveSkillDamageTargets(definition, custom, targetID, targetOwnerID)
+	if len(definition.hitFrameMs) > 0 {
+		// 多段技能：出招掷一次（同值复用各段），按 trigger_effect 帧位
+		// 逐段调度（52795 抓包：每段全套命中帧、死亡目标跳过）。
+		attackMin, attackMax := player.meleeDamageRange()
+		roll := rollSkillDamage(attackMin, attackMax, definition.damageRatio())
+		scheduleSkillMultiHits(link, world, definition, player, targets, roll, remote)
+		log.Printf("%s: scheduled multi-hit skill id=%s ticks=%d targets=%d roll=%d miss=%t",
+			remote, definition.id, len(definition.hitFrameMs), len(targets), roll.damage, roll.damage == 0)
+	} else if len(targets) > 0 {
+		// 单段技能：逐目标掷值落血（Java settleTargets——每目标独立
+		// 掷骰），未命中（damage=0）整段不发帧。
+		attackMin, attackMax := player.meleeDamageRange()
+		hits := make([]skillSettleHit, 0, len(targets))
+		for _, ref := range targets {
+			roll := rollSkillDamage(attackMin, attackMax, definition.damageRatio())
+			if roll.damage <= 0 {
 				continue
 			}
-			angle := float32(0)
-			width := float32(0)
-			if definition.targetMode == skillTargetCasterSector {
-				angle = definition.sectorAngle
-			} else if definition.targetMode == skillTargetCasterRectangle {
-				width = definition.areaWidth
-			}
-			results, err := world.applyShapedSkillDamage(center, definition.areaRadius, definition.areaHeight, angle, width, effect.amount, now)
+			outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, now)
 			if err != nil {
 				return true, err
 			}
-			for _, result := range results {
-				if damageTargetID == 0 {
-					damageTargetID = result.id
-				}
-				damageTargetCount++
-				hitIDs = append(hitIDs, result.id)
-				if err := link.WriteFrame(result.frame); err != nil {
-					return true, err
-				}
-				// 群体命中同样走完整表现帧族（§4 逐目标序列）。
-				if err := writeSkillHitEventFrames(link, world, definition, player,
-					result.id, result.ownerID, effect.amount, result.hpRatio, result.model, result.cumulative); err != nil {
-					return true, err
-				}
-				if result.killed {
-					totalLoot += result.loot
-					// 群杀致死帧同样中继给其他可见成员。
-					world.relayNPCKillFrame(result.id, result.frame)
-				}
-				// 群体技能同样按命中逐跳 +2(与单体一致)。
-				if _, spFrame, spErr := player.addSP(ragGainCleanHit); spErr != nil {
-					return true, spErr
-				} else if spFrame != nil {
-					if err := link.WriteFrame(spFrame); err != nil {
-						return true, err
-					}
+			if outcome.frame == nil {
+				continue
+			}
+			hits = append(hits, skillSettleHit{ref: ref, damage: roll.damage, outcome: outcome})
+		}
+		if len(hits) > 0 {
+			// 命中过敌人即战斗活动（官方 §9.1「命中入战」）：驱动 10s
+			// 脱战迟滞窗口，击杀清仇恨/怪未及锁定自己时不再闪回 Normal。
+			player.noteCombatActivity(now)
+			totalLoot, err := writeSkillSettleFrames(link, world, definition, player, hits, remote)
+			if err != nil {
+				return true, err
+			}
+			awardSettleLoot(link, player, totalLoot, fmt.Sprintf("targets=%d", len(hits)), remote)
+			if err := writeWujiSequenceFrames(link, definition, player, hits, 0); err != nil {
+				return true, err
+			}
+			hitIDs := make([]uint32, 0, len(hits))
+			var damageSum int32
+			for _, hit := range hits {
+				hitIDs = append(hitIDs, hit.ref.id)
+				damageSum += hit.damage
+			}
+			for _, effect := range definition.effects {
+				if effect.kind == skillEffectTargetControl {
+					world.applyNPCControl(hitIDs, effect.buff.lifetime, now)
+					log.Printf("%s: settled compiled target control skill=%s buff=%s targets=%d lifetime=%s",
+						remote, definition.id, effect.buff.configID, len(hitIDs), effect.buff.lifetime)
 				}
 			}
-			log.Printf("%s: settled compiled area skill id=%s mode=%d center=(%.2f,%.2f,%.2f) radius=%.1f angle=%.1f width=%.1f hits=%d damage_each=%d",
-				remote, definition.id, definition.targetMode, center.X, center.Y, center.Z,
-				definition.areaRadius, definition.sectorAngle, definition.areaWidth, len(results), effect.amount)
+			// 战斗真气（Java feedMeridianZhenQi：伤害合计×0.1 折真气）。
+			for _, frame := range player.jingMaiCombatFeed(damageSum) {
+				if err := link.WriteFrame(frame); err != nil {
+					return true, err
+				}
+			}
+			log.Printf("%s: settled skill id=%s targets=%d damage_ratio=%.3f",
+				remote, definition.id, len(hits), definition.damageRatio())
 		}
-	}
-	for _, effect := range definition.effects {
-		if effect.kind == skillEffectTargetControl {
-			world.applyNPCControl(hitIDs, effect.buff.lifetime, now)
-			log.Printf("%s: settled compiled target control skill=%s buff=%s targets=%d lifetime=%s",
-				remote, definition.id, effect.buff.configID, len(hitIDs), effect.buff.lifetime)
-		}
-	}
-	if totalLoot > 0 {
-		player.addSilver(totalLoot)
-		silverFrame, err := player.silverUpdate()
-		if err != nil {
-			return true, err
-		}
-		if err := link.WriteFrame(silverFrame); err != nil {
-			return true, err
-		}
-		log.Printf("%s: skill defeated NPCs targets=%d silver_drop=%d", remote, damageTargetCount, totalLoot)
 	}
 	for _, buff := range appliedBuffs {
 		schedulePlayerBuffExpiry(link, player, buff.slot, buff.staticData, buff.expires)
-	}
-	// 命中过敌人即战斗活动（官方 §9.1「命中入战」）：驱动 10s 脱战
-	// 迟滞窗口，击杀清仇恨/怪未及锁定自己时不再闪回 Normal。
-	if damageTargetCount > 0 {
-		player.noteCombatActivity(now)
 	}
 	// 技能重置跳跃（2026-11-07 跳段限制批次，用户钉死规则）：腾空中
 	// 施放技能成功 → 跳段计数重置但只授予一段（grantAirJumpReset 内部
 	// 仅对腾空状态生效；着地本就全量重置）。
 	player.grantAirJumpReset()
-	scheduleCurrentSkillClear(link, player, definition)
+	scheduleCurrentSkillClear(link, player, definition, castEpoch)
 	state := player.stateSnapshot()
-	log.Printf("%s: accepted skill id=%s mp=%d sp=%d qg=%d damage=%d target=%d targets=%d personal_cd=%s public_cd=%s",
-		remote, definition.id, state.MP, player.skillSP(), state.QingGongPoint, definition.baseDamage, damageTargetID, damageTargetCount, definition.personalCD, definition.publicCD)
+	log.Printf("%s: accepted skill id=%s mp=%d sp=%d qg=%d base_damage=%d waves=%d target=%d targets=%d personal_cd=%s public_cd=%s",
+		remote, definition.id, state.MP, player.skillSP(), state.QingGongPoint, definition.baseDamage, definition.damageWaves, targetID, len(targets), definition.personalCD, definition.publicCD)
 	return true, nil
 }
 
-func scheduleSkillFollowupActions(conn sceneMessageConnection, definition combatSkillDefinition) {
-	for _, scheduled := range definition.followupActions {
-		segment := scheduled
-		delay := segment.at
-		if delay < 0 {
-			delay = 0
-		}
-		time.AfterFunc(delay, func() {
-			frame, err := playerActionStateFrame(segment.action)
-			if err != nil {
-				log.Printf("skill follow-up State encode id=%s action=%s: %v", definition.id, segment.action, err)
-				return
-			}
-			if err := conn.WriteFrame(frame); err != nil {
-				log.Printf("skill follow-up State write id=%s action=%s: %v", definition.id, segment.action, err)
-				return
-			}
-			log.Printf("skill follow-up State sent id=%s action=%s at=%s", definition.id, segment.action, delay)
-		})
-	}
-}
-
-func scheduleCurrentSkillClear(conn sceneMessageConnection, player *playerActor, definition combatSkillDefinition) {
+// scheduleCurrentSkillClear 动作总时长后的收尾（Java scheduleEndOfAction
+// + 52905 抓包 14/14 收招簇）：0x12 删 active_skill_rec 行 0 → 六属性
+// 技能态清除帧 → State(idx19)="stand" 复位。删行按 (id, epoch) 配对——
+// 被新招顶掉的旧招在此空转；State='stand' 只走官方模板通道 idx19 一条
+// （抓包收尾簇恰一条 24B State 帧）。
+func scheduleCurrentSkillClear(conn sceneMessageConnection, player *playerActor, definition combatSkillDefinition, castEpoch uint64) {
 	delay := definition.totalActionDuration()
 	if delay <= 0 {
 		delay = time.Millisecond
 	}
 	time.AfterFunc(delay, func() {
-		if !player.clearCurrentSkill(definition.id) {
+		if !player.clearCurrentSkill(definition.id, castEpoch) {
 			return
 		}
-		// §3 行 9：动作总时长后 0x12 删 active_skill_rec 行 0 +
-		// State(idx19)="stand"（183 是我方已验证的动作段复位通道，并行保留）。
 		if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordActiveSkill, 0)); err != nil {
 			log.Printf("skill active row delete id=%s: %v", definition.id, err)
 		}
@@ -961,20 +1317,11 @@ func scheduleCurrentSkillClear(conn sceneMessageConnection, player *playerActor,
 			log.Printf("skill state clear write id=%s: %v", definition.id, err)
 			return
 		}
-		stand, err := playerActionStateFrame("stand")
-		if err != nil {
-			log.Printf("skill stand restore encode id=%s: %v", definition.id, err)
-			return
-		}
-		if err := conn.WriteFrame(stand); err != nil {
-			log.Printf("skill stand restore write id=%s: %v", definition.id, err)
-			return
-		}
 		if standState, err := playerStandStateFrame(); err == nil {
 			if err := conn.WriteFrame(standState); err != nil {
 				log.Printf("skill stand state write id=%s: %v", definition.id, err)
 			}
 		}
-		log.Printf("skill state cleared and stand restored id=%s total_action=%s", definition.id, delay)
+		log.Printf("skill state cleared id=%s total_action=%s", definition.id, delay)
 	})
 }

@@ -66,10 +66,29 @@
 - 1s ticker（facultyTicker 同拍）：租约期每秒扣点且回复暂停；点变化推
   `QingGongPoint@692` 单属性 0x10 帧；耗尽强摘租约。
 
+### 缓降图标链（2026-11-07 补齐，Java QingGongHandler/GLIDE_BUFF_* 同源）
+
+- 经济口径之外，qinggong_9 此前缺客户端缓降图标的 buff 链，本批补齐：
+  - `qinggongBuffFor` 新增 `buf_qg_light` 分支：槽 19（qg 族块 12..18 后
+    首位，对齐 Java freeBuffSlot 从 12 起扫）、StaticData 218
+    （buff_static[218]）、10min（buff_new LifeTime 600000，秒耗 10/s 下
+    点耗尽必然先到，10min 只是槽租约兜底）、clearOnEnd。
+  - msg169 九值时间形态 `glideTimedBuffFrame`（52795 抓包 buf_qg_light
+    实证）：`[169, addRemove, "buf_qg_light", obj, obj, 宽名×2,
+    i64 到期unix毫秒, i32 2048]`。⚠️ addRemove 极性与六值 skillBuffFrame
+    相反：0=挂/1=摘；v7 是 Unix 毫秒（非槽串的 FILETIME 口径）。
+  - 三条路径接线：begin 挂帧先于 vitalUpdate 槽帧（Java engageGlide 帧序
+    ②169 ③槽）；end/耗尽强摘摘帧先于清槽（v7 取租约原到期，
+    `buffExpiry`）；10min 定时器到期补摘帧（Java glideTick lease-expired
+    同口径）。游离 end 也回摘帧——客户端状态重同步。
+- 测试 `qinggong_glide_test.go`（6 例）：挂帧形态+帧序、摘帧保 v7+清槽、
+  游离摘、耗尽摘帧先于清槽、漂移族不发 169、九值骨架解码。
+
 ### 已知未做（战斗一期 backlog，docs/combat-traffic-compare.md 同源）
 
-- qinggong_9 缓降的 msg169 timedBuff 图标链（add/remove + 槽帧）未移植：
-  经济口径已对齐（10 开局 + 10/s），仅客户端缓降图标不显示。
+- Java 缓降租约与 drift 租约互相独立（缓降+游墙可并存双份秒耗）；Go 沿用
+  单一 `qingGongLease`，qinggong_9 begin 会被异 id 持续型顶替。物理上
+  空中缓降与贴墙游墙不同时发生，单机表现无差异。
 
 ## 三、测试
 

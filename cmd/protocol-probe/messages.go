@@ -233,6 +233,7 @@ type serverCustomValue struct {
 	int32    *int32
 	int64    *int64
 	float32  *float32
+	float64  *float64
 	object   *serverCustomObject
 }
 
@@ -241,6 +242,12 @@ func customInt(value int32) serverCustomValue     { return serverCustomValue{int
 func customInt64(value int64) serverCustomValue   { return serverCustomValue{int64: &value} }
 func customFloat32(value float32) serverCustomValue {
 	return serverCustomValue{float32: &value}
+}
+
+// customFloat64 是 TVarList tag5（f64）：msg24 c1=71 武技连击段的 30.0/0.0
+// 双精度对（Java CustomMessages.ofFloat64 / FightMessages.wujiComboFloat）。
+func customFloat64(value float64) serverCustomValue {
+	return serverCustomValue{float64: &value}
 }
 
 // customWideString 是 TVarList tag7 宽字符串：u32(字节数+2) +
@@ -350,6 +357,9 @@ func encodeServerCustomValuesWithOpcode(opcode byte, args []serverCustomValue, l
 		case value.float32 != nil:
 			msg = append(msg, 4)
 			msg = binary.LittleEndian.AppendUint32(msg, math.Float32bits(*value.float32))
+		case value.float64 != nil:
+			msg = append(msg, 5)
+			msg = binary.LittleEndian.AppendUint64(msg, math.Float64bits(*value.float64))
 		case value.object != nil:
 			msg = append(msg, 8)
 			msg = binary.LittleEndian.AppendUint32(msg, value.object.objectID)
@@ -472,4 +482,19 @@ func heartbeatReply(ping []byte) []byte {
 		reply[0] = 0x38
 	}
 	return reply
+}
+
+// timeSyncFrame 即 msg294 对钟帧（Java LoginFlow.timeSyncFrame 同源，
+// 52905 抓包 1s 一发、计数器恒 +1000）：[294, i32 服务器运行毫秒,
+// i64 unix毫秒+FILETIME 纪元偏移, i64 unix 秒, f64 46327.464 常量]。
+// cooldown_rec 的 start/end 是绝对 unix 毫秒，客户端靠本帧对齐本机
+// 时钟偏移；尾值 46327.464 为官方抓包常量（游戏世界天数口径，语义未定）。
+func timeSyncFrame(uptimeMs int32, now time.Time) ([]byte, error) {
+	const fileTimeEpochOffsetMs = int64(11644473600000) // 1601-01-01 相对 1970 的毫秒差
+	return serverCustomIntMessage(294,
+		customInt(uptimeMs),
+		customInt64(now.UnixMilli()+fileTimeEpochOffsetMs),
+		customInt64(now.Unix()),
+		customFloat64(46327.464),
+	)
 }

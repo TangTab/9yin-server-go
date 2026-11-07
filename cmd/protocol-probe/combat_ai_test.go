@@ -51,16 +51,20 @@ func TestCombatTickAggroesAndDamagesNearbyPlayer(t *testing.T) {
 	if after := player.stateSnapshot().HP; after >= before {
 		t.Fatalf("NPC attack HP=%d, want below %d", after, before)
 	}
-	// 三段攻击表现帧（F 盘 writeNPCAttackFrames 同构）：
-	// msg337 预备（0x1E）→ msg20 动作（0x27）→ msg24 命中（0x1E）。
+	// NPC 攻击表现帧（Java NpcCombatAi 出招簇）：msg337 预备 → msg20
+	// 动作 → msg24 命中 → 0x2D 受击特效。msg20 统一 0x1E 壳（42 份抓包
+	// 0 次走 0x27，2026-11-07 战斗重写对齐）。
 	var sawPrep, sawAnim, sawHit bool
 	for _, frame := range conn.Frames() {
-		switch {
-		case frame[0] == 0x1E && int32(binary.LittleEndian.Uint32(frame[4:])) == 337:
+		if frame[0] != 0x1E {
+			continue
+		}
+		switch int32(binary.LittleEndian.Uint32(frame[4:])) {
+		case 337:
 			sawPrep = true
-		case frame[0] == 0x27:
+		case 20:
 			sawAnim = true
-		case frame[0] == 0x1E && int32(binary.LittleEndian.Uint32(frame[4:])) == 24:
+		case 24:
 			sawHit = true
 		}
 	}
