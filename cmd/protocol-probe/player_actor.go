@@ -262,6 +262,10 @@ type playerActor struct {
 	groundY      float32
 	hasGroundY   bool
 	lastJumpAt   time.Time
+	// 跳段预输入（input buffer）：被跳段闸拒绝的 216 begin 快照。
+	// 仅存最新一条——连打时旧输入被新输入顶替（格斗预输入语义），
+	// 落地观测拍由位移路径回放（takeBufferedAirJump）。
+	pendingAirJump *bufferedAirJump
 	// 外观域会话状态（docs/装备外观与风物志挂载.md V4）：
 	// 显示类型偏好（custom 61 三 radio，role_appearance 持久化）、
 	// 时装/身份装激活集（role_fashion_suits）、皮肤衣橱（role_skins）、
@@ -335,7 +339,9 @@ func newPlayerActor(name string, silver int32) *playerActor {
 		speed:             sim.NewMotion(),
 		silver:            silver,
 		faction:           defaultRoleFaction,
-		motion:            playerMotion{moveSpeed: 25, runSpeed: 25, gravity: 9.8},
+		// 默认移动/奔跑速度 5：与 Java 参考服对齐（2026-11-02 由 25 下调，
+		// 25 过快）；GM 面板「移动参数」可运行时改。
+		motion:            playerMotion{moveSpeed: 5, runSpeed: 5, gravity: 9.8},
 		buffs:             make(map[uint16]activePlayerBuff),
 		activeQingGong:    make(map[string]struct{}),
 		learnedSkills:     learnedSkills,
@@ -505,18 +511,67 @@ func (p *playerActor) grantAirJumpReset() {
 
 // observePositionY 由 0x0A 位移路径逐帧喂入：着地时持续校准 groundY
 // 基准；腾空中 y 回落到基准 1m 内即视为落地——清空跳段计数进入
-// 新循环。跳崖（y 瞬间低于基准）也按落地处理：宁可早重置也不误伤。
-func (p *playerActor) observePositionY(y float32, now time.Time) {
+// 新循环，并返回 true 供调用方回放跳段预输入。跳崖（y 瞬间低于基准）
+// 也按落地处理：宁可早重置也不误伤。
+func (p *playerActor) observePositionY(y float32, now time.Time) (landed bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if !p.airborne {
 		p.groundY = y
 		p.hasGroundY = true
-		return
+		return false
 	}
 	if p.hasGroundY && y <= p.groundY+airJumpLandingEpsilon {
 		p.landResetLocked(y)
+		return true
 	}
+	return false
+}
+
+// 跳段预输入窗口：被拒 begin 与落地观测之间只隔位移包在途延迟
+//（0x0A 逐帧 ≤100ms 一拍），300ms 足够覆盖网络抖动。纯空中连打
+// 不会有落地包跟随——窗口过期即静默丢弃，不扣费不执行（与跳段闸
+// 拒绝语义一致，蹭跳无利可图）。
+const airJumpBufferWindow = 300 * time.Millisecond
+
+// bufferedAirJump 是被跳段闸拒绝后暂存的 216 begin 快照（仅跳段型：
+// 过能力门、只败在段位耗尽的输入）。
+type bufferedAirJump struct {
+	qingGongID     string
+	capabilityFree bool
+	queuedAt       time.Time
+}
+
+// bufferAirJumpInput 记录被跳段闸拒绝的跳段 begin（预输入）。仅存
+// 最新一条：连打时旧输入被新输入顶替，落地拍至多回放一次。
+func (p *playerActor) bufferAirJumpInput(entry bufferedAirJump) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.pendingAirJump = &entry
+}
+
+// clearBufferedAirJump 同 id 的 begin 已被正常受理时作废其预输入：
+// 该次按键已被服务，落地拍不再回放旧输入（防预输入「复活」早前
+// 已被受理挤掉的按次）。
+func (p *playerActor) clearBufferedAirJump(qingGongID string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.pendingAirJump != nil && p.pendingAirJump.qingGongID == qingGongID {
+		p.pendingAirJump = nil
+	}
+}
+
+// takeBufferedAirJump 落地观测拍取出预输入：过期（纯空中连打无落地
+// 跟随）或无预输入返回 false。取出即清——一次落地至多回放一条。
+func (p *playerActor) takeBufferedAirJump(now time.Time) (bufferedAirJump, bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	entry := p.pendingAirJump
+	p.pendingAirJump = nil
+	if entry == nil || now.Sub(entry.queuedAt) > airJumpBufferWindow {
+		return bufferedAirJump{}, false
+	}
+	return *entry, true
 }
 
 // landResetLocked 清空腾空跳段态并校准着地基准。调用方必须已持 p.mu。

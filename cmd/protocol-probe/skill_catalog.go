@@ -496,9 +496,11 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		bindDistance:     bindDistance,
 		groundRushAction: groundRushAction,
 	}
-	if definition.publicCD <= 0 {
-		definition.publicCD = definition.personalCD
-	}
+	// 公共 CD 严格走配置（varprop/skill_new AddCoolDownTime），缺配置即 0，
+	// 不回落 personalCD：无我剑诀(CS_jh_dgjj) 等无 CoolDownTeam 套路一旦
+	// 回落，会发明出 team=0/时长=personalCD 的伪公共行——客户端把 team=0
+	// 当全组生效，一招出来整条技能栏转 20s（2026-11-08 官服 FsGame 对拍
+	// 修正；官服 reg-stub 只有 cooldown_rec/nocooldown_*，CD 全由配置驱动）。
 	if damage > 0 {
 		definition.effects = append(definition.effects, combatSkillEffect{
 			kind: skillEffectDamage, amount: damage,

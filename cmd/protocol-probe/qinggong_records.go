@@ -687,6 +687,31 @@ func writeGlideBuffRemovalFor(conn sceneMessageConnection, player *playerActor, 
 	}
 }
 
+// flushBufferedAirJump 落地观测拍回放跳段预输入（0x0A 位移路径在
+// observePositionY 报告落地后调用）：新周期计段→扣费，与正常 begin
+// 同序同帧（acceptQingGongBegin 共用）。TCP 序保证落地包先于其后的
+// 216，理论上落地与回放之间不会有并发 begin 抢占段位；若确有
+//（回放前段位已占用）则预输入作废——那次真实按键已走正常路径扣费。
+func flushBufferedAirJump(conn sceneMessageConnection, player *playerActor, catalog *qinggong.Catalog, remote string) {
+	entry, ok := player.takeBufferedAirJump(time.Now())
+	if !ok {
+		return
+	}
+	definition, exists := catalog.Lookup(entry.qingGongID)
+	if !exists || !isJumpStageQingGong(definition) {
+		return
+	}
+	now := time.Now()
+	if !player.beginAirJump(definition.ID, now) {
+		return
+	}
+	if err := acceptQingGongBegin(conn, player, definition, entry.capabilityFree, now, remote); err != nil {
+		log.Printf("%s: flush buffered air jump id=%s: %v", remote, definition.ID, err)
+		return
+	}
+	log.Printf("%s: flushed buffered air jump id=%s (landing observed)", remote, definition.ID)
+}
+
 // scheduleRedSuperArmorExpiry 在到期时清除同一份原生状态。
 func scheduleRedSuperArmorExpiry(conn sceneMessageConnection, player *playerActor, expires time.Time) {
 	schedulePlayerBuffExpiry(conn, player, redSuperArmorBuffSlot, redSuperArmorStaticData, expires)

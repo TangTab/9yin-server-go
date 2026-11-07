@@ -237,6 +237,52 @@ func TestSkillCooldownFramesDualRows(t *testing.T) {
 	assertCooldownRow(public, 50000, 50369, start+7000, "GCD row")
 }
 
+// TestSkillCooldownFramesOmitPublicRowWithoutTeamConfig 无我剑诀
+// （CS_jh_dgjj，skill_static 无 CoolDownTeam、skill_new/varprop 无
+// AddCoolDownTime）只发个人行：官方从不发 team=0 的 50000 公共行——
+// 客户端把 team=0 当全组公共 CD，一招出来整条技能栏转 personalCD
+// （2026-11-08 修正：CD 严格走配置，publicCD 不再回落 personalCD）。
+func TestSkillCooldownFramesOmitPublicRowWithoutTeamConfig(t *testing.T) {
+	definition := combatSkillDefinition{
+		id:               "CS_jh_dgjj04",
+		cooldownCategory: 9054,
+		cooldownTeam:     0,
+		personalCD:       20 * time.Second,
+		publicCD:         0,
+	}
+	now := time.Now()
+	personal, public, err := skillCooldownFrames(definition, now)
+	if err != nil {
+		t.Fatalf("encode cooldown frames: %v", err)
+	}
+	if len(personal) != 38 || personal[0] != 0x11 {
+		t.Fatalf("personal row = %x", personal)
+	}
+	if got := binary.LittleEndian.Uint32(personal[16:]); got != 9054 {
+		t.Fatalf("personal category = %d, want 9054 (dgjj04 横断明枪)", got)
+	}
+	if end := int64(binary.LittleEndian.Uint64(personal[28:])); end-now.UnixMilli() != 20000 {
+		t.Fatalf("personal duration = %d ms, want 20000 (官方 View40 同值)", end-now.UnixMilli())
+	}
+	if got := binary.LittleEndian.Uint16(personal[36:]); got != 0xFFFF {
+		t.Fatalf("personal team = %#x, want 0xFFFF", got)
+	}
+	if public != nil {
+		t.Fatalf("team-less set must not emit public GCD row: %x", public)
+	}
+	// 目录真值钉子（夹具含 dgjj 时）：无 team 套路编译后 publicCD 必须
+	// 为 0（不回落 personalCD）。
+	if definition, ok := combatSkills["CS_jh_dgjj04"]; ok {
+		if definition.cooldownTeam != 0 || definition.publicCD != 0 {
+			t.Fatalf("dgjj04 catalog cooldownTeam=%d publicCD=%s, want 0/0 (配置无公共CD)",
+				definition.cooldownTeam, definition.publicCD)
+		}
+		if definition.personalCD != 20*time.Second {
+			t.Fatalf("dgjj04 personalCD=%s, want 20s (官方 View40 同值)", definition.personalCD)
+		}
+	}
+}
+
 func TestActiveSkillRecordRowRoundTrip(t *testing.T) {
 	row := serverRecordAddString(playerObjectID, playerOwnerID, recordActiveSkill, "sfgp01")
 	if row[0] != 0x11 {

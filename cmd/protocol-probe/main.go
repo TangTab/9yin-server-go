@@ -2029,8 +2029,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 跳段落地探测（2026-11-07 跳段限制批次）：0x0A 位移包
 				// 逐帧喂 y——着地时校准基准，腾空回落到基准 1m 内即清
 				// 跳段计数进入新循环（observePositionY 内含互斥锁）。
+				// 落地拍同时回放跳段预输入：被跳段闸拒绝的提前输入在
+				// 300ms 窗口内于此执行（腾空判定滞后于真实落地的补偿）。
 				if runtime != nil && runtime.player != nil {
-					runtime.player.observePositionY(y, time.Now())
+					if runtime.player.observePositionY(y, time.Now()) {
+						flushBufferedAirJump(link, runtime.player, qingGongCatalog, conn.RemoteAddr().String())
+					}
 				}
 				changed := world.updateMemberPosition(location.Position, sceneNPCs)
 				nearbyCount := countNPCsWithin(sceneNPCs, location.Position, npcRadius)
@@ -2568,10 +2572,31 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 	// 落地（observePositionY）/超时（qingGongTick 兜底）/技能重置
 	// （grantAirJumpReset 只给一段）后恢复。拒绝不回滚段位——客户端
 	// 物理照跳（Java 口径），段位跟随消耗防蹭跳。
-	if isJumpStageQingGong(definition) && !player.beginAirJump(definition.ID, now) {
-		log.Printf("%s: reject qinggong id=%s air jump stage exhausted", remote, definition.ID)
-		return true, nil
+	if isJumpStageQingGong(definition) {
+		if !player.beginAirJump(definition.ID, now) {
+			// 跳段预输入（input buffer）：腾空判定可能滞后于客户端真实
+			// 落地（落地位移包在途），该 begin 或是下一周期的合法跳。
+			// 暂存最新一条，落地观测拍回放（300ms 窗口过期即丢弃——
+			// 纯空中连打不会有落地包跟随，不执行不扣费）。
+			player.bufferAirJumpInput(bufferedAirJump{
+				qingGongID:     definition.ID,
+				capabilityFree: capabilityFree,
+				queuedAt:       now,
+			})
+			log.Printf("%s: reject qinggong id=%s air jump stage exhausted (buffered)", remote, definition.ID)
+			return true, nil
+		}
+		// 受理即作废同 id 旧预输入：该次按键已被服务，落地拍不再回放。
+		player.clearBufferedAirJump(definition.ID)
 	}
+	return true, acceptQingGongBegin(link, player, definition, capabilityFree, now, remote)
+}
+
+// acceptQingGongBegin 执行通过全部闸门后的 216 begin 尾段（扣费→
+// 持续租约→Buff 链→推帧）。正常路径与跳段预输入回放
+// （flushBufferedAirJump）共用，保证两条路径的扣费/帧序完全同构；
+// 计段（beginAirJump）由调用方在扣费前完成——拒绝不回滚段位同口径。
+func acceptQingGongBegin(link sceneMessageConnection, player *playerActor, definition qinggong.Definition, capabilityFree bool, now time.Time, remote string) error {
 	var cost int32
 	if !capabilityFree {
 		var accepted bool
@@ -2579,7 +2604,7 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 		if !accepted {
 			state := player.stateSnapshot()
 			log.Printf("%s: reject qinggong id=%s cost=%d point=%d", remote, definition.ID, cost, state.QingGongPoint)
-			return true, nil
+			return nil
 		}
 	}
 	// 持续型（UseType=1，含 qinggong_9 缓降）：挂秒耗租约（CCQGP 每秒
@@ -2592,21 +2617,21 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 	}
 	alreadyActive, expires, err := activateQingGongBuff(player, definition, now)
 	if err != nil {
-		return true, err
+		return err
 	}
 	// 缓降（buf_qg_light）：msg169 九值挂帧先于槽帧（Java engageGlide
 	// 帧序 ②169 ③BufferInfoN；点数随 vitalUpdate 同批下发）。
 	if definition.BufferID == qingGongGlideBuffID && !alreadyActive && !expires.IsZero() {
 		if err := writeGlideTimedBuffAdd(link, player, expires); err != nil {
-			return true, err
+			return err
 		}
 	}
 	update, err := player.vitalUpdate()
 	if err != nil {
-		return true, fmt.Errorf("encode qinggong update: %w", err)
+		return fmt.Errorf("encode qinggong update: %w", err)
 	}
 	if err = link.WriteFrame(update); err != nil {
-		return true, fmt.Errorf("write qinggong update: %w", err)
+		return fmt.Errorf("write qinggong update: %w", err)
 	}
 	if !alreadyActive && !expires.IsZero() {
 		spec, _ := qinggongBuffFor(definition)
@@ -2614,7 +2639,7 @@ func handleQingGongCustom(link sceneMessageConnection, player *playerActor, cata
 	}
 	state := player.stateSnapshot()
 	log.Printf("%s: accepted qinggong id=%s type=%d cost=%d point=%d/%d", remote, definition.ID, definition.Type, cost, state.QingGongPoint, state.MaxQingGongPoint+state.MaxQingGongPointAdd)
-	return true, nil
+	return nil
 }
 
 func handleActiveQingGongCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {

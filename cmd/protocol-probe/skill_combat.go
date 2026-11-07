@@ -184,10 +184,12 @@ func (definition combatSkillDefinition) totalActionDuration() time.Duration {
 	return duration
 }
 
-// skillCooldownFrames 产出出招 CD 双行（§3 行 1/3 顺序，中间夹
+// skillCooldownFrames 产出出招 CD 行（§3 行 1/3 顺序，中间夹
 // active_skill_rec 行由调用方写入）：个人行 team 恒 0xFFFF；GCD 行
 // 类别固定 50000、时长取 varprop AddCoolDownTime（publicCD）、team 取
-// skill_static CoolDownTeam。
+// skill_static CoolDownTeam。GCD 行仅在配置同时给出 CoolDownTeam 与
+// AddCoolDownTime 时下发（无我剑诀等无 team 套路无公共行——官方从不发
+// team=0 的 50000 行，客户端会把它当全组公共 CD，一招转全场）。
 func skillCooldownFrames(definition combatSkillDefinition, now time.Time) (personal, public []byte, err error) {
 	start := now.UnixMilli()
 	// 官方 cooldown_rec 第 4 列 team 是 u16（0xFFFF 个人行 /
@@ -200,6 +202,9 @@ func skillCooldownFrames(definition combatSkillDefinition, now time.Time) (perso
 	})
 	if err != nil {
 		return nil, nil, err
+	}
+	if definition.cooldownTeam <= 0 || definition.publicCD <= 0 {
+		return personal, nil, nil
 	}
 	public, err = serverRecordAddCells(playerObjectID, playerOwnerID, recordCooldown, []recordCell{
 		recordInt(uint32(50000)),
@@ -1165,8 +1170,10 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	if err := link.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordActiveSkill, definition.id)); err != nil {
 		return true, fmt.Errorf("write active skill row %s: %w", definition.id, err)
 	}
-	if err := link.WriteFrame(publicCDFrame); err != nil {
-		return true, err
+	if publicCDFrame != nil {
+		if err := link.WriteFrame(publicCDFrame); err != nil {
+			return true, err
+		}
 	}
 	// CanUse 置 0（View40 行；不置则真机技能图标恒灰）；个人 CD 尽时
 	// 置 1（官方 SP 变化不触发行帧，图标点亮由客户端按 SP 自算）。
