@@ -316,6 +316,26 @@
         value: +document.querySelector("#act-day-limit").value,
       });
     }
+    // 历练层（docs/livepoint-conversion.md）：发历练点 / 潜能修为直设 /
+    // 转化速度加成 %（卦象效果等价物）。
+    function addLivepoint() {
+      command({
+        action: "add_livepoint",
+        points: +document.querySelector("#livepoint-points").value,
+      });
+    }
+    function setHoldFaculty() {
+      command({
+        action: "set_hold_faculty",
+        value: +document.querySelector("#hold-faculty-value").value,
+      });
+    }
+    function setLiveSpeedPower() {
+      command({
+        action: "set_live_speed_power",
+        value: +document.querySelector("#live-speed-power").value,
+      });
+    }
     function spawnDummy(hp) {
       command({
         action: "spawn_dummy",

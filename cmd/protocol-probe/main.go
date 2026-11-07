@@ -59,7 +59,13 @@ func main() {
 	respawnInterval := flag.Int("respawn-interval", 30, "batch monster respawn interval in seconds: every interval all DEAD combat NPCs revive at their spawn points, alive ones untouched (0 disables batching and falls back to per-NPC RefreshTime)")
 	corpseTTL := flag.Int("corpse-ttl", 10, "corpse removal delay in seconds: dead monster corpses are removed (0x0E) after this long and rematerialize on respawn (0 keeps corpses until revive)")
 	autosaveSecs := flag.Int("autosave-interval", 300, "periodic online snapshot flush in seconds: every interval each online player's faculty/jingmai snapshots are upserted to MySQL (guards against hard kills; 0 disables)")
+	livepointVIPFlag := flag.Bool("livepoint-vip", false, "livepoint conversion tier: true = everyone converts losslessly (VIP), false = normal 70% to faculty + 30% to hold-faculty (Java -Dnineyin.livepoint.vip)")
+	livepointPriceFlag := flag.Int("livepoint-price", 500, "hold-faculty redemption price: N gold converts N*price potential faculty (Java -Dnineyin.livepoint.price)")
+	facultySeedFlag := flag.Int("faculty-seed", int(initialFaculty), "new-character faculty seed; existing roles keep their snapshot value (Java -Dnineyin.faculty.seed)")
 	flag.Parse()
+	livepointVIP = *livepointVIPFlag
+	livepointPrice = int32(*livepointPriceFlag)
+	facultySeed = int32(*facultySeedFlag)
 	setNpcRespawnBatchInterval(time.Duration(*respawnInterval) * time.Second)
 	setNpcCorpseTTL(time.Duration(*corpseTTL) * time.Second)
 	if *logFile != "" {
@@ -905,6 +911,45 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction(fmt.Sprintf("演武每日上限设为 %d 两", display))
 			}
 			log.Printf("%s: GM set ActDayValueMax=%d", conn.RemoteAddr(), int32(command.Value))
+		case "add_livepoint":
+			added := player.addLivepoint(command.Points)
+			update, updateErr := player.vitalUpdate()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("历练发放失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction(fmt.Sprintf("发放历练 %d 点（入槽 %d 毫历练）", command.Points, added))
+			log.Printf("%s: GM add_livepoint points=%d addedMillis=%d", conn.RemoteAddr(), command.Points, added)
+		case "set_hold_faculty":
+			player.setHoldFaculty(int32(command.Value))
+			update, updateErr := player.vitalUpdate()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("潜能修为设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction(fmt.Sprintf("潜能修为设为 %d", int32(command.Value)))
+			log.Printf("%s: GM set HoldFaculty=%d", conn.RemoteAddr(), int32(command.Value))
+		case "set_live_speed_power":
+			player.setLiveSpeedPower(int32(command.Value))
+			update, updateErr := player.vitalUpdate()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("转化加成设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction(fmt.Sprintf("历练转化加成设为 %d%%", int32(command.Value)))
+			log.Printf("%s: GM set LiveSpeedPower=%d", conn.RemoteAddr(), int32(command.Value))
 		case "set_weather":
 			preset, presetErr := gmapi.WeatherPresetByKey(command.Weather)
 			if presetErr != nil {
@@ -1293,6 +1338,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				continue
 			}
 			slot, advanced := player.facultyTick(now)
+			// 历练层 100 秒步进（facultyTick 同拍）：整步才结算，静默秒
+			// 零帧零落库。
+			livepointChanged := player.livepointTick(now)
 			innerPowerPassiveExpired := player.expireInnerPowerPassive(now)
 			sitcrossAdvanced := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
@@ -1331,7 +1379,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 				}
 			}
-			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired) {
+			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired || livepointChanged) {
 				var state []byte
 				state, tickErr = player.vitalUpdate()
 				if tickErr == nil {
@@ -1345,6 +1393,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if advanced {
 				persistFaculty()
 				log.Printf("%s: settled inner cultivation role=%d slot=%d", conn.RemoteAddr(), selected.ID, slot)
+			}
+			if livepointChanged {
+				persistFaculty()
+				log.Printf("%s: settled livepoint role=%d", conn.RemoteAddr(), selected.ID)
 			}
 			if sitcrossAdvanced {
 				state := player.stateSnapshot()

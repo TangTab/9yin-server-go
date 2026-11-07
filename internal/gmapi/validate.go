@@ -175,6 +175,24 @@ func Validate(body CommandBody) (Command, error) {
 			return command, fmt.Errorf("act day limit must be between 0 and 999999 (0 = unlimited)")
 		}
 		command.Value = body.Value
+	case "add_livepoint":
+		// 历练发放（×1000 毫按序填槽）：总历练上限 999 点（Java 同界）。
+		if body.Points < 1 || body.Points > 999 {
+			return command, fmt.Errorf("livepoint points must be between 1 and 999")
+		}
+		command.Points = body.Points
+	case "set_hold_faculty":
+		// 潜能修为直设（HoldFaculty@800）。
+		if body.Value < 0 || body.Value > 2_000_000_000 {
+			return command, fmt.Errorf("hold faculty must be between 0 and 2000000000")
+		}
+		command.Value = body.Value
+	case "set_live_speed_power":
+		// 历练转化速度加成 %（LiveSpeedPower@809，卦象效果等价物）。
+		if body.Value < 0 || body.Value > 1000 {
+			return command, fmt.Errorf("live speed power must be between 0 and 1000")
+		}
+		command.Value = body.Value
 	case "set_weather":
 		if _, presetErr := WeatherPresetByKey(body.Weather); presetErr != nil {
 			return command, presetErr

@@ -70,6 +70,12 @@ S2C 回包与 191 同构：`1E 03 00 | 02 <235> | 02 <sub> | 02 <arg>`。
 | -Dnineyin.livepoint.price | 500 | 潜能赎回价（N 黄金 → N×price 潜能修为） |
 | -Dnineyin.faculty.seed | 10000 | 新角色修为种子（存量角色按快照保留；原 9,999,999 无限种子废弃） |
 
+Go 服（cmd/protocol-probe）2026-11-08 移植落地，flag 对应物：
+`-livepoint-vip` / `-livepoint-price` / `-faculty-seed`（默认值同上）；
+GM 面板三动作（add_livepoint/set_hold_faculty/set_live_speed_power）
+经 gmapi.Validate 单一闸门；快照 8 字段落 role_faculty.snapshot
+（键名与 Java FacultyStore 逐字一致）。
+
 ## 持久化
 
 `FacultyStore`（faculty.json 文件主档 + role_faculty DB 快照）增 8 字段：

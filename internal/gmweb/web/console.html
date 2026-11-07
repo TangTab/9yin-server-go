@@ -581,14 +581,16 @@
       <section>
         <h2>修为</h2>
         <p class="muted">
-          修为=修炼点余额（Faculty，内修每分钟折半消耗，种子 999
-          万），<b>角色级持久化</b>（role_faculty 快照，重登沿用）；修炼速度拆为<b>基础值 ×
+          修为=修炼点余额（Faculty，内修每分钟折半消耗，主供给为<b>历练转化</b>（在线每
+          100 秒 +1 点历练入槽，槽速 10/20/50/100/200 修为/100秒；普通档 70% 进修为、
+          30% 进潜能修为，黄金按价赎回），新角色种子 1
+          万），<b>角色级持久化</b>（role_faculty 快照，重登沿用，历练离线照结）；修炼速度拆为<b>基础值 ×
           倍率</b>（默认 200 ×
           1，倍率可填小数），实际值走 FillSpeed、基础值走 NorFacultyAdd
           同帧下发；普通内修态改速即时生效，停修/演武态下次开修生效。填满当前修炼内功的本层修炼度立即升一层（0x18
           书帧 + 0x10 属性 + 191/14 升层提示），恰达满级自动停修。
         </p>
-        <input id="faculty-value" type="number" value="9999999" min="0"
+        <input id="faculty-value" type="number" value="10000" min="0"
           max="2000000000" /><button onclick="setFaculty()">设置修为</button><button onclick="
               if (confirm('确定把当前修炼内功的本层修炼度填满（立即升一层）？'))
                 command({ action: 'fill_current_neigong' });
@@ -606,9 +608,23 @@
             style="min-width: 110px; width: 110px" /></label>
         <button onclick="setActDayLimit()">应用演武碎银上限</button>
         <button onclick="command({ action: 'clear_team_fatigue' })">清除团练疲劳</button><br />
+        <label>历练点数
+          <input id="livepoint-points" type="number" value="99" min="1" max="999"
+            style="min-width: 90px; width: 90px" /></label>
+        <button onclick="addLivepoint()">发放历练</button>
+        <label>潜能修为
+          <input id="hold-faculty-value" type="number" value="0" min="0" max="2000000000"
+            style="min-width: 110px; width: 110px" /></label>
+        <button onclick="setHoldFaculty()">设置潜能修为</button><br />
+        <label>转化加成%
+          <input id="live-speed-power" type="number" value="0" min="0" max="1000"
+            style="min-width: 90px; width: 90px" /></label>
+        <button onclick="setLiveSpeedPower()">应用转化加成</button><br />
         <span class="muted">演武碎银上限 0=不限制（ActDayValue 族随 0x10
           下发；有限额时打卡超限静默拒绝）。团练疲劳=TeamFacultyValue（0..80000，客户端按剩余精力%显示），清除即恢复
-          100%。</span>
+          100%。历练槽 5×999 点（LiveGroove_1..5 随 0x10 下发，UI 显示
+          值/1000）；潜能修为=HoldFaculty（历练转化窗口黄金赎回，价 500
+          可由 -livepoint-price 配）；转化加成=LiveSpeedPower（卦象效果等价物）。</span>
       </section>
       <section>
         <h2>风物志卡牌</h2>

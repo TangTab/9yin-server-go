@@ -22,6 +22,15 @@ const (
 	propTotalFillValue uint16 = 765
 	propCurLevel       uint16 = 763
 	propFillSpeed      uint16 = 773
+	// 历练层（form_faculty.lua 数据绑定源；docs/livepoint-conversion.md）：
+	// 槽值毫历练（UI 显示 = 值/1000）。
+	propHoldFaculty    uint16 = 800 // HoldFaculty Int32:潜能修为存量
+	propLiveGroove1    uint16 = 804 // LiveGroove_1..5 Int32:历练槽 1..5
+	propLiveGroove2    uint16 = 805
+	propLiveGroove3    uint16 = 806
+	propLiveGroove4    uint16 = 807
+	propLiveGroove5    uint16 = 808
+	propLiveSpeedPower uint16 = 809 // LiveSpeedPower Int32:转化速度加成 %
 	propPowerValue     uint16 = 2287
 	propMaxPowerValue  uint16 = 2288
 	propSP             uint16 = 467 // SP Int32:怒气
@@ -98,6 +107,41 @@ const (
 	defaultExtraNeiGongMaxLevel int32 = 36
 	defaultExtraNeiGongTotal    int32 = 700
 	defaultExtraNeiGongPower    int32 = 120
+
+	// ---- 历练层常量（官方公式 form_faculty.lua:87-111 钉死；
+	// docs/livepoint-conversion.md）----
+	// 历练槽位数（LiveGroove_1..5@804..808）。
+	grooveCount = 5
+	// 每槽毫历练上限：999 点 × 1000（1 点历练 = 1000 毫 = 1000 修为）。
+	grooveCap int32 = 999_000
+	// 100 秒整步进（在线每 100 秒 +1 点历练）；每步累积步长 1000 毫。
+	livepointStepSeconds  = 100
+	livepointAccrueMillis int32 = 1_000
+	// 新角色修为种子默认（官服模型下历练是修为主供给；-faculty-seed 可配）。
+	initialFaculty int32 = 10_000
+
+	// CLIENT_CUSTOMMSG_LIVEPOINT_INFO（client_custom_define.lua:145）：
+	// 历练/潜能赎回（form_holdfaculty_buy.lua）。
+	livepointInfoMsg int32 = 235
+)
+
+// 槽基础转化速度（修为/100秒，槽非空才计）：10/20/50/100/200；
+// 五槽全满名俊 = 380 修为/100秒（客户端同公式），普通档 ×0.7。
+var grooveBaseSpeed = [grooveCount]int32{10, 20, 50, 100, 200}
+
+// livepointEpochGuard 快照时间戳哨兵下界（2000-01-01）：早于此（含
+// 零值/0001-01-01 哨兵）视为无效基准，restore 回退 now 防离线结算爆走。
+var livepointEpochGuard = time.Unix(946684800, 0).UTC()
+
+// 历练层配置（Java -Dnineyin.livepoint.vip / .price / nineyin.faculty.seed
+// 的 Go 对应物；main 启动时自 flags 赋值，会话循环开跑前定格）。
+var (
+	// livepointVIP true=全员名俊无损转化；false=普通档 70/30 + 潜能赎回。
+	livepointVIP bool
+	// livepointPrice 潜能赎回价：N 黄金 → N×price 潜能修为转正式修为。
+	livepointPrice int32 = 500
+	// facultySeed 新角色修为种子（存量角色按快照保留）。
+	facultySeed int32 = initialFaculty
 )
 
 func facultyBool(value bool) int32 {
@@ -167,6 +211,15 @@ type playerProgress struct {
 	actDayValueMax  int32
 	actDayValueUsed int32
 	actDayValueLast int32
+	// 历练层（LiveGroove，毫历练单位；docs/livepoint-conversion.md）：
+	// liveGroove 槽 1..5 = LiveGroove_1..5@804..808（客户端显示 = 值/1000）；
+	// holdFaculty 潜能修为 HoldFaculty@800（普通档转化 30% 分流，黄金按价
+	// 赎回）；liveSpeedPower 转化速度加成 % LiveSpeedPower@809（卦象等来源）；
+	// lastLivepoint 是与 lastAdvance 分钟节拍并行的 100 秒独立结算基准。
+	liveGroove     [grooveCount]int32
+	holdFaculty    int32
+	liveSpeedPower int32
+	lastLivepoint  time.Time
 }
 
 type playerAttributes struct {
@@ -331,9 +384,12 @@ func newPlayerProgress() playerProgress {
 		{configID: "ng_em_001", staticData: 8, itemType: 1002, level: 1, maxLevel: 36, total: 700, power: 120, maxPower: 120},
 	}
 	progress := playerProgress{
-		books:        books,
-		curNeiGong:   books[0].configID,
-		faculty:      9_999_999,
+		books:      books,
+		curNeiGong: books[0].configID,
+		// 完整官服模型：修为由历练转化供给。新角色种子可配（-faculty-seed），
+		// 存量角色由快照 restore 覆盖；GM set_faculty 保留直设兜底（原
+		// 9,999,999 无限种子废弃）。
+		faculty:      facultySeed,
 		facultyState: facultyStateConvert,
 		facultyStyle: facultyStyleNormal,
 		facultyName:  books[0].configID,
@@ -360,6 +416,8 @@ func newPlayerProgress() playerProgress {
 	// 就取自 wuxuelevelinfo.ini，此处只是把 1 级书的 700 兜底也归位）。
 	progress.alignLevelTotals()
 	progress.refreshAllModernEffects()
+	// 历练层结算基准随修炼基准同拍起步（Java create 同款）。
+	progress.lastLivepoint = progress.lastAdvance
 	// 登录即满怒:满值 = 基础 80 + 当前运行内功档位加成(默认 ng_wd_001
 	// 武当一内 +10 → 90)。
 	progress.attributes.sp = progress.rageCap()
@@ -488,6 +546,17 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propTotalFillValue, Name: "TotalFillValue", Value: clientdata.Int32Value(total)},
 		{Index: propCurLevel, Name: "CurLevel", Value: clientdata.Int32Value(level)},
 		{Index: propFillSpeed, Name: "FillSpeed", Value: clientdata.Int32Value(p.fillSpeed)},
+		// ---- 历练层（0x09 官方属性表索引；修炼界面 5 条历练进度条与
+		// “当前历练 X/999”总条的数据源，100 秒步进结算）----
+		{Index: propLiveGroove1, Name: "LiveGroove_1", Value: clientdata.Int32Value(p.liveGroove[0])},
+		{Index: propLiveGroove2, Name: "LiveGroove_2", Value: clientdata.Int32Value(p.liveGroove[1])},
+		{Index: propLiveGroove3, Name: "LiveGroove_3", Value: clientdata.Int32Value(p.liveGroove[2])},
+		{Index: propLiveGroove4, Name: "LiveGroove_4", Value: clientdata.Int32Value(p.liveGroove[3])},
+		{Index: propLiveGroove5, Name: "LiveGroove_5", Value: clientdata.Int32Value(p.liveGroove[4])},
+		// 转化速度加成 %：客户端公式 speed×(1+power/100)。
+		{Index: propLiveSpeedPower, Name: "LiveSpeedPower", Value: clientdata.Int32Value(p.liveSpeedPower)},
+		// 潜能修为存量：“历练转化”窗黄金赎回的数据源。
+		{Index: propHoldFaculty, Name: "HoldFaculty", Value: clientdata.Int32Value(p.holdFaculty)},
 		{Index: propPowerValue, Name: "PowerValue", Value: clientdata.Int32Value(power)},
 		{Index: propMaxPowerValue, Name: "MaxPowerValue", Value: clientdata.Int32Value(maxPower)},
 		{Index: propSP, Name: "SP", Value: clientdata.Int32Value(a.sp)},
@@ -676,6 +745,104 @@ func (p *playerProgress) advanceFaculty(now time.Time) (uint16, bool) {
 	return 0, false
 }
 
+// ------------------------------------------------------------------ 历练层
+
+// livepointTick 历练层 100 秒步进结算（官方公式 form_faculty.lua:87-111
+// 钉死；docs/livepoint-conversion.md）：每步先累积后转化——累积是总历练
+// 未达上限（5×999 点）时 +1000 毫进第一个未满槽，全满丢弃；转化是每槽
+// 独立按 full = base_i×(100+power)/100、actual = min(槽余, full) 扣毫历练
+// 产修为（1 毫历练 = 1 修为）：名俊无损进修为；普通档 70% 进修为、
+// 30% 进潜能（HoldFaculty，黄金按价赎回）。余数留在 lastLivepoint（与
+// advanceFaculty 分钟节拍同模式）。返回是否有变化（ticker 变化检测）。
+func (p *playerProgress) livepointTick(now time.Time, vip bool) bool {
+	now = now.UTC()
+	if p.lastLivepoint.IsZero() || now.Before(p.lastLivepoint) {
+		p.lastLivepoint = now
+		return false
+	}
+	steps := int(now.Sub(p.lastLivepoint) / (livepointStepSeconds * time.Second))
+	if steps <= 0 {
+		return false
+	}
+	p.lastLivepoint = p.lastLivepoint.Add(time.Duration(steps) * livepointStepSeconds * time.Second)
+	changed := false
+	for step := 0; step < steps; step++ {
+		changed = p.accrueLivepoint() || changed
+		changed = p.convertLivepoint(vip) || changed
+	}
+	return changed
+}
+
+// accrueLivepoint 在线累积：+1000 毫进第一个未满槽（总上限 999 点 =
+// 5×999000 毫，全满丢弃）。
+func (p *playerProgress) accrueLivepoint() bool {
+	for i := 0; i < grooveCount; i++ {
+		if p.liveGroove[i] < grooveCap {
+			p.liveGroove[i] = min(grooveCap, p.liveGroove[i]+livepointAccrueMillis)
+			return true
+		}
+	}
+	return false
+}
+
+// convertLivepoint 转化：每槽按官方公式扣毫历练产修为；普通档 70% 进
+// 修为、30% 进潜能。
+func (p *playerProgress) convertLivepoint(vip bool) bool {
+	changed := false
+	for i := 0; i < grooveCount; i++ {
+		if p.liveGroove[i] <= 0 {
+			continue
+		}
+		full := int64(grooveBaseSpeed[i]) * int64(100+p.liveSpeedPower) / 100
+		actual := int32(min(int64(p.liveGroove[i]), full))
+		p.liveGroove[i] -= actual
+		if vip {
+			p.faculty += actual
+		} else {
+			gain := actual * 7 / 10
+			p.faculty += gain
+			p.holdFaculty += actual - gain
+		}
+		changed = true
+	}
+	return changed
+}
+
+// addLivepoint GM add_livepoint：发 N 点历练（×1000 毫按序填槽，溢出
+// 丢弃）。返回实际入槽毫数。
+func (p *playerProgress) addLivepoint(points int32) int32 {
+	remaining := max(int32(0), points) * livepointAccrueMillis
+	added := int32(0)
+	for i := 0; i < grooveCount && remaining > 0; i++ {
+		space := grooveCap - p.liveGroove[i]
+		if space <= 0 {
+			continue
+		}
+		put := min(space, remaining)
+		p.liveGroove[i] += put
+		added += put
+		remaining -= put
+	}
+	return added
+}
+
+// setHoldFaculty GM set_hold_faculty：潜能修为直设（入口已限非负，
+// 本处再钳防御）。
+func (p *playerProgress) setHoldFaculty(value int32) {
+	p.holdFaculty = max(int32(0), value)
+}
+
+// setLiveSpeedPower GM set_live_speed_power：转化速度加成 %（卦象效果
+// 等价物）。
+func (p *playerProgress) setLiveSpeedPower(value int32) {
+	p.liveSpeedPower = max(int32(0), value)
+}
+
+// clampGroove 快照槽值钳到 [0, 每槽上限]（防脏档）。
+func clampGroove(value int32) int32 {
+	return max(int32(0), min(grooveCap, value))
+}
+
 // awardActiveFaculty 恰好结算一张演武卡。选择索引和支付来源在协议边界
 // 校验；本地测试领域当前使用固定的 20000 点卡牌结果，同时让运行时保持
 // 主动状态，以配合客户端两秒的卡牌动画/冷却。
@@ -730,11 +897,20 @@ func (p *playerProgress) snapshot() facultyProgressSnapshot {
 		ActDayValueMax:      p.actDayValueMax,
 		ActDayValueUsed:     p.actDayValueUsed,
 		ActDayValueLast:     p.actDayValueLast,
-		BaseStr:             p.attributes.str,
-		BaseSta:             p.attributes.sta,
-		BaseDex:             p.attributes.dex,
-		BaseIng:             p.attributes.ing,
-		BaseSpi:             p.attributes.spi,
+		// 历练层 8 字段（Java FacultyStore 键名逐字对齐，共享 MySQL 三服互读）。
+		LiveGroove1:      p.liveGroove[0],
+		LiveGroove2:      p.liveGroove[1],
+		LiveGroove3:      p.liveGroove[2],
+		LiveGroove4:      p.liveGroove[3],
+		LiveGroove5:      p.liveGroove[4],
+		HoldFaculty:      p.holdFaculty,
+		LiveSpeedPower:   p.liveSpeedPower,
+		LastLivepointUTC: p.lastLivepoint.UTC(),
+		BaseStr:          p.attributes.str,
+		BaseSta:          p.attributes.sta,
+		BaseDex:          p.attributes.dex,
+		BaseIng:          p.attributes.ing,
+		BaseSpi:          p.attributes.spi,
 	}
 	for _, book := range p.books {
 		value.Books = append(value.Books, facultyBookSnapshot{
@@ -786,6 +962,24 @@ func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
 		p.actDayValueUsed = value.ActDayValueUsed
 		p.actDayValueLast = value.ActDayValueLast
 	}
+	// 历练层：槽值钳到上限；holdFaculty/liveSpeedPower 非负钳制；旧档
+	// 缺字段零值宽松归零（槽空、无加成）。随后对 lastLivepoint 以来的
+	// 整步照结离线补结算（累积+转化，与 advanceFaculty 离线分钟结算
+	// 同语义）。
+	p.liveGroove = [grooveCount]int32{
+		clampGroove(value.LiveGroove1), clampGroove(value.LiveGroove2),
+		clampGroove(value.LiveGroove3), clampGroove(value.LiveGroove4),
+		clampGroove(value.LiveGroove5),
+	}
+	p.holdFaculty = max(int32(0), value.HoldFaculty)
+	p.liveSpeedPower = max(int32(0), value.LiveSpeedPower)
+	lastLivepoint := value.LastLivepointUTC.UTC()
+	// 零值（旧档缺失）/早于哨兵下界/未来值一律重基 now 防离线结算爆走。
+	if lastLivepoint.Before(livepointEpochGuard) || lastLivepoint.After(now.UTC()) {
+		lastLivepoint = now.UTC()
+	}
+	p.lastLivepoint = lastLivepoint
+	p.livepointTick(now, livepointVIP)
 	if value.BaseStr > 0 {
 		p.attributes.str = value.BaseStr
 	}
@@ -921,7 +1115,7 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 {
 		return false, nil
 	}
-	if custom.Values[0].Int32 != 215 && custom.Values[0].Int32 != 1006 {
+	if custom.Values[0].Int32 != 215 && custom.Values[0].Int32 != 1006 && custom.Values[0].Int32 != livepointInfoMsg {
 		return false, nil
 	}
 	if player == nil {
@@ -955,6 +1149,44 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			return true, err
 		}
 		return true, syncState()
+
+	case livepointInfoMsg: // CLIENT_CUSTOMMSG_LIVEPOINT_INFO（历练/潜能赎回）
+		if len(custom.Values) < 2 || custom.Values[1].Type != 2 {
+			return true, fmt.Errorf("235 requires an int subcommand")
+		}
+		switch custom.Values[1].Int32 {
+		case 1: // SUB_GETINFO → 回赎回价（form_holdfaculty_buy.lua 同构）
+			frame, err := serverCustomIntMessage(livepointInfoMsg,
+				customInt(1),
+				customInt(livepointPrice),
+			)
+			if err != nil {
+				return true, err
+			}
+			return true, link.WriteFrame(frame)
+		case 2: // SUB_BUY：N 黄金 → N×price 潜能修为转正式修为
+			if len(custom.Values) < 3 || custom.Values[2].Type != 2 {
+				return true, fmt.Errorf("235 sub=2 requires an int count")
+			}
+			count := custom.Values[2].Int32
+			if !player.buyHoldFaculty(count) {
+				// 越界静默（count≤0/黄金不足/潜能不足；客户端同校验，
+				// 双保险防刷）。
+				return true, nil
+			}
+			goldFrame, err := player.goldUpdate()
+			if err != nil {
+				return true, err
+			}
+			if err := link.WriteFrame(goldFrame); err != nil {
+				return true, err
+			}
+			return true, syncState()
+		case 3: // SUB_EXCHANGE 修为兑换（form_faculty_exchange）：受理不实现
+			return true, nil
+		default:
+			return true, fmt.Errorf("unsupported 235 subcommand %d", custom.Values[1].Int32)
+		}
 
 	case 1006: // CLIENT_CUSTOMMSG_FACULTY_INFO
 		if len(custom.Values) < 2 || custom.Values[1].Type != 2 {

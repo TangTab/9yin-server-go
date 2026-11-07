@@ -979,6 +979,58 @@ func (p *playerActor) facultyTick(now time.Time) (uint16, bool) {
 	return slot, changed
 }
 
+// livepointTick 历练层 100 秒步进（facultyTick 同拍）：累积 +1 历练/100s
+// 进槽、按槽速转化产修为（普通档 70% + 30% 潜能）。返回是否有变化。
+func (p *playerActor) livepointTick(now time.Time) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.progress.livepointTick(now, livepointVIP)
+}
+
+// buyHoldFaculty custom 235/2：N 黄金 → N×price 潜能修为转正式修为。
+// count≤0/黄金不足/潜能不足静默拒绝（客户端同校验，双保险防刷）。
+func (p *playerActor) buyHoldFaculty(count int32) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if count <= 0 || count > p.gold {
+		return false
+	}
+	amount := int64(count) * int64(livepointPrice)
+	if amount > int64(p.progress.holdFaculty) {
+		return false
+	}
+	p.gold -= count
+	p.progress.holdFaculty -= int32(amount)
+	if sum := int64(p.progress.faculty) + amount; sum > math.MaxInt32 {
+		p.progress.faculty = math.MaxInt32
+	} else {
+		p.progress.faculty = int32(sum)
+	}
+	return true
+}
+
+// addLivepoint GM add_livepoint：发 N 点历练（×1000 毫按序填槽）。
+// 返回实际入槽毫数。
+func (p *playerActor) addLivepoint(points int32) int32 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.progress.addLivepoint(points)
+}
+
+// setHoldFaculty GM set_hold_faculty：潜能修为直设。
+func (p *playerActor) setHoldFaculty(value int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.progress.setHoldFaculty(value)
+}
+
+// setLiveSpeedPower GM set_live_speed_power：历练转化速度加成 %。
+func (p *playerActor) setLiveSpeedPower(value int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.progress.setLiveSpeedPower(value)
+}
+
 func (p *playerActor) facultySnapshot() facultyProgressSnapshot {
 	p.mu.Lock()
 	defer p.mu.Unlock()

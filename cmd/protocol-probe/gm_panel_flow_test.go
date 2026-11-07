@@ -139,6 +139,9 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_five_attributes","attrStr":100,"attrSta":0,"attrDex":80,"attrIng":0,"attrSpi":90}`, http.StatusOK},
 		{`{"action":"set_fill_speed","base":200,"multiplier":1.5}`, http.StatusOK},
 		{`{"action":"set_act_day_limit","value":500}`, http.StatusOK},
+		{`{"action":"add_livepoint","points":99}`, http.StatusOK},
+		{`{"action":"set_hold_faculty","value":1234}`, http.StatusOK},
+		{`{"action":"set_live_speed_power","value":50}`, http.StatusOK},
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":5}`, http.StatusOK},
 		{`{"action":"set_autosave_interval","value":300}`, http.StatusOK}, // 数据存盘：默认周期
 		{`{"action":"set_autosave_interval","value":0}`, http.StatusOK},    // 0=关闭合法
@@ -162,6 +165,10 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_fill_speed","base":0,"multiplier":1}`, http.StatusBadRequest},
 		{`{"action":"set_fill_speed","base":200,"multiplier":0.05}`, http.StatusBadRequest},
 		{`{"action":"set_act_day_limit","value":1000000}`, http.StatusBadRequest},
+		{`{"action":"add_livepoint","points":0}`, http.StatusBadRequest},   // 总历练上限 999 点
+		{`{"action":"add_livepoint","points":1000}`, http.StatusBadRequest},
+		{`{"action":"set_hold_faculty","value":-1}`, http.StatusBadRequest},
+		{`{"action":"set_live_speed_power","value":1001}`, http.StatusBadRequest},
 		{`{"action":"set_weather","weather":"..\\..\\evil"}`, http.StatusBadRequest}, // 闭名单拒绝路径注入
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":601}`, http.StatusBadRequest},
 		{`{"action":"set_autosave_interval","value":-1}`, http.StatusBadRequest},   // 负数拒绝

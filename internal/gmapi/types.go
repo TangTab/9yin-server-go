@@ -64,6 +64,7 @@ type CommandBody struct {
 	AttrSpi     int32   `json:"attrSpi"`
 	Base        int32   `json:"base"`
 	Multiplier  float32 `json:"multiplier"`
+	Points      int32   `json:"points"`
 	MsgId       int32   `json:"msgId"`
 	SubType     int32   `json:"subType"`
 	Weather     string  `json:"weather"`
@@ -110,6 +111,7 @@ type Command struct {
 	AttrSpi       int32
 	FacultyBase   int32   // set_fill_speed 基数
 	FillMultiplier float32 // set_fill_speed 倍率
+	Points        int32   // add_livepoint 历练点数
 	MsgId         int32   // custom_probe 数值寻址消息号
 	SubType       int32   // custom_probe 探针参数
 	Weather       string  // set_weather 闭名单键

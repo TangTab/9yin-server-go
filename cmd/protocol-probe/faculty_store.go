@@ -133,6 +133,18 @@ type facultyProgressSnapshot struct {
 	ActDayValueMax  int32 `json:"act_day_value_max"`
 	ActDayValueUsed int32 `json:"act_day_value_used"`
 	ActDayValueLast int32 `json:"act_day_value_last"`
+	// 历练层（LiveGroove 毫历练/HoldFaculty/LiveSpeedPower；docs/
+	// livepoint-conversion.md）：键名与 Java FacultyStore 逐字一致（共享
+	// MySQL，三服互读）。旧档缺字段零值 → restore 宽松归零；
+	// last_livepoint_utc 零值（0001-01-01）= 无效哨兵，restore 回退 now。
+	LiveGroove1      int32     `json:"live_groove_1"`
+	LiveGroove2      int32     `json:"live_groove_2"`
+	LiveGroove3      int32     `json:"live_groove_3"`
+	LiveGroove4      int32     `json:"live_groove_4"`
+	LiveGroove5      int32     `json:"live_groove_5"`
+	HoldFaculty      int32     `json:"hold_faculty"`
+	LiveSpeedPower   int32     `json:"live_speed_power"`
+	LastLivepointUTC time.Time `json:"last_livepoint_utc"`
 	// 基础五维（GM set_five_attributes）：旧档缺省 0 → 还原不覆盖
 	// 运行时值（Java FacultyStore 注释同口径）。
 	BaseStr int32 `json:"base_str"`
@@ -165,6 +177,14 @@ var facultySnapshotJSONKeys = map[string]bool{
 	"act_day_value_max":     true,
 	"act_day_value_used":    true,
 	"act_day_value_last":    true,
+	"live_groove_1":         true,
+	"live_groove_2":         true,
+	"live_groove_3":         true,
+	"live_groove_4":         true,
+	"live_groove_5":         true,
+	"hold_faculty":          true,
+	"live_speed_power":      true,
+	"last_livepoint_utc":    true,
 	"base_str":              true,
 	"base_sta":              true,
 	"base_dex":              true,
