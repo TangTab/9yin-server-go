@@ -8,6 +8,7 @@ package main
 import (
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -97,6 +98,21 @@ func (hub *gmHub) fashionCatalogHandler(writer http.ResponseWriter, request *htt
 		attachNames(categories[index].Items, names)
 	}
 	writeGMJSON(writer, http.StatusOK, categories)
+}
+
+// itemsHandler GET /api/items?q=<中文名或ConfigID>&view=<0..4>：「所有
+// 道具与换装」搜索（Java GmCatalog.items 同口径；目录装载见
+// gm_item_catalog.go）。
+func (hub *gmHub) itemsHandler(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	view := 0
+	if parsed, err := strconv.Atoi(request.URL.Query().Get("view")); err == nil && parsed >= 0 {
+		view = parsed
+	}
+	writeGMJSON(writer, http.StatusOK, gmItems.search(request.URL.Query().Get("q"), view))
 }
 
 // gmCardRow 是 /api/cards 与 /api/hair-cards 的行形态（console-features.js

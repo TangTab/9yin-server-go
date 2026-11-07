@@ -100,7 +100,8 @@ func newKeybindDBStore(db *sql.DB) *keybindDBStore {
 }
 
 // Load 读取键位域整行；operate_mode NULL 表示从未设置（不下发，
-// 客户端保持本地默认 2.5D）。无行或 DB 错误按「无存档」处理。
+// 客户端保持本地默认 2.5D）；neigong_bind NULL 表示从未绑定（同零帧）。
+// 无行或 DB 错误按「无存档」处理。
 func (store *keybindDBStore) Load(roleID role.RoleID) (playerKeybind, bool) {
 	var record playerKeybind
 	if store == nil || store.db == nil || roleID == 0 {
@@ -109,9 +110,10 @@ func (store *keybindDBStore) Load(roleID role.RoleID) (playerKeybind, bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), customConfigQueryTimeout)
 	defer cancel()
 	var operateMode sql.NullInt32
+	var neigongBind sql.NullString
 	err := store.db.QueryRowContext(ctx,
-		`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode FROM role_keybinds WHERE role_id = ?`,
-		roleID).Scan(&record.bind, &record.scheme1, &record.scheme2, &operateMode)
+		`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode, neigong_bind FROM role_keybinds WHERE role_id = ?`,
+		roleID).Scan(&record.bind, &record.scheme1, &record.scheme2, &operateMode, &neigongBind)
 	if errors.Is(err, sql.ErrNoRows) {
 		return record, false
 	}
@@ -122,6 +124,9 @@ func (store *keybindDBStore) Load(roleID role.RoleID) (playerKeybind, bool) {
 	if operateMode.Valid {
 		record.operateMode = operateMode.Int32
 		record.operateModeSet = true
+	}
+	if neigongBind.Valid {
+		record.neigongBind = neigongBind.String
 	}
 	return record, true
 }
@@ -184,6 +189,29 @@ func (store *keybindDBStore) SaveOperateMode(roleID role.RoleID, mode int32) err
 ON DUPLICATE KEY UPDATE operate_mode = VALUES(operate_mode)`,
 		roleID, mode); err != nil {
 		return fmt.Errorf("persist operate mode role=%d: %w", roleID, err)
+	}
+	return nil
+}
+
+// SaveNeiGongBind 落内功栏绑定串（role_keybinds.neigong_bind，
+// 0015 增列）。串形见 validNeiGongBind；首插同样要补 bind_value 空串。
+func (store *keybindDBStore) SaveNeiGongBind(roleID role.RoleID, value string) error {
+	if store == nil {
+		return nil
+	}
+	if store.db == nil {
+		return errors.New("keybind store: no database")
+	}
+	if roleID == 0 {
+		return errors.New("keybind store: zero role id")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), customConfigQueryTimeout)
+	defer cancel()
+	if _, err := store.db.ExecContext(ctx,
+		`INSERT INTO role_keybinds (role_id, bind_value, neigong_bind) VALUES (?, '', ?)
+ON DUPLICATE KEY UPDATE neigong_bind = VALUES(neigong_bind)`,
+		roleID, value); err != nil {
+		return fmt.Errorf("persist neigong bind role=%d: %w", roleID, err)
 	}
 	return nil
 }

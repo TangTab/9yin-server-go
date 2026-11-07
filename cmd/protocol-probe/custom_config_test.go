@@ -136,6 +136,110 @@ func TestAddObjectEmbedsKeybindWithoutTrailingSpace(t *testing.T) {
 	t.Fatal("archive does not embed OperateMode(223)=1")
 }
 
+// 绑定串合法性：恰好 25 值 + 尾分号，值 0..99（客户端 G_NG_GRID_COUNT=25、
+// 绑定框 DataSource 序号；get_svr_ng_bind 按拆段数校验，脏串会整串回落全零）。
+func TestValidNeiGongBind(t *testing.T) {
+	canonical := "0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;"
+	if !validNeiGongBind(canonical) {
+		t.Fatal("all-zero canonical bind must be accepted")
+	}
+	withValues := "0;0;1;2;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;"
+	if !validNeiGongBind(withValues) {
+		t.Fatal("bind with values must be accepted")
+	}
+	for name, value := range map[string]string{
+		"missing trailing semicolon": strings.TrimSuffix(canonical, ";"),
+		"short slot count":           "0;0;0;",
+		"extra segment":              canonical + "0;",
+		"empty value":                strings.Replace(canonical, "0;0;", ";;", 1),
+		"value out of range":         strings.Replace(canonical, "0;0;", "100;", 1),
+		"non numeric":                strings.Replace(canonical, "0;0;", "a;", 1),
+		"empty string":               "",
+	} {
+		if validNeiGongBind(value) {
+			t.Fatalf("%s must be rejected: %q", name, value)
+		}
+	}
+}
+
+// 199：合法上传回推 0x10 NeiGongBind(201) + 更新内存；非法串静默零帧。
+func TestHandleNeiGongBindCustomValidatesAndEchoes(t *testing.T) {
+	conn := &captureMessageConnection{}
+	player := newPlayerActor("测试", 0)
+	upload := func(value string) clientCustomMessage {
+		return clientCustomMessage{Values: []clientCustomValue{
+			{Type: 2, Int32: clientCustomNeiGongBind},
+			{Type: 6, Text: value},
+		}}
+	}
+
+	bind := "0;1;0;0;2;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;"
+	handled, err := handleNeiGongBindCustom(conn, player, upload(bind), "test", nil, 0)
+	if err != nil || !handled || len(conn.frames) != 1 {
+		t.Fatalf("valid upload handled=%t err=%v frames=%d", handled, err, len(conn.frames))
+	}
+	frame := conn.frames[0]
+	if got := binary.LittleEndian.Uint16(frame[12:]); got != neiGongBindPropertyIndex {
+		t.Fatalf("echo index=%d, want %d", got, neiGongBindPropertyIndex)
+	}
+	if !strings.Contains(string(frame), bind+" \x00") {
+		t.Fatalf("echo value must carry trailing space: %x", frame)
+	}
+	if snapshot := player.keybindSnapshot(); snapshot.neigongBind != bind {
+		t.Fatalf("memory neigongBind=%q", snapshot.neigongBind)
+	}
+
+	for name, value := range map[string]string{
+		"wrong slot count": "0;1;",
+		"garbage":          "abc",
+		"range":            strings.Replace(bind, "0;1;", "0;777;", 1),
+	} {
+		connReject := &captureMessageConnection{}
+		handled, err := handleNeiGongBindCustom(connReject, player, upload(value), "test", nil, 0)
+		if err != nil || !handled || len(connReject.frames) != 0 {
+			t.Fatalf("%s handled=%t err=%v frames=%d", name, handled, err, len(connReject.frames))
+		}
+	}
+
+	// player 未生成（选角前）忽略且零帧。
+	connBefore := &captureMessageConnection{}
+	handled, err = handleNeiGongBindCustom(connBefore, nil, upload(bind), "test", nil, 0)
+	if err != nil || !handled || len(connBefore.frames) != 0 {
+		t.Fatalf("before-spawn handled=%t err=%v frames=%d", handled, err, len(connBefore.frames))
+	}
+}
+
+// pushKeybindFrames 尾随 201 帧（有档才发）；0x0D 档内嵌 201 无尾空格。
+func TestNeiGongBindPushAndArchiveEmbed(t *testing.T) {
+	bind := "1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;"
+	player := newPlayerActor("测试", 0)
+	player.setKeybind(playerKeybind{neigongBind: bind})
+	conn := &captureMessageConnection{}
+	if err := pushKeybindFrames(conn, player); err != nil {
+		t.Fatal(err)
+	}
+	if len(conn.frames) != 1 {
+		t.Fatalf("frames=%d, want only NeiGongBind", len(conn.frames))
+	}
+	if got := binary.LittleEndian.Uint16(conn.frames[0][12:]); got != neiGongBindPropertyIndex {
+		t.Fatalf("index=%d, want %d", got, neiGongBindPropertyIndex)
+	}
+
+	location := role.Position{X: 1, Y: 2, Z: 3}
+	msg := player.addObject(location, roleVisual{sex: 1})
+	if !strings.Contains(string(msg), bind+"\x00") || strings.Contains(string(msg), bind+" \x00") {
+		t.Fatal("archive NeiGongBind must be NUL-terminated without trailing space")
+	}
+	// 全零档（空串）零属性：bare 档不携带 201。
+	barePlayer := newPlayerActor("测试", 0)
+	bare := barePlayer.addObject(location, roleVisual{sex: 1})
+	for offset := 0; offset+2 <= len(bare); offset++ {
+		if binary.LittleEndian.Uint16(bare[offset:]) == neiGongBindPropertyIndex {
+			t.Fatal("bare archive must not embed NeiGongBind")
+		}
+	}
+}
+
 func keybindUploadCustom(scheme int32, value string) clientCustomMessage {
 	return clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: clientCustomKeybindUpload},

@@ -3,11 +3,9 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"math"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/gmapi"
 	"github.com/local/9yin-go-server/internal/role"
 )
 
@@ -35,46 +33,21 @@ func encodeExitScene() []byte { return []byte{0x0C} }
 type sceneDestination struct{ location role.Location }
 
 // parseSceneDestination 接受 config,resource,x,y,z,orient。它是刻意显式
-// 的测试/GM 输入；不猜测任何客户端动作。
+// 的测试/GM 输入；不猜测任何客户端动作。解析逻辑的权威实现在
+// internal/gmapi（GM 校验与之共用），此处保留场景运行时侧的薄包装。
 func parseSceneDestination(value string) (sceneDestination, error) {
-	parts := strings.Split(value, ",")
-	if len(parts) != 6 || strings.TrimSpace(parts[0]) == "" || strings.TrimSpace(parts[1]) == "" {
-		return sceneDestination{}, fmt.Errorf("want config,resource,x,y,z,orient")
+	location, err := gmapi.ParseDestination(value)
+	if err != nil {
+		return sceneDestination{}, err
 	}
-	values := [4]float32{}
-	for i := range values {
-		parsed, err := strconv.ParseFloat(strings.TrimSpace(parts[i+2]), 32)
-		if err != nil {
-			return sceneDestination{}, fmt.Errorf("coordinate %d: %w", i, err)
-		}
-		values[i] = float32(parsed)
-	}
-	return sceneDestination{location: role.Location{
-		Scene:    role.Scene{Config: strings.TrimSpace(parts[0]), Resource: strings.TrimSpace(parts[1])},
-		Position: role.Position{X: values[0], Y: values[1], Z: values[2], Orient: values[3]},
-	}}, nil
+	return sceneDestination{location: location}, nil
 }
 
 // parseScenePosition 解析仅限 GM 使用的同场景传送输入。场景标识刻意
 // 省略：TeleportWithinScene 总是保持当前活动场景，并在重进入期间拒绝
-// 使用。
+// 使用。权威实现在 internal/gmapi，此处为薄包装。
 func parseScenePosition(value string) (role.Position, error) {
-	parts := strings.Split(value, ",")
-	if len(parts) != 4 {
-		return role.Position{}, fmt.Errorf("want x,y,z,orient")
-	}
-	values := [4]float32{}
-	for i := range values {
-		parsed, err := strconv.ParseFloat(strings.TrimSpace(parts[i]), 32)
-		if err != nil || math.IsNaN(parsed) || math.IsInf(parsed, 0) {
-			if err == nil {
-				err = fmt.Errorf("must be finite")
-			}
-			return role.Position{}, fmt.Errorf("coordinate %d: %w", i, err)
-		}
-		values[i] = float32(parsed)
-	}
-	return role.Position{X: values[0], Y: values[1], Z: values[2], Orient: values[3]}, nil
+	return gmapi.ParsePosition(value)
 }
 
 // sceneRuntime 负责单个活动玩家的重进入序列。它让 NPC 注册表和生命

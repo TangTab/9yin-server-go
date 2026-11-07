@@ -87,13 +87,14 @@ func TestKeybindDBSaveOperateModeBootstrapsBindValue(t *testing.T) {
 	}
 }
 
-// operate_mode NULL = 从未设置（不下发，客户端保持本地默认 2.5D）。
+// operate_mode NULL = 从未设置（不下发，客户端保持本地默认 2.5D）；
+// neigong_bind NULL = 从未绑定（同零帧，客户端 get_svr_ng_bind 回落全零）。
 func TestKeybindDBLoadDistinguishesNullOperateMode(t *testing.T) {
 	mock, stores := newCustomConfigMockDB(t)
-	mock.ExpectQuery(`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode FROM role_keybinds WHERE role_id = \?`).
+	mock.ExpectQuery(`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode, neigong_bind FROM role_keybinds WHERE role_id = \?`).
 		WithArgs(customConfigTestRoleID).
-		WillReturnRows(sqlmock.NewRows([]string{"bind_value", "shortcut_key1", "shortcut_key2", "operate_mode"}).
-			AddRow("1,87", "2,83", "3,65", nil))
+		WillReturnRows(sqlmock.NewRows([]string{"bind_value", "shortcut_key1", "shortcut_key2", "operate_mode", "neigong_bind"}).
+			AddRow("1,87", "2,83", "3,65", nil, nil))
 	loaded, exists := stores.keybind.Load(customConfigTestRoleID)
 	if !exists || loaded.bind != "1,87" || loaded.scheme1 != "2,83" || loaded.scheme2 != "3,65" {
 		t.Fatalf("loaded=%+v exists=%t", loaded, exists)
@@ -101,23 +102,41 @@ func TestKeybindDBLoadDistinguishesNullOperateMode(t *testing.T) {
 	if loaded.operateModeSet {
 		t.Fatal("NULL operate_mode must read as unset")
 	}
+	if loaded.neigongBind != "" {
+		t.Fatalf("NULL neigong_bind must read as empty, got %q", loaded.neigongBind)
+	}
 
 	mock, stores = newCustomConfigMockDB(t)
-	mock.ExpectQuery(`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode FROM role_keybinds WHERE role_id = \?`).
+	mock.ExpectQuery(`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode, neigong_bind FROM role_keybinds WHERE role_id = \?`).
 		WithArgs(customConfigTestRoleID).
-		WillReturnRows(sqlmock.NewRows([]string{"bind_value", "shortcut_key1", "shortcut_key2", "operate_mode"}).
-			AddRow("1,87", "", "", int32(0)))
+		WillReturnRows(sqlmock.NewRows([]string{"bind_value", "shortcut_key1", "shortcut_key2", "operate_mode", "neigong_bind"}).
+			AddRow("1,87", "", "", int32(0), "0;1;0;"))
 	loaded, exists = stores.keybind.Load(customConfigTestRoleID)
 	if !exists || !loaded.operateModeSet || loaded.operateMode != 0 {
 		t.Fatalf("loaded=%+v exists=%t", loaded, exists)
 	}
+	if loaded.neigongBind != "0;1;0;" {
+		t.Fatalf("neigong_bind=%q", loaded.neigongBind)
+	}
 
 	mock, stores = newCustomConfigMockDB(t)
-	mock.ExpectQuery(`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode FROM role_keybinds WHERE role_id = \?`).
+	mock.ExpectQuery(`SELECT bind_value, shortcut_key1, shortcut_key2, operate_mode, neigong_bind FROM role_keybinds WHERE role_id = \?`).
 		WithArgs(customConfigTestRoleID).
-		WillReturnRows(sqlmock.NewRows([]string{"bind_value", "shortcut_key1", "shortcut_key2", "operate_mode"}))
+		WillReturnRows(sqlmock.NewRows([]string{"bind_value", "shortcut_key1", "shortcut_key2", "operate_mode", "neigong_bind"}))
 	if _, exists := stores.keybind.Load(customConfigTestRoleID); exists {
 		t.Fatal("missing row must read as no archive")
+	}
+}
+
+// SaveNeiGongBind 首插补 bind_value 空串（role_keybinds NOT NULL 同坑）。
+func TestKeybindDBSaveNeiGongBindBootstrapsBindValue(t *testing.T) {
+	mock, stores := newCustomConfigMockDB(t)
+	mock.ExpectExec(`INSERT INTO role_keybinds \(role_id, bind_value, neigong_bind\) VALUES \(\?, '', \?\)`+
+		` ON DUPLICATE KEY UPDATE neigong_bind = VALUES\(neigong_bind\)`).
+		WithArgs(customConfigTestRoleID, "0;1;2;").
+		WillReturnResult(newSQLMockResult(0, 1))
+	if err := stores.keybind.SaveNeiGongBind(customConfigTestRoleID, "0;1;2;"); err != nil {
+		t.Fatal(err)
 	}
 }
 

@@ -3,6 +3,8 @@ package main
 import (
 	"strconv"
 	"strings"
+
+	"github.com/local/9yin-go-server/internal/gmapi"
 )
 
 // 怒气上限加成的运行内功分档。
@@ -42,7 +44,8 @@ import (
 // maxNeiGongRageCapAdd 是任何内功能提供的最大怒气上限加成（五内/
 // 六内/会意 +50）。GM HTTP 侧无法读到会话内的当前上限，用它做入参
 // 上界（实际值仍由 setSP/addSP 按当前有效上限饱和）。
-const maxNeiGongRageCapAdd int32 = 50
+// 权威定义在 internal/gmapi（GM 线协议界值与之共用），此处为别名。
+const maxNeiGongRageCapAdd int32 = gmapi.MaxNeiGongRageCapAdd
 
 // schoolNeiGongPrefixes 是 12+1 个宗派段（neigong_type.ini）的学校
 // 前缀；后缀 _001.._006 = 一内..六内、_101 = 会意功。

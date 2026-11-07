@@ -9,7 +9,17 @@
 
 - 区服列表：`127.0.0.1:4000`
 - 游戏服务：`127.0.0.1:19061`
-- GM 页面：`http://127.0.0.1:19062/`（概览）→ `http://127.0.0.1:19062/console.html`（控制台）
+- GM 页面（独立面板进程，优先）：`http://127.0.0.1:19064/` → `http://127.0.0.1:19064/console.html`
+- GM 页面（游戏服内嵌，回滚形态）：`http://127.0.0.1:19062/`
+- GM internal API（仅供 gm-panel 调用，仅本机 + token）：`127.0.0.1:19063`
+
+GM 面板有两种等价形态：独立进程 `gm-panel.exe`（19064，经 internal API
+19063 与游戏服交互，游戏服重启后面板不掉线）与游戏服内嵌（19062，回滚
+路径）。两形态共用同一份前端与命令校验；token 由 start-9yin.bat 首次
+启动自动生成到 env.server（`NINEYIN_GM_TOKEN`）。单独拉起/重开独立面板
+用 `server-cmd\start-gm-panel.bat`（读同一份 token；全无 token 时首次
+运行也会自动生成，但要求游戏服用同一 token 启动）。设计见
+`docs/gm-service-rpc-split-design.md`。
 
 账号：test001
 密码：test001
@@ -21,6 +31,7 @@
 ```powershell
 go test ./...
 go build -trimpath -o .\build\9yin-game-server.exe ./cmd/protocol-probe
+go build -trimpath -o .\build\gm-panel.exe ./cmd/gm-panel
 ```
 
 编译产物写入 `build`，不会自动覆盖根目录中正在测试的服务端 EXE。

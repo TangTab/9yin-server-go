@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
@@ -22,6 +24,14 @@ const (
 	// C2S 99：CLIENT_CUSTOMMSG_SET_OPERATEMODE（form_system_interface_setting
 	// .switch_mode），[99, mode]，0=3D（WASD）/ 1=2.5D（点击）。
 	clientCustomSetOperateMode int32 = 99
+	// C2S 199：CLIENT_CUSTOMMSG_NEIGONGBIND（custom_update_ng_bind(info)，
+	// form_main_shortcut 内功栏绑定框 on_btn_bind_click → update_to_srv），
+	// [199, "v1;…;v25;"]。25 个值对应内功栏 25 格（grid_shortcut_3 三页
+	// 各 5 格 + grid_shortcut_8 十格，G_NG_GRID_COUNT=25），值 = 该格绑定
+	// 的武器快捷栏序号（0=未绑定）。客户端主窗体打开时从玩家属性
+	// NeiGongBind 整串快照（get_svr_ng_bind）：服务端不回存档则重登
+	// 全零——表现为「内功栏放置武器/内功绑定的快捷栏序号没有存储」。
+	clientCustomNeiGongBind int32 = 199
 	// S2C 705：on_parser_customizing(configStr) 个性配置下行通道，
 	// 0x1E 旧壳（Java LoginFlow.customizingFrame 同形）。
 	serverCustomPushCustomizing int32 = 705
@@ -36,7 +46,39 @@ const (
 	keybindScheme1PropertyIndex uint16 = 199
 	keybindScheme2PropertyIndex uint16 = 200
 	operateModePropertyIndex    uint16 = 223
+	// NeiGongBind（type7）：内功栏绑定串权威属性。0x10 单属性帧带
+	// 尾空格、0x0D 档内嵌无尾空格，与 198 同方言两形态。
+	neiGongBindPropertyIndex uint16 = 201
 )
+
+// neiGongBindSlotCount 是内功栏绑定串的固定格数（客户端
+// form_main_shortcut.lua G_NG_GRID_COUNT=25；get_svr_ng_bind 按拆段数
+// 校验，不是 26 段就整串回落全零）。串形 = 25 个 "v;" + 尾分号。
+const neiGongBindSlotCount = 25
+
+// validNeiGongBind 校验客户端上传的内功栏绑定串：恰好 25 个值加尾
+// 分号（拆 26 段、末段空），各值为 0..99 的十进制数（绑定框 DataSource
+// 序号，0=清除绑定）。不符则整串拒收（零帧），防脏串落库后把客户端
+// 档位校验打回全零。
+func validNeiGongBind(value string) bool {
+	if !strings.HasSuffix(value, ";") {
+		return false
+	}
+	fields := strings.Split(value, ";")
+	if len(fields) != neiGongBindSlotCount+1 || fields[neiGongBindSlotCount] != "" {
+		return false
+	}
+	for _, field := range fields[:neiGongBindSlotCount] {
+		if field == "" || len(field) > 2 {
+			return false
+		}
+		number, err := strconv.Atoi(field)
+		if err != nil || number < 0 || number > 99 {
+			return false
+		}
+	}
+	return true
+}
 
 // customizingConfigLimit 是 role_customizing.customizing_value 的列宽
 // （VARBINARY(65535)，0005 迁移定稿）。串为纯 ASCII + 控制字节
@@ -48,15 +90,16 @@ const customizingConfigLimit = 65535
 const keybindValueLimit = 4096
 
 // playerKeybind 镜像 role_keybinds 单行（键位域的权威内存副本）。
-// 0x0D addObject 档内嵌 198/223 与 ClientReady 单属性帧都读这里；
+// 0x0D addObject 档内嵌 198/223/201 与 ClientReady 单属性帧都读这里；
 // operateModeSet 区分「从未设置」（NULL，不下发，客户端保持本地默认）
-// 与显式 0。
+// 与显式 0。neigongBind 空 = 从未绑定（不下发，客户端回落全零串）。
 type playerKeybind struct {
 	bind           string
 	scheme1        string
 	scheme2        string
 	operateMode    int32
 	operateModeSet bool
+	neigongBind    string
 }
 
 // applyScheme 更新一份键位串（必须在 p.mu 内调用）。
@@ -88,6 +131,12 @@ func (p *playerActor) setOperateMode(mode int32) {
 	defer p.mu.Unlock()
 	p.keybind.operateMode = mode
 	p.keybind.operateModeSet = true
+}
+
+func (p *playerActor) applyNeiGongBind(value string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.keybind.neigongBind = value
 }
 
 func (p *playerActor) keybindSnapshot() playerKeybind {
@@ -130,6 +179,16 @@ func operateModePropertyFrame(mode int32) ([]byte, error) {
 	}})
 }
 
+// neiGongBindPropertyFrame 编码 0x10 NeiGongBind 单属性帧（idx 201，
+// type7）。线上串 = value + " "（键位域同方言）；客户端 get_svr_ng_bind
+// 以 QueryProp 读它初始化绑定框，且 update_to_srv 靠与它比对决定是否
+// 需要再上传——不回推则两端永不收敛。
+func neiGongBindPropertyFrame(value string) ([]byte, error) {
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{{
+		Index: neiGongBindPropertyIndex, Name: "NeiGongBind", Value: clientdata.StringValue(value + " "),
+	}})
+}
+
 // pushSavedCustomizing 推存档个性配置（无档零帧：客户端保持默认并自行
 // 上传基线）。705 是连接级配置对象，不随 0x0C 切图重置，无需重推。
 func pushSavedCustomizing(conn sceneMessageConnection, config string) error {
@@ -148,7 +207,8 @@ func pushSavedCustomizing(conn sceneMessageConnection, config string) error {
 
 // pushKeybindFrames 在 post-spawn 推送存档键位域：198（当前启用）、
 // 199/200（方案一/二，保存面板 check_saved 读它们判定「已保存」）、
-// 223（操作模式）。无档属性零帧。调用方以会话闸控制只推一次，
+// 223（操作模式）、201（内功栏绑定串，内功栏主窗体打开时快照）。
+// 无档属性零帧。调用方以会话闸控制只推一次，
 // 0x0C 切图清空玩家对象属性视图后需复位闸重推（Java completeSceneReentry
 // 同款；705 连接级，不在此列）。
 func pushKeybindFrames(conn sceneMessageConnection, player *playerActor) error {
@@ -179,6 +239,15 @@ func pushKeybindFrames(conn sceneMessageConnection, player *playerActor) error {
 		}
 		if err := conn.WriteFrame(frame); err != nil {
 			return fmt.Errorf("push operate mode %d: %w", bind.operateMode, err)
+		}
+	}
+	if bind.neigongBind != "" {
+		frame, err := neiGongBindPropertyFrame(bind.neigongBind)
+		if err != nil {
+			return err
+		}
+		if err := conn.WriteFrame(frame); err != nil {
+			return fmt.Errorf("push neigong bind: %w", err)
 		}
 	}
 	return nil
@@ -315,5 +384,46 @@ func handleOperateModeCustom(conn sceneMessageConnection, player *playerActor, c
 		log.Printf("%s: persist operate mode role=%d: %v", remote, roleID, err)
 	}
 	log.Printf("%s: operate mode set %d (%s)", remote, mode, map[bool]string{true: "2.5D click", false: "3D WASD"}[mode == 1])
+	return true, nil
+}
+
+// handleNeiGongBindCustom 处理 C2S 199 内功栏绑定上传：校验 → 回推
+// 0x10 NeiGongBind 同步客户端属性缓存 → 落库。非法串静默拒（零帧）。
+// Java 参考服未实现此域（docs/lua64-protocol-dict.md 仅录得协议号），
+// 语义按客户端 form_main_shortcut.lua 直读。
+func handleNeiGongBindCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string, store *keybindDBStore, roleID role.RoleID) (bool, error) {
+	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomNeiGongBind {
+		return false, nil
+	}
+	if player == nil {
+		log.Printf("%s: ignore neigong bind before role selected", remote)
+		return true, nil
+	}
+	if len(custom.Values) != 2 || custom.Values[1].Type != 6 {
+		return true, fmt.Errorf("neigong bind expects TVarList(199, string), got %v", custom.Values)
+	}
+	value := custom.Values[1].Text
+	if !validNeiGongBind(value) {
+		log.Printf("%s: ignore invalid neigong bind len=%d", remote, len(value))
+		return true, nil
+	}
+	frame, err := neiGongBindPropertyFrame(value)
+	if err != nil {
+		return true, err
+	}
+	if err := conn.WriteFrame(frame); err != nil {
+		return true, fmt.Errorf("echo neigong bind: %w", err)
+	}
+	player.applyNeiGongBind(value)
+	if err := store.SaveNeiGongBind(roleID, value); err != nil {
+		log.Printf("%s: persist neigong bind role=%d: %v", remote, roleID, err)
+	}
+	bound := 0
+	for _, field := range strings.Split(strings.TrimSuffix(value, ";"), ";") {
+		if field != "0" {
+			bound++
+		}
+	}
+	log.Printf("%s: neigong bind uploaded (%d/%d slots bound)", remote, bound, neiGongBindSlotCount)
 	return true, nil
 }

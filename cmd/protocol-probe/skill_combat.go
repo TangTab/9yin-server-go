@@ -423,6 +423,14 @@ func (s *sceneLifecycle) selectedCombatTarget() (uint32, uint32, bool) {
 	}
 	s.run.mu.Lock()
 	defer s.run.mu.Unlock()
+	return s.livingCombatSelectionLocked()
+}
+
+// livingCombatSelectionLocked 是 selectedCombatTarget 的锁内形态
+// （要求调用方已持有 s.run.mu）：选中对象须仍是存活战斗 NPC 才可用；
+// 陈旧格（对象已消亡/非战斗交互/owner 不符）与空选同一待遇，视为
+// 没有目标。
+func (s *sceneLifecycle) livingCombatSelectionLocked() (uint32, uint32, bool) {
 	id := worldcore.EntityID(s.selectedObject)
 	vitals, hasVitals := s.run.combat.Vitals(id)
 	if !hasVitals || vitals.HP <= 0 {

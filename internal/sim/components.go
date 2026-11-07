@@ -75,6 +75,16 @@ func (v *Vitals) Revive() {
 	v.Logic = entity.LogicStateNormal
 }
 
+// ResetAfterLeash 是活怪栓绳归位的权威完全重置：HP/瘀血层/MP 回满
+// 并退回 Normal（数值迁移与 Revive 一致；调用场景是脱战回家而非
+// 尸体复活，帧形对齐官方重置帧「HP 回满 + 463=0」）。
+func (v *Vitals) ResetAfterLeash() {
+	v.HP = v.MaxHP
+	v.HitHP = v.MaxHP
+	v.MP = v.MaxMP
+	v.Logic = entity.LogicStateNormal
+}
+
 // SetLogicState 只改变当前状态；HP 和 MP 仍由同一份 Vitals 持有，
 // 并由发布方一并进行同步。
 func (v *Vitals) SetLogicState(state uint8) {

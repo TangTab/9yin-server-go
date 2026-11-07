@@ -33,6 +33,28 @@ rem --- MySQL: roles and neigong progress persist to MySQL (data/ JSON deprecate
 rem To override: set NINEYIN_MYSQL_DSN as a system env var before starting.
 if not defined NINEYIN_MYSQL_DSN set "NINEYIN_MYSQL_DSN=nineyin:nineyin123@tcp(127.0.0.1:3306)/nineyin"
 
+rem --- GM token: 游戏服 internal API(19063) 与 gm-panel(19064) 共用 ---
+rem 首次启动自动生成一次并追加到 env.server（幂等）；改 token 需重启两个进程。
+rem findstr 用正则：/l 字面量匹配不到带引号的 set "VAR=..." 写法。
+if not defined NINEYIN_GM_TOKEN if exist "%ROOT%env.server" for /f "usebackq delims=" %%L in (`findstr /b /r /c:"set .*NINEYIN_GM_TOKEN" "%ROOT%env.server"`) do call %%L
+rem 生成块里只 set 变量；落盘在块外顶层做——括号块内的 %NINEYIN_GM_TOKEN%
+rem 是解析期展开（此刻为空），写进 env.server 的会是空 token。
+set "GM_TOKEN_FRESH="
+if not defined NINEYIN_GM_TOKEN (
+  for /f "delims=" %%G in ('powershell.exe -NoProfile -Command "[guid]::NewGuid().ToString('N')"') do (
+    set "NINEYIN_GM_TOKEN=%%G"
+    set "GM_TOKEN_FRESH=1"
+  )
+)
+if defined GM_TOKEN_FRESH (
+  if exist "%ROOT%env.server" (
+    >>"%ROOT%env.server" echo set "NINEYIN_GM_TOKEN=%NINEYIN_GM_TOKEN%"
+    echo GM token generated and appended to env.server.
+  ) else (
+    echo GM token generated per-run only ^(env.server not found^).
+  )
+)
+
 echo MySQL DSN : %NINEYIN_MYSQL_DSN%
 rem Real TCP connect probe: mysqld's dual-stack "::" listener is invisible to
 rem Get-NetTCPConnection -State Listen (empty State in the connection table).
@@ -49,7 +71,11 @@ powershell.exe -NoProfile -Command "$listeners = @(Get-NetTCPConnection -State L
 set "PORT_STATE=%ERRORLEVEL%"
 if "%PORT_STATE%"=="2" (
   echo Nine Yin server copy is already running.
-  start "Nine Yin GM Panel" http://127.0.0.1:19062/
+  if exist "%ROOT%gm-panel.exe" (
+    start "Nine Yin GM Panel" http://127.0.0.1:19064/
+  ) else (
+    start "Nine Yin GM Panel" http://127.0.0.1:19062/
+  )
   exit /b 0
 )
 if "%PORT_STATE%"=="1" (
@@ -63,7 +89,8 @@ echo.
 echo Starting portable Nine Yin local services...
 echo Server list : 127.0.0.1:4000
 echo Game  : 127.0.0.1:19061
-echo GM UI : http://127.0.0.1:19062/
+echo GM UI : http://127.0.0.1:19062/ (embedded, rollback)
+if exist "%ROOT%gm-panel.exe" echo GM UI : http://127.0.0.1:19064/ (standalone gm-panel)
 echo.
 
 powershell.exe -NoProfile -Command "if (Get-NetTCPConnection -State Listen -LocalPort 4000 -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }"
@@ -73,10 +100,19 @@ if errorlevel 1 (
   echo Server list 4000 is already running; reusing it.
 )
 
-start "Nine Yin Game 19061" /D "%ROOT%" "%SERVER%" -listen 127.0.0.1:19061 -gm-listen 127.0.0.1:19062 -log-file "%LOGDIR%\protocol-probe-live.log" 1>>"%LOGDIR%\game-19061.current.log" 2>>&1
+start "Nine Yin Game 19061" /D "%ROOT%" "%SERVER%" -listen 127.0.0.1:19061 -gm-listen 127.0.0.1:19062 -gm-internal-listen 127.0.0.1:19063 -gm-internal-token "%NINEYIN_GM_TOKEN%" -log-file "%LOGDIR%\protocol-probe-live.log" 1>>"%LOGDIR%\game-19061.current.log" 2>>&1
+
+rem 独立面板进程：可选存在；缺失时仅内嵌面板可用（回滚形态）。
+if exist "%ROOT%gm-panel.exe" (
+  start "Nine Yin GM Panel 19064" /D "%ROOT%" "%ROOT%gm-panel.exe" -listen 127.0.0.1:19064 -game-addr 127.0.0.1:19063 -game-token "%NINEYIN_GM_TOKEN%" 1>>"%LOGDIR%\gm-panel.current.log" 2>>&1
+)
 
 timeout /t 2 /nobreak >nul
-start "Nine Yin GM Panel" http://127.0.0.1:19062/
+if exist "%ROOT%gm-panel.exe" (
+  start "Nine Yin GM Panel" http://127.0.0.1:19064/
+) else (
+  start "Nine Yin GM Panel" http://127.0.0.1:19062/
+)
 
-echo Launcher finished. Keep the two server windows open.
+echo Launcher finished. Keep the server windows open.
 rem pause

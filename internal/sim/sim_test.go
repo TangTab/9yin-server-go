@@ -255,6 +255,19 @@ func TestVitalsReviveResetsToFull(t *testing.T) {
 	}
 }
 
+// TestVitalsResetAfterLeashRefillsLivingFighter 栓绳重置只服务活怪：
+// 受击残血（含瘀血层）的 Fighting NPC 回家即回满并退回 Normal；
+// Died 态不经此路径复活（尸体仍走 Revive/重生批次）。
+func TestVitalsResetAfterLeashRefillsLivingFighter(t *testing.T) {
+	v := NewVitals(100, 50)
+	v.ApplyDamage(60)
+	v.SpendMP(30)
+	v.ResetAfterLeash()
+	if v.HP != 100 || v.HitHP != 100 || v.MP != 50 || v.Logic != entity.LogicStateNormal {
+		t.Fatalf("leash reset must restore full normal state, got %+v", v)
+	}
+}
+
 func TestVitalsActorStateProjection(t *testing.T) {
 	v := NewVitals(100, 50)
 	v.ApplyDamage(40)

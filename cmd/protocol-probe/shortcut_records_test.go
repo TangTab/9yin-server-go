@@ -48,8 +48,8 @@ func TestSetShortcutAddsAndReplacesRecordRow(t *testing.T) {
 }
 
 // 客户端 C2S 201 传的是可见栏位索引而非记录行号（shortcut_game.lua
-// remove_shortcut 全部调用点实证）。按索引定位，0x12 用删除时该行的
-// 真实行号清行。
+// remove_shortcut 全部调用点实证）。应答走整表重建方言：编辑前的
+// 全部行倒序 0x12 清空，再按内存序 0x11 重放（见 rebuildShortcutRecord）。
 func TestRemoveShortcutUsesVisibleIndex(t *testing.T) {
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("测试", 0)
@@ -58,25 +58,32 @@ func TestRemoveShortcutUsesVisibleIndex(t *testing.T) {
 
 	remove := shortcutCustom(clientCustomRemoveShortcut, clientCustomValue{Type: 2, Int32: 9})
 	handled, err := handleShortcutCustom(conn, player, remove, "test", nil, 0)
-	if err != nil || !handled || len(conn.frames) != 1 {
+	if err != nil || !handled || len(conn.frames) != 3 {
 		t.Fatalf("remove handled=%t err=%v frames=%d", handled, err, len(conn.frames))
 	}
+	// 倒序清空两行：先 row1（被删的 index=9）再 row0，然后重建剩余行。
 	if got := binary.LittleEndian.Uint16(conn.frames[0][12:]); conn.frames[0][0] != 0x12 || got != 1 {
-		t.Fatalf("remove frame=%x row=%d", conn.frames[0], got)
+		t.Fatalf("sweep first frame=%x row=%d", conn.frames[0], got)
+	}
+	if got := binary.LittleEndian.Uint16(conn.frames[1][12:]); conn.frames[1][0] != 0x12 || got != 0 {
+		t.Fatalf("sweep second frame=%x row=%d", conn.frames[1], got)
+	}
+	if conn.frames[2][0] != 0x11 || !strings.Contains(string(conn.frames[2]), "CS_yhwq_hsqs01") {
+		t.Fatalf("rebuild frame=%x", conn.frames[2])
 	}
 	snapshot := player.shortcutSnapshot()
 	if len(snapshot) != 1 || snapshot[0].index != 8 {
 		t.Fatalf("remaining shortcuts=%+v", snapshot)
 	}
 
-	// 删除首行（index=8，行号 0）时 0x12 必须清行号 0。
+	// 删最后一行：清 1 行 + 0 行重建。
 	removeFirst := shortcutCustom(clientCustomRemoveShortcut, clientCustomValue{Type: 2, Int32: 8})
 	handled, err = handleShortcutCustom(conn, player, removeFirst, "test", nil, 0)
-	if err != nil || !handled || len(conn.frames) != 2 {
+	if err != nil || !handled || len(conn.frames) != 4 {
 		t.Fatalf("remove-first handled=%t err=%v frames=%d", handled, err, len(conn.frames))
 	}
-	if got := binary.LittleEndian.Uint16(conn.frames[1][12:]); conn.frames[1][0] != 0x12 || got != 0 {
-		t.Fatalf("remove-first frame=%x row=%d", conn.frames[1], got)
+	if got := binary.LittleEndian.Uint16(conn.frames[3][12:]); conn.frames[3][0] != 0x12 || got != 0 {
+		t.Fatalf("remove-first frame=%x row=%d", conn.frames[3], got)
 	}
 	if snapshot := player.shortcutSnapshot(); len(snapshot) != 0 {
 		t.Fatalf("all removed, remaining=%+v", snapshot)
@@ -85,7 +92,7 @@ func TestRemoveShortcutUsesVisibleIndex(t *testing.T) {
 	// 不存在的索引静默忽略（零帧）。
 	removeMissing := shortcutCustom(clientCustomRemoveShortcut, clientCustomValue{Type: 2, Int32: 40})
 	handled, err = handleShortcutCustom(conn, player, removeMissing, "test", nil, 0)
-	if err != nil || !handled || len(conn.frames) != 2 {
+	if err != nil || !handled || len(conn.frames) != 4 {
 		t.Fatalf("remove-missing handled=%t err=%v frames=%d", handled, err, len(conn.frames))
 	}
 }

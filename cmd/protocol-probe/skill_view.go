@@ -34,8 +34,9 @@ const (
 )
 
 // starterSkillRowIDs 标记 starter 基线行：这些行走 Java StarterSkills.skillRowProperties
-// 方言（UseLimit 回落 9、加发 LeadTime/LeadSepTime 固定族）；DB 追加行走
-// StarterGrants.dbSkillViewAdd 方言（UseLimit 仅 >0 稀疏发，Lead 系不发）。
+// 方言（加发 LeadTime/LeadSepTime 固定族）；DB 追加行走 StarterGrants.dbSkillViewAdd
+// 方言（Lead 系不发）。UseLimit 两种方言一致：仅 skill_new 真值 >0 稀疏发（官方
+// 55866 对拍，Java 的 starter 回落 9 系误泛化，勿镜像）。
 var starterSkillRowIDs = func() map[string]bool {
 	ids := make(map[string]bool, len(starterSkillViews))
 	for _, skill := range starterSkillViews {
@@ -158,8 +159,12 @@ func learnedSkillViewFrames(skills []learnedSkillView) ([][]byte, error) {
 // 族仅 >0 才发（怒招由此带出 AConsumeSP → 客户端显示怒气消耗并在怒气不足时灰
 // 图标）；TargetShapePara2 即技能最大射程（快捷栏 tooltip 距离/施法限距读它）、
 // HitShapePara1/2 地面圈指示，均仅 >0 才发；Quality/恢复与五系伤害倍率=1、
-// Flow=5 固定族——缺席会让面板显示空/零。starter 行加发 UseLimit（回落 9）与
-// LeadTime/LeadSepTime（Java starter 方言；官方 DB 行从不发）。
+// Flow=5 固定族——缺席会让面板显示空/零。starter 行加发 LeadTime/LeadSepTime
+// （Java starter 方言；官方 DB 行从不发）。UseLimit 仅 skill_new 真值 >0 才发：
+// 官方 55866 抓包 207 行里 128 行稀疏携带、值 9 全包仅 zs_default_01（打坐）
+// 1 次，太极拳/花神/心佛掌整段不发；Java 的「回落 9」是把打坐行误泛化——
+// 下发 9 会让客户端按 skill_use_limit 规则 9「无法在战斗状态使用」在入战
+// 瞬间把图标判红（服务端并无此闸，出现红图标但实际可出招的假象）。
 func skillRowProperties(skill learnedSkillView) []serverViewProperty {
 	starterRow := starterSkillRowIDs[skill.configID]
 	var supplement *skillRowSupplement
@@ -202,8 +207,6 @@ func skillRowProperties(skill learnedSkillView) []serverViewProperty {
 	}
 	if useLimit > 0 {
 		properties = append(properties, viewInt(propSkillUseLimit, useLimit))
-	} else if starterRow {
-		properties = append(properties, viewInt(propSkillUseLimit, 9))
 	}
 	if supplement == nil {
 		return properties

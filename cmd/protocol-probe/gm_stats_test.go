@@ -7,32 +7,6 @@ import (
 	"testing"
 )
 
-// TestGMWeatherPresetsClosedList 钉死天气闭名单：49 键、面板目录与
-// gmWeatherPresetByKey 同源、任意目录串（路径注入）必须被拒绝。
-func TestGMWeatherPresetsClosedList(t *testing.T) {
-	if len(gmWeatherPresets) != 49 {
-		t.Fatalf("weather presets = %d keys, want 49 (Java GmWeatherPresets 同数)", len(gmWeatherPresets))
-	}
-	seen := map[string]bool{}
-	for _, preset := range gmWeatherPresets {
-		if preset.Key == "" || preset.Label == "" {
-			t.Fatalf("incomplete preset %+v", preset)
-		}
-		if seen[preset.Key] {
-			t.Fatalf("duplicate weather key %q", preset.Key)
-		}
-		seen[preset.Key] = true
-		if _, err := gmWeatherPresetByKey(preset.Key); err != nil {
-			t.Fatalf("catalog key %q rejected by lookup: %v", preset.Key, err)
-		}
-	}
-	for _, injected := range []string{"", "..", "../../evil", "heavy_rain_501 ", "HEAVY_RAIN_501"} {
-		if _, err := gmWeatherPresetByKey(injected); err == nil {
-			t.Fatalf("injected weather key %q must be rejected", injected)
-		}
-	}
-}
-
 // TestGMStatsThinFrames 逐帧钉死 GM 面板域瘦帧的形（opcode/对象身份/
 // 属性序/值编码），全部对齐 Java LoginFlow applyXxx 的下发序。
 func TestGMStatsThinFrames(t *testing.T) {

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -62,7 +63,7 @@ func TestGMFlowCommandRoundTrip(t *testing.T) {
 		gotCommand <- command
 		command.complete(nil)
 		// 会话循环执行成功后回写面板状态（main.go 中的 setSilver）。
-		session.setSilver(command.silver)
+		session.setSilver(command.Silver)
 	}()
 
 	// 第 3 步：控制台 command() 发出的同款 POST。
@@ -84,7 +85,7 @@ func TestGMFlowCommandRoundTrip(t *testing.T) {
 	// 第 4 步：会话通道必须收到浏览器提交的原值。
 	select {
 	case command := <-gotCommand:
-		if command.action != "set_silver" || command.silver != 12345 {
+		if command.Action != "set_silver" || command.Silver != 12345 {
 			t.Fatalf("session received %+v", command)
 		}
 	case <-time.After(time.Second):
@@ -139,8 +140,14 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_fill_speed","base":200,"multiplier":1.5}`, http.StatusOK},
 		{`{"action":"set_act_day_limit","value":500}`, http.StatusOK},
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":5}`, http.StatusOK},
+		{`{"action":"set_autosave_interval","value":300}`, http.StatusOK}, // 数据存盘：默认周期
+		{`{"action":"set_autosave_interval","value":0}`, http.StatusOK},    // 0=关闭合法
 		{`{"action":"popup_gm_panel"}`, http.StatusOK},
 		{`{"action":"custom_probe","msgId":517,"subType":899000000}`, http.StatusOK},
+
+		// —— 「所有道具与换装」：grant_item 合法负载（发放+立即穿戴）——
+		{`{"action":"grant_item","itemConfig":"blade_60705","amount":2,"wearNow":true}`, http.StatusOK},
+		{`{"action":"grant_item","itemConfig":"box_gift_01","amount":0}`, http.StatusOK}, // 数量缺省回落 1
 
 		// —— 界外/缺值负载：照搬 Java GmRemote 的闸门 ——
 		{`{"action":"set_guanyin","guanYin":-1}`, http.StatusBadRequest},
@@ -157,8 +164,12 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_act_day_limit","value":1000000}`, http.StatusBadRequest},
 		{`{"action":"set_weather","weather":"..\\..\\evil"}`, http.StatusBadRequest}, // 闭名单拒绝路径注入
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":601}`, http.StatusBadRequest},
+		{`{"action":"set_autosave_interval","value":-1}`, http.StatusBadRequest},   // 负数拒绝
+		{`{"action":"set_autosave_interval","value":3.5}`, http.StatusBadRequest}, // 必须整数
+		{`{"action":"set_autosave_interval","value":86401}`, http.StatusBadRequest},
 		{`{"action":"custom_probe","msgId":0,"subType":1}`, http.StatusBadRequest},
 		{`{"action":"custom_probe","msgId":800,"subType":1}`, http.StatusBadRequest},
+		{`{"action":"grant_item","itemConfig":"   "}`, http.StatusBadRequest}, // 空白 ConfigID
 	}
 	for _, testCase := range cases {
 		body, status := post(testCase.payload)
@@ -170,6 +181,63 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 	offline, status := postOffline(t, server, 999, `{"action":"fill_sp"}`)
 	if status != http.StatusConflict || !strings.Contains(offline, "not online") {
 		t.Fatalf("offline session status=%d body=%s", status, offline)
+	}
+}
+
+// TestGMFlowAutosaveInterval 数据存盘周期是进程级共享原子值：假会话
+// 循环执行与 main.go processGMCommand set_autosave_interval 分支相同的
+//写动作，验证 HTTP → 校验 → 会话通道 → setAutosaveInterval 的完整链路。
+func TestGMFlowAutosaveInterval(t *testing.T) {
+	previous := autosaveInterval()
+	t.Cleanup(func() { setAutosaveInterval(previous) })
+
+	server, session, _ := gmFlowHarness(t)
+	// 会话循环消费命令：照抄执行器分支的写动作与回执文案。
+	go func() {
+		for command := range session.commands {
+			if command.Action == "set_autosave_interval" {
+				seconds := int32(command.Value)
+				setAutosaveInterval(time.Duration(seconds) * time.Second)
+				if seconds > 0 {
+					session.setAction(fmt.Sprintf("自动存盘间隔设为 %d 秒（在线玩家内功/经脉快照周期落库）", seconds))
+				} else {
+					session.setAction("自动存盘已关闭：仅断线与 Ctrl+C 关服时存")
+				}
+			}
+			command.complete(nil)
+		}
+	}()
+
+	payload, _ := json.Marshal(map[string]any{"action": "set_autosave_interval", "value": 120})
+	response, err := http.Post(server.URL+"/api/sessions/7/command", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("post command: %v", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("command status=%d", response.StatusCode)
+	}
+	if got := autosaveInterval(); got != 120*time.Second {
+		t.Fatalf("autosave interval=%v want 2m", got)
+	}
+	// 状态回读带上执行器回执文案（顶栏"最近操作"）。
+	body, _, _ := gmGetBody(t, server.URL+"/api/sessions")
+	if !strings.Contains(body, "自动存盘间隔设为 120 秒") {
+		t.Fatalf("sessions state missing autosave receipt: %s", body)
+	}
+
+	// 0=关闭语义：共享值清零后 1s tick 的判定分支不再触发。
+	payload, _ = json.Marshal(map[string]any{"action": "set_autosave_interval", "value": 0})
+	response, err = http.Post(server.URL+"/api/sessions/7/command", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("post disable: %v", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("disable status=%d", response.StatusCode)
+	}
+	if got := autosaveInterval(); got != 0 {
+		t.Fatalf("autosave interval after disable=%v want 0", got)
 	}
 }
 

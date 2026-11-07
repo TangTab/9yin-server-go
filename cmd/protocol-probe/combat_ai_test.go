@@ -292,3 +292,168 @@ func TestCombatTickRespawnsAfterTemplateRefreshTime(t *testing.T) {
 	}
 	lifecycle.close()
 }
+
+// TestCombatTickClearsNPCFightingAfterLeash 复刻真机反馈：玩家打怪一下后
+// 脱离（死亡/离场/拉出栓绳距离），怪清仇恨回家——旧实现 Vitals.Logic 停在
+// Fighting 永不回落（脱战只随重生发生），客户端一直显示战斗态怪。修复后
+// 清仇恨 tick 完全重置（HP/瘀血/MP 回满 + Fighting→Normal）并补发 0x10
+// 属性帧（463=0），帧形与官方重置帧一致（55866/12141/52905 抓包：NPC 463
+// 生命周期 0→1→120→0，0 帧伴随资源回满；栓绳样本无抓包，回满为拍板行为）。
+func TestCombatTickClearsNPCFightingAfterLeash(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, lifecycle, 87)
+	id := worldcore.EntityID(87)
+	vitals, ok := lifecycle.run.combat.Vitals(id)
+	if !ok {
+		t.Fatal("combat NPC must have vitals")
+	}
+	vitals.ApplyDamage(1) // 玩家命中：入战 Fighting + 瘀血层
+	lifecycle.run.combat.WriteVitals(id, vitals)
+
+	player := newPlayerActor("tester", 0)
+	now := time.Unix(7000, 0)
+	// 近身 tick：建立仇恨并咬住目标；combatTickForTest 每次调用都
+	// 登记一个新成员（旧成员留在怪脚边会被继续咬），先跑脱离 tick
+	// 再注销旧成员——顺序颠倒会因成员清空触发场景关闭。
+	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now)
+	lifecycle.mu.Lock()
+	staleWireID := lifecycle.wireID
+	lifecycle.mu.Unlock()
+	lifecycle.combatTickForTest(player, role.Position{X: 500, Y: 0, Z: 500}, now.Add(time.Second))
+	lifecycle.run.detachMember(staleWireID)
+
+	// 玩家拉出栓绳距离：清仇恨回位 + 战斗态回落。怪本就在家，
+	// 该 tick 唯一新增帧即 463=0 的 NPC 属性帧。
+	lifecycle.combatTickForTest(player, role.Position{X: 500, Y: 0, Z: 500}, now.Add(2*time.Second))
+	if cleared, _ := lifecycle.run.combat.Vitals(id); cleared.Logic != entity.LogicStateNormal {
+		t.Fatalf("NPC LogicState=%d after leash, want Normal", cleared.Logic)
+	} else if cleared.HP != cleared.MaxHP || cleared.HitHP != cleared.MaxHP {
+		t.Fatalf("leash must refill to full: HP=%d HitHP=%d MaxHP=%d", cleared.HP, cleared.HitHP, cleared.MaxHP)
+	}
+	if brain, _ := lifecycle.run.combat.Brain(id); brain.Threat != 0 || brain.TargetMember != 0 {
+		t.Fatalf("brain threat=%d target=%d after leash, want cleared", brain.Threat, brain.TargetMember)
+	}
+	var logicState *byte
+	for _, frame := range conn.Frames() {
+		if frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != 87 {
+			continue
+		}
+		// npcCombatProperties 线宽：21/463/464=1B，28/30/32/465/469/578=4B。
+		off := 12
+		for i := 0; i < int(binary.LittleEndian.Uint16(frame[10:])); i++ {
+			idx := binary.LittleEndian.Uint16(frame[off:])
+			off += 2
+			width := map[uint16]int{21: 1, 463: 1, propDead: 1}[idx]
+			if width == 0 {
+				width = 4
+			}
+			if idx == 463 {
+				value := frame[off]
+				logicState = &value
+			}
+			off += width
+		}
+		if off != len(frame) {
+			t.Fatalf("NPC property frame len=%d parsed=%d (layout drift)", len(frame), off)
+		}
+	}
+	if logicState == nil {
+		t.Fatal("leash tick did not broadcast NPC LogicState frame")
+	}
+	if *logicState != entity.LogicStateNormal {
+		t.Fatalf("NPC LogicState frame=%d, want Normal(0)", *logicState)
+	}
+	lifecycle.close()
+}
+
+// autoSelectFrames 收集受害者连接上的 LastObject(414)/AutoSelectObject(415)
+// 单属性 0x10 帧（各 22B：n@10=1、idx@12、target@14/18），返回
+// idx→(targetID,targetOwner)。登录全量 0x10 帧属性数远大于 1，天然被过滤。
+func autoSelectFrames(conn *captureMessageConnection) map[uint16][2]uint32 {
+	found := map[uint16][2]uint32{}
+	for _, frame := range conn.Frames() {
+		if len(frame) != 22 || frame[0] != 0x10 || binary.LittleEndian.Uint16(frame[10:]) != 1 {
+			continue
+		}
+		idx := binary.LittleEndian.Uint16(frame[12:])
+		if idx == 414 || idx == 415 {
+			found[idx] = [2]uint32{binary.LittleEndian.Uint32(frame[14:]), binary.LittleEndian.Uint32(frame[18:])}
+		}
+	}
+	return found
+}
+
+func TestNPCAttackAutoSelectsAttackerForUntargetedVictim(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, lifecycle, 91)
+	player := newPlayerActor("tester", 0)
+	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3000, 0))
+	found := autoSelectFrames(conn)
+	for _, idx := range []uint16{414, 415} {
+		target, ok := found[idx]
+		if !ok {
+			t.Fatalf("attacker auto-select frame idx=%d missing", idx)
+		}
+		if target[0] != 91 || target[1] != 1 {
+			t.Fatalf("idx=%d selected %d-%d, want 91-1", idx, target[0], target[1])
+		}
+	}
+	if lifecycle.selectedObject != 91 || lifecycle.selectedOwner != 1 {
+		t.Fatalf("server selection mirror = %d-%d, want 91-1", lifecycle.selectedObject, lifecycle.selectedOwner)
+	}
+	// 自动选中必须立刻打通 211 选靶路径（skillTargetSelected 族）。
+	if id, owner, ok := lifecycle.selectedCombatTarget(); !ok || id != 91 || owner != 1 {
+		t.Fatalf("selectedCombatTarget after auto-select = %d-%d ok=%t", id, owner, ok)
+	}
+	lifecycle.close()
+}
+
+func TestNPCAttackKeepsPlayerManualSelection(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, lifecycle, 92)
+	registerTestCombatNPC(t, lifecycle, 93)
+	placeTestNPC(t, lifecycle, 93, 200, 200) // 仇恨圈外保持存活的手动目标
+	lifecycle.selectedObject, lifecycle.selectedOwner = 93, 1
+	player := newPlayerActor("tester", 0)
+	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3100, 0))
+	if lifecycle.selectedObject != 93 || lifecycle.selectedOwner != 1 {
+		t.Fatalf("manual target overridden by auto-select: now %d-%d", lifecycle.selectedObject, lifecycle.selectedOwner)
+	}
+	if found := autoSelectFrames(conn); len(found) != 0 {
+		t.Fatalf("auto-select frames must not fire while a living manual target exists: %v", found)
+	}
+	lifecycle.close()
+}
+
+func TestNPCAttackReplacesStaleSelection(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, lifecycle, 94)
+	// 已消亡对象占位的陈旧格与空选同权，攻击者应当顶替。
+	lifecycle.selectedObject, lifecycle.selectedOwner = 949494, 1
+	player := newPlayerActor("tester", 0)
+	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3200, 0))
+	if lifecycle.selectedObject != 94 || lifecycle.selectedOwner != 1 {
+		t.Fatalf("stale selection not replaced: %d-%d", lifecycle.selectedObject, lifecycle.selectedOwner)
+	}
+	found := autoSelectFrames(conn)
+	if _, ok := found[415]; !ok {
+		t.Fatal("stale selection replacement must push AutoSelectObject frame")
+	}
+	lifecycle.close()
+}

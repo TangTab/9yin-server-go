@@ -5,6 +5,8 @@ import (
 	"math"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+
+	"github.com/local/9yin-go-server/internal/gmapi"
 )
 
 // GM 面板域（货币/属性/状态批次）的玩家侧状态与帧构建器。参考 Java
@@ -46,7 +48,8 @@ const (
 const actDayUnlimitedSentinel int32 = 999_999_999
 
 // gmBaseAttributeCap 与 Java PlayerProgress.BASE_ATTRIBUTE_CAP 一致。
-const gmBaseAttributeCap int32 = 1_000_000
+// 权威定义在 internal/gmapi（GM 线协议界值与之共用），此处为别名。
+const gmBaseAttributeCap int32 = gmapi.BaseAttributeCap
 
 // gmVitalsState 是 GM set_vitals 的生存属性层（Java PlayerProgress.Vitals
 // 的 GM 可写子集；max_hp_override/max_mp_override 仅快照透传）。

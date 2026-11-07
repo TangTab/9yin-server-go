@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script>
+    if (location.protocol === "https:") {
+      location.href = "http://" + location.host + location.pathname;
+    }
+  </script>
+  <title>九阴本地 GM</title>
+  <link rel="stylesheet" href="/static/console.css" />
+</head>
+
+<body>
+  <header>
+    <h1>九阴本地 GM</h1>
+    <span class="chip" id="gm-server-badge" title="GM 面板地址（本机）"><b>服务器</b>-</span>
+    <a id="gm-back-link" href="/">← 服务器概览</a>
+    <div id="player-card" class="player-chips">读取中……</div>
+    <span id="command-status" class="status"></span>
+  </header>
+  <div class="layout">
+    <nav id="gm-nav"></nav>
+    <main class="grid">
+      <section id="sec-player">
+        <h2>在线角色</h2>
+        <p class="muted">
+          仅监听
+          127.0.0.1。命令直接交给在线游戏会话执行；顶部实时显示当前角色状态。
+        </p>
+        <pre id="state">读取中……</pre>
+        <button onclick="popupGMPanel()">弹出游戏GM面板</button><button onclick="refresh()">刷新</button>
+      </section>
+      <section>
+        <h2>伙伴系统</h2>
+        <p class="muted">
+          伙伴操作直接作用于当前在线角色；拉伙伴不要求重新邀请，且会使用当前场景。
+          伙伴默认跟随（走远自动追上，切图后在新场景身边重生）；辅助按周期给玩家回血。
+        </p>
+        <button onclick="botCommand('bot_ensure')">创建 / 校验青禾</button><button
+          onclick="botCommand('bot_pull_here')">拉伙伴到我身边</button><button
+          onclick="botCommand('bot_follow_start')">开始跟随</button><button
+          onclick="botCommand('bot_follow_stop')">停止跟随</button><button
+          onclick="botCommand('bot_revive')">复活回满血</button><br />
+        <label>辅助
+          <select id="bot-support-enabled">
+            <option value="1">开</option>
+            <option value="0" selected>关</option>
+          </select></label>
+        <label>间隔(秒)
+          <input id="bot-support-interval" type="number" value="5" min="1" max="60"
+            style="min-width: 70px; width: 70px" /></label>
+        <label>治疗量
+          <input id="bot-support-heal" type="number" value="500" min="0" max="100000"
+            style="min-width: 90px; width: 90px" /></label>
+        <button onclick="botSupportConfigure()">配置辅助技能</button>
+        <pre id="bot-state">读取伙伴状态中……</pre>
+      </section>
+      <section>
+        <h2>所有道具与换装</h2>
+        <p class="muted">
+          目录合并 equipment.ini 与 tool_item.ini：中文名以 stringname.idres 为准
+          （与游戏内显示同源，可纠正表内抄错/占位名）；idres 无键回落表内 Name，
+          仍无则显示 ConfigID；注释节与身份装内件（ViewID≠1..4，走「时装/身份装发放」）
+          不进本列表。ViewID 会把道具分别放入普通、装备、材料、任务背包。
+        </p>
+        <input id="item-query" placeholder="输入中文名或 ConfigID，例如：久仙刀、药、礼包" />
+        <select id="item-view">
+          <option value="0">全部分类</option>
+          <option value="1">普通道具</option>
+          <option value="2">装备</option>
+          <option value="3">材料</option>
+          <option value="4">任务物品</option>
+        </select>
+        <button onclick="searchItems()">搜索</button><br />
+        <select id="item-result">
+          <option value="">请先搜索道具</option>
+        </select>
+        <input id="item-amount" type="number" value="1" min="1" max="9999"
+          style="min-width: 90px; width: 90px" />
+        <button onclick="grantItem(false)">加入对应背包</button><button onclick="grantItem(true)">立即穿戴</button>
+        <div id="item-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>时装 / 身份装发放</h2>
+        <p class="muted">
+          目录按 equipment.ini EquipType
+          分类：时装帽子/衣服/鞋子为分件，时装套装（FashionCoat）与身份装套装（Suit）为整套。「立即穿戴」直接穿进人物属性面板身份装/时装栏位（16-19，自动镜像新面板
+          40-43）并同步外观与发型；「加入装备背包」由玩家自己穿。时装裤子暂无数据（九阴时装没有独立裤子分件，裤外观由套装自带）。
+        </p>
+        <label>分类
+          <select id="fashion-cat"></select></label>
+        <input id="fashion-query" placeholder="按中文名或 ConfigID 过滤（可留空）" oninput="renderFashionItems()" /><br />
+        <select id="fashion-result" size="10" style="width: 100%; max-width: 560px; height: 220px">
+          <option value="">目录读取中……</option>
+        </select><br />
+        <button onclick="grantFashion(true)">立即穿戴</button><button onclick="grantFashion(false)">加入装备背包</button>
+        <div id="fashion-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>碎银 / 官银 / 黄金 / 怒气</h2>
+        <p class="muted">
+          重制服务（重置属性）扣的是<b>官银</b>（senior_prop_cost
+          type=2），缺钱报"您的银两不足"就设官银；黄金=商城元宝。四项均为本会话数值（重登重置；官银/黄金的
+          vip.json 级持久化待接）：碎银=CapitalType1、官银=CapitalType2、黄金=CapitalType0、怒气=SP
+          （0–100，设置后立即下发属性帧）。
+        </p>
+        <input id="silver" type="number" value="99999" min="0" /><button onclick="silver()">
+          设置碎银</button><br />
+        <input id="guanyin" type="number" value="99999" min="0" /><button onclick="guanyinSet()">
+          设置官银</button><br />
+        <input id="gold" type="number" value="9999" min="0" /><button onclick="goldSet()">
+          设置黄金</button><br />
+        <input id="sp" type="number" value="100" min="0" max="100" /><button onclick="setSP()">
+          设置怒气</button><button onclick="addSP(10)">+10</button><button onclick="addSP(50)">+50</button><button
+          onclick="fillSP()">回满</button><br />
+          <label>自动回复/秒
+          <input id="rage-recovery" type="number" value="0" min="0" max="1000" style="min-width: 110px; width: 110px" /></label><button
+            onclick="setRageRecovery()">应用</button><span class="muted">（0=关闭；官方满档 5；会话级，重登归零）</span>
+      </section>
+      <section>
+        <h2>怪物刷新</h2>
+        <p class="muted">
+          <b>批量刷新</b>：每到间隔统一重生所有<b>已死亡</b>怪物（回出生点满血），活怪一律不动；0=关闭批量，回到每怪独立
+          RefreshTime 计时。<b>尸体清除</b>：死亡超过该秒数后尸体消失（0x0E），重生时在出生点重新物化；0=尸体保留到重生。任务怪（EventNpc/事件触发生成器）从不生成，也永不进入刷新循环。杀怪掉落宝箱 60 秒未拾自动消失。
+        </p>
+        <label>批量间隔/秒
+          <input id="respawn-interval" type="number" value="30" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
+          onclick="setRespawnInterval()">应用</button>
+        <label style="margin-left: 12px">尸体清除/秒
+        <input id="corpse-ttl" type="number" value="10" min="0" max="3600" style="min-width: 110px; width: 110px" /></label><button
+          onclick="setCorpseTTL()">应用</button>
+      </section>
+      <section>
+        <h2>数据存盘</h2>
+        <p class="muted">
+          <b>自动存盘</b>：每到间隔把所有在线玩家的内功修为/经脉快照落库（与正常下线同一组存盘，进程被强杀时最多丢一个周期）；
+          <b>0=关闭</b>，仅断线与 Ctrl+C 优雅关服时存。进程级设置，改动即刻对全部在线会话生效；重启后回落启动参数
+          -autosave-interval（默认 300 秒）。
+        </p>
+        <label>间隔/秒
+        <input id="autosave-interval" type="number" value="300" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
+          onclick="setAutosaveInterval()">应用</button>
+      </section>
+      <section>
+        <h2>经脉</h2>
+        <p class="muted">
+          每日真气硬闸：开启后当日已获真气（ZQPLValue，被动修炼 + 打怪折算同一池）达到阈值即停止入账，进度条停住，次日 UTC
+          日切自动恢复；关闭则不限量（进度条上限显示回落官方缺省 500）。设置为<b>角色级持久化</b>（重登沿用），修改立即下发属性帧。
+        </p>
+        <label><input id="zhenqi-cap-enabled" type="checkbox" /> 是否开启每日硬闸</label><br />
+        <label>每日阈值
+          <input id="zhenqi-cap-value" type="number" value="500" min="1" max="10000000"
+            style="min-width: 110px; width: 110px" /></label>
+        <button onclick="zhenqiCapSet()">应用设置</button>
+        <div id="zhenqi-cap-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>洗练（身上装备 · 指定部位）</h2>
+        <p class="muted">
+          先选部位再点功能：<b>随机洗练</b>=词条属性+数值全随机重掷（op3）；<b>定向洗练</b>=保持现有词条属性不变，只在同属性族内随机重掷数值（op4）；<b>抛光</b>=保持词条属性不变，把每条数值拉到该属性族的最高档（组内最大值）。招式开光随机洗练已学招式词条。词条是全局属性包，穿在任何部位都生效；武器走
+          senior_weapon 专属池，防具/首饰走 senior_prop
+          专属池（防具定向/抛光在同内功同属性族内重掷），没有专属段时按家族前缀回退、仍没有才兜底全池。结果立即重刷装备视图、战斗加成并写入
+          equip.json。定向/抛光需要该部位已有词条。
+        </p>
+        <label>目标部位
+          <select id="recast-target-slot"></select></label>
+        <button onclick="gmRecast('recast_slot_prop')">随机洗练</button>
+        <button onclick="gmRecast('recast_slot_dire')">定向洗练</button>
+        <button onclick="gmRecast('recast_slot_polish')">抛光</button>
+        <button onclick="gmRecast('recast_slot_skill')">招式开光</button>
+        <span id="recast-result" class="muted"></span>
+        <div style="margin-top: 8px">
+          <b>自定义词条</b>
+          <span class="muted">（追加写入，不替换现有词条）</span><br />
+          <button onclick="toggleAffixList()">全部词条列表</button>
+          <button onclick="recastChecked('prop')">加入词条（普通）</button>
+          <button onclick="recastChecked('skill')">加入词条（招式）</button>
+          <button onclick="recastClearAffix()">清空装备词条</button>
+          <span id="recast-affix-hint" class="muted"></span><br />
+          <input id="affix-filter" type="text" placeholder="输入 名称/ID 筛选…"
+            style="display: none; min-width: 180px; width: 180px" oninput="filterAffixList()" />
+          <label id="affix-weapon-label" style="display: none">武器类型
+            <select id="affix-weapon-filter" onchange="filterAffixList()"
+              style="min-width: 90px; width: 90px"></select></label>
+          <div id="affix-list-box" style="display: none">
+            <details open>
+              <summary>普通词条（PropBuilt）</summary>
+              <div id="recast-prop-list" class="affix-list"></div>
+            </details>
+            <details>
+              <summary>招式词条（SkillPack）</summary>
+              <div id="recast-skill-list" class="affix-list"></div>
+            </details>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>模板生成（带词条装备）</h2>
+        <p class="muted">
+          按官方生活技能模板生成并立即穿戴（模板优先取 51 级金色 60501
+          家族基座，词条随装备持久化）：<b>厨师</b>=6
+          条属性词条；<b>铁匠</b>=3
+          条属性词条 + 3
+          条招式词条（招式按所选武器类型的官方池随机，与洗练「招式开光」同语义）。<b>护腕</b>=3
+          条阳刚臂力（+33/+35/+35）+ 3 条招式词条（按身上已穿武器类型，未穿武器则省略）。<b>防具
+          8 部位</b>=固定 5 条红词条（外功防御能力+46/+47、体魄+29、内息+39、臂力+35，绿色招架词条由装备配置自动附带）。词条数值取自
+          senior_weapon_rand 官方洗练池（池缺失回退全池随机并在回执注明）；项链/耳环/戒指与防具同款红词条直接穿戴。
+        </p>
+        <label>武器类型
+          <select id="tpl-weapon-type">
+            <option value="101">单刀</option>
+            <option value="102" selected>单剑</option>
+            <option value="103">匕首</option>
+            <option value="104">双刀</option>
+            <option value="105">双剑</option>
+            <option value="106">双刺</option>
+            <option value="107">长棍</option>
+            <option value="108">短棍</option>
+            <option value="122">重剑</option>
+          </select></label>
+        <label>职业
+          <select id="tpl-crafter">
+            <option value="cook">厨师（6 属性词条）</option>
+            <option value="smith">铁匠（3 属性 + 3 招式）</option>
+          </select></label>
+        <button onclick="gmTemplateWeapon()">生成武器</button><br />
+        <label>防具部位
+          <select id="tpl-armor-slot">
+            <option value="helmet">帽子</option>
+            <option value="amulet">项链</option>
+            <option value="cloth">衣服</option>
+            <option value="pants">裤子</option>
+            <option value="leg">绑腿</option>
+            <option value="shoes">鞋子</option>
+            <option value="ear">耳环</option>
+            <option value="ring">戒指</option>
+          </select></label>
+        <button onclick="gmTemplateArmor()">生成防具</button>
+        <button onclick="gmTemplateBracer()">生成带技能词条的护腕</button>
+      </section>
+      <section>
+        <h2>移动参数</h2>
+        <p class="muted">
+          移动速度同时更新 MoveSpeed 与 RunSpeed；下落重力更新
+          Gravity，数值越大下落越快，下一次起跳生效（数值范围 0.1–100）。
+        </p>
+        <label>移动速度
+          <input id="move-speed" type="number" value="5" min="0.1" max="100" step="0.5" /></label><button
+          onclick="setMoveSpeed()">应用</button><br />
+        <label>下落重力
+          <input id="gravity" type="number" value="9.8" min="0.1" max="100" step="0.1" /></label><button
+          onclick="setGravity()">应用</button><br />
+        <button onclick="command({ action: 'fightword_probe' })">
+          测试伤害飘字 24680
+        </button>
+      </section>
+      <section>
+        <h2>训练木桩</h2>
+        <p class="muted">
+          在角色当前位置生成一只纯沙包怪物：移动速度
+          0、不会还手、血量自定义，打空即死（可反复生成）。测输出/测技能专用。
+        </p>
+        <label>血量
+          <input id="dummy-hp" type="number" value="100000" min="1"
+            style="min-width: 120px; width: 120px" /></label>
+        <button onclick="spawnDummy()">生成木桩</button>
+        <button onclick="spawnDummy(1000000)">生成 100 万血木桩</button>
+      </section>
+      <section>
+        <h2>添加假人（战斗）</h2>
+        <p class="muted">
+          在角色面前生成一只「机关木人」造型的可战斗假人（血量默认 5
+          万、名字可自定义）：选中出招命中后假人会周期还手（近身挥击、恒
+          1 点实伤），打空血 15 秒后满血重生，可反复练习连招/测承伤。单段伤害与招式参数当前仅记日志不生效。
+        </p>
+        <label>名字
+          <input id="cd-name" value="战斗假人" style="min-width: 140px; width: 160px" /></label>
+        <label>血量
+          <input id="cd-hp" type="number" value="50000" min="1"
+            style="min-width: 110px; width: 110px" /></label>
+        <label>单段伤害(0=按技能表)
+          <input id="cd-dmg" type="number" value="0" min="0"
+            style="min-width: 90px; width: 90px" /></label><br />
+        <label>预设套路：
+          <select id="cd-preset" onchange="cdPreset(this.value)">
+            <option value="random">随机套路</option>
+          </select></label><br />
+        <label>招式（顿号/逗号分隔，可自行增删）<br /><textarea id="cd-skills" rows="3"
+            style="min-width: 340px; width: 360px"></textarea></label><br />
+        <button onclick="spawnCombatDummy()">生成战斗假人</button>
+        <button onclick="clearCombatDummies()">清除全部战斗假人</button>
+      </section>
+      <section>
+        <h2>世界宝箱</h2>
+        <p class="muted">
+          在角色当前位置生成一个「镀银宝箱」（BoxNpc10006，洛阳同款）：点击开箱
+          → 蹲下拾取动作 + 开盖动画 +
+          拾取框（随机装备/礼包/带词条宝物），拾取完宝箱自动消失。可反复生成。
+        </p>
+        <button onclick="spawnChest()">生成镀银宝箱</button>
+      </section>
+      <section>
+        <h2>常用传送</h2>
+        <p class="muted">主城 / 新手村：</p>
+        <button onclick="preset('yanjing')">燕京</button><button onclick="preset('suzhou')">苏州</button><button
+          onclick="preset('jinling')">金陵</button><button onclick="preset('luoyang')">洛阳</button><button
+          onclick="preset('chengdu')">成都</button>
+        <button onclick="preset('jimingyi')">鸡鸣驿</button><button
+          onclick="preset('yanyuzhuang')">烟雨庄</button><button
+          onclick="preset('qiandengzhen')">千灯镇</button><button onclick="preset('erengu')">恶人谷</button><br />
+        <p class="muted">八大门派：</p>
+        <button onclick="preset('jinyiwei')">锦衣卫</button><button onclick="preset('gaibang')">丐帮</button><button
+          onclick="preset('junzitang')">君子堂</button><button onclick="preset('jilegu')">极乐谷</button>
+        <button onclick="preset('tangmen')">唐门</button><button onclick="preset('emei')">峨眉</button><button
+          onclick="preset('wudang')">武当</button><button onclick="preset('shaolin')">少林</button><br />
+        <p class="muted">江湖势力：</p>
+        <button onclick="preset('yihuagong')">移花宫</button><button
+          onclick="preset('taohuadao')">桃花岛</button><button onclick="preset('wugenmen')">无根门</button>
+        <button onclick="preset('xujia')">徐家庄</button><button onclick="preset('jinzhen')">金针沈家</button><button
+          onclick="preset('wanshou')">万兽山庄</button><button onclick="preset('tianlun')">天轮寺</button><button
+          onclick="preset('qingyi')">青衣楼</button><br />
+        <p class="muted">隐世宗门：</p>
+        <button onclick="preset('xuedao')">血刀门</button><button onclick="preset('huashan')">华山派</button><button
+          onclick="preset('gumu')">古墓派</button><button onclick="preset('damo')">达摩宗</button><button
+          onclick="preset('shenshui')">神水宫</button>
+        <button onclick="preset('changfeng')">长风镖局</button><button
+          onclick="preset('nianluo')">念萝崖</button><button onclick="preset('wuxian')">无仙教</button><button
+          onclick="preset('shenji')">神机营</button><button onclick="preset('xingmiao')">星渺阁</button><br />
+        <button onclick="preset('tianya')">天涯海阁</button><button onclick="preset('wanghui')">王回庄</button><button
+          onclick="preset('wuxu')">无虚</button><button onclick="preset('shenjihui')">神机营</button>
+        <button onclick="preset('kunlunpai')">昆仑派</button><button
+          onclick="preset('xingtianbao')">刑天堡</button><button
+          onclick="preset('tianshanpai')">天山派</button><button onclick="preset('mingjiao')">明教</button><br />
+        <p class="muted">野外世界场景：</p>
+        <button onclick="preset('scene01')">游云十六洲</button><button
+          onclick="preset('scene02')">蓬莱仙境</button><button onclick="preset('scene03')">泛黄平原</button><button
+          onclick="preset('scene04')">襄阳坡</button><button onclick="preset('scene04b')">向阳坡北</button>
+        <button onclick="preset('scene05')">念萝坝</button><button onclick="preset('scene06')">凌霄城</button><button
+          onclick="preset('scene07')">梅花岭</button><button onclick="preset('scene08')">塞外大漠</button><button
+          onclick="preset('scene09')">塞北草原</button><br />
+        <button onclick="preset('scene10')">华山论剑</button><button onclick="preset('scene11')">快活岛</button><button
+          onclick="preset('scene16')">蓬莱岛</button><button onclick="preset('scene17')">侠客岛</button><button
+          onclick="preset('scene19')">无寂道</button>
+        <button onclick="preset('scene32')">永夜城</button><button onclick="preset('scene33')">鬼市</button><button
+          onclick="preset('scene14')">场景14</button><button onclick="preset('scene15')">场景15</button><br />
+        <p class="muted">江湖禁地 / 副本入口：</p>
+        <button onclick="preset('jindi_klsg')">孔雀山庄</button><button
+          onclick="preset('jindi_lmkc')">龙门客栈</button><button
+          onclick="preset('jindi_qingy')">青云堡</button><button onclick="preset('jindi_yamg')">雁门关</button>
+        <button onclick="preset('jindi_sjd')">神机岛</button><button
+          onclick="preset('jindi_xyg')">血影宫</button><button onclick="preset('jindi_ysg')">阎王阁</button><button
+          onclick="preset('jindi_zyg')">紫云宫</button><br />
+        <button onclick="preset('jindi_shg')">森罗殿</button><button
+          onclick="preset('jindi_ysl')">药王谷</button><button onclick="preset('jindi_xyu')">星月湖</button><button
+          onclick="preset('jindi_hlg')">火麟洞</button>
+        <button onclick="preset('jindi_qlg')">七里谷</button><button
+          onclick="preset('jindi_dmgc')">大漠鬼城</button><button
+          onclick="preset('jindi_qcxi')">千苍峡</button><button onclick="preset('jindi_hygu')">横云谷</button><br />
+        <button onclick="preset('jindi_tsha')">天山海岛</button><button
+          onclick="preset('jindi_ywf')">隐王峰</button><button
+          onclick="preset('jindi_wxtg')">五行天宫</button><button onclick="preset('jindi_gshe')">鬼市蛇王</button>
+        <button onclick="preset('jindi_gwng')">鬼市鬼王</button><button
+          onclick="preset('jindi_sdmz')">十大试炼</button><button
+          onclick="preset('jindi_nzyhb')">逆转阴阳堡</button><button
+          onclick="preset('jindi_czx')">潮之巷</button><br />
+        <button onclick="preset('jindi_csyt')">春山隐庭</button><button onclick="preset('jindi_mx')">溟墟</button>
+        <button onclick="preset('jindi_qyb')">竞速·青云堡</button><button
+          onclick="preset('jindi_kssg')">竞速·孔雀山庄</button><button
+          onclick="preset('jindi_lmkc2')">竞速·龙门客栈</button><button
+          onclick="preset('jindi_dmgc2')">竞速·大漠鬼城</button><br />
+        <p class="muted">跨服 / 活动场景：</p>
+        <button onclick="preset('worldwar01')">世界战场(一)</button><button
+          onclick="preset('worldwar02')">世界战场(二)</button><button
+          onclick="preset('battle_myz')">牧云泽</button><button onclick="preset('battle_gmp')">古墓坡</button>
+        <button onclick="preset('battle_myz2')">牧云泽(二)</button><button
+          onclick="preset('tianlundb')">天伦夺宝</button><button
+          onclick="preset('schoolwar5')">门派战·锦衣卫</button><button
+          onclick="preset('schoolwar6')">门派战·丐帮</button><br />
+        <button onclick="preset('schoolwar7')">门派战·君子堂</button><button
+          onclick="preset('schoolwar8')">门派战·极乐谷</button><button
+          onclick="preset('schoolwar9')">门派战·唐门</button><button
+          onclick="preset('schoolwar10')">门派战·峨眉</button>
+        <button onclick="preset('schoolwar11')">门派战·武当</button><button
+          onclick="preset('schoolwar12')">门派战·少林</button><button
+          onclick="preset('schoolwar20')">门派战·明教</button><button
+          onclick="preset('schoolwar22')">门派战·天山</button><br />
+        <p class="muted">冒险场景 / 秘境：</p>
+        <button onclick="preset('adv024')">万象门</button><button onclick="preset('adv023')">千机阁</button><button
+          onclick="preset('adv032')">玄冰洞</button><button onclick="preset('adv011')">玄冥洞</button>
+        <button onclick="preset('adv033')">烈焰洞</button><button onclick="preset('adv100')">藏经阁</button><button
+          onclick="preset('adv101')">天机阁</button><button onclick="preset('adv041')">碧波潭</button><br />
+        <button onclick="preset('adv045')">桃花谷</button><button onclick="preset('adv052')">寒冰洞</button><button
+          onclick="preset('adv053')">火焰洞</button><button onclick="preset('adv054')">白雾谷</button>
+        <button onclick="preset('adv055')">青竹谷</button><button onclick="preset('adv057')">迷踪林</button><button
+          onclick="preset('adv102')">天武阁</button><button onclick="preset('adv106')">望月台</button><br />
+        <button onclick="preset('adv120')">凌云台</button><button onclick="preset('adv121')">千雪峰</button><button
+          onclick="preset('adv122')">望月崖</button><button onclick="preset('adv123')">观星台</button>
+        <button onclick="preset('adv148')">明月(冥岳)</button><button
+          onclick="preset('adv152')">五行天宫</button><button onclick="preset('adv153')">净天宫</button><button
+          onclick="preset('adv199')">宝藏岛</button><br />
+        <p class="muted">江湖险境：</p>
+        <button onclick="preset('jianghu_hole01')">险境一</button><button
+          onclick="preset('jianghu_hole02')">险境二</button><button
+          onclick="preset('jianghu_hole03')">险境三</button><button
+          onclick="preset('jianghu_hole04')">险境四</button>
+        <button onclick="preset('jianghu_hole05')">险境五</button><button
+          onclick="preset('jianghu_hole06')">险境六</button><button
+          onclick="preset('jianghu_newtype01')">新境一</button><button
+          onclick="preset('jianghu_newtype02')">新境二</button><br />
+        <p class="muted">内景 / 其它：</p>
+        <button onclick="preset('groupscene045')">天隐谷</button><button
+          onclick="preset('prison')">监狱</button><button onclick="preset('fight05')">比武场五</button><button
+          onclick="preset('fight06')">比武场六</button>
+        <button onclick="preset('fight08')">比武场八</button><button
+          onclick="preset('loading01')">世界王场景</button><button onclick="preset('scene12')">场景12</button><button
+          onclick="preset('scene13')">场景13</button>
+      </section>
+      <section>
+        <h2>踢馆传送</h2>
+        <p class="muted">点击对应踢馆名称，传送到入口NPC面前。共35个踢馆。</p>
+        <p class="muted">成都场景：</p>
+        <button onclick="preset('tiguan_1')">浣花剑派</button><button
+          onclick="preset('tiguan_3')">沈家堡</button><button onclick="preset('tiguan_4')">徐家庄</button><button
+          onclick="preset('tiguan_5')">南宫世家</button><br />
+        <p class="muted">烟雨庄：</p>
+        <button onclick="preset('tiguan_7')">盐帮</button><button
+          onclick="preset('tiguan_13')">神风帮</button><button onclick="preset('tiguan_25')">天外天</button><br />
+        <p class="muted">燕京：</p>
+        <button onclick="preset('tiguan_15')">古墓派</button><button
+          onclick="preset('tiguan_18')">东方世家</button><button onclick="preset('tiguan_23')">杀人庄</button><br />
+        <p class="muted">洛阳：</p>
+        <button onclick="preset('tiguan_20')">燕门世家</button><button
+          onclick="preset('tiguan_28')">抱犊寨</button><button onclick="preset('tiguan_26')">秦王府</button><br />
+        <p class="muted">唐门：</p>
+        <button onclick="preset('tiguan_16')">沐云庄</button><button
+          onclick="preset('tiguan_17')">十二连环坞</button><button onclick="preset('tiguan_29')">天宝寨</button><br />
+        <p class="muted">恶人谷：</p>
+        <button onclick="preset('tiguan_6')">星宿派</button><button
+          onclick="preset('tiguan_21')">素云宫</button><br />
+        <p class="muted">塞外大漠：</p>
+        <button onclick="preset('tiguan_24')">大漠鬼城</button><button
+          onclick="preset('tiguan_32')">天罗教</button><br />
+        <p class="muted">其他场景：</p>
+        <button onclick="preset('tiguan_2')">天香茶林(千灯镇)</button><button
+          onclick="preset('tiguan_8')">仙霞派(蓬莱仙境)</button><button
+          onclick="preset('tiguan_9')">霓裳宫(念萝坝)</button><button
+          onclick="preset('tiguan_10')">霹雳堂(梅花岭)</button><button
+          onclick="preset('tiguan_11')">万兽山庄(丐帮)</button><button
+              onclick="preset('tiguan_12')">嵩山派(少林)</button><button
+              onclick="preset('tiguan_14')">幽冥宫(泛黄平原)</button><button
+              onclick="preset('tiguan_19')">慕容世家(苏州)</button><button
+          onclick="preset('tiguan_22')">凌霄城</button><button
+          onclick="preset('tiguan_27')">恶虎山寨(漠河镇)</button><button
+          onclick="preset('tiguan_30')">虎啸山庄(武当)</button><button
+          onclick="preset('tiguan_31')">幽灵山庄(锦衣卫)</button><button
+          onclick="preset('tiguan_33')">双龙堡(峨眉)</button><button
+          onclick="preset('tiguan_34')">冥岳</button><button onclick="preset('tiguan_35')">净天宫</button>
+      </section>
+      <section>
+        <h2>世界 BOSS</h2>
+        <p class="muted">
+          强制生成按 normalboss/jhsceneboss 刷新表驱动：在当前场景的门派固定点每点生成
+          1 只（bosslist 轮选），江湖 BOSS 仅当当前场景在其随机场景池内时于随机点降世。
+          bossnpc 官方模板（真实血量、命中反击），击杀后消失不重生；会话级摆放，切图清空。
+        </p>
+        <button onclick="command({ action: 'worldboss_spawn' })">强制生成全部</button>
+        <button onclick="command({ action: 'worldboss_clear' })">清除在场BOSS</button>
+        <button onclick="command({ action: 'worldboss_list' })">查看在场情况</button>
+      </section>
+      <section>
+        <h2>副本</h2>
+        <p class="muted">
+          列表来自服务端已安装的 cloneinfo.ini（clonecolset 掉落计分链本期未接）。
+          进入即切场景并按 creator 表 NpcProgress 波次逐级揭示（≤当前波可见）；
+          副本内击杀不复活，当前波战斗怪全灭自动推进；难度档仅记录展示；
+          进入不限次（会话内计数提示），销毁回进本前位置。
+        </p>
+        <select id="clone-config">
+          <option value="ini\scene\clone003">读取副本列表中……</option>
+        </select>
+        <select id="clone-fun">
+          <option value="1">普通</option>
+          <option value="2">困难</option>
+          <option value="3">地狱</option>
+          <option value="4">炼狱</option>
+        </select>
+        <button onclick="enterClone()">创建并进入副本</button>
+        <button onclick="reenterClone()">进入已打开副本</button>
+        <button onclick="destroyClone()">销毁副本</button>
+      </section>
+      <section>
+        <h2>自定义切图与场景内瞬移</h2>
+        <input id="destination" value="ini\scene\city04_LuoYang,city04,243.387,43.277,403.821,5.024" /><button
+          onclick="scene(document.querySelector('#destination').value)">
+          切换场景</button><br />
+        <input id="scene-filter" placeholder="按场景名/资源名过滤" oninput="filterScenes()" /><select
+          id="scene-select" onchange="fillSceneDestination()"></select><br />
+        <input id="teleport" placeholder="X,Y,Z,朝向" /><button onclick="useCurrentPosition()">
+          填入当前坐标</button><button onclick="teleportPlayer()">场景内瞬移</button>
+      </section>
+      <section>
+        <h2>门派</h2>
+        <p class="muted">
+          修改角色原生门派属性（School/Force/NewSchool）并持久化落库；
+          不自动赠送对应套路、身份装或任务线（身份装可用「外观」区另行激活）。
+        </p>
+        <select id="faction">
+          <optgroup label="八大门派">
+            <option value="shaolin">少林</option>
+            <option value="wudang">武当</option>
+            <option value="emei">峨眉</option>
+            <option value="gaibang">丐帮</option>
+            <option value="tangmen">唐门</option>
+            <option value="junzitang">君子堂</option>
+            <option value="jinyiwei">锦衣卫</option>
+            <option value="jilegu">极乐谷</option>
+          </optgroup>
+          <optgroup label="后续门派">
+            <option value="mingjiao">明教</option>
+            <option value="tianshan">天山派</option>
+            <option value="kunlun">昆仑派</option>
+            <option value="xingtianbao">刑天城</option>
+            <option value="wuxu">无虚门</option>
+          </optgroup>
+          <optgroup label="江湖势力">
+            <option value="yihuagong">移花宫</option>
+            <option value="taohuadao">桃花岛</option>
+            <option value="wugenmen">无根门</option>
+            <option value="xujia">徐家庄</option>
+            <option value="wanshou">万兽山庄</option>
+            <option value="jinzhen">金针沈家</option>
+            <option value="tianlun">天轮寺</option>
+            <option value="qingyi">青衣阁</option>
+          </optgroup>
+          <optgroup label="宗门">
+            <option value="xuedao">血刀门</option>
+            <option value="huashan">华山派</option>
+            <option value="gumu">古墓派</option>
+            <option value="damo">达摩派</option>
+            <option value="shenshui">神水宫</option>
+            <option value="changfeng">长风镖局</option>
+            <option value="nianluo">念萝坝</option>
+            <option value="wuxian">无仙教</option>
+            <option value="shenji">神机营</option>
+            <option value="xingmiao">星渺阁</option>
+            <option value="tianya">天涯海阁</option>
+            <option value="wanghui">王回洲</option>
+            <option value="shenjihui">神机汇</option>
+          </optgroup>
+        </select>
+        <button onclick="setFaction()">应用门派</button>
+        <button onclick="command({ action: 'learn_all_neigong' })">
+          一键学会全部内功
+        </button>
+      </section>
+      <section>
+        <h2>武学套路</h2>
+        <p class="muted">
+          把玩家已学会的全部武学套路（View=40
+          技能目录）按 skill_static varprop 满级一次性升满并填满修为，行帧刷
+          Level/MaxLevel/修为并重建可用性心跳；满级经 data/武学等级.json
+          落档重登保持。遗忘则回登录基线（DB 模式=基础五件套，starter
+          模式=初始套路集），清档、删 role_skills 武学行并摘除失效快捷栏。
+        </p>
+        <button onclick="
+              if (confirm('确定把全部武学套路升到满级？'))
+                command({ action: 'learn_all_taolu' });
+            ">
+          一键学满武学套路等级
+        </button>
+        <button onclick="
+              if (confirm('确定删除全部已学武学套路（重置为初始状态）？'))
+                command({ action: 'forget_all_taolu' });
+            ">
+          删除全部武学
+        </button>
+      </section>
+      <section>
+        <h2>修为</h2>
+        <p class="muted">
+          修为=修炼点余额（Faculty，内修每分钟折半消耗，种子 999
+          万），<b>角色级持久化</b>（role_faculty 快照，重登沿用）；修炼速度拆为<b>基础值 ×
+          倍率</b>（默认 200 ×
+          1，倍率可填小数），实际值走 FillSpeed、基础值走 NorFacultyAdd
+          同帧下发；普通内修态改速即时生效，停修/演武态下次开修生效。填满当前修炼内功的本层修炼度立即升一层（0x18
+          书帧 + 0x10 属性 + 191/14 升层提示），恰达满级自动停修。
+        </p>
+        <input id="faculty-value" type="number" value="9999999" min="0"
+          max="2000000000" /><button onclick="setFaculty()">设置修为</button><button onclick="
+              if (confirm('确定把当前修炼内功的本层修炼度填满（立即升一层）？'))
+                command({ action: 'fill_current_neigong' });
+            ">
+          填满当前内功修炼度</button><br />
+        <label>基础值/min
+          <input id="fill-speed-base" type="number" value="200" min="1" max="1000000"
+            style="min-width: 90px; width: 90px" /></label>
+        <label>倍率
+          <input id="fill-speed-multiplier" type="number" value="1" min="0.1" max="100" step="0.1"
+            style="min-width: 90px; width: 90px" /></label>
+        <button onclick="setFillSpeed()">应用修炼速度</button><br />
+        <label>每日碎银上限(两)
+          <input id="act-day-limit" type="number" value="0" min="0" max="999999"
+            style="min-width: 110px; width: 110px" /></label>
+        <button onclick="setActDayLimit()">应用演武碎银上限</button>
+        <button onclick="command({ action: 'clear_team_fatigue' })">清除团练疲劳</button><br />
+        <span class="muted">演武碎银上限 0=不限制（ActDayValue 族随 0x10
+          下发；有限额时打卡超限静默拒绝）。团练疲劳=TeamFacultyValue（0..80000，客户端按剩余精力%显示），清除即恢复
+          100%。</span>
+      </section>
+      <section>
+        <h2>风物志卡牌</h2>
+        <p class="muted">
+          基于 CardRec（按位记录收集）与 UseCardRec（已装备卡牌）。数据来自
+          data/card_models.json。点击卡牌名即可装备（ShowEquipType=2，优先显示卡牌模型）。
+        </p>
+        <button onclick="command({ action: 'grant_all_cards' })">
+          一键获取全部风物志
+        </button>
+        <button onclick="command({ action: 'unequip_card' })">
+          卸下全部风物志</button><br />
+        <select id="card-category">
+          <option value="">全部分类</option>
+        </select>
+        <input id="card-query" placeholder="搜索中文名或卡牌ID，例如：屠龙刀鞘、1" />
+        <button onclick="searchCards()">搜索</button>
+        <button onclick="loadAllCards()">显示全部</button>
+        <select id="card-result" size="8" style="
+              min-width: 420px;
+              width: 420px;
+              display: block;
+              margin: 8px 0;
+            "></select>
+        <button onclick="equipSelectedCard()">装备选中卡牌</button>
+        <div id="card-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>风物志头发</h2>
+        <p class="muted">
+          仅列出只含 Hat 部件的纯发型卡牌（helmet 头模，不含
+          Cloth/Pants/Shoes/Weapon）。点击「装备选中发型」会叠加在已有风物志之上，已装备的衣服/武器外形不会被替换。
+        </p>
+        <select id="hair-result" size="10" style="
+              min-width: 420px;
+              width: 420px;
+              display: block;
+              margin: 8px 0;
+            "></select>
+        <button onclick="equipSelectedHair()">装备选中发型</button>
+        <button onclick="command({ action: 'unequip_card' })">
+          卸下全部风物志
+        </button>
+        <button onclick="command({ action: 'grant_all_cards' })">
+          一键获取全部风物志
+        </button>
+        <div id="hair-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>五维属性</h2>
+        <p class="muted">
+          直接修改角色五维（臂力/体魄/身法/内息/罡气），改动后立即重算派生战斗属性并实时刷新客户端面板。留空或填
+          0 表示该维不修改。属性为覆盖式写入（非累加）。
+        </p>
+        <label>臂力 <input id="attr-str" type="number" value="0" min="0" /></label>
+        <label>体魄 <input id="attr-sta" type="number" value="0" min="0" /></label>
+        <label>身法 <input id="attr-dex" type="number" value="0" min="0" /></label>
+        <label>内息 <input id="attr-ing" type="number" value="0" min="0" /></label>
+        <label>罡气 <input id="attr-spi" type="number" value="0" min="0" /></label>
+        <button onclick="setFiveAttributes()">应用五维并刷新</button>
+        <div id="attr-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>称号管理</h2>
+        <p class="muted">
+          玩家初始无任何称号；发放/佩戴/取消均经服务端校验。称号 ID 与名称取自
+          data/称号数据.json 总表（客户端 role_title_* 文本）。佩戴即写入
+          TitleID 属性并刷新界面。
+        </p>
+        <input id="title-query" placeholder="搜索称号中文名或 ID，例如：隐士高人、9193" />
+        <button onclick="searchTitles()">搜索</button>
+        <button onclick="loadAllTitles()">显示全部</button>
+        <select id="title-result" size="8" style="
+              min-width: 420px;
+              width: 420px;
+              display: block;
+              margin: 8px 0;
+            "></select>
+        <button onclick="grantSelectedTitle()">发放选中称号</button>
+        <button onclick="wearSelectedTitle()">佩戴选中称号</button>
+        <button onclick="command({ action: 'cancel_title' })">
+          取消佩戴
+        </button>
+        <button onclick="
+              if (confirm('确定清空该角色全部称号并取消佩戴？'))
+                command({ action: 'clear_titles' });
+            ">
+          清空全部称号
+        </button>
+        <div id="title-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>快捷栏位</h2>
+        <p class="muted">
+          存档/恢复玩家的快捷栏布局（数字键1-0、Ctrl+1-0、F1-F5等）。每次登录自动从
+          data/快捷栏位按键.json 读取；游戏内拖放技能时自动保存。
+        </p>
+        <button onclick="command({ action: 'save_shortcuts' })">
+          💾 保存当前快捷栏到文件
+        </button>
+        <div id="shortcut-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>实力等级</h2>
+        <p class="muted">
+          设置玩家 PowerLevel（0–160），服务端自动按功力等级映射称号
+          LevelTitle 并刷新界面。
+        </p>
+        <input id="power-level" type="number" value="0" min="0" max="160" /><button
+          onclick="setPowerLevel()">设置实力等级</button>
+      </section>
+      <section>
+        <h2>性格善恶</h2>
+        <p class="muted">
+          设置玩家 善值/恶值/基础狂邪，服务端自动计算性格标签（0正常 1侠 2恶
+          3狂 4邪）与性格数值并刷新界面。
+        </p>
+        <label>善值 <input id="justice" type="number" value="0" /></label>
+        <label>恶值 <input id="evil" type="number" value="0" /></label>
+        <label>基础狂邪 <input id="free-base" type="number" value="0" /></label>
+        <button onclick="setAlignment()">设置性格善恶</button>
+      </section>
+      <section>
+        <h2>体力 / 饱食 / 杀戮 / 酒量</h2>
+        <p class="muted">
+          一次性设置 9 项活力属性；当前体力/饱食默认填满至上限，上限加成默认
+          0。服务端刷新界面并持久化 save=true
+          项（体力/饱食/杀戮值/酒量等级）。
+        </p>
+        <label>当前体力 Ene <input id="vit-ene" type="number" value="123" /></label>
+        <label>体力上限 MaxEne <input id="vit-maxene" type="number" value="123" /></label>
+        <label>体力上限加成 <input id="vit-maxeneadd" type="number" value="0" /></label>
+        <label>体力恢复/秒 <input id="vit-resumeene" type="number" value="0" /></label>
+        <label>当前饱食 Sat <input id="vit-sat" type="number" value="123" /></label>
+        <label>饱食上限 MaxSat <input id="vit-maxsat" type="number" value="123" /></label>
+        <label>饱食上限加成 <input id="vit-maxsatadd" type="number" value="0" /></label>
+        <label>杀戮值 PKValue <input id="vit-pk" type="number" value="0" /></label>
+        <label>酒量等级 DrunkLevel <input id="vit-drunk" type="number" value="1" /></label>
+        <button onclick="setVitals()">设置活力属性</button>
+      </section>
+      <section>
+        <h2>动作与剧情测试</h2>
+        <button onclick="story('red_super_armor')">红霸体 20 秒</button><button
+          onclick="story('action_state_sgmd')">神鬼莫敌动作</button><button
+          onclick="story('action_state_hsqs05')">第五招动作</button><button
+          onclick="story('action_state_stop')">恢复待机</button>
+        <button onclick="story('npc_bubble')">NPC 气泡</button><button
+          onclick="story('drama_prompt')">章节提示</button>
+      </section>
+      <section>
+        <h2>御风神水（大轻功）</h2>
+        <p class="muted">
+          大轻功（百鸟凌云系列）一/二/三段冲刺的客户端原生条件包要求 BuffStore
+          存在 buf_ride_yufeng（御风状态）。先点「添加御风状态」（持续 10
+          分钟，可重复点击刷新），再上马/起跳后按轻功冲刺键即可施展大轻功；不需要时点「取消」。
+        </p>
+        <button onclick="story('yufeng_add')">添加御风状态</button>
+        <button onclick="story('yufeng_remove')">取消御风状态</button><br />
+        <p class="muted">
+          真实道具路线（官服玩法）：发放御风神水到背包 → 右键使用 → 弹蓄力条 →
+          蓄力条走完才加御风状态（buff 时长按道具天数）。
+        </p>
+        <button onclick="addYufengItem('ride_windrunner_002')">
+          发放御风道具（3天）
+        </button>
+        <button onclick="addYufengItem('ride_windrunner_004')">
+          发放御风神水（7天）
+        </button>
+        <button onclick="addYufengItem('ride_windrunner_003')">
+          发放御风神水（10天）
+        </button>
+        <button onclick="addYufengItem('ride_windrunner_005')">
+          发放御风神水（14天）
+        </button>
+      </section>
+      <section>
+        <h2>待机站姿（持久化）</h2>
+        <p class="muted">
+          切换玩家待机站姿并按角色持久化到
+          data/待机站姿.json：重登、过图、受击/挖矿/技能结束后的回站都会保持所选站姿。动作名来自客户端
+          index.ini 节名。
+        </p>
+        <button onclick="setIdleStancePreset('stand')">默认站姿 [stand]</button><button
+          onclick="setIdleStancePreset('khbd_stand_01')">
+          葵花站姿 [khbd_stand_01]</button><button onclick="setIdleStancePreset('TJstand')">无根站姿
+          [TJstand]</button><button onclick="setIdleStancePreset('')">恢复当前站姿</button><br />
+        <label>全部站姿
+          <select id="idle-stance-list" size="8" style="min-width: 360px; height: 180px">
+            <option>读取站姿列表中……</option>
+          </select></label>
+        <button onclick="setIdleStance()">切换到选中站姿</button>
+        <div id="idle-stance-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>冶炼（已对齐 D:\ 参考端）</h2>
+        <p class="muted">
+          打开冶炼只发 466 open_id=2 + 570 util_show_form，全链路零
+          413/416/gamestep/825
+          应答；九阴志整套系统与功能开关注册表已删除（2026-09-08）。仍报「当前活动未开启」时：(1)
+          先完整重启 FxGame.exe 清原生 SwitchManager 缓存；(2)
+          切下方「最小登录模式」再重登一次（与 D:\
+          字节级对齐），若冶炼恢复即说明 H 某条登录推送污染了客户端原生
+          SwitchManager 表——把日志发我定位。
+        </p>
+        <button onclick="toggleMinimalLogin()">
+          最小登录模式（对齐 D:\）</button><span id="minimal-login-state" class="muted">读取中……</span>
+      </section>
+      <section>
+        <h2>身份系统（一键激活全部）</h2>
+        <p class="muted">
+          数据源 <code>share/task/origin/origin.ini</code>（1197 条；奖励表
+          prize_item/prize_title/prize_prop 同目录）。C2S 协议已接：
+          <b>700</b> 激活单身份 / <b>702</b> 领奖（真发奖：物品入包 +
+          称号授 role_titles 所有权 + repute_* 阵营叠加并即时刷新声望行）/
+          <b>706</b> 请求行刷新；701 展示 / 705 领取查询留待。点击下方按钮：把全部身份一次性加入【已激活】集合（Origin_Active
+          记录行 + role_origins 落库，重登/切图保持），【未领取】状态不变；玩家在身份界面点
+          702 才标记"已领奖"并实际拿到奖励（物品未入包——如满包——则不标记，下次点击补发）。
+        </p>
+        <button onclick="originActivateAll()">一键激活全部身份</button><span id="origin-state"
+          class="muted">状态读取中……</span>
+      </section>
+      <section>
+        <h2>门派声望（自定义）</h2>
+        <p class="muted">
+          覆盖全部八大门派、江湖势力与隐世宗门（含隐士、江湖声望）：直接写入角色在
+          <code>data/repute</code> 的声望进度，并即时刷新客户端
+          <code>Repute_Record</code> 表，供「身份条件需要声望」的场景验证。
+        </p>
+        <select id="repute-name">
+          <option value="all">全部（含隐士、江湖）</option>
+        </select>
+        <label>点数
+          <input id="repute-value" type="number" value="5000" min="0" max="9999999"
+            style="width: 110px" /></label>
+        <button onclick="reputeApply('set')">设定为该值</button>
+        <button onclick="reputeApply('add')">累加该值</button>
+        <button onclick="loadReputeStatus()">刷新声望列表</button>
+        <div id="repute-state" class="muted">状态读取中……</div>
+      </section>
+      <section>
+        <h2>场景天气</h2>
+        <p class="muted">
+          下发 on_weather_sky（sub 4）实时切换客户端 SceneParaStore
+          天气渲染包（目录名带 _001 为昼、_501 为夜）。雨/雪粒子需客户端画面设置开启天气并使用高或极高画质，天色与雾不受限。切图重进即恢复场景默认天气。
+        </p>
+        <select id="weather">
+          <option value="clear">读取天气列表中……</option>
+        </select><label>过渡秒
+          <input id="weather-fade" type="number" value="10" min="0" max="600"
+            style="width: 70px" /></label><button onclick="setWeather()">切换天气</button>
+      </section>
+      <section>
+        <h2>礼包与物品</h2>
+        <p class="muted">
+          礼包列表来自 tool_item.ini（ItemType 2102/2103 开箱类）。标
+          <b>有内容</b> 的打开会出真物品：内容来自 drop 目录已有的包，或
+          data\giftbox.json
+          自配表；其余打开时会提示内容未配置。通用输入框可发任意物品
+          ConfigID。
+        </p>
+        <button onclick="story('giftbox_merchant_here')">
+          把礼包测试商人拉到身边</button><br />
+        <input id="gift-filter" placeholder="搜索礼包名字或ID（可选）" style="max-width: 420px"
+          oninput="filterGifts()" /><br />
+        <select id="gift-box" size="6" style="min-width: 420px; height: 150px">
+          <option>读取礼包列表中……</option>
+        </select><br />
+        <button onclick="addGiftBox()">加入背包 ×</button><input id="gift-amount" type="number" value="1" min="1"
+          max="99" style="min-width: 70px" /><br />
+        <input id="item-config" placeholder="任意物品 ConfigID（如 yaopin_00100）" /><input id="item-amount"
+          type="number" value="1" min="1" max="9999" style="min-width: 90px" /><button
+          onclick="addItem()">通用添加物品</button>
+        <button onclick="sendTestMail()">作为系统邮件附件发送</button>
+      </section>
+      <section>
+        <h2>GM 邮件</h2>
+        <p class="muted">
+          以系统邮件（发件人显示「系统邮件」）发自定义信息或物品附件；正文与物品
+          ConfigID 至少填一项，物品附件在邮箱中领取后入包。收件角色留空 =
+          发给当前选中会话的角色；填任意角色名可发给其他玩家——在线实时推送，
+          离线则写入信箱存档，对方下次登录在主界面邮件按钮查收。
+        </p>
+        <input id="mail-role" placeholder="收件角色名（留空=当前会话角色）" style="max-width: 260px" /><br />
+        <input id="mail-title" placeholder="标题（默认「系统邮件」）" style="max-width: 260px" /><br />
+        <textarea id="mail-content" placeholder="正文（与物品附件至少填一项）" rows="3"
+          style="min-width: 420px"></textarea><br />
+        <input id="mail-item" placeholder="物品 ConfigID（可选，如 yaopin_00100）"
+          style="max-width: 260px" /><input id="mail-amount" type="number" value="1" min="1"
+          max="9999" style="min-width: 90px" /><br />
+        <button onclick="sendMail()">发送邮件</button>
+      </section>
+      <section>
+        <h2>场景任务验证</h2>
+        <p class="muted">
+          场景任务测试：前往成都厨师钱安康，点击 NPC 后选择任务项；该次真实
+          SelectMenu 会创建 Task_Accepted/Task_Record 并刷新任务栏。
+        </p>
+        <button onclick="story('scene_task_start')">
+          开始成都场景任务测试 791
+        </button>
+        <button onclick="story('scene_task_submit_ready')">
+          直接完成采集并返回钱安康交付
+        </button>
+        <button onclick="story('scene_task_remove')">
+          清理场景任务测试 791
+        </button>
+        <hr />
+        <p class="muted">
+          全场景任务全流程验证：填写任意任务 ID（任务目录含全部 task_*.txt
+          任务线），走「接取 → 推进全部步骤 → 交付 → 奖励」完整链路。任务 ID
+          留空时，推进/清理/奖励默认作用于最早的活跃任务。
+        </p>
+        <label>任务ID
+          <input id="authored-task-id" type="number" value="791" min="0"
+            style="min-width: 90px" /></label><br />
+        <button onclick="authoredTask('authored_task_start')">
+          接取任务
+        </button>
+        <button onclick="authoredTask('authored_task_submit_ready')">
+          推进全部步骤（可交付）
+        </button>
+        <button onclick="authoredTask('authored_task_remove')">
+          清理任务
+        </button>
+        <button onclick="authoredTask('authored_task_reward')">
+          补发任务奖励
+        </button>
+        <div id="authored-task-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>暮色剧情验证</h2>
+        <p class="muted">
+          第一步在暮色之村庙内固定点（庙内箱子机关坐标）生成钥匙箱，点击出帧对话菜单，真实确认后箱子消失并获得旧钥匙提示；第二步在固定坐标生成躲起来的村民，点击确认「跟我走」后按服务端移动帧走向护送村民结束点。不在暮色之村时会自动从村口大门进村。
+        </p>
+        <button onclick="story('twilight_mechanism_start')">
+          开始灰尘盒子机关任务
+        </button>
+        <button onclick="story('twilight_mechanism_remove')">
+          清理机关任务</button><br />
+        <button onclick="story('twilight_npc_move_start')">
+          开始点击 NPC 定点移动
+        </button>
+        <button onclick="story('twilight_npc_move_remove')">
+          清理移动 NPC
+        </button>
+        <hr />
+        <p class="muted">
+          暮色剧情坐标归位验证：按 creator 表固定坐标全量下发 clone003 摆位（628 个：5 波 NpcProgress 小怪、周厉风等 6 Boss、村门/栅栏/赵家院门、宝箱水桶火堆、机关与采集点），不跟随玩家生成；波次进度推到最大以揭示全部 NpcProgress 阶段，重置会重建副本世界（进度回到 1）。
+        </p>
+        <button onclick="story('twilight_stages_start')">
+          开始暮色剧情归位验证
+        </button>
+        <button onclick="story('twilight_stages_remove')">
+          重置/清理暮色剧情验证
+        </button>
+        <hr />
+        <p class="muted">
+          副本难度档（AI 条件 Func(8,N)，1普通/2困难/3地狱/4修罗）：影响 BOSS
+          出生 buff 与死亡掉宝箱矩阵（BossBox003[难度]05[评价]）。击杀 BOSS
+          后在原地掉落对应宝箱（评价档默认 1）。
+        </p>
+        <button onclick="story('twilight_difficulty', { level: 1 })">
+          难度：普通
+        </button>
+        <button onclick="story('twilight_difficulty', { level: 2 })">
+          难度：困难
+        </button>
+        <button onclick="story('twilight_difficulty', { level: 3 })">
+          难度：地狱
+        </button>
+        <button onclick="story('twilight_difficulty', { level: 4 })">
+          难度：修罗
+        </button>
+      </section>
+      <section>
+        <h2>九阴志全局门控</h2>
+        <p class="muted">
+          九阴志阶段是<b>全服唯一</b>的单向刻度：1=1内 … 9=6内（对应客户端
+          power_guide.ini 的 step 主步骤
+          1…6）。阶段只增不减——设置小于当前值的阶段会被忽略；需要回退请用「重置阶段」。每次生效都会向全服在线连接广播
+          419 阶段帧。
+        </p>
+        <label>目标阶段
+          <select id="ninjiuzhi-stage">
+            <option value="1">1 — 1内</option>
+            <option value="2">2 — 2内</option>
+            <option value="3">3 — 3内</option>
+            <option value="4">4 — 4内</option>
+            <option value="5">5 — 5内</option>
+            <option value="6">6 — 5内后期</option>
+            <option value="7">7 — 6内前期</option>
+            <option value="8">8 — 6内中期</option>
+            <option value="9">9 — 6内</option>
+          </select>
+        </label>
+        <button onclick="ninJiuZhiSet()">设置阶段（单向递增）</button>
+        <button onclick="ninJiuZhiReset()">重置阶段</button>
+        <button onclick="ninJiuZhiStatus()">查询状态</button>
+        <hr />
+        <p class="muted">
+          事件点注入（全服累计）：击杀 /
+          任务接取事件累计到阈值会自动推进阶段，用于本地验证门禁开放节奏。
+        </p>
+        <button onclick="ninJiuZhiEvent('kill')">击杀事件 +1</button>
+        <button onclick="ninJiuZhiEvent('task')">任务事件 +1</button>
+        <div id="ninjiuzhi-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>S2C 自定义消息探针</h2>
+        <p class="muted">
+          向当前角色发送一条数字型 S2C custom 消息（客户端槽位 =
+          2×ID+15）。subType 默认
+          899000000（精炼窗）。已验证：517=on_custom_show_tersure（宝物精炼/重制/洗炼，sub_type
+          899000000/1/8）、526=on_custom_itemexchange（兑换）、688=on_table_info（打造台，会报错）、111=custom_show_offline_job_daily、287=踢馆、191=教习、250=时限、4-8=对话菜单。
+        </p>
+        <label>msgId
+          <input id="probe-msgid" type="number" value="517" min="1" max="764" /></label>
+        <label>subType <input id="probe-subtype" type="number" value="899000000" /></label>
+        <button onclick="customProbe()">发送探针</button>
+        <button onclick="customProbe(517)">517 精炼</button><button onclick="customProbe(517, 899000001)">517
+          重制</button><button onclick="customProbe(517, 899000008)">517 洗炼</button><button
+          onclick="customProbe(526)">526 兑换</button><button onclick="customProbe(514)">514</button><button
+          onclick="customProbe(515)">515</button><button onclick="customProbe(516)">516</button><button
+          onclick="customProbe(620)">620</button><button onclick="customProbe(621)">621</button><button
+          onclick="customProbe(736)">736</button><button onclick="customProbe(737)">737</button><button
+          onclick="customProbe(764)">764</button><button onclick="customProbe(688)">688 打造台</button>
+        <button onclick="customProbe(419)">419 九阴志步数</button><button onclick="customProbe(413)">413
+          开关开启</button><button onclick="customProbe(417)">417 九阴志高亮</button><button
+          onclick="customProbe(418)">418 地图图标</button><button onclick="customProbe(416, 2)">416 空事件</button>
+        <div id="probe-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>聊天与气泡调试</h2>
+        <p class="muted">
+          聊天 C2S(1 = CLIENT_CUSTOMMSG_CHAT)
+          已接入：游戏内聊天框发送会触发此消息并回显为头顶气泡 + 面板「名字:
+          内容」。下方按钮直接走 0x1A 广播链路，用于验证气泡/面板显示。
+        </p>
+        <input id="chat-text" placeholder="输入要广播的聊天内容，例如：大家好" />
+        <button onclick="chatBroadcast()">聊天广播(真实链路)</button>
+        <button onclick="speechLen()">气泡(长度前缀)</button>
+        <button onclick="speechNul()">气泡(空终止)</button>
+        <div id="chat-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>经脉周天设置</h2>
+        <p class="muted">
+          所有正经默认已开通为 216
+          周天。客户端可直接点击“激活/关闭”来生效或取消属性加成。此处仅用于把选中经脉的周天档位改为
+          36/72/108/144/180/216（同时改最大层数和当前层数），改完重推 View 45
+          并刷新五维。
+        </p>
+        <select id="jingmai-id"></select>
+        <select id="jingmai-tier">
+          <option value="36">36 周天</option>
+          <option value="72">72 周天</option>
+          <option value="108">108 周天</option>
+          <option value="144">144 周天</option>
+          <option value="180">180 周天</option>
+          <option value="216" selected>216 周天</option>
+        </select>
+        <button onclick="setJingMaiTier()">设置周天</button>
+        <div id="jingmai-hint" class="muted"></div>
+      </section>
+      <section>
+        <h2>坐骑管理</h2>
+        <p class="muted">
+          选择坐骑后点击"骑乘"即可直接激活并骑乘。已激活的坐骑再次使用不会消耗道具。
+        </p>
+        <select id="mount-result" size="8" style="
+              width: 100%;
+              max-width: 600px;
+              background: #1a1a1e;
+              color: #eee;
+            "></select>
+        <div id="mount-hint" class="muted"></div>
+        <div style="margin-top: 6px">
+          <button onclick="mountSelected()">骑乘</button>
+        </div>
+      </section>
+      <section>
+        <h2>快捷键方案</h2>
+        <p class="muted">
+          游戏内按键设置窗口点【确定/应用/恢复默认】或切换 3D/2.5D
+          时，客户端会通过 1425 自动上传整套配置，服务端落盘
+          data/快捷键方案.json，下次登录自动恢复（含操作模式）。此处可手动调试：绑定需按键
+          ID（7=跳跃、1=前进、2=后退…详见 ui_Jump 等文本）。
+        </p>
+        <label>键位ID
+          <input id="kb-id" type="number" value="7" style="width: 70px" /></label>
+        <label>按键 <input id="kb-key" value="Space" style="width: 90px" /></label>
+        <label><input type="checkbox" id="kb-ctrl" />Ctrl</label>
+        <label><input type="checkbox" id="kb-shift" />Shift</label>
+        <label><input type="checkbox" id="kb-alt" />Alt</label>
+        <button onclick="keybindBind()">绑定</button>
+        <button onclick="keybindBind(true)">强制覆盖</button>
+        <button onclick="
+              keybind('unbind ' + document.querySelector('#kb-id').value)
+            ">
+          解绑
+        </button>
+        <br />
+        <button onclick="keybind('mode 0')">3D 模式</button>
+        <button onclick="keybind('mode 1')">2.5D 模式</button>
+        <button onclick="keybind('default')">恢复默认</button>
+        <button onclick="keybind('undo')">撤销</button>
+        <button onclick="keybind('redo')">重做</button>
+        <br />
+        <button onclick="keybind('save 1')">保存到方案1</button>
+        <button onclick="keybind('save 2')">保存到方案2</button>
+        <button onclick="keybind('load 1')">加载方案1</button>
+        <button onclick="keybind('load 2')">加载方案2</button>
+      </section>
+      <section>
+        <h2>兵录设置</h2>
+        <p class="muted">
+          直接修改角色兵录（百晓生兵录集）：等级=伤害提高、进度=x/y、上限。修改即时落盘
+          data/binglu.json
+          并实时推送到客户端面板。登录时有进度的角色整域重放 12 行（零进度不推，官服对拍口径）。
+        </p>
+        <select id="binglu-row">
+          <option value="0">徒手</option>
+          <option value="1" selected>单刀</option>
+          <option value="2">单剑</option>
+          <option value="3">匕首</option>
+          <option value="4">双刀</option>
+          <option value="5">双剑</option>
+          <option value="6">双刺</option>
+          <option value="7">长棍</option>
+          <option value="8">短棍</option>
+          <option value="10">暗器</option>
+          <option value="11">奇门</option>
+        </select>
+        <label>等级
+          <input id="binglu-cur" type="number" value="9" min="0" style="width: 70px" /></label>
+        <label>进度
+          <input id="binglu-fill" type="number" value="0" min="0" style="width: 70px" /></label>
+        <label>上限
+          <input id="binglu-max" type="number" placeholder="默认不改" min="0" style="width: 70px" /></label>
+        <button onclick="bingluSet()">设置</button>
+        <button onclick="bingluMax()">单行升满</button>
+        <button onclick="binglu('max')">全部升满</button>
+      </section>
+      <section id="sec-fashion">
+        <h2>时装</h2>
+        <p class="muted">
+          一键激活当前角色的全部服装（时装）。数据来自装备配置中
+          EquipType=FashionCoat 的服装（共 525
+          套），激活后属性面板「时装」页签会显示为已激活，并写入
+          data/新版服装数据.json 永久存档。
+        </p>
+        <button onclick="command({ action: 'grant_all_fashion' })">
+          一键激活全部服装
+        </button>
+        <p class="muted" style="margin-top: 10px">
+          身份装：按当前角色门派激活门派身份套装（登录时也会自动补齐）；
+          显示类型：三套外观切换（0=江湖装 / 1=身份装 / 2=时装，游戏内属性
+          面板 radio 同款开关）。
+        </p>
+        <button onclick="command({ action: 'grant_identity_suits' })">
+          激活本门派身份装
+        </button>
+        <label>显示类型
+          <select id="showequip-type" style="width: 110px">
+            <option value="0">0 江湖装</option>
+            <option value="1">1 身份装</option>
+            <option value="2">2 时装</option>
+          </select></label>
+        <button onclick="command({ action: 'set_showequip_type', type: Number(document.getElementById('showequip-type').value) })">
+          切换显示类型
+        </button>
+      </section>
+    </main>
+  </div>
+  <script defer src="/static/console-core.js"></script>
+  <script defer src="/static/console-features.js"></script>
+</body>
+
+</html>

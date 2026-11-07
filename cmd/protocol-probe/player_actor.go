@@ -13,6 +13,8 @@ import (
 	"github.com/local/9yin-go-server/internal/entity"
 	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
+
+	"github.com/local/9yin-go-server/internal/gmapi"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -126,7 +128,8 @@ const (
 	// 运行内功的档位加成(playerProgress.rageCap,2026-11-07 客户端已
 	// 实证消费 MaxSP+MaxSPAdd 口径)。所有 GM 及战斗获取路径都经由
 	// 这些辅助函数,客户端属性永远不会成为该资源的权威。
-	maxPlayerSP int32 = 80
+	// 权威定义在 internal/gmapi（GM 线协议界值与之共用），此处为别名。
+	maxPlayerSP int32 = gmapi.MaxPlayerSP
 
 	// 本地测试的打坐恢复按现有的服务器秒每秒结算一次。用户规则：存活
 	// 的角色无论装备或内功推导出的总量如何，都在十秒内回满
@@ -1810,6 +1813,12 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	}
 	if p.keybind.operateModeSet {
 		addInt(operateModePropertyIndex, p.keybind.operateMode)
+	}
+	// NeiGongBind(201) 同窗口内嵌：内功栏主窗体打开即 QueryProp 快照
+	//（get_svr_ng_bind 按拆段数校验，读不到就整串回落全零），补推晚于
+	// 主窗体打开会留一次「绑定丢失」表象。档内同样无尾空格；无档零属性。
+	if p.keybind.neigongBind != "" {
+		addString(neiGongBindPropertyIndex, p.keybind.neigongBind)
 	}
 	addFloat(9, location.X)
 	addFloat(10, location.Y)

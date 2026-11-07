@@ -298,7 +298,9 @@ func TestSkillRowDataSupplementMatchesInstalledTables(t *testing.T) {
 
 // TestSkillViewRowsCarryConsumeRangeCdEmission 行级补集下发（Java
 // StarterSkills.skillRowProperties 方言）：VarPropNo/CoolDownTime/Quality/
-// 倍率固定族/Flow 每行必发，UseLimit/LeadTime/LeadSepTime starter 行必发；
+// 倍率固定族/Flow 每行必发，LeadTime/LeadSepTime starter 行必发；UseLimit
+// 仅 skill_new 真值 >0 稀疏发（官方 55866 对拍：太极拳/花神/心佛掌整段不发，
+// 回落 9 会按 skill_use_limit 规则 9 在入战时把图标判红）；
 // 消耗/射程按线上字节序（索引 u16 LE + 值 LE）钉死锚点。
 func TestSkillViewRowsCarryConsumeRangeCdEmission(t *testing.T) {
 	frames, err := starterSkillViewFrames()
@@ -314,11 +316,14 @@ func TestSkillViewRowsCarryConsumeRangeCdEmission(t *testing.T) {
 		t.Fatalf("%s not in starter set", id)
 		return nil
 	}
+	hasProp := func(frame []byte, propertyIndex uint16) bool {
+		return bytes.Contains(frame, []byte{byte(propertyIndex), byte(propertyIndex >> 8)})
+	}
 	everyRow := []uint16{
 		propVarPropNo, propCoolDownTime, propQuality, propFlow,
 		propHPHealMul, propMPHealMul, propPhyDamageMul, propStiDamageMul,
 		propJujDamageMul, propNegDamageMul, propMasDamageMul,
-		propSkillUseLimit, propLeadTime, propLeadSepTime,
+		propLeadTime, propLeadSepTime,
 	}
 	for index, skill := range starterSkillViews {
 		for _, propertyIndex := range everyRow {
@@ -367,12 +372,28 @@ func TestSkillViewRowsCarryConsumeRangeCdEmission(t *testing.T) {
 	if bytes.Contains(tjq08, []byte{byte(propHitShapePara1 & 0xff), byte(propHitShapePara1 >> 8)}) {
 		t.Fatalf("tjq08 must not carry non-sector HitShapePara1: %x", tjq08)
 	}
+	// UseLimit 官方稀疏方言：skill_new 无 UseLimit 的行整列不发（官方 55868
+	// 抓包太极拳/花神/心佛掌全段缺席；下发 9 会按 skill_use_limit 规则 9
+	// 「无法在战斗状态使用」在入战瞬间把图标判红）；五件套真值行照发。
+	for _, id := range []string{"CS_wd_tjq01", "CS_wd_tjq04", "CS_wd_tjq08",
+		"CS_yhwq_hsqs01", "CS_jh_xfz01"} {
+		if hasProp(rowFrame(id), propSkillUseLimit) {
+			t.Fatalf("%s must not carry UseLimit (skill_new has none): %x", id, rowFrame(id))
+		}
+	}
+	if !bytes.Contains(rowFrame("zs_default_01"), intSeq(propSkillUseLimit, 9)) {
+		t.Fatalf("zs_default_01 must carry real ini UseLimit=9 (打坐): %x", rowFrame("zs_default_01"))
+	}
+	if !bytes.Contains(rowFrame("zs_normal_02"), intSeq(propSkillUseLimit, 2)) {
+		t.Fatalf("zs_normal_02 must carry real ini UseLimit=2 (单手剑): %x", rowFrame("zs_normal_02"))
+	}
 }
 
 // TestSkillRowPropertiesStarterVsDBDialect starter 行与 DB 追加行的方言差
-// （Java StarterGrants.dbSkillViewAdd 注释口径）：DB 行无链路时 UseLimit/
-// LeadTime/LeadSepTime 整组不发；starter 行 UseLimit 回落 9（skill_new 真值
-// 空时）与 Lead 系固定族照发；倍率固定族两方言都发。
+// （Java StarterGrants.dbSkillViewAdd 注释口径）：DB 行无链路时 LeadTime/
+// LeadSepTime 不发；UseLimit 两方言一致稀疏（仅 skill_new 真值 >0 发——官方
+// 55866 对拍，Java starter 回落 9 系把打坐行 zs_default_01 误泛化，下发 9
+// 会让客户端按规则「无法在战斗状态使用」在入战时红图标）；倍率固定族两方言都发。
 func TestSkillRowPropertiesStarterVsDBDialect(t *testing.T) {
 	dbRow := skillRowProperties(learnedSkillView{configID: "no_such_skill", staticData: 1, itemType: 1000, level: 1})
 	if viewPropByIndex(dbRow, propSkillUseLimit) != nil ||
@@ -382,13 +403,18 @@ func TestSkillRowPropertiesStarterVsDBDialect(t *testing.T) {
 	if value, ok := viewPropFloat(dbRow, propPhyDamageMul); !ok || value != 1 {
 		t.Fatalf("db row fixed multiplier missing: %+v", dbRow)
 	}
-	// starter 行：hsqs01 的 skill_new UseLimit 为空 → 回落 9；zs_default_01
-	// 真值即 9。
-	for id := range map[string]bool{"CS_yhwq_hsqs01": true, "zs_default_01": true} {
+	// starter 行：hsqs01 的 skill_new UseLimit 为空 → 整列不发；zs_default_01
+	// 真值即 9（打坐，全包唯一值 9 行）。
+	row := skillRowProperties(learnedSkillView{configID: "CS_yhwq_hsqs01", staticData: 1, itemType: 1000, level: 1})
+	if viewPropByIndex(row, propSkillUseLimit) != nil {
+		t.Fatalf("hsqs01 must not carry UseLimit (skill_new has none): %+v", row)
+	}
+	row = skillRowProperties(learnedSkillView{configID: "zs_default_01", staticData: 1, itemType: 1000, level: 1})
+	if useLimit, ok := viewPropInt(row, propSkillUseLimit); !ok || useLimit != 9 {
+		t.Fatalf("zs_default_01 UseLimit=%d ok=%t, want 9", useLimit, ok)
+	}
+	for _, id := range []string{"CS_yhwq_hsqs01", "zs_default_01"} {
 		row := skillRowProperties(learnedSkillView{configID: id, staticData: 1, itemType: 1000, level: 1})
-		if useLimit, ok := viewPropInt(row, propSkillUseLimit); !ok || useLimit != 9 {
-			t.Fatalf("%s UseLimit=%d ok=%t, want 9", id, useLimit, ok)
-		}
 		if lead, ok := viewPropInt(row, propLeadTime); !ok || lead != 10000 {
 			t.Fatalf("%s LeadTime=%d ok=%t, want 10000", id, lead, ok)
 		}

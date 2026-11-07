@@ -13,13 +13,18 @@ import (
 	"math"
 	"net"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"sync"
+	"sync/atomic"
+	"syscall"
 	"time"
 	"unicode/utf16"
 
 	"github.com/local/9yin-go-server/internal/auth"
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/gmapi"
 	"github.com/local/9yin-go-server/internal/luascript"
 	"github.com/local/9yin-go-server/internal/neigong"
 	"github.com/local/9yin-go-server/internal/npcfunc"
@@ -40,6 +45,8 @@ func main() {
 	demoDamage := flag.Int("demo-damage", 0, "test-only damage applied once after the player reaches the active scene (0 disables it)")
 	starterSilver := flag.Int("starter-silver", 99999, "test-only starting CapitalType1 (碎银) for the active player")
 	gmListen := flag.String("gm-listen", "127.0.0.1:19062", "local GM HTTP listen address (empty disables)")
+	gmInternalListen := flag.String("gm-internal-listen", "127.0.0.1:19063", "internal GM API listen address for the standalone gm-panel process (loopback only; requires -gm-internal-token, empty disables)")
+	gmInternalToken := flag.String("gm-internal-token", os.Getenv("NINEYIN_GM_TOKEN"), "bearer token guarding the internal GM API (defaults to NINEYIN_GM_TOKEN)")
 	logFile := flag.String("log-file", runtimeProjectPath("artifacts", "local", "logs", "protocol-probe-live.log"), "append runtime log to this local file")
 	npcFuncPath := flag.String("npc-func", defaultLegacyNPCFuncPath, "Npc_Func.xml used to build per-NPC service menus")
 	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts", "host"), "server-side event Lua scripts directory (game.on contract; empty disables)")
@@ -51,6 +58,7 @@ func main() {
 	qingGongDefinePath := flag.String("qinggong-define", filepath.Join(defaultModernShareRoot, "skill", "qinggong", "qgdefine.ini"), "current-client QGDefine.ini used to validate and charge 216")
 	respawnInterval := flag.Int("respawn-interval", 30, "batch monster respawn interval in seconds: every interval all DEAD combat NPCs revive at their spawn points, alive ones untouched (0 disables batching and falls back to per-NPC RefreshTime)")
 	corpseTTL := flag.Int("corpse-ttl", 10, "corpse removal delay in seconds: dead monster corpses are removed (0x0E) after this long and rematerialize on respawn (0 keeps corpses until revive)")
+	autosaveSecs := flag.Int("autosave-interval", 300, "periodic online snapshot flush in seconds: every interval each online player's faculty/jingmai snapshots are upserted to MySQL (guards against hard kills; 0 disables)")
 	flag.Parse()
 	setNpcRespawnBatchInterval(time.Duration(*respawnInterval) * time.Second)
 	setNpcCorpseTTL(time.Duration(*corpseTTL) * time.Second)
@@ -223,20 +231,133 @@ func main() {
 		return inventoryStore.itemNames(ctx, configIDs)
 	}
 	if *gmListen != "" {
-		go serveGM(*gmListen, gm)
+		// internal API 未开（无 token）时传空串：登记册没有“本面板所连”
+		// 卡片，但探活其它已登记服务器仍然可用。
+		manageBound := *gmInternalListen
+		if *gmInternalToken == "" {
+			manageBound = ""
+		}
+		go serveGM(*gmListen, gm, manageBound)
+	}
+	// 独立面板进程（gm-panel.exe）经 internal API 访问同一个 gmHub。
+	// 刻意不默认启用：需要显式提供 token（flag 或 NINEYIN_GM_TOKEN），
+	// 否则按设计文档 §5.2 fail-soft——记日志后不开监听，游戏服照常跑。
+	if *gmInternalListen != "" {
+		if *gmInternalToken == "" {
+			log.Printf("GM internal API disabled: -gm-internal-token (or NINEYIN_GM_TOKEN) is empty")
+		} else {
+			go serveGMInternal(*gmInternalListen, *gmInternalToken, gm, gmHealthInfo{
+				ListenAddr: *addr,
+				ServerRoot: runtimeProjectPath("."),
+			})
+		}
 	}
 	ln, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatal(err)
 	}
+	// 自动存盘周期装进共享原子值：GM 面板 set_autosave_interval 运行中
+	// 可改，重启回落本 flag 缺省。
+	setAutosaveInterval(time.Duration(*autosaveSecs) * time.Second)
 	log.Printf("protocol probe listening on %s", *addr)
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			log.Print(err)
-			continue
+	// 关服存盘：收到 Ctrl+C 时 Go 默认直接终止进程，各连接 defer 的
+	// persistFaculty/persistJingMai 快照不会执行。这里监听信号，停止收新
+	// 连接并主动断开全部在线连接——断线会驱动 handle 沿"玩家正常下线"
+	// 同一路径退出并落库（内功/经脉快照、场景收尾），drain 完成后再由
+	// defer store.Close() 关库退出。
+	// 注意：Windows 下直接点控制台窗口的 X 或 taskkill /F 不给进程发
+	// 信号，只有 Ctrl+C（CTRL_BREAK 等同 SIGTERM）能走到这条存盘路径。
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	closing := make(chan struct{})
+	var sessions sync.WaitGroup
+	liveMu := new(sync.Mutex)
+	liveConns := make(map[net.Conn]struct{})
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				select {
+				case <-closing:
+					return
+				default:
+				}
+				log.Print(err)
+				continue
+			}
+			liveMu.Lock()
+			liveConns[conn] = struct{}{}
+			liveMu.Unlock()
+			sessions.Add(1)
+			go func() {
+				defer sessions.Done()
+				defer func() {
+					liveMu.Lock()
+					delete(liveConns, conn)
+					liveMu.Unlock()
+				}()
+				handle(conn, store, facultyStore, inventoryStore, skillStore, customConfig, appearanceCfg, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
+			}()
 		}
-		go handle(conn, store, facultyStore, inventoryStore, skillStore, customConfig, appearanceCfg, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
+	}()
+	sig := <-shutdown
+	log.Printf("received %v: shutting down and flushing online player snapshots", sig)
+	close(closing)
+	_ = ln.Close()
+	if n := closeLiveSessions(liveMu, liveConns); n > 0 {
+		log.Printf("closed %d live session(s); waiting up to %s for snapshot flush", n, shutdownDrainTimeout)
+	}
+	// ln.Close 与并发 Accept 返回之间存在极小窗口：个别连接可能刚被
+	// 接受还没来得及入表。稍等后补扫一遍，避免 drain 空等超时。
+	time.Sleep(50 * time.Millisecond)
+	if n := closeLiveSessions(liveMu, liveConns); n > 0 {
+		log.Printf("closed %d late session(s)", n)
+	}
+	if !waitGroupTimeout(&sessions, shutdownDrainTimeout) {
+		log.Printf("session drain timed out after %s; some online snapshots may be lost", shutdownDrainTimeout)
+	}
+	log.Printf("shutdown complete")
+}
+
+// shutdownDrainTimeout 是关服时等待全部在线连接走完"下线落库"路径的上限。
+const shutdownDrainTimeout = 15 * time.Second
+
+// autosaveIntervalNanos 是进程级自动存盘周期（GM 面板 set_autosave_interval
+// 可调；初值来自 -autosave-interval）。各在线会话的 1s tick 读它判定到期，
+// 改动即刻对全部在线玩家生效；0=关闭（断线与 Ctrl+C 关服路径不受影响）。
+// 与 npc_refresh.go 的批量刷新间隔同款：包级原子 + getter/setter，任意
+// 会话循环可写，无锁。
+var autosaveIntervalNanos atomic.Int64
+
+func autosaveInterval() time.Duration { return time.Duration(autosaveIntervalNanos.Load()) }
+
+func setAutosaveInterval(interval time.Duration) { autosaveIntervalNanos.Store(int64(interval)) }
+
+// closeLiveSessions 关闭注册表中当前全部在线连接并清出注册表，返回关闭数。
+func closeLiveSessions(mu *sync.Mutex, conns map[net.Conn]struct{}) int {
+	mu.Lock()
+	defer mu.Unlock()
+	closed := 0
+	for conn := range conns {
+		_ = conn.Close()
+		delete(conns, conn)
+		closed++
+	}
+	return closed
+}
+
+// waitGroupTimeout 等待 WaitGroup 清零，超时返回 false。
+func waitGroupTimeout(group *sync.WaitGroup, timeout time.Duration) bool {
+	done := make(chan struct{})
+	go func() {
+		group.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+		return true
+	case <-time.After(timeout):
+		return false
 	}
 }
 
@@ -502,9 +623,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		if gmSession == nil || player == nil {
 			return fmt.Errorf("character has not entered a scene")
 		}
-		switch command.action {
+		switch command.Action {
 		case "set_silver":
-			player.setSilver(command.silver)
+			player.setSilver(command.Silver)
 			update, updateErr := player.silverUpdate()
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
@@ -513,17 +634,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("碎银设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setSilver(command.silver)
-			log.Printf("%s: GM set CapitalType1=%d", conn.RemoteAddr(), command.silver)
+			gmSession.setSilver(command.Silver)
+			log.Printf("%s: GM set CapitalType1=%d", conn.RemoteAddr(), command.Silver)
 		case "set_sp", "add_sp", "fill_sp":
 			var sp int32
 			var update []byte
 			var updateErr error
-			switch command.action {
+			switch command.Action {
 			case "set_sp":
-				sp, update, updateErr = player.setSP(command.sp)
+				sp, update, updateErr = player.setSP(command.SP)
 			case "add_sp":
-				sp, update, updateErr = player.addSP(command.sp)
+				sp, update, updateErr = player.addSP(command.SP)
 			default:
 				sp, update, updateErr = player.setSP(player.rageCap())
 			}
@@ -535,13 +656,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return updateErr
 			}
 			gmSession.setSP(sp, fmt.Sprintf("怒气设为 %d/%d", sp, player.rageCap()))
-			log.Printf("%s: GM %s SP=%d", conn.RemoteAddr(), command.action, sp)
+			log.Printf("%s: GM %s SP=%d", conn.RemoteAddr(), command.Action, sp)
 		case "set_rage_recovery":
-			rate := player.setRageRecovery(int32(command.value))
+			rate := player.setRageRecovery(int32(command.Value))
 			gmSession.setRageRecovery(rate, fmt.Sprintf("怒气自动回复设为 %d/秒", rate))
 			log.Printf("%s: GM set rage recovery=%d/s", conn.RemoteAddr(), rate)
 		case "set_move_speed":
-			update, updateErr := player.setMoveSpeed(command.value)
+			update, updateErr := player.setMoveSpeed(command.Value)
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -549,10 +670,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("移动速度设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("移动速度设为 %.2f", command.value))
-			log.Printf("%s: GM set MoveSpeed/RunSpeed=%.2f", conn.RemoteAddr(), command.value)
+			gmSession.setAction(fmt.Sprintf("移动速度设为 %.2f", command.Value))
+			log.Printf("%s: GM set MoveSpeed/RunSpeed=%.2f", conn.RemoteAddr(), command.Value)
 		case "set_gravity":
-			update, updateErr := player.setGravity(command.value)
+			update, updateErr := player.setGravity(command.Value)
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -560,10 +681,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("下落重力设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("下落重力设为 %.2f", command.value))
-			log.Printf("%s: GM set Gravity=%.2f", conn.RemoteAddr(), command.value)
+			gmSession.setAction(fmt.Sprintf("下落重力设为 %.2f", command.Value))
+			log.Printf("%s: GM set Gravity=%.2f", conn.RemoteAddr(), command.Value)
 		case "set_respawn_interval":
-			seconds := int32(command.value)
+			seconds := int32(command.Value)
 			setNpcRespawnBatchInterval(time.Duration(seconds) * time.Second)
 			if seconds > 0 {
 				gmSession.setAction(fmt.Sprintf("批量刷新间隔设为 %d 秒（死了的统一重生，活怪不动）", seconds))
@@ -572,7 +693,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			log.Printf("%s: GM set respawn interval=%ds", conn.RemoteAddr(), seconds)
 		case "set_corpse_ttl":
-			seconds := int32(command.value)
+			seconds := int32(command.Value)
 			setNpcCorpseTTL(time.Duration(seconds) * time.Second)
 			if seconds > 0 {
 				gmSession.setAction(fmt.Sprintf("尸体清除延迟设为 %d 秒（超时 0x0E，重生时重新物化）", seconds))
@@ -580,8 +701,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("尸体清除已关闭：尸体保留到重生")
 			}
 			log.Printf("%s: GM set corpse ttl=%ds", conn.RemoteAddr(), seconds)
+		case "set_autosave_interval":
+			seconds := int32(command.Value)
+			setAutosaveInterval(time.Duration(seconds) * time.Second)
+			if seconds > 0 {
+				gmSession.setAction(fmt.Sprintf("自动存盘间隔设为 %d 秒（在线玩家内功/经脉快照周期落库）", seconds))
+			} else {
+				gmSession.setAction("自动存盘已关闭：仅断线与 Ctrl+C 关服时存")
+			}
+			log.Printf("%s: GM set autosave interval=%ds", conn.RemoteAddr(), seconds)
 		case "set_faction":
-			preset, presetErr := gmFactionPresetByKey(command.faction)
+			preset, presetErr := gmapi.FactionPresetByKey(command.Faction)
 			if presetErr != nil {
 				return presetErr
 			}
@@ -604,7 +734,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("切图失败：角色尚未进入场景")
 				return fmt.Errorf("character has not entered a scene")
 			}
-			if switchErr := runtime.SwitchScene(command.destination); switchErr != nil {
+			if switchErr := runtime.SwitchScene(sceneDestination{location: command.Destination}); switchErr != nil {
 				gmSession.setAction("切图失败：" + switchErr.Error())
 				return switchErr
 			}
@@ -622,7 +752,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("场景内瞬移失败：角色尚未进入场景")
 				return fmt.Errorf("character has not entered a scene")
 			}
-			if teleportErr := runtime.TeleportWithinScene(command.position); teleportErr != nil {
+			if teleportErr := runtime.TeleportWithinScene(command.Position); teleportErr != nil {
 				gmSession.setAction("场景内瞬移失败：" + teleportErr.Error())
 				return teleportErr
 			}
@@ -633,20 +763,20 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				pendingLocation = nil
 			}
 			gmSession.setLocation(runtime.activeRole.Location, "已发送场景内瞬移（0x1F）")
-			log.Printf("%s: GM sent same-scene ServerLocation x=%.3f y=%.3f z=%.3f orient=%.3f", conn.RemoteAddr(), command.position.X, command.position.Y, command.position.Z, command.position.Orient)
+			log.Printf("%s: GM sent same-scene ServerLocation x=%.3f y=%.3f z=%.3f orient=%.3f", conn.RemoteAddr(), command.Position.X, command.Position.Y, command.Position.Z, command.Position.Orient)
 		case "set_showequip_type":
-			player.setShowEquipTypePref(int(command.showEquipType))
-			if saveErr := appearanceCfg.appearance.Save(selected.ID, int(command.showEquipType)); saveErr != nil {
+			player.setShowEquipTypePref(int(command.ShowEquipType))
+			if saveErr := appearanceCfg.appearance.Save(selected.ID, int(command.ShowEquipType)); saveErr != nil {
 				log.Printf("%s: GM persist show equip type role=%d: %v", conn.RemoteAddr(), selected.ID, saveErr)
 			}
 			if refreshErr := pushAppearanceRefresh(link, player); refreshErr != nil {
 				gmSession.setAction("显示类型切换失败：" + refreshErr.Error())
 				return refreshErr
 			}
-			gmSession.setAction(fmt.Sprintf("外显类型已切为 %s", showEquipTypeName(int(command.showEquipType))))
-			log.Printf("%s: GM set ShowEquipType=%d", conn.RemoteAddr(), command.showEquipType)
+			gmSession.setAction(fmt.Sprintf("外显类型已切为 %s", showEquipTypeName(int(command.ShowEquipType))))
+			log.Printf("%s: GM set ShowEquipType=%d", conn.RemoteAddr(), command.ShowEquipType)
 		case "set_gold":
-			player.setGold(command.gold)
+			player.setGold(command.Gold)
 			update, updateErr := player.goldUpdate()
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
@@ -655,10 +785,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("金币设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setGold(command.gold)
-			log.Printf("%s: GM set CapitalType0=%d", conn.RemoteAddr(), command.gold)
+			gmSession.setGold(command.Gold)
+			log.Printf("%s: GM set CapitalType0=%d", conn.RemoteAddr(), command.Gold)
 		case "set_guanyin":
-			player.setGuanYin(command.guanYin)
+			player.setGuanYin(command.GuanYin)
 			update, updateErr := player.guanYinUpdate()
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
@@ -667,10 +797,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("官银设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setGuanYin(command.guanYin)
-			log.Printf("%s: GM set CapitalType2=%d", conn.RemoteAddr(), command.guanYin)
+			gmSession.setGuanYin(command.GuanYin)
+			log.Printf("%s: GM set CapitalType2=%d", conn.RemoteAddr(), command.GuanYin)
 		case "set_power_level":
-			update, updateErr := player.setPowerLevel(int32(command.value))
+			update, updateErr := player.setPowerLevel(int32(command.Value))
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -678,10 +808,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("实力等级设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("实力等级设为 %d（%s）", int32(command.value), roleListTitle(int(command.value))))
-			log.Printf("%s: GM set PowerLevel=%d", conn.RemoteAddr(), int32(command.value))
+			gmSession.setAction(fmt.Sprintf("实力等级设为 %d（%s）", int32(command.Value), roleListTitle(int(command.Value))))
+			log.Printf("%s: GM set PowerLevel=%d", conn.RemoteAddr(), int32(command.Value))
 		case "set_alignment":
-			update, updateErr := player.setAlignment(command.justice, command.evil, command.freeBase)
+			update, updateErr := player.setAlignment(command.Justice, command.Evil, command.FreeBase)
 			if updateErr == nil && update != nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -689,10 +819,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("性格善恶设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("性格设为 善 %d / 恶 %d / 基数 %d", command.justice, command.evil, command.freeBase))
-			log.Printf("%s: GM set Justice=%d Evil=%d FreeBase=%d", conn.RemoteAddr(), command.justice, command.evil, command.freeBase)
+			gmSession.setAction(fmt.Sprintf("性格设为 善 %d / 恶 %d / 基数 %d", command.Justice, command.Evil, command.FreeBase))
+			log.Printf("%s: GM set Justice=%d Evil=%d FreeBase=%d", conn.RemoteAddr(), command.Justice, command.Evil, command.FreeBase)
 		case "set_pk_mode":
-			update, updateErr := player.setPKMode(command.pkMode)
+			update, updateErr := player.setPKMode(command.PkMode)
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -700,13 +830,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("PK 模式设置失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("PK 模式设为 %d", command.pkMode))
-			log.Printf("%s: GM set PKMode=%d", conn.RemoteAddr(), command.pkMode)
+			gmSession.setAction(fmt.Sprintf("PK 模式设为 %d", command.PkMode))
+			log.Printf("%s: GM set PKMode=%d", conn.RemoteAddr(), command.PkMode)
 		case "set_vitals":
 			update, updateErr := player.setGMVitals(gmVitalsState{
-				ene: command.ene, maxEne: command.maxEne, resumeEne: command.resumeEne,
-				sat: command.sat, maxSat: command.maxSat,
-				pkValue: command.pkValue, drunkLevel: command.drunkLevel,
+				ene: command.Ene, maxEne: command.MaxEne, resumeEne: command.ResumeEne,
+				sat: command.Sat, maxSat: command.MaxSat,
+				pkValue: command.PkValue, drunkLevel: command.DrunkLevel,
 			})
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
@@ -717,11 +847,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("体力 %d/%d 饱食 %d/%d 杀戮 %d 酒量 %d",
-				command.ene, command.maxEne, command.sat, command.maxSat, command.pkValue, command.drunkLevel))
+				command.Ene, command.MaxEne, command.Sat, command.MaxSat, command.PkValue, command.DrunkLevel))
 			log.Printf("%s: GM set vitals ene=%d/%d sat=%d/%d pk=%d drunk=%d", conn.RemoteAddr(),
-				command.ene, command.maxEne, command.sat, command.maxSat, command.pkValue, command.drunkLevel)
+				command.Ene, command.MaxEne, command.Sat, command.MaxSat, command.PkValue, command.DrunkLevel)
 		case "set_faculty":
-			update, updateErr := player.setFacultyValue(int32(command.value))
+			update, updateErr := player.setFacultyValue(int32(command.Value))
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -730,11 +860,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return updateErr
 			}
 			persistFaculty()
-			gmSession.setFaculty(int32(command.value))
-			gmSession.setAction(fmt.Sprintf("修为设为 %d", int32(command.value)))
-			log.Printf("%s: GM set Faculty=%d", conn.RemoteAddr(), int32(command.value))
+			gmSession.setFaculty(int32(command.Value))
+			gmSession.setAction(fmt.Sprintf("修为设为 %d", int32(command.Value)))
+			log.Printf("%s: GM set Faculty=%d", conn.RemoteAddr(), int32(command.Value))
 		case "set_five_attributes":
-			update, updateErr := player.setBaseAttributes(command.attrStr, command.attrSta, command.attrDex, command.attrIng, command.attrSpi)
+			update, updateErr := player.setBaseAttributes(command.AttrStr, command.AttrSta, command.AttrDex, command.AttrIng, command.AttrSpi)
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -744,11 +874,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("五维设为 臂 %d 身 %d 内 %d 罡 %d 体 %d",
-				command.attrStr, command.attrSta, command.attrIng, command.attrSpi, command.attrDex))
+				command.AttrStr, command.AttrSta, command.AttrIng, command.AttrSpi, command.AttrDex))
 			log.Printf("%s: GM set base attributes str=%d sta=%d dex=%d ing=%d spi=%d", conn.RemoteAddr(),
-				command.attrStr, command.attrSta, command.attrDex, command.attrIng, command.attrSpi)
+				command.AttrStr, command.AttrSta, command.AttrDex, command.AttrIng, command.AttrSpi)
 		case "set_fill_speed":
-			actual, update, updateErr := player.setFillSpeed(command.facultyBase, command.fillMultiplier)
+			actual, update, updateErr := player.setFillSpeed(command.FacultyBase, command.FillMultiplier)
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -757,10 +887,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return updateErr
 			}
 			persistFaculty()
-			gmSession.setAction(fmt.Sprintf("修炼速度设为 %d（%d × %.2f）", actual, command.facultyBase, command.fillMultiplier))
-			log.Printf("%s: GM set FillSpeed=%d base=%d multiplier=%.2f", conn.RemoteAddr(), actual, command.facultyBase, command.fillMultiplier)
+			gmSession.setAction(fmt.Sprintf("修炼速度设为 %d（%d × %.2f）", actual, command.FacultyBase, command.FillMultiplier))
+			log.Printf("%s: GM set FillSpeed=%d base=%d multiplier=%.2f", conn.RemoteAddr(), actual, command.FacultyBase, command.FillMultiplier)
 		case "set_act_day_limit":
-			display, update, updateErr := player.setActDayLimit(int32(command.value))
+			display, update, updateErr := player.setActDayLimit(int32(command.Value))
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -769,21 +899,21 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return updateErr
 			}
 			persistFaculty()
-			if int32(command.value) <= 0 {
+			if int32(command.Value) <= 0 {
 				gmSession.setAction("演武每日上限已解除（不限制）")
 			} else {
 				gmSession.setAction(fmt.Sprintf("演武每日上限设为 %d 两", display))
 			}
-			log.Printf("%s: GM set ActDayValueMax=%d", conn.RemoteAddr(), int32(command.value))
+			log.Printf("%s: GM set ActDayValueMax=%d", conn.RemoteAddr(), int32(command.Value))
 		case "set_weather":
-			preset, presetErr := gmWeatherPresetByKey(command.weather)
+			preset, presetErr := gmapi.WeatherPresetByKey(command.Weather)
 			if presetErr != nil {
 				return presetErr
 			}
 			// Java modernCustomCommandMessage("on_weather_sky", 4, key,
 			// fade, "") 同形：0x27 命令名寻址，客户端 ChangeWeatherEffect。
 			update, updateErr := serverModernCustomStringMessage("on_weather_sky",
-				customInt(4), customString(preset.Key), customInt(command.fadeSec), customString(""))
+				customInt(4), customString(preset.Key), customInt(command.FadeSec), customString(""))
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -791,8 +921,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("天气切换失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("天气已切为 %s（过渡 %d 秒）", preset.Label, command.fadeSec))
-			log.Printf("%s: GM set weather=%s fade=%ds", conn.RemoteAddr(), preset.Key, command.fadeSec)
+			gmSession.setAction(fmt.Sprintf("天气已切为 %s（过渡 %d 秒）", preset.Label, command.FadeSec))
+			log.Printf("%s: GM set weather=%s fade=%ds", conn.RemoteAddr(), preset.Key, command.FadeSec)
 		case "popup_gm_panel":
 			// 客户端 custom_handler close_gmcc_form msg_id=2 → 弹出
 			// GMCC 聊天面板（Java applyPopupGmPanel 同帧）。
@@ -809,7 +939,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		case "custom_probe":
 			// 数值寻址探针（Go 原生补齐，Java 无 GM 侧对应）：
 			// 0x27 [msgId, subType]，用于面板预置消息号的客户端行为观察。
-			update, updateErr := serverModernCustomIntMessage(command.msgID, customInt(command.subType))
+			update, updateErr := serverModernCustomIntMessage(command.MsgId, customInt(command.SubType))
 			if updateErr == nil {
 				updateErr = link.WriteFrame(update)
 			}
@@ -817,8 +947,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("探针发送失败：" + updateErr.Error())
 				return updateErr
 			}
-			gmSession.setAction(fmt.Sprintf("已发送探针 msgId=%d subType=%d", command.msgID, command.subType))
-			log.Printf("%s: GM custom probe msgId=%d subType=%d", conn.RemoteAddr(), command.msgID, command.subType)
+			gmSession.setAction(fmt.Sprintf("已发送探针 msgId=%d subType=%d", command.MsgId, command.SubType))
+			log.Printf("%s: GM custom probe msgId=%d subType=%d", conn.RemoteAddr(), command.MsgId, command.SubType)
 		case "grant_identity_suits":
 			before := len(player.fashionSuitSnapshot())
 			grantIdentitySuitsAtLogin(&appearanceSession{
@@ -858,20 +988,20 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				link: link, player: player, store: inventory, skins: appearanceCfg.skins,
 				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(), now: time.Now,
 			}
-			entry, known := inventory.lookupGrantable(ctx, command.itemConfig)
+			entry, known := inventory.lookupGrantable(ctx, command.ItemConfig)
 			if !known {
-				gmSession.setAction("发放失败：game_items 无此配置 " + command.itemConfig)
-				return fmt.Errorf("unknown item config %q", command.itemConfig)
+				gmSession.setAction("发放失败：game_items 无此配置 " + command.ItemConfig)
+				return fmt.Errorf("unknown item config %q", command.ItemConfig)
 			}
 			equipType := entry.equipType
 			if equipType == "" {
-				if stat := equipmentModels.itemStatic(command.itemConfig); stat != nil {
+				if stat := equipmentModels.itemStatic(command.ItemConfig); stat != nil {
 					equipType = stat.equipType
 				}
 			}
-			if command.wearNow && equipSlotFor(equipType, player.sessionEquips()) > 0 {
+			if command.WearNow && equipSlotFor(equipType, player.sessionEquips()) > 0 {
 				slot := equipSlotFor(equipType, player.sessionEquips())
-				worn, wearErr := inventory.upsertEquipSlot(ctx, selected.ID, slot, command.itemConfig, entry.itemType, equipType)
+				worn, wearErr := inventory.upsertEquipSlot(ctx, selected.ID, slot, command.ItemConfig, entry.itemType, equipType)
 				if wearErr != nil {
 					gmSession.setAction("穿戴发放失败：" + wearErr.Error())
 					return wearErr
@@ -881,46 +1011,46 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					gmSession.setAction("穿戴帧推送失败：" + framesErr.Error())
 					return framesErr
 				}
-				gmSession.setAction(fmt.Sprintf("已发放并穿戴 %s（槽位 %d）", command.itemConfig, slot))
-				log.Printf("%s: GM grant_item wear config=%s slot=%d", conn.RemoteAddr(), command.itemConfig, slot)
+				gmSession.setAction(fmt.Sprintf("已发放并穿戴 %s（槽位 %d）", command.ItemConfig, slot))
+				log.Printf("%s: GM grant_item wear config=%s slot=%d", conn.RemoteAddr(), command.ItemConfig, slot)
 				return nil
 			}
-			landed := session.grantBagItem(entry, command.amount)
+			landed := session.grantBagItem(entry, command.Amount)
 			if landed <= 0 {
 				gmSession.setAction("发放失败：背包已满（1..90）")
 				return fmt.Errorf("bag full")
 			}
-			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.itemConfig, command.amount, entry.viewID, landed))
-			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.itemConfig, command.amount, landed)
+			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, landed))
+			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, landed)
 		case "equip_card", "equip_hair":
-			entry, known := skinCards.lookup(int(command.cardId))
+			entry, known := skinCards.lookup(int(command.CardId))
 			if !known {
-				gmSession.setAction(fmt.Sprintf("皮肤 %d 不在 card.ini 目录", command.cardId))
-				return fmt.Errorf("unknown skin %d", command.cardId)
+				gmSession.setAction(fmt.Sprintf("皮肤 %d 不在 card.ini 目录", command.CardId))
+				return fmt.Errorf("unknown skin %d", command.CardId)
 			}
-			if command.action == "equip_hair" && !entry.hairOnly() {
-				gmSession.setAction(fmt.Sprintf("皮肤 %d 不是纯发型卡（%s）", command.cardId, skinPartSummary(entry, player.visualSexOf())))
-				return fmt.Errorf("skin %d is not hair-only", command.cardId)
+			if command.Action == "equip_hair" && !entry.hairOnly() {
+				gmSession.setAction(fmt.Sprintf("皮肤 %d 不是纯发型卡（%s）", command.CardId, skinPartSummary(entry, player.visualSexOf())))
+				return fmt.Errorf("skin %d is not hair-only", command.CardId)
 			}
 			state := player.skinSnapshot()
 			sex := player.visualSexOf()
-			state.addCollected(command.cardId)
-			if command.action == "equip_hair" {
+			state.addCollected(command.CardId)
+			if command.Action == "equip_hair" {
 				mounted := make([]int32, 0, len(state.mounted))
 				for _, id := range state.mounted {
 					other, ok := skinCards.lookup(int(id))
-					if ok && other.hairOnly() && id != command.cardId {
+					if ok && other.hairOnly() && id != command.CardId {
 						continue // 其他发型卡让位
 					}
-					if id == command.cardId {
+					if id == command.CardId {
 						continue // 重挂刷新到队尾
 					}
 					mounted = append(mounted, id)
 				}
-				state.mounted = append(mounted, command.cardId)
+				state.mounted = append(mounted, command.CardId)
 			} else {
-				state.removeMounted(command.cardId)
-				state.mounted = append(state.mounted, command.cardId)
+				state.removeMounted(command.CardId)
+				state.mounted = append(state.mounted, command.CardId)
 			}
 			if saveErr := appearanceCfg.skins.Save(selected.ID, state); saveErr != nil {
 				log.Printf("%s: GM persist skins role=%d: %v", conn.RemoteAddr(), selected.ID, saveErr)
@@ -930,8 +1060,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("衣橱刷新失败：" + refreshErr.Error())
 				return refreshErr
 			}
-			gmSession.setAction(fmt.Sprintf("已挂载皮肤 %d（%s）", command.cardId, skinPartSummary(entry, sex)))
-			log.Printf("%s: GM %s skin=%d", conn.RemoteAddr(), command.action, command.cardId)
+			gmSession.setAction(fmt.Sprintf("已挂载皮肤 %d（%s）", command.CardId, skinPartSummary(entry, sex)))
+			log.Printf("%s: GM %s skin=%d", conn.RemoteAddr(), command.Action, command.CardId)
 		case "unequip_card":
 			state := player.skinSnapshot()
 			if len(state.mounted) == 0 {
@@ -1055,7 +1185,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("Lua 脚本未启用（-scripts 为空）")
 				return fmt.Errorf("lua scripts are disabled")
 			}
-			result, evalErr := scriptHost.Eval(command.code)
+			result, evalErr := scriptHost.Eval(command.Code)
 			if evalErr != nil {
 				gmSession.setAction("Lua 执行失败：" + evalErr.Error())
 				return evalErr
@@ -1104,7 +1234,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			log.Printf("%s: GM task_rebuild tasks=%d bindings=%d npcs=%d",
 				conn.RemoteAddr(), stats.Tasks, stats.Bindings, stats.BoundNPCs)
 		default:
-			return fmt.Errorf("unsupported GM action %q", command.action)
+			return fmt.Errorf("unsupported GM action %q", command.Action)
 		}
 		return nil
 	}
@@ -1135,6 +1265,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	}()
 	facultyTicker := time.NewTicker(time.Second)
 	defer facultyTicker.Stop()
+	// 周期自动存盘的节拍锚点：下方 1s tick 里按共享周期（GM 可调）
+	// 判定是否到期，见 case now := <-facultyTicker.C。
+	lastAutosave := time.Now()
 	for {
 		var commandQueue <-chan gmCommand
 		if gmSession != nil {
@@ -1147,6 +1280,15 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			_ = processGMCommand(command)
 			continue
 		case now := <-facultyTicker.C:
+			// 周期自动存盘（与断线下线同一组快照，均幂等 upsert）：
+			// 进程被强杀（没走 Ctrl+C 优雅关服）时在线玩家最多丢一个
+			// 周期的增量。周期读共享原子值，GM 面板改完即刻对全部
+			// 在线会话生效；persist 对未登录态是 no-op。
+			if interval := autosaveInterval(); interval > 0 && now.Sub(lastAutosave) >= interval {
+				persistFaculty()
+				persistJingMai()
+				lastAutosave = now
+			}
 			if player == nil || selected == nil {
 				continue
 			}
@@ -1954,7 +2096,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox) {
+				if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -1984,6 +2126,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				case clientCustomSetOperateMode:
 					if _, handleErr := handleOperateModeCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
 						log.Printf("%s: handle activity operate mode: %v", conn.RemoteAddr(), handleErr)
+						return
+					}
+				case clientCustomNeiGongBind:
+					if _, handleErr := handleNeiGongBindCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
+						log.Printf("%s: handle activity neigong bind: %v", conn.RemoteAddr(), handleErr)
 						return
 					}
 				case clientCustomSitCross:
@@ -2219,6 +2366,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			case clientCustomSetOperateMode:
 				if _, handleErr := handleOperateModeCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
 					log.Printf("%s: handle operate mode: %v", conn.RemoteAddr(), handleErr)
+					return
+				}
+			case clientCustomNeiGongBind:
+				if _, handleErr := handleNeiGongBindCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
+					log.Printf("%s: handle neigong bind: %v", conn.RemoteAddr(), handleErr)
 					return
 				}
 			case clientCustomSitCross:

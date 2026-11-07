@@ -85,7 +85,7 @@ func (p *playerActor) setShortcut(index int32, kind, id string) (oldRow int, exi
 
 // removeShortcutIndex 按可见栏位索引删除快捷栏条目。客户端 C2S 201 的
 // 全部调用点（shortcut_game.lua remove_shortcut）传的都是栏位索引而
-// 非记录行号；返回删除时该条目在内存表中的 0 基行号供 0x12 清行。
+// 非记录行号；返回删除时该条目在内存表中的 0 基行号供日志核对。
 func (p *playerActor) removeShortcutIndex(index int32) (int, playerShortcut, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -166,61 +166,47 @@ func ensureSitcrossShortcut(player *playerActor) bool {
 
 // grantHeartBuddhaPalmShortcuts 通过原生 shortcut_rec 记录，用完整的
 // 心佛掌套路填满下方数字快捷栏第二页的 1..7 格。
-// 每个请求的目标槽位均为权威设置。
+// 每个请求的目标槽位均为权威设置；有变更时按整表重建方言应答。
 func grantHeartBuddhaPalmShortcuts(conn sceneMessageConnection, player *playerActor) (int, error) {
 	if player == nil {
 		return 0, nil
 	}
 	granted := 0
+	oldRows := len(player.shortcutSnapshot())
 	for offset, id := range heartBuddhaPalmShortcutIDs {
 		index := heartBuddhaPalmShortcutBaseIndex + int32(offset)
-		oldRow, existed, unchanged := player.setShortcut(index, heartBuddhaPalmShortcutKind, id)
-		if unchanged {
+		if _, _, unchanged := player.setShortcut(index, heartBuddhaPalmShortcutKind, id); unchanged {
 			continue
 		}
-		if existed {
-			if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordShortcut, uint16(oldRow))); err != nil {
-				return granted, fmt.Errorf("replace heart buddha palm shortcut row %d: %w", oldRow, err)
-			}
-		}
-		frame, err := shortcutAddFrame(playerShortcut{index: index, kind: heartBuddhaPalmShortcutKind, id: id})
-		if err != nil {
-			return granted, err
-		}
-		if err := conn.WriteFrame(frame); err != nil {
-			return granted, fmt.Errorf("add heart buddha palm shortcut index %d: %w", index, err)
-		}
 		granted++
+	}
+	if granted > 0 {
+		if err := rebuildShortcutRecord(conn, player, oldRows); err != nil {
+			return granted, fmt.Errorf("rebuild heart buddha palm shortcuts: %w", err)
+		}
 	}
 	return granted, nil
 }
 
 // grantTaiJiQuanGuPuShortcuts 用完整已学习的 太极拳(古谱) 套路
-// 填满数字快捷栏第三页的 1..8 格。
+// 填满数字快捷栏第三页的 1..8 格；有变更时按整表重建方言应答。
 func grantTaiJiQuanGuPuShortcuts(conn sceneMessageConnection, player *playerActor) (int, error) {
 	if player == nil {
 		return 0, nil
 	}
 	granted := 0
+	oldRows := len(player.shortcutSnapshot())
 	for offset, id := range taiJiQuanGuPuShortcutIDs {
 		index := taiJiQuanGuPuShortcutBaseIndex + int32(offset)
-		oldRow, existed, unchanged := player.setShortcut(index, taiJiQuanGuPuShortcutKind, id)
-		if unchanged {
+		if _, _, unchanged := player.setShortcut(index, taiJiQuanGuPuShortcutKind, id); unchanged {
 			continue
 		}
-		if existed {
-			if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordShortcut, uint16(oldRow))); err != nil {
-				return granted, fmt.Errorf("replace tai ji shortcut row %d: %w", oldRow, err)
-			}
-		}
-		frame, err := shortcutAddFrame(playerShortcut{index: index, kind: taiJiQuanGuPuShortcutKind, id: id})
-		if err != nil {
-			return granted, err
-		}
-		if err := conn.WriteFrame(frame); err != nil {
-			return granted, fmt.Errorf("add tai ji shortcut index %d: %w", index, err)
-		}
 		granted++
+	}
+	if granted > 0 {
+		if err := rebuildShortcutRecord(conn, player, oldRows); err != nil {
+			return granted, fmt.Errorf("rebuild tai ji shortcuts: %w", err)
+		}
 	}
 	return granted, nil
 }
@@ -279,11 +265,40 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 	return true, nil
 }
 
+// rebuildShortcutRecord 是快捷栏编辑的应答方言：先把客户端 shortcut_rec
+// 从尾行到 0 倒序清空，再按内存序整表重建。倒序删行使行号重编号永不
+// 参与，客户端引擎侧无论怎样维护行号都不会错位。
+//
+// 依据（2026-11-07 真机对照）：增量「0x12 旧行 + 0x11 追加」在本客户端
+// 上行号口径会漂——服务端重放自洽但客户端删错行（表象：拖出不移除、
+// 拖到别处图标重叠，与 Java 2026-11-04 修的行号错位同族）。另一台真机
+// 验证可用的服务端（9yin_server1 抓包 127-0-0-1-52905）对每次 200/201
+// 都回「117 行倒序 DEL + 整表 ADD」，故镜像该方言。oldRows 为编辑前
+// 的内存表行数（清空范围），重建内容取当前快照。
+func rebuildShortcutRecord(conn sceneMessageConnection, player *playerActor, oldRows int) error {
+	for row := oldRows - 1; row >= 0; row-- {
+		if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordShortcut, uint16(row))); err != nil {
+			return fmt.Errorf("sweep shortcut row %d: %w", row, err)
+		}
+	}
+	for _, shortcut := range player.shortcutSnapshot() {
+		frame, err := shortcutAddFrame(shortcut)
+		if err != nil {
+			return err
+		}
+		if err := conn.WriteFrame(frame); err != nil {
+			return fmt.Errorf("rebuild shortcut index %d: %w", shortcut.index, err)
+		}
+	}
+	return nil
+}
+
 // handleShortcutCustom 实现现代版 shortcut_game.lua 的约定。
 // Set 使用快捷栏索引/类型/config ID。Remove 同样使用可见的快捷栏
 // 索引（shortcut_game.lua remove_shortcut 的全部调用点传索引，不是
-// 记录行号）。内存表更新成功后尽力落库（role_shortcuts），失败仅
-// 告警不断会话——帧下发与内存态优先于持久化。
+// 记录行号）。编辑生效后按 rebuildShortcutRecord 整表重建应答，并
+// 尽力落库（role_shortcuts），失败仅告警不断会话——帧下发与内存态
+// 优先于持久化。
 func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string, store *shortcutDBStore, roleID role.RoleID) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 {
 		return false, nil
@@ -316,22 +331,14 @@ func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, cust
 		if shortcut.kind == "" || shortcut.id == "" || len(shortcut.kind) > 64 || len(shortcut.id) > 256 {
 			return true, fmt.Errorf("invalid shortcut kind/id lengths %d/%d", len(shortcut.kind), len(shortcut.id))
 		}
-		oldRow, existed, unchanged := player.setShortcut(shortcut.index, shortcut.kind, shortcut.id)
+		oldRows := len(player.shortcutSnapshot())
+		_, existed, unchanged := player.setShortcut(shortcut.index, shortcut.kind, shortcut.id)
 		if unchanged {
 			log.Printf("%s: shortcut unchanged index=%d kind=%s id=%s", remote, shortcut.index, shortcut.kind, shortcut.id)
 			return true, nil
 		}
-		if existed {
-			if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordShortcut, uint16(oldRow))); err != nil {
-				return true, fmt.Errorf("delete replaced shortcut row %d: %w", oldRow, err)
-			}
-		}
-		frame, err := shortcutAddFrame(shortcut)
-		if err != nil {
-			return true, err
-		}
-		if err := conn.WriteFrame(frame); err != nil {
-			return true, fmt.Errorf("add shortcut index %d: %w", shortcut.index, err)
+		if err := rebuildShortcutRecord(conn, player, oldRows); err != nil {
+			return true, fmt.Errorf("rebuild after set index %d: %w", shortcut.index, err)
 		}
 		if err := store.Upsert(roleID, shortcut); err != nil {
 			log.Printf("%s: persist shortcut role=%d index=%d: %v", remote, roleID, shortcut.index, err)
@@ -347,13 +354,14 @@ func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, cust
 		if index < 0 || index > 4096 {
 			return true, fmt.Errorf("shortcut index %d is out of range", index)
 		}
+		oldRows := len(player.shortcutSnapshot())
 		row, shortcut, exists := player.removeShortcutIndex(index)
 		if !exists {
 			log.Printf("%s: ignore missing shortcut index=%d", remote, index)
 			return true, nil
 		}
-		if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordShortcut, uint16(row))); err != nil {
-			return true, fmt.Errorf("remove shortcut index=%d row=%d: %w", index, row, err)
+		if err := rebuildShortcutRecord(conn, player, oldRows); err != nil {
+			return true, fmt.Errorf("rebuild after remove index=%d: %w", index, err)
 		}
 		if err := store.DeleteIndex(roleID, index); err != nil {
 			log.Printf("%s: persist shortcut removal role=%d index=%d: %v", remote, roleID, index, err)

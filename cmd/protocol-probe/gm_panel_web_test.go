@@ -33,8 +33,11 @@ func gmGetBody(t *testing.T, url string) (string, string, int) {
 	return string(body), response.Header.Get("Content-Type"), response.StatusCode
 }
 
-// TestGMIndexIsLocalServerOverview 验证概览页只与本服 GM API
-// 对话：入口不再引用网关时代的 /api/manage/* 或多服务器跳转参数。
+// TestGMIndexIsLocalServerOverview 验证概览页与本服 GM API 的对话面。
+// 2026-11-07 二次修订：页面新增「记录服务器」登记册（Java gm-web index
+// 同款，localStorage 列表 + /api/manage/status 同源探活代理 + /api/panel-info
+// 自述）后，网关时代禁令里仍成立的是 __s=/?s= 多服跳转参数——探活与
+// 登记册是面板自身实现的端点，不再是网关转发残留。
 func TestGMIndexIsLocalServerOverview(t *testing.T) {
 	server := gmPanelTestServer(t)
 	index, contentType, status := gmGetBody(t, server.URL+"/")
@@ -48,12 +51,15 @@ func TestGMIndexIsLocalServerOverview(t *testing.T) {
 		`fetch("/api/sessions")`,
 		`location.href='console.html'`,
 		"服务器概览",
+		"记录服务器",
+		`fetch("/api/manage/status?s="`,
+		`fetch("/api/panel-info")`,
 	} {
 		if !strings.Contains(index, reference) {
 			t.Fatalf("index.html missing %q", reference)
 		}
 	}
-	for _, stale := range []string{"/api/manage/", "__s=", "localStorage"} {
+	for _, stale := range []string{"__s=", "console.html?s="} {
 		if strings.Contains(index, stale) {
 			t.Fatalf("index.html still references gateway-era %q", stale)
 		}

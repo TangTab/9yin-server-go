@@ -177,6 +177,7 @@ func (r *sceneRun) combatTick(now time.Time) {
 // HP 面板）。预备与动作帧以 NPC 为中心，受害者首发后对视口内可见该
 // NPC 的其他成员中继。伤害已在锁内同步结算，这里纯表现。
 func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
+	r.autoSelectAttackerTargets(attacks)
 	for _, attack := range attacks {
 		if attack.victim == nil || attack.victim.view == nil {
 			continue
@@ -214,6 +215,48 @@ func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
 				log.Printf("%s: write NPC attack hit %d: %v", attack.victim.view.remote, attack.npcID, err)
 			}
 		}
+	}
+}
+
+// autoSelectAttackerTargets 在 NPC 出手时给没有战斗目标的受害者自动
+// 选中攻击者：LastObject(414)+AutoSelectObject(415) 双帧 + 服务端
+// selectedObject 镜像，与 0x07/431 手动选中（objectRequest/
+// handleSelectTargetCustom）走同一条 writePlayerTargetLocked 路径，
+// 使 211 技能选靶（skillTargetSelected/SelectedArea）无需玩家先点击
+// 即可反击。仅在受害者当前没有可用战斗目标时接管——玩家手动选中
+// 的目标绝不被覆盖；陈旧格（目标已死/非战斗交互）与空选同权，可被
+// 攻击者顶替。官方服无此行为（55866 实证 414/415 全为点击回声，
+// 挨打事件 ±8 帧 0 次自发推送），这是本服的便利性扩展。
+func (r *sceneRun) autoSelectAttackerTargets(attacks []npcAttackPresentation) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.closed {
+		return
+	}
+	for _, attack := range attacks {
+		if attack.victim == nil || attack.victim.view == nil {
+			continue
+		}
+		view := attack.victim.view
+		if _, _, alive := view.livingCombatSelectionLocked(); alive {
+			continue
+		}
+		id := worldcore.EntityID(attack.npcID)
+		meta, exists := r.npcMeta(id)
+		if !exists || meta.ownerID != attack.ownerID || meta.interaction != npcInteractionCombat {
+			continue
+		}
+		if vitals, ok := r.combat.Vitals(id); !ok || vitals.HP <= 0 {
+			continue
+		}
+		if err := view.writePlayerTargetLocked(attack.npcID, attack.ownerID); err != nil {
+			log.Printf("%s: auto-select attacker id=%d: %v", view.remote, attack.npcID, err)
+			continue
+		}
+		view.selectedObject = attack.npcID
+		view.selectedOwner = attack.ownerID
+		log.Printf("%s: auto-selected attacker id=%d owner=%d (victim had no living target)",
+			view.remote, attack.npcID, attack.ownerID)
 	}
 }
 
@@ -281,8 +324,9 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			state.Threat = 1
 		}
 		position, engaged := targets[state.TargetMember]
-		if !engaged {
-			// 目标死亡或离场：清除仇恨并按栓绳规则回位。
+		distance := horizontalDistance(*transform, position)
+		if !engaged || distance > state.ChaseRange {
+			// 目标死亡/离场，或被拉出栓绳距离：清除仇恨并按栓绳规则回位。
 			state.Threat = 0
 			state.TargetMember = 0
 			if horizontalDistance(*transform, state.Home) > 0.25 {
@@ -292,18 +336,15 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 				}
 				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
 			}
-			return
-		}
-		distance := horizontalDistance(*transform, position)
-		if distance > state.ChaseRange {
-			state.Threat = 0
-			state.TargetMember = 0
-			if horizontalDistance(*transform, state.Home) > 0.25 {
-				if err := r.setNPCTransformLocked(id, state.Home); err != nil {
-					log.Printf("scene %s/%s: leash transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
-					return
-				}
-				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
+			// 受击带入的 Fighting 态随清仇恨完全重置（HP/瘀血/MP 回满
+			// + 463=0）并补发 0x10 属性帧——否则 NPC 的脱战只发生在
+			// 重生，怪回家后永远顶着战斗态。官方 463 生命周期
+			// 0→1→120→0（55866/12141/52905 抓包一致），0 恒以重置
+			// 属性帧下发且伴随资源回满；玩家侧同语义迁移见
+			// setCombatPresence（威胁/10s 迟滞）。
+			if vitals.Logic == entity.LogicStateFighting {
+				vitals.ResetAfterLeash()
+				updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcCombatProperties(vitals.ActorState(meta.id, meta.ownerID))})
 			}
 			return
 		}

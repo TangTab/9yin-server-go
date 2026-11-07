@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/local/9yin-go-server/internal/gmapi"
 )
 
 // 门派加入（msg973 新手指南 / msg997 门派消息；fork school.go:64-99
@@ -31,7 +33,7 @@ func lookupFactionByID(id string) (string, error) {
 	if id == "" {
 		return "", fmt.Errorf("empty school id.")
 	}
-	for _, preset := range gmFactionPresets {
+	for _, preset := range gmapi.FactionPresets {
 		if strings.EqualFold(preset.Faction, id) {
 			return preset.Faction, nil
 		}
