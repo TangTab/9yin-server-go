@@ -42,8 +42,8 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 		t.Fatalf("MP=%d, want %d", got, beforeMP-11)
 	}
 	frames := conn.Frames()
-	if len(frames) != 3 || frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 {
-		t.Fatalf("frames=%d, want 0x11 cooldown, 0x10 player update, then 0x10 verified State action", len(frames))
+	if len(frames) != 4 || frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x27 {
+		t.Fatalf("frames=%d, want 0x11 cooldown, 0x10 player update, 0x10 verified State action, then 0x27 msg20", len(frames))
 	}
 	if got := binary.LittleEndian.Uint16(frames[0][10:]); got != recordCooldown {
 		t.Fatalf("cooldown record index=%d, want %d", got, recordCooldown)
@@ -81,11 +81,11 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 		t.Fatalf("cooldown rejection still spent MP: %d", got)
 	}
 	deadline := time.Now().Add(time.Second)
-	for len(conn.Frames()) < 4 && time.Now().Before(deadline) {
+	for len(conn.Frames()) < 5 && time.Now().Before(deadline) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	frames = conn.Frames()
-	if len(frames) != 4 || frames[3][0] != 0x10 {
+	if len(frames) != 5 || frames[4][0] != 0x10 {
 		t.Fatalf("frames after follow-up=%d, want one delayed 0x10 State action", len(frames))
 	}
 }
@@ -121,8 +121,8 @@ func TestHandleSkillFourStagesNativeVisibleBuff(t *testing.T) {
 		t.Fatalf("BufferListStr=%q, want buf_CS_yhwq_hsqs04", got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 3 || frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 {
-		t.Fatalf("frames=%d, want 0x11 cooldown, 0x10 player update, then 0x10 verified State action", len(frames))
+	if len(frames) != 4 || frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x27 {
+		t.Fatalf("frames=%d, want 0x11 cooldown, 0x10 player update, 0x10 State action, then 0x27 msg20", len(frames))
 	}
 }
 
@@ -246,8 +246,8 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 	if got := player.bufferListString(time.Now()); !strings.Contains(got, "buf_fixed_red") {
 		t.Fatalf("BufferListStr=%q, want buf_fixed_red", got)
 	}
-	if frames := conn.Frames(); len(frames) != 3 ||
-		frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 {
+	if frames := conn.Frames(); len(frames) != 4 ||
+		frames[0][0] != 0x11 || frames[1][0] != 0x10 || frames[2][0] != 0x10 || frames[3][0] != 0x27 {
 		t.Fatalf("开太极 initial frames=%x", frames)
 	}
 }

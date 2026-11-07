@@ -42,12 +42,32 @@ func createRoleName(msg []byte) string {
 	return string(utf16.Decode(units))
 }
 
-// oneRoleLoginSuccess 选角列表 0x04 帧。f23/f24/f25 为选人界面的
+// roleListLook 选角列表的外观态（Java LoginFlow.roleListVisual 对应物）：
+// f6=显示类型存档（无档保持 golden "1"——字节兼容），f9/f10/f11=按显示
+// 模式合并后的衣/裤/鞋模型（装备合并 > 身份/时装 finalModels > 皮肤
+// card.ini 部件模型，缺件回落装备合并值）。
+type roleListLook struct {
+	showEquipType string
+	visual        roleVisual
+}
+
+// defaultRoleListLook 无 DB 外观态时的回退（golden 兼容形态）。
+func defaultRoleListLook(appearance []string) roleListLook {
+	return roleListLook{showEquipType: "1", visual: resolveRoleVisual(appearance)}
+}
+
+// oneRoleLoginSuccess 选角列表 0x04 帧（无外观态的 golden 形态，建角回
+// 路与既有测试沿用）。带 DB 外观态的选角走 oneRoleLoginSuccessWithLook。
+func oneRoleLoginSuccess(now time.Time, name string, appearance []string, sceneConfig, sceneResource string) []byte {
+	return oneRoleLoginSuccessWithLook(now, name, appearance, sceneConfig, sceneResource, defaultRoleListLook(appearance))
+}
+
+// oneRoleLoginSuccessWithLook 选角列表 0x04 帧。f23/f24/f25 为选人界面的
 // 实力称号/所在场景/剧本标题（Java LoginMessages.oneRoleLoginSuccess 生产
 // 重载）：f23=roleListTitle 档位键、f24=sceneDisplayName 真实场景名、
 // f25=bookIntroKey 剧本标题键，客户端 form_roles.lua 分别按 desc_ 前缀、
 // 原键、原键查表本地化，查不到才回退显示原码。
-func oneRoleLoginSuccess(now time.Time, name string, appearance []string, sceneConfig, sceneResource string) []byte {
+func oneRoleLoginSuccessWithLook(now time.Time, name string, appearance []string, sceneConfig, sceneResource string, look roleListLook) []byte {
 	msg := noRoleLoginSuccess(now)
 	binary.LittleEndian.PutUint32(msg[0x25:], 1)
 	appendByte := func(v byte) { msg = append(msg, v) }
@@ -80,13 +100,13 @@ func oneRoleLoginSuccess(now time.Time, name string, appearance []string, sceneC
 		}
 		return fallback
 	}
-	visual := resolveRoleVisual(appearance)
+	visual := look.visual
 	fields := make([]string, 36)
 	fields[0] = fmt.Sprint(visual.sex)
 	fields[1] = roleFaction(appearance)
 	fields[2], fields[3], fields[4] = "0", "0", "1"
 	fields[5] = get(2, "")
-	fields[6] = "1"
+	fields[6] = look.showEquipType
 	fields[7] = visual.hair
 	fields[9], fields[10], fields[11] = visual.cloth, visual.pants, visual.shoes
 	fields[21], fields[22] = "stand", "127.0.0.1"
@@ -95,7 +115,7 @@ func oneRoleLoginSuccess(now time.Time, name string, appearance []string, sceneC
 	fields[25] = bookIntroKey(get(0, "book1"))
 	fields[31] = "0"
 	fields[32] = get(0, "book1")
-		fields[33] = visual.hair // 客户端 form_roles.lua [34]=hair，随性别取默认发型
+	fields[33] = visual.hair // 客户端 form_roles.lua [34]=hair，随性别取默认发型
 	fields[35] = "0"
 	rolePara := strings.Join(fields, ",")
 	appendWord(6)
@@ -146,6 +166,7 @@ type serverViewSpec struct {
 type serverViewProperty struct {
 	index  uint16
 	byte1  *byte
+	word   *uint16
 	text   *string
 	int32  *int32
 	real32 *float32
@@ -153,6 +174,11 @@ type serverViewProperty struct {
 
 func viewByte(index uint16, value byte) serverViewProperty {
 	return serverViewProperty{index: index, byte1: &value}
+}
+
+// viewWord 编码官方线型 2（u16，如扩容锚点 BeginPos/EndPos@2013/2014）。
+func viewWord(index uint16, value uint16) serverViewProperty {
+	return serverViewProperty{index: index, word: &value}
 }
 
 func viewString(index uint16, value string) serverViewProperty {
@@ -364,6 +390,9 @@ func serverCreateViewWithProperties(spec serverViewSpec, properties []serverView
 		case property.byte1 != nil:
 			msg = binary.LittleEndian.AppendUint16(msg, property.index)
 			msg = append(msg, *property.byte1)
+		case property.word != nil:
+			msg = binary.LittleEndian.AppendUint16(msg, property.index)
+			msg = binary.LittleEndian.AppendUint16(msg, *property.word)
 		case property.text != nil:
 			msg = binary.LittleEndian.AppendUint16(msg, property.index)
 			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(*property.text)+1))
@@ -399,6 +428,9 @@ func serverViewAdd(viewID, objectIndex uint16, properties []serverViewProperty) 
 		case property.byte1 != nil:
 			msg = binary.LittleEndian.AppendUint16(msg, property.index)
 			msg = append(msg, *property.byte1)
+		case property.word != nil:
+			msg = binary.LittleEndian.AppendUint16(msg, property.index)
+			msg = binary.LittleEndian.AppendUint16(msg, *property.word)
 		case property.text != nil:
 			msg = binary.LittleEndian.AppendUint16(msg, property.index)
 			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(*property.text)+1))
@@ -415,23 +447,6 @@ func serverViewAdd(viewID, objectIndex uint16, properties []serverViewProperty) 
 		}
 	}
 	return msg, nil
-}
-
-func starterBagViews() []serverViewSpec {
-	// 这些 ID 由当前客户端 share/view_define.lua 定义。四个
-	// 主视图支撑可见的背包页签；四个 AddToolBox 视图支撑
-	// 各自的扩展槽位。Capacity 只是客户端视图中的上限；
-	// 固定的网格布局由 GUI 自行提供。
-	return []serverViewSpec{
-		{ID: 121, Capacity: 132}, // VIEWPORT_EQUIP_TOOL：基础 36 + 16*6 扩展
-		{ID: 2, Capacity: 132},   // VIEWPORT_TOOL
-		{ID: 123, Capacity: 132}, // VIEWPORT_MATERIAL_TOOL
-		{ID: 125, Capacity: 132}, // VIEWPORT_TASK_TOOL
-		{ID: 122, Capacity: 16},  // VIEWPORT_EQUIP_ADDTOOLBOX
-		{ID: 3, Capacity: 16},    // VIEWPORT_ADDTOOLBOX
-		{ID: 124, Capacity: 16},  // VIEWPORT_MATERIAL_ADDTOOLBOX
-		{ID: 126, Capacity: 16},  // VIEWPORT_TASK_ADDTOOLBOX
-	}
 }
 
 func noRoleLoginSuccess(now time.Time) []byte {

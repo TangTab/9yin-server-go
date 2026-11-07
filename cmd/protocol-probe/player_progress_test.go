@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -532,5 +533,102 @@ func TestFacultyRestoreSettlesOfflineProgress(t *testing.T) {
 	}
 	if progress.facultyState != facultyStateConvert || progress.facultyStyle != facultyStyleNormal {
 		t.Fatalf("restored faculty state=%d style=%d", progress.facultyState, progress.facultyStyle)
+	}
+}
+
+// 快照携带 starter 目录之外的书（Java 服学会的 ng_jh_201 无妄神功，
+// 取自线上 role 674 的真实快照值）：从 neigong.ini 目录回填身份后追加，
+// 进度按快照覆盖，且 snapshot() 回写不丢。
+func TestFacultyRestoreAppendsCatalogBackfilledBooks(t *testing.T) {
+	catalog, err := loadModernNeiGongCatalog()
+	if err != nil {
+		t.Skip("modern neigong catalog unavailable")
+	}
+	entry, ok := catalog.book("ng_jh_201")
+	if !ok {
+		t.Skip("neigong.ini has no ng_jh_201 (catalog drifted)")
+	}
+	progress := newPlayerProgress()
+	starterCount := len(progress.books)
+	saved := progress.snapshot()
+	saved.CurNeiGong = "ng_jh_201"
+	saved.FacultyName = "ng_jh_201"
+	saved.Books = append(saved.Books, facultyBookSnapshot{
+		ConfigID: "ng_jh_201", Level: 7, Fill: 44254, Total: 48000, Power: 240, MaxPower: 240,
+	})
+	progress.restore(saved, time.Now())
+	if len(progress.books) != starterCount+1 {
+		t.Fatalf("books=%d, want %d (+1 backfilled)", len(progress.books), starterCount+1)
+	}
+	book := progress.book("ng_jh_201")
+	if book == nil {
+		t.Fatal("ng_jh_201 must be restored as a book")
+	}
+	if book.staticData != entry.staticData || book.itemType != entry.itemType {
+		t.Fatalf("backfilled identity=%+v, want catalog entry %+v", book, entry)
+	}
+	if book.level != 7 || book.fill != 44254 || book.total != 48000 || book.power != 240 {
+		t.Fatalf("snapshot progress must overlay: %+v", book)
+	}
+	if book.maxLevel < 7 {
+		t.Fatalf("maxLevel=%d must cover snapshot level 7", book.maxLevel)
+	}
+	if progress.curNeiGong != "ng_jh_201" || progress.facultyName != "ng_jh_201" {
+		t.Fatalf("cur/faculty targets must resolve to the backfilled book: cur=%s name=%s", progress.curNeiGong, progress.facultyName)
+	}
+	roundTrip := progress.snapshot()
+	found := false
+	for _, savedBook := range roundTrip.Books {
+		if savedBook.ConfigID == "ng_jh_201" && savedBook.Level == 7 && savedBook.Total == 48000 {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("snapshot round-trip lost ng_jh_201: %+v", roundTrip.Books)
+	}
+}
+
+// neigong.ini 的经典节（可见 Buff 路线）优先；mind_ 重复节只在经典
+// 节缺席时兜底，且不覆盖任何已有条目。
+func TestMergeNeiGongBookSectionPrefersClassicRoute(t *testing.T) {
+	books := make(map[string]modernNeiGongBook)
+	mergeNeiGongBookSection(books, "mind_ng_wd_001", map[string]string{
+		"QName": "ng_wd_001", "StaticData": "1006", "ItemType": "1002", "School": "ng_wd",
+	})
+	if entry, ok := books["ng_wd_001"]; !ok || entry.staticData != 1006 {
+		t.Fatalf("mind_-only book must backfill: %+v", entry)
+	}
+	mergeNeiGongBookSection(books, "ng_wd_001", map[string]string{
+		"QName": "ng_wd_001", "StaticData": "5", "ItemType": "1002", "School": "ng_wd",
+	})
+	if entry := books["ng_wd_001"]; entry.staticData != 5 {
+		t.Fatalf("classic section must override mind_ placeholder: %+v", entry)
+	}
+	mergeNeiGongBookSection(books, "mind_ng_wd_001", map[string]string{
+		"QName": "ng_wd_001", "StaticData": "1006", "ItemType": "1002",
+	})
+	if entry := books["ng_wd_001"]; entry.staticData != 5 {
+		t.Fatalf("late mind_ section must not override classic: %+v", entry)
+	}
+	mergeNeiGongBookSection(books, "[broken", map[string]string{"StaticData": "1"})
+	mergeNeiGongBookSection(books, "ng_xx_001", map[string]string{"StaticData": "0"})
+	if len(books) != 1 {
+		t.Fatalf("non-ng/malformed sections must be ignored: %v", books)
+	}
+}
+
+func TestSnapshotExtraInt(t *testing.T) {
+	parsed := map[string]json.RawMessage{"max_level": json.RawMessage("71"), "name": json.RawMessage(`"x"`), "frac": json.RawMessage("1.5")}
+	if got := snapshotExtraInt(parsed, "max_level"); got != 71 {
+		t.Fatalf("max_level=%d, want 71", got)
+	}
+	if got := snapshotExtraInt(parsed, "name"); got != 0 {
+		t.Fatalf("string extra must read 0, got %d", got)
+	}
+	if got := snapshotExtraInt(parsed, "frac"); got != 0 {
+		t.Fatalf("fractional extra must read 0, got %d", got)
+	}
+	if got := snapshotExtraInt(parsed, "missing"); got != 0 {
+		t.Fatalf("missing extra must read 0, got %d", got)
 	}
 }

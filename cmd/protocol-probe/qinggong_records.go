@@ -47,6 +47,10 @@ const (
 	// 32 位位集；因此它们必须声明为类型 3。
 	recordColumnInt = byte(3)
 
+	// FxNet2 将 schema 类型 2 解码为两字节 Word（UseCardRec 两列
+	// [皮肤号, 显示类型] 官方线型）。
+	recordColumnWord = byte(2)
+
 	// FxNet2!GameReceiver::RecvRecordRow 将 schema 类型 4 解码为带符号的
 	// 八字节整数。cooldown_rec 的起始/结束列使用该类型。
 	recordColumnInt64 = byte(4)
@@ -63,6 +67,9 @@ const (
 	recordTaskCompleted  uint16 = 3
 	recordShortcut       uint16 = 4
 	recordCooldown       uint16 = 5
+	recordFashionSuit    uint16 = 6
+	recordCard           uint16 = 7
+	recordUseCard        uint16 = 8
 	viewportQingGong     uint16 = 46
 	// View 对象使用原始的场景属性 ConfigID 字段。后续仅商店用的兼容字段
 	// 105 有相同的显示名，但 QingGongContainer 的原生查找读取的不是它。
@@ -93,6 +100,21 @@ var qingGongRecordSchemas = []recordSchema{
 	{name: "cooldown_rec", colTypes: []byte{
 		recordColumnInt, recordColumnInt64, recordColumnInt64, recordColumnInt,
 	}},
+	// 时装页签（docs/装备外观与风物志挂载.md V4；官方 schema
+	// FashionSuitRec [7,3,3,4,3,3]，数值列语义未校准保持零填充）。
+	// 行 = 已激活套装 configId + 5 个零值数值列；ClientReady 推、
+	// 购买补行，0x0C 重入随玩家对象清空后重推。
+	{name: "FashionSuitRec", colTypes: []byte{
+		recordColumnString, recordColumnInt, recordColumnInt,
+		recordColumnInt64, recordColumnInt, recordColumnInt,
+	}},
+	// 风物志收集位图（官方 schema CardRec [3]：每行 32 皮肤，serial=
+	// 皮肤号+1，显式行号全推含零行；0x12 倒序删行）。
+	{name: "CardRec", colTypes: []byte{recordColumnInt}},
+	// 风物志挂载行（官方 schema UseCardRec [2,2]：皮肤号 + 显示类型 0，
+	// 两列均 u16 Word 线型——Java SkinMessagesTest 实证首列 u16@帧内
+	// [16..17]）。
+	{name: "UseCardRec", colTypes: []byte{recordColumnWord, recordColumnWord}},
 }
 
 // starterQingGongIDs 是当前客户端的基础类别。它们刻意使用 config ID
@@ -160,14 +182,20 @@ func serverRecordAddString(objectID, ownerID uint32, recordIndex uint16, value s
 // serverRecordAddInt32 编码一个整型记录单元格。SERVER_RECORD_ADD 追加
 // 行，因此需要稀疏行的调用方必须先发出更早的行。
 func serverRecordAddInt32(objectID, ownerID uint32, recordIndex uint16, value uint32) []byte {
+	return serverRecordAddInt32Row(objectID, ownerID, recordIndex, 0, value)
+}
+
+// serverRecordAddInt32Row 带显式行号的整型记录单元格（CardRec 位图行
+// 专用：FxNet2 按行号对齐 32 皮肤/行的位集，缺行会让后续行整体前移）。
+func serverRecordAddInt32Row(objectID, ownerID uint32, recordIndex uint16, row, value uint32) []byte {
 	msg := make([]byte, 20)
 	msg[0] = 0x11
 	msg[1] = 0 // 场景对象
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
-	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一列
-	binary.LittleEndian.PutUint16(msg[14:], 1) // 一个整型列
+	binary.LittleEndian.PutUint16(msg[12:], uint16(row)) // 源行号
+	binary.LittleEndian.PutUint16(msg[14:], 1)           // 一行
 	binary.LittleEndian.PutUint32(msg[16:], value)
 	return msg
 }
@@ -209,6 +237,14 @@ func serverRecordAddCells(objectID, ownerID uint32, recordIndex uint16, cells []
 				return nil, fmt.Errorf("record column %d requires int32", column)
 			}
 			msg = binary.LittleEndian.AppendUint32(msg, *cell.intValue)
+		case recordColumnWord:
+			if cell.intValue == nil || cell.int64Value != nil || cell.text != nil {
+				return nil, fmt.Errorf("record column %d requires word", column)
+			}
+			if *cell.intValue < 0 || *cell.intValue > math.MaxUint16 {
+				return nil, fmt.Errorf("record column %d word %d out of range", column, *cell.intValue)
+			}
+			msg = binary.LittleEndian.AppendUint16(msg, uint16(*cell.intValue))
 		case recordColumnInt64:
 			if cell.int64Value == nil || cell.intValue != nil || cell.text != nil {
 				return nil, fmt.Errorf("record column %d requires int64", column)

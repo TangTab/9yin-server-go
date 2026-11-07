@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -112,6 +113,24 @@ type combatSkillDefinition struct {
 	followupActions  []skillActionSegment
 	actionDuration   time.Duration
 	effects          []combatSkillEffect
+	// 冲锋链字段（Java CombatSkill/SkillCastHandler 同源）：
+	// castRange=TargetShapePara2>0 ? TSP2 : max(形状半径,8m)；
+	// canRush=skill_static.CanRush；lockSkill=script=="skilllock"||canRush||
+	// (TargetType==4&&DamageType!=0)（msg20 动作三分用）；
+	// isDamageSkill=skill_static.IsDamage；bind/groundRushAction=
+	// skill_lock_data[LockType] 的 BindDistance/LockGRushAction（缺行回退）。
+	castRange        float32
+	canRush          bool
+	lockSkill        bool
+	isDamageSkill    bool
+	bindDistance     float32
+	groundRushAction string
+}
+
+// stagedRushFamily 报告该技能是否走冲锋暂存链：
+// Java 语义 canRush && script=="skilllock"（大小写不敏感）。
+func (definition combatSkillDefinition) stagedRushFamily() bool {
+	return definition.canRush && strings.EqualFold(definition.script, "skilllock")
 }
 
 func (definition combatSkillDefinition) totalActionDuration() time.Duration {
@@ -223,6 +242,27 @@ func useSkillCastTransform(custom clientCustomMessage) (worldcore.Transform, boo
 		transform.Orient = custom.Values[5].Float32
 	}
 	return transform, true
+}
+
+// resolveSkillActionTarget 是 msg20/msg19 动作帧的目标对象三分
+// （Java resolveActionTarget 同源）：锁定/冲锋技=211 瞄准对象（校验存活
+// 战斗 NPC，失效回落选中目标）——客户端据此本地执行冲锋位移；自增益招
+// （IsDamage=0）=施法者自己；其余伤害技=空对象 obj(0,0)。
+func resolveSkillActionTarget(definition combatSkillDefinition, custom clientCustomMessage,
+	world *sceneLifecycle, selectedID, selectedOwner uint32) (uint32, uint32) {
+	if definition.lockSkill {
+		if aimID, aimOwner := dashLandingAimObject(custom); aimID != 0 && world.combatNPCAlive(aimID, aimOwner) {
+			return aimID, aimOwner
+		}
+		if selectedID != 0 && selectedID != playerObjectID {
+			return selectedID, selectedOwner
+		}
+		return 0, 0
+	}
+	if !definition.isDamageSkill {
+		return playerObjectID, playerOwnerID
+	}
+	return 0, 0
 }
 
 func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uint64, now time.Time) (bool, string) {
@@ -535,6 +575,28 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 			return true, nil
 		}
 	}
+	// 攻击距离闸（Java 八轮拍板「按技能真实射程控制释放距离」）：施法者
+	// 坐标取 211 自带上报（宽容解析，缺省原点同 Java）；距离=施法者→目标。
+	// 冲锋三段式：≤TSP2 立即受理；TSP2<距离≤15m 且冲锋族走暂存疾跑链
+	// （CurSkillID+msg25+msg24 档2，CD/资源落地才结）；>15m 静默拒（零帧）。
+	if definition.requiresTarget && world != nil {
+		if targetTransform, hasTransform := world.combatNPCTransform(targetID); hasTransform {
+			castAt, _ := useSkillCastTransform(custom)
+			distance := math.Sqrt(float64(
+				square(castAt.X-targetTransform.X) +
+					square(castAt.Y-targetTransform.Y) +
+					square(castAt.Z-targetTransform.Z)))
+			if rushStageEnabled() && definition.stagedRushFamily() &&
+				distance > float64(definition.castRange) && distance <= rushStageMaxMeters {
+				return stageRushCast(link, player, definition, targetID, targetOwnerID, targetTransform, distance, remote)
+			}
+			if distance > float64(definition.castRange) {
+				log.Printf("%s: reject skill id=%s out of range %.0fm > %.0fm",
+					remote, definition.id, distance, definition.castRange)
+				return true, nil
+			}
+		}
+	}
 	now := time.Now()
 	target := uint64(targetID) | uint64(targetOwnerID)<<32
 	if ok, reason := player.beginSkillUse(definition, target, now); !ok {
@@ -566,6 +628,23 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 		}
 		if len(definition.followupActions) > 0 {
 			scheduleSkillFollowupActions(link, definition)
+		}
+	}
+	// msg20 技能动作帧（官服 out2 时间线定谳的两分规则）：锁定族
+	// （SkillLock/CanRush）带真实 NPC 目标走 msg19 锁定帧（24 值大帧，
+	// combat-gap 后续项——本轮不发，避免「无冲刺动画」回归）；其余
+	// （非锁定技/自增益/无目标）走 msg20，目标对象按三分：自增益招
+	// （IsDamage=0）=施法者自己，其余伤害技=空对象（57378/52795 实证）。
+	actionTargetID, actionTargetOwner := resolveSkillActionTarget(definition, custom, world, targetID, targetOwnerID)
+	lockCastPending := definition.lockSkill &&
+		actionTargetID != 0 && actionTargetID != playerObjectID
+	if !lockCastPending {
+		actionFrame, err := nativeSkillActionFrame(definition.id, actionTargetID, actionTargetOwner)
+		if err != nil {
+			return true, fmt.Errorf("encode native skill action %s: %w", definition.id, err)
+		}
+		if err := link.WriteFrame(actionFrame); err != nil {
+			return true, err
 		}
 	}
 	log.Printf("%s: started verified State skill action skill=%s action=%s followups=%d total=%s caster=%d-%d target=%d-%d",

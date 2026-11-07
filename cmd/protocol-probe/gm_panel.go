@@ -22,6 +22,9 @@ import (
 type gmHub struct {
 	mu       sync.RWMutex
 	sessions map[uint64]*gmSession
+	// itemNames 是 GET 目录端点的中文名解析钩子（game_items 批查；
+	// main() 装配，nil 时条目名回退 ConfigID——httptest 无 DB 也可用）。
+	itemNames func(configIDs []string) map[string]string
 }
 
 type gmSession struct {
@@ -47,14 +50,20 @@ type gmPlayerState struct {
 }
 
 type gmCommand struct {
-	action      string
-	silver      int32
-	sp          int32
-	value       float32
-	destination sceneDestination
-	position    role.Position
-	faction     string
-	code        string // lua_eval 的 Lua 源码
+	action        string
+	silver        int32
+	sp            int32
+	value         float32
+	destination   sceneDestination
+	position      role.Position
+	faction       string
+	code          string // lua_eval 的 Lua 源码
+	itemConfig    string // grant_item/add_item 的物品配置 ID
+	amount        int32  // grant_item 数量
+	wearNow       bool   // grant_item 穿戴形态（否则入背包）
+	cardId        int32  // equip_card/equip_hair 皮肤号
+	showEquipType int32  // set_showequip_type 0/1/2
+	gold          int32  // set_gold（会话级 CapitalType0）
 	// reply 带缓冲，使会话循环总能完成其帧的写入，
 	// 即便浏览器在等待 HTTP 响应期间断开连接。
 	reply chan error
@@ -197,6 +206,9 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 		}
 		writeGMJSON(writer, http.StatusOK, hub.snapshots())
 	})
+	mux.HandleFunc("/api/fashion-catalog", hub.fashionCatalogHandler)
+	mux.HandleFunc("/api/cards", hub.cardsHandler)
+	mux.HandleFunc("/api/hair-cards", hub.hairCardsHandler)
 	mux.HandleFunc("/api/sessions/", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodPost || !strings.HasSuffix(request.URL.Path, "/command") {
 			writer.WriteHeader(http.StatusNotFound)
@@ -218,6 +230,12 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 			Position    string  `json:"position"`
 			Faction     string  `json:"faction"`
 			Code        string  `json:"code"`
+			Type        int32   `json:"type"`
+			ItemConfig  string  `json:"itemConfig"`
+			Amount      int32   `json:"amount"`
+			WearNow     bool    `json:"wearNow"`
+			CardId      int32   `json:"cardId"`
+			Gold        int32   `json:"gold"`
 		}
 		if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
 			writeGMError(writer, http.StatusBadRequest, "invalid JSON body")
@@ -286,6 +304,35 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 				writeGMError(writer, http.StatusBadRequest, factionErr.Error())
 				return
 			}
+		case "set_showequip_type":
+			if body.Type < 0 || body.Type > 2 {
+				writeGMError(writer, http.StatusBadRequest, "show equip type must be 0 (江湖装), 1 (身份装) or 2 (时装)")
+				return
+			}
+			command.showEquipType = body.Type
+		case "set_gold":
+			if body.Gold < 0 {
+				writeGMError(writer, http.StatusBadRequest, "gold must be non-negative")
+				return
+			}
+			command.gold = body.Gold
+		case "grant_item", "add_item":
+			if strings.TrimSpace(body.ItemConfig) == "" {
+				writeGMError(writer, http.StatusBadRequest, "itemConfig is required")
+				return
+			}
+			if body.Amount < 1 {
+				body.Amount = 1
+			}
+			command.itemConfig, command.amount, command.wearNow = strings.TrimSpace(body.ItemConfig), body.Amount, body.WearNow
+		case "equip_card", "equip_hair":
+			if body.CardId <= 0 {
+				writeGMError(writer, http.StatusBadRequest, "cardId must be a positive skin id")
+				return
+			}
+			command.cardId = body.CardId
+		case "grant_identity_suits", "grant_all_fashion", "unequip_card", "grant_all_cards":
+			// 无负载动作：目录/存档校验在会话循环内完成。
 		case "npc_bubble", "drama_prompt", "red_super_armor",
 			"action_state_fishing", "action_state_hsqs05", "action_state_sgmd",
 			"action_native_fishing", "action_state_stop":

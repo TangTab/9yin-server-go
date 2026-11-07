@@ -208,7 +208,16 @@ func main() {
 	}
 	defer store.Close()
 	facultyStore := newFacultyDBStore(store.db)
+	inventoryStore := newInventoryStore(store.db)
+	skillStore := newSkillDBStore(store.db)
+	customConfig := newCustomConfigStores(store.db)
+	appearanceCfg := newAppearanceStores(store.db)
 	gm := newGMHub()
+	gm.itemNames = func(configIDs []string) map[string]string {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		return inventoryStore.itemNames(ctx, configIDs)
+	}
 	if *gmListen != "" {
 		go serveGM(*gmListen, gm)
 	}
@@ -223,11 +232,11 @@ func main() {
 			log.Print(err)
 			continue
 		}
-		go handle(conn, store, facultyStore, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
+		go handle(conn, store, facultyStore, inventoryStore, skillStore, customConfig, appearanceCfg, sceneRegistry, staticNPCs, npcFuncs, qingGongCatalog, float32(*npcRadius), int32(*demoDamage), int32(*starterSilver), switchDestination, gm, scriptHost, neigongEffects, *captureDir)
 	}
 }
 
-func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
+func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inventory *inventoryStore, skills *skillDBStore, customConfig customConfigStores, appearanceCfg appearanceStores, sceneRegistry *sceneNPCRegistry, staticNPCs []npcSpawn, npcFuncs *npcfunc.Registry, qingGongCatalog *qinggong.Catalog, npcRadius float32, demoDamage, starterSilver int32, switchDestination *sceneDestination, gm *gmHub, scriptHost *luascript.Host, neigongEffects *neigong.Effects, captureDir string) {
 	if captureDir != "" {
 		var tap *captureTap
 		conn, tap = newCapturedConn(conn, captureDir)
@@ -275,6 +284,39 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 	defer persistFaculty()
 	qingGongGranted := false
 	neigongGranted := false
+	// dbLearnedSkills 是 0x0C 装载的 role_skills 已学集（wuxue/anqi）。
+	// 空切片 = 无 DB 行或读库失败，grantStarterProgress 回退 starter 集。
+	dbLearnedSkills := []learnedSkillView{}
+	// 自定义配置域的会话级状态（Java LoginSession 对应物）：DB 快捷栏
+	// 基线装载后 starter 授予整体让位；键位/个性配置推送一次推全，
+	// 切图重推只针对挂在玩家对象上的 0x10 属性。
+	shortcutsFromDB := false
+	shortcutRowsSent := false
+	customizingSess := customizingSession{}
+	customizingPushed := false
+	keybindPushed := false
+	currentRoleID := func() role.RoleID {
+		if selected != nil {
+			return selected.ID
+		}
+		return 0
+	}
+	// 物品域会话上下文（msg30/31/34/36 共用；store 缺库时纯内存降级）。
+	newItemSession := func() *itemSession {
+		return &itemSession{
+			link: link, player: player, store: inventory, skins: appearanceCfg.skins,
+			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
+			now: time.Now,
+		}
+	}
+	// 外观域会话上下文（msg61/19 共用）。
+	newAppearanceSession := func() *appearanceSession {
+		return &appearanceSession{
+			link: link, player: player, inventory: inventory,
+			appearance: appearanceCfg.appearance, fashionStore: appearanceCfg.fashion,
+			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
+		}
+	}
 	grantStarterProgress := func() error {
 		if player == nil {
 			return fmt.Errorf("character has not entered a scene")
@@ -288,7 +330,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 				return fmt.Errorf("write View=43: %w", err)
 			}
 		}
-		skillFrames, err := starterSkillViewFrames()
+		skillFrames, err := learnedSkillViewFrames(mergeLearnedSkills(dbLearnedSkills))
 		if err != nil {
 			return fmt.Errorf("encode View=40: %w", err)
 		}
@@ -297,15 +339,21 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 				return fmt.Errorf("write View=40: %w", err)
 			}
 		}
-		if granted, err := grantHeartBuddhaPalmShortcuts(link, player); err != nil {
-			return fmt.Errorf("grant heart buddha palm shortcuts: %w", err)
-		} else if granted > 0 {
-			log.Printf("%s: granted %d 心佛掌 shortcuts numeric_page_2=[%d..%d]", conn.RemoteAddr(), granted, heartBuddhaPalmShortcutBaseIndex, heartBuddhaPalmShortcutBaseIndex+int32(len(heartBuddhaPalmShortcutIDs))-1)
-		}
-		if granted, err := grantTaiJiQuanGuPuShortcuts(link, player); err != nil {
-			return fmt.Errorf("grant tai ji quan gu pu shortcuts: %w", err)
-		} else if granted > 0 {
-			log.Printf("%s: granted %d 太极拳(古谱) shortcuts numeric_page_3=[%d..%d]", conn.RemoteAddr(), granted, taiJiQuanGuPuShortcutBaseIndex, taiJiQuanGuPuShortcutBaseIndex+int32(len(taiJiQuanGuPuShortcutIDs))-1)
+		// 套路快捷栏授予是 starter 回退：DB 有玩家编辑基线时让位，
+		// 否则每次重入都会复活玩家已删除的条目。
+		if shortcutsFromDB {
+			log.Printf("%s: skip starter scheme shortcuts, %d rows restored from role_shortcuts", conn.RemoteAddr(), len(player.shortcutSnapshot()))
+		} else {
+			if granted, err := grantHeartBuddhaPalmShortcuts(link, player); err != nil {
+				return fmt.Errorf("grant heart buddha palm shortcuts: %w", err)
+			} else if granted > 0 {
+				log.Printf("%s: granted %d 心佛掌 shortcuts numeric_page_2=[%d..%d]", conn.RemoteAddr(), granted, heartBuddhaPalmShortcutBaseIndex, heartBuddhaPalmShortcutBaseIndex+int32(len(heartBuddhaPalmShortcutIDs))-1)
+			}
+			if granted, err := grantTaiJiQuanGuPuShortcuts(link, player); err != nil {
+				return fmt.Errorf("grant tai ji quan gu pu shortcuts: %w", err)
+			} else if granted > 0 {
+				log.Printf("%s: granted %d 太极拳(古谱) shortcuts numeric_page_3=[%d..%d]", conn.RemoteAddr(), granted, taiJiQuanGuPuShortcutBaseIndex, taiJiQuanGuPuShortcutBaseIndex+int32(len(taiJiQuanGuPuShortcutIDs))-1)
+			}
 		}
 		state, err := player.vitalUpdate()
 		if err != nil {
@@ -462,6 +510,179 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			}
 			gmSession.setLocation(runtime.activeRole.Location, "已发送场景内瞬移（0x1F）")
 			log.Printf("%s: GM sent same-scene ServerLocation x=%.3f y=%.3f z=%.3f orient=%.3f", conn.RemoteAddr(), command.position.X, command.position.Y, command.position.Z, command.position.Orient)
+		case "set_showequip_type":
+			player.setShowEquipTypePref(int(command.showEquipType))
+			if saveErr := appearanceCfg.appearance.Save(selected.ID, int(command.showEquipType)); saveErr != nil {
+				log.Printf("%s: GM persist show equip type role=%d: %v", conn.RemoteAddr(), selected.ID, saveErr)
+			}
+			if refreshErr := pushAppearanceRefresh(link, player); refreshErr != nil {
+				gmSession.setAction("显示类型切换失败：" + refreshErr.Error())
+				return refreshErr
+			}
+			gmSession.setAction(fmt.Sprintf("外显类型已切为 %s", showEquipTypeName(int(command.showEquipType))))
+			log.Printf("%s: GM set ShowEquipType=%d", conn.RemoteAddr(), command.showEquipType)
+		case "set_gold":
+			player.setGold(command.gold)
+			update, updateErr := player.goldUpdate()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("金币设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			gmSession.setAction(fmt.Sprintf("金币设为 %d（会话级）", command.gold))
+			log.Printf("%s: GM set CapitalType0=%d", conn.RemoteAddr(), command.gold)
+		case "grant_identity_suits":
+			before := len(player.fashionSuitSnapshot())
+			grantIdentitySuitsAtLogin(&appearanceSession{
+				link: link, player: player, inventory: inventory,
+				appearance: appearanceCfg.appearance, fashionStore: appearanceCfg.fashion,
+				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(),
+			})
+			granted := len(player.fashionSuitSnapshot()) - before
+			if granted > 0 && player.fashionRowsPushed() {
+				if rowsErr := pushFashionSuitRows(link, player.fashionSuitSnapshot()); rowsErr != nil {
+					gmSession.setAction("身份装行推送失败：" + rowsErr.Error())
+					return rowsErr
+				}
+			}
+			gmSession.setAction(fmt.Sprintf("身份装激活完成，本次新增 %d 套", granted))
+		case "grant_all_fashion":
+			fashionAll := fashionSuits.fashionSuitsAll()
+			if len(fashionAll) == 0 {
+				gmSession.setAction("时装目录为空（缺 ini/form/fashion_suit.ini）")
+				return fmt.Errorf("fashion suit catalog is empty")
+			}
+			if activateErr := appearanceCfg.fashion.Activate(selected.ID, fashionAll); activateErr != nil {
+				gmSession.setAction("时装激活落库失败：" + activateErr.Error())
+				return activateErr
+			}
+			player.restoreFashionSuits(mergeFashionSuits(player.fashionSuitSnapshot(), fashionAll))
+			if player.fashionRowsPushed() {
+				if rowsErr := pushFashionSuitRows(link, player.fashionSuitSnapshot()); rowsErr != nil {
+					gmSession.setAction("时装行推送失败：" + rowsErr.Error())
+					return rowsErr
+				}
+			}
+			gmSession.setAction(fmt.Sprintf("已激活全部时装 %d 套", len(fashionAll)))
+			log.Printf("%s: GM grant_all_fashion role=%d suits=%d", conn.RemoteAddr(), selected.ID, len(fashionAll))
+		case "grant_item", "add_item":
+			session := &itemSession{
+				link: link, player: player, store: inventory, skins: appearanceCfg.skins,
+				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(), now: time.Now,
+			}
+			entry, known := inventory.lookupGrantable(ctx, command.itemConfig)
+			if !known {
+				gmSession.setAction("发放失败：game_items 无此配置 " + command.itemConfig)
+				return fmt.Errorf("unknown item config %q", command.itemConfig)
+			}
+			equipType := entry.equipType
+			if equipType == "" {
+				if stat := equipmentModels.itemStatic(command.itemConfig); stat != nil {
+					equipType = stat.equipType
+				}
+			}
+			if command.wearNow && equipSlotFor(equipType, player.sessionEquips()) > 0 {
+				slot := equipSlotFor(equipType, player.sessionEquips())
+				worn, wearErr := inventory.upsertEquipSlot(ctx, selected.ID, slot, command.itemConfig, entry.itemType, equipType)
+				if wearErr != nil {
+					gmSession.setAction("穿戴发放失败：" + wearErr.Error())
+					return wearErr
+				}
+				player.replaceEquipSlot(worn)
+				if framesErr := pushWearFrames(link, selected.ID, player.visualSexOf(), effectiveShowEquipType(player), worn, player.sessionEquips()); framesErr != nil {
+					gmSession.setAction("穿戴帧推送失败：" + framesErr.Error())
+					return framesErr
+				}
+				gmSession.setAction(fmt.Sprintf("已发放并穿戴 %s（槽位 %d）", command.itemConfig, slot))
+				log.Printf("%s: GM grant_item wear config=%s slot=%d", conn.RemoteAddr(), command.itemConfig, slot)
+				return nil
+			}
+			landed := session.grantBagItem(entry, command.amount)
+			if landed <= 0 {
+				gmSession.setAction("发放失败：背包已满（1..90）")
+				return fmt.Errorf("bag full")
+			}
+			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.itemConfig, command.amount, entry.viewID, landed))
+			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.itemConfig, command.amount, landed)
+		case "equip_card", "equip_hair":
+			entry, known := skinCards.lookup(int(command.cardId))
+			if !known {
+				gmSession.setAction(fmt.Sprintf("皮肤 %d 不在 card.ini 目录", command.cardId))
+				return fmt.Errorf("unknown skin %d", command.cardId)
+			}
+			if command.action == "equip_hair" && !entry.hairOnly() {
+				gmSession.setAction(fmt.Sprintf("皮肤 %d 不是纯发型卡（%s）", command.cardId, skinPartSummary(entry, player.visualSexOf())))
+				return fmt.Errorf("skin %d is not hair-only", command.cardId)
+			}
+			state := player.skinSnapshot()
+			sex := player.visualSexOf()
+			state.addCollected(command.cardId)
+			if command.action == "equip_hair" {
+				mounted := make([]int32, 0, len(state.mounted))
+				for _, id := range state.mounted {
+					other, ok := skinCards.lookup(int(id))
+					if ok && other.hairOnly() && id != command.cardId {
+						continue // 其他发型卡让位
+					}
+					if id == command.cardId {
+						continue // 重挂刷新到队尾
+					}
+					mounted = append(mounted, id)
+				}
+				state.mounted = append(mounted, command.cardId)
+			} else {
+				state.removeMounted(command.cardId)
+				state.mounted = append(state.mounted, command.cardId)
+			}
+			if saveErr := appearanceCfg.skins.Save(selected.ID, state); saveErr != nil {
+				log.Printf("%s: GM persist skins role=%d: %v", conn.RemoteAddr(), selected.ID, saveErr)
+			}
+			player.applySkins(state)
+			if refreshErr := pushSkinRefreshFrames(link, player); refreshErr != nil {
+				gmSession.setAction("衣橱刷新失败：" + refreshErr.Error())
+				return refreshErr
+			}
+			gmSession.setAction(fmt.Sprintf("已挂载皮肤 %d（%s）", command.cardId, skinPartSummary(entry, sex)))
+			log.Printf("%s: GM %s skin=%d", conn.RemoteAddr(), command.action, command.cardId)
+		case "unequip_card":
+			state := player.skinSnapshot()
+			if len(state.mounted) == 0 {
+				gmSession.setAction("当前无挂载皮肤")
+				return nil
+			}
+			state.mounted = nil
+			if saveErr := appearanceCfg.skins.Save(selected.ID, state); saveErr != nil {
+				log.Printf("%s: GM persist skins role=%d: %v", conn.RemoteAddr(), selected.ID, saveErr)
+			}
+			player.applySkins(state)
+			if refreshErr := pushSkinRefreshFrames(link, player); refreshErr != nil {
+				gmSession.setAction("衣橱刷新失败：" + refreshErr.Error())
+				return refreshErr
+			}
+			gmSession.setAction("已卸载全部皮肤（图鉴保留）")
+			log.Printf("%s: GM unequip_card role=%d", conn.RemoteAddr(), selected.ID)
+		case "grant_all_cards":
+			allIDs := skinCards.allIDs()
+			if len(allIDs) == 0 {
+				gmSession.setAction("皮肤目录为空（缺 share/rule/card.ini）")
+				return fmt.Errorf("skin catalog is empty")
+			}
+			state := player.skinSnapshot()
+			for _, id := range allIDs {
+				state.addCollected(int32(id))
+			}
+			if saveErr := appearanceCfg.skins.Save(selected.ID, state); saveErr != nil {
+				log.Printf("%s: GM persist skins role=%d: %v", conn.RemoteAddr(), selected.ID, saveErr)
+			}
+			player.applySkins(state)
+			if refreshErr := pushSkinRefreshFrames(link, player); refreshErr != nil {
+				gmSession.setAction("衣橱刷新失败：" + refreshErr.Error())
+				return refreshErr
+			}
+			gmSession.setAction(fmt.Sprintf("已全量收录 %d 张皮肤卡", len(allIDs)))
+			log.Printf("%s: GM grant_all_cards role=%d skins=%d", conn.RemoteAddr(), selected.ID, len(allIDs))
 		case "npc_bubble":
 			ident, bubbleErr := world.sendGMNPCBubble("ui_shop")
 			if bubbleErr != nil {
@@ -728,8 +949,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			exists := selected != nil
 			payload := noRoleLoginSuccess(time.Now())
 			if exists {
-				payload = oneRoleLoginSuccess(time.Now(), selected.Name, selected.Appearance.Values,
-					selected.Location.Scene.Config, selected.Location.Scene.Resource)
+				// 选角列表外观（Java roleListVisual）：f6=显示类型存档、
+				// f9/f10/f11=按显示模式合并的衣裤鞋模型——选角界面与游戏内
+				// 外观一致；读库失败回 golden 形态。
+				look := roleListLookOf(ctx, inventory, appearanceCfg, selected.ID, selected.Appearance.Values)
+				payload = oneRoleLoginSuccessWithLook(time.Now(), selected.Name, selected.Appearance.Values,
+					selected.Location.Scene.Config, selected.Location.Scene.Resource, look)
 			}
 			if err := link.WriteFrame(payload); err != nil {
 				log.Printf("%s: write no-role login success: %v", conn.RemoteAddr(), err)
@@ -791,12 +1016,56 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			visual := resolveRoleVisual(activeRole.Appearance.Values)
 			player = newPlayerActor(activeRole.Name, starterSilver)
 			player.faction = roleFaction(activeRole.Appearance.Values)
+			// 外观域会话态（docs/装备外观与风物志挂载.md V4）：显示类型
+			// 偏好（role_appearance）、时装/身份装激活集（role_fashion_suits，
+			// 登录按 faction 幂等补发身份装）、皮肤衣橱（role_skins）。
+			// 全部软依赖：缺表/坏行回默认（江湖装/空衣橱），不阻塞登录。
+			if pref, saved := appearanceCfg.appearance.Load(activeRole.ID); saved {
+				player.setShowEquipTypePref(pref)
+				log.Printf("%s: restored show equip type role=%d type=%d", conn.RemoteAddr(), activeRole.ID, pref)
+			}
+			if suits, saved := appearanceCfg.fashion.List(activeRole.ID); saved {
+				player.restoreFashionSuits(suits)
+			}
+			grantIdentitySuitsAtLogin(&appearanceSession{
+				link: link, player: player, inventory: inventory,
+				appearance: appearanceCfg.appearance, fashionStore: appearanceCfg.fashion,
+				ctx: ctx, roleID: activeRole.ID, remote: conn.RemoteAddr().String(),
+			})
+			if saved, ok := appearanceCfg.skins.Load(activeRole.ID); ok {
+				player.restoreSkins(saved)
+				log.Printf("%s: restored skins role=%d collected=%d mounted=%d", conn.RemoteAddr(), activeRole.ID, len(saved.collected), len(saved.mounted))
+			}
 			if saved, exists := facultyStore.Load(activeRole.ID); exists {
 				player.restoreFaculty(saved, time.Now())
 				log.Printf("%s: restored persistent faculty role=%d state=%d style=%d name=%s", conn.RemoteAddr(), activeRole.ID, player.progress.facultyState, player.progress.facultyStyle, player.progress.facultyName)
 			} else {
 				persistFaculty()
 				log.Printf("%s: initialized persistent normal faculty role=%d name=%s", conn.RemoteAddr(), activeRole.ID, player.progress.facultyName)
+			}
+			// 已学技能装载（Java LoginFlow.loadDbSkills 同口径）：读库失败
+			// 或空表只记日志回退 starter 集，不阻塞登录。
+			if dbSkills, skillErr := skills.learnedSkills(ctx, activeRole.ID); skillErr != nil {
+				log.Printf("%s: load learned skills (skip to starter set) role=%d: %v", conn.RemoteAddr(), activeRole.ID, skillErr)
+			} else {
+				dbLearnedSkills = dbSkills
+				log.Printf("%s: learned skills role=%d db_rows=%d starter=%d merged=%d", conn.RemoteAddr(), activeRole.ID, len(dbSkills), len(starterSkillViews), len(mergeLearnedSkills(dbSkills)))
+			}
+			// 自定义配置域装载：键位/操作模式必须在 sendPlayerSpawn 之前
+			// 进内存——0x0D 档（引擎建对象时即读）内嵌 ShortcutKey(198)/
+			// OperateMode(223)。快捷栏基线与个性配置串在 ClientReady 后
+			// 经 0x11 重放 / S2C 705 下发。
+			if saved, exists := customConfig.keybind.Load(activeRole.ID); exists {
+				player.setKeybind(saved)
+				log.Printf("%s: restored keybind role=%d bind=%dB scheme1=%dB scheme2=%dB operate_mode=%t", conn.RemoteAddr(), activeRole.ID, len(saved.bind), len(saved.scheme1), len(saved.scheme2), saved.operateModeSet)
+			}
+			if saved, exists := customConfig.shortcuts.List(activeRole.ID); exists && len(saved) > 0 {
+				player.replaceShortcuts(saved)
+				shortcutsFromDB = true
+				log.Printf("%s: restored %d shortcut rows from role_shortcuts role=%d", conn.RemoteAddr(), len(saved), activeRole.ID)
+			}
+			if saved, exists := customConfig.customizing.Load(activeRole.ID); exists {
+				customizingSess.saved, customizingSess.hasSaved = saved, true
 			}
 			// 场景服务器在发送任何对象归档之前，必须先定义
 			// 可见属性和可见记录两种 schema。参考服务器中的
@@ -822,13 +1091,25 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 				return
 			}
 			log.Printf("%s: sent property table (%d entries) and record table (%d entries, QingGongRec)", conn.RemoteAddr(), binary.LittleEndian.Uint16(propertyTable[1:]), len(qingGongRecordSchemas))
-			for _, view := range starterBagViews() {
-				if err := link.WriteFrame(serverCreateView(view)); err != nil {
-					log.Printf("%s: create starter bag view id=%d: %v", conn.RemoteAddr(), view.ID, err)
+			// 三期官方方言：17 视图容器（8 主页 BaseCap=18 + 8 扩展页 +
+			// View1 纸娃娃），随后按 DB 扩容锚点行下发扩展槽位。
+			for _, frame := range bagViewCreateFrames() {
+				if err := link.WriteFrame(frame); err != nil {
+					log.Printf("%s: create bag view frame: %v", conn.RemoteAddr(), err)
 					return
 				}
 			}
-			log.Printf("%s: created %d empty starter bag views", conn.RemoteAddr(), len(starterBagViews()))
+			bagpacks, packErr := inventory.bagpacks(ctx, activeRole.ID)
+			if packErr != nil {
+				log.Printf("%s: load bagpack anchors (skip): %v", conn.RemoteAddr(), packErr)
+			}
+			for _, frame := range itemBagFrames(bagpacks, time.Now()) {
+				if err := link.WriteFrame(frame); err != nil {
+					log.Printf("%s: add bagpack anchor: %v", conn.RemoteAddr(), err)
+					return
+				}
+			}
+			log.Printf("%s: created %d bag view containers with %d expansion anchors", conn.RemoteAddr(), len(bagViewCreateFrames()), len(itemBagFrames(bagpacks, time.Now())))
 
 			if err := world.begin(activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource, sceneNPCs); err != nil {
 				log.Printf("%s: begin scene generation: %v", conn.RemoteAddr(), err)
@@ -840,16 +1121,53 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			}
 			log.Printf("%s: sent PlayerEntry opcode=0x0B object=1 scene=%s resource=%s", conn.RemoteAddr(), activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource)
 
+			// 三期物品下发（DB 模式）：纸娃娃 + 背包成对行 + 武器外观；
+			// DB 读失败回退空背包，不阻塞登录（Java LoginFlow 同口径，
+			// 但不以其「穿戴为空即整段跳过」为门槛——有背包行即下发）。
+			// 读取先于 spawn：已穿衣/裤/鞋模型经 mergeVisual 并进 0x0D 档
+			//（Java AppearanceSync.mergeVisual——重登不回落「初始屌丝装」）。
+			equips, equipErr := inventory.equips(ctx, activeRole.ID)
+			if equipErr != nil {
+				log.Printf("%s: load equips (skip inventory): %v", conn.RemoteAddr(), equipErr)
+			}
+			bagItems, bagErr := inventory.bagItems(ctx, activeRole.ID)
+			if bagErr != nil {
+				log.Printf("%s: load bag items (skip inventory): %v", conn.RemoteAddr(), bagErr)
+			}
+			visual = mergeVisual(visual, equips)
+
 			if err := sendPlayerSpawn(link, player, activeRole.Location.Position, visual); err != nil {
 				log.Printf("%s: write player spawn chain: %v", conn.RemoteAddr(), err)
 				return
 			}
 			log.Printf("%s: sent player 0x0D + 0x1F + authoritative vital 0x10", conn.RemoteAddr())
+			if equipErr == nil && bagErr == nil && (len(equips) > 0 || len(bagItems) > 0) {
+				frames, frameErr := inventoryFrames(activeRole.ID, visual.sex, equips, bagItems)
+				if frameErr != nil {
+					log.Printf("%s: encode inventory (skip): %v", conn.RemoteAddr(), frameErr)
+				} else {
+					for _, frame := range frames {
+						if err := link.WriteFrame(frame); err != nil {
+							log.Printf("%s: push inventory frame: %v", conn.RemoteAddr(), err)
+							return
+						}
+					}
+					log.Printf("%s: pushed inventory equips=%d bagItems=%d role=%d", conn.RemoteAddr(), len(equips), len(bagItems), activeRole.ID)
+				}
+			}
+			// 会话物品模型：登录装载（DB 读失败=空模型；后续 msg30/31/34/36 的权威内存态）。
+			player.restoreSessionInventory(visual.sex, equips, bagItems, bagpacks)
+			// 登录外观补帧（Java pushEquipAppearance 同门槛）：帽/身份装/
+			// 时装任一槽占用或显示类型非默认江湖装才推 0x10，否则零帧
+			//（0x0D 档已带装备合并视觉，帧序对齐 golden）。
+			if err := pushEquipAppearance(link, player, equips); err != nil {
+				log.Printf("%s: push equip appearance: %v", conn.RemoteAddr(), err)
+			}
 			// 现在就注册完整场景目录中初始的邻近切片，
 			// 但在客户端就绪屏障之前不将其发送上线。
 			// 加载场景会清空客户端的原生对象表。因此在
 			// ClientReady 之前发送的对象会闪现一次随即被移除。
-			world.attachMember(player, activeRole.Location.Position, resolveRoleVisual(activeRole.Appearance.Values))
+			world.attachMember(player, activeRole.Location.Position, visual)
 			world.refreshVisibility(sceneNPCs, activeRole.Location.Position)
 			nearbyCount := countNPCsWithin(sceneNPCs, activeRole.Location.Position, npcRadius)
 			if err := machine.RoleChosen(); err != nil {
@@ -909,6 +1227,30 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 						log.Printf("%s: restore shortcuts after stable re-entry: %v", conn.RemoteAddr(), shortcutErr)
 						return
 					}
+					// 键位域属性（198/199/200/223）挂玩家对象属性视图，
+					// 0x0C 已随对象清空——0x0D 档内嵌之外还须单属性帧
+					// 重推一次（Java completeSceneReentry 同款重臂）。
+					// 705 是连接级配置对象，不随切图重置，无需重发。
+					if keybindErr := pushKeybindFrames(link, player); keybindErr != nil {
+						log.Printf("%s: restore keybind after stable re-entry: %v", conn.RemoteAddr(), keybindErr)
+						return
+					}
+					// 外观域同样挂玩家对象：风物志/时装记录行 + ShowEquipType
+					// 属性视图 + 最终模型 0x10 全部随 0x0C 清空，重入后整推
+					//（记录行镜像计数先归零——客户端已无旧行可删）。
+					player.resetSkinRowMirrors()
+					if skinsErr := pushSavedSkins(link, player); skinsErr != nil {
+						log.Printf("%s: restore skins after stable re-entry: %v", conn.RemoteAddr(), skinsErr)
+						return
+					}
+					if fashionErr := pushFashionSuitRows(link, player.fashionSuitSnapshot()); fashionErr != nil {
+						log.Printf("%s: restore fashion rows after stable re-entry: %v", conn.RemoteAddr(), fashionErr)
+						return
+					}
+					if appearanceErr := pushAppearanceRefresh(link, player); appearanceErr != nil {
+						log.Printf("%s: restore appearance after stable re-entry: %v", conn.RemoteAddr(), appearanceErr)
+						return
+					}
 					qingGongGranted = true
 					log.Printf("%s: restored %d QingGongRec rows and %d View=46 items after 0x0C re-entry", conn.RemoteAddr(), len(starterQingGongIDs), len(starterQingGongIDs)+len(starterQingGongSkillIDs))
 					// ServerExitScene 会连同玩家对象一起移除 View 43。
@@ -945,12 +1287,55 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 				qingGongGranted = true
 				log.Printf("%s: granted %d QingGongRec rows and %d View=46 items after explicit ClientReady", conn.RemoteAddr(), len(starterQingGongIDs), len(starterQingGongIDs)+len(starterQingGongSkillIDs))
 			}
-			if player != nil {
-				if granted, shortcutErr := grantSitcrossShortcut(link, player); shortcutErr != nil {
-					log.Printf("%s: grant native sitcross shortcut: %v", conn.RemoteAddr(), shortcutErr)
+			// 自定义配置域 ClientReady 推送（Java grantOncePerConnectionRows
+			// 同窗口）：个性配置 705 必须赶在客户端登录期上传 107（默认键位
+			// 转储）之前；键位域四属性挂玩家对象属性视图，0x0C 切图清对象
+			// 即丢、重入时由 stable re-entry 分支重推。无档零帧。
+			if player != nil && !customizingPushed {
+				customizingPushed = true
+				if pushErr := pushSavedCustomizing(link, customizingSess.saved); pushErr != nil {
+					log.Printf("%s: push saved customizing: %v", conn.RemoteAddr(), pushErr)
 					return
-				} else if granted {
+				} else if customizingSess.hasSaved {
+					log.Printf("%s: pushed saved customizing config %d bytes", conn.RemoteAddr(), len(customizingSess.saved))
+				}
+			}
+			if player != nil && !keybindPushed {
+				keybindPushed = true
+				if pushErr := pushKeybindFrames(link, player); pushErr != nil {
+					log.Printf("%s: push saved keybind: %v", conn.RemoteAddr(), pushErr)
+					return
+				}
+			}
+			// 外观域 ClientReady 推送（Java ClientReady 链同窗口：键位后、
+			// 时装页签前）：风物志收录位图 + 挂载行 + 显示开关（空态零帧，
+			// 客户端保持未收录）；FashionSuitRec 行（已激活套装 configId，
+			// 数值列零填充）。两者挂玩家对象记录视图，0x0C 重入随对象清空
+			// 由 stable re-entry 分支重推。
+			if player != nil && !player.skinsRowsPushed() {
+				player.setSkinsRowsPushed()
+				if pushErr := pushSavedSkins(link, player); pushErr != nil {
+					log.Printf("%s: push saved skins: %v", conn.RemoteAddr(), pushErr)
+					return
+				}
+			}
+			if player != nil && !player.fashionRowsPushed() {
+				player.setFashionRowsPushed()
+				if pushErr := pushFashionSuitRows(link, player.fashionSuitSnapshot()); pushErr != nil {
+					log.Printf("%s: push fashion suit rows: %v", conn.RemoteAddr(), pushErr)
+					return
+				}
+			}
+			if player != nil && !shortcutRowsSent {
+				shortcutRowsSent = true
+				// DB 无玩家编辑基线时补 starter 打坐条目；有基线则以玩家
+				// 编辑结果为准（删除即删除，不复活）。
+				if !shortcutsFromDB && ensureSitcrossShortcut(player) {
 					log.Printf("%s: granted native sitcross shortcut index=%d kind=%s id=%s", conn.RemoteAddr(), sitcrossShortcutIndex, sitcrossShortcutKind, sitcrossShortcutID)
+				}
+				if shortcutErr := grantShortcutRows(link, player); shortcutErr != nil {
+					log.Printf("%s: replay shortcut rows after ClientReady: %v", conn.RemoteAddr(), shortcutErr)
+					return
 				}
 			}
 			if player != nil && !neigongGranted {
@@ -1154,7 +1539,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -1167,8 +1552,23 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 						return
 					}
 				case clientCustomSetShortcut, clientCustomRemoveShortcut:
-					if _, handleErr := handleShortcutCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					if _, handleErr := handleShortcutCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.shortcuts, currentRoleID()); handleErr != nil {
 						log.Printf("%s: handle activity shortcut: %v", conn.RemoteAddr(), handleErr)
+						return
+					}
+				case clientCustomSaveCustomizing:
+					if _, handleErr := handleCustomizingCustom(link, player, custom, conn.RemoteAddr().String(), &customizingSess, customConfig.customizing, currentRoleID()); handleErr != nil {
+						log.Printf("%s: handle activity customizing: %v", conn.RemoteAddr(), handleErr)
+						return
+					}
+				case clientCustomKeybindUpload:
+					if _, handleErr := handleKeybindCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
+						log.Printf("%s: handle activity keybind: %v", conn.RemoteAddr(), handleErr)
+						return
+					}
+				case clientCustomSetOperateMode:
+					if _, handleErr := handleOperateModeCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
+						log.Printf("%s: handle activity operate mode: %v", conn.RemoteAddr(), handleErr)
 						return
 					}
 				case clientCustomSitCross:
@@ -1197,6 +1597,47 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 				case clientCustomBlockState:
 					if handleErr := handleBlockStateCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle block state: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomChangeWarning:
+					if _, handleErr := handleChangeWarningCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle change warning: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomCastDashLanding:
+					if _, handleErr := handleCastDashLanding(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle dash landing: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomMovementUpload:
+					// 高频移动上报：无冲锋在途时静默返回，不记日志。
+					if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomMoveItem:
+					if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity move item: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomUseItem:
+					if _, handleErr := handleBodyItemUse(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity use item: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomDeleteItem:
+					if _, handleErr := handleDeleteItemCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity delete item: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomArrangeBag:
+					if _, handleErr := handleArrangeItemCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity arrange bag: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomShowEquipType:
+					if _, handleErr := handleShowEquipTypeCustom(newAppearanceSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity show equip type: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomFashionSuit:
+					if _, handleErr := handleFashionSuitCustom(newAppearanceSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity fashion suit: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomWardrobeCard:
+					if _, handleErr := handleWardrobeCardCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity wardrobe card: %v", conn.RemoteAddr(), handleErr)
 					}
 				case 215, 1006:
 					if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -1291,7 +1732,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			for _, value := range custom.Values[1:] {
 				arguments = append(arguments, value.String())
 			}
-			log.Printf("%s: client CustomSend opcode=0x%02X msg_id=%d args=[%s]", conn.RemoteAddr(), custom.Opcode, custom.Values[0].Int32, strings.Join(arguments, ", "))
+			// msg15 移动上报是引擎直发高频帧（Java 同款静默），不进逐条日志。
+			if custom.Values[0].Int32 != clientCustomMovementUpload {
+				log.Printf("%s: client CustomSend opcode=0x%02X msg_id=%d args=[%s]", conn.RemoteAddr(), custom.Opcode, custom.Values[0].Int32, strings.Join(arguments, ", "))
+			}
 			switch custom.Values[0].Int32 {
 			case clientCustomUseSkill:
 				if _, handleErr := handleSkillCustom(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
@@ -1299,8 +1743,23 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 					return
 				}
 			case clientCustomSetShortcut, clientCustomRemoveShortcut:
-				if _, handleErr := handleShortcutCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+				if _, handleErr := handleShortcutCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.shortcuts, currentRoleID()); handleErr != nil {
 					log.Printf("%s: handle shortcut: %v", conn.RemoteAddr(), handleErr)
+					return
+				}
+			case clientCustomSaveCustomizing:
+				if _, handleErr := handleCustomizingCustom(link, player, custom, conn.RemoteAddr().String(), &customizingSess, customConfig.customizing, currentRoleID()); handleErr != nil {
+					log.Printf("%s: handle customizing: %v", conn.RemoteAddr(), handleErr)
+					return
+				}
+			case clientCustomKeybindUpload:
+				if _, handleErr := handleKeybindCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
+					log.Printf("%s: handle keybind: %v", conn.RemoteAddr(), handleErr)
+					return
+				}
+			case clientCustomSetOperateMode:
+				if _, handleErr := handleOperateModeCustom(link, player, custom, conn.RemoteAddr().String(), customConfig.keybind, currentRoleID()); handleErr != nil {
+					log.Printf("%s: handle operate mode: %v", conn.RemoteAddr(), handleErr)
 					return
 				}
 			case clientCustomSitCross:
@@ -1329,6 +1788,47 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, scene
 			case clientCustomBlockState:
 				if handleErr := handleBlockStateCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle block state: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomChangeWarning:
+				if _, handleErr := handleChangeWarningCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle change warning: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomCastDashLanding:
+				if _, handleErr := handleCastDashLanding(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle dash landing: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomMovementUpload:
+				// 高频移动上报：无冲锋在途时静默返回，不记日志。
+				if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomMoveItem:
+				if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle move item: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomUseItem:
+				if _, handleErr := handleBodyItemUse(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle use item: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomDeleteItem:
+				if _, handleErr := handleDeleteItemCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle delete item: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomArrangeBag:
+				if _, handleErr := handleArrangeItemCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle arrange bag: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomShowEquipType:
+				if _, handleErr := handleShowEquipTypeCustom(newAppearanceSession(), custom); handleErr != nil {
+					log.Printf("%s: handle show equip type: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomFashionSuit:
+				if _, handleErr := handleFashionSuitCustom(newAppearanceSession(), custom); handleErr != nil {
+					log.Printf("%s: handle fashion suit: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomWardrobeCard:
+				if _, handleErr := handleWardrobeCardCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle wardrobe card: %v", conn.RemoteAddr(), handleErr)
 				}
 			case 215, 1006: // 内功穿戴 / faculty 状态机
 				if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {

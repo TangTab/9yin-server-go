@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -12,9 +13,35 @@ type itemModels struct {
 	female string
 }
 
+// itemStatic 是 equipment.ini 的物品静态展示字段（背包/纸娃娃行需要），
+// 对齐 Java EquipmentModels.ItemStatic：[config].ColorLevel/Level/
+// MaxBuildCount/EffectPackID/EquipType + ArtPack→itemartstatic.ini 的
+// Photo。
+type itemStatic struct {
+	photo         string
+	colorLevel    int32
+	level         int32
+	maxBuildCount int32
+	effectPackID  int32
+	equipType     string
+}
+
+// artifactPacks 是套装式物品（身份装/时装套装衣）的分件 ArtPack
+// （equipment.ini [config].HatArtPack/PlantsArtPack/ShoesArtPack——
+// 注意官方拼写就是 Plants；Java EquipmentResolver 同表）。
+type artifactPacks struct {
+	hat    string
+	plants string
+	shoes  string
+}
+
 type equipmentResolver struct {
-	artByItem map[string]string
-	models    map[string]itemModels
+	artByItem  map[string]string
+	models     map[string]itemModels
+	statics    map[string]itemStatic
+	photos     map[string]string
+	actionSets map[string]string
+	packs      map[string]artifactPacks
 }
 
 func loadEquipmentResolver() *equipmentResolver {
@@ -22,12 +49,60 @@ func loadEquipmentResolver() *equipmentResolver {
 	if root == "" {
 		root = filepath.Join(defaultModernShareRoot, "item")
 	}
-	r := &equipmentResolver{artByItem: map[string]string{}, models: map[string]itemModels{}}
+	r := &equipmentResolver{
+		artByItem:  map[string]string{},
+		models:     map[string]itemModels{},
+		statics:    map[string]itemStatic{},
+		photos:     map[string]string{},
+		actionSets: map[string]string{},
+		packs:      map[string]artifactPacks{},
+	}
+	staticFields := map[string]*itemStatic{}
+	parseIntFallback := func(value string, fallback int32) int32 {
+		if value == "" {
+			return fallback
+		}
+		parsed, err := strconv.Atoi(value)
+		if err != nil {
+			return fallback
+		}
+		return int32(parsed)
+	}
 	parseINI(filepath.Join(root, "equipment.ini"), func(section, key, value string) {
 		if key == "ArtPack" {
 			r.artByItem[section] = value
 		}
+		packs := r.packs[section]
+		switch key {
+		case "HatArtPack":
+			packs.hat = value
+		case "PlantsArtPack":
+			packs.plants = value
+		case "ShoesArtPack":
+			packs.shoes = value
+		}
+		r.packs[section] = packs
+		fields, ok := staticFields[section]
+		if !ok {
+			fields = &itemStatic{}
+			staticFields[section] = fields
+		}
+		switch key {
+		case "ColorLevel":
+			fields.colorLevel = parseIntFallback(value, 1)
+		case "Level":
+			fields.level = parseIntFallback(value, 0)
+		case "MaxBuildCount":
+			fields.maxBuildCount = parseIntFallback(value, 2)
+		case "EffectPackID":
+			fields.effectPackID = parseIntFallback(value, 0)
+		case "EquipType":
+			fields.equipType = value
+		}
 	})
+	for section, fields := range staticFields {
+		r.statics[strings.ToLower(section)] = *fields
+	}
 	parseINI(filepath.Join(root, "itemartstatic.ini"), func(section, key, value string) {
 		models := r.models[section]
 		switch key {
@@ -35,10 +110,41 @@ func loadEquipmentResolver() *equipmentResolver {
 			models.male = value
 		case "FemaleModel":
 			models.female = value
+		case "Photo":
+			r.photos[section] = value
+		case "ActionSet":
+			r.actionSets[section] = value
 		}
 		r.models[section] = models
 	})
+	// Photo 依赖 equipment.ini.ArtPack → itemartstatic.ini 的跨表联结，
+	// 两表都解析完成后回填一次。
+	for section := range staticFields {
+		if art := r.artByItem[section]; art != "" {
+			lower := strings.ToLower(section)
+			updated := r.statics[lower]
+			updated.photo = r.photos[art]
+			r.statics[lower] = updated
+		}
+	}
 	return r
+}
+
+// itemStatic 返回物品静态展示字段；未知配置返回 nil。
+func (r *equipmentResolver) itemStatic(configID string) *itemStatic {
+	if configID == "" {
+		return nil
+	}
+	if stat, ok := r.statics[strings.ToLower(configID)]; ok {
+		return &stat
+	}
+	return nil
+}
+
+// resolveActionSet 返回 itemartstatic [ArtPack].ActionSet（武器持械
+// 动画组）；表缺配置返回空串由调用方按 ItemType 回退。
+func (r *equipmentResolver) resolveActionSet(configID string) string {
+	return r.actionSets[r.artByItem[configID]]
 }
 
 func parseINI(path string, consume func(section, key, value string)) {
@@ -79,6 +185,38 @@ func (r *equipmentResolver) resolve(config string, sex byte) string {
 		return models.male
 	}
 	return config
+}
+
+// resolveComponent 套装分件解析（Java EquipmentResolver.resolvePack）：
+// 配置空/已是模型路径 → "";分件 ArtPack 空或 "-1" 哨兵（该件缺席）→ "";
+// 按性别取 MaleModel/FemaleModel（无表值空串——与 resolve 不同,不回退
+// 配置名）。
+func (r *equipmentResolver) resolveComponent(config string, art string, sex byte) string {
+	if config == "" || strings.Contains(config, `\`) {
+		return ""
+	}
+	if art == "" || art == "-1" {
+		return ""
+	}
+	models := r.models[art]
+	if sex == 1 && models.female != "" {
+		return models.female
+	}
+	return models.male
+}
+
+// resolveHat/resolvePants/resolveShoes 身份装槽 16 整套与套装式时装
+// (FashionCoat)自带的帽/裤/鞋分件模型。
+func (r *equipmentResolver) resolveHat(config string, sex byte) string {
+	return r.resolveComponent(config, r.packs[config].hat, sex)
+}
+
+func (r *equipmentResolver) resolvePants(config string, sex byte) string {
+	return r.resolveComponent(config, r.packs[config].plants, sex)
+}
+
+func (r *equipmentResolver) resolveShoes(config string, sex byte) string {
+	return r.resolveComponent(config, r.packs[config].shoes, sex)
 }
 
 type roleVisual struct {

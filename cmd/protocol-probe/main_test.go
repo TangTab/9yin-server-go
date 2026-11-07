@@ -672,26 +672,19 @@ func TestModernTalkMenuUsesCustomGMenuIDs(t *testing.T) {
 	}
 }
 
-func TestStarterBagViewsUseCurrentCreateViewLayout(t *testing.T) {
-	views := starterBagViews()
-	if got, want := len(views), 8; got != want {
-		t.Fatalf("starter bag view count=%d, want %d", got, want)
+func TestBagViewContainersUseCurrentCreateViewLayout(t *testing.T) {
+	// 17 视图容器（8 主页 BaseCap=18 + 8 扩展页 + View1 纸娃娃）由
+	// inventory_test.go TestBagViewCreateFramesLayout 逐项断言；
+	// 这里保留旧用例的视图覆盖面检查（页签与扩展页齐全）。
+	seen := make(map[uint16]bool)
+	for _, frame := range bagViewCreateFrames() {
+		if frame[0] != 0x15 {
+			t.Fatalf("bag view frame opcode=%#x, want 0x15", frame[0])
+		}
+		seen[binary.LittleEndian.Uint16(frame[1:])] = true
 	}
-	seen := make(map[uint16]bool, len(views))
-	for _, view := range views {
-		if seen[view.ID] {
-			t.Fatalf("duplicate view id %d", view.ID)
-		}
-		seen[view.ID] = true
-		msg := serverCreateView(view)
-		if got, want := len(msg), 7; got != want {
-			t.Fatalf("view %d frame len=%d, want %d", view.ID, got, want)
-		}
-		if msg[0] != 0x15 || binary.LittleEndian.Uint16(msg[1:]) != view.ID || binary.LittleEndian.Uint16(msg[3:]) != view.Capacity || binary.LittleEndian.Uint16(msg[5:]) != 0 {
-			t.Fatalf("view %d frame=%x", view.ID, msg)
-		}
-	}
-	for _, required := range []uint16{2, 3, 121, 122, 123, 124, 125, 126} {
+	for _, required := range []uint16{1, 2, 3, 121, 122, 123, 124, 125, 126,
+		174, 175, 176, 177, 178, 179, 180, 181} {
 		if !seen[required] {
 			t.Fatalf("missing required bag view %d", required)
 		}

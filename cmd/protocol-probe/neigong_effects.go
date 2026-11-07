@@ -13,6 +13,7 @@ import (
 // 入门内功清单。这些是已安装的现代客户端配置表，定义了
 // StaticData -> level varprop -> PropModify/SkillModify/Buffer。
 var (
+	modernNeiGongIniPath     = filepath.Join(defaultModernShareRoot, "skill", "neigong", "neigong.ini")
 	modernNeiGongStaticPath  = filepath.Join(defaultModernShareRoot, "skill", "neigong", "neigong_static.ini")
 	modernNeiGongVarPropPath = filepath.Join(defaultModernShareRoot, "skill", "neigong", "neigong_varprop.ini")
 	modernBuffNewPath        = filepath.Join(defaultModernShareRoot, "skill", "buff_new.ini")
@@ -38,6 +39,16 @@ type modernNeiGongVarProp struct {
 
 type modernNeiGongRange struct{ min, max int32 }
 
+// modernNeiGongBook 是 neigong.ini 一本内功的目录身份：configId（QName，
+// 如 ng_wd_001）→ StaticData/ItemType/School。内功不在 skill_new.ini
+// （game_skills 的 wuxue 域），快照中超出 starter 目录的书从这里回填。
+type modernNeiGongBook struct {
+	configID   string
+	staticData int32
+	itemType   int32
+	school     string
+}
+
 type modernNeiGongEffect struct {
 	staticData     uint32
 	buffID         string
@@ -51,6 +62,7 @@ type modernNeiGongEffect struct {
 type modernNeiGongCatalog struct {
 	ranges     map[int32]modernNeiGongRange
 	varProps   map[int32]modernNeiGongVarProp
+	books      map[string]modernNeiGongBook
 	buffStatic map[string]uint32
 	propPacks  map[int32][]modernNeiGongModifier
 	skillPacks map[int32][]modernNeiGongModifier
@@ -67,6 +79,7 @@ func loadModernNeiGongCatalog() (*modernNeiGongCatalog, error) {
 		catalog := &modernNeiGongCatalog{
 			ranges:     make(map[int32]modernNeiGongRange),
 			varProps:   make(map[int32]modernNeiGongVarProp),
+			books:      make(map[string]modernNeiGongBook),
 			buffStatic: make(map[string]uint32),
 			propPacks:  make(map[int32][]modernNeiGongModifier),
 			skillPacks: make(map[int32][]modernNeiGongModifier),
@@ -81,6 +94,9 @@ func loadModernNeiGongCatalog() (*modernNeiGongCatalog, error) {
 }
 
 func (c *modernNeiGongCatalog) load() error {
+	if err := c.loadBooks(); err != nil {
+		return err
+	}
 	if err := parseModernINI(modernNeiGongStaticPath, func(section, key, value string) error {
 		id, err := strconv.ParseInt(section, 10, 32)
 		if err != nil {
@@ -156,6 +172,87 @@ func (c *modernNeiGongCatalog) load() error {
 		return err
 	}
 	return nil
+}
+
+// loadBooks 解析 neigong.ini 的书目录（QName → StaticData/ItemType/
+// School）。文件同时含经典节（[ng_wd_001]）与 mind_ 重复节
+// （[mind_ng_wd_001]，QName 键指向同一本书但 Buff 明确隐藏）。
+func (c *modernNeiGongCatalog) loadBooks() error {
+	fields := make(map[string]string)
+	section := ""
+	flush := func() {
+		if section != "" {
+			mergeNeiGongBookSection(c.books, section, fields)
+		}
+	}
+	if err := parseModernINI(modernNeiGongIniPath, func(name, key, value string) error {
+		if name != section {
+			flush()
+			section = name
+			fields = make(map[string]string)
+		}
+		fields[key] = strings.TrimSpace(value)
+		return nil
+	}); err != nil {
+		return err
+	}
+	flush()
+	return nil
+}
+
+// mergeNeiGongBookSection 把一个小节并进书目录：经典节（节名=QName）
+// 是官方可见 Buff 路线，始终覆盖；mind_ 重复节仅在该书尚无记录时
+// 兜底，不覆盖任何已有条目（与 starter 目录对两套记录的取舍一致）。
+func mergeNeiGongBookSection(books map[string]modernNeiGongBook, section string, fields map[string]string) {
+	qname := section
+	classic := !strings.HasPrefix(section, "mind_")
+	if !classic {
+		qname = fields["QName"]
+	}
+	if !strings.HasPrefix(qname, "ng_") {
+		return
+	}
+	staticData, err := parseModernInt32(fields["StaticData"])
+	if err != nil || staticData <= 0 {
+		return
+	}
+	itemType, err := parseModernInt32(fields["ItemType"])
+	if err != nil || itemType <= 0 {
+		itemType = 1002
+	}
+	if !classic {
+		if _, exists := books[qname]; exists {
+			return
+		}
+	}
+	books[qname] = modernNeiGongBook{
+		configID:   qname,
+		staticData: staticData,
+		itemType:   itemType,
+		school:     fields["School"],
+	}
+}
+
+// book 返回目录身份；快照恢复用它回填 starter 目录之外的书。
+func (c *modernNeiGongCatalog) book(configID string) (modernNeiGongBook, bool) {
+	entry, exists := c.books[configID]
+	return entry, exists
+}
+
+// maxLevelOf 返回该 StaticData varprop 区间内的最大等级，作为快照缺
+// max_level 时的显示上限推导。
+func (c *modernNeiGongCatalog) maxLevelOf(staticData int32) int32 {
+	entry, exists := c.ranges[staticData]
+	if !exists || entry.min <= 0 || entry.max < entry.min {
+		return 0
+	}
+	var best int32
+	for id := entry.min; id <= entry.max; id++ {
+		if candidate, exists := c.varProps[id]; exists && candidate.level > best {
+			best = candidate.level
+		}
+	}
+	return best
 }
 
 func (c *modernNeiGongCatalog) effect(staticData, level int32) (modernNeiGongEffect, error) {

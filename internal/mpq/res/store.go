@@ -160,7 +160,7 @@ func (s *Store) Exists(name string) bool { return s.Layer(name) != "" }
 func (s *Store) Read(name string) ([]byte, error) {
 	norm := Normalize(name)
 	if s.isDeleted(norm) {
-		return nil, fmt.Errorf("res: 资源不存在（墓碑）：%s", name)
+		return nil, fmt.Errorf("res: 资源不存在（墓碑）：%s: %w", name, fs.ErrNotExist)
 	}
 	if local := s.localFileOf(norm); local != "" {
 		return os.ReadFile(local)
@@ -172,7 +172,7 @@ func (s *Store) Read(name string) ([]byte, error) {
 	if l.base.HasFile(norm) {
 		return l.base.ReadFile(norm)
 	}
-	return nil, fmt.Errorf("res: 资源不存在：%s", name)
+	return nil, fmt.Errorf("res: 资源不存在：%s: %w", name, fs.ErrNotExist)
 }
 
 func (s *Store) isDeleted(normalized string) bool {

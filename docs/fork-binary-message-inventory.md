@@ -133,9 +133,9 @@ resource_store（MPQ 三层仓）、ecs/world 架构、server_moving、内功特
 |---|---|---|---|
 | P0 | 431 选目标 + 414/415 回帧 + updateSkillRangeHints | 技能选靶前置；今天抓包已钉死格式 | ✅ 2026-11-06（rangeHints 待补） |
 | P0 | 0x18 ping → 0x38 回复 | combat-gap-audit D11：3 秒 HUD 延迟根因 | ✅ 2026-11-06（纯回显，49840 实证；Java 30B 版是错的） |
-| P1 | 15 移动上报全量（冲锋落地续招 212） | 冲锋暂存探测到位逻辑 | ⬜ |
-| P1 | 54 格挡 / 218 招架 / 292 预警 | active_parry 三件套 | 54 ✅ 2026-11-06（槽11+msg169 宽串+InParry 帧表位 231..233）；218 已有占位；292 ⬜ |
-| P1 | 30/31/34/36 背包装备四件套 | equip_wear.go 同源，一次还原 | ⬜ |
+| P1 | 15 移动上报全量（冲锋落地续招 212） | 冲锋暂存探测到位逻辑 | ✅ 2026-11-07（211 三层距离闸 TSP2/8m 回落+暂存带≤15m+静默拒；暂存=CurSkillID+msg25+msg24-c61 档2；msg15 到位探测 3m 半径+疾跑转冲刺 msg24 档1+0x1F 锚；212/msg15 共用 resume=337 回显+msg26+重组 10 值短式 211 重入受理链；msg20 非 lock 族已接、lock 族真实 NPC 目标走 msg19 仍缺） |
+| P1 | 54 格挡 / 218 招架 / 292 预警 | active_parry 三件套 | 54 ✅ 2026-11-06（槽11+msg169 宽串+InParry 帧表位 231..233）；218 已有占位；292 ✅ 2026-11-07（零参 0↔2 翻转+单帧 0x10 idx463 byte；出招/格挡中拒绝） |
+| P1 | 30/31/34/36 背包装备四件套 | equip_wear.go 同源，一次还原 | ✅ 2026-11-07（30 移动/穿脱/换装 + 34 丢弃 + 36 同类聚合压缩；31 全链=穿戴分支+秘籍 SkillBook/Page/Scroll 学习（门槛 condition.ini Type1/3/19、wuxue/anqi 直达层+View40 重开、neigong 抬上限+View43、qinggong View46 追加）+开箱三源（box_contents 描述对照→drops_mvp 权重包→缺包阶梯兜底）+药品回血阶梯+Lua 钩子预留；写穿 MySQL（uid/affixes 缺列降级）；会话模型 playerActor.bag/equip）。简化：皮肤卡（fwz 域）、选择箱 389、temp_stat 实施、zhenfa、886-889 一键配装、arrange 不落盘（fork 同款） |
 | P2 | 70/71 商店 + 180 风物志 + 295 称号 | 经济/收集 | ⬜ |
 | P2 | 150/161 经脉 + 240 打坐 + 216/217 轻功激活 | 修炼闭环 | ⬜ |
 | P3 | 861 淬火 / 933-938 重铸 / 864 生活职业 / 972-997 门派新手 | 深度玩法 | ⬜ |

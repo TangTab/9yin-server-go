@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log"
 	"math"
 	"path/filepath"
@@ -99,6 +101,8 @@ type skillResourceTables struct {
 	consume     iniTable
 	damage      iniTable
 	hitShape    iniTable
+	targetShape iniTable
+	lockData    iniTable
 	actions     iniTable
 	buffNew     iniTable
 	buffStatic  iniTable
@@ -134,6 +138,27 @@ func loadSkillResourceTables() (skillResourceTables, error) {
 		return result, err
 	}
 	if result.hitShape, err = load(filepath.Join(modernSkillRoot, "attack_hitshape.ini")); err != nil {
+		return result, err
+	}
+	// attack_targetshape.ini / skill_lock_data.ini：冲锋链（TargetShapePara2
+	// 真实射程、LockGRushAction 冲刺动画/BindDistance）所需。测试夹具仓与
+	// 精简部署可能缺这两张表：缺失按空表降级（射程回退 max(形状半径,8m)、
+	// 冲刺参数回退默认值），与 Java 行缺失时的 fallback 语义一致。
+	loadOptional := func(name string) (iniTable, error) {
+		table, loadErr := load(filepath.Join(modernSkillRoot, name))
+		if loadErr != nil {
+			if errors.Is(loadErr, fs.ErrNotExist) {
+				log.Printf("skill resource %s missing; rush cast falls back to default range/params", name)
+				return make(iniTable), nil
+			}
+			return nil, loadErr
+		}
+		return table, nil
+	}
+	if result.targetShape, err = loadOptional("attack_targetshape.ini"); err != nil {
+		return result, err
+	}
+	if result.lockData, err = loadOptional("skill_lock_data.ini"); err != nil {
 		return result, err
 	}
 	result.actions = make(iniTable)
@@ -345,6 +370,23 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 	if publicCooldown <= 0 {
 		publicCooldown = iniInt(newFields, "AddCoolDownTime")
 	}
+	// 冲锋链编译（Java CombatSkillCatalog 同源）：TargetShapePara2 即技能
+	// 面板真实射程；缺表/缺行回退 max(形状半径, 8m)。锁定参数经
+	// skill_static.LockType 索引 skill_lock_data 行。
+	targetShape := tables.targetShape[strconv.FormatInt(int64(iniInt(varProp, "TargetShapePkg")), 10)]
+	castRange := iniFloat(targetShape, "TargetShapePara2")
+	if castRange <= 0 {
+		castRange = float32(math.Max(float64(radius), selectedRangeFallbackMeters))
+	}
+	lockRow := tables.lockData[strconv.FormatInt(int64(iniInt(static, "LockType")), 10)]
+	bindDistance := iniFloat(lockRow, "BindDistance")
+	if bindDistance <= 0 {
+		bindDistance = defaultRushBindDistance
+	}
+	groundRushAction := iniValue(lockRow, "LockGRushAction")
+	if groundRushAction == "" {
+		groundRushAction = defaultGroundRushAction
+	}
 	definition := combatSkillDefinition{
 		id: skillID, staticData: staticData, script: script,
 		taoLu: iniValue(static, "TaoLu"), level: level,
@@ -360,6 +402,13 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		targetMode:       targetMode, areaRadius: radius, areaHeight: iniFloat(varProp, "HeightDiff"),
 		sectorAngle: angle, areaWidth: width,
 		actionName: action, actionDuration: actionDuration, followupActions: followups,
+		castRange: castRange,
+		canRush:   iniInt(static, "CanRush") != 0,
+		lockSkill: strings.EqualFold(script, "skilllock") || iniInt(static, "CanRush") != 0 ||
+			(iniInt(static, "TargetType") == 4 && iniInt(static, "DamageType") != 0),
+		isDamageSkill:    isDamage,
+		bindDistance:     bindDistance,
+		groundRushAction: groundRushAction,
 	}
 	if definition.publicCD <= 0 {
 		definition.publicCD = definition.personalCD
@@ -479,6 +528,29 @@ func (catalog *combatSkillCatalog) definition(id string, level int32) (combatSki
 	catalog.cache[key] = definition
 	catalog.cacheMu.Unlock()
 	return definition, true
+}
+
+// maxLevelOf 技能满级（秘籍书直达层夹制用；Java maxLevelOf 同构）：
+// skill_static [Min,Max]VarPropNo 区间内 varprop（script=skilllock 走
+// lockVar 表，否则 normalVar）Level 的最大值；未索引/无区间/空表 → 1。
+func (catalog *combatSkillCatalog) maxLevelOf(id string) int32 {
+	newFields, indexed := catalog.tables.skillNew[id]
+	if !indexed {
+		return 1
+	}
+	static := catalog.tables.skillStatic[strconv.FormatInt(int64(iniInt(newFields, "StaticData")), 10)]
+	varTable := catalog.tables.normalVar
+	if strings.EqualFold(iniValue(newFields, "script"), "skilllock") {
+		varTable = catalog.tables.lockVar
+	}
+	best := int32(1)
+	for varID := iniInt(static, "MinVarPropNo"); varID <= iniInt(static, "MaxVarPropNo") && varID > 0; varID++ {
+		fields := varTable[strconv.FormatInt(int64(varID), 10)]
+		if level := iniInt(fields, "Level"); level > best {
+			best = level
+		}
+	}
+	return best
 }
 
 func mustLoadCombatSkillCatalog() *combatSkillCatalog {

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/local/9yin-go-server/internal/entity"
+	"github.com/local/9yin-go-server/internal/role"
 )
 
 const (
@@ -82,15 +83,28 @@ func (p *playerActor) setShortcut(index int32, kind, id string) (oldRow int, exi
 	return 0, false, false
 }
 
-func (p *playerActor) removeShortcutRow(row int) (playerShortcut, bool) {
+// removeShortcutIndex 按可见栏位索引删除快捷栏条目。客户端 C2S 201 的
+// 全部调用点（shortcut_game.lua remove_shortcut）传的都是栏位索引而
+// 非记录行号；返回删除时该条目在内存表中的 0 基行号供 0x12 清行。
+func (p *playerActor) removeShortcutIndex(index int32) (int, playerShortcut, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if row < 0 || row >= len(p.shortcuts) {
-		return playerShortcut{}, false
+	for row, shortcut := range p.shortcuts {
+		if shortcut.index != index {
+			continue
+		}
+		p.shortcuts = append(p.shortcuts[:row], p.shortcuts[row+1:]...)
+		return row, shortcut, true
 	}
-	shortcut := p.shortcuts[row]
-	p.shortcuts = append(p.shortcuts[:row], p.shortcuts[row+1:]...)
-	return shortcut, true
+	return 0, playerShortcut{}, false
+}
+
+// replaceShortcuts 用数据库基线整体替换内存快捷栏（登录装载；此后
+// 内存表是唯一事实源，玩家编辑实时落库同步）。
+func (p *playerActor) replaceShortcuts(shortcuts []playerShortcut) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.shortcuts = append([]playerShortcut(nil), shortcuts...)
 }
 
 func (p *playerActor) shortcutSnapshot() []playerShortcut {
@@ -129,33 +143,25 @@ func grantShortcutRows(conn sceneMessageConnection, player *playerActor) error {
 	return nil
 }
 
-// grantSitcrossShortcut 在 ClientReady 之后安装已学习的原生打坐快捷栏条目。
-// 客户端把 zs_default_01 识别为一种特殊的原生动作，
-// 并使用 CustomSend 240 而不是 211 战斗路线。
-func grantSitcrossShortcut(conn sceneMessageConnection, player *playerActor) (bool, error) {
+// ensureSitcrossShortcut 在 ClientReady 之后确保已学习的原生打坐快捷栏
+// 条目在内存表里。客户端把 zs_default_01 识别为一种特殊的原生动作，
+// 并使用 CustomSend 240 而不是 211 战斗路线。只补内存不发帧：0x11 行
+// 由 grantShortcutRows 统一重放，避免同一行重复下发。
+func ensureSitcrossShortcut(player *playerActor) bool {
 	if player == nil {
-		return false, nil
+		return false
 	}
 
 	player.mu.Lock()
 	for _, shortcut := range player.shortcuts {
 		if shortcut.index == sitcrossShortcutIndex {
 			player.mu.Unlock()
-			return false, nil
+			return false
 		}
 	}
-	shortcut := playerShortcut{index: sitcrossShortcutIndex, kind: sitcrossShortcutKind, id: sitcrossShortcutID}
-	player.shortcuts = append(player.shortcuts, shortcut)
+	player.shortcuts = append(player.shortcuts, playerShortcut{index: sitcrossShortcutIndex, kind: sitcrossShortcutKind, id: sitcrossShortcutID})
 	player.mu.Unlock()
-
-	frame, err := shortcutAddFrame(shortcut)
-	if err != nil {
-		return false, err
-	}
-	if err := conn.WriteFrame(frame); err != nil {
-		return false, fmt.Errorf("add sitcross shortcut: %w", err)
-	}
-	return true, nil
+	return true
 }
 
 // grantHeartBuddhaPalmShortcuts 通过原生 shortcut_rec 记录，用完整的
@@ -274,9 +280,11 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 }
 
 // handleShortcutCustom 实现现代版 shortcut_game.lua 的约定。
-// Set 使用快捷栏索引/类型/config ID。Remove 使用当前的记录行，
-// 而不是可见的快捷栏索引。
-func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
+// Set 使用快捷栏索引/类型/config ID。Remove 同样使用可见的快捷栏
+// 索引（shortcut_game.lua remove_shortcut 的全部调用点传索引，不是
+// 记录行号）。内存表更新成功后尽力落库（role_shortcuts），失败仅
+// 告警不断会话——帧下发与内存态优先于持久化。
+func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string, store *shortcutDBStore, roleID role.RoleID) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 {
 		return false, nil
 	}
@@ -325,23 +333,32 @@ func handleShortcutCustom(conn sceneMessageConnection, player *playerActor, cust
 		if err := conn.WriteFrame(frame); err != nil {
 			return true, fmt.Errorf("add shortcut index %d: %w", shortcut.index, err)
 		}
+		if err := store.Upsert(roleID, shortcut); err != nil {
+			log.Printf("%s: persist shortcut role=%d index=%d: %v", remote, roleID, shortcut.index, err)
+		}
 		log.Printf("%s: shortcut set index=%d kind=%s id=%s replaced=%t", remote, shortcut.index, shortcut.kind, shortcut.id, existed)
 		return true, nil
 
 	case clientCustomRemoveShortcut:
 		if len(custom.Values) != 2 || custom.Values[1].Type != 2 {
-			return true, fmt.Errorf("remove shortcut expects int row, got %v", custom.Values)
+			return true, fmt.Errorf("remove shortcut expects int index, got %v", custom.Values)
 		}
-		row := int(custom.Values[1].Int32)
-		shortcut, exists := player.removeShortcutRow(row)
+		index := custom.Values[1].Int32
+		if index < 0 || index > 4096 {
+			return true, fmt.Errorf("shortcut index %d is out of range", index)
+		}
+		row, shortcut, exists := player.removeShortcutIndex(index)
 		if !exists {
-			log.Printf("%s: ignore missing shortcut row=%d", remote, row)
+			log.Printf("%s: ignore missing shortcut index=%d", remote, index)
 			return true, nil
 		}
 		if err := conn.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordShortcut, uint16(row))); err != nil {
-			return true, fmt.Errorf("remove shortcut row %d: %w", row, err)
+			return true, fmt.Errorf("remove shortcut index=%d row=%d: %w", index, row, err)
 		}
-		log.Printf("%s: shortcut removed row=%d index=%d kind=%s id=%s", remote, row, shortcut.index, shortcut.kind, shortcut.id)
+		if err := store.DeleteIndex(roleID, index); err != nil {
+			log.Printf("%s: persist shortcut removal role=%d index=%d: %v", remote, roleID, index, err)
+		}
+		log.Printf("%s: shortcut removed index=%d row=%d kind=%s id=%s", remote, index, row, shortcut.kind, shortcut.id)
 		return true, nil
 	}
 	return false, nil

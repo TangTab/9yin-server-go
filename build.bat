@@ -32,4 +32,3 @@ if errorlevel 1 (
 echo.
 echo Build completed:
 echo %~dp0build\9yin-game-server.exe
-pause

@@ -159,6 +159,7 @@ type playerActor struct {
 	buffs                 map[uint16]activePlayerBuff
 	activeQingGong        map[string]struct{}
 	shortcuts             []playerShortcut
+	keybind               playerKeybind
 	learnedSkills         map[string]int32
 	skillCooldowns        map[string]time.Time
 	skillTeamCooldowns    map[int32]time.Time
@@ -173,6 +174,35 @@ type playerActor struct {
 	innerPowerProcReadyAt time.Time
 	innerPowerHealReadyAt time.Time
 	progress              playerProgress
+	// 冲锋暂存链（fork qinggong_gj.go / Java SkillCastHandler 同源）：
+	// 211 越程按下时暂存出招，msg15/212 探测到位后续招。
+	// 与同名方法 logicState() 区分：权威运行状态在 vitals.Logic。
+	rushLogicState byte // 0=普通 2=预警（msg292 翻转；463 号属性回帧）
+	pendingCast    *pendingCastState
+	rushInFlight   bool
+	rushDashIssued bool
+	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
+	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
+	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。
+	bag           []bagRow
+	equip         []equipRow
+	bagpackRows   []bagpackRow
+	visualSex     byte // 武器外观解析用（登录装载时回填）
+	lastItemUseAt time.Time
+	qingGongExtra map[string]struct{} // 秘籍习得的非 starter 轻功（View46 追加行去重）
+	// 外观域会话状态（docs/装备外观与风物志挂载.md V4）：
+	// 显示类型偏好（custom 61 三 radio，role_appearance 持久化）、
+	// 时装/身份装激活集（role_fashion_suits）、皮肤衣橱（role_skins）、
+	// 会话级金币（CapitalType0，Java 口径不落库）。
+	showEquipType    int
+	showEquipTypeSet bool
+	fashionSuits     []string // 激活集（升序去重；收录判定大小写不敏感）
+	fashionPushed    bool     // FashionSuitRec 行是否已推（购买补行用）
+	skins            skinState
+	skinsPushed      bool
+	skinRows         uint32 // 已推 CardRec 位图行数（整刷前先倒序删）
+	skinMountedRows  uint32 // 已推 UseCardRec 挂载行数
+	gold             int32  // CapitalType0（会话级；购买扣 1 金）
 }
 
 // playerMotion 是刻意由服务器持有的 GM 状态。其值通过常规的现代对象
@@ -255,6 +285,10 @@ func (p *playerActor) logicState() uint8 {
 	defer p.mu.Unlock()
 	return p.vitals.Logic
 }
+
+// logicStateSnapshot 是 logicState 的快照命名变体，与
+// currentSkillSnapshot/parryingSnapshot 对齐。
+func (p *playerActor) logicStateSnapshot() uint8 { return p.logicState() }
 
 func (p *playerActor) setLogicState(state uint8) {
 	p.mu.Lock()
@@ -1336,6 +1370,15 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addInt(4, 0)        // Race(全表唯一@4)
 	addString(1588, "") // Job(玩家域 1588,官方线型 String)
 	addByte(1465, 1)    // Level(玩家域 1465,官方线型 Byte)
+	// 键位域（Java PlayerActor.addObject 同位）：引擎建对象时即读，
+	// post-ready 0x10 补推太晚（2026-11-04「模式没推」根因）。档内
+	// 198 无尾空格（0x10 单帧形态带 " "，勿混用）；无档零属性。
+	if p.keybind.bind != "" {
+		addString(keybindPropertyIndex, p.keybind.bind)
+	}
+	if p.keybind.operateModeSet {
+		addInt(operateModePropertyIndex, p.keybind.operateMode)
+	}
 	addFloat(9, location.X)
 	addFloat(10, location.Y)
 	addFloat(11, location.Z)

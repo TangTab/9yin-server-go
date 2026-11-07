@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
 // CLIENT_CUSTOMMSG_ACTIVE_PARRY 是现代客户端用于主动招架控制的共享 C->S 入口。
@@ -51,6 +53,54 @@ func handleActiveParryCustom(player *playerActor, custom clientCustomMessage, re
 // CLIENT_CUSTOMMSG_BLOCK_STATE（fork handleBlockStateCustom：值 0=按下
 // 格挡、非 0=松开；Java handleManualParry engage==0 同义）。
 const clientCustomBlockState int32 = 54
+
+// propLogicState 是预警切换回帧的单属性索引（官方表 463 号，byte 型）。
+const propLogicState uint16 = 463
+
+// handleBlockStateCustom 见下方；handleChangeWarningCustom 还原 fork
+// active_parry.go:186-250 的预警切换：零参消息，仅在普通(0)↔预警(2)间
+// 翻转；出招中/格挡中/异常态拒绝。回单帧 0x10 LogicState byte。
+func handleChangeWarningCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
+	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomChangeWarning {
+		return false, nil
+	}
+	if player == nil {
+		return true, fmt.Errorf("change warning before scene player exists")
+	}
+	if len(custom.Values) != 1 {
+		log.Printf("%s: reject change warning with extra payload nvalues=%d", remote, len(custom.Values)-1)
+		return true, fmt.Errorf("change warning expects no payload, got %d extra values", len(custom.Values)-1)
+	}
+	state := player.logicStateSnapshot()
+	if state != 0 && state != 2 {
+		log.Printf("%s: reject change warning from logic state %d", remote, state)
+		return true, nil
+	}
+	if casting := player.currentSkillSnapshot(); casting != "" {
+		log.Printf("%s: reject change warning while casting %s", remote, casting)
+		return true, nil
+	}
+	if player.parryingSnapshot() {
+		log.Printf("%s: reject change warning while parrying", remote)
+		return true, nil
+	}
+	next := byte(2)
+	if state == 2 {
+		next = 0
+	}
+	player.setLogicState(next)
+	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: propLogicState, Name: "LogicState", Value: clientdata.ByteValue(next)},
+	})
+	if err != nil {
+		return true, fmt.Errorf("encode logic state: %w", err)
+	}
+	if err := link.WriteFrame(frame); err != nil {
+		return true, err
+	}
+	log.Printf("%s: change warning logic_state %d -> %d", remote, state, next)
+	return true, nil
+}
 
 // handleBlockStateCustom 还原手动格挡（Java handleManualParry +
 // sendParryStateFrames 同源）：状态变化时挂/清槽 11 的 BuffInParry，

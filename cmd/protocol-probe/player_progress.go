@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -72,6 +74,11 @@ const (
 	logicStateFaculty   byte  = 108
 
 	normalFacultyFillPerMinute int32 = 200
+
+	// 快照额外书的显示兜底（与 starter 目录 1 级书的初值同款）。
+	defaultExtraNeiGongMaxLevel int32 = 36
+	defaultExtraNeiGongTotal    int32 = 700
+	defaultExtraNeiGongPower    int32 = 120
 )
 
 func facultyBool(value bool) int32 {
@@ -520,6 +527,9 @@ func (p *playerProgress) snapshot() facultyProgressSnapshot {
 }
 
 func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
+	// 快照书集合是权威（Java PlayerProgress 同口径）：先回填 starter
+	// 目录之外的书，随后的 CurNeiGong/FacultyName 校验才能命中它们。
+	p.restoreExtraBooks(value)
 	if p.book(value.CurNeiGong) != nil {
 		p.curNeiGong = value.CurNeiGong
 	}
@@ -554,6 +564,68 @@ func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
 		p.lastAdvance = now.UTC()
 	}
 	p.refreshAllModernEffects()
+}
+
+// restoreExtraBooks 把快照中超出 starter 目录的书从 neigong.ini 目录
+// 回填后追加。目录查无此书时丢弃（客户端无法把未知的 ConfigID 解析成
+// wuxue 对象，faculty.lua 的普通开始按钮会因此保持禁用）；进度仍由
+// restore 的公共覆盖循环按快照值校验写入。无资源目录时（单元测试）
+// 整体跳过，行为与历史版本一致。
+func (p *playerProgress) restoreExtraBooks(value facultyProgressSnapshot) {
+	catalog, err := loadModernNeiGongCatalog()
+	if err != nil {
+		return
+	}
+	appended := make([]string, 0, 4)
+	for _, saved := range value.Books {
+		if p.book(saved.ConfigID) != nil {
+			continue
+		}
+		entry, ok := catalog.book(saved.ConfigID)
+		if !ok || entry.staticData <= 0 {
+			log.Printf("faculty snapshot book %s missing from neigong.ini catalog; dropped", saved.ConfigID)
+			continue
+		}
+		p.books = append(p.books, learnedNeiGong{
+			configID:   saved.ConfigID,
+			staticData: entry.staticData,
+			itemType:   entry.itemType,
+			level:      1,
+			maxLevel:   extraNeiGongMaxLevel(catalog, entry.staticData, saved),
+			total:      defaultExtraNeiGongTotal,
+			power:      defaultExtraNeiGongPower,
+			maxPower:   defaultExtraNeiGongPower,
+		})
+		appended = append(appended, saved.ConfigID)
+	}
+	if len(appended) > 0 {
+		log.Printf("faculty snapshot restored %d catalog backfilled books: %v", len(appended), appended)
+	}
+}
+
+// extraNeiGongMaxLevel 取显示上限：快照 extras 的 max_level（新版服
+// 写入）优先，否则从 varprop 区间推导，最终回退 starter 目录的 36。
+func extraNeiGongMaxLevel(catalog *modernNeiGongCatalog, staticData int32, saved facultyBookSnapshot) int32 {
+	if value := snapshotExtraInt(saved.extras, "max_level"); value > 0 {
+		return value
+	}
+	if value := catalog.maxLevelOf(staticData); value > 0 {
+		return value
+	}
+	return defaultExtraNeiGongMaxLevel
+}
+
+// snapshotExtraInt 读取快照透传键里的整数值；缺失或非数字返回 0。
+func snapshotExtraInt(extras map[string]json.RawMessage, key string) int32 {
+	raw, ok := extras[key]
+	if !ok || len(raw) == 0 {
+		return 0
+	}
+	var value int32
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return 0
+	}
+	return value
 }
 
 // S2CFacultyMessage 是当前表 custom_faculty_msg 接收器对应的 C++

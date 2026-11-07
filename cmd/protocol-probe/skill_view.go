@@ -56,15 +56,43 @@ var starterSkillViews = []learnedSkillView{
 	{configID: "CS_wd_tjq08", staticData: 2107, itemType: 1000, level: 1, maxLevel: 19, pauseTime: (757.5 + 58*1000.0/30)},
 }
 
-// starterSkillViewFrames 在 stage_main 就绪屏障之后构建原生的
+// mergeLearnedSkills 合并 starter 基线与 DB 已学集（Java
+// StarterSkills.withDefaultBasics 同口径的并集语义）。starter 在前、
+// 顺序与数值不变：心佛掌/太极拳快捷栏的行号锚定在 starter 顺序上；
+// DB 行按 configID 去重追加，与 starter 重叠时 starter 条目优先。
+func mergeLearnedSkills(dbRows []learnedSkillView) []learnedSkillView {
+	if len(dbRows) == 0 {
+		return starterSkillViews
+	}
+	seen := make(map[string]bool, len(starterSkillViews)+len(dbRows))
+	for _, skill := range starterSkillViews {
+		seen[skill.configID] = true
+	}
+	merged := append([]learnedSkillView(nil), starterSkillViews...)
+	for _, row := range dbRows {
+		if seen[row.configID] {
+			continue
+		}
+		seen[row.configID] = true
+		merged = append(merged, row)
+	}
+	return merged
+}
+
+// starterSkillViewFrames 是无 DB 行时的兜底路径（行为与历史版本一致）。
+func starterSkillViewFrames() ([][]byte, error) {
+	return learnedSkillViewFrames(starterSkillViews)
+}
+
+// learnedSkillViewFrames 在 stage_main 就绪屏障之后构建原生的
 // 已学习武学容器。包含 StaticData 和 ItemType 是因为
 // GoodsGrid 在解析本地图标和武学展示时会从
 // 视图对象中读取它们。
-func starterSkillViewFrames() ([][]byte, error) {
+func learnedSkillViewFrames(skills []learnedSkillView) ([][]byte, error) {
 	frames := [][]byte{
-		serverCreateView(serverViewSpec{ID: viewportSkill, Capacity: uint16(len(starterSkillViews))}),
+		serverCreateView(serverViewSpec{ID: viewportSkill, Capacity: uint16(len(skills))}),
 	}
-	for index, skill := range starterSkillViews {
+	for index, skill := range skills {
 		frame, err := serverViewAdd(viewportSkill, uint16(index+1), []serverViewProperty{
 			// 视图行取官方表玩家域(末现):ConfigID@1440(String)、
 			// Level@1465(Byte)、PauseTime@2240(Int32)。

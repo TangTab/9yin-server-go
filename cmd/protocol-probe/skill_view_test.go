@@ -116,3 +116,52 @@ func TestTaiJiQuanGuPuSkillMetadataMatchesInstalledClient(t *testing.T) {
 		}
 	}
 }
+
+// starter 顺序与数值是快捷栏行号锚点：合并只允许在尾部追加 DB 行，
+// 与 starter 重叠的 configID 以 starter 条目优先（去重不覆盖）。
+func TestMergeLearnedSkillsAppendsDBRowsAfterStarter(t *testing.T) {
+	dbRows := []learnedSkillView{
+		{configID: "CS_wd_tjq01", staticData: 4057, itemType: 1000, level: 5}, // 与 starter 重叠
+		{configID: "CS_by_xhmdl01", staticData: 13701, itemType: 1000, level: 1, maxLevel: 12},
+		{configID: "CS_by_xhmdl01"}, // DB 自身重复也去重
+	}
+	merged := mergeLearnedSkills(dbRows)
+	if got, want := len(merged), len(starterSkillViews)+1; got != want {
+		t.Fatalf("merged=%d, want %d", got, want)
+	}
+	for index, skill := range starterSkillViews {
+		if merged[index] != skill {
+			t.Fatalf("merged[%d]=%+v must equal starter row (starter wins on overlap)", index, merged[index])
+		}
+	}
+	extra := merged[len(merged)-1]
+	if extra.configID != "CS_by_xhmdl01" || extra.staticData != 13701 {
+		t.Fatalf("appended db row=%+v", extra)
+	}
+}
+
+func TestMergeLearnedSkillsEmptyDBKeepsStarter(t *testing.T) {
+	merged := mergeLearnedSkills(nil)
+	if len(merged) != len(starterSkillViews) {
+		t.Fatalf("merged=%d, want starter %d", len(merged), len(starterSkillViews))
+	}
+}
+
+func TestLearnedSkillViewFramesUsesMergedCapacity(t *testing.T) {
+	skills := append([]learnedSkillView(nil), starterSkillViews...)
+	skills = append(skills, learnedSkillView{configID: "CS_by_xhmdl01", staticData: 13701, itemType: 1000, level: 1, maxLevel: 12})
+	frames, err := learnedSkillViewFrames(skills)
+	if err != nil {
+		t.Fatal(err)
+	}
+	create := frames[0]
+	if create[0] != 0x15 ||
+		binary.LittleEndian.Uint16(create[1:]) != viewportSkill ||
+		binary.LittleEndian.Uint16(create[3:]) != uint16(len(skills)) {
+		t.Fatalf("CreateView(40) capacity mismatch: %x", create)
+	}
+	last := frames[len(frames)-1]
+	if !bytes.Contains(last, []byte("CS_by_xhmdl01\x00")) {
+		t.Fatalf("last row must carry the appended db skill: %x", last)
+	}
+}
