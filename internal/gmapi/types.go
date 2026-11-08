@@ -69,6 +69,9 @@ type CommandBody struct {
 	SubType     int32   `json:"subType"`
 	Weather     string  `json:"weather"`
 	FadeSec     int32   `json:"fadeSec"`
+	Enabled     int32   `json:"enabled"`    // set_zhenqi_cap 硬闸开关 0/1
+	JingMaiId   string  `json:"jingMaiId"`  // set_jingmai_tier 经脉 configID
+	JingMaiTier int32   `json:"jingMaiTier"` // set_jingmai_tier 周天档 1..216
 }
 
 // Command 是校验通过后的命令纯数据。原 cmd/protocol-probe 的 gmCommand
@@ -116,6 +119,9 @@ type Command struct {
 	SubType       int32   // custom_probe 探针参数
 	Weather       string  // set_weather 闭名单键
 	FadeSec       int32   // set_weather 过渡秒
+	Enabled       int32   // set_zhenqi_cap 每日真气硬闸 0/1（阈值走 Value）
+	JingMaiID     string  // set_jingmai_tier 经脉 configID
+	JingMaiTier   int32   // set_jingmai_tier 周天档 1..216（游戏侧按目录上限再钳）
 }
 
 // PlayerState 是 GET 会话列表端点的行结构。原 gmPlayerState 原样搬来

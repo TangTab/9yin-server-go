@@ -265,6 +265,16 @@ type jingMaiZhenQiPool struct {
 	Used int32  `json:"used"` // 今日已耗（ZQPLValue）
 }
 
+// jingMaiDailyCap 每日真气硬闸（GM set_zhenqi_cap；Java PlayerMeridian
+// capEnabled/capValue 同构）：开启后当日已获真气（ZQPLValue）达到阈值
+// 即拦截入账（被动修炼/打怪折算同一闸，超额笔按剩余额度截断、零帧
+// 静默），ZhenQiDayValue 属性随开关显示阈值/回落官方缺省 500。
+// 默认关闭（私服节奏不限量，docs/jingmai-cd-qinggong.md §二）。
+type jingMaiDailyCap struct {
+	Enabled bool  `json:"enabled"`
+	Value   int32 `json:"value"` // 每日阈值 ≥1；关闭时仍保存，重开沿用
+}
+
 type jingMaiState struct {
 	cur        string
 	last       string
@@ -272,6 +282,7 @@ type jingMaiState struct {
 	activated  []string
 	progress   map[string]jingMaiProgressRow
 	zhenQi     jingMaiZhenQiPool
+	cap        jingMaiDailyCap
 	lastTickAt time.Time
 }
 
@@ -282,6 +293,7 @@ type jingMaiSnapshot struct {
 	Activated []string                      `json:"activated"`
 	Progress  map[string]jingMaiProgressRow `json:"progress"`
 	ZhenQi    jingMaiZhenQiPool             `json:"zhenQi"`
+	Cap       jingMaiDailyCap               `json:"cap"`
 }
 
 func (p *playerActor) jingMaiSnapshotOf() jingMaiSnapshot {
@@ -292,6 +304,7 @@ func (p *playerActor) jingMaiSnapshotOf() jingMaiSnapshot {
 		Learned:   append([]string(nil), p.jingmai.learned...),
 		Activated: append([]string(nil), p.jingmai.activated...),
 		ZhenQi:    p.jingmai.zhenQi,
+		Cap:       p.jingmai.cap,
 	}
 	if len(p.jingmai.progress) > 0 {
 		snapshot.Progress = make(map[string]jingMaiProgressRow, len(p.jingmai.progress))
@@ -336,6 +349,11 @@ func (p *playerActor) restoreJingMai(snapshot jingMaiSnapshot, now time.Time) {
 		p.jingmai.progress = make(map[string]jingMaiProgressRow)
 	}
 	p.jingmai.zhenQi = snapshot.ZhenQi
+	// 旧档无 cap 节点（零值关闸）：阈值回落官方缺省 500，重开沿用。
+	p.jingmai.cap = snapshot.Cap
+	if p.jingmai.cap.Value < 1 {
+		p.jingmai.cap.Value = zhenQiDayValueMax
+	}
 	p.jingmai.lastTickAt = now
 }
 
@@ -384,13 +402,23 @@ func (p *playerActor) hasLearnedJingMai(id string) bool {
 	return p.jingMaiRowLocked(id) > 0
 }
 
-// setCurJingMai 修炼位迁移：cur→last、新 id 入 cur（fork
-// playerActor.setCurJaiMai 同构，title_system 反汇编 152-159 行）。
+// setCurJingMai 修炼位迁移：设置修炼时 cur/last 同值、停止修炼时 cur
+// 清空而 last 保留最后一条。客户端显示契约（form_main_player.
+// set_jingmaiinfo_tips / form_wuxue_jingmai_infomation.get_jingmai_item）：
+// 「修炼经脉/修炼周天/修炼进度」tips 用 LastJingMai 定位 View45 行取
+// Level/CurFillValue/TotalFillValue，浮窗「继续修炼」按钮亦读
+// LastJingMai 重发 150/1——修炼中 last 必须与 cur 同值；旧「cur→last
+// 迁移」语义下首修后 last 空、客户端 get_jingmai_item 返回 nil，四项
+// 全不显示（2026-11-08 经脉 tips 无数据根因）。
 func (p *playerActor) setCurJingMai(id string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.jingmai.last = p.jingmai.cur
-	p.jingmai.cur = id
+	if id != "" {
+		p.jingmai.cur = id
+		p.jingmai.last = id
+	} else {
+		p.jingmai.cur = ""
+	}
 	if p.jingmai.lastTickAt.IsZero() {
 		p.jingmai.lastTickAt = time.Now()
 	}
@@ -421,6 +449,57 @@ func (p *playerActor) deactivateJingMai(id string) (int, bool) {
 	return 0, false
 }
 
+// setJingMaiDailyCap GM set_zhenqi_cap：是否开启每日硬闸 + 每日阈值
+//（阈值 ≥1 才受理；关闭时阈值仍保存，重开沿用——Java setDailyCap 同
+// 语义）。ZhenQiDayValue 口径随开关即时变化，调用方负责补发属性帧。
+func (p *playerActor) setJingMaiDailyCap(enabled bool, value int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if value >= 1 {
+		p.jingmai.cap.Value = value
+	}
+	if p.jingmai.cap.Value < 1 {
+		p.jingmai.cap.Value = zhenQiDayValueMax
+	}
+	p.jingmai.cap.Enabled = enabled
+}
+
+// zhenQiDayValueLocked 玩家属性 ZhenQiDayValue 口径：开闸显示阈值，
+// 关闸回落官方缺省 500（Java zhenQiDayValue 同构）。须持 p.mu。
+func (p *playerActor) zhenQiDayValueLocked() int32 {
+	if p.jingmai.cap.Enabled && p.jingmai.cap.Value >= 1 {
+		return p.jingmai.cap.Value
+	}
+	return zhenQiDayValueMax
+}
+
+// setJingMaiLevel GM set_jingmai_tier：直设周天等级（钳 1..目录上限，
+// fill 归零走新周天起点——Java setLevel 同构）。返回受理前旧等级、
+// 新行与 View45 行号；未学该经脉返回 ok=false（调用方先校验目录收录）。
+func (p *playerActor) setJingMaiLevel(catalog *jingMaiCatalog, id string, level int32) (old int32, row jingMaiProgressRow, slot int, ok bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	slot = p.jingMaiRowLocked(id)
+	if slot == 0 {
+		return 0, jingMaiProgressRow{}, 0, false
+	}
+	target := level
+	if def, found := catalog.def(id); found && def.maxLevel > 0 {
+		target = min(max(level, 1), def.maxLevel)
+	} else if target < 1 {
+		target = 1
+	}
+	if p.jingmai.progress == nil {
+		p.jingmai.progress = make(map[string]jingMaiProgressRow)
+	}
+	row = p.jingmai.progress[id]
+	old = row.Level
+	row.Level = target
+	row.Fill = 0
+	p.jingmai.progress[id] = row
+	return old, row, slot, true
+}
+
 // jingMaiPropsLocked 玩家经脉属性 8 件套（Java JingMaiMessages.playerProps
 // 同字段集：849/850 string + 819/851/852/855/856/857 i32；addObject 与
 // stateProperties 复用）。须持 p.mu。
@@ -434,7 +513,7 @@ func (p *playerActor) jingMaiPropsLocked() []clientdata.IndexedProperty {
 		{Index: propLastJingMai, Name: "LastJingMai", Value: clientdata.StringValue(p.jingmai.last)},
 		{Index: propJingMaiTotLevel, Name: "JingMaiTotalLevel", Value: clientdata.Int32Value(totalLevel)},
 		{Index: propJMActCount, Name: "jmActCount", Value: clientdata.Int32Value(1)},
-		{Index: propZhenQiDayValue, Name: "ZhenQiDayValue", Value: clientdata.Int32Value(zhenQiDayValueMax)},
+		{Index: propZhenQiDayValue, Name: "ZhenQiDayValue", Value: clientdata.Int32Value(p.zhenQiDayValueLocked())},
 		{Index: propZQPLValue, Name: "ZQPLValue", Value: clientdata.Int32Value(p.jingmai.zhenQi.Used)},
 		{Index: propZQActlValue, Name: "ZQActlValue", Value: clientdata.Int32Value(0)},
 		{Index: propZQUnUsedValue, Name: "ZQUnUsedValue", Value: clientdata.Int32Value(0)},
@@ -514,8 +593,9 @@ func jingMaiViewUpdateFrame(slot uint16, row jingMaiProgressRow, levelUp bool) (
 }
 
 // jingMaiCultivateTick 1s ticker 的结算体：整分钟 +43 真气/分钟进当前
-// 修炼经脉（日预算 500 封顶），满 750 周天升级；变化才产帧。返回待写
-// 帧（升级帧 levelUp=true 带 Level+TotalFillValue，否则单 CurFillValue）。
+// 修炼经脉（每日硬闸开闸时按剩余额度截断，关闸不限量），满 750 周天
+// 升级；变化才产帧。返回待写帧（升级帧 levelUp=true 带 Level+
+// TotalFillValue，否则单 CurFillValue）。
 func (p *playerActor) jingMaiCultivateTick(catalog *jingMaiCatalog, now time.Time) [][]byte {
 	if catalog == nil {
 		return nil
@@ -540,62 +620,12 @@ func (p *playerActor) jingMaiCultivateTick(catalog *jingMaiCatalog, now time.Tim
 	if state.cur == "" {
 		return nil
 	}
-	slot := p.jingMaiRowLocked(state.cur)
-	if slot == 0 {
-		return nil // 未学经脉不结算（150/1 已闸；旧档防御）
-	}
-	def, ok := catalog.def(state.cur)
-	if !ok || def.maxLevel <= 0 {
-		return nil
-	}
-	budget := int64(zhenQiDayValueMax) - int64(state.zhenQi.Used)
-	if budget <= 0 {
-		return nil
-	}
-	accrue := int64(zhenQiPerMinute) * minutes
-	if accrue > budget {
-		accrue = budget
-	}
-	row := state.progress[state.cur]
-	var frames [][]byte
-	consumed := int64(0)
-	for accrue > 0 && row.Level < def.maxLevel {
-		need := int64(zhenQiPerWeek - row.Fill)
-		if accrue < need {
-			row.Fill += int32(accrue)
-			consumed += accrue
-			accrue = 0
-			frame, err := jingMaiViewUpdateFrame(uint16(slot), row, false)
-			if err == nil {
-				frames = append(frames, frame)
-			}
-			break
-		}
-		accrue -= need
-		consumed += need
-		row.Fill = 0
-		row.Level++
-		frame, err := jingMaiViewUpdateFrame(uint16(slot), row, true)
-		if err == nil {
-			frames = append(frames, frame)
-		}
-	}
-	if consumed <= 0 {
-		return nil
-	}
-	row.Total += int32(consumed)
-	if state.progress == nil {
-		state.progress = make(map[string]jingMaiProgressRow)
-	}
-	state.progress[state.cur] = row
-	state.zhenQi.Used += int32(consumed)
-	return frames
+	return p.applyZhenQiLocked(catalog, int64(zhenQiPerMinute)*minutes)
 }
 
 // jingMaiCombatFeed 战斗真气入账（Java PlayerMeridian.addCombatZhenQi：
-// 伤害合计 × zhenqi.ini damage_ratio=0.1，向下取整保底 1；溢出连升封顶
-// maxLevel，日预算 500 截断）。命中结算后按整招累计调用，返回 View45
-// 行帧（CurFillValue/升级帧）。变化才产帧。
+// 伤害合计 × zhenqi.ini damage_ratio=0.1，向下取整保底 1）。命中结算后
+// 按整招累计调用，返回 View45 行帧（CurFillValue/升级帧）。变化才产帧。
 func (p *playerActor) jingMaiCombatFeed(damage int32) [][]byte {
 	if damage <= 0 || globalJingMaiCatalog == nil {
 		return nil
@@ -612,21 +642,35 @@ func (p *playerActor) jingMaiCombatFeed(damage int32) [][]byte {
 		state.zhenQi.Day = today
 		state.zhenQi.Used = 0
 	}
+	accrue := int64(math.Max(1, math.Floor(float64(damage)*jingMaiCombatZhenQiRatio)))
+	return p.applyZhenQiLocked(globalJingMaiCatalog, accrue)
+}
+
+// applyZhenQiLocked 真气入账公共体（Java applyZhenQi 同构；被动 tick 与
+// 战斗折算同池同闸）：每日硬闸开闸时按剩余额度截断（额度耗尽零帧
+// 静默，关闸不限量——ZhenQiDayValue 仅展示口径）；溢出连升封顶
+// maxLevel；变化才产帧。须持 p.mu。
+func (p *playerActor) applyZhenQiLocked(catalog *jingMaiCatalog, accrue int64) [][]byte {
+	state := &p.jingmai
+	if accrue <= 0 {
+		return nil
+	}
+	if state.cap.Enabled {
+		headroom := int64(state.cap.Value) - int64(state.zhenQi.Used)
+		if headroom <= 0 {
+			return nil // 当日额度已用尽：硬闸拦截（零帧静默）
+		}
+		if accrue > headroom {
+			accrue = headroom
+		}
+	}
 	slot := p.jingMaiRowLocked(state.cur)
 	if slot == 0 {
-		return nil
+		return nil // 未学经脉不结算（150/1 已闸；旧档防御）
 	}
-	def, ok := globalJingMaiCatalog.def(state.cur)
+	def, ok := catalog.def(state.cur)
 	if !ok || def.maxLevel <= 0 {
 		return nil
-	}
-	accrue := int64(math.Max(1, math.Floor(float64(damage)*jingMaiCombatZhenQiRatio)))
-	budget := int64(zhenQiDayValueMax) - int64(state.zhenQi.Used)
-	if budget <= 0 {
-		return nil
-	}
-	if accrue > budget {
-		accrue = budget
 	}
 	row := state.progress[state.cur]
 	var frames [][]byte
@@ -659,6 +703,14 @@ func (p *playerActor) jingMaiCombatFeed(damage int32) [][]byte {
 	}
 	state.progress[state.cur] = row
 	state.zhenQi.Used += int32(consumed)
+	// 尾随玩家经脉属性帧（Java meridianTickOnce/SkillCastHandler 同构）：
+	// ZQPLValue（今日已获）与 JingMaiTotalLevel（升级后）随入账刷新，
+	// 客户端 tips「经脉总等级」/浮窗今日真气条才有增量更新。锁内纯编码。
+	if propsFrame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, p.jingMaiPropsLocked()); err == nil {
+		frames = append(frames, propsFrame)
+	} else {
+		log.Printf("jingmai: encode props frame after accrual: %v", err)
+	}
 	return frames
 }
 

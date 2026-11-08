@@ -70,6 +70,12 @@ func newNPCCombatState(npc npcSpawn, home worldcore.Transform) sim.Brain {
 		Home: home, AggroRange: aggro, ChaseRange: chase,
 		AttackRange: npcAttackRangeMeters, MoveSpeed: move, Damage: npcAttackDamage,
 		AttackEvery: npcAttackEvery, RespawnAfter: npcRespawnAfter(npc),
+		// NotPositive=1（官方属性表 idx 62，Int32）：creator 条目级
+		// “不主动攻击”。城内 attacknpc.xml 大多带此标记（city05 219 条
+		// 中 85 条，掷斧监工/背柴工人/剧情人物），野外表（scene01）全
+		// 空即全主动。creator 属性后于模板列写入，两层同名列以 creator
+		// 为准，与本读取一致。
+		Passive: npc.int32Property("NotPositive") != 0,
 	}
 }
 
@@ -91,7 +97,8 @@ func (n npcSpawn) float32Property(name string) float32 {
 // combatTick 是场景运行时的每秒权威 NPC 模拟。它只发送当前客户端
 // 已会消费的包：NPC 0x20/0x1F 移动以及普通的 0x10 属性包。
 // 仇恨目标取"最近存活成员"并经 Brain.TargetMember 粘性保持，
-// 直到目标死亡或被拉出栓绳距离。
+// 直到目标死亡或被拉出栓绳距离；NotPositive（被动）NPC 例外——
+// 只认 applySkillDamageToNPC 受击锁定的攻击者，从不主动索敌。
 //
 // 锁内结算（run.mu → p.mu，锁序与全局规则一致），帧写入在锁外
 // 经各成员视图的 conn 完成（transport 写帧线程安全）。
@@ -301,6 +308,11 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 				return
 			}
 			if !state.RespawnAt.IsZero() && !now.Before(state.RespawnAt) {
+				if _, hasLoot := r.lootBoxes[meta.id]; hasLoot {
+					// 尸体带未拾掉落：重生推迟到掉落清除（拾空/超时标
+					// removed 后走重注册路径），避免"掉落还在、怪已复活"。
+					return
+				}
 				vitals.Revive()
 				state.Threat = 0
 				state.TargetMember = 0
@@ -317,6 +329,13 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 
 		if state.Threat == 0 || state.TargetMember == 0 {
+			// NotPositive（被动）NPC 只认受击路径锁定的目标
+			// （applySkillDamageToNPC 写入攻击者），绝不做近身主动索敌
+			// ——否则城里白名监工/工人会追咬路过玩家（Java NpcCombatAi
+			// 全量即纯反击模型）。无目标即原地待命。
+			if state.Passive {
+				return
+			}
 			state.TargetMember = nearestTargetLocked(targets, *transform, state.AggroRange)
 			if state.TargetMember == 0 {
 				return
@@ -486,7 +505,14 @@ func (s *sceneLifecycle) combatTickForTest(player *playerActor, position role.Po
 // scheduleCombatMoveArrival 只在客户端拥有一个移动间隔
 // 来朝目的地播放动画之后，才确认最终位置。transform
 // 比较即是取消令牌：持续追击每 tick 都会更新它，
-// 因此过期的定时器绝不会确认一个陈旧的目的地。
+// 因此过期的定时器绝不会确认一个陈旧的目的地——但持续追击
+// 期间也不能让客户端对 NPC 的位置认知一直停在出生点（官服
+// a.pcapng 追击中的怪拿到 6 次坐标变化的 0x1F；本服 57587 会话
+// 追击全程零 0x1F，客户端认知滞后 4m+，冲锋 c61 终点随之错位）。
+// 因此被更新的定时器不再静默丢弃：距上次广播位移超阈值时改发
+// 当前权威坐标的 0x1F（节流 ≥1m 且 ≥500ms，与官服追逐中几秒一帧
+// 的节奏同量级；同 tick 与 0x20 成对发送的瞬移观感只在无节流的
+// 逐 tick 直发时出现）。
 // 定时器归场景运行时所有（epoch 防护），确认帧扇出给
 // 当前视口内可见该 NPC 的成员。
 func (r *sceneRun) scheduleCombatMoveArrival(members []*sceneMember, move npcMoveUpdate, delay time.Duration) {
@@ -510,21 +536,45 @@ func (r *sceneRun) scheduleCombatMoveArrival(members []*sceneMember, move npcMov
 			return
 		}
 		transform, transformOK := r.npcTransform(worldcore.EntityID(move.id))
-		if !transformOK || !sameCombatTransform(transform, move.destination) {
+		if !transformOK {
 			return
 		}
-		frame := serverLocation(meta.id, meta.ownerID, transform)
-		for _, member := range members {
-			if member.view == nil || !member.view.npcVisible(move.id) {
-				continue
-			}
-			if err := member.view.conn.WriteFrame(frame); err != nil {
-				log.Printf("%s: confirm combat NPC move id=%d: %v", member.view.remote, meta.id, err)
-			}
+		if !sameCombatTransform(transform, move.destination) {
+			// 被更新的移动取代（追击继续）：节流补发当前权威坐标，
+			// 防客户端认知长期滞留在旧位置。
+			r.throttledNPCLocationBroadcast(members, meta, transform)
+			return
 		}
+		r.throttledNPCLocationBroadcast(members, meta, transform)
 	})
 	r.timers = append(r.timers, timer)
 	r.mu.Unlock()
+}
+
+// throttledNPCLocationBroadcast 带节流的 NPC 0x1F 广播：距上次已广播
+// 位置水平位移 ≥npcLocationBroadcastMinMeters 且距上次发送 ≥
+// npcLocationBroadcastMinInterval 才发。调用方必须已持有 r.mu。
+func (r *sceneRun) throttledNPCLocationBroadcast(members []*sceneMember, meta sceneEntity, transform worldcore.Transform) {
+	now := time.Now()
+	if last, ok := r.npcLastLocation[meta.id]; ok {
+		if now.Sub(last.at) < npcLocationBroadcastMinInterval ||
+			horizontalDistance(last.transform, transform) < npcLocationBroadcastMinMeters {
+			return
+		}
+	}
+	if r.npcLastLocation == nil {
+		r.npcLastLocation = make(map[uint32]npcLocationBroadcast)
+	}
+	r.npcLastLocation[meta.id] = npcLocationBroadcast{transform: transform, at: now}
+	frame := serverLocation(meta.id, meta.ownerID, transform)
+	for _, member := range members {
+		if member.view == nil || !member.view.npcVisible(meta.id) {
+			continue
+		}
+		if err := member.view.conn.WriteFrame(frame); err != nil {
+			log.Printf("%s: sync combat NPC location id=%d: %v", member.view.remote, meta.id, err)
+		}
+	}
 }
 
 // broadcastNPCFrames 在锁外把战斗 tick 产出的 NPC 移动/属性帧
@@ -617,6 +667,18 @@ func sameCombatTransform(a, b worldcore.Transform) bool {
 		math.Abs(float64(a.Y-b.Y)) < epsilon &&
 		math.Abs(float64(a.Z-b.Z)) < epsilon &&
 		math.Abs(float64(a.Orient-b.Orient)) < epsilon
+}
+
+// NPC 0x1F 位置广播节流参数（官服 a.pcapng 追击中的怪 ~几秒一帧）。
+const (
+	npcLocationBroadcastMinMeters   = 1.0
+	npcLocationBroadcastMinInterval = 500 * time.Millisecond
+)
+
+// npcLocationBroadcast 是单个 NPC 最近一次 0x1F 广播水位。
+type npcLocationBroadcast struct {
+	transform worldcore.Transform
+	at        time.Time
 }
 
 // setNPCTransformLocked 更新 NPC 权威坐标：可视权威 Scene 实体

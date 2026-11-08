@@ -212,8 +212,9 @@ func grantTaiJiQuanGuPuShortcuts(conn sceneMessageConnection, player *playerActo
 }
 
 // handleSitcrossCustom 处理观测到的现代原生打坐请求：
-// activity TVarList(240, int startOrStop)。它刻意返回普通的
-// 0x10 角色属性，而不是旧版的 S->C 0x1E 自定义通知。
+// activity tVarList(240, int startOrStop)。它刻意返回普通的
+// 0x10 角色属性（而非旧版 S->C 0x1E 自定义通知），并按官服
+// 进出簇同拍补 msg24 c1=40/41 "dazuo_old" 动作飘字。
 func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomSitCross {
 		return false, nil
@@ -261,7 +262,17 @@ func handleSitcrossCustom(conn sceneMessageConnection, player *playerActor, cust
 	if err := conn.WriteFrame(frame); err != nil {
 		return true, fmt.Errorf("send sitcross state=%d: %w", next, err)
 	}
-	log.Printf("%s: sitcross native state %d -> %d via normal 0x10", remote, current, next)
+	// 打坐动作飘字（msg24 c1=40 进/41 出，窄串 dazuo_old）：官服
+	// 进出簇与 LogicState 帧同毫秒成对出现（FsGame 官服抓包全量
+	// 成对实证），是打坐进入/退出动作的视觉提示来源。
+	actionFrame, err := sitcrossActionFrame(playerObjectID, playerOwnerID, next == entity.LogicStateSitcross)
+	if err != nil {
+		return true, fmt.Errorf("encode sitcross action=%d: %w", next, err)
+	}
+	if err := conn.WriteFrame(actionFrame); err != nil {
+		return true, fmt.Errorf("send sitcross action=%d: %w", next, err)
+	}
+	log.Printf("%s: sitcross native state %d -> %d via normal 0x10 + dazuo_old action", remote, current, next)
 	return true, nil
 }
 

@@ -167,6 +167,57 @@ func TestEventNPCIsNotMaterializedWithoutTaskOwnership(t *testing.T) {
 	}
 }
 
+// TestSubSceneCombatNPCIsNotMaterialized 子场景闸门：creator 条目带
+// SubSceneNo 的战斗脚本类（AttackNpc/BossNpc）是活动/分线态内容（成都
+// AttackNpc.xml 135/219 条，如夜探守卫 newworld_nangong_yetan_*
+// SubSceneNo=8961），官服只在子场景激活时物化——基础场景不注册、不
+// 物化、无 Vitals/Brain。平民带 SubSceneNo 照常注册（站桩无害）。
+func TestSubSceneCombatNPCIsNotMaterialized(t *testing.T) {
+	combat := testNPCSpawn()
+	combat.resolved.ConfigID = "newworld_nangong_yetan_002"
+	combat.resolved.ScriptClass = "AttackNpc"
+	combat.resolved.Extensions["creator.SubSceneNo"] = "8961"
+
+	civilian := testNPCSpawn()
+	civilian.resolved.Extensions["creator.SubSceneNo"] = "8961"
+
+	boss := testNPCSpawn()
+	boss.resolved.ScriptClass = "BossNpc"
+	boss.resolved.Extensions["creator.SubSceneNo"] = "50"
+
+	wild := testNPCSpawn() // 野外怪无 SubSceneNo，保持可注册
+	wild.resolved.ScriptClass = "AttackNpc"
+
+	if npcSpawnEligible(combat) || npcSpawnEligible(boss) {
+		t.Fatal("sub-scene combat NPCs must be excluded from the base scene")
+	}
+	if !npcSpawnEligible(civilian) {
+		t.Fatal("sub-scene civilians stay materialized")
+	}
+	if !npcSpawnEligible(wild) {
+		t.Fatal("wilderness combat NPCs without SubSceneNo must stay eligible")
+	}
+
+	// 共享场景准入同闸门：子场景战斗 NPC 不进世界（ID 间隙与 EventNpc
+	// 同语义，目录下标→wire ID 映射不受影响）。
+	lifecycle := newSceneLifecycle("test", discardMessageConnection{})
+	if err := lifecycle.begin("scene", "resource", []npcSpawn{combat, civilian, wild}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := lifecycle.npcMetaByID(2); ok {
+		t.Fatal("sub-scene combat NPC entered the shared scene world")
+	}
+	if _, ok := lifecycle.npcMetaByID(3); !ok {
+		t.Fatal("sub-scene civilian must stay registered")
+	}
+	if _, ok := lifecycle.npcMetaByID(4); !ok {
+		t.Fatal("wilderness combat NPC must stay registered")
+	}
+	if _, ok := lifecycle.run.combat.Brain(worldcore.EntityID(2)); ok {
+		t.Fatal("sub-scene combat NPC must never gain a brain")
+	}
+}
+
 func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
 	server, client := net.Pipe()
 	defer server.Close()

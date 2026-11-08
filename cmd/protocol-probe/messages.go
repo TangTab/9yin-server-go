@@ -305,8 +305,10 @@ func serverModernCustomIntMessage(messageID int32, values ...serverCustomValue) 
 }
 
 func serverCustomIntMessageWithOpcode(opcode byte, messageID int32, values ...serverCustomValue) ([]byte, error) {
-	if messageID < 1 || messageID >= 765 {
-		return nil, fmt.Errorf("custom message id %d outside client range [1,764]", messageID)
+	// 上限不设：官服 c.pcapng 实发 770（九阴志明细）/772 等高位 ID，
+	// 此前 [1,764] 上限是 Java 侧假设，已被抓包证伪。
+	if messageID < 1 {
+		return nil, fmt.Errorf("custom message id %d must be positive", messageID)
 	}
 	args := make([]serverCustomValue, 0, len(values)+1)
 	args = append(args, customInt(messageID))

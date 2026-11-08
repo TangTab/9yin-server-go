@@ -11,16 +11,20 @@ rem        (an already-defined environment variable takes priority)
 rem    [2] Copy build\* into the target root, overwriting existing files
 rem    [3] Copy server-cmd\* into the target root only when missing,
 rem        so local edits on the target side survive redeploys
-rem    [4] Create env.server in the target root with default values
+rem    [4] Mirror the scripts\ tree (host + module\{combat,neigong,...})
+rem        into the target, overwriting - Lua logic ships with the exe
+rem        (2026-11-08: F: deploy was missing scripts\module\combat\
+rem        formula.lua and the combat engine silently fell back)
+rem    [5] Create env.server in the target root with default values
 rem        when missing (existing file is never touched)
 rem
 rem  Usage: deploy.bat
-rem    Run build.bat first; this script only ships what is in build\.
+rem    Run build.bat first; this script ships what is in build\ and scripts\.
 rem ============================================================
 
 cd /d "%~dp0"
 
-rem ---------- [1/3] Load NINEYIN_SERVER_ROOT from env.server ----------
+rem ---------- [1/5] Load NINEYIN_SERVER_ROOT from env.server ----------
 if defined NINEYIN_SERVER_ROOT goto root_loaded
 if not exist "env.server" (
     echo [ERROR] NINEYIN_SERVER_ROOT is not defined and env.server was not found.
@@ -50,8 +54,8 @@ echo   Target : %NINEYIN_SERVER_ROOT%
 echo ==========================================
 echo.
 
-rem ---------- [2/3] build\* -> target, overwrite ----------
-echo [2/4] Deploying build\* (overwrite)...
+rem ---------- [2/5] build\* -> target, overwrite ----------
+echo [2/5] Deploying build\* (overwrite)...
 if not exist "build\*" (
     echo [ERROR] build\ is empty. Run build.bat first.
     pause
@@ -64,8 +68,8 @@ for %%f in ("%~dp0build\*") do (
     set /a BUILD_N+=1
 )
 
-rem ---------- [3/4] server-cmd\* -> target, only if missing ----------
-echo [3/4] Deploying server-cmd\* (skip existing)...
+rem ---------- [3/5] server-cmd\* -> target, only if missing ----------
+echo [3/5] Deploying server-cmd\* (skip existing)...
 set /a CMD_NEW=0
 set /a CMD_SKIP=0
 for %%f in ("%~dp0server-cmd\*") do (
@@ -73,8 +77,24 @@ for %%f in ("%~dp0server-cmd\*") do (
     if errorlevel 1 goto deploy_fail
 )
 
-rem ---------- [4/4] env.server -> create with defaults if missing ----------
-echo [4/4] Checking env.server...
+rem ---------- [4/5] scripts\ tree -> target, overwrite ----------
+echo [4/5] Deploying scripts\ tree (overwrite)...
+set /a SCRIPT_N=0
+if exist "%~dp0scripts" (
+    for /f "delims=" %%f in ('dir /s /b /a:-d "%~dp0scripts" 2^>nul') do set /a SCRIPT_N+=1
+    rem /h: hidden/system files must ship too, /e: all subdirs, /y: overwrite, /i: dest is a dir
+    xcopy /e /h /y /i "%~dp0scripts\*" "%NINEYIN_SERVER_ROOT%\scripts\" >nul
+    if errorlevel 2 (
+        echo [ERROR] Failed to mirror scripts\ into the target.
+        goto deploy_fail
+    )
+    echo   [scripts] tree mirrored ^(existing overwritten^)
+) else (
+    echo   [scripts] repo has no scripts\ tree - skipped
+)
+
+rem ---------- [5/5] env.server -> create with defaults if missing ----------
+echo [5/5] Checking env.server...
 if exist "%NINEYIN_SERVER_ROOT%\env.server" (
     echo   [env.server] exists, left untouched
     goto env_server_done
@@ -90,9 +110,11 @@ echo ==========================================
 echo Deploy finished.
 echo   build     : %BUILD_N% file(s) copied (existing overwritten)
 echo   server-cmd: %CMD_NEW% added, %CMD_SKIP% skipped (already present)
+echo   scripts   : %SCRIPT_N% file(s) mirrored (existing overwritten)
 echo   Target    : %NINEYIN_SERVER_ROOT%
 echo   Start with: %NINEYIN_SERVER_ROOT%\start-9yin.bat
 echo ==========================================
+
 endlocal
 exit /b 0
 

@@ -39,12 +39,15 @@ V3  修复怪打不死的BUG
 
 
 
-历练
+
 属性计算
 
+演武药物暴击
 
-
-
-
+完全按照帧数据来进行处理
 
 客户端资源目录 F:\Game\Online\9yin\9yin-server-go\resources
+
+解析的包：F:\Game\Online\9yin\9yin_server_new\artifacts
+
+exe: F:\Game\Online\9yin\9yin_server1\build\9yin-game-native-menu.exe

@@ -63,13 +63,14 @@ type gmVitalsState struct {
 // role_faculty 快照跨登录保留。零值即合法（Java 身份块缺发则面板整块
 // 空白，因此零也要下发而非省略帧）。
 type gmPanelDomain struct {
-	powerLevel int32 // 种子 roleListPowerLevel（151=title027）
-	justice    int32
-	evil       int32
-	freeBase   int32
-	pkMode     int32
-	vitalsSet  bool
-	vitals     gmVitalsState
+	powerLevel    int32 // 种子 roleListPowerLevel（151=title027）
+	powerLevelSet bool  // GM set_power_level 显式覆盖；否则按 varprop.NeiGongLevel 自动推导（§2.7）
+	justice       int32
+	evil          int32
+	freeBase      int32
+	pkMode        int32
+	vitalsSet     bool
+	vitals        gmVitalsState
 }
 
 // setGuanYin 与 setSilver 同款：写会话状态并返回单属性 0x10。
@@ -94,24 +95,30 @@ func (p *playerActor) guanYinValue() int32 {
 	return p.guanYin
 }
 
-// setPowerLevel 记录实力等级并返回 [PowerLevel, LevelTitle] 双属性帧。
-// 称号键复用选人界面的同一分档（Java applyPowerLevel 同口径）。
+// setPowerLevel GM 显式覆盖实力点数（此后 effectivePowerLevel 以此为准，
+// 直至重登回落自动推导口径），并返回 [PowerLevel, LevelTitle] 双属性帧。
 func (p *playerActor) setPowerLevel(value int32) ([]byte, error) {
 	p.mu.Lock()
 	p.gm.powerLevel = value
+	p.gm.powerLevelSet = true
 	p.mu.Unlock()
 	return p.powerLevelFrame()
 }
 
 // powerLevelFrame 总是产出双属性帧（实力等级是面板身份块的必填位，
-// Java identityProperties 无条件携带；种子 roleListPowerLevel=151）。
+// Java identityProperties 无条件携带）。取值走 effectivePowerLevel：
+// GM 覆盖优先，否则按已学内功 varprop.NeiGongLevel 自动推导（种子 151
+// 兜底）——客户端镇派兵器 tooltip 条件行按同一 PowerLevel 本地命中，
+// 两端口径必须一致（盘点 §2.6/§2.7）。称号键按 facultylevel.ini 阶梯。
 func (p *playerActor) powerLevelFrame() ([]byte, error) {
-	p.mu.Lock()
-	powerLevel := p.gm.powerLevel
-	p.mu.Unlock()
+	powerLevel := int(p.effectivePowerLevel())
+	title := randomEquipCatalogOf().titleForPowerLevel(powerLevel)
+	if title == "" {
+		title = roleListTitle(powerLevel)
+	}
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: propPowerLevel, Name: "PowerLevel", Value: clientdata.Int32Value(powerLevel)},
-		{Index: propLevelTitle, Name: "LevelTitle", Value: clientdata.StringValue(roleListTitle(int(powerLevel)))},
+		{Index: propPowerLevel, Name: "PowerLevel", Value: clientdata.Int32Value(int32(powerLevel))},
+		{Index: propLevelTitle, Name: "LevelTitle", Value: clientdata.StringValue(title)},
 	})
 }
 

@@ -26,13 +26,17 @@ const (
 )
 
 // EquipType（小写）→ 纸娃娃候选槽位（Java AppearanceSync.EQUIP_SLOTS 同表；
-// 双槽类型给两个，穿戴选首个空槽，全占用替换第一槽）。
+// 双槽类型给两个，穿戴选首个空槽，全占用替换第一槽）。宝物/娃娃槽位
+// 权威 = ini/equipbox.ini [EquipType]（Treasure=25-29、NewTreasure=30-34，
+// 装备栏容量 52；盘点 docs/镇派兵器与娃娃宝物随机属性.md §3.6）。
 var equipSlotsByType = map[string][]int32{
 	"hat": {1}, "cloth": {3}, "pants": {4}, "wrist": {6}, "leg": {7}, "shoes": {8},
 	"earring": {11, 12}, "necklace": {13}, "fingerring": {14, 15},
 	"suit": {16}, "newsuit": {16},
 	"fashioncoat": {17}, "newfashioncoat": {17}, "fashionhat": {18}, "fashionshoes": {19},
 	"weapon": {22}, "shotweapon": {22}, "innerweapon": {22},
+	"treasure":    {25, 26, 27, 28, 29},
+	"newtreasure": {30, 31, 32, 33, 34},
 }
 
 // mirrorDollSlot 时装/身份装槽（16-19）→ 新面板镜像槽（40-43）；其余原样。
@@ -233,15 +237,16 @@ func pushWearFrames(link sceneMessageConnection, roleID role.RoleID, sex byte, s
 
 // itemSession 是四件套 handler 的会话上下文（customConfig 惯例的参数包）。
 type itemSession struct {
-	link     sceneMessageConnection
-	player   *playerActor
-	store    *inventoryStore  // 可为 nil（纯内存降级）
-	skins    *skinDBStore     // 风物志衣橱存档（card 收录链用；可为 nil）
-	currency *currencyDBStore // 碎银存档（商店购销后落库；可为 nil）
-	ctx      context.Context
-	roleID   role.RoleID
-	remote   string
-	now      func() time.Time
+	link        sceneMessageConnection
+	player      *playerActor
+	store       *inventoryStore     // 可为 nil（纯内存降级）
+	skins       *skinDBStore        // 风物志衣橱存档（card 收录链用；可为 nil）
+	currency    *currencyDBStore    // 碎银存档（商店购销后落库；可为 nil）
+	randomProps *randomPropsDBStore // 娃娃/宝物随机属性存档（可为 nil）
+	ctx         context.Context
+	roleID      role.RoleID
+	remote      string
+	now         func() time.Time
 }
 
 // persistCurrency 商店购销后的碎银落库（fork "persist currency after
@@ -395,13 +400,22 @@ func (h *itemSession) addToBagItemCount(item bagRow, count int32) bool {
 // grantBagItem 发放物品入包（容量感知：1..90 无空位即断）；返回槽位（0=失败）。
 // （Java grantBagItem 同构：开箱/脚本 grants 的统一落包路径。）
 func (h *itemSession) grantBagItem(entry grantableItem, amount int32) int32 {
+	row, ok := h.grantBagItemRow(entry, amount)
+	if !ok {
+		return 0
+	}
+	return row.slot
+}
+
+// grantBagItemRow 入包并返回权威行（uid/seq 回填；GM 发放随机属性接线用）。
+func (h *itemSession) grantBagItemRow(entry grantableItem, amount int32) (bagRow, bool) {
 	category := entry.viewID
 	if category < 1 || category > 4 {
 		category = 1
 	}
 	slot := h.player.freeBagSlot(category)
 	if slot <= 0 {
-		return 0
+		return bagRow{}, false
 	}
 	inserted := bagRow{
 		slot: slot, configID: entry.configID, itemType: entry.itemType, amount: amount,
@@ -411,7 +425,7 @@ func (h *itemSession) grantBagItem(entry grantableItem, amount int32) int32 {
 		row, err := h.store.insertBagItem(h.ctx, h.roleID, inserted)
 		if err != nil {
 			log.Printf("%s: insert bag item %s: %v", h.remote, entry.configID, err)
-			return 0
+			return bagRow{}, false
 		}
 		inserted = row
 	}
@@ -421,7 +435,7 @@ func (h *itemSession) grantBagItem(entry grantableItem, amount int32) int32 {
 	if err := pushBagItemFrames(h.link, h.roleID, inserted); err != nil {
 		log.Printf("%s: push granted row: %v", h.remote, err)
 	}
-	return inserted.slot
+	return inserted, true
 }
 
 // ---- msg30 移动物品/穿脱装备 ----
@@ -504,6 +518,14 @@ func unequipFromDoll(h *itemSession, equipSlot, toView, toSlot int32) {
 	if err := pushBagItemFrames(h.link, h.roleID, landed); err != nil {
 		log.Printf("%s: unequip push bag row: %v", h.remote, err)
 	}
+	// 宝物/娃娃脱下入包：record 跟随 uid 整推到背包槽位；镇派兵器
+	// 武器槽脱下：动态 4 属性清零并补面板帧。
+	h.pushRandomPropsForBag(landed.configID, landed.uid, landed.viewID, landed.slot)
+	if equipSlot == 22 && h.player.refreshZhenpaiEquipBonuses() {
+		if err := h.player.pushZhenpaiPanelFrame(h.link); err != nil {
+			log.Printf("%s: zhenpai panel frame: %v", h.remote, err)
+		}
+	}
 	// 外观整刷（Java pushAppearanceRefresh 同口径：脱下后按有效显示
 	// 类型重推最终模型 + 武器三属性显式清除）。
 	if appearance, err := appearanceFrame(playerObjectID, playerOwnerID, effectiveShowEquipType(h.player), sex, equipsNow); err != nil {
@@ -574,6 +596,9 @@ func wearFromBag(h *itemSession, fromView, fromSlot, toSlot int32) bool {
 	worn := equipRow{
 		configID: item.configID, itemType: item.itemType, equipType: equipType, slot: slot,
 		hardiness: hardiness, maxHardiness: maxHardiness, seq: item.seq, uid: item.uid,
+		// 镇派兵器词缀随穿戴帧即时下发（moveBagToEquip 落库不回读，
+		// 内存行直接按目录包列表构造 PropBuilt）。
+		propBuilt: randomEquipCatalogOf().zhenpaiPropBuiltString(item.configID),
 	}
 	h.player.mu.Lock()
 	h.player.bag = append(h.player.bag[:index], h.player.bag[index+1:]...)
@@ -603,9 +628,19 @@ func wearFromBag(h *itemSession, fromView, fromSlot, toSlot int32) bool {
 		if err := pushBagItemFrames(h.link, h.roleID, landedOld); err != nil {
 			log.Printf("%s: wear push swapped row: %v", h.remote, err)
 		}
+		// 让位旧宝物/娃娃回背包：record 跟随 uid 整推到背包槽位。
+		h.pushRandomPropsForBag(landedOld.configID, landedOld.uid, landedOld.viewID, landedOld.slot)
 	}
 	if err := pushWearFrames(h.link, h.roleID, sex, effectiveShowEquipType(h.player), worn, equipsNow); err != nil {
 		log.Printf("%s: wear push frames: %v", h.remote, err)
+	}
+	// 宝物/娃娃穿上：record 整推到纸娃娃槽位；镇派兵器武器槽：动态 4
+	// 属性按实力点数重算并补面板帧（盘点 §2.6）。
+	h.pushRandomPropsForEquip(worn.configID, worn.uid, slot)
+	if slot == 22 && h.player.refreshZhenpaiEquipBonuses() {
+		if err := h.player.pushZhenpaiPanelFrame(h.link); err != nil {
+			log.Printf("%s: zhenpai panel frame: %v", h.remote, err)
+		}
 	}
 	swapNote := ""
 	if hasOld {

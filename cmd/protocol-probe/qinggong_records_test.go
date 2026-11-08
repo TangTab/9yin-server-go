@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -111,6 +112,35 @@ func TestFacultyGuideCompletedTaskRows(t *testing.T) {
 	}
 }
 
+// native-menu grantFunctionUnlock 的 23 行 Task_Accepted 顺序清单
+// （62311/49840 两会话 #124-#146 实证）：门派引导链 1555--1562 铺在
+// 1344 之后、1140--1147 之前，51002 收尾。
+func TestFacultyAcceptedTaskIDsIncludeSchoolLeadFamily(t *testing.T) {
+	ids := facultyAcceptedTaskIDs()
+	want := []uint32{
+		1069, 1070, 1071, 1072, 1073, 1344,
+		1555, 1556, 1557, 1558, 1559, 1560, 1561, 1562,
+		1140, 1141, 1142, 1143, 1144, 1145, 1146, 1147,
+		51002,
+	}
+	if !slices.Equal(ids, want) {
+		t.Fatalf("accepted ids=%v want %v", ids, want)
+	}
+	// 门派引导链只进 Task_Accepted，不进 Task_Completed 位集：
+	// 位图行值与既有断言保持不变（42 行仍只有 1344/1346 位）。
+	taskIDs := []uint32{functionUnlockTaskID, facultyAltTaskID, facultyActAltTaskID}
+	for taskID := facultyGuideTaskFirst; taskID <= facultyGuideTaskLast; taskID++ {
+		taskIDs = append(taskIDs, taskID)
+	}
+	for taskID := facultyActTaskFirst; taskID <= facultyActTaskLast; taskID++ {
+		taskIDs = append(taskIDs, taskID)
+	}
+	rows, finalRow := taskCompletedRows(taskIDs)
+	if finalRow != 1593 || rows[42] != 0x00000005 {
+		t.Fatalf("completed bitmap drifted: finalRow=%d row42=0x%08X", finalRow, rows[42])
+	}
+}
+
 func TestRecordTablePassesThroughOfficialSchemas(t *testing.T) {
 	// 整表透传后官方 447 schema 全量在场（含 Repute_Record 等
 	// 未消费记录）——行帧下标才有官方口径可绑定。
@@ -199,7 +229,7 @@ func TestGrantStarterQingGongUsesRecordAndView(t *testing.T) {
 	}
 	_, finalTaskRow := taskCompletedRows([]uint32{facultyActAltTaskID})
 	facultyAcceptedRows := len(facultyAcceptedTaskIDs())
-	wantFrames := len(starterQingGongIDs) + 1 + len(starterQingGongIDs) + len(starterQingGongSkillIDs) + facultyAcceptedRows + int(finalTaskRow) + 1
+	wantFrames := len(starterQingGongIDs) + 1 + len(starterQingGongIDs) + len(starterQingGongSkillIDs) + facultyAcceptedRows + int(finalTaskRow) + 1 + len(collectSkillIDs)
 	if len(conn.frames) != wantFrames {
 		t.Fatalf("frames=%d want=%d", len(conn.frames), wantFrames)
 	}
@@ -211,14 +241,15 @@ func TestGrantStarterQingGongUsesRecordAndView(t *testing.T) {
 		t.Fatalf("QingGongContainer ConfigID property=%d want=%d", got, qingGongConfigProperty)
 	}
 	completedRowsStart := len(conn.frames) - (int(finalTaskRow) + 1)
-	accepted := conn.frames[completedRowsStart-facultyAcceptedRows]
+	// 采集技能 204 行插在 23 行任务与位图之间（native #548-#751 帧序）
+	accepted := conn.frames[completedRowsStart-facultyAcceptedRows-len(collectSkillIDs)]
 	if accepted[0] != 0x11 || binary.LittleEndian.Uint16(accepted[10:]) != recordTaskAccepted || binary.LittleEndian.Uint16(accepted[14:]) != 1 {
 		t.Fatalf("faculty Task_Accepted row=%x", accepted)
 	}
 	if got := binary.LittleEndian.Uint32(accepted[16:]); got != facultyGuideTaskFirst {
 		t.Fatalf("first faculty Task_Accepted id=%d want=%d", got, facultyGuideTaskFirst)
 	}
-	lastAccepted := conn.frames[completedRowsStart-1]
+	lastAccepted := conn.frames[completedRowsStart-len(collectSkillIDs)-1]
 	if got := binary.LittleEndian.Uint32(lastAccepted[16:]); got != facultyActAltTaskID {
 		t.Fatalf("last faculty Task_Accepted id=%d want=%d", got, facultyActAltTaskID)
 	}

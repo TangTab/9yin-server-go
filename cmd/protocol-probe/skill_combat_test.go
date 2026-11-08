@@ -3,10 +3,13 @@ package main
 import (
 	"encoding/binary"
 	"math"
+	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/entity"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -460,7 +463,7 @@ func TestTaiJiStanceAlternatesAndTimedBuffsUseInstalledRecords(t *testing.T) {
 	target := uint64(playerObjectID) | uint64(playerOwnerID)<<32
 	now := time.Now()
 	definition := taiJiQuanGuPuCombatSkills["CS_wd_tjq04"]
-	if ok, reason := player.beginSkillUse(definition, target, now); !ok {
+	if ok, reason := player.beginSkillUse(definition, target, now, false); !ok {
 		t.Fatalf("begin 金鸡独立: %s", reason)
 	}
 	player.activateNamedBuff(taiJiStanceBuffSlot, taiJiDefenceStanceBuffStaticData, "buf_CS_wd_tjq04_1", taiJiStanceBuffLease, now)
@@ -543,7 +546,7 @@ func TestSkillSevenSpendsSP(t *testing.T) {
 	player := newPlayerActor("tester", 0)
 	definition := yiHuaWuQueCombatSkills["CS_yhwq_hsqs07"]
 	definition.requiresTarget = false
-	ok, reason := player.beginSkillUse(definition, uint64(playerObjectID)|uint64(playerOwnerID)<<32, time.Now())
+	ok, reason := player.beginSkillUse(definition, uint64(playerObjectID)|uint64(playerOwnerID)<<32, time.Now(), false)
 	if !ok {
 		t.Fatalf("begin skill seven: %s", reason)
 	}
@@ -566,5 +569,173 @@ func TestAttackSkillRequiresSelectedTarget(t *testing.T) {
 	}
 	if len(conn.frames) != 0 {
 		t.Fatalf("target rejection emitted %d frames", len(conn.frames))
+	}
+}
+
+// newTestCombatEngine 装载一个仅注入指定规格的每击公式引擎（真实
+// scripts/module/combat/formula.lua）。
+func newTestCombatEngine(t *testing.T, specs ...combatcalc.FormulaSpec) *combatcalc.Engine {
+	t.Helper()
+	engine := combatcalc.New(filepath.Join("..", "..", "scripts", "module", "combat"), nil)
+	if _, err := engine.Load(specs); err != nil {
+		t.Fatalf("combat engine load: %v", err)
+	}
+	return engine
+}
+
+// taijiFormula494 镜像 formula.ini [494]（太极拳系威力系数公式）。
+func taijiFormula494() combatcalc.FormulaSpec {
+	return combatcalc.FormulaSpec{
+		ID:      494,
+		Formula: "(P1+((P4+P5+P6+P7)*P2*0.195))/P3",
+		Src:     map[int]int{1: 5, 2: 5, 3: 5, 4: 0, 5: 0, 6: 0, 7: 0},
+		Prop: map[int]string{
+			4: "MeleePower", 5: "MeleePowerAdd",
+			6: "MinMeleeDamage", 7: "MaxMeleeDamage",
+		},
+	}
+}
+
+func TestRollSkillHitUsesPerHitFormulaEngine(t *testing.T) {
+	original := installedCombatCalc
+	installedCombatCalc = newTestCombatEngine(t, taijiFormula494())
+	defer func() { installedCombatCalc = original }()
+
+	originalRandom := combatRandomFloat64
+	combatRandomFloat64 = func() float64 { return 0.5 }
+	defer func() { combatRandomFloat64 = originalRandom }()
+
+	player := newPlayerActor("tester", 0)
+	definition := combatSkillDefinition{
+		id: "CS_wd_tjq01", script: "SkillNormal",
+		damageRows: []skillDamageRow{{formulaID: 494, damageType: "NegDamage", params: []string{"112", "1", "2"}}},
+		hitCount:   10,
+	}
+	// 默认属性（str=30/meleePower=80/武器 20-35）：
+	// (112+((80+30+20+35)*1*0.195))/2 = 72.08 → 72（legacy 路径会掷 28×ratio）
+	roll := rollSkillHit(player, definition, skillDamageTargetRef{}, nil, 1)
+	if roll.damage != 72 || roll.crit {
+		t.Fatalf("per-hit roll = %+v, want damage=72 crit=false", roll)
+	}
+}
+
+func TestRollSkillHitFallsBackWhenFormulaUnsupported(t *testing.T) {
+	original := installedCombatCalc
+	installedCombatCalc = newTestCombatEngine(t, taijiFormula494())
+	defer func() { installedCombatCalc = original }()
+
+	originalRandom := combatRandomFloat64
+	combatRandomFloat64 = func() float64 { return 0.5 }
+	defer func() { combatRandomFloat64 = originalRandom }()
+
+	player := newPlayerActor("tester", 0)
+	// 公式号未注入 → legacy：attack=20+floor(0.5×16)=28，ratio<=0 按 1 → 28
+	definition := combatSkillDefinition{
+		id: "CS_test", script: "SkillNormal",
+		damageRows: []skillDamageRow{{formulaID: 777, damageType: "PhyDamage", params: []string{"100"}}},
+	}
+	roll := rollSkillHit(player, definition, skillDamageTargetRef{}, nil, 1)
+	if roll.damage != 28 {
+		t.Fatalf("legacy fallback roll = %+v, want damage=28", roll)
+	}
+	// 引擎未装配（测试默认态）同样走 legacy
+	installedCombatCalc = nil
+	roll = rollSkillHit(player, definition, skillDamageTargetRef{}, nil, 1)
+	if roll.damage != 28 {
+		t.Fatalf("no-engine fallback roll = %+v, want damage=28", roll)
+	}
+}
+
+// TestMultiHitSkillRollsPerHitIndependently 验证多段技能每击独立掷值
+// （2026-11-08 数值重写：此前一掷同值复用各段）。三段各掷 R[10,20]：
+// 预掷序列 0.1/0.3/0.7 → 伤害 11/13/17，合计 41。
+func TestMultiHitSkillRollsPerHitIndependently(t *testing.T) {
+	engine := newTestCombatEngine(t, combatcalc.FormulaSpec{
+		ID: 9, Formula: "R[P1,P2]", Src: map[int]int{1: 5, 2: 5},
+	})
+	originalEngine := installedCombatCalc
+	installedCombatCalc = engine
+	defer func() { installedCombatCalc = originalEngine }()
+
+	// 计数随机源：每次 rollSkillHit 消费 9 枚（miss/crit/6×extra），
+	// miss 与 crit 恒 0.5（不触发），extra 首位按序给 0.1/0.3/0.7。
+	rolls := []float64{0.1, 0.3, 0.7, 0.9}
+	var index int
+	var mu sync.Mutex
+	originalRandom := combatRandomFloat64
+	combatRandomFloat64 = func() float64 {
+		mu.Lock()
+		defer mu.Unlock()
+		if index%9 < 2 {
+			index++
+			return 0.5
+		}
+		value := rolls[(index/9)%len(rolls)]
+		index++
+		return value
+	}
+	defer func() { combatRandomFloat64 = originalRandom }()
+
+	player := newPlayerActor("tester", 0)
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 95)
+	placeTestNPC(t, world, 95, 4, 0)
+
+	definition := combatSkillDefinition{
+		id: "CS_test_multihit", script: "SkillNormal",
+		damageRows: []skillDamageRow{{formulaID: 9, damageType: "PhyDamage", params: []string{"10", "20"}}},
+		hitFrameMs: []time.Duration{time.Millisecond, 2 * time.Millisecond, 3 * time.Millisecond},
+	}
+	// ownerID 与 resolveSkillDamageTargets 同源（npcMeta 派生）。
+	meta, ok := world.npcMeta(worldcore.EntityID(95))
+	if !ok {
+		t.Fatal("npc 95 meta missing")
+	}
+	scheduleSkillMultiHits(conn, world, definition, player,
+		[]skillDamageTargetRef{{id: 95, ownerID: meta.ownerID}}, "test")
+	time.Sleep(120 * time.Millisecond)
+
+	vitals, ok := world.run.combat.Vitals(95)
+	if !ok {
+		t.Fatal("NPC 95 missing")
+	}
+	if got, want := vitals.HP, int32(1000-11-13-17); got != want {
+		t.Fatalf("NPC HP=%d, want %d (per-hit 11/13/17)", got, want)
+	}
+}
+
+// TestRollSkillHitPicksCritValueByDamageType 验证暴击值按伤害系取用：
+// phyVa=0/magicVa=16 时，PhyDamage 行暴击率 5%（0.10 不暴）、内功系行
+// 14.4%（0.10 暴击 → 72×2=144）。
+func TestRollSkillHitPicksCritValueByDamageType(t *testing.T) {
+	original := installedCombatCalc
+	installedCombatCalc = newTestCombatEngine(t, taijiFormula494())
+	defer func() { installedCombatCalc = original }()
+
+	originalRandom := combatRandomFloat64
+	combatRandomFloat64 = func() float64 { return 0.10 }
+	defer func() { combatRandomFloat64 = originalRandom }()
+
+	player := newPlayerActor("tester", 0)
+	player.mu.Lock()
+	player.progress.attributes.phyVa = 0
+	player.progress.attributes.magicVa = 16
+	player.mu.Unlock()
+
+	external := combatSkillDefinition{
+		damageRows: []skillDamageRow{{formulaID: 494, damageType: "NegDamage", params: []string{"112", "1", "2"}}},
+	}
+	if roll := rollSkillHit(player, external, skillDamageTargetRef{}, nil, 1); !roll.crit || roll.damage != 144 {
+		t.Fatalf("内功系应暴击 144，得 %+v", roll)
+	}
+	physical := combatSkillDefinition{
+		damageRows: []skillDamageRow{{formulaID: 494, damageType: "PhyDamage", params: []string{"112", "1", "2"}}},
+	}
+	if roll := rollSkillHit(player, physical, skillDamageTargetRef{}, nil, 1); roll.crit || roll.damage != 72 {
+		t.Fatalf("外功系应不暴击 72，得 %+v", roll)
 	}
 }

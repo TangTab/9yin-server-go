@@ -58,6 +58,16 @@ func Validate(body CommandBody) (Command, error) {
 			float64(body.Value) != float64(int32(body.Value)) || body.Value < 0 || body.Value > 3600 {
 			return command, fmt.Errorf("corpse ttl must be an integer between 0 and 3600 seconds")
 		}
+	case "set_lootbox_ttl":
+		// 杀怪掉落宝箱在场时长（秒）：未拾超时自动消失（0x0E）；0=保留
+		// 到拾空。进程级，改值对在场宝箱即刻生效。
+		if math.IsNaN(float64(body.Value)) || math.IsInf(float64(body.Value), 0) ||
+			float64(body.Value) != float64(int32(body.Value)) || body.Value < 0 || body.Value > 86400 {
+			return command, fmt.Errorf("lootbox ttl must be an integer between 0 and 86400 seconds")
+		}
+	case "spawn_chest":
+		// GM 世界宝箱：在当前角色位置生成一只独立宝箱实体（stormbox_10
+		// 方言），掉落走回落阶梯一包，拾空/超时消失。
 	case "set_autosave_interval":
 		// 在线玩家内功/经脉快照的自动存盘周期（秒）：0=关闭（仅断线
 		// 与 Ctrl+C 关服时存）。进程级，改动即刻对全部在线会话生效。
@@ -193,6 +203,27 @@ func Validate(body CommandBody) (Command, error) {
 			return command, fmt.Errorf("live speed power must be between 0 and 1000")
 		}
 		command.Value = body.Value
+	case "set_zhenqi_cap":
+		// 经脉每日真气硬闸（Java GmRemote.validateCommand 同域）：
+		// 是否开启 0/1 + 每日阈值 1..10⁷（走 Value 键，与 set_act_day_limit 同模式）。
+		if body.Enabled != 0 && body.Enabled != 1 {
+			return command, fmt.Errorf("zhenqi cap enabled must be 0 or 1")
+		}
+		if body.Value < 1 || body.Value > 10_000_000 {
+			return command, fmt.Errorf("zhenqi cap value must be between 1 and 10000000")
+		}
+		command.Enabled = body.Enabled
+		command.Value = body.Value
+	case "set_jingmai_tier":
+		// 经脉周天直设（面板档 36..216；游戏侧按目录上限逐条钳制）。
+		if strings.TrimSpace(body.JingMaiId) == "" {
+			return command, fmt.Errorf("jingMaiId is required")
+		}
+		if body.JingMaiTier < 1 || body.JingMaiTier > 216 {
+			return command, fmt.Errorf("jingMaiTier must be between 1 and 216")
+		}
+		command.JingMaiID = strings.TrimSpace(body.JingMaiId)
+		command.JingMaiTier = body.JingMaiTier
 	case "set_weather":
 		if _, presetErr := WeatherPresetByKey(body.Weather); presetErr != nil {
 			return command, presetErr

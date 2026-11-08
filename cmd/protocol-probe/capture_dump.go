@@ -81,6 +81,10 @@ func (t *captureTap) Read(p []byte) (int, error) {
 	n, err := t.conn.Read(p)
 	if n > 0 {
 		_, _ = t.c2s.Write(p[:n])
+		// 逐读即刷：上行流量小（几 KB/分钟），64KB 缓冲若只靠 Close
+		// 落盘，会话进行中 c2s 恒为 0 字节——真机回归时正在测的会话
+		// 拿不到上行数据（55052 会话诊断受阻）。
+		_ = t.c2s.Flush()
 	}
 	return n, err
 }
@@ -89,6 +93,7 @@ func (t *captureTap) Write(p []byte) (int, error) {
 	n, err := t.conn.Write(p)
 	if n > 0 {
 		_, _ = t.s2c.Write(p[:n])
+		_ = t.s2c.Flush()
 	}
 	return n, err
 }

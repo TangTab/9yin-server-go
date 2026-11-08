@@ -84,3 +84,53 @@ SP 单帧(命中×2) → 经脉真气 View45 行帧
 ```
 多段：出招簇同上（无命中段），每 trigger_effect 帧位对存活目标重复全套命中帧 + wuji 段帧（`<LevelupRelevance>_2.._4`）。
 NPC 攻击（每 2.2s，6m 内）：`337(NPC) → 20(NPC→玩家, jn_mon053_02) → [命中: msg24(7,1,…,20) + 0x2D]`，格挡零伤害帧、回怒 +1/+2。
+
+## 2026-11-08 数值重写批次：每击公式引擎（combatcalc）
+
+伤害掷骰从「面板攻击区间 × 技能倍率」两参数近似升级为客户端真模型（damage_calculate r 行 × formula.ini 公式），计算移入 Lua：
+
+| 项 | 内容 |
+|---|---|
+| 新包 | `internal/combatcalc`：transpile（表达式→Lua 闭包体：P<n>/R[a,b]/#Prop/全角括号）+ host（长存 VM、装载期注入公式闭包、ProtectedCall+超时+指令预算、运行期出错整引擎禁用→legacy） |
+| 引擎脚本 | `scripts/module/combat/formula.lua`：原 M.calc（Java CombatFormulas 全管线移植，此前未接线）保留，新增 `M.install_formulas`/`M.calc_hit`（参数按 Src 5/6/0/1/2 解析→公式求值→miss 10%→crit 5%×2.0→保底 1；守方侧全零与参考服一致） |
+| 目录编译 | `skill_catalog.go`：`compileSkillDamage` 增产 `damageRows`（r 行原始参数），`hitCount`（varprop）入定义；`hurtCount()`=判定帧数＞HitCount＞正 r 段数 |
+| 结算口 | `rollSkillHit`（引擎优先→legacy 回退）；**多段从"出招一掷同值复用各段"改为每击×每目标独立掷值**；单段逐目标同前但走新入口；结算发帧链路零改动 |
+| 装配 | `-combat-scripts`（默认 scripts/module/combat）+ formula.ini（share/skill/，启动解析注入，非数字节跳过）+ GM `lua_reload` 联动热重载 |
+| 回退 | 引擎缺失/公式不支持（转译失败或 Src=4/7/8/9/10/11/12/13）→ `rollSkillDamage` legacy 原样保留，服务器永不因脚本层停摆 |
+| 测试 | transpile golden（[1][2][44][494][63全角]）、引擎 golden（太极拳 494=(112+((80+30+20+35)×0.195))/2=72）、fallback 三态、多段独立掷（三段 11/13/17）、开太极 legacy 原样 365 |
+
+已知边界（与 §十六/§十八 待办一致）：守方侧全零（防御/减免/暴击对抗）、外部暴率/爆伤四字段、群妖乱舞怒气暴击（套路 buff，不进基础管线）、多 r 行伤害包（NPC/buff 异形）走 legacy、Min/MaxMeleeDamage 暂用面板攻击区间口径。
+
+### 同批追加：攻方对抗值接入 + 守方管线铺设
+
+- `calc_hit` 的 miss/crit 从硬编码 10%/5% 换为真实公式：`missChance(accuracy, evasion,…)`、`critChance(crit_value, resilience,…)`；攻方暴击/命中按伤害系取 PhyVa/MagicVa、PhyHit/MagicHit（默认 16 暴击值 vs 零封劲 → 暴击率 14.4%，正对 §七 PVE 实测 14–15%）；命中 50 vs 守方零闪避 → PVE 永不 miss（真实口径，低级怪近零闪避）。
+- 守方三字段（defense/evasion/resilience）经 `HitInput.Defender` 全程铺通至 Lua `defenseReduction/missChance/critChance`——NPC 属性块（官方 base block 0..98，见 newer-go-server-deployment 记忆）迁移前传 nil 按零值，迁移后只改数据源不改公式。
+- 测试：`TestEngineCalcHitAttackerDefenderStats`（14.41% 暴击边界/封劲压制/1 万防→37/闪避对抗/零闪避永不 miss）+ `TestRollSkillHitPicksCritValueByDamageType`（phyVa=0/magicVa=16 两系分选）。
+
+## 2026-11-08 NPC 属性块迁移批次：staticprop 实力包接入守方
+
+| 项 | 内容 |
+|---|---|
+| 数据源 | `share/npc/staticprop.ini`（745 节＝实力包 PowerNo，含 [-1] 兜底）：五维/HP/MP/五系防/PI·AI 防 17 个成长基数（HPBase 可为浮点如 1.775）。Go/Java/客户端 Lua 此前均未消费；官方 base block 0..98 是场景面板块、不含防御——官服按实力包在服务端推导（视图块 PhyDef@584/Dodge@562/VaDef@573），抓包无攻击怪防御样本 |
+| 推导规则 | `属性 = Base × Level`（**推断**，无官方参照；锚＝§七 白狼封劲 20–40 ≈ StaBase1×L30）——集中在 `deriveNPCCombatStats` 一处可调。装于 registerNPCLocked（读模板列 Level@6/PowerNo@60，均场景域字段自动绑定），存 sceneEntity.combatStats |
+| 接线 | rollSkillHit 增 ref/world 参：`defenderStatsOf` 按伤害系选防（Phy→外防、Sti/Juj/Neg/Mas→分系）+ Evasion→missChance；两调用点（多段段内逐目标、单段循环）传 ref |
+| 风险控制 | **Resilience（封劲）暂不推导**：玩家侧暴击值未成长（默认 16），接 NPC 封劲（≈30）会把暴击率清零——待装备/宝物批抬玩家暴击值后接通。Defense 受对数曲线 ~900 下限天然无害；Evasion（DexBase×Level）vs 命中 50 影响微弱 |
+| 装载 | loadChengduNPCSpawns 一并装载；资源仓优先、os.Open 散文件兜底（部署端 resources/modern 为解包树）、双失败→零值守方（不停摆）；启动日志 `packages=745` |
+| 测试 | 解析 golden（testdata/staticprop_golden.ini 四节逐字拷自真件，含 1.775 浮点）；推导（×Level/[-1] 兜底/level 缺省/空表全零）；接线（Level50·PhyDefBase200→外防 10000→72×0.519=37；negDef=0 分系不受影响） |
+
+### 附：Go 方言 vs 官方表 0..98 同位异名对照（10 处，纯内部命名卫生，帧按 Index 定位不受影响；本批未改，备查）
+
+| idx | 官方表 | Go 方言 |
+|---|---|---|
+| 21 | Prop21 | LogicState |
+| 26 | Prop26 | SpeedRatio |
+| 36 | Prop36 | Name |
+| 42 | WuXing | WeaponMode |
+| 47 | WeaponName | CollideRadius |
+| 48 | WeaponMode | LuaScript |
+| 77 | Mount | VisType |
+| 82 | CurRiderType | ExtraInfo |
+| 85 | NeigongPKStatus | EscortFlag |
+| 88 | InParry | WeaponName |
+
+（方言侧 LogicState/SpeedRatio/Name/CollideRadius/LuaScript 在官方表他处存在：463/390/178/179/1464；VisType/ExtraInfo/EscortFlag 官方表完全不存在，已从默认值移除——npc_resolver.go:347 注释。）

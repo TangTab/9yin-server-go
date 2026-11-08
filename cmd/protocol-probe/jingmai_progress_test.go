@@ -8,11 +8,14 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
 // 经脉（msg150/161）：Java JingMaiCustomHandler/JingMaiMessages 全链对齐
 // （已学模型 + 首修自动激活 + starter 种子）。目录从 stub INI 装载（无
-// NINEYIN_SERVER_ROOT 依赖）；结算速度 43 真气/分钟、750/周天、日预算 500。
+// NINEYIN_SERVER_ROOT 依赖）；结算速度 43 真气/分钟、750/周天；每日
+// 真气硬闸默认关闭不限量（GM set_zhenqi_cap 开闸才按阈值截断）。
 
 func stubJingMaiCatalog(t *testing.T) *jingMaiCatalog {
 	t.Helper()
@@ -102,7 +105,9 @@ func TestJingMaiCultivateSetsCurLastAutoActivatesAndWritesPropsFrame(t *testing.
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
 	snapshot := player.jingMaiSnapshotOf()
-	if snapshot.Cur != "jm_b" || snapshot.Last != "jm_a" {
+	// 显示契约（客户端 get_jingmai_item 用 LastJingMai 定位 View45 行）：
+	// 修炼中 last 与 cur 同值，首修/换修后 tips 四件套立即有数据。
+	if snapshot.Cur != "jm_b" || snapshot.Last != "jm_b" {
 		t.Fatalf("cur=%q last=%q", snapshot.Cur, snapshot.Last)
 	}
 	// 停修：空 id 清修炼位。
@@ -193,10 +198,11 @@ func TestJingMaiCultivateTickAccruesAndLevelsUp(t *testing.T) {
 	anchor := time.Date(2026, 11, 7, 10, 0, 0, 0, time.Local)
 	player.restoreJingMai(jingMaiSnapshot{Learned: []string{"jm_a"}, Cur: "jm_a", ZhenQi: jingMaiZhenQiPool{Day: anchor.Format("2006-01-02")}}, anchor)
 
-	// 2 分钟 = 86 真气：未满 750 周天 → 单进度帧。
+	// 2 分钟 = 86 真气：未满 750 周天 → 进度帧 + 玩家属性帧（ZQPLValue
+	// 等刷新，Java meridianTickOnce 变化即补 playerPropsFrame 同构）。
 	frames := player.jingMaiCultivateTick(catalog, anchor.Add(2*time.Minute))
-	if len(frames) != 1 {
-		t.Fatalf("frames=%d, want 1 progress frame", len(frames))
+	if len(frames) != 2 {
+		t.Fatalf("frames=%d, want progress + props", len(frames))
 	}
 	snapshot := player.jingMaiSnapshotOf()
 	if got := snapshot.Progress["jm_a"]; got.Fill != 86 || got.Level != 0 || got.Total != 86 {
@@ -205,20 +211,29 @@ func TestJingMaiCultivateTickAccruesAndLevelsUp(t *testing.T) {
 	if snapshot.ZhenQi.Used != 86 {
 		t.Fatalf("zhenQi used=%d, want 86", snapshot.ZhenQi.Used)
 	}
+	propsIndices, err := propertyFrameIndices(frames[len(frames)-1])
+	if err != nil || !containsIndex(propsIndices, propZQPLValue) {
+		t.Fatalf("tick props frame missing ZQPLValue: indices=%v err=%v", propsIndices, err)
+	}
 
-	// 再 8 分钟 = 344 真气 → 86+344=430 仍未升级，单帧。
+	// 再 8 分钟 = 344 真气 → 86+344=430 仍未升级，进度帧 + 属性帧。
 	frames = player.jingMaiCultivateTick(catalog, anchor.Add(10*time.Minute))
-	if len(frames) != 1 {
+	if len(frames) != 2 {
 		t.Fatalf("frames=%d", len(frames))
 	}
 
-	// 追加至 707 后 1 分钟 +43=750 → 升级帧（Level+TotalFillValue）。
+	// 追加至 707 后 1 分钟 +43=750 → 升级帧（Level+TotalFillValue）+
+	// 属性帧（JingMaiTotalLevel 14→15 随帧刷新）。
 	snapshot = player.jingMaiSnapshotOf()
 	snapshot.Progress["jm_a"] = jingMaiProgressRow{Level: 0, Fill: 707, Total: 707}
 	player.restoreJingMai(snapshot, anchor.Add(11*time.Minute))
 	frames = player.jingMaiCultivateTick(catalog, anchor.Add(12*time.Minute))
-	if len(frames) != 1 {
-		t.Fatalf("frames=%d, want level-up frame", len(frames))
+	if len(frames) != 2 {
+		t.Fatalf("frames=%d, want level-up + props", len(frames))
+	}
+	propsIndices, err = propertyFrameIndices(frames[len(frames)-1])
+	if err != nil || !containsIndex(propsIndices, propJingMaiTotLevel) {
+		t.Fatalf("level-up props frame missing JingMaiTotalLevel: indices=%v err=%v", propsIndices, err)
 	}
 	snapshot = player.jingMaiSnapshotOf()
 	if got := snapshot.Progress["jm_a"]; got.Level != 1 || got.Fill != 0 || got.Total != 750 {
@@ -230,13 +245,15 @@ func TestJingMaiCultivateTickRespectsDailyBudgetAndMaxLevel(t *testing.T) {
 	catalog := stubJingMaiCatalog(t)
 	player := newPlayerActor("经脉侠", 0)
 	anchor := time.Date(2026, 11, 7, 10, 0, 0, 0, time.Local)
-	// jm_a maxLevel=3；已用 499/500 → 1 分钟只能补 1 点。
+	// jm_a maxLevel=3；硬闸 500 开启且已用 499/500 → 1 分钟只能补 1 点
+	//（开闸截断；Java applyZhenQi headroom 同构）。
 	player.restoreJingMai(jingMaiSnapshot{
 		Learned: []string{"jm_a"},
 		Cur:     "jm_a",
 		Progress: map[string]jingMaiProgressRow{
 			"jm_a": {Level: 0, Fill: 10, Total: 10},
 		},
+		Cap:    jingMaiDailyCap{Enabled: true, Value: 500},
 		ZhenQi: jingMaiZhenQiPool{Day: anchor.Format("2006-01-02"), Used: 499},
 	}, anchor)
 	frames := player.jingMaiCultivateTick(catalog, anchor.Add(1*time.Minute))
@@ -247,9 +264,17 @@ func TestJingMaiCultivateTickRespectsDailyBudgetAndMaxLevel(t *testing.T) {
 	if snapshot.ZhenQi.Used != 500 {
 		t.Fatalf("used=%d, want capped 500", snapshot.ZhenQi.Used)
 	}
-	// 预算耗尽后不再产帧。
+	// 额度耗尽后不再产帧（零帧静默）。
 	if frames = player.jingMaiCultivateTick(catalog, anchor.Add(2*time.Minute)); len(frames) != 0 {
 		t.Fatalf("frames=%d after budget exhausted", len(frames))
+	}
+	// 关闸不限量（Java 默认行为）：同日 500 之上照常入账。
+	player.setJingMaiDailyCap(false, 500)
+	if frames = player.jingMaiCultivateTick(catalog, anchor.Add(3*time.Minute)); len(frames) != 2 {
+		t.Fatalf("frames=%d with cap disabled", len(frames))
+	}
+	if snapshot = player.jingMaiSnapshotOf(); snapshot.ZhenQi.Used != 543 {
+		t.Fatalf("used=%d, want uncapped 543 (+43/min)", snapshot.ZhenQi.Used)
 	}
 
 	// 满级截断：jm_b maxLevel=225 级 225 → 不再累计。
@@ -390,5 +415,118 @@ func TestPushJingMaiFramesSeedsStarterLearned(t *testing.T) {
 	}
 	if frames = conn.Frames(); len(frames) != 6 {
 		t.Fatalf("frames=%d after repush, want 6", len(frames))
+	}
+}
+
+// findJingMaiProp 按属性索引取值（jingMaiPropsLocked 的行查询辅助）。
+func findJingMaiProp(properties []clientdata.IndexedProperty, index uint16) (clientdata.Value, bool) {
+	for _, property := range properties {
+		if property.Index == index {
+			return property.Value, true
+		}
+	}
+	return clientdata.Value{}, false
+}
+
+// GM set_zhenqi_cap：ZhenQiDayValue 展示口径随开关变化（开闸=阈值/
+// 关闸=官方缺省 500），阈值关闭时仍保存、重开沿用；快照 roundtrip 与
+// 旧档（无 cap 节点）兼容（Java setDailyCap/zhenQiDayValue 同构）。
+func TestJingMaiDailyCapDisplayAndPersistence(t *testing.T) {
+	player := newPlayerActor("硬闸侠", 0)
+	seedJingMaiLearned(player, "jm_a")
+
+	player.mu.Lock()
+	properties := player.jingMaiPropsLocked()
+	player.mu.Unlock()
+	if value, ok := findJingMaiProp(properties, propZhenQiDayValue); !ok || value.I32 != zhenQiDayValueMax {
+		t.Fatalf("default ZhenQiDayValue=%+v ok=%t, want %d", value, ok, zhenQiDayValueMax)
+	}
+
+	player.setJingMaiDailyCap(true, 3000)
+	player.mu.Lock()
+	properties = player.jingMaiPropsLocked()
+	player.mu.Unlock()
+	if value, _ := findJingMaiProp(properties, propZhenQiDayValue); value.I32 != 3000 {
+		t.Fatalf("capped ZhenQiDayValue=%d, want 3000", value.I32)
+	}
+
+	// 关闸回落 500，但阈值 3000 仍在快照里（重开沿用）。
+	player.setJingMaiDailyCap(false, 0)
+	snapshot := player.jingMaiSnapshotOf()
+	if snapshot.Cap.Enabled || snapshot.Cap.Value != 3000 {
+		t.Fatalf("snapshot cap=%+v, want disabled but value kept 3000", snapshot.Cap)
+	}
+	player.mu.Lock()
+	properties = player.jingMaiPropsLocked()
+	player.mu.Unlock()
+	if value, _ := findJingMaiProp(properties, propZhenQiDayValue); value.I32 != zhenQiDayValueMax {
+		t.Fatalf("uncapped ZhenQiDayValue=%d, want %d", value.I32, zhenQiDayValueMax)
+	}
+
+	// 快照 JSON 往返保真。
+	raw, err := json.Marshal(snapshot)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var decoded jingMaiSnapshot
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if decoded.Cap.Value != 3000 || decoded.Cap.Enabled {
+		t.Fatalf("roundtrip cap=%+v", decoded.Cap)
+	}
+
+	// 旧档无 cap 节点（零值）：关闸 + 阈值回落官方缺省。
+	legacy := []byte(`{"cur":"","last":"","activated":null,"progress":{},"zhenQi":{"day":"","used":0}}`)
+	var legacySnapshot jingMaiSnapshot
+	if err := json.Unmarshal(legacy, &legacySnapshot); err != nil {
+		t.Fatalf("legacy unmarshal: %v", err)
+	}
+	restored := newPlayerActor("回档侠", 0)
+	restored.restoreJingMai(legacySnapshot, time.Now())
+	if again := restored.jingMaiSnapshotOf(); again.Cap.Enabled || again.Cap.Value != zhenQiDayValueMax {
+		t.Fatalf("legacy cap=%+v, want disabled with default %d", again.Cap, zhenQiDayValueMax)
+	}
+}
+
+// GM set_jingmai_tier：直设周天（钳 1..目录上限、fill 归零走新周天
+// 起点）、未学拒绝、经脉总等级随动（Java setLevel 同构）。
+func TestSetJingMaiLevelClampsAndResetsFill(t *testing.T) {
+	catalog := stubJingMaiCatalog(t)
+	player := newPlayerActor("周天侠", 0)
+	player.restoreJingMai(jingMaiSnapshot{
+		Learned: []string{"jm_a", "jm_b"},
+		Progress: map[string]jingMaiProgressRow{
+			"jm_a": {Level: 1, Fill: 100, Total: 100},
+			"jm_b": {Level: 1},
+		},
+	}, time.Now())
+
+	// jm_a maxLevel=3：99 钳到 3，fill 归零，行号=授予序 1。
+	old, row, slot, ok := player.setJingMaiLevel(catalog, "jm_a", 99)
+	if !ok || old != 1 || row.Level != 3 || row.Fill != 0 || slot != 1 {
+		t.Fatalf("set 99: old=%d row=%+v slot=%d ok=%t", old, row, slot, ok)
+	}
+	// 经脉总等级随动：jm_a=3 + jm_b=1 → JingMaiTotalLevel=4。
+	player.mu.Lock()
+	total := 0
+	for _, id := range player.jingmai.learned {
+		total += int(player.jingmai.progress[id].Level)
+	}
+	player.mu.Unlock()
+	if total != 4 {
+		t.Fatalf("totalLevel=%d, want 4", total)
+	}
+	// 0 钳到 1。
+	if _, row, _, ok := player.setJingMaiLevel(catalog, "jm_a", 0); !ok || row.Level != 1 {
+		t.Fatalf("set 0: row=%+v ok=%t (want clamp to 1)", row, ok)
+	}
+	// 未学经脉拒绝（先在客户端开通）。
+	if _, _, _, ok := player.setJingMaiLevel(catalog, "jm_ni", 36); ok {
+		t.Fatalf("unlearned jm_ni accepted")
+	}
+	// 目录外 id 同样拒绝（行号=0）。
+	if _, _, _, ok := player.setJingMaiLevel(catalog, "jm_missing", 36); ok {
+		t.Fatalf("unknown jm_missing accepted")
 	}
 }

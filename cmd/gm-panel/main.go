@@ -117,6 +117,7 @@ func (p *panelServer) mux() *http.ServeMux {
 	mux.HandleFunc("/api/cards", p.catalogProxy("cards"))
 	mux.HandleFunc("/api/hair-cards", p.catalogProxy("hair-cards"))
 	mux.HandleFunc("/api/items", p.catalogProxy("items"))
+	mux.HandleFunc("/api/meridians", p.catalogProxy("meridians"))
 	// 管理页（index.html 记录服务器登记册）：同源探活代理 + 面板自述。
 	// 实现在契约层，与游戏服内嵌面板共用同一份代码。
 	gmapi.MountManageAPI(mux, p.gameAddr, panelVersion)

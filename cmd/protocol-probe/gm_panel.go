@@ -27,6 +27,9 @@ type gmHub struct {
 	// itemNames 是 GET 目录端点的中文名解析钩子（game_items 批查；
 	// main() 装配，nil 时条目名回退 ConfigID——httptest 无 DB 也可用）。
 	itemNames func(configIDs []string) map[string]string
+	// meridianRows 是 /api/meridians 的目录钩子（共享库 game_meridians
+	// 查询，带中文名；main() 装配，nil/空时回退 globalJingMaiCatalog）。
+	meridianRows func() []gmMeridianRow
 }
 
 type gmSession struct {
@@ -219,6 +222,7 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 		writeGMJSON(writer, http.StatusOK, hub.snapshots())
 	})
 	mux.HandleFunc("/api/items", hub.itemsHandler)
+	mux.HandleFunc("/api/meridians", hub.meridiansHandler)
 	mux.HandleFunc("/api/fashion-catalog", hub.fashionCatalogHandler)
 	mux.HandleFunc("/api/cards", hub.cardsHandler)
 	mux.HandleFunc("/api/hair-cards", hub.hairCardsHandler)

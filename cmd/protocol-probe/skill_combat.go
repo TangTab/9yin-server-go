@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/entity"
 	"github.com/local/9yin-go-server/internal/sim"
 	worldcore "github.com/local/9yin-go-server/internal/world"
@@ -106,11 +107,17 @@ type combatSkillDefinition struct {
 	baseDamage       int32
 	// damageWaves 是 damage_calculate 正 r 段数（伤害倍率分母：
 	// ratio = baseDamage/100/waves，Java CombatSkill.damageRatio 同式）。
+	// damageRows 是 r 行原始编译产物（2026-11-08 数值重写批次）：combatcalc
+	// 每击公式路径按 formulaID 取 formula.ini 公式、按位喂 params（P1 基值/
+	// P2 波动/分摊系数等），legacy ratio 路径保留为回退。hitCount 是 varprop
+	// HitCount 列（hurtCount() 的第二优先级计数来源）。
 	// hitFrameMs 是 zhaoshi trigger_custom_N（段号;trigger_effect;帧号;
 	// 效果名）编译出的多段判定时刻（30fps 换算毫秒），空表=单段即时
 	// 结算。levelupRelevance（wuji_* 前缀=武技族，出招链带 169 段）与
 	// packCategory（2=怒招）驱动武技连击段下发。
 	damageWaves      int32
+	damageRows       []skillDamageRow
+	hitCount         int32
 	hitFrameMs       []time.Duration
 	levelupRelevance string
 	packCategory     int32
@@ -126,11 +133,14 @@ type combatSkillDefinition struct {
 	effects          []combatSkillEffect
 	// 冲锋链字段（Java CombatSkill/SkillCastHandler 同源）：
 	// castRange=TargetShapePara2>0 ? TSP2 : max(形状半径,8m)；
+	// rushRange=skill_static.RushRange（冲锋发起上限，缺列回退
+	// max(castRange,15m)——TargetShape 半径不是冲锋技的可攻击距离）；
 	// canRush=skill_static.CanRush；lockSkill=script=="skilllock"||canRush||
 	// (TargetType==4&&DamageType!=0)（msg20 动作三分用）；
 	// isDamageSkill=skill_static.IsDamage；bind/groundRushAction=
 	// skill_lock_data[LockType] 的 BindDistance/LockGRushAction（缺行回退）。
 	castRange        float32
+	rushRange        float32
 	canRush          bool
 	lockSkill        bool
 	isDamageSkill    bool
@@ -138,10 +148,14 @@ type combatSkillDefinition struct {
 	groundRushAction string
 }
 
-// stagedRushFamily 报告该技能是否走冲锋暂存链：
-// Java 语义 canRush && script=="skilllock"（大小写不敏感）。
+// stagedRushFamily 报告该技能是否走冲锋暂存链。
+// 2026-11-08 50514 会话回归：本服 skill_static.ini 的 Script 列普遍为
+// None（hyjf07 [7648] CanRush=1、Script=None 实测），旧条件
+// `canRush && script=="skilllock"` 恒 false → 全部冲锋 211 被静默拒
+// （零帧，客户端无动画不动）。放宽为 canRush 单条件——lockSkill 判定
+// 本来就有 canRush 兜底，冲锋族以 CanRush 列为准。
 func (definition combatSkillDefinition) stagedRushFamily() bool {
-	return definition.canRush && strings.EqualFold(definition.script, "skilllock")
+	return definition.canRush
 }
 
 // scriptLabel 是 msg24 飘字第 7 值（Java CombatSkill.scriptLabel）：锁定族
@@ -154,12 +168,134 @@ func (definition combatSkillDefinition) scriptLabel() string {
 	return definition.script
 }
 
+// installedCombatCalc 是每击公式引擎（main 按 -combat-scripts 装配；nil 或
+// 未 Ready 时 rollSkillHit 全走 legacy 掷骰——测试环境不装配即维持旧行为）。
+var installedCombatCalc *combatcalc.Engine
+
+// combatCalcSnapshot 返回攻方属性/生存值快照（combatcalc ctx.props/vitals）。
+// MeleePowerAdd 等加成位按五维衍生系数取对应维（attr-derived 官方系数）。
+func (p *playerActor) combatCalcSnapshot() (props, vitals map[string]int64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	a := p.progress.attributes
+	v := p.vitals
+	props = map[string]int64{
+		"Str": int64(a.str), "Dex": int64(a.dex), "Ing": int64(a.ing),
+		"Spi": int64(a.spi), "Sta": int64(a.sta),
+		"MeleePower": int64(a.meleePower), "MeleePowerAdd": int64(a.str),
+		"ShotPower": int64(a.shotPower), "ShotPowerAdd": int64(a.dex),
+		"MagicPower": int64(a.magicPower), "MagicPowerAdd": int64(a.ing),
+		"PhyVa": int64(a.phyVa), "MagicVa": int64(a.magicVa),
+		"PhyHit": int64(a.phyHit), "MagicHit": int64(a.magicHit), "Dodge": int64(a.dodge),
+		"MinMeleeDamage": int64(a.minMeleeDamage), "MaxMeleeDamage": int64(a.maxMeleeDamage),
+	}
+	vitals = map[string]int64{
+		"HP": int64(v.HP), "MaxHP": int64(v.MaxHP),
+		"MP": int64(v.MP), "MaxMP": int64(v.MaxMP),
+	}
+	return props, vitals
+}
+
+// rollSkillHit 单击伤害结算（2026-11-08 数值重写）：优先 combatcalc 每击
+// 公式路径——damage_calculate r 行 × formula.ini 公式（P1 基值+P2 波动+
+// 威力×系数+分摊），每击×每目标独立掷值；暴击值/命中值按伤害系取
+// PhyVa/MagicVa、PhyHit/MagicHit（§十六②：基础暴率=5%+10%×(暴击值−封劲)/
+// (暴击值+1)，默认 16 点暴击值 vs 零封劲 ≈14.4%，正对 §七 PVE 实测的
+// 14–15%）。守方取自 NPC 实力包推导（npcCombatStats：staticprop Base×
+// Level，按伤害系选防；封劲暂 0 见其注释）；无 stats/非本场景目标按零值
+// （与参考服"守方侧缺省"口径一致）。引擎未装载/公式不支持/运行期回退时
+// 走 legacy 面板×倍率掷骰（rollSkillDamage 原样保留）。
+func rollSkillHit(player *playerActor, definition combatSkillDefinition, ref skillDamageTargetRef, world *sceneLifecycle, targetCount int) combatRoll {
+	if engine := installedCombatCalc; engine != nil && engine.Ready() {
+		if row, ok := definition.primaryDamageRow(); ok && engine.Supports(row.formulaID) {
+			props, vitals := player.combatCalcSnapshot()
+			critValue, accuracy := props["PhyVa"], props["PhyHit"]
+			if !strings.EqualFold(row.damageType, "PhyDamage") {
+				critValue, accuracy = props["MagicVa"], props["MagicHit"]
+			}
+			input := &combatcalc.HitInput{
+				FormulaID:      row.formulaID,
+				Params:         row.params,
+				HurtCount:      definition.hurtCount(),
+				CurTargetCount: targetCount,
+				Props:          props,
+				Vitals:         vitals,
+				CritValue:      critValue,
+				Accuracy:       accuracy,
+				Defender:       defenderStatsOf(world, ref, row.damageType),
+				MissRoll:       randFloat64(),
+				CritRoll:       randFloat64(),
+				ExtraRolls: []float64{
+					randFloat64(), randFloat64(), randFloat64(),
+					randFloat64(), randFloat64(), randFloat64(),
+				},
+			}
+			if result, handled := engine.CalcHit(input); handled {
+				return combatRoll{damage: result.Damage, crit: result.Crit}
+			}
+		}
+	}
+	attackMin, attackMax := player.meleeDamageRange()
+	return rollSkillDamage(attackMin, attackMax, definition.damageRatio())
+}
+
+// defenderStatsOf 按伤害系选防构建守方快照（PhyDamage→外防，阴/阳/刚/
+// 柔→对应分系防）。无推导数据返回 nil（引擎按零值守方）。
+func defenderStatsOf(world *sceneLifecycle, ref skillDamageTargetRef, damageType string) *combatcalc.DefenderStats {
+	stats := world.npcCombatStatsOf(ref)
+	if stats == nil {
+		return nil
+	}
+	defense := stats.phyDef
+	switch {
+	case strings.EqualFold(damageType, "StiDamage"):
+		defense = stats.stiDef
+	case strings.EqualFold(damageType, "JujDamage"):
+		defense = stats.jujDef
+	case strings.EqualFold(damageType, "NegDamage"):
+		defense = stats.negDef
+	case strings.EqualFold(damageType, "MasDamage"):
+		defense = stats.masDef
+	}
+	return &combatcalc.DefenderStats{
+		Defense:    int64(defense),
+		Evasion:    int64(stats.evasion),
+		Resilience: 0, // 封劲暂不推导（npcCombatStats 注释）
+	}
+}
+
 // damageRatio 是公式倍率（formula.lua 的 ratio；<=0 由公式按 1.0 处理）。
 func (definition combatSkillDefinition) damageRatio() float64 {
 	if definition.damageWaves <= 0 {
 		return 0
 	}
 	return float64(definition.baseDamage) / 100 / float64(definition.damageWaves)
+}
+
+// hurtCount 是公式 HurtCount 计数器的解析值（客户端 Src=1 上下文）：
+// 多段判定帧数优先，其次 varprop HitCount 列，最后回落正 r 段数。
+func (definition combatSkillDefinition) hurtCount() int {
+	if n := len(definition.hitFrameMs); n > 0 {
+		return n
+	}
+	if definition.hitCount > 0 {
+		return int(definition.hitCount)
+	}
+	if definition.damageWaves > 0 {
+		return int(definition.damageWaves)
+	}
+	return 1
+}
+
+// primaryDamageRow 返回每击公式路径使用的 r 行：取第一条公式号 >0 的行
+// （绝大多数玩家技能单 r 行；多 r 行的 NPC/buff 伤害包属异形，走 legacy）。
+func (definition combatSkillDefinition) primaryDamageRow() (skillDamageRow, bool) {
+	for _, row := range definition.damageRows {
+		if row.formulaID > 0 {
+			return row, true
+		}
+	}
+	return skillDamageRow{}, false
 }
 
 // wujiRelevance 报告武技族（LevelupRelevance=wuji_* 前缀）：出招链带
@@ -362,44 +498,50 @@ func resolveSkillActionTarget(definition combatSkillDefinition, custom clientCus
 	return 0, 0
 }
 
-func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uint64, now time.Time) (bool, string) {
+// beginSkillUse 受理一笔出招：CD/GCD 闸 + MP/SP/轻功结算 + 出招簿记。
+// settled=true 为冲锋落地重入专用——CD/MP/轻功已在 c61 时点
+//（commitRushDashCosts）结算过，跳过闸与扣费，只补簿记（防止个人 CD
+// 把自己的落地续招拒掉）。
+func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uint64, now time.Time, settled bool) (bool, string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if p.skillLockUntil.After(now) {
-		return false, fmt.Sprintf("skill locked remaining=%s", p.skillLockUntil.Sub(now).Round(time.Millisecond))
-	}
-	if ready := p.skillCooldowns[definition.id]; ready.After(now) {
-		return false, fmt.Sprintf("personal cooldown remaining=%s", ready.Sub(now).Round(time.Millisecond))
-	}
-	// 公共 GCD 只拦套路切换（Java PlayerActor.beginSkillUse:1061-1064
-	// 同构、bug.txt:8「同套路不在触发公共7秒冷却，不同套路会看到7秒CD
-	// 转圈回复」）：同套路连招与出招者自身永不拦——个人 CD<7s 的技能
-	// 不再被压到 7s。此前 per-team 硬闸（skillTeamCooldowns[CoolDownTeam]）
-	// 把同套路五招（共享 CoolDownTeam）连同施法者全部锁 7s，是本地自造
-	// 模型，已废弃。
-	if p.publicCDUntil.After(now) && definition.taoLu != p.publicCDTaolu {
-		return false, fmt.Sprintf("public cooldown (taolu switch from=%s) remaining=%s",
-			p.publicCDTaolu, p.publicCDUntil.Sub(now).Round(time.Millisecond))
-	}
-	state := p.snapshotLocked()
-	if state.LogicState == entity.LogicStateDied || state.HP <= 0 {
-		return false, "player is dead"
-	}
-	if state.MP < definition.mpCost {
-		return false, fmt.Sprintf("MP %d < %d", state.MP, definition.mpCost)
-	}
-	if p.progress.attributes.sp < definition.spCost {
-		return false, fmt.Sprintf("SP %d < %d", p.progress.attributes.sp, definition.spCost)
-	}
-	if definition.qgCost > 0 {
-		if cost, ok := p.qinggong.Use(definition.qgCost, now); !ok {
-			return false, fmt.Sprintf("QingGongPoint cannot pay %d (resolved cost %d)", definition.qgCost, cost)
+	if !settled {
+		if p.skillLockUntil.After(now) {
+			return false, fmt.Sprintf("skill locked remaining=%s", p.skillLockUntil.Sub(now).Round(time.Millisecond))
 		}
+		if ready := p.skillCooldowns[definition.id]; ready.After(now) {
+			return false, fmt.Sprintf("personal cooldown remaining=%s", ready.Sub(now).Round(time.Millisecond))
+		}
+		// 公共 GCD 只拦套路切换（Java PlayerActor.beginSkillUse:1061-1064
+		// 同构、bug.txt:8「同套路连招不在触发公共7秒冷却，不同套路会看到7秒CD
+		// 转圈回复」）：同套路连招与出招者自身永不拦——个人 CD<7s 的技能
+		// 不再被压到 7s。此前 per-team 硬闸（skillTeamCooldowns[CoolDownTeam]）
+		// 把同套路五招（共享 CoolDownTeam）连同施法者全部锁 7s，是本地自造
+		// 模型，已废弃。
+		if p.publicCDUntil.After(now) && definition.taoLu != p.publicCDTaolu {
+			return false, fmt.Sprintf("public cooldown (taolu switch from=%s) remaining=%s",
+				p.publicCDTaolu, p.publicCDUntil.Sub(now).Round(time.Millisecond))
+		}
+		state := p.snapshotLocked()
+		if state.LogicState == entity.LogicStateDied || state.HP <= 0 {
+			return false, "player is dead"
+		}
+		if state.MP < definition.mpCost {
+			return false, fmt.Sprintf("MP %d < %d", state.MP, definition.mpCost)
+		}
+		if p.progress.attributes.sp < definition.spCost {
+			return false, fmt.Sprintf("SP %d < %d", p.progress.attributes.sp, definition.spCost)
+		}
+		if definition.qgCost > 0 {
+			if cost, ok := p.qinggong.Use(definition.qgCost, now); !ok {
+				return false, fmt.Sprintf("QingGongPoint cannot pay %d (resolved cost %d)", definition.qgCost, cost)
+			}
+		}
+		if !p.vitals.SpendMP(definition.mpCost) {
+			return false, "MP spend rejected"
+		}
+		p.progress.attributes.sp -= definition.spCost
 	}
-	if !p.vitals.SpendMP(definition.mpCost) {
-		return false, "MP spend rejected"
-	}
-	p.progress.attributes.sp -= definition.spCost
 	p.skillCooldowns[definition.id] = now.Add(definition.personalCD)
 	// 每次受理都刷新 GCD 窗口与发起套路（62433 抓包：每招恒发个人+GCD
 	// 双行；客户端按 team 列过滤，同套路技能不显示 7s——服务端同样只拦
@@ -487,14 +629,16 @@ type areaSkillDamageResult struct {
 }
 
 // relayNPCKillFrame 把致死 0x10 帧转发给同场景其他可见成员，让旁观者
-// 与迟到者看到一致的死亡/重生周期；随后把击杀点排队的掉落宝箱物化
-// 帧（0x0D+0x1F）锁外扇出。apply* 内部自持 run.mu，调用点在锁外，
-// 两个扇出各自加锁安全。
-func (s *sceneLifecycle) relayNPCKillFrame(id uint32, frame []byte) {
+// 与迟到者看到一致的死亡/重生周期；挂尸掉落（非实体宝箱）随后补发
+// CanPick/PickMember 冒光属性（击杀者首发+其他成员中继）；最后把击杀
+// 点排队的宝箱实体物化帧（0x0D+0x1F）锁外扇出。apply* 内部自持
+// run.mu，调用点在锁外，各扇出独立加锁安全。
+func (s *sceneLifecycle) relayNPCKillFrame(id uint32, frame []byte, killerName string) {
 	if s == nil || s.run == nil || frame == nil {
 		return
 	}
 	s.run.relayNPCPropertyFrame(id, frame, s)
+	s.relayCorpsePickFrames(id, killerName)
 	s.run.flushPendingObjectFrames()
 }
 
@@ -828,6 +972,12 @@ func (s *sceneLifecycle) applySkillDamageToNPC(id, ownerID uint32, amount int32,
 	state := vitals.ActorState(id, ownerID)
 	if brain, isCombat := s.run.combat.Brain(entityID); isCombat {
 		brain.Threat += amount
+		// 受击锁定攻击者（Java NpcCombatAi 反击入口）：NotPositive 被动
+		// NPC 的唯一索敌来源——无目标时把攻击者写进 TargetMember，tick
+		// 随后按普通追击/攻击/栓绳流程反击。已有目标（粘性）不覆盖。
+		if brain.TargetMember == 0 && state.HP > 0 && s.wireID != 0 {
+			brain.TargetMember = s.wireID
+		}
 		if state.HP <= 0 {
 			brain.Threat = 0
 			if npcRespawnBatchInterval() > 0 {
@@ -902,7 +1052,7 @@ func writeSkillSettleFrames(link sceneMessageConnection, world *sceneLifecycle, 
 		}
 		if hit.outcome.killed {
 			totalLoot += hit.outcome.loot
-			world.relayNPCKillFrame(hit.ref.id, hit.outcome.frame)
+			world.relayNPCKillFrame(hit.ref.id, hit.outcome.frame, player.snapshotName())
 		}
 	}
 	if len(hits) > 0 {
@@ -991,13 +1141,13 @@ func awardSettleLoot(link sceneMessageConnection, player *playerActor, totalLoot
 }
 
 // scheduleSkillMultiHits 多段结算（Java scheduleMultiHits、52795 抓包
-// 实证形态）：出招时掷一次伤害值（同招各段各目标同值），按
-// trigger_effect 帧位逐段调度——每段对仍存活目标发全套命中帧；首段
-// 命中进战斗+目标控制，后续段刷新战斗活跃时刻；每段每目标 +2 回怒；
-// 末段后按整招累计伤害喂经脉真气。
+// 实证形态）：按 trigger_effect 帧位逐段调度——每击×每目标独立掷值
+// （rollSkillHit：combatcalc 每击公式路径优先，legacy 回退），每段对仍
+// 存活目标发全套命中帧；首段命中进战斗+目标控制，后续段刷新战斗活跃
+// 时刻；每段每目标 +2 回怒；末段后按整招累计伤害喂经脉真气。
 func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, definition combatSkillDefinition,
-	player *playerActor, targets []skillDamageTargetRef, roll combatRoll, remote string) {
-	if len(targets) == 0 || roll.damage <= 0 {
+	player *playerActor, targets []skillDamageTargetRef, remote string) {
+	if len(targets) == 0 {
 		return
 	}
 	times := skillHitTimes(definition)
@@ -1016,7 +1166,12 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 			now := time.Now()
 			hits := make([]skillSettleHit, 0, len(targets))
 			killed := false
+			stageDamage := int64(0)
 			for _, ref := range targets {
+				roll := rollSkillHit(player, definition, ref, world, len(targets))
+				if roll.damage <= 0 {
+					continue // 本击未命中：该目标本段不发帧
+				}
 				outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, now)
 				if err != nil {
 					log.Printf("%s: multi-hit stage %d apply id=%d: %v", remote, tick, ref.id, err)
@@ -1026,6 +1181,7 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 					continue // 前段已击杀/目标失效：本段跳过（不发帧）
 				}
 				hits = append(hits, skillSettleHit{ref: ref, damage: roll.damage, outcome: outcome})
+				stageDamage += int64(roll.damage)
 				if outcome.killed {
 					killed = true
 				}
@@ -1074,7 +1230,7 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 					}
 				}
 			}
-			log.Printf("%s: multi-hit stage %d/%d skill=%s hits=%d damage_each=%d", remote, tick+1, len(times), definition.id, len(hits), roll.damage)
+			log.Printf("%s: multi-hit stage %d/%d skill=%s hits=%d damage_sum=%d", remote, tick+1, len(times), definition.id, len(hits), stageDamage)
 		})
 	}
 }
@@ -1106,28 +1262,45 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	targetID := playerObjectID
 	targetOwnerID := playerOwnerID
 	if definition.requiresTarget {
-		var ok bool
-		if targetID, targetOwnerID, ok = world.selectedCombatTarget(); !ok {
+		// 瞄准对象优先（211 长式 idx10；落地重组 211 也带它），选中目标
+		// 兜底——冲锋落地续招时选中目标可能已换/丢失。
+		if aimID, aimOwner := dashLandingAimObject(custom); aimID != 0 && world.combatNPCAlive(aimID, aimOwner) {
+			targetID, targetOwnerID = aimID, aimOwner
+		} else if selectedID, selectedOwner, ok := world.selectedCombatTarget(); ok {
+			targetID, targetOwnerID = selectedID, selectedOwner
+		} else {
 			log.Printf("%s: reject skill id=%s without living selected target", remote, definition.id)
 			return true, nil
 		}
 	}
 	// 攻击距离闸（Java 八轮拍板「按技能真实射程控制释放距离」）：施法者
 	// 坐标取 211 自带上报（宽容解析，缺省原点同 Java）；距离=施法者→目标。
-	// 冲锋三段式：≤TSP2 立即受理；TSP2<距离≤15m 且冲锋族走暂存疾跑链
-	// （CurSkillID+msg25+msg24 档2，CD/资源落地才结）；>15m 静默拒（零帧）。
+	// 冲锋族距离模型（官服 b/e.pcapng 重解码 + f.pcapng 十连按修正
+	// 2026-11-08）：面板射程（castRange/TargetShapePara2）不是可攻击距离；
+	// 身前近距（≤rushStageNearCastMeters）直接施法，更远一律走暂存冲锋链
+	//（受理簇→客户端自动接近→6.5m 内 c61 冲刺→212 落地出伤害）。
+	// **受理与距离解耦**（f 十连按实证：14.6~19.8m 全受理零拒绝，kfkj02
+	// 无 RushRange 列）——不做发起上限拒包，RushRange 仅存档参考。
 	if definition.requiresTarget && world != nil {
 		if targetTransform, hasTransform := world.combatNPCTransform(targetID); hasTransform {
 			castAt, _ := useSkillCastTransform(custom)
-			distance := math.Sqrt(float64(
-				square(castAt.X-targetTransform.X) +
-					square(castAt.Y-targetTransform.Y) +
-					square(castAt.Z-targetTransform.Z)))
-			if rushStageEnabled() && definition.stagedRushFamily() &&
-				distance > float64(definition.castRange) && distance <= rushStageMaxMeters {
-				return stageRushCast(link, player, definition, targetID, targetOwnerID, targetTransform, distance, remote)
+			// 冲锋族几何基准 = 211 自报目标坐标（客户端世界观）；NPC 服务端
+			// 走动不广播，两边可差 5m+，按服务端坐标算 c61 终点会被客户端
+			// 校验拒冲（57587 会话实证）。非冲锋族仍按服务端坐标。
+			geometry := targetTransform
+			claimed, hasClaimed := useSkillClaimedTargetTransform(custom)
+			if definition.stagedRushFamily() && hasClaimed {
+				geometry = claimed
 			}
-			if distance > float64(definition.castRange) {
+			distance := math.Sqrt(float64(
+				square(castAt.X-geometry.X) +
+					square(castAt.Y-geometry.Y) +
+					square(castAt.Z-geometry.Z)))
+			if rushStageEnabled() && definition.stagedRushFamily() {
+				if distance > rushStageNearCastMeters(definition) {
+					return stageRushCast(link, player, definition, targetID, targetOwnerID, geometry, castAt, distance, remote)
+				}
+			} else if distance > float64(definition.castRange) {
 				log.Printf("%s: reject skill id=%s out of range %.0fm > %.0fm",
 					remote, definition.id, distance, definition.castRange)
 				return true, nil
@@ -1136,11 +1309,14 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	}
 	now := time.Now()
 	target := uint64(targetID) | uint64(targetOwnerID)<<32
+	// 冲锋落地重入（pending.settled）：CD/MP 已在 c61 时点结算，跳过
+	// 闸/扣费/CD 行（官服落地簇无 CD 行；个人 CD 会拒掉自己的续招）。
+	settledResume := player.resumeSettleSkipSnapshot()
 	// 顶掉补删（Java §D8 对拍）：GCD 不硬闸，连招会把上一招的收尾定时器
 	// 顶掉；新招受理时上一招仍挂着的，立即补发它的 0x12+清除帧——
 	// active_skill_rec 的 add/del 恒 1:1（参考服 8/8、52905 14/14）。
 	superseded := player.currentSkillSnapshot()
-	if ok, reason := player.beginSkillUse(definition, target, now); !ok {
+	if ok, reason := player.beginSkillUse(definition, target, now, settledResume); !ok {
 		log.Printf("%s: reject skill id=%s: %s", remote, definition.id, reason)
 		return true, nil
 	}
@@ -1164,13 +1340,15 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	if err != nil {
 		return true, fmt.Errorf("encode skill cooldown %s: %w", definition.id, err)
 	}
-	if err := link.WriteFrame(personalCDFrame); err != nil {
-		return true, err
+	if !settledResume {
+		if err := link.WriteFrame(personalCDFrame); err != nil {
+			return true, err
+		}
 	}
 	if err := link.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordActiveSkill, definition.id)); err != nil {
 		return true, fmt.Errorf("write active skill row %s: %w", definition.id, err)
 	}
-	if publicCDFrame != nil {
+	if !settledResume && publicCDFrame != nil {
 		if err := link.WriteFrame(publicCDFrame); err != nil {
 			return true, err
 		}
@@ -1231,20 +1409,18 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	// 出招时刻解析目标快照（多段按此逐段结算，段间不追补新目标）。
 	targets := world.resolveSkillDamageTargets(definition, custom, targetID, targetOwnerID)
 	if len(definition.hitFrameMs) > 0 {
-		// 多段技能：出招掷一次（同值复用各段），按 trigger_effect 帧位
-		// 逐段调度（52795 抓包：每段全套命中帧、死亡目标跳过）。
-		attackMin, attackMax := player.meleeDamageRange()
-		roll := rollSkillDamage(attackMin, attackMax, definition.damageRatio())
-		scheduleSkillMultiHits(link, world, definition, player, targets, roll, remote)
-		log.Printf("%s: scheduled multi-hit skill id=%s ticks=%d targets=%d roll=%d miss=%t",
-			remote, definition.id, len(definition.hitFrameMs), len(targets), roll.damage, roll.damage == 0)
+		// 多段技能：按 trigger_effect 帧位逐段调度（52795 抓包：每段全套
+		// 命中帧、死亡目标跳过）。2026-11-08 数值重写：每击×每目标独立
+		// 掷值结算（此前"出招掷一次、同值复用各段各目标"）。
+		scheduleSkillMultiHits(link, world, definition, player, targets, remote)
+		log.Printf("%s: scheduled multi-hit skill id=%s ticks=%d targets=%d per_hit_roll=true",
+			remote, definition.id, len(definition.hitFrameMs), len(targets))
 	} else if len(targets) > 0 {
 		// 单段技能：逐目标掷值落血（Java settleTargets——每目标独立
 		// 掷骰），未命中（damage=0）整段不发帧。
-		attackMin, attackMax := player.meleeDamageRange()
 		hits := make([]skillSettleHit, 0, len(targets))
 		for _, ref := range targets {
-			roll := rollSkillDamage(attackMin, attackMax, definition.damageRatio())
+			roll := rollSkillHit(player, definition, ref, world, len(targets))
 			if roll.damage <= 0 {
 				continue
 			}

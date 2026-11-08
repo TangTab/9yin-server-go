@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -47,6 +48,14 @@ func newSceneNPCRegistry(tableDir, creatorRoot string) (*sceneNPCRegistry, error
 	tables, err := loadNPCTemplateTables(tableDir)
 	if err != nil {
 		return nil, err
+	}
+	// 实力包表（staticprop.ini）随 NPC 目录一并装载：守方战斗数值推导用
+	//（2026-11-08 NPC 属性块迁移批次）。此前挂在 loadChengduNPCSpawns
+	//（无人调用）里，被链接器死代码消除整链裁掉——装载从未执行，
+	// deriveNPCCombatStats 恒按零值表推导。表缺失不阻断——推导按零值。
+	installedStaticPropTable = loadStaticPropTable()
+	if installedStaticPropTable != nil {
+		log.Printf("NPC 实力包表 ready packages=%d path=%s", len(installedStaticPropTable), staticPropPath())
 	}
 	entries, err := readResourceDirEntries(creatorRoot)
 	if err != nil {

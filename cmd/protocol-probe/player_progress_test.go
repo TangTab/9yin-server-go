@@ -329,8 +329,11 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	}
 	readyView := readyFrames[len(readyFrames)-2]
 	readyState := readyFrames[len(readyFrames)-1]
-	if readyView[0] != 0x18 || binary.LittleEndian.Uint16(readyView[1:]) != viewportNeiGong {
-		t.Fatalf("1006/1 first reply must refresh selected View=43 book: %x", readyView)
+	// 0x10 isView=1 view=43 行级增量帧（裸 0x18 重发不触发客户端
+	// updateitem，武学面板停在旧等级——2026-11-08 50514 抓包实证）。
+	if readyView[0] != 0x10 || readyView[1] != 1 ||
+		binary.LittleEndian.Uint32(readyView[2:]) != uint32(viewportNeiGong) {
+		t.Fatalf("1006/1 first reply must update selected View=43 row: %x", readyView)
 	}
 	if readyState[0] != 0x10 || !bytes.Contains(readyState, []byte("ng_wd_001\x00")) {
 		t.Fatalf("1006/1 second reply must publish FacultyName state: %x", readyState)
@@ -371,7 +374,8 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	frames = conn.Frames()
 	viewUpdated := false
 	for _, frame := range frames {
-		if len(frame) >= 3 && frame[0] == 0x18 && binary.LittleEndian.Uint16(frame[1:]) == viewportNeiGong {
+		if len(frame) >= 12 && frame[0] == 0x10 && frame[1] == 1 &&
+			binary.LittleEndian.Uint32(frame[2:]) == uint32(viewportNeiGong) {
 			viewUpdated = true
 			break
 		}
@@ -554,6 +558,60 @@ func TestActiveFacultyLevelUpNotifiesClientAfterStateAndViewRefresh(t *testing.T
 	}
 	if exitIndex < 0 || levelIndex < 0 || levelIndex >= exitIndex {
 		t.Fatalf("active exit must follow level-up state refresh: exit=%d level=%d frames=%x", exitIndex, levelIndex, frames)
+	}
+	// 升级路径必须先发 View=43 行级增量帧（0x10 isView=1——裸 0x18 重发
+	// 不触发客户端 updateitem，武学面板停在旧等级）和怒气上限专帧，再发
+	// 角色状态与原生升级通知。
+	updateIndex, capIndex := -1, -1
+	for index, frame := range frames {
+		if len(frame) >= 12 && frame[0] == 0x10 && frame[1] == 1 &&
+			binary.LittleEndian.Uint32(frame[2:]) == uint32(viewportNeiGong) {
+			updateIndex = index
+		}
+		if len(frame) >= 12 && frame[0] == 0x10 && frame[1] == 0 &&
+			bytes.Contains(frame, []byte{byte(propMaxSPAdd & 0xff), byte(propMaxSPAdd >> 8)}) {
+			capIndex = index
+		}
+	}
+	if updateIndex < 0 {
+		t.Fatalf("level-up must refresh the View=43 row via 0x10 isView=1: %x", frames)
+	}
+	if capIndex < 0 || capIndex > levelIndex {
+		t.Fatalf("rage cap frame must precede the level-up notice: cap=%d level=%d", capIndex, levelIndex)
+	}
+	if updateIndex > capIndex || capIndex > levelIndex {
+		t.Fatalf("refresh order update=%d cap=%d level=%d", updateIndex, capIndex, levelIndex)
+	}
+}
+
+// bookUpdateFrame 的方言钉死：0x10 isView=1 view=43 owner=行号，六属性
+// 集 Level(byte)/MaxLevel/CurFill/TotalFill/Power/MaxPower——与官服
+// e.pcapng 既有视图行更新帧（0x10 isView=1 view=40 行）同构。
+func TestNeiGongBookUpdateFrameIsViewRowPropertyUpdate(t *testing.T) {
+	progress := newPlayerProgress()
+	progress.books[0].level = 31
+	progress.books[0].fill = 4321
+	frame, err := progress.bookUpdateFrame(1)
+	if err != nil {
+		t.Fatalf("bookUpdateFrame: %v", err)
+	}
+	if frame[0] != 0x10 || frame[1] != 1 {
+		t.Fatalf("header=%x want 0x10 isView=1", frame[:2])
+	}
+	if got := binary.LittleEndian.Uint32(frame[2:]); got != uint32(viewportNeiGong) {
+		t.Fatalf("view=%d want %d", got, viewportNeiGong)
+	}
+	if got := binary.LittleEndian.Uint32(frame[6:]); got != 1 {
+		t.Fatalf("row=%d want 1", got)
+	}
+	if count := binary.LittleEndian.Uint16(frame[10:]); count != 6 {
+		t.Fatalf("property count=%d want 6", count)
+	}
+	if !bytes.Contains(frame, []byte{byte(propJMLevel & 0xff), byte(propJMLevel >> 8), 31}) {
+		t.Fatalf("frame missing Level=31 byte: %x", frame)
+	}
+	if !bytes.Contains(frame, []byte{byte(propCurFillValue & 0xff), byte(propCurFillValue >> 8), 0xe1, 0x10, 0, 0}) {
+		t.Fatalf("frame missing CurFillValue=4321: %x", frame)
 	}
 }
 

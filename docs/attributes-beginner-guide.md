@@ -608,7 +608,7 @@
 **结算次序**（参考服 `calc` 掷骰序，与攻略、客户端口径一致）：`未命中 → 暴击 → 防御减免 → 增伤乘区 → 格挡 → 平坦抵消 → 保底 1`。
 
 1. **命中/闪避**：未命中率＝10%＋15%×(闪避−命中)/(闪避+1)＋闪避加成%−命中加成%，合计上限 24%、整体夹 [0,1]〔定论，§十四七点整表〕。**闪避深谷**＝基础式为负时外部加成先填坑（vs 1000 命中、600 闪避即谷底）。**移动闪避**〔补稿〕＝移速＞4.0 才生效、＋移速×(10/3)%（鞋＋0.35~0.6；雁行 28→93.3% 可规避 BOSS 技）。
-2. **暴击判定**：基础暴率＝5%＋10%×(暴击值−封劲)/(暴击值+1)，内层夹 [0,15%]〔定论，双套整表；VaDefAdd＝封劲〕；暴击无深谷（截 0 后外力直叠）；**怒气暴击**〔客户端 formula.ini[532]，攻略未载〕＝＋SP/(MaxSP+MaxSPAdd)×35%，上限＋35%。
+2. **暴击判定**：基础暴率＝5%＋10%×(暴击值−封劲)/(暴击值+1)，内层夹 [0,15%]〔定论，双套整表；VaDefAdd＝封劲〕；暴击无深谷（截 0 后外力直叠）；"群妖乱舞"套路 buff 专属：＋SP/(MaxSP+MaxSPAdd)×35% 上限＋35%〔客户端 formula.ini[532]，非通用机制，用户 2026-11-08 澄清〕。
 3. **暴击伤害**：倍率＝2.0＋Σ爆伤%−Σ暴伤减免%〔定论，三证；`critMultiplier`〕；乘数为当前普通伤害；兵录/娃娃在倍率外。
 4. **防御减免**：减免%＝20·ln(防御/100)−44，夹 [0,75%]〔定论：社区拟合与参考服常数逐位一致；双曲线为中段近似；1 万→48%、≈3.84 万封顶〕；外防/阴/柔/阳/刚分系独立；防御值先扣忽视再入曲线。
 5. **破防/忽视**：1 破防＝10 外防忽视〔三源定论〕；破防挂角色（徒手生效、内功徒手除外）、每 4 破防＝＋1 武器伤害（仅武器）；经脉只有内防忽视（1:1 不分系），外功忽视来自武器/宝物，娃娃有分系忽视；% 减免忽视在防御减免后加算（每 1%＝＋1% 伤害）。
@@ -618,7 +618,7 @@
 9. **增伤乘区**：批注/护腕类＝加算乘区 (1＋Σ)；内功属性匹配（+20%/+16%）与内功特效＝独立乘区连乘；五系 FinalDamageAdd；多段整体÷段数、平坦项每击恒定。
 10. **保底与上限**：命中伤害保底 1 点、完全招架为 0（不吃保底）；全战斗属性上限 80000（`fight_prop_max_value.ini`）。
 
-**服务端落地状态**：已实现＝骰子骨架/结算次序、暴击倍率 2.0、CD、怒气档位；缺口＝守方侧全 0（第 4–7 条全链未接线）、外部加成四字段（crit/critDamage 的 Bonus/Reduction）、怒气暴击、移动闪避、平坦通道（第 8 条）、骰子输入仍为"面板×倍率"两参数近似（未接 damage_calculate.ini 四参数）。
+**服务端落地状态**（2026-11-08 数值重写批次后）：已实现＝骰子骨架/结算次序、**每击公式路径（damage_calculate r 行 × formula.ini 公式经 internal/combatcalc 注入 Lua，多段每击×每目标独立掷）**、**攻方暴击值/命中值按伤害系接入真实公式（16 暴击值→14.4% 暴击率）**、暴击倍率 2.0、CD、怒气档位；守方三字段（defense/evasion/resilience）管线已铺至引擎、数据源待 NPC 属性块（官方 base block）迁移；缺口＝外部加成四字段（crit/critDamage 的 Bonus/Reduction）、怒气暴击（群妖乱舞套路 buff）、移动闪避、平坦通道（第 8 条）、legacy 面板×倍率路径保留为脚本层缺失时的回退。
 
 ## 十七、六大属性增益效果总表（2026-11-08 综合整理）
 
@@ -651,7 +651,7 @@
 | 移动闪避 | ＋移速×(10/3)%，门槛＞4.0；基础移速 3.9；鞋＋0.35/0.4/0.6 | 〔定论〕Tip 补稿＋三档拟合 |
 | 基础暴击率 | 5%＋10%×(暴击值−封劲)/(暴击值+1)，内层夹 [0,15%] | 〔定论〕代码＋§七实测＋§十四五整表 |
 | 暴击阈值 | ＜0.67×封劲趋 0；2×封劲＝10% 性价比顶点 | §十四 |
-| 怒气暴击 | ＋SP/(MaxSP+MaxSPAdd)×35%（上限＋35%） | 〔单证〕客户端 formula[532] |
+| 怒气暴击 | ＋SP/(MaxSP+MaxSPAdd)×35%（上限＋35%）——**"群妖乱舞"套路专属 buff，非通用机制**（用户 2026-11-08 澄清） | 〔单证〕客户端 formula[532] |
 | 暴击倍率 | 2.0＋Σ爆伤%−Σ暴免%（加法） | 〔定论〕代码＋§6.3＋§十 |
 | 防御减免 | 20·ln(防御/100)−44，夹 [0,75%]；50%≈1.1 万、75%≈3.84 万；内防量级≈1/10 | 〔定论〕参考服＋社区拟合常数一致 |
 | 破防 | 1 破防＝10 外防忽视；4 破防＝1 武器伤害（仅武器） | 〔定论〕三源 |
@@ -683,7 +683,7 @@
 
 **C. 客户端字段对照**（伤害相关 PropName 子集）：威力 MeleePowerAdd/ShotPowerAdd/MagicPowerAdd；伤害系 Phy/Neg/Mas/Sti/Juj DamageAdd＋五系 FinalDamageAdd/Reduce；暴击族 Phy/MagicVaAdd（值）、Phy/MagicVaProbAdd（率）、Phy/MagicVaDamageAdd（爆伤）、VaDefAdd（封劲）、VaDefProbAdd、VaDamageDefAdd（暴免）；命中/闪避 Phy/MagicHitAdd、Phy/MagicHitProbAdd、DodgeAdd、DodgeProbAdd；防御族 PhyDefAdd＋四系 DefAdd＋ProbAdd 族＋MinMagicDefAdd；忽视族 AIPhyDefAdd＋AI 四系＋AIPhy/AIMagicParryAdd；招架族 MaxParryAdd、ParryUpSpeedAdd、Phy/MagicParryDamResAdd；武器 Min/MaxMeleeDamage；其他 DamageReduce/Add、IgnoreSheild1~12、MaxQingGongPointAdd、SP/MaxSP/MaxSPAdd。
 
-**D. 服务端落地点**：Java `CombatFormulas.Input` 20 字段中，Go 现仅喂 attack（面板攻击近似，待换 damage_calculate 四参数）、ratio、missRoll、critRoll 四项；其余 16 项零值缺省——defense、pierce、internalConversion、accuracy、evasion、hitRateBonus、dodgeRateBonus、critValue、resilience、critRateBonus/Reduction、critDamageBonus/Reduction、damageReduction、blockRating、parrying。
+**D. 服务端落地点**（2026-11-08 数值重写＋NPC 属性块迁移批次后）：每击公式路径已落地——`internal/combatcalc` 引擎（damage_calculate r 行 × formula.ini 公式）喂 attack 侧全参数（P1..Pn/威力/武器区间/HurtCount/CurTargetCount）＋critValue、accuracy（按伤害系取 PhyVa/MagicVa、PhyHit/MagicHit）；**守方 Defense/Evasion 已接真实数据**（staticprop.ini 实力包 745 节 × Base×Level 推断规则，按伤害系选防，NPC 模板 PowerNo/Level 驱动）；Resilience 暂 0（玩家暴击值未成长，接入会清零暴击率，待装备/宝物批）。仍缺：pierce、internalConversion、hitRateBonus、dodgeRateBonus、critRateBonus/Reduction、critDamageBonus/Reduction、damageReduction、blockRating、parrying（外部加成与格挡通道）。legacy 面板×倍率路径（rollSkillDamage）保留为脚本层缺失回退。
 
 ## 十九、缺口与待核清单
 

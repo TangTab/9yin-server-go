@@ -11,9 +11,15 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-// 掉落宝箱（官方掉落箱窗口方言，协议考据自客户端 lua，无需发明）：
-//   - 宝箱本体 = CommonNpc 模板 stormbox_10（特殊财宝箱，Java GM 宝箱
-//     LoginFlow.CHEST_TEMPLATE 同款，真实客户端已验证可渲染可点击）；
+// 杀怪掉落双形态（官服方言，e.pcapng 实证 + 客户端 lua 考据 2026-11-08）：
+//   - 普通怪 = 掉落挂尸体（attachLootToCorpseLocked）：不生成新实体，
+//     掉落运行时挂在尸体本身；客户端冒光/拾取光标由 0x10 属性
+//     CanPick@76=1 + PickMember@1592=击杀者名 驱动（scene_obj_prop.lua
+//     on_change_pick_state → DeadPickup 特效），点击尸体开掉落窗，
+//     内容懒加载——死亡时零掉落下发；
+//   - 宝箱怪（AIEditorPackID 死亡生箱事件）与 GM 世界宝箱 = 独立实体
+//     （spawnChestEntityAtLocked，BoxNpc/BossBox 模板，0x0D 物化）。
+// 掉落窗协议两形态共用（View 80 方言，考据自客户端 lua）：
 //   - 点击（0x07 FuncID=0）→ 服务端建 View 80（VIEWPORT_DROP_BOX，
 //     capacity 16，视图属性 DropType=0），行属性 ConfigID/Amount/
 //     ColorLevel（官方索引 1440/1894/1892），随后名字寻址 custom
@@ -24,19 +30,27 @@ const (
 	viewportDropBox              uint16 = 80   // share/view_define.lua VIEWPORT_DROP_BOX
 	dropBoxCapacity              uint16 = 16   // form_droppick.lua MAX_DROP_BOX_CAPACITY
 	propDropType                 uint16 = 2224 // DropType Int32（视图域）
+	propCanPick                  uint16 = 76   // CanPick Byte（场景对象域，尸体冒光开关）
+	propPickMember               uint16 = 1592 // PickMember WideString（拾取归属名单，逗号分隔玩家名）
 	clientCustomPickupDropItem   int32  = 380  // CLIENT_CUSTOMMSG_PICKUP_DROPITEM
 	clientCustomCloseDropBox     int32  = 382  // CLIENT_CUSTOMMSG_CLOSE_DROPBOX
 	lootBoxTemplateConfigID             = "stormbox_10"
 )
 
-// lootBoxRuntime 是一只在场宝箱的共享状态（挂 sceneRun，多连接共见；
-// 拾取互斥经 run.mu 下的 taken 标记结算）。
+// lootBoxRuntime 是一份在场掉落的共享状态（挂 sceneRun，多连接共见；
+// 拾取互斥经 run.mu 下的 taken 标记结算）。官服双形态：
+//   - standalone=false：普通怪掉落挂尸体（键=尸体 id，点击尸体开窗，
+//     CanPick/PickMember 属性驱动客户端冒光+拾取光标，懒加载方言）；
+//   - standalone=true：宝箱怪（AIEditorPackID 生箱事件）或 GM 世界宝箱
+//     的独立实体（stormbox_10/BoxNpc 模板，0x0D 物化，拾空/超时 0x0E）。
 type lootBoxRuntime struct {
-	id        uint32
-	ownerID   uint32
-	contents  []grantItem
-	taken     []bool
-	expiresAt time.Time
+	id         uint32
+	ownerID    uint32
+	contents   []grantItem
+	taken      []bool
+	spawnedAt  time.Time // 过期按生成时刻+当前 lootBoxTTL() 推算（改值即刻生效）
+	standalone bool      // true=独立宝箱实体；false=掉落挂尸体本体
+	picker     string    // 挂尸形态的拾取归属（击杀者名，死亡中继时补写）
 }
 
 func (b *lootBoxRuntime) remainingLocked() int {
@@ -130,13 +144,45 @@ func rollLootForNPC(npc npcSpawn) []grantItem {
 	return currentDropPacks().roll(dropID, 1, itemUseRandom())
 }
 
-// spawnLootBoxLocked 在击杀点尸体位置生成一只宝箱（id 取 nextWireID
-// 段，永不复用）。调用方必须已持有 r.mu；物化帧排队
-// pendingObjectFrames，由击杀中继后的 flushPendingObjectFrames 锁外扇出。
-func (r *sceneRun) spawnLootBoxLocked(deadID, ownerID uint32, now time.Time) {
+// attachLootToCorpseLocked 普通怪掉落挂尸体（官服懒加载方言）：掉落
+// 运行时挂在尸体实体本身（键=尸体 id，不生成新实体），玩家点击尸体
+// 开 View 80，客户端冒光/拾取光标由 CanPick/PickMember 属性驱动（死亡
+// 中继时补发）。roll 为空=无掉落，尸体走普通 corpse TTL。调用方必须
+// 已持有 r.mu。
+func (r *sceneRun) attachLootToCorpseLocked(deadID, ownerID uint32, now time.Time) {
 	index := int(deadID) - 2
 	if index < 0 || index >= len(r.catalog) {
-		return // 目录外实体（测试摆放）不掉宝箱
+		return // 目录外实体（测试摆放）不掉落
+	}
+	contents := rollLootForNPC(r.catalog[index])
+	if len(contents) == 0 {
+		return
+	}
+	meta, ok := r.npcMeta(worldcore.EntityID(deadID))
+	if !ok {
+		return
+	}
+	box := &lootBoxRuntime{
+		id: deadID, ownerID: ownerID,
+		contents:   contents,
+		taken:      make([]bool, len(contents)),
+		spawnedAt:  now,
+		standalone: false,
+	}
+	meta.lootBox = box
+	r.writeNpcMeta(worldcore.EntityID(deadID), meta)
+	r.lootBoxes[deadID] = box
+	log.Printf("scene %s/%s: loot attached to corpse %d items=%d ttl=%s",
+		r.key.config, r.key.resource, deadID, len(contents), lootBoxTTL())
+}
+
+// spawnBoxNPCEntityLocked 宝箱怪路径：击杀点尸体位置生成独立宝箱实体
+//（AIEditorPackID 死亡生箱事件指定的 BoxNpc/BossBox 模板），掉落内容
+// 仍按怪自己的 DropID roll。调用方必须已持有 r.mu。
+func (r *sceneRun) spawnBoxNPCEntityLocked(deadID uint32, boxConfigID string, now time.Time) {
+	index := int(deadID) - 2
+	if index < 0 || index >= len(r.catalog) {
+		return
 	}
 	contents := rollLootForNPC(r.catalog[index])
 	if len(contents) == 0 {
@@ -146,7 +192,16 @@ func (r *sceneRun) spawnLootBoxLocked(deadID, ownerID uint32, now time.Time) {
 	if !ok {
 		return
 	}
-	spawn := lootBoxTemplate()
+	r.spawnChestEntityAtLocked(transform, contents, boxConfigID, deadID, now)
+}
+
+// spawnChestEntityAtLocked 生成一只独立宝箱实体（宝箱怪/GM 世界宝箱，
+// id 取 nextWireID 段永不复用），返回实体 id（0=失败）。visibleWith 是
+// 物化帧的可见性锚对象（宝箱怪=尸体 id；0=对全部在场成员直发）。
+// 调用方必须已持有 r.mu；物化帧排队 pendingObjectFrames，由
+// flushPendingObjectFrames 锁外扇出。
+func (r *sceneRun) spawnChestEntityAtLocked(transform worldcore.Transform, contents []grantItem, boxConfigID string, visibleWith uint32, now time.Time) uint32 {
+	spawn, _ := chestEntityTemplate(boxConfigID)
 	spawn.x, spawn.y, spawn.z, spawn.orient = transform.X, transform.Y, transform.Z, transform.Orient
 	spawn.route, spawn.schedule = nil, nil // 宝箱不巡逻
 	id := r.nextWireID
@@ -155,45 +210,135 @@ func (r *sceneRun) spawnLootBoxLocked(deadID, ownerID uint32, now time.Time) {
 	}
 	r.nextWireID = id + 1
 	if err := r.registerNPCLocked(id, spawn); err != nil {
-		log.Printf("scene %s/%s: register loot box at dead %d: %v", r.key.config, r.key.resource, deadID, err)
-		return
+		log.Printf("scene %s/%s: register chest entity %s: %v", r.key.config, r.key.resource, boxConfigID, err)
+		return 0
 	}
 	meta, ok := r.npcMeta(worldcore.EntityID(id))
 	if !ok {
-		return
+		return 0
 	}
 	box := &lootBoxRuntime{
 		id: id, ownerID: meta.ownerID,
-		contents:  contents,
-		taken:     make([]bool, len(contents)),
-		expiresAt: now.Add(lootBoxTTL),
+		contents:   contents,
+		taken:      make([]bool, len(contents)),
+		spawnedAt:  now,
+		standalone: true,
 	}
 	meta.lootBox = box
 	r.writeNpcMeta(worldcore.EntityID(id), meta)
 	r.lootBoxes[id] = box
 	r.pendingObjectFrames = append(r.pendingObjectFrames, pendingObjectFrame{
-		id: id, ownerID: meta.ownerID, visibleWith: deadID,
+		id: id, ownerID: meta.ownerID, visibleWith: visibleWith,
 		payload: append([]byte(nil), meta.payload...), transform: transform,
 	})
-	log.Printf("scene %s/%s: loot box %d spawned at dead %d items=%d ttl=%s",
-		r.key.config, r.key.resource, id, deadID, len(contents), lootBoxTTL)
+	log.Printf("scene %s/%s: chest entity %d (%s) spawned items=%d ttl=%s",
+		r.key.config, r.key.resource, id, boxConfigID, len(contents), lootBoxTTL())
+	return id
 }
 
-// removeLootBoxLocked 注销一只宝箱并登记 0x0E（out 为 nil 时不登记，
-// 由 despawnLootBox 直发路径自行扇出）。调用方必须已持有 r.mu。
+// chestEntityTables 是 BoxNpc/BossBox 模板的两张权威表
+//（clonenpc/funnpc/boxnpc.txt 的 BossBox* 与 worldnpc/funnpc/boxnpc.txt
+// 的野外 BoxNpc*），Once 装载缓存。
+var (
+	chestEntityTablesOnce sync.Once
+	chestEntityTables     []*clientdata.NPCTemplateTable
+)
+
+// chestEntityTemplate 按ConfigID 解析宝箱实体模板（BoxNpc/BossBox）；
+// 缺模板回落 stormbox_10（含手工 fallback 模板，测试环境无 npcconfig
+// 也能生成）。
+func chestEntityTemplate(boxConfigID string) (npcSpawn, bool) {
+	if boxConfigID != "" && boxConfigID != lootBoxTemplateConfigID {
+		chestEntityTablesOnce.Do(func() {
+			for _, rel := range []string{
+				filepath.Join("npc", "npcconfig", "clonenpc", "funnpc", "boxnpc.txt"),
+				filepath.Join("npc", "npcconfig", "worldnpc", "funnpc", "boxnpc.txt"),
+			} {
+				path := filepath.Join(defaultModernShareRoot, rel)
+				file, err := openResourceReader(path)
+				if err != nil {
+					log.Printf("chest entity table %s unavailable (%v)", path, err)
+					continue
+				}
+				table, loadErr := clientdata.LoadNPCTemplateTable(file, path)
+				_ = file.Close()
+				if loadErr != nil {
+					log.Printf("chest entity table %s: %v", path, loadErr)
+					continue
+				}
+				chestEntityTables = append(chestEntityTables, table)
+			}
+		})
+		for _, table := range chestEntityTables {
+			if len(table.LookupAll(boxConfigID)) == 0 {
+				continue
+			}
+			resolved, err := clientdata.ResolveNPC(table, clientdata.NPCCreatorInstance{TemplateID: boxConfigID}, clientdata.ResolveOptions{
+				Defaults: clientdata.VisibleNPCSpawnDefaultsCompatV1(),
+			})
+			if err == nil {
+				return npcSpawn{resolved: resolved}, true
+			}
+			log.Printf("chest entity template %s resolve: %v", boxConfigID, err)
+		}
+		log.Printf("chest entity template %s unresolved; falling back to %s", boxConfigID, lootBoxTemplateConfigID)
+	}
+	return lootBoxTemplate(), false
+}
+
+// removeLootBoxLocked 注销一份掉落并登记 0x0E（out 为 nil 时不登记，
+// 由 despawnLootBox 直发路径自行扇出）。挂尸形态注销的就是尸体本体：
+// 必须同步 deadNPCs[id].removed=true，否则批量扫描会对已注销实体走
+// reviveNPCLocked 缺 Vitals 兜底 delete(deadNPCs)，把重生吞掉。调用方
+// 必须已持有 r.mu。
 func (r *sceneRun) removeLootBoxLocked(out *refreshTickOutcome, id, ownerID uint32) {
 	if err := r.unregisterNPC(worldcore.EntityID(id)); err != nil {
 		log.Printf("scene %s/%s: remove loot box %d: %v", r.key.config, r.key.resource, id, err)
 		return
 	}
 	delete(r.lootBoxes, id)
+	if rec, ok := r.deadNPCs[id]; ok && !rec.removed {
+		rec.removed = true
+		r.deadNPCs[id] = rec
+	}
 	if out != nil {
 		out.despawns = append(out.despawns, npcDespawnUpdate{id: id, ownerID: ownerID})
 	}
 }
 
-// despawnLootBox 拾空/关闭宝箱后的直发移除：锁内注销、锁外把 0x0E
-// 扇出给可见该宝箱的成员。
+// relayCorpsePickFrames 挂尸掉落的冒光属性下发（官服方言）：死亡时
+// 补发尸体 CanPick@76=1 + PickMember@1592=击杀者名（宽串）。客户端
+// scene_obj_prop.lua on_change_pick_state 据此挂 DeadPickup 特效并
+// 切拾取光标。击杀者首发（致死 0x10 的 link.WriteFrame 不含这两帧）、
+// 视口内其他成员走中继。实体宝箱（standalone）不发。
+func (s *sceneLifecycle) relayCorpsePickFrames(id uint32, killerName string) {
+	s.run.mu.Lock()
+	if s.run.closed {
+		s.run.mu.Unlock()
+		return
+	}
+	box, has := s.run.lootBoxes[id]
+	if !has || box.standalone {
+		s.run.mu.Unlock()
+		return
+	}
+	if killerName != "" {
+		box.picker = killerName // 迟到者补帧时读回
+	}
+	s.run.mu.Unlock()
+	canPick := sceneObjectByteProperty(id, box.ownerID, propCanPick, 1)
+	pickMember := sceneObjectWideStringProperty(id, box.ownerID, propPickMember, box.picker)
+	for _, frame := range [][]byte{canPick, pickMember} {
+		if err := s.conn.WriteFrame(frame); err != nil {
+			log.Printf("%s: send corpse pick property %d: %v", s.remote, id, err)
+		}
+		s.run.relayNPCPropertyFrame(id, frame, s)
+	}
+}
+
+// despawnLootBox 拾空后的直发移除：锁内注销（挂尸形态=清尸体本体，
+// removeLootBoxLocked 内部同步 deadNPCs removed 放行重生）、锁外把
+// 0x0E 扇出给可见该对象的成员。
 func (r *sceneRun) despawnLootBox(id, ownerID uint32) {
 	r.mu.Lock()
 	if r.closed {
@@ -219,9 +364,10 @@ func (r *sceneRun) despawnLootBox(id, ownerID uint32) {
 }
 
 // flushPendingObjectFrames 把 apply* 锁内排队的宝箱物化帧（0x0D+0x1F）
-// 在锁外扇出给看得见尸体的成员，并把宝箱号注入其可见集（站着不动
-// 的成员也能收到后续的过期/拾空 0x0E）。击杀中继后必调；refreshTick
-// 兜底再排空。
+// 在锁外扇出给看得见锚对象的成员，并把宝箱号注入其可见集（站着不动
+// 的成员也能收到后续的过期/拾空 0x0E）。锚=尸体（宝箱怪路径）；
+// visibleWith==0（GM 世界宝箱）对全部在场成员直发。击杀中继后必调；
+// refreshTick 兜底再排空。
 func (r *sceneRun) flushPendingObjectFrames() {
 	r.mu.Lock()
 	if r.closed || len(r.pendingObjectFrames) == 0 {
@@ -235,7 +381,10 @@ func (r *sceneRun) flushPendingObjectFrames() {
 	for _, object := range pending {
 		location := serverLocation(object.id, object.ownerID, object.transform)
 		for _, member := range members {
-			if member.view == nil || !member.view.npcVisible(object.visibleWith) {
+			if member.view == nil {
+				continue
+			}
+			if object.visibleWith != 0 && !member.view.npcVisible(object.visibleWith) {
 				continue
 			}
 			if err := member.view.conn.WriteFrame(object.payload); err != nil {

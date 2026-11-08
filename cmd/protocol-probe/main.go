@@ -26,6 +26,7 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/gmapi"
 	"github.com/local/9yin-go-server/internal/luascript"
+	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/neigong"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/qinggong"
@@ -52,12 +53,14 @@ func main() {
 	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts", "host"), "server-side event Lua scripts directory (game.on contract; empty disables)")
 	captureDir := flag.String("capture-dir", runtimeProjectPath("captures", "local"), "dump raw wire bytes of every session to <dir>/<ip-pid>_c2s.bin and _s2c.bin (empty disables)")
 	neigongScriptsPath := flag.String("neigong-scripts", runtimeProjectPath("scripts", "module", "neigong"), "neigong effect module scripts directory (buf_ng_*.lua; empty disables)")
+	combatScriptsPath := flag.String("combat-scripts", runtimeProjectPath("scripts", "module", "combat"), "combat per-hit formula engine scripts directory (formula.lua; empty disables, damage falls back to legacy dice)")
 	switchScene := flag.String("switch-scene", "", "test-only live destination: config,resource,x,y,z,orient (empty disables it)")
 	npcAuditAll := flag.Bool("npc-audit-all", false, "inventory every modern NPC creator scene and exit")
 	npcServiceAuditScene := flag.String("npc-service-audit-scene", "", "write effective NPC service audit for config,resource,x,y,z,orient and exit")
 	qingGongDefinePath := flag.String("qinggong-define", filepath.Join(defaultModernShareRoot, "skill", "qinggong", "qgdefine.ini"), "current-client QGDefine.ini used to validate and charge 216")
 	respawnInterval := flag.Int("respawn-interval", 30, "batch monster respawn interval in seconds: every interval all DEAD combat NPCs revive at their spawn points, alive ones untouched (0 disables batching and falls back to per-NPC RefreshTime)")
 	corpseTTL := flag.Int("corpse-ttl", 10, "corpse removal delay in seconds: dead monster corpses are removed (0x0E) after this long and rematerialize on respawn (0 keeps corpses until revive)")
+	lootBoxTTLFlag := flag.Int("lootbox-ttl", 300, "drop loot box lifetime in seconds: unclaimed loot boxes disappear (0x0E) after this long, changes apply to live boxes on the next tick (0 keeps boxes until fully looted; official attacknpc DestroyTime2=60)")
 	autosaveSecs := flag.Int("autosave-interval", 300, "periodic online snapshot flush in seconds: every interval each online player's faculty/jingmai snapshots are upserted to MySQL (guards against hard kills; 0 disables)")
 	livepointVIPFlag := flag.Bool("livepoint-vip", false, "livepoint conversion tier: true = everyone converts losslessly (VIP), false = normal 70% to faculty + 30% to hold-faculty (Java -Dnineyin.livepoint.vip)")
 	livepointPriceFlag := flag.Int("livepoint-price", 500, "hold-faculty redemption price: N gold converts N*price potential faculty (Java -Dnineyin.livepoint.price)")
@@ -68,6 +71,7 @@ func main() {
 	facultySeed = int32(*facultySeedFlag)
 	setNpcRespawnBatchInterval(time.Duration(*respawnInterval) * time.Second)
 	setNpcCorpseTTL(time.Duration(*corpseTTL) * time.Second)
+	setLootBoxTTL(time.Duration(*lootBoxTTLFlag) * time.Second)
 	if *logFile != "" {
 		if err := os.MkdirAll(filepath.Dir(*logFile), 0755); err != nil {
 			log.Fatalf("create log directory: %v", err)
@@ -133,6 +137,30 @@ func main() {
 			log.Printf("内功特效脚本 partially loaded count=%d path=%s: %v", loaded, *neigongScriptsPath, neigongErr)
 		} else {
 			log.Printf("内功特效脚本 ready count=%d path=%s", loaded, *neigongScriptsPath)
+		}
+	}
+	// 每击公式引擎（scripts/module/combat/formula.lua + formula.ini 注入；
+	// 2026-11-08 数值重写）：装载失败/禁用只影响新数值路径，rollSkillHit
+	// 自动回退 legacy 面板×倍率掷骰，战斗链不受阻。
+	if *combatScriptsPath != "" {
+		specs, specErr := loadCombatFormulaSpecs()
+		if specErr != nil {
+			log.Printf("formula.ini 不可用（每击公式路径禁用）：%v", specErr)
+		} else {
+			combatFormulaSpecs = specs
+			combatEngine := combatcalc.New(*combatScriptsPath, log.Printf)
+			installed, engineErr := combatEngine.Load(specs)
+			if engineErr != nil {
+				log.Printf("公式引擎不可用（伤害走 legacy 掷骰）：%v", engineErr)
+			} else {
+				installedCombatCalc = combatEngine
+				_, skipped := combatEngine.Loaded()
+				note := combatEngine.SkipSummary()
+				if len(note) > 160 {
+					note = note[:160] + "…"
+				}
+				log.Printf("公式引擎 ready formulas=%d skipped=%d path=%s skip=%s", installed, skipped, *combatScriptsPath, note)
+			}
 		}
 	}
 	if *npcAuditAll {
@@ -236,6 +264,32 @@ func main() {
 		defer cancel()
 		return inventoryStore.itemNames(ctx, configIDs)
 	}
+	// 经脉目录（面板「经脉周天设置」下拉）：共享库 game_meridians 直查
+	//（Java GmCatalogDb.meridians 同款 SQL）；缺表/缺库回落包级目录。
+	gm.meridianRows = func() []gmMeridianRow {
+		if store.db == nil {
+			return nil
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		rows, err := store.db.QueryContext(ctx,
+			`SELECT meridian_id, name, max_level FROM game_meridians ORDER BY meridian_id`)
+		if err != nil {
+			log.Printf("meridian catalog lookup: %v", err)
+			return nil
+		}
+		defer rows.Close()
+		catalog := make([]gmMeridianRow, 0, 35)
+		for rows.Next() {
+			var row gmMeridianRow
+			if err := rows.Scan(&row.ID, &row.Name, &row.DefaultMax); err != nil {
+				log.Printf("meridian catalog scan: %v", err)
+				return nil
+			}
+			catalog = append(catalog, row)
+		}
+		return catalog
+	}
 	if *gmListen != "" {
 		// internal API 未开（无 token）时传空串：登记册没有“本面板所连”
 		// 卡片，但探活其它已登记服务器仍然可用。
@@ -261,6 +315,14 @@ func main() {
 	ln, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatal(err)
+	}
+	// 镇派兵器/宝物/娃娃生成目录预热（equipment/proppack/varprop/
+	// randomequiprule 全表一次性装载；失败只降级对应功能并记日志，
+	// 首次登录不再付装载延迟）。
+	if catalog := randomEquipCatalogOf(); catalog.err != nil {
+		log.Printf("random equip catalog degraded: %v", catalog.err)
+	} else {
+		log.Printf("random equip catalog ready items=%d packs=%d", len(catalog.itemFields), len(catalog.packRows))
 	}
 	// 自动存盘周期装进共享原子值：GM 面板 set_autosave_interval 运行中
 	// 可改，重启回落本 flag 缺省。
@@ -442,6 +504,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	// P2 域 store（msg70/71 货币、msg295 称号、msg150/161 经脉）：缺表/
 	// 缺库一律降级会话态（建表权威在 migrations/，运行时不做 DDL）。
 	currencyStore := newCurrencyDBStore(store.db)
+	randomPropsStore := newRandomPropsDBStore(store.db)
 	titleStore := newTitleDBStore(store.db)
 	jingMaiStore := newJingMaiDBStore(store.db)
 	jingMaiCatalog, jingMaiCatalogErr := loadJingMaiCatalog(defaultJingMaiINIPath, defaultJingMaiStaticINIPath)
@@ -507,6 +570,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	customizingSess := customizingSession{}
 	customizingPushed := false
 	keybindPushed := false
+	// 九阴志（419 步骤 + data_record 59 事件行）连接级只发一次：章节
+	// 门槛的功能开放数据源（native-menu main.go:626/629 同位）。
+	jyzPushed := false
+	// jyzGameStepSent 414 'gamestep' 收尾帧连接级一次（native #1744）。
+	jyzGameStepSent := false
 	// SwitchManager 批量开关（0x1E 414 "sync"）连接级只发一次：引擎开关
 	// 树不随场景代际清空，0x0C 重入不重放（Java switchSyncPushed 同口径）。
 	switchSyncPushed := false
@@ -520,8 +588,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	newItemSession := func() *itemSession {
 		return &itemSession{
 			link: link, player: player, store: inventory, skins: appearanceCfg.skins,
-			currency: currencyStore,
-			ctx:      ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
+			currency: currencyStore, randomProps: randomPropsStore,
+			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
 			now: time.Now,
 		}
 	}
@@ -707,6 +775,39 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("尸体清除已关闭：尸体保留到重生")
 			}
 			log.Printf("%s: GM set corpse ttl=%ds", conn.RemoteAddr(), seconds)
+		case "set_lootbox_ttl":
+			seconds := int32(command.Value)
+			setLootBoxTTL(time.Duration(seconds) * time.Second)
+			if seconds > 0 {
+				gmSession.setAction(fmt.Sprintf("宝箱存留时间设为 %d 秒（未拾超时消失，对在场宝箱即刻生效）", seconds))
+			} else {
+				gmSession.setAction("宝箱存留已关闭：宝箱保留到被拾空")
+			}
+			log.Printf("%s: GM set lootbox ttl=%ds", conn.RemoteAddr(), seconds)
+		case "spawn_chest":
+			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
+				gmSession.setAction("世界宝箱生成失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			position := runtime.activeRole.Location.Position
+			transform := worldcore.Transform{X: position.X, Y: position.Y, Z: position.Z, Orient: position.Orient}
+			contents := currentDropPacks().roll("", 1, itemUseRandom())
+			chestRun := runtime.world.run
+			chestRun.mu.Lock()
+			if chestRun.closed {
+				chestRun.mu.Unlock()
+				gmSession.setAction("世界宝箱生成失败：场景已关闭")
+				return fmt.Errorf("scene run closed")
+			}
+			chestID := chestRun.spawnChestEntityAtLocked(transform, contents, "", 0, time.Now())
+			chestRun.mu.Unlock()
+			chestRun.flushPendingObjectFrames()
+			if chestID == 0 {
+				gmSession.setAction("世界宝箱生成失败：实体注册未成")
+				return fmt.Errorf("chest entity register failed")
+			}
+			gmSession.setAction(fmt.Sprintf("已在当前位置生成世界宝箱（实体 %d，内含 %d 件，未拾超时消失）", chestID, len(contents)))
+			log.Printf("%s: GM spawned world chest entity=%d items=%d", conn.RemoteAddr(), chestID, len(contents))
 		case "set_autosave_interval":
 			seconds := int32(command.Value)
 			setAutosaveInterval(time.Duration(seconds) * time.Second)
@@ -950,6 +1051,60 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("历练转化加成设为 %d%%", int32(command.Value)))
 			log.Printf("%s: GM set LiveSpeedPower=%d", conn.RemoteAddr(), int32(command.Value))
+		case "set_zhenqi_cap":
+			// 经脉每日真气硬闸（Java applyZhenqiCap 同构）：角色级设置随
+			// role_meridians 快照持久化；ZhenQiDayValue 口径即时变化
+			//（开闸显示阈值/关闸回落官方缺省 500，被动/战斗同闸）。
+			player.setJingMaiDailyCap(command.Enabled == 1, int32(command.Value))
+			persistJingMai()
+			frame, updateErr := player.jingMaiPropsFrame()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(frame)
+			}
+			if updateErr != nil {
+				gmSession.setAction("真气硬闸设置失败：" + updateErr.Error())
+				return updateErr
+			}
+			if command.Enabled == 1 {
+				gmSession.setAction(fmt.Sprintf("每日真气硬闸已开启（阈值 %d，今日已获 %d）",
+					int32(command.Value), player.jingMaiSnapshotOf().ZhenQi.Used))
+			} else {
+				gmSession.setAction(fmt.Sprintf("每日真气硬闸已关闭（阈值 %d 已保存，重开沿用；进度条上限回落官方缺省 500）", int32(command.Value)))
+			}
+			log.Printf("%s: GM set_zhenqi_cap enabled=%d value=%d", conn.RemoteAddr(), command.Enabled, int32(command.Value))
+		case "set_jingmai_tier":
+			// 经脉周天直设（Java applySetJingmaiTier 同构）：目录收录 +
+			// 已学双闸 → 钳 1..目录上限、fill 归零走新周天起点 → View45
+			// 升级行帧 + CurJingMai/JingMaiTotalLevel 属性帧 → 落盘。
+			def, known := jingMaiCatalog.def(command.JingMaiID)
+			if !known {
+				gmSession.setAction("周天设置失败：经脉目录无 " + command.JingMaiID)
+				return fmt.Errorf("unknown jingmai id %q", command.JingMaiID)
+			}
+			old, row, slot, set := player.setJingMaiLevel(jingMaiCatalog, command.JingMaiID, command.JingMaiTier)
+			if !set {
+				gmSession.setAction("周天设置失败：" + command.JingMaiID + " 未学（先在客户端开通）")
+				return fmt.Errorf("unlearned jingmai %q", command.JingMaiID)
+			}
+			tierFrame, tierErr := jingMaiViewUpdateFrame(uint16(slot), row, true)
+			if tierErr == nil {
+				tierErr = link.WriteFrame(tierFrame)
+			}
+			if tierErr != nil {
+				gmSession.setAction("周天设置失败：" + tierErr.Error())
+				return tierErr
+			}
+			propsFrame, propsErr := player.jingMaiPropsFrame()
+			if propsErr == nil {
+				propsErr = link.WriteFrame(propsFrame)
+			}
+			if propsErr != nil {
+				gmSession.setAction("经脉属性推送失败：" + propsErr.Error())
+				return propsErr
+			}
+			persistJingMai()
+			gmSession.setAction(fmt.Sprintf("%s 周天 %d → %d（上限 %d）", command.JingMaiID, old, row.Level, def.maxLevel))
+			log.Printf("%s: GM set_jingmai_tier %s %d -> %d (max %d)", conn.RemoteAddr(), command.JingMaiID, old, row.Level, def.maxLevel)
 		case "set_weather":
 			preset, presetErr := gmapi.WeatherPresetByKey(command.Weather)
 			if presetErr != nil {
@@ -1031,6 +1186,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		case "grant_item", "add_item":
 			session := &itemSession{
 				link: link, player: player, store: inventory, skins: appearanceCfg.skins,
+				currency: currencyStore, randomProps: randomPropsStore,
 				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(), now: time.Now,
 			}
 			entry, known := inventory.lookupGrantable(ctx, command.ItemConfig)
@@ -1044,6 +1200,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					equipType = stat.equipType
 				}
 			}
+			randomKind := randomEquipCatalogOf().randomEquipKind(command.ItemConfig)
 			if command.WearNow && equipSlotFor(equipType, player.sessionEquips()) > 0 {
 				slot := equipSlotFor(equipType, player.sessionEquips())
 				worn, wearErr := inventory.upsertEquipSlot(ctx, selected.ID, slot, command.ItemConfig, entry.itemType, equipType)
@@ -1056,17 +1213,31 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					gmSession.setAction("穿戴帧推送失败：" + framesErr.Error())
 					return framesErr
 				}
+				// 宝物/娃娃：掷随机属性 → 存档 → 纸娃娃槽位 record 整推；
+				// 镇派兵器：动态 4 属性按实力点数重算并补面板帧。
+				if randomKind != randomKindNone {
+					session.pushRandomPropsForEquip(command.ItemConfig, worn.uid, slot)
+				}
+				if slot == 22 && player.refreshZhenpaiEquipBonuses() {
+					if err := player.pushZhenpaiPanelFrame(link); err != nil {
+						log.Printf("%s: zhenpai panel frame: %v", conn.RemoteAddr(), err)
+					}
+				}
 				gmSession.setAction(fmt.Sprintf("已发放并穿戴 %s（槽位 %d）", command.ItemConfig, slot))
 				log.Printf("%s: GM grant_item wear config=%s slot=%d", conn.RemoteAddr(), command.ItemConfig, slot)
 				return nil
 			}
-			landed := session.grantBagItem(entry, command.Amount)
-			if landed <= 0 {
+			inserted, landed := session.grantBagItemRow(entry, command.Amount)
+			if !landed || inserted.slot <= 0 {
 				gmSession.setAction("发放失败：背包已满（1..90）")
 				return fmt.Errorf("bag full")
 			}
-			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, landed))
-			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, landed)
+			// 宝物/娃娃入包：掷值 + 存档 + 背包槽位 record 整推。
+			if randomKind != randomKindNone {
+				session.pushRandomPropsForBag(command.ItemConfig, inserted.uid, inserted.viewID, inserted.slot)
+			}
+			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, inserted.slot))
+			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, inserted.slot)
 		case "equip_card", "equip_hair":
 			entry, known := skinCards.lookup(int(command.CardId))
 			if !known {
@@ -1253,6 +1424,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction(fmt.Sprintf("Lua 重载完成但有失败脚本 count=%d：%v", loaded, reloadErr))
 				return reloadErr
 			}
+			// 每击公式引擎一并热重载（formula.ini 规格复用启动缓存，不重读
+			// 文件）；失败只回报，不回滚事件脚本结果。
+			if installedCombatCalc != nil && len(combatFormulaSpecs) > 0 {
+				if formulas, combatErr := installedCombatCalc.Reload(combatFormulaSpecs); combatErr != nil {
+					gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d；公式引擎重载失败：%v", loaded, combatErr))
+					log.Printf("%s: GM lua_reload combat engine failed: %v", conn.RemoteAddr(), combatErr)
+				} else {
+					log.Printf("%s: GM lua_reload combat formulas=%d", conn.RemoteAddr(), formulas)
+				}
+			}
 			// 内功特效模块一并热重载；失败只回报原因，不影响事件脚本结果。
 			if neigongEffects.Enabled() {
 				neigongLoaded, neigongErr := neigongEffects.Reload()
@@ -1342,7 +1523,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 零帧零落库。
 			livepointChanged := player.livepointTick(now)
 			innerPowerPassiveExpired := player.expireInnerPowerPassive(now)
-			sitcrossAdvanced := player.sitcrossTick()
+			sitcrossSettlement := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
 			combatRageAdvanced := player.rageRecoveryTick()
 			// 轻功结算（Java facultyTicker 同拍）：租约秒耗 / 3s 分档
@@ -1359,15 +1540,40 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			var tickErr error
 			if advanced {
+				// 行级增量帧（0x10 isView=1）：裸 0x18 重发行不触发客户端
+				// updateitem，武学面板内功页会停在旧等级（2026-11-08 抓包
+				// 实证）。上限对(MaxSP/MaxSPAdd)不进常规批，升级可能抬
+				// 内功档位，这里用 215 同款专帧刷新怒气球分母。
 				var frame []byte
-				frame, tickErr = player.progressBookFrame(slot)
+				frame, tickErr = player.bookUpdateFrame(slot)
 				if tickErr == nil {
 					tickErr = link.WriteFrame(frame)
 				}
+				if tickErr == nil {
+					if frame, err := player.rageCapUpdate(); err != nil {
+						tickErr = err
+					} else {
+						tickErr = link.WriteFrame(frame)
+					}
+				}
 			}
-			if tickErr == nil && qingGongPointChanged {
-				tickErr = link.WriteFrame(player.qingGongPointFrame())
+		if tickErr == nil && qingGongPointChanged {
+			tickErr = link.WriteFrame(player.qingGongPointFrame())
+		}
+		if tickErr == nil && sitcrossSettlement.Changed() {
+			// 打坐回复走官方形态帧簇：逐层 n=1 单属性帧 + msg24
+			// c1=16 治疗飘字（UI 的 +回复量 绿字来源）。绝不能并入
+			// 下面的全量 vitalUpdate——官服坐姿周期帧从不带
+			// LogicState，整帧重推会让客户端重入坐姿动画。
+			var frames [][]byte
+			frames, tickErr = player.sitcrossRecoveryFrames(sitcrossSettlement)
+			for _, frame := range frames {
+				if tickErr != nil {
+					break
+				}
+				tickErr = link.WriteFrame(frame)
 			}
+		}
 		if tickErr == nil && qingGongForceEnded != "" {
 			// 点耗尽强摘：与 216 end 同口径清轻功 Buff 后推全量
 			// 状态（vitalUpdate 会带上空掉的 BufferInfo 槽）。
@@ -1379,7 +1585,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 				}
 			}
-			if tickErr == nil && (advanced || sitcrossAdvanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired || livepointChanged) {
+			if tickErr == nil && (advanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired || livepointChanged) {
 				var state []byte
 				state, tickErr = player.vitalUpdate()
 				if tickErr == nil {
@@ -1398,9 +1604,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				persistFaculty()
 				log.Printf("%s: settled livepoint role=%d", conn.RemoteAddr(), selected.ID)
 			}
-			if sitcrossAdvanced {
+			if sitcrossSettlement.Changed() {
 				state := player.stateSnapshot()
-				log.Printf("%s: settled sitcross HP=%d/%d MP=%d/%d", conn.RemoteAddr(), state.HP, state.MaxHP, state.MP, state.MaxMP)
+				log.Printf("%s: settled sitcross HP=%d/%d MP=%d/%d heal=%d overflow=%d", conn.RemoteAddr(), state.HP, state.MaxHP, state.MP, state.MaxMP, sitcrossSettlement.HPApplied, sitcrossSettlement.HPWasted)
 			}
 			if combatBruiseAdvanced {
 				state := player.stateSnapshot()
@@ -1681,9 +1887,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			log.Printf("%s: sent player 0x0D + 0x1F + authoritative vital 0x10", conn.RemoteAddr())
 			// 面板身份/域块补推（Java PanelState.identityProperties/
 			// domainProperties 随 0x0D 档下发的对应物，走独立瘦帧不动
-			// 档形）：实力 151 种子 + 称号/性格/侠恶/生存属性零值常发
-			//——缺发则人物面板整块空白（实力一行不显示的根因）；vitals
-			// 由 role_faculty 快照在 restoreFaculty 时播种。
+			// 档形）：实力=自动推导（varprop.NeiGongLevel，GM set 过则
+			// 覆盖）+ 称号/性格/侠恶/生存属性零值常发——缺发则人物面板
+			// 整块空白（实力一行不显示的根因）；vitals 由 role_faculty
+			// 快照在 restoreFaculty 时播种。穿戴武器的镇派动态 4 属性
+			// 先重算（identity/vital 帧与注入位同源）。
+			player.refreshZhenpaiEquipBonuses()
 			if err := gmWritePanelFrames(link, player); err != nil {
 				log.Printf("%s: push panel identity/domain frames: %v", conn.RemoteAddr(), err)
 			}
@@ -1700,6 +1909,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 					log.Printf("%s: pushed inventory equips=%d bagItems=%d role=%d", conn.RemoteAddr(), len(equips), len(bagItems), activeRole.ID)
 				}
+				// 娃娃/宝物随机属性 record 整推（官服 0x11 flag=1 方言）：
+				// 纸娃娃槽位行（view1）与背包行（对应页）各按 uid 取快照。
+				pushLoginRandomProps(link, randomPropsStore, ctx, activeRole.ID, equips, bagItems)
 			}
 			// 会话物品模型：登录装载（DB 读失败=空模型；后续 msg30/31/34/36 的权威内存态）。
 			player.restoreSessionInventory(visual.sex, equips, bagItems, bagpacks)
@@ -1925,6 +2137,21 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 			}
+			if player != nil && !jyzPushed {
+				// 九阴志数据部（native 62311 帧序：坐骑之后、开关同步
+				// 之前）：quest49 簇 + 419 步骤 + data_record 58 行打包。
+				// gamestep 步骤帧不在此处——sync 之后由收尾帧下发
+				// （sync 重置 414 域，先发会被抹掉）。
+				jyzPushed = true
+				ownedMountPacks := make(map[uint32]bool, len(sessionMounts))
+				for _, mount := range sessionMounts {
+					ownedMountPacks[mount.PackID] = true
+				}
+				if jyzErr := pushJyzRecords(link, jyzRecordsConfig, ownedMountPacks); jyzErr != nil {
+					log.Printf("%s: push jyz records: %v", conn.RemoteAddr(), jyzErr)
+					return
+				}
+			}
 			if player != nil && !switchSyncPushed {
 				// 参考服 pushSwitchSync：ClientReady 收尾一次性批量开
 				// 客户端 SwitchManager（0x1E 414 "sync" ×203）。2919 在列
@@ -1944,6 +2171,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 				log.Printf("%s: enabled native skill-action switch=%d via modern S2C 0x27 message=%d", conn.RemoteAddr(), skillActionInputSwitch, serverSwitchControlMessage)
+			}
+			if player != nil && jyzPushed && !jyzGameStepSent {
+				// 414 'gamestep' 收尾帧（native #1744：switch sync 之后
+				// 的最后一帧；sync 重置 414 域状态，先发的 gamestep 会被
+				// 抹掉——功能入口菜单不出现的根因）。
+				jyzGameStepSent = true
+				if stepErr := pushJyzGameStepFinal(link, jyzRecordsConfig); stepErr != nil {
+					log.Printf("%s: push jyz gamestep final: %v", conn.RemoteAddr(), stepErr)
+					return
+				}
+				log.Printf("%s: pushed jyz gamestep step=%d final via S2C 0x1E message=%d", conn.RemoteAddr(), jyzRecordsConfig.step, serverJyzGameStepMessage)
 			}
 			// 当前正式服流量可能在场景已经激活后重复发送 ClientReady
 			// （例如在较晚的 UI/stage 回调之后）。
@@ -2152,7 +2390,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-				if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox) {
+				if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -2212,6 +2450,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
 					}
+				case clientCustomAttackTarget:
+					if handleErr := handleAttackTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle attack target: %v", conn.RemoteAddr(), handleErr)
+					}
 				case clientCustomBlockState:
 					if handleErr := handleBlockStateCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle block state: %v", conn.RemoteAddr(), handleErr)
@@ -2228,6 +2470,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					// 高频移动上报：无冲锋在途时静默返回，不记日志。
 					if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomRushMoveUpload:
+					// 冲锋在途位移上报（msg220，4×f32）：非在途静默。
+					if _, handleErr := handleRushMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle rush movement upload: %v", conn.RemoteAddr(), handleErr)
 					}
 				case clientCustomMoveItem:
 					if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
@@ -2300,6 +2547,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				case clientCustomCloseDropBox:
 					if _, handleErr := handleCloseDropBoxCustom(world, custom); handleErr != nil {
 						log.Printf("%s: handle activity close drop box: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomJyzQuery:
+					if handleErr := handleJyzQueryCustom(link, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity jyz query: %v", conn.RemoteAddr(), handleErr)
 					}
 				case 215, 1006:
 					if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -2540,6 +2791,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			case clientCustomCloseDropBox:
 				if _, handleErr := handleCloseDropBoxCustom(world, custom); handleErr != nil {
 					log.Printf("%s: handle close drop box: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomJyzQuery:
+				if handleErr := handleJyzQueryCustom(link, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle jyz query: %v", conn.RemoteAddr(), handleErr)
 				}
 			case 215, 1006: // 内功穿戴 / faculty 状态机
 				if _, handleErr := handlePlayerProgressCustom(link, player, custom); handleErr != nil {
@@ -2793,6 +3048,24 @@ func sceneObjectIntProperty(objectID, ownerID uint32, propertyIndex uint16, valu
 	binary.LittleEndian.PutUint16(msg[10:], 1)
 	msg = binary.LittleEndian.AppendUint16(msg, propertyIndex)
 	return binary.LittleEndian.AppendUint32(msg, uint32(value))
+}
+
+// sceneObjectWideStringProperty 更新一个协商为宽字符串的场景对象
+// 属性（如挂尸掉落归属 PickMember@1592，逗号分隔玩家名）。
+func sceneObjectWideStringProperty(objectID, ownerID uint32, propertyIndex uint16, value string) []byte {
+	msg := make([]byte, 12, 12+len(value)*2+4)
+	msg[0] = 0x10 // SERVER_OBJECT_PROPERTY
+	msg[1] = 0    // 场景对象，而非视图对象
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], 1)
+	msg = binary.LittleEndian.AppendUint16(msg, propertyIndex)
+	units := utf16.Encode([]rune(value))
+	msg = binary.LittleEndian.AppendUint32(msg, uint32((len(units)+1)*2))
+	for _, unit := range units {
+		msg = binary.LittleEndian.AppendUint16(msg, unit)
+	}
+	return binary.LittleEndian.AppendUint16(msg, 0)
 }
 
 func sceneObjectTransformProperties(objectID, ownerID uint32, transform worldcore.Transform) []byte {

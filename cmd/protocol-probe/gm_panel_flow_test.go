@@ -145,6 +145,9 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":5}`, http.StatusOK},
 		{`{"action":"set_autosave_interval","value":300}`, http.StatusOK}, // 数据存盘：默认周期
 		{`{"action":"set_autosave_interval","value":0}`, http.StatusOK},    // 0=关闭合法
+		{`{"action":"set_lootbox_ttl","value":300}`, http.StatusOK},   // 宝箱存留：默认 5 分钟
+		{`{"action":"set_lootbox_ttl","value":0}`, http.StatusOK},      // 0=保留到拾空合法
+		{`{"action":"spawn_chest"}`, http.StatusOK}, // GM 世界宝箱（无参白名单）
 		{`{"action":"popup_gm_panel"}`, http.StatusOK},
 		{`{"action":"custom_probe","msgId":517,"subType":899000000}`, http.StatusOK},
 
@@ -174,6 +177,9 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_autosave_interval","value":-1}`, http.StatusBadRequest},   // 负数拒绝
 		{`{"action":"set_autosave_interval","value":3.5}`, http.StatusBadRequest}, // 必须整数
 		{`{"action":"set_autosave_interval","value":86401}`, http.StatusBadRequest},
+		{`{"action":"set_lootbox_ttl","value":-1}`, http.StatusBadRequest},   // 负数拒绝
+		{`{"action":"set_lootbox_ttl","value":3.5}`, http.StatusBadRequest}, // 必须整数
+		{`{"action":"set_lootbox_ttl","value":86401}`, http.StatusBadRequest},
 		{`{"action":"custom_probe","msgId":0,"subType":1}`, http.StatusBadRequest},
 		{`{"action":"custom_probe","msgId":800,"subType":1}`, http.StatusBadRequest},
 		{`{"action":"grant_item","itemConfig":"   "}`, http.StatusBadRequest}, // 空白 ConfigID
@@ -245,6 +251,63 @@ func TestGMFlowAutosaveInterval(t *testing.T) {
 	}
 	if got := autosaveInterval(); got != 0 {
 		t.Fatalf("autosave interval after disable=%v want 0", got)
+	}
+}
+
+// TestGMFlowLootBoxTTL 宝箱存留时间是进程级共享原子值：假会话循环执行与
+// main.go processGMCommand set_lootbox_ttl 分支相同的写动作，验证 HTTP →
+// 校验 → 会话通道 → setLootBoxTTL 的完整链路。
+func TestGMFlowLootBoxTTL(t *testing.T) {
+	previous := lootBoxTTL()
+	t.Cleanup(func() { setLootBoxTTL(previous) })
+
+	server, session, _ := gmFlowHarness(t)
+	// 会话循环消费命令：照抄执行器分支的写动作与回执文案。
+	go func() {
+		for command := range session.commands {
+			if command.Action == "set_lootbox_ttl" {
+				seconds := int32(command.Value)
+				setLootBoxTTL(time.Duration(seconds) * time.Second)
+				if seconds > 0 {
+					session.setAction(fmt.Sprintf("宝箱存留时间设为 %d 秒（未拾超时消失，对在场宝箱即刻生效）", seconds))
+				} else {
+					session.setAction("宝箱存留已关闭：宝箱保留到被拾空")
+				}
+			}
+			command.complete(nil)
+		}
+	}()
+
+	payload, _ := json.Marshal(map[string]any{"action": "set_lootbox_ttl", "value": 300})
+	response, err := http.Post(server.URL+"/api/sessions/7/command", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("post command: %v", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("command status=%d", response.StatusCode)
+	}
+	if got := lootBoxTTL(); got != 300*time.Second {
+		t.Fatalf("lootbox ttl=%v want 5m", got)
+	}
+	// 状态回读带上执行器回执文案（顶栏"最近操作"）。
+	body, _, _ := gmGetBody(t, server.URL+"/api/sessions")
+	if !strings.Contains(body, "宝箱存留时间设为 300 秒") {
+		t.Fatalf("sessions state missing lootbox receipt: %s", body)
+	}
+
+	// 0=关闭语义：过期结算分支对在场宝箱不再触发。
+	payload, _ = json.Marshal(map[string]any{"action": "set_lootbox_ttl", "value": 0})
+	response, err = http.Post(server.URL+"/api/sessions/7/command", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("post disable: %v", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("disable status=%d", response.StatusCode)
+	}
+	if got := lootBoxTTL(); got != 0 {
+		t.Fatalf("lootbox ttl after disable=%v want 0", got)
 	}
 }
 

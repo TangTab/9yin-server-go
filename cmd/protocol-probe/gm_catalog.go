@@ -17,6 +17,46 @@ type gmCatalogItem struct {
 	Name     string `json:"name"`
 }
 
+// gmMeridianRow 是 /api/meridians 与 /internal/v1/catalog/meridians 的
+// 行形态（Java GmCatalogDb.meridians 同构：{id,name,defaultMax}；面板
+// 「经脉周天设置」下拉即此三列）。
+type gmMeridianRow struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	DefaultMax int32  `json:"defaultMax"`
+}
+
+// meridiansHandler GET /api/meridians：经脉目录。优先 hub.meridianRows
+//（共享库 game_meridians：meridian_id 升序，中文名+周天上限）；钩子
+// 缺席/空表时回退 globalJingMaiCatalog 目录（name=configID）。
+func (hub *gmHub) meridiansHandler(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	var rows []gmMeridianRow
+	if hub.meridianRows != nil {
+		rows = hub.meridianRows()
+	}
+	if len(rows) == 0 {
+		rows = meridianRowsFromCatalog(globalJingMaiCatalog)
+	}
+	writeGMJSON(writer, http.StatusOK, rows)
+}
+
+// meridianRowsFromCatalog 无 DB 回退：目录 configID 顺序即行序，
+// 名字退化为 configID（Java data/经脉.json 缺席时同款降级）。
+func meridianRowsFromCatalog(catalog *jingMaiCatalog) []gmMeridianRow {
+	if catalog == nil {
+		return nil
+	}
+	rows := make([]gmMeridianRow, 0, len(catalog.order))
+	for _, def := range catalog.order {
+		rows = append(rows, gmMeridianRow{ID: def.configID, Name: def.configID, DefaultMax: def.maxLevel})
+	}
+	return rows
+}
+
 type gmCatalogCategory struct {
 	Key   string          `json:"key"`
 	Label string          `json:"label"`

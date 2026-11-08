@@ -103,18 +103,38 @@ func TestVitalsRestoreWhileSitOnlyChangesLivingSitcrossActor(t *testing.T) {
 	v := newPlayerVitals()
 	v.ApplyDamage(200)
 	v.SpendMP(100)
-	if changed := v.RestoreWhileSit(20, 30); changed {
+	if settlement := v.RestoreWhileSit(20, 30); settlement.Changed() {
 		t.Fatal("normal actor recovered outside sitcross")
 	}
 	v.SetLogicState(entity.LogicStateSitcross)
-	if changed := v.RestoreWhileSit(20, 30); !changed {
+	settlement := v.RestoreWhileSit(20, 30)
+	if !settlement.Changed() {
 		t.Fatal("sitcross actor did not recover")
+	}
+	if settlement.HPApplied != 20 || settlement.HPWasted != 0 || settlement.HitHPChanged || settlement.MPApplied != 30 || settlement.MPWasted != 0 {
+		t.Fatalf("settlement=%+v", settlement)
 	}
 	if v.HP != 820 || v.MP != 430 || v.HitHP != 1000 {
 		t.Fatalf("recovery state=%+v", v)
 	}
+	// 回复追平受击血条的那一跳：HitHP 低于回复后的 HP 时被抬升，
+	// 官服该跳双 Ratio+双值四帧（00:11:54.833）。
+	v.HitHP = 700
+	settlement = v.RestoreWhileSit(50, 0)
+	if !settlement.HitHPChanged || v.HitHP != 870 {
+		t.Fatalf("hitHP catch-up settlement=%+v state=%+v", settlement, v)
+	}
+	// 触顶跳按官服末跳口径拆 (实际, 溢出)：只剩 130 缺口，回复 200
+	// 落 130/70（官服补满末跳 162+1478=名义 1640 同式）。
+	settlement = v.RestoreWhileSit(200, 0)
+	if settlement.HPApplied != 130 || settlement.HPWasted != 70 || !settlement.HitHPChanged {
+		t.Fatalf("capped settlement=%+v", settlement)
+	}
+	if v.HP != 1000 || v.HitHP != 1000 {
+		t.Fatalf("capped recovery state=%+v", v)
+	}
 	v.SetLogicState(entity.LogicStateDied)
-	if changed := v.RestoreWhileSit(20, 30); changed {
+	if settlement := v.RestoreWhileSit(20, 30); settlement.Changed() {
 		t.Fatal("dead actor recovered while sitcross unavailable")
 	}
 }

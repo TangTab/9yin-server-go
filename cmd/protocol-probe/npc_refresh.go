@@ -17,11 +17,14 @@ import (
 var (
 	npcRespawnBatchIntervalNanos atomic.Int64
 	npcCorpseTTLNanos            atomic.Int64
+	lootBoxTTLNanos              atomic.Int64
 )
 
-// lootBoxTTL 掉落宝箱在场时长：官方 attacknpc DestroyTime2（最大消失
-// 时间）= 60s。
-const lootBoxTTL = 60 * time.Second
+// lootBoxDefaultTTL 掉落宝箱在场默认时长。官方 attacknpc DestroyTime2
+// （最大消失时间）= 60s；本服默认放宽到 5 分钟，-lootbox-ttl / GM 面板
+// 可调（0=保留到拾空）。过期结算每 tick 现读全局参数（按宝箱生成时刻
+// 推算），改值对在场宝箱即刻生效。
+const lootBoxDefaultTTL = 5 * time.Minute
 
 func npcRespawnBatchInterval() time.Duration {
 	return time.Duration(npcRespawnBatchIntervalNanos.Load())
@@ -31,8 +34,13 @@ func npcCorpseTTL() time.Duration {
 	return time.Duration(npcCorpseTTLNanos.Load())
 }
 
+func lootBoxTTL() time.Duration {
+	return time.Duration(lootBoxTTLNanos.Load())
+}
+
 func setNpcRespawnBatchInterval(d time.Duration) { npcRespawnBatchIntervalNanos.Store(int64(d)) }
 func setNpcCorpseTTL(d time.Duration)            { npcCorpseTTLNanos.Store(int64(d)) }
+func setLootBoxTTL(d time.Duration)              { lootBoxTTLNanos.Store(int64(d)) }
 
 // deadNPCRecord 登记一具等待重生的怪物尸体。spawnIndex 是目录下标
 // （重生实体号 = spawnIndex+2 保持不变）；removed 表示尸体已被 TTL
@@ -99,9 +107,14 @@ func (r *sceneRun) refreshSettleLocked(now time.Time) *refreshTickOutcome {
 	}
 	out := &refreshTickOutcome{members: r.sortedMembersLocked()}
 	// 尸体 TTL：超时清除（0x0E 直发 + 注销实体），等批量/定时重生重注册。
+	// 挂尸掉落（r.lootBoxes[id]）的尸体不走本分支——由掉落 TTL 接管
+	//（拾空/超时清尸时 removeLootBoxLocked 同步 removed，重生随之放行）。
 	if ttl > 0 {
 		for id, rec := range r.deadNPCs {
 			if rec.removed || now.Before(rec.diedAt.Add(ttl)) {
+				continue
+			}
+			if _, hasLoot := r.lootBoxes[id]; hasLoot {
 				continue
 			}
 			ownerID := uint32(1)
@@ -137,7 +150,8 @@ func (r *sceneRun) refreshSettleLocked(now time.Time) *refreshTickOutcome {
 		}
 	}
 	// 批量扫描：死了的统一重生（尸体在场=原地复活帧组；已清除=重注册），
-	// 没死的一律不动。
+	// 没死的一律不动。带未拾掉落的尸体跳过复活——掉落清除（拾空/超时）
+	// 标记 removed 后按重注册路径重生。
 	if sweepDue {
 		r.nextSweepAt = now.Add(interval)
 		for id, rec := range r.deadNPCs {
@@ -145,6 +159,9 @@ func (r *sceneRun) refreshSettleLocked(now time.Time) *refreshTickOutcome {
 				if r.respawnRemovedNPCLocked(out, id, rec) {
 					delete(r.deadNPCs, id)
 				}
+				continue
+			}
+			if _, hasLoot := r.lootBoxes[id]; hasLoot {
 				continue
 			}
 			entityID := worldcore.EntityID(id)
@@ -166,12 +183,16 @@ func (r *sceneRun) refreshSettleLocked(now time.Time) *refreshTickOutcome {
 			delete(r.deadNPCs, id)
 		}
 	}
-	// 宝箱过期：在场超 lootBoxTTL 直接消失。
-	for id, box := range r.lootBoxes {
-		if now.Before(box.expiresAt) {
-			continue
+	// 掉落过期：在场超 lootBoxTTL（每 tick 现读，改值即刻生效；0=保留
+	// 到拾空）直接消失。挂尸形态=清尸体（removeLootBoxLocked 内部同步
+	// deadNPCs removed，重生随之放行）；实体宝箱=注销宝箱本体。
+	if boxTTL := lootBoxTTL(); boxTTL > 0 {
+		for id, box := range r.lootBoxes {
+			if now.Sub(box.spawnedAt) < boxTTL {
+				continue
+			}
+			r.removeLootBoxLocked(out, id, box.ownerID)
 		}
-		r.removeLootBoxLocked(out, id, box.ownerID)
 	}
 	if len(out.despawns) == 0 && len(out.readds) == 0 && len(out.moves) == 0 && len(out.updates) == 0 {
 		return nil
@@ -256,8 +277,12 @@ func (r *sceneRun) flushRefreshFrames(out *refreshTickOutcome) {
 	}
 }
 
-// recordNPCDeathLocked 在击杀点登记尸体记录，并按怪物 DropID 生成
-// 掉落宝箱。调用方必须已持有 r.mu（apply* 伤害路径）。
+// recordNPCDeathLocked 在击杀点登记尸体记录，并按官服双形态掉落方言
+// 分叉：AIEditorPackID 登记了死亡生箱事件 → 独立宝箱实体
+//（spawnBoxNPCEntityLocked）；否则 DropID roll 非空 → 掉落挂尸体
+//（attachLootToCorpseLocked，CanPick/PickMember 驱动客户端冒光）；
+// roll 为空 = 纯尸体（corpse TTL 清除）。调用方必须已持有 r.mu
+//（apply* 伤害路径）。
 func (r *sceneRun) recordNPCDeathLocked(id, ownerID uint32, brain sim.Brain, now time.Time) {
 	rec := deadNPCRecord{spawnIndex: int(id) - 2, diedAt: now, respawnAt: brain.RespawnAt}
 	if rec.spawnIndex < 0 || rec.spawnIndex >= len(r.catalog) {
@@ -268,5 +293,11 @@ func (r *sceneRun) recordNPCDeathLocked(id, ownerID uint32, brain sim.Brain, now
 		rec.removed = true
 	}
 	r.deadNPCs[id] = rec
-	r.spawnLootBoxLocked(id, ownerID, now)
+	if rec.spawnIndex >= 0 {
+		if templates := chestSpawnConfigForNPC(r.catalog[rec.spawnIndex]); len(templates) > 0 {
+			r.spawnBoxNPCEntityLocked(id, templates[0], now)
+			return
+		}
+	}
+	r.attachLootToCorpseLocked(id, ownerID, now)
 }

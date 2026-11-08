@@ -110,24 +110,24 @@ func TestUniversalCooldownIsTaoluSwitchLock(t *testing.T) {
 	if flower.taoLu == taiJi.taoLu {
 		t.Fatalf("fixture taolu collision %q", flower.taoLu)
 	}
-	if ok, reason := player.beginSkillUse(flower, 0, now); !ok {
+	if ok, reason := player.beginSkillUse(flower, 0, now, false); !ok {
 		t.Fatalf("begin flower: %s", reason)
 	}
 	// 同套路连招：GCD 窗口内立即可续（各走各的个人 CD）。
-	if ok, reason := player.beginSkillUse(flowerFirst, 0, now); !ok {
+	if ok, reason := player.beginSkillUse(flowerFirst, 0, now, false); !ok {
 		t.Fatalf("same-taolu follow-up blocked by public cooldown: %s", reason)
 	}
 	// 出招者自身：个人 CD(1s) 尽、GCD(7s) 仍在 → 复读放行。
-	if ok, reason := player.beginSkillUse(flower, 0, now.Add(1100*time.Millisecond)); !ok {
+	if ok, reason := player.beginSkillUse(flower, 0, now.Add(1100*time.Millisecond), false); !ok {
 		t.Fatalf("self re-cast after personal CD blocked: %s", reason)
 	}
 	// 跨套路：GCD 窗口内被拒（套路切换锁）。
-	ok, reason := player.beginSkillUse(taiJi, 0, now.Add(1200*time.Millisecond))
+	ok, reason := player.beginSkillUse(taiJi, 0, now.Add(1200*time.Millisecond), false)
 	if ok || !strings.Contains(reason, "taolu switch") {
 		t.Fatalf("cross-taolu cast within GCD ok=%t reason=%q, want taolu switch reject", ok, reason)
 	}
 	// 窗口过后（最后一次出招 now+1.1s + 7s）放行。
-	if ok, reason := player.beginSkillUse(taiJi, 0, now.Add(9*time.Second)); !ok {
+	if ok, reason := player.beginSkillUse(taiJi, 0, now.Add(9*time.Second), false); !ok {
 		t.Fatalf("cross-taolu cast after GCD window: %s", reason)
 	}
 }

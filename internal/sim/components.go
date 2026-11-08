@@ -128,35 +128,65 @@ func (v *Vitals) RecoverBruisedHPWhileFighting(amount int32) bool {
 	return true
 }
 
+// SitcrossSettlement 记录一次打坐恢复的逐层结算结果，供出帧层
+// 按官方形态拆帧：HP 层产 n=1 属性帧对 + msg24 c1=16 治疗飘字、
+// MP 层产属性帧对 + c1=18 回蓝飘字（官服补满末跳 (实际, 溢出)
+// 拆分实证），HitHP 层产自己的属性帧对。
+type SitcrossSettlement struct {
+	// HPApplied 是本跳实际落入 HP 的量（飘字帧第 2 值；未触顶跳
+	// 等于名义回复量）。
+	HPApplied int32
+	// HPWasted 是被上限截断的溢出量（飘字帧第 3 值；官服末跳
+	// 162+1478=名义1640）。
+	HPWasted int32
+	// HitHPChanged 表示瘀血层 HitHP 被抬升到新 HP（回复追平受击
+	// 血条的那一跳，官服 00:11:54.833 双 Ratio+双值四帧实证）。
+	HitHPChanged bool
+	// MPApplied/MPWasted 与 HP 层同口径（官服 c1=18 回蓝飘字：
+	// 49.4.14.150:7074 实时实证每跳 +519 飘字，心搏 +100 无飘字）。
+	MPApplied int32
+	MPWasted  int32
+}
+
+// Changed 汇总本跳是否有任何层落到状态变化。
+func (s SitcrossSettlement) Changed() bool {
+	return s.HPApplied > 0 || s.HitHPChanged || s.MPApplied > 0
+}
+
 // RestoreWhileSit 执行一次权威的打坐恢复结算。它绝不会复活
 // 死亡状态，在 LS_SITCROSS 之外也不做任何事；因此 UI 的恢复
 // 速率属性绝不会被误当作实际治疗。
-func (v *Vitals) RestoreWhileSit(hpAmount, mpAmount int32) bool {
+func (v *Vitals) RestoreWhileSit(hpAmount, mpAmount int32) SitcrossSettlement {
+	var settlement SitcrossSettlement
 	if hpAmount < 0 || mpAmount < 0 {
-		return false
+		return settlement
 	}
 	if v.Logic != entity.LogicStateSitcross || v.HP <= 0 {
-		return false
+		return settlement
 	}
-	changed := false
 	if hpAmount > 0 && v.HP < v.MaxHP {
+		before := v.HP
 		v.HP += hpAmount
 		if v.HP > v.MaxHP {
 			v.HP = v.MaxHP
 		}
+		settlement.HPApplied = v.HP - before
+		settlement.HPWasted = hpAmount - settlement.HPApplied
 		if v.HitHP < v.HP {
 			v.HitHP = v.HP
+			settlement.HitHPChanged = true
 		}
-		changed = true
 	}
 	if mpAmount > 0 && v.MP < v.MaxMP {
+		before := v.MP
 		v.MP += mpAmount
 		if v.MP > v.MaxMP {
 			v.MP = v.MaxMP
 		}
-		changed = true
+		settlement.MPApplied = v.MP - before
+		settlement.MPWasted = mpAmount - settlement.MPApplied
 	}
-	return changed
+	return settlement
 }
 
 // SpendMP 是技能处理的权威资源闸门。
@@ -232,6 +262,12 @@ type Brain struct {
 	Damage       int32
 	AttackEvery  time.Duration
 	RespawnAfter time.Duration
+	// Passive 镜像模板/creator 字段 NotPositive（官方属性表 idx 62）：
+	// 城内 AttackNpc 大多置 1（掷斧监工/背柴工人/剧情人物等白名
+	// NPC），官方语义为不主动攻击、仅受击反击（Java NpcCombatAi 全量
+	// 即此模型）。置位时 tick 不做近身主动仇恨，目标只能由受击路径
+	//（applySkillDamageToNPC）锁定。
+	Passive bool
 
 	Threat          int32
 	TargetMember    uint32

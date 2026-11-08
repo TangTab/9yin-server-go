@@ -220,6 +220,10 @@ type playerProgress struct {
 	holdFaculty    int32
 	liveSpeedPower int32
 	lastLivepoint  time.Time
+	// 镇派兵器 4 条动态属性注入位（武器槽 22 + 实力点数命中属性包条件行，
+	// random_equip_push.go refreshZhenpaiEquipBonuses 维护；官方"根据角色
+	// 实力等级"口径——发放/穿戴/升档时重算，盘点 §2.6/§2.7）。
+	zhenpaiEquip zhenpaiEquipBonus
 }
 
 type playerAttributes struct {
@@ -320,8 +324,8 @@ func (p *playerProgress) effectiveFive() (str, sta, dex, ing, spi int32) {
 func (p *playerProgress) derivedResourceAdds() (maxHPAdd, maxMPAdd int32) {
 	str, sta, _, ing, spi := p.effectiveFive()
 	bookHP, bookMP := p.equippedResourceAdds()
-	return str*attrHPPerStr + sta*attrHPPerSta + bookHP,
-		ing*attrMPPerIng + spi*attrMPPerSpi + bookMP
+	return str*attrHPPerStr + sta*attrHPPerSta + bookHP + p.zhenpaiEquip.maxHP,
+		ing*attrMPPerIng + spi*attrMPPerSpi + bookMP + p.zhenpaiEquip.maxMP
 }
 
 // derivedMinMagicDefAdd 是 MinMagicDefAdd@597 全量：round(0.2·Spi)
@@ -344,7 +348,7 @@ func (p *playerProgress) parryValueTotal() int32 {
 	if equipped := p.book(p.curNeiGong); equipped != nil {
 		add = equipped.maxParryAdd
 	}
-	return p.attributes.maxParry + add
+	return p.attributes.maxParry + add + p.zhenpaiEquip.parry
 }
 
 func newPlayerProgress() playerProgress {
@@ -625,6 +629,29 @@ func (p *playerProgress) bookFrame(slot uint16) ([]byte, error) {
 		viewInt(propPowerValue, book.power),
 		viewInt(propMaxPowerValue, book.maxPower),
 		viewInt(propWuXing, book.wuXing),
+	})
+}
+
+// bookUpdateFrame View43 行级增量帧（0x10 isView=1 view=43 owner=行号）。
+// 官服方言（e.pcapng 实证：既有视图行更新走 0x10 isView=1，本服经脉
+// jingMaiViewUpdateFrame / 技能行 CanUse 同构）：已存在行的等级/进度/
+// 内力变化必须走属性增量帧——裸 0x18 VIEW_ADD 对已存在行号不触发客户端
+// databinder 的 updateitem，武学面板(K)内功页会一直停在旧等级/旧进度
+// （2026-11-08 50514 抓包实证：ng_jh_201 升 14→15 后连发 0x18 行帧，
+// 面板不刷新）。调用方持有 p.mu；行必须已在视图中（修炼/演武只作用于
+// 已学书，新书仍走 rebuildNeiGongView 整视图重开）。
+func (p *playerProgress) bookUpdateFrame(slot uint16) ([]byte, error) {
+	if slot == 0 || int(slot) > len(p.books) {
+		return nil, fmt.Errorf("invalid neigong slot %d", slot)
+	}
+	book := p.books[slot-1]
+	return sceneObjectProperties(uint32(viewportNeiGong), uint32(slot), 1, []clientdata.IndexedProperty{
+		{Index: propJMLevel, Name: "Level", Value: clientdata.ByteValue(byte(book.level))},
+		{Index: propMaxLevel, Name: "MaxLevel", Value: clientdata.Int32Value(book.maxLevel)},
+		{Index: propCurFillValue, Name: "CurFillValue", Value: clientdata.Int32Value(book.fill)},
+		{Index: propTotalFillValue, Name: "TotalFillValue", Value: clientdata.Int32Value(book.total)},
+		{Index: propPowerValue, Name: "PowerValue", Value: clientdata.Int32Value(book.power)},
+		{Index: propMaxPowerValue, Name: "MaxPowerValue", Value: clientdata.Int32Value(book.maxPower)},
 	})
 }
 
@@ -1208,7 +1235,7 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			// set_control_state 会立即解析武学对象并读取 Level/MaxLevel；
 			// 此前这个刷新只在 1006/21 之后发生，这正是为什么先点一次演武
 			// 看起来像是解锁了普通的内修按钮。
-			frame, err := player.progressBookFrame(slot)
+			frame, err := player.bookUpdateFrame(slot)
 			if err != nil {
 				return true, err
 			}
@@ -1228,7 +1255,7 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				return true, err
 			}
 			if advanced {
-				frame, err := player.progressBookFrame(slot)
+				frame, err := player.bookUpdateFrame(slot)
 				if err != nil {
 					return true, err
 				}
@@ -1246,7 +1273,7 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				return true, err
 			}
 			if advanced {
-				frame, err := player.progressBookFrame(slot)
+				frame, err := player.bookUpdateFrame(slot)
 				if err != nil {
 					return true, err
 				}
@@ -1291,12 +1318,22 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				// 修炼面板从它的 View=43 物品对象读取 Level/Fill。请在主动
 				// 表单仍然存在时先发送该对象；否则关闭路径可能让面板默认的
 				// 一级对象在重新打开时
-				// 仍然处于绑定状态。
-				frame, err := player.progressBookFrame(slot)
+				// 仍然处于绑定状态。行级增量帧（0x10 isView=1）确保武学
+				// 面板的同本书也同步刷新——裸 0x18 重发不触发 updateitem。
+				frame, err := player.bookUpdateFrame(slot)
 				if err != nil {
 					return true, err
 				}
 				if err := link.WriteFrame(frame); err != nil {
+					return true, err
+				}
+				// 升级可能抬当前装备书的内功档位，怒气上限分母用 215 同款
+				// 专帧刷新（上限对不进常规批）。
+				capFrame, capErr := player.rageCapUpdate()
+				if capErr != nil {
+					return true, capErr
+				}
+				if err := link.WriteFrame(capFrame); err != nil {
 					return true, err
 				}
 			}

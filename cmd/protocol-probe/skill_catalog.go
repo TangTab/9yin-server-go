@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"math"
@@ -40,10 +41,19 @@ func loadINISections(path string) (iniTable, error) {
 		return nil, err
 	}
 	defer file.Close()
+	table, err := scanINISections(file)
+	if err != nil {
+		return nil, fmt.Errorf("scan %s: %w", path, err)
+	}
+	return table, nil
+}
 
+// scanINISections 从任意 reader 解析 ini 段落（loadINISections 的流式内核，
+// 测试可用 os.Open 直读仓内文件、绕过资源仓夹具）。
+func scanINISections(r io.Reader) (iniTable, error) {
 	table := make(iniTable)
 	section := ""
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(r)
 	scanner.Buffer(make([]byte, 64*1024), 4*1024*1024)
 	for scanner.Scan() {
 		line := strings.TrimSpace(strings.TrimPrefix(scanner.Text(), "\ufeff"))
@@ -69,7 +79,7 @@ func loadINISections(path string) (iniTable, error) {
 		})
 	}
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("scan %s: %w", path, err)
+		return nil, err
 	}
 	return table, nil
 }
@@ -210,10 +220,20 @@ func findVarPropRow(static []iniField, script string, level int32, tables skillR
 	return 0, nil
 }
 
+// skillDamageRow 是 damage_calculate 单条 r 行的原始编译产物（2026-11-08
+// 数值重写批次）：formulaID=formula.ini 段号、damageType=伤害系
+// （PhyDamage/NegDamage/…）、params=第 3 段起按位对应 P1..Pn 的原始串
+// （含 "a;b" 波动区间形态）。combatcalc 引擎按 formulaID 取公式、按位喂参。
+type skillDamageRow struct {
+	formulaID  int32
+	damageType string
+	params     []string
+}
+
 // compileSkillDamage 返回 damage_calculate 行的伤害编译对：baseDamage=
 // 全部 r 字段第 3 段正值之和；waves=正 r 段数（Java damageWaves——多段
-// 技能的倍率分母）。
-func compileSkillDamage(fields []iniField) (baseDamage, waves int32) {
+// 技能的倍率分母）；rows=原始 r 行（每击公式路径用）。
+func compileSkillDamage(fields []iniField) (baseDamage, waves int32, rows []skillDamageRow) {
 	var total float64
 	for _, field := range fields {
 		if !strings.EqualFold(field.key, "r") {
@@ -223,13 +243,26 @@ func compileSkillDamage(fields []iniField) (baseDamage, waves int32) {
 		if len(parts) < 3 {
 			continue
 		}
+		formulaID, err := strconv.ParseInt(strings.TrimSpace(parts[0]), 10, 32)
+		if err != nil {
+			continue
+		}
+		params := make([]string, 0, len(parts)-2)
+		for _, part := range parts[2:] {
+			params = append(params, strings.TrimSpace(part))
+		}
+		rows = append(rows, skillDamageRow{
+			formulaID:  int32(formulaID),
+			damageType: strings.TrimSpace(parts[1]),
+			params:     params,
+		})
 		value, err := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
 		if err == nil && value > 0 {
 			total += value
 			waves++
 		}
 	}
-	return int32(math.Round(total)), waves
+	return int32(math.Round(total)), waves, rows
 }
 
 func compileTargetMode(fields []iniField, isDamage bool) (skillTargetMode, float32, float32, float32) {
@@ -439,7 +472,7 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		return combatSkillDefinition{}, fmt.Errorf("%s has no level-%d varprop", skillID, level)
 	}
 	consume := tables.consume[strconv.FormatInt(int64(iniInt(varProp, "Consume")), 10)]
-	damage, damageWaves := compileSkillDamage(tables.damage[strconv.FormatInt(int64(iniInt(varProp, "DamageCalculate")), 10)])
+	damage, damageWaves, damageRows := compileSkillDamage(tables.damage[strconv.FormatInt(int64(iniInt(varProp, "DamageCalculate")), 10)])
 	isDamage := iniInt(static, "IsDamage") != 0
 	hitShape := tables.hitShape[strconv.FormatInt(int64(iniInt(varProp, "HitShapePkg")), 10)]
 	targetMode, radius, angle, width := compileTargetMode(hitShape, isDamage)
@@ -459,6 +492,15 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 	castRange := iniFloat(targetShape, "TargetShapePara2")
 	if castRange <= 0 {
 		castRange = float32(math.Max(float64(radius), selectedRangeFallbackMeters))
+	}
+	// RushRange 是冲锋技的真实发起上限（skill_static.RushRange，全表 397
+	// 列；myjf02/03=15）。TargetShape 半径（myjf02/03=Pkg[7]"以自己为圆心
+	// 半径6米"）不是可攻击距离——官服语义（b/e.pcapng 重解码 2026-11-08）：
+	// bind 身位内直接施法，bind~RushRange 之间走冲锋链（客户端自动接近+
+	// 6.5m 内服务端 c61 冲刺），超 RushRange 拒。缺列回退 max(射程, 15m)。
+	rushRange := iniFloat(static, "RushRange")
+	if rushRange <= 0 {
+		rushRange = float32(math.Max(float64(castRange), rushStageMaxMeters))
 	}
 	lockRow := tables.lockData[strconv.FormatInt(int64(iniInt(static, "LockType")), 10)]
 	bindDistance := iniFloat(lockRow, "BindDistance")
@@ -481,6 +523,8 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		qgCost:           iniInt(consume, "AConsumeQGP"),
 		baseDamage:       damage,
 		damageWaves:      damageWaves,
+		damageRows:       damageRows,
+		hitCount:         iniInt(varProp, "HitCount"),
 		hitFrameMs:       hitFrameMs,
 		levelupRelevance: iniValue(newFields, "LevelupRelevance"),
 		packCategory:     iniInt(newFields, "PackCategory"),
@@ -489,6 +533,7 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		sectorAngle: angle, areaWidth: width,
 		actionName: action, actionDuration: actionDuration, followupActions: followups,
 		castRange: castRange,
+		rushRange: rushRange,
 		canRush:   iniInt(static, "CanRush") != 0,
 		lockSkill: strings.EqualFold(script, "skilllock") || iniInt(static, "CanRush") != 0 ||
 			(iniInt(static, "TargetType") == 4 && iniInt(static, "DamageType") != 0),

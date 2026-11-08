@@ -91,8 +91,26 @@ type sceneEntity struct {
 	// 宽串名（NpcNickName 列）。官方表缺列时为空串，帧仍发。
 	model    string
 	wideName string
+	// combatStats 是实力包推导的守方战斗数值（注册期一次，静态；
+	// 2026-11-08 NPC 属性块迁移批次）。nil＝未推导（保持零值守方）。
+	combatStats *npcCombatStats
 	// lootBox 非 nil 表示这是掉落宝箱（点击开 View 80，不走对话/选靶）。
 	lootBox *lootBoxRuntime
+}
+
+// npcCombatStatsOf 取指定 NPC 的守方战斗数值（rollSkillHit 按伤害系选防
+// 用）。要求调用方未持 s.run.mu（内部自取；miss 目标返回 nil）。
+func (s *sceneLifecycle) npcCombatStatsOf(ref skillDamageTargetRef) *npcCombatStats {
+	if s == nil {
+		return nil
+	}
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
+	meta, ok := s.run.npcMeta(worldcore.EntityID(ref.id))
+	if !ok || meta.ownerID != ref.ownerID {
+		return nil
+	}
+	return meta.combatStats
 }
 
 // ---- sceneEntity / Transform 组件访问器（委托场景运行时） ----
@@ -313,8 +331,13 @@ func (s *sceneLifecycle) refreshVisibility(catalog []npcSpawn, position role.Pos
 			next[wireID] = struct{}{}
 		}
 	}
-	// 动态掉落宝箱共用同一可见集（物化/0x0E 扇出过滤统一）。
-	for id := range s.run.lootBoxes {
+	// 动态实体宝箱（宝箱怪/GM 世界宝箱）共用同一可见集（物化/0x0E 扇出
+	// 过滤统一）。挂尸掉落的载体是目录 NPC 本身，已由上方目录距离扫描
+	// 覆盖，无需重复注入。
+	for id, box := range s.run.lootBoxes {
+		if !box.standalone {
+			continue
+		}
 		transform, ok := s.run.npcTransform(worldcore.EntityID(id))
 		if !ok {
 			continue
@@ -591,7 +614,7 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			})
 		}
 		// 重放的 0x0D 是注册期快照（满血活怪）。若该 NPC 当前是尸体
-		// （被杀后等待重生），紧补一帧 0x10 死亡属性，让迟到的客户端
+		//（被杀后等待重生），紧补一帧 0x10 死亡属性，让迟到的客户端
 		// 立即转入死亡表现，而不是渲染一头无法选中的"活怪"。
 		if vitals, hasVitals := s.run.npcVitals(id); hasVitals {
 			if state := vitals.ActorState(entity.id, entity.ownerID); state.HP <= 0 {
@@ -601,6 +624,17 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 				}
 				if err := s.conn.WriteFrame(deadFrame); err != nil {
 					return fmt.Errorf("correct dead scene object %d: %w", entity.id, err)
+				}
+				// 尸体带未拾掉落（挂尸形态）：补发 CanPick/PickMember 冒光
+				// 属性，迟到者同样看到尸体发光与拾取光标。
+				if entity.lootBox != nil && !entity.lootBox.standalone {
+					canPick := sceneObjectByteProperty(entity.id, entity.ownerID, propCanPick, 1)
+					pickMember := sceneObjectWideStringProperty(entity.id, entity.ownerID, propPickMember, entity.lootBox.picker)
+					for _, frame := range [][]byte{canPick, pickMember} {
+						if err := s.conn.WriteFrame(frame); err != nil {
+							return fmt.Errorf("send corpse pick property %d: %w", entity.id, err)
+						}
+					}
 				}
 			}
 		}

@@ -15,6 +15,24 @@
 --
 -- 输出：{damage, miss, crit, parried, reduction_pct}
 --   掷骰顺序：未命中 → 暴击（招架不免疫暴击）→ 招架穿透 → 平减 → 保底 1 点。
+--
+-- ── 每击公式路径（internal/combatcalc 宿主，2026-11-08 数值重写批次）──
+--
+--   M.install_formulas(formulas, bindings)：装载期注入 formula.ini 转译闭包
+--     formulas[formula_id] = function(PV, R, Q) return <转译表达式> end
+--     bindings[formula_id][n] = { src=码, prop=名 }（P1..Pn 来源绑定）
+--   M.calc_hit(ctx)：战斗链每击×每目标调用一次，按 damage_calculate 的 r 行
+--     求单击伤害（P1 基值+P2 波动+威力×系数+分摊，客户端 tips_func_skill.lua
+--     同构）：
+--     ctx.formula_id / ctx.params[1..n]（r 行第 3 段起原始串）/
+--     ctx.hurt_count / ctx.cur_target_count / ctx.props{属性名→值} /
+--     ctx.vitals{HP/MaxHP/MP/MaxMP} /
+--     ctx.rand{[1]=miss, [2]=crit, [3..]=区间掷序列——Go 预掷，脚本不掷骰}
+--     返回 {damage, miss, crit} 或 {fallback=true}（调用方走 legacy 面板×倍率）。
+--
+--   参数来源码：5=字面量；6="a;b" 区间→掷一点；0=攻方属性；1=计数器
+--   (HurtCount/CurTargetCount)；2=生存值。4/7/8/9/10/11/12/13 宿主装载期过滤。
+--   结算复用下方管线助手（守方侧当前全零，与参考服一致；接线后两路径同享）。
 
 local M = {}
 
@@ -105,6 +123,125 @@ function M.calc(c)
   end
   return { damage = damage, miss = false, crit = crit, parried = parried,
            reduction_pct = reduction }
+end
+
+-- ── 每击公式路径 ─────────────────────────────────────────────────────────
+
+local FORMULAS = nil -- [formula_id] = function(PV, R, Q)
+local BINDINGS = nil -- [formula_id] = { [n] = {src=, prop=} }
+
+function M.install_formulas(formulas, bindings)
+  FORMULAS = formulas
+  BINDINGS = bindings
+  local count = 0
+  for _ in pairs(formulas) do count = count + 1 end
+  return count
+end
+
+-- next_rand 按求值顺序消费宿主预掷序列（rand[3..]），耗尽复用末位：
+-- Go 侧 stub 序列即完全复现（确定性可测）。
+local function next_rand(ctx)
+  local seq = ctx.rand
+  if not seq then return 0.5 end
+  local index = (ctx._rand_index or 2) + 1
+  ctx._rand_index = index
+  local value = seq[index]
+  if value == nil then
+    value = seq[#seq] or 0.5
+  end
+  return value
+end
+
+-- resolve_param 解析单个参数位（P<n>）的取值。
+local function resolve_param(ctx, binding, raw)
+  if not binding then
+    return tonumber(raw) or 0
+  end
+  local src = binding.src or 0
+  if src == 5 then
+    return tonumber(raw) or 0
+  elseif src == 6 then
+    -- "a;b" 波动区间 → [a,b] 均匀整数
+    local text = tostring(raw or "")
+    local lo, hi = text:match("^([^;]+);([^;]+)$")
+    lo, hi = tonumber(lo), tonumber(hi)
+    if not lo or not hi then
+      return tonumber(raw) or 0
+    end
+    if hi < lo then lo, hi = hi, lo end
+    return math.floor(lo + (hi - lo + 1) * next_rand(ctx))
+  elseif src == 0 then
+    local props = ctx.props or {}
+    return props[binding.prop or ""] or 0
+  elseif src == 1 then
+    if binding.prop == "HurtCount" then return ctx.hurt_count or 1 end
+    if binding.prop == "CurTargetCount" then return ctx.cur_target_count or 1 end
+    return 0
+  elseif src == 2 then
+    local vitals = ctx.vitals or {}
+    return vitals[binding.prop or ""] or 0
+  end
+  return 0
+end
+
+-- query_prop 是 #Prop 直接引用的查询（属性 → 生存值 → 计数器 → 0）。
+local function query_prop(ctx, name)
+  local value = (ctx.props or {})[name]
+  if value == nil then value = (ctx.vitals or {})[name] end
+  if value == nil and name == "HurtCount" then value = ctx.hurt_count end
+  if value == nil and name == "CurTargetCount" then value = ctx.cur_target_count end
+  return value or 0
+end
+
+function M.calc_hit(ctx)
+  if not FORMULAS or not BINDINGS then
+    return {fallback = true}
+  end
+  local fn = FORMULAS[ctx.formula_id]
+  local bind = BINDINGS[ctx.formula_id]
+  if not fn or not bind then
+    return {fallback = true}
+  end
+
+  -- 参数解析：P1..Pmax（绑定表按 1..max 连续注入，位缺即 nil→字面量兜底）
+  local params = ctx.params or {}
+  local pv = {}
+  local max_param = 0
+  for n in pairs(bind) do
+    if n > max_param then max_param = n end
+  end
+  for n = 1, max_param do
+    pv[n] = resolve_param(ctx, bind[n], params[n])
+  end
+
+  local raw = fn(pv, function(lo, hi)
+    if hi < lo then lo, hi = hi, lo end
+    return math.floor(lo + (hi - lo + 1) * next_rand(ctx))
+  end, function(name) return query_prop(ctx, name) end)
+  if type(raw) ~= "number" or raw ~= raw or raw == math.huge or raw == -math.huge then
+    return {fallback = true}
+  end
+
+  -- 结算次序同 M.calc：防御减免 → 未命中 → 暴击 → 保底。攻方暴击值/
+  -- 命中值按伤害系取 PhyVa/MagicVa、PhyHit/MagicHit（Go 侧预选）；
+  -- 守方（defender）缺省零值——NPC 属性块迁移前与参考服"守方侧缺省"
+  -- 口径一致，管线已铺好（§十六 4–7 条）。
+  local defender = ctx.defender or {}
+  raw = raw * (1 - defenseReduction(defender.defense or 0))
+  local seq = ctx.rand or {}
+  local miss = missChance(ctx.accuracy or 0, defender.evasion or 0, 0, 0)
+  if miss > 0 and (seq[1] or 0) < miss then
+    return {damage = 0, miss = true, crit = false}
+  end
+  local chance = critChance(ctx.crit_value or 0, defender.resilience or 0, 0, 0)
+  local crit = false
+  if chance > 0 and (seq[2] or 0) < chance then
+    raw = raw * critMultiplier(0, 0) -- 基础 2.0 倍率（外部爆伤未接线）
+    crit = true
+  end
+  local damage = math.floor(raw)
+  if damage < 1 then damage = 1 end
+  return {damage = damage, miss = false, crit = crit}
 end
 
 return M

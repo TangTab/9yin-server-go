@@ -147,6 +147,11 @@ type combatRoll struct {
 // rollSkillDamage 出招掷值（Java SkillCastHandler.rollDamage 同序）：
 // missRoll/critRoll 先掷，攻方区间掷值后掷。miss → damage=0（发帧阶段
 // 整段跳过）；命中保底 1 点。
+//
+// 2026-11-08 数值重写后本函数降级为 legacy 回退路径（面板攻击×技能倍率
+// 两参数近似）：rollSkillHit 优先走 combatcalc 每击公式路径（damage_
+// calculate r 行 × formula.ini 公式），引擎不可用/公式不支持时才落到这里。
+// legacy 面板口径与 Java 参考服一致，保留作为脚本层缺失时的兜底。
 func rollSkillDamage(attackMin, attackMax int32, ratio float64) combatRoll {
 	missRoll := randFloat64()
 	critRoll := randFloat64()

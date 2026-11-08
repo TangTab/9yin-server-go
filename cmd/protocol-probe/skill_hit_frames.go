@@ -60,6 +60,53 @@ func skillHitDamageFrame(victimID, victimOwner uint32, damage int32, skillID, sc
 	)
 }
 
+// healFloatFrame 即 msg24 治疗/回蓝飘字（10 值形态，官服打坐
+// 回复九跳逐帧实证，FsGame 官服抓包 00:11:50.408–00:12:00.882）：
+//
+//	[24, obj(受者), i32 16|18, i32 实际回复, i32 溢出截断, i32 0,
+//	 窄串来源ID, 窄串script标签, 宽串受者名, 宽串受者名]
+//
+// 补满末跳官服实发 (162,1478)：实际 162 + 截断 1478 = 名义 1640；
+// 未触顶跳恒 (回复量, 0)。同型帧亦用于 buff 回复（NPC
+// buff_clone_recovery_5 飘字实证：脚本标签 "Buffer"、来源位为
+// buff 名），script 标签区分来源族；打坐技能来源用 "SkillNormal"。
+// 宽名双写为施法者/受者两位；打坐自愈时两者同为本人。
+// kind：16=HP 治疗飘字、18=MP 回蓝飘字（49.4.14.150:7074 实时
+// 实证打坐 MP 每跳 [24, obj, 18, 519, 0, 0, zs_default_01,
+// SkillNormal, 名, 名]，与 c1=16 同十值形态）。
+func healFloatFrame(targetID, targetOwner uint32, kind, applied, wasted int32, sourceID, scriptLabel, targetWideName string) ([]byte, error) {
+	return serverCustomIntMessage(24,
+		customObject(targetID, targetOwner),
+		customInt(kind),
+		customInt(applied),
+		customInt(wasted),
+		customInt(0),
+		customString(sourceID),
+		customString(scriptLabel),
+		customWideString(targetWideName),
+		customWideString(targetWideName),
+	)
+}
+
+// sitcrossActionFrame 即打坐进入/退出动作飘字（msg24 4 值形态）：
+//
+//	[24, obj(自己), i32 40|41, 窄串"dazuo_old"]
+//
+// 官服打坐进出簇与 LogicState 单属性帧同毫秒成对出现，c1=40 进、
+// 41 出（FsGame 官服抓包 102 进出全量成对实证）；旁观者同广播，
+// 这也是别人打坐时你能看到的动作提示来源。
+func sitcrossActionFrame(id, owner uint32, enter bool) ([]byte, error) {
+	action := int32(41)
+	if enter {
+		action = 40
+	}
+	return serverCustomIntMessage(24,
+		customObject(id, owner),
+		customInt(action),
+		customString("dazuo_old"),
+	)
+}
+
 // hurtEffectFrame 编码 0x2D 受击特效（25B）：
 //
 //	2D | 01 | 00 | u32 受害者obj@3 | u32 owner@7 | u16 2 @11 | u16 28 @13

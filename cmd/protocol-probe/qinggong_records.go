@@ -45,6 +45,7 @@ func init() {
 		"FashionSuitRec":     recordFashionSuit,
 		"CardRec":            recordCard,
 		"UseCardRec":         recordUseCard,
+		"data_record":        recordDataRecord,
 		"NewRideRec":         recordNewRide,
 		"RecvLetterRec":      recordRecvLetter,
 	} {
@@ -199,6 +200,7 @@ const (
 	recordFashionSuit    uint16 = 315 // FashionSuitRec（[7,3,3,4,3,3]）
 	recordCard           uint16 = 322 // CardRec（[3]）
 	recordUseCard        uint16 = 324 // UseCardRec（[2,2]）
+	recordDataRecord     uint16 = 120 // data_record（[2]，九阴志事件状态行）
 	viewportQingGong     uint16 = 46
 	// View 对象使用原始的场景属性 ConfigID 字段。后续仅商店用的兼容字段
 	// 105 有相同的显示名，但 QingGongContainer 的原生查找读取的不是它。
@@ -273,6 +275,40 @@ func serverRecordAddInt32Row(objectID, ownerID uint32, recordIndex uint16, row, 
 	binary.LittleEndian.PutUint16(msg[12:], uint16(row)) // 源行号
 	binary.LittleEndian.PutUint16(msg[14:], 1)           // 一行
 	binary.LittleEndian.PutUint32(msg[16:], value)
+	return msg
+}
+
+// serverRecordAddWordRow 带显式行号的 u16 记录单元格（单行帧，
+// native-menu pushJyzEventRecords 同形：抓包帧即
+// 11 00 <obj> <owner> 78 00 <行号> 01 00 <u16>）。
+func serverRecordAddWordRow(objectID, ownerID uint32, recordIndex uint16, row, value uint16) []byte {
+	msg := make([]byte, 18)
+	msg[0] = 0x11
+	msg[1] = 0 // 场景对象
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
+	binary.LittleEndian.PutUint16(msg[12:], row) // 源行号
+	binary.LittleEndian.PutUint16(msg[14:], 1)   // 一行
+	binary.LittleEndian.PutUint16(msg[16:], value)
+	return msg
+}
+
+// serverRecordAddWordRows 把整段 u16 行打包进一帧 0x11（源行号 0 起、
+// 行数=len）。官服 data_record 方言：c.pcapng #256 九阴志事件状态为
+// 11 00 <obj> <owner> 78 00 0000 3a00 <u16×58> 单帧铺满，而非逐行帧。
+func serverRecordAddWordRows(objectID, ownerID uint32, recordIndex uint16, values []uint16) []byte {
+	msg := make([]byte, 16, 16+2*len(values))
+	msg[0] = 0x11
+	msg[1] = 0 // 场景对象
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
+	binary.LittleEndian.PutUint16(msg[12:], 0) // 源行号 0 起
+	binary.LittleEndian.PutUint16(msg[14:], uint16(len(values)))
+	for _, value := range values {
+		msg = binary.LittleEndian.AppendUint16(msg, value)
+	}
 	return msg
 }
 
@@ -442,6 +478,18 @@ const (
 	facultyActTaskFirst uint32 = 1140
 	facultyActTaskLast  uint32 = 1147
 	facultyActAltTaskID uint32 = 51002
+
+	// 门派引导链家族：task_school_lead.ini 八大老门派 TaskList 的第 9 位
+	// （1555 少林、1556 武当、1557 峨眉、1558 丐帮、1559 锦衣卫、1560
+	// 极乐谷、1561 君子堂、1562 唐门；刑天堡/明教/天山/昆仑/五仙教走
+	// 76709 等独立号段，不在 native-menu 的补集里），与上面 1140--1147
+	// （同文件 TaskList 第 1 位）逐派配对。native-menu grantFunctionUnlock
+	// 在 Task_Accepted 里额外铺了这一族（exe 0x140421e61 的 0x613..0x61a
+	// 区间，captures/local/62311、49840 两会话 23 行实证）。只进
+	// Task_Accepted、不进 Task_Completed 位集——该构建的位图 860 行
+	// 全零，无置位证据。
+	facultySchoolLeadTaskFirst uint32 = 1555
+	facultySchoolLeadTaskLast  uint32 = 1562
 )
 
 // taskCompletedBit 遵循 0x11854870 处的现代 FxGameLogic 谓词。它把一
@@ -472,11 +520,16 @@ func taskCompletedRows(taskIDs []uint32) (map[uint32]uint32, uint32) {
 }
 
 func facultyAcceptedTaskIDs() []uint32 {
-	taskIDs := make([]uint32, 0, int(facultyGuideTaskLast-facultyGuideTaskFirst)+int(facultyActTaskLast-facultyActTaskFirst)+4)
+	taskIDs := make([]uint32, 0, int(facultyGuideTaskLast-facultyGuideTaskFirst)+
+		int(facultySchoolLeadTaskLast-facultySchoolLeadTaskFirst)+
+		int(facultyActTaskLast-facultyActTaskFirst)+4)
 	for taskID := facultyGuideTaskFirst; taskID <= facultyGuideTaskLast; taskID++ {
 		taskIDs = append(taskIDs, taskID)
 	}
 	taskIDs = append(taskIDs, facultyAltTaskID)
+	for taskID := facultySchoolLeadTaskFirst; taskID <= facultySchoolLeadTaskLast; taskID++ {
+		taskIDs = append(taskIDs, taskID)
+	}
 	for taskID := facultyActTaskFirst; taskID <= facultyActTaskLast; taskID++ {
 		taskIDs = append(taskIDs, taskID)
 	}
@@ -512,6 +565,12 @@ func grantFunctionUnlock(conn sceneMessageConnection) error {
 		if err := conn.WriteFrame(frame); err != nil {
 			return fmt.Errorf("add Task_Accepted task %d: %w", taskID, err)
 		}
+	}
+
+	// native grantCollectSkillRec：23 行任务之后、Task_Completed 位图
+	// 之前铺 204 项采集技能（62311 #548-#751 帧序）。
+	if err := grantCollectSkills(conn); err != nil {
+		return fmt.Errorf("grant collect skills: %w", err)
 	}
 
 	rowValues, finalRow := taskCompletedRows(taskIDs)

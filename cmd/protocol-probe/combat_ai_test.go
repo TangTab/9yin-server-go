@@ -22,6 +22,21 @@ func registerTestCombatNPC(t *testing.T, lifecycle *sceneLifecycle, id uint32) {
 	}
 }
 
+// registerPassiveTestCombatNPC 注册 NotPositive=1 的 AttackNpc——城内
+// 白名 NPC（掷斧监工/背柴工人/剧情人物）的数据形态：creator 条目属性
+// 层写入（NotPositive 官方属性表 idx 62，Int32）。
+func registerPassiveTestCombatNPC(t *testing.T, lifecycle *sceneLifecycle, id uint32) {
+	t.Helper()
+	npc := testNPCSpawn()
+	npc.resolved.ConfigID = "AttackNPC_passive"
+	npc.resolved.ScriptClass = "AttackNpc"
+	npc.resolved.Properties["NotPositive"] = clientdata.PropertyValue{Value: clientdata.Int32Value(1)}
+	npc.x, npc.y, npc.z = 1, 0, 0
+	if err := lifecycle.registerNPCOnRun(id, npc); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // placeTestNPC 把已注册的测试 NPC 摆到指定 X/Z。注册点固定为
 // (1,0,0)，因此显式写全两个坐标与原先只改 transform.X 的戳点
 // 行为一致。
@@ -33,6 +48,106 @@ func placeTestNPC(t *testing.T, lifecycle *sceneLifecycle, id uint32, x, z float
 	}
 	transform.X, transform.Z = x, z
 	lifecycle.writeNpcTransform(worldcore.EntityID(id), transform)
+}
+
+// TestNewNPCCombatStateHonorsNotPositive 模板位断言：NotPositive=1 →
+// Passive（不主动索敌）；缺省/0（野外怪）→ 主动。creator 属性与模板列
+// 同名时 resolver 以 creator 层为最终值（后写覆盖）。
+func TestNewNPCCombatStateHonorsNotPositive(t *testing.T) {
+	home := worldcore.Transform{X: 1, Y: 0, Z: 0}
+	active := newNPCCombatState(testNPCSpawn(), home)
+	if active.Passive {
+		t.Fatal("absent NotPositive must stay active (wilderness monster)")
+	}
+	passive := testNPCSpawn()
+	passive.resolved.Properties["NotPositive"] = clientdata.PropertyValue{Value: clientdata.Int32Value(1)}
+	if state := newNPCCombatState(passive, home); !state.Passive {
+		t.Fatal("NotPositive=1 must mark brain passive")
+	}
+	zero := testNPCSpawn()
+	zero.resolved.Properties["NotPositive"] = clientdata.PropertyValue{Value: clientdata.Int32Value(0)}
+	if state := newNPCCombatState(zero, home); state.Passive {
+		t.Fatal("NotPositive=0 must stay active")
+	}
+}
+
+// TestPassiveNPCDoesNotAggroNearbyPlayer 复刻真机反馈的根因：玩家走到
+// 城内白名 AttackNpc（NotPositive=1）身边，NPC 不追不咬、玩家不入战。
+func TestPassiveNPCDoesNotAggroNearbyPlayer(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerPassiveTestCombatNPC(t, lifecycle, 101)
+	player := newPlayerActor("tester", 0)
+	before := player.stateSnapshot().HP
+	now := time.Unix(8000, 0)
+	// 连跑多个 tick：被动怪必须始终原地待命。
+	for i := 0; i < 3; i++ {
+		result := lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now.Add(time.Duration(i)*time.Second))
+		if result.playerStateChanged || result.playerRevived {
+			t.Fatalf("passive NPC aggroed idle player at tick %d: %+v", i, result)
+		}
+	}
+	if after := player.stateSnapshot().HP; after != before {
+		t.Fatalf("passive NPC damaged idle player: HP=%d want %d", after, before)
+	}
+	if logic := player.stateSnapshot().LogicState; logic != entity.LogicStateNormal {
+		t.Fatalf("passive NPC dragged idle player into combat: LogicState=%d", logic)
+	}
+	if brain, _ := lifecycle.run.combat.Brain(worldcore.EntityID(101)); brain.Threat != 0 || brain.TargetMember != 0 {
+		t.Fatalf("passive NPC built threat=%d target=%d without being hit", brain.Threat, brain.TargetMember)
+	}
+	lifecycle.close()
+}
+
+// TestPassiveNPCRetaliatesWhenHit 受击反击闭环：白名 NPC 被打一下后锁定
+// 攻击者，随后按普通追击/攻击流程反击（Java NpcCombatAi 纯反击模型）。
+func TestPassiveNPCRetaliatesWhenHit(t *testing.T) {
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerPassiveTestCombatNPC(t, lifecycle, 102)
+	player := newPlayerActor("tester", 0)
+	now := time.Unix(8100, 0)
+	// 首 tick 登记 s.wireID（受击锁定攻击者要用），被动怪原地待命。
+	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now)
+	// 玩家命中 NPC 一次（applySkillDamageToNPC 真实入口；伤害 1 进威胁表）。
+	if _, err := lifecycle.applySkillDamageToNPC(102, 1, 1, now); err != nil {
+		t.Fatal(err)
+	}
+	lifecycle.mu.Lock()
+	attackerWireID := lifecycle.wireID
+	lifecycle.mu.Unlock()
+	brain, ok := lifecycle.run.combat.Brain(worldcore.EntityID(102))
+	if !ok {
+		t.Fatal("passive NPC must have a brain")
+	}
+	if brain.Threat == 0 || brain.TargetMember != attackerWireID {
+		t.Fatalf("hit did not lock attacker: threat=%d target=%d attacker=%d", brain.Threat, brain.TargetMember, attackerWireID)
+	}
+	// 攻击周期 2.2s 后的 tick：受击锁定的成员就在脚边，必须真反击掉血。
+	before := player.stateSnapshot().HP
+	result := lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now.Add(npcAttackEvery))
+	if after := player.stateSnapshot().HP; after >= before {
+		t.Fatalf("passive NPC did not retaliate after being hit: HP=%d want below %d", after, before)
+	}
+	if !result.playerStateChanged {
+		t.Fatal("retaliation must change player state")
+	}
+	var sawHit bool
+	for _, frame := range conn.Frames() {
+		if frame[0] == 0x1E && int32(binary.LittleEndian.Uint32(frame[4:])) == 24 {
+			sawHit = true
+		}
+	}
+	if !sawHit {
+		t.Fatal("retaliation attack frames missing msg24 hit")
+	}
+	lifecycle.close()
 }
 
 func TestCombatTickAggroesAndDamagesNearbyPlayer(t *testing.T) {

@@ -179,23 +179,30 @@ func bookIntroKey(book string) string {
 	return book
 }
 
-// roleListTitle 选人界面实力称号（f23）：等级 → title0NN 档位键
-// （title001=不堪一击 … title027=返璞归真，客户端按 desc_title0NN 本地化）。
+// roleListTitle 选人界面实力称号（f23）：等级 → title0NN 档位键，客户端按
+// desc_title0NN 本地化。阶梯 = share/faculty/facultylevel.ini [config] 权威
+// 表（0-240 共 32 阶）：0-135 每 5 点 title001-025（深藏不露）、136-240 每
+// 15 点 title026-032（深不可测…搏日擒天）。旧实现 131-135 段误入 title026、
+// >165 截断 title027，均与客户端表不符（盘点 §2.7/§2.8）。
 func roleListTitle(powerLevel int) string {
-	switch {
-	case powerLevel <= 5:
+	if powerLevel <= 5 {
 		return "title001"
+	}
+	switch {
 	case powerLevel <= 120:
 		title := (powerLevel-1)/5 + 1
 		if title > 24 {
 			title = 24
 		}
 		return fmt.Sprintf("title%03d", title)
-	case powerLevel <= 130:
+	case powerLevel <= 135:
 		return "title025"
-	case powerLevel <= 150:
-		return "title026"
 	default:
-		return "title027"
+		// 136 起 15 点一阶：136-150=026 … 226-240=032，超出封顶 032。
+		title := 26 + (powerLevel-136)/15
+		if title > 32 {
+			title = 32
+		}
+		return fmt.Sprintf("title%03d", title)
 	}
 }

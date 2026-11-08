@@ -125,3 +125,60 @@ func TestRoleParaCarriesShowEquipTypeLook(t *testing.T) {
 		t.Fatalf("f9=%q, want 时装模型", fields[9])
 	}
 }
+
+// /api/meridians：钩子（game_meridians 形态 {id,name,defaultMax}）优先；
+// 钩子缺席/空表回退 globalJingMaiCatalog（name=configID）。
+func TestGMMeridiansEndpoint(t *testing.T) {
+	hub := newGMHub()
+	hub.meridianRows = func() []gmMeridianRow {
+		return []gmMeridianRow{
+			{ID: "jm_chong", Name: "冲脉", DefaultMax: 180},
+			{ID: "jm_dantian", Name: "丹田本元", DefaultMax: 180},
+		}
+	}
+	server := httptest.NewServer(newGMMux(hub))
+	t.Cleanup(server.Close)
+
+	response, err := http.Get(server.URL + "/api/meridians")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d", response.StatusCode)
+	}
+	var rows []gmMeridianRow
+	if err := json.NewDecoder(response.Body).Decode(&rows); err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 2 || rows[0].ID != "jm_chong" || rows[0].Name != "冲脉" || rows[0].DefaultMax != 180 {
+		t.Fatalf("rows=%+v", rows)
+	}
+}
+
+func TestGMMeridiansEndpointFallsBackToCatalog(t *testing.T) {
+	// 钩子缺席（httptest 无 DB）：回退包级目录，名字退化为 configID。
+	original := globalJingMaiCatalog
+	globalJingMaiCatalog = &jingMaiCatalog{
+		order: []jingMaiDef{{configID: "jm_a", itemType: 1003, maxLevel: 3}},
+		byID:  map[string]int{"jm_a": 0},
+	}
+	t.Cleanup(func() { globalJingMaiCatalog = original })
+
+	hub := newGMHub()
+	server := httptest.NewServer(newGMMux(hub))
+	t.Cleanup(server.Close)
+
+	response, err := http.Get(server.URL + "/api/meridians")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	var rows []gmMeridianRow
+	if err := json.NewDecoder(response.Body).Decode(&rows); err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 || rows[0].ID != "jm_a" || rows[0].Name != "jm_a" || rows[0].DefaultMax != 3 {
+		t.Fatalf("fallback rows=%+v", rows)
+	}
+}

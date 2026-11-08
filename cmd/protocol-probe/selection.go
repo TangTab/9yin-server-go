@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"time"
 
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -13,6 +14,58 @@ import (
 // 官方语义见 docs/fork-binary-message-inventory.md 与
 // docs/combat-traffic-compare.md（49840 抓包钉死帧形）。
 const clientCustomSelectTarget int32 = 431
+
+// CLIENT_CUSTOMMSG_ATTACK_TARGET（298）：客户端请求自动攻击/接近目标。
+// 官服应答 msg209 [接近距离15, obj(目标), 0]（a.pcapng 14.258/46.489
+// 双样本）——这是客户端「自动战斗接近」的授权帧：点怪后客户端自动跑向
+// 目标、跑入射程自动出招都依赖它；缺 209 时客户端发完 211 不起跑
+//（2026-11-08 全天回归的最终根因：官服的"跑"是自动攻击接近系统，
+// 不是冲锋链独有行为）。
+const clientCustomAttackTarget int32 = 298
+
+// handleAttackTargetCustom 处理 msg298 自动攻击目标请求：
+// [298, i32 0, obj(目标)] → 回 msg209 [15, obj(目标), 0] 授权。
+// 官服应答后续的 LogicState/移速帧（463/386/390）跟随各自系统，
+// 不随 209 固定下发。
+func handleAttackTargetCustom(world *sceneLifecycle, custom clientCustomMessage, remote string) error {
+	if len(custom.Values) < 3 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomAttackTarget {
+		return fmt.Errorf("attack target message mismatch: %v", custom.Values)
+	}
+	if custom.Values[2].Type != 8 {
+		return fmt.Errorf("attack target argument must be object, got %s", custom.Values[2])
+	}
+	packed := binary.LittleEndian.Uint64(custom.Values[2].Raw[:])
+	targetID := uint32(packed)
+	targetOwner := uint32(packed >> 32)
+	if targetID == 0 {
+		return nil
+	}
+	world.run.mu.Lock()
+	defer world.run.mu.Unlock()
+	if world.closed {
+		return nil
+	}
+	if _, exists := world.npcMeta(worldcore.EntityID(targetID)); !exists {
+		// 未知对象：回零目标授权（客户端清接近态），不报错断链。
+		frame, err := serverCustomIntMessage(209, customInt(15), customObject(0, 0), customInt(0))
+		if err != nil {
+			return err
+		}
+		return world.conn.WriteFrame(frame)
+	}
+	frame, err := serverCustomIntMessage(209, customInt(15), customObject(targetID, targetOwner), customInt(0))
+	if err != nil {
+		return fmt.Errorf("encode attack target ack: %w", err)
+	}
+	if err := world.conn.WriteFrame(frame); err != nil {
+		return fmt.Errorf("send attack target ack: %w", err)
+	}
+	// 298 语义即攻击意图：镜像选中（211 选靶读取）。
+	world.selectedObject = targetID
+	world.selectedOwner = targetOwner
+	log.Printf("%s: attack target ack id=%d owner=%d", remote, targetID, targetOwner)
+	return nil
+}
 
 // AutoSelectObject 与 LastObject 配对：fork 每次选择目标回两帧属性
 // (官方表玩家域 414/415)。
@@ -60,7 +113,20 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	}
 	world.selectedObject = entity.id
 	world.selectedOwner = entity.ownerID
-	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s",
+	// 冲锋暂存授权（2026-11-08 官服 b.pcapng 双样本实证）：msg431 是冲锋
+	// 按键的第一步（目标确认；普通点选走 298），官服应答在选中双帧之外
+	// 再发 msg25[30000]——客户端等这帧才启动自动接近；431 前客户端无
+	// 任何技能上报，应答簇里的技能帧是遗留态重推。缺 msg25 时客户端不
+	// 跑、直接连发 211+212 完事（55981/62096 会话实证）。锁内只补写一
+	// 帧（skillPauseFrame 是纯编码，无锁竞争）。
+	pause, err := skillPauseFrame(int32(rushPendingWindow / time.Millisecond))
+	if err != nil {
+		return fmt.Errorf("encode select target pause ack: %w", err)
+	}
+	if err := world.conn.WriteFrame(pause); err != nil {
+		return fmt.Errorf("send select target pause ack: %w", err)
+	}
+	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s (pause ack)",
 		remote, entity.id, entity.ownerID, entity.configID, entity.interaction)
 	return nil
 }

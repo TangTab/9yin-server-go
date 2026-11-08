@@ -40,6 +40,15 @@ const (
 	propHPHeartSpeedAdd uint16 = 621
 	propMPHeartSpeed    uint16 = 618
 	propMPHeartSpeedAdd uint16 = 622
+	// 资源值单属性帧索引：打坐回复（sitcrossRecoveryFrames）与轻功
+	// 回复（qingGongPointFrame）一样按官方形态逐层发 n=1 单帧，
+	// 不走全量 stateProperties。
+	propHP         uint16 = 465
+	propMP         uint16 = 466
+	propHPRatio    uint16 = 469
+	propMPRatio    uint16 = 470
+	propHitHP      uint16 = 481
+	propHitHPRatio uint16 = 482
 	// form_main_player 的恢复提示框从这些独立属性获取实际恢复量，而不
 	// 是从 *HeartSpeed 读取。
 	propHPUpSpeed           uint16 = 615
@@ -235,6 +244,9 @@ type playerActor struct {
 	pendingCast    *pendingCastState
 	rushInFlight   bool
 	rushDashIssued bool
+	// resumeSettleSkip：冲锋落地重入受理链时的一次性跳过标记
+	//（pending.settled 时置位——CD/MP 已在 c61 时点结算）。
+	resumeSettleSkip bool
 	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
 	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
 	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。
@@ -368,7 +380,8 @@ func (p *playerActor) snapshotLocked() entity.ActorState {
 	state.Name = p.name
 	state.QingGongPoint = p.qinggong.Point
 	state.MaxQingGongPoint = p.qinggong.Max
-	state.MaxQingGongPointAdd = p.qinggong.MaxAdd
+	// 镇派兵器"轻功值上限"注入位与 p.qinggong.MaxAdd 同帧（盘点 §4）。
+	state.MaxQingGongPointAdd = p.qinggong.MaxAdd + p.progress.zhenpaiEquip.qinggong
 	state.QingGongConsumeMul = p.qinggong.ConsumeMul
 	state.SpeedRatio = p.speed.SpeedRatio
 	return state
@@ -958,10 +971,12 @@ func (p *playerActor) facultyExit() {
 	p.vitals.SetLogicState(0)
 }
 
-func (p *playerActor) progressBookFrame(slot uint16) ([]byte, error) {
+// bookUpdateFrame View43 行级增量帧（已存在行；武学面板升级后刷新的
+// 官方方言，见 playerProgress.bookUpdateFrame）。
+func (p *playerActor) bookUpdateFrame(slot uint16) ([]byte, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.progress.bookFrame(slot)
+	return p.progress.bookUpdateFrame(slot)
 }
 
 func (p *playerActor) facultyTick(now time.Time) (uint16, bool) {
@@ -1101,17 +1116,17 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	mpRatio := int32(int64(state.MP) * 100 / int64(state.MaxMP))
 	properties := []clientdata.IndexedProperty{
 		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
-		{Index: 469, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
-		{Index: 470, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
+		{Index: propHPRatio, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		{Index: propMPRatio, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
 		// 客户端用这些基础值加上 MaxHPAdd/MaxMPAdd 推导显示的总量。
 		// Actor.Max* 仍是服务器侧的总上限。
 		{Index: 578, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
 		{Index: 579, Name: "MaxMP", Value: clientdata.Int32Value(state.BaseMaxMP)},
-		{Index: 465, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: 466, Name: "MP", Value: clientdata.Int32Value(state.MP)},
+		{Index: propHP, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		{Index: propMP, Name: "MP", Value: clientdata.Int32Value(state.MP)},
 		{Index: 390, Name: "SpeedRatio", Value: clientdata.Int32Value(state.SpeedRatio)},
-		{Index: 481, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
-		{Index: 482, Name: "HitHPRatio", Value: clientdata.Int32Value(hitHPRatio)},
+		{Index: propHitHP, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
+		{Index: propHitHPRatio, Name: "HitHPRatio", Value: clientdata.Int32Value(hitHPRatio)},
 		{Index: 692, Name: "QingGongPoint", Value: clientdata.Int32Value(state.QingGongPoint)},
 		{Index: 693, Name: "MaxQingGongPoint", Value: clientdata.Int32Value(state.MaxQingGongPoint)},
 		{Index: 694, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
@@ -1590,13 +1605,59 @@ func (p *playerActor) loginVitalUpdate() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, properties)
 }
 
-// sitcrossTick 只推进服务器持有的 HP/MP 状态。调用方会发送生成的常规
-// 0x10 档案，因此客户端绝不会自行凭 HPHeartSpeed/MPHeartSpeed 虚构
-// 资源值。
-func (p *playerActor) sitcrossTick() bool {
+// sitcrossTick 只推进服务器持有的 HP/MP 状态，并返回逐层结算明细；
+// 调用方按官方形态出帧（sitcrossRecoveryFrames：n=1 单属性帧 +
+// msg24 c1=16 治疗飘字），客户端绝不会自行凭 HPHeartSpeed/
+// MPHeartSpeed 虚构资源值。
+func (p *playerActor) sitcrossTick() sim.SitcrossSettlement {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.vitals.RestoreWhileSit(sitcrossRecoveryPerSecond(p.vitals.MaxHP), sitcrossRecoveryPerSecond(p.vitals.MaxMP))
+}
+
+// sitcrossRecoveryFrames 生成打坐回复一跳的官方形态帧簇（FsGame
+// 官服抓包 00:11:50.408–00:12:00.882 九跳逐帧实证）：逐层 n=1
+// 单属性帧（HitHPRatio→HitHP→HPRatio→HP，MP 同形），HP/MP 层
+// 随后各补自己的 msg24 飘字——c1=16 治疗绿字、c1=18 回蓝飘字
+// （49.4.14.150:7074 实时实证，HP/MP 分帧各飘各的）。
+// 坐姿期间的周期帧绝不能改走带 LogicState 的全量 vitalUpdate：
+// 官服坐姿周期帧从不携带 LogicState，重推状态帧会让客户端重入
+// 坐姿动画。
+func (p *playerActor) sitcrossRecoveryFrames(settlement sim.SitcrossSettlement) ([][]byte, error) {
+	p.mu.Lock()
+	state := p.snapshotLocked()
+	name := p.name
+	p.mu.Unlock()
+	frames := make([][]byte, 0, 6)
+	if settlement.HitHPChanged {
+		frames = append(frames,
+			sceneObjectIntProperty(playerObjectID, playerOwnerID, propHitHPRatio, int32(int64(state.HitHP)*100/int64(state.MaxHP))),
+			sceneObjectIntProperty(playerObjectID, playerOwnerID, propHitHP, state.HitHP),
+		)
+	}
+	if settlement.HPApplied > 0 {
+		frames = append(frames,
+			sceneObjectIntProperty(playerObjectID, playerOwnerID, propHPRatio, int32(int64(state.HP)*100/int64(state.MaxHP))),
+			sceneObjectIntProperty(playerObjectID, playerOwnerID, propHP, state.HP),
+		)
+		frame, err := healFloatFrame(playerObjectID, playerOwnerID, 16, settlement.HPApplied, settlement.HPWasted, sitcrossShortcutID, "SkillNormal", name)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+	}
+	if settlement.MPApplied > 0 {
+		frames = append(frames,
+			sceneObjectIntProperty(playerObjectID, playerOwnerID, propMPRatio, int32(int64(state.MP)*100/int64(state.MaxMP))),
+			sceneObjectIntProperty(playerObjectID, playerOwnerID, propMP, state.MP),
+		)
+		frame, err := healFloatFrame(playerObjectID, playerOwnerID, 18, settlement.MPApplied, settlement.MPWasted, sitcrossShortcutID, "SkillNormal", name)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+	}
+	return frames, nil
 }
 
 // sitcrossRecoveryPerSecond 向上取整，使无法整除的推导上限仍能在至多
@@ -1946,14 +2007,14 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addFloat(386, motion.runSpeed)
 	addInt(390, state.SpeedRatio)
 	addByte(27, 0) // CantJump(全表唯一@27)
-	addInt(469, int32(int64(state.HP)*100/int64(state.MaxHP)))
-	addInt(470, int32(int64(state.MP)*100/int64(state.MaxMP)))
+	addInt(propHPRatio, int32(int64(state.HP)*100/int64(state.MaxHP)))
+	addInt(propMPRatio, int32(int64(state.MP)*100/int64(state.MaxMP)))
 	addInt(578, state.BaseMaxHP)
 	addInt(579, state.BaseMaxMP)
-	addInt(465, state.HP)
-	addInt(466, state.MP)
-	addInt(481, state.HitHP)
-	addInt(482, int32(int64(state.HitHP)*100/int64(state.MaxHP)))
+	addInt(propHP, state.HP)
+	addInt(propMP, state.MP)
+	addInt(propHitHP, state.HitHP)
+	addInt(propHitHPRatio, int32(int64(state.HitHP)*100/int64(state.MaxHP)))
 	addInt(692, state.QingGongPoint)
 	addInt(693, state.MaxQingGongPoint)
 	addInt(694, state.MaxQingGongPointAdd)

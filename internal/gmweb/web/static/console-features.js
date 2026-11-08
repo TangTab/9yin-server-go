@@ -291,6 +291,12 @@
         value: +document.querySelector("#corpse-ttl").value,
       });
     }
+    function setLootBoxTTL() {
+      command({
+        action: "set_lootbox_ttl",
+        value: +document.querySelector("#lootbox-ttl").value,
+      });
+    }
     function setAutosaveInterval() {
       command({
         action: "set_autosave_interval",

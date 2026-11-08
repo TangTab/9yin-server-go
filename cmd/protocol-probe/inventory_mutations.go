@@ -312,7 +312,9 @@ func insertBagRow(ctx context.Context, tx *sql.Tx, roleID role.RoleID, slot int3
 	return nil
 }
 
-// insertEquipRow 事务内装备行（game_items 联表补全；uid 列缺席降级）。
+// insertEquipRow 事务内装备行（game_items 联表补全；uid/affixes 列缺席
+// 逐级降级）。镇派兵器（@PropModifyPackRec 条件动态包）在此单点写入
+// affixes 包列表 JSON——读侧 propBuiltOf → PropBuilt@1954 下发 tooltip。
 func insertEquipRow(ctx context.Context, tx *sql.Tx, roleID role.RoleID, slot int32, configID string, itemType int32, carryUid string) error {
 	var seq int64
 	if err := tx.QueryRowContext(ctx,
@@ -320,30 +322,55 @@ func insertEquipRow(ctx context.Context, tx *sql.Tx, roleID role.RoleID, slot in
 		return err
 	}
 	uid := effectiveUidCross(carryUid)
-	insert := "INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, art_pack, uid) " +
-		"SELECT ?, ?, g.item_id, g.item_type, g.equip_type, g.hardiness, g.max_hardiness, ?, g.art_pack, ? FROM game_items g WHERE g.item_id = ?"
-	result, err := tx.ExecContext(ctx, insert, roleID, seq, slot, uid, configID)
+	affixes := randomEquipCatalogOf().zhenpaiAffixesJSON(configID)
+	if affixes == "" {
+		affixes = "[]"
+	}
+	insert := "INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, art_pack, uid, affixes) " +
+		"SELECT ?, ?, g.item_id, g.item_type, g.equip_type, g.hardiness, g.max_hardiness, ?, g.art_pack, ?, ? FROM game_items g WHERE g.item_id = ?"
+	result, err := tx.ExecContext(ctx, insert, roleID, seq, slot, uid, affixes, configID)
 	if err == nil {
 		if affected, affErr := result.RowsAffected(); affErr == nil && affected == 0 {
 			// game_items 无行：按背包行类型兜底直插（equip_type 由调用方内存行给出）。
 			_, err = tx.ExecContext(ctx,
-				"INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, uid) "+
-					"VALUES (?, ?, ?, ?, ?, 100, 100, ?, ?)",
-				roleID, seq, configID, itemType, "", slot, uid)
+				"INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, uid, affixes) "+
+					"VALUES (?, ?, ?, ?, ?, 100, 100, ?, ?, ?)",
+				roleID, seq, configID, itemType, "", slot, uid, affixes)
 			if err != nil && unknownColumn(err, "uid") {
 				_, err = tx.ExecContext(ctx,
-					"INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot) "+
-						"VALUES (?, ?, ?, ?, ?, 100, 100, ?)",
-					roleID, seq, configID, itemType, "", slot)
+					"INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, affixes) "+
+						"VALUES (?, ?, ?, ?, ?, 100, 100, ?, ?)",
+					roleID, seq, configID, itemType, "", slot, affixes)
+				if err != nil && unknownColumn(err, "affixes") {
+					_, err = tx.ExecContext(ctx,
+						"INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot) "+
+							"VALUES (?, ?, ?, ?, ?, 100, 100, ?)",
+						roleID, seq, configID, itemType, "", slot)
+				}
+			} else if err != nil && unknownColumn(err, "affixes") {
+				_, err = tx.ExecContext(ctx,
+					"INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, uid) "+
+						"VALUES (?, ?, ?, ?, ?, 100, 100, ?, ?)",
+					roleID, seq, configID, itemType, "", slot, uid)
 			}
 			return err
 		}
 		return nil
 	}
-	if unknownColumn(err, "uid") {
-		insert = "INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, art_pack) " +
-			"SELECT ?, ?, g.item_id, g.item_type, g.equip_type, g.hardiness, g.max_hardiness, ?, g.art_pack FROM game_items g WHERE g.item_id = ?"
-		_, err = tx.ExecContext(ctx, insert, roleID, seq, slot, configID)
+	switch {
+	case unknownColumn(err, "affixes"):
+		insert = "INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, art_pack, uid) " +
+			"SELECT ?, ?, g.item_id, g.item_type, g.equip_type, g.hardiness, g.max_hardiness, ?, g.art_pack, ? FROM game_items g WHERE g.item_id = ?"
+		_, err = tx.ExecContext(ctx, insert, roleID, seq, slot, uid, configID)
+	case unknownColumn(err, "uid"):
+		insert = "INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, art_pack, affixes) " +
+			"SELECT ?, ?, g.item_id, g.item_type, g.equip_type, g.hardiness, g.max_hardiness, ?, g.art_pack, ? FROM game_items g WHERE g.item_id = ?"
+		_, err = tx.ExecContext(ctx, insert, roleID, seq, slot, affixes, configID)
+		if err != nil && unknownColumn(err, "affixes") {
+			insert = "INSERT INTO role_equip_items (role_id, seq, config_id, item_type, equip_type, hardiness, max_hardiness, slot, art_pack) " +
+				"SELECT ?, ?, g.item_id, g.item_type, g.equip_type, g.hardiness, g.max_hardiness, ?, g.art_pack FROM game_items g WHERE g.item_id = ?"
+			_, err = tx.ExecContext(ctx, insert, roleID, seq, slot, configID)
+		}
 	}
 	return err
 }
@@ -382,15 +409,29 @@ func (s *inventoryStore) upsertEquipSlot(ctx context.Context, roleID role.RoleID
 	if err := tx.Commit(); err != nil {
 		return row, err
 	}
-	// 回读权威行（game_items 联表已补 equip_type/hardiness）；回读失败
-	// 不回滚穿戴（行已落库），用已知字段兜底。
+	// 回读权威行（game_items 联表已补 equip_type/hardiness；affixes 随行
+	// 回读——镇派兵器的 PropBuilt 必须随穿戴帧即时下发，否则 tooltip 要
+	// 等重登才出词条）；回读失败不回滚穿戴（行已落库），用已知字段兜底。
+	var affixes sql.NullString
 	err = s.db.QueryRowContext(ctx,
-		"SELECT config_id, item_type, equip_type, slot, hardiness, max_hardiness, seq, uid "+
+		"SELECT config_id, item_type, equip_type, slot, hardiness, max_hardiness, seq, uid, affixes "+
 			"FROM role_equip_items WHERE role_id = ? AND slot = ?", roleID, slot).
 		Scan(&row.configID, &row.itemType, &row.equipType, &row.slot,
-			&row.hardiness, &row.maxHardiness, &row.seq, &carryUid)
+			&row.hardiness, &row.maxHardiness, &row.seq, &carryUid, &affixes)
+	if err != nil {
+		if !unknownColumn(err, "affixes") {
+			err = s.db.QueryRowContext(ctx,
+				"SELECT config_id, item_type, equip_type, slot, hardiness, max_hardiness, seq, uid "+
+					"FROM role_equip_items WHERE role_id = ? AND slot = ?", roleID, slot).
+				Scan(&row.configID, &row.itemType, &row.equipType, &row.slot,
+					&row.hardiness, &row.maxHardiness, &row.seq, &carryUid)
+		}
+	}
 	if err != nil {
 		row.configID, row.itemType, row.equipType, row.slot = configID, itemType, equipType, slot
+		row.propBuilt = randomEquipCatalogOf().zhenpaiPropBuiltString(configID)
+	} else {
+		row.propBuilt = propBuiltOf(affixes)
 	}
 	row.uid = carryUid.String
 	return row, nil

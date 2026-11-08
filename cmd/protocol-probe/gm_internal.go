@@ -79,6 +79,7 @@ func newGMInternalMux(token string, hub *gmHub, info gmHealthInfo) http.Handler 
 	mux.HandleFunc("/internal/v1/catalog/cards", hub.cardsHandler)
 	mux.HandleFunc("/internal/v1/catalog/hair-cards", hub.hairCardsHandler)
 	mux.HandleFunc("/internal/v1/catalog/items", hub.itemsHandler)
+	mux.HandleFunc("/internal/v1/catalog/meridians", hub.meridiansHandler)
 	return withBearerAuth(token, mux)
 }
 

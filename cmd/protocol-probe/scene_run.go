@@ -47,6 +47,9 @@ type sceneRun struct {
 	lootBoxes           map[uint32]*lootBoxRuntime
 	nextSweepAt         time.Time
 	pendingObjectFrames []pendingObjectFrame
+	// npcLastLocation 是 NPC 0x1F 位置广播的节流水位（追击期间客户端
+	// 认知保鲜，combat_ai.throttledNPCLocationBroadcast 读写）。
+	npcLastLocation map[uint32]npcLocationBroadcast
 	// fightRelation 是 0x13 fight_relation_rec 单格累计伤害的权威表：
 	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
 	// NPC 死亡清除，重生后从零累计。run.mu 保护。
@@ -157,8 +160,24 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 // 与 Java 参考 NpcViewport.visibleInLocalViewport 同规则——不注册、
 // 不物化、无 Vitals/Brain，因此也永不进入死亡→重生刷新循环。
 // eventtrigger.xml（任务触发生成器）另在 npc_catalog.go 装载期排除。
+//
+// 子场景闸门（2026-11-08）：creator 条目带 SubSceneNo（成都实测
+// AttackNpc.xml 219 条中 135 条，如夜探守卫 newworld_nangong_yetan_*
+// SubSceneNo=8961）是活动/分线态内容——官服只在子场景激活时由脚本
+// 物化，基础场景从不出现。战斗脚本类（AttackNpc/BossNpc）带此标记
+// 一律不注册：否则白名活动守卫会被静态摆进大场景主动咬路过玩家。
+// 平民带 SubSceneNo 的照常注册（站桩无害，避免误伤活动对话内容）。
 func npcSpawnEligible(npc npcSpawn) bool {
-	return !strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc")
+	if strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc") {
+		return false
+	}
+	if subScene, exists := npc.resolved.Extensions["creator.SubSceneNo"]; exists && subScene != "" {
+		switch strings.ToLower(strings.TrimSpace(npc.resolved.ScriptClass)) {
+		case "attacknpc", "bossnpc":
+			return false
+		}
+	}
+	return true
 }
 
 // ---- 成员管理 ----
@@ -405,6 +424,7 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 		}
 	}
 	maxHP, maxMP := int32(1000), int32(100)
+	level, powerNo := int32(1), int32(0)
 	for _, property := range orderedProperties {
 		switch property.Name {
 		case "MaxHP":
@@ -415,8 +435,18 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 			if property.Value.I32 > 0 {
 				maxMP = property.Value.I32
 			}
+		case "Level":
+			if property.Value.I32 > 0 {
+				level = property.Value.I32
+			}
+		case "PowerNo":
+			powerNo = property.Value.I32
 		}
 	}
+	// 实力包守方数值推导（2026-11-08 NPC 属性块迁移）：Base×Level 规则
+	// 集中在 deriveNPCCombatStats；封劲暂不推导（见其注释）。
+	stats := deriveNPCCombatStats(powerNo, level)
+	meta.combatStats = &stats
 	transform := worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient}
 	vitals := sim.NewVitals(maxHP, maxMP)
 	if interaction == npcInteractionCombat {
