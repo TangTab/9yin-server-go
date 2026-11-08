@@ -1,6 +1,8 @@
 package main
 
 import (
+	worldcore "github.com/local/9yin-go-server/internal/world"
+
 	"math"
 	"os"
 	"path/filepath"
@@ -105,14 +107,14 @@ func TestRollSkillHitAppliesNPCDefense(t *testing.T) {
 	if err := world.registerNPCOnRun(97, npc); err != nil {
 		t.Fatal(err)
 	}
-	meta, ok := world.npcMeta(97)
+	meta, ok := world.npcMeta(worldcore.EntityID(forkNPCID(97)))
 	if !ok {
 		t.Fatal("npc 97 meta missing")
 	}
 	if meta.combatStats == nil || meta.combatStats.phyDef != 10000 {
 		t.Fatalf("combatStats 推导不符：%+v", meta.combatStats)
 	}
-	ref := skillDamageTargetRef{id: 97, ownerID: meta.ownerID}
+	ref := skillDamageTargetRef{id: forkNPCID(97), ownerID: meta.ownerID}
 
 	physical := combatSkillDefinition{
 		damageRows: []skillDamageRow{{formulaID: 494, damageType: "PhyDamage", params: []string{"112", "1", "2"}}},

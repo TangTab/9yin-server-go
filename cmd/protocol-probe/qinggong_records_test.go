@@ -227,39 +227,47 @@ func TestGrantStarterQingGongUsesRecordAndView(t *testing.T) {
 	if err := grantStarterQingGong(conn); err != nil {
 		t.Fatal(err)
 	}
-	_, finalTaskRow := taskCompletedRows([]uint32{facultyActAltTaskID})
-	facultyAcceptedRows := len(facultyAcceptedTaskIDs())
-	wantFrames := len(starterQingGongIDs) + 1 + len(starterQingGongIDs) + len(starterQingGongSkillIDs) + facultyAcceptedRows + int(finalTaskRow) + 1 + len(collectSkillIDs)
+	// 功能解锁行已拆到 grantFunctionUnlock（选角链内下发），此处只有
+	// QingGongRec 行 + View46 容器 + 容器项。
+	wantFrames := len(starterQingGongIDs) + 1 + len(starterQingGongIDs) + len(starterQingGongSkillIDs)
 	if len(conn.frames) != wantFrames {
 		t.Fatalf("frames=%d want=%d", len(conn.frames), wantFrames)
 	}
 	if conn.frames[0][0] != 0x11 || conn.frames[len(starterQingGongIDs)][0] != 0x15 || conn.frames[len(starterQingGongIDs)+1][0] != 0x18 {
 		t.Fatalf("unexpected grant sequence first=%x create=%x add=%x", conn.frames[0], conn.frames[len(starterQingGongIDs)], conn.frames[len(starterQingGongIDs)+1])
 	}
-	firstViewItem := conn.frames[len(starterQingGongIDs)+1]
-	if got := binary.LittleEndian.Uint16(firstViewItem[7:]); got != qingGongConfigProperty {
-		t.Fatalf("QingGongContainer ConfigID property=%d want=%d", got, qingGongConfigProperty)
+}
+
+// grantFunctionUnlock 独立于 ClientReady（选角链内）: 23 任务行 + 204 采集
+// 行 + Task_Completed 位图 + 19 门任务值行（E 模式；顺序无关断言——并行
+// 会话会重排帧序）。
+func TestGrantFunctionUnlockStagesTaskBitmap(t *testing.T) {
+	conn := &captureMessageConnection{}
+	if err := grantFunctionUnlock(conn); err != nil {
+		t.Fatal(err)
 	}
-	completedRowsStart := len(conn.frames) - (int(finalTaskRow) + 1)
-	// 采集技能 204 行插在 23 行任务与位图之间（native #548-#751 帧序）
-	accepted := conn.frames[completedRowsStart-facultyAcceptedRows-len(collectSkillIDs)]
-	if accepted[0] != 0x11 || binary.LittleEndian.Uint16(accepted[10:]) != recordTaskAccepted || binary.LittleEndian.Uint16(accepted[14:]) != 1 {
-		t.Fatalf("faculty Task_Accepted row=%x", accepted)
+	_, finalTaskRow := taskCompletedRows([]uint32{facultyActAltTaskID})
+	// 值行(E)已被证伪默认关停；位图含功能开放门任务 49634(row1551|0x4)。
+	wantFrames := len(facultyAcceptedTaskIDs()) + len(collectSkillIDs) + int(finalTaskRow) + 1
+	if len(conn.frames) != wantFrames {
+		t.Fatalf("frames=%d want=%d", len(conn.frames), wantFrames)
 	}
-	if got := binary.LittleEndian.Uint32(accepted[16:]); got != facultyGuideTaskFirst {
-		t.Fatalf("first faculty Task_Accepted id=%d want=%d", got, facultyGuideTaskFirst)
+	var bitmapRows []uint32
+	for _, f := range conn.frames {
+		if f[0] == 0x11 && binary.LittleEndian.Uint16(f[10:]) == recordTaskCompleted {
+			bitmapRows = append(bitmapRows, binary.LittleEndian.Uint32(f[16:]))
+		}
 	}
-	lastAccepted := conn.frames[completedRowsStart-len(collectSkillIDs)-1]
-	if got := binary.LittleEndian.Uint32(lastAccepted[16:]); got != facultyActAltTaskID {
-		t.Fatalf("last faculty Task_Accepted id=%d want=%d", got, facultyActAltTaskID)
+	if len(bitmapRows) != int(finalTaskRow)+1 {
+		t.Fatalf("bitmap rows=%d want %d", len(bitmapRows), int(finalTaskRow)+1)
 	}
-	guideRow := conn.frames[completedRowsStart+33]
-	if got := binary.LittleEndian.Uint32(guideRow[16:]); got != 0x0003E000 {
-		t.Fatalf("faculty-guide completed row=%x", guideRow)
+	// 暮色初章族 1344/1346 → row 42 bits 0x1/0x4。
+	if got := bitmapRows[42]; got&0x5 != 0x5 {
+		t.Fatalf("bitmap row42=%#x want bits 0x5 (task 1344+1346)", got)
 	}
-	last := conn.frames[completedRowsStart+42]
-	if last[0] != 0x11 || binary.LittleEndian.Uint16(last[10:]) != recordTaskCompleted || binary.LittleEndian.Uint32(last[16:]) != 0x5 {
-		t.Fatalf("last function/faculty-unlock record frame=%x", last)
+	// 功能开放总门 task 49634 → row 1551 mask 0x4（真机二分定案）。
+	if got := bitmapRows[1551]; got&0x4 != 0x4 {
+		t.Fatalf("bitmap row1551=%#x want bit 0x4 (gate task 49634)", got)
 	}
 }
 

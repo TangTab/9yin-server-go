@@ -1,6 +1,8 @@
 package main
 
 import (
+	worldcore "github.com/local/9yin-go-server/internal/world"
+
 	"encoding/binary"
 	"math"
 	"os"
@@ -377,18 +379,18 @@ func TestSceneRunPatrolTick(t *testing.T) {
 	suppressedView.refreshVisibility(catalog, role.Position{X: 0})
 	distantView.refreshVisibility(catalog, role.Position{X: 400, Z: 400})
 
-	sceneBefore, err := run.scene.Get(2)
+	sceneBefore, err := run.scene.Get(worldcore.EntityID(forkNPCID(2)))
 	if err != nil {
 		t.Fatal(err)
 	}
 	nearBefore := len(conn.Frames())
 	run.patrolTick(time.UnixMilli(2500)) // 去程中点：z=5
 
-	transform, ok := run.npcTransform(2)
+	transform, ok := run.npcTransform(worldcore.EntityID(forkNPCID(2)))
 	if !ok || math.Abs(float64(transform.Z-5)) > 1e-4 {
 		t.Fatalf("interpolated transform=%+v", transform)
 	}
-	sceneAfter, err := run.scene.Get(2)
+	sceneAfter, err := run.scene.Get(worldcore.EntityID(forkNPCID(2)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -409,7 +411,7 @@ func TestSceneRunPatrolTick(t *testing.T) {
 	if count := binary.LittleEndian.Uint16(allDest[1:]); count != 1 {
 		t.Fatalf("all-dest count=%d", count)
 	}
-	if id := binary.LittleEndian.Uint32(allDest[3:]); id != 2 {
+	if id := binary.LittleEndian.Uint32(allDest[3:]); id != forkNPCID(2) {
 		t.Fatalf("all-dest object=%d", id)
 	}
 	if bits := binary.LittleEndian.Uint32(allDest[19:]); math.Float32frombits(bits) != 10 {
@@ -460,7 +462,7 @@ func TestRegisterPatrolNPCSamplesSchedule(t *testing.T) {
 	if err := run.populate([]npcSpawn{spawn}); err != nil {
 		t.Fatal(err)
 	}
-	transform, ok := run.npcTransform(2)
+	transform, ok := run.npcTransform(worldcore.EntityID(forkNPCID(2)))
 	if !ok {
 		t.Fatal("NPC must be registered")
 	}
@@ -470,12 +472,12 @@ func TestRegisterPatrolNPCSamplesSchedule(t *testing.T) {
 		t.Fatalf("registered transform=%+v", transform)
 	}
 	run.mu.Lock()
-	meta, _ := run.npcMeta(2)
+	meta, _ := run.npcMeta(worldcore.EntityID(forkNPCID(2)))
 	run.mu.Unlock()
 	if meta.schedule == nil {
 		t.Fatal("registered meta must carry the schedule")
 	}
-	if len(run.patrolIDs) != 1 || run.patrolIDs[0] != 2 {
+	if len(run.patrolIDs) != 1 || run.patrolIDs[0] != forkNPCID(2) {
 		t.Fatalf("patrolIDs=%v", run.patrolIDs)
 	}
 }

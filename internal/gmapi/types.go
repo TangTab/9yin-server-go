@@ -25,6 +25,10 @@ const (
 	MaxNeiGongRageCapAdd int32 = 50
 	// BaseAttributeCap 与 Java PlayerProgress.BASE_ATTRIBUTE_CAP 一致。
 	BaseAttributeCap int32 = 1_000_000
+	// JyzStageMin/JyzStageMax 九阴志全局阶段界值（GM 面板「九阴志
+	// 全局门控」：1=1内 … 9=6内，单向刻度）。
+	JyzStageMin int32 = 1
+	JyzStageMax int32 = 9
 )
 
 // CommandBody 是 POST 命令端点的 JSON 请求体。字段名与标签从
@@ -69,9 +73,11 @@ type CommandBody struct {
 	SubType     int32   `json:"subType"`
 	Weather     string  `json:"weather"`
 	FadeSec     int32   `json:"fadeSec"`
-	Enabled     int32   `json:"enabled"`    // set_zhenqi_cap 硬闸开关 0/1
-	JingMaiId   string  `json:"jingMaiId"`  // set_jingmai_tier 经脉 configID
+	Enabled     int32   `json:"enabled"`     // set_zhenqi_cap 硬闸开关 0/1
+	JingMaiId   string  `json:"jingMaiId"`   // set_jingmai_tier 经脉 configID
 	JingMaiTier int32   `json:"jingMaiTier"` // set_jingmai_tier 周天档 1..216
+	Stage       int32   `json:"stage"`       // ninjiuzhi_set 九阴志目标阶段 1..9
+	EventKind   string  `json:"eventKind"`   // ninjiuzhi_event kill|task
 }
 
 // Command 是校验通过后的命令纯数据。原 cmd/protocol-probe 的 gmCommand
@@ -81,51 +87,53 @@ type CommandBody struct {
 // Destination 用 role.Location 而不是游戏服的 sceneDestination：
 // 后者是场景运行时的私有类型，契约层只承诺"已通过解析的目的地"。
 type Command struct {
-	Action        string
-	Silver        int32
-	SP            int32
-	Value         float32
-	Destination   role.Location
-	Position      role.Position
-	Faction       string
-	Code          string // lua_eval 的 Lua 源码
-	ItemConfig    string // grant_item/add_item 的物品配置 ID
-	Amount        int32  // grant_item 数量
-	WearNow       bool   // grant_item 穿戴形态（否则入背包）
-	CardId        int32  // equip_card/equip_hair 皮肤号
-	ShowEquipType int32  // set_showequip_type 0/1/2
-	Gold          int32  // set_gold（会话级 CapitalType0）
-	GuanYin       int32  // set_guanyin（会话级 CapitalType2）
-	PkMode        int32  // set_pk_mode 0..8
-	Justice       int32  // set_alignment 三值（0=跳过，前端 +v||0 折叠语义）
-	Evil          int32
-	FreeBase      int32
-	Ene           int32 // set_vitals 生存属性层（0=跳过；Add 字段官方表无，忽略）
-	MaxEne        int32
-	ResumeEne     int32
-	Sat           int32
-	MaxSat        int32
-	PkValue       int32
-	DrunkLevel    int32
-	AttrStr       int32 // set_five_attributes 基础五维（0=跳过该维）
-	AttrSta       int32
-	AttrDex       int32
-	AttrIng       int32
-	AttrSpi       int32
-	FacultyBase   int32   // set_fill_speed 基数
+	Action         string
+	Silver         int32
+	SP             int32
+	Value          float32
+	Destination    role.Location
+	Position       role.Position
+	Faction        string
+	Code           string // lua_eval 的 Lua 源码
+	ItemConfig     string // grant_item/add_item 的物品配置 ID
+	Amount         int32  // grant_item 数量
+	WearNow        bool   // grant_item 穿戴形态（否则入背包）
+	CardId         int32  // equip_card/equip_hair 皮肤号
+	ShowEquipType  int32  // set_showequip_type 0/1/2
+	Gold           int32  // set_gold（会话级 CapitalType0）
+	GuanYin        int32  // set_guanyin（会话级 CapitalType2）
+	PkMode         int32  // set_pk_mode 0..8
+	Justice        int32  // set_alignment 三值（0=跳过，前端 +v||0 折叠语义）
+	Evil           int32
+	FreeBase       int32
+	Ene            int32 // set_vitals 生存属性层（0=跳过；Add 字段官方表无，忽略）
+	MaxEne         int32
+	ResumeEne      int32
+	Sat            int32
+	MaxSat         int32
+	PkValue        int32
+	DrunkLevel     int32
+	AttrStr        int32 // set_five_attributes 基础五维（0=跳过该维）
+	AttrSta        int32
+	AttrDex        int32
+	AttrIng        int32
+	AttrSpi        int32
+	FacultyBase    int32   // set_fill_speed 基数
 	FillMultiplier float32 // set_fill_speed 倍率
-	Points        int32   // add_livepoint 历练点数
-	MsgId         int32   // custom_probe 数值寻址消息号
-	SubType       int32   // custom_probe 探针参数
-	Weather       string  // set_weather 闭名单键
-	FadeSec       int32   // set_weather 过渡秒
-	Enabled       int32   // set_zhenqi_cap 每日真气硬闸 0/1（阈值走 Value）
-	JingMaiID     string  // set_jingmai_tier 经脉 configID
-	JingMaiTier   int32   // set_jingmai_tier 周天档 1..216（游戏侧按目录上限再钳）
+	Points         int32   // add_livepoint 历练点数
+	MsgId          int32   // custom_probe 数值寻址消息号
+	SubType        int32   // custom_probe 探针参数
+	Weather        string  // set_weather 闭名单键
+	FadeSec        int32   // set_weather 过渡秒
+	Enabled        int32   // set_zhenqi_cap 每日真气硬闸 0/1（阈值走 Value）
+	JingMaiID      string  // set_jingmai_tier 经脉 configID
+	JingMaiTier    int32   // set_jingmai_tier 周天档 1..216（游戏侧按目录上限再钳）
+	Stage          int32   // ninjiuzhi_set 九阴志目标阶段 1..9（单调递增，回退由游戏侧拒绝并回报文本）
+	EventKind      string  // ninjiuzhi_event 事件点类别 kill|task
 }
 
 // PlayerState 是 GET 会话列表端点的行结构。原 gmPlayerState 原样搬来
-//（JSON 标签即面板前端契约）。
+// （JSON 标签即面板前端契约）。
 type PlayerState struct {
 	SessionID    uint64        `json:"sessionId"`
 	Remote       string        `json:"remote"`

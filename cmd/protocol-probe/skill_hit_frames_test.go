@@ -13,7 +13,7 @@ import (
 )
 
 func TestFightRelationDamageFrameLayout(t *testing.T) {
-	frame := fightRelationDamageFrame(0x11000001, 0x7A5C0B, 344)
+	frame := fightRelationDamageFrame(1, 0x7A5C0B, 344)
 	if len(frame) != 21 {
 		t.Fatalf("fight relation frame length = %d, want 21", len(frame))
 	}
@@ -23,8 +23,8 @@ func TestFightRelationDamageFrameLayout(t *testing.T) {
 	if frame[1] != 0 {
 		t.Fatalf("flag byte = %#x, want 0", frame[1])
 	}
-	if got := binary.LittleEndian.Uint32(frame[2:]); got != 0x11000001 {
-		t.Fatalf("object = %#x, want 0x11000001", got)
+	if got := binary.LittleEndian.Uint32(frame[2:]); got != uint32(1) {
+		t.Fatalf("object = %#x, want 1", got)
 	}
 	if got := binary.LittleEndian.Uint32(frame[6:]); got != 0x7A5C0B {
 		t.Fatalf("owner = %#x, want 0x7A5C0B", got)
@@ -95,7 +95,7 @@ func decodeCustomValuesFrame(t *testing.T, frame []byte) []clientCustomValue {
 }
 
 func TestSkillHitDamageFrameElevenValues(t *testing.T) {
-	frame, err := skillHitDamageFrame(7, 1, 143, "sfgp01", "SkillLock", "monv030101", "测试侠客")
+	frame, err := skillHitDamageFrame(forkNPCID(7), 1, 143, "sfgp01", "SkillLock", "monv030101", "测试侠客")
 	if err != nil {
 		t.Fatalf("encode skill hit frame: %v", err)
 	}
@@ -109,7 +109,7 @@ func TestSkillHitDamageFrameElevenValues(t *testing.T) {
 			t.Fatalf("value[%d] = type %d int %d, want int %d", index, values[index].Type, values[index].Int32, want)
 		}
 	}
-	if values[1].Type != 8 || values[1].Raw != packTestObject(7, 1) {
+	if values[1].Type != 8 || values[1].Raw != packTestObject(forkNPCID(7), 1) {
 		t.Fatalf("value[1] victim object mismatch: %+v", values[1])
 	}
 	if values[6].Text != "sfgp01" || values[7].Text != "SkillLock" || values[8].Text != "monv030101" {
@@ -121,7 +121,7 @@ func TestSkillHitDamageFrameElevenValues(t *testing.T) {
 }
 
 func TestNPCAttackHitFrameNineValues(t *testing.T) {
-	frame, err := npcAttackHitFrame(playerObjectID, playerOwnerID, 1, 7, 1, "monv030101", "受害者", "野怪")
+	frame, err := npcAttackHitFrame(playerObjectID, playerOwnerID, 1, forkNPCID(7), 1, "monv030101", "受害者", "野怪")
 	if err != nil {
 		t.Fatalf("encode NPC attack hit frame: %v", err)
 	}
@@ -138,7 +138,7 @@ func TestNPCAttackHitFrameNineValues(t *testing.T) {
 	if values[1].Type != 8 || values[1].Raw != packTestObject(playerObjectID, playerOwnerID) {
 		t.Fatalf("value[1] player object mismatch: %+v", values[1])
 	}
-	if values[4].Type != 8 || values[4].Raw != packTestObject(7, 1) {
+	if values[4].Type != 8 || values[4].Raw != packTestObject(forkNPCID(7), 1) {
 		t.Fatalf("value[4] NPC object mismatch: %+v", values[4])
 	}
 	if values[5].Text != "monv030101" {
@@ -150,7 +150,7 @@ func TestNPCAttackHitFrameNineValues(t *testing.T) {
 }
 
 func TestSkillHurtAndConfirmFrames(t *testing.T) {
-	hurt, err := skillHurtActionFrame(7, 1, playerObjectID, playerOwnerID)
+	hurt, err := skillHurtActionFrame(forkNPCID(7), 1, playerObjectID, playerOwnerID)
 	if err != nil {
 		t.Fatalf("encode hurt frame: %v", err)
 	}
@@ -158,11 +158,11 @@ func TestSkillHurtAndConfirmFrames(t *testing.T) {
 	if len(values) != 5 || values[0].Int32 != 18 || values[2].Text != "hurt_half" || values[3].Int32 != 0 {
 		t.Fatalf("msg18 shape mismatch: %+v", values)
 	}
-	if values[1].Raw != packTestObject(7, 1) || values[4].Raw != packTestObject(playerObjectID, playerOwnerID) {
+	if values[1].Raw != packTestObject(forkNPCID(7), 1) || values[4].Raw != packTestObject(playerObjectID, playerOwnerID) {
 		t.Fatalf("msg18 objects mismatch: %+v", values)
 	}
 
-	confirm, err := skillHitConfirmFrame(playerObjectID, playerOwnerID, "sfgp01", 7, 1)
+	confirm, err := skillHitConfirmFrame(playerObjectID, playerOwnerID, "sfgp01", forkNPCID(7), 1)
 	if err != nil {
 		t.Fatalf("encode confirm frame: %v", err)
 	}
@@ -170,13 +170,13 @@ func TestSkillHurtAndConfirmFrames(t *testing.T) {
 	if len(values) != 4 || values[0].Int32 != 205 || values[2].Text != "sfgp01" {
 		t.Fatalf("msg205 shape mismatch: %+v", values)
 	}
-	if values[1].Raw != packTestObject(playerObjectID, playerOwnerID) || values[3].Raw != packTestObject(7, 1) {
+	if values[1].Raw != packTestObject(playerObjectID, playerOwnerID) || values[3].Raw != packTestObject(forkNPCID(7), 1) {
 		t.Fatalf("msg205 objects mismatch: %+v", values)
 	}
 }
 
 func TestNPCCastPreparationFrameShape(t *testing.T) {
-	frame, err := npcCastPreparationFrame(7, 1, 1.5, 2, 3, 0.25)
+	frame, err := npcCastPreparationFrame(forkNPCID(7), 1, 1.5, 2, 3, 0.25)
 	if err != nil {
 		t.Fatalf("encode NPC cast preparation: %v", err)
 	}
@@ -184,7 +184,7 @@ func TestNPCCastPreparationFrameShape(t *testing.T) {
 	if len(values) != 7 || values[0].Int32 != 337 {
 		t.Fatalf("msg337 shape mismatch: %+v", values)
 	}
-	if values[1].Type != 8 || values[1].Raw != packTestObject(7, 1) {
+	if values[1].Type != 8 || values[1].Raw != packTestObject(forkNPCID(7), 1) {
 		t.Fatalf("msg337 object mismatch: %+v", values[1])
 	}
 	if values[2].Float32 != 1.5 || values[3].Float32 != 2 || values[4].Float32 != 3 || values[5].Float32 != 0.25 {

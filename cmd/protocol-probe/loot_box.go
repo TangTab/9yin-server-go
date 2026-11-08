@@ -150,7 +150,7 @@ func rollLootForNPC(npc npcSpawn) []grantItem {
 // 中继时补发）。roll 为空=无掉落，尸体走普通 corpse TTL。调用方必须
 // 已持有 r.mu。
 func (r *sceneRun) attachLootToCorpseLocked(deadID, ownerID uint32, now time.Time) {
-	index := int(deadID) - 2
+	index := forkNPCIndex(deadID) - 2
 	if index < 0 || index >= len(r.catalog) {
 		return // 目录外实体（测试摆放）不掉落
 	}
@@ -180,7 +180,7 @@ func (r *sceneRun) attachLootToCorpseLocked(deadID, ownerID uint32, now time.Tim
 //（AIEditorPackID 死亡生箱事件指定的 BoxNpc/BossBox 模板），掉落内容
 // 仍按怪自己的 DropID roll。调用方必须已持有 r.mu。
 func (r *sceneRun) spawnBoxNPCEntityLocked(deadID uint32, boxConfigID string, now time.Time) {
-	index := int(deadID) - 2
+	index := forkNPCIndex(deadID) - 2
 	if index < 0 || index >= len(r.catalog) {
 		return
 	}
@@ -204,11 +204,11 @@ func (r *sceneRun) spawnChestEntityAtLocked(transform worldcore.Transform, conte
 	spawn, _ := chestEntityTemplate(boxConfigID)
 	spawn.x, spawn.y, spawn.z, spawn.orient = transform.X, transform.Y, transform.Z, transform.Orient
 	spawn.route, spawn.schedule = nil, nil // 宝箱不巡逻
-	id := r.nextWireID
-	if id == 0 {
-		id = 2
+	id := forkNPCID(r.nextWireID)
+	if id == forkNPCID(0) {
+		id = forkNPCID(2)
 	}
-	r.nextWireID = id + 1
+	r.nextWireID++
 	if err := r.registerNPCLocked(id, spawn); err != nil {
 		log.Printf("scene %s/%s: register chest entity %s: %v", r.key.config, r.key.resource, boxConfigID, err)
 		return 0

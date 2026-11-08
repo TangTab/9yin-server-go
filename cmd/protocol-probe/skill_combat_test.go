@@ -49,17 +49,17 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	// 官方出招簇（Java handleValues + 抓包 52905 #3000-#3005）：个人 CD
 	// 行 → active 行 → GCD 行 → 玩家面板 → msg20（0x1E 壳；不再发
 	// State 动作帧、msg20 不走 0x27——42 份抓包 0 次）。
-	if len(frames) != 5 || frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x1E {
-		t.Fatalf("frames=%d, want 0x11 cooldown/personal+active+GCD, 0x10 player update, then 0x1E msg20", len(frames))
-	}
-	if got := binary.LittleEndian.Uint16(frames[1][10:]); got != recordActiveSkill {
-		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
-	}
-	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordCooldown {
-		t.Fatalf("GCD record index=%d, want %d", got, recordCooldown)
+	if len(frames) != 15 || frames[0][0] != 0x11 || frames[13][0] != 0x10 || frames[14][0] != 0x1E {
+		t.Fatalf("frames=%d, want CD clusters (0x11+0x13 official dialect) + active + 0x10 player update + 0x1E msg20", len(frames))
 	}
 	if got := binary.LittleEndian.Uint16(frames[0][10:]); got != recordCooldown {
 		t.Fatalf("cooldown record index=%d, want %d", got, recordCooldown)
+	}
+	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != cooldownRowPersonal {
+		t.Fatalf("personal cooldown row=%d, want %d", got, cooldownRowPersonal)
+	}
+	if got := binary.LittleEndian.Uint16(frames[12][10:]); got != recordActiveSkill {
+		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
 	}
 	if got := player.currentSkillSnapshot(); got != "CS_yhwq_hsqs05" {
 		t.Fatalf("CurSkillID=%q, want CS_yhwq_hsqs05", got)
@@ -98,8 +98,8 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	// 延迟 State 帧，帧数保持出招簇 5 条。
 	time.Sleep(50 * time.Millisecond)
 	frames = conn.Frames()
-	if len(frames) != 5 {
-		t.Fatalf("frames after follow-up=%d, want no delayed State frames (5)", len(frames))
+	if len(frames) != 15 {
+		t.Fatalf("frames after follow-up=%d, want no delayed State frames (15)", len(frames))
 	}
 }
 
@@ -148,10 +148,10 @@ func TestCurrentSkillClearEchoesCombatLogicState(t *testing.T) {
 	if frame[0] != 0x10 {
 		t.Fatalf("clear frame opcode=%#x, want 0x10", frame[0])
 	}
-	if got := binary.LittleEndian.Uint16(frame[10:12]); got != 6 {
-		t.Fatalf("clear frame props=%d, want 6 (exe #2014 六项形态)", got)
+	if got := binary.LittleEndian.Uint16(frame[10:12]); got != 8 {
+		t.Fatalf("clear frame props=%d, want 8 (六项 + CantMove/CantParry 官服 46.175 收尾对)", got)
 	}
-	wantIndices := []uint16{463, propCurSkillID, propCurSkillTarget, propCurSkillCanNoLimit, propCantBeSkillLocked, propCantBeSkillMustLocked}
+	wantIndices := []uint16{463, propCurSkillID, propCurSkillTarget, propCurSkillCanNoLimit, propCantBeSkillLocked, propCantBeSkillMustLocked, propRushCantMove, propCantParry}
 	off := 12
 	for i, want := range wantIndices {
 		if got := binary.LittleEndian.Uint16(frame[off : off+2]); got != want {
@@ -175,6 +175,11 @@ func TestCurrentSkillClearEchoesCombatLogicState(t *testing.T) {
 			off += 5
 		case propCurSkillTarget:
 			off += 8
+		case propCantParry:
+			if got := binary.LittleEndian.Uint32(frame[off : off+4]); got != 0 {
+				t.Fatalf("CantParry=%d, want 0", got)
+			}
+			off += 4
 		default:
 			if got := frame[off]; got != 0 {
 				t.Fatalf("prop %d =%d, want 0", want, got)
@@ -212,14 +217,14 @@ func TestHandleSkillFourStagesNativeVisibleBuff(t *testing.T) {
 		t.Fatalf("BufferListStr=%q, want buf_CS_yhwq_hsqs04", got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 5 || frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x1E {
-		t.Fatalf("frames=%d, want 0x11 cooldown/personal+active+GCD, 0x10 player update, then 0x1E msg20", len(frames))
+	if len(frames) != 15 || frames[0][0] != 0x11 || frames[13][0] != 0x10 || frames[14][0] != 0x1E {
+		t.Fatalf("frames=%d, want CD clusters (0x11+0x13 official dialect) + active + 0x10 player update + 0x1E msg20", len(frames))
 	}
-	if got := binary.LittleEndian.Uint16(frames[1][10:]); got != recordActiveSkill {
+	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != cooldownRowPersonal {
+		t.Fatalf("personal cooldown row=%d, want %d", got, cooldownRowPersonal)
+	}
+	if got := binary.LittleEndian.Uint16(frames[12][10:]); got != recordActiveSkill {
 		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
-	}
-	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordCooldown {
-		t.Fatalf("GCD record index=%d, want %d", got, recordCooldown)
 	}
 }
 
@@ -347,11 +352,14 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 	}
 	frames := conn.Frames()
 	// 官方出招簇（不再发 State 动作帧；msg20 走 0x1E 壳）。
-	if len(frames) != 5 ||
-		frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x1E {
+	if len(frames) != 15 ||
+		frames[0][0] != 0x11 || frames[13][0] != 0x10 || frames[14][0] != 0x1E {
 		t.Fatalf("开太极 initial frames=%x", frames)
 	}
-	if got := binary.LittleEndian.Uint16(frames[1][10:]); got != recordActiveSkill {
+	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != cooldownRowPersonal {
+		t.Fatalf("开太极 personal cooldown row=%d, want %d", got, cooldownRowPersonal)
+	}
+	if got := binary.LittleEndian.Uint16(frames[12][10:]); got != recordActiveSkill {
 		t.Fatalf("开太极 active skill record=%d, want %d", got, recordActiveSkill)
 	}
 }
@@ -386,10 +394,10 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if inside, _ := world.run.combat.Vitals(91); inside.HP != 1000-365 {
+	if inside, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(91))); inside.HP != 1000-365 {
 		t.Fatalf("inside NPC HP=%d, want %d after rolled 365 damage", inside.HP, 1000-365)
 	}
-	if outside, _ := world.run.combat.Vitals(92); outside.HP <= 0 {
+	if outside, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(92))); outside.HP <= 0 {
 		t.Fatalf("outside NPC HP=%d, want alive outside five metres", outside.HP)
 	}
 }
@@ -417,13 +425,13 @@ func TestCompiledSectorDamageUsesC2S211CasterOrientation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(results) != 1 || results[0].id != 93 {
+	if len(results) != 1 || results[0].id != forkNPCID(93) {
 		t.Fatalf("sector results=%+v, want only facing NPC 93", results)
 	}
-	if front, _ := world.run.combat.Vitals(93); front.HP != 900 {
+	if front, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(93))); front.HP != 900 {
 		t.Fatalf("front NPC HP=%d, want 900", front.HP)
 	}
-	if back, _ := world.run.combat.Vitals(94); back.HP != 1000 {
+	if back, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(94))); back.HP != 1000 {
 		t.Fatalf("back NPC HP=%d, want untouched 1000", back.HP)
 	}
 }
@@ -453,7 +461,7 @@ func TestCompiledRectangleDamageUsesLengthWidthAndOrientation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(results) != 1 || results[0].id != 95 {
+	if len(results) != 1 || results[0].id != forkNPCID(95) {
 		t.Fatalf("rectangle results=%+v, want only NPC 95", results)
 	}
 }
@@ -691,15 +699,15 @@ func TestMultiHitSkillRollsPerHitIndependently(t *testing.T) {
 		hitFrameMs: []time.Duration{time.Millisecond, 2 * time.Millisecond, 3 * time.Millisecond},
 	}
 	// ownerID 与 resolveSkillDamageTargets 同源（npcMeta 派生）。
-	meta, ok := world.npcMeta(worldcore.EntityID(95))
+	meta, ok := world.npcMeta(worldcore.EntityID(forkNPCID(95)))
 	if !ok {
 		t.Fatal("npc 95 meta missing")
 	}
 	scheduleSkillMultiHits(conn, world, definition, player,
-		[]skillDamageTargetRef{{id: 95, ownerID: meta.ownerID}}, "test")
+		[]skillDamageTargetRef{{id: forkNPCID(95), ownerID: meta.ownerID}}, "test")
 	time.Sleep(120 * time.Millisecond)
 
-	vitals, ok := world.run.combat.Vitals(95)
+	vitals, ok := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(95)))
 	if !ok {
 		t.Fatal("NPC 95 missing")
 	}

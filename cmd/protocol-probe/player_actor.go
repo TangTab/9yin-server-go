@@ -18,10 +18,30 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-const (
+// fork 对象 id 方案（docs/fork-object-id-migration.md）：玩家 =
+// (1, 角色 DB id)。
+// 0x0B PlayerEntry 首携此对，客户端据此绑定自体化身并做移动/接近
+// 子系统的高位类型位校验；owner=1 是 NPC 专属位（51357 实证玩家
+// owner=1 会被当 NPC 实体导致进世界 10s 超时）。会话变量而非 const：
+// 角色装载时经 setPlayerWireIdentity 按 role id 定值；默认对（无 DB
+// 场景/测试）owner 取 618（首个本地角色）。
+var (
 	playerObjectID uint32 = 1
 	playerOwnerID  uint32 = 1
+)
 
+// setPlayerWireIdentity 角色装载时定玩家 (obj, owner)：obj 恒 1（本客户端
+// 构建把自体硬绑 obj=1——49925/51357 双证：obj≠1 即进世界 10s 超时，
+// 与 owner 无关），owner = 角色 DB id（≠1 即非 NPC 位；移动子系统若验
+// owner 这是唯一可动的自由度——验证中）。
+func setPlayerWireIdentity(roleID uint32) {
+	playerObjectID = 1
+	playerOwnerID = 1 // 分离实验 C：玩家回到 (1,1)，NPC 保持 0x1100 段——
+	// 若此版进不了游戏 ⇒ 本客户端不认 0x1100 NPC 物化（推翻 55866 同构假设）
+	_ = roleID
+}
+
+const (
 	// 官方属性表(2370 项)玩家域索引(同名多处取末现)。官方表没有的
 	// 旧私有属性(CantUseSkill/CurSkillEffectID/CurSkillLevel)已删除,
 	// 不再下发。official_property_indices_test.go 按名断言防漂移。
@@ -61,6 +81,9 @@ const (
 	// UI 直接读取 CanUse；当它缺失时，即使受保护的战斗请求路径仍能到达
 	// C2S 211，图标也会被渲染为不可用。
 	propSkillCanUse uint16 = 2236 // CanUse Byte(官服怒气灰化心跳簇同索引)
+	// propSkillCurTargetCount：View40 技能行 CurTargetCount（官服伤害段簇
+	// 首击前=命中数、击杀后=0，f/g 实证；官服现行表同索引 579）。
+	propSkillCurTargetCount uint16 = 577
 	// 当前客户端并不通过 School 表达所有归属关系。其角色面板依次选用
 	// Force，再 NewSchool，最后 School。因此必须让这些协商属性保持显式，
 	// 后期势力和隐藏门派才不会被渲染成 \"无门派\"。
@@ -247,6 +270,14 @@ type playerActor struct {
 	// resumeSettleSkip：冲锋落地重入受理链时的一次性跳过标记
 	//（pending.settled 时置位——CD/MP 已在 c61 时点结算）。
 	resumeSettleSkip bool
+	// cooldown_rec 双槽覆写簿记（官服方言，official_frames.go）：每玩家
+	// 固定个人/公共两槽，col0/col3 变化才重写、col1/col2 每次覆写，
+	// 过期行由下次受理/执行惰性 0x12 清扫（f/g/b 实证）。
+	cdPersonalRowBook cooldownRowBook
+	cdPublicRowBook   cooldownRowBook
+	// rushStatePingAt：官服状态四连（586/645/646/750）上次下发时刻——
+	// 官服全程 ~3s 周期重发，冲锋接近段按此节流补发（锁 p.mu）。
+	rushStatePingAt time.Time
 	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
 	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
 	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。
@@ -1558,6 +1589,30 @@ func (p *playerActor) vitalUpdate() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, p.stateProperties())
 }
 
+// combatVitalsFrame 战斗 tick 专用的小面板（纯数值 vitals，n≈10）：
+// 官服战斗中从不重推全量面板——全量含 State="stand"/LogicState/
+// CurSkillID/CurSkillTarget/PauseSkill，会把冲锋受理簇刚设的接近态
+// 洗掉（53051 会话实证：簇后 1s 内全量面板到达 → 客户端退出自动接近、
+// 220 冻结刷）。战斗血量官方通道是 0x2D/c1=7/SP 单帧（broadcastNPCAttacks
+// 已发），这里只补数值 vitals 同步。
+func (p *playerActor) combatVitalsFrame() ([]byte, error) {
+	p.mu.Lock()
+	state := p.snapshotLocked()
+	sp := p.progress.attributes.sp
+	p.mu.Unlock()
+	props := []clientdata.IndexedProperty{
+		{Index: propHPRatio, Name: "HPRatio", Value: clientdata.Int32Value(int32(int64(state.HP) * 100 / int64(state.MaxHP)))},
+		{Index: propMPRatio, Name: "MPRatio", Value: clientdata.Int32Value(int32(int64(state.MP) * 100 / int64(state.MaxMP)))},
+		{Index: propHP, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		{Index: propMP, Name: "MP", Value: clientdata.Int32Value(state.MP)},
+		{Index: propHitHP, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
+		{Index: propHitHPRatio, Name: "HitHPRatio", Value: clientdata.Int32Value(int32(int64(state.HitHP) * 100 / int64(state.MaxHP)))},
+		{Index: propSP, Name: "SP", Value: clientdata.Int32Value(sp)},
+		{Index: propQingGongPointIndex, Name: "QingGongPoint", Value: clientdata.Int32Value(state.QingGongPoint)},
+	}
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, props)
+}
+
 // rageCapSnapshot 返回当前怒气上限对:基础 MaxSP(恒 80)与运行内功的
 // MaxSPAdd 档位加成。调用方自行持锁。
 func (p *playerActor) rageCapSnapshot() (base, add int32) {
@@ -1827,6 +1882,10 @@ func (p *playerActor) currentSkillClearUpdate() ([]byte, error) {
 		{Index: propCurSkillCanNoLimit, Name: "CurSkillCanNoLimit", Value: clientdata.ByteValue(0)},
 		{Index: propCantBeSkillLocked, Name: "CantBeSkillLocked", Value: clientdata.ByteValue(0)},
 		{Index: propCantBeSkillMustLocked, Name: "CantBeSkillMustLocked", Value: clientdata.ByteValue(0)},
+		// 官服收尾簇（f 46.175）成对清 CantMove/CantParry——落地簇 msg19 后
+		// 置位的两帧若不随收招清除，会悬挂到下一招把人物冻住（63073 前科）。
+		{Index: propRushCantMove, Name: "CantMove", Value: clientdata.ByteValue(0)},
+		{Index: propCantParry, Name: "CantParry", Value: clientdata.Int32Value(0)},
 	})
 }
 

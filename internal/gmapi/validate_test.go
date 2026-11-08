@@ -85,3 +85,41 @@ func TestValidateJingMaiTier(t *testing.T) {
 		}
 	}
 }
+
+// 九阴志全局门控四动作（ninjiuzhi_set/event/reset/status）的契约层
+// 校验：阶段界值 1..9、事件类别枚举 kill|task、无负载动作直放行。
+// 「阶段只增不减」的拒绝语义在游戏侧判定，不在本层。
+func TestValidateJiuYinZhi(t *testing.T) {
+	command, err := validateBody(t, `{"action":"ninjiuzhi_set","stage":7}`)
+	if err != nil {
+		t.Fatalf("valid set rejected: %v", err)
+	}
+	if command.Stage != 7 {
+		t.Fatalf("command=%+v", command)
+	}
+	for _, raw := range []string{
+		`{"action":"ninjiuzhi_set","stage":0}`,
+		`{"action":"ninjiuzhi_set","stage":10}`,
+		`{"action":"ninjiuzhi_set"}`,
+	} {
+		if _, err := validateBody(t, raw); err == nil {
+			t.Fatalf("invalid set accepted: %s", raw)
+		} else if !strings.Contains(err.Error(), "stage") {
+			t.Fatalf("error %q should name stage", err)
+		}
+	}
+	for _, kind := range []string{"kill", "task"} {
+		command, err := validateBody(t, `{"action":"ninjiuzhi_event","eventKind":"`+kind+`"}`)
+		if err != nil || command.EventKind != kind {
+			t.Fatalf("event kind %q rejected: %v", kind, err)
+		}
+	}
+	if _, err := validateBody(t, `{"action":"ninjiuzhi_event","eventKind":"boss"}`); err == nil {
+		t.Fatal("unknown event kind accepted")
+	}
+	for _, action := range []string{"ninjiuzhi_reset", "ninjiuzhi_status"} {
+		if _, err := validateBody(t, `{"action":"`+action+`"}`); err != nil {
+			t.Fatalf("%s rejected: %v", action, err)
+		}
+	}
+}

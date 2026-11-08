@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
-	"time"
 
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -113,20 +112,19 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	}
 	world.selectedObject = entity.id
 	world.selectedOwner = entity.ownerID
-	// 冲锋暂存授权（2026-11-08 官服 b.pcapng 双样本实证）：msg431 是冲锋
-	// 按键的第一步（目标确认；普通点选走 298），官服应答在选中双帧之外
-	// 再发 msg25[30000]——客户端等这帧才启动自动接近；431 前客户端无
-	// 任何技能上报，应答簇里的技能帧是遗留态重推。缺 msg25 时客户端不
-	// 跑、直接连发 211+212 完事（55981/62096 会话实证）。锁内只补写一
-	// 帧（skillPauseFrame 是纯编码，无锁竞争）。
-	pause, err := skillPauseFrame(int32(rushPendingWindow / time.Millisecond))
+	// 431 ack = 选中双帧（416/417）+ **msg209 官服走语义**（用户点测：
+	// 选中即下发官服自动接近授权 [接近距离15, obj(目标), 0]——a.pcapng
+	// 14.258 官方形态；fork 客户端 298 自请求时的应答同型，此处改为
+	// 选目标即主动下发，测试其接近子系统是否由此武装）。
+	approach, err := serverCustomIntMessage(209, customInt(15),
+		customObject(entity.id, entity.ownerID), customInt(0))
 	if err != nil {
-		return fmt.Errorf("encode select target pause ack: %w", err)
+		return fmt.Errorf("encode select approach ack: %w", err)
 	}
-	if err := world.conn.WriteFrame(pause); err != nil {
-		return fmt.Errorf("send select target pause ack: %w", err)
+	if err := world.conn.WriteFrame(approach); err != nil {
+		return fmt.Errorf("send select approach ack: %w", err)
 	}
-	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s (pause ack)",
+	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s (approach ack 209)",
 		remote, entity.id, entity.ownerID, entity.configID, entity.interaction)
 	return nil
 }
@@ -135,8 +133,8 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 // 属性帧（fork scene_lifecycle.go:1090-1094 writePlayerTargetLocked；
 // 49840 抓包 s2c 0x10 双帧逐字节对应）。
 func (s *sceneLifecycle) writePlayerTargetLocked(targetID, targetOwner uint32) error {
-	if err := s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, 414, targetID, targetOwner)); err != nil {
+	if err := s.conn.WriteFrame(sceneObjectObjectProperty(playerObjectID, playerOwnerID, 414, targetID, targetOwner)); err != nil {
 		return err
 	}
-	return s.conn.WriteFrame(sceneObjectObjectProperty(1, 1, uint32(propAutoSelectObject), targetID, targetOwner))
+	return s.conn.WriteFrame(sceneObjectObjectProperty(playerObjectID, playerOwnerID, uint32(propAutoSelectObject), targetID, targetOwner))
 }

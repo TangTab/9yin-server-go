@@ -29,7 +29,9 @@ import (
 //
 // init 默认 jyzStep=6、jyzEventState=2，环境变量
 // NINEYIN_JYZ_STEP（仅 >0 生效）与 NINEYIN_JYZ_EVENT_STATE
-// （>=0 生效，低 8 位截断）可覆盖。
+// （>=0 生效，低 8 位截断）可覆盖。运行期 step 由全服九阴志门控
+// jyzGate 驱动（GM ninjiuzhi_* 动作/击杀事件点可变，见 jyz_gate.go）；
+// 本配置只作装载期的初始值与 data_record 行值来源。
 const (
 	// serverJyzGameStepMessage 0x1E 首值=414，次值窄字符串 'gamestep'
 	// 命令名寻址（官服 #111 逐字节）。
@@ -83,7 +85,9 @@ func resolveJyzConfig(getenv func(string) string) jyzConfig {
 	return cfg
 }
 
-// jyzRecordsConfig 进程级配置（启动环境决定，运行期不变）。
+// jyzRecordsConfig 进程级初始配置（启动环境决定）：step 只作为
+// jyzGate 的装载期初始阶段，eventState 为 data_record 行值（运行期
+// 不变）。运行期下发一律取 jyzGate.config()。
 var jyzRecordsConfig = resolveJyzConfig(os.Getenv)
 
 // jyzStepFrame 0x1E 414 ['gamestep', step, 1]（官服 #111 同形）。
@@ -159,18 +163,42 @@ func pushJyzGameStepFinal(link sceneMessageConnection, cfg jyzConfig) error {
 	return nil
 }
 
+// pushJyzStageChange 阶段生效后向单连接下发 419 步骤帧 + 414 gamestep
+// 收尾帧 + worldInfo 推进提示（Java broadcastNinJiuZhiStage 同源帧）。
+// 这是登录链之后的中途变更：sync 早已完成，gamestep 直发合法；
+// data_record 事件行与阶段正交，不随阶段重发（重发会追加重复行）。
+func pushJyzStageChange(link sceneMessageConnection, newStage int) error {
+	cfg := jyzConfig{step: int32(newStage), eventState: jyzGate.eventStateValue()}
+	legacy, err := jyzLegacyStepFrame(cfg)
+	if err != nil {
+		return fmt.Errorf("encode jyz legacy step: %w", err)
+	}
+	if err := link.WriteFrame(legacy); err != nil {
+		return fmt.Errorf("write jyz legacy step: %w", err)
+	}
+	if err := pushJyzGameStepFinal(link, cfg); err != nil {
+		return err
+	}
+	if err := link.WriteFrame(worldInfo(0, jyzStageChangeNotice(newStage))); err != nil {
+		return fmt.Errorf("write jyz stage notice: %w", err)
+	}
+	return nil
+}
+
 // handleJyzQueryCustom 应答 C2S 770 (player_name, msgID)：回 419+data
 // 数据部 + 414 gamestep + 770 事件明细帧。官服对该查询无即时应答
 // （步骤帧已在登录推过、明细帧由 UI 查询链触发），这里补齐保证
-// 客户端状态完整；quest 簇不重发（会重复行）。
+// 客户端状态完整；quest 簇不重发（会重复行）。步骤值取全服门控
+// 当前阶段。
 func handleJyzQueryCustom(link sceneMessageConnection, custom clientCustomMessage, remote string) error {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomJyzQuery {
 		return fmt.Errorf("jyz query custom malformed: %v", custom.Values)
 	}
-	if err := pushJyzDataRecords(link, jyzRecordsConfig); err != nil {
+	cfg := jyzGate.config()
+	if err := pushJyzDataRecords(link, cfg); err != nil {
 		return err
 	}
-	if err := pushJyzGameStepFinal(link, jyzRecordsConfig); err != nil {
+	if err := pushJyzGameStepFinal(link, cfg); err != nil {
 		return err
 	}
 	detail, err := jyzDetailFrame()
@@ -180,6 +208,6 @@ func handleJyzQueryCustom(link sceneMessageConnection, custom clientCustomMessag
 	if err := link.WriteFrame(detail); err != nil {
 		return fmt.Errorf("write jyz detail: %w", err)
 	}
-	log.Printf("%s: answered jyz query via data + gamestep step=%d + detail entries=%d", remote, jyzRecordsConfig.step, len(jyzDetailEntries))
+	log.Printf("%s: answered jyz query via data + gamestep step=%d + detail entries=%d", remote, cfg.step, len(jyzDetailEntries))
 	return nil
 }

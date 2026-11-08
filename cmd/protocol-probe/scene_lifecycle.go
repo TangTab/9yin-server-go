@@ -317,7 +317,7 @@ func (s *sceneLifecycle) refreshVisibility(catalog []npcSpawn, position role.Pos
 		if dx*dx+dz*dz > radiusSquared {
 			continue
 		}
-		next[uint32(index)+2] = struct{}{}
+		next[forkNPCID(uint32(index)+2)] = struct{}{}
 	}
 	// 其他成员的远程实体与 NPC 共用同一可见集（帧扇出过滤统一）。
 	s.run.mu.Lock()

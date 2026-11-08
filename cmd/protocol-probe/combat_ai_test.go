@@ -42,12 +42,12 @@ func registerPassiveTestCombatNPC(t *testing.T, lifecycle *sceneLifecycle, id ui
 // 行为一致。
 func placeTestNPC(t *testing.T, lifecycle *sceneLifecycle, id uint32, x, z float32) {
 	t.Helper()
-	transform, ok := lifecycle.npcTransform(worldcore.EntityID(id))
+	transform, ok := lifecycle.npcTransform(worldcore.EntityID(forkNPCID(id)))
 	if !ok {
 		t.Fatalf("NPC %d has no transform", id)
 	}
 	transform.X, transform.Z = x, z
-	lifecycle.writeNpcTransform(worldcore.EntityID(id), transform)
+	lifecycle.writeNpcTransform(worldcore.EntityID(forkNPCID(id)), transform)
 }
 
 // TestNewNPCCombatStateHonorsNotPositive 模板位断言：NotPositive=1 →
@@ -96,7 +96,7 @@ func TestPassiveNPCDoesNotAggroNearbyPlayer(t *testing.T) {
 	if logic := player.stateSnapshot().LogicState; logic != entity.LogicStateNormal {
 		t.Fatalf("passive NPC dragged idle player into combat: LogicState=%d", logic)
 	}
-	if brain, _ := lifecycle.run.combat.Brain(worldcore.EntityID(101)); brain.Threat != 0 || brain.TargetMember != 0 {
+	if brain, _ := lifecycle.run.combat.Brain(worldcore.EntityID(forkNPCID(101))); brain.Threat != 0 || brain.TargetMember != 0 {
 		t.Fatalf("passive NPC built threat=%d target=%d without being hit", brain.Threat, brain.TargetMember)
 	}
 	lifecycle.close()
@@ -116,13 +116,13 @@ func TestPassiveNPCRetaliatesWhenHit(t *testing.T) {
 	// 首 tick 登记 s.wireID（受击锁定攻击者要用），被动怪原地待命。
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now)
 	// 玩家命中 NPC 一次（applySkillDamageToNPC 真实入口；伤害 1 进威胁表）。
-	if _, err := lifecycle.applySkillDamageToNPC(102, 1, 1, now); err != nil {
+	if _, err := lifecycle.applySkillDamageToNPC(forkNPCID(102), 1, 1, now); err != nil {
 		t.Fatal(err)
 	}
 	lifecycle.mu.Lock()
 	attackerWireID := lifecycle.wireID
 	lifecycle.mu.Unlock()
-	brain, ok := lifecycle.run.combat.Brain(worldcore.EntityID(102))
+	brain, ok := lifecycle.run.combat.Brain(worldcore.EntityID(forkNPCID(102)))
 	if !ok {
 		t.Fatal("passive NPC must have a brain")
 	}
@@ -284,7 +284,7 @@ func TestCombatTickRespawnsDeadHostileAtHome(t *testing.T) {
 		t.Fatal(err)
 	}
 	registerTestCombatNPC(t, lifecycle, 83)
-	id := worldcore.EntityID(83)
+	id := worldcore.EntityID(forkNPCID(83))
 	vitals, ok := lifecycle.run.combat.Vitals(id)
 	if !ok {
 		t.Fatal("combat NPC must have vitals")
@@ -362,7 +362,7 @@ func TestNPCRespawnAfterHonorsOfficialRefreshTime(t *testing.T) {
 	if err := lifecycle.registerNPCOnRun(85, refreshed); err != nil {
 		t.Fatal(err)
 	}
-	brain, ok := lifecycle.run.combat.Brain(worldcore.EntityID(85))
+	brain, ok := lifecycle.run.combat.Brain(worldcore.EntityID(forkNPCID(85)))
 	if !ok || brain.RespawnAfter != 2*time.Second {
 		t.Fatalf("registered brain respawn=%v ok=%t", brain.RespawnAfter, ok)
 	}
@@ -384,7 +384,7 @@ func TestCombatTickRespawnsAfterTemplateRefreshTime(t *testing.T) {
 	if err := lifecycle.registerNPCOnRun(86, npc); err != nil {
 		t.Fatal(err)
 	}
-	id := worldcore.EntityID(86)
+	id := worldcore.EntityID(forkNPCID(86))
 	killTime := time.Unix(6000, 0)
 	vitals, ok := lifecycle.run.combat.Vitals(id)
 	if !ok {
@@ -421,7 +421,7 @@ func TestCombatTickClearsNPCFightingAfterLeash(t *testing.T) {
 		t.Fatal(err)
 	}
 	registerTestCombatNPC(t, lifecycle, 87)
-	id := worldcore.EntityID(87)
+	id := worldcore.EntityID(forkNPCID(87))
 	vitals, ok := lifecycle.run.combat.Vitals(id)
 	if !ok {
 		t.Fatal("combat NPC must have vitals")
@@ -454,7 +454,7 @@ func TestCombatTickClearsNPCFightingAfterLeash(t *testing.T) {
 	}
 	var logicState *byte
 	for _, frame := range conn.Frames() {
-		if frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != 87 {
+		if frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != forkNPCID(87) {
 			continue
 		}
 		// npcCombatProperties 线宽：21/463/464=1B，28/30/32/465/469/578=4B。
@@ -517,15 +517,15 @@ func TestNPCAttackAutoSelectsAttackerForUntargetedVictim(t *testing.T) {
 		if !ok {
 			t.Fatalf("attacker auto-select frame idx=%d missing", idx)
 		}
-		if target[0] != 91 || target[1] != 1 {
+		if target[0] != forkNPCID(91) || target[1] != 1 {
 			t.Fatalf("idx=%d selected %d-%d, want 91-1", idx, target[0], target[1])
 		}
 	}
-	if lifecycle.selectedObject != 91 || lifecycle.selectedOwner != 1 {
+	if lifecycle.selectedObject != forkNPCID(91) || lifecycle.selectedOwner != 1 {
 		t.Fatalf("server selection mirror = %d-%d, want 91-1", lifecycle.selectedObject, lifecycle.selectedOwner)
 	}
 	// 自动选中必须立刻打通 211 选靶路径（skillTargetSelected 族）。
-	if id, owner, ok := lifecycle.selectedCombatTarget(); !ok || id != 91 || owner != 1 {
+	if id, owner, ok := lifecycle.selectedCombatTarget(); !ok || id != forkNPCID(91) || owner != 1 {
 		t.Fatalf("selectedCombatTarget after auto-select = %d-%d ok=%t", id, owner, ok)
 	}
 	lifecycle.close()
@@ -540,10 +540,10 @@ func TestNPCAttackKeepsPlayerManualSelection(t *testing.T) {
 	registerTestCombatNPC(t, lifecycle, 92)
 	registerTestCombatNPC(t, lifecycle, 93)
 	placeTestNPC(t, lifecycle, 93, 200, 200) // 仇恨圈外保持存活的手动目标
-	lifecycle.selectedObject, lifecycle.selectedOwner = 93, 1
+	lifecycle.selectedObject, lifecycle.selectedOwner = forkNPCID(93), 1
 	player := newPlayerActor("tester", 0)
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3100, 0))
-	if lifecycle.selectedObject != 93 || lifecycle.selectedOwner != 1 {
+	if lifecycle.selectedObject != forkNPCID(93) || lifecycle.selectedOwner != 1 {
 		t.Fatalf("manual target overridden by auto-select: now %d-%d", lifecycle.selectedObject, lifecycle.selectedOwner)
 	}
 	if found := autoSelectFrames(conn); len(found) != 0 {
@@ -560,10 +560,10 @@ func TestNPCAttackReplacesStaleSelection(t *testing.T) {
 	}
 	registerTestCombatNPC(t, lifecycle, 94)
 	// 已消亡对象占位的陈旧格与空选同权，攻击者应当顶替。
-	lifecycle.selectedObject, lifecycle.selectedOwner = 949494, 1
+	lifecycle.selectedObject, lifecycle.selectedOwner = forkNPCID(949494), 1
 	player := newPlayerActor("tester", 0)
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3200, 0))
-	if lifecycle.selectedObject != 94 || lifecycle.selectedOwner != 1 {
+	if lifecycle.selectedObject != forkNPCID(94) || lifecycle.selectedOwner != 1 {
 		t.Fatalf("stale selection not replaced: %d-%d", lifecycle.selectedObject, lifecycle.selectedOwner)
 	}
 	found := autoSelectFrames(conn)

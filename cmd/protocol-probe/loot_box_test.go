@@ -85,31 +85,31 @@ func TestBatchRespawnSweepRevivesDeadAndLeavesAlive(t *testing.T) {
 
 	now := time.Unix(10000, 0)
 	run.refreshTick(now) // 先空扫一次，落定扫描基线（生产由每秒 tick 自然完成）
-	killOnly(run, 2, deadNPCRecord{spawnIndex: 0, diedAt: now})
-	aliveBefore, _ := run.combat.Vitals(3)
-	aliveTransform, _ := run.npcTransform(worldcore.EntityID(3))
+	killOnly(run, forkNPCID(2), deadNPCRecord{spawnIndex: 0, diedAt: now})
+	aliveBefore, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(3)))
+	aliveTransform, _ := run.npcTransform(worldcore.EntityID(forkNPCID(3)))
 
 	run.refreshTick(now.Add(4 * time.Second))
-	if dead, _ := run.combat.Vitals(2); dead.HP != 0 {
+	if dead, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); dead.HP != 0 {
 		t.Fatalf("NPC revived before sweep deadline: %+v", dead)
 	}
-	if _, busy := run.deadNPCs[2]; !busy {
+	if _, busy := run.deadNPCs[forkNPCID(2)]; !busy {
 		t.Fatal("dead record dropped before sweep")
 	}
 
 	run.refreshTick(now.Add(5 * time.Second))
-	revived, _ := run.combat.Vitals(2)
+	revived, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2)))
 	if revived.HP != revived.MaxHP {
 		t.Fatalf("dead NPC not revived by sweep: %+v", revived)
 	}
-	if _, busy := run.deadNPCs[2]; busy {
+	if _, busy := run.deadNPCs[forkNPCID(2)]; busy {
 		t.Fatal("dead record kept after sweep")
 	}
 	// 活怪不动：HP 与坐标原样。
-	if alive, _ := run.combat.Vitals(3); alive.HP != aliveBefore.HP {
+	if alive, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(3))); alive.HP != aliveBefore.HP {
 		t.Fatalf("alive NPC HP changed: %d -> %d", aliveBefore.HP, alive.HP)
 	}
-	if after, _ := run.npcTransform(worldcore.EntityID(3)); after != aliveTransform {
+	if after, _ := run.npcTransform(worldcore.EntityID(forkNPCID(3))); after != aliveTransform {
 		t.Fatalf("alive NPC moved: %+v -> %+v", aliveTransform, after)
 	}
 	// 复活帧组：0x20 回家 + 0x10 属性（与每怪复活同帧方言）。
@@ -127,20 +127,20 @@ func TestCorpseTTLRemovesAndPerNPCRespawnReRegisters(t *testing.T) {
 	defer view.close()
 
 	now := time.Unix(11000, 0)
-	killOnly(run, 2, deadNPCRecord{spawnIndex: 0, diedAt: now, respawnAt: now.Add(15 * time.Second)})
+	killOnly(run, forkNPCID(2), deadNPCRecord{spawnIndex: 0, diedAt: now, respawnAt: now.Add(15 * time.Second)})
 
 	run.refreshTick(now.Add(3 * time.Second))
 	frames := conn.Frames()
 	if len(frames) != 1 || frames[0][0] != 0x0E {
 		t.Fatalf("corpse TTL must emit exactly 0x0E, frames=%x", frames)
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); exists {
 		t.Fatal("corpse must be unregistered after TTL")
 	}
-	if rec, ok := run.deadNPCs[2]; !ok || !rec.removed {
+	if rec, ok := run.deadNPCs[forkNPCID(2)]; !ok || !rec.removed {
 		t.Fatalf("dead record not marked removed: %+v ok=%t", rec, ok)
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(3)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(3))); !exists {
 		t.Fatal("alive NPC must stay registered")
 	}
 
@@ -149,13 +149,13 @@ func TestCorpseTTLRemovesAndPerNPCRespawnReRegisters(t *testing.T) {
 	if len(frames) != 3 || frames[1][0] != 0x0D || frames[2][0] != 0x1F {
 		t.Fatalf("respawn must rematerialize with 0x0D+0x1F, frames=%x", frames)
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); !exists {
 		t.Fatal("removed NPC must re-register under the same id")
 	}
-	if revived, _ := run.combat.Vitals(2); revived.HP != revived.MaxHP {
+	if revived, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); revived.HP != revived.MaxHP {
 		t.Fatalf("re-registered NPC must be full HP: %+v", revived)
 	}
-	if _, busy := run.deadNPCs[2]; busy {
+	if _, busy := run.deadNPCs[forkNPCID(2)]; busy {
 		t.Fatal("dead record kept after per-NPC respawn")
 	}
 }
@@ -169,7 +169,7 @@ func TestBatchRespawnReRegistersRemovedCorpse(t *testing.T) {
 
 	now := time.Unix(12000, 0)
 	run.refreshTick(now) // 先空扫一次，落定扫描基线
-	killOnly(run, 2, deadNPCRecord{spawnIndex: 0, diedAt: now})
+	killOnly(run, forkNPCID(2), deadNPCRecord{spawnIndex: 0, diedAt: now})
 
 	run.refreshTick(now.Add(3 * time.Second))
 	if frames := conn.Frames(); len(frames) != 1 || frames[0][0] != 0x0E {
@@ -180,7 +180,7 @@ func TestBatchRespawnReRegistersRemovedCorpse(t *testing.T) {
 	if len(frames) != 3 || frames[1][0] != 0x0D || frames[2][0] != 0x1F {
 		t.Fatalf("sweep re-add frames=%x", frames)
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); !exists {
 		t.Fatal("removed corpse must re-register on sweep")
 	}
 }
@@ -193,7 +193,7 @@ func TestKillAttachesLootToCorpse(t *testing.T) {
 	run, view, conn, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	now := time.Unix(13000, 0)
 	wireIDBefore := run.nextWireID
 	outcome, err := view.applySelectedSkillDamage(999999, now)
@@ -201,7 +201,7 @@ func TestKillAttachesLootToCorpse(t *testing.T) {
 	if err != nil || !killed || frame == nil {
 		t.Fatalf("kill settlement frame=%v id=%d killed=%t err=%v", frame, id, killed, err)
 	}
-	box, has := run.lootBoxes[2]
+	box, has := run.lootBoxes[forkNPCID(2)]
 	if !has {
 		t.Fatalf("kill must attach loot to the corpse (id=2), got %d boxes", len(run.lootBoxes))
 	}
@@ -214,7 +214,7 @@ func TestKillAttachesLootToCorpse(t *testing.T) {
 	if run.nextWireID != wireIDBefore { // 挂尸不得消耗实体号（玩家已从该池取号）
 		t.Fatalf("corpse loot must not consume a wire id: %d -> %d", wireIDBefore, run.nextWireID)
 	}
-	meta, exists := run.npcMeta(worldcore.EntityID(2))
+	meta, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2)))
 	if !exists || meta.lootBox != box {
 		t.Fatalf("corpse meta must carry the loot runtime: exists=%t", exists)
 	}
@@ -224,7 +224,7 @@ func TestKillAttachesLootToCorpse(t *testing.T) {
 	if opcodes.has(0x0D) || opcodes.has(0x1F) {
 		t.Fatalf("corpse loot must not materialize a new object, frames=%v", opcodes)
 	}
-	if !hasCorpsePickFrames(t, conn.Frames(), 2) {
+	if !hasCorpsePickFrames(t, conn.Frames(), forkNPCID(2)) {
 		t.Fatalf("kill relay must send CanPick/PickMember frames, frames=%v", opcodes)
 	}
 	if box.picker != "tester" {
@@ -268,7 +268,7 @@ func TestDropBoxOpenPickCloseFlow(t *testing.T) {
 	run, view, conn, player := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	now := time.Unix(14000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
@@ -276,11 +276,11 @@ func TestDropBoxOpenPickCloseFlow(t *testing.T) {
 		t.Fatalf("kill settlement err=%v killed=%t", err, killed)
 	}
 	view.relayNPCKillFrame(id, frame, "tester")
-	box := run.lootBoxes[2]
+	box := run.lootBoxes[forkNPCID(2)]
 	firstItem := box.contents[0]
 
 	openedBase := len(conn.Frames())
-	if _, err := view.objectRequest(clientObjectRequest{Sequence: 7, ObjectID: 2, OwnerID: 1}); err != nil {
+	if _, err := view.objectRequest(clientObjectRequest{Sequence: 7, ObjectID: forkNPCID(2), OwnerID: 1}); err != nil {
 		t.Fatalf("open drop box on corpse: %v", err)
 	}
 	openFrames := frameOpcodes(conn.Frames()[openedBase:])
@@ -328,10 +328,10 @@ func TestDropBoxOpenPickCloseFlow(t *testing.T) {
 		if len(run.lootBoxes) != 0 {
 			t.Fatalf("emptied box still on scene: %d", len(run.lootBoxes))
 		}
-		if _, exists := run.npcMeta(worldcore.EntityID(2)); exists {
+		if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); exists {
 			t.Fatal("emptied corpse must be unregistered")
 		}
-		if rec, ok := run.deadNPCs[2]; !ok || !rec.removed {
+		if rec, ok := run.deadNPCs[forkNPCID(2)]; !ok || !rec.removed {
 			t.Fatalf("emptied corpse must be marked removed for respawn: %+v ok=%t", rec, ok)
 		}
 		if view.openDropBox != nil {
@@ -347,7 +347,7 @@ func TestDropBoxCloseKeepsBox(t *testing.T) {
 	run, view, conn, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	now := time.Unix(15000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
@@ -355,7 +355,7 @@ func TestDropBoxCloseKeepsBox(t *testing.T) {
 		t.Fatalf("kill settlement err=%v killed=%t", err, killed)
 	}
 	view.relayNPCKillFrame(id, frame, "tester")
-	if _, err := view.objectRequest(clientObjectRequest{Sequence: 8, ObjectID: 2, OwnerID: 1}); err != nil {
+	if _, err := view.objectRequest(clientObjectRequest{Sequence: 8, ObjectID: forkNPCID(2), OwnerID: 1}); err != nil {
 		t.Fatalf("open drop box on corpse: %v", err)
 	}
 	base := len(conn.Frames())
@@ -375,11 +375,11 @@ func TestDropBoxCloseKeepsBox(t *testing.T) {
 	if len(run.lootBoxes) != 1 {
 		t.Fatalf("close must keep the loot on the corpse, got %d", len(run.lootBoxes))
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); !exists {
 		t.Fatal("close must keep the corpse registered")
 	}
 	// 再次打开：行仍在（未拾取）。
-	if _, err := view.objectRequest(clientObjectRequest{Sequence: 9, ObjectID: 2, OwnerID: 1}); err != nil {
+	if _, err := view.objectRequest(clientObjectRequest{Sequence: 9, ObjectID: forkNPCID(2), OwnerID: 1}); err != nil {
 		t.Fatalf("reopen drop box: %v", err)
 	}
 	if view.openDropBox == nil || len(view.openDropBox.slots) == 0 {
@@ -397,7 +397,7 @@ func TestLootBoxExpiresAfterTTL(t *testing.T) {
 	run, view, conn, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	now := time.Unix(16000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
@@ -408,10 +408,10 @@ func TestLootBoxExpiresAfterTTL(t *testing.T) {
 
 	// 尸体 TTL(2s) 已过但掉落 TTL(60s) 未到：尸体不清除。
 	run.refreshTick(now.Add(10 * time.Second))
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); !exists {
 		t.Fatal("corpse must survive its own TTL while loot is pending")
 	}
-	if rec, ok := run.deadNPCs[2]; !ok || rec.removed {
+	if rec, ok := run.deadNPCs[forkNPCID(2)]; !ok || rec.removed {
 		t.Fatalf("corpse must not be removed while loot is pending: %+v ok=%t", rec, ok)
 	}
 	// 参数即时生效：掉落生成 60s 后把 TTL 调小到 30s，下一次结算即清尸。
@@ -420,10 +420,10 @@ func TestLootBoxExpiresAfterTTL(t *testing.T) {
 	if len(run.lootBoxes) != 0 {
 		t.Fatalf("loot must expire after TTL, got %d", len(run.lootBoxes))
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); exists {
 		t.Fatal("expired corpse must be unregistered")
 	}
-	if rec, ok := run.deadNPCs[2]; !ok || !rec.removed {
+	if rec, ok := run.deadNPCs[forkNPCID(2)]; !ok || !rec.removed {
 		t.Fatalf("expired corpse must be marked removed for respawn: %+v ok=%t", rec, ok)
 	}
 	opcodes := frameOpcodes(conn.Frames())
@@ -440,7 +440,7 @@ func TestLootBoxZeroTTLKeepsBox(t *testing.T) {
 	run, view, _, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	now := time.Unix(16000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	if err != nil || !outcome.killed {
@@ -455,10 +455,10 @@ func TestLootBoxZeroTTLKeepsBox(t *testing.T) {
 	if len(run.lootBoxes) != 1 {
 		t.Fatalf("loot must survive with ttl=0, got %d", len(run.lootBoxes))
 	}
-	if vitals, _ := run.combat.Vitals(worldcore.EntityID(2)); vitals.HP != 0 {
+	if vitals, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); vitals.HP != 0 {
 		t.Fatalf("corpse must stay dead while loot is unclaimed: %+v", vitals)
 	}
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); !exists {
 		t.Fatal("corpse must stay registered with ttl=0 loot")
 	}
 }
@@ -482,7 +482,7 @@ func TestEventNpcNeverEntersRefreshCycle(t *testing.T) {
 	run.activateMember(view.wireID)
 	defer view.close()
 
-	if _, exists := run.npcMeta(worldcore.EntityID(3)); exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(3))); exists {
 		t.Fatal("EventNpc must never be registered")
 	}
 	if len(run.deadNPCs) != 0 || len(run.lootBoxes) != 0 {
@@ -511,7 +511,7 @@ func TestCorpseLootDefersRespawn(t *testing.T) {
 
 	now := time.Unix(17000, 0)
 	run.refreshTick(now) // 落定扫描基线
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	if err != nil || !outcome.killed {
 		t.Fatalf("kill settlement err=%v killed=%t", err, outcome.killed)
@@ -520,38 +520,38 @@ func TestCorpseLootDefersRespawn(t *testing.T) {
 
 	// 批量扫描点已过：尸体带掉落不复活。
 	run.refreshTick(now.Add(6 * time.Second))
-	if vitals, _ := run.combat.Vitals(worldcore.EntityID(2)); vitals.HP != 0 {
+	if vitals, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); vitals.HP != 0 {
 		t.Fatalf("corpse must stay dead while loot is pending: %+v", vitals)
 	}
-	if _, busy := run.deadNPCs[2]; !busy {
+	if _, busy := run.deadNPCs[forkNPCID(2)]; !busy {
 		t.Fatal("dead record dropped while loot is pending")
 	}
 
 	// 每怪模式同理：RespawnAt 到点 simulateLocked 也跳过复活。
 	setNpcRespawnBatchInterval(0)
-	if brain, has := run.combat.Brain(worldcore.EntityID(2)); has {
+	if brain, has := run.combat.Brain(worldcore.EntityID(forkNPCID(2))); has {
 		brain.RespawnAt = now.Add(time.Second)
-		run.combat.WriteBrain(worldcore.EntityID(2), brain)
+		run.combat.WriteBrain(worldcore.EntityID(forkNPCID(2)), brain)
 	}
 	run.combatTick(now.Add(7 * time.Second))
-	if vitals, _ := run.combat.Vitals(worldcore.EntityID(2)); vitals.HP != 0 {
+	if vitals, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); vitals.HP != 0 {
 		t.Fatalf("per-NPC respawn must defer while loot is pending: %+v", vitals)
 	}
 
 	// 拾空清尸 → removed；下一 tick 按目录行重注册（0x0D+0x1F）。
 	run.mu.Lock()
-	run.removeLootBoxLocked(nil, 2, 1)
+	run.removeLootBoxLocked(nil, forkNPCID(2), 1)
 	run.mu.Unlock()
-	if rec, ok := run.deadNPCs[2]; !ok || !rec.removed {
+	if rec, ok := run.deadNPCs[forkNPCID(2)]; !ok || !rec.removed {
 		t.Fatalf("loot cleanup must mark corpse removed: %+v ok=%t", rec, ok)
 	}
 	respawnBase := len(conn.Frames())
 	// 击杀时每怪重生已排 respawnAt=now+15s，越过后重注册成行。
 	run.refreshTick(now.Add(20 * time.Second))
-	if _, exists := run.npcMeta(worldcore.EntityID(2)); !exists {
+	if _, exists := run.npcMeta(worldcore.EntityID(forkNPCID(2))); !exists {
 		t.Fatal("corpse must re-register after loot cleanup")
 	}
-	if revived, _ := run.combat.Vitals(worldcore.EntityID(2)); revived.HP != revived.MaxHP {
+	if revived, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); revived.HP != revived.MaxHP {
 		t.Fatalf("re-registered NPC must be full HP: %+v", revived)
 	}
 	opcodes := frameOpcodes(conn.Frames()[respawnBase:])
@@ -573,21 +573,21 @@ func TestChestMonsterSpawnsBoxEntity(t *testing.T) {
 	monster.resolved.Extensions["template.AIEditorPackID"] = "700"
 	run.catalog[0] = monster
 
-	view.selectedObject, view.selectedOwner = 2, 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
 	now := time.Unix(18000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
 	if err != nil || !killed {
 		t.Fatalf("kill settlement err=%v killed=%t", err, killed)
 	}
-	if _, hasCorpseLoot := run.lootBoxes[2]; hasCorpseLoot {
+	if _, hasCorpseLoot := run.lootBoxes[forkNPCID(2)]; hasCorpseLoot {
 		t.Fatal("chest monster corpse must not carry loot itself")
 	}
 	var chestID uint32
 	var chest *lootBoxRuntime
 	for chestID, chest = range run.lootBoxes {
 	}
-	if chestID == 2 || chestID == 0 || !chest.standalone {
+	if chestID == forkNPCID(2) || chestID == 0 || !chest.standalone {
 		t.Fatalf("chest monster must spawn a standalone entity, id=%d box=%+v", chestID, chest)
 	}
 	view.relayNPCKillFrame(id, frame, "tester")
@@ -595,7 +595,7 @@ func TestChestMonsterSpawnsBoxEntity(t *testing.T) {
 	if !opcodes.has(0x0D) || !opcodes.has(0x1F) {
 		t.Fatalf("chest entity materialization frames=%v", opcodes)
 	}
-	if hasCorpsePickFrames(t, conn.Frames(), 2) {
+	if hasCorpsePickFrames(t, conn.Frames(), forkNPCID(2)) {
 		t.Fatal("chest monster corpse must NOT emit CanPick frames")
 	}
 }

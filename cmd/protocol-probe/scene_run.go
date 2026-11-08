@@ -199,7 +199,7 @@ func (r *sceneRun) attachMember(member *sceneMember) uint32 {
 		if r.nextWireID == 0 {
 			r.nextWireID = 2
 		}
-		member.objectID = r.nextWireID
+		member.objectID = forkNPCID(r.nextWireID)
 		r.nextWireID++
 		r.members[member.objectID] = member
 		if member.player != nil {
@@ -342,7 +342,25 @@ func (r *sceneRun) tickOnce(now time.Time) {
 
 // registerNPCLocked 注册单个 NPC：可视权威实体 + 四组件一次成型。
 // 调用方必须已持有 r.mu。
+// forkNPCID 把裸场景索引映射到 fork 对象 id 段（0x1100_0000|idx，
+// docs/fork-object-id-migration.md）。已是大号 id（宝箱实体等）直通。
+func forkNPCID(id uint32) uint32 {
+	if id == 0 || id >= 0x01000000 {
+		return id
+	}
+	return 0x11000000 | id
+}
+
+// forkNPCIndex 反解 fork id 的目录行索引（forkNPCID 的逆；裸 id 直通）。
+func forkNPCIndex(id uint32) int {
+	if id >= 0x11000000 {
+		return int(id & 0xFFFFFF)
+	}
+	return int(id)
+}
+
 func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
+	id = forkNPCID(id)
 	if id == 0 || id == 1 {
 		return fmt.Errorf("NPC scene identity %d collides with reserved player identity", id)
 	}

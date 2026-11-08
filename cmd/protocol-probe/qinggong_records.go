@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 	"unicode/utf16"
 
@@ -318,6 +321,9 @@ type recordCell struct {
 	byteValue   *uint32
 	doubleValue *float64
 	text        *string
+	// objectCell：int64Value 低 32 位对象号 / 高 32 位 owner（rec114 col0
+	// 等 obj 型列，官服 0x13 逐格与 0x11 行加共用 recordCell 载体）。
+	objectCell bool
 }
 
 func recordInt(value uint32) recordCell      { return recordCell{intValue: &value} }
@@ -519,6 +525,34 @@ func taskCompletedRows(taskIDs []uint32) (map[uint32]uint32, uint32) {
 	return rowValues, finalRow
 }
 
+// functionOpenGateTaskID 功能开放总门任务（2026-11-09 真机二分定案：
+// Task_Completed row 1551 mask 0x4 单一位点亮后左右功能按钮栏全出，
+// 反推 taskCompletedBit(49634)=row1551/0x4——串行映射与本服编码器一致。
+// 此前从条件 ini 展开的 1346/1084..2938 均为误判（D2 整行饱和无效）。
+const functionOpenGateTaskID uint32 = 49634
+
+// funcGateTaskIDs 功能按钮栏门任务全集（func_btns.ini/func_btns_ex.ini
+// 条件包递归展开：Type=8 Task_Completed 1346 + Func27 引擎函数挂的
+// 17 个剧情任务）。点亮这些位 → 左右两栏功能按钮全出（洪水实验实证）。
+var funcGateTaskIDs = []uint32{
+	1084, 1109, 1217, 1251, 1263, 1298, 1311, 1322, 1324, 1330,
+	1346, 1362, 1369, 1373, 1384, 1401, 1412, 2838, 2938,
+}
+
+// parseFloodRange 解析 "a-b" 区间（含端点，允许 a==b）。
+func parseFloodRange(raw string) (uint32, uint32, bool) {
+	parts := strings.Split(raw, "-")
+	if len(parts) != 2 {
+		return 0, 0, false
+	}
+	lo, err1 := strconv.Atoi(parts[0])
+	hi, err2 := strconv.Atoi(parts[1])
+	if err1 != nil || err2 != nil || lo < 0 || hi < lo {
+		return 0, 0, false
+	}
+	return uint32(lo), uint32(hi), true
+}
+
 func facultyAcceptedTaskIDs() []uint32 {
 	taskIDs := make([]uint32, 0, int(facultyGuideTaskLast-facultyGuideTaskFirst)+
 		int(facultySchoolLeadTaskLast-facultySchoolLeadTaskFirst)+
@@ -542,7 +576,7 @@ func facultyAcceptedTaskIDs() []uint32 {
 // Task_Completed 只能追加，前面的每一行都必须发出，包括包含所需位
 // 的各行之前的零值行。
 func grantFunctionUnlock(conn sceneMessageConnection) error {
-	taskIDs := []uint32{functionUnlockTaskID, facultyAltTaskID, facultyActAltTaskID}
+	taskIDs := []uint32{functionUnlockTaskID, facultyAltTaskID, facultyActAltTaskID, functionOpenGateTaskID}
 	for taskID := facultyGuideTaskFirst; taskID <= facultyGuideTaskLast; taskID++ {
 		taskIDs = append(taskIDs, taskID)
 	}
@@ -573,11 +607,75 @@ func grantFunctionUnlock(conn sceneMessageConnection) error {
 		return fmt.Errorf("grant collect skills: %w", err)
 	}
 
+	// funcGateTaskIDs 功能按钮栏（func_btns.ini + func_btns_ex.ini）条件
+	// 体系的门任务全集：Type=8 Task_Completed(1346 暮色初章) + Func27
+	// 引擎函数挂的 17 个剧情任务（1084..2938，两侧按钮栏各自条件包
+	// 递归展开，2026-11-08 从两份 ini + condition_formula/condition.ini
+	// 枚举）。洪水实验（全位 0xFFFFFFFF）实证这些位点亮后左右两栏
+	// 按钮全部出现。
+	for _, id := range funcGateTaskIDs {
+		taskIDs = append(taskIDs, id)
+	}
 	rowValues, finalRow := taskCompletedRows(taskIDs)
+	// 门任务位三候选并集：真机实证 taskCompletedBit 的 serial+1/(bit-1)
+	// 编码（1346→row42 bit3=0x4）不被条件认可，全刷 0xFFFFFFFF 可过
+	//（2026-11-08 真机）。三种候选编码——taskID%32 直取(0x40)、
+	// taskID%32-1(0x20)、serial%32 直取(0x8)——全部并上；落点均在
+	// 同段剧情链邻居位，语义无害。待单点位实验收窄后换精确位。
+	// env NINEYIN_TASK_BITMAP_EXACT=1 只用原始精确位（对照）。
+	gateValueRows := os.Getenv("NINEYIN_TASK_BITMAP_VALUEROWS") != ""
+	if exact := os.Getenv("NINEYIN_TASK_BITMAP_EXACT"); exact != "" {
+		// 对照：只用 taskCompletedBit 原始位。
+		gateValueRows = false
+	} else if floodRange := os.Getenv("NINEYIN_TASK_BITMAP_FLOOD"); floodRange != "" {
+		// 二分定位：NINEYIN_TASK_BITMAP_FLOOD=a-b 把行区间 [a,b] 刷
+		// 0xFFFFFFFF（含端点，超出 finalRow 自动扩行），其余行保持
+		// 精确位。值行(下述实验E)同时停发，保证单变量。
+		gateValueRows = false
+		lo, hi, ok := parseFloodRange(floodRange)
+		if !ok {
+			return fmt.Errorf("bad NINEYIN_TASK_BITMAP_FLOOD %q (want a-b)", floodRange)
+		}
+		if hi > finalRow {
+			finalRow = hi
+		}
+		for row := lo; row <= hi; row++ {
+			rowValues[row] = 0xFFFFFFFF
+		}
+	} else if rowVal := os.Getenv("NINEYIN_TASK_BITMAP_ROWVAL"); rowVal != "" {
+		// 行内位二分：NINEYIN_TASK_BITMAP_ROWVAL=row:hexval 把指定行
+		// 的值精确设为 hexval（0x 前缀可选），其余行保持精确位。
+		gateValueRows = false
+		parts := strings.SplitN(rowVal, ":", 2)
+		if len(parts) != 2 {
+			return fmt.Errorf("bad NINEYIN_TASK_BITMAP_ROWVAL %q (want row:hexval)", rowVal)
+		}
+		row64, err := strconv.ParseUint(parts[0], 10, 32)
+		val64, verr := strconv.ParseUint(strings.TrimPrefix(parts[1], "0x"), 16, 32)
+		if err != nil || verr != nil {
+			return fmt.Errorf("bad NINEYIN_TASK_BITMAP_ROWVAL %q: %v/%v", rowVal, err, verr)
+		}
+		if uint32(row64) > finalRow {
+			finalRow = uint32(row64)
+		}
+		rowValues[uint32(row64)] = uint32(val64)
+	}
 	for currentRow := uint32(0); currentRow <= finalRow; currentRow++ {
 		value := rowValues[currentRow]
 		if err := conn.WriteFrame(serverRecordAddInt32(playerObjectID, playerOwnerID, recordTaskCompleted, value)); err != nil {
 			return fmt.Errorf("add Task_Completed row %d: %w", currentRow, err)
+		}
+	}
+	// 实验E（value-row 方言）：Type=8/Func27 的 IsTaskCompleted 疑为
+	// FindRecordRow("Task_Completed", col0, taskID)——按值查行而非
+	// 位图。洪水 0xFFFFFFFF 与整行饱和均不认（值≠任务号）与该语义
+	// 一致；官服老号走 Func85 日期豁免所以从未发过 row=1346。在位图
+	// 行之后追加「值=任务号」行覆盖全部门任务。
+	if gateValueRows {
+		for _, gateID := range funcGateTaskIDs {
+			if err := conn.WriteFrame(serverRecordAddInt32(playerObjectID, playerOwnerID, recordTaskCompleted, gateID)); err != nil {
+				return fmt.Errorf("add Task_Completed gate row %d: %w", gateID, err)
+			}
 		}
 	}
 	log.Printf("Function/faculty unlock staged Task_Accepted tasks=%v and Task_Completed tasks=%v final-row=%d", facultyAcceptedTaskIDs(), taskIDs, finalRow)
@@ -587,6 +685,12 @@ func grantFunctionUnlock(conn sceneMessageConnection) error {
 // grantStarterQingGong 在 ClientReady 之后写入两个客户端侧的事实来源：
 // QingGongRec 驱动 CheckLearn_QingGong，而 View 46 支撑针对
 // QingGongContainer 的条件检查。
+// 注意：grantFunctionUnlock 不在此处——功能解锁行（Task_Accepted/
+// CollectSkill/Task_Completed 位图）必须在**选角链内**（0x0D spawn 之后、
+// ClientReady 之前）下发：客户端 form_main 的 funcbtns 在进场景时按
+// ConditionManager 评估 26001=「完成暮色初章」(Task_Completed 1346)，
+// ClientReady 后补发行赶到时条件已定型（真机 func ini 只存出 btn_system
+// 的根因，native 62311 #124-146 帧序实证任务行在选角链内）。
 func grantStarterQingGong(conn sceneMessageConnection) error {
 	for _, id := range starterQingGongIDs {
 		if err := conn.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordQingGong, id)); err != nil {
@@ -605,9 +709,6 @@ func grantStarterQingGong(conn sceneMessageConnection) error {
 		if err := conn.WriteFrame(frame); err != nil {
 			return fmt.Errorf("add QingGongContainer %s: %w", id, err)
 		}
-	}
-	if err := grantFunctionUnlock(conn); err != nil {
-		return err
 	}
 	return nil
 }

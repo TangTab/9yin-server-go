@@ -284,7 +284,11 @@ func (r *sceneRun) flushRefreshFrames(out *refreshTickOutcome) {
 // roll 为空 = 纯尸体（corpse TTL 清除）。调用方必须已持有 r.mu
 //（apply* 伤害路径）。
 func (r *sceneRun) recordNPCDeathLocked(id, ownerID uint32, brain sim.Brain, now time.Time) {
-	rec := deadNPCRecord{spawnIndex: int(id) - 2, diedAt: now, respawnAt: brain.RespawnAt}
+	// 九阴志事件点：击杀是全服阶段的有机事件源（Java SceneFlow 战斗
+	// 管线 onKill 同款）。只动门控状态不广播——gate.mu 不再取场景锁，
+	// 无锁序环；阶段变化由各会话 ticker 漂移检查补推。
+	jyzGate.onKill()
+	rec := deadNPCRecord{spawnIndex: forkNPCIndex(id) - 2, diedAt: now, respawnAt: brain.RespawnAt}
 	if rec.spawnIndex < 0 || rec.spawnIndex >= len(r.catalog) {
 		// 目录外实体（测试/动态摆放）：无重注册来源，仅支持原地复活路径。
 		rec.spawnIndex = -1

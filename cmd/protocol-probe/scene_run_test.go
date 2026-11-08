@@ -1,6 +1,8 @@
 package main
 
 import (
+	worldcore "github.com/local/9yin-go-server/internal/world"
+
 	"encoding/binary"
 	"testing"
 	"time"
@@ -46,10 +48,10 @@ func TestSharedSceneRunServesTwoViews(t *testing.T) {
 	// A 视口内含 NPC；B 距离 400 出半径，不可见。
 	viewA.refreshVisibility(catalog, near)
 	viewB.refreshVisibility(catalog, far)
-	if !viewA.npcVisible(2) {
+	if !viewA.npcVisible(forkNPCID(2)) {
 		t.Fatal("NPC 2 must be visible to the nearby view")
 	}
-	if viewB.npcVisible(2) {
+	if viewB.npcVisible(forkNPCID(2)) {
 		t.Fatal("NPC 2 must not be visible to the distant view")
 	}
 
@@ -76,20 +78,20 @@ func TestSharedSceneRunServesTwoViews(t *testing.T) {
 
 	// 共享状态：A 侧击杀 NPC，B 的下一次对账能看到其权威坐标
 	// （复活回 home）而不是各自私有的副本。
-	vitals, ok := run.combat.Vitals(2)
+	vitals, ok := run.combat.Vitals(worldcore.EntityID(forkNPCID(2)))
 	if !ok {
 		t.Fatal("NPC 2 must have vitals in the shared run")
 	}
 	for vitals.HP > 0 {
 		vitals.ApplyDamage(500)
-		run.combat.WriteVitals(2, vitals)
+		run.combat.WriteVitals(worldcore.EntityID(forkNPCID(2)), vitals)
 	}
-	brain, _ := run.combat.Brain(2)
+	brain, _ := run.combat.Brain(worldcore.EntityID(forkNPCID(2)))
 	brain.RespawnAt = now.Add(time.Second)
-	run.combat.WriteBrain(2, brain)
+	run.combat.WriteBrain(worldcore.EntityID(forkNPCID(2)), brain)
 	run.combatTick(now.Add(2 * time.Second))
-	revivedA, _ := run.combat.Vitals(2)
-	revivedB, _ := run.combat.Vitals(2)
+	revivedA, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2)))
+	revivedB, _ := run.combat.Vitals(worldcore.EntityID(forkNPCID(2)))
 	if revivedA.HP != revivedA.MaxHP || revivedB.HP != revivedB.MaxHP {
 		t.Fatalf("shared respawn state A=%+v B=%+v", revivedA, revivedB)
 	}
@@ -100,7 +102,7 @@ func TestSharedSceneRunServesTwoViews(t *testing.T) {
 	// B 走近后对账：出/入半径由各视图自己的过滤快照结算。
 	walkClose := role.Position{X: 2, Y: 0, Z: 0}
 	viewB.updateMemberPosition(walkClose, catalog)
-	if !viewB.npcVisible(2) {
+	if !viewB.npcVisible(forkNPCID(2)) {
 		t.Fatal("NPC 2 must enter the approaching view's visibility set")
 	}
 	viewA.close()
@@ -258,17 +260,17 @@ func TestKillFrameRelayReachesVisibleBystanders(t *testing.T) {
 	killer.refreshVisibility(catalog, role.Position{X: 1})
 	bystander.refreshVisibility(catalog, role.Position{X: 2})
 	far.refreshVisibility(catalog, role.Position{X: 400})
-	if !bystander.npcVisible(2) || far.npcVisible(2) {
+	if !bystander.npcVisible(forkNPCID(2)) || far.npcVisible(forkNPCID(2)) {
 		t.Fatal("visibility setup mismatch")
 	}
 
-	killer.selectedObject, killer.selectedOwner = 2, 1
+	killer.selectedObject, killer.selectedOwner = forkNPCID(2), 1
 	outcome, err := killer.applySelectedSkillDamage(999999, time.Unix(7000, 0))
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
 	if err != nil || !killed || frame == nil {
 		t.Fatalf("kill settlement frame=%v id=%d killed=%t err=%v", frame, id, killed, err)
 	}
-	if brain, ok := run.combat.Brain(2); !ok || brain.RespawnAt.IsZero() {
+	if brain, ok := run.combat.Brain(worldcore.EntityID(forkNPCID(2))); !ok || brain.RespawnAt.IsZero() {
 		t.Fatalf("kill must schedule respawn, brain=%+v ok=%t", brain, ok)
 	}
 	killer.relayNPCKillFrame(id, frame, "")
@@ -309,20 +311,20 @@ func TestViewportReconcileCorrectsCorpseForLateEntrant(t *testing.T) {
 	run.activateMember(viewA.wireID)
 
 	// A 侧击杀 NPC：尸体保留在世界（官方抓包 0x0E=0，不删除实体）。
-	vitals, ok := run.combat.Vitals(2)
+	vitals, ok := run.combat.Vitals(worldcore.EntityID(forkNPCID(2)))
 	if !ok {
 		t.Fatal("NPC 2 must have vitals")
 	}
 	for vitals.HP > 0 {
 		vitals.ApplyDamage(500)
-		run.combat.WriteVitals(2, vitals)
+		run.combat.WriteVitals(worldcore.EntityID(forkNPCID(2)), vitals)
 	}
 
 	// B 从远处进场后走近尸体并触发对账。
 	viewB.attachMember(newPlayerActor("b", 0), role.Position{X: 400}, roleVisual{})
 	run.activateMember(viewB.wireID)
 	viewB.updateMemberPosition(role.Position{X: 2}, catalog)
-	if !viewB.npcVisible(2) {
+	if !viewB.npcVisible(forkNPCID(2)) {
 		t.Fatal("corpse must be visible to the approaching view")
 	}
 	if err := viewB.reconcileViewport(); err != nil {

@@ -22,6 +22,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 	}
 
 	selectMsg := func(targetID, targetOwner uint32) clientCustomMessage {
+		targetID = forkNPCID(targetID)
 		packed := uint64(targetID) | uint64(targetOwner)<<32
 		var raw [8]byte
 		binary.LittleEndian.PutUint64(raw[:], packed)
@@ -35,24 +36,23 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	// 2026-11-08：选中双帧 + msg25 冲锋暂存授权应答（官服 431 方言）。
+	// 431 ack = 选中双帧 + msg209 官服走语义（选目标即下发自动接近授权）。
 	if len(frames) != 3 {
-		t.Fatalf("select target frames=%x, want LastObject+AutoSelectObject+msg25", frames)
+		t.Fatalf("select target frames=%x, want LastObject+AutoSelectObject+msg209", frames)
 	}
 	lastObject, autoSelect := frames[0], frames[1]
-	if frames[2][0] != 0x1E || binary.LittleEndian.Uint16(frames[2][1:]) != 3 ||
-		int32(binary.LittleEndian.Uint32(frames[2][4:])) != 25 {
-		t.Fatalf("pause ack frame=%x", frames[2])
+	if frames[2][0] != 0x1E || int32(binary.LittleEndian.Uint32(frames[2][4:])) != 209 {
+		t.Fatalf("approach ack frame=%x", frames[2])
 	}
 	if lastObject[0] != 0x10 || binary.LittleEndian.Uint16(lastObject[12:]) != 414 ||
-		binary.LittleEndian.Uint64(lastObject[14:]) != uint64(4456)|uint64(1)<<32 {
+		binary.LittleEndian.Uint64(lastObject[14:]) != uint64(forkNPCID(4456))|uint64(1)<<32 {
 		t.Fatalf("LastObject frame=%x", lastObject)
 	}
 	if autoSelect[0] != 0x10 || binary.LittleEndian.Uint16(autoSelect[12:]) != propAutoSelectObject ||
-		binary.LittleEndian.Uint64(autoSelect[14:]) != uint64(4456)|uint64(1)<<32 {
+		binary.LittleEndian.Uint64(autoSelect[14:]) != uint64(forkNPCID(4456))|uint64(1)<<32 {
 		t.Fatalf("AutoSelectObject frame=%x", autoSelect)
 	}
-	if targetID, targetOwner, ok := lifecycle.selectedCombatTarget(); !ok || targetID != 4456 || targetOwner != 1 {
+	if targetID, targetOwner, ok := lifecycle.selectedCombatTarget(); !ok || targetID != forkNPCID(4456) || targetOwner != 1 {
 		t.Fatalf("selected target=%d-%d ok=%t", targetID, targetOwner, ok)
 	}
 
@@ -61,7 +61,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
-	// 选中 3 帧（双属性+msg25 授权）+ 清除双帧 = 5。
+	// 选中 3 帧（双属性+msg209）+ 清除双帧 = 5。
 	if len(frames) != 5 || binary.LittleEndian.Uint64(frames[4][14:]) != 0 {
 		t.Fatalf("clear target frames=%x, want zeroed AutoSelectObject tail", frames)
 	}

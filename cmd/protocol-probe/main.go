@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -24,9 +25,9 @@ import (
 
 	"github.com/local/9yin-go-server/internal/auth"
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/gmapi"
 	"github.com/local/9yin-go-server/internal/luascript"
-	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/neigong"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/qinggong"
@@ -91,6 +92,9 @@ func main() {
 		}
 		switchDestination = &parsed
 	}
+	// 九阴志全局门控重装为落盘形态（<server root>/data/ninjiuzhi.json
+	// + requirements 覆写；env NINEYIN_JYZ_STEP 作初始阶段覆写）。
+	jyzGate = loadJyzGate(runtimeProjectPath("data"), jyzRecordsConfig)
 	// 触发资源仓初始化（本地 > patch > base，带读缓存），启动日志
 	// 会给出各层条目与缓存上限；不可用时回退直接文件访问。
 	resourceAccessorOf()
@@ -575,6 +579,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	jyzPushed := false
 	// jyzGameStepSent 414 'gamestep' 收尾帧连接级一次（native #1744）。
 	jyzGameStepSent := false
+	// jyzStageRev 本连接已随帧下发的九阴志阶段版本（jyzGate.
+	// stageRevision 的镜像）：登录链收尾帧后为基线，全服阶段被
+	// 其他会话/GM/击杀推进时由 1s ticker 漂移检查补推。
+	jyzStageRev := jyzGate.stageRevision()
 	// SwitchManager 批量开关（0x1E 414 "sync"）连接级只发一次：引擎开关
 	// 树不随场景代际清空，0x0C 重入不重放（Java switchSyncPushed 同口径）。
 	switchSyncPushed := false
@@ -671,6 +679,31 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			return err
 		}
 		scheduleRedSuperArmorExpiry(link, player, expires)
+		return nil
+	}
+	// replyJyzStatus 九阴志 GM 动作的状态回显（Java GmActions 同款）：
+	// worldInfo(0, status) 给游戏内 + setAction 给面板轮询。
+	replyJyzStatus := func() error {
+		status := jyzGate.status()
+		if err := link.WriteFrame(worldInfo(0, status)); err != nil {
+			gmSession.setAction("九阴志状态回显失败：" + err.Error())
+			return err
+		}
+		gmSession.setAction(status)
+		return nil
+	}
+	// applyJyzStageChange 阶段生效后向本连接内联下发 419+gamestep+
+	// 推进提示（Java broadcastNinJiuZhiStage 同源帧；其他连接由各自
+	// ticker 漂移检查补推），并把阶段版本镜像为本连接基线防重复。
+	applyJyzStageChange := func(oldStage, newStage int) error {
+		if newStage == oldStage {
+			return nil
+		}
+		if err := pushJyzStageChange(link, newStage); err != nil {
+			gmSession.setAction("九阴志阶段下发失败：" + err.Error())
+			return err
+		}
+		jyzStageRev = jyzGate.stageRevision()
 		return nil
 	}
 	defer func() {
@@ -1459,6 +1492,46 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				stats.Tasks, stats.Bindings, stats.BoundNPCs))
 			log.Printf("%s: GM task_rebuild tasks=%d bindings=%d npcs=%d",
 				conn.RemoteAddr(), stats.Tasks, stats.Bindings, stats.BoundNPCs)
+		case "ninjiuzhi_set":
+			// 九阴志全局门控：单调设阶（Java GmActions ninjiuzhi_set，
+			// 拒绝回退的原因文本原样回给面板）。
+			reason, oldStage, newStage := jyzGate.setStage(int(command.Stage))
+			if reason != "" {
+				gmSession.setAction(reason)
+				return errors.New(reason)
+			}
+			if stageErr := applyJyzStageChange(oldStage, newStage); stageErr != nil {
+				return stageErr
+			}
+			if replyErr := replyJyzStatus(); replyErr != nil {
+				return replyErr
+			}
+			log.Printf("%s: GM ninjiuzhi_set stage %d -> %d", conn.RemoteAddr(), oldStage, newStage)
+		case "ninjiuzhi_event":
+			// 事件点 +1（kill/task）：累计到阈值自动升阶（可连跳）。
+			oldStage, newStage := jyzGate.addEvent(command.EventKind)
+			if stageErr := applyJyzStageChange(oldStage, newStage); stageErr != nil {
+				return stageErr
+			}
+			if replyErr := replyJyzStatus(); replyErr != nil {
+				return replyErr
+			}
+			log.Printf("%s: GM ninjiuzhi_event kind=%s stage %d -> %d", conn.RemoteAddr(), command.EventKind, oldStage, newStage)
+		case "ninjiuzhi_reset":
+			// 回初始阶段、点数/事件清零（面板专用；阶段回落同样广播）。
+			oldStage, newStage := jyzGate.reset()
+			if stageErr := applyJyzStageChange(oldStage, newStage); stageErr != nil {
+				return stageErr
+			}
+			if replyErr := replyJyzStatus(); replyErr != nil {
+				return replyErr
+			}
+			log.Printf("%s: GM ninjiuzhi_reset stage %d -> %d", conn.RemoteAddr(), oldStage, newStage)
+		case "ninjiuzhi_status":
+			if replyErr := replyJyzStatus(); replyErr != nil {
+				return replyErr
+			}
+			log.Printf("%s: GM ninjiuzhi_status", conn.RemoteAddr())
 		default:
 			return fmt.Errorf("unsupported GM action %q", command.Action)
 		}
@@ -1515,6 +1588,19 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				persistJingMai()
 				lastAutosave = now
 			}
+			// 九阴志阶段漂移检查：全服阶段被其他会话的 GM 动作或击杀
+			// 事件点推进时，本连接在自己的写循环里补推 419+gamestep+
+			// 推进提示（≤1s；不跨 goroutine 写连接，单写者纪律）。
+			// jyzGameStepSent 保证不会抢在 switch sync 之前发 gamestep。
+			if jyzGameStepSent && jyzGate.stageRevision() != jyzStageRev {
+				jyzStageRev = jyzGate.stageRevision()
+				stage := jyzGate.currentStage()
+				if stageErr := pushJyzStageChange(link, stage); stageErr != nil {
+					log.Printf("%s: push jyz stage drift: %v", conn.RemoteAddr(), stageErr)
+				} else {
+					log.Printf("%s: relayed jyz stage change stage=%d via ticker", conn.RemoteAddr(), stage)
+				}
+			}
 			if player == nil || selected == nil {
 				continue
 			}
@@ -1557,37 +1643,42 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 				}
 			}
-		if tickErr == nil && qingGongPointChanged {
-			tickErr = link.WriteFrame(player.qingGongPointFrame())
-		}
-		if tickErr == nil && sitcrossSettlement.Changed() {
-			// 打坐回复走官方形态帧簇：逐层 n=1 单属性帧 + msg24
-			// c1=16 治疗飘字（UI 的 +回复量 绿字来源）。绝不能并入
-			// 下面的全量 vitalUpdate——官服坐姿周期帧从不带
-			// LogicState，整帧重推会让客户端重入坐姿动画。
-			var frames [][]byte
-			frames, tickErr = player.sitcrossRecoveryFrames(sitcrossSettlement)
-			for _, frame := range frames {
-				if tickErr != nil {
-					break
-				}
-				tickErr = link.WriteFrame(frame)
+			if tickErr == nil && qingGongPointChanged {
+				tickErr = link.WriteFrame(player.qingGongPointFrame())
 			}
-		}
-		if tickErr == nil && qingGongForceEnded != "" {
-			// 点耗尽强摘：与 216 end 同口径清轻功 Buff 后推全量
-			// 状态（vitalUpdate 会带上空掉的 BufferInfo 槽）。
-			if definition, exists := qingGongCatalog.Lookup(qingGongForceEnded); exists {
-				// 缓降先补 msg169 摘帧（v7 需在清槽前读租约原到期）。
-				writeGlideBuffRemovalFor(link, player, definition, now)
-				if err := endQingGongBuff(link, player, definition); err != nil {
+			if tickErr == nil && sitcrossSettlement.Changed() {
+				// 打坐回复走官方形态帧簇：逐层 n=1 单属性帧 + msg24
+				// c1=16 治疗飘字（UI 的 +回复量 绿字来源）。绝不能并入
+				// 下面的全量 vitalUpdate——官服坐姿周期帧从不带
+				// LogicState，整帧重推会让客户端重入坐姿动画。
+				var frames [][]byte
+				frames, tickErr = player.sitcrossRecoveryFrames(sitcrossSettlement)
+				for _, frame := range frames {
+					if tickErr != nil {
+						break
+					}
+					tickErr = link.WriteFrame(frame)
+				}
+			}
+			if tickErr == nil && qingGongForceEnded != "" {
+				// 点耗尽强摘：与 216 end 同口径清轻功 Buff 后推全量
+				// 状态（vitalUpdate 会带上空掉的 BufferInfo 槽）。
+				if definition, exists := qingGongCatalog.Lookup(qingGongForceEnded); exists {
+					// 缓降先补 msg169 摘帧（v7 需在清槽前读租约原到期）。
+					writeGlideBuffRemovalFor(link, player, definition, now)
+					if err := endQingGongBuff(link, player, definition); err != nil {
 						log.Printf("%s: clear exhausted qinggong buff id=%s: %v", conn.RemoteAddr(), qingGongForceEnded, err)
 					}
 				}
 			}
 			if tickErr == nil && (advanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired || livepointChanged) {
+				// 数值 vitals 小帧（n=8）——vitalUpdate 全量面板含 State="stand"
+				// /LogicState/CurSkillID/PauseSkill，会把冲锋受理簇的接近态洗掉
+				//（64785/61392 会话实证：轻功点回复 advanced 每周期触发全量推送，
+				// 簇后 ~70 帧再现 152 属性面板 → 客户端不自走）。官服轻功回复只发
+				// n=1 QingGongPoint 单帧、战斗数值走 0x2D/SP 小帧。
 				var state []byte
-				state, tickErr = player.vitalUpdate()
+				state, tickErr = player.combatVitalsFrame()
 				if tickErr == nil {
 					tickErr = link.WriteFrame(state)
 				}
@@ -1731,6 +1822,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			visual := resolveRoleVisual(activeRole.Appearance.Values)
 			player = newPlayerActor(activeRole.Name, starterSilver)
+			setPlayerWireIdentity(uint32(activeRole.ID))
 			player.faction = roleFaction(activeRole.Appearance.Values)
 			// 外观域会话态（docs/装备外观与风物志挂载.md V4）：显示类型
 			// 偏好（role_appearance）、时装/身份装激活集（role_fashion_suits，
@@ -1863,7 +1955,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: write entry scene: %v", conn.RemoteAddr(), err)
 				return
 			}
-			log.Printf("%s: sent PlayerEntry opcode=0x0B object=1 scene=%s resource=%s", conn.RemoteAddr(), activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource)
+			log.Printf("%s: sent PlayerEntry opcode=0x0B object=%#x owner=%d scene=%s resource=%s", conn.RemoteAddr(), playerObjectID, playerOwnerID, activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource)
 
 			// 三期物品下发（DB 模式）：纸娃娃 + 背包成对行 + 武器外观；
 			// DB 读失败回退空背包，不阻塞登录（Java LoginFlow 同口径，
@@ -1896,6 +1988,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if err := gmWritePanelFrames(link, player); err != nil {
 				log.Printf("%s: push panel identity/domain frames: %v", conn.RemoteAddr(), err)
 			}
+			// 功能解锁行必须赶在 ClientReady 之前（选角链内）：客户端
+			// form_main 进场景即按 ConditionManager 评估功能按钮条件
+			//（26001=暮色初章 Task_Completed 1346 等），迟到行不参与
+			// 评估——native 62311 #124-146 同位（0x0D 之后、view_add
+			// 批次前后）。
+			if grantErr := grantFunctionUnlock(link); grantErr != nil {
+				log.Printf("%s: grant function unlock in choose chain: %v", conn.RemoteAddr(), grantErr)
+				return
+			}
+			log.Printf("%s: granted function unlock rows in choose chain (before ClientReady)", conn.RemoteAddr())
 			if equipErr == nil && bagErr == nil && (len(equips) > 0 || len(bagItems) > 0) {
 				frames, frameErr := inventoryFrames(activeRole.ID, visual.sex, equips, bagItems)
 				if frameErr != nil {
@@ -1984,6 +2086,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if player != nil {
 					if grantErr := grantStarterQingGong(link); grantErr != nil {
 						log.Printf("%s: restore qinggong after stable re-entry: %v", conn.RemoteAddr(), grantErr)
+						return
+					}
+					// 功能解锁行同样挂玩家对象记录，0x0C 已随对象清空——
+					// 新对象上重建（评估时序同选角链口径）。
+					if grantErr := grantFunctionUnlock(link); grantErr != nil {
+						log.Printf("%s: restore function unlock after stable re-entry: %v", conn.RemoteAddr(), grantErr)
 						return
 					}
 					if shortcutErr := grantShortcutRows(link, player); shortcutErr != nil {
@@ -2147,7 +2255,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				for _, mount := range sessionMounts {
 					ownedMountPacks[mount.PackID] = true
 				}
-				if jyzErr := pushJyzRecords(link, jyzRecordsConfig, ownedMountPacks); jyzErr != nil {
+				if jyzErr := pushJyzRecords(link, jyzGate.config(), ownedMountPacks); jyzErr != nil {
 					log.Printf("%s: push jyz records: %v", conn.RemoteAddr(), jyzErr)
 					return
 				}
@@ -2175,13 +2283,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if player != nil && jyzPushed && !jyzGameStepSent {
 				// 414 'gamestep' 收尾帧（native #1744：switch sync 之后
 				// 的最后一帧；sync 重置 414 域状态，先发的 gamestep 会被
-				// 抹掉——功能入口菜单不出现的根因）。
+				// 抹掉——功能入口菜单不出现的根因）。步骤值取全服门控
+				// 当前阶段，并把阶段版本镜像为本连接基线（此后只有
+				// 全服阶段变化才由 ticker 补推）。
 				jyzGameStepSent = true
-				if stepErr := pushJyzGameStepFinal(link, jyzRecordsConfig); stepErr != nil {
+				jyzCfg := jyzGate.config()
+				jyzStageRev = jyzGate.stageRevision()
+				if stepErr := pushJyzGameStepFinal(link, jyzCfg); stepErr != nil {
 					log.Printf("%s: push jyz gamestep final: %v", conn.RemoteAddr(), stepErr)
 					return
 				}
-				log.Printf("%s: pushed jyz gamestep step=%d final via S2C 0x1E message=%d", conn.RemoteAddr(), jyzRecordsConfig.step, serverJyzGameStepMessage)
+				log.Printf("%s: pushed jyz gamestep step=%d final via S2C 0x1E message=%d", conn.RemoteAddr(), jyzCfg.step, serverJyzGameStepMessage)
 			}
 			// 当前正式服流量可能在场景已经激活后重复发送 ClientReady
 			// （例如在较晚的 UI/stage 回调之后）。
@@ -2390,7 +2502,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-				if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -2476,6 +2588,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if _, handleErr := handleRushMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle rush movement upload: %v", conn.RemoteAddr(), handleErr)
 					}
+				case clientCustomRushHitConfirm, clientCustomCorpseQuery:
+					// 官服静默消费（f ⑦ / g 战后实证）：msg915 命中确认上报
+					// [1,obj,x,y,z,朝向] 与 msg990 尸体拾取查询均无 S2C 回应。
+					log.Printf("%s: silent custom msg=%d values=%d", conn.RemoteAddr(), custom.Values[0].Int32, len(custom.Values))
 				case clientCustomMoveItem:
 					if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity move item: %v", conn.RemoteAddr(), handleErr)

@@ -149,7 +149,12 @@ func (r *sceneRun) combatTick(now time.Time) {
 		if !outcome.changed[member.objectID] {
 			continue
 		}
-		if frame, err := member.player.vitalUpdate(); err == nil {
+		// 战斗 tick 只推数值 vitals 小帧——全量面板（vitalUpdate）含
+		// State="stand"/LogicState/CurSkillID/PauseSkill，会在冲锋受理簇
+		// 之后把客户端的自动接近态洗掉（53051 会话实证：簇后 1s 全量面板
+		// 到达 → CurSkillID 被清空 → 客户端不自走、220 冻结刷）。官服
+		// 战斗中从不重推全量面板。
+		if frame, err := member.player.combatVitalsFrame(); err == nil {
 			if err := member.view.conn.WriteFrame(frame); err != nil {
 				log.Printf("%s: publish combat vitals: %v", member.view.remote, err)
 			}

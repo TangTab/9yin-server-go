@@ -236,6 +236,20 @@ func Validate(body CommandBody) (Command, error) {
 			}
 			command.FadeSec = body.FadeSec
 		}
+	case "ninjiuzhi_set":
+		// 九阴志全局门控：目标阶段界值内即受理；「阶段只增不减」
+		// 的拒绝语义在游戏侧判定并把原因文本回给面板。
+		if body.Stage < JyzStageMin || body.Stage > JyzStageMax {
+			return command, fmt.Errorf("stage must be between %d and %d", JyzStageMin, JyzStageMax)
+		}
+		command.Stage = body.Stage
+	case "ninjiuzhi_event":
+		if kind := body.EventKind; kind != "kill" && kind != "task" {
+			return command, fmt.Errorf("eventKind must be kill or task")
+		}
+		command.EventKind = body.EventKind
+	case "ninjiuzhi_reset", "ninjiuzhi_status":
+		// 无负载动作：全服阶段状态经 worldInfo + 会话 LastAction 回显。
 	case "popup_gm_panel":
 	case "custom_probe":
 		if body.MsgId < 1 || body.MsgId > 764 {
