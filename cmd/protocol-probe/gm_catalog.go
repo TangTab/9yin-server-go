@@ -27,7 +27,7 @@ type gmMeridianRow struct {
 }
 
 // meridiansHandler GET /api/meridians：经脉目录。优先 hub.meridianRows
-//（共享库 game_meridians：meridian_id 升序，中文名+周天上限）；钩子
+// （共享库 game_meridians：meridian_id 升序，中文名+周天上限）；钩子
 // 缺席/空表时回退 globalJingMaiCatalog 目录（name=configID）。
 func (hub *gmHub) meridiansHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet {

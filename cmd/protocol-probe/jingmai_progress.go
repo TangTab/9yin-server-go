@@ -450,7 +450,7 @@ func (p *playerActor) deactivateJingMai(id string) (int, bool) {
 }
 
 // setJingMaiDailyCap GM set_zhenqi_cap：是否开启每日硬闸 + 每日阈值
-//（阈值 ≥1 才受理；关闭时阈值仍保存，重开沿用——Java setDailyCap 同
+// （阈值 ≥1 才受理；关闭时阈值仍保存，重开沿用——Java setDailyCap 同
 // 语义）。ZhenQiDayValue 口径随开关即时变化，调用方负责补发属性帧。
 func (p *playerActor) setJingMaiDailyCap(enabled bool, value int32) {
 	p.mu.Lock()

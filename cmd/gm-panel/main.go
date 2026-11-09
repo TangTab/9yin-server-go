@@ -118,6 +118,19 @@ func (p *panelServer) mux() *http.ServeMux {
 	mux.HandleFunc("/api/hair-cards", p.catalogProxy("hair-cards"))
 	mux.HandleFunc("/api/items", p.catalogProxy("items"))
 	mux.HandleFunc("/api/meridians", p.catalogProxy("meridians"))
+	// console 页启动即拉取的补充目录/状态端点（游戏服 gm_catalog_dirs.go
+	// 同名 handler 的镜像）；minimal-login 有 POST 切换，走 methodProxy。
+	mux.HandleFunc("/api/clones", p.catalogProxy("clones"))
+	mux.HandleFunc("/api/scenes", p.catalogProxy("scenes"))
+	mux.HandleFunc("/api/giftboxes", p.catalogProxy("giftboxes"))
+	mux.HandleFunc("/api/titles", p.catalogProxy("titles"))
+	mux.HandleFunc("/api/mounts", p.catalogProxy("mounts"))
+	mux.HandleFunc("/api/idle-stances", p.catalogProxy("idle-stances"))
+	mux.HandleFunc("/api/recast-affixes", p.catalogProxy("recast-affixes"))
+	mux.HandleFunc("/api/combat-dummy/taolus", p.catalogProxy("combat-dummy/taolus"))
+	mux.HandleFunc("/api/repute/status", p.catalogProxy("repute/status"))
+	mux.HandleFunc("/api/origin/status", p.catalogProxy("origin/status"))
+	mux.HandleFunc("/api/minimal-login", p.methodProxy("/internal/v1/minimal-login"))
 	// 管理页（index.html 记录服务器登记册）：同源探活代理 + 面板自述。
 	// 实现在契约层，与游戏服内嵌面板共用同一份代码。
 	gmapi.MountManageAPI(mux, p.gameAddr, panelVersion)
@@ -229,6 +242,28 @@ func (p *panelServer) catalogProxy(name string) http.HandlerFunc {
 			return
 		}
 		status, raw, ok := p.gameRequest(http.MethodGet, "/internal/v1/catalog/"+name, request.URL.RawQuery, nil)
+		if !ok {
+			gmapi.WriteError(writer, http.StatusServiceUnavailable, "game server unreachable")
+			return
+		}
+		writeProxyJSON(writer, status, raw)
+	}
+}
+
+// methodProxy 透传任意方法的 internal 端点（minimal-login 的 GET 读 /
+// POST 切换用；请求体直接转发的场景同样适用）。
+func (p *panelServer) methodProxy(path string) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		var body []byte
+		if request.Body != nil {
+			raw, err := io.ReadAll(http.MaxBytesReader(writer, request.Body, commandBodyLimit))
+			if err != nil {
+				gmapi.WriteError(writer, http.StatusBadRequest, "invalid request body")
+				return
+			}
+			body = raw
+		}
+		status, raw, ok := p.gameRequest(request.Method, path, request.URL.RawQuery, body)
 		if !ok {
 			gmapi.WriteError(writer, http.StatusServiceUnavailable, "game server unreachable")
 			return

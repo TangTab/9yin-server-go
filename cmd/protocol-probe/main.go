@@ -136,6 +136,9 @@ func main() {
 	scriptHost := scripts.events
 	// neigongEffects 是 neigong_dispatch.go 的进程级分发宿主（包级变量）。
 	neigongEffects = scripts.neigong
+	// skillScripts 是 skill_catalog.go 的进程级技能脚本宿主（包级变量）：
+	// effects_data 条目（self_buffs/target_effects）整组并入技能编译。
+	skillScripts = scripts.skills
 	// 每击公式引擎（scripts/module/combat/formula.lua + formula.ini 注入；
 	// 2026-11-08 数值重写）：装载失败/禁用只影响新数值路径，rollSkillHit
 	// 自动回退 legacy 面板×倍率掷骰，战斗链不受阻。
@@ -1463,6 +1466,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					log.Printf("%s: GM lua_reload combat formulas=%d", conn.RemoteAddr(), formulas)
 				}
 			}
+			// effects_data 快照已换代：清技能编译缓存，下一次出招按新
+			// buff 组重编译（skill_catalog.go applyEffectsDataBuffs）。
+			installedCombatSkillCatalog.resetCache()
 			gmSession.setAction("Lua 脚本已重载 " + summary)
 			log.Printf("%s: GM lua_reload %s", conn.RemoteAddr(), summary)
 
@@ -1614,7 +1620,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if advanced {
 				// 行级增量帧（0x10 isView=1）：裸 0x18 重发行不触发客户端
 				// updateitem，武学面板内功页会停在旧等级（2026-11-08 抓包
-				// 实证）。上限对(MaxSP/MaxSPAdd)不进常规批，升级可能抬
+				// 实证）。MaxSP(580,折算最终值)不进常规批，升级可能抬
 				// 内功档位，这里用 215 同款专帧刷新怒气球分母。
 				var frame []byte
 				frame, tickErr = player.bookUpdateFrame(slot)

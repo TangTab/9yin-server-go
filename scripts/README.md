@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | `module/neigong/buf_ng_*.lua` | 155 本内功特效模块 | `internal/neigong`（`-neigong-scripts`，默认本目录） |
 | `module/item/*.lua` | 使用物效果 `M.on_use(ctx)`（3 本） | `internal/itemuse`（`-item-scripts`） |
-| `module/skill/*.lua` | 技能编译覆盖 + 全技能效果表 effects_data（7 本，6433 条） | `internal/skillscript`（`-skill-scripts`） |
+| `module/skill/*.lua` | 技能编译覆盖 + 全技能效果表 effects_data（7 本，6433 条） | `internal/skillscript`（`-skill-scripts`）；effects_data 的 buff 组已接线技能目录编译（skill_catalog.go，优先级：手勘覆盖 > effects_data > INI 兜底） |
 | `module/combat/formula.lua` | 伤害公式 `M.calc(c)` | `internal/combatformula`（`-combat-scripts`） |
 
 四类模块宿主共用 `internal/modulevm` 内核（装载软语义、运行期坏脚本只禁用

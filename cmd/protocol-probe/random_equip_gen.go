@@ -145,12 +145,12 @@ type randomEquipCatalog struct {
 	boxTrea   map[int]int      // boxlevel [Treasure]：ColorLevel → 条数
 
 	// 娃娃管线（newtersure/）
-	newtpl  map[int]int              // newtemplate：模板 → base_rule
-	baseRul map[int][]rollRange      // baseproprule：千分 roll
-	baseLvl map[int]map[int]int      // baseproplevel_<ColorLevel>：[propID][物品Level] → 固定值
-	addRul  map[string][]rollRange   // addproprule：[Prop]/[Color]
-	addLvl  map[int]map[int][2]int   // addproplevel_<品质>：[propID][等级1-10] → min,max
-	boxWawa map[int]int              // boxlevel [NewTreasure]
+	newtpl  map[int]int            // newtemplate：模板 → base_rule
+	baseRul map[int][]rollRange    // baseproprule：千分 roll
+	baseLvl map[int]map[int]int    // baseproplevel_<ColorLevel>：[propID][物品Level] → 固定值
+	addRul  map[string][]rollRange // addproprule：[Prop]/[Color]
+	addLvl  map[int]map[int][2]int // addproplevel_<品质>：[propID][等级1-10] → min,max
+	boxWawa map[int]int            // boxlevel [NewTreasure]
 }
 
 var (

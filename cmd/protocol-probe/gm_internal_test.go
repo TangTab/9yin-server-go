@@ -166,6 +166,19 @@ func TestGMInternalCatalogEndpoints(t *testing.T) {
 		"/internal/v1/catalog/cards",
 		"/internal/v1/catalog/hair-cards",
 		"/internal/v1/catalog/items",
+		// gm_catalog_dirs.go 的补充目录/状态端点镜像（gm-panel 同名
+		// /api/* 代理到这里）。
+		"/internal/v1/catalog/clones",
+		"/internal/v1/catalog/scenes",
+		"/internal/v1/catalog/giftboxes",
+		"/internal/v1/catalog/titles",
+		"/internal/v1/catalog/mounts",
+		"/internal/v1/catalog/idle-stances",
+		"/internal/v1/catalog/recast-affixes",
+		"/internal/v1/catalog/combat-dummy/taolus",
+		"/internal/v1/catalog/repute/status",
+		"/internal/v1/catalog/origin/status",
+		"/internal/v1/minimal-login",
 	} {
 		if _, status := gmInternalGet(t, server.URL+path, "secret-token"); status != http.StatusOK {
 			t.Fatalf("%s: status=%d want 200", path, status)

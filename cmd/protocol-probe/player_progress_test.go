@@ -96,9 +96,9 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	if _, exists := regular["MaxSPAdd"]; exists {
 		t.Fatal("regular property profile must not carry MaxSPAdd")
 	}
-	// 登录/切图链的首个权威 0x10(=stateProperties 大批 + MaxSP/MaxSPAdd
-	// 各一次,无独立怒气帧):SP(467)=满值(有效上限),MaxSP(580)=80,
-	// MaxSPAdd(583)=当前运行内功档位加成。
+	// 登录/切图链的首个权威 0x10(=stateProperties 大批 + MaxSP 折算
+	// 最终值一次,无独立怒气帧):SP(467)=满值(有效上限),MaxSP(580)=
+	// 基础 80 + 运行内功档位加成,MaxSPAdd(583) 按官服口径不出帧。
 	frame, err := player.loginVitalUpdate()
 	if err != nil {
 		t.Fatal(err)
@@ -110,14 +110,16 @@ func TestPlayerVitalsIncludeMaxSPDisplayCap(t *testing.T) {
 	if !bytes.Contains(frame, spNeedle) {
 		t.Fatalf("login vital batch misses SP=%d at index %d: %x", rageCap, propSP, frame)
 	}
-	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(maxPlayerSP), 0, 0, 0}
+	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(rageCap), 0, 0, 0}
 	if !bytes.Contains(frame, maxSPNeedle) {
-		t.Fatalf("login vital batch misses MaxSP=%d at index 580: %x", maxPlayerSP, frame)
+		t.Fatalf("login vital batch misses MaxSP=%d at index 580: %x", rageCap, frame)
 	}
-	_, rageAdd := player.rageCapSnapshot()
-	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8), byte(rageAdd), 0, 0, 0}
-	if !bytes.Contains(frame, maxSPAddNeedle) {
-		t.Fatalf("login vital batch misses MaxSPAdd=%d at index 583: %x", rageAdd, frame)
+	loginIndices, walkErr := propertyFrameIndices(frame)
+	if walkErr != nil {
+		t.Fatalf("walk login 0x10 frame: %v", walkErr)
+	}
+	if containsIndex(loginIndices, propMaxSPAdd) {
+		t.Fatalf("login vital batch carries MaxSPAdd(%d); official never sends it", propMaxSPAdd)
 	}
 	// 常规批不再携带上限。
 	regularFrame, err := player.vitalUpdate()
@@ -295,8 +297,8 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	conn := &captureMessageConnection{}
 
 	// 215 必须只接受已学习的 View=43 秘籍，并用 CurNeiGong 绑定消费的
-	// 常规属性档案回复;换书改变怒气上限,故回复是两帧——先上限对
-	// (MaxSP/MaxSPAdd 专帧,ng_jh_001 坐忘功 +10),再常规状态批。
+	// 常规属性档案回复;换书改变怒气上限,故回复是两帧——先 MaxSP
+	// 专帧(折算最终值,ng_jh_001 坐忘功 +10 → 90),再常规状态批。
 	handled, err := handlePlayerProgressCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 215}, {Type: 6, Text: "ng_jh_001"},
 	}})
@@ -307,9 +309,9 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
 		t.Fatalf("215 reply=%x", frames)
 	}
-	capNeedle := []byte{byte(propMaxSPAdd & 0xff), byte(propMaxSPAdd >> 8), 10, 0, 0, 0}
+	capNeedle := []byte{byte(propMaxSP & 0xff), byte(propMaxSP >> 8), byte(maxPlayerSP + 10), 0, 0, 0}
 	if !bytes.Contains(frames[0], capNeedle) {
-		t.Fatalf("215 first reply must carry MaxSPAdd=10 (坐忘功): %x", frames[0])
+		t.Fatalf("215 first reply must carry MaxSP=%d (坐忘功): %x", maxPlayerSP+10, frames[0])
 	}
 	if !bytes.Contains(frames[1], []byte("ng_jh_001\x00")) {
 		t.Fatalf("215 second reply must bind CurNeiGong: %x", frames[1])
@@ -569,7 +571,7 @@ func TestActiveFacultyLevelUpNotifiesClientAfterStateAndViewRefresh(t *testing.T
 			updateIndex = index
 		}
 		if len(frame) >= 12 && frame[0] == 0x10 && frame[1] == 0 &&
-			bytes.Contains(frame, []byte{byte(propMaxSPAdd & 0xff), byte(propMaxSPAdd >> 8)}) {
+			bytes.Contains(frame, []byte{byte(propMaxSP & 0xff), byte(propMaxSP >> 8), byte(maxPlayerSP + 10), 0, 0, 0}) {
 			capIndex = index
 		}
 	}

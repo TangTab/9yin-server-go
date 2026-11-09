@@ -9,6 +9,7 @@ gmtest-sandbox/
 /data-legacy-*.tar.gz
 /logs/
 /resources/
+/tmp/
 *.exe
 *.exe~
 *.log

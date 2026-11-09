@@ -152,9 +152,10 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 
 // TestOfficialDialectMaxSPLonginOnly 官方方言下 MaxSP(580) 只在登录/切图
 // 链首个权威 0x10 全量批出现一次(fork 49840 实证:全场 5181 帧仅 #16 一处,
-// 121 属性批携带);MaxSPAdd(583) 官方从未发送,本服在同一登录批实验性
-// 携带一次(验证客户端怒气球口径,后续按内功档位计算);恢复批/事件批/
-// 0x0D 归档都不得再携带二者。塞错位置会让客户端在进世界时崩溃。
+// 121 属性批携带),值 = 基础 80 + 运行内功档位加成折算合一(rageCapWireValue);
+// MaxSPAdd(583) 官方从未发送(2026-11-09 docs/official 复核),本服同样
+// 不出帧;恢复批/事件批/0x0D 归档都不得再携带二者。塞错位置会让客户端
+// 在进世界时崩溃。
 func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 	for _, name := range []string{"MaxSP", "MaxSPAdd"} {
 		entry, ok := clientdata.PlayerProperty(name)
@@ -166,7 +167,7 @@ func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 		}
 	}
 	player := newPlayerActor("本地角色", 0)
-	// 登录批:stateProperties 大批 + MaxSP/MaxSPAdd 各一次。
+	// 登录批:stateProperties 大批 + MaxSP(折算最终值)一次,583 不出帧。
 	login, err := player.loginVitalUpdate()
 	if err != nil {
 		t.Fatal(err)
@@ -187,24 +188,22 @@ func TestOfficialDialectMaxSPLoginOnly(t *testing.T) {
 	if maxSPCount != 1 {
 		t.Fatalf("login batch carries MaxSP %d times, want exactly 1", maxSPCount)
 	}
-	if maxSPAddCount != 1 {
-		t.Fatalf("login batch carries MaxSPAdd %d times, want exactly 1", maxSPAddCount)
+	if maxSPAddCount != 0 {
+		t.Fatalf("login batch carries MaxSPAdd %d times, want 0 (official never sends 583)", maxSPAddCount)
 	}
-	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(maxPlayerSP), 0, 0, 0}
+	// MaxSP = 基础 80 + 默认运行内功 ng_wd_001(武当一内 +10) = 90。
+	rageCap := player.rageCapWireValue()
+	if rageCap != maxPlayerSP+10 {
+		t.Fatalf("default wire MaxSP=%d, want %d", rageCap, maxPlayerSP+10)
+	}
+	maxSPNeedle := []byte{byte(580 & 0xff), byte(580 >> 8), byte(rageCap), 0, 0, 0}
 	if !bytes.Contains(login, maxSPNeedle) {
-		t.Fatalf("login batch MaxSP slot is not %d: %x", maxPlayerSP, login)
-	}
-	// MaxSPAdd = 当前运行内功的档位加成(默认 ng_wd_001 武当一内 +10)。
-	_, rageAdd := player.rageCapSnapshot()
-	maxSPAddNeedle := []byte{byte(583 & 0xff), byte(583 >> 8), byte(rageAdd), 0, 0, 0}
-	if !bytes.Contains(login, maxSPAddNeedle) {
-		t.Fatalf("login batch MaxSPAdd slot is not %d: %x", rageAdd, login)
+		t.Fatalf("login batch MaxSP slot is not %d: %x", rageCap, login)
 	}
 	// SP(467) 随同一大批出现且为满值(登录即满 = 有效上限)。
 	if !containsIndex(loginIndices, propSP) {
 		t.Fatalf("login batch misses SP at index %d", propSP)
 	}
-	rageCap := player.rageCap()
 	spNeedle := []byte{byte(propSP & 0xff), byte(propSP >> 8), byte(rageCap), 0, 0, 0}
 	if !bytes.Contains(login, spNeedle) {
 		t.Fatalf("login batch SP slot is not %d: %x", rageCap, login)

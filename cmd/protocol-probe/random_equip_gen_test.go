@@ -90,7 +90,10 @@ func TestZhenpaiDynamicValuesSynthetic(t *testing.T) {
 }
 
 func TestRoleListTitleLadder(t *testing.T) {
-	cases := []struct{ power int; want string }{
+	cases := []struct {
+		power int
+		want  string
+	}{
 		{0, "title001"}, {5, "title001"}, {6, "title002"}, {67, "title014"},
 		{116, "title024"}, {120, "title024"}, {121, "title025"}, {131, "title025"},
 		{135, "title025"}, {136, "title026"}, {150, "title026"}, {151, "title027"},

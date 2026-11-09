@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -276,6 +278,15 @@ func (r *sceneRun) autoSelectAttackerTargets(attacks []npcAttackPresentation) {
 	}
 }
 
+// npcChaseEnabled 测试开关 NINEYIN_NPC_CHASE=off（默认开）：关闭 NPC
+// 追击位移，怪坐标恒停出生点——pending.geometry（211 快照）/服务端
+// 权威/客户端认知三方一致，用于隔离追击 0x1F 广播节流（客户端滞后
+// 4m+）造成的冲锋 c61 终点漂移。栓绳回位/重生都以 Home 为目的地，
+// 怪未挪窝即原地 no-op，无需另闸。
+func npcChaseEnabled() bool {
+	return !strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_NPC_CHASE")), "off")
+}
+
 // simulateLocked 是 combatTick 的锁内结算段，独立出来供测试路径
 // 复用（测试只消费 NPC 帧，不写玩家 vital 帧）。
 func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
@@ -380,6 +391,12 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		// 攻击冷却结束，或已超出本 tick 的攻击者数量上限。
 		threatened[state.TargetMember] = true
 		if now.Before(state.ControlledUntil) {
+			return
+		}
+		if !npcChaseEnabled() && distance > state.AttackRange {
+			// NINEYIN_NPC_CHASE=off 测试方言：追击位移整段静默，仇恨
+			// 照常持有。放在攻击者名额闸之前——远距怪不占每 tick 的
+			// 攻击名额，玩家走进 AttackRange 后攻击逻辑照常走。
 			return
 		}
 		if aggressors >= combatTickMaxAggressors {

@@ -66,7 +66,7 @@ const (
 	propMaxHPAdd       uint16 = 581
 	propMaxMPAdd       uint16 = 582
 	propMaxSP          uint16 = 580
-	propMaxSPAdd       uint16 = 583
+	propMaxSPAdd       uint16 = 583 // 官方表存在但官服全程零下发;本服不出帧(加成折进 MaxSP)
 	propMaxLevel       uint16 = 2083
 	// View 43 的条目是普通客户端对象。GoodsGrid 读取这两个属性来解析
 	// 当前的内功静态记录及其图片；对现代客户端而言仅有 ConfigID 是
@@ -82,11 +82,11 @@ const (
 	propMinMagicDefAdd uint16 = 597
 )
 
-// MaxSP(580)/MaxSPAdd(583) 官方表存在,二者都只在登录/切图全量批由
-// player_actor.go 的 loginVitalUpdate 携带一次(MaxSP 为 49840 帧实证
-// 仅 #16 一处;MaxSPAdd 官方抓包从未出现,现随登录批一并下发做客户端
-// 效果验证,后续改由当前运行内功的怒气上限加成计算),其余任何批次
-// (恢复批/事件批/0x0D 归档)不得携带。
+// MaxSP(580)/MaxSPAdd(583) 官方表存在,但只有 MaxSP 在登录/切图全量批
+// 由 player_actor.go 的 loginVitalUpdate 携带一次(49840 帧实证仅 #16
+// 一处;值 = 基础 80 + 运行内功档位加成折算合一,见 rageCapWireValue)。
+// 官方抓包从未出现 583(2026-11-09 docs/official 复核),本服同样不出帧;
+// 其余任何批次(恢复批/事件批/0x0D 归档)不得携带 580/583。
 
 // activeFacultyCardReward 刻意只在玩家从三张卡中选出一张（C->S 1006/23）
 // 之后才发放。主动页面并不是一个按分钟计的修炼计时器。
@@ -115,7 +115,7 @@ const (
 	// 每槽毫历练上限：999 点 × 1000（1 点历练 = 1000 毫 = 1000 修为）。
 	grooveCap int32 = 999_000
 	// 100 秒整步进（在线每 100 秒 +1 点历练）；每步累积步长 1000 毫。
-	livepointStepSeconds  = 100
+	livepointStepSeconds        = 100
 	livepointAccrueMillis int32 = 1_000
 	// 新角色修为种子默认（官服模型下历练是修为主供给；-faculty-seed 可配）。
 	initialFaculty int32 = 10_000
@@ -1164,10 +1164,9 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 		if err := player.equipNeiGong(custom.Values[1].Text); err != nil {
 			return true, err
 		}
-		// 换书会改变怒气有效上限。上限对(580/583)不进常规批/0x0D
-		// 归档,但客户端已实证消费 MaxSP+MaxSPAdd 口径,这里用与纯 SP
-		// 事件帧同形的单次 0x10 专帧先行刷新分母,再发含收敛后 SP 的
-		// 常规大批。
+		// 换书会改变怒气有效上限。MaxSP(580,折算最终值)不进常规批/
+		// 0x0D 归档,这里用与纯 SP 事件帧同形的单次 0x10 专帧先行刷新
+		// 分母,再发含收敛后 SP 的常规大批。
 		capFrame, capErr := player.rageCapUpdate()
 		if capErr != nil {
 			return true, capErr

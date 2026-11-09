@@ -53,10 +53,11 @@ func TestNeiGongRageCapAddTiers(t *testing.T) {
 }
 
 // TestRageCapFollowsEquippedNeiGong 换书改变有效上限:饱和、初始满值
-// 与 wire 上的 MaxSPAdd 同步切换。
+// 与 wire 上的 MaxSP(折算最终值 = 基础 80 + 档位加成)同步切换;
+// MaxSPAdd(583) 按官服口径从不出帧。
 func TestRageCapFollowsEquippedNeiGong(t *testing.T) {
 	player := newPlayerActor("tester", 0)
-	// 默认 ng_wd_001(一内+10):登录即满 90,MaxSPAdd=10。
+	// 默认 ng_wd_001(一内+10):登录即满 90,wire MaxSP=90。
 	if got := player.rageCap(); got != maxPlayerSP+10 {
 		t.Fatalf("default rageCap=%d, want %d", got, maxPlayerSP+10)
 	}
@@ -67,12 +68,19 @@ func TestRageCapFollowsEquippedNeiGong(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	addNeedle := []byte{byte(583 & 0xff), byte(583 >> 8), 10, 0, 0, 0}
-	if !bytes.Contains(frame, addNeedle) {
-		t.Fatalf("login MaxSPAdd is not 10 (ng_wd_001): %x", frame)
+	loginIndices, walkErr := propertyFrameIndices(frame)
+	if walkErr != nil {
+		t.Fatalf("walk login 0x10 frame: %v", walkErr)
+	}
+	if containsIndex(loginIndices, propMaxSPAdd) {
+		t.Fatalf("login batch carries MaxSPAdd(%d); official never sends it", propMaxSPAdd)
+	}
+	maxSPNeedle := []byte{byte(propMaxSP & 0xff), byte(propMaxSP >> 8), byte(maxPlayerSP + 10), 0, 0, 0}
+	if !bytes.Contains(frame, maxSPNeedle) {
+		t.Fatalf("login MaxSP is not %d (ng_wd_001): %x", maxPlayerSP+10, frame)
 	}
 
-	// 切到移花宫明玉神功(+40):上限 120,存量怒气保持,MaxSPAdd=40。
+	// 切到移花宫明玉神功(+40):上限 120,存量怒气保持,wire MaxSP=120。
 	if err := player.equipNeiGong("ng_yh_001"); err != nil {
 		t.Fatal(err)
 	}
@@ -87,9 +95,16 @@ func TestRageCapFollowsEquippedNeiGong(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	addNeedle = []byte{byte(583 & 0xff), byte(583 >> 8), 40, 0, 0, 0}
-	if !bytes.Contains(capFrame, addNeedle) {
-		t.Fatalf("cap frame MaxSPAdd is not 40 (ng_yh_001): %x", capFrame)
+	capIndices, walkErr := propertyFrameIndices(capFrame)
+	if walkErr != nil {
+		t.Fatalf("walk cap 0x10 frame: %v", walkErr)
+	}
+	if containsIndex(capIndices, propMaxSPAdd) {
+		t.Fatalf("cap frame carries MaxSPAdd(%d); official never sends it", propMaxSPAdd)
+	}
+	maxSPNeedle = []byte{byte(propMaxSP & 0xff), byte(propMaxSP >> 8), byte(maxPlayerSP + 40), 0, 0, 0}
+	if !bytes.Contains(capFrame, maxSPNeedle) {
+		t.Fatalf("cap frame MaxSP is not %d (ng_yh_001): %x", maxPlayerSP+40, capFrame)
 	}
 
 	// 切回坐忘功(+10):上限收缩回 90,存量 120 收敛到 90。

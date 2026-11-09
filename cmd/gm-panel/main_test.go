@@ -50,6 +50,11 @@ func newFakeGameBackend(t *testing.T) *fakeGameBackend {
 		backend.requests.Add(1)
 		writeRaw(writer, http.StatusOK, `[{"configId":"x","name":"测试"}]`)
 	})
+	mux.HandleFunc("/internal/v1/minimal-login", func(writer http.ResponseWriter, request *http.Request) {
+		backend.authSeen.Store("minimal-login:"+request.Method, request.Header.Get("Authorization"))
+		backend.requests.Add(1)
+		writeRaw(writer, http.StatusOK, `{"enabled":true}`)
+	})
 	backend.server = httptest.NewServer(mux)
 	t.Cleanup(backend.server.Close)
 	return backend
@@ -278,5 +283,49 @@ func TestPanelInfo(t *testing.T) {
 	body, status := panelGet(t, panel.URL+"/api/panel-info")
 	if status != http.StatusOK || !strings.Contains(body, `"gameAddr"`) || !strings.Contains(body, `"panelVersion"`) {
 		t.Fatalf("panel-info: status=%d body=%s", status, body)
+	}
+}
+
+// TestPanelSupplementCatalogDirs 补充目录/状态端点（console 页启动即
+// fetch 的 11 个 /api/*）代理到 internal API 同名路径，minimal-login
+// 的 POST 经 methodProxy 透传方法与鉴权头。
+func TestPanelSupplementCatalogDirs(t *testing.T) {
+	backend := newFakeGameBackend(t)
+	panel := newPanel(t, backend)
+
+	for _, path := range []string{
+		"/api/clones", "/api/scenes", "/api/giftboxes", "/api/titles",
+		"/api/mounts", "/api/idle-stances", "/api/recast-affixes",
+		"/api/combat-dummy/taolus", "/api/repute/status", "/api/origin/status",
+	} {
+		body, status := panelGet(t, panel.URL+path)
+		if status != http.StatusOK || !strings.Contains(body, "测试") {
+			t.Fatalf("%s: status=%d body=%s", path, status, body)
+		}
+		internal := strings.TrimPrefix(path, "/api")
+		if seen, _ := backend.authSeen.Load("catalog:/internal/v1/catalog" + internal); seen != "Bearer tok?" {
+			t.Fatalf("%s forward=%v", path, seen)
+		}
+	}
+
+	// minimal-login：GET/POST 都经 methodProxy 透传。
+	body, status := panelGet(t, panel.URL+"/api/minimal-login")
+	if status != http.StatusOK || !strings.Contains(body, `"enabled":true`) {
+		t.Fatalf("minimal-login GET: status=%d body=%s", status, body)
+	}
+	if body, status := panelPost(t, panel.URL+"/api/minimal-login", ""); status != http.StatusOK || !strings.Contains(body, `"enabled":true`) {
+		t.Fatalf("minimal-login POST: status=%d body=%s", status, body)
+	}
+	if seen, _ := backend.authSeen.Load("minimal-login:POST"); seen != "Bearer tok" {
+		t.Fatalf("minimal-login POST forward=%v", seen)
+	}
+
+	// GET-only 目录端点在面板本地拒绝 POST（不打后端）。
+	before := backend.requests.Load()
+	if body, status := panelPost(t, panel.URL+"/api/clones", ""); status != http.StatusMethodNotAllowed {
+		t.Fatalf("post clones: status=%d body=%s", status, body)
+	}
+	if got := backend.requests.Load(); got != before {
+		t.Fatalf("post clones hit backend (%d -> %d)", before, got)
 	}
 }

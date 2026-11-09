@@ -97,7 +97,7 @@ echo.
 start "Nine Yin GM Panel 19064" /D "%EXEDIR%" "%PANEL%" -listen 127.0.0.1:19064 -game-addr 127.0.0.1:19063 -game-token "%NINEYIN_GM_TOKEN%" 1>>"%EXEDIR%logs\gm-panel.current.log" 2>>&1
 
 timeout /t 1 /nobreak >nul
-start "Nine Yin GM Panel" http://127.0.0.1:19064/
+rem start "Nine Yin GM Panel" http://127.0.0.1:19064/
 
 echo Launcher finished. Keep the panel window open.
 rem pause

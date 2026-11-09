@@ -109,9 +109,9 @@ if exist "%ROOT%gm-panel.exe" (
 
 timeout /t 2 /nobreak >nul
 if exist "%ROOT%gm-panel.exe" (
-  start "Nine Yin GM Panel" http://127.0.0.1:19064/
+  rem start "Nine Yin GM Panel" http://127.0.0.1:19064/
 ) else (
-  start "Nine Yin GM Panel" http://127.0.0.1:19062/
+  rem start "Nine Yin GM Panel" http://127.0.0.1:19062/
 )
 
 echo Launcher finished. Keep the server windows open.

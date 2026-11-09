@@ -9,11 +9,13 @@ import (
 )
 
 // 宝箱怪判定（官服 AI 编辑器方言，F 盘资源考据 2026-11-08）：
-//   attacknpc 第 82 列 / bossnpc 第 73 列 AIEditorPackID →
-//   share/rule/ai_editor_package.ini [包id] EventGroup=逗号分隔的事件节 id →
-//   share/rule/ai_editor_event.ini [事件id] EventType=3（死亡）且
-//   OpEvent=25（创建 NPC）时 Para1=死后生成的 BoxNpc/BossBox 宝箱模板
-//   ConfigID（全表 1738 处 OpEvent=25、其中 1605 处挂在死亡事件）。
+//
+//	attacknpc 第 82 列 / bossnpc 第 73 列 AIEditorPackID →
+//	share/rule/ai_editor_package.ini [包id] EventGroup=逗号分隔的事件节 id →
+//	share/rule/ai_editor_event.ini [事件id] EventType=3（死亡）且
+//	OpEvent=25（创建 NPC）时 Para1=死后生成的 BoxNpc/BossBox 宝箱模板
+//	ConfigID（全表 1738 处 OpEvent=25、其中 1605 处挂在死亡事件）。
+//
 // 普通怪没有生箱事件：掉落按 DropID 挂尸体（CanPick/PickMember 属性驱动
 // 客户端冒光+拾取光标，scene_obj_prop.lua on_change_pick_state）。
 // 资源缺失时判定表为空（全部走挂尸），测试环境不依赖资源树。
@@ -23,7 +25,7 @@ var (
 )
 
 // chestSpawnConfigForNPC 返回怪物 AI 编辑包登记的死后宝箱模板列表
-//（Extensions["template.AIEditorPackID"]，npc_resolver 对表列自动透传）。
+// （Extensions["template.AIEditorPackID"]，npc_resolver 对表列自动透传）。
 func chestSpawnConfigForNPC(npc npcSpawn) []string {
 	if npc.resolved.Extensions == nil {
 		return nil

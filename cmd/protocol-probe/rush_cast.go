@@ -50,15 +50,15 @@ const (
 	clientCustomCorpseQuery     int32 = 990 // 尸体拾取查询（同上，g 战后实证）
 
 	// 三层距离模型（g/f/b 联合定版 + Java SkillCastHandler 常量同源）。
-	selectedRangeFallbackMeters = 8.0  // 无 TSP2/形状半径时的近战回落射程（skill_catalog 引用）
-	rushStageMaxMeters          = 15.0 // RushRange 缺列时的回落（skill_catalog 引用，仅存档参考）
-	rushArrivalRadiusMeters   = 3.0              // 落地到达半径（212 上报距目标 ≤3m = 落地）
-	rushDirectCastSlackMeters = 2.0              // bind 之上的直收余量
-	rushPendingWindow         = 30 * time.Second // 暂存出招有效期（官服 msg25 窗口=30000ms）
-	defaultRushBindDistance   = float32(1.5)     // skill_lock_data 缺行时的身前绑定距离
-	defaultGroundRushAction   = "qg_fastrun_2h_01" // 官服地面锁定冲锋动画
-	convertDashLevel          = 1                  // 冲刺档位（官服锁定冲锋 c61=1）
-	msgRushCommand            = 61                 // msg24 c1=61 冲刺/疾跑指令
+	selectedRangeFallbackMeters = 8.0                // 无 TSP2/形状半径时的近战回落射程（skill_catalog 引用）
+	rushStageMaxMeters          = 15.0               // RushRange 缺列时的回落（skill_catalog 引用，仅存档参考）
+	rushArrivalRadiusMeters     = 3.0                // 落地到达半径（212 上报距目标 ≤3m = 落地）
+	rushDirectCastSlackMeters   = 2.0                // bind 之上的直收余量
+	rushPendingWindow           = 30 * time.Second   // 暂存出招有效期（官服 msg25 窗口=30000ms）
+	defaultRushBindDistance     = float32(1.5)       // skill_lock_data 缺行时的身前绑定距离
+	defaultGroundRushAction     = "qg_fastrun_2h_01" // 官服地面锁定冲锋动画
+	convertDashLevel            = 1                  // 冲刺档位（官服锁定冲锋 c61=1）
+	msgRushCommand              = 61                 // msg24 c1=61 冲刺/疾跑指令
 	// rushDashLiftMeters：c61 终点在玩家上报 y 之上的抬升（恒 +1.0 小跳弧线）。
 	rushDashLiftMeters = float32(1.0)
 	// rushDashTimeout：c61 发出后等待 212 的静默安全阀（官服无此机制）。
@@ -87,10 +87,10 @@ func rushDirectCastMeters(definition combatSkillDefinition) float64 {
 
 // 冲锋簇属性索引（按名映射自本服表；官服现行表同名字 +2 偏移）。
 const (
-	propRushCantMove  uint16 = 203 // CantMove Byte
-	propRushPauseSkill uint16 = 220 // PauseSkill String
-	propRushLogicState uint16 = 463 // LogicState Byte
-	propRushFP         uint16 = 462 // FP Int32（伤害段 FP/SP 对）
+	propRushCantMove        uint16 = 203 // CantMove Byte
+	propRushPauseSkill      uint16 = 220 // PauseSkill String
+	propRushLogicState      uint16 = 463 // LogicState Byte
+	propRushFP              uint16 = 462 // FP Int32（伤害段 FP/SP 对）
 	propRushLastWGAttackNpc uint16 = 867 // LastWGAttackNpc String（直收簇宣告目标模型）
 
 	propQingGongPointIndex uint16 = 692 // QingGongPoint Int32（c61 扣后单帧）
@@ -128,12 +128,12 @@ type pendingCastState struct {
 	approachRetries int
 	stepping        bool
 	// 结算快照（staging 时从 definition 复制）。
-	mpCost, spCost, qgCost   int32
-	cooldownCategory         int32
-	cooldownTeam             int32
-	personalCD, publicCD     time.Duration
-	taoLu                    string
-	nominalDamage            int32
+	mpCost, spCost, qgCost int32
+	cooldownCategory       int32
+	cooldownTeam           int32
+	personalCD, publicCD   time.Duration
+	taoLu                  string
+	nominalDamage          int32
 }
 
 // rushStageEnabled 对齐 Java -Dnineyin.rush.stage（默认开）。
@@ -429,7 +429,7 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 		airborne:      airborne,
 		geometry:      target,
 		nominalDamage: definition.baseDamage,
-		mpCost:         definition.mpCost, spCost: definition.spCost, qgCost: definition.qgCost,
+		mpCost:        definition.mpCost, spCost: definition.spCost, qgCost: definition.qgCost,
 		cooldownCategory: definition.cooldownCategory, cooldownTeam: definition.cooldownTeam,
 		personalCD: definition.personalCD, publicCD: definition.publicCD,
 		taoLu: definition.taoLu,
@@ -1115,7 +1115,7 @@ func (p *playerActor) maybeRushStatePing(link sceneMessageConnection, now time.T
 // issueApproachSprint fork 客户端方言：接近段服务端驱动——先发与官服
 // 唯一已验证形态逐字节同形的 c61（g 14.660：档1 + LockGRushAction +
 // y=上报y+1.0；55413 会话实证档2+平 y 变体被忽略）。两次未到位
-//（10s）转 0x1F 步进兜底：每 300ms 向 bind 点步进 ~3m，到位后服务端
+// （10s）转 0x1F 步进兜底：每 300ms 向 bind 点步进 ~3m，到位后服务端
 // 直接落走带落地簇（客户端不发 212 也照常出伤害）。
 func issueApproachSprint(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, target worldcore.Transform,
 	fromX, fromY, fromZ float32, remote string) error {
@@ -1274,7 +1274,7 @@ func packPlayerObjectRaw(objectID, ownerID uint32) [8]byte {
 }
 
 // useSkillClaimedTargetTransform 解出 211 长格式 idx11..13 的目标坐标
-//（客户端世界观里的目标位置）。冲锋链全部几何以它为准。
+// （客户端世界观里的目标位置）。冲锋链全部几何以它为准。
 func useSkillClaimedTargetTransform(custom clientCustomMessage) (worldcore.Transform, bool) {
 	if len(custom.Values) < 14 ||
 		custom.Values[11].Type != 4 ||

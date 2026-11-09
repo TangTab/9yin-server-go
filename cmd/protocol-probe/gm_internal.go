@@ -24,7 +24,7 @@ type gmHealthInfo struct {
 // serveGMInternal 起独立面板进程专用的 internal API（docs/gm-service-rpc-split-design.md §5）。
 // 刻意只应绑 loopback；鉴权 = Bearer token 常数时间比对。命令仍经由
 // hub 的会话命令通道交接，internal API handler 绝不直接写客户端帧
-//（单写者纪律）。
+// （单写者纪律）。
 func serveGMInternal(listen, token string, hub *gmHub, info gmHealthInfo) {
 	server := &http.Server{
 		Addr:              listen,
@@ -51,16 +51,16 @@ func newGMInternalMux(token string, hub *gmHub, info gmHealthInfo) http.Handler 
 		online := len(hub.sessions)
 		hub.mu.RUnlock()
 		gmapi.WriteJSON(writer, http.StatusOK, map[string]any{
-			"status":     "ok",
-			"version":    gmInternalVersion,
-			"uptimeSec":  int(time.Since(started).Seconds()),
-			"sessions":   online,
+			"status":    "ok",
+			"version":   gmInternalVersion,
+			"uptimeSec": int(time.Since(started).Seconds()),
+			"sessions":  online,
 			// 以下三字段与 Java GmRemote status RPC 同形，供管理页
 			//（index.html 记录服务器卡片）展示；running 恒 true——
 			// 能应答即在线。
-			"running":           true,
-			"listenAddr":        info.ListenAddr,
-			"serverRoot":        info.ServerRoot,
+			"running":    true,
+			"listenAddr": info.ListenAddr,
+			"serverRoot": info.ServerRoot,
 		})
 	})
 	mux.HandleFunc("/internal/v1/sessions", func(writer http.ResponseWriter, request *http.Request) {
@@ -80,6 +80,19 @@ func newGMInternalMux(token string, hub *gmHub, info gmHealthInfo) http.Handler 
 	mux.HandleFunc("/internal/v1/catalog/hair-cards", hub.hairCardsHandler)
 	mux.HandleFunc("/internal/v1/catalog/items", hub.itemsHandler)
 	mux.HandleFunc("/internal/v1/catalog/meridians", hub.meridiansHandler)
+	// gm_catalog_dirs.go 的补充目录/状态端点镜像（gm-panel 同名 /api/*
+	// 代理到这里）；minimal-login 带 POST 切换，其余 GET-only。
+	mux.HandleFunc("/internal/v1/catalog/clones", hub.clonesHandler)
+	mux.HandleFunc("/internal/v1/catalog/scenes", hub.scenesHandler)
+	mux.HandleFunc("/internal/v1/catalog/giftboxes", hub.giftBoxesHandler)
+	mux.HandleFunc("/internal/v1/catalog/titles", hub.titlesHandler)
+	mux.HandleFunc("/internal/v1/catalog/mounts", hub.mountsHandler)
+	mux.HandleFunc("/internal/v1/catalog/idle-stances", hub.idleStancesHandler)
+	mux.HandleFunc("/internal/v1/catalog/recast-affixes", hub.recastAffixesHandler)
+	mux.HandleFunc("/internal/v1/catalog/combat-dummy/taolus", hub.combatDummyTaolusHandler)
+	mux.HandleFunc("/internal/v1/catalog/repute/status", hub.reputeStatusHandler)
+	mux.HandleFunc("/internal/v1/catalog/origin/status", hub.originStatusHandler)
+	mux.HandleFunc("/internal/v1/minimal-login", hub.minimalLoginHandler)
 	return withBearerAuth(token, mux)
 }
 

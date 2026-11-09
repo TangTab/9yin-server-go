@@ -43,6 +43,12 @@ type gmItemRow struct {
 	MaxAmount  int    `json:"maxAmount"`
 	ColorLevel int    `json:"colorLevel"`
 	NeedSex    int    `json:"needSex"`
+	// ItemType 仅供目录内过滤（/api/giftboxes 取 2102/2103 开箱类），
+	// 不属于面板检索行字段，不参与 JSON 输出。
+	ItemType int `json:"-"`
+	// ArtPack 同为目录内过滤数据（/api/mounts 取坐骑外观 ID），
+	// 不参与 JSON 输出。
+	ArtPack string `json:"-"`
 }
 
 type gmItemCatalog struct {
@@ -54,17 +60,19 @@ type gmItemCatalog struct {
 // 尾段再过 idres 名链。
 type gmItemSection struct {
 	row  gmItemRow
-	seen uint8
+	seen uint16
 }
 
 const (
-	gmItemKeyName uint8 = 1 << iota
+	gmItemKeyName uint16 = 1 << iota
 	gmItemKeyScript
 	gmItemKeyEquipType
 	gmItemKeyViewID
 	gmItemKeyMaxAmount
 	gmItemKeyColorLevel
 	gmItemKeyNeedSex
+	gmItemKeyItemType
+	gmItemKeyArtPack
 )
 
 // gmItemIniSource 单张 ini 表（equipment=true / tool_item=false）。
@@ -183,6 +191,16 @@ func loadGMItemCatalogFrom(names map[string]string, sources ...gmItemIniSource) 
 				if current.seen&gmItemKeyNeedSex == 0 {
 					current.seen |= gmItemKeyNeedSex
 					setGMItemInt(value, &current.row.NeedSex)
+				}
+			case "itemtype":
+				if current.seen&gmItemKeyItemType == 0 {
+					current.seen |= gmItemKeyItemType
+					setGMItemInt(value, &current.row.ItemType)
+				}
+			case "artpack":
+				if current.seen&gmItemKeyArtPack == 0 {
+					current.seen |= gmItemKeyArtPack
+					current.row.ArtPack = value
 				}
 			}
 		}

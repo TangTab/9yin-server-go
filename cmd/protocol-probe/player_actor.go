@@ -163,9 +163,10 @@ const (
 
 	// SP 是当前现代客户端的怒气资源。基础满池值对齐 fork 抓包实证
 	// (49840 帧 #16 登录全量批 MaxSP=80);有效上限 = 基础 80 + 当前
-	// 运行内功的档位加成(playerProgress.rageCap,2026-11-07 客户端已
-	// 实证消费 MaxSP+MaxSPAdd 口径)。所有 GM 及战斗获取路径都经由
-	// 这些辅助函数,客户端属性永远不会成为该资源的权威。
+	// 运行内功的档位加成(playerProgress.rageCap)。wire 上按官服口径
+	// 只随 MaxSP(580) 下发折算后的最终值(rageCapWireValue),MaxSPAdd
+	// (583) 从不出帧。所有 GM 及战斗获取路径都经由这些辅助函数,客户端
+	// 属性永远不会成为该资源的权威。
 	// 权威定义在 internal/gmapi（GM 线协议界值与之共用），此处为别名。
 	maxPlayerSP int32 = gmapi.MaxPlayerSP
 
@@ -243,8 +244,8 @@ type playerActor struct {
 	// publicCDTaolu 同构）：到期时刻 + 发起套路串——同套路连招与出招者
 	// 自身只走个人 CD，切套路才付 7s；每次受理都刷新窗口（连招把切换
 	// 锁后推是官方语义）。p.mu 保护。
-	publicCDUntil        time.Time
-	publicCDTaolu        string
+	publicCDUntil time.Time
+	publicCDTaolu string
 
 	currentSkillID       string
 	currentSkillEffectID string
@@ -255,12 +256,12 @@ type playerActor struct {
 	currentSkillEpoch uint64
 	// skillViewRows 是 View40 行号映射（configID → 行号，出招 CanUse
 	// 行帧寻址用；登录 merge 与秘籍重建时随视图帧一起刷新）。
-	skillViewRows         map[string]uint16
-	activeParry           activeParryRequest
-	parrying              bool
-	skillLockUntil        time.Time
-	reviveAt              time.Time
-	progress              playerProgress
+	skillViewRows  map[string]uint16
+	activeParry    activeParryRequest
+	parrying       bool
+	skillLockUntil time.Time
+	reviveAt       time.Time
+	progress       playerProgress
 	// GM 面板域（货币/属性/状态批次，gm_stats.go）：官银为会话级货币
 	//（Java PlayerActor 同口径，不落库）；gm 是实力等级/善恶/PK 模式/
 	// 生存属性的会话权威，spawn 后按需补推。
@@ -391,12 +392,12 @@ func newPlayerActor(name string, silver int32) *playerActor {
 	}
 	now := time.Now()
 	p := &playerActor{
-		name:              name,
-		vitals:            sim.NewVitals(1000, 500),
-		qinggong:          sim.NewQingGong(now),
-		speed:             sim.NewMotion(),
-		silver:            silver,
-		faction:           defaultRoleFaction,
+		name:     name,
+		vitals:   sim.NewVitals(1000, 500),
+		qinggong: sim.NewQingGong(now),
+		speed:    sim.NewMotion(),
+		silver:   silver,
+		faction:  defaultRoleFaction,
 		// 默认移动/奔跑速度 5：与 Java 参考服对齐（2026-11-02 由 25 下调，
 		// 25 过快）；GM 面板「移动参数」可运行时改。
 		motion:            playerMotion{moveSpeed: 5, runSpeed: 5, gravity: 9.8},
@@ -588,7 +589,7 @@ func (p *playerActor) observePositionY(y float32, now time.Time) (landed bool) {
 }
 
 // 跳段预输入窗口：被拒 begin 与落地观测之间只隔位移包在途延迟
-//（0x0A 逐帧 ≤100ms 一拍），300ms 足够覆盖网络抖动。纯空中连打
+// （0x0A 逐帧 ≤100ms 一拍），300ms 足够覆盖网络抖动。纯空中连打
 // 不会有落地包跟随——窗口过期即静默丢弃，不扣费不执行（与跳段闸
 // 拒绝语义一致，蹭跳无利可图）。
 const airJumpBufferWindow = 300 * time.Millisecond
@@ -1591,12 +1592,6 @@ func (p *playerActor) combatVitalsFrame() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, props)
 }
 
-// rageCapSnapshot 返回当前怒气上限对:基础 MaxSP(恒 80)与运行内功的
-// MaxSPAdd 档位加成。调用方自行持锁。
-func (p *playerActor) rageCapSnapshot() (base, add int32) {
-	return maxPlayerSP, p.progress.rageCapAdd()
-}
-
 // rageCap 是服务器侧怒气饱和用的有效上限(基础+加成)。GM 满怒与
 // 战斗日志消费同一入口。
 func (p *playerActor) rageCap() int32 {
@@ -1605,35 +1600,39 @@ func (p *playerActor) rageCap() int32 {
 	return p.progress.rageCap()
 }
 
-// rageCapUpdate 生成只含上限对(MaxSP/MaxSPAdd)的单次 0x10 专帧,
-// 与纯 SP 事件帧同形。用于 215 换书后向客户端刷新怒气球分母——上限
-// 对不得进入常规大批/0x0D 归档,专帧是登录全量批之外唯一的合法载体。
+// rageCapWireValue 计算最终随 MaxSP(580) 下发的怒气上限值:基础 80 +
+// 运行内功档位加成折算合一(基础值保持 80 不变)。官服口径(docs/
+// official 三份时间线 2026-11-09 复核):官方全程只下发 MaxSP(登录
+// 4.7s MaxSP=50 ×2),MaxSPAdd(583) 零下发——加成在服务器侧折进
+// MaxSP 一次给出。客户端怒气球分母 = MaxSP + MaxSPAdd,583 不出帧
+// 时客户端按默认 0 参与,分母与本服有效上限一致。
+func (p *playerActor) rageCapWireValue() int32 {
+	return p.rageCap()
+}
+
+// rageCapUpdate 生成只含 MaxSP(580,折算最终值)的单次 0x10 专帧,
+// 与纯 SP 事件帧同形。用于 215 换书/升级抬档后向客户端刷新怒气球
+// 分母——MaxSP 不得进入常规大批/0x0D 归档,专帧是登录全量批之外
+// 唯一的合法载体。
 func (p *playerActor) rageCapUpdate() ([]byte, error) {
-	p.mu.Lock()
-	base, add := p.rageCapSnapshot()
-	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(base)},
-		{Index: propMaxSPAdd, Name: "MaxSPAdd", Value: clientdata.Int32Value(add)},
+		{Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(p.rageCapWireValue())},
 	})
 }
 
-// loginVitalUpdate 是登录/切图链的首个权威 0x10,也是 MaxSP/MaxSPAdd
-// 全量批形态的唯一下发点:MaxSP 为 fork 抓包实证(49840 帧全场 5181 帧
-// 仅 #16 一处,121 属性全量批携带,fork 值 80;Java 参考服同为登录一次),
-// MaxSPAdd 是本服实现(官方从未发送;客户端已实证按 MaxSP+MaxSPAdd
-// 呈现怒气球,值=当前运行内功档位加成)。之后的恢复批/事件批都不再
-// 携带二者;把上限塞进 0x0D 归档或周期批会让客户端在进世界时崩溃。
+// loginVitalUpdate 是登录/切图链的首个权威 0x10,也是 MaxSP 全量批
+// 形态的唯一下发点:MaxSP 为 fork 抓包实证(49840 帧全场 5181 帧
+// 仅 #16 一处,121 属性全量批携带,fork 值 80;Java 参考服同为登录一次)。
+// 本服在此批只携带 MaxSP 一条,值 = rageCapWireValue(基础 80 + 运行
+// 内功档位加成;官方抓包全程无 MaxSPAdd(583),加成折进 580,基础值
+// 80 不变)。之后的恢复批/事件批都不再携带;把上限塞进 0x0D 归档
+// 或周期批会让客户端在进世界时崩溃。
 // SP(467) 本就在 stateProperties 大批内,无独立登录怒气帧;这里只是
 // 在同一批上补一次上限声明。
 func (p *playerActor) loginVitalUpdate() ([]byte, error) {
 	properties := p.stateProperties()
-	p.mu.Lock()
-	base, add := p.rageCapSnapshot()
-	p.mu.Unlock()
 	properties = append(properties,
-		clientdata.IndexedProperty{Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(base)},
-		clientdata.IndexedProperty{Index: propMaxSPAdd, Name: "MaxSPAdd", Value: clientdata.Int32Value(add)},
+		clientdata.IndexedProperty{Index: propMaxSP, Name: "MaxSP", Value: clientdata.Int32Value(p.rageCapWireValue())},
 	)
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, properties)
 }
@@ -2116,9 +2115,9 @@ func sendPlayerAddObject(conn sceneMessageConnection, player *playerActor, locat
 
 // sendPlayerLocationAndVitals 发 0x1F 重定位 + 常规 vitals 大批 0x10。
 // 官方方言下没有独立的登录怒气帧:SP(467) 随 stateProperties 大批下发,
-// MaxSP/MaxSPAdd 只由 loginVitalUpdate 在这批全量档携带一次(新服 exe
-// 反汇编零引用 580/583,客户端疑似按本地口径呈现怒气球,MaxSPAdd 为
-// 验证该口径的实验下发)。
+// MaxSP(580,折算最终值) 只由 loginVitalUpdate 在这批全量档携带一次
+// (官服抓包全程零下发 583,加成折进 580;新服 exe 反汇编零引用
+// 580/583,客户端疑似按本地口径呈现怒气球)。
 func sendPlayerLocationAndVitals(conn sceneMessageConnection, player *playerActor, location role.Position) error {
 	if err := conn.WriteFrame(serverLocation(playerObjectID, playerOwnerID, worldTransform(location))); err != nil {
 		return err

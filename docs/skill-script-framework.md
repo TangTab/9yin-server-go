@@ -254,11 +254,13 @@ item=2 `r_drop/r_proc`、neigong=1）。Lua 侧无回掷通道：不暴露 Java 
   每调用 Java 预掷 1 枚 `r_adjust`，掷骰序固定在 miss/crit/区间掷值之后——无钩子
   技能 RNG 序列零扰动）。CS_wd_tjq04.lua 的注释示例可参考。
 
-## Go 服务端接入状态（2026-11-06；2026-11-09 扩至全部四类并接线战斗分发）
+## Go 服务端接入状态（2026-11-06；2026-11-09 扩至全部四类并接线战斗分发/技能 buff 编译）
 
 本仓（9yin-go-server1）已接入**全部四类模块脚本层**，其中 **neigong 已接线
 战斗分发**（`cmd/protocol-probe/neigong_dispatch.go`，参考服 NeiGongEffects
-的 Go 等价物）；item/skill/combat 三个域仍为装载 + 调用桥，消费方待接：
+的 Go 等价物）、**skill 的 effects_data 已接线技能目录编译**（buff 组，
+2026-11-09，见下）；item/combat 域中 item 仍为装载 + 调用桥
+（combat 公式由 combatcalc 每击引擎单独消费）：
 
 - **脚本入仓**：参考服 `scripts/{combat,item,neigong,skill}` 四类拷贝至本仓
   `scripts/module/` 下；事件脚本迁至 `scripts/host/`（`-scripts` 默认改指该
@@ -302,6 +304,20 @@ item=2 `r_drop/r_proc`、neigong=1）。Lua 侧无回掷通道：不暴露 Java 
   与既有判定独立）。九阴志档位门缺省阶段 1（`neigongStoryStage` 常量，
   九阴志系统落地后接全服进度）。宿主 nil（测试/禁用）→ 全部分发点零效果，
   行为与接入前逐位一致。
+- **skill effects_data 接线技能目录编译**（2026-11-09）：buff 效果优先级
+  对齐参考服 CombatSkillCatalog——手勘覆盖（verifiedSkillEffectOverlays，
+  6 技含槽位/红霸体/架势轮换，行为钉死不改）> **effects_data 条目**
+  （`skillScripts.EffectData`：self_buffs[] → skillEffectPlayerBuff 原生
+  自增益挂槽 11..24、target_effects[] → skillEffectTargetControl 出招结算
+  对命中 NPC 施加租约控制；by_level[level] 的 self_life_ms/target_life_ms
+  逐级覆盖租约）> INI 单条 exact_buff（buf_<技能ID> 兜底）。条目存在即
+  **整组取代** INI（含 damage-only 条目压制 INI 24h 假租约兜底）。
+  覆盖增益：INI exact_buff 仅覆盖 45% 玩家技（5951/13062 L1），effects_data
+  补齐其中 1233 个无 buff 家族技 + 1145 条多 buff 条目。伤害数值不取
+  effects_data（damage_amount/by_level 伤害差集不并入——数值以 combatcalc
+  每击公式为权威）。GM `lua_reload` 重载 effects_data 后清技能编译缓存
+  （resetCache），下一次出招重编译。宿主 nil → 回落 INI，行为与接入前
+  逐位一致。
 - **统一以参考服脚本为权威**（2026-11-09）：删除 Go 侧自研的 desc 编译器
   被动引擎（neigong_passives.go——曾从现代客户端描述文本编译幻玉"料敌
   先机"Proc 闪避+闪避治疗，参考服脚本中该机制为 TODO），战斗链内功行为

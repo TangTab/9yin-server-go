@@ -500,7 +500,7 @@ func resolveSkillActionTarget(definition combatSkillDefinition, custom clientCus
 
 // beginSkillUse 受理一笔出招：CD/GCD 闸 + MP/SP/轻功结算 + 出招簿记。
 // settled=true 为冲锋落地重入专用——CD/MP/轻功已在 c61 时点
-//（commitRushDashCosts）结算过，跳过闸与扣费，只补簿记（防止个人 CD
+// （commitRushDashCosts）结算过，跳过闸与扣费，只补簿记（防止个人 CD
 // 把自己的落地续招拒掉）。
 func (p *playerActor) beginSkillUse(definition combatSkillDefinition, target uint64, now time.Time, settled bool) (bool, string) {
 	p.mu.Lock()

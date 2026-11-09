@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/local/9yin-go-server/internal/skillscript"
 )
 
 var (
@@ -551,17 +553,35 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 			kind: skillEffectDamage, amount: damage,
 		})
 	}
-	if buff, harmful, exists := compileExactSkillBuff(skillID, level, tables); exists {
-		overlay := verifiedSkillEffectOverlays[skillID]
-		if overlay.selfBuffLease > 0 {
-			buff.lifetime = overlay.selfBuffLease
+	// buff 效果编译优先级（对齐参考服 CombatSkillCatalog）：
+	//   1. 手勘覆盖 verifiedSkillEffectOverlays（6 技，含保留槽位/红霸体/
+	//      架势轮换，与 INI exact_buff 组合，行为逐字段钉死不改）；
+	//   2. effects_data 条目（scripts/module/skill/effects_data.lua，经
+	//      internal/skillscript 装载快照）：self_buffs[]/target_effects[]
+	//      整组取代 INI 单条——多 buff 技与无 buf_<技能ID> 家族的技能由此
+	//      获得效果（覆盖 +1233 个 INI 无 exact_buff 的玩家技能）；
+	//   3. INI 单条 exact_buff（buf_<技能ID> 兜底）。
+	if _, pinned := verifiedSkillEffectOverlays[skillID]; pinned {
+		if buff, harmful, exists := compileExactSkillBuff(skillID, level, tables); exists {
+			overlay := verifiedSkillEffectOverlays[skillID]
+			if overlay.selfBuffLease > 0 {
+				buff.lifetime = overlay.selfBuffLease
+			}
+			buff.preferredSlot = overlay.preferredSlot
+			kind := skillEffectPlayerBuff
+			if harmful {
+				kind = skillEffectTargetControl
+			}
+			definition.effects = append(definition.effects, combatSkillEffect{kind: kind, buff: buff})
 		}
-		buff.preferredSlot = overlay.preferredSlot
-		kind := skillEffectPlayerBuff
-		if harmful {
-			kind = skillEffectTargetControl
+	} else if !applyEffectsDataBuffs(&definition, skillID, level) {
+		if buff, harmful, exists := compileExactSkillBuff(skillID, level, tables); exists {
+			kind := skillEffectPlayerBuff
+			if harmful {
+				kind = skillEffectTargetControl
+			}
+			definition.effects = append(definition.effects, combatSkillEffect{kind: kind, buff: buff})
 		}
-		definition.effects = append(definition.effects, combatSkillEffect{kind: kind, buff: buff})
 	}
 	if overlay := verifiedSkillEffectOverlays[skillID]; len(overlay.stance) > 0 {
 		definition.effects = append(definition.effects, combatSkillEffect{
@@ -572,6 +592,68 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		definition.effects = append(definition.effects, combatSkillEffect{kind: skillEffectRedArmor})
 	}
 	return definition, nil
+}
+
+// skillScripts 是进程级技能脚本宿主（scripts/module/skill，internal/
+// skillscript）。main 装配 scriptHosts 后注入；nil（未启用/测试）时
+// applyEffectsDataBuffs 恒 false，编译回落 INI exact_buff，行为与
+// 接入前一致。
+var skillScripts *skillscript.Scripts
+
+// applyEffectsDataBuffs 把 effects_data 条目的 buff 组并入技能编译：
+// self_buffs → 原生自增益 Buff（skillEffectPlayerBuff，动态槽 11..24
+// 分配）；target_effects → 目标控制（skillEffectTargetControl，出招
+// 结算对命中 NPC 施加租约控制）。by_level[level] 的 self_life_ms/
+// target_life_ms 逐级覆盖租约（显式值有效）。条目存在即返回 true
+// （整组取代 INI 单条——含"条目无 buff 字段"的纯伤害技：其对 INI 兜底
+// 24h 假租约的取代正是参考服语义）。宿主未装配/无条目 → false。
+func applyEffectsDataBuffs(definition *combatSkillDefinition, skillID string, level int32) bool {
+	if skillScripts == nil || !skillScripts.Enabled() {
+		return false
+	}
+	entry := skillScripts.EffectData(skillID)
+	if entry == nil {
+		return false
+	}
+	var delta *skillscript.LevelDelta
+	if entry.ByLevel != nil {
+		delta = entry.ByLevel[int64(level)]
+	}
+	for _, spec := range entry.SelfBuffs {
+		lifetime := time.Duration(spec.LifeMS) * time.Millisecond
+		if delta != nil && delta.SelfLifeMS != nil {
+			lifetime = time.Duration(*delta.SelfLifeMS) * time.Millisecond
+		}
+		buffLevel := int32(spec.Level)
+		if buffLevel < 1 {
+			buffLevel = 1
+		}
+		definition.effects = append(definition.effects, combatSkillEffect{
+			kind: skillEffectPlayerBuff,
+			buff: skillBuffDefinition{
+				configID: spec.ConfigID, staticData: uint32(spec.StaticData),
+				level: buffLevel, lifetime: lifetime,
+			},
+		})
+	}
+	for _, spec := range entry.TargetEffects {
+		lifetime := time.Duration(spec.LifeMS) * time.Millisecond
+		if delta != nil && delta.TargetLifeMS != nil {
+			lifetime = time.Duration(*delta.TargetLifeMS) * time.Millisecond
+		}
+		buffLevel := int32(spec.Level)
+		if buffLevel < 1 {
+			buffLevel = 1
+		}
+		definition.effects = append(definition.effects, combatSkillEffect{
+			kind: skillEffectTargetControl,
+			buff: skillBuffDefinition{
+				configID: spec.ConfigID, staticData: uint32(spec.StaticData),
+				level: buffLevel, lifetime: lifetime,
+			},
+		})
+	}
+	return true
 }
 
 type combatSkillCacheKey struct {
@@ -661,6 +743,17 @@ func (catalog *combatSkillCatalog) definition(id string, level int32) (combatSki
 	catalog.cache[key] = definition
 	catalog.cacheMu.Unlock()
 	return definition, true
+}
+
+// resetCache 清空 (id, level) 编译缓存。技能脚本热重载（GM lua_reload，
+// effects_data 快照换代）后由调用方触发，让下一次出招按新数据重编译。
+func (catalog *combatSkillCatalog) resetCache() {
+	if catalog == nil {
+		return
+	}
+	catalog.cacheMu.Lock()
+	catalog.cache = make(map[combatSkillCacheKey]combatSkillDefinition)
+	catalog.cacheMu.Unlock()
 }
 
 // skillRowSupplement 是 View40 技能行的官方补集（Java CombatSkillCatalog.SkillRowData

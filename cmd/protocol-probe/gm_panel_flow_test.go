@@ -122,12 +122,12 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		payload string
 		status  int
 	}{
-		{`{"action":"learn_all_taolu"}`, http.StatusBadRequest}, // 网关时代的动作，当前服已不支持
-		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest}, // 超过 maxPlayerSP
-		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},     // 怒气自动回复速率（官方满档 5）
+		{`{"action":"learn_all_taolu"}`, http.StatusBadRequest},               // 网关时代的动作，当前服已不支持
+		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest},               // 超过 maxPlayerSP
+		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},           // 怒气自动回复速率（官方满档 5）
 		{`{"action":"set_rage_recovery","value":3.5}`, http.StatusBadRequest}, // 必须整数
-		{`{"action":"set_rage_recovery","value":-1}`, http.StatusBadRequest}, // 负数拒绝
-		{`{"action":"set_silver"}`, http.StatusOK},              // silver 缺省 0，合法
+		{`{"action":"set_rage_recovery","value":-1}`, http.StatusBadRequest},  // 负数拒绝
+		{`{"action":"set_silver"}`, http.StatusOK},                            // silver 缺省 0，合法
 
 		// —— 货币/属性/状态批次：合法负载过白名单（会话循环侧会取走）——
 		{`{"action":"set_guanyin","guanYin":888}`, http.StatusOK},
@@ -144,10 +144,10 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_live_speed_power","value":50}`, http.StatusOK},
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":5}`, http.StatusOK},
 		{`{"action":"set_autosave_interval","value":300}`, http.StatusOK}, // 数据存盘：默认周期
-		{`{"action":"set_autosave_interval","value":0}`, http.StatusOK},    // 0=关闭合法
-		{`{"action":"set_lootbox_ttl","value":300}`, http.StatusOK},   // 宝箱存留：默认 5 分钟
-		{`{"action":"set_lootbox_ttl","value":0}`, http.StatusOK},      // 0=保留到拾空合法
-		{`{"action":"spawn_chest"}`, http.StatusOK}, // GM 世界宝箱（无参白名单）
+		{`{"action":"set_autosave_interval","value":0}`, http.StatusOK},   // 0=关闭合法
+		{`{"action":"set_lootbox_ttl","value":300}`, http.StatusOK},       // 宝箱存留：默认 5 分钟
+		{`{"action":"set_lootbox_ttl","value":0}`, http.StatusOK},         // 0=保留到拾空合法
+		{`{"action":"spawn_chest"}`, http.StatusOK},                       // GM 世界宝箱（无参白名单）
 		{`{"action":"popup_gm_panel"}`, http.StatusOK},
 		{`{"action":"custom_probe","msgId":517,"subType":899000000}`, http.StatusOK},
 
@@ -168,16 +168,16 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_fill_speed","base":0,"multiplier":1}`, http.StatusBadRequest},
 		{`{"action":"set_fill_speed","base":200,"multiplier":0.05}`, http.StatusBadRequest},
 		{`{"action":"set_act_day_limit","value":1000000}`, http.StatusBadRequest},
-		{`{"action":"add_livepoint","points":0}`, http.StatusBadRequest},   // 总历练上限 999 点
+		{`{"action":"add_livepoint","points":0}`, http.StatusBadRequest}, // 总历练上限 999 点
 		{`{"action":"add_livepoint","points":1000}`, http.StatusBadRequest},
 		{`{"action":"set_hold_faculty","value":-1}`, http.StatusBadRequest},
 		{`{"action":"set_live_speed_power","value":1001}`, http.StatusBadRequest},
 		{`{"action":"set_weather","weather":"..\\..\\evil"}`, http.StatusBadRequest}, // 闭名单拒绝路径注入
 		{`{"action":"set_weather","weather":"heavy_rain_501","fadeSec":601}`, http.StatusBadRequest},
-		{`{"action":"set_autosave_interval","value":-1}`, http.StatusBadRequest},   // 负数拒绝
+		{`{"action":"set_autosave_interval","value":-1}`, http.StatusBadRequest},  // 负数拒绝
 		{`{"action":"set_autosave_interval","value":3.5}`, http.StatusBadRequest}, // 必须整数
 		{`{"action":"set_autosave_interval","value":86401}`, http.StatusBadRequest},
-		{`{"action":"set_lootbox_ttl","value":-1}`, http.StatusBadRequest},   // 负数拒绝
+		{`{"action":"set_lootbox_ttl","value":-1}`, http.StatusBadRequest},  // 负数拒绝
 		{`{"action":"set_lootbox_ttl","value":3.5}`, http.StatusBadRequest}, // 必须整数
 		{`{"action":"set_lootbox_ttl","value":86401}`, http.StatusBadRequest},
 		{`{"action":"custom_probe","msgId":0,"subType":1}`, http.StatusBadRequest},
@@ -199,7 +199,7 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 
 // TestGMFlowAutosaveInterval 数据存盘周期是进程级共享原子值：假会话
 // 循环执行与 main.go processGMCommand set_autosave_interval 分支相同的
-//写动作，验证 HTTP → 校验 → 会话通道 → setAutosaveInterval 的完整链路。
+// 写动作，验证 HTTP → 校验 → 会话通道 → setAutosaveInterval 的完整链路。
 func TestGMFlowAutosaveInterval(t *testing.T) {
 	previous := autosaveInterval()
 	t.Cleanup(func() { setAutosaveInterval(previous) })

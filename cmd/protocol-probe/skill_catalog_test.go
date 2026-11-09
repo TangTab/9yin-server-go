@@ -1,9 +1,13 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/local/9yin-go-server/internal/skillscript"
 )
 
 func hasCompiledEffect(definition combatSkillDefinition, kind skillEffectKind) bool {
@@ -196,5 +200,243 @@ func TestSkillBuffAllocatorUsesNegotiatedDynamicSlots(t *testing.T) {
 		configID: "overflow", staticData: 60000, lifetime: time.Minute,
 	}, now); ok {
 		t.Fatal("allocator accepted a 15th dynamic Buff beyond BufferInfo24")
+	}
+}
+
+// loadEffectsDataHost 用给定 effects_data.lua 内容装载技能脚本宿主并注入
+// skill_catalog 的全局；目录缓存随装载/清理重置，避免跨测试残留。
+func loadEffectsDataHost(t *testing.T, effectsDataSrc string) {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "effects_data.lua"), []byte(effectsDataSrc), 0644); err != nil {
+		t.Fatal(err)
+	}
+	host := skillscript.New(dir, nil)
+	if _, err := host.Load(); err != nil {
+		t.Fatalf("load effects_data host: %v", err)
+	}
+	previous := skillScripts
+	skillScripts = host
+	installedCombatSkillCatalog.resetCache()
+	t.Cleanup(func() {
+		skillScripts = previous
+		installedCombatSkillCatalog.resetCache()
+	})
+}
+
+func effectsByKind(definition combatSkillDefinition, kind skillEffectKind) []combatSkillEffect {
+	var out []combatSkillEffect
+	for _, effect := range definition.effects {
+		if effect.kind == kind {
+			out = append(out, effect)
+		}
+	}
+	return out
+}
+
+// effects_data 层：self_buffs/target_effects 整组并入编译（优先级：
+// 手勘覆盖 > effects_data > INI 兜底）。
+func TestEffectsDataBuffCompilation(t *testing.T) {
+	loadEffectsDataHost(t, `local E = {}
+E["CS_yhwq_hsqs01"] = {
+    self_buffs = { { config_id = "buf_probe_a", static_data = 4242, level = 2, life_ms = 5000 } },
+    target_effects = { { config_id = "buf_probe_t", static_data = 4343, level = 1, life_ms = 3000, control = true } },
+    by_level = { [2] = { self_life_ms = 99000 } },
+}
+E["CS_yhwq_hsqs03"] = {
+    damage = { amount = 100, waves = 1 },
+}
+return E
+`)
+	// 自增益 + 目标控制各一条，租约按条目值。
+	definition, ok := installedCombatSkillCatalog.definition("CS_yhwq_hsqs01", 1)
+	if !ok {
+		t.Fatal("CS_yhwq_hsqs01 should compile")
+	}
+	selfs := effectsByKind(definition, skillEffectPlayerBuff)
+	if len(selfs) != 1 || selfs[0].buff.configID != "buf_probe_a" ||
+		selfs[0].buff.staticData != 4242 || selfs[0].buff.level != 2 ||
+		selfs[0].buff.lifetime != 5*time.Second || selfs[0].buff.preferredSlot != 0 {
+		t.Fatalf("self_buffs = %+v", selfs)
+	}
+	targets := effectsByKind(definition, skillEffectTargetControl)
+	if len(targets) != 1 || targets[0].buff.configID != "buf_probe_t" ||
+		targets[0].buff.lifetime != 3*time.Second {
+		t.Fatalf("target_effects = %+v", targets)
+	}
+
+	// by_level[2] 的 self_life_ms 逐级覆盖租约。
+	level2, ok := installedCombatSkillCatalog.definition("CS_yhwq_hsqs01", 2)
+	if !ok {
+		t.Skip("CS_yhwq_hsqs01 无 2 级编译（maxLevel=11 应可编译）")
+	}
+	selfs2 := effectsByKind(level2, skillEffectPlayerBuff)
+	if len(selfs2) != 1 || selfs2[0].buff.lifetime != 99*time.Second {
+		t.Fatalf("by_level lease override = %+v", selfs2)
+	}
+
+	// 条目无 buff 字段：整组取代（INI exact_buff 不再附加——hsqs03 原有
+	// buf_CS_yhwq_hsqs03 的 INI 兜底被 damage-only 条目取代）。
+	none, ok := installedCombatSkillCatalog.definition("CS_yhwq_hsqs03", 1)
+	if !ok {
+		t.Fatal("CS_yhwq_hsqs03 should compile")
+	}
+	if got := len(effectsByKind(none, skillEffectPlayerBuff)) + len(effectsByKind(none, skillEffectTargetControl)); got != 0 {
+		t.Fatalf("damage-only 条目必须整组取代 INI 兜底 buff，实际携带 %d 条", got)
+	}
+}
+
+// 钉死技能不受 effects_data 层影响：hsqs05 的槽位/红霸体覆盖逐字段保持。
+func TestPinnedSkillUnaffectedByEffectsData(t *testing.T) {
+	var pinnedWithout, pinnedWith combatSkillDefinition
+	var ok bool
+	func() {
+		loadEffectsDataHost(t, `local E = {}
+E["CS_yhwq_hsqs05"] = { self_buffs = { { config_id = "buf_impostor", static_data = 1, life_ms = 60000 } } }
+return E
+`)
+		pinnedWith, ok = installedCombatSkillCatalog.definition("CS_yhwq_hsqs05", 1)
+		if !ok {
+			t.Fatal("CS_yhwq_hsqs05 should compile")
+		}
+	}()
+	skillScripts = nil
+	installedCombatSkillCatalog.resetCache()
+	pinnedWithout, ok = installedCombatSkillCatalog.definition("CS_yhwq_hsqs05", 1)
+	if !ok {
+		t.Fatal("CS_yhwq_hsqs05 should compile without host")
+	}
+	if len(pinnedWith.effects) != len(pinnedWithout.effects) {
+		t.Fatalf("pinned skill effects changed: with=%d without=%d", len(pinnedWith.effects), len(pinnedWithout.effects))
+	}
+	for i := range pinnedWith.effects {
+		a, b := pinnedWith.effects[i], pinnedWithout.effects[i]
+		if a.kind != b.kind || a.amount != b.amount || a.buff != b.buff || len(a.buffVariants) != len(b.buffVariants) {
+			t.Fatalf("pinned effect[%d] changed: %+v vs %+v", i, a, b)
+		}
+		for v := range a.buffVariants {
+			if a.buffVariants[v] != b.buffVariants[v] {
+				t.Fatalf("pinned effect[%d] variant[%d] changed", i, v)
+			}
+		}
+	}
+	for _, effect := range pinnedWith.effects {
+		if effect.buff.configID == "buf_impostor" {
+			t.Fatal("effects_data must not inject buffs into pinned skills")
+		}
+	}
+}
+
+// 回退链：宿主禁用时按 INI exact_buff 编译（与接入前行为一致）。
+func TestEffectsDataFallbackToINI(t *testing.T) {
+	skillScripts = nil
+	installedCombatSkillCatalog.resetCache()
+	t.Cleanup(func() { installedCombatSkillCatalog.resetCache() })
+	// CS_yhwq_hsqs02 未被钉死：INI exact_buff（buf_CS_yhwq_hsqs02 家族）
+	// 决定其 buff 效果的有无——这里只需断言编译成功且不 panic，效果
+	// 数与 INI 数据一致（有则为单条，无则为零）。
+	definition, ok := installedCombatSkillCatalog.definition("CS_yhwq_hsqs02", 1)
+	if !ok {
+		t.Fatal("CS_yhwq_hsqs02 should compile")
+	}
+	total := len(effectsByKind(definition, skillEffectPlayerBuff)) + len(effectsByKind(definition, skillEffectTargetControl))
+	if total > 1 {
+		t.Fatalf("INI 兜底至多单条 buff，实际 %d 条", total)
+	}
+}
+
+// 热重载换代：effects_data 快照变化 + resetCache 后重编译生效。
+func TestEffectsDataHotReloadRecompiles(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "effects_data.lua"), []byte(`local E = {}
+E["CS_yhwq_hsqs01"] = { self_buffs = { { config_id = "buf_probe_a", static_data = 4242, life_ms = 5000 } } }
+return E
+`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	host := skillscript.New(dir, nil)
+	if _, err := host.Load(); err != nil {
+		t.Fatal(err)
+	}
+	previous := skillScripts
+	skillScripts = host
+	installedCombatSkillCatalog.resetCache()
+	t.Cleanup(func() {
+		skillScripts = previous
+		installedCombatSkillCatalog.resetCache()
+	})
+
+	definition, _ := installedCombatSkillCatalog.definition("CS_yhwq_hsqs01", 1)
+	if selfs := effectsByKind(definition, skillEffectPlayerBuff); len(selfs) != 1 || selfs[0].buff.lifetime != 5*time.Second {
+		t.Fatalf("before reload = %+v", selfs)
+	}
+	// 改表 → 宿主重载 → 清缓存（GM lua_reload 链路）→ 重编译取新租约。
+	if err := os.WriteFile(filepath.Join(dir, "effects_data.lua"), []byte(`local E = {}
+E["CS_yhwq_hsqs01"] = { self_buffs = { { config_id = "buf_probe_a", static_data = 4242, life_ms = 99000 } } }
+return E
+`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := host.Reload(); err != nil {
+		t.Fatal(err)
+	}
+	installedCombatSkillCatalog.resetCache()
+	reloaded, _ := installedCombatSkillCatalog.definition("CS_yhwq_hsqs01", 1)
+	if selfs := effectsByKind(reloaded, skillEffectPlayerBuff); len(selfs) != 1 || selfs[0].buff.lifetime != 99*time.Second {
+		t.Fatalf("after reload = %+v, want 99s lease", selfs)
+	}
+}
+
+// 真实 effects_data 冒烟：仓内 scripts/module/skill 快照与目录编译一致
+// （可编译的候选技逐个比对 buff 组的条数/类型/staticData/租约）。
+func TestRealEffectsDataCatalogSmoke(t *testing.T) {
+	host := skillscript.New(filepath.Join("..", "..", "scripts", "module", "skill"), nil)
+	if _, err := host.Load(); err != nil {
+		t.Fatalf("load real skill scripts: %v", err)
+	}
+	previous := skillScripts
+	skillScripts = host
+	installedCombatSkillCatalog.resetCache()
+	t.Cleanup(func() {
+		skillScripts = previous
+		installedCombatSkillCatalog.resetCache()
+	})
+
+	carriers := []string{"CS_3times", "CS_base_pgd04", "CS_by_gxcj02", "CS_wd_tjq01", "CS_by_wgl06"}
+	compiled := 0
+	for _, id := range carriers {
+		entry := host.EffectData(id)
+		if entry == nil {
+			t.Fatalf("%s missing in real effects_data", id)
+		}
+		definition, ok := installedCombatSkillCatalog.definition(id, 1)
+		if !ok {
+			continue // 目录跳过的技术（缺动作等）不计
+		}
+		compiled++
+		wantSelf, wantTarget := len(entry.SelfBuffs), len(entry.TargetEffects)
+		gotSelf := len(effectsByKind(definition, skillEffectPlayerBuff))
+		gotTarget := len(effectsByKind(definition, skillEffectTargetControl))
+		if _, pinned := verifiedSkillEffectOverlays[id]; pinned {
+			continue // 钉死技走覆盖路径，不与 effects_data 对数
+		}
+		if gotSelf != wantSelf || gotTarget != wantTarget {
+			t.Fatalf("%s buff 组不符：self %d/%d target %d/%d", id, gotSelf, wantSelf, gotTarget, wantTarget)
+		}
+		for i, spec := range entry.SelfBuffs {
+			if buff := effectsByKind(definition, skillEffectPlayerBuff)[i].buff; buff.staticData != uint32(spec.StaticData) ||
+				buff.lifetime != time.Duration(spec.LifeMS)*time.Millisecond {
+				t.Fatalf("%s self_buff[%d] = %+v, want spec %+v", id, i, buff, spec)
+			}
+		}
+		for i, spec := range entry.TargetEffects {
+			if buff := effectsByKind(definition, skillEffectTargetControl)[i].buff; buff.staticData != uint32(spec.StaticData) ||
+				buff.lifetime != time.Duration(spec.LifeMS)*time.Millisecond {
+				t.Fatalf("%s target_effect[%d] = %+v, want spec %+v", id, i, buff, spec)
+			}
+		}
+	}
+	if compiled == 0 {
+		t.Fatal("no carrier compiled; smoke tested nothing")
 	}
 }

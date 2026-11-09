@@ -279,10 +279,10 @@ func (r *sceneRun) flushRefreshFrames(out *refreshTickOutcome) {
 
 // recordNPCDeathLocked 在击杀点登记尸体记录，并按官服双形态掉落方言
 // 分叉：AIEditorPackID 登记了死亡生箱事件 → 独立宝箱实体
-//（spawnBoxNPCEntityLocked）；否则 DropID roll 非空 → 掉落挂尸体
-//（attachLootToCorpseLocked，CanPick/PickMember 驱动客户端冒光）；
+// （spawnBoxNPCEntityLocked）；否则 DropID roll 非空 → 掉落挂尸体
+// （attachLootToCorpseLocked，CanPick/PickMember 驱动客户端冒光）；
 // roll 为空 = 纯尸体（corpse TTL 清除）。调用方必须已持有 r.mu
-//（apply* 伤害路径）。
+// （apply* 伤害路径）。
 func (r *sceneRun) recordNPCDeathLocked(id, ownerID uint32, brain sim.Brain, now time.Time) {
 	// 九阴志事件点：击杀是全服阶段的有机事件源（Java SceneFlow 战斗
 	// 管线 onKill 同款）。只动门控状态不广播——gate.mu 不再取场景锁，

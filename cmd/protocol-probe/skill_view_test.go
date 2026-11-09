@@ -263,8 +263,8 @@ func viewPropFloat(properties []serverViewProperty, index uint16) (float32, bool
 // personalCD=6s 互证。
 func TestSkillRowDataSupplementMatchesInstalledTables(t *testing.T) {
 	anchors := []struct {
-		id                           string
-		varPropNo, mp, sp, cdMs      int32
+		id                              string
+		varPropNo, mp, sp, cdMs         int32
 		targetPara2, hitPara1, hitPara2 float32
 	}{
 		{"CS_yhwq_hsqs01", 252701, 21, 0, 2000, 20, 0, 0},

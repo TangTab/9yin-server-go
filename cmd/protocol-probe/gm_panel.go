@@ -195,7 +195,7 @@ func (session *gmSession) setLocation(location role.Location, action string) {
 }
 
 // serveGM 起内嵌面板。manageBoundAddr 是本进程 internal API 的监听地址
-//（未启用则空串）：管理页登记册据此给对应卡片打「本面板所连」标记，
+// （未启用则空串）：管理页登记册据此给对应卡片打「本面板所连」标记，
 // 并让内嵌面板同样能探活其它已登记的 Go 服。
 func serveGM(listen string, hub *gmHub, manageBoundAddr string) {
 	mux := newGMMux(hub)
@@ -227,6 +227,19 @@ func newGMMux(hub *gmHub) *http.ServeMux {
 	mux.HandleFunc("/api/cards", hub.cardsHandler)
 	mux.HandleFunc("/api/hair-cards", hub.hairCardsHandler)
 	mux.HandleFunc("/api/weather", gmWeatherCatalogHandler)
+	// 补齐 console 页启动即拉取的目录/状态端点（gm_catalog_dirs.go）：
+	// 此前未注册时前端 404，各板块显示「加载失败」。
+	mux.HandleFunc("/api/clones", hub.clonesHandler)
+	mux.HandleFunc("/api/scenes", hub.scenesHandler)
+	mux.HandleFunc("/api/giftboxes", hub.giftBoxesHandler)
+	mux.HandleFunc("/api/titles", hub.titlesHandler)
+	mux.HandleFunc("/api/mounts", hub.mountsHandler)
+	mux.HandleFunc("/api/idle-stances", hub.idleStancesHandler)
+	mux.HandleFunc("/api/recast-affixes", hub.recastAffixesHandler)
+	mux.HandleFunc("/api/combat-dummy/taolus", hub.combatDummyTaolusHandler)
+	mux.HandleFunc("/api/repute/status", hub.reputeStatusHandler)
+	mux.HandleFunc("/api/origin/status", hub.originStatusHandler)
+	mux.HandleFunc("/api/minimal-login", hub.minimalLoginHandler)
 	mux.HandleFunc("/api/sessions/", func(writer http.ResponseWriter, request *http.Request) {
 		hub.serveSessionCommand("/api/sessions/", "panel", writer, request)
 	})

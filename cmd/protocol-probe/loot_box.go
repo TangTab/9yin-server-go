@@ -19,6 +19,7 @@ import (
 //     内容懒加载——死亡时零掉落下发；
 //   - 宝箱怪（AIEditorPackID 死亡生箱事件）与 GM 世界宝箱 = 独立实体
 //     （spawnChestEntityAtLocked，BoxNpc/BossBox 模板，0x0D 物化）。
+//
 // 掉落窗协议两形态共用（View 80 方言，考据自客户端 lua）：
 //   - 点击（0x07 FuncID=0）→ 服务端建 View 80（VIEWPORT_DROP_BOX，
 //     capacity 16，视图属性 DropType=0），行属性 ConfigID/Amount/
@@ -27,14 +28,14 @@ import (
 //   - C2S 380=拾取槽位（int）、382=关箱；1008（拾银）/381（任务掉落）
 //     本批无对应行，不处理。
 const (
-	viewportDropBox              uint16 = 80   // share/view_define.lua VIEWPORT_DROP_BOX
-	dropBoxCapacity              uint16 = 16   // form_droppick.lua MAX_DROP_BOX_CAPACITY
-	propDropType                 uint16 = 2224 // DropType Int32（视图域）
-	propCanPick                  uint16 = 76   // CanPick Byte（场景对象域，尸体冒光开关）
-	propPickMember               uint16 = 1592 // PickMember WideString（拾取归属名单，逗号分隔玩家名）
-	clientCustomPickupDropItem   int32  = 380  // CLIENT_CUSTOMMSG_PICKUP_DROPITEM
-	clientCustomCloseDropBox     int32  = 382  // CLIENT_CUSTOMMSG_CLOSE_DROPBOX
-	lootBoxTemplateConfigID             = "stormbox_10"
+	viewportDropBox            uint16 = 80   // share/view_define.lua VIEWPORT_DROP_BOX
+	dropBoxCapacity            uint16 = 16   // form_droppick.lua MAX_DROP_BOX_CAPACITY
+	propDropType               uint16 = 2224 // DropType Int32（视图域）
+	propCanPick                uint16 = 76   // CanPick Byte（场景对象域，尸体冒光开关）
+	propPickMember             uint16 = 1592 // PickMember WideString（拾取归属名单，逗号分隔玩家名）
+	clientCustomPickupDropItem int32  = 380  // CLIENT_CUSTOMMSG_PICKUP_DROPITEM
+	clientCustomCloseDropBox   int32  = 382  // CLIENT_CUSTOMMSG_CLOSE_DROPBOX
+	lootBoxTemplateConfigID           = "stormbox_10"
 )
 
 // lootBoxRuntime 是一份在场掉落的共享状态（挂 sceneRun，多连接共见；
@@ -177,7 +178,7 @@ func (r *sceneRun) attachLootToCorpseLocked(deadID, ownerID uint32, now time.Tim
 }
 
 // spawnBoxNPCEntityLocked 宝箱怪路径：击杀点尸体位置生成独立宝箱实体
-//（AIEditorPackID 死亡生箱事件指定的 BoxNpc/BossBox 模板），掉落内容
+// （AIEditorPackID 死亡生箱事件指定的 BoxNpc/BossBox 模板），掉落内容
 // 仍按怪自己的 DropID roll。调用方必须已持有 r.mu。
 func (r *sceneRun) spawnBoxNPCEntityLocked(deadID uint32, boxConfigID string, now time.Time) {
 	index := forkNPCIndex(deadID) - 2
@@ -237,7 +238,7 @@ func (r *sceneRun) spawnChestEntityAtLocked(transform worldcore.Transform, conte
 }
 
 // chestEntityTables 是 BoxNpc/BossBox 模板的两张权威表
-//（clonenpc/funnpc/boxnpc.txt 的 BossBox* 与 worldnpc/funnpc/boxnpc.txt
+// （clonenpc/funnpc/boxnpc.txt 的 BossBox* 与 worldnpc/funnpc/boxnpc.txt
 // 的野外 BoxNpc*），Once 装载缓存。
 var (
 	chestEntityTablesOnce sync.Once

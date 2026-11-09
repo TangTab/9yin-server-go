@@ -433,7 +433,7 @@ func TestLootBoxExpiresAfterTTL(t *testing.T) {
 }
 
 // TestLootBoxZeroTTLKeepsBox 0=永不过期：尸体与掉落跨超长时刻仍在场
-//（只能被拾空移除），重生全程被推迟。
+// （只能被拾空移除），重生全程被推迟。
 func TestLootBoxZeroTTLKeepsBox(t *testing.T) {
 	pinRefreshParams(t, 0, 0)
 	pinLootBoxTTL(t, 0)
