@@ -40,20 +40,14 @@ func npcDetail0x28Frame(objectID, ownerID uint32) []byte {
 }
 
 // writeNPCDetailProbeFrame 诊断路径：materialize NPC 后发模板 0x28。
-// NINEYIN_NPC_0X28_PROBE=1（替换 obj/own/serial）｜=2（**原样重发官服帧，
-// 零字节修改**——消元实验：原样被拒=0x28 需特定上下文/前置状态；原样
-// 通过=替换破坏校验，再二分具体字段。06:45 会话实证替换版被拒
-// （size/property error ×123 帧）。
+// **仅 NINEYIN_NPC_0X28_PROBE=2（原样重发官服帧，零字节修改）有效**——
+// =1 替换版已移除（06:45/06:47/06:52 三轮真机实证被拒：size/property
+// error ×123 帧/轮，拒收帧轰炸污染客户端对象状态）。
 func writeNPCDetailProbeFrame(conn sceneMessageConnection, objectID, ownerID uint32, remote string) {
-	mode := strings.TrimSpace(os.Getenv("NINEYIN_NPC_0X28_PROBE"))
-	if mode == "" {
+	if strings.TrimSpace(os.Getenv("NINEYIN_NPC_0X28_PROBE")) != "2" {
 		return
 	}
-	frame := npcDetail0x28Template
-	if mode != "2" {
-		frame = npcDetail0x28Frame(objectID, ownerID)
-	}
-	if err := conn.WriteFrame(frame); err != nil {
+	if err := conn.WriteFrame(npcDetail0x28Template); err != nil {
 		log.Printf("%s: npc 0x28 probe frame: %v", remote, err)
 	}
 }
