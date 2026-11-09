@@ -607,13 +607,14 @@ type skillDamageOutcome struct {
 }
 
 // applySelectedSkillDamage 是 applySkillDamageToNPC 的选中目标快捷方式
-// （历史测试路径保留：伤害直落选中战斗 NPC）。
+// （历史测试路径保留：伤害直落选中战斗 NPC；无玩家上下文，跳过内功
+// on_attack 分发）。
 func (s *sceneLifecycle) applySelectedSkillDamage(amount int32, now time.Time) (skillDamageOutcome, error) {
 	id, ownerID, ok := s.selectedCombatTarget()
 	if !ok {
 		return skillDamageOutcome{}, nil
 	}
-	return s.applySkillDamageToNPC(id, ownerID, amount, now)
+	return s.applySkillDamageToNPC(id, ownerID, amount, nil, now)
 }
 
 type areaSkillDamageResult struct {
@@ -963,8 +964,9 @@ func (s *sceneLifecycle) queryShapedSkillTargets(center worldcore.Transform, rad
 // applySkillDamageToNPC 对指定战斗 NPC 落一击伤害（Java FightState.
 // applyDamage + applySelectedSkillDamage 合并的参数化形态）：目标失效/
 // 已死/未命中 ApplyDamage 拒绝时返回零值 outcome（frame=nil，发帧阶段
-// 整段跳过）。累计威胁进 0x13，死亡清仇恨排重生。
-func (s *sceneLifecycle) applySkillDamageToNPC(id, ownerID uint32, amount int32, now time.Time) (skillDamageOutcome, error) {
+// 整段跳过）。累计威胁进 0x13，死亡清仇恨排重生。player 非空时先走
+// 内功特效 on_attack 分发（实中目标才到这；extra_damage 并入落血值）。
+func (s *sceneLifecycle) applySkillDamageToNPC(id, ownerID uint32, amount int32, player *playerActor, now time.Time) (skillDamageOutcome, error) {
 	s.run.mu.Lock()
 	defer s.run.mu.Unlock()
 	entityID := worldcore.EntityID(id)
@@ -973,7 +975,10 @@ func (s *sceneLifecycle) applySkillDamageToNPC(id, ownerID uint32, amount int32,
 	if !hasVitals || !exists || meta.ownerID != ownerID || meta.interaction != npcInteractionCombat || vitals.HP <= 0 {
 		return skillDamageOutcome{}, nil
 	}
-	if !vitals.ApplyDamage(amount) {
+	if player != nil {
+		amount = player.dispatchNeiGongAttack(id, vitals.HP, vitals.MaxHP, amount, now)
+	}
+	if amount <= 0 || !vitals.ApplyDamage(amount) {
 		return skillDamageOutcome{}, nil
 	}
 	s.run.combat.WriteVitals(entityID, vitals)
@@ -1263,7 +1268,7 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 				if roll.damage <= 0 {
 					continue // 本击未命中：该目标本段不发帧
 				}
-				outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, now)
+				outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, player, now)
 				if err != nil {
 					log.Printf("%s: multi-hit stage %d apply id=%d: %v", remote, tick, ref.id, err)
 					continue
@@ -1532,7 +1537,7 @@ func launchSkillDamagePhase(link sceneMessageConnection, player *playerActor, wo
 			if roll.damage <= 0 {
 				continue
 			}
-			outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, now)
+			outcome, err := world.applySkillDamageToNPC(ref.id, ref.ownerID, roll.damage, player, now)
 			if err != nil {
 				log.Printf("%s: settle damage %s: %v", remote, definition.id, err)
 				return

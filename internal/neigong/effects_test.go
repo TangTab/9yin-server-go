@@ -109,7 +109,7 @@ func TestRealScriptsHookSmoke(t *testing.T) {
 					BookLevel: 30, BookMaxLevel: 36, StoryStage: 5,
 					NowMS: 1_000_000, RProc: rproc,
 					Damage: 500, Incoming: 300,
-					Self: SelfStats{HP: 800, MaxHP: 1000, MP: 120, MaxMP: 200, Attack: 66},
+					Self:  SelfStats{HP: 800, MaxHP: 1000, MP: 120, MaxMP: 200, Attack: 66},
 					State: map[string]any{"until_at": int64(1_500_000), "layers": int64(2), "count": int64(1)},
 				}
 				if event.target {
@@ -371,7 +371,7 @@ function M.on_attack(ctx) return { heal = 7 } end
 return M
 `)
 	e := New(dir, nil)
-	e.timeout = 150 * time.Millisecond
+	e.SetTimeout(150 * time.Millisecond)
 	if _, err := e.Load(); err != nil {
 		t.Fatal(err)
 	}

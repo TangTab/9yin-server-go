@@ -15,9 +15,12 @@ import (
 func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 	entry := make([]byte, 15, 96)
 	entry[0] = 0x0B
-	binary.LittleEndian.PutUint32(entry[1:], playerObjectID)
-	binary.LittleEndian.PutUint32(entry[5:], playerOwnerID)
-	binary.LittleEndian.PutUint32(entry[9:], 1)
+	// fork 版布局（抓包实证）：[1:5] 场景对象ID（常量 0x1F6A3），
+	// [5:9]/[9:13] 即玩家的线缆 objectID/ownerID，与玩家 0x0D 档案、
+	// 0x1F/0x10/0x11 严格同源——三处必须一起改，否则客户端对象表断裂。
+	binary.LittleEndian.PutUint32(entry[1:], 0x1F6A3)
+	binary.LittleEndian.PutUint32(entry[5:], playerObjectID)
+	binary.LittleEndian.PutUint32(entry[9:], playerOwnerID)
 	binary.LittleEndian.PutUint16(entry[13:], 3)
 	entry = appendStringProperty(entry, 7, scene.Config)
 	entry = appendStringProperty(entry, 8, scene.Resource)

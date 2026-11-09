@@ -116,7 +116,7 @@ func TestPassiveNPCRetaliatesWhenHit(t *testing.T) {
 	// 首 tick 登记 s.wireID（受击锁定攻击者要用），被动怪原地待命。
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now)
 	// 玩家命中 NPC 一次（applySkillDamageToNPC 真实入口；伤害 1 进威胁表）。
-	if _, err := lifecycle.applySkillDamageToNPC(forkNPCID(102), 1, 1, now); err != nil {
+	if _, err := lifecycle.applySkillDamageToNPC(forkNPCID(102), 1, 1, nil, now); err != nil {
 		t.Fatal(err)
 	}
 	lifecycle.mu.Lock()

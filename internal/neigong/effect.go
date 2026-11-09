@@ -1,25 +1,22 @@
 package neigong
 
 import (
-	"fmt"
-	"math"
-	"strconv"
-	"strings"
-
 	"github.com/iceisfun/golua/v2/vm"
+	"github.com/local/9yin-go-server/internal/modulevm"
 )
 
 // Effect 是钩子返回指令白名单的 Go 形态。nil 字段/零值表示该指令未下发。
 // 白名单外的键与畸形值在 convertEffect 处 WARN 丢弃，不打断战斗链（对齐
 // 参考服 NeiGongEffects 契约；形态按 155 本仓内脚本实测勘定）。
 type Effect struct {
-	ExtraDamage *ExtraDamage // extra_damage：并入当次落血的附伤
-	ReducePct   float64      // reduce_pct：承伤折减系数 0..1（0=未下发）
-	Shield      *Shield      // shield：护盾（FIFO 吸收，到期即弃）
-	Heal        int64        // heal：回复气血
-	MPRestore   int64        // mp_restore：回复内力
-	Reflect     *Reflect     // reflect：反打（数值或 {amount,kind} 双形态）
-	ParryReduce *ParryReduce // parry_reduce：格挡减伤拆分（解析占位）
+	ExtraDamage *ExtraDamage   // extra_damage：并入当次落血的附伤
+	ReducePct   float64        // reduce_pct：承伤折减系数 0..1（0=未下发）
+	Shield      *Shield        // shield：护盾（FIFO 吸收，到期即弃）
+	DodgeAdd    *DodgeAdd      // dodge_add：闪避加成窗（本仓扩展，料敌先机）
+	Heal        int64          // heal：回复气血
+	MPRestore   int64          // mp_restore：回复内力
+	Reflect     *Reflect       // reflect：反打（数值或 {amount,kind} 双形态）
+	ParryReduce *ParryReduce   // parry_reduce：格挡减伤拆分（解析占位）
 	State       map[string]any // state：扁平状态回写，下次经 Ctx.State 传回
 }
 
@@ -27,6 +24,13 @@ type Effect struct {
 type ExtraDamage struct {
 	Amount int64
 	Kind   string
+}
+
+// DodgeAdd 是闪避加成窗指令（本仓扩展）：期间受击闪避 +Amount 个百分点，
+// 持续 LifeMS。表达参考服脚本中的 TODO 机制"料敌先机"（buf_ng_yh_001）。
+type DodgeAdd struct {
+	Amount int64
+	LifeMS int64
 }
 
 // Shield 是护盾指令。
@@ -60,7 +64,7 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 		}
 		key = nextKey
 		if !nextKey.IsString() {
-			e.warnOnce(buffID+":key", "%s: %s 返回非字符串键 %s，已丢弃", buffID, event, valueString(nextKey))
+			e.host.WarnOnce(buffID+":key", "neigong: %s: %s 返回非字符串键 %s，已丢弃", buffID, event, modulevm.ValueString(nextKey))
 			continue
 		}
 		name := nextKey.AsString()
@@ -71,11 +75,11 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 			}
 		case "reflect":
 			if value.IsNumber() {
-				if amount, ok := luaInt(value); ok && amount > 0 {
+				if amount, ok := modulevm.LuaInt(value); ok && amount > 0 {
 					effect.Reflect, set = &Reflect{Amount: amount}, true
 					continue
 				}
-				e.warnOnce(buffID+":"+name, "%s: %s reflect 数值 %s 非正/畸形，已丢弃", buffID, event, valueString(value))
+				e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s reflect 数值 %s 非正/畸形，已丢弃", buffID, event, modulevm.ValueString(value))
 				continue
 			}
 			if amount, kind, ok := e.convertAmountKind(buffID, name, value); ok {
@@ -88,15 +92,19 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 					continue
 				}
 			}
-			e.warnOnce(buffID+":"+name, "%s: %s reduce_pct %s 越界 [0,1]，已丢弃", buffID, event, valueString(value))
+			e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s reduce_pct %s 越界 [0,1]，已丢弃", buffID, event, modulevm.ValueString(value))
 		case "shield":
 			if s, ok := e.convertShield(buffID, event, value); ok {
 				effect.Shield, set = s, true
 			}
+		case "dodge_add":
+			if d, ok := e.convertDodgeAdd(buffID, event, value); ok {
+				effect.DodgeAdd, set = d, true
+			}
 		case "heal", "mp_restore":
-			amount, ok := luaInt(value)
+			amount, ok := modulevm.LuaInt(value)
 			if !ok || amount <= 0 {
-				e.warnOnce(buffID+":"+name, "%s: %s %s %s 非正/畸形，已丢弃", buffID, event, name, valueString(value))
+				e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s %s %s 非正/畸形，已丢弃", buffID, event, name, modulevm.ValueString(value))
 				continue
 			}
 			if name == "heal" {
@@ -114,10 +122,10 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 				effect.State = e.convertState(buffID, event, value.AsTable())
 				set = true
 			} else {
-				e.warnOnce(buffID+":"+name, "%s: %s state %s 非表，已丢弃", buffID, event, valueString(value))
+				e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s state %s 非表，已丢弃", buffID, event, modulevm.ValueString(value))
 			}
 		default:
-			e.warnOnce(buffID+":"+name, "%s: %s 返回白名单外指令 %s=%s，已丢弃", buffID, event, name, valueString(value))
+			e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s 返回白名单外指令 %s=%s，已丢弃", buffID, event, name, modulevm.ValueString(value))
 		}
 	}
 	if !set {
@@ -133,13 +141,13 @@ func (e *Effects) convertAmountKind(buffID, name string, value vm.Value) (int64,
 	if !ok {
 		return 0, "", false
 	}
-	amountValue := tableGet(table, "amount")
-	amount, ok := luaInt(amountValue)
+	amountValue := modulevm.Field(table, "amount")
+	amount, ok := modulevm.LuaInt(amountValue)
 	if !ok || amount <= 0 {
-		e.warnOnce(buffID+":"+name, "%s: %s.amount %s 非正/畸形，整条丢弃", buffID, name, valueString(amountValue))
+		e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s.amount %s 非正/畸形，整条丢弃", buffID, name, modulevm.ValueString(amountValue))
 		return 0, "", false
 	}
-	return amount, tableGet(table, "kind").AsString(), true
+	return amount, modulevm.Field(table, "kind").AsString(), true
 }
 
 func (e *Effects) convertShield(buffID, event string, value vm.Value) (*Shield, bool) {
@@ -147,14 +155,30 @@ func (e *Effects) convertShield(buffID, event string, value vm.Value) (*Shield, 
 	if !ok {
 		return nil, false
 	}
-	amount, amountOK := luaInt(tableGet(table, "amount"))
-	life, lifeOK := luaInt(tableGet(table, "life_ms"))
+	amount, amountOK := modulevm.LuaInt(modulevm.Field(table, "amount"))
+	life, lifeOK := modulevm.LuaInt(modulevm.Field(table, "life_ms"))
 	if !amountOK || amount <= 0 || !lifeOK || life <= 0 {
-		e.warnOnce(buffID+":shield", "%s: %s shield {amount=%s, life_ms=%s} 畸形，整条丢弃",
-			buffID, event, valueString(tableGet(table, "amount")), valueString(tableGet(table, "life_ms")))
+		e.host.WarnOnce(buffID+":shield", "neigong: %s: %s shield {amount=%s, life_ms=%s} 畸形，整条丢弃",
+			buffID, event, modulevm.ValueString(modulevm.Field(table, "amount")), modulevm.ValueString(modulevm.Field(table, "life_ms")))
 		return nil, false
 	}
 	return &Shield{Amount: amount, LifeMS: life}, true
+}
+
+// convertDodgeAdd 解析 dodge_add{amount, life_ms}（本仓扩展指令）。
+func (e *Effects) convertDodgeAdd(buffID, event string, value vm.Value) (*DodgeAdd, bool) {
+	table, ok := e.tableOf(buffID, "dodge_add", value)
+	if !ok {
+		return nil, false
+	}
+	amount, amountOK := modulevm.LuaInt(modulevm.Field(table, "amount"))
+	life, lifeOK := modulevm.LuaInt(modulevm.Field(table, "life_ms"))
+	if !amountOK || amount <= 0 || !lifeOK || life <= 0 {
+		e.host.WarnOnce(buffID+":dodge_add", "neigong: %s: %s dodge_add {amount=%s, life_ms=%s} 畸形，整条丢弃",
+			buffID, event, modulevm.ValueString(modulevm.Field(table, "amount")), modulevm.ValueString(modulevm.Field(table, "life_ms")))
+		return nil, false
+	}
+	return &DodgeAdd{Amount: amount, LifeMS: life}, true
 }
 
 func (e *Effects) convertParryReduce(buffID, event string, value vm.Value) (*ParryReduce, bool) {
@@ -162,11 +186,11 @@ func (e *Effects) convertParryReduce(buffID, event string, value vm.Value) (*Par
 	if !ok {
 		return nil, false
 	}
-	internal, internalOK := luaFloat(tableGet(table, "internal"))
-	external, externalOK := luaFloat(tableGet(table, "external"))
+	internal, internalOK := modulevm.LuaFloat(modulevm.Field(table, "internal"))
+	external, externalOK := modulevm.LuaFloat(modulevm.Field(table, "external"))
 	if !internalOK || !externalOK {
-		e.warnOnce(buffID+":parry_reduce", "%s: %s parry_reduce {internal=%s, external=%s} 畸形，整条丢弃",
-			buffID, event, valueString(tableGet(table, "internal")), valueString(tableGet(table, "external")))
+		e.host.WarnOnce(buffID+":parry_reduce", "neigong: %s: %s parry_reduce {internal=%s, external=%s} 畸形，整条丢弃",
+			buffID, event, modulevm.ValueString(modulevm.Field(table, "internal")), modulevm.ValueString(modulevm.Field(table, "external")))
 		return nil, false
 	}
 	return &ParryReduce{Internal: internal, External: external}, true
@@ -184,7 +208,7 @@ func (e *Effects) convertState(buffID, event string, table vm.LuaTable) map[stri
 		}
 		key = nextKey
 		if !nextKey.IsString() {
-			e.warnOnce(buffID+":state-key", "%s: %s state 非字符串键 %s，已丢弃", buffID, event, valueString(nextKey))
+			e.host.WarnOnce(buffID+":state-key", "neigong: %s: %s state 非字符串键 %s，已丢弃", buffID, event, modulevm.ValueString(nextKey))
 			continue
 		}
 		switch {
@@ -197,7 +221,7 @@ func (e *Effects) convertState(buffID, event string, table vm.LuaTable) map[stri
 		case value.IsBool():
 			out[nextKey.AsString()] = value.AsBool()
 		default:
-			e.warnOnce(buffID+":state:"+nextKey.AsString(), "%s: %s state[%s] 非标量（%s），已丢弃",
+			e.host.WarnOnce(buffID+":state:"+nextKey.AsString(), "neigong: %s: %s state[%s] 非标量（%s），已丢弃",
 				buffID, event, nextKey.AsString(), value.Type())
 		}
 	}
@@ -209,73 +233,6 @@ func (e *Effects) tableOf(buffID, name string, value vm.Value) (vm.LuaTable, boo
 	if value.IsTable() {
 		return value.AsTable(), true
 	}
-	e.warnOnce(buffID+":"+name, "%s: %s 非表（%s），整条丢弃", buffID, name, valueString(value))
+	e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s 非表（%s），整条丢弃", buffID, name, modulevm.ValueString(value))
 	return nil, false
-}
-
-// luaInt 把 Lua 数值安全转 int64（NaN/Inf 拒绝；浮点取最近整数）。
-func luaInt(v vm.Value) (int64, bool) {
-	switch {
-	case v.IsInt():
-		return v.AsInt(), true
-	case v.IsFloat():
-		f := v.AsFloat()
-		if math.IsNaN(f) || math.IsInf(f, 0) {
-			return 0, false
-		}
-		return int64(math.Round(f)), true
-	default:
-		return 0, false
-	}
-}
-
-// luaFloat 把 Lua 数值安全转 float64（NaN/Inf 拒绝）。
-func luaFloat(v vm.Value) (float64, bool) {
-	if !v.IsNumber() {
-		return 0, false
-	}
-	f := v.AsFloat()
-	if math.IsNaN(f) || math.IsInf(f, 0) {
-		return 0, false
-	}
-	return f, true
-}
-
-// valueString 把 Lua 值序列化为可读文本（仅用于 WARN 日志；表浅层展开）。
-func valueString(v vm.Value) string {
-	switch {
-	case v.IsNil():
-		return "nil"
-	case v.IsBool():
-		return strconv.FormatBool(v.AsBool())
-	case v.IsInt():
-		return strconv.FormatInt(v.AsInt(), 10)
-	case v.IsFloat():
-		return strconv.FormatFloat(v.AsFloat(), 'g', -1, 64)
-	case v.IsString():
-		return v.AsString()
-	case v.IsTable():
-		if table := v.AsTable(); table != nil {
-			var parts []string
-			count := 0
-			key := vm.Nil
-			for {
-				nextKey, value, err := table.Next(key)
-				if err != nil || nextKey.IsNil() {
-					break
-				}
-				if count >= 8 {
-					parts = append(parts, "...")
-					break
-				}
-				count++
-				parts = append(parts, valueString(nextKey)+"="+valueString(value))
-				key = nextKey
-			}
-			return "{" + strings.Join(parts, ", ") + "}"
-		}
-		return "table"
-	default:
-		return fmt.Sprintf("%s(%s)", v.Type(), v.String())
-	}
 }

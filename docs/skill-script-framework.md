@@ -254,29 +254,77 @@ item=2 `r_drop/r_proc`、neigong=1）。Lua 侧无回掷通道：不暴露 Java 
   每调用 Java 预掷 1 枚 `r_adjust`，掷骰序固定在 miss/crit/区间掷值之后——无钩子
   技能 RNG 序列零扰动）。CS_wd_tjq04.lua 的注释示例可参考。
 
-## Go 服务端接入状态（2026-11-06）
+## Go 服务端接入状态（2026-11-06；2026-11-09 扩至全部四类并接线战斗分发）
 
-本仓（9yin-go-server1）本期接入 **neigong 脚本层**（装载 + 目录 + 钩子调用桥），
-战斗分发（SkillCastHandler/NpcCombatAi 等价物）留待战斗二期：
+本仓（9yin-go-server1）已接入**全部四类模块脚本层**，其中 **neigong 已接线
+战斗分发**（`cmd/protocol-probe/neigong_dispatch.go`，参考服 NeiGongEffects
+的 Go 等价物）；item/skill/combat 三个域仍为装载 + 调用桥，消费方待接：
 
 - **脚本入仓**：参考服 `scripts/{combat,item,neigong,skill}` 四类拷贝至本仓
-  `scripts/module/` 下（combat/item/skill 备用未装载）；事件脚本迁至
-  `scripts/host/`（`-scripts` 默认改指该目录，见 scripts/README.md）。
-- **装载器**：`internal/neigong`（`neigong.Effects`）。与事件宿主
-  （`internal/luascript`，game.on/整机重建）分立：**独立 VM**、模块式装载
-  （捕获 `return M` 表）、`M.meta` 建目录（`Books/Book/ByBook`）、
-  **运行期坏脚本只禁用该本**（VM 不重建、指令预算按调用重置——
-  多人下一次坏调用最坏一次 ≤500ms 持锁停顿后即隔离）。
-- **调用桥**：`Hook(buffID, event, ctx) *Effect`（事件别名链
-  on_attack→on_hit / on_victim→on_be_hit / on_periodic→on_tick；返回白名单
-  同上节，reflect 兼容数值与 {amount,kind} 双形态）、
-  `Passive(buffID, ctx) map[string]float64`（扁平数值属性表）、
-  `Broken()`（禁用清单）。ctx 字段集同上节，另含脚本实测消费的
-  `controlled`；`on_attack` 必带 target、`on_victim`/`on_parry` 必带
-  attacker 的分发契约由调用方保证（buf_ng_nl_001 无保护读 `ctx.attacker.oid`）。
-- **接线**：`cmd/protocol-probe` 新增 `-neigong-scripts`（默认
-  `scripts/module/neigong`，空禁用）；启动日志 `内功特效脚本 ready count=155`；
-  GM `lua_reload` 连同内功目录一并重载并回报两个计数。
-- **测试**：`internal/neigong`（探针：白名单全形态/别名/state 回写/档位门/
-  单本禁用隔离/超时；真实目录冒烟：155 本 × 4 事件 × 双 r_proc 档全量调用
-  零禁用 + 坐忘功 passive/周期盾行为钉子）。
+  `scripts/module/` 下；事件脚本迁至 `scripts/host/`（`-scripts` 默认改指该
+  目录，见 scripts/README.md）。
+- **共享内核**：`internal/modulevm`——模块式装载（捕获 `return M` 表）、
+  **运行期坏脚本只禁用该模块**（VM 不重建、指令预算按调用重置——多人下
+  一次坏调用最坏一次 ≤500ms 持锁停顿后即隔离）、WarnOnce 防热路径刷屏、
+  `EachModule` 域校验回调（读 M.meta 建目录）。与事件宿主
+  （`internal/luascript`，game.on/整机重建）分立。
+- **四类域包**（均薄封装 modulevm）：
+  - `internal/neigong`（`Effects`）：`Hook(buffID, event, ctx) *Effect`
+    （别名链 on_attack→on_hit / on_victim→on_be_hit / on_periodic→on_tick；
+    返回白名单同上节，reflect 兼容双形态）、`Passive`（扁平数值属性表）、
+    `Books/Book/ByBook` 目录。ctx 另含脚本实测消费的 `controlled`；
+    `on_attack` 必带 target、`on_victim`/`on_parry` 必带 attacker 的分发
+    契约由调用方保证（buf_ng_nl_001 无保护读 `ctx.attacker.oid`）。
+  - `internal/itemuse`（`Catalog`）：`Use(itemID, ctx) *Effect` → `M.on_use`
+    （heal_hp/heal_mp/open_box/grant_items≤16/temp_stat/consume 缺省 true）；
+    `Items/Item` 目录。
+  - `internal/skillscript`（`Scripts`）：`Overlay(id, def)` → `M.compile`
+    增量覆盖（self_buff_lease_ms/self_buff_slot/red_armor/stance_cycle/
+    damage/self_buffs/target_effects）；`HitRatio(id, ctx)` → `M.on_hit`
+    （夹 [0,100]，nil=不调整）；`EffectData(id)` → effects_data **装载期
+    整表快照**（6433 条；by_level 差集字段实测四种：damage_amount/
+    damage_waves/target_life_ms/self_life_ms，显式 0 有效）。
+  - `internal/combatformula`（`Formula`）：`Calc(in) *Output` → `M.calc`
+    （输入攻守属性 + 预掷 `rand[1]/rand[2]`；nil 时调用方回退内置公式）。
+- **接线**：`cmd/protocol-probe` 五 flag（`-scripts` + `-neigong-scripts`/
+  `-item-scripts`/`-skill-scripts`/`-combat-scripts`，默认 `scripts/module/`
+  对应子目录，空禁用），`scriptHosts` 聚合（script_hosts.go）；启动日志各域
+  `ready count=…`；GM `lua_reload` 五类一并热重载并回报各域计数。
+- **neigong 战斗分发**（neigong_dispatch.go）：装备书 varprop `buffID` 即
+  模块键；`hookNeiGong` 骨架在 p.mu 内取快照（书/自身/state/盾池）、锁外
+  调脚本（modulevm 叶子锁，微秒级；坏书只禁用该本）、回锁落账。四个分发点：`resolveNPCAttack`
+  命中→`on_victim`（reduce_pct 折减 → 盾池 FIFO 吸收 → 落血；heal/mp_restore
+  落账；reflect 经 outcome 反打 NPC 走常规伤亡链）、格挡→`on_parry`
+  （零伤，只落 state/heal/mp/shield）；`applySelectedSkillDamage`→`on_attack`
+  （extra_damage 并入落血值）；`simulateLocked` 交战成员→`on_periodic`
+  （1s 节拍、脱战自停）。state 存 playerActor（会话内存态，换书清空）；
+  盾池 FIFO 到期即弃；r_proc 用 combatPercentRoll 确定性预掷（盐 31..34
+  与既有判定独立）。九阴志档位门缺省阶段 1（`neigongStoryStage` 常量，
+  九阴志系统落地后接全服进度）。宿主 nil（测试/禁用）→ 全部分发点零效果，
+  行为与接入前逐位一致。
+- **统一以参考服脚本为权威**（2026-11-09）：删除 Go 侧自研的 desc 编译器
+  被动引擎（neigong_passives.go——曾从现代客户端描述文本编译幻玉"料敌
+  先机"Proc 闪避+闪避治疗，参考服脚本中该机制为 TODO），战斗链内功行为
+  全部来自脚本：`M.passive` 静态属性经代数缓存（modulevm.Generation，
+  热重载/换书/升级失效）接入受击裁定——坐忘功 `damage_reduction_add` 平减
+  （floor 1 点）；其余被动键（max_mp_add 等）缓存待后续属性域消费。
+- **本仓白名单/钩子扩展**（把参考服 TODO 机制落进脚本，2026-11-09）：
+  - `dodge_add{amount,life_ms}` 指令：闪避加成窗（料敌先机）。Go 侧窗状态
+    与盾池同构（到期即弃、Proc 刷新覆盖）；窗激活期间挂客户端可见原生
+    Proc Buff（BufferInfo 槽 10 = buff_new.ini [buf_ng_yh_001_5]
+    StaticData **13107**，varprop→proppack 链含 DodgeProbAdd=20），战斗
+    tick 过期清扫摘除并推 changed 帧。
+  - `on_dodge` 钩子（受击裁定闪避分支派发）：成功闪避事件——移花接玉
+    （heal/mp/shield/state；闪避无伤故 extra_damage/reduce_pct 不适用）。
+  - **幻玉神功 buf_ng_yh_001 完整实现**（数值逐层勘定自 desc2.idres
+    desc_mind_buf_ng_yh_001_\<层\>_ngtips）：料敌先机 50% Proc → +20% 闪避
+    5-11s（36-26s cd）；移花接玉闪避回 2-5% 最大气血（4s cd）；层 6-7
+    下一击 +60% 经 state 充能、on_attack 附伤兑现（ctx.damage×60% 平减取整）。
+    原常驻 evasion_add 近似已移除（真实机制取代）。与参考仓同步该文件时
+    注意：参考仓版本仍为 TODO 桩。
+- **测试**：各域单测 + 真实目录钉子——neigong：155 本 × 4 事件 × 双 r_proc
+  全量冒烟零禁用 + 坐忘功 passive/周期盾；item：3 本真实效果（祛风散回血/
+  惊鸿礼盒开包/飞云剑匣限时属性）；skill：太极拳四式架势轮换覆盖、
+  CS_wd_tjq01 条目与 by_level 逐级差集、karma_jh_cqgf01 显式 0；formula：
+  12 组黄金用例（未命中/暴击/对数外防/完全招架/穿透/平减/保底/倍率）手算自
+  脚本常量区钉死。

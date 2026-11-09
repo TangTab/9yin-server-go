@@ -54,6 +54,8 @@ func main() {
 	scriptsPath := flag.String("scripts", runtimeProjectPath("scripts", "host"), "server-side event Lua scripts directory (game.on contract; empty disables)")
 	captureDir := flag.String("capture-dir", runtimeProjectPath("captures", "local"), "dump raw wire bytes of every session to <dir>/<ip-pid>_c2s.bin and _s2c.bin (empty disables)")
 	neigongScriptsPath := flag.String("neigong-scripts", runtimeProjectPath("scripts", "module", "neigong"), "neigong effect module scripts directory (buf_ng_*.lua; empty disables)")
+	itemScriptsPath := flag.String("item-scripts", runtimeProjectPath("scripts", "module", "item"), "item use-effect module scripts directory (M.on_use; empty disables)")
+	skillScriptsPath := flag.String("skill-scripts", runtimeProjectPath("scripts", "module", "skill"), "skill module scripts directory (M.compile/M.on_hit + effects_data.lua; empty disables)")
 	combatScriptsPath := flag.String("combat-scripts", runtimeProjectPath("scripts", "module", "combat"), "combat per-hit formula engine scripts directory (formula.lua; empty disables, damage falls back to legacy dice)")
 	switchScene := flag.String("switch-scene", "", "test-only live destination: config,resource,x,y,z,orient (empty disables it)")
 	npcAuditAll := flag.Bool("npc-audit-all", false, "inventory every modern NPC creator scene and exit")
@@ -123,26 +125,17 @@ func main() {
 	// 任务目录是进程级静态配置（快照或资源派生，见 task_catalog.go）；
 	// 在任何连接进入前装配。
 	taskCatalog = openTaskCatalog()
-	scriptHost := luascript.New(*scriptsPath, log.Printf)
-	if *scriptsPath != "" {
-		loaded, scriptErr := scriptHost.LoadDir()
-		if scriptErr != nil {
-			log.Printf("Lua scripts partially loaded count=%d path=%s: %v", loaded, *scriptsPath, scriptErr)
-		} else {
-			log.Printf("Lua scripts ready count=%d path=%s", loaded, *scriptsPath)
-		}
-	}
-	// 内功特效模块脚本（scripts/module/neigong）：独立 VM、单本禁用隔离；
-	// 战斗二期接线前仅装载建目录，钩子调用桥见 internal/neigong。
-	neigongEffects := neigong.New(*neigongScriptsPath, log.Printf)
-	if *neigongScriptsPath != "" {
-		loaded, neigongErr := neigongEffects.Load()
-		if neigongErr != nil {
-			log.Printf("内功特效脚本 partially loaded count=%d path=%s: %v", loaded, *neigongScriptsPath, neigongErr)
-		} else {
-			log.Printf("内功特效脚本 ready count=%d path=%s", loaded, *neigongScriptsPath)
-		}
-	}
+	// 脚本宿主聚合（事件 + neigong/item/skill 模块域；见 script_hosts.go）：
+	// 各 VM 独立、错误互不连坐。内功特效宿主注入战斗分发层
+	// （neigong_dispatch.go）；item/skill 模块域消费方接线前仅装载建
+	// 目录。combat 公式引擎由下方 combatcalc 单独装配（rollSkillHit
+	// 消费），不在此重复装载。
+	scripts := newScriptHosts(*scriptsPath, *neigongScriptsPath, *itemScriptsPath, *skillScriptsPath)
+	scripts.load()
+	hostRegistry = scripts
+	scriptHost := scripts.events
+	// neigongEffects 是 neigong_dispatch.go 的进程级分发宿主（包级变量）。
+	neigongEffects = scripts.neigong
 	// 每击公式引擎（scripts/module/combat/formula.lua + formula.ini 注入；
 	// 2026-11-08 数值重写）：装载失败/禁用只影响新数值路径，rollSkillHit
 	// 自动回退 legacy 面板×倍率掷骰，战斗链不受阻。
@@ -167,6 +160,7 @@ func main() {
 			}
 		}
 	}
+
 	if *npcAuditAll {
 		entries, auditErr := auditNPCSceneRoot(defaultNPCTableDir, filepath.Dir(defaultNPCCreatorDir))
 		if auditErr != nil {
@@ -1448,38 +1442,30 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			gmSession.setAction("Lua 结果：" + result)
 			log.Printf("%s: GM lua_eval ok", conn.RemoteAddr())
 		case "lua_reload":
-			if !scriptHost.Enabled() {
+			// 各宿主一并热重载（事件 + 内功/使用物/技能模块域；进程级
+			// 登记册 hostRegistry）；失败只回报原因，已完成的重载保持生效。
+			summary, reloadErr := hostRegistry.reloadAll()
+			if reloadErr != nil {
+				gmSession.setAction(fmt.Sprintf("Lua 重载完成但有失败脚本 %s：%v", summary, reloadErr))
+				return reloadErr
+			}
+			if summary == "" {
 				gmSession.setAction("Lua 脚本未启用（-scripts 为空）")
 				return fmt.Errorf("lua scripts are disabled")
-			}
-			loaded, reloadErr := scriptHost.Reload()
-			if reloadErr != nil {
-				gmSession.setAction(fmt.Sprintf("Lua 重载完成但有失败脚本 count=%d：%v", loaded, reloadErr))
-				return reloadErr
 			}
 			// 每击公式引擎一并热重载（formula.ini 规格复用启动缓存，不重读
 			// 文件）；失败只回报，不回滚事件脚本结果。
 			if installedCombatCalc != nil && len(combatFormulaSpecs) > 0 {
 				if formulas, combatErr := installedCombatCalc.Reload(combatFormulaSpecs); combatErr != nil {
-					gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d；公式引擎重载失败：%v", loaded, combatErr))
+					gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 %s；公式引擎重载失败：%v", summary, combatErr))
 					log.Printf("%s: GM lua_reload combat engine failed: %v", conn.RemoteAddr(), combatErr)
 				} else {
 					log.Printf("%s: GM lua_reload combat formulas=%d", conn.RemoteAddr(), formulas)
 				}
 			}
-			// 内功特效模块一并热重载；失败只回报原因，不影响事件脚本结果。
-			if neigongEffects.Enabled() {
-				neigongLoaded, neigongErr := neigongEffects.Reload()
-				if neigongErr != nil {
-					gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d；内功特效部分失败 count=%d：%v", loaded, neigongLoaded, neigongErr))
-					return neigongErr
-				}
-				gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d；内功特效 count=%d", loaded, neigongLoaded))
-				log.Printf("%s: GM lua_reload host=%d neigong=%d", conn.RemoteAddr(), loaded, neigongLoaded)
-				break
-			}
-			gmSession.setAction(fmt.Sprintf("Lua 脚本已重载 count=%d", loaded))
-			log.Printf("%s: GM lua_reload count=%d", conn.RemoteAddr(), loaded)
+			gmSession.setAction("Lua 脚本已重载 " + summary)
+			log.Printf("%s: GM lua_reload %s", conn.RemoteAddr(), summary)
+
 		case "task_rebuild":
 			// 只重派生并覆写快照；运行中的场景继续使用装配时的目录，
 			// 新目录在下次启动经 openTaskCatalog 生效。
@@ -1606,9 +1592,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			slot, advanced := player.facultyTick(now)
 			// 历练层 100 秒步进（facultyTick 同拍）：整步才结算，静默秒
-			// 零帧零落库。
+			// 零帧零落库。（内功受击被动已由 scripts/module/neigong 分发层
+			// 接管，无旧 expireInnerPowerPassive 到期清算。）
 			livepointChanged := player.livepointTick(now)
-			innerPowerPassiveExpired := player.expireInnerPowerPassive(now)
 			sitcrossSettlement := player.sitcrossTick()
 			combatBruiseAdvanced := player.combatBruiseTick()
 			combatRageAdvanced := player.rageRecoveryTick()
@@ -1671,7 +1657,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 				}
 			}
-			if tickErr == nil && (advanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || innerPowerPassiveExpired || livepointChanged) {
+			if tickErr == nil && (advanced || combatBruiseAdvanced || combatRageAdvanced || combatAdvanced || livepointChanged) {
 				// 数值 vitals 小帧（n=8）——vitalUpdate 全量面板含 State="stand"
 				// /LogicState/CurSkillID/PauseSkill，会把冲锋受理簇的接近态洗掉
 				//（64785/61392 会话实证：轻功点回复 advanced 每周期触发全量推送，

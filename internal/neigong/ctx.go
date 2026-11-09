@@ -6,15 +6,15 @@ import (
 
 // SelfStats 是脚本可见的自身快照（ctx.self）。
 type SelfStats struct {
-	HP, MaxHP   int64
-	MP, MaxMP   int64
-	Attack      int64
+	HP, MaxHP int64
+	MP, MaxMP int64
+	Attack    int64
 }
 
 // TargetInfo 是脚本可见的目标快照（ctx.target；nil 表示本次事件无目标）。
 type TargetInfo struct {
-	OID        uint32
-	HP, MaxHP  int64
+	OID       uint32
+	HP, MaxHP int64
 }
 
 // Ctx 是一次钩子调用的环境快照（只读，Go 侧预填）。字段面按 155 本仓内
@@ -30,20 +30,20 @@ type Ctx struct {
 	BookMaxLevel int // 书满级（层位换算分母）
 	StoryStage   int // 全服九阴志阶段（档位门 cap = 3 + stage - 1）
 
-	NowMS  int64 // 服时钟（毫秒）；脚本 state 窗口用它算 until_at
-	RProc  float64 // 预掷_proc 随机数 [0,1)
+	NowMS int64   // 服时钟（毫秒）；脚本 state 窗口用它算 until_at
+	RProc float64 // 预掷_proc 随机数 [0,1)
 
-	Damage  int64 // 本次事件造成的伤害（on_attack 侧）
-	Incoming int64 // 承受的伤害（on_victim/on_parry 侧，格挡下为格挡前值）
-	Parried bool  // 本次事件被目标格挡（on_attack 侧）
-	Crit    bool  // 本次事件暴击
-	Controlled bool // 自身处于禁轻功/定身/昏迷类控制
+	Damage     int64 // 本次事件造成的伤害（on_attack 侧）
+	Incoming   int64 // 承受的伤害（on_victim/on_parry 侧，格挡下为格挡前值）
+	Parried    bool  // 本次事件被目标格挡（on_attack 侧）
+	Crit       bool  // 本次事件暴击
+	Controlled bool  // 自身处于禁轻功/定身/昏迷类控制
 
 	SinceLastMS int64 // 距上次有效触发的毫秒数；<0 表示未知/无上次触发
 
 	Self        SelfStats
-	Target      *TargetInfo // nil = 无目标键
-	AttackerOID uint32      // 0 = 无 attacker 键
+	Target      *TargetInfo    // nil = 无目标键
+	AttackerOID uint32         // 0 = 无 attacker 键
 	State       map[string]any // 上一次有效触发回写的扁平状态；nil = 不设 state 键
 }
 

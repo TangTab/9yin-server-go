@@ -106,9 +106,15 @@ const (
 	taiJiStanceBuffSlot   uint16 = 7
 	taiJiSkill05BuffSlot  uint16 = 8
 	taiJiSkill07BuffSlot  uint16 = 9
-	// 明玉神功“料敌先机”是独立的短期闪避 Buff；它不能覆盖常驻内功
-	// Buff，也不能挤占轻功/技能 Buff 的槽位。
-	yihuaPassiveBuffSlot uint16 = 10
+	// 槽 10 为内功"料敌先机"Proc Buff 保留（dodge_add 闪避窗激活期间
+	// 挂载，见 neigong_dispatch.go；动态技能 Buff 协商分配范围 11..24
+	// 不变，槽 10 客户端侧属原生 Proc Buff 家族，不作他用）。
+	neigongProcBuffSlot uint16 = 10
+	// 幻玉神功 Proc Buff 的原生家族勘定值（buff_new.ini [buf_ng_yh_001_5]
+	// StaticData=13107，varprop→proppack 链含 DodgeProbAdd=20）。
+	neigongProcBuffStaticData uint32 = 13107
+	neigongProcBuffConfigID   string = "buf_ng_yh_001_5"
+	firstAutoBuffSlot         uint16 = 11
 
 	// 轻功使用型/能力型 Buff 槽（qgdefine BufferID/ExistBufID 链，
 	// StaticData 出自 F: 部署 resources/modern/share/skill/buff_new.ini
@@ -232,12 +238,14 @@ type playerActor struct {
 	keybind               playerKeybind
 	learnedSkills         map[string]int32
 	skillCooldowns        map[string]time.Time
+	skillTeamCooldowns    map[int32]time.Time
 	// 公共 GCD（跨套路切换锁，bug.txt 官方规则；Java publicCdUntil/
-	// publicCdTaolu 同构）：到期时刻 + 发起套路串——同套路连招与出招者
+	// publicCDTaolu 同构）：到期时刻 + 发起套路串——同套路连招与出招者
 	// 自身只走个人 CD，切套路才付 7s；每次受理都刷新窗口（连招把切换
 	// 锁后推是官方语义）。p.mu 保护。
 	publicCDUntil        time.Time
 	publicCDTaolu        string
+
 	currentSkillID       string
 	currentSkillEffectID string
 	currentSkillLevel    int32
@@ -252,8 +260,6 @@ type playerActor struct {
 	parrying              bool
 	skillLockUntil        time.Time
 	reviveAt              time.Time
-	innerPowerProcReadyAt time.Time
-	innerPowerHealReadyAt time.Time
 	progress              playerProgress
 	// GM 面板域（货币/属性/状态批次，gm_stats.go）：官银为会话级货币
 	//（Java PlayerActor 同口径，不落库）；gm 是实力等级/善恶/PK 模式/
@@ -331,6 +337,15 @@ type playerActor struct {
 	// 激活序（active_jingmai_rec 行镜像）与真气池；快照持久化
 	// role_meridians（migrations/0004）。
 	jingmai jingMaiState
+	// 内功特效脚本分发状态（scripts/module/neigong，见 neigong_dispatch.go）：
+	// neigongState 是上一次有效触发回写的扁平状态（脚本互斥窗/层数），
+	// shields 为 FIFO 吸收池，dodge 为闪避加成窗（料敌先机），periodicAt
+	// 驱动 on_periodic 的 1s 节拍，passive 为 M.passive 静态属性的代数缓存。
+	neigongState      map[string]any
+	neigongShields    []neigongShield
+	neigongDodge      neigongDodgeWindow
+	neigongPeriodicAt time.Time
+	neigongPassive    neigongPassiveCache
 }
 
 // playerMotion 是刻意由服务器持有的 GM 状态。其值通过常规的现代对象
@@ -763,22 +778,28 @@ func (p *playerActor) activeParrySnapshot() activeParryRequest {
 }
 
 type npcAttackOutcome struct {
-	stateChanged        bool
-	parried             bool
-	dodged              bool
-	dead                bool
-	innerPowerTriggered bool
-	innerPowerHeal      int32
+	stateChanged bool
+	parried      bool
+	dodged       bool
+	dead         bool
 	// rageDelta 是本次受击裁定的怒气增量(官方规则:格挡状态被揍 +2、
 	// 直接受击 +1;主动招架窗口等同格挡态)。由调用方在锁外编码成
 	// 18 字节 SP 单帧。
 	rageDelta int32
+	// neigongReflect 是 on_victim 特效（reflect 指令）产生的反打值，
+	// 由战斗 tick 在锁外反打 NPC（击杀走 NPC 常规死亡链）。
+	neigongReflect int32
 }
 
 // resolveNPCAttack 是服务器权威的受击裁定。当前客户端已提供 C2S 的
 // 主动招架入口（218），但其确切的战斗枚举尚未还原；对本地服务器而言，
 // 每条新的 218 请求都授予一个 600ms 的招架窗口。闪避按攻击者和秒
 // 确定性生成，重连无法重掷已接受的判定结果。
+//
+// 内功特效以 scripts/module/neigong 脚本为唯一权威：常驻被动
+// （M.passive：幻玉 evasion_add 并入闪避、坐忘 damage_reduction_add 平减）
+// 与事件钩子在此结算；格挡 → on_parry（零伤，只落 state/heal/mp/shield）；
+// 命中 → on_victim（reduce_pct 折减、盾池 FIFO 吸收、heal/mp、reflect 反打）。
 func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time.Time) npcAttackOutcome {
 	p.mu.Lock()
 	deadAlready := p.vitals.HP <= 0
@@ -788,41 +809,41 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 	}
 	parry := p.activeParrySnapshot()
 	if !parry.At.IsZero() && now.Sub(parry.At) >= 0 && now.Sub(parry.At) <= 600*time.Millisecond {
-		// 主动招架窗口内的攻击按"格挡状态被揍"得怒。
-		return npcAttackOutcome{parried: true, rageDelta: ragGainParriedHit}
+		// 主动招架窗口内的攻击按"格挡状态被揍"得怒（零伤，特效只落
+		// state/heal/mp/shield）。
+		triggered := p.dispatchNeiGongParry(attackerID, damage, now)
+		return npcAttackOutcome{parried: true, stateChanged: triggered, rageDelta: ragGainParriedHit}
 	}
-	profile, hasProfile := p.equippedInnerPowerPassive()
-	activePassive, triggered := false, false
-	if hasProfile && profile.mode == innerPowerModeIncomingDodgeHeal {
-		activePassive, triggered = p.applyIncomingDodgePassive(profile, attackerID, now)
-	}
-	dodgeChance := baseLocalDodgeProbability
-	if activePassive {
-		dodgeChance += profile.dodgeAdd
-	}
+	// 闪避掷 = 基础 + 脚本常驻被动（M.passive evasion_add）+ 闪避窗
+	//（dodge_add，料敌先机 Proc 期间）。闪避成功派发 on_dodge（移花接玉）。
+	dodgeChance := baseLocalDodgeProbability + p.neigongPassiveEvasion() + p.neigongDodgeAdd(now)
 	if combatPercentRoll(attackerID, now, 18) < dodgeChance {
-		healed := int32(0)
-		if hasProfile && profile.mode == innerPowerModeIncomingDodgeHeal && !p.innerPowerHealCoolingDown(now) {
-			p.mu.Lock()
-			amount := (p.vitals.MaxHP*profile.healPercent + 99) / 100
-			if p.vitals.ApplyHeal(amount) {
-				healed = amount
-			}
-			p.setInnerPowerHealCooldownLocked(now.Add(profile.healCooldown))
-			p.mu.Unlock()
-		}
-		return npcAttackOutcome{stateChanged: triggered || healed > 0, dodged: true, innerPowerTriggered: triggered, innerPowerHeal: healed}
+		triggered := p.dispatchNeiGongDodge(attackerID, damage, now)
+		return npcAttackOutcome{dodged: true, stateChanged: triggered}
 	}
+	// 常驻被动平减（damage_reduction_add），floor 1 点（完全招架才零伤）。
+	if flat := p.neigongPassiveDamageReduction(); flat > 0 && damage > 1 {
+		damage -= flat
+		if damage < 1 {
+			damage = 1
+		}
+	}
+	applied, reflectAmount, neigongChanged := p.dispatchNeiGongVictim(attackerID, damage, now)
 	// 手动格挡(msg54)状态下的实伤同样按格挡态得怒 +2,未格挡 +1。
 	ragGain := ragGainUnparriedHit
 	if p.parryingSnapshot() {
 		ragGain = ragGainParriedHit
 	}
 	p.mu.Lock()
-	changed := p.vitals.ApplyDamage(damage)
+	changed := applied > 0 && p.vitals.ApplyDamage(applied)
 	if !changed {
+		dead := p.vitals.HP <= 0
 		p.mu.Unlock()
-		return npcAttackOutcome{}
+		// 盾全吸收或零伤：不落血，但特效可能已改血/蓝/状态。
+		if neigongChanged {
+			return npcAttackOutcome{stateChanged: true, neigongReflect: reflectAmount}
+		}
+		return npcAttackOutcome{dead: dead}
 	}
 	// 实际吃到伤害即战斗活动：驱动 10s 脱战迟滞窗口。
 	p.lastCombatAt = now
@@ -837,7 +858,7 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		p.skillLockUntil = now.Add(500 * time.Millisecond)
 		p.mu.Unlock()
 	}
-	return npcAttackOutcome{stateChanged: true, dead: dead, rageDelta: ragGain}
+	return npcAttackOutcome{stateChanged: true, dead: dead, rageDelta: ragGain, neigongReflect: reflectAmount}
 }
 
 // combatPercentRoll 对同一攻击者和同一服务器 tick 是确定性的。它让
@@ -845,55 +866,6 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 func combatPercentRoll(attackerID uint32, now time.Time, salt uint64) int32 {
 	value := uint64(attackerID)*1103515245 + uint64(now.Unix())*2654435761 + salt*97
 	return int32(value % 100)
-}
-
-// applyIncomingDodgePassive 是内功档案的事件模式通用执行器，该档案由其
-// 已安装的描述和子 Buff 编译而来。其他被动模式都接入同一个受击前的
-// 派发点。
-func (p *playerActor) applyIncomingDodgePassive(profile innerPowerPassiveProfile, attackerID uint32, now time.Time) (active, triggered bool) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	current := p.buffs[yihuaPassiveBuffSlot]
-	active = current.staticData == profile.procStatic && current.expiresUTC.After(now.UTC())
-	if active || p.innerPowerProcReadyAt.After(now) || combatPercentRoll(attackerID, now, 17) >= profile.procChance {
-		return active, false
-	}
-	expires := now.UTC().Add(profile.procLifetime)
-	p.buffs[yihuaPassiveBuffSlot] = activePlayerBuff{staticData: profile.procStatic, expiresUTC: expires, configID: profile.procBuffID, level: profile.buffLevel}
-	p.innerPowerProcReadyAt = now.Add(profile.procCooldown)
-	return true, true
-}
-
-func (p *playerActor) innerPowerHealCoolingDown(now time.Time) bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	return p.innerPowerHealReadyAt.After(now)
-}
-
-func (p *playerActor) setInnerPowerHealCooldown(next time.Time) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.setInnerPowerHealCooldownLocked(next)
-}
-
-// setInnerPowerHealCooldownLocked 供已持 p.mu 的受击裁定路径使用。
-// 调用方必须已持有 p.mu。
-func (p *playerActor) setInnerPowerHealCooldownLocked(next time.Time) {
-	p.innerPowerHealReadyAt = next
-}
-
-// expireInnerPowerPassive 只清除料敌先机。随后常规的连接 tick 会发送
-// 一个常规 0x10 属性档案，同时移除 BufferInfo10 和与之匹配的
-// BufferListStr 条目。
-func (p *playerActor) expireInnerPowerPassive(now time.Time) bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	buff, ok := p.buffs[yihuaPassiveBuffSlot]
-	if !ok || buff.expiresUTC.After(now.UTC()) {
-		return false
-	}
-	delete(p.buffs, yihuaPassiveBuffSlot)
-	return true
 }
 
 func (p *playerActor) skillLocked(now time.Time) bool {
@@ -936,6 +908,12 @@ func (p *playerActor) equipNeiGong(id string) error {
 	if err := p.progress.equip(id); err != nil {
 		return err
 	}
+	// 换书即换特效：旧书的脚本状态窗/盾池/闪避窗/被动缓存不跨书存活。
+	p.neigongState = nil
+	p.neigongShields = nil
+	p.neigongDodge = neigongDodgeWindow{}
+	delete(p.buffs, neigongProcBuffSlot)
+	p.neigongPassive = neigongPassiveCache{}
 	p.syncEquippedNeiGongBuffLocked(time.Now())
 	p.syncEquippedNeiGongResourcesLocked()
 	return nil
@@ -1320,7 +1298,7 @@ func (p *playerActor) activateSkillBuff(definition skillBuffDefinition, now time
 		}
 	}
 	if slot == 0 {
-		for candidate := yihuaPassiveBuffSlot + 1; candidate <= bufferInfoSlotCount; candidate++ {
+		for candidate := firstAutoBuffSlot; candidate <= bufferInfoSlotCount; candidate++ {
 			active, occupied := p.buffs[candidate]
 			if !occupied || !active.expiresUTC.After(now.UTC()) {
 				slot = candidate

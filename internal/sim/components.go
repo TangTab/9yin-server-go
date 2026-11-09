@@ -201,6 +201,19 @@ func (v *Vitals) SpendMP(cost int32) bool {
 	return true
 }
 
+// RestoreMP 回复内力（内功特效 mp_restore 指令的落点），钳到上限。
+func (v *Vitals) RestoreMP(amount int32) bool {
+	if amount <= 0 || v.MP >= v.MaxMP {
+		return false
+	}
+	before := v.MP
+	v.MP += amount
+	if v.MP > v.MaxMP {
+		v.MP = v.MaxMP
+	}
+	return v.MP != before
+}
+
 // SetDerivedMaxima 在已装备内功评定完成后设置权威的资源总量
 // 上限。基础上限永不改变，仍供客户端协议的 Max/Max+Add 显示
 // 使用。上限增大时满值保持满值；部分消耗的保留绝对量，仅在上限

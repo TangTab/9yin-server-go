@@ -143,13 +143,14 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 		if !npcSpawnEligible(npc) {
 			continue
 		}
-		if err := r.registerNPCLocked(uint32(index)+2, npc); err != nil {
+		if err := r.registerNPCLocked((uint32(index)+2)|0x11000000, npc); err != nil {
 			return fmt.Errorf("register NPC %s: %w", npc.resolved.ConfigID, err)
 		}
 		registered++
 	}
-	// NPC 占用 2..len(catalog)+1；玩家 wireID 从其上界之后分配，
-	// 两个 ID 空间永不碰撞。
+	// NPC 占用 0x11000002..0x11000000|len(catalog)+1（fork 版 ID 方案，
+	// 与玩家共用 0x11000000 类型位前缀）；远程玩家 wireID 仍从无前缀的
+	// 低位空间自增，与 NPC 的前缀空间和玩家保留 ID 0x11000001 永不碰撞。
 	r.nextWireID = uint32(len(catalog)) + 2
 	log.Printf("scene run populated config=%s resource=%s registered=%d skipped=%d", r.key.config, r.key.resource, registered, len(catalog)-registered)
 	return nil
@@ -361,7 +362,7 @@ func forkNPCIndex(id uint32) int {
 
 func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 	id = forkNPCID(id)
-	if id == 0 || id == 1 {
+	if id == 0 || id == 1 || id == playerObjectID {
 		return fmt.Errorf("NPC scene identity %d collides with reserved player identity", id)
 	}
 	if npc.schedule != nil && !patrolCombatScriptClass(npc.resolved.ScriptClass) {

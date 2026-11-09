@@ -45,6 +45,10 @@ const (
 	npcAttackRangeMeters = float32(6.0)
 	npcAttackEvery       = 2200 * time.Millisecond
 	npcAttackDamage      = int32(1)
+
+	// baseLocalDodgeProbability 是受击裁定的基础闪避（百分点）；脚本
+	// 被动（幻玉 evasion_add）在此之上叠加。
+	baseLocalDodgeProbability = int32(10)
 )
 
 // newNPCCombatState 从模板属性构造敌对 NPC 的战斗决策组件。
@@ -397,6 +401,23 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 		state.NextAttack = now.Add(state.AttackEvery)
 		outcome := target.player.resolveNPCAttack(meta.id, state.Damage, now)
+		// on_victim 特效（reflect 指令）反打 NPC：走同一 NPC 伤亡链
+		//（威胁清理/重生排程/属性帧）。
+		if outcome.neigongReflect > 0 && vitals.HP > 0 {
+			if vitals.ApplyDamage(outcome.neigongReflect) {
+				state.Threat += outcome.neigongReflect
+				if vitals.HP <= 0 {
+					state.Threat = 0
+					if npcRespawnBatchInterval() > 0 {
+						// 批量刷新模式：重生归 refreshTick 周期扫描统一复活。
+						state.RespawnAt = time.Time{}
+					} else {
+						state.RespawnAt = now.Add(state.RespawnAfter)
+					}
+				}
+				updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcCombatProperties(vitals.ActorState(meta.id, meta.ownerID))})
+			}
+		}
 		// 攻击表现素材（锁外补发 msg337/msg20/msg24/0x2D）；朝向重算
 		// 为面向目标。素材取自 NPC meta 与受害者成员，全部只读。
 		// hpRatio 取受击后玩家血量百分比（0x2D 双写值；maxHP 兜底 1）。
@@ -428,16 +449,8 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			}
 		}
 		remote := target.view.remote
-		if outcome.innerPowerTriggered {
-			log.Printf("%s: inner-power incoming passive triggered id=%d config=%s", remote, meta.id, meta.configID)
-		}
 		if outcome.dodged {
-			if outcome.innerPowerHeal > 0 {
-				playerState := target.player.stateSnapshot()
-				log.Printf("%s: NPC attack dodged id=%d config=%s inner-power dodge-heal=%d player_hp=%d/%d", remote, meta.id, meta.configID, outcome.innerPowerHeal, playerState.HP, playerState.MaxHP)
-			} else {
-				log.Printf("%s: NPC attack dodged id=%d config=%s", remote, meta.id, meta.configID)
-			}
+			log.Printf("%s: NPC attack dodged id=%d config=%s", remote, meta.id, meta.configID)
 		} else if outcome.stateChanged {
 			playerState := target.player.stateSnapshot()
 			log.Printf("%s: NPC attack id=%d config=%s damage=%d player_hp=%d/%d", remote, meta.id, meta.configID, state.Damage, playerState.HP, playerState.MaxHP)
@@ -445,14 +458,21 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			log.Printf("%s: NPC attack parried id=%d config=%s", remote, meta.id, meta.configID)
 		}
 	})
-	// 玩家侧战斗临场感（Fighting/Normal 迁移）按成员分别结算。
-	// 威胁或 10s 内战斗活动（noteCombatActivity）都保持 Fighting。
+	// 玩家侧战斗临场感（Fighting/Normal 迁移）、内功特效周期节拍
+	//（on_periodic，仅交战成员、脱战自停）与闪避窗过期清扫（含料敌
+	// 先机原生 Buff 摘除）按成员分别结算。
 	changed := make(map[uint32]bool, len(members))
 	for _, member := range members {
 		if member.player == nil {
 			continue
 		}
 		if member.player.setCombatPresence(threatened[member.objectID], now) {
+			changed[member.objectID] = true
+		}
+		if threatened[member.objectID] && member.player.dispatchNeiGongPeriodic(now) {
+			changed[member.objectID] = true
+		}
+		if member.player.expireNeiGongDodgeWindow(now) {
 			changed[member.objectID] = true
 		}
 	}
