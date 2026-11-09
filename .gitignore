@@ -19,5 +19,5 @@ gmtest-sandbox/
 *.dmp
 *.7z
 
-
+/res*.*
 env.server
