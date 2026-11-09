@@ -259,6 +259,15 @@ func Validate(body CommandBody) (Command, error) {
 	case "ninjiuzhi_reset", "ninjiuzhi_status":
 		// 无负载动作：全服阶段状态经 worldInfo + 会话 LastAction 回显。
 	case "popup_gm_panel":
+	case "tersure_wash_open":
+		// 宝物洗炼界面开窗（on_custom_show_tersure）：new=899000021 新界面
+		//（主武学洗）/old=899000008 老界面（属性洗+武学洗）。复用 itemConfig
+		// 字段承载形态参数。
+		form := strings.TrimSpace(body.ItemConfig)
+		if form != "new" && form != "old" {
+			return command, fmt.Errorf("itemConfig must be new or old")
+		}
+		command.ItemConfig = form
 	case "custom_probe":
 		if body.MsgId < 1 || body.MsgId > 764 {
 			return command, fmt.Errorf("probe msgId must be between 1 and 764")
@@ -279,6 +288,9 @@ func Validate(body CommandBody) (Command, error) {
 		command.CardId = body.CardId
 	case "grant_identity_suits", "grant_all_fashion", "unequip_card", "grant_all_cards":
 		// 无负载动作：目录/存档校验在会话循环内完成。
+	case "learn_all_taolu", "forget_all_taolu", "learn_all_neigong":
+		// 武学三动作（面板「门派/武学套路」区块）：已学集/目录空态由
+		// 会话循环判并回执（如「尚未学会任何武学」），这里无负载可校验。
 	case "npc_bubble", "drama_prompt", "red_super_armor",
 		"action_state_fishing", "action_state_hsqs05", "action_state_sgmd",
 		"action_native_fishing", "action_state_stop":

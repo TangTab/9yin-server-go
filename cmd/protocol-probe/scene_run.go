@@ -212,7 +212,10 @@ func (r *sceneRun) attachMember(member *sceneMember) uint32 {
 		if r.nextWireID == 0 {
 			r.nextWireID = 2
 		}
-		member.objectID = forkNPCID(r.nextWireID)
+		// 远程玩家 wireID 留在无前缀低位空间（docs/id-system-analysis.md
+		// §6.2 ID 布局）：0x11 前缀段专属玩家化身与 NPC 物化，低位段给
+		// 动态挂接成员，两空间由前缀位天然隔离、永不碰撞。
+		member.objectID = r.nextWireID
 		r.nextWireID++
 		r.members[member.objectID] = member
 		if member.player != nil {
@@ -402,9 +405,11 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 		}
 	}
 	entityID := worldcore.EntityID(id)
+	// NPC owner 官服化（npcOwnerID 注释；owner=1 是 fork 方言的 NPC 位，
+	// 官服客户端把它当玩家化身→PvP 分支不自走）。
 	if err := r.scene.Add(worldcore.Entity{
 		ID:         entityID,
-		OwnerID:    1,
+		OwnerID:    worldcore.EntityID(npcOwnerID(id)),
 		Kind:       worldcore.EntityNPC,
 		Transform:  worldcore.Transform{X: npc.x, Y: npc.y, Z: npc.z, Orient: npc.orient},
 		Properties: properties,
@@ -421,7 +426,7 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 	meta := sceneEntity{
 		id:          id,
 		description: "npc:" + npc.resolved.ConfigID,
-		ownerID:     1,
+		ownerID:     npcOwnerID(id),
 		configID:    npc.resolved.ConfigID,
 		scriptClass: npc.resolved.ScriptClass,
 		interaction: interaction,

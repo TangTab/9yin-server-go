@@ -139,10 +139,10 @@ func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 	if got := player.progress.books[0].staticData; got != 5 {
 		t.Fatalf("ng_wd_001 StaticData=%d, want classic visible-buff value 5", got)
 	}
-	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("1742,1,1,3,")) {
+	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("1742,11000001,7A5C0B,3,")) {
 		t.Fatalf("level-30 neigong BufferInfo=%q", got)
 	}
-	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_wd_001,local-4,3,1-1,")) {
+	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_wd_001,local-4,3,285212673-8018955,")) {
 		t.Fatalf("level-30 neigong BufferListStr=%q", got)
 	}
 	// 官方全量公式（55866/12173 抓包解出的系数）：属性分量 + 内功 pack。
@@ -245,7 +245,7 @@ func TestTaoHuaInnerPowerUsesClassicVisibleRoute(t *testing.T) {
 	if err := player.equipNeiGong("ng_th_001"); err != nil {
 		t.Fatal(err)
 	}
-	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("347A,1,1,3,")) {
+	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("347A,11000001,7A5C0B,3,")) {
 		t.Fatalf("碧波心法 BufferInfo=%q", got)
 	}
 }
@@ -265,10 +265,10 @@ func TestYiHuaInnerPowerUsesSharedClassicVisibleRoute(t *testing.T) {
 	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 5829 || got.BaseMaxMP != 500 || got.MaxMP != 2235 {
 		t.Fatalf("明玉神功 server caps=%+v, want base 1000/500 total 5829/2235", got)
 	}
-	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("3311,1,1,3,")) {
+	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("3311,11000001,7A5C0B,3,")) {
 		t.Fatalf("明玉神功 BufferInfo=%q", got)
 	}
-	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_yh_001,local-4,3,1-1,")) {
+	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_yh_001,local-4,3,285212673-8018955,")) {
 		t.Fatalf("明玉神功 BufferListStr=%q", got)
 	}
 	// 五维线上值 85/87/100/127/97：MaxHPAdd=2·85+7·87+4050=4829、

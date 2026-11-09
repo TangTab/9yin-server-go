@@ -855,6 +855,9 @@
         wearNow,
       });
     }
+    function tersureWashOpen(form) {
+      command({ action: "tersure_wash_open", itemConfig: form });
+    }
     async function loadAllTitles() {
       try {
         let rows = await (await fetch("/api/titles")).json();

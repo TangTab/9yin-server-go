@@ -330,7 +330,9 @@ func TestHandleCustomizingCustomFirstUploadGate(t *testing.T) {
 		t.Fatalf("before-spawn handled=%t err=%v frames=%d seen=%t", handled, err, len(connEarly.frames), session.seenUpload)
 	}
 
-	// 有存档：首传（默认键位转储）跳过落库，回发存档再确认。
+	// 有存档：首传（默认键位转储）跳过落库；官服方言零 705 回显
+	//（on_parser_customizing 强制 game_control_mode=0 打断 2.5D 点击
+	// 移动——2026-11-09 停推，见 custom_config.go pushSavedCustomizing）。
 	store, mock := newMockCustomizingDB(t)
 	mock.ExpectQuery(`SELECT customizing_value FROM role_customizing WHERE role_id = \?`).
 		WithArgs(customConfigTestRoleID).
@@ -342,28 +344,22 @@ func TestHandleCustomizingCustomFirstUploadGate(t *testing.T) {
 	}
 	session = customizingSession{saved: saved, hasSaved: exists}
 	handled, err = handleCustomizingCustom(conn, player, customizingUploadCustom("default-dump"), "test", &session, store, customConfigTestRoleID)
-	if err != nil || !handled || len(conn.frames) != 1 {
+	if err != nil || !handled || len(conn.frames) != 0 {
 		t.Fatalf("first upload handled=%t err=%v frames=%d", handled, err, len(conn.frames))
 	}
-	if !strings.Contains(string(conn.frames[0]), "saved-config") {
-		t.Fatalf("re-asserted frame=%x", conn.frames[0])
-	}
 
-	// 后续上传落库并回显上传内容。
+	// 后续上传落库（官服不回显）。
 	mock.ExpectExec(`INSERT INTO role_customizing \(role_id, customizing_value\) VALUES \(\?, \?\)`+
 		` ON DUPLICATE KEY UPDATE customizing_value = VALUES\(customizing_value\)`).
 		WithArgs(customConfigTestRoleID, []byte("player-edit")).
 		WillReturnResult(newSQLMockResult(0, 1))
 	connEcho := &captureMessageConnection{}
 	handled, err = handleCustomizingCustom(connEcho, player, customizingUploadCustom("player-edit"), "test", &session, store, customConfigTestRoleID)
-	if err != nil || !handled || len(connEcho.frames) != 1 {
+	if err != nil || !handled || len(connEcho.frames) != 0 {
 		t.Fatalf("second upload handled=%t err=%v frames=%d", handled, err, len(connEcho.frames))
 	}
-	if !strings.Contains(string(connEcho.frames[0]), "player-edit") {
-		t.Fatalf("echo frame=%x", connEcho.frames[0])
-	}
 
-	// 无存档会话：首传直接建基线。
+	// 无存档会话：首传直接建基线（零回显）。
 	store2, mock2 := newMockCustomizingDB(t)
 	mock2.ExpectExec(`INSERT INTO role_customizing \(role_id, customizing_value\) VALUES \(\?, \?\)`+
 		` ON DUPLICATE KEY UPDATE customizing_value = VALUES\(customizing_value\)`).
@@ -372,7 +368,7 @@ func TestHandleCustomizingCustomFirstUploadGate(t *testing.T) {
 	connFresh := &captureMessageConnection{}
 	freshSession := customizingSession{}
 	handled, err = handleCustomizingCustom(connFresh, player, customizingUploadCustom("first-baseline"), "test", &freshSession, store2, customConfigTestRoleID)
-	if err != nil || !handled || len(connFresh.frames) != 1 || !freshSession.hasSaved {
+	if err != nil || !handled || len(connFresh.frames) != 0 || !freshSession.hasSaved {
 		t.Fatalf("fresh first upload handled=%t err=%v frames=%d saved=%t", handled, err, len(connFresh.frames), freshSession.hasSaved)
 	}
 }

@@ -459,6 +459,28 @@ func (s *inventoryStore) upsertSkill(ctx context.Context, roleID role.RoleID, sk
 	return err
 }
 
+// deleteSkillsByTypes 删除角色的指定类型技能行（GM forget_all_taolu 删
+// wuxue/anqi；Java RoleInventoryStore.deleteSkills 同构，Go 的 View40 恒为
+// starter∪DB 并集模型，暗器行一并清才能与重登基线一致）。
+func (s *inventoryStore) deleteSkillsByTypes(ctx context.Context, roleID role.RoleID, skillTypes []string) error {
+	if s == nil || s.db == nil || len(skillTypes) == 0 {
+		return nil
+	}
+	_, err := s.db.ExecContext(ctx,
+		"DELETE FROM role_skills WHERE role_id = ? AND skill_type IN ("+strings.TrimRight(strings.Repeat("?,", len(skillTypes)), ",")+")",
+		append([]any{roleID}, anySlice(skillTypes)...)...)
+	return err
+}
+
+// anySlice 把 []string 抬成 []any（SQL 占位参数拼接用）。
+func anySlice(values []string) []any {
+	result := make([]any, len(values))
+	for index, value := range values {
+		result[index] = value
+	}
+	return result
+}
+
 // grantableItem 是发放目录行（game_items 查询结果；ToolItemCatalog.ItemInfo 对应物）。
 type grantableItem struct {
 	configID  string

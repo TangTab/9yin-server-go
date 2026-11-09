@@ -24,6 +24,7 @@ type itemStatic struct {
 	maxBuildCount int32
 	effectPackID  int32
 	equipType     string
+	tersureType   int32 // TersureType（宝物 0..4 五类池；-1=非宝物无此键）
 }
 
 // artifactPacks 是套装式物品（身份装/时装套装衣）的分件 ArtPack
@@ -98,6 +99,8 @@ func loadEquipmentResolver() *equipmentResolver {
 			fields.effectPackID = parseIntFallback(value, 0)
 		case "EquipType":
 			fields.equipType = value
+		case "TersureType":
+			fields.tersureType = parseIntFallback(value, 0)
 		}
 	})
 	for section, fields := range staticFields {

@@ -48,9 +48,12 @@ type randomPropLine struct {
 	Level   int     `json:"level,omitempty"`
 }
 
-// randomSkillLine 一条随机技能行（RandomSkillRec=[skillstore下标,0,value,解锁位]）。
+// randomSkillLine 一条随机技能行（RandomSkillRec=[skillstore下标,SubSkill
+// 下标,value,解锁位]——col1 官方实证为 0/1 子技能序号（capture-players
+// obj=1-26 同 store 成对 col1=0/1），非技能 id；单 SubSkill 条目恒 0）。
 type randomSkillLine struct {
 	StoreID int     `json:"store"`
+	Sub     int     `json:"sub,omitempty"`
 	Value   float64 `json:"value"`
 	Unlock  int     `json:"unlock,omitempty"`
 }
@@ -89,7 +92,8 @@ type randomItemFields struct {
 	level      int // ilvl
 	templateID int // TemplateRandomID
 	needRandom int
-	propPacks  []int // @PropModifyPackRec（条件动态包）
+	propPacks  []int // @PropModifyPackRec（条件动态属性包，PropBuilt 类型 1）
+	skillPacks []int // @SkillModifyPackRec（套路威力包，PropBuilt 类型 2）
 }
 
 type tstoreEntry struct {
@@ -112,6 +116,7 @@ type propstoreEntry struct {
 type skillstoreEntry struct {
 	subs    [][2]string // (SubSkill, PropName)
 	limitNo int
+	taolu   string // TaoLu 键（套路 id；洗炼计费查 hhttreasuretaolu [taolu]）
 }
 
 type rollRange struct {
@@ -207,6 +212,10 @@ func loadRandomEquipCatalog() *randomEquipCatalog {
 				fields.propPacks = append(fields.propPacks, id)
 				wantedPacks[id] = true
 			}
+		case "@SkillModifyPackRec":
+			if id, err := strconv.Atoi(value); err == nil {
+				fields.skillPacks = append(fields.skillPacks, id)
+			}
 		case "TemplateRandomID":
 			if id, err := strconv.Atoi(value); err == nil {
 				fields.templateID = id
@@ -234,9 +243,9 @@ func loadRandomEquipCatalog() *randomEquipCatalog {
 		c.err = fmt.Errorf("equipment.ini: %w", err)
 		return c
 	}
-	// 剪枝：无动态包、无模板、非宝物/娃娃类型的条目全部丢弃。
+	// 剪枝：无动态包/技能包、无模板、非宝物/娃娃类型的条目全部丢弃。
 	for id, fields := range c.itemFields {
-		if len(fields.propPacks) == 0 && fields.templateID == 0 &&
+		if len(fields.propPacks) == 0 && len(fields.skillPacks) == 0 && fields.templateID == 0 &&
 			fields.equipType != "Treasure" && fields.equipType != "NewTreasure" {
 			delete(c.itemFields, id)
 		}
@@ -451,6 +460,8 @@ func (c *randomEquipCatalog) loadTreasureTables() {
 			entry.subs = append(entry.subs, [2]string{strings.TrimSpace(parts[0]), name})
 		case "limitlistno":
 			entry.limitNo, _ = strconv.Atoi(value)
+		case "taolu":
+			entry.taolu = value
 		}
 		c.skstore[id] = entry
 		return nil
@@ -683,34 +694,44 @@ func (c *randomEquipCatalog) zhenpaiDynamicValues(configID string, powerLevel in
 	return values
 }
 
-// zhenpaiPropBuiltString PropBuilt@1954 串（"1,id;1,id"——affixes JSON 的
-// 协议等价形态，非 DB 回读路径（bag→wear 内存构造行）的即时帧用）。
+// zhenpaiPropBuiltString PropBuilt@1954 串（"N,id;N,id"——N 是表类型列：
+// 1=proppack 属性包 / 2=skillpack 套路威力包，tips_func_equip.lua:550-559
+// get_text_by_table_id 按类型取 tips_proppack_<id>/tips_skillpack_<id> 文案；
+// affixes JSON 的协议等价形态，非 DB 回读路径（bag→wear 内存构造行）用）。
 func (c *randomEquipCatalog) zhenpaiPropBuiltString(configID string) string {
-	packs := c.zhenpaiPropPacksOf(configID)
-	if len(packs) == 0 {
+	fields, ok := c.itemFields[configID]
+	if !ok || (len(fields.propPacks) == 0 && len(fields.skillPacks) == 0) {
 		return ""
 	}
-	segments := make([]string, 0, len(packs))
-	for _, packID := range packs {
+	segments := make([]string, 0, len(fields.propPacks)+len(fields.skillPacks))
+	for _, packID := range fields.propPacks {
 		segments = append(segments, fmt.Sprintf("1,%d", packID))
+	}
+	for _, packID := range fields.skillPacks {
+		segments = append(segments, fmt.Sprintf("2,%d", packID))
 	}
 	return strings.Join(segments, ";")
 }
 
-// zhenpaiAffixesJSON 生成品实例的 affixes 列 JSON（包列表形态；
-// 客户端按本地 proppack 渲染 tooltip，条件行由客户端按 PowerLevel 自行命中）。
+// zhenpaiAffixesJSON 生成品实例的 affixes 列 JSON（包列表形态，kind 列
+// 1=属性包/2=技能包；propBuiltOf 按 kind 还原 "N,id" 段；客户端按本地
+// proppack/skillpack 渲染 tooltip，条件行由客户端按 PowerLevel 自行命中）。
 func (c *randomEquipCatalog) zhenpaiAffixesJSON(configID string) string {
-	packs := c.zhenpaiPropPacksOf(configID)
-	if len(packs) == 0 {
+	fields, ok := c.itemFields[configID]
+	if !ok || (len(fields.propPacks) == 0 && len(fields.skillPacks) == 0) {
 		return ""
 	}
 	type affixEntry struct {
 		PackRec   int `json:"pack_rec"`
 		PropBuilt int `json:"prop_built"`
+		Kind      int `json:"kind"`
 	}
-	entries := make([]affixEntry, 0, len(packs))
-	for _, packID := range packs {
-		entries = append(entries, affixEntry{PackRec: 0, PropBuilt: packID})
+	entries := make([]affixEntry, 0, len(fields.propPacks)+len(fields.skillPacks))
+	for _, packID := range fields.propPacks {
+		entries = append(entries, affixEntry{PackRec: 0, PropBuilt: packID, Kind: 1})
+	}
+	for _, packID := range fields.skillPacks {
+		entries = append(entries, affixEntry{PackRec: 0, PropBuilt: packID, Kind: 2})
 	}
 	encoded, err := json.Marshal(entries)
 	if err != nil {
@@ -794,6 +815,100 @@ func (c *randomEquipCatalog) rollTreasure(configID string, rnd *rand.Rand) (item
 	return snapshot, nil
 }
 
+// skillStoreTaoLu skillstore 条目的 TaoLu 套路 id（洗炼计费键；空=不在
+// hhttreasuretaolu [taolu] 表）。
+func (c *randomEquipCatalog) skillStoreTaoLu(storeID int) string {
+	return c.skstore[storeID].taolu
+}
+
+// treasureWashPool 宝物模板包候选条目并集（kind 1=属性/2=技能）。
+// 洗炼与首掷同池（前代服 kept/rolled 行为参照 _r43_full.txt）。
+func (c *randomEquipCatalog) treasureWashPool(configID string, kind int) ([]tstoreEntry, error) {
+	fields, ok := c.itemFields[configID]
+	if !ok || fields.templateID == 0 {
+		return nil, fmt.Errorf("treasure %s: no template", configID)
+	}
+	packs := c.templates[fields.templateID]
+	if len(packs) == 0 {
+		return nil, fmt.Errorf("treasure %s: template %d absent", configID, fields.templateID)
+	}
+	var pool []tstoreEntry
+	for _, packID := range packs {
+		pack, ok := c.tstore[packID]
+		if !ok {
+			continue
+		}
+		for _, entry := range pack.entries {
+			if entry.kind == kind {
+				pool = append(pool, entry)
+			}
+		}
+	}
+	if len(pool) == 0 {
+		return nil, fmt.Errorf("treasure %s: no kind-%d pool", configID, kind)
+	}
+	return pool, nil
+}
+
+// rollTreasurePropsForWash 属性洗：同一模板池均匀不放回抽 count 条并按
+// limitelist 值域重掷（锁定行的保留与前置排序由调用方负责——总数不变，
+// 锁定行原样保留）。
+func (c *randomEquipCatalog) rollTreasurePropsForWash(configID string, count int, rnd *rand.Rand) ([]randomPropLine, error) {
+	if count <= 0 {
+		return nil, nil
+	}
+	fields := c.itemFields[configID]
+	pool, err := c.treasureWashPool(configID, 1)
+	if err != nil {
+		return nil, err
+	}
+	chosen := pickEntries(pool, count, rnd)
+	rolled := make([]randomPropLine, 0, len(chosen))
+	for _, entry := range chosen {
+		value, err := c.rollLimitValue(c.propstore[entry.id].limitNo, entry.ranges, fields.level, fields.colorLevel, rnd)
+		if err != nil {
+			continue
+		}
+		rolled = append(rolled, randomPropLine{PropID: entry.id, Value: value})
+	}
+	if len(rolled) == 0 {
+		return nil, fmt.Errorf("treasure %s: prop wash rolled nothing", configID)
+	}
+	return rolled, nil
+}
+
+// rollTreasureSkillForWash 武学洗：技能池重掷主武学条。skillType 池语义
+//（老界面 0/1、新界面 2/3 → 门派/江湖）：江湖=SubSkill 前缀 CS_jh_*，
+// 门派=其余——启发式口径，官方过滤规则未见于资源，待抓包校正。
+func (c *randomEquipCatalog) rollTreasureSkillForWash(configID string, skillType int, rnd *rand.Rand) (randomSkillLine, error) {
+	fields := c.itemFields[configID]
+	pool, err := c.treasureWashPool(configID, 2)
+	if err != nil {
+		return randomSkillLine{}, err
+	}
+	wantJianghu := skillType == 1 || skillType == 3
+	var filtered []tstoreEntry
+	for _, entry := range pool {
+		sub := ""
+		if store, ok := c.skstore[entry.id]; ok && len(store.subs) > 0 {
+			sub = store.subs[0][0]
+		}
+		isJianghu := strings.HasPrefix(sub, "CS_jh_")
+		if isJianghu == wantJianghu {
+			filtered = append(filtered, entry)
+		}
+	}
+	if len(filtered) == 0 {
+		return randomSkillLine{}, fmt.Errorf("treasure %s: no %s skill pool", configID, map[bool]string{true: "jianghu", false: "school"}[wantJianghu])
+	}
+	entry := filtered[rnd.Intn(len(filtered))]
+	value, err := c.rollLimitValue(c.skstore[entry.id].limitNo, nil, fields.level, fields.colorLevel, rnd)
+	if err != nil {
+		return randomSkillLine{}, err
+	}
+	return randomSkillLine{StoreID: entry.id, Value: value}, nil
+}
+
 // rollLimitValue 值域 roll：显式行号集（templatestore "1=0|51,52,…"）均匀取
 // 一行；-1 走通用规则 maxalvl[ilvl][qlvl]；行内 [min,max] 均匀取整。
 func (c *randomEquipCatalog) rollLimitValue(limitNo int, rows []int, ilvl, qlvl int, rnd *rand.Rand) (float64, error) {
@@ -856,7 +971,10 @@ func (c *randomEquipCatalog) rollWawa(configID string, rnd *rand.Rand) (itemRand
 	}
 	if base, ok := rollThousandth(c.baseRul[baseRule], rnd); ok {
 		if value, ok := c.baseLvl[fields.colorLevel][fields.level*10000+base]; ok {
-			snapshot.PropRows = append(snapshot.PropRows, randomPropLine{PropID: base, Value: float64(value), Flag: 1})
+			// 官方方言（capture-players timeline obj=1-30..33）：基础行
+			// [propID,value,0,0,0,0]——flag=0 无品质前缀；flag=1 会让客户端
+			// 拼 ui.newtreasure.quality_<品质> 键，quality=0 无词条直接露键名。
+			snapshot.PropRows = append(snapshot.PropRows, randomPropLine{PropID: base, Value: float64(value)})
 		} else {
 			return snapshot, fmt.Errorf("wawa %s: baseproplevel_%d[%d][%d] absent", configID, fields.colorLevel, base, fields.level)
 		}
@@ -914,4 +1032,11 @@ func (c *randomEquipCatalog) randomEquipKind(configID string) int {
 		return randomKindWawa
 	}
 	return randomKindNone
+}
+
+// hasTemplatePacks 是否带固定模板包（@Prop/SkillModifyPackRec）——此类物品
+// 词条走 record 394/395 官方通道，PropBuilt 让位 EffectPackID（互斥守护）。
+func (c *randomEquipCatalog) hasTemplatePacks(configID string) bool {
+	fields, ok := c.itemFields[configID]
+	return ok && (len(fields.propPacks) > 0 || len(fields.skillPacks) > 0)
 }

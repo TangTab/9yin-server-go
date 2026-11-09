@@ -191,17 +191,18 @@ func neiGongBindPropertyFrame(value string) ([]byte, error) {
 
 // pushSavedCustomizing 推存档个性配置（无档零帧：客户端保持默认并自行
 // 上传基线）。705 是连接级配置对象，不随 0x0C 切图重置，无需重推。
+//
+// 2026-11-09 停推（官服镜像）：官服 c/jn/a 三份抓包全程 705 下行恒 0
+// ——官服客户端本地自存配置（switch_mode 落 systeminfo.ini），从不靠
+// 服务端恢复。更关键的是真机抓包实证（49166 会话）：客户端
+// on_parser_customizing（custom_handler.lua:3959）每收一帧 705 就强制
+// game_config_info.game_control_mode=0 与 camera_value=0，把引擎控制
+// 对象打回传统 3D（左键=调视角），而 operate_control_mode 仍=1（设置
+// 界面照显九阴特色）——表象即「点击地面零输出、WASD 正常」。705 回推
+// 是 fork 客户端（本地不落盘）的兼容需求，官服客户端不需要且被它破坏。
 func pushSavedCustomizing(conn sceneMessageConnection, config string) error {
-	if config == "" {
-		return nil
-	}
-	frame, err := customizingFrame(config)
-	if err != nil {
-		return fmt.Errorf("encode customizing frame: %w", err)
-	}
-	if err := conn.WriteFrame(frame); err != nil {
-		return fmt.Errorf("send customizing frame: %w", err)
-	}
+	_ = conn
+	_ = config
 	return nil
 }
 

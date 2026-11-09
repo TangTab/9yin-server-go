@@ -82,6 +82,12 @@
           style="min-width: 90px; width: 90px" />
         <button onclick="grantItem(false)">加入对应背包</button><button onclick="grantItem(true)">立即穿戴</button>
         <div id="item-hint" class="muted"></div>
+        <p class="muted">
+          宝物洗炼（发放宝物后开窗，火浣台宝物走老界面、TersureType 0..2 走
+          新界面；洗炼消耗按 hhttreasuretaolu 表：古谱扣火浣台、普通扣碎银）。
+        </p>
+        <button onclick="tersureWashOpen('old')">打开洗炼·老界面（属性/武学）</button><button
+          onclick="tersureWashOpen('new')">打开洗炼·新界面（主武学）</button>
       </section>
       <section>
         <h2>时装 / 身份装发放</h2>

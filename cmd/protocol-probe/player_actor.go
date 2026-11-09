@@ -18,26 +18,27 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-// fork 对象 id 方案（docs/fork-object-id-migration.md）：玩家 =
-// (1, 角色 DB id)。
-// 0x0B PlayerEntry 首携此对，客户端据此绑定自体化身并做移动/接近
-// 子系统的高位类型位校验；owner=1 是 NPC 专属位（51357 实证玩家
-// owner=1 会被当 NPC 实体导致进世界 10s 超时）。会话变量而非 const：
-// 角色装载时经 setPlayerWireIdentity 按 role id 定值；默认对（无 DB
-// 场景/测试）owner 取 618（首个本地角色）。
+// fork 对象 id 方案（docs/id-system-analysis.md §5/§6，权威=fork exe
+// 9yin-game-native-menu.exe 抓包 127-0-0-1-57378 真机进游戏会话）：
+// 玩家 = (0x11000001, 0x7A5C0B) 常量对。0x0B PlayerEntry 首携此对，
+// 客户端据此绑定自体化身并做移动/接近子系统的高位类型位校验。
+// 此前真机三连败的重新解读：51357=(0x11000001,1) 败在 owner=1 撞
+// NPC 专属位；49925=(0x07000001,618) 败在官服 0x07 段非本客户端方言；
+// （1,1) 基线能进但 id 校验门全关。fork 的精确对此前从未上过真机——
+// "obj 必须恒 1"的旧结论作废，本对即 fork 逐字节实证的可进游戏对。
+// 会话变量而非 const：留 per-role 演进口；默认对（无 DB 场景/测试）
+// 即 fork 常量。
 var (
-	playerObjectID uint32 = 1
-	playerOwnerID  uint32 = 1
+	playerObjectID uint32 = 0x11000001
+	playerOwnerID  uint32 = 0x7A5C0B
 )
 
-// setPlayerWireIdentity 角色装载时定玩家 (obj, owner)：obj 恒 1（本客户端
-// 构建把自体硬绑 obj=1——49925/51357 双证：obj≠1 即进世界 10s 超时，
-// 与 owner 无关），owner = 角色 DB id（≠1 即非 NPC 位；移动子系统若验
-// owner 这是唯一可动的自由度——验证中）。
+// setPlayerWireIdentity 角色装载时定玩家 (obj, owner)：当前照抄 fork
+// 常量对（fork 抓包实证其客户端不验 owner 取值规则，只验配对合法
+// 性）；roleID 参数保留为将来 per-role 分配的接入口，暂不参与取值。
 func setPlayerWireIdentity(roleID uint32) {
-	playerObjectID = 1
-	playerOwnerID = 1 // 分离实验 C：玩家回到 (1,1)，NPC 保持 0x1100 段——
-	// 若此版进不了游戏 ⇒ 本客户端不认 0x1100 NPC 物化（推翻 55866 同构假设）
+	playerObjectID = 0x11000001
+	playerOwnerID = 0x7A5C0B
 	_ = roleID
 }
 
@@ -285,6 +286,10 @@ type playerActor struct {
 	// rushStatePingAt：官服状态四连（586/645/646/750）上次下发时刻——
 	// 官服全程 ~3s 周期重发，冲锋接近段按此节流补发（锁 p.mu）。
 	rushStatePingAt time.Time
+	// moveEchoWalking 官服移动回显状态机（技能.pcapng §一）：state7↔4
+	// 走停迁移沿发状态四连，同态重发（追怪改向/在途重报）不重发
+	//（锁 p.mu）。
+	moveEchoWalking bool
 	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
 	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
 	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。
@@ -294,6 +299,9 @@ type playerActor struct {
 	visualSex     byte // 武器外观解析用（登录装载时回填）
 	lastItemUseAt time.Time
 	qingGongExtra map[string]struct{} // 秘籍习得的非 starter 轻功（View46 追加行去重）
+	// tersure 宝物洗炼会话（688 主链：放入锁 0 起、解锁 1 止；pending
+	// 候选未存即丢——重登后客户端重开界面重洗）。p.mu 保护。
+	tersure tersureWashSession
 	// 轻功经济域（fork Java QingGongHandler/PlayerActor，2026-11-07）：
 	// 持续型轻功（UseType=1：踏波行/上天梯/壁虎游墙/轻身缓降）挂秒耗
 	// 租约，官方 3s 分档回复在租约期暂停；即时型（UseType=0）引擎逐帧
@@ -700,6 +708,46 @@ func (p *playerActor) learnSkill(configID string, level int32) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.learnedSkills[configID] = level
+}
+
+// learnedSkillsSnapshot 返回已学表的副本（GM learn_all_taolu 满级计算用）。
+func (p *playerActor) learnedSkillsSnapshot() map[string]int32 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	snapshot := make(map[string]int32, len(p.learnedSkills))
+	for id, level := range p.learnedSkills {
+		snapshot[id] = level
+	}
+	return snapshot
+}
+
+// replaceLearnedSkills 整表替换已学技能等级（GM learn_all_taolu 满级覆写 /
+// forget_all_taolu 基线重置）。
+func (p *playerActor) replaceLearnedSkills(levels map[string]int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.learnedSkills = levels
+}
+
+// skillViewRowOrder 按行号序返回 View40 行的 ConfigID（下标=行号-1；
+// GM 等级帧按行序逐条下发用）。
+func (p *playerActor) skillViewRowOrder() []string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	order := make([]string, len(p.skillViewRows))
+	for id, row := range p.skillViewRows {
+		if row >= 1 && int(row) <= len(order) {
+			order[row-1] = id
+		}
+	}
+	return order
+}
+
+// progressBookCount 已收录内功书数（GM learn_all_neigong 回执用）。
+func (p *playerActor) progressBookCount() int {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return len(p.progress.books)
 }
 
 // mergeDBLearnedSkills 把登录装载的 role_skills 已学集并入释放闸

@@ -342,7 +342,7 @@
 | 658 | CLIENT_CUSTOMMSG_OFFLINE_BUY_OTHERONE_STALL | `custom_stall_buy_from_stall(wstr,str,int,i64)` |
 | 685 | CLIENT_CUSTOMMSG_BEGIN_COLLECT_EQUIP | `custom_equipblend_collect(int,int)` |
 | 687 | CLIENT_CUSTOMMSG_COLLECT_EQUIP | `custom_collect_equip(int,...)` |
-| 688 | CLIENT_CUSTOMMSG_TERSURE | `custom_tersure_lock(int,int,int)`; `custom_tersure_unlock(int,int,int)`; `custom_tersure_target_lock(int,int,int)`; `custom_tersure_target_unlock(int,int,int)` +25 |
+| 688 | CLIENT_CUSTOMMSG_TERSURE | `custom_tersure_lock(int,int,int)`; `custom_tersure_unlock(int,int,int)`; `custom_tersure_target_lock(int,int,int)`; `custom_tersure_target_unlock(int,int,int)` +25。**2026-11-10 已接线主链**（tersure_wash.go：0/1/6/7/8/9/10/11/12/13 两套洗炼界面；开窗=S2C 数字 517+功能号 899000008/21，result=命令名 `on_custom_show_tersuer_result`；其余子命令日志静默） |
 | 689 | CLIENT_CUSTOMMSG_ATTIRE_EQUIP_COPY | `custom_attire_equip_copy_msg(str,int,int)` |
 | 692 | CLIENT_CUSTOMMSG_ATTIRE_EQUIP_BLEND | `custom_attire_equip_blend(int,str)` |
 | 693 | CLIENT_CUSTOMMSG_LINGXIAO_ZHIZUN | `custom_linxiao_zhizun(int,...)` |

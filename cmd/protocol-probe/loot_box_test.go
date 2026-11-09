@@ -193,7 +193,7 @@ func TestKillAttachesLootToCorpse(t *testing.T) {
 	run, view, conn, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	now := time.Unix(13000, 0)
 	wireIDBefore := run.nextWireID
 	outcome, err := view.applySelectedSkillDamage(999999, now)
@@ -268,7 +268,7 @@ func TestDropBoxOpenPickCloseFlow(t *testing.T) {
 	run, view, conn, player := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	now := time.Unix(14000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
@@ -280,7 +280,7 @@ func TestDropBoxOpenPickCloseFlow(t *testing.T) {
 	firstItem := box.contents[0]
 
 	openedBase := len(conn.Frames())
-	if _, err := view.objectRequest(clientObjectRequest{Sequence: 7, ObjectID: forkNPCID(2), OwnerID: 1}); err != nil {
+	if _, err := view.objectRequest(clientObjectRequest{Sequence: 7, ObjectID: forkNPCID(2), OwnerID: npcTestOwner(2)}); err != nil {
 		t.Fatalf("open drop box on corpse: %v", err)
 	}
 	openFrames := frameOpcodes(conn.Frames()[openedBase:])
@@ -347,7 +347,7 @@ func TestDropBoxCloseKeepsBox(t *testing.T) {
 	run, view, conn, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	now := time.Unix(15000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
@@ -355,7 +355,7 @@ func TestDropBoxCloseKeepsBox(t *testing.T) {
 		t.Fatalf("kill settlement err=%v killed=%t", err, killed)
 	}
 	view.relayNPCKillFrame(id, frame, "tester")
-	if _, err := view.objectRequest(clientObjectRequest{Sequence: 8, ObjectID: forkNPCID(2), OwnerID: 1}); err != nil {
+	if _, err := view.objectRequest(clientObjectRequest{Sequence: 8, ObjectID: forkNPCID(2), OwnerID: npcTestOwner(2)}); err != nil {
 		t.Fatalf("open drop box on corpse: %v", err)
 	}
 	base := len(conn.Frames())
@@ -379,7 +379,7 @@ func TestDropBoxCloseKeepsBox(t *testing.T) {
 		t.Fatal("close must keep the corpse registered")
 	}
 	// 再次打开：行仍在（未拾取）。
-	if _, err := view.objectRequest(clientObjectRequest{Sequence: 9, ObjectID: forkNPCID(2), OwnerID: 1}); err != nil {
+	if _, err := view.objectRequest(clientObjectRequest{Sequence: 9, ObjectID: forkNPCID(2), OwnerID: npcTestOwner(2)}); err != nil {
 		t.Fatalf("reopen drop box: %v", err)
 	}
 	if view.openDropBox == nil || len(view.openDropBox.slots) == 0 {
@@ -397,7 +397,7 @@ func TestLootBoxExpiresAfterTTL(t *testing.T) {
 	run, view, conn, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	now := time.Unix(16000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
@@ -440,7 +440,7 @@ func TestLootBoxZeroTTLKeepsBox(t *testing.T) {
 	run, view, _, _ := newRefreshTestRun(t)
 	defer view.close()
 
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	now := time.Unix(16000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	if err != nil || !outcome.killed {
@@ -511,7 +511,7 @@ func TestCorpseLootDefersRespawn(t *testing.T) {
 
 	now := time.Unix(17000, 0)
 	run.refreshTick(now) // 落定扫描基线
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	if err != nil || !outcome.killed {
 		t.Fatalf("kill settlement err=%v killed=%t", err, outcome.killed)
@@ -540,7 +540,7 @@ func TestCorpseLootDefersRespawn(t *testing.T) {
 
 	// 拾空清尸 → removed；下一 tick 按目录行重注册（0x0D+0x1F）。
 	run.mu.Lock()
-	run.removeLootBoxLocked(nil, forkNPCID(2), 1)
+	run.removeLootBoxLocked(nil, forkNPCID(2), npcTestOwner(2))
 	run.mu.Unlock()
 	if rec, ok := run.deadNPCs[forkNPCID(2)]; !ok || !rec.removed {
 		t.Fatalf("loot cleanup must mark corpse removed: %+v ok=%t", rec, ok)
@@ -573,7 +573,7 @@ func TestChestMonsterSpawnsBoxEntity(t *testing.T) {
 	monster.resolved.Extensions["template.AIEditorPackID"] = "700"
 	run.catalog[0] = monster
 
-	view.selectedObject, view.selectedOwner = forkNPCID(2), 1
+	view.selectedObject, view.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	now := time.Unix(18000, 0)
 	outcome, err := view.applySelectedSkillDamage(999999, now)
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed

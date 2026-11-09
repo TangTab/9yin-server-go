@@ -268,7 +268,7 @@ func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
 }
 
 func testWorldEntity(id uint32) worldcore.Entity {
-	return worldcore.Entity{ID: worldcore.EntityID(id), OwnerID: 1, Kind: worldcore.EntityNPC}
+	return worldcore.Entity{ID: worldcore.EntityID(id), OwnerID: worldcore.EntityID(npcOwnerID(forkNPCID(id))), Kind: worldcore.EntityNPC}
 }
 
 type discardMessageConnection struct{}
@@ -326,7 +326,7 @@ func TestParseClientObjectRequest(t *testing.T) {
 }
 
 func TestServerMovingLayout(t *testing.T) {
-	msg := serverMoving(forkNPCID(3494), 1, MotionState{DestX: 1.25, DestY: 2.5, DestZ: 3.75, DestOrient: 4, Extra: 7})
+	msg := serverMoving(forkNPCID(3494), npcTestOwner(3494), MotionState{DestX: 1.25, DestY: 2.5, DestZ: 3.75, DestOrient: 4, Extra: 7})
 	if len(msg) != 45 || msg[0] != 0x20 {
 		t.Fatalf("moving header len=%d opcode=%#x", len(msg), msg[0])
 	}
@@ -350,7 +350,7 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 	if err := lifecycle.registerNPCOnRun(3494, testNPCSpawn()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494)}); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
@@ -362,11 +362,11 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 	if len(frame) != 22 || frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != playerObjectID || binary.LittleEndian.Uint16(frame[12:]) != 414 { // LastObject(官方玩家域)
 		t.Fatalf("LastObject frame=%x", frame)
 	}
-	if got := binary.LittleEndian.Uint64(frame[14:]); got != uint64(forkNPCID(3494))|uint64(1)<<32 {
+	if got := binary.LittleEndian.Uint64(frame[14:]); got != uint64(forkNPCID(3494))|uint64(npcTestOwner(3494))<<32 {
 		t.Fatalf("LastObject reference=%#x", got)
 	}
 	if auto := frames[1]; len(auto) != 22 || binary.LittleEndian.Uint16(auto[12:]) != propAutoSelectObject ||
-		binary.LittleEndian.Uint64(auto[14:]) != uint64(forkNPCID(3494))|uint64(1)<<32 {
+		binary.LittleEndian.Uint64(auto[14:]) != uint64(forkNPCID(3494))|uint64(npcTestOwner(3494))<<32 {
 		t.Fatalf("AutoSelectObject frame=%x", auto)
 	}
 	if got := binary.LittleEndian.Uint32(frames[2][4:]); frames[2][0] != 0x1E || frames[2][3] != 2 || got != 4 {
@@ -375,7 +375,7 @@ func TestObjectRequestSetsPlayerLastObjectAndConfiguredTalkMenu(t *testing.T) {
 	if got := binary.LittleEndian.Uint32(frames[len(frames)-1][4:]); frames[len(frames)-1][0] != 0x1E || frames[len(frames)-1][3] != 2 || got != 7 {
 		t.Fatalf("cinematic end frame=%x", frames[len(frames)-1])
 	}
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494)}); err != nil {
 		t.Fatal(err)
 	}
 	if got := len(conn.Frames()); got != 6 {
@@ -399,7 +399,7 @@ func TestObjectRequestSelectsCombatNPCWithoutDialogue(t *testing.T) {
 	if got := meta4455.interaction; got != npcInteractionCombat {
 		t.Fatalf("combat interaction=%s", got)
 	}
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(4455), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(4455), OwnerID: npcTestOwner(4455)}); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
@@ -408,19 +408,19 @@ func TestObjectRequestSelectsCombatNPCWithoutDialogue(t *testing.T) {
 	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
 		t.Fatalf("combat click frames=%x; want LastObject+AutoSelectObject", frames)
 	}
-	if got := binary.LittleEndian.Uint64(frames[0][14:]); got != uint64(forkNPCID(4455))|uint64(1)<<32 {
+	if got := binary.LittleEndian.Uint64(frames[0][14:]); got != uint64(forkNPCID(4455))|uint64(npcTestOwner(4455))<<32 {
 		t.Fatalf("combat LastObject=%#x", got)
 	}
 	if got := binary.LittleEndian.Uint16(frames[1][12:]); got != propAutoSelectObject {
 		t.Fatalf("combat AutoSelectObject property index=%d", got)
 	}
-	if got := binary.LittleEndian.Uint64(frames[1][14:]); got != uint64(forkNPCID(4455))|uint64(1)<<32 {
+	if got := binary.LittleEndian.Uint64(frames[1][14:]); got != uint64(forkNPCID(4455))|uint64(npcTestOwner(4455))<<32 {
 		t.Fatalf("combat AutoSelectObject=%#x", got)
 	}
 	if lifecycle.lastMenuObject != 0 {
 		t.Fatalf("combat click opened menu for object=%d", lifecycle.lastMenuObject)
 	}
-	if targetID, targetOwner, ok := lifecycle.selectedCombatTarget(); !ok || targetID != forkNPCID(4455) || targetOwner != 1 {
+	if targetID, targetOwner, ok := lifecycle.selectedCombatTarget(); !ok || targetID != forkNPCID(4455) || targetOwner != npcTestOwner(4455) {
 		t.Fatalf("combat target=%d-%d ok=%t", targetID, targetOwner, ok)
 	}
 }
@@ -440,7 +440,7 @@ func TestObjectRequestDoesNotFabricateDialogueForUnconfiguredCivilian(t *testing
 	if got := meta4456.interaction; got != npcInteractionSelectOnly {
 		t.Fatalf("civilian interaction=%s", got)
 	}
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(4456), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(4456), OwnerID: npcTestOwner(4456)}); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
@@ -465,14 +465,14 @@ func TestObjectRequestOpensDepotViewAfterCinematicSelection(t *testing.T) {
 	entity.services = []npcService{{mark: 0x1002, label: "仓库", value: "1", source: "DepotID"}}
 	lifecycle.writeNpcMeta(worldcore.EntityID(forkNPCID(3494)), entity)
 
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494)}); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
 	if len(frames) != 6 || frames[0][0] != 0x10 || frames[2][0] != 0x1E {
 		t.Fatalf("depot click frames=%d, want LastObject+AutoSelectObject + cinematic talk: %x", len(frames), frames)
 	}
-	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: 1, FuncID: 807000000}); err != nil {
+	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494), FuncID: 807000000}); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
@@ -497,14 +497,14 @@ func TestObjectRequestOpensShopViewAfterCinematicSelection(t *testing.T) {
 	entity.services = []npcService{{mark: 0x1001, label: "商店", value: "Shop_yaopin_00100", source: "ShopID"}}
 	lifecycle.writeNpcMeta(worldcore.EntityID(forkNPCID(3494)), entity)
 
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494)}); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
 	if len(frames) != 6 || frames[0][0] != 0x10 || frames[2][0] != 0x1E {
 		t.Fatalf("shop click frames=%d, want LastObject+AutoSelectObject + cinematic talk: %x", len(frames), frames)
 	}
-	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: 1, FuncID: 805000000}); err != nil {
+	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494), FuncID: 805000000}); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
@@ -545,14 +545,14 @@ func TestMultiServiceNPCUsesNativeMenuThenSelectedShopView(t *testing.T) {
 	}
 	lifecycle.writeNpcMeta(worldcore.EntityID(forkNPCID(3494)), entity)
 
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494)}); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
 	if len(frames) != 7 || frames[0][0] != 0x10 || frames[2][0] != 0x1E {
 		t.Fatalf("multi-service click must send LastObject+AutoSelectObject + cinematic menu: %x", frames)
 	}
-	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: 1, FuncID: 805000000}); err != nil {
+	if err := lifecycle.selectNPCMenu(clientObjectRequest{Sequence: 2, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494), FuncID: 805000000}); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
@@ -562,7 +562,7 @@ func TestMultiServiceNPCUsesNativeMenuThenSelectedShopView(t *testing.T) {
 }
 
 func TestServerMenuUsesCurrentClientLayout(t *testing.T) {
-	msg, err := serverMenu(forkNPCID(3494), 1, []serverMenuItem{{Type: 7, Mark: 0x1234, Content: "测试"}})
+	msg, err := serverMenu(forkNPCID(3494), npcTestOwner(3494), []serverMenuItem{{Type: 7, Mark: 0x1234, Content: "测试"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -572,7 +572,7 @@ func TestServerMenuUsesCurrentClientLayout(t *testing.T) {
 	if got := binary.LittleEndian.Uint32(msg[1:]); got != forkNPCID(3494) {
 		t.Fatalf("object=%d", got)
 	}
-	if got := binary.LittleEndian.Uint32(msg[5:]); got != 1 {
+	if got := binary.LittleEndian.Uint32(msg[5:]); got != npcTestOwner(3494) {
 		t.Fatalf("owner=%d", got)
 	}
 	if got := binary.LittleEndian.Uint16(msg[9:]); got != 1 {
@@ -877,14 +877,14 @@ func TestSceneObjectTransformProperties(t *testing.T) {
 
 func TestServerLocation(t *testing.T) {
 	transform := worldcore.Transform{X: 738.09, Y: 23.79, Z: 676.88, Orient: 0.16}
-	msg := serverLocation(forkNPCID(1487), 1, transform)
+	msg := serverLocation(forkNPCID(1487), npcTestOwner(1487), transform)
 	if len(msg) != 25 || msg[0] != 0x1F {
 		t.Fatalf("ServerLocation header=%x len=%d", msg, len(msg))
 	}
 	if got := binary.LittleEndian.Uint32(msg[1:]); got != forkNPCID(1487) {
 		t.Fatalf("object id=%d", got)
 	}
-	if got := binary.LittleEndian.Uint32(msg[5:]); got != 1 {
+	if got := binary.LittleEndian.Uint32(msg[5:]); got != npcTestOwner(1487) {
 		t.Fatalf("owner id=%d", got)
 	}
 	for i, want := range []float32{transform.X, transform.Y, transform.Z, transform.Orient} {
@@ -923,7 +923,7 @@ func newTaskServiceLifecycle(t *testing.T, conn *captureMessageConnection, host 
 	entity, _ := lifecycle.npcMeta(worldcore.EntityID(forkNPCID(3494)))
 	entity.services = []npcService{{mark: markTask, label: "任务", source: "task"}}
 	lifecycle.writeNpcMeta(worldcore.EntityID(forkNPCID(3494)), entity)
-	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: 1}); err != nil {
+	if _, err := lifecycle.objectRequest(clientObjectRequest{Sequence: 1, ObjectID: forkNPCID(3494), OwnerID: npcTestOwner(3494)}); err != nil {
 		t.Fatal(err)
 	}
 	return lifecycle
@@ -982,3 +982,7 @@ func TestNpcServiceWithoutScriptStaysUnimplemented(t *testing.T) {
 		t.Fatalf("without script the task service must stay unimplemented, got %v", err)
 	}
 }
+
+
+// npcTestOwner 测试侧 NPC owner 期望值（随 npcOwnerID 官服化）。
+func npcTestOwner(bareID uint32) uint32 { return npcOwnerID(forkNPCID(bareID)) }

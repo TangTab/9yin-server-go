@@ -9,9 +9,14 @@ import (
 	"github.com/local/9yin-go-server/internal/role"
 )
 
-// sendEntryScene 是当前客户端的 0x0B 场景档案，既用于初次角色进入，也
-// 用于现场 0x0C 重进入。属性 schema（0x09）是连接级作用域，重进入时
-// 刻意不重发。
+// sendEntryScene 0x0B 场景档案。2026-11-10 真机教训：**0x0B 属性 idx
+// 按连接收到的 0x09 表解析**——官服样本（c/登陆.pcapng）用官服表 idx
+// 1447/1448 写 ConfigID/Resource，但本服客户端收到的是本服表（idx7=
+// ConfigID/idx8=Resource）；照抄官服 idx 会把 Config 解析成 ClineNpcFile
+// → 场景加载失败（真机实证，已回滚）。fork 版布局在本服表下自洽。
+// 官服版与本版的实质差异只剩：attrCount 4 vs 3（官服多 idx178 Name 常量
+// 段+idx1468 u16）、尾部 99/MaxVisuals、场景号=每次进场新流水（非查表
+// key，无害）。寻路不初始化的根因不在 0x0B 属性 idx——继续排查。
 func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 	entry := make([]byte, 15, 96)
 	entry[0] = 0x0B
@@ -25,8 +30,6 @@ func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 	entry = appendStringProperty(entry, 7, scene.Config)
 	entry = appendStringProperty(entry, 8, scene.Resource)
 	entry = binary.LittleEndian.AppendUint16(entry, 99)
-	// MaxVisuals 官方语义=最大可见对象数（u16，官方真服发 100；capture-fxgame-op2 0x0B 实证），取值范围是 0 到 65535（即 0 到 2¹⁶-1）?,
-	// 这里设置 1000000 ?
 	entry = binary.LittleEndian.AppendUint32(entry, 200)
 	return conn.WriteFrame(entry)
 }

@@ -65,6 +65,12 @@ const (
 	propPlayerShotWpn  uint16 = 398  // ShotWeapon String
 	propPlayerActionSt uint16 = 406  // ActionSet String
 	propItemPhoto      uint16 = 184  // Photo String（玩家/视图域末次出现）
+	// 洗炼域（0x09 表视图域；洗炼界面 QueryProp 校验用，缺发会被
+	// form_treasure_reset[_add] 拒收或报 nil 比较）。
+	propLockStatus       uint16 = 1899 // LockStatus Int32
+	propTersureType      uint16 = 1972 // TersureType Int32（宝物 0..4 五类池）
+	propTaoLuValue       uint16 = 1976 // TaoLuValue Int32
+	propSecondTaoLuCnt   uint16 = 1980 // SecondTaoLuCounts Int32
 )
 
 // serverViewRemove 编码 SERVER_VIEW_REMOVE（0x19）：u16 视图 + u16 槽位。
@@ -300,8 +306,11 @@ func equipmentViewAdd(roleID role.RoleID, equip equipRow) ([]byte, error) {
 		viewByte(propItemLevel, statLevel(stat)),
 	)
 	// 精炼词缀（PropBuilt）与特效包（EffectPackID）互斥；词缀非空下发。
+	// 模板包物品（镇派兵器等：equipment.ini @Prop/SkillModifyPackRec）的
+	// 词条走物品 record 394/395（官方方言，random_equip_push.go），PropBuilt
+	// 让位特效行——旧库残留的包列表 affixes 同步吞掉。
 	switch {
-	case equip.propBuilt != "":
+	case equip.propBuilt != "" && !randomEquipCatalogOf().hasTemplatePacks(equip.configID):
 		props = append(props, viewString(propPropBuilt, equip.propBuilt))
 	case stat != nil && stat.effectPackID != 0:
 		props = append(props, viewInt(propEffectPackID, stat.effectPackID))
@@ -349,8 +358,36 @@ func bagRowViewAdd(roleID role.RoleID, item bagRow) ([]byte, error) {
 		if stat != nil && stat.photo != "" {
 			props = append(props, viewString(propItemPhoto, stat.photo))
 		}
+		// 宝物行洗炼域属性（form_treasure_reset[_add] 放入校验：
+		// TersureType/BindStatus/ColorLevel/LockStatus/SecondTaoLuCounts）。
+		// BindStatus 原位覆写为 1（绑定，洗炼硬门槛；通用 6 项已带 0）；
+		// LockStatus 基线 0，锁定态由 688 会话经 0x10 isView=1 增量帧翻转。
+		if isTreasureEquipType(equipType) {
+			tersureType := int32(0)
+			if stat != nil {
+				tersureType = stat.tersureType
+			}
+			for i := range props {
+				if props[i].index == propBindStatus {
+					props[i] = viewInt(propBindStatus, 1)
+					break
+				}
+			}
+			props = append(props,
+				viewInt(propTersureType, tersureType),
+				viewInt(propLockStatus, 0),
+				viewInt(propTaoLuValue, 0),
+				viewInt(propSecondTaoLuCnt, 0),
+			)
+		}
 	}
 	return serverViewAdd(bagViewOf(item.viewID), uint16(item.slot), props)
+}
+
+// isTreasureEquipType 宝物类装备（Treasure=火浣台宝物、NewTreasure=翡翠
+// 娃娃；洗炼域属性按此判定）。
+func isTreasureEquipType(equipType string) bool {
+	return equipType == "Treasure" || equipType == "NewTreasure"
 }
 
 // itemCommonProps 通用 6 项：ConfigID/Amount=1/MaxAmount=1/ItemType/

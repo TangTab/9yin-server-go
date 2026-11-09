@@ -1100,11 +1100,94 @@ func handleMovementUpload(link sceneMessageConnection, player *playerActor, worl
 	x, y, z := values[3].Float32, values[4].Float32, values[5].Float32
 	orient := movementUploadOrient(values)
 	absorbClientPosition(world, x, y, z, orient)
-	if player == nil || !player.rushInFlightSnapshot() {
+	if player == nil {
+		return true, nil
+	}
+	if !player.rushInFlightSnapshot() {
+		// 官服移动应答方言（技能.pcapng §一）：逐帧 0x21 玩家回显 +
+		// 走↔停迁移状态四连——客户端等这对帧才执行点击移动。
+		echoPlayerMoveIntent(link, player, values, x, y, z, remote)
 		return true, nil
 	}
 	tryRushArrival(link, player, world, x, y, z, orient, remote)
 	return true, nil
+}
+
+// echoPlayerMoveIntent 官服移动应答（技能.pcapng §一 全样本实证）：每帧
+// 寻路族（id 高 16 位 0xA000——点击地面/地图点击/技能接近）与 WASD 族
+// （0x0000/0x3000）的 state7/4/6/8 回显一帧单条目 0x21（走帧
+// dest=(idx6, y, idx7)、角度=atan2(destX−x, destZ−z)、速度=idx8、朝向=
+// idx9；停帧 dest=上报终点、角度=朝向增量 idx6、速度/朝向=0）；state5
+// 跳跃双帧不回显。state7↔4 走停迁移沿先补发官服状态四连
+//（586/645/646/750——官服对每次点击起跑/到位停帧 +0~80ms 必发，
+// 64785 会话实证缺它客户端停滞不自走），同态重发只回 0x21（官服追怪
+// 改向五连重报无 ping）。冲锋在途段不回显（消费方为 tryRushArrival，
+// 官服该段位移走 c61/212 落地链）。
+func echoPlayerMoveIntent(link sceneMessageConnection, player *playerActor, values []clientCustomValue,
+	x, y, z float32, remote string) {
+	if len(values) < 7 || values[1].Type != 2 || values[2].Type != 2 || values[6].Type != 4 {
+		return
+	}
+	intentID := uint32(values[1].Int32)
+	state := values[2].Int32
+	echo := playerMoveEcho{objectID: playerObjectID, ownerID: playerOwnerID, intentID: intentID}
+	walking := false
+	switch state {
+	case 7, 6, 8: // 行进态（6/8=下落/滑翔变体，官服同回显）
+		if len(values) < 8 || values[7].Type != 4 {
+			return
+		}
+		echo.destX, echo.destY, echo.destZ = values[6].Float32, y, values[7].Float32
+		echo.angle = moveEchoAngle(echo.destX - x, echo.destZ - z)
+		if len(values) > 8 && values[8].Type == 4 {
+			echo.speed = values[8].Float32
+		}
+		echo.orient = movementUploadOrient(values)
+		walking = true
+	case 4: // 停帧：官服角度槽=朝向增量（0.07→ang=0.07 三证）
+		echo.destX, echo.destY, echo.destZ = x, y, z
+		echo.angle = values[6].Float32
+	default:
+		return
+	}
+	if !player.noteMoveEchoWalking(walking) {
+		if err := link.WriteFrame(serverAllDestPlayerEcho(echo)); err != nil {
+			log.Printf("%s: player move echo: %v", remote, err)
+		}
+		return
+	}
+	for _, ping := range officialStatePingFrames() {
+		if ping == nil {
+			continue
+		}
+		if err := link.WriteFrame(ping); err != nil {
+			log.Printf("%s: player move echo ping: %v", remote, err)
+			return
+		}
+	}
+	if err := link.WriteFrame(serverAllDestPlayerEcho(echo)); err != nil {
+		log.Printf("%s: player move echo: %v", remote, err)
+	}
+}
+
+// moveEchoAngle 官服移动角：atan2(dx, dz) 归一 [0, 2π)（技能.pcapng
+// 官服样本 0.07/2.12/5.21/4.69 四证——负角补 2π，如 -1.076→5.21）。
+func moveEchoAngle(dx, dz float32) float32 {
+	angle := float32(math.Atan2(float64(dx), float64(dz)))
+	if angle < 0 {
+		angle += 2 * float32(math.Pi)
+	}
+	return angle
+}
+
+// noteMoveEchoWalking 记录走停态并报告是否发生迁移（迁移=状态四连
+// 触发器；锁 p.mu）。
+func (p *playerActor) noteMoveEchoWalking(walking bool) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	transitioned := p.moveEchoWalking != walking
+	p.moveEchoWalking = walking
+	return transitioned
 }
 
 // movementUploadOrient 提取 msg15 的绝对朝向：仅 state7 长式带

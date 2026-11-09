@@ -131,8 +131,11 @@ func (s *inventoryStore) equips(ctx context.Context, roleID role.RoleID) ([]equi
 	}
 }
 
-// propBuiltOf 把 affixes JSON [{"pack_rec":0,"prop_built":id}] 解成协议
-// PropBuilt 串 "1,id;1,id"（四期装备词缀层）；空/坏 JSON 返回空串。
+// propBuiltOf 把 affixes JSON [{"pack_rec":0,"prop_built":id,"kind":N}] 解成
+// 协议 PropBuilt 串 "N,id;N,id"。段首数字是表类型列（tips_func_equip.lua
+// get_text_by_table_id：1=proppack 属性包 / 2=skillpack 套路威力包 / 3-5=
+// buff/equip/task 包）；kind 缺省按 1（Java 旧存档 [{"pack_rec":0,
+// "prop_built":id}] 兼容）。空/坏 JSON 返回空串。
 func propBuiltOf(affixes sql.NullString) string {
 	if !affixes.Valid || affixes.String == "" {
 		return ""
@@ -140,13 +143,18 @@ func propBuiltOf(affixes sql.NullString) string {
 	var entries []struct {
 		PackRec   int64 `json:"pack_rec"`
 		PropBuilt int64 `json:"prop_built"`
+		Kind      int64 `json:"kind"`
 	}
 	if err := json.Unmarshal([]byte(affixes.String), &entries); err != nil {
 		return ""
 	}
 	segments := make([]string, 0, len(entries))
 	for _, entry := range entries {
-		segments = append(segments, fmt.Sprintf("1,%d", entry.PropBuilt))
+		kind := entry.Kind
+		if kind < 1 || kind > 5 {
+			kind = 1
+		}
+		segments = append(segments, fmt.Sprintf("%d,%d", kind, entry.PropBuilt))
 	}
 	return strings.Join(segments, ";")
 }

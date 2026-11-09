@@ -8,6 +8,7 @@ package main
 // 原文逐行核实）。
 
 import (
+	"database/sql"
 	"encoding/binary"
 	"encoding/json"
 	"math"
@@ -152,19 +153,104 @@ func TestZhenpaiAffixesJSONShape(t *testing.T) {
 	c := &randomEquipCatalog{
 		itemFields: map[string]randomItemFields{
 			"sword_ytj_001": {propPacks: []int{95510, 95511, 95512, 95513}},
+			"blade_test": {
+				propPacks:  []int{95258, 95252},
+				skillPacks: []int{9659, 9679},
+			},
 		},
 		packRows: map[int][]propPackRow{}, conds: map[int]powerCond{}, formulas: map[int]string{},
 	}
-	encoded := c.zhenpaiAffixesJSON("sword_ytj_001")
+	encoded := c.zhenpaiAffixesJSON("blade_test")
 	var entries []struct {
 		PackRec   int `json:"pack_rec"`
 		PropBuilt int `json:"prop_built"`
+		Kind      int `json:"kind"`
 	}
 	if err := json.Unmarshal([]byte(encoded), &entries); err != nil {
 		t.Fatalf("decode affixes %q: %v", encoded, err)
 	}
-	if len(entries) != 4 || entries[0].PropBuilt != 95510 || entries[3].PropBuilt != 95513 {
-		t.Errorf("affixes = %+v want 4 packs 95510..95513", entries)
+	if len(entries) != 4 {
+		t.Fatalf("affixes = %+v want 4 entries", entries)
+	}
+	if entries[0].Kind != 1 || entries[1].Kind != 1 || entries[2].Kind != 2 || entries[3].Kind != 2 {
+		t.Errorf("kind 列 = %+v want 1,1,2,2", entries)
+	}
+	if got := c.zhenpaiPropBuiltString("blade_test"); got != "1,95258;1,95252;2,9659;2,9679" {
+		t.Errorf("propBuilt = %q want 1,95258;1,95252;2,9659;2,9679", got)
+	}
+	if got := c.zhenpaiPropBuiltString("sword_ytj_001"); got != "1,95510;1,95511;1,95512;1,95513" {
+		t.Errorf("倚天剑 propBuilt = %q（应无技能包段）", got)
+	}
+}
+
+func TestPropBuiltOfKindColumn(t *testing.T) {
+	// Java 旧存档（无 kind）按 1 还原；新 kind=2 段还原为 "2,id"。
+	legacy := propBuiltOf(sql.NullString{String: `[{"pack_rec":0,"prop_built":12345}]`, Valid: true})
+	if legacy != "1,12345" {
+		t.Errorf("legacy = %q want 1,12345", legacy)
+	}
+	mixed := propBuiltOf(sql.NullString{String: `[{"pack_rec":0,"prop_built":95258,"kind":1},{"pack_rec":0,"prop_built":9659,"kind":2}]`, Valid: true})
+	if mixed != "1,95258;2,9659" {
+		t.Errorf("mixed = %q want 1,95258;2,9659", mixed)
+	}
+}
+
+// frameSink 收集 WriteFrame 的帧（record 推送断言用）。
+type frameSink struct{ frames [][]byte }
+
+func (s *frameSink) WriteFrame(frame []byte) error {
+	s.frames = append(s.frames, append([]byte(nil), frame...))
+	return nil
+}
+
+func TestPushModifyPackRecordsFrames(t *testing.T) {
+	// 模板包词条官方通道：PropModifyPackRec(394) 属性包行 + SkillModifyPackRec(395)
+	// 技能包行，各一帧多行、单 int32 列；无包物品零帧。
+	c := &randomEquipCatalog{
+		itemFields: map[string]randomItemFields{
+			"blade_test":         {propPacks: []int{95258, 95259}, skillPacks: []int{9659, 9679, 9699}},
+			"plain_item":         {},
+		},
+	}
+	// 注入：先触发一次懒装载（Once 落定）再覆写全局字段——重置 Once 会
+	// 让下一次调用重新装载真表覆盖注入。
+	randomEquipCatalogOf()
+	old := randomEquipCat
+	randomEquipCat = c
+	defer func() { randomEquipCat = old }()
+
+	sink := &frameSink{}
+	pushModifyPackRecords(sink, viewDoll, 22, "blade_test")
+	if len(sink.frames) != 2 {
+		t.Fatalf("frames = %d want 2", len(sink.frames))
+	}
+	first := sink.frames[0]
+	if first[0] != 0x11 || first[1] != 1 {
+		t.Fatalf("header = % x", first[:2])
+	}
+	if rec := binary.LittleEndian.Uint16(first[10:]); rec != 394 {
+		t.Errorf("frame0 rec = %d want 394", rec)
+	}
+	if rows := binary.LittleEndian.Uint16(first[14:]); rows != 2 {
+		t.Errorf("frame0 rows = %d want 2", rows)
+	}
+	if v := binary.LittleEndian.Uint32(first[16:]); v != 95258 {
+		t.Errorf("frame0 row0 = %d want 95258", v)
+	}
+	if v := binary.LittleEndian.Uint32(first[20:]); v != 95259 {
+		t.Errorf("frame0 row1 = %d want 95259", v)
+	}
+	second := sink.frames[1]
+	if rec := binary.LittleEndian.Uint16(second[10:]); rec != 395 {
+		t.Errorf("frame1 rec = %d want 395", rec)
+	}
+	if rows := binary.LittleEndian.Uint16(second[14:]); rows != 3 {
+		t.Errorf("frame1 rows = %d want 3", rows)
+	}
+	empty := &frameSink{}
+	pushModifyPackRecords(empty, viewDoll, 22, "plain_item")
+	if len(empty.frames) != 0 {
+		t.Errorf("plain item frames = %d want 0", len(empty.frames))
 	}
 }
 
@@ -190,6 +276,16 @@ func randomCatalogForTest(t *testing.T) *randomEquipCatalog {
 
 func TestZhenpaiBandsAgainstRealTables(t *testing.T) {
 	c := randomCatalogForTest(t)
+	// PropBuilt 完整串：4 条件属性段（类型 1）+ 套路威力段（类型 2，
+	// 冷月刀 7 条；倚天剑无技能段）——官方 equipment.ini 逐字段。
+	if got, want := c.zhenpaiPropBuiltString("blade_leader_jyw_001"),
+		"1,95258;1,95259;1,95252;1,95253;2,9659;2,9679;2,9699;2,9719;2,9739;2,10562;2,12715"; got != want {
+		t.Errorf("冷月刀 PropBuilt = %q want %q", got, want)
+	}
+	if got, want := c.zhenpaiPropBuiltString("sword_ytj_001"),
+		"1,95510;1,95511;1,95512;1,95513"; got != want {
+		t.Errorf("倚天剑 PropBuilt = %q want %q", got, want)
+	}
 	cases := []struct {
 		config string
 		power  int
@@ -298,6 +394,10 @@ func TestRollWawaGrow(t *testing.T) {
 	}
 	if base.Value <= 0 {
 		t.Errorf("基础值 = %v 非正", base.Value)
+	}
+	// 官方方言：基础行后四列全 0（flag=1 会露 ui.newtreasure.quality_0 键名）。
+	if base.Flag != 0 || base.Quality != 0 || base.Level != 0 {
+		t.Errorf("基础行方言 = flag %d/quality %d/level %d want 全 0", base.Flag, base.Quality, base.Level)
 	}
 	for _, line := range snapshot.PropRows[1:] {
 		if line.Quality < 1 || line.Quality > 4 {

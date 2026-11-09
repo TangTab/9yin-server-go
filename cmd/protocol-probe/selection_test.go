@@ -32,7 +32,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		}}
 	}
 
-	if err := handleSelectTargetCustom(lifecycle, selectMsg(4456, 1), "test"); err != nil {
+	if err := handleSelectTargetCustom(lifecycle, selectMsg(4456, npcTestOwner(4456)), "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
@@ -43,14 +43,14 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 	}
 	lastObject, autoSelect := frames[0], frames[1]
 	if lastObject[0] != 0x10 || binary.LittleEndian.Uint16(lastObject[12:]) != 414 ||
-		binary.LittleEndian.Uint64(lastObject[14:]) != uint64(forkNPCID(4456))|uint64(1)<<32 {
+		binary.LittleEndian.Uint64(lastObject[14:]) != uint64(forkNPCID(4456))|uint64(npcTestOwner(4456))<<32 {
 		t.Fatalf("LastObject frame=%x", lastObject)
 	}
 	if autoSelect[0] != 0x10 || binary.LittleEndian.Uint16(autoSelect[12:]) != propAutoSelectObject ||
-		binary.LittleEndian.Uint64(autoSelect[14:]) != uint64(forkNPCID(4456))|uint64(1)<<32 {
+		binary.LittleEndian.Uint64(autoSelect[14:]) != uint64(forkNPCID(4456))|uint64(npcTestOwner(4456))<<32 {
 		t.Fatalf("AutoSelectObject frame=%x", autoSelect)
 	}
-	if targetID, targetOwner, ok := lifecycle.selectedCombatTarget(); !ok || targetID != forkNPCID(4456) || targetOwner != 1 {
+	if targetID, targetOwner, ok := lifecycle.selectedCombatTarget(); !ok || targetID != forkNPCID(4456) || targetOwner != npcTestOwner(4456) {
 		t.Fatalf("selected target=%d-%d ok=%t", targetID, targetOwner, ok)
 	}
 

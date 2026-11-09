@@ -122,7 +122,10 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		payload string
 		status  int
 	}{
-		{`{"action":"learn_all_taolu"}`, http.StatusBadRequest},               // 网关时代的动作，当前服已不支持
+		{`{"action":"learn_all_taolu"}`, http.StatusOK},                      // 武学三动作：学满（会话循环取走）
+		{`{"action":"forget_all_taolu"}`, http.StatusOK},                     // 武学三动作：全遗忘
+		{`{"action":"learn_all_neigong"}`, http.StatusOK},                    // 武学三动作：内功全收录
+		{`{"action":"no_such_action"}`, http.StatusBadRequest},               // 未知动作
 		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest},               // 超过 maxPlayerSP
 		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},           // 怒气自动回复速率（官方满档 5）
 		{`{"action":"set_rage_recovery","value":3.5}`, http.StatusBadRequest}, // 必须整数

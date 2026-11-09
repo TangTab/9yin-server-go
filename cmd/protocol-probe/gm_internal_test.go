@@ -103,8 +103,11 @@ func TestGMInternalCommandRoundTrip(t *testing.T) {
 	if body, status := post(`{"action":"set_silver","silver":777}`); status != http.StatusOK || !strings.Contains(body, `"sent"`) {
 		t.Fatalf("round trip: status=%d body=%s", status, body)
 	}
-	if _, status := post(`{"action":"learn_all_taolu"}`); status != http.StatusBadRequest {
-		t.Fatalf("unsupported action: status=%d want 400", status)
+	if _, status := post(`{"action":"learn_all_taolu"}`); status != http.StatusOK {
+		t.Fatalf("learn_all_taolu now valid: status=%d want 200", status)
+	}
+	if body, status := post(`{"action":"no_such_action"}`); status != http.StatusBadRequest || !strings.Contains(body, "unsupported action") {
+		t.Fatalf("unsupported action: status=%d body=%s", status, body)
 	}
 	if body, status := post(`{"action":"set_sp","sp":999}`); status != http.StatusBadRequest || !strings.Contains(body, "SP must be between") {
 		t.Fatalf("sp bound: status=%d body=%s", status, body)

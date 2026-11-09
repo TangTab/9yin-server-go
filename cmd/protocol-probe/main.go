@@ -620,6 +620,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 		}
 		learnedRows := mergeLearnedSkills(dbLearnedSkills)
+		// 武学等级档值合并（GM learn_all_taolu 落 data/武学等级.json 后
+		// 重登保持满级显示与出招高级编译；行值与释放闸出自同一档值）。
+		learnedRows = applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), learnedRows)
 		// View40 行号映射进内存（出招 CanUse 行帧寻址；Java skillRows 同构）。
 		player.noteSkillViewRows(learnedRows)
 		skillFrames, err := learnedSkillViewFrames(learnedRows)
@@ -874,6 +877,40 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			gmSession.setFaction(preset.Faction, preset.Label)
 			log.Printf("%s: GM set School=%s (%s)", conn.RemoteAddr(), preset.Faction, preset.Label)
+		case "learn_all_neigong":
+			// 一键收录全部内功（面板「门派」区块）：补书 + View43 整视图
+			// 重建 + role_faculty 快照落库（Java applyLearnAllNeigong 同构）。
+			message, neigongErr := applyGMLearnAllNeiGong(link, player, selected.ID, conn.RemoteAddr().String())
+			if neigongErr != nil {
+				gmSession.setAction("内功收录失败：" + neigongErr.Error())
+				return neigongErr
+			}
+			persistFaculty()
+			gmSession.setAction(message)
+		case "learn_all_taolu":
+			// 一键学满武学套路等级（面板「武学套路」区块）：已学全部升
+			// varprop 满级，档值落 data/武学等级.json，逐行等级帧刷新
+			// （Java applyLearnAllTaolu 同构）。
+			message, learnErr := applyGMLearnAllTaolu(link, player, selected.ID, skillLevelStoreOf(), conn.RemoteAddr().String())
+			if learnErr != nil {
+				gmSession.setAction("武学学满失败：" + learnErr.Error())
+				return learnErr
+			}
+			gmSession.setAction(message)
+		case "forget_all_taolu":
+			// 删除全部武学（面板「武学套路」区块）：回 starter 基线集，
+			// 清等级档、删 role_skills 武学行、View40 重开、摘失效快捷栏
+			// （Java applyForgetAllTaolu 同构；基线=Go 的 starter∪DB 并集
+			// 模型在 DB 行删净后的 starter 集）。
+			message, forgetErr := applyGMForgetAllTaolu(link, player, selected.ID, skillLevelStoreOf(), inventory, customConfig.shortcuts, ctx, conn.RemoteAddr().String())
+			if forgetErr != nil {
+				gmSession.setAction("武学删除失败：" + forgetErr.Error())
+				return forgetErr
+			}
+			// 会话级 DB 已学集同步清空：后续 0x0C 重入的 View40 重建
+			// 不再复活已删行（与重登口径一致）。
+			dbLearnedSkills = nil
+			gmSession.setAction(message)
 		case "switch_scene":
 			if runtime == nil || selected == nil {
 				gmSession.setAction("切图失败：角色尚未进入场景")
@@ -952,6 +989,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if updateErr != nil {
 				gmSession.setAction("实力等级设置失败：" + updateErr.Error())
 				return updateErr
+			}
+			// 实力点数换档联动：穿戴镇派兵器 4 条动态属性按新波段重算并
+			// 补面板帧（客户端 tooltip 条件行亦按新 PowerLevel 本地重命中）。
+			if player.refreshZhenpaiEquipBonuses() {
+				if err := player.pushZhenpaiPanelFrame(link); err != nil {
+					log.Printf("%s: zhenpai panel frame: %v", conn.RemoteAddr(), err)
+				}
 			}
 			gmSession.setAction(fmt.Sprintf("实力等级设为 %d（%s）", int32(command.Value), roleListTitle(int(command.Value))))
 			log.Printf("%s: GM set PowerLevel=%d", conn.RemoteAddr(), int32(command.Value))
@@ -1187,6 +1231,18 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			gmSession.setAction(fmt.Sprintf("已发送探针 msgId=%d subType=%d", command.MsgId, command.SubType))
 			log.Printf("%s: GM custom probe msgId=%d subType=%d", conn.RemoteAddr(), command.MsgId, command.SubType)
+		case "tersure_wash_open":
+			// 宝物洗炼界面开窗（NPC 对话链同方言；官服经火浣台 NPC 触发）。
+			open, openErr := tersureWashOpenFrame(command.ItemConfig)
+			if openErr == nil {
+				openErr = link.WriteFrame(open)
+			}
+			if openErr != nil {
+				gmSession.setAction("洗炼界面发送失败：" + openErr.Error())
+				return openErr
+			}
+			gmSession.setAction(fmt.Sprintf("已打开宝物洗炼界面（%s）", map[string]string{"new": "新界面·主武学洗", "old": "老界面·属性/武学洗"}[command.ItemConfig]))
+			log.Printf("%s: GM tersure_wash_open form=%s", conn.RemoteAddr(), command.ItemConfig)
 		case "grant_identity_suits":
 			before := len(player.fashionSuitSnapshot())
 			grantIdentitySuitsAtLogin(&appearanceSession{
@@ -1238,7 +1294,6 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					equipType = stat.equipType
 				}
 			}
-			randomKind := randomEquipCatalogOf().randomEquipKind(command.ItemConfig)
 			if command.WearNow && equipSlotFor(equipType, player.sessionEquips()) > 0 {
 				slot := equipSlotFor(equipType, player.sessionEquips())
 				worn, wearErr := inventory.upsertEquipSlot(ctx, selected.ID, slot, command.ItemConfig, entry.itemType, equipType)
@@ -1251,11 +1306,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					gmSession.setAction("穿戴帧推送失败：" + framesErr.Error())
 					return framesErr
 				}
-				// 宝物/娃娃：掷随机属性 → 存档 → 纸娃娃槽位 record 整推；
-				// 镇派兵器：动态 4 属性按实力点数重算并补面板帧。
-				if randomKind != randomKindNone {
-					session.pushRandomPropsForEquip(command.ItemConfig, worn.uid, slot)
-				}
+				// 模板包 record（镇派兵器词条官方通道 394/395）+ 宝物/娃娃
+				// 随机属性掷值存档整推（helper 内部分拣）；镇派兵器动态 4
+				// 属性按实力点数重算并补面板帧。
+				session.pushRandomPropsForEquip(command.ItemConfig, worn.uid, slot)
 				if slot == 22 && player.refreshZhenpaiEquipBonuses() {
 					if err := player.pushZhenpaiPanelFrame(link); err != nil {
 						log.Printf("%s: zhenpai panel frame: %v", conn.RemoteAddr(), err)
@@ -1270,10 +1324,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("发放失败：背包已满（1..90）")
 				return fmt.Errorf("bag full")
 			}
-			// 宝物/娃娃入包：掷值 + 存档 + 背包槽位 record 整推。
-			if randomKind != randomKindNone {
-				session.pushRandomPropsForBag(command.ItemConfig, inserted.uid, inserted.viewID, inserted.slot)
-			}
+			// 模板包 record + 宝物/娃娃掷值存档 + 背包槽位 record 整推。
+			session.pushRandomPropsForBag(command.ItemConfig, inserted.uid, inserted.viewID, inserted.slot)
 			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, inserted.slot))
 			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, inserted.slot)
 		case "equip_card", "equip_hair":
@@ -1971,6 +2023,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: load bag items (skip inventory): %v", conn.RemoteAddr(), bagErr)
 			}
 			visual = mergeVisual(visual, equips)
+			// 会话物品模型先装载再 spawn：穿戴武器槽 22 的镇派动态 4 属性
+			// 必须进 0x0D 档/权威 vital 0x10/面板身份帧（equips 读取在
+			// spawn 前的同款时序，2026-11-09 登录属性过期根因：refresh
+			// 曾跑在 restore 之前，按空装备表算出零加成）。
+			player.restoreSessionInventory(visual.sex, equips, bagItems, bagpacks)
+			player.refreshZhenpaiEquipBonuses()
 
 			if err := sendPlayerSpawn(link, player, activeRole.Location.Position, visual); err != nil {
 				log.Printf("%s: write player spawn chain: %v", conn.RemoteAddr(), err)
@@ -1982,9 +2040,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 档形）：实力=自动推导（varprop.NeiGongLevel，GM set 过则
 			// 覆盖）+ 称号/性格/侠恶/生存属性零值常发——缺发则人物面板
 			// 整块空白（实力一行不显示的根因）；vitals 由 role_faculty
-			// 快照在 restoreFaculty 时播种。穿戴武器的镇派动态 4 属性
-			// 先重算（identity/vital 帧与注入位同源）。
-			player.refreshZhenpaiEquipBonuses()
+			// 快照在 restoreFaculty 时播种。镇派动态 4 属性已在装载后
+			// 重算（identity/vital 帧与注入位同源）。
 			if err := gmWritePanelFrames(link, player); err != nil {
 				log.Printf("%s: push panel identity/domain frames: %v", conn.RemoteAddr(), err)
 			}
@@ -2015,8 +2072,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 纸娃娃槽位行（view1）与背包行（对应页）各按 uid 取快照。
 				pushLoginRandomProps(link, randomPropsStore, ctx, activeRole.ID, equips, bagItems)
 			}
-			// 会话物品模型：登录装载（DB 读失败=空模型；后续 msg30/31/34/36 的权威内存态）。
-			player.restoreSessionInventory(visual.sex, equips, bagItems, bagpacks)
+			// 会话物品模型已在 spawn 前装载（restoreSessionInventory 提前，
+			// 镇派动态 4 属性与 0x0D 档同源）。
 			// 登录外观补帧（Java pushEquipAppearance 同门槛）：帽/身份装/
 			// 时装任一槽占用或显示类型非默认江湖装才推 0x10，否则零帧
 			//（0x0D 档已带装备合并视觉，帧序对齐 golden）。
@@ -2502,7 +2559,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery || custom.Values[0].Int32 == clientCustomMapNavigate) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery || custom.Values[0].Int32 == clientCustomMapNavigate || custom.Values[0].Int32 == clientCustomTersure) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -2594,6 +2651,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					// msg266 地图寻路标记（技能.pcapng：起跑前 ~73ms 一次，
 					// 两次地图移动双证，S2C 零回应——位置由随后的 msg15 收编）。
 					log.Printf("%s: silent custom msg=%d values=%d", conn.RemoteAddr(), custom.Values[0].Int32, len(custom.Values))
+				case clientCustomTersure:
+					// 宝物洗炼 688 主链（tersure_wash.go：两套界面共用状态机）。
+					if _, handleErr := handleTersureCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity tersure: %v", conn.RemoteAddr(), handleErr)
+					}
 				case clientCustomMoveItem:
 					if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity move item: %v", conn.RemoteAddr(), handleErr)
@@ -2838,10 +2900,15 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
 				}
-			case clientCustomMoveItem:
-				if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
-					log.Printf("%s: handle move item: %v", conn.RemoteAddr(), handleErr)
-				}
+		case clientCustomMoveItem:
+			if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
+				log.Printf("%s: handle move item: %v", conn.RemoteAddr(), handleErr)
+			}
+		case clientCustomTersure:
+			// 宝物洗炼 688 主链（直达 0x1E/0x27 路径；活动信封 case 在上）。
+			if _, handleErr := handleTersureCustom(newItemSession(), custom); handleErr != nil {
+				log.Printf("%s: handle tersure: %v", conn.RemoteAddr(), handleErr)
+			}
 			case clientCustomUseItem:
 				if _, handleErr := handleBodyItemUse(newItemSession(), custom); handleErr != nil {
 					log.Printf("%s: handle use item: %v", conn.RemoteAddr(), handleErr)
@@ -3117,13 +3184,21 @@ func countNPCsWithin(catalog []npcSpawn, position role.Position, radius float32)
 	return count
 }
 
+// npcOwnerID 从对象号派生稳定唯一的 owner（官服客户端语义=创建者
+// roleID 段，官服抓包 NPC owner 恒非 1：0x58ed26/0x56a654/0x150 等；
+// fork 生态「owner=1=NPC 专属位」方言对官服客户端无效——owner=1 会被
+// 解析为「1 号玩家的化身」，锁定走 PvP 分支、自动接近不启动，
+// 2026-11-10 官服客户端不自走排查定论）。取 0x0066xxxx 段：同 obj 同
+// owner（重连/重生稳定）、避开 0/1/玩家 0x7A5C0B/对象 0x1100 前缀段。
+func npcOwnerID(objectID uint32) uint32 {
+	return 0x00660000 | (objectID & 0xFFFF)
+}
+
 func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error) {
 	msg := make([]byte, 0x3f, 256)
 	msg[0] = 0x0D
 	binary.LittleEndian.PutUint32(msg[1:], objectID)
-	// 该字段是当前场景/所有者标识，而非视口槽位。
-	// 玩家入场为该连接确立了场景标识 1。
-	binary.LittleEndian.PutUint32(msg[5:], 1)
+	binary.LittleEndian.PutUint32(msg[5:], npcOwnerID(objectID))
 	binary.LittleEndian.PutUint32(msg[0x09:], math.Float32bits(npc.x))
 	binary.LittleEndian.PutUint32(msg[0x0D:], math.Float32bits(npc.y))
 	binary.LittleEndian.PutUint32(msg[0x11:], math.Float32bits(npc.z))

@@ -116,7 +116,7 @@ func TestPassiveNPCRetaliatesWhenHit(t *testing.T) {
 	// 首 tick 登记 s.wireID（受击锁定攻击者要用），被动怪原地待命。
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, now)
 	// 玩家命中 NPC 一次（applySkillDamageToNPC 真实入口；伤害 1 进威胁表）。
-	if _, err := lifecycle.applySkillDamageToNPC(forkNPCID(102), 1, 1, nil, now); err != nil {
+	if _, err := lifecycle.applySkillDamageToNPC(forkNPCID(102), npcTestOwner(102), 1, nil, now); err != nil {
 		t.Fatal(err)
 	}
 	lifecycle.mu.Lock()
@@ -517,15 +517,15 @@ func TestNPCAttackAutoSelectsAttackerForUntargetedVictim(t *testing.T) {
 		if !ok {
 			t.Fatalf("attacker auto-select frame idx=%d missing", idx)
 		}
-		if target[0] != forkNPCID(91) || target[1] != 1 {
+		if target[0] != forkNPCID(91) || target[1] != npcTestOwner(91) {
 			t.Fatalf("idx=%d selected %d-%d, want 91-1", idx, target[0], target[1])
 		}
 	}
-	if lifecycle.selectedObject != forkNPCID(91) || lifecycle.selectedOwner != 1 {
+	if lifecycle.selectedObject != forkNPCID(91) || lifecycle.selectedOwner != npcTestOwner(91) {
 		t.Fatalf("server selection mirror = %d-%d, want 91-1", lifecycle.selectedObject, lifecycle.selectedOwner)
 	}
 	// 自动选中必须立刻打通 211 选靶路径（skillTargetSelected 族）。
-	if id, owner, ok := lifecycle.selectedCombatTarget(); !ok || id != forkNPCID(91) || owner != 1 {
+	if id, owner, ok := lifecycle.selectedCombatTarget(); !ok || id != forkNPCID(91) || owner != npcTestOwner(91) {
 		t.Fatalf("selectedCombatTarget after auto-select = %d-%d ok=%t", id, owner, ok)
 	}
 	lifecycle.close()
@@ -540,10 +540,10 @@ func TestNPCAttackKeepsPlayerManualSelection(t *testing.T) {
 	registerTestCombatNPC(t, lifecycle, 92)
 	registerTestCombatNPC(t, lifecycle, 93)
 	placeTestNPC(t, lifecycle, 93, 200, 200) // 仇恨圈外保持存活的手动目标
-	lifecycle.selectedObject, lifecycle.selectedOwner = forkNPCID(93), 1
+	lifecycle.selectedObject, lifecycle.selectedOwner = forkNPCID(93), npcTestOwner(93)
 	player := newPlayerActor("tester", 0)
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3100, 0))
-	if lifecycle.selectedObject != forkNPCID(93) || lifecycle.selectedOwner != 1 {
+	if lifecycle.selectedObject != forkNPCID(93) || lifecycle.selectedOwner != npcTestOwner(93) {
 		t.Fatalf("manual target overridden by auto-select: now %d-%d", lifecycle.selectedObject, lifecycle.selectedOwner)
 	}
 	if found := autoSelectFrames(conn); len(found) != 0 {
@@ -560,10 +560,10 @@ func TestNPCAttackReplacesStaleSelection(t *testing.T) {
 	}
 	registerTestCombatNPC(t, lifecycle, 94)
 	// 已消亡对象占位的陈旧格与空选同权，攻击者应当顶替。
-	lifecycle.selectedObject, lifecycle.selectedOwner = forkNPCID(949494), 1
+	lifecycle.selectedObject, lifecycle.selectedOwner = forkNPCID(949494), npcTestOwner(949494)
 	player := newPlayerActor("tester", 0)
 	lifecycle.combatTickForTest(player, role.Position{X: 1, Y: 0, Z: 0}, time.Unix(3200, 0))
-	if lifecycle.selectedObject != forkNPCID(94) || lifecycle.selectedOwner != 1 {
+	if lifecycle.selectedObject != forkNPCID(94) || lifecycle.selectedOwner != npcTestOwner(94) {
 		t.Fatalf("stale selection not replaced: %d-%d", lifecycle.selectedObject, lifecycle.selectedOwner)
 	}
 	found := autoSelectFrames(conn)

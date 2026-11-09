@@ -3,6 +3,7 @@ package main
 import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 
+	"bytes"
 	"encoding/binary"
 	"testing"
 	"time"
@@ -264,7 +265,7 @@ func TestKillFrameRelayReachesVisibleBystanders(t *testing.T) {
 		t.Fatal("visibility setup mismatch")
 	}
 
-	killer.selectedObject, killer.selectedOwner = forkNPCID(2), 1
+	killer.selectedObject, killer.selectedOwner = forkNPCID(2), npcTestOwner(2)
 	outcome, err := killer.applySelectedSkillDamage(999999, time.Unix(7000, 0))
 	frame, id, killed := outcome.frame, outcome.id, outcome.killed
 	if err != nil || !killed || frame == nil {
@@ -330,16 +331,30 @@ func TestViewportReconcileCorrectsCorpseForLateEntrant(t *testing.T) {
 	if err := viewB.reconcileViewport(); err != nil {
 		t.Fatal(err)
 	}
-	// NPC（实体 2）先于玩家实体（3+）下发：0x0D → 0x1F → 0x10 死亡修正。
+	// 尸体 NPC 自身的修正三连必须保持 0x0D → 0x1F → 0x10 顺序（注册期
+	// 满血快照 → 权威坐标 → 死亡修正）。远程成员 wireID 在低位段
+	//（docs/id-system-analysis.md §6.2），数值序上先于 0x11 段 NPC 物化，
+	// 因此按对象过滤断言，不假设三连从帧 0 开始。
 	frames := connB.Frames()
+	corpseID := forkNPCID(2)
 	want := []byte{0x0D, 0x1F, 0x10}
-	if len(frames) < len(want) {
-		t.Fatalf("late entrant frames=%x", frames)
-	}
-	for i, opcode := range want {
-		if frames[i][0] != opcode {
-			t.Fatalf("late entrant frame %d = %#x, want %#x (all=%x)", i, frames[i][0], opcode, frames)
+	var got []byte
+	for _, frame := range frames {
+		var objectID uint32
+		switch frame[0] {
+		case 0x0D, 0x1F: // [1:5] 对象 id
+			objectID = binary.LittleEndian.Uint32(frame[1:5])
+		case 0x10: // flag@1, objectID@2（docs/id-system-analysis.md §4）
+			objectID = binary.LittleEndian.Uint32(frame[2:6])
+		default:
+			continue
 		}
+		if objectID == corpseID {
+			got = append(got, frame[0])
+		}
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatalf("late entrant corpse frames=% X, want % X (all=%x)", got, want, frames)
 	}
 	viewA.close()
 	viewB.close()

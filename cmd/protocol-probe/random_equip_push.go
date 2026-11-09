@@ -27,6 +27,8 @@ import (
 const (
 	recordRandomProp  uint16 = 400 // 官方 447 schema：RandomPropRec
 	recordRandomSkill uint16 = 401 // RandomSkillRec
+	recordPropModify  uint16 = 394 // PropModifyPackRec：模板属性包（equipment.ini @PropModifyPackRec），单列 [packID]
+	recordSkillModify uint16 = 395 // SkillModifyPackRec：模板技能包，单列 [packID]
 )
 
 const randomPropsQueryTimeout = 5 * time.Second
@@ -151,13 +153,13 @@ func randomPropRecRows(lines []randomPropLine) [][]recordCell {
 	return rows
 }
 
-// randomSkillRecRows RandomSkillRec 行（四列：store/0/value/unlock）。
+// randomSkillRecRows RandomSkillRec 行（四列：store/SubSkill下标/value/unlock）。
 func randomSkillRecRows(lines []randomSkillLine) [][]recordCell {
 	rows := make([][]recordCell, 0, len(lines))
 	for _, line := range lines {
 		rows = append(rows, []recordCell{
 			recordInt(uint32(line.StoreID)),
-			recordInt(0),
+			recordInt(uint32(line.Sub)),
 			recordFloat64(line.Value),
 			recordInt(uint32(line.Unlock)),
 		})
@@ -263,9 +265,25 @@ func (store *randomPropsDBStore) LoadAll(ctx context.Context, roleID role.RoleID
 		snapshot := itemRandomProps{Kind: kind}
 		_ = json.Unmarshal([]byte(propRows), &snapshot.PropRows)
 		_ = json.Unmarshal([]byte(skillRows), &snapshot.SkillRows)
+		normalizeRandomPropsDialect(&snapshot)
 		snapshots[uid] = snapshot
 	}
 	return snapshots
+}
+
+// normalizeRandomPropsDialect 把旧快照归一到官方线上方言：娃娃基础行
+// flag=1+quality=0（曾致客户端露 ui.newtreasure.quality_0 键名）强制回到
+// 官方 [propID,value,0,0,0,0]；附加行 quality 恒 1-4 不受影响。
+func normalizeRandomPropsDialect(snapshot *itemRandomProps) {
+	if snapshot.Kind != randomKindWawa {
+		return
+	}
+	for i := range snapshot.PropRows {
+		if snapshot.PropRows[i].Quality == 0 && snapshot.PropRows[i].Flag != 0 {
+			snapshot.PropRows[i].Flag = 0
+			snapshot.PropRows[i].Level = 0
+		}
+	}
 }
 
 // rollRandomPropsSnapshot 掷值入口：宝物/娃娃各走管线，随机源复用物品链
@@ -316,8 +334,11 @@ type zhenpaiEquipBonus struct {
 	maxHP, maxMP, qinggong, parry int32
 }
 
-// refreshZhenpaiEquipBonuses 按当前穿戴武器 + 实力点数重算 4 条动态属性；
-// 返回是否有变化（调用方据此决定是否补推面板帧）。
+// refreshZhenpaiEquipBonuses 按当前穿戴武器 + 实力点数重算 4 条动态属性，
+// 并联动血/蓝池上限（syncEquippedNeiGongResourcesLocked 消费同一
+// derivedResourceAdds 注入位）；返回是否有变化（调用方据此决定是否补推
+// 面板帧）。登录时序：restoreSessionInventory 之后、sendPlayerSpawn 之前
+// 调用，保证 0x0D 档/权威 vital 0x10/面板身份帧三处同源。
 func (p *playerActor) refreshZhenpaiEquipBonuses() bool {
 	var weapon string
 	for _, equip := range p.sessionEquips() {
@@ -343,6 +364,7 @@ func (p *playerActor) refreshZhenpaiEquipBonuses() bool {
 		return false
 	}
 	p.progress.zhenpaiEquip = bonus
+	p.syncEquippedNeiGongResourcesLocked()
 	return true
 }
 
@@ -390,8 +412,46 @@ func (h *itemSession) ensureRandomProps(configID, uid string, kind int) (itemRan
 	return snapshot, nil
 }
 
-// pushRandomPropsForEquip 穿戴后整推（纸娃娃 view1 槽位）。
+// pushModifyPackRecords 模板包物品（镇派兵器等）的官方词条通道：
+// PropModifyPackRec(394)/SkillModifyPackRec(395) 每包一行单 int32 列，
+// 客户端按本地 proppack/skillpack 渲染并按 PowerLevel 自行命中条件行
+//（c.pcapng 修为书 394×6 行同帧实证；PropBuilt@1954 属打造/洗练实例
+// 通道，模板武器不走，且与 EffectPackID 互斥——见 equipmentViewAdd）。
+func pushModifyPackRecords(link sceneMessageConnection, viewID, objectIndex uint16, configID string) {
+	catalog := randomEquipCatalogOf()
+	fields, ok := catalog.itemFields[configID]
+	if !ok || (len(fields.propPacks) == 0 && len(fields.skillPacks) == 0) {
+		return
+	}
+	for _, group := range []struct {
+		index uint16
+		packs []int
+	}{
+		{recordPropModify, fields.propPacks},
+		{recordSkillModify, fields.skillPacks},
+	} {
+		if len(group.packs) == 0 {
+			continue
+		}
+		rows := make([][]recordCell, 0, len(group.packs))
+		for _, packID := range group.packs {
+			rows = append(rows, []recordCell{recordInt(uint32(packID))})
+		}
+		frame, err := serverRecordAddRowsView(viewID, objectIndex, group.index, rows)
+		if err != nil {
+			log.Printf("encode modify packs %s rec %d: %v", configID, group.index, err)
+			continue
+		}
+		if err := link.WriteFrame(frame); err != nil {
+			log.Printf("write modify packs %s rec %d: %v", configID, group.index, err)
+		}
+	}
+}
+
+// pushRandomPropsForEquip 穿戴后整推（纸娃娃 view1 槽位）：模板包 record
+// + 宝物/娃娃随机 record。
 func (h *itemSession) pushRandomPropsForEquip(configID, uid string, slot int32) {
+	pushModifyPackRecords(h.link, viewDoll, uint16(slot), configID)
 	kind := randomEquipCatalogOf().randomEquipKind(configID)
 	if kind == randomKindNone {
 		return
@@ -406,8 +466,9 @@ func (h *itemSession) pushRandomPropsForEquip(configID, uid string, slot int32) 
 	}
 }
 
-// pushRandomPropsForBag 入包后整推（背包页槽位）。
+// pushRandomPropsForBag 入包后整推（背包页槽位）：模板包 record + 随机 record。
 func (h *itemSession) pushRandomPropsForBag(configID, uid string, viewID, slot int32) {
+	pushModifyPackRecords(h.link, bagViewOf(viewID), uint16(slot), configID)
 	kind := randomEquipCatalogOf().randomEquipKind(configID)
 	if kind == randomKindNone {
 		return
@@ -433,11 +494,11 @@ func pushLoginRandomProps(link sceneMessageConnection, store *randomPropsDBStore
 		return
 	}
 	snapshots := store.LoadAll(ctx, roleID)
-	if len(snapshots) == 0 {
-		return
-	}
 	pushed := 0
+	// 模板包 record（镇派兵器等，randomKindNone 但有 packs）先行；
+	// 快照为空也要推（随机属性行才依赖 uid 快照）。
 	for _, equip := range equips {
+		pushModifyPackRecords(link, viewDoll, uint16(equip.slot), equip.configID)
 		if catalog.randomEquipKind(equip.configID) == randomKindNone {
 			continue
 		}
@@ -455,6 +516,7 @@ func pushLoginRandomProps(link sceneMessageConnection, store *randomPropsDBStore
 		if item.slot < 1 || item.slot > int32(bagSlotMax) {
 			continue
 		}
+		pushModifyPackRecords(link, bagViewOf(item.viewID), uint16(item.slot), item.configID)
 		if catalog.randomEquipKind(item.configID) == randomKindNone {
 			continue
 		}

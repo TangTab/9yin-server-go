@@ -131,7 +131,7 @@ func TestPanelCommandPreValidation(t *testing.T) {
 	backend := newFakeGameBackend(t)
 	panel := newPanel(t, backend)
 
-	if body, status := panelPost(t, panel.URL+"/api/sessions/7/command", `{"action":"learn_all_taolu"}`); status != http.StatusBadRequest {
+	if body, status := panelPost(t, panel.URL+"/api/sessions/7/command", `{"action":"no_such_action"}`); status != http.StatusBadRequest {
 		t.Fatalf("unsupported action should 400 locally: status=%d body=%s", status, body)
 	}
 	if body, status := panelPost(t, panel.URL+"/api/sessions/7/command", `{"action":"set_sp","sp":9999}`); status != http.StatusBadRequest || !strings.Contains(body, "SP must be between") {
