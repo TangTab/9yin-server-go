@@ -35,8 +35,10 @@ func TestStarterNPCUsesClientResourceIdentity(t *testing.T) {
 	if !bytes.Contains(msg, []byte{34, 0, 229, 0, 0, 0}) {
 		t.Fatal("NPC AddObject does not contain int32 NpcType=229")
 	}
-	if got := binary.LittleEndian.Uint16(msg[0x3d:]); got != 7 {
-		t.Fatalf("NPC property count=%d, want 7", got)
+	// 官服位属性增补后：fork schema 7 项 + 官服固定 8 项（Material/Level
+	// 缺省不追加）= 15（officialNPCProperties，2026-11-10）。
+	if got := binary.LittleEndian.Uint16(msg[0x3d:]); got != 15 {
+		t.Fatalf("NPC property count=%d, want 15", got)
 	}
 	for offset := 0x19; offset < 0x3d; offset++ {
 		if msg[offset] != 0 {

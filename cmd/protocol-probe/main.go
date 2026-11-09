@@ -3214,8 +3214,43 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 	for _, property := range properties {
 		msg = appendNPCProperty(msg, property)
 	}
-	binary.LittleEndian.PutUint16(msg[0x3d:], uint16(len(properties)))
+	// 官服位属性增补（c.pcapng 0x0D 251B 帧逐属性走查定版，2026-11-10）：
+	// 官服客户端的 NPC 物化依赖官服位行集（本服表含 fork/官服双位）。
+	// CollideRadius(179) 是客户端寻路避障的关键输入——此前 fork 位集
+	// 不含任何官服位属性。值优先取 schema（模型名/等级），其余为官服
+	// 常量（ActionSpeed=1.0/BornAction=stand/WeaponMode=hand1_1/三比例=100）。
+	official := officialNPCProperties(npc)
+	for _, property := range official {
+		msg = appendNPCProperty(msg, property)
+	}
+	binary.LittleEndian.PutUint16(msg[0x3d:], uint16(len(properties)+len(official)))
 	return msg, nil
+}
+
+// officialNPCProperties 官服位 NPC 物化属性集（idx=本服表的官服位行；
+// 官服真表号与本服表官服位存在 ±N 错位，一律按名映射）。模型名缺省时
+// 跳过 ConfigID 行（零值模型串会污染客户端表现）。
+func officialNPCProperties(npc npcSpawn) []clientdata.IndexedProperty {
+	props := []clientdata.IndexedProperty{
+		{Index: 179, Name: "CollideRadius", Value: clientdata.Float32Value(0.9)},
+		{Index: 183, Name: "State", Value: clientdata.StringValue("stand")},
+		{Index: 214, Name: "ActionSpeed", Value: clientdata.Float32Value(1.0)},
+		{Index: 1597, Name: "BornAction", Value: clientdata.StringValue("stand")},
+		{Index: 1599, Name: "WeaponMode", Value: clientdata.StringValue("hand1_1")},
+		{Index: 469, Name: "HPRatio", Value: clientdata.Int32Value(100)},
+		{Index: 478, Name: "ParryRatio", Value: clientdata.Int32Value(100)},
+		{Index: 482, Name: "HitHPRatio", Value: clientdata.Int32Value(100)},
+	}
+	if material, ok := npc.resolved.Properties["Material"]; ok && material.Value.Text != "" {
+		props = append(props,
+			clientdata.IndexedProperty{Index: 1440, Name: "ConfigID", Value: clientdata.StringValue(material.Value.Text)},
+			clientdata.IndexedProperty{Index: 1441, Name: "Resource", Value: clientdata.StringValue("npc\\world" + material.Value.Text)},
+		)
+	}
+	if level, ok := npc.resolved.Properties["Level"]; ok && level.Value.I32 > 0 && level.Value.I32 < 256 {
+		props = append(props, clientdata.IndexedProperty{Index: 1465, Name: "Level", Value: clientdata.ByteValue(byte(level.Value.I32))})
+	}
+	return props
 }
 
 func sceneObjectByteProperty(objectID, ownerID uint32, propertyIndex uint16, value byte) []byte {
