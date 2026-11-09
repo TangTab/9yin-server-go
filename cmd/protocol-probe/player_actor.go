@@ -2139,6 +2139,16 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	count++
 	msg = appendObjectProperty(msg, 414, 0, 0) // LastObject(玩家域)
 	count++
+	// 官服位物理档案（2026-11-10）：官服进场给玩家自己发 0x28 详情帧
+	//（3187B，obj=玩家）——其中 CollideRadius 是客户端寻路引擎的玩家
+	// 碰撞体输入。0x28 通道未通前，物理属性经已验证的 0x0D 通道补发
+	//（与 NPC 的 officialNPCProperties 同集）。
+	addFloat(179, 0.9)          // CollideRadius
+	addString(183, "stand")     // State
+	addFloat(214, 1.0)          // ActionSpeed
+	addInt(469, 100)            // HPRatio
+	addInt(478, 100)            // ParryRatio
+	addInt(482, 100)            // HitHPRatio
 	binary.LittleEndian.PutUint16(msg[0x3d:], count)
 	p.mu.Unlock()
 	return msg
