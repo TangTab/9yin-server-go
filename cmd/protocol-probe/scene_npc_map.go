@@ -47,6 +47,36 @@ func writeSceneNPCMapFrames(conn sceneMessageConnection, world *sceneLifecycle, 
 	world.run.mu.Unlock()
 
 	sent := 0
+	// 官服事务序（c.pcapng 71 帧序列压缩定版）：[144,145,154] 前导 →
+	// 130×N → [144,145,154] 收尾 → 再一组 [144,145,154]。144/145/154
+	// 是表事务定界符——裸发 130 客户端不提交（06:59 会话 3016 帧实证：
+	// 发了但大地图仍空）。
+	writeNPCMapDelimiter := func() bool {
+		specs := []struct {
+			id int32
+		}{{144}, {145}, {154}}
+		for _, del := range specs {
+			var frame []byte
+			var err error
+			if del.id == 144 {
+				frame, err = serverCustomIntMessage(229, customInt(144), customInt(0))
+			} else {
+				frame, err = serverCustomIntMessage(229, customInt(del.id))
+			}
+			if err != nil {
+				log.Printf("%s: scene npc map delimiter %d: %v", remote, del.id, err)
+				return false
+			}
+			if err := conn.WriteFrame(frame); err != nil {
+				log.Printf("%s: scene npc map delimiter %d: %v", remote, del.id, err)
+				return false
+			}
+		}
+		return true
+	}
+	if !writeNPCMapDelimiter() {
+		return
+	}
 	for _, p := range points {
 		frame, err := serverCustomIntMessage(229,
 			customInt(130),
@@ -72,5 +102,7 @@ func writeSceneNPCMapFrames(conn sceneMessageConnection, world *sceneLifecycle, 
 		}
 		sent++
 	}
-	log.Printf("%s: scene npc map frames sent=%d", remote, sent)
+	writeNPCMapDelimiter()
+	writeNPCMapDelimiter()
+	log.Printf("%s: scene npc map frames sent=%d (delimited)", remote, sent)
 }
