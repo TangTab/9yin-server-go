@@ -605,13 +605,14 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		digest := sha256.Sum256(payload)
 		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
 			s.remote, id, entity.description, payload[0], len(payload), digest)
-		// 0x28 详情帧诊断实验（npc_detail_frame.go，NINEYIN_NPC_0X28_PROBE=1）：
-		// 官服 NPC 物化主力是 0x28（与 0x0D 同 handler），验证其是否触发
-		// 客户端挂载 map_path.package / 初始化 path_finding。
-		writeNPCDetailProbeFrame(s.conn, uint32(id), entity.ownerID, s.remote)
 		if err := s.conn.WriteFrame(payload); err != nil {
 			return fmt.Errorf("add scene object %d: %w", id, err)
 		}
+		// 0x28 详情帧诊断实验（npc_detail_frame.go，NINEYIN_NPC_0X28_PROBE=1）：
+		// 官服 0x28 是实体已物化后的详情补充（首测发在 0x0D 之前被客户端
+		// 以 size error/property error 拒收——06:36 会话 trace 实证），
+		// 故挪到 0x0D 之后。
+		writeNPCDetailProbeFrame(s.conn, uint32(id), entity.ownerID, s.remote)
 		if entity.ownerID != 0 {
 			location := serverLocation(entity.id, entity.ownerID, transform)
 			if err := s.conn.WriteFrame(location); err != nil {
