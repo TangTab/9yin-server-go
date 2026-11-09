@@ -17,6 +17,13 @@ import (
 // 大地图图层为空、点击无反应（msg266 都不发起）。最小可行版取多数值：
 // v9=703/v10=1/v11=0/v12=0/名空/缩放空。
 func writeSceneNPCMapFrames(conn sceneMessageConnection, world *sceneLifecycle, remote string) {
+	// 2026-11-10 修正：记录表 130=EscortRec（押镖表）而非场景 NPC 表——
+	// msg229 是通用记录更新帧，与大地图图层无关（recnames.json 定名）。
+	// 本函数停用（两轮真机实证无效：3016 帧含定界全发、大地图仍空）。
+	return
+	_ = conn
+	_ = remote
+	// 以下为已证伪的 130 假设实现，留档。
 	if world == nil {
 		return
 	}
