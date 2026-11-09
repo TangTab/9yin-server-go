@@ -48,6 +48,7 @@ const (
 	clientCustomChangeWarning   int32 = 292 // CLIENT_CUSTOMMSG_CHANGEWARNING 预警切换
 	clientCustomRushHitConfirm  int32 = 915 // 冲锋命中确认上报（官服无回应，静默消费）
 	clientCustomCorpseQuery     int32 = 990 // 尸体拾取查询（同上，g 战后实证）
+	clientCustomMapNavigate     int32 = 266 // 地图寻路标记（技能.pcapng：起跑前 ~73ms 一次，S2C 零回应）
 
 	// 三层距离模型（g/f/b 联合定版 + Java SkillCastHandler 常量同源）。
 	selectedRangeFallbackMeters = 8.0                // 无 TSP2/形状半径时的近战回落射程（skill_catalog 引用）
@@ -75,14 +76,32 @@ func rushDashTriggerMeters() float64 { return 5.0 + 1.5 }
 // b 4.41m 样本 220 上报 3.61m 不触发实证）。
 func rushDashWindowLoMeters() float64 { return 5.0 }
 
-// rushDirectCastMeters 是直收带上界：≤该距离不走暂存链直接执行
-// （g 3.06m 直收 / b 4.41m 暂存钉死边界∈(3.06,4.41]，取 Java 同源 bind+2）。
+// rushDirectCastMeters 是直收带上界：≤该距离不走暂存链直接执行。
+// 三源合成：bind+2（g 3.06m 直收 / b 4.41m 暂存钉死边界∈(3.06,4.41]，
+// Java 同源）；**castRange+1**（技能.pcapng 定版：hyjf02 6.95m 按下当毫秒
+// msg284 直收簇、kfkj02 1.19m 同形——按下即执行窗口随面板射程走）；
+// 下限 3.5。
 func rushDirectCastMeters(definition combatSkillDefinition) float64 {
 	near := float64(definition.bindDistance) + rushDirectCastSlackMeters
+	if bound := float64(definition.castRange) + 1; near < bound {
+		near = bound
+	}
 	if floor := rushArrivalRadiusMeters + 0.5; near < floor {
 		near = floor
 	}
 	return near
+}
+
+// rushWalkBandAcceptMeters：212 走带认可半径。官服 walk-in 直收的 212
+// 可落在 castRange+1 内任意点（技能.pcapng：hyjf02 212@5.81/5.58 官服
+// 认可落地——原走带全宽 5.0 对 6 米技能过窄，会把合法步行落地误判成
+// 窗口外而驱动接近/取消）。
+func rushWalkBandAcceptMeters(pending *pendingCastState) float64 {
+	accept := rushDashWindowLoMeters()
+	if bound := float64(pending.castRange) + 1; accept < bound {
+		accept = bound
+	}
+	return accept
 }
 
 // 冲锋簇属性索引（按名映射自本服表；官服现行表同名字 +2 偏移）。
@@ -465,18 +484,18 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 		}},
 		frameBuilder{"msg707", func() ([]byte, error) { return rushCastStateFrame() }},
 	)
-	// 状态四连（586/645/646/750）暂撤：官服它是行走上报的确认回执（先有
-	// 走才有回执），而我们无走也发——疑似多余的四连反而破坏接近态
-	//（55052 会走版无四连；64785/61392/61060 有四连全不自走，对照构建
-	// 定位中）。maybeRushStatePing 的在途重发同样停用。
-	if false {
-		for _, ping := range officialStatePingFrames() {
-			frame := ping
-			if frame == nil {
-				continue
-			}
-			builders = append(builders, frameBuilder{"state-ping", func() ([]byte, error) { return frame, nil }})
+	// 状态四连（586/645/646/750）：恢复。此前「暂撤」的对照推理（55052
+	// 无四连会走 / 64785 有四连不自走）因果倒置——那批不自走会话处于
+	// 受理簇方言错位期。技能.pcapng 官服三证（32.642/415.577/1290.300）
+	// 钉死：官服每次受理簇后 +42ms 必发四连，且客户端同毫秒起跑——
+	// 四连与自走共存，是簇的组成部分而非干扰。maybeRushStatePing 的
+	// 在途 3s 周期重发仍停用（最小变量，先验簇尾四连）。
+	for _, ping := range officialStatePingFrames() {
+		frame := ping
+		if frame == nil {
+			continue
 		}
+		builders = append(builders, frameBuilder{"state-ping", func() ([]byte, error) { return frame, nil }})
 	}
 	frames := make([][]byte, 0, len(builders))
 	for _, builder := range builders {
@@ -633,7 +652,16 @@ func executeRushDirect(link sceneMessageConnection, player *playerActor, world *
 			return true, err
 		}
 	}
-	// 状态四连同撤（对照构建，见 stageRushCast 注释）。
+	// 状态四连（官服 367.971 直收簇 → 368.020 +49ms 四连实证；与受理簇
+	// 尾四连同源，恢复理由见 stageRushCast 注释）。
+	for _, ping := range officialStatePingFrames() {
+		if ping == nil {
+			continue
+		}
+		if err := link.WriteFrame(ping); err != nil {
+			return true, err
+		}
+	}
 	player.noteRushStatePing(now)
 	// 出招簿记 + 伤害链（settled：CD/MP 已在簇内结算）
 	target := uint64(targetID) | uint64(targetOwner)<<32
@@ -797,7 +825,7 @@ func handleCastDashLanding(link sceneMessageConnection, player *playerActor, wor
 		}
 		if geometry.X != 0 || geometry.Z != 0 {
 			distance := math.Sqrt(float64(square(x-geometry.X) + square(z-geometry.Z)))
-			if distance > rushDashWindowLoMeters() {
+			if distance > rushWalkBandAcceptMeters(pending) {
 				if pending.stepping {
 					// 步进驱动在途：客户端的 212 是原地噪音，忽略让步进完成。
 					return true, nil
@@ -819,7 +847,8 @@ func handleCastDashLanding(link sceneMessageConnection, player *playerActor, wor
 			}
 			// 走带内的 212[尾0/1] = 步行/冲刺落地（b 4.41m 走到 3.17m 落地
 			// 实证；本服客户端 ~3.6m 即停连发 212[0]，63073 会话实证——
-			// 认可半径取走带全宽 5.0，c61 是否发出只决定落地簇形态）。
+			// 认可半径 max(GRushRange, castRange+1)：hyjf02 型 6 米技能官方
+			// 212 落在 5.5~5.8m 全认可，技能.pcapng 定版）。
 			log.Printf("%s: dash landing in walk band skill id=%s dist=%.1fm dash=%t",
 				remote, pending.skillID, distance, player.rushDashIssuedSnapshot())
 		}
@@ -1024,6 +1053,15 @@ func resumePendingCastAt(link sceneMessageConnection, player *playerActor, world
 			return err
 		}
 	}
+	// 状态四连（官服 416.162 落地簇 → 416.321 +159ms 四连实证）。
+	for _, ping := range officialStatePingFrames() {
+		if ping == nil {
+			continue
+		}
+		if err := link.WriteFrame(ping); err != nil {
+			return err
+		}
+	}
 	_ = model
 	// 出招簿记 + 伤害链（settled 跳过 CD/MP 闸防自拒）。
 	target := uint64(pending.targetID) | uint64(pending.targetOwner)<<32
@@ -1052,28 +1090,131 @@ func handleMovementUpload(link sceneMessageConnection, player *playerActor, worl
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomMovementUpload {
 		return false, nil
 	}
-	if player == nil || !player.rushInFlightSnapshot() {
-		return true, nil
-	}
 	values := custom.Values
 	if len(values) < 6 || values[3].Type != 4 || values[4].Type != 4 || values[5].Type != 4 {
 		return true, nil
 	}
-	orient := float32(0)
-	if len(values) > 6 && values[6].Type == 4 {
-		orient = values[6].Float32
+	// 官服 msg15 全形态（走 82B / 停 67B / 跳 105B）idx3..5 恒为 x,y,z，
+	// 非冲锋在途也收编位置（技能.pcapng 定版：0x21 回显含玩家条目 =
+	// 服务端收编证据；追击 NPC 测距依赖服务端侧玩家坐标）。
+	x, y, z := values[3].Float32, values[4].Float32, values[5].Float32
+	orient := movementUploadOrient(values)
+	absorbClientPosition(world, x, y, z, orient)
+	if player == nil || !player.rushInFlightSnapshot() {
+		return true, nil
 	}
-	tryRushArrival(link, player, world, values[3].Float32, values[4].Float32, values[5].Float32, orient, remote)
+	tryRushArrival(link, player, world, x, y, z, orient, remote)
 	return true, nil
+}
+
+// movementUploadOrient 提取 msg15 的绝对朝向：仅 state7 长式带
+// （[15, id, 7, x, y, z, destx, desty, speed, orient, clock]，idx9）；
+// state4 停帧 idx6 是增量朝向、跳帧无朝向——均不取。旧实现取 idx6
+// （实为 destx）= 字段错位。
+func movementUploadOrient(values []clientCustomValue) float32 {
+	if len(values) > 9 && values[2].Type == 2 && values[2].Int32 == 7 && values[9].Type == 4 {
+		return values[9].Float32
+	}
+	return 0
+}
+
+// absorbClientPosition 把客户端移动上报收编为场景侧权威位置。
+func absorbClientPosition(world *sceneLifecycle, x, y, z, orient float32) {
+	if world == nil || world.wireID == 0 {
+		return
+	}
+	world.run.updateMemberPosition(world.wireID, role.Position{X: x, Y: y, Z: z, Orient: orient})
+}
+
+// areaRushDirectCastMeters：范围型点地直收带上界（技能.pcapng 分带：
+// 1.45m 直收无 c61 / 3.96m、5.52m 档1 冲——分界 ∈ (1.45, 3.96]，取与
+// 锁定型直收下限同源的 3.5）。
+const areaRushDirectCastMeters = 3.5
+
+// areaRushTier2Action：范围型长距疾跑动画（b/e 8.2m 档2 方言）。
+const areaRushTier2Action = "qg_fastruning_s_2h_01"
+
+// useSkillGroundPointTransform 解析 211 短式 idx6..8 的地面点（范围型
+// hyjf07 点地形态；锁定式此三值为 0）。
+func useSkillGroundPointTransform(custom clientCustomMessage) (worldcore.Transform, bool) {
+	if len(custom.Values) < 9 ||
+		custom.Values[6].Type != 4 || custom.Values[7].Type != 4 || custom.Values[8].Type != 4 {
+		return worldcore.Transform{}, false
+	}
+	transform := worldcore.Transform{
+		X: custom.Values[6].Float32,
+		Y: custom.Values[7].Float32,
+		Z: custom.Values[8].Float32,
+	}
+	if transform.X == 0 && transform.Y == 0 && transform.Z == 0 {
+		return worldcore.Transform{}, false
+	}
+	return transform, true
+}
+
+// issueAreaGroundRushDash 范围型点地受理即冲刺（技能.pcapng 1216.284
+// 官服簇：0x1F 锚 → c61（+48ms），**无 CantMove/CantParry（锁定 c61
+// 专属）、无 msg25/PauseSkill**；CD/MP/伤害仍由主出招路径即时结算——
+// 官服伤害在落地 212 后 ~400ms，单机无对拍方先即时，真机验证后再官服
+// 化）。~400ms 后补 msg26 + 0x1F + msg337 落地三件套（近似官服 1216.720
+// 落地簇，位置取 c61 终点）。
+func issueAreaGroundRushDash(link sceneMessageConnection, player *playerActor,
+	definition combatSkillDefinition, castAt, ground worldcore.Transform, remote string) {
+	distance := math.Sqrt(float64(square(castAt.X-ground.X) + square(castAt.Z-ground.Z)))
+	if distance <= areaRushDirectCastMeters {
+		return
+	}
+	level := int32(2)
+	action := areaRushTier2Action
+	if distance <= rushDashTriggerMeters() {
+		level = 1
+		action = defaultGroundRushAction
+	}
+	// c61 终点 = 地面点身前 bind（官服 1216 dash=dist-1.5、1275 同式）。
+	destX, _, destZ := rushBindPoint(ground, castAt.X, castAt.Z, defaultRushBindDistance)
+	destY := castAt.Y + rushDashLiftMeters
+	if err := link.WriteFrame(serverLocation(playerObjectID, playerOwnerID, castAt)); err != nil {
+		log.Printf("%s: area rush anchor: %v", remote, err)
+		return
+	}
+	frame, err := dashRushFrame(destX, destY, destZ, level, action)
+	if err == nil {
+		err = link.WriteFrame(frame)
+	}
+	if err != nil {
+		log.Printf("%s: area rush dash skill id=%s: %v", remote, definition.id, err)
+		return
+	}
+	log.Printf("%s: area rush dash skill id=%s ground=(%.2f,%.2f) dist=%.1fm tier=%d",
+		remote, definition.id, ground.X, ground.Z, distance, level)
+	dest := worldcore.Transform{X: destX, Y: castAt.Y, Z: destZ, Orient: orientTowardTarget(castAt.X, castAt.Z, ground.X, ground.Z)}
+	time.AfterFunc(400*time.Millisecond, func() {
+		steps := []struct {
+			name  string
+			build func() ([]byte, error)
+		}{
+			{"msg26", func() ([]byte, error) { return skillPauseClearFrame() }},
+			{"0x1F", func() ([]byte, error) { return serverLocation(playerObjectID, playerOwnerID, dest), nil }},
+			{"msg337", func() ([]byte, error) { return casterTransformSyncFrame(dest.X, dest.Y, dest.Z, dest.Orient) }},
+		}
+		for _, step := range steps {
+			frame, err := step.build()
+			if err != nil {
+				log.Printf("%s: area rush landing %s: %v", remote, step.name, err)
+				return
+			}
+			if err := link.WriteFrame(frame); err != nil {
+				log.Printf("%s: area rush landing %s: %v", remote, step.name, err)
+				return
+			}
+		}
+	})
 }
 
 func handleRushMovementUpload(link sceneMessageConnection, player *playerActor, world *sceneLifecycle,
 	custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomRushMoveUpload {
 		return false, nil
-	}
-	if player == nil || !player.rushInFlightSnapshot() {
-		return true, nil
 	}
 	values := custom.Values
 	if len(values) < 4 || values[1].Type != 4 || values[2].Type != 4 || values[3].Type != 4 {
@@ -1082,6 +1223,12 @@ func handleRushMovementUpload(link sceneMessageConnection, player *playerActor, 
 	orient := float32(0)
 	if len(values) > 4 && values[4].Type == 4 {
 		orient = values[4].Float32
+	}
+	// msg220 [220, x, y, z, orient?]：位置同样收编（官服仅在接近段发出，
+	// 收编无害且保持与 msg15 同口径）。
+	absorbClientPosition(world, values[1].Float32, values[2].Float32, values[3].Float32, orient)
+	if player == nil || !player.rushInFlightSnapshot() {
+		return true, nil
 	}
 	tryRushArrival(link, player, world, values[1].Float32, values[2].Float32, values[3].Float32, orient, remote)
 	return true, nil
@@ -1233,7 +1380,9 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 	if geometry.X == 0 && geometry.Y == 0 && geometry.Z == 0 {
 		geometry = target
 	}
-	distance := math.Sqrt(float64(square(x-geometry.X) + square(y-geometry.Y) + square(z-geometry.Z)))
+	// xz 平面距离（与 212 三分同口径；技能.pcapng c61 触发三证
+	// 6.09/6.10/5.91 均平地未暴露 y，统一 2D 防坡地 y 差误判）。
+	distance := math.Sqrt(float64(square(x-geometry.X) + square(z-geometry.Z)))
 	if player.rushDashIssuedSnapshot() || pending.approachIssued {
 		return
 	}

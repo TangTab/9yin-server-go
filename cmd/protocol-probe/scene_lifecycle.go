@@ -96,6 +96,10 @@ type sceneEntity struct {
 	combatStats *npcCombatStats
 	// lootBox 非 nil 表示这是掉落宝箱（点击开 View 80，不走对话/选靶）。
 	lootBox *lootBoxRuntime
+	// chase 是路点图追击状态（mapnav_chase.go）：A* 折线/重规划节流/
+	// 跨分量重试计数。nil＝尚未进入追击。清仇恨/重生时置 nil。
+	// 只在 run.mu 内经 eachCombatNPCFullLocked 的组件指针访问。
+	chase *npcChaseState
 }
 
 // npcCombatStatsOf 取指定 NPC 的守方战斗数值（rollSkillHit 按伤害系选防

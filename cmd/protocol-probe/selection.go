@@ -112,19 +112,13 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	}
 	world.selectedObject = entity.id
 	world.selectedOwner = entity.ownerID
-	// 431 ack = 选中双帧（416/417）+ **msg209 官服走语义**（用户点测：
-	// 选中即下发官服自动接近授权 [接近距离15, obj(目标), 0]——a.pcapng
-	// 14.258 官方形态；fork 客户端 298 自请求时的应答同型，此处改为
-	// 选目标即主动下发，测试其接近子系统是否由此武装）。
-	approach, err := serverCustomIntMessage(209, customInt(15),
-		customObject(entity.id, entity.ownerID), customInt(0))
-	if err != nil {
-		return fmt.Errorf("encode select approach ack: %w", err)
-	}
-	if err := world.conn.WriteFrame(approach); err != nil {
-		return fmt.Errorf("send select approach ack: %w", err)
-	}
-	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s (approach ack 209)",
+	// 431 ack = 选中双帧（416/417）仅此而已——技能.pcapng（103.143.19.173
+	// :7072 线）官服实证：选目标全程无 msg209，客户端照样锁定+自走。
+	// 此前的「选目标即主动下发 msg209 接近授权」是 a.pcapng（7074 线）
+	// 方言的试验性加戏；7072 线客户端上无此消息，多发反而可疑干扰锁定
+	// 态（本服实测：客户端 431 风暴重选、211 恒短式无目标）。298 自请求
+	// 的应答（handleAttackTargetCustom）保留——那是客户端主动要求的。
+	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s",
 		remote, entity.id, entity.ownerID, entity.configID, entity.interaction)
 	return nil
 }

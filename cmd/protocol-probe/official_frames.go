@@ -13,12 +13,14 @@ package main
 //   msg24 c1=10 怒气段序 / c1=29 击退（f 44.539、g 39.072/56.468 击杀簇实证）
 //   msg284 空值标记帧（g 直收簇 CurSkillTarget 后恒发，语义未定位，逐位镜像）
 //
-// CD 行官服方言（槽位覆写模型）：每玩家固定双槽（f/g 玩家 97/98、b 玩家
-// 93/94——槽号是玩家侧属性，按 97/98 固定），落格规则：
-//   个人行：0x11 空行(槽不活跃时) + col0 类别(变化时) + col1/col2 起止(每次)
-//           + col3 0xFFFF(变化时) + 行3 col1/col2（当前施法窗，个人行铺完后重写）
-//   公共行：同上但 col0=50000、col3=CoolDownTeam，无行3 对
-//   过期行在下一次受理/执行时惰性 0x12 清扫（f 7.764/15.649 实证）
+// CD 行方言（2026-11-09 真机定版）：现行=**行0 整行**（serverRecordAddCells
+// 一帧带全 4 列），native-menu 反编译同款真机转圈双验；官服抓包方言
+//（0x11 空行行97个人/98公共 + 0x13 逐格 + 行3=施法窗 1s 非 CD）帧与
+// g 14.660 逐字节同构仍不转圈，客户端消费前置待考证（疑登录期视图
+// 绑定），官服槽号与逐格 builders 保留在库供考证启用：
+//   个人行 97：col0 类别 / col1 起 / col2 止 / col3 0xFFFF；铺完重写行3 施法窗
+//   公共行 98：col0=50000 / col3=CoolDownTeam；无行3 对
+//   过期行在下一次受理时惰性 0x12 清扫
 
 import (
 	"encoding/binary"
@@ -278,7 +280,8 @@ func officialStatePingFrames() [4][]byte {
 
 // ---- CD 行官服方言（槽位覆写模型，玩家级双槽） ----
 
-// cooldownRowBook 记录一个 CD 槽的已落格状态（覆写判定）。
+// cooldownRowBook 记录 CD 行的已下发状态（惰性清扫判定）。行0 整行
+// 方言下个人/公共共用行 0（后写覆盖），expires 取两者较晚。
 type cooldownRowBook struct {
 	live     bool
 	category int32
@@ -286,123 +289,54 @@ type cooldownRowBook struct {
 	expires  time.Time
 }
 
-// sweepExpiredCooldownRows 惰性清扫：官服在下一次受理/执行时对已过期槽
-// 逐行发 0x12（f 7.764/15.649 与受理簇同刻实证）。返回清扫帧。
+// sweepExpiredCooldownRows 惰性清扫：CD 行过期后在下一次受理时发 0x12
+// 删行 0，避免客户端残留上一招的 CD 行（官服 0x12 清扫语义的行0 简化）。
 func (p *playerActor) sweepExpiredCooldownRows(now time.Time) [][]byte {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	var frames [][]byte
-	for row, book := range map[uint16]*cooldownRowBook{
-		cooldownRowPersonal: &p.cdPersonalRowBook,
-		cooldownRowPublic:   &p.cdPublicRowBook,
-	} {
-		if book.live && now.After(book.expires) {
-			book.live = false
-			frames = append(frames, serverRecordDelRow(playerObjectID, playerOwnerID, recordCooldown, row))
-		}
+	book := &p.cdPersonalRowBook
+	if book.live && now.After(book.expires) {
+		book.live = false
+		frames = append(frames, serverRecordDelRow(playerObjectID, playerOwnerID, recordCooldown, 0))
 	}
 	return frames
 }
 
-// writeOfficialCooldownRows 按官服方言落 CD 双行（受理即结的普通出招、
-// 直收簇、c61 触发簇共用）。col1/col2 恒写，col0/col3 变化才写，
-// 槽不活跃先铺 0x11 空行；个人行铺完后重写行3 col1/col2。
+// writeOfficialCooldownRows 落出招 CD 双行（受理即结的普通出招、直收簇、
+// c61 触发簇共用）。**行0 整行方言**（0x12 recordAddCells）：native-menu
+// 反编译同款（skillCooldownFrameWithDuration，行0+UnixMilli）与本服
+// fb5df8e 构建真机双验转圈——2026-11-09 官服逐格方言（0x11 空行行97/98+
+// 0x13 逐格+行3 施法窗）真机不转圈（纪元修复后仍不认，帧与 g 14.660
+// 逐字节同构），客户端消费该方言的前置（疑视图绑定/初始化）待考证，
+// 见 docs/冲锋与打坐官服抓包分析及Go移植.md §3.2.2。
 func (p *playerActor) writeOfficialCooldownRows(link sceneMessageConnection,
 	category int32, team int32, personal time.Duration, public time.Duration, now time.Time) error {
 	// 字面定义（测试/自增益零成本）不落 CD 行——官方从不发类别 0 的行。
 	if category == 0 && personal <= 0 && public <= 0 {
 		return nil
 	}
-	startMs := now.UnixMilli()
-	writeCell := func(row uint16, col uint8, val recordCell) error {
-		frame, err := serverRecordGridCell(playerObjectID, playerOwnerID, recordCooldown, row, col, val)
-		if err != nil {
-			return err
-		}
-		return link.WriteFrame(frame)
+	personalFrame, publicFrame, err := skillCooldownFrames(combatSkillDefinition{
+		cooldownCategory: category,
+		cooldownTeam:     team,
+		personalCD:       personal,
+		publicCD:         public,
+	}, now)
+	if err != nil {
+		return fmt.Errorf("encode cooldown rows: %w", err)
 	}
-	// 个人行（官服序：0x11 空行 → col0 类别 → col1 起 → col2 止 →
-	// col3 0xFFFF → 行3 col1/col2）
-	personalEnd := startMs + personal.Milliseconds()
-	pb := &p.cdPersonalRowBook
-	if !pb.live {
-		empty, err := serverRecordAddEmptyRow(playerObjectID, playerOwnerID, recordCooldown, cooldownRowPersonal)
-		if err != nil {
-			return err
-		}
-		if err := link.WriteFrame(empty); err != nil {
+	if err := link.WriteFrame(personalFrame); err != nil {
+		return err
+	}
+	if publicFrame != nil {
+		if err := link.WriteFrame(publicFrame); err != nil {
 			return err
 		}
 	}
-	personalWrites := []struct {
-		col uint8
-		val recordCell
-	}{
-		{1, recordInt64(startMs)},
-		{2, recordInt64(personalEnd)},
+	expires := personal
+	if public > expires {
+		expires = public
 	}
-	if !pb.live || pb.category != category {
-		personalWrites = append([]struct {
-			col uint8
-			val recordCell
-		}{{0, recordInt(uint32(category))}}, personalWrites...)
-	}
-	if !pb.live || pb.team != -1 {
-		personalWrites = append(personalWrites, struct {
-			col uint8
-			val recordCell
-		}{3, recordInt(0xFFFF)})
-	}
-	for _, w := range personalWrites {
-		if err := writeCell(cooldownRowPersonal, w.col, w.val); err != nil {
-			return err
-		}
-	}
-	for _, w := range []struct {
-		col uint8
-		val recordCell
-	}{
-		{1, recordInt64(startMs)},
-		{2, recordInt64(personalEnd)},
-	} {
-		if err := writeCell(cooldownRowWindow, w.col, w.val); err != nil {
-			return err
-		}
-	}
-	pb.live, pb.category, pb.team, pb.expires = true, category, -1, now.Add(personal)
-	// 公共行（team/publicCD 齐备才有——官方从不发 team=0 的 50000 行）
-	gb := &p.cdPublicRowBook
-	if team > 0 && public > 0 {
-		publicEnd := startMs + public.Milliseconds()
-		if !gb.live {
-			empty, err := serverRecordAddEmptyRow(playerObjectID, playerOwnerID, recordCooldown, cooldownRowPublic)
-			if err != nil {
-				return err
-			}
-			if err := link.WriteFrame(empty); err != nil {
-				return err
-			}
-		}
-		publicWrites := []struct {
-			col uint8
-			val recordCell
-		}{
-			{0, recordInt(50000)},
-			{1, recordInt64(startMs)},
-			{2, recordInt64(publicEnd)},
-		}
-		if !gb.live || gb.team != team {
-			publicWrites = append(publicWrites, struct {
-				col uint8
-				val recordCell
-			}{3, recordInt(uint32(team))})
-		}
-		for _, w := range publicWrites {
-			if err := writeCell(cooldownRowPublic, w.col, w.val); err != nil {
-				return err
-			}
-		}
-		gb.live, gb.category, gb.team, gb.expires = true, 50000, team, now.Add(public)
-	}
+	p.cdPersonalRowBook = cooldownRowBook{live: true, category: category, team: team, expires: now.Add(expires)}
 	return nil
 }

@@ -46,19 +46,19 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 		t.Fatalf("MP=%d, want %d", got, beforeMP-11)
 	}
 	frames := conn.Frames()
-	// 官方出招簇（Java handleValues + 抓包 52905 #3000-#3005）：个人 CD
-	// 行 → active 行 → GCD 行 → 玩家面板 → msg20（0x1E 壳；不再发
-	// State 动作帧、msg20 不走 0x27——42 份抓包 0 次）。
-	if len(frames) != 15 || frames[0][0] != 0x11 || frames[13][0] != 0x10 || frames[14][0] != 0x1E {
-		t.Fatalf("frames=%d, want CD clusters (0x11+0x13 official dialect) + active + 0x10 player update + 0x1E msg20", len(frames))
+	// 出招簇（行0 整行 CD 方言，2026-11-09 真机回退）：个人 CD 行 →
+	// GCD 行 → active 行 → 玩家面板 → msg20（0x1E 壳；不再发 State 动作
+	// 帧、msg20 不走 0x27——42 份抓包 0 次）。
+	if len(frames) != 5 || frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x1E {
+		t.Fatalf("frames=%d, want CD rows(0x11 x2, row 0) + active + 0x10 player update + 0x1E msg20", len(frames))
 	}
 	if got := binary.LittleEndian.Uint16(frames[0][10:]); got != recordCooldown {
 		t.Fatalf("cooldown record index=%d, want %d", got, recordCooldown)
 	}
-	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != cooldownRowPersonal {
-		t.Fatalf("personal cooldown row=%d, want %d", got, cooldownRowPersonal)
+	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != 0 {
+		t.Fatalf("personal cooldown row=%d, want 0 (row0 whole-row dialect)", got)
 	}
-	if got := binary.LittleEndian.Uint16(frames[12][10:]); got != recordActiveSkill {
+	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordActiveSkill {
 		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
 	}
 	if got := player.currentSkillSnapshot(); got != "CS_yhwq_hsqs05" {
@@ -98,8 +98,8 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	// 延迟 State 帧，帧数保持出招簇 5 条。
 	time.Sleep(50 * time.Millisecond)
 	frames = conn.Frames()
-	if len(frames) != 15 {
-		t.Fatalf("frames after follow-up=%d, want no delayed State frames (15)", len(frames))
+	if len(frames) != 5 {
+		t.Fatalf("frames after follow-up=%d, want no delayed State frames (5)", len(frames))
 	}
 }
 
@@ -217,13 +217,13 @@ func TestHandleSkillFourStagesNativeVisibleBuff(t *testing.T) {
 		t.Fatalf("BufferListStr=%q, want buf_CS_yhwq_hsqs04", got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 15 || frames[0][0] != 0x11 || frames[13][0] != 0x10 || frames[14][0] != 0x1E {
-		t.Fatalf("frames=%d, want CD clusters (0x11+0x13 official dialect) + active + 0x10 player update + 0x1E msg20", len(frames))
+	if len(frames) != 5 || frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x1E {
+		t.Fatalf("frames=%d, want CD rows(0x11 x2, row 0) + active + 0x10 player update + 0x1E msg20", len(frames))
 	}
-	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != cooldownRowPersonal {
-		t.Fatalf("personal cooldown row=%d, want %d", got, cooldownRowPersonal)
+	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != 0 {
+		t.Fatalf("personal cooldown row=%d, want 0 (row0 whole-row dialect)", got)
 	}
-	if got := binary.LittleEndian.Uint16(frames[12][10:]); got != recordActiveSkill {
+	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordActiveSkill {
 		t.Fatalf("active skill record index=%d, want %d", got, recordActiveSkill)
 	}
 }
@@ -351,15 +351,15 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 		t.Fatalf("BufferListStr=%q, want buf_fixed_red", got)
 	}
 	frames := conn.Frames()
-	// 官方出招簇（不再发 State 动作帧；msg20 走 0x1E 壳）。
-	if len(frames) != 15 ||
-		frames[0][0] != 0x11 || frames[13][0] != 0x10 || frames[14][0] != 0x1E {
+	// 出招簇（行0 整行 CD 方言，不再发 State 动作帧；msg20 走 0x1E 壳）。
+	if len(frames) != 5 ||
+		frames[0][0] != 0x11 || frames[3][0] != 0x10 || frames[4][0] != 0x1E {
 		t.Fatalf("开太极 initial frames=%x", frames)
 	}
-	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != cooldownRowPersonal {
-		t.Fatalf("开太极 personal cooldown row=%d, want %d", got, cooldownRowPersonal)
+	if got := binary.LittleEndian.Uint16(frames[0][12:]); got != 0 {
+		t.Fatalf("开太极 personal cooldown row=%d, want 0 (row0 whole-row dialect)", got)
 	}
-	if got := binary.LittleEndian.Uint16(frames[12][10:]); got != recordActiveSkill {
+	if got := binary.LittleEndian.Uint16(frames[2][10:]); got != recordActiveSkill {
 		t.Fatalf("开太极 active skill record=%d, want %d", got, recordActiveSkill)
 	}
 }

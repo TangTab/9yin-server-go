@@ -61,3 +61,8 @@ msg446/rec22 boss 簇、DailyLP(rec39) 入账格、fight_relation 行1
 解析的包：F:\Game\Online\9yin\9yin_server_new\artifacts
 
 exe: F:\Game\Online\9yin\9yin_server1\build\9yin-game-native-menu.exe
+
+
+
+功能开放总开关 = Task_Completed row 1551 的 0x4 位
+             = 本服 taskCompletedBit(49634)  ← 我们的位映射本来就是对的

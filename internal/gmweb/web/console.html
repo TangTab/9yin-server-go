@@ -125,7 +125,8 @@
         <p class="muted">
           <b>批量刷新</b>：每到间隔统一重生所有<b>已死亡</b>怪物（回出生点满血），活怪一律不动；0=关闭批量，回到每怪独立
           RefreshTime 计时。<b>尸体清除</b>：死亡超过该秒数后尸体消失（0x0E），重生时在出生点重新物化；0=尸体保留到重生（带未拾掉落的尸体不受此项约束，见下）。<b>掉落存留</b>：官服双形态——普通怪掉落挂尸体（点击尸体拾取，尸体冒光提示），宝箱怪（AI编辑包死亡生箱事件）与 GM 世界宝箱为独立实体；挂尸掉落/宝箱实体超过该秒数未拾自动消失（0=保留到拾空，改值即刻生效，重启回落
-          -lootbox-ttl 默认 300 秒）；掉落未清期间怪物不重生。任务怪（EventNpc/事件触发生成器）从不生成，也永不进入刷新循环。
+          -lootbox-ttl 默认 300 秒）；掉落未清期间怪物不重生。任务怪（EventNpc/事件触发生成器）从不生成，也永不进入刷新循环。<b>自动追击</b>：总开关（进程级，重启回落启动环境
+          NINEYIN_NPC_CHASE）；关闭后仇恨照常持有但怪停在出生点不动——冲锋测试（隔离追击 0x1F 节流造成的终点漂移）专用方言。
         </p>
         <label>批量间隔/秒
         <input id="respawn-interval" type="number" value="30" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
@@ -136,6 +137,8 @@
         <label style="margin-left: 12px">宝箱存留/秒
         <input id="lootbox-ttl" type="number" value="300" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
           onclick="setLootBoxTTL()">应用</button>
+        <label style="margin-left: 12px"><input id="npc-chase-enabled" type="checkbox" checked />
+          自动追击</label><button onclick="setNpcChase()">应用</button>
       </section>
       <section>
         <h2>数据存盘</h2>

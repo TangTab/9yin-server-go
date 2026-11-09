@@ -65,6 +65,14 @@ func Validate(body CommandBody) (Command, error) {
 			float64(body.Value) != float64(int32(body.Value)) || body.Value < 0 || body.Value > 86400 {
 			return command, fmt.Errorf("lootbox ttl must be an integer between 0 and 86400 seconds")
 		}
+	case "set_npc_chase":
+		// NPC 自动追击总开关（0=关 1=开，缺省视为 0）。进程级（初值=
+		// 启动 env NINEYIN_NPC_CHASE，重启回落）；关闭后仇恨照常持有但
+		// 追击位移整段静默，怪坐标恒停出生点。
+		if body.Enabled != 0 && body.Enabled != 1 {
+			return command, fmt.Errorf("npc chase enabled must be 0 or 1")
+		}
+		command.Enabled = body.Enabled
 	case "spawn_chest":
 		// GM 世界宝箱：在当前角色位置生成一只独立宝箱实体（stormbox_10
 		// 方言），掉落走回落阶梯一包，拾空/超时消失。

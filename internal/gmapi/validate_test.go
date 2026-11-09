@@ -86,6 +86,37 @@ func TestValidateJingMaiTier(t *testing.T) {
 	}
 }
 
+// NPC 自动追击总开关（set_npc_chase）：enabled 严格 0/1（与
+// set_zhenqi_cap 的开关口径一致），游戏侧进程级覆写。缺省 enabled=0
+// 视为关闭（与 set_silver 缺省 0 合法同口径；面板恒显式发送）。
+func TestValidateNPCChase(t *testing.T) {
+	for _, raw := range []string{
+		`{"action":"set_npc_chase","enabled":1}`,
+		`{"action":"set_npc_chase","enabled":0}`,
+		`{"action":"set_npc_chase"}`,
+	} {
+		command, err := validateBody(t, raw)
+		if err != nil {
+			t.Fatalf("valid chase rejected: %v (%s)", err, raw)
+		}
+		if command.Enabled != 0 && command.Enabled != 1 {
+			t.Fatalf("command=%+v (%s)", command, raw)
+		}
+	}
+	for _, raw := range []string{
+		`{"action":"set_npc_chase","enabled":2}`,
+		`{"action":"set_npc_chase","enabled":-1}`,
+	} {
+		_, err := validateBody(t, raw)
+		if err == nil {
+			t.Fatalf("invalid chase accepted: %s", raw)
+		}
+		if !strings.Contains(err.Error(), "npc chase") {
+			t.Fatalf("error %q should name the offending field", err)
+		}
+	}
+}
+
 // 九阴志全局门控四动作（ninjiuzhi_set/event/reset/status）的契约层
 // 校验：阶段界值 1..9、事件类别枚举 kill|task、无负载动作直放行。
 // 「阶段只增不减」的拒绝语义在游戏侧判定，不在本层。

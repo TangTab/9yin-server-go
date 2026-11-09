@@ -327,6 +327,10 @@ func (definition combatSkillDefinition) totalActionDuration() time.Duration {
 // AddCoolDownTime 时下发（无我剑诀等无 team 套路无公共行——官方从不发
 // team=0 的 50000 行，客户端会把它当全组公共 CD，一招转全场）。
 func skillCooldownFrames(definition combatSkillDefinition, now time.Time) (personal, public []byte, err error) {
+	// 纪元口径：native-menu 反编译同方言（skillCooldownFrameWithDuration，
+	// UnixMilli）真机转圈亲证——客户端 CD 倒计时只消费 col2-col1 时长，
+	// 绝对纪元不参与。官服逐格方言用 1601(FILETIME) 纪元毫秒（g 14.660
+	// col1=UnixMilli+11644473600000 逐位吻合），待该方言启用时同口径。
 	start := now.UnixMilli()
 	// 官方 cooldown_rec 第 4 列 team 是 u16（0xFFFF 个人行 /
 	// CoolDownTeam GCD 行），此前自协商方言误声明为 u32。
@@ -1388,9 +1392,10 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 			if definition.stagedRushFamily() && hasClaimed {
 				geometry = claimed
 			}
+			// xz 平面距离（与 212 三分 / tryRushArrival 同口径；技能.pcapng
+			// 触发三证均平地，统一 2D 防坡地 y 差误判）。
 			distance := math.Sqrt(float64(
 				square(castAt.X-geometry.X) +
-					square(castAt.Y-geometry.Y) +
 					square(castAt.Z-geometry.Z)))
 			if rushStageEnabled() && definition.stagedRushFamily() {
 				// 距离四桶（g/f/b 定版）：≤直收带直接执行簇（不走暂存链、
@@ -1404,6 +1409,19 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				log.Printf("%s: reject skill id=%s out of range %.0fm > %.0fm",
 					remote, definition.id, distance, definition.castRange)
 				return true, nil
+			}
+		}
+	}
+	// 范围型点地冲锋（技能.pcapng 定版）：hyjf07 型（CanRush + 非锁定
+	// 目标 + 211 短式带地面点）。分带：≤3.5 受理即直收（55.5@1.45 无 c61
+	// 直接 msg20+伤害，主出招路径已覆盖）；>3.5 受理即 c61 冲向地面点
+	// 身前 bind（3.96/5.52 档1 qg_fastrun、b/e 8.2 档2 qg_fastruning_s，
+	// 档1|档2 分界=GRushRange+Add 6.5；1216 终点=ground 身前 1.5，
+	// dash=dist-1.5 双证）。
+	if rushStageEnabled() && definition.canRush && !definition.requiresTarget && world != nil {
+		if ground, ok := useSkillGroundPointTransform(custom); ok {
+			if castAt, hasCast := useSkillCastTransform(custom); hasCast {
+				issueAreaGroundRushDash(link, player, definition, castAt, ground, remote)
 			}
 		}
 	}

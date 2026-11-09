@@ -814,6 +814,14 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("宝箱存留已关闭：宝箱保留到被拾空")
 			}
 			log.Printf("%s: GM set lootbox ttl=%ds", conn.RemoteAddr(), seconds)
+		case "set_npc_chase":
+			enabled := setNPCChaseEnabled(command.Enabled == 1)
+			if enabled {
+				gmSession.setAction("NPC 自动追击已开启：怪沿路点图寻路折线逼近（无图场景直线贴地）")
+			} else {
+				gmSession.setAction("NPC 自动追击已关闭：仇恨照常持有，怪停在出生点（冲锋测试方言）")
+			}
+			log.Printf("%s: GM set npc chase enabled=%v", conn.RemoteAddr(), enabled)
 		case "spawn_chest":
 			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
 				gmSession.setAction("世界宝箱生成失败：角色尚未进入场景")
@@ -2494,7 +2502,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery || custom.Values[0].Int32 == clientCustomMapNavigate) {
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
@@ -2580,9 +2588,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if _, handleErr := handleRushMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle rush movement upload: %v", conn.RemoteAddr(), handleErr)
 					}
-				case clientCustomRushHitConfirm, clientCustomCorpseQuery:
+				case clientCustomRushHitConfirm, clientCustomCorpseQuery, clientCustomMapNavigate:
 					// 官服静默消费（f ⑦ / g 战后实证）：msg915 命中确认上报
-					// [1,obj,x,y,z,朝向] 与 msg990 尸体拾取查询均无 S2C 回应。
+					// [1,obj,x,y,z,朝向] 与 msg990 尸体拾取查询均无 S2C 回应；
+					// msg266 地图寻路标记（技能.pcapng：起跑前 ~73ms 一次，
+					// 两次地图移动双证，S2C 零回应——位置由随后的 msg15 收编）。
 					log.Printf("%s: silent custom msg=%d values=%d", conn.RemoteAddr(), custom.Values[0].Int32, len(custom.Values))
 				case clientCustomMoveItem:
 					if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {

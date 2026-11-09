@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -24,6 +25,9 @@ type npcMoveUpdate struct {
 	id          uint32
 	ownerID     uint32
 	destination worldcore.Transform
+	// delay 是该次移动的到达确认延时（scheduleCombatMoveArrival 用）。
+	// 0＝旧默认 1s（重生/栓绳瞬移类）；追击折线按剩余路径长/速度。
+	delay time.Duration
 }
 
 type npcPropertyUpdate struct {
@@ -278,13 +282,30 @@ func (r *sceneRun) autoSelectAttackerTargets(attacks []npcAttackPresentation) {
 	}
 }
 
-// npcChaseEnabled 测试开关 NINEYIN_NPC_CHASE=off（默认开）：关闭 NPC
-// 追击位移，怪坐标恒停出生点——pending.geometry（211 快照）/服务端
-// 权威/客户端认知三方一致，用于隔离追击 0x1F 广播节流（客户端滞后
-// 4m+）造成的冲锋 c61 终点漂移。栓绳回位/重生都以 Home 为目的地，
-// 怪未挪窝即原地 no-op，无需另闸。
+// npcChaseDisabled 进程级追击开关（true=关）。初值取启动环境
+// NINEYIN_NPC_CHASE=off（部署方言，起服时读一次），GM 面板
+// set_npc_chase 运行期覆写（重启回落 env 初值）。
+var npcChaseDisabled atomic.Bool
+
+func init() {
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_NPC_CHASE")), "off") {
+		npcChaseDisabled.Store(true)
+	}
+}
+
+// npcChaseEnabled 追击位移总闸（默认开）：关闭后怪坐标恒停出生点——
+// pending.geometry（211 快照）/服务端权威/客户端认知三方一致，用于
+// 隔离追击 0x1F 广播节流（客户端滞后 4m+）造成的冲锋 c61 终点漂移。
+// 仇恨照常持有（受击锁定/威胁表不动），栓绳回位/重生都以 Home 为
+// 目的地，怪未挪窝即原地 no-op，无需另闸。
 func npcChaseEnabled() bool {
-	return !strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_NPC_CHASE")), "off")
+	return !npcChaseDisabled.Load()
+}
+
+// setNPCChaseEnabled GM 面板运行期覆写追击开关，返回覆写后的状态。
+func setNPCChaseEnabled(enabled bool) bool {
+	npcChaseDisabled.Store(!enabled)
+	return npcChaseEnabled()
 }
 
 // simulateLocked 是 combatTick 的锁内结算段，独立出来供测试路径
@@ -338,6 +359,8 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 				state.TargetMember = 0
 				state.NextAttack = time.Time{}
 				state.RespawnAt = time.Time{}
+				// 追击导航状态随重生废弃（Home 位置的折线对新生命周期无意义）。
+				meta.chase = nil
 				if err := r.setNPCTransformLocked(id, state.Home); err != nil {
 					log.Printf("scene %s/%s: respawn transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
 					return
@@ -366,25 +389,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		distance := horizontalDistance(*transform, position)
 		if !engaged || distance > state.ChaseRange {
 			// 目标死亡/离场，或被拉出栓绳距离：清除仇恨并按栓绳规则回位。
-			state.Threat = 0
-			state.TargetMember = 0
-			if horizontalDistance(*transform, state.Home) > 0.25 {
-				if err := r.setNPCTransformLocked(id, state.Home); err != nil {
-					log.Printf("scene %s/%s: leash transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
-					return
-				}
-				moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
-			}
-			// 受击带入的 Fighting 态随清仇恨完全重置（HP/瘀血/MP 回满
-			// + 463=0）并补发 0x10 属性帧——否则 NPC 的脱战只发生在
-			// 重生，怪回家后永远顶着战斗态。官方 463 生命周期
-			// 0→1→120→0（55866/12141/52905 抓包一致），0 恒以重置
-			// 属性帧下发且伴随资源回满；玩家侧同语义迁移见
-			// setCombatPresence（威胁/10s 迟滞）。
-			if vitals.Logic == entity.LogicStateFighting {
-				vitals.ResetAfterLeash()
-				updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcCombatProperties(vitals.ActorState(meta.id, meta.ownerID))})
-			}
+			r.appendNPCReturnHomeLocked(id, meta, vitals, state, transform, &moves, &updates)
 			return
 		}
 		// 该 NPC 仍持有有效目标，即便它此刻正在等待
@@ -394,9 +399,10 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			return
 		}
 		if !npcChaseEnabled() && distance > state.AttackRange {
-			// NINEYIN_NPC_CHASE=off 测试方言：追击位移整段静默，仇恨
-			// 照常持有。放在攻击者名额闸之前——远距怪不占每 tick 的
-			// 攻击名额，玩家走进 AttackRange 后攻击逻辑照常走。
+			// 追击总闸关闭（NINEYIN_NPC_CHASE=off 启动方言或 GM 面板
+			// set_npc_chase=0）：追击位移整段静默，仇恨照常持有。
+			// 放在攻击者名额闸之前——远距怪不占每 tick 的攻击名额，
+			// 玩家走进 AttackRange 后攻击逻辑照常走。
 			return
 		}
 		if aggressors >= combatTickMaxAggressors {
@@ -405,12 +411,21 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		aggressors++
 		target := memberByID[state.TargetMember]
 		if distance > state.AttackRange {
-			destination := stepToward(*transform, position, minFloat32(state.MoveSpeed, distance-state.AttackRange))
+			// 路点图追击（mapnav_chase.go）：A* 折线推进 + y 插值替代
+			// 旧水平直线 stepToward——穿墙（无寻路）与穿地/悬空（y 不
+			// 随地形）两个根因在此一并消除（docs/map-path-waypoint-graph.md
+			// §5/§6.3）。无图场景内部回落直线贴地。
+			destination, delay, gaveUp := r.advanceChaseLocked(meta, state, transform, position, now)
+			if gaveUp {
+				// 跨分量连续规划失败：放弃仇恨按栓绳语义回位。
+				r.appendNPCReturnHomeLocked(id, meta, vitals, state, transform, &moves, &updates)
+				return
+			}
 			if err := r.setNPCTransformLocked(id, destination); err != nil {
 				log.Printf("scene %s/%s: chase transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
 				return
 			}
-			moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: destination})
+			moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: destination, delay: delay})
 			return
 		}
 		if now.Before(state.NextAttack) {
@@ -495,6 +510,41 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 	}
 	r.mu.Unlock()
 	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage, attacks: attacks}
+}
+
+// appendNPCReturnHomeLocked 清仇恨并按栓绳规则回位：正常脱战（目标
+// 死亡/离场/拉出 ChaseRange）与路点图追击放弃（跨分量连续规划失败）
+// 共用同一语义。受击带入的 Fighting 态随清仇恨完全重置（HP/瘀血/MP
+// 回满 + 463=0）并补发 0x10 属性帧——否则 NPC 的脱战只发生在重生，
+// 怪回家后永远顶着战斗态。官方 463 生命周期 0→1→120→0（55866/
+// 12141/52905 抓包一致），0 恒以重置属性帧下发且伴随资源回满；玩家
+// 侧同语义迁移见 setCombatPresence（威胁/10s 迟滞）。
+//
+// moves/updates 以指针接收（append 扩容对调用方可见）。调用方必须
+// 已持有 r.mu。
+func (r *sceneRun) appendNPCReturnHomeLocked(
+	id worldcore.EntityID,
+	meta *sceneEntity,
+	vitals *sim.Vitals,
+	state *sim.Brain,
+	transform *worldcore.Transform,
+	moves *[]npcMoveUpdate,
+	updates *[]npcPropertyUpdate,
+) {
+	state.Threat = 0
+	state.TargetMember = 0
+	meta.chase = nil
+	if horizontalDistance(*transform, state.Home) > 0.25 {
+		if err := r.setNPCTransformLocked(id, state.Home); err != nil {
+			log.Printf("scene %s/%s: leash transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
+			return
+		}
+		*moves = append(*moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: state.Home})
+	}
+	if vitals.Logic == entity.LogicStateFighting {
+		vitals.ResetAfterLeash()
+		*updates = append(*updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcCombatProperties(vitals.ActorState(meta.id, meta.ownerID))})
+	}
 }
 
 // nearestTargetLocked 返回 aggroRange 内最近的存活目标；没有则返回 0。
@@ -636,8 +686,10 @@ func (r *sceneRun) broadcastNPCFrames(members []*sceneMember, moves []npcMoveUpd
 		// 在同一个战斗 tick 中让它与 ServerMoving 成对发送：那样会使
 		// actor 瞬移到目的地而不是播放移动动作。之后
 		// 的追击目的地会在该定时器执行之前更改权威
-		// transform，从而令此次确认失效。
-		r.scheduleCombatMoveArrival(members, move, time.Second)
+		// transform，从而令此次确认失效。到达延时按折线路径长/速度
+		//（docs/map-path-waypoint-graph.md §6.3：折线长于直线，固定
+		// 1s 会提前确认回到漂移）；重生/栓绳瞬移类保持默认 1s。
+		r.scheduleCombatMoveArrival(members, move, move.delay)
 	}
 	for _, update := range updates {
 		frame, err := sceneObjectProperties(update.id, update.ownerID, 0, update.properties)
@@ -776,22 +828,6 @@ func npcCombatProperties(state entity.ActorState) []clientdata.IndexedProperty {
 func horizontalDistance(a, b worldcore.Transform) float32 {
 	dx, dz := a.X-b.X, a.Z-b.Z
 	return float32(math.Hypot(float64(dx), float64(dz)))
-}
-
-func stepToward(from, to worldcore.Transform, step float32) worldcore.Transform {
-	distance := horizontalDistance(from, to)
-	if distance <= 0 || step <= 0 {
-		return from
-	}
-	if step > distance {
-		step = distance
-	}
-	ratio := step / distance
-	result := from
-	result.X += (to.X - from.X) * ratio
-	result.Z += (to.Z - from.Z) * ratio
-	result.Orient = float32(math.Atan2(float64(to.Z-from.Z), float64(to.X-from.X)))
-	return result
 }
 
 func minFloat32(a, b float32) float32 {

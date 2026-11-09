@@ -1,7 +1,7 @@
 # 路点图(.path)格式逆向与 NPC 追击寻路方案
 
 > 2026-11-09 完成。服务端 `.path` 二进制格式破解 + 数学级校验 + 几何空间评估 + NPC 追击穿墙/穿地根因定位。
-> 状态:**分析 100% 完成,实现未开始**。配套文档:`map-region-are0-rgn1.md`(客户端区域多边形)、`jingmai-cd-qinggong.md`(轻功)。
+> 状态:**§6 全部落地（2026-11-09）**——`internal/mapnav`（parse/index/astar/follow 四文件）+ `cmd/protocol-probe/mapnav_chase.go` 追击重接线，测试 22 项全绿（mapnav 13 + 追击集成 6 + 批测 2）。实现新发现见 §6.5。配套文档:`map-region-are0-rgn1.md`(客户端区域多边形)、`jingmai-cd-qinggong.md`(轻功)。
 
 ## 1. 数据资产
 
@@ -150,9 +150,42 @@ internal/mapnav/
 - 跟随:构造坡地路径断言 Y 单调插值无跳变;穿墙回归:在已知有墙场景(需实测选图)断言路径绕行;
 - 追击集成:复用 `NINEYIN_NPC_CHASE` 方言 + `combatTickForTest` 驱动。
 
+## 6.5 实现落地记录（2026-11-09）
+
+### 模块与接线
+
+| 文件 | 内容 |
+|---|---|
+| `internal/mapnav/parse.go` | 二进制解析（两遍扫描 CSR 邻接表）+ 字节精确校验 + `ValidateEdgeDistances` 数学级校验 + 越界/截断防御 |
+| `internal/mapnav/index.go` | 32m XZ 均匀网格（counting-sort 前缀桶）+ `Nearest`（**3D 距离**环形扩张剪枝——同 x/z 多楼层必须命中同层）+ `Library`（进程级缓存，缺失负缓存只探一次盘） |
+| `internal/mapnav/astar.go` | 二叉堆 A*（手写堆 + 代章懒失效数组复用；启发式 3D 欧氏可采纳） |
+| `internal/mapnav/follow.go` | `Follower` 折线进给（y 线性插值）+ `StepTowardGround`（直线贴地）/`LerpOrientFreeStep`（末段直线，旧 stepToward 语义+y 插值） |
+| `cmd/protocol-probe/mapnav_chase.go` | 追击状态机（`npcChaseState`/`advanceChaseLocked`/`planChasePath`）+ `warmNav`（sync.Once 后台预热，r.mu 内落盘） |
+| `cmd/protocol-probe/combat_ai.go` | 追击分支替换为 `advanceChaseLocked`；栓绳/放弃共用 `appendNPCReturnHomeLocked`；`npcMoveUpdate.delay`=到达确认延时（剩余路径长/速度，旧固定 1s 保留给重生/栓绳瞬移） |
+| `testdata/mapnav/` | 6 个代表文件（adv031/_main、battle02/_main(4B 空图)、scene04、school01） |
+
+### 关键实现决策（与 §6.3 的差异/补充）
+
+1. **规划折线丢弃 path[0]（NPC 最近路点）**：战斗 tick 1s > 重规划节流 400ms，即追击期间几乎每拍重规划；若折线首段是“当前位置→最近路点”，NPC 位于两路点中间时每拍都先折返 → **原地振荡永不前进**（穿墙回归测试实测）。改为当前位置直接走向 path[1]，弦切 ≤ 一格路点间距（~10m），网格拓扑仍守。
+2. **Nearest 用 3D 距离而非水平距离**：school 类多层建筑图同 x/z 上下叠层，水平最近会吸附错楼层；网格环形剪枝的下界是水平量恒 ≤ 3D 距离，正确性不受影响。
+3. **导航状态三处生命周期钩子**：清仇恨（栓绳/目标死亡）、重生、跨分量放弃——全部 `meta.chase = nil`。
+4. **sceneRun 异步预热**：`newSceneRun` 即 `go warmNav()`（scene14 解析 ~400ms 全量批测口径），首个追击 tick 在 run.mu 内零阻塞；未就绪当拍直线兜底。
+5. **测试钩子 `mapnavLoaderForTest`**：合成图注入必须先于 sceneRun 创建（预热 Once 抢跑会负缓存）；追击测试驱动用 `chaseTickForTest`（`combatTickForTest` 每次调用挂新成员、旧成员位置冻结——仅测试现象，生产连接循环无此问题）。
+
+### 批测实证（F 盘部署 557 文件，2026-11-09）
+
+- **字节精确 557/557**（351 万节点/2085 万边，解析总耗时 ~400ms）；scene14 A* 随机 1000 对：成功率 0.995（理论 Σ(分量占比)²=0.996）、平均 **2.6ms/对**、主分量 99.8%（62 分量）——与 §3 分析一致；
+- **官方手编非欧边权（§2.1 的修正）**：508/557 文件在 0.1m 内全净；49 文件含少量官方 authored 边权（groupscene* 系恒 52 边/≤1.5m、test*/clone* 副本图最高 ~25m、25% 边）。**存储权重即权威代价**，A* 照用；批测硬闸只拦“maxDev>50m 或过半边偏差”（格式误读的签名），authored 噪声记日志不判败。
+
+### 后续
+
+- 真机验证：city05/scene 野外拉怪观察绕墙/贴坡；追击总闸已上 GM 面板（怪物刷新分组 `set_npc_chase` 0/1，进程级覆写、重启回落启动 env `NINEYIN_NPC_CHASE`——env 仍作起服初值方言）；
+- `_main` 图接入（§7.1）与防作弊层（§4 的 2/3/5 层）未做，属独立批次。
+
 ## 7. 开放问题
 
 1. `_main.path` 的真实用途未证实(推测:大世界行路/巡逻主干),实现 mapnav 时顺带在官服抓包验证,暂不接入;
 2. 路点间距 ~10m,坡度大处两路点高差可达数米,y 插值已够视觉;若日后要更准,可结合 ARE0 地形(`map-region-are0-rgn1.md`,完成度 ~80%);
 3. school 类多分量图占 47% 节点在次级分量,A* 兜底策略(§6.3.5)需实测调参;
 4. `idres` 文件(608 个)未排查是否含额外空间数据,低优先级。
+

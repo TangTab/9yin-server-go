@@ -147,6 +147,8 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_autosave_interval","value":0}`, http.StatusOK},   // 0=关闭合法
 		{`{"action":"set_lootbox_ttl","value":300}`, http.StatusOK},       // 宝箱存留：默认 5 分钟
 		{`{"action":"set_lootbox_ttl","value":0}`, http.StatusOK},         // 0=保留到拾空合法
+		{`{"action":"set_npc_chase","enabled":0}`, http.StatusOK},         // NPC 自动追击总开关
+		{`{"action":"set_npc_chase","enabled":1}`, http.StatusOK},
 		{`{"action":"spawn_chest"}`, http.StatusOK},                       // GM 世界宝箱（无参白名单）
 		{`{"action":"popup_gm_panel"}`, http.StatusOK},
 		{`{"action":"custom_probe","msgId":517,"subType":899000000}`, http.StatusOK},
@@ -180,6 +182,7 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_lootbox_ttl","value":-1}`, http.StatusBadRequest},  // 负数拒绝
 		{`{"action":"set_lootbox_ttl","value":3.5}`, http.StatusBadRequest}, // 必须整数
 		{`{"action":"set_lootbox_ttl","value":86401}`, http.StatusBadRequest},
+		{`{"action":"set_npc_chase","enabled":2}`, http.StatusBadRequest}, // 开关严格 0/1
 		{`{"action":"custom_probe","msgId":0,"subType":1}`, http.StatusBadRequest},
 		{`{"action":"custom_probe","msgId":800,"subType":1}`, http.StatusBadRequest},
 		{`{"action":"grant_item","itemConfig":"   "}`, http.StatusBadRequest}, // 空白 ConfigID
@@ -308,6 +311,63 @@ func TestGMFlowLootBoxTTL(t *testing.T) {
 	}
 	if got := lootBoxTTL(); got != 0 {
 		t.Fatalf("lootbox ttl after disable=%v want 0", got)
+	}
+}
+
+// TestGMFlowNPCChase NPC 自动追击总开关是进程级共享原子值（初值=启动
+// env NINEYIN_NPC_CHASE）：假会话循环执行与 main.go processGMCommand
+// set_npc_chase 分支相同的写动作，验证 HTTP → 校验 → 会话通道 →
+// setNPCChaseEnabled → npcChaseEnabled 的完整链路。
+func TestGMFlowNPCChase(t *testing.T) {
+	previous := npcChaseEnabled()
+	t.Cleanup(func() { setNPCChaseEnabled(previous) })
+
+	server, session, _ := gmFlowHarness(t)
+	// 会话循环消费命令：照抄执行器分支的写动作与回执文案。
+	go func() {
+		for command := range session.commands {
+			if command.Action == "set_npc_chase" {
+				enabled := setNPCChaseEnabled(command.Enabled == 1)
+				if enabled {
+					session.setAction("NPC 自动追击已开启：怪沿路点图寻路折线逼近（无图场景直线贴地）")
+				} else {
+					session.setAction("NPC 自动追击已关闭：仇恨照常持有，怪停在出生点（冲锋测试方言）")
+				}
+			}
+			command.complete(nil)
+		}
+	}()
+
+	payload, _ := json.Marshal(map[string]any{"action": "set_npc_chase", "enabled": 0})
+	response, err := http.Post(server.URL+"/api/sessions/7/command", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("post disable: %v", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("disable status=%d", response.StatusCode)
+	}
+	if npcChaseEnabled() {
+		t.Fatal("npc chase must be disabled after GM command")
+	}
+	// 状态回读带上执行器回执文案（顶栏"最近操作"）。
+	body, _, _ := gmGetBody(t, server.URL+"/api/sessions")
+	if !strings.Contains(body, "NPC 自动追击已关闭") {
+		t.Fatalf("sessions state missing chase receipt: %s", body)
+	}
+
+	// 重开语义：追击 tick 恢复位移分支。
+	payload, _ = json.Marshal(map[string]any{"action": "set_npc_chase", "enabled": 1})
+	response, err = http.Post(server.URL+"/api/sessions/7/command", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("post enable: %v", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("enable status=%d", response.StatusCode)
+	}
+	if !npcChaseEnabled() {
+		t.Fatal("npc chase must be re-enabled after GM command")
 	}
 }
 

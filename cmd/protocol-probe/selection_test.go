@@ -36,14 +36,12 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	// 431 ack = 选中双帧 + msg209 官服走语义（选目标即下发自动接近授权）。
-	if len(frames) != 3 {
-		t.Fatalf("select target frames=%x, want LastObject+AutoSelectObject+msg209", frames)
+	// 431 ack = 选中双帧（416/417）仅此——技能.pcapng（7072 线）官服实证
+	// 选目标全程无 msg209（撤试验性加戏，见 selection.go 注释）。
+	if len(frames) != 2 {
+		t.Fatalf("select target frames=%x, want LastObject+AutoSelectObject only", frames)
 	}
 	lastObject, autoSelect := frames[0], frames[1]
-	if frames[2][0] != 0x1E || int32(binary.LittleEndian.Uint32(frames[2][4:])) != 209 {
-		t.Fatalf("approach ack frame=%x", frames[2])
-	}
 	if lastObject[0] != 0x10 || binary.LittleEndian.Uint16(lastObject[12:]) != 414 ||
 		binary.LittleEndian.Uint64(lastObject[14:]) != uint64(forkNPCID(4456))|uint64(1)<<32 {
 		t.Fatalf("LastObject frame=%x", lastObject)
@@ -61,8 +59,8 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
-	// 选中 3 帧（双属性+msg209）+ 清除双帧 = 5。
-	if len(frames) != 5 || binary.LittleEndian.Uint64(frames[4][14:]) != 0 {
+	// 选中双帧 + 清除双帧 = 4。
+	if len(frames) != 4 || binary.LittleEndian.Uint64(frames[3][14:]) != 0 {
 		t.Fatalf("clear target frames=%x, want zeroed AutoSelectObject tail", frames)
 	}
 	if _, _, ok := lifecycle.selectedCombatTarget(); ok {
@@ -73,7 +71,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 	if err := handleSelectTargetCustom(lifecycle, selectMsg(9999, 1), "test"); err == nil {
 		t.Fatal("unknown target accepted")
 	}
-	if got := len(conn.Frames()); got != 5 {
+	if got := len(conn.Frames()); got != 4 {
 		t.Fatalf("unknown target appended frames: %d", got)
 	}
 

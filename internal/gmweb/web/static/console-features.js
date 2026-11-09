@@ -297,6 +297,14 @@
         value: +document.querySelector("#lootbox-ttl").value,
       });
     }
+    // NPC 自动追击总开关（进程级；关闭=仇恨照常持有但怪停在出生点，
+    // 冲锋测试方言，重启回落启动环境 NINEYIN_NPC_CHASE）。
+    function setNpcChase() {
+      command({
+        action: "set_npc_chase",
+        enabled: document.querySelector("#npc-chase-enabled").checked ? 1 : 0,
+      });
+    }
     function setAutosaveInterval() {
       command({
         action: "set_autosave_interval",

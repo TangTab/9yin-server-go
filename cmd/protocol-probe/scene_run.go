@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/ecs"
+	"github.com/local/9yin-go-server/internal/mapnav"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
@@ -54,6 +55,13 @@ type sceneRun struct {
 	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
 	// NPC 死亡清除，重生后从零累计。run.mu 保护。
 	fightRelation map[uint32]int32
+	// 路点图导航域（mapnav_chase.go）：nav/navPlanner/navLoaded 由
+	// warmNav（sync.Once，创建时后台预热）在 run.mu 内写入；追击分支
+	// 在 run.mu 内经 navGraphLocked() 取用，未就绪本拍走直线兜底。
+	nav        *mapnav.Graph
+	navPlanner *mapnav.Planner
+	navLoaded  bool
+	navOnce    sync.Once
 }
 
 // sceneMember 是挂靠场景的一个连接成员。position 是场景侧的
@@ -115,7 +123,7 @@ func acquireSceneRun(key sceneKey, catalog []npcSpawn, funcs *npcfunc.Registry) 
 }
 
 func newSceneRun(key sceneKey, funcs *npcfunc.Registry) *sceneRun {
-	return &sceneRun{
+	run := &sceneRun{
 		key:       key,
 		combat:    sim.New(),
 		scene:     worldcore.NewScene(),
@@ -126,6 +134,10 @@ func newSceneRun(key sceneKey, funcs *npcfunc.Registry) *sceneRun {
 		// fightRelation 惰性建表即可，但预分配免去首击路径的判空。
 		fightRelation: make(map[uint32]int32),
 	}
+	// 后台预热路点图（scene14 解析 ~百毫秒级），避免首个追击 tick
+	// 在 run.mu 内同步付这笔钱。
+	go run.warmNav()
+	return run
 }
 
 // populate 一次性注册全量目录。实体 ID = 目录下标 + 2，
