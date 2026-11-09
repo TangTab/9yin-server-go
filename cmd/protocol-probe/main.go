@@ -2008,6 +2008,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			log.Printf("%s: sent PlayerEntry opcode=0x0B object=%#x owner=%d scene=%s resource=%s", conn.RemoteAddr(), playerObjectID, playerOwnerID, activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource)
+			// 官服 S2C 0x0A 府邸记录帧镜像（客户端 C2S 0x0A 信封头的
+			// 回显来源，home_records_frame.go）。
+			writeOfficialHomeRecordsFrame(link, conn.RemoteAddr().String())
 
 			// 三期物品下发（DB 模式）：纸娃娃 + 背包成对行 + 武器外观；
 			// DB 读失败回退空背包，不阻塞登录（Java LoginFlow 同口径，
