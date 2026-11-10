@@ -55,6 +55,12 @@ type sceneRun struct {
 	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
 	// NPC 死亡清除，重生后从零累计。run.mu 保护。
 	fightRelation map[uint32]int32
+	// npcMoveState 是 NPC 行走状态水位（patrolTick 读写）：id → 最近一次
+	// 下发的 moving 标志。检出翻转时发 0x10 State(183)="walk"/"stand"
+	// （官服 NPC 行为通道：起走发 walk、驻停发 stand，与 0x21 路点帧
+	// 成对出现；docs/官服登录帧对照与缺口清单.md §13.5）。实体注销时
+	// 连带清除。run.mu 保护。
+	npcMoveState map[uint32]bool
 	// 路点图导航域（mapnav_chase.go）：nav/navPlanner/navLoaded 由
 	// warmNav（sync.Once，创建时后台预热）在 run.mu 内写入；追击分支
 	// 在 run.mu 内经 navGraphLocked() 取用，未就绪本拍走直线兜底。

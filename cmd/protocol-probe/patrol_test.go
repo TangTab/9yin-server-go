@@ -3,6 +3,7 @@ package main
 import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 
+	"bytes"
 	"encoding/binary"
 	"math"
 	"os"
@@ -400,10 +401,31 @@ func TestSceneRunPatrolTick(t *testing.T) {
 
 	frames := conn.Frames()[nearBefore:]
 	var allDest []byte
+	var stateFrame []byte
 	for _, frame := range frames {
 		if frame[0] == 0x21 {
 			allDest = frame
 		}
+		if frame[0] == 0x10 && frame[1] == 0 {
+			stateFrame = frame
+		}
+	}
+	// 首拍（去程中点）行为状态：0x10 State(183)="walk"，先于 0x21 批量帧。
+	if stateFrame == nil {
+		t.Fatalf("ready member received no State frame, frames=%d", len(frames))
+	}
+	if idx := binary.LittleEndian.Uint16(stateFrame[12:]); idx != 183 {
+		t.Fatalf("State frame property index=%d", idx)
+	}
+	if n := binary.LittleEndian.Uint32(stateFrame[14:]); n != 5 { // len("walk")+1
+		t.Fatalf("State frame string len=%d", n)
+	}
+	if string(stateFrame[18:22]) != "walk" {
+		t.Fatalf("State frame value=%q", stateFrame[18:22])
+	}
+	// 状态帧应排在 0x21 批量帧之前（先置动画，再同步目的地）。
+	if !bytes.Equal(frames[0], stateFrame) {
+		t.Fatalf("State frame must precede the 0x21 batch, first op=%#x", frames[0][0])
 	}
 	if allDest == nil {
 		t.Fatalf("ready member received no ServerAllDest, frames=%d", len(frames))
@@ -430,11 +452,15 @@ func TestSceneRunPatrolTick(t *testing.T) {
 		t.Fatalf("member out of viewport got %d frames", len(distantConn.Frames()))
 	}
 
-	// 停留拍：速度 0、flags 0（驱动客户端停步动画）。
+	// 停留拍：速度 0、flags 0（驱动客户端停步动画）；行为状态翻转为 stand。
 	nearBefore = len(conn.Frames())
 	run.patrolTick(time.UnixMilli(6000))
+	standSeen := false
 	for _, frame := range conn.Frames()[nearBefore:] {
 		if frame[0] != 0x21 {
+			if frame[0] == 0x10 && string(frame[18:24]) == "stand\x00" {
+				standSeen = true
+			}
 			continue
 		}
 		if bits := binary.LittleEndian.Uint32(frame[27:]); math.Float32frombits(bits) != 0 {
@@ -442,6 +468,17 @@ func TestSceneRunPatrolTick(t *testing.T) {
 		}
 		if flags := binary.LittleEndian.Uint32(frame[43:]); flags != 0 {
 			t.Fatalf("dwelling moveFlags=%d", flags)
+		}
+	}
+	if !standSeen {
+		t.Fatal("dwell tick must flip State to stand")
+	}
+	// 无翻转拍不再重复发状态帧。
+	nearBefore = len(conn.Frames())
+	run.patrolTick(time.UnixMilli(6200))
+	for _, frame := range conn.Frames()[nearBefore:] {
+		if frame[0] == 0x10 {
+			t.Fatal("state frame must not repeat without a transition")
 		}
 	}
 	view.close()

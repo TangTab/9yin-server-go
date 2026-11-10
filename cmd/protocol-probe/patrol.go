@@ -16,6 +16,8 @@ import (
 	"time"
 
 	worldcore "github.com/local/9yin-go-server/internal/world"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
@@ -647,17 +649,36 @@ func (r *sceneRun) patrolTick(now time.Time) {
 	}
 	nowMs := now.UnixMilli()
 	samples := make([]allDestEntry, 0, len(r.patrolIDs))
+	type npcStateUpdate struct {
+		objectID uint32
+		frame    []byte
+	}
+	stateUpdates := make([]npcStateUpdate, 0, 2)
+	if r.npcMoveState == nil {
+		r.npcMoveState = make(map[uint32]bool)
+	}
 	kept := r.patrolIDs[:0]
 	for _, id := range r.patrolIDs {
 		entityID := worldcore.EntityID(id)
 		meta, exists := r.npcMeta(entityID)
 		if !exists || meta.schedule == nil {
-			continue // 实体已注销（测试路径）：移出在巡表
+			delete(r.npcMoveState, id) // 实体已注销（测试路径）：移出在巡表与状态水位
+			continue
 		}
 		kept = append(kept, id)
 		motion := meta.schedule.motionAt(nowMs)
 		position := meta.schedule.positionAt(nowMs)
 		r.writeNpcTransform(entityID, worldcore.Transform{X: position.x, Y: position.y, Z: position.z, Orient: position.orient})
+		// 行为状态翻转（含首拍）：0x10 State(183)="walk"/"stand"，
+		// 与 0x21 同可见性下发（官服 e.pcapng 实证 §13.5）。
+		if last, seen := r.npcMoveState[id]; !seen || last != motion.moving {
+			r.npcMoveState[id] = motion.moving
+			if frame, err := npcStatePropertyFrame(meta.id, meta.ownerID, motion.moving); err == nil {
+				stateUpdates = append(stateUpdates, npcStateUpdate{objectID: meta.id, frame: frame})
+			} else {
+				log.Printf("patrol npc state frame %d: %v", id, err)
+			}
+		}
 		flags := uint32(0)
 		if motion.moving {
 			flags = 1
@@ -689,10 +710,17 @@ func (r *sceneRun) patrolTick(now time.Time) {
 			}
 			batch = append(batch, sample)
 		}
-		if len(batch) == 0 {
+		// 状态翻转帧先于 0x21 批量帧（先置动画状态，再同步运动目的地）。
+		frames := make([][]byte, 0, 1+(len(batch)+patrolBroadcastBatch-1)/patrolBroadcastBatch)
+		for _, update := range stateUpdates {
+			if !member.view.npcVisible(update.objectID) {
+				continue
+			}
+			frames = append(frames, update.frame)
+		}
+		if len(batch) == 0 && len(frames) == 0 {
 			continue
 		}
-		frames := make([][]byte, 0, (len(batch)+patrolBroadcastBatch-1)/patrolBroadcastBatch)
 		for start := 0; start < len(batch); start += patrolBroadcastBatch {
 			end := start + patrolBroadcastBatch
 			if end > len(batch) {
@@ -712,4 +740,24 @@ func (r *sceneRun) patrolTick(now time.Time) {
 			}
 		}
 	}
+}
+
+// npcStatePropertyIndex 是 State 属性在 0x09 表中的索引（新旧两版表
+// 0–306 段无漂移，均为 183，线型 7 字符串）。
+const npcStatePropertyIndex = 183
+
+// npcStatePropertyFrame 生成 NPC 行为状态帧：0x10 单属性
+// State(183)="walk"/"stand"。官服 NPC 行为通道（2026-11-10 定版，
+// docs/官服登录帧对照与缺口清单.md §13.5）：全 pcap 值域
+// stand×81 / walk×80 / ty_talk3×1，与 0x21 路点帧成对——起走发
+// walk、驻停发 stand；字节形态 e.pcapng 实证
+// `10 00 <obj> <owner> 0100 b700 06000000 "stand\0"`。
+func npcStatePropertyFrame(objectID, ownerID uint32, moving bool) ([]byte, error) {
+	state := "stand"
+	if moving {
+		state = "walk"
+	}
+	return sceneObjectProperties(objectID, ownerID, 0, []clientdata.IndexedProperty{
+		{Index: npcStatePropertyIndex, Name: "State", Value: clientdata.StringValue(state)},
+	})
 }
