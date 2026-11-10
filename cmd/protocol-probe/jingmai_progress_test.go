@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"os"
@@ -356,16 +357,27 @@ func TestPushJingMaiFramesReplaysViewRecordsAndProps(t *testing.T) {
 		t.Fatalf("push: %v", err)
 	}
 	frames := conn.Frames()
-	// 1 容器 + 2 已学行 + 1 记录行 + 1 面板帧 = 5（Java 授予块顺序：
-	// View45 → active_jingmai_rec → 玩家属性帧）。
-	if len(frames) != 5 {
-		t.Fatalf("frames=%d, want 5", len(frames))
+	// 1 容器 + 2 已学行 + 1 plug_record 伴随行（2026-11-10 官服补齐）+
+	// 1 active_jingmai_rec 记录行 + 1 面板帧 = 6（授予块顺序：
+	// View45 → plug_record → active_jingmai_rec → 玩家属性帧）。
+	if len(frames) != 6 {
+		t.Fatalf("frames=%d, want 6", len(frames))
 	}
-	if frames[3][0] != 0x11 || binary.LittleEndian.Uint16(frames[3][10:]) != recordActiveJingMai {
-		t.Fatalf("record replay=%x", frames[3])
+	if frames[3][0] != 0x11 || binary.LittleEndian.Uint16(frames[3][10:]) != recordPlugRec {
+		t.Fatalf("plug_record replay=%x", frames[3])
 	}
-	if frames[4][0] != 0x10 {
-		t.Fatalf("props frame=%#x", frames[4][0])
+	// plug_record 对象域 = obj=45(view45) owner=行号 1，首列 jm_a。
+	if binary.LittleEndian.Uint32(frames[3][2:6]) != 45 || binary.LittleEndian.Uint32(frames[3][6:10]) != 1 {
+		t.Fatalf("plug_record object domain=%x", frames[3][:10])
+	}
+	if !bytes.Contains(frames[3], []byte("jm_a")) {
+		t.Fatalf("plug_record missing config: %x", frames[3])
+	}
+	if frames[4][0] != 0x11 || binary.LittleEndian.Uint16(frames[4][10:]) != recordActiveJingMai {
+		t.Fatalf("record replay=%x", frames[4])
+	}
+	if frames[5][0] != 0x10 {
+		t.Fatalf("props frame=%#x", frames[5][0])
 	}
 }
 

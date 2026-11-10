@@ -72,6 +72,10 @@ const (
 	propZQUnUsedValue        = 857 // 恒 0
 
 	propJMStaticData = 2237
+	// propJMVarPropNo(2239) 经脉 varprop 编号（官服 c.pcapng View45 22 行
+	// 逐帧实证：每行必备，值=MinVarPropNo+Level-1；fork 表 2239 同名）。
+	// 修炼加成的挂点——客户端按此号查 varprop 求经脉属性表。
+	propJMVarPropNo = 2239
 	propJMItemType   = 1889
 	propJMLevel      = 1465 // byte
 	propJMMaxLevel   = 2083
@@ -110,10 +114,11 @@ var starterJingMaiIDs = []string{
 // ---- 目录（jingmai.ini + jingmai_static.ini，GBK 文件只读 ASCII 字段） ----
 
 type jingMaiDef struct {
-	configID   string
-	itemType   int32 // 1003
-	staticData int32
-	maxLevel   int32 // jingmai_static.ini 区间宽
+	configID     string
+	itemType     int32 // 1003
+	staticData   int32
+	maxLevel     int32 // jingmai_static.ini 区间宽
+	minVarPropNo int32 // 区间起点（VarPropNo=Min+Level-1；目录缺区间 0）
 }
 
 // globalJingMaiCatalog 是目录的包级缓存（main.handle 每连接装载成功后
@@ -209,6 +214,7 @@ func loadJingMaiCatalog(jingMaiPath, staticPath string) (*jingMaiCatalog, error)
 			current.staticData = int32(parsed)
 			if bounds, ok := staticRanges[int32(parsed)]; ok {
 				current.maxLevel = int32(bounds[1]-bounds[0]) + 1
+				current.minVarPropNo = int32(bounds[0])
 			}
 		}
 	}
@@ -535,6 +541,7 @@ func jingMaiViewRowFrame(row jingMaiProgressRow, def jingMaiDef, slot uint16) ([
 		viewString(1440, def.configID),
 		viewInt(propJMStaticData, def.staticData),
 		viewInt(propJMItemType, def.itemType),
+		viewInt(propJMVarPropNo, def.minVarPropNo+int32(row.Level)-1),
 		viewByte(propJMLevel, byte(row.Level)),
 		viewInt(propJMMaxLevel, def.maxLevel),
 		viewInt(propTotalFill, zhenQiPerWeek),
@@ -543,6 +550,60 @@ func jingMaiViewRowFrame(row jingMaiProgressRow, def jingMaiDef, slot uint16) ([
 		properties = append(properties, viewInt(propCurFill, row.Fill))
 	}
 	return serverViewAdd(viewportJingMai, slot, properties)
+}
+
+// recordPlugRec plug_record(419) 官方 447 schema 列型 [7,3,7]（窄串,
+// i32, 窄串）——激活经脉的插栓登记（官服 c.pcapng 4.7s：View45 激活行
+// 每行伴随一条，对象域 obj=45(视图) owner=行号）。op14 事务伴随帧本服
+// 全局缺失（对照文档 §11.2-A），此处仅补记录行。
+const recordPlugRec uint16 = 419
+
+// pushJingMaiPlugRecords 激活经脉的 plug_record 伴随行整推（View45 行
+// 序定位 slot；未学/目录缺失跳过）。m150 激活时由调用方即时补单行。
+func pushJingMaiPlugRecords(link sceneMessageConnection, player *playerActor, catalog *jingMaiCatalog, activated []string) error {
+	if catalog == nil || len(activated) == 0 {
+		return nil
+	}
+	player.mu.Lock()
+	learned := append([]string(nil), player.jingmai.learned...)
+	progress := make(map[string]jingMaiProgressRow, len(player.jingmai.progress))
+	for id, row := range player.jingmai.progress {
+		progress[id] = row
+	}
+	player.mu.Unlock()
+	slotOf := make(map[string]uint16, len(learned))
+	for index, id := range learned {
+		slotOf[id] = uint16(index + 1)
+	}
+	for _, id := range activated {
+		slot, ok := slotOf[id]
+		if !ok {
+			continue
+		}
+		def, hasDef := catalog.def(id)
+		if !hasDef {
+			def = jingMaiDef{configID: id, itemType: 1003}
+		}
+		frame, err := jingMaiPlugRecFrame(def, progress[id], slot)
+		if err != nil {
+			return fmt.Errorf("encode plug_record %s: %w", id, err)
+		}
+		if err := link.WriteFrame(frame); err != nil {
+			return fmt.Errorf("write plug_record %s: %w", id, err)
+		}
+	}
+	return nil
+}
+
+// jingMaiPlugRecFrame 激活经脉的 plug_record 伴随行（obj=45 owner=slot，
+// 列值按官服语义推断：[configID, 等级, 空]——官服行内容值未解出样本，
+// 待真机校准）。
+func jingMaiPlugRecFrame(def jingMaiDef, row jingMaiProgressRow, slot uint16) ([]byte, error) {
+	return serverRecordAddCells(uint32(viewportJingMai), uint32(slot), recordPlugRec, []recordCell{
+		recordString(def.configID),
+		recordInt(uint32(row.Level)),
+		recordString(""),
+	})
 }
 
 // jingMaiViewFrames View45 容器 + 已学行（Java viewFrames：行序=learned
@@ -920,6 +981,11 @@ func pushJingMaiFrames(link sceneMessageConnection, player *playerActor, catalog
 	if cur != "" && !containsString(activated, cur) {
 		player.activateJingMai(cur)
 		activated = append(activated, cur)
+	}
+	// 官服 4.7s 补齐：激活经脉每行伴随 plug_record#419（c.pcapng View45
+	// 激活行逐行成对实证，此前零下发——对照文档 §11.1-14）。
+	if plugErr := pushJingMaiPlugRecords(link, player, catalog, activated); plugErr != nil {
+		return plugErr
 	}
 	for _, id := range activated {
 		if err := link.WriteFrame(serverRecordAddString(playerObjectID, playerOwnerID, recordActiveJingMai, id)); err != nil {

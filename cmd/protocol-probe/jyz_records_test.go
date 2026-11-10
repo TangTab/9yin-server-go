@@ -26,15 +26,15 @@ func TestJyzStepFrameMatchesOfficialCapture(t *testing.T) {
 	}
 }
 
-// native 62311 #1680-#1742 帧序：quest49 簇(4 帧) → 419 步骤 → data_record 打包。
+// native 62311 #1680-#1742 帧序：quest49 簇(4 帧) → m416 域声明 → 419 步骤 → data_record 打包。
 func TestPushJyzRecordsWritesQuestClusterStepAndPackedRows(t *testing.T) {
 	conn := &captureMessageConnection{}
 	if err := pushJyzRecords(conn, defaultJyzConfig(), nil); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 6 {
-		t.Fatalf("frames=%d want=6 (quest4 + 419 + data)", len(frames))
+	if len(frames) != 7 {
+		t.Fatalf("frames=%d want=7 (quest4 + 416 + 419 + data)", len(frames))
 	}
 	// quest49 簇: Task_Accepted(29) 行 taskid=49、Task_Record(30)、NewRideRec(310)×2
 	if got := binary.LittleEndian.Uint16(frames[0][10:]); got != recordTaskAccepted {
@@ -61,13 +61,24 @@ func TestPushJyzRecordsWritesQuestClusterStepAndPackedRows(t *testing.T) {
 			t.Fatalf("ride %d pack=%d want=%d", k, pack, wantPack)
 		}
 	}
+	// m416 域声明（官服 c.pcapng 4.71s，419 前置）：["DomainJiuYinZhi", step]
+	want416 := []byte{
+		0x1e, 0x03, 0x00, // 0x1E 壳 + 3 值
+		0x02, 0xa0, 0x01, 0x00, 0x00, // int 416
+		0x06, 0x10, 0x00, 0x00, 0x00, // 窄串 len 16（含 NUL）
+		'D', 'o', 'm', 'a', 'i', 'n', 'J', 'i', 'u', 'Y', 'i', 'n', 'Z', 'h', 'i', 0x00,
+		0x02, 0x06, 0x00, 0x00, 0x00, // int 6 = step
+	}
+	if !bytes.Equal(frames[4], want416) {
+		t.Fatalf("416 frame=% X want % X", frames[4], want416)
+	}
 	// 419 legacy 帧 = native #1683 逐字节
 	want419 := []byte{0x1e, 0x02, 0x00, 0x02, 0xa3, 0x01, 0x00, 0x00, 0x02, 0x06, 0x00, 0x00, 0x00}
-	if !bytes.Equal(frames[4], want419) {
-		t.Fatalf("419 frame=% X want % X", frames[4], want419)
+	if !bytes.Equal(frames[5], want419) {
+		t.Fatalf("419 frame=% X want % X", frames[5], want419)
 	}
 	// data_record 打包 58 行
-	row := frames[5]
+	row := frames[6]
 	if len(row) != 16+2*jyzEventCount {
 		t.Fatalf("packed row frame len=%d want=%d", len(row), 16+2*jyzEventCount)
 	}
@@ -129,7 +140,7 @@ func TestJyzDetailFrameMatchesOfficialCapture(t *testing.T) {
 	}
 }
 
-// C2S 770 (player_name, msgID) 应答：419+data 数据部 + gamestep + 770 明细，共四帧（quest 簇不重发）。
+// C2S 770 (player_name, msgID) 应答：m416+419+data 数据部 + gamestep + 770 明细，共五帧（quest 簇不重发）。
 func TestHandleJyzQueryCustomAnswersStepAndDetail(t *testing.T) {
 	custom := clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: clientCustomJyzQuery},
@@ -141,20 +152,26 @@ func TestHandleJyzQueryCustomAnswersStepAndDetail(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 4 {
-		t.Fatalf("frames=%d want=4", len(frames))
+	if len(frames) != 5 {
+		t.Fatalf("frames=%d want=5", len(frames))
 	}
-	if frames[0][0] != 0x1e || binary.LittleEndian.Uint32(frames[0][4:8]) != uint32(serverJyzLegacyStepMessage) {
-		t.Fatalf("419 frame=% X", frames[0])
+	if frames[0][0] != 0x1e || binary.LittleEndian.Uint32(frames[0][4:8]) != uint32(officialMsgJyzDomain) {
+		t.Fatalf("416 frame=% X", frames[0])
 	}
-	if frames[1][0] != 0x11 || binary.LittleEndian.Uint16(frames[1][10:]) != recordDataRecord {
-		t.Fatalf("data_record frame=% X", frames[1])
+	if !bytes.Contains(frames[0], []byte("DomainJiuYinZhi")) {
+		t.Fatalf("416 frame missing domain name: % X", frames[0])
 	}
-	if frames[2][0] != 0x1e || binary.LittleEndian.Uint32(frames[2][4:8]) != uint32(serverJyzGameStepMessage) {
-		t.Fatalf("gamestep frame=% X", frames[2])
+	if frames[1][0] != 0x1e || binary.LittleEndian.Uint32(frames[1][4:8]) != uint32(serverJyzLegacyStepMessage) {
+		t.Fatalf("419 frame=% X", frames[1])
 	}
-	if frames[3][0] != 0x1e || binary.LittleEndian.Uint32(frames[3][4:8]) != uint32(serverJyzDetailMessage) {
-		t.Fatalf("detail frame=% X", frames[3])
+	if frames[2][0] != 0x11 || binary.LittleEndian.Uint16(frames[2][10:]) != recordDataRecord {
+		t.Fatalf("data_record frame=% X", frames[2])
+	}
+	if frames[3][0] != 0x1e || binary.LittleEndian.Uint32(frames[3][4:8]) != uint32(serverJyzGameStepMessage) {
+		t.Fatalf("gamestep frame=% X", frames[3])
+	}
+	if frames[4][0] != 0x1e || binary.LittleEndian.Uint32(frames[4][4:8]) != uint32(serverJyzDetailMessage) {
+		t.Fatalf("detail frame=% X", frames[4])
 	}
 }
 

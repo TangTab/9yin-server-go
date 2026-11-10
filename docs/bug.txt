@@ -62,8 +62,14 @@ exe: F:\Game\Online\9yin\9yin_server1\build\9yin-game-native-menu.exe
 功能开启是否有其它的开关， 而不是用这个 数据没有下发
 功能开放总开关 = Task_Completed row 1551 的 0x4 位
              = 本服 taskCompletedBit(49634)  ← 我们的位映射本来就是对的
+
+buff 清理
              
 
 待验证
 
 真机建议重点验证：交错分组背包整理后无物品消失、拖 A 到 B 格两物品互换、同类药拖叠合并、整理后重登槽位保持（落盘生效） 
+
+测试：TestPushCombatAttributeDelta 验证无变化零帧 / 变化项全为 0x10 单帧 / Str 索引（485=0x01E5）在列。真机回归时重点看镇派兵器穿脱的属性增量表现。
+
+ida 看看 fxlogic.dll

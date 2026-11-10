@@ -263,6 +263,14 @@ type playerActor struct {
 	skillLockUntil time.Time
 	reviveAt       time.Time
 	progress       playerProgress
+	// timedBuffs 限时增益（timed_buffs.go）：超长时限 buff 的运行态，
+	// role_timed_buffs 快照持久化；与战斗槽位租约（p.buffs）分离。
+	timedBuffs []timedBuffRuntime
+	// equipAdds 普通装备随机属性的战斗面板折算（属性索引→合计加成，
+	// official_login_align.go equipAttributeSums）：登录装载与穿脱时
+	// 刷新；combatPanelProperties 在 progressProperties 基础上合并本层，
+	// 登录全量簇与换装增量簇共用同一出口。
+	equipAdds map[uint16]int32
 	// GM 面板域（货币/属性/状态批次，gm_stats.go）：官银为会话级货币
 	//（Java PlayerActor 同口径，不落库）；gm 是实力等级/善恶/PK 模式/
 	// 生存属性的会话权威，spawn 后按需补推。
@@ -1447,6 +1455,7 @@ func (p *playerActor) bufferListStringLocked(now time.Time) string {
 		}
 		fmt.Fprintf(&list, "%s,local-%d,%d,%d-%d,%d,1,0|", configID, slot, level, playerObjectID, playerOwnerID, buff.expiresUTC.UnixMilli())
 	}
+	p.appendTimedBuffsLocked(&list, now)
 	return list.String()
 }
 

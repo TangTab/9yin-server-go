@@ -185,6 +185,10 @@ func useSkillBook(h *itemSession, item bagRow, script string) {
 	h.player.mu.Lock()
 	h.player.lastItemUseAt = h.now()
 	h.player.mu.Unlock()
+	// 修习升级可能是内功也可能是技能（用户口径）：技能升级改阴阳太极
+	// 桶（3阴/4阳入桶）、传承直升抬当前装备书改五维 Add/HP·MP 分量——
+	// 快照先于一切会话状态变更，应用后统一推战斗面板增量。
+	combatBefore := combatPanelSnapshot(h.player)
 
 	// ① 武学/暗器手法：role_skills 落库 + 已学表追加 + View40 整视图重开。
 	if len(newWuxue) > 0 {
@@ -244,6 +248,8 @@ func useSkillBook(h *itemSession, item bagRow, script string) {
 	if !h.consumeBagItemCount(item, 1) {
 		log.Printf("use skill book %s: consume failed (row missing/changed)", item.configID)
 	}
+	// 战斗面板增量（技能桶/直升书 Add 变化项，官服单属性帧形态）。
+	pushCombatAttributeDelta(h.link, h.player, combatBefore, h.remote)
 	log.Printf("%s: use skill book %s: wuxue=%v neigong=%v qinggong=%v skipped=%v",
 		h.remote, item.configID, newWuxue, newNeigong, newQingGong, skipped)
 }

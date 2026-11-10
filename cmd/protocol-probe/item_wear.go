@@ -487,6 +487,9 @@ func handleMoveItemCustom(h *itemSession, custom clientCustomMessage) (bool, err
 // unequipFromDoll 脱下：装备栏 → 背包页（toView 非背包页归装备页 121；
 // toSlot<=0 自动选该页首空格）。
 func unequipFromDoll(h *itemSession, equipSlot, toView, toSlot int32) {
+	// 战斗属性增量推送基线（官服运行期模型：只推变化项单属性 0x10，
+	// official_login_align.go；快照必须在装备表变更前取）。
+	combatBefore := combatPanelSnapshot(h.player)
 	item, index, ok := h.player.equipAtSlot(equipSlot)
 	if !ok {
 		log.Printf("%s: move 30 equip[%d] empty", h.remote, equipSlot)
@@ -550,6 +553,9 @@ func unequipFromDoll(h *itemSession, equipSlot, toView, toSlot int32) {
 	} else if err := h.link.WriteFrame(appearance); err != nil {
 		log.Printf("%s: unequip appearance frame: %v", h.remote, err)
 	}
+	// 普通装备随机属性折算刷新，再推增量（官服单属性帧形态）。
+	h.player.setEquipAttributeAdds(equipAttributeSums(equipsNow, h.randomProps.LoadAll(h.ctx, h.roleID)))
+	pushCombatAttributeDelta(h.link, h.player, combatBefore, h.remote)
 	log.Printf("%s: move 30 equip[%d]->bag[%d:%d] config=%s", h.remote, equipSlot, view, slot, item.configID)
 }
 
@@ -557,6 +563,8 @@ func unequipFromDoll(h *itemSession, equipSlot, toView, toSlot int32) {
 // （EquipType→槽位，toSlot<=0 自动槽=双槽类型首个空槽）→ 目标槽被占时
 // 旧装备让位到装备页首空格 → 落库 → 源格清帧 + 旧装备入包帧 + 穿戴帧组。
 func wearFromBag(h *itemSession, fromView, fromSlot, toSlot int32) bool {
+	// 战斗属性增量推送基线（同 unequipFromDoll：快照先于装备表变更）。
+	combatBefore := combatPanelSnapshot(h.player)
 	category := bagCategoryOf(fromView)
 	if category == 0 {
 		log.Printf("%s: wear reject: source view %d not a bag page", h.remote, fromView)
@@ -659,6 +667,10 @@ func wearFromBag(h *itemSession, fromView, fromSlot, toSlot int32) bool {
 			log.Printf("%s: zhenpai panel frame: %v", h.remote, err)
 		}
 	}
+	// 普通装备随机属性折算刷新（穿脱改变已穿戴集），再推增量。
+	h.player.setEquipAttributeAdds(equipAttributeSums(equipsNow, h.randomProps.LoadAll(h.ctx, h.roleID)))
+	// 战斗属性增量（装备折算+镇派重算后只推变化项的单属性 0x10）。
+	pushCombatAttributeDelta(h.link, h.player, combatBefore, h.remote)
 	swapNote := ""
 	if hasOld {
 		swapNote = " (swapped out " + old.configID + ")"

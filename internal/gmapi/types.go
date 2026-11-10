@@ -128,6 +128,10 @@ type Command struct {
 	FadeSec        int32   // set_weather 过渡秒
 	Enabled        int32   // set_zhenqi_cap 每日真气硬闸 0/1（阈值走 Value）
 	JingMaiID      string  // set_jingmai_tier 经脉 configID
+	BuffConfig     string  // grant_timed_buff 限时 buff 配置 ID
+	BuffHours      float32 // grant_timed_buff 时长（小时；支持小数）
+	BuffLevel      int32   // grant_timed_buff 等级（默认 1）
+	ClearBuffs     bool    // clear_timed_buffs 全清限时 buff
 	JingMaiTier    int32   // set_jingmai_tier 周天档 1..216（游戏侧按目录上限再钳）
 	Stage          int32   // ninjiuzhi_set 九阴志目标阶段 1..9（单调递增，回退由游戏侧拒绝并回报文本）
 	EventKind      string  // ninjiuzhi_event 事件点类别 kill|task

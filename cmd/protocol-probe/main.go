@@ -516,6 +516,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	if jingMaiCatalogErr != nil {
 		log.Printf("%s: jingmai catalog unavailable (msg150/161 degrade): %v", conn.RemoteAddr(), jingMaiCatalogErr)
 	}
+	// persistTimedBuffs 在选角链装载处赋值（timed_buffs.go 快照落库；
+	// ticker 到期结算复用同一闭包）。
+	var persistTimedBuffs func()
 	persistJingMai := func() {
 		if jingMaiStore == nil || selected == nil || player == nil {
 			return
@@ -599,6 +602,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	// SwitchManager 批量开关（0x1E 414 "sync"）连接级只发一次：引擎开关
 	// 树不随场景代际清空，0x0C 重入不重放（Java switchSyncPushed 同口径）。
 	switchSyncPushed := false
+	// 官服就绪位信息帧（m607/m52/m586 + 战斗属性全量，c.pcapng 4.8s
+	// ClientReady 簇同位）连接级只发一次；0x0C 重入随对象清空由
+	// stable re-entry 分支按官服口径选择性重推（战斗属性挂玩家对象）。
+	officialReadyInfoPushed := false
 	currentRoleID := func() role.RoleID {
 		if selected != nil {
 			return selected.ID
@@ -759,6 +766,41 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			gmSession.setSilver(command.Silver)
 			log.Printf("%s: GM set CapitalType1=%d", conn.RemoteAddr(), command.Silver)
+		case "grant_timed_buff":
+			// 限时 buff 授予（timed_buffs.go）：m169 时间形态挂帧 + 立即
+			// 落库（到期时刻随快照持久，重启/断线后登录重放）。
+			if command.BuffConfig == "" || command.BuffHours <= 0 {
+				gmSession.setAction("grant_timed_buff 需要配置 ID 与正时长")
+				return fmt.Errorf("grant_timed_buff requires config id and positive hours")
+			}
+			expires := player.grantTimedBuff(command.BuffConfig, command.BuffLevel, 0,
+				time.Duration(float64(command.BuffHours)*float64(time.Hour)), time.Now())
+			player.mu.Lock()
+			entry, _ := func() (timedBuffRuntime, bool) {
+				for index := range player.timedBuffs {
+					if player.timedBuffs[index].configID == command.BuffConfig && !player.timedBuffs[index].expired {
+						return player.timedBuffs[index], true
+					}
+				}
+				return timedBuffRuntime{}, false
+			}()
+			player.mu.Unlock()
+			if frame, frameErr := timedBuffGrantFrame(entry, player.name); frameErr == nil {
+				if writeErr := link.WriteFrame(frame); writeErr != nil {
+					log.Printf("%s: GM grant timed buff frame: %v", conn.RemoteAddr(), writeErr)
+				}
+			}
+			persistTimedBuffs()
+			gmSession.setAction(fmt.Sprintf("限时 buff %s 已授予，到期 %s", command.BuffConfig, expires.Local().Format("2006-01-02 15:04:05")))
+			log.Printf("%s: GM grant timed buff %s hours=%.2f level=%d expires=%s", conn.RemoteAddr(), command.BuffConfig, command.BuffHours, command.BuffLevel, expires.UTC().Format(time.RFC3339))
+		case "clear_timed_buffs":
+			count := player.timedBuffActiveCount(time.Now())
+			player.mu.Lock()
+			player.timedBuffs = player.timedBuffs[:0]
+			player.mu.Unlock()
+			persistTimedBuffs()
+			gmSession.setAction(fmt.Sprintf("已清空 %d 条限时 buff", count))
+			log.Printf("%s: GM cleared %d timed buffs", conn.RemoteAddr(), count)
 		case "set_sp", "add_sp", "fill_sp":
 			var sp int32
 			var update []byte
@@ -1731,6 +1773,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if player == nil || selected == nil {
 				continue
 			}
+			combatPanelBefore := combatPanelSnapshot(player)
 			slot, advanced := player.facultyTick(now)
 			// 历练层 100 秒步进（facultyTick 同拍）：整步才结算，静默秒
 			// 零帧零落库。（内功受击被动已由 scripts/module/neigong 分发层
@@ -1768,6 +1811,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					} else {
 						tickErr = link.WriteFrame(frame)
 					}
+				}
+				// 升级改阴阳太极桶/书 Add 分量（vitalUpdate 大批不覆盖
+				// 战斗面板列）：官服增量模型，只推变化项单属性帧。
+				if tickErr == nil {
+					pushCombatAttributeDelta(link, player, combatPanelBefore, conn.RemoteAddr().String())
 				}
 			}
 			if tickErr == nil && qingGongPointChanged {
@@ -1843,6 +1891,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 				}
 				persistJingMai()
+			}
+			// 限时 buff 到期结算（timed_buffs.go）：跨越到期产 m169 摘帧
+			//（v7=原到期毫秒），运行态标记 expired 待落库收敛。
+			if frames := player.timedBuffExpiryFrames(now); len(frames) > 0 {
+				for _, frame := range frames {
+					if err := link.WriteFrame(frame); err != nil {
+						log.Printf("%s: publish timed buff removal: %v", conn.RemoteAddr(), err)
+						return
+					}
+				}
+				persistTimedBuffs()
 			}
 			continue
 		case received := <-inbound:
@@ -2008,6 +2067,27 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				sessionMounts = mounts
 				log.Printf("%s: restored mounts role=%d owned=%d current=%d", conn.RemoteAddr(), activeRole.ID, len(mounts), mountCurrentPack(mounts))
 			}
+
+			// 限时 buff 装载（timed_buffs.go）：role_timed_buffs 快照，已过期
+			// 条目直接丢弃；未过期集在 ClientReady 簇以 m169 时间形态重放。
+			timedBuffStore := newTimedBuffDBStore(store.db)
+			persistTimedBuffs = func() {
+				if selected == nil || player == nil {
+					return
+				}
+				player.mu.Lock()
+				entries := player.timedBuffSnapshotLocked()
+				player.mu.Unlock()
+				if err := timedBuffStore.Save(ctx, selected.ID, entries); err != nil {
+					log.Printf("%s: persist timed buffs: %v", conn.RemoteAddr(), err)
+				}
+			}
+			defer persistTimedBuffs()
+			if saved, ok := timedBuffStore.Load(ctx, activeRole.ID); ok {
+				if live := player.restoreTimedBuffs(saved, time.Now()); live > 0 {
+					log.Printf("%s: restored timed buffs role=%d live=%d dropped=%d", conn.RemoteAddr(), activeRole.ID, live, len(saved)-live)
+				}
+			}
 			// 已学技能装载（Java LoginFlow.loadDbSkills 同口径）：读库失败
 			// 或空表只记日志回退 starter 集，不阻塞登录。
 			if dbSkills, skillErr := skills.learnedSkills(ctx, activeRole.ID); skillErr != nil {
@@ -2048,18 +2128,38 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// QingGongRec 是玩家记录，而非可见对象属性。当前
 			// 客户端在该 schema 完成协商之前拒绝将轻功视为已学习，
 			// 即使其能量属性（QingGongPoint/MaxQingGongPoint）
-			// 已经存在。记录表逐字节透传官方 447 schema 方言
-			// （客户端原生消费者按官方下标绑定，自建子表会错绑）。
-			recordTable, recordErr := serverRecordTable()
-			if recordErr != nil {
-				log.Printf("%s: encode record table: %v", conn.RemoteAddr(), recordErr)
-				return
+			// 已经存在。
+			//
+			// 2026-11-10 官服对齐（对照文档 §四-3）：官服登录只发一帧
+			// S2C 0x0A（10429B / 446 schema，c.pcapng 0.097s 实证），且
+			// 客户端取其帧头 16B 作为后续 C2S 0x0A 活动信封头回显。旧实现
+			// 「447 表 + 10429 镜像」双发与官服形态不符——合并为单帧直发
+			// 官服镜像（镜像帧即官服原始字节，零结构风险）；编码侧 0x11/
+			// 0x13 行仍按 447 schema 生成，登录链引用的 recId ≤446 与官服
+			// 表完全兼容（第 447 项为 fork 自有记录，登录链零引用）。
+			// NINEYIN_HOME_RECORDS_MIRROR=0 时回退旧 447 表单发（对账用）。
+			if homeRecordsMirrorEnabled() && len(officialHomeRecordsFrame) > 0 {
+				if err := link.WriteFrame(officialHomeRecordsFrame); err != nil {
+					log.Printf("%s: write official record table frame: %v", conn.RemoteAddr(), err)
+					return
+				}
+				log.Printf("%s: sent property table (%d entries) and official record table frame (%d bytes / %d schemas)", conn.RemoteAddr(), binary.LittleEndian.Uint16(propertyTable[1:]), len(officialHomeRecordsFrame), binary.LittleEndian.Uint16(officialHomeRecordsFrame[1:]))
+			} else {
+				recordTable, recordErr := serverRecordTable()
+				if recordErr != nil {
+					log.Printf("%s: encode record table: %v", conn.RemoteAddr(), recordErr)
+					return
+				}
+				if err := link.WriteFrame(recordTable); err != nil {
+					log.Printf("%s: write record table: %v", conn.RemoteAddr(), err)
+					return
+				}
+				log.Printf("%s: sent property table (%d entries) and fallback record table (%d entries)", conn.RemoteAddr(), binary.LittleEndian.Uint16(propertyTable[1:]), binary.LittleEndian.Uint16(recordTable[1:]))
 			}
-			if err := link.WriteFrame(recordTable); err != nil {
-				log.Printf("%s: write record table: %v", conn.RemoteAddr(), err)
-				return
-			}
-			log.Printf("%s: sent property table (%d entries) and official record table (%d entries)", conn.RemoteAddr(), binary.LittleEndian.Uint16(propertyTable[1:]), binary.LittleEndian.Uint16(recordTable[1:]))
+			// 官服 0.1s 位登录信息帧簇（m366 客户端 IP 回显 / m623 /
+			// m655 服务器标识，c.pcapng 0.097-0.099s 同位：0x0A 之后、
+			// 建视图之前；official_login_align.go）。
+			writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), string(accountKey), activeRole.Name, uint32(activeRole.ID))
 			// 三期官方方言：17 视图容器（8 主页 BaseCap=18 + 8 扩展页 +
 			// View1 纸娃娃），随后按 DB 扩容锚点行下发扩展槽位。
 			for _, frame := range bagViewCreateFrames() {
@@ -2089,10 +2189,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			log.Printf("%s: sent PlayerEntry opcode=0x0B object=%#x owner=%d scene=%s resource=%s", conn.RemoteAddr(), playerObjectID, playerOwnerID, activeRole.Location.Scene.Config, activeRole.Location.Scene.Resource)
-			// 官服 S2C 0x0A 府邸记录帧镜像（客户端 C2S 0x0A 信封头的
-			// 回显来源，home_records_frame.go）。
-			writeOfficialHomeRecordsFrame(link, conn.RemoteAddr().String())
-			// msg229 130 场景 NPC 点位表（大地图图层，scene_npc_map.go）。
+			// S2C 0x0A 官服记录表帧已在 0x09 属性表之后单帧下发
+			//（2026-11-10 合并：原此位镜像帧上移，与官服 0.097s 时序一致）。
+			// msg229 130 场景 NPC 点位表（已停用，scene_npc_map.go）。
 			writeSceneNPCMapFrames(link, world, conn.RemoteAddr().String())
 
 			// 三期物品下发（DB 模式）：纸娃娃 + 背包成对行 + 武器外观；
@@ -2115,6 +2214,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 曾跑在 restore 之前，按空装备表算出零加成）。
 			player.restoreSessionInventory(visual.sex, equips, bagItems, bagpacks)
 			player.refreshZhenpaiEquipBonuses()
+			// 普通装备随机属性折算（RandomPropRec 快照按 uid 汇总，official_
+			// login_align.go）：登录全量簇与换装增量簇共用 combatPanelProperties。
+			if randomPropsStore != nil {
+				player.setEquipAttributeAdds(equipAttributeSums(equips, randomPropsStore.LoadAll(ctx, activeRole.ID)))
+			}
 
 			if err := sendPlayerSpawn(link, player, activeRole.Location.Position, visual); err != nil {
 				log.Printf("%s: write player spawn chain: %v", conn.RemoteAddr(), err)
@@ -2401,13 +2505,39 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 			}
-			if player != nil && !neigongGranted {
-				if progressErr := grantStarterProgress(); progressErr != nil {
-					log.Printf("%s: grant stable inner-power/player attributes: %v", conn.RemoteAddr(), progressErr)
-					return
-				}
-				log.Printf("%s: granted View=43 inner-power and View=40 花无缺七招 after explicit ClientReady", conn.RemoteAddr())
+		if player != nil && !neigongGranted {
+			if progressErr := grantStarterProgress(); progressErr != nil {
+				log.Printf("%s: grant stable inner-power/player attributes: %v", conn.RemoteAddr(), progressErr)
+				return
 			}
+			log.Printf("%s: granted View=43 inner-power and View=40 花无缺七招 after explicit ClientReady", conn.RemoteAddr())
+		}
+		if player != nil && !officialReadyInfoPushed {
+			// 官服 4.8s 位就绪信息帧簇（c.pcapng 4.80-4.84s：技能视图簇
+			// 之后、View46 之前）：m607 账号+角色名 → m52 服务器时间 →
+			// m586 [5] 登录状态簇首 → 战斗属性全量 0x10 逐项单帧
+			//（official_login_align.go；官服另有的背包视图行在本服位于
+			// 选角链，时序差异已在对照文档 §十一 注记）。
+			officialReadyInfoPushed = true
+			writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), string(accountKey), player.name, time.Now())
+			writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
+			// 限时 buff 就绪重放（m169 九值时间形态，v7=到期unix毫秒；
+			// 官服登录期 buf_baosd_02 语义的带时间对应物）。
+			if timedFrames, terr := player.timedBuffLoginReplayFrames(time.Now()); terr != nil {
+				log.Printf("%s: replay timed buffs: %v", conn.RemoteAddr(), terr)
+			} else {
+				for _, frame := range timedFrames {
+					if werr := link.WriteFrame(frame); werr != nil {
+						log.Printf("%s: write timed buff replay: %v", conn.RemoteAddr(), werr)
+						break
+					}
+				}
+				if len(timedFrames) > 0 {
+					log.Printf("%s: replayed %d timed buffs after ClientReady", conn.RemoteAddr(), len(timedFrames))
+				}
+			}
+			writeOfficialCombatAttributeFrames(link, player, conn.RemoteAddr().String())
+		}
 			if player != nil && !mountsPushed {
 				// 坐骑（Java mountsPushed，43/40 之后、switch 同步之前）：
 				// NewRideRec 拥有行 + 骑乘态帧（重登步行口径）。
@@ -2673,13 +2803,46 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// TVarList(216, qinggong_id, begin_or_end) 到达，而不是独立的
 			// 顶层 0x1E 帧。只解析完整的类型化列表，使其他
 			// 活动/移动包保持原有的生命周期行为。
-			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 && (custom.Values[0].Int32 == clientCustomSetShortcut || custom.Values[0].Int32 == clientCustomRemoveShortcut || custom.Values[0].Int32 == clientCustomSitCross || custom.Values[0].Int32 == clientCustomSaveCustomizing || custom.Values[0].Int32 == clientCustomKeybindUpload || custom.Values[0].Int32 == clientCustomSetOperateMode || custom.Values[0].Int32 == clientCustomNeiGongBind || custom.Values[0].Int32 == 211 || custom.Values[0].Int32 == 215 || custom.Values[0].Int32 == 216 || custom.Values[0].Int32 == 217 || custom.Values[0].Int32 == clientCustomActiveParry || custom.Values[0].Int32 == 1006 || custom.Values[0].Int32 == clientCustomSelectTarget || custom.Values[0].Int32 == clientCustomAttackTarget || custom.Values[0].Int32 == clientCustomBlockState || custom.Values[0].Int32 == clientCustomMovementUpload || custom.Values[0].Int32 == clientCustomRushMoveUpload || custom.Values[0].Int32 == clientCustomCastDashLanding || custom.Values[0].Int32 == clientCustomChangeWarning || custom.Values[0].Int32 == clientCustomMoveItem || custom.Values[0].Int32 == clientCustomUseItem || custom.Values[0].Int32 == clientCustomDeleteItem || custom.Values[0].Int32 == clientCustomArrangeBag || custom.Values[0].Int32 == clientCustomShowEquipType || custom.Values[0].Int32 == clientCustomFashionSuit || custom.Values[0].Int32 == clientCustomWardrobeCard || custom.Values[0].Int32 == clientCustomShopBuy || custom.Values[0].Int32 == clientCustomShopSell || custom.Values[0].Int32 == clientCustomSetTitle || custom.Values[0].Int32 == clientCustomJingMaiCultivate || custom.Values[0].Int32 == clientCustomJingMaiActive || custom.Values[0].Int32 == clientCustomFreshManChoice || custom.Values[0].Int32 == clientCustomGuideAddSchool || custom.Values[0].Int32 == clientCustomSchoolMessage || custom.Values[0].Int32 == clientCustomPickupDropItem || custom.Values[0].Int32 == clientCustomCloseDropBox || custom.Values[0].Int32 == clientCustomJyzQuery || custom.Values[0].Int32 == clientCustomMapNavigate || custom.Values[0].Int32 == clientCustomTersure) {
+			if custom, ok, _ := parseClientActivityCustomMessage(plain); ok && len(custom.Values) > 0 && custom.Values[0].Type == 2 {
+				if !activityCustomMsgKnown(custom.Values[0].Int32) {
+					// 2026-11-10 排障补齐（对照文档 §五-C）：官服登录期客户端
+					// 大量 UI/设置上报走 0x0A 信封（lua64 已定名 27 个，§五-A2），
+					// 旧白名单外完全静默——连「客户端发过」都不可见。现在逐条
+					// 留痕；不应答（官服对其中多数亦无逐条回帧，语义明确的
+					// 应答族见 §五-A 待办）。
+					log.Printf("%s: unhandled activity custom msg_id=%d args=%d", conn.RemoteAddr(), custom.Values[0].Int32, len(custom.Values)-1)
+					continue
+				}
 				arguments := make([]string, 0, len(custom.Values)-1)
 				for _, value := range custom.Values[1:] {
 					arguments = append(arguments, value.String())
 				}
 				log.Printf("%s: client activity CustomSend opcode=0x0A msg_id=%d args=[%s]", conn.RemoteAddr(), custom.Values[0].Int32, strings.Join(arguments, ", "))
 				switch custom.Values[0].Int32 {
+				case clientCustomMsgDelay:
+					// m924 → m294 官服形态应答（c.pcapng ×139 逐对实证：
+					// [client_ms 回显, obj(玩家), unix 秒, uptime 秒]）。
+					// 1s 周期推（fork 52905 方言，CD 对钟）保留，两者共存。
+					if len(custom.Values) >= 2 {
+						clientMs := custom.Values[1].Int64
+						if custom.Values[1].Type == 2 {
+							clientMs = int64(custom.Values[1].Int32)
+						}
+						reply, replyErr := officialTimeSyncReplyFrame(clientMs, timeSyncStart, time.Now())
+						if replyErr != nil {
+							log.Printf("%s: encode m294 reply: %v", conn.RemoteAddr(), replyErr)
+						} else if writeErr := link.WriteFrame(reply); writeErr != nil {
+							log.Printf("%s: write m294 reply: %v", conn.RemoteAddr(), writeErr)
+						}
+					}
+				case clientCustomTaskMsg:
+					// m327 任务消息（CLIENT_CUSTOMMSG_TASK_MSG，lua64 定名）：
+					// 子命令 6=已接任务列表同步，官服回 0x13 Task_Accepted
+					// 位图写格 ×9 两轮幂等重推——等价物 = 已授予接受任务行
+					// 重放（幂等；其余子命令官服无应答观测）。
+					if repushErr := repushAcceptedTaskFrames(link, conn.RemoteAddr().String()); repushErr != nil {
+						log.Printf("%s: repush accepted tasks for msg327: %v", conn.RemoteAddr(), repushErr)
+					}
 				case clientCustomUseSkill:
 					if _, handleErr := handleSkillCustom(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle activity skill: %v", conn.RemoteAddr(), handleErr)

@@ -297,8 +297,10 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	conn := &captureMessageConnection{}
 
 	// 215 必须只接受已学习的 View=43 秘籍，并用 CurNeiGong 绑定消费的
-	// 常规属性档案回复;换书改变怒气上限,故回复是两帧——先 MaxSP
-	// 专帧(折算最终值,ng_jh_001 坐忘功 +10 → 90),再常规状态批。
+	// 常规属性档案回复。官服增量口径（2026-11-10 对齐）：MaxSP 专帧
+	//（折算最终值,ng_jh_001 坐忘功 +10 → 90）→ 常规状态批 → 换书战斗
+	// 面板增量（单属性 0x10：五维 Add/HP·MP/Parry/CurNeiGongWuXing
+	// 变化项；官服运行期从不重推全量）。
 	handled, err := handlePlayerProgressCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 215}, {Type: 6, Text: "ng_jh_001"},
 	}})
@@ -306,7 +308,7 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 		t.Fatalf("215 handled=%v err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 2 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
+	if len(frames) < 3 || frames[0][0] != 0x10 || frames[1][0] != 0x10 {
 		t.Fatalf("215 reply=%x", frames)
 	}
 	capNeedle := []byte{byte(propMaxSP & 0xff), byte(propMaxSP >> 8), byte(maxPlayerSP + 10), 0, 0, 0}
@@ -315,6 +317,21 @@ func TestInnerPowerC2SUpdatesNormalPropertyAndViewState(t *testing.T) {
 	}
 	if !bytes.Contains(frames[1], []byte("ng_jh_001\x00")) {
 		t.Fatalf("215 second reply must bind CurNeiGong: %x", frames[1])
+	}
+	// 增量帧全部为单属性 0x10（len=18），换书至少改变五维与运行内功
+	// 五行（CurNeiGongWuXing 654）。
+	deltaProps := make(map[uint16]bool, len(frames)-2)
+	for _, frame := range frames[2:] {
+		if frame[0] != 0x10 || len(frame) != 18 {
+			t.Fatalf("215 delta frame not single-property 0x10: %x", frame)
+		}
+		deltaProps[binary.LittleEndian.Uint16(frame[12:14])] = true
+	}
+	if !deltaProps[propCurNeiGongWuXing] {
+		t.Fatalf("215 delta missing CurNeiGongWuXing: %x", frames)
+	}
+	if !deltaProps[propStr] {
+		t.Fatalf("215 delta missing Str add change: %x", frames)
 	}
 
 	// 1006/1 选择一本秘籍；1006/11 启动持久的后台转换，而不进入可见的

@@ -77,6 +77,21 @@ const (
 	//（太极/阴柔/阳刚，ui_wuxue_prop_N）的显示来源：面板按 FacultyName
 	// 取武学对象后 QueryProp("WuXing")，缺省时整列退回 ui_train_elemt。
 	propWuXing uint16 = 2243
+	// 阴阳太极累计（官服 4.7s 登录簇 0x10 YinLevel=1089/YangLevel=623/
+	// TaijiLevel=299）：按已学内功 wuxing（wuxuebaseinfo.ini nWuXing：
+	// 5=太极/6=阴柔/7=阳刚，neigong_effects.go 目录）分桶累计等级——
+	// 「当前修炼的内功、技能的属性（wuxing）」口径（2026-11-10 对齐）。
+	propYinLevel   uint16 = 251
+	propYangLevel  uint16 = 252
+	propTaijiLevel uint16 = 253
+	// 武技点（经脉无忌格 wujibox 解锁货币，form_wuxue_wuji*.lua 读
+	// share wujibox_need 表并消耗 WuJiPoint 开格——custom 150 子令）。
+	// 玩家持有值无存档源：默认 0，NINEYIN_WUJI_POINT/_MAX 覆盖。
+	propWuJiPoint    uint16 = 862
+	propMaxWuJiPoint uint16 = 863
+	// CurNeiGongWuXing(654) 当前运行内功的五行（官服 4.7s View43 行簇后
+	// 0x10 单帧实证，值 6=阴柔同族口径）：内修面板当前页的属性角标来源。
+	propCurNeiGongWuXing uint16 = 654
 	// 装备内功的 PropModify 加成。
 	propMaxParryAdd    uint16 = 477
 	propMinMagicDefAdd uint16 = 597
@@ -526,6 +541,13 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 	}
 	a := p.attributes
 	maxParryAdd := int32(0)
+	// 阴阳太极累计（wuxing 分桶）由 actor 层 combatPanelProperties 注入
+	//（内功 books + 技能 learnedSkills 双输入；本方法只覆盖内功域）。
+	// 当前运行内功五行（缺目录/未装备 0，客户端按 ≤0 退回缺省文案）。
+	curWuXing := int32(0)
+	if catalog, err := loadModernNeiGongCatalog(); err == nil {
+		curWuXing = catalog.wuXingOf(p.curNeiGong)
+	}
 	// 将当前装备的内功应用到服务器持有的角色状态上。对应的 BuffStore
 	// 条目由 playerActor 安装；可见的主属性必须遵循同一个权威来源。
 	if equipped := p.book(p.curNeiGong); equipped != nil {
@@ -598,6 +620,9 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propMaxParryAdd, Name: "MaxParryAdd", Value: clientdata.Int32Value(maxParryAdd)},
 		{Index: propMinMagicDefAdd, Name: "MinMagicDefAdd", Value: clientdata.Int32Value(minMagicDefAdd)},
 		{Index: propMaxLevel, Name: "MaxLevel", Value: clientdata.Int32Value(maxLevel)},
+		{Index: propCurNeiGongWuXing, Name: "CurNeiGongWuXing", Value: clientdata.Int32Value(curWuXing)},
+		{Index: propWuJiPoint, Name: "WuJiPoint", Value: clientdata.Int32Value(wuJiPointEnv())},
+		{Index: propMaxWuJiPoint, Name: "MaxWuJiPoint", Value: clientdata.Int32Value(wuJiPointMaxEnv())},
 	}
 }
 
@@ -1156,11 +1181,18 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 		}
 		return link.WriteFrame(frame)
 	}
+	// syncCombatPanel 换书/升级后的战斗面板增量（官服运行期模型：
+	// 只推变化项单属性 0x10；换书改五维总值/CurNeiGongWuXing，升级
+	// 改阴阳太极桶与书 Add，vitalUpdate 大批不覆盖这些列）。
+	syncCombatPanel := func(before map[uint16][]byte) {
+		pushCombatAttributeDelta(link, player, before, "faculty")
+	}
 	switch custom.Values[0].Int32 {
 	case 215: // CLIENT_CUSTOMMSG_USE_NEIGONG
 		if len(custom.Values) < 2 || custom.Values[1].Type != 6 || custom.Values[1].Text == "" {
 			return true, fmt.Errorf("215 requires a learned neigong ConfigID string")
 		}
+		combatBefore := combatPanelSnapshot(player)
 		if err := player.equipNeiGong(custom.Values[1].Text); err != nil {
 			return true, err
 		}
@@ -1174,7 +1206,11 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 		if err := link.WriteFrame(capFrame); err != nil {
 			return true, err
 		}
-		return true, syncState()
+		if err := syncState(); err != nil {
+			return true, err
+		}
+		syncCombatPanel(combatBefore)
+		return true, nil
 
 	case livepointInfoMsg: // CLIENT_CUSTOMMSG_LIVEPOINT_INFO（历练/潜能赎回）
 		if len(custom.Values) < 2 || custom.Values[1].Type != 2 {
@@ -1246,6 +1282,7 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			}
 			return true, nil
 		case 11: // SUB_CLIENT_NORMAL_BEGIN
+			combatBefore := combatPanelSnapshot(player)
 			slot, advanced, err := player.facultyBegin(facultyStyleNormal)
 			if err != nil {
 				return true, err
@@ -1261,9 +1298,11 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				if err := link.WriteFrame(frame); err != nil {
 					return true, err
 				}
+				syncCombatPanel(combatBefore)
 			}
 			return true, nil
 		case 21: // SUB_CLIENT_ACT_BEGIN
+			combatBefore := combatPanelSnapshot(player)
 			slot, advanced, err := player.facultyBegin(facultyStyleAct)
 			if err != nil {
 				return true, err
@@ -1279,6 +1318,7 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				if err := link.WriteFrame(frame); err != nil {
 					return true, err
 				}
+				syncCombatPanel(combatBefore)
 			}
 			frame, err := encodeFacultyActiveBegin()
 			if err != nil {
@@ -1309,6 +1349,9 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			if payment != 1 && payment != 2 && payment != 4 {
 				return true, nil
 			}
+			// 升级会改书 Add（等级相关，装备中则五维/HP·MP 跟动）与
+			// 阴阳太极桶（Σlevel）——快照先于结算，levelUp 后推增量。
+			combatBefore := combatPanelSnapshot(player)
 			slot, awarded, levelUp, maxLevel, err := player.progress.awardActiveFaculty()
 			if err != nil {
 				return true, err
@@ -1340,6 +1383,9 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 				return true, err
 			}
 			if levelUp {
+				// 战斗面板增量（书 Add/阴阳太极桶随等级变化，官服单属性帧
+				// 形态；先于原生升级通知，面板与飘字同帧口径）。
+				syncCombatPanel(combatBefore)
 				// 客户端不会仅凭 View=43 推断出升级。faculty.lua 把 sub=14 映射
 				// 到 on_msg_level_up()，后者读取已同步的 CurLevel 并刷新面板/
 				// 通知。
