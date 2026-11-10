@@ -3,12 +3,17 @@ package clientdata
 import (
 	_ "embed"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+	"testing"
 )
 
 //go:embed official_property_table.txt
 var officialPropertyTableText string
+
+//go:embed official_property_table_2433.txt
+var officialPropertyTable2433Text string
 
 // SCENE_EXTENSION_FLOOR 是商店/运动扩展块在官方表中的起始位置:
 // 扩展块名字按「首现且 index >= 99」解析(镜像 Java PropertyTable 语义)。
@@ -63,33 +68,87 @@ func (t propertyTable) byNameScene(name string, minIndex int) (PropertyEntry, bo
 	return PropertyEntry{}, false
 }
 
-var officialTable = loadOfficialPropertyTable()
+var (
+	officialTable          propertyTable
+	activePropertyTableMde string
+)
 
-func loadOfficialPropertyTable() propertyTable {
+func init() {
+	text, mode := activePropertyTableText()
+	officialTable = parsePropertyTable(text, mode)
+	activePropertyTableMde = mode
+}
+
+// 属性表方言档位（NINEYIN_PROPERTY_TABLE，默认 fork）：
+//
+//	fork         官方 2370 项快照（场景域头块 0..173 + 共享域），与全部
+//	             硬编码 prop* 常量配对自洽，现网方言——换表工程
+//	             （分支 official-2433-table，docs/官服登录帧对照与缺口
+//	             清单.md §14.3）完成前的默认。
+//	official2433 官服 7074 线 2433 项真表（头块换血为家园/帮会/VIP 域，
+//	             64 名缺席、共享域 +2/+7 插入漂移）——启用后 SceneProperty/
+//	             PlayerProperty/0x09 下发帧全部按官表解析；场景域硬编码
+//	             与 BufferListStr/NpcNickName 通道在 P3/P4 完成前会断，
+//	             仅限换表分支联调。
+func activePropertyTableText() (string, string) {
+	switch strings.TrimSpace(os.Getenv("NINEYIN_PROPERTY_TABLE")) {
+	case "official2433":
+		return officialPropertyTable2433Text, "official2433"
+	default:
+		return officialPropertyTableText, "fork"
+	}
+}
+
+// ActivePropertyTableMode 返回当前生效的属性表方言（日志/诊断用）。
+func ActivePropertyTableMode() string { return activePropertyTableMde }
+
+// SwapPropertyTableForTest 在测试内切换属性表方言并在测试结束后恢复。
+// 必须在任意 SceneProperty/PlayerProperty 查询前调用。
+func SwapPropertyTableForTest(t testing.TB, mode string) {
+	t.Helper()
+	var text string
+	switch mode {
+	case "official2433":
+		text = officialPropertyTable2433Text
+	case "fork":
+		text = officialPropertyTableText
+	default:
+		t.Fatalf("unknown property table mode %q", mode)
+	}
+	prev, prevMode := officialTable, activePropertyTableMde
+	officialTable = parsePropertyTable(text, mode)
+	activePropertyTableMde = mode
+	t.Cleanup(func() {
+		officialTable = prev
+		activePropertyTableMde = prevMode
+	})
+}
+
+func parsePropertyTable(text, mode string) propertyTable {
 	table := propertyTable{
 		entries: nil,
 		scene:   map[string]PropertyEntry{},
 		player:  map[string]PropertyEntry{},
 	}
-	for i, line := range strings.Split(officialPropertyTableText, "\n") {
+	for i, line := range strings.Split(text, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
 		parts := strings.Split(line, "\t")
 		if len(parts) != 3 {
-			panic(fmt.Sprintf("clientdata: official property table line %d: want 3 columns, got %d", i+1, len(parts)))
+			panic(fmt.Sprintf("clientdata(%s): property table line %d: want 3 columns, got %d", mode, i+1, len(parts)))
 		}
 		index, err := strconv.Atoi(strings.TrimSpace(parts[0]))
 		if err != nil {
-			panic(fmt.Sprintf("clientdata: official property table line %d: bad index %q", i+1, parts[0]))
+			panic(fmt.Sprintf("clientdata(%s): property table line %d: bad index %q", mode, i+1, parts[0]))
 		}
 		if index != len(table.entries) {
-			panic(fmt.Sprintf("clientdata: official property table line %d: index %d != position %d", i+1, index, len(table.entries)))
+			panic(fmt.Sprintf("clientdata(%s): property table line %d: index %d != position %d", mode, i+1, index, len(table.entries)))
 		}
 		code, err := strconv.Atoi(strings.TrimSpace(parts[2]))
 		if err != nil {
-			panic(fmt.Sprintf("clientdata: official property table line %d: bad type %q", i+1, parts[2]))
+			panic(fmt.Sprintf("clientdata(%s): property table line %d: bad type %q", mode, i+1, parts[2]))
 		}
 		name := strings.TrimSpace(parts[1])
 		entry := PropertyEntry{
