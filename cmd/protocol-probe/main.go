@@ -2159,7 +2159,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 官服 0.1s 位登录信息帧簇（m366 客户端 IP 回显 / m623 /
 			// m655 服务器标识，c.pcapng 0.097-0.099s 同位：0x0A 之后、
 			// 建视图之前；official_login_align.go）。
-			writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(activeRole.Name), activeRole.Name, uint32(activeRole.ID))
+			writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(), activeRole.Name, uint32(activeRole.ID))
 			// 三期官方方言：17 视图容器（8 主页 BaseCap=18 + 8 扩展页 +
 			// View1 纸娃娃），随后按 DB 扩容锚点行下发扩展槽位。
 			for _, frame := range bagViewCreateFrames() {
@@ -2519,7 +2519,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				//（official_login_align.go；官服另有的背包视图行在本服位于
 				// 选角链，时序差异已在对照文档 §十一 注记）。
 				officialReadyInfoPushed = true
-				writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(player.name), player.name, time.Now())
+				writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(), player.name, time.Now())
 				writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
 				// 限时 buff 就绪重放（m169 九值时间形态，v7=到期unix毫秒；
 				// 官服登录期 buf_baosd_02 语义的带时间对应物）。

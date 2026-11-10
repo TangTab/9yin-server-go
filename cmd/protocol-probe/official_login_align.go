@@ -99,16 +99,16 @@ func officialServerIdentity() (serverID int32, serverName string) {
 }
 
 // officialAccountLabel 返回 m655/m607 的账号显示名。官服两帧携带明文账号
-// （c.pcapng 实证 "lizy86"），但本服不解开 op02 登录帧账号槽的客户端加扰
-// （docs/id-system-analysis.md §一：服务端只对槽密文做 SHA256 得 acct:v1
-// 内部键），拿不到明文——默认回退角色名，NINEYIN_OFFICIAL_ACCOUNT 可
-// 覆盖为真实账号名。曾直接下发 acct:v1 摘要，客户端账号档案栏会显示
-// 整串十六进制（2026-11-11 回退）。
-func officialAccountLabel(roleName string) string {
+// （c.pcapng 实证 "lizy86"，tag6 窄串），但本服不解开 op02 登录帧账号槽的
+// 客户端加扰（docs/id-system-analysis.md §一：服务端只对槽密文做 SHA256
+// 得 acct:v1 内部键），拿不到明文。tag6 窄串只放 ASCII（官方/Java 同俗，
+// 中文走 tag7 宽串——曾回退中文角色名致账号栏乱码，2026-11-11 修正），
+// 故默认空串，NINEYIN_OFFICIAL_ACCOUNT 覆盖为真实账号名。
+func officialAccountLabel() string {
 	if v := strings.TrimSpace(os.Getenv("NINEYIN_OFFICIAL_ACCOUNT")); v != "" {
 		return v
 	}
-	return roleName
+	return ""
 }
 
 // writeOfficialLoginInfoFrames 下发 0.1s 位的登录信息帧簇（m366/m623/m655）。
@@ -128,7 +128,7 @@ func writeOfficialLoginInfoFrames(link sceneMessageConnection, remote, account s
 	serverID, serverName := officialServerIdentity()
 	accountID := int64(roleID)
 	if frame, err := serverCustomIntMessage(officialMsgServerIdentity,
-		customInt(serverID), customInt(serverID), customString(serverName),
+		customInt(serverID), customInt(serverID), customWideString(serverName),
 		customInt(serverID), customString(account), customInt64(accountID)); err == nil {
 		frames = append(frames, frame)
 	}
@@ -145,7 +145,7 @@ func writeOfficialLoginInfoFrames(link sceneMessageConnection, remote, account s
 // 位置：ClientReady 技能视图（View43/40/45）授予之后（c.pcapng 4.80-4.83s 同位）。
 func writeOfficialReadyInfoFrames(link sceneMessageConnection, remote, account string, roleName string, now time.Time) {
 	frames := [][]byte{}
-	if frame, err := serverCustomIntMessage(officialMsgAccountCard, customString(account), customString(roleName)); err == nil {
+	if frame, err := serverCustomIntMessage(officialMsgAccountCard, customString(account), customWideString(roleName)); err == nil {
 		frames = append(frames, frame)
 	}
 	if frame, err := serverCustomIntMessage(officialMsgServerTime, customInt(1), customInt64(now.Unix())); err == nil {

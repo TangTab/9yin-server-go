@@ -4,10 +4,20 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
-	"strings"
 	"testing"
 	"time"
+	"unicode/utf16"
 )
+
+// utf16Encode 把字符串编成 UTF-16LE 字节（宽串帧体断言用）。
+func utf16Encode(s string) []byte {
+	units := utf16.Encode([]rune(s))
+	out := make([]byte, 0, len(units)*2)
+	for _, u := range units {
+		out = binary.LittleEndian.AppendUint16(out, u)
+	}
+	return out
+}
 
 // m294 官服形态应答（c.pcapng PAIR 实证）：
 // [294, client_ms 回显(i64), obj(玩家), unix 秒(i64), uptime 秒(f64)]。
@@ -84,8 +94,13 @@ func TestWriteOfficialLoginInfoFrames(t *testing.T) {
 	if !bytes.Contains(frames[0], []byte("1.2.3.4")) {
 		t.Fatalf("m366 missing client ip: % X", frames[0])
 	}
-	if !bytes.Contains(frames[2], []byte("lizy86")) || !bytes.Contains(frames[2], []byte("侠骨丹心")) {
-		t.Fatalf("m655 missing server identity strings: % X", frames[2])
+	if !bytes.Contains(frames[2], []byte("lizy86")) {
+		t.Fatalf("m655 missing account narrow string: % X", frames[2])
+	}
+	// 服务器名官服=tag7 宽串（UTF-16LE，c.pcapng 实证）——窄串 UTF-8 会被
+	// 客户端按本地码页解读成乱码。
+	if !bytes.Contains(frames[2], utf16Encode("侠骨丹心")) {
+		t.Fatalf("m655 missing wide server name: % X", frames[2])
 	}
 	// m655 账号 ID = roleID（i64 尾值）
 	if !bytes.Contains(frames[2], []byte{0x03, 42, 0, 0, 0, 0, 0, 0, 0}) {
@@ -108,25 +123,29 @@ func TestWriteOfficialReadyInfoFrames(t *testing.T) {
 			t.Fatalf("frame%d msg id=%d want=%d", i, id, want)
 		}
 	}
+	// m607 官服方言：账号 tag6 窄串 + 角色名 tag7 宽串。
+	if !bytes.Contains(frames[0], []byte("lizy86")) {
+		t.Fatalf("m607 missing account narrow string: % X", frames[0])
+	}
+	if !bytes.Contains(frames[0], utf16Encode("徐测试")) {
+		t.Fatalf("m607 missing wide role name: % X", frames[0])
+	}
 	// m52 unix=1794116366=0x6AF00B0E → i64 LE
 	if !bytes.Contains(frames[1], []byte{0x03, 0x0E, 0x0B, 0xF0, 0x6A, 0x00, 0x00, 0x00, 0x00}) {
 		t.Fatalf("m52 unix seconds payload missing: % X", frames[1])
 	}
 }
 
-// 账号显示名：env 覆盖优先，未设时回退角色名——绝不回显 acct:v1 摘要
-// （内部账号键下发会让客户端账号档案栏显示整串十六进制）。
+// 账号显示名：env 覆盖优先，未设时空串（tag6 窄串只放 ASCII，中文角色名
+// 会乱码）——绝不回显 acct:v1 摘要，也不放中文。
 func TestOfficialAccountLabel(t *testing.T) {
 	t.Setenv("NINEYIN_OFFICIAL_ACCOUNT", "")
-	if got := officialAccountLabel("徐测试"); got != "徐测试" {
-		t.Fatalf("label=%q want role name fallback", got)
+	if got := officialAccountLabel(); got != "" {
+		t.Fatalf("label=%q want empty fallback", got)
 	}
 	t.Setenv("NINEYIN_OFFICIAL_ACCOUNT", "  test001  ")
-	if got := officialAccountLabel("徐测试"); got != "test001" {
+	if got := officialAccountLabel(); got != "test001" {
 		t.Fatalf("label=%q want env override trimmed", got)
-	}
-	if got := officialAccountLabel("徐测试"); strings.Contains(got, "acct:v1:") {
-		t.Fatalf("label=%q leaked internal account key", got)
 	}
 }
 
