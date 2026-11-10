@@ -3504,30 +3504,83 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 	return msg, nil
 }
 
-// officialNPCProperties 官服位 NPC 物化属性集（idx=本服表的官服位行；
-// 官服真表号与本服表官服位存在 ±N 错位，一律按名映射）。模型名缺省时
-// 跳过 ConfigID 行（零值模型串会污染客户端表现）。
+// officialNPCProperties 官服位 NPC 物化属性集（c.pcapng #1777/#1789 两帧
+// 0x0D 251B ×16 属性逐项定版，2026-11-10）：CollideRadius/State/Type/
+// Resource/ConfigID/Photo/NpcType/ActionSpeed/Level/BossLevel/IDCard/
+// BornAction/WeaponMode/HPRatio/ParryRatio/HitHPRatio。索引一律按名经
+// PlayerProperty（末现=官服位）解析——官服 2433 表与本服 2370 表同名行
+// 存在 +2/+7 分段漂移（§四-2/§四-5 同源），硬编码索引换表即错位。
+// 模型名缺省时跳过 Resource/ConfigID/Photo 行（零值模型串会污染客户端
+// 表现）；NpcType 由 fork schema 场景位（@34）已携带，不重复发官服位。
 func officialNPCProperties(npc npcSpawn) []clientdata.IndexedProperty {
+	collide := clientdata.MustPlayerProperty("CollideRadius")
+	state := clientdata.MustPlayerProperty("State")
+	propType := clientdata.MustPlayerProperty("Type")
+	resource := clientdata.MustPlayerProperty("Resource")
+	configID := clientdata.MustPlayerProperty("ConfigID")
+	photo := clientdata.MustPlayerProperty("Photo")
+	actionSpeed := clientdata.MustPlayerProperty("ActionSpeed")
+	level := clientdata.MustPlayerProperty("Level")
+	bossLevel := clientdata.MustPlayerProperty("BossLevel")
+	idCard := clientdata.MustPlayerProperty("IDCard")
+	bornAction := clientdata.MustPlayerProperty("BornAction")
+	weaponMode := clientdata.MustPlayerProperty("WeaponMode")
+	hpRatio := clientdata.MustPlayerProperty("HPRatio")
+	parryRatio := clientdata.MustPlayerProperty("ParryRatio")
+	hitHPRatio := clientdata.MustPlayerProperty("HitHPRatio")
 	props := []clientdata.IndexedProperty{
-		{Index: 179, Name: "CollideRadius", Value: clientdata.Float32Value(0.9)},
-		{Index: 183, Name: "State", Value: clientdata.StringValue("stand")},
-		{Index: 214, Name: "ActionSpeed", Value: clientdata.Float32Value(1.0)},
-		{Index: 1597, Name: "BornAction", Value: clientdata.StringValue("stand")},
-		{Index: 1599, Name: "WeaponMode", Value: clientdata.StringValue("hand1_1")},
-		{Index: 469, Name: "HPRatio", Value: clientdata.Int32Value(100)},
-		{Index: 478, Name: "ParryRatio", Value: clientdata.Int32Value(100)},
-		{Index: 482, Name: "HitHPRatio", Value: clientdata.Int32Value(100)},
+		{Index: collide.Index, Name: collide.Name, Value: clientdata.Float32Value(0.9)},
+		{Index: state.Index, Name: state.Name, Value: clientdata.StringValue("stand")},
+		// 官服 #1777 Type=4（NPC 对象类别常量）。
+		officialNPCIntProp(propType, 4),
 	}
 	if material, ok := npc.resolved.Properties["Material"]; ok && material.Value.Text != "" {
+		resourceValue := "npc\\world" + material.Value.Text
 		props = append(props,
-			clientdata.IndexedProperty{Index: 1440, Name: "ConfigID", Value: clientdata.StringValue(material.Value.Text)},
-			clientdata.IndexedProperty{Index: 1441, Name: "Resource", Value: clientdata.StringValue("npc\\world" + material.Value.Text)},
+			// 官服 #1777：Resource="npc\worldnpc197"、Photo="icon\func"
+			// +Resource+".png"——图标路径由资源路径拼接派生。
+			clientdata.IndexedProperty{Index: resource.Index, Name: resource.Name, Value: clientdata.StringValue(resourceValue)},
+			clientdata.IndexedProperty{Index: configID.Index, Name: configID.Name, Value: clientdata.StringValue(material.Value.Text)},
+			clientdata.IndexedProperty{Index: photo.Index, Name: photo.Name, Value: clientdata.StringValue("icon\\func" + resourceValue + ".png")},
 		)
 	}
-	if level, ok := npc.resolved.Properties["Level"]; ok && level.Value.I32 > 0 && level.Value.I32 < 256 {
-		props = append(props, clientdata.IndexedProperty{Index: 1465, Name: "Level", Value: clientdata.ByteValue(byte(level.Value.I32))})
+	props = append(props, officialNPCFloatProp(actionSpeed, 1.0))
+	if levelProp, ok := npc.resolved.Properties["Level"]; ok && levelProp.Value.I32 > 0 && levelProp.Value.I32 < 256 {
+		props = append(props, officialNPCIntProp(level, levelProp.Value.I32))
 	}
+	// 官服 #1777 BossLevel=1（普通怪基线）；schema 有真值时优先。
+	bossLevelValue := int32(1)
+	if boss, ok := npc.resolved.Properties["BossLevel"]; ok && boss.Value.I32 > 0 && boss.Value.I32 < 256 {
+		bossLevelValue = boss.Value.I32
+	}
+	props = append(props,
+		officialNPCIntProp(bossLevel, bossLevelValue),
+		// 官服 #1777 IDCard="null,null,null,null,null"（五槽空身份卡）。
+		clientdata.IndexedProperty{Index: idCard.Index, Name: idCard.Name, Value: clientdata.StringValue("null,null,null,null,null")},
+		clientdata.IndexedProperty{Index: bornAction.Index, Name: bornAction.Name, Value: clientdata.StringValue("stand")},
+		clientdata.IndexedProperty{Index: weaponMode.Index, Name: weaponMode.Name, Value: clientdata.StringValue("hand1_1")},
+		officialNPCIntProp(hpRatio, 100),
+		officialNPCIntProp(parryRatio, 100),
+		officialNPCIntProp(hitHPRatio, 100),
+	)
 	return props
+}
+
+// officialNPCIntProp 按表线型分派整数值（fork/官服表同名行线型一致，
+// 但换表防错位仍以 entry.Type 为准编码）。
+func officialNPCIntProp(entry clientdata.PropertyEntry, value int32) clientdata.IndexedProperty {
+	switch entry.Type {
+	case clientdata.WireByte:
+		return clientdata.IndexedProperty{Index: entry.Index, Name: entry.Name, Value: clientdata.ByteValue(byte(value))}
+	case clientdata.WireWord:
+		return clientdata.IndexedProperty{Index: entry.Index, Name: entry.Name, Value: clientdata.WordValue(uint16(value))}
+	default:
+		return clientdata.IndexedProperty{Index: entry.Index, Name: entry.Name, Value: clientdata.Int32Value(value)}
+	}
+}
+
+func officialNPCFloatProp(entry clientdata.PropertyEntry, value float32) clientdata.IndexedProperty {
+	return clientdata.IndexedProperty{Index: entry.Index, Name: entry.Name, Value: clientdata.Float32Value(value)}
 }
 
 func sceneObjectByteProperty(objectID, ownerID uint32, propertyIndex uint16, value byte) []byte {

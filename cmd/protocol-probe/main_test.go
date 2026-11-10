@@ -35,10 +35,23 @@ func TestStarterNPCUsesClientResourceIdentity(t *testing.T) {
 	if !bytes.Contains(msg, []byte{34, 0, 229, 0, 0, 0}) {
 		t.Fatal("NPC AddObject does not contain int32 NpcType=229")
 	}
-	// 官服位属性增补后：fork schema 7 项 + 官服固定 8 项（Material/Level
-	// 缺省不追加）= 15（officialNPCProperties，2026-11-10）。
-	if got := binary.LittleEndian.Uint16(msg[0x3d:]); got != 15 {
-		t.Fatalf("NPC property count=%d, want 15", got)
+	// 官服位属性增补后：fork schema 7 项 + 官服固定 11 项（CollideRadius/
+	// State/Type/ActionSpeed/BossLevel/IDCard/BornAction/WeaponMode/三比例；
+	// Material/Level 缺省不追加）= 18（officialNPCProperties 官服 16-prop
+	// 方言对齐 c.pcapng #1777，2026-11-10）。
+	if got := binary.LittleEndian.Uint16(msg[0x3d:]); got != 18 {
+		t.Fatalf("NPC property count=%d, want 18", got)
+	}
+	// 官服 #1777 定版三新行：Type(fork 181)=4 / BossLevel(fork 1590)=1 /
+	// IDCard(fork 1595)="null,null,null,null,null"（0x0D 串=u32 长度+NUL）。
+	if !bytes.Contains(msg, []byte{0xb5, 0x00, 0x04}) {
+		t.Fatal("NPC AddObject does not contain official-position Type=4")
+	}
+	if !bytes.Contains(msg, []byte{0x36, 0x06, 0x01}) {
+		t.Fatal("NPC AddObject does not contain BossLevel=1")
+	}
+	if !bytes.Contains(msg, append([]byte{0x3b, 0x06, 0x19, 0x00, 0x00, 0x00}, []byte("null,null,null,null,null")...)) {
+		t.Fatal("NPC AddObject does not contain IDCard row")
 	}
 	for offset := 0x19; offset < 0x3d; offset++ {
 		if msg[offset] != 0 {
