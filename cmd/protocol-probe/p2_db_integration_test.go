@@ -241,3 +241,30 @@ func TestJingMaiDBSaveLoadRoundtrip(t *testing.T) {
 		t.Fatalf("learned roundtrip=%v", got.Learned)
 	}
 }
+
+// role_tasks 往返（migrations/0009 已重放时生效；缺表跳过——Go 不做
+// 运行期 DDL）。借首个 roles 行，结束恢复原状不留残留。
+func TestTaskDBSaveLoadRoundtrip(t *testing.T) {
+	db := p2OptionalTableTest(t, "role_tasks")
+	var roleID role.RoleID
+	if err := db.QueryRow("SELECT role_id FROM roles ORDER BY role_id LIMIT 1").Scan(&roleID); err != nil {
+		t.Skipf("no roles rows to borrow: %v", err)
+	}
+	restoreTableSnapshot(t, db, "role_tasks", roleID)
+	store := newTaskDBStore(db)
+	want := taskProgressSnapshot{
+		Accepted: []taskAcceptedRow{
+			{TaskID: 791, Status: taskStatusActive, AcceptedAt: 1790000000},
+			{TaskID: 802, Status: taskStatusSubmitReady, AcceptedAt: 1790000100},
+		},
+		Completed: []int{42},
+	}
+	if err := store.Save(roleID, want); err != nil {
+		t.Fatalf("save: %v", err)
+	}
+	got, ok := store.Load(roleID)
+	if !ok || len(got.Accepted) != 2 || got.Accepted[0].TaskID != 791 ||
+		got.Accepted[1].Status != taskStatusSubmitReady || len(got.Completed) != 1 || got.Completed[0] != 42 {
+		t.Fatalf("load=%+v ok=%t", got, ok)
+	}
+}

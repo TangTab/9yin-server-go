@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"database/sql/driver"
 	"encoding/binary"
 	"testing"
 	"time"
+
+	"github.com/DATA-DOG/go-sqlmock"
 
 	"github.com/local/9yin-go-server/internal/role"
 )
@@ -289,16 +292,23 @@ func TestArrangeGroupsByConfigAndCompacts(t *testing.T) {
 		t.Fatalf("item_x (other page) slot=%d, want 3 untouched", got)
 	}
 	frames := conn.Frames()
-	// 3 次移动 × (remove 旧 + remove 新预清 + add + remove 镜像) = 12 帧。
-	if len(frames) != 12 {
-		t.Fatalf("arrange frames=%d, want 12", len(frames))
+	// 两阶段：3 次移动 = 先清 6 帧旧格（主视图+镜像各 3）→ 再 3×(目标预清
+	// +add+目标镜像) = 15 帧。全部旧格 remove 先行，后行 remove 不再误清
+	// 前行刚落的显示（撞格覆盖缺陷的帧型修复）。
+	if len(frames) != 15 {
+		t.Fatalf("arrange frames=%d, want 15", len(frames))
 	}
-	for index := 0; index < len(frames); index += 4 {
-		if frames[index][0] != 0x19 || frames[index+1][0] != 0x19 ||
-			frames[index+2][0] != 0x18 || frames[index+3][0] != 0x19 {
-			t.Fatalf("arrange frame quad %d=%x", index/4, frames[index:index+4])
+	for index := 0; index < 6; index++ {
+		if frames[index][0] != 0x19 {
+			t.Fatalf("arrange phase-1 frame %d=%x, want remove", index, frames[index])
 		}
 	}
+	for index := 6; index < len(frames); index += 3 {
+		if frames[index][0] != 0x19 || frames[index+1][0] != 0x18 || frames[index+2][0] != 0x19 {
+			t.Fatalf("arrange push triple %d=%x", index/3, frames[index:index+3])
+		}
+	}
+	assertNoRemoveAfterAdd(t, frames, viewToolPage)
 
 	// 再整理：已紧凑 → 无变更零帧。
 	base := len(conn.Frames())
@@ -339,5 +349,265 @@ func TestWearRefusedForNonBagSource(t *testing.T) {
 	}
 	if got := len(conn.Frames()); got != 0 {
 		t.Fatalf("invalid source emitted %d frames", got)
+	}
+}
+
+// assertNoRemoveAfterAdd 客户端安全不变量：任一 add(view,slot) 之后不得再
+// 出现同 view+slot 的 remove（后行 remove 清掉前行刚落的显示——整理/拖拽
+// 覆盖缺陷的帧型）。镜像页 view 不同天然排除。
+func assertNoRemoveAfterAdd(t *testing.T, frames [][]byte, view uint16) {
+	t.Helper()
+	lastRemove := map[uint16]int{}
+	for index, frame := range frames {
+		if len(frame) < 5 || frame[0] != 0x19 {
+			continue
+		}
+		if binary.LittleEndian.Uint16(frame[1:]) != view {
+			continue
+		}
+		lastRemove[binary.LittleEndian.Uint16(frame[3:])] = index
+	}
+	for index, frame := range frames {
+		if len(frame) < 5 || frame[0] != 0x18 {
+			continue
+		}
+		if binary.LittleEndian.Uint16(frame[1:]) != view {
+			continue
+		}
+		slot := binary.LittleEndian.Uint16(frame[3:])
+		if removeIndex, taken := lastRemove[slot]; taken && removeIndex > index {
+			t.Fatalf("add @%d (view=%d slot=%d) cleared by later remove @%d", index, view, slot, removeIndex)
+		}
+	}
+}
+
+// TestArrangeNoSlotCollisionWhenLaterGroupHoldsLowSlot 旧分配算法撞格回归：
+// 早组行被分进未处理晚组行仍占用的低格 → 同格双物品 + add 覆盖原地行。
+// 组序 g1（A@1,B@3）→ g2（C@2）；顺填结果 A@1、B@2、C@3，C 不被 B 覆盖。
+func TestArrangeNoSlotCollisionWhenLaterGroupHoldsLowSlot(t *testing.T) {
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "item_a", itemType: 1, amount: 1, viewID: 1},
+		bagRow{slot: 3, configID: "item_a", itemType: 1, amount: 1, viewID: 1},
+		bagRow{slot: 2, configID: "item_c", itemType: 1, amount: 1, viewID: 1},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, nil)
+
+	if handled, err := handleArrangeItemCustom(h, arrangeMsg(2)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	seen := map[int32]string{}
+	player.mu.Lock()
+	for _, row := range player.bag {
+		if row.viewID != 1 {
+			continue
+		}
+		if existing, taken := seen[row.slot]; taken {
+			t.Fatalf("slot %d duplicated: %s vs %s", row.slot, existing, row.configID)
+		}
+		seen[row.slot] = row.configID
+	}
+	player.mu.Unlock()
+	if seen[1] != "item_a" || seen[2] != "item_a" || seen[3] != "item_c" {
+		t.Fatalf("arranged slots=%v, want item_a@1 item_a@2 item_c@3", seen)
+	}
+	assertNoRemoveAfterAdd(t, conn.Frames(), viewToolPage)
+}
+
+// TestMoveItemOntoOccupiedSwaps 拖到占用格交换：旧实现直接落位与占用行同
+// 格互覆。验证两行互换、无重复槽位、同格 remove 先于 add。
+func TestMoveItemOntoOccupiedSwaps(t *testing.T) {
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "yaopin_00100", itemType: 2101, amount: 2, viewID: 1},
+		bagRow{slot: 5, configID: "caiyao_00200", itemType: 2201, amount: 3, viewID: 1},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, nil)
+
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(2, 1, 2, 5)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	if got := bagSlotOf(t, player, "yaopin_00100", 1); got != 5 {
+		t.Fatalf("yaopin slot=%d, want 5 (swapped into target cell)", got)
+	}
+	if got := bagSlotOf(t, player, "caiyao_00200", 1); got != 1 {
+		t.Fatalf("caiyao slot=%d, want 1 (occupant moved to vacated source)", got)
+	}
+	assertNoRemoveAfterAdd(t, conn.Frames(), viewToolPage)
+}
+
+// TestMoveItemSameConfigEquipSwapsNotMerges 同 configID 装备是各自实例
+// （uid/耐久独立），拖到同款上应交换而非合并。
+func TestMoveItemSameConfigEquipSwapsNotMerges(t *testing.T) {
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "sword_dup", itemType: 101, amount: 1, viewID: 2, equipType: "Weapon"},
+		bagRow{slot: 5, configID: "sword_dup", itemType: 101, amount: 1, viewID: 2, equipType: "Weapon"},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, nil)
+
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(121, 1, 121, 5)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	slots := map[int32]int{}
+	player.mu.Lock()
+	for _, row := range player.bag {
+		if row.configID == "sword_dup" {
+			slots[row.slot]++
+		}
+	}
+	player.mu.Unlock()
+	if len(slots) != 2 || slots[1] != 1 || slots[5] != 1 {
+		t.Fatalf("equip rows slots=%v, want both rows kept at 1 and 5 (swapped)", slots)
+	}
+}
+
+// TestMoveItemOntoSameStackMerges 拖到同 configID 可叠行：并入目标行（额
+// 度合加），源格清空、行数减一。
+func TestMoveItemOntoSameStackMerges(t *testing.T) {
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "yaopin_00100", itemType: 2101, amount: 2, viewID: 1},
+		bagRow{slot: 5, configID: "yaopin_00100", itemType: 2101, amount: 3, viewID: 1},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, nil)
+
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(2, 1, 2, 5)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	if got := bagAmountOf(t, player, "yaopin_00100", 1); got != 5 {
+		t.Fatalf("amount=%d, want merged 5", got)
+	}
+	player.mu.Lock()
+	rows := 0
+	for _, row := range player.bag {
+		if row.configID == "yaopin_00100" && row.viewID == 1 {
+			rows++
+			if row.slot != 5 {
+				t.Fatalf("merged row slot=%d, want 5", row.slot)
+			}
+		}
+	}
+	player.mu.Unlock()
+	if rows != 1 {
+		t.Fatalf("rows=%d, want single merged row", rows)
+	}
+	assertNoRemoveAfterAdd(t, conn.Frames(), viewToolPage)
+}
+
+// TestMoveItemRejectsSlotOutOfBounds 槽位越界（91+）拒绝：零帧、内存不动
+// （登录侧对 91+ 槽位显示裁剪，不允许拖拽再写入越界槽）。
+func TestMoveItemRejectsSlotOutOfBounds(t *testing.T) {
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "yaopin_00100", itemType: 2101, amount: 1, viewID: 1},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, nil)
+
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(2, 1, 2, 91)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	if got := len(conn.Frames()); got != 0 {
+		t.Fatalf("out-of-bounds move emitted %d frames", got)
+	}
+	if got := bagSlotOf(t, player, "yaopin_00100", 1); got != 1 {
+		t.Fatalf("slot=%d, want unchanged 1", got)
+	}
+}
+
+// TestMoveItemSwapPersistsBySeq 拖拽交换落盘：seq 键控（槽位键在中途态
+// 双中两行），单事务两条 UPDATE。
+func TestMoveItemSwapPersistsBySeq(t *testing.T) {
+	store, mock := newMockInventoryDB(t)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE role_bag_items SET slot = \\?, view_id = \\?").
+		WithArgs(int32(5), int32(1), int64(role.RoleID(901)), int64(11)).
+		WillReturnResult(newSQLMockResult(0, 1))
+	mock.ExpectExec("UPDATE role_bag_items SET slot = \\?, view_id = \\?").
+		WithArgs(int32(1), int32(1), int64(role.RoleID(901)), int64(12)).
+		WillReturnResult(newSQLMockResult(0, 1))
+	mock.ExpectCommit()
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "yaopin_00100", itemType: 2101, amount: 1, viewID: 1, seq: 11},
+		bagRow{slot: 5, configID: "caiyao_00200", itemType: 2201, amount: 1, viewID: 1, seq: 12},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, store)
+
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(2, 1, 2, 5)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	if got := bagSlotOf(t, player, "yaopin_00100", 1); got != 5 {
+		t.Fatalf("yaopin slot=%d, want 5", got)
+	}
+	if got := bagSlotOf(t, player, "caiyao_00200", 1); got != 1 {
+		t.Fatalf("caiyao slot=%d, want 1", got)
+	}
+}
+
+// TestMoveItemMergePersistsBySeq 拖拽叠堆合并落盘：dst 加数 + src 删行 +
+// 回读总额，单事务。
+func TestMoveItemMergePersistsBySeq(t *testing.T) {
+	store, mock := newMockInventoryDB(t)
+	mock.ExpectBegin()
+	mock.ExpectExec("UPDATE role_bag_items SET amount = amount \\+ \\?").
+		WithArgs(int32(2), int64(role.RoleID(901)), int64(11)).
+		WillReturnResult(newSQLMockResult(0, 1))
+	mock.ExpectExec("DELETE FROM role_bag_items WHERE role_id = \\? AND seq = \\?").
+		WithArgs(int64(role.RoleID(901)), int64(12)).
+		WillReturnResult(newSQLMockResult(0, 1))
+	readback := sqlmock.NewRows([]string{"amount"}).AddRow(5)
+	mock.ExpectQuery("SELECT amount FROM role_bag_items WHERE role_id = \\? AND seq = \\?").
+		WithArgs(int64(role.RoleID(901)), int64(11)).
+		WillReturnRows(readback)
+	mock.ExpectCommit()
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "yaopin_00100", itemType: 2101, amount: 2, viewID: 1, seq: 12},
+		bagRow{slot: 5, configID: "yaopin_00100", itemType: 2101, amount: 3, viewID: 1, seq: 11},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, store)
+
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(2, 1, 2, 5)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	if got := bagAmountOf(t, player, "yaopin_00100", 1); got != 5 {
+		t.Fatalf("amount=%d, want DB readback 5", got)
+	}
+}
+
+// TestArrangePersistsThroughStore 整理落盘：每条移动一行 seq 键控 UPDATE
+// （不再"不落盘"——内存/DB 槽位分叉会让后续槽位键写入命中错行）。
+func TestArrangePersistsThroughStore(t *testing.T) {
+	store, mock := newMockInventoryDB(t)
+	// 移动 A(3→2)、A(7→3)、B(9→4)。
+	mock.ExpectBegin()
+	for _, args := range [][]driver.Value{
+		{int32(2), int32(1), int64(role.RoleID(901)), int64(21)},
+		{int32(3), int32(1), int64(role.RoleID(901)), int64(22)},
+		{int32(4), int32(1), int64(role.RoleID(901)), int64(23)},
+	} {
+		mock.ExpectExec("UPDATE role_bag_items SET slot = \\?, view_id = \\?").
+			WithArgs(args...).
+			WillReturnResult(newSQLMockResult(0, 1))
+	}
+	mock.ExpectCommit()
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "item_c", itemType: 1, amount: 1, viewID: 1, seq: 20},
+		bagRow{slot: 3, configID: "item_a", itemType: 1, amount: 1, viewID: 1, seq: 21},
+		bagRow{slot: 7, configID: "item_a", itemType: 1, amount: 1, viewID: 1, seq: 22},
+		bagRow{slot: 9, configID: "item_b", itemType: 1, amount: 1, viewID: 1, seq: 23},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, store)
+
+	if handled, err := handleArrangeItemCustom(h, arrangeMsg(2)); err != nil || !handled {
+		t.Fatalf("handled=%t err=%v", handled, err)
+	}
+	if got := bagSlotOf(t, player, "item_c", 1); got != 1 {
+		t.Fatalf("item_c slot=%d, want 1", got)
+	}
+	if got := bagSlotOf(t, player, "item_b", 1); got != 4 {
+		t.Fatalf("item_b slot=%d, want 4", got)
 	}
 }

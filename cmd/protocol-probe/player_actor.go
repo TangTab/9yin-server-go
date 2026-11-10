@@ -346,6 +346,10 @@ type playerActor struct {
 	// 激活序（active_jingmai_rec 行镜像）与真气池；快照持久化
 	// role_meridians（migrations/0004）。
 	jingmai jingMaiState
+	// 任务域（task_records.go）：已接（含可交付态）与已完成集合；快照
+	// 持久化 role_tasks（migrations/0009），GM authored_task_* 是当前
+	// 唯一写入口。
+	tasks playerTaskDomain
 	// 内功特效脚本分发状态（scripts/module/neigong，见 neigong_dispatch.go）：
 	// neigongState 是上一次有效触发回写的扁平状态（脚本互斥窗/层数），
 	// shields 为 FIFO 吸收池，dodge 为闪避加成窗（料敌先机），periodicAt

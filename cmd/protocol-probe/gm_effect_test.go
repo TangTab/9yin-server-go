@@ -40,6 +40,15 @@ func (r *frameRecorder) last() []byte {
 	return r.frames[len(r.frames)-1]
 }
 
+// snapshot 返回全部已收帧的拷贝（多帧序断言用）。
+func (r *frameRecorder) snapshot() [][]byte {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	out := make([][]byte, len(r.frames))
+	copy(out, r.frames)
+	return out
+}
+
 // gmEffectHarness 组装「真实执行器 + 假连接」：playerActor / gmSession /
 // frameRecorder 与 main.go handle() 里的对象同款，processGMCommand 闭包
 // 各分支的调用序列在用例里逐字照抄（闭包自身无独立逻辑，只是把这些

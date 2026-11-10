@@ -50,6 +50,89 @@ func (s *inventoryStore) moveBagSlot(ctx context.Context, roleID role.RoleID, fr
 	return err == nil && affected > 0
 }
 
+// bagSlotMove 是一次重定位（seq 键控——role_bag_items 主键 (role_id,seq)，
+// 槽位交换/整理批量重排时按槽位定位会连环误中，按实例身份定位与顺序无关）。
+type bagSlotMove struct {
+	seq    int64
+	slot   int32
+	viewID int32
+}
+
+// repositionBagRows 单事务批量重定位（拖拽交换=2 条 / 整理=N 条）：
+// 逐条 UPDATE ... WHERE role_id=? AND seq=?；RowsAffected==0 视为内存
+// 与 DB 脱钩，整批回滚拒绝（防止半途落盘造出新的重复槽位）。
+func (s *inventoryStore) repositionBagRows(ctx context.Context, roleID role.RoleID, moves []bagSlotMove) bool {
+	if s == nil || s.db == nil || len(moves) == 0 {
+		return true
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Printf("repositionBagRows role=%d begin: %v", roleID, err)
+		return false
+	}
+	defer func() { _ = tx.Rollback() }()
+	for _, move := range moves {
+		result, err := tx.ExecContext(ctx,
+			"UPDATE role_bag_items SET slot = ?, view_id = ? WHERE role_id = ? AND seq = ?",
+			move.slot, move.viewID, roleID, move.seq)
+		if err != nil {
+			log.Printf("repositionBagRows role=%d seq=%d->slot=%d: %v", roleID, move.seq, move.slot, err)
+			return false
+		}
+		affected, err := result.RowsAffected()
+		if err != nil || affected == 0 {
+			log.Printf("repositionBagRows role=%d seq=%d not found (affected=%d err=%v)", roleID, move.seq, affected, err)
+			return false
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		log.Printf("repositionBagRows role=%d commit: %v", roleID, err)
+		return false
+	}
+	return true
+}
+
+// mergeBagStack 同类叠堆合并（拖拽到同 configID 可叠行）：dst 行加数、
+// src 行删除，均按 seq 键控；返回 dst 新总额（失败 ok=false）。
+func (s *inventoryStore) mergeBagStack(ctx context.Context, roleID role.RoleID, srcSeq, dstSeq int64, addAmount int32) (int32, bool) {
+	if s == nil || s.db == nil {
+		return 0, true
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		log.Printf("mergeBagStack role=%d begin: %v", roleID, err)
+		return 0, false
+	}
+	defer func() { _ = tx.Rollback() }()
+	result, err := tx.ExecContext(ctx,
+		"UPDATE role_bag_items SET amount = amount + ? WHERE role_id = ? AND seq = ?",
+		addAmount, roleID, dstSeq)
+	if err != nil {
+		log.Printf("mergeBagStack role=%d dst seq=%d: %v", roleID, dstSeq, err)
+		return 0, false
+	}
+	if affected, _ := result.RowsAffected(); affected == 0 {
+		log.Printf("mergeBagStack role=%d dst seq=%d not found", roleID, dstSeq)
+		return 0, false
+	}
+	if _, err := tx.ExecContext(ctx,
+		"DELETE FROM role_bag_items WHERE role_id = ? AND seq = ?", roleID, srcSeq); err != nil {
+		log.Printf("mergeBagStack role=%d src seq=%d: %v", roleID, srcSeq, err)
+		return 0, false
+	}
+	var total int32
+	if err := tx.QueryRowContext(ctx,
+		"SELECT amount FROM role_bag_items WHERE role_id = ? AND seq = ?", roleID, dstSeq).Scan(&total); err != nil {
+		log.Printf("mergeBagStack role=%d readback: %v", roleID, err)
+		return 0, false
+	}
+	if err := tx.Commit(); err != nil {
+		log.Printf("mergeBagStack role=%d commit: %v", roleID, err)
+		return 0, false
+	}
+	return total, true
+}
+
 // moveBagToEquip 背包 → 装备栏（删背包行；装备行经 game_items 联表补
 // equip_type/hardiness/max_hardiness/art_pack，uid 跨表携带）。
 func (s *inventoryStore) moveBagToEquip(ctx context.Context, roleID role.RoleID, bagSlot, equipSlot, category int32) bool {
@@ -376,8 +459,11 @@ func insertEquipRow(ctx context.Context, tx *sql.Tx, roleID role.RoleID, slot in
 }
 
 // upsertEquipSlot 时装/身份装穿戴（Java RoleInventoryStore.upsertEquip 的
-// 槽位直写形态：时装不走背包源，直接 upsert 纸娃娃槽 16-19）。同槽旧行
-// 的 uid 保留（客户端实例稳定身份），delete+insert 事务内完成；落库后
+// 槽位直写形式：时装不走背包源，直接 upsert 纸娃娃槽 16-19）。同槽同款
+// 重穿的 uid 保留（客户端实例稳定身份）；异 configID 覆盖生成新 uid——
+// 继承旧 uid 会让新物品命中旧物品的随机属性快照（role_item_random_props
+// 按 uid 键控，GM 连发宝物/娃娃到同槽时属性串号），调用方负责先让位旧装
+// 备（GM 路径走 unequipFromDoll）。delete+insert 事务内完成；落库后
 // 回读权威行（seq/uid/equip_type 以 DB 为准）供内存与帧使用。无 DB
 // （内存降级）返回调用方构造的行。
 func (s *inventoryStore) upsertEquipSlot(ctx context.Context, roleID role.RoleID, slot int32, configID string, itemType int32, equipType string) (equipRow, error) {
@@ -393,11 +479,15 @@ func (s *inventoryStore) upsertEquipSlot(ctx context.Context, roleID role.RoleID
 		return row, err
 	}
 	defer func() { _ = tx.Rollback() }()
-	var carryUid sql.NullString
+	var carryUid, oldConfigID sql.NullString
 	err = tx.QueryRowContext(ctx,
-		"SELECT uid FROM role_equip_items WHERE role_id = ? AND slot = ?", roleID, slot).Scan(&carryUid)
+		"SELECT uid, config_id FROM role_equip_items WHERE role_id = ? AND slot = ?", roleID, slot).
+		Scan(&carryUid, &oldConfigID)
 	if err != nil && err != sql.ErrNoRows && !unknownColumn(err, "uid") {
 		return row, err
+	}
+	if carryUid.Valid && oldConfigID.Valid && oldConfigID.String != configID {
+		carryUid = sql.NullString{} // 异款覆盖：新实例身份，不带旧 uid（String 一并清空）
 	}
 	if _, err := tx.ExecContext(ctx,
 		"DELETE FROM role_equip_items WHERE role_id = ? AND slot = ?", roleID, slot); err != nil {

@@ -362,8 +362,25 @@ func (h *itemSession) consumeBagItemCount(item bagRow, count int32) bool {
 				log.Printf("%s: mirror clear consumed row: %v", h.remote, err)
 			}
 		}
+		// 行删净即实例消亡：宝物/娃娃的随机属性快照（role_item_random_props
+		// 按 uid 键控）随之清理，防孤儿行累积与 uid 复用时的属性串号。
+		h.deleteRandomPropsSnapshot(item)
 	}
 	return true
+}
+
+// deleteRandomPropsSnapshot 清理物品实例的随机属性快照（仅宝物/娃娃有；
+// 空 uid/无 store/非随机装备零开销跳过；失败只记日志不影响主流程）。
+func (h *itemSession) deleteRandomPropsSnapshot(item bagRow) {
+	if h.randomProps == nil || item.uid == "" {
+		return
+	}
+	if randomEquipCatalogOf().randomEquipKind(item.configID) == randomKindNone {
+		return
+	}
+	if err := h.randomProps.DeleteByUID(h.ctx, h.roleID, item.uid); err != nil {
+		log.Printf("%s: delete random props %s uid=%s: %v", h.remote, item.configID, item.uid, err)
+	}
 }
 
 // addToBagItemCount 行内加数并同步客户端行（consumeBagItemCount 的
@@ -658,7 +675,10 @@ func wearableEquipType(item bagRow) string {
 	return item.equipType
 }
 
-// moveBagRowBetweenViews 背包页间/页内移动（toSlot<=0 自动选目标页首空格）。
+// moveBagRowBetweenViews 背包页间/页内移动（toSlot<=0 自动选目标页首空格；
+// 目标格被占：同 configID 可叠行合并、异种两行交换。旧实现不查占用直接
+// 落位，与占用行同格互覆（客户端 add 盖掉原物品显示、重登重复槽位互吞）；
+// 魔盒扩展区（视图 3/122/124/126 归一同槽位域 1..90）拖拽同路径同修）。
 func moveBagRowBetweenViews(h *itemSession, fromView, fromSlot, toView, toSlot int32) {
 	fromCategory := bagCategoryOf(fromView)
 	toCategory := bagCategoryOf(toView)
@@ -673,6 +693,21 @@ func moveBagRowBetweenViews(h *itemSession, fromView, fromSlot, toView, toSlot i
 	}
 	if slot <= 0 {
 		log.Printf("%s: move 30 reject: bag page %d full", h.remote, toView)
+		return
+	}
+	if slot > int32(bagSlotMax) {
+		log.Printf("%s: move 30 reject: slot %d out of 1..%d", h.remote, slot, bagSlotMax)
+		return
+	}
+	if occupant, occupantIndex, taken := h.player.bagItemAt(bagViewOf(toCategory), slot); taken {
+		if occupant.viewID == item.viewID && occupant.slot == item.slot {
+			return // 拖回原格：无操作
+		}
+		if occupant.configID == item.configID && wearableEquipType(item) == "" && wearableEquipType(occupant) == "" {
+			mergeBagRows(h, fromView, fromSlot, item, occupant)
+		} else {
+			swapBagRows(h, fromView, fromSlot, item, index, occupant, occupantIndex, slot)
+		}
 		return
 	}
 	if h.store != nil && !h.store.moveBagSlot(h.ctx, h.roleID, fromSlot, fromCategory, slot, toCategory) {
@@ -697,6 +732,105 @@ func moveBagRowBetweenViews(h *itemSession, fromView, fromSlot, toView, toSlot i
 		log.Printf("%s: move push row: %v", h.remote, err)
 	}
 	log.Printf("%s: move 30 bag[%d:%d]%d->bag[%d:%d] config=%s", h.remote, fromView, fromSlot, fromCategory, toView, slot, item.configID)
+}
+
+// swapBagRows 拖拽落位到已占用格的交换：两行互换 (slot,viewID)。DB 按 seq
+// 键控单事务重定位（槽位键在中途态会双中两行，不可用）；帧两阶段——先清
+// 两旧格（源 raw 视图+镜像、目标主视图+镜像），再分别推两行，避免后行的
+// remove 误清前行刚落的显示。
+func swapBagRows(h *itemSession, fromView, fromSlot int32, src bagRow, srcIndex int, dst bagRow, dstIndex int, toSlot int32) {
+	if h.store != nil && (src.seq <= 0 || dst.seq <= 0) {
+		log.Printf("%s: move 30 swap reject: missing seq (src=%d dst=%d)", h.remote, src.seq, dst.seq)
+		return
+	}
+	if h.store != nil && !h.store.repositionBagRows(h.ctx, h.roleID, []bagSlotMove{
+		{seq: src.seq, slot: toSlot, viewID: dst.viewID},
+		{seq: dst.seq, slot: fromSlot, viewID: src.viewID},
+	}) {
+		log.Printf("%s: move 30 swap persist failed", h.remote)
+		return
+	}
+	movedSrc, movedDst := src, dst
+	movedSrc.slot, movedSrc.viewID = toSlot, dst.viewID
+	movedDst.slot, movedDst.viewID = fromSlot, src.viewID
+	h.player.mu.Lock()
+	if h.player.bag[srcIndex].slot == src.slot && h.player.bag[srcIndex].viewID == src.viewID {
+		h.player.bag[srcIndex] = movedSrc
+	}
+	if h.player.bag[dstIndex].slot == dst.slot && h.player.bag[dstIndex].viewID == dst.viewID {
+		h.player.bag[dstIndex] = movedDst
+	}
+	h.player.mu.Unlock()
+
+	for _, cell := range []struct{ view, slot uint16 }{
+		{uint16(fromView), uint16(fromSlot)},
+		{bagViewOf(dst.viewID), uint16(toSlot)},
+	} {
+		if err := h.link.WriteFrame(serverViewRemove(cell.view, cell.slot)); err != nil {
+			log.Printf("%s: swap clear cell: %v", h.remote, err)
+		}
+		if mirror := bagMirrorOf(cell.view); mirror != cell.view {
+			if err := h.link.WriteFrame(serverViewRemove(mirror, cell.slot)); err != nil {
+				log.Printf("%s: swap clear cell mirror: %v", h.remote, err)
+			}
+		}
+	}
+	for _, row := range []bagRow{movedSrc, movedDst} {
+		if err := pushBagItemFrames(h.link, h.roleID, row); err != nil {
+			log.Printf("%s: swap push row: %v", h.remote, err)
+		}
+	}
+	log.Printf("%s: move 30 swap bag[%d:%d]<->bag[%d:%d] (%s <-> %s)",
+		h.remote, fromSlot, src.viewID, toSlot, dst.viewID, src.configID, dst.configID)
+}
+
+// mergeBagRows 拖拽落位到同 configID 可叠行：src 并入 dst（DB seq 键控
+// amount 合加+删行，内存以回读总额为准；纯内存模式按快照合计），帧=清
+// 源格（raw 视图+镜像）+ 推 dst 行。
+func mergeBagRows(h *itemSession, fromView, fromSlot int32, src, dst bagRow) {
+	total := src.amount + dst.amount
+	if h.store != nil {
+		if src.seq <= 0 || dst.seq <= 0 {
+			log.Printf("%s: move 30 merge reject: missing seq (src=%d dst=%d)", h.remote, src.seq, dst.seq)
+			return
+		}
+		dbTotal, ok := h.store.mergeBagStack(h.ctx, h.roleID, src.seq, dst.seq, src.amount)
+		if !ok {
+			log.Printf("%s: move 30 merge persist failed", h.remote)
+			return
+		}
+		total = dbTotal
+	}
+	h.player.mu.Lock()
+	for index := range h.player.bag {
+		if h.player.bag[index].slot == src.slot && h.player.bag[index].viewID == src.viewID {
+			h.player.bag = append(h.player.bag[:index], h.player.bag[index+1:]...)
+			break
+		}
+	}
+	for index := range h.player.bag {
+		if h.player.bag[index].slot == dst.slot && h.player.bag[index].viewID == dst.viewID {
+			h.player.bag[index].amount = total
+			break
+		}
+	}
+	h.player.mu.Unlock()
+
+	if err := h.link.WriteFrame(serverViewRemove(uint16(fromView), uint16(fromSlot))); err != nil {
+		log.Printf("%s: merge clear source: %v", h.remote, err)
+	}
+	if fromMirror := bagMirrorOf(uint16(fromView)); fromMirror != uint16(fromView) {
+		if err := h.link.WriteFrame(serverViewRemove(fromMirror, uint16(fromSlot))); err != nil {
+			log.Printf("%s: merge clear source mirror: %v", h.remote, err)
+		}
+	}
+	merged := dst
+	merged.amount = total
+	if err := pushBagItemFrames(h.link, h.roleID, merged); err != nil {
+		log.Printf("%s: merge push row: %v", h.remote, err)
+	}
+	log.Printf("%s: move 30 merge bag[%d:%d] into bag[%d:%d] %s x%d -> total %d",
+		h.remote, fromSlot, src.viewID, dst.slot, dst.viewID, src.configID, src.amount, total)
 }
 
 // ---- msg34 丢弃 ----
@@ -743,8 +877,11 @@ func handleDeleteItemCustom(h *itemSession, custom clientCustomMessage) (bool, e
 // ---- msg36 整理 ----
 
 // handleArrangeItemCustom（[36,view]，fork 只读 values[1]）：同类聚合+前移
-// 压缩——同 ConfigID 聚为相邻组（组间按首现顺序），整体前移填满低位空格；
-// 仅对变更格发出 remove(旧)+成对 add(新) 帧。fork 同款不落盘。
+// 压缩——同 ConfigID 聚为相邻组（组间按首现顺序），按组序顺填 1..N 低位
+// 槽（目标集是纯排列互异，杜绝旧 next/used 分配把行塞进未处理行仍占用的
+// 格子——同格双物品/客户端覆盖的根因）。写穿 DB（seq 键控批量重定位，
+// 失败拒绝内存不动）；帧两阶段：先清全部旧格（主视图+镜像），再逐行推送
+// （后行的 remove 不会误清前行刚落的显示）。
 func handleArrangeItemCustom(h *itemSession, custom clientCustomMessage) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomArrangeBag {
 		return false, nil
@@ -774,35 +911,21 @@ func handleArrangeItemCustom(h *itemSession, custom clientCustomMessage) (bool, 
 		}
 	}
 	sort.SliceStable(rows, func(i, j int) bool { return rows[i].slot < rows[j].slot })
-	firstSlot := make(map[string]int32)
-	groupOrder := make([]string, 0, len(rows))
+	groupIndex := make(map[string]int, len(rows))
 	for _, item := range rows {
-		if _, exists := firstSlot[item.configID]; !exists {
-			firstSlot[item.configID] = item.slot
-			groupOrder = append(groupOrder, item.configID)
+		if _, exists := groupIndex[item.configID]; !exists {
+			groupIndex[item.configID] = len(groupIndex)
 		}
-	}
-	groupIndex := make(map[string]int, len(groupOrder))
-	for i, id := range groupOrder {
-		groupIndex[id] = i
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
 		return groupIndex[rows[i].configID] < groupIndex[rows[j].configID]
 	})
-	// 前移压缩：已定序的行依次取最低空格（不高于原槽位则前移，否则不动）。
-	used := make([]bool, int(bagSlotMax)+1)
+	// 顺填 1..N：行数超容量（历史 91+ 溢出行）保持原格不动。
 	moves := make([]arrangeMove, 0, len(rows))
-	next := int32(1)
 	for index := range rows {
-		for next <= int32(bagSlotMax) && used[next] {
-			next++
-		}
-		target := rows[index].slot
-		if next < target {
-			target = next
-		}
-		if target > 0 && target <= int32(bagSlotMax) {
-			used[target] = true
+		target := int32(index + 1)
+		if target > int32(bagSlotMax) {
+			continue
 		}
 		if target != rows[index].slot {
 			moves = append(moves, arrangeMove{from: rows[index].slot, to: target, row: rows[index]})
@@ -814,21 +937,54 @@ func handleArrangeItemCustom(h *itemSession, custom clientCustomMessage) (bool, 
 		log.Printf("%s: arrange 36 view=%d no changes", h.remote, view)
 		return true, nil
 	}
-	// 回写内存模型：非本页行 + 重排后的本页行。
-	newBag := make([]bagRow, 0, len(h.player.bag))
-	for _, item := range h.player.bag {
-		if item.viewID != category {
-			newBag = append(newBag, item)
-		}
-	}
-	newBag = append(newBag, rows...)
-	h.player.bag = newBag
 	h.player.mu.Unlock()
 
+	// 写穿：DB 按 seq 键控批量重定位（RowsAffected==0=内存与 DB 脱钩，
+	// 整批拒绝，不再走"fork 同款不落盘"——那会让后续按槽位键的写命中
+	// 错行、造出重复槽位，重登后同格互覆）。
+	if h.store != nil {
+		dbMoves := make([]bagSlotMove, 0, len(moves))
+		for _, move := range moves {
+			if move.row.seq <= 0 {
+				log.Printf("%s: arrange 36 reject: row %s slot=%d missing seq", h.remote, move.row.configID, move.from)
+				return true, nil
+			}
+			dbMoves = append(dbMoves, bagSlotMove{seq: move.row.seq, slot: move.to, viewID: category})
+		}
+		if !h.store.repositionBagRows(h.ctx, h.roleID, dbMoves) {
+			log.Printf("%s: arrange 36 persist failed (bag untouched)", h.remote)
+			return true, nil
+		}
+	}
+
+	// 回写内存：按 (from 槽位,页) 匹配 + 负槽位标记两遍翻转——移动集可能
+	// 成环（A 3→2 而 B 2→3），直接按目标落位会误中尚未搬走的行。
+	h.player.mu.Lock()
+	for _, move := range moves {
+		for index := range h.player.bag {
+			if h.player.bag[index].slot == move.from && h.player.bag[index].viewID == category {
+				h.player.bag[index].slot = -move.to
+				break
+			}
+		}
+	}
+	for index := range h.player.bag {
+		if h.player.bag[index].slot < 0 {
+			h.player.bag[index].slot = -h.player.bag[index].slot
+		}
+	}
+	h.player.mu.Unlock()
+
+	// 帧两阶段：先清全部旧格（主视图+镜像页），再逐行入格。
 	for _, move := range moves {
 		if err := h.link.WriteFrame(serverViewRemove(view, uint16(move.from))); err != nil {
 			log.Printf("%s: arrange clear old slot: %v", h.remote, err)
 		}
+		if err := h.link.WriteFrame(serverViewRemove(bagMirrorOf(view), uint16(move.from))); err != nil {
+			log.Printf("%s: arrange clear old mirror: %v", h.remote, err)
+		}
+	}
+	for _, move := range moves {
 		moved := move.row
 		moved.slot = move.to
 		if err := pushBagItemFrames(h.link, h.roleID, moved); err != nil {

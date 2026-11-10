@@ -154,3 +154,38 @@ func TestValidateJiuYinZhi(t *testing.T) {
 		}
 	}
 }
+
+// 任务调试四动作（authored_task_*，数据侧写入口）：接取必填任务 ID；
+// 推进/清理/交付允许 0（=最早活跃任务），拒绝负数。
+func TestValidateAuthoredTask(t *testing.T) {
+	command, err := validateBody(t, `{"action":"authored_task_start","taskId":791}`)
+	if err != nil {
+		t.Fatalf("valid start rejected: %v", err)
+	}
+	if command.TaskId != 791 {
+		t.Fatalf("command=%+v", command)
+	}
+	for _, action := range []string{
+		"authored_task_submit_ready", "authored_task_remove", "authored_task_reward",
+	} {
+		command, err := validateBody(t, `{"action":"`+action+`","taskId":0}`)
+		if err != nil {
+			t.Fatalf("valid %s rejected: %v", action, err)
+		}
+		if command.TaskId != 0 {
+			t.Fatalf("%s command=%+v", action, command)
+		}
+	}
+	for _, raw := range []string{
+		`{"action":"authored_task_start","taskId":0}`,
+		`{"action":"authored_task_start","taskId":-1}`,
+		`{"action":"authored_task_start"}`,
+		`{"action":"authored_task_submit_ready","taskId":-7}`,
+		`{"action":"authored_task_remove","taskId":-1}`,
+		`{"action":"authored_task_reward","taskId":-3}`,
+	} {
+		if _, err := validateBody(t, raw); err == nil {
+			t.Fatalf("invalid task command accepted: %s", raw)
+		}
+	}
+}

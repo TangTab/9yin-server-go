@@ -525,6 +525,19 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		}
 	}
 	defer persistJingMai()
+	// 任务域（task_records.go）：role_tasks 快照；缺表/缺库降级会话态
+	//（与 P2 域同语义，建表权威在 migrations/0009）。GM authored_task_*
+	// 与后续协议帧共用同一内存域，断线/周期/事件三路落库。
+	taskStore := newTaskDBStore(store.db)
+	persistTasks := func() {
+		if taskStore == nil || selected == nil || player == nil {
+			return
+		}
+		if err := taskStore.Save(selected.ID, player.taskSnapshotOf()); err != nil {
+			log.Printf("%s: persist task progress: %v", conn.RemoteAddr(), err)
+		}
+	}
+	defer persistTasks()
 	// 邮件/坐骑域（Java lettersGranted/mountsPushed 同位）：role_letters/
 	// role_mounts 快照读档 → ClientReady 整表重放；无存档零帧。
 	letterStore := newLetterDBStore(store.db)
@@ -559,6 +572,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		return nil
 	}
 	qingGongGranted := false
+	// AutoTrace（自动寻路开关）挂玩家对象属性，ClientReady 簇首推一次、
+	// 0x0C 切图清对象后由 stable re-entry 分支重推。
+	autoTracePushed := false
 	neigongGranted := false
 	// dbLearnedSkills 是 0x0C 装载的 role_skills 已学集（wuxue/anqi）。
 	// 空切片 = 无 DB 行或读库失败，grantStarterProgress 回退 starter 集。
@@ -1296,6 +1312,18 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			if command.WearNow && equipSlotFor(equipType, player.sessionEquips()) > 0 {
 				slot := equipSlotFor(equipType, player.sessionEquips())
+				// 目标槽被异款占用（单槽类型重发/多槽全满回落首槽）：先让位
+				// 旧装备入包（unequipFromDoll 一体完成 DB uid 携带 + 内存 +
+				// 帧 + 随机属性 record 重推），防 upsert 直接覆盖——旧物品凭空
+				// 消失且 uid 被继承（宝物/娃娃随机属性串号根因）。同款重穿
+				// 保持原地替换（upsert 保留实例身份）。
+				if old, _, taken := player.equipAtSlot(slot); taken && old.configID != command.ItemConfig {
+					unequipFromDoll(session, slot, int32(viewEquipBag), 0)
+					if _, _, still := player.equipAtSlot(slot); still {
+						gmSession.setAction(fmt.Sprintf("发放失败：槽位 %d 让位失败（背包满或落库失败），已占用 %s", slot, old.configID))
+						return fmt.Errorf("slot %d occupied by %s, displace failed", slot, old.configID)
+					}
+				}
 				worn, wearErr := inventory.upsertEquipSlot(ctx, selected.ID, slot, command.ItemConfig, entry.itemType, equipType)
 				if wearErr != nil {
 					gmSession.setAction("穿戴发放失败：" + wearErr.Error())
@@ -1544,6 +1572,52 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				stats.Tasks, stats.Bindings, stats.BoundNPCs))
 			log.Printf("%s: GM task_rebuild tasks=%d bindings=%d npcs=%d",
 				conn.RemoteAddr(), stats.Tasks, stats.Bindings, stats.BoundNPCs)
+		case "authored_task_start":
+			// 全任务流程验证（数据侧，task_records.go）：接取入内存域并
+			// 落库；任务必须在目录中有文本（目录外 ID 一律拒绝，防脏档）。
+			if _, ok := taskCatalog.TaskByID(int(command.TaskId)); !ok {
+				gmSession.setAction(fmt.Sprintf("任务 %d 不在任务目录（可用 task_rebuild 重建快照）", command.TaskId))
+				return fmt.Errorf("task %d not in catalog", command.TaskId)
+			}
+			if !player.acceptTask(int(command.TaskId), time.Now()) {
+				gmSession.setAction(fmt.Sprintf("任务 %d 已接取或已完成，无需重复接取", command.TaskId))
+				return nil
+			}
+			persistTasks()
+			active, ready, done := player.taskCounts()
+			gmSession.setAction(fmt.Sprintf("任务 %d 已接取（进行中 %d、可交付 %d、已完成 %d）",
+				command.TaskId, active, ready, done))
+			log.Printf("%s: GM authored_task_start task=%d", conn.RemoteAddr(), command.TaskId)
+		case "authored_task_submit_ready", "authored_task_remove", "authored_task_reward":
+			// 推进到可交付 / 清理 / 交付（奖励发放属协议侧，这里只落
+			// 状态）：任务 ID 留空（0）默认作用于最早接取的活跃任务。
+			taskID := int(command.TaskId)
+			if taskID == 0 {
+				taskID = player.earliestActiveTaskID()
+				if taskID == 0 {
+					gmSession.setAction("没有进行中的任务（先接取一个任务）")
+					return nil
+				}
+			}
+			var verb string
+			applied := false
+			switch command.Action {
+			case "authored_task_submit_ready":
+				verb, applied = "推进到可交付", player.markTaskSubmitReady(taskID)
+			case "authored_task_remove":
+				verb, applied = "清理", player.removeTask(taskID)
+			default:
+				verb, applied = "交付", player.completeTask(taskID)
+			}
+			if !applied {
+				gmSession.setAction(fmt.Sprintf("任务 %d 不在接取列表（或已在目标状态）", taskID))
+				return nil
+			}
+			persistTasks()
+			active, ready, done := player.taskCounts()
+			gmSession.setAction(fmt.Sprintf("任务 %d 已%s（进行中 %d、可交付 %d、已完成 %d）",
+				taskID, verb, active, ready, done))
+			log.Printf("%s: GM %s task=%d", conn.RemoteAddr(), command.Action, taskID)
 		case "ninjiuzhi_set":
 			// 九阴志全局门控：单调设阶（Java GmActions ninjiuzhi_set，
 			// 拒绝回退的原因文本原样回给面板）。
@@ -1638,6 +1712,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if interval := autosaveInterval(); interval > 0 && now.Sub(lastAutosave) >= interval {
 				persistFaculty()
 				persistJingMai()
+				persistTasks()
 				lastAutosave = now
 			}
 			// 九阴志阶段漂移检查：全服阶段被其他会话的 GM 动作或击杀
@@ -1917,6 +1992,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				player.restoreJingMai(saved, time.Now())
 				log.Printf("%s: restored jingmai role=%d cur=%s activated=%d", conn.RemoteAddr(), activeRole.ID, saved.Cur, len(saved.Activated))
 			}
+			// 任务态装载（GM authored_task_* 写入口的数据侧对应物）：
+			// 无存档零动作，缺表降级只记日志，不阻塞登录。
+			if saved, exists := taskStore.Load(activeRole.ID); exists {
+				player.restoreTaskState(saved)
+				log.Printf("%s: restored tasks role=%d accepted=%d completed=%d", conn.RemoteAddr(), activeRole.ID, len(saved.Accepted), len(saved.Completed))
+			}
 			// 邮件/坐骑镜像装载（Java LoginFlow restorePanel 同位）：
 			// 无存档零帧，缺表降级只记日志，不阻塞登录。
 			if letters := letterStore.Load(activeRole.ID); len(letters) > 0 {
@@ -2060,6 +2141,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			log.Printf("%s: granted function unlock rows in choose chain (before ClientReady)", conn.RemoteAddr())
+			// 开图位图 + 当前场景迷雾行（官服 0.128s 阶段C 记录簇同位；
+			// 地图点击寻路/世界地图城市标签的数据源，缺则图层为空）。
+			if mapErr := grantMapRecords(link, activeRole.Location.Scene.Resource); mapErr != nil {
+				log.Printf("%s: grant map records: %v", conn.RemoteAddr(), mapErr)
+				return
+			}
+			log.Printf("%s: granted OpenMapRec bitmap and MapMaskRec row for %s", conn.RemoteAddr(), activeRole.Location.Scene.Resource)
 			if equipErr == nil && bagErr == nil && (len(equips) > 0 || len(bagItems) > 0) {
 				frames, frameErr := inventoryFrames(activeRole.ID, visual.sex, equips, bagItems)
 				if frameErr != nil {
@@ -2156,6 +2244,16 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: restore function unlock after stable re-entry: %v", conn.RemoteAddr(), grantErr)
 						return
 					}
+					// 开图/迷雾记录与 AutoTrace 属性同挂玩家对象，0x0C 清空
+					// 后以目标场景 resource 重推（迷雾行随场景走）。
+					if mapErr := grantMapRecords(link, runtime.activeRole.Location.Scene.Resource); mapErr != nil {
+						log.Printf("%s: restore map records after stable re-entry: %v", conn.RemoteAddr(), mapErr)
+						return
+					}
+					if traceErr := pushAutoTrace(link); traceErr != nil {
+						log.Printf("%s: restore AutoTrace after stable re-entry: %v", conn.RemoteAddr(), traceErr)
+						return
+					}
 					if shortcutErr := grantShortcutRows(link, player); shortcutErr != nil {
 						log.Printf("%s: restore shortcuts after stable re-entry: %v", conn.RemoteAddr(), shortcutErr)
 						return
@@ -2223,6 +2321,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			explicitSceneReady = true
 			log.Printf("%s: observed explicit stage_main ClientReady (0x09)", conn.RemoteAddr())
+			// AutoTrace=1（官服 4.81s ClientReady 簇，m144 后 m52 前）：
+			// 自动寻路开关——大地图点击寻路的引擎闸门，登录缺发则点击
+			// 无反应（msg266 都不发起）。
+			if player != nil && !autoTracePushed {
+				autoTracePushed = true
+				if traceErr := pushAutoTrace(link); traceErr != nil {
+					log.Printf("%s: push AutoTrace: %v", conn.RemoteAddr(), traceErr)
+					return
+				}
+				log.Printf("%s: pushed AutoTrace=1 after ClientReady", conn.RemoteAddr())
+			}
 			// 在当前客户端上，初始 0x0A 会在原生 stage 构造完成之前到达，
 			// 而后者稍后还会清除已学习技能状态。
 			// 只有显式的 stage_main 0x09 对 QingGongRec/View=46 是安全的。

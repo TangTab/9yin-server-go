@@ -307,6 +307,18 @@ func Validate(body CommandBody) (Command, error) {
 		}
 		command.Code = body.Code
 	case "lua_reload", "task_rebuild":
+	case "authored_task_start":
+		// 任务调试四动作的数据侧写入口（task_records.go）：接取必填
+		// 任务 ID；其余动作 0=最早活跃任务（面板文案同口径）。
+		if body.TaskId < 1 {
+			return command, fmt.Errorf("task id must be at least 1")
+		}
+		command.TaskId = body.TaskId
+	case "authored_task_submit_ready", "authored_task_remove", "authored_task_reward":
+		if body.TaskId < 0 {
+			return command, fmt.Errorf("task id must not be negative")
+		}
+		command.TaskId = body.TaskId
 	default:
 		return command, fmt.Errorf("unsupported action")
 	}

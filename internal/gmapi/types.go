@@ -78,6 +78,7 @@ type CommandBody struct {
 	JingMaiTier int32   `json:"jingMaiTier"` // set_jingmai_tier 周天档 1..216
 	Stage       int32   `json:"stage"`       // ninjiuzhi_set 九阴志目标阶段 1..9
 	EventKind   string  `json:"eventKind"`   // ninjiuzhi_event kill|task
+	TaskId      int32   `json:"taskId"`      // authored_task_* 任务 ID（start 必填；其余 0=最早活跃）
 }
 
 // Command 是校验通过后的命令纯数据。原 cmd/protocol-probe 的 gmCommand
@@ -130,6 +131,7 @@ type Command struct {
 	JingMaiTier    int32   // set_jingmai_tier 周天档 1..216（游戏侧按目录上限再钳）
 	Stage          int32   // ninjiuzhi_set 九阴志目标阶段 1..9（单调递增，回退由游戏侧拒绝并回报文本）
 	EventKind      string  // ninjiuzhi_event 事件点类别 kill|task
+	TaskId         int32   // authored_task_* 任务 ID（start ≥1 必填；submit_ready/remove/reward 0=最早活跃）
 }
 
 // PlayerState 是 GET 会话列表端点的行结构。原 gmPlayerState 原样搬来

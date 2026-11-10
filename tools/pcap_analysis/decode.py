@@ -2,6 +2,16 @@
 """帧级解码：8 个 pcapng → 事件列表 JSON（供时间线构建）。
 
 每帧产出: {t, dir, op, desc, sig} — sig 用于后续连续合并。
+
+2026-11-10 修正（0x11/0x12/0x13 记录帧布局，与 Go 服务端
+serverRecordAddCells/serverRecordDelRow/serverRecordGridCell 互证 + c.pcapng
+原始帧字节级验证）：
+  - 0x11 @12=起始行（此前误当行数）、「+N行」全错——OpenMapRec#51 实为
+    行0起+24行开图位图、MapMaskRec#56 行0起+1行 [366,"scene22",1]；
+  - 0x12 行号在 @12（此前误读 @10 = rec 字段）；
+  - 0x13 列在 @16、值在 @17（此前列=@12 格数低字节、值=@13:17 头字段）。
+旧 events/*.json 与由此生成的时间线 md 中相关读数引用时按此换算
+（docs/官服登录帧对照与缺口清单.md §四-9）。
 """
 import json
 import os
@@ -281,25 +291,40 @@ def describe_s2c(fr, tbl):
     if op == 0x11:
         if n < 16:
             return base + '(短)', 'op11'
-        obj, owner, rec, nrows = struct.unpack_from('<IIHH', fr, 2)
+        # 布局（Go serverRecordAddCells 同构 + c.pcapng 0x11 帧字节级验证）：
+        # obj u32@2 owner u32@6 rec u16@10 起始行 u16@12 行数 u16@14 数据@16。
+        # 2026-11-10 修正：此前把 @12 起始行当行数读——「+0行」全是误读
+        #（OpenMapRec#51 实为行0起+24行位图、MapMaskRec#56 行0起+1行）。
+        obj, owner, rec, start_row, nrows = struct.unpack_from('<IIHHH', fr, 2)
         rn = REC_NAMES.get(rec, '?')
-        sig = 'op11:%d:%d' % (rec, nrows)
-        return '%s[%s#%d %s/%s] +%d行' % (base, rn, rec, hex(obj), hex(owner), nrows), sig
+        sig = 'op11:%d:%d+%d' % (rec, start_row, nrows)
+        return '%s[%s#%d %s/%s] 行%d起+%d行' % (base, rn, rec, hex(obj), hex(owner), start_row, nrows), sig
     if op == 0x12:
         if n < 14:
             return base + '(短)', 'op12'
+        # 布局（Go serverRecordDelRow 同构）：obj@2 owner@6 rec@10 行 u16@12；
+        # sub@1：0=场景对象 / 1=视图对象(view@2/objIdx@6) / 2=全局记录(obj 0/0)。
+        # 2026-11-10 修正：此前行号误读 @10（=rec 字段）。
+        sub = fr[1]
         obj, owner, rec = struct.unpack_from('<IIH', fr, 2)
-        row = struct.unpack_from('<H', fr, 10)[0] if n >= 12 else -1
+        row = struct.unpack_from('<H', fr, 12)[0]
         rn = REC_NAMES.get(rec, '?')
         sig = 'op12:%d:%s' % (rec, row)
-        return '%s[%s#%d 行%s %s]' % (base, rn, rec, row, hex(obj)), sig
+        return '%s[%s#%d 行%s %s sub%d]' % (base, rn, rec, row, hex(obj), sub), sig
     if op == 0x13:
         if n < 17:
             return base + '(短)', 'op13'
-        obj, owner, rec, nrows, row = struct.unpack_from('<IIHHH', fr, 2)
-        col = fr[12]
-        raw = fr[13:17]
-        v = struct.unpack('<i', raw)[0] if len(raw) == 4 else None
+        # 布局（Go serverRecordGridCell 同构 + c.pcapng 验证）：obj@2 owner@6
+        # rec@10 格数 u16@12 行 u16@14 列 u8@16 值@17（列型随 schema，尽力
+        # i32/u16 解）。2026-11-10 修正：此前列=@12（格数低字节）、值=@13:17
+        #（头字段当值）——旧时间线里 0x13 的「列/值」全是错位读数。
+        obj, owner, rec, count, row = struct.unpack_from('<IIHHH', fr, 2)
+        col = fr[16]
+        v = None
+        if len(fr) >= 21:
+            v = struct.unpack_from('<i', fr, 17)[0]
+        elif len(fr) >= 19:
+            v = struct.unpack_from('<H', fr, 17)[0]
         rn = REC_NAMES.get(rec, '?')
         sig = 'op13:%d:%d:%d' % (rec, row, col)
         return '%s[%s#%d 行%d 列%d =%s %s]' % (base, rn, rec, row, col, v, hex(obj)), sig
