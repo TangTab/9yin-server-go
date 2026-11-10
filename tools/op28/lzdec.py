@@ -23,7 +23,9 @@ class World:
         return base
 
 class DecodeError(Exception):
-    pass
+    def __init__(self, msg, partial=b''):
+        super().__init__(msg)
+        self.partial = partial
 
 def decompress(blob, outlen, world, trace=None):
     """blob: bytes starting at mode byte. returns bytes(outlen). raises on pool miss."""
@@ -98,7 +100,7 @@ def decompress(blob, outlen, world, trace=None):
             if idx not in pool:
                 if trace is not None:
                     trace.append(('POOLMISS', idx, ln, write, src))
-                raise DecodeError(f'pool miss idx={idx:#x} len={ln} at out[{write:#x}], bloboff={src:#x}')
+                raise DecodeError(f'pool miss idx={idx:#x} len={ln} at out[{write:#x}], bloboff={src:#x}', bytes(out))
             srcpos = pool[idx]
             chunk = bytes(heap[srcpos:srcpos+ln])
             if len(chunk) < ln:

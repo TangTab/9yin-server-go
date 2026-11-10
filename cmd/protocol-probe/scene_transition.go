@@ -33,8 +33,19 @@ func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 	// 真机教训由此消解——两方言各自与所发表自洽）。
 	entry = appendStringProperty(entry, clientdata.MustSceneProperty("ConfigID").Index, scene.Config)
 	entry = appendStringProperty(entry, clientdata.MustSceneProperty("Resource").Index, scene.Resource)
+	// 尾属性 idx 99 的宽度按当前 0x09 表线型编码：fork 活动表该行
+	// int32（4B，旧写法恰好合法）、官方 2433 表 int64（8B）。此前恒写
+	// u32 → 官方方言下客户端按表读 8B 越出帧尾 → fxnet2 RecvProperty
+	// "Out range" → (GameReceiver::ServerEntryScene)property error
+	// （2026-11-11 06:29 真机 trace.log 三连 + 逐帧走查定案；官方
+	// l.pcapng #126 0x0B 样本为 5 属性形无 99 尾，fork 抓包带此尾且
+	// fork 方言真机可进——保留 fork 形但按表补宽）。
 	entry = binary.LittleEndian.AppendUint16(entry, 99)
-	entry = binary.LittleEndian.AppendUint32(entry, 200)
+	if tail, ok := clientdata.PropertyByIndex(99); ok && tail.Type == clientdata.WireInt32 {
+		entry = binary.LittleEndian.AppendUint32(entry, 200)
+	} else {
+		entry = binary.LittleEndian.AppendUint64(entry, 200)
+	}
 	return conn.WriteFrame(entry)
 }
 
