@@ -680,7 +680,7 @@ func (p *playerActor) qingGongPointFrame() []byte {
 	p.mu.Lock()
 	point := p.qinggong.Point
 	p.mu.Unlock()
-	return sceneObjectIntProperty(playerObjectID, playerOwnerID, 692, point)
+	return sceneObjectIntProperty(playerObjectID, playerOwnerID, clientdata.MustPlayerProperty("QingGongPoint").Index, point) // fork=692
 }
 
 func (p *playerActor) learnedSkillLevel(configID string) (int32, bool) {
@@ -793,7 +793,7 @@ func factionProperties(faction string) []clientdata.IndexedProperty {
 		school, newSchool = "", faction
 	}
 	return []clientdata.IndexedProperty{
-		{Index: 189, Name: "School", Value: clientdata.StringValue(school)},
+		{Index: clientdata.MustPlayerProperty("School").Index, Name: "School", Value: clientdata.StringValue(school)},
 		{Index: propForce, Name: "Force", Value: clientdata.StringValue(force)},
 		{Index: propNewSchool, Name: "NewSchool", Value: clientdata.StringValue(newSchool)},
 	}
@@ -1162,21 +1162,21 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	hitHPRatio := int32(int64(state.HitHP) * 100 / int64(state.MaxHP))
 	mpRatio := int32(int64(state.MP) * 100 / int64(state.MaxMP))
 	properties := []clientdata.IndexedProperty{
-		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
 		{Index: propHPRatio, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
 		{Index: propMPRatio, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
 		// 客户端用这些基础值加上 MaxHPAdd/MaxMPAdd 推导显示的总量。
 		// Actor.Max* 仍是服务器侧的总上限。
-		{Index: 578, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
-		{Index: 579, Name: "MaxMP", Value: clientdata.Int32Value(state.BaseMaxMP)},
+		{Index: clientdata.MustPlayerProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
+		{Index: clientdata.MustPlayerProperty("MaxMP").Index, Name: "MaxMP", Value: clientdata.Int32Value(state.BaseMaxMP)},
 		{Index: propHP, Name: "HP", Value: clientdata.Int32Value(state.HP)},
 		{Index: propMP, Name: "MP", Value: clientdata.Int32Value(state.MP)},
-		{Index: 390, Name: "SpeedRatio", Value: clientdata.Int32Value(state.SpeedRatio)},
+		{Index: clientdata.MustPlayerProperty("SpeedRatio").Index, Name: "SpeedRatio", Value: clientdata.Int32Value(state.SpeedRatio)},
 		{Index: propHitHP, Name: "HitHP", Value: clientdata.Int32Value(state.HitHP)},
 		{Index: propHitHPRatio, Name: "HitHPRatio", Value: clientdata.Int32Value(hitHPRatio)},
-		{Index: 692, Name: "QingGongPoint", Value: clientdata.Int32Value(state.QingGongPoint)},
-		{Index: 693, Name: "MaxQingGongPoint", Value: clientdata.Int32Value(state.MaxQingGongPoint)},
-		{Index: 694, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
+		{Index: clientdata.MustPlayerProperty("QingGongPoint").Index, Name: "QingGongPoint", Value: clientdata.Int32Value(state.QingGongPoint)},
+		{Index: clientdata.MustPlayerProperty("MaxQingGongPoint").Index, Name: "MaxQingGongPoint", Value: clientdata.Int32Value(state.MaxQingGongPoint)},
+		{Index: clientdata.MustPlayerProperty("MaxQingGongPointAdd").Index, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(state.MaxQingGongPointAdd)},
 		{Index: propNeigongPKStatus, Name: "NeigongPKStatus", Value: clientdata.WordValue(0)},
 		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
 		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(boolInt32(p.parrying))},
@@ -1204,10 +1204,10 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		{Index: propHPUpSpeedAdd, Name: "HPUpSpeedAdd", Value: clientdata.Int32Value(hpUpSpeedAdd)},
 		{Index: propMPUpSpeed, Name: "MPUpSpeed", Value: clientdata.Int32Value(mpRecovery)},
 		{Index: propMPUpSpeedAdd, Name: "MPUpSpeedAdd", Value: clientdata.Int32Value(mpUpSpeedAdd)},
-		{Index: 178, Name: "Name", Value: clientdata.WideStringValue(state.Name)},
+		{Index: clientdata.MustPlayerProperty("Name").Index, Name: "Name", Value: clientdata.WideStringValue(state.Name)},
 		// 官方玩家域 CapitalType1@417 线型 4(int64):货币按小端
 		// 八字节编码(真机抓包实证)。
-		{Index: 417, Name: "CapitalType1", Value: clientdata.Int64Value(int64(p.silver))},
+		{Index: clientdata.MustPlayerProperty("CapitalType1").Index, Name: "CapitalType1", Value: clientdata.Int64Value(int64(p.silver))},
 		{Index: bufferListPropertyIndex, Name: "BufferListStr", Value: clientdata.StringValue(p.bufferListStringLocked(now))},
 	}
 	properties = append(properties, factionProperties(p.faction)...)
@@ -1245,13 +1245,13 @@ func boolByte(value bool) byte {
 // 标准跳跃重力。
 func baseMotionProperties(motion playerMotion) []clientdata.IndexedProperty {
 	return []clientdata.IndexedProperty{
-		{Index: 677, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
-		{Index: 678, Name: "GravityAdd", Value: clientdata.Float32Value(0)},
+		{Index: clientdata.MustPlayerProperty("Gravity").Index, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
+		{Index: clientdata.MustPlayerProperty("GravityAdd").Index, Name: "GravityAdd", Value: clientdata.Float32Value(0)},
 		// 现代 FxGameLogic 的 FallDownManager 会从本地玩家对象查询
 		// DropHeightPub。它的兜底值只有 5.0 个世界单位；这里刻意使用
 		// 偏高的本地测试安全阈值，让普通的地形降落退出回着地动作，而非
 		// 进入倒地动作。 TODO: 后面改GM参数控制，默认 5.0
-		{Index: 389, Name: "DropHeightPub", Value: clientdata.Float32Value(100000)},
+		{Index: clientdata.MustPlayerProperty("DropHeightPub").Index, Name: "DropHeightPub", Value: clientdata.Float32Value(100000)},
 	}
 }
 
@@ -1270,8 +1270,8 @@ func (p *playerActor) setMoveSpeed(value float32) ([]byte, error) {
 	motion := p.motion
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 384, Name: "MoveSpeed", Value: clientdata.Float32Value(motion.moveSpeed)},
-		{Index: 386, Name: "RunSpeed", Value: clientdata.Float32Value(motion.runSpeed)},
+		{Index: clientdata.MustPlayerProperty("MoveSpeed").Index, Name: "MoveSpeed", Value: clientdata.Float32Value(motion.moveSpeed)},
+		{Index: clientdata.MustPlayerProperty("RunSpeed").Index, Name: "RunSpeed", Value: clientdata.Float32Value(motion.runSpeed)},
 	})
 }
 
@@ -1281,7 +1281,7 @@ func (p *playerActor) setGravity(value float32) ([]byte, error) {
 	motion := p.motion
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 677, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
+		{Index: clientdata.MustPlayerProperty("Gravity").Index, Name: "Gravity", Value: clientdata.Float32Value(motion.gravity)},
 	})
 }
 
@@ -1891,7 +1891,7 @@ func (p *playerActor) currentSkillClearUpdate() ([]byte, error) {
 	logic := p.vitals.Logic
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(logic)},
+		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(logic)},
 		{Index: propCurSkillID, Name: "CurSkillID", Value: clientdata.StringValue("")},
 		{Index: propCurSkillTarget, Name: "CurSkillTarget", Value: clientdata.ObjectValue(0, 0)},
 		{Index: propCurSkillCanNoLimit, Name: "CurSkillCanNoLimit", Value: clientdata.ByteValue(0)},
@@ -1979,7 +1979,7 @@ func (p *playerActor) silverUpdate() ([]byte, error) {
 	silver := p.silver
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 417, Name: "CapitalType1", Value: clientdata.Int64Value(int64(silver))},
+		{Index: clientdata.MustPlayerProperty("CapitalType1").Index, Name: "CapitalType1", Value: clientdata.Int64Value(int64(silver))},
 	})
 }
 
@@ -2040,13 +2040,13 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		count++
 	}
 
-	addByte(181, 2) // Type = TYPE_PLAYER(玩家域 181,Byte)
-	addByte(182, visual.sex)
-	addString(184, visual.photo)
-	addByte(174, 0)     // Camp(玩家域 174,官方线型 Byte)
-	addInt(4, 0)        // Race(全表唯一@4)
-	addString(1588, "") // Job(玩家域 1588,官方线型 String)
-	addByte(1465, 1)    // Level(玩家域 1465,官方线型 Byte)
+	addByte(clientdata.MustPlayerProperty("Type").Index, 2)               // Type = TYPE_PLAYER（fork=181，Byte）
+	addByte(clientdata.MustPlayerProperty("Sex").Index, visual.sex)       // fork=182
+	addString(clientdata.MustPlayerProperty("Photo").Index, visual.photo) // fork=184
+	addByte(clientdata.MustPlayerProperty("Camp").Index, 0)               // Camp（fork=174，官方线型 Byte）
+	addInt(4, 0)                                                          // Race(fork-only：官服 2433 表无此名，P3 处置)
+	addString(clientdata.MustPlayerProperty("Job").Index, "")             // Job（fork=1588，官方线型 String）
+	addByte(clientdata.MustPlayerProperty("Level").Index, 1)              // Level（fork=1465，官方线型 Byte）
 	// 键位域（Java PlayerActor.addObject 同位）：引擎建对象时即读，
 	// post-ready 0x10 补推太晚（2026-11-04「模式没推」根因）。档内
 	// 198 无尾空格（0x10 单帧形态带 " "，勿混用）；无档零属性。
@@ -2062,36 +2062,36 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	if p.keybind.neigongBind != "" {
 		addString(neiGongBindPropertyIndex, p.keybind.neigongBind)
 	}
-	addFloat(9, location.X)
+	addFloat(9, location.X) // PosiX/Y/Z/Orient(fork-only 9-12：官服表无此名，坐标走 0x0D 固定头，P3 处置)
 	addFloat(10, location.Y)
 	addFloat(11, location.Z)
 	addFloat(12, location.Orient)
-	addString(188, visual.hair)
-	addString(185, visual.face)
-	addString(393, visual.cloth)
-	addString(394, visual.pants)
-	addString(395, visual.shoes)
-	addString(406, visual.actionSet)
-	addString(183, "stand")
-	addInt(20, 0) // FloatingState(全表唯一@20)
-	addByte(463, state.LogicState)
-	addFloat(681, 8.0)
-	addFloat(384, motion.moveSpeed)
-	addFloat(385, 7.5)
-	addFloat(386, motion.runSpeed)
-	addInt(390, state.SpeedRatio)
-	addByte(27, 0) // CantJump(全表唯一@27)
+	addString(clientdata.MustPlayerProperty("Hair").Index, visual.hair)           // fork=188
+	addString(clientdata.MustPlayerProperty("Face").Index, visual.face)           // fork=185
+	addString(clientdata.MustPlayerProperty("Cloth").Index, visual.cloth)         // fork=393
+	addString(clientdata.MustPlayerProperty("Pants").Index, visual.pants)         // fork=394
+	addString(clientdata.MustPlayerProperty("Shoes").Index, visual.shoes)         // fork=395
+	addString(clientdata.MustPlayerProperty("ActionSet").Index, visual.actionSet) // fork=406
+	addString(clientdata.MustPlayerProperty("State").Index, "stand")              // fork=183
+	addInt(20, 0)                                                                 // FloatingState(fork-only@20：官服表无此名，P3 处置)
+	addByte(clientdata.MustPlayerProperty("LogicState").Index, state.LogicState)  // fork=463
+	addFloat(clientdata.MustPlayerProperty("JumpSpeed").Index, 8.0)               // JumpSpeed（fork=681）
+	addFloat(clientdata.MustPlayerProperty("MoveSpeed").Index, motion.moveSpeed)  // fork=384
+	addFloat(clientdata.MustPlayerProperty("WalkSpeed").Index, 7.5)               // WalkSpeed（fork=385）
+	addFloat(clientdata.MustPlayerProperty("RunSpeed").Index, motion.runSpeed)    // fork=386
+	addInt(clientdata.MustPlayerProperty("SpeedRatio").Index, state.SpeedRatio)   // fork=390
+	addByte(27, 0)                                                                // CantJump(fork-only@27：官服表无此名，P3 处置)
 	addInt(propHPRatio, int32(int64(state.HP)*100/int64(state.MaxHP)))
 	addInt(propMPRatio, int32(int64(state.MP)*100/int64(state.MaxMP)))
-	addInt(578, state.BaseMaxHP)
-	addInt(579, state.BaseMaxMP)
+	addInt(clientdata.MustPlayerProperty("MaxHP").Index, state.BaseMaxHP) // fork=578
+	addInt(clientdata.MustPlayerProperty("MaxMP").Index, state.BaseMaxMP) // fork=579
 	addInt(propHP, state.HP)
 	addInt(propMP, state.MP)
 	addInt(propHitHP, state.HitHP)
 	addInt(propHitHPRatio, int32(int64(state.HitHP)*100/int64(state.MaxHP)))
-	addInt(692, state.QingGongPoint)
-	addInt(693, state.MaxQingGongPoint)
-	addInt(694, state.MaxQingGongPointAdd)
+	addInt(clientdata.MustPlayerProperty("QingGongPoint").Index, state.QingGongPoint)             // fork=692
+	addInt(clientdata.MustPlayerProperty("MaxQingGongPoint").Index, state.MaxQingGongPoint)       // fork=693
+	addInt(clientdata.MustPlayerProperty("MaxQingGongPointAdd").Index, state.MaxQingGongPointAdd) // fork=694
 	// ParryRatio 建对象即带：官方 NPC 0x0D 同款（三方抓包 NPC 帧均含
 	// 478=100）。引擎建对象时即读格挡族，post-ready 0x10 补推可能太晚
 	// （2026-11-04 键位域同教训）；玩家侧值恒 100。

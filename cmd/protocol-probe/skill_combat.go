@@ -416,8 +416,8 @@ func nativeSkillActionFrame(skillID string, targetID, targetOwnerID uint32) ([]b
 // 可以弥补这个时序缺口，且不会改变选定的外观。
 func skillActionPreparationFrame() ([]byte, error) {
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 406, Name: "ActionSet", Value: clientdata.StringValue("0h")},
-		{Index: 183, Name: "State", Value: clientdata.StringValue("stand")},
+		{Index: clientdata.MustPlayerProperty("ActionSet").Index, Name: "ActionSet", Value: clientdata.StringValue("0h")},
+		{Index: clientdata.MustPlayerProperty("State").Index, Name: "State", Value: clientdata.StringValue("stand")},
 	})
 }
 
@@ -430,7 +430,7 @@ func playerActionStateFrame(action string) ([]byte, error) {
 		return nil, fmt.Errorf("player action state is empty")
 	}
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 183, Name: "State", Value: clientdata.StringValue(action)},
+		{Index: clientdata.MustPlayerProperty("State").Index, Name: "State", Value: clientdata.StringValue(action)},
 	})
 }
 

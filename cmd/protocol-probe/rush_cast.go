@@ -1119,7 +1119,7 @@ func handleMovementUpload(link sceneMessageConnection, player *playerActor, worl
 // dest=(idx6, y, idx7)、角度=atan2(destX−x, destZ−z)、速度=idx8、朝向=
 // idx9；停帧 dest=上报终点、角度=朝向增量 idx6、速度/朝向=0）；state5
 // 跳跃双帧不回显。state7↔4 走停迁移沿先补发官服状态四连
-//（586/645/646/750——官服对每次点击起跑/到位停帧 +0~80ms 必发，
+// （586/645/646/750——官服对每次点击起跑/到位停帧 +0~80ms 必发，
 // 64785 会话实证缺它客户端停滞不自走），同态重发只回 0x21（官服追怪
 // 改向五连重报无 ping）。冲锋在途段不回显（消费方为 tryRushArrival，
 // 官服该段位移走 c61/212 落地链）。

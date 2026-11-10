@@ -130,7 +130,7 @@ func pushJyzRecords(link sceneMessageConnection, cfg jyzConfig, ownedMountPacks 
 }
 
 // pushJyzDataRecords m416 域声明 + 419 步骤 + data_record 打包行
-//（770 查询应答复用；quest 簇只进 ClientReady 一次性链，重发会重复行）。
+// （770 查询应答复用；quest 簇只进 ClientReady 一次性链，重发会重复行）。
 // m416 ["DomainJiuYinZhi", step]：官服 4.7s 在 m419 前发（c.pcapng
 // 4.71s 实证，对照文档 §三-3.3）；本服此前零下发。
 func pushJyzDataRecords(link sceneMessageConnection, cfg jyzConfig) error {

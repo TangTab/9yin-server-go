@@ -878,7 +878,7 @@ func (c *randomEquipCatalog) rollTreasurePropsForWash(configID string, count int
 }
 
 // rollTreasureSkillForWash 武学洗：技能池重掷主武学条。skillType 池语义
-//（老界面 0/1、新界面 2/3 → 门派/江湖）：江湖=SubSkill 前缀 CS_jh_*，
+// （老界面 0/1、新界面 2/3 → 门派/江湖）：江湖=SubSkill 前缀 CS_jh_*，
 // 门派=其余——启发式口径，官方过滤规则未见于资源，待抓包校正。
 func (c *randomEquipCatalog) rollTreasureSkillForWash(configID string, skillType int, rnd *rand.Rand) (randomSkillLine, error) {
 	fields := c.itemFields[configID]

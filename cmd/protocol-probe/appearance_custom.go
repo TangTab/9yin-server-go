@@ -103,7 +103,7 @@ func (p *playerActor) goldUpdate() ([]byte, error) {
 	gold := p.gold
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 416, Name: "CapitalType0", Value: clientdata.Int64Value(int64(gold))},
+		{Index: clientdata.MustPlayerProperty("CapitalType0").Index, Name: "CapitalType0", Value: clientdata.Int64Value(int64(gold))},
 	})
 }
 

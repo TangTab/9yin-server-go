@@ -216,7 +216,7 @@ func skillRowLevelUpFrame(row uint16, level, maxLevel, curFill, totalFill int32,
 		return nil, fmt.Errorf("skill row level-up: level %d < 1", level)
 	}
 	properties := []clientdata.IndexedProperty{
-		{Index: 1465, Name: "Level", Value: clientdata.ByteValue(byte(level))},
+		{Index: clientdata.MustPlayerProperty("Level").Index, Name: "Level", Value: clientdata.ByteValue(byte(level))},
 		{Index: propMaxLevel, Name: "MaxLevel", Value: clientdata.Int32Value(maxLevel)},
 		{Index: propCurFillValue, Name: "CurFillValue", Value: clientdata.Int32Value(curFill)},
 		{Index: propTotalFillValue, Name: "TotalFillValue", Value: clientdata.Int32Value(totalFill)},

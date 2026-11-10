@@ -304,6 +304,7 @@ func splitHostPort(addr string) (string, string, error) {
 //   - 内功 5=太极→TaijiLevel、6=阴柔→YinLevel、7=阳刚→YangLevel
 //   - 技能 3=阴→YinLevel、4=阳→YangLevel（语义直配；1=刚/2=柔 无
 //     阴阳太极对应桶，不入）
+//
 // 数据源 wuxuebaseinfo.ini nWuXing（neigong_effects.go 目录）；目录
 // 不可用时全零（技能不走 skillWuXing 的缺行回退 5——回退会误入太极桶，
 // 桶计算只认目录原值，0 跳过）。官服 1089/623/299 的精确构成无样本，

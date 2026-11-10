@@ -11,7 +11,7 @@ import (
 )
 
 // gmGBK 把 UTF-8 样本编成 GBK，模拟资源树里的真实 ini 文件
-//（gmScanINI 装载路径先做 GBK 解码）。
+// （gmScanINI 装载路径先做 GBK 解码）。
 func gmGBK(t *testing.T, text string) []byte {
 	t.Helper()
 	data, _, err := transform.Bytes(simplifiedchinese.GBK.NewEncoder(), []byte(text))

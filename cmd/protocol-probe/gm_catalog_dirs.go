@@ -418,7 +418,7 @@ func loadGMIdleStances() []gmIdleStanceRow {
 }
 
 // parseGMIdleStances 纯函数装载：节名含 stand 的节进目录
-//（action = 节名，skeleton = Skeleton 键值，缺键留空）。
+// （action = 节名，skeleton = Skeleton 键值，缺键留空）。
 func parseGMIdleStances(data []byte) []gmIdleStanceRow {
 	var order []string
 	skeletonByAction := map[string]string{}

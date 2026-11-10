@@ -377,10 +377,10 @@ func (p *playerActor) pushZhenpaiPanelFrame(link sceneMessageConnection) error {
 	qinggongAdd := p.progress.zhenpaiEquip.qinggong
 	p.mu.Unlock()
 	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: 581, Name: "MaxHPAdd", Value: clientdata.Int32Value(maxHPAdd)},
-		{Index: 582, Name: "MaxMPAdd", Value: clientdata.Int32Value(maxMPAdd)},
+		{Index: clientdata.MustPlayerProperty("MaxHPAdd").Index, Name: "MaxHPAdd", Value: clientdata.Int32Value(maxHPAdd)},
+		{Index: clientdata.MustPlayerProperty("MaxMPAdd").Index, Name: "MaxMPAdd", Value: clientdata.Int32Value(maxMPAdd)},
 		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parry)},
-		{Index: 694, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(qinggongAdd)},
+		{Index: clientdata.MustPlayerProperty("MaxQingGongPointAdd").Index, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(qinggongAdd)},
 	})
 	if err != nil {
 		return err
@@ -415,7 +415,7 @@ func (h *itemSession) ensureRandomProps(configID, uid string, kind int) (itemRan
 // pushModifyPackRecords 模板包物品（镇派兵器等）的官方词条通道：
 // PropModifyPackRec(394)/SkillModifyPackRec(395) 每包一行单 int32 列，
 // 客户端按本地 proppack/skillpack 渲染并按 PowerLevel 自行命中条件行
-//（c.pcapng 修为书 394×6 行同帧实证；PropBuilt@1954 属打造/洗练实例
+// （c.pcapng 修为书 394×6 行同帧实证；PropBuilt@1954 属打造/洗练实例
 // 通道，模板武器不走，且与 EffectPackID 互斥——见 equipmentViewAdd）。
 func pushModifyPackRecords(link sceneMessageConnection, viewID, objectIndex uint16, configID string) {
 	catalog := randomEquipCatalogOf()

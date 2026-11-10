@@ -242,7 +242,7 @@ func timedBuffRemoveFrame(configID string, endEpochMs int64, category int32, pla
 }
 
 // timedBuffLoginReplayFrames 登录/就绪重放：未过期条目逐条授予帧
-//（官服登录期 buf_baosd_02 语义的带时间形态对应物）。
+// （官服登录期 buf_baosd_02 语义的带时间形态对应物）。
 func (p *playerActor) timedBuffLoginReplayFrames(now time.Time) ([][]byte, error) {
 	p.mu.Lock()
 	buffs := make([]timedBuffRuntime, 0, len(p.timedBuffs))

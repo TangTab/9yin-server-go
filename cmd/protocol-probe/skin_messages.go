@@ -98,7 +98,7 @@ func skinDelRowFrames(objectID, ownerID uint32, recordIndex uint16, rowCount uin
 func skinShowEquipTypeFrame(objectID, ownerID uint32, showEquipType int, cardID int32) ([]byte, error) {
 	return sceneObjectProperties(objectID, ownerID, 0, []clientdata.IndexedProperty{
 		{Index: propShowEquipType, Name: "ShowEquipType", Value: clientdata.ByteValue(uint8(showEquipType))},
-		{Index: 2117, Name: "CardID", Value: clientdata.Int32Value(cardID)},
+		{Index: clientdata.MustPlayerProperty("CardID").Index, Name: "CardID", Value: clientdata.Int32Value(cardID)},
 	})
 }
 

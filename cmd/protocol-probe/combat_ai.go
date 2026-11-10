@@ -814,13 +814,13 @@ func npcCombatProperties(state entity.ActorState) []clientdata.IndexedProperty {
 	}
 	return []clientdata.IndexedProperty{
 		{Index: 21, Name: "Prop21", Value: clientdata.ByteValue(1)},
-		{Index: 28, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
-		{Index: 30, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
-		{Index: 32, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: 463, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
-		{Index: 465, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: 469, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
-		{Index: 578, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
+		{Index: clientdata.MustSceneProperty("HPRatio").Index, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		{Index: clientdata.MustSceneProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
+		{Index: clientdata.MustSceneProperty("HP").Index, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: clientdata.MustPlayerProperty("HP").Index, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		{Index: clientdata.MustPlayerProperty("HPRatio").Index, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		{Index: clientdata.MustPlayerProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
 		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
 	}
 }
