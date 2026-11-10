@@ -108,3 +108,15 @@ bit 1=匹配:   u16: idx=(v>>4)&0xfff, nib=v&0xf; nib≠0→len=nib+2 消耗2B; 
 - 崩溃 dump ×5：F:/Game/Online/9yin/9yin/bin64/[]DUMP2026111*.dmp
 - 崩溃会话抓包：F:/.../captures/local/127-0-0-1-{60809,51770,61547}_s2c.bin（裸 TCP，EE+XOR 编码）
 - fxgame.exe（VMP 薄壳）加载链：FxCore→FxTool→FxNet2→FxGui→FxRender→FxTerrain→FxSpecial→FxWorld→FxSound→FxGameLogic→FxModel→FxModelAdv→FxPackage→FxGnugo→FxPhysics8→FxFFMpeg→FxProtect→FxMovie→fx_chat→fx_event
+
+## v3 已落地（feat/op28-official 分支，2026-11-11）
+
+- `cmd/protocol-probe/npc_detail_v3.go`：mode=0x46 明文方言程序化构造
+  （零 LZ/零字典依赖）。字段集 `officialNPCEntityProperties`：官方 0x46 帧
+  字段序，Level/BossLevel/NpcType/RotatePara/State 取 schema 真值，其余官服
+  常量；串值 [len u32][GBK+NUL]，列宽按 0x09 表线型。
+- 调用点 scene_lifecycle.go：`NINEYIN_NPC_DETAIL_0X28=1` 走 v3，物化(0x0D)
+  之后下发（时序不变）。
+- v2（0x47 模板切片）退役存档；测试 npc_detail_v3_test.go 按表列型回走
+  零失步 + 身份/常量逐项断言。
+- 真机待验：official2433 + NINEYIN_NPC_DETAIL_0X28=1 → NPC 渲染。

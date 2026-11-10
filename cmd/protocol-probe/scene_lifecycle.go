@@ -615,16 +615,12 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		// 先 0x28 配对疑为 op29 批量预载对象特例，新对象应先物化后详情
 		//（=1 探针首测同教训 c1cd1b9）。
 		if npcDetail0x28Enabled() {
-			resource := ""
-			if entity.model != "" {
-				resource = "npc\\world" + entity.model
-			}
-			for _, prop := range entity.properties {
-				if prop.Name == "Resource" && prop.Value.Text != "" {
-					resource = prop.Value.Text
-				}
-			}
-			if err := s.conn.WriteFrame(npcDetail0x28Frame(uint32(id), entity.ownerID, transform, resource, entity.configID)); err != nil {
+			// v3（2026-11-11）：mode=0x46 明文方言程序化构造——0x47 LZ
+			// 模板路线四连崩定案退役（根因=模板保真段的池回引 token 依赖
+			// 客户端全会话字典状态，见 docs/op28-fxnet2-lz-decoder.md）；
+			// 官方 l.pcapng 自有 6 帧 0x46 纯拷贝先例，任何会话状态安全。
+			props := officialNPCEntityProperties(entity.properties, entity.model, entity.configID)
+			if err := s.conn.WriteFrame(npcDetail0x28V3Frame(uint32(id), entity.ownerID, transform, props)); err != nil {
 				return fmt.Errorf("npc 0x28 detail %d: %w", id, err)
 			}
 		}

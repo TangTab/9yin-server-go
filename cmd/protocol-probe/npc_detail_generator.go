@@ -21,7 +21,10 @@ func npcDetail0x28Enabled() bool {
 // 一个值、同对象重发幂等——l.pcapng 218 帧实证）。
 var npcDetail0x28Event atomic.Uint32
 
-// npcDetail0x28Frame 以官服 234B 模板为底生成 0x28 详情记录。
+// npcDetail0x28Frame v2 精确切片生成器——【已退役，仅存档】。
+// 真机四连崩定案（2026-11-11，docs/op28-fxnet2-lz-decoder.md）：0x47 帧
+// 是 LZ 字典压缩流，模板保真段携带池回引 token 依赖客户端全会话字典
+// 状态，重放必崩。生产路径已切 v3（npc_detail_v3.go，mode=0x46 明文）。
 //
 // 模板（c.pcapng #1776）逐字节全解定版（2026-11-11，l.pcapng 218 帧
 // 交叉验证）。结构：
