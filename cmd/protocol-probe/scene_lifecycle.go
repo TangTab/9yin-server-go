@@ -605,16 +605,13 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		digest := sha256.Sum256(payload)
 		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
 			s.remote, id, entity.description, payload[0], len(payload), digest)
-		// 0x28 详情帧探针 =3 档（npc_detail_frame.go）：官服成对时序是
-		// 0x28 先于 0x0D（c.pcapng #1776→#1777）；三轮被拒的 =1 版根因
-		// 是 serial 覆写了 [1]=0x47 家族标记（帧头布局已双模板定版）。
-		writeNPCDetailProbeFrameBeforeV3(s.conn, uint32(id), entity.ownerID, transform, s.remote)
 		if err := s.conn.WriteFrame(payload); err != nil {
 			return fmt.Errorf("add scene object %d: %w", id, err)
 		}
-		// 0x28 详情帧探针 =2 档（原样重发官服帧，零字节修改，消元对照；
-		// =1 替换版三轮实证被拒已移除——被拒的是覆写 0x47 标记的自损帧）。
-		writeNPCDetailProbeFrame(s.conn, uint32(id), entity.ownerID, s.remote)
+		// 0x28 详情帧探针已退役（2026-11-10 真机定案）：=3 正帧版实证
+		// 客户端消费该通道但记录块身份冲突即崩（模板 NPC 的动作/模型套
+		// 在本服对象上）；寻路假设亦证伪（不发 0x28 时寻路正常）。0x28
+		// 只走 P3 按对象生成器（见 npc_detail_frame.go 注释）。
 		if entity.ownerID != 0 {
 			location := serverLocation(entity.id, entity.ownerID, transform)
 			if err := s.conn.WriteFrame(location); err != nil {
