@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/gmapi"
 	"github.com/local/9yin-go-server/internal/role"
 )
@@ -27,8 +28,11 @@ func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 	binary.LittleEndian.PutUint32(entry[5:], playerObjectID)
 	binary.LittleEndian.PutUint32(entry[9:], playerOwnerID)
 	binary.LittleEndian.PutUint16(entry[13:], 3)
-	entry = appendStringProperty(entry, 7, scene.Config)
-	entry = appendStringProperty(entry, 8, scene.Resource)
+	// ConfigID/Resource 按名经场景域（首现）解析：fork 表落 7/8、
+	// 官服 2433 表天然落 1447/1448（=官服 op0B 样本原号，上方注释的
+	// 真机教训由此消解——两方言各自与所发表自洽）。
+	entry = appendStringProperty(entry, clientdata.MustSceneProperty("ConfigID").Index, scene.Config)
+	entry = appendStringProperty(entry, clientdata.MustSceneProperty("Resource").Index, scene.Resource)
 	entry = binary.LittleEndian.AppendUint16(entry, 99)
 	entry = binary.LittleEndian.AppendUint32(entry, 200)
 	return conn.WriteFrame(entry)

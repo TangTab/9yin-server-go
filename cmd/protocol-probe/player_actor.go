@@ -2152,10 +2152,10 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		msg = appendNPCProperty(msg, property)
 		count++
 	}
-	addString(391, visual.hair) // Hat
-	msg = appendWideStringProperty(msg, 178, state.Name)
+	addString(391, visual.hair)                                                                  // Hat
+	msg = appendWideStringProperty(msg, clientdata.MustPlayerProperty("Name").Index, state.Name) // fork=178（双表同位）
 	count++
-	msg = appendObjectProperty(msg, 414, 0, 0) // LastObject(玩家域)
+	msg = appendObjectProperty(msg, uint16(clientdata.MustPlayerProperty("LastObject").Index), 0, 0) // LastObject（fork=414）
 	count++
 	// 官服位物理档案（2026-11-10）：官服进场给玩家自己发 0x28 详情帧
 	//（3187B，obj=玩家）——其中 CollideRadius 是客户端寻路引擎的玩家

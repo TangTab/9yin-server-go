@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"log"
 
 	worldcore "github.com/local/9yin-go-server/internal/world"
@@ -66,9 +67,10 @@ func handleAttackTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	return nil
 }
 
-// AutoSelectObject 与 LastObject 配对：fork 每次选择目标回两帧属性
-// (官方表玩家域 414/415)。
-const propAutoSelectObject uint16 = 415
+// AutoSelectObject 与 LastObject 配对：每次选择目标回两帧属性（按名
+// 解析——fork 414/415，官服 2433 表天然落 416/417=官服 m431 应答原号
+// §四-5）。
+var propAutoSelectObject = clientdata.MustPlayerProperty("AutoSelectObject").Index // fork=415
 
 // handleSelectTargetCustom 还原 fork selection.go:102-129：
 // packed raw16 = objId(低 32) | owner(高 32)。清零目标走
@@ -127,7 +129,8 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 // 属性帧（fork scene_lifecycle.go:1090-1094 writePlayerTargetLocked；
 // 49840 抓包 s2c 0x10 双帧逐字节对应）。
 func (s *sceneLifecycle) writePlayerTargetLocked(targetID, targetOwner uint32) error {
-	if err := s.conn.WriteFrame(sceneObjectObjectProperty(playerObjectID, playerOwnerID, 414, targetID, targetOwner)); err != nil {
+	// LastObject 按名解析：fork=414、官服=416。
+	if err := s.conn.WriteFrame(sceneObjectObjectProperty(playerObjectID, playerOwnerID, uint32(clientdata.MustPlayerProperty("LastObject").Index), targetID, targetOwner)); err != nil {
 		return err
 	}
 	return s.conn.WriteFrame(sceneObjectObjectProperty(playerObjectID, playerOwnerID, uint32(propAutoSelectObject), targetID, targetOwner))
