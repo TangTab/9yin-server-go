@@ -2152,7 +2152,7 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 		msg = appendNPCProperty(msg, property)
 		count++
 	}
-	addString(391, visual.hair)                                                                  // Hat
+	addString(clientdata.MustPlayerProperty("Hat").Index, visual.hair)                           // Hat（fork=391）                                                                  // Hat
 	msg = appendWideStringProperty(msg, clientdata.MustPlayerProperty("Name").Index, state.Name) // fork=178（双表同位）
 	count++
 	msg = appendObjectProperty(msg, uint16(clientdata.MustPlayerProperty("LastObject").Index), 0, 0) // LastObject（fork=414）
@@ -2161,12 +2161,12 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	//（3187B，obj=玩家）——其中 CollideRadius 是客户端寻路引擎的玩家
 	// 碰撞体输入。0x28 通道未通前，物理属性经已验证的 0x0D 通道补发
 	//（与 NPC 的 officialNPCProperties 同集）。
-	addFloat(179, 0.9)      // CollideRadius
-	addString(183, "stand") // State
-	addFloat(214, 1.0)      // ActionSpeed
-	addInt(469, 100)        // HPRatio
-	addInt(478, 100)        // ParryRatio
-	addInt(482, 100)        // HitHPRatio
+	addFloat(clientdata.MustPlayerProperty("CollideRadius").Index, 0.9) // fork=179
+	addString(clientdata.MustPlayerProperty("State").Index, "stand")    // fork=183
+	addFloat(clientdata.MustPlayerProperty("ActionSpeed").Index, 1.0)   // fork=214
+	addInt(clientdata.MustPlayerProperty("HPRatio").Index, 100)         // fork=469
+	addInt(clientdata.MustPlayerProperty("ParryRatio").Index, 100)      // fork=478
+	addInt(clientdata.MustPlayerProperty("HitHPRatio").Index, 100)      // fork=482
 	binary.LittleEndian.PutUint16(msg[0x3d:], count)
 	p.mu.Unlock()
 	return msg
