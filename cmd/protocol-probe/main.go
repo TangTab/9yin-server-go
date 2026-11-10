@@ -3687,14 +3687,17 @@ func sceneObjectObjectProperty(objectID, ownerID, propertyIndex, targetID, targe
 	return appendObjectProperty(msg, uint16(propertyIndex), targetID, targetOwnerID)
 }
 
-// officialPropertyTableFrame 逐行透传内嵌的官方 0x09 属性表
-// (internal/clientdata/official_property_table.txt,2370 项)。
+// officialPropertyTableFrame 逐行透传当前生效的 0x09 属性表
+// （clientdata.ActivePropertyTableMode：fork=2370 项现网方言 /
+// official2433=官服 2433 项真表，NINEYIN_PROPERTY_TABLE 门控，
+// docs/官服登录帧对照与缺口清单.md §14.3 换表工程）。
 // 帧体 = [0x09][u16 count](name\0 u8 type)*;客户端按位置绑定索引,
-// 因此表内容必须与官方方言逐字节一致,不做任何删改。
-// 来源:F 盘新版服务端 exe 抓包提取(tools/export_official_table.py),
+// 因此表内容必须与帧索引方言逐字节一致,不做任何删改。
+// fork 表来源:F 盘新版服务端 exe 抓包提取(tools/export_official_table.py),
 // 与 Java 参考服 official_property_table.txt 三方比对 0 差异。
 func officialPropertyTableFrame() []byte {
 	entries := clientdata.OfficialPropertyEntries()
+	log.Printf("property table dialect=%s entries=%d", clientdata.ActivePropertyTableMode(), len(entries))
 	msg := make([]byte, 3, 3+64*1024)
 	msg[0] = 0x09
 	binary.LittleEndian.PutUint16(msg[1:], uint16(len(entries)))
