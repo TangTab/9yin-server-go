@@ -3471,6 +3471,12 @@ func npcOwnerID(objectID uint32) uint32 {
 	return 0x00660000 | (objectID & 0xFFFF)
 }
 
+// npcOfficialSparseEnabled 控制 NPC 渲染二分实验：=1 时 NPC 0x0D 仅发
+// 官服位 16-prop 集（NINEYIN_NPC_OFFICIAL_SPARSE，默认关）。
+func npcOfficialSparseEnabled() bool {
+	return strings.TrimSpace(os.Getenv("NINEYIN_NPC_OFFICIAL_SPARSE")) == "1"
+}
+
 func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error) {
 	msg := make([]byte, 0x3f, 256)
 	msg[0] = 0x0D
@@ -3487,6 +3493,13 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 	properties, err := npc.resolved.OrderedProperties()
 	if err != nil {
 		return nil, err
+	}
+	// NPC 渲染二分实验（§14.3 真机第五轮）：NINEYIN_NPC_OFFICIAL_SPARSE=1
+	// 时只发官服 #1777 同款 16-prop 集（砍 schema 行与重复项）。官服模式
+	// 下 134/134 NPC 0x0D 走查零失败但客户端不渲染——本开关二分
+	// 「schema 多余行压制渲染」vs「渲染需 0x28 详情记录」两假说。
+	if npcOfficialSparseEnabled() {
+		properties = nil
 	}
 	for _, property := range properties {
 		msg = appendNPCProperty(msg, property)
@@ -3542,6 +3555,19 @@ func officialNPCProperties(npc npcSpawn) []clientdata.IndexedProperty {
 			clientdata.IndexedProperty{Index: resource.Index, Name: resource.Name, Value: clientdata.StringValue(resourceValue)},
 			clientdata.IndexedProperty{Index: configID.Index, Name: configID.Name, Value: clientdata.StringValue(material.Value.Text)},
 			clientdata.IndexedProperty{Index: photo.Index, Name: photo.Name, Value: clientdata.StringValue("icon\\func" + resourceValue + ".png")},
+		)
+	} else if r, ok := npc.resolved.Properties["Resource"]; ok && r.Value.Text != "" {
+		// schema 只有 Resource（无 Material 列）时：Resource 直用 schema 值、
+		// ConfigID 取 schema ConfigID、Photo 照官服规则拼接——官服 16-prop
+		// 方言下三行必发（sparse 二分模式尤其）。
+		configValue := r.Value.Text
+		if c, ok := npc.resolved.Properties["ConfigID"]; ok && c.Value.Text != "" {
+			configValue = c.Value.Text
+		}
+		props = append(props,
+			clientdata.IndexedProperty{Index: resource.Index, Name: resource.Name, Value: clientdata.StringValue(r.Value.Text)},
+			clientdata.IndexedProperty{Index: configID.Index, Name: configID.Name, Value: clientdata.StringValue(configValue)},
+			clientdata.IndexedProperty{Index: photo.Index, Name: photo.Name, Value: clientdata.StringValue("icon\\func" + r.Value.Text + ".png")},
 		)
 	}
 	props = append(props, officialNPCFloatProp(actionSpeed, 1.0))
