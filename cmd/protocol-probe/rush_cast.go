@@ -232,6 +232,26 @@ func (p *playerActor) resumeSettleSkipSnapshot() bool {
 	return p.resumeSettleSkip
 }
 
+// rushPressGate 冲锋族按压入口闸：beginSkillUse 非 settled 分支的锁招/
+// 个人 CD / 公共 GCD 三闸只读版。冲锋链在 211 入口提前分叉（直收 return /
+// 暂存挂起），不补这道闸则四个结算点均无 CD 校验（commitRushDashCosts
+// 只写不查）。MP/SP/轻功不在此查——仍按官服模型留在执行提交点。
+func (p *playerActor) rushPressGate(definition combatSkillDefinition, now time.Time) (bool, string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.skillLockUntil.After(now) {
+		return false, fmt.Sprintf("skill locked remaining=%s", p.skillLockUntil.Sub(now).Round(time.Millisecond))
+	}
+	if ready := p.skillCooldowns[definition.id]; ready.After(now) {
+		return false, fmt.Sprintf("personal cooldown remaining=%s", ready.Sub(now).Round(time.Millisecond))
+	}
+	if p.publicCDUntil.After(now) && definition.taoLu != p.publicCDTaolu {
+		return false, fmt.Sprintf("public cooldown (taolu switch from=%s) remaining=%s",
+			p.publicCDTaolu, p.publicCDUntil.Sub(now).Round(time.Millisecond))
+	}
+	return true, ""
+}
+
 // commitRushDashCosts 在执行提交点（c61 / 直收簇 / 步行落地簇）结算
 // CD/MP/SP 并做出招簿记；includeQingGong 仅冲刺路径为真（近距直收与步行
 // 落地官服均不扣轻功点——g 直收簇无 QingGongPoint 帧、b 步行落地同）。

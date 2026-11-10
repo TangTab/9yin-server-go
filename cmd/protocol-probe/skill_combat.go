@@ -1373,6 +1373,19 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 			return true, nil
 		}
 	}
+	// 冲锋族按压闸（2026-11-11）：锁定目标的冲锋分支（直收/暂存）提前
+	// return，永远到不了 beginSkillUse 的 CD/GCD 闸——commitRushDashCosts
+	// 只起 CD 不查，冷却中按压会照常受理→走近→照常出招（贴脸即无视 CD
+	// 连发）。官服「受理自由」（f 十连按全受理）的样本全部无 CD 在途，
+	// 不能外推到冷却期；此处按 beginSkillUse 同语义先过锁招/个人 CD/
+	// 公共 GCD 三闸，MP/SP/轻功仍留在执行提交点（「CD/MP 在执行时点结」
+	// 模型不变）。
+	if rushStageEnabled() && definition.canRush {
+		if ok, reason := player.rushPressGate(definition, time.Now()); !ok {
+			log.Printf("%s: reject skill id=%s: %s", remote, definition.id, reason)
+			return true, nil
+		}
+	}
 	// 攻击距离闸（Java 八轮拍板「按技能真实射程控制释放距离」）：施法者
 	// 坐标取 211 自带上报（宽容解析，缺省原点同 Java）；距离=施法者→目标。
 	// 冲锋族距离模型（官服 b/e.pcapng 重解码 + f.pcapng 十连按修正

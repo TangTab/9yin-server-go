@@ -381,6 +381,80 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 	}
 }
 
+// 冲锋族按压闸（2026-11-11）：个人 CD 在途时按下（远距原本会暂存受理、
+// 近距原本会直收出招——commitRushDashCosts 只起 CD 不查）必须整体拒绝：
+// 零帧、不挂暂存、不标记 in-flight。冷却结束后按压恢复受理。
+func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
+	var definition combatSkillDefinition
+	found := false
+	for id, candidate := range installedCombatSkillCatalog.levelOne {
+		if candidate.stagedRushFamily() && candidate.requiresTarget &&
+			rushDirectCastMeters(candidate)+2 < float64(candidate.rushRange) {
+			definition = candidate
+			_ = id
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Skip("fixture catalog has no staged rush family selected-target skill with roomy rush range")
+	}
+	nearCast := rushDirectCastMeters(definition)
+
+	build := func(npcX float32) (*captureMessageConnection, *playerActor, *sceneLifecycle) {
+		conn := &captureMessageConnection{}
+		world := newSceneLifecycle("test", conn)
+		if err := world.begin("scene", "resource", nil); err != nil {
+			t.Fatal(err)
+		}
+		registerTestCombatNPC(t, world, 91)
+		placeTestNPC(t, world, 91, npcX, 0)
+		player := newPlayerActor("冲锋侠", 0)
+		player.mu.Lock()
+		player.learnedSkills[definition.id] = 1
+		player.skillCooldowns[definition.id] = time.Now().Add(30 * time.Second)
+		player.mu.Unlock()
+		if err := handleSelectTargetCustom(world, warningToggleMessage(clientCustomSelectTarget,
+			clientCustomValue{Type: 8, Raw: packTestObject(forkNPCID(91), npcTestOwner(91))}), "test"); err != nil {
+			t.Fatal(err)
+		}
+		return conn, player, world
+	}
+
+	for name, npcX := range map[string]float32{
+		"far-staging-band": float32(definition.rushRange + 5),
+		"near-direct-band": float32(math.Max(0.5, nearCast-1)),
+	} {
+		conn, player, world := build(npcX)
+		base := len(conn.Frames())
+		if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+			t.Fatalf("%s press handled=%t err=%v", name, handled, err)
+		}
+		if frames := conn.Frames()[base:]; len(frames) != 0 {
+			t.Fatalf("%s press sent %d frames during cooldown, want zero", name, len(frames))
+		}
+		if player.peekPendingCast(time.Now()) != nil {
+			t.Fatalf("%s press staged a pending cast during cooldown", name)
+		}
+		if player.rushInFlightSnapshot() {
+			t.Fatalf("%s press marked rush in flight during cooldown", name)
+		}
+	}
+
+	// 冷却结束后（闸时间已过）：恢复受理（远距照常暂存）。
+	conn, player, world := build(float32(definition.rushRange + 5))
+	player.mu.Lock()
+	player.skillCooldowns[definition.id] = time.Now().Add(-time.Second)
+	player.mu.Unlock()
+	base := len(conn.Frames())
+	if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+		t.Fatalf("expired-cooldown press handled=%t err=%v", handled, err)
+	}
+	if frames := conn.Frames()[base:]; len(frames) != 9 {
+		t.Fatalf("expired-cooldown press frames=%d, want 9-frame acceptance cluster", len(frames))
+	}
+}
+
 // msg15/msg220 接近探测 + 冲刺窗口 (5.0, 6.5]（g 5.54 触发 / b 3.61 不触发）：
 // 窗口外零帧；窗口内 c61 冲刺簇；冲刺已发后静默；212 三分兜底保留。
 func TestMovementUploadDrivesRushArrival(t *testing.T) {
