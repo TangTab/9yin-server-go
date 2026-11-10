@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"math"
+	"strings"
 	"testing"
 	"time"
 )
@@ -96,6 +97,7 @@ func TestWriteOfficialLoginInfoFrames(t *testing.T) {
 func TestWriteOfficialReadyInfoFrames(t *testing.T) {
 	conn := &captureMessageConnection{}
 	now := time.Unix(1794116366, 0)
+
 	writeOfficialReadyInfoFrames(conn, "test", "lizy86", "徐测试", now)
 	frames := conn.Frames()
 	if len(frames) != 3 {
@@ -109,6 +111,22 @@ func TestWriteOfficialReadyInfoFrames(t *testing.T) {
 	// m52 unix=1794116366=0x6AF00B0E → i64 LE
 	if !bytes.Contains(frames[1], []byte{0x03, 0x0E, 0x0B, 0xF0, 0x6A, 0x00, 0x00, 0x00, 0x00}) {
 		t.Fatalf("m52 unix seconds payload missing: % X", frames[1])
+	}
+}
+
+// 账号显示名：env 覆盖优先，未设时回退角色名——绝不回显 acct:v1 摘要
+// （内部账号键下发会让客户端账号档案栏显示整串十六进制）。
+func TestOfficialAccountLabel(t *testing.T) {
+	t.Setenv("NINEYIN_OFFICIAL_ACCOUNT", "")
+	if got := officialAccountLabel("徐测试"); got != "徐测试" {
+		t.Fatalf("label=%q want role name fallback", got)
+	}
+	t.Setenv("NINEYIN_OFFICIAL_ACCOUNT", "  test001  ")
+	if got := officialAccountLabel("徐测试"); got != "test001" {
+		t.Fatalf("label=%q want env override trimmed", got)
+	}
+	if got := officialAccountLabel("徐测试"); strings.Contains(got, "acct:v1:") {
+		t.Fatalf("label=%q leaked internal account key", got)
 	}
 }
 

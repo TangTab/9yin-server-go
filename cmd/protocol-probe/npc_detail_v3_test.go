@@ -175,6 +175,19 @@ func TestNPCDetail0x28V3Frame(t *testing.T) {
 	}
 }
 
+func TestNPCDetail0x28V3FrameForkTable(t *testing.T) {
+	// 2026-11-11 真机回归：fork 表 + NINEYIN_NPC_DETAIL_0X28=1 曾致首帧
+	// NPC 0x0D 后会话静默关闭（疑 v3 属性集构造 panic）。双方言都必须走通。
+	clientdata.SwapPropertyTableForTest(t, "fork")
+	props := officialNPCEntityProperties([]clientdata.IndexedProperty{
+		{Index: clientdata.MustPlayerProperty("Level").Index, Name: "Level", Value: clientdata.Int32Value(5)},
+	}, "npc449", "sz447")
+	frame := npcDetail0x28V3Frame(1, 2, worldcore.Transform{}, props)
+	if frame[1] != 0x46 {
+		t.Fatalf("mode=%#x", frame[1])
+	}
+}
+
 func TestNPCDetail0x28V3FrameNoIdentity(t *testing.T) {
 	clientdata.SwapPropertyTableForTest(t, "official2433")
 	props := officialNPCEntityProperties(nil, "", "")

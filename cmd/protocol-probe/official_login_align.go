@@ -98,6 +98,19 @@ func officialServerIdentity() (serverID int32, serverName string) {
 	return serverID, serverName
 }
 
+// officialAccountLabel 返回 m655/m607 的账号显示名。官服两帧携带明文账号
+// （c.pcapng 实证 "lizy86"），但本服不解开 op02 登录帧账号槽的客户端加扰
+// （docs/id-system-analysis.md §一：服务端只对槽密文做 SHA256 得 acct:v1
+// 内部键），拿不到明文——默认回退角色名，NINEYIN_OFFICIAL_ACCOUNT 可
+// 覆盖为真实账号名。曾直接下发 acct:v1 摘要，客户端账号档案栏会显示
+// 整串十六进制（2026-11-11 回退）。
+func officialAccountLabel(roleName string) string {
+	if v := strings.TrimSpace(os.Getenv("NINEYIN_OFFICIAL_ACCOUNT")); v != "" {
+		return v
+	}
+	return roleName
+}
+
 // writeOfficialLoginInfoFrames 下发 0.1s 位的登录信息帧簇（m366/m623/m655）。
 // 位置：0x0A 记录表之后、建视图之前（c.pcapng 0.097-0.099s 同位）。
 func writeOfficialLoginInfoFrames(link sceneMessageConnection, remote, account string, roleName string, roleID uint32) {

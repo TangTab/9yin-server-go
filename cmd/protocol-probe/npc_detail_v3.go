@@ -126,7 +126,7 @@ func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, con
 	collideRadius, state, propType := must("CollideRadius"), must("State"), must("Type")
 	resource, config, photo := must("Resource"), must("ConfigID"), must("Photo")
 	rotatePara, npcType, actionSpeed := must("RotatePara"), must("NpcType"), must("ActionSpeed")
-	aiEffect, level, bossLevel := must("AIEffect"), must("Level"), must("BossLevel")
+	level, bossLevel := must("Level"), must("BossLevel")
 	idCard, bornAction, weaponMode := must("IDCard"), must("BornAction"), must("WeaponMode")
 	hpRatio, parryRatio, hitHPRatio := must("HPRatio"), must("ParryRatio"), must("HitHPRatio")
 
@@ -168,11 +168,17 @@ func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, con
 	if value, ok := lookup("BossLevel"); ok && value.I32 > 0 && value.I32 < 256 {
 		bossLevelValue = value.I32
 	}
+	// AIEffect 为可选行（官方表@84 在场、fork 表玩家域缺席——真机教训
+	// 2026-11-11：MustPlayerProperty 在 fork 表 panic 致会话静默关闭）。
+	optional := []clientdata.IndexedProperty(nil)
+	if aiEffect, ok := clientdata.PlayerProperty("AIEffect"); ok {
+		optional = append(optional, clientdata.IndexedProperty{Index: aiEffect.Index, Name: aiEffect.Name, Value: clientdata.StringValue("nil")})
+	}
 	props = append(props,
 		officialNPCIntProp(npcType, npcTypeValue),
 		officialNPCFloatProp(actionSpeed, 1.0),
-		clientdata.IndexedProperty{Index: aiEffect.Index, Name: aiEffect.Name, Value: clientdata.StringValue("nil")},
 	)
+	props = append(props, optional...)
 	if levelValue > 0 {
 		props = append(props, officialNPCIntProp(level, levelValue))
 	}
