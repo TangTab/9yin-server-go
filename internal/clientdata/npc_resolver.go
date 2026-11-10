@@ -216,7 +216,16 @@ func ResolveNPC(table *NPCTemplateTable, instance NPCCreatorInstance, options Re
 	if instance.Transform.AY != nil {
 		placement["Orient"] = Float32Value(*instance.Transform.AY)
 	}
-	if err := applyValueLayer(resolved.Properties, placement, Provenance{Layer: "runtime", Source: instance.Source, Record: instance.Ordinal, Field: "transform"}); err != nil {
+	// 摆放坐标的权威在 resolved.Transform；属性表副本仅服务 fork 方言
+	// 0x0D 属性行（PosiX/Y/Z/Orient 为 fork-only 名）。官服方言下按名
+	// 缺席即不注入（0x0D 坐标走固定头，§14.3 场景域处置同策）。
+	wirePlacement := make(map[string]Value, len(placement))
+	for name, value := range placement {
+		if field, ok := SceneProperty(name); ok && field.Type == value.Type {
+			wirePlacement[name] = value
+		}
+	}
+	if err := applyValueLayer(resolved.Properties, wirePlacement, Provenance{Layer: "runtime", Source: instance.Source, Record: instance.Ordinal, Field: "transform"}); err != nil {
 		return ResolvedNPC{}, err
 	}
 	if err := applyValueLayer(resolved.Properties, options.Runtime, Provenance{Layer: "runtime", Source: "resolve-options"}); err != nil {
@@ -347,7 +356,7 @@ func parseIntegralInt32(raw string) (int32, error) {
 // 官方属性表迁移(2026-11):旧兼容私有名 VisType/ExtraInfo/EscortFlag
 // 在官方 2370 项表中不存在,无法编码下发,已从默认值移除。
 func VisibleNPCSpawnDefaultsCompatV1() map[string]Value {
-	return map[string]Value{
+	defaults := map[string]Value{
 		"Type":             ByteValue(4),
 		"Sex":              ByteValue(0),
 		"ActionSet":        StringValue(""),
@@ -387,4 +396,19 @@ func VisibleNPCSpawnDefaultsCompatV1() map[string]Value {
 		"OnlyCareDistance": Int32Value(0),
 		"RefreshAtOnce":    Int32Value(0),
 	}
+	// 0x09 表方言门控（docs 官服登录帧对照 §14.3）：默认层按当前表场景域
+	// （首现）过滤——缺席名（fork-only，官服表无此行）与线型不符名
+	//（ActionSoundMode fork 场景位=int32、官服唯一现=string）一律不注入，
+	// 避免 ResolveNPC 类型校验硬错。2026-11-10 真机：官服方言下该层
+	// 5413/5413 实例尽没于 ActionSoundMode 类型错配→NPC 目录空→选角链
+	// 断连。fork 表下全部条目类型吻合，行为逐位不变。
+	filtered := make(map[string]Value, len(defaults))
+	for name, value := range defaults {
+		field, ok := SceneProperty(name)
+		if !ok || field.Type != value.Type {
+			continue
+		}
+		filtered[name] = value
+	}
+	return filtered
 }
