@@ -95,8 +95,8 @@ func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 		{"InParry", propInParry, clientdata.WireInt32},
 		{"InManualParry", propInManualParry, clientdata.WireInt32},
 		{"ParryValue", propParryValue, clientdata.WireInt32},
-		// Buff 快照族
-		{"BufferListStr", bufferListPropertyIndex, clientdata.WireString},
+		// Buff 快照族（BufferListStr fork-only：按名门控官服方言停发，
+		// 无全局常量——fork 位断言见 player_actor 各发送点）
 		{"BufferInfo1", bufferInfoFirstPropertyIndex, clientdata.WireString},
 		// selection.go
 		{"AutoSelectObject", propAutoSelectObject, clientdata.WireObject},

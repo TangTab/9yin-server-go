@@ -11,6 +11,9 @@ import (
 // 全部按名解析（PlayerProperty 末现），fork 模式落 fork 位（1590/1595/469…），
 // official2433 模式自动落官服位（1597/1602/471…，c.pcapng #1777 原号）。
 func TestOfficialNPCPropertiesFollowActiveTable(t *testing.T) {
+	// 本测试自带双方言断言：fork 段先显式切回 fork（进程可能以
+	// NINEYIN_PROPERTY_TABLE=official2433 启动做官服模式冒烟）。
+	clientdata.SwapPropertyTableForTest(t, "fork")
 	npc := testNPCSpawn()
 
 	forkProps := officialNPCProperties(npc)

@@ -812,17 +812,22 @@ func npcCombatProperties(state entity.ActorState) []clientdata.IndexedProperty {
 	if state.MaxHP > 0 {
 		hpRatio = int32(int64(state.HP) * 100 / int64(state.MaxHP))
 	}
-	return []clientdata.IndexedProperty{
-		{Index: 21, Name: "Prop21", Value: clientdata.ByteValue(1)},
-		{Index: clientdata.MustSceneProperty("HPRatio").Index, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
-		{Index: clientdata.MustSceneProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
-		{Index: clientdata.MustSceneProperty("HP").Index, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
-		{Index: clientdata.MustPlayerProperty("HP").Index, Name: "HP", Value: clientdata.Int32Value(state.HP)},
-		{Index: clientdata.MustPlayerProperty("HPRatio").Index, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
-		{Index: clientdata.MustPlayerProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
-		{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
+	props := make([]clientdata.IndexedProperty, 0, 9)
+	// Prop21(fork-only@21)：官服表缺席，按名门控——官服方言跳过。
+	if prop21, ok := clientdata.SceneProperty("Prop21"); ok {
+		props = append(props, clientdata.IndexedProperty{Index: prop21.Index, Name: prop21.Name, Value: clientdata.ByteValue(1)})
 	}
+	props = append(props,
+		clientdata.IndexedProperty{Index: clientdata.MustSceneProperty("HPRatio").Index, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		clientdata.IndexedProperty{Index: clientdata.MustSceneProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
+		clientdata.IndexedProperty{Index: clientdata.MustSceneProperty("HP").Index, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		clientdata.IndexedProperty{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		clientdata.IndexedProperty{Index: clientdata.MustPlayerProperty("HP").Index, Name: "HP", Value: clientdata.Int32Value(state.HP)},
+		clientdata.IndexedProperty{Index: clientdata.MustPlayerProperty("HPRatio").Index, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
+		clientdata.IndexedProperty{Index: clientdata.MustPlayerProperty("MaxHP").Index, Name: "MaxHP", Value: clientdata.Int32Value(state.BaseMaxHP)},
+		clientdata.IndexedProperty{Index: propDead, Name: "Dead", Value: clientdata.ByteValue(boolByte(state.HP <= 0))},
+	)
+	return props
 }
 
 func horizontalDistance(a, b worldcore.Transform) float32 {

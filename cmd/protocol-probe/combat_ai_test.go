@@ -457,16 +457,24 @@ func TestCombatTickClearsNPCFightingAfterLeash(t *testing.T) {
 		if frame[0] != 0x10 || binary.LittleEndian.Uint32(frame[2:]) != forkNPCID(87) {
 			continue
 		}
-		// npcCombatProperties 线宽：21/463/464=1B，28/30/32/465/469/578=4B。
+		// npcCombatProperties 线宽按当前方言表线型推导（fork 21/463/464=1B、
+		// 28/30/32/465/469/578=4B；官服位随表漂移）。
 		off := 12
 		for i := 0; i < int(binary.LittleEndian.Uint16(frame[10:])); i++ {
 			idx := binary.LittleEndian.Uint16(frame[off:])
 			off += 2
-			width := map[uint16]int{21: 1, 463: 1, propDead: 1}[idx]
-			if width == 0 {
-				width = 4
+			width := 4
+			if entry, ok := clientdata.PropertyByIndex(int(idx)); ok {
+				switch entry.Type {
+				case clientdata.WireByte:
+					width = 1
+				case clientdata.WireWord:
+					width = 2
+				case clientdata.WireInt64, clientdata.WireObject:
+					width = 8
+				}
 			}
-			if idx == 463 {
+			if idx == clientdata.MustPlayerProperty("LogicState").Index {
 				value := frame[off]
 				logicState = &value
 			}

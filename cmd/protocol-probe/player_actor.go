@@ -47,8 +47,7 @@ const (
 	// BufferListStr 是原生玩法的 BuffContainer 快照。BufferInfo 槽位是
 	// 原生视觉存储的投影。两者必须描述同一批活动 Buff：仅有 UI 的
 	// BufferInfo 不足以通过 qinggong_3 的原生 HasBuff("buf_qg_drift") 门控。
-	bufferListPropertyIndex uint16 = 143 // BufferListStr String(全表唯一；fork-only：官服 2433 表无此名，官方替代方言待 P4 考证)
-	bufferInfoSlotCount     uint16 = 24
+	bufferInfoSlotCount uint16 = 24
 
 	redSuperArmorBuffSlot uint16 = 1
 	waterDriftBuffSlot    uint16 = 2
@@ -1208,7 +1207,14 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		// 官方玩家域 CapitalType1@417 线型 4(int64):货币按小端
 		// 八字节编码(真机抓包实证)。
 		{Index: clientdata.MustPlayerProperty("CapitalType1").Index, Name: "CapitalType1", Value: clientdata.Int64Value(int64(p.silver))},
-		{Index: bufferListPropertyIndex, Name: "BufferListStr", Value: clientdata.StringValue(p.bufferListStringLocked(now))},
+	}
+	// BufferListStr(fork-only@143)：官服表无此名（buff 条官方走
+	// BufferInfo CSV 槽+m169，§14.5），官服方言停发整帧。
+	if bufferList, ok := clientdata.PlayerProperty("BufferListStr"); ok {
+		properties = append(properties, clientdata.IndexedProperty{
+			Index: bufferList.Index, Name: bufferList.Name,
+			Value: clientdata.StringValue(p.bufferListStringLocked(now)),
+		})
 	}
 	properties = append(properties, factionProperties(p.faction)...)
 	for _, slot := range nativeBuffSlots {
@@ -2044,9 +2050,12 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addByte(clientdata.MustPlayerProperty("Sex").Index, visual.sex)       // fork=182
 	addString(clientdata.MustPlayerProperty("Photo").Index, visual.photo) // fork=184
 	addByte(clientdata.MustPlayerProperty("Camp").Index, 0)               // Camp（fork=174，官方线型 Byte）
-	addInt(4, 0)                                                          // Race(fork-only：官服 2433 表无此名，P3 处置)
-	addString(clientdata.MustPlayerProperty("Job").Index, "")             // Job（fork=1588，官方线型 String）
-	addByte(clientdata.MustPlayerProperty("Level").Index, 1)              // Level（fork=1465，官方线型 Byte）
+	// Race(fork-only@4)：官服表缺席，按名门控——官服方言跳过。
+	if race, ok := clientdata.SceneProperty("Race"); ok {
+		addInt(race.Index, 0)
+	}
+	addString(clientdata.MustPlayerProperty("Job").Index, "") // Job（fork=1588，官方线型 String）
+	addByte(clientdata.MustPlayerProperty("Level").Index, 1)  // Level（fork=1465，官方线型 Byte）
 	// 键位域（Java PlayerActor.addObject 同位）：引擎建对象时即读，
 	// post-ready 0x10 补推太晚（2026-11-04「模式没推」根因）。档内
 	// 198 无尾空格（0x10 单帧形态带 " "，勿混用）；无档零属性。
@@ -2062,10 +2071,20 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	if p.keybind.neigongBind != "" {
 		addString(neiGongBindPropertyIndex, p.keybind.neigongBind)
 	}
-	addFloat(9, location.X) // PosiX/Y/Z/Orient(fork-only 9-12：官服表无此名，坐标走 0x0D 固定头，P3 处置)
-	addFloat(10, location.Y)
-	addFloat(11, location.Z)
-	addFloat(12, location.Orient)
+	// PosiX/Y/Z/Orient(fork-only 9-12)：官服 2433 表无此名（坐标走 0x0D
+	// 固定头），官服方言下按名缺席即整组跳过。
+	if posiX, ok := clientdata.SceneProperty("PosiX"); ok {
+		addFloat(posiX.Index, location.X)
+	}
+	if posiY, ok := clientdata.SceneProperty("PosiY"); ok {
+		addFloat(posiY.Index, location.Y)
+	}
+	if posiZ, ok := clientdata.SceneProperty("PosiZ"); ok {
+		addFloat(posiZ.Index, location.Z)
+	}
+	if orient, ok := clientdata.SceneProperty("Orient"); ok {
+		addFloat(orient.Index, location.Orient)
+	}
 	addString(clientdata.MustPlayerProperty("Hair").Index, visual.hair)           // fork=188
 	addString(clientdata.MustPlayerProperty("Face").Index, visual.face)           // fork=185
 	addString(clientdata.MustPlayerProperty("Cloth").Index, visual.cloth)         // fork=393
@@ -2073,14 +2092,20 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addString(clientdata.MustPlayerProperty("Shoes").Index, visual.shoes)         // fork=395
 	addString(clientdata.MustPlayerProperty("ActionSet").Index, visual.actionSet) // fork=406
 	addString(clientdata.MustPlayerProperty("State").Index, "stand")              // fork=183
-	addInt(20, 0)                                                                 // FloatingState(fork-only@20：官服表无此名，P3 处置)
-	addByte(clientdata.MustPlayerProperty("LogicState").Index, state.LogicState)  // fork=463
-	addFloat(clientdata.MustPlayerProperty("JumpSpeed").Index, 8.0)               // JumpSpeed（fork=681）
-	addFloat(clientdata.MustPlayerProperty("MoveSpeed").Index, motion.moveSpeed)  // fork=384
-	addFloat(clientdata.MustPlayerProperty("WalkSpeed").Index, 7.5)               // WalkSpeed（fork=385）
-	addFloat(clientdata.MustPlayerProperty("RunSpeed").Index, motion.runSpeed)    // fork=386
-	addInt(clientdata.MustPlayerProperty("SpeedRatio").Index, state.SpeedRatio)   // fork=390
-	addByte(27, 0)                                                                // CantJump(fork-only@27：官服表无此名，P3 处置)
+	// FloatingState(fork-only@20)：官服表缺席，按名门控——官服方言跳过。
+	if floating, ok := clientdata.SceneProperty("FloatingState"); ok {
+		addInt(floating.Index, 0)
+	}
+	addByte(clientdata.MustPlayerProperty("LogicState").Index, state.LogicState) // fork=463
+	addFloat(clientdata.MustPlayerProperty("JumpSpeed").Index, 8.0)              // JumpSpeed（fork=681）
+	addFloat(clientdata.MustPlayerProperty("MoveSpeed").Index, motion.moveSpeed) // fork=384
+	addFloat(clientdata.MustPlayerProperty("WalkSpeed").Index, 7.5)              // WalkSpeed（fork=385）
+	addFloat(clientdata.MustPlayerProperty("RunSpeed").Index, motion.runSpeed)   // fork=386
+	addInt(clientdata.MustPlayerProperty("SpeedRatio").Index, state.SpeedRatio)  // fork=390
+	// CantJump(fork-only@27)：官服表缺席，按名门控——官服方言跳过。
+	if cantJump, ok := clientdata.SceneProperty("CantJump"); ok {
+		addByte(cantJump.Index, 0)
+	}
 	addInt(propHPRatio, int32(int64(state.HP)*100/int64(state.MaxHP)))
 	addInt(propMPRatio, int32(int64(state.MP)*100/int64(state.MaxMP)))
 	addInt(clientdata.MustPlayerProperty("MaxHP").Index, state.BaseMaxHP) // fork=578
@@ -2103,7 +2128,10 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	// CurSkillEffectID/CurSkillLevel:官方表无此名,不再下发。
 	addObject(propCurSkillTarget, p.currentSkillTarget)
 	addInt(propModifySkillLockTime, 200) // 官方口径 200（Java #2014 exe；旧 5000 为本地占位）
-	addString(bufferListPropertyIndex, p.bufferListStringLocked(now))
+	// BufferListStr(fork-only@143)：官服方言停发（§14.5）。
+	if bufferList, ok := clientdata.PlayerProperty("BufferListStr"); ok {
+		addString(bufferList.Index, p.bufferListStringLocked(now))
+	}
 	for _, property := range baseMotionProperties(motion) {
 		addFloat(property.Index, property.Value.F32)
 	}

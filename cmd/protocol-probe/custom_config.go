@@ -41,14 +41,14 @@ const (
 // type7 / 199 ShortcutKey1 type7 / 200 ShortcutKey2 type7 / 223 OperateMode
 // type3。0x10 单属性帧的键位串一律加 " " 尾空格（参考端 60310 抓包逐字节
 // 范本），0x0D 档内嵌的 198 无尾空格——两处形态不可混用。
-const (
-	keybindPropertyIndex        uint16 = 198
-	keybindScheme1PropertyIndex uint16 = 199
-	keybindScheme2PropertyIndex uint16 = 200
-	operateModePropertyIndex    uint16 = 223
+var (
+	keybindPropertyIndex        = clientdata.MustPlayerProperty("ShortcutKey").Index  // fork=198
+	keybindScheme1PropertyIndex = clientdata.MustPlayerProperty("ShortcutKey1").Index // fork=199
+	keybindScheme2PropertyIndex = clientdata.MustPlayerProperty("ShortcutKey2").Index // fork=200
+	operateModePropertyIndex    = clientdata.MustPlayerProperty("OperateMode").Index  // fork=223
 	// NeiGongBind（type7）：内功栏绑定串权威属性。0x10 单属性帧带
 	// 尾空格、0x0D 档内嵌无尾空格，与 198 同方言两形态。
-	neiGongBindPropertyIndex uint16 = 201
+	neiGongBindPropertyIndex = clientdata.MustPlayerProperty("NeiGongBind").Index // fork=201
 )
 
 // neiGongBindSlotCount 是内功栏绑定串的固定格数（客户端

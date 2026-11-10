@@ -742,9 +742,9 @@ func (r *sceneRun) patrolTick(now time.Time) {
 	}
 }
 
-// npcStatePropertyIndex 是 State 属性在 0x09 表中的索引（新旧两版表
-// 0–306 段无漂移，均为 183，线型 7 字符串）。
-const npcStatePropertyIndex = 183
+// npcStatePropertyIndex 是 State 属性在 0x09 表中的索引（按名解析，
+// fork/官服两表 0–306 段无漂移均为 183，线型 7 字符串）。
+var npcStatePropertyIndex = clientdata.MustPlayerProperty("State").Index // fork=183
 
 // npcStatePropertyFrame 生成 NPC 行为状态帧：0x10 单属性
 // State(183)="walk"/"stand"。官服 NPC 行为通道（2026-11-10 定版，
