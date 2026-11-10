@@ -18,10 +18,10 @@ import (
 // role_currency 快照；金币（416）/银卡（418）保持会话级（fork 快照仅
 // {Silver}，Java applyCapital 同口径不落库）。帧序对齐 fork
 // currenciesUpdate：三币各一帧 0x10。
-const (
-	propCapitalType0 = 416
-	propCapitalType1 = 417
-	propCapitalType2 = 418
+var (
+	propCapitalType0 = clientdata.MustPlayerProperty("CapitalType0").Index // CapitalType0（fork=416）
+	propCapitalType1 = clientdata.MustPlayerProperty("CapitalType1").Index // CapitalType1（fork=417）
+	propCapitalType2 = clientdata.MustPlayerProperty("CapitalType2").Index // CapitalType2（fork=418）
 )
 
 const currencyDBQueryTimeout = 5 * time.Second

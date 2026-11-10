@@ -592,10 +592,10 @@ func serverAllDest(entries []allDestEntry) []byte {
 // 的 state7/4/6/8 逐帧回显，state5 跳跃双帧不回显——这是客户端执行
 // 点击移动的前置应答（官服节奏：状态四连 +0~80ms、0x21 +50~200ms）。
 type playerMoveEcho struct {
-	objectID, ownerID uint32
-	destX, destY, destZ float32
+	objectID, ownerID    uint32
+	destX, destY, destZ  float32
 	angle, speed, orient float32
-	intentID uint32
+	intentID             uint32
 }
 
 // serverAllDestPlayerEcho 编码单条目 0x21 玩家回显帧（47B 官服同形）。

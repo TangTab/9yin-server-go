@@ -28,10 +28,10 @@ func writeSceneNPCMapFrames(conn sceneMessageConnection, world *sceneLifecycle, 
 		return
 	}
 	type npcPoint struct {
-		id                                                               uint32
-		owner                                                            uint32
-		configID                                                         string
-		x, y, z, orient                                                  float32
+		id              uint32
+		owner           uint32
+		configID        string
+		x, y, z, orient float32
 	}
 	world.run.mu.Lock()
 	if world.run.closed {

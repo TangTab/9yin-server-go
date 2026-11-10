@@ -12,89 +12,89 @@ import (
 // 官方属性表(2370 项)玩家域索引(同名多处取末现)。0x09 表按位置绑定,
 // 这些值必须与 internal/clientdata/official_property_table.txt 逐项一致;
 // official_property_indices_test.go 按名断言防漂移。
-const (
-	propCurNeiGong     uint16 = 653 // CurNeiGong String
-	propFaculty        uint16 = 798 // Faculty Int32
-	propFacultyState   uint16 = 758
-	propFacultyStyle   uint16 = 759
-	propFacultyName    uint16 = 760
-	propCurFillValue   uint16 = 764
-	propTotalFillValue uint16 = 765
-	propCurLevel       uint16 = 763
-	propFillSpeed      uint16 = 773
+var (
+	propCurNeiGong     = clientdata.MustPlayerProperty("CurNeiGong").Index     // CurNeiGong String（fork=653）
+	propFaculty        = clientdata.MustPlayerProperty("Faculty").Index        // Faculty Int32（fork=798）
+	propFacultyState   = clientdata.MustPlayerProperty("FacultyState").Index   // FacultyState（fork=758）
+	propFacultyStyle   = clientdata.MustPlayerProperty("FacultyStyle").Index   // FacultyStyle（fork=759）
+	propFacultyName    = clientdata.MustPlayerProperty("FacultyName").Index    // FacultyName（fork=760）
+	propCurFillValue   = clientdata.MustPlayerProperty("CurFillValue").Index   // CurFillValue（fork=764）
+	propTotalFillValue = clientdata.MustPlayerProperty("TotalFillValue").Index // TotalFillValue（fork=765）
+	propCurLevel       = clientdata.MustPlayerProperty("CurLevel").Index       // CurLevel（fork=763）
+	propFillSpeed      = clientdata.MustPlayerProperty("FillSpeed").Index      // FillSpeed（fork=773）
 	// 历练层（form_faculty.lua 数据绑定源；docs/livepoint-conversion.md）：
 	// 槽值毫历练（UI 显示 = 值/1000）。
-	propHoldFaculty    uint16 = 800 // HoldFaculty Int32:潜能修为存量
-	propLiveGroove1    uint16 = 804 // LiveGroove_1..5 Int32:历练槽 1..5
-	propLiveGroove2    uint16 = 805
-	propLiveGroove3    uint16 = 806
-	propLiveGroove4    uint16 = 807
-	propLiveGroove5    uint16 = 808
-	propLiveSpeedPower uint16 = 809 // LiveSpeedPower Int32:转化速度加成 %
-	propPowerValue     uint16 = 2287
-	propMaxPowerValue  uint16 = 2288
-	propSP             uint16 = 467 // SP Int32:怒气
-	propStr            uint16 = 485
-	propSta            uint16 = 489
-	propDex            uint16 = 487
-	propIng            uint16 = 486
-	propSpi            uint16 = 488
-	propMeleePower     uint16 = 500
-	propShotPower      uint16 = 501
-	propMagicPower     uint16 = 502
-	propMeleePowerAdd  uint16 = 503
-	propShotPowerAdd   uint16 = 504
-	propMagicPowerAdd  uint16 = 505
-	propPhyHit         uint16 = 556
-	propPhyHitAdd      uint16 = 557
-	propMagicHit       uint16 = 559
-	propMagicHitAdd    uint16 = 560
-	propDodge          uint16 = 562
-	propDodgeAdd       uint16 = 563
-	propPhyVa          uint16 = 565
-	propPhyVaAdd       uint16 = 566
-	propMagicVa        uint16 = 569
-	propMagicVaAdd     uint16 = 570
-	propMaxParry       uint16 = 476
-	propPhyDef         uint16 = 584
-	propStiDef         uint16 = 586
-	propNegDef         uint16 = 588
-	propMasDef         uint16 = 589
-	propJujDef         uint16 = 587
-	propMinMeleeDamage uint16 = 510
-	propMaxMeleeDamage uint16 = 509
-	propMaxHPAdd       uint16 = 581
-	propMaxMPAdd       uint16 = 582
-	propMaxSP          uint16 = 580
-	propMaxSPAdd       uint16 = 583 // 官方表存在但官服全程零下发;本服不出帧(加成折进 MaxSP)
-	propMaxLevel       uint16 = 2083
+	propHoldFaculty    = clientdata.MustPlayerProperty("HoldFaculty").Index    // HoldFaculty Int32:潜能修为存量（fork=800）
+	propLiveGroove1    = clientdata.MustPlayerProperty("LiveGroove_1").Index   // LiveGroove_1..5 Int32:历练槽 1..5（fork=804）
+	propLiveGroove2    = clientdata.MustPlayerProperty("LiveGroove_2").Index   // LiveGroove_2（fork=805）
+	propLiveGroove3    = clientdata.MustPlayerProperty("LiveGroove_3").Index   // LiveGroove_3（fork=806）
+	propLiveGroove4    = clientdata.MustPlayerProperty("LiveGroove_4").Index   // LiveGroove_4（fork=807）
+	propLiveGroove5    = clientdata.MustPlayerProperty("LiveGroove_5").Index   // LiveGroove_5（fork=808）
+	propLiveSpeedPower = clientdata.MustPlayerProperty("LiveSpeedPower").Index // LiveSpeedPower Int32:转化速度加成 %（fork=809）
+	propPowerValue     = clientdata.MustPlayerProperty("PowerValue").Index     // PowerValue（fork=2287）
+	propMaxPowerValue  = clientdata.MustPlayerProperty("MaxPowerValue").Index  // MaxPowerValue（fork=2288）
+	propSP             = clientdata.MustPlayerProperty("SP").Index             // SP Int32:怒气（fork=467）
+	propStr            = clientdata.MustPlayerProperty("Str").Index            // Str（fork=485）
+	propSta            = clientdata.MustPlayerProperty("Sta").Index            // Sta（fork=489）
+	propDex            = clientdata.MustPlayerProperty("Dex").Index            // Dex（fork=487）
+	propIng            = clientdata.MustPlayerProperty("Ing").Index            // Ing（fork=486）
+	propSpi            = clientdata.MustPlayerProperty("Spi").Index            // Spi（fork=488）
+	propMeleePower     = clientdata.MustPlayerProperty("MeleePower").Index     // MeleePower（fork=500）
+	propShotPower      = clientdata.MustPlayerProperty("ShotPower").Index      // ShotPower（fork=501）
+	propMagicPower     = clientdata.MustPlayerProperty("MagicPower").Index     // MagicPower（fork=502）
+	propMeleePowerAdd  = clientdata.MustPlayerProperty("MeleePowerAdd").Index  // MeleePowerAdd（fork=503）
+	propShotPowerAdd   = clientdata.MustPlayerProperty("ShotPowerAdd").Index   // ShotPowerAdd（fork=504）
+	propMagicPowerAdd  = clientdata.MustPlayerProperty("MagicPowerAdd").Index  // MagicPowerAdd（fork=505）
+	propPhyHit         = clientdata.MustPlayerProperty("PhyHit").Index         // PhyHit（fork=556）
+	propPhyHitAdd      = clientdata.MustPlayerProperty("PhyHitAdd").Index      // PhyHitAdd（fork=557）
+	propMagicHit       = clientdata.MustPlayerProperty("MagicHit").Index       // MagicHit（fork=559）
+	propMagicHitAdd    = clientdata.MustPlayerProperty("MagicHitAdd").Index    // MagicHitAdd（fork=560）
+	propDodge          = clientdata.MustPlayerProperty("Dodge").Index          // Dodge（fork=562）
+	propDodgeAdd       = clientdata.MustPlayerProperty("DodgeAdd").Index       // DodgeAdd（fork=563）
+	propPhyVa          = clientdata.MustPlayerProperty("PhyVa").Index          // PhyVa（fork=565）
+	propPhyVaAdd       = clientdata.MustPlayerProperty("PhyVaAdd").Index       // PhyVaAdd（fork=566）
+	propMagicVa        = clientdata.MustPlayerProperty("MagicVa").Index        // MagicVa（fork=569）
+	propMagicVaAdd     = clientdata.MustPlayerProperty("MagicVaAdd").Index     // MagicVaAdd（fork=570）
+	propMaxParry       = clientdata.MustPlayerProperty("MaxParry").Index       // MaxParry（fork=476）
+	propPhyDef         = clientdata.MustPlayerProperty("PhyDef").Index         // PhyDef（fork=584）
+	propStiDef         = clientdata.MustPlayerProperty("StiDef").Index         // StiDef（fork=586）
+	propNegDef         = clientdata.MustPlayerProperty("NegDef").Index         // NegDef（fork=588）
+	propMasDef         = clientdata.MustPlayerProperty("MasDef").Index         // MasDef（fork=589）
+	propJujDef         = clientdata.MustPlayerProperty("JujDef").Index         // JujDef（fork=587）
+	propMinMeleeDamage = clientdata.MustPlayerProperty("MinMeleeDamage").Index // MinMeleeDamage（fork=510）
+	propMaxMeleeDamage = clientdata.MustPlayerProperty("MaxMeleeDamage").Index // MaxMeleeDamage（fork=509）
+	propMaxHPAdd       = clientdata.MustPlayerProperty("MaxHPAdd").Index       // MaxHPAdd（fork=581）
+	propMaxMPAdd       = clientdata.MustPlayerProperty("MaxMPAdd").Index       // MaxMPAdd（fork=582）
+	propMaxSP          = clientdata.MustPlayerProperty("MaxSP").Index          // MaxSP（fork=580）
+	propMaxSPAdd       = clientdata.MustPlayerProperty("MaxSPAdd").Index       // 官方表存在但官服全程零下发;本服不出帧(加成折进 MaxSP)（fork=583）
+	propMaxLevel       = clientdata.MustPlayerProperty("MaxLevel").Index       // MaxLevel（fork=2083）
 	// View 43 的条目是普通客户端对象。GoodsGrid 读取这两个属性来解析
 	// 当前的内功静态记录及其图片；对现代客户端而言仅有 ConfigID 是
 	// 不够的。
-	propStaticData uint16 = 2237
-	propItemType   uint16 = 1889
+	propStaticData = clientdata.MustPlayerProperty("StaticData").Index // StaticData（fork=2237）
+	propItemType   = clientdata.MustPlayerProperty("ItemType").Index   // ItemType（fork=1889）
 	// WuXing(玩家域末现)是内修面板 form_wuxue_faculty 属性列
 	//（太极/阴柔/阳刚，ui_wuxue_prop_N）的显示来源：面板按 FacultyName
 	// 取武学对象后 QueryProp("WuXing")，缺省时整列退回 ui_train_elemt。
-	propWuXing uint16 = 2243
+	propWuXing = clientdata.MustPlayerProperty("WuXing").Index // WuXing（fork=2243）
 	// 阴阳太极累计（官服 4.7s 登录簇 0x10 YinLevel=1089/YangLevel=623/
 	// TaijiLevel=299）：按已学内功 wuxing（wuxuebaseinfo.ini nWuXing：
 	// 5=太极/6=阴柔/7=阳刚，neigong_effects.go 目录）分桶累计等级——
 	// 「当前修炼的内功、技能的属性（wuxing）」口径（2026-11-10 对齐）。
-	propYinLevel   uint16 = 251
-	propYangLevel  uint16 = 252
-	propTaijiLevel uint16 = 253
+	propYinLevel   = clientdata.MustPlayerProperty("YinLevel").Index   // YinLevel（fork=251）
+	propYangLevel  = clientdata.MustPlayerProperty("YangLevel").Index  // YangLevel（fork=252）
+	propTaijiLevel = clientdata.MustPlayerProperty("TaijiLevel").Index // TaijiLevel（fork=253）
 	// 武技点（经脉无忌格 wujibox 解锁货币，form_wuxue_wuji*.lua 读
 	// share wujibox_need 表并消耗 WuJiPoint 开格——custom 150 子令）。
 	// 玩家持有值无存档源：默认 0，NINEYIN_WUJI_POINT/_MAX 覆盖。
-	propWuJiPoint    uint16 = 862
-	propMaxWuJiPoint uint16 = 863
+	propWuJiPoint    = clientdata.MustPlayerProperty("WuJiPoint").Index    // WuJiPoint（fork=862）
+	propMaxWuJiPoint = clientdata.MustPlayerProperty("MaxWuJiPoint").Index // MaxWuJiPoint（fork=863）
 	// CurNeiGongWuXing(654) 当前运行内功的五行（官服 4.7s View43 行簇后
 	// 0x10 单帧实证，值 6=阴柔同族口径）：内修面板当前页的属性角标来源。
-	propCurNeiGongWuXing uint16 = 654
+	propCurNeiGongWuXing = clientdata.MustPlayerProperty("CurNeiGongWuXing").Index // CurNeiGongWuXing（fork=654）
 	// 装备内功的 PropModify 加成。
-	propMaxParryAdd    uint16 = 477
-	propMinMagicDefAdd uint16 = 597
+	propMaxParryAdd    = clientdata.MustPlayerProperty("MaxParryAdd").Index    // MaxParryAdd（fork=477）
+	propMinMagicDefAdd = clientdata.MustPlayerProperty("MinMagicDefAdd").Index // MinMagicDefAdd（fork=597）
 )
 
 // MaxSP(580)/MaxSPAdd(583) 官方表存在,但只有 MaxSP 在登录/切图全量批

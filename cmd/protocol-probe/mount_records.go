@@ -35,10 +35,13 @@ import (
 const (
 	recordNewRide uint16 = 310 // 官方 447 schema：NewRideRec
 
-	propNewRideID    uint16 = 1333 // 当前坐骑包
-	propCurRiderType uint16 = 82   // MountType
-
 	mountDBQueryTimeout = 5 * time.Second
+)
+
+// 属性索引按名解析（0x09 表方言门控换表自动跟随；fork 位见各行注记）。
+var (
+	propNewRideID    = clientdata.MustPlayerProperty("NewRideID").Index    // 当前坐骑包（fork=1333）
+	propCurRiderType = clientdata.MustPlayerProperty("CurRiderType").Index // MountType（fork=82）
 )
 
 var (

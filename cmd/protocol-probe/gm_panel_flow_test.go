@@ -122,10 +122,10 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		payload string
 		status  int
 	}{
-		{`{"action":"learn_all_taolu"}`, http.StatusOK},                      // 武学三动作：学满（会话循环取走）
-		{`{"action":"forget_all_taolu"}`, http.StatusOK},                     // 武学三动作：全遗忘
-		{`{"action":"learn_all_neigong"}`, http.StatusOK},                    // 武学三动作：内功全收录
-		{`{"action":"no_such_action"}`, http.StatusBadRequest},               // 未知动作
+		{`{"action":"learn_all_taolu"}`, http.StatusOK},                       // 武学三动作：学满（会话循环取走）
+		{`{"action":"forget_all_taolu"}`, http.StatusOK},                      // 武学三动作：全遗忘
+		{`{"action":"learn_all_neigong"}`, http.StatusOK},                     // 武学三动作：内功全收录
+		{`{"action":"no_such_action"}`, http.StatusBadRequest},                // 未知动作
 		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest},               // 超过 maxPlayerSP
 		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},           // 怒气自动回复速率（官方满档 5）
 		{`{"action":"set_rage_recovery","value":3.5}`, http.StatusBadRequest}, // 必须整数
@@ -152,7 +152,7 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		{`{"action":"set_lootbox_ttl","value":0}`, http.StatusOK},         // 0=保留到拾空合法
 		{`{"action":"set_npc_chase","enabled":0}`, http.StatusOK},         // NPC 自动追击总开关
 		{`{"action":"set_npc_chase","enabled":1}`, http.StatusOK},
-		{`{"action":"spawn_chest"}`, http.StatusOK},                       // GM 世界宝箱（无参白名单）
+		{`{"action":"spawn_chest"}`, http.StatusOK}, // GM 世界宝箱（无参白名单）
 		{`{"action":"popup_gm_panel"}`, http.StatusOK},
 		{`{"action":"custom_probe","msgId":517,"subType":899000000}`, http.StatusOK},
 

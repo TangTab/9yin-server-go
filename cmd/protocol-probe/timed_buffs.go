@@ -305,5 +305,3 @@ func (p *playerActor) appendTimedBuffsLocked(list *strings.Builder, now time.Tim
 			playerObjectID, playerOwnerID, buff.expiresUTC.UnixMilli())
 	}
 }
-
-

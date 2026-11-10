@@ -208,8 +208,8 @@ func TestPushModifyPackRecordsFrames(t *testing.T) {
 	// 技能包行，各一帧多行、单 int32 列；无包物品零帧。
 	c := &randomEquipCatalog{
 		itemFields: map[string]randomItemFields{
-			"blade_test":         {propPacks: []int{95258, 95259}, skillPacks: []int{9659, 9679, 9699}},
-			"plain_item":         {},
+			"blade_test": {propPacks: []int{95258, 95259}, skillPacks: []int{9659, 9679, 9699}},
+			"plain_item": {},
 		},
 	}
 	// 注入：先触发一次懒装载（Once 落定）再覆写全局字段——重置 Once 会

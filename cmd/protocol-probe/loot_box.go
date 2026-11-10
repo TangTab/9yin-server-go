@@ -28,14 +28,18 @@ import (
 //   - C2S 380=拾取槽位（int）、382=关箱；1008（拾银）/381（任务掉落）
 //     本批无对应行，不处理。
 const (
-	viewportDropBox            uint16 = 80   // share/view_define.lua VIEWPORT_DROP_BOX
-	dropBoxCapacity            uint16 = 16   // form_droppick.lua MAX_DROP_BOX_CAPACITY
-	propDropType               uint16 = 2224 // DropType Int32（视图域）
-	propCanPick                uint16 = 76   // CanPick Byte（场景对象域，尸体冒光开关）
-	propPickMember             uint16 = 1592 // PickMember WideString（拾取归属名单，逗号分隔玩家名）
-	clientCustomPickupDropItem int32  = 380  // CLIENT_CUSTOMMSG_PICKUP_DROPITEM
-	clientCustomCloseDropBox   int32  = 382  // CLIENT_CUSTOMMSG_CLOSE_DROPBOX
+	viewportDropBox            uint16 = 80  // share/view_define.lua VIEWPORT_DROP_BOX
+	dropBoxCapacity            uint16 = 16  // form_droppick.lua MAX_DROP_BOX_CAPACITY
+	clientCustomPickupDropItem int32  = 380 // CLIENT_CUSTOMMSG_PICKUP_DROPITEM
+	clientCustomCloseDropBox   int32  = 382 // CLIENT_CUSTOMMSG_CLOSE_DROPBOX
 	lootBoxTemplateConfigID           = "stormbox_10"
+)
+
+// 属性索引按名解析（0x09 表方言门控换表自动跟随；fork 位见各行注记）。
+var (
+	propDropType   = clientdata.MustPlayerProperty("DropType").Index   // DropType Int32（视图域）（fork=2224）
+	propCanPick    = clientdata.MustSceneProperty("CanPick").Index     // CanPick Byte（场景对象域，尸体冒光开关）（fork=76）
+	propPickMember = clientdata.MustPlayerProperty("PickMember").Index // PickMember WideString（拾取归属名单，逗号分隔玩家名）（fork=1592）
 )
 
 // lootBoxRuntime 是一份在场掉落的共享状态（挂 sceneRun，多连接共见；

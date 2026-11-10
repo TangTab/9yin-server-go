@@ -105,14 +105,14 @@ func rushWalkBandAcceptMeters(pending *pendingCastState) float64 {
 }
 
 // 冲锋簇属性索引（按名映射自本服表；官服现行表同名字 +2 偏移）。
-const (
-	propRushCantMove        uint16 = 203 // CantMove Byte
-	propRushPauseSkill      uint16 = 220 // PauseSkill String
-	propRushLogicState      uint16 = 463 // LogicState Byte
-	propRushFP              uint16 = 462 // FP Int32（伤害段 FP/SP 对）
-	propRushLastWGAttackNpc uint16 = 867 // LastWGAttackNpc String（直收簇宣告目标模型）
+var (
+	propRushCantMove        = clientdata.MustPlayerProperty("CantMove").Index        // CantMove Byte（fork=203）
+	propRushPauseSkill      = clientdata.MustPlayerProperty("PauseSkill").Index      // PauseSkill String（fork=220）
+	propRushLogicState      = clientdata.MustPlayerProperty("LogicState").Index      // LogicState Byte（fork=463）
+	propRushFP              = clientdata.MustPlayerProperty("FP").Index              // FP Int32（伤害段 FP/SP 对）（fork=462）
+	propRushLastWGAttackNpc = clientdata.MustPlayerProperty("LastWGAttackNpc").Index // LastWGAttackNpc String（直收簇宣告目标模型）（fork=867）
 
-	propQingGongPointIndex uint16 = 692 // QingGongPoint Int32（c61 扣后单帧）
+	propQingGongPointIndex = clientdata.MustPlayerProperty("QingGongPoint").Index // QingGongPoint Int32（c61 扣后单帧）（fork=692）
 )
 
 // msg19 打击点拟合常数：两打击点分别在玩家沿「目标→玩家」延长线、
@@ -1138,7 +1138,7 @@ func echoPlayerMoveIntent(link sceneMessageConnection, player *playerActor, valu
 			return
 		}
 		echo.destX, echo.destY, echo.destZ = values[6].Float32, y, values[7].Float32
-		echo.angle = moveEchoAngle(echo.destX - x, echo.destZ - z)
+		echo.angle = moveEchoAngle(echo.destX-x, echo.destZ-z)
 		if len(values) > 8 && values[8].Type == 4 {
 			echo.speed = values[8].Float32
 		}

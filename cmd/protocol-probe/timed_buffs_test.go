@@ -73,7 +73,7 @@ func TestTimedBuffExpiryFrames(t *testing.T) {
 	player := newPlayerActor("到期侠", 0)
 	player.grantTimedBuff("buf_test_1h", 1, 0, time.Hour, now)
 
-	if frames := player.timedBuffExpiryFrames(now.Add(10*time.Minute)); len(frames) != 0 {
+	if frames := player.timedBuffExpiryFrames(now.Add(10 * time.Minute)); len(frames) != 0 {
 		t.Fatalf("premature removal frames=%d", len(frames))
 	}
 	frames := player.timedBuffExpiryFrames(now.Add(2 * time.Hour))

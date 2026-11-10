@@ -46,18 +46,18 @@ const (
 
 // tersureWashSession 一次洗炼会话（放入锁 0 起、取出/换物解锁 1 止）。
 type tersureWashSession struct {
-	active       bool
-	viewID       uint16 // 客户端寻址视图（洗炼界面 get_view_item 读回同源）
-	slot         int32
-	uid          string
-	configID     string
-	kind         int // randomKindTreaure / randomKindWawa
-	snapshot     *itemRandomProps // 会话权威快照（首用时 ensure，存后更新——
+	active   bool
+	viewID   uint16 // 客户端寻址视图（洗炼界面 get_view_item 读回同源）
+	slot     int32
+	uid      string
+	configID string
+	kind     int              // randomKindTreaure / randomKindWawa
+	snapshot *itemRandomProps // 会话权威快照（首用时 ensure，存后更新——
 	// 锁定期间无并发修改方）
-	pendingProp  []randomPropLine  // 属性洗候选全量（锁定行前置）
-	pendingSkill *randomSkillLine  // 武学洗候选
-	lockedRows   map[int]bool      // RandomPropRec 行锁（0 基行号）
-	tempRows     int               // 已下发 TempTersureRec 行数（清行用）
+	pendingProp  []randomPropLine // 属性洗候选全量（锁定行前置）
+	pendingSkill *randomSkillLine // 武学洗候选
+	lockedRows   map[int]bool     // RandomPropRec 行锁（0 基行号）
+	tempRows     int              // 已下发 TempTersureRec 行数（清行用）
 }
 
 // handleTersureCustom 688 入口（活动信封/直达双路都汇到这里）。
@@ -484,7 +484,7 @@ func tersureRewriteRecord(h *itemSession, view uint16, slot int32, record uint16
 }
 
 // serverRecordDelRowView 0x12 ServerRecordDelRow 的视图对象寻址形态
-//（flag=1，寻址布局镜像 serverRecordAddRowsView；场景对象版见
+// （flag=1，寻址布局镜像 serverRecordAddRowsView；场景对象版见
 // shortcut_records.go serverRecordDelRow——0x12 末 u16=起始行号，逐行删）。
 func serverRecordDelRowView(viewID, objectIndex, recordIndex, row uint16) []byte {
 	msg := make([]byte, 16)

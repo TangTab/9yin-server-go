@@ -380,7 +380,7 @@ func TestChaseReplansWhenTargetShifts(t *testing.T) {
 }
 
 // TestChaseGateSilencesMovementButHoldsThreat GM 追击总闸
-//（set_npc_chase=0 / NINEYIN_NPC_CHASE=off）：位移分支整段静默、怪停
+// （set_npc_chase=0 / NINEYIN_NPC_CHASE=off）：位移分支整段静默、怪停
 // 出生点，但仇恨照常持有（威胁表/受击锁定不动）。
 func TestChaseGateSilencesMovementButHoldsThreat(t *testing.T) {
 	nodes := []mapnav.Node{{0, 0, 0}, {10, 0, 0}, {20, 0, 0}, {30, 0, 0}}

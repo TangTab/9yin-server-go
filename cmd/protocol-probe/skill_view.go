@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
+)
 
 const viewportSkill uint16 = 40
 
@@ -9,28 +13,28 @@ const viewportSkill uint16 = 40
 // AConsumeQGP@2254/TargetShapePara2@2260/HitShapePara1@2261/HitShapePara2@2262/
 // HPHealMul@2265/MPHealMul@2266/Flow@2267/LeadTime@2270/LeadSepTime@2271（Int32）；
 // Quality@2119(Byte)；CoolDownTime@2034(Int32)；五系 DamageMul@518..522(Float32)。
-const (
-	propSkillUseLimit    uint16 = 2238
-	propVarPropNo        uint16 = 2239
-	propAConsumeHP       uint16 = 2245
-	propAConsumeMP       uint16 = 2246
-	propAConsumeSP       uint16 = 2252
-	propAConsumeQGP      uint16 = 2254
-	propTargetShapePara2 uint16 = 2260
-	propHitShapePara1    uint16 = 2261
-	propHitShapePara2    uint16 = 2262
-	propHPHealMul        uint16 = 2265
-	propMPHealMul        uint16 = 2266
-	propFlow             uint16 = 2267
-	propLeadTime         uint16 = 2270
-	propLeadSepTime      uint16 = 2271
-	propQuality          uint16 = 2119
-	propCoolDownTime     uint16 = 2034
-	propPhyDamageMul     uint16 = 518
-	propStiDamageMul     uint16 = 519
-	propJujDamageMul     uint16 = 520
-	propNegDamageMul     uint16 = 521
-	propMasDamageMul     uint16 = 522
+var (
+	propSkillUseLimit    = clientdata.MustPlayerProperty("UseLimit").Index         // UseLimit（fork=2238）
+	propVarPropNo        = clientdata.MustPlayerProperty("VarPropNo").Index        // VarPropNo（fork=2239）
+	propAConsumeHP       = clientdata.MustPlayerProperty("AConsumeHP").Index       // AConsumeHP（fork=2245）
+	propAConsumeMP       = clientdata.MustPlayerProperty("AConsumeMP").Index       // AConsumeMP（fork=2246）
+	propAConsumeSP       = clientdata.MustPlayerProperty("AConsumeSP").Index       // AConsumeSP（fork=2252）
+	propAConsumeQGP      = clientdata.MustPlayerProperty("AConsumeQGP").Index      // AConsumeQGP（fork=2254）
+	propTargetShapePara2 = clientdata.MustPlayerProperty("TargetShapePara2").Index // TargetShapePara2（fork=2260）
+	propHitShapePara1    = clientdata.MustPlayerProperty("HitShapePara1").Index    // HitShapePara1（fork=2261）
+	propHitShapePara2    = clientdata.MustPlayerProperty("HitShapePara2").Index    // HitShapePara2（fork=2262）
+	propHPHealMul        = clientdata.MustPlayerProperty("HPHealMul").Index        // HPHealMul（fork=2265）
+	propMPHealMul        = clientdata.MustPlayerProperty("MPHealMul").Index        // MPHealMul（fork=2266）
+	propFlow             = clientdata.MustPlayerProperty("Flow").Index             // Flow（fork=2267）
+	propLeadTime         = clientdata.MustPlayerProperty("LeadTime").Index         // LeadTime（fork=2270）
+	propLeadSepTime      = clientdata.MustPlayerProperty("LeadSepTime").Index      // LeadSepTime（fork=2271）
+	propQuality          = clientdata.MustPlayerProperty("Quality").Index          // Quality（fork=2119）
+	propCoolDownTime     = clientdata.MustPlayerProperty("CoolDownTime").Index     // CoolDownTime（fork=2034）
+	propPhyDamageMul     = clientdata.MustPlayerProperty("PhyDamageMul").Index     // PhyDamageMul（fork=518）
+	propStiDamageMul     = clientdata.MustPlayerProperty("StiDamageMul").Index     // StiDamageMul（fork=519）
+	propJujDamageMul     = clientdata.MustPlayerProperty("JujDamageMul").Index     // JujDamageMul（fork=520）
+	propNegDamageMul     = clientdata.MustPlayerProperty("NegDamageMul").Index     // NegDamageMul（fork=521）
+	propMasDamageMul     = clientdata.MustPlayerProperty("MasDamageMul").Index     // MasDamageMul（fork=522）
 )
 
 // starterSkillRowIDs 标记 starter 基线行：这些行走 Java StarterSkills.skillRowProperties

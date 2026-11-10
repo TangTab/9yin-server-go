@@ -19,7 +19,7 @@ func TestSkillLevelFileStoreRoundTrip(t *testing.T) {
 		t.Fatalf("empty store level=%d want 0", level)
 	}
 	if err := store.apply(42, map[string]int32{
-		"CS_wd_tjq01": 19,
+		"CS_wd_tjq01":  19,
 		"zs_normal_02": 1, // 仅 >1 落档
 	}); err != nil {
 		t.Fatalf("apply: %v", err)

@@ -99,7 +99,7 @@ func (r *sceneRun) navGraphLocked() *mapnav.Graph {
 // 坐标。跨分量/无解返回 nil。path[0]（NPC 最近路点）被丢弃——从当前
 // 位置直接走向 path[1]：重规划每拍发生时“先折返最近路点”会让 NPC 在
 // 两路点间原地振荡（追击穿墙回归实测）；近似弦切不超过一格路点间距
-//（~10m），仍沿可走网格拓扑。调用方必须已持有 r.mu。
+// （~10m），仍沿可走网格拓扑。调用方必须已持有 r.mu。
 func (r *sceneRun) planChasePath(graph *mapnav.Graph, from, target mapnav.Node) []mapnav.Node {
 	start, goal := graph.Nearest(from), graph.Nearest(target)
 	if start < 0 || goal < 0 {
@@ -202,7 +202,7 @@ func chaseStraightDelay(remaining, speed float32) time.Duration {
 }
 
 // orientTowardTransform 折线跟随的朝向：沿本拍实际推进方向；零位移
-//（已到折线端点等）保持旧朝向。
+// （已到折线端点等）保持旧朝向。
 func orientTowardTransform(from, at mapnav.Node, fallback float32) worldcore.Transform {
 	orient := fallback
 	if dx, dz := at.X-from.X, at.Z-from.Z; dx != 0 || dz != 0 {

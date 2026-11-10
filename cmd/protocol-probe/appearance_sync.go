@@ -43,15 +43,15 @@ const (
 )
 
 // 官方 0x09 表玩家域外观属性索引（official_property_table.txt）。
-const (
-	propShowEquipType uint16 = 408 // t1 Byte
-	propFashionCoat   uint16 = 1353
-	propFashionHat    uint16 = 1354
-	propFashionShoes  uint16 = 1355
-	propPlayerHat     uint16 = 391 // addObject 档内是发型别名，0x10 才是真帽
-	propPlayerCloth   uint16 = 393
-	propPlayerPants   uint16 = 394
-	propPlayerShoes   uint16 = 395
+var (
+	propShowEquipType = clientdata.MustPlayerProperty("ShowEquipType").Index // t1 Byte（fork=408）
+	propFashionCoat   = clientdata.MustPlayerProperty("FashionCoat").Index   // FashionCoat（fork=1353）
+	propFashionHat    = clientdata.MustPlayerProperty("FashionHat").Index    // FashionHat（fork=1354）
+	propFashionShoes  = clientdata.MustPlayerProperty("FashionShoes").Index  // FashionShoes（fork=1355）
+	propPlayerHat     = clientdata.MustPlayerProperty("Hat").Index           // addObject 档内是发型别名，0x10 才是真帽（fork=391）
+	propPlayerCloth   = clientdata.MustPlayerProperty("Cloth").Index         // Cloth（fork=393）
+	propPlayerPants   = clientdata.MustPlayerProperty("Pants").Index         // Pants（fork=394）
+	propPlayerShoes   = clientdata.MustPlayerProperty("Shoes").Index         // Shoes（fork=395）
 )
 
 // wornModels 已穿装备按槽位 → 模型路径（后穿覆盖先穿，同槽只留一件）。

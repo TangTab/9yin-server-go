@@ -998,6 +998,5 @@ func TestNpcServiceWithoutScriptStaysUnimplemented(t *testing.T) {
 	}
 }
 
-
 // npcTestOwner 测试侧 NPC owner 期望值（随 npcOwnerID 官服化）。
 func npcTestOwner(bareID uint32) uint32 { return npcOwnerID(forkNPCID(bareID)) }

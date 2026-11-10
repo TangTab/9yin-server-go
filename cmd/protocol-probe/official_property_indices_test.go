@@ -9,11 +9,12 @@ import (
 	"github.com/local/9yin-go-server/internal/clientdata"
 )
 
-// TestPlayerPropertyIndicesMatchOfficialTable 把所有玩家侧属性索引常量
-// 钉死到官方 0x09 属性表(internal/clientdata/official_property_table.txt,
-// 2370 项)的玩家域(同名取末现)位置与线型上。0x09 表按位置绑定,任何
-// 常量与表漂移都会让客户端按错位索引解析属性——历史上 MaxSP 撞 208/209
-// 曾导致进世界即崩。改常量必须同步改这张表(或反之),本测试是唯一闸门。
+// TestPlayerPropertyIndicesMatchOfficialTable 把所有玩家侧属性索引
+// 钉死到官方 0x09 属性表的玩家域(同名取末现)名字与线型上。
+// 2026-11-10 P2b 起 prop* 常量已改为按名解析的 var（MustPlayerProperty/
+// MustSceneProperty，0x09 表方言门控换表自动跟随）——本测试转为校验
+// 「所引用表行与语义名/线型一致」：改表行名或线型、或改常量引用名都会
+// 在此爆。历史背景：MaxSP 撞 208/209 曾致进世界即崩，位置绑定依旧成立。
 func TestPlayerPropertyIndicesMatchOfficialTable(t *testing.T) {
 	playerAnchors := []struct {
 		name     string

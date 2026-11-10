@@ -13,34 +13,34 @@ import (
 // LoginFlow applyCapital/applyPowerLevel/applyAlignment/applySetPkMode/
 // applyVitals/applyFillSpeed/applyActDayLimit 同源；线缆事实（索引/线型/
 // 帧序）以 GmWeatherPresets 同期的 official_property_table 玩家域为准。
-const (
-	propPowerLevel     uint16 = 210 // PowerLevel Int32 实力等级
-	propLevelTitle     uint16 = 801 // LevelTitle String 实力称号键
-	propCharacterFlag  uint16 = 319 // CharacterFlag Int32 性格标记
-	propCharacterValue uint16 = 320 // CharacterValue Int32 性格值
-	propJustice        uint16 = 321 // Justice Int32 善值
-	propEvil           uint16 = 322 // Evil Int32 恶值
-	propFreeBase       uint16 = 323 // FreeBase Int32 自由善恶基数
-	propPKValue        uint16 = 427 // PKValue Int32 杀戮值
-	propPKMode         uint16 = 437 // PKMode Byte PK 模式（官方线型 1）
-	propEne            uint16 = 705 // Ene Int32 体力
-	propMaxEne         uint16 = 706 // MaxEne Int32 体力上限
-	propResumeEne      uint16 = 707 // ResumeEne Int32 体力恢复
-	propSat            uint16 = 708 // Sat Int32 饱食
-	propMaxSat         uint16 = 709 // MaxSat Int32 饱食上限
-	propDrunkLevel     uint16 = 723 // DrunkLevel Int32 酒量
-	propMount          uint16 = 77  // Mount String 当前坐骑 configId（空=无）
+var (
+	propPowerLevel     = clientdata.MustPlayerProperty("PowerLevel").Index     // PowerLevel Int32 实力等级（fork=210）
+	propLevelTitle     = clientdata.MustPlayerProperty("LevelTitle").Index     // LevelTitle String 实力称号键（fork=801）
+	propCharacterFlag  = clientdata.MustPlayerProperty("CharacterFlag").Index  // CharacterFlag Int32 性格标记（fork=319）
+	propCharacterValue = clientdata.MustPlayerProperty("CharacterValue").Index // CharacterValue Int32 性格值（fork=320）
+	propJustice        = clientdata.MustPlayerProperty("Justice").Index        // Justice Int32 善值（fork=321）
+	propEvil           = clientdata.MustPlayerProperty("Evil").Index           // Evil Int32 恶值（fork=322）
+	propFreeBase       = clientdata.MustPlayerProperty("FreeBase").Index       // FreeBase Int32 自由善恶基数（fork=323）
+	propPKValue        = clientdata.MustPlayerProperty("PKValue").Index        // PKValue Int32 杀戮值（fork=427）
+	propPKMode         = clientdata.MustPlayerProperty("PKMode").Index         // PKMode Byte PK 模式（官方线型 1）（fork=437）
+	propEne            = clientdata.MustPlayerProperty("Ene").Index            // Ene Int32 体力（fork=705）
+	propMaxEne         = clientdata.MustPlayerProperty("MaxEne").Index         // MaxEne Int32 体力上限（fork=706）
+	propResumeEne      = clientdata.MustPlayerProperty("ResumeEne").Index      // ResumeEne Int32 体力恢复（fork=707）
+	propSat            = clientdata.MustPlayerProperty("Sat").Index            // Sat Int32 饱食（fork=708）
+	propMaxSat         = clientdata.MustPlayerProperty("MaxSat").Index         // MaxSat Int32 饱食上限（fork=709）
+	propDrunkLevel     = clientdata.MustPlayerProperty("DrunkLevel").Index     // DrunkLevel Int32 酒量（fork=723）
+	propMount          = clientdata.MustPlayerProperty("Mount").Index          // Mount String 当前坐骑 configId（空=无）（fork=77）
 	// propTitleID@360 归 title_system.go 声明（称号域独占），此处共用。
-	propCurRideMount    uint16 = 361  // CurRideMount Object 骑乘态坐骑对象（无=0）
-	propPrestigeExp     uint16 = 848  // PrestigeExp Int32 声望总量
-	propBingLuType      uint16 = 2153 // BingLuType Int32 兵录槽类型（无数据源发 0）
-	propMaxBingLuLevel  uint16 = 2154 // MaxBingLuLevel Int32 兵录最高等级
-	propNorFacultyAdd   uint16 = 774  // NorFacultyAdd Int32 修炼速度基数
-	propActDayValue     uint16 = 790  // ActDayValue Int32 演武每日额度（文）
-	propActCostSuiYin   uint16 = 791  // ActCostSuiYin Int32 今日已耗碎银（文）
-	propActDayValueLast uint16 = 795  // ActDayValueLast Int32 剩余总量（文）
-	propActDayValueUsed uint16 = 796  // ActDayValueUsed Int32 今日已用（文）
-	propActDayValueMax  uint16 = 797  // ActDayValueMax Int32 每日上限（文，0=不限制）
+	propCurRideMount    = clientdata.MustPlayerProperty("CurRideMount").Index    // CurRideMount Object 骑乘态坐骑对象（无=0）（fork=361）
+	propPrestigeExp     = clientdata.MustPlayerProperty("PrestigeExp").Index     // PrestigeExp Int32 声望总量（fork=848）
+	propBingLuType      = clientdata.MustPlayerProperty("BingLuType").Index      // BingLuType Int32 兵录槽类型（无数据源发 0）（fork=2153）
+	propMaxBingLuLevel  = clientdata.MustPlayerProperty("MaxBingLuLevel").Index  // MaxBingLuLevel Int32 兵录最高等级（fork=2154）
+	propNorFacultyAdd   = clientdata.MustPlayerProperty("NorFacultyAdd").Index   // NorFacultyAdd Int32 修炼速度基数（fork=774）
+	propActDayValue     = clientdata.MustPlayerProperty("ActDayValue").Index     // ActDayValue Int32 演武每日额度（文）（fork=790）
+	propActCostSuiYin   = clientdata.MustPlayerProperty("ActCostSuiYin").Index   // ActCostSuiYin Int32 今日已耗碎银（文）（fork=791）
+	propActDayValueLast = clientdata.MustPlayerProperty("ActDayValueLast").Index // ActDayValueLast Int32 剩余总量（文）（fork=795）
+	propActDayValueUsed = clientdata.MustPlayerProperty("ActDayValueUsed").Index // ActDayValueUsed Int32 今日已用（文）（fork=796）
+	propActDayValueMax  = clientdata.MustPlayerProperty("ActDayValueMax").Index  // ActDayValueMax Int32 每日上限（文，0=不限制）（fork=797）
 )
 
 // actDayUnlimitedSentinel 与 Java PlayerProgress.UNLIMITED_ACT_DAY_VALUE

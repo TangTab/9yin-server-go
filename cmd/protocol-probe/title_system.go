@@ -21,10 +21,14 @@ import (
 // 拥有集合经 title_rec 记录行（官方 schema 5 列 [u32,u32,f64,u8,f64]，
 // 数值列语义未校准保持零填充——FashionSuitRec 同例）进世界重放。
 const (
-	clientCustomSetTitle int32  = 295
-	propTitleID          uint16 = 360
-	titleIDMax           int32  = 500000
-	titleDBQueryTimeout         = 5 * time.Second
+	clientCustomSetTitle int32 = 295
+	titleIDMax           int32 = 500000
+	titleDBQueryTimeout        = 5 * time.Second
+)
+
+// 属性索引按名解析（0x09 表方言门控换表自动跟随；fork 位见各行注记）。
+var (
+	propTitleID = clientdata.MustPlayerProperty("TitleID").Index // TitleID（fork=360）
 )
 
 // titleRow 是 role_titles 的行形态（Java PanelDataStore：role_id+title_id

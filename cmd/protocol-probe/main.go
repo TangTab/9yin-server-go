@@ -2505,39 +2505,39 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 			}
-		if player != nil && !neigongGranted {
-			if progressErr := grantStarterProgress(); progressErr != nil {
-				log.Printf("%s: grant stable inner-power/player attributes: %v", conn.RemoteAddr(), progressErr)
-				return
+			if player != nil && !neigongGranted {
+				if progressErr := grantStarterProgress(); progressErr != nil {
+					log.Printf("%s: grant stable inner-power/player attributes: %v", conn.RemoteAddr(), progressErr)
+					return
+				}
+				log.Printf("%s: granted View=43 inner-power and View=40 花无缺七招 after explicit ClientReady", conn.RemoteAddr())
 			}
-			log.Printf("%s: granted View=43 inner-power and View=40 花无缺七招 after explicit ClientReady", conn.RemoteAddr())
-		}
-		if player != nil && !officialReadyInfoPushed {
-			// 官服 4.8s 位就绪信息帧簇（c.pcapng 4.80-4.84s：技能视图簇
-			// 之后、View46 之前）：m607 账号+角色名 → m52 服务器时间 →
-			// m586 [5] 登录状态簇首 → 战斗属性全量 0x10 逐项单帧
-			//（official_login_align.go；官服另有的背包视图行在本服位于
-			// 选角链，时序差异已在对照文档 §十一 注记）。
-			officialReadyInfoPushed = true
-			writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), string(accountKey), player.name, time.Now())
-			writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
-			// 限时 buff 就绪重放（m169 九值时间形态，v7=到期unix毫秒；
-			// 官服登录期 buf_baosd_02 语义的带时间对应物）。
-			if timedFrames, terr := player.timedBuffLoginReplayFrames(time.Now()); terr != nil {
-				log.Printf("%s: replay timed buffs: %v", conn.RemoteAddr(), terr)
-			} else {
-				for _, frame := range timedFrames {
-					if werr := link.WriteFrame(frame); werr != nil {
-						log.Printf("%s: write timed buff replay: %v", conn.RemoteAddr(), werr)
-						break
+			if player != nil && !officialReadyInfoPushed {
+				// 官服 4.8s 位就绪信息帧簇（c.pcapng 4.80-4.84s：技能视图簇
+				// 之后、View46 之前）：m607 账号+角色名 → m52 服务器时间 →
+				// m586 [5] 登录状态簇首 → 战斗属性全量 0x10 逐项单帧
+				//（official_login_align.go；官服另有的背包视图行在本服位于
+				// 选角链，时序差异已在对照文档 §十一 注记）。
+				officialReadyInfoPushed = true
+				writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), string(accountKey), player.name, time.Now())
+				writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
+				// 限时 buff 就绪重放（m169 九值时间形态，v7=到期unix毫秒；
+				// 官服登录期 buf_baosd_02 语义的带时间对应物）。
+				if timedFrames, terr := player.timedBuffLoginReplayFrames(time.Now()); terr != nil {
+					log.Printf("%s: replay timed buffs: %v", conn.RemoteAddr(), terr)
+				} else {
+					for _, frame := range timedFrames {
+						if werr := link.WriteFrame(frame); werr != nil {
+							log.Printf("%s: write timed buff replay: %v", conn.RemoteAddr(), werr)
+							break
+						}
+					}
+					if len(timedFrames) > 0 {
+						log.Printf("%s: replayed %d timed buffs after ClientReady", conn.RemoteAddr(), len(timedFrames))
 					}
 				}
-				if len(timedFrames) > 0 {
-					log.Printf("%s: replayed %d timed buffs after ClientReady", conn.RemoteAddr(), len(timedFrames))
-				}
+				writeOfficialCombatAttributeFrames(link, player, conn.RemoteAddr().String())
 			}
-			writeOfficialCombatAttributeFrames(link, player, conn.RemoteAddr().String())
-		}
 			if player != nil && !mountsPushed {
 				// 坐骑（Java mountsPushed，43/40 之后、switch 同步之前）：
 				// NewRideRec 拥有行 + 骑乘态帧（重登步行口径）。
@@ -3177,15 +3177,15 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
 				}
-		case clientCustomMoveItem:
-			if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
-				log.Printf("%s: handle move item: %v", conn.RemoteAddr(), handleErr)
-			}
-		case clientCustomTersure:
-			// 宝物洗炼 688 主链（直达 0x1E/0x27 路径；活动信封 case 在上）。
-			if _, handleErr := handleTersureCustom(newItemSession(), custom); handleErr != nil {
-				log.Printf("%s: handle tersure: %v", conn.RemoteAddr(), handleErr)
-			}
+			case clientCustomMoveItem:
+				if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle move item: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomTersure:
+				// 宝物洗炼 688 主链（直达 0x1E/0x27 路径；活动信封 case 在上）。
+				if _, handleErr := handleTersureCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle tersure: %v", conn.RemoteAddr(), handleErr)
+				}
 			case clientCustomUseItem:
 				if _, handleErr := handleBodyItemUse(newItemSession(), custom); handleErr != nil {
 					log.Printf("%s: handle use item: %v", conn.RemoteAddr(), handleErr)

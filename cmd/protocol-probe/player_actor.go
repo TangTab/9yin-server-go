@@ -43,60 +43,12 @@ func setPlayerWireIdentity(roleID uint32) {
 }
 
 const (
-	// 官方属性表(2370 项)玩家域索引(同名多处取末现)。官方表没有的
-	// 旧私有属性(CantUseSkill/CurSkillEffectID/CurSkillLevel)已删除,
-	// 不再下发。official_property_indices_test.go 按名断言防漂移。
-	propNeigongPKStatus uint16 = 85  // NeigongPKStatus Word(官方线型 2)
-	propDead            uint16 = 464 // Dead Byte(官方线型 1)
-	propCurSkillID      uint16 = 460 // CurSkillID String
-	// 收招清除帧（exe #2014 六项形态）后三项归零通道，官方线型均 1：
-	propCurSkillCanNoLimit    uint16 = 624 // CurSkillCanNoLimit Byte
-	propCantBeSkillLocked     uint16 = 208 // CantBeSkillLocked Byte
-	propCantBeSkillMustLocked uint16 = 209 // CantBeSkillMustLocked Byte
-	propState                 uint16 = 19  // State String（动作总时长后 stand 复位帧用）
-	propPauseTime             uint16 = 2240
-	// 原生主角 UI 将这些属性绑定为整数。它们描述的是对外通告的恢复
-	// 速率；真正的 HP/MP 变动仍以服务器为来源。
-	propHPHeartSpeed    uint16 = 617
-	propHPHeartSpeedAdd uint16 = 621
-	propMPHeartSpeed    uint16 = 618
-	propMPHeartSpeedAdd uint16 = 622
-	// 资源值单属性帧索引：打坐回复（sitcrossRecoveryFrames）与轻功
-	// 回复（qingGongPointFrame）一样按官方形态逐层发 n=1 单帧，
-	// 不走全量 stateProperties。
-	propHP         uint16 = 465
-	propMP         uint16 = 466
-	propHPRatio    uint16 = 469
-	propMPRatio    uint16 = 470
-	propHitHP      uint16 = 481
-	propHitHPRatio uint16 = 482
-	// form_main_player 的恢复提示框从这些独立属性获取实际恢复量，而不
-	// 是从 *HeartSpeed 读取。
-	propHPUpSpeed           uint16 = 615
-	propHPUpSpeedAdd        uint16 = 619
-	propMPUpSpeed           uint16 = 616
-	propMPUpSpeedAdd        uint16 = 620
-	propCurSkillTarget      uint16 = 627 // CurSkillTarget Object
-	propModifySkillLockTime uint16 = 221
-	// 已学技能对象对这个字节的使用独立于服务器的请求受理。现代快捷栏
-	// UI 直接读取 CanUse；当它缺失时，即使受保护的战斗请求路径仍能到达
-	// C2S 211，图标也会被渲染为不可用。
-	propSkillCanUse uint16 = 2236 // CanUse Byte(官服怒气灰化心跳簇同索引)
-	// propSkillCurTargetCount：View40 技能行 CurTargetCount（官服伤害段簇
-	// 首击前=命中数、击杀后=0，f/g 实证；官服现行表同索引 579）。
-	propSkillCurTargetCount uint16 = 577
-	// 当前客户端并不通过 School 表达所有归属关系。其角色面板依次选用
-	// Force，再 NewSchool，最后 School。因此必须让这些协商属性保持显式，
-	// 后期势力和隐藏门派才不会被渲染成 \"无门派\"。
-	propForce     uint16 = 194 // Force String(玩家域)
-	propNewSchool uint16 = 190 // NewSchool String
 
 	// BufferListStr 是原生玩法的 BuffContainer 快照。BufferInfo 槽位是
 	// 原生视觉存储的投影。两者必须描述同一批活动 Buff：仅有 UI 的
 	// BufferInfo 不足以通过 qinggong_3 的原生 HasBuff("buf_qg_drift") 门控。
-	bufferListPropertyIndex      uint16 = 143 // BufferListStr String(全表唯一)
-	bufferInfoFirstPropertyIndex uint16 = 629 // BufferInfo1
-	bufferInfoSlotCount          uint16 = 24
+	bufferListPropertyIndex uint16 = 143 // BufferListStr String(全表唯一；fork-only：官服 2433 表无此名，官方替代方言待 P4 考证)
+	bufferInfoSlotCount     uint16 = 24
 
 	redSuperArmorBuffSlot uint16 = 1
 	waterDriftBuffSlot    uint16 = 2
@@ -139,20 +91,6 @@ const (
 	// StaticData 4558、24h 租约。按下挂槽、松开清槽。
 	parryBuffSlot       uint16 = 11
 	parryBuffStaticData uint32 = 4558
-	// 格挡族属性(官方表玩家域):InParry@471/InManualParry@474/
-	// ParryValue@475(场景域基块的 InParry@88 属 NPC 帧)。
-	// ParryValue 是 MaxParry+MaxParryAdd 的推导和（progress.
-	// parryValueTotal，官方抓包 116/157 逐点吻合）。
-	propInParry       uint16 = 471
-	propInManualParry uint16 = 474
-	propParryValue    uint16 = 475
-	// 登录首批补位（55866/49840/62311 三方抓包一致）：官方首帧 0x10
-	// 一律带 CantParry@472=0、ParryRatio@478=100、ParryUpSpeed@479=4，
-	// NPC 则在 0x0D 建对象即带 478。缺这三位时客户端格挡值 HUD/面板
-	// 显示为空——引擎侧格挡 UI 绑定整族，非仅 ParryValue。
-	propCantParry    uint16 = 472
-	propParryRatio   uint16 = 478
-	propParryUpSpeed uint16 = 479
 
 	redSuperArmorStaticData uint32 = 8682
 	waterDriftStaticData    uint32 = 216
@@ -186,6 +124,45 @@ const (
 	ragGainParriedHit   int32 = 2
 	ragGainUnparriedHit int32 = 1
 	ragGainCleanHit     int32 = 2
+)
+
+// 属性索引按名解析（0x09 表方言门控换表自动跟随；fork 位见各行注记）。
+var (
+	propNeigongPKStatus          = clientdata.MustPlayerProperty("NeigongPKStatus").Index       // NeigongPKStatus Word(官方线型 2)（fork=85）
+	propDead                     = clientdata.MustPlayerProperty("Dead").Index                  // Dead Byte(官方线型 1)（fork=464）
+	propCurSkillID               = clientdata.MustPlayerProperty("CurSkillID").Index            // CurSkillID String（fork=460）
+	propCurSkillCanNoLimit       = clientdata.MustPlayerProperty("CurSkillCanNoLimit").Index    // CurSkillCanNoLimit Byte（fork=624）
+	propCantBeSkillLocked        = clientdata.MustPlayerProperty("CantBeSkillLocked").Index     // CantBeSkillLocked Byte（fork=208）
+	propCantBeSkillMustLocked    = clientdata.MustPlayerProperty("CantBeSkillMustLocked").Index // CantBeSkillMustLocked Byte（fork=209）
+	propState                    = clientdata.MustSceneProperty("State").Index                  // State String（动作总时长后 stand 复位帧用）（fork=19）
+	propPauseTime                = clientdata.MustPlayerProperty("PauseTime").Index             // PauseTime（fork=2240）
+	propHPHeartSpeed             = clientdata.MustPlayerProperty("HPHeartSpeed").Index          // HPHeartSpeed（fork=617）
+	propHPHeartSpeedAdd          = clientdata.MustPlayerProperty("HPHeartSpeedAdd").Index       // HPHeartSpeedAdd（fork=621）
+	propMPHeartSpeed             = clientdata.MustPlayerProperty("MPHeartSpeed").Index          // MPHeartSpeed（fork=618）
+	propMPHeartSpeedAdd          = clientdata.MustPlayerProperty("MPHeartSpeedAdd").Index       // MPHeartSpeedAdd（fork=622）
+	propHP                       = clientdata.MustPlayerProperty("HP").Index                    // HP（fork=465）
+	propMP                       = clientdata.MustPlayerProperty("MP").Index                    // MP（fork=466）
+	propHPRatio                  = clientdata.MustPlayerProperty("HPRatio").Index               // HPRatio（fork=469）
+	propMPRatio                  = clientdata.MustPlayerProperty("MPRatio").Index               // MPRatio（fork=470）
+	propHitHP                    = clientdata.MustPlayerProperty("HitHP").Index                 // HitHP（fork=481）
+	propHitHPRatio               = clientdata.MustPlayerProperty("HitHPRatio").Index            // HitHPRatio（fork=482）
+	propHPUpSpeed                = clientdata.MustPlayerProperty("HPUpSpeed").Index             // HPUpSpeed（fork=615）
+	propHPUpSpeedAdd             = clientdata.MustPlayerProperty("HPUpSpeedAdd").Index          // HPUpSpeedAdd（fork=619）
+	propMPUpSpeed                = clientdata.MustPlayerProperty("MPUpSpeed").Index             // MPUpSpeed（fork=616）
+	propMPUpSpeedAdd             = clientdata.MustPlayerProperty("MPUpSpeedAdd").Index          // MPUpSpeedAdd（fork=620）
+	propCurSkillTarget           = clientdata.MustPlayerProperty("CurSkillTarget").Index        // CurSkillTarget Object（fork=627）
+	propModifySkillLockTime      = clientdata.MustPlayerProperty("ModifySkillLockTime").Index   // ModifySkillLockTime（fork=221）
+	propSkillCanUse              = clientdata.MustPlayerProperty("CanUse").Index                // CanUse Byte(官服怒气灰化心跳簇同索引)（fork=2236）
+	propSkillCurTargetCount      = clientdata.MustPlayerProperty("CurTargetCount").Index        // CurTargetCount（fork=577）
+	propForce                    = clientdata.MustPlayerProperty("Force").Index                 // Force String(玩家域)（fork=194）
+	propNewSchool                = clientdata.MustPlayerProperty("NewSchool").Index             // NewSchool String（fork=190）
+	bufferInfoFirstPropertyIndex = clientdata.MustPlayerProperty("BufferInfo1").Index           // BufferInfo1（fork=629）
+	propInParry                  = clientdata.MustPlayerProperty("InParry").Index               // InParry（fork=471）
+	propInManualParry            = clientdata.MustPlayerProperty("InManualParry").Index         // InManualParry（fork=474）
+	propParryValue               = clientdata.MustPlayerProperty("ParryValue").Index            // ParryValue（fork=475）
+	propCantParry                = clientdata.MustPlayerProperty("CantParry").Index             // CantParry（fork=472）
+	propParryRatio               = clientdata.MustPlayerProperty("ParryRatio").Index            // ParryRatio（fork=478）
+	propParryUpSpeed             = clientdata.MustPlayerProperty("ParryUpSpeed").Index          // ParryUpSpeed（fork=479）
 )
 
 var nativeBuffSlots = func() []uint16 {
@@ -2156,12 +2133,12 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	//（3187B，obj=玩家）——其中 CollideRadius 是客户端寻路引擎的玩家
 	// 碰撞体输入。0x28 通道未通前，物理属性经已验证的 0x0D 通道补发
 	//（与 NPC 的 officialNPCProperties 同集）。
-	addFloat(179, 0.9)          // CollideRadius
-	addString(183, "stand")     // State
-	addFloat(214, 1.0)          // ActionSpeed
-	addInt(469, 100)            // HPRatio
-	addInt(478, 100)            // ParryRatio
-	addInt(482, 100)            // HitHPRatio
+	addFloat(179, 0.9)      // CollideRadius
+	addString(183, "stand") // State
+	addFloat(214, 1.0)      // ActionSpeed
+	addInt(469, 100)        // HPRatio
+	addInt(478, 100)        // ParryRatio
+	addInt(482, 100)        // HitHPRatio
 	binary.LittleEndian.PutUint16(msg[0x3d:], count)
 	p.mu.Unlock()
 	return msg

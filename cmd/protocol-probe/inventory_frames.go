@@ -42,35 +42,35 @@ var (
 
 // 官方 0x09 表玩家/视图域（末次出现）属性索引。
 // ItemType@1889 与 player_progress.go 的 propItemType 同一索引，直接复用。
-const (
-	propItemConfigID   uint16 = 1440 // ConfigID String
-	propItemLevel      uint16 = 1465 // Level Byte
-	propColorLevel     uint16 = 1892 // ColorLevel Int32
-	propUniqueID       uint16 = 1893 // UniqueID String
-	propAmount         uint16 = 1894 // Amount Int32
-	propMaxAmount      uint16 = 1895 // MaxAmount Int32
-	propBindStatus     uint16 = 1898 // BindStatus Int32
-	propHardiness      uint16 = 1935 // Hardiness Int32
-	propMaxHardiness   uint16 = 1936 // MaxHardiness Int32
-	propEquipType      uint16 = 1938 // EquipType String
-	propMaxBuildCount  uint16 = 1950 // MaxBuildCount Int32
-	propCurBuildCount  uint16 = 1951 // CurBuildCount Int32
-	propPropBuilt      uint16 = 1954 // PropBuilt String
-	propEffectPackID   uint16 = 1959 // EffectPackID Int32
-	propRecoverFlag    uint16 = 1971 // RecoverFlag Byte
-	propBeginPos       uint16 = 2013 // BeginPos Word
-	propEndPos         uint16 = 2014 // EndPos Word
-	propBaseCap        uint16 = 2215 // BaseCap Int32
-	propPlayerWeapon   uint16 = 396  // Weapon String
-	propPlayerShotWpn  uint16 = 398  // ShotWeapon String
-	propPlayerActionSt uint16 = 406  // ActionSet String
-	propItemPhoto      uint16 = 184  // Photo String（玩家/视图域末次出现）
+var (
+	propItemConfigID   = clientdata.MustPlayerProperty("ConfigID").Index      // ConfigID String（fork=1440）
+	propItemLevel      = clientdata.MustPlayerProperty("Level").Index         // Level Byte（fork=1465）
+	propColorLevel     = clientdata.MustPlayerProperty("ColorLevel").Index    // ColorLevel Int32（fork=1892）
+	propUniqueID       = clientdata.MustPlayerProperty("UniqueID").Index      // UniqueID String（fork=1893）
+	propAmount         = clientdata.MustPlayerProperty("Amount").Index        // Amount Int32（fork=1894）
+	propMaxAmount      = clientdata.MustPlayerProperty("MaxAmount").Index     // MaxAmount Int32（fork=1895）
+	propBindStatus     = clientdata.MustPlayerProperty("BindStatus").Index    // BindStatus Int32（fork=1898）
+	propHardiness      = clientdata.MustPlayerProperty("Hardiness").Index     // Hardiness Int32（fork=1935）
+	propMaxHardiness   = clientdata.MustPlayerProperty("MaxHardiness").Index  // MaxHardiness Int32（fork=1936）
+	propEquipType      = clientdata.MustPlayerProperty("EquipType").Index     // EquipType String（fork=1938）
+	propMaxBuildCount  = clientdata.MustPlayerProperty("MaxBuildCount").Index // MaxBuildCount Int32（fork=1950）
+	propCurBuildCount  = clientdata.MustPlayerProperty("CurBuildCount").Index // CurBuildCount Int32（fork=1951）
+	propPropBuilt      = clientdata.MustPlayerProperty("PropBuilt").Index     // PropBuilt String（fork=1954）
+	propEffectPackID   = clientdata.MustPlayerProperty("EffectPackID").Index  // EffectPackID Int32（fork=1959）
+	propRecoverFlag    = clientdata.MustPlayerProperty("RecoverFlag").Index   // RecoverFlag Byte（fork=1971）
+	propBeginPos       = clientdata.MustPlayerProperty("BeginPos").Index      // BeginPos Word（fork=2013）
+	propEndPos         = clientdata.MustPlayerProperty("EndPos").Index        // EndPos Word（fork=2014）
+	propBaseCap        = clientdata.MustPlayerProperty("BaseCap").Index       // BaseCap Int32（fork=2215）
+	propPlayerWeapon   = clientdata.MustPlayerProperty("Weapon").Index        // Weapon String（fork=396）
+	propPlayerShotWpn  = clientdata.MustPlayerProperty("ShotWeapon").Index    // ShotWeapon String（fork=398）
+	propPlayerActionSt = clientdata.MustPlayerProperty("ActionSet").Index     // ActionSet String（fork=406）
+	propItemPhoto      = clientdata.MustPlayerProperty("Photo").Index         // Photo String（玩家/视图域末次出现）（fork=184）
 	// 洗炼域（0x09 表视图域；洗炼界面 QueryProp 校验用，缺发会被
 	// form_treasure_reset[_add] 拒收或报 nil 比较）。
-	propLockStatus       uint16 = 1899 // LockStatus Int32
-	propTersureType      uint16 = 1972 // TersureType Int32（宝物 0..4 五类池）
-	propTaoLuValue       uint16 = 1976 // TaoLuValue Int32
-	propSecondTaoLuCnt   uint16 = 1980 // SecondTaoLuCounts Int32
+	propLockStatus     = clientdata.MustPlayerProperty("LockStatus").Index        // LockStatus Int32（fork=1899）
+	propTersureType    = clientdata.MustPlayerProperty("TersureType").Index       // TersureType Int32（宝物 0..4 五类池）（fork=1972）
+	propTaoLuValue     = clientdata.MustPlayerProperty("TaoLuValue").Index        // TaoLuValue Int32（fork=1976）
+	propSecondTaoLuCnt = clientdata.MustPlayerProperty("SecondTaoLuCounts").Index // SecondTaoLuCounts Int32（fork=1980）
 )
 
 // serverViewRemove 编码 SERVER_VIEW_REMOVE（0x19）：u16 视图 + u16 槽位。

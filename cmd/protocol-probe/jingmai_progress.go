@@ -62,27 +62,27 @@ const (
 	// COMBAT_ZHENQI_RATIO；zhenqi.ini damage_ratio=0.1——伤害合计×0.1
 	// 向下取整保底 1 折真气）。
 	jingMaiCombatZhenQiRatio = 0.1
-	propCurJingMai           = 849 // string 当前修炼经脉
-	propLastJingMai          = 850 // string 上次修炼经脉
-	propJingMaiTotLevel      = 819
-	propJMActCount           = 851 // 可激活条数（恒 1）
-	propZhenQiDayValue       = 852
-	propZQPLValue            = 855 // 今日真气
-	propZQActlValue          = 856 // 恒 0
-	propZQUnUsedValue        = 857 // 恒 0
-
-	propJMStaticData = 2237
-	// propJMVarPropNo(2239) 经脉 varprop 编号（官服 c.pcapng View45 22 行
-	// 逐帧实证：每行必备，值=MinVarPropNo+Level-1；fork 表 2239 同名）。
-	// 修炼加成的挂点——客户端按此号查 varprop 求经脉属性表。
-	propJMVarPropNo = 2239
-	propJMItemType   = 1889
-	propJMLevel      = 1465 // byte
-	propJMMaxLevel   = 2083
-	propCurFill      = 764
-	propTotalFill    = 765
 
 	jingMaiDBQueryTimeout = 5 * time.Second
+)
+
+// 属性索引按名解析（0x09 表方言门控换表自动跟随；fork 位见各行注记）。
+var (
+	propCurJingMai      = clientdata.MustPlayerProperty("CurJingMai").Index        // string 当前修炼经脉（fork=849）
+	propLastJingMai     = clientdata.MustPlayerProperty("LastJingMai").Index       // string 上次修炼经脉（fork=850）
+	propJingMaiTotLevel = clientdata.MustPlayerProperty("JingMaiTotalLevel").Index // JingMaiTotalLevel（fork=819）
+	propJMActCount      = clientdata.MustPlayerProperty("jmActCount").Index        // 可激活条数（恒 1）（fork=851）
+	propZhenQiDayValue  = clientdata.MustPlayerProperty("ZhenQiDayValue").Index    // ZhenQiDayValue（fork=852）
+	propZQPLValue       = clientdata.MustPlayerProperty("ZQPLValue").Index         // 今日真气（fork=855）
+	propZQActlValue     = clientdata.MustPlayerProperty("ZQActlValue").Index       // 恒 0（fork=856）
+	propZQUnUsedValue   = clientdata.MustPlayerProperty("ZQUnUsedValue").Index     // 恒 0（fork=857）
+	propJMStaticData    = clientdata.MustPlayerProperty("StaticData").Index        // StaticData（fork=2237）
+	propJMVarPropNo     = clientdata.MustPlayerProperty("VarPropNo").Index         // VarPropNo（fork=2239）
+	propJMItemType      = clientdata.MustPlayerProperty("ItemType").Index          // ItemType（fork=1889）
+	propJMLevel         = clientdata.MustPlayerProperty("Level").Index             // byte（fork=1465）
+	propJMMaxLevel      = clientdata.MustPlayerProperty("MaxLevel").Index          // MaxLevel（fork=2083）
+	propCurFill         = clientdata.MustPlayerProperty("CurFillValue").Index      // CurFillValue（fork=764）
+	propTotalFill       = clientdata.MustPlayerProperty("TotalFillValue").Index    // TotalFillValue（fork=765）
 )
 
 var (

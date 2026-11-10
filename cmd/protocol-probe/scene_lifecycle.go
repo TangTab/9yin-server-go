@@ -751,20 +751,21 @@ func (s *sceneLifecycle) openShopLocked(shopID string) error {
 		viewportShop = 61
 		shopPageSize = 10
 		shopCapacity = 100
-		// 官方表玩家/视图域(视图行取末现):ShopID@2219、PageNum@2220、
-		// PageCount@2221、ShopType@2222、ConfigID@1440、Amount@1894、
-		// SellPrice0/1/2@1900-1902、MaxAmount@1895。
-		propShopID      = 2219
-		propPageNum     = 2220
-		propPageCount   = 2221
-		propShopType    = 2222
-		propConfigID    = 1440
-		propAmount      = 1894
-		propPriceGold   = 1900
-		propPriceSilver = 1901
-		propPriceCard   = 1902
-		propMaxAmount   = 1895
-		maxBuyAmount    = 99
+		maxBuyAmount = 99
+	)
+
+	// 属性索引按名解析（0x09 表方言门控换表自动跟随；fork 位见各行注记）。
+	var (
+		propShopID      = clientdata.MustPlayerProperty("ShopID").Index     // ShopID（fork=2219）
+		propPageNum     = clientdata.MustPlayerProperty("PageNum").Index    // PageNum（fork=2220）
+		propPageCount   = clientdata.MustPlayerProperty("PageCount").Index  // PageCount（fork=2221）
+		propShopType    = clientdata.MustPlayerProperty("ShopType").Index   // ShopType（fork=2222）
+		propConfigID    = clientdata.MustPlayerProperty("ConfigID").Index   // ConfigID（fork=1440）
+		propAmount      = clientdata.MustPlayerProperty("Amount").Index     // Amount（fork=1894）
+		propPriceGold   = clientdata.MustPlayerProperty("SellPrice0").Index // SellPrice0（fork=1900）
+		propPriceSilver = clientdata.MustPlayerProperty("SellPrice1").Index // SellPrice1（fork=1901）
+		propPriceCard   = clientdata.MustPlayerProperty("SellPrice2").Index // SellPrice2（fork=1902）
+		propMaxAmount   = clientdata.MustPlayerProperty("MaxAmount").Index  // MaxAmount（fork=1895）
 	)
 	items, shopType, pageCount, err := loadShopCatalogSection(defaultShopINIPath, shopID)
 	if err != nil {

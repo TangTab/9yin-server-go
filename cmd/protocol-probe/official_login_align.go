@@ -250,6 +250,7 @@ func pushCombatAttributeDelta(link sceneMessageConnection, player *playerActor, 
 		log.Printf("%s: pushed combat attribute delta after equip change (%d props)", remote, sent)
 	}
 }
+
 // officialTimeSyncReplyFrame m924→m294 官服形态应答：
 // [client_ms 回显(i64), obj(玩家), unix 秒(i64), uptime 秒(f64)]。
 // （c.pcapng 全量时间线 PAIR ×139 实证；uptime 为服务器运行秒数浮点。）
