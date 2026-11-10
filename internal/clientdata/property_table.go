@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -94,9 +95,62 @@ func activePropertyTableText() (string, string) {
 	switch strings.TrimSpace(os.Getenv("NINEYIN_PROPERTY_TABLE")) {
 	case "official2433":
 		return officialPropertyTable2433Text, "official2433"
+	case "hybrid2433":
+		return hybridPropertyTableText(), "hybrid2433"
 	default:
 		return officialPropertyTableText, "fork"
 	}
+}
+
+// hybridPropertyTableText 拼接混合表：fork 快照的场景域头块（0..173 行）
+// + 官服 2433 真表的共享域（174..2432 行）。
+//
+// 背景（2026-11-11 真机实验矩阵定向）：fork 客户端的 NPC 视觉管线消费
+// 属性块里的对象头行（Type@0/Sex@1/Photo@2/ConfigID@7/Resource@8/
+// PosiX@9/PosiY@10/PosiZ@11/Orient@12…），fork 表方言下 NPC 0x0D 携带
+// 这些头行（83 字段）渲染正常；官服整表头块换血为家园/帮会/VIP 域后
+// 这 35 个头行名无行可落（OrderedProperties 静默丢弃 → 48 字段），
+// 客户端拿不到对象头数据 → NPC 添加成功但不渲染。混合表把 fork 头块
+// 还给客户端、共享域保持官服 2433 行号，两全。
+func hybridPropertyTableText() string {
+	hybridOnce.Do(func() {
+		hybridText = splicePropertyTables(officialPropertyTableText, officialPropertyTable2433Text, 174)
+	})
+	return hybridText
+}
+
+var (
+	hybridOnce sync.Once
+	hybridText string
+)
+
+// splicePropertyTables 取 head 表 idx<headFloor 的行 + tail 表 idx>=headFloor
+// 的行（跳过注释/坏行），保持升序拼接。
+func splicePropertyTables(head, tail string, headFloor int) string {
+	var out []string
+	for _, ln := range strings.Split(strings.TrimRight(head, "\r\n"), "\n") {
+		if idx, ok := propertyTableRowIndex(ln); ok && idx < headFloor {
+			out = append(out, ln)
+		}
+	}
+	for _, ln := range strings.Split(strings.TrimRight(tail, "\r\n"), "\n") {
+		if idx, ok := propertyTableRowIndex(ln); ok && idx >= headFloor {
+			out = append(out, ln)
+		}
+	}
+	return strings.Join(out, "\n") + "\n"
+}
+
+func propertyTableRowIndex(line string) (int, bool) {
+	parts := strings.Split(line, "\t")
+	if len(parts) < 3 {
+		return 0, false
+	}
+	idx, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, false
+	}
+	return idx, true
 }
 
 // ActivePropertyTableMode 返回当前生效的属性表方言（日志/诊断用）。
@@ -112,6 +166,8 @@ func SwapPropertyTableForTest(t testing.TB, mode string) {
 		text = officialPropertyTable2433Text
 	case "fork":
 		text = officialPropertyTableText
+	case "hybrid2433":
+		text = hybridPropertyTableText()
 	default:
 		t.Fatalf("unknown property table mode %q", mode)
 	}
