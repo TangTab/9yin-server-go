@@ -1592,19 +1592,19 @@ func qinggongMotionProperties() []clientdata.IndexedProperty {
 		return clientdata.IndexedProperty{Index: index, Name: name, Value: clientdata.Float32Value(value)}
 	}
 	return []clientdata.IndexedProperty{
-		f(388, "RunSpeedAdd", 0), f(682, "JumpSpeedAdd", 0),
-		f(655, "DriftSpeed", waterSpeed), f(656, "DriftSpeedAdd", 0),
-		f(659, "DriftJumpSpeed", waterJumpSpeed), f(660, "DriftJumpSpeedAdd", 0),
-		f(661, "SndJumpSpeed", secondJumpSpeed), f(662, "SndJumpSpeedAdd", 0),
-		f(663, "ThdJumpSpeed", thirdJumpSpeed), f(664, "ThdJumpSpeedAdd", 0),
-		f(665, "AirRushSpeed", airRushSpeed), f(666, "AirRushSpeedAdd", 0),
-		f(667, "AirRushDist", airRushDist), f(668, "AirRushDistAdd", 0),
-		f(669, "LandRushSpeed", landRushSpeed), f(670, "LandRushSpeedAdd", 0),
-		f(671, "LandRushDist", landRushDist), f(672, "LandRushDistAdd", 0),
-		f(679, "ClimbSpeed", climbSpeed), f(680, "ClimbSpeedAdd", 0),
-		f(873, "GRushRange", groundRushRange), f(876, "GRushRangeAdd", groundRushRangeAdd),
-		f(874, "ARushRange", airRushRange), f(877, "ARushRangeAdd", airRushRangeAdd),
-		f(875, "WRushRange", waterRushRange), f(878, "WRushRangeAdd", waterRushRangeAdd),
+		f(clientdata.MustPlayerProperty("RunSpeedAdd").Index, "RunSpeedAdd", 0), f(clientdata.MustPlayerProperty("JumpSpeedAdd").Index, "JumpSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("DriftSpeed").Index, "DriftSpeed", waterSpeed), f(clientdata.MustPlayerProperty("DriftSpeedAdd").Index, "DriftSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("DriftJumpSpeed").Index, "DriftJumpSpeed", waterJumpSpeed), f(clientdata.MustPlayerProperty("DriftJumpSpeedAdd").Index, "DriftJumpSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("SndJumpSpeed").Index, "SndJumpSpeed", secondJumpSpeed), f(clientdata.MustPlayerProperty("SndJumpSpeedAdd").Index, "SndJumpSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("ThdJumpSpeed").Index, "ThdJumpSpeed", thirdJumpSpeed), f(clientdata.MustPlayerProperty("ThdJumpSpeedAdd").Index, "ThdJumpSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("AirRushSpeed").Index, "AirRushSpeed", airRushSpeed), f(clientdata.MustPlayerProperty("AirRushSpeedAdd").Index, "AirRushSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("AirRushDist").Index, "AirRushDist", airRushDist), f(clientdata.MustPlayerProperty("AirRushDistAdd").Index, "AirRushDistAdd", 0),
+		f(clientdata.MustPlayerProperty("LandRushSpeed").Index, "LandRushSpeed", landRushSpeed), f(clientdata.MustPlayerProperty("LandRushSpeedAdd").Index, "LandRushSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("LandRushDist").Index, "LandRushDist", landRushDist), f(clientdata.MustPlayerProperty("LandRushDistAdd").Index, "LandRushDistAdd", 0),
+		f(clientdata.MustPlayerProperty("ClimbSpeed").Index, "ClimbSpeed", climbSpeed), f(clientdata.MustPlayerProperty("ClimbSpeedAdd").Index, "ClimbSpeedAdd", 0),
+		f(clientdata.MustPlayerProperty("GRushRange").Index, "GRushRange", groundRushRange), f(clientdata.MustPlayerProperty("GRushRangeAdd").Index, "GRushRangeAdd", groundRushRangeAdd),
+		f(clientdata.MustPlayerProperty("ARushRange").Index, "ARushRange", airRushRange), f(clientdata.MustPlayerProperty("ARushRangeAdd").Index, "ARushRangeAdd", airRushRangeAdd),
+		f(clientdata.MustPlayerProperty("WRushRange").Index, "WRushRange", waterRushRange), f(clientdata.MustPlayerProperty("WRushRangeAdd").Index, "WRushRangeAdd", waterRushRangeAdd),
 	}
 }
 

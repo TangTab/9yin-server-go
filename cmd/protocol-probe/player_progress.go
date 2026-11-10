@@ -644,10 +644,10 @@ func (p *playerProgress) bookFrame(slot uint16) ([]byte, error) {
 	}
 	book := p.books[slot-1]
 	return serverViewAdd(viewportNeiGong, slot, []serverViewProperty{
-		viewString(1440, book.configID),
+		viewString(clientdata.MustPlayerProperty("ConfigID").Index, book.configID),
 		viewInt(propStaticData, book.staticData),
 		viewInt(propItemType, book.itemType),
-		viewByte(1465, byte(book.level)),
+		viewByte(clientdata.MustPlayerProperty("Level").Index, byte(book.level)), // fork=1465
 		viewInt(propMaxLevel, book.maxLevel),
 		viewInt(propCurFillValue, book.fill),
 		viewInt(propTotalFillValue, book.total),

@@ -182,10 +182,10 @@ func skillRowProperties(skill learnedSkillView) []serverViewProperty {
 	properties := []serverViewProperty{
 		// 视图行取官方表玩家域(末现):ConfigID@1440(String)、
 		// Level@1465(Byte)、PauseTime@2240(Int32)。
-		viewString(1440, skill.configID),
+		viewString(clientdata.MustPlayerProperty("ConfigID").Index, skill.configID),
 		viewInt(propStaticData, skill.staticData),
 		viewInt(propItemType, skill.itemType),
-		viewByte(1465, byte(skill.level)),
+		viewByte(clientdata.MustPlayerProperty("Level").Index, byte(skill.level)),
 		viewInt(propMaxLevel, skill.maxLevel),
 		viewInt(propCurFillValue, skill.fill),
 		viewInt(propTotalFillValue, skill.total),

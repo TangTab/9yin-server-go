@@ -538,7 +538,7 @@ func (p *playerActor) jingMaiPropsFrame() ([]byte, error) {
 // TotalFillValue=每周天所需真气 750，非历史累计——Java totalFillPerLevel）。
 func jingMaiViewRowFrame(row jingMaiProgressRow, def jingMaiDef, slot uint16) ([]byte, error) {
 	properties := []serverViewProperty{
-		viewString(1440, def.configID),
+		viewString(clientdata.MustPlayerProperty("ConfigID").Index, def.configID),
 		viewInt(propJMStaticData, def.staticData),
 		viewInt(propJMItemType, def.itemType),
 		viewInt(propJMVarPropNo, def.minVarPropNo+int32(row.Level)-1),
