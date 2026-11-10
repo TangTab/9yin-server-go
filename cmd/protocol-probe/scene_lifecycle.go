@@ -602,10 +602,18 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		if entity.schedule != nil {
 			patchAddObjectTransform(payload, transform)
 		}
+		digest := sha256.Sum256(payload)
+		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
+			s.remote, id, entity.description, payload[0], len(payload), digest)
+		if err := s.conn.WriteFrame(payload); err != nil {
+			return fmt.Errorf("add scene object %d: %w", id, err)
+		}
 		// 0x28 详情记录（官服方言 NPC 渲染必需，sparse 二分定案）：
-		// NINEYIN_NPC_DETAIL_0X28=1 时按官服成对时序先于 0x0D 下发
-		//（c.pcapng #1776→#1777）。生成器=模板常量+身份串重写（见
-		// npc_detail_generator.go）。
+		// NINEYIN_NPC_DETAIL_0X28=1，物化（0x0D）之后下发——两代生成器
+		//（=3 模板身份 / v2 本服身份+精确切片）在 0x0D 前下发均真机崩溃，
+		// 身份策略迥异故共同点排除身份串、指向时序；官服 #1776→#1777
+		// 先 0x28 配对疑为 op29 批量预载对象特例，新对象应先物化后详情
+		//（=1 探针首测同教训 c1cd1b9）。
 		if npcDetail0x28Enabled() {
 			resource := ""
 			if entity.model != "" {
@@ -619,12 +627,6 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			if err := s.conn.WriteFrame(npcDetail0x28Frame(uint32(id), entity.ownerID, transform, resource, entity.configID)); err != nil {
 				return fmt.Errorf("npc 0x28 detail %d: %w", id, err)
 			}
-		}
-		digest := sha256.Sum256(payload)
-		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
-			s.remote, id, entity.description, payload[0], len(payload), digest)
-		if err := s.conn.WriteFrame(payload); err != nil {
-			return fmt.Errorf("add scene object %d: %w", id, err)
 		}
 		// 0x28 详情帧探针已退役（2026-11-10 真机定案）：=3 正帧版实证
 		// 客户端消费该通道但记录块身份冲突即崩（模板 NPC 的动作/模型套
