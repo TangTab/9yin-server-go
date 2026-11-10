@@ -37,10 +37,12 @@ func TestStarterNPCUsesClientResourceIdentity(t *testing.T) {
 	}
 	// 官服位属性增补后：fork schema 7 项 + 官服固定 11 项（CollideRadius/
 	// State/Type/ActionSpeed/BossLevel/IDCard/BornAction/WeaponMode/三比例；
-	// Material/Level 缺省不追加）= 18（officialNPCProperties 官服 16-prop
+	// Material/Level 缺省不追加）= 21（officialNPCProperties 官服 16-prop
 	// 方言对齐 c.pcapng #1777，2026-11-10）。
-	if got := binary.LittleEndian.Uint16(msg[0x3d:]); got != 18 {
-		t.Fatalf("NPC property count=%d, want 18", got)
+	// Resource 回退（fde3fcd）：schema 无 Material 有 Resource 时官服位
+	// Resource/ConfigID/Photo 三行由 schema 直供 → 18+3=21。
+	if got := binary.LittleEndian.Uint16(msg[0x3d:]); got != 21 {
+		t.Fatalf("NPC property count=%d, want 21", got)
 	}
 	// 官服 #1777 定版三新行：Type(fork 181)=4 / BossLevel(fork 1590)=1 /
 	// IDCard(fork 1595)="null,null,null,null,null"（0x0D 串=u32 长度+NUL）。
