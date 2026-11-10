@@ -602,6 +602,24 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		if entity.schedule != nil {
 			patchAddObjectTransform(payload, transform)
 		}
+		// 0x28 详情记录（官服方言 NPC 渲染必需，sparse 二分定案）：
+		// NINEYIN_NPC_DETAIL_0X28=1 时按官服成对时序先于 0x0D 下发
+		//（c.pcapng #1776→#1777）。生成器=模板常量+身份串重写（见
+		// npc_detail_generator.go）。
+		if npcDetail0x28Enabled() {
+			resource := ""
+			if entity.model != "" {
+				resource = "npc\\world" + entity.model
+			}
+			for _, prop := range entity.properties {
+				if prop.Name == "Resource" && prop.Value.Text != "" {
+					resource = prop.Value.Text
+				}
+			}
+			if err := s.conn.WriteFrame(npcDetail0x28Frame(uint32(id), entity.ownerID, transform, resource, entity.configID)); err != nil {
+				return fmt.Errorf("npc 0x28 detail %d: %w", id, err)
+			}
+		}
 		digest := sha256.Sum256(payload)
 		log.Printf("%s: materialize scene object id=%d kind=%s opcode=0x%02X payload_len=%d payload_sha256=%x",
 			s.remote, id, entity.description, payload[0], len(payload), digest)
