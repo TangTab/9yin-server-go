@@ -712,6 +712,25 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 		log.Printf("%s: coalesced duplicate object request sequence=%d id=%d owner=%d", s.remote, request.Sequence, entity.id, entity.ownerID)
 		return entity.description, nil
 	}
+	// 选靶查询应答补 0x28 目标详情（技能.pcapng 30.282→30.456 实证：
+	// 客户端 op 0x07 查询后官服回 f#0187 mode=0x47 详情帧——客户端接近
+	// AI 读目标详情（CollideRadius/位姿等）计算走近停靠，缺此帧即 431
+	// 连发重查且冲锋受理后不自走；物化时发过的详情会过期，按需重发，
+	// 位置取当前权威 Transform，序=详情先于 LastObject 对）。
+	if npcDetail0x28Enabled() {
+		if transform, transformOK := s.npcTransform(worldcore.EntityID(entity.id)); transformOK {
+			props := officialNPCEntityProperties(entity.properties, entity.model, entity.configID)
+			var detailTarget *worldcore.Transform
+			if entity.schedule != nil {
+				if motion := entity.schedule.motionAt(time.Now().UnixMilli()); motion.moving {
+					detailTarget = &worldcore.Transform{X: motion.destX, Y: motion.destY, Z: motion.destZ, Orient: motion.destOrient}
+				}
+			}
+			if err := s.conn.WriteFrame(npcDetail0x28V3Frame(uint32(entity.id), entity.ownerID, transform, detailTarget, props)); err != nil {
+				return "", fmt.Errorf("npc 0x28 detail on select %d: %w", entity.id, err)
+			}
+		}
+	}
 	// 0x07 点击与 msg431 选目标共用同一条回帧路径：
 	// LastObject(100) + AutoSelectObject(230) 双属性帧（49840 抓包
 	// 证实客户端点击后服务端回 414/415 两帧）。

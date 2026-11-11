@@ -191,7 +191,7 @@ func TestMovementEchoAngleWrapAndRushGate(t *testing.T) {
 		id: "CS_rush_echo", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}

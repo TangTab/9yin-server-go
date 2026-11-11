@@ -446,7 +446,7 @@ func rushCastStateFrame() ([]byte, error) {
 //	      CurSkillID + msg25 + PauseSkill + msg707[15]（不重发 CurSkillTarget）
 //
 // 受理与距离解耦；拉回/走动期间服务端零帧零取消，唯一出口=重按或 30s 过期。
-func stageRushCast(link sceneMessageConnection, player *playerActor, definition combatSkillDefinition,
+func stageRushCast(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, definition combatSkillDefinition,
 	targetID, targetOwner uint32, target worldcore.Transform, castAt worldcore.Transform,
 	distance float64, remote string) (bool, error) {
 	now := time.Now().UTC()
@@ -562,7 +562,7 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 		// 服务端驱动接近兜底（11-09 老链复辟精简版）：600ms 后（留自走
 		// 窗口，若客户端真自走则其 msg15 会推进 tryRushArrival）距目标
 		// 仍超冲刺上界即发 c61 接近冲刺，2.5s 无落地重试一次。
-		scheduleRushApproachDash(link, player, definition, target, castAt, distance, remote)
+		scheduleRushApproachDash(link, player, world, definition, target, castAt, distance, remote)
 	}
 	log.Printf("%s: rush staged skill id=%s dist=%.1fm air=%t rearm=%t window=%s",
 		remote, definition.id, distance, airborne, rearm, rushPendingWindow)
@@ -1514,52 +1514,111 @@ func useSkillClaimedTargetTransform(custom clientCustomMessage) (worldcore.Trans
 	return transform, true
 }
 
-// scheduleRushApproachDash 服务端驱动接近（>6.5m 档）：0x1F 锚 + c61
-// 疾跑指令（level=1 qg_fastrun_2h_01，11-09 真机链实证 fork 客户端执行
-// 该指令位移），落地后由 212/tryRushArrival 接管窗口冲刺。官服此段为
-// 客户端自走（官服客户端专属行为），本补丁为 fork 方言兜底。
-func scheduleRushApproachDash(link sceneMessageConnection, player *playerActor,
+// scheduleRushApproachDash 服务端驱动接近（>6.5m 档，a21d783 老链全量
+// 复辟 2026-11-12）：c61×2（2.5s 重试）→ 0x20 ServerMoving → 0x1F 碎步
+//（150ms/1.2m，56086 实证被执行）→ 收步 0x21 停帧 + resumePendingCastAt
+// 服务端落地簇（客户端不发 212 也照常出伤害）。官服此段为客户端自走
+//（同客户端下选靶 0x28 详情帧应已解锁自走——本链为数据缺口未清时的
+// 兜底，自走成功则 peekPendingCast 提前消失、链条自然短路）。
+func scheduleRushApproachDash(link sceneMessageConnection, player *playerActor, world *sceneLifecycle,
 	definition combatSkillDefinition, target, castAt worldcore.Transform, distance float64, remote string) {
 	if distance <= rushDashTriggerMeters() {
 		return // 冲刺窗口内由 tryRushArrival 接管
 	}
-	fire := func() {
-		if pending := player.peekPendingCast(time.Now().UTC()); pending == nil || pending.skillID != definition.id {
-			return
-		}
-		if player.rushDashIssuedSnapshot() {
-			return
-		}
-		if err := link.WriteFrame(serverLocation(playerObjectID, playerOwnerID, castAt)); err != nil {
-			log.Printf("%s: rush approach anchor: %v", remote, err)
-			return
-		}
-		destX, destY, destZ := rushBindPoint(target, castAt.X, castAt.Z, definition.bindDistance)
-		frame, err := dashRushFrame(destX, destY+rushDashLiftMeters, destZ, 1, defaultGroundRushAction)
-		if err == nil {
-			err = link.WriteFrame(frame)
-		}
+	pending := player.peekPendingCast(time.Now().UTC())
+	if pending == nil || pending.skillID != definition.id {
+		return
+	}
+	destX, _, destZ := rushBindPoint(target, castAt.X, castAt.Z, pending.bindDistance)
+	destY := castAt.Y + rushDashLiftMeters
+	alive := func() bool {
+		return player.peekPendingCast(time.Now().UTC()) == pending && !player.rushDashIssuedSnapshot()
+	}
+	dash := func() bool {
+		frame, err := dashRushFrame(destX, destY, destZ, convertDashLevel, pending.groundRushAction)
 		if err != nil {
+			log.Printf("%s: rush approach dash %s encode: %v", remote, definition.id, err)
+			return false
+		}
+		if err := link.WriteFrame(frame); err != nil {
 			log.Printf("%s: rush approach dash %s: %v", remote, definition.id, err)
-			return
+			return false
 		}
 		log.Printf("%s: rush approach dash skill=%s dest=(%.1f, %.1f) dist=%.1fm", remote, definition.id, destX, destZ, distance)
-		// 2.5s 无落地重试一次（11-09 同款 retry 节奏）。
-		time.AfterFunc(2500*time.Millisecond, func() {
-			if pending := player.peekPendingCast(time.Now().UTC()); pending == nil || pending.skillID != definition.id {
-				return
-			}
-			if player.rushDashIssuedSnapshot() {
-				return
-			}
-			frame, err := dashRushFrame(destX, destY+rushDashLiftMeters, destZ, 1, defaultGroundRushAction)
-			if err == nil {
-				err = link.WriteFrame(frame)
-			}
-			if err == nil {
-				log.Printf("%s: rush approach dash retry skill=%s (no landing in 2.5s)", remote, definition.id)
-			}
-		})
+		return true
 	}
-	time.AfterFunc(600*time.Millisecond, fire)
+	stepping := func() {
+		log.Printf("%s: rush approach falling back to fine 0x1F stepping", remote)
+		pos := castAt
+		for {
+			time.Sleep(150 * time.Millisecond)
+			if !alive() {
+				return
+			}
+			dx, dz := destX-pos.X, destZ-pos.Z
+			dist := math.Sqrt(float64(dx*dx + dz*dz))
+			if dist < 0.6 {
+				stop := serverAllDest([]allDestEntry{{
+					objectID: playerObjectID, ownerID: playerOwnerID,
+					destX: pos.X, destY: pos.Y, destZ: pos.Z,
+					destOrient: orientTowardTarget(pos.X, pos.Z, target.X, target.Z),
+				}})
+				if stop != nil {
+					_ = link.WriteFrame(stop)
+				}
+				if err := resumePendingCastAt(link, player, world, pos.X, pos.Y, pos.Z,
+					orientTowardTarget(pos.X, pos.Z, target.X, target.Z), "approach-steps", remote); err != nil {
+					log.Printf("%s: approach steps landing: %v", remote, err)
+				}
+				return
+			}
+			step := float32(1.2)
+			if dist < float64(step) {
+				step = float32(dist)
+			}
+			pos.X += dx / float32(dist) * step
+			pos.Z += dz / float32(dist) * step
+			if err := link.WriteFrame(serverLocation(playerObjectID, playerOwnerID, pos)); err != nil {
+				log.Printf("%s: approach step frame: %v", remote, err)
+				return
+			}
+		}
+	}
+	time.AfterFunc(600*time.Millisecond, func() {
+		if !alive() {
+			return
+		}
+		if !dash() {
+			return
+		}
+		time.AfterFunc(2500*time.Millisecond, func() {
+			if !alive() {
+				return
+			}
+			log.Printf("%s: rush approach dash retry skill=%s (no landing in 2.5s)", remote, definition.id)
+			if !dash() {
+				return
+			}
+			time.AfterFunc(2500*time.Millisecond, func() {
+				if !alive() {
+					return
+				}
+				// c61 两连败：0x20 ServerMoving（fork 参考服帧型，55866
+				// 实证参考服用；官方无此帧但客户端执行）。
+				log.Printf("%s: rush approach falling back to 0x20 server-moving to (%.1f, %.1f)", remote, destX, destZ)
+				if err := link.WriteFrame(serverMoving(playerObjectID, playerOwnerID, MotionState{
+					DestX: destX, DestY: castAt.Y, DestZ: destZ,
+					DestOrient: orientTowardTarget(castAt.X, castAt.Z, destX, destZ),
+				})); err != nil {
+					log.Printf("%s: approach 0x20 frame: %v", remote, err)
+				}
+				time.AfterFunc(2500*time.Millisecond, func() {
+					if !alive() {
+						return
+					}
+					go stepping()
+				})
+			})
+		})
+	})
 }

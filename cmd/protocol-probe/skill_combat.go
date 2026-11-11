@@ -1492,7 +1492,7 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				if distance <= rushDirectCastMeters(definition) {
 					return executeRushDirect(link, player, world, definition, targetID, targetOwnerID, geometry, castAt, distance, remote)
 				}
-				return stageRushCast(link, player, definition, targetID, targetOwnerID, geometry, castAt, distance, remote)
+				return stageRushCast(link, player, world, definition, targetID, targetOwnerID, geometry, castAt, distance, remote)
 			} else if distance > float64(definition.castRange) {
 				log.Printf("%s: reject skill id=%s out of range %.0fm > %.0fm",
 					remote, definition.id, distance, definition.castRange)

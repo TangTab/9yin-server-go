@@ -106,7 +106,7 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
 
 	before := time.Now()
-	if handled, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if handled, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("stage handled=%t err=%v", handled, err)
 	}
@@ -153,7 +153,7 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 	// 暂存期再次按下（重受理）：官服 f/g 定版 7 帧——CurSkillID="" +
 	// msg26 + PauseSkill="" + CurSkillID + msg25 + PauseSkill + msg707，
 	// 不重发 CurSkillTarget。
-	if handled, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if handled, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("rearm stage handled=%t err=%v", handled, err)
 	}
@@ -175,7 +175,7 @@ func TestStageRushCastAirborneDisabledFallsBackToGroundDialect(t *testing.T) {
 	player := newPlayerActor("冲锋侠", 0)
 	definition := combatSkillDefinition{id: "CS_rush_air", canRush: true, script: "skilllock",
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 43, Z: 20}, worldcore.Transform{X: 4, Y: 50, Z: 20}, 12, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -485,7 +485,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		id: "CS_rush_unlearned", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -534,7 +534,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 	// 自冲落地（上报点距目标 ≤3m，未发 c61=步行落地形态）：
 	// PauseSkill+msg26+LogicState 对+fight_relation+0x1F×1+337+c1=40+
 	// msg19+CantMove/CantParry=11 帧（步行无 CantMove 清前导、单 0x1F）。
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 5, Y: 0, Z: 0}, 5, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -555,7 +555,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 
 	// 重新暂存后走完整冲刺链：上报点距目标 6m ∈ (5.0, 6.5] → c61 簇
 	//（零成本定义 6 帧），终点=目标身前 bind、y+1.0。
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -639,7 +639,7 @@ func TestRushMovementUpload220DrivesArrival(t *testing.T) {
 		id: "CS_rush_unlearned", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
