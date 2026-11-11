@@ -104,7 +104,7 @@ go run ./cmd/mpq store read . <名字>   # 读单个文件并预览
 
 ## 许可证
 
-- 本仓库的初始代码来源自论坛，其真实作者未知，亦未声明许可证。故本仓库自有代码（`cmd/`、`internal/(!ecs)`、及根工程配置）以
+- 本仓库的初始代码来源自论坛，其真实作者未知，亦未声明许可证。故本仓库自有代码（`cmd/`、`internal/(!ecs)`、`scripts`、及根工程配置）以
   [BSD 3-Clause](LICENSE.txt) 许可发布。
 - `internal/ecs/` 目录为内嵌的 [unitoftime/ecs](https://github.com/unitoftime/ecs)
   框架源码，保持上游原样、不做修改，遵循其上游 MIT License 许可证
