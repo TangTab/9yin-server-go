@@ -45,6 +45,7 @@ type CommandBody struct {
 	Code        string  `json:"code"`
 	Type        int32   `json:"type"`
 	ItemConfig  string  `json:"itemConfig"`
+	MountConfig string `json:"mountConfig"` // mount_ride 的坐骑道具 config
 	Amount      int32   `json:"amount"`
 	WearNow     bool    `json:"wearNow"`
 	CardId      int32   `json:"cardId"`
@@ -97,6 +98,7 @@ type Command struct {
 	Faction        string
 	Code           string // lua_eval 的 Lua 源码
 	ItemConfig     string // grant_item/add_item 的物品配置 ID
+	MountConfig    string // mount_ride 的坐骑道具 config（面板 mountConfig 键）
 	Amount         int32  // grant_item 数量
 	WearNow        bool   // grant_item 穿戴形态（否则入背包）
 	CardId         int32  // equip_card/equip_hair 皮肤号

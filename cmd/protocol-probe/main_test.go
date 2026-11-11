@@ -782,6 +782,12 @@ func (c *captureMessageConnection) Frames() [][]byte {
 	return append([][]byte(nil), c.frames...)
 }
 
+func (c *captureMessageConnection) resetFrames() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.frames = nil
+}
+
 func TestNoRoleLoginSuccess(t *testing.T) {
 	now := time.Date(2026, 7, 11, 12, 34, 56, 0, time.Local)
 	msg := noRoleLoginSuccess(now)

@@ -87,7 +87,7 @@ func TestInstalledButUnlearnedSkillCannotUseUniversalExecutor(t *testing.T) {
 	}
 	before := player.stateSnapshot()
 	conn := &captureMessageConnection{}
-	handled, err := handleSkillCustom(conn, player, nil, useSkillMessage(unlearned), "test")
+	handled, err := handleSkillCustom(conn, player, nil, nil, useSkillMessage(unlearned), "test")
 	if err != nil || !handled {
 		t.Fatalf("unlearned installed skill handled=%t err=%v", handled, err)
 	}

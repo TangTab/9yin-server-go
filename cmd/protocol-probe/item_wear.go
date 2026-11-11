@@ -243,6 +243,7 @@ type itemSession struct {
 	skins       *skinDBStore        // 风物志衣橱存档（card 收录链用；可为 nil）
 	currency    *currencyDBStore    // 碎银存档（商店购销后落库；可为 nil）
 	randomProps *randomPropsDBStore // 娃娃/宝物随机属性存档（可为 nil）
+	mount       *mountSession       // 坐骑运行域（script=Mount 道具分流；可为 nil）
 	ctx         context.Context
 	roleID      role.RoleID
 	remote      string

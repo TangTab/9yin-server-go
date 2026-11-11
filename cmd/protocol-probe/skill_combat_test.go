@@ -35,7 +35,7 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	player := newPlayerActor("tester", 0)
 	beforeMP := player.stateSnapshot().MP
 	conn := &captureMessageConnection{}
-	handled, err := handleSkillCustom(conn, player, nil, useSkillMessage("CS_yhwq_hsqs05"), "test")
+	handled, err := handleSkillCustom(conn, player, nil, nil, useSkillMessage("CS_yhwq_hsqs05"), "test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +86,7 @@ func TestHandleSelfSkillSpendsMPAndStartsCooldown(t *testing.T) {
 	if rules := player.buffRules(time.Now()); !rules.CantHitEffect || !rules.CantBeSkillLocked {
 		t.Fatalf("red super armor rules=%+v", rules)
 	}
-	handled, err = handleSkillCustom(conn, player, nil, useSkillMessage("CS_yhwq_hsqs05"), "test")
+	handled, err = handleSkillCustom(conn, player, nil, nil, useSkillMessage("CS_yhwq_hsqs05"), "test")
 	if err != nil || !handled {
 		t.Fatalf("second handle handled=%t err=%v", handled, err)
 	}
@@ -206,7 +206,7 @@ func TestCurrentSkillClearEchoesCombatLogicState(t *testing.T) {
 func TestHandleSkillFourStagesNativeVisibleBuff(t *testing.T) {
 	player := newPlayerActor("tester", 0)
 	conn := &captureMessageConnection{}
-	handled, err := handleSkillCustom(conn, player, nil, useSkillMessage("CS_yhwq_hsqs04"), "test")
+	handled, err := handleSkillCustom(conn, player, nil, nil, useSkillMessage("CS_yhwq_hsqs04"), "test")
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
@@ -337,7 +337,7 @@ func TestOpenTaiJiStartsWithoutSelectedTargetAndStagesActionBoundRedArmor(t *tes
 	player := newPlayerActor("tester", 0)
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
-	handled, err := handleSkillCustom(conn, player, world, useSkillMessage("CS_wd_tjq08"), "test")
+	handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessage("CS_wd_tjq08"), "test")
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
@@ -388,6 +388,7 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 		conn,
 		player,
 		world,
+		nil,
 		useSkillMessageAt("CS_wd_tjq08", 0, 0, 0),
 		"test",
 	)
@@ -568,7 +569,7 @@ func TestAttackSkillRequiresSelectedTarget(t *testing.T) {
 	beforeMP := player.stateSnapshot().MP
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
-	handled, err := handleSkillCustom(conn, player, world, useSkillMessage("CS_yhwq_hsqs01"), "test")
+	handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessage("CS_yhwq_hsqs01"), "test")
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}

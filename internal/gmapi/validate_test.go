@@ -189,3 +189,18 @@ func TestValidateAuthoredTask(t *testing.T) {
 		}
 	}
 }
+
+// mount_ride（坐骑骑乘）：mountConfig 非空闸（Java GmRemote mount_ride
+// 同域；面板 mountConfig 键直传）。
+func TestValidateMountRide(t *testing.T) {
+	command, err := validateBody(t, `{"action":"mount_ride","mountConfig":"ride_jh_whz_0001"}`)
+	if err != nil {
+		t.Fatalf("validate mount_ride: %v", err)
+	}
+	if command.MountConfig != "ride_jh_whz_0001" {
+		t.Fatalf("MountConfig=%q", command.MountConfig)
+	}
+	if _, err := validateBody(t, `{"action":"mount_ride","mountConfig":"  "}`); err == nil {
+		t.Fatalf("empty mountConfig should fail")
+	}
+}

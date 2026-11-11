@@ -282,6 +282,14 @@ type playerActor struct {
 	bagpackRows   []bagpackRow
 	visualSex     byte // 武器外观解析用（登录装载时回填）
 	lastItemUseAt time.Time
+	// 坐骑运行域（mount_runtime.go）：拥有集会话镜像（登录时装入，
+	// mount_ride/266 链变更为权威）+ 骑乘/挂起态 + NewRideRec 已推行数
+	//（整刷清场记账，0x0C 重入随对象清空复位）。p.mu 保护。
+	mounts        []mountEntry
+	mountRowsSent int
+	riding        bool
+	ridingConfig  string // 骑乘中坐骑 configId（空=步行）
+	pendingMount  string // USEITEM 挂起 configId（等 266 sub=1 确认后消耗）
 	qingGongExtra map[string]struct{} // 秘籍习得的非 starter 轻功（View46 追加行去重）
 	// tersure 宝物洗炼会话（688 主链：放入锁 0 起、解锁 1 止；pending
 	// 候选未存即丢——重登后客户端重开界面重洗）。p.mu 保护。

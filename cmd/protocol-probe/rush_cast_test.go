@@ -319,7 +319,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 	// 接近带：受理簇 5 帧，无冲刺、无 CD 行。
 	conn, player, world := build(float32((math.Max(rushDashTriggerMeters(), nearCast) + float64(definition.rushRange)) / 2))
 	base := len(conn.Frames())
-	if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("staging cast handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()[base:]
@@ -335,7 +335,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 	// 直收带外不远处的按下（直收带+1.5m）：同样只发受理 5 帧。
 	conn, player, world = build(float32(nearCast + 1.5))
 	base = len(conn.Frames())
-	if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("close cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
@@ -349,7 +349,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 	// 远距（超 RushRange）：受理与距离解耦——照常暂存。
 	conn, player, world = build(definition.rushRange + 5)
 	base = len(conn.Frames())
-	if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("far cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
@@ -364,7 +364,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 	// CurSkillID（官服 g 直收簇，无 0x11/CD 首帧、无暂存）。
 	conn, player, world = build(float32(math.Max(0.5, nearCast-1)))
 	base = len(conn.Frames())
-	if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("near cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
@@ -427,7 +427,7 @@ func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
 	} {
 		conn, player, world := build(npcX)
 		base := len(conn.Frames())
-		if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+		if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 			t.Fatalf("%s press handled=%t err=%v", name, handled, err)
 		}
 		if frames := conn.Frames()[base:]; len(frames) != 0 {
@@ -447,7 +447,7 @@ func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
 	player.skillCooldowns[definition.id] = time.Now().Add(-time.Second)
 	player.mu.Unlock()
 	base := len(conn.Frames())
-	if handled, err := handleSkillCustom(conn, player, world, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
+	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("expired-cooldown press handled=%t err=%v", handled, err)
 	}
 	if frames := conn.Frames()[base:]; len(frames) != 9 {

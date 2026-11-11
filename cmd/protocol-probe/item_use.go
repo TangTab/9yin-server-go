@@ -78,6 +78,17 @@ func handleBodyItemUse(h *itemSession, custom clientCustomMessage) (bool, error)
 		useSkillBook(h, item, script)
 		return true, nil
 	}
+	// 坐骑道具（tool_item script=Mount）：已拥有直接上马、未拥有挂
+	// pending + S2C 240 激活提示（menu2 handleMountItemUse 同位；
+	// 消耗在 266 sub=1 确认链，不在此处扣道具）。
+	if lowerASCII(script) == "mount" && h.mount != nil {
+		if def := h.mount.catalog.defByConfig(item.configID); def != nil {
+			handleMountItemUse(h, item, def)
+			return true, nil
+		}
+		log.Printf("%s: use item %s script=Mount but not in mount catalog", h.remote, item.configID)
+		return true, nil
+	}
 	useItemEffect(h, item, view)
 	return true, nil
 }

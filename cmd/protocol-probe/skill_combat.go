@@ -1335,7 +1335,7 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 	}
 }
 
-func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, custom clientCustomMessage, remote string) (bool, error) {
+func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, mount *mountSession, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomUseSkill {
 		return false, nil
 	}
@@ -1346,6 +1346,14 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	}
 	if player == nil {
 		log.Printf("%s: reject skill before player spawn id=%s", remote, definition.id)
+		return true, nil
+	}
+	// 骑乘技能闸（menu2 handleRideSkillCustom :695-738，211 出招链前置）：
+	// 骑乘技能不在武学表（无 compiled 定义/未学）——先于 learned 闸分流；
+	// dismount 技能转下马，其余骑乘技能受理不播报（广播帧二期随真机
+	// castSkillIDFrame 字节补），步行发骑乘技/骑乘发非白名单技忽略。
+	if mount != nil && (mount.catalog.hasRideSkill(definition.id) || player.ridingMountConfig() != "") {
+		mountSkillGate(mount, definition.id) // 三态均终止出招：下马已收尾、忽略已记日志
 		return true, nil
 	}
 	level, learned := player.learnedSkillLevel(definition.id)

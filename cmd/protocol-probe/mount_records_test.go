@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 // 坐骑域（NewRideRec 310 [3,3,6,1]）：行帧/清行/骑乘态帧 + 三表目录
@@ -67,18 +69,33 @@ func TestPushMountFramesClearsReaddsAndSendsRideState(t *testing.T) {
 	}
 }
 
-func TestMountRideStateFrameWalkStyle(t *testing.T) {
-	frame, err := mountRideStateFrame(41523, 2)
+func TestMountRideStateFrameMountedAndWalkStyle(t *testing.T) {
+	frame, err := mountRideStateFrame(`npc\ride_hawk_0201`, 41523, 2)
 	if err != nil {
 		t.Fatalf("ride state: %v", err)
 	}
 	if frame[0] != 0x10 {
 		t.Fatalf("opcode=%#x", frame[0])
 	}
-	// 重登步行口径：Mount@77 空串，NewRideID@1333=包号，CurRiderType@82。
+	// 上马口径：Mount@77 模型串，NewRideID@1333=包号，CurRiderType@82。
+	if !strings.Contains(string(frame), `npc\ride_hawk_0201`) {
+		t.Fatalf("ride state missing mount model: %x", frame)
+	}
 	raw := string(frame)
 	if !containsPropertyIndex(raw, 77) || !containsPropertyIndex(raw, 1333) || !containsPropertyIndex(raw, 82) {
 		t.Fatalf("ride state missing property indices: %x", frame)
+	}
+
+	// 重登步行/下马口径：Mount 空串 + NewRideID/CurRiderType 双 0。
+	walk, err := mountRideStateFrame("", 41523, 2)
+	if err != nil {
+		t.Fatalf("walk state: %v", err)
+	}
+	if walk[0] != 0x10 {
+		t.Fatalf("walk opcode=%#x", walk[0])
+	}
+	if strings.Contains(string(walk), `npc\ride_hawk_0201`) {
+		t.Fatalf("walk state must not carry model: %x", walk)
 	}
 }
 
@@ -90,14 +107,24 @@ func containsPropertyIndex(frame string, index uint16) bool {
 func stubMountCatalog(t *testing.T) *mountCatalog {
 	t.Helper()
 	dir := t.TempDir()
-	toolItem := "[MOUNT_A]\nScript=Mount\nMountType=0\nArtPack=100\n\n" +
+	toolItem := "[MOUNT_A]\nScript=Mount\nMountType=0\nArtPack=100\nName=坐骑甲\n" +
+		"RideSkillID=riding_dismount, riding_spur\n\n" +
 		"[MOUNT_B]\nScript=Mount\nMountType=7\nArtPack=200\n\n" +
 		"[NOT_MOUNT]\nScript=Other\nArtPack=300\n\n" +
 		"[MOUNT_NOMODEL]\nScript=Mount\nMountType=3\nArtPack=400\n"
 	itemArtStatic := "[100]\nMaleModel=npc\\ride_a\n\n[200]\nMaleModel=npc\\ride_b\n\n[400]\nFemaleModel=npc\\ride_c\n"
-	newRide := "[100]\nMountType=5\n\n[400]\nMountType=9\n"
+	newRide := "[100]\nMountType=5\nSpeedQuality=10.5\nRideSkillID=riding_dismount_diao\n\n[400]\nMountType=9\n"
 	for name, content := range map[string]string{"tool_item.ini": toolItem, "itemartstatic.ini": itemArtStatic, "new_ride.ini": newRide} {
-		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o644); err != nil {
+		raw := []byte(content)
+		if name == "tool_item.ini" {
+			// 生产 tool_item.ini 是 GBK——fixture 同码（Name 中文名走转码链）。
+			encoded, err := simplifiedchinese.GBK.NewEncoder().Bytes([]byte(content))
+			if err != nil {
+				t.Fatalf("encode gbk: %v", err)
+			}
+			raw = encoded
+		}
+		if err := os.WriteFile(filepath.Join(dir, name), raw, 0o644); err != nil {
 			t.Fatalf("write %s: %v", name, err)
 		}
 	}
@@ -127,6 +154,38 @@ func TestLoadMountCatalogThreeTableMerge(t *testing.T) {
 	}
 	if got := catalog.riderTypeOf(9999); got != 0 {
 		t.Fatalf("riderType(9999)=%d, want 0", got)
+	}
+
+	// 定义链：模型/名称/技能合集/速度合并（menu2 mountCatalog 同口径）。
+	def := catalog.defByConfig("MOUNT_A")
+	if def == nil {
+		t.Fatalf("defByConfig(MOUNT_A)=nil")
+	}
+	if def.model != `npc\ride_a` || def.packID != 100 || def.mountType != 5 {
+		t.Fatalf("def=%+v", def)
+	}
+	if def.name != "坐骑甲" {
+		t.Fatalf("def.name=%q (GBK 中文应解出)", def.name)
+	}
+	if def.speed != 10.5 {
+		t.Fatalf("def.speed=%v, want 10.5 (new_ride SpeedQuality)", def.speed)
+	}
+	// RideSkillID 两表合并：tool_item 列表 + new_ride 追加，保序去重。
+	if len(def.rideSkills) != 3 || def.rideSkills[0] != "riding_dismount" ||
+		def.rideSkills[1] != "riding_spur" || def.rideSkills[2] != "riding_dismount_diao" {
+		t.Fatalf("rideSkills=%v", def.rideSkills)
+	}
+	// 全目录合集（211 闸用）。
+	for _, skill := range []string{"riding_dismount", "riding_spur", "riding_dismount_diao"} {
+		if !catalog.hasRideSkill(skill) {
+			t.Fatalf("hasRideSkill(%q)=false", skill)
+		}
+	}
+	if catalog.hasRideSkill("not_a_ride_skill") {
+		t.Fatalf("hasRideSkill(not_a_ride_skill)=true")
+	}
+	if catalog.defByPack(100) != def {
+		t.Fatalf("defByPack(100) mismatch")
 	}
 }
 

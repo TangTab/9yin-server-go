@@ -281,6 +281,13 @@ func Validate(body CommandBody) (Command, error) {
 			body.Amount = 1
 		}
 		command.ItemConfig, command.Amount, command.WearNow = strings.TrimSpace(body.ItemConfig), body.Amount, body.WearNow
+	case "mount_ride":
+		// 坐骑骑乘（Java GmRemote mount_ride 同域）：mountConfig=坐骑道具
+		// config（tool_item script=Mount 且目录有模型映射）；再点同骑=下马。
+		if strings.TrimSpace(body.MountConfig) == "" {
+			return command, fmt.Errorf("mountConfig is required")
+		}
+		command.MountConfig = strings.TrimSpace(body.MountConfig)
 	case "equip_card", "equip_hair":
 		if body.CardId <= 0 {
 			return command, fmt.Errorf("cardId must be a positive skin id")

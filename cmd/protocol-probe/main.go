@@ -545,14 +545,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	defer persistTasks()
 	// 邮件/坐骑域（Java lettersGranted/mountsPushed 同位）：role_letters/
 	// role_mounts 快照读档 → ClientReady 整表重放；无存档零帧。
-	letterStore := newLetterDBStore(store.db)
-	mountStore := newMountDBStore(store.db)
-	mountCatalog := loadMountCatalog(defaultToolItemINIPath, defaultItemArtStaticPath, defaultNewRideINIPath)
-	sessionLetters := []letterEntry(nil)
-	sessionMounts := []mountEntry(nil)
-	lettersPushed := false
-	mountsPushed := false
-	mountSentRows := 0
+		letterStore := newLetterDBStore(store.db)
+		mountStore := newMountDBStore(store.db)
+		mountCatalog := loadMountCatalog(defaultToolItemINIPath, defaultItemArtStaticPath, defaultNewRideINIPath)
+		sessionLetters := []letterEntry(nil)
+		lettersPushed := false
+		mountsPushed := false
 	pushLetters := func() error {
 		lettersPushed = true
 		if len(sessionLetters) == 0 {
@@ -564,18 +562,31 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		log.Printf("%s: replayed %d RecvLetterRec rows", conn.RemoteAddr(), len(sessionLetters))
 		return nil
 	}
-	pushMounts := func() error {
-		mountsPushed = true
-		rows, err := pushMountFrames(link, sessionMounts, mountCatalog, mountSentRows)
-		if err != nil {
-			return fmt.Errorf("replay NewRideRec rows: %w", err)
+		pushMounts := func() error {
+			mountsPushed = true
+			mounts := []mountEntry(nil)
+			var oldRows int
+			if player != nil {
+				player.mu.Lock()
+				mounts = make([]mountEntry, len(player.mounts))
+				copy(mounts, player.mounts)
+				oldRows = player.mountRowsSent
+				player.mu.Unlock()
+			}
+			rows, err := pushMountFrames(link, mounts, mountCatalog, oldRows)
+			if err != nil {
+				return fmt.Errorf("replay NewRideRec rows: %w", err)
+			}
+			if player != nil {
+				player.mu.Lock()
+				player.mountRowsSent = rows
+				player.mu.Unlock()
+			}
+			if len(mounts) > 0 {
+				log.Printf("%s: pushed saved mounts owned=%d current=%d", conn.RemoteAddr(), len(mounts), mountCurrentPack(mounts))
+			}
+			return nil
 		}
-		mountSentRows = rows
-		if len(sessionMounts) > 0 {
-			log.Printf("%s: pushed saved mounts owned=%d current=%d", conn.RemoteAddr(), len(sessionMounts), mountCurrentPack(sessionMounts))
-		}
-		return nil
-	}
 	qingGongGranted := false
 	// AutoTrace（自动寻路开关）挂玩家对象属性，ClientReady 簇首推一次、
 	// 0x0C 切图清对象后由 stable re-entry 分支重推。
@@ -615,10 +626,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		return 0
 	}
 	// 物品域会话上下文（msg30/31/34/36 共用；store 缺库时纯内存降级）。
+	newMountSession := func() *mountSession {
+		return &mountSession{
+			link: link, player: player, store: mountStore, catalog: mountCatalog,
+			inventory: inventory, ctx: ctx, roleID: currentRoleID(),
+			remote: conn.RemoteAddr().String(), now: time.Now,
+		}
+	}
 	newItemSession := func() *itemSession {
 		return &itemSession{
 			link: link, player: player, store: inventory, skins: appearanceCfg.skins,
-			currency: currencyStore, randomProps: randomPropsStore,
+			currency: currencyStore, randomProps: randomPropsStore, mount: newMountSession(),
 			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
 			now: time.Now,
 		}
@@ -1400,6 +1418,40 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			session.pushRandomPropsForBag(command.ItemConfig, inserted.uid, inserted.viewID, inserted.slot)
 			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, inserted.slot))
 			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, inserted.slot)
+		case "mount_ride":
+			// 坐骑骑乘（Java applyMountRide 同语义）：道具 config → 目录
+			// （需 script=Mount 且有模型映射）→ 未拥有自动补行（永久口径）
+			// → 选中并骑乘；再点同骑 = 下马（拥有保留）。GM 链不消耗道具。
+			mountDef := mountCatalog.defByConfig(command.MountConfig)
+			if mountDef == nil {
+				gmSession.setAction("坐骑道具不存在或不可骑: " + command.MountConfig + "（需 tool_item script=Mount 且 itemartstatic 有模型映射）")
+				return fmt.Errorf("mount config %q not rideable", command.MountConfig)
+			}
+			mount := newMountSession()
+			if player.ridingMountConfig() == mountDef.configID {
+				if mountErr := mount.stopMount(); mountErr != nil {
+					gmSession.setAction("下马失败：" + mountErr.Error())
+					return mountErr
+				}
+				gmSession.setAction(fmt.Sprintf("已从 %s [%s] 上下马（拥有保留）", mountDef.name, mountDef.configID))
+				log.Printf("%s: GM mount_ride dismount pack=%d", conn.RemoteAddr(), mountDef.packID)
+				return nil
+			}
+			player.mu.Lock()
+			player.mounts = withMountSelected(
+				withOwnedMount(player.mounts, mountDef.packID, mountDef.configID), mountDef.packID)
+			player.mu.Unlock()
+			mount.persistMounts("gm mount_ride")
+			if pubErr := mount.publishOwnedMounts(); pubErr != nil {
+				log.Printf("%s: publish mounts after gm mount_ride: %v", conn.RemoteAddr(), pubErr)
+			}
+			if mountErr := mount.startMount(mountDef); mountErr != nil {
+				gmSession.setAction("上马失败：" + mountErr.Error())
+				return mountErr
+			}
+			gmSession.setAction(fmt.Sprintf("已骑乘 %s [%s] 模型 %s（NewRideRec 包 %d；再点同骑下马）",
+				mountDef.name, mountDef.configID, mountDef.model, mountDef.packID))
+			log.Printf("%s: GM mount_ride pack=%d model=%s", conn.RemoteAddr(), mountDef.packID, mountDef.model)
 		case "equip_card", "equip_hair":
 			entry, known := skinCards.lookup(int(command.CardId))
 			if !known {
@@ -2085,7 +2137,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: restored letters role=%d count=%d", conn.RemoteAddr(), activeRole.ID, len(letters))
 			}
 			if mounts := mountStore.Load(activeRole.ID); len(mounts) > 0 {
-				sessionMounts = mounts
+				player.restoreMounts(mounts)
 				log.Printf("%s: restored mounts role=%d owned=%d current=%d", conn.RemoteAddr(), activeRole.ID, len(mounts), mountCurrentPack(mounts))
 			}
 
@@ -2428,12 +2480,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: %v", conn.RemoteAddr(), err)
 						return
 					}
-					mountsPushed = false
-					mountSentRows = 0
-					if err := pushMounts(); err != nil {
-						log.Printf("%s: %v", conn.RemoteAddr(), err)
-						return
-					}
+				mountsPushed = false
+				player.resetMountRows()
+				if err := pushMounts(); err != nil {
+					log.Printf("%s: %v", conn.RemoteAddr(), err)
+					return
+				}
 					if switchErr := enableSkillActionSwitch(link); switchErr != nil {
 						log.Printf("%s: restore native skill-action switch after 0x0C re-entry: %v", conn.RemoteAddr(), switchErr)
 						return
@@ -2572,11 +2624,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 之前）：quest49 簇 + 419 步骤 + data_record 58 行打包。
 				// gamestep 步骤帧不在此处——sync 之后由收尾帧下发
 				// （sync 重置 414 域，先发会被抹掉）。
-				jyzPushed = true
-				ownedMountPacks := make(map[uint32]bool, len(sessionMounts))
-				for _, mount := range sessionMounts {
-					ownedMountPacks[mount.PackID] = true
-				}
+			jyzPushed = true
+			ownedMountPacks := make(map[uint32]bool)
+			for _, mount := range player.mountsSnapshot() {
+				ownedMountPacks[mount.PackID] = true
+			}
 				if jyzErr := pushJyzRecords(link, jyzGate.config(), ownedMountPacks); jyzErr != nil {
 					log.Printf("%s: push jyz records: %v", conn.RemoteAddr(), jyzErr)
 					return
@@ -2865,7 +2917,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: repush accepted tasks for msg327: %v", conn.RemoteAddr(), repushErr)
 					}
 				case clientCustomUseSkill:
-					if _, handleErr := handleSkillCustom(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+					if _, handleErr := handleSkillCustom(link, player, world, newMountSession(), custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle activity skill: %v", conn.RemoteAddr(), handleErr)
 						return
 					}
@@ -3129,7 +3181,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			switch custom.Values[0].Int32 {
 			case clientCustomUseSkill:
-				if _, handleErr := handleSkillCustom(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
+				if _, handleErr := handleSkillCustom(link, player, world, newMountSession(), custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle skill: %v", conn.RemoteAddr(), handleErr)
 					return
 				}
@@ -3210,6 +3262,17 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			case clientCustomUseItem:
 				if _, handleErr := handleBodyItemUse(newItemSession(), custom); handleErr != nil {
 					log.Printf("%s: handle use item: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomRide:
+				// 坐骑骑乘键（menu2 handleRideCustom：toggle 上/下马）。
+				if _, handleErr := handleRideCustom(newMountSession(), custom); handleErr != nil {
+					log.Printf("%s: handle ride: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomNewRide:
+				// ride_util 子令（menu2 handleNewRideCustom：sub=1 使用
+				// 坐骑道具确认 / sub=2 切换选中并骑乘）。
+				if _, handleErr := handleNewRideCustom(newMountSession(), custom); handleErr != nil {
+					log.Printf("%s: handle new ride: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomDeleteItem:
 				if _, handleErr := handleDeleteItemCustom(newItemSession(), custom); handleErr != nil {
