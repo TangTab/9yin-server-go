@@ -238,7 +238,14 @@ type playerActor struct {
 	parrying       bool
 	skillLockUntil time.Time
 	reviveAt       time.Time
-	progress       playerProgress
+	// 通道技能运行态（skill_channel.go，挑战.pcapng 2026-11-12 寒心恨雪
+	// 定版）：channelUntil=通道有效期（受理起 waves×interval+余量，窗口
+	// 外 m914 静默吞）；channelTransform=客户端逐段上报的最新位置/朝向
+	//（引导中角色瞬移跟随当跳目标，服务端以此为准做逐波索敌）。
+	channelUntil     time.Time
+	channelTransform worldcore.Transform
+	channelHasPos    bool
+	progress         playerProgress
 	// timedBuffs 限时增益（timed_buffs.go）：超长时限 buff 的运行态，
 	// role_timed_buffs 快照持久化；与战斗槽位租约（p.buffs）分离。
 	timedBuffs []timedBuffRuntime

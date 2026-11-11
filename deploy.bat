@@ -17,6 +17,9 @@ rem        (2026-11-08: F: deploy was missing scripts\module\combat\
 rem        formula.lua and the combat engine silently fell back)
 rem    [5] Create env.server in the target root with default values
 rem        when missing (existing file is never touched)
+rem    [6] Run sql-replay.exe from the target root against MySQL to apply
+rem        pending migrations idempotently (embedded migration set,
+rem        sql_replay_ledger guarded; a failed replay stops the deploy)
 rem
 rem  Usage: deploy.bat
 rem    Run build.bat first; this script ships what is in build\ and scripts\.
@@ -24,12 +27,12 @@ rem ============================================================
 
 cd /d "%~dp0"
 
-rem ---------- [1/5] Load NINEYIN_SERVER_ROOT from env.server ----------
+rem ---------- [1/6] Load NINEYIN_SERVER_ROOT from env.server ----------
 if defined NINEYIN_SERVER_ROOT goto root_loaded
 if not exist "env.server" (
     echo [ERROR] NINEYIN_SERVER_ROOT is not defined and env.server was not found.
     echo         Copy env.server.default to env.server and fill in the target path.
-    pause
+    call :close_countdown
     exit /b 1
 )
 rem Execute only the lines that start with "set " so comments (::) are skipped.
@@ -37,13 +40,13 @@ for /f "usebackq delims=" %%L in (`findstr /b /l /c:"set " "env.server"`) do cal
 :root_loaded
 if not defined NINEYIN_SERVER_ROOT (
     echo [ERROR] NINEYIN_SERVER_ROOT is not set in env.server.
-    pause
+    call :close_countdown
     exit /b 1
 )
 if not exist "%NINEYIN_SERVER_ROOT%" (
     echo [ERROR] Target folder does not exist: %NINEYIN_SERVER_ROOT%
     echo         Check NINEYIN_SERVER_ROOT in env.server.
-    pause
+    call :close_countdown
     exit /b 1
 )
 
@@ -54,11 +57,11 @@ echo   Target : %NINEYIN_SERVER_ROOT%
 echo ==========================================
 echo.
 
-rem ---------- [2/5] build\* -> target, overwrite ----------
-echo [2/5] Deploying build\* (overwrite)...
+rem ---------- [2/6] build\* -> target, overwrite ----------
+echo [2/6] Deploying build\* (overwrite)...
 if not exist "build\*" (
     echo [ERROR] build\ is empty. Run build.bat first.
-    pause
+    call :close_countdown
     exit /b 1
 )
 set /a BUILD_N=0
@@ -68,8 +71,8 @@ for %%f in ("%~dp0build\*") do (
     set /a BUILD_N+=1
 )
 
-rem ---------- [3/5] server-cmd\* -> target, only if missing ----------
-echo [3/5] Deploying server-cmd\* (skip existing)...
+rem ---------- [3/6] server-cmd\* -> target, only if missing ----------
+echo [3/6] Deploying server-cmd\* (skip existing)...
 set /a CMD_NEW=0
 set /a CMD_SKIP=0
 for %%f in ("%~dp0server-cmd\*") do (
@@ -77,8 +80,8 @@ for %%f in ("%~dp0server-cmd\*") do (
     if errorlevel 1 goto deploy_fail
 )
 
-rem ---------- [4/5] scripts\ tree -> target, overwrite ----------
-echo [4/5] Deploying scripts\ tree (overwrite)...
+rem ---------- [4/6] scripts\ tree -> target, overwrite ----------
+echo [4/6] Deploying scripts\ tree (overwrite)...
 set /a SCRIPT_N=0
 if exist "%~dp0scripts" (
     for /f "delims=" %%f in ('dir /s /b /a:-d "%~dp0scripts" 2^>nul') do set /a SCRIPT_N+=1
@@ -93,8 +96,8 @@ if exist "%~dp0scripts" (
     echo   [scripts] repo has no scripts\ tree - skipped
 )
 
-rem ---------- [5/5] env.server -> create with defaults if missing ----------
-echo [5/5] Checking env.server...
+rem ---------- [5/6] env.server -> create with defaults if missing ----------
+echo [5/6] Checking env.server...
 if exist "%NINEYIN_SERVER_ROOT%\env.server" (
     echo   [env.server] exists, left untouched
     goto env_server_done
@@ -104,6 +107,24 @@ if exist "%NINEYIN_SERVER_ROOT%\env.server" (
 >>"%NINEYIN_SERVER_ROOT%\env.server" echo set "NINEYIN_MYSQL_DSN=nineyin:nineyin123@tcp(127.0.0.1:3306)/nineyin"
 echo   [env.server] created with defaults ^(loaded by start-9yin.bat^)
 :env_server_done
+
+rem ---------- [6/6] sql-replay: roll pending SQL migrations into MySQL ----------
+echo [6/6] Running sql-replay against MySQL...
+if not exist "%NINEYIN_SERVER_ROOT%\sql-replay.exe" (
+    echo   [WARN] sql-replay.exe missing in target - run build.bat again. Migrations were NOT applied.
+    goto sql_done
+)
+rem -embedded: use the migration set compiled into the exe - the target root
+rem has no migrations dir. DSN priority inside the tool: NINEYIN_MYSQL_DSN
+rem env var, then the -env file passed below.
+"%NINEYIN_SERVER_ROOT%\sql-replay.exe" -embedded -env "%NINEYIN_SERVER_ROOT%\env.server" -timeout 10m
+if errorlevel 1 (
+    echo [ERROR] SQL migration replay failed. Files were deployed, but fix MySQL
+    echo         or the DSN before starting the server - see sql-replay output above.
+    call :close_countdown
+    exit /b 1
+)
+:sql_done
 
 echo.
 echo ==========================================
@@ -121,10 +142,18 @@ exit /b 0
 :deploy_fail
 echo.
 echo [ERROR] Deploy aborted.
-pause
+call :close_countdown
 exit /b 1
 
 rem ================= helpers =================
+
+rem Wait 15s so the error above can be read, then return so the caller can
+rem exit. timeout shows a live countdown; any keypress skips the wait.
+rem (The window itself auto-closes only when the bat was double-clicked.)
+:close_countdown
+echo Closing in 15 seconds - press any key to close now...
+timeout /t 15
+exit /b 0
 
 rem Copy one build artifact into the target root, overwriting.
 :deploy_build_file

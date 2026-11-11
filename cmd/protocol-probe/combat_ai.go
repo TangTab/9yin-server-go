@@ -25,8 +25,10 @@ type npcMoveUpdate struct {
 	id          uint32
 	ownerID     uint32
 	destination worldcore.Transform
-	// delay 是该次移动的到达确认延时（scheduleCombatMoveArrival 用）。
+	// speed 是该次移动的行进速度（0x21 广播第 6 槽；0=瞬移类不发
+	// 跑步动画）。delay 是到达确认延时（scheduleCombatMoveArrival 用）。
 	// 0＝旧默认 1s（重生/栓绳瞬移类）；追击折线按剩余路径长/速度。
+	speed float32
 	delay time.Duration
 }
 
@@ -34,6 +36,19 @@ type npcPropertyUpdate struct {
 	id         uint32
 	ownerID    uint32
 	properties []clientdata.IndexedProperty
+}
+
+// npcMoveStateProperties 追击行进态 State 行（moving=true → walk）。
+// 与巡逻 0x21 伴生的 npcStatePropertyFrame 同一字段同语义，走属性
+// 帧通道以便搭战斗 tick 的 updates 批量扇出。
+func npcMoveStateProperties(moving bool) []clientdata.IndexedProperty {
+	state := "stand"
+	if moving {
+		state = "walk"
+	}
+	return []clientdata.IndexedProperty{
+		{Index: npcStatePropertyIndex, Name: "State", Value: clientdata.StringValue(state)},
+	}
 }
 
 const (
@@ -45,10 +60,17 @@ const (
 	playerAutoReviveDelay   = 8 * time.Second
 
 	// NPC 攻击三常量（Java NpcCombatAi 逐值对齐、参考服 55866 实证）：
-	// 反击近身 6m、周期 2.2s（抓包 12141 实测 ~2s 一轮）、每击实伤 1
+	// 命中有效 6m、周期 2.2s（抓包 12141 实测 ~2s 一轮）、每击实伤 1
 	// （名义攻击力 20 经玩家防御折算恒 1，只出现在 msg24 c1=7 尾值）。
 	// 此前 Go 用 MaxHP/50(≥10, Boss×2)/1500ms/3.5m 属本地自造，整体废弃。
 	npcAttackRangeMeters = float32(6.0)
+	// npcEngageRangeMeters 追击停靠分位：reach 超过它继续逼近、进入它
+	// 才站定输出。官服野怪出招距离实测（技能.pcapng，受害者双源新鲜
+	// 坐标 msg337+C2S211）min≈0.8 / p50≈2.3 / p75≈6.5m——即怪贴脸到
+	// 2~3m 打、6m 内仍能命中；Java 的 6m 只是反击循环有效距（玩家跑出
+	// 才收手），不是停靠线。单用 6m 停靠 = 怪在六米外站桩隔空挥击
+	// （2026-11-12 真机回归，工具 tools/npc_attack_distance_probe.py）。
+	npcEngageRangeMeters = float32(3.0)
 	npcAttackEvery       = 2200 * time.Millisecond
 	npcAttackDamage      = int32(1)
 
@@ -78,7 +100,8 @@ func newNPCCombatState(npc npcSpawn, home worldcore.Transform) sim.Brain {
 	}
 	return sim.Brain{
 		Home: home, AggroRange: aggro, ChaseRange: chase,
-		AttackRange: npcAttackRangeMeters, MoveSpeed: move, Damage: npcAttackDamage,
+		AttackRange: npcAttackRangeMeters, EngageRange: npcEngageRangeMeters,
+		MoveSpeed: move, Damage: npcAttackDamage,
 		AttackEvery: npcAttackEvery, RespawnAfter: npcRespawnAfter(npc),
 		// NotPositive=1（官方属性表 idx 62，Int32）：creator 条目级
 		// “不主动攻击”。城内 attacknpc.xml 大多带此标记（city05 219 条
@@ -138,6 +161,7 @@ type npcAttackPresentation struct {
 	landed         bool
 	hpRatio        int32
 	model          string
+	skill          string // 攻击动画串（NormalSkill 节名或兜底常量）
 	playerWideName string
 	npcWideName    string
 	victim         *sceneMember
@@ -210,7 +234,7 @@ func (r *sceneRun) broadcastNPCAttacks(attacks []npcAttackPresentation) {
 			log.Printf("%s: encode NPC cast preparation %d: %v", attack.victim.view.remote, attack.npcID, err)
 			continue
 		}
-		animFrame, err := nativeSkillActionFrameFor(attack.npcID, attack.ownerID, npcAttackSkillJN, playerObjectID, playerOwnerID)
+		animFrame, err := nativeSkillActionFrameFor(attack.npcID, attack.ownerID, attack.skill, playerObjectID, playerOwnerID)
 		if err != nil {
 			log.Printf("%s: encode NPC attack action %d: %v", attack.victim.view.remote, attack.npcID, err)
 			continue
@@ -392,13 +416,17 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			r.appendNPCReturnHomeLocked(id, meta, vitals, state, transform, &moves, &updates)
 			return
 		}
+		// reach 是含高度差的 3D 距离：攻击/追击分位用它（水平距离对柱
+		// 顶/屋檐上的玩家恒“近战在位”）；栓绳/索敌仍用水平距离（视野
+		// 语义，高处看得见、拉不远）。
+		reach := distance3D(*transform, position)
 		// 该 NPC 仍持有有效目标，即便它此刻正在等待
 		// 攻击冷却结束，或已超出本 tick 的攻击者数量上限。
 		threatened[state.TargetMember] = true
 		if now.Before(state.ControlledUntil) {
 			return
 		}
-		if !npcChaseEnabled() && distance > state.AttackRange {
+		if !npcChaseEnabled() && reach > state.AttackRange {
 			// 追击总闸关闭（NINEYIN_NPC_CHASE=off 启动方言或 GM 面板
 			// set_npc_chase=0）：追击位移整段静默，仇恨照常持有。
 			// 放在攻击者名额闸之前——远距怪不占每 tick 的攻击名额，
@@ -410,23 +438,60 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 		aggressors++
 		target := memberByID[state.TargetMember]
-		if distance > state.AttackRange {
-			// 路点图追击（mapnav_chase.go）：A* 折线推进 + y 插值替代
-			// 旧水平直线 stepToward——穿墙（无寻路）与穿地/悬空（y 不
-			// 随地形）两个根因在此一并消除（docs/map-path-waypoint-graph.md
-			// §5/§6.3）。无图场景内部回落直线贴地。
+		// 追击/攻击双分位（官服方言，2026-11-12）：reach > EngageRange(3m)
+		// 继续逼近，reach ≤ AttackRange(6m) 即可命中——两档之间（3~6m 带）
+		// 边走边打，怪不再在 6m 线外站桩隔空挥击。
+		if npcChaseEnabled() && reach > state.EngageRange {
+			// 路点图追击（mapnav_chase.go）：A* 折线推进 + 贴地插值替代
+			// 旧水平直线 stepToward——穿墙（无寻路）、穿地/悬空（y 不随
+			// 地形）、飞天追高（y 朝悬空目标插值）三个根因在此一并消除
+			//（docs/map-path-waypoint-graph.md §5/§6.3）。无图场景内部
+			// 回落直线贴地。攻防分位用 3D 距离：玩家跳上柱顶/屋檐后水
+			// 平虽近但够不着，NPC 只能贴地追到下方，不再隔空平 A。
 			destination, delay, gaveUp := r.advanceChaseLocked(meta, state, transform, position, now)
 			if gaveUp {
 				// 跨分量连续规划失败：放弃仇恨按栓绳语义回位。
 				r.appendNPCReturnHomeLocked(id, meta, vitals, state, transform, &moves, &updates)
 				return
 			}
+			// setNPCTransformLocked 经 ECS 就地写会覆盖 *transform，先存
+			// 旧值再落盘，供零位移判定。
+			before := *transform
 			if err := r.setNPCTransformLocked(id, destination); err != nil {
 				log.Printf("scene %s/%s: chase transform id=%d: %v", r.key.config, r.key.resource, meta.id, err)
 				return
 			}
-			moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: destination, delay: delay})
-			return
+			if r.npcMoveState == nil {
+				r.npcMoveState = make(map[uint32]bool)
+			}
+			if !npcTransformMoved(destination, before) {
+				// 水平已在攻击位内但 3D 够不着（柱顶/屋檐卡位）：零位移
+				// 不发移动帧，行进态翻回 stand——NPC 原地守在下方，不播
+				// 原地走路动画。
+				if last, seen := r.npcMoveState[uint32(id)]; seen && last {
+					r.npcMoveState[uint32(id)] = false
+					updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcMoveStateProperties(false)})
+				}
+				return
+			}
+			moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: destination, speed: state.MoveSpeed, delay: delay})
+			// 追击行进态翻转（巡逻 0x21 同款，官服 e.pcapng §13.5）：
+			// 起 chase 即 State=walk（含首拍），进入攻击位/脱战回位翻回
+			// stand——0x21 只驱动位移，跑步动画还需 State 行。
+			if last, seen := r.npcMoveState[uint32(id)]; !seen || !last {
+				r.npcMoveState[uint32(id)] = true
+				updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcMoveStateProperties(true)})
+			}
+			if reach > state.AttackRange {
+				// 命中有效距之外：本拍只追不打。
+				return
+			}
+			// 3~6m 带：位移照发、出招照走（官服野怪边逼近边挥击的样本，
+			// 技能.pcapng p75≈6.5m 命中即此带内出招）。
+		} else if last, seen := r.npcMoveState[uint32(id)]; seen && last {
+			// 进入攻击位（本 tick 不再位移）：行进态若仍挂着翻回 stand。
+			r.npcMoveState[uint32(id)] = false
+			updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcMoveStateProperties(false)})
 		}
 		if now.Before(state.NextAttack) {
 			return
@@ -468,6 +533,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			landed:         !outcome.dodged && !outcome.parried,
 			hpRatio:        hpRatio,
 			model:          meta.model,
+			skill:          npcAttackActionSkill(meta.normalSkill),
 			playerWideName: target.player.snapshotName(),
 			npcWideName:    meta.wideName,
 			victim:         target,
@@ -673,7 +739,18 @@ func (r *sceneRun) throttledNPCLocationBroadcast(members []*sceneMember, meta sc
 // 扇出给视口内可见对应 NPC 的成员，并排布到达确认定时器。
 func (r *sceneRun) broadcastNPCFrames(members []*sceneMember, moves []npcMoveUpdate, updates []npcPropertyUpdate) {
 	for _, move := range moves {
-		frame := serverMoving(move.id, move.ownerID, motionFromDest(move.destination))
+		// 官方追击移动广播=0x21 ServerAllDest（技能.pcapng：0x20 全程
+		// 0 次；0x21 条目带速度槽——缺速度客户端无跑步动画直接滑行
+		// 飘移）。speed>0 即行进（flags=1，巡逻同款），瞬移类 speed=0。
+		flags := uint32(0)
+		if move.speed > 0 {
+			flags = 1
+		}
+		frame := serverAllDest([]allDestEntry{{
+			objectID: move.id, ownerID: move.ownerID,
+			destX: move.destination.X, destY: move.destination.Y, destZ: move.destination.Z,
+			destOrient: move.destination.Orient, speed: move.speed, moveFlags: flags,
+		}})
 		for _, member := range members {
 			if member.view == nil || !member.view.npcVisible(move.id) {
 				continue
@@ -833,6 +910,21 @@ func npcCombatProperties(state entity.ActorState) []clientdata.IndexedProperty {
 func horizontalDistance(a, b worldcore.Transform) float32 {
 	dx, dz := a.X-b.X, a.Z-b.Z
 	return float32(math.Hypot(float64(dx), float64(dz)))
+}
+
+// distance3D 返回含高度差的三维欧氏距离（攻防分位的可达性口径）。
+func distance3D(a, b worldcore.Transform) float32 {
+	dx, dy, dz := a.X-b.X, a.Y-b.Y, a.Z-b.Z
+	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
+}
+
+// npcTransformMoved 判定本拍追击位移是否值得广播：零位移（目标水平
+// 已在攻击位内但 3D 够不着——柱顶/屋檐卡位）不发移动帧；浮点贴地
+// 收敛的尾差（<1cm）视同未动。
+func npcTransformMoved(a, b worldcore.Transform) bool {
+	return math.Abs(float64(a.X-b.X)) > 0.01 ||
+		math.Abs(float64(a.Y-b.Y)) > 0.01 ||
+		math.Abs(float64(a.Z-b.Z)) > 0.01
 }
 
 func minFloat32(a, b float32) float32 {

@@ -45,8 +45,8 @@ type CommandBody struct {
 	Code        string  `json:"code"`
 	Type        int32   `json:"type"`
 	ItemConfig  string  `json:"itemConfig"`
-	MountConfig string `json:"mountConfig"` // mount_ride 的坐骑道具 config
-	BingluArgs   string `json:"bingluArgs"`   // binglu 的 set/max 子命令串
+	MountConfig string  `json:"mountConfig"` // mount_ride 的坐骑道具 config
+	BingluArgs  string  `json:"bingluArgs"`  // binglu 的 set/max 子命令串
 	Amount      int32   `json:"amount"`
 	WearNow     bool    `json:"wearNow"`
 	CardId      int32   `json:"cardId"`
@@ -81,6 +81,8 @@ type CommandBody struct {
 	Stage       int32   `json:"stage"`       // ninjiuzhi_set 九阴志目标阶段 1..9
 	EventKind   string  `json:"eventKind"`   // ninjiuzhi_event kill|task
 	TaskId      int32   `json:"taskId"`      // authored_task_* 任务 ID（start 必填；其余 0=最早活跃）
+	SkillKey    string  `json:"skillKey"`    // learn_taolu 套路 key / learn_neigong 内功书 configId
+	SkillLevel  int32   `json:"skillLevel"`  // 目标层数（0=各自满级；游戏侧按目录上限逐技钳制）
 }
 
 // Command 是校验通过后的命令纯数据。原 cmd/protocol-probe 的 gmCommand
@@ -140,6 +142,8 @@ type Command struct {
 	Stage          int32   // ninjiuzhi_set 九阴志目标阶段 1..9（单调递增，回退由游戏侧拒绝并回报文本）
 	EventKind      string  // ninjiuzhi_event 事件点类别 kill|task
 	TaskId         int32   // authored_task_* 任务 ID（start ≥1 必填；submit_ready/remove/reward 0=最早活跃）
+	SkillKey       string  // learn_taolu 套路 key / learn_neigong 内功书 configId（面板 skillKey 键）
+	SkillLevel     int32   // learn_taolu/learn_neigong 目标层数（0=各自满级，游戏侧逐技钳上限）
 }
 
 // PlayerState 是 GET 会话列表端点的行结构。原 gmPlayerState 原样搬来

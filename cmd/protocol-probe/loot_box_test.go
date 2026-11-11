@@ -112,9 +112,10 @@ func TestBatchRespawnSweepRevivesDeadAndLeavesAlive(t *testing.T) {
 	if after, _ := run.npcTransform(worldcore.EntityID(forkNPCID(3))); after != aliveTransform {
 		t.Fatalf("alive NPC moved: %+v -> %+v", aliveTransform, after)
 	}
-	// 复活帧组：0x20 回家 + 0x10 属性（与每怪复活同帧方言）。
+	// 复活帧组：0x21 回家（速度 0）+ 0x10 属性（与每怪复活同帧方言；
+	// 2026-11-11 追击/瞬移统一 0x21——0x20 官服全程 0 次）。
 	opcodes := frameOpcodes(conn.Frames())
-	if !opcodes.has(0x20) || !opcodes.has(0x10) {
+	if !opcodes.has(0x21) || !opcodes.has(0x10) {
 		t.Fatalf("respawn frames=%v", opcodes)
 	}
 }

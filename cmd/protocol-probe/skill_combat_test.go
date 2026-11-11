@@ -381,6 +381,8 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	// /100/waves（开太极 1304/100/1=13.04）。注入确定性随机源（0.5/0.5/0.5
 	// =命中、非暴击、攻方 20+floor(0.5×16)=28）→ 伤害恒 floor(28×13.04)
 	// =365，不再直扣静态 1304。
+	// 2026-11-11 hitbreak 时序批次：开太极三段判定 333/6000/7933ms（段链
+	// 全时长累加）——首段后验 635，末段（3×365=1095>1000）致死。
 	originalRandom := combatRandomFloat64
 	combatRandomFloat64 = func() float64 { return 0.5 }
 	defer func() { combatRandomFloat64 = originalRandom }()
@@ -395,9 +397,22 @@ func TestOpenTaiJiDamagesCombatNPCsInsideInstalledFiveMetreCircle(t *testing.T) 
 	if err != nil || !handled {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
-	if inside, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(91))); inside.HP != 1000-365 {
-		t.Fatalf("inside NPC HP=%d, want %d after rolled 365 damage", inside.HP, 1000-365)
+	waitForHP := func(want func(int32) bool, what string) {
+		t.Helper()
+		deadline := time.Now().Add(10 * time.Second)
+		for {
+			inside, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(91)))
+			if want(inside.HP) {
+				return
+			}
+			if time.Now().After(deadline) {
+				t.Fatalf("inside NPC HP=%d, want %s", inside.HP, what)
+			}
+			time.Sleep(25 * time.Millisecond)
+		}
 	}
+	waitForHP(func(hp int32) bool { return hp == 1000-365 }, "635 after first 365 damage tick")
+	waitForHP(func(hp int32) bool { return hp <= 0 }, "dead after three ticks of 365")
 	if outside, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(92))); outside.HP <= 0 {
 		t.Fatalf("outside NPC HP=%d, want alive outside five metres", outside.HP)
 	}
@@ -705,7 +720,7 @@ func TestMultiHitSkillRollsPerHitIndependently(t *testing.T) {
 		t.Fatal("npc 95 meta missing")
 	}
 	scheduleSkillMultiHits(conn, world, definition, player,
-		[]skillDamageTargetRef{{id: forkNPCID(95), ownerID: meta.ownerID}}, "test")
+		[]skillDamageTargetRef{{id: forkNPCID(95), ownerID: meta.ownerID}}, clientCustomMessage{}, "test")
 	time.Sleep(120 * time.Millisecond)
 
 	vitals, ok := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(95)))
@@ -714,6 +729,62 @@ func TestMultiHitSkillRollsPerHitIndependently(t *testing.T) {
 	}
 	if got, want := vitals.HP, int32(1000-11-13-17); got != want {
 		t.Fatalf("NPC HP=%d, want %d (per-hit 11/13/17)", got, want)
+	}
+}
+
+// TestShapedMultihitPicksUpNewEntrants 范围型多段逐段重索敌（用户
+// 2026-11-12 口径：技能期间进入范围的敌人也要吃伤害）——出招快照
+// 只有 NPC95，段间 NPC96 走进范围后两段都命中它。
+func TestShapedMultihitPicksUpNewEntrants(t *testing.T) {
+	originalEngine := installedCombatCalc
+	installedCombatCalc = newTestCombatEngine(t, combatcalc.FormulaSpec{
+		ID: 9, Formula: "R[P1,P2]", Src: map[int]int{1: 5, 2: 5},
+	})
+	defer func() { installedCombatCalc = originalEngine }()
+	originalRandom := combatRandomFloat64
+	combatRandomFloat64 = func() float64 { return 0.5 }
+	defer func() { combatRandomFloat64 = originalRandom }()
+
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 95)
+	placeTestNPC(t, world, 95, 4, 0)
+	registerTestCombatNPC(t, world, 96)
+	placeTestNPC(t, world, 96, 50, 0) // 出招时在范围外
+
+	definition := combatSkillDefinition{
+		id: "CS_test_shaped", script: "SkillNormal",
+		targetMode: skillTargetCasterCircle, areaRadius: 6,
+		damageRows: []skillDamageRow{{formulaID: 9, damageType: "PhyDamage", params: []string{"10", "20"}}},
+		hitFrameMs: []time.Duration{5 * time.Millisecond, 20 * time.Millisecond},
+	}
+	custom := clientCustomMessage{Values: []clientCustomValue{
+		{Type: 2, Int32: 211},
+		{Type: 6, Text: "CS_test_shaped"},
+		{Type: 4, Float32: 0}, {Type: 4, Float32: 0}, {Type: 4, Float32: 0},
+	}}
+	player := newPlayerActor("tester", 0)
+	targets := world.resolveSkillDamageTargets(definition, custom, 0, 0)
+	if len(targets) != 1 || targets[0].id != forkNPCID(95) {
+		t.Fatalf("出招快照=%v, want 仅 NPC95（96 在范围外）", targets)
+	}
+	scheduleSkillMultiHits(conn, world, definition, player, targets, custom, "test")
+	// 技能期间 NPC96 走进范围（段间进场）。
+	world.run.mu.Lock()
+	world.run.writeNpcTransform(worldcore.EntityID(forkNPCID(96)), worldcore.Transform{X: 1, Z: 0})
+	world.run.mu.Unlock()
+	time.Sleep(60 * time.Millisecond)
+
+	hp95, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(95)))
+	hp96, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(96)))
+	if hp95.HP != 1000-2*15 {
+		t.Fatalf("NPC95 HP=%d, want %d (两段各 15)", hp95.HP, 1000-2*15)
+	}
+	if hp96.HP != 1000-2*15 {
+		t.Fatalf("NPC96 HP=%d, want %d (进场后两段都命中——旧快照实现恒 1000)", hp96.HP, 1000-2*15)
 	}
 }
 

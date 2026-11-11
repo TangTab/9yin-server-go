@@ -111,8 +111,15 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 		t.Fatalf("stage handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 9 { // 5 帧受理簇 + 状态四连（官服簇尾 +42ms 必发）
-		t.Fatalf("staging frames=%d, want 9-frame acceptance cluster+state-ping", len(frames))
+	// jn 32.642 官服首受理定版（2026-11-12 复核勘误）：CurSkillID →
+	// CurSkillTarget → msg25 → msg707 → 四连 = 8 帧（f#0194 idx462 实为
+	// CurSkillID='CS_jh_hyjf02\0'，旧「不发 CurSkillID」系误读；PauseSkill
+	// 首受理仍仅重受理方言携带）。
+	if len(frames) != 10 {
+		t.Fatalf("staging frames=%d, want 10-frame (8 簇 + 时钟对 294/0x38)", len(frames))
+	}
+	if int32(binary.LittleEndian.Uint32(frames[8][4:])) != 294 || frames[9][0] != 0x38 {
+		t.Fatalf("clock pair frames=%x %x", frames[8], frames[9])
 	}
 	if frames[0][0] != 0x10 || binary.LittleEndian.Uint16(frames[0][12:]) != propCurSkillID {
 		t.Fatalf("CurSkillID frame=%x", frames[0])
@@ -123,11 +130,8 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 	if int32(binary.LittleEndian.Uint32(frames[2][4:])) != 25 {
 		t.Fatalf("msg25 frame=%x", frames[2])
 	}
-	if frames[3][0] != 0x10 || binary.LittleEndian.Uint16(frames[3][12:]) != propRushPauseSkill {
-		t.Fatalf("PauseSkill frame=%x", frames[3])
-	}
-	if int32(binary.LittleEndian.Uint32(frames[4][4:])) != 707 {
-		t.Fatalf("msg707 frame=%x", frames[4])
+	if int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
+		t.Fatalf("msg707 frame=%x", frames[3])
 	}
 	pending := player.peekPendingCast(time.Now())
 	if pending == nil || pending.skillID != "CS_rush_stage" || pending.targetID != forkNPCID(91) || pending.targetOwner != npcTestOwner(91) || pending.airborne {
@@ -153,7 +157,7 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("rearm stage handled=%t err=%v", handled, err)
 	}
-	frames3 := conn.Frames()[9:]
+	frames3 := conn.Frames()[10:]
 	if len(frames3) != 11 ||
 		frames3[0][0] != 0x10 || binary.LittleEndian.Uint16(frames3[0][12:]) != propCurSkillID ||
 		int32(binary.LittleEndian.Uint32(frames3[1][4:])) != 26 ||
@@ -176,8 +180,8 @@ func TestStageRushCastAirborneDisabledFallsBackToGroundDialect(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 9 { // 5 帧受理簇 + 状态四连
-		t.Fatalf("air staging frames=%d, want 9 (airborne disabled)", len(frames))
+	if len(frames) != 10 { // jn 首受理方言：4 帧簇 + 四连 + 时钟对
+		t.Fatalf("air staging frames=%d, want 10 (airborne disabled)", len(frames))
 	}
 	if pending := player.peekPendingCast(time.Now()); pending == nil || pending.airborne {
 		t.Fatalf("pending cast=%+v, want airborne=false", pending)
@@ -323,10 +327,10 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatalf("staging cast handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()[base:]
-	if len(frames) != 9 || frames[0][0] != 0x10 ||
+	if len(frames) != 10 || frames[0][0] != 0x10 ||
 		int32(binary.LittleEndian.Uint32(frames[2][4:])) != 25 ||
-		int32(binary.LittleEndian.Uint32(frames[4][4:])) != 707 {
-		t.Fatalf("staging frames=%x, want 9-frame acceptance cluster+state-ping", frames)
+		int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
+		t.Fatalf("staging frames=%x, want 10-frame acceptance cluster+clock pair", frames)
 	}
 	if !player.rushInFlightSnapshot() {
 		t.Fatal("staging did not mark rush in flight")
@@ -339,7 +343,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatalf("close cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
-	if len(frames) != 9 || int32(binary.LittleEndian.Uint32(frames[4][4:])) != 707 {
+	if len(frames) != 10 || int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
 		t.Fatalf("close cast frames=%x, want acceptance cluster", frames)
 	}
 	if player.rushDashIssuedSnapshot() {
@@ -353,7 +357,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatalf("far cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
-	if len(frames) != 9 || int32(binary.LittleEndian.Uint32(frames[4][4:])) != 707 {
+	if len(frames) != 10 || int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
 		t.Fatalf("far cast frames=%x, want acceptance (distance-decoupled)", frames)
 	}
 	if player.peekPendingCast(time.Now()) == nil {
@@ -450,8 +454,10 @@ func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
 	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("expired-cooldown press handled=%t err=%v", handled, err)
 	}
-	if frames := conn.Frames()[base:]; len(frames) != 9 {
-		t.Fatalf("expired-cooldown press frames=%d, want 9-frame acceptance cluster", len(frames))
+	// 首受理簇（jn 32.642 官服定版，CurSkillID 勘误后）：CurSkillID +
+	// CurSkillTarget + msg25 + msg707 + 状态四连 = 8 帧。
+	if frames := conn.Frames()[base:]; len(frames) != 10 {
+		t.Fatalf("expired-cooldown press frames=%d, want 10-frame acceptance cluster+clock pair", len(frames))
 	}
 }
 
@@ -485,18 +491,17 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 	}
 	base := len(conn.Frames()) // 受理簇 5 帧为基数。
 
-	// 距目标 8m（>6.5m 窗口上界）：fork 客户端方言——发官服同形 c61 接近
-	// 冲刺（档1 + y+1.0；fork 客户端无自主接近行为，服务端驱动）。
+	// 距目标 8m（>6.5m 窗口上界）：官服方言——客户端自走（65210 会话
+	// 23:02:27 官服簇下客户端实发 state7 实证），服务端零帧；旧的
+	// c61/0x1F 服务端驱动已撤（瞬移根因）。
 	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(2, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("far movement handled=%t err=%v", handled, err)
 	}
-	frames := conn.Frames()[base:]
-	if len(frames) != 1 || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 24 ||
-		int32(binary.LittleEndian.Uint32(frames[0][18:])) != msgRushCommand ||
-		int32(binary.LittleEndian.Uint32(frames[0][38:])) != convertDashLevel {
-		t.Fatalf("far movement frames=%x, want c61 approach dash (档1 官服同形)", frames)
+	var frames [][]byte
+	frames = conn.Frames()[base:]
+	if len(frames) != 0 {
+		t.Fatalf("far movement emitted %d frames=%x, want 0 (client self-approach)", len(frames), frames)
 	}
-	base = len(conn.Frames())
 
 	// 窗口下界以下（距目标 4m ≤5.0）：零帧——官服走近直接 212[尾0] 落地，
 	// 不发 c61（b 4.41m 样本 3.61m 上报不触发实证）。
@@ -507,22 +512,24 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		t.Fatalf("below-window movement emitted %d frames, want 0", got)
 	}
 
-	// 走带外 212（距目标 10m > 认可半径 max(5.0, castRange+1=9)——技能
-	// .pcapng 定版：hyjf02(射程6) 212@5.58/5.81 官服认可落地，认可半径
-	// 随 castRange 走）：取消方言（f 拉回/62622 暂存期按别的技能）——
-	// 安全作废，3 帧释放簇。
+	// 走带外 212 且未发冲刺（2026-11-11 语义更新）：客户端自走在途的
+	// 噪音 212 不再触发取消/驱动——静默忽略（零帧），暂存态保留交给
+	// 30s 过期/重按出清。取消簇（msg26+PauseSkill-clear+337）仅保留
+	// 给「冲刺已发未执行」的拉回方言（handleCastDashLanding 内分支）。
 	if handled, err := handleCastDashLanding(conn, player, world, dashLandingMessage(0, 0, 0, 0.5), "test"); err != nil || !handled {
 		t.Fatalf("far landing handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
-	if len(frames) != 3 || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 26 ||
-		frames[1][0] != 0x10 || binary.LittleEndian.Uint16(frames[1][12:]) != propRushPauseSkill ||
-		int32(binary.LittleEndian.Uint32(frames[2][4:])) != 337 {
-		t.Fatalf("far landing frames=%x, want msg26+PauseSkill-clear+337 cancel", frames)
+	if len(frames) != 0 {
+		t.Fatalf("far landing frames=%x, want 0 (in-flight noise ignored)", frames)
 	}
-	if player.rushInFlightSnapshot() || player.peekPendingCast(time.Now()) != nil {
-		t.Fatal("far landing kept rush state alive")
+	if !player.rushInFlightSnapshot() || player.peekPendingCast(time.Now()) == nil {
+		t.Fatal("far noise landing must not tear down pending approach")
 	}
+	// 显式取消出清暂存（取消簇帧数不计入后续断言），后续用例重新暂存。
+	base = len(conn.Frames())
+	cancelPendingCast(conn, player, 0, 0, 0, 0.5, "test")
+	_ = base
 
 	// 自冲落地（上报点距目标 ≤3m，未发 c61=步行落地形态）：
 	// PauseSkill+msg26+LogicState 对+fight_relation+0x1F×1+337+c1=40+

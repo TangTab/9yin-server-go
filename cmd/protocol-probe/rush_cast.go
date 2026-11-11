@@ -138,14 +138,6 @@ type pendingCastState struct {
 	geometry worldcore.Transform
 	// settled：CD/MP 已在 c61 时点结算；落地重入据此跳过重复结算。
 	settled bool
-	// approachIssued：fork 客户端方言——服务端已发 c61 接近冲刺。
-	// fork 客户端没有官方客户端的「受理簇后自主接近」行为（从未自走，
-	// 2026-11-08 用户定论），接近段由服务端驱动。c61 两次被忽略后
-	//（approachRetries≥2）转 0x1F 步进兜底（stepping）——0x1F 是本
-	// 客户端唯一被证实执行的位移原语（第一轮「瞬移」实证）。
-	approachIssued  bool
-	approachRetries int
-	stepping        bool
 	// 结算快照（staging 时从 definition 复制）。
 	mpCost, spCost, qgCost int32
 	cooldownCategory       int32
@@ -491,19 +483,32 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	for _, sweep := range player.sweepExpiredCooldownRows(now) {
 		builders = append(builders, frameBuilder{"cd-sweep", func() ([]byte, error) { return sweep, nil }})
 	}
-	builders = append(builders, frameBuilder{"CurSkillID", func() ([]byte, error) { return curSkillIDFrame(definition.id) }})
+	// 首受理（非 rearm）官方方言（技能.pcapng 32.642 定版逐帧，2026-11-12
+	// 复核勘误）：**CurSkillID(462)=staged 技能串 → CurSkillTarget(629) →
+	// msg25(25,30000,'skill_pause') → msg707[15] → 四连**，+155ms 双入口
+	// 0x21 走踢帧（见 stageRushCast 尾部）。旧结论「首受理不发 CurSkillID」
+	// 系对 f#0194 的误读（其 idx462 实为 'CS_jh_hyjf02\0'=staged 技能）；
+	// 当年「多发致施法中不自走」的对照实验缺的是走踢帧，CurSkillID 被错怪。
+	// PauseSkill 首受理仍不发（32.6-33.8 全窗无该行），重受理（f.pcapng
+	// P 系列）官方才发清+设全家桶，见上方 rearm 分支。
 	if !rearm {
-		builders = append(builders, frameBuilder{"CurSkillTarget", func() ([]byte, error) {
-			return rushPropertyFrame(propCurSkillTarget, "CurSkillTarget", clientdata.ObjectValue(targetID, targetOwner))
-		}})
+		builders = append(builders,
+			frameBuilder{"CurSkillID", func() ([]byte, error) { return curSkillIDFrame(definition.id) }},
+			frameBuilder{"CurSkillTarget", func() ([]byte, error) {
+				return rushPropertyFrame(propCurSkillTarget, "CurSkillTarget", clientdata.ObjectValue(targetID, targetOwner))
+			}})
+	} else {
+		builders = append(builders, frameBuilder{"CurSkillID", func() ([]byte, error) { return curSkillIDFrame(definition.id) }})
 	}
 	builders = append(builders,
 		frameBuilder{"msg25", func() ([]byte, error) { return skillPauseFrame(int32(rushPendingWindow / time.Millisecond)) }},
-		frameBuilder{"PauseSkill-set", func() ([]byte, error) {
-			return rushPropertyFrame(propRushPauseSkill, "PauseSkill", clientdata.StringValue(definition.id))
-		}},
-		frameBuilder{"msg707", func() ([]byte, error) { return rushCastStateFrame() }},
 	)
+	if rearm {
+		builders = append(builders, frameBuilder{"PauseSkill-set", func() ([]byte, error) {
+			return rushPropertyFrame(propRushPauseSkill, "PauseSkill", clientdata.StringValue(definition.id))
+		}})
+	}
+	builders = append(builders, frameBuilder{"msg707", func() ([]byte, error) { return rushCastStateFrame() }})
 	// 状态四连（586/645/646/750）：恢复。此前「暂撤」的对照推理（55052
 	// 无四连会走 / 64785 有四连不自走）因果倒置——那批不自走会话处于
 	// 受理簇方言错位期。技能.pcapng 官服三证（32.642/415.577/1290.300）
@@ -532,9 +537,64 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 			return true, err
 		}
 	}
+	// 走踢帧（技能.pcapng 32.797 f#0202 定版）：受理簇 +155ms 双入口 0x21
+	// （同 obj=玩家：入口1=当前位、入口2=目标 BindDistance 内收邻点）。
+	// 官服 C2S 在簇后 32.642→33.282 零移动上报——技能接近是服务端踢的，
+	// 客户端自身不起走；缺此帧即「远距冲锋原地不动」根因。仅首受理发。
+	// 时钟对先行（官服全程 1Hz 的 msg294+op0x38；客户端按服务端时间插值
+	// 0x21 位移，无钟基准则踢帧被吃但不执行——三轮真机定位）。
+	if !rearm {
+		writeOfficialClockPair(link, remote)
+		scheduleOfficialClockTicker(link, player, definition.id, remote)
+		kickTarget, kickCast, kickBind := target, castAt, definition.bindDistance
+		kickSkill := definition.id
+		time.AfterFunc(150*time.Millisecond, func() {
+			if pending := player.peekPendingCast(time.Now().UTC()); pending == nil || pending.skillID != kickSkill {
+				return // 已重按/过期/换技能，踢帧作废
+			}
+			if err := link.WriteFrame(rushWalkKickFrame(kickCast, kickTarget, kickBind)); err != nil {
+				log.Printf("%s: rush walk kick %s: %v", remote, kickSkill, err)
+			} else {
+				log.Printf("%s: rush walk kick sent skill=%s toward (%.1f, %.1f)", remote, kickSkill, kickTarget.X, kickTarget.Z)
+			}
+		})
+		// fork 客户端无官服的自走 AI（官服客户端簇后 0.485s 自起走）——
+		// 服务端驱动接近兜底（11-09 老链复辟精简版）：600ms 后（留自走
+		// 窗口，若客户端真自走则其 msg15 会推进 tryRushArrival）距目标
+		// 仍超冲刺上界即发 c61 接近冲刺，2.5s 无落地重试一次。
+		scheduleRushApproachDash(link, player, definition, target, castAt, distance, remote)
+	}
 	log.Printf("%s: rush staged skill id=%s dist=%.1fm air=%t rearm=%t window=%s",
 		remote, definition.id, distance, airborne, rearm, rushPendingWindow)
 	return true, nil
+}
+
+// rushWalkKickFrame 冲锋走踢帧：双入口 0x21（44B playerMoveEcho 条目形，
+// 技能.pcapng f#0202 逐槽精解 2026-11-12 二轮勘误）：**两入口=同一目的
+// 地**（官服样本 947.8/947.9≈bind 点重复两次，非「当前位→目的地」——
+// 一轮的 A→B 双点解读系字节错位误读），angle/speed/orient/尾槽两入口
+// 全同；speed=4.5、orient 恒 **-π**（官服两样本 -3.14，非朝向）、尾双槽
+// 5.5/**9.8**(0x411CCCCD)、intentID 两入口均 0xa0000f01（寻路族）。
+// 官服踢后 0.485s 客户端即起走（其间 s2c 零帧）——踢帧单独触发走位。
+func rushWalkKickFrame(castAt, target worldcore.Transform, bind float32) []byte {
+	bindX, bindY, bindZ := rushBindPoint(target, castAt.X, castAt.Z, bind)
+	payload := make([]byte, 3, 3+2*44)
+	payload[0] = 0x21
+	binary.LittleEndian.PutUint16(payload[1:], 2)
+	for i := 0; i < 2; i++ {
+		payload = binary.LittleEndian.AppendUint32(payload, playerObjectID)
+		payload = binary.LittleEndian.AppendUint32(payload, playerOwnerID)
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindX))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindY))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindZ))
+		payload = binary.LittleEndian.AppendUint32(payload, 0x4096268F) // slot3 官服四样本恒 4.689（常量槽非角度，三轮真机+字节 diff 定版）
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(4.5))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(-math.Pi)) // 官服恒 -π
+		payload = binary.LittleEndian.AppendUint32(payload, 0x40B00000)                // 5.5 官服恒定
+		payload = binary.LittleEndian.AppendUint32(payload, 0x411CCCCD)                // 9.8 官服恒定
+		payload = binary.LittleEndian.AppendUint32(payload, 0xa0000f01)                // 寻路族 intentID 两入口同值
+	}
+	return payload
 }
 
 // noteRushStatePing 记录状态四连下发时刻（受理/直收簇内联发送后调用，
@@ -846,19 +906,15 @@ func handleCastDashLanding(link sceneMessageConnection, player *playerActor, wor
 		if geometry.X != 0 || geometry.Z != 0 {
 			distance := math.Sqrt(float64(square(x-geometry.X) + square(z-geometry.Z)))
 			if distance > rushWalkBandAcceptMeters(pending) {
-				if pending.stepping {
-					// 步进驱动在途：客户端的 212 是原地噪音，忽略让步进完成。
-					return true, nil
-				}
-				if !player.rushDashIssuedSnapshot() && !pending.approachIssued {
-					// fork 客户端方言：客户端从不自主接近（2026-11-08 定论），
-					// 任何位置的原地 212 = 就地执行请求——接入服务端驱动接近
-					//（c61 → 两败转 0x1F 步进，65533 实证步进会被执行）。
-					log.Printf("%s: in-place landing request beyond walk band skill id=%s dist=%.1fm; driving approach",
+				// 超走带的 212：客户端自走已在 65210 会话（2026-11-11
+				// 23:02:27）实证成立——受理簇方言修正后官服客户端会自主
+				// 接近，此形态只应出现在方言错位期。不再服务端驱动接近
+				//（c61/0x1F 步进=玩家一下一下瞬移的根因，「fork 客户端
+				// 从未自走」2026-11-08 定论作废）；未发冲刺时静默忽略，
+				// 交给 30s 过期/重按出清。
+				if !player.rushDashIssuedSnapshot() {
+					log.Printf("%s: in-place landing beyond walk band ignored skill id=%s dist=%.1fm",
 						remote, pending.skillID, distance)
-					if err := issueApproachSprint(link, player, world, geometry, x, y, z, remote); err != nil {
-						log.Printf("%s: approach drive: %v", remote, err)
-					}
 					return true, nil
 				}
 				// 冲刺已发未执行（客户端拉回/暂存期按了别的技能）——安全作废。
@@ -1123,13 +1179,24 @@ func handleMovementUpload(link sceneMessageConnection, player *playerActor, worl
 	if player == nil {
 		return true, nil
 	}
-	if !player.rushInFlightSnapshot() {
-		// 官服移动应答方言（技能.pcapng §一）：逐帧 0x21 玩家回显 +
-		// 走↔停迁移状态四连——客户端等这对帧才执行点击移动。
+	if player.rushInFlightSnapshot() {
+		if player.rushDashIssuedSnapshot() {
+			// c61 冲刺段在途位移：不回显，消费方为 212/c61 落地链
+			//（官服方言）。
+			tryRushArrival(link, player, world, x, y, z, orient, remote)
+			return true, nil
+		}
+		// 受理后的技能接近段（c61 未发）：官服逐帧 0x21 玩家回显 +
+		// 走停迁移四连照发（jn 34.105/34.833 接近段持续 0x21 样本；
+		// 64785 实证缺四连客户端中途停滞不自走），位置照常收编进
+		// 到达检测。
 		echoPlayerMoveIntent(link, player, values, x, y, z, remote)
+		tryRushArrival(link, player, world, x, y, z, orient, remote)
 		return true, nil
 	}
-	tryRushArrival(link, player, world, x, y, z, orient, remote)
+	// 官服移动应答方言（技能.pcapng §一）：逐帧 0x21 玩家回显 +
+	// 走↔停迁移状态四连——客户端等这对帧才执行点击移动。
+	echoPlayerMoveIntent(link, player, values, x, y, z, remote)
 	return true, nil
 }
 
@@ -1362,104 +1429,6 @@ func (p *playerActor) maybeRushStatePing(link sceneMessageConnection, now time.T
 	}
 }
 
-// issueApproachSprint fork 客户端方言：接近段服务端驱动——先发与官服
-// 唯一已验证形态逐字节同形的 c61（g 14.660：档1 + LockGRushAction +
-// y=上报y+1.0；55413 会话实证档2+平 y 变体被忽略）。两次未到位
-// （10s）转 0x1F 步进兜底：每 300ms 向 bind 点步进 ~3m，到位后服务端
-// 直接落走带落地簇（客户端不发 212 也照常出伤害）。
-func issueApproachSprint(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, target worldcore.Transform,
-	fromX, fromY, fromZ float32, remote string) error {
-	pending := player.peekPendingCast(time.Now().UTC())
-	if pending == nil || pending.approachIssued || pending.stepping {
-		return nil
-	}
-	destX, _, destZ := rushBindPoint(target, fromX, fromZ, pending.bindDistance)
-	destY := fromY + rushDashLiftMeters
-	frame, err := dashRushFrame(destX, destY, destZ, convertDashLevel, pending.groundRushAction)
-	if err != nil {
-		return fmt.Errorf("encode approach sprint: %w", err)
-	}
-	if err := link.WriteFrame(frame); err != nil {
-		return err
-	}
-	pending.approachIssued = true
-	log.Printf("%s: rush approach dash dest=(%.2f,%.2f) level=%d action=%s", remote, destX, destZ, convertDashLevel, pending.groundRushAction)
-	time.AfterFunc(2500*time.Millisecond, func() {
-		if player.peekPendingCast(time.Now().UTC()) != pending {
-			return
-		}
-		if player.rushDashIssuedSnapshot() || !pending.approachIssued {
-			return
-		}
-		pending.approachRetries++
-		pending.approachIssued = false
-		if pending.approachRetries < 2 {
-			log.Printf("%s: rush approach dash retry armed (no landing in 2.5s)", remote)
-			return
-		}
-		// c61 两连败：转 0x20 ServerMoving 自驱（fork 参考服帧型，55866
-		// 抓包实证参考服向移动实体下发；官方抓包无此帧但本客户端属 fork
-		// 家族）。2.5s 无落地再降级 0x1F 细步进。
-		pending.stepping = true
-		log.Printf("%s: rush approach falling back to 0x20 server-moving to (%.2f,%.2f)", remote, destX, destZ)
-		if err := link.WriteFrame(serverMoving(playerObjectID, playerOwnerID, MotionState{
-			DestX: destX, DestY: fromY, DestZ: destZ,
-			DestOrient: orientTowardTarget(fromX, fromZ, destX, destZ),
-		})); err != nil {
-			log.Printf("%s: approach 0x20 frame: %v", remote, err)
-		}
-		time.AfterFunc(2500*time.Millisecond, func() {
-			if player.peekPendingCast(time.Now().UTC()) != pending || player.rushDashIssuedSnapshot() {
-				return
-			}
-			// 0x20 也没驱动到位：0x1F 细步进兜底（150ms/步 ~1.2m，观感
-			// 接近疾跑的快速碎步；56086 实证 0x1F 会被执行）。
-			log.Printf("%s: rush approach falling back to fine 0x1F stepping", remote)
-			go func() {
-				pos := worldcore.Transform{X: fromX, Y: fromY, Z: fromZ}
-				for {
-					time.Sleep(150 * time.Millisecond)
-					if player.peekPendingCast(time.Now().UTC()) != pending || player.rushDashIssuedSnapshot() {
-						return
-					}
-					dx, dz := destX-pos.X, destZ-pos.Z
-					dist := math.Sqrt(float64(dx*dx + dz*dz))
-					if dist < 0.6 {
-						// 收步：0x21 flags=0 速度 0 停止 + 走带落地。
-						stop := serverAllDest([]allDestEntry{{
-							objectID: playerObjectID, ownerID: playerOwnerID,
-							destX: pos.X, destY: pos.Y, destZ: pos.Z,
-							destOrient: orientTowardTarget(pos.X, pos.Z, target.X, target.Z),
-						}})
-						if stop != nil {
-							_ = link.WriteFrame(stop)
-						}
-						if err := resumePendingCastAt(link, player, world, pos.X, pos.Y, pos.Z,
-							orientTowardTarget(pos.X, pos.Z, target.X, target.Z), "approach-steps", remote); err != nil {
-							log.Printf("%s: approach steps landing: %v", remote, err)
-						}
-						return
-					}
-					step := float32(1.2)
-					if dist < float64(step) {
-						step = float32(dist)
-					}
-					pos.X += dx / float32(dist) * step
-					pos.Z += dz / float32(dist) * step
-					if err := link.WriteFrame(serverLocation(playerObjectID, playerOwnerID, pos)); err != nil {
-						log.Printf("%s: approach step frame: %v", remote, err)
-						return
-					}
-					if world != nil && world.wireID != 0 {
-						world.run.updateMemberPosition(world.wireID, role.Position{X: pos.X, Y: pos.Y, Z: pos.Z})
-					}
-				}
-			}()
-		})
-	})
-	return nil
-}
-
 // tryRushArrival 移动上报驱动的冲刺探测：仅当距目标进入冲刺窗口
 // (GRushRange 5.0, +Add 6.5] 时发 c61；低于下界由客户端自行走进走带
 // 发 212 落地。冲刺已发出后静默——落地只认 212。
@@ -1486,15 +1455,15 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 	// xz 平面距离（与 212 三分同口径；技能.pcapng c61 触发三证
 	// 6.09/6.10/5.91 均平地未暴露 y，统一 2D 防坡地 y 差误判）。
 	distance := math.Sqrt(float64(square(x-geometry.X) + square(z-geometry.Z)))
-	if player.rushDashIssuedSnapshot() || pending.approachIssued {
+	if player.rushDashIssuedSnapshot() {
 		return
 	}
 	if distance > rushDashTriggerMeters() {
-		// fork 客户端方言：窗口外由服务端发 c61 档2 接近疾跑（fork 客户端
-		// 无官方客户端的自主接近行为——2026-11-08 用户定论「从未自走」）。
-		if err := issueApproachSprint(link, player, world, geometry, x, y, z, remote); err != nil {
-			log.Printf("%s: rush approach sprint: %v", remote, err)
-		}
+		// 官方方言：接近段由客户端自走（jn 32.642 受理簇同毫秒 state7；
+		// 65210 会话 23:02:27 官服簇下方客户端实发自走帧实证）。旧的
+		// 服务端 c61/0x1F 驱动（「fork 客户端从未自走」2026-11-08 定论
+		// 的产物）会把玩家一下一下瞬移（23:02 真机实证），已撤除——
+		// 等客户端走进冲刺窗口由 issueRushDash 接手。
 		return
 	}
 	if distance <= rushDashWindowLoMeters() {
@@ -1543,4 +1512,54 @@ func useSkillClaimedTargetTransform(custom clientCustomMessage) (worldcore.Trans
 		return worldcore.Transform{}, false
 	}
 	return transform, true
+}
+
+// scheduleRushApproachDash 服务端驱动接近（>6.5m 档）：0x1F 锚 + c61
+// 疾跑指令（level=1 qg_fastrun_2h_01，11-09 真机链实证 fork 客户端执行
+// 该指令位移），落地后由 212/tryRushArrival 接管窗口冲刺。官服此段为
+// 客户端自走（官服客户端专属行为），本补丁为 fork 方言兜底。
+func scheduleRushApproachDash(link sceneMessageConnection, player *playerActor,
+	definition combatSkillDefinition, target, castAt worldcore.Transform, distance float64, remote string) {
+	if distance <= rushDashTriggerMeters() {
+		return // 冲刺窗口内由 tryRushArrival 接管
+	}
+	fire := func() {
+		if pending := player.peekPendingCast(time.Now().UTC()); pending == nil || pending.skillID != definition.id {
+			return
+		}
+		if player.rushDashIssuedSnapshot() {
+			return
+		}
+		if err := link.WriteFrame(serverLocation(playerObjectID, playerOwnerID, castAt)); err != nil {
+			log.Printf("%s: rush approach anchor: %v", remote, err)
+			return
+		}
+		destX, destY, destZ := rushBindPoint(target, castAt.X, castAt.Z, definition.bindDistance)
+		frame, err := dashRushFrame(destX, destY+rushDashLiftMeters, destZ, 1, defaultGroundRushAction)
+		if err == nil {
+			err = link.WriteFrame(frame)
+		}
+		if err != nil {
+			log.Printf("%s: rush approach dash %s: %v", remote, definition.id, err)
+			return
+		}
+		log.Printf("%s: rush approach dash skill=%s dest=(%.1f, %.1f) dist=%.1fm", remote, definition.id, destX, destZ, distance)
+		// 2.5s 无落地重试一次（11-09 同款 retry 节奏）。
+		time.AfterFunc(2500*time.Millisecond, func() {
+			if pending := player.peekPendingCast(time.Now().UTC()); pending == nil || pending.skillID != definition.id {
+				return
+			}
+			if player.rushDashIssuedSnapshot() {
+				return
+			}
+			frame, err := dashRushFrame(destX, destY+rushDashLiftMeters, destZ, 1, defaultGroundRushAction)
+			if err == nil {
+				err = link.WriteFrame(frame)
+			}
+			if err == nil {
+				log.Printf("%s: rush approach dash retry skill=%s (no landing in 2.5s)", remote, definition.id)
+			}
+		})
+	}
+	time.AfterFunc(600*time.Millisecond, fire)
 }

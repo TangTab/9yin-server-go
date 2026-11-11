@@ -218,3 +218,56 @@ func TestValidateBinglu(t *testing.T) {
 		t.Fatalf("empty bingluArgs should fail")
 	}
 }
+
+// learn_taolu/learn_neigong（整套发放）：skillKey 非空闸 + skillLevel
+// 0..999 界值（0=各自满级；逐技钳上限在游戏侧）。
+func TestValidateLearnSkill(t *testing.T) {
+	command, err := validateBody(t, `{"action":"learn_taolu","skillKey":"cs_wd_tjq","skillLevel":36}`)
+	if err != nil {
+		t.Fatalf("validate learn_taolu: %v", err)
+	}
+	if command.SkillKey != "cs_wd_tjq" || command.SkillLevel != 36 {
+		t.Fatalf("SkillKey/SkillLevel=%q/%d", command.SkillKey, command.SkillLevel)
+	}
+	// 缺省层数=0（各自满级）放行。
+	command, err = validateBody(t, `{"action":"learn_neigong","skillKey":"ng_wd_001"}`)
+	if err != nil {
+		t.Fatalf("validate learn_neigong default level: %v", err)
+	}
+	if command.SkillLevel != 0 {
+		t.Fatalf("default SkillLevel=%d want 0", command.SkillLevel)
+	}
+	for _, bad := range []string{
+		`{"action":"learn_taolu","skillKey":"  "}`,
+		`{"action":"learn_neigong"}`,
+		`{"action":"learn_taolu","skillKey":"k","skillLevel":-1}`,
+		`{"action":"learn_neigong","skillKey":"k","skillLevel":1000}`,
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("invalid body %s should fail", bad)
+		}
+	}
+}
+
+// forget_taolu/forget_neigong（整套移除）：skillKey 非空闸；层数字段
+// 无意义但放行（移除语义在游戏侧）。
+func TestValidateForgetSkill(t *testing.T) {
+	command, err := validateBody(t, `{"action":"forget_taolu","skillKey":"cs_wd_tjq"}`)
+	if err != nil {
+		t.Fatalf("validate forget_taolu: %v", err)
+	}
+	if command.SkillKey != "cs_wd_tjq" {
+		t.Fatalf("SkillKey=%q", command.SkillKey)
+	}
+	if _, err := validateBody(t, `{"action":"forget_neigong","skillKey":"ng_wd_001","skillLevel":5}`); err != nil {
+		t.Fatalf("forget_neigong with stray level: %v", err)
+	}
+	for _, bad := range []string{
+		`{"action":"forget_taolu","skillKey":""}`,
+		`{"action":"forget_neigong"}`,
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("invalid body %s should fail", bad)
+		}
+	}
+}

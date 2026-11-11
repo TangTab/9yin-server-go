@@ -96,10 +96,12 @@ func (r *sceneRun) navGraphLocked() *mapnav.Graph {
 }
 
 // planChasePath 规划 NPC→目标的世界折线：当前坐标 → A* 路点 → 目标
-// 坐标。跨分量/无解返回 nil。path[0]（NPC 最近路点）被丢弃——从当前
-// 位置直接走向 path[1]：重规划每拍发生时“先折返最近路点”会让 NPC 在
-// 两路点间原地振荡（追击穿墙回归实测）；近似弦切不超过一格路点间距
-// （~10m），仍沿可走网格拓扑。调用方必须已持有 r.mu。
+// 的地面投影。跨分量/无解返回 nil。path[0]（NPC 最近路点）被丢弃——
+// 从当前位置直接走向 path[1]：重规划每拍发生时“先折返最近路点”会让
+// NPC 在两路点间原地振荡（追击穿墙回归实测）；近似弦切不超过一格路
+// 点间距（~10m），仍沿可走网格拓扑。末点是目标 x/z + 最近路点 y：
+// 玩家本在地面时与原始坐标几乎重合；玩家悬空（屋顶/柱顶/跳跃途中）
+// 时折线贴地走完，不再沿最后一段把 NPC 拉上天。调用方必须已持有 r.mu。
 func (r *sceneRun) planChasePath(graph *mapnav.Graph, from, target mapnav.Node) []mapnav.Node {
 	start, goal := graph.Nearest(from), graph.Nearest(target)
 	if start < 0 || goal < 0 {
@@ -117,7 +119,9 @@ func (r *sceneRun) planChasePath(graph *mapnav.Graph, from, target mapnav.Node) 
 	for _, index := range indices {
 		pts = append(pts, graph.NodeAt(index))
 	}
-	pts = append(pts, target)
+	grounded := target
+	grounded.Y = graph.NodeAt(goal).Y
+	pts = append(pts, grounded)
 	return pts
 }
 
@@ -145,12 +149,16 @@ func (r *sceneRun) advanceChaseLocked(meta *sceneEntity, state *sim.Brain, trans
 		meta.chase = chase
 	}
 
-	// 末段直线：距目标 ~一个路点间距内直线逼近，y 直接朝目标插值
-	//（近距目标 y 可信），步长钳到攻击范围边界。
+	// 末段直线：距目标 ~一个路点间距内直线逼近，步长钳到停靠分位
+	// （EngageRange≈3m，官服野怪贴脸出招；命中有效距另算，见
+	// combat_ai.go 双分位注释）。y 绝不朝目标插值——玩家可能站在 NPC
+	// 不可达的高处（屋顶/柱顶/跳跃途中），旧“近距目标 y 可信”假设正是
+	// 追击飞天/瞬移的根因；改为以限速向落点最近路点高度贴地收敛，零
+	// 水平步长仍落地（悬空纠偏）。
 	if distance < chaseFinalStraightMeters {
 		chase.follower.SetPath(nil)
-		step := minFloat32(state.MoveSpeed, distance-state.AttackRange)
-		at := mapnav.LerpOrientFreeStep(from, goal, step)
+		step := minFloat32(state.MoveSpeed, distance-state.EngageRange)
+		at := mapnav.GroundFollowStep(graph, from, goal, step, state.MoveSpeed)
 		return orientTowardTransform(from, at, transform.Orient), chaseStraightDelay(step, state.MoveSpeed), false
 	}
 
@@ -185,10 +193,11 @@ func (r *sceneRun) advanceChaseLocked(meta *sceneEntity, state *sim.Brain, trans
 	return chaseStraightLocked(graph, from, goal, distance, state), chaseStraightDelay(distance, state.MoveSpeed), false
 }
 
-// chaseStraightLocked 直线兜底推进：步长钳到攻击范围边界，y 向落点
-// 最近路点渐进贴地（graph == nil 时 y 维持出发高度，即旧 stepToward）。
+// chaseStraightLocked 直线兜底推进：步长钳到停靠分位（EngageRange），
+// y 向落点最近路点渐进贴地（graph == nil 时 y 维持出发高度，即旧
+// stepToward）。
 func chaseStraightLocked(graph *mapnav.Graph, from, goal mapnav.Node, distance float32, state *sim.Brain) worldcore.Transform {
-	step := minFloat32(state.MoveSpeed, distance-state.AttackRange)
+	step := minFloat32(state.MoveSpeed, distance-state.EngageRange)
 	at := mapnav.StepTowardGround(graph, from, goal, step)
 	return worldcore.Transform{X: at.X, Y: at.Y, Z: at.Z, Orient: atan2Orient(from, at)}
 }

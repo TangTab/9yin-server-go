@@ -200,9 +200,16 @@ func TestMovementEchoAngleWrapAndRushGate(t *testing.T) {
 		-1610608895, 7, 2, 0, 0, 9, 0, 4.5, 3.14), "test"); err != nil {
 		t.Fatal(err)
 	}
+	// 2026-11-11 接近段回显定版（jn 34.105/34.833 官服样本）：c61 未发的
+	// 技能接近段照发 0x21 玩家回显——缺它客户端中途停滞不自走（64785
+	// 实证）。冲刺段（markRushDashIssued 后）才静默走 212 落地链。
+	sawEcho := false
 	for _, frame := range conn.Frames()[base:] {
 		if frame[0] == 0x21 {
-			t.Fatal("rush in-flight walk must not emit 0x21 player echo")
+			sawEcho = true
 		}
+	}
+	if !sawEcho {
+		t.Fatal("rush approach walk must emit 0x21 player echo")
 	}
 }

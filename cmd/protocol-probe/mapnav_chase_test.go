@@ -203,8 +203,9 @@ func TestChaseFollowsWaypointPolylineAroundWall(t *testing.T) {
 }
 
 // TestChaseFinalStraightApproach 末段直线（§6.3.3）：距目标 <12m 折线
-// 让位直线逼近，y 直接朝目标插值（近距目标 y 可信），步长钳到攻击
-// 范围边界（6m）。
+// 让位直线逼近，步长钳到停靠分位（EngageRange=3m，2026-11-12 双分位）；
+// y 绝不朝目标插值——玩家悬空（y=8 于平地图）时 NPC 贴地推进（追击
+// 飞天/瞬移回归）。
 func TestChaseFinalStraightApproach(t *testing.T) {
 	// 平地图：两排路点即可，玩家挂在排间空档。
 	nodes := []mapnav.Node{{0, 0, 0}, {20, 0, 0}, {0, 0, 20}, {20, 0, 20}}
@@ -217,18 +218,71 @@ func TestChaseFinalStraightApproach(t *testing.T) {
 	}
 	warmMapnavForTest(t, lifecycle)
 
-	// NPC (10,0,10) 图中心，玩家 (10,8,1)：水平距 9m ∈ (6,12)。
+	// NPC (10,0,10) 图中心，玩家 (10,8,1)：水平距 9m ∈ (3,12)、悬空 8m。
 	registerChaseTestNPC(t, lifecycle, 91, 10, 0, 10, 80, 200, 4.5)
 	player := newPlayerActor("tester", 0)
 	lifecycle.combatTickForTest(player, role.Position{X: 10, Y: 8, Z: 1}, time.Unix(6000, 0))
 
 	at := chaseNPCTransform(t, lifecycle, 91)
-	// 直线步长 = min(4.5, 9-6) = 3：Z 减 3、y 朝 8 插值 3/9。
-	if at.Z > 7.01 || at.Z < 6.99 {
-		t.Fatalf("final straight Z=%.2f want ~7 (clamped at attack range edge)", at.Z)
+	// 直线步长 = min(4.5, 9-3) = 4.5：Z 减 4.5；y 贴地（地面路点恒 0），
+	// 不再朝悬空目标 y=8 爬升。
+	if at.Z > 5.51 || at.Z < 5.49 {
+		t.Fatalf("final straight Z=%.2f want ~5.5 (clamped at engage range edge)", at.Z)
 	}
-	if at.Y < 2.5 || at.Y > 2.9 {
-		t.Fatalf("final straight Y=%.2f want ~2.67 (interpolated toward target y)", at.Y)
+	if at.Y > 0.01 || at.Y < -0.01 {
+		t.Fatalf("final straight Y=%.2f want 0 (grounded, never toward airborne target)", at.Y)
+	}
+	lifecycle.close()
+}
+
+// TestChasePerchedTargetStaysGrounded 柱顶/屋檐卡位回归（2026-11-11）：
+// 玩家跳上高处后，水平再近 NPC 也不得朝玩家高度爬升（旧末段直线 y 朝
+// 目标插值 + 折线末点用原始目标坐标 → NPC 飞天/瞬移上来）；攻防分位
+// 3D 化后，柱顶玩家水平已进停靠分位也够不着——NPC 贴地停在停靠分位
+// 边缘、零位移不发移动帧、行进态翻回 stand、不隔空出伤。
+func TestChasePerchedTargetStaysGrounded(t *testing.T) {
+	nodes := []mapnav.Node{{0, 0, 0}, {10, 0, 0}, {20, 0, 0}, {30, 0, 0}}
+	edges := [][2]int{{0, 1}, {1, 0}, {1, 2}, {2, 1}, {2, 3}, {3, 2}}
+	hookMapnavGraph(t, "perchgrid", encodeMapnavGraph(nodes, edges))
+	conn := &captureMessageConnection{}
+	lifecycle := newSceneLifecycle("test", conn)
+	if err := lifecycle.begin("scene", "perchgrid", nil); err != nil {
+		t.Fatal(err)
+	}
+	warmMapnavForTest(t, lifecycle)
+
+	registerChaseTestNPC(t, lifecycle, 97, 0, 0, 0, 200, 400, 4.5)
+	player := newPlayerActor("tester", 0)
+	before := player.stateSnapshot()
+	now := time.Unix(10000, 0)
+	// 玩家 (18,15,0)：水平 18m、悬空 15m（柱顶）。
+	lifecycle.combatTickForTest(player, role.Position{X: 18, Y: 15, Z: 0}, now)
+	for tick := 1; tick <= 5; tick++ {
+		chaseTickForTest(lifecycle, role.Position{X: 18, Y: 15, Z: 0}, now.Add(time.Duration(tick)*time.Second))
+	}
+	at := chaseNPCTransform(t, lifecycle, 97)
+	// y 恒贴地：绝不朝 15 爬升（旧实现末段直线/折线末点都会拉高）。
+	if at.Y > 0.01 || at.Y < -0.01 {
+		t.Fatalf("perched chase lifted NPC: Y=%.2f want 0 (ground)", at.Y)
+	}
+	// 水平停在停靠分位边缘（18-3=15）：末段直线步长钳 0 后不再逼近。
+	if at.X < 14.9 || at.X > 15.1 {
+		t.Fatalf("perched chase X=%.2f want ~15 (engage range edge)", at.X)
+	}
+	// 3D 够不着（√(3²+15²)≈15.3m > 6）：不隔空出伤。
+	if after := player.stateSnapshot(); after.HP != before.HP {
+		t.Fatalf("NPC attacked through height: HP %d -> %d", before.HP, after.HP)
+	}
+	// 仇恨仍持有（柱下守位），零位移拍行进态翻回 stand。
+	lifecycle.run.mu.Lock()
+	brain, _ := lifecycle.run.combat.Brain(worldcore.EntityID(forkNPCID(97)))
+	walking := lifecycle.run.npcMoveState[uint32(forkNPCID(97))]
+	lifecycle.run.mu.Unlock()
+	if brain.Threat == 0 {
+		t.Fatal("perched chase must hold threat below pillar")
+	}
+	if walking {
+		t.Fatal("zero-displacement tick must flip move state back to stand")
 	}
 	lifecycle.close()
 }
@@ -270,10 +324,11 @@ func TestChaseCrossComponentGivesUpAndReturnsHome(t *testing.T) {
 	if at.X != 0 || at.Z != 0 {
 		t.Fatalf("give-up must return home, got %+v", at)
 	}
-	// 回位移动帧 + Fighting 重置属性帧都应广播。
+	// 回位移动帧 + Fighting 重置属性帧都应广播（移动=0x21 ServerAllDest，
+	// 2026-11-11 追击方言对齐：0x20 官服全程 0 次）。
 	var sawMove, sawReset bool
 	for _, frame := range conn.Frames() {
-		if frame[0] == 0x20 {
+		if frame[0] == 0x21 {
 			sawMove = true
 		}
 		if frame[0] == 0x10 {
@@ -299,11 +354,11 @@ func TestChaseWithoutGraphKeepsStraightLine(t *testing.T) {
 	lifecycle.run.warmNav()
 	registerChaseTestNPC(t, lifecycle, 93, 0, 0, 0, 200, 400, 4)
 	player := newPlayerActor("tester", 0)
-	// 水平距 10（>6 攻击距），玩家 y=50（悬空）：旧语义 y 不动。
+	// 水平距 10（>3 停靠分位），玩家 y=50（悬空）：旧语义 y 不动。
 	lifecycle.combatTickForTest(player, role.Position{X: 10, Y: 50, Z: 0}, time.Unix(8000, 0))
 	at := chaseNPCTransform(t, lifecycle, 93)
 	if at.X < 3.5 || at.X > 4.5 {
-		t.Fatalf("no-graph chase X=%.2f want ~4 (min(4, 10-6))", at.X)
+		t.Fatalf("no-graph chase X=%.2f want ~4 (min(4, 10-3))", at.X)
 	}
 	if at.Y != 0 {
 		t.Fatalf("no-graph chase Y=%.2f want 0 (legacy semantics keep spawn height)", at.Y)
@@ -377,6 +432,49 @@ func TestChaseReplansWhenTargetShifts(t *testing.T) {
 		t.Fatalf("replan endpoint must track moved target: got (%.0f,%.0f) want near (30,31)", replanEnd.X, replanEnd.Z)
 	}
 	lifecycle.close()
+}
+
+// TestChaseEngageDualRange 追击/攻击双分位方言（2026-11-12，官服
+// 技能.pcapng 实测出招距离 p50≈2.3m/p75≈6.5m）：
+//   - reach 7m（>AttackRange 6m）：只追不打——步长 min(4.5, 7-3)=4、
+//     玩家不掉血；
+//   - reach 5m（3~6m 带）：边逼近边出招——X 推进 min(4.5, 5-3)=2 且
+//     玩家掉血；
+//   - reach 2m（≤EngageRange 3m）：站定输出——X 不动且掉血。
+// 单 6m 停靠线的旧方言（怪在六米外站桩隔空挥击）即此测试的反例。
+func TestChaseEngageDualRange(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		playerX   float32
+		wantMoveX float32
+		wantHit   bool
+	}{
+		{"beyond attack range moves only", 7, 4, false},
+		{"band closes and hits", 5, 2, true},
+		{"inside engage stands and hits", 2, 0, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			conn := &captureMessageConnection{}
+			lifecycle := newSceneLifecycle("test", conn)
+			if err := lifecycle.begin("scene", "nograph", nil); err != nil {
+				t.Fatal(err)
+			}
+			lifecycle.run.warmNav()
+			registerChaseTestNPC(t, lifecycle, 98, 0, 0, 0, 200, 400, 4.5)
+			player := newPlayerActor("tester", 0)
+			before := player.stateSnapshot().HP
+			lifecycle.combatTickForTest(player, role.Position{X: tc.playerX, Y: 0, Z: 0}, time.Unix(11000, 0))
+			at := chaseNPCTransform(t, lifecycle, 98)
+			if at.X < tc.wantMoveX-0.05 || at.X > tc.wantMoveX+0.05 {
+				t.Fatalf("NPC X=%.2f want %.2f", at.X, tc.wantMoveX)
+			}
+			hit := player.stateSnapshot().HP < before
+			if hit != tc.wantHit {
+				t.Fatalf("player hit=%t want %t (HP %d -> %d)", hit, tc.wantHit, before, player.stateSnapshot().HP)
+			}
+			lifecycle.close()
+		})
+	}
 }
 
 // TestChaseGateSilencesMovementButHoldsThreat GM 追击总闸

@@ -123,8 +123,12 @@ func LerpOrientFreeStep(from, to Node, step float32) Node {
 // StepTowardGround 与 LerpOrientFreeStep 同为直线推进，但 y 不朝目标
 // 插值（目标可能悬空/钻地），而是按本步占全程的比例向“推进落点的
 // 最近路点高度”渐进贴地。无图（g == nil）时退化为纯水平推进、
-// y 维持出发高度（旧 stepToward 语义）。
+// y 维持出发高度（旧 stepToward 语义）。step<=0（目标已在水平攻击
+// 位内）时钳为 0，只做贴地收敛。
 func StepTowardGround(g *Graph, from, to Node, step float32) Node {
+	if step < 0 {
+		step = 0
+	}
 	// 先只推 x/z（把 y 置平再插值，避免被目标 y 带偏）。
 	flat := LerpOrientFreeStep(Node{X: from.X, Z: from.Z}, Node{X: to.X, Z: to.Z}, step)
 	next := Node{X: flat.X, Y: from.Y, Z: flat.Z}
@@ -137,6 +141,32 @@ func StepTowardGround(g *Graph, from, to Node, step float32) Node {
 			ratio := minFloat32(step, total) / total
 			next.Y += (ground - next.Y) * ratio
 		}
+	}
+	return next
+}
+
+// GroundFollowStep 直线推进且 y 独立贴地：x/z 朝 to 推进 step，y 以每拍
+// 至多 vstep 的限速向“落点最近路点高度”收敛——绝不朝目标 y 插值（目标
+// 可能在推进者不可达的高处：屋顶/柱顶/跳跃途中，正是追击 NPC 飞天/
+// 瞬移的根因）。step<=0 时 x/z 原地不动，y 仍按 vstep 落地（悬空纠偏不
+// 依赖水平步长）。无图（g == nil）退化为纯水平推进、y 维持出发高度。
+func GroundFollowStep(g *Graph, from, to Node, step, vstep float32) Node {
+	if step < 0 {
+		step = 0
+	}
+	flat := LerpOrientFreeStep(Node{X: from.X, Z: from.Z}, Node{X: to.X, Z: to.Z}, step)
+	next := Node{X: flat.X, Y: from.Y, Z: flat.Z}
+	if g == nil {
+		return next
+	}
+	if node := g.Nearest(next); node >= 0 {
+		dy := g.nodes[node].Y - next.Y
+		if dy > vstep {
+			dy = vstep
+		} else if dy < -vstep {
+			dy = -vstep
+		}
+		next.Y += dy
 	}
 	return next
 }

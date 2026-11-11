@@ -293,16 +293,33 @@ type rawActionSegment struct {
 }
 
 // compileSkillActions 编译 zhaoshi 时间线：动作段（此前已有）+ 多段判定
-// 时刻 hitFrames（Java CombatSkillCatalog.compileSkillActions 同构）。
-// trigger_custom_N=段号;trigger_effect;帧号;效果名，过滤序（52795 抓包
-// 实证）：①效果名含 _hurt 的帧=伤害段（gxfhj02 的 ×4=每招 4 段）；②无
-// hurt 帧时取效果名以技能核心名（尾段去数字取前 3 字母，如 sfgp01→sfg）
-// 开头的帧（shl08 的 shl08_NN×6=6 段）；刀光/fly/特效帧与技能全名施法帧
-// 剔除；皆无 → 单段即时结算。
+// 时刻 hitFrames。trigger_custom_N=段号;trigger_effect;帧号;效果名，
+// trigger_effect 旧过滤序（52795 参考服抓包）：①效果名含 _hurt 的帧=
+// 伤害段（gxfhj02 的 ×4=每招 4 段）；②无 hurt 帧时取效果名以技能核心名
+// （尾段去数字取前 3 字母，如 sfgp01→sfg）开头的帧（shl08 的 shl08_NN×6
+// =6 段）；刀光/fly/特效帧与技能全名施法帧剔除；皆无 → 单段即时结算。
+//
+// 2026-11-11 官服 pcapng 定版（技能/挑战 双抓包 12 技互证）：伤害跳对齐
+// trigger_hitbreak 帧位——hitbreak 优先取用；帧是段内相对帧，段 N 的判定
+// 时刻 = 前序段全时长累加（不含 inBlend 混融折减）+ 帧号/30fps。实证锚点：
+// lyfh02 hitbreak seg1@14/seg2@12 → 467/1067ms（官服 551/1141−RTT80）；
+// wuji_lyfh07 旋风五段 15/45/75/105/135 → 500..4500ms（官服 587..4565）。
+// 无判定帧的技能（shl08 族）回落 trigger_effect 旧口径。
+//
+// 2026-11-12 挑战.pcapng 补定：trigger_hitback 同为判定帧——太极剑舞
+// CS_wd_tjj07 官服 8 跳 = hitback×6 + hitbreak×2（hitbreak-only 只会 2 跳）；
+// hitback 第 4 参是击退距离+受击动画（「1.3,hurt_f_1_s」），不改变判定语义。
+// 已验证 9 个 11-11 锚定技全部零 hitback，合并无回归面。判定集 =
+// hitbreak ∪ hitback（同刻去重，hitbreak 优先）。
 func compileSkillActions(fields []iniField, skillID string) (string, time.Duration, []skillActionSegment, []time.Duration) {
 	raw := make([]rawActionSegment, 0, 3)
-	hurtFrames := make([]float64, 0, 4)
-	coreFrames := make([]float64, 0, 4)
+	type stagedFrame struct {
+		segment int
+		frame   float64
+	}
+	hurtFrames := make([]stagedFrame, 0, 4)
+	coreFrames := make([]stagedFrame, 0, 4)
+	judgments := make([]stagedFrame, 0, 4)
 	corePrefix := skillCorePrefix(skillID)
 	for _, field := range fields {
 		if order, err := strconv.Atoi(field.key); err == nil {
@@ -321,46 +338,82 @@ func compileSkillActions(fields []iniField, skillID string) (string, time.Durati
 			continue
 		}
 		parts := strings.Split(field.value, ";")
-		// 布局：段号;trigger_effect;帧号;效果名
-		if len(parts) < 4 || !strings.EqualFold(strings.TrimSpace(parts[1]), "trigger_effect") {
+		// 布局：段号;trigger_effect;帧号;效果名（hitbreak 的效果名可为空/空格）
+		if len(parts) < 4 {
+			continue
+		}
+		segment, _ := strconv.Atoi(strings.TrimSpace(parts[0]))
+		kind := strings.TrimSpace(parts[1])
+		frame, err := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
+		if err != nil || frame < 0 {
+			continue
+		}
+		if strings.EqualFold(kind, "trigger_hitbreak") || strings.EqualFold(kind, "trigger_hitback") {
+			judgments = append(judgments, stagedFrame{segment: segment, frame: frame})
+			continue
+		}
+		if !strings.EqualFold(kind, "trigger_effect") {
 			continue
 		}
 		effectName := strings.TrimSpace(parts[3])
 		if effectName == "" || effectName == skillID {
 			continue // 施法特效帧（与技能同名）不是伤害段
 		}
-		frame, err := strconv.ParseFloat(strings.TrimSpace(parts[2]), 64)
-		if err != nil || frame < 0 {
-			continue
-		}
 		if strings.Contains(effectName, "_hurt") {
-			hurtFrames = append(hurtFrames, frame)
+			hurtFrames = append(hurtFrames, stagedFrame{segment: segment, frame: frame})
 		} else if corePrefix != "" && strings.HasPrefix(effectName, corePrefix) {
-			coreFrames = append(coreFrames, frame)
+			coreFrames = append(coreFrames, stagedFrame{segment: segment, frame: frame})
 		}
-	}
-	hitFrames := hurtFrames
-	if len(hitFrames) == 0 {
-		hitFrames = coreFrames
-	}
-	sort.Float64s(hitFrames)
-	hitFrameMs := make([]time.Duration, len(hitFrames))
-	for i, frame := range hitFrames {
-		hitFrameMs[i] = time.Duration(frame / 30 * float64(time.Second))
 	}
 	sort.Slice(raw, func(i, j int) bool { return raw[i].order < raw[j].order })
+	// 段链起点：官方判定帧按「前序段全时长累加」拍点，inBlend 只作用于
+	// 客户端动画混融（followup 播放时刻仍用它）不影响伤害时刻。
+	chainStart := make(map[int]time.Duration, len(raw))
+	at := time.Duration(0)
+	for _, seg := range raw {
+		chainStart[seg.order] = at
+		at += time.Duration(seg.endFrame / 30 * float64(time.Second))
+	}
+	toAbsolute := func(staged []stagedFrame) []time.Duration {
+		out := make([]time.Duration, 0, len(staged))
+		for _, f := range staged {
+			offset, ok := chainStart[f.segment]
+			if !ok {
+				offset = 0 // 段号失配（引用未定义段）：按全局帧兜底
+			}
+			out = append(out, offset+time.Duration(f.frame/30*float64(time.Second)))
+		}
+		sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
+		// hitbreak 与 hitback 同刻：一跳（排序后同刻必相邻）
+		dedup := out[:0]
+		for i, at := range out {
+			if i > 0 && dedup[len(dedup)-1] == at {
+				continue
+			}
+			dedup = append(dedup, at)
+		}
+		return dedup
+	}
+	hitFrameMs := toAbsolute(judgments)
+	if len(hitFrameMs) == 0 {
+		fallback := hurtFrames
+		if len(fallback) == 0 {
+			fallback = coreFrames
+		}
+		hitFrameMs = toAbsolute(fallback)
+	}
 	if len(raw) == 0 {
 		return "", 0, nil, hitFrameMs
 	}
 	duration := time.Duration(raw[0].endFrame / 30 * float64(time.Second))
-	at := time.Duration(0)
+	followupAt := time.Duration(0)
 	followups := make([]skillActionSegment, 0, len(raw)-1)
 	for i := 1; i < len(raw); i++ {
 		overlap := time.Duration(math.Max(raw[i].inBlend, 0) * float64(time.Second))
-		at += time.Duration(raw[i-1].endFrame/30*float64(time.Second)) - overlap
+		followupAt += time.Duration(raw[i-1].endFrame/30*float64(time.Second)) - overlap
 		followups = append(followups, skillActionSegment{
 			action: raw[i].action,
-			at:     at,
+			at:     followupAt,
 			// State 会播放完整的具名资源。它无法选择
 			// zhaoshi_player.ini 中编码的起止片段。
 			duration: time.Duration(raw[i].endFrame / 30 * float64(time.Second)),
@@ -531,6 +584,7 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		levelupRelevance: iniValue(newFields, "LevelupRelevance"),
 		packCategory:     iniInt(newFields, "PackCategory"),
 		requiresTarget:   targetMode == skillTargetSelected || targetMode == skillTargetSelectedArea,
+		noLimit:          iniInt(static, "NoLimit") != 0,
 		targetMode:       targetMode, areaRadius: radius, areaHeight: iniFloat(varProp, "HeightDiff"),
 		sectorAngle: angle, areaWidth: width,
 		actionName: action, actionDuration: actionDuration, followupActions: followups,
@@ -542,6 +596,13 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		isDamageSkill:    isDamage,
 		bindDistance:     bindDistance,
 		groundRushAction: groundRushAction,
+	}
+	// 通道型（UseLimit=166 族，channelSkillSpecs）：SP 改逐波扣
+	//（launchChannelWaves 每波 −spPerWave），预扣清零防双收。
+	if spec, isChannel := channelSkillSpecs[skillID]; isChannel {
+		channelSpec := spec
+		definition.channel = &channelSpec
+		definition.spCost = 0
 	}
 	// 公共 CD 严格走配置（varprop/skill_new AddCoolDownTime），缺配置即 0，
 	// 不回落 personalCD：无我剑诀(CS_jh_dgjj) 等无 CoolDownTeam 套路一旦

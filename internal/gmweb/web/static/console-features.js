@@ -350,6 +350,78 @@
         value: +document.querySelector("#live-speed-power").value,
       });
     }
+    // 整套学习（武学套路区块）：套路=school_taolu 精选集、内功=neigong
+    // 目录；层数 0/留空=各自满级，超上限由服务端按最大给（回执注明）。
+    async function loadGMTaolus() {
+      try {
+        let rows = await (await fetch("/api/taolus")).json();
+        let s = document.querySelector("#gm-taolu");
+        if (!s) return;
+        s.innerHTML = "";
+        if (!rows.length) {
+          s.innerHTML = '<option value="">（套路目录未加载）</option>';
+          return;
+        }
+        for (let t of rows) {
+          let o = document.createElement("option");
+          o.value = t.key;
+          o.textContent = t.label + "（" + t.skills.length + "招）";
+          s.appendChild(o);
+        }
+      } catch (e) { }
+    }
+    async function loadGMNeigongs() {
+      try {
+        let rows = await (await fetch("/api/neigongs")).json();
+        let s = document.querySelector("#gm-neigong");
+        if (!s) return;
+        s.innerHTML = "";
+        if (!rows.length) {
+          s.innerHTML = '<option value="">（内功目录未加载）</option>';
+          return;
+        }
+        for (let b of rows) {
+          let o = document.createElement("option");
+          o.value = b.configId;
+          o.textContent = b.name + "（满" + b.maxLevel + "层）";
+          s.appendChild(o);
+        }
+      } catch (e) { }
+    }
+    function learnTaolu() {
+      let key = document.querySelector("#gm-taolu").value;
+      if (!key) return alert("套路目录未加载");
+      command({
+        action: "learn_taolu",
+        skillKey: key,
+        skillLevel: +document.querySelector("#gm-taolu-level").value || 0,
+      });
+    }
+    function learnNeiGong() {
+      let key = document.querySelector("#gm-neigong").value;
+      if (!key) return alert("内功目录未加载");
+      command({
+        action: "learn_neigong",
+        skillKey: key,
+        skillLevel: +document.querySelector("#gm-neigong-level").value || 0,
+      });
+    }
+    // 移除（learn_* 逆操作）：非登录基线项彻底删除，基线项回初始档
+    //（服务端回执注明明细；基线套路招式重置回 1 层、基线内功重登复活）。
+    function forgetTaolu() {
+      let key = document.querySelector("#gm-taolu").value;
+      if (!key) return alert("套路目录未加载");
+      if (!confirm("确定移除所选套路？（非登录基线招式彻底删除，基线招式重置回 1 层）"))
+        return;
+      command({ action: "forget_taolu", skillKey: key });
+    }
+    function forgetNeiGong() {
+      let key = document.querySelector("#gm-neigong").value;
+      if (!key) return alert("内功目录未加载");
+      if (!confirm("确定移除所选内功？（非登录基线书彻底删除，基线书重登回到初始档）"))
+        return;
+      command({ action: "forget_neigong", skillKey: key });
+    }
     function spawnDummy(hp) {
       command({
         action: "spawn_dummy",
@@ -1147,4 +1219,6 @@
     loadMinimalLogin();
     loadOriginStatus();
     loadCombatDummyTaolus();
+    loadGMTaolus();
+    loadGMNeigongs();
     setInterval(refresh, 2500);

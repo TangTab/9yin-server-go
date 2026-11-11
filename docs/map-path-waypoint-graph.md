@@ -135,7 +135,7 @@ internal/mapnav/
 
 1. **重算节流**:每 300~500ms,或目标偏离上次规划终点 > 8m 时重算 A*(起点=NPC 最近路点,终点=玩家最近路点);
 2. **折线跟随**:每 tick 沿路径折线推进 `MoveSpeed`,**Y 取相邻两路点高度的线性插值** → 穿地/悬空消失;
-3. **末段直线**:距玩家 < ~12m(约一个路点间距)切直线逼近,视觉无缝;
+3. **末段直线**:距玩家 < ~12m(约一个路点间距)切直线逼近,视觉无缝;y 不朝玩家插值,而是限速向落点最近路点高度贴地收敛(玩家跳上柱顶/屋檐时水平虽近、垂直不可达,旧"y 朝目标插值"正是 NPC 飞天/瞬移的根因);
 4. **兜底(无图场景)**:保留现有直线 `stepToward`,但 Y 从最近可图吸附;完全无图则维持现状并打点日志;
 5. **跨分量兜底**:起终点不同连通分量 → A* 失败 → 沿直线走但每 ~2s 重试吸附(玩家可能走进另一分量可达范围);连续失败 N 次放弃仇恨回 Home。
 
@@ -159,9 +159,9 @@ internal/mapnav/
 | `internal/mapnav/parse.go` | 二进制解析（两遍扫描 CSR 邻接表）+ 字节精确校验 + `ValidateEdgeDistances` 数学级校验 + 越界/截断防御 |
 | `internal/mapnav/index.go` | 32m XZ 均匀网格（counting-sort 前缀桶）+ `Nearest`（**3D 距离**环形扩张剪枝——同 x/z 多楼层必须命中同层）+ `Library`（进程级缓存，缺失负缓存只探一次盘） |
 | `internal/mapnav/astar.go` | 二叉堆 A*（手写堆 + 代章懒失效数组复用；启发式 3D 欧氏可采纳） |
-| `internal/mapnav/follow.go` | `Follower` 折线进给（y 线性插值）+ `StepTowardGround`（直线贴地）/`LerpOrientFreeStep`（末段直线，旧 stepToward 语义+y 插值） |
-| `cmd/protocol-probe/mapnav_chase.go` | 追击状态机（`npcChaseState`/`advanceChaseLocked`/`planChasePath`）+ `warmNav`（sync.Once 后台预热，r.mu 内落盘） |
-| `cmd/protocol-probe/combat_ai.go` | 追击分支替换为 `advanceChaseLocked`；栓绳/放弃共用 `appendNPCReturnHomeLocked`；`npcMoveUpdate.delay`=到达确认延时（剩余路径长/速度，旧固定 1s 保留给重生/栓绳瞬移） |
+| `internal/mapnav/follow.go` | `Follower` 折线进给（y 线性插值）+ `StepTowardGround`（直线贴地）/`GroundFollowStep`（末段直线贴地：x/z 照推、y 限速向落点最近路点收敛，**绝不朝目标 y 插值**——2026-11-11 悬空目标回归）/`LerpOrientFreeStep`（纯旧语义保留位，无图兜底用） |
+| `cmd/protocol-probe/mapnav_chase.go` | 追击状态机（`npcChaseState`/`advanceChaseLocked`/`planChasePath`）+ `warmNav`（sync.Once 后台预热，r.mu 内落盘）；折线末点=目标 x/z+最近路点 y（目标悬空时折线贴地走完） |
+| `cmd/protocol-probe/combat_ai.go` | 追击分支替换为 `advanceChaseLocked`；栓绳/放弃共用 `appendNPCReturnHomeLocked`；`npcMoveUpdate.delay`=到达确认延时（剩余路径长/速度，旧固定 1s 保留给重生/栓绳瞬移）；**攻防分位用 3D 距离 `reach`**（栓绳/索敌仍水平——2026-11-11：柱顶/屋檐卡位 NPC 够不着不再隔空平 A，零位移拍不发移动帧、行进态翻回 stand） |
 | `testdata/mapnav/` | 6 个代表文件（adv031/_main、battle02/_main(4B 空图)、scene04、school01） |
 
 ### 关键实现决策（与 §6.3 的差异/补充）
@@ -171,6 +171,7 @@ internal/mapnav/
 3. **导航状态三处生命周期钩子**：清仇恨（栓绳/目标死亡）、重生、跨分量放弃——全部 `meta.chase = nil`。
 4. **sceneRun 异步预热**：`newSceneRun` 即 `go warmNav()`（scene14 解析 ~400ms 全量批测口径），首个追击 tick 在 run.mu 内零阻塞；未就绪当拍直线兜底。
 5. **测试钩子 `mapnavLoaderForTest`**：合成图注入必须先于 sceneRun 创建（预热 Once 抢跑会负缓存）；追击测试驱动用 `chaseTickForTest`（`combatTickForTest` 每次调用挂新成员、旧成员位置冻结——仅测试现象，生产连接循环无此问题）。
+6. **悬空目标三闸（2026-11-11 柱顶卡位回归）**：玩家跳上高处后旧实现 NPC 会飞天/瞬移上来，三处同因同修——①末段直线 y 由"朝目标插值"改为 `GroundFollowStep` 限速贴地（零水平步长仍落地）；②折线末点由原始目标坐标改为 x/z+最近路点 y 投影（悬空目标折线不再沿末段拉高；多楼层有路点的屋顶 3D Nearest 仍命中本层，正常走上楼）；③攻防分位 `distance > AttackRange` 改 3D `reach`（水平 6m 内但垂直 15m 高 → 继续追击贴地停在攻击范围边缘，零位移不发移动帧、不隔空出伤）。栓绳（ChaseRange）/索敌（AggroRange）保持水平——视野语义，高处看得见、拉不远。回归测试 `TestChasePerchedTargetStaysGrounded`。
 
 ### 批测实证（F 盘部署 557 文件，2026-11-09）
 

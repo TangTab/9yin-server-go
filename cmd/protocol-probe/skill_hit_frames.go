@@ -11,6 +11,10 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 )
@@ -202,12 +206,50 @@ func npcAttackHitFrame(playerID, playerOwner uint32, damage int32, npcID, npcOwn
 	)
 }
 
-// npcAttackSkillJN 是 NPC 攻击动画帧携带的招式串（Java NpcCombatAi.
+// npcAttackSkillJN 是 NPC 攻击动画帧的兜底招式串（Java NpcCombatAi.
 // NPC_ATTACK_SKILL 同值；参考服 55866 追风士 jn_mon053_02 逐位对齐。
-// 抓包 12141 另见 jn_mon043_02（按 NPC 模型取招式的官方列未定位，
-// 统一走 Java 常量）。此前 Go 发 "SkillNormal" 是本地占位——msg20 的
-// 技能串要能索引客户端招式动画表，"SkillNormal" 不是招式 ID。
+// 抓包 12141 另见 jn_mon043_02。2026-11-11 起按 NPC 的 NormalSkill 列
+//（attacknpc col81，值=zhaoshi_npc.ini 节名，如 jn_mon_hand_021）优先，
+// npcSkillActionKnown 校验通过才用列值，否则回落本常量。
 const npcAttackSkillJN = "jn_mon053_02"
+
+// npcSkillActions 是 zhaoshi_npc.ini 节名集合（进程级懒装载；文件
+// 缺失时空集=全部走常量兜底，行为与旧版一致）。节名是 ASCII，无需
+// GBK 转码。
+var npcSkillActions = sync.OnceValue(func() map[string]struct{} {
+	data, err := os.ReadFile(filepath.Join(runtimeProjectPath("resources", "modern", "ini", "action"), "zhaoshi_npc.ini"))
+	if err != nil {
+		return nil
+	}
+	sections := make(map[string]struct{})
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.TrimSpace(line)
+		if len(line) > 2 && line[0] == '[' && line[len(line)-1] == ']' {
+			sections[line[1:len(line)-1]] = struct{}{}
+		}
+	}
+	return sections
+})
+
+// npcSkillActionKnown 报告 name 是否 zhaoshi_npc.ini 的现有招式节——
+// NormalSkill 列混有模型名等其它命名空间的值（chuanyunsheri_nan 等
+// 不在招式表），不在表内的串不可作 msg20 动画串。
+func npcSkillActionKnown(name string) bool {
+	if name == "" {
+		return false
+	}
+	_, ok := npcSkillActions()[name]
+	return ok
+}
+
+// npcAttackActionSkill 取 NPC 攻击动画串：meta 配置优先，空值/未知
+// 节名回落兜底常量。
+func npcAttackActionSkill(configured string) string {
+	if npcSkillActionKnown(configured) {
+		return configured
+	}
+	return npcAttackSkillJN
+}
 
 // skillBuffFrame 即 msg169 技能 buff 九值形态（Java FightMessages.skillBuff）：
 //

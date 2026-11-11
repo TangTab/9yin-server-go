@@ -239,6 +239,8 @@ func newGMMux(hub *gmHub, accounts role.AccountRepository) *http.ServeMux {
 	mux.HandleFunc("/api/idle-stances", hub.idleStancesHandler)
 	mux.HandleFunc("/api/recast-affixes", hub.recastAffixesHandler)
 	mux.HandleFunc("/api/combat-dummy/taolus", hub.combatDummyTaolusHandler)
+	mux.HandleFunc("/api/taolus", hub.taolusHandler)
+	mux.HandleFunc("/api/neigongs", hub.neigongsHandler)
 	mux.HandleFunc("/api/repute/status", hub.reputeStatusHandler)
 	mux.HandleFunc("/api/origin/status", hub.originStatusHandler)
 	mux.HandleFunc("/api/minimal-login", hub.minimalLoginHandler)

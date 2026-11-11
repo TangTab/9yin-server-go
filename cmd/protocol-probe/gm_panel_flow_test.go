@@ -122,15 +122,23 @@ func TestGMFlowRejectsBadCommands(t *testing.T) {
 		payload string
 		status  int
 	}{
-		{`{"action":"learn_all_taolu"}`, http.StatusOK},                       // 武学三动作：学满（会话循环取走）
-		{`{"action":"forget_all_taolu"}`, http.StatusOK},                      // 武学三动作：全遗忘
-		{`{"action":"learn_all_neigong"}`, http.StatusOK},                     // 武学三动作：内功全收录
-		{`{"action":"no_such_action"}`, http.StatusBadRequest},                // 未知动作
-		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest},               // 超过 maxPlayerSP
-		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},           // 怒气自动回复速率（官方满档 5）
-		{`{"action":"set_rage_recovery","value":3.5}`, http.StatusBadRequest}, // 必须整数
-		{`{"action":"set_rage_recovery","value":-1}`, http.StatusBadRequest},  // 负数拒绝
-		{`{"action":"set_silver"}`, http.StatusOK},                            // silver 缺省 0，合法
+		{`{"action":"learn_all_taolu"}`, http.StatusOK},                                        // 武学三动作：学满（会话循环取走）
+		{`{"action":"forget_all_taolu"}`, http.StatusOK},                                       // 武学三动作：全遗忘
+		{`{"action":"learn_all_neigong"}`, http.StatusOK},                                      // 武学三动作：内功全收录
+		{`{"action":"learn_taolu","skillKey":"cs_wd_tjq","skillLevel":36}`, http.StatusOK},     // 整套发放：套路
+		{`{"action":"learn_neigong","skillKey":"ng_wd_001"}`, http.StatusOK},                   // 整套发放：内功（层数缺省=满级）
+		{`{"action":"forget_taolu","skillKey":"cs_wd_tjq"}`, http.StatusOK},                    // 整套移除：套路
+		{`{"action":"forget_neigong","skillKey":"ng_wd_001"}`, http.StatusOK},                  // 整套移除：内功
+		{`{"action":"learn_taolu","skillKey":" "}`, http.StatusBadRequest},                     // 整套发放：key 空
+		{`{"action":"forget_taolu"}`, http.StatusBadRequest},                                   // 整套移除：key 缺省
+		{`{"action":"forget_neigong","skillKey":"k","skillLevel":5}`, http.StatusOK},           // 整套移除：层数字段无意义放行
+		{`{"action":"learn_neigong","skillKey":"k","skillLevel":1000}`, http.StatusBadRequest}, // 整套发放：层数超界
+		{`{"action":"no_such_action"}`, http.StatusBadRequest},                                 // 未知动作
+		{`{"action":"set_sp","sp":999}`, http.StatusBadRequest},                                // 超过 maxPlayerSP
+		{`{"action":"set_rage_recovery","value":5}`, http.StatusOK},                            // 怒气自动回复速率（官方满档 5）
+		{`{"action":"set_rage_recovery","value":3.5}`, http.StatusBadRequest},                  // 必须整数
+		{`{"action":"set_rage_recovery","value":-1}`, http.StatusBadRequest},                   // 负数拒绝
+		{`{"action":"set_silver"}`, http.StatusOK},                                             // silver 缺省 0，合法
 
 		// —— 货币/属性/状态批次：合法负载过白名单（会话循环侧会取走）——
 		{`{"action":"set_guanyin","guanYin":888}`, http.StatusOK},
@@ -387,4 +395,33 @@ func postOffline(t *testing.T, server *httptest.Server, id uint64, payload strin
 	defer response.Body.Close()
 	raw, _ := io.ReadAll(response.Body)
 	return string(raw), response.StatusCode
+}
+
+// TestGMTaolusAndNeigongsCatalogEndpoints 整套发放的目录端点：GET 出
+// JSON 数组（真实树缺失时为空数组也必须是合法 JSON），POST 405。
+func TestGMTaolusAndNeigongsCatalogEndpoints(t *testing.T) {
+	server, _, _ := gmFlowHarness(t)
+	for _, path := range []string{"/api/taolus", "/api/neigongs"} {
+		response, err := http.Get(server.URL + path)
+		if err != nil {
+			t.Fatalf("get %s: %v", path, err)
+		}
+		body, _ := io.ReadAll(response.Body)
+		response.Body.Close()
+		if response.StatusCode != http.StatusOK {
+			t.Fatalf("%s status=%d body=%s", path, response.StatusCode, body)
+		}
+		var rows []map[string]any
+		if err := json.Unmarshal(body, &rows); err != nil {
+			t.Fatalf("%s not a JSON array: %v body=%s", path, err, body)
+		}
+		post, err := http.Post(server.URL+path, "application/json", strings.NewReader("{}"))
+		if err != nil {
+			t.Fatalf("post %s: %v", path, err)
+		}
+		post.Body.Close()
+		if post.StatusCode != http.StatusMethodNotAllowed {
+			t.Fatalf("%s POST status=%d want 405", path, post.StatusCode)
+		}
+	}
 }

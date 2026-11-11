@@ -60,3 +60,53 @@ func TestOfficialNPCPropertiesFollowActiveTable(t *testing.T) {
 	// 官服模式下 schema 场景行数随头块换血缩水（OrderedProperties 按首现
 	// 解析，fork 场景域名在官服表缺席）——总计数不固定，只断言官服位行在。
 }
+
+// TestOfficialNPCPropertiesBoxGatherCollideGate 宝箱/采集族碰撞方言
+// （npc.pcapng 2026-11-11 官服 0x0D 定版）：NpcType=161/153 不发
+// CollideRadius，改发尾行 OpenRange=2.0/GatherRange=3.0；ConfigID 前缀
+// 兜底判族；常规 NPC 保留 collide 首行且 schema 真值直通。
+func TestOfficialNPCPropertiesBoxGatherCollideGate(t *testing.T) {
+	clientdata.SwapPropertyTableForTest(t, "fork")
+	propByName := func(props []clientdata.IndexedProperty, name string) (clientdata.IndexedProperty, bool) {
+		for _, p := range props {
+			if p.Name == name {
+				return p, true
+			}
+		}
+		return clientdata.IndexedProperty{}, false
+	}
+
+	box := testNPCSpawn()
+	box.resolved.Properties["NpcType"] = clientdata.PropertyValue{Value: clientdata.Int32Value(161)}
+	box.resolved.Properties["ConfigID"] = clientdata.PropertyValue{Value: clientdata.StringValue("BoxNpc10014")}
+	props := officialNPCProperties(box)
+	if _, ok := propByName(props, "CollideRadius"); ok {
+		t.Fatal("宝箱族（NpcType=161）不应下发 CollideRadius")
+	}
+	if p, ok := propByName(props, "OpenRange"); !ok || p.Value.F32 != 2.0 {
+		t.Fatalf("宝箱族应尾行 OpenRange=2.0, got ok=%v v=%v", ok, p.Value.F32)
+	}
+
+	// 采集族走 ConfigID 前缀兜底（schema 无 NpcType 列的表）。
+	gather := testNPCSpawn()
+	delete(gather.resolved.Properties, "NpcType")
+	gather.resolved.Properties["ConfigID"] = clientdata.PropertyValue{Value: clientdata.StringValue("GatherClone003001")}
+	props = officialNPCProperties(gather)
+	if _, ok := propByName(props, "CollideRadius"); ok {
+		t.Fatal("采集族（GatherClone*）不应下发 CollideRadius")
+	}
+	if p, ok := propByName(props, "GatherRange"); !ok || p.Value.F32 != 3.0 {
+		t.Fatalf("采集族应尾行 GatherRange=3.0, got ok=%v v=%v", ok, p.Value.F32)
+	}
+
+	// 常规 NPC：collide 保持首行且读 schema 真值（官服 0.5 档）。
+	normal := testNPCSpawn()
+	normal.resolved.Properties["CollideRadius"] = clientdata.PropertyValue{Value: clientdata.Float32Value(0.5)}
+	props = officialNPCProperties(normal)
+	if len(props) == 0 || props[0].Name != "CollideRadius" {
+		t.Fatal("常规 NPC 的 CollideRadius 应保持官服位块首行")
+	}
+	if props[0].Value.F32 != 0.5 {
+		t.Fatalf("CollideRadius schema 真值未直通: %v", props[0].Value.F32)
+	}
+}

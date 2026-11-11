@@ -448,6 +448,13 @@ func (r *sceneRun) registerNPCLocked(id uint32, npc npcSpawn) error {
 	if property, ok := npc.resolved.Properties["NpcNickName"]; ok {
 		meta.wideName = property.Value.Text
 	}
+	// NPC 攻击招式（msg20 动画串）：NormalSkill 列（attacknpc col81）
+	// 的值须是 zhaoshi_npc.ini 的现有节名才采用（表里混有模型名/其它
+	// 命名空间的值，如 chuanyunsheri_nan 不在招式表）；否则攻击帧回落
+	// jn_mon053_02 常量（Java 同款兜底）。
+	if property, ok := npc.resolved.Properties["NormalSkill"]; ok && npcSkillActionKnown(property.Value.Text) {
+		meta.normalSkill = property.Value.Text
+	}
 	if hasPortal {
 		meta.portal = &portal
 	}

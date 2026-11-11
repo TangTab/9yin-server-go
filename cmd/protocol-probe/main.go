@@ -545,13 +545,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	defer persistTasks()
 	// 邮件/坐骑域（Java lettersGranted/mountsPushed 同位）：role_letters/
 	// role_mounts 快照读档 → ClientReady 整表重放；无存档零帧。
-		letterStore := newLetterDBStore(store.db)
-		mountStore := newMountDBStore(store.db)
-		mountCatalog := loadMountCatalog(defaultToolItemINIPath, defaultItemArtStaticPath, defaultNewRideINIPath)
-		bingluStore := newBingluDBStore(store.db)
-		sessionLetters := []letterEntry(nil)
-		lettersPushed := false
-		mountsPushed := false
+	letterStore := newLetterDBStore(store.db)
+	mountStore := newMountDBStore(store.db)
+	mountCatalog := loadMountCatalog(defaultToolItemINIPath, defaultItemArtStaticPath, defaultNewRideINIPath)
+	bingluStore := newBingluDBStore(store.db)
+	sessionLetters := []letterEntry(nil)
+	lettersPushed := false
+	mountsPushed := false
 	pushLetters := func() error {
 		lettersPushed = true
 		if len(sessionLetters) == 0 {
@@ -563,31 +563,31 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		log.Printf("%s: replayed %d RecvLetterRec rows", conn.RemoteAddr(), len(sessionLetters))
 		return nil
 	}
-		pushMounts := func() error {
-			mountsPushed = true
-			mounts := []mountEntry(nil)
-			var oldRows int
-			if player != nil {
-				player.mu.Lock()
-				mounts = make([]mountEntry, len(player.mounts))
-				copy(mounts, player.mounts)
-				oldRows = player.mountRowsSent
-				player.mu.Unlock()
-			}
-			rows, err := pushMountFrames(link, mounts, mountCatalog, oldRows)
-			if err != nil {
-				return fmt.Errorf("replay NewRideRec rows: %w", err)
-			}
-			if player != nil {
-				player.mu.Lock()
-				player.mountRowsSent = rows
-				player.mu.Unlock()
-			}
-			if len(mounts) > 0 {
-				log.Printf("%s: pushed saved mounts owned=%d current=%d", conn.RemoteAddr(), len(mounts), mountCurrentPack(mounts))
-			}
-			return nil
+	pushMounts := func() error {
+		mountsPushed = true
+		mounts := []mountEntry(nil)
+		var oldRows int
+		if player != nil {
+			player.mu.Lock()
+			mounts = make([]mountEntry, len(player.mounts))
+			copy(mounts, player.mounts)
+			oldRows = player.mountRowsSent
+			player.mu.Unlock()
 		}
+		rows, err := pushMountFrames(link, mounts, mountCatalog, oldRows)
+		if err != nil {
+			return fmt.Errorf("replay NewRideRec rows: %w", err)
+		}
+		if player != nil {
+			player.mu.Lock()
+			player.mountRowsSent = rows
+			player.mu.Unlock()
+		}
+		if len(mounts) > 0 {
+			log.Printf("%s: pushed saved mounts owned=%d current=%d", conn.RemoteAddr(), len(mounts), mountCurrentPack(mounts))
+		}
+		return nil
+	}
 	qingGongGranted := false
 	// AutoTrace（自动寻路开关）挂玩家对象属性，ClientReady 簇首推一次、
 	// 0x0C 切图清对象后由 stable re-entry 分支重推。
@@ -992,6 +992,62 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("武学学满失败：" + learnErr.Error())
 				return learnErr
 			}
+			gmSession.setAction(message)
+		case "learn_taolu":
+			// 整套学某套路（面板「武学套路」区块「整套学习」）：school_taolu.ini
+			// 精选集全招式入已学表并直达指定层（0=逐技满级，逐技钳 varprop
+			// 上限），秘籍链同款 role_skills 落库 + View40 整视图重开 + 等级档。
+			message, learnErr := applyGMLearnTaolu(link, player, selected.ID, skillLevelStoreOf(), inventory, ctx, command.SkillKey, command.SkillLevel, conn.RemoteAddr().String())
+			if learnErr != nil {
+				gmSession.setAction("套路学习失败：" + learnErr.Error())
+				return learnErr
+			}
+			gmSession.setAction(message)
+		case "learn_neigong":
+			// 学单本内功直达指定层（面板「武学套路」区块「整套学习」）：
+			// 0=满级、超上限按 varprop 满级给；曲线逐层推进 total/power，
+			// View43 整视图重建 + role_faculty 快照落库。
+			message, learnErr := applyGMLearnNeiGong(link, player, selected.ID, command.SkillKey, command.SkillLevel, conn.RemoteAddr().String())
+			if learnErr != nil {
+				gmSession.setAction("内功学习失败：" + learnErr.Error())
+				return learnErr
+			}
+			persistFaculty()
+			gmSession.setAction(message)
+		case "forget_taolu":
+			// 移除整套套路（learn_taolu 逆操作）：非基线招删 DB 行+等级档，
+			// 基线招重置回 1 层；View40 重开 + CanUse 批 + 摘失效快捷栏。
+			removedIDs, message, forgetErr := applyGMForgetTaolu(link, player, selected.ID, skillLevelStoreOf(), inventory, customConfig.shortcuts, ctx, command.SkillKey, conn.RemoteAddr().String())
+			if forgetErr != nil {
+				gmSession.setAction("套路移除失败：" + forgetErr.Error())
+				return forgetErr
+			}
+			// 会话级 DB 已学集过滤：0x0C 重入的 View40 重建不再复活已删行
+			//（与重登重查库口径一致；starter 基线行不在删除集，不受影响）。
+			if len(removedIDs) > 0 && len(dbLearnedSkills) > 0 {
+				removed := make(map[string]bool, len(removedIDs))
+				for _, id := range removedIDs {
+					removed[id] = true
+				}
+				filtered := make([]learnedSkillView, 0, len(dbLearnedSkills))
+				for _, row := range dbLearnedSkills {
+					if removed[row.configID] {
+						continue
+					}
+					filtered = append(filtered, row)
+				}
+				dbLearnedSkills = filtered
+			}
+			gmSession.setAction(message)
+		case "forget_neigong":
+			// 移除单本内功（learn_neigong 逆操作）：删书；装备书/修炼目标
+			// 重接余下首本，View43 重开 + role_faculty 快照落库。
+			message, forgetErr := applyGMForgetNeiGong(link, player, selected.ID, command.SkillKey, conn.RemoteAddr().String())
+			if forgetErr != nil {
+				gmSession.setAction("内功移除失败：" + forgetErr.Error())
+				return forgetErr
+			}
+			persistFaculty()
 			gmSession.setAction(message)
 		case "forget_all_taolu":
 			// 删除全部武学（面板「武学套路」区块）：回 starter 基线集，
@@ -2337,6 +2393,23 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			log.Printf("%s: sent player 0x0D + 0x1F + authoritative vital 0x10", conn.RemoteAddr())
+			// 玩家档案 0x28 全量帧（官服登录簇方言，docs/官服玩家档案
+			// 0x28全量帧.md）：NINEYIN_PLAYER_PROFILE_0X28=1 门控。时序=
+			// 物化（0x0D）之后、面板身份/视图行爆发之前——官服 #132 档案
+			// 帧先于玩家 0x14/0x11 视图行，NPC 0x28 教训=先物化后详情。
+			// mode=0x46 纯 memcpy 明文（与 NPC 0x28 v3 同族）：基础字段
+			// + 技能行 v2（官服 k#1978 模板 17 列，数据与 View40 同源）。
+			if playerProfile0x28Enabled() {
+				// 技能行数据与 grantStarterProgress/View40 同源（merge 集
+				// + 等级档合并），档案帧先行、View40 行后到——官服同位。
+				learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
+				profileFrame, fieldCount := playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows)
+				if err := link.WriteFrame(profileFrame); err != nil {
+					log.Printf("%s: write player profile 0x28 (skip): %v", conn.RemoteAddr(), err)
+				} else {
+					log.Printf("%s: sent player profile 0x28 mode=0x46 fields=%d skills=%d bytes=%d", conn.RemoteAddr(), fieldCount, len(learnedRows), len(profileFrame))
+				}
+			}
 			// 面板身份/域块补推（Java PanelState.identityProperties/
 			// domainProperties 随 0x0D 档下发的对应物，走独立瘦帧不动
 			// 档形）：实力=自动推导（varprop.NeiGongLevel，GM set 过则
@@ -2519,18 +2592,18 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: %v", conn.RemoteAddr(), err)
 						return
 					}
-				mountsPushed = false
-				player.resetMountRows()
-				if err := pushMounts(); err != nil {
-					log.Printf("%s: %v", conn.RemoteAddr(), err)
-					return
-				}
-				// 兵录行挂玩家对象，0x0C 随对象清空——行记账复位后整表
-				// 重放（零进度 0 帧口径在 pushBinglu 内部）。
-				player.resetBingluRows()
-				if err := pushBinglu(); err != nil {
-					log.Printf("%s: replay binglu rows: %v", conn.RemoteAddr(), err)
-				}
+					mountsPushed = false
+					player.resetMountRows()
+					if err := pushMounts(); err != nil {
+						log.Printf("%s: %v", conn.RemoteAddr(), err)
+						return
+					}
+					// 兵录行挂玩家对象，0x0C 随对象清空——行记账复位后整表
+					// 重放（零进度 0 帧口径在 pushBinglu 内部）。
+					player.resetBingluRows()
+					if err := pushBinglu(); err != nil {
+						log.Printf("%s: replay binglu rows: %v", conn.RemoteAddr(), err)
+					}
 					if switchErr := enableSkillActionSwitch(link); switchErr != nil {
 						log.Printf("%s: restore native skill-action switch after 0x0C re-entry: %v", conn.RemoteAddr(), switchErr)
 						return
@@ -2676,11 +2749,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 之前）：quest49 簇 + 419 步骤 + data_record 58 行打包。
 				// gamestep 步骤帧不在此处——sync 之后由收尾帧下发
 				// （sync 重置 414 域，先发会被抹掉）。
-			jyzPushed = true
-			ownedMountPacks := make(map[uint32]bool)
-			for _, mount := range player.mountsSnapshot() {
-				ownedMountPacks[mount.PackID] = true
-			}
+				jyzPushed = true
+				ownedMountPacks := make(map[uint32]bool)
+				for _, mount := range player.mountsSnapshot() {
+					ownedMountPacks[mount.PackID] = true
+				}
 				if jyzErr := pushJyzRecords(link, jyzGate.config(), ownedMountPacks); jyzErr != nil {
 					log.Printf("%s: push jyz records: %v", conn.RemoteAddr(), jyzErr)
 					return
@@ -3042,6 +3115,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
 					}
+				case clientCustomChannelSync:
+					// 通道技能逐段位置上报（m914，挑战.pcapng）：窗口外静默。
+					if _, handleErr := handleChannelSyncCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle channel sync: %v", conn.RemoteAddr(), handleErr)
+					}
 				case clientCustomRushMoveUpload:
 					// 冲锋在途位移上报（msg220，4×f32）：非在途静默。
 					if _, handleErr := handleRushMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
@@ -3323,6 +3401,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 高频移动上报：无冲锋在途时静默返回，不记日志。
 				if _, handleErr := handleMovementUpload(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle movement upload: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomChannelSync:
+				// 通道技能逐段位置上报（m914，挑战.pcapng）：窗口外静默。
+				if _, handleErr := handleChannelSyncCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle channel sync: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomMoveItem:
 				if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
@@ -3706,8 +3789,16 @@ func npcAddObject(objectID uint32, npc npcSpawn, probeIndex int) ([]byte, error)
 // 存在 +2/+7 分段漂移（§四-2/§四-5 同源），硬编码索引换表即错位。
 // 模型名缺省时跳过 Resource/ConfigID/Photo 行（零值模型串会污染客户端
 // 表现）；NpcType 由 fork schema 场景位（@34）已携带，不重复发官服位。
+//
+// CollideRadius 分族方言（npc.pcapng 2026-11-11 官服 0x0D 定版）：战斗/
+// 交互 NPC 恒发且排官服位块首行，值按体型的 0.5~1.0——优先 schema 真值
+// （目录表列或兼容层缺省 0.905），界外回落 0.9 基线；宝箱族（NpcType=161，
+// BoxNpc*）与采集族（NpcType=153，GatherClone*）不发碰撞体，交互半径
+// 改走尾行 OpenRange=2.0 / GatherRange=3.0。
 func officialNPCProperties(npc npcSpawn) []clientdata.IndexedProperty {
 	collide := clientdata.MustPlayerProperty("CollideRadius")
+	openRange := clientdata.MustPlayerProperty("OpenRange")
+	gatherRange := clientdata.MustPlayerProperty("GatherRange")
 	state := clientdata.MustPlayerProperty("State")
 	propType := clientdata.MustPlayerProperty("Type")
 	resource := clientdata.MustPlayerProperty("Resource")
@@ -3722,12 +3813,32 @@ func officialNPCProperties(npc npcSpawn) []clientdata.IndexedProperty {
 	hpRatio := clientdata.MustPlayerProperty("HPRatio")
 	parryRatio := clientdata.MustPlayerProperty("ParryRatio")
 	hitHPRatio := clientdata.MustPlayerProperty("HitHPRatio")
-	props := []clientdata.IndexedProperty{
-		{Index: collide.Index, Name: collide.Name, Value: clientdata.Float32Value(0.9)},
-		{Index: state.Index, Name: state.Name, Value: clientdata.StringValue("stand")},
+	collideValue := float32(0.9)
+	if c, ok := npc.resolved.Properties["CollideRadius"]; ok && c.Value.F32 > 0.1 && c.Value.F32 < 16 {
+		collideValue = c.Value.F32
+	}
+	// 分族判据：NpcType 列优先，ConfigID 前缀兜底（schema 无该列的表）。
+	npcTypeValue := int32(0)
+	if t, ok := npc.resolved.Properties["NpcType"]; ok {
+		npcTypeValue = t.Value.I32
+	}
+	configIDValue := ""
+	if c, ok := npc.resolved.Properties["ConfigID"]; ok {
+		configIDValue = c.Value.Text
+	} else if m, ok := npc.resolved.Properties["Material"]; ok {
+		configIDValue = m.Value.Text
+	}
+	boxKind := npcTypeValue == 161 || strings.HasPrefix(configIDValue, "BoxNpc")
+	gatherKind := npcTypeValue == 153 || strings.HasPrefix(configIDValue, "GatherClone")
+	props := make([]clientdata.IndexedProperty, 0, 20)
+	if !boxKind && !gatherKind {
+		props = append(props, clientdata.IndexedProperty{Index: collide.Index, Name: collide.Name, Value: clientdata.Float32Value(collideValue)})
+	}
+	props = append(props,
+		clientdata.IndexedProperty{Index: state.Index, Name: state.Name, Value: clientdata.StringValue("stand")},
 		// 官服 #1777 Type=4（NPC 对象类别常量）。
 		officialNPCIntProp(propType, 4),
-	}
+	)
 	if material, ok := npc.resolved.Properties["Material"]; ok && material.Value.Text != "" {
 		resourceValue := "npc\\world" + material.Value.Text
 		props = append(props,
@@ -3770,6 +3881,13 @@ func officialNPCProperties(npc npcSpawn) []clientdata.IndexedProperty {
 		officialNPCIntProp(parryRatio, 100),
 		officialNPCIntProp(hitHPRatio, 100),
 	)
+	// 宝箱/采集族尾行=交互半径（npc.pcapng BoxNpc10079/GatherClone003001
+	// 帧尾定版值 2.0/3.0）。
+	if boxKind {
+		props = append(props, officialNPCFloatProp(openRange, 2.0))
+	} else if gatherKind {
+		props = append(props, officialNPCFloatProp(gatherRange, 3.0))
+	}
 	return props
 }
 

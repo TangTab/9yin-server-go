@@ -16,10 +16,12 @@ package main
 //     soleOwnedMount 同口径），无坐骑拒绝。
 //   - 211 出招链骑乘技能闸（mountSkillGate）：骑乘技能白名单 = 全目录
 //     RideSkillID 合集；dismount 技能转下马；步行发骑乘技能忽略；
-//     骑乘中非白名单技能忽略。
-//   - S2C 回执（menu2 encodeS2CRide* 反汇编钉死）：239 上马 [pack] /
-//     240 激活提示 [1, pack, static] / 242 下马 []（均 0x1E int 外壳）+
-//     on_custom_new_ride 0x1E 字符串外壳 [pack]。
+//     骑乘中非白名单技能忽略；白名单放行走官服受理簇（mount_skills.go）。
+//     riding_start（骑术精通，starter 五件套）= 召唤技：步行按选中上马
+//     （2026-11-12 真机 23:19 会话实证客户端主技能栏会连发它的 211）。
+//   - S2C 回执：239 上马 [pack, pack]（双 int 序基双覆盖，真机勘误）/
+//     240 激活提示 [1, pack, static] / 242 下马 []（均 0x1E int 外壳；
+//     menu2 的 on_custom_new_ride 字符串外壳已删——客户端只认 int msgid）。
 //
 // 骑乘态不跨登录：重登恒步行（Mount 空串），拥有集/选中位跨登录存档
 //（role_mounts.snapshot，mount_records.go 同链）。
@@ -41,7 +43,11 @@ const (
 	serverCustomRideOn   int32 = 239 // 上马回执（menu2 startMount :445）
 	serverCustomRideAsk  int32 = 240 // 激活确认提示（handleMountItemUse :669）
 	serverCustomRideOff  int32 = 242 // 下马回执（stopMount :504 双发）
-	serverCustomRideName       = "on_custom_new_ride" // 0x1E 字符串外壳（:776）
+
+	// ridingStartSkillID 骑术精通（starter 五件套 21515，skill_view.go
+	// 同名行）：主技能栏召唤技——客户端步行连发它的 211（真机 23:19 会话
+	// 50+ 次），转 startSelectedMount。
+	ridingStartSkillID = "riding_start"
 )
 
 // mountSession 坐骑运行域会话上下文（itemSession 同款式参数包；
@@ -120,10 +126,14 @@ func (m *mountSession) publishOwnedMounts() error {
 	return nil
 }
 
-// startMount 上马（menu2 :405-457）：骑乘态属性组（Mount=model 非空）+
-// S2C 239 回执 + on_custom_new_ride 字符串帧。骑乘速度 buf
-// （SpeedQuality/RideBuffer，menu2 activateBuff :419）暂不接——Java
-// 校准点 5：默认速度跟人走，真机需要时二期补。
+// startMount 上马：骑乘态属性组（Mount=model 非空）+ S2C 239 回执。
+// 239 双 int [包id, 包id]（2026-11-12 真机勘误）：引擎处理器 GetInt 取
+// 值的序基（0/1-based）无法从反汇编单独定案——双覆盖两种序基都取到包
+// id，多余值引擎不读。旧版另发的 on_custom_new_ride 窄串命名帧是 menu2
+// 发明方言（客户端 OnCustom 只认 int msgid，串首值=type error 逐帧拒，
+// trace.log 实证 23:48:22.606）——已删。骑乘速度 buf（SpeedQuality/
+// RideBuffer，menu2 activateBuff :419）暂不接——Java 校准点 5：默认速度
+// 跟人走，真机需要时二期补。
 func (m *mountSession) startMount(def *mountDefinition) error {
 	frame, err := mountRideStateFrame(def.model, def.packID, def.mountType)
 	if err != nil {
@@ -132,13 +142,8 @@ func (m *mountSession) startMount(def *mountDefinition) error {
 	if err := m.link.WriteFrame(frame); err != nil {
 		return err
 	}
-	if frame, err = serverCustomIntMessageWithOpcode(0x1E, serverCustomRideOn, customInt(int32(def.packID))); err == nil {
-		err = m.link.WriteFrame(frame)
-	}
-	if err != nil {
-		return err
-	}
-	if frame, err = serverCustomStringMessageWithOpcode(0x1E, serverCustomRideName, customInt(int32(def.packID))); err == nil {
+	if frame, err = serverCustomIntMessageWithOpcode(0x1E, serverCustomRideOn,
+		customInt(int32(def.packID)), customInt(int32(def.packID))); err == nil {
 		err = m.link.WriteFrame(frame)
 	}
 	if err != nil {
@@ -249,11 +254,23 @@ func handleRideCustom(m *mountSession, custom clientCustomMessage) (bool, error)
 	if riding {
 		return true, m.stopMount()
 	}
+	return true, m.startSelectedMount()
+}
+
+// startSelectedMount 按选中上马（handleRideCustom 步行分支与
+// riding_start 召唤技共用）：无选中且仅拥有一匹时选中它
+//（soleOwnedMount，menu2 :524-546）；无坐骑/目录未收录拒绝，零帧。
+// 返回已处理错误（拒绝时 nil，日志已记）。
+func (m *mountSession) startSelectedMount() error {
+	m.player.mu.Lock()
+	mounts := make([]mountEntry, len(m.player.mounts))
+	copy(mounts, m.player.mounts)
+	m.player.mu.Unlock()
 	selected := mountCurrentPack(mounts)
 	soleOwned := selected == 0 && len(mounts) == 1
 	if selected == 0 && !soleOwned {
 		log.Printf("%s: ride rejected: no mount selected/owned", m.remote)
-		return true, nil
+		return nil
 	}
 	current := selected
 	if soleOwned {
@@ -262,7 +279,7 @@ func handleRideCustom(m *mountSession, custom clientCustomMessage) (bool, error)
 	def := m.catalog.defByPack(current)
 	if def == nil {
 		log.Printf("%s: ride rejected: pack %d not in mount catalog", m.remote, current)
-		return true, nil
+		return nil
 	}
 	if soleOwned {
 		// 唯一拥有自动选中：落档并整推（选中位跨登录保持）。
@@ -274,7 +291,7 @@ func handleRideCustom(m *mountSession, custom clientCustomMessage) (bool, error)
 			log.Printf("%s: publish mounts after ride select: %v", m.remote, err)
 		}
 	}
-	return true, m.startMount(def)
+	return m.startMount(def)
 }
 
 // ---- C2S 266 ride_util 子令 ----
@@ -455,7 +472,7 @@ const (
 //   - 步行发骑乘技能 → 拒绝（"ride skill while not riding (ignored)"）；
 //   - 骑乘中发非白名单技能 → 拒绝（"ride skill not in mount skills"）；
 //   - 骑乘中发 dismount 技能 → 下马不出招；
-//   - 其余放行（骑乘技能照常出招，冲锋/连招链不受影响）。
+//   - 其余放行（放行后由 emitRideSkillCast 发官服受理簇，mount_skills.go）。
 func mountSkillGate(m *mountSession, skillID string) mountSkillGateResult {
 	if m == nil || m.player == nil || skillID == "" {
 		return mountSkillPass

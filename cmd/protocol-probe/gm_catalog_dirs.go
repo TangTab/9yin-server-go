@@ -588,6 +588,29 @@ func (hub *gmHub) combatDummyTaolusHandler(writer http.ResponseWriter, request *
 }
 
 // ---------------------------------------------------------------------------
+// /api/taolus 与 /api/neigongs —— 「整套学习」发放目录（武学套路区块）。
+// 套路=school_taolu.ini+taolu_info.ini 精选集；内功=neigong.ini 全目录
+// （含 varprop 满层，供面板层数输入参考）。资源缺失时为空数组，面板
+// 下拉显示「无」。
+// ---------------------------------------------------------------------------
+
+func (hub *gmHub) taolusHandler(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	writeGMJSON(writer, http.StatusOK, gmTaolus.rows)
+}
+
+func (hub *gmHub) neigongsHandler(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	writeGMJSON(writer, http.StatusOK, loadGMNeiGongRows())
+}
+
+// ---------------------------------------------------------------------------
 // /api/repute/status 与 /api/origin/status —— 门派声望/身份系统装载
 // 状态。两块功能的命令端（repute_apply / origin_activate_all）与数据
 // 表（声望势力表、data/origin/origins.json）都尚未接入服务端，按前端

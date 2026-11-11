@@ -590,6 +590,30 @@
             ">
           删除全部武学
         </button>
+        <p class="muted" style="margin-top: 10px">
+          整套学习/移除：给指定套路/内功一次性发放并直达指定层数。层数
+          留空或 0=各自满级；超过该招式/内功 varprop 最高层数时按最大给
+          （各招式上限可能不同，回执会注明）。移除为学习的逆操作：非
+          登录基线项彻底删除（含 DB 行与等级档、失效快捷栏），基线项
+          重置回初始档。套路清单=school_taolu.ini+taolu_info.ini（占位
+          节按 skill_static TaoLu 分组重建）；内功清单=neigong.ini
+          全目录。等级重登保持（武学等级.json / role_faculty 快照）。
+        </p>
+        <label>套路
+          <select id="gm-taolu"></select></label>
+        <label>层数
+          <input id="gm-taolu-level" type="number" min="0" max="999" placeholder="0=满级" style="width: 90px" />
+        </label>
+        <button onclick="learnTaolu()">学习所选套路</button>
+        <button onclick="forgetTaolu()">移除所选套路</button>
+        <br />
+        <label>内功
+          <select id="gm-neigong"></select></label>
+        <label>层数
+          <input id="gm-neigong-level" type="number" min="0" max="999" placeholder="0=满级" style="width: 90px" />
+        </label>
+        <button onclick="learnNeiGong()">学习所选内功</button>
+        <button onclick="forgetNeiGong()">移除所选内功</button>
       </section>
       <section>
         <h2>修为</h2>

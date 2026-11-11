@@ -593,6 +593,18 @@ func (s *inventoryStore) deleteSkillsByTypes(ctx context.Context, roleID role.Ro
 	return err
 }
 
+// deleteSkill 删除角色的单个技能行（GM forget_taolu 逐招移除；starter
+// 基线行的删除无害——重登 mergeLearnedSkills 由 starter 集自动补齐）。
+func (s *inventoryStore) deleteSkill(ctx context.Context, roleID role.RoleID, skillID string) error {
+	if s == nil || s.db == nil || skillID == "" {
+		return nil
+	}
+	_, err := s.db.ExecContext(ctx,
+		"DELETE FROM role_skills WHERE role_id = ? AND skill_id = ?",
+		roleID, skillID)
+	return err
+}
+
 // anySlice 把 []string 抬成 []any（SQL 占位参数拼接用）。
 func anySlice(values []string) []any {
 	result := make([]any, len(values))

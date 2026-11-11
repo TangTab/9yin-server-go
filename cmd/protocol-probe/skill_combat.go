@@ -111,14 +111,24 @@ type combatSkillDefinition struct {
 	// 每击公式路径按 formulaID 取 formula.ini 公式、按位喂 params（P1 基值/
 	// P2 波动/分摊系数等），legacy ratio 路径保留为回退。hitCount 是 varprop
 	// HitCount 列（hurtCount() 的第二优先级计数来源）。
-	// hitFrameMs 是 zhaoshi trigger_custom_N（段号;trigger_effect;帧号;
-	// 效果名）编译出的多段判定时刻（30fps 换算毫秒），空表=单段即时
+	// hitFrameMs 是 zhaoshi trigger_custom_N 编译出的多段判定时刻
+	// （30fps 换算毫秒）：trigger_hitbreak 帧位优先（2026-11-11 官服
+	// pcapng 定版，段内相对帧+前序段全时长累加），无 hitbreak 回落
+	// trigger_effect _hurt/核心前缀帧（段相对同口径），空表=单段即时
 	// 结算。levelupRelevance（wuji_* 前缀=武技族，出招链带 169 段）与
 	// packCategory（2=怒招）驱动武技连击段下发。
 	damageWaves      int32
 	damageRows       []skillDamageRow
 	hitCount         int32
 	hitFrameMs       []time.Duration
+	// channel 非空 = 怒招引导通道型（skill_channel.go，挑战.pcapng
+	// 2026-11-12 寒心恨雪定版）：跳数/节奏由服务端波次引擎驱动而非
+	// hitFrameMs（通道型 zhaoshi 单段仅 1 hitbreak），SP 逐波扣无预扣。
+	channel *channelSkillSpec
+	// noLimit = skill_static NoLimit（施法中不锁行动）：受理簇须在 m20
+	// 前发 CurSkillCanNoLimit=1（挑战.pcapng tjj07 受理簇实证）——客户端
+	// m20 处理链据此放行移动，缺它=太极剑舞等可移动技被定死原地。
+	noLimit bool
 	levelupRelevance string
 	packCategory     int32
 	requiresTarget   bool
@@ -901,6 +911,17 @@ func (s *sceneLifecycle) resolveSkillDamageTargets(definition combatSkillDefinit
 	}
 }
 
+// refreshTargetsPerTick 范围型（以施法者为中心的圆/扇/矩形）逐段重索敌
+//（用户口径：技能期间进入范围的敌人也要吃伤害——官服剑阵跟随移动的
+// 语义）；锁定单体/目标区域保持出招快照。
+func (definition combatSkillDefinition) refreshTargetsPerTick() bool {
+	switch definition.targetMode {
+	case skillTargetCasterCircle, skillTargetCasterSector, skillTargetCasterRectangle:
+		return true
+	}
+	return false
+}
+
 // sectorAngleForShape / areaWidthForShape：形状查询参数收口（扇形取
 // sectorAngle、矩形取 areaWidth，其余 0——与 applyShapedSkillDamage
 // 的旧分支语义一致）。
@@ -1246,7 +1267,7 @@ func awardSettleLoot(link sceneMessageConnection, player *playerActor, totalLoot
 // 存活目标发全套命中帧；首段命中进战斗+目标控制，后续段刷新战斗活跃
 // 时刻；每段每目标 +2 回怒；末段后按整招累计伤害喂经脉真气。
 func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, definition combatSkillDefinition,
-	player *playerActor, targets []skillDamageTargetRef, remote string) {
+	player *playerActor, targets []skillDamageTargetRef, custom clientCustomMessage, remote string) {
 	if len(targets) == 0 {
 		return
 	}
@@ -1254,6 +1275,11 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 	if len(times) == 0 {
 		return
 	}
+	// 范围型逐段重索敌（refreshTargetsPerTick）：以玩家实时位置为形状
+	// 中心重查——段间进入范围的敌人也吃该段伤害；玩家坐标优先取
+	// combat world 权威值（m15/212 持续更新），回落 211 施法位。
+	perTickRefresh := definition.refreshTargetsPerTick()
+	castAt, _ := useSkillCastTransform(custom)
 	lastAt := times[len(times)-1]
 	// 段间可能并发到达（帧位相近时）：跨段共享态用原子量（firstTick 防重
 	// 复入战、landedTotal 汇总喂真气）。
@@ -1264,10 +1290,22 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 		lastTick := at == lastAt
 		time.AfterFunc(at, func() {
 			now := time.Now()
-			hits := make([]skillSettleHit, 0, len(targets))
+			tickTargets := targets
+			if perTickRefresh {
+				origin := castAt
+				if live, ok := world.combatNPCTransform(playerObjectID); ok {
+					origin = live
+				}
+				tickTargets = world.queryShapedSkillTargets(origin, definition.areaRadius, definition.areaHeight,
+					definition.sectorAngleForShape(), definition.areaWidthForShape())
+				if len(tickTargets) == 0 {
+					return // 本段无目标（都死了/没人进范围）：零帧跳过
+				}
+			}
+			hits := make([]skillSettleHit, 0, len(tickTargets))
 			killed := false
 			stageDamage := int64(0)
-			for _, ref := range targets {
+			for _, ref := range tickTargets {
 				roll := rollSkillHit(player, definition, ref, world, len(targets))
 				if roll.damage <= 0 {
 					continue // 本击未命中：该目标本段不发帧
@@ -1339,6 +1377,37 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomUseSkill {
 		return false, nil
 	}
+	// 骑乘技能先于武学目录闸分流（menu2 handleRideSkillCustom :695-738
+	// 同位）：riding_* 不在 zhaoshi 编译目录（无动作时间线），落在
+	// parseUseSkillCustom 恒 false——旧闸位在其后实际从未到达（骑乘技能
+	// 全被当 unlearned 吞掉）。dismount 族转下马；步行发骑乘技/骑乘发非
+	// 白名单技忽略；其余骑乘技能发官服受理簇（mount_skills.go）。
+	// riding_start（骑术精通）= 召唤技，不在 RideSkillID 白名单：步行按
+	// 选中上马（soleOwned 同 handleRideCustom 口径）；骑乘中忽略。
+	if mount != nil && player != nil {
+		if len(custom.Values) >= 2 && custom.Values[0].Type == 2 &&
+			custom.Values[0].Int32 == clientCustomUseSkill && custom.Values[1].Type == 6 {
+			skillID := custom.Values[1].Text
+			if skillID == ridingStartSkillID {
+				if player.ridingMount() {
+					return true, nil // 骑乘中召唤技无操作
+				}
+				if err := mount.startSelectedMount(); err != nil {
+					log.Printf("%s: riding start mount: %v", remote, err)
+				}
+				return true, nil
+			}
+			if skillID != "" && mount.catalog.hasRideSkill(skillID) {
+				if mountSkillGate(mount, skillID) != mountSkillPass {
+					return true, nil // 下马已收尾 / 忽略已记日志
+				}
+				if err := mount.emitRideSkillCast(skillID); err != nil {
+					log.Printf("%s: ride skill cast frames: %v", remote, err)
+				}
+				return true, nil
+			}
+		}
+	}
 	definition, valid := parseUseSkillCustom(custom)
 	if !valid {
 		log.Printf("%s: reject malformed or unlearned USE_SKILL values=%v", remote, custom.Values)
@@ -1348,12 +1417,10 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 		log.Printf("%s: reject skill before player spawn id=%s", remote, definition.id)
 		return true, nil
 	}
-	// 骑乘技能闸（menu2 handleRideSkillCustom :695-738，211 出招链前置）：
-	// 骑乘技能不在武学表（无 compiled 定义/未学）——先于 learned 闸分流；
-	// dismount 技能转下马，其余骑乘技能受理不播报（广播帧二期随真机
-	// castSkillIDFrame 字节补），步行发骑乘技/骑乘发非白名单技忽略。
-	if mount != nil && (mount.catalog.hasRideSkill(definition.id) || player.ridingMountConfig() != "") {
-		mountSkillGate(mount, definition.id) // 三态均终止出招：下马已收尾、忽略已记日志
+	// 骑乘中发非白名单（普通武学）技能：闸拒绝（骑乘白名单外的出招
+	// 一律忽略，menu2 "ride skill not in mount skills" 同口径）。
+	if mount != nil && player.ridingMountConfig() != "" {
+		mountSkillGate(mount, definition.id)
 		return true, nil
 	}
 	level, learned := player.learnedSkillLevel(definition.id)
@@ -1454,6 +1521,13 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	// 顶掉补删（Java §D8 对拍）：GCD 不硬闸，连招会把上一招的收尾定时器
 	// 顶掉；新招受理时上一招仍挂着的，立即补发它的 0x12+清除帧——
 	// active_skill_rec 的 add/del 恒 1:1（参考服 8/8、52905 14/14）。
+	// 通道型 SP 闸前置（挑战.pcapng：SP=0 四连受理零回帧——CD 行/簿记
+	// 全不发，静默吞；SP 逐波扣故按「付得起首波」判）。
+	if definition.channel != nil && player.skillSP() < definition.channel.spPerWave {
+		log.Printf("%s: swallow channel skill id=%s: SP %d < %d (official silent)",
+			remote, definition.id, player.skillSP(), definition.channel.spPerWave)
+		return true, nil
+	}
 	superseded := player.currentSkillSnapshot()
 	if ok, reason := player.beginSkillUse(definition, target, now, settledResume); !ok {
 		log.Printf("%s: reject skill id=%s: %s", remote, definition.id, reason)
@@ -1474,6 +1548,12 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	// §3 出招帧序（Java handleValues 逐位同序）：个人 CD 行 →
 	// active_skill_rec 行 → GCD 行 → View40 行 CanUse=0 → 玩家全量 →
 	// msg337 施法回显 → msg20。
+	// 通道型受理态帧（挑战.pcapng 官序：CurSkillID → CurSkillTarget →
+	// Cant* 置位 → BufferInfo 槽 CSV，均先于 CD 行；CurSkillID 设置→
+	// 波1 清空的瞬时对是客户端通道演出触发链的组成）。
+	if definition.channel != nil {
+		writeChannelAcceptStateFrames(link, definition, targetID, targetOwnerID, now, remote)
+	}
 	if !settledResume {
 		// CD 行官服方言（0x11 空行+0x13 逐格+槽位覆写）+ 受理时惰性清扫
 		// 过期行（f 6.224 kfkj01 官方普通出招同构）。
@@ -1527,13 +1607,31 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 			return true, err
 		}
 	}
+	// 施法中不锁行动标志（挑战.pcapng tjj07 受理簇：NoLimit=1 技能在
+	// m20 前发 CurSkillCanNoLimit=1，客户端 m20 处理链据此放行移动——
+	// 缺它=太极剑舞等可移动技被定死原地，2026-11-12 真机四轮实证；
+	// 收招清除簇 currentSkillClearUpdate 已含归零帧）。
+	if definition.noLimit {
+		if noLimitFrame, nlErr := objectSingleProperty(playerObjectID, playerOwnerID,
+			propCurSkillCanNoLimit, "CurSkillCanNoLimit", clientdata.ByteValue(1)); nlErr == nil {
+			if err := link.WriteFrame(noLimitFrame); err != nil {
+				return true, err
+			}
+		}
+	}
 	// msg20 技能动作帧：目标对象三分（resolveSkillActionTarget——锁定族
 	// =211 瞄准/选中目标、自增益=自己、其余=空对象）。锁定族官方走
 	// msg19 锁定帧（c61 冲刺+0x1F+24 值大帧），但 42 份抓包 0 次出现且
 	// 此前实现有「无冲刺动画」回归史——继续 msg20 路线（分歧记录在
-	// docs/combat-rewrite-hardcoded-audit.md）。
+	// docs/combat-rewrite-hardcoded-audit.md）。通道型名字=zhaoshi 段 1
+	// 动作名（挑战.pcapng：hyjf08 官方 m20='qzj_07_1' 非技能 id，受理簇
+	// +122ms；常规技能仍是技能 id）。
 	actionTargetID, actionTargetOwner := resolveSkillActionTarget(definition, custom, world, targetID, targetOwnerID)
-	actionFrame, err := nativeSkillActionFrame(definition.id, actionTargetID, actionTargetOwner)
+	actionName := definition.id
+	if definition.channel != nil && definition.actionName != "" {
+		actionName = definition.actionName
+	}
+	actionFrame, err := nativeSkillActionFrame(actionName, actionTargetID, actionTargetOwner)
 	if err != nil {
 		return true, fmt.Errorf("encode native skill action %s: %w", definition.id, err)
 	}
@@ -1558,13 +1656,21 @@ func launchSkillDamagePhase(link sceneMessageConnection, player *playerActor, wo
 	castEpoch uint64, remote string) {
 	now := time.Now()
 	appliedBuffs := stagePlayerSkillEffects(player, definition, now, remote)
+	// 通道型（寒心恨雪族）：服务端波次引擎替代动画帧驱动——逐波单目标
+	// 重新索敌、每波扣 SP、无活目标即停（skill_channel.go）。
+	if definition.channel != nil {
+		launchChannelWaves(link, world, definition, player, custom, targetID, targetOwnerID, remote)
+		log.Printf("%s: launched channel waves skill=%s waves=%d interval=%s sp_per_wave=%d",
+			remote, definition.id, definition.channel.waves, definition.channel.interval, definition.channel.spPerWave)
+		return
+	}
 	// 出招时刻解析目标快照（多段按此逐段结算，段间不追补新目标）。
 	targets := world.resolveSkillDamageTargets(definition, custom, targetID, targetOwnerID)
 	if len(definition.hitFrameMs) > 0 {
 		// 多段技能：按 trigger_effect 帧位逐段调度（52795 抓包：每段全套
 		// 命中帧、死亡目标跳过）。2026-11-08 数值重写：每击×每目标独立
 		// 掷值结算（此前"出招掷一次、同值复用各段各目标"）。
-		scheduleSkillMultiHits(link, world, definition, player, targets, remote)
+		scheduleSkillMultiHits(link, world, definition, player, targets, custom, remote)
 		log.Printf("%s: scheduled multi-hit skill id=%s ticks=%d targets=%d per_hit_roll=true",
 			remote, definition.id, len(definition.hitFrameMs), len(targets))
 	} else if len(targets) > 0 {

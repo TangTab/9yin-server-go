@@ -157,7 +157,17 @@ wstr len=字节数；WireObject=8B；0x10=[op][flags][obj u32][own u32][count u1
 
 ## 余项（可选）
 
-1. **0x28 必要性复验**：hybrid + 关 0x28 是否仍渲染（旧"必需"结论出自带病会话）；
+1. ~~**0x28 必要性复验**：hybrid + 关 0x28 是否仍渲染（旧"必需"结论出自带病会话）~~
+   【2026-11-11 19:46 复验销项——**0x28 非必需**】与 07:46 定案严格单变量对照
+   （同 hybrid2433，仅注释 F: bat 的 `set NINEYIN_NPC_DETAIL_0X28=1`）真机重跑，
+   NPC 照常渲染。五层证据：①bat 0X28 行已 rem；②HKCU 用户环境无该变量（无
+   泄漏）；③日志 `19:46:40 property table dialect=hybrid2433 entries=2433`；
+   ④wire 抓包（会话 56319，captures/local，smoke decode_frames 逐帧计数）
+   **0x0D×134 / 0x28×0**——0x28 一帧未发而渲染成功；⑤用户肉眼确认。
+   结论：**0x0D 头行通道独走即可渲染**；旧"必需"确系带病会话误判（真因=
+   official2433 头块换血丢 35 头行，见 §四）。0x28 v3 生成器降级为可选增强
+   （`NINEYIN_NPC_DETAIL_0X28=1`，不再承担渲染职责）。范围限定：本销项仅覆盖
+   hybrid（头块在场）方言；纯 official2433 无头块，NPC 物化仍走 0x28（见余项 2）；
 2. 真·官服还原（纯 official2433 无头块）：~~需 0x29 批量预载通道~~
    【2026-11-11 勘误，0x29 已全解见 `官服0x29批量预载通道解析.md`】：0x29 是
    **玩家记录行集**批量预载通道（任务/称号/好友/装备方案…），obj=玩家自身，
@@ -167,7 +177,8 @@ wstr len=字节数；WireObject=8B；0x10=[op][flags][obj u32][own u32][count u1
    ——已证部分成立（表帧滑窗可命中多数 miss 槽，但非唯一源）；
 3. m655 登录帧方言差异（official_login_align 在 fork 形下=紫泉+618 vs 旧版
    account 串）——低优先级观察；
-4. 默认方言是否翻 hybrid2433：待拍板（现默认 fork）。
+4. 默认方言是否翻 hybrid2433：待拍板（现默认 fork）。2026-11-11 19:46 起
+   拍板输入更新：**最小渲染组合 = hybrid2433 + 0x28 关**（见余项 1 销项）。
 
 ## 提交清单（feat/op28-official）
 

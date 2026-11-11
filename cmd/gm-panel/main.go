@@ -128,6 +128,8 @@ func (p *panelServer) mux() *http.ServeMux {
 	mux.HandleFunc("/api/idle-stances", p.catalogProxy("idle-stances"))
 	mux.HandleFunc("/api/recast-affixes", p.catalogProxy("recast-affixes"))
 	mux.HandleFunc("/api/combat-dummy/taolus", p.catalogProxy("combat-dummy/taolus"))
+	mux.HandleFunc("/api/taolus", p.catalogProxy("taolus"))
+	mux.HandleFunc("/api/neigongs", p.catalogProxy("neigongs"))
 	mux.HandleFunc("/api/repute/status", p.catalogProxy("repute/status"))
 	mux.HandleFunc("/api/origin/status", p.catalogProxy("origin/status"))
 	mux.HandleFunc("/api/minimal-login", p.methodProxy("/internal/v1/minimal-login"))

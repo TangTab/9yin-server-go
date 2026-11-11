@@ -64,8 +64,8 @@ exe: F:\Game\Online\9yin\9yin_server1\build\9yin-game-native-menu.exe
              = 本服 taskCompletedBit(49634)  ← 我们的位映射本来就是对的
 
 buff 清理
-             
-
+暴击伤害显示
+技能特效位置 寒心恨雪
 
 
 
@@ -130,7 +130,8 @@ Boss 帧（2 样例）	部分	Fixed WeaponName FixedBeHitAct SelfForceID BufferI
 样例多样性不足：6 帧只覆盖 功能NPC/Boss/普通怪 三类。商店、传送、任务 NPC 是否有专属字段——未知（276 帧 0x47 官方帧被池种子锁死提不出，这是硬上限）。
 数据源缺口：BufferInfo（出生 buff 配置）、OriginPara（起源参数）在服务端侧还没有数据来源；其余字段都能从现有 npc_template_table 派生。
 建议
-按需补齐，不必预研：v3 的 officialNPCEntityProperties 是属性列表结构，加字段是增量改动。什么时候做 Boss 战/起源系统，什么时候把对应条件字段加进去——每个字段都有官方样例字节可抄（本回复的表格就是提取好的）。真正建议先做的是 NPC 收缩文档余项 1：hybrid + 关 0x28 复验——如果 0x0D 头行通道独走就能渲染，0x28 字段保真度的优先级还会再降一档。、
+按需补齐，不必预研：v3 的 officialNPCEntityProperties 是属性列表结构，加字段是增量改动。什么时候做 Boss 战/起源系统，什么时候把对应条件字段加进去——每个字段都有官方样例字节可抄（本回复的表格就是提取好的）。
+真正建议先做的是 NPC 收缩文档余项 1：hybrid + 关 0x28 复验——如果 0x0D 头行通道独走就能渲染，0x28 字段保真度的优先级还会再降一档。、
 
 
 

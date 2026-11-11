@@ -267,10 +267,16 @@ func (v Vitals) ActorState(objectID, ownerID uint32) entity.ActorState {
 // 对象敌对——只有 attacknpc/bossnpc 会携带本组件，平民 NPC
 // 只有 Vitals，两者的组件布局（archetype）天然分离。
 type Brain struct {
-	Home         worldcore.Transform
-	AggroRange   float32
-	ChaseRange   float32
-	AttackRange  float32
+	Home        worldcore.Transform
+	AggroRange  float32
+	ChaseRange  float32
+	AttackRange float32
+	// EngageRange 追击停靠分位（米）：reach 超过它就继续逼近，进入它
+	// 才站定输出。与 AttackRange（命中有效距，Java NpcCombatAi
+	// ATTACK_RANGE_METERS=6 的反击循环语义）分离——官服野怪实测出招
+	// 距离 p50≈2.3m（技能.pcapng 双源新鲜坐标），单用 6m 当停靠线会
+	// 让怪在六米外站桩隔空挥击（2026-11-12）。
+	EngageRange  float32
 	MoveSpeed    float32
 	Damage       int32
 	AttackEvery  time.Duration

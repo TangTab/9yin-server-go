@@ -48,14 +48,14 @@ func TestHandleRideCustomToggle(t *testing.T) {
 	}
 
 	// 唯一拥有（未选中）→ soleOwnedMount 自动选中 + 上马（整推 + 属性组
-	// + 239 + on_custom_new_ride）。
+	// + 239；on_custom_new_ride 命名帧 2026-11-12 已删——客户端 type error）。
 	player.restoreMounts([]mountEntry{{ConfigID: "MOUNT_B", PackID: 200}})
 	if _, err = handleRideCustom(session, rideCustomMessage(1)); err != nil {
 		t.Fatalf("ride: %v", err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 5 { // 整推（拥有行+骑乘态）+ 上马属性组 + 239 + on_custom_new_ride
-		t.Fatalf("frames=%d, want 5", len(frames))
+	if len(frames) != 4 { // 整推（拥有行+骑乘态）+ 上马属性组 + 239（双 int）
+		t.Fatalf("frames=%d, want 4", len(frames))
 	}
 	if !player.ridingMount() || player.ridingMountConfig() != "MOUNT_B" {
 		t.Fatalf("riding=%v config=%q", player.riding, player.ridingConfig)

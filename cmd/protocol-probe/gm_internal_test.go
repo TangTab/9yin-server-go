@@ -106,6 +106,18 @@ func TestGMInternalCommandRoundTrip(t *testing.T) {
 	if _, status := post(`{"action":"learn_all_taolu"}`); status != http.StatusOK {
 		t.Fatalf("learn_all_taolu now valid: status=%d want 200", status)
 	}
+	if _, status := post(`{"action":"learn_taolu","skillKey":"cs_wd_tjq","skillLevel":36}`); status != http.StatusOK {
+		t.Fatalf("learn_taolu valid: status=%d want 200", status)
+	}
+	if _, status := post(`{"action":"learn_neigong","skillKey":"ng_wd_001","skillLevel":0}`); status != http.StatusOK {
+		t.Fatalf("learn_neigong valid: status=%d want 200", status)
+	}
+	if _, status := post(`{"action":"forget_taolu","skillKey":"cs_wd_tjq"}`); status != http.StatusOK {
+		t.Fatalf("forget_taolu valid: status=%d want 200", status)
+	}
+	if _, status := post(`{"action":"forget_neigong","skillKey":"ng_wd_001"}`); status != http.StatusOK {
+		t.Fatalf("forget_neigong valid: status=%d want 200", status)
+	}
 	if body, status := post(`{"action":"no_such_action"}`); status != http.StatusBadRequest || !strings.Contains(body, "unsupported action") {
 		t.Fatalf("unsupported action: status=%d body=%s", status, body)
 	}

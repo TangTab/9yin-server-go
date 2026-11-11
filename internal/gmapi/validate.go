@@ -305,6 +305,24 @@ func Validate(body CommandBody) (Command, error) {
 	case "learn_all_taolu", "forget_all_taolu", "learn_all_neigong":
 		// 武学三动作（面板「门派/武学套路」区块）：已学集/目录空态由
 		// 会话循环判并回执（如「尚未学会任何武学」），这里无负载可校验。
+	case "learn_taolu", "learn_neigong":
+		// 整套发放（面板「武学套路」区块「整套学习」）：skillKey=套路 key（school_taolu.ini
+		// 节名）或内功书 configId（ng_*）；skillLevel=目标层数，0/缺省=各自
+		// 满级，超过目录上限由游戏侧逐技/逐书钳制（回执报实际层数）。
+		if strings.TrimSpace(body.SkillKey) == "" {
+			return command, fmt.Errorf("skillKey is required")
+		}
+		if body.SkillLevel < 0 || body.SkillLevel > 999 {
+			return command, fmt.Errorf("skillLevel must be between 0 and 999")
+		}
+		command.SkillKey, command.SkillLevel = strings.TrimSpace(body.SkillKey), body.SkillLevel
+	case "forget_taolu", "forget_neigong":
+		// 整套移除（learn_* 的逆操作）：同一 skillKey；层数字段无意义
+		// （移除语义=非基线项删除、登录基线项回初始档，游戏侧执行）。
+		if strings.TrimSpace(body.SkillKey) == "" {
+			return command, fmt.Errorf("skillKey is required")
+		}
+		command.SkillKey = strings.TrimSpace(body.SkillKey)
 	case "npc_bubble", "drama_prompt", "red_super_armor",
 		"action_state_fishing", "action_state_hsqs05", "action_state_sgmd",
 		"action_native_fishing", "action_state_stop":

@@ -304,7 +304,9 @@ func TestCombatTickRespawnsDeadHostileAtHome(t *testing.T) {
 		t.Fatalf("respawn vitals=%+v", revived)
 	}
 	frames := conn.Frames()
-	if len(frames) != 2 || frames[0][0] != 0x20 || frames[1][0] != 0x10 {
+	// 重生瞬移走 0x21（速度 0）+ 0x10 属性帧（2026-11-11 追击方言
+	// 对齐：0x20 全程 0 次官服定论）。
+	if len(frames) != 2 || frames[0][0] != 0x21 || frames[1][0] != 0x10 {
 		t.Fatalf("respawn frames=%x", frames)
 	}
 }
@@ -319,8 +321,10 @@ func TestCombatMoveDoesNotImmediatelyConfirmLocation(t *testing.T) {
 	player := newPlayerActor("tester", 0)
 	lifecycle.combatTickForTest(player, role.Position{X: 10, Y: 0, Z: 0}, time.Unix(4000, 0))
 	frames := conn.Frames()
-	if len(frames) != 1 || frames[0][0] != 0x20 {
-		t.Fatalf("first chase tick frames=%x, want only ServerMoving", frames)
+	// 首拍追击 = 0x21 移动（带速度）+ 0x10 State=walk 翻转（跑步动画
+	// 双通道，官服 e.pcapng §13.5 巡逻同款语义）。
+	if len(frames) != 2 || frames[0][0] != 0x21 || frames[1][0] != 0x10 {
+		t.Fatalf("first chase tick frames=%x, want 0x21 move + State flip", frames)
 	}
 	lifecycle.close()
 }

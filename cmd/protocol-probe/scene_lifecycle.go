@@ -91,6 +91,9 @@ type sceneEntity struct {
 	// 宽串名（NpcNickName 列）。官方表缺列时为空串，帧仍发。
 	model    string
 	wideName string
+	// normalSkill 是该 NPC 的攻击招式节名（NormalSkill 列，经
+	// zhaoshi_npc.ini 节名校验；空=用 jn_mon053_02 常量兜底）。
+	normalSkill string
 	// combatStats 是实力包推导的守方战斗数值（注册期一次，静态；
 	// 2026-11-08 NPC 属性块迁移批次）。nil＝未推导（保持零值守方）。
 	combatStats *npcCombatStats
@@ -608,6 +611,17 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		if err := s.conn.WriteFrame(payload); err != nil {
 			return fmt.Errorf("add scene object %d: %w", id, err)
 		}
+		// 对象-主人绑定伴生帧（op 0x31 ServerLinkPair，2026-11-11 官服
+		// 差集定版）：[op][u16 n][n×(obj u32, owner u32)]——官服与 0x28/
+		// 0x0D 物化强相关交错（jn 179 条 vs 0x28 279 条；npc.pcapng n=4
+		// 批量=0x0E 对象段×0x0A5 玩家 owner 段），是客户端实体-主人表的
+		// 喂养通道，本服此前零下发——技能接近引擎的目标校验疑依赖此表
+		//（50073 会话受理簇/0x28/选中链逐帧同构仍不自走的剩余差集之首）。
+		if entity.ownerID != 0 {
+			if err := s.conn.WriteFrame(serverLinkPairFrame(uint32(id), entity.ownerID)); err != nil {
+				return fmt.Errorf("link pair %d: %w", id, err)
+			}
+		}
 		// 0x28 详情记录（官服方言 NPC 渲染必需，sparse 二分定案）：
 		// NINEYIN_NPC_DETAIL_0X28=1，物化（0x0D）之后下发——两代生成器
 		//（=3 模板身份 / v2 本服身份+精确切片）在 0x0D 前下发均真机崩溃，
@@ -620,7 +634,15 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			// 客户端全会话字典状态，见 docs/op28-fxnet2-lz-decoder.md）；
 			// 官方 l.pcapng 自有 6 帧 0x46 纯拷贝先例，任何会话状态安全。
 			props := officialNPCEntityProperties(entity.properties, entity.model, entity.configID)
-			if err := s.conn.WriteFrame(npcDetail0x28V3Frame(uint32(id), entity.ownerID, transform, props)); err != nil {
+			// 走动物化 posB=段末目的地（npc.pcapng 官服 8/8 帧 A≠B）；
+			// 停留/静立保持 A=B。
+			var target *worldcore.Transform
+			if entity.schedule != nil {
+				if motion := entity.schedule.motionAt(time.Now().UnixMilli()); motion.moving {
+					target = &worldcore.Transform{X: motion.destX, Y: motion.destY, Z: motion.destZ, Orient: motion.destOrient}
+				}
+			}
+			if err := s.conn.WriteFrame(npcDetail0x28V3Frame(uint32(id), entity.ownerID, transform, target, props)); err != nil {
 				return fmt.Errorf("npc 0x28 detail %d: %w", id, err)
 			}
 		}

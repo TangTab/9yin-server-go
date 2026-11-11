@@ -19,8 +19,10 @@ package main
 //	  [4:8]   own u32
 //	  [8:60]  变换块 13×f32 槽（52B）：
 //	          [8:24]  posA x,y,z,yaw（当前位）
-//	          [24:40] posB x,y,z,yaw（目标位；静立 NPC 与 A 同值）
-//	          [40]    scale（官方常量 1.25）
+//	          [24:40] posB x,y,z,yaw（目标位；npc.pcapng 走动物化 8/8 帧
+//	                  A≠B（B=段末目的地），静立/停留与 A 同值）
+//	          [40]    scale（npc.pcapng 非常量：NPC/怪 1.25、玩家形 1.28、
+//	                  Boss 形 5.0；服务端无数据源，取 NPC 基线 1.25）
 //	          [44]    第二朝向（官方样本 2π 或 0，取 0）
 //	          [48:56] 保留零
 //	          [56:60] 原始 u32 1（按 f32 读=1.4e-45，非浮点语义）
@@ -44,16 +46,29 @@ func encodeGBK(text string) ([]byte, error) {
 	return result, err
 }
 
+// npcDetail0x28BaseScale 变换块 scale 槽基线。npc.pcapng（2026-11-11
+// 官服 0x46 帧）实测非常量：NPC/怪 1.25、玩家形 1.28、Boss 形 5.0——
+// 该槽疑为客户端模型底缩放（xmod 内烘）的服务端回显，模板表 Scale 列
+// （"1.2,1.2,1.2" 三元组）与官服槽值无公式关系（boss 模板 1.2 vs 槽
+// 5.0），服务端无数据源，故保持 NPC 基线 1.25。
+const npcDetail0x28BaseScale = float32(1.25)
+
 // npcDetail0x28V3Frame 生成 mode=0x46 明文 0x28 NPC 详情帧。
+// target 非 nil 时 posB=目标位（官服走动物化 A=当前位/B=段末目的地，
+// npc.pcapng 8/8 帧均 A≠B；静立/停留 NPC 官服 A=B，传 nil 即同值）。
 // props 需按官方语义排好序（见 officialNPCEntityProperties），列型编码
 // 以各 Value.Type 为准（officialNPCIntProp 族已按当前表分派）。
-func npcDetail0x28V3Frame(objectID, ownerID uint32, transform worldcore.Transform, props []clientdata.IndexedProperty) []byte {
+func npcDetail0x28V3Frame(objectID, ownerID uint32, transform worldcore.Transform, target *worldcore.Transform, props []clientdata.IndexedProperty) []byte {
+	posB := transform
+	if target != nil {
+		posB = *target
+	}
 	body := make([]byte, 0, 320)
 	body = binary.LittleEndian.AppendUint32(body, objectID)
 	body = binary.LittleEndian.AppendUint32(body, ownerID)
-	// 变换块：posA 与 posB 同值（静立物化），scale=1.25，其余保留槽。
+	// 变换块：posA=当前位、posB=目标位（静立同值），scale 基线见常量注。
 	for _, f := range []float32{transform.X, transform.Y, transform.Z, transform.Orient,
-		transform.X, transform.Y, transform.Z, transform.Orient, 1.25, 0, 0, 0} {
+		posB.X, posB.Y, posB.Z, posB.Orient, npcDetail0x28BaseScale, 0, 0, 0} {
 		body = binary.LittleEndian.AppendUint32(body, math.Float32bits(f))
 	}
 	body = binary.LittleEndian.AppendUint32(body, 1) // 原始 u32 标志位，非 f32
@@ -109,10 +124,22 @@ func gbkBytes(text string) []byte {
 	return []byte(text)
 }
 
-// officialNPCEntityProperties 从场景实体 schema 属性构造 0x28 v3 字段集
-// （官方 0x46 帧字段序；Level/BossLevel/NpcType/RotatePara/State 取 schema
-// 真值，其余为官服常量——与 officialNPCProperties 同源语义，但面向
-// sceneEntity 数据形状）。model 为空时省略 Resource/ConfigID/Photo 三行。
+// officialNPCEntityProperties 从场景实体 schema 属性构造 0x28 v3 字段集，
+// 按官方 0x46 样本帧的分形态方言发送（tools/op28/parse_template46.py
+// #0/#1 全字段图，2026-11-11 晚补齐）：
+//
+//	#0 普通NPC（26 字段）：Photo 在场；NpcType 后插 CursorShape、
+//	  HPRatio 后插 MPRatio、尾随 HasKarma/Character/KarmaLevel/
+//	  OriginPara1-3 官服常量族；
+//	#1 带武器NPC（23 字段）：判据=schema WeaponName 非空；CollideRadius
+//	  后插 Fixed（schema>0 才发）、WeaponMode 前插 WeaponName、其后
+//	  FixedBeHitAct/SelfForceID（schema Force>0 优先，缺省官服 999）；
+//	 不发 Photo/CursorShape/MPRatio/karma/origin 族。
+//	  BufferInfo1/2 为活 buff 槽 CSV（P4 方言）——物化期 NPC 无 buff，省略。
+//
+// Level/BossLevel/NpcType/RotatePara/State 取 schema 真值，其余为官服
+// 常量——与 officialNPCProperties 同源语义，但面向 sceneEntity 数据形状。
+// model 为空时省略 Resource/ConfigID（#0 形连同 Photo）三行。
 func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, configID string) []clientdata.IndexedProperty {
 	lookup := func(name string) (clientdata.Value, bool) {
 		for _, prop := range schema {
@@ -130,10 +157,30 @@ func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, con
 	idCard, bornAction, weaponMode := must("IDCard"), must("BornAction"), must("WeaponMode")
 	hpRatio, parryRatio, hitHPRatio := must("HPRatio"), must("ParryRatio"), must("HitHPRatio")
 
+	// 形态判据：带武器 NPC 走官方 #1 形（npc 目录 schema 的 WeaponName 列，
+	// 默认空串=徒手——npc_resolver.go 默认层）。
+	weaponName := schemaString(lookup, "WeaponName", "")
+	armed := weaponName != ""
+
+	// CollideRadius 按体型的真值优先（npc.pcapng 0x46 怪物形=0.915/Boss
+	// 形=1.0），schema 缺席回落兼容层缺省 0.905。
+	collideValue := float32(0.905)
+	if v, ok := lookup("CollideRadius"); ok && v.F32 > 0.1 && v.F32 < 16 {
+		collideValue = v.F32
+	}
+
 	props := []clientdata.IndexedProperty{
-		clientdata.IndexedProperty{Index: collideRadius.Index, Name: collideRadius.Name, Value: clientdata.Float32Value(0.9)},
+		clientdata.IndexedProperty{Index: collideRadius.Index, Name: collideRadius.Name, Value: clientdata.Float32Value(collideValue)},
 		clientdata.IndexedProperty{Index: state.Index, Name: state.Name, Value: clientdata.StringValue(schemaString(lookup, "State", "stand"))},
 		officialNPCIntProp(propType, 4),
+	}
+	if armed {
+		// 官方 #1：Fixed 紧随 CollideRadius（固定不动标记，schema 0=可动不发）。
+		if fixedEntry, ok := clientdata.PlayerProperty("Fixed"); ok {
+			if value, has := lookup("Fixed"); has && value.I32 > 0 {
+				props = append(props, officialNPCIntProp(fixedEntry, value.I32))
+			}
+		}
 	}
 	resourceValue := ""
 	if model != "" {
@@ -152,9 +199,12 @@ func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, con
 			clientdata.IndexedProperty{Index: rotatePara.Index, Name: rotatePara.Name,
 				Value: clientdata.StringValue(schemaString(lookup, "RotatePara", "0.0,1.000,0.0"))},
 			clientdata.IndexedProperty{Index: config.Index, Name: config.Name, Value: clientdata.StringValue(configValue)},
-			clientdata.IndexedProperty{Index: photo.Index, Name: photo.Name,
-				Value: clientdata.StringValue("icon\\func" + resourceValue + ".png")},
 		)
+		// Photo 仅 #0 形（官方 #1 带武器样本无 Photo 行）。
+		if !armed {
+			props = append(props, clientdata.IndexedProperty{Index: photo.Index, Name: photo.Name,
+				Value: clientdata.StringValue("icon\\func" + resourceValue + ".png")})
+		}
 	}
 	npcTypeValue := int32(14)
 	if value, ok := lookup("NpcType"); ok && value.I32 > 0 {
@@ -174,10 +224,14 @@ func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, con
 	if aiEffect, ok := clientdata.PlayerProperty("AIEffect"); ok {
 		optional = append(optional, clientdata.IndexedProperty{Index: aiEffect.Index, Name: aiEffect.Name, Value: clientdata.StringValue("nil")})
 	}
-	props = append(props,
-		officialNPCIntProp(npcType, npcTypeValue),
-		officialNPCFloatProp(actionSpeed, 1.0),
-	)
+	props = append(props, officialNPCIntProp(npcType, npcTypeValue))
+	if !armed {
+		// 官方 #0：CursorShape=2 紧随 NpcType（鼠标形态，schema 真值优先）。
+		if entry, ok := clientdata.PlayerProperty("CursorShape"); ok {
+			props = append(props, officialNPCIntProp(entry, schemaInt(lookup, "CursorShape", 2)))
+		}
+	}
+	props = append(props, officialNPCFloatProp(actionSpeed, 1.0))
 	props = append(props, optional...)
 	if levelValue > 0 {
 		props = append(props, officialNPCIntProp(level, levelValue))
@@ -186,17 +240,68 @@ func officialNPCEntityProperties(schema []clientdata.IndexedProperty, model, con
 		officialNPCIntProp(bossLevel, bossLevelValue),
 		clientdata.IndexedProperty{Index: idCard.Index, Name: idCard.Name, Value: clientdata.StringValue("null,null,null,null,null")},
 		clientdata.IndexedProperty{Index: bornAction.Index, Name: bornAction.Name, Value: clientdata.StringValue("stand")},
-		clientdata.IndexedProperty{Index: weaponMode.Index, Name: weaponMode.Name, Value: clientdata.StringValue("hand1_1")},
-		officialNPCIntProp(hpRatio, 100),
+	)
+	if armed {
+		// 官方 #1：WeaponName 在 WeaponMode 前（武器模型窄串）。
+		if entry, ok := clientdata.PlayerProperty("WeaponName"); ok {
+			props = append(props, clientdata.IndexedProperty{Index: entry.Index, Name: entry.Name, Value: clientdata.StringValue(weaponName)})
+		}
+	}
+	weaponModeValue := schemaString(lookup, "WeaponMode", "hand1_1")
+	props = append(props, clientdata.IndexedProperty{Index: weaponMode.Index, Name: weaponMode.Name, Value: clientdata.StringValue(weaponModeValue)})
+	if armed {
+		// 官方 #1：WeaponMode 后 FixedBeHitAct=1（固定受击动作）+ SelfForceID
+		//（阵营；schema Force>0 优先，缺省官服样本 999）。
+		if entry, ok := clientdata.PlayerProperty("FixedBeHitAct"); ok {
+			props = append(props, officialNPCIntProp(entry, 1))
+		}
+		if entry, ok := clientdata.PlayerProperty("SelfForceID"); ok {
+			force := int32(999)
+			if value, has := lookup("Force"); has && value.I32 > 0 {
+				force = value.I32
+			}
+			props = append(props, officialNPCIntProp(entry, force))
+		}
+	}
+	props = append(props, officialNPCIntProp(hpRatio, 100))
+	if !armed {
+		// 官方 #0：MPRatio 紧随 HPRatio（样本值 11）。
+		if entry, ok := clientdata.PlayerProperty("MPRatio"); ok {
+			props = append(props, officialNPCIntProp(entry, schemaInt(lookup, "MPRatio", 11)))
+		}
+	}
+	props = append(props,
 		officialNPCIntProp(parryRatio, 100),
 		officialNPCIntProp(hitHPRatio, 100),
 	)
+	if !armed {
+		// 官方 #0 尾部常量族：业报/性格/出身三参数（样本 1/1/3 与 7/1/5）。
+		for _, row := range []struct {
+			name     string
+			fallback int32
+		}{
+			{"HasKarma", 1}, {"Character", 1}, {"KarmaLevel", 3},
+			{"OriginPara1", 7}, {"OriginPara2", 1}, {"OriginPara3", 5},
+		} {
+			if entry, ok := clientdata.PlayerProperty(row.name); ok {
+				props = append(props, officialNPCIntProp(entry, schemaInt(lookup, row.name, row.fallback)))
+			}
+		}
+	}
 	return props
 }
 
 func schemaString(lookup func(string) (clientdata.Value, bool), name, fallback string) string {
 	if value, ok := lookup(name); ok && value.Text != "" {
 		return value.Text
+	}
+	return fallback
+}
+
+// schemaInt 整数行 schema 真值优先（>0），缺省回落官服常量。
+func schemaInt(lookup func(string) (clientdata.Value, bool), name string, fallback int32) int32 {
+	if value, ok := lookup(name); ok && value.I32 > 0 {
+		return value.I32
 	}
 	return fallback
 }

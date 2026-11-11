@@ -385,8 +385,49 @@ func TestStraightSteps(t *testing.T) {
 	if grounded.Y < -0.001 {
 		t.Fatalf("grounded step y=%.2f sank below ground", grounded.Y)
 	}
+	// 负步长钳 0：只贴地不倒退（攻防分位 3D 化后水平可先于步长归零）。
+	clamped := StepTowardGround(graph, Node{0, 3, 0}, Node{10, 50, 0}, -2)
+	if clamped.X != 0 || clamped.Y > 3.001 || clamped.Y < 0 {
+		t.Fatalf("negative step = %+v want x frozen, y eased toward ground", clamped)
+	}
 	if o := OrientToward(Node{0, 0, 0}, Node{0, 0, 10}); math.Abs(float64(o-math.Pi/2)) > 1e-5 {
 		t.Fatalf("orient = %f want pi/2", o)
+	}
+}
+
+// TestGroundFollowStepClampsVertical 悬空目标回归（追击飞天/瞬移根因）：
+// x/z 照常推进，y 限速向落点地面收敛、绝不朝目标 y 插值；零水平步长
+// （step<=0 钳 0）时 y 仍按 vstep 落地/爬出，不依赖水平推进。
+func TestGroundFollowStepClampsVertical(t *testing.T) {
+	graph, err := Parse(encodeGraph(t, []Node{{0, 0, 0}, {10, 0, 0}}, [][2]int{{0, 1}, {1, 0}}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 目标悬空 y=30：x/z 推进 2.5，y 已在地面则纹丝不动。
+	got := GroundFollowStep(graph, Node{0, 0, 0}, Node{10, 30, 0}, 2.5, 4.5)
+	if got != (Node{2.5, 0, 0}) {
+		t.Fatalf("ground-follow step = %+v want {2.5 0 0}", got)
+	}
+	// 出发悬空（异常态）+ 零水平步长：y 仍按 vstep=4.5 限速落地。
+	settling := GroundFollowStep(graph, Node{10, 12, 0}, Node{10, 30, 0}, -1, 4.5)
+	if settling.X != 10 || settling.Z != 0 {
+		t.Fatalf("zero step must freeze x/z: %+v", settling)
+	}
+	if settling.Y < 7.4 || settling.Y > 7.6 {
+		t.Fatalf("settling y=%.2f want 7.5 (12-4.5 clamped descent)", settling.Y)
+	}
+	// 地面在上方（坑底）：限速爬升而非一步登天。
+	climbing := GroundFollowStep(graph, Node{0, -6, 0}, Node{10, -6, 0}, 0, 4.5)
+	if climbing.X != 0 {
+		t.Fatalf("zero step must freeze x: %+v", climbing)
+	}
+	if climbing.Y < -1.6 || climbing.Y > -1.4 {
+		t.Fatalf("climbing y=%.2f want -1.5 (-6+4.5 clamped climb)", climbing.Y)
+	}
+	// 无图退化为旧语义：y 维持出发高度。
+	legacy := GroundFollowStep(nil, Node{0, 5, 0}, Node{10, 30, 0}, 2.5, 4.5)
+	if legacy != (Node{2.5, 5, 0}) {
+		t.Fatalf("no-graph ground-follow = %+v want y kept at 5", legacy)
 	}
 }
 
