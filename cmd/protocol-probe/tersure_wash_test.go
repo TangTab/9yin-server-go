@@ -472,3 +472,140 @@ func TestTersureWashRealTables(t *testing.T) {
 		}
 	}
 }
+
+// ---- 娃娃淬炼族（sub 14/15 锁 + 21 强化 + 20 替换）----
+
+// syntheticWawaCatalog 合成娃娃目录（NewTreasure：newtemplate 7 → 基础
+// + 附加两条管线，与 rollWawa 表族对齐）。
+func syntheticWawaCatalog() *randomEquipCatalog {
+	c := syntheticWashCatalog()
+	c.itemFields["wawa_test"] = randomItemFields{
+		equipType: "NewTreasure", colorLevel: 6, level: 64, templateID: 7,
+	}
+	c.newtpl = map[int]int{7: 1}
+	c.baseRul = map[int][]rollRange{1: {{lo: 0, hi: 9999, id: 101}}}
+	c.baseLvl = map[int]map[int]int{6: {64*10000 + 101: 50}}
+	c.boxWawa = map[int]int{6: 2}
+	c.addRul = map[string][]rollRange{
+		"Prop":   {{lo: 0, hi: 4999, id: 201}, {lo: 5000, hi: 9999, id: 202}},
+		"Color":  {{lo: 0, hi: 9999, id: 3}},
+	}
+	c.addLvl = map[int]map[int][2]int{3: {1*10000 + 201: {10, 20}, 1*10000 + 202: {15, 25}}}
+	return c
+}
+
+func TestTersureWawaLockAndIntensify(t *testing.T) {
+	syntheticWawaCatalog()
+	syntheticCostTables()
+
+	player := &playerActor{}
+	player.mu.Lock()
+	player.bag = []bagRow{{slot: 6, configID: "wawa_test", itemType: 193, amount: 1, viewID: 2, equipType: "NewTreasure"}}
+	player.silver = 1000
+	player.mu.Unlock()
+	recorder := &frameRecorder{}
+	h := newTestItemSession(recorder, player, nil)
+	const view, slot = uint16(121), int32(6)
+
+	// sub 14 娃娃锁（复用 0/1 链）。
+	if handled, err := handleTersureCustom(h, tersureMsg(14, int32(view), slot)); !handled || err != nil {
+		t.Fatalf("wawa lock: handled=%v err=%v", handled, err)
+	}
+	player.mu.Lock()
+	locked := player.tersure.active && player.tersure.kind == randomKindWawa
+	player.mu.Unlock()
+	if !locked {
+		t.Fatal("娃娃锁未绑定 kind=wawa 会话")
+	}
+
+	// 先属性洗一轮（sub 8）落 pending，随后存（sub 9）使快照就绪——
+	// intensify 直接在快照上重掷。
+	if handled, err := handleTersureCustom(h, tersureMsg(8, int32(view), slot, -1)); !handled || err != nil {
+		t.Fatalf("wawa prop wash: %v", err)
+	}
+	if handled, err := handleTersureCustom(h, tersureMsg(9, int32(view), slot)); !handled || err != nil {
+		t.Fatalf("wawa prop save: %v", err)
+	}
+
+	// sub 21 强化（select=-1 全部未锁行）→ 预览帧 + 结果 sub 13。
+	before := recorder.count()
+	if handled, err := handleTersureCustom(h, tersureMsg(21, int32(view), slot, -1)); !handled || err != nil {
+		t.Fatalf("wawa intensify: %v", err)
+	}
+	player.mu.Lock()
+	pending := player.tersure.pendingProp
+	player.mu.Unlock()
+	if len(pending) == 0 {
+		t.Fatal("强化后无 pending 候选")
+	}
+	frames := recorder.framesSince(before)
+	var hasNotify13 bool
+	for _, frame := range frames {
+		if frame[0] == 0x1E && bytes.Contains(frame, []byte("on_custom_show_tersuer_result")) {
+			// sub 13 int 值（0x0D）在帧内。
+			if bytes.Contains(frame, []byte{13, 0, 0, 0}) {
+				hasNotify13 = true
+			}
+		}
+	}
+	if !hasNotify13 {
+		t.Error("强化结果未回执 sub 13")
+	}
+
+	// sub 20 替换两行（0,1）→ 结果 sub 11。
+	before = recorder.count()
+	if handled, err := handleTersureCustom(h, tersureMsg(20, int32(view), slot, 0, 1)); !handled || err != nil {
+		t.Fatalf("wawa replace: %v", err)
+	}
+	frames = recorder.framesSince(before)
+	var hasNotify11 bool
+	for _, frame := range frames {
+		if frame[0] == 0x1E && bytes.Contains(frame, []byte("on_custom_show_tersuer_result")) &&
+			bytes.Contains(frame, []byte{11, 0, 0, 0}) {
+			hasNotify11 = true
+		}
+	}
+	if !hasNotify11 {
+		t.Error("替换结果未回执 sub 11")
+	}
+
+	// 宝物走强化被拒（kind 门）。
+	player.mu.Lock()
+	player.tersure.kind = randomKindTreaure
+	player.mu.Unlock()
+	if handled, _ := handleTersureCustom(h, tersureMsg(21, int32(view), slot, -1)); !handled {
+		t.Fatal("handled=false")
+	}
+
+	// sub 15 娃娃解锁。
+	if handled, err := handleTersureCustom(h, tersureMsg(15, int32(view), slot)); !handled || err != nil {
+		t.Fatalf("wawa unlock: %v", err)
+	}
+	player.mu.Lock()
+	still := player.tersure.active
+	player.mu.Unlock()
+	if still {
+		t.Fatal("娃娃解锁后会话仍在")
+	}
+}
+
+func TestWawaIntensifyRows(t *testing.T) {
+	rows := []randomPropLine{{PropID: 1}, {PropID: 2}, {PropID: 3}}
+	locked := map[int]bool{1: true}
+	// select=-1：未锁行 0/2。
+	if got := wawaIntensifyRows(locked, rows, -1); len(got) != 2 || got[0] != 0 || got[1] != 2 {
+		t.Fatalf("all-unlocked=%v", got)
+	}
+	// 单行 select=1 被锁 → 空。
+	if got := wawaIntensifyRows(locked, rows, 1); got != nil {
+		t.Fatalf("locked single=%v", got)
+	}
+	// 单行 select=0。
+	if got := wawaIntensifyRows(locked, rows, 0); len(got) != 1 || got[0] != 0 {
+		t.Fatalf("single=%v", got)
+	}
+	// 越界。
+	if got := wawaIntensifyRows(locked, rows, 9); got != nil {
+		t.Fatalf("out-of-range=%v", got)
+	}
+}

@@ -91,6 +91,33 @@ func handleTersureCustom(h *itemSession, custom clientCustomMessage) (bool, erro
 		tersureWashSkill(h, uint16(view), slot, int(skillType), sub == 12)
 	case 11, 13:
 		tersureSaveSkill(h, uint16(view), slot, sub == 13)
+	case 14:
+		// 娃娃整件锁（custom_sender.lua:4814 custom_newtersure_lock——
+		// 新娃娃界面与 0/1 同语义，直接复用锁链）。
+		tersureLockItem(h, uint16(view), slot, true)
+	case 15:
+		tersureLockItem(h, uint16(view), slot, false)
+	case 16, 17:
+		// 娃娃材料锁（stuff_lock/unlock，16 带 prop_count）——材料位语义
+		// 待真机（form_newtreasure_grave），一期静默受理。
+		log.Printf("%s: tersure stuff lock sub=%d view=%d index=%d (accepted, phase-2)",
+			h.remote, sub, view, slot)
+	case 18, 19, 22:
+		// 娃娃 grave（埋葬换新）/transfer（词条转移）/repair（修复）——
+		// 客户端等回执（10/12/14），语义未定前不回执（防 UI 状态错乱）。
+		log.Printf("%s: tersure sub=%d view=%d index=%d not implemented (phase-2)", h.remote, sub, view, slot)
+	case 20:
+		if len(args) < 5 {
+			log.Printf("%s: tersure replace malformed args=%d", h.remote, len(args))
+			return true, nil
+		}
+		tersureWawaReplace(h, uint16(view), slot, args[3], args[4])
+	case 21:
+		selectRow := int32(-1)
+		if len(args) >= 4 {
+			selectRow = args[3]
+		}
+		tersureWawaIntensify(h, uint16(view), slot, selectRow)
 	default:
 		log.Printf("%s: tersure 688 sub=%d not implemented (view=%d index=%d)", h.remote, sub, view, slot)
 	}
@@ -545,4 +572,121 @@ func tersureWashOpenFrame(form string) ([]byte, error) {
 		id = int32(89900008)
 	}
 	return serverModernCustomIntMessage(517, customInt(id))
+}
+
+// ---- 娃娃淬炼族（sub 14-22，custom_sender.lua:4814-4878 方言） ----
+
+// tersureWawaIntensify sub 21 娃娃强化（custom_newtersure_intensify(view,
+// index, select)）：select 行（-1=全部未锁行）同池重掷 + TempTersureRec
+// 预览 + 结果 sub 13（客户端 form_newtreasure_grave show_intensify_result）。
+// 升级/品质语义待真机（洗炼近似：同池重掷选中行）。
+func tersureWawaIntensify(h *itemSession, view uint16, slot int32, selectRow int32) {
+	session, snapshot, ok := tersureSessionSnapshot(h, view, slot)
+	if !ok {
+		return
+	}
+	if session.kind != randomKindWawa {
+		log.Printf("%s: tersure intensify kind=%d not wawa view=%d slot=%d", h.remote, session.kind, view, slot)
+		return
+	}
+	targets := wawaIntensifyRows(session.lockedRows, snapshot.PropRows, selectRow)
+	if len(targets) == 0 {
+		log.Printf("%s: tersure intensify no target rows (select=%d locked-all?)", h.remote, selectRow)
+		return
+	}
+	if !h.billTersureWash(0, tersurePropWashCostSilver, "wawa intensify", session.configID) {
+		return
+	}
+	rolled, err := randomEquipCatalogOf().rollTreasurePropsForWash(session.configID, len(targets), itemUseRandom())
+	if err != nil {
+		log.Printf("%s: tersure intensify %s: %v", h.remote, session.configID, err)
+		return
+	}
+	pending := append([]randomPropLine(nil), snapshot.PropRows...)
+	for index, line := range rolled {
+		pending[targets[index]] = line
+	}
+	h.player.mu.Lock()
+	h.player.tersure.pendingProp = pending
+	h.player.mu.Unlock()
+
+	rows := make([][]recordCell, 0, len(pending))
+	for index, line := range pending {
+		_, locked := session.lockedRows[index]
+		rows = append(rows, tersureTempPropRow(line, locked))
+	}
+	if !tersurePushTempRows(h, view, slot, rows) {
+		return
+	}
+	tersureNotifyResult(h, 13)
+	log.Printf("%s: tersure wawa intensify %s rows=%v", h.remote, session.configID, targets)
+}
+
+// tersureWawaReplace sub 20 娃娃词条替换（custom_newtersure_replace(view,
+// index, select_1, select_2)）：两行同池重掷 + 预览 + 结果 sub 11（客户端
+// show_newtersure_replace_result）。双行语义待真机（替换近似：重掷两行）。
+func tersureWawaReplace(h *itemSession, view uint16, slot int32, select1, select2 int32) {
+	session, snapshot, ok := tersureSessionSnapshot(h, view, slot)
+	if !ok {
+		return
+	}
+	if session.kind != randomKindWawa {
+		log.Printf("%s: tersure replace kind=%d not wawa view=%d slot=%d", h.remote, session.kind, view, slot)
+		return
+	}
+	targets := make([]int, 0, 2)
+	for _, selectRow := range []int32{select1, select2} {
+		index := int(selectRow)
+		if index >= 0 && index < len(snapshot.PropRows) {
+			targets = append(targets, index)
+		}
+	}
+	if len(targets) == 0 {
+		log.Printf("%s: tersure replace no valid rows (%d,%d)", h.remote, select1, select2)
+		return
+	}
+	if !h.billTersureWash(0, tersurePropWashCostSilver, "wawa replace", session.configID) {
+		return
+	}
+	rolled, err := randomEquipCatalogOf().rollTreasurePropsForWash(session.configID, len(targets), itemUseRandom())
+	if err != nil {
+		log.Printf("%s: tersure replace %s: %v", h.remote, session.configID, err)
+		return
+	}
+	pending := append([]randomPropLine(nil), snapshot.PropRows...)
+	for index, line := range rolled {
+		pending[targets[index]] = line
+	}
+	h.player.mu.Lock()
+	h.player.tersure.pendingProp = pending
+	h.player.mu.Unlock()
+
+	rows := make([][]recordCell, 0, len(pending))
+	for index, line := range pending {
+		rows = append(rows, tersureTempPropRow(line, session.lockedRows[index]))
+	}
+	if !tersurePushTempRows(h, view, slot, rows) {
+		return
+	}
+	tersureNotifyResult(h, 11)
+	log.Printf("%s: tersure wawa replace %s rows=%v", h.remote, session.configID, targets)
+}
+
+// wawaIntensifyRows 强化目标行集：select=-1 全部未锁行，否则单行
+//（越界/锁定空集）。
+func wawaIntensifyRows(locked map[int]bool, rows []randomPropLine, selectRow int32) []int {
+	if selectRow >= 0 {
+		index := int(selectRow)
+		if index >= len(rows) || locked[index] {
+			return nil
+		}
+		return []int{index}
+	}
+	targets := make([]int, 0, len(rows))
+	for index := range rows {
+		if !locked[index] {
+			targets = append(targets, index)
+		}
+	}
+	return targets
 }

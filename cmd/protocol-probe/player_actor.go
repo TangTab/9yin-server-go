@@ -294,6 +294,13 @@ type playerActor struct {
 	// tersure 宝物洗炼会话（688 主链：放入锁 0 起、解锁 1 止；pending
 	// 候选未存即丢——重登后客户端重开界面重洗）。p.mu 保护。
 	tersure tersureWashSession
+	// weaponRecast 武器重铸台会话（weapon_recast.go：933 锁定 → 935 预览
+	// → 938 确认；未确认即丢——客户端重锁重洗）。p.mu 保护。
+	recast weaponRecastSession
+	// 兵录域（binglu.go）：12 槽进度会话镜像（登录装载，GM binglu/943
+	// 扩档变更为权威）+ binglu_rank_rec 已推行数（整刷清场记账）。
+	binglu         []bingluRow
+	bingluRowsSent int
 	// 轻功经济域（fork Java QingGongHandler/PlayerActor，2026-11-07）：
 	// 持续型轻功（UseType=1：踏波行/上天梯/壁虎游墙/轻身缓降）挂秒耗
 	// 租约，官方 3s 分档回复在租约期暂停；即时型（UseType=0）引擎逐帧

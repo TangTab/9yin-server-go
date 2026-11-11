@@ -548,6 +548,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		letterStore := newLetterDBStore(store.db)
 		mountStore := newMountDBStore(store.db)
 		mountCatalog := loadMountCatalog(defaultToolItemINIPath, defaultItemArtStaticPath, defaultNewRideINIPath)
+		bingluStore := newBingluDBStore(store.db)
 		sessionLetters := []letterEntry(nil)
 		lettersPushed := false
 		mountsPushed := false
@@ -640,6 +641,23 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
 			now: time.Now,
 		}
+	}
+	// 兵录域会话上下文（943 扩档/984 查看共用）。
+	newBingluSession := func() *bingluSession {
+		return &bingluSession{
+			link: link, player: player, store: bingluStore,
+			roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
+		}
+	}
+	// 兵录整推（ClientReady/0x0C 重入/GM/943 共用；零进度 0 帧）。
+	pushBinglu := func() error {
+		if player == nil {
+			return nil
+		}
+		if !bingluHasProgress(player.bingluSnapshot()) {
+			return nil // 零进度 0 帧（官服对拍口径）
+		}
+		return pushBingluFrames(link, player)
 	}
 	// 外观域会话上下文（msg61/19 共用）。
 	newAppearanceSession := func() *appearanceSession {
@@ -1418,6 +1436,24 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			session.pushRandomPropsForBag(command.ItemConfig, inserted.uid, inserted.viewID, inserted.slot)
 			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, inserted.slot))
 			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, inserted.slot)
+		case "binglu":
+			// 兵录设置（Java applyBinglu 同语义）：set <row> <cur> <fill>
+			// [max]（上限缺省不改）/ max [row]（缺省全部——cur 置有效上限、
+			// 进度清零）。变更后整刷 + MaxBingLuLevel 属性 + 落档。
+			rows, text, ok := applyBingluArgs(player, command.BingluArgs)
+			if !ok {
+				gmSession.setAction("兵录设置失败：" + text)
+				return fmt.Errorf("binglu args %q invalid", command.BingluArgs)
+			}
+			player.replaceBinglu(rows)
+			if err := pushBingluFrames(link, player); err != nil {
+				log.Printf("%s: gm binglu refresh: %v", conn.RemoteAddr(), err)
+			}
+			if err := bingluStore.Save(selected.ID, player.bingluSnapshot()); err != nil {
+				log.Printf("%s: persist binglu after gm set: %v", conn.RemoteAddr(), err)
+			}
+			gmSession.setAction(text)
+			log.Printf("%s: GM binglu %q -> %s", conn.RemoteAddr(), command.BingluArgs, text)
 		case "mount_ride":
 			// 坐骑骑乘（Java applyMountRide 同语义）：道具 config → 目录
 			// （需 script=Mount 且有模型映射）→ 未拥有自动补行（永久口径）
@@ -2140,6 +2176,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				player.restoreMounts(mounts)
 				log.Printf("%s: restored mounts role=%d owned=%d current=%d", conn.RemoteAddr(), activeRole.ID, len(mounts), mountCurrentPack(mounts))
 			}
+			// 兵录装载（role_binglu 快照；缺档回默认 12 行 [0,0,10]——
+			// 零进度 ClientReady 0 帧，Java bingluStore.load 同口径）。
+			player.restoreBinglu(bingluStore.Load(activeRole.ID))
 
 			// 限时 buff 装载（timed_buffs.go）：role_timed_buffs 快照，已过期
 			// 条目直接丢弃；未过期集在 ClientReady 簇以 m169 时间形态重放。
@@ -2486,6 +2525,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					log.Printf("%s: %v", conn.RemoteAddr(), err)
 					return
 				}
+				// 兵录行挂玩家对象，0x0C 随对象清空——行记账复位后整表
+				// 重放（零进度 0 帧口径在 pushBinglu 内部）。
+				player.resetBingluRows()
+				if err := pushBinglu(); err != nil {
+					log.Printf("%s: replay binglu rows: %v", conn.RemoteAddr(), err)
+				}
 					if switchErr := enableSkillActionSwitch(link); switchErr != nil {
 						log.Printf("%s: restore native skill-action switch after 0x0C re-entry: %v", conn.RemoteAddr(), switchErr)
 						return
@@ -2617,6 +2662,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if err := pushMounts(); err != nil {
 					log.Printf("%s: %v", conn.RemoteAddr(), err)
 					return
+				}
+			}
+			if player != nil {
+				// 兵录（binglu_rank_rec 178 密集 12 行 + MaxBingLuLevel；
+				// 零进度 0 帧——官服对拍口径，pushBinglu 内部闸）。
+				if err := pushBinglu(); err != nil {
+					log.Printf("%s: push binglu rows: %v", conn.RemoteAddr(), err)
 				}
 			}
 			if player != nil && !jyzPushed {
@@ -3006,6 +3058,28 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if _, handleErr := handleTersureCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity tersure: %v", conn.RemoteAddr(), handleErr)
 					}
+				case clientCustomEquipRandPropLock, clientCustomEquipRandPropUnlock,
+					clientCustomYuRandProp, clientCustomYuDesignateProp,
+					clientCustomResumeEquipProp, clientCustomSureEquipProp:
+					// 武器重铸 933-938（活动信封路径）。
+					if _, handleErr := handleRecastCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity recast: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomBeginQiangHua:
+					// 武器强化（淬炼）861（活动信封路径）。
+					if _, handleErr := handleQiangHuaCustom(newItemSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity qianghua: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomModifyBinglu:
+					// 兵录扩档 943（活动信封路径）。
+					if _, handleErr := handleModifyBingluCustom(newBingluSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity modify binglu: %v", conn.RemoteAddr(), handleErr)
+					}
+				case clientCustomGetBinglu:
+					// 兵录查看 984（活动信封路径）。
+					if _, handleErr := handleGetBingluCustom(newBingluSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity get binglu: %v", conn.RemoteAddr(), handleErr)
+					}
 				case clientCustomMoveItem:
 					if _, handleErr := handleMoveItemCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity move item: %v", conn.RemoteAddr(), handleErr)
@@ -3258,6 +3332,29 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 宝物洗炼 688 主链（直达 0x1E/0x27 路径；活动信封 case 在上）。
 				if _, handleErr := handleTersureCustom(newItemSession(), custom); handleErr != nil {
 					log.Printf("%s: handle tersure: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomEquipRandPropLock, clientCustomEquipRandPropUnlock,
+				clientCustomYuRandProp, clientCustomYuDesignateProp,
+				clientCustomResumeEquipProp, clientCustomSureEquipProp:
+				// 武器重铸 933-938（weapon_recast.go；handleRecastCustom
+				// 内部再按消息号分流）。
+				if _, handleErr := handleRecastCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle recast: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomBeginQiangHua:
+				// 武器强化（淬炼）861（weapon_qianghua.go）。
+				if _, handleErr := handleQiangHuaCustom(newItemSession(), custom); handleErr != nil {
+					log.Printf("%s: handle qianghua: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomModifyBinglu:
+				// 兵录扩档 943（binglu.go：sub=0 上限提升，耗修为）。
+				if _, handleErr := handleModifyBingluCustom(newBingluSession(), custom); handleErr != nil {
+					log.Printf("%s: handle modify binglu: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomGetBinglu:
+				// 兵录查看 984（custom_show_binglu_info 回执）。
+				if _, handleErr := handleGetBingluCustom(newBingluSession(), custom); handleErr != nil {
+					log.Printf("%s: handle get binglu: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomUseItem:
 				if _, handleErr := handleBodyItemUse(newItemSession(), custom); handleErr != nil {

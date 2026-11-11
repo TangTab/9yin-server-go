@@ -204,3 +204,17 @@ func TestValidateMountRide(t *testing.T) {
 		t.Fatalf("empty mountConfig should fail")
 	}
 }
+
+// binglu（兵录设置）：bingluArgs 非空闸（形状由游戏侧执行器校验）。
+func TestValidateBinglu(t *testing.T) {
+	command, err := validateBody(t, `{"action":"binglu","bingluArgs":"set 1 7 120 15"}`)
+	if err != nil {
+		t.Fatalf("validate binglu: %v", err)
+	}
+	if command.BingluArgs != "set 1 7 120 15" {
+		t.Fatalf("BingluArgs=%q", command.BingluArgs)
+	}
+	if _, err := validateBody(t, `{"action":"binglu","bingluArgs":""}`); err == nil {
+		t.Fatalf("empty bingluArgs should fail")
+	}
+}

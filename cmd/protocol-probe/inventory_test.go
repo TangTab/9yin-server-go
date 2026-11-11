@@ -378,8 +378,8 @@ func (e *mysqlError) Error() string { return e.message }
 func TestBagItemsEnrichedFromGameItems(t *testing.T) {
 	store, mock := newMockInventoryDB(t)
 	rows := sqlmock.NewRows([]string{"slot", "config_id", "item_type", "amount", "view_id",
-		"name", "equip_type", "hardiness", "max_hardiness", "seq", "uid"}).
-		AddRow(1, "box_wnhd_dllb01", 0, 1, 0, nil, nil, nil, nil, 0, nil)
+		"name", "equip_type", "hardiness", "max_hardiness", "seq", "uid", "affixes"}).
+		AddRow(1, "box_wnhd_dllb01", 0, 1, 0, nil, nil, nil, nil, 0, nil, nil)
 	mock.ExpectQuery("SELECT slot.*FROM role_bag_items").
 		WithArgs(int64(role.RoleID(665))).
 		WillReturnRows(rows)
@@ -469,5 +469,31 @@ func TestInventoryDBLiveRowsEncodeFrames(t *testing.T) {
 	}
 	if encoded == 0 {
 		t.Fatal("no role produced inventory frames")
+	}
+}
+
+
+// 0020 前旧库（affixes 列缺）：bagItems 降级重查且 propBuilt 恒空。
+func TestBagItemsDegradeWithoutAffixesColumn(t *testing.T) {
+	store, mock := newMockInventoryDB(t)
+	mock.ExpectQuery("SELECT slot.*affixes.*FROM role_bag_items").
+		WithArgs(int64(role.RoleID(665))).
+		WillReturnError(&mysqlError{message: "Unknown column 'affixes' in 'field list'"})
+	rows := sqlmock.NewRows([]string{"slot", "config_id", "item_type", "amount", "view_id",
+		"name", "equip_type", "hardiness", "max_hardiness", "seq", "uid"}).
+		AddRow(1, "box_wnhd_dllb01", 2102, 1, 1, "登陆大礼包", "", nil, nil, 0, nil)
+	mock.ExpectQuery("SELECT slot.*FROM role_bag_items").
+		WithArgs(int64(role.RoleID(665))).
+		WillReturnRows(rows)
+	catalog := sqlmock.NewRows([]string{"item_id", "item_type", "view_id", "item_name", "equip_type"})
+	mock.ExpectQuery("SELECT item_id, item_type, view_id, item_name, equip_type FROM game_items").
+		WithArgs("box_wnhd_dllb01").
+		WillReturnRows(catalog)
+	items, err := store.bagItems(testContext(t), role.RoleID(665))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(items) != 1 || items[0].propBuilt != "" {
+		t.Fatalf("降级读取异常: %+v", items)
 	}
 }

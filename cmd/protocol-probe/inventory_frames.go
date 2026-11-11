@@ -358,6 +358,11 @@ func bagRowViewAdd(roleID role.RoleID, item bagRow) ([]byte, error) {
 		if stat != nil && stat.photo != "" {
 			props = append(props, viewString(propItemPhoto, stat.photo))
 		}
+		// 精炼词缀（PropBuilt）：装备行同款条件（equipmentViewAdd :313——
+		// 词条与特效包互斥；非空且非模板包物品下发，洗炼二期 00020 通道）。
+		if item.propBuilt != "" && !randomEquipCatalogOf().hasTemplatePacks(item.configID) {
+			props = append(props, viewString(propPropBuilt, item.propBuilt))
+		}
 		// 宝物行洗炼域属性（form_treasure_reset[_add] 放入校验：
 		// TersureType/BindStatus/ColorLevel/LockStatus/SecondTaoLuCounts）。
 		// BindStatus 原位覆写为 1（绑定，洗炼硬门槛；通用 6 项已带 0）；

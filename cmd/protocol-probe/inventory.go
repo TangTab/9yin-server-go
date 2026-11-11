@@ -43,6 +43,7 @@ type bagRow struct {
 	maxHardiness int32
 	seq          int64
 	uid          string
+	propBuilt    string // affixes JSON 解码（PropBuilt@1954 串；洗炼二期）
 }
 
 // bagpackRow 是扩容包锚点（page 1..4；boost=扩容格数；永久=9999-12-31）。
@@ -160,17 +161,20 @@ func propBuiltOf(affixes sql.NullString) string {
 }
 
 // bagItems 读取背包行（seq 升序）并用 game_items 富化 itemType/viewID/
-// name/equipType 的缺省值。uid 列缺席降级重查。
+// name/equipType 的缺省值。uid/affixes 列缺席逐级降级重查（00013/00020
+// 迁移列；旧库无列时 propBuilt 恒空——洗炼写侧同步降级）。
 func (s *inventoryStore) bagItems(ctx context.Context, roleID role.RoleID) ([]bagRow, error) {
 	const full = "SELECT slot, config_id, item_type, amount, view_id, name, equip_type, " +
+		"hardiness, max_hardiness, seq, uid, affixes FROM role_bag_items WHERE role_id = ? ORDER BY seq"
+	const noAffixes = "SELECT slot, config_id, item_type, amount, view_id, name, equip_type, " +
 		"hardiness, max_hardiness, seq, uid FROM role_bag_items WHERE role_id = ? ORDER BY seq"
 	const noUID = "SELECT slot, config_id, item_type, amount, view_id, name, equip_type, " +
 		"hardiness, max_hardiness, seq FROM role_bag_items WHERE role_id = ? ORDER BY seq"
 	items := make([]bagRow, 0, 16)
-	scanWith := func(withUID bool) func(*sql.Rows) error {
+	scanWith := func(withUID, withAffixes bool) func(*sql.Rows) error {
 		return func(rows *sql.Rows) error {
 			var row bagRow
-			var name, equipType, uid sql.NullString
+			var name, equipType, uid, affixes sql.NullString
 			// hardiness/max_hardiness 列可空（礼包类物品为 NULL）。
 			var hardiness, maxHardiness sql.NullInt32
 			dest := []any{&row.slot, &row.configID, &row.itemType, &row.amount, &row.viewID,
@@ -178,18 +182,29 @@ func (s *inventoryStore) bagItems(ctx context.Context, roleID role.RoleID) ([]ba
 			if withUID {
 				dest = append(dest, &uid)
 			}
+			if withAffixes {
+				dest = append(dest, &affixes)
+			}
 			if err := rows.Scan(dest...); err != nil {
 				return err
 			}
 			row.name, row.equipType, row.uid = name.String, equipType.String, uid.String
 			row.hardiness, row.maxHardiness = hardiness.Int32, maxHardiness.Int32
+			if withAffixes {
+				row.propBuilt = propBuiltOf(affixes)
+			}
 			items = append(items, row)
 			return nil
 		}
 	}
-	err := s.query(ctx, roleID, full, scanWith(true))
-	if unknownColumn(err, "uid") {
-		err = s.query(ctx, roleID, noUID, scanWith(false))
+	err := s.query(ctx, roleID, full, scanWith(true, true))
+	for err != nil && (unknownColumn(err, "affixes") || unknownColumn(err, "uid")) {
+		switch {
+		case unknownColumn(err, "affixes"):
+			err = s.query(ctx, roleID, noAffixes, scanWith(true, false))
+		default:
+			err = s.query(ctx, roleID, noUID, scanWith(false, false))
+		}
 	}
 	if err != nil {
 		return items, err

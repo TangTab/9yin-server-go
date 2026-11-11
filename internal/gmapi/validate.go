@@ -288,6 +288,13 @@ func Validate(body CommandBody) (Command, error) {
 			return command, fmt.Errorf("mountConfig is required")
 		}
 		command.MountConfig = strings.TrimSpace(body.MountConfig)
+	case "binglu":
+		// 兵录设置（Java applyBinglu 同域）：`set <row> <cur> <fill> [max]` /
+		// `max [row]`；界值校验在游戏会话循环执行器（row/cur/fill/max 档）。
+		if strings.TrimSpace(body.BingluArgs) == "" {
+			return command, fmt.Errorf("bingluArgs is required")
+		}
+		command.BingluArgs = strings.TrimSpace(body.BingluArgs)
 	case "equip_card", "equip_hair":
 		if body.CardId <= 0 {
 			return command, fmt.Errorf("cardId must be a positive skin id")

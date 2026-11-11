@@ -346,25 +346,56 @@ func (s *inventoryStore) insertBagItem(ctx context.Context, roleID role.RoleID, 
 		return item, err
 	}
 	uid := randomUid()
-	insert := "INSERT INTO role_bag_items (role_id, seq, slot, config_id, item_type, amount, view_id, name, script, uid) " +
-		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	// affixes：装备类初始词条（@PropModifyPackRec 条件包；重铸/强化写侧
+	// 才产生非空值）。00020 列缺席逐级剥列（uid 先、affixes 后）。
+	insert := "INSERT INTO role_bag_items (role_id, seq, slot, config_id, item_type, amount, view_id, name, script, uid, affixes) " +
+		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	affixes := randomEquipCatalogOf().zhenpaiAffixesJSON(item.configID)
+	if affixes == "" {
+		affixes = "[]"
+	}
 	if _, err := tx.ExecContext(ctx, insert,
 		roleID, seq, slot, item.configID, item.itemType, item.amount, item.viewID,
-		nullString(item.name), nullString(""), uid); err != nil {
-		if !unknownColumn(err, "uid") {
+		nullString(item.name), nullString(""), uid, affixes); err != nil {
+		if !unknownColumn(err, "uid") && !unknownColumn(err, "affixes") {
 			return item, err
 		}
-		insert = "INSERT INTO role_bag_items (role_id, seq, slot, config_id, item_type, amount, view_id, name, script) " +
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-		if _, err := tx.ExecContext(ctx, insert,
-			roleID, seq, slot, item.configID, item.itemType, item.amount, item.viewID,
-			nullString(item.name), nullString("")); err != nil {
-			return item, err
+		if unknownColumn(err, "affixes") {
+			// 0020 前：剥 affixes 重试（uid 列已在 0013 就位）。
+			insert = "INSERT INTO role_bag_items (role_id, seq, slot, config_id, item_type, amount, view_id, name, script, uid) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+			if _, err := tx.ExecContext(ctx, insert,
+				roleID, seq, slot, item.configID, item.itemType, item.amount, item.viewID,
+				nullString(item.name), nullString(""), uid); err != nil {
+				if !unknownColumn(err, "uid") {
+					return item, err
+				}
+				insert = "INSERT INTO role_bag_items (role_id, seq, slot, config_id, item_type, amount, view_id, name, script) " +
+					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+				if _, err := tx.ExecContext(ctx, insert,
+					roleID, seq, slot, item.configID, item.itemType, item.amount, item.viewID,
+					nullString(item.name), nullString("")); err != nil {
+					return item, err
+				}
+				uid = ""
+			}
+		} else {
+			// 0013 前（uid 列缺，affixes 必同缺）：老两段式。
+			insert = "INSERT INTO role_bag_items (role_id, seq, slot, config_id, item_type, amount, view_id, name, script) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+			if _, err := tx.ExecContext(ctx, insert,
+				roleID, seq, slot, item.configID, item.itemType, item.amount, item.viewID,
+				nullString(item.name), nullString("")); err != nil {
+				return item, err
+			}
+			uid = ""
 		}
-		uid = ""
 	}
 	if err := tx.Commit(); err != nil {
 		return item, err
+	}
+	if affixes != "" && affixes != "[]" {
+		item.propBuilt = propBuiltOfAffixes(affixes)
 	}
 	item.slot = slot
 	item.seq = seq
