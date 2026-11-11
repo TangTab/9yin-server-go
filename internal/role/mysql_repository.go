@@ -111,9 +111,10 @@ func (repository *MySQLRepository) FindByKey(ctx context.Context, key AccountKey
 	}
 	var account Account
 	var stored []byte
+	var passwordHash []byte
 	err := repository.db.QueryRowContext(ctx, `
-SELECT account_id, account_key, status, version
-FROM accounts WHERE account_key = ?`, []byte(key)).Scan(&account.ID, &stored, &account.Status, &account.Version)
+SELECT account_id, account_key, status, version, password_hash
+FROM accounts WHERE account_key = ?`, []byte(key)).Scan(&account.ID, &stored, &account.Status, &account.Version, &passwordHash)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Account{}, ErrNotFound
 	}
@@ -121,10 +122,29 @@ FROM accounts WHERE account_key = ?`, []byte(key)).Scan(&account.ID, &stored, &a
 		return Account{}, storageError(err)
 	}
 	account.Key = AccountKey(stored)
+	account.PasswordHash = passwordHash
 	if account.Status != AccountActive {
 		return Account{}, ErrAccountDisabled
 	}
 	return account, nil
+}
+
+// RegisterAccount upsert 注册（fork /api/register）：不存在则建号落校验子，
+// 已存在则覆写（改密语义）。accounts.password_hash 列在 0001 schema 即有，
+// 无需迁移。
+func (repository *MySQLRepository) RegisterAccount(ctx context.Context, key AccountKey, passwordHash []byte) (Account, error) {
+	if err := ValidateAccountKey(key); err != nil {
+		return Account{}, err
+	}
+	if len(passwordHash) == 0 || len(passwordHash) > 255 || len(passwordHash)%16 != 0 {
+		return Account{}, fmt.Errorf("%w: invalid password verifier", ErrInvalidArgument)
+	}
+	if _, err := repository.db.ExecContext(ctx, `
+INSERT INTO accounts(account_key, password_hash) VALUES (?, ?)
+ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)`, []byte(key), passwordHash); err != nil {
+		return Account{}, storageError(err)
+	}
+	return repository.FindByKey(ctx, key)
 }
 
 func (repository *MySQLRepository) ProvisionLegacy(ctx context.Context, key AccountKey) (Account, error) {

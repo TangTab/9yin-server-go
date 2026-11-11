@@ -197,8 +197,8 @@ func (session *gmSession) setLocation(location role.Location, action string) {
 // serveGM 起内嵌面板。manageBoundAddr 是本进程 internal API 的监听地址
 // （未启用则空串）：管理页登记册据此给对应卡片打「本面板所连」标记，
 // 并让内嵌面板同样能探活其它已登记的 Go 服。
-func serveGM(listen string, hub *gmHub, manageBoundAddr string) {
-	mux := newGMMux(hub)
+func serveGM(listen string, hub *gmHub, manageBoundAddr string, accounts role.AccountRepository) {
+	mux := newGMMux(hub, accounts)
 	gmapi.MountManageAPI(mux, manageBoundAddr, gmInternalVersion)
 	server := &http.Server{Addr: listen, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
 	log.Printf("GM panel listening on http://%s (localhost only)", listen)
@@ -209,11 +209,13 @@ func serveGM(listen string, hub *gmHub, manageBoundAddr string) {
 
 // newGMMux 组装 GM 面板的全部 HTTP 路由。独立成函数后，
 // 测试可以直接把路由挂到 httptest 上验证，而不必真的监听端口。
-func newGMMux(hub *gmHub) *http.ServeMux {
+// accounts 供注册端点使用；测试面板传 nil 时该端点回 503。
+func newGMMux(hub *gmHub, accounts role.AccountRepository) *http.ServeMux {
 	mux := http.NewServeMux()
 	// 页面与静态资源来自 internal/gmweb 的编译期嵌入资产，
 	// 与独立面板进程共用同一份文件。
 	gmweb.Mount(mux)
+	mux.HandleFunc("/api/register", gmRegisterHandler(accounts))
 	mux.HandleFunc("/api/sessions", func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodGet {
 			writer.WriteHeader(http.StatusMethodNotAllowed)

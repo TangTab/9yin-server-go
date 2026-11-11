@@ -140,11 +140,11 @@ func TestWriteOfficialReadyInfoFrames(t *testing.T) {
 // 会乱码）——绝不回显 acct:v1 摘要，也不放中文。
 func TestOfficialAccountLabel(t *testing.T) {
 	t.Setenv("NINEYIN_OFFICIAL_ACCOUNT", "")
-	if got := officialAccountLabel(); got != "" {
+	if got := officialAccountLabel(""); got != "" {
 		t.Fatalf("label=%q want empty fallback", got)
 	}
 	t.Setenv("NINEYIN_OFFICIAL_ACCOUNT", "  test001  ")
-	if got := officialAccountLabel(); got != "test001" {
+	if got := officialAccountLabel(""); got != "test001" {
 		t.Fatalf("label=%q want env override trimmed", got)
 	}
 }

@@ -32,7 +32,7 @@ func gmFlowHarness(t *testing.T) (*httptest.Server, *gmSession, *gmHub) {
 			Position: role.Position{X: 243.4, Y: 43.3, Z: 403.8, Orient: 5.0},
 		},
 	}, "少林", 50, 0, 0, 10, 9_999_999)
-	server := httptest.NewServer(newGMMux(hub))
+	server := httptest.NewServer(newGMMux(hub, nil))
 	t.Cleanup(server.Close)
 	return server, session, hub
 }

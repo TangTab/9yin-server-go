@@ -28,6 +28,44 @@ func (repository *JSONRepository) FindByKey(ctx context.Context, key AccountKey)
 	return accountFromJSON(key, identity), nil
 }
 
+// RegisterAccount upsert 注册（fork /api/register）：账号不存在则建号并落
+// 口令校验子；已存在则覆写校验子（改密语义，fork 实证 updated:true）。
+func (repository *JSONRepository) RegisterAccount(ctx context.Context, key AccountKey, passwordHash []byte) (Account, error) {
+	if err := ctx.Err(); err != nil {
+		return Account{}, err
+	}
+	if err := ValidateAccountKey(key); err != nil {
+		return Account{}, err
+	}
+	if len(passwordHash) == 0 || len(passwordHash) > 255 || len(passwordHash)%16 != 0 {
+		return Account{}, fmt.Errorf("%w: invalid password verifier", ErrInvalidArgument)
+	}
+	repository.mu.Lock()
+	defer repository.mu.Unlock()
+	text := string(key)
+	identity, exists := repository.identities[text]
+	if exists && identity.Status != AccountActive {
+		return Account{}, ErrAccountDisabled
+	}
+	if !exists {
+		identity = repository.ensureIdentityLocked(text, false)
+	}
+	previous := identity.PasswordHash
+	identity.PasswordHash = append([]byte(nil), passwordHash...)
+	identity.AccountVersion++
+	repository.identities[text] = identity
+	if err := repository.persistLocked(); err != nil {
+		identity.PasswordHash = previous
+		identity.AccountVersion--
+		repository.identities[text] = identity
+		if !exists {
+			delete(repository.identities, text)
+		}
+		return Account{}, err
+	}
+	return accountFromJSON(key, identity), nil
+}
+
 func (repository *JSONRepository) ProvisionLegacy(ctx context.Context, key AccountKey) (Account, error) {
 	if err := ctx.Err(); err != nil {
 		return Account{}, err
@@ -53,7 +91,13 @@ func (repository *JSONRepository) ProvisionLegacy(ctx context.Context, key Accou
 }
 
 func accountFromJSON(key AccountKey, identity jsonIdentity) Account {
-	return Account{ID: identity.AccountID, Key: key, Status: identity.Status, Version: identity.AccountVersion}
+	return Account{
+		ID:           identity.AccountID,
+		Key:          key,
+		Status:       identity.Status,
+		Version:      identity.AccountVersion,
+		PasswordHash: identity.PasswordHash,
+	}
 }
 
 func (repository *JSONRepository) ListByAccount(ctx context.Context, accountID AccountID) ([]RoleSummary, error) {

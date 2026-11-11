@@ -252,6 +252,18 @@
       </div>
     </div>
     <fieldset class="registry">
+      <legend>注册账号</legend>
+      <label>账号 <input id="reg-account" placeholder="登录用的账号名" style="width: 150px" autocomplete="off" /></label>
+      <label>密码 <input id="reg-password" type="password" placeholder="登录密码" style="width: 150px" autocomplete="new-password" /></label>
+      <button class="primary" onclick="registerAccount()">注册</button>
+      <span id="reg-result" class="hint"></span>
+      <p class="hint">
+        注册后直接在游戏登录界面输入该账号和密码即可。已注册账号重复注册＝改密码。
+        未注册过的存量账号仍按旧方式直接登录；一旦注册即开始强制校验密码。
+        （要求所有账号必须先注册：环境变量 NINEYIN_REQUIRE_REGISTRATION=1）
+      </p>
+    </fieldset>
+    <fieldset class="registry">
       <legend>记录服务器（internal API 地址）</legend>
       <label>名称 <input id="add-name" placeholder="本机" style="width: 120px" /></label>
       <label>地址 <input id="add-host" placeholder="127.0.0.1" style="width: 130px" /></label>
@@ -319,6 +331,30 @@
 
     refresh();
     setInterval(refresh, POLL_MS);
+
+    // —— 注册账号（fork /api/register 对齐：upsert，重复注册＝改密码）——
+    async function registerAccount() {
+      let out = document.querySelector("#reg-result");
+      let account = document.querySelector("#reg-account").value.trim();
+      let password = document.querySelector("#reg-password").value;
+      if (!account) { out.textContent = "请输入账号名"; return; }
+      if (!password) { out.textContent = "请设置密码"; return; }
+      out.textContent = "注册中…";
+      try {
+        let r = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ account: account, password: password })
+        });
+        let j = await r.json();
+        if (!r.ok) { out.textContent = "失败：" + (j.error || "注册失败"); return; }
+        out.textContent = j.updated
+          ? "已更新密码：" + j.account
+          : "注册成功：" + j.account + "（account_id=" + j.account_id + "）";
+      } catch (e) {
+        out.textContent = "失败：" + e.message;
+      }
+    }
 
     // —— 服务器登记册（参考 Java gm-web index.html 的 gm_servers 逻辑）——
     // 列表存本浏览器 localStorage；探活走面板同源代理 /api/manage/status

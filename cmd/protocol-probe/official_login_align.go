@@ -98,17 +98,16 @@ func officialServerIdentity() (serverID int32, serverName string) {
 	return serverID, serverName
 }
 
-// officialAccountLabel 返回 m655/m607 的账号显示名。官服两帧携带明文账号
-// （c.pcapng 实证 "lizy86"，tag6 窄串），但本服不解开 op02 登录帧账号槽的
-// 客户端加扰（docs/id-system-analysis.md §一：服务端只对槽密文做 SHA256
-// 得 acct:v1 内部键），拿不到明文。tag6 窄串只放 ASCII（官方/Java 同俗，
-// 中文走 tag7 宽串——曾回退中文角色名致账号栏乱码，2026-11-11 修正），
-// 故默认空串，NINEYIN_OFFICIAL_ACCOUNT 覆盖为真实账号名。
-func officialAccountLabel() string {
+// officialAccountLabel 返回 m655/m607 的账号显示名。2026-11-11 起 op02
+// 账号槽密文经 fork 域密码逆阶梯解出明文账号（docs/fork-login-crypto.md，
+// DecryptAccountFields 已滤非 ASCII——tag6 窄串只放 ASCII，官方/Java 同俗，
+// 中文账号名回空防账号栏乱码），即回传真实用户名；
+// NINEYIN_OFFICIAL_ACCOUNT 仍可强制覆盖。
+func officialAccountLabel(loginAccount string) string {
 	if v := strings.TrimSpace(os.Getenv("NINEYIN_OFFICIAL_ACCOUNT")); v != "" {
 		return v
 	}
-	return ""
+	return loginAccount
 }
 
 // writeOfficialLoginInfoFrames 下发 0.1s 位的登录信息帧簇（m366/m623/m655）。

@@ -298,7 +298,7 @@ func main() {
 		if *gmInternalToken == "" {
 			manageBound = ""
 		}
-		go serveGM(*gmListen, gm, manageBound)
+		go serveGM(*gmListen, gm, manageBound, store.accounts)
 	}
 	// 独立面板进程（gm-panel.exe）经 internal API 访问同一个 gmHub。
 	// 刻意不默认启用：需要显式提供 token（flag 或 NINEYIN_GM_TOKEN），
@@ -488,6 +488,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	defer world.close()
 	ctx := context.Background()
 	var accountKey role.AccountKey
+	var loginPasswordCiphertext []byte
+	var loginAccountName string
 	var account role.Account
 	var selected *role.RoleSnapshot
 	var player *playerActor
@@ -1928,15 +1930,34 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			accountKey = role.AccountKey(identity.String())
-			log.Printf("session=%d remote=%s opcode=0x02 decoded_len=%d account=%s", machine.ID(), conn.RemoteAddr(), len(plain), identity.Prefix())
+			// 双槽密文：密码槽供 login 比对；账号槽解密出明文账号名
+			// （m655/m607 登录信息栏回传源，docs/fork-login-crypto.md）。
+			accountCiphertext, passwordCiphertext, err := auth.ParseLoginCredentials(plain)
+			if err != nil {
+				log.Printf("session=%d remote=%s reject login credentials: %v", machine.ID(), conn.RemoteAddr(), err)
+				return
+			}
+			loginPasswordCiphertext = passwordCiphertext
+			if name, _ := auth.DecryptAccountFields(accountCiphertext, passwordCiphertext); name != "" {
+				loginAccountName = name
+				log.Printf("session=%d remote=%s opcode=0x02 decoded_len=%d account=%s name=%s", machine.ID(), conn.RemoteAddr(), len(plain), identity.Prefix(), name)
+			} else {
+				log.Printf("session=%d remote=%s opcode=0x02 decoded_len=%d account=%s", machine.ID(), conn.RemoteAddr(), len(plain), identity.Prefix())
+			}
 		} else {
 			fmt.Printf("remote=%s opcode=0x%02X decoded_len=%d\n%s\n", conn.RemoteAddr(), plain[0], len(plain), hex.Dump(plain))
 		}
 		if plain[0] == 0x02 {
 			var err error
-			account, selected, err = store.login(ctx, accountKey)
+			account, selected, err = store.login(ctx, accountKey, loginPasswordCiphertext)
 			if err != nil {
-				log.Printf("%s: load account role: %v", conn.RemoteAddr(), err)
+				if errors.Is(err, errPasswordMismatch) {
+					log.Printf("%s: reject login: password mismatch account=%s", conn.RemoteAddr(), string(accountKey[:len("acct:v1:")+12]))
+				} else if errors.Is(err, errAccountNotRegistered) {
+					log.Printf("%s: reject login: account not registered (NINEYIN_REQUIRE_REGISTRATION) account=%s", conn.RemoteAddr(), string(accountKey[:len("acct:v1:")+12]))
+				} else {
+					log.Printf("%s: load account role: %v", conn.RemoteAddr(), err)
+				}
 				return
 			}
 			exists := selected != nil
@@ -2159,7 +2180,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 官服 0.1s 位登录信息帧簇（m366 客户端 IP 回显 / m623 /
 			// m655 服务器标识，c.pcapng 0.097-0.099s 同位：0x0A 之后、
 			// 建视图之前；official_login_align.go）。
-			writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(), activeRole.Name, uint32(activeRole.ID))
+			writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), activeRole.Name, uint32(activeRole.ID))
 			// 三期官方方言：17 视图容器（8 主页 BaseCap=18 + 8 扩展页 +
 			// View1 纸娃娃），随后按 DB 扩容锚点行下发扩展槽位。
 			for _, frame := range bagViewCreateFrames() {
@@ -2519,7 +2540,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				//（official_login_align.go；官服另有的背包视图行在本服位于
 				// 选角链，时序差异已在对照文档 §十一 注记）。
 				officialReadyInfoPushed = true
-				writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(), player.name, time.Now())
+				writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), player.name, time.Now())
 				writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
 				// 限时 buff 就绪重放（m169 九值时间形态，v7=到期unix毫秒；
 				// 官服登录期 buf_baosd_02 语义的带时间对应物）。

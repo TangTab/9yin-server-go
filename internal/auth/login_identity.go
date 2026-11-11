@@ -16,6 +16,11 @@ const (
 	accountMax      = 256
 	secretMin       = 16
 	secretMax       = 512
+
+	// loginAccountDomain / accountKeyPrefix 是 acct:v1 键的哈希域与前缀
+	// （登录侧解析与注册侧 AccountKeyFor 共用，保证两侧同密文同键）。
+	loginAccountDomain = "nineyin/login-account/v1"
+	accountKeyPrefix   = "acct:v1:"
 )
 
 var ErrInvalidLogin = errors.New("login: invalid message")
@@ -49,7 +54,7 @@ func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
 	}
 
 	digest := sha256.New()
-	_, _ = digest.Write([]byte("nineyin/login-account/v1"))
+	_, _ = digest.Write([]byte(loginAccountDomain))
 	_, _ = digest.Write([]byte{0})
 	var encodedLength [4]byte
 	binary.LittleEndian.PutUint32(encodedLength[:], accountLength)
@@ -96,7 +101,7 @@ func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
 	if next != len(message) {
 		return AccountIdentity{}, fmt.Errorf("%w: trailing login data", ErrInvalidLogin)
 	}
-	return AccountIdentity{id: "acct:v1:" + hex.EncodeToString(accountDigest)}, nil
+	return AccountIdentity{id: accountKeyPrefix + hex.EncodeToString(accountDigest)}, nil
 }
 
 func validateSlotLength(name string, length uint32, minimum, maximum uint32) error {

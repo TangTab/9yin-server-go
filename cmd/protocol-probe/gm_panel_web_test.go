@@ -14,7 +14,7 @@ import (
 // /、/console.html 与 /static/ 提供。
 func gmPanelTestServer(t *testing.T) *httptest.Server {
 	t.Helper()
-	server := httptest.NewServer(newGMMux(newGMHub()))
+	server := httptest.NewServer(newGMMux(newGMHub(), nil))
 	t.Cleanup(server.Close)
 	return server
 }

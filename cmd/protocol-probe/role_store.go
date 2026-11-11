@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -105,13 +106,42 @@ func (store *roleStore) Close() error {
 	return store.close()
 }
 
-func (store *roleStore) login(ctx context.Context, key role.AccountKey) (role.Account, *role.RoleSnapshot, error) {
+// errPasswordMismatch / errAccountNotRegistered 是登录拒绝的两个业务因：
+// 前者关闭连接由 main.go 日志区分，后者仅在要求注册模式下出现。
+var (
+	errPasswordMismatch    = errors.New("role store: password mismatch")
+	errAccountNotRegistered = errors.New("role store: account not registered")
+)
+
+// requireRegistration 报告「登录必须先注册」模式（fork 默认行为；本服默认
+// 关闭以兼容存量自动建号）。NINEYIN_REQUIRE_REGISTRATION=1/true 开启。
+func requireRegistration() bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("NINEYIN_REQUIRE_REGISTRATION"))) {
+	case "1", "true", "yes", "on":
+		return true
+	}
+	return false
+}
+
+// login 完成账号定位与口令校验：
+//   - 账号已注册（password_hash 非空）→ 密码槽密文必须与校验子逐字节相等
+//     （客户端/注册端同链确定性加密，比对即校验，不解密）；
+//   - 存量账号（无校验子）→ 免口令直接放行，首次注册后开始强制；
+//   - 未知账号 → 默认 ProvisionLegacy 自动建号；requireRegistration 模式下
+//     拒绝（fork 行为：必须先经 GM 页注册）。
+func (store *roleStore) login(ctx context.Context, key role.AccountKey, passwordCiphertext []byte) (role.Account, *role.RoleSnapshot, error) {
 	account, err := store.accounts.FindByKey(ctx, key)
 	if errors.Is(err, role.ErrNotFound) {
+		if requireRegistration() {
+			return role.Account{}, nil, errAccountNotRegistered
+		}
 		account, err = store.accounts.ProvisionLegacy(ctx, key)
 	}
 	if err != nil {
 		return role.Account{}, nil, err
+	}
+	if len(account.PasswordHash) > 0 && !bytes.Equal(passwordCiphertext, account.PasswordHash) {
+		return role.Account{}, nil, errPasswordMismatch
 	}
 	summaries, err := store.roles.ListByAccount(ctx, account.ID)
 	if err != nil {

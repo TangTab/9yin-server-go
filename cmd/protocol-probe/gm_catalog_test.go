@@ -18,7 +18,7 @@ func newCatalogTestServer(t *testing.T) *httptest.Server {
 	hub.itemNames = func(configIDs []string) map[string]string {
 		return map[string]string{"shaolin01": "少林俗家一阶"}
 	}
-	server := httptest.NewServer(newGMMux(hub))
+	server := httptest.NewServer(newGMMux(hub, nil))
 	t.Cleanup(server.Close)
 	return server
 }
@@ -136,7 +136,7 @@ func TestGMMeridiansEndpoint(t *testing.T) {
 			{ID: "jm_dantian", Name: "丹田本元", DefaultMax: 180},
 		}
 	}
-	server := httptest.NewServer(newGMMux(hub))
+	server := httptest.NewServer(newGMMux(hub, nil))
 	t.Cleanup(server.Close)
 
 	response, err := http.Get(server.URL + "/api/meridians")
@@ -166,7 +166,7 @@ func TestGMMeridiansEndpointFallsBackToCatalog(t *testing.T) {
 	t.Cleanup(func() { globalJingMaiCatalog = original })
 
 	hub := newGMHub()
-	server := httptest.NewServer(newGMMux(hub))
+	server := httptest.NewServer(newGMMux(hub, nil))
 	t.Cleanup(server.Close)
 
 	response, err := http.Get(server.URL + "/api/meridians")

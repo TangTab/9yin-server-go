@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/local/9yin-go-server/internal/auth"
 
 	"github.com/DATA-DOG/go-sqlmock"
 
@@ -23,11 +26,11 @@ func testRoleStore(t *testing.T) *roleStore {
 func TestRoleStoreIsolatesAccountsAndPersistsLocationVersion(t *testing.T) {
 	ctx := context.Background()
 	store := testRoleStore(t)
-	firstAccount, firstRole, err := store.login(ctx, "acct:v1:first")
+	firstAccount, firstRole, err := store.login(ctx, "acct:v1:first", nil)
 	if err != nil || firstRole != nil {
 		t.Fatalf("first login role=%v error=%v", firstRole, err)
 	}
-	secondAccount, secondRole, err := store.login(ctx, "acct:v1:second")
+	secondAccount, secondRole, err := store.login(ctx, "acct:v1:second", nil)
 	if err != nil || secondRole != nil {
 		t.Fatalf("second login role=%v error=%v", secondRole, err)
 	}
@@ -59,14 +62,14 @@ func TestRoleStoreIsolatesAccountsAndPersistsLocationVersion(t *testing.T) {
 		t.Fatalf("saved location = %#v", firstRole.Location)
 	}
 
-	_, reloaded, err := store.login(ctx, firstAccount.Key)
+	_, reloaded, err := store.login(ctx, firstAccount.Key, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if reloaded == nil || reloaded.Location.Position != location.Position {
 		t.Fatalf("reloaded role = %#v", reloaded)
 	}
-	_, other, err := store.login(ctx, secondAccount.Key)
+	_, other, err := store.login(ctx, secondAccount.Key, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,5 +103,78 @@ func TestVerifyRequiredTablesFailsFastOnMissing(t *testing.T) {
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Error(err)
+	}
+}
+
+// TestRoleStoreRegisterAndPasswordVerification 注册→验密全链：
+// 存量账号（无校验子）免密放行；注册后错误密码拒绝、正确密码（客户端
+// 密码槽密文形态）放行；重复注册＝改密（fork 实证 upsert 语义）。
+func TestRoleStoreRegisterAndPasswordVerification(t *testing.T) {
+	ctx := context.Background()
+	store := testRoleStore(t)
+
+	const accountName = "regtest01"
+	key, err := auth.AccountKeyFor(accountName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(key, "acct:v1:") || len(key) != len("acct:v1:")+64 {
+		t.Fatalf("unexpected key shape: %q", key)
+	}
+
+	// 未注册：默认模式自动建号，免口令放行。
+	account, _, err := store.login(ctx, role.AccountKey(key), nil)
+	if err != nil {
+		t.Fatalf("legacy auto-provision login: %v", err)
+	}
+	if len(account.PasswordHash) != 0 {
+		t.Fatalf("unregistered account has verifier: %x", account.PasswordHash)
+	}
+
+	// 注册：校验子落库。
+	verifier := auth.ComputePasswordVerifier(accountName, "first-pass")
+	if _, err := store.accounts.RegisterAccount(ctx, account.Key, verifier); err != nil {
+		t.Fatal(err)
+	}
+	// 错误密码（另一口令的密文）拒绝。
+	if _, _, err := store.login(ctx, account.Key, auth.ComputePasswordVerifier(accountName, "wrong-pass")); !errors.Is(err, errPasswordMismatch) {
+		t.Fatalf("wrong password: want errPasswordMismatch, got %v", err)
+	}
+	// 正确密码放行。
+	if _, _, err := store.login(ctx, account.Key, verifier); err != nil {
+		t.Fatalf("correct password rejected: %v", err)
+	}
+
+	// 重复注册＝改密。
+	rekeyed := auth.ComputePasswordVerifier(accountName, "second-pass")
+	if _, err := store.accounts.RegisterAccount(ctx, account.Key, rekeyed); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := store.login(ctx, account.Key, verifier); !errors.Is(err, errPasswordMismatch) {
+		t.Fatalf("old password after re-register: want mismatch, got %v", err)
+	}
+	if _, _, err := store.login(ctx, account.Key, rekeyed); err != nil {
+		t.Fatalf("new password rejected: %v", err)
+	}
+}
+
+// TestRoleStoreRequireRegistration 要求注册模式下未知账号拒绝建号。
+func TestRoleStoreRequireRegistration(t *testing.T) {
+	t.Setenv("NINEYIN_REQUIRE_REGISTRATION", "1")
+	ctx := context.Background()
+	store := testRoleStore(t)
+	key, err := auth.AccountKeyFor("gated01")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := store.login(ctx, role.AccountKey(key), nil); !errors.Is(err, errAccountNotRegistered) {
+		t.Fatalf("want errAccountNotRegistered, got %v", err)
+	}
+	// 注册后放行。
+	if _, err := store.accounts.RegisterAccount(ctx, role.AccountKey(key), auth.ComputePasswordVerifier("gated01", "pw")); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := store.login(ctx, role.AccountKey(key), auth.ComputePasswordVerifier("gated01", "pw")); err != nil {
+		t.Fatalf("registered login rejected: %v", err)
 	}
 }

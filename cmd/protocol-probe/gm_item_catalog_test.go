@@ -110,7 +110,7 @@ func TestGMItemsEndpoint(t *testing.T) {
 		{ConfigID: "weapon_jiuxian_01", Name: "久仙刀", ViewID: 2, Wearable: true, EquipType: "Weapon", NeedSex: 0},
 		{ConfigID: "box_gift_01", Name: "惊鸿礼盒", ViewID: 1, Script: "BoxItem", NeedSex: 2},
 	}})
-	server := httptest.NewServer(newGMMux(newGMHub()))
+	server := httptest.NewServer(newGMMux(newGMHub(), nil))
 	t.Cleanup(server.Close)
 
 	response, err := http.Get(server.URL + "/api/items?q=%E4%B9%85%E4%BB%99&view=2") // q=久仙

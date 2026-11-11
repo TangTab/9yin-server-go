@@ -32,6 +32,7 @@ type jsonIdentity struct {
 	RoleID            RoleID        `json:"role_id,omitempty"`
 	Status            AccountStatus `json:"status"`
 	AccountVersion    uint64        `json:"account_version"`
+	PasswordHash      []byte        `json:"password_hash,omitempty"`
 	Slot              uint16        `json:"slot,omitempty"`
 	RoleVersion       uint64        `json:"role_version,omitempty"`
 	AppearanceVersion uint64        `json:"appearance_version,omitempty"`

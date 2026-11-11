@@ -26,6 +26,10 @@ type Account struct {
 	Key     AccountKey
 	Status  AccountStatus
 	Version uint64
+	// PasswordHash 是注册口令校验子（auth.ComputePasswordVerifier 输出，
+	// 客户端密码槽密文）。nil 表示存量未注册账号——登录免口令校验，
+	// 首次注册后开始强制比对。
+	PasswordHash []byte
 }
 
 type Appearance struct {
@@ -77,6 +81,9 @@ var (
 type AccountRepository interface {
 	FindByKey(context.Context, AccountKey) (Account, error)
 	ProvisionLegacy(context.Context, AccountKey) (Account, error)
+	// RegisterAccount 注册/改密（fork /api/register 语义：upsert——
+	// 账号不存在则建号落校验子，已存在则覆写校验子）。
+	RegisterAccount(ctx context.Context, key AccountKey, passwordHash []byte) (Account, error)
 }
 
 type RoleRepository interface {
