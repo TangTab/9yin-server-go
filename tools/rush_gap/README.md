@@ -41,7 +41,10 @@ python -I npc28_decode.py jn.pkl                    # 概览：全部 0x28 对�
 python -I npc28_decode.py jn.pkl --at 30.456        # 逐字段值
 python -I npc28_decode.py login.pkl --obj 0x1100163b
 
-# 6. fxgamelogic.dll 明文带反汇编（加壳段不可静态解）
+# 6. 本服 tap 裸流（captures/local/<prefix>_{c2s,s2c}.bin；无时间戳，帧序伪时间）
+python -I local_frames.py <captures/local/127-0-0-1-51859 前缀> loc.json --pkl loc.pkl
+
+# 7. fxgamelogic.dll 明文带反汇编（加壳段不可静态解）
 python -I xdis.py 0xc891f5 100 --dll <fxgamelogic.dll 路径>
 ```
 
@@ -54,6 +57,7 @@ python -I xdis.py 0xc891f5 100 --dll <fxgamelogic.dll 路径>
 | dump_frames.py | frames pkl + 时间窗 + op 过滤 → 帧字节 hexdump |
 | npc28_decode.py | 0x27-0x2a 族 LZ 会话池解码（World2）+ 0x28 字段走查（概览/--at/--obj） |
 | walk_correlation.py | 每次出招的 211→首条 m15 state7→受理簇时延对齐与模式分类 |
+| local_frames.py | 本服 tap 裸流（EE 转义未去的 .bin）→ 事件 json/frames pkl（帧序伪时间，无毫秒时序） |
 | xdis.py | fxgamelogic.dll 明文 .text 反汇编，.rdata 字符串立即数自动注释 |
 
 ## 已知边界
