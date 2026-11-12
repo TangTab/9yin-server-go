@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/local/9yin-go-server/internal/gmapi"
 )
 
 type gmCatalogItem struct {
@@ -41,7 +43,7 @@ func (hub *gmHub) meridiansHandler(writer http.ResponseWriter, request *http.Req
 	if len(rows) == 0 {
 		rows = meridianRowsFromCatalog(globalJingMaiCatalog)
 	}
-	writeGMJSON(writer, http.StatusOK, rows)
+	gmWriteContentTagged(writer, request, "meridians", rows)
 }
 
 // meridianRowsFromCatalog 无 DB 回退：目录 configID 顺序即行序，
@@ -137,7 +139,7 @@ func (hub *gmHub) fashionCatalogHandler(writer http.ResponseWriter, request *htt
 	for index := range categories {
 		attachNames(categories[index].Items, names)
 	}
-	writeGMJSON(writer, http.StatusOK, categories)
+	gmWriteTaggedJSON(writer, request, gmapi.HashTag("fashion", "g"+strconv.FormatUint(gmNameGen(), 10), gmBootStamp), categories)
 }
 
 // itemsHandler GET /api/items?q=<中文名或ConfigID>&view=<0..4>：「所有
@@ -152,7 +154,9 @@ func (hub *gmHub) itemsHandler(writer http.ResponseWriter, request *http.Request
 	if parsed, err := strconv.Atoi(request.URL.Query().Get("view")); err == nil && parsed >= 0 {
 		view = parsed
 	}
-	writeGMJSON(writer, http.StatusOK, gmItems.search(request.URL.Query().Get("q"), view))
+	query := request.URL.Query().Get("q")
+	results := gmItems.search(query, view)
+	gmWriteTaggedJSON(writer, request, gmapi.HashTag("items", query, strconv.Itoa(view), gmBootStamp), results)
 }
 
 // gmCardRow 是 /api/cards 与 /api/hair-cards 的行形态（console-features.js
@@ -213,7 +217,7 @@ func (hub *gmHub) cardsHandler(writer http.ResponseWriter, request *http.Request
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, hub.cardsCore(false))
+	gmWriteTaggedJSON(writer, request, gmapi.HashTag("cards", "g"+strconv.FormatUint(gmNameGen(), 10), gmBootStamp), hub.cardsCore(false))
 }
 
 // hairCardsHandler GET /api/hair-cards：纯发型皮肤（equip_hair 专用）。
@@ -222,5 +226,5 @@ func (hub *gmHub) hairCardsHandler(writer http.ResponseWriter, request *http.Req
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, hub.cardsCore(true))
+	gmWriteTaggedJSON(writer, request, gmapi.HashTag("hair-cards", "g"+strconv.FormatUint(gmNameGen(), 10), gmBootStamp), hub.cardsCore(true))
 }

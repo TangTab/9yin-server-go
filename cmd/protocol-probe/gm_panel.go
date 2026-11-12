@@ -24,6 +24,9 @@ import (
 type gmHub struct {
 	mu       sync.RWMutex
 	sessions map[uint64]*gmSession
+	// attachCount 会话表组合版本（attach/detach +1）：sessions ETag
+	// 的组成部分（设计文档 §5.1 S4），任何快照可变因素都要推动它。
+	attachCount uint64
 	// itemNames 是 GET 目录端点的中文名解析钩子（game_items 批查；
 	// main() 装配，nil 时条目名回退 ConfigID——httptest 无 DB 也可用）。
 	itemNames func(configIDs []string) map[string]string
@@ -37,9 +40,16 @@ type gmSession struct {
 	remote   string
 	commands chan gmCommand
 
-	mu    sync.RWMutex
-	state gmapi.PlayerState
+	mu       sync.RWMutex
+	state    gmapi.PlayerState
+	stateVer uint64 // 状态变更计数：sessions ETag 组成部分（S4）
 }
+
+// bumpState 状态变更计数 +1（必须在持有 session.mu 时调用）。
+// snapshots 的 ETag 由 hub.attachCount + 各会话 stateVer 拼出：任何
+// 落进 PlayerState 的变化都要经 set* 方法 → bumpState，否则浏览器
+// 轮询拿不到 304。
+func (session *gmSession) bumpState() { session.stateVer++ }
 
 // gmPlayerState 保留原名引用契约层结构（快照字段即 /api/sessions
 // 的 JSON 行）。
@@ -76,6 +86,7 @@ func (hub *gmHub) attach(id uint64, remote string, active *role.RoleSnapshot, fa
 	}
 	hub.mu.Lock()
 	hub.sessions[id] = session
+	hub.attachCount++
 	hub.mu.Unlock()
 	return session
 }
@@ -83,6 +94,7 @@ func (hub *gmHub) attach(id uint64, remote string, active *role.RoleSnapshot, fa
 func (hub *gmHub) detach(id uint64) {
 	hub.mu.Lock()
 	delete(hub.sessions, id)
+	hub.attachCount++
 	hub.mu.Unlock()
 }
 
@@ -98,6 +110,34 @@ func (hub *gmHub) snapshots() []gmapi.PlayerState {
 		states = append(states, session.snapshot())
 	}
 	return states
+}
+
+// sessionsTag 会话快照的内容标签：boot 戳 + 组合计数 + 各会话状态计数。
+// 只要全部状态变更都走 set* 方法（bumpState），标签就与快照内容一一对应。
+func (hub *gmHub) sessionsTag() string {
+	hub.mu.RLock()
+	attach := hub.attachCount
+	vers := make([]string, 0, len(hub.sessions))
+	for _, session := range hub.sessions {
+		session.mu.RLock()
+		vers = append(vers, fmt.Sprintf("%d:%d", session.id, session.stateVer))
+		session.mu.RUnlock()
+	}
+	hub.mu.RUnlock()
+	return "sessions-" + gmBootStamp + "-a" + fmt.Sprint(attach) + "-" + fmt.Sprint(vers)
+}
+
+// writeSessionsTagged 两处 sessions 出口（/api/sessions 与 internal
+// /internal/v1/sessions）共用的 304 写出器。
+func (hub *gmHub) writeSessionsTagged(writer http.ResponseWriter, request *http.Request) {
+	tag := hub.sessionsTag()
+	etag := gmapi.ETagValue(tag)
+	if gmapi.ETagMatches(request.Header.Get("If-None-Match"), etag) {
+		gmapi.WriteNotModified(writer)
+		return
+	}
+	gmapi.SetETag(writer, tag)
+	writeGMJSON(writer, http.StatusOK, hub.snapshots())
 }
 
 func (hub *gmHub) enqueue(id uint64, command gmCommand) error {
@@ -125,6 +165,7 @@ func (session *gmSession) snapshot() gmapi.PlayerState {
 
 func (session *gmSession) setAction(action string) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.LastAction = action
 	session.state.UpdatedAt = time.Now()
 	session.mu.Unlock()
@@ -132,6 +173,7 @@ func (session *gmSession) setAction(action string) {
 
 func (session *gmSession) setSilver(value int32) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.Silver = value
 	session.state.LastAction = fmt.Sprintf("碎银设为 %d", value)
 	session.state.UpdatedAt = time.Now()
@@ -140,6 +182,7 @@ func (session *gmSession) setSilver(value int32) {
 
 func (session *gmSession) setGuanYin(value int32) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.GuanYin = value
 	session.state.LastAction = fmt.Sprintf("官银设为 %d", value)
 	session.state.UpdatedAt = time.Now()
@@ -148,6 +191,7 @@ func (session *gmSession) setGuanYin(value int32) {
 
 func (session *gmSession) setGold(value int32) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.Gold = value
 	session.state.LastAction = fmt.Sprintf("金币设为 %d（会话级）", value)
 	session.state.UpdatedAt = time.Now()
@@ -156,6 +200,7 @@ func (session *gmSession) setGold(value int32) {
 
 func (session *gmSession) setFaculty(value int32) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.Faculty = value
 	session.state.UpdatedAt = time.Now()
 	session.mu.Unlock()
@@ -163,6 +208,7 @@ func (session *gmSession) setFaculty(value int32) {
 
 func (session *gmSession) setSP(value int32, action string) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.SP = value
 	session.state.LastAction = action
 	session.state.UpdatedAt = time.Now()
@@ -171,6 +217,7 @@ func (session *gmSession) setSP(value int32, action string) {
 
 func (session *gmSession) setRageRecovery(value int32, action string) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.RageRecovery = value
 	session.state.LastAction = action
 	session.state.UpdatedAt = time.Now()
@@ -179,6 +226,7 @@ func (session *gmSession) setRageRecovery(value int32, action string) {
 
 func (session *gmSession) setFaction(faction, label string) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.Faction = faction
 	session.state.LastAction = "门派设为 " + label
 	session.state.UpdatedAt = time.Now()
@@ -187,6 +235,7 @@ func (session *gmSession) setFaction(faction, label string) {
 
 func (session *gmSession) setLocation(location role.Location, action string) {
 	session.mu.Lock()
+	session.bumpState()
 	session.state.Scene = location.Scene
 	session.state.Position = location.Position
 	session.state.LastAction = action
@@ -221,7 +270,7 @@ func newGMMux(hub *gmHub, accounts role.AccountRepository) *http.ServeMux {
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		writeGMJSON(writer, http.StatusOK, hub.snapshots())
+		hub.writeSessionsTagged(writer, request)
 	})
 	mux.HandleFunc("/api/items", hub.itemsHandler)
 	mux.HandleFunc("/api/meridians", hub.meridiansHandler)
@@ -244,6 +293,7 @@ func newGMMux(hub *gmHub, accounts role.AccountRepository) *http.ServeMux {
 	mux.HandleFunc("/api/repute/status", hub.reputeStatusHandler)
 	mux.HandleFunc("/api/origin/status", hub.originStatusHandler)
 	mux.HandleFunc("/api/minimal-login", hub.minimalLoginHandler)
+	mux.HandleFunc("/api/catalog/manifest", hub.manifestHandler)
 	mux.HandleFunc("/api/sessions/", func(writer http.ResponseWriter, request *http.Request) {
 		hub.serveSessionCommand("/api/sessions/", "panel", writer, request)
 	})
@@ -319,5 +369,12 @@ func gmWeatherCatalogHandler(writer http.ResponseWriter, request *http.Request) 
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+	tag := gmapi.WeatherTag()
+	etag := gmapi.ETagValue(tag)
+	if gmapi.ETagMatches(request.Header.Get("If-None-Match"), etag) {
+		gmapi.WriteNotModified(writer)
+		return
+	}
+	gmapi.SetETag(writer, tag)
 	writeGMJSON(writer, http.StatusOK, gmapi.WeatherCatalog())
 }

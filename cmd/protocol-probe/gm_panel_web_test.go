@@ -102,6 +102,50 @@ func TestGMConsolePageServedAndAdapted(t *testing.T) {
 	}
 }
 
+// TestGMConsoleAxPageServed 验证 AXUI 重写版控制台（docs/gm-console-axui-redesign-design.md）
+// 可经 /console-ax.html 取到，且入口模块/面板模块全部进入嵌入资产。旧版
+// console.html 保持不动，两页并行直至迁移完成。
+func TestGMConsoleAxPageServed(t *testing.T) {
+	server := gmPanelTestServer(t)
+	page, contentType, status := gmGetBody(t, server.URL+"/console-ax.html")
+	if status != http.StatusOK {
+		t.Fatalf("console-ax status=%d want=%d", status, http.StatusOK)
+	}
+	if !strings.HasPrefix(contentType, "text/html") {
+		t.Fatalf("console-ax content-type=%q want text/html", contentType)
+	}
+	for _, reference := range []string{
+		`href="/static/ax.css"`,
+		`href="/static/app/app.css"`,
+		`src="/static/app/main.js"`,
+		`scheme="dark"`,
+		`href="/console.html"`, // 迁移期回旧版的出口
+	} {
+		if !strings.Contains(page, reference) {
+			t.Fatalf("console-ax.html missing %q", reference)
+		}
+	}
+	// 入口与四个已迁移面板模块 + 占位模块必须真的在嵌入资产里可取。
+	for _, asset := range []string{
+		"/static/app/main.js",
+		"/static/app/api.js",
+		"/static/app/state.js",
+		"/static/app/ui.js",
+		"/static/app/panels/registry.js",
+		"/static/app/panels/role.js",
+		"/static/app/panels/item.js",
+		"/static/app/panels/fashion.js",
+		"/static/app/panels/scene.js",
+		"/static/app/panels/pending.js",
+		"/static/ax.esm.js",
+		"/static/ax.css",
+	} {
+		if _, _, code := gmGetBody(t, server.URL+asset); code != http.StatusOK {
+			t.Fatalf("GET %s status=%d want=200", asset, code)
+		}
+	}
+}
+
 func TestGMServesEmbeddedStaticAssets(t *testing.T) {
 	server := gmPanelTestServer(t)
 	cases := map[string]struct {

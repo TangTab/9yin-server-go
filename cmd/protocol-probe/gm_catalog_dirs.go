@@ -22,6 +22,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/local/9yin-go-server/internal/gmapi"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
@@ -141,7 +142,8 @@ func (hub *gmHub) clonesHandler(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMCloneRows())
+	rows := loadGMCloneRows()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("clones", rows), rows)
 }
 
 // ---------------------------------------------------------------------------
@@ -207,7 +209,8 @@ func (hub *gmHub) scenesHandler(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMSceneRows())
+	rows := loadGMSceneRows()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("scenes", rows), rows)
 }
 
 // ---------------------------------------------------------------------------
@@ -246,7 +249,7 @@ func (hub *gmHub) giftBoxesHandler(writer http.ResponseWriter, request *http.Req
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMGiftBoxRows())
+	gmWriteContentTagged(writer, request, "giftboxes", loadGMGiftBoxRows())
 }
 
 // ---------------------------------------------------------------------------
@@ -308,7 +311,8 @@ func (hub *gmHub) titlesHandler(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMTitleRows())
+	rows := loadGMTitleRows()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("titles", rows), rows)
 }
 
 // ---------------------------------------------------------------------------
@@ -387,7 +391,8 @@ func (hub *gmHub) mountsHandler(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMMountRows())
+	rows := loadGMMountRows()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("mounts", rows), rows)
 }
 
 // ---------------------------------------------------------------------------
@@ -446,7 +451,8 @@ func (hub *gmHub) idleStancesHandler(writer http.ResponseWriter, request *http.R
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMIdleStances())
+	rows := loadGMIdleStances()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("idle-stances", rows), rows)
 }
 
 // ---------------------------------------------------------------------------
@@ -563,7 +569,8 @@ func (hub *gmHub) recastAffixesHandler(writer http.ResponseWriter, request *http
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMRecastAffixes())
+	affixes := loadGMRecastAffixes()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("recast-affixes", affixes), affixes)
 }
 
 // ---------------------------------------------------------------------------
@@ -584,7 +591,7 @@ func (hub *gmHub) combatDummyTaolusHandler(writer http.ResponseWriter, request *
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, []gmTaoluRow{})
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("combat-dummy-taolus", []gmTaoluRow{}), []gmTaoluRow{})
 }
 
 // ---------------------------------------------------------------------------
@@ -599,7 +606,7 @@ func (hub *gmHub) taolusHandler(writer http.ResponseWriter, request *http.Reques
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, gmTaolus.rows)
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("taolus", gmTaolus.rows), gmTaolus.rows)
 }
 
 func (hub *gmHub) neigongsHandler(writer http.ResponseWriter, request *http.Request) {
@@ -607,7 +614,7 @@ func (hub *gmHub) neigongsHandler(writer http.ResponseWriter, request *http.Requ
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, loadGMNeiGongRows())
+	gmWriteContentTagged(writer, request, "neigongs", loadGMNeiGongRows())
 }
 
 // ---------------------------------------------------------------------------
@@ -638,7 +645,7 @@ func (hub *gmHub) reputeStatusHandler(writer http.ResponseWriter, request *http.
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, gmReputeStatus{Loaded: false, Reputes: []gmReputeRow{}})
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("repute-status", gmReputeStatus{}), gmReputeStatus{Loaded: false, Reputes: []gmReputeRow{}})
 }
 
 func (hub *gmHub) originStatusHandler(writer http.ResponseWriter, request *http.Request) {
@@ -646,7 +653,7 @@ func (hub *gmHub) originStatusHandler(writer http.ResponseWriter, request *http.
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	writeGMJSON(writer, http.StatusOK, gmOriginStatus{Loaded: false, Total: 0})
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("origin-status", gmOriginStatus{}), gmOriginStatus{Loaded: false, Total: 0})
 }
 
 // ---------------------------------------------------------------------------
@@ -661,11 +668,80 @@ var gmMinimalLoginEnabled atomic.Bool
 func (hub *gmHub) minimalLoginHandler(writer http.ResponseWriter, request *http.Request) {
 	switch request.Method {
 	case http.MethodGet:
-		writeGMJSON(writer, http.StatusOK, map[string]bool{"enabled": gmMinimalLoginEnabled.Load()})
+		enabled := gmMinimalLoginEnabled.Load()
+		gmWriteTaggedJSON(writer, request, gmapi.HashTag("minimal-login", strconv.FormatBool(enabled), gmBootStamp), map[string]bool{"enabled": enabled})
 	case http.MethodPost:
 		gmMinimalLoginEnabled.Store(!gmMinimalLoginEnabled.Load())
 		writeGMJSON(writer, http.StatusOK, map[string]bool{"enabled": gmMinimalLoginEnabled.Load()})
 	default:
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+// ---------------------------------------------------------------------------
+// S2/S3（设计文档 §5.1）：目录启动预热 + 静态目录标签 + manifest 端点。
+// ---------------------------------------------------------------------------
+
+// gmStaticTagMemo name → 标签条目。静态目录行装载一次后进程内不变，
+// 标签（行哈希+boot 戳）也只算一次。
+var gmStaticTagMemo sync.Map
+
+type gmStaticTagEntry struct {
+	once sync.Once
+	tag  string
+}
+
+// gmStaticTagOf 取（首次计算并缓存）静态目录标签。调用方须先触发装载
+// （rows 传入已装载结果），once 内只做哈希。
+func gmStaticTagOf(name string, rows any) string {
+	entryAny, _ := gmStaticTagMemo.LoadOrStore(name, &gmStaticTagEntry{})
+	entry := entryAny.(*gmStaticTagEntry)
+	entry.once.Do(func() { entry.tag = gmCatalogTag(name, rows) })
+	return entry.tag
+}
+
+// warmGMCatalogDirs S2 目录预热：boot 后台把懒装载目录全部先解析一遍，
+// 首个用户请求永不再等 INI 解析（sync.Once 机制不变，只是提前触发）。
+// gmItems/skinCards/fashionSuits/gmTaolus 本就是包级启动装载，无需列入。
+func warmGMCatalogDirs() {
+	loadGMCloneRows()
+	loadGMSceneRows()
+	loadGMTitleRows()
+	loadGMMountRows()
+	loadGMIdleStances()
+	loadGMRecastAffixes()
+	loadGMNeiGongRows() // 触发 modernNeiGongCatalogOnce
+}
+
+// gmCatalogManifest S3 manifest 载荷：面板前端用它做目录缓存键版本。
+type gmCatalogManifest struct {
+	Version         string            `json:"version"`
+	NamesGeneration uint64            `json:"namesGeneration"`
+	Catalogs        map[string]string `json:"catalogs"`
+}
+
+// manifestHandler GET /api/catalog/manifest（internal 侧同名镜像）：
+// version = boot 戳 + 名称代数；catalogs 给静态目录的当前标签。
+func (hub *gmHub) manifestHandler(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	namesGen := gmNameGen()
+	version := gmBootStamp + "-g" + strconv.FormatUint(namesGen, 10)
+	payload := gmCatalogManifest{
+		Version:         version,
+		NamesGeneration: namesGen,
+		Catalogs: map[string]string{
+			"clones":         gmStaticTagOf("clones", loadGMCloneRows()),
+			"scenes":         gmStaticTagOf("scenes", loadGMSceneRows()),
+			"titles":         gmStaticTagOf("titles", loadGMTitleRows()),
+			"mounts":         gmStaticTagOf("mounts", loadGMMountRows()),
+			"idle-stances":   gmStaticTagOf("idle-stances", loadGMIdleStances()),
+			"recast-affixes": gmStaticTagOf("recast-affixes", loadGMRecastAffixes()),
+			"taolus":         gmStaticTagOf("taolus", gmTaolus.rows),
+			"weather":        gmapi.WeatherTag(),
+		},
+	}
+	gmWriteTaggedJSON(writer, request, gmapi.HashTag("manifest", version), payload)
 }

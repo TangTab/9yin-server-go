@@ -490,18 +490,6 @@ func heartbeatReply(ping []byte) []byte {
 // FILETIME 纪元）。msg294 对钟 i64 与 cooldown_rec（rec109）col1/col2
 // 起止毫秒同为 FILETIME 纪元——g 14.660 官服对拍：CD 起=13438617363446
 // = UnixMilli+本偏移，逐位吻合（止-起 个人 6000/公共 7000ms）。
+// （2026-11-12 P0a：旧 Java 方言 1Hz 自推 timeSyncFrame 已删，m294 全场
+// 唯一来源=officialTimeSyncReplyFrame 对 m924 的应答。）
 const fileTimeEpochOffsetMs = int64(11644473600000)
-
-// timeSyncFrame 即 msg294 对钟帧（Java LoginFlow.timeSyncFrame 同源，
-// 52905 抓包 1s 一发、计数器恒 +1000）：[294, i32 服务器运行毫秒,
-// i64 unix毫秒+FILETIME 纪元偏移, i64 unix 秒, f64 46327.464 常量]。
-// 客户端靠本帧对齐本机时钟偏移（CD 起止同口径，见 fileTimeEpochOffsetMs）；
-// 尾值 46327.464 为官方抓包常量（游戏世界天数口径，语义未定）。
-func timeSyncFrame(uptimeMs int32, now time.Time) ([]byte, error) {
-	return serverCustomIntMessage(294,
-		customInt(uptimeMs),
-		customInt64(now.UnixMilli()+fileTimeEpochOffsetMs),
-		customInt64(now.Unix()),
-		customFloat64(46327.464),
-	)
-}

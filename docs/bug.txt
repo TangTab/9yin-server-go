@@ -113,25 +113,30 @@ m294 我方 fork 方言周期推与官服应答共存下，客户端 RTT 配对�
 测试：TestPushCombatAttributeDelta 验证无变化零帧 / 变化项全为 0x10 单帧 / Str 索引（485=0x01E5）在列。真机回归时重点看镇派兵器穿脱的属性增量表现。
 
 npc：
-渲染级（fork 模式主线）——够了，已定案
-真机会话 56232 铁证：hybrid2433 + 0x0D 83字段头行 + 134× 0x28 v3 全发存活 → NPC 渲染成功、无断连。渲染管线消费的东西（变换块 52B、Resource 模型、头行、等级/血条属性）全部就位，v3 语法与官方 6/6 精确一致。
+P0a 三项修改全部完成并通过测试。
 
-官方保真级——语法够，字段集差一截
-官方 6 帧 0x46 样例（恰好覆盖 3 类 NPC）的完整字段 vs v3 生成器：
+改动清单（11 文件，+81/−297）
+① 撤按压窗口多发帧（官服接近段零 S2C）
 
-类别	v3 已覆盖	官方有、v3 没有
-核心集（6/6 帧全有，18 个）	✅ 全部	–
-Boss 帧（2 样例）	部分	Fixed WeaponName FixedBeHitAct SelfForceID BufferInfo1/2（出生 buff 2299/6218 显示）
-战斗怪（3 样例）	部分	NotPositive
-功能 NPC（1 样例）	部分	CursorShape（光标形态）MPRatio HasKarma Character KarmaLevel OriginPara1/2/3（起源参数，对应 0x29 的 Origin 记录族）
-这 13 个条件字段影响的不是“能不能渲染”，是交互细节（光标、buff 图标、武器挂载、业力显示）。
+rush_cast.go：删走踢帧 rushWalkKickFrame（+150ms 双入口 0x21）与 scheduleRushApproachDash（c61 接近冲刺链 + 0x1F 锚 + 2.5s 重试）；stageRushCast 签名还原（去掉 world 参数），受理簇回到官服 8 帧（4 簇 + 四连）
+接近段现在只剩：受理簇 → 状态四连 → echoPlayerMoveIntent 对 m15 的逐帧回显；客户端自走进入 (5.0,6.5] 由 tryRushArrival 发 c61（官服方言不变）
+② 时钟收敛单路（抓包实证的每秒 3 条矛盾 m294 → 恰 1 条）
 
-两个数据上限
-样例多样性不足：6 帧只覆盖 功能NPC/Boss/普通怪 三类。商店、传送、任务 NPC 是否有专属字段——未知（276 帧 0x47 官方帧被池种子锁死提不出，这是硬上限）。
-数据源缺口：BufferInfo（出生 buff 配置）、OriginPara（起源参数）在服务端侧还没有数据来源；其余字段都能从现有 npc_template_table 派生。
-建议
-按需补齐，不必预研：v3 的 officialNPCEntityProperties 是属性列表结构，加字段是增量改动。什么时候做 Boss 战/起源系统，什么时候把对应条件字段加进去——每个字段都有官方样例字节可抄（本回复的表格就是提取好的）。
-真正建议先做的是 NPC 收缩文档余项 1：hybrid + 关 0x28 复验——如果 0x0D 头行通道独走就能渲染，0x28 字段保真度的优先级还会再降一档。、
+删 main.go 连接期 1Hz Java 方言自推（timeSyncFrame 及其 goroutine）
+删 official_clock.go 整文件（scoped 钟对 + 0x38 序号器；0x38 ping 应答走 heartbeatReply 原路保留）
+officialTimeSyncReplyFrame 改官服帧级方言：[294, client_ms 回显, reqid=应答时刻 FILETIME ms（官服样本逐位吻合，与 CD 行同纪元）, unix 秒, uptime=46335.831 常量]
+③ 速度族官服值
+
+player_actor.go：0x0D 档 WalkSpeed 7.5→1.28（旧值系与 DriftSpeed 混淆）、MoveSpeed=RunSpeed 5.0→3.9（服务端无模拟消费方，仅属性下发，零风险）
+验证
+冲锋/移动/时钟域全部测试更新通过（10→8 帧、rearm 11 帧、m294 五值形状含 reqid/常量断言）
+go build ./... 通过；全量测试仅剩 TestShapedMultihitPicksUpNewEntrants（干净树上同样失败的既有问题）和 QiangHua 两个 flaky（干净树 2/4 次也失败）——均与本次改动无关
+文档 P0a 已标注「已落地」三项明细
+下一步（真机复测）
+重新构建部署到 F:（deploy.bat 或手动拷 protocol-probe.exe）；
+远距按 hyjf02（≥20m）：观察是否自走——同时抓 NINEYIN_CAPTURE_DIR tap；
+若仍不武装：下一步就按文档 P0a-4 给 tap 加时间戳 + 客户端 bin64/trace.log 定位武装失败点（P2「物理属性 60 连发形态」也备着）。
+要我顺手把这次改动 commit 吗？
 
 
 

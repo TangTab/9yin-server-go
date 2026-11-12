@@ -260,11 +260,19 @@ func main() {
 	customConfig := newCustomConfigStores(store.db)
 	appearanceCfg := newAppearanceStores(store.db)
 	gm := newGMHub()
+	// S1（设计文档 §5.1）：名称查询先走全量内存缓存（boot 后台装载），
+	// 未就绪/放弃时回落原批查路径——行为与旧版完全一致，fail-soft。
 	gm.itemNames = func(configIDs []string) map[string]string {
+		if names, ready := gmItemNames.lookup(configIDs); ready {
+			return names
+		}
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		return inventoryStore.itemNames(ctx, configIDs)
 	}
+	// S1 装载循环 + S2 目录预热：都放后台，不阻塞开服。
+	go gmItemNames.start(store.db, gmNameRetryInterval)
+	go warmGMCatalogDirs()
 	// 经脉目录（面板「经脉周天设置」下拉）：共享库 game_meridians 直查
 	//（Java GmCatalogDb.meridians 同款 SQL）；缺表/缺库回落包级目录。
 	gm.meridianRows = func() []gmMeridianRow {
@@ -449,32 +457,6 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		return
 	}
 	defer link.Close()
-	// msg294 对钟帧 1s 一发（Java LoginFlow 1s scheduler、52905 抓包
-	// 747 条计数器恒 +1000 实证）：cooldown_rec 的 start/end 是绝对
-	// unix 毫秒，客户端靠它对齐本机时钟偏移；随连接生命周期启停。
-	timeSyncStop := make(chan struct{})
-	timeSyncStart := time.Now()
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-timeSyncStop:
-				return
-			case now := <-ticker.C:
-				uptime := int32(now.Sub(timeSyncStart).Milliseconds())
-				frame, err := timeSyncFrame(uptime, now)
-				if err != nil {
-					log.Printf("%s: encode time sync: %v", conn.RemoteAddr(), err)
-					continue
-				}
-				if err := link.WriteFrame(frame); err != nil {
-					return
-				}
-			}
-		}
-	}()
-	defer close(timeSyncStop)
 	machine := session.New()
 	var sceneNPCs []npcSpawn
 	log.Printf("session=%d remote=%s opened phase=%s", machine.ID(), conn.RemoteAddr(), machine.Phase())
@@ -3018,15 +3000,15 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: client activity CustomSend opcode=0x0A msg_id=%d args=[%s]", conn.RemoteAddr(), custom.Values[0].Int32, strings.Join(arguments, ", "))
 				switch custom.Values[0].Int32 {
 				case clientCustomMsgDelay:
-					// m924 → m294 官服形态应答（c.pcapng ×139 逐对实证：
-					// [client_ms 回显, obj(玩家), unix 秒, uptime 秒]）。
-					// 1s 周期推（fork 52905 方言，CD 对钟）保留，两者共存。
+					// m924 → m294 官服形态应答（技能.pcapng 全程 1Hz 逐对实证：
+					// [client_ms 回显, reqid(应答时刻 FILETIME ms), unix 秒,
+					// uptime 天(常量)]）。P0a 时钟收敛后这是全场唯一 m294 源。
 					if len(custom.Values) >= 2 {
 						clientMs := custom.Values[1].Int64
 						if custom.Values[1].Type == 2 {
 							clientMs = int64(custom.Values[1].Int32)
 						}
-						reply, replyErr := officialTimeSyncReplyFrame(clientMs, timeSyncStart, time.Now())
+						reply, replyErr := officialTimeSyncReplyFrame(clientMs, time.Now())
 						if replyErr != nil {
 							log.Printf("%s: encode m294 reply: %v", conn.RemoteAddr(), replyErr)
 						} else if writeErr := link.WriteFrame(reply); writeErr != nil {

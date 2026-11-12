@@ -418,7 +418,9 @@ func newPlayerActor(name string, silver int32) *playerActor {
 		faction:  defaultRoleFaction,
 		// 默认移动/奔跑速度 5：与 Java 参考服对齐（2026-11-02 由 25 下调，
 		// 25 过快）；GM 面板「移动参数」可运行时改。
-		motion:            playerMotion{moveSpeed: 5, runSpeed: 5, gravity: 9.8},
+		// 速度族官服值（登陆-all 登录物理档案实证：MoveSpeed=RunSpeed=3.9；
+		// 旧 5.0 系 fork 测试值——2026-11-12 P0a 修正）。
+		motion:            playerMotion{moveSpeed: 3.9, runSpeed: 3.9, gravity: 9.8},
 		buffs:             make(map[uint16]activePlayerBuff),
 		activeQingGong:    make(map[string]struct{}),
 		learnedSkills:     learnedSkills,
@@ -2121,7 +2123,7 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addByte(clientdata.MustPlayerProperty("LogicState").Index, state.LogicState) // fork=463
 	addFloat(clientdata.MustPlayerProperty("JumpSpeed").Index, 8.0)              // JumpSpeed（fork=681）
 	addFloat(clientdata.MustPlayerProperty("MoveSpeed").Index, motion.moveSpeed) // fork=384
-	addFloat(clientdata.MustPlayerProperty("WalkSpeed").Index, 7.5)              // WalkSpeed（fork=385）
+	addFloat(clientdata.MustPlayerProperty("WalkSpeed").Index, 1.28)             // WalkSpeed 官服值 1.28（旧 7.5 系与 DriftSpeed 混淆，2026-11-12 P0a）
 	addFloat(clientdata.MustPlayerProperty("RunSpeed").Index, motion.runSpeed)   // fork=386
 	addInt(clientdata.MustPlayerProperty("SpeedRatio").Index, state.SpeedRatio)  // fork=390
 	// CantJump(fork-only@27)：官服表缺席，按名门控——官服方言跳过。

@@ -25,6 +25,8 @@ type fakeGameBackend struct {
 	sessionsBody   string
 	commandStatus  int
 	commandBody    string
+
+	catalogETag string // catalog 端点回给面板的 ETag（空=不带）；INM 命中回 304
 }
 
 func newFakeGameBackend(t *testing.T) *fakeGameBackend {
@@ -48,6 +50,13 @@ func newFakeGameBackend(t *testing.T) *fakeGameBackend {
 	mux.HandleFunc("/internal/v1/catalog/", func(writer http.ResponseWriter, request *http.Request) {
 		backend.authSeen.Store("catalog:"+request.URL.Path, request.Header.Get("Authorization")+"?"+request.URL.RawQuery)
 		backend.requests.Add(1)
+		if backend.catalogETag != "" {
+			writer.Header().Set("ETag", backend.catalogETag)
+			if request.Header.Get("If-None-Match") == backend.catalogETag {
+				writer.WriteHeader(http.StatusNotModified)
+				return
+			}
+		}
 		writeRaw(writer, http.StatusOK, `[{"configId":"x","name":"测试"}]`)
 	})
 	mux.HandleFunc("/internal/v1/minimal-login", func(writer http.ResponseWriter, request *http.Request) {
@@ -69,7 +78,7 @@ func writeRaw(writer http.ResponseWriter, status int, body string) {
 func newPanel(t *testing.T, backend *fakeGameBackend) *httptest.Server {
 	t.Helper()
 	panel := &panelServer{gameBase: backend.server.URL, gameAddr: strings.TrimPrefix(backend.server.URL, "http://"),
-		token: "tok", client: &http.Client{Timeout: commandTimeout}}
+		token: "tok", client: &http.Client{Timeout: commandTimeout}, catCache: make(map[string]catalogCacheEntry)}
 	server := httptest.NewServer(panel.mux())
 	t.Cleanup(server.Close)
 	return server

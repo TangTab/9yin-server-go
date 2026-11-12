@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script>
+    if (location.protocol === "https:") {
+      location.href = "http://" + location.host + location.pathname;
+    }
+  </script>
+  <title>九阴本地 GM · AX</title>
+  <link rel="stylesheet" href="/static/ax.css" />
+  <link rel="stylesheet" href="/static/app/app.css" />
+</head>
+
+<body scheme="dark">
+  <header id="topbar">
+    <button id="nav-toggle" class="icon-btn" title="导航">☰</button>
+    <h1>九阴 GM</h1>
+    <span class="chip" id="gm-server-badge" title="GM 面板地址（本机）"><b>服务器</b>-</span>
+    <div id="player-card" class="player-chips">读取中……</div>
+    <span class="topbar-spacer"></span>
+    <button id="palette-btn" class="icon-btn" title="全局搜索（Ctrl+K）">🔍</button>
+    <button id="history-btn" class="icon-btn" title="操作历史">🕘</button>
+    <button id="theme-btn" class="icon-btn" title="切换亮/暗主题">🌓</button>
+    <a id="old-console-link" href="/console.html" title="迁移期间旧版保持可用">旧版控制台</a>
+    <a href="/">← 服务器概览</a>
+  </header>
+  <div class="layout">
+    <nav id="gm-nav" aria-label="GM 功能导航"></nav>
+    <main id="view" class="view">
+      <section class="panel">
+        <ax-skeleton type="card"></ax-skeleton>
+      </section>
+    </main>
+  </div>
+  <footer id="statusbar">
+    <span id="conn-status"><span class="dot"></span>连接中……</span>
+    <span id="last-refresh"></span>
+    <span id="command-status"></span>
+  </footer>
+  <div id="toast-stack" aria-live="polite"></div>
+  <script type="module" src="/static/app/main.js"></script>
+</body>
+
+</html>

@@ -19,12 +19,12 @@ func utf16Encode(s string) []byte {
 	return out
 }
 
-// m294 官服形态应答（c.pcapng PAIR 实证）：
-// [294, client_ms 回显(i64), obj(玩家), unix 秒(i64), uptime 秒(f64)]。
+// m294 官服形态应答（技能.pcapng 帧级复核，2026-11-12 P0a）：
+// [294, client_ms 回显(i64), reqid(i64=应答时刻 FILETIME ms),
+//  unix 秒(i64), uptime 天(f64 全场常量)]。
 func TestOfficialTimeSyncReplyFrameShape(t *testing.T) {
-	start := time.Unix(1000, 0)
-	now := start.Add(90 * time.Second)
-	frame, err := officialTimeSyncReplyFrame(72290612, start, now)
+	now := time.Unix(1000, 0)
+	frame, err := officialTimeSyncReplyFrame(72290612, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,16 +44,14 @@ func TestOfficialTimeSyncReplyFrameShape(t *testing.T) {
 	if echo := binary.LittleEndian.Uint64(frame[9:]); echo != 72290612 {
 		t.Fatalf("client_ms echo=%d want=72290612", echo)
 	}
-	// 第三值：obj(玩家)（tag8 低32=对象ID 高32=ownerID）
+	// 第三值：reqid = 应答时刻 FILETIME 毫秒（tag3 i64；官服样本口径，
+	// 与 CD 行 col1/col2 同纪元）
 	off := 17
-	if frame[off] != 8 {
-		t.Fatalf("obj tag=%d want=8", frame[off])
+	if frame[off] != 3 {
+		t.Fatalf("reqid tag=%d want=3 (i64)", frame[off])
 	}
-	if obj := binary.LittleEndian.Uint32(frame[off+1:]); obj != playerObjectID {
-		t.Fatalf("obj id=%#x want=%#x", obj, playerObjectID)
-	}
-	if owner := binary.LittleEndian.Uint32(frame[off+5:]); owner != playerOwnerID {
-		t.Fatalf("obj owner=%#x want=%#x", owner, playerOwnerID)
+	if reqid := binary.LittleEndian.Uint64(frame[off+1:]); reqid != uint64(now.UnixMilli()+fileTimeEpochOffsetMs) {
+		t.Fatalf("reqid=%d want=%d", reqid, now.UnixMilli()+fileTimeEpochOffsetMs)
 	}
 	// 第四值：unix 秒（tag3）
 	off += 9
@@ -63,14 +61,14 @@ func TestOfficialTimeSyncReplyFrameShape(t *testing.T) {
 	if unix := binary.LittleEndian.Uint64(frame[off+1:]); unix != uint64(now.Unix()) {
 		t.Fatalf("unix=%d want=%d", unix, now.Unix())
 	}
-	// 第五值：uptime 秒（tag5 f64，~90）
+	// 第五值：uptime 天（tag5 f64 官服全场常量）
 	off += 9
 	if frame[off] != 5 {
 		t.Fatalf("uptime tag=%d want=5 (f64)", frame[off])
 	}
 	uptime := math.Float64frombits(binary.LittleEndian.Uint64(frame[off+1:]))
-	if uptime < 89.9 || uptime > 90.1 {
-		t.Fatalf("uptime=%.3f want≈90", uptime)
+	if uptime != officialUptimeDays {
+		t.Fatalf("uptime=%.3f want=%.3f (常量)", uptime, officialUptimeDays)
 	}
 }
 

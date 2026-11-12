@@ -28,7 +28,6 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -263,21 +262,28 @@ func pushCombatAttributeDelta(link sceneMessageConnection, player *playerActor, 
 	}
 }
 
-// officialTimeSyncReplyFrame m924→m294 官服形态应答：
-// [client_ms 回显(i64), obj(玩家), unix 秒(i64), uptime 秒(f64)]。
-// （c.pcapng 全量时间线 PAIR ×139 实证；uptime 为服务器运行秒数浮点。）
-func officialTimeSyncReplyFrame(clientMs int64, start time.Time, now time.Time) ([]byte, error) {
-	uptime := float64(now.Sub(start).Milliseconds()) / 1000
-	if math.IsNaN(uptime) || uptime < 0 {
-		uptime = 0
-	}
+// officialTimeSyncReplyFrame m924→m294 官服形态应答（2026-11-12 P0a
+// 按技能.pcapng 帧级复核修正）：
+//
+//	[294, client_ms 回显(i64), reqid(i64), unix 秒(i64), uptime 天(f64 常量)]
+//
+// reqid = 应答时刻的 FILETIME 毫秒（官服样本 0xc38f0e0xxxx 逐位吻合
+// UnixMilli+1601 纪元偏移，与 CD 行 col1/col2 同口径；解码器把它显示成
+// obj 是 8B 值的误读）；uptime 为官服全场**位恒定**的「世界天数」常量
+// （样本 46335.831 整场不变），客户端不消费其活值——本服直接镜像常量。
+func officialTimeSyncReplyFrame(clientMs int64, now time.Time) ([]byte, error) {
 	return serverCustomIntMessage(officialMsgTimeSync,
 		customInt64(clientMs),
-		customObject(playerObjectID, playerOwnerID),
+		customInt64(now.UnixMilli()+fileTimeEpochOffsetMs),
 		customInt64(now.Unix()),
-		customFloat64(uptime),
+		customFloat64(officialUptimeDays),
 	)
 }
+
+// officialUptimeDays m294 尾值常量：官服样本（技能.pcapng 全程
+// 1289 帧恒 46335.831）。语义疑为服务器世界年龄天数，客户端无活值消费
+// 证据——按原样镜像。
+const officialUptimeDays = 46335.831
 
 // repushAcceptedTaskFrames m327 应答：重放已授予的 Task_Accepted 行
 // （官服对 m327[6] 回 0x13 位图写格 ×9 两轮；本服等价物 = 接受任务

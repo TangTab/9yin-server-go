@@ -36,6 +36,10 @@ var panelVersion = "dev"
 // 时去抖，游戏服不被多个浏览器标签页叠加打挂。
 const sessionsCacheTTL = 500 * time.Millisecond
 
+// catalogCacheTTL 目录代理的微缓存窗口（设计文档 §5.1 S5）。目录在
+// 游戏服进程内不变，30s 足够长；游戏服重启由 ETag 失配自然纠正。
+const catalogCacheTTL = 30 * time.Second
+
 // commandTimeout 覆盖 internal API 的最坏时延（入队 750ms + 等
 // 回执 2s + 余量，设计文档 §5.3）。
 const commandTimeout = 3 * time.Second
@@ -55,6 +59,20 @@ type panelServer struct {
 	cachedAt   time.Time
 	cachedBody []byte
 	cachedCode int
+	cachedETag string
+
+	// catalogCache 目录代理微缓存（S5）：key = 目录名+查询串。
+	catMu    sync.Mutex
+	catCache map[string]catalogCacheEntry
+}
+
+// catalogCacheEntry 目录代理缓存条目。code=304 表示后端对某客户端
+// INM 回了 304——此时 body 为空、etag 保留，后续同 INM 请求直接 304。
+type catalogCacheEntry struct {
+	at   time.Time
+	code int
+	body []byte
+	etag string
 }
 
 func main() {
@@ -70,6 +88,7 @@ func main() {
 		gameAddr: *gameAddr,
 		token:    *gameToken,
 		client:   &http.Client{Timeout: commandTimeout},
+		catCache: make(map[string]catalogCacheEntry),
 	}
 	panel.logGameHealth()
 	server := &http.Server{Addr: *listen, Handler: panel.mux(), ReadHeaderTimeout: 5 * time.Second}
@@ -108,6 +127,13 @@ func (p *panelServer) mux() *http.ServeMux {
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
+		tag := gmapi.WeatherTag()
+		etag := gmapi.ETagValue(tag)
+		if gmapi.ETagMatches(request.Header.Get("If-None-Match"), etag) {
+			gmapi.WriteNotModified(writer)
+			return
+		}
+		gmapi.SetETag(writer, tag)
 		gmapi.WriteJSON(writer, http.StatusOK, gmapi.WeatherCatalog())
 	})
 	mux.HandleFunc("/api/sessions", p.sessionsProxy)
@@ -133,44 +159,53 @@ func (p *panelServer) mux() *http.ServeMux {
 	mux.HandleFunc("/api/repute/status", p.catalogProxy("repute/status"))
 	mux.HandleFunc("/api/origin/status", p.catalogProxy("origin/status"))
 	mux.HandleFunc("/api/minimal-login", p.methodProxy("/internal/v1/minimal-login"))
+	mux.HandleFunc("/api/catalog/manifest", p.catalogProxy("manifest"))
 	// 管理页（index.html 记录服务器登记册）：同源探活代理 + 面板自述。
 	// 实现在契约层，与游戏服内嵌面板共用同一份代码。
 	gmapi.MountManageAPI(mux, p.gameAddr, panelVersion)
 	return mux
 }
 
-// gameRequest 发一次带鉴权的 internal API 请求，返回状态码与原始 body；
-// 传输层失败（游戏服不在/超时）以 ok=false 报告，由调用方映射 503。
-func (p *panelServer) gameRequest(method, path, query string, body []byte) (int, []byte, bool) {
+// gameRequest 发一次带鉴权的 internal API 请求，返回状态码、原始 body
+// 与响应 ETag（无则空串）；传输层失败（游戏服不在/超时）以 ok=false
+// 报告，由调用方映射 503。inm 非空时作为 If-None-Match 转发给游戏服
+//（GET 目录/会话的 304 协商）。
+func (p *panelServer) gameRequest(method, path, query string, body []byte, inm string) (int, []byte, string, bool) {
 	var reader io.Reader
 	if body != nil {
 		reader = bytes.NewReader(body)
 	}
 	request, err := http.NewRequest(method, p.gameBase+path, reader)
 	if err != nil {
-		return 0, nil, false
+		return 0, nil, "", false
 	}
 	request.Header.Set("Authorization", "Bearer "+p.token)
 	if body != nil {
 		request.Header.Set("Content-Type", "application/json")
+	}
+	if inm != "" {
+		request.Header.Set("If-None-Match", inm)
 	}
 	if query != "" {
 		request.URL.RawQuery = query
 	}
 	response, err := p.client.Do(request)
 	if err != nil {
-		return 0, nil, false
+		return 0, nil, "", false
 	}
 	defer response.Body.Close()
 	raw, err := io.ReadAll(io.LimitReader(response.Body, 4<<20))
 	if err != nil {
-		return 0, nil, false
+		return 0, nil, "", false
 	}
-	return response.StatusCode, raw, true
+	return response.StatusCode, raw, response.Header.Get("ETag"), true
 }
 
-func writeProxyJSON(writer http.ResponseWriter, status int, body []byte) {
+func writeProxyJSON(writer http.ResponseWriter, status int, body []byte, etag string) {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if etag != "" {
+		writer.Header().Set("ETag", etag)
+	}
 	writer.WriteHeader(status)
 	_, _ = writer.Write(body)
 }
@@ -182,21 +217,27 @@ func (p *panelServer) sessionsProxy(writer http.ResponseWriter, request *http.Re
 		writer.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+	inm := request.Header.Get("If-None-Match")
 	p.mu.Lock()
 	fresh := time.Since(p.cachedAt) < sessionsCacheTTL
-	body, code := p.cachedBody, p.cachedCode
+	body, code, etag := p.cachedBody, p.cachedCode, p.cachedETag
 	p.mu.Unlock()
 	if !fresh {
-		status, raw, ok := p.gameRequest(http.MethodGet, "/internal/v1/sessions", "", nil)
+		status, raw, gameETag, ok := p.gameRequest(http.MethodGet, "/internal/v1/sessions", "", nil, inm)
 		if !ok {
 			status, raw = http.StatusServiceUnavailable, []byte(`{"error":"game server unreachable"}`)
 		}
-		body, code = raw, status
+		body, code, etag = raw, status, gameETag
 		p.mu.Lock()
-		p.cachedAt, p.cachedBody, p.cachedCode = time.Now(), body, code
+		p.cachedAt, p.cachedBody, p.cachedCode, p.cachedETag = time.Now(), body, code, etag
 		p.mu.Unlock()
 	}
-	writeProxyJSON(writer, code, body)
+	// 游戏服（或微缓存条目）对客户端 INM 命中 → 304 空体直回。
+	if code == http.StatusNotModified || (etag != "" && gmapi.ETagMatches(inm, etag)) {
+		gmapi.WriteNotModified(writer)
+		return
+	}
+	writeProxyJSON(writer, code, body, etag)
 }
 
 // commandProxy 命令通道：本地快速校验（与游戏服同一份 internal/gmapi
@@ -227,28 +268,52 @@ func (p *panelServer) commandProxy(writer http.ResponseWriter, request *http.Req
 		gmapi.WriteError(writer, http.StatusBadRequest, validateErr.Error())
 		return
 	}
-	status, response, ok := p.gameRequest(http.MethodPost,
-		"/internal/v1/sessions/"+strconv.FormatUint(id, 10)+"/command", "", raw)
+	status, response, _, ok := p.gameRequest(http.MethodPost,
+		"/internal/v1/sessions/"+strconv.FormatUint(id, 10)+"/command", "", raw, "")
 	if !ok {
 		gmapi.WriteError(writer, http.StatusServiceUnavailable, "game server unreachable")
 		return
 	}
-	writeProxyJSON(writer, status, response)
+	writeProxyJSON(writer, status, response, "")
 }
 
 // catalogProxy 代理目录端点（含查询串透传，/api/items 的 q/view 用）。
+// S5：30s 微缓存 + ETag/304 协商——客户端带着 INM 命中缓存（或游戏服
+// 304）时空体直回，刷新页面不再全量重拉目录。
 func (p *panelServer) catalogProxy(name string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodGet {
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		status, raw, ok := p.gameRequest(http.MethodGet, "/internal/v1/catalog/"+name, request.URL.RawQuery, nil)
-		if !ok {
-			gmapi.WriteError(writer, http.StatusServiceUnavailable, "game server unreachable")
+		inm := request.Header.Get("If-None-Match")
+		key := name + "?" + request.URL.RawQuery
+		p.catMu.Lock()
+		entry, hit := p.catCache[key]
+		fresh := hit && time.Since(entry.at) < catalogCacheTTL
+		p.catMu.Unlock()
+		if !fresh {
+			status, raw, etag, ok := p.gameRequest(http.MethodGet, "/internal/v1/catalog/"+name, request.URL.RawQuery, nil, inm)
+			if !ok {
+				gmapi.WriteError(writer, http.StatusServiceUnavailable, "game server unreachable")
+				return
+			}
+			// 失败响应不缓存；200/304 连同 ETag 入缓存。
+			if status == http.StatusOK || status == http.StatusNotModified {
+				entry = catalogCacheEntry{at: time.Now(), code: status, body: raw, etag: etag}
+				p.catMu.Lock()
+				p.catCache[key] = entry
+				p.catMu.Unlock()
+			} else {
+				writeProxyJSON(writer, status, raw, etag)
+				return
+			}
+		}
+		if entry.code == http.StatusNotModified || (entry.etag != "" && gmapi.ETagMatches(inm, entry.etag)) {
+			gmapi.WriteNotModified(writer)
 			return
 		}
-		writeProxyJSON(writer, status, raw)
+		writeProxyJSON(writer, entry.code, entry.body, entry.etag)
 	}
 }
 
@@ -265,11 +330,11 @@ func (p *panelServer) methodProxy(path string) http.HandlerFunc {
 			}
 			body = raw
 		}
-		status, raw, ok := p.gameRequest(request.Method, path, request.URL.RawQuery, body)
+		status, raw, etag, ok := p.gameRequest(request.Method, path, request.URL.RawQuery, body, "")
 		if !ok {
 			gmapi.WriteError(writer, http.StatusServiceUnavailable, "game server unreachable")
 			return
 		}
-		writeProxyJSON(writer, status, raw)
+		writeProxyJSON(writer, status, raw, etag)
 	}
 }

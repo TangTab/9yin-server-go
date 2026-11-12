@@ -1,0 +1,505 @@
+/* 九阴 GM · AXUI 版页面级样式（只做布局与少量定制，不 fork ax.css）。
+ * 主题底色延续旧版（#0f1115 系）的武侠金暗色基调；组件视觉交给 ax.css。 */
+
+:root {
+  --gm-bg: #0f1115;
+  --gm-card: #161922;
+  --gm-line: #2a2f3a;
+  --gm-gold: #e8b34b;
+  --gm-blue: #4ba3e8;
+  --gm-text: #e6e9ef;
+  --gm-muted: #8b93a3;
+}
+
+html,
+body[scheme="dark"] {
+  background: var(--gm-bg);
+  color: var(--gm-text);
+}
+
+body {
+  margin: 0;
+  font: 14px/1.6 "Segoe UI", system-ui, "Microsoft YaHei", sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---- 顶栏 ---- */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--gm-line);
+  background: linear-gradient(90deg, #14171d, #1c2027);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-wrap: wrap;
+}
+
+#topbar h1 {
+  font-size: 18px;
+  margin: 0;
+  color: var(--gm-gold);
+  white-space: nowrap;
+}
+
+.icon-btn {
+  background: none;
+  border: 1px solid var(--gm-line);
+  border-radius: 6px;
+  color: var(--gm-text);
+  font-size: 15px;
+  line-height: 1;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  border-color: var(--gm-gold);
+}
+
+.chip {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  background: var(--gm-card);
+  border: 1px solid var(--gm-line);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.chip b {
+  color: var(--gm-muted);
+  font-weight: 500;
+}
+
+.player-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 200px;
+}
+
+.player-chips .chip.flash b,
+.player-chips .chip.flash {
+  color: var(--gm-gold);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+#topbar a {
+  color: var(--gm-blue);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ---- 主布局 ---- */
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+#gm-nav {
+  width: 218px;
+  flex: none;
+  border-right: 1px solid var(--gm-line);
+  background: #12151c;
+  padding: 10px 8px 24px;
+  overflow-y: auto;
+  max-height: calc(100vh - 96px);
+  position: sticky;
+  top: 53px;
+}
+
+#gm-nav .grp {
+  margin-bottom: 2px;
+}
+
+#gm-nav .grp-hdr {
+  padding: 6px 8px;
+  color: var(--gm-muted);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+}
+
+#gm-nav .grp-hdr:hover {
+  color: var(--gm-text);
+  background: #1a1e28;
+}
+
+#gm-nav .grp-hdr::after {
+  content: "▸";
+  transition: transform 0.15s;
+}
+
+#gm-nav .grp.open .grp-hdr::after {
+  transform: rotate(90deg);
+}
+
+#gm-nav .grp-items {
+  display: none;
+}
+
+#gm-nav .grp.open .grp-items {
+  display: block;
+}
+
+#gm-nav .grp-items a {
+  display: block;
+  padding: 5px 10px 5px 20px;
+  color: var(--gm-text);
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#gm-nav .grp-items a:hover {
+  background: #1a1e28;
+}
+
+#gm-nav .grp-items a.active {
+  background: #2a2416;
+  color: var(--gm-gold);
+}
+
+.view {
+  flex: 1;
+  padding: 16px 20px 40px;
+  min-width: 0;
+}
+
+/* ---- 板块卡 ---- */
+.panel {
+  background: var(--gm-card);
+  border: 1px solid var(--gm-line);
+  border-radius: 10px;
+  padding: 16px 18px 20px;
+  margin-bottom: 16px;
+}
+
+.panel>h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  color: var(--gm-gold);
+}
+
+.panel .desc {
+  color: var(--gm-muted);
+  font-size: 12.5px;
+  margin: 0 0 14px;
+  border-left: 3px solid #3a3320;
+  padding: 4px 10px;
+  background: #1a1d26;
+  border-radius: 0 6px 6px 0;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+.field-row label {
+  color: var(--gm-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.hint {
+  color: var(--gm-muted);
+  font-size: 12.5px;
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.hint.ok {
+  color: #6fd692;
+}
+
+.hint.err {
+  color: #ff8080;
+}
+
+/* 按钮矩阵（传送/探针等） */
+.btn-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.matrix-group .matrix-label {
+  color: var(--gm-muted);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.matrix-group .matrix-items {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.matrix-input {
+  margin-bottom: 10px;
+}
+
+/* 目录选择器（M1） */
+.picker {
+  border: 1px solid var(--gm-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.picker-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #1a1e28;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.picker-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.picker-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #1e222c;
+  font-size: 13px;
+}
+
+.picker-row:hover {
+  background: #1e2330;
+}
+
+.picker-row.selected {
+  background: #2a2416;
+  color: var(--gm-gold);
+}
+
+.picker-row .sub {
+  color: var(--gm-muted);
+  font-size: 12px;
+}
+
+.picker-pager {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px;
+  background: #1a1e28;
+  color: var(--gm-muted);
+  font-size: 12.5px;
+}
+
+.picker-pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.picker-empty {
+  padding: 14px;
+  color: var(--gm-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ---- 底栏 ---- */
+#statusbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 6px 16px;
+  border-top: 1px solid var(--gm-line);
+  background: #12151c;
+  font-size: 12px;
+  color: var(--gm-muted);
+  position: sticky;
+  bottom: 0;
+}
+
+#conn-status .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6a7283;
+  margin-right: 6px;
+}
+
+#conn-status.online .dot {
+  background: #3fbf6f;
+  box-shadow: 0 0 6px #3fbf6f;
+}
+
+#conn-status.offline .dot {
+  background: #ff6b6b;
+}
+
+/* ---- Toast ---- */
+#toast-stack {
+  position: fixed;
+  right: 16px;
+  bottom: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  max-width: 360px;
+}
+
+.toast {
+  background: #1d222d;
+  border: 1px solid var(--gm-line);
+  border-left: 3px solid var(--gm-blue);
+  color: var(--gm-text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.2s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: none;
+}
+
+.toast.ok {
+  border-left-color: #3fbf6f;
+}
+
+.toast.err {
+  border-left-color: #ff6b6b;
+}
+
+.toast.warn {
+  border-left-color: var(--gm-gold);
+}
+
+/* ---- 窄屏 ---- */
+@media (max-width: 960px) {
+  #gm-nav {
+    position: fixed;
+    left: 0;
+    top: 53px;
+    bottom: 30px;
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform 0.2s;
+    max-height: none;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  #gm-nav.open {
+    transform: none;
+  }
+}
+
+/* ax 组件在暗色下的微调 */
+.panel ax-callout {
+  margin-bottom: 10px;
+}
+
+/* ---- 全局浮层（命令面板 / 历史抽屉） ---- */
+.palette-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 10, 0.62);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  z-index: 90;
+}
+
+.palette-panel {
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  background: var(--gm-card);
+  border: 1px solid var(--gm-line);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
+}
+
+.palette-panel .picker-row.selected {
+  background: #2a2416;
+}
+
+/* ---- 亮色主题（body 无 scheme 属性时生效；ax.css 组件自带亮色默认） ---- */
+body:not([scheme="dark"]) {
+  --gm-bg: #f5f6f8;
+  --gm-card: #ffffff;
+  --gm-line: #dde1e8;
+  --gm-text: #26292f;
+  --gm-muted: #7a8090;
+  background: var(--gm-bg);
+  color: var(--gm-text);
+}
+
+body:not([scheme="dark"]) #topbar {
+  background: linear-gradient(90deg, #ffffff, #f0f2f6);
+}
+
+body:not([scheme="dark"]) #gm-nav,
+body:not([scheme="dark"]) #statusbar {
+  background: #eef0f4;
+}
+
+body:not([scheme="dark"]) #gm-nav .grp-items a:hover,
+body:not([scheme="dark"]) .picker-row:hover,
+body:not([scheme="dark"]) .picker-toolbar,
+body:not([scheme="dark"]) .picker-pager {
+  background: #e9ecf1;
+}
+
+body:not([scheme="dark"]) .picker-row {
+  border-bottom-color: #e6e9ef;
+}
+
+body:not([scheme="dark"]) .panel .desc {
+  background: #f0f2f6;
+  border-left-color: #d9c68f;
+}
+
+body:not([scheme="dark"]) input,
+body:not([scheme="dark"]) textarea {
+  background: #ffffff !important;
+  border-color: var(--gm-line) !important;
+  color: var(--gm-text) !important;
+}

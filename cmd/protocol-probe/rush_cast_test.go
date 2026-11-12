@@ -106,7 +106,7 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
 
 	before := time.Now()
-	if handled, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if handled, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("stage handled=%t err=%v", handled, err)
 	}
@@ -115,11 +115,8 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 	// CurSkillTarget → msg25 → msg707 → 四连 = 8 帧（f#0194 idx462 实为
 	// CurSkillID='CS_jh_hyjf02\0'，旧「不发 CurSkillID」系误读；PauseSkill
 	// 首受理仍仅重受理方言携带）。
-	if len(frames) != 10 {
-		t.Fatalf("staging frames=%d, want 10-frame (8 簇 + 时钟对 294/0x38)", len(frames))
-	}
-	if int32(binary.LittleEndian.Uint32(frames[8][4:])) != 294 || frames[9][0] != 0x38 {
-		t.Fatalf("clock pair frames=%x %x", frames[8], frames[9])
+	if len(frames) != 8 {
+		t.Fatalf("staging frames=%d, want 8-frame 簇（P0a 撤时钟对/走踢，按压窗口零多发帧）", len(frames))
 	}
 	if frames[0][0] != 0x10 || binary.LittleEndian.Uint16(frames[0][12:]) != propCurSkillID {
 		t.Fatalf("CurSkillID frame=%x", frames[0])
@@ -153,11 +150,11 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 	// 暂存期再次按下（重受理）：官服 f/g 定版 7 帧——CurSkillID="" +
 	// msg26 + PauseSkill="" + CurSkillID + msg25 + PauseSkill + msg707，
 	// 不重发 CurSkillTarget。
-	if handled, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if handled, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("rearm stage handled=%t err=%v", handled, err)
 	}
-	frames3 := conn.Frames()[10:]
+	frames3 := conn.Frames()[8:]
 	if len(frames3) != 11 ||
 		frames3[0][0] != 0x10 || binary.LittleEndian.Uint16(frames3[0][12:]) != propCurSkillID ||
 		int32(binary.LittleEndian.Uint32(frames3[1][4:])) != 26 ||
@@ -175,13 +172,13 @@ func TestStageRushCastAirborneDisabledFallsBackToGroundDialect(t *testing.T) {
 	player := newPlayerActor("冲锋侠", 0)
 	definition := combatSkillDefinition{id: "CS_rush_air", canRush: true, script: "skilllock",
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 43, Z: 20}, worldcore.Transform{X: 4, Y: 50, Z: 20}, 12, "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 10 { // jn 首受理方言：4 帧簇 + 四连 + 时钟对
-		t.Fatalf("air staging frames=%d, want 10 (airborne disabled)", len(frames))
+	if len(frames) != 8 { // jn 首受理方言：4 帧簇 + 四连（P0a 撤时钟对）
+		t.Fatalf("air staging frames=%d, want 8 (airborne disabled)", len(frames))
 	}
 	if pending := player.peekPendingCast(time.Now()); pending == nil || pending.airborne {
 		t.Fatalf("pending cast=%+v, want airborne=false", pending)
@@ -327,10 +324,10 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatalf("staging cast handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()[base:]
-	if len(frames) != 10 || frames[0][0] != 0x10 ||
+	if len(frames) != 8 || frames[0][0] != 0x10 ||
 		int32(binary.LittleEndian.Uint32(frames[2][4:])) != 25 ||
 		int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
-		t.Fatalf("staging frames=%x, want 10-frame acceptance cluster+clock pair", frames)
+		t.Fatalf("staging frames=%x, want 8-frame acceptance cluster", frames)
 	}
 	if !player.rushInFlightSnapshot() {
 		t.Fatal("staging did not mark rush in flight")
@@ -343,7 +340,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatalf("close cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
-	if len(frames) != 10 || int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
+	if len(frames) != 8 || int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
 		t.Fatalf("close cast frames=%x, want acceptance cluster", frames)
 	}
 	if player.rushDashIssuedSnapshot() {
@@ -357,7 +354,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatalf("far cast handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
-	if len(frames) != 10 || int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
+	if len(frames) != 8 || int32(binary.LittleEndian.Uint32(frames[3][4:])) != 707 {
 		t.Fatalf("far cast frames=%x, want acceptance (distance-decoupled)", frames)
 	}
 	if player.peekPendingCast(time.Now()) == nil {
@@ -456,8 +453,8 @@ func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
 	}
 	// 首受理簇（jn 32.642 官服定版，CurSkillID 勘误后）：CurSkillID +
 	// CurSkillTarget + msg25 + msg707 + 状态四连 = 8 帧。
-	if frames := conn.Frames()[base:]; len(frames) != 10 {
-		t.Fatalf("expired-cooldown press frames=%d, want 10-frame acceptance cluster+clock pair", len(frames))
+	if frames := conn.Frames()[base:]; len(frames) != 8 {
+		t.Fatalf("expired-cooldown press frames=%d, want 8-frame acceptance cluster", len(frames))
 	}
 }
 
@@ -485,7 +482,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		id: "CS_rush_unlearned", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -534,7 +531,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 	// 自冲落地（上报点距目标 ≤3m，未发 c61=步行落地形态）：
 	// PauseSkill+msg26+LogicState 对+fight_relation+0x1F×1+337+c1=40+
 	// msg19+CantMove/CantParry=11 帧（步行无 CantMove 清前导、单 0x1F）。
-	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 5, Y: 0, Z: 0}, 5, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -555,7 +552,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 
 	// 重新暂存后走完整冲刺链：上报点距目标 6m ∈ (5.0, 6.5] → c61 簇
 	//（零成本定义 6 帧），终点=目标身前 bind、y+1.0。
-	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -639,7 +636,7 @@ func TestRushMovementUpload220DrivesArrival(t *testing.T) {
 		id: "CS_rush_unlearned", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}

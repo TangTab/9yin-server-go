@@ -68,7 +68,7 @@ func newGMInternalMux(token string, hub *gmHub, info gmHealthInfo) http.Handler 
 			writer.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
-		gmapi.WriteJSON(writer, http.StatusOK, hub.snapshots())
+		hub.writeSessionsTagged(writer, request)
 	})
 	mux.HandleFunc("/internal/v1/sessions/", func(writer http.ResponseWriter, request *http.Request) {
 		hub.serveSessionCommand("/internal/v1/sessions/", "internal", writer, request)
@@ -94,6 +94,7 @@ func newGMInternalMux(token string, hub *gmHub, info gmHealthInfo) http.Handler 
 	mux.HandleFunc("/internal/v1/catalog/neigongs", hub.neigongsHandler)
 	mux.HandleFunc("/internal/v1/catalog/repute/status", hub.reputeStatusHandler)
 	mux.HandleFunc("/internal/v1/catalog/origin/status", hub.originStatusHandler)
+	mux.HandleFunc("/internal/v1/catalog/manifest", hub.manifestHandler)
 	mux.HandleFunc("/internal/v1/minimal-login", hub.minimalLoginHandler)
 	return withBearerAuth(token, mux)
 }
