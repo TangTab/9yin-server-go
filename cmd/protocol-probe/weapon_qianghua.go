@@ -26,6 +26,7 @@ package main
 import (
 	"log"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -125,7 +126,16 @@ func loadQiangHuaCatalog(path string) *qiangHuaCatalog {
 			rule.packs = splitIntList(value)
 		}
 	})
+	// pending 是 map（解析期按下标聚合），遍历序随机：不排序则 byJob
+	// 每职业的规则顺序每次起服洗牌，resolveRule 的「首条在册规则」随机
+	// 命中不同档位（强化计费漂移 + 测试 flaky，2026-11-12 定位）。INI
+	// 节号升序即官方档位序。
+	ordered := make([]*qiangHuaRule, 0, len(pending))
 	for _, rule := range pending {
+		ordered = append(ordered, rule)
+	}
+	sort.Slice(ordered, func(i, j int) bool { return ordered[i].id < ordered[j].id })
+	for _, rule := range ordered {
 		if len(rule.packs) == 0 || rule.item == "" {
 			continue
 		}
@@ -282,6 +292,9 @@ func handleQiangHuaCustom(h *itemSession, custom clientCustomMessage) (bool, err
 			if err := pushBagItemFrames(h.link, h.roleID, fresh); err != nil {
 				log.Printf("%s: qianghua 861 bag frames: %v", h.remote, err)
 			}
+			// 清格+重发同槽位也会清掉客户端挂着的模板包/随机属性行，
+			// 按原槽位补推（普通武器无包无随机零帧）。
+			h.pushRandomPropsForBag(fresh.configID, fresh.uid, fresh.viewID, fresh.slot)
 		}
 	}
 	log.Printf("%s: qianghua 861 config=%s view=%d rule=%d packs=%v cost=%d stone=%s x%d",

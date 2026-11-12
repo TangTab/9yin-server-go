@@ -139,10 +139,10 @@ func TestStarterInnerPowerViewUsesNegotiatedBookFields(t *testing.T) {
 	if got := player.progress.books[0].staticData; got != 5 {
 		t.Fatalf("ng_wd_001 StaticData=%d, want classic visible-buff value 5", got)
 	}
-	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("1742,11000001,7A5C0B,3,")) {
+	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("1742,1105C0E3,3DEFBAE,3,")) {
 		t.Fatalf("level-30 neigong BufferInfo=%q", got)
 	}
-	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_wd_001,local-4,3,285212673-8018955,")) {
+	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_wd_001,local-4,3,285589731-64945070,")) {
 		t.Fatalf("level-30 neigong BufferListStr=%q", got)
 	}
 	// 官方全量公式（55866/12173 抓包解出的系数）：属性分量 + 内功 pack。
@@ -245,7 +245,7 @@ func TestTaoHuaInnerPowerUsesClassicVisibleRoute(t *testing.T) {
 	if err := player.equipNeiGong("ng_th_001"); err != nil {
 		t.Fatal(err)
 	}
-	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("347A,11000001,7A5C0B,3,")) {
+	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("347A,1105C0E3,3DEFBAE,3,")) {
 		t.Fatalf("碧波心法 BufferInfo=%q", got)
 	}
 }
@@ -265,10 +265,10 @@ func TestYiHuaInnerPowerUsesSharedClassicVisibleRoute(t *testing.T) {
 	if got := player.stateSnapshot(); got.BaseMaxHP != 1000 || got.MaxHP != 5829 || got.BaseMaxMP != 500 || got.MaxMP != 2235 {
 		t.Fatalf("明玉神功 server caps=%+v, want base 1000/500 total 5829/2235", got)
 	}
-	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("3311,11000001,7A5C0B,3,")) {
+	if got := player.bufferInfo(innerPowerBuffSlot, time.Now()); !bytes.HasPrefix([]byte(got), []byte("3311,1105C0E3,3DEFBAE,3,")) {
 		t.Fatalf("明玉神功 BufferInfo=%q", got)
 	}
-	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_yh_001,local-4,3,285212673-8018955,")) {
+	if got := player.bufferListString(time.Now()); !bytes.Contains([]byte(got), []byte("buf_ng_yh_001,local-4,3,285589731-64945070,")) {
 		t.Fatalf("明玉神功 BufferListStr=%q", got)
 	}
 	// 五维线上值 85/87/100/127/97：MaxHPAdd=2·85+7·87+4050=4829、
@@ -961,5 +961,71 @@ func TestAttributeDerivedAddsMatchOfficialCapture(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// TestZhenpaiParryAddLandsInAddColumn 镇派兵器"招架耐力上限"必须落
+// MaxParryAdd@477 Add 列（客户端上限=MaxParry+MaxParryAdd 推导），
+// 不能只折进 ParryValue@475 总量位——2026-11-12 真机「加的招架耐力
+// 的上限没变」根因；475 恒等于 476+477 推导和。
+func TestZhenpaiParryAddLandsInAddColumn(t *testing.T) {
+	player := newPlayerActor("镇派侠", 0)
+	player.mu.Lock()
+	player.progress.zhenpaiEquip = zhenpaiEquipBonus{parry: 30000}
+	base := player.progress.attributes.maxParry
+	bookAdd := int32(0)
+	if equipped := player.progress.book(player.progress.curNeiGong); equipped != nil {
+		bookAdd = equipped.maxParryAdd
+	}
+	player.mu.Unlock()
+
+	props := map[string]int32{}
+	for _, property := range player.progressProperties() {
+		props[property.Name] = property.Value.I32
+	}
+	if got := props["MaxParryAdd"]; got != bookAdd+30000 {
+		t.Fatalf("MaxParryAdd=%d, want 书分量 %d + 镇派 30000（Add 列须含镇派）", got, bookAdd)
+	}
+	// 475 在 stateProperties() 域（progressProperties 不带 ParryValue）。
+	stateProps := map[string]int32{}
+	for _, property := range player.stateProperties() {
+		stateProps[property.Name] = property.Value.I32
+	}
+	if got := stateProps["ParryValue"]; got != base+bookAdd+30000 {
+		t.Fatalf("ParryValue=%d, want MaxParry %d + MaxParryAdd %d", got, base, bookAdd+30000)
+	}
+	if got, want := stateProps["ParryValue"], props["MaxParry"]+props["MaxParryAdd"]; got != want {
+		t.Fatalf("ParryValue=%d != MaxParry+MaxParryAdd=%d（475 ≠ 476+477 推导和）", got, want)
+	}
+
+	// 面板补帧须带 477：换装/换实力档瞬间客户端 Add 列才有刷新源。
+	sink := &frameSink{}
+	if err := player.pushZhenpaiPanelFrame(sink); err != nil {
+		t.Fatal(err)
+	}
+	if len(sink.frames) != 1 {
+		t.Fatalf("panel frames=%d, want 1", len(sink.frames))
+	}
+	frame := sink.frames[0]
+	if frame[0] != 0x10 {
+		t.Fatalf("frame head=%#x, want 0x10", frame[0])
+	}
+	count := int(binary.LittleEndian.Uint16(frame[10:]))
+	got := map[uint16]int32{}
+	offset := 12
+	for i := 0; i < count; i++ {
+		if offset+6 > len(frame) {
+			t.Fatalf("frame truncated at prop %d", i)
+		}
+		index := binary.LittleEndian.Uint16(frame[offset:])
+		// 本帧五属性（581/582/475/477/694）全 Int32 线型。
+		got[index] = int32(binary.LittleEndian.Uint32(frame[offset+2:]))
+		offset += 6
+	}
+	if v, ok := got[propMaxParryAdd]; !ok || v != bookAdd+30000 {
+		t.Fatalf("panel frame MaxParryAdd@%d=%d(ok=%t), want %d", propMaxParryAdd, v, ok, bookAdd+30000)
+	}
+	if v, ok := got[propParryValue]; !ok || v != base+bookAdd+30000 {
+		t.Fatalf("panel frame ParryValue@%d=%d(ok=%t), want %d", propParryValue, v, ok, base+bookAdd+30000)
 	}
 }

@@ -281,6 +281,27 @@ func Validate(body CommandBody) (Command, error) {
 			body.Amount = 1
 		}
 		command.ItemConfig, command.Amount, command.WearNow = strings.TrimSpace(body.ItemConfig), body.Amount, body.WearNow
+	case "gm_generate_weapon":
+		// 模板生成（带词条装备）三动作（Java LoginFlow applyGenerate*
+		// 同域）：武器=类型+职业；词条构造在游戏会话循环执行器。
+		switch body.WeaponType {
+		case 101, 102, 103, 104, 105, 106, 107, 108, 122:
+		default:
+			return command, fmt.Errorf("weaponType 必须是 101-108/122（刀/剑/匕首/双刀/双剑/双刺/长棍/短棍/重剑）")
+		}
+		if body.Crafter != "cook" && body.Crafter != "smith" {
+			return command, fmt.Errorf("crafter 必须是 cook（厨师）或 smith（铁匠）")
+		}
+		command.WeaponType, command.Crafter = body.WeaponType, body.Crafter
+	case "gm_generate_armor":
+		switch body.ArmorSlot {
+		case "helmet", "amulet", "cloth", "pants", "leg", "shoes", "wrist", "ear", "ring":
+		default:
+			return command, fmt.Errorf("armorSlot 必须是 helmet/amulet/cloth/pants/leg/shoes/wrist/ear/ring")
+		}
+		command.ArmorSlot = body.ArmorSlot
+	case "gm_generate_bracer":
+		// 无负载动作：护腕模板与词条构造在游戏会话循环执行器。
 	case "mount_ride":
 		// 坐骑骑乘（Java GmRemote mount_ride 同域）：mountConfig=坐骑道具
 		// config（tool_item script=Mount 且目录有模型映射）；再点同骑=下马。

@@ -47,6 +47,9 @@ type CommandBody struct {
 	ItemConfig  string  `json:"itemConfig"`
 	MountConfig string  `json:"mountConfig"` // mount_ride 的坐骑道具 config
 	BingluArgs  string  `json:"bingluArgs"`  // binglu 的 set/max 子命令串
+	WeaponType  int32   `json:"weaponType"`  // gm_generate_weapon 类型 101-108/122
+	Crafter     string  `json:"crafter"`     // gm_generate_weapon 职业 cook/smith
+	ArmorSlot   string  `json:"armorSlot"`   // gm_generate_armor 部位 helmet/…/ring
 	Amount      int32   `json:"amount"`
 	WearNow     bool    `json:"wearNow"`
 	CardId      int32   `json:"cardId"`
@@ -103,6 +106,9 @@ type Command struct {
 	ItemConfig     string // grant_item/add_item 的物品配置 ID
 	MountConfig    string // mount_ride 的坐骑道具 config（面板 mountConfig 键）
 	BingluArgs     string // binglu 的 set/max 子命令串（面板 bingluArgs 键）
+	WeaponType     int32  // gm_generate_weapon 武器类型 101刀-108短棍/122重剑（面板 weaponType 键）
+	Crafter        string // gm_generate_weapon 职业 cook/smith（面板 crafter 键）
+	ArmorSlot      string // gm_generate_armor 防具部位键（面板 armorSlot 键）
 	Amount         int32  // grant_item 数量
 	WearNow        bool   // grant_item 穿戴形态（否则入背包）
 	CardId         int32  // equip_card/equip_hair 皮肤号

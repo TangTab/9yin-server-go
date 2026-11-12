@@ -219,3 +219,4 @@ func TestQingGongBigJumpKeepsCapabilityBuffOnEnd(t *testing.T) {
 		t.Fatal("big jump end must not clear the activation capability buff")
 	}
 }
+

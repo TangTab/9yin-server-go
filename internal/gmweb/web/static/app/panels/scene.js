@@ -196,7 +196,7 @@ function renderWeather(host) {
       selected = row;
     },
   });
-  const fade = numField({ label: "过渡秒", value: 10, min: 0, max: 600, width: "70px" });
+  const fade = numField({ label: "过渡秒", value: 10, min: 0, max: 600, width: "150px" });
   picker.refresh(); // 进板块即拉一次（本地过滤型目录）
   const apply = h("ax-btn", { label: "切换天气", theme: "prim" });
   apply.addEventListener("click", () => {
@@ -220,7 +220,7 @@ function renderClone(host) {
     desc: "列表来自服务端已安装的 cloneinfo.ini。进入即切场景并按波次逐级揭示；副本内击杀不复活，全灭自动推进；进入不限次，销毁回进本前位置。",
   });
   const configSelect = h("ax-select", { search: true, full: true, "max-height": "260", placeholder: "选择副本（可输入过滤）" });
-  const funSelect = h("ax-select", { style: "width:110px;" });
+  const funSelect = h("ax-select", { style: "width:150px;" });
   const note = hint();
   const byConfig = new Map();
   catalog("/api/clones")
@@ -248,7 +248,7 @@ function renderClone(host) {
       value: JSON.stringify([1, 2, 3, 4].filter((n) => allowed.includes(n)).map((n) => ({ label: names[n], value: String(n) }))),
     });
   }
-  configSelect.addEventListener("changed", syncFun);
+  configSelect.addEventListener("change", syncFun); // ax-select 只派发原生 change（「changed」走 .on() 通道）
   const enter = h("ax-btn", { label: "创建并进入副本", theme: "prim" });
   enter.addEventListener("click", () => {
     const config = configSelect.value;

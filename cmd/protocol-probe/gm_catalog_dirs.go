@@ -196,12 +196,28 @@ func parseGMSceneRows(data []byte) []gmSceneRow {
 		rows = append(rows, gmSceneRow{
 			Config:   value,
 			Resource: resource,
-			Name:     sceneDisplayName(value, resource),
+			Name:     gmSceneDisplayName(value, resource),
 			ID:       id,
 		})
 	})
 	sort.Slice(rows, func(i, j int) bool { return rows[i].ID < rows[j].ID })
 	return rows
+}
+
+// gmSceneDisplayName 场景目录显示名（GM 面板专用）：idres config/resource
+// 两键命中即中文；未命中的（test04/plot2 等测试场景，idres 本无名）回落
+// resource 基名——面板侧没人本地化 scene_name_NNN 键，发编码键只会显示
+// 「编码」（sceneDisplayName 的 scene_name_NNN 回落是给选角 f24 用的，
+// 客户端可本地化，两处口径不同）。
+func gmSceneDisplayName(config, resource string) string {
+	tables := sceneNameTablesOf()
+	if name := tables.nameByKey[strings.ToLower(config)]; name != "" {
+		return name
+	}
+	if name := tables.nameByKey[strings.ToLower(resource)]; name != "" {
+		return name
+	}
+	return resource
 }
 
 func (hub *gmHub) scenesHandler(writer http.ResponseWriter, request *http.Request) {
@@ -254,8 +270,11 @@ func (hub *gmHub) giftBoxesHandler(writer http.ResponseWriter, request *http.Req
 
 // ---------------------------------------------------------------------------
 // /api/titles —— 称号目录（「称号管理」节）。share/rule/title.ini 给
-// 称号 ID → TitleType；中文名在服务端称号 record 数据里，静态表解析
-// 不到，按前端约定 name 退化为空串（下拉显示「ID — [类型N]」）。
+// 称号 ID → TitleType；中文名 = 客户端本地化键 role_title_<id>（form_
+// role_info/form_title.lua GetText 同链），主表在 text/chineses/desc.idres
+// （UTF-8，覆盖约 1300/3474，未命中的多为测试/结拜特殊段，客户端同样
+// 键回退，这里 name 留空、前端回落显示 ID）。行序：有名称号在前
+//（面板首屏可读、可按名称过滤），无名称号殿后，各自 ID 升序。
 // ---------------------------------------------------------------------------
 
 type gmTitleRow struct {
@@ -269,19 +288,53 @@ var (
 	gmTitleRows     []gmTitleRow
 )
 
+// gmTitleNamesOnce 装载 desc.idres 的 role_title_<id> → 中文名（只收该
+// 前缀，与 stringname.idres 的场景/物品名表互不相干）。
+var (
+	gmTitleNamesOnce sync.Once
+	gmTitleNames     map[int]string
+)
+
+func loadGMTitleNames() map[int]string {
+	gmTitleNamesOnce.Do(func() {
+		gmTitleNames = map[int]string{}
+		if content, err := readResourceBytes(filepath.Join(defaultModernTextRoot, "chineses", "desc.idres")); err == nil {
+			for _, raw := range strings.Split(strings.TrimPrefix(string(content), "\ufeff"), "\n") {
+				line := strings.TrimSpace(raw)
+				if !strings.HasPrefix(line, "role_title_") {
+					continue
+				}
+				key, value, found := strings.Cut(line, "=")
+				if !found || value == "" {
+					continue
+				}
+				id, err := strconv.Atoi(strings.TrimPrefix(key, "role_title_"))
+				if err != nil {
+					continue
+				}
+				if _, exists := gmTitleNames[id]; !exists {
+					gmTitleNames[id] = value
+				}
+			}
+		}
+	})
+	return gmTitleNames
+}
+
 func loadGMTitleRows() []gmTitleRow {
 	gmTitleRowsOnce.Do(func() {
 		gmTitleRows = []gmTitleRow{}
 		if data, err := gmReadINI(defaultModernShareRoot, "rule", "title.ini"); err == nil {
-			gmTitleRows = parseGMTitleRows(data)
+			gmTitleRows = parseGMTitleRows(data, loadGMTitleNames())
 		}
 	})
 	return gmTitleRows
 }
 
 // parseGMTitleRows 纯函数装载：节名 = 称号 ID，TitleType = 类型；
-// 非 TitleType 键与非数字节跳过，行按 ID 升序。
-func parseGMTitleRows(data []byte) []gmTitleRow {
+// 非 TitleType 键与非数字节跳过；行序 = 有名称号在前（ID 升序）、
+// 无名称号殿后（ID 升序）。
+func parseGMTitleRows(data []byte, names map[int]string) []gmTitleRow {
 	var ids []int
 	typeByTitle := map[int]int{}
 	gmScanINI(data, func(section, key, value string) {
@@ -300,10 +353,16 @@ func parseGMTitleRows(data []byte) []gmTitleRow {
 	})
 	sort.Ints(ids)
 	rows := make([]gmTitleRow, 0, len(ids))
+	unnamed := make([]gmTitleRow, 0)
 	for _, id := range ids {
-		rows = append(rows, gmTitleRow{ID: id, Type: typeByTitle[id]})
+		row := gmTitleRow{ID: id, Type: typeByTitle[id], Name: names[id]}
+		if row.Name == "" {
+			unnamed = append(unnamed, row)
+		} else {
+			rows = append(rows, row)
+		}
 	}
-	return rows
+	return append(rows, unnamed...)
 }
 
 func (hub *gmHub) titlesHandler(writer http.ResponseWriter, request *http.Request) {

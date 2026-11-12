@@ -758,8 +758,16 @@ func TestShapedMultihitPicksUpNewEntrants(t *testing.T) {
 	definition := combatSkillDefinition{
 		id: "CS_test_shaped", script: "SkillNormal",
 		targetMode: skillTargetCasterCircle, areaRadius: 6,
+		// 生产目录恒有 skillEffectDamage（compileSkillDamage base>0 时
+		// 追加），resolveSkillDamageTargets 的 hasDamage 闸门消费它。
+		effects:    []combatSkillEffect{{kind: skillEffectDamage, amount: 10}},
 		damageRows: []skillDamageRow{{formulaID: 9, damageType: "PhyDamage", params: []string{"10", "20"}}},
-		hitFrameMs: []time.Duration{5 * time.Millisecond, 20 * time.Millisecond},
+		// 帧位须给「快照后、首跳前」的进场留足余量：命中跳走 time.
+		// AfterFunc 墙钟，go test ./... 并行多包抢 CPU 时主协程可能
+		// 迟 5ms+ 才写 transform——窄窗（5/20ms）下 NPC96 错过首跳，
+		// 断言随机红（2026-11-12 flaky 定位）。150ms 首跳+450ms 次跳
+		// 下进场余量 30 倍，仍覆盖「两段都吃到」的语义。
+		hitFrameMs: []time.Duration{150 * time.Millisecond, 450 * time.Millisecond},
 	}
 	custom := clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: 211},
@@ -776,7 +784,7 @@ func TestShapedMultihitPicksUpNewEntrants(t *testing.T) {
 	world.run.mu.Lock()
 	world.run.writeNpcTransform(worldcore.EntityID(forkNPCID(96)), worldcore.Transform{X: 1, Z: 0})
 	world.run.mu.Unlock()
-	time.Sleep(60 * time.Millisecond)
+	time.Sleep(700 * time.Millisecond)
 
 	hp95, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(95)))
 	hp96, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(96)))

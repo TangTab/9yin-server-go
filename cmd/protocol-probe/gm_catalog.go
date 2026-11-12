@@ -142,9 +142,25 @@ func (hub *gmHub) fashionCatalogHandler(writer http.ResponseWriter, request *htt
 	gmWriteTaggedJSON(writer, request, gmapi.HashTag("fashion", "g"+strconv.FormatUint(gmNameGen(), 10), gmBootStamp), categories)
 }
 
-// itemsHandler GET /api/items?q=<中文名或ConfigID>&view=<0..4>：「所有
-// 道具与换装」搜索（Java GmCatalog.items 同口径；目录装载见
-// gm_item_catalog.go）。
+// gmItemsPage 分页信封（带 offset 的请求返回此形态；新 AXUI 面板消费）。
+type gmItemsPage struct {
+	Rows   []gmItemRow `json:"rows"`
+	Total  int         `json:"total"`
+	Offset int         `json:"offset"`
+	Limit  int         `json:"limit"`
+}
+
+// gmItemsPageLimit 分页默认/上限。
+const (
+	gmItemsPageLimitDefault = 50
+	gmItemsPageLimitMax     = 300
+)
+
+// itemsHandler GET /api/items?q=<中文名或ConfigID>&view=<0..4>
+// [&offset=<n>&limit=<n>]：「所有道具与换装」搜索（Java GmCatalog.items
+// 同口径；目录装载见 gm_item_catalog.go）。带 offset 时返回分页信封
+// {rows,total,offset,limit}（total=命中总数，可翻完整目录）；不带 offset
+// 保持旧裸数组（旧 console-features.js 依赖，上限 gmItemSearchLimit）。
 func (hub *gmHub) itemsHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet {
 		writer.WriteHeader(http.StatusMethodNotAllowed)
@@ -155,8 +171,33 @@ func (hub *gmHub) itemsHandler(writer http.ResponseWriter, request *http.Request
 		view = parsed
 	}
 	query := request.URL.Query().Get("q")
-	results := gmItems.search(query, view)
-	gmWriteTaggedJSON(writer, request, gmapi.HashTag("items", query, strconv.Itoa(view), gmBootStamp), results)
+	params := request.URL.Query()
+	rawOffset := params.Get("offset")
+	if rawOffset == "" {
+		results := gmItems.search(query, view)
+		gmWriteTaggedJSON(writer, request, gmapi.HashTag("items", query, strconv.Itoa(view), gmBootStamp), results)
+		return
+	}
+	offset, offsetErr := strconv.Atoi(rawOffset)
+	if offsetErr != nil || offset < 0 {
+		gmapi.WriteError(writer, http.StatusBadRequest, "invalid offset")
+		return
+	}
+	limit := gmItemsPageLimitDefault
+	if rawLimit := params.Get("limit"); rawLimit != "" {
+		if parsed, err := strconv.Atoi(rawLimit); err != nil || parsed <= 0 {
+			gmapi.WriteError(writer, http.StatusBadRequest, "invalid limit")
+			return
+		} else if parsed > gmItemsPageLimitMax {
+			limit = gmItemsPageLimitMax
+		} else {
+			limit = parsed
+		}
+	}
+	rows, total := gmItems.searchPage(query, view, offset, limit)
+	gmWriteTaggedJSON(writer, request,
+		gmapi.HashTag("items", query, strconv.Itoa(view), strconv.Itoa(offset), strconv.Itoa(limit), gmBootStamp),
+		gmItemsPage{Rows: rows, Total: total, Offset: offset, Limit: limit})
 }
 
 // gmCardRow 是 /api/cards 与 /api/hair-cards 的行形态（console-features.js

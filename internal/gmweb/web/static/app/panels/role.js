@@ -74,7 +74,7 @@ function renderFive(host) {
   const fields = {};
   const row = h("div", { class: "field-row" });
   for (const [key, label, def] of defs) {
-    fields[key] = numField({ label, value: def, min: 0, width: "110px" });
+    fields[key] = numField({ label, value: def, min: 0, width: "150px" });
     row.appendChild(fields[key].node);
   }
   const note = hint();
@@ -98,7 +98,7 @@ function renderPower(host) {
     title: "实力等级",
     desc: "设置玩家 PowerLevel（0–160），服务端自动按功力等级映射称号 LevelTitle 并刷新界面。",
   });
-  const value = numField({ label: "实力等级", value: 0, min: 0, max: 160, width: "110px" });
+  const value = numField({ label: "实力等级", value: 0, min: 0, max: 160, width: "150px" });
   body.appendChild(h("div", { class: "field-row" }, [value.node]));
   body.appendChild(
     h("div", { class: "actions-row" }, [
@@ -136,7 +136,7 @@ function renderVitals(host) {
   const fields = {};
   const row = h("div", { class: "field-row" });
   for (const [key, label, def] of defs) {
-    fields[key] = numField({ label, value: def, width: "110px" });
+    fields[key] = numField({ label, value: def, width: "150px" });
     row.appendChild(fields[key].node);
   }
   body.appendChild(row);
@@ -158,9 +158,9 @@ function renderAlignment(host) {
     title: "性格善恶",
     desc: "设置玩家 善值/恶值/基础狂邪，服务端自动计算性格标签（0正常 1侠 2恶 3狂 4邪）与性格数值并刷新界面。",
   });
-  const justice = numField({ label: "善值", value: 0, width: "110px" });
-  const evil = numField({ label: "恶值", value: 0, width: "110px" });
-  const freeBase = numField({ label: "基础狂邪", value: 0, width: "110px" });
+  const justice = numField({ label: "善值", value: 0, width: "150px" });
+  const evil = numField({ label: "恶值", value: 0, width: "150px" });
+  const freeBase = numField({ label: "基础狂邪", value: 0, width: "150px" });
   body.appendChild(h("div", { class: "field-row" }, [justice.node, evil.node, freeBase.node]));
   const apply = h("ax-btn", { label: "设置性格善恶", theme: "prim" });
   apply.addEventListener("click", async () => {

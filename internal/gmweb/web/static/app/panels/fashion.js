@@ -53,8 +53,8 @@ function renderFashionGrant(host) {
   const note = hint();
   const picker = catalogPicker({
     recentKey: "fashion",
-    placeholder: "选择分类后拉取目录，再按中文名或 ConfigID 过滤",
-    emptyText: "请先选择分类",
+    placeholder: "按中文名或 ConfigID 过滤，可先选分类缩小范围",
+    emptyText: "没有匹配的时装/身份装",
     fetchRows: async (query) => {
       if (!categories.length) {
         categories = await catalog("/api/fashion-catalog");
@@ -84,10 +84,7 @@ function renderFashionGrant(host) {
     const hit = categories.find((c) => c.label === label);
     return hit ? hit.key : "";
   }
-  catSelect.addEventListener("changed", () => picker.refresh());
-  // 进入板块即拉一次目录（F1：目录请求跟随板块；缓存后零成本），
-  // 同时填充分类下拉——否则分类为空、必须先输入关键词才能看到数据。
-  picker.refresh();
+  catSelect.addEventListener("change", () => picker.refresh()); // ax-select 只派发原生 change（「changed」走 .on() 通道）
   body.appendChild(h("div", { class: "field-row" }, [h("label", {}, ["分类"]), catSelect]));
   body.appendChild(picker.node);
   const wear = h("ax-btn", { label: "立即穿戴", theme: "prim" });

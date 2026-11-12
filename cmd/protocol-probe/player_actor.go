@@ -18,27 +18,28 @@ import (
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
-// fork 对象 id 方案（docs/id-system-analysis.md §5/§6，权威=fork exe
-// 9yin-game-native-menu.exe 抓包 127-0-0-1-57378 真机进游戏会话）：
-// 玩家 = (0x11000001, 0x7A5C0B) 常量对。0x0B PlayerEntry 首携此对，
-// 客户端据此绑定自体化身并做移动/接近子系统的高位类型位校验。
-// 此前真机三连败的重新解读：51357=(0x11000001,1) 败在 owner=1 撞
-// NPC 专属位；49925=(0x07000001,618) 败在官服 0x07 段非本客户端方言；
-// （1,1) 基线能进但 id 校验门全关。fork 的精确对此前从未上过真机——
-// "obj 必须恒 1"的旧结论作废，本对即 fork 逐字节实证的可进游戏对。
-// 会话变量而非 const：留 per-role 演进口；默认对（无 DB 场景/测试）
-// 即 fork 常量。
+// 玩家对象 id 方案（2026-11-12 晚修订，docs/id-system-analysis.md §5/§6
+// 背景）：玩家 = (0x1105C0E3, 0x03DEFBAE)——登陆-all.pcapng 官服玩家
+// 原对。此前 fork 对 (0x11000001, 0x7A5C0B) 只被验过「可进游戏」；
+// 但本服 NPC obj 分配带 = 0x11000002..0x1100xxxx，玩家 0x11000001 恰好
+// 夹在 NPC 序列开头——官服玩家 id 永远离 NPC 带（NPC=0x0700/0x1100 低
+// 段，玩家=0x0703xxxx/0x1105xxxx 高段）。冲锋自走四轮真机（簇/钟/踢帧
+// 逐字节全对）零武装后，按用户假设切换官方式段外大计数器对验证
+// 「移动/接近子系统按 id 带校验自体化身」：id 在 NPC 带内 → 登录/渲染
+// 正常但接近子系统拒绝武装。此前三连败重读：51357=(0x11000001,1) 败
+// owner=1 撞 NPC 专属位；49925=(0x07000001,618) 败在玩家 id 又落官服
+// NPC 低段 0x0700xxxx——同为「玩家 id 进 NPC 带」问题。
+// 会话变量而非 const：留 per-role 演进口；默认对即官服原对。
 var (
-	playerObjectID uint32 = 0x11000001
-	playerOwnerID  uint32 = 0x7A5C0B
+	playerObjectID uint32 = 0x1105C0E3
+	playerOwnerID  uint32 = 0x03DEFBAE
 )
 
-// setPlayerWireIdentity 角色装载时定玩家 (obj, owner)：当前照抄 fork
-// 常量对（fork 抓包实证其客户端不验 owner 取值规则，只验配对合法
-// 性）；roleID 参数保留为将来 per-role 分配的接入口，暂不参与取值。
+// setPlayerWireIdentity 角色装载时定玩家 (obj, owner)：当前照抄官服
+// 登陆对；roleID 参数保留为将来 per-role 分配的接入口，暂不参与取值。
 func setPlayerWireIdentity(roleID uint32) {
-	playerObjectID = 0x11000001
-	playerOwnerID = 0x7A5C0B
+	playerObjectID = 0x1105C0E3
+	playerOwnerID = 0x03DEFBAE
 	_ = roleID
 }
 
@@ -1420,6 +1421,11 @@ func (p *playerActor) bufferInfo(slot uint16, now time.Time) string {
 	return p.bufferInfoLocked(slot, now)
 }
 
+// bufferInfoLocked 槽帧 CSV 六段=StaticData HEX、obj HEX、owner HEX、level、
+// 到期 1601 纪元毫秒 HEX、剩余跳（55866 实证 '11CE,11000001,7A5C0B,1,
+// C38DC7DD957,1'：seg5 解码=1601 纪元 2026-11-04，非 Unix——旧 UnixMilli
+// 值被客户端按 1601 纪元解出 1657 年=即刻过期，非战斗格挡按下即被客户端
+// 撤销（战斗态姿态由 LogicState 撑住故只在非战斗暴露）。
 func (p *playerActor) bufferInfoLocked(slot uint16, now time.Time) string {
 	buff, ok := p.buffs[slot]
 	if !ok || !buff.expiresUTC.After(now.UTC()) {
@@ -1429,7 +1435,7 @@ func (p *playerActor) bufferInfoLocked(slot uint16, now time.Time) string {
 	if level < 1 {
 		level = 1
 	}
-	return fmt.Sprintf("%X,%X,%X,%X,%X,%X", buff.staticData, playerObjectID, playerOwnerID, level, buff.expiresUTC.UnixMilli(), 1)
+	return fmt.Sprintf("%X,%X,%X,%X,%X,%X", buff.staticData, playerObjectID, playerOwnerID, level, epoch1601Ms(buff.expiresUTC), 1)
 }
 
 // bufferListString 遵循已保留的 BufferModule::RefreshBuffersInfo 布局：
@@ -2227,6 +2233,98 @@ func sendPlayerLocationAndVitals(conn sceneMessageConnection, player *playerActo
 		return err
 	}
 	return conn.WriteFrame(vitals)
+}
+
+// physicsLoginFrameSpec 官服登录「玩家物理档案」单属性帧规格：登陆-all
+// .pcapng t=10.87（玩家 obj 0x1105c0e3/0x3defbae）逐帧提取。isInt 对应
+// 0x09 表 type3(Int32)，其余 type5(Float32)——两套表（fork/2433）34 名
+// 全在位且线型一致（2026-11-12 核对）。
+type physicsLoginFrameSpec struct {
+	name  string
+	f     float32
+	i     int32
+	isInt bool
+}
+
+// physicsLoginFrameSpecs 官服序 = A 段（ParryRes/HeartSpeed/Rush 族/速度
+// 族 16 条）→ B 段（Climb→MaxGJ 18 条）。官服两段之间夹建视图/m386/
+// AnnotateCombineRec，这里连发、段内相对序与官服一致。JumpSpeed 官服
+// 5.5（0x0D 档 fork 旧值 8.0 由本流覆盖回官值）；Add 族官服登录流不发。
+var physicsLoginFrameSpecs = []physicsLoginFrameSpec{
+	{"PhyParryDamRes", 50, 0, false},
+	{"MagicParryDamRes", 50, 0, false},
+	{"HPHeartSpeed", 0, 5000, true},
+	{"MPHeartSpeed", 0, 5000, true},
+	{"GRushRange", 5.0, 0, false},
+	{"ARushRange", 8.0, 0, false},
+	{"WRushRange", 8.0, 0, false},
+	{"UnderWaterSpeed", 10.0, 0, false},
+	{"UnderWaterModifySpeed", 1.0, 0, false},
+	{"WalkSpeed", 1.28, 0, false},
+	{"RunSpeed", 3.9, 0, false},
+	{"ActionSpeed", 1.0, 0, false},
+	{"MoveSpeed", 3.9, 0, false},
+	{"JumpSpeed", 5.5, 0, false},
+	{"Gravity", 9.8, 0, false},
+	{"DropHeightPub", 10.0, 0, false},
+	{"ClimbSpeed", 7.5, 0, false},
+	{"DriftSpeed", 7.5, 0, false},
+	{"AdvancedJumpSpeed", 23.0, 0, false},
+	{"AdvancedGlideSpeed", 5.0, 0, false},
+	{"AdvancedFastfallSpeed", 30.0, 0, false},
+	{"AdvancedFastfallDist", 40.0, 0, false},
+	{"UnderSandSpeed", 5.8, 0, false},
+	{"WaterRushSpeed", 25.0, 0, false},
+	{"WaterRushDist", 6.5, 0, false},
+	{"DriftJumpSpeed", 6.0, 0, false},
+	{"SndJumpSpeed", 6.0, 0, false},
+	{"ThdJumpSpeed", 6.0, 0, false},
+	{"AirRushSpeed", 15.0, 0, false},
+	{"AirRushDist", 12.0, 0, false},
+	{"LandRushSpeed", 25.0, 0, false},
+	{"LandRushDist", 6.5, 0, false},
+	{"MaxQingGongPoint", 0, 150, true},
+	{"MaxGJQingGongPoint", 0, 150, true},
+}
+
+// sendPlayerPhysicsLoginStream 官服登录玩家物理档案的 0x10 单属性流
+//（docs/冲锋自走触发链官服定版与差集.md P2）：官服在 0x09/0x0A 表后、
+// 建视图前给玩家自己逐帧连发 34 条单属性 0x10。这些值我们虽已在 0x0D
+// 建对象大档携带，但官服形态是逐帧变更事件——若客户端引擎的接近/冲锋
+// 子系统在属性更新沿上武装（默认→5.0），一次性大档不触发同一路径。
+// 登录一次（sendPlayerSpawn 之后），场景重入不重发。
+func sendPlayerPhysicsLoginStream(conn sceneMessageConnection, player *playerActor) error {
+	player.mu.Lock()
+	motion := player.motion
+	state := player.snapshotLocked()
+	player.mu.Unlock()
+	sent := 0
+	for _, spec := range physicsLoginFrameSpecs {
+		entry := clientdata.MustPlayerProperty(spec.name)
+		property := clientdata.IndexedProperty{Index: entry.Index, Name: spec.name}
+		switch {
+		case spec.name == "MoveSpeed":
+			property.Value = clientdata.Float32Value(motion.moveSpeed)
+		case spec.name == "RunSpeed":
+			property.Value = clientdata.Float32Value(motion.runSpeed)
+		case spec.name == "MaxQingGongPoint":
+			property.Value = clientdata.Int32Value(state.MaxQingGongPoint)
+		case spec.isInt:
+			property.Value = clientdata.Int32Value(spec.i)
+		default:
+			property.Value = clientdata.Float32Value(spec.f)
+		}
+		frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{property})
+		if err != nil {
+			return err
+		}
+		if err := conn.WriteFrame(frame); err != nil {
+			return err
+		}
+		sent++
+	}
+	log.Printf("sent player physics login stream frames=%d", sent)
+	return nil
 }
 
 func worldTransform(position role.Position) worldcore.Transform {

@@ -104,6 +104,41 @@ func rushWalkBandAcceptMeters(pending *pendingCastState) float64 {
 	return accept
 }
 
+// rushDashDialect：per-skill c61 授予方言（技能1.pcapng 16 次授予观测，
+// 2026-11-13 定版，docs/技能1pcapng多套路冲锋官服方言.md §1.2/§1.3）。
+// c61 是服务端指令，官服在 m220 上报距目标进入该技能授予窗时 +30~90ms
+// 下发；flag/动画随技能冲刺类别——lock 表三类动作 G=qg_fastrun(flag1)/
+// A=qg_fastruning_s(flag2)/W=swim_rush，0h/2h 后缀=空手/持械。观测窗=各
+// 技能 220 上报距目标带；未列技能回落 G 类（skill_lock_data
+// LockGRushAction）+ 默认窗 (GRushRange, GRushRange+Add]。
+type rushDashDialect struct {
+	windowLo, windowHi float64
+	level              int32
+	action             string // 空=沿用 definition.groundRushAction（G 类）
+}
+
+var officialRushDashDialects = map[string]rushDashDialect{
+	// hyjf02：220@8.1 授予，@6.1/7.3 窗外走入直收（19.1m 按压实证）。
+	"CS_jh_hyjf02": {windowLo: 7.5, windowHi: 8.5},
+	// hsjf02 观测窗 6.3~6.5 = 默认窗，不列。
+	// 空手腿法（0h）与灭剑如虹走 A 类 fastruning flag2；sky 变体空中
+	// 冲刺窗显著更宽（落差 4.2m/平距 7.1m 实证）。
+	"CS_jz_xytf02":     {windowLo: 5.0, windowHi: 7.0, level: 2, action: "qg_fastruning_s_0h_01"},
+	"CS_jz_xytf07_sky": {windowLo: 8.0, windowHi: 11.0, level: 2, action: "qg_fastruning_s_0h_01"},
+	"CS_jz_xytf02_sky": {windowLo: 11.0, windowHi: 14.5, level: 2, action: "qg_fastruning_s_0h_01"},
+	"CS_hs_kfkj02":     {windowLo: 9.0, windowHi: 11.0, level: 2, action: "qg_fastruning_s_2h_01"},
+	"CS_jh_mzjf02":     {windowLo: 5.0, windowHi: 8.0},  // 220@13.8 窗外零授予
+	"CS_jh_mzjf03":     {windowLo: 5.0, windowHi: 14.0}, // 220@13.2 仍授予
+}
+
+// rushDashDialectFor 解析技能授予方言（未列回落默认 G 类窗）。
+func rushDashDialectFor(skillID string) rushDashDialect {
+	if dialect, ok := officialRushDashDialects[skillID]; ok {
+		return dialect
+	}
+	return rushDashDialect{windowLo: rushDashWindowLoMeters(), windowHi: rushDashTriggerMeters()}
+}
+
 // 冲锋簇属性索引（按名映射自本服表；官服现行表同名字 +2 偏移）。
 var (
 	propRushCantMove        = clientdata.MustPlayerProperty("CantMove").Index        // CantMove Byte（fork=203）
@@ -134,6 +169,10 @@ type pendingCastState struct {
 	bindDistance     float32
 	groundRushAction string
 	airborne         bool
+	// c61 授予方言（技能1.pcapng per-skill；未列技能= G 类默认窗）。
+	dashWindowLo, dashWindowHi float64
+	dashLevel                  int32
+	dashAction                 string
 	// geometry：冲锋链几何基准（211 自报目标坐标优先，缺省服务端坐标）。
 	geometry worldcore.Transform
 	// settled：CD/MP 已在 c61 时点结算；落地重入据此跳过重复结算。
@@ -452,6 +491,15 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	now := time.Now().UTC()
 	airborne := castAt.Y-target.Y > rushAirborneYDeltaMeters
 	rearm := player.peekPendingCast(now) != nil
+	dialect := rushDashDialectFor(definition.id)
+	dashLevel := dialect.level
+	if dashLevel == 0 {
+		dashLevel = convertDashLevel
+	}
+	dashAction := dialect.action
+	if dashAction == "" {
+		dashAction = definition.groundRushAction
+	}
 	player.stagePendingCast(&pendingCastState{
 		skillID: definition.id, targetID: targetID, targetOwner: targetOwner,
 		expiresUTC: now.Add(rushPendingWindow),
@@ -463,7 +511,9 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 		mpCost:        definition.mpCost, spCost: definition.spCost, qgCost: definition.qgCost,
 		cooldownCategory: definition.cooldownCategory, cooldownTeam: definition.cooldownTeam,
 		personalCD: definition.personalCD, publicCD: definition.publicCD,
-		taoLu: definition.taoLu,
+		taoLu:        definition.taoLu,
+		dashWindowLo: dialect.windowLo, dashWindowHi: dialect.windowHi,
+		dashLevel: dashLevel, dashAction: dashAction,
 	})
 	type frameBuilder struct {
 		name  string
@@ -500,6 +550,12 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	} else {
 		builders = append(builders, frameBuilder{"CurSkillID", func() ([]byte, error) { return curSkillIDFrame(definition.id) }})
 	}
+	// msg25[30000,'skill_pause']（P0f 鉴别实验结论：撤除后 64006 轮仍零武装
+	// 且体验更差，已回滚恢复）。
+	// **stage 期不发 m24 c61**（技能1.pcapng 2026-11-13 定版：官服受理簇
+	// 零 m24；c61 是服务端指令，仅在 m220 上报进技能授予窗时由
+	// tryRushArrival→issueRushDash 下发——P0c/P0e 的受理期 stage-dash 档2
+	// 系 Java 方言误植，真机实证客户端零消费且非官服帧序）。
 	builders = append(builders,
 		frameBuilder{"msg25", func() ([]byte, error) { return skillPauseFrame(int32(rushPendingWindow / time.Millisecond)) }},
 	)
@@ -537,15 +593,39 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 			return true, err
 		}
 	}
-	// 按压窗口零多发帧（2026-11-12 P0a 定版，官服接近段实证零 S2C）：
-	// 此前的走踢帧（+155ms 0x21 双入口）实为官服对客户端 m15 起跑的
-	// **回显**（echoPlayerMoveIntent 已按官服形态实现），主动发不驱动走位；
-	// 接近 0x1F 锚是传送语义（会把已武装的走拽回按压点）；c61 接近冲刺
-	// 客户端从不执行。三者全撤——接近段只留受理簇 + 状态四连 + m15 回显，
-	// 客户端自走进入 (5.0,6.5] 由 tryRushArrival 发 c61（官服方言）。
-	log.Printf("%s: rush staged skill id=%s dist=%.1fm air=%t rearm=%t window=%s",
-		remote, definition.id, distance, airborne, rearm, rushPendingWindow)
+	log.Printf("%s: rush staged skill id=%s dist=%.1fm air=%t rearm=%t window=%s dest=(%.1f,%.1f,%.1f)",
+		remote, definition.id, distance, airborne, rearm, rushPendingWindow, target.X, target.Y, target.Z)
 	return true, nil
+}
+
+// rushWalkKickFrame 冲锋走踢帧：双入口 0x21（44B playerMoveEcho 条目形，
+// 技能.pcapng f#0202 逐槽精解 2026-11-12 二轮勘误）：**两入口=同一目的
+// 地**（官服样本 947.8/947.9≈bind 点重复两次，非「当前位→目的地」——
+// 一轮的 A→B 双点解读系字节错位误读），angle/speed/orient/尾槽两入口
+// 全同；speed=4.5、orient 恒 **-π**（官服两样本 -3.14，非朝向）、尾双槽
+// 5.5/**9.8**(0x411CCCCD)、intentID 两入口均 0xa0000f01（寻路族）。
+// 官服踢后 0.485s 客户端即起走（其间 s2c 零帧）——踢帧单独触发走位。
+// 注意：踢帧被客户端消费要求钟基正确（m294=m924 单路应答），错方言
+// 下踢帧被当回显吃掉不执行（凌晨三轮实证）。
+func rushWalkKickFrame(castAt, target worldcore.Transform, bind float32) []byte {
+	bindX, bindY, bindZ := rushBindPoint(target, castAt.X, castAt.Z, bind)
+	payload := make([]byte, 3, 3+2*44)
+	payload[0] = 0x21
+	binary.LittleEndian.PutUint16(payload[1:], 2)
+	for i := 0; i < 2; i++ {
+		payload = binary.LittleEndian.AppendUint32(payload, playerObjectID)
+		payload = binary.LittleEndian.AppendUint32(payload, playerOwnerID)
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindX))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindY))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindZ))
+		payload = binary.LittleEndian.AppendUint32(payload, 0x4096268F) // slot3 官服四样本恒 4.689（常量槽非角度，三轮真机+字节 diff 定版）
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(4.5))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(-math.Pi)) // 官服恒 -π
+		payload = binary.LittleEndian.AppendUint32(payload, 0x40B00000)                // 5.5 官服恒定
+		payload = binary.LittleEndian.AppendUint32(payload, 0x411CCCCD)                // 9.8 官服恒定
+		payload = binary.LittleEndian.AppendUint32(payload, 0xa0000f01)                // 寻路族 intentID 两入口同值
+	}
+	return payload
 }
 
 // noteRushStatePing 记录状态四连下发时刻（受理/直收簇内联发送后调用，
@@ -721,7 +801,10 @@ func issueRushDash(link sceneMessageConnection, player *playerActor, target worl
 		return nil
 	}
 	destX, _, destZ := rushBindPoint(target, fromX, fromZ, pending.bindDistance)
-	destY := fromY + rushDashLiftMeters
+	// dest y=目标 y+1.0（技能1.pcapng 四样本拟合：#2 target38.6→39.59、
+	// #5 39.9→40.91、#3 38.6→39.37、#17 4.3→5.33；旧「玩家 y+1.0」系
+	// f 平地样本巧合，坡地会偏）。
+	destY := target.Y + rushDashLiftMeters
 	now := time.Now().UTC()
 	if err := player.commitRushDashCosts(pending, now, true); err != nil {
 		log.Printf("%s: rush dash cost settle failed skill id=%s: %v", remote, pending.skillID, err)
@@ -738,7 +821,15 @@ func issueRushDash(link sceneMessageConnection, player *playerActor, target worl
 		build func() ([]byte, error)
 	}{
 		{"c61-dash", func() ([]byte, error) {
-			return dashRushFrame(destX, destY, destZ, convertDashLevel, pending.groundRushAction)
+			level := pending.dashLevel
+			if level == 0 {
+				level = convertDashLevel
+			}
+			action := pending.dashAction
+			if action == "" {
+				action = pending.groundRushAction
+			}
+			return dashRushFrame(destX, destY, destZ, level, action)
 		}},
 		{"CantMove-set", func() ([]byte, error) {
 			return rushPropertyFrame(propRushCantMove, "CantMove", clientdata.ByteValue(1))
@@ -857,27 +948,26 @@ func handleCastDashLanding(link sceneMessageConnection, player *playerActor, wor
 		if geometry.X != 0 || geometry.Z != 0 {
 			distance := math.Sqrt(float64(square(x-geometry.X) + square(z-geometry.Z)))
 			if distance > rushWalkBandAcceptMeters(pending) {
-				// 超走带的 212：客户端自走已在 65210 会话（2026-11-11
-				// 23:02:27）实证成立——受理簇方言修正后官服客户端会自主
-				// 接近，此形态只应出现在方言错位期。不再服务端驱动接近
-				//（c61/0x1F 步进=玩家一下一下瞬移的根因，「fork 客户端
-				// 从未自走」2026-11-08 定论作废）；未发冲刺时静默忽略，
-				// 交给 30s 过期/重按出清。
-				if !player.rushDashIssuedSnapshot() {
-					log.Printf("%s: in-place landing beyond walk band ignored skill id=%s dist=%.1fm",
-						remote, pending.skillID, distance)
+				// 冲刺已发未执行（客户端拉回/暂存期按了别的技能）——安全作废。
+				if player.rushDashIssuedSnapshot() {
+					cancelPendingCast(link, player, x, y, z, orient, remote)
 					return true, nil
 				}
-				// 冲刺已发未执行（客户端拉回/暂存期按了别的技能）——安全作废。
-				cancelPendingCast(link, player, x, y, z, orient, remote)
-				return true, nil
+				// 超走带的 212 无条件落地（Java b 线方言：handleDashLanding
+				// 无距离闸直接 resumePendingCastAt）。54949 会话实证走带闸
+				// 静默忽略致客户端狂发 212×278 无响应——客户端停点即其
+				// 认定的射程内（其目标认知与服务端 NPC 实时位可差 5m+，
+				// 按 211 自报目标坐标算距才与客户端同口径）。
+				log.Printf("%s: dash landing beyond walk band accepted skill id=%s dist=%.1fm",
+					remote, pending.skillID, distance)
+			} else {
+				// 走带内的 212[尾0/1] = 步行/冲刺落地（b 4.41m 走到 3.17m 落地
+				// 实证；本服客户端 ~3.6m 即停连发 212[0]，63073 会话实证——
+				// 认可半径 max(GRushRange, castRange+1)：hyjf02 型 6 米技能官方
+				// 212 落在 5.5~5.8m 全认可，技能.pcapng 定版）。
+				log.Printf("%s: dash landing in walk band skill id=%s dist=%.1fm dash=%t",
+					remote, pending.skillID, distance, player.rushDashIssuedSnapshot())
 			}
-			// 走带内的 212[尾0/1] = 步行/冲刺落地（b 4.41m 走到 3.17m 落地
-			// 实证；本服客户端 ~3.6m 即停连发 212[0]，63073 会话实证——
-			// 认可半径 max(GRushRange, castRange+1)：hyjf02 型 6 米技能官方
-			// 212 落在 5.5~5.8m 全认可，技能.pcapng 定版）。
-			log.Printf("%s: dash landing in walk band skill id=%s dist=%.1fm dash=%t",
-				remote, pending.skillID, distance, player.rushDashIssuedSnapshot())
 		}
 		// 目标不可测距（自增益目标/world 未就绪）：维持落地续招。
 		resumePendingCastAt(link, player, world, x, y, z, orient, "dash-landing", remote)
@@ -1409,7 +1499,14 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 	if player.rushDashIssuedSnapshot() {
 		return
 	}
-	if distance > rushDashTriggerMeters() {
+	// 授予窗 per-skill（技能1.pcapng 2026-11-13：官服对 m220 进窗应答 c61，
+	// 窗外零应答——hyjf02 220@8.1 授予 / @6.1、7.3 走入直收；xytf_sky 窗
+	// 达 14m）。未列表回落 (GRushRange, +Add]。
+	windowLo, windowHi := pending.dashWindowLo, pending.dashWindowHi
+	if windowHi <= 0 {
+		windowLo, windowHi = rushDashWindowLoMeters(), rushDashTriggerMeters()
+	}
+	if distance > windowHi || distance <= windowLo {
 		// 官方方言：接近段由客户端自走（jn 32.642 受理簇同毫秒 state7；
 		// 65210 会话 23:02:27 官服簇下方客户端实发自走帧实证）。旧的
 		// 服务端 c61/0x1F 驱动（「fork 客户端从未自走」2026-11-08 定论
@@ -1417,11 +1514,8 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 		// 等客户端走进冲刺窗口由 issueRushDash 接手。
 		return
 	}
-	if distance <= rushDashWindowLoMeters() {
-		return
-	}
 	log.Printf("%s: rush within dash window skill id=%s dist=%.1fm in (%.1f, %.1f]",
-		remote, pending.skillID, distance, rushDashWindowLoMeters(), rushDashTriggerMeters())
+		remote, pending.skillID, distance, windowLo, windowHi)
 	if err := issueRushDash(link, player, geometry, x, y, z, remote); err != nil {
 		log.Printf("%s: rush dash issue: %v", remote, err)
 	}

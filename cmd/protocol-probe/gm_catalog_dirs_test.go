@@ -102,13 +102,21 @@ TitleType=1
 [2000]
 TitleType=3
 NotTitle=ignore
+
+[2001]
+TitleType=3
 `
-	rows := parseGMTitleRows(gmGBK(t, sample))
-	if len(rows) != 3 {
-		t.Fatalf("rows=%d want 3: %+v", len(rows), rows)
+	// 名称表：1003/2001 有名（2001 故意不传名），15/2000 无名。
+	rows := parseGMTitleRows(gmGBK(t, sample), map[int]string{1003: "有名称号"})
+	if len(rows) != 4 {
+		t.Fatalf("rows=%d want 4: %+v", len(rows), rows)
 	}
-	if rows[0].ID != 15 || rows[0].Type != 2 || rows[2].ID != 2000 || rows[2].Type != 3 {
-		t.Fatalf("rows=%+v", rows)
+	// 有名称号在前（ID 升序），无名称号殿后（ID 升序）。
+	if rows[0].ID != 1003 || rows[0].Name != "有名称号" || rows[0].Type != 1 {
+		t.Fatalf("rows[0]=%+v（有名称号应排最前）", rows[0])
+	}
+	if rows[1].ID != 15 || rows[1].Type != 2 || rows[3].ID != 2001 || rows[3].Name != "" {
+		t.Fatalf("rows=%+v（无名称号殿后、ID 升序、名空串）", rows)
 	}
 }
 

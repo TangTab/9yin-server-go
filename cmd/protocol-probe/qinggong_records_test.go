@@ -173,7 +173,7 @@ func TestQingGongWaterBuffsUseSeparateNativeSlots(t *testing.T) {
 	if err != nil || already || expires.IsZero() {
 		t.Fatalf("activate drift already=%t expires=%v err=%v", already, expires, err)
 	}
-	if got := player.bufferListString(now); !strings.Contains(got, "buf_qg_drift,local-2,1,285212673-8018955,") {
+	if got := player.bufferListString(now); !strings.Contains(got, "buf_qg_drift,local-2,1,285589731-64945070,") {
 		t.Fatalf("drift BufferListStr=%q", got)
 	}
 	already, _, err = activateQingGongBuff(player, drift, now)
@@ -188,7 +188,7 @@ func TestQingGongWaterBuffsUseSeparateNativeSlots(t *testing.T) {
 	if already, expires, err = activateQingGongBuff(player, jump, now); err != nil || already || expires.IsZero() {
 		t.Fatalf("activate jump already=%t expires=%v err=%v", already, expires, err)
 	}
-	if got := player.bufferListString(now); !strings.Contains(got, "buf_qg_dst,local-3,1,285212673-8018955,") {
+	if got := player.bufferListString(now); !strings.Contains(got, "buf_qg_dst,local-3,1,285589731-64945070,") {
 		t.Fatalf("jump BufferListStr=%q", got)
 	}
 }
@@ -284,10 +284,10 @@ func TestGrantRedSuperArmorUsesNativeBufferInfoProperty(t *testing.T) {
 	if frame[0] != 0x10 || binary.LittleEndian.Uint16(frame[10:]) < 2 {
 		t.Fatalf("BufferInfo update header=%x", frame)
 	}
-	if !strings.Contains(string(frame), "21EA,11000001,7A5C0B,1,") {
+	if !strings.Contains(string(frame), "21EA,1105C0E3,3DEFBAE,1,") {
 		t.Fatalf("missing native BufferInfo serialization: %q", frame)
 	}
-	if !strings.Contains(string(frame), "buf_fixed_red,local-1,1,285212673-8018955,") {
+	if !strings.Contains(string(frame), "buf_fixed_red,local-1,1,285589731-64945070,") {
 		t.Fatalf("missing native BufferListStr serialization: %q", frame)
 	}
 }

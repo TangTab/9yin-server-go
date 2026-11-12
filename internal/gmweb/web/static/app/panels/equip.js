@@ -14,7 +14,7 @@ function renderItems(host) {
     desc: "目录合并 equipment.ini 与 tool_item.ini，中文名以 stringname.idres 为准（与游戏内显示同源）。ViewID 把道具分别放入普通、装备、材料、任务背包；「立即穿戴」数量固定 1。宝物洗炼入口在选中宝物后可用。",
   });
   let selected = null;
-  const amount = numField({ label: "数量", value: 1, min: 1, max: 9999, width: "90px" });
+  const amount = numField({ label: "数量", value: 1, min: 1, max: 9999, width: "150px" });
   const viewSelect = h("ax-select", {
     content: JSON.stringify([
       { label: "全部分类", value: "0" },
@@ -27,23 +27,32 @@ function renderItems(host) {
   });
   const picker = catalogPicker({
     recentKey: "items-grant",
-    placeholder: "输入中文名或 ConfigID，例如：久仙刀、药、礼包（服务端搜索，上限 300）",
+    placeholder: "输入中文名或 ConfigID，例如：久仙刀、药、礼包（服务端搜索分页，可翻完整目录）",
     emptyText: "没有找到匹配项",
-    fetchRows: async (query, signal) => {
-      if (!query) return [];
+    fetchRows: async (query, signal, page) => {
       const view = viewSelect.value || "0";
-      const rows = await search("/api/items?q=" + encodeURIComponent(query) + "&view=" + view, signal);
-      return rows.map((row) => ({
-        label: row.name || row.configId,
-        sub: row.configId + " · " + ["普通", "装备", "材料", "任务"][row.viewId - 1] + (row.wearable ? " · 可穿戴" : ""),
-        value: row.configId,
-      }));
+      // 带 offset/limit 走服务端分页信封 {rows,total}：目录 10 万+ 行，
+      // 旧「一次截 300 条」把总量与翻页都做成了假的。
+      const data = await search(
+        "/api/items?q=" + encodeURIComponent(query) + "&view=" + view + "&offset=" + (page.offset || 0) + "&limit=" + (page.limit || 50),
+        signal
+      );
+      return {
+        rows: (data.rows || []).map((row) => ({
+          label: row.name || row.configId,
+          sub: row.configId + " · " + ["普通", "装备", "材料", "任务"][row.viewId - 1] + (row.wearable ? " · 可穿戴" : ""),
+          value: row.configId,
+        })),
+        total: data.total || 0,
+      };
     },
     onPick(row) {
       selected = row;
     },
   });
-  viewSelect.addEventListener("changed", () => picker.refresh());
+  // ax-select 只派发原生 change（CustomEvent）与 input；「changed」仅存在于
+  // AXUI 的 .on()/on-changed 订阅通道，addEventListener("changed") 永远不触发。
+  viewSelect.addEventListener("change", () => picker.refresh());
   const grant = actionBtn({
     label: "加入对应背包",
     build: () => (selected ? { action: "grant_item", itemConfig: selected.value, amount: amount.get() ?? 1 } : (toast("请先搜索并选择道具", "warn"), null)),
@@ -212,7 +221,7 @@ function renderTemplate(host) {
       { label: "双刀", value: "104" }, { label: "双剑", value: "105" }, { label: "双刺", value: "106" },
       { label: "长棍", value: "107" }, { label: "短棍", value: "108" }, { label: "重剑", value: "122" },
     ]),
-    style: "width:110px;",
+    style: "width:150px;",
     value: "102",
   });
   const crafterSelect = h("ax-select", {
@@ -228,7 +237,7 @@ function renderTemplate(host) {
       { label: "裤子", value: "pants" }, { label: "绑腿", value: "leg" }, { label: "鞋子", value: "shoes" },
       { label: "耳环", value: "ear" }, { label: "戒指", value: "ring" },
     ]),
-    style: "width:110px;",
+    style: "width:150px;",
   });
   const genWeapon = actionBtn({
     label: "生成武器",
@@ -306,12 +315,12 @@ function renderBinglu(host) {
       { label: "双刺", value: "6" }, { label: "长棍", value: "7" }, { label: "短棍", value: "8" },
       { label: "暗器", value: "10" }, { label: "奇门", value: "11" },
     ]),
-    style: "width:110px;",
+    style: "width:150px;",
     value: "1",
   });
-  const cur = numField({ label: "等级", value: 9, min: 0, width: "70px" });
-  const fill = numField({ label: "进度", value: 0, min: 0, width: "70px" });
-  const max = numField({ label: "上限（空=不改）", value: "", min: 0, width: "90px" });
+  const cur = numField({ label: "等级", value: 9, min: 0, width: "150px" });
+  const fill = numField({ label: "进度", value: 0, min: 0, width: "150px" });
+  const max = numField({ label: "上限（空=不改）", value: "", min: 0, width: "150px" });
   const set = actionBtn({
     label: "设置",
     build: () => {

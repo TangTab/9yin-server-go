@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"testing"
+	"time"
 )
 
 func TestActiveParryAcceptsModernIntegralSubtype(t *testing.T) {
@@ -50,9 +52,9 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 		}}
 	}
 
-	// 按下（0=engage）：官方同构两帧——msg169 + 0x10 格挡属性帧，
-	// 槽 11 激活。格挡不清怒（55866 复核撤销，见 active_parry.go），
-	// 且按下前后怒气值保持不变。
+	// 按下（0=engage）：官服六件套序（a.pcapng 5.144 定版，2026-11-12 P2）
+	// ——MoveSpeed+RunSpeedAdd+InParry+ParryUpSpeedAdd+BufferInfo4 五单属性帧
+	// + msg169 + InManualParry，共 7 帧。槽 11 激活；格挡不清怒。
 	spBefore := player.skillSP()
 	if err := handleBlockStateCustom(conn, player, blockMsg(0), "test"); err != nil {
 		t.Fatal(err)
@@ -61,10 +63,10 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 		t.Fatalf("engage must not touch SP: %d -> %d", spBefore, got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 2 {
-		t.Fatalf("engage frames=%d, want notice+state", len(frames))
+	if len(frames) != 7 {
+		t.Fatalf("engage frames=%d, want official six-frame order (5 props + notice + InManualParry)", len(frames))
 	}
-	notice, state := frames[0], frames[1]
+	notice, state := frames[5], frames[0]
 	if notice[0] != 0x1E || binary.LittleEndian.Uint16(notice[1:]) != 9 {
 		t.Fatalf("parry notice header=%x", notice)
 	}
@@ -80,8 +82,8 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if !bytes.Contains(notice, wide) {
 		t.Fatalf("parry notice missing wide name: %x", notice)
 	}
-	if state[0] != 0x10 || !bytes.Contains(state, []byte{0, 0}) {
-		t.Fatalf("parry state frame=%x", state)
+	if state[0] != 0x10 || binary.LittleEndian.Uint16(state[12:]) != propParryTokenMoveSpeed {
+		t.Fatalf("parry state frame=%x (want MoveSpeed single-prop head of official order)", state)
 	}
 	if !player.parryingSnapshot() {
 		t.Fatal("engage did not set parrying")
@@ -91,30 +93,52 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if err := handleBlockStateCustom(conn, player, blockMsg(0), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 2 {
+	if got := len(conn.Frames()); got != 7 {
 		t.Fatalf("duplicate engage appended frames: %d", got)
 	}
 
-	// 松开（非 0）：清槽 + 两帧。
+	// 松开（非 0）：官服七帧释放序（m169 移除+六单属性）。
 	if err := handleBlockStateCustom(conn, player, blockMsg(1), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 4 {
-		t.Fatalf("release frames=%d", got)
+	if got := len(conn.Frames()); got != 14 {
+		t.Fatalf("release frames=%d, want official seven-frame release order", got)
 	}
 	if player.parryingSnapshot() {
 		t.Fatal("release kept parrying")
 	}
 
-	// 游离的重复松开：只重推一帧空态（客户端重同步）。
+	// 游离的重复松开：重推完整两帧对（169 摘除事件 + 0x10 空态）——
+	// 客户端"已格挡"死锁只认 169 摘除事件，单属性帧不解锁（2026-11-12）。
 	if err := handleBlockStateCustom(conn, player, blockMsg(1), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 5 {
-		t.Fatalf("stray release frames=%d, want one resync frame", got)
+	frames = conn.Frames()
+	if got := len(frames); got != 21 {
+		t.Fatalf("stray release frames=%d, want official release order resync", got)
+	}
+	if frames[14][0] != 0x1E || !bytes.Contains(frames[14], []byte("BuffInParry\x00")) {
+		t.Fatalf("stray resync missing 169 remove event: %x", frames[14])
+	}
+	if flag := binary.LittleEndian.Uint32(frames[14][9:13]); flag != 1 {
+		t.Fatalf("stray resync 169 end flag=%d, want 1 (release)", flag)
 	}
 	if player.parryingSnapshot() {
 		t.Fatal("stray release re-engaged parry")
+	}
+}
+
+// 格挡槽串到期段必须是 1601 纪元毫秒 HEX（55866 '11CE,11000001,7A5C0B,1,
+// C38DC7DD957,1' 实证；UnixMilli 会被客户端按 1601 纪元解成 1657 年=
+// 即刻过期，非战斗格挡按下即被客户端撤销）。
+func TestParryBuffSerialEpoch1601(t *testing.T) {
+	player := newPlayerActor("纪元侠", 0)
+	engagedAt := time.Date(2026, 11, 12, 11, 30, 0, 0, time.UTC)
+	serial := player.engageParryBuff(engagedAt)
+	wantExpiry := engagedAt.Add(24 * time.Hour).UnixMilli() + windowsEpochDeltaMs
+	want := fmt.Sprintf("11CE,%X,%X,1,%X,1", uint32(playerObjectID), uint32(playerOwnerID), wantExpiry)
+	if serial != want {
+		t.Fatalf("parry serial=%q want=%q", serial, want)
 	}
 }
 
@@ -203,8 +227,8 @@ func TestChangeWarningRejectsExtraPayloadWhileCastingAndWhileParrying(t *testing
 	if got := player.logicStateSnapshot(); got != 0 {
 		t.Fatalf("parrying toggle flipped state to %d", got)
 	}
-	// 至此连接上只有格挡按下产生的 notice+state 两帧（预警拒绝不回帧）。
-	if frames := conn.Frames(); len(frames) != 2 {
+	// 至此连接上只有格挡按下产生的官服七帧序（预警拒绝不回帧）。
+	if frames := conn.Frames(); len(frames) != 7 {
 		t.Fatalf("warning rejections emitted frames: %x", frames)
 	}
 }

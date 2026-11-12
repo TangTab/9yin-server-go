@@ -611,3 +611,86 @@ func TestArrangePersistsThroughStore(t *testing.T) {
 		t.Fatalf("item_b slot=%d, want 4", got)
 	}
 }
+
+// TestMoveSwapArrangeRePushModifyPackRecords 镇派兵器模板包 record（394/395）
+// 挂在客户端 (view,slot) 上：移动/交换/整理清格后必须按新槽位重推，
+// 否则背包内换位后属性消失（重登由 pushLoginRandomProps 才恢复——
+// 2026-11-12 真机报告根因）。
+func TestMoveSwapArrangeRePushModifyPackRecords(t *testing.T) {
+	c := &randomEquipCatalog{
+		itemFields: map[string]randomItemFields{
+			"blade_zpsb_test": {propPacks: []int{95258}, skillPacks: []int{9659}},
+			"yaopin_plain":    {},
+		},
+	}
+	// 注入：先落定 Once 再覆写全局（TestPushModifyPackRecordsFrames 同法）。
+	randomEquipCatalogOf()
+	old := randomEquipCat
+	randomEquipCat = c
+	defer func() { randomEquipCat = old }()
+
+	recordTargets := func(frames [][]byte, record uint16) []uint32 {
+		var targets []uint32
+		for _, f := range frames {
+			if len(f) < 16 || f[0] != 0x11 || f[1] != 1 {
+				continue
+			}
+			if binary.LittleEndian.Uint16(f[10:]) != record {
+				continue
+			}
+			targets = append(targets, binary.LittleEndian.Uint32(f[6:]))
+		}
+		return targets
+	}
+
+	// 交换：装备页 slot1(镇派) <-> slot5(普通)。
+	player := playerWithBag(
+		bagRow{slot: 1, configID: "blade_zpsb_test", itemType: 2201, amount: 1, viewID: 2},
+		bagRow{slot: 5, configID: "yaopin_plain", itemType: 2101, amount: 3, viewID: 2},
+	)
+	conn := &captureMessageConnection{}
+	h := newTestItemSession(conn, player, nil)
+	if handled, err := handleMoveItemCustom(h, moveItemMsg(121, 1, 121, 5)); err != nil || !handled {
+		t.Fatalf("swap handled=%t err=%v", handled, err)
+	}
+	if got := bagSlotOf(t, player, "blade_zpsb_test", 2); got != 5 {
+		t.Fatalf("blade slot=%d, want 5", got)
+	}
+	frames := conn.Frames()
+	if got := recordTargets(frames, 394); len(got) != 1 || got[0] != 5 {
+		t.Fatalf("swap prop-pack targets=%v, want [5]（新槽位重推）", got)
+	}
+	if got := recordTargets(frames, 395); len(got) != 1 || got[0] != 5 {
+		t.Fatalf("swap skill-pack targets=%v, want [5]", got)
+	}
+
+	// 移动到空格：slot5(镇派) -> slot9。
+	player2 := playerWithBag(
+		bagRow{slot: 5, configID: "blade_zpsb_test", itemType: 2201, amount: 1, viewID: 2},
+	)
+	conn2 := &captureMessageConnection{}
+	h2 := newTestItemSession(conn2, player2, nil)
+	if handled, err := handleMoveItemCustom(h2, moveItemMsg(121, 5, 121, 9)); err != nil || !handled {
+		t.Fatalf("move handled=%t err=%v", handled, err)
+	}
+	if got := recordTargets(conn2.Frames(), 394); len(got) != 1 || got[0] != 9 {
+		t.Fatalf("move prop-pack targets=%v, want [9]", got)
+	}
+
+	// 整理：yaopin@1 不动、镇派 slot3 -> slot2，record 落新槽位。
+	player3 := playerWithBag(
+		bagRow{slot: 1, configID: "yaopin_plain", itemType: 2101, amount: 3, viewID: 2},
+		bagRow{slot: 3, configID: "blade_zpsb_test", itemType: 2201, amount: 1, viewID: 2},
+	)
+	conn3 := &captureMessageConnection{}
+	h3 := newTestItemSession(conn3, player3, nil)
+	if handled, err := handleArrangeItemCustom(h3, arrangeMsg(121)); err != nil || !handled {
+		t.Fatalf("arrange handled=%t err=%v", handled, err)
+	}
+	if got := bagSlotOf(t, player3, "blade_zpsb_test", 2); got != 2 {
+		t.Fatalf("arrange blade slot=%d, want 2", got)
+	}
+	if got := recordTargets(conn3.Frames(), 394); len(got) != 1 || got[0] != 2 {
+		t.Fatalf("arrange prop-pack targets=%v, want [2]", got)
+	}
+}

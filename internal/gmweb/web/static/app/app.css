@@ -11,18 +11,25 @@
   --gm-muted: #8b93a3;
 }
 
+html {
+  height: 100%;
+}
+
 html,
 body[scheme="dark"] {
   background: var(--gm-bg);
   color: var(--gm-text);
 }
 
+/* 上中下应用壳：body 锁定视口高，顶/底栏固定，中间 .layout 自动吃满剩余高，
+ * 页面整体不滚动，导航与内容各自内滚。 */
 body {
   margin: 0;
   font: 14px/1.6 "Segoe UI", system-ui, "Microsoft YaHei", sans-serif;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* ---- 顶栏 ---- */
@@ -33,9 +40,8 @@ body {
   padding: 10px 16px;
   border-bottom: 1px solid var(--gm-line);
   background: linear-gradient(90deg, #14171d, #1c2027);
-  position: sticky;
-  top: 0;
   z-index: 20;
+  flex: none;
   flex-wrap: wrap;
 }
 
@@ -107,6 +113,7 @@ body {
   display: flex;
   flex: 1;
   min-height: 0;
+  position: relative;
 }
 
 #gm-nav {
@@ -116,9 +123,6 @@ body {
   background: #12151c;
   padding: 10px 8px 24px;
   overflow-y: auto;
-  max-height: calc(100vh - 96px);
-  position: sticky;
-  top: 53px;
 }
 
 #gm-nav .grp {
@@ -181,6 +185,7 @@ body {
   flex: 1;
   padding: 16px 20px 40px;
   min-width: 0;
+  overflow-y: auto;
 }
 
 /* ---- 板块卡 ---- */
@@ -345,8 +350,7 @@ body {
   background: #12151c;
   font-size: 12px;
   color: var(--gm-muted);
-  position: sticky;
-  bottom: 0;
+  flex: none;
 }
 
 #conn-status .dot {
@@ -413,14 +417,14 @@ body {
 /* ---- 窄屏 ---- */
 @media (max-width: 960px) {
   #gm-nav {
-    position: fixed;
+    /* 抽屉锚定 .layout 上下沿（layout 已是视口内滚区），不再写死顶/底栏像素 */
+    position: absolute;
     left: 0;
-    top: 53px;
-    bottom: 30px;
+    top: 0;
+    bottom: 0;
     z-index: 30;
     transform: translateX(-100%);
     transition: transform 0.2s;
-    max-height: none;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
   }
 

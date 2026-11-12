@@ -11,11 +11,11 @@ function renderCurrency(host) {
     title: "碎银 / 官银 / 黄金 / 怒气",
     desc: "四项均为本会话数值（重登重置；官银/黄金的 vip.json 级持久化待接）：碎银=CapitalType1、官银=CapitalType2、黄金=CapitalType0、怒气=SP（0–100，设置后立即下发属性帧）。",
   });
-  const silver = numField({ label: "碎银", value: 99999, min: 0, width: "110px" });
-  const guanYin = numField({ label: "官银", value: 99999, min: 0, width: "110px" });
-  const gold = numField({ label: "黄金", value: 9999, min: 0, width: "110px" });
-  const sp = numField({ label: "怒气", value: 100, min: 0, max: 100, width: "90px" });
-  const rage = numField({ label: "自动回复/秒", value: 0, min: 0, max: 1000, width: "110px" });
+  const silver = numField({ label: "碎银", value: 99999, min: 0, width: "150px" });
+  const guanYin = numField({ label: "官银", value: 99999, min: 0, width: "150px" });
+  const gold = numField({ label: "黄金", value: 9999, min: 0, width: "150px" });
+  const sp = numField({ label: "怒气", value: 100, min: 0, max: 100, width: "150px" });
+  const rage = numField({ label: "自动回复/秒", value: 0, min: 0, max: 1000, width: "150px" });
   body.appendChild(h("div", { class: "field-row" }, [silver.node, guanYin.node, gold.node, sp.node]));
 
   const setSilver = h("ax-btn", { label: "设置碎银" });
@@ -60,7 +60,7 @@ function renderGifts(host) {
 
   // —— 礼包（小目录，一次拉全量前端过滤） ——
   let giftSelected = null;
-  const giftAmount = numField({ label: "数量", value: 1, min: 1, max: 99, width: "70px" });
+  const giftAmount = numField({ label: "数量", value: 1, min: 1, max: 99, width: "150px" });
   const giftPicker = catalogPicker({
     recentKey: "giftboxes",
     placeholder: "搜索礼包名字或 ID（拉取一次后本地过滤）",
@@ -82,7 +82,6 @@ function renderGifts(host) {
     },
   });
   const addGift = h("ax-btn", { label: "礼包加入背包", theme: "prim" });
-  giftPicker.refresh(); // 进板块即拉一次（本地过滤型目录）
   addGift.addEventListener("click", () => {
     if (!giftSelected) return toast("请先选择一个礼包", "warn");
     applyCommand(
@@ -99,13 +98,12 @@ function renderGifts(host) {
 
   // —— 任意物品（服务端搜索直连） ——
   let itemSelected = null;
-  const itemAmount = numField({ label: "数量", value: 1, min: 1, max: 9999, width: "90px" });
+  const itemAmount = numField({ label: "数量", value: 1, min: 1, max: 9999, width: "150px" });
   const itemPicker = catalogPicker({
     recentKey: "items",
     placeholder: "输入中文名或 ConfigID，例如：久仙刀、药、礼包（服务端搜索）",
     emptyText: "没有找到匹配项",
     fetchRows: async (query, signal) => {
-      if (!query) return [];
       const rows = await search("/api/items?q=" + encodeURIComponent(query), signal);
       return rows.map((row) => ({
         label: row.name || row.configId,

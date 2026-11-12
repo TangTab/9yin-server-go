@@ -425,7 +425,10 @@ func (h *itemSession) grantBagItem(entry grantableItem, amount int32) int32 {
 	return row.slot
 }
 
-// grantBagItemRow 入包并返回权威行（uid/seq 回填；GM 发放随机属性接线用）。
+// grantBagItemRow 入包并返回权威行（uid/seq 回填）。入包即整推属性
+// record（模板包 394/395 + 宝物/娃娃随机掷值并存档）——GM 发放/开箱/
+// 拾取/商店统一走这里；此前仅 GM 发放路径补推，拾取/开箱入包属性缺失
+// 至重登。
 func (h *itemSession) grantBagItemRow(entry grantableItem, amount int32) (bagRow, bool) {
 	category := entry.viewID
 	if category < 1 || category > 4 {
@@ -453,6 +456,7 @@ func (h *itemSession) grantBagItemRow(entry grantableItem, amount int32) (bagRow
 	if err := pushBagItemFrames(h.link, h.roleID, inserted); err != nil {
 		log.Printf("%s: push granted row: %v", h.remote, err)
 	}
+	h.pushRandomPropsForBag(inserted.configID, inserted.uid, inserted.viewID, inserted.slot)
 	return inserted, true
 }
 
@@ -744,6 +748,9 @@ func moveBagRowBetweenViews(h *itemSession, fromView, fromSlot, toView, toSlot i
 	if err := pushBagItemFrames(h.link, h.roleID, moved); err != nil {
 		log.Printf("%s: move push row: %v", h.remote, err)
 	}
+	// 属性 record 跟随槽位：0x19 清格会连带清掉客户端挂在旧 (view,slot)
+	// 的 394/395 模板包行与随机属性行，行落位后须按新槽位整推。
+	h.pushRandomPropsForBag(moved.configID, moved.uid, moved.viewID, moved.slot)
 	log.Printf("%s: move 30 bag[%d:%d]%d->bag[%d:%d] config=%s", h.remote, fromView, fromSlot, fromCategory, toView, slot, item.configID)
 }
 
@@ -792,6 +799,10 @@ func swapBagRows(h *itemSession, fromView, fromSlot int32, src bagRow, srcIndex 
 		if err := pushBagItemFrames(h.link, h.roleID, row); err != nil {
 			log.Printf("%s: swap push row: %v", h.remote, err)
 		}
+		// 交换后属性 record 须按各自新槽位重推：清格已把客户端挂在旧
+		// (view,slot) 的 394/395/随机属性行清掉，只重发行不重推 record =
+		// 镇派兵器背包内交换后属性消失（重登才恢复）的根因。
+		h.pushRandomPropsForBag(row.configID, row.uid, row.viewID, row.slot)
 	}
 	log.Printf("%s: move 30 swap bag[%d:%d]<->bag[%d:%d] (%s <-> %s)",
 		h.remote, fromSlot, src.viewID, toSlot, dst.viewID, src.configID, dst.configID)
@@ -1003,6 +1014,8 @@ func handleArrangeItemCustom(h *itemSession, custom clientCustomMessage) (bool, 
 		if err := pushBagItemFrames(h.link, h.roleID, moved); err != nil {
 			log.Printf("%s: arrange push row: %v", h.remote, err)
 		}
+		// 同 swap：槽位变化后按新槽位整推属性 record（无包无随机零帧）。
+		h.pushRandomPropsForBag(moved.configID, moved.uid, moved.viewID, moved.slot)
 	}
 	log.Printf("%s: arrange 36 view=%d moved=%d cells (grouped by config, compacted)", h.remote, view, len(moves))
 	return true, nil

@@ -11,6 +11,10 @@ set "SERVER=%ROOT%9yin-game-server.exe"
 set "LOGDIR=%ROOT%logs"
 set "LISTER=%ROOT%loopback-lister.ps1"
 
+set NINEYIN_PROPERTY_TABLE=hybrid2433
+set NINEYIN_NPC_DETAIL_0X28=1
+set NINEYIN_PLAYER_PROFILE_0X28=1
+
 if not exist "%SERVER%" (
   echo ERROR: server executable not found:
   echo %SERVER%

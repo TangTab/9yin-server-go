@@ -26,8 +26,8 @@ function renderKeybind(host) {
     title: "快捷键方案",
     desc: "游戏内按键窗口点【确定/应用】或切换 3D/2.5D 时客户端自动上传整套配置并落盘，下次登录自动恢复。此处手动调试：绑定需按键 ID（7=跳跃、1=前进、2=后退…）。",
   });
-  const keyId = numField({ label: "键位ID", value: 7, width: "70px" });
-  const key = textField({ label: "按键", value: "Space", width: "90px" });
+  const keyId = numField({ label: "键位ID", value: 7, width: "150px" });
+  const key = textField({ label: "按键", value: "Space", width: "150px" });
   const ctrl = h("input", { type: "checkbox" });
   const shift = h("input", { type: "checkbox" });
   const alt = h("input", { type: "checkbox" });

@@ -51,10 +51,10 @@
           </select></label>
         <label>间隔(秒)
           <input id="bot-support-interval" type="number" value="5" min="1" max="60"
-            style="min-width: 70px; width: 70px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <label>治疗量
           <input id="bot-support-heal" type="number" value="500" min="0" max="100000"
-            style="min-width: 90px; width: 90px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="botSupportConfigure()">配置辅助技能</button>
         <pre id="bot-state">读取伙伴状态中……</pre>
       </section>
@@ -79,7 +79,7 @@
           <option value="">请先搜索道具</option>
         </select>
         <input id="item-amount" type="number" value="1" min="1" max="9999"
-          style="min-width: 90px; width: 90px" />
+          style="min-width: 150px; width: 150px" />
         <button onclick="grantItem(false)">加入对应背包</button><button onclick="grantItem(true)">立即穿戴</button>
         <div id="item-hint" class="muted"></div>
         <p class="muted">
@@ -123,7 +123,7 @@
           设置怒气</button><button onclick="addSP(10)">+10</button><button onclick="addSP(50)">+50</button><button
           onclick="fillSP()">回满</button><br />
           <label>自动回复/秒
-          <input id="rage-recovery" type="number" value="0" min="0" max="1000" style="min-width: 110px; width: 110px" /></label><button
+          <input id="rage-recovery" type="number" value="0" min="0" max="1000" style="min-width: 150px; width: 150px" /></label><button
             onclick="setRageRecovery()">应用</button><span class="muted">（0=关闭；官方满档 5；会话级，重登归零）</span>
       </section>
       <section>
@@ -135,13 +135,13 @@
           NINEYIN_NPC_CHASE）；关闭后仇恨照常持有但怪停在出生点不动——冲锋测试（隔离追击 0x1F 节流造成的终点漂移）专用方言。
         </p>
         <label>批量间隔/秒
-        <input id="respawn-interval" type="number" value="30" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
+        <input id="respawn-interval" type="number" value="30" min="0" max="86400" style="min-width: 150px; width: 150px" /></label><button
           onclick="setRespawnInterval()">应用</button>
         <label style="margin-left: 12px">尸体清除/秒
-        <input id="corpse-ttl" type="number" value="10" min="0" max="3600" style="min-width: 110px; width: 110px" /></label><button
+        <input id="corpse-ttl" type="number" value="10" min="0" max="3600" style="min-width: 150px; width: 150px" /></label><button
           onclick="setCorpseTTL()">应用</button>
         <label style="margin-left: 12px">宝箱存留/秒
-        <input id="lootbox-ttl" type="number" value="300" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
+        <input id="lootbox-ttl" type="number" value="300" min="0" max="86400" style="min-width: 150px; width: 150px" /></label><button
           onclick="setLootBoxTTL()">应用</button>
         <label style="margin-left: 12px"><input id="npc-chase-enabled" type="checkbox" checked />
           自动追击</label><button onclick="setNpcChase()">应用</button>
@@ -154,7 +154,7 @@
           -autosave-interval（默认 300 秒）。
         </p>
         <label>间隔/秒
-        <input id="autosave-interval" type="number" value="300" min="0" max="86400" style="min-width: 110px; width: 110px" /></label><button
+        <input id="autosave-interval" type="number" value="300" min="0" max="86400" style="min-width: 150px; width: 150px" /></label><button
           onclick="setAutosaveInterval()">应用</button>
       </section>
       <section>
@@ -166,7 +166,7 @@
         <label><input id="zhenqi-cap-enabled" type="checkbox" /> 是否开启每日硬闸</label><br />
         <label>每日阈值
           <input id="zhenqi-cap-value" type="number" value="500" min="1" max="10000000"
-            style="min-width: 110px; width: 110px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="zhenqiCapSet()">应用设置</button>
         <div id="zhenqi-cap-hint" class="muted"></div>
       </section>
@@ -197,7 +197,7 @@
             style="display: none; min-width: 180px; width: 180px" oninput="filterAffixList()" />
           <label id="affix-weapon-label" style="display: none">武器类型
             <select id="affix-weapon-filter" onchange="filterAffixList()"
-              style="min-width: 90px; width: 90px"></select></label>
+              style="min-width: 150px; width: 150px"></select></label>
           <div id="affix-list-box" style="display: none">
             <details open>
               <summary>普通词条（PropBuilt）</summary>
@@ -293,10 +293,10 @@
           <input id="cd-name" value="战斗假人" style="min-width: 140px; width: 160px" /></label>
         <label>血量
           <input id="cd-hp" type="number" value="50000" min="1"
-            style="min-width: 110px; width: 110px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <label>单段伤害(0=按技能表)
           <input id="cd-dmg" type="number" value="0" min="0"
-            style="min-width: 90px; width: 90px" /></label><br />
+            style="min-width: 150px; width: 150px" /></label><br />
         <label>预设套路：
           <select id="cd-preset" onchange="cdPreset(this.value)">
             <option value="random">随机套路</option>
@@ -602,7 +602,7 @@
         <label>套路
           <select id="gm-taolu"></select></label>
         <label>层数
-          <input id="gm-taolu-level" type="number" min="0" max="999" placeholder="0=满级" style="width: 90px" />
+          <input id="gm-taolu-level" type="number" min="0" max="999" placeholder="0=满级" style="width: 150px" />
         </label>
         <button onclick="learnTaolu()">学习所选套路</button>
         <button onclick="forgetTaolu()">移除所选套路</button>
@@ -610,7 +610,7 @@
         <label>内功
           <select id="gm-neigong"></select></label>
         <label>层数
-          <input id="gm-neigong-level" type="number" min="0" max="999" placeholder="0=满级" style="width: 90px" />
+          <input id="gm-neigong-level" type="number" min="0" max="999" placeholder="0=满级" style="width: 150px" />
         </label>
         <button onclick="learnNeiGong()">学习所选内功</button>
         <button onclick="forgetNeiGong()">移除所选内功</button>
@@ -635,27 +635,27 @@
           填满当前内功修炼度</button><br />
         <label>基础值/min
           <input id="fill-speed-base" type="number" value="200" min="1" max="1000000"
-            style="min-width: 90px; width: 90px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <label>倍率
           <input id="fill-speed-multiplier" type="number" value="1" min="0.1" max="100" step="0.1"
-            style="min-width: 90px; width: 90px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="setFillSpeed()">应用修炼速度</button><br />
         <label>每日碎银上限(两)
           <input id="act-day-limit" type="number" value="0" min="0" max="999999"
-            style="min-width: 110px; width: 110px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="setActDayLimit()">应用演武碎银上限</button>
         <button onclick="command({ action: 'clear_team_fatigue' })">清除团练疲劳</button><br />
         <label>历练点数
           <input id="livepoint-points" type="number" value="99" min="1" max="999"
-            style="min-width: 90px; width: 90px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="addLivepoint()">发放历练</button>
         <label>潜能修为
           <input id="hold-faculty-value" type="number" value="0" min="0" max="2000000000"
-            style="min-width: 110px; width: 110px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="setHoldFaculty()">设置潜能修为</button><br />
         <label>转化加成%
           <input id="live-speed-power" type="number" value="0" min="0" max="1000"
-            style="min-width: 90px; width: 90px" /></label>
+            style="min-width: 150px; width: 150px" /></label>
         <button onclick="setLiveSpeedPower()">应用转化加成</button><br />
         <span class="muted">演武碎银上限 0=不限制（ActDayValue 族随 0x10
           下发；有限额时打卡超限静默拒绝）。团练疲劳=TeamFacultyValue（0..80000，客户端按剩余精力%显示），清除即恢复
@@ -895,7 +895,7 @@
         </select>
         <label>点数
           <input id="repute-value" type="number" value="5000" min="0" max="9999999"
-            style="width: 110px" /></label>
+            style="width: 150px" /></label>
         <button onclick="reputeApply('set')">设定为该值</button>
         <button onclick="reputeApply('add')">累加该值</button>
         <button onclick="loadReputeStatus()">刷新声望列表</button>
@@ -911,7 +911,7 @@
           <option value="clear">读取天气列表中……</option>
         </select><label>过渡秒
           <input id="weather-fade" type="number" value="10" min="0" max="600"
-            style="width: 70px" /></label><button onclick="setWeather()">切换天气</button>
+            style="width: 150px" /></label><button onclick="setWeather()">切换天气</button>
       </section>
       <section>
         <h2>礼包与物品</h2>
@@ -930,9 +930,9 @@
           <option>读取礼包列表中……</option>
         </select><br />
         <button onclick="addGiftBox()">加入背包 ×</button><input id="gift-amount" type="number" value="1" min="1"
-          max="99" style="min-width: 70px" /><br />
+          max="99" style="min-width: 150px" /><br />
         <input id="item-config" placeholder="任意物品 ConfigID（如 yaopin_00100）" /><input id="item-amount"
-          type="number" value="1" min="1" max="9999" style="min-width: 90px" /><button
+          type="number" value="1" min="1" max="9999" style="min-width: 150px" /><button
           onclick="addItem()">通用添加物品</button>
         <button onclick="sendTestMail()">作为系统邮件附件发送</button>
       </section>
@@ -950,7 +950,7 @@
           style="min-width: 420px"></textarea><br />
         <input id="mail-item" placeholder="物品 ConfigID（可选，如 yaopin_00100）"
           style="max-width: 260px" /><input id="mail-amount" type="number" value="1" min="1"
-          max="9999" style="min-width: 90px" /><br />
+          max="9999" style="min-width: 150px" /><br />
         <button onclick="sendMail()">发送邮件</button>
       </section>
       <section>
@@ -976,7 +976,7 @@
         </p>
         <label>任务ID
           <input id="authored-task-id" type="number" value="791" min="0"
-            style="min-width: 90px" /></label><br />
+            style="min-width: 150px" /></label><br />
         <button onclick="authoredTask('authored_task_start')">
           接取任务
         </button>
@@ -1151,8 +1151,8 @@
           ID（7=跳跃、1=前进、2=后退…详见 ui_Jump 等文本）。
         </p>
         <label>键位ID
-          <input id="kb-id" type="number" value="7" style="width: 70px" /></label>
-        <label>按键 <input id="kb-key" value="Space" style="width: 90px" /></label>
+          <input id="kb-id" type="number" value="7" style="width: 150px" /></label>
+        <label>按键 <input id="kb-key" value="Space" style="width: 150px" /></label>
         <label><input type="checkbox" id="kb-ctrl" />Ctrl</label>
         <label><input type="checkbox" id="kb-shift" />Shift</label>
         <label><input type="checkbox" id="kb-alt" />Alt</label>
@@ -1196,11 +1196,11 @@
           <option value="11">奇门</option>
         </select>
         <label>等级
-          <input id="binglu-cur" type="number" value="9" min="0" style="width: 70px" /></label>
+          <input id="binglu-cur" type="number" value="9" min="0" style="width: 150px" /></label>
         <label>进度
-          <input id="binglu-fill" type="number" value="0" min="0" style="width: 70px" /></label>
+          <input id="binglu-fill" type="number" value="0" min="0" style="width: 150px" /></label>
         <label>上限
-          <input id="binglu-max" type="number" placeholder="默认不改" min="0" style="width: 70px" /></label>
+          <input id="binglu-max" type="number" placeholder="默认不改" min="0" style="width: 150px" /></label>
         <button onclick="bingluSet()">设置</button>
         <button onclick="bingluMax()">单行升满</button>
         <button onclick="binglu('max')">全部升满</button>
@@ -1225,7 +1225,7 @@
           激活本门派身份装
         </button>
         <label>显示类型
-          <select id="showequip-type" style="width: 110px">
+          <select id="showequip-type" style="width: 150px">
             <option value="0">0 江湖装</option>
             <option value="1">1 身份装</option>
             <option value="2">2 时装</option>

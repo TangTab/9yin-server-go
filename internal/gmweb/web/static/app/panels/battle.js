@@ -42,8 +42,8 @@ function renderCombatDummy(host) {
     desc: "在角色面前生成一只可战斗假人（血量默认 5 万、名字可自定义）：选中出招命中后假人周期还手（近身挥击、恒 1 点实伤），打空血 15 秒后满血重生。招式用顿号/逗号分隔。",
   });
   const name = textField({ label: "名字", value: "战斗假人", width: "140px" });
-  const hp = numField({ label: "血量", value: 50000, min: 1, width: "110px" });
-  const damage = numField({ label: "单段伤害(0=按技能表)", value: 0, min: 0, width: "90px" });
+  const hp = numField({ label: "血量", value: 50000, min: 1, width: "150px" });
+  const damage = numField({ label: "单段伤害(0=按技能表)", value: 0, min: 0, width: "150px" });
   const preset = h("ax-select", { style: "min-width:170px;", placeholder: "选择套路预设" });
   const skills = h("textarea", { rows: 3, placeholder: "招式（顿号/逗号分隔，可自行增删）" });
   skills.style.cssText = "width:100%;max-width:420px;background:#11141b;border:1px solid var(--gm-line);border-radius:6px;color:var(--gm-text);padding:8px 10px;font-size:13px;";
@@ -54,7 +54,7 @@ function renderCombatDummy(host) {
       preset.set({ key: "content", value: JSON.stringify([{ label: "随机套路", value: "random" }, ...taolus.map((t) => ({ label: t.label + "（" + t.skills.length + "招）", value: t.key }))]) });
     })
     .catch(() => {});
-  preset.addEventListener("changed", () => {
+  preset.addEventListener("change", () => { // ax-select 只派发原生 change（「changed」走 .on() 通道）
     const key = preset.value;
     let taolu = null;
     if (key === "随机套路") {
@@ -104,8 +104,8 @@ function renderBot(host) {
     style: "width:80px;",
     value: "0",
   });
-  const interval = numField({ label: "间隔(秒)", value: 5, min: 1, max: 60, width: "70px" });
-  const heal = numField({ label: "治疗量", value: 500, min: 0, max: 100000, width: "90px" });
+  const interval = numField({ label: "间隔(秒)", value: 5, min: 1, max: 60, width: "150px" });
+  const heal = numField({ label: "治疗量", value: 500, min: 0, max: 100000, width: "150px" });
   const botCommand = (label, action, params) =>
     actionBtn({
       label,

@@ -199,8 +199,11 @@ func splitIntList(raw string) []int {
 	return values
 }
 
-// packKind 词条归属（1=proppack / 2=skillpack；未知 0）。
+// packKind 词条归属（1=proppack / 2=skillpack；未知 0；nil 目录 0）。
 func (catalog *weaponRecastCatalog) packKind(id int) int {
+	if catalog == nil {
+		return 0
+	}
 	switch {
 	case catalog.propIDs[id]:
 		return 1
@@ -431,6 +434,8 @@ func recastConfirm(h *itemSession, view, slot, opType int32) {
 			if err := pushBagItemFrames(h.link, h.roleID, row); err != nil {
 				log.Printf("%s: recast confirm bag frames: %v", h.remote, err)
 			}
+			// 同 qianghua：清格+重发后按原槽位补推属性 record。
+			h.pushRandomPropsForBag(row.configID, row.uid, row.viewID, row.slot)
 		}
 	default:
 		if err := h.store.updateEquipAffixes(h.ctx, h.roleID, weaponEquipSlot, affixes); err != nil {

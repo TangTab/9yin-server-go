@@ -137,7 +137,7 @@ func (n npcSpawn) float32Property(name string) float32 {
 // 经各成员视图的 conn 完成（transport 写帧线程安全）。
 type combatTickOutcome struct {
 	members []*sceneMember
-	moves   []npcMoveUpdate
+	moves []npcMoveUpdate
 	updates []npcPropertyUpdate
 	changed map[uint32]bool
 	// rageFrames 是受击得怒(格挡被揍 +2/直接被揍 +1)产生的 18 字节

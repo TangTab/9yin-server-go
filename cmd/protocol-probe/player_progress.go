@@ -354,16 +354,24 @@ func (p *playerProgress) derivedMinMagicDefAdd() int32 {
 	return add
 }
 
-// parryValueTotal 是 ParryValue@475 官方式：MaxParry 基础位 + MaxParryAdd。
-// （官方新建角色 100+16=116、55866 会话 100+57=157 逐点吻合；16/57 的
-// MaxParryAdd 官方来源未定位——非 ng_jh_001 varprop/pack，疑门派被动，
-// 本服 MaxParryAdd 仍只取装备内功分量，此差已知。）
-func (p *playerProgress) parryValueTotal() int32 {
+// maxParryAddTotal 是 MaxParryAdd@477 的全量 Add 列（内功 pack 分量 +
+// 镇派兵器"招架耐力上限"）。客户端以 MaxParry+MaxParryAdd 为耐力上限，
+// 镇派加成必须进 Add 列而非只折进 475 总量位（2026-11-12 真机：「加的
+// 招架耐力的上限没变」——旧实现 477 只带书分量，475 才含镇派）。
+func (p *playerProgress) maxParryAddTotal() int32 {
 	add := int32(0)
 	if equipped := p.book(p.curNeiGong); equipped != nil {
 		add = equipped.maxParryAdd
 	}
-	return p.attributes.maxParry + add + p.zhenpaiEquip.parry
+	return add + p.zhenpaiEquip.parry
+}
+
+// parryValueTotal 是 ParryValue@475 官方式：MaxParry 基础位 + MaxParryAdd
+// 全量（= 476+477 推导和）。（官方新建角色 100+16=116、55866 会话
+// 100+57=157 逐点吻合；16/57 的 MaxParryAdd 官方来源未定位——非
+// ng_jh_001 varprop/pack，疑门派被动，此差已知不在此补。）
+func (p *playerProgress) parryValueTotal() int32 {
+	return p.attributes.maxParry + p.maxParryAddTotal()
 }
 
 func newPlayerProgress() playerProgress {
@@ -540,7 +548,6 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		level, maxLevel, fill, total, power, maxPower = book.level, book.maxLevel, book.fill, book.total, book.power, book.maxPower
 	}
 	a := p.attributes
-	maxParryAdd := int32(0)
 	// 阴阳太极累计（wuxing 分桶）由 actor 层 combatPanelProperties 注入
 	//（内功 books + 技能 learnedSkills 双输入；本方法只覆盖内功域）。
 	// 当前运行内功五行（缺目录/未装备 0，客户端按 ≤0 退回缺省文案）。
@@ -556,7 +563,6 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		a.dex += equipped.dexAdd
 		a.ing += equipped.ingAdd
 		a.spi += equipped.spiAdd
-		maxParryAdd = equipped.maxParryAdd
 	}
 	// 资源/内防 Add 走官方全量公式（属性分量 + 内功 pack 分量），
 	// 与 vitals SetDerivedMaxima 的 derivedResourceAdds 同源。
@@ -617,7 +623,7 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propMaxMeleeDamage, Name: "MaxMeleeDamage", Value: clientdata.Int32Value(a.maxMeleeDamage)},
 		{Index: propMaxHPAdd, Name: "MaxHPAdd", Value: clientdata.Int32Value(maxHPAdd)},
 		{Index: propMaxMPAdd, Name: "MaxMPAdd", Value: clientdata.Int32Value(maxMPAdd)},
-		{Index: propMaxParryAdd, Name: "MaxParryAdd", Value: clientdata.Int32Value(maxParryAdd)},
+		{Index: propMaxParryAdd, Name: "MaxParryAdd", Value: clientdata.Int32Value(p.maxParryAddTotal())},
 		{Index: propMinMagicDefAdd, Name: "MinMagicDefAdd", Value: clientdata.Int32Value(minMagicDefAdd)},
 		{Index: propMaxLevel, Name: "MaxLevel", Value: clientdata.Int32Value(maxLevel)},
 		{Index: propCurNeiGongWuXing, Name: "CurNeiGongWuXing", Value: clientdata.Int32Value(curWuXing)},

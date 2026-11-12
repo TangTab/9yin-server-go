@@ -210,10 +210,12 @@ export function smallSelect({ placeholder = "输入过滤…", items, value }) {
 /* ---------------- M1 CatalogPicker ---------------- */
 
 /**
- * 目录选择器：服务端搜索 + 前端分页 + 最近选用。
+ * 目录选择器：服务端搜索 + 分页 + 最近选用。
  * cfg: {
  *   placeholder, pageSize=50,
- *   fetchRows: async (query, signal) => [{label, sub, value, …}],  // 服务端/缓存搜索
+ *   fetchRows: async (query, signal, page) => 行数组（本地分页）或
+ *              {rows, total}（服务端分页：page={offset,limit}，翻页按
+ *              total 计页数并逐页向 fetchRows 取数）,
  *   onPick: (row) => void,
  *   emptyText
  * }
@@ -223,14 +225,16 @@ export function catalogPicker(cfg) {
   const pageSize = cfg.pageSize || 50;
   let rows = [];
   let page = 0;
+  let serverTotal = null; // null=本地分页（fetchRows 返回数组）；数字=服务端分页总量
   let selected = null;
   let lastQuery = "";
+  let lastToken = ""; // query@offset 过期响应丢弃（分页翻页与改词并发）
   let aborter = null;
 
   const input = h("input", { class: "picker-input", type: "text", placeholder: cfg.placeholder || "输入中文名或 ID 搜索…" });
   input.style.cssText = "flex:1;min-width:200px;background:#11141b;border:1px solid var(--gm-line);border-radius:6px;color:var(--gm-text);padding:6px 10px;";
   const listEl = h("div", { class: "picker-list" });
-  const emptyEl = h("div", { class: "picker-empty" }, ["输入关键词开始搜索"]);
+  const emptyEl = h("div", { class: "picker-empty" }, ["加载中……"]);
   const infoEl = h("span", {}, [""]);
   const prevBtn = h("button", { class: "icon-btn" }, ["‹ 上一页"]);
   const nextBtn = h("button", { class: "icon-btn" }, ["下一页 ›"]);
@@ -287,6 +291,7 @@ export function catalogPicker(cfg) {
 
   function renderList() {
     listEl.innerHTML = "";
+    const count = serverTotal !== null ? serverTotal : rows.length;
     if (!rows.length) {
       emptyEl.style.display = "";
       pager.style.display = "none";
@@ -295,7 +300,8 @@ export function catalogPicker(cfg) {
     emptyEl.style.display = "none";
     pager.style.display = "";
     const start = page * pageSize;
-    const slice = rows.slice(start, start + pageSize);
+    // 服务端分页：rows 恰为本页数据，不切片；本地分页：在整包里切当前页。
+    const slice = serverTotal !== null ? rows : rows.slice(start, start + pageSize);
     for (const row of slice) {
       const item = h("div", { class: "picker-row" + (selected && selected.value === row.value ? " selected" : "") }, [
         h("span", {}, [row.label]),
@@ -304,14 +310,15 @@ export function catalogPicker(cfg) {
       item.addEventListener("click", () => pick(row));
       listEl.appendChild(item);
     }
-    const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
-    infoEl.textContent = (start + 1) + "-" + Math.min(start + pageSize, rows.length) + " / 共 " + rows.length + " 条，第 " + (page + 1) + "/" + totalPages + " 页";
+    const totalPages = Math.max(1, Math.ceil(count / pageSize));
+    infoEl.textContent = (start + 1) + "-" + Math.min(start + pageSize, count) + " / 共 " + count + " 条，第 " + (page + 1) + "/" + totalPages + " 页";
     prevBtn.disabled = page <= 0;
     nextBtn.disabled = page >= totalPages - 1;
   }
 
-  async function runQuery(query) {
+  async function runQuery(query, offset = 0) {
     lastQuery = query;
+    lastToken = query + "@" + offset;
     if (aborter) aborter.abort();
     aborter = new AbortController();
     emptyEl.style.display = "";
@@ -319,10 +326,16 @@ export function catalogPicker(cfg) {
     listEl.innerHTML = "";
     pager.style.display = "none";
     try {
-      const result = await cfg.fetchRows(query, aborter.signal);
-      if (query !== lastQuery) return; // 过期响应丢弃
-      rows = result || [];
-      page = 0;
+      const result = await cfg.fetchRows(query, aborter.signal, { offset, limit: pageSize });
+      if (lastToken !== query + "@" + offset) return; // 过期响应丢弃
+      if (Array.isArray(result)) {
+        rows = result;
+        serverTotal = null;
+      } else {
+        rows = (result && result.rows) || [];
+        serverTotal = result && result.total ? result.total : 0;
+      }
+      page = Math.floor(offset / pageSize);
       emptyEl.textContent = rows.length ? "" : (cfg.emptyText || "没有匹配项");
       renderList();
     } catch (err) {
@@ -334,19 +347,22 @@ export function catalogPicker(cfg) {
 
   input.addEventListener("input", debounce(() => runQuery(input.value.trim()), 300));
   prevBtn.addEventListener("click", () => {
-    if (page > 0) {
-      page--;
-      renderList();
-    }
+    if (page <= 0) return;
+    page--;
+    if (serverTotal !== null) runQuery(lastQuery, page * pageSize);
+    else renderList();
   });
   nextBtn.addEventListener("click", () => {
-    if ((page + 1) * pageSize < rows.length) {
-      page++;
-      renderList();
-    }
+    const count = serverTotal !== null ? serverTotal : rows.length;
+    if ((page + 1) * pageSize >= count) return;
+    page++;
+    if (serverTotal !== null) runQuery(lastQuery, page * pageSize);
+    else renderList();
   });
 
   renderRecent();
+  // 进入板块即拉第一页（空查询=全量目录首屏），不要求先输入关键词搜索。
+  runQuery("");
 
   return {
     node: box,

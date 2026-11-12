@@ -369,17 +369,20 @@ func (p *playerActor) refreshZhenpaiEquipBonuses() bool {
 }
 
 // pushZhenpaiPanelFrame 镇派兵器 4 属性变化后的面板补帧（581/582/475/694
-// 官方总量位——与 progress 注入位同源）。
+// 官方总量位 + 477 Add 列——招架耐力上限在客户端由 MaxParry+MaxParryAdd
+// 推导，镇派加成须同时落 477 才可见）。
 func (p *playerActor) pushZhenpaiPanelFrame(link sceneMessageConnection) error {
 	p.mu.Lock()
 	maxHPAdd, maxMPAdd := p.progress.derivedResourceAdds()
 	parry := p.progress.parryValueTotal()
+	parryAdd := p.progress.maxParryAddTotal()
 	qinggongAdd := p.progress.zhenpaiEquip.qinggong
 	p.mu.Unlock()
 	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
 		{Index: clientdata.MustPlayerProperty("MaxHPAdd").Index, Name: "MaxHPAdd", Value: clientdata.Int32Value(maxHPAdd)},
 		{Index: clientdata.MustPlayerProperty("MaxMPAdd").Index, Name: "MaxMPAdd", Value: clientdata.Int32Value(maxMPAdd)},
 		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(parry)},
+		{Index: propMaxParryAdd, Name: "MaxParryAdd", Value: clientdata.Int32Value(parryAdd)},
 		{Index: clientdata.MustPlayerProperty("MaxQingGongPointAdd").Index, Name: "MaxQingGongPointAdd", Value: clientdata.Int32Value(qinggongAdd)},
 	})
 	if err != nil {

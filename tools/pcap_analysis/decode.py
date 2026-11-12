@@ -348,10 +348,12 @@ def describe_s2c(fr, tbl):
         sig = 'op18:%d' % view
         return '%s view=%d%s obj#%d +%d属性' % (base, view, VIEW_NAMES.get(view, ''), obj_idx, cnt), sig
     if op == 0x1F:
-        if n >= 26:
-            obj = struct.unpack_from('<I', fr, 2)[0]
-            owner = struct.unpack_from('<I', fr, 6)[0]
-            x, y, z, o = struct.unpack_from('<ffff', fr, 10)
+        # 实证布局（63749 tap frame2028）：[op][obj@1][owner@5][x,y,z,o@9] = 25B，
+        # 无 sub 字节；owner<<32|obj = m211 十四值里的 64 位目标 id，逐位自洽。
+        if n >= 25:
+            obj = struct.unpack_from('<I', fr, 1)[0]
+            owner = struct.unpack_from('<I', fr, 5)[0]
+            x, y, z, o = struct.unpack_from('<ffff', fr, 9)
             sig = 'op1F:%s' % hex(obj)
             return '%s[%s/%s] (%.2f,%.2f,%.2f) o=%.2f' % (base, hex(obj), hex(owner), x, y, z, o), sig
         return base + '(短len=%d)' % n, 'op1F'

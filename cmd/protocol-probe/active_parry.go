@@ -102,9 +102,12 @@ func handleChangeWarningCustom(link sceneMessageConnection, player *playerActor,
 	return true, nil
 }
 
-// handleBlockStateCustom 还原手动格挡（Java handleManualParry +
-// sendParryStateFrames 同源）：状态变化时挂/清槽 11 的 BuffInParry，
-// 回 msg169（BuffInParry 事件，双宽串角色名）+ 0x10 InParry 属性帧。
+// handleBlockStateCustom 还原手动格挡（Java handleManualParry 同源，
+// clientCustomBlockState=54 即 C2S m54）。应答=官服六件套序
+// （writeOfficialParryTokenAck，a.pcapng 5.144/5.695 定版：按下
+// MoveSpeed1.9f+RunSpeedAdd-1.2f+InParry+ParryUpSpeedAdd-93+BufferInfo4=26
+// +m169 添加+InManualParry；松开反向+m169 移除）——此前 fork 四属性合帧
+// 应答缺速度族，客户端 m54 连发 5971 条等不到官服方言（2026-11-12 P2）。
 // 重复按下静默；重复松开仍回帧（客户端状态重同步，78 发按值去重
 // =50 沿=50 回帧的 F 盘实证）。非战斗也可按格挡（不切 LogicState）。
 func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) error {
@@ -139,11 +142,13 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	if alreadyParrying == engage {
 		if !engage {
 			// 游离的重复松开：客户端可能错过上一次回帧，重推空态。
-			if frame, err := player.parryStateFrame(false, ""); err == nil {
-				if writeErr := link.WriteFrame(frame); writeErr != nil {
-					return writeErr
-				}
-			} else {
+			// 必须发**完整两帧对**（169 摘除事件 + 0x10 属性帧）——客户端的
+			// 格挡认知锚在 msg169 BuffInParry 事件上，仅属性帧摘不掉：
+			// 2026-11-12 真机死锁（旧纪元 bug 残留）客户端带"已格挡"认知
+			// 只发 1 等确认、永不再发按下(0)，单属性帧 ack 无法解锁，
+			// 两帧对一发即恢复。官服登录段本就有 remove→clear→fill→add
+			// 重登记舞步（k.pcapng），多发一次摘除事件方言安全。
+			if err := writeOfficialParryTokenAck(link, player, false); err != nil {
 				return err
 			}
 			log.Printf("%s: ack stray manual parry release (client state resync)", remote)
@@ -152,14 +157,49 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	}
 
 	now := time.Now().UTC()
-	buffInfo := player.releaseParryBuff()
+	player.releaseParryBuff()
 	if engage {
-		buffInfo = player.engageParryBuff(now)
+		player.engageParryBuff(now)
 		// 格挡不清怒(2026-11-07 撤销):Java handleManualParry 不动 SP,
 		// 55866 复核四次 SP→0 单帧全部嵌在出招序列(294/337/20/24/CanUse)
 		// 里、无一先于 msg169 格挡通告(按下帧甚至更靠后),且战斗态/
 		// 非战斗态各占一半——"格挡开启清怒"系误读。格挡态本身按
 		// "格挡被揍 +2"攒怒。
+	}
+	if err := writeOfficialParryTokenAck(link, player, engage); err != nil {
+		return err
+	}
+	log.Printf("%s: manual parry engage=%t buff_slot=%d", remote, engage, parryBuffSlot)
+	return nil
+}
+
+// ---- m54 官服令牌格挡问答（a.pcapng 5.144/5.695 定版，2026-11-12 P2） ----
+
+var (
+	propParryTokenMoveSpeed   = clientdata.MustPlayerProperty("MoveSpeed").Index
+	propParryTokenRunSpeedAdd = clientdata.MustPlayerProperty("RunSpeedAdd").Index
+	propParryTokenUpSpeedAdd  = clientdata.MustPlayerProperty("ParryUpSpeedAdd").Index
+	propParryTokenBufferInfo4 = clientdata.MustPlayerProperty("BufferInfo4").Index
+)
+
+// handleParryTokenCustom 处理 C2S m54（格挡令牌问答，官服令牌/fork 0-1 双形态）。
+// 官服客户端连发令牌版 m54 等六件套应答（a.pcapng：按下=MoveSpeed 1.9f+
+// RunSpeedAdd -1.2f+InParry 1+ParryUpSpeedAdd -93+BufferInfo4 26+m169 添加+
+// InManualParry 1；松开=m169 移除+BufferInfo4 1+InParry 0+MoveSpeed 4.8f+
+// RunSpeedAdd 0.6f+ParryUpSpeedAdd 10+InManualParry 0，「连发直到应答到达」）。
+// 令牌值每会话成对随机，按下/松开判定=状态机（非格挡态收到→按下，
+// a 会话三对完美交替实证）；fork 客户端 0/1 形态按值（1=按下持续上报、
+// 0=松开）。此前全天 5971 条 m54 零应答——客户端 m54 连发不停的同源根因，
+// 亦是「官服应答方言正确→客户端切官服模式」假说（P2）的探针。
+// writeOfficialParryTokenAck 官服 m54 应答（单属性帧序照 a.pcapng，
+// m169 与 78 通道同构九值帧；速度对照抄官服样本值 1.9/-1.2 → 4.8/0.6）。
+func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor, engage bool) error {
+	single := func(index uint16, name string, value clientdata.Value) error {
+		frame, err := objectSingleProperty(playerObjectID, playerOwnerID, index, name, value)
+		if err != nil {
+			return fmt.Errorf("encode parry token %s: %w", name, err)
+		}
+		return link.WriteFrame(frame)
 	}
 	name := player.snapshotName()
 	notice, err := serverCustomIntMessage(169,
@@ -169,22 +209,53 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 		customObject(playerObjectID, playerOwnerID),
 		customWideString(name),
 		customWideString(name),
-		customInt64(now.UnixMilli()),
+		customInt64(0),
 		customInt(0),
 	)
 	if err != nil {
-		return fmt.Errorf("encode parry notice: %w", err)
+		return fmt.Errorf("encode parry token notice: %w", err)
+	}
+	if engage {
+		if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(1.9)); err != nil {
+			return err
+		}
+		if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(-1.2)); err != nil {
+			return err
+		}
+		if err := single(propInParry, "InParry", clientdata.Int32Value(1)); err != nil {
+			return err
+		}
+		if err := single(propParryTokenUpSpeedAdd, "ParryUpSpeedAdd", clientdata.Int32Value(-93)); err != nil {
+			return err
+		}
+		// BufferInfo4 表线型=7(串)：无 type 字节方言下必须发串（官服帧带
+		// 显式 type=0x01 override 故可发 int；我们无 type 字节→按表线型，
+		// 发 int 会被当串长度域解出 Out range，trace.log 23:53 实证）。
+		if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue("26")); err != nil {
+			return err
+		}
+		if err := link.WriteFrame(notice); err != nil {
+			return err
+		}
+		return single(propInManualParry, "InManualParry", clientdata.Int32Value(1))
 	}
 	if err := link.WriteFrame(notice); err != nil {
 		return err
 	}
-	frame, err := player.parryStateFrame(engage, buffInfo)
-	if err != nil {
-		return fmt.Errorf("encode parry state: %w", err)
-	}
-	if err := link.WriteFrame(frame); err != nil {
+	if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue("1")); err != nil {
 		return err
 	}
-	log.Printf("%s: manual parry engage=%t buff_slot=%d", remote, engage, parryBuffSlot)
-	return nil
+	if err := single(propInParry, "InParry", clientdata.Int32Value(0)); err != nil {
+		return err
+	}
+	if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(4.8)); err != nil {
+		return err
+	}
+	if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(0.6)); err != nil {
+		return err
+	}
+	if err := single(propParryTokenUpSpeedAdd, "ParryUpSpeedAdd", clientdata.Int32Value(10)); err != nil {
+		return err
+	}
+	return single(propInManualParry, "InManualParry", clientdata.Int32Value(0))
 }

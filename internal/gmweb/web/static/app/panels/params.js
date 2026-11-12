@@ -11,9 +11,9 @@ function renderRespawn(host) {
     title: "怪物刷新",
     desc: "批量刷新：每到间隔统一重生所有已死亡怪物（活怪不动），0=关闭批量回到每怪独立计时。尸体清除：死亡超过秒数后尸体消失，0=保留到重生。宝箱存留：挂尸掉落/宝箱实体超时未拾自动消失（0=保留到拾空）。自动追击：进程级总开关，关闭后仇恨照常持有但怪停在出生点。",
   });
-  const interval = numField({ label: "批量间隔/秒", value: 30, min: 0, max: 86400, width: "110px" });
-  const corpse = numField({ label: "尸体清除/秒", value: 10, min: 0, max: 3600, width: "110px" });
-  const lootbox = numField({ label: "宝箱存留/秒", value: 300, min: 0, max: 86400, width: "110px" });
+  const interval = numField({ label: "批量间隔/秒", value: 30, min: 0, max: 86400, width: "150px" });
+  const corpse = numField({ label: "尸体清除/秒", value: 10, min: 0, max: 3600, width: "150px" });
+  const lootbox = numField({ label: "宝箱存留/秒", value: 300, min: 0, max: 86400, width: "150px" });
   const chase = h("input", { type: "checkbox", checked: true });
   chase.style.cssText = "width:16px;height:16px;accent-color:var(--gm-gold);";
   body.appendChild(
@@ -63,7 +63,7 @@ function renderAutosave(host) {
     title: "数据存盘",
     desc: "自动存盘：每到间隔把所有在线玩家的内功修为/经脉快照落库（与正常下线同一组存盘，强杀最多丢一个周期）；0=关闭，仅断线与 Ctrl+C 优雅关服时存。进程级设置，改动即刻生效，重启回落启动参数。",
   });
-  const interval = numField({ label: "间隔/秒", value: 300, min: 0, max: 86400, width: "110px" });
+  const interval = numField({ label: "间隔/秒", value: 300, min: 0, max: 86400, width: "150px" });
   body.appendChild(
     h("div", { class: "field-row" }, [
       interval.node,
@@ -86,8 +86,8 @@ function renderMovement(host) {
     title: "移动参数",
     desc: "移动速度同时更新 MoveSpeed 与 RunSpeed；下落重力数值越大下落越快，下一次起跳生效（范围 0.1–100）。",
   });
-  const speed = numField({ label: "移动速度", value: 5, min: 0.1, max: 100, step: 0.5, width: "90px" });
-  const gravity = numField({ label: "下落重力", value: 9.8, min: 0.1, max: 100, step: 0.1, width: "90px" });
+  const speed = numField({ label: "移动速度", value: 5, min: 0.1, max: 100, step: 0.5, width: "150px" });
+  const gravity = numField({ label: "下落重力", value: 9.8, min: 0.1, max: 100, step: 0.1, width: "150px" });
   body.appendChild(
     h("div", { class: "field-row" }, [
       speed.node,

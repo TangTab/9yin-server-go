@@ -19,7 +19,7 @@ function renderSceneTask(host) {
       cmdBtn({ label: "清理场景任务测试", danger: true, action: "scene_task_remove", section: "场景任务" }),
     ])
   );
-  const taskId = numField({ label: "任务ID", value: 791, min: 0, width: "90px" });
+  const taskId = numField({ label: "任务ID", value: 791, min: 0, width: "150px" });
   const authored = (label, action) =>
     actionBtn({
       label,
@@ -175,7 +175,7 @@ function renderRepute(host) {
     desc: "覆盖全部八大门派、江湖势力与隐世宗门（含隐士、江湖声望）：直接写入角色的声望进度并即时刷新客户端声望表。",
   });
   const nameSelect = h("ax-select", { search: true, full: true, "max-height": "260", placeholder: "选择声望目标（加载中…）" });
-  const value = numField({ label: "点数", value: 5000, min: 0, max: 9999999, width: "110px" });
+  const value = numField({ label: "点数", value: 5000, min: 0, max: 9999999, width: "150px" });
   const note = hint();
   async function load() {
     try {

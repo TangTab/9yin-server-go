@@ -13,7 +13,7 @@ import (
 )
 
 func TestFightRelationDamageFrameLayout(t *testing.T) {
-	frame := fightRelationDamageFrame(1, 0x7A5C0B, 344)
+	frame := fightRelationDamageFrame(1, 0x03DEFBAE, 344)
 	if len(frame) != 21 {
 		t.Fatalf("fight relation frame length = %d, want 21", len(frame))
 	}
@@ -26,8 +26,8 @@ func TestFightRelationDamageFrameLayout(t *testing.T) {
 	if got := binary.LittleEndian.Uint32(frame[2:]); got != uint32(1) {
 		t.Fatalf("object = %#x, want 1", got)
 	}
-	if got := binary.LittleEndian.Uint32(frame[6:]); got != 0x7A5C0B {
-		t.Fatalf("owner = %#x, want 0x7A5C0B", got)
+	if got := binary.LittleEndian.Uint32(frame[6:]); got != 0x03DEFBAE {
+		t.Fatalf("owner = %#x, want 0x03DEFBAE", got)
 	}
 	if got := binary.LittleEndian.Uint16(frame[10:]); got != recordFightRelation {
 		t.Fatalf("record index = %d, want %d (fight_relation_rec)", got, recordFightRelation)

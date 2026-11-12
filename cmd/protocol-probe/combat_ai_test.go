@@ -584,3 +584,4 @@ func TestNPCAttackReplacesStaleSelection(t *testing.T) {
 	}
 	lifecycle.close()
 }
+

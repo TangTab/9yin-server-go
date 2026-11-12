@@ -49,8 +49,8 @@ function renderTaolu(host) {
   });
   let taoluSelected = null;
   let neigongSelected = null;
-  const taoluLevel = numField({ label: "层数（0=满级）", value: "", min: 0, max: 999, width: "90px" });
-  const neigongLevel = numField({ label: "层数（0=满级）", value: "", min: 0, max: 999, width: "90px" });
+  const taoluLevel = numField({ label: "层数（0=满级）", value: "", min: 0, max: 999, width: "150px" });
+  const neigongLevel = numField({ label: "层数（0=满级）", value: "", min: 0, max: 999, width: "150px" });
   const taoluPicker = catalogPicker({
     recentKey: "taolus",
     placeholder: "搜索套路（拉取一次后本地过滤）",
@@ -153,12 +153,12 @@ function renderFaculty(host) {
     desc: "修为=修炼点余额（主供给为历练转化）。修炼速度拆为基础值 × 倍率；填满当前内功修炼度立即升一层。角色级持久化，重登沿用。",
   });
   const value = numField({ label: "修为", value: 10000, min: 0, max: 2000000000, width: "120px" });
-  const base = numField({ label: "基础值/min", value: 200, min: 1, max: 1000000, width: "90px" });
+  const base = numField({ label: "基础值/min", value: 200, min: 1, max: 1000000, width: "150px" });
   const multiplier = numField({ label: "倍率", value: 1, min: 0.1, max: 100, step: 0.1, width: "80px" });
-  const dayLimit = numField({ label: "每日碎银上限(两)", value: 0, min: 0, max: 999999, width: "110px" });
-  const livepoint = numField({ label: "历练点数", value: 99, min: 1, max: 999, width: "90px" });
-  const hold = numField({ label: "潜能修为", value: 0, min: 0, max: 2000000000, width: "110px" });
-  const livePower = numField({ label: "转化加成%", value: 0, min: 0, max: 1000, width: "90px" });
+  const dayLimit = numField({ label: "每日碎银上限(两)", value: 0, min: 0, max: 999999, width: "150px" });
+  const livepoint = numField({ label: "历练点数", value: 99, min: 1, max: 999, width: "150px" });
+  const hold = numField({ label: "潜能修为", value: 0, min: 0, max: 2000000000, width: "150px" });
+  const livePower = numField({ label: "转化加成%", value: 0, min: 0, max: 1000, width: "150px" });
   body.appendChild(
     h("div", { class: "field-row" }, [
       value.node,
@@ -239,7 +239,7 @@ function renderJingmai(host) {
   });
   const enabled = h("input", { type: "checkbox" });
   enabled.style.cssText = "width:16px;height:16px;accent-color:var(--gm-gold);";
-  const value = numField({ label: "每日阈值", value: 500, min: 1, max: 10000000, width: "110px" });
+  const value = numField({ label: "每日阈值", value: 500, min: 1, max: 10000000, width: "150px" });
   const apply = actionBtn({
     label: "应用设置",
     build: () => {

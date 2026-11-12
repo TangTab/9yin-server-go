@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"log"
+	"time"
 
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -114,13 +115,24 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	}
 	world.selectedObject = entity.id
 	world.selectedOwner = entity.ownerID
-	// 431 ack = 选中双帧（416/417）仅此而已——技能.pcapng（103.143.19.173
-	// :7072 线）官服实证：选目标全程无 msg209，客户端照样锁定+自走。
-	// 此前的「选目标即主动下发 msg209 接近授权」是 a.pcapng（7074 线）
-	// 方言的试验性加戏；7072 线客户端上无此消息，多发反而可疑干扰锁定
-	// 态（本服实测：客户端 431 风暴重选、211 恒短式无目标）。298 自请求
-	// 的应答（handleAttackTargetCustom）保留——那是客户端主动要求的。
-	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s",
+	// 选靶 msg25 暂存授权恢复（2026-11-12 深夜）：官服 b.pcapng 双样本实证
+	// msg431 应答=选中双帧之外再发 msg25[30000]，客户端等这帧才启动自动
+	// 接近；缺 msg25 时客户端不跑、连发 211+212 完事（55981/62096 会话
+	// 实证）。曾按技能.pcapng（7072 线选靶无 m25）撤成裸双帧——但同客户
+	// 端在官服发令牌版 m54、在本服发 0/1 版（2026-11-12 对照实证），
+	// 本服客户端处于 fork 协议模式，7072 线方言不适用；fork/b 线的
+	// select→m25 才是本客户端的武装前提。锁内只补写一帧（skillPauseFrame
+	// 纯编码，无锁竞争）。
+	pause, err := skillPauseFrame(int32(rushPendingWindow / time.Millisecond))
+	if err != nil {
+		return fmt.Errorf("encode select target pause ack: %w", err)
+	}
+	if err := world.conn.WriteFrame(pause); err != nil {
+		return fmt.Errorf("send select target pause ack: %w", err)
+	}
+	// 431 ack = 选中双帧（416/417）+ msg25[30000]。298 自请求的应答
+	// （handleAttackTargetCustom）保留——那是客户端主动要求的。
+	log.Printf("%s: selected target id=%d owner=%d config=%s interaction=%s (pause ack)",
 		remote, entity.id, entity.ownerID, entity.configID, entity.interaction)
 	return nil
 }

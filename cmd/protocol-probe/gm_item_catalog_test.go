@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
@@ -103,6 +104,31 @@ func TestGMItemCatalogLoadAndSearch(t *testing.T) {
 	if rows := bulk.search("", 0); len(rows) != gmItemSearchLimit {
 		t.Fatalf("limit=%d, want %d", len(rows), gmItemSearchLimit)
 	}
+
+	// 分页：total=命中总数（不受 limit 截断），行窗 [offset, offset+limit)，
+	// view 过滤与 search 同口径。
+	bulk.rows = nil
+	for i := 0; i < 305; i++ {
+		bulk.rows = append(bulk.rows, gmItemRow{ConfigID: "tool_" + strconv.Itoa(i), ViewID: 1})
+	}
+	for i := 0; i < 40; i++ {
+		bulk.rows = append(bulk.rows, gmItemRow{ConfigID: "equip_" + strconv.Itoa(i), ViewID: 2})
+	}
+	page1, total := bulk.searchPage("", 1, 0, 50)
+	if total != 305 || len(page1) != 50 || page1[0].ConfigID != "tool_0" || page1[49].ConfigID != "tool_49" {
+		t.Fatalf("page1 len=%d total=%d first=%s last=%s", len(page1), total, page1[0].ConfigID, page1[49].ConfigID)
+	}
+	lastPage, total := bulk.searchPage("", 1, 300, 50)
+	if total != 305 || len(lastPage) != 5 || lastPage[0].ConfigID != "tool_300" {
+		t.Fatalf("lastPage len=%d total=%d first=%s, want 尾页 5 行", len(lastPage), total, lastPage[0].ConfigID)
+	}
+	if rows, total := bulk.searchPage("", 2, 0, 50); total != 40 || len(rows) != 40 {
+		t.Fatalf("view=2 page total=%d len=%d, want 40/40", total, len(rows))
+	}
+	// offset 越界=空页但 total 照实。
+	if rows, total := bulk.searchPage("", 1, 999, 50); total != 305 || len(rows) != 0 {
+		t.Fatalf("overflow page len=%d total=%d, want 0/305", len(rows), total)
+	}
 }
 
 func TestGMItemsEndpoint(t *testing.T) {
@@ -127,6 +153,45 @@ func TestGMItemsEndpoint(t *testing.T) {
 	}
 	if len(rows) != 1 || rows[0].ConfigID != "weapon_jiuxian_01" {
 		t.Fatalf("rows=%+v, want 久仙刀一件", rows)
+	}
+
+	// 分页信封：带 offset 返回 {rows,total,offset,limit}，view 过滤叠加。
+	injectStubGMItemCatalog(t, &gmItemCatalog{rows: []gmItemRow{
+		{ConfigID: "weapon_jiuxian_01", Name: "久仙刀", ViewID: 2, Wearable: true, EquipType: "Weapon", NeedSex: 0},
+		{ConfigID: "box_gift_01", Name: "惊鸿礼盒", ViewID: 1, Script: "BoxItem", NeedSex: 2},
+	}})
+	paged, err := http.Get(server.URL + "/api/items?view=1&offset=0&limit=1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer paged.Body.Close()
+	if paged.StatusCode != http.StatusOK {
+		t.Fatalf("paged status=%d", paged.StatusCode)
+	}
+	var envelope struct {
+		Rows   []gmItemRow `json:"rows"`
+		Total  int         `json:"total"`
+		Offset int         `json:"offset"`
+		Limit  int         `json:"limit"`
+	}
+	if err := json.NewDecoder(paged.Body).Decode(&envelope); err != nil {
+		t.Fatal(err)
+	}
+	if envelope.Total != 1 || envelope.Offset != 0 || envelope.Limit != 1 ||
+		len(envelope.Rows) != 1 || envelope.Rows[0].ConfigID != "box_gift_01" {
+		t.Fatalf("envelope=%+v, want view=1 仅礼盒一件", envelope)
+	}
+	// 非法 offset/limit 400（limit 校验挂在信封分支，须与 offset 同请求；
+	// 不带 offset 的旧裸数组方言不消费 limit，照旧忽略）。
+	for _, bad := range []string{"offset=-1", "offset=abc", "offset=0&limit=0", "offset=0&limit=-5", "offset=0&limit=x"} {
+		badReq, err := http.Get(server.URL + "/api/items?" + bad)
+		if err != nil {
+			t.Fatal(err)
+		}
+		badReq.Body.Close()
+		if badReq.StatusCode != http.StatusBadRequest {
+			t.Fatalf("%s status=%d, want 400", bad, badReq.StatusCode)
+		}
 	}
 
 	// 非 GET 拒绝。

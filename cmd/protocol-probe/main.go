@@ -1470,10 +1470,27 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("发放失败：背包已满（1..90）")
 				return fmt.Errorf("bag full")
 			}
-			// 模板包 record + 宝物/娃娃掷值存档 + 背包槽位 record 整推。
-			session.pushRandomPropsForBag(command.ItemConfig, inserted.uid, inserted.viewID, inserted.slot)
+			// 模板包 record + 宝物/娃娃掷值存档 + 背包槽位 record 整推已
+			// 收敛进 grantBagItemRow（拾取/开箱/商店与 GM 发放同链）。
 			gmSession.setAction(fmt.Sprintf("已发放 %s x%d（背包 %d 页槽 %d）", command.ItemConfig, command.Amount, entry.viewID, inserted.slot))
 			log.Printf("%s: GM grant_item bag config=%s amount=%d slot=%d", conn.RemoteAddr(), command.ItemConfig, command.Amount, inserted.slot)
+		case "gm_generate_weapon", "gm_generate_armor", "gm_generate_bracer":
+			// 模板生成（带词条装备）三动作（gm_generate_equip.go；Java
+			// LoginFlow applyGenerate* 同域）：挑 60501 家族模板 + 词条
+			// 构造 + 立即穿戴，全链复用 grant_item 的 itemSession 上下文。
+			session := &itemSession{
+				link: link, player: player, store: inventory, skins: appearanceCfg.skins,
+				currency: currencyStore, randomProps: randomPropsStore,
+				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(), now: time.Now,
+			}
+			text, genErr := applyGMGenerateEquip(session, command.Action,
+				command.WeaponType, command.Crafter, command.ArmorSlot)
+			if genErr != nil {
+				gmSession.setAction("生成失败：" + genErr.Error())
+				return genErr
+			}
+			gmSession.setAction(text)
+			log.Printf("%s: GM %s: %s", conn.RemoteAddr(), command.Action, text)
 		case "binglu":
 			// 兵录设置（Java applyBinglu 同语义）：set <row> <cur> <fill>
 			// [max]（上限缺省不改）/ max [row]（缺省全部——cur 置有效上限、
@@ -2375,6 +2392,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return
 			}
 			log.Printf("%s: sent player 0x0D + 0x1F + authoritative vital 0x10", conn.RemoteAddr())
+			// 官服登录物理档案 0x10 单属性流（34 条，冲锋自走 P2）：0x0D
+			// 大档之后逐帧补发——官服形态即逐帧变更事件，引擎接近子系统
+			// 若在更新沿上武装则只有这条路能触发（大档不触发同路径）。
+			if err := sendPlayerPhysicsLoginStream(link, player); err != nil {
+				log.Printf("%s: write player physics login stream (skip): %v", conn.RemoteAddr(), err)
+			}
 			// 玩家档案 0x28 全量帧（官服登录簇方言，docs/官服玩家档案
 			// 0x28全量帧.md）：NINEYIN_PLAYER_PROFILE_0X28=1 门控。时序=
 			// 物化（0x0D）之后、面板身份/视图行爆发之前——官服 #132 档案

@@ -273,5 +273,33 @@ func (c *gmItemCatalog) search(query string, view int) []gmItemRow {
 	return out
 }
 
+// searchPage 分页检索（与 search 同一匹配口径）：返回 [offset, offset+limit)
+// 的命中行与命中总数。目录 10 万+ 行，旧「一次截 300 条」让前端把截断值
+// 当总量、且永远翻不到 300 名以外——分页信封把真实 total 交回前端。
+// 全表线性扫一遍（含 total 计数），毫秒级，无需索引。
+func (c *gmItemCatalog) searchPage(query string, view, offset, limit int) ([]gmItemRow, int) {
+	if c == nil {
+		return []gmItemRow{}, 0
+	}
+	needle := strings.ToLower(strings.TrimSpace(query))
+	out := make([]gmItemRow, 0, min(limit, 32))
+	total := 0
+	for _, row := range c.rows {
+		if needle != "" &&
+			!strings.Contains(strings.ToLower(row.Name), needle) &&
+			!strings.Contains(strings.ToLower(row.ConfigID), needle) {
+			continue
+		}
+		if view > 0 && row.ViewID != view {
+			continue
+		}
+		if total >= offset && len(out) < limit {
+			out = append(out, row)
+		}
+		total++
+	}
+	return out, total
+}
+
 // gmItems 全局目录（fashionSuits 同款包级缓存）。
 var gmItems = loadGMItemCatalog(defaultModernShareRoot)
