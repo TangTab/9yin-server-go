@@ -240,6 +240,31 @@
             <option value="smith">铁匠（3 属性 + 3 招式）</option>
           </select></label>
         <button onclick="gmTemplateWeapon()">生成武器</button><br />
+        <label>伤害词条
+          <input id="tpl-damage-affixes" type="number" value="0" min="0" max="6" style="width:4.5em" /></label>
+        <label>破击词条
+          <input id="tpl-pierce-affixes" type="number" value="0" min="0" max="6" style="width:4.5em" /></label>
+        <label>技能词条
+          <input id="tpl-skill-affixes" type="number" value="0" min="0" max="6" style="width:4.5em" /></label>
+        <label>档位
+          <select id="tpl-affix-tier">
+            <option value="max" selected>最高档</option>
+            <option value="rand">随机档</option>
+          </select></label>
+        <button onclick="gmTemplateWeapon()">按词条计划生成武器</button>
+        <p class="muted">
+          词条计划（伤害/破击/技能三个计数任一 &gt;0 时生效，覆盖职业随机）：伤害=外功伤害递增档、破击=破防能力递增档、技能=招式威力（skillpack）；
+          档位默认每类取最高 N 档，可切池内随机。全 0 时按上方职业规则随机。
+        </p><br />
+        <label>技能套路
+          <select id="tpl-skill-taolu">
+            <option value="">不按套路（全池随机）</option>
+          </select></label><br />
+        <div id="tpl-skill-list" class="affix-list" style="max-height:160px;overflow:auto;margin:4px 0;"></div>
+        <p class="muted" id="tpl-skill-hint">
+          技能词条套路定向：勾选具体招式=每招精确 1 条威力词条（标注实招/虚招/架招/怒招）；
+          只选套路不勾=同套路威力招式中随机「技能词条」计数条。
+        </p><br />
         <label>防具部位
           <select id="tpl-armor-slot">
             <option value="helmet">帽子</option>

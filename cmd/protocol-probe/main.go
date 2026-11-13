@@ -1478,16 +1478,41 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 模板生成（带词条装备）三动作（gm_generate_equip.go；Java
 			// LoginFlow applyGenerate* 同域）：挑 60501 家族模板 + 词条
 			// 构造 + 立即穿戴，全链复用 grant_item 的 itemSession 上下文。
+			// 武器支持可选词条计划（伤害/破击/技能三类条数 + 档位开关）。
 			session := &itemSession{
 				link: link, player: player, store: inventory, skins: appearanceCfg.skins,
 				currency: currencyStore, randomProps: randomPropsStore,
 				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(), now: time.Now,
 			}
 			text, genErr := applyGMGenerateEquip(session, command.Action,
-				command.WeaponType, command.Crafter, command.ArmorSlot)
+				command.WeaponType, command.Crafter, command.ArmorSlot, gmAffixPlan{
+					Damage:     int(command.DamageAffixes),
+					Pierce:     int(command.PierceAffixes),
+					Skill:      int(command.SkillAffixes),
+					MaxTier:    command.MaxTier,
+					SkillTaolu: command.SkillTaolu,
+					SkillKeys:  command.SkillKeys,
+				})
 			if genErr != nil {
 				gmSession.setAction("生成失败：" + genErr.Error())
 				return genErr
+			}
+			gmSession.setAction(text)
+			log.Printf("%s: GM %s: %s", conn.RemoteAddr(), command.Action, text)
+		case "recast_add_affix", "recast_clear_affix":
+			// 精确包号词条操作（gm_recast_affix.go；面板「洗练」区词条
+			// 目录勾选加入/清空）：对已穿装备槽追加或清空词条，recastConfirm
+			// 同链落库 + 穿戴帧重发。
+			session := &itemSession{
+				link: link, player: player, store: inventory, skins: appearanceCfg.skins,
+				currency: currencyStore, randomProps: randomPropsStore,
+				ctx: ctx, roleID: selected.ID, remote: conn.RemoteAddr().String(), now: time.Now,
+			}
+			text, affixErr := applyRecastAffixCommand(session, command.Action,
+				command.Slot, command.PackIDs, command.AffixKind)
+			if affixErr != nil {
+				gmSession.setAction("词条操作失败：" + affixErr.Error())
+				return affixErr
 			}
 			gmSession.setAction(text)
 			log.Printf("%s: GM %s: %s", conn.RemoteAddr(), command.Action, text)

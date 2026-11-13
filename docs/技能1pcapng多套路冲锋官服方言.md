@@ -99,13 +99,17 @@ sky 系（#9/#12/#15）为空中冲刺：跳跃中（手动 state6/0x2903）发 
 ### 2.1 定靶技首按簇（本包 12 例统一）
 
 ```
-[0x12:109 惰性清过期 CD 行 ×0~2] → CurSkillID=skill → CurSkillTarget=None →
+[0x12:109 惰性清过期 CD 行 ×0~2] → CurSkillID=skill → CurSkillTarget=目标 →
 m25[30000,"skill_pause"] → PauseSkill=skill → m707[15]
 ```
 
-- **CurSkillTarget 全场 48/48 恒 None**——即使 m431 已选靶、m211 十四值带目标三元组，
-  官服也从不把目标写入 CurSkillTarget。技能.pcapng「簇帧 CurSkillTarget 带目标 id」
-  与本包不一致（两方言并存或旧读有误，落码以恒 None 为准、待第三包仲裁）。
+- **CurSkillTarget(629,t9) 携带目标对象真值**（2026-11-13 字节级复核勘误）：此前
+  「全场 48/48 恒 None」系解码伪影——事件流 describe 对 t9 对象型渲染为 None，原始
+  字节里 5/5 首受理样本全带真目标（141.199=0x110087e6/0x15c16、157.764=0x110087e1/0x15c11、
+  181.869=0x1100aaae/0x664619、148.530/793.617 同形），与 211 自报 aim 逐位一致。
+  与技能.pcapng「簇帧带目标 id」一致，无两方言问题；服务端现行代码本就发真值，维持。
+- **PauseSkill=skill 首受理即发**（m25 后、m707 前，5/5 样本）：技能.pcapng 32.642
+  「首受理不发 PauseSkill」系中途开抓、该按压实为 rearm 形态的误判。
 - `_sky` 变体簇内 CurSkillID 后加 `CurIsAirSkill=2`；兵器系（kfkj/mzjf）=4；清除/换技=0
   （语义：0=无/地面清、2=空中技、4=持械系，仅 scene2 角色观测到）。
 - 怒招受理即扣 FP：FP=0 + m586/m645/m646/m750 状态族（HP/FP 广播帧，全场 78 次非簇专属）
@@ -183,7 +187,7 @@ CurSkillID(+CurIsAirSkill) → MPRatio/MP → m20 范围施放标记[技能基�
 4. anim/flag 分流表：剑系 `1/qg_fastrun_2h_01`、空手系 `2/qg_fastruning_s_0h_01`、
    灭剑如虹类 `2/qg_fastruning_s_2h_01`（跨系例外存在，先按套路武器映射）。
 5. 落码清单（独立小项）：直收簇 CantParry=2、m284、范围技 m20+超时清 CurSkillID、
-   重按两路径、m707[2/28/29]、受理簇 CurSkillTarget 恒 None、CD 行授予时机。
+   重按两路径、m707[2/28/29]、受理簇 CurSkillTarget 真值（见 §2.1 勘误）、CD 行授予时机。
 
 ## 七、落码记录（2026-11-13 01:00，已部署 F: 待真机）
 
@@ -198,6 +202,19 @@ CurSkillID(+CurIsAirSkill) → MPRatio/MP → m20 范围施放标记[技能基�
 
 测试：TestRushDashDialectPerSkill 新增（hyjf02 6m 零帧/8m flag1、xytf07_sky 9.5m flag2+0h、
 mzjf02 13m 零帧）；簇帧数断言 9→8 同步 ×6。build.bat 全绿，deploy.bat 已部署 F: 并起服。
+
+### 七.1 补码（2026-11-13 上午，字节级值差对拍后）
+
+远距按压受理簇三方字节对照（官服技能1 5 样本 vs 本服 62374/55133 tap）定版两处：
+
+- **首受理簇补 `PauseSkill(220)=skill`**（m25 后、m707 前）：官服 5/5 登录锚定首按全带；
+  此前代码仅 rearm 发。受理簇 8→9 帧。msg25+PauseSkill 成对是客户端技能暂存/接近
+  状态机的输入对——本服远距按压不自走的首要值差嫌疑。
+- **CurSkillTarget 维持真值**（§2.1 勘误）：官服字节全带真目标，非 None；代码本就
+  发真值，无需改。CurIsAirSkill(625)=4 仅兵器系（kfkj/mzjf）观测到，剑系不发，
+  暂不落码（映射未定案）。
+
+测试：staging/air/expired-cooldown/接近带断言 8→9 帧、帧位平移（PauseSkill 落 frames[3]）。
 
 **真机判据**：
 1. 剑系（hyjf02/myjf02）：远处按压 → 走近 → 日志 `rush within dash window ... in (7.5, 8.5]`

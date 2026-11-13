@@ -153,6 +153,7 @@ func (p *panelServer) mux() *http.ServeMux {
 	mux.HandleFunc("/api/mounts", p.catalogProxy("mounts"))
 	mux.HandleFunc("/api/idle-stances", p.catalogProxy("idle-stances"))
 	mux.HandleFunc("/api/recast-affixes", p.catalogProxy("recast-affixes"))
+	mux.HandleFunc("/api/skill-affixes", p.catalogProxy("skill-affixes"))
 	mux.HandleFunc("/api/combat-dummy/taolus", p.catalogProxy("combat-dummy/taolus"))
 	mux.HandleFunc("/api/taolus", p.catalogProxy("taolus"))
 	mux.HandleFunc("/api/neigongs", p.catalogProxy("neigongs"))

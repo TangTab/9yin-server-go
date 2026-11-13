@@ -202,12 +202,83 @@
             command({ action: "recast_clear_affix", slot: slot });
           }
 
+          // —— 技能词条套路定向（/api/skill-affixes 两级目录） ——
+          let TPL_SKILL_TAOLUS = null;
+          async function loadTplSkillTaolus() {
+            if (TPL_SKILL_TAOLUS !== null) return;
+            try {
+              let j = await (await fetch("/api/skill-affixes")).json();
+              TPL_SKILL_TAOLUS = j.loaded ? j.taolus || [] : [];
+            } catch (e) {
+              TPL_SKILL_TAOLUS = [];
+            }
+            let sel = document.querySelector("#tpl-skill-taolu");
+            if (sel) {
+              for (let t of TPL_SKILL_TAOLUS) {
+                let opt = document.createElement("option");
+                opt.value = t.key;
+                opt.textContent = t.label + "（" + t.skills.length + " 招）";
+                sel.appendChild(opt);
+              }
+            }
+            let hint = document.querySelector("#tpl-skill-hint");
+            if (hint && !TPL_SKILL_TAOLUS.length)
+              hint.textContent =
+                "招式威力词条目录未加载（缺少 skillpack/技能静态表）";
+          }
+          function renderTplSkillList() {
+            let sel = document.querySelector("#tpl-skill-taolu");
+            let box = document.querySelector("#tpl-skill-list");
+            if (!sel || !box) return;
+            box.innerHTML = "";
+            let taolu = (TPL_SKILL_TAOLUS || []).find(
+              (t) => t.key === sel.value,
+            );
+            if (!taolu) return;
+            for (let s of taolu.skills) {
+              let lab = document.createElement("label");
+              lab.className = "affix-item";
+              lab.innerHTML =
+                '<input type="checkbox" value="' +
+                s.key +
+                '"> ' +
+                s.name +
+                ' <span class="muted">[' +
+                s.type +
+                "]</span>";
+              box.appendChild(lab);
+            }
+          }
           function gmTemplateWeapon() {
-            command({
+            let body = {
               action: "gm_generate_weapon",
               weaponType: +document.querySelector("#tpl-weapon-type").value,
               crafter: document.querySelector("#tpl-crafter").value,
-            });
+            };
+            // 词条计划（三个计数任一 >0 生效；输入缺失按 0=职业随机）。
+            let damage = document.querySelector("#tpl-damage-affixes");
+            let pierce = document.querySelector("#tpl-pierce-affixes");
+            let skill = document.querySelector("#tpl-skill-affixes");
+            let tier = document.querySelector("#tpl-affix-tier");
+            body.damageAffixes = damage ? Math.max(0, Math.min(6, +damage.value || 0)) : 0;
+            body.pierceAffixes = pierce ? Math.max(0, Math.min(6, +pierce.value || 0)) : 0;
+            body.skillAffixes = skill ? Math.max(0, Math.min(6, +skill.value || 0)) : 0;
+            if (tier) body.maxTier = tier.value !== "rand";
+            // 技能词条套路定向：勾选招式=精确指定；只选套路=套路内随机。
+            let taoluSel = document.querySelector("#tpl-skill-taolu");
+            let taoluList = document.querySelector("#tpl-skill-list");
+            if (taoluSel && taoluSel.value) {
+              body.skillTaolu = taoluSel.value;
+              let keys = [];
+              if (taoluList)
+                taoluList
+                  .querySelectorAll("input:checked")
+                  .forEach(function (c) {
+                    keys.push(c.value);
+                  });
+              if (keys.length) body.skillKeys = keys;
+            }
+            command(body);
           }
           function gmTemplateArmor() {
             command({
@@ -1195,6 +1266,10 @@
     document
       .querySelector("#clone-config")
       .addEventListener("change", syncCloneFun);
+    let tplTaoluSel = document.querySelector("#tpl-skill-taolu");
+    if (tplTaoluSel)
+      tplTaoluSel.addEventListener("change", renderTplSkillList);
+    loadTplSkillTaolus();
     let gmBadge = document.querySelector("#gm-server-badge");
     if (gmBadge && GM_SERVER) {
       gmBadge.innerHTML = "<b>服务器</b>";

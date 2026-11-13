@@ -50,6 +50,15 @@ type CommandBody struct {
 	WeaponType  int32   `json:"weaponType"`  // gm_generate_weapon 类型 101-108/122
 	Crafter     string  `json:"crafter"`     // gm_generate_weapon 职业 cook/smith
 	ArmorSlot   string  `json:"armorSlot"`   // gm_generate_armor 部位 helmet/…/ring
+	DamageAffixes int32 `json:"damageAffixes"` // gm_generate_weapon 伤害词条数 0..6（0=不指定）
+	PierceAffixes int32 `json:"pierceAffixes"` // gm_generate_weapon 破击词条数 0..6
+	SkillAffixes  int32 `json:"skillAffixes"`  // gm_generate_weapon 技能词条数 0..6
+	MaxTier       bool  `json:"maxTier"`       // gm_generate_weapon 档位策略（true=每类最高 N 档；false=池内随机）
+	SkillTaolu    string `json:"skillTaolu"`   // gm_generate_weapon 技能词条套路 key（定向；空=全池随机）
+	SkillKeys     []string `json:"skillKeys"`  // gm_generate_weapon 指定招式 key（每招 1 条；优先于 skillAffixes）
+	Slot        int32   `json:"slot"`        // recast_add_affix/recast_clear_affix 穿戴槽
+	PackIDs     []int32 `json:"packIDs"`     // recast_add_affix 词条包号列表
+	AffixKind   string  `json:"affixKind"`   // recast_add_affix 词条归属 prop/skill
 	Amount      int32   `json:"amount"`
 	WearNow     bool    `json:"wearNow"`
 	CardId      int32   `json:"cardId"`
@@ -109,6 +118,15 @@ type Command struct {
 	WeaponType     int32  // gm_generate_weapon 武器类型 101刀-108短棍/122重剑（面板 weaponType 键）
 	Crafter        string // gm_generate_weapon 职业 cook/smith（面板 crafter 键）
 	ArmorSlot      string // gm_generate_armor 防具部位键（面板 armorSlot 键）
+	DamageAffixes  int32  // gm_generate_weapon 伤害词条数（面板 damageAffixes 键；三类全 0=按职业随机）
+	PierceAffixes  int32  // gm_generate_weapon 破击词条数（面板 pierceAffixes 键）
+	SkillAffixes   int32  // gm_generate_weapon 技能词条数（面板 skillAffixes 键）
+	MaxTier        bool   // gm_generate_weapon 档位策略：true=每类最高 N 档 / false=池内随机
+	SkillTaolu     string // gm_generate_weapon 技能词条套路 key（面板 skillTaolu 键）
+	SkillKeys      []string // gm_generate_weapon 指定招式 key（面板 skillKeys 键；运行态校验在游戏侧）
+	Slot           int32  // recast_add_affix/recast_clear_affix 穿戴槽（面板 slot 键）
+	PackIDs        []int32 // recast_add_affix 词条包号列表（面板 packIDs 键）
+	AffixKind      string // recast_add_affix 词条归属 prop/skill（面板 affixKind 键）
 	Amount         int32  // grant_item 数量
 	WearNow        bool   // grant_item 穿戴形态（否则入背包）
 	CardId         int32  // equip_card/equip_hair 皮肤号

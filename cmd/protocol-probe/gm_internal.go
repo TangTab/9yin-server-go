@@ -89,6 +89,7 @@ func newGMInternalMux(token string, hub *gmHub, info gmHealthInfo) http.Handler 
 	mux.HandleFunc("/internal/v1/catalog/mounts", hub.mountsHandler)
 	mux.HandleFunc("/internal/v1/catalog/idle-stances", hub.idleStancesHandler)
 	mux.HandleFunc("/internal/v1/catalog/recast-affixes", hub.recastAffixesHandler)
+	mux.HandleFunc("/internal/v1/catalog/skill-affixes", hub.skillAffixesHandler)
 	mux.HandleFunc("/internal/v1/catalog/combat-dummy/taolus", hub.combatDummyTaolusHandler)
 	mux.HandleFunc("/internal/v1/catalog/taolus", hub.taolusHandler)
 	mux.HandleFunc("/internal/v1/catalog/neigongs", hub.neigongsHandler)

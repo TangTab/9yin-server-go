@@ -6,6 +6,22 @@ import (
 	"strings"
 )
 
+// recastAffixSlots 是词条命令可寻址的穿戴槽闭名单（面板 equip.js
+// RECAST_SLOTS 同表：头发1/衣服3/裤子4/护腕6/绑腿7/鞋子8/耳环11-12/
+// 项链13/戒指14-15/武器22/宝物25-29/娃娃44-48）。
+var recastAffixSlots = map[int32]bool{
+	1: true, 3: true, 4: true, 6: true, 7: true, 8: true,
+	11: true, 12: true, 13: true, 14: true, 15: true,
+	22: true,
+	25: true, 26: true, 27: true, 28: true, 29: true,
+	44: true, 45: true, 46: true, 47: true, 48: true,
+}
+
+// recastAffixSlot slot 是否在词条命令可寻址的穿戴槽闭名单内。
+func recastAffixSlot(slot int32) bool {
+	return recastAffixSlots[slot]
+}
+
 // Validate 是 GM 命令输入校验的唯一权威实现：body 的形状与界值
 // 检查、预设/目的地字段的闭名单转换，全部集中在这里。它从
 // cmd/protocol-probe/gm_panel.go 的 HTTP 校验大 switch 原样抽取，
@@ -283,7 +299,9 @@ func Validate(body CommandBody) (Command, error) {
 		command.ItemConfig, command.Amount, command.WearNow = strings.TrimSpace(body.ItemConfig), body.Amount, body.WearNow
 	case "gm_generate_weapon":
 		// 模板生成（带词条装备）三动作（Java LoginFlow applyGenerate*
-		// 同域）：武器=类型+职业；词条构造在游戏会话循环执行器。
+		// 同域）：武器=类型+职业；词条构造在游戏会话循环执行器。可选
+		// 词条计划（伤害/破击/技能三类条数）：任一 >0 走官方定向路由
+		// 构造，全 0 保持职业随机行为。
 		switch body.WeaponType {
 		case 101, 102, 103, 104, 105, 106, 107, 108, 122:
 		default:
@@ -292,7 +310,38 @@ func Validate(body CommandBody) (Command, error) {
 		if body.Crafter != "cook" && body.Crafter != "smith" {
 			return command, fmt.Errorf("crafter 必须是 cook（厨师）或 smith（铁匠）")
 		}
+		for _, bound := range []struct {
+			name  string
+			count int32
+		}{
+			{"damageAffixes", body.DamageAffixes},
+			{"pierceAffixes", body.PierceAffixes},
+			{"skillAffixes", body.SkillAffixes},
+		} {
+			if bound.count < 0 || bound.count > 6 {
+				return command, fmt.Errorf("%s 必须在 0..6（0=不指定）", bound.name)
+			}
+		}
+		if total := body.DamageAffixes + body.PierceAffixes + body.SkillAffixes; total > 12 {
+			return command, fmt.Errorf("三类词条总数不能超过 12（当前 %d）", total)
+		}
+		// 技能词条套路定向：套路/招式 key 只做形状闸门，存在性与威力
+		// 词条覆盖在游戏侧按目录判（回执注明省略原因）。
+		if len(body.SkillTaolu) > 64 {
+			return command, fmt.Errorf("skillTaolu 过长（≤64 字符）")
+		}
+		if len(body.SkillKeys) > 6 {
+			return command, fmt.Errorf("skillKeys 最多 6 个招式")
+		}
+		for _, key := range body.SkillKeys {
+			if strings.TrimSpace(key) == "" || len(key) > 64 {
+				return command, fmt.Errorf("skillKeys 每项须为 1..64 字符的招式 key")
+			}
+		}
 		command.WeaponType, command.Crafter = body.WeaponType, body.Crafter
+		command.DamageAffixes, command.PierceAffixes = body.DamageAffixes, body.PierceAffixes
+		command.SkillAffixes, command.MaxTier = body.SkillAffixes, body.MaxTier
+		command.SkillTaolu, command.SkillKeys = body.SkillTaolu, body.SkillKeys
 	case "gm_generate_armor":
 		switch body.ArmorSlot {
 		case "helmet", "amulet", "cloth", "pants", "leg", "shoes", "wrist", "ear", "ring":
@@ -302,6 +351,34 @@ func Validate(body CommandBody) (Command, error) {
 		command.ArmorSlot = body.ArmorSlot
 	case "gm_generate_bracer":
 		// 无负载动作：护腕模板与词条构造在游戏会话循环执行器。
+	case "recast_add_affix":
+		// 精确包号加词条（面板「洗练」区词条目录勾选）：slot=穿戴槽
+		//（equip.js RECAST_SLOTS 同表）；packIDs=词条包号；affixKind
+		// 决定客户端查表归属（prop→proppack / skill→skillpack；双表
+		// 同号包 13234 族的显示由 kind 决定）。
+		if !recastAffixSlot(body.Slot) {
+			return command, fmt.Errorf("slot 必须是身上装备槽（1/3/4/6/7/8/11-15/22/25-29/44-48）")
+		}
+		if len(body.PackIDs) == 0 {
+			return command, fmt.Errorf("packIDs 不能为空")
+		}
+		if len(body.PackIDs) > 32 {
+			return command, fmt.Errorf("packIDs 一次最多 32 条")
+		}
+		for _, id := range body.PackIDs {
+			if id < 1 || id > 999999 {
+				return command, fmt.Errorf("packID %d 越界（1..999999）", id)
+			}
+		}
+		if body.AffixKind != "prop" && body.AffixKind != "skill" {
+			return command, fmt.Errorf("affixKind 必须是 prop 或 skill")
+		}
+		command.Slot, command.PackIDs, command.AffixKind = body.Slot, body.PackIDs, body.AffixKind
+	case "recast_clear_affix":
+		if !recastAffixSlot(body.Slot) {
+			return command, fmt.Errorf("slot 必须是身上装备槽（1/3/4/6/7/8/11-15/22/25-29/44-48）")
+		}
+		command.Slot = body.Slot
 	case "mount_ride":
 		// 坐骑骑乘（Java GmRemote mount_ride 同域）：mountConfig=坐骑道具
 		// config（tool_item script=Mount 且目录有模型映射）；再点同骑=下马。

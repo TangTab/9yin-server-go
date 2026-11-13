@@ -213,7 +213,7 @@ function renderTemplate(host) {
   const { section, body } = panelSection({
     id: "sec-template",
     title: "模板生成（带词条装备）",
-    desc: "按官方生活技能模板生成并立即穿戴（模板优先取 51 级金色 60501 家族基座，词条随装备持久化）：厨师=6 条属性词条；铁匠=3 属性 + 3 招式；护腕=3 阳刚臂力 + 3 招式（按已穿武器类型）；防具 8 部位=固定 5 条红词条。",
+    desc: "按官方生活技能模板生成并立即穿戴（模板优先取 51 级金色 60501 家族基座，词条随装备持久化）：厨师=6 条属性词条；铁匠=3 属性 + 3 招式；护腕=3 阳刚臂力 + 3 招式（按已穿武器类型）；防具 8 部位=固定 5 条红词条。武器可指定词条计划（下方三个计数任一 >0 生效，覆盖职业随机）：伤害=外功伤害递增档、破击=破防能力递增档、技能=招式威力（skillpack）；档位默认每类取最高 N 档，可切池内随机。技能词条可按套路定向：勾选具体招式=每招精确 1 条（列表标注实招/虚招/架招/怒招），只选套路=同套路威力招式随机。",
   });
   const weaponSelect = h("ax-select", {
     content: JSON.stringify([
@@ -239,9 +239,91 @@ function renderTemplate(host) {
     ]),
     style: "width:150px;",
   });
+  // 指定词条计划：三类计数（0=不指定）+ 档位开关；全 0 时按职业随机。
+  const damageCount = numField({ label: "伤害词条", value: 0, min: 0, max: 6, width: "110px" });
+  const pierceCount = numField({ label: "破击词条", value: 0, min: 0, max: 6, width: "110px" });
+  const skillCount = numField({ label: "技能词条", value: 0, min: 0, max: 6, width: "110px" });
+  const tierSelect = h("ax-select", {
+    content: JSON.stringify([
+      { label: "最高档", value: "max" },
+      { label: "随机档", value: "rand" },
+    ]),
+    style: "width:110px;",
+    value: "max",
+  });
+
+  // —— 技能词条按套路定向（折叠区：套路下拉 + 招式勾选，类型标注） ——
+  // 勾选招式 = 每招精确 1 条威力词条；只选套路不勾 = 该套路威力招式中
+  // 随机「技能词条」计数条（不放回，不同招式）。
+  const taoluSkillBox = h("div", { class: "affix-list" });
+  const taoluHint = hint();
+  const taoluSelect = h("ax-select", { style: "min-width:190px;", search: true });
+  let taoluData = [];
+  let taoluLoaded = false;
+  function fillTaoluSelect() {
+    const options = [{ label: "不按套路（全池随机）", value: "" }];
+    for (const t of taoluData) options.push({ label: t.label + "（" + t.skills.length + " 招）", value: t.key });
+    taoluSelect.setAttribute("content", JSON.stringify(options));
+    taoluSelect.setAttribute("value", "");
+  }
+  function renderTaoluSkills(key) {
+    taoluSkillBox.textContent = "";
+    const taolu = taoluData.find((t) => t.key === key);
+    if (!taolu) return;
+    for (const skill of taolu.skills) {
+      taoluSkillBox.appendChild(
+        h("label", { class: "picker-row", style: "gap:8px;" }, [
+          h("input", { type: "checkbox", value: skill.key }),
+          h("span", {}, [skill.name]),
+          h("span", { class: "sub" }, ["[" + skill.type + "]"]),
+        ])
+      );
+    }
+  }
+  taoluSelect.addEventListener("change", () => renderTaoluSkills(taoluSelect.value || ""));
+  const taoluWrap = h("details", {}, [
+    h("summary", { style: "cursor:pointer;color:var(--gm-gold);font-size:13px;margin:12px 0 6px;" }, ["技能词条按套路选择（勾选=精确指定招式；只选套路=同套路威力招式随机）"]),
+  ]);
+  taoluWrap.appendChild(h("div", { class: "field-row" }, [h("label", {}, ["套路"]), taoluSelect]));
+  taoluWrap.appendChild(taoluSkillBox);
+  taoluWrap.appendChild(taoluHint.node);
+  taoluWrap.addEventListener("toggle", () => {
+    if (taoluWrap.open && !taoluLoaded) {
+      taoluLoaded = true;
+      catalog("/api/skill-affixes")
+        .then((data) => {
+          if (data.loaded === false) {
+            taoluHint.set("招式威力词条目录未加载（缺少 skillpack/技能静态表）", false);
+            return;
+          }
+          taoluData = data.taolus || [];
+          fillTaoluSelect();
+          taoluHint.set("套路目录已载入（" + taoluData.length + " 个套路有威力词条招式）", true);
+        })
+        .catch((err) => taoluHint.set(err.message || String(err), false));
+    }
+  });
+
   const genWeapon = actionBtn({
     label: "生成武器",
-    build: () => ({ action: "gm_generate_weapon", weaponType: Number(weaponSelect.value || 102), crafter: crafterSelect.value || "cook" }),
+    build: () => {
+      const body = {
+        action: "gm_generate_weapon",
+        weaponType: Number(weaponSelect.value || 102),
+        crafter: crafterSelect.value || "cook",
+        damageAffixes: damageCount.get() ?? 0,
+        pierceAffixes: pierceCount.get() ?? 0,
+        skillAffixes: skillCount.get() ?? 0,
+        maxTier: (tierSelect.value || "max") === "max",
+      };
+      const taolu = taoluSelect.value || "";
+      if (taolu) {
+        body.skillTaolu = taolu;
+        const checked = Array.from(taoluSkillBox.querySelectorAll("input:checked")).map((c) => c.value);
+        if (checked.length) body.skillKeys = checked;
+      }
+      return body;
+    },
     okText: "武器生成已提交",
     section: "模板生成",
   });
@@ -258,6 +340,8 @@ function renderTemplate(host) {
     section: "模板生成",
   });
   body.appendChild(h("div", { class: "field-row" }, [h("label", {}, ["武器类型"]), weaponSelect, h("label", {}, ["职业"]), crafterSelect, genWeapon]));
+  body.appendChild(h("div", { class: "field-row" }, [damageCount.node, pierceCount.node, skillCount.node, tierSelect]));
+  body.appendChild(taoluWrap);
   body.appendChild(h("div", { class: "field-row" }, [h("label", {}, ["防具部位"]), armorSelect, genArmor, genBracer]));
   host.appendChild(section);
 }

@@ -14,6 +14,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"sort"
@@ -517,9 +518,11 @@ func (hub *gmHub) idleStancesHandler(writer http.ResponseWriter, request *http.R
 // ---------------------------------------------------------------------------
 // /api/recast-affixes —— 洗练词条目录（「洗练」节）。share/item/
 // senior_weapon_dire.ini 的 r=<PropName>,<词条ID>,… 行给出每把武器
-// 可洗的普通词条；同一词条多武器出现时 source 合并武器节名。招式
-// 词条（skill）在当前资源表里没有对应源，按空数组应答；整表缺失时
-// loaded=false，前端显示「洗练资源未加载」提示。
+// 可洗的普通词条；同一词条多武器出现时 source 合并武器节名，Name 联查
+// proppack 首行增强为「属性名+值」。招式词条（skill）取洗练随机池内
+// skillpack 归属包（13234 族双表同号——skillpack 侧是招式威力，Name=
+// Comment 中文名）；整表缺失时 loaded=false，前端显示「洗练资源未加载」
+// 提示。
 // ---------------------------------------------------------------------------
 
 type gmRecastAffix struct {
@@ -534,6 +537,7 @@ type gmRecastSkill struct {
 	Source string `json:"source,omitempty"`
 	Detail string `json:"detail,omitempty"`
 	Taolu  string `json:"taolu,omitempty"`
+	Type   string `json:"type,omitempty"` // 实招/虚招/架招/怒招（skill_static 归属）
 	Weapon string `json:"weapon,omitempty"`
 }
 
@@ -554,8 +558,130 @@ func loadGMRecastAffixes() gmRecastAffixes {
 		if data, err := gmReadINI(defaultModernShareRoot, "item", "senior_weapon_dire.ini"); err == nil {
 			gmRecastAffixesData = parseGMRecastAffixes(data)
 		}
+		gmAttachRecastSkills(&gmRecastAffixesData)
+		gmEnhanceRecastPropNames(&gmRecastAffixesData)
 	})
 	return gmRecastAffixesData
+}
+
+// gmAttachRecastSkills 招式词条目录（Skill 数组）：官方洗练随机池内
+// skillpack 归属包（13234 族双表同号——skillpack 侧是招式威力，如
+// [13234] Comment=神风诀的弄月吟风威力增加7成）。Name 取节内 Comment
+// 中文名，Detail 取首条 r= 威力行；随机池/skillpack 缺失时保持空数组。
+func gmAttachRecastSkills(data *gmRecastAffixes) {
+	randBytes, err := gmReadINI(defaultModernShareRoot, "item", "senior_weapon_rand.ini")
+	if err != nil {
+		return
+	}
+	pool := map[int]bool{}
+	gmScanINI(randBytes, func(section, key, value string) {
+		if key != "r" {
+			return
+		}
+		if _, ok := parseUintSection(section); ok {
+			return // 节名须是武器 config 串（非数字）
+		}
+		for _, id := range splitIntList(value) {
+			if id != 0 {
+				pool[id] = true
+			}
+		}
+	})
+	if len(pool) == 0 {
+		return
+	}
+	type skillAgg struct {
+		name     string
+		detail   string
+		firstKey string // 首条 r= 行的技能 key（类型标注查 skillStatic）
+	}
+	byID := map[int]*skillAgg{}
+	if skillBytes, skillErr := gmReadINI(defaultModernShareRoot, "modifypack", "skillpack.ini"); skillErr == nil {
+		gmScanINI(skillBytes, func(section, key, value string) {
+			id, ok := parseUintSection(section)
+			if !ok || id == 0 || !pool[int(id)] {
+				return
+			}
+			agg, exists := byID[int(id)]
+			if !exists {
+				agg = &skillAgg{}
+				byID[int(id)] = agg
+			}
+			switch key {
+			case "comment":
+				if agg.name == "" {
+					agg.name = value
+				}
+			case "r":
+				if agg.firstKey == "" && strings.Contains(value, ",") {
+					agg.firstKey = strings.ToLower(strings.TrimSpace(strings.Split(value, ",")[0]))
+				}
+				if agg.detail == "" && strings.Contains(value, ",") {
+					if fields := strings.Split(value, ","); len(fields) >= 3 {
+						agg.detail = strings.TrimSpace(fields[0]) + " " +
+							strings.TrimSpace(fields[1]) + " +" + strings.TrimSpace(fields[2])
+					}
+				}
+			}
+		})
+	}
+	if len(byID) == 0 {
+		return
+	}
+	ids := make([]int, 0, len(byID))
+	for id := range byID {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+	affixes := currentSkillAffixCatalog()
+	for _, id := range ids {
+		agg := byID[id]
+		name := agg.name
+		if name == "" {
+			name = fmt.Sprintf("招式词条 %d", id)
+		}
+			row := gmRecastSkill{ID: id, Name: name, Detail: agg.detail}
+			if static, ok := affixes.skillStatic[agg.firstKey]; ok {
+				row.Type = skillAffixTypeLabel(static.EffectType, static.Rage)
+				row.Taolu = static.Taolu
+			}
+		data.Skill = append(data.Skill, row)
+	}
+}
+
+// gmEnhanceRecastPropNames 普通词条名增强：Name 从裸路由属性名
+//（MeleeDamage）增强为 "属性名+值"（如 MinMeleeDamage+7——proppack 该
+// 包首条 r= 行；13234 族双定义包在 proppack 侧是 AIPhyDefAdd+100）。
+func gmEnhanceRecastPropNames(data *gmRecastAffixes) {
+	propBytes, err := gmReadINI(defaultModernShareRoot, "modifypack", "proppack.ini")
+	if err != nil {
+		return
+	}
+	firstLine := map[int]string{} // pack → "PropName+value"
+	gmScanINI(propBytes, func(section, key, value string) {
+		if key != "r" || !strings.Contains(value, ",") {
+			return
+		}
+		pack, ok := parseUintSection(section)
+		if !ok || pack == 0 {
+			return
+		}
+		if _, seen := firstLine[int(pack)]; seen {
+			return
+		}
+		fields := strings.Split(value, ",")
+		if len(fields) < 3 {
+			return
+		}
+		if propName := strings.TrimSpace(fields[1]); propName != "" {
+			firstLine[int(pack)] = propName + "+" + strings.TrimSpace(fields[2])
+		}
+	})
+	for index := range data.Prop {
+		if label, ok := firstLine[data.Prop[index].ID]; ok {
+			data.Prop[index].Name = label
+		}
+	}
 }
 
 // parseGMRecastAffixes 纯函数装载：r= 行首字段是词条属性名，其后
@@ -630,6 +756,110 @@ func (hub *gmHub) recastAffixesHandler(writer http.ResponseWriter, request *http
 	}
 	affixes := loadGMRecastAffixes()
 	gmWriteTaggedJSON(writer, request, gmStaticTagOf("recast-affixes", affixes), affixes)
+}
+
+// ---------------------------------------------------------------------------
+// /api/skill-affixes —— 招式威力词条两级目录（「模板生成」技能词条的
+// 套路 → 招式选择）：套路行序与 /api/taolus 一致（school_taolu 文件序），
+// 每套路只列有威力词条包（skillpack PackCategory=5）的基座招式，Type
+// 标注实招/虚招/架招/怒招（skill_static EffectType + PackCategory==2）。
+// 数据缺失按 loaded=false 空表应答，前端显示降级提示。
+// ---------------------------------------------------------------------------
+
+type gmSkillAffixSkill struct {
+	Key  string `json:"key"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
+type gmSkillAffixTaolu struct {
+	Key    string              `json:"key"`
+	Label  string              `json:"label"`
+	Skills []gmSkillAffixSkill `json:"skills"`
+}
+
+type gmSkillAffixes struct {
+	Loaded bool                `json:"loaded"`
+	Taolus []gmSkillAffixTaolu `json:"taolus"`
+}
+
+var (
+	gmSkillAffixesOnce sync.Once
+	gmSkillAffixesData gmSkillAffixes
+)
+
+func loadGMSkillAffixes() gmSkillAffixes {
+	gmSkillAffixesOnce.Do(func() {
+		gmSkillAffixesData = buildGMSkillAffixes(currentSkillAffixCatalog(), gmTaolus, currentSkillDescNames())
+	})
+	return gmSkillAffixesData
+}
+
+// buildGMSkillAffixes 纯函数组装：威力目录的套路分组按 /api/taolus 行
+// 序输出（gmTaolus 未收录的威力套路按 key 追加在尾部，仍可用）；招式
+// 名缺 string_skill_desc 条目时回退 key 原样。
+func buildGMSkillAffixes(catalog *skillAffixCatalog, taolus *gmTaoluCatalog, names map[string]string) gmSkillAffixes {
+	result := gmSkillAffixes{Taolus: []gmSkillAffixTaolu{}}
+	if catalog == nil || len(catalog.taoluSkills) == 0 {
+		return result
+	}
+	emit := func(taoluKey string) {
+		members := catalog.taoluSkills[taoluKey]
+		if len(members) == 0 {
+			return
+		}
+		row := gmSkillAffixTaolu{Key: taoluKey, Skills: make([]gmSkillAffixSkill, 0, len(members))}
+		if resolved, ok := taolus.resolve(taoluKey); ok {
+			row.Label = resolved.Label
+		} else {
+			row.Label = taoluKey
+		}
+		for _, key := range members {
+			name := names[key]
+			if name == "" {
+				name = key
+			}
+			static := catalog.skillStatic[key]
+			row.Skills = append(row.Skills, gmSkillAffixSkill{
+				Key: key, Name: name, Type: skillAffixTypeLabel(static.EffectType, static.Rage),
+			})
+		}
+		result.Taolus = append(result.Taolus, row)
+	}
+	emitted := make(map[string]bool, len(catalog.taoluSkills))
+	if taolus != nil {
+		for _, row := range taolus.rows {
+			key := strings.ToLower(row.Key)
+			if _, has := catalog.taoluSkills[key]; !has {
+				continue // 该套路无威力词条招式：面板两级选择跳过。
+			}
+			emit(key)
+			emitted[key] = true
+		}
+	}
+	// 威力分组中有而 /api/taolus 未收录的套路（如 shijia 之外的分组）按
+	// key 序追加，避免目录丢失。
+	rest := make([]string, 0)
+	for key := range catalog.taoluSkills {
+		if !emitted[key] {
+			rest = append(rest, key)
+		}
+	}
+	sort.Strings(rest)
+	for _, key := range rest {
+		emit(key)
+	}
+	result.Loaded = len(result.Taolus) > 0
+	return result
+}
+
+func (hub *gmHub) skillAffixesHandler(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		writer.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	affixes := loadGMSkillAffixes()
+	gmWriteTaggedJSON(writer, request, gmStaticTagOf("skill-affixes", affixes), affixes)
 }
 
 // ---------------------------------------------------------------------------

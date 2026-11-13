@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"testing"
-	"time"
 )
 
 func TestActiveParryAcceptsModernIntegralSubtype(t *testing.T) {
@@ -39,9 +38,9 @@ func TestActiveParryRejectsFractionalSubtypeWithoutMutatingState(t *testing.T) {
 	}
 }
 
-// msg54 手动格挡（Java handleManualParry + fork handleBlockStateCustom
-// 同源）：按下挂槽 11 + msg169 + InParry 属性帧；松开清槽；重复按下
-// 静默；游离松开重推空态帧。
+// msg54 手动格挡（Java handleManualParry 同源）：按下回官服六件套序
+// （含 BufferInfo4 无时长槽串）+m169；松开七帧清空；重复按下静默；
+// 游离松开重推释放序。
 func TestBlockStateEngageAndRelease(t *testing.T) {
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("格挡侠", 0)
@@ -52,9 +51,9 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 		}}
 	}
 
-	// 按下（0=engage）：官服六件套序（a.pcapng 5.144 定版，2026-11-12 P2）
+	// 按下（0=engage）：官服六件套序（a.pcapng 5.2s 定版）
 	// ——MoveSpeed+RunSpeedAdd+InParry+ParryUpSpeedAdd+BufferInfo4 五单属性帧
-	// + msg169 + InManualParry，共 7 帧。槽 11 激活；格挡不清怒。
+	// + msg169 + InManualParry，共 7 帧。格挡不清怒。
 	spBefore := player.skillSP()
 	if err := handleBlockStateCustom(conn, player, blockMsg(0), "test"); err != nil {
 		t.Fatal(err)
@@ -85,6 +84,16 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if state[0] != 0x10 || binary.LittleEndian.Uint16(state[12:]) != propParryTokenMoveSpeed {
 		t.Fatalf("parry state frame=%x (want MoveSpeed single-prop head of official order)", state)
 	}
+	// 第 5 帧=BufferInfo4 官服无时长槽串（a.pcapng 5.2s
+	// '11CE,701E5A4,3AD5FB,1,0,0' 同形：seg5 到期/seg6 剩余跳恒 0）。
+	wantSerial := fmt.Sprintf("%X,%X,%X,1,0,0", parryBuffStaticData, playerObjectID, playerOwnerID)
+	serial := frames[4]
+	if serial[0] != 0x10 || binary.LittleEndian.Uint16(serial[12:]) != propParryTokenBufferInfo4 {
+		t.Fatalf("parry serial frame=%x (want BufferInfo4 single-prop)", serial)
+	}
+	if !bytes.Contains(serial, []byte(wantSerial)) {
+		t.Fatalf("parry serial=%x missing official no-expiry CSV %q", serial, wantSerial)
+	}
 	if !player.parryingSnapshot() {
 		t.Fatal("engage did not set parrying")
 	}
@@ -103,6 +112,16 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	}
 	if got := len(conn.Frames()); got != 14 {
 		t.Fatalf("release frames=%d, want official seven-frame release order", got)
+	}
+	// 松开第 2 帧=BufferInfo4 清空串（a.pcapng 5.7s 'BufferInfo4='；
+	// u32 长度 1 + NUL → 帧长 12+2+4+1=19，且不含 0x11CE 槽串）。
+	frames = conn.Frames()
+	clear := frames[8]
+	if clear[0] != 0x10 || binary.LittleEndian.Uint16(clear[12:]) != propParryTokenBufferInfo4 {
+		t.Fatalf("parry clear frame=%x (want BufferInfo4 single-prop)", clear)
+	}
+	if len(clear) != 19 || bytes.Contains(clear, []byte(wantSerial)) {
+		t.Fatalf("parry clear frame=%x want empty string value", clear)
 	}
 	if player.parryingSnapshot() {
 		t.Fatal("release kept parrying")
@@ -128,17 +147,26 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	}
 }
 
-// 格挡槽串到期段必须是 1601 纪元毫秒 HEX（55866 '11CE,11000001,7A5C0B,1,
-// C38DC7DD957,1' 实证；UnixMilli 会被客户端按 1601 纪元解成 1657 年=
-// 即刻过期，非战斗格挡按下即被客户端撤销）。
-func TestParryBuffSerialEpoch1601(t *testing.T) {
+// 格挡槽串官服无时长：seg5 到期/seg6 剩余跳恒 0（a.pcapng 5.2s
+// '11CE,701E5A4,3AD5FB,1,0,0' 定版；对照限时 buff '229D,…,8,
+// C38EA546FE9,A'——seg5=1601 纪元毫秒、seg6 递减）。格挡 buf 事件驱动：
+// 按下登记、松开/被打破摘除。两代同症教训都钉在这条断言上：旧 fork
+// 方言 seg5 发 UnixMilli 被客户端按 1601 纪元解出 1657 年=即刻过期；
+// 此前字面量 "26" 则令 0x11CE 登记解析失败——两者都表现为非战斗格挡
+// 按下即被撤销（战斗态姿态由 LogicState 撑住掩盖）。
+func TestParryBuffSerialNoExpiry(t *testing.T) {
+	conn := &captureMessageConnection{}
 	player := newPlayerActor("纪元侠", 0)
-	engagedAt := time.Date(2026, 11, 12, 11, 30, 0, 0, time.UTC)
-	serial := player.engageParryBuff(engagedAt)
-	wantExpiry := engagedAt.Add(24 * time.Hour).UnixMilli() + windowsEpochDeltaMs
-	want := fmt.Sprintf("11CE,%X,%X,1,%X,1", uint32(playerObjectID), uint32(playerOwnerID), wantExpiry)
-	if serial != want {
-		t.Fatalf("parry serial=%q want=%q", serial, want)
+	if err := handleBlockStateCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
+		{Type: 2, Int32: clientCustomBlockState},
+		{Type: 2, Int32: 0},
+	}}, "test"); err != nil {
+		t.Fatal(err)
+	}
+	want := fmt.Sprintf("%X,%X,%X,1,0,0", parryBuffStaticData, playerObjectID, playerOwnerID)
+	frames := conn.Frames()
+	if len(frames) != 7 || !bytes.Contains(frames[4], []byte(want)) {
+		t.Fatalf("parry serial want official no-expiry CSV %q in BufferInfo4 frame, frames=%x", want, frames)
 	}
 }
 

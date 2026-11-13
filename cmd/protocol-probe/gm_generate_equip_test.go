@@ -11,17 +11,20 @@ import (
 // 固定词条索引与三动作端到端（Java LoginFlow applyGenerate* 对齐）。
 
 // stubGMGenerateCatalog 合成洗练目录（setWeaponRecastCatalogForTest 注入）：
-// sword_zztest_60501 精确节（混合 prop/skill）+ blade 家族节（前缀并集路径）
-// + 无关节（整池兜底时也并入）。
+// sword_zztest_60501 精确节（混合 prop/skill + MeleeDamage/AIPhyDef 定向
+// 路由）+ blade 家族节（前缀并集路径）+ 无关节（整池兜底时也并入）。
 func stubGMGenerateCatalog(t *testing.T) *weaponRecastCatalog {
 	t.Helper()
 	dir := t.TempDir()
 	randINI := "[sword_zztest_60501]\nr=13040,13041,13234\n\n" +
 		"[blade_family_1]\nr=13041\n\n[blade_family_2]\nr=13040,13236\n"
+	direINI := "[sword_zztest_60501]\nr=MeleeDamage,13040,13041,13042\nr=AIPhyDef,13234,13236,13238\n\n" +
+		"[blade_family_2]\nr=MeleeDamage,13044,13045\n\n[unrelated_999]\nr=MeleeDamage,13049\n"
 	propPackINI := "[13040]\nr=,MinMeleeDamage,7,0\n\n[13041]\nr=,PhyDefAdd,46,0\n\n[13042]\nr=,StrAdd,35,0\n"
 	skillPackINI := "[13234]\nr=CS_a,PhyDamageMul,0.7,0\n\n[13236]\nr=CS_b,StiDamageMul,0.8,0\n"
 	for name, content := range map[string]string{
 		"senior_weapon_rand.ini": randINI,
+		"senior_weapon_dire.ini": direINI,
 		"proppack.ini":           propPackINI,
 		"skillpack.ini":          skillPackINI,
 	} {
@@ -182,7 +185,7 @@ func TestApplyGMGenerateWeapon(t *testing.T) {
 	stubGMGenerateItems(t)
 	h, player := newGMGenerateSession(t, false)
 
-	text, err := applyGMGenerateWeapon(h, 102, "cook")
+	text, err := applyGMGenerateWeapon(h, 102, "cook", gmAffixPlan{})
 	if err != nil {
 		t.Fatalf("cook weapon: %v", err)
 	}
@@ -199,13 +202,13 @@ func TestApplyGMGenerateWeapon(t *testing.T) {
 	}
 
 	// 未知类型拒绝。
-	if _, err := applyGMGenerateWeapon(h, 99, "cook"); err == nil {
+	if _, err := applyGMGenerateWeapon(h, 99, "cook", gmAffixPlan{}); err == nil {
 		t.Fatalf("weaponType 99 should fail")
 	}
 
 	// 铁匠：3 混合 + 3 招式（weaponPool=精确节混合池，招式段计入总数）。
 	h2, player2 := newGMGenerateSession(t, false)
-	if _, err := applyGMGenerateWeapon(h2, 102, "smith"); err != nil {
+	if _, err := applyGMGenerateWeapon(h2, 102, "smith", gmAffixPlan{}); err != nil {
 		t.Fatalf("smith weapon: %v", err)
 	}
 	row2, _ := player2.wornItemAt(22)
@@ -225,7 +228,7 @@ func TestApplyGMGenerateWeaponPoolFallback(t *testing.T) {
 	stubGMGenerateItems(t)
 	h, _ := newGMGenerateSession(t, false)
 
-	text, err := applyGMGenerateWeapon(h, 102, "cook")
+	text, err := applyGMGenerateWeapon(h, 102, "cook", gmAffixPlan{})
 	if err != nil {
 		t.Fatalf("fallback weapon: %v", err)
 	}
@@ -322,7 +325,7 @@ func TestWearGMTemplateDisplace(t *testing.T) {
 	stubGMGenerateItems(t)
 	h, player := newGMGenerateSession(t, true) // blade_test 占 22
 
-	if _, err := applyGMGenerateWeapon(h, 102, "cook"); err != nil {
+	if _, err := applyGMGenerateWeapon(h, 102, "cook", gmAffixPlan{}); err != nil {
 		t.Fatalf("displace weapon: %v", err)
 	}
 	// 22 槽换新（家族随机二选一），旧武器让位入包。
@@ -346,7 +349,7 @@ func TestWearGMTemplateBagFallback(t *testing.T) {
 	stubGMGenerateItems(t)
 	h, player := newGMGenerateSession(t, false)
 
-	text, err := wearGMTemplate(h, gmItems.rows[5], []int{13040}, "防具", "")
+	text, err := wearGMTemplate(h, gmItems.rows[5], []gmAffixEntry{{Pack: 13040, Kind: 1}}, "防具", "")
 	if err != nil {
 		t.Fatalf("bag fallback: %v", err)
 	}
@@ -367,10 +370,143 @@ func TestWearGMTemplateBagFallback(t *testing.T) {
 func TestApplyGMGenerateEquipDispatch(t *testing.T) {
 	stubGMGenerateItems(t)
 	h, _ := newGMGenerateSession(t, false)
-	if _, err := applyGMGenerateEquip(h, "gm_generate_bracer", 0, "", ""); err != nil {
+	if _, err := applyGMGenerateEquip(h, "gm_generate_bracer", 0, "", "", gmAffixPlan{}); err != nil {
 		t.Fatalf("dispatch bracer: %v", err)
 	}
-	if _, err := applyGMGenerateEquip(h, "gm_generate_unknown", 0, "", ""); err == nil {
+	if _, err := applyGMGenerateEquip(h, "gm_generate_unknown", 0, "", "", gmAffixPlan{}); err == nil {
 		t.Fatalf("unknown action should fail")
+	}
+}
+
+// stubPlannedItems 单候选武器目录（家族随机二选一会引入模板不确定性，
+// 计划构造用例需要固定模板走精确节）。
+func stubPlannedItems(t *testing.T) {
+	t.Helper()
+	injectStubGMItemCatalog(t, &gmItemCatalog{rows: []gmItemRow{
+		{ConfigID: "sword_zztest_60501", Name: "测试单剑", ViewID: 2, Wearable: true,
+			EquipType: "Weapon", ItemType: 2101, ColorLevel: 5, NeedSex: 2},
+	}})
+}
+
+func TestGMTemplateDirePool(t *testing.T) {
+	catalog := stubGMGenerateCatalog(t)
+	// 精确节路由。
+	if pool := gmTemplateDirePool(catalog, "sword_zztest_60501", "MeleeDamage"); len(pool) != 3 || pool[0] != 13040 {
+		t.Fatalf("exact dire pool=%v", pool)
+	}
+	// 家族前缀并集：blade_family_888 → blade_family_2 的 MeleeDamage。
+	if pool := gmTemplateDirePool(catalog, "blade_family_888", "MeleeDamage"); len(pool) != 2 || pool[0] != 13044 || pool[1] != 13045 {
+		t.Fatalf("family dire pool=%v", pool)
+	}
+	// 前缀无匹配 → 全表同名路由并集（节名排序：blade_family_2 →
+	// sword_zztest_60501 → unrelated_999）。
+	if pool := gmTemplateDirePool(catalog, "thorn_missing_1", "MeleeDamage"); len(pool) != 6 || pool[0] != 13044 || pool[5] != 13049 {
+		t.Fatalf("fallback dire pool=%v", pool)
+	}
+	// 全表无该属性路由 → nil。
+	if pool := gmTemplateDirePool(catalog, "sword_zztest_60501", "MaxHPAdd"); pool != nil {
+		t.Fatalf("missing route pool=%v", pool)
+	}
+}
+
+func TestGMPickAffixPacks(t *testing.T) {
+	// 最高档：去重升序取尾（13040 重复不计数）。
+	if picked := gmPickAffixPacks([]int{13040, 13041, 13040, 13042}, 2, true); len(picked) != 2 || picked[0] != 13041 || picked[1] != 13042 {
+		t.Fatalf("maxTier picked=%v", picked)
+	}
+	// 档位不足取全部去重。
+	if picked := gmPickAffixPacks([]int{13040, 13041, 13040}, 5, true); len(picked) != 2 || picked[0] != 13040 || picked[1] != 13041 {
+		t.Fatalf("short maxTier picked=%v", picked)
+	}
+	// 随机档：放回均匀抽（单元素池 → 重复值）。
+	if picked := gmPickAffixPacks([]int{13040}, 3, false); len(picked) != 3 || picked[2] != 13040 {
+		t.Fatalf("random picked=%v", picked)
+	}
+	if gmPickAffixPacks(nil, 3, true) != nil || gmPickAffixPacks([]int{13040}, 0, true) != nil {
+		t.Fatalf("empty pool/zero count should return nil")
+	}
+}
+
+func TestApplyGMGenerateWeaponPlanned(t *testing.T) {
+	setWeaponRecastCatalogForTest(stubGMGenerateCatalog(t))
+	t.Cleanup(func() { setWeaponRecastCatalogForTest(nil) })
+	stubPlannedItems(t)
+	h, player := newGMGenerateSession(t, false)
+
+	// 计划伤害 2（[13040..13042] 最高 2 档=13041,13042）+ 破击 1
+	//（[13234..13238] 最高=13238，kind=1）+ 技能 1（洗练池 skillpack
+	// 归属=[13234]，kind=2 强制——PropBuilt "2,13234" 才显示招式威力）。
+	text, err := applyGMGenerateWeapon(h, 102, "cook", gmAffixPlan{Damage: 2, Pierce: 1, Skill: 1, MaxTier: true})
+	if err != nil {
+		t.Fatalf("planned weapon: %v", err)
+	}
+	if !strings.Contains(text, "已生成并穿戴武器 sword_zztest_60501（词条 4 条）") {
+		t.Fatalf("text=%q", text)
+	}
+	row, ok := player.wornItemAt(22)
+	if !ok || row.propBuilt != "1,13041;1,13042;1,13238;2,13234" {
+		t.Fatalf("propBuilt=%q", row.propBuilt)
+	}
+}
+
+func TestApplyGMGenerateWeaponPlannedRandomTier(t *testing.T) {
+	setWeaponRecastCatalogForTest(stubGMGenerateCatalog(t))
+	t.Cleanup(func() { setWeaponRecastCatalogForTest(nil) })
+	stubPlannedItems(t)
+	h, player := newGMGenerateSession(t, false)
+
+	// 随机档：伤害 2 条 ∈ {13040,13041,13042}（可重复）；技能 2 条
+	// 洗练池 skillpack 归属只有 13234（放回抽两次同值），kind 段为 2。
+	if _, err := applyGMGenerateWeapon(h, 102, "cook", gmAffixPlan{Damage: 2, Skill: 2}); err != nil {
+		t.Fatalf("random tier weapon: %v", err)
+	}
+	row, _ := player.wornItemAt(22)
+	segments := strings.Split(row.propBuilt, ";")
+	if len(segments) != 4 {
+		t.Fatalf("propBuilt=%q segments=%d", row.propBuilt, len(segments))
+	}
+	damagePool := map[string]bool{"1,13040": true, "1,13041": true, "1,13042": true}
+	for _, segment := range segments[:2] {
+		if !damagePool[segment] {
+			t.Fatalf("damage segment %q outside pool", segment)
+		}
+	}
+	if segments[2] != "2,13234" || segments[3] != "2,13234" {
+		t.Fatalf("skill segments=%q", segments[2:])
+	}
+}
+
+func TestApplyGMGenerateWeaponPlannedPoolMiss(t *testing.T) {
+	// 池表全 miss → 三类全省略并回执注明（词条 0 条）。
+	dir := t.TempDir()
+	setWeaponRecastCatalogForTest(loadWeaponRecastCatalog(
+		filepath.Join(dir, "miss.ini"), filepath.Join(dir, "miss.ini"),
+		filepath.Join(dir, "miss.ini"), filepath.Join(dir, "miss.ini")))
+	t.Cleanup(func() { setWeaponRecastCatalogForTest(nil) })
+	stubPlannedItems(t)
+	h, player := newGMGenerateSession(t, false)
+
+	text, err := applyGMGenerateWeapon(h, 102, "cook", gmAffixPlan{Damage: 2, Pierce: 1, Skill: 1, MaxTier: true})
+	if err != nil {
+		t.Fatalf("pool miss weapon: %v", err)
+	}
+	for _, note := range []string{"词条 0 条", "伤害定向路由缺失", "破击定向路由缺失", "招式池缺失"} {
+		if !strings.Contains(text, note) {
+			t.Fatalf("text=%q missing note %q", text, note)
+		}
+	}
+	row, _ := player.wornItemAt(22)
+	if row.propBuilt != "" {
+		t.Fatalf("propBuilt=%q want empty", row.propBuilt)
+	}
+}
+
+func TestGMPlannedAffixesJSONRoundTrip(t *testing.T) {
+	entries := []gmAffixEntry{{Pack: 13041, Kind: 1}, {Pack: 13234, Kind: 2}, {Pack: 99, Kind: 9}}
+	if built := propBuiltOfAffixes(gmAffixesJSONEntries(entries)); built != "1,13041;2,13234;1,99" {
+		t.Fatalf("round-trip built=%q", built)
+	}
+	if gmAffixesJSONEntries(nil) != "[]" {
+		t.Fatalf("nil entries should encode []")
 	}
 }

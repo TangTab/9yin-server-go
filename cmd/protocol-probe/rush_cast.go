@@ -535,12 +535,13 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	}
 	// 首受理（非 rearm）官方方言（技能.pcapng 32.642 定版逐帧，2026-11-12
 	// 复核勘误）：**CurSkillID(462)=staged 技能串 → CurSkillTarget(629) →
-	// msg25(25,30000,'skill_pause') → msg707[15] → 四连**，+155ms 双入口
-	// 0x21 走踢帧（见 stageRushCast 尾部）。旧结论「首受理不发 CurSkillID」
-	// 系对 f#0194 的误读（其 idx462 实为 'CS_jh_hyjf02\0'=staged 技能）；
-	// 当年「多发致施法中不自走」的对照实验缺的是走踢帧，CurSkillID 被错怪。
-	// PauseSkill 首受理仍不发（32.6-33.8 全窗无该行），重受理（f.pcapng
-	// P 系列）官方才发清+设全家桶，见上方 rearm 分支。
+	// msg25(25,30000,'skill_pause') → PauseSkill(220)=技能 → msg707[15] →
+	// 四连**。旧结论「首受理不发 CurSkillID」系对 f#0194 的误读（其 idx462
+	// 实为 'CS_jh_hyjf02\0'=staged 技能）；当年「多发致施法中不自走」的
+	// 对照实验缺的是走踢帧，CurSkillID 被错怪。
+	// PauseSkill 首受理必发（技能1.pcapng 登录锚定 5/5 样本：141.199/
+	// 148.530/157.764/181.869/793.617 全在 m25 后带 PauseSkill=技能；
+	// 技能.pcapng 32.642「首受理不发」系中途开抓、实为 rearm 形态的误判）。
 	if !rearm {
 		builders = append(builders,
 			frameBuilder{"CurSkillID", func() ([]byte, error) { return curSkillIDFrame(definition.id) }},
@@ -559,11 +560,12 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	builders = append(builders,
 		frameBuilder{"msg25", func() ([]byte, error) { return skillPauseFrame(int32(rushPendingWindow / time.Millisecond)) }},
 	)
-	if rearm {
-		builders = append(builders, frameBuilder{"PauseSkill-set", func() ([]byte, error) {
-			return rushPropertyFrame(propRushPauseSkill, "PauseSkill", clientdata.StringValue(definition.id))
-		}})
-	}
+	// PauseSkill=技能：首受理与 rearm 均发（技能1.pcapng 5/5 首受理样本
+	// 皆有，m25 之后、m707 之前——技能暂存状态机 msg25+PauseSkill 成对
+	// 是客户端接近武装的输入）。
+	builders = append(builders, frameBuilder{"PauseSkill-set", func() ([]byte, error) {
+		return rushPropertyFrame(propRushPauseSkill, "PauseSkill", clientdata.StringValue(definition.id))
+	}})
 	builders = append(builders, frameBuilder{"msg707", func() ([]byte, error) { return rushCastStateFrame() }})
 	// 状态四连（586/645/646/750）：恢复。此前「暂撤」的对照推理（55052
 	// 无四连会走 / 64785 有四连不自走）因果倒置——那批不自走会话处于

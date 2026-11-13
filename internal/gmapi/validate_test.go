@@ -271,3 +271,78 @@ func TestValidateForgetSkill(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateGenerateWeaponPlan(t *testing.T) {
+	// 全 0 计划：保持职业随机行为，crafter 校验不变。
+	command, err := validateBody(t, `{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook"}`)
+	if err != nil {
+		t.Fatalf("zero plan rejected: %v", err)
+	}
+	if command.DamageAffixes != 0 || command.PierceAffixes != 0 || command.SkillAffixes != 0 || command.MaxTier {
+		t.Fatalf("command=%+v", command)
+	}
+	// 指定计划：三类条数与档位开关透传。
+	command, err = validateBody(t, `{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","damageAffixes":3,"pierceAffixes":2,"skillAffixes":3,"maxTier":true}`)
+	if err != nil {
+		t.Fatalf("plan rejected: %v", err)
+	}
+	if command.DamageAffixes != 3 || command.PierceAffixes != 2 || command.SkillAffixes != 3 || !command.MaxTier {
+		t.Fatalf("command=%+v", command)
+	}
+	for _, bad := range []string{
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","damageAffixes":7}`,
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","pierceAffixes":-1}`,
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillAffixes":6,"damageAffixes":6,"pierceAffixes":6}`,
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"chef","damageAffixes":1}`,
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("invalid plan %s should fail", bad)
+		}
+	}
+}
+
+func TestValidateRecastAffix(t *testing.T) {
+	command, err := validateBody(t, `{"action":"recast_add_affix","slot":22,"packIDs":[13040,13234],"affixKind":"skill"}`)
+	if err != nil {
+		t.Fatalf("add rejected: %v", err)
+	}
+	if command.Slot != 22 || len(command.PackIDs) != 2 || command.PackIDs[1] != 13234 || command.AffixKind != "skill" {
+		t.Fatalf("command=%+v", command)
+	}
+	command, err = validateBody(t, `{"action":"recast_clear_affix","slot":6}`)
+	if err != nil {
+		t.Fatalf("clear rejected: %v", err)
+	}
+	if command.Slot != 6 {
+		t.Fatalf("command=%+v", command)
+	}
+	for _, bad := range []string{
+		`{"action":"recast_add_affix","slot":2,"packIDs":[13040],"affixKind":"prop"}`,   // 非法槽
+		`{"action":"recast_add_affix","slot":22,"packIDs":[],"affixKind":"prop"}`,       // 空 packIDs
+		`{"action":"recast_add_affix","slot":22,"packIDs":[0],"affixKind":"prop"}`,      // 越界包号
+		`{"action":"recast_add_affix","slot":22,"packIDs":[13040],"affixKind":"mix"}`,   // 未知归属
+		`{"action":"recast_clear_affix","slot":121}`,                                    // 背包视图不可寻址
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("invalid body %s should fail", bad)
+		}
+	}
+}
+
+func TestValidateGenerateWeaponSkillTaolu(t *testing.T) {
+	command, err := validateBody(t, `{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillTaolu":"cs_jh_sfj","skillAffixes":3,"skillKeys":["CS_jh_sfj04","CS_jh_sfj08"]}`)
+	if err != nil {
+		t.Fatalf("taolu plan rejected: %v", err)
+	}
+	if command.SkillTaolu != "cs_jh_sfj" || len(command.SkillKeys) != 2 || command.SkillKeys[1] != "CS_jh_sfj08" {
+		t.Fatalf("command=%+v", command)
+	}
+	for _, bad := range []string{
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillTaolu":"cs_jh_sfj","skillKeys":["a","b","c","d","e","f","g"]}`, // >6 招式
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillKeys":["  "]}`,     // 空项
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("invalid body %s should fail", bad)
+		}
+	}
+}

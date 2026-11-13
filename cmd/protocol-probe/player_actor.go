@@ -87,9 +87,9 @@ const (
 	qgLightBuffSlot     uint16 = 19 // buf_qg_light  StaticData 218（10min）
 	glideBuffStaticData uint32 = 218
 
-	// 右键格挡 BuffInParry（Java PlayerActor 同源）：槽 11、
-	// StaticData 4558、24h 租约。按下挂槽、松开清槽。
-	parryBuffSlot       uint16 = 11
+	// 右键格挡 BuffInParry（Java PlayerActor 同源）：StaticData 4558=
+	// 0x11CE。官服无时长（a.pcapng 槽 4 CSV 到期段恒 0），按下/松开由
+	// writeOfficialParryTokenAck 的事件对与槽串登记，不挂限时租约。
 	parryBuffStaticData uint32 = 4558
 
 	redSuperArmorStaticData uint32 = 8682
@@ -1531,44 +1531,23 @@ func (p *playerActor) snapshotName() string {
 	return p.name
 }
 
-// engageParryBuff 按下格挡：挂 BuffInParry 到槽 11。已在格挡时保留
-// 原到期时间（幂等由调用方的状态变化检查保证，这里再防一层）。
-func (p *playerActor) engageParryBuff(now time.Time) string {
+// engageParryBuff 按下格挡：仅翻状态位。BuffInParry 官服无时长（a.pcapng
+// 槽 4 CSV 到期段恒 0），登记/摘除全走 writeOfficialParryTokenAck 的
+// m169 事件对与 BufferInfo4 槽串——不再挂 fork 方言的槽 11 限时租约
+// （24h/1601 纪元），避免全量面板推送时客户端把 0x11CE 重复登记进
+// 第二个槽、松开后残留僵尸登记。
+func (p *playerActor) engageParryBuff() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if !p.parrying {
-		p.buffs[parryBuffSlot] = activePlayerBuff{
-			staticData: parryBuffStaticData,
-			expiresUTC: now.UTC().Add(24 * time.Hour),
-			level:      1,
-		}
-		p.parrying = true
-	}
-	return p.bufferInfoLocked(parryBuffSlot, now)
+	p.parrying = true
 }
 
-// releaseParryBuff 松开格挡：清槽 11，返回空 BufferInfo 串。
-func (p *playerActor) releaseParryBuff() string {
+// releaseParryBuff 松开格挡：清状态位（客户端侧摘除由 m169 移除 +
+// BufferInfo4 清空帧完成）。
+func (p *playerActor) releaseParryBuff() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	delete(p.buffs, parryBuffSlot)
 	p.parrying = false
-	return ""
-}
-
-// parryStateFrame 回格挡属性帧（0x10）：InParry/InManualParry 置位 +
-// BufferInfo11 槽串 + 当前格挡值（Java parryStateFrame 同形）。
-func (p *playerActor) parryStateFrame(engage bool, buffInfo string) ([]byte, error) {
-	flag := int32(0)
-	if engage {
-		flag = 1
-	}
-	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(flag)},
-		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(flag)},
-		{Index: bufferInfoPropertyIndex(parryBuffSlot), Name: bufferInfoPropertyName(parryBuffSlot), Value: clientdata.StringValue(buffInfo)},
-		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(p.progress.parryValueTotal())},
-	})
 }
 
 // expireBuff 只清除创建此定时器的那份确切租约。后续的刷新绝不会被一个

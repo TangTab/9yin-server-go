@@ -104,8 +104,8 @@ func handleChangeWarningCustom(link sceneMessageConnection, player *playerActor,
 
 // handleBlockStateCustom 还原手动格挡（Java handleManualParry 同源，
 // clientCustomBlockState=54 即 C2S m54）。应答=官服六件套序
-// （writeOfficialParryTokenAck，a.pcapng 5.144/5.695 定版：按下
-// MoveSpeed1.9f+RunSpeedAdd-1.2f+InParry+ParryUpSpeedAdd-93+BufferInfo4=26
+// （writeOfficialParryTokenAck，a.pcapng 5.2/5.7s 定版：按下
+// MoveSpeed+RunSpeedAdd+InParry+ParryUpSpeedAdd+BufferInfo4 无时长槽串
 // +m169 添加+InManualParry；松开反向+m169 移除）——此前 fork 四属性合帧
 // 应答缺速度族，客户端 m54 连发 5971 条等不到官服方言（2026-11-12 P2）。
 // 重复按下静默；重复松开仍回帧（客户端状态重同步，78 发按值去重
@@ -156,10 +156,9 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 		return nil
 	}
 
-	now := time.Now().UTC()
 	player.releaseParryBuff()
 	if engage {
-		player.engageParryBuff(now)
+		player.engageParryBuff()
 		// 格挡不清怒(2026-11-07 撤销):Java handleManualParry 不动 SP,
 		// 55866 复核四次 SP→0 单帧全部嵌在出招序列(294/337/20/24/CanUse)
 		// 里、无一先于 msg169 格挡通告(按下帧甚至更靠后),且战斗态/
@@ -169,7 +168,7 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	if err := writeOfficialParryTokenAck(link, player, engage); err != nil {
 		return err
 	}
-	log.Printf("%s: manual parry engage=%t buff_slot=%d", remote, engage, parryBuffSlot)
+	log.Printf("%s: manual parry engage=%t", remote, engage)
 	return nil
 }
 
@@ -184,15 +183,21 @@ var (
 
 // handleParryTokenCustom 处理 C2S m54（格挡令牌问答，官服令牌/fork 0-1 双形态）。
 // 官服客户端连发令牌版 m54 等六件套应答（a.pcapng：按下=MoveSpeed 1.9f+
-// RunSpeedAdd -1.2f+InParry 1+ParryUpSpeedAdd -93+BufferInfo4 26+m169 添加+
-// InManualParry 1；松开=m169 移除+BufferInfo4 1+InParry 0+MoveSpeed 4.8f+
-// RunSpeedAdd 0.6f+ParryUpSpeedAdd 10+InManualParry 0，「连发直到应答到达」）。
+// RunSpeedAdd -1.2f+InParry 1+ParryUpSpeedAdd -93+BufferInfo4 无时长槽串+
+// m169 添加+InManualParry 1；松开=m169 移除+BufferInfo4 清空+InParry 0+
+// MoveSpeed 4.8f+RunSpeedAdd 0.6f+ParryUpSpeedAdd 10+InManualParry 0，
+// 「连发直到应答到达」）。
 // 令牌值每会话成对随机，按下/松开判定=状态机（非格挡态收到→按下，
 // a 会话三对完美交替实证）；fork 客户端 0/1 形态按值（1=按下持续上报、
 // 0=松开）。此前全天 5971 条 m54 零应答——客户端 m54 连发不停的同源根因，
 // 亦是「官服应答方言正确→客户端切官服模式」假说（P2）的探针。
 // writeOfficialParryTokenAck 官服 m54 应答（单属性帧序照 a.pcapng，
 // m169 与 78 通道同构九值帧；速度对照抄官服样本值 1.9/-1.2 → 4.8/0.6）。
+// BufferInfo4 槽串=curated.md a.pcapng 5.2/5.7s 逐字节定版：按下
+// '11CE,701E5A4,3AD5FB,1,0,0'、松开空串。seg5 到期/seg6 剩余跳恒 0——
+// 格挡 buff 无时长、事件驱动（按下登记，松开/被打破摘除）。曾误抄
+// 字面量 "26"/"1"：客户端解析不出 0x11CE 登记、非战斗姿态按下即塌
+// （战斗态由 LogicState 撑住掩盖，与旧纪元 bug 同症不同因）。
 func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor, engage bool) error {
 	single := func(index uint16, name string, value clientdata.Value) error {
 		frame, err := objectSingleProperty(playerObjectID, playerOwnerID, index, name, value)
@@ -228,10 +233,14 @@ func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor
 		if err := single(propParryTokenUpSpeedAdd, "ParryUpSpeedAdd", clientdata.Int32Value(-93)); err != nil {
 			return err
 		}
-		// BufferInfo4 表线型=7(串)：无 type 字节方言下必须发串（官服帧带
-		// 显式 type=0x01 override 故可发 int；我们无 type 字节→按表线型，
-		// 发 int 会被当串长度域解出 Out range，trace.log 23:53 实证）。
-		if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue("26")); err != nil {
+		// BufferInfo4 官服=六段 CSV 槽串（curated.md a.pcapng 5.2s
+		// '11CE,701E5A4,3AD5FB,1,0,0'），seg5 到期/seg6 剩余跳恒 0：
+		// 格挡 buff 无时长，靠 m169 事件对增删。曾误抄字面量 "26"，
+		// 客户端解析不出 0x11CE 登记→非战斗姿态按下即被撤销（战斗态
+		// 由 LogicState 撑住掩盖）。表线型 7(串)：按线型发串，发 int
+		// 会被当串长度域解出 Out range（trace.log 23:53 实证）。
+		if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue(
+			fmt.Sprintf("%X,%X,%X,1,0,0", parryBuffStaticData, playerObjectID, playerOwnerID))); err != nil {
 			return err
 		}
 		if err := link.WriteFrame(notice); err != nil {
@@ -242,7 +251,8 @@ func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor
 	if err := link.WriteFrame(notice); err != nil {
 		return err
 	}
-	if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue("1")); err != nil {
+	// 官服松开=BufferInfo4 清空串（curated.md a.pcapng 5.7s 'BufferInfo4='）。
+	if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue("")); err != nil {
 		return err
 	}
 	if err := single(propInParry, "InParry", clientdata.Int32Value(0)); err != nil {
