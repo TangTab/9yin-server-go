@@ -1275,11 +1275,13 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 	if len(times) == 0 {
 		return
 	}
-	// 范围型逐段重索敌（refreshTargetsPerTick）：以玩家实时位置为形状
-	// 中心重查——段间进入范围的敌人也吃该段伤害；玩家坐标优先取
-	// combat world 权威值（m15/212 持续更新），回落 211 施法位。
-	perTickRefresh := definition.refreshTargetsPerTick()
-	castAt, _ := useSkillCastTransform(custom)
+			// 范围型逐段重索敌（refreshTargetsPerTick）：以玩家实时位置为形状
+			// 中心重查——段间进入范围的敌人也吃该段伤害；玩家坐标优先取
+			// 场景成员表权威值（m15/212 经 updateMemberPosition 持续刷新，
+			// playerLiveTransform——combatNPCTransform(playerObjectID) 对玩家
+			// 恒 miss，会冻结在 211 施法位），回落 211 施法位。
+			perTickRefresh := definition.refreshTargetsPerTick()
+			castAt, _ := useSkillCastTransform(custom)
 	lastAt := times[len(times)-1]
 	// 段间可能并发到达（帧位相近时）：跨段共享态用原子量（firstTick 防重
 	// 复入战、landedTotal 汇总喂真气）。
@@ -1293,7 +1295,7 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 			tickTargets := targets
 			if perTickRefresh {
 				origin := castAt
-				if live, ok := world.combatNPCTransform(playerObjectID); ok {
+				if live, ok := world.playerLiveTransform(); ok {
 					origin = live
 				}
 				tickTargets = world.queryShapedSkillTargets(origin, definition.areaRadius, definition.areaHeight,

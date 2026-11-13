@@ -346,3 +346,31 @@ func TestValidateGenerateWeaponSkillTaolu(t *testing.T) {
 		}
 	}
 }
+
+// enter_clone（副本进入）：config 非空 + fun 1..3 形状闸（目录成员性
+// 与该副本难度档存在性依赖资源树，归游戏侧执行器校验）；
+// reenter_clone/destroy_clone 无参数放行。
+func TestValidateCloneCommands(t *testing.T) {
+	command, err := validateBody(t, `{"action":"enter_clone","config":"ini\\scene\\clone003","fun":2}`)
+	if err != nil {
+		t.Fatalf("validate enter_clone: %v", err)
+	}
+	if command.Config != `ini\scene\clone003` || command.Fun != 2 {
+		t.Fatalf("Config/Fun=%q/%d", command.Config, command.Fun)
+	}
+	for _, action := range []string{"reenter_clone", "destroy_clone"} {
+		if _, err := validateBody(t, `{"action":"`+action+`"}`); err != nil {
+			t.Fatalf("validate %s: %v", action, err)
+		}
+	}
+	for _, bad := range []string{
+		`{"action":"enter_clone","config":"  ","fun":1}`,
+		`{"action":"enter_clone","fun":1}`,
+		`{"action":"enter_clone","config":"ini\\scene\\clone003","fun":0}`,
+		`{"action":"enter_clone","config":"ini\\scene\\clone003","fun":4}`,
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("invalid body %s should fail", bad)
+		}
+	}
+}

@@ -51,7 +51,12 @@ func sendEntryScene(conn sceneMessageConnection, scene role.Scene) error {
 
 func encodeExitScene() []byte { return []byte{0x0C} }
 
-type sceneDestination struct{ location role.Location }
+// sceneDestination 是一次场景切换的目标。instance 空 = 共享世界场景；
+// 非空 = 副本实例 ID（dungeonManager 分配，进入独立实例运行时）。
+type sceneDestination struct {
+	location role.Location
+	instance string
+}
 
 // parseSceneDestination 接受 config,resource,x,y,z,orient。它是刻意显式
 // 的测试/GM 输入；不猜测任何客户端动作。解析逻辑的权威实现在
@@ -128,7 +133,11 @@ func (r *sceneRuntime) SwitchScene(destination sceneDestination) error {
 		r.activeRole.Location = previous
 		return fmt.Errorf("write ExitScene: %w", err)
 	}
-	if err := r.world.begin(destination.location.Scene.Config, destination.location.Scene.Resource, catalog); err != nil {
+	if err := r.world.beginKey(sceneKey{
+		config:   destination.location.Scene.Config,
+		resource: destination.location.Scene.Resource,
+		instance: destination.instance,
+	}, catalog); err != nil {
 		// 共享场景下 begin 失败只回滚本视图的位置与世界挂靠。
 		r.activeRole.Location = previous
 		return fmt.Errorf("begin replacement scene: %w", err)

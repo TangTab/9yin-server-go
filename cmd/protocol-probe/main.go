@@ -768,6 +768,51 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 		}
 	}()
+	// 副本实例断线清场（dungeon.go）：空场关闭运行时并摘除登记。不
+	// 回跳——连接已断，副本位置从未落库（移动路径在场闸门），重登
+	// 自然回到存档锚点（returnTo）。先于 world.close() 执行：随后
+	// close→detachMember 在已关闭运行时上是安全 no-op 补扫。
+	defer func() {
+		if selected != nil {
+			if instance := dungeons.take(selected.ID); instance != nil {
+				dungeons.shutdownInstance(instance)
+				log.Printf("%s: dropped open dungeon on disconnect config=%s instance=%s", conn.RemoteAddr(), instance.key.config, instance.id)
+			}
+		}
+	}()
+	// returnDungeon 把属主送回 returnTo 并销毁实例：GM destroy_clone 与
+	// 末波自动收尾（ticker）共用。必须在属主会话 goroutine 内调用
+	//（SwitchScene 单写者纪律）；notice 为 gmSession 回报文案。
+	returnDungeon := func(instance *dungeonInstance, notice string) {
+		if instance.run != nil {
+			instance.run.callDungeonScript(luaEventDungeonDestroy, nil)
+		}
+		if instance.run != nil && runtime != nil && runtime.world.run == instance.run {
+			if switchErr := runtime.SwitchScene(sceneDestination{location: instance.returnTo}); switchErr != nil {
+				// 回跳失败多为连接已坏：仍销毁运行时，位置由存档锚点
+				//（returnTo，进本期间从未被副本位置覆盖）兜底。
+				log.Printf("%s: dungeon return switch failed (instance=%s): %v", conn.RemoteAddr(), instance.id, switchErr)
+				if gmSession != nil {
+					gmSession.setAction("副本回跳失败：" + switchErr.Error())
+				}
+			} else {
+				sceneNPCs = runtime.npcCatalog
+				pendingLocation = &runtime.activeRole.Location
+				if saveErr := store.saveLocation(ctx, selected, runtime.activeRole.Location); saveErr != nil {
+					log.Printf("%s: persist dungeon return location: %v", conn.RemoteAddr(), saveErr)
+				} else {
+					pendingLocation = nil
+				}
+				if gmSession != nil {
+					gmSession.setLocation(runtime.activeRole.Location, notice)
+				}
+			}
+		} else if gmSession != nil {
+			gmSession.setAction(notice)
+		}
+		dungeons.shutdownInstance(instance)
+		log.Printf("%s: dungeon destroyed config=%s instance=%s difficulty=%d", conn.RemoteAddr(), instance.key.config, instance.id, instance.difficulty)
+	}
 	processGMCommand := func(command gmCommand) (commandErr error) {
 		defer func() { command.complete(commandErr) }()
 		if gmSession == nil || player == nil {
@@ -1061,8 +1106,120 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			} else {
 				pendingLocation = nil
 			}
-			gmSession.setLocation(runtime.activeRole.Location, "已发送 GM 在线切图，等待目标场景 Ready")
-			log.Printf("%s: GM sent live 0x0C re-entry to scene=%s resource=%s", conn.RemoteAddr(), runtime.activeRole.Location.Scene.Config, runtime.activeRole.Location.Scene.Resource)
+				gmSession.setLocation(runtime.activeRole.Location, "已发送 GM 在线切图，等待目标场景 Ready")
+				log.Printf("%s: GM sent live 0x0C re-entry to scene=%s resource=%s", conn.RemoteAddr(), runtime.activeRole.Location.Scene.Config, runtime.activeRole.Location.Scene.Resource)
+			case "enter_clone":
+				// 副本实例生命周期（dungeon.go）：目录/难度校验 → 登记实例
+				//（returnTo=进本前位置）→ 带实例键走既有 0x0C 重入序列 →
+				// 回填运行时并置 managed/noRespawn。副本期间不落库 clone
+				// 场景位置（移动路径有在场闸门），存档锚点保持 returnTo。
+				if runtime == nil || selected == nil {
+					gmSession.setAction("进本失败：角色尚未进入场景")
+					return fmt.Errorf("character has not entered a scene")
+				}
+				row := cloneCatalogRow(command.Config)
+				if row == nil {
+					gmSession.setAction("进本失败：副本不在 cloneinfo 目录（" + command.Config + "）")
+					return fmt.Errorf("clone config %q not in cloneinfo.ini", command.Config)
+				}
+				difficultyAllowed := false
+				for _, difficulty := range row.Difficulties {
+					if difficulty == int(command.Fun) {
+						difficultyAllowed = true
+						break
+					}
+				}
+				if !difficultyAllowed {
+					gmSession.setAction(fmt.Sprintf("进本失败：%s 不支持难度档 %d", row.Config, command.Fun))
+					return fmt.Errorf("clone %s has no difficulty %d", row.Config, command.Fun)
+				}
+				scene, sceneErr := cloneSceneOf(command.Config)
+				if sceneErr != nil {
+					gmSession.setAction("进本失败：" + sceneErr.Error())
+					return sceneErr
+				}
+				scene = normalizeClientScene(scene)
+				catalog, _, catalogErr := sceneRegistry.catalogFor(scene)
+				if catalogErr != nil {
+					gmSession.setAction("进本失败：副本 NPC 目录不可用：" + catalogErr.Error())
+					return catalogErr
+				}
+				entry := dungeonEntryPosition(catalog)
+				instance, createErr := dungeons.create(selected.ID, scene, int(command.Fun), runtime.activeRole.Location, entry)
+				if createErr != nil {
+					gmSession.setAction("进本失败：已有打开的副本，请先销毁")
+					return createErr
+				}
+				destination := sceneDestination{
+					location: role.Location{Scene: scene, Position: entry, Version: runtime.activeRole.Location.Version},
+					instance: instance.id,
+				}
+				if switchErr := runtime.SwitchScene(destination); switchErr != nil {
+					dungeons.take(selected.ID)
+					gmSession.setAction("进本失败：" + switchErr.Error())
+					return switchErr
+				}
+				dungeons.attachRun(selected.ID, runtime.world.run)
+				if attached := dungeons.open(selected.ID); attached != nil && attached.run != nil {
+					run := attached.run
+					ownerID := selected.ID
+					run.mu.Lock()
+					// 副本事件宿主与收尾钩（dungeon_wave.go）：markFinished 只动
+					// manager 锁，回城由本会话 ticker 的自动收尾分支执行。
+					run.scripts = scriptHost
+					run.dungeonDifficulty = int(command.Fun)
+					run.finishHook = func() { dungeons.markFinished(ownerID) }
+					run.mu.Unlock()
+					// 进本事件（无脚本时 no-op）：剧情提示/开场播报。
+					run.callDungeonScript(luaEventDungeonEnter, func(ec *luascript.EventContext) {
+						ec.Player.ID = uint32(selected.ID)
+						ec.Player.Name = selected.Name
+						ec.Player.Scene = scene.Config
+						ec.Player.X, ec.Player.Y, ec.Player.Z = float64(entry.X), float64(entry.Y), float64(entry.Z)
+					})
+				}
+				sceneNPCs = runtime.npcCatalog
+				gmSession.setLocation(runtime.activeRole.Location, fmt.Sprintf("已进入副本 %s（%s·%s），销毁后回进本前位置", row.Config, row.Description, dungeonDifficultyName(int(command.Fun))))
+				log.Printf("%s: GM entered dungeon config=%s resource=%s instance=%s difficulty=%d entry=(%.1f,%.1f,%.1f)",
+					conn.RemoteAddr(), scene.Config, scene.Resource, instance.id, command.Fun, entry.X, entry.Y, entry.Z)
+			case "reenter_clone":
+				if runtime == nil || selected == nil {
+					gmSession.setAction("重进失败：角色尚未进入场景")
+					return fmt.Errorf("character has not entered a scene")
+				}
+				instance := dungeons.open(selected.ID)
+				if instance == nil {
+					gmSession.setAction("重进失败：当前没有打开的副本，请先创建并进入")
+					return fmt.Errorf("no open dungeon for role %d", selected.ID)
+				}
+				destination := sceneDestination{
+					location: role.Location{
+						Scene:    role.Scene{Config: instance.key.config, Resource: instance.key.resource},
+						Position: instance.entry,
+						Version:  runtime.activeRole.Location.Version,
+					},
+					instance: instance.id,
+				}
+				if switchErr := runtime.SwitchScene(destination); switchErr != nil {
+					gmSession.setAction("重进失败：" + switchErr.Error())
+					return switchErr
+				}
+				// 实例运行时已在注册表，beginKey 直接复用；attachRun 幂等。
+				dungeons.attachRun(selected.ID, runtime.world.run)
+				sceneNPCs = runtime.npcCatalog
+				gmSession.setLocation(runtime.activeRole.Location, "已重新进入打开的副本（进度保留，怪不复活）")
+				log.Printf("%s: GM re-entered dungeon config=%s instance=%s", conn.RemoteAddr(), instance.key.config, instance.id)
+			case "destroy_clone":
+				if runtime == nil || selected == nil {
+					gmSession.setAction("销毁失败：角色尚未进入场景")
+					return fmt.Errorf("character has not entered a scene")
+				}
+				instance := dungeons.take(selected.ID)
+				if instance == nil {
+					gmSession.setAction("销毁失败：当前没有打开的副本")
+					return fmt.Errorf("no open dungeon for role %d", selected.ID)
+				}
+				returnDungeon(instance, "副本已销毁，已回到进本前位置")
 		case "teleport":
 			if runtime == nil || selected == nil {
 				gmSession.setAction("场景内瞬移失败：角色尚未进入场景")
@@ -1942,6 +2099,15 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			if player == nil || selected == nil {
 				continue
+			}
+			// 副本自动收尾（dungeon_wave.go）：末波全灭由引擎 finishHook 置
+			// 位 finished，回城+销毁必须在属主会话 goroutine 执行（≤1s 延迟）。
+			if runtime != nil {
+				if instance := dungeons.open(selected.ID); instance != nil && instance.finished {
+					if taken := dungeons.take(selected.ID); taken != nil {
+						returnDungeon(taken, "副本通关，已回到进本前位置")
+					}
+				}
 			}
 			combatPanelBefore := combatPanelSnapshot(player)
 			slot, advanced := player.facultyTick(now)
@@ -3016,13 +3182,27 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						runtime.activeRole.Location.Scene.Config, runtime.activeRole.Location.Scene.Resource)
 					continue
 				}
-				pendingLocation = &location
-				if time.Since(lastPositionSave) >= 2*time.Second {
-					if err := store.saveLocation(ctx, selected, location); err != nil {
-						log.Printf("%s: persist movement: %v", conn.RemoteAddr(), err)
-					} else {
-						lastPositionSave = time.Now()
-						pendingLocation = nil
+				// 副本实例在场时不落库 clone 场景位置：存档锚点保持进本前
+				// 位置（dungeonInstance.returnTo），销毁/断线回跳与重登都以
+				// 它为准。pendingLocation 一并置 nil，防断线 defer 兜底把
+				// 副本位置写成存档。
+				inOpenDungeon := runtime != nil
+				if inOpenDungeon {
+					if instance := dungeons.open(selected.ID); instance == nil || runtime.world.run != instance.run {
+						inOpenDungeon = false
+					}
+				}
+				if inOpenDungeon {
+					pendingLocation = nil
+				} else {
+					pendingLocation = &location
+					if time.Since(lastPositionSave) >= 2*time.Second {
+						if err := store.saveLocation(ctx, selected, location); err != nil {
+							log.Printf("%s: persist movement: %v", conn.RemoteAddr(), err)
+						} else {
+							lastPositionSave = time.Now()
+							pendingLocation = nil
+						}
 					}
 				}
 			}

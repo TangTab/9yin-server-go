@@ -387,6 +387,90 @@ return E
 	}
 }
 
+// M.compile channel 指令接线：Lua 覆盖优先（waves=3 改参生效）+ 畸形
+// 指令回退离线种子 + 非种子技覆盖模块不产生通道语义（资源树不可用时跳过）。
+func TestChannelScriptOverlayWiring(t *testing.T) {
+	if _, err := openResourceReader(filepath.Join(modernSkillRoot, "skill_new.ini")); err != nil {
+		t.Skipf("resource store unavailable: %v", err)
+	}
+	dir := t.TempDir()
+	writeChannelModule := func(src string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(dir, "CS_jh_hyjf08.lua"), []byte(src), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeChannelModule(`local M = {}
+function M.compile(def)
+  return { channel = { waves = 3, first_wave_ms = 120, interval_ms = 300, sp_per_wave = 7,
+                       victim_buff = "buf_probe_v", self_buff = "buf_probe_s", self_buff_static = 4242 } }
+end
+return M
+`)
+	host := skillscript.New(dir, nil)
+	if _, err := host.Load(); err != nil {
+		t.Fatal(err)
+	}
+	previous := skillScripts
+	skillScripts = host
+	installedCombatSkillCatalog.resetCache()
+	t.Cleanup(func() {
+		skillScripts = previous
+		installedCombatSkillCatalog.resetCache()
+	})
+
+	definition, ok := installedCombatSkillCatalog.definition("CS_jh_hyjf08", 1)
+	if !ok {
+		t.Skipf("CS_jh_hyjf08 not in catalog at level 1")
+	}
+	spec := definition.channel
+	if spec == nil || spec.waves != 3 || spec.firstWave != 120*time.Millisecond || spec.interval != 300*time.Millisecond ||
+		spec.spPerWave != 7 || spec.victimBuff != "buf_probe_v" || spec.selfBuff != "buf_probe_s" || spec.selfBuffStatic != 4242 {
+		t.Fatalf("hyjf08 channel = %+v, want Lua 覆盖值", spec)
+	}
+	if definition.spCost != 0 {
+		t.Fatalf("hyjf08 spCost = %d, want 0（逐波扣无预扣）", definition.spCost)
+	}
+
+	// 畸形 channel（waves 超上限整条丢弃）→ 回退离线种子（8 波 × SP10）。
+	writeChannelModule(`local M = {}
+function M.compile(def)
+  return { channel = { waves = 8000, first_wave_ms = 180, interval_ms = 440, sp_per_wave = 10,
+                       victim_buff = "buf_probe_v", self_buff = "buf_probe_s", self_buff_static = 4242 } }
+end
+return M
+`)
+	if _, err := host.Reload(); err != nil {
+		t.Fatal(err)
+	}
+	installedCombatSkillCatalog.resetCache()
+	fallback, _ := installedCombatSkillCatalog.definition("CS_jh_hyjf08", 1)
+	if fspec := fallback.channel; fspec == nil || fspec.waves != 8 || fspec.spPerWave != 10 ||
+		fspec.victimBuff != "buf_CS_jh_hyjf08" || fspec.selfBuffStatic != 9019 {
+		t.Fatalf("hyjf08 fallback channel = %+v, want 离线种子", fspec)
+	}
+
+	// 非种子技的覆盖模块（无 channel 指令）不产生通道语义。
+	writeChannelModule(`local M = {}
+function M.compile(def) return { red_armor = true } end
+return M
+`)
+	if err := os.Rename(filepath.Join(dir, "CS_jh_hyjf08.lua"), filepath.Join(dir, "CS_wd_tjq08.lua")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := host.Reload(); err != nil {
+		t.Fatal(err)
+	}
+	installedCombatSkillCatalog.resetCache()
+	tjq, ok := installedCombatSkillCatalog.definition("CS_wd_tjq08", 1)
+	if !ok {
+		t.Skipf("CS_wd_tjq08 not in catalog at level 1")
+	}
+	if tjq.channel != nil {
+		t.Fatalf("tjq08 channel = %+v, want nil（buff 型覆盖 ≠ 通道技）", tjq.channel)
+	}
+}
+
 // 真实 effects_data 冒烟：仓内 scripts/module/skill 快照与目录编译一致
 // （可编译的候选技逐个比对 buff 组的条数/类型/staticData/租约）。
 func TestRealEffectsDataCatalogSmoke(t *testing.T) {

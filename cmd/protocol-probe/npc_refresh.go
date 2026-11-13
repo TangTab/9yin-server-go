@@ -132,7 +132,8 @@ func (r *sceneRun) refreshSettleLocked(now time.Time) *refreshTickOutcome {
 	}
 	// 每怪模式（批量关闭）：已被 TTL 清除的尸体按各自 respawnAt 重注册。
 	// 批量模式期间被杀（无 respawnAt）的尸体按死亡时刻+默认间隔兜底。
-	if interval <= 0 {
+	// noRespawn（副本实例）：尸体清除后不重生，两条重生路径一并跳过。
+	if interval <= 0 && !r.noRespawn {
 		for id, rec := range r.deadNPCs {
 			if !rec.removed {
 				continue
@@ -152,7 +153,7 @@ func (r *sceneRun) refreshSettleLocked(now time.Time) *refreshTickOutcome {
 	// 批量扫描：死了的统一重生（尸体在场=原地复活帧组；已清除=重注册），
 	// 没死的一律不动。带未拾掉落的尸体跳过复活——掉落清除（拾空/超时）
 	// 标记 removed 后按重注册路径重生。
-	if sweepDue {
+	if sweepDue && !r.noRespawn {
 		r.nextSweepAt = now.Add(interval)
 		for id, rec := range r.deadNPCs {
 			if rec.removed {
@@ -288,6 +289,17 @@ func (r *sceneRun) recordNPCDeathLocked(id, ownerID uint32, brain sim.Brain, now
 	// 管线 onKill 同款）。只动门控状态不广播——gate.mu 不再取场景锁，
 	// 无锁序环；阶段变化由各会话 ticker 漂移检查补推。
 	jyzGate.onKill()
+	if r.waveMode {
+		// 副本波次结算（dungeon_wave.go）：出在场集合 + 计数 + npc_killed
+		// 事件（configID 优先取在场元数据，尸体 TTL 清除后回落目录行）。
+		configID := ""
+		if meta, ok := r.npcMeta(worldcore.EntityID(id)); ok {
+			configID = meta.configID
+		} else if rec := forkNPCIndex(id) - 2; rec >= 0 && rec < len(r.catalog) {
+			configID = r.catalog[rec].resolved.ConfigID
+		}
+		r.onDungeonNPCKilledLocked(id, configID)
+	}
 	rec := deadNPCRecord{spawnIndex: forkNPCIndex(id) - 2, diedAt: now, respawnAt: brain.RespawnAt}
 	if rec.spawnIndex < 0 || rec.spawnIndex >= len(r.catalog) {
 		// 目录外实体（测试/动态摆放）：无重注册来源，仅支持原地复活路径。

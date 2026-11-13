@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/combatcalc"
+	"github.com/local/9yin-go-server/internal/skillscript"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -277,16 +278,26 @@ func TestChannelSyncCustomEchoesInsideWindowOnly(t *testing.T) {
 	}
 }
 
-// TestChannelSpecsWiredToCatalog 真树冒烟：hyjf08/tqjf08 定义带通道参数
-// 且预扣清零（资源树不可用时跳过）。
+// TestChannelSpecsWiredToCatalog 真树冒烟：装载仓内 scripts/module/skill
+// 真实宿主后，hyjf08/tqjf08 定义带 Lua 声明的官服定版通道参数且预扣
+// 清零（资源树不可用时跳过）。权威源是 <技能ID>.lua 的 M.compile
+// channel 指令；Go channelSkillSpecs 仅离线兜底。
 func TestChannelSpecsWiredToCatalog(t *testing.T) {
 	if _, err := openResourceReader(filepath.Join(modernSkillRoot, "skill_new.ini")); err != nil {
 		t.Skipf("resource store unavailable: %v", err)
 	}
+	host := skillscript.New(filepath.Join("..", "..", "scripts", "module", "skill"), nil)
+	if _, err := host.Load(); err != nil {
+		t.Fatalf("load real skill scripts: %v", err)
+	}
+	previous := skillScripts
+	skillScripts = host
+	installedCombatSkillCatalog.resetCache()
+	t.Cleanup(func() {
+		skillScripts = previous
+		installedCombatSkillCatalog.resetCache()
+	})
 	for _, id := range []string{"CS_jh_hyjf08", "CS_jh_tqjf08"} {
-		if _, ok := channelSkillSpecs[id]; !ok {
-			t.Fatalf("%s missing from channelSkillSpecs", id)
-		}
 		definition, ok := installedCombatSkillCatalog.definition(id, 1)
 		if !ok {
 			t.Skipf("%s not in catalog at level 1", id)
@@ -294,8 +305,17 @@ func TestChannelSpecsWiredToCatalog(t *testing.T) {
 		if definition.channel == nil {
 			t.Fatalf("%s compiled without channel spec", id)
 		}
-		if definition.channel.waves != 8 || definition.channel.spPerWave != 10 {
-			t.Fatalf("%s channel spec = %+v, want 8 waves × SP10", id, definition.channel)
+		if definition.channel.waves != 8 || definition.channel.spPerWave != 10 ||
+			definition.channel.firstWave != 180*time.Millisecond || definition.channel.interval != 440*time.Millisecond {
+			t.Fatalf("%s channel spec = %+v, want 8 waves × SP10 × 440ms（官服定版）", id, definition.channel)
+		}
+		wantStatic := int32(9019)
+		if id == "CS_jh_tqjf08" {
+			wantStatic = 32607
+		}
+		if definition.channel.victimBuff != "buf_"+id || definition.channel.selfBuff != "buf_"+id+"_03" ||
+			definition.channel.selfBuffStatic != wantStatic {
+			t.Fatalf("%s channel buffs = %+v", id, definition.channel)
 		}
 		if definition.spCost != 0 {
 			t.Fatalf("%s spCost=%d, want 0 (逐波扣无预扣)", id, definition.spCost)

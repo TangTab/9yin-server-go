@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/skillscript"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -37,15 +38,36 @@ type channelSkillSpec struct {
 	selfBuffStatic    int32
 }
 
-// channelSkillSpecs 官服抓包种子。UseLimit=166 全目录恰 3 技
-// （hyjf08/SM_hyjf08/tqjf08）：hyjf08 为抓包实证；tqjf08 zhaoshi 与
-// hyjf08 逐位同构（单段 17 帧 wj_qzj_07_1 + hitbreak@15 + MovieScene）
-// 按同构播种；SM 变体无 zhaoshi 段（missing_player_action）不可施放。
+// channelSkillSpecs 离线种子（脚本宿主不可用时的兜底）。权威数据源是
+// scripts/module/skill/<技能ID>.lua 的 M.compile channel 指令（GM
+// lua_reload 热更调参），宿主未启用/无文件/坏模块时目录编译回退本表
+// 并打日志。UseLimit=166 全目录恰 3 技（hyjf08/SM_hyjf08/tqjf08）：
+// hyjf08 为抓包实证；tqjf08 zhaoshi 与 hyjf08 逐位同构（单段 17 帧
+// wj_qzj_07_1 + hitbreak@15 + MovieScene）按同构播种；SM 变体无
+// zhaoshi 段（missing_player_action）不可施放。
 var channelSkillSpecs = map[string]channelSkillSpec{
 	"CS_jh_hyjf08": {waves: 8, firstWave: 180 * time.Millisecond, interval: 440 * time.Millisecond, spPerWave: 10,
 		victimBuff: "buf_CS_jh_hyjf08", selfBuff: "buf_CS_jh_hyjf08_03", selfBuffStatic: 9019},
 	"CS_jh_tqjf08": {waves: 8, firstWave: 180 * time.Millisecond, interval: 440 * time.Millisecond, spPerWave: 10,
 		victimBuff: "buf_CS_jh_tqjf08", selfBuff: "buf_CS_jh_tqjf08_03", selfBuffStatic: 32607},
+}
+
+// channelSpecFromScript 把 skillscript.ChannelSpec（Lua M.compile 的
+// channel 指令快照，毫秒整数）折算为引擎口径（time.Duration）。校验
+// 已在转换层完成（internal/skillscript/convert.go），此处只做单位换算。
+func channelSpecFromScript(spec *skillscript.ChannelSpec) *channelSkillSpec {
+	if spec == nil {
+		return nil
+	}
+	return &channelSkillSpec{
+		waves:         int(spec.Waves),
+		firstWave:     time.Duration(spec.FirstWaveMS) * time.Millisecond,
+		interval:      time.Duration(spec.IntervalMS) * time.Millisecond,
+		spPerWave:     int32(spec.SpPerWave),
+		victimBuff:    spec.VictimBuff,
+		selfBuff:      spec.SelfBuff,
+		selfBuffStatic: int32(spec.SelfBuffStatic),
+	}
 }
 
 // 通道帧簇官服方言常量（挑战.pcapng 波簇全帧实证）：

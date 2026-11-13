@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | `module/neigong/buf_ng_*.lua` | 155 本内功特效模块 | `internal/neigong`（`-neigong-scripts`，默认本目录） |
 | `module/item/*.lua` | 使用物效果 `M.on_use(ctx)`（3 本） | `internal/itemuse`（`-item-scripts`） |
-| `module/skill/*.lua` | 技能编译覆盖 + 全技能效果表 effects_data（7 本，6433 条） | `internal/skillscript`（`-skill-scripts`）；effects_data 的 buff 组已接线技能目录编译（skill_catalog.go，优先级：手勘覆盖 > effects_data > INI 兜底） |
+| `module/skill/*.lua` | 技能编译覆盖 + 效果表 effects_data + 描述解析表 desc_effects（10 本；6433+2208 条） | `internal/skillscript`（`-skill-scripts`）；effects_data 的 buff 组与 M.compile 的 channel 通道参数已接线技能目录编译（skill_catalog.go，buff 优先级：手勘覆盖 > effects_data > INI 兜底；channel 脚本优先、Go 种子兜底）。desc_effects 为旁路数据层（暂无引擎消费，见 [docs/skill-desc-ir.md](../docs/skill-desc-ir.md)） |
 | `module/combat/formula.lua` | 伤害公式 `M.calc(c)` | `internal/combatformula`（`-combat-scripts`） |
 
 四类模块宿主共用 `internal/modulevm` 内核（装载软语义、运行期坏脚本只禁用
@@ -43,6 +43,12 @@ game.on("事件名", function(ctx) ... end)
 | 事件 | 触发点 |
 | --- | --- |
 | `npc_service` | 玩家在 NPC 菜单选中一项原生未实现的服务（任务/传送/职业/宝石/帮派/宅邸等 mark） |
+| `dungeon_enter` | GM 进本成功后（副本实例，见 [docs/dungeon-clone-system.md](../docs/dungeon-clone-system.md)） |
+| `dungeon_npc_killed` | 副本内 NPC 死亡 |
+| `dungeon_wave_cleared` | 副本当前波全灭结算点（返回真值=接管推进节奏） |
+| `dungeon_destroy` | 副本销毁（GM destroy / 通关收尾）前 |
+
+副本事件可自带任意事件名经 `ctx:after` 延时触发（见下）。
 
 ### 调试输出
 
@@ -50,16 +56,29 @@ game.on("事件名", function(ctx) ... end)
 game.log("格式 %s=%d", "键", 42)   -- 进服务端日志，带 lua: 前缀
 ```
 
-### 调用上下文 ctx（仅 npc_service）
+### 调用上下文 ctx
 
 - `ctx:player()` → `{ id, name, faction, silver, sp, scene, x, y, z }`
 - `ctx:npc()` → `{ id, config_id, name }`
-- `ctx:service()` → `{ mark, label, value, source }`
+- `ctx:service()` → `{ mark, label, value, source }`（npc_service）
 - `ctx:tasks()` → 该 NPC 绑定的任务数组（来自 `data/tasks.json` 任务目录，
   纯文本）：`{ id, title, target, can_accept_menu }`
 - `ctx:notify(brief, chapter_name?)` → 给玩家发剧情提示卡
-  （chapter_name 缺省 `ui_shop`，须是客户端已装的文本 ID；brief 可为任意文本）
+  （chapter_name 缺省 `ui_shop`，须是客户端已装的文本 ID；brief 可为任意文本；
+  副本事件下广播全体在场成员）
 - `ctx:bubble(text_id)` → 让该 NPC 头顶冒五秒说话气泡（text_id 须已装）
+
+副本事件（`dungeon_*` 及 `ctx:after` 触发的自定义事件）额外可用：
+
+- `ctx:dungeon()` → `{ config, resource, instance, difficulty, wave, next_wave, killed }`
+  （`next_wave`=0 即末波；wave 是 creator.NpcProgress 波次刻度）
+- `ctx:spawn_wave(n)` → 立即物化波次组 n（幂等；n 须是目录里存在的波次值）
+- `ctx:after(seconds, event)` → 声明延时事件回调（秒 ∈ (0,600]，触发时携带
+  全套副本 ctx；定时器归场景运行时持有，副本销毁后不触发）
+
+范例：`host/dungeon_clone003.lua`（暮色之村——进本剧情、每波播报、
+接管节奏演示）。注意 `game.on` 每事件名单处理器：第二个副本脚本前
+需先加按 `ctx:dungeon().config` 分发的路由层。
 
 ### GM 面板
 
@@ -105,9 +124,14 @@ Go 侧分发点：受击（on_victim）、格挡（on_parry）、出招实中（
   open_box{drop_id,rolls}/grant_items(≤16)/temp_stat/consume(缺省 true)。
 - `skillscript.Scripts`：`Overlay(id, def)` → `M.compile` 增量覆盖
   （self_buff_lease_ms/self_buff_slot/red_armor/stance_cycle/damage/
-  self_buffs/target_effects）；`HitRatio(id, ctx)` → `M.on_hit` 倍率
+  self_buffs/target_effects/channel——channel 是通道型引导参数
+  （寒心恨雪族），声明即通道技，波次引擎与帧序方言仍在 Go 侧）；
+  `HitRatio(id, ctx)` → `M.on_hit` 倍率
   （夹 [0,100]，nil=不调整）；`EffectData(id)` → effects_data 条目快照
-  （damage/self_buffs/target_effects/by_level 四种差集字段，显式 0 有效）。
+  （damage/self_buffs/target_effects/by_level 四种差集字段，显式 0 有效）；
+  `DescEffects(id)` → desc_effects 条目快照（描述文本解析产物，受控词表
+  IR 见 [docs/skill-desc-ir.md](../docs/skill-desc-ir.md)，旁路数据层暂无
+  引擎消费）。
 - `combatformula.Formula.Calc(in)` → `M.calc`：输入攻守属性 + 预掷
   `rand[1]/rand[2]`，输出 `{damage,miss,crit,parried,reduction_pct}`；
   nil 时调用方回退内置公式。

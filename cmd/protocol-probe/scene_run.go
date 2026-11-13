@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/ecs"
+	"github.com/local/9yin-go-server/internal/luascript"
 	"github.com/local/9yin-go-server/internal/mapnav"
 	"github.com/local/9yin-go-server/internal/npcfunc"
 	"github.com/local/9yin-go-server/internal/role"
@@ -37,6 +38,28 @@ type sceneRun struct {
 	patrolIDs      []uint32 // 在巡 NPC 的场景 ID（populate 按目录序即 ID 序追加）
 	closed         bool
 	ticking        bool
+	// managed：副本实例标记。置位后末成员离开不再自动 shutdown
+	//（实例在打开期间常驻，供 reenter_clone 回来），销毁由
+	// dungeonManager 显式执行。noRespawn：副本怪杀完不复活——
+	// combatTick 的每怪复活分支与 refreshTick 的批量/重注册扫描
+	// 一并跳过（尸体 TTL 清除照常）。
+	managed   bool
+	noRespawn bool
+	// 波次域（dungeon_wave.go）：副本实例的 NpcProgress 逐波揭示。
+	// waveMode 由 populate 时目录含波次数据开启；waveAlive 清空即
+	// 波次结算点（Lua dungeon_wave_cleared 可接管推进节奏）。
+	waveMode         bool
+	currentWave      int                  // 当前在场波次值（0=无波次数据）
+	waveGroups       map[int][]int        // 波次值 → 目录下标集
+	pendingWaves     []int                // 尚未注册的波次值（升序）
+	waveAlive        map[uint32]struct{}  // 当前波在场 NPC 的 wire ID
+	waveClearedFired int                  // 已发过 wave_cleared 的波次值（防重发）
+	dungeonKills     int                  // 副本内击杀累计
+	dungeonDifficulty int                 // 难度档（attachRun 后由 GM 路径回填）
+	finished         bool                 // 末波全灭（收尾已排程）
+	viewsDirty       bool                 // 有新波物化，待 tick 外 reconcile 全体视口
+	scripts          *luascript.Host      // 副本事件宿主（enter 时注入；nil=无脚本走默认引擎）
+	finishHook       func()               // 收尾回调（dungeonManager.markFinished；epoch 防护后锁外执行）
 	tickStop       chan struct{}
 	tickDone       chan struct{}
 	npcFuncs       *npcfunc.Registry
@@ -93,8 +116,13 @@ type sceneMember struct {
 	patrolReadyAt time.Time
 }
 
+// sceneKey 是场景运行时的注册表键。instance 区分共享世界场景与副本
+// 实例：空 = 共享世界场景（同 config 全服一份运行时），非空 = 副本
+// 实例 ID（同 config 可并存多个独立运行时，由 dungeonManager 生命周期
+// 托管）。
 type sceneKey struct {
 	config, resource string
+	instance         string
 }
 
 var (
@@ -148,6 +176,8 @@ func newSceneRun(key sceneKey, funcs *npcfunc.Registry) *sceneRun {
 
 // populate 一次性注册全量目录。实体 ID = 目录下标 + 2，
 // 与单连接时代的分配规则保持一致（0/1 保留给玩家）。
+// 副本实例（key.instance 非空）且目录带 NpcProgress 波次数据时走
+// 逐波揭示：首波之外的全部留待波次推进注册（dungeon_wave.go）。
 func (r *sceneRun) populate(catalog []npcSpawn) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -157,12 +187,26 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 	registered := 0
 	// 目录保留在运行时上：尸体 TTL 清除后的重生需要按原下标重注册。
 	r.catalog = catalog
+	if r.key.instance != "" {
+		r.initWaveGroupsLocked(catalog)
+	}
 	for index, npc := range catalog {
 		if !npcSpawnEligible(npc) {
 			continue
 		}
-		if err := r.registerNPCLocked((uint32(index)+2)|0x11000000, npc); err != nil {
+		if r.waveMode {
+			if wave, hasWave := npcWaveValue(npc); hasWave && wave != r.currentWave {
+				continue
+			}
+		}
+		id := (uint32(index) + 2) | 0x11000000
+		if err := r.registerNPCLocked(id, npc); err != nil {
 			return fmt.Errorf("register NPC %s: %w", npc.resolved.ConfigID, err)
+		}
+		if r.waveMode {
+			if _, hasWave := npcWaveValue(npc); hasWave {
+				r.trackWaveNPCLocked(id)
+			}
 		}
 		registered++
 	}
@@ -269,7 +313,7 @@ func (r *sceneRun) detachMember(objectID uint32) {
 		_ = r.scene.Remove(entityID)
 	}
 	r.combat.Remove(entityID)
-	if len(r.members) == 0 && !r.closed {
+	if len(r.members) == 0 && !r.closed && !r.managed {
 		r.shutdownLocked()
 	}
 }
@@ -358,6 +402,13 @@ func (r *sceneRun) tickOnce(now time.Time) {
 	r.combatTick(now)
 	r.patrolTick(now)
 	r.refreshTick(now)
+	r.waveTick(now)
+	r.mu.Lock()
+	dirty := r.viewsDirty
+	r.mu.Unlock()
+	if dirty {
+		r.reconcileMemberViews()
+	}
 }
 
 // ---- NPC 注册（自 sceneLifecycle.registerNPC 迁入）----

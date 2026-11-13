@@ -52,10 +52,11 @@ func writeModule(t *testing.T, dir, name, src string) {
 
 func TestLoadRealSkillScripts(t *testing.T) {
 	s := newRealScripts(t, &logSink{})
-	if s.Loaded() != 7 {
-		t.Fatalf("Loaded = %d, want 7 (6 overlays + effects_data)", s.Loaded())
+	if s.Loaded() != 10 {
+		t.Fatalf("Loaded = %d, want 10 (8 overlays + effects_data + desc_effects)", s.Loaded())
 	}
 	want := []string{
+		"CS_jh_hyjf08", "CS_jh_tqjf08",
 		"CS_wd_tjq04", "CS_wd_tjq05", "CS_wd_tjq07", "CS_wd_tjq08",
 		"CS_yhwq_hsqs04", "CS_yhwq_hsqs05",
 	}
@@ -142,6 +143,190 @@ func TestRealEffectDataEntry(t *testing.T) {
 	// 未知技能 → nil。
 	if entry := s.EffectData("CS_nope_999"); entry != nil {
 		t.Fatalf("unknown = %+v", entry)
+	}
+}
+
+// 真实通道覆盖钉子：hyjf08（挑战.pcapng 实证）与 tqjf08（同构播种）。
+func TestRealChannelOverlay(t *testing.T) {
+	s := newRealScripts(t, &logSink{})
+	hyjf := s.Overlay("CS_jh_hyjf08", &BuffDef{})
+	if hyjf == nil || hyjf.Channel == nil {
+		t.Fatalf("hyjf08 overlay = %+v", hyjf)
+	}
+	want := &ChannelSpec{
+		Waves: 8, FirstWaveMS: 180, IntervalMS: 440, SpPerWave: 10,
+		VictimBuff: "buf_CS_jh_hyjf08", SelfBuff: "buf_CS_jh_hyjf08_03", SelfBuffStatic: 9019,
+	}
+	if *hyjf.Channel != *want {
+		t.Fatalf("hyjf08 channel = %+v, want %+v", hyjf.Channel, want)
+	}
+	tqjf := s.Overlay("CS_jh_tqjf08", &BuffDef{})
+	if tqjf == nil || tqjf.Channel == nil {
+		t.Fatalf("tqjf08 overlay = %+v", tqjf)
+	}
+	if tqjf.Channel.SelfBuffStatic != 32607 || tqjf.Channel.VictimBuff != "buf_CS_jh_tqjf08" {
+		t.Fatalf("tqjf08 channel = %+v", tqjf.Channel)
+	}
+	// 通道覆盖只下发 channel 增量。
+	if hyjf.Damage != nil || hyjf.SelfBuffs != nil || hyjf.TargetEffects != nil || hyjf.RedArmor {
+		t.Fatalf("hyjf08 overlay has unexpected increments: %+v", hyjf)
+	}
+}
+
+// channel 指令校验：任一字段畸形整条丢弃（不部分采纳）。
+func TestChannelSpecValidation(t *testing.T) {
+	dir := t.TempDir()
+	base := `local M = {}
+function M.compile(def)
+  return { channel = { waves = %s, first_wave_ms = %s, interval_ms = %s, sp_per_wave = %s,
+                       victim_buff = %s, self_buff = %s, self_buff_static = %s } }
+end
+return M
+`
+	writeModule(t, dir, "probe_good.lua", fmt.Sprintf(base, "8", "180", "440", "10",
+		`"buf_probe"`, `"buf_probe_03"`, "9019"))
+	writeModule(t, dir, "probe_waves.lua", fmt.Sprintf(base, "8000", "180", "440", "10",
+		`"buf_probe"`, `"buf_probe_03"`, "9019"))
+	writeModule(t, dir, "probe_interval.lua", fmt.Sprintf(base, "8", "180", "0", "10",
+		`"buf_probe"`, `"buf_probe_03"`, "9019"))
+	writeModule(t, dir, "probe_sp.lua", fmt.Sprintf(base, "8", "180", "440", "-1",
+		`"buf_probe"`, `"buf_probe_03"`, "9019"))
+	writeModule(t, dir, "probe_buffs.lua", fmt.Sprintf(base, "8", "180", "440", "10",
+		`""`, `"buf_probe_03"`, "9019"))
+	writeModule(t, dir, "probe_static.lua", fmt.Sprintf(base, "8", "180", "440", "10",
+		`"buf_probe"`, `"buf_probe_03"`, `-1`))
+	sink := &logSink{}
+	s := New(dir, sink.printf)
+	if _, err := s.Load(); err != nil {
+		t.Fatal(err)
+	}
+	good := s.Overlay("probe_good", &BuffDef{})
+	if good == nil || good.Channel == nil || good.Channel.Waves != 8 || good.Channel.IntervalMS != 440 ||
+		good.Channel.VictimBuff != "buf_probe" || good.Channel.SelfBuffStatic != 9019 {
+		t.Fatalf("good overlay = %+v", good)
+	}
+	for _, id := range []string{"probe_waves", "probe_interval", "probe_sp", "probe_buffs", "probe_static"} {
+		if overlay := s.Overlay(id, &BuffDef{}); overlay != nil && overlay.Channel != nil {
+			t.Fatalf("%s channel = %+v, want dropped", id, overlay.Channel)
+		}
+		if !sink.has(id + " channel") {
+			t.Fatalf("missing drop warning for %s in %q", id, sink.lines)
+		}
+	}
+}
+
+// 真实 desc_effects 钉子：金样本三套路（旋刀/太极剑/寒心恨雪）。
+func TestRealDescEffects(t *testing.T) {
+	s := newRealScripts(t, &logSink{})
+	if s.DescEffectsCount() == 0 {
+		t.Fatal("desc_effects 快照为空")
+	}
+
+	// 旋刀 06：招架给攻击者"血刃"（8s，10 层爆发定身 2s）+ 被攻击叠层。
+	xhmdl06 := s.DescEffects("CS_by_xhmdl06")
+	if xhmdl06 == nil || len(xhmdl06.OnParry) != 1 || len(xhmdl06.OnVictim) != 1 {
+		t.Fatalf("xhmdl06 = %+v", xhmdl06)
+	}
+	parry := xhmdl06.OnParry[0]
+	if parry.ApplyBuff != "buf_CS_by_xhmdl06_01" || !parry.ApplyResolved ||
+		parry.ApplyLifeMS != 8000 || parry.BurstAt != 10 || parry.BurstKind != "root" || parry.BurstDurMS != 2000 {
+		t.Fatalf("xhmdl06 on_parry = %+v", parry)
+	}
+	if xhmdl06.OnVictim[0].StackBuff != "buf_CS_by_xhmdl06_01" || xhmdl06.OnVictim[0].StackPerHit != 1 {
+		t.Fatalf("xhmdl06 on_victim = %+v", xhmdl06.OnVictim[0])
+	}
+	if len(xhmdl06.ByLevel[2]) == 0 || xhmdl06.ByLevel[2]["on_parry.1.apply_life_ms"] != 10000 {
+		t.Fatalf("xhmdl06 by_level = %+v", xhmdl06.ByLevel)
+	}
+
+	// 旋刀 01：前方 20 米扇形 + 命中未招架加"孽"（3 层爆发昏迷 2s）。
+	xhmdl01 := s.DescEffects("CS_by_xhmdl01")
+	if xhmdl01 == nil || xhmdl01.Compile == nil {
+		t.Fatalf("xhmdl01 = %+v", xhmdl01)
+	}
+	if xhmdl01.Compile.AOEShape != "sector" || xhmdl01.Compile.AOERadiusM != 20 {
+		t.Fatalf("xhmdl01 compile = %+v", xhmdl01.Compile)
+	}
+	if hit := xhmdl01.OnHit[0]; hit.Condition == nil || !hit.Condition.Unparried ||
+		hit.BurstAt != 3 || hit.BurstKind != "coma" {
+		t.Fatalf("xhmdl01 on_hit = %+v", hit)
+	}
+
+	// 太极剑 01：双击（max_hits=2）+ 轻功旁注；08：击退 + 减蓝；
+	// 09：击落 → 5 秒禁轻功。
+	tjj01 := s.DescEffects("CS_wd_tjj01")
+	if tjj01 == nil || tjj01.Compile == nil || tjj01.Compile.MaxHits != 2 ||
+		!tjj01.Compile.RushNote || !tjj01.Compile.CanQinggong {
+		t.Fatalf("tjj01 = %+v", tjj01)
+	}
+	tjj08 := s.DescEffects("CS_wd_tjj08")
+	if tjj08 == nil || len(tjj08.OnHit) != 1 {
+		t.Fatalf("tjj08 = %+v", tjj08)
+	}
+	if hit := tjj08.OnHit[0]; hit.DisplacementKind != "push" || !hit.MPDrain {
+		t.Fatalf("tjj08 on_hit = %+v", hit)
+	}
+	tjj09 := s.DescEffects("CS_wd_tjj09")
+	if tjj09 == nil || len(tjj09.OnHit) != 1 || tjj09.OnHit[0].ControlKind != "ban_qinggong" ||
+		tjj09.OnHit[0].ControlDurMS != 5000 {
+		t.Fatalf("tjj09 = %+v", tjj09)
+	}
+
+	// 寒心恨雪：L1 斩 3 次 → L6 起斩 8 次（数值差集保真）。
+	hyjf08 := s.DescEffects("CS_jh_hyjf08")
+	if hyjf08 == nil || hyjf08.Compile == nil || hyjf08.Compile.MaxHits != 3 {
+		t.Fatalf("hyjf08 = %+v", hyjf08)
+	}
+	if got := hyjf08.ByLevel[6]["compile.max_hits"]; got != 8 {
+		t.Fatalf("hyjf08 by_level[6] = %d, want 8", got)
+	}
+
+	// 未知技能 → nil。
+	if entry := s.DescEffects("CS_nope_999"); entry != nil {
+		t.Fatalf("unknown = %+v", entry)
+	}
+}
+
+// desc_effects 畸形条目降级：坏条目 WARN 跳过，合法条目照常服务。
+func TestDescEffectsMalformedDegrades(t *testing.T) {
+	dir := t.TempDir()
+	writeModule(t, dir, "desc_effects.lua", `local E = {}
+E["probe_good"] = {
+    compile = { max_hits = 4, air = "only" },
+    on_hit = { { control_kind = "stun", control_dur_ms = 1500, condition = { unparried = true } } },
+    unparsed = { "某段未解析" },
+}
+E[42] = { compile = { max_hits = 1 } }
+E["probe_junk"] = "not-a-table"
+E["probe_empty"] = {}
+return E
+`)
+	sink := &logSink{}
+	s := New(dir, sink.printf)
+	if _, err := s.Load(); err != nil {
+		t.Fatal(err)
+	}
+	good := s.DescEffects("probe_good")
+	if good == nil || good.Compile == nil || good.Compile.MaxHits != 4 || good.Compile.Air != "only" {
+		t.Fatalf("probe_good = %+v", good)
+	}
+	hit := good.OnHit[0]
+	if hit.ControlKind != "stun" || hit.ControlDurMS != 1500 || hit.Condition == nil || !hit.Condition.Unparried {
+		t.Fatalf("probe_good on_hit = %+v", hit)
+	}
+	if len(good.Unparsed) != 1 || good.Unparsed[0] != "某段未解析" {
+		t.Fatalf("probe_good unparsed = %+v", good.Unparsed)
+	}
+	for _, bad := range []string{"probe_junk", "probe_empty", "42"} {
+		if entry := s.DescEffects(bad); entry != nil {
+			t.Fatalf("%s = %+v, want skipped", bad, entry)
+		}
+	}
+	if !sink.has("desc_effects") || !sink.has("已跳过") {
+		t.Fatalf("missing skip warnings: %q", sink.lines)
+	}
+	if s.DescEffectsCount() != 1 {
+		t.Fatalf("count = %d, want 1", s.DescEffectsCount())
 	}
 }
 

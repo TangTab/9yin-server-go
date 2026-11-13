@@ -597,11 +597,12 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		bindDistance:     bindDistance,
 		groundRushAction: groundRushAction,
 	}
-	// 通道型（UseLimit=166 族，channelSkillSpecs）：SP 改逐波扣
-	//（launchChannelWaves 每波 −spPerWave），预扣清零防双收。
-	if spec, isChannel := channelSkillSpecs[skillID]; isChannel {
-		channelSpec := spec
-		definition.channel = &channelSpec
+	// 通道型（UseLimit=166 族）：SP 改逐波扣（launchChannelWaves 每波
+	// −spPerWave），预扣清零防双收。参数源：脚本覆盖模块 M.compile 的
+	// channel 指令优先（scripts/module/skill/<技能ID>.lua，热更走
+	// lua_reload），宿主不可用/覆盖缺失时回退离线种子（skill_channel.go）。
+	if spec := resolveChannelSkillSpec(skillID, level, tables); spec != nil {
+		definition.channel = spec
 		definition.spCost = 0
 	}
 	// 公共 CD 严格走配置（varprop/skill_new AddCoolDownTime），缺配置即 0，
@@ -715,6 +716,38 @@ func applyEffectsDataBuffs(definition *combatSkillDefinition, skillID string, le
 		})
 	}
 	return true
+}
+
+// resolveChannelSkillSpec 解析通道型引导参数：脚本覆盖模块 M.compile
+// 的 channel 指令优先（scripts/module/skill/<技能ID>.lua——新通道技只
+// 需一个 Lua 文件，无需改 Go），宿主未启用/无模块/指令畸形被丢弃时
+// 回退离线种子 channelSkillSpecs。种子成员回退（脚本丢了 channel 指令
+// =漂移）打日志；非种子技的 buff 型覆盖模块（tjq04 红霸体等）本就无
+// channel 指令，静默返回 nil。def 传 INI 编译的 buf_<技能ID> 精确
+// buff 快照供脚本参考缺省空。
+func resolveChannelSkillSpec(skillID string, level int32, tables skillResourceTables) *channelSkillSpec {
+	seed, isSeed := channelSkillSpecs[skillID]
+	if skillScripts != nil && skillScripts.Enabled() && skillScripts.HasOverlay(skillID) {
+		var def *skillscript.BuffDef
+		if buff, _, exists := compileExactSkillBuff(skillID, level, tables); exists {
+			def = &skillscript.BuffDef{
+				ConfigID:   buff.configID,
+				StaticData: int64(buff.staticData),
+				Level:      int64(buff.level),
+				LifetimeMS: buff.lifetime.Milliseconds(),
+			}
+		}
+		if overlay := skillScripts.Overlay(skillID, def); overlay != nil && overlay.Channel != nil {
+			return channelSpecFromScript(overlay.Channel)
+		}
+		if isSeed {
+			log.Printf("skill catalog: %s 覆盖模块未返回有效 channel 指令，通道参数回退离线种子", skillID)
+		}
+	}
+	if !isSeed {
+		return nil
+	}
+	return &seed
 }
 
 type combatSkillCacheKey struct {

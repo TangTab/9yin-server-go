@@ -95,6 +95,8 @@ type CommandBody struct {
 	TaskId      int32   `json:"taskId"`      // authored_task_* 任务 ID（start 必填；其余 0=最早活跃）
 	SkillKey    string  `json:"skillKey"`    // learn_taolu 套路 key / learn_neigong 内功书 configId
 	SkillLevel  int32   `json:"skillLevel"`  // 目标层数（0=各自满级；游戏侧按目录上限逐技钳制）
+	Config      string  `json:"config"`      // enter_clone 副本 config（cloneinfo.ini 节名原样）
+	Fun         int32   `json:"fun"`         // enter_clone 难度档 1=普通 2=困难 3=地狱
 }
 
 // Command 是校验通过后的命令纯数据。原 cmd/protocol-probe 的 gmCommand
@@ -168,6 +170,8 @@ type Command struct {
 	TaskId         int32   // authored_task_* 任务 ID（start ≥1 必填；submit_ready/remove/reward 0=最早活跃）
 	SkillKey       string  // learn_taolu 套路 key / learn_neigong 内功书 configId（面板 skillKey 键）
 	SkillLevel     int32   // learn_taolu/learn_neigong 目标层数（0=各自满级，游戏侧逐技钳上限）
+	Config         string  // enter_clone 副本 config（cloneinfo.ini 节名原样；目录成员性校验在游戏侧）
+	Fun            int32   // enter_clone 难度档 1=普通 2=困难 3=地狱（该档存在性校验在游戏侧）
 }
 
 // PlayerState 是 GET 会话列表端点的行结构。原 gmPlayerState 原样搬来

@@ -295,6 +295,26 @@ func (s *sceneLifecycle) updateMemberPosition(position role.Position, catalog []
 	return s.refreshVisibility(catalog, position)
 }
 
+// playerLiveTransform 返回本视图玩家的场景权威位置（成员表条目；
+// m15/212 移动上报与冲锋链落点经 updateMemberPosition 持续刷新）。
+// 玩家物化进 combat ECS 的键是 wireID 且无 Vitals 组件，按全局
+// playerObjectID 走 combatNPCTransform 恒 miss——可移动范围技逐段
+// 索敌的实时圆心必须从这里取（2026-11-13 太极剑舞真机修复）。
+func (s *sceneLifecycle) playerLiveTransform() (worldcore.Transform, bool) {
+	if s == nil || s.wireID == 0 {
+		return worldcore.Transform{}, false
+	}
+	s.run.mu.Lock()
+	defer s.run.mu.Unlock()
+	member, exists := s.run.members[s.wireID]
+	if !exists {
+		return worldcore.Transform{}, false
+	}
+	return worldcore.Transform{
+		X: member.position.X, Y: member.position.Y, Z: member.position.Z, Orient: member.position.Orient,
+	}, true
+}
+
 // combatActive 报告本视图是否越过就绪屏障（供成员登记读取）。
 func (s *sceneLifecycle) combatActive() bool {
 	return s.armed == false && s.runActive()
@@ -375,10 +395,17 @@ func (s *sceneLifecycle) refreshVisibility(catalog []npcSpawn, position role.Pos
 	return true
 }
 
-// begin 切换视图到目标场景：离开当前运行时，再（经注册表或
-// 独占新建）挂靠目标运行时并一次性注册全量目录。视图自身的
-// 就绪屏障与菜单状态随世代重置。
+// begin 切换视图到共享世界场景（instance 为空的 sceneKey）。副本
+// 实例经 beginKey 携带独立实例键进入。
 func (s *sceneLifecycle) begin(config, resource string, catalog []npcSpawn) error {
+	return s.beginKey(sceneKey{config: config, resource: resource}, catalog)
+}
+
+// beginKey 切换视图到目标场景：离开当前运行时，再（经注册表或
+// 独占新建）挂靠目标运行时并一次性注册全量目录。视图自身的
+// 就绪屏障与菜单状态随世代重置。key.instance 非空时挂靠的是
+// 独立副本实例运行时（同 config 多实例互不干扰）。
+func (s *sceneLifecycle) beginKey(key sceneKey, catalog []npcSpawn) error {
 	s.mu.Lock()
 	closed := s.closed
 	s.mu.Unlock()
@@ -387,7 +414,6 @@ func (s *sceneLifecycle) begin(config, resource string, catalog []npcSpawn) erro
 	}
 	s.detachMember()
 	s.stopReplayTimers()
-	key := sceneKey{config: config, resource: resource}
 	var run *sceneRun
 	if s.registry {
 		acquired, err := acquireSceneRun(key, catalog, s.run.npcFuncs)

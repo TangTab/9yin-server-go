@@ -367,6 +367,10 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 	r.eachCombatNPCFullLocked(func(id worldcore.EntityID, vitals *sim.Vitals, state *sim.Brain, transform *worldcore.Transform, meta *sceneEntity) {
 		actorState := vitals.ActorState(meta.id, meta.ownerID)
 		if actorState.HP <= 0 {
+			if r.noRespawn {
+				// 副本实例：尸体只等 refreshTick 的 TTL 清除，绝不复活。
+				return
+			}
 			if npcRespawnBatchInterval() > 0 {
 				// 批量刷新模式：重生归 refreshTick 周期扫描统一结算
 				//（尸体 TTL 清除 + 批量复活），这里只保留尸体。

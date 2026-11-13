@@ -68,18 +68,36 @@ type TaskSnapshot struct {
 	CanAcceptMenu string
 }
 
+// DungeonSnapshot 是脚本可见的副本实例快照（ctx:dungeon()）。
+type DungeonSnapshot struct {
+	Config     string
+	Resource   string
+	Instance   string
+	Difficulty int
+	Wave       int // 当前在场波次值（NpcProgress 刻度；0=无波次数据）
+	NextWave   int // 下一个未注册波次值（0=已是末波）
+	Killed     int // 副本内击杀累计
+}
+
 // EventContext 描述一次事件调用的环境数据与副作用回调。回调由调用方
 // 提供，并在调用方的锁纪律下执行（例如已持 run.mu 时直接写帧）。
 type EventContext struct {
 	Player  PlayerSnapshot
 	NPC     NPCSnapshot
 	Service ServiceSnapshot
+	// Dungeon 是副本事件（dungeon_*）携带的实例快照；非副本事件为零值。
+	Dungeon DungeonSnapshot
 	// Tasks 是本次事件 NPC 绑定且已加载文本的任务（npc_service 事件）。
 	Tasks []TaskSnapshot
 	// Notify 发送剧情提示卡（服务端 custom 383 路线）。
 	Notify func(brief, chapterName string) error
 	// Bubble 发送 NPC 说话气泡（服务端 custom 43 路线）。
 	Bubble func(textID string) error
+	// SpawnWave 物化一个副本波次组（dungeon_wave 引擎；回调在调用方
+	// 场景锁纪律下执行）。
+	SpawnWave func(wave int) error
+	// After 声明一个延时副本事件回调（定时器由引擎持有，秒 ∈ (0,600]）。
+	After func(seconds float64, event string) error
 }
 
 const (
@@ -384,6 +402,57 @@ func newEventTable(v *vm.VM, ec *EventContext) *vm.Table {
 		setString(t, "value", ec.Service.Value)
 		setString(t, "source", ec.Service.Source)
 		l.Set(0, vm.NewTable(t))
+		return 1
+	}))
+	ctx.SetString("dungeon", vm.NewNativeFunc(func(l *vm.VM) int {
+		t := vm.NewEmptyTable()
+		setString(t, "config", ec.Dungeon.Config)
+		setString(t, "resource", ec.Dungeon.Resource)
+		setString(t, "instance", ec.Dungeon.Instance)
+		if ec.Dungeon.Difficulty != 0 {
+			t.SetString("difficulty", vm.NewInt(int64(ec.Dungeon.Difficulty)))
+		}
+		if ec.Dungeon.Wave != 0 {
+			t.SetString("wave", vm.NewInt(int64(ec.Dungeon.Wave)))
+		}
+		if ec.Dungeon.NextWave != 0 {
+			t.SetString("next_wave", vm.NewInt(int64(ec.Dungeon.NextWave)))
+		}
+		if ec.Dungeon.Killed != 0 {
+			t.SetString("killed", vm.NewInt(int64(ec.Dungeon.Killed)))
+		}
+		l.Set(0, vm.NewTable(t))
+		return 1
+	}))
+	ctx.SetString("spawn_wave", vm.NewNativeFunc(func(l *vm.VM) int {
+		// ctx:spawn_wave(n)：1=self。
+		if l.ArgCount() < 2 || ec.SpawnWave == nil {
+			panic(&vm.LuaError{Value: vm.NewString("ctx:spawn_wave(n) 不可用")})
+		}
+		wave := l.Get(2)
+		if !wave.IsNumber() {
+			panic(&vm.LuaError{Value: vm.NewString("ctx:spawn_wave 需要波次数值（NpcProgress 刻度）")})
+		}
+		if err := ec.SpawnWave(int(wave.AsInt())); err != nil {
+			panic(&vm.LuaError{Value: vm.NewString("spawn_wave: " + err.Error())})
+		}
+		l.Set(0, vm.True)
+		return 1
+	}))
+	ctx.SetString("after", vm.NewNativeFunc(func(l *vm.VM) int {
+		// ctx:after(seconds, event)：1=self。
+		if l.ArgCount() < 3 || ec.After == nil {
+			panic(&vm.LuaError{Value: vm.NewString("ctx:after(seconds, event) 不可用")})
+		}
+		seconds := l.Get(2)
+		event := l.Get(3)
+		if !seconds.IsNumber() || !event.IsString() {
+			panic(&vm.LuaError{Value: vm.NewString("ctx:after 需要秒数与事件名")})
+		}
+		if err := ec.After(seconds.AsFloat(), event.AsString()); err != nil {
+			panic(&vm.LuaError{Value: vm.NewString("after: " + err.Error())})
+		}
+		l.Set(0, vm.True)
 		return 1
 	}))
 	ctx.SetString("tasks", vm.NewNativeFunc(func(l *vm.VM) int {

@@ -115,6 +115,21 @@ func Validate(body CommandBody) (Command, error) {
 		// 到达该循环之前完成转换。
 		command.Action = "switch_scene"
 		command.Destination = destination
+	case "enter_clone":
+		// 契约层只做形状校验：config 非空 + 难度档 1..3。目录成员性
+		//（cloneinfo.ini 节名）与该副本难度档存在性依赖资源树，归
+		// 游戏侧 processGMCommand 校验。
+		command.Config = strings.TrimSpace(body.Config)
+		if command.Config == "" {
+			return command, fmt.Errorf("enter_clone requires a clone config (cloneinfo.ini section)")
+		}
+		if body.Fun < 1 || body.Fun > 3 {
+			return command, fmt.Errorf("enter_clone difficulty must be 1 (easy), 2 (difficult) or 3 (hell)")
+		}
+		command.Fun = body.Fun
+	case "reenter_clone", "destroy_clone":
+		// 无参数：操作对象是发令角色当前打开的副本实例（无实例时
+		// 由游戏侧回报文本错误）。
 	case "teleport":
 		position, parseErr := ParsePosition(body.Position)
 		if parseErr != nil {

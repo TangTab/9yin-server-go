@@ -95,6 +95,17 @@ E["CS_wd_tjq01"] = {
 - **重新生成**：`python tools/skill-data/gen_skill_scripts.py`（幂等；表更新后重跑
   + `reload_scripts` 或重启生效）。
 
+## skill/desc_effects.lua（描述解析表，2026-11-13 接线装载层）
+
+**描述文本（`string_skill_desc.idres` 的 `desc_<技能ID>_<等级>`）解析为
+受控词表 IR 的汇总表**：`tools/skill-data/gen_desc_effects.py`（本仓生成器，
+幂等/`--selftest` 金样本）产出，2,538 技 → 2,208 条目。动词三分类
+（控制状态/位移/资源）、字段全集、覆盖率与引擎接线路线见
+[skill-desc-ir.md](skill-desc-ir.md)。与 effects_data 同构装载
+（`skillscript.DescEffects(id)` 快照查询），但是**旁路数据层**：不进
+buff 优先级链、当前无引擎消费——它是"这套技能该有什么行为"的权威索引，
+二三期接线（on_hit 每击加状态、typed control、破防/招架触发等）以此为准。
+
 ## skill/<技能ID>.lua（编译覆盖 + on_hit 钩子）
 
 `CombatSkillCatalog` 编译每个技能时调用 `LuaScriptService.skillOverlay(id, level, exactBuff)`；
@@ -115,7 +126,7 @@ function M.compile(def)
           life_ms = 86400000, slot = 7 },
       },
     },
-    -- 完整效果集（2026-11-05）：
+    -- 完整效果集（2026-11-05；channel 2026-11-13 接线）：
     damage = { amount = 540, waves = 4 },        -- 伤害/段数覆盖（取整组时覆盖 INI 编译值）
     self_buffs = {                                -- 多自 buff（整组取代精确 buff 的自增益效果）
       { config_id = "buf_CS_xxx", static_data = 6013, level = 1, life_ms = 35000, slot = 5 },
@@ -126,6 +137,15 @@ function M.compile(def)
       -- control=true：受控到租约终点（fight.control，同 INI 有害精确 buff 语义）
       -- frame=true：加发 msg169 目标 debuff 帧（武技 169 帧的脚本化泛化，默认关）
     },
+    channel = {                                   -- 通道型引导参数（寒心恨雪族，2026-11-13）：
+      waves = 8, first_wave_ms = 180,             --   声明即通道技（SP 预扣清零、逐波扣），
+      interval_ms = 440, sp_per_wave = 10,        --   波次/索敌/帧序方言由 Go 引擎驱动不下放
+      victim_buff = "buf_CS_xxx",                 --   每波瞬挂瞬摘的受害者 m169 buff
+      self_buff = "buf_CS_xxx_03",                --   自身 m169 buff 对
+      self_buff_static = 9019,                    --   BufferInfo 槽 CSV 首段 StaticData
+    },                                            --   校验：waves 1..32、时序 (0,60000]ms、
+                                                  --   sp_per_wave/self_buff_static ≥0、buff 名非空，
+                                                  --   任一畸形整条丢弃回退 Go 离线种子
   }
 end
 ```

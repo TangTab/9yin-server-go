@@ -11,6 +11,7 @@ import (
 
 	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/entity"
+	"github.com/local/9yin-go-server/internal/role"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -793,6 +794,78 @@ func TestShapedMultihitPicksUpNewEntrants(t *testing.T) {
 	}
 	if hp96.HP != 1000-2*15 {
 		t.Fatalf("NPC96 HP=%d, want %d (进场后两段都命中——旧快照实现恒 1000)", hp96.HP, 1000-2*15)
+	}
+}
+
+// TestShapedMultihitFollowsMovingCaster 可移动范围技（太极剑舞
+// CS_wd_tjj07 族，UsingCanMove=1）逐段圆心跟随玩家实时位置（用户
+// 2026-11-13 口径：我们靠近目标/目标靠近我们，后续伤害都生效）。
+// 出招位 (0,0) 半径 6；NPC95 起手在圈内。技能期间玩家走到 (28,0)：
+// NPC96(30,0)=我们靠近的目标、NPC97 从 (40,0) 走到 (33,0)=靠近我们
+// 的目标，两段都须命中；留在出招位的 NPC95 自然离场不再吃伤害。
+// 旧实现的实时圆心取 combatNPCTransform(playerObjectID)——玩家物化键
+// 是 wireID 且无 Vitals，恒 miss → 圆心冻结 211 施法位（95 恒命中、
+// 96/97 恒 miss）。
+func TestShapedMultihitFollowsMovingCaster(t *testing.T) {
+	originalEngine := installedCombatCalc
+	installedCombatCalc = newTestCombatEngine(t, combatcalc.FormulaSpec{
+		ID: 9, Formula: "R[P1,P2]", Src: map[int]int{1: 5, 2: 5},
+	})
+	defer func() { installedCombatCalc = originalEngine }()
+	originalRandom := combatRandomFloat64
+	combatRandomFloat64 = func() float64 { return 0.5 }
+	defer func() { combatRandomFloat64 = originalRandom }()
+
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	player := newPlayerActor("tester", 0)
+	world.attachMember(player, role.Position{}, roleVisual{})
+	registerTestCombatNPC(t, world, 95)
+	placeTestNPC(t, world, 95, 4, 0)
+	registerTestCombatNPC(t, world, 96)
+	placeTestNPC(t, world, 96, 30, 0)
+	registerTestCombatNPC(t, world, 97)
+	placeTestNPC(t, world, 97, 40, 0)
+
+	definition := combatSkillDefinition{
+		id: "CS_test_shaped_move", script: "SkillNormal",
+		targetMode: skillTargetCasterCircle, areaRadius: 6,
+		effects:    []combatSkillEffect{{kind: skillEffectDamage, amount: 10}},
+		damageRows: []skillDamageRow{{formulaID: 9, damageType: "PhyDamage", params: []string{"10", "20"}}},
+		hitFrameMs: []time.Duration{150 * time.Millisecond, 450 * time.Millisecond},
+	}
+	custom := clientCustomMessage{Values: []clientCustomValue{
+		{Type: 2, Int32: 211},
+		{Type: 6, Text: "CS_test_shaped_move"},
+		{Type: 4, Float32: 0}, {Type: 4, Float32: 0}, {Type: 4, Float32: 0},
+	}}
+	targets := world.resolveSkillDamageTargets(definition, custom, 0, 0)
+	if len(targets) != 1 || targets[0].id != forkNPCID(95) {
+		t.Fatalf("出招快照=%v, want 仅 NPC95（96/97 在圈外）", targets)
+	}
+	scheduleSkillMultiHits(conn, world, definition, player, targets, custom, "test")
+	// 技能期间玩家移动（m15 上报路径）：走到 NPC96 身边；NPC97 同时
+	// 主动靠近玩家的新位置。
+	world.updateMemberPosition(role.Position{X: 28}, nil)
+	world.run.mu.Lock()
+	world.run.writeNpcTransform(worldcore.EntityID(forkNPCID(97)), worldcore.Transform{X: 33, Z: 0})
+	world.run.mu.Unlock()
+	time.Sleep(700 * time.Millisecond)
+
+	hp95, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(95)))
+	hp96, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(96)))
+	hp97, _ := world.run.combat.Vitals(worldcore.EntityID(forkNPCID(97)))
+	if hp95.HP != 1000 {
+		t.Fatalf("NPC95 HP=%d, want 1000 (玩家离场后不再命中——旧实现恒 %d)", hp95.HP, 1000-2*15)
+	}
+	if hp96.HP != 1000-2*15 {
+		t.Fatalf("NPC96 HP=%d, want %d (玩家靠近后两段都命中)", hp96.HP, 1000-2*15)
+	}
+	if hp97.HP != 1000-2*15 {
+		t.Fatalf("NPC97 HP=%d, want %d (目标靠近玩家后两段都命中)", hp97.HP, 1000-2*15)
 	}
 }
 

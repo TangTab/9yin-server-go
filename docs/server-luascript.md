@@ -56,8 +56,15 @@ Lua 5.5 语义注意：chunk 内一旦出现 `global x = 1` 声明即进入严�
 
 ## 事件与 API
 
-事件当前只有一个：`npc_service`（原生未实现的 NPC 菜单服务，markTask
-0x1008 等）。处理器 `return false` 显式交回默认"未实现"路径。
+事件当前两组：
+
+- `npc_service`（原生未实现的 NPC 菜单服务，markTask 0x1008 等）。处理器
+  `return false` 显式交回默认"未实现"路径。
+- `dungeon_*` 副本玩法组（2026-11-13，见 [dungeon-clone-system.md](dungeon-clone-system.md)）：
+  `dungeon_enter` / `dungeon_npc_killed` / `dungeon_wave_cleared` /
+  `dungeon_destroy` + `ctx:dungeon()` 快照与 `ctx:spawn_wave(n)` /
+  `ctx:after(sec, event)` 能力回调（`dungeon_wave_cleared` 返回真值即接管
+  波次推进节奏）。
 
 ```lua
 game.on("npc_service", function(ctx)
@@ -91,8 +98,10 @@ ctx 快照字段与脚本侧用法详见 [../scripts/README.md](../scripts/READM
 
 ## 后续方向
 
-- 事件面扩展：战斗命中钩子、tick 定时器、物品使用（msg31 链，见
-  [item-use-msg31.md](item-use-msg31.md)）都可以走同一 `game.on` 机制。
-- 若需要按 mark 细分事件（`npc_service/task`）或一次性多处理器，
-  在 `Host.Call` 之上加路由即可，不必动引擎绑定层。
+- 事件面扩展：战斗命中钩子、物品使用（msg31 链，见
+  [item-use-msg31.md](item-use-msg31.md)）都可以走同一 `game.on` 机制
+  （tick 定时器已由副本层的 `ctx:after` 落地一种形态）。
+- 若需要按 mark/config 细分事件或一次性多处理器（多副本脚本必需，
+  `game.on` 单 handler 后者覆盖前者），在 `Host.Call` 之上加路由即可，
+  不必动引擎绑定层。
 - 引擎升级：重放 FORK.md 的两个补丁文件 + 重跑其测试套件即可。
