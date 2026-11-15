@@ -96,5 +96,7 @@ flags u32，LSB 先消费，`flags==1` 触发重填（哨兵位=已用位数上�
 
 - `tools/lz_exact.py`：`decode()`（帧模式）/`Session().decode()`（会话模式）/
   `unframe()`/`compress_core()`+`wrap_compress()`（官方方言压缩，600 例随机 round-trip 全过）
+- 镜像数据字典：`回放bin-LZ明文结构与属性盘点.md`（19 个 LZ 帧明文结构 + 119 个
+  0x10 属性帧 idx→2433 列名清单，`tools/replay_lz_attr_report.py` 一键再生）
 - 重放注入用全字面量编码（tools/lz47_literal.py）依然安全；官方方言压缩可显著缩帧
 - 抓包离线解码：pcaplib.build_streams + stream_frames → 0x27-0x30 族 → lz_exact

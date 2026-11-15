@@ -870,57 +870,96 @@ func TestAreaGroundRushDashTierSelection(t *testing.T) {
 	}
 }
 
-// TestRushApproachDashImmediateGrantAndFallback 服务端驱动接近（默认开，
-// 2026-11-15）：本服登录方言下客户端无本地「按下即走」，远距受理当拍即发
-// c61 簇（外服私服范围型「受理即 c61」方言移植到锁定冲锋）；超时无 212
-// 落地 → 服务端 bind 点兜底直收（dash 落地簇 + pending 消费 + inFlight 清）。
-func TestRushApproachDashImmediateGrantAndFallback(t *testing.T) {
+// TestRushApproachWalkDriveAndSentinel 服务端驱动接近 v3（2026-11-15 逆向
+// 定版）：受理簇 + 单条目 0x21 主玩家走位驱动（intent=0x2B01 白名单态）；
+// 落地哨对「从未移动」兜底 bind 点直收（walk-in 落地簇）；客户端位移推进
+// 则让位 212 链；off 关闭回归纯 9 帧受理方言。
+func TestRushApproachWalkDriveAndSentinel(t *testing.T) {
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("冲锋侠", 0)
 	definition := combatSkillDefinition{id: "CS_rush_far", canRush: true, script: "skilllock",
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-	oldTimeout := rushDashTimeout
-	rushDashTimeout = 40 * time.Millisecond
-	defer func() { rushDashTimeout = oldTimeout }()
+	oldInterval := rushWalkSentinelInterval
+	oldSpeed, oldSlack := rushWalkDriveSpeed, rushWalkSentinelETASlack
+	rushWalkSentinelInterval = 40 * time.Millisecond
+	rushWalkDriveSpeed, rushWalkSentinelETASlack = 1e9, 0 // ETA≈0：首查=复查间隔
+	defer func() {
+		rushWalkSentinelInterval = oldInterval
+		rushWalkDriveSpeed, rushWalkSentinelETASlack = oldSpeed, oldSlack
+	}()
 
 	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 15 { // 9 受理簇 + 6 c61 簇（零成本定义）
-		t.Fatalf("approach staging frames=%d, want 9+6", len(frames))
+	if len(frames) != 12 { // 9 受理簇 + 逃逸门三明治（LogicState 置/0x21 驱动/还原）
+		t.Fatalf("approach staging frames=%d, want 9+3 drive", len(frames))
 	}
-	if int32(binary.LittleEndian.Uint32(frames[9][4:])) != 24 ||
-		int32(binary.LittleEndian.Uint32(frames[9][18:])) != msgRushCommand {
-		t.Fatalf("cluster tail must open c61 dash, got %x", frames[9])
+	if idx := binary.LittleEndian.Uint16(frames[9][12:]); idx != propRushLogicState {
+		t.Fatalf("escape-set frame idx=%d, want LogicState", idx)
 	}
-	if !player.rushDashIssuedSnapshot() {
-		t.Fatal("approach staging must issue dash immediately")
+	drive := frames[10]
+	if drive[0] != 0x21 || binary.LittleEndian.Uint16(drive[1:]) != 1 || len(drive) != 47 {
+		t.Fatalf("walk drive frame=%x, want 47B single-entry 0x21", drive)
+	}
+	if got := binary.LittleEndian.Uint32(drive[43:]); got != 1 {
+		t.Fatalf("walk drive intent=%#x, want 0x1 (escape-gate dialect, NPC-style)", got)
+	}
+	if got := math.Float32frombits(binary.LittleEndian.Uint32(drive[27:])); math.Abs(float64(got-4.5)) > 0.01 {
+		t.Fatalf("walk drive speed=%v, want 4.5", got)
+	}
+	if player.rushDashIssuedSnapshot() {
+		t.Fatal("approach staging must not issue c61 (drive replaces dead channel)")
 	}
 
-	// 超时兜底：无 212 → 服务端 bind 点直收（dashIssued 落地簇 18 帧）。
+	// 落地哨：站立无位移 → 兜底 bind 点直收（walk-in 落地簇 15 帧）。
 	time.Sleep(200 * time.Millisecond)
-	landing := conn.Frames()[15:]
-	if len(landing) != 18 {
-		t.Fatalf("timeout fallback landing frames=%d, want 18-frame dash landing cluster+state-ping", len(landing))
+	landing := conn.Frames()[12:]
+	if len(landing) != 15 {
+		t.Fatalf("sentinel fallback landing frames=%d, want 15-frame walk-in cluster+state-ping", len(landing))
 	}
-	if landing[0][0] != 0x10 || binary.LittleEndian.Uint16(landing[0][12:]) != propRushCantMove {
-		t.Fatalf("fallback landing starts with CantMove clear, got %x", landing[0])
+	if landing[0][0] != 0x10 || binary.LittleEndian.Uint16(landing[0][12:]) != propRushPauseSkill {
+		t.Fatalf("walk-in fallback starts with PauseSkill clear, got %x", landing[0])
 	}
 	if player.peekPendingCast(time.Now()) != nil || player.rushInFlightSnapshot() {
-		t.Fatal("timeout fallback must consume pending and clear in-flight state")
+		t.Fatal("sentinel fallback must consume pending and clear in-flight state")
 	}
 
-	// NINEYIN_RUSH_APPROACH=off：受理簇回归纯 9 帧（被动等客户端方言）。
-	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	// 客户端自行移动（m15 推进）：落地哨让位 212 walk-in，不得兜底。
 	conn2 := &captureMessageConnection{}
 	player2 := newPlayerActor("冲锋侠乙", 0)
 	if _, err := stageRushCast(conn2, player2, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn2.Frames()); got != 9 {
+	base := len(conn2.Frames())
+	// 连续行走流（真实客户端行走期持续 m15 上报；单帧即停=停步兜底路径）。
+	for i := 0; i < 6; i++ {
+		if _, err := handleMovementUpload(conn2, player2, nil,
+			walkUploadMessage(-1610608895, 7, float32(5+i*2), 0, 0, 20, 0, 4.5, 0), "test"); err != nil { // 0xA0000F01
+			t.Fatal(err)
+		}
+		time.Sleep(35 * time.Millisecond)
+	}
+	extra := conn2.Frames()[base:]
+	if len(extra) >= 15 { // 兜底 walk-in 簇=15 帧，绝不能出现
+		t.Fatalf("moving client got %d extra frames, want echo-only (<15, no fallback cluster)", len(extra))
+	}
+	if player2.peekPendingCast(time.Now()) == nil || player2.rushDashIssuedSnapshot() {
+		t.Fatal("moving client must keep pending alive (no fallback, no c61)")
+	}
+
+	// NINEYIN_RUSH_APPROACH=off：受理簇回归纯 9 帧（被动等客户端方言）。
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	conn3 := &captureMessageConnection{}
+	player3 := newPlayerActor("冲锋侠丙", 0)
+	if _, err := stageRushCast(conn3, player3, nil, definition, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(conn3.Frames()); got != 9 {
 		t.Fatalf("approach-off staging frames=%d, want 9", got)
 	}
 }
+

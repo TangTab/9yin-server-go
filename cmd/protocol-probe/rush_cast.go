@@ -70,10 +70,21 @@ const (
 	rushWalkKickDelay = 155 * time.Millisecond
 )
 
-// rushDashTimeout：c61 发出后等待 212 落地的安全阀（外服私服无此机制）。
-// var 化供测试缩短；到点仍未落地（c61 未被消费/212 丢失）→ 服务端 bind
-// 点兜底直收（见 issueRushDash）。
-var rushDashTimeout = 6 * time.Second
+// rushDashFallbackDelay：c61 发出后的落地哨首查延迟（外服私服无此机制；
+// var 化供测试缩短）。c61 未被本客户端消费（2026-11-15 真机实证）时站立
+// 按压会呆站——首查即兜底 bind 点直收；客户端已自行移动则让位 212 链。
+var rushDashFallbackDelay = 1500 * time.Millisecond
+
+// rushWalkSentinelInterval：走位驱动落地哨的复查间隔（var 化供测试缩短）。
+var rushWalkSentinelInterval = 2500 * time.Millisecond
+
+// rushWalkDriveSpeed / rushWalkSentinelETASlack：落地哨首查的步行 ETA 推算
+// 参数（distance/speed + slack，逃逸门驱动的客户端可能不上报 m15）——
+// var 化供测试压缩。
+var (
+	rushWalkDriveSpeed      = 4.5
+	rushWalkSentinelETASlack = 1 * time.Second
+)
 
 // rushDashTriggerMeters 是 c61 冲刺窗口上界：GRushRange(5.0)+GRushRangeAdd(1.5)。
 func rushDashTriggerMeters() float64 { return 5.0 + 1.5 }
@@ -267,6 +278,31 @@ func (p *playerActor) resumeSettleSkipSnapshot() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.resumeSettleSkip
+}
+
+// noteClientReport 记录客户端最近位移上报（m15/220 均走此），供冲锋落地哨
+// 判定 c61 后客户端是否自行移动（c61 零消费实证 2026-11-15）。
+func (p *playerActor) noteClientReport(x, z float32, at time.Time) {
+	p.mu.Lock()
+	p.clientReportX, p.clientReportZ, p.clientReportAt = x, z, at
+	p.mu.Unlock()
+}
+
+// clientMovedSince c61 发出后客户端是否自行位移（>0.5m 的新上报）。
+func (p *playerActor) clientMovedSince(issuedAt time.Time, fromX, fromZ float32) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.clientReportAt.IsZero() || p.clientReportAt.Before(issuedAt) {
+		return false
+	}
+	return math.Sqrt(float64(square(p.clientReportX-fromX)+square(p.clientReportZ-fromZ))) > 0.5
+}
+
+// clientReportSnapshot 客户端最近位移上报位置（走位驱动落地哨用）。
+func (p *playerActor) clientReportSnapshot() (float32, float32, time.Time) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.clientReportX, p.clientReportZ, p.clientReportAt
 }
 
 // rushPressGate 冲锋族按压入口闸：beginSkillUse 非 settled 分支的锁招/
@@ -618,22 +654,91 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, world *scen
 	if strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_RUSH_WALK_KICK")), "1") {
 		scheduleRushWalkKick(link, player, definition, targetID, target, castAt, remote)
 	}
-	// ★服务端驱动接近（默认开，NINEYIN_RUSH_APPROACH=off 关闭）：本服
-	// 登录方言下客户端无本地「按下即走」（2026-11-15 终局定论：踢帧四方言
-	// 全被 OnMoving motion_func 白名单闸死），远距受理后只会无限期挂起。
-	// 移植外服私服范围型「受理即 c61」方言（a.pcapng hyjf07：受理簇 +
-	// c61 档2 qg_fastruning_s + CD/MP，无 220 前置，客户端执行疾跑）到
-	// 锁定目标冲锋——受理同拍下发 c61，角色疾跑接近目标；落地 212 走既有
-	// resumePendingCastAt 出招链，6s 无落地则服务端 bind 点兜底直收。
-	if rushApproachDashEnabled() && !player.rushDashIssuedSnapshot() {
-		if err := issueRushDash(link, player, world, target, castAt.X, castAt.Y, castAt.Z, remote); err != nil {
-			log.Printf("%s: rush approach dash skill id=%s: %v", remote, definition.id, err)
-		} else if player.rushDashIssuedSnapshot() {
-			log.Printf("%s: rush approach dash issued skill id=%s dist=%.1fm (immediate grant dialect)",
-				remote, definition.id, distance)
+	// ★服务端驱动接近 v4（默认开，NINEYIN_RUSH_APPROACH=off 关闭）：本服
+	// 登录方言下客户端无本地「按下即走」（2026-11-15 终局定论），远距受理
+	// 后只会无限期挂起。c61 受理即授予已被真机证伪（15:55 会话 6 秒零位移）；
+	// v3 白名单态 0x21（intent=0x2B01）真机复测同样零移动（15:39/15:41 两轮，
+	// trace.log 零 AllDest 错误=帧被收进实体但未起跑，vt+0x250 应用路径另有
+	// 前置/槽位坑，逆向二轮追查中）。
+	//
+	// v4=OnMoving 拒后逃逸门（RE 方案 B）：先 0x10 置 LogicState(433)=106
+	//（OnMoving 白名单拒绝后唯一放行分支），再发 0x21 单条目（NPC 巡逻同
+	// 帧型，intent=0x00000001），随即还原 LogicState=0——放行走的是
+	// 「远程玩家同款事件链」（事件 22 → motion vt+0x50），即 NPC/远程玩家
+	// 每天都在真机上正常走路的那条应用路径。0x10→0x21→0x10 同 flush 顺序
+	// 到达，OnMoving 读 LogicState 在 0x21 处理时点命中 106。
+	// 落地哨首查延迟按步行 ETA 推算（该路径客户端可能不上报 m15）。
+	if rushApproachDashEnabled() {
+		bindX, bindY, bindZ := rushBindPoint(target, castAt.X, castAt.Z, definition.bindDistance)
+		orient := orientTowardTarget(castAt.X, castAt.Z, target.X, target.Z)
+		drive := serverAllDest([]allDestEntry{{
+			objectID: playerObjectID, ownerID: playerOwnerID,
+			destX: bindX, destY: bindY, destZ: bindZ, destOrient: orient,
+			speed: 4.5, moveFlags: 1,
+		}})
+		escapeSet, errSet := objectSingleProperty(playerObjectID, playerOwnerID, propRushLogicState, "LogicState", clientdata.ByteValue(rushEscapeDriveLogicState))
+		escapeRestore, errRestore := objectSingleProperty(playerObjectID, playerOwnerID, propRushLogicState, "LogicState", clientdata.ByteValue(0))
+		if errSet != nil || errRestore != nil {
+			log.Printf("%s: rush walk drive encode skill id=%s: %v/%v", remote, definition.id, errSet, errRestore)
+		} else if err := link.WriteFrame(escapeSet); err != nil {
+			log.Printf("%s: rush walk drive escape-set: %v", remote, err)
+		} else if err := link.WriteFrame(drive); err != nil {
+			log.Printf("%s: rush walk drive skill id=%s: %v", remote, definition.id, err)
+		} else if err := link.WriteFrame(escapeRestore); err != nil {
+			log.Printf("%s: rush walk drive escape-restore: %v", remote, err)
+		} else {
+			log.Printf("%s: rush walk drive sent skill id=%s dist=%.1fm dest=(%.1f,%.1f,%.1f) escape-gate logicstate=%d",
+				remote, definition.id, distance, bindX, bindY, bindZ, rushEscapeDriveLogicState)
 		}
+		scheduleRushWalkSentinel(link, player, world, target, castAt, distance, remote)
 	}
 	return true, nil
+}
+
+// rushEscapeDriveLogicState：OnMoving 白名单拒后放行分支要求的 LogicState
+// 值（0x6A=106；游戏语义=LS_OFFLINEJOB 离线托管，此处仅作位移放行开关，
+// 0x21 处理完即还原 0）。
+const rushEscapeDriveLogicState byte = 0x6A
+
+// scheduleRushWalkSentinel 走位驱动落地哨：首查延迟=max(复查间隔, 步行
+// ETA+1s)（逃逸门驱动走「远程玩家同款事件链」，客户端可能不上报 m15，
+// 按 ETA 推算到达时刻）；此后每 rushWalkSentinelInterval 复查暂存态——
+// 客户端从未/不再位移（驱动被拒或中途停步）→ 服务端 bind 点兜底直收
+//（walk-in 落地簇，CD/MP 落地结）；位移推进中 → 继续等它的 212 walk-in
+//（官方语义：拉回不打断暂存）。C2S 位移上报（含 6s 心跳对）都会刷新
+// clientReport，心跳位置不变不会误判为移动。
+func scheduleRushWalkSentinel(link sceneMessageConnection, player *playerActor, world *sceneLifecycle,
+	target, castAt worldcore.Transform, distance float64, remote string) {
+	lastX, lastZ := castAt.X, castAt.Z
+	firstDelay := rushWalkSentinelInterval
+	if eta := time.Duration(distance/rushWalkDriveSpeed*float64(time.Second)) + rushWalkSentinelETASlack; eta > firstDelay {
+		firstDelay = eta
+	}
+	var check func()
+	check = func() {
+		pending := player.peekPendingCast(time.Now().UTC())
+		if pending == nil || player.rushDashIssuedSnapshot() {
+			return // 已落地/取消/rearm/已转 c61 冲刺链
+		}
+		reportX, reportZ, _ := player.clientReportSnapshot()
+		if math.Sqrt(float64(square(reportX-lastX)+square(reportZ-lastZ))) > 0.5 {
+			lastX, lastZ = reportX, reportZ
+			time.AfterFunc(rushWalkSentinelInterval, check) // 客户端在走：让位 212
+			return
+		}
+		// 站立/停步：服务端兜底直收（bind 点 0x1F 锚 + walk-in 落地簇）。
+		geometry := target
+		if live, ok := world.combatNPCTransform(pending.targetID); ok {
+			geometry = live
+		}
+		destX, _, destZ := rushBindPoint(geometry, castAt.X, castAt.Z, pending.bindDistance)
+		orient := orientTowardTarget(destX, destZ, geometry.X, geometry.Z)
+		log.Printf("%s: rush walk sentinel; stationary fallback cast at bind dest=(%.2f,%.2f)", remote, destX, destZ)
+		if err := resumePendingCastAt(link, player, world, destX, geometry.Y, destZ, orient, "walk-sentinel-fallback", remote); err != nil {
+			log.Printf("%s: rush walk sentinel fallback: %v", remote, err)
+		}
+	}
+	time.AfterFunc(firstDelay, check)
 }
 
 // rushApproachDashEnabled 服务端驱动接近开关（默认开；NINEYIN_RUSH_APPROACH=off 关闭）。
@@ -997,12 +1102,20 @@ func issueRushDash(link sceneMessageConnection, player *playerActor, world *scen
 		}
 	}
 	player.markRushDashIssued()
-	time.AfterFunc(rushDashTimeout, func() {
+	issuedAt := time.Now().UTC()
+	time.AfterFunc(rushDashFallbackDelay, func() {
 		if player.peekPendingCast(time.Now().UTC()) != pending {
 			return // 已 212 落地续招 / 重按换暂存 / 过期取消
 		}
-		// 冲刺超时未落地：服务端兜底直收。落点=目标（实时坐标）身前 bind，
-		// 0x1F 锚把角色定过去 + 完整落地簇 + 出招伤害——保证受理后必然施放。
+		if player.clientMovedSince(issuedAt, fromX, fromZ) {
+			// 客户端自行移动中（手动走近/驱动位移生效）：让位官方 212
+			// walk-in 落地链，不抢跑（官方语义：拉回不打断暂存）。
+			log.Printf("%s: rush dash deferred; client self-moving, awaiting 212 walk-in", remote)
+			return
+		}
+		// 站立未动：c61 未被消费（本客户端实证零消费，2026-11-15 真机）→
+		// 服务端兜底直收。落点=目标（实时坐标）身前 bind，0x1F 锚把角色
+		// 定过去 + 完整落地簇 + 出招伤害——保证受理后必然施放。
 		geometry := target
 		if live, ok := world.combatNPCTransform(pending.targetID); ok {
 			geometry = live
@@ -1327,6 +1440,7 @@ func handleMovementUpload(link sceneMessageConnection, player *playerActor, worl
 	if player == nil {
 		return true, nil
 	}
+	player.noteClientReport(x, z, time.Now())
 	maybeBareWalkKickProbe(link, player, x, y, z, remote)
 	if player.rushInFlightSnapshot() {
 		if player.rushDashIssuedSnapshot() {
@@ -1546,6 +1660,9 @@ func handleRushMovementUpload(link sceneMessageConnection, player *playerActor, 
 	// msg220 [220, x, y, z, orient?]：位置同样收编（外服私服仅在接近段发出，
 	// 收编无害且保持与 msg15 同口径）。
 	absorbClientPosition(world, values[1].Float32, values[2].Float32, values[3].Float32, orient)
+	if player != nil {
+		player.noteClientReport(values[1].Float32, values[3].Float32, time.Now())
+	}
 	if player == nil || !player.rushInFlightSnapshot() {
 		return true, nil
 	}

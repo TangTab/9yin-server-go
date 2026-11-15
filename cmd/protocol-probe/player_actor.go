@@ -300,6 +300,12 @@ type playerActor struct {
 	// 走停迁移沿发状态四连，同态重发（追怪改向/在途重报）不重发
 	//（锁 p.mu）。
 	moveEchoWalking bool
+	// clientReportX/Z/At：客户端最近一次位移上报（m15/220）的位置与时刻——
+	// 冲锋落地哨用它判「c61 后客户端是否自行移动」（c61 未被消费的实证
+	// 2026-11-15：站立客户端 6s 零位移；自行移动=让位官方 212 walk-in 链）。
+	clientReportX  float32
+	clientReportZ  float32
+	clientReportAt time.Time
 	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
 	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
 	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。
