@@ -26,10 +26,14 @@ type npcMoveUpdate struct {
 	ownerID     uint32
 	destination worldcore.Transform
 	// speed 是该次移动的行进速度（0x21 广播第 6 槽；0=瞬移类不发
-	// 跑步动画）。delay 是到达确认延时（scheduleCombatMoveArrival 用）。
-	// 0＝旧默认 1s（重生/栓绳瞬移类）；追击折线按剩余路径长/速度。
+	// 跑步动画）。delay 是历史到达确认延时（到达定时器已随 0x1F
+	// 洪流治理退役，字段保留避免追击调用点连锁改动）。
 	speed float32
 	delay time.Duration
+	// stopFacing 非空＝官方「停止对」方言（技能.pcapng f#41 帧级定版）：
+	// 追击停步（进入攻击位/卡位守候）时同帧两条目——[行进角,0,0,尾0]
+	// 停位移 + [面向角,0,∓2π,尾1] 原地转身面向目标。speed 此时无值。
+	stopFacing *float32
 }
 
 type npcPropertyUpdate struct {
@@ -137,7 +141,7 @@ func (n npcSpawn) float32Property(name string) float32 {
 // 经各成员视图的 conn 完成（transport 写帧线程安全）。
 type combatTickOutcome struct {
 	members []*sceneMember
-	moves []npcMoveUpdate
+	moves   []npcMoveUpdate
 	updates []npcPropertyUpdate
 	changed map[uint32]bool
 	// rageFrames 是受击得怒(格挡被揍 +2/直接被揍 +1)产生的 18 字节
@@ -147,6 +151,17 @@ type combatTickOutcome struct {
 	// writeNPCAttackFrames 三段式：msg337 预备→msg20 动作→msg24 命中）。
 	// 伤害结算仍在锁内同步完成；这里只携带锁外补发表帧所需的只读快照。
 	attacks []npcAttackPresentation
+	// parryBreaks 虚招破防事件（锁内结算已清玩家格挡态/令牌/闲时看门狗
+	// 并开启不可格挡窗；锁外据此补发手动格挡释放序 + CantParry 窗帧）。
+	parryBreaks []parryBreakEvent
+}
+
+// parryBreakEvent 一次虚招破防的锁外表现素材：受害者成员（锁外取
+// view.conn/player）+ 施破 NPC。
+type parryBreakEvent struct {
+	victim   *sceneMember
+	npc      uint32
+	npcOwner uint32
 }
 
 // npcAttackPresentation 是一次 NPC 攻击的表现快照。transform 已带
@@ -213,6 +228,76 @@ func (r *sceneRun) combatTick(now time.Time) {
 	}
 	r.broadcastNPCFrames(outcome.members, outcome.moves, outcome.updates)
 	r.broadcastNPCAttacks(outcome.attacks)
+	r.broadcastParryBreaks(outcome.parryBreaks)
+}
+
+// broadcastParryBreaks 虚招破防锁外表现（格挡.pcapng 官方方言逐帧定版，
+// 三次实测：+29.735/+62.433/+76.661）：
+//
+//	m169[0, buf_CantParry]（挂不可格挡 debuff，施破 NPC 为施法者）
+//	→ 手动格挡官方式释放序（m169[1,BuffInParry]+BufferInfo4 清空+
+//	   InParry 0+速度还原+ParryUpSpeedAdd 10）
+//	→ 3s 后 m169[1, buf_CantParry]（窗口到点摘除）。
+//
+// 无 CantParry 属性帧（官方走 buff 事件对，不走 472 号属性——472 是
+// 格挡值/招架耐久，被格挡命中消耗 100→96）。破防后客户端会发新令牌
+// ×4 重试约 6s（官方零回应，由 noteParryStrayToken 侧静默吞）。
+func (r *sceneRun) broadcastParryBreaks(breaks []parryBreakEvent) {
+	for _, event := range breaks {
+		victim := event.victim
+		if victim == nil || victim.view == nil || victim.player == nil {
+			continue
+		}
+		name := victim.player.snapshotName()
+		debuff, err := serverCustomIntMessage(169,
+			customInt(0),
+			customString("buf_CantParry"),
+			customObject(event.npc, event.npcOwner),
+			customObject(playerObjectID, playerOwnerID),
+			customWideString(name),
+			customWideString(name),
+			customInt64(0),
+			customInt(0),
+		)
+		if err != nil {
+			log.Printf("%s: encode CantParry debuff: %v", victim.view.remote, err)
+			continue
+		}
+		if err := victim.view.conn.WriteFrame(debuff); err != nil {
+			log.Printf("%s: write CantParry debuff: %v", victim.view.remote, err)
+			continue
+		}
+		if err := writeOfficialParryTokenAck(victim.view.conn, victim.player, false); err != nil {
+			log.Printf("%s: write feint parry break release: %v", victim.view.remote, err)
+			continue
+		}
+		// 格挡临时战斗姿态还原（同 m54 松开口径）。
+		if pre := victim.player.takeParryPreBlockState(); pre != 0xFF {
+			victim.player.setLogicState(pre)
+			victim.player.writeLogicStateFrame(victim.view.conn, pre)
+		}
+		remote := victim.view.remote
+		time.AfterFunc(feintBreakCantParryWindow, func() {
+			remove, err := serverCustomIntMessage(169,
+				customInt(1),
+				customString("buf_CantParry"),
+				customObject(event.npc, event.npcOwner),
+				customObject(playerObjectID, playerOwnerID),
+				customWideString(name),
+				customWideString(name),
+				customInt64(0),
+				customInt(0),
+			)
+			if err != nil {
+				log.Printf("%s: encode CantParry expiry: %v", remote, err)
+				return
+			}
+			if err := victim.view.conn.WriteFrame(remove); err != nil {
+				log.Printf("%s: write CantParry expiry: %v", remote, err)
+			}
+		})
+		log.Printf("%s: feint broke manual parry npc=%d (buf_CantParry %s)", victim.view.remote, event.npc, feintBreakCantParryWindow)
+	}
 }
 
 // broadcastNPCAttacks 补发本 tick 的 NPC 攻击表现帧（Java NpcCombatAi
@@ -361,6 +446,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 	aggressors := 0
 	threatened := make(map[uint32]bool, len(targets))
 	var rage map[uint32][]byte
+	var parryBreaks []parryBreakEvent
 	attacks := make([]npcAttackPresentation, 0, 2)
 	// eachCombatNPCFullLocked 以 EntityID 升序一次遍历交付全部组件指针；
 	// 分支逻辑与单连接时代逐行等价，就地修改即生效。
@@ -412,6 +498,8 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 				return
 			}
 			state.Threat = 1
+			// 首击保持即时（nextattack 零值）；攻击相位解耦移到出手后
+			// 的冷却计算（见下方 NextAttack 结算处）。
 		}
 		position, engaged := targets[state.TargetMember]
 		distance := horizontalDistance(*transform, position)
@@ -471,10 +559,12 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			if !npcTransformMoved(destination, before) {
 				// 水平已在攻击位内但 3D 够不着（柱顶/屋檐卡位）：零位移
 				// 不发移动帧，行进态翻回 stand——NPC 原地守在下方，不播
-				// 原地走路动画。
+				// 原地走路动画。停步补官方停止对（面向目标原地转身）。
 				if last, seen := r.npcMoveState[uint32(id)]; seen && last {
 					r.npcMoveState[uint32(id)] = false
 					updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcMoveStateProperties(false)})
+					facing := float32(math.Atan2(float64(position.Z-transform.Z), float64(position.X-transform.X)))
+					moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: *transform, stopFacing: &facing})
 				}
 				return
 			}
@@ -493,15 +583,41 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			// 3~6m 带：位移照发、出招照走（外服私服野怪边逼近边挥击的样本，
 			// 技能.pcapng p75≈6.5m 命中即此带内出招）。
 		} else if last, seen := r.npcMoveState[uint32(id)]; seen && last {
-			// 进入攻击位（本 tick 不再位移）：行进态若仍挂着翻回 stand。
+			// 进入攻击位（本 tick 不再位移）：行进态若仍挂着翻回 stand，
+			// 并补官方停止对（停位移 + 原地转身面向目标）。
 			r.npcMoveState[uint32(id)] = false
 			updates = append(updates, npcPropertyUpdate{id: meta.id, ownerID: meta.ownerID, properties: npcMoveStateProperties(false)})
+			facing := float32(math.Atan2(float64(position.Z-transform.Z), float64(position.X-transform.X)))
+			moves = append(moves, npcMoveUpdate{id: meta.id, ownerID: meta.ownerID, destination: *transform, stopFacing: &facing})
 		}
 		if now.Before(state.NextAttack) {
 			return
 		}
-		state.NextAttack = now.Add(state.AttackEvery)
-		outcome := target.player.resolveNPCAttack(meta.id, state.Damage, now)
+		// 攻击相位解耦（60380 会话实证：同 tick 索敌的多只怪冷却同相
+		// → 每 3s 整点齐步出手）。后续冷却按 NPC id 确定性追加 0~1 个
+		// tick（Knuth 乘法散列 mod 2）：齐攻一拍后各怪节奏自然错开，
+		// 首击不受影响。
+		state.NextAttack = now.Add(state.AttackEvery + time.Duration(
+			uint64(meta.id)*2654435761%2)*time.Second)
+		// 虚招判定（GM set_npc_feint 标记）：被标 NPC 的攻击按虚招结算，
+		// 命中格挡中的玩家即破防（官方「虚招击破架招」相克）。常规野怪
+		// 攻击不是虚招，按普通攻击被格挡零伤。
+		feint := false
+		if r.npcFeintMarks != nil {
+			feint = r.npcFeintMarks[uint32(meta.id)]
+		}
+		// 普攻伤害走公式掷值（2026-11-15 NPC 伤害公式接入）：攻方面板=
+		// 实力包推导（Str/Dex Base×Level）区间掷值 ×(1-玩家外防对数减伤)
+		// ×1.0 + 暴击掷；命中判定仍归 resolveNPCAttack 的闪避出口。攻方
+		// 数值缺失（表未装载/零值）回落旧常量伤害 state.Damage。
+		damage := state.Damage
+		if rolled := rollNPCAttackDamage(meta.combatStats, target.player.defenderSnapshotOfNPCAttack()); rolled > 0 {
+			damage = rolled
+		}
+		outcome := target.player.resolveNPCAttack(meta.id, damage, feint, now)
+		if outcome.breakParry {
+			parryBreaks = append(parryBreaks, parryBreakEvent{victim: target, npc: meta.id, npcOwner: meta.ownerID})
+		}
 		// on_victim 特效（reflect 指令）反打 NPC：走同一 NPC 伤亡链
 		//（威胁清理/重生排程/属性帧）。
 		if outcome.neigongReflect > 0 && vitals.HP > 0 {
@@ -555,7 +671,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 			log.Printf("%s: NPC attack dodged id=%d config=%s", remote, meta.id, meta.configID)
 		} else if outcome.stateChanged {
 			playerState := target.player.stateSnapshot()
-			log.Printf("%s: NPC attack id=%d config=%s damage=%d player_hp=%d/%d", remote, meta.id, meta.configID, state.Damage, playerState.HP, playerState.MaxHP)
+			log.Printf("%s: NPC attack id=%d config=%s damage=%d player_hp=%d/%d", remote, meta.id, meta.configID, damage, playerState.HP, playerState.MaxHP)
 		} else if outcome.parried {
 			log.Printf("%s: NPC attack parried id=%d config=%s", remote, meta.id, meta.configID)
 		}
@@ -579,7 +695,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 	}
 	r.mu.Unlock()
-	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage, attacks: attacks}
+	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage, attacks: attacks, parryBreaks: parryBreaks}
 }
 
 // appendNPCReturnHomeLocked 清仇恨并按栓绳规则回位：正常脱战（目标
@@ -664,96 +780,63 @@ func (s *sceneLifecycle) combatTickForTest(player *playerActor, position role.Po
 	return combatTickResult{playerStateChanged: after.LogicState != before.LogicState || after.HP != before.HP}
 }
 
-// scheduleCombatMoveArrival 只在客户端拥有一个移动间隔
-// 来朝目的地播放动画之后，才确认最终位置。transform
-// 比较即是取消令牌：持续追击每 tick 都会更新它，
-// 因此过期的定时器绝不会确认一个陈旧的目的地——但持续追击
-// 期间也不能让客户端对 NPC 的位置认知一直停在出生点（外服私服
-// a.pcapng 追击中的怪拿到 6 次坐标变化的 0x1F；本服 57587 会话
-// 追击全程零 0x1F，客户端认知滞后 4m+，冲锋 c61 终点随之错位）。
-// 因此被更新的定时器不再静默丢弃：距上次广播位移超阈值时改发
-// 当前权威坐标的 0x1F（节流 ≥1m 且 ≥500ms，与外服私服追逐中几秒一帧
-// 的节奏同量级；同 tick 与 0x20 成对发送的瞬移观感只在无节流的
-// 逐 tick 直发时出现）。
-// 定时器归场景运行时所有（epoch 防护），确认帧扇出给
-// 当前视口内可见该 NPC 的成员。
-func (r *sceneRun) scheduleCombatMoveArrival(members []*sceneMember, move npcMoveUpdate, delay time.Duration) {
-	if delay <= 0 {
-		delay = time.Second
-	}
-	r.mu.Lock()
-	if r.closed {
-		r.mu.Unlock()
-		return
-	}
-	epoch := r.epoch
-	timer := time.AfterFunc(delay, func() {
-		r.mu.Lock()
-		defer r.mu.Unlock()
-		if r.closed || r.epoch != epoch {
-			return
-		}
-		meta, exists := r.npcMeta(worldcore.EntityID(move.id))
-		if !exists || meta.ownerID != move.ownerID {
-			return
-		}
-		transform, transformOK := r.npcTransform(worldcore.EntityID(move.id))
-		if !transformOK {
-			return
-		}
-		if !sameCombatTransform(transform, move.destination) {
-			// 被更新的移动取代（追击继续）：节流补发当前权威坐标，
-			// 防客户端认知长期滞留在旧位置。
-			r.throttledNPCLocationBroadcast(members, meta, transform)
-			return
-		}
-		r.throttledNPCLocationBroadcast(members, meta, transform)
-	})
-	r.timers = append(r.timers, timer)
-	r.mu.Unlock()
-}
-
-// throttledNPCLocationBroadcast 带节流的 NPC 0x1F 广播：距上次已广播
-// 位置水平位移 ≥npcLocationBroadcastMinMeters 且距上次发送 ≥
-// npcLocationBroadcastMinInterval 才发。调用方必须已持有 r.mu。
-func (r *sceneRun) throttledNPCLocationBroadcast(members []*sceneMember, meta sceneEntity, transform worldcore.Transform) {
-	now := time.Now()
-	if last, ok := r.npcLastLocation[meta.id]; ok {
-		if now.Sub(last.at) < npcLocationBroadcastMinInterval ||
-			horizontalDistance(last.transform, transform) < npcLocationBroadcastMinMeters {
-			return
-		}
-	}
-	if r.npcLastLocation == nil {
-		r.npcLastLocation = make(map[uint32]npcLocationBroadcast)
-	}
-	r.npcLastLocation[meta.id] = npcLocationBroadcast{transform: transform, at: now}
-	frame := serverLocation(meta.id, meta.ownerID, transform)
-	for _, member := range members {
-		if member.view == nil || !member.view.npcVisible(meta.id) {
-			continue
-		}
-		if err := member.view.conn.WriteFrame(frame); err != nil {
-			log.Printf("%s: sync combat NPC location id=%d: %v", member.view.remote, meta.id, err)
-		}
-	}
-}
+// scheduleCombatMoveArrival/throttledNPCLocationBroadcast 已随 0x1F 洪流
+// 治理退役（2026-11-15 真机 60380 会话抓包 vs 技能.pcapng 定案）：官方
+// 服务端对移动中的 NPC 从不发 0x1F（全场 143 条几乎全是玩家自身落点），
+// NPC 位置认知完全由 0x21 走路条目 + 0x28 物化载荷坐标承载。旧机制
+// （到达确认 + 节流补发 + 视口重放）合计每会话 5000+ 条 0x1F，每次到达
+// 都是硬置位——客户端走路动画被打断、模型钉回旧坐标，即真机「怪不追
+// 人/模型原地/突然闪现」三症的直接元凶。
 
 // broadcastNPCFrames 在锁外把战斗 tick 产出的 NPC 移动/属性帧
-// 扇出给视口内可见对应 NPC 的成员，并排布到达确认定时器。
+// 扇出给视口内可见对应 NPC 的成员。
+//
+// 0x21 条目方言（技能.pcapng 帧级定版，2026-11-15）：
+//   - 行进：[目的地xyz][行进角][速度][+2π][0,0,尾1]——rotate 槽（s8）
+//     官方步行条目恒 +2π，此前我方恒 0 是客户端不消费条目的疑点之一；
+//   - 停止对（追击停步）：同帧两条目 [角,0,0,尾0]+[面向角,0,-2π,尾1]，
+//     第一条停位移、第二条原地转身；
+//   - 瞬移类（重生/栓绳回位 speed=0）：单停止条目 + 立即 0x1F 硬置位
+//     （唯一保留的 NPC 0x1F 场景——等价官方对异步落位对象的一次落点）。
 func (r *sceneRun) broadcastNPCFrames(members []*sceneMember, moves []npcMoveUpdate, updates []npcPropertyUpdate) {
 	for _, move := range moves {
+		if move.stopFacing != nil {
+			// 官方停止对：停位移 + 原地转身面向目标。
+			frame := serverAllDest([]allDestEntry{
+				{
+					objectID: move.id, ownerID: move.ownerID,
+					destX: move.destination.X, destY: move.destination.Y, destZ: move.destination.Z,
+					destOrient: *move.stopFacing, speed: 0, moveFlags: 0,
+				},
+				{
+					objectID: move.id, ownerID: move.ownerID,
+					destX: move.destination.X, destY: move.destination.Y, destZ: move.destination.Z,
+					destOrient: *move.stopFacing, speed: 0, rotate: float32(-2 * math.Pi), moveFlags: 1,
+				},
+			})
+			for _, member := range members {
+				if member.view == nil || !member.view.npcVisible(move.id) {
+					continue
+				}
+				if err := member.view.conn.WriteFrame(frame); err != nil {
+					log.Printf("%s: combat stop NPC %d: %v", member.view.remote, move.id, err)
+				}
+			}
+			continue
+		}
 		// 官方追击移动广播=0x21 ServerAllDest（技能.pcapng：0x20 全程
-		// 0 次；0x21 条目带速度槽——缺速度客户端无跑步动画直接滑行
-		// 飘移）。speed>0 即行进（flags=1，巡逻同款），瞬移类 speed=0。
+		// 0 次；0x21 条目带速度槽）。speed>0 即行进（rotate=+2π、flags=1），
+		// 瞬移类 speed=0（rotate=0、flags=0）。
+		rotate := float32(0)
 		flags := uint32(0)
 		if move.speed > 0 {
+			rotate = float32(2 * math.Pi)
 			flags = 1
 		}
 		frame := serverAllDest([]allDestEntry{{
 			objectID: move.id, ownerID: move.ownerID,
 			destX: move.destination.X, destY: move.destination.Y, destZ: move.destination.Z,
-			destOrient: move.destination.Orient, speed: move.speed, moveFlags: flags,
+			destOrient: move.destination.Orient, speed: move.speed, rotate: rotate, moveFlags: flags,
 		}})
 		for _, member := range members {
 			if member.view == nil || !member.view.npcVisible(move.id) {
@@ -763,14 +846,20 @@ func (r *sceneRun) broadcastNPCFrames(members []*sceneMember, moves []npcMoveUpd
 				log.Printf("%s: combat move NPC %d: %v", member.view.remote, move.id, err)
 			}
 		}
-		// ServerLocation 在当前客户端中是到达确认。不要
-		// 在同一个战斗 tick 中让它与 ServerMoving 成对发送：那样会使
-		// actor 瞬移到目的地而不是播放移动动作。之后
-		// 的追击目的地会在该定时器执行之前更改权威
-		// transform，从而令此次确认失效。到达延时按折线路径长/速度
-		//（docs/infra/map-path-waypoint-graph.md §6.3：折线长于直线，固定
-		// 1s 会提前确认回到漂移）；重生/栓绳瞬移类保持默认 1s。
-		r.scheduleCombatMoveArrival(members, move, move.delay)
+		if move.speed == 0 {
+			// 瞬移类（重生/栓绳）：0x21 停止条目 + 立即 0x1F 落位。
+			// 不再排到达定时器——官方对移动 NPC 零 0x1F，延迟确认
+			// 只会在追击中途把模型硬拉回旧坐标（闪现元凶）。
+			location := serverLocation(move.id, move.ownerID, move.destination)
+			for _, member := range members {
+				if member.view == nil || !member.view.npcVisible(move.id) {
+					continue
+				}
+				if err := member.view.conn.WriteFrame(location); err != nil {
+					log.Printf("%s: combat teleport NPC %d: %v", member.view.remote, move.id, err)
+				}
+			}
+		}
 	}
 	for _, update := range updates {
 		frame, err := sceneObjectProperties(update.id, update.ownerID, 0, update.properties)
@@ -842,18 +931,6 @@ func sameCombatTransform(a, b worldcore.Transform) bool {
 		math.Abs(float64(a.Y-b.Y)) < epsilon &&
 		math.Abs(float64(a.Z-b.Z)) < epsilon &&
 		math.Abs(float64(a.Orient-b.Orient)) < epsilon
-}
-
-// NPC 0x1F 位置广播节流参数（外服私服 a.pcapng 追击中的怪 ~几秒一帧）。
-const (
-	npcLocationBroadcastMinMeters   = 1.0
-	npcLocationBroadcastMinInterval = 500 * time.Millisecond
-)
-
-// npcLocationBroadcast 是单个 NPC 最近一次 0x1F 广播水位。
-type npcLocationBroadcast struct {
-	transform worldcore.Transform
-	at        time.Time
 }
 
 // setNPCTransformLocked 更新 NPC 权威坐标：可视权威 Scene 实体

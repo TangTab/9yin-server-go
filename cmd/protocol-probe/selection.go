@@ -78,7 +78,7 @@ var propAutoSelectObject = clientdata.MustPlayerProperty("AutoSelectObject").Ind
 // clearSelectedTarget 等价路径；有效目标校验实体存在后回
 // LastObject + AutoSelectObject 双帧，并把选择镜像到
 // selectedObject/selectedOwner 供 211 技能选靶读取。
-func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage, remote string) error {
+func handleSelectTargetCustom(world *sceneLifecycle, player *playerActor, custom clientCustomMessage, remote string) error {
 	if len(custom.Values) < 2 {
 		return fmt.Errorf("select target message needs id and object, got %d values", len(custom.Values))
 	}
@@ -129,6 +129,12 @@ func handleSelectTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	}
 	if err := world.conn.WriteFrame(pause); err != nil {
 		return fmt.Errorf("send select target pause ack: %w", err)
+	}
+	// m25/m26 配对看门狗（锁内只编码+武装定时器，无锁竞争）：官服 m25
+	// 从不孤悬（0.4~4.6s 必配对 m26），裸 m25 会把客户端输入锁满 30s 窗
+	// ——连选目标后格挡/出招全哑（2026-11-12 定案、2026-11-15 真机复发）。
+	if player != nil {
+		player.armSkillPauseRelease(world.conn, remote)
 	}
 	// 431 ack = 选中双帧（416/417）+ msg25[30000]。298 自请求的应答
 	// （handleAttackTargetCustom）保留——那是客户端主动要求的。

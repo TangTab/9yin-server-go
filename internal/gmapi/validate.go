@@ -89,6 +89,14 @@ func Validate(body CommandBody) (Command, error) {
 			return command, fmt.Errorf("npc chase enabled must be 0 or 1")
 		}
 		command.Enabled = body.Enabled
+	case "set_npc_feint":
+		// 选中怪的虚招标记（0=普通攻击 1=虚招）。虚招命中格挡中的玩家
+		// 会击破其手动格挡并进入不可格挡窗（官方「虚招击破架招」相克）；
+		// 常规野怪攻击不是虚招。作用于当前角色的选中目标。
+		if body.Enabled != 0 && body.Enabled != 1 {
+			return command, fmt.Errorf("npc feint enabled must be 0 or 1")
+		}
+		command.Enabled = body.Enabled
 	case "spawn_chest":
 		// GM 世界宝箱：在当前角色位置生成一只独立宝箱实体（stormbox_10
 		// 方言），掉落走回落阶梯一包，拾空/超时消失。

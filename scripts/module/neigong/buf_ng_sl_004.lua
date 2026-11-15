@@ -1,18 +1,18 @@
 -- 旃檀心经（buf_ng_sl_004）｜少林派｜受击触发
 -- 源：内功特效清单.txt 行466-470（5 层）。
 -- 受击几率减免该次伤害 15-25% 并获旃檀香气；化瘀（死血转淤血 TODO）；
--- 活血：5(4) 缕后将淤血恢复为气血（v1：叠层满后一次性回血近似）。
+-- 活血：5(4) 缕后将 30-50% 淤血恢复为气血（bruise_restore percent 官方值）。
 -- 层5：受击几率移除昏迷封招 TODO。
 local M = {}
 M.meta = { id = "buf_ng_sl_004", name = "旃檀心经", book = "ng_sl_004",
            category = "victim", max_tier = 5 }
 M.defaults = { proc = 0.25 }
 M.levels = {
-  [1] = { reduce = 0.15, need = 5, heal = 90 },
-  [2] = { reduce = 0.17, need = 5, heal = 115 },
-  [3] = { reduce = 0.20, need = 5, heal = 145 },
-  [4] = { reduce = 0.22, need = 5, heal = 180 },
-  [5] = { reduce = 0.25, need = 4, heal = 225 },
+  [1] = { reduce = 0.15, need = 5, bruise = 0.30 },
+  [2] = { reduce = 0.17, need = 5, bruise = 0.34 },
+  [3] = { reduce = 0.20, need = 5, bruise = 0.38 },
+  [4] = { reduce = 0.22, need = 5, bruise = 0.42 },
+  [5] = { reduce = 0.25, need = 4, bruise = 0.50 },
 }
 
 local function tier_of(ctx)
@@ -31,7 +31,8 @@ function M.on_victim(ctx)
   local s = ctx.state or {}
   local aroma = (s.aroma or 0) + 1
   if aroma >= p.need then
-    return { reduce_pct = p.reduce, heal = p.heal, state = { aroma = 0 } }
+    -- 活血：叠层满后把官方比例的淤血层转为气血（受层厚上限）。
+    return { reduce_pct = p.reduce, bruise_restore = { percent = p.bruise }, state = { aroma = 0 } }
   end
   return { reduce_pct = p.reduce, state = { aroma = aroma } }
 end

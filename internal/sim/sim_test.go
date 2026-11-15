@@ -386,3 +386,28 @@ func TestWorldRemoveMissingIsNoop(t *testing.T) {
 		t.Fatal("removed entity must be gone")
 	}
 }
+
+func TestVitalsRestoreBruisedLayerConvertsUpToLayer(t *testing.T) {
+	v := newPlayerVitals()
+	// 无淤血层（满血）：转换零。
+	if got := v.RestoreBruisedLayer(50); got != 0 {
+		t.Fatalf("full actor converted %d from empty bruise layer", got)
+	}
+	v.ApplyDamage(200)
+	// 层厚 200：转换 50 后层被真血追平（HP 升、HitHP/上限不动）。
+	if got := v.RestoreBruisedLayer(50); got != 50 || v.HP != 850 || v.HitHP != 1000 {
+		t.Fatalf("bruise conversion=%d vitals=%+v", got, v)
+	}
+	// 超层转换受层厚钳制：剩余 150 层请求 999 只转 150。
+	if got := v.RestoreBruisedLayer(999); got != 150 || v.HP != 1000 || v.HitHP != 1000 {
+		t.Fatalf("layer clamp conversion=%d vitals=%+v", got, v)
+	}
+	// 层空后零转换；死亡不生效。
+	if got := v.RestoreBruisedLayer(10); got != 0 {
+		t.Fatalf("empty layer converted %d", got)
+	}
+	v.ApplyDamage(1000)
+	if got := v.RestoreBruisedLayer(10); got != 0 {
+		t.Fatalf("dead actor converted %d", got)
+	}
+}

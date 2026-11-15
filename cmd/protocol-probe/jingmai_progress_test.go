@@ -111,14 +111,15 @@ func TestJingMaiCultivateSetsCurLastAutoActivatesAndWritesPropsFrame(t *testing.
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 2 {
-		t.Fatalf("frames=%d, want record add + props", len(frames))
+	// 自动补行经整表重写（固定超额清表 9 删 + 批量加）+ 面板帧。
+	if len(frames) != 9+1+1 {
+		t.Fatalf("frames=%d, want 9 dels + record add + props", len(frames))
 	}
-	if frames[0][0] != 0x11 || !strings.Contains(string(frames[0]), "jm_a") {
-		t.Fatalf("auto active record=%x", frames[0])
+	if frames[9][0] != 0x11 || !strings.Contains(string(frames[9]), "jm_a") {
+		t.Fatalf("auto active record=%x", frames[9])
 	}
-	if frames[1][0] != 0x10 {
-		t.Fatalf("props frame=%#x", frames[1][0])
+	if frames[10][0] != 0x10 {
+		t.Fatalf("props frame=%#x", frames[10][0])
 	}
 	// 换修：已有激活行 → 仅面板帧。
 	if handled, err := handleJingMaiCultivateCustom(conn, player, catalog, cultivateMsg(jingMaiSubSetCultivation, "jm_b"), "test"); err != nil || !handled {
@@ -137,12 +138,12 @@ func TestJingMaiCultivateSetsCurLastAutoActivatesAndWritesPropsFrame(t *testing.
 	if snapshot = player.jingMaiSnapshotOf(); snapshot.Cur != "" || snapshot.Last != "jm_b" {
 		t.Fatalf("cleared cur=%q last=%q", snapshot.Cur, snapshot.Last)
 	}
-	// 2（首修）+1（换修）+1（停修）=4；除首帧记录行外均为 0x10。
+	// 首修=11（9 删+批量加+面板帧）、换修/停修各 1 面板帧；重写块后全 0x10。
 	frames = conn.Frames()
-	if len(frames) != 4 {
-		t.Fatalf("frames=%d, want 4", len(frames))
+	if len(frames) != 11+1+1 {
+		t.Fatalf("frames=%d, want 13", len(frames))
 	}
-	for _, frame := range frames[1:] {
+	for _, frame := range frames[10:] {
 		if frame[0] != 0x10 {
 			t.Fatalf("props frame=%#x", frame[0])
 		}
@@ -182,12 +183,19 @@ func TestJingMaiActiveAddsAndRemovesRecordRows(t *testing.T) {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	// 官方式（2026-11-15）：记录行 + 8 件套 + 养成数值增量帧（激活即
-	// 属性生效）。
-	if len(frames) != 3 {
-		t.Fatalf("frames=%d, want record add + props + attribute", len(frames))
+	// 官方式（2026-11-15 晚二版）：rewrite=固定超额清表 9 删（行 8..0，
+	// 越界删客户端仅记 trace 噪音——自愈幽灵行）+ 批量加行 + 8 件套 +
+	// 养成数值增量帧（激活即属性生效）。
+	if len(frames) != 9+1+2 {
+		t.Fatalf("frames=%d, want 9 dels + record add + props + attribute", len(frames))
 	}
-	addFrame := frames[0]
+	for row := 8; row >= 0; row-- {
+		del := frames[8-row]
+		if del[0] != 0x12 || binary.LittleEndian.Uint16(del[12:]) != uint16(row) {
+			t.Fatalf("del[%d]=%x (want row %d, descending over-provisioned)", 8-row, del, row)
+		}
+	}
+	addFrame := frames[9]
 	if addFrame[0] != 0x11 || binary.LittleEndian.Uint16(addFrame[10:]) != recordActiveJingMai {
 		t.Fatalf("record add=%x (want idx %d active_jingmai_rec)", addFrame, recordActiveJingMai)
 	}
@@ -205,10 +213,6 @@ func TestJingMaiActiveAddsAndRemovesRecordRows(t *testing.T) {
 		t.Fatalf("handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()
-	delFrame := frames[len(frames)-3]
-	if delFrame[0] != 0x12 || binary.LittleEndian.Uint16(delFrame[12:]) != 0 {
-		t.Fatalf("record del=%x (want row 0)", delFrame)
-	}
 	if snapshot := player.jingMaiSnapshotOf(); len(snapshot.Activated) != 0 {
 		t.Fatalf("activated=%v after deactivate", snapshot.Activated)
 	}
@@ -231,22 +235,23 @@ func TestJingMaiActiveRewriteConverges(t *testing.T) {
 	}
 	before := len(conn.Frames())
 
-	// 关闭 jm_a：整表重写 = 降序删已发行（行 1、行 0）+ 批量重加剩余
-	//（jm_b）+ 面板帧 + 数值帧 = 5 帧。
+	// 关闭 jm_a：整表重写 = 固定超额清表 9 删（行 8..0）+ 批量重加剩余
+	//（jm_b）+ 面板帧 + 数值帧 = 12 帧（2026-11-15 晚二版：不按记账清表，
+	// 任何幽灵行失步每次自愈）。
 	if handled, err := handleJingMaiActiveCustom(conn, player, activeMsg(jingMaiSubDeactivate, "jm_a"), "test"); err != nil || !handled {
 		t.Fatalf("deactivate: %v", err)
 	}
 	frames := conn.Frames()[before:]
-	if len(frames) != 5 {
-		t.Fatalf("frames=%d, want 5 (del 1, del 0, batch add, props, attribute)", len(frames))
+	if len(frames) != 9+1+2 {
+		t.Fatalf("frames=%d, want 9 dels + batch add + props + attribute", len(frames))
 	}
-	if frames[0][0] != 0x12 || binary.LittleEndian.Uint16(frames[0][12:]) != 1 {
-		t.Fatalf("first del=%x (want row 1, descending)", frames[0])
+	if frames[0][0] != 0x12 || binary.LittleEndian.Uint16(frames[0][12:]) != 8 {
+		t.Fatalf("first del=%x (want row 8, descending over-provisioned)", frames[0])
 	}
-	if frames[1][0] != 0x12 || binary.LittleEndian.Uint16(frames[1][12:]) != 0 {
-		t.Fatalf("second del=%x (want row 0)", frames[1])
+	if frames[1][0] != 0x12 || binary.LittleEndian.Uint16(frames[1][12:]) != 7 {
+		t.Fatalf("second del=%x (want row 7)", frames[1])
 	}
-	batch := frames[2]
+	batch := frames[9]
 	if batch[0] != 0x11 || binary.LittleEndian.Uint16(batch[10:]) != recordActiveJingMai ||
 		binary.LittleEndian.Uint16(batch[12:]) != 0 || binary.LittleEndian.Uint16(batch[14:]) != 1 {
 		t.Fatalf("batch add=%x (want rec=%d 源行0 行数1)", batch, recordActiveJingMai)
@@ -254,14 +259,14 @@ func TestJingMaiActiveRewriteConverges(t *testing.T) {
 	if !strings.Contains(string(batch), "jm_b") || strings.Contains(string(batch), "jm_a") {
 		t.Fatalf("batch add content=%x (want jm_b only)", batch)
 	}
-	// 服务端记账收敛：再次整表重写（拒绝路径同样收敛）只按 1 行清表。
+	// 拒绝路径同样整表收敛：固定超额清表（行 8 起降序）。
 	before = len(conn.Frames())
 	if handled, err := handleJingMaiActiveCustom(conn, player, activeMsg(jingMaiSubActivate, "jm_a"), "test"); err != nil || !handled {
 		t.Fatalf("re-activate: %v", err)
 	}
 	frames = conn.Frames()[before:]
-	if len(frames[0:]) < 4 || frames[0][0] != 0x12 || binary.LittleEndian.Uint16(frames[0][12:]) != 0 {
-		t.Fatalf("re-activate frames=%x (want del row 0 first)", frames)
+	if len(frames) < 4 || frames[0][0] != 0x12 || binary.LittleEndian.Uint16(frames[0][12:]) != uint16(jingMaiActLimitMax) {
+		t.Fatalf("re-activate frames=%x (want del row %d first)", frames, jingMaiActLimitMax)
 	}
 	if snapshot := player.jingMaiSnapshotOf(); len(snapshot.Activated) != 2 {
 		t.Fatalf("activated=%v", snapshot.Activated)
@@ -433,10 +438,10 @@ func TestPushJingMaiFramesReplaysViewRecordsAndProps(t *testing.T) {
 	}
 	frames := conn.Frames()
 	// 1 容器 + 2 已学行 + 1 plug_record 伴随行（2026-11-10 外服私服补齐）+
-	// 1 active_jingmai_rec 记录行 + 1 面板帧 = 6（授予块顺序：
-	// View45 → plug_record → active_jingmai_rec → 玩家属性帧）。
-	if len(frames) != 6 {
-		t.Fatalf("frames=%d, want 6", len(frames))
+	// active_jingmai_rec 整表重写（9 删 + 1 批量加）+ 1 面板帧 = 15（授予块
+	// 顺序：View45 → plug_record → active_jingmai_rec → 玩家属性帧）。
+	if len(frames) != 4+9+1+1 {
+		t.Fatalf("frames=%d, want 15", len(frames))
 	}
 	if frames[3][0] != 0x11 || binary.LittleEndian.Uint16(frames[3][10:]) != recordPlugRec {
 		t.Fatalf("plug_record replay=%x", frames[3])
@@ -448,11 +453,11 @@ func TestPushJingMaiFramesReplaysViewRecordsAndProps(t *testing.T) {
 	if !bytes.Contains(frames[3], []byte("jm_a")) {
 		t.Fatalf("plug_record missing config: %x", frames[3])
 	}
-	if frames[4][0] != 0x11 || binary.LittleEndian.Uint16(frames[4][10:]) != recordActiveJingMai {
-		t.Fatalf("record replay=%x", frames[4])
+	if frames[13][0] != 0x11 || binary.LittleEndian.Uint16(frames[13][10:]) != recordActiveJingMai {
+		t.Fatalf("record replay=%x", frames[13])
 	}
-	if frames[5][0] != 0x10 {
-		t.Fatalf("props frame=%#x", frames[5][0])
+	if frames[14][0] != 0x10 {
+		t.Fatalf("props frame=%#x", frames[14][0])
 	}
 }
 
@@ -483,9 +488,10 @@ func TestPushJingMaiFramesSeedsStarterLearned(t *testing.T) {
 		t.Fatalf("push: %v", err)
 	}
 	frames := conn.Frames()
-	// 容器 + 1 已学行（jm_ni 未学不发）+ 面板帧 = 3。
-	if len(frames) != 3 {
-		t.Fatalf("frames=%d, want 3", len(frames))
+	// 容器 + 1 已学行（jm_ni 未学不发）+ active_jingmai_rec 整表重写
+	//（9 删、零激活无批量加，2026-11-15 晚二版固定超额清表）+ 面板帧 = 12。
+	if len(frames) != 2 + 9 + 1 {
+		t.Fatalf("frames=%d, want 12 (view 2 + rewrite 9 + props 1)", len(frames))
 	}
 	if !strings.Contains(string(frames[1]), "jm_dantian") {
 		t.Fatalf("starter row missing jm_dantian: %x", frames[1])
@@ -501,8 +507,8 @@ func TestPushJingMaiFramesSeedsStarterLearned(t *testing.T) {
 	if err := pushJingMaiFrames(conn, player, catalog); err != nil {
 		t.Fatalf("repush: %v", err)
 	}
-	if frames = conn.Frames(); len(frames) != 6 {
-		t.Fatalf("frames=%d after repush, want 6", len(frames))
+	if frames = conn.Frames(); len(frames) != 24 {
+		t.Fatalf("frames=%d after repush, want 24 (12×2)", len(frames))
 	}
 }
 

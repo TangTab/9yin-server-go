@@ -232,18 +232,9 @@ const (
 	markTask      uint16 = 0x1008
 )
 
-type sceneLocationReplay struct {
-	id      uint32
-	payload []byte
-}
-
-var actor2LocationReplayDelays = []time.Duration{
-	250 * time.Millisecond,
-	750 * time.Millisecond,
-	1500 * time.Millisecond,
-	3 * time.Second,
-	5 * time.Second,
-}
+// sceneLocationReplay/actor2LocationReplayDelays（视口新增后 250ms~5s
+// 五拍延迟 0x1F 重放）已随 0x1F 洪流治理退役（2026-11-15 真机定案：
+// 官方对移动 NPC 零 0x1F，重放快照会把追击中的 NPC 硬拉回旧坐标）。
 
 func newSceneLifecycle(remote string, conn sceneMessageConnection, registries ...*npcfunc.Registry) *sceneLifecycle {
 	var funcs *npcfunc.Registry
@@ -622,18 +613,16 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		if !exists {
 			return fmt.Errorf("missing property encoder for scene object %d", update.Entity.ID)
 		}
-		transform, transformOK := s.npcTransform(update.Entity.ID)
-		if !transformOK {
+		if _, transformOK := s.npcTransform(update.Entity.ID); !transformOK {
 			return fmt.Errorf("missing transform for scene object %d", update.Entity.ID)
 		}
-		// Transform 是目前巡逻循环唯一会改变的状态。在这里重放所有外观/
-		// AI 字段会让当前客户端重建它的 Actor2。请使用紧凑的协商坐标更新；
-		// sceneObjectProperties 仍留作未来真正变更时的编码器。
-		properties := sceneObjectTransformProperties(entity.id, entity.ownerID, transform)
-		if err := s.conn.WriteFrame(properties); err != nil {
-			return fmt.Errorf("update scene object %d: %w", entity.id, err)
-		}
-		log.Printf("%s: updated scene object transform id=%d kind=%s", s.remote, entity.id, entity.description)
+		// NPC 位移不再走 0x10 坐标属性帧（2026-11-15 官方方言定版）：
+		// sceneObjectTransformProperties 的 idx 9-12 是 fork 表坐标位，
+		// 官方 2494 表同位是 BindFurn/家园字段（真坐标在表尾 PosiX@2434+
+		// 按名解析才对）——旧帧在官方客户端上既不落位还写脏家园属性；
+		// 官方对移动 NPC 只用 0x21（走路）与 0x28 载荷（落位）。
+		// Updates 现仅作服务端位移巡检日志保留。
+		log.Printf("%s: npc transform moved id=%d kind=%s (0x21 owns movement)", s.remote, entity.id, entity.description)
 	}
 	// 世代变更意味着客户端已经替换了原生场景/对象管理器。发送旧世代的
 	// 移除消息可能命中新近复用的 ID，因此只在同一世代内发出 0x0E。
@@ -651,7 +640,6 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 	if len(delta.Adds) != 0 || len(delta.Removes) != 0 {
 		log.Printf("%s: scene viewport delta adds=%d removes=%d", s.remote, len(delta.Adds), len(delta.Removes))
 	}
-	locationReplays := make([]sceneLocationReplay, 0, len(delta.Adds))
 	for _, addition := range delta.Adds {
 		id := addition.Entity.ID
 		entity, exists := s.npcMeta(id)
@@ -736,13 +724,14 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		// 在本服对象上）；寻路假设亦证伪（不发 0x28 时寻路正常）。0x28
 		// 只走 P3 按对象生成器（见 npc_detail_frame.go 注释）。
 		if entity.ownerID != 0 {
+			// 落位只发一次即时 0x1F（与 0x28 载荷坐标同值，等于官方对
+			// 异步落位对象的单次落点）。旧的 5 拍延迟重放已删——重放
+			// 载荷是加入视口时的位置快照，追击中的 NPC 会被 250ms~5s
+			// 后的旧坐标硬拉回去（真机「钉在出生点+突然闪现」元凶之一）。
 			location := serverLocation(entity.id, entity.ownerID, transform)
 			if err := s.conn.WriteFrame(location); err != nil {
 				return fmt.Errorf("locate scene object %d: %w", entity.id, err)
 			}
-			locationReplays = append(locationReplays, sceneLocationReplay{
-				id: uint32(id), payload: append([]byte(nil), location...),
-			})
 		}
 		// 重放的 0x0D 是注册期快照（满血活怪）。若该 NPC 当前是尸体
 		//（被杀后等待重生），紧补一帧 0x10 死亡属性，让迟到的客户端
@@ -773,9 +762,6 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 	}
 	if err := s.viewport.Commit(delta); err != nil {
 		return err
-	}
-	if len(locationReplays) != 0 {
-		s.scheduleLocationReplaysLocked(locationReplays)
 	}
 	return nil
 }
@@ -1462,50 +1448,6 @@ func (s *sceneLifecycle) npcVisible(id uint32) bool {
 	defer s.mu.Unlock()
 	_, visible := s.visibleNPCs[id]
 	return visible
-}
-
-// scheduleLocationReplaysLocked 排布本视图的延迟 ServerLocation
-// 重放。定时器归视图所有（只写自己的 conn），世界存在性检查在
-// run.mu 下进行。调用方必须已持有 s.run.mu。
-func (s *sceneLifecycle) scheduleLocationReplaysLocked(replays []sceneLocationReplay) {
-	run := s.run
-	for _, delay := range actor2LocationReplayDelays {
-		delay := delay
-		batch := make([]sceneLocationReplay, len(replays))
-		for i, replay := range replays {
-			batch[i] = sceneLocationReplay{id: replay.id, payload: append([]byte(nil), replay.payload...)}
-		}
-		timer := time.AfterFunc(delay, func() {
-			s.mu.Lock()
-			closed := s.closed
-			s.mu.Unlock()
-			if closed {
-				return
-			}
-			run.mu.Lock()
-			defer run.mu.Unlock()
-			if run.closed {
-				return
-			}
-			sent := 0
-			for _, replay := range batch {
-				if _, exists := run.npcMeta(worldcore.EntityID(replay.id)); !exists {
-					continue
-				}
-				if err := s.conn.WriteFrame(replay.payload); err != nil {
-					log.Printf("%s: delayed ServerLocation id=%d after %s: %v", s.remote, replay.id, delay, err)
-					return
-				}
-				sent++
-			}
-			if sent != 0 {
-				log.Printf("%s: replayed ServerLocation for %d scene objects after %s", s.remote, sent, delay)
-			}
-		})
-		s.mu.Lock()
-		s.replayTimers = append(s.replayTimers, timer)
-		s.mu.Unlock()
-	}
 }
 
 func sceneRemoveObject(objectID, ownerID uint32) []byte {

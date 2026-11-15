@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -108,7 +109,9 @@ func handleChangeWarningCustom(link sceneMessageConnection, player *playerActor,
 // MoveSpeed+RunSpeedAdd+InParry+ParryUpSpeedAdd+BufferInfo4 无时长槽串
 // +m169 添加+InManualParry；松开反向+m169 移除）——此前 fork 四属性合帧
 // 应答缺速度族，客户端 m54 连发 5971 条等不到外服私服方言（2026-11-12 P2）。
-// 重复按下静默；重复松开仍回帧（客户端状态重同步，78 发按值去重
+// 按下方言双形：fork 协议模式 0/1 按值（0=按下）；官服族客户端发令牌版
+// （i64 成对随机令牌，2026-11-15 真机 58929 会话实证），按 parryTokenTransition
+// 状态机判定。重复按下/松开均回帧（客户端状态重同步，78 发按值去重
 // =50 沿=50 回帧的 F 盘实证）。非战斗也可按格挡（不切 LogicState）。
 func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) error {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomBlockState {
@@ -120,26 +123,64 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	if len(custom.Values) < 2 {
 		return fmt.Errorf("block state requires a value, got %d values", len(custom.Values))
 	}
-	// fork 的 tag2/tag3 双编码：i32 与 i64 都按数值比较 0。
 	state := custom.Values[1]
+	// 虚招破防后的不可格挡窗：m54 全部静默吞并记住散逸令牌（格挡.pcapng
+	// 定版：破防后客户端发新令牌×4 重试约 6s，官方零回应——窗后同值到达
+	// 继续静默防误判成新按下）；真实按下（异值）走正常受理并清散逸记忆。
+	if player.cantParrySnapshot() {
+		player.noteParryStrayToken(state)
+		return nil
+	}
+	if player.parryStraySnapshot() != 0 {
+		if player.parryStrayMatches(state) {
+			return nil
+		}
+		player.clearParryStrayToken()
+	}
+	// 双方言判定：fork 协议模式客户端发 0/1（0=按下、非 0=松开；Java
+	// handleManualParry engage==0 同义）；官服族客户端（B 线官方方言登录
+	// 后）的 m54 是**每帧状态上报**——值=基调（首条上报，未格挡）、
+	// 值≠基调=格挡中（parryStateReport；2026-11-15 真机 57719 会话
+	// 6984 条同值零间隙定案）。0/1 按值直判。
 	engage := false
+	tokenDialect := false
+	stateReport := func(value int64) bool {
+		tokenDialect = true
+		return player.parryStateReport(value)
+	}
 	switch state.Type {
 	case 2:
-		engage = state.Int32 == 0
+		if state.Int32 == 0 || state.Int32 == 1 {
+			engage = state.Int32 == 0
+		} else {
+			engage = stateReport(int64(state.Int32))
+		}
 	case 3:
-		engage = state.Int64 == 0
+		if state.Int64 == 0 || state.Int64 == 1 {
+			engage = state.Int64 == 0
+		} else {
+			engage = stateReport(state.Int64)
+		}
 	case 4, 5:
 		number, ok := state.exactInt32()
 		if !ok {
 			return fmt.Errorf("block state value is not integral: %s", state)
 		}
-		engage = number == 0
+		if number == 0 || number == 1 {
+			engage = number == 0
+		} else {
+			engage = stateReport(int64(number))
+		}
 	default:
 		return fmt.Errorf("block state value must be numeric, got %s", state)
 	}
 
 	alreadyParrying := player.parryingSnapshot()
 	if alreadyParrying == engage {
+		if tokenDialect {
+			// 状态上报无变迁：零帧（每帧上报，回任何帧都会自激成洪流）。
+			return nil
+		}
 		if !engage {
 			// 游离的重复松开：客户端可能错过上一次回帧，重推空态。
 			// 必须发**完整两帧对**（169 摘除事件 + 0x10 属性帧）——客户端的
@@ -167,6 +208,21 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 	}
 	if err := writeOfficialParryTokenAck(link, player, engage); err != nil {
 		return err
+	}
+	// 格挡期间临时战斗姿态（2026-11-16 定版策略）：官服按住右键=拔剑
+	// 格挡的备战造型；真机实证只有 LogicState=1 立得住架势（战斗段 6s
+	// 保持 vs 预警(2)段 50ms 即弃）。Z 持剑切换（m292）所有权不侵占——
+	// 按下时记下 0/2 原值临时升 1，松开/破防原值回写。官方按下簇本身
+	// 不带 463（a.pcapng），此帧是我方让客户端架势立住的撑持方言。
+	if engage {
+		if state := player.logicStateSnapshot(); state == 0 || state == 2 {
+			player.setParryPreBlockState(state)
+			player.setLogicState(1)
+			player.writeLogicStateFrame(link, 1)
+		}
+	} else if pre := player.takeParryPreBlockState(); pre != 0xFF {
+		player.setLogicState(pre)
+		player.writeLogicStateFrame(link, pre)
 	}
 	log.Printf("%s: manual parry engage=%t", remote, engage)
 	return nil
@@ -221,10 +277,13 @@ func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor
 		return fmt.Errorf("encode parry token notice: %w", err)
 	}
 	if engage {
-		if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(1.9)); err != nil {
+		// 速度族=a.pcapng 5.144s 按下簇逐字节（f32 位形直接复刻：
+		// MoveSpeed 0x3FE28F5C≈1.764、RunSpeedAdd 0xC00851EC≈-2.04——
+		// 旧注释的 1.9/-1.2 系误读；按下即塌疑与速度值不符客户端自检有关）。
+		if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(math.Float32frombits(0x3FE28F5C))); err != nil {
 			return err
 		}
-		if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(-1.2)); err != nil {
+		if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(math.Float32frombits(0xC00851EC))); err != nil {
 			return err
 		}
 		if err := single(propInParry, "InParry", clientdata.Int32Value(1)); err != nil {
@@ -246,6 +305,9 @@ func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor
 		if err := link.WriteFrame(notice); err != nil {
 			return err
 		}
+		if err := single(propParryValue, "ParryValue", clientdata.Int32Value(player.parryValueTotalSnapshot())); err != nil {
+			return err
+		}
 		return single(propInManualParry, "InManualParry", clientdata.Int32Value(1))
 	}
 	if err := link.WriteFrame(notice); err != nil {
@@ -258,10 +320,12 @@ func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor
 	if err := single(propInParry, "InParry", clientdata.Int32Value(0)); err != nil {
 		return err
 	}
-	if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(4.8)); err != nil {
+	// 松开恢复族=a.pcapng 5.695s 逐字节：MoveSpeed 0x40900000=4.5、
+	// RunSpeedAdd 0x3F19999A=0.6。
+	if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(math.Float32frombits(0x40900000))); err != nil {
 		return err
 	}
-	if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(0.6)); err != nil {
+	if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(math.Float32frombits(0x3F19999A))); err != nil {
 		return err
 	}
 	if err := single(propParryTokenUpSpeedAdd, "ParryUpSpeedAdd", clientdata.Int32Value(10)); err != nil {

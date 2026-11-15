@@ -131,6 +131,12 @@ func iniFieldFloat(fields []iniField, key string) float64 {
 type npcCombatStats struct {
 	phyDef, stiDef, jujDef, negDef, masDef int32 // 分系防御
 	evasion                                int32 // 闪避值
+	// attackPower/accuracy 是攻方数值（2026-11-15 NPC 伤害公式接入）：
+	// 普攻面板威力与命中值，同按 Base×Level 从实力包五维推导
+	//（Str→威力、Dex→命中）。零值（表缺失）时出招回落旧常量伤害
+	// npcAttackDamage。
+	attackPower int32
+	accuracy    int32
 	// resilience（封劲）暂不推导：玩家侧暴击值未成长（默认 16），接入
 	// NPC 封劲（StaBase×Level≈30）会把暴击率清零——待装备/宝物批把玩家
 	// 暴击值抬到外服私服量级（数百+）后一并接通。
@@ -164,5 +170,11 @@ func deriveNPCCombatStats(powerNo, level int32) npcCombatStats {
 		negDef:  grow(row.negDefBase),
 		masDef:  grow(row.masDefBase),
 		evasion: grow(row.dexBase),
+		// 攻方推导与守方同规则：威力取 Str、命中取 Dex。锚玩家白板
+		//（attack 区间掷值 ×(1-外防减伤)×1.0 保底 1）：兜底节 StrBase=6
+		// → L30 怪 attack=180，掷区间 ±20% 后 ≈144-216——与外服私服玩家
+		// 打同级野怪单跳 82-215 对称。
+		attackPower: grow(row.strBase),
+		accuracy:    grow(row.dexBase),
 	}
 }

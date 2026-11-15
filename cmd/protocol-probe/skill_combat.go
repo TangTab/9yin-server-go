@@ -117,10 +117,10 @@ type combatSkillDefinition struct {
 	// trigger_effect _hurt/核心前缀帧（段相对同口径），空表=单段即时
 	// 结算。levelupRelevance（wuji_* 前缀=武技族，出招链带 169 段）与
 	// packCategory（2=怒招）驱动武技连击段下发。
-	damageWaves      int32
-	damageRows       []skillDamageRow
-	hitCount         int32
-	hitFrameMs       []time.Duration
+	damageWaves int32
+	damageRows  []skillDamageRow
+	hitCount    int32
+	hitFrameMs  []time.Duration
 	// channel 非空 = 怒招引导通道型（skill_channel.go，挑战.pcapng
 	// 2026-11-12 寒心恨雪定版）：跳数/节奏由服务端波次引擎驱动而非
 	// hitFrameMs（通道型 zhaoshi 单段仅 1 hitbreak），SP 逐波扣无预扣。
@@ -128,7 +128,7 @@ type combatSkillDefinition struct {
 	// noLimit = skill_static NoLimit（施法中不锁行动）：受理簇须在 m20
 	// 前发 CurSkillCanNoLimit=1（挑战.pcapng tjj07 受理簇实证）——客户端
 	// m20 处理链据此放行移动，缺它=太极剑舞等可移动技被定死原地。
-	noLimit bool
+	noLimit          bool
 	levelupRelevance string
 	packCategory     int32
 	requiresTarget   bool
@@ -156,6 +156,7 @@ type combatSkillDefinition struct {
 	isDamageSkill    bool
 	bindDistance     float32
 	groundRushAction string
+	airRushAction    string // 空中冲刺动作（LockARushAction/fastruning_s 族，v26）
 }
 
 // stagedRushFamily 报告该技能是否走冲锋暂存链。
@@ -204,6 +205,15 @@ func (p *playerActor) combatCalcSnapshot() (props, vitals map[string]int64) {
 		"MP": int64(v.MP), "MaxMP": int64(v.MaxMP),
 	}
 	return props, vitals
+}
+
+// defenderSnapshotOfNPCAttack 返回 NPC 普攻公式所需的守方快照
+//（外防/封劲）。封劲（VaDef）玩家侧未成长恒 0——与「玩家打 NPC 守方
+// 封劲暂 0」口径对称。
+func (p *playerActor) defenderSnapshotOfNPCAttack() npcAttackDamageInput {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return npcAttackDamageInput{phyDef: float64(p.progress.attributes.phyDef)}
 }
 
 // rollSkillHit 单击伤害结算（2026-11-08 数值重写）：优先 combatcalc 每击
@@ -912,7 +922,7 @@ func (s *sceneLifecycle) resolveSkillDamageTargets(definition combatSkillDefinit
 }
 
 // refreshTargetsPerTick 范围型（以施法者为中心的圆/扇/矩形）逐段重索敌
-//（用户口径：技能期间进入范围的敌人也要吃伤害——外服私服剑阵跟随移动的
+// （用户口径：技能期间进入范围的敌人也要吃伤害——外服私服剑阵跟随移动的
 // 语义）；锁定单体/目标区域保持出招快照。
 func (definition combatSkillDefinition) refreshTargetsPerTick() bool {
 	switch definition.targetMode {
@@ -1275,13 +1285,13 @@ func scheduleSkillMultiHits(link sceneMessageConnection, world *sceneLifecycle, 
 	if len(times) == 0 {
 		return
 	}
-			// 范围型逐段重索敌（refreshTargetsPerTick）：以玩家实时位置为形状
-			// 中心重查——段间进入范围的敌人也吃该段伤害；玩家坐标优先取
-			// 场景成员表权威值（m15/212 经 updateMemberPosition 持续刷新，
-			// playerLiveTransform——combatNPCTransform(playerObjectID) 对玩家
-			// 恒 miss，会冻结在 211 施法位），回落 211 施法位。
-			perTickRefresh := definition.refreshTargetsPerTick()
-			castAt, _ := useSkillCastTransform(custom)
+	// 范围型逐段重索敌（refreshTargetsPerTick）：以玩家实时位置为形状
+	// 中心重查——段间进入范围的敌人也吃该段伤害；玩家坐标优先取
+	// 场景成员表权威值（m15/212 经 updateMemberPosition 持续刷新，
+	// playerLiveTransform——combatNPCTransform(playerObjectID) 对玩家
+	// 恒 miss，会冻结在 211 施法位），回落 211 施法位。
+	perTickRefresh := definition.refreshTargetsPerTick()
+	castAt, _ := useSkillCastTransform(custom)
 	lastAt := times[len(times)-1]
 	// 段间可能并发到达（帧位相近时）：跨段共享态用原子量（firstTick 防重
 	// 复入战、landedTotal 汇总喂真气）。
@@ -1445,6 +1455,16 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 			targetID, targetOwnerID = aimID, aimOwner
 		} else if selectedID, selectedOwner, ok := world.selectedCombatTarget(); ok {
 			targetID, targetOwnerID = selectedID, selectedOwner
+		} else if definition.canRush && world != nil {
+			// v26（用户拍板）：无目标按地按压冲锋族 = 范围冲锋形态（20:06
+			// 真机四连 reject 实证旧闸把范围冲锋全拒）——落空目标判定，
+			// 由下方范围路径按地面点直达。
+			if _, hasGround := useSkillGroundPointTransform(custom); hasGround {
+				log.Printf("%s: rush ground-point form skill id=%s (no target)", remote, definition.id)
+			} else {
+				log.Printf("%s: reject skill id=%s without living selected target", remote, definition.id)
+				return true, nil
+			}
 		} else {
 			log.Printf("%s: reject skill id=%s without living selected target", remote, definition.id)
 			return true, nil
@@ -1508,10 +1528,29 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	// 身前 bind（3.96/5.52 档1 qg_fastrun、b/e 8.2 档2 qg_fastruning_s，
 	// 档1|档2 分界=GRushRange+Add 6.5；1216 终点=ground 身前 1.5，
 	// dash=dist-1.5 双证）。
-	if rushStageEnabled() && definition.canRush && !definition.requiresTarget && world != nil {
+	targetlessRush := definition.requiresTarget && targetID == playerObjectID
+	if rushStageEnabled() && definition.canRush && (!definition.requiresTarget || targetlessRush) && world != nil {
 		if ground, ok := useSkillGroundPointTransform(custom); ok {
 			if castAt, hasCast := useSkillCastTransform(custom); hasCast {
-				issueAreaGroundRushDash(link, player, definition, castAt, ground, remote)
+				// v26（用户定版「范围冲锋=有动画的冲刺非瞬移」）：远距点地先冲
+				// 刺（c61 动画+0x21 驱动），ETA 后以冲刺终点**重放本 211**——
+				// 届时距地面点 ≤3.5 不再触发冲刺，主施法路径在终点正常执行
+				//（旧版主路径当场原地出招=「原地」根因）。
+				if eta := issueAreaGroundRushDash(link, player, definition, castAt, ground, remote); eta > 0 {
+					// v28：重放 211 落点=点选平面点本体（与冲刺终点一致；
+					// 旧 rushBindPoint 身前 1.5m 系单体方言误植）。
+					replay := custom
+					replay.Values = append([]clientCustomValue(nil), custom.Values...)
+					replay.Values[2].Float32 = ground.X
+					replay.Values[3].Float32 = ground.Y
+					replay.Values[4].Float32 = ground.Z
+					time.AfterFunc(eta, func() {
+						if _, err := handleSkillCustom(link, player, world, mount, replay, remote); err != nil {
+							log.Printf("%s: area rush replay cast: %v", remote, err)
+						}
+					})
+					return true, nil
+				}
 			}
 		}
 	}

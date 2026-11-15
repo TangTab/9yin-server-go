@@ -304,9 +304,10 @@ func TestCombatTickRespawnsDeadHostileAtHome(t *testing.T) {
 		t.Fatalf("respawn vitals=%+v", revived)
 	}
 	frames := conn.Frames()
-	// 重生瞬移走 0x21（速度 0）+ 0x10 属性帧（2026-11-11 追击方言
-	// 对齐：0x20 全程 0 次外服私服定论）。
-	if len(frames) != 2 || frames[0][0] != 0x21 || frames[1][0] != 0x10 {
+	// 重生瞬移 = 0x21 停止条目（速度 0）+ 立即 0x1F 硬落位 + 0x10 属性帧
+	//（2026-11-15 官方方言定版：0x20 全程 0 次；NPC 移动只靠 0x21，
+	// 唯一保留的 NPC 0x1F 场景就是这类瞬移落位）。
+	if len(frames) != 3 || frames[0][0] != 0x21 || frames[1][0] != 0x1F || frames[2][0] != 0x10 {
 		t.Fatalf("respawn frames=%x", frames)
 	}
 }
@@ -591,3 +592,42 @@ func TestNPCAttackReplacesStaleSelection(t *testing.T) {
 	lifecycle.close()
 }
 
+
+func TestRollNPCAttackDamageFormulaBands(t *testing.T) {
+	// 确定性随机源：区间掷值=下界、暴击不触发。
+	sequence := []float64{0, 1}
+	index := 0
+	restore := combatRandomFloat64
+	combatRandomFloat64 = func() float64 {
+		v := sequence[index%len(sequence)]
+		index++
+		return v
+	}
+	defer func() { combatRandomFloat64 = restore }()
+
+	// 攻方数值缺失 → 0（调用方回落常量伤害）。
+	if got := rollNPCAttackDamage(nil, npcAttackDamageInput{}); got != 0 {
+		t.Fatalf("nil stats damage = %d", got)
+	}
+	if got := rollNPCAttackDamage(&npcCombatStats{}, npcAttackDamageInput{}); got != 0 {
+		t.Fatalf("zero stats damage = %d", got)
+	}
+	// 兜底节 StrBase=6 × L30 = 180：零减伤、无暴击、掷下界 → 144。
+	stats := &npcCombatStats{attackPower: 180, accuracy: 210}
+	if got := rollNPCAttackDamage(stats, npcAttackDamageInput{}); got != 144 {
+		t.Fatalf("low-roll damage = %d, want 144", got)
+	}
+	// 玩家外防对数减伤：def=10000 → 20ln(100)−44 ≈ 48.1% 减伤。
+	index = 0
+	defended := rollNPCAttackDamage(stats, npcAttackDamageInput{phyDef: 10000})
+	if defended >= 144 || defended < 60 {
+		t.Fatalf("defended damage = %d, want reduced band", defended)
+	}
+	// 暴击掷中（critRoll=0 < 5%基础）：×2。
+	index = 0
+	sequence = []float64{0, 0}
+	defer func() { sequence = []float64{0, 1} }()
+	if got := rollNPCAttackDamage(stats, npcAttackDamageInput{}); got != 288 {
+		t.Fatalf("crit damage = %d, want 288", got)
+	}
+}

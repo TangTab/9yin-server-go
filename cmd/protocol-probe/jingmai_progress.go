@@ -1586,16 +1586,23 @@ func (p *playerActor) resetJingMaiActiveRows() {
 	p.jingmaiActiveRowsSent = 0
 }
 
-// rewriteJingMaiActiveRows active_jingmai_rec 整表重写：按会话记账降序
-// DelRow 清表（引擎删行后紧凑，高位先删避免错位），再单帧批量重加全量
-// 激活集（外服 c.pcapng 登录批量帧同构）。客户端行序与内容解耦，
-// FindRecordRow 按内容命中——增删/互斥/拒绝任一路径后统一收敛。
+// rewriteJingMaiActiveRows active_jingmai_rec 整表重写：固定超额降序
+// DelRow 清表（0..jmActLimitMax），再单帧批量重加全量激活集（外服
+// c.pcapng 登录批量帧同构）。客户端行序与内容解耦，FindRecordRow 按内容
+// 命中——增删/互斥/拒绝任一路径后统一收敛。
+//
+// ★不按行数记账清表（2026-11-15 晚真机字节级定案）：0x0C 重入路径存在
+// 「resetJingMaiActiveRows 清零记账但客户端表未随对象销毁、且无重放跟随」
+// 的窗口（重复 ClientReady 抑制重放），此后 rewrite 只加不删——客户端
+// 表残留幽灵行，「激活了就关不掉」（captures 55262 s2c #10728 铁证：首次
+// 去活仅 ADD2 无任何 DEL）。固定超额清表对任何来源的失步每次自愈：越界
+// 删行客户端仅记 "delete row failed" trace 噪音（官方 fight_relation_rec
+// 同款行为），功能无损。
 func (p *playerActor) rewriteJingMaiActiveRows(link sceneMessageConnection) error {
 	p.mu.Lock()
 	activated := append([]string(nil), p.jingmai.activated...)
-	sent := p.jingmaiActiveRowsSent
 	p.mu.Unlock()
-	for row := sent - 1; row >= 0; row-- {
+	for row := int(jingMaiActLimitMax); row >= 0; row-- {
 		if err := link.WriteFrame(serverRecordDelRow(playerObjectID, playerOwnerID, recordActiveJingMai, uint16(row))); err != nil {
 			return fmt.Errorf("clear active_jingmai_rec row=%d: %w", row, err)
 		}

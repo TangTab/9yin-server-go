@@ -553,7 +553,13 @@ type allDestEntry struct {
 	destZ      float32
 	destOrient float32
 	speed      float32
-	moveFlags  uint32
+	// rotate：s6 转向符号（官方步行 -π / 冲刺 +2π，技能3.pcapng 实证）；
+	// motion2/motion3：s7(Motion2=速度副本)/s8(Motion3=重力 9.9/空中 0)
+	//——主玩家驱动完整方言（v15）；NPC 条目保持零值不变。
+	rotate    float32
+	motion2   float32
+	motion3   float32
+	moveFlags uint32
 }
 
 // serverAllDest 编码移动实体的批量广播帧：`op | u16 count | count×44B`。
@@ -576,9 +582,9 @@ func serverAllDest(entries []allDestEntry) []byte {
 		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(entry.destZ))
 		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(entry.destOrient))
 		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(entry.speed))
-		payload = binary.LittleEndian.AppendUint32(payload, 0)
-		payload = binary.LittleEndian.AppendUint32(payload, 0)
-		payload = binary.LittleEndian.AppendUint32(payload, 0)
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(entry.rotate))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(entry.motion2))
+		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(entry.motion3))
 		payload = binary.LittleEndian.AppendUint32(payload, entry.moveFlags)
 	}
 	return payload
@@ -680,13 +686,17 @@ func (r *sceneRun) patrolTick(now time.Time) {
 			}
 		}
 		flags := uint32(0)
+		rotate := float32(0)
 		if motion.moving {
 			flags = 1
+			// 官方步行条目 rotate(s8) 恒 +2π（技能.pcapng NPC 移动条目
+			// 帧级定版，2026-11-15）；停止条目保持 0。
+			rotate = float32(2 * math.Pi)
 		}
 		samples = append(samples, allDestEntry{
 			objectID: meta.id, ownerID: meta.ownerID,
 			destX: motion.destX, destY: motion.destY, destZ: motion.destZ,
-			destOrient: motion.destOrient, speed: motion.speed, moveFlags: flags,
+			destOrient: motion.destOrient, speed: motion.speed, rotate: rotate, moveFlags: flags,
 		})
 	}
 	r.patrolIDs = kept

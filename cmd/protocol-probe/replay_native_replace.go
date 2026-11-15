@@ -65,8 +65,10 @@ import (
 //	                               我方同款流，客户端无本地默认缺省 0，跳跃
 //	                               Z 初速=0；PHYSICS-16=Phase B 后补发我方
 //	                               sendPlayerPhysicsLoginStream，main.go 同点）
-//	                               ；其余 idx 仍 MIRROR-12 透传（105 idx 对账
-//	                               待真机再切）
+//	                               ；其余 idx=ATTR-SHADOW 真值优先/影子兜底
+//	                               （2026-11-15：有我方值源的行就地换值，
+//	                               无源行保留影子默认值；481/624 占位常量
+//	                               显式保留影子——replay_attr_mirror.go）
 //	 0x29 gemskill 预载         → UNKNOWN-13 透传
 //	 0x27 trs 令牌簇            → UNKNOWN-14 透传
 //	 0x38 ×2                    → UNKNOWN-7 透传
@@ -247,7 +249,9 @@ func p2UnknownMarker(frame []byte) string {
 	case 0x2A:
 		return "DROP-8 官方装备外观 0x2A 停发（影子覆盖 DB 装备根因；外观改由我方 0x10 属性通道）"
 	case 0x10:
-		return "MIRROR-12 官方玩家属性值 0x10（我方权威簇覆盖大头，105 idx 对账待真机）"
+		// self 帧走 ATTR-SHADOW 换值（replay_attr_mirror.go），此处只剩
+		// 场景/对象域与换值失败回落帧。
+		return "MIRROR-12 官方属性值 0x10（非 self 域或影子兜底透传）"
 	case 0x29:
 		return "UNKNOWN-13 0x29 预载（gemskill_052 族）"
 	case 0x27:
@@ -351,7 +355,9 @@ func replayPhase2NativeReplaceBytes(conn sceneMessageConnection, raw []byte, lab
 	viewIdx := 0
 	seen := map[string]bool{}
 	motionOverrides := nativeP2SelfMotionOverrides(player)
+	attrOverrides := replayAttrOverrides(player)
 	nativeCount, passCount, dropCount, motionCount := 0, 0, 0, 0
+	attrSwapped, attrShadow := 0, 0
 	sent := 0
 	rest := raw
 	for len(rest) >= 4 {
@@ -387,6 +393,48 @@ func replayPhase2NativeReplaceBytes(conn sceneMessageConnection, raw []byte, lab
 			}
 		}
 		switch {
+		case frame[0] == 0x10 && len(frame) >= 12 && frame[1] == 0 &&
+			binary.LittleEndian.Uint32(frame[2:]) == obj:
+			// ATTR-SHADOW：self 0x10 影子属性帧真值优先/影子兜底
+			// （2026-11-15 用户拍板）。帧级二分 p2mirror 丢帧口径优先。
+			if bisectDropsP2Mirror() {
+				dropCount++
+				continue
+			}
+			if out, swapped, _, aok := replayAttrShadowSwap(frame, obj, attrOverrides); aok {
+				if err := conn.WriteFrame(out); err != nil {
+					log.Printf("replay %s: %v", label, err)
+					return sent
+				}
+				if swapped > 0 {
+					if attrSwapped == 0 {
+						log.Printf("native-replace P2 op=0x10 self 属性帧 -> 真值优先/影子兜底 [有源 idx 换我方值，无源 idx=影子默认值；481/624 保留影子]")
+					}
+					nativeCount++
+					attrSwapped++
+				} else {
+					if attrShadow == 0 {
+						log.Printf("native-replace P2 op=0x10 self 属性帧纯影子透传（无我方值源 idx=影子默认值，暂时兜底）")
+					}
+					passCount++
+					attrShadow++
+				}
+				sent++
+				continue
+			}
+			// aok=false（解析错位/round-trip 不过）：落 default 透传。
+			marker := p2UnknownMarker(frame)
+			if !seen[marker] {
+				seen[marker] = true
+				log.Printf("native-replace P2 op=0x%02X PASSTHROUGH [%s]", frame[0], marker)
+			}
+			if err := conn.WriteFrame(frame); err != nil {
+				log.Printf("replay %s: %v", label, err)
+				return sent
+			}
+			passCount++
+			attrShadow++
+			sent++
 		case frame[0] == 0x1E && len(frame) >= 14 && isSelfM24StateMirror(frame, obj, own):
 			// DROP-m24：外服玩家状态镜帧（bin P2#122 实证 m24 obj(self) i33
 			// ——c.pcapng 抓拍时外服玩家所处的状态值，重登即灌给我们的玩家；
@@ -481,8 +529,8 @@ func replayPhase2NativeReplaceBytes(conn sceneMessageConnection, raw []byte, lab
 			sent++
 		}
 	}
-	log.Printf("native-replace P2 summary: native=%d (motion=%d) passthrough=%d dropped=%d (unknown classes=%d) file=%s",
-		nativeCount, motionCount, passCount, dropCount, len(seen), strings.TrimSpace(label))
+	log.Printf("native-replace P2 summary: native=%d (motion=%d attrSwapped=%d) passthrough=%d (attrShadow=%d) dropped=%d (unknown classes=%d) file=%s",
+		nativeCount, motionCount, passCount, attrShadow, attrSwapped, dropCount, len(seen), strings.TrimSpace(label))
 	return sent
 }
 

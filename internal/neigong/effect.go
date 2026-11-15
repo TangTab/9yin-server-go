@@ -14,6 +14,7 @@ type Effect struct {
 	Shield      *Shield        // shield：护盾（FIFO 吸收，到期即弃）
 	DodgeAdd    *DodgeAdd      // dodge_add：闪避加成窗（本仓扩展，料敌先机）
 	Heal        int64          // heal：回复气血
+	BruiseRestore *BruiseRestore // bruise_restore：瘀血层转气血（活血/化解淤血，官方内功特效）
 	MPRestore   int64          // mp_restore：回复内力
 	Reflect     *Reflect       // reflect：反打（数值或 {amount,kind} 双形态）
 	ParryReduce *ParryReduce   // parry_reduce：格挡减伤拆分（解析占位）
@@ -43,6 +44,14 @@ type Shield struct {
 type Reflect struct {
 	Amount int64
 	Kind   string
+}
+
+// BruiseRestore 是瘀血转气血指令（本仓扩展）：把瘀血层（HitHP-HP）
+// 即时转为真实气血，转换量受层厚上限。Amount 为点数；Percent 为层厚
+// 比例（0<P≤1，如旃檀心经活血 30-50%）。两者同时下发时点数优先。
+type BruiseRestore struct {
+	Amount  int64
+	Percent float64
 }
 
 // ParryReduce 是格挡减伤拆分（内功/外功分量；当前管线格挡零伤，解析占位）。
@@ -100,6 +109,10 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 		case "dodge_add":
 			if d, ok := e.convertDodgeAdd(buffID, event, value); ok {
 				effect.DodgeAdd, set = d, true
+			}
+		case "bruise_restore":
+			if b, ok := e.convertBruiseRestore(buffID, event, value); ok {
+				effect.BruiseRestore, set = b, true
 			}
 		case "heal", "mp_restore":
 			amount, ok := modulevm.LuaInt(value)
@@ -179,6 +192,33 @@ func (e *Effects) convertDodgeAdd(buffID, event string, value vm.Value) (*DodgeA
 		return nil, false
 	}
 	return &DodgeAdd{Amount: amount, LifeMS: life}, true
+}
+
+// convertBruiseRestore 解析 bruise_restore 双形态：裸数值/表 {amount=X}
+// 为点数，表 {percent=P} 为瘀血层比例（0<P≤1）。
+func (e *Effects) convertBruiseRestore(buffID, event string, value vm.Value) (*BruiseRestore, bool) {
+	if value.IsNumber() {
+		if amount, ok := modulevm.LuaInt(value); ok && amount > 0 {
+			return &BruiseRestore{Amount: amount}, true
+		}
+		e.host.WarnOnce(buffID+":bruise_restore", "neigong: %s: %s bruise_restore 数值 %s 非正/畸形，已丢弃", buffID, event, modulevm.ValueString(value))
+		return nil, false
+	}
+	table, ok := e.tableOf(buffID, "bruise_restore", value)
+	if !ok {
+		return nil, false
+	}
+	amount, amountOK := modulevm.LuaInt(modulevm.Field(table, "amount"))
+	percent, percentOK := modulevm.LuaFloat(modulevm.Field(table, "percent"))
+	if amountOK && amount > 0 {
+		return &BruiseRestore{Amount: amount}, true
+	}
+	if percentOK && percent > 0 && percent <= 1 {
+		return &BruiseRestore{Percent: percent}, true
+	}
+	e.host.WarnOnce(buffID+":bruise_restore", "neigong: %s: %s bruise_restore {amount=%s, percent=%s} 畸形，整条丢弃",
+		buffID, event, modulevm.ValueString(modulevm.Field(table, "amount")), modulevm.ValueString(modulevm.Field(table, "percent")))
+	return nil, false
 }
 
 func (e *Effects) convertParryReduce(buffID, event string, value vm.Value) (*ParryReduce, bool) {

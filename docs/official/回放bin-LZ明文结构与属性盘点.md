@@ -1664,6 +1664,11 @@
 
 - A/B 两节即镜像帧再生的数据字典：解码（lz_exact）→ 按 B 节列型/ A 节语法改载荷 →
   `wrap_compress` 重编码 → 重打包 bin（[u32 len][frame]）→ 重编译内嵌。
+- **0x10 属性帧已切「真值优先/影子兜底」（2026-11-15 落地）**：`cmd/protocol-probe/replay_attr_mirror.go`
+  在帧替换档内逐行换值——self 帧实测 53/106 帧换为我方值（值源=stateProperties 打底
+  +combatPanelProperties 覆盖），其余 50 idx 影子默认值兜底（492-496 五维Add/520-527 分系
+  增伤/540+ AI 族/610-616 回复倍率等无我方源，481/624 占位常量显式保留影子）；
+  影子行重编码字节零漂移由 round-trip 闸保证（TestReplayAttrShadowRoundTrip）。
 - 0x2A 装备外观行（P2#80-91/#113-115）已可按 [idx][2433 列型值] 逐对再生，
   DROP_ATTR 差集（52 重叠/53 独有）可据此清单对账销项。
 - P1#0/P1#2 为压缩 custommsg（m368/m414），值域语义另行定案；0x28 化身档案

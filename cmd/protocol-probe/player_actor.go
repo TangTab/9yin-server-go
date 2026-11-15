@@ -255,6 +255,20 @@ type playerActor struct {
 	skillViewRows  map[string]uint16
 	activeParry    activeParryRequest
 	parrying       bool
+	// parryBaseline 令牌方言 m54 的状态基调值（0=未采集）：官服族客户端
+	// 每帧广播当前格挡状态（值=基调=未格挡、值≠基调=格挡中），基调取
+	// 登录后首条上报（parryStateReport）。
+	parryBaseline int64
+	// parryStrayValue 破防窗内被吞的散逸令牌（格挡.pcapng +78s：破防后
+	// 客户端发新令牌×4 重试约 6s，官方零回应、客户端自行放弃；窗后同值
+	// 到达继续静默，防误判成新按下）。真实按下（异于散逸值）时清零。
+	parryStrayValue int64
+	// parryPreBlockState 手动格挡期间临时战斗姿态(1)的还原位（格挡前
+	// 的 0/2，松开/破防后回写——Z 持剑切换的所有权不被侵占）。
+	parryPreBlockState byte
+	// cantParryUntil 虚招破防后的不可格挡窗（官方「被虚招命中的瞬间，
+	// 短时间内无法格挡」；窗内 m54 全部静默吞，窗过后重新按下受理）。
+	cantParryUntil time.Time
 	skillLockUntil time.Time
 	reviveAt       time.Time
 	// 通道技能运行态（skill_channel.go，挑战.pcapng 2026-11-12 寒心恨雪
@@ -283,8 +297,18 @@ type playerActor struct {
 	// 与同名方法 logicState() 区分：权威运行状态在 vitals.Logic。
 	rushLogicState byte // 0=普通 2=预警（msg292 翻转；463 号属性回帧）
 	pendingCast    *pendingCastState
-	rushInFlight   bool
-	rushDashIssued bool
+	// skillPauseTimer 是 msg25/msg26 配对看门狗（armSkillPauseRelease，
+	// rush_cast.go）：诅咒族消息开必有合，官服从不孤悬。
+	skillPauseTimer *time.Timer
+	rushInFlight     bool
+	rushDashIssued   bool
+	rushDashAirborne bool // 冲刺发出时的空中档标记（轻功释放帧随所有出口下发）
+	// JumpTimes 飞行计数镜像状态（mirrorJumpTimes，rush_cast.go）：官服按
+	// m15 迁移起飞授 1/三段跳能力授 2/空中动作耗 0——我方不发则客户端空中
+	// 配额耗尽后不复活（2026-11-16「穿云纵过去后卡状态用不出」根因）。
+	airFlightActive   bool
+	airFlightConsumed bool
+	airFlightLastY    float32
 	// resumeSettleSkip：冲锋落地重入受理链时的一次性跳过标记
 	//（pending.settled 时置位——CD/MP 已在 c61 时点结算）。
 	resumeSettleSkip bool
@@ -304,8 +328,16 @@ type playerActor struct {
 	// 冲锋落地哨用它判「c61 后客户端是否自行移动」（c61 未被消费的实证
 	// 2026-11-15：站立客户端 6s 零位移；自行移动=让位官方 212 walk-in 链）。
 	clientReportX  float32
+	clientReportY  float32
 	clientReportZ  float32
 	clientReportAt time.Time
+	// approachDest/Speed/Active：服务端驱动接近当前段；Cancelled=手动打断闩
+	//（v13：打断后旧 c61 瞬移兜底关闭，暂存走官方过期/重按语义）。
+	approachDest      worldcore.Transform
+	approachSpeed     float32
+	approachActive    bool
+	approachCancelled bool
+	approachDashing   bool
 	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
 	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
 	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。
@@ -872,6 +904,9 @@ type npcAttackOutcome struct {
 	parried      bool
 	dodged       bool
 	dead         bool
+	// breakParry 虚招命中格挡中的玩家：格挡被击破（调用方在锁外补发
+	// 手动格挡释放序 + CantParry 窗帧）。伤害照常全额结算。
+	breakParry bool
 	// rageDelta 是本次受击裁定的怒气增量(官方规则:格挡状态被揍 +2、
 	// 直接受击 +1;主动招架窗口等同格挡态)。由调用方在锁外编码成
 	// 18 字节 SP 单帧。
@@ -886,11 +921,17 @@ type npcAttackOutcome struct {
 // 每条新的 218 请求都授予一个 600ms 的招架窗口。闪避按攻击者和秒
 // 确定性生成，重连无法重掷已接受的判定结果。
 //
+// 格挡语义（2026-11-15 官方规则落地）：按住右键(msg54 手动格挡态)与
+// 218 主动窗口一致——普通攻击被招架（零伤 + 格挡被揍 +2 怒 + on_parry
+// 特效）；**虚招（feint）例外**：直接击破格挡（breakManualParry），
+// 伤害全额结算并进入不可格挡窗。装备「破防」属性是防御侧数值，与本
+// 招式相克判定无关。
+//
 // 内功特效以 scripts/module/neigong 脚本为唯一权威：常驻被动
 // （M.passive：幻玉 evasion_add 并入闪避、坐忘 damage_reduction_add 平减）
 // 与事件钩子在此结算；格挡 → on_parry（零伤，只落 state/heal/mp/shield）；
 // 命中 → on_victim（reduce_pct 折减、盾池 FIFO 吸收、heal/mp、reflect 反打）。
-func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time.Time) npcAttackOutcome {
+func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, feint bool, now time.Time) npcAttackOutcome {
 	p.mu.Lock()
 	deadAlready := p.vitals.HP <= 0
 	p.mu.Unlock()
@@ -898,8 +939,11 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		return npcAttackOutcome{}
 	}
 	parry := p.activeParrySnapshot()
-	if !parry.At.IsZero() && now.Sub(parry.At) >= 0 && now.Sub(parry.At) <= 600*time.Millisecond {
-		// 主动招架窗口内的攻击按"格挡状态被揍"得怒（零伤，特效只落
+	activeWindow := !parry.At.IsZero() && now.Sub(parry.At) >= 0 && now.Sub(parry.At) <= 600*time.Millisecond
+	// 手动格挡态（m54 按住右键）与主动招架窗口同权：普通攻击零伤被
+	// 招架；虚招穿透（破防判定在闪避掷之后）。
+	if (activeWindow || (p.parryingSnapshot() && !p.cantParrySnapshot())) && !feint {
+		// 招架内的攻击按"格挡状态被揍"得怒（零伤，特效只落
 		// state/heal/mp/shield）。
 		triggered := p.dispatchNeiGongParry(attackerID, damage, now)
 		return npcAttackOutcome{parried: true, stateChanged: triggered, rageDelta: ragGainParriedHit}
@@ -918,6 +962,14 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 			damage = 1
 		}
 	}
+	// 虚招命中格挡中的目标（未被闪避）：格挡被直接击破（官方「被虚招
+	// 破防的瞬间，短时间内无法格挡」）——伤害全额照走，破防后的受击
+	// 按未格挡得怒 +1。
+	brokeParry := false
+	if feint && p.parryingSnapshot() {
+		p.breakManualParry(now)
+		brokeParry = true
+	}
 	applied, reflectAmount, neigongChanged := p.dispatchNeiGongVictim(attackerID, damage, now)
 	// 手动格挡(msg54)状态下的实伤同样按格挡态得怒 +2,未格挡 +1。
 	ragGain := ragGainUnparriedHit
@@ -930,6 +982,9 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		dead := p.vitals.HP <= 0
 		p.mu.Unlock()
 		// 盾全吸收或零伤：不落血，但特效可能已改血/蓝/状态。
+		if brokeParry {
+			return npcAttackOutcome{stateChanged: neigongChanged, breakParry: true, neigongReflect: reflectAmount}
+		}
 		if neigongChanged {
 			return npcAttackOutcome{stateChanged: true, neigongReflect: reflectAmount}
 		}
@@ -948,7 +1003,7 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, now time
 		p.skillLockUntil = now.Add(500 * time.Millisecond)
 		p.mu.Unlock()
 	}
-	return npcAttackOutcome{stateChanged: true, dead: dead, rageDelta: ragGain, neigongReflect: reflectAmount}
+	return npcAttackOutcome{stateChanged: true, dead: dead, breakParry: brokeParry, rageDelta: ragGain, neigongReflect: reflectAmount}
 }
 
 // combatPercentRoll 对同一攻击者和同一服务器 tick 是确定性的。它让
@@ -1268,6 +1323,10 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 		// 一发、之后不再重推，公式未定位（样本恒 100/4）。
 		{Index: propCantParry, Name: "CantParry", Value: clientdata.Int32Value(0)},
 		{Index: propParryRatio, Name: "ParryRatio", Value: clientdata.Int32Value(100)},
+		// ParryType 出生补位（参考 9yin-go-server2 parryProperties：出生格挡族
+		// 必含 ParryType=0——客户端按它选格挡姿态，从未下发则架势无姿态
+		// 可显示（2026-11-16「服务端已招架、客户端不显示架势」对齐）。
+		{Index: clientdata.MustPlayerProperty("ParryType").Index, Name: "ParryType", Value: clientdata.Int32Value(0)},
 		{Index: propParryUpSpeed, Name: "ParryUpSpeed", Value: clientdata.Int32Value(4)},
 		// ParryValue@475 官方为 MaxParry(100)+MaxParryAdd 的推导和
 		//（抓包 116/157 逐点吻合），不再用静态参考值。
@@ -1623,6 +1682,128 @@ func (p *playerActor) releaseParryBuff() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.parrying = false
+}
+
+// parryValueTotalSnapshot 招架值总量快照（应答帧用，server2 参考口径）。
+func (p *playerActor) parryValueTotalSnapshot() int32 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.progress.parryValueTotal()
+}
+
+// parryStateReport 令牌方言 m54 的状态解码（2026-11-15 淚夜定案）：
+// 官服族客户端**每帧广播**当前格挡状态（57719 会话 6984 条同值零间隙、
+// 58929 会话基调值为主+按压期换值成对交替实证）——基调=登录后首条
+// 上报值（未格挡），值≠基调=格挡中，回基调=取消。此前把首条基调值当
+// 「按下」从登录即错误受理，还把客户端格挡输入搅乱（按压不再换值），
+// 连续三轮「按住/松开」反转皆此根因。
+func (p *playerActor) parryStateReport(value int64) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.parryBaseline == 0 {
+		p.parryBaseline = value
+	}
+	return value != p.parryBaseline
+}
+
+// feintBreakCantParryWindow 虚招破防后的不可格挡窗时长。格挡.pcapng
+// 三次实测 3.11/3.03/2.99s——恒 3s（buf_CantParry buff 挂/摘对，见
+// broadcastParryBreaks）。
+const feintBreakCantParryWindow = 3 * time.Second
+
+// breakManualParry 虚招破防（官方语义：虚招命中格挡中的目标，格挡被
+// 直接击破，短时间内无法再格挡）。状态位+令牌+闲时看门狗一并清，
+// 不可格挡窗到点前 m54 全部静默；释放序/CantParry 帧由战斗 tick 在
+// 锁外补发（outcome.breakParry）。
+func (p *playerActor) breakManualParry(now time.Time) {
+	p.mu.Lock()
+	p.parrying = false
+	p.cantParryUntil = now.Add(feintBreakCantParryWindow)
+	p.mu.Unlock()
+}
+
+// noteParryStrayToken 记录破防窗内被吞的 m54 令牌（值提取按 tag2/tag3）。
+func (p *playerActor) noteParryStrayToken(state clientCustomValue) {
+	var value int64
+	switch state.Type {
+	case 2:
+		value = int64(state.Int32)
+	case 3:
+		value = state.Int64
+	}
+	if value == 0 {
+		return
+	}
+	p.mu.Lock()
+	p.parryStrayValue = value
+	p.mu.Unlock()
+}
+
+// parryStraySnapshot 当前散逸令牌（0=无）。
+func (p *playerActor) parryStraySnapshot() int64 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.parryStrayValue
+}
+
+// parryStrayMatches 该条 m54 是否命中散逸令牌。
+func (p *playerActor) parryStrayMatches(state clientCustomValue) bool {
+	var value int64
+	switch state.Type {
+	case 2:
+		value = int64(state.Int32)
+	case 3:
+		value = state.Int64
+	}
+	if value == 0 {
+		return false
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.parryStrayValue == value
+}
+
+// clearParryStrayToken 真实按下（异于散逸值）到达时清记忆。
+func (p *playerActor) clearParryStrayToken() {
+	p.mu.Lock()
+	p.parryStrayValue = 0
+	p.mu.Unlock()
+}
+
+// setParryPreBlockState / takeParryPreBlockState 格挡临时战斗姿态的
+// 记忆对（0xFF=无在格挡）。
+func (p *playerActor) setParryPreBlockState(state byte) {
+	p.mu.Lock()
+	p.parryPreBlockState = state
+	p.mu.Unlock()
+}
+
+func (p *playerActor) takeParryPreBlockState() byte {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	pre := p.parryPreBlockState
+	p.parryPreBlockState = 0xFF
+	return pre
+}
+
+// writeLogicStateFrame 推 463 单属性帧（姿态变更的线上形态）。
+func (p *playerActor) writeLogicStateFrame(link sceneMessageConnection, state byte) {
+	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: propLogicState, Name: "LogicState", Value: clientdata.ByteValue(state)},
+	})
+	if err != nil {
+		return
+	}
+	if err := link.WriteFrame(frame); err != nil {
+		return
+	}
+}
+
+// cantParrySnapshot 不可格挡窗是否仍在生效。
+func (p *playerActor) cantParrySnapshot() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return time.Now().Before(p.cantParryUntil)
 }
 
 // expireBuff 只清除创建此定时器的那份确切租约。后续的刷新绝不会被一个
@@ -2205,6 +2386,17 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	// 478=100）。引擎建对象时即读格挡族，post-ready 0x10 补推可能太晚
 	// （2026-11-04 键位域同教训）；玩家侧值恒 100。
 	addInt(propParryRatio, 100)
+	// 格挡资源组整组入档（9yin-go-server2 工作版定案：客户端的右键格挡
+	// 输入门在对象创建时按 fighter 资源初始化——InParry/CantParry/ParryType/
+	// InManualParry/ParryValue/ParryUpSpeed 缺席=门不开，post-ready 0x10
+	// 补推不重评（同 LogicState 教训；2026-11-16 真机四轮「非战斗不能格挡」
+	// 根因）。ParryValue=招架值满值（格挡.pcapng 472 初值 100 同族）。
+	addInt(propInParry, 0)
+	addInt(propCantParry, 0)
+	addInt(clientdata.MustPlayerProperty("ParryType").Index, 0)
+	addInt(propInManualParry, 0)
+	addInt(propParryValue, p.progress.parryValueTotal())
+	addInt(propParryUpSpeed, 4)
 	addWord(propNeigongPKStatus, 0)            // 官方线型 Word
 	addByte(propDead, boolByte(state.HP <= 0)) // 官方线型 Byte
 	// CantUseSkill:官方 2370 项表无此名,不再下发。

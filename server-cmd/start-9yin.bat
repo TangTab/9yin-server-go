@@ -91,6 +91,7 @@ powershell.exe -NoProfile -Command "$listeners = @(Get-NetTCPConnection -State L
 set "PORT_STATE=%ERRORLEVEL%"
 if "%PORT_STATE%"=="2" (
   echo Nine Yin server copy is already running.
+  echo If the standalone 19064 gm-panel is closed, run start-gm-panel.bat to bring it back.
   if exist "%ROOT%gm-panel.exe" (
     start "Nine Yin GM Panel" http://127.0.0.1:19064/
   ) else (
@@ -121,13 +122,17 @@ if errorlevel 1 (
 )
 
 start "Nine Yin Game 19061" /D "%ROOT%" "%SERVER%" -listen %GAME_LISTEN% -gm-listen %GM_LISTEN% -gm-internal-listen 127.0.0.1:19063 -gm-internal-token "%NINEYIN_GM_TOKEN%" -log-file "%LOGDIR%\protocol-probe-live.log" 1>>"%LOGDIR%\game-19061.current.log" 2>>&1
+rem 残留 gm-panel：旧实例占着 19064 且锁住 gm-panel.current.log（启动报"另一个程序正在使用此文件"即此因），先按路径清掉再拉新。
+set "PANEL_EXE=%ROOT%gm-panel.exe"
+if exist "%PANEL_EXE%" powershell.exe -NoProfile -Command "Get-Process gm-panel -ErrorAction SilentlyContinue | Where-Object { $_.Path -and [IO.Path]::GetFullPath($_.Path) -ieq [IO.Path]::GetFullPath($env:PANEL_EXE) } | Stop-Process -Force -ErrorAction SilentlyContinue" >nul 2>&1
+if exist "%PANEL_EXE%" %SystemRoot%\System32\timeout.exe /t 1 /nobreak >nul 2>&1
 
 rem 独立面板进程：可选存在；缺失时仅内嵌面板可用（回滚形态）。
 if exist "%ROOT%gm-panel.exe" (
   start "Nine Yin GM Panel 19064" /D "%ROOT%" "%ROOT%gm-panel.exe" -listen %PANEL_LISTEN% -game-addr 127.0.0.1:19063 -game-token "%NINEYIN_GM_TOKEN%" 1>>"%LOGDIR%\gm-panel.current.log" 2>>&1
 )
 
-timeout /t 2 /nobreak >nul
+%SystemRoot%\System32\timeout.exe /t 2 /nobreak >nul 2>&1 || ping -n 3 127.0.0.1 >nul
 if exist "%ROOT%gm-panel.exe" (
   rem start "Nine Yin GM Panel" http://127.0.0.1:19064/
 ) else (

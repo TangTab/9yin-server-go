@@ -81,7 +81,7 @@ return M
 	before := player.vitals.HP
 	player.mu.Unlock()
 
-	outcome := player.resolveNPCAttack(attacker, 100, now)
+	outcome := player.resolveNPCAttack(attacker, 100, false, now)
 	if outcome.dodged || outcome.parried || outcome.dead {
 		t.Fatalf("outcome = %+v", outcome)
 	}
@@ -94,7 +94,7 @@ return M
 		t.Fatalf("neigongReflect = %d, want 20", outcome.neigongReflect)
 	}
 	// state 回写：第二次受击 hits=2。
-	player.resolveNPCAttack(attacker, 100, now.Add(time.Second))
+	player.resolveNPCAttack(attacker, 100, false, now.Add(time.Second))
 	player.mu.Lock()
 	hits := player.neigongState["hits"]
 	player.mu.Unlock()
@@ -123,21 +123,21 @@ return M
 	before := player.stateSnapshot().HP
 
 	// 第一击：授盾 100，全吸收 60 → HP 不动。
-	if outcome := player.resolveNPCAttack(attacker, 60, now); outcome.dodged || outcome.dead || !outcome.stateChanged {
+	if outcome := player.resolveNPCAttack(attacker, 60, false, now); outcome.dodged || outcome.dead || !outcome.stateChanged {
 		t.Fatalf("first outcome = %+v", outcome)
 	}
 	if hp := player.stateSnapshot().HP; hp != before {
 		t.Fatalf("HP after full absorb = %d, want %d", hp, before)
 	}
 	// 第二击：余盾 40 吸收 → 60-40=20 落血。
-	if outcome := player.resolveNPCAttack(attacker, 60, now.Add(time.Second)); outcome.dodged || outcome.dead {
+	if outcome := player.resolveNPCAttack(attacker, 60, false, now.Add(time.Second)); outcome.dodged || outcome.dead {
 		t.Fatalf("second outcome = %+v", outcome)
 	}
 	if hp := player.stateSnapshot().HP; hp != before-20 {
 		t.Fatalf("HP after partial absorb = %d, want %d", hp, before-20)
 	}
 	// 第三击：无盾全额落血。
-	player.resolveNPCAttack(attacker, 30, now.Add(2*time.Second))
+	player.resolveNPCAttack(attacker, 30, false, now.Add(2*time.Second))
 	if hp := player.stateSnapshot().HP; hp != before-50 {
 		t.Fatalf("HP after shield gone = %d, want %d", hp, before-50)
 	}
@@ -192,7 +192,7 @@ return M
 	player.setActiveParry(activeParryRequest{At: time.Unix(1_700_000_000, 0)})
 	now := time.Unix(1_700_000_000, 0).Add(100 * time.Millisecond)
 
-	outcome := player.resolveNPCAttack(7, 200, now)
+	outcome := player.resolveNPCAttack(7, 200, false, now)
 	if !outcome.parried || outcome.dead || outcome.dodged {
 		t.Fatalf("outcome = %+v", outcome)
 	}
@@ -284,7 +284,7 @@ func TestDispatchDisabledPaths(t *testing.T) {
 	before := player.stateSnapshot().HP
 
 	// 宿主 nil（默认：main 之外未注入）。
-	outcome := player.resolveNPCAttack(attacker, 100, now)
+	outcome := player.resolveNPCAttack(attacker, 100, false, now)
 	if outcome.neigongReflect != 0 || outcome.stateChanged != true || player.stateSnapshot().HP != before-100 {
 		t.Fatalf("nil host changed combat behavior: %+v", outcome)
 	}
@@ -324,7 +324,7 @@ return M
 	equipProbeBook(t, player, "probe_victim", 6, 36)
 	now := time.Unix(1_700_000_000, 0)
 	attacker := nonDodgingAttacker(now)
-	player.resolveNPCAttack(attacker, 10, now)
+	player.resolveNPCAttack(attacker, 10, false, now)
 	player.mu.Lock()
 	player.neigongShields = []neigongShield{{amount: 50, expiresAt: now.Add(time.Hour)}}
 	player.mu.Unlock()
@@ -374,7 +374,7 @@ func TestScriptPassiveEvasionAndReduction(t *testing.T) {
 	bare.progress.books = []learnedNeiGong{{configID: "裸书", staticData: 1, level: 1, maxLevel: 36}}
 	bare.progress.curNeiGong = "裸书"
 	bare.mu.Unlock()
-	if outcome := bare.resolveNPCAttack(edgeCase, 50, now); outcome.dodged {
+	if outcome := bare.resolveNPCAttack(edgeCase, 50, false, now); outcome.dodged {
 		t.Fatal("无 buffID 的书不得获得被动闪避")
 	}
 
@@ -386,7 +386,7 @@ func TestScriptPassiveEvasionAndReduction(t *testing.T) {
 	}
 	attacker := nonDodgingAttacker(now)
 	before := zuoWang.stateSnapshot().HP
-	outcome := zuoWang.resolveNPCAttack(attacker, 100, now)
+	outcome := zuoWang.resolveNPCAttack(attacker, 100, false, now)
 	if outcome.dodged || outcome.dead || outcome.neigongReflect != 0 {
 		t.Fatalf("坐忘受击 outcome = %+v", outcome)
 	}
@@ -397,7 +397,7 @@ func TestScriptPassiveEvasionAndReduction(t *testing.T) {
 	small := newPlayerActor("坐忘", 0)
 	equipProbeBook(t, small, "buf_ng_jh_001", 1, 5)
 	smallBefore := small.stateSnapshot().HP
-	small.resolveNPCAttack(attacker, 10, now)
+	small.resolveNPCAttack(attacker, 10, false, now)
 	if hp := small.stateSnapshot().HP; hp != smallBefore-1 {
 		t.Fatalf("平减 floor = %d, want %d (10-20 → 1)", hp, smallBefore-1)
 	}
@@ -467,7 +467,7 @@ func TestRealHuanYuVictimDodgeHeal(t *testing.T) {
 	if attacker == 0 {
 		t.Fatal("no proc attacker found")
 	}
-	if outcome := player.resolveNPCAttack(attacker, 40, now); outcome.dodged || !outcome.stateChanged {
+	if outcome := player.resolveNPCAttack(attacker, 40, false, now); outcome.dodged || !outcome.stateChanged {
 		t.Fatalf("proc hit outcome = %+v", outcome)
 	}
 	player.mu.Lock()
@@ -490,7 +490,7 @@ func TestRealHuanYuVictimDodgeHeal(t *testing.T) {
 	player.vitals.ApplyDamage(300) // 腾出回血空间
 	hpBeforeDodge := player.vitals.HP
 	player.mu.Unlock()
-	outcome := player.resolveNPCAttack(dodger, 40, now2)
+	outcome := player.resolveNPCAttack(dodger, 40, false, now2)
 	if !outcome.dodged || !outcome.stateChanged {
 		t.Fatalf("window dodge outcome = %+v", outcome)
 	}
@@ -518,7 +518,7 @@ func TestRealHuanYuVictimDodgeHeal(t *testing.T) {
 		t.Fatal("expired window must clear buff and dodge bonus")
 	}
 	dodger3 := windowDodger(now3, 20)
-	if outcome := player.resolveNPCAttack(dodger3, 40, now3); outcome.dodged {
+	if outcome := player.resolveNPCAttack(dodger3, 40, false, now3); outcome.dodged {
 		t.Fatal("dodge must fall back to base after window expiry")
 	}
 }
@@ -583,7 +583,7 @@ return M
 	equipProbeBook(t, player, "probe_bad_dodge", 1, 36)
 	now := time.Unix(1_700_000_000, 0)
 	attacker := nonDodgingAttacker(now)
-	player.resolveNPCAttack(attacker, 50, now)
+	player.resolveNPCAttack(attacker, 50, false, now)
 	player.mu.Lock()
 	window := player.neigongDodge
 	_, mounted := player.buffs[neigongProcBuffSlot]

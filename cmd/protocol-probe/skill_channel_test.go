@@ -148,8 +148,8 @@ func TestChannelWavesDrainSPAndEmitPerWaveFrames(t *testing.T) {
 	if hurt18 != 3 {
 		t.Fatalf("m18 hurt frames=%d, want 3 (每波一帧)", hurt18)
 	}
-	// c1=71 第 11 值=当波动作名（首波空、波2=qzj_07_2、波3=qzj_07_3）——
-	// 真机三轮「无动画」根因修复的锚点。
+	// c1=71 第 11 值=当波动作名（用户 2026-11-15 拍板：逐波全发、序号
+	// 从 2 递增——波 1/2/3=qzj_07_2/3/4；官服方言首波空串已覆盖）。
 	waveActions := []string{}
 	for _, frame := range conn.Frames() {
 		if len(frame) == 0 || frame[0] != 0x1E {
@@ -163,8 +163,8 @@ func TestChannelWavesDrainSPAndEmitPerWaveFrames(t *testing.T) {
 			waveActions = append(waveActions, values.Values[10].Text)
 		}
 	}
-	if len(waveActions) != 3 || waveActions[0] != "" || waveActions[1] != "qzj_07_2" || waveActions[2] != "qzj_07_3" {
-		t.Fatalf("c1=71 动作名序列=%v, want ['', qzj_07_2, qzj_07_3]", waveActions)
+	if len(waveActions) != 3 || waveActions[0] != "qzj_07_2" || waveActions[1] != "qzj_07_3" || waveActions[2] != "qzj_07_4" {
+		t.Fatalf("c1=71 动作名序列=%v, want [qzj_07_2, qzj_07_3, qzj_07_4]", waveActions)
 	}
 }
 
@@ -245,7 +245,7 @@ func TestChannelSyncCustomEchoesInsideWindowOnly(t *testing.T) {
 		{Type: 2, Int32: clientCustomChannelSync},
 		{Type: 4, Float32: 581.6}, {Type: 4, Float32: 38.6}, {Type: 4, Float32: 282.8}, {Type: 4, Float32: -1.17},
 	}}
-	handled, err := handleChannelSyncCustom(conn, player, sync, "test")
+	handled, err := handleChannelSyncCustom(conn, player, nil, sync, "test")
 	if !handled || err != nil {
 		t.Fatalf("handled=%v err=%v, want true nil", handled, err)
 	}
@@ -268,7 +268,7 @@ func TestChannelSyncCustomEchoesInsideWindowOnly(t *testing.T) {
 	player.channelUntil = time.Now().Add(-time.Second)
 	player.mu.Unlock()
 	conn.resetFrames()
-	if handled, err = handleChannelSyncCustom(conn, player, sync, "test"); !handled || err != nil {
+	if handled, err = handleChannelSyncCustom(conn, player, nil, sync, "test"); !handled || err != nil {
 		t.Fatalf("handled=%v err=%v, want true nil", handled, err)
 	}
 	for _, frame := range conn.Frames() {

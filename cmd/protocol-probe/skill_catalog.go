@@ -566,6 +566,15 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 	if groundRushAction == "" {
 		groundRushAction = defaultGroundRushAction
 	}
+	// v26：空中冲刺动作=LockARushAction（fastruning_s 族）；缺列由 G 类名
+	// 推导（qg_fastrun→qg_fastruning_s），再回落默认 2h 位。
+	airRushAction := iniValue(lockRow, "LockARushAction")
+	if airRushAction == "" {
+		airRushAction = strings.Replace(groundRushAction, "qg_fastrun", "qg_fastruning_s", 1)
+	}
+	if airRushAction == groundRushAction || airRushAction == "" {
+		airRushAction = "qg_fastruning_s_2h_01"
+	}
 	definition := combatSkillDefinition{
 		id: skillID, staticData: staticData, script: script,
 		taoLu: iniValue(static, "TaoLu"), level: level,
@@ -583,7 +592,7 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		hitFrameMs:       hitFrameMs,
 		levelupRelevance: iniValue(newFields, "LevelupRelevance"),
 		packCategory:     iniInt(newFields, "PackCategory"),
-		requiresTarget:   targetMode == skillTargetSelected || targetMode == skillTargetSelectedArea,
+		requiresTarget:   targetMode == skillTargetSelected || (targetMode == skillTargetSelectedArea && iniInt(static, "CanRush") == 0),
 		noLimit:          iniInt(static, "NoLimit") != 0,
 		targetMode:       targetMode, areaRadius: radius, areaHeight: iniFloat(varProp, "HeightDiff"),
 		sectorAngle: angle, areaWidth: width,
@@ -596,6 +605,7 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		isDamageSkill:    isDamage,
 		bindDistance:     bindDistance,
 		groundRushAction: groundRushAction,
+		airRushAction:    airRushAction,
 	}
 	// 通道型（UseLimit=166 族）：SP 改逐波扣（launchChannelWaves 每波
 	// −spPerWave），预扣清零防双收。参数源：脚本覆盖模块 M.compile 的

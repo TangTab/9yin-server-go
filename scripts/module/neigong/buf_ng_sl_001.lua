@@ -1,15 +1,16 @@
 -- 禅定功（buf_ng_sl_001）｜少林派｜常驻/被动
 -- 源：内功特效清单.txt 行454-457（4 层）。
--- 层1-3：攻击 15% 几率化解部分淤血（TODO：淤血层指令；v1：回血近似）。
--- 层4：15% 几率回复少量气血。
+-- 层1-3：攻击 15% 几率化解部分淤血（bruise_restore：淤血层即时转气血，
+--        比例推断 15%/层——官方未给固定值，percent 形态自适应层厚）。
+-- 层4：15% 几率回复少量气血（heal）。
 local M = {}
 M.meta = { id = "buf_ng_sl_001", name = "禅定功", book = "ng_sl_001",
            category = "passive", max_tier = 4 }
 M.defaults = { proc = 0.15 }
 M.levels = {
-  [1] = { heal = 25 },
-  [2] = { heal = 33 },
-  [3] = { heal = 42 },
+  [1] = { bruise = 0.15 },
+  [2] = { bruise = 0.15 },
+  [3] = { bruise = 0.15 },
   [4] = { heal = 52 },
 }
 
@@ -25,7 +26,11 @@ local function roll(ctx, p) return (ctx.rand and ctx.rand.r_proc or 1) < p end
 
 function M.on_attack(ctx)
   if not roll(ctx, M.defaults.proc) then return nil end
-  return { heal = lv(ctx).heal }
+  local p = lv(ctx)
+  if p.bruise then
+    return { bruise_restore = { percent = p.bruise } }
+  end
+  return { heal = p.heal }
 end
 
 return M

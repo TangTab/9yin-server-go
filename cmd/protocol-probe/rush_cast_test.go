@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"math"
 	"testing"
@@ -190,86 +191,6 @@ func TestStageRushCastAirborneDisabledFallsBackToGroundDialect(t *testing.T) {
 // hyjf02 窗 (7.5,8.5]——6m 窗下零帧（走入直收桶）、8m 授予 G 类 flag1+
 // lock 动画；xytf07_sky 窗 (8,11] 授予 A 类 flag2+qg_fastruning_s_0h_01、
 // 终点 y=目标 y+1.0；mzjf02 上界 8——13m 零授予（220@13.8 外服私服零应答）。
-func TestRushDashDialectPerSkill(t *testing.T) {
-	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
-	newEnv := func() (*captureMessageConnection, *playerActor, *sceneLifecycle) {
-		conn := &captureMessageConnection{}
-		world := newSceneLifecycle("test", conn)
-		if err := world.begin("scene", "resource", nil); err != nil {
-			t.Fatal(err)
-		}
-		registerTestCombatNPC(t, world, 91)
-		placeTestNPC(t, world, 91, 10, 0)
-		return conn, newPlayerActor("冲锋侠", 0), world
-	}
-	stage := func(conn *captureMessageConnection, player *playerActor, world *sceneLifecycle, skill string) {
-		definition := combatSkillDefinition{id: skill, canRush: true, script: "skilllock",
-			bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-		if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
-			worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	// hyjf02：6m（默认窗内、本技能窗下）零帧；8m 授予 G 类。
-	conn, player, world := newEnv()
-	stage(conn, player, world, "CS_jh_hyjf02")
-	base := len(conn.Frames())
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(4, 0, 0, 0), "test"); err != nil || !handled {
-		t.Fatalf("hyjf02 near movement handled=%t err=%v", handled, err)
-	}
-	if got := len(conn.Frames()) - base; got != 0 {
-		t.Fatalf("hyjf02 6m emitted %d frames, want 0 (below per-skill windowLo 7.5)", got)
-	}
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(2, 0, 0, 0), "test"); err != nil || !handled {
-		t.Fatalf("hyjf02 window movement handled=%t err=%v", handled, err)
-	}
-	frames := conn.Frames()[base:]
-	if len(frames) == 0 || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 24 ||
-		int32(binary.LittleEndian.Uint32(frames[0][18:])) != msgRushCommand {
-		t.Fatalf("hyjf02 8m must grant c61, got %x", frames[:1])
-	}
-	if level := int32(binary.LittleEndian.Uint32(frames[0][38:])); level != 1 {
-		t.Fatalf("hyjf02 c61 level=%d, want G-class 1", level)
-	}
-	if action := string(frames[0][47 : 47+16]); action != defaultGroundRushAction {
-		t.Fatalf("hyjf02 c61 action=%s, want %s", action, defaultGroundRushAction)
-	}
-	destY := math.Float32frombits(binary.LittleEndian.Uint32(frames[0][28:]))
-	if destY != 1.0 {
-		t.Fatalf("hyjf02 c61 destY=%.2f, want target.Y+1.0=1.0", destY)
-	}
-
-	// xytf07_sky：9.5m ∈ (8,11] 授予 A 类 flag2+空手 0h 动画。
-	conn, player, world = newEnv()
-	stage(conn, player, world, "CS_jz_xytf07_sky")
-	base = len(conn.Frames())
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(0.5, 0, 0, 0), "test"); err != nil || !handled {
-		t.Fatalf("xytf07_sky movement handled=%t err=%v", handled, err)
-	}
-	frames = conn.Frames()[base:]
-	if len(frames) == 0 || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 24 {
-		t.Fatalf("xytf07_sky 9.5m must grant c61, got %d frames", len(frames))
-	}
-	if level := int32(binary.LittleEndian.Uint32(frames[0][38:])); level != 2 {
-		t.Fatalf("xytf07_sky c61 level=%d, want A-class 2", level)
-	}
-	if action := string(frames[0][47 : 47+21]); action != "qg_fastruning_s_0h_01" {
-		t.Fatalf("xytf07_sky c61 action=%s", action)
-	}
-
-	// mzjf02：13m > 上界 8 零授予。
-	conn, player, world = newEnv()
-	stage(conn, player, world, "CS_jh_mzjf02")
-	base = len(conn.Frames())
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(-3, 0, 0, 0), "test"); err != nil || !handled {
-		t.Fatalf("mzjf02 movement handled=%t err=%v", handled, err)
-	}
-	if got := len(conn.Frames()) - base; got != 0 {
-		t.Fatalf("mzjf02 13m emitted %d frames, want 0 (above per-skill windowHi 8)", got)
-	}
-}
-
 // 无暂存 212：外服私服零回应（b 51.4+ 连发 15 条 212[尾0] 全程静默）。
 func TestDashLandingWithoutPendingIsSilent(t *testing.T) {
 	conn := &captureMessageConnection{}
@@ -301,7 +222,7 @@ func TestDashLandingResumesPendingSelfSkill(t *testing.T) {
 		expiresUTC: time.Now().Add(rushPendingWindow),
 	})
 	player.markRushInFlight()
-	player.markRushDashIssued()
+	player.markRushDashIssued(false)
 	beforeMP := player.stateSnapshot().MP
 
 	if handled, err := handleCastDashLanding(conn, player, nil, dashLandingMessage(6, 0, 7, 0), "test"); err != nil || !handled {
@@ -396,7 +317,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		player.mu.Lock()
 		player.learnedSkills[definition.id] = 1
 		player.mu.Unlock()
-		if err := handleSelectTargetCustom(world, warningToggleMessage(clientCustomSelectTarget,
+		if err := handleSelectTargetCustom(world, player, warningToggleMessage(clientCustomSelectTarget,
 			clientCustomValue{Type: 8, Raw: packTestObject(forkNPCID(91), npcTestOwner(91))}), "test"); err != nil {
 			t.Fatal(err)
 		}
@@ -503,7 +424,7 @@ func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
 		player.learnedSkills[definition.id] = 1
 		player.skillCooldowns[definition.id] = time.Now().Add(30 * time.Second)
 		player.mu.Unlock()
-		if err := handleSelectTargetCustom(world, warningToggleMessage(clientCustomSelectTarget,
+		if err := handleSelectTargetCustom(world, player, warningToggleMessage(clientCustomSelectTarget,
 			clientCustomValue{Type: 8, Raw: packTestObject(forkNPCID(91), npcTestOwner(91))}), "test"); err != nil {
 			t.Fatal(err)
 		}
@@ -587,13 +508,14 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		t.Fatalf("far movement emitted %d frames=%x, want 0 (client self-approach)", len(frames), frames)
 	}
 
-	// 窗口下界以下（距目标 4m ≤5.0）：零帧——外服私服走近直接 212[尾0] 落地，
-	// 不发 c61（b 4.41m 样本 3.61m 上报不触发实证）。
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(6, 0, 0, 0), "test"); err != nil || !handled {
-		t.Fatalf("below-window movement handled=%t err=%v", handled, err)
+	// v24：6m（冲刺带外）仅官方回显，无驱动帧（含 0x21 条目 s5=25）。
+	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(4, 0, 0, 0), "test"); err != nil || !handled {
+		t.Fatalf("out-of-band movement handled=%t err=%v", handled, err)
 	}
-	if got := len(conn.Frames()) - base; got != 0 {
-		t.Fatalf("below-window movement emitted %d frames, want 0", got)
+	for _, f := range conn.Frames()[base:] {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			t.Fatalf("out-of-band movement must not drive dash: %x", f)
+		}
 	}
 
 	// 走带外 212 且未发冲刺（2026-11-12 深夜方言更新，Java b 线
@@ -640,22 +562,19 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		t.Fatal(err)
 	}
 	base = len(conn.Frames())
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(4, 0, 0, 0), "test"); err != nil || !handled {
+	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(6, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("dash movement handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
-	if len(frames) != 6 || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 24 ||
-		int32(binary.LittleEndian.Uint32(frames[0][18:])) != msgRushCommand ||
-		frames[1][0] != 0x10 || binary.LittleEndian.Uint16(frames[1][12:]) != propRushCantMove {
-		t.Fatalf("dash frames=%x, want c61 cluster (6 frames)", frames)
+	var sawDash bool
+	for _, f := range frames {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 &&
+			math.Abs(float64(math.Float32frombits(binary.LittleEndian.Uint32(f[27:]))-rushDriveDashSpeedMeters)) < 0.01 {
+			sawDash = true
+		}
 	}
-	destX := math.Float32frombits(binary.LittleEndian.Uint32(frames[0][23:]))
-	destY := math.Float32frombits(binary.LittleEndian.Uint32(frames[0][28:]))
-	if destX != 8.5 || destY != 1.0 {
-		t.Fatalf("c61 dest=(%.2f,%.2f), want (8.5,1.0)", destX, destY)
-	}
-	if int32(binary.LittleEndian.Uint32(frames[0][38:])) != convertDashLevel {
-		t.Fatalf("c61 dash level=%x", frames[0])
+	if !sawDash {
+		t.Fatalf("dash frames=%x, want [106]+[0x21 s5=25] drive", frames)
 	}
 	if !player.rushDashIssuedSnapshot() {
 		t.Fatal("approach did not issue dash")
@@ -703,7 +622,7 @@ func TestRushMovementUpload220DrivesArrival(t *testing.T) {
 
 	upload220 := clientCustomMessage{Opcode: 0x1E, Values: []clientCustomValue{
 		{Type: 2, Int32: clientCustomRushMoveUpload},
-		{Type: 4, Float32: 4},
+		{Type: 4, Float32: 6},
 		{Type: 4, Float32: 0},
 		{Type: 4, Float32: 0},
 		{Type: 4, Float32: 0.5},
@@ -731,9 +650,15 @@ func TestRushMovementUpload220DrivesArrival(t *testing.T) {
 		t.Fatalf("dash 220 handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()[base:]
-	if len(frames) != 6 || int32(binary.LittleEndian.Uint32(frames[0][4:])) != 24 ||
-		int32(binary.LittleEndian.Uint32(frames[0][18:])) != msgRushCommand {
-		t.Fatalf("dash 220 frames=%x, want c61 dash cluster", frames)
+	var sawDash bool
+	for _, f := range frames {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 &&
+			math.Abs(float64(math.Float32frombits(binary.LittleEndian.Uint32(f[27:]))-rushDriveDashSpeedMeters)) < 0.01 {
+			sawDash = true
+		}
+	}
+	if !sawDash {
+		t.Fatalf("dash 220 frames=%x, want [106]+[0x21 s5=25] drive", frames)
 	}
 	if !player.rushDashIssuedSnapshot() {
 		t.Fatal("220 approach did not issue dash")
@@ -825,141 +750,137 @@ func TestUseSkillGroundPointTransform(t *testing.T) {
 	}
 }
 
-// 范围型点地三分带（技能.pcapng 定版）：≤3.5 直收零帧（55.5@1.45 无
-// c61）；3.5<d≤6.5 c61 档1 qg_fastrun（1216@5.52/+48ms、1275@3.96）；
-// >6.5 档2 qg_fastruning_s（b/e 8.2）。簇=0x1F 锚 + c61（无
-// CantMove/CantParry——那是锁定 c61 专属）；+400ms 落地三件套
-// msg26+0x1F+337（近似外服私服 1216.720）。
+// 范围型点地冲刺（v28 用户真机定版 2026-11-16）：≤3.5 直收零帧；
+// 落点=点选平面点本体（非身前 bind）；地面=25+State=run 跑步动画；
+// 高→低落差>1.5=空中档 15+c61 flag2。簇=[106]+[c61]+[State=run]+[0x21]。
 func TestAreaGroundRushDashTierSelection(t *testing.T) {
 	definition := combatSkillDefinition{
 		id: "CS_jh_hyjf07", canRush: true, castRange: 15,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
+		airRushAction: "qg_fastruning_s_2h_01",
 	}
-	newCase := func(gx float32) (*captureMessageConnection, worldcore.Transform) {
+	newCase := func(castAt, ground worldcore.Transform) *captureMessageConnection {
 		conn := &captureMessageConnection{}
-		castAt := worldcore.Transform{X: 0, Y: 0, Z: 0}
-		issueAreaGroundRushDash(conn, newPlayerActor("点地侠", 0), definition, castAt,
-			worldcore.Transform{X: gx, Y: 0, Z: 0}, "test")
-		return conn, castAt
+		issueAreaGroundRushDash(conn, newPlayerActor("点地侠", 0), definition, castAt, ground, "test")
+		return conn
 	}
 
-	conn, _ := newCase(2) // ≤3.5：直收，主路径处理，零帧。
+	conn := newCase(worldcore.Transform{}, worldcore.Transform{X: 2}) // ≤3.5：直收，主路径处理，零帧。
 	if got := len(conn.Frames()); got != 0 {
 		t.Fatalf("near-ground emitted %d frames, want 0", got)
 	}
 
-	conn, castAt := newCase(5) // 档1 带。
+	// v28 地面：[106]+[c61 flag1]+[State=run]+[0x21 s5=25 dest=点选点本体]
+	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 5})
 	frames := conn.Frames()
-	if len(frames) != 2 || frames[0][0] != 0x1F ||
-		int32(binary.LittleEndian.Uint32(frames[1][4:])) != 24 ||
-		int32(binary.LittleEndian.Uint32(frames[1][18:])) != msgRushCommand ||
-		int32(binary.LittleEndian.Uint32(frames[1][38:])) != 1 {
-		t.Fatalf("tier1 frames=%x, want 0x1F + c61 tier1", frames)
+	if len(frames) != 4 || frames[0][0] != 0x10 || binary.LittleEndian.Uint16(frames[0][12:]) != propRushLogicState ||
+		frames[1][0] != 0x1e || int32(binary.LittleEndian.Uint32(frames[1][18:])) != msgRushCommand ||
+		frames[3][0] != 0x21 || len(frames[3]) != 47 || binary.LittleEndian.Uint32(frames[3][43:]) != 1 {
+		t.Fatalf("area drive frames=%x, want [106]+[c61]+[State=run]+[0x21 47B]", frames)
 	}
-	// c61 终点 = ground 身前 bind（外服私服 1216 dash=dist-1.5）。
-	destX := binary.LittleEndian.Uint32(frames[1][23:])
-	if math.Abs(float64(math.Float32frombits(destX)-3.5)) > 0.01 {
-		t.Fatalf("tier1 dest x = %v, want 3.5 (ground 5 - bind 1.5)", math.Float32frombits(destX))
+	if got := math.Float32frombits(binary.LittleEndian.Uint32(frames[3][27:])); math.Abs(float64(got-rushDriveDashSpeedMeters)) > 0.01 {
+		t.Fatalf("area drive s5=%v, want 25", got)
 	}
-	_ = castAt
+	destX := binary.LittleEndian.Uint32(frames[3][11:])
+	if math.Abs(float64(math.Float32frombits(destX)-5)) > 0.01 {
+		t.Fatalf("area drive dest x = %v, want 5 (clicked point itself)", math.Float32frombits(destX))
+	}
+	// State=run 动画行（0x10 单属性串帧，v8 实证拖动期动画通道）。
+	if frames[2][0] != 0x10 || binary.LittleEndian.Uint16(frames[2][12:]) != npcStatePropertyIndex ||
+		!bytes.Contains(frames[2], []byte("run")) {
+		t.Fatalf("area ground drive must carry State=run, frame=%x", frames[2])
+	}
 
-	conn, _ = newCase(8) // 档2 带。
-	frames = conn.Frames()
-	if len(frames) != 2 || int32(binary.LittleEndian.Uint32(frames[1][38:])) != 2 {
-		t.Fatalf("tier2 frames=%x, want 0x1F + c61 tier2", frames)
+	// v28 高→低（落差 4m）：空中档 15 + c61 flag2，无 State=run。
+	conn = newCase(worldcore.Transform{Y: 4}, worldcore.Transform{X: 8})
+	frames2 := conn.Frames()
+	if len(frames2) != 3 || frames2[2][0] != 0x21 || len(frames2[2]) != 47 {
+		t.Fatalf("area air frames=%x, want [106]+[c61 flag2]+[0x21]", frames2)
+	}
+	if got := math.Float32frombits(binary.LittleEndian.Uint32(frames2[2][27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) > 0.01 {
+		t.Fatalf("area air drive s5=%v, want 15", got)
+	}
+	c61 := decodeCustomValuesFrame(t, frames2[1])
+	if len(c61) < 7 || c61[6].Type != 2 || c61[6].Int32 != 2 {
+		t.Fatalf("area air c61 flag = %+v, want 2", c61)
+	}
+
+	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 12}) // 远距同款
+	frames3 := conn.Frames()
+	if len(frames3) != 4 || frames3[3][0] != 0x21 || len(frames3[3]) != 47 {
+		t.Fatalf("area far frames=%x, want [106]+[c61]+[State]+[0x21]", frames3)
 	}
 }
 
-// TestRushApproachWalkDriveAndSentinel 服务端驱动接近 v3（2026-11-15 逆向
-// 定版）：受理簇 + 单条目 0x21 主玩家走位驱动（intent=0x2B01 白名单态）；
-// 落地哨对「从未移动」兜底 bind 点直收（walk-in 落地簇）；客户端位移推进
-// 则让位 212 链；off 关闭回归纯 9 帧受理方言。
-func TestRushApproachWalkDriveAndSentinel(t *testing.T) {
+// TestRushDashBandDrive v24 终版（用户拍板）：受理簇纯官方 9 帧（服务端
+// 不再控制步行）；客户端移动上报进入冲刺带 (3,5] 触发 25m/s 冲刺驱动
+// （逃逸门方言 [106]+[0x21]），ETA 到点 bind（1~1.5m）直接释放。
+func TestRushDashBandDrive(t *testing.T) {
 	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 91)
+	placeTestNPC(t, world, 91, 20, 0)
 	player := newPlayerActor("冲锋侠", 0)
 	definition := combatSkillDefinition{id: "CS_rush_far", canRush: true, script: "skilllock",
-		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-	oldInterval := rushWalkSentinelInterval
-	oldSpeed, oldSlack := rushWalkDriveSpeed, rushWalkSentinelETASlack
-	rushWalkSentinelInterval = 40 * time.Millisecond
-	rushWalkDriveSpeed, rushWalkSentinelETASlack = 1e9, 0 // ETA≈0：首查=复查间隔
-	defer func() {
-		rushWalkSentinelInterval = oldInterval
-		rushWalkDriveSpeed, rushWalkSentinelETASlack = oldSpeed, oldSlack
-	}()
+		bindDistance: defaultRushBindDistance, castRange: 3, groundRushAction: defaultGroundRushAction}
+	player.mu.Lock()
+	player.learnedSkills[definition.id] = 1
+	player.mu.Unlock()
+	if err := handleSelectTargetCustom(world, player, warningToggleMessage(clientCustomSelectTarget,
+		clientCustomValue{Type: 8, Raw: packTestObject(forkNPCID(91), npcTestOwner(91))}), "test"); err != nil {
+		t.Fatal(err)
+	}
 
-	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, world, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
 		t.Fatal(err)
 	}
-	frames := conn.Frames()
-	if len(frames) != 12 { // 9 受理簇 + 逃逸门三明治（LogicState 置/0x21 驱动/还原）
-		t.Fatalf("approach staging frames=%d, want 9+3 drive", len(frames))
-	}
-	if idx := binary.LittleEndian.Uint16(frames[9][12:]); idx != propRushLogicState {
-		t.Fatalf("escape-set frame idx=%d, want LogicState", idx)
-	}
-	drive := frames[10]
-	if drive[0] != 0x21 || binary.LittleEndian.Uint16(drive[1:]) != 1 || len(drive) != 47 {
-		t.Fatalf("walk drive frame=%x, want 47B single-entry 0x21", drive)
-	}
-	if got := binary.LittleEndian.Uint32(drive[43:]); got != 1 {
-		t.Fatalf("walk drive intent=%#x, want 0x1 (escape-gate dialect, NPC-style)", got)
-	}
-	if got := math.Float32frombits(binary.LittleEndian.Uint32(drive[27:])); math.Abs(float64(got-4.5)) > 0.01 {
-		t.Fatalf("walk drive speed=%v, want 4.5", got)
-	}
-	if player.rushDashIssuedSnapshot() {
-		t.Fatal("approach staging must not issue c61 (drive replaces dead channel)")
+	if got := len(conn.Frames()); got != 12 { // 选靶应答2 + 纯官方受理簇9（步行驱动已撤）
+		t.Fatalf("staging frames=%d, want 11", got)
 	}
 
-	// 落地哨：站立无位移 → 兜底 bind 点直收（walk-in 落地簇 15 帧）。
-	time.Sleep(200 * time.Millisecond)
-	landing := conn.Frames()[12:]
-	if len(landing) != 15 {
-		t.Fatalf("sentinel fallback landing frames=%d, want 15-frame walk-in cluster+state-ping", len(landing))
+	// 客户端自走进入冲刺带：位置 (16,0,0) → 距目标 4m ∈ (3,5]
+	base := len(conn.Frames())
+	if _, err := handleMovementUpload(conn, player, world,
+		walkUploadMessage(-1610608895, 7, 16, 0, 0, 20, 0, 4.5, 0), "test"); err != nil {
+		t.Fatal(err)
 	}
-	if landing[0][0] != 0x10 || binary.LittleEndian.Uint16(landing[0][12:]) != propRushPauseSkill {
-		t.Fatalf("walk-in fallback starts with PauseSkill clear, got %x", landing[0])
+	frames := conn.Frames()[base:]
+	var sawGate, sawDash bool
+	for _, f := range frames {
+		if f[0] == 0x10 && len(f) >= 14 && binary.LittleEndian.Uint16(f[12:]) == propRushLogicState {
+			sawGate = true
+		}
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-rushDriveDashSpeedMeters)) < 0.01 {
+				if dx := math.Float32frombits(binary.LittleEndian.Uint32(f[11:])); math.Abs(float64(dx-18.5)) < 0.05 {
+					sawDash = true
+				}
+			}
+		}
+	}
+	if !sawGate || !sawDash {
+		t.Fatalf("dash band must trigger [106]+[0x21 s5=25 dest=bind], gate=%t dash=%t frames=%x", sawGate, sawDash, frames)
+	}
+	if !player.rushDashIssuedSnapshot() {
+		t.Fatal("dash band must mark dash issued")
+	}
+
+	// ETA（(4-1.5)/25+0.12≈0.22s）后：还原 + bind 释放（落地簇 0x1F 锚）
+	time.Sleep(500 * time.Millisecond)
+	sawLanding := false
+	for _, f := range conn.Frames()[base+len(frames):] {
+		if f[0] == 0x1F {
+			sawLanding = true
+		}
+	}
+	if !sawLanding {
+		t.Fatal("dash ETA must land (0x1F anchors)")
 	}
 	if player.peekPendingCast(time.Now()) != nil || player.rushInFlightSnapshot() {
-		t.Fatal("sentinel fallback must consume pending and clear in-flight state")
-	}
-
-	// 客户端自行移动（m15 推进）：落地哨让位 212 walk-in，不得兜底。
-	conn2 := &captureMessageConnection{}
-	player2 := newPlayerActor("冲锋侠乙", 0)
-	if _, err := stageRushCast(conn2, player2, nil, definition, forkNPCID(91), npcTestOwner(91),
-		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
-		t.Fatal(err)
-	}
-	base := len(conn2.Frames())
-	// 连续行走流（真实客户端行走期持续 m15 上报；单帧即停=停步兜底路径）。
-	for i := 0; i < 6; i++ {
-		if _, err := handleMovementUpload(conn2, player2, nil,
-			walkUploadMessage(-1610608895, 7, float32(5+i*2), 0, 0, 20, 0, 4.5, 0), "test"); err != nil { // 0xA0000F01
-			t.Fatal(err)
-		}
-		time.Sleep(35 * time.Millisecond)
-	}
-	extra := conn2.Frames()[base:]
-	if len(extra) >= 15 { // 兜底 walk-in 簇=15 帧，绝不能出现
-		t.Fatalf("moving client got %d extra frames, want echo-only (<15, no fallback cluster)", len(extra))
-	}
-	if player2.peekPendingCast(time.Now()) == nil || player2.rushDashIssuedSnapshot() {
-		t.Fatal("moving client must keep pending alive (no fallback, no c61)")
-	}
-
-	// NINEYIN_RUSH_APPROACH=off：受理簇回归纯 9 帧（被动等客户端方言）。
-	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
-	conn3 := &captureMessageConnection{}
-	player3 := newPlayerActor("冲锋侠丙", 0)
-	if _, err := stageRushCast(conn3, player3, nil, definition, forkNPCID(91), npcTestOwner(91),
-		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
-		t.Fatal(err)
-	}
-	if got := len(conn3.Frames()); got != 9 {
-		t.Fatalf("approach-off staging frames=%d, want 9", got)
+		t.Fatal("dash landing must consume pending")
 	}
 }
-

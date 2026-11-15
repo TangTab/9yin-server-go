@@ -507,3 +507,32 @@ func TestDisabledHost(t *testing.T) {
 		t.Fatal("disabled Passive must be nil")
 	}
 }
+
+func TestHookConvertsBruiseRestoreForms(t *testing.T) {
+	e := newTestEffects(t, "testdata", &logSink{})
+	// 裸数值形态。
+	effect := e.Hook("probe_bruise", "on_victim", probeCtx())
+	if effect == nil || effect.BruiseRestore == nil || effect.BruiseRestore.Amount != 88 {
+		t.Fatalf("bare-number BruiseRestore = %+v", effect)
+	}
+	// {amount} 表形态。
+	effect = e.Hook("probe_bruise", "on_parry", probeCtx())
+	if effect == nil || effect.BruiseRestore == nil || effect.BruiseRestore.Amount != 120 {
+		t.Fatalf("table-amount BruiseRestore = %+v", effect)
+	}
+	// {percent} 表形态。
+	effect = e.Hook("probe_bruise", "on_dodge", probeCtx())
+	if effect == nil || effect.BruiseRestore == nil || effect.BruiseRestore.Percent != 0.3 {
+		t.Fatalf("table-percent BruiseRestore = %+v", effect)
+	}
+	// percent 越界 (0,1]：整条丢弃并 WARN。
+	sink := &logSink{}
+	e = newTestEffects(t, "testdata", sink)
+	effect = e.Hook("probe_bruise", "on_periodic", probeCtx())
+	if effect != nil {
+		t.Fatalf("out-of-range percent must drop whole effect, got %+v", effect)
+	}
+	if !sink.has("bruise_restore") {
+		t.Fatalf("missing WARN for out-of-range percent: %v", sink.lines)
+	}
+}

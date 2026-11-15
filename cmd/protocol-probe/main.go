@@ -952,14 +952,47 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("宝箱存留已关闭：宝箱保留到被拾空")
 			}
 			log.Printf("%s: GM set lootbox ttl=%ds", conn.RemoteAddr(), seconds)
-		case "set_npc_chase":
-			enabled := setNPCChaseEnabled(command.Enabled == 1)
-			if enabled {
-				gmSession.setAction("NPC 自动追击已开启：怪沿路点图寻路折线逼近（无图场景直线贴地）")
-			} else {
-				gmSession.setAction("NPC 自动追击已关闭：仇恨照常持有，怪停在出生点（冲锋测试方言）")
-			}
-			log.Printf("%s: GM set npc chase enabled=%v", conn.RemoteAddr(), enabled)
+			case "set_npc_chase":
+				enabled := setNPCChaseEnabled(command.Enabled == 1)
+				if enabled {
+					gmSession.setAction("NPC 自动追击已开启：怪沿路点图寻路折线逼近（无图场景直线贴地）")
+				} else {
+					gmSession.setAction("NPC 自动追击已关闭：仇恨照常持有，怪停在出生点（冲锋测试方言）")
+				}
+				log.Printf("%s: GM set npc chase enabled=%v", conn.RemoteAddr(), enabled)
+			case "set_npc_feint":
+				// 选中怪虚招标记：被标怪的攻击按虚招结算（命中格挡中的
+				// 玩家即破防 + 不可格挡窗）。作用于当前角色的选中目标。
+				if runtime == nil || runtime.world == nil || runtime.world.run == nil {
+					gmSession.setAction("虚招标记失败：角色尚未进入场景")
+					return fmt.Errorf("character has not entered a scene")
+				}
+				feintRun := runtime.world.run
+				feintRun.mu.Lock()
+				selected := runtime.world.selectedObject
+				if selected != 0 && feintRun.npcFeintMarks == nil {
+					feintRun.npcFeintMarks = map[uint32]bool{}
+				}
+				marked := false
+				if selected != 0 {
+					marked = command.Enabled == 1
+					if marked {
+						feintRun.npcFeintMarks[selected] = true
+					} else {
+						delete(feintRun.npcFeintMarks, selected)
+					}
+				}
+				feintRun.mu.Unlock()
+				if selected == 0 {
+					gmSession.setAction("虚招标记失败：请先点选一只怪物作为目标")
+					return fmt.Errorf("no selected target")
+				}
+				if marked {
+					gmSession.setAction(fmt.Sprintf("怪物 %d 已标记为虚招：攻击命中格挡中的角色将击破格挡并禁格挡 3 秒（官方 buf_CantParry 方言）", selected))
+				} else {
+					gmSession.setAction(fmt.Sprintf("怪物 %d 的虚招标记已移除：攻击恢复普通（被格挡零伤）", selected))
+				}
+				log.Printf("%s: GM set npc feint id=%d enabled=%v", conn.RemoteAddr(), selected, marked)
 		case "spawn_chest":
 			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
 				gmSession.setAction("世界宝箱生成失败：角色尚未进入场景")
@@ -3148,6 +3181,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				player.setEquipAttributeAdds(equipAttributeSums(equips, randomPropsStore.LoadAll(ctx, activeRole.ID)))
 			}
 
+			// 姿态(LogicState)完全交由客户端 Z 持剑切换（m292）与战斗临场感
+			// 管理：强制出生预警(2)会把客户端切换状态机搞反（60107 会话
+			// m292×73 重试全失败=按 Z 时客户端以为自己在 0、期待回 2，我们
+			// 却按服务端态 2 回 0）；持剑(2)正是右键格挡的前置。
 			if err := sendPlayerSpawn(link, player, activeRole.Location.Position, visual); err != nil {
 				log.Printf("%s: write player spawn chain: %v", conn.RemoteAddr(), err)
 				return
@@ -3353,6 +3390,25 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						return
 					}
 					log.Printf("%s: restored View=43 inner-power and View=40 花无缺七招 after 0x0C re-entry", conn.RemoteAddr())
+					// 角色栏信息同口径补推（2026-11-15 真机「切图后角色栏信息
+					// 没有下发」）：官方切图=第二爆发整段重演（wholesale 两相位
+					// 定案），登录 ClientReady 的就绪信息簇（m607 账号/角色名 →
+					// m52 服务器时间 → m586 就绪头）+ 登录 buff 重登记舞步 +
+					// 限时 buff 重放 + 战斗属性全量单帧簇均随 0x0C 清对象丢失，
+					// 此处整推重建（与 spawn 后 ClientReady 推送同序同源）。
+					writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), player.name, time.Now())
+					writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
+					if timedFrames, terr := player.timedBuffLoginReplayFrames(time.Now()); terr != nil {
+						log.Printf("%s: replay timed buffs after 0x0C re-entry: %v", conn.RemoteAddr(), terr)
+					} else {
+						for _, frame := range timedFrames {
+							if werr := link.WriteFrame(frame); werr != nil {
+								log.Printf("%s: write timed buff replay after 0x0C re-entry: %v", conn.RemoteAddr(), werr)
+								break
+							}
+						}
+					}
+					writeOfficialCombatAttributeFrames(link, player, conn.RemoteAddr().String())
 					// 邮件/坐骑记录行挂玩家对象，0x0C 已随对象清空——重入后
 					// 整表重放（镜像计数先归零：客户端已无旧行可删，外观域
 					// 同口径；Java lettersGranted/mountsPushed 重入复位）。
@@ -4030,7 +4086,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: handle active parry: %v", conn.RemoteAddr(), handleErr)
 					}
 				case clientCustomSelectTarget:
-					if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
+					if handleErr := handleSelectTargetCustom(world, player, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
 					}
 				case clientCustomAttackTarget:
@@ -4056,7 +4112,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					}
 				case clientCustomChannelSync:
 					// 通道技能逐段位置上报（m914，挑战.pcapng）：窗口外静默。
-					if _, handleErr := handleChannelSyncCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					if _, handleErr := handleChannelSyncCustom(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 						log.Printf("%s: handle channel sync: %v", conn.RemoteAddr(), handleErr)
 					}
 				case clientCustomRushMoveUpload:
@@ -4327,7 +4383,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					log.Printf("%s: handle active parry: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomSelectTarget:
-				if handleErr := handleSelectTargetCustom(world, custom, conn.RemoteAddr().String()); handleErr != nil {
+				if handleErr := handleSelectTargetCustom(world, player, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle select target: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomBlockState:
@@ -4349,7 +4405,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				}
 			case clientCustomChannelSync:
 				// 通道技能逐段位置上报（m914，挑战.pcapng）：窗口外静默。
-				if _, handleErr := handleChannelSyncCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+				if _, handleErr := handleChannelSyncCustom(link, player, world, custom, conn.RemoteAddr().String()); handleErr != nil {
 					log.Printf("%s: handle channel sync: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomMoveItem:

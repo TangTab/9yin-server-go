@@ -12,6 +12,14 @@ import (
 func TestHandleSelectTargetCustom(t *testing.T) {
 	conn := &captureMessageConnection{}
 	lifecycle := newSceneLifecycle("test", conn)
+	player := newPlayerActor("tester", 0)
+	t.Cleanup(func() {
+		player.mu.Lock()
+		if player.skillPauseTimer != nil {
+			player.skillPauseTimer.Stop()
+		}
+		player.mu.Unlock()
+	})
 	if err := lifecycle.begin("scene", "resource", nil); err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +41,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 		}}
 	}
 
-	if err := handleSelectTargetCustom(lifecycle, selectMsg(4456, npcTestOwner(4456)), "test"); err != nil {
+	if err := handleSelectTargetCustom(lifecycle, player, selectMsg(4456, npcTestOwner(4456)), "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()
@@ -61,7 +69,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 	}
 
 	// 取消选择（msgId 440 之后客户端跟发 431 obj(0,0)）。
-	if err := handleSelectTargetCustom(lifecycle, selectMsg(0, 0), "test"); err != nil {
+	if err := handleSelectTargetCustom(lifecycle, player, selectMsg(0, 0), "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
@@ -74,7 +82,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 	}
 
 	// 未知对象：报错且不追加帧。
-	if err := handleSelectTargetCustom(lifecycle, selectMsg(9999, 1), "test"); err == nil {
+	if err := handleSelectTargetCustom(lifecycle, player, selectMsg(9999, 1), "test"); err == nil {
 		t.Fatal("unknown target accepted")
 	}
 	if got := len(conn.Frames()); got != 5 {
@@ -83,7 +91,7 @@ func TestHandleSelectTargetCustom(t *testing.T) {
 
 	// 形状校验：第二个值必须是 raw16 对象。
 	bad := clientCustomMessage{Values: []clientCustomValue{{Type: 2, Int32: clientCustomSelectTarget}, {Type: 2, Int32: 4456}}}
-	if err := handleSelectTargetCustom(lifecycle, bad, "test"); err == nil {
+	if err := handleSelectTargetCustom(lifecycle, player, bad, "test"); err == nil {
 		t.Fatal("non-object target accepted")
 	}
 }

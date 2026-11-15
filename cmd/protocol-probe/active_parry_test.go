@@ -62,8 +62,8 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 		t.Fatalf("engage must not touch SP: %d -> %d", spBefore, got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 7 {
-		t.Fatalf("engage frames=%d, want official six-frame order (5 props + notice + InManualParry)", len(frames))
+	if len(frames) != 9 {
+		t.Fatalf("engage frames=%d, want ack cluster + ParryValue + transient fight stance", len(frames))
 	}
 	notice, state := frames[5], frames[0]
 	if notice[0] != 0x1E || binary.LittleEndian.Uint16(notice[1:]) != 9 {
@@ -102,7 +102,7 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if err := handleBlockStateCustom(conn, player, blockMsg(0), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 7 {
+	if got := len(conn.Frames()); got != 9 {
 		t.Fatalf("duplicate engage appended frames: %d", got)
 	}
 
@@ -110,13 +110,13 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 	if err := handleBlockStateCustom(conn, player, blockMsg(1), "test"); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(conn.Frames()); got != 14 {
-		t.Fatalf("release frames=%d, want official seven-frame release order", got)
+	if got := len(conn.Frames()); got != 17 {
+		t.Fatalf("release frames=%d, want seven-frame order + stance restore", got)
 	}
 	// 松开第 2 帧=BufferInfo4 清空串（a.pcapng 5.7s 'BufferInfo4='；
 	// u32 长度 1 + NUL → 帧长 12+2+4+1=19，且不含 0x11CE 槽串）。
 	frames = conn.Frames()
-	clear := frames[8]
+	clear := frames[10]
 	if clear[0] != 0x10 || binary.LittleEndian.Uint16(clear[12:]) != propParryTokenBufferInfo4 {
 		t.Fatalf("parry clear frame=%x (want BufferInfo4 single-prop)", clear)
 	}
@@ -133,13 +133,13 @@ func TestBlockStateEngageAndRelease(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames = conn.Frames()
-	if got := len(frames); got != 21 {
+	if got := len(frames); got != 24 {
 		t.Fatalf("stray release frames=%d, want official release order resync", got)
 	}
-	if frames[14][0] != 0x1E || !bytes.Contains(frames[14], []byte("BuffInParry\x00")) {
-		t.Fatalf("stray resync missing 169 remove event: %x", frames[14])
+	if frames[17][0] != 0x1E || !bytes.Contains(frames[17], []byte("BuffInParry\x00")) {
+		t.Fatalf("stray resync missing 169 remove event: %x", frames[17])
 	}
-	if flag := binary.LittleEndian.Uint32(frames[14][9:13]); flag != 1 {
+	if flag := binary.LittleEndian.Uint32(frames[17][9:13]); flag != 1 {
 		t.Fatalf("stray resync 169 end flag=%d, want 1 (release)", flag)
 	}
 	if player.parryingSnapshot() {
@@ -165,7 +165,7 @@ func TestParryBuffSerialNoExpiry(t *testing.T) {
 	}
 	want := fmt.Sprintf("%X,%X,%X,1,0,0", parryBuffStaticData, playerObjectID, playerOwnerID)
 	frames := conn.Frames()
-	if len(frames) != 7 || !bytes.Contains(frames[4], []byte(want)) {
+	if len(frames) != 9 || !bytes.Contains(frames[4], []byte(want)) {
 		t.Fatalf("parry serial want official no-expiry CSV %q in BufferInfo4 frame, frames=%x", want, frames)
 	}
 }
@@ -252,11 +252,11 @@ func TestChangeWarningRejectsExtraPayloadWhileCastingAndWhileParrying(t *testing
 	if handled, err := handleChangeWarningCustom(conn, player, warningMsg, "test"); err != nil || !handled {
 		t.Fatalf("parrying reject handled=%t err=%v", handled, err)
 	}
-	if got := player.logicStateSnapshot(); got != 0 {
-		t.Fatalf("parrying toggle flipped state to %d", got)
+	if got := player.logicStateSnapshot(); got != 1 {
+		t.Fatalf("parrying engage should hold transient fight stance, got %d", got)
 	}
 	// 至此连接上只有格挡按下产生的外服私服七帧序（预警拒绝不回帧）。
-	if frames := conn.Frames(); len(frames) != 7 {
+	if frames := conn.Frames(); len(frames) != 9 {
 		t.Fatalf("warning rejections emitted frames: %x", frames)
 	}
 }

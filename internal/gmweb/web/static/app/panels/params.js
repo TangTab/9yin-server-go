@@ -52,6 +52,26 @@ function renderRespawn(host) {
       }),
     ])
   );
+  body.appendChild(
+    h("div", { class: "field-row" }, [
+      h("p", { class: "desc" }, [
+        "虚招标记：先在游戏里点选一只怪物，再勾选应用——被标怪的攻击按虚招结算，命中格挡中的角色会击破格挡并禁格挡 2 秒；常规怪攻击被格挡零伤。",
+      ]),
+    ])
+  );
+  const feint = h("input", { type: "checkbox", checked: false });
+  feint.style.cssText = "width:16px;height:16px;accent-color:var(--gm-gold);";
+  body.appendChild(
+    h("div", { class: "field-row" }, [
+      h("label", {}, ["选中怪为虚招"]), feint,
+      actionBtn({
+        label: "应用虚招标记",
+        build: () => ({ action: "set_npc_feint", enabled: feint.checked }),
+        okText: feint.checked ? "选中怪已标记为虚招" : "选中怪虚招标记已移除",
+        section: "怪物刷新",
+      }),
+    ])
+  );
   host.appendChild(section);
 }
 

@@ -129,15 +129,8 @@ officialTimeSyncReplyFrame 改外服私服帧级方言：[294, client_ms 回显,
 
 player_actor.go：0x0D 档 WalkSpeed 7.5→1.28（旧值系与 DriftSpeed 混淆）、MoveSpeed=RunSpeed 5.0→3.9（服务端无模拟消费方，仅属性下发，零风险）
 验证
-冲锋/移动/时钟域全部测试更新通过（10→8 帧、rearm 11 帧、m294 五值形状含 reqid/常量断言）
-go build ./... 通过；全量测试仅剩 TestShapedMultihitPicksUpNewEntrants（干净树上同样失败的既有问题）和 QiangHua 两个 flaky（干净树 2/4 次也失败）——均与本次改动无关
-文档 P0a 已标注「已落地」三项明细
-下一步（真机复测）
-重新构建部署到 F:（deploy.bat 或手动拷 protocol-probe.exe）；
-远距按 hyjf02（≥20m）：观察是否自走——同时抓 NINEYIN_CAPTURE_DIR tap；
-若仍不武装：下一步就按文档 P0a-4 给 tap 加时间戳 + 客户端 bin64/trace.log 定位武装失败点（P2「物理属性 60 连发形态」也备着）。
-要我顺手把这次改动 commit 吗？
-
+空中突然落地，本来该释放技能，但立即落地才释放技能、
+短距离冲锋 地面和空中 不同（3m）
 
 
 坐骑
@@ -163,3 +156,5 @@ Mount 属性非空是否驱动引擎挂模型动画（候选补发 CurRideMount@
 BingLuType@2153 恒 0 是否足够（外服私服未观测到非零；可能关联笛类/奇门展示开关）
 984 回执的 12 行摊平列序（cur,fill,max/行 vs 其他组合——客户端 set_binglu_info 按逗号 split 后按下标取）
 兵录熟练度随战斗上涨的投放（fill 值——Java 也只有 GM 设置，官方按武器类型击中数积累，捕获无样本；需要时可在击杀链按当前武器类型 +fill）
+
+格挡

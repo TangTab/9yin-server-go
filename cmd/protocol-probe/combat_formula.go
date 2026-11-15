@@ -138,6 +138,46 @@ var combatRandomFloat64 = rand.Float64
 
 func randFloat64() float64 { return combatRandomFloat64() }
 
+// npcAttackDamageInput 是 NPC 普攻掷值的守方快照（玩家侧面板）。
+type npcAttackDamageInput struct {
+	phyDef    float64 // 玩家外防（对数减伤曲线入参）
+	resilience float64 // 玩家封劲（暴击公式分母项；未成长=0）
+}
+
+// npcCritValue 是 NPC 普攻的暴击值（与玩家白板同 16，口径见
+// player_progress 建号默认 phyVa=16）。
+const npcCritValue = 16.0
+
+// rollNPCAttackDamage 结算一次 NPC 普攻伤害（2026-11-15 NPC 伤害公式
+// 接入）：攻方面板=实力包推导 attackPower，区间 ±20% 掷值后走
+// combatFormulasCalc 全公式（外防对数减伤 × ratio 1.0 + 暴击掷 5-15%）。
+// 命中/闪避不在此掷——受击裁定的闪避出口（dodgeChance：基础 10% +
+// 内功被动/闪避窗）由 resolveNPCAttack 拥有，此处 missRoll 固定 1.0
+// 强制命中，避免双重闪避。攻方数值缺失（表未装载）返回 0，调用方
+// 回落旧常量伤害 npcAttackDamage。
+func rollNPCAttackDamage(stats *npcCombatStats, defender npcAttackDamageInput) int32 {
+	if stats == nil || stats.attackPower <= 0 {
+		return 0
+	}
+	attack := float64(stats.attackPower)
+	variance := 0.2 * attack
+	attack += math.Floor(randFloat64() * (2*variance + 1)) - variance
+	result := combatFormulasCalc(combatFormulaInput{
+		attack:    attack,
+		defense:   defender.phyDef,
+		accuracy:  float64(stats.accuracy),
+		critValue: npcCritValue,
+		resilience: defender.resilience,
+		ratio:     1.0,
+		missRoll:  1.0, // 强制命中：闪避判定归 resolveNPCAttack
+		critRoll:  randFloat64(),
+	})
+	if result.miss {
+		return 0
+	}
+	return result.damage
+}
+
 // combatRoll 是一次掷骰产物（Java RollResult 同构）：damage=0 即未命中。
 type combatRoll struct {
 	damage int32

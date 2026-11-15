@@ -182,6 +182,18 @@ func (p *playerActor) hookNeiGong(event string, rollSalt uint64, rollOID uint32,
 	if effect.Heal > 0 {
 		p.vitals.ApplyHeal(int32(effect.Heal))
 	}
+	if effect.BruiseRestore != nil {
+		// 瘀血层转气血（bruise_restore）：percent 形态按受击时快照的
+		// 层厚折算（活血 30-50% 等）；点数形态直传。转换受层厚上限，
+		// 常规 0x10 面板已含 HitHP/HitHPRatio，无需额外帧。
+		bruiseAmount := effect.BruiseRestore.Amount
+		if bruiseAmount <= 0 && effect.BruiseRestore.Percent > 0 {
+			bruiseAmount = int64(float64(snapshot.HitHP-snapshot.HP) * effect.BruiseRestore.Percent)
+		}
+		if bruiseAmount > 0 {
+			p.vitals.RestoreBruisedLayer(int32(bruiseAmount))
+		}
+	}
 	if effect.MPRestore > 0 {
 		p.vitals.RestoreMP(int32(effect.MPRestore))
 	}

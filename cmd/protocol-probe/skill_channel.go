@@ -374,9 +374,10 @@ func launchChannelWaves(link sceneMessageConnection, world *sceneLifecycle, defi
 
 // channelWaveEffectFrame 即 msg24 c1=71 通道逐波效果帧
 // （挑战.pcapng 满跳 4×8+2=34 帧与跳数严格相等）。**第 11 值=当波
-// 动作名**（2026-11-12 真机三轮「瞬移有动作但无动画」根因：外服私服波 2~8
-// 尾值=qzj_07_2..qzj_07_8 递增——客户端按名逐波播放挥砍动作，首波空串
-// =动画由受理 m20 的段 1 动作 qzj_07_1 驱动）：
+// 动作名**（2026-11-12 真机三轮「瞬移有动作但无动画」根因：客户端按名
+// 逐波播放挥砍动作。官服方言=首波空串+波 2~8 尾值 qzj_07_2..qzj_07_8
+// 递增；用户 2026-11-15 真机拍板改为逐波全发、序号从 2 递增，见
+// channelWaveActionName）：
 // [24, victim, 71, victim, '', 1, caster, 30.0, 0.0, '', waveAction]。
 func channelWaveEffectFrame(victimID, victimOwner uint32, waveAction string) ([]byte, error) {
 	return serverCustomIntMessage(24,
@@ -393,18 +394,19 @@ func channelWaveEffectFrame(victimID, victimOwner uint32, waveAction string) ([]
 	)
 }
 
-// channelWaveActionName 波 N 的动作名：首波空串（受理 m20 已驱动），
-// 波 2..N=<动作基名>_<波号>（qzj_07_1 → qzj_07_2..qzj_07_8 递增，
-// 外服私服 4 满跳逐位复现；基名=definition.actionName 去尾 "_1"）。
+// channelWaveActionName 波 N 的动作名：逐波全发 <动作基名>_<波号+1>，
+// 序号从 2 递增（qzj_07_1 → 波 1=qzj_07_2 … 波 8=qzj_07_9；用户
+// 2026-11-15 真机拍板，覆盖官服方言——官服首波空串=动画由受理 m20 的
+// 段 1 动作 qzj_07_1 驱动、波 2~8=qzj_07_2.._8 逐位复现，我方真机首波
+// 空串不触发动画）。注意波 8=qzj_07_9 超出客户端动作表
+//（pre_mutual_action.ini 仅 _1.._8），末波按缺名处理；
+// 基名=definition.actionName 去尾 "_1"。
 func channelWaveActionName(actionName string, waveIndex int) string {
-	if waveIndex == 0 {
-		return ""
-	}
 	base := strings.TrimSuffix(actionName, "_1")
 	if base == actionName {
 		return actionName // 无 _1 后缀的异构动作名：全波同名兜底
 	}
-	return fmt.Sprintf("%s_%d", base, waveIndex+1)
+	return fmt.Sprintf("%s_%d", base, waveIndex+2)
 }
 
 // handleChannelSyncCustom 受理 C2S m914 通道逐段位置上报
@@ -412,7 +414,7 @@ func channelWaveActionName(actionName string, waveIndex int) string {
 // 0~200ms；尾参 12/3 恒定语义未定位）。窗口内更新通道权威位置并回
 // 0x21 成对停帧（外服私服成对：归一 [0,2π) 角 + 原始朝向，spd=0——瞬移无
 // 移动过程帧）；窗口外静默吞。
-func handleChannelSyncCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
+func handleChannelSyncCustom(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomChannelSync {
 		return false, nil
 	}
@@ -433,6 +435,11 @@ func handleChannelSyncCustom(link sceneMessageConnection, player *playerActor, c
 	}
 	if !player.noteChannelSync(time.Now(), transform) {
 		return true, nil // 非通道窗口：静默吞
+	}
+	// v26：轻功/通道滑翔期的逐段位置同样喂冲锋冲刺带（用户拍板：轻功中
+	// 进带立刻结束轻功释放技能——滑翔期位移走 m914 不走 m15）。
+	if player.rushInFlightSnapshot() && !player.rushDashIssuedSnapshot() {
+		tryRushArrival(link, player, world, transform.X, transform.Y, transform.Z, transform.Orient, remote)
 	}
 	angle := transform.Orient
 	for angle < 0 {

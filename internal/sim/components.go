@@ -111,6 +111,25 @@ func (v *Vitals) ApplyHeal(amount int32) bool {
 	return v.HP != before
 }
 
+// RestoreBruisedLayer 把瘀血层（HitHP-HP 差值）即时转为真实气血：
+// 「活血/化解淤血」类内功特效的落点。转换量受当前层厚限制，超出
+// 部分自然丢弃；不动 HitHP/MaxHP（层被真血追平、上限不变），死亡
+// 状态下不生效。返回实际转换量（供飘字/日志帧消费）。
+func (v *Vitals) RestoreBruisedLayer(amount int32) int32 {
+	if amount <= 0 || v.Logic == entity.LogicStateDied {
+		return 0
+	}
+	layer := v.HitHP - v.HP
+	if layer <= 0 {
+		return 0
+	}
+	if amount > layer {
+		amount = layer
+	}
+	v.HP += amount
+	return amount
+}
+
 // RecoverBruisedHPWhileFighting 只结算战斗期间的瘀血层。
 // HitHP 是受击前/第二根血条，让它向 HP 回消散可见瘀血而不给
 // 真实 HP。其他 LogicState 下有意不做任何事。

@@ -174,8 +174,8 @@ func TestJingMaiActiveExcludeSwaps(t *testing.T) {
 			delFrames++
 		}
 	}
-	if delFrames != 1 {
-		t.Fatalf("record-del frames=%d, want 1 (exclusion swap)", delFrames)
+	if delFrames != 2*(int(jingMaiActLimitMax)+1) {
+		t.Fatalf("record-del frames=%d, want %d (两次激活各一次整表重写，固定超额清表)", delFrames, 2*(jingMaiActLimitMax+1))
 	}
 }
 

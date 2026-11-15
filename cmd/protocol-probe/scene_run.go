@@ -46,6 +46,11 @@ type sceneRun struct {
 	// 一并跳过（尸体 TTL 清除照常）。
 	managed   bool
 	noRespawn bool
+	// npcFeintMarks 虚招标记（GM set_npc_feint 对选中怪的运行期覆写）：
+	// 命中的 NPC 攻击按虚招结算——命中格挡中的玩家时击破其手动格挡
+	// 并进入不可格挡窗（resolveNPCAttack feint 分支）。常规野怪攻击
+	// 不是虚招，不破防。
+	npcFeintMarks map[uint32]bool
 	// 波次域（dungeon_wave.go）：副本实例的 NpcProgress 逐波揭示。
 	// waveMode 由 populate 时目录含波次数据开启；waveAlive 清空即
 	// 波次结算点（Lua dungeon_wave_cleared 可接管推进节奏）。
@@ -72,9 +77,6 @@ type sceneRun struct {
 	lootBoxes           map[uint32]*lootBoxRuntime
 	nextSweepAt         time.Time
 	pendingObjectFrames []pendingObjectFrame
-	// npcLastLocation 是 NPC 0x1F 位置广播的节流水位（追击期间客户端
-	// 认知保鲜，combat_ai.throttledNPCLocationBroadcast 读写）。
-	npcLastLocation map[uint32]npcLocationBroadcast
 	// fightRelation 是 0x13 fight_relation_rec 单格累计伤害的权威表：
 	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
 	// NPC 死亡清除，重生后从零累计。run.mu 保护。

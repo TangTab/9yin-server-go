@@ -63,7 +63,7 @@
 |---|---|---|
 | [attributes-beginner-guide](guides/attributes-beginner-guide.md) | 属性篇（十一源，防御曲线/暴击闪避公式/面板七色等定论） | 现行参考 |
 | [neigong-beginner-guide](guides/neigong-beginner-guide.md) | 内功篇（四大类/层级/兑换/怒气） | 现行参考 |
-| [combat-mechanics-guide](guides/combat-mechanics-guide.md) | 战斗机制篇（霸体三类型） | 现行参考 |
+| [combat-mechanics-guide](guides/combat-mechanics-guide.md) | 战斗篇（第二篇到稿：招式五类/冲锋/轻功/控制/霸体/防反，含服务端对照） | 现行参考 |
 
 ## 五、client/ —— 客户端资产与知识库
 
