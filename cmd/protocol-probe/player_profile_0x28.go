@@ -27,7 +27,8 @@ package main
 // 值来源：六包（c/k/登陆/登陆2/登陆-all）独立会话恒定值——Name/Face 为
 // 外服私服遮蔽占位（跨角色恒定，非真名）；LastLineTask 族/复活点表为登录
 // 场景常量。真机验证渲染通过后再接技能行（ConfigID+16 列模板）与本服
-// 真值（复活点/键位）。门控：NINEYIN_PLAYER_PROFILE_0X28=1（默认关）。
+// 真值（复活点/键位）。门控：默认开（2026-11-15 内置，NINEYIN_PLAYER_
+// PROFILE_0X28=0 可关——fork 客户端丢弃 0x28 帧，开着无害）。
 
 import (
 	"encoding/binary"
@@ -38,9 +39,10 @@ import (
 	"github.com/local/9yin-go-server/internal/role"
 )
 
-// playerProfile0x28Enabled 控制玩家档案 0x28 帧下发（NINEYIN_PLAYER_PROFILE_0X28=1）。
+// playerProfile0x28Enabled 控制玩家档案 0x28 帧下发（默认开；
+// NINEYIN_PLAYER_PROFILE_0X28=0 显式关闭——2026-11-15 起内置，bat 不再设参）。
 func playerProfile0x28Enabled() bool {
-	return os.Getenv("NINEYIN_PLAYER_PROFILE_0X28") == "1"
+	return os.Getenv("NINEYIN_PLAYER_PROFILE_0X28") != "0"
 }
 
 // 外服私服恒定字节值（六包跨会话逐字节一致；Name/Face 为遮蔽占位，见文件头）。

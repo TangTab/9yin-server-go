@@ -27,10 +27,12 @@ import (
 //	 #3/#4  0x10 idx1405        → UNKNOWN-3 透传（TodayCapitalLeave1 双帧
 //	                               8B 值域 360000/350976，编码未定案）
 //	 #5     0x0B 进场           → 原生 sendEntryScene（官方 4 属性形已对齐）
-//	 #6     0x28 化身档案       → UNKNOWN-4 透传+posA 改写（native 路径内
-//	                               接管=SWAP_SELF 可撤；装备外观 opaque 段
-//	                               生成器缺=最后一块数据镜像，走查=docs/
-//	                               official/外服玩家档案0x28全量帧.md）
+//	 #6     0x28 化身档案       → 原生换代=我方 41 字段+技能行生成档
+//	                               （2026-11-15 01:3x「待机动作+脸部装饰」
+//	                               两残留影子的根治；换心时代「只剩头」
+//	                               缺口已由恒发 0x10 外观帧补上；降级=
+//	                               透传+posA 改写，走查=docs/official/
+//	                               外服玩家档案0x28全量帧.md）
 //	 #7/#9  0x1E m2 asyn_time   → UNKNOWN-5 透传（载荷对 98/274 语义未定）
 //	 #8     0x10 idx248         → UNKNOWN-6 透传（SafeLoginFlag=6 值语义未定）
 //	 #11    0x10 idx694         → 原生 sceneObjectIntProperty（值=我方
@@ -133,9 +135,10 @@ func nativeP1MarkUnknown(idx int, frame []byte, seen map[string]bool) {
 // nativeP1Disposition P1 帧就地替换分派。返回 native=true 时调用方应发
 // useEntryScene 的进场帧（或 frames 列表），不再透传原帧。
 // 帧替换档下 SWAP_SELF 的两大职责全部收编：#5 0x0B→sendEntryScene、
-// #6 化身 0x28→透传+posA 对齐存档落点（原 selfIdsOverride 分支同款 16B
-// 改写，头部形不符则原样透传保底）——bat 里 SWAP_SELF 因此可撤。
-func nativeP1Disposition(idx int, frame []byte, player *playerActor, pos role.Position) (frames [][]byte, useEntryScene bool, note string, native bool) {
+// #6 化身 0x28→我方生成档（nativeAvatar 非空时；装备/脸面影子的根治，
+// 换心时代「只剩头」缺口已由恒发 0x10 外观帧补上）或透传+posA 对齐
+//（nativeAvatar=nil 的降级路径，头部形不符则原样透传保底）。
+func nativeP1Disposition(idx int, frame []byte, player *playerActor, pos role.Position, nativeAvatar []byte) (frames [][]byte, useEntryScene bool, note string, native bool) {
 	switch idx {
 	case 5:
 		if frame[0] != 0x0B {
@@ -143,10 +146,14 @@ func nativeP1Disposition(idx int, frame []byte, player *playerActor, pos role.Po
 		}
 		return nil, true, "sendEntryScene 官方 4 属性形", true
 	case 6:
-		// UNKNOWN-4：化身 0x28 装备外观 opaque 段生成器缺=最后一块
-		// 数据镜像——本帧仍透传（仅 posA 16B 对齐存档落点）。
+		// 化身 0x28。nativeAvatar 非空=我方生成档直接换代（ids/posA
+		// 已按当前全局嵌入，零改写）；空=外服档案透传+posA 16B 对齐
+		// 存档落点（UNKNOWN-4 降级路径）。
 		if frame[0] != 0x28 || len(frame) <= 1000 {
 			return nil, false, "", false
+		}
+		if len(nativeAvatar) > 0 {
+			return [][]byte{nativeAvatar}, false, "我方档案 41 字段+技能行（opaque 影子段根除；外观走恒发 0x10 帧）", true
 		}
 		out := append([]byte(nil), frame...)
 		if posOff, ok := officialFramePosAOffset(out, playerObjectID, playerOwnerID); ok {
@@ -205,13 +212,9 @@ func p2UnknownMarker(frame []byte) string {
 }
 
 // replayPhase2NativeReplace Phase B 帧替换走查：0x15/0x1F 原生生成，
-// 其余透传+标注。返回发送帧数。
-func replayPhase2NativeReplace(conn sceneMessageConnection, path string, obj, own uint32, pos role.Position) int {
-	raw, err := os.ReadFile(path)
-	if err != nil {
-		log.Printf("replay file %s unreadable: %v", path, err)
-		return 0
-	}
+// 0x2A DROP-8 停发，其余透传+标注。raw/label 来自 replayPhase2FramesRaw
+//（env 覆盖 > exe 内嵌）。返回发送帧数。
+func replayPhase2NativeReplaceBytes(conn sceneMessageConnection, raw []byte, label string, obj, own uint32, pos role.Position) int {
 	views := officialP2ViewCreateSet()
 	viewIdx := 0
 	seen := map[string]bool{}
@@ -246,7 +249,7 @@ func replayPhase2NativeReplace(conn sceneMessageConnection, path string, obj, ow
 					log.Printf("native-replace P2 0x15 order mismatch @viewIdx=%d bin=%d table=%d; passthrough", viewIdx-1, binView, spec.id)
 				}
 				if err := conn.WriteFrame(frame); err != nil {
-					log.Printf("replay %s: %v", path, err)
+					log.Printf("replay %s: %v", label, err)
 					return sent
 				}
 				passCount++
@@ -263,7 +266,7 @@ func replayPhase2NativeReplace(conn sceneMessageConnection, path string, obj, ow
 				return sent
 			}
 			if err := conn.WriteFrame(out); err != nil {
-				log.Printf("replay %s: %v", path, err)
+				log.Printf("replay %s: %v", label, err)
 				return sent
 			}
 			nativeCount++
@@ -271,7 +274,7 @@ func replayPhase2NativeReplace(conn sceneMessageConnection, path string, obj, ow
 		case frame[0] == 0x1F && len(frame) >= 9 && binary.LittleEndian.Uint32(frame[1:]) == obj:
 			out := serverLocation(obj, own, worldcore.Transform{X: pos.X, Y: pos.Y, Z: pos.Z, Orient: pos.Orient})
 			if err := conn.WriteFrame(out); err != nil {
-				log.Printf("replay %s: %v", path, err)
+				log.Printf("replay %s: %v", label, err)
 				return sent
 			}
 			nativeCount++
@@ -283,7 +286,7 @@ func replayPhase2NativeReplace(conn sceneMessageConnection, path string, obj, ow
 				log.Printf("native-replace P2 op=0x%02X PASSTHROUGH [%s]", frame[0], marker)
 			}
 			if err := conn.WriteFrame(frame); err != nil {
-				log.Printf("replay %s: %v", path, err)
+				log.Printf("replay %s: %v", label, err)
 				return sent
 			}
 			passCount++
@@ -291,7 +294,7 @@ func replayPhase2NativeReplace(conn sceneMessageConnection, path string, obj, ow
 		}
 	}
 	log.Printf("native-replace P2 summary: native=%d passthrough=%d dropped=%d (unknown classes=%d) file=%s",
-		nativeCount, passCount, dropCount, len(seen), strings.TrimSpace(path))
+		nativeCount, passCount, dropCount, len(seen), strings.TrimSpace(label))
 	return sent
 }
 

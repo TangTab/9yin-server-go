@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/local/9yin-go-server/cmd/protocol-probe/replaydata"
 	"github.com/local/9yin-go-server/internal/role"
 )
 
@@ -67,6 +68,32 @@ func TestOfficialP2ViewCreateSetByteIdentical(t *testing.T) {
 	}
 }
 
+// TestEmbeddedReplayBinsMatchSource 内嵌 bin 与 tmp 源文件逐字节一致
+// （防「只改一头」漂移：tmp 源演进后必须重拷 replaydata/）。
+func TestEmbeddedReplayBinsMatchSource(t *testing.T) {
+	for _, c := range []struct {
+		name string
+		path string
+		emb  []byte
+	}{
+		{"p1", `G:\pojie\ai\9yin-server-go\tmp\op28_analysis\replay_p1_slim.bin`, replaydata.Phase1},
+		{"p2", `G:\pojie\ai\9yin-server-go\tmp\op28_analysis\replay_p2_slim.bin`, replaydata.Phase2},
+	} {
+		src, err := os.ReadFile(c.path)
+		if err != nil {
+			t.Skipf("source bin %s unavailable: %v", c.path, err)
+		}
+		if len(c.emb) != len(src) {
+			t.Fatalf("%s embedded=%dB source=%dB 长度漂移", c.name, len(c.emb), len(src))
+		}
+		for i := range src {
+			if c.emb[i] != src[i] {
+				t.Fatalf("%s 首个差异 @%d: emb=%02x src=%02x（重拷 replaydata/）", c.name, i, c.emb[i], src[i])
+			}
+		}
+	}
+}
+
 // TestP1DispositionCoversSlimBin P1 分派表按 slim bin 13 帧逐序位核验：
 // 原生帧 op 形必须对上；透传帧必须全部有 UNKNOWN 标注（无漏标）。
 func TestP1DispositionCoversSlimBin(t *testing.T) {
@@ -76,7 +103,7 @@ func TestP1DispositionCoversSlimBin(t *testing.T) {
 	}
 	player := newPlayerActor("probe", 0)
 	for idx, frame := range binFrames {
-		_, _, _, isNative := nativeP1Disposition(idx, frame, player, role.Position{X: 928.3, Y: 48.7, Z: 998.9, Orient: 0.906})
+		_, _, _, isNative := nativeP1Disposition(idx, frame, player, role.Position{X: 928.3, Y: 48.7, Z: 998.9, Orient: 0.906}, nil)
 		if isNative {
 			continue
 		}
@@ -85,12 +112,30 @@ func TestP1DispositionCoversSlimBin(t *testing.T) {
 		}
 	}
 	// 原生三位的形状闸：#5 必须 0x0B、#11 必须单属性帧。
-	if _, _, _, ok := nativeP1Disposition(5, append([]byte{0x0B}, make([]byte, 82)...), player, role.Position{}); !ok {
+	if _, _, _, ok := nativeP1Disposition(5, append([]byte{0x0B}, make([]byte, 82)...), player, role.Position{}, nil); !ok {
 		t.Error("P1#5 0x0B 应为原生替换")
 	}
 	qgFrame := sceneObjectIntProperty(1, 2, 694, 150)
 	if len(qgFrame) != 18 || qgFrame[0] != 0x10 {
 		t.Errorf("QingGongPoint 单属性帧形状异常: %x", qgFrame)
+	}
+}
+
+// TestP1AvatarNativeSwap 帧替换档 #6 换代闸：nativeAvatar 非空时必须
+// 直接采用我方生成档（不再透传外服档案、零改写）。
+func TestP1AvatarNativeSwap(t *testing.T) {
+	binFrames := unpackReplayPackFrames(t, `G:\pojie\ai\9yin-server-go\tmp\op28_analysis\replay_p1_slim.bin`)
+	if len(binFrames) != 13 {
+		t.Skipf("p1 slim 帧数 %d 不等于 13（bin 已演化）", len(binFrames))
+	}
+	avatar := binFrames[6]
+	mine := []byte{0x28, 0x46, 0xEE}
+	frames, _, note, isNative := nativeP1Disposition(6, avatar, nil, role.Position{}, mine)
+	if !isNative || len(frames) != 1 || string(frames[0]) != string(mine) {
+		t.Fatalf("换代路径未生效: native=%v frames=%d", isNative, len(frames))
+	}
+	if !strings.Contains(note, "我方档案") {
+		t.Errorf("标注缺「我方档案」: %q", note)
 	}
 }
 
@@ -112,7 +157,7 @@ func TestP1AvatarPosARewriteNative(t *testing.T) {
 	defer func() { playerObjectID, playerOwnerID = savedObj, savedOwn }()
 
 	pos := role.Position{X: 11.5, Y: 22.5, Z: 33.5, Orient: 0.25}
-	frames, _, note, isNative := nativeP1Disposition(6, avatar, nil, pos)
+	frames, _, note, isNative := nativeP1Disposition(6, avatar, nil, pos, nil)
 	if !isNative {
 		t.Fatal("P1#6 化身 0x28 应由 native 路径接管")
 	}

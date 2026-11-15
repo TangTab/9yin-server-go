@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/local/9yin-go-server/cmd/protocol-probe/replaydata"
 	"github.com/local/9yin-go-server/internal/role"
 )
 
@@ -91,7 +92,17 @@ func officialFramePosAOffset(frame []byte, obj, own uint32) (int, bool) {
 // 0x28 的 posA 改写成果拽回外服出生点（重进位置修复的漏网帧）。逐帧
 // 把 self 0x1F 的 posA 对齐存档落点，其余帧原样。
 func replayFramesPackAlignSelfPos(conn sceneMessageConnection, path string, obj, own uint32, pos role.Position) int {
-	return replayFramesPackTransform(conn, path, func(frame []byte) []byte {
+	return replayFramesPackTransform(conn, path, selfPosAlignTransform(obj, own, pos))
+}
+
+// replayFramesPackAlignSelfPosBytes 字节版（内嵌/env 已读入的包体）。
+func replayFramesPackAlignSelfPosBytes(conn sceneMessageConnection, raw []byte, label string, obj, own uint32, pos role.Position) int {
+	return replayFramesPackTransformBytes(conn, raw, label, selfPosAlignTransform(obj, own, pos))
+}
+
+// selfPosAlignTransform self 0x1F 的 posA 对齐变换（两版共用）。
+func selfPosAlignTransform(obj, own uint32, pos role.Position) func([]byte) []byte {
+	return func(frame []byte) []byte {
 		if frame[0] != 0x1F {
 			return frame
 		}
@@ -104,13 +115,39 @@ func replayFramesPackAlignSelfPos(conn sceneMessageConnection, path string, obj,
 			binary.LittleEndian.PutUint32(out[posOff+4*i:], math.Float32bits(v))
 		}
 		return out
-	})
+	}
 }
 
 // replayFramesPack 原样回放 [u32 len][frame]×N 打包文件（tools 打包器
 // 产出）；裸单帧文件回退。返回发送帧数。
 func replayFramesPack(conn sceneMessageConnection, path string) int {
 	return replayFramesPackTransform(conn, path, nil)
+}
+
+// replayEntryFramesRaw Phase A 帧源：env 覆盖（换包实验）> exe 内嵌
+// bin（replaydata）。2026-11-15 起生产 bat 不再设 FRAMES_FILE——骨架
+// 数据已进 exe，外置路径只剩实验用途。
+func replayEntryFramesRaw() (raw []byte, label string) {
+	if p := replayEntryFramesPath(); p != "" {
+		if b, err := os.ReadFile(p); err == nil {
+			return b, p
+		} else {
+			log.Printf("replay entry file %s unreadable (%v); using embedded bin", p, err)
+		}
+	}
+	return replaydata.Phase1, "embedded:replay_p1_slim.bin"
+}
+
+// replayPhase2FramesRaw Phase B 帧源：同 replayEntryFramesRaw 口径。
+func replayPhase2FramesRaw() (raw []byte, label string) {
+	if p := strings.TrimSpace(os.Getenv("NINEYIN_REPLAY_PHASE2_FILE")); p != "" {
+		if b, err := os.ReadFile(p); err == nil {
+			return b, p
+		} else {
+			log.Printf("replay phase-2 file %s unreadable (%v); using embedded bin", p, err)
+		}
+	}
+	return replaydata.Phase2, "embedded:replay_p2_slim.bin"
 }
 
 // replayFramesPackTransform 逐帧回放打包文件，transform 非 nil 时每帧
@@ -121,6 +158,11 @@ func replayFramesPackTransform(conn sceneMessageConnection, path string, transfo
 		log.Printf("replay file %s unreadable: %v", path, err)
 		return 0
 	}
+	return replayFramesPackTransformBytes(conn, raw, path, transform)
+}
+
+// replayFramesPackTransformBytes 字节版走查（内嵌/env 已读入的包体）。
+func replayFramesPackTransformBytes(conn sceneMessageConnection, raw []byte, label string, transform func([]byte) []byte) int {
 	sent := 0
 	rest := raw
 	for len(rest) >= 4 {
@@ -133,7 +175,7 @@ func replayFramesPackTransform(conn sceneMessageConnection, path string, transfo
 			frame = transform(frame)
 		}
 		if err := conn.WriteFrame(frame); err != nil {
-			log.Printf("replay %s: %v", path, err)
+			log.Printf("replay %s: %v", label, err)
 			break
 		}
 		sent++
@@ -142,7 +184,7 @@ func replayFramesPackTransform(conn sceneMessageConnection, path string, transfo
 	// 兼容裸单帧文件
 	if sent == 0 && len(raw) > 0 {
 		if err := conn.WriteFrame(raw); err != nil {
-			log.Printf("replay %s: %v", path, err)
+			log.Printf("replay %s: %v", label, err)
 			return 0
 		}
 		sent = 1

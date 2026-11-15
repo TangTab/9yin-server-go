@@ -382,7 +382,17 @@
     }
 
     function validHost(h) {
-      return /^(localhost|(\d{1,3}\.){3}\d{1,3})$/i.test((h || "").trim());
+      h = (h || "").trim().replace(/^\[|\]$/g, "");
+      if (/^(localhost|(\d{1,3}\.){3}\d{1,3})$/i.test(h)) return true;
+      // IPv6 字面量：仅十六进制与冒号（须含冒号），排除 URL/主机名。
+      return /^[0-9a-f:]+$/i.test(h) && h.indexOf(":") >= 0;
+    }
+
+    // host:port 组装：IPv6 字面量须带方括号，否则端口无法与地址消歧。
+    function hostPort(host, port) {
+      host = (host || "").trim();
+      return host.indexOf(":") >= 0 ? "[" + host.replace(/^\[|\]$/g, "") + "]:" + port
+        : host + ":" + port;
     }
 
     function addServer() {
@@ -392,8 +402,8 @@
       if (!validHost(host)) return alert("地址需为 IP 或 localhost");
       if (!(port > 0 && port < 65536)) return alert("端口不合法");
       let list = loadServers();
-      let addr = host + ":" + port;
-      if (list.some((s) => s.host + ":" + s.rpcPort === addr)) {
+      let addr = hostPort(host, port);
+      if (list.some((s) => hostPort(s.host, s.rpcPort) === addr)) {
         return alert("该服务器已在列表中");
       }
       list.push({ id: Date.now(), name: name || addr, host: host, rpcPort: port });
@@ -415,14 +425,14 @@
       if (!s) return;
       let name = prompt("服务器名称", s.name);
       if (name === null) return;
-      s.name = name.trim() || s.host + ":" + s.rpcPort;
+      s.name = name.trim() || hostPort(s.host, s.rpcPort);
       saveServers(list);
       renderRegistry();
     }
 
     async function pollRegistry() {
       for (let s of loadServers()) {
-        let addr = s.host + ":" + s.rpcPort;
+        let addr = hostPort(s.host, s.rpcPort);
         try {
           let r = await fetch("/api/manage/status?s=" + encodeURIComponent(addr));
           registryStatus[addr] = await r.json();
@@ -453,7 +463,7 @@
       document.querySelector("#empty").hidden = list.length > 0;
       box.innerHTML = "";
       for (let s of list) {
-        let addr = s.host + ":" + s.rpcPort;
+        let addr = hostPort(s.host, s.rpcPort);
         let st = registryStatus[addr] || { online: false };
         let bound = addr === panelGameAddr;
         let card = document.createElement("div");

@@ -15,7 +15,8 @@ import (
 	"github.com/local/9yin-go-server/internal/role"
 )
 
-// gmHub 刻意只监听 localhost。命令由所属的游戏会话循环
+// gmHub 的面板默认只监听 localhost（-gm-listen 可改绑任意 IP，写法见
+// resolveListenAddr）。命令由所属的游戏会话循环
 // 执行，而不是在 HTTP handler 中执行，这样两个 goroutine
 // 绝不会向同一个客户端连接交叉写入 FxNet2 帧。
 //
@@ -250,7 +251,7 @@ func serveGM(listen string, hub *gmHub, manageBoundAddr string, accounts role.Ac
 	mux := newGMMux(hub, accounts)
 	gmapi.MountManageAPI(mux, manageBoundAddr, gmInternalVersion)
 	server := &http.Server{Addr: listen, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
-	log.Printf("GM panel listening on http://%s (localhost only)", listen)
+	log.Printf("GM panel listening on http://%s", listen)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Printf("GM panel stopped: %v", err)
 	}

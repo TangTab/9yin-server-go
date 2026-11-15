@@ -70,6 +70,14 @@ func main() {
 	livepointPriceFlag := flag.Int("livepoint-price", 500, "hold-faculty redemption price: N gold converts N*price potential faculty (Java -Dnineyin.livepoint.price)")
 	facultySeedFlag := flag.Int("faculty-seed", int(initialFaculty), "new-character faculty seed; existing roles keep their snapshot value (Java -Dnineyin.faculty.seed)")
 	flag.Parse()
+	// 绑定 IP 规范化：-listen 族支持 IPv4 / IPv6 / 任意 IP（*、any、::、
+	// 0.0.0.0 及裸 IPv6 等，见 resolveListenAddr）。空串 = 关闭对应监听。
+	*addr = resolveListenAddr(*addr, "19061")
+	*gmListen = resolveListenAddr(*gmListen, "19062")
+	*gmInternalListen = resolveListenAddr(*gmInternalListen, "19063")
+	if *addr == "" {
+		log.Fatal("-listen is empty: the game TCP listener is required")
+	}
 	livepointVIP = *livepointVIPFlag
 	livepointPrice = int32(*livepointPriceFlag)
 	facultySeed = int32(*facultySeedFlag)
@@ -2551,14 +2559,42 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					log.Printf("%s: begin scene generation: %v", conn.RemoteAddr(), err)
 					return
 				}
+				// overlay 档登记场景成员（2026-11-15「NPC 巡逻没有了」）：
+				// startTickLocked 唯一调用点在 attachMember 内，wholesale
+				// 进场此前从不 attach——1s 场景 tick（patrolTick 巡逻/
+				// combatTick 索敌）整场不启动，wireID=0 还连锁堵死
+				// activateMember（0x21 扇出的 patrolReadyAt 闸）与
+				// playerLiveTransform（可移动范围技索敌圆心）。纯回放档
+				//（非 overlay）仍不 attach——外服帧独占对象空间，原生
+				// tick 的帧全是噪声。巡逻首拍由 clientActivity 在显式
+				// 0x09 后 activateMember 放开（+5s 缓冲），读条窗口零泄露。
+				if replayNativeOverlayEnabled() {
+					world.attachMember(player, activeRole.Location.Position, visual)
+					world.refreshVisibility(sceneNPCs, activeRole.Location.Position)
+					log.Printf("%s: overlay attach member; patrol/combat tick primed at spawn", conn.RemoteAddr())
+				}
 				swapSelf := os.Getenv("NINEYIN_REPLAY_SWAP_SELF") == "1"
 				// SELF_IDS 借用身份时化身原样透传（外服帧 ids 已对位，
 				// 任何改写都是回归风险）。
 				selfIdsOverride := strings.TrimSpace(os.Getenv("NINEYIN_REPLAY_SELF_IDS")) != ""
 				sent, swappedEntry, swappedAvatar := 0, false, false
-				if raw, rerr := os.ReadFile(replayEntryFramesPath()); rerr != nil {
-					log.Printf("%s: replay file %s unreadable: %v", conn.RemoteAddr(), replayEntryFramesPath(), rerr)
-			} else {
+				// 帧替换档化身换代（2026-11-15 01:3x）：外服透传档案的
+				// opaque 段（装备模型/脸面域）=「待机动作+脸部装饰」两处
+				// 残留影子的来源，LZ 帧不可字段级改写——改发我方 41 字段
+				// +技能行生成档；换心时代「只剩头」的装备段缺口已由恒发
+				// 0x10 外观帧（DROP-8 同轮）补上。ids/落点取当前全局
+				//（SELF_IDS 档=外服对），档案内嵌 posA=存档落点。
+				var nativeAvatarFrame []byte
+				if replayNativeFramesEnabled() {
+					learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
+					nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows)
+				}
+				// Phase A 帧源：env 覆盖（换包实验）> exe 内嵌 bin
+				//（replaydata——2026-11-15 起生产 bat 不再外置路径）。
+				raw, entryLabel := replayEntryFramesRaw()
+				if len(raw) == 0 {
+					log.Printf("%s: replay entry frames unavailable (env+embedded both empty)", conn.RemoteAddr())
+				} else {
 				rest := raw
 				replayFrameIdx := 0
 				nativeP1Seen := map[string]bool{}
@@ -2573,7 +2609,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					// 替换为代码生成（值=我方权威状态/结构常量），其余
 					// 透传并打 UNKNOWN 标注（欠账清单逐个销项后 bin 退役）。
 					if replayNativeFramesEnabled() {
-						if nativeFrames, useEntryScene, note, isNative := nativeP1Disposition(replayFrameIdx, frame, player, activeRole.Location.Position); isNative {
+						if nativeFrames, useEntryScene, note, isNative := nativeP1Disposition(replayFrameIdx, frame, player, activeRole.Location.Position, nativeAvatarFrame); isNative {
 							wrote := 0
 							if useEntryScene {
 								if err := sendEntryScene(link, activeRole.Location.Scene); err != nil {
@@ -2690,7 +2726,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 							}
 						default:
 							if err := link.WriteFrame(frame); err != nil {
-								log.Printf("%s: replay %s: %v", conn.RemoteAddr(), replayEntryFramesPath(), err)
+								log.Printf("%s: replay %s: %v", conn.RemoteAddr(), entryLabel, err)
 								return
 							}
 						}
@@ -2698,7 +2734,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						rest = rest[4+fl:]
 					}
 				}
-				log.Printf("%s: wholesale replay entry: sent %d frame(s) from %s (swapSelf=%v entry=%v avatar=%v); native login frames suppressed", conn.RemoteAddr(), sent, replayEntryFramesPath(), swapSelf, swappedEntry, swappedAvatar)
+				log.Printf("%s: wholesale replay entry: sent %d frame(s) from %s (swapSelf=%v entry=%v avatar=%v); native login frames suppressed", conn.RemoteAddr(), sent, entryLabel, swapSelf, swappedEntry, swappedAvatar)
 				// 内功栏绑定串进场位补发：wholesale 档无我方 self 0x0D 档
 				//（外服形状=0x0B+档案 0x28），NeiGongBind(201) 唯一载具剩
 				// ClientReady 簇 0x10——但主窗体 main_form_open 在读条末尾
@@ -2729,10 +2765,11 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 每连接复位显式就绪门（包级原子跨连接残留会让下一次
 				// 登录的物化又在读条窗口抢跑）。
 				replayExplicitReadySeen.Store(false)
-				if strings.TrimSpace(os.Getenv("NINEYIN_REPLAY_PHASE2_FILE")) != "" {
-					replayPhase2Armed.Store(true)
-					log.Printf("%s: phase-2 replay armed at wholesale entry", conn.RemoteAddr())
-				}
+				// Phase B 帧源=env 覆盖 > exe 内嵌（replayPhase2FramesRaw
+				// 恒有内嵌兜底，wholesale 档恒武装——2026-11-15 起 bat
+				// 不再外置 PHASE2_FILE 路径）。
+				replayPhase2Armed.Store(true)
+				log.Printf("%s: phase-2 replay armed at wholesale entry", conn.RemoteAddr())
 				if err := machine.RoleChosen(); err != nil {
 					log.Printf("%s: complete choose-role transition: %v", conn.RemoteAddr(), err)
 					return
@@ -2818,7 +2855,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				log.Printf("%s: write player physics login stream (skip): %v", conn.RemoteAddr(), err)
 			}
 			// 玩家档案 0x28 全量帧（外服私服登录簇方言，docs/official/外服玩家档案
-			// 0x28全量帧.md）：NINEYIN_PLAYER_PROFILE_0X28=1 门控。时序=
+			// 0x28全量帧.md）：默认开（playerProfile0x28Enabled，=0 可关）。时序=
 			// 物化（0x0D）之后、面板身份/视图行爆发之前——外服私服 #132 档案
 			// 帧先于玩家 0x14/0x11 视图行，NPC 0x28 教训=先物化后详情。
 			// mode=0x46 纯 memcpy 明文（与 NPC 0x28 v3 同族）：基础字段
@@ -3046,20 +3083,24 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// AOI 物化簇的相位窗（外服实测 0x09 后 65ms 发第二爆发）。
 			if replayPhase2Armed.Load() {
 				replayPhase2Armed.Store(false)
-				if path := strings.TrimSpace(os.Getenv("NINEYIN_REPLAY_PHASE2_FILE")); path != "" && runtime != nil && runtime.activeRole != nil {
+				if runtime != nil && runtime.activeRole != nil {
 					// self 0x1F posA 对齐存档落点（p2_slim 内那帧外服
 					// Location 会把化身 posA 拽回外服出生点——重进位置
 					// 修复的漏网帧，2026-11-14 恢复）。
-					// 帧替换档：0x15/0x1F 原生生成、其余透传+UNKNOWN
-					// 标注（replay_native_replace.go 分派表）。
-					var phase2Sent int
-					if replayNativeFramesEnabled() {
-						phase2Sent = replayPhase2NativeReplace(link, path, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position)
-					} else {
-						phase2Sent = replayFramesPackAlignSelfPos(link, path, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position)
-					}
-					if phase2Sent > 0 {
-						log.Printf("%s: replayed %d phase-2 frame(s) after explicit ClientReady", conn.RemoteAddr(), phase2Sent)
+					// 帧替换档：0x15/0x1F 原生生成、0x2A DROP、其余透传
+					// +UNKNOWN 标注（replay_native_replace.go 分派表）。
+					// 帧源=env 覆盖 > exe 内嵌（replayPhase2FramesRaw）。
+					phase2Raw, phase2Label := replayPhase2FramesRaw()
+					if len(phase2Raw) > 0 {
+						var phase2Sent int
+						if replayNativeFramesEnabled() {
+							phase2Sent = replayPhase2NativeReplaceBytes(link, phase2Raw, phase2Label, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position)
+						} else {
+							phase2Sent = replayFramesPackAlignSelfPosBytes(link, phase2Raw, phase2Label, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position)
+						}
+						if phase2Sent > 0 {
+							log.Printf("%s: replayed %d phase-2 frame(s) from %s after explicit ClientReady", conn.RemoteAddr(), phase2Sent, phase2Label)
+						}
 					}
 				}
 			}

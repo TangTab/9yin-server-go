@@ -6,7 +6,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -26,21 +25,25 @@ const statusProbeTimeout = 1500 * time.Millisecond
 
 var manageProbeClient = &http.Client{Timeout: statusProbeTimeout}
 
-// validManageHost 与 index.html 的 validHost 同一口径：只收 IP/localhost，
-// 不放行任意 URL（探活代理会让面板向该地址发起请求，必须收紧输入面）。
-var manageHostPattern = regexp.MustCompile(`(?i)^(localhost|(\d{1,3}\.){3}\d{1,3})$`)
+// validManageHost 与 index.html 的 validHost 同一口径：只收 IP/localhost
+// （IPv4/IPv6 字面量均可，IPv6 容许带方括号），不放行任意 URL（探活代理
+// 会让面板向该地址发起请求，必须收紧输入面）。
+func validManageHost(host string) bool {
+	host = strings.Trim(strings.TrimSpace(host), "[]")
+	return strings.EqualFold(host, "localhost") || net.ParseIP(host) != nil
+}
 
 // parseManageAddress 解析 "host:port"；host 仅 IP/localhost，port 1..65535。
 func parseManageAddress(s string) (string, bool) {
 	host, port, err := net.SplitHostPort(strings.TrimSpace(s))
-	if err != nil || !manageHostPattern.MatchString(host) {
+	if err != nil || !validManageHost(host) {
 		return "", false
 	}
 	value, err := strconv.Atoi(port)
 	if err != nil || value < 1 || value > 65535 {
 		return "", false
 	}
-	return net.JoinHostPort(host, port), true
+	return net.JoinHostPort(strings.Trim(host, "[]"), port), true
 }
 
 // MountManageAPI 挂两个管理页端点：
