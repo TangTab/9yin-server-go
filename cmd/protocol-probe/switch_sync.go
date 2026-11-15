@@ -32,13 +32,18 @@ var switchSyncIDs = []int32{
 	2901, 2903, 2906, 2908, 2909, 2911, 2917, 2918, 2919, 2923, 2925,
 }
 
-// switchSyncFrame 生成 0x1E 414("sync", id×203) 批量开关帧（Java
+// switchSyncFrame 生成 0x1E 414("sync", id×N) 批量开关帧（Java
 // StarterGrants.switchSyncFrame 同形：旧版 0x1E 外壳，首值为消息号，
-// 次值为窄字符串 "sync"，其后为开关号列表）。
+// 次值为窄字符串 "sync"，其后为开关号列表）。二分轮 official-sync
+// 整表换官方 701 id（NINEYIN_REPLAY_BISECT=official-sync）。
 func switchSyncFrame() ([]byte, error) {
-	values := make([]serverCustomValue, 0, len(switchSyncIDs)+1)
+	ids := switchSyncIDs
+	if bisectActive("official-sync") {
+		ids = officialSwitchSyncIDs
+	}
+	values := make([]serverCustomValue, 0, len(ids)+1)
 	values = append(values, customString("sync"))
-	for _, id := range switchSyncIDs {
+	for _, id := range ids {
 		values = append(values, customInt(id))
 	}
 	return serverCustomIntMessage(serverSwitchControlMessage, values...)

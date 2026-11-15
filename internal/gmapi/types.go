@@ -88,8 +88,9 @@ type CommandBody struct {
 	Weather     string  `json:"weather"`
 	FadeSec     int32   `json:"fadeSec"`
 	Enabled     int32   `json:"enabled"`     // set_zhenqi_cap 硬闸开关 0/1
-	JingMaiId   string  `json:"jingMaiId"`   // set_jingmai_tier 经脉 configID
+	JingMaiId   string  `json:"jingMaiId"`   // set_jingmai_tier/open_xuewei 经脉 configID
 	JingMaiTier int32   `json:"jingMaiTier"` // set_jingmai_tier 周天档 1..216
+	XueWeiId    string  `json:"xueWeiId"`    // open_xuewei 穴位 configID（"all"=按穴位地图全开）
 	Stage       int32   `json:"stage"`       // ninjiuzhi_set 九阴志目标阶段 1..9
 	EventKind   string  `json:"eventKind"`   // ninjiuzhi_event kill|task
 	TaskId      int32   `json:"taskId"`      // authored_task_* 任务 ID（start 必填；其余 0=最早活跃）
@@ -159,7 +160,8 @@ type Command struct {
 	Weather        string  // set_weather 闭名单键
 	FadeSec        int32   // set_weather 过渡秒
 	Enabled        int32   // set_zhenqi_cap 每日真气硬闸 0/1（阈值走 Value）
-	JingMaiID      string  // set_jingmai_tier 经脉 configID
+	JingMaiID      string  // set_jingmai_tier/open_xuewei 经脉 configID
+	XueWeiID       string  // open_xuewei 穴位 configID（"all"=按穴位地图全开）
 	BuffConfig     string  // grant_timed_buff 限时 buff 配置 ID
 	BuffHours      float32 // grant_timed_buff 时长（小时；支持小数）
 	BuffLevel      int32   // grant_timed_buff 等级（默认 1）

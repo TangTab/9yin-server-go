@@ -20,9 +20,13 @@ package main
 //
 // 官读 LZ 编码器四捷径（len=0→cstring、[idx_lo][FF] flag、[00跑+01 00]
 // 分节标记、NUL 槽增量续段）全部不复刻——纯标准编码，字段稀疏可缺席
-// 是官方语义（k#1978 相对 k#15 即少 idx162）。BaseFace（外服私服 len=0 变体）
-// 与 ShortcutKey（176B 主段后接增量续段，单发主段为未经官方验证的截断
-// 形态；键位另有 0x10 快捷配置通道）v1 均省略。
+// 是官方语义（k#1978 相对 k#15 即少 idx162）。BaseFace（外服私服 len=0
+// 变体）v1 起省略。ShortcutKey（官方 f#042，str176 '1,87;2,83;…'）v2
+// 起按存档键位嵌入（2026-11-15「保存的按键配置下发有问题」：官服家族
+// 客户端在 AddObject 时从档案字段初始化键位管理器，后到的 0x10 idx198
+// 只同步属性视图不重建引擎键表——官方唯一回放通道就是本字段；官方
+// 抓包里的「主段+增量续段」是 LZ 编码器字典复用手法，语义即完整串，
+// 0x46 明文单段=标准编码）。
 //
 // 值来源：六包（c/k/登陆/登陆2/登陆-all）独立会话恒定值——Name/Face 为
 // 外服私服遮蔽占位（跨角色恒定，非真名）；LastLineTask 族/复活点表为登录
@@ -66,8 +70,9 @@ type profileProp struct {
 	raw  []byte
 }
 
-// playerProfilePropSpecs v1 字段清单（41 项，官方 idx 序；省略 BaseFace/
-// ShortcutKey，见文件头）。值=六包恒定外服私服常量。
+// playerProfilePropSpecs v1 字段清单（41 项，官方 idx 序；省略 BaseFace，
+// ShortcutKey 由调用方存档串动态嵌入——均见文件头）。值=六包恒定外服私服
+// 常量。
 var playerProfilePropSpecs = []profileProp{
 	{"Name", 0, playerProfileNameWide},
 	{"GroupID", 0xFFFFFFFF, nil},
@@ -240,9 +245,13 @@ func clampU8(v int) int {
 
 // playerProfile0x28Frame 生成玩家档案 mode=0x46 明文帧，返回 (帧, 字段数)。
 // pos=登录落点（posA）；scale/posB 按外服私服玩家形恒零。skills=已学集合
-// （View40 merge 集同源），逐技能附外服私服模板 17 列行。当前表缺席的字段名
-// 静默跳过（fork 表兼容，字段数按实际写入计——外服私服稀疏语义）。
-func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills []learnedSkillView) ([]byte, int) {
+// （View40 merge 集同源），逐技能附外服私服模板 17 列行。keybind=存档键位
+// 串（scheme 0 当前启用，195 上传原串；空=省略字段，稀疏官方语义）。
+// curNeiGong=当前装备内功（官方档案 @0x110b 实证 CurNeiGong@655 唯一通道
+// 就是本档案——0x10/View43 均不携带，引擎按装备内功 varprop 推导实力档；
+// 空=省略）。curWuXing=CurNeiGongWuXing@656。
+// 当前表缺席的字段名静默跳过（fork 表兼容，字段数按实际写入计）。
+func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills []learnedSkillView, keybind, curNeiGong string, curWuXing int32) ([]byte, int) {
 	body := make([]byte, 0, 640)
 	body = binary.LittleEndian.AppendUint32(body, objectID)
 	body = binary.LittleEndian.AppendUint32(body, ownerID)
@@ -268,8 +277,47 @@ func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills 
 		}
 		count++
 	}
+	// 二分 A/B 位 avatar-bare：官方 f#036 BaseFace 空串（标准编码
+	// [len=1][NUL]）补位——对照官档 43 字段形（2026-11-15「重登回走」
+	// 生成档 vs 透传档差异定位）。
+	if bisectActive("avatar-bare") {
+		if entry, ok := profilePropEntry("BaseFace"); ok {
+			body = binary.LittleEndian.AppendUint16(body, entry.Index)
+			body = binary.LittleEndian.AppendUint32(body, 1)
+			body = append(body, 0)
+			count++
+		}
+	}
+	// ShortcutKey（官方 f#042 尾字段）：存档键位原串 + NUL（appendStringValue
+	// 同形——len 含 NUL）。空串省略。
+	if keybind != "" {
+		if entry, ok := profilePropEntry("ShortcutKey"); ok {
+			body = binary.LittleEndian.AppendUint16(body, entry.Index)
+			body = binary.LittleEndian.AppendUint32(body, uint32(len(keybind)+1))
+			body = append(body, keybind...)
+			body = append(body, 0)
+			count++
+		}
+	}
 	body, rowCount := appendProfileSkillRows(body, skills)
 	count += rowCount
+	// 装备内功身份对（官方档案尾区实证：k#1978 @0x110b idx655
+	// CurNeiGong="ng_jz_006" + idx656 CurNeiGongWuXing——引擎实力档的
+	// 装备内功锚点，0x28 档案是官方唯一下发通道）。空 ID 省略（稀疏语义）。
+	if curNeiGong != "" {
+		if entry, ok := profilePropEntry("CurNeiGong"); ok {
+			body = binary.LittleEndian.AppendUint16(body, entry.Index)
+			body = binary.LittleEndian.AppendUint32(body, uint32(len(curNeiGong)+1))
+			body = append(body, curNeiGong...)
+			body = append(body, 0)
+			count++
+		}
+		if entry, ok := profilePropEntry("CurNeiGongWuXing"); ok && curWuXing != 0 {
+			body = binary.LittleEndian.AppendUint16(body, entry.Index)
+			body = binary.LittleEndian.AppendUint32(body, uint32(curWuXing))
+			count++
+		}
+	}
 	// 字段数回填 body[60:62]（变换块定长 52B 保证）。
 	binary.LittleEndian.PutUint16(body[60:], uint16(count))
 
@@ -279,6 +327,22 @@ func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills 
 	frame = binary.LittleEndian.AppendUint32(frame, uint32(len(body)))   // 明文体长
 	frame = append(frame, body...)
 	return frame, count
+}
+
+// curNeiGongProfilePair 档案装备内功身份对：CurNeiGong（progress 权威）
+// + 五行（目录缺表回落 0=省略字段）。
+func (p *playerActor) curNeiGongProfilePair() (string, int32) {
+	p.mu.Lock()
+	id := p.progress.curNeiGong
+	p.mu.Unlock()
+	if id == "" {
+		return "", 0
+	}
+	wuXing := int32(0)
+	if catalog, err := loadModernNeiGongCatalog(); err == nil {
+		wuXing = catalog.wuXingOf(id)
+	}
+	return id, wuXing
 }
 
 // appendProfileNumeric 按官方表列型码写数值。t6（f64 日期族）特殊：

@@ -1080,6 +1080,17 @@
         jingMaiTier: tier,
       });
     }
+    function openXueWeiAll() {
+      let id = document.querySelector("#jingmai-id").value;
+      if (!id) return alert("请先选择一条经脉");
+      command({ action: "open_xuewei", jingMaiId: id, xueWeiId: "all" });
+    }
+    function setJingMaiActCount() {
+      let count = +document.querySelector("#jingmai-act-count").value;
+      if (!count || count < 1 || count > 8)
+        return alert("可激活条数须在 1..8");
+      command({ action: "set_jingmai_act_count", value: count });
+    }
     function customProbe(msgId, subType) {
       let id = msgId || +document.querySelector("#probe-msgid").value;
       let sub =

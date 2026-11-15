@@ -246,6 +246,11 @@ func serverRecordTable() ([]byte, error) {
 // serverRecordAddString 为单列的场景对象记录编码 SERVER_RECORD_ADD
 // (0x11)。玩家标识必须与 0x0D 对象标识（1-1）一致，否则
 // GetPlayer()/QueryRecord 看不到新行。
+//
+// ⚠ 单行帧只适合「一次只追一行、永不删」的表：帧内 12:14 是源行起始，
+// 引擎按行号插位（每帧起始 0=插到行 0）——顺序敏感/要删行的表必须走
+// serverRecordAddStringRows 单帧批量 + 整表重写（tersure 模式，2026-11-15
+// active_jingmai_rec「关不掉」根因）。
 func serverRecordAddString(objectID, ownerID uint32, recordIndex uint16, value string) []byte {
 	msg := make([]byte, 16, 16+len(value)+5)
 	msg[0] = 0x11
@@ -253,11 +258,37 @@ func serverRecordAddString(objectID, ownerID uint32, recordIndex uint16, value s
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
-	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一列
-	binary.LittleEndian.PutUint16(msg[14:], 1) // 一个字符串列
+	binary.LittleEndian.PutUint16(msg[12:], 0) // 源行起始
+	binary.LittleEndian.PutUint16(msg[14:], 1) // 一行
 	msg = binary.LittleEndian.AppendUint32(msg, uint32(len(value)+1))
 	msg = append(msg, value...)
 	return append(msg, 0)
+}
+
+// serverRecordAddStringRows 单列场景对象记录的批量加行帧（0x11：源行 0
+// 起、行数 N、N 个字符串单元逐行排布）。官服 active_jingmai_rec 登录样
+// 本（c.pcapng #293：一帧 8 行）逐位同构；与降序 DelRow 整表清配对使用
+// （tersureRewriteRecord 同模式），客户端行序与内容解耦、FindRecordRow
+// 按内容命中。
+func serverRecordAddStringRows(objectID, ownerID uint32, recordIndex uint16, values []string) []byte {
+	size := 16
+	for _, value := range values {
+		size += 4 + len(value) + 1
+	}
+	msg := make([]byte, 16, size)
+	msg[0] = 0x11
+	msg[1] = 0 // 场景对象
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
+	binary.LittleEndian.PutUint16(msg[12:], 0) // 源行 0 起
+	binary.LittleEndian.PutUint16(msg[14:], uint16(len(values)))
+	for _, value := range values {
+		msg = binary.LittleEndian.AppendUint32(msg, uint32(len(value)+1))
+		msg = append(msg, value...)
+		msg = append(msg, 0)
+	}
+	return msg
 }
 
 // serverRecordAddInt32 编码一个整型记录单元格。SERVER_RECORD_ADD 追加

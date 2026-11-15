@@ -263,6 +263,22 @@ func Validate(body CommandBody) (Command, error) {
 		}
 		command.JingMaiID = strings.TrimSpace(body.JingMaiId)
 		command.JingMaiTier = body.JingMaiTier
+	case "set_jingmai_act_count":
+		// 可激活经脉条数上限（官方初始 3 → 九阴志最多 8；GM 调 1..8）。
+		if body.Value < 1 || body.Value > 8 {
+			return command, fmt.Errorf("act count must be between 1 and 8")
+		}
+		command.Value = body.Value
+	case "open_xuewei":
+		// GM 开穴：穴位 configID 或 "all"（按穴位地图全开该经脉）。
+		if strings.TrimSpace(body.JingMaiId) == "" {
+			return command, fmt.Errorf("jingMaiId is required")
+		}
+		if strings.TrimSpace(body.XueWeiId) == "" {
+			return command, fmt.Errorf("xueWeiId is required (or all)")
+		}
+		command.JingMaiID = strings.TrimSpace(body.JingMaiId)
+		command.XueWeiID = strings.TrimSpace(body.XueWeiId)
 	case "set_weather":
 		if _, presetErr := WeatherPresetByKey(body.Weather); presetErr != nil {
 			return command, presetErr

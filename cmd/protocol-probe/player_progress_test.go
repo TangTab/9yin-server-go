@@ -627,11 +627,16 @@ func TestNeiGongBookUpdateFrameIsViewRowPropertyUpdate(t *testing.T) {
 	if got := binary.LittleEndian.Uint32(frame[6:]); got != 1 {
 		t.Fatalf("row=%d want 1", got)
 	}
-	if count := binary.LittleEndian.Uint16(frame[10:]); count != 6 {
-		t.Fatalf("property count=%d want 6", count)
+	if count := binary.LittleEndian.Uint16(frame[10:]); count != 7 {
+		// 六基础属性 + varprop 档就位时的 NeiGongLevel（实力点数轴，
+		// 资源目录缺失时回落 6）。
+		t.Fatalf("property count=%d want 7", count)
 	}
 	if !bytes.Contains(frame, []byte{byte(propJMLevel & 0xff), byte(propJMLevel >> 8), 31}) {
 		t.Fatalf("frame missing Level=31 byte: %x", frame)
+	}
+	if !bytes.Contains(frame, []byte{byte(propNeiGongLevel & 0xff), byte(propNeiGongLevel >> 8)}) {
+		t.Fatal("frame missing NeiGongLevel axis (varprop row present)")
 	}
 	if !bytes.Contains(frame, []byte{byte(propCurFillValue & 0xff), byte(propCurFillValue >> 8), 0xe1, 0x10, 0, 0}) {
 		t.Fatalf("frame missing CurFillValue=4321: %x", frame)

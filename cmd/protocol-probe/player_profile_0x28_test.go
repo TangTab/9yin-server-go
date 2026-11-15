@@ -29,12 +29,12 @@ func profileFieldWireSize(typeCode int) int {
 }
 
 // TestPlayerProfile0x28Envelope 帧头不变量 + 逐字段走查精确落在帧尾
-//（与外服私服样本同一校验口径：len-1/bodylen/count/字段区按表列型走完恰尽）。
+// （与外服私服样本同一校验口径：len-1/bodylen/count/字段区按表列型走完恰尽）。
 func TestPlayerProfile0x28Envelope(t *testing.T) {
 	// 外服私服方言下 41 字段全量解析（fork 表家园/VIP/节日域头行缺席=11 字段
 	// 稀疏形，另由 TestPlayerProfile0x28ForkSparseSmoke 覆盖）。
 	pos := role.Position{X: 660.6, Y: 33.6, Z: 299.5, Orient: 1.578}
-	frame, count := playerProfile0x28Frame(0x1105C0E3, 0x03DEfBAE, pos, nil)
+	frame, count := playerProfile0x28Frame(0x1105C0E3, 0x03DEfBAE, pos, nil, "", "ng_jz_006", 6)
 	if frame[0] != 0x28 || frame[1] != 0x46 {
 		t.Fatalf("header = %#x %#x, want 28 46", frame[0], frame[1])
 	}
@@ -67,8 +67,12 @@ func TestPlayerProfile0x28Envelope(t *testing.T) {
 	if int(got) != count {
 		t.Fatalf("count = %d, want %d", got, count)
 	}
-	if count != len(playerProfilePropSpecs) {
-		t.Fatalf("official2433 field count = %d, want %d（全量清单应无缺席）", count, len(playerProfilePropSpecs))
+	// 41 基础 + CurNeiGong/CurNeiGongWuXing 装备内功对（官方档案 @0x110b 方言）。
+	if count != len(playerProfilePropSpecs)+2 {
+		t.Fatalf("official2433 field count = %d, want %d+2（全量清单+装备内功对）", count, len(playerProfilePropSpecs))
+	}
+	if !bytes.Contains(body, append([]byte("ng_jz_006"), 0)) {
+		t.Fatal("profile body missing CurNeiGong=ng_jz_006")
 	}
 	off := 62
 	seen := map[string]bool{}
@@ -124,7 +128,7 @@ func TestPlayerProfile0x28Envelope(t *testing.T) {
 // TestPlayerProfile0x28FollowsActiveTable 双方言换表跟随：official2433
 // 下 Name 落外服私服原号 178、HomeFengShuiDate 落 6（登陆-all #132 实证位）。
 func TestPlayerProfile0x28FollowsActiveTable(t *testing.T) {
-	frame, _ := playerProfile0x28Frame(1, 2, role.Position{}, nil)
+	frame, _ := playerProfile0x28Frame(1, 2, role.Position{}, nil, "", "", 0)
 	body := frame[10:]
 	count := int(binary.LittleEndian.Uint16(body[60:]))
 	off := 62
@@ -157,7 +161,7 @@ func TestPlayerProfile0x28SkillRows(t *testing.T) {
 		{configID: "CS_sl_djgq04", staticData: 3932, level: 1, maxLevel: 4, total: 20400, pauseTime: 30000},
 		{configID: "zs_normal_02", staticData: 77, level: 3, maxLevel: 9, total: 500, pauseTime: 0},
 	}
-	frame, count := playerProfile0x28Frame(1, 2, role.Position{}, skills)
+	frame, count := playerProfile0x28Frame(1, 2, role.Position{}, skills, "", "", 0)
 	body := frame[10:]
 	if int(binary.LittleEndian.Uint16(body[60:])) != count {
 		t.Fatalf("count hdr mismatch")
@@ -202,5 +206,55 @@ func TestPlayerProfile0x28SkillRows(t *testing.T) {
 	}
 	if configs != 2 {
 		t.Fatalf("ConfigID rows=%d, want 2", configs)
+	}
+}
+
+// TestPlayerProfile0x28ShortcutKey 档案键位字段（官方 f#042 idx198，t7）：
+// 存档串原样 + NUL 嵌入，位于基础字段区尾部（技能行之前）；空串省略
+// （2026-11-15「保存的按键配置下发有问题」：官服家族客户端在 AddObject
+// 时从档案字段初始化键位管理器，官方唯一回放通道）。
+func TestPlayerProfile0x28ShortcutKey(t *testing.T) {
+	bind := "1,87;2,83;3,81;4,69;5,65;"
+	frame, count := playerProfile0x28Frame(1, 2, role.Position{}, nil, bind, "", 0)
+	body := frame[10:]
+	off := 62
+	var gotBind string
+	gotCount := 0
+	for i := 0; i < count; i++ {
+		idx := binary.LittleEndian.Uint16(body[off:])
+		entry, _ := clientdata.PropertyByIndex(int(idx))
+		off += 2
+		var val string
+		if entry.TypeCode == 7 || entry.TypeCode == 8 {
+			n := int(binary.LittleEndian.Uint32(body[off:]))
+			raw := body[off+4 : off+4+n]
+			off += 4 + n
+			if entry.Name == "ShortcutKey" {
+				gotBind = string(raw[:len(raw)-1]) // 去 NUL
+			}
+			val = "str"
+		} else {
+			off += profileFieldWireSize(entry.TypeCode)
+			val = "num"
+		}
+		_ = val
+		gotCount++
+	}
+	if off != len(body) {
+		t.Fatalf("走查残差 %d B（解析错位）", len(body)-off)
+	}
+	if gotBind != bind {
+		t.Fatalf("ShortcutKey = %q, want %q", gotBind, bind)
+	}
+	if gotCount != count {
+		t.Fatalf("走查字段数 %d != count %d", gotCount, count)
+	}
+	// 空串省略：count 不含 ShortcutKey。
+	emptyFrame, emptyCount := playerProfile0x28Frame(1, 2, role.Position{}, nil, "", "", 0)
+	if emptyCount != count-1 {
+		t.Fatalf("空键位 count=%d, want %d（省略一字段）", emptyCount, count-1)
+	}
+	if bytes.Contains(emptyFrame[62:], []byte("ShortcutKey")) {
+		t.Fatalf("空键位档案不应含 ShortcutKey 字段")
 	}
 }

@@ -61,7 +61,7 @@ func activityCustomMsgKnown(id int32) bool {
 	switch id {
 	case clientCustomSetShortcut, clientCustomRemoveShortcut, clientCustomSitCross,
 		clientCustomSaveCustomizing, clientCustomKeybindUpload, clientCustomSetOperateMode,
-		clientCustomNeiGongBind,
+		clientCustomNeiGongBind, clientCustomChangeMoveType,
 		211, 215, 216, 217, 1006,
 		clientCustomActiveParry,
 		clientCustomSelectTarget, clientCustomAttackTarget, clientCustomBlockState,

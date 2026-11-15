@@ -111,8 +111,8 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 		t.Fatalf("stage handled=%t err=%v", handled, err)
 	}
 	frames := conn.Frames()
-	if len(frames) != 9 {
-		t.Fatalf("staging frames=%d, want 9-frame 簇（技能1.pcapng 定版：受理簇零 m24 且首受理带 PauseSkill，c61 仅 220 进窗时发）", len(frames))
+	if len(frames) != 9 { // 5 受理簇（m25 已恢复）+ 4 状态四连
+		t.Fatalf("staging frames=%d, want 9-frame 簇（受理簇零 m24 且首受理带 PauseSkill）", len(frames))
 	}
 	if frames[0][0] != 0x10 || binary.LittleEndian.Uint16(frames[0][12:]) != propCurSkillID {
 		t.Fatalf("CurSkillID frame=%x", frames[0])

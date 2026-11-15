@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -15,6 +16,7 @@ import (
 var (
 	propCurNeiGong     = clientdata.MustPlayerProperty("CurNeiGong").Index     // CurNeiGong String（fork=653）
 	propFaculty        = clientdata.MustPlayerProperty("Faculty").Index        // Faculty Int32（fork=798）
+	propMaxFaculty     = clientdata.MustPlayerProperty("MaxFaculty").Index     // MaxFaculty Int32（官方恒 2000000000）
 	propFacultyState   = clientdata.MustPlayerProperty("FacultyState").Index   // FacultyState（fork=758）
 	propFacultyStyle   = clientdata.MustPlayerProperty("FacultyStyle").Index   // FacultyStyle（fork=759）
 	propFacultyName    = clientdata.MustPlayerProperty("FacultyName").Index    // FacultyName（fork=760）
@@ -73,6 +75,19 @@ var (
 	// 不够的。
 	propStaticData = clientdata.MustPlayerProperty("StaticData").Index // StaticData（fork=2237）
 	propItemType   = clientdata.MustPlayerProperty("ItemType").Index   // ItemType（fork=1889）
+	// View 43 书行官方方言补充（c.pcapng #633/#634 走查，2026-11-15）：
+	// 引擎侧 PowerLevel = max(书行 NeiGongLevel)（玩法入口门槛数据源，
+	// 瘦身 bin 剥离官方书行后我方行缺该属性 → 实力判定恒不过）。
+	// VarPropNo/Quality 与 skill_view.go 声明共用。
+	propSchool       = clientdata.MustPlayerProperty("School").Index       // School String（官方行 ng_jz）
+	propNeiGongLevel = clientdata.MustPlayerProperty("NeiGongLevel").Index // NeiGongLevel Int32（实力点数轴）
+	propBufferID     = clientdata.MustPlayerProperty("BufferID").Index     // BufferID String（书 buff）
+	propBufferLevel  = clientdata.MustPlayerProperty("BufferLevel").Index  // BufferLevel Int32
+	propStrAdd       = clientdata.MustPlayerProperty("StrAdd").Index       // StrAdd..SpiAdd Int32（varprop 档五维）
+	propStaAdd       = clientdata.MustPlayerProperty("StaAdd").Index
+	propDexAdd       = clientdata.MustPlayerProperty("DexAdd").Index
+	propIngAdd       = clientdata.MustPlayerProperty("IngAdd").Index
+	propSpiAdd       = clientdata.MustPlayerProperty("SpiAdd").Index
 	// WuXing(玩家域末现)是内修面板 form_wuxue_faculty 属性列
 	//（太极/阴柔/阳刚，ui_wuxue_prop_N）的显示来源：面板按 FacultyName
 	// 取武学对象后 QueryProp("WuXing")，缺省时整列退回 ui_train_elemt。
@@ -239,6 +254,11 @@ type playerProgress struct {
 	// random_equip_push.go refreshZhenpaiEquipBonuses 维护；官方"根据角色
 	// 实力等级"口径——发放/穿戴/升档时重算，盘点 §2.6/§2.7）。
 	zhenpaiEquip zhenpaiEquipBonus
+	// meridianBonus 已激活经脉的官方逐层累积加成（jingmai_progress.go
+	// recomputeJingMaiBonusLocked 维护：激活集/周天/穴位任一变化即重算；
+	// 五维进 effectiveFive，HP/MP/招架/内防 Add 进对应 derived 全量公式，
+	// 其余战斗面板列由 properties() 直发——2026-11-15 官方式经脉对齐）。
+	meridianBonus jingMaiAttrSet
 }
 
 type playerAttributes struct {
@@ -321,49 +341,60 @@ func (p *playerProgress) clampSP(value int32) int32 {
 	return value
 }
 
-// effectiveFive 返回基础五维 + 装备内功加成的线上总值（0x10 485-489
-// 下发的同一数值，官方 wire 即总值）。
+// effectiveFive 返回基础五维 + 装备内功加成 + 已激活经脉官方逐层加成
+// 的线上总值（0x10 485-489 下发的同一数值，官方 wire 即总值）。
 func (p *playerProgress) effectiveFive() (str, sta, dex, ing, spi int32) {
 	a := p.attributes
+	str, sta, dex, ing, spi = a.str, a.sta, a.dex, a.ing, a.spi
 	if equipped := p.book(p.curNeiGong); equipped != nil {
-		return a.str + equipped.strAdd, a.sta + equipped.staAdd, a.dex + equipped.dexAdd,
-			a.ing + equipped.ingAdd, a.spi + equipped.spiAdd
+		str += equipped.strAdd
+		sta += equipped.staAdd
+		dex += equipped.dexAdd
+		ing += equipped.ingAdd
+		spi += equipped.spiAdd
 	}
-	return a.str, a.sta, a.dex, a.ing, a.spi
+	str += p.meridianBonus.str
+	sta += p.meridianBonus.sta
+	dex += p.meridianBonus.dex
+	ing += p.meridianBonus.ing
+	spi += p.meridianBonus.spi
+	return str, sta, dex, ing, spi
 }
 
 // derivedResourceAdds 是官方 MaxHPAdd@581/MaxMPAdd@582 的全量公式
-// （属性分量 + 装备内功 pack 分量）。vitals 的 SetDerivedMaxima 与
-// properties() 的 581/582 必须消费同一来源，客户端显示总量才能与
-// 服务器端消耗/恢复使用的总上限一致。
+// （属性分量 + 装备内功 pack 分量 + 已激活经脉官方逐层 Add 分量——
+// VarProp 的 MaxHPAdd/MaxMPAdd 是独立列，与五维公式分量不重复计）。
+// vitals 的 SetDerivedMaxima 与 properties() 的 581/582 必须消费同一
+// 来源，客户端显示总量才能与服务器端消耗/恢复使用的总上限一致。
 func (p *playerProgress) derivedResourceAdds() (maxHPAdd, maxMPAdd int32) {
 	str, sta, _, ing, spi := p.effectiveFive()
 	bookHP, bookMP := p.equippedResourceAdds()
-	return str*attrHPPerStr + sta*attrHPPerSta + bookHP + p.zhenpaiEquip.maxHP,
-		ing*attrMPPerIng + spi*attrMPPerSpi + bookMP + p.zhenpaiEquip.maxMP
+	return str*attrHPPerStr + sta*attrHPPerSta + bookHP + p.zhenpaiEquip.maxHP + p.meridianBonus.maxHPAdd,
+		ing*attrMPPerIng + spi*attrMPPerSpi + bookMP + p.zhenpaiEquip.maxMP + p.meridianBonus.maxMPAdd
 }
 
 // derivedMinMagicDefAdd 是 MinMagicDefAdd@597 全量：round(0.2·Spi)
-// 属性分量 + 装备内功 varprop 分量。
+// 属性分量 + 装备内功 varprop 分量 + 经脉逐层分量。
 func (p *playerProgress) derivedMinMagicDefAdd() int32 {
 	_, _, _, _, spi := p.effectiveFive()
 	add := spiTenthsAdd(spi)
 	if equipped := p.book(p.curNeiGong); equipped != nil {
 		add += equipped.minMagicDefAdd
 	}
-	return add
+	return add + p.meridianBonus.minMagicDefAdd
 }
 
 // maxParryAddTotal 是 MaxParryAdd@477 的全量 Add 列（内功 pack 分量 +
-// 镇派兵器"招架耐力上限"）。客户端以 MaxParry+MaxParryAdd 为耐力上限，
-// 镇派加成必须进 Add 列而非只折进 475 总量位（2026-11-12 真机：「加的
-// 招架耐力的上限没变」——旧实现 477 只带书分量，475 才含镇派）。
+// 镇派兵器"招架耐力上限" + 经脉逐层分量）。客户端以 MaxParry+MaxParryAdd
+// 为耐力上限，镇派加成必须进 Add 列而非只折进 475 总量位（2026-11-12
+// 真机：「加的招架耐力的上限没变」——旧实现 477 只带书分量，475 才含
+// 镇派）。
 func (p *playerProgress) maxParryAddTotal() int32 {
 	add := int32(0)
 	if equipped := p.book(p.curNeiGong); equipped != nil {
 		add = equipped.maxParryAdd
 	}
-	return add + p.zhenpaiEquip.parry
+	return add + p.zhenpaiEquip.parry + p.meridianBonus.maxParryAdd
 }
 
 // parryValueTotal 是 ParryValue@475 官方式：MaxParry 基础位 + MaxParryAdd
@@ -565,11 +596,19 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		a.ing += equipped.ingAdd
 		a.spi += equipped.spiAdd
 	}
-	// 资源/内防 Add 走官方全量公式（属性分量 + 内功 pack 分量），
-	// 与 vitals SetDerivedMaxima 的 derivedResourceAdds 同源。
+	// 已激活经脉的官方逐层五维并进面板总值（effectiveFive 同源；与书
+	// 分量并列，2026-11-15 官方式经脉对齐）。
+	a.str += p.meridianBonus.str
+	a.sta += p.meridianBonus.sta
+	a.dex += p.meridianBonus.dex
+	a.ing += p.meridianBonus.ing
+	a.spi += p.meridianBonus.spi
+	// 资源/内防 Add 走官方全量公式（属性分量 + 内功 pack 分量 +
+	// 经脉逐层分量），与 vitals SetDerivedMaxima 的 derivedResourceAdds
+	// 同源。
 	maxHPAdd, maxMPAdd := p.derivedResourceAdds()
 	minMagicDefAdd := p.derivedMinMagicDefAdd()
-	return []clientdata.IndexedProperty{
+	properties := []clientdata.IndexedProperty{
 		{Index: propCurNeiGong, Name: "CurNeiGong", Value: clientdata.StringValue(p.curNeiGong)},
 		{Index: propFaculty, Name: "Faculty", Value: clientdata.Int32Value(p.faculty)},
 		{Index: propFacultyState, Name: "FacultyState", Value: clientdata.Int32Value(p.facultyState)},
@@ -601,19 +640,20 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propMeleePower, Name: "MeleePower", Value: clientdata.Int32Value(a.meleePower)},
 		{Index: propShotPower, Name: "ShotPower", Value: clientdata.Int32Value(a.shotPower)},
 		{Index: propMagicPower, Name: "MagicPower", Value: clientdata.Int32Value(a.magicPower)},
-		{Index: propMeleePowerAdd, Name: "MeleePowerAdd", Value: clientdata.Int32Value(a.str)},
-		{Index: propShotPowerAdd, Name: "ShotPowerAdd", Value: clientdata.Int32Value(a.dex)},
-		{Index: propMagicPowerAdd, Name: "MagicPowerAdd", Value: clientdata.Int32Value(a.ing)},
+		// Add 列 = 五维公式分量（1·对应维）+ 经脉官方逐层显式分量。
+		{Index: propMeleePowerAdd, Name: "MeleePowerAdd", Value: clientdata.Int32Value(a.str + p.meridianBonus.meleePowerAdd)},
+		{Index: propShotPowerAdd, Name: "ShotPowerAdd", Value: clientdata.Int32Value(a.dex + p.meridianBonus.shotPowerAdd)},
+		{Index: propMagicPowerAdd, Name: "MagicPowerAdd", Value: clientdata.Int32Value(a.ing + p.meridianBonus.magicPowerAdd)},
 		{Index: propPhyHit, Name: "PhyHit", Value: clientdata.Int32Value(a.phyHit)},
-		{Index: propPhyHitAdd, Name: "PhyHitAdd", Value: clientdata.Int32Value(a.dex)},
+		{Index: propPhyHitAdd, Name: "PhyHitAdd", Value: clientdata.Int32Value(a.dex + p.meridianBonus.phyHitAdd)},
 		{Index: propMagicHit, Name: "MagicHit", Value: clientdata.Int32Value(a.magicHit)},
-		{Index: propMagicHitAdd, Name: "MagicHitAdd", Value: clientdata.Int32Value(a.spi)},
+		{Index: propMagicHitAdd, Name: "MagicHitAdd", Value: clientdata.Int32Value(a.spi + p.meridianBonus.magicHitAdd)},
 		{Index: propDodge, Name: "Dodge", Value: clientdata.Int32Value(a.dodge)},
-		{Index: propDodgeAdd, Name: "DodgeAdd", Value: clientdata.Int32Value(a.dex)},
+		{Index: propDodgeAdd, Name: "DodgeAdd", Value: clientdata.Int32Value(a.dex + p.meridianBonus.dodgeAdd)},
 		{Index: propPhyVa, Name: "PhyVa", Value: clientdata.Int32Value(a.phyVa)},
-		{Index: propPhyVaAdd, Name: "PhyVaAdd", Value: clientdata.Int32Value(a.str)},
+		{Index: propPhyVaAdd, Name: "PhyVaAdd", Value: clientdata.Int32Value(a.str + p.meridianBonus.phyVaAdd)},
 		{Index: propMagicVa, Name: "MagicVa", Value: clientdata.Int32Value(a.magicVa)},
-		{Index: propMagicVaAdd, Name: "MagicVaAdd", Value: clientdata.Int32Value(a.spi)},
+		{Index: propMagicVaAdd, Name: "MagicVaAdd", Value: clientdata.Int32Value(a.spi + p.meridianBonus.magicVaAdd)},
 		{Index: propMaxParry, Name: "MaxParry", Value: clientdata.Int32Value(a.maxParry)},
 		{Index: propPhyDef, Name: "PhyDef", Value: clientdata.Int32Value(a.phyDef)},
 		{Index: propStiDef, Name: "StiDef", Value: clientdata.Int32Value(a.stiDef)},
@@ -631,6 +671,8 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propWuJiPoint, Name: "WuJiPoint", Value: clientdata.Int32Value(wuJiPointEnv())},
 		{Index: propMaxWuJiPoint, Name: "MaxWuJiPoint", Value: clientdata.Int32Value(wuJiPointMaxEnv())},
 	}
+	properties = append(properties, jingMaiBonusExtraProps(p.meridianBonus)...)
+	return properties
 }
 
 func (p *playerProgress) viewFrames() ([][]byte, error) {
@@ -645,23 +687,54 @@ func (p *playerProgress) viewFrames() ([][]byte, error) {
 	return frames, nil
 }
 
+// bookFrame View43 书行（0x18 VIEW_ADD）。属性集对齐官方方言（c.pcapng
+// #633/#634 逐位走查）：ConfigID/ItemType/School/VarPropNo/Level/
+// NeiGongLevel/五维Add/BufferID/BufferLevel/StaticData/MaxLevel/Quality/
+// WuXing + 我方修炼进度族（CurFill/TotalFill/Power/MaxPower）。其中
+// NeiGongLevel 是客户端引擎的实力点数来源（max() 出 PowerLevel），varprop
+// 档缺失时整组 varprop 族回退省略（等级帧形不变，仅实力轴缺发）。
 func (p *playerProgress) bookFrame(slot uint16) ([]byte, error) {
 	if slot == 0 || int(slot) > len(p.books) {
 		return nil, fmt.Errorf("invalid neigong slot %d", slot)
 	}
 	book := p.books[slot-1]
-	return serverViewAdd(viewportNeiGong, slot, []serverViewProperty{
+	props := []serverViewProperty{
 		viewString(clientdata.MustPlayerProperty("ConfigID").Index, book.configID),
-		viewInt(propStaticData, book.staticData),
 		viewInt(propItemType, book.itemType),
 		viewByte(clientdata.MustPlayerProperty("Level").Index, byte(book.level)), // fork=1465
+		viewInt(propStaticData, book.staticData),
 		viewInt(propMaxLevel, book.maxLevel),
 		viewInt(propCurFillValue, book.fill),
 		viewInt(propTotalFillValue, book.total),
 		viewInt(propPowerValue, book.power),
 		viewInt(propMaxPowerValue, book.maxPower),
 		viewInt(propWuXing, book.wuXing),
-	})
+	}
+	// varprop 档族（官方行序：School,VarPropNo 在前、NeiGongLevel 紧随
+	// Level、五维与 buff 在中段、Quality 在 MaxLevel 后）。装载失败或档
+	// 行缺失时静默省略——不阻塞视图行下发。
+	if catalog, err := loadModernNeiGongCatalog(); err == nil {
+		if row, varPropNo, rowErr := catalog.varPropRow(book.staticData, book.level); rowErr == nil {
+			school := book.configID
+			if idx := strings.LastIndex(school, "_"); idx > 0 {
+				school = school[:idx]
+			}
+			props = append(props,
+				viewString(propSchool, school),
+				viewInt(propVarPropNo, varPropNo),
+				viewInt(propNeiGongLevel, row.neiGongLevel),
+				viewInt(propStrAdd, row.direct["StrAdd"]),
+				viewInt(propStaAdd, row.direct["StaAdd"]),
+				viewInt(propDexAdd, row.direct["DexAdd"]),
+				viewInt(propIngAdd, row.direct["IngAdd"]),
+				viewInt(propSpiAdd, row.direct["SpiAdd"]),
+				viewString(propBufferID, row.buffID),
+				viewInt(propBufferLevel, row.buffLevel),
+				viewByte(propQuality, 1),
+			)
+		}
+	}
+	return serverViewAdd(viewportNeiGong, slot, props)
 }
 
 // bookUpdateFrame View43 行级增量帧（0x10 isView=1 view=43 owner=行号）。
@@ -677,14 +750,22 @@ func (p *playerProgress) bookUpdateFrame(slot uint16) ([]byte, error) {
 		return nil, fmt.Errorf("invalid neigong slot %d", slot)
 	}
 	book := p.books[slot-1]
-	return sceneObjectProperties(uint32(viewportNeiGong), uint32(slot), 1, []clientdata.IndexedProperty{
+	props := []clientdata.IndexedProperty{
 		{Index: propJMLevel, Name: "Level", Value: clientdata.ByteValue(byte(book.level))},
 		{Index: propMaxLevel, Name: "MaxLevel", Value: clientdata.Int32Value(book.maxLevel)},
 		{Index: propCurFillValue, Name: "CurFillValue", Value: clientdata.Int32Value(book.fill)},
 		{Index: propTotalFillValue, Name: "TotalFillValue", Value: clientdata.Int32Value(book.total)},
 		{Index: propPowerValue, Name: "PowerValue", Value: clientdata.Int32Value(book.power)},
 		{Index: propMaxPowerValue, Name: "MaxPowerValue", Value: clientdata.Int32Value(book.maxPower)},
-	})
+	}
+	// NeiGongLevel 随等级档推进（varprop 档实力点数轴，引擎 PowerLevel
+	// 数据源）；档缺失时省略（bookFrame 同口径）。
+	if catalog, err := loadModernNeiGongCatalog(); err == nil {
+		if row, _, rowErr := catalog.varPropRow(book.staticData, book.level); rowErr == nil {
+			props = append(props, clientdata.IndexedProperty{Index: propNeiGongLevel, Name: "NeiGongLevel", Value: clientdata.Int32Value(row.neiGongLevel)})
+		}
+	}
+	return sceneObjectProperties(uint32(viewportNeiGong), uint32(slot), 1, props)
 }
 
 func (p *playerProgress) equip(id string) error {

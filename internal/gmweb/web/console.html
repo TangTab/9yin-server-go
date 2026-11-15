@@ -1134,21 +1134,34 @@
       <section>
         <h2>经脉周天设置</h2>
         <p class="muted">
-          所有正经默认已开通为 216
-          周天。客户端可直接点击“激活/关闭”来生效或取消属性加成。此处仅用于把选中经脉的周天档位改为
-          36/72/108/144/180/216（同时改最大层数和当前层数），改完重推 View 45
-          并刷新五维。
+          官方式经脉：全套开通、初始 9 周天；开穴提升上限（每穴 +36，跷脉
+          75/穴，开满即目录顶格；内功层数达标自动开穴）。周天直设会被钳到
+          当前上限——想拉满请先用「开穴」。激活才有官方逐层属性加成，
+          激活条数默认 3（官方初始值），可在此调整 1..8。
         </p>
         <select id="jingmai-id"></select>
         <select id="jingmai-tier">
+          <option value="9">9 周天</option>
           <option value="36">36 周天</option>
           <option value="72">72 周天</option>
           <option value="108">108 周天</option>
           <option value="144">144 周天</option>
           <option value="180">180 周天</option>
-          <option value="216" selected>216 周天</option>
+          <option value="216">216 周天</option>
         </select>
         <button onclick="setJingMaiTier()">设置周天</button>
+        <button onclick="openXueWeiAll()">开穴(全开→上限顶格)</button>
+        <div>
+          <input
+            id="jingmai-act-count"
+            type="number"
+            min="1"
+            max="8"
+            value="3"
+            style="width: 5em"
+          />
+          <button onclick="setJingMaiActCount()">设置可激活条数</button>
+        </div>
         <div id="jingmai-hint" class="muted"></div>
       </section>
       <section>

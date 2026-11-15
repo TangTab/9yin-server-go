@@ -68,7 +68,9 @@ type gmPanelDomain struct {
 	justice       int32
 	evil          int32
 	freeBase      int32
+	alignmentSet  bool // GM set_alignment 生效过（快照节点落盘门槛）
 	pkMode        int32
+	pkModeSet     bool // GM set_pk_mode 生效过
 	vitalsSet     bool
 	vitals        gmVitalsState
 }
@@ -128,12 +130,15 @@ func (p *playerActor) setAlignment(justice, evil, freeBase int32) ([]byte, error
 	p.mu.Lock()
 	if justice > 0 {
 		p.gm.justice = justice
+		p.gm.alignmentSet = true
 	}
 	if evil > 0 {
 		p.gm.evil = evil
+		p.gm.alignmentSet = true
 	}
 	if freeBase > 0 {
 		p.gm.freeBase = freeBase
+		p.gm.alignmentSet = true
 	}
 	p.mu.Unlock()
 	return p.alignmentFrame()
@@ -154,6 +159,7 @@ func (p *playerActor) alignmentFrame() ([]byte, error) {
 func (p *playerActor) setPKMode(mode int32) ([]byte, error) {
 	p.mu.Lock()
 	p.gm.pkMode = mode
+	p.gm.pkModeSet = true
 	p.mu.Unlock()
 	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
 		{Index: propPKMode, Name: "PKMode", Value: clientdata.ByteValue(byte(mode))},
@@ -206,6 +212,22 @@ func (p *playerActor) identityFrame() ([]byte, error) {
 	})
 }
 
+// facultyIdentityFrame 修为域身份帧（官方方言对齐，c.pcapng #87/#88/
+// #2261/#2262：MaxFaculty=2000000000 官方常量、Faculty/HoldFaculty 我方
+// 权威值。官方全量 bin 时代随镜像帧到达，瘦身 335 帧后窗口外全缺——
+// 面板修为行与依赖修为域的客户端判断数据源）。
+func (p *playerActor) facultyIdentityFrame() ([]byte, error) {
+	p.mu.Lock()
+	faculty := p.progress.faculty
+	holdFaculty := p.progress.holdFaculty
+	p.mu.Unlock()
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: propFaculty, Name: "Faculty", Value: clientdata.Int32Value(faculty)},
+		{Index: propMaxFaculty, Name: "MaxFaculty", Value: clientdata.Int32Value(2000000000)},
+		{Index: propHoldFaculty, Name: "HoldFaculty", Value: clientdata.Int32Value(holdFaculty)},
+	})
+}
+
 // domainFrame 是面板域块整帧（Java PanelState.domainProperties 保守
 // 语义：TitleID 取佩戴位，坐骑/兵录/声望暂无数据源发零值，真机待验后
 // 按抓包修正）。与身份块同帧级合并进 gmPanelFrames。
@@ -223,13 +245,15 @@ func (p *playerActor) domainFrame() ([]byte, error) {
 	})
 }
 
-// gmPanelFrames 生成 spawn 后的面板域补推帧（身份块 + 域块各一帧，
-// 常态必有——Java identityProperties/domainProperties 随 0x0D 档下发的
-// 瘦帧对应物）。切图重进与登录同口径（0x0C 清玩家对象后重放）。
+// gmPanelFrames 生成 spawn 后的面板域补推帧（身份块 + 修为域 + 域块各
+// 一帧，常态必有——Java identityProperties/domainProperties 随 0x0D 档
+// 下发的瘦帧对应物 + 官方修为域方言）。切图重进与登录同口径（0x0C 清
+// 玩家对象后重放）。
 func (p *playerActor) gmPanelFrames() ([][]byte, error) {
-	frames := make([][]byte, 0, 2)
+	frames := make([][]byte, 0, 3)
 	for _, build := range []func() ([]byte, error){
 		p.identityFrame,
+		p.facultyIdentityFrame,
 		p.domainFrame,
 	} {
 		frame, err := build()

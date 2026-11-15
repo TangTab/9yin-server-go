@@ -34,6 +34,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
@@ -67,6 +68,8 @@ const (
 	// rushAirborneYDeltaMeters：空中冲锋判定（world 内部 NPC y 口径未校准，
 	// 禁用中——一律走地面链）。
 	rushAirborneYDeltaMeters = float32(1e9)
+	// rushWalkKickDelay：受理簇到走踢帧的官方簇距（外服私服 f#0202 +155ms）。
+	rushWalkKickDelay = 155 * time.Millisecond
 )
 
 // rushDashTriggerMeters 是 c61 冲刺窗口上界：GRushRange(5.0)+GRushRangeAdd(1.5)。
@@ -557,12 +560,18 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	// 零 m24；c61 是服务端指令，仅在 m220 上报进技能授予窗时由
 	// tryRushArrival→issueRushDash 下发——P0c/P0e 的受理期 stage-dash 档2
 	// 系 Java 方言误植，真机实证客户端零消费且非外服私服帧序）。
+	// msg25[30000,'skill_pause']（2026-11-15 曾撤、同日按令恢复：跳跃异常
+	// 真凶=回放瘦身剥离官服物理帧档案（PHYSICS-16，另案已修），m25 无罪；
+	// 远距按压的官方暂存 UX 保留）。
+	// **stage 期不发 m24 c61**（技能1.pcapng 2026-11-13 定版：外服私服受理簇
+	// 零 m24；c61 是服务端指令，仅在 m220 上报进技能授予窗时由
+	// tryRushArrival→issueRushDash 下发——P0c/P0e 的受理期 stage-dash 档2
+	// 系 Java 方言误植，真机实证客户端零消费且非外服私服帧序）。
 	builders = append(builders,
 		frameBuilder{"msg25", func() ([]byte, error) { return skillPauseFrame(int32(rushPendingWindow / time.Millisecond)) }},
 	)
 	// PauseSkill=技能：首受理与 rearm 均发（技能1.pcapng 5/5 首受理样本
-	// 皆有，m25 之后、m707 之前——技能暂存状态机 msg25+PauseSkill 成对
-	// 是客户端接近武装的输入）。
+	// 皆有，m25 之后、m707 之前——技能暂存状态机 msg25+PauseSkill 成对）。
 	builders = append(builders, frameBuilder{"PauseSkill-set", func() ([]byte, error) {
 		return rushPropertyFrame(propRushPauseSkill, "PauseSkill", clientdata.StringValue(definition.id))
 	}})
@@ -597,37 +606,120 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	}
 	log.Printf("%s: rush staged skill id=%s dist=%.1fm air=%t rearm=%t window=%s dest=(%.1f,%.1f,%.1f)",
 		remote, definition.id, distance, airborne, rearm, rushPendingWindow, target.X, target.Y, target.Z)
+	// 走踢帧默认停发（NINEYIN_RUSH_WALK_KICK=1 显式开）：三方言真机全零走
+	// （0xa0000f01 双同值 / 真方言 A/B 双点 0xA0000000+0x30000F01），且
+	// 真方言会把客户端本地移动机打楔（跳不高/原地弹=服务端推的停帧与
+	// 伪 WASD 条目被吞进本地 intent 状态机，2026-11-15 09:5x 真机）。
+	// 客户端 OnMoving 闸（motion_func 白名单）未破之前不再自动发。
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_RUSH_WALK_KICK")), "1") {
+		scheduleRushWalkKick(link, player, definition, targetID, target, castAt, remote)
+	}
 	return true, nil
 }
 
-// rushWalkKickFrame 冲锋走踢帧：双入口 0x21（44B playerMoveEcho 条目形，
-// 技能.pcapng f#0202 逐槽精解 2026-11-12 二轮勘误）：**两入口=同一目的
-// 地**（外服私服样本 947.8/947.9≈bind 点重复两次，非「当前位→目的地」——
-// 一轮的 A→B 双点解读系字节错位误读），angle/speed/orient/尾槽两入口
-// 全同；speed=4.5、orient 恒 **-π**（外服私服两样本 -3.14，非朝向）、尾双槽
-// 5.5/**9.8**(0x411CCCCD)、intentID 两入口均 0xa0000f01（寻路族）。
-// 外服私服踢后 0.485s 客户端即起走（其间 s2c 零帧）——踢帧单独触发走位。
-// 注意：踢帧被客户端消费要求钟基正确（m294=m924 单路应答），错方言
-// 下踢帧被当回显吃掉不执行（凌晨三轮实证）。
+// scheduleRushWalkKick 受理簇后 +155ms 下发走踢帧（真方言双入口，见
+// rushWalkKickFrame）。发送前复核暂存态仍是本次受理且未发冲刺——
+// 155ms 内换了技能/取消/已进窗发 c61 的，旧踢帧作废。
+func scheduleRushWalkKick(link sceneMessageConnection, player *playerActor, definition combatSkillDefinition,
+	targetID uint32, target, castAt worldcore.Transform, remote string) {
+	time.AfterFunc(rushWalkKickDelay, func() {
+		pending := player.peekPendingCast(time.Now().UTC())
+		if pending == nil || pending.skillID != definition.id || pending.targetID != targetID {
+			return
+		}
+		if player.rushDashIssuedSnapshot() {
+			return
+		}
+		bindX, bindY, bindZ := rushBindPoint(target, castAt.X, castAt.Z, definition.bindDistance)
+		if err := link.WriteFrame(rushWalkKickFrame(castAt, target, definition.bindDistance)); err != nil {
+			log.Printf("%s: rush walk kick skill id=%s: %v", remote, definition.id, err)
+			return
+		}
+		log.Printf("%s: rush walk kick sent skill id=%s bind=(%.1f,%.1f,%.1f)",
+			remote, definition.id, bindX, bindY, bindZ)
+	})
+}
+
+// rushWalkKickFrame 冲锋走踢帧：双入口 0x21（44B 条目形，f.pcapng #69
+// 逐槽三解定版 2026-11-15 凌晨——**2026-11-12「二轮勘误」系字节错位误读
+// 全废**：两入口=当前位→目的地 A/B 双点（首轮解读才是对的），slot3=角度
+// （非 4.689 常量）、尾双槽=0/0（非 5.5/9.8）、orient=+π（非 -π）、
+// intent 按 entry 分族（非两入口同 0xa0000f01））：
+//
+//	entry0 停帧形：pos=当前位、angle=当前朝向、speed=0、orient=0、尾 0/0、
+//	              intent=0xA0000000
+//	entry1 走帧形：pos=bind 点、angle=atan2(dest−cur)（dx,dz）、speed=4.5、
+//	              orient=+π、尾 0/0、intent=0x30000F01（WASD 键盘族）
+//
+// 走起后逐帧行进回显（#78 形）：单条目 speed=1.77 orient=+π intent=0xF01。
+// 踢帧被客户端消费要求钟基正确（m294=m924 单路应答）。
+// ⚠ 真机实证（09:2x）：真方言也会把客户端移动机打楔（跳不高/原地弹），
+// 仅 NINEYIN_RUSH_WALK_KICK=1 显式开启时才发。
 func rushWalkKickFrame(castAt, target worldcore.Transform, bind float32) []byte {
 	bindX, bindY, bindZ := rushBindPoint(target, castAt.X, castAt.Z, bind)
+	angle := float32(math.Atan2(float64(bindX-castAt.X), float64(bindZ-castAt.Z)))
 	payload := make([]byte, 3, 3+2*44)
 	payload[0] = 0x21
 	binary.LittleEndian.PutUint16(payload[1:], 2)
-	for i := 0; i < 2; i++ {
-		payload = binary.LittleEndian.AppendUint32(payload, playerObjectID)
-		payload = binary.LittleEndian.AppendUint32(payload, playerOwnerID)
-		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindX))
-		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindY))
-		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindZ))
-		payload = binary.LittleEndian.AppendUint32(payload, 0x4096268F) // slot3 外服私服四样本恒 4.689（常量槽非角度，三轮真机+字节 diff 定版）
-		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(4.5))
-		payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(-math.Pi)) // 外服私服恒 -π
-		payload = binary.LittleEndian.AppendUint32(payload, 0x40B00000)                // 5.5 外服私服恒定
-		payload = binary.LittleEndian.AppendUint32(payload, 0x411CCCCD)                // 9.8 外服私服恒定
-		payload = binary.LittleEndian.AppendUint32(payload, 0xa0000f01)                // 寻路族 intentID 两入口同值
-	}
+	// entry0：停帧形（当前位 + 当前朝向 + speed 0）
+	payload = binary.LittleEndian.AppendUint32(payload, playerObjectID)
+	payload = binary.LittleEndian.AppendUint32(payload, playerOwnerID)
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(castAt.X))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(castAt.Y))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(castAt.Z))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(castAt.Orient))
+	payload = binary.LittleEndian.AppendUint32(payload, 0) // speed 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0) // orient 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0) // 尾槽 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0) // 尾槽 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0xa0000000)
+	// entry1：走帧形（bind 点 + 移动角 + speed 4.5 + orient +π）
+	payload = binary.LittleEndian.AppendUint32(payload, playerObjectID)
+	payload = binary.LittleEndian.AppendUint32(payload, playerOwnerID)
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindX))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindY))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(bindZ))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(angle))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(4.5))
+	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(math.Pi)) // 外服样本 3.14=+π
+	payload = binary.LittleEndian.AppendUint32(payload, 0)                        // 尾槽 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0)                        // 尾槽 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0x30000f01)               // WASD 键盘族
 	return payload
+}
+
+// maybeBareWalkKickProbe 裸踢帧判别实验（NINEYIN_RUSH_KICK_PROBE=1）：
+// 首个 m15 后 45s，无任何受理簇/msg25/PauseSkill 前置，单发一帧踢帧
+// （目的地=玩家东侧 8m）。判别：客户端起走（m15 坐标推进）=踢帧机制
+// 活着；零走=本客户端模式对本地玩家的 AllDest 服务端移动死路
+// （2026-11-15 判别定案=死路，三方言+裸踢全零走）。默认关。
+var bareKickProbeSeen sync.Map // *playerActor -> time.Time（首见 m15/哨兵）
+
+func maybeBareWalkKickProbe(link sceneMessageConnection, player *playerActor, x, y, z float32, remote string) {
+	if !strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_RUSH_KICK_PROBE")), "1") {
+		return
+	}
+	now := time.Now()
+	first, loaded := bareKickProbeSeen.LoadOrStore(player, now)
+	if !loaded {
+		return // 首见只登记
+	}
+	firstAt := first.(time.Time)
+	if firstAt.After(now.Add(time.Hour)) {
+		return // 哨兵=已发过
+	}
+	if now.Sub(firstAt) < 45*time.Second {
+		return
+	}
+	castAt := worldcore.Transform{X: x, Y: y, Z: z}
+	target := worldcore.Transform{X: x + 8 + defaultRushBindDistance, Y: y, Z: z}
+	if err := link.WriteFrame(rushWalkKickFrame(castAt, target, defaultRushBindDistance)); err != nil {
+		log.Printf("%s: bare walk kick probe: %v", remote, err)
+		return
+	}
+	bareKickProbeSeen.Store(player, now.Add(24*time.Hour)) // 哨兵=已发
+	log.Printf("%s: bare walk kick probe sent from=(%.1f,%.1f,%.1f) dest=(%.1f,%.1f,%.1f)",
+		remote, x, y, z, x+8, y, z)
 }
 
 // noteRushStatePing 记录状态四连下发时刻（受理/直收簇内联发送后调用，
@@ -1222,6 +1314,7 @@ func handleMovementUpload(link sceneMessageConnection, player *playerActor, worl
 	if player == nil {
 		return true, nil
 	}
+	maybeBareWalkKickProbe(link, player, x, y, z, remote)
 	if player.rushInFlightSnapshot() {
 		if player.rushDashIssuedSnapshot() {
 			// c61 冲刺段在途位移：不回显，消费方为 212/c61 落地链

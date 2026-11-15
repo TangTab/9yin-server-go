@@ -203,8 +203,8 @@ func TestPanelIdentityDomainFrames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(frames) != 2 { // 身份块 + 域块
-		t.Fatalf("panel frames=%d want 2", len(frames))
+	if len(frames) != 3 { // 身份块 + 修为域 + 域块
+		t.Fatalf("panel frames=%d want 3", len(frames))
 	}
 	for _, frame := range frames {
 		if frame[0] != 0x10 {
@@ -238,7 +238,26 @@ func TestPanelIdentityDomainFrames(t *testing.T) {
 		t.Fatalf("identity frame missing seed LevelTitle title027: % x", frames[0])
 	}
 
-	domainIndices, walkErr := propertyFrameIndices(frames[1])
+	// 修为域帧（官方方言：Faculty 我方权威 + MaxFaculty 官方常量 20 亿 +
+	// HoldFaculty）——c.pcapng #87/#88/#2261/#2262 对齐。
+	facultyIndices, walkErr := propertyFrameIndices(frames[1])
+	if walkErr != nil {
+		t.Fatal(walkErr)
+	}
+	facultyWant := []uint16{propFaculty, propMaxFaculty, propHoldFaculty}
+	if len(facultyIndices) != len(facultyWant) {
+		t.Fatalf("faculty indices=%v want %v", facultyIndices, facultyWant)
+	}
+	for i := range facultyWant {
+		if facultyIndices[i] != facultyWant[i] {
+			t.Fatalf("faculty indices=%v want %v", facultyIndices, facultyWant)
+		}
+	}
+	if got := binary.LittleEndian.Uint32(frames[1][14:18]); got != 10000 {
+		t.Fatalf("seed Faculty=%d want 10000", got)
+	}
+
+	domainIndices, walkErr := propertyFrameIndices(frames[2])
 	if walkErr != nil {
 		t.Fatal(walkErr)
 	}
@@ -376,5 +395,55 @@ func TestFacultySnapshotGMPanelRoundtrip(t *testing.T) {
 	}
 	if vitalsSet {
 		t.Fatal("legacy snapshot must not seed vitals")
+	}
+}
+
+// TestFacultySnapshotPanelIdentityPersist 面板身份层持久回归（2026-11-15
+// 「GM 设值重登丢失」）：set_power_level/set_alignment/set_pk_mode 生效后
+// 快照落 panel_identity 节点，还原到新 actor 逐值回种；未设置的 actor
+// 快照不落节点（nil 语义）。
+func TestFacultySnapshotPanelIdentityPersist(t *testing.T) {
+	player := newPlayerActor("面板侠", 0)
+	if _, err := player.setPowerLevel(302); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := player.setAlignment(120, 45, 7); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := player.setPKMode(2); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := json.Marshal(player.facultySnapshot())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var restored facultyProgressSnapshot
+	if err := json.Unmarshal(raw, &restored); err != nil {
+		t.Fatal(err)
+	}
+	if restored.PanelIdentity == nil {
+		t.Fatalf("panel_identity 节点未落: %s", raw)
+	}
+	target := newPlayerActor("还原侠", 0)
+	target.restoreFaculty(restored, restored.LastAdvanceUTC)
+	target.mu.Lock()
+	gm := target.gm
+	target.mu.Unlock()
+	if !gm.powerLevelSet || gm.powerLevel != 302 {
+		t.Fatalf("restored powerLevel=%d set=%v", gm.powerLevel, gm.powerLevelSet)
+	}
+	if !gm.alignmentSet || gm.justice != 120 || gm.evil != 45 || gm.freeBase != 7 {
+		t.Fatalf("restored alignment=%d/%d/%d set=%v", gm.justice, gm.evil, gm.freeBase, gm.alignmentSet)
+	}
+	if !gm.pkModeSet || gm.pkMode != 2 {
+		t.Fatalf("restored pkMode=%d set=%v", gm.pkMode, gm.pkModeSet)
+	}
+	// 未设置的 actor：不落节点（旧档语义）。
+	plain, err := json.Marshal(newPlayerActor("白板侠", 0).facultySnapshot())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(plain), "panel_identity") {
+		t.Fatalf("白板快照不应落 panel_identity: %s", plain)
 	}
 }

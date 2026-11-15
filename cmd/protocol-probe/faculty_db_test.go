@@ -158,10 +158,13 @@ func TestFacultySnapshotSubsetMarshalStable(t *testing.T) {
 	if err := json.Unmarshal(rendered, &fields); err != nil {
 		t.Fatal(err)
 	}
-	// vitals 是 omitempty 指针：未设置（nil）时不落节点，与 Java
-	// “null = 旧档未设置，不落节点”同口径；其余键恒输出。
+	// vitals/panel_identity 是 omitempty 指针：未设置（nil）时不落节点，
+	// 与 Java “null = 旧档未设置，不落节点”同口径；其余键恒输出。
 	want := len(facultySnapshotJSONKeys)
 	if snapshot.Vitals == nil {
+		want--
+	}
+	if snapshot.PanelIdentity == nil {
 		want--
 	}
 	if len(fields) != want {

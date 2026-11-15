@@ -230,9 +230,12 @@ type playerActor struct {
 	activeQingGong        map[string]struct{}
 	shortcuts             []playerShortcut
 	keybind               playerKeybind
-	learnedSkills         map[string]int32
-	skillCooldowns        map[string]time.Time
-	skillTeamCooldowns    map[int32]time.Time
+	// keybindUploadSeen 是 195 上传的会话首传闸（登录转储防覆盖，见
+	// handleKeybindCustom）。p.mu 保护。
+	keybindUploadSeen  bool
+	learnedSkills      map[string]int32
+	skillCooldowns     map[string]time.Time
+	skillTeamCooldowns map[int32]time.Time
 	// 公共 GCD（跨套路切换锁，bug.txt 官方规则；Java publicCdUntil/
 	// publicCDTaolu 同构）：到期时刻 + 发起套路串——同套路连招与出招者
 	// 自身只走个人 CD，切套路才付 7s；每次受理都刷新窗口（连招把切换
@@ -311,8 +314,8 @@ type playerActor struct {
 	mounts        []mountEntry
 	mountRowsSent int
 	riding        bool
-	ridingConfig  string // 骑乘中坐骑 configId（空=步行）
-	pendingMount  string // USEITEM 挂起 configId（等 266 sub=1 确认后消耗）
+	ridingConfig  string              // 骑乘中坐骑 configId（空=步行）
+	pendingMount  string              // USEITEM 挂起 configId（等 266 sub=1 确认后消耗）
 	qingGongExtra map[string]struct{} // 秘籍习得的非 starter 轻功（View46 追加行去重）
 	// tersure 宝物洗炼会话（688 主链：放入锁 0 起、解锁 1 止；pending
 	// 候选未存即丢——重登后客户端重开界面重洗）。p.mu 保护。
@@ -368,6 +371,10 @@ type playerActor struct {
 	// 激活序（active_jingmai_rec 行镜像）与真气池；快照持久化
 	// role_meridians（migrations/0004）。
 	jingmai jingMaiState
+	// jingmaiActiveRowsSent 本会话已下发给客户端的 active_jingmai_rec
+	// 行数（整表重写记账；0x0C 重入随客户端对象清空须复位）。会话级、
+	// 不持久化。
+	jingmaiActiveRowsSent int
 	// 任务域（task_records.go）：已接（含可交付态）与已完成集合；快照
 	// 持久化 role_tasks（migrations/0009），GM authored_task_* 是当前
 	// 唯一写入口。
@@ -1145,6 +1152,16 @@ func (p *playerActor) facultySnapshot() facultyProgressSnapshot {
 			PKValue: p.gm.vitals.pkValue, DrunkLevel: p.gm.vitals.drunkLevel,
 		}
 	}
+	// GM 面板身份层（实力/侠恶/PK 模式，2026-11-15 晋升持久）：任一动作
+	// 生效过即落节点；vitals 同 nil 语义。
+	if p.gm.powerLevelSet || p.gm.alignmentSet || p.gm.pkModeSet {
+		value.PanelIdentity = &facultyPanelIdentitySnapshot{
+			PowerLevel: p.gm.powerLevel, PowerLevelSet: p.gm.powerLevelSet,
+			Justice: p.gm.justice, Evil: p.gm.evil, FreeBase: p.gm.freeBase,
+			AlignmentSet: p.gm.alignmentSet,
+			PKMode: p.gm.pkMode, PKModeSet: p.gm.pkModeSet,
+		}
+	}
 	return value
 }
 
@@ -1159,6 +1176,16 @@ func (p *playerActor) restoreFaculty(value facultyProgressSnapshot, now time.Tim
 			pkValue: value.Vitals.PKValue, drunkLevel: value.Vitals.DrunkLevel,
 		}
 		p.gm.vitalsSet = true
+	}
+	if value.PanelIdentity != nil {
+		p.gm.powerLevel = value.PanelIdentity.PowerLevel
+		p.gm.powerLevelSet = value.PanelIdentity.PowerLevelSet
+		p.gm.justice = value.PanelIdentity.Justice
+		p.gm.evil = value.PanelIdentity.Evil
+		p.gm.freeBase = value.PanelIdentity.FreeBase
+		p.gm.alignmentSet = value.PanelIdentity.AlignmentSet
+		p.gm.pkMode = value.PanelIdentity.PKMode
+		p.gm.pkModeSet = value.PanelIdentity.PKModeSet
 	}
 	if p.progress.facultyState == facultyStateConvert && p.progress.facultyStyle == facultyStyleAct {
 		p.vitals.SetLogicState(logicStateFaculty)
@@ -1182,6 +1209,16 @@ func (p *playerActor) activateQingGong(id string) bool {
 	return true
 }
 
+// loginLogicStateForBisect 二分 A/B 位 logicstate1：官方抓包玩家 LogicState
+// 恒 1（skill-clear 记忆实证）而我方登录发 0——若引擎把 0 当走态，此位
+// 翻 1 即修复「重登回走」。定版后常量化。
+func loginLogicStateForBisect(state uint8) uint8 {
+	if bisectActive("logicstate1") {
+		return 1
+	}
+	return state
+}
+
 func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -1201,7 +1238,7 @@ func (p *playerActor) stateProperties() []clientdata.IndexedProperty {
 	hitHPRatio := int32(int64(state.HitHP) * 100 / int64(state.MaxHP))
 	mpRatio := int32(int64(state.MP) * 100 / int64(state.MaxMP))
 	properties := []clientdata.IndexedProperty{
-		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(state.LogicState)},
+		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(loginLogicStateForBisect(state.LogicState))},
 		{Index: propHPRatio, Name: "HPRatio", Value: clientdata.Int32Value(hpRatio)},
 		{Index: propMPRatio, Name: "MPRatio", Value: clientdata.Int32Value(mpRatio)},
 		// 客户端用这些基础值加上 MaxHPAdd/MaxMPAdd 推导显示的总量。
@@ -2271,7 +2308,7 @@ var physicsLoginFrameSpecs = []physicsLoginFrameSpec{
 	{"WRushRange", 8.0, 0, false},
 	{"UnderWaterSpeed", 10.0, 0, false},
 	{"UnderWaterModifySpeed", 1.0, 0, false},
-	{"WalkSpeed", 1.28, 0, false},
+	{"WalkSpeed", 1.281, 0, false},
 	{"RunSpeed", 3.9, 0, false},
 	{"ActionSpeed", 1.0, 0, false},
 	{"MoveSpeed", 3.9, 0, false},
@@ -2296,6 +2333,18 @@ var physicsLoginFrameSpecs = []physicsLoginFrameSpec{
 	{"LandRushDist", 6.5, 0, false},
 	{"MaxQingGongPoint", 0, 150, true},
 	{"MaxGJQingGongPoint", 0, 150, true},
+	// InteractStatus(int64)：官服登录物理档案窗口显式下发 -1（c.pcapng
+	// #94 单属性帧 0xFFFFFFFFFFFFFFFF）——语义=玩家当前不在任何 TVT/江湖
+	// 活动中。缺发时客户端按类型缺省 0=ITT_SPY_MENP（门派刺探），bin 透传
+	// 的 m100 进场 onready 会让 form_tvt_skill 判 GetCurrentTvtType()≠-1
+	// 弹出刺探技能栏（妙手空空/背后突袭/偷天换日+破绽值，2026-11-15 真机
+	// 「刺探玩法被默认打开」根因；瘦身 bin 剥离了官方这帧）。
+	{"InteractStatus", 0, -1, true},
+	// IsRun(int32)：跑步/走路通道（官方 0x09 表 idx1829；引擎 move_type
+	// 1=跑/0=走，2026-11-15 真机交替上报定版）。A/B 位：值 1 期间真机
+	// 重登仍走——疑客户端消费语义与 move_type 反位（名 IsRun 实为步行
+	// 位？），本轮试 0：重登默认变跑=反位坐实，定版后常量化。
+	{"IsRun", 0, 0, true},
 }
 
 // sendPlayerPhysicsLoginStream 外服私服登录玩家物理档案的 0x10 单属性流
@@ -2320,6 +2369,9 @@ func sendPlayerPhysicsLoginStream(conn sceneMessageConnection, player *playerAct
 			property.Value = clientdata.Float32Value(motion.runSpeed)
 		case spec.name == "MaxQingGongPoint":
 			property.Value = clientdata.Int32Value(state.MaxQingGongPoint)
+		case spec.name == "InteractStatus":
+			// 表线型 t4(Int64)：官服 #94 实发 8B -1，须走 Int64 线宽。
+			property.Value = clientdata.Int64Value(int64(spec.i))
 		case spec.isInt:
 			property.Value = clientdata.Int32Value(spec.i)
 		default:

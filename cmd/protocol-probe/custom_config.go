@@ -24,6 +24,10 @@ const (
 	// C2S 99：CLIENT_CUSTOMMSG_SET_OPERATEMODE（form_system_interface_setting
 	// .switch_mode），[99, mode]，0=3D（WASD）/ 1=2.5D（点击）。
 	clientCustomSetOperateMode int32 = 99
+	// C2S 3：CLIENT_CUSTOMMSG_MOVE_TYPE（custom_change_move_type(int)，Java
+	// lua64 协议字典 §一）。fxgamelogic 走/跑切换键与点击移动都会发——
+	// 2026-11-15 前恒 unhandled（真机日志 20 次实证）。
+	clientCustomChangeMoveType int32 = 3
 	// C2S 199：CLIENT_CUSTOMMSG_NEIGONGBIND（custom_update_ng_bind(info)，
 	// form_main_shortcut 内功栏绑定框 on_btn_bind_click → update_to_srv），
 	// [199, "v1;…;v25;"]。25 个值对应内功栏 25 格（grid_shortcut_3 三页
@@ -100,6 +104,9 @@ type playerKeybind struct {
 	operateMode    int32
 	operateModeSet bool
 	neigongBind    string
+	// moveType 是 C2S 3 CLIENT_CUSTOMMSG_MOVE_TYPE 的会话级镜像
+	//（走/跑模式；极性待真机定版，暂不落库）。
+	moveType int32
 }
 
 // applyScheme 更新一份键位串（必须在 p.mu 内调用）。
@@ -143,6 +150,27 @@ func (p *playerActor) keybindSnapshot() playerKeybind {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.keybind
+}
+
+// keybindUploadSeenLocked 报告本会话是否已见过 195 上传（首传闸读侧）。
+func (p *playerActor) keybindUploadSeenLocked() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.keybindUploadSeen
+}
+
+// markKeybindUploadSeen 标记本会话已见过 195 上传（首传闸写侧）。
+func (p *playerActor) markKeybindUploadSeen() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.keybindUploadSeen = true
+}
+
+// moveType 会话级走/跑模式镜像（C2S 3 上传值；极性待真机定版）。
+func (p *playerActor) setMoveType(mode int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.keybind.moveType = mode
 }
 
 // customizingFrame 编码 S2C 705（0x1E 旧壳 int 路由 + 窄串载荷），
@@ -329,6 +357,13 @@ func printableKeybindValue(value string) bool {
 // handleKeybindCustom 处理 C2S 195 键位方案上传：校验 → 回推 0x10
 // 属性帧（客户端属性视图以服务端下发为准，不回推则保存面板恒
 // 「未保存」）→ 落库。非法 scheme/串静默拒（零帧）。
+//
+// 会话首传闸（2026-11-15「重登丢改键」根因）：客户端登录期会先上传
+// 当前键位转储（此刻服务端恢复帧尚未应用，多为默认键位）。真机日志
+// 铁证（10:31:08~15 三次改键提交 649/648B 已入库 → 10:32:54 重登转储
+// 658B 把它覆盖回默认）。首传且库存有档时跳过落库、回推存档再确认
+// 恢复态（handleCustomizingCustom 首传闸同款）；后续上传（编辑提交）
+// 照常落库。
 func handleKeybindCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string, store *keybindDBStore, roleID role.RoleID) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomKeybindUpload {
 		return false, nil
@@ -349,6 +384,21 @@ func handleKeybindCustom(conn sceneMessageConnection, player *playerActor, custo
 		log.Printf("%s: ignore invalid keybind upload scheme=%d len=%d", remote, scheme, len(bind))
 		return true, nil
 	}
+	firstUpload := !player.keybindUploadSeenLocked()
+	player.markKeybindUploadSeen()
+	if firstUpload && scheme == 0 && player.keybindSnapshot().bind != "" {
+		// 登录转储：不落库，回推存档键位（客户端键位管理器随后以存档为准）。
+		saved := player.keybindSnapshot().bind
+		frame, err := keybindSchemePropertyFrame(0, saved)
+		if err != nil {
+			return true, err
+		}
+		if err := conn.WriteFrame(frame); err != nil {
+			return true, fmt.Errorf("re-assert keybind scheme 0: %w", err)
+		}
+		log.Printf("%s: skipped login keybind dump (%d bytes), re-asserted saved %d bytes", remote, len(bind), len(saved))
+		return true, nil
+	}
 	frame, err := keybindSchemePropertyFrame(scheme, bind)
 	if err != nil {
 		return true, err
@@ -360,7 +410,34 @@ func handleKeybindCustom(conn sceneMessageConnection, player *playerActor, custo
 	if err := store.SaveScheme(roleID, scheme, bind); err != nil {
 		log.Printf("%s: persist keybind role=%d scheme=%d: %v", remote, roleID, scheme, err)
 	}
-	log.Printf("%s: keybind scheme %d uploaded (%d bytes)", remote, scheme, len(bind))
+	log.Printf("%s: keybind scheme %d uploaded (%d bytes)%s", remote, scheme, len(bind), map[bool]string{true: " (first)", false: ""}[firstUpload])
+	return true, nil
+}
+
+// handleMoveTypeCustom 处理 C2S 3 CLIENT_CUSTOMMSG_MOVE_TYPE（
+// custom_change_move_type(int)，Java lua64 协议字典 §一；fxgamelogic 走/跑
+// 切换键与点击移动均会发）。2026-11-15 真机日志实证此前恒 unhandled——
+// 值语义（走/跑极性）由本 handler 落 log 后真机定版；同步回显 IsRun
+// 属性帧（idx1829，0x09 表声明通道）保持客户端属性视图一致。
+func handleMoveTypeCustom(conn sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
+	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomChangeMoveType {
+		return false, nil
+	}
+	if len(custom.Values) < 2 {
+		return true, fmt.Errorf("move type expects TVarList(3, int), got %v", custom.Values)
+	}
+	mode, ok := custom.Values[1].exactInt32()
+	if !ok {
+		return true, fmt.Errorf("move type value mismatch: %v", custom.Values)
+	}
+	log.Printf("%s: move type change -> %d (walk/run toggle or click-move report; 1=run/0=walk per 2026-11-15 real-machine alternation)", remote, mode)
+	if player != nil {
+		player.setMoveType(mode)
+	}
+	// 不回显 IsRun（2026-11-15 午后 A/B 撤回）：客户端对 IsRun 属性的消费
+	// 语义未定版，回显曾疑似把用户切换翻回走（12:20:15 的 1,0,1,0 快速
+	// 振荡吻合「切换→回显→翻回」回路）。切走/跑是客户端本地权威，服务
+	// 端只记录。
 	return true, nil
 }
 

@@ -8,8 +8,19 @@ import (
 	"testing"
 
 	"github.com/local/9yin-go-server/cmd/protocol-probe/replaydata"
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
 )
+
+// frameAt 按序取 frameRecorder 收集的帧（MOTION-15 测试用）。
+func (r *frameRecorder) frameAt(i int) []byte {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if i < 0 || i >= len(r.frames) {
+		return nil
+	}
+	return r.frames[i]
+}
 
 // unpackReplayPackFrames 解 [u32 len][frame]×N 打包文件（replayFramesPack
 // 同口径）。
@@ -136,6 +147,141 @@ func TestP1AvatarNativeSwap(t *testing.T) {
 	}
 	if !strings.Contains(note, "我方档案") {
 		t.Errorf("标注缺「我方档案」: %q", note)
+	}
+}
+
+// TestPhysicsStreamInteractStatusMinusOne 物理档案流必须携带 InteractStatus=-1
+//（int64 线型，官服 c.pcapng #94 逐字节同形）：缺发=客户端缺省 0（ITT_SPY_MENP
+// 门派刺探），bin 透传 m100 onready 即弹刺探技能栏（2026-11-15「刺探玩法被
+// 默认打开」根因回归闸）。
+func TestPhysicsStreamInteractStatusMinusOne(t *testing.T) {
+	player := newPlayerActor("probe", 0)
+	rec := &frameRecorder{}
+	if err := sendPlayerPhysicsLoginStream(rec, player); err != nil {
+		t.Fatalf("sendPlayerPhysicsLoginStream: %v", err)
+	}
+	idx := clientdata.MustPlayerProperty("InteractStatus").Index
+	encoded, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: idx, Name: "InteractStatus", Value: clientdata.Int64Value(-1)},
+	})
+	if err != nil {
+		t.Fatalf("encode reference: %v", err)
+	}
+	found := false
+	for i := 0; i < rec.count(); i++ {
+		if string(rec.frameAt(i)) == string(encoded) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("物理档案流缺 InteractStatus=-1 帧（期望 %x）", encoded)
+	}
+}
+
+// TestPhysicsStreamIsRun 物理档案流必须携带 IsRun（int32，0x09 表 idx1829，
+// 引擎 move_type 1=跑/0=走）。A/B 位当前=0（值 1 期间真机重登仍走，疑
+// 客户端消费反位——见 physicsLoginFrameSpecs 注释）。
+func TestPhysicsStreamIsRunOne(t *testing.T) {
+	player := newPlayerActor("probe", 0)
+	rec := &frameRecorder{}
+	if err := sendPlayerPhysicsLoginStream(rec, player); err != nil {
+		t.Fatalf("sendPlayerPhysicsLoginStream: %v", err)
+	}
+	idx := clientdata.MustPlayerProperty("IsRun").Index
+	encoded, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: idx, Name: "IsRun", Value: clientdata.Int32Value(0)},
+	})
+	if err != nil {
+		t.Fatalf("encode reference: %v", err)
+	}
+	found := false
+	for i := 0; i < rec.count(); i++ {
+		if string(rec.frameAt(i)) == string(encoded) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("物理档案流缺 IsRun=1 帧（期望 %x）", encoded)
+	}
+}
+
+// TestP2SelfMotionOverride 帧替换档 P2 self 0x10 移动/跳跃族改写闸
+//（MOTION-15，2026-11-15「跳跃异常」根因回归防线）：外服镜像帧
+//（DriftJumpSpeedAdd=3.0/SndJumpSpeedAdd=4.8/ThdJumpSpeedAdd=3.0/
+// RunSpeedAdd=0.6/MoveSpeed=4.5/DropHeightPub=24/QingGongPoint=160 等）
+// 必须改写为我方权威值；权威表外的镜像属性照旧 MIRROR-12 透传。
+func TestP2SelfMotionOverride(t *testing.T) {
+	player := newPlayerActor("probe", 0)
+	overrides := nativeP2SelfMotionOverrides(player)
+	// bin 实测在位的移动/跳跃族 idx（c.pcapng P2 #224-#232/#320 等）。
+	for _, idx := range []uint16{
+		clientdata.MustPlayerProperty("MoveSpeed").Index,
+		clientdata.MustPlayerProperty("RunSpeedAdd").Index,
+		clientdata.MustPlayerProperty("DropHeightPub").Index,
+		clientdata.MustPlayerProperty("DriftJumpSpeedAdd").Index,
+		clientdata.MustPlayerProperty("SndJumpSpeedAdd").Index,
+		clientdata.MustPlayerProperty("ThdJumpSpeedAdd").Index,
+		clientdata.MustPlayerProperty("AirRushDistAdd").Index,
+		clientdata.MustPlayerProperty("QingGongPoint").Index,
+		clientdata.MustPlayerProperty("MaxQingGongPointAdd").Index,
+		clientdata.MustPlayerProperty("UnderWaterModifySpeed").Index,
+	} {
+		if _, ok := overrides[idx]; !ok {
+			t.Errorf("idx=%d 不在 MOTION-15 权威改写表", idx)
+		}
+	}
+
+	mirror := func(idx uint16, value float32) []byte {
+		frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+			{Index: idx, Value: clientdata.Float32Value(value)},
+		})
+		if err != nil {
+			t.Fatalf("encode mirror frame idx=%d: %v", idx, err)
+		}
+		return frame
+	}
+	sndJump := mirror(clientdata.MustPlayerProperty("SndJumpSpeedAdd").Index, 4.8)
+	qgPoint, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: clientdata.MustPlayerProperty("QingGongPoint").Index, Value: clientdata.Int32Value(160)},
+	})
+	if err != nil {
+		t.Fatalf("encode qgpoint mirror: %v", err)
+	}
+	// 权威表外镜像（MaxSP）：必须原样透传。
+	maxSP := mirror(clientdata.MustPlayerProperty("MaxSP").Index, 130)
+
+	var pack []byte
+	for _, frame := range [][]byte{sndJump, qgPoint, maxSP} {
+		pack = binary.LittleEndian.AppendUint32(pack, uint32(len(frame)))
+		pack = append(pack, frame...)
+	}
+	rec := &frameRecorder{}
+	sent := replayPhase2NativeReplaceBytes(rec, pack, "test", playerObjectID, playerOwnerID, role.Position{}, player)
+	if sent != 3 || rec.count() != 3 {
+		t.Fatalf("发送帧数异常: sent=%d recorded=%d", sent, rec.count())
+	}
+	// #0 SndJumpSpeedAdd 4.8 → 官服轻功加成组 5.1（PHYSICS-16 同轮定案：
+	// Add 是跳跃 Z 初速的合法组成，清零=二段跳只剩基值 6）。
+	out := rec.frameAt(0)
+	if got := binary.LittleEndian.Uint16(out[12:]); got != clientdata.MustPlayerProperty("SndJumpSpeedAdd").Index {
+		t.Fatalf("#0 idx=%d 非 SndJumpSpeedAdd", got)
+	}
+	if bits := binary.LittleEndian.Uint32(out[14:]); bits != math.Float32bits(officialQingGongLevelAdds.sndJump) {
+		t.Errorf("SndJumpSpeedAdd 未改写为轻功加成组值 %v: bits=%#x", officialQingGongLevelAdds.sndJump, bits)
+	}
+	// #1 QingGongPoint 160 → 轻功池快照（P1#11 同源）。
+	out = rec.frameAt(1)
+	if got := binary.LittleEndian.Uint16(out[12:]); got != clientdata.MustPlayerProperty("QingGongPoint").Index {
+		t.Fatalf("#1 idx=%d 非 QingGongPoint", got)
+	}
+	if got := int32(binary.LittleEndian.Uint32(out[14:])); got != player.stateSnapshot().QingGongPoint {
+		t.Errorf("QingGongPoint=%d 期望池快照 %d", got, player.stateSnapshot().QingGongPoint)
+	}
+	// #2 MaxSP 表外镜像：逐字节透传。
+	if string(rec.frameAt(2)) != string(maxSP) {
+		t.Errorf("表外镜像帧未原样透传:\n got=%x\nwant=%x", rec.frameAt(2), maxSP)
 	}
 }
 

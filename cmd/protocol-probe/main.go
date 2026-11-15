@@ -583,6 +583,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 	// AutoTrace（自动寻路开关）挂玩家对象属性，ClientReady 簇首推一次、
 	// 0x0C 切图清对象后由 stable re-entry 分支重推。
 	autoTracePushed := false
+	// 面板身份/域块（实力/侠恶等 15+6 位）overlay ClientReady 簇首推一次
+	//（wholesale 首进场不走 spawn 链补推点；0x0C 重进另有 gmWritePanelFrames）。
+	panelIdentityPushed := false
 	neigongGranted := false
 	// dbLearnedSkills 是 0x0C 装载的 role_skills 已学集（wuxue/anqi）。
 	// 空切片 = 无 DB 行或读库失败，grantStarterProgress 回退 starter 集。
@@ -1049,6 +1052,24 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				return learnErr
 			}
 			persistFaculty()
+			// 官方式穴位收敛（2026-11-15）：新学内功达层即开穴
+			//（xuewei_activerule；View44 追加行 + View45 阶梯上限帧），
+			// 激活加成重算后补全量属性帧。
+			if xwFrames, xwChanged := player.jingMaiXueWeiReEval(jingMaiCatalog); xwChanged {
+				for _, frame := range xwFrames {
+					if err := link.WriteFrame(frame); err != nil {
+						log.Printf("%s: publish xuewei frames after learn_neigong: %v", conn.RemoteAddr(), err)
+						break
+					}
+				}
+				player.refreshJingMaiBonus(jingMaiCatalog)
+				if attribute, attrErr := player.jingMaiAttributeFrame(); attrErr == nil {
+					if err := link.WriteFrame(attribute); err != nil {
+						log.Printf("%s: publish jingmai props after learn_neigong: %v", conn.RemoteAddr(), err)
+					}
+				}
+				persistJingMai()
+			}
 			gmSession.setAction(message)
 		case "forget_taolu":
 			// 移除整套套路（learn_taolu 逆操作）：非基线招删 DB 行+等级档，
@@ -1115,120 +1136,120 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			} else {
 				pendingLocation = nil
 			}
-				gmSession.setLocation(runtime.activeRole.Location, "已发送 GM 在线切图，等待目标场景 Ready")
-				log.Printf("%s: GM sent live 0x0C re-entry to scene=%s resource=%s", conn.RemoteAddr(), runtime.activeRole.Location.Scene.Config, runtime.activeRole.Location.Scene.Resource)
-			case "enter_clone":
-				// 副本实例生命周期（dungeon.go）：目录/难度校验 → 登记实例
-				//（returnTo=进本前位置）→ 带实例键走既有 0x0C 重入序列 →
-				// 回填运行时并置 managed/noRespawn。副本期间不落库 clone
-				// 场景位置（移动路径有在场闸门），存档锚点保持 returnTo。
-				if runtime == nil || selected == nil {
-					gmSession.setAction("进本失败：角色尚未进入场景")
-					return fmt.Errorf("character has not entered a scene")
+			gmSession.setLocation(runtime.activeRole.Location, "已发送 GM 在线切图，等待目标场景 Ready")
+			log.Printf("%s: GM sent live 0x0C re-entry to scene=%s resource=%s", conn.RemoteAddr(), runtime.activeRole.Location.Scene.Config, runtime.activeRole.Location.Scene.Resource)
+		case "enter_clone":
+			// 副本实例生命周期（dungeon.go）：目录/难度校验 → 登记实例
+			//（returnTo=进本前位置）→ 带实例键走既有 0x0C 重入序列 →
+			// 回填运行时并置 managed/noRespawn。副本期间不落库 clone
+			// 场景位置（移动路径有在场闸门），存档锚点保持 returnTo。
+			if runtime == nil || selected == nil {
+				gmSession.setAction("进本失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			row := cloneCatalogRow(command.Config)
+			if row == nil {
+				gmSession.setAction("进本失败：副本不在 cloneinfo 目录（" + command.Config + "）")
+				return fmt.Errorf("clone config %q not in cloneinfo.ini", command.Config)
+			}
+			difficultyAllowed := false
+			for _, difficulty := range row.Difficulties {
+				if difficulty == int(command.Fun) {
+					difficultyAllowed = true
+					break
 				}
-				row := cloneCatalogRow(command.Config)
-				if row == nil {
-					gmSession.setAction("进本失败：副本不在 cloneinfo 目录（" + command.Config + "）")
-					return fmt.Errorf("clone config %q not in cloneinfo.ini", command.Config)
-				}
-				difficultyAllowed := false
-				for _, difficulty := range row.Difficulties {
-					if difficulty == int(command.Fun) {
-						difficultyAllowed = true
-						break
-					}
-				}
-				if !difficultyAllowed {
-					gmSession.setAction(fmt.Sprintf("进本失败：%s 不支持难度档 %d", row.Config, command.Fun))
-					return fmt.Errorf("clone %s has no difficulty %d", row.Config, command.Fun)
-				}
-				scene, sceneErr := cloneSceneOf(command.Config)
-				if sceneErr != nil {
-					gmSession.setAction("进本失败：" + sceneErr.Error())
-					return sceneErr
-				}
-				scene = normalizeClientScene(scene)
-				catalog, _, catalogErr := sceneRegistry.catalogFor(scene)
-				if catalogErr != nil {
-					gmSession.setAction("进本失败：副本 NPC 目录不可用：" + catalogErr.Error())
-					return catalogErr
-				}
-				entry := dungeonEntryPosition(catalog)
-				instance, createErr := dungeons.create(selected.ID, scene, int(command.Fun), runtime.activeRole.Location, entry)
-				if createErr != nil {
-					gmSession.setAction("进本失败：已有打开的副本，请先销毁")
-					return createErr
-				}
-				destination := sceneDestination{
-					location: role.Location{Scene: scene, Position: entry, Version: runtime.activeRole.Location.Version},
-					instance: instance.id,
-				}
-				if switchErr := runtime.SwitchScene(destination); switchErr != nil {
-					dungeons.take(selected.ID)
-					gmSession.setAction("进本失败：" + switchErr.Error())
-					return switchErr
-				}
-				dungeons.attachRun(selected.ID, runtime.world.run)
-				if attached := dungeons.open(selected.ID); attached != nil && attached.run != nil {
-					run := attached.run
-					ownerID := selected.ID
-					run.mu.Lock()
-					// 副本事件宿主与收尾钩（dungeon_wave.go）：markFinished 只动
-					// manager 锁，回城由本会话 ticker 的自动收尾分支执行。
-					run.scripts = scriptHost
-					run.dungeonDifficulty = int(command.Fun)
-					run.finishHook = func() { dungeons.markFinished(ownerID) }
-					run.mu.Unlock()
-					// 进本事件（无脚本时 no-op）：剧情提示/开场播报。
-					run.callDungeonScript(luaEventDungeonEnter, func(ec *luascript.EventContext) {
-						ec.Player.ID = uint32(selected.ID)
-						ec.Player.Name = selected.Name
-						ec.Player.Scene = scene.Config
-						ec.Player.X, ec.Player.Y, ec.Player.Z = float64(entry.X), float64(entry.Y), float64(entry.Z)
-					})
-				}
-				sceneNPCs = runtime.npcCatalog
-				gmSession.setLocation(runtime.activeRole.Location, fmt.Sprintf("已进入副本 %s（%s·%s），销毁后回进本前位置", row.Config, row.Description, dungeonDifficultyName(int(command.Fun))))
-				log.Printf("%s: GM entered dungeon config=%s resource=%s instance=%s difficulty=%d entry=(%.1f,%.1f,%.1f)",
-					conn.RemoteAddr(), scene.Config, scene.Resource, instance.id, command.Fun, entry.X, entry.Y, entry.Z)
-			case "reenter_clone":
-				if runtime == nil || selected == nil {
-					gmSession.setAction("重进失败：角色尚未进入场景")
-					return fmt.Errorf("character has not entered a scene")
-				}
-				instance := dungeons.open(selected.ID)
-				if instance == nil {
-					gmSession.setAction("重进失败：当前没有打开的副本，请先创建并进入")
-					return fmt.Errorf("no open dungeon for role %d", selected.ID)
-				}
-				destination := sceneDestination{
-					location: role.Location{
-						Scene:    role.Scene{Config: instance.key.config, Resource: instance.key.resource},
-						Position: instance.entry,
-						Version:  runtime.activeRole.Location.Version,
-					},
-					instance: instance.id,
-				}
-				if switchErr := runtime.SwitchScene(destination); switchErr != nil {
-					gmSession.setAction("重进失败：" + switchErr.Error())
-					return switchErr
-				}
-				// 实例运行时已在注册表，beginKey 直接复用；attachRun 幂等。
-				dungeons.attachRun(selected.ID, runtime.world.run)
-				sceneNPCs = runtime.npcCatalog
-				gmSession.setLocation(runtime.activeRole.Location, "已重新进入打开的副本（进度保留，怪不复活）")
-				log.Printf("%s: GM re-entered dungeon config=%s instance=%s", conn.RemoteAddr(), instance.key.config, instance.id)
-			case "destroy_clone":
-				if runtime == nil || selected == nil {
-					gmSession.setAction("销毁失败：角色尚未进入场景")
-					return fmt.Errorf("character has not entered a scene")
-				}
-				instance := dungeons.take(selected.ID)
-				if instance == nil {
-					gmSession.setAction("销毁失败：当前没有打开的副本")
-					return fmt.Errorf("no open dungeon for role %d", selected.ID)
-				}
-				returnDungeon(instance, "副本已销毁，已回到进本前位置")
+			}
+			if !difficultyAllowed {
+				gmSession.setAction(fmt.Sprintf("进本失败：%s 不支持难度档 %d", row.Config, command.Fun))
+				return fmt.Errorf("clone %s has no difficulty %d", row.Config, command.Fun)
+			}
+			scene, sceneErr := cloneSceneOf(command.Config)
+			if sceneErr != nil {
+				gmSession.setAction("进本失败：" + sceneErr.Error())
+				return sceneErr
+			}
+			scene = normalizeClientScene(scene)
+			catalog, _, catalogErr := sceneRegistry.catalogFor(scene)
+			if catalogErr != nil {
+				gmSession.setAction("进本失败：副本 NPC 目录不可用：" + catalogErr.Error())
+				return catalogErr
+			}
+			entry := dungeonEntryPosition(catalog)
+			instance, createErr := dungeons.create(selected.ID, scene, int(command.Fun), runtime.activeRole.Location, entry)
+			if createErr != nil {
+				gmSession.setAction("进本失败：已有打开的副本，请先销毁")
+				return createErr
+			}
+			destination := sceneDestination{
+				location: role.Location{Scene: scene, Position: entry, Version: runtime.activeRole.Location.Version},
+				instance: instance.id,
+			}
+			if switchErr := runtime.SwitchScene(destination); switchErr != nil {
+				dungeons.take(selected.ID)
+				gmSession.setAction("进本失败：" + switchErr.Error())
+				return switchErr
+			}
+			dungeons.attachRun(selected.ID, runtime.world.run)
+			if attached := dungeons.open(selected.ID); attached != nil && attached.run != nil {
+				run := attached.run
+				ownerID := selected.ID
+				run.mu.Lock()
+				// 副本事件宿主与收尾钩（dungeon_wave.go）：markFinished 只动
+				// manager 锁，回城由本会话 ticker 的自动收尾分支执行。
+				run.scripts = scriptHost
+				run.dungeonDifficulty = int(command.Fun)
+				run.finishHook = func() { dungeons.markFinished(ownerID) }
+				run.mu.Unlock()
+				// 进本事件（无脚本时 no-op）：剧情提示/开场播报。
+				run.callDungeonScript(luaEventDungeonEnter, func(ec *luascript.EventContext) {
+					ec.Player.ID = uint32(selected.ID)
+					ec.Player.Name = selected.Name
+					ec.Player.Scene = scene.Config
+					ec.Player.X, ec.Player.Y, ec.Player.Z = float64(entry.X), float64(entry.Y), float64(entry.Z)
+				})
+			}
+			sceneNPCs = runtime.npcCatalog
+			gmSession.setLocation(runtime.activeRole.Location, fmt.Sprintf("已进入副本 %s（%s·%s），销毁后回进本前位置", row.Config, row.Description, dungeonDifficultyName(int(command.Fun))))
+			log.Printf("%s: GM entered dungeon config=%s resource=%s instance=%s difficulty=%d entry=(%.1f,%.1f,%.1f)",
+				conn.RemoteAddr(), scene.Config, scene.Resource, instance.id, command.Fun, entry.X, entry.Y, entry.Z)
+		case "reenter_clone":
+			if runtime == nil || selected == nil {
+				gmSession.setAction("重进失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			instance := dungeons.open(selected.ID)
+			if instance == nil {
+				gmSession.setAction("重进失败：当前没有打开的副本，请先创建并进入")
+				return fmt.Errorf("no open dungeon for role %d", selected.ID)
+			}
+			destination := sceneDestination{
+				location: role.Location{
+					Scene:    role.Scene{Config: instance.key.config, Resource: instance.key.resource},
+					Position: instance.entry,
+					Version:  runtime.activeRole.Location.Version,
+				},
+				instance: instance.id,
+			}
+			if switchErr := runtime.SwitchScene(destination); switchErr != nil {
+				gmSession.setAction("重进失败：" + switchErr.Error())
+				return switchErr
+			}
+			// 实例运行时已在注册表，beginKey 直接复用；attachRun 幂等。
+			dungeons.attachRun(selected.ID, runtime.world.run)
+			sceneNPCs = runtime.npcCatalog
+			gmSession.setLocation(runtime.activeRole.Location, "已重新进入打开的副本（进度保留，怪不复活）")
+			log.Printf("%s: GM re-entered dungeon config=%s instance=%s", conn.RemoteAddr(), instance.key.config, instance.id)
+		case "destroy_clone":
+			if runtime == nil || selected == nil {
+				gmSession.setAction("销毁失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			instance := dungeons.take(selected.ID)
+			if instance == nil {
+				gmSession.setAction("销毁失败：当前没有打开的副本")
+				return fmt.Errorf("no open dungeon for role %d", selected.ID)
+			}
+			returnDungeon(instance, "副本已销毁，已回到进本前位置")
 		case "teleport":
 			if runtime == nil || selected == nil {
 				gmSession.setAction("场景内瞬移失败：角色尚未进入场景")
@@ -1297,6 +1318,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					log.Printf("%s: zhenpai panel frame: %v", conn.RemoteAddr(), err)
 				}
 			}
+			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("实力等级设为 %d（%s）", int32(command.Value), roleListTitle(int(command.Value))))
 			log.Printf("%s: GM set PowerLevel=%d", conn.RemoteAddr(), int32(command.Value))
 		case "set_alignment":
@@ -1308,6 +1330,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("性格善恶设置失败：" + updateErr.Error())
 				return updateErr
 			}
+			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("性格设为 善 %d / 恶 %d / 基数 %d", command.Justice, command.Evil, command.FreeBase))
 			log.Printf("%s: GM set Justice=%d Evil=%d FreeBase=%d", conn.RemoteAddr(), command.Justice, command.Evil, command.FreeBase)
 		case "set_pk_mode":
@@ -1319,6 +1342,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("PK 模式设置失败：" + updateErr.Error())
 				return updateErr
 			}
+			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("PK 模式设为 %d", command.PkMode))
 			log.Printf("%s: GM set PKMode=%d", conn.RemoteAddr(), command.PkMode)
 		case "set_vitals":
@@ -1456,8 +1480,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			log.Printf("%s: GM set_zhenqi_cap enabled=%d value=%d", conn.RemoteAddr(), command.Enabled, int32(command.Value))
 		case "set_jingmai_tier":
 			// 经脉周天直设（Java applySetJingmaiTier 同构）：目录收录 +
-			// 已学双闸 → 钳 1..目录上限、fill 归零走新周天起点 → View45
-			// 升级行帧 + CurJingMai/JingMaiTotalLevel 属性帧 → 落盘。
+			// 已学双闸 → 钳 1..当前阶梯上限（开穴不足不越档）、fill 归零
+			// 走新周天起点 → View45 升级行帧 + CurJingMai/JingMaiTotalLevel
+			// 属性帧 → 激活加成重算 + 落盘。
 			def, known := jingMaiCatalog.def(command.JingMaiID)
 			if !known {
 				gmSession.setAction("周天设置失败：经脉目录无 " + command.JingMaiID)
@@ -1468,6 +1493,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("周天设置失败：" + command.JingMaiID + " 未学（先在客户端开通）")
 				return fmt.Errorf("unlearned jingmai %q", command.JingMaiID)
 			}
+			cap := player.jingMaiCapOf(jingMaiCatalog, command.JingMaiID)
 			tierFrame, tierErr := jingMaiViewUpdateFrame(uint16(slot), row, true)
 			if tierErr == nil {
 				tierErr = link.WriteFrame(tierFrame)
@@ -1476,6 +1502,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("周天设置失败：" + tierErr.Error())
 				return tierErr
 			}
+			player.refreshJingMaiBonus(jingMaiCatalog)
 			propsFrame, propsErr := player.jingMaiPropsFrame()
 			if propsErr == nil {
 				propsErr = link.WriteFrame(propsFrame)
@@ -1484,9 +1511,86 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("经脉属性推送失败：" + propsErr.Error())
 				return propsErr
 			}
+			if attribute, attrErr := player.jingMaiAttributeFrame(); attrErr == nil {
+				if err := link.WriteFrame(attribute); err != nil {
+					log.Printf("%s: publish jingmai attrs after set_jingmai_tier: %v", conn.RemoteAddr(), err)
+				}
+			}
 			persistJingMai()
-			gmSession.setAction(fmt.Sprintf("%s 周天 %d → %d（上限 %d）", command.JingMaiID, old, row.Level, def.maxLevel))
-			log.Printf("%s: GM set_jingmai_tier %s %d -> %d (max %d)", conn.RemoteAddr(), command.JingMaiID, old, row.Level, def.maxLevel)
+			gmSession.setAction(fmt.Sprintf("%s 周天 %d → %d（当前上限 %d/目录 %d，开穴提升）", command.JingMaiID, old, row.Level, cap, def.maxLevel))
+			log.Printf("%s: GM set_jingmai_tier %s %d -> %d (cap %d, catalog max %d)", conn.RemoteAddr(), command.JingMaiID, old, row.Level, cap, def.maxLevel)
+		case "set_jingmai_act_count":
+			// 可激活经脉条数上限（官方初始 3 → 九阴志最多 8；本服 GM 调
+			// 1..8）：jmActCount 属性随 8 件套即时刷新（客户端 tooltip
+			// 「最多可激活{@1}条」）。
+			applied := player.setJingMaiActLimit(int32(command.Value))
+			persistJingMai()
+			propsFrame, propsErr := player.jingMaiPropsFrame()
+			if propsErr == nil {
+				propsErr = link.WriteFrame(propsFrame)
+			}
+			if propsErr != nil {
+				gmSession.setAction("激活条数设置失败：" + propsErr.Error())
+				return propsErr
+			}
+			gmSession.setAction(fmt.Sprintf("可激活经脉条数已设为 %d（已激活 %d 条）", applied, len(player.jingMaiActivatedSnapshot())))
+			log.Printf("%s: GM set_jingmai_act_count %d", conn.RemoteAddr(), applied)
+		case "open_xuewei":
+			// GM 开穴（越内功规则直开；xuewei="all"=按穴位地图全开该
+			// 经脉 → 阶梯上限顶格）：View44 追加行 + View45 MaxLevel 帧 +
+			// 激活加成重算 + 8 件套/全量属性帧 + 落盘。
+			if command.XueWeiID == "" {
+				gmSession.setAction("开穴失败：缺少穴位 ID（或 all）")
+				return fmt.Errorf("open_xuewei requires xueWeiID or all")
+			}
+			xwFrames, fresh, openErr := player.gmOpenJingMaiXueWei(jingMaiCatalog, command.JingMaiID, command.XueWeiID)
+			if openErr != nil {
+				gmSession.setAction("开穴失败：" + openErr.Error())
+				return openErr
+			}
+			if len(fresh) == 0 {
+				gmSession.setAction(command.JingMaiID + " 穴位已全开，无新增")
+				return nil
+			}
+			for _, frame := range xwFrames {
+				if err := link.WriteFrame(frame); err != nil {
+					gmSession.setAction("开穴失败：帧推送 " + err.Error())
+					return err
+				}
+			}
+			// View44 首建（此前零已开穴）时走整推补容器。
+			player.mu.Lock()
+			openedCount := len(player.jingmai.openedXueWei)
+			player.mu.Unlock()
+			if openedCount == len(fresh) {
+				containerFrames, err := player.jingMaiXueWeiViewFrames()
+				if err == nil {
+					for _, frame := range containerFrames {
+						if err = link.WriteFrame(frame); err != nil {
+							break
+						}
+					}
+				}
+				if err != nil {
+					gmSession.setAction("开穴失败：View44 整推 " + err.Error())
+					return err
+				}
+			}
+			player.refreshJingMaiBonus(jingMaiCatalog)
+			if propsFrame, propsErr := player.jingMaiPropsFrame(); propsErr == nil {
+				if err := link.WriteFrame(propsFrame); err != nil {
+					log.Printf("%s: publish jingmai props after open_xuewei: %v", conn.RemoteAddr(), err)
+				}
+			}
+			if attribute, attrErr := player.jingMaiAttributeFrame(); attrErr == nil {
+				if err := link.WriteFrame(attribute); err != nil {
+					log.Printf("%s: publish jingmai attrs after open_xuewei: %v", conn.RemoteAddr(), err)
+				}
+			}
+			persistJingMai()
+			cap := player.jingMaiCapOf(jingMaiCatalog, command.JingMaiID)
+			gmSession.setAction(fmt.Sprintf("%s 新开 %d 穴（%s），当前周天上限 %d", command.JingMaiID, len(fresh), strings.Join(fresh, ","), cap))
+			log.Printf("%s: GM open_xuewei %s %s -> +%d, cap=%d", conn.RemoteAddr(), command.JingMaiID, command.XueWeiID, len(fresh), cap)
 		case "set_weather":
 			preset, presetErr := gmapi.WeatherPresetByKey(command.Weather)
 			if presetErr != nil {
@@ -2162,6 +2266,27 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if tickErr == nil {
 					pushCombatAttributeDelta(link, player, combatPanelBefore, conn.RemoteAddr().String())
 				}
+				// 官方式穴位收敛（2026-11-15）：内功层数达标即开穴
+				//（xuewei_activerule；View44 追加行 + View45 阶梯上限
+				// 帧），激活加成随行重算后补全量属性帧。
+				if tickErr == nil {
+					if xwFrames, xwChanged := player.jingMaiXueWeiReEval(jingMaiCatalog); xwChanged {
+						for _, frame := range xwFrames {
+							if tickErr = link.WriteFrame(frame); tickErr != nil {
+								break
+							}
+						}
+						if tickErr == nil {
+							player.refreshJingMaiBonus(jingMaiCatalog)
+							if attribute, attrErr := player.jingMaiAttributeFrame(); attrErr == nil {
+								tickErr = link.WriteFrame(attribute)
+							}
+						}
+						if tickErr == nil {
+							persistJingMai()
+						}
+					}
+				}
 			}
 			if tickErr == nil && qingGongPointChanged {
 				tickErr = link.WriteFrame(player.qingGongPointFrame())
@@ -2544,7 +2669,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 外服私服 0.1s 位登录信息帧簇（m366 客户端 IP 回显 / m623 /
 			// m655 服务器标识，c.pcapng 0.097-0.099s 同位：0x0A 之后、
 			// 建视图之前；official_login_align.go）。
-			writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), activeRole.Name, uint32(activeRole.ID))
+			if !bisectActive("ours-logininfo") {
+				writeOfficialLoginInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), activeRole.Name, uint32(activeRole.ID))
+			}
 			// B 线第十一轮 wholesale 判别（replay_phase2.go）：进场整体
 			// 外服化。跳过本块其余全部我方进场帧，改发外服 Phase A
 			//（0x0B+化身 0x28+首爆发），Phase B 等客户端显式 0x09。
@@ -2585,9 +2712,31 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 0x10 外观帧（DROP-8 同轮）补上。ids/落点取当前全局
 				//（SELF_IDS 档=外服对），档案内嵌 posA=存档落点。
 				var nativeAvatarFrame []byte
-				if replayNativeFramesEnabled() {
-					learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
-					nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows)
+				// 化身默认=官服透传+posA 改写（2026-11-15 真机 A/B 终局
+				// 定案：「重登回走」根因在我方 0x46 生成档——41/42 字段、
+				// 去技能行、去键位段的全部形态恒走；官档（43 字段+尾区）
+				// 恒跑。差异收窄到官方尾区/opaque 段或 0x47 LZ 包装（离线
+				// 不可解码），尾区生成器完成前默认透传，代价=待机动作/脸
+				// 面两处装饰影子（cosmetics 换功能）。
+				if replayNativeFramesEnabled() && bisectActive("avatar-native") {
+					if bisectActive("avatar-bare") {
+						// 二分 A/B 位 avatar-bare：41 字段+BaseFace、无键位
+						// 嵌段、无技能行（playerProfile0x28Frame 内联动）。
+						curNG, curNGWu := player.curNeiGongProfilePair()
+						nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, nil, "", curNG, curNGWu)
+						log.Printf("%s: bisect avatar-bare: native avatar 41+BaseFace, no ShortcutKey, no skills", conn.RemoteAddr())
+					} else if bisectActive("avatar-noskills") {
+						// 二分 A/B 位 avatar-noskills：生成档去全部技能行
+						//（211 行 ×17 列≈3600 字段 vs 官档 ~15 行——技能行洪水
+						// 疑为「生成档时代恒走」触发器，2026-11-15）。
+						curNG, curNGWu := player.curNeiGongProfilePair()
+						nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, nil, player.keybindSnapshot().bind, curNG, curNGWu)
+						log.Printf("%s: bisect avatar-noskills: native avatar without skill rows", conn.RemoteAddr())
+					} else {
+						learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
+						curNG, curNGWu := player.curNeiGongProfilePair()
+						nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows, player.keybindSnapshot().bind, curNG, curNGWu)
+					}
 				}
 				// Phase A 帧源：env 覆盖（换包实验）> exe 内嵌 bin
 				//（replaydata——2026-11-15 起生产 bat 不再外置路径）。
@@ -2595,46 +2744,69 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				if len(raw) == 0 {
 					log.Printf("%s: replay entry frames unavailable (env+embedded both empty)", conn.RemoteAddr())
 				} else {
-				rest := raw
-				replayFrameIdx := 0
-				nativeP1Seen := map[string]bool{}
-				for len(rest) >= 4 {
-					fl := int(binary.LittleEndian.Uint32(rest))
-					if fl <= 0 || fl > len(rest)-4 || fl > 0x10000 {
-						break
+					// 物理档案流前置（PHYSICS-17，2026-11-15「运动模式被设置为
+					// 走路模式」）：官服位序=0x09/0x0A 表后、进场 0x0B 之前逐帧
+					// 34+ 条单属性 0x10（c.pcapng #12..#40，含 WalkSpeed/MoveSpeed/
+					// JumpSpeed 族）。瘦身 bin 的 Phase A 从 #110 起——速度族全在
+					// Phase B 镜像段，化身建视觉体（fxgamelogic 0x46eaa00）在
+					// Phase A 已发生：实测速度≤2.0 → move_type=1 走路（0=跑/1=走，
+					// role 创建默认 0=跑）。补发点（显式 0x09 后）已晚于判定沿，
+					// 故在 0x0B 前复刻官服位序前置整条流（0x0B 之前=登录爆发区，
+					// 非读条窗口，官服同位安全）。
+					if replayNativeFramesEnabled() && player != nil {
+						if bisectActive("ours-physics") {
+							// 二分静默轮：跳过物理档案流
+						} else if physErr := sendPlayerPhysicsLoginStream(link, player); physErr != nil {
+							log.Printf("%s: pre-entry physics stream: %v", conn.RemoteAddr(), physErr)
+							return
+						}
+						log.Printf("%s: sent pre-entry physics login stream (official position, before Phase A 0x0B)", conn.RemoteAddr())
 					}
-					frame := rest[4 : 4+fl]
-					// 帧替换档（NINEYIN_REPLAY_NATIVE_FRAMES=1，
-					// replay_native_replace.go）：已有原生生成器的帧就地
-					// 替换为代码生成（值=我方权威状态/结构常量），其余
-					// 透传并打 UNKNOWN 标注（欠账清单逐个销项后 bin 退役）。
-					if replayNativeFramesEnabled() {
-						if nativeFrames, useEntryScene, note, isNative := nativeP1Disposition(replayFrameIdx, frame, player, activeRole.Location.Position, nativeAvatarFrame); isNative {
-							wrote := 0
-							if useEntryScene {
-								if err := sendEntryScene(link, activeRole.Location.Scene); err != nil {
-									log.Printf("%s: native-replace P1#%d entry scene: %v", conn.RemoteAddr(), replayFrameIdx, err)
-									return
+					rest := raw
+					replayFrameIdx := 0
+					nativeP1Seen := map[string]bool{}
+					for len(rest) >= 4 {
+						fl := int(binary.LittleEndian.Uint32(rest))
+						if fl <= 0 || fl > len(rest)-4 || fl > 0x10000 {
+							break
+						}
+						frame := rest[4 : 4+fl]
+						// 帧替换档（NINEYIN_REPLAY_NATIVE_FRAMES=1，
+						// replay_native_replace.go）：已有原生生成器的帧就地
+						// 替换为代码生成（值=我方权威状态/结构常量），其余
+						// 透传并打 UNKNOWN 标注（欠账清单逐个销项后 bin 退役）。
+						if replayNativeFramesEnabled() {
+							if nativeFrames, useEntryScene, note, isNative := nativeP1Disposition(replayFrameIdx, frame, player, activeRole.Location.Position, nativeAvatarFrame); isNative {
+								wrote := 0
+								if useEntryScene {
+									if err := sendEntryScene(link, activeRole.Location.Scene); err != nil {
+										log.Printf("%s: native-replace P1#%d entry scene: %v", conn.RemoteAddr(), replayFrameIdx, err)
+										return
+									}
+									wrote++
 								}
-								wrote++
-							}
-							for _, nativeFrame := range nativeFrames {
-								if err := link.WriteFrame(nativeFrame); err != nil {
-									log.Printf("%s: native-replace P1#%d write: %v", conn.RemoteAddr(), replayFrameIdx, err)
-									return
+								for _, nativeFrame := range nativeFrames {
+									if err := link.WriteFrame(nativeFrame); err != nil {
+										log.Printf("%s: native-replace P1#%d write: %v", conn.RemoteAddr(), replayFrameIdx, err)
+										return
+									}
+									wrote++
 								}
-								wrote++
+								log.Printf("%s: native-replace P1#%d op=0x%02X -> %d native frame(s) [%s]", conn.RemoteAddr(), replayFrameIdx, frame[0], wrote, note)
+								sent += wrote
+								rest = rest[4+fl:]
+								replayFrameIdx++
+								continue
 							}
-							log.Printf("%s: native-replace P1#%d op=0x%02X -> %d native frame(s) [%s]", conn.RemoteAddr(), replayFrameIdx, frame[0], wrote, note)
-							sent += wrote
-							rest = rest[4+fl:]
-							replayFrameIdx++
+							nativeP1MarkUnknown(replayFrameIdx, frame, nativeP1Seen)
+						}
+						replayFrameIdx++
+						// 帧级二分 p1pass/allreplay 轮：透传帧整帧丢弃（原生分派
+						// 帧已在上方 continue，不受影响）。
+						if bisectDropsP1Pass() {
 							continue
 						}
-						nativeP1MarkUnknown(replayFrameIdx, frame, nativeP1Seen)
-					}
-					replayFrameIdx++
-					switch {
+						switch {
 						case swapSelf && frame[0] == 0x0B:
 							// NINEYIN_REPLAY_PASSTHROUGH_0B=1：0x0B 原样透传
 							//（步骤①真机定案=我方 0x0B 是物化破坏点；官方 4 属性
@@ -2655,33 +2827,33 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 								swappedEntry = true
 							}
 						case swapSelf && frame[0] == 0x28 && fl > 1000:
-						if selfIdsOverride {
-							// 借用外服身份：外服化身帧 ids 已对位 self，
-							// 原样透传（第十一轮实证可建可渲染）——唯 posA
-							// 仍是外服出生点（2026-11-14 真机「重进不在
-							// 退出位置」报障）。头部形 obj,own,X/Y/Z/Orient
-							//（c#124 实测 obj@14/own@18/posA@22=928.33,
-							// 48.75,998.877,0.906），只改写这 16 字节为
-							// 存档落点（移动 2s 节流+断线兜底落库值），其余
-							// 零改动；头部形不符则原样透传保底。
-							out := append([]byte(nil), frame...)
-							if posOff, ok := officialFramePosAOffset(out, playerObjectID, playerOwnerID); ok {
-								pos := activeRole.Location.Position
-								for i, v := range []float32{pos.X, pos.Y, pos.Z, pos.Orient} {
-									binary.LittleEndian.PutUint32(out[posOff+4*i:], math.Float32bits(v))
+							if selfIdsOverride {
+								// 借用外服身份：外服化身帧 ids 已对位 self，
+								// 原样透传（第十一轮实证可建可渲染）——唯 posA
+								// 仍是外服出生点（2026-11-14 真机「重进不在
+								// 退出位置」报障）。头部形 obj,own,X/Y/Z/Orient
+								//（c#124 实测 obj@14/own@18/posA@22=928.33,
+								// 48.75,998.877,0.906），只改写这 16 字节为
+								// 存档落点（移动 2s 节流+断线兜底落库值），其余
+								// 零改动；头部形不符则原样透传保底。
+								out := append([]byte(nil), frame...)
+								if posOff, ok := officialFramePosAOffset(out, playerObjectID, playerOwnerID); ok {
+									pos := activeRole.Location.Position
+									for i, v := range []float32{pos.X, pos.Y, pos.Z, pos.Orient} {
+										binary.LittleEndian.PutUint32(out[posOff+4*i:], math.Float32bits(v))
+									}
+									log.Printf("%s: avatar 0x28 posA -> saved (%.2f, %.2f, %.2f, o=%.3f)", conn.RemoteAddr(), pos.X, pos.Y, pos.Z, pos.Orient)
+								} else {
+									log.Printf("%s: avatar 0x28 posA offset unresolved; passthrough untouched", conn.RemoteAddr())
 								}
-								log.Printf("%s: avatar 0x28 posA -> saved (%.2f, %.2f, %.2f, o=%.3f)", conn.RemoteAddr(), pos.X, pos.Y, pos.Z, pos.Orient)
-							} else {
-								log.Printf("%s: avatar 0x28 posA offset unresolved; passthrough untouched", conn.RemoteAddr())
+								if err := link.WriteFrame(out); err != nil {
+									log.Printf("%s: replay avatar passthrough: %v", conn.RemoteAddr(), err)
+									return
+								}
+								swappedAvatar = true
+								log.Printf("%s: avatar 0x28 passthrough (%d bytes, official ids)", conn.RemoteAddr(), fl)
+								break
 							}
-							if err := link.WriteFrame(out); err != nil {
-								log.Printf("%s: replay avatar passthrough: %v", conn.RemoteAddr(), err)
-								return
-							}
-							swappedAvatar = true
-							log.Printf("%s: avatar 0x28 passthrough (%d bytes, official ids)", conn.RemoteAddr(), fl)
-							break
-						}
 							// 换身两档：NINEYIN_REPLAY_AVATAR_BODY 指向外服档案
 							// 明文体模板（k#1978 全 392 字段含 elmet/cloth/shoes/
 							// sword 装备外观区）——obj/own 全文替换+posA 落我方坐
@@ -2716,7 +2888,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 								log.Printf("%s: swapped avatar 0x28 -> body template %s fields=%d bytes=%d obj=%#x", conn.RemoteAddr(), bodyPath, binary.LittleEndian.Uint16(plain[60:]), len(wrapped), playerObjectID)
 							} else {
 								learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
-								profileFrame, fieldCount := playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows)
+								curNG, curNGWu := player.curNeiGongProfilePair()
+								profileFrame, fieldCount := playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows, player.keybindSnapshot().bind, curNG, curNGWu)
 								if err := link.WriteFrame(profileFrame); err != nil {
 									log.Printf("%s: write swapped player profile 0x28: %v", conn.RemoteAddr(), err)
 									return
@@ -2851,7 +3024,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 外服私服登录物理档案 0x10 单属性流（34 条，冲锋自走 P2）：0x0D
 			// 大档之后逐帧补发——外服私服形态即逐帧变更事件，引擎接近子系统
 			// 若在更新沿上武装则只有这条路能触发（大档不触发同路径）。
-			if err := sendPlayerPhysicsLoginStream(link, player); err != nil {
+			if bisectActive("ours-physics") {
+				// 二分静默轮：跳过物理档案流
+			} else if physErr := sendPlayerPhysicsLoginStream(link, player); physErr != nil {
 				log.Printf("%s: write player physics login stream (skip): %v", conn.RemoteAddr(), err)
 			}
 			// 玩家档案 0x28 全量帧（外服私服登录簇方言，docs/official/外服玩家档案
@@ -2864,7 +3039,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 技能行数据与 grantStarterProgress/View40 同源（merge 集
 				// + 等级档合并），档案帧先行、View40 行后到——外服私服同位。
 				learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
-				profileFrame, fieldCount := playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows)
+				curNG, curNGWu := player.curNeiGongProfilePair()
+				profileFrame, fieldCount := playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows, player.keybindSnapshot().bind, curNG, curNGWu)
 				if err := link.WriteFrame(profileFrame); err != nil {
 					log.Printf("%s: write player profile 0x28 (skip): %v", conn.RemoteAddr(), err)
 				} else {
@@ -3053,6 +3229,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: %v", conn.RemoteAddr(), err)
 						return
 					}
+					// active_jingmai_rec 行记账同口径复位（客户端表已空，
+					// 重入整推前不得再按旧行数发删行）。
+					player.resetJingMaiActiveRows()
 					mountsPushed = false
 					player.resetMountRows()
 					if err := pushMounts(); err != nil {
@@ -3084,6 +3263,25 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if replayPhase2Armed.Load() {
 				replayPhase2Armed.Store(false)
 				if runtime != nil && runtime.activeRole != nil {
+					// 基础物理档案补发（PHYSICS-16，2026-11-15「跳跃异常」
+					// 根因收口）：官服登录在首爆发窗口逐帧连发 34 条单属性
+					// 0x10 + InteractStatus=-1（c.pcapng #10-#94 实证：
+					// JumpSpeed=5.5/Gravity=9.8/三跳基值 6.0/AirRush 15·12/
+					// Advanced 23…）；瘦身把整组当数据行剥离，wholesale 又停发
+					// 我方同款流——客户端无本地默认（缺省 0），跳跃 Z 初速=0。
+					// ★时序（「刺探玩法被默认打开」第二根因）：必须在 Phase B
+					// 回放**之前**发——bin P2#121 m100 进场 onready 一到，
+					// form_tvt_main.on_ready 即按 InteractStatus 当前值判
+					// GetCurrentTvtType()≠-1 弹刺探技能栏，之后 -1 到达也
+					// 不再复查（首版放在 Phase B 后=晚 235 帧，真机栏未消）。
+					// 官方同序（物理帧在首爆发、m100 在尾段）。
+					if replayNativeFramesEnabled() && player != nil {
+						if bisectActive("ours-physics") {
+							// 二分静默轮：跳过物理档案流
+						} else if physErr := sendPlayerPhysicsLoginStream(link, player); physErr != nil {
+							log.Printf("%s: write native physics login stream: %v", conn.RemoteAddr(), physErr)
+						}
+					}
 					// self 0x1F posA 对齐存档落点（p2_slim 内那帧外服
 					// Location 会把化身 posA 拽回外服出生点——重进位置
 					// 修复的漏网帧，2026-11-14 恢复）。
@@ -3094,7 +3292,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if len(phase2Raw) > 0 {
 						var phase2Sent int
 						if replayNativeFramesEnabled() {
-							phase2Sent = replayPhase2NativeReplaceBytes(link, phase2Raw, phase2Label, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position)
+							phase2Sent = replayPhase2NativeReplaceBytes(link, phase2Raw, phase2Label, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position, player)
 						} else {
 							phase2Sent = replayFramesPackAlignSelfPosBytes(link, phase2Raw, phase2Label, playerObjectID, playerOwnerID, runtime.activeRole.Location.Position)
 						}
@@ -3180,6 +3378,21 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if replayReplaceEntryEnabled() && !replayNativeOverlayEnabled() {
 				goto readyTail
 			}
+			// 面板身份/域块补推（2026-11-15 真机「实力/侠恶值没有下发」）：
+			// 正常进场的补推点在 spawn 链（wholesale 整体停发）、0x0C 重进
+			// 有 gmWritePanelFrames——唯独 wholesale 首进场两处都不经过，
+			// 且瘦身 bin 的 MIRROR-12 差集里 PowerLevel/Justice/Evil/
+			// FreeBase 全缺（full_dump 实证）→ 人物面板整块空白。此处随
+			// overlay ClientReady 簇补齐（身份块含实力/称号/侠善恶狂/生存
+			// 属性/PK 模式 15 位 + 域块 6 位，零值也发=Java 同口径）。
+			if player != nil && !panelIdentityPushed {
+				panelIdentityPushed = true
+				if panelErr := gmWritePanelFrames(link, player); panelErr != nil {
+					log.Printf("%s: push panel identity frames: %v", conn.RemoteAddr(), panelErr)
+				} else {
+					log.Printf("%s: pushed panel identity/domain frames after ClientReady", conn.RemoteAddr())
+				}
+			}
 			// AutoTrace=1（外服私服 4.81s ClientReady 簇，m144 后 m52 前）：
 			// 自动寻路开关——大地图点击寻路的引擎闸门，登录缺发则点击
 			// 无反应（msg266 都不发起）。
@@ -3208,7 +3421,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// 即丢、重入时由 stable re-entry 分支重推。无档零帧。
 			if player != nil && !customizingPushed {
 				customizingPushed = true
-				if pushErr := pushSavedCustomizing(link, customizingSess.saved); pushErr != nil {
+				if bisectActive("ours-customizing") {
+					// 二分静默轮：跳过
+				} else if pushErr := pushSavedCustomizing(link, customizingSess.saved); pushErr != nil {
 					log.Printf("%s: push saved customizing: %v", conn.RemoteAddr(), pushErr)
 					return
 				} else if customizingSess.hasSaved {
@@ -3217,7 +3432,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			if player != nil && !keybindPushed {
 				keybindPushed = true
-				if pushErr := pushKeybindFrames(link, player); pushErr != nil {
+				if bisectActive("ours-keybind") {
+					// 二分静默轮：跳过
+				} else if pushErr := pushKeybindFrames(link, player); pushErr != nil {
 					log.Printf("%s: push saved keybind: %v", conn.RemoteAddr(), pushErr)
 					return
 				}
@@ -3330,7 +3547,9 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 必须先于 enableSkillActionSwitch：sync 清空整棵开关树后
 				// 重设，1223 随后走 reset 单开。
 				switchSyncPushed = true
-				if syncErr := pushSwitchSync(link); syncErr != nil {
+				if bisectActive("ours-switch") {
+					// 二分静默轮：跳过
+				} else if syncErr := pushSwitchSync(link); syncErr != nil {
 					log.Printf("%s: push switch sync: %v", conn.RemoteAddr(), syncErr)
 					return
 				}
@@ -3362,7 +3581,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			// （例如在较晚的 UI/stage 回调之后）。
 			// 这不是创建新场景世代的请求；拒绝它会拆掉一个
 			// 本来健康的连接。
-readyTail:
+		readyTail:
 			if machine.Phase() == session.PhaseInWorld {
 				log.Printf("%s: ignored duplicate ClientReady in active scene", conn.RemoteAddr())
 				continue
@@ -3429,7 +3648,9 @@ readyTail:
 						// 兼容 0x0A 晋升的 ClientReady 同样要开开关树
 						//（该客户端路径不经过显式 0x09 分支时兜底）。
 						switchSyncPushed = true
-						if syncErr := pushSwitchSync(link); syncErr != nil {
+						if bisectActive("ours-switch") {
+							// 二分静默轮：跳过
+						} else if syncErr := pushSwitchSync(link); syncErr != nil {
 							log.Printf("%s: push compatibility switch sync: %v", conn.RemoteAddr(), syncErr)
 							return
 						}
@@ -3633,6 +3854,13 @@ readyTail:
 				case clientCustomSaveCustomizing:
 					if _, handleErr := handleCustomizingCustom(link, player, custom, conn.RemoteAddr().String(), &customizingSess, customConfig.customizing, currentRoleID()); handleErr != nil {
 						log.Printf("%s: handle activity customizing: %v", conn.RemoteAddr(), handleErr)
+						return
+					}
+				case clientCustomChangeMoveType:
+					// CLIENT_CUSTOMMSG_MOVE_TYPE（走/跑切换与点击移动上报；
+					// 2026-11-15 前恒 unhandled）。
+					if _, handleErr := handleMoveTypeCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+						log.Printf("%s: handle activity move type: %v", conn.RemoteAddr(), handleErr)
 						return
 					}
 				case clientCustomKeybindUpload:
@@ -3924,6 +4152,12 @@ readyTail:
 			case clientCustomSaveCustomizing:
 				if _, handleErr := handleCustomizingCustom(link, player, custom, conn.RemoteAddr().String(), &customizingSess, customConfig.customizing, currentRoleID()); handleErr != nil {
 					log.Printf("%s: handle customizing: %v", conn.RemoteAddr(), handleErr)
+					return
+				}
+			case clientCustomChangeMoveType:
+				// CLIENT_CUSTOMMSG_MOVE_TYPE（走/跑切换与点击移动上报）。
+				if _, handleErr := handleMoveTypeCustom(link, player, custom, conn.RemoteAddr().String()); handleErr != nil {
+					log.Printf("%s: handle move type: %v", conn.RemoteAddr(), handleErr)
 					return
 				}
 			case clientCustomKeybindUpload:

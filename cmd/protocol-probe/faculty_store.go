@@ -110,6 +110,21 @@ type facultyVitalsSnapshot struct {
 	MaxMPOverride int32 `json:"max_mp_override"`
 }
 
+// facultyPanelIdentitySnapshot 是 role_faculty 快照的面板身份节点（GM
+// set_power_level/set_alignment/set_pk_mode 的持久层，2026-11-15 真机
+// 「GM 设值重登丢失」：此前三动作会话级设计对齐 Java，用户拍板晋升持久）。
+// nil = 旧档未设置，不落节点（vitals 同口径）。
+type facultyPanelIdentitySnapshot struct {
+	PowerLevel    int32 `json:"power_level"`
+	PowerLevelSet bool  `json:"power_level_set"`
+	Justice       int32 `json:"justice"`
+	Evil          int32 `json:"evil"`
+	FreeBase      int32 `json:"free_base"`
+	AlignmentSet  bool  `json:"alignment_set"`
+	PKMode        int32 `json:"pk_mode"`
+	PKModeSet     bool  `json:"pk_mode_set"`
+}
+
 type facultyProgressSnapshot struct {
 	CurNeiGong     string                `json:"cur_neigong"`
 	Faculty        int32                 `json:"faculty"`
@@ -154,6 +169,8 @@ type facultyProgressSnapshot struct {
 	BaseSpi int32 `json:"base_spi"`
 	// 生存属性层（GM set_vitals）：nil = 旧档未设置。
 	Vitals *facultyVitalsSnapshot `json:"vitals,omitempty"`
+	// 面板身份层（GM 实力/侠恶/PK 模式持久）：nil = 旧档未设置。
+	PanelIdentity *facultyPanelIdentitySnapshot `json:"panel_identity,omitempty"`
 
 	// extras 保存解码时遇到的本结构未知字段（非导出，encoding/json
 	// 不直接编解码），编码时按 key 排序原样回写。
@@ -191,6 +208,7 @@ var facultySnapshotJSONKeys = map[string]bool{
 	"base_ing":              true,
 	"base_spi":              true,
 	"vitals":                true,
+	"panel_identity":        true,
 }
 
 func (snapshot *facultyProgressSnapshot) UnmarshalJSON(data []byte) error {

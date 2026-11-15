@@ -37,12 +37,16 @@ type modernNeiGongModifier struct {
 }
 
 type modernNeiGongVarProp struct {
-	level      int32
-	buffID     string
-	buffLevel  int32
-	direct     map[string]int32
-	propPacks  []int32
-	skillPacks []int32
+	level int32
+	// neiGongLevel 是 varprop 档的内功等级（实力点数轴，≠书 Level）：
+	// View43 行 idx2291 NeiGongLevel 的官方数据源，客户端引擎取
+	// max(书行 NeiGongLevel) 换算玩家实力阶（玩法入口门槛）。
+	neiGongLevel int32
+	buffID       string
+	buffLevel    int32
+	direct       map[string]int32
+	propPacks    []int32
+	skillPacks   []int32
 }
 
 type modernNeiGongRange struct{ min, max int32 }
@@ -147,6 +151,8 @@ func (c *modernNeiGongCatalog) load() error {
 		switch key {
 		case "Level":
 			record.level, err = parseModernInt32(value)
+		case "NeiGongLevel":
+			record.neiGongLevel, err = parseModernInt32(value)
 		case "BufferID":
 			record.buffID = strings.TrimSpace(value)
 		case "BufferLevel":
@@ -357,22 +363,27 @@ func (c *modernNeiGongCatalog) maxLevelOf(staticData int32) int32 {
 	return best
 }
 
-func (c *modernNeiGongCatalog) effect(staticData, level int32) (modernNeiGongEffect, error) {
+// varPropRow 按 StaticData 段号范围找该等级的 varprop 档行，返回
+// （档行, 档号 VarPropNo）。View43 书行官方方言（c.pcapng #633/#634 走查）
+// 携带 VarPropNo@2246 = MinVarPropNo+level-1 段号本身。
+func (c *modernNeiGongCatalog) varPropRow(staticData, level int32) (modernNeiGongVarProp, int32, error) {
 	entry, exists := c.ranges[staticData]
 	if !exists || entry.min <= 0 || entry.max < entry.min {
-		return modernNeiGongEffect{}, fmt.Errorf("missing modern neigong StaticData=%d range", staticData)
+		return modernNeiGongVarProp{}, 0, fmt.Errorf("missing modern neigong StaticData=%d range", staticData)
 	}
-	var record modernNeiGongVarProp
-	found := false
 	for id := entry.min; id <= entry.max; id++ {
 		candidate, exists := c.varProps[id]
 		if exists && candidate.level == level {
-			record, found = candidate, true
-			break
+			return candidate, id, nil
 		}
 	}
-	if !found {
-		return modernNeiGongEffect{}, fmt.Errorf("StaticData=%d has no varprop at level=%d", staticData, level)
+	return modernNeiGongVarProp{}, 0, fmt.Errorf("StaticData=%d has no varprop at level=%d", staticData, level)
+}
+
+func (c *modernNeiGongCatalog) effect(staticData, level int32) (modernNeiGongEffect, error) {
+	record, _, err := c.varPropRow(staticData, level)
+	if err != nil {
+		return modernNeiGongEffect{}, err
 	}
 	effect := modernNeiGongEffect{
 		buffID:         record.buffID,
