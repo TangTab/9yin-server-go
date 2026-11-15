@@ -457,6 +457,77 @@ func TestPersistentFacultySettlesElapsedMinutes(t *testing.T) {
 	}
 }
 
+// GM fill_current_neigong（Java fillCurrentFaculty 同构，2026-11-15 补齐——
+// 此前面板按钮被契约层「unsupported action」拒绝）：本层填满升一层、fill
+// 归零；恰好满级对齐自然修炼语义（fill=0、自动停修）；满级后再填零变更；
+// 无修炼书零变更。
+func TestFillCurrentFacultyLevelsUpAndStopsAtMax(t *testing.T) {
+	progress := newPlayerProgress()
+	// books[0]=ng_wd_001 L30/36：填满 → L31、fill=0。
+	beforeLevel := progress.books[0].level
+	slot, granted, levelUp, maxLevel, newLevel := progress.fillCurrentFaculty()
+	if !granted || !levelUp || maxLevel || slot != 1 || newLevel != beforeLevel+1 {
+		t.Fatalf("fill: slot=%d granted=%t levelUp=%t maxLevel=%t newLevel=%d", slot, granted, levelUp, maxLevel, newLevel)
+	}
+	if got := progress.books[0].fill; got != 0 {
+		t.Fatalf("fill=%d want 0 (升级吞掉本层 total)", got)
+	}
+	// 31→35：再填 4 次各升一层、均未满级。
+	for i := 0; i < 4; i++ {
+		_, granted, _, maxLevel, _ := progress.fillCurrentFaculty()
+		if !granted || maxLevel {
+			t.Fatalf("iteration %d: granted=%t maxLevel=%t", i, granted, maxLevel)
+		}
+	}
+	// 35→36：满级停修（facultyState=NONE、fillSpeed=0）。
+	_, granted, _, maxLevel, newLevel = progress.fillCurrentFaculty()
+	if !granted || !maxLevel || newLevel != progress.books[0].maxLevel {
+		t.Fatalf("max fill: granted=%t maxLevel=%t newLevel=%d", granted, maxLevel, newLevel)
+	}
+	if progress.facultyState != facultyStateNone || progress.fillSpeed != 0 {
+		t.Fatalf("max fill state=%d speed=%d, want auto-stop", progress.facultyState, progress.fillSpeed)
+	}
+	// 满级后再填：零变更（granted=false、maxLevel=true）。
+	if _, granted, _, maxLevel, _ := progress.fillCurrentFaculty(); granted || !maxLevel {
+		t.Fatalf("post-max fill granted=%t maxLevel=%t, want no-op", granted, maxLevel)
+	}
+	// 无修炼书：零变更（Java 槽位 -1 语义）。
+	progress.facultyName = ""
+	if slot, granted, _, _, _ := progress.fillCurrentFaculty(); slot != 0 || granted {
+		t.Fatalf("no-book fill slot=%d granted=%t, want silent no-op", slot, granted)
+	}
+}
+
+// TeamFaculty 族（GM clear_team_fatigue）：快照 roundtrip + 清零 +
+// properties() 携带（客户端团练剩余精力绑定源）。
+func TestTeamFacultyFatigueClearAndSnapshot(t *testing.T) {
+	progress := newPlayerProgress()
+	progress.teamFacultyValue = 79190
+	progress.teamFacultyLast = 1200
+	snapshot := progress.snapshot()
+	if snapshot.TeamFacultyValue != 79190 || snapshot.TeamFacultyLast != 1200 {
+		t.Fatalf("snapshot team=%+v", snapshot.TeamFacultyValue)
+	}
+	restored := newPlayerProgress()
+	restored.restore(snapshot, time.Now())
+	if restored.teamFacultyValue != 79190 || restored.teamFacultyLast != 1200 {
+		t.Fatalf("restored team value=%d last=%d", restored.teamFacultyValue, restored.teamFacultyLast)
+	}
+	restored.clearTeamFacultyFatigue()
+	if restored.teamFacultyValue != 0 {
+		t.Fatalf("clear team=%d, want 0", restored.teamFacultyValue)
+	}
+	seen := map[string]bool{}
+	for _, property := range restored.properties() {
+		seen[property.Name] = true
+	}
+	for _, name := range []string{"TeamFacultyState", "TeamFacultyValue", "TeamFacultyLast"} {
+		if !seen[name] {
+			t.Fatalf("properties missing %s", name)
+		}
+	}
+}
+
 func TestActiveFacultyPaysOnlyAfterCardSelection(t *testing.T) {
 	progress := newPlayerProgress()
 	start := time.Date(2026, 7, 23, 12, 0, 0, 0, time.UTC)

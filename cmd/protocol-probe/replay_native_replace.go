@@ -47,7 +47,7 @@ import (
 //	 0x1F self Location         → 原生 serverLocation（存档落点，替代
 //	                               AlignSelfPos 改写）
 //	 0x2A ×15 官方装备外观      → DROP-8 停发（2026-11-15 00:5x 真机
-//	                               「影子覆盖 DB 装备」根因：官服玩家全套
+//	                               「影子覆盖 DB 装备」根因：外服玩家全套
 //	                               穿着帧压在我方数据库装备之上；我方外观
 //	                               走 0x10 属性通道，替换档恒发压影子）
 //	 0x1E argc16 ×62 NPC 行     → UNKNOWN-9 透传（m229 sub130 官方 AOI
@@ -57,9 +57,9 @@ import (
 //	                               m386 限时窗/m416 DomainJiuYinZhi/m294
 //	                               对钟/m681 令牌/m607 账号名等，见解析文档）
 //	 0x10 ×115 官方玩家属性值   → 移动/跳跃族原生改写（MOTION-15：基础值=
-//	                               我方权威生成器，Add 族=官服轻功等级加成组
-//	                               常量；镜像 Add 帧本是官服 5 级轻功玩家合法
-//	                               状态——「跳跃异常」真根因是瘦身把官服 34 帧
+//	                               我方权威生成器，Add 族=外服轻功等级加成组
+//	                               常量；镜像 Add 帧本是外服 5 级轻功玩家合法
+//	                               状态——「跳跃异常」真根因是瘦身把外服 34 帧
 //	                               基础物理档案（JumpSpeed=5.5/Gravity=9.8/
 //	                               三跳基值 6.0…）当数据行剥离+wholesale 停发
 //	                               我方同款流，客户端无本地默认缺省 0，跳跃
@@ -79,13 +79,14 @@ func replayNativeFramesEnabled() bool {
 // replayBisectMode 帧级二分旋钮（NINEYIN_REPLAY_BISECT，2026-11-15
 // 「重登回走」定位）：按轮丢弃回放帧集合/静默我方推送，重启（不重编）
 // 即可切换。支持逗号分隔多值。
-//   p2custom —— 丢 Phase B 全部 0x1E 透传 custom（157 帧）
-//   p2mirror —— 丢 Phase B 全部 0x10 官方属性镜像
-//   p2all    —— 上两者
-//   p1pass   —— 丢 Phase A 全部透传帧（仅留原生生成）
-//   allreplay—— p1pass+p2all（过猛：实测进不了游戏）
-//   ours-switch / ours-customizing / ours-physics / ours-keybind /
-//   ours-logininfo —— 静默我方对应推送簇
+//
+//	p2custom —— 丢 Phase B 全部 0x1E 透传 custom（157 帧）
+//	p2mirror —— 丢 Phase B 全部 0x10 官方属性镜像
+//	p2all    —— 上两者
+//	p1pass   —— 丢 Phase A 全部透传帧（仅留原生生成）
+//	allreplay—— p1pass+p2all（过猛：实测进不了游戏）
+//	ours-switch / ours-customizing / ours-physics / ours-keybind /
+//	ours-logininfo —— 静默我方对应推送簇
 func replayBisectMode() string {
 	return strings.TrimSpace(os.Getenv("NINEYIN_REPLAY_BISECT"))
 }
@@ -125,19 +126,19 @@ type officialViewSpec struct {
 // （c.pcapng P2 #5/#62-67/#74-79/#93/#102-112/#116-120/#133/#238）。
 func officialP2ViewCreateSet() []officialViewSpec {
 	return []officialViewSpec{
-		{116, 1, false},   // 未知用途小容器
-		{47, 512, false},  // 经脉
+		{116, 1, false},  // 未知用途小容器
+		{47, 512, false}, // 经脉
 		{48, 128, false},
-		{44, 512, false},  // 内修 wuxing
-		{45, 128, false},  // 任务
-		{43, 512, false},  // 内功
-		{40, 800, false},  // 武学
+		{44, 512, false}, // 内修 wuxing
+		{45, 128, false}, // 任务
+		{43, 512, false}, // 内功
+		{40, 800, false}, // 武学
 		{41, 512, false},
 		{170, 10, false},
 		{29, 40, false},
-		{1, 52, false},    // 纸娃娃
+		{1, 52, false}, // 纸娃娃
 		{64, 6, false},
-		{174, 90, true}, {175, 2, false},   // 背包主页/扩展页 ×8 组
+		{174, 90, true}, {175, 2, false}, // 背包主页/扩展页 ×8 组
 		{176, 90, true}, {177, 2, false},
 		{178, 90, true}, {179, 2, false},
 		{180, 90, true}, {181, 2, false},
@@ -146,7 +147,7 @@ func officialP2ViewCreateSet() []officialViewSpec {
 		{123, 90, true}, {124, 2, false},
 		{125, 90, true}, {126, 2, false},
 		{159, 24, false},
-		{46, 512, false},  // 轻功 QingGongRec
+		{46, 512, false}, // 轻功 QingGongRec
 	}
 }
 
@@ -186,7 +187,7 @@ func nativeP1MarkUnknown(idx int, frame []byte, seen map[string]bool) {
 // 帧替换档下 SWAP_SELF 的两大职责全部收编：#5 0x0B→sendEntryScene、
 // #6 化身 0x28→我方生成档（nativeAvatar 非空时；装备/脸面影子的根治，
 // 换心时代「只剩头」缺口已由恒发 0x10 外观帧补上）或透传+posA 对齐
-//（nativeAvatar=nil 的降级路径，头部形不符则原样透传保底）。
+// （nativeAvatar=nil 的降级路径，头部形不符则原样透传保底）。
 func nativeP1Disposition(idx int, frame []byte, player *playerActor, pos role.Position, nativeAvatar []byte) (frames [][]byte, useEntryScene bool, note string, native bool) {
 	switch idx {
 	case 0, 2:
@@ -277,15 +278,15 @@ func p2UnknownMarker(frame []byte) string {
 }
 
 // nativeP2SelfMotionOverrides P2 透传帧里 self 0x10 移动/跳跃族的权威值表
-//（MOTION-15）。wholesale 进场停发我方 0x0D 大档与物理档案单帧流，
+// （MOTION-15）。wholesale 进场停发我方 0x0D 大档与物理档案单帧流，
 // ClientReady 战斗面板簇（officialCombatPanelProp）也不含该族——外服镜像
 // 值落地后无任何我方帧覆盖。值表不发明新常量，全部取自既有权威生成器：
 // baseMotionProperties（Gravity/DropHeightPub）、qinggongMotionProperties
-//（跳/冲刺族基线）、motion 快照（MoveSpeed/RunSpeed）、轻功池快照
-//（QingGongPoint/Max，P1#11 同源）。
+// （跳/冲刺族基线）、motion 快照（MoveSpeed/RunSpeed）、轻功池快照
+// （QingGongPoint/Max，P1#11 同源）。
 //
-// Add 族按「官服轻功等级加成组」取值（9yin-go-server2 qinggong_jump_physics.go
-// 官服 5 级轻功抓拍定案，随 View=46 下发）：SndJumpSpeedAdd=5.1、
+// Add 族按「外服轻功等级加成组」取值（9yin-go-server2 qinggong_jump_physics.go
+// 外服 5 级轻功抓拍定案，随 View=46 下发）：SndJumpSpeedAdd=5.1、
 // Thd/DriftJumpSpeedAdd=3.0、AirRushDistAdd=5.0、DropHeightPub 10→24。
 // bin 镜像值（4.8/3.0/3.0/5.0/24）即被捕获玩家的同组状态——不是坏数据，
 // 但按去镜像原则改写为我方常量。二段跳 Z 初速=SndJumpSpeed(6)+Add(5.1)
@@ -310,12 +311,12 @@ func nativeP2SelfMotionOverrides(player *playerActor) map[uint16]clientdata.Inde
 		return clientdata.IndexedProperty{Index: clientdata.MustPlayerProperty(name).Index, Name: name, Value: clientdata.Int32Value(value)}
 	}
 	// MoveSpeed/RunSpeed/RunSpeedAdd：官方档案基线 3.9/3.9/0（c.pcapng #13/#15
-	// 全对 3.9；镜像 RunSpeedAdd=0.6 是官服玩家装备加成——不得继承）。
+	// 全对 3.9；镜像 RunSpeedAdd=0.6 是外服玩家装备加成——不得继承）。
 	// motion.moveSpeed 会随会话漂移（曾实测 4.8 → 真机「移动速度很快」根因，
 	// 2026-11-15 午后定案：4.8+透传 0.6 叠加远超官方）。UnderWaterModifySpeed：
 	// 外服物理档案流同值 1.0（改写=闭环防漂移）。
 	add(f("MoveSpeed", 3.9), f("RunSpeed", 3.9), f("RunSpeedAdd", 0), f("UnderWaterModifySpeed", 1))
-	// 轻功等级加成组（官服 5 级轻功值；覆盖 qinggongMotionProperties 的
+	// 轻功等级加成组（外服 5 级轻功值；覆盖 qinggongMotionProperties 的
 	// Add=0 基线——跳跃高度主要由这组 Add 决定，清零=二段跳只有基值 6）。
 	add(f("SndJumpSpeedAdd", officialQingGongLevelAdds.sndJump),
 		f("ThdJumpSpeedAdd", officialQingGongLevelAdds.thdJump),
@@ -326,8 +327,8 @@ func nativeP2SelfMotionOverrides(player *playerActor) map[uint16]clientdata.Inde
 	return overrides
 }
 
-// officialQingGongLevelAdds 官服轻功等级加成组常量（server2
-// qinggong_jump_physics.go 官服 5 级轻功抓拍；驱动链=跳跃 Z 初速的 Add 项）。
+// officialQingGongLevelAdds 外服轻功等级加成组常量（server2
+// qinggong_jump_physics.go 外服 5 级轻功抓拍；驱动链=跳跃 Z 初速的 Add 项）。
 type officialQingGongLevelAddsSpec struct {
 	sndJump     float32 // SndJumpSpeedAdd：二段跳加成
 	thdJump     float32 // ThdJumpSpeedAdd：三段跳加成
@@ -387,11 +388,11 @@ func replayPhase2NativeReplaceBytes(conn sceneMessageConnection, raw []byte, lab
 		}
 		switch {
 		case frame[0] == 0x1E && len(frame) >= 14 && isSelfM24StateMirror(frame, obj, own):
-			// DROP-m24：官服玩家状态镜帧（bin P2#122 实证 m24 obj(self) i33
-			// ——c.pcapng 抓拍时官服玩家所处的状态值，重登即灌给我们的玩家；
-			// c1=33 疑移动/走态镜像，2026-11-15「重登回走」终局嫌疑。官服
+			// DROP-m24：外服玩家状态镜帧（bin P2#122 实证 m24 obj(self) i33
+			// ——c.pcapng 抓拍时外服玩家所处的状态值，重登即灌给我们的玩家；
+			// c1=33 疑移动/走态镜像，2026-11-15「重登回走」终局嫌疑。外服
 			// 玩家数据行一律不得镜像（DROP-8 同族），状态权威在我方。
-			marker := "DROP-m24 官服玩家状态镜帧（m24 obj(self) c1=33 疑走态镜像；重登回走终局嫌疑）"
+			marker := "DROP-m24 外服玩家状态镜帧（m24 obj(self) c1=33 疑走态镜像；重登回走终局嫌疑）"
 			if !seen[marker] {
 				seen[marker] = true
 				log.Printf("native-replace P2 op=0x1E DROP [%s]", marker)

@@ -148,6 +148,9 @@ type facultyProgressSnapshot struct {
 	ActDayValueMax  int32 `json:"act_day_value_max"`
 	ActDayValueUsed int32 `json:"act_day_value_used"`
 	ActDayValueLast int32 `json:"act_day_value_last"`
+	// 团练疲劳层（GM clear_team_fatigue）：旧档缺字段零值=满精力。
+	TeamFacultyValue int32 `json:"team_faculty_value"`
+	TeamFacultyLast  int32 `json:"team_faculty_last"`
 	// 历练层（LiveGroove 毫历练/HoldFaculty/LiveSpeedPower；docs/
 	// livepoint-conversion.md）：键名与 Java FacultyStore 逐字一致（共享
 	// MySQL，三服互读）。旧档缺字段零值 → restore 宽松归零；
@@ -194,6 +197,8 @@ var facultySnapshotJSONKeys = map[string]bool{
 	"act_day_value_max":     true,
 	"act_day_value_used":    true,
 	"act_day_value_last":    true,
+	"team_faculty_value":    true,
+	"team_faculty_last":     true,
 	"live_groove_1":         true,
 	"live_groove_2":         true,
 	"live_groove_3":         true,

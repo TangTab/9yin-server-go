@@ -258,7 +258,13 @@ func TestJingMaiBonusWiring(t *testing.T) {
 // 旧目录满级一致，只是上限换成阶梯值）。
 func TestJingMaiCultivateRespectsCapLadder(t *testing.T) {
 	catalog := stubJingMaiCatalog(t)
-	// jm_b maxLevel=225（跷脉形态）——无穴 cap=9。
+	// jm_b maxLevel=225（跷脉形态）：挂 3 穴地图、零开穴 → cap=初始 9
+	//（无穴位图已回落目录上限，阶梯语义须有地图才成立）。
+	for i := range catalog.order {
+		if catalog.order[i].configID == "jm_b" {
+			catalog.order[i].xueWei = []string{"xw_b1", "xw_b2", "xw_b3"}
+		}
+	}
 	player := newPlayerActor("封顶侠", 0)
 	anchor := time.Date(2026, 11, 15, 10, 0, 0, 0, time.Local)
 	player.restoreJingMai(jingMaiSnapshot{

@@ -309,9 +309,12 @@ type jingMaiState struct {
 	lastTickAt time.Time
 	// openedXueWei 已开穴位（View44 行序；内功 activerule 自动开 + GM
 	// open_xuewei，只增不减）。actLimit 可激活经脉条数上限（官方初始 3，
-	// GM set_jingmai_act_count 1..8；jmActCount 属性即此值）。
+	// GM set_jingmai_act_count 1..8；jmActCount 属性即此值）。tierReset
+	// 坐忘功初始值归一标记（false=旧档，ensureJingMaiLearned 一次性拉回
+	// 初始 1 级/剥目录穴后置位；此后 GM set_jingmai_tier 档位持久）。
 	openedXueWei []string
 	actLimit     int32
+	tierReset    bool
 }
 
 type jingMaiSnapshot struct {
@@ -323,9 +326,11 @@ type jingMaiSnapshot struct {
 	ZhenQi    jingMaiZhenQiPool             `json:"zhenQi"`
 	Cap       jingMaiDailyCap               `json:"cap"`
 	// 官方式穴位/激活上限（2026-11-15；旧档缺字段=空穴/默认条数，回填
-	// 语义见 restoreJingMai）。
+	// 语义见 restoreJingMai）。TierReset 缺=false=尚未做过坐忘功初始值
+	// 归一（ensureJingMaiLearned 一次性归位后置位持久）。
 	OpenedXueWei []string `json:"openedXueWei,omitempty"`
 	ActLimit     int32    `json:"actLimit,omitempty"`
+	TierReset    bool     `json:"tierReset,omitempty"`
 }
 
 func (p *playerActor) jingMaiSnapshotOf() jingMaiSnapshot {
@@ -339,6 +344,7 @@ func (p *playerActor) jingMaiSnapshotOf() jingMaiSnapshot {
 		Cap:          p.jingmai.cap,
 		OpenedXueWei: append([]string(nil), p.jingmai.openedXueWei...),
 		ActLimit:     p.jingmai.actLimit,
+		TierReset:    p.jingmai.tierReset,
 	}
 	if len(p.jingmai.progress) > 0 {
 		snapshot.Progress = make(map[string]jingMaiProgressRow, len(p.jingmai.progress))
@@ -389,9 +395,11 @@ func (p *playerActor) restoreJingMai(snapshot jingMaiSnapshot, now time.Time) {
 		p.jingmai.cap.Value = zhenQiDayValueMax
 	}
 	// 官方式扩展（旧档缺字段回填）：穴位空集随内功规则/重入再收敛；
-	// actLimit 缺省官方初始 3 条。
+	// actLimit 缺省官方初始 3 条；tierReset 缺=false，ensureJingMaiLearned
+	// 首次进世界做坐忘功初始值一次性归一。
 	p.jingmai.openedXueWei = append([]string(nil), snapshot.OpenedXueWei...)
 	p.jingmai.actLimit = snapshot.ActLimit
+	p.jingmai.tierReset = snapshot.TierReset
 	if p.jingmai.actLimit < 1 {
 		p.jingmai.actLimit = jingMaiActLimitDefault
 	}
@@ -402,8 +410,13 @@ func (p *playerActor) restoreJingMai(snapshot jingMaiSnapshot, now time.Time) {
 }
 
 // ensureJingMaiLearned 进世界种子与补齐（Java PlayerMeridian.create +
-// 2026-11-15 全套开通）：starter 全集按授予序入学，每条 1 级 0 真气；
-// 老档已学的保留原行序，缺的追加（幂等并集——14 条旧档自动补成全套）。
+// 2026-11-15 全套开通）：starter 全集按授予序入学，每条 1 级 0 真气——
+// 坐忘功初始值语义（初始上限 9，随内功 activerule 开穴提升），升档全走
+// GM 面板 set_jingmai_tier（2026-11-15 晚用户拍板，撤销同日更早的「默认
+// 满周天」）。tierReset 一次性归一：默认满周天时期（tierSeeded 老字段/
+// 全穴开+满级）落库的档首次进世界拉回初始值（等级 1 + 剥离目录穴位，
+// 合法穴随 jingMaiPrepareLogin 的 activerule 即刻重开），此后 GM 设置
+// 持久不被回种覆盖。
 func (p *playerActor) ensureJingMaiLearned(catalog *jingMaiCatalog) {
 	if catalog == nil {
 		return
@@ -428,8 +441,35 @@ func (p *playerActor) ensureJingMaiLearned(catalog *jingMaiCatalog) {
 		}
 		added = true
 	}
-	if added {
-		log.Printf("jingmai: supplemented full-set meridians to %d rows", len(p.jingmai.learned))
+	reset := 0
+	if !p.jingmai.tierReset {
+		// 一次性归一回坐忘功初始值：全已学行 Level=1；剥离目录穴位表内
+		// 的已开穴（seedMax 批量开的穴），activerule 合法穴在紧随的
+		// jingMaiPrepareLogin 里按内功层数重开。
+		mapped := make(map[string]bool)
+		for _, def := range catalog.order {
+			for _, xwID := range def.xueWei {
+				mapped[xwID] = true
+			}
+		}
+		kept := p.jingmai.openedXueWei[:0]
+		for _, xwID := range p.jingmai.openedXueWei {
+			if !mapped[xwID] {
+				kept = append(kept, xwID)
+			}
+		}
+		reset = len(p.jingmai.openedXueWei) - len(kept)
+		p.jingmai.openedXueWei = kept
+		for _, id := range p.jingmai.learned {
+			if p.jingmai.progress[id].Level != 1 {
+				reset++
+			}
+			p.jingmai.progress[id] = jingMaiProgressRow{Level: 1}
+		}
+		p.jingmai.tierReset = true
+	}
+	if added || reset > 0 {
+		log.Printf("jingmai: full-set meridians=%d rows (official initial tier, reset %d)", len(p.jingmai.learned), reset)
 	}
 }
 
@@ -588,6 +628,76 @@ func (p *playerActor) setJingMaiLevel(catalog *jingMaiCatalog, id string, level 
 	row.Fill = 0
 	p.jingmai.progress[id] = row
 	return old, row, slot, true
+}
+
+// gmSetJingMaiTier GM set_jingmai_tier 直设周天的完整受理（2026-11-15
+// 晚定版，替代 setJingMaiLevel 的裸钳制路径）：①未学自动开通（逆脉/经筋
+// 等 starter 外条目此前被「未学」闸拒绝——真机「设置失败」根因）；②按
+// 目标档位自动补开穴位至阶梯上限够到目标（开满即封顶，跷脉请求 216 落
+// 225 满档）；③Level=目标（全开=封顶值），fill 归零。返回受理前旧等
+// 级、新行、View45 行号、增量帧（View44 穴位追加行 + View45 MaxLevel
+// 上调帧；容器未建时由调用方走 jingMaiXueWeiViewFrames 整推）与新开穴
+// 位列表。调用方先校验目录收录。
+func (p *playerActor) gmSetJingMaiTier(catalog *jingMaiCatalog, xw *xueWeiCatalog, id string, tier int32) (old int32, row jingMaiProgressRow, slot int, frames [][]byte, fresh []string, learnedNow bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	def, _ := catalog.def(id)
+	slot = p.jingMaiRowLocked(id)
+	if slot == 0 {
+		// GM 直设=授予：未学条目按目录形态开通（新行追加到 learned 尾）。
+		p.jingmai.learned = append(p.jingmai.learned, id)
+		slot = len(p.jingmai.learned)
+		learnedNow = true
+	}
+	if p.jingmai.progress == nil {
+		p.jingmai.progress = make(map[string]jingMaiProgressRow)
+	}
+	row = p.jingmai.progress[id]
+	old = row.Level
+	// 自动补开穴位：阶梯上限（初始 9 + 每穴 36/跷 75，开满封顶）够到目标
+	// 档位为止；地图顺序开，保持与 open_xuewei 相同的行序语义。
+	opened := make(map[string]bool, len(p.jingmai.openedXueWei))
+	for _, xwID := range p.jingmai.openedXueWei {
+		opened[xwID] = true
+	}
+	viewReady := len(p.jingmai.openedXueWei) > 0
+	capBefore := p.jingMaiCapLocked(catalog, id)
+	for _, xwID := range def.xueWei {
+		if p.jingMaiCapLocked(catalog, id) >= tier {
+			break
+		}
+		if opened[xwID] {
+			continue
+		}
+		opened[xwID] = true
+		p.jingmai.openedXueWei = append(p.jingmai.openedXueWei, xwID)
+		fresh = append(fresh, xwID)
+		if viewReady && xw != nil {
+			rowDef := xw.defs[xwID]
+			if frame, err := jingMaiXueWeiRowFrame(rowDef, uint16(len(p.jingmai.openedXueWei))); err == nil {
+				frames = append(frames, frame)
+			}
+		}
+	}
+	capAfter := p.jingMaiCapLocked(catalog, id)
+	if capAfter != capBefore || learnedNow {
+		if frame, err := jingMaiViewCapUpdateFrame(uint16(slot), capAfter); err == nil {
+			frames = append(frames, frame)
+		}
+	}
+	// 目标档：够到取目标；全开后仍不够（带脉请求 216 落 180 顶格）取封
+	// 顶值——不再卡在阶梯缝里。
+	target := tier
+	if target > capAfter {
+		target = capAfter
+	}
+	if target < 1 {
+		target = 1
+	}
+	row.Level = target
+	row.Fill = 0
+	p.jingmai.progress[id] = row
+	return old, row, slot, frames, fresh, learnedNow
 }
 
 // recomputeJingMaiBonusLocked 重算激活经脉的官方逐层加成（activated∩
@@ -1356,7 +1466,7 @@ func handleJingMaiActiveCustom(link sceneMessageConnection, player *playerActor,
 			}
 		}
 		// 官方式条数闸：jmActCount 上限（初始 3，GM 可调 1..8）。客户端
-		// 无对应错误键，服务端静默拒绝（与官服一致）。
+		// 无对应错误键，服务端静默拒绝（与外服一致）。
 		if player.jingMaiActHeadroom() <= 0 {
 			log.Printf("%s: reject activate jingmai id=%s (act limit reached)", remote, id)
 			break
@@ -1435,7 +1545,7 @@ func pushJingMaiFrames(link sceneMessageConnection, player *playerActor, catalog
 	if plugErr := pushJingMaiPlugRecords(link, player, catalog, activated); plugErr != nil {
 		return plugErr
 	}
-	// active_jingmai_rec 整表重写（单帧批量，官服登录样本同构；行数
+	// active_jingmai_rec 整表重写（单帧批量，外服登录样本同构；行数
 	// 记账随 0x0C 重入复位）。
 	if err := player.rewriteJingMaiActiveRows(link); err != nil {
 		return fmt.Errorf("replay active_jingmai_rec: %w", err)
@@ -1478,7 +1588,7 @@ func (p *playerActor) resetJingMaiActiveRows() {
 
 // rewriteJingMaiActiveRows active_jingmai_rec 整表重写：按会话记账降序
 // DelRow 清表（引擎删行后紧凑，高位先删避免错位），再单帧批量重加全量
-// 激活集（官服 c.pcapng 登录批量帧同构）。客户端行序与内容解耦，
+// 激活集（外服 c.pcapng 登录批量帧同构）。客户端行序与内容解耦，
 // FindRecordRow 按内容命中——增删/互斥/拒绝任一路径后统一收敛。
 func (p *playerActor) rewriteJingMaiActiveRows(link sceneMessageConnection) error {
 	p.mu.Lock()

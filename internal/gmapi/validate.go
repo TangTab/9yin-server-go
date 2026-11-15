@@ -219,6 +219,11 @@ func Validate(body CommandBody) (Command, error) {
 			return command, fmt.Errorf("fill speed multiplier must be between 0.1 and 100")
 		}
 		command.FacultyBase, command.FillMultiplier = body.Base, body.Multiplier
+	case "fill_current_neigong":
+		// 无参：当前修炼书本层修炼度填满并结算升级（Java fillCurrentFaculty
+		// 同构；2026-11-15 补齐——此前面板按钮点按即「unsupported action」）。
+	case "clear_team_fatigue":
+		// 无参：团练消耗值 TeamFacultyValue 归零（客户端剩余精力恢复 100%）。
 	case "set_act_day_limit":
 		if body.Value < 0 || body.Value > 999_999 {
 			return command, fmt.Errorf("act day limit must be between 0 and 999999 (0 = unlimited)")
@@ -254,12 +259,13 @@ func Validate(body CommandBody) (Command, error) {
 		command.Enabled = body.Enabled
 		command.Value = body.Value
 	case "set_jingmai_tier":
-		// 经脉周天直设（面板档 36..216；游戏侧按目录上限逐条钳制）。
+		// 经脉周天直设（面板档 36..225——跷脉目录 225；游戏侧按目录上限
+		// 逐条钳制 + 未学条目自动开通，2026-11-15）。
 		if strings.TrimSpace(body.JingMaiId) == "" {
 			return command, fmt.Errorf("jingMaiId is required")
 		}
-		if body.JingMaiTier < 1 || body.JingMaiTier > 216 {
-			return command, fmt.Errorf("jingMaiTier must be between 1 and 216")
+		if body.JingMaiTier < 1 || body.JingMaiTier > 225 {
+			return command, fmt.Errorf("jingMaiTier must be between 1 and 225")
 		}
 		command.JingMaiID = strings.TrimSpace(body.JingMaiId)
 		command.JingMaiTier = body.JingMaiTier

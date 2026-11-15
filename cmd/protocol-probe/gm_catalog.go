@@ -30,7 +30,8 @@ type gmMeridianRow struct {
 
 // meridiansHandler GET /api/meridians：经脉目录。优先 hub.meridianRows
 // （共享库 game_meridians：meridian_id 升序，中文名+周天上限）；钩子
-// 缺席/空表时回退 globalJingMaiCatalog 目录（name=configID）。
+// 缺席/空表时回退 globalJingMaiCatalog 目录（name=configID）。行名统一
+// decorateMeridianName 去重（逆脉/经筋与正脉同名）。
 func (hub *gmHub) meridiansHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodGet {
 		writer.WriteHeader(http.StatusMethodNotAllowed)
@@ -43,7 +44,28 @@ func (hub *gmHub) meridiansHandler(writer http.ResponseWriter, request *http.Req
 	if len(rows) == 0 {
 		rows = meridianRowsFromCatalog(globalJingMaiCatalog)
 	}
+	for index := range rows {
+		rows[index].Name = decorateMeridianName(rows[index].ID, rows[index].Name)
+	}
 	gmWriteContentTagged(writer, request, "meridians", rows)
+}
+
+// decorateMeridianName 目录行显示名去重：逆脉（_ni）/经筋（_jin）与正脉
+// 在 game_meridians.name 同名，下拉无从分辨——真机「周天设置失败：未学」
+// 的主误选源（2026-11-15）。缀语义后缀，原名仍可检索。
+func decorateMeridianName(id, name string) string {
+	if name == "" {
+		name = id
+	}
+	switch {
+	case strings.HasSuffix(id, "_jin_ni"):
+		return name + "（经筋·逆）"
+	case strings.HasSuffix(id, "_jin"):
+		return name + "（经筋）"
+	case strings.HasSuffix(id, "_ni"):
+		return name + "（逆脉）"
+	}
+	return name
 }
 
 // meridianRowsFromCatalog 无 DB 回退：目录 configID 顺序即行序，

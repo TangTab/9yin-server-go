@@ -23,8 +23,9 @@ func TestJingMaiCatalogResolvesFromFixtureStore(t *testing.T) {
 	if !ok || def.maxLevel != 180 || def.itemType != 1003 {
 		t.Fatalf("jm_dantian def=%+v ok=%v (want maxLevel=180)", def, ok)
 	}
-	// 穴位地图挂接（UI ini 夹具仓暂缺 → 空表不炸；阶梯回落初始 9）。
-	if cap := jingMaiCapFor(def.maxLevel, 0, int32(len(def.xueWei))); cap != jingMaiInitialCap {
-		t.Fatalf("no-xuewei cap=%d, want %d", cap, jingMaiInitialCap)
+	// 穴位地图挂接（UI ini 夹具仓暂缺 → 空表不炸；无穴位图回落目录上限
+	// 180——丹田满档前提，2026-11-15）。
+	if cap := jingMaiCapFor(def.maxLevel, 0, int32(len(def.xueWei))); cap != 180 {
+		t.Fatalf("no-xuewei cap=%d, want 180 (catalog max fallback)", cap)
 	}
 }

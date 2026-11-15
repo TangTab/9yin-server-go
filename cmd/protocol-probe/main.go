@@ -1457,6 +1457,91 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			persistFaculty()
 			gmSession.setAction(fmt.Sprintf("历练转化加成设为 %d%%", int32(command.Value)))
 			log.Printf("%s: GM set LiveSpeedPower=%d", conn.RemoteAddr(), int32(command.Value))
+		case "fill_current_neigong":
+			// 当前修炼书本层修炼度填满并升一层（Java fillCurrentFaculty
+			// 同构，2026-11-15 补齐）。帧序镜像 1006/23 演武领奖：View43
+			// 行级增量（面板先重读等级）→ 怒气上限专帧 → 全量 0x10 →
+			// 战斗面板增量 + 191/14 升级通知；满级补 191/23 停修（客户端
+			// 表单 exit_flag 抑制其过期回调）。
+			combatBefore := combatPanelSnapshot(player)
+			slot, granted, levelUp, maxLevel, newLevel := player.fillCurrentNeiGong()
+			if !granted {
+				if maxLevel {
+					gmSession.setAction("当前修炼内功已满级，无需填满")
+				} else {
+					gmSession.setAction("填满失败：当前没有修炼中的内功（先在客户端选书开修）")
+				}
+				return nil
+			}
+			bookFrame, bookErr := player.bookUpdateFrame(slot)
+			if bookErr == nil {
+				bookErr = link.WriteFrame(bookFrame)
+			}
+			if bookErr != nil {
+				gmSession.setAction("填满失败：书行帧 " + bookErr.Error())
+				return bookErr
+			}
+			if levelUp {
+				capFrame, capErr := player.rageCapUpdate()
+				if capErr == nil {
+					capErr = link.WriteFrame(capFrame)
+				}
+				if capErr != nil {
+					gmSession.setAction("填满失败：怒气上限帧 " + capErr.Error())
+					return capErr
+				}
+			}
+			vitalFrame, vitalErr := player.vitalUpdate()
+			if vitalErr == nil {
+				vitalErr = link.WriteFrame(vitalFrame)
+			}
+			if vitalErr != nil {
+				gmSession.setAction("填满失败：" + vitalErr.Error())
+				return vitalErr
+			}
+			if levelUp {
+				pushCombatAttributeDelta(link, player, combatBefore, "faculty")
+				levelFrame, levelErr := encodeFacultyMessage(14, facultyBool(maxLevel))
+				if levelErr == nil {
+					levelErr = link.WriteFrame(levelFrame)
+				}
+				if levelErr != nil {
+					gmSession.setAction("填满失败：升级通知 " + levelErr.Error())
+					return levelErr
+				}
+			}
+			if levelUp || maxLevel {
+				exitFrame, exitErr := encodeFacultyMessage(23, 0) // SUB_SERVER_ACT_EXIT
+				if exitErr == nil {
+					exitErr = link.WriteFrame(exitFrame)
+				}
+				if exitErr != nil {
+					log.Printf("%s: publish faculty exit after fill_current_neigong: %v", conn.RemoteAddr(), exitErr)
+				}
+			}
+			persistFaculty()
+			action := fmt.Sprintf("当前内功修炼度已填满，升至 %d 层", newLevel)
+			if maxLevel {
+				action += "（已满级，自动停修）"
+			}
+			gmSession.setAction(action)
+			log.Printf("%s: GM fill_current_neigong slot=%d -> level=%d (levelUp=%t maxLevel=%t)",
+				conn.RemoteAddr(), slot, newLevel, levelUp, maxLevel)
+		case "clear_team_fatigue":
+			// 团练疲劳清零（TeamFacultyValue 归零，客户端剩余精力恢复
+			// 100%；随全量 0x10 下发 TeamFaculty 族）。
+			player.clearTeamFatigue()
+			update, updateErr := player.vitalUpdate()
+			if updateErr == nil {
+				updateErr = link.WriteFrame(update)
+			}
+			if updateErr != nil {
+				gmSession.setAction("团练疲劳清除失败：" + updateErr.Error())
+				return updateErr
+			}
+			persistFaculty()
+			gmSession.setAction("团练疲劳已清除（剩余精力恢复 100%）")
+			log.Printf("%s: GM clear_team_fatigue", conn.RemoteAddr())
 		case "set_zhenqi_cap":
 			// 经脉每日真气硬闸（Java applyZhenqiCap 同构）：角色级设置随
 			// role_meridians 快照持久化；ZhenQiDayValue 口径即时变化
@@ -1479,22 +1564,52 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			log.Printf("%s: GM set_zhenqi_cap enabled=%d value=%d", conn.RemoteAddr(), command.Enabled, int32(command.Value))
 		case "set_jingmai_tier":
-			// 经脉周天直设（Java applySetJingmaiTier 同构）：目录收录 +
-			// 已学双闸 → 钳 1..当前阶梯上限（开穴不足不越档）、fill 归零
-			// 走新周天起点 → View45 升级行帧 + CurJingMai/JingMaiTotalLevel
-			// 属性帧 → 激活加成重算 + 落盘。
+			// 经脉周天直设（2026-11-15 晚定版，真机「设置失败」修复）：
+			// 目录收录即受理——未学条目（逆脉/经筋等）自动开通，不再被
+			// 「未学」闸拒绝；按目标档自动补开穴位至阶梯上限够到目标、
+			// fill 归零走新周天起点 → View44 穴位增量帧 + View45 行帧 +
+			// CurJingMai/JingMaiTotalLevel 属性帧 → 激活加成重算 + 落盘。
 			def, known := jingMaiCatalog.def(command.JingMaiID)
 			if !known {
 				gmSession.setAction("周天设置失败：经脉目录无 " + command.JingMaiID)
 				return fmt.Errorf("unknown jingmai id %q", command.JingMaiID)
 			}
-			old, row, slot, set := player.setJingMaiLevel(jingMaiCatalog, command.JingMaiID, command.JingMaiTier)
-			if !set {
-				gmSession.setAction("周天设置失败：" + command.JingMaiID + " 未学（先在客户端开通）")
-				return fmt.Errorf("unlearned jingmai %q", command.JingMaiID)
+			player.mu.Lock()
+			openedBefore := len(player.jingmai.openedXueWei)
+			player.mu.Unlock()
+			old, row, slot, xwFrames, fresh, learnedNow := player.gmSetJingMaiTier(jingMaiCatalog, xueWeiCatalogOf(), command.JingMaiID, command.JingMaiTier)
+			// View44 首建（此前零已开穴）时走整推补容器；此后穴位追加行
+			// 帧已在 xwFrames 内。
+			if len(fresh) > 0 && openedBefore == 0 {
+				containerFrames, err := player.jingMaiXueWeiViewFrames()
+				if err == nil {
+					for _, frame := range containerFrames {
+						if err = link.WriteFrame(frame); err != nil {
+							break
+						}
+					}
+				}
+				if err != nil {
+					gmSession.setAction("周天设置失败：View44 整推 " + err.Error())
+					return err
+				}
+			}
+			for _, frame := range xwFrames {
+				if err := link.WriteFrame(frame); err != nil {
+					gmSession.setAction("周天设置失败：穴位/上限帧 " + err.Error())
+					return err
+				}
 			}
 			cap := player.jingMaiCapOf(jingMaiCatalog, command.JingMaiID)
-			tierFrame, tierErr := jingMaiViewUpdateFrame(uint16(slot), row, true)
+			// 新开通行客户端 View45 尚无该行：走 serverViewAdd 建行（同
+			// 登录路径）；既有行走 0x10 isView=1 升级行帧。
+			var tierFrame []byte
+			var tierErr error
+			if learnedNow {
+				tierFrame, tierErr = jingMaiViewRowFrame(row, def, uint16(slot), cap)
+			} else {
+				tierFrame, tierErr = jingMaiViewUpdateFrame(uint16(slot), row, true)
+			}
 			if tierErr == nil {
 				tierErr = link.WriteFrame(tierFrame)
 			}
@@ -1517,8 +1632,14 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				}
 			}
 			persistJingMai()
-			gmSession.setAction(fmt.Sprintf("%s 周天 %d → %d（当前上限 %d/目录 %d，开穴提升）", command.JingMaiID, old, row.Level, cap, def.maxLevel))
-			log.Printf("%s: GM set_jingmai_tier %s %d -> %d (cap %d, catalog max %d)", conn.RemoteAddr(), command.JingMaiID, old, row.Level, cap, def.maxLevel)
+			action := fmt.Sprintf("%s 周天 %d → %d（上限 %d/目录 %d，补开 %d 穴）",
+				command.JingMaiID, old, row.Level, cap, def.maxLevel, len(fresh))
+			if learnedNow {
+				action += "；该经脉原未开通，已自动开通（重登后视图完整）"
+			}
+			gmSession.setAction(action)
+			log.Printf("%s: GM set_jingmai_tier %s %d -> %d (cap %d, catalog max %d, +xuewei %d, learnedNow %v)",
+				conn.RemoteAddr(), command.JingMaiID, old, row.Level, cap, def.maxLevel, len(fresh), learnedNow)
 		case "set_jingmai_act_count":
 			// 可激活经脉条数上限（官方初始 3 → 九阴志最多 8；本服 GM 调
 			// 1..8）：jmActCount 属性随 8 件套即时刷新（客户端 tooltip
@@ -2712,19 +2833,30 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				// 0x10 外观帧（DROP-8 同轮）补上。ids/落点取当前全局
 				//（SELF_IDS 档=外服对），档案内嵌 posA=存档落点。
 				var nativeAvatarFrame []byte
-				// 化身默认=官服透传+posA 改写（2026-11-15 真机 A/B 终局
+				// 化身默认=外服透传+posA 改写（2026-11-15 真机 A/B 终局
 				// 定案：「重登回走」根因在我方 0x46 生成档——41/42 字段、
 				// 去技能行、去键位段的全部形态恒走；官档（43 字段+尾区）
 				// 恒跑。差异收窄到官方尾区/opaque 段或 0x47 LZ 包装（离线
 				// 不可解码），尾区生成器完成前默认透传，代价=待机动作/脸
 				// 面两处装饰影子（cosmetics 换功能）。
-				if replayNativeFramesEnabled() && bisectActive("avatar-native") {
-					if bisectActive("avatar-bare") {
+				if replayNativeFramesEnabled() && (bisectActive("avatar-native") || bisectActive("avatar-mirror") || bisectActive("avatar-47")) {
+					if bisectActive("avatar-mirror") {
+						// 镜像轮：技能行区=官档 DMP 提取字节（playerProfile0x28Frame
+						// 内联动），其余=我方生成档（含键位嵌段）。
+						nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, nil, player.keybindSnapshot().bind, "", 0)
+						log.Printf("%s: bisect avatar-mirror: native avatar + official 211-skill-row bytes from DMP", conn.RemoteAddr())
+					} else if bisectActive("avatar-bare") {
 						// 二分 A/B 位 avatar-bare：41 字段+BaseFace、无键位
 						// 嵌段、无技能行（playerProfile0x28Frame 内联动）。
 						curNG, curNGWu := player.curNeiGongProfilePair()
 						nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, nil, "", curNG, curNGWu)
 						log.Printf("%s: bisect avatar-bare: native avatar 41+BaseFace, no ShortcutKey, no skills", conn.RemoteAddr())
+					} else if bisectActive("avatar-47") {
+						// 0x47 全字面量包装轮（playerProfile0x28Frame 内联动）。
+						learnedRows := applyStoredSkillLevels(player, currentRoleID(), skillLevelStoreOf(), mergeLearnedSkills(dbLearnedSkills))
+						curNG, curNGWu := player.curNeiGongProfilePair()
+						nativeAvatarFrame, _ = playerProfile0x28Frame(playerObjectID, playerOwnerID, activeRole.Location.Position, learnedRows, player.keybindSnapshot().bind, curNG, curNGWu)
+						log.Printf("%s: bisect avatar-47: native avatar content in mode-0x47 literal wrapper", conn.RemoteAddr())
 					} else if bisectActive("avatar-noskills") {
 						// 二分 A/B 位 avatar-noskills：生成档去全部技能行
 						//（211 行 ×17 列≈3600 字段 vs 官档 ~15 行——技能行洪水
@@ -2745,14 +2877,14 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					log.Printf("%s: replay entry frames unavailable (env+embedded both empty)", conn.RemoteAddr())
 				} else {
 					// 物理档案流前置（PHYSICS-17，2026-11-15「运动模式被设置为
-					// 走路模式」）：官服位序=0x09/0x0A 表后、进场 0x0B 之前逐帧
+					// 走路模式」）：外服位序=0x09/0x0A 表后、进场 0x0B 之前逐帧
 					// 34+ 条单属性 0x10（c.pcapng #12..#40，含 WalkSpeed/MoveSpeed/
 					// JumpSpeed 族）。瘦身 bin 的 Phase A 从 #110 起——速度族全在
 					// Phase B 镜像段，化身建视觉体（fxgamelogic 0x46eaa00）在
 					// Phase A 已发生：实测速度≤2.0 → move_type=1 走路（0=跑/1=走，
 					// role 创建默认 0=跑）。补发点（显式 0x09 后）已晚于判定沿，
-					// 故在 0x0B 前复刻官服位序前置整条流（0x0B 之前=登录爆发区，
-					// 非读条窗口，官服同位安全）。
+					// 故在 0x0B 前复刻外服位序前置整条流（0x0B 之前=登录爆发区，
+					// 非读条窗口，外服同位安全）。
 					if replayNativeFramesEnabled() && player != nil {
 						if bisectActive("ours-physics") {
 							// 二分静默轮：跳过物理档案流
@@ -3264,7 +3396,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				replayPhase2Armed.Store(false)
 				if runtime != nil && runtime.activeRole != nil {
 					// 基础物理档案补发（PHYSICS-16，2026-11-15「跳跃异常」
-					// 根因收口）：官服登录在首爆发窗口逐帧连发 34 条单属性
+					// 根因收口）：外服登录在首爆发窗口逐帧连发 34 条单属性
 					// 0x10 + InteractStatus=-1（c.pcapng #10-#94 实证：
 					// JumpSpeed=5.5/Gravity=9.8/三跳基值 6.0/AirRush 15·12/
 					// Advanced 23…）；瘦身把整组当数据行剥离，wholesale 又停发

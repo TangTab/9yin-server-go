@@ -1,4 +1,5 @@
-// skill.js —— 组5「武学与修炼」：门派 / 武学套路 / 修为 / 经脉 / 经脉周天。
+// skill.js —— 组5「武学与修炼」：门派 / 武学套路 / 修为 / 经脉（周天设置
+// 与每日真气硬闸合并在同一区，2026-11-15）。
 // 套路与内功目录按需拉取（一次全量 + 本地过滤 + 最近选用）。
 
 import { h, panelSection, numField, cmdBtn, actionBtn, catalogPicker, hint, toast } from "../ui.js";
@@ -229,14 +230,49 @@ function renderFaculty(host) {
   host.appendChild(section);
 }
 
-/* ---------------- 经脉（每日真气硬闸） ---------------- */
+/* ---------------- 经脉（真气硬闸 + 周天设置） ---------------- */
 
 function renderJingmai(host) {
   const { section, body } = panelSection({
     id: "sec-jingmai",
     title: "经脉",
-    desc: "每日真气硬闸：开启后当日已获真气达到阈值即停止入账，次日 UTC 日切自动恢复；关闭则不限量。角色级持久化，修改立即下发属性帧。",
+    desc: "全套经脉（丹田/正经/奇经，含跷·隐）默认开通为坐忘功初始值（1 周天/上限 9，随内功开穴提升），客户端可直接点激活/关闭。周天设置可改单条档位（丹田 180/正经 216/跷脉 225 封顶）：未学条目（逆脉/经筋）自动开通，穴位自动补开到位，改完重推经脉视图并刷新五维。",
   });
+  // —— 周天设置 ——
+  let selected = null;
+  const tierSelect = h("ax-select", {
+    content: JSON.stringify([
+      { label: "36 周天", value: "36" }, { label: "72 周天", value: "72" }, { label: "108 周天", value: "108" },
+      { label: "144 周天", value: "144" }, { label: "180 周天", value: "180" }, { label: "216 周天", value: "216" },
+      { label: "225 周天（跷脉满）", value: "225" },
+    ]),
+    style: "width:150px;",
+    value: "216",
+  });
+  const picker = catalogPicker({
+    recentKey: "meridians",
+    placeholder: "搜索经脉（拉取一次后本地过滤）",
+    emptyText: "没有匹配的经脉",
+    fetchRows: async (query) => {
+      const rows = await catalog("/api/meridians");
+      const needle = query.toLowerCase();
+      return rows
+        .filter((row) => !needle || (row.name || "").toLowerCase().includes(needle) || row.id.toLowerCase().includes(needle))
+        .map((row) => ({ label: row.name || row.id, sub: row.id + " · 满档 " + row.defaultMax + " 层", value: row.id }));
+    },
+    onPick(row) {
+      selected = row;
+    },
+  });
+  const tierApply = actionBtn({
+    label: "设置周天",
+    build: () => (selected ? { action: "set_jingmai_tier", jingMaiId: selected.value, jingMaiTier: Number(tierSelect.value || 216) } : (toast("请先选择一条经脉", "warn"), null)),
+    okText: () => "周天已设置：" + selected.label,
+    section: "经脉",
+  });
+  body.appendChild(picker.node);
+  body.appendChild(h("div", { class: "actions-row", style: "margin:8px 0 14px;" }, [h("label", {}, ["目标档位"]), tierSelect, tierApply]));
+  // —— 每日真气硬闸 ——
   const enabled = h("input", { type: "checkbox" });
   enabled.style.cssText = "width:16px;height:16px;accent-color:var(--gm-gold);";
   const value = numField({ label: "每日阈值", value: 500, min: 1, max: 10000000, width: "150px" });
@@ -250,54 +286,11 @@ function renderJingmai(host) {
     okText: "真气硬闸已应用",
     section: "经脉",
   });
-  body.appendChild(h("div", { class: "field-row" }, [h("label", {}, ["是否开启每日硬闸"]), enabled, value.node, apply]));
-  host.appendChild(section);
-}
-
-/* ---------------- 经脉周天 ---------------- */
-
-function renderJingmaiTier(host) {
-  const { section, body } = panelSection({
-    id: "sec-jingmai-tier",
-    title: "经脉周天设置",
-    desc: "所有正经默认已开通为 216 周天（客户端可直接点激活/关闭）。此处用于把选中经脉的周天档位改为 36/72/…/216（同时改最大层数和当前层数），改完重推经脉视图并刷新五维。",
-  });
-  let selected = null;
-  const tierSelect = h("ax-select", {
-    content: JSON.stringify([
-      { label: "36 周天", value: "36" }, { label: "72 周天", value: "72" }, { label: "108 周天", value: "108" },
-      { label: "144 周天", value: "144" }, { label: "180 周天", value: "180" }, { label: "216 周天", value: "216" },
-    ]),
-    style: "width:120px;",
-    value: "216",
-  });
-  const picker = catalogPicker({
-    recentKey: "meridians",
-    placeholder: "搜索经脉（拉取一次后本地过滤）",
-    emptyText: "没有匹配的经脉",
-    fetchRows: async (query) => {
-      const rows = await catalog("/api/meridians");
-      const needle = query.toLowerCase();
-      return rows
-        .filter((row) => !needle || (row.name || "").toLowerCase().includes(needle) || row.id.toLowerCase().includes(needle))
-        .map((row) => ({ label: row.name || row.id, sub: row.id + " · 默认满 " + row.defaultMax + " 层", value: row.id }));
-    },
-    onPick(row) {
-      selected = row;
-    },
-  });
-  const apply = actionBtn({
-    label: "设置周天",
-    build: () => (selected ? { action: "set_jingmai_tier", jingMaiId: selected.value, jingMaiTier: Number(tierSelect.value || 216) } : (toast("请先选择一条经脉", "warn"), null)),
-    okText: () => "周天已设置：" + selected.label,
-    section: "经脉周天",
-  });
-  body.appendChild(picker.node);
-  body.appendChild(h("div", { class: "actions-row", style: "margin-top:8px;" }, [h("label", {}, ["目标档位"]), tierSelect, apply]));
+  body.appendChild(h("div", { class: "field-row", style: "border-top:1px solid var(--gm-line);padding-top:12px;" }, [h("label", {}, ["是否开启每日硬闸"]), enabled, value.node, apply]));
   host.appendChild(section);
 }
 
 export function render(host, { sectionId }) {
-  const renderers = { faction: renderFaction, taolu: renderTaolu, faculty: renderFaculty, jingmai: renderJingmai, "jingmai-tier": renderJingmaiTier };
+  const renderers = { faction: renderFaction, taolu: renderTaolu, faculty: renderFaculty, jingmai: renderJingmai };
   (renderers[sectionId] || renderFaction)(host);
 }

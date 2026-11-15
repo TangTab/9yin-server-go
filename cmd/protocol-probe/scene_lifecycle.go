@@ -798,7 +798,7 @@ func (s *sceneLifecycle) objectRequest(request clientObjectRequest) (string, err
 		return entity.description, nil
 	}
 	// 点击不重发 0x28 详情帧（2026-11-14 真机定案：点击中立 NPC 原地复制
-	// 出第二个 NPC）。旧注释的官服依据系误判——技能.pcapng f#0187 mode=0x47
+	// 出第二个 NPC）。旧注释的外服依据系误判——技能.pcapng f#0187 mode=0x47
 	// 帧实为走动 NPC 的 AOI 物化帧（own=336 自持族），官方对 c2s 0x07 连点
 	// 五次（obj=0x7018099）S2C 零对象帧应答；npc.pcapng 里 NPC 形 id 的 0x28
 	// 每对象恰好一次。0x28 在客户端=第二次 AddObject（OnAddObject→

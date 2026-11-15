@@ -211,7 +211,7 @@ func TestPlayerProfile0x28SkillRows(t *testing.T) {
 
 // TestPlayerProfile0x28ShortcutKey 档案键位字段（官方 f#042 idx198，t7）：
 // 存档串原样 + NUL 嵌入，位于基础字段区尾部（技能行之前）；空串省略
-// （2026-11-15「保存的按键配置下发有问题」：官服家族客户端在 AddObject
+// （2026-11-15「保存的按键配置下发有问题」：外服家族客户端在 AddObject
 // 时从档案字段初始化键位管理器，官方唯一回放通道）。
 func TestPlayerProfile0x28ShortcutKey(t *testing.T) {
 	bind := "1,87;2,83;3,81;4,69;5,65;"

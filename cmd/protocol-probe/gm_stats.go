@@ -265,6 +265,24 @@ func (p *playerActor) gmPanelFrames() ([][]byte, error) {
 	return frames, nil
 }
 
+// fillCurrentNeiGong GM fill_current_neigong：当前修炼书本层修炼度填满
+// 并结算升级（progress.fillCurrentFaculty 锁内执行；帧序由调用方负责，
+// 与 1006/23 演武领奖同款）。2026-11-15 补齐——此前面板按钮点按即被
+// 契约层「unsupported action」拒绝。
+func (p *playerActor) fillCurrentNeiGong() (slot uint16, granted, levelUp, maxLevel bool, newLevel int32) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.progress.fillCurrentFaculty()
+}
+
+// clearTeamFatigue GM clear_team_fatigue：团练消耗值 TeamFacultyValue
+// 归零（客户端剩余精力恢复 100%）。
+func (p *playerActor) clearTeamFatigue() {
+	p.mu.Lock()
+	p.progress.clearTeamFacultyFatigue()
+	p.mu.Unlock()
+}
+
 // setFacultyValue 修写修炼总量并返回常规全量 0x10（stateProperties 已
 // 内嵌 progress.properties()，携 Faculty@798，Java vitalUpdate 同形）。
 func (p *playerActor) setFacultyValue(value int32) ([]byte, error) {

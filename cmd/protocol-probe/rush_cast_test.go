@@ -100,13 +100,14 @@ func TestRushFrameBuildersMatchJavaLayouts(t *testing.T) {
 // msg25[30000] → PauseSkill → msg707[15]。重受理 7 帧：三帧清前导
 // CurSkillID=""+msg26+PauseSkill="" 后**不重发 CurSkillTarget**。
 func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("冲锋侠", 0)
 	definition := combatSkillDefinition{id: "CS_rush_stage", canRush: true, script: "skilllock",
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
 
 	before := time.Now()
-	if handled, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if handled, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("stage handled=%t err=%v", handled, err)
 	}
@@ -149,7 +150,7 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 	// 暂存期再次按下（重受理）：外服私服 f/g 定版 7 帧——CurSkillID="" +
 	// msg26 + PauseSkill="" + CurSkillID + msg25 + PauseSkill + msg707，
 	// 不重发 CurSkillTarget。
-	if handled, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if handled, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 20}, worldcore.Transform{X: 4, Y: 0, Z: 20}, 12, "test"); err != nil || !handled {
 		t.Fatalf("rearm stage handled=%t err=%v", handled, err)
 	}
@@ -167,11 +168,12 @@ func TestStageRushCastStagesPendingAndMarksInFlight(t *testing.T) {
 
 // 空中判定禁用回归（53831 真机教训）：y 差再大也走地面链。
 func TestStageRushCastAirborneDisabledFallsBackToGroundDialect(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("冲锋侠", 0)
 	definition := combatSkillDefinition{id: "CS_rush_air", canRush: true, script: "skilllock",
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 43, Z: 20}, worldcore.Transform{X: 4, Y: 50, Z: 20}, 12, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -189,6 +191,7 @@ func TestStageRushCastAirborneDisabledFallsBackToGroundDialect(t *testing.T) {
 // lock 动画；xytf07_sky 窗 (8,11] 授予 A 类 flag2+qg_fastruning_s_0h_01、
 // 终点 y=目标 y+1.0；mzjf02 上界 8——13m 零授予（220@13.8 外服私服零应答）。
 func TestRushDashDialectPerSkill(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	newEnv := func() (*captureMessageConnection, *playerActor, *sceneLifecycle) {
 		conn := &captureMessageConnection{}
 		world := newSceneLifecycle("test", conn)
@@ -202,7 +205,7 @@ func TestRushDashDialectPerSkill(t *testing.T) {
 	stage := func(conn *captureMessageConnection, player *playerActor, world *sceneLifecycle, skill string) {
 		definition := combatSkillDefinition{id: skill, canRush: true, script: "skilllock",
 			bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
-		if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+		if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 			worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 			t.Fatal(err)
 		}
@@ -364,6 +367,7 @@ func TestDashLandingResumesPendingSelfSkill(t *testing.T) {
 // 211 距离四桶分发（g/f/b 定版）：≤直收带 executeRushDirect（首帧 0x10
 // CurSkillID，无暂存）；其余一律暂存受理簇 5 帧（受理与距离解耦）。
 func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	var definition combatSkillDefinition
 	found := false
 	for id, candidate := range installedCombatSkillCatalog.levelOne {
@@ -469,6 +473,7 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 // 近距原本会直收出招——commitRushDashCosts 只起 CD 不查）必须整体拒绝：
 // 零帧、不挂暂存、不标记 in-flight。冷却结束后按压恢复受理。
 func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	var definition combatSkillDefinition
 	found := false
 	for id, candidate := range installedCombatSkillCatalog.levelOne {
@@ -542,6 +547,7 @@ func TestRushPressDuringPersonalCooldownRejected(t *testing.T) {
 // msg15/msg220 接近探测 + 冲刺窗口 (5.0, 6.5]（g 5.54 触发 / b 3.61 不触发）：
 // 窗口外零帧；窗口内 c61 冲刺簇；冲刺已发后静默；212 三分兜底保留。
 func TestMovementUploadDrivesRushArrival(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
 	if err := world.begin("scene", "resource", nil); err != nil {
@@ -563,7 +569,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		id: "CS_rush_unlearned", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -608,7 +614,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 	// 自冲落地（上报点距目标 ≤3m，未发 c61=步行落地形态）：
 	// PauseSkill+msg26+LogicState 对+fight_relation+0x1F×1+337+c1=40+
 	// msg19+CantMove/CantParry=11 帧（步行无 CantMove 清前导、单 0x1F）。
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 5, Y: 0, Z: 0}, 5, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -629,7 +635,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 
 	// 重新暂存后走完整冲刺链：上报点距目标 6m ∈ (5.0, 6.5] → c61 簇
 	//（零成本定义 6 帧），终点=目标身前 bind、y+1.0。
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -685,6 +691,7 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 
 // msg220 冲锋在途位移上报（4×f32）：窗口内同款 c61 簇；非在途静默。
 func TestRushMovementUpload220DrivesArrival(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验受理簇方言，关服务端驱动接近
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
 	if err := world.begin("scene", "resource", nil); err != nil {
@@ -713,7 +720,7 @@ func TestRushMovementUpload220DrivesArrival(t *testing.T) {
 		id: "CS_rush_unlearned", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}
@@ -860,5 +867,60 @@ func TestAreaGroundRushDashTierSelection(t *testing.T) {
 	frames = conn.Frames()
 	if len(frames) != 2 || int32(binary.LittleEndian.Uint32(frames[1][38:])) != 2 {
 		t.Fatalf("tier2 frames=%x, want 0x1F + c61 tier2", frames)
+	}
+}
+
+// TestRushApproachDashImmediateGrantAndFallback 服务端驱动接近（默认开，
+// 2026-11-15）：本服登录方言下客户端无本地「按下即走」，远距受理当拍即发
+// c61 簇（外服私服范围型「受理即 c61」方言移植到锁定冲锋）；超时无 212
+// 落地 → 服务端 bind 点兜底直收（dash 落地簇 + pending 消费 + inFlight 清）。
+func TestRushApproachDashImmediateGrantAndFallback(t *testing.T) {
+	conn := &captureMessageConnection{}
+	player := newPlayerActor("冲锋侠", 0)
+	definition := combatSkillDefinition{id: "CS_rush_far", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction}
+	oldTimeout := rushDashTimeout
+	rushDashTimeout = 40 * time.Millisecond
+	defer func() { rushDashTimeout = oldTimeout }()
+
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
+		t.Fatal(err)
+	}
+	frames := conn.Frames()
+	if len(frames) != 15 { // 9 受理簇 + 6 c61 簇（零成本定义）
+		t.Fatalf("approach staging frames=%d, want 9+6", len(frames))
+	}
+	if int32(binary.LittleEndian.Uint32(frames[9][4:])) != 24 ||
+		int32(binary.LittleEndian.Uint32(frames[9][18:])) != msgRushCommand {
+		t.Fatalf("cluster tail must open c61 dash, got %x", frames[9])
+	}
+	if !player.rushDashIssuedSnapshot() {
+		t.Fatal("approach staging must issue dash immediately")
+	}
+
+	// 超时兜底：无 212 → 服务端 bind 点直收（dashIssued 落地簇 18 帧）。
+	time.Sleep(200 * time.Millisecond)
+	landing := conn.Frames()[15:]
+	if len(landing) != 18 {
+		t.Fatalf("timeout fallback landing frames=%d, want 18-frame dash landing cluster+state-ping", len(landing))
+	}
+	if landing[0][0] != 0x10 || binary.LittleEndian.Uint16(landing[0][12:]) != propRushCantMove {
+		t.Fatalf("fallback landing starts with CantMove clear, got %x", landing[0])
+	}
+	if player.peekPendingCast(time.Now()) != nil || player.rushInFlightSnapshot() {
+		t.Fatal("timeout fallback must consume pending and clear in-flight state")
+	}
+
+	// NINEYIN_RUSH_APPROACH=off：受理簇回归纯 9 帧（被动等客户端方言）。
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	conn2 := &captureMessageConnection{}
+	player2 := newPlayerActor("冲锋侠乙", 0)
+	if _, err := stageRushCast(conn2, player2, nil, definition, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 20, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 20, "test"); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(conn2.Frames()); got != 9 {
+		t.Fatalf("approach-off staging frames=%d, want 9", got)
 	}
 }

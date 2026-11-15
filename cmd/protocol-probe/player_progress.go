@@ -27,6 +27,12 @@ var (
 	// 历练层（form_faculty.lua 数据绑定源；docs/systems/livepoint-conversion.md）：
 	// 槽值毫历练（UI 显示 = 值/1000）。
 	propHoldFaculty    = clientdata.MustPlayerProperty("HoldFaculty").Index    // HoldFaculty Int32:潜能修为存量（fork=800）
+	// 团练疲劳层（form_team_faculty_member 数据绑定源；官方 2433 表
+	// TeamFacultyState=777/TeamFacultyValue=779/TeamFacultyLast=780——Java
+	// 注释的 777/778 是 fork 表旧号，按名解析自动对号）。
+	propTeamFacultyState = clientdata.MustPlayerProperty("TeamFacultyState").Index // 团练状态（0=未在团练；全链未实现，占位 0）
+	propTeamFacultyValue = clientdata.MustPlayerProperty("TeamFacultyValue").Index // 团练消耗值（客户端按 TeamValue=80000 反算剩余精力%）
+	propTeamFacultyLast  = clientdata.MustPlayerProperty("TeamFacultyLast").Index  // 团练剩余可抵扣修炼度
 	propLiveGroove1    = clientdata.MustPlayerProperty("LiveGroove_1").Index   // LiveGroove_1..5 Int32:历练槽 1..5（fork=804）
 	propLiveGroove2    = clientdata.MustPlayerProperty("LiveGroove_2").Index   // LiveGroove_2（fork=805）
 	propLiveGroove3    = clientdata.MustPlayerProperty("LiveGroove_3").Index   // LiveGroove_3（fork=806）
@@ -241,6 +247,11 @@ type playerProgress struct {
 	actDayValueMax  int32
 	actDayValueUsed int32
 	actDayValueLast int32
+	// 团练疲劳层（GM clear_team_fatigue；0x09 表 777/779/780）。团练全链
+	// 未实现：value 常年 0（客户端剩余精力恒 100%），GM 清零语义与 Java
+	// 对齐保面板动作可用；last 为团练剩余可抵扣修炼度占位。
+	teamFacultyValue int32
+	teamFacultyLast  int32
 	// 历练层（LiveGroove，毫历练单位；docs/systems/livepoint-conversion.md）：
 	// liveGroove 槽 1..5 = LiveGroove_1..5@804..808（客户端显示 = 值/1000）；
 	// holdFaculty 潜能修为 HoldFaculty@800（普通档转化 30% 分流，黄金按价
@@ -629,6 +640,11 @@ func (p *playerProgress) properties() []clientdata.IndexedProperty {
 		{Index: propLiveSpeedPower, Name: "LiveSpeedPower", Value: clientdata.Int32Value(p.liveSpeedPower)},
 		// 潜能修为存量：“历练转化”窗黄金赎回的数据源。
 		{Index: propHoldFaculty, Name: "HoldFaculty", Value: clientdata.Int32Value(p.holdFaculty)},
+		// ---- 团练疲劳层（form_wuxue_faculty/form_team_faculty_member 数据
+		// 绑定源；客户端剩余精力% = (TeamValue80000-值)×100/80000）----
+		{Index: propTeamFacultyState, Name: "TeamFacultyState", Value: clientdata.Int32Value(0)},
+		{Index: propTeamFacultyValue, Name: "TeamFacultyValue", Value: clientdata.Int32Value(p.teamFacultyValue)},
+		{Index: propTeamFacultyLast, Name: "TeamFacultyLast", Value: clientdata.Int32Value(p.teamFacultyLast)},
 		{Index: propPowerValue, Name: "PowerValue", Value: clientdata.Int32Value(power)},
 		{Index: propMaxPowerValue, Name: "MaxPowerValue", Value: clientdata.Int32Value(maxPower)},
 		{Index: propSP, Name: "SP", Value: clientdata.Int32Value(a.sp)},
@@ -1019,6 +1035,46 @@ func (p *playerProgress) awardActiveFaculty() (slot uint16, awarded, levelUp, ma
 	return 0, false, false, false, fmt.Errorf("active faculty selected book %q is not learned", p.facultyName)
 }
 
+// fillCurrentFaculty GM fill_current_neigong（Java fillCurrentFaculty 同构）：
+// 把当前修炼书（facultyName）本层修炼度填满并结算升级；恰好升满时对齐
+// 自然修炼语义（fill=0、自动停修）。无修炼书静默零变更（Java 槽位 -1
+// 语义：granted=false 且 maxLevel=false）。返回槽位（1 基，0=无书）、
+// 是否发放、是否升级、是否满级、结算后层数。
+func (p *playerProgress) fillCurrentFaculty() (slot uint16, granted, levelUp, maxLevel bool, newLevel int32) {
+	for index := range p.books {
+		book := &p.books[index]
+		if book.configID != p.facultyName {
+			continue
+		}
+		if book.level >= book.maxLevel {
+			return uint16(index + 1), false, false, true, book.level
+		}
+		previousLevel := book.level
+		book.fill = book.total
+		for book.fill >= book.total && book.level < book.maxLevel {
+			book.fill -= book.total
+			book.level++
+			levelUpNeiGongTotal(book)
+			book.maxPower += 20
+			book.power = book.maxPower
+		}
+		_ = book.applyModernEffect()
+		if book.level >= book.maxLevel {
+			book.fill = 0
+			p.facultyState = facultyStateNone
+			p.fillSpeed = 0
+		}
+		return uint16(index + 1), true, book.level != previousLevel, book.level >= book.maxLevel, book.level
+	}
+	return 0, false, false, false, 0
+}
+
+// clearTeamFacultyFatigue GM clear_team_fatigue：团练消耗值归零（客户端
+// 剩余精力恢复 100%；Java clearTeamFacultyFatigue 同构）。
+func (p *playerProgress) clearTeamFacultyFatigue() {
+	p.teamFacultyValue = 0
+}
+
 func (p *playerProgress) snapshot() facultyProgressSnapshot {
 	value := facultyProgressSnapshot{
 		CurNeiGong:     p.curNeiGong,
@@ -1037,6 +1093,9 @@ func (p *playerProgress) snapshot() facultyProgressSnapshot {
 		ActDayValueMax:      p.actDayValueMax,
 		ActDayValueUsed:     p.actDayValueUsed,
 		ActDayValueLast:     p.actDayValueLast,
+		// 团练疲劳层（GM clear_team_fatigue）：旧档缺字段零值=满精力。
+		TeamFacultyValue: p.teamFacultyValue,
+		TeamFacultyLast:  p.teamFacultyLast,
 		// 历练层 8 字段（Java FacultyStore 键名逐字对齐，共享 MySQL 三服互读）。
 		LiveGroove1:      p.liveGroove[0],
 		LiveGroove2:      p.liveGroove[1],
@@ -1102,6 +1161,9 @@ func (p *playerProgress) restore(value facultyProgressSnapshot, now time.Time) {
 		p.actDayValueUsed = value.ActDayValueUsed
 		p.actDayValueLast = value.ActDayValueLast
 	}
+	// 团练疲劳层：旧档缺字段零值宽松归零（剩余精力 100%）。
+	p.teamFacultyValue = max(int32(0), value.TeamFacultyValue)
+	p.teamFacultyLast = max(int32(0), value.TeamFacultyLast)
 	// 历练层：槽值钳到上限；holdFaculty/liveSpeedPower 非负钳制；旧档
 	// 缺字段零值宽松归零（槽空、无加成）。随后对 lastLivepoint 以来的
 	// 整步照结离线补结算（累积+转化，与 advanceFaculty 离线分钟结算

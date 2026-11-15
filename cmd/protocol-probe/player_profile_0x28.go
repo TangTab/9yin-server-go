@@ -22,7 +22,7 @@ package main
 // 分节标记、NUL 槽增量续段）全部不复刻——纯标准编码，字段稀疏可缺席
 // 是官方语义（k#1978 相对 k#15 即少 idx162）。BaseFace（外服私服 len=0
 // 变体）v1 起省略。ShortcutKey（官方 f#042，str176 '1,87;2,83;…'）v2
-// 起按存档键位嵌入（2026-11-15「保存的按键配置下发有问题」：官服家族
+// 起按存档键位嵌入（2026-11-15「保存的按键配置下发有问题」：外服家族
 // 客户端在 AddObject 时从档案字段初始化键位管理器，后到的 0x10 idx198
 // 只同步属性视图不重建引擎键表——官方唯一回放通道就是本字段；官方
 // 抓包里的「主段+增量续段」是 LZ 编码器字典复用手法，语义即完整串，
@@ -263,7 +263,12 @@ func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills 
 	body = binary.LittleEndian.AppendUint16(body, 0) // 字段数占位（body[60:62]）
 
 	count := 0
+	mirror := bisectActive("avatar-mirror")
 	for _, spec := range playerProfilePropSpecs {
+		if mirror && spec.name == "DongHaiRelivePositon" {
+			// 镜像轮：DongHai 起整段换官档字节（见 avatarMirrorFields）
+			continue
+		}
 		entry, ok := profilePropEntry(spec.name)
 		if !ok {
 			continue
@@ -299,8 +304,14 @@ func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills 
 			count++
 		}
 	}
-	body, rowCount := appendProfileSkillRows(body, skills)
-	count += rowCount
+	if mirror {
+		body = append(body, avatarMirrorFields...)
+		count += 3588
+	} else {
+		rowBytes, rowCount := appendProfileSkillRows(body, skills)
+		body = rowBytes
+		count += rowCount
+	}
 	// 装备内功身份对（官方档案尾区实证：k#1978 @0x110b idx655
 	// CurNeiGong="ng_jz_006" + idx656 CurNeiGongWuXing——引擎实力档的
 	// 装备内功锚点，0x28 档案是官方唯一下发通道）。空 ID 省略（稀疏语义）。
@@ -321,12 +332,91 @@ func playerProfile0x28Frame(objectID, ownerID uint32, pos role.Position, skills 
 	// 字段数回填 body[60:62]（变换块定长 52B 保证）。
 	binary.LittleEndian.PutUint16(body[60:], uint16(count))
 
+	if bisectActive("avatar-47") {
+		// 二分 A/B 位 avatar-47：同样内容改走 mode-0x47 全字面量 LZ 包装
+		//（零池依赖、解码输出=原文；tools/lz47_literal.py 同语义 Python
+		// 版已 lzdec 往返验证）——判别「重登回走」触发器是否在 0x46
+		// memcpy vs 0x47 解压路径本身（2026-11-15 终局实验）。
+		frame := wrapProfile0x28As47Literal(body)
+		return frame, count
+	}
 	frame := make([]byte, 0, len(body)+10)
 	frame = append(frame, 0x28, 0x46)
 	frame = binary.LittleEndian.AppendUint32(frame, uint32(len(body)+9)) // len-1
 	frame = binary.LittleEndian.AppendUint32(frame, uint32(len(body)))   // 明文体长
 	frame = append(frame, body...)
 	return frame, count
+}
+
+// wrapProfile0x28As47Literal mode-0x47 全字面量编码：字面量 token（k∈
+// {1,2,3,4} 字节，n 位型 0010/0100/1000/0000，耗 k bit）+ 尾 11 字节逐
+// 字节 1bit；每 flags 词在已用位最高位置哨兵 1（寄存器==1 触发重填）。
+func wrapProfile0x28As47Literal(body []byte) []byte {
+	var out []byte
+	var wordBits []bool
+	var wordData []byte
+	flush := func() {
+		w := uint32(0)
+		for i, b := range wordBits {
+			if b {
+				w |= 1 << uint(i)
+			}
+		}
+		w |= 1 << uint(len(wordBits)) // 哨兵位
+		out = binary.LittleEndian.AppendUint32(out, w)
+		out = append(out, wordData...)
+		wordBits, wordData = nil, nil
+	}
+	emitLiteral := func(k int, chunk []byte) {
+		need := k
+		if len(wordBits)+need > 31 {
+			flush()
+		}
+		var n uint8
+		switch k {
+		case 1:
+			n = 0b0010
+		case 2:
+			n = 0b0100
+		case 3:
+			n = 0b1000
+		default:
+			n = 0
+		}
+		for j := 0; j < 4; j++ {
+			wordBits = append(wordBits, n&(1<<uint(j)) != 0)
+		}
+		wordData = append(wordData, chunk...)
+	}
+	emitTailByte := func(b byte) {
+		if len(wordBits)+1 > 31 {
+			flush()
+		}
+		wordBits = append(wordBits, false)
+		wordData = append(wordData, b)
+	}
+	mainLen := len(body) - 0xb
+	if mainLen < 0 {
+		mainLen = len(body)
+	}
+	for i := 0; i < mainLen; {
+		k := 4
+		if r := mainLen - i; r < k {
+			k = r
+		}
+		emitLiteral(k, body[i:i+k])
+		i += k
+	}
+	for _, b := range body[mainLen:] {
+		emitTailByte(b)
+	}
+	flush()
+	frame := make([]byte, 0, len(out)+10)
+	frame = append(frame, 0x28, 0x47)
+	frame = binary.LittleEndian.AppendUint32(frame, uint32(len(out)+9)) // len-1（0x47 客户端以 outlen 为准）
+	frame = binary.LittleEndian.AppendUint32(frame, uint32(len(body)))
+	frame = append(frame, out...)
+	return frame
 }
 
 // curNeiGongProfilePair 档案装备内功身份对：CurNeiGong（progress 权威）

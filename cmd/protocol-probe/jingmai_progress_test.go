@@ -217,7 +217,7 @@ func TestJingMaiActiveAddsAndRemovesRecordRows(t *testing.T) {
 // active_jingmai_rec 整表重写回归（2026-11-15「关不掉」根因钉）：单行
 // 加帧源行 0=插到行 0，与服务端追加序错位会让删行打错行——修复后任何
 // 激活集变化都走「降序 DelRow 清表 + 单帧批量重加」，客户端向服务端
-// 状态收敛；批量帧布局与官服 c.pcapng 登录样本逐位同构。
+// 状态收敛；批量帧布局与外服 c.pcapng 登录样本逐位同构。
 func TestJingMaiActiveRewriteConverges(t *testing.T) {
 	catalog := stubJingMaiCatalog(t)
 	_ = catalog
@@ -616,5 +616,112 @@ func TestSetJingMaiLevelClampsAndResetsFill(t *testing.T) {
 	// 目录外 id 同样拒绝（行号=0）。
 	if _, _, _, ok := player.setJingMaiLevel(catalog, "jm_missing", 36); ok {
 		t.Fatalf("unknown jm_missing accepted")
+	}
+}
+
+// GM set_jingmai_tier 直设完整受理（2026-11-15 晚定版，真机「设置失败」
+// 修复）：未学条目自动开通（不再「未学」拒）+ 按目标档自动补开穴位至
+// 阶梯上限够到目标。
+func TestGMSetJingMaiTierAutoLearnsAndOpensXueWei(t *testing.T) {
+	catalog := stubJingMaiCatalog(t)
+	// jm_b maxLevel=225（跷脉形态 step=75）：挂 3 穴地图，零开穴 cap=9。
+	for i := range catalog.order {
+		if catalog.order[i].configID == "jm_b" {
+			catalog.order[i].xueWei = []string{"xw_b1", "xw_b2", "xw_b3"}
+		}
+	}
+	player := newPlayerActor("逆脉侠", 0)
+	player.restoreJingMai(jingMaiSnapshot{
+		Learned:  []string{"jm_b"},
+		Progress: map[string]jingMaiProgressRow{"jm_b": {Level: 1}},
+	}, time.Now())
+
+	// 未学条目（目录内即可，用 jm_a）自动开通：learnedNow、行号追加、
+	// 等级=目标（jm_a maxLevel=3 无阶梯缝）。
+	old, row, slot, frames, fresh, learnedNow := player.gmSetJingMaiTier(catalog, xueWeiCatalogOf(), "jm_a", 2)
+	if !learnedNow || old != 0 || row.Level != 2 || slot != 2 || len(fresh) != 0 {
+		t.Fatalf("auto-learn: old=%d row=%+v slot=%d fresh=%v learnedNow=%t", old, row, slot, fresh, learnedNow)
+	}
+	if len(frames) != 1 { // 新开通行只带 View45 上限帧（容器未建时无穴位追加帧）
+		t.Fatalf("auto-learn frames=%d, want 1 (cap frame)", len(frames))
+	}
+
+	// 已学条目按目标自动开穴：请求 150 → 开 xw_b1(75)+xw_b2(150) 即停，
+	// 目标=150；fill 归零。
+	old, row, slot, frames, fresh, learnedNow = player.gmSetJingMaiTier(catalog, xueWeiCatalogOf(), "jm_b", 150)
+	if learnedNow || old != 1 || row.Level != 150 || row.Fill != 0 || slot != 1 {
+		t.Fatalf("tier 150: old=%d row=%+v slot=%d learnedNow=%t", old, row, slot, learnedNow)
+	}
+	if len(fresh) != 2 || fresh[0] != "xw_b1" || fresh[1] != "xw_b2" {
+		t.Fatalf("fresh=%v, want [xw_b1 xw_b2]", fresh)
+	}
+	if cap := player.jingMaiCapOf(catalog, "jm_b"); cap != 150 {
+		t.Fatalf("cap=%d after open 2 xuewei, want 150", cap)
+	}
+
+	// 顶格请求：开满封顶（xw_b3 → cap=225），目标 216 落 216/225。
+	_, row, _, _, fresh, _ = player.gmSetJingMaiTier(catalog, xueWeiCatalogOf(), "jm_b", 216)
+	if len(fresh) != 1 || fresh[0] != "xw_b3" || row.Level != 216 {
+		t.Fatalf("top tier: fresh=%v level=%d, want [xw_b3] 216", fresh, row.Level)
+	}
+	if cap := player.jingMaiCapOf(catalog, "jm_b"); cap != 225 {
+		t.Fatalf("cap=%d after all open, want 225", cap)
+	}
+}
+
+// 默认坐忘功初始值（2026-11-15 晚二拍板，撤销同日更早的默认满周天）：
+// 新种子=1 级；默认满周天时期落的档（满级+全穴开+tierSeeded 老标记）首
+// 次进世界一次性归一回初始值并置 tierReset，此后 GM 面板设置持久。
+func TestEnsureJingMaiLearnedInitialTierReset(t *testing.T) {
+	catalog := stubJingMaiCatalog(t)
+	// jm_b 挂 3 穴地图（模拟默认满周天时期 seedMax 批量开的穴）。
+	for i := range catalog.order {
+		if catalog.order[i].configID == "jm_b" {
+			catalog.order[i].xueWei = []string{"xw_b1", "xw_b2", "xw_b3"}
+		}
+	}
+	player := newPlayerActor("归一侠", 0)
+	player.restoreJingMai(jingMaiSnapshot{
+		Learned:      []string{"jm_a", "jm_b"},
+		Progress:     map[string]jingMaiProgressRow{"jm_a": {Level: 3}, "jm_b": {Level: 225}},
+		OpenedXueWei: []string{"xw_b1", "xw_b2", "xw_b3", "xw_orphan"},
+	}, time.Now())
+	player.ensureJingMaiLearned(catalog)
+	snapshot := player.jingMaiSnapshotOf()
+	for _, id := range []string{"jm_a", "jm_b"} {
+		if got := snapshot.Progress[id]; got.Level != 1 || got.Fill != 0 {
+			t.Fatalf("%s reset level=%+v, want 1/0", id, got)
+		}
+	}
+	if len(snapshot.OpenedXueWei) != 1 || snapshot.OpenedXueWei[0] != "xw_orphan" {
+		t.Fatalf("openedXueWei=%v, want mapped xuewei stripped (orphan kept)", snapshot.OpenedXueWei)
+	}
+	if cap := player.jingMaiCapOf(catalog, "jm_b"); cap != jingMaiInitialCap {
+		t.Fatalf("jm_b cap=%d after reset, want initial %d", cap, jingMaiInitialCap)
+	}
+	if !snapshot.TierReset {
+		t.Fatalf("tierReset not set after one-shot normalize")
+	}
+	// 归一后 GM 升档持久：再进世界不回种覆盖。
+	player.gmSetJingMaiTier(catalog, xueWeiCatalogOf(), "jm_b", 150)
+	player.ensureJingMaiLearned(catalog)
+	if got := player.jingMaiSnapshotOf().Progress["jm_b"]; got.Level != 150 {
+		t.Fatalf("post-reset GM tier=%d, want 150 (persists)", got.Level)
+	}
+
+	// 新档：种子 1 级 + 标记即置。
+	fresh := newPlayerActor("萌新初始", 0)
+	fresh.ensureJingMaiLearned(catalog)
+	snapshot = fresh.jingMaiSnapshotOf()
+	if len(snapshot.Learned) != len(catalog.starterOrder()) {
+		t.Fatalf("learned=%d, want %d", len(snapshot.Learned), len(catalog.starterOrder()))
+	}
+	for _, id := range snapshot.Learned {
+		if got := snapshot.Progress[id]; got.Level != 1 {
+			t.Fatalf("%s seeded level=%d, want 1 (official initial)", id, got.Level)
+		}
+	}
+	if !snapshot.TierReset {
+		t.Fatalf("fresh seed must set tierReset")
 	}
 }

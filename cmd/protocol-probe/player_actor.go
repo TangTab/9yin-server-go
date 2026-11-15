@@ -1159,7 +1159,7 @@ func (p *playerActor) facultySnapshot() facultyProgressSnapshot {
 			PowerLevel: p.gm.powerLevel, PowerLevelSet: p.gm.powerLevelSet,
 			Justice: p.gm.justice, Evil: p.gm.evil, FreeBase: p.gm.freeBase,
 			AlignmentSet: p.gm.alignmentSet,
-			PKMode: p.gm.pkMode, PKModeSet: p.gm.pkModeSet,
+			PKMode:       p.gm.pkMode, PKModeSet: p.gm.pkModeSet,
 		}
 	}
 	return value
@@ -2333,7 +2333,7 @@ var physicsLoginFrameSpecs = []physicsLoginFrameSpec{
 	{"LandRushDist", 6.5, 0, false},
 	{"MaxQingGongPoint", 0, 150, true},
 	{"MaxGJQingGongPoint", 0, 150, true},
-	// InteractStatus(int64)：官服登录物理档案窗口显式下发 -1（c.pcapng
+	// InteractStatus(int64)：外服登录物理档案窗口显式下发 -1（c.pcapng
 	// #94 单属性帧 0xFFFFFFFFFFFFFFFF）——语义=玩家当前不在任何 TVT/江湖
 	// 活动中。缺发时客户端按类型缺省 0=ITT_SPY_MENP（门派刺探），bin 透传
 	// 的 m100 进场 onready 会让 form_tvt_skill 判 GetCurrentTvtType()≠-1
@@ -2348,7 +2348,7 @@ var physicsLoginFrameSpecs = []physicsLoginFrameSpec{
 }
 
 // sendPlayerPhysicsLoginStream 外服私服登录玩家物理档案的 0x10 单属性流
-//（docs/冲锋自走触发链外服私服定版与差集.md P2）：外服私服在 0x09/0x0A 表后、
+// （docs/冲锋自走触发链外服私服定版与差集.md P2）：外服私服在 0x09/0x0A 表后、
 // 建视图前给玩家自己逐帧连发 34 条单属性 0x10。这些值我们虽已在 0x0D
 // 建对象大档携带，但外服私服形态是逐帧变更事件——若客户端引擎的接近/冲锋
 // 子系统在属性更新沿上武装（默认→5.0），一次性大档不触发同一路径。
@@ -2370,7 +2370,7 @@ func sendPlayerPhysicsLoginStream(conn sceneMessageConnection, player *playerAct
 		case spec.name == "MaxQingGongPoint":
 			property.Value = clientdata.Int32Value(state.MaxQingGongPoint)
 		case spec.name == "InteractStatus":
-			// 表线型 t4(Int64)：官服 #94 实发 8B -1，须走 Int64 线宽。
+			// 表线型 t4(Int64)：外服 #94 实发 8B -1，须走 Int64 线宽。
 			property.Value = clientdata.Int64Value(int64(spec.i))
 		case spec.isInt:
 			property.Value = clientdata.Int32Value(spec.i)

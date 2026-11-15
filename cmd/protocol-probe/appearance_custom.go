@@ -129,7 +129,7 @@ func pushAppearanceRefresh(link sceneMessageConnection, player *playerActor) err
 // pushEquipAppearance 登录期 addObject 后的外观补帧（Java 同名门槛）：
 // 帽/身份装/时装任一槽占用或显示类型非默认江湖装才发，否则零帧
 // （帧序对齐 golden——0x0D 档已带装备合并视觉）。
-// 帧替换档（wholesale 回放）例外恒发：化身是外服 0x28 档案（自带官服
+// 帧替换档（wholesale 回放）例外恒发：化身是外服 0x28 档案（自带外服
 // 装备外观段），无我方 0x0D 合并视觉可言——DB 装备外观必须主动压影子
 // （2026-11-15 00:5x 真机「影子覆盖 DB 装备」根因；Phase B 官方 0x2A
 // 已同步停发，本帧是唯一我方外观源）。

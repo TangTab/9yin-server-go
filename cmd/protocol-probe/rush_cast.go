@@ -63,14 +63,17 @@ const (
 	msgRushCommand              = 61                 // msg24 c1=61 冲刺/疾跑指令
 	// rushDashLiftMeters：c61 终点在玩家上报 y 之上的抬升（恒 +1.0 小跳弧线）。
 	rushDashLiftMeters = float32(1.0)
-	// rushDashTimeout：c61 发出后等待 212 的静默安全阀（外服私服无此机制）。
-	rushDashTimeout = 6 * time.Second
 	// rushAirborneYDeltaMeters：空中冲锋判定（world 内部 NPC y 口径未校准，
 	// 禁用中——一律走地面链）。
 	rushAirborneYDeltaMeters = float32(1e9)
 	// rushWalkKickDelay：受理簇到走踢帧的官方簇距（外服私服 f#0202 +155ms）。
 	rushWalkKickDelay = 155 * time.Millisecond
 )
+
+// rushDashTimeout：c61 发出后等待 212 落地的安全阀（外服私服无此机制）。
+// var 化供测试缩短；到点仍未落地（c61 未被消费/212 丢失）→ 服务端 bind
+// 点兜底直收（见 issueRushDash）。
+var rushDashTimeout = 6 * time.Second
 
 // rushDashTriggerMeters 是 c61 冲刺窗口上界：GRushRange(5.0)+GRushRangeAdd(1.5)。
 func rushDashTriggerMeters() float64 { return 5.0 + 1.5 }
@@ -487,8 +490,9 @@ func rushCastStateFrame() ([]byte, error) {
 //	重受理：CurSkillID="" + msg26 + PauseSkill="" + [0x12 清扫] +
 //	      CurSkillID + msg25 + PauseSkill + msg707[15]（不重发 CurSkillTarget）
 //
-// 受理与距离解耦；拉回/走动期间服务端零帧零取消，唯一出口=重按或 30s 过期。
-func stageRushCast(link sceneMessageConnection, player *playerActor, definition combatSkillDefinition,
+// 受理与距离解耦；拉回/走动期间服务端零帧零取消，唯一出口=重按或 30s 过期
+// （2026-11-15 起受理尾追加服务端驱动接近 c61，见函数尾注释）。
+func stageRushCast(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, definition combatSkillDefinition,
 	targetID, targetOwner uint32, target worldcore.Transform, castAt worldcore.Transform,
 	distance float64, remote string) (bool, error) {
 	now := time.Now().UTC()
@@ -561,7 +565,7 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	// tryRushArrival→issueRushDash 下发——P0c/P0e 的受理期 stage-dash 档2
 	// 系 Java 方言误植，真机实证客户端零消费且非外服私服帧序）。
 	// msg25[30000,'skill_pause']（2026-11-15 曾撤、同日按令恢复：跳跃异常
-	// 真凶=回放瘦身剥离官服物理帧档案（PHYSICS-16，另案已修），m25 无罪；
+	// 真凶=回放瘦身剥离外服物理帧档案（PHYSICS-16，另案已修），m25 无罪；
 	// 远距按压的官方暂存 UX 保留）。
 	// **stage 期不发 m24 c61**（技能1.pcapng 2026-11-13 定版：外服私服受理簇
 	// 零 m24；c61 是服务端指令，仅在 m220 上报进技能授予窗时由
@@ -614,7 +618,27 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, definition 
 	if strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_RUSH_WALK_KICK")), "1") {
 		scheduleRushWalkKick(link, player, definition, targetID, target, castAt, remote)
 	}
+	// ★服务端驱动接近（默认开，NINEYIN_RUSH_APPROACH=off 关闭）：本服
+	// 登录方言下客户端无本地「按下即走」（2026-11-15 终局定论：踢帧四方言
+	// 全被 OnMoving motion_func 白名单闸死），远距受理后只会无限期挂起。
+	// 移植外服私服范围型「受理即 c61」方言（a.pcapng hyjf07：受理簇 +
+	// c61 档2 qg_fastruning_s + CD/MP，无 220 前置，客户端执行疾跑）到
+	// 锁定目标冲锋——受理同拍下发 c61，角色疾跑接近目标；落地 212 走既有
+	// resumePendingCastAt 出招链，6s 无落地则服务端 bind 点兜底直收。
+	if rushApproachDashEnabled() && !player.rushDashIssuedSnapshot() {
+		if err := issueRushDash(link, player, world, target, castAt.X, castAt.Y, castAt.Z, remote); err != nil {
+			log.Printf("%s: rush approach dash skill id=%s: %v", remote, definition.id, err)
+		} else if player.rushDashIssuedSnapshot() {
+			log.Printf("%s: rush approach dash issued skill id=%s dist=%.1fm (immediate grant dialect)",
+				remote, definition.id, distance)
+		}
+	}
 	return true, nil
+}
+
+// rushApproachDashEnabled 服务端驱动接近开关（默认开；NINEYIN_RUSH_APPROACH=off 关闭）。
+func rushApproachDashEnabled() bool {
+	return !strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_RUSH_APPROACH")), "off")
 }
 
 // scheduleRushWalkKick 受理簇后 +155ms 下发走踢帧（真方言双入口，见
@@ -682,9 +706,9 @@ func rushWalkKickFrame(castAt, target worldcore.Transform, bind float32) []byte 
 	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(angle))
 	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(4.5))
 	payload = binary.LittleEndian.AppendUint32(payload, math.Float32bits(math.Pi)) // 外服样本 3.14=+π
-	payload = binary.LittleEndian.AppendUint32(payload, 0)                        // 尾槽 0
-	payload = binary.LittleEndian.AppendUint32(payload, 0)                        // 尾槽 0
-	payload = binary.LittleEndian.AppendUint32(payload, 0x30000f01)               // WASD 键盘族
+	payload = binary.LittleEndian.AppendUint32(payload, 0)                         // 尾槽 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0)                         // 尾槽 0
+	payload = binary.LittleEndian.AppendUint32(payload, 0x30000f01)                // WASD 键盘族
 	return payload
 }
 
@@ -885,7 +909,11 @@ func executeRushDirect(link sceneMessageConnection, player *playerActor, world *
 // issueRushDash 最终冲刺指令（外服私服 c61 簇序，f 42.948 定版）：
 // c61 → CantMove=1 → CantParry=1 → CD 双行（官方方言）→ MPRatio → MP →
 // QingGongPoint。终点 y=玩家上报 y+1.0；此刻不发 0x1F（外服私服锚只在落地簇）。
-func issueRushDash(link sceneMessageConnection, player *playerActor, target worldcore.Transform,
+// rushDashTimeout 到点仍未 212 落地（c61 未被消费/212 丢失）时不再静默
+// 释放——改走 resumePendingCastAt(bind) 服务端落点直收（0x1F 锚 + 完整
+// 落地簇 + 出招），保证冲锋受理后必然施放（2026-11-15 远距按压自走缺失
+// 的服务端驱动替代）。
+func issueRushDash(link sceneMessageConnection, player *playerActor, world *sceneLifecycle, target worldcore.Transform,
 	fromX, fromY, fromZ float32, remote string) error {
 	if player.rushDashIssuedSnapshot() {
 		return nil
@@ -970,37 +998,22 @@ func issueRushDash(link sceneMessageConnection, player *playerActor, target worl
 	}
 	player.markRushDashIssued()
 	time.AfterFunc(rushDashTimeout, func() {
-		if !player.rushInFlightSnapshot() || !player.rushDashIssuedSnapshot() {
-			return
-		}
 		if player.peekPendingCast(time.Now().UTC()) != pending {
-			return
+			return // 已 212 落地续招 / 重按换暂存 / 过期取消
 		}
-		player.clearRushInFlight()
-		release := []struct {
-			name  string
-			build func() ([]byte, error)
-		}{
-			{"CantMove-clear", func() ([]byte, error) {
-				return rushPropertyFrame(propRushCantMove, "CantMove", clientdata.ByteValue(0))
-			}},
-			{"CantParry-clear", func() ([]byte, error) {
-				return rushPropertyFrame(propCantParry, "CantParry", clientdata.Int32Value(0))
-			}},
-			{"msg26", func() ([]byte, error) { return skillPauseClearFrame() }},
-			{"PauseSkill-clear", func() ([]byte, error) {
-				return rushPropertyFrame(propRushPauseSkill, "PauseSkill", clientdata.StringValue(""))
-			}},
+		// 冲刺超时未落地：服务端兜底直收。落点=目标（实时坐标）身前 bind，
+		// 0x1F 锚把角色定过去 + 完整落地簇 + 出招伤害——保证受理后必然施放。
+		geometry := target
+		if live, ok := world.combatNPCTransform(pending.targetID); ok {
+			geometry = live
 		}
-		for _, step := range release {
-			if frame, err := step.build(); err == nil {
-				if err := link.WriteFrame(frame); err != nil {
-					log.Printf("rush dash timeout %s: %v", step.name, err)
-					return
-				}
-			}
+		destX, _, destZ := rushBindPoint(geometry, fromX, fromZ, pending.bindDistance)
+		orient := orientTowardTarget(destX, destZ, geometry.X, geometry.Z)
+		log.Printf("%s: rush dash landing timeout; server-side fallback cast at bind dest=(%.2f,%.2f)",
+			remote, destX, destZ)
+		if err := resumePendingCastAt(link, player, world, destX, geometry.Y, destZ, orient, "dash-timeout-fallback", remote); err != nil {
+			log.Printf("%s: rush dash timeout fallback: %v", remote, err)
 		}
-		log.Printf("%s: rush dash landing timeout; released rush state", remote)
 	})
 	log.Printf("%s: rush dash issued dest=(%.2f,%.2f,%.2f) action=%s",
 		remote, destX, destY, destZ, pending.groundRushAction)
@@ -1611,7 +1624,7 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 	}
 	log.Printf("%s: rush within dash window skill id=%s dist=%.1fm in (%.1f, %.1f]",
 		remote, pending.skillID, distance, windowLo, windowHi)
-	if err := issueRushDash(link, player, geometry, x, y, z, remote); err != nil {
+	if err := issueRushDash(link, player, world, geometry, x, y, z, remote); err != nil {
 		log.Printf("%s: rush dash issue: %v", remote, err)
 	}
 }

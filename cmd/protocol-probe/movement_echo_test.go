@@ -171,6 +171,7 @@ func TestMovementUploadEchoesPlayerIntent(t *testing.T) {
 
 // 负角归一 [0,2π)（外服私服 -1.076→5.21 样本）与冲锋在途不回显。
 func TestMovementEchoAngleWrapAndRushGate(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off") // 本测试只验回显方言，关服务端驱动接近
 	if got := moveEchoAngle(-9.34, 5.04); math.Abs(float64(got-5.207)) > 0.001 {
 		t.Fatalf("moveEchoAngle(-9.34,5.04)=%.4f, want 5.207", got)
 	}
@@ -191,7 +192,7 @@ func TestMovementEchoAngleWrapAndRushGate(t *testing.T) {
 		id: "CS_rush_echo", canRush: true, script: "skilllock", castRange: 8,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
 	}
-	if _, err := stageRushCast(conn, player, definition, forkNPCID(91), npcTestOwner(91),
+	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
 	}

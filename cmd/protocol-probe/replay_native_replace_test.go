@@ -151,7 +151,7 @@ func TestP1AvatarNativeSwap(t *testing.T) {
 }
 
 // TestPhysicsStreamInteractStatusMinusOne 物理档案流必须携带 InteractStatus=-1
-//（int64 线型，官服 c.pcapng #94 逐字节同形）：缺发=客户端缺省 0（ITT_SPY_MENP
+// （int64 线型，外服 c.pcapng #94 逐字节同形）：缺发=客户端缺省 0（ITT_SPY_MENP
 // 门派刺探），bin 透传 m100 onready 即弹刺探技能栏（2026-11-15「刺探玩法被
 // 默认打开」根因回归闸）。
 func TestPhysicsStreamInteractStatusMinusOne(t *testing.T) {
@@ -208,8 +208,8 @@ func TestPhysicsStreamIsRunOne(t *testing.T) {
 }
 
 // TestP2SelfMotionOverride 帧替换档 P2 self 0x10 移动/跳跃族改写闸
-//（MOTION-15，2026-11-15「跳跃异常」根因回归防线）：外服镜像帧
-//（DriftJumpSpeedAdd=3.0/SndJumpSpeedAdd=4.8/ThdJumpSpeedAdd=3.0/
+// （MOTION-15，2026-11-15「跳跃异常」根因回归防线）：外服镜像帧
+// （DriftJumpSpeedAdd=3.0/SndJumpSpeedAdd=4.8/ThdJumpSpeedAdd=3.0/
 // RunSpeedAdd=0.6/MoveSpeed=4.5/DropHeightPub=24/QingGongPoint=160 等）
 // 必须改写为我方权威值；权威表外的镜像属性照旧 MIRROR-12 透传。
 func TestP2SelfMotionOverride(t *testing.T) {
@@ -262,7 +262,7 @@ func TestP2SelfMotionOverride(t *testing.T) {
 	if sent != 3 || rec.count() != 3 {
 		t.Fatalf("发送帧数异常: sent=%d recorded=%d", sent, rec.count())
 	}
-	// #0 SndJumpSpeedAdd 4.8 → 官服轻功加成组 5.1（PHYSICS-16 同轮定案：
+	// #0 SndJumpSpeedAdd 4.8 → 外服轻功加成组 5.1（PHYSICS-16 同轮定案：
 	// Add 是跳跃 Z 初速的合法组成，清零=二段跳只剩基值 6）。
 	out := rec.frameAt(0)
 	if got := binary.LittleEndian.Uint16(out[12:]); got != clientdata.MustPlayerProperty("SndJumpSpeedAdd").Index {

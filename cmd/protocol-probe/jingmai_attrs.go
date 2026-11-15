@@ -582,11 +582,16 @@ const (
 )
 
 // jingMaiCapFor 阶梯上限：openedXueWei=该经脉已开穴位数，total=穴位总数。
+// total<=0（穴位地图缺该经脉，如丹田无穴）时直取目录上限——阶梯以穴位
+// 计数为基础，无穴可开却按初始 9 卡死会让该经脉永远到不了满档。
 func jingMaiCapFor(maxLevel, openedXueWei, total int32) int32 {
 	if maxLevel <= 0 {
 		return jingMaiInitialCap
 	}
 	if maxLevel <= jingMaiInitialCap {
+		return maxLevel
+	}
+	if total <= 0 {
 		return maxLevel
 	}
 	if openedXueWei <= 0 {

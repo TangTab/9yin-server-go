@@ -266,7 +266,7 @@ func serverRecordAddString(objectID, ownerID uint32, recordIndex uint16, value s
 }
 
 // serverRecordAddStringRows 单列场景对象记录的批量加行帧（0x11：源行 0
-// 起、行数 N、N 个字符串单元逐行排布）。官服 active_jingmai_rec 登录样
+// 起、行数 N、N 个字符串单元逐行排布）。外服 active_jingmai_rec 登录样
 // 本（c.pcapng #293：一帧 8 行）逐位同构；与降序 DelRow 整表清配对使用
 // （tersureRewriteRecord 同模式），客户端行序与内容解耦、FindRecordRow
 // 按内容命中。

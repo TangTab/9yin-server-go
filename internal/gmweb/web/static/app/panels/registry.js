@@ -30,7 +30,7 @@ export const GROUPS = [
     id: "skill",
     name: "武学与修炼",
     load: () => import("./skill.js"),
-    sections: ["faction", "taolu", "faculty", "jingmai", "jingmai-tier"],
+    sections: ["faction", "taolu", "faculty", "jingmai"],
   },
   {
     id: "scene",
@@ -101,7 +101,6 @@ export const SECTION_TITLES = {
   taolu: "武学套路",
   faculty: "修为",
   jingmai: "经脉",
-  "jingmai-tier": "经脉周天设置",
   presets: "常用传送",
   tiguan: "踢馆传送",
   teleport: "自定义切图与场景内瞬移",

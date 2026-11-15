@@ -67,6 +67,10 @@ func TestValidateJingMaiTier(t *testing.T) {
 	if err != nil {
 		t.Fatalf("valid tier rejected: %v", err)
 	}
+	// 跷脉目录满档 225 合法（2026-11-15 上限 216→225）。
+	if _, err := validateBody(t, `{"action":"set_jingmai_tier","jingMaiId":"jm_yinqiao","jingMaiTier":225}`); err != nil {
+		t.Fatalf("qiao max tier 225 rejected: %v", err)
+	}
 	if command.JingMaiID != "jm_dantian" || command.JingMaiTier != 36 {
 		t.Fatalf("command=%+v", command)
 	}
@@ -74,7 +78,7 @@ func TestValidateJingMaiTier(t *testing.T) {
 		`{"action":"set_jingmai_tier","jingMaiId":"","jingMaiTier":36}`,
 		`{"action":"set_jingmai_tier","jingMaiTier":36}`,
 		`{"action":"set_jingmai_tier","jingMaiId":"jm_dantian","jingMaiTier":0}`,
-		`{"action":"set_jingmai_tier","jingMaiId":"jm_dantian","jingMaiTier":217}`,
+		`{"action":"set_jingmai_tier","jingMaiId":"jm_dantian","jingMaiTier":226}`,
 	} {
 		_, err := validateBody(t, raw)
 		if err == nil {
@@ -89,6 +93,15 @@ func TestValidateJingMaiTier(t *testing.T) {
 // NPC 自动追击总开关（set_npc_chase）：enabled 严格 0/1（与
 // set_zhenqi_cap 的开关口径一致），游戏侧进程级覆写。缺省 enabled=0
 // 视为关闭（与 set_silver 缺省 0 合法同口径；面板恒显式发送）。
+// 修为修复两动作（2026-11-15 补齐）：无参即合法。
+func TestValidateFacultyRepairActions(t *testing.T) {
+	for _, action := range []string{"fill_current_neigong", "clear_team_fatigue"} {
+		if _, err := validateBody(t, `{"action":"`+action+`"}`); err != nil {
+			t.Fatalf("%s rejected: %v", action, err)
+		}
+	}
+}
+
 func TestValidateNPCChase(t *testing.T) {
 	for _, raw := range []string{
 		`{"action":"set_npc_chase","enabled":1}`,
