@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"math"
 	"time"
 
-	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/entity"
 )
 
@@ -181,14 +179,14 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 			return nil
 		}
 		if !engage {
-			// 游离的重复松开：客户端可能错过上一次回帧，重推空态。
-			// 必须发**完整两帧对**（169 摘除事件 + 0x10 属性帧）——客户端的
-			// 格挡认知锚在 msg169 BuffInParry 事件上，仅属性帧摘不掉：
-			// 2026-11-12 真机死锁（旧纪元 bug 残留）客户端带"已格挡"认知
-			// 只发 1 等确认、永不再发按下(0)，单属性帧 ack 无法解锁，
-			// 两帧对一发即恢复。外服私服登录段本就有 remove→clear→fill→add
-			// 重登记舞步（k.pcapng），多发一次摘除事件方言安全。
-			if err := writeOfficialParryTokenAck(link, player, false); err != nil {
+			// 游离的重复松开：客户端清理被中断的动作时会连发多个松开，
+			// 权威回帧保持其 fighter 资源对齐（server2「Echo even
+			// duplicate release events」同口径，2026-11-17）。
+			frame, err := player.manualParryStateUpdate()
+			if err != nil {
+				return err
+			}
+			if err := link.WriteFrame(frame); err != nil {
 				return err
 			}
 			log.Printf("%s: ack stray manual parry release (client state resync)", remote)
@@ -205,12 +203,20 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 		// 非战斗态各占一半——"格挡开启清怒"系误读。格挡态本身按
 		// "格挡被揍 +2"攒怒。
 	}
-	if err := writeOfficialParryTokenAck(link, player, engage); err != nil {
+	// 应答=三属性权威帧（InParry/InManualParry/ParryValue，server2
+	// manualParryStateUpdate 同构）：fork 客户端格挡认知锚在 fighter
+	// 资源上，六件套速度族/m169/BufferInfo4 是外服私服方言。
+	frame, err := player.manualParryStateUpdate()
+	if err != nil {
 		return err
 	}
-	// 格挡期间临时战斗姿态（2026-11-16 定版策略）：官服按住右键=拔剑
-	// 格挡的备战造型；真机实证只有 LogicState=1 立得住架势（战斗段 6s
-	// 保持 vs 预警(2)段 50ms 即弃）。Z 持剑切换（m292）所有权不侵占——
+	if err := link.WriteFrame(frame); err != nil {
+		return err
+	}
+	// 格挡期间临时战斗姿态（2026-11-16 定版策略；2026-11-17 曾按
+	// server2「零 463」口径删除，52506 会话 6 按塌 5 实证回退，恢复）：
+	// 非战斗下客户端格挡架势由 LogicState=1 撑住（真机实证战斗段 6s
+	// 保持 vs 预警段 50ms 即弃）。Z 持剑切换（m292）所有权不侵占——
 	// 按下时记下 0/2 原值临时升 1，松开/破防原值回写。官方按下簇本身
 	// 不带 463（a.pcapng），此帧是我方让客户端架势立住的撑持方言。
 	if engage {
@@ -229,106 +235,5 @@ func handleBlockStateCustom(link sceneMessageConnection, player *playerActor, cu
 
 // ---- m54 外服私服令牌格挡问答（a.pcapng 5.144/5.695 定版，2026-11-12 P2） ----
 
-var (
-	propParryTokenMoveSpeed   = clientdata.MustPlayerProperty("MoveSpeed").Index
-	propParryTokenRunSpeedAdd = clientdata.MustPlayerProperty("RunSpeedAdd").Index
-	propParryTokenUpSpeedAdd  = clientdata.MustPlayerProperty("ParryUpSpeedAdd").Index
-	propParryTokenBufferInfo4 = clientdata.MustPlayerProperty("BufferInfo4").Index
-)
 
-// handleParryTokenCustom 处理 C2S m54（格挡令牌问答，外服私服令牌/fork 0-1 双形态）。
-// 外服私服客户端连发令牌版 m54 等六件套应答（a.pcapng：按下=MoveSpeed 1.9f+
-// RunSpeedAdd -1.2f+InParry 1+ParryUpSpeedAdd -93+BufferInfo4 无时长槽串+
-// m169 添加+InManualParry 1；松开=m169 移除+BufferInfo4 清空+InParry 0+
-// MoveSpeed 4.8f+RunSpeedAdd 0.6f+ParryUpSpeedAdd 10+InManualParry 0，
-// 「连发直到应答到达」）。
-// 令牌值每会话成对随机，按下/松开判定=状态机（非格挡态收到→按下，
-// a 会话三对完美交替实证）；fork 客户端 0/1 形态按值（1=按下持续上报、
-// 0=松开）。此前全天 5971 条 m54 零应答——客户端 m54 连发不停的同源根因，
-// 亦是「外服私服应答方言正确→客户端切外服私服模式」假说（P2）的探针。
-// writeOfficialParryTokenAck 外服私服 m54 应答（单属性帧序照 a.pcapng，
-// m169 与 78 通道同构九值帧；速度对照抄外服私服样本值 1.9/-1.2 → 4.8/0.6）。
-// BufferInfo4 槽串=curated.md a.pcapng 5.2/5.7s 逐字节定版：按下
-// '11CE,701E5A4,3AD5FB,1,0,0'、松开空串。seg5 到期/seg6 剩余跳恒 0——
-// 格挡 buff 无时长、事件驱动（按下登记，松开/被打破摘除）。曾误抄
-// 字面量 "26"/"1"：客户端解析不出 0x11CE 登记、非战斗姿态按下即塌
-// （战斗态由 LogicState 撑住掩盖，与旧纪元 bug 同症不同因）。
-func writeOfficialParryTokenAck(link sceneMessageConnection, player *playerActor, engage bool) error {
-	single := func(index uint16, name string, value clientdata.Value) error {
-		frame, err := objectSingleProperty(playerObjectID, playerOwnerID, index, name, value)
-		if err != nil {
-			return fmt.Errorf("encode parry token %s: %w", name, err)
-		}
-		return link.WriteFrame(frame)
-	}
-	name := player.snapshotName()
-	notice, err := serverCustomIntMessage(169,
-		customInt(boolInt32(!engage)),
-		customString("BuffInParry"),
-		customObject(playerObjectID, playerOwnerID),
-		customObject(playerObjectID, playerOwnerID),
-		customWideString(name),
-		customWideString(name),
-		customInt64(0),
-		customInt(0),
-	)
-	if err != nil {
-		return fmt.Errorf("encode parry token notice: %w", err)
-	}
-	if engage {
-		// 速度族=a.pcapng 5.144s 按下簇逐字节（f32 位形直接复刻：
-		// MoveSpeed 0x3FE28F5C≈1.764、RunSpeedAdd 0xC00851EC≈-2.04——
-		// 旧注释的 1.9/-1.2 系误读；按下即塌疑与速度值不符客户端自检有关）。
-		if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(math.Float32frombits(0x3FE28F5C))); err != nil {
-			return err
-		}
-		if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(math.Float32frombits(0xC00851EC))); err != nil {
-			return err
-		}
-		if err := single(propInParry, "InParry", clientdata.Int32Value(1)); err != nil {
-			return err
-		}
-		if err := single(propParryTokenUpSpeedAdd, "ParryUpSpeedAdd", clientdata.Int32Value(-93)); err != nil {
-			return err
-		}
-		// BufferInfo4 外服私服=六段 CSV 槽串（curated.md a.pcapng 5.2s
-		// '11CE,701E5A4,3AD5FB,1,0,0'），seg5 到期/seg6 剩余跳恒 0：
-		// 格挡 buff 无时长，靠 m169 事件对增删。曾误抄字面量 "26"，
-		// 客户端解析不出 0x11CE 登记→非战斗姿态按下即被撤销（战斗态
-		// 由 LogicState 撑住掩盖）。表线型 7(串)：按线型发串，发 int
-		// 会被当串长度域解出 Out range（trace.log 23:53 实证）。
-		if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue(
-			fmt.Sprintf("%X,%X,%X,1,0,0", parryBuffStaticData, playerObjectID, playerOwnerID))); err != nil {
-			return err
-		}
-		if err := link.WriteFrame(notice); err != nil {
-			return err
-		}
-		if err := single(propParryValue, "ParryValue", clientdata.Int32Value(player.parryValueTotalSnapshot())); err != nil {
-			return err
-		}
-		return single(propInManualParry, "InManualParry", clientdata.Int32Value(1))
-	}
-	if err := link.WriteFrame(notice); err != nil {
-		return err
-	}
-	// 外服私服松开=BufferInfo4 清空串（curated.md a.pcapng 5.7s 'BufferInfo4='）。
-	if err := single(propParryTokenBufferInfo4, "BufferInfo4", clientdata.StringValue("")); err != nil {
-		return err
-	}
-	if err := single(propInParry, "InParry", clientdata.Int32Value(0)); err != nil {
-		return err
-	}
-	// 松开恢复族=a.pcapng 5.695s 逐字节：MoveSpeed 0x40900000=4.5、
-	// RunSpeedAdd 0x3F19999A=0.6。
-	if err := single(propParryTokenMoveSpeed, "MoveSpeed", clientdata.Float32Value(math.Float32frombits(0x40900000))); err != nil {
-		return err
-	}
-	if err := single(propParryTokenRunSpeedAdd, "RunSpeedAdd", clientdata.Float32Value(math.Float32frombits(0x3F19999A))); err != nil {
-		return err
-	}
-	if err := single(propParryTokenUpSpeedAdd, "ParryUpSpeedAdd", clientdata.Int32Value(10)); err != nil {
-		return err
-	}
-	return single(propInManualParry, "InManualParry", clientdata.Int32Value(0))
-}
+

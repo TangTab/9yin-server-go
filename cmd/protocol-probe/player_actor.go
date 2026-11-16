@@ -263,13 +263,16 @@ type playerActor struct {
 	// 客户端发新令牌×4 重试约 6s，官方零回应、客户端自行放弃；窗后同值
 	// 到达继续静默，防误判成新按下）。真实按下（异于散逸值）时清零。
 	parryStrayValue int64
-	// parryPreBlockState 手动格挡期间临时战斗姿态(1)的还原位（格挡前
-	// 的 0/2，松开/破防后回写——Z 持剑切换的所有权不被侵占）。
-	parryPreBlockState byte
 	// cantParryUntil 虚招破防后的不可格挡窗（官方「被虚招命中的瞬间，
 	// 短时间内无法格挡」；窗内 m54 全部静默吞，窗过后重新按下受理）。
 	cantParryUntil time.Time
-	skillLockUntil time.Time
+	// parryPreBlockState 手动格挡期间临时战斗姿态(1)的还原位（格挡前
+	// 的 0/2，松开/破防后回写——Z 持剑切换的所有权不被侵占）。0xFF=
+	// 无在格挡。非战斗格挡的架势由 LogicState=1 撑住（2026-11-16 真机
+	// 定版：战斗段 6s 保持 vs 预警段 50ms 即弃；2026-11-17 三属性帧版
+	// 全删撑持后 52506 会话 6 按塌 5 实证回退，现恢复）。
+	parryPreBlockState byte
+	skillLockUntil     time.Time
 	reviveAt       time.Time
 	// 通道技能运行态（skill_channel.go，挑战.pcapng 2026-11-12 寒心恨雪
 	// 定版）：channelUntil=通道有效期（受理起 waves×interval+余量，窗口
@@ -488,7 +491,9 @@ func newPlayerActor(name string, silver int32) *playerActor {
 		skillCooldowns:    make(map[string]time.Time),
 		instantQingGongAt: make(map[string]time.Time),
 		airJumpsUsed:      make(map[string]bool),
-		progress:          newPlayerProgress(),
+		// parryPreBlockState 0xFF=无在格挡（零值 0 会被 take 误当还原位）。
+		parryPreBlockState: 0xFF,
+		progress:           newPlayerProgress(),
 		// GM 面板域以种子起步（Java PanelState 同口径）：实力 151 与
 		// 选人界面 f23 同档（title027 返璞归真），其余零值合法即下发。
 		gm: gmPanelDomain{
@@ -1691,6 +1696,26 @@ func (p *playerActor) parryValueTotalSnapshot() int32 {
 	return p.progress.parryValueTotal()
 }
 
+// manualParryStateUpdate 格挡态权威三属性帧（server2 manualParryStateUpdate
+// 同构，2026-11-17）：InParry+InManualParry+ParryValue——fork 客户端的格挡
+// 认知锚在这组 fighter 资源上（六件套速度族/m169/BufferInfo4/临时升 1
+// 均为外服私服方言，在原生链上非战斗格挡按下即塌）。active 门槛=
+// parrying && parryValue>0；重复松开也回帧（客户端中断动作清理时连发
+// 多个松开，权威回帧保持其 fighter 资源对齐，server2 同口径）。
+func (p *playerActor) manualParryStateUpdate() ([]byte, error) {
+	value := p.parryValueTotalSnapshot()
+	active := p.parryingSnapshot() && value > 0
+	inParry := int32(0)
+	if active {
+		inParry = 1
+	}
+	return sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
+		{Index: propInParry, Name: "InParry", Value: clientdata.Int32Value(inParry)},
+		{Index: propInManualParry, Name: "InManualParry", Value: clientdata.Int32Value(inParry)},
+		{Index: propParryValue, Name: "ParryValue", Value: clientdata.Int32Value(value)},
+	})
+}
+
 // parryStateReport 令牌方言 m54 的状态解码（2026-11-15 淚夜定案）：
 // 官服族客户端**每帧广播**当前格挡状态（57719 会话 6984 条同值零间隙、
 // 58929 会话基调值为主+按压期换值成对交替实证）——基调=登录后首条
@@ -1770,26 +1795,13 @@ func (p *playerActor) clearParryStrayToken() {
 	p.mu.Unlock()
 }
 
-// setParryPreBlockState / takeParryPreBlockState 格挡临时战斗姿态的
-// 记忆对（0xFF=无在格挡）。
-func (p *playerActor) setParryPreBlockState(state byte) {
-	p.mu.Lock()
-	p.parryPreBlockState = state
-	p.mu.Unlock()
-}
-
-func (p *playerActor) takeParryPreBlockState() byte {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	pre := p.parryPreBlockState
-	p.parryPreBlockState = 0xFF
-	return pre
-}
-
-// writeLogicStateFrame 推 463 单属性帧（姿态变更的线上形态）。
+// writeLogicStateFrame 推 LogicState 单属性帧（姿态变更的线上形态）。
+// idx 按现行表动态解析（2494 表=465；旧硬编 463 在该表位是别的属性=
+// 错位白发——非战斗格挡「按下即塌」根因：撑持升 1 帧从未到达客户端，
+// 战斗态只是被客户端本地战斗态兜住，2026-11-17）。
 func (p *playerActor) writeLogicStateFrame(link sceneMessageConnection, state byte) {
 	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: propLogicState, Name: "LogicState", Value: clientdata.ByteValue(state)},
+		{Index: clientdata.MustPlayerProperty("LogicState").Index, Name: "LogicState", Value: clientdata.ByteValue(state)},
 	})
 	if err != nil {
 		return
@@ -1804,6 +1816,22 @@ func (p *playerActor) cantParrySnapshot() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return time.Now().Before(p.cantParryUntil)
+}
+
+// setParryPreBlockState / takeParryPreBlockState 格挡临时战斗姿态的
+// 记忆对（0xFF=无在格挡；take 取走即清零）。
+func (p *playerActor) setParryPreBlockState(state byte) {
+	p.mu.Lock()
+	p.parryPreBlockState = state
+	p.mu.Unlock()
+}
+
+func (p *playerActor) takeParryPreBlockState() byte {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	pre := p.parryPreBlockState
+	p.parryPreBlockState = 0xFF
+	return pre
 }
 
 // expireBuff 只清除创建此定时器的那份确切租约。后续的刷新绝不会被一个
@@ -2443,6 +2471,17 @@ func (p *playerActor) addObjectAs(objectID, ownerID uint32, location role.Positi
 	addInt(clientdata.MustPlayerProperty("HPRatio").Index, 100)         // fork=469
 	addInt(clientdata.MustPlayerProperty("ParryRatio").Index, 100)      // fork=478
 	addInt(clientdata.MustPlayerProperty("HitHPRatio").Index, 100)      // fork=482
+	// 格挡 fighter 资源组入档（server2 parryProperties 定案，2026-11-17）：
+	// 客户端格挡输入门只在对象创建时按档案初始化一次——组缺席则右键按下
+	// 不触发格挡（原生链真机：m54 只上报基调值、engage 永不成立，「非战斗
+	// 不能格挡」根因；wholesale 时代靠官服 0x28 档自带本组掩盖）。
+	// ParryValue=MaxParry+MaxParryAdd 推导和（progress 同源）。
+	addInt(propInParry, 0)
+	addInt(propCantParry, 0)
+	addInt(clientdata.MustPlayerProperty("ParryType").Index, 0)
+	addInt(propInManualParry, 0)
+	addInt(propParryValue, p.progress.parryValueTotal())
+	addInt(propParryUpSpeed, 4)
 	binary.LittleEndian.PutUint16(msg[0x3d:], count)
 	p.mu.Unlock()
 	return msg

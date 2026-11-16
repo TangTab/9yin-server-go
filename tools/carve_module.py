@@ -4,19 +4,20 @@
 节内容=运行时内存（VMP 已解包）；头=内存头（完好用内存的，缺则用磁盘头）；
 布局=PointerToRawData:=VirtualAddress、SizeOfRawData:=VirtualSize，
 ImageBase:=实际加载基址 → 重建后 VA 与 DMP 地址逐位一致。
-用法: python carve_module.py <module_name> <out_path>
+用法: python carve_module.py <module_name> <out_path> [dmp_path]
 """
+import os
 import struct
 import sys
 
 sys.path.insert(0, r'G:\pojie\ai\9yin-server-go\tools')
 from dmp_reader import Dump
 
-DMP = r'G:/pojie/ai/tmp_carve/fxgame.DMP'
+DMP = r'F:/Game/Online/9yin/九阴资源/tmp_carve/fxgame.DMP'
 
 
-def main(mod_name, out_path):
-    d = Dump(DMP)
+def main(mod_name, out_path, dmp=None):
+    d = Dump(dmp or os.environ.get('NINEYIN_DMP', DMP))
     mods = {n.replace('\\', '/').split('/')[-1].lower(): (n, b, s) for n, b, s in d.modules()}
     if mod_name.lower() not in mods:
         print('module not found:', mod_name)
@@ -70,4 +71,4 @@ def main(mod_name, out_path):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else None)

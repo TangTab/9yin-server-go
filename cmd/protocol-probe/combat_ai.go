@@ -267,11 +267,18 @@ func (r *sceneRun) broadcastParryBreaks(breaks []parryBreakEvent) {
 			log.Printf("%s: write CantParry debuff: %v", victim.view.remote, err)
 			continue
 		}
-		if err := writeOfficialParryTokenAck(victim.view.conn, victim.player, false); err != nil {
-			log.Printf("%s: write feint parry break release: %v", victim.view.remote, err)
+		// 破防释放序=三属性权威帧（InParry/InManualParry/ParryValue 空态，
+		// server2 同口径）+ 格挡临时战斗姿态还原（同 m54 松开口径，
+		// 2026-11-17 随撑持方言恢复）。
+		breakFrame, breakErr := victim.player.manualParryStateUpdate()
+		if breakErr != nil {
+			log.Printf("%s: encode feint parry break state: %v", victim.view.remote, breakErr)
 			continue
 		}
-		// 格挡临时战斗姿态还原（同 m54 松开口径）。
+		if err := victim.view.conn.WriteFrame(breakFrame); err != nil {
+			log.Printf("%s: write feint parry break state: %v", victim.view.remote, err)
+			continue
+		}
 		if pre := victim.player.takeParryPreBlockState(); pre != 0xFF {
 			victim.player.setLogicState(pre)
 			victim.player.writeLogicStateFrame(victim.view.conn, pre)

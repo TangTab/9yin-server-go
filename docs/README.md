@@ -22,6 +22,7 @@
 | [外服登录帧对照与缺口清单](official/外服登录帧对照与缺口清单.md) | 登录帧逐帧对照总账（§一~§15）：缺口/差异/未应答台账，逐轮追加 | 现行权威（总账） |
 | [fxnet2-op-dispatch-table](official/fxnet2-op-dispatch-table.md) | fxnet2.dll 引擎 op 分发器静态解码定版（0x00-0x37 主表 + 0x27-0x30 压缩族二级表） | 现行权威 |
 | [fxgamelogic-s2c-custommsg-table](official/fxgamelogic-s2c-custommsg-table.txt) | fxgamelogic 722 槽 custommsg ID→handler 原始提取表 | 数据附录 |
+| [fxgamelogic格挡门与CustomSend双路架构](official/fxgamelogic格挡门与CustomSend双路架构.md) | 格挡门逆向定版：CustomSend lua 白名单闸（54 不在名单）vs 原生无闸路、m292 发送器+RoleStateIndex、InParry/fightparry/ClaspParryLockTime 生态、m54 链定位 VMP 区、下一步三选 | 现行权威（格挡门逆向） |
 | [外服抓包交互时间线分析](official/外服抓包交互时间线分析.md) | a-i.pcapng（8 抓包/4 会话/7071-7074 线）交互时间线主报告 | 现行参考 |
 | [附录-骨干时间线](official/附录-骨干时间线.md) · [精选](official/附录-精选时间线.md) · [全量合并](official/附录-全量合并时间线.md) | 三粒度原始时间线 dump（98K/530K/670K） | 数据附录 |
 | [外服0x29批量预载通道解析](official/外服0x29批量预载通道解析.md) | 0x29 登录簇玩家记录批量预载通道语法 + LZ 池种子定案 | 现行参考 |
