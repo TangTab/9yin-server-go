@@ -77,6 +77,9 @@ type sceneRun struct {
 	lootBoxes           map[uint32]*lootBoxRuntime
 	nextSweepAt         time.Time
 	pendingObjectFrames []pendingObjectFrame
+	// gmDummies 是 GM 训练木桩的在场登记（gm_dummy.go；id → ownerID）：
+	// clear_dummies 按表清除，惰性建表。run.mu 保护。
+	gmDummies map[uint32]uint32
 	// fightRelation 是 0x13 fight_relation_rec 单格累计伤害的权威表：
 	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
 	// NPC 死亡清除，重生后从零累计。run.mu 保护。

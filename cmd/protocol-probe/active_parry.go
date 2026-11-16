@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/entity"
 )
 
 // CLIENT_CUSTOMMSG_ACTIVE_PARRY 是现代客户端用于主动招架控制的共享 C->S 入口。
@@ -58,48 +59,46 @@ const clientCustomBlockState int32 = 54
 // propLogicState 是预警切换回帧的单属性索引（官方表 463 号，byte 型）。
 const propLogicState uint16 = 463
 
-// handleBlockStateCustom 见下方；handleChangeWarningCustom 还原 fork
-// active_parry.go:186-250 的预警切换：零参消息，仅在普通(0)↔预警(2)间
-// 翻转；出招中/格挡中/异常态拒绝。回单帧 0x10 LogicState byte。
+// handleChangeWarningCustom 处理 C2S m292（Z 拔/收刀，零参）。fork 客户端
+// 「绝不自行发明状态」——Z 的执行完全依赖服务端回帧（9yin-go-server2
+// handleChangeWarningCustom 权威方言，2026-11-17 七轮排查真机定版）：
+// 受理仅翻 LogicState 0↔2，翻态后回 vitalUpdate 全量帧（FxGameLogic 收
+// 面板里的 LogicState=2 播拔刀挂剑、收 0 播收刀）；战斗(1)/打坐(102)/
+// 死亡(120)等态忽略。单属性 463 帧形态客户端不认（21:19 会话振荡实证）。
 func handleChangeWarningCustom(link sceneMessageConnection, player *playerActor, custom clientCustomMessage, remote string) (bool, error) {
 	if len(custom.Values) == 0 || custom.Values[0].Type != 2 || custom.Values[0].Int32 != clientCustomChangeWarning {
 		return false, nil
 	}
 	if player == nil {
-		return true, fmt.Errorf("change warning before scene player exists")
+		log.Printf("%s: reject change warning before player spawn", remote)
+		return true, nil
 	}
 	if len(custom.Values) != 1 {
-		log.Printf("%s: reject change warning with extra payload nvalues=%d", remote, len(custom.Values)-1)
-		return true, fmt.Errorf("change warning expects no payload, got %d extra values", len(custom.Values)-1)
-	}
-	state := player.logicStateSnapshot()
-	if state != 0 && state != 2 {
-		log.Printf("%s: reject change warning from logic state %d", remote, state)
+		log.Printf("%s: ignore change warning with extra payload nvalues=%d", remote, len(custom.Values)-1)
 		return true, nil
 	}
-	if casting := player.currentSkillSnapshot(); casting != "" {
-		log.Printf("%s: reject change warning while casting %s", remote, casting)
+	current := player.logicStateSnapshot()
+	var next uint8
+	switch current {
+	case entity.LogicStateWarning:
+		next = entity.LogicStateNormal
+	case entity.LogicStateNormal:
+		next = entity.LogicStateWarning
+	default:
+		// 客户端只在空闲静态/移动态发起切换；战斗(1)/打坐(102)/死亡(120)
+		// 等态忽略请求，维持服务端权威状态（server2 同口径）。
+		log.Printf("%s: ignore change warning from logic state %d", remote, current)
 		return true, nil
-	}
-	if player.parryingSnapshot() {
-		log.Printf("%s: reject change warning while parrying", remote)
-		return true, nil
-	}
-	next := byte(2)
-	if state == 2 {
-		next = 0
 	}
 	player.setLogicState(next)
-	frame, err := sceneObjectProperties(playerObjectID, playerOwnerID, 0, []clientdata.IndexedProperty{
-		{Index: propLogicState, Name: "LogicState", Value: clientdata.ByteValue(next)},
-	})
+	frame, err := player.vitalUpdate()
 	if err != nil {
-		return true, fmt.Errorf("encode logic state: %w", err)
+		return true, fmt.Errorf("encode change warning state=%d: %w", next, err)
 	}
 	if err := link.WriteFrame(frame); err != nil {
-		return true, err
+		return true, fmt.Errorf("send change warning state=%d: %w", next, err)
 	}
-	log.Printf("%s: change warning logic_state %d -> %d", remote, state, next)
+	log.Printf("%s: change warning %d -> %d via vitalUpdate", remote, current, next)
 	return true, nil
 }
 

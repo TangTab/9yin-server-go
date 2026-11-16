@@ -5,6 +5,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"testing"
+
+	"github.com/local/9yin-go-server/internal/clientdata"
+	"github.com/local/9yin-go-server/internal/entity"
 )
 
 func TestActiveParryAcceptsModernIntegralSubtype(t *testing.T) {
@@ -171,8 +174,10 @@ func TestParryBuffSerialNoExpiry(t *testing.T) {
 }
 
 // msg292 预警切换（fork active_parry.go:186-250）：零参消息在普通(0)↔
-// 预警(2)间翻转并回单帧 0x10 LogicState byte；出招中/格挡中/带额外
-// 载荷拒绝。
+// msg292 预警切换（Z 拔/收刀）fork 方言（server2 权威实现，2026-11-17
+// 七轮排查真机定版）：受理翻 LogicState 0↔2 并回 vitalUpdate 全量帧
+//（面板带 LogicState——FxGameLogic 据此播拔刀挂剑）；战斗等非 0/2 态
+// 忽略；带载荷静默忽略。
 func TestChangeWarningTogglesLogicState(t *testing.T) {
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("预警侠", 0)
@@ -181,82 +186,84 @@ func TestChangeWarningTogglesLogicState(t *testing.T) {
 	if handled, err := handleChangeWarningCustom(conn, player, warningMsg, "test"); err != nil || !handled {
 		t.Fatalf("first toggle handled=%t err=%v", handled, err)
 	}
-	if got := player.logicStateSnapshot(); got != 2 {
-		t.Fatalf("logic state=%d, want 2 after engage", got)
+	if got := player.logicStateSnapshot(); got != entity.LogicStateWarning {
+		t.Fatalf("logic state=%d, want warning after first Z", got)
 	}
 	frames := conn.Frames()
-	if len(frames) != 1 {
-		t.Fatalf("warning frames=%d, want single LogicState frame", len(frames))
+	if len(frames) != 1 || frames[0][0] != 0x10 {
+		t.Fatalf("warning frames=%x, want single vitalUpdate 0x10", frames)
 	}
+	// vitalUpdate 面板必须带 LogicState=2（fork 客户端据此执行拔刀）。
+	// idx 按现行表解析（2494 表=465；旧硬编 463 在该表位是别的属性——
+	// idx 错位正是旧单属性帧方言失灵的一半真相）。
 	frame := frames[0]
-	// 0x10 | isView=0 | obj | owner | count=1 | idx 463 | byte 2。
-	if len(frame) != 15 || frame[0] != 0x10 || frame[1] != 0 ||
-		binary.LittleEndian.Uint32(frame[2:]) != playerObjectID ||
-		binary.LittleEndian.Uint32(frame[6:]) != playerOwnerID ||
-		binary.LittleEndian.Uint16(frame[10:]) != 1 ||
-		binary.LittleEndian.Uint16(frame[12:]) != propLogicState || frame[14] != 2 {
-		t.Fatalf("LogicState frame=%x", frame)
+	found := false
+	wantIdx := clientdata.MustPlayerProperty("LogicState").Index
+	off := 12
+	cnt := int(binary.LittleEndian.Uint16(frame[10:12]))
+	for i := 0; i < cnt; i++ {
+		if off+2 > len(frame) {
+			break
+		}
+		idx := binary.LittleEndian.Uint16(frame[off : off+2])
+		off += 2
+		if idx == wantIdx {
+			found = frame[off] == entity.LogicStateWarning
+			break
+		}
+		off += 4 // 面板其余列宽不逐一解，仅扫描 LogicState 位
+	}
+	if !found {
+		t.Fatalf("vitalUpdate missing LogicState=%d: %x", entity.LogicStateWarning, frame)
 	}
 
-	// 翻回普通：同构单帧，byte 0。
+	// 翻回收刀：同构 vitalUpdate 单帧。
 	if handled, err := handleChangeWarningCustom(conn, player, warningMsg, "test"); err != nil || !handled {
 		t.Fatalf("second toggle handled=%t err=%v", handled, err)
 	}
-	if got := player.logicStateSnapshot(); got != 0 {
-		t.Fatalf("logic state=%d, want 0 after release", got)
+	if got := player.logicStateSnapshot(); got != entity.LogicStateNormal {
+		t.Fatalf("logic state=%d, want normal after second Z", got)
 	}
-	frames = conn.Frames()
-	if len(frames) != 2 || frames[1][14] != 0 {
+	if frames := conn.Frames(); len(frames) != 2 {
 		t.Fatalf("release frames=%x", frames)
 	}
 }
 
-func TestChangeWarningRejectsExtraPayloadWhileCastingAndWhileParrying(t *testing.T) {
+func TestChangeWarningIgnoresExtraPayloadAndFightStance(t *testing.T) {
 	conn := &captureMessageConnection{}
 	player := newPlayerActor("预警侠", 0)
 
-	// 带载荷：错误且不翻转。
+	// 带载荷：静默忽略零帧不翻转（server2 方言，不回错不断链）。
 	extra := clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: clientCustomChangeWarning},
 		{Type: 2, Int32: 1},
 	}}
-	if handled, err := handleChangeWarningCustom(conn, player, extra, "test"); !handled || err == nil {
+	if handled, err := handleChangeWarningCustom(conn, player, extra, "test"); err != nil || !handled {
 		t.Fatalf("extra payload handled=%t err=%v", handled, err)
 	}
 	if got := player.logicStateSnapshot(); got != 0 {
 		t.Fatalf("extra payload flipped state to %d", got)
 	}
-
-	// 出招中拒绝。
-	player.mu.Lock()
-	player.currentSkillID = "CS_yhwq_hsqs05"
-	player.mu.Unlock()
-	warningMsg := clientCustomMessage{Values: []clientCustomValue{{Type: 2, Int32: clientCustomChangeWarning}}}
-	if handled, err := handleChangeWarningCustom(conn, player, warningMsg, "test"); err != nil || !handled {
-		t.Fatalf("casting reject handled=%t err=%v", handled, err)
+	if frames := conn.Frames(); len(frames) != 0 {
+		t.Fatalf("extra payload emitted frames=%x", frames)
 	}
-	if got := player.logicStateSnapshot(); got != 0 {
-		t.Fatalf("casting toggle flipped state to %d", got)
-	}
-	player.mu.Lock()
-	player.currentSkillID = ""
-	player.mu.Unlock()
 
-	// 格挡中拒绝。
+	// 格挡按下（HEAD 方言升临时战斗姿态 1）后：m292 落入非 0/2 忽略分支。
 	if err := handleBlockStateCustom(conn, player, clientCustomMessage{Values: []clientCustomValue{
 		{Type: 2, Int32: clientCustomBlockState},
 		{Type: 2, Int32: 0},
 	}}, "test"); err != nil {
 		t.Fatal(err)
 	}
+	base := len(conn.Frames())
+	warningMsg := clientCustomMessage{Values: []clientCustomValue{{Type: 2, Int32: clientCustomChangeWarning}}}
 	if handled, err := handleChangeWarningCustom(conn, player, warningMsg, "test"); err != nil || !handled {
-		t.Fatalf("parrying reject handled=%t err=%v", handled, err)
+		t.Fatalf("fight-stance toggle handled=%t err=%v", handled, err)
 	}
 	if got := player.logicStateSnapshot(); got != 1 {
-		t.Fatalf("parrying engage should hold transient fight stance, got %d", got)
+		t.Fatalf("fight stance must be held, got %d", got)
 	}
-	// 至此连接上只有格挡按下产生的外服私服七帧序（预警拒绝不回帧）。
-	if frames := conn.Frames(); len(frames) != 9 {
-		t.Fatalf("warning rejections emitted frames: %x", frames)
+	if got := len(conn.Frames()) - base; got != 0 {
+		t.Fatalf("fight-stance toggle emitted %d frames, want ignore", got)
 	}
 }

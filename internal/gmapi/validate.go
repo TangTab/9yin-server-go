@@ -100,6 +100,23 @@ func Validate(body CommandBody) (Command, error) {
 	case "spawn_chest":
 		// GM 世界宝箱：在当前角色位置生成一只独立宝箱实体（stormbox_10
 		// 方言），掉落走回落阶梯一包，拾空/超时消失。
+	case "spawn_dummy":
+		// GM 训练木桩：官方木人桩 AttackNpc 模板，纯沙包（不索敌/不追击/
+		// 不还手），血量自定义，数量 1..20 环形摆在角色身边（0 视为 1）；
+		// 打空 15 秒满血复活。clear_dummies 一键清除。
+		if body.DummyHp < 1 || body.DummyHp > 2_000_000_000 {
+			return command, fmt.Errorf("dummy hp must be between 1 and 2000000000")
+		}
+		command.DummyHp = body.DummyHp
+		command.Count = body.Count
+		if command.Count == 0 {
+			command.Count = 1
+		}
+		if command.Count < 1 || command.Count > 20 {
+			return command, fmt.Errorf("dummy count must be between 1 and 20")
+		}
+	case "clear_dummies":
+		// 无负载动作：清除当前场景全部 GM 训练木桩（活体与尸体）。
 	case "set_autosave_interval":
 		// 在线玩家内功/经脉快照的自动存盘周期（秒）：0=关闭（仅断线
 		// 与 Ctrl+C 关服时存）。进程级，改动即刻对全部在线会话生效。

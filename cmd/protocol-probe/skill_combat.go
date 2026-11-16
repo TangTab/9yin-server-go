@@ -1170,9 +1170,18 @@ func writeSkillSettleFrames(link sceneMessageConnection, world *sceneLifecycle, 
 			}
 		}
 		if hit.outcome.killed {
-			// 击杀簇（外服私服序）：fight_relation 撤销 → c1=29 击退；
-			// 死亡面板/尸体拾取走既有 relayNPCKillFrame 链。
+			// 击杀簇（外服私服序）：fight_relation 撤销 → 死亡面板 →
+			// c1=29 击退；尸体拾取走既有 relayNPCKillFrame 链。
 			if err := link.WriteFrame(fightRelationRowDeleteFrame()); err != nil {
+				return totalLoot, err
+			}
+			// 死亡面板（0x10 HP=0/LogicState=120/Dead=1）必须首发给击杀者
+			// 本人：relayNPCKillFrame 走 relayCombatFrame 的 exclude 语义只
+			// 中继旁观者——此前单人场景下死亡帧谁也收不到，客户端不播死亡
+			// 动画、空血怪原地站立，15s 后服务端复活照常索敌追击成「僵尸怪」
+			//（2026-11-16 真机 61093 会话捕获实证：全捕获 Dead=1/LogicState=
+			// 120 零帧，被杀怪仅剩 0x2D HPRatio=0）。
+			if err := link.WriteFrame(hit.outcome.frame); err != nil {
 				return totalLoot, err
 			}
 			totalLoot += hit.outcome.loot
@@ -1517,7 +1526,13 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				// 距离四桶（g/f/b 定版）：≤直收带直接执行簇（不走暂存链、
 				// CD/MP 即刻结、不扣轻功）；其余一律暂存冲锋链（受理与距离
 				// 解耦，f 十连按 14.6~19.8m 全受理零拒绝）。
-				if distance <= rushDirectCastMeters(definition) {
+				// v30 空/地混层闸（2026-11-16 用户定版+二轮澄清）：近身但
+				// |出招位 y−目标 y|>1m（角色/目标任一在高处）时不直收
+				//（原地普攻=隔空打高处/低处目标），改走暂存链——stageRushCast
+				// 尾部立即冲锋到目标身边出招；同层 ≤1m 距离分带 v29 原样。
+				heightGap := math.Abs(float64(castAt.Y - geometry.Y))
+				if distance <= rushDirectCastMeters(definition) &&
+					heightGap <= float64(rushChargeHeightGateMeters) {
 					return executeRushDirect(link, player, world, definition, targetID, targetOwnerID, geometry, castAt, distance, remote)
 				}
 				return stageRushCast(link, player, world, definition, targetID, targetOwnerID, geometry, castAt, distance, remote)

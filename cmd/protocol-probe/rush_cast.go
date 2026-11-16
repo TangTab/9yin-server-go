@@ -75,9 +75,27 @@ const (
 	//（2026-11-16 官服观察定版：3m 技能在 3~5m 立即冲锋；技能4.pcapng
 	// 玩家档案 LandRushSpeed=25/AirRushSpeed=15 分档同源）。
 	rushGRushRangeMeters = 5.0
+	// rushChargeHeightGateMeters 空/地混层闸（v30，2026-11-16 用户定版+
+	// 二轮澄清）：|出招位置 y − 目标 y| 超过该值=角色/目标任一在高处
+	//（角色空-目标地 / 目标空-角色地 / 双空）——近身也不原地直收（隔空
+	// 打高处/低处目标），改走冲锋链受理即冲；≤1m 视为同层，距离分带与
+	// v29 完全一致（平地带内照常地面冲锋，其它规则不动）。
+	rushChargeHeightGateMeters = float32(1.0)
+	// rushChargeUpliftAirborneMeters 低→高空中奔袭档阈值（v30 用户补充）：
+	// 目标高于出招位置超过该值的冲锋走空中档（fastruning flag2 15m/s 奔袭
+	// 动画，非地面跑步动画）；高→低维持 1.5m（rushAirborneAboveMeters，
+	// 技能4.pcapng 实证）。范围冲锋（点地）同规则。
+	rushChargeUpliftAirborneMeters = float32(0.5)
 	// rushWalkKickDelay：受理簇到走踢帧的官方簇距（外服私服 f#0202 +155ms）。
 	rushWalkKickDelay = 155 * time.Millisecond
 )
+
+// rushChargeAirborne 冲锋空中档判定（v30）：高→低 >1.5m（技能4.pcapng
+// 俯冲实证）或 低→高 >0.5m（2026-11-16 用户补充：低地冲高地走空中奔袭
+// 动画，非地面跑步）→ 空中档（fastruning flag2 / 15m/s / ETA 3D）。
+func rushChargeAirborne(casterY, destY float32) bool {
+	return casterY-destY > rushAirborneAboveMeters || destY-casterY > rushChargeUpliftAirborneMeters
+}
 
 // rushDashFallbackDelay：c61 发出后的落地哨首查延迟（外服私服无此机制；
 // var 化供测试缩短）。c61 未被本客户端消费（2026-11-15 真机实证）时站立
@@ -547,13 +565,8 @@ func (p *playerActor) approachCancelledSnapshot() bool {
 	return p.approachCancelled
 }
 
-// clientAirborneAbove 客户端上报 y 高于锚点（空中冲刺判定，v11：3 米技
-// 短冲终点地面/空中分流）。
-func (p *playerActor) clientAirborneAbove(anchorY float32) bool {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	return p.clientReportY-anchorY > 1.5
-}
+// clientAirborneAbove 已并入 rushChargeAirborne（v30：低→高 >0.5m 亦
+// 空中档；原方法只识高→低 1.5m）。
 
 // rushPressGate 冲锋族按压入口闸：beginSkillUse 非 settled 分支的锁招/
 // 个人 CD / 公共 GCD 三闸只读版。冲锋链在 211 入口提前分叉（直收 return /
@@ -880,7 +893,8 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, world *scen
 	// v29：空中判定启用（旧 1e9 禁用线撤销——其根因是 NPC 服务端 y 口径
 	// 时代，而冲锋族 geometry 已用 211 自报目标坐标，与 castAt 同为客户端
 	// 坐标系；官服观察「空中奔袭凭空飞过不落地、速度 15」即此分支）。
-	airborne := castAt.Y-target.Y > rushAirborneAboveMeters
+	// v30：低→高 >0.5m 亦空中档（rushChargeAirborne 统一判定）。
+	airborne := rushChargeAirborne(castAt.Y, target.Y)
 	rearm := player.peekPendingCast(now) != nil
 	// 冲刺在途标记必须在 stagePendingCast 复位前捕获（旧代码复位后再读
 	// 恒 false，换技能还原分支实际不可达——v29 修正）。
@@ -1040,6 +1054,18 @@ func stageRushCast(link sceneMessageConnection, player *playerActor, world *scen
 	// 客户端 OnMoving 闸（motion_func 白名单）未破之前不再自动发。
 	if strings.EqualFold(strings.TrimSpace(os.Getenv("NINEYIN_RUSH_WALK_KICK")), "1") {
 		scheduleRushWalkKick(link, player, definition, targetID, target, castAt, remote)
+	}
+	// v30 近身混层立即冲锋（2026-11-16 用户定版+二轮澄清）：直收带内但
+	// |出招位 y−目标 y|>1m（空/地混层：角色空-目标地/目标空-角色地/双空）
+	// ——原地普攻会隔空打高处/低处目标，受理簇后立即发冲锋（211 分流已
+	// 保证此形态不再走 executeRushDirect；带外按压仍由客户端自走近、上报
+	// 进带后 tryRushArrival 触发，同层 ≤1m 距离分带 v29 原样）。客户端
+	// 自身飞行中扣住（airFlightActive 闸，与 tryRushArrival 同款；落地后
+	// 行走上报重新触发）。
+	if distance <= rushDirectCastMeters(definition) &&
+		math.Abs(float64(castAt.Y-target.Y)) > float64(rushChargeHeightGateMeters) &&
+		!player.airFlightActiveSnapshot() {
+		rushDashDrive(link, player, world, target, castAt.X, castAt.Y, castAt.Z, remote)
 	}
 	// ★服务端驱动接近 v5（默认开，NINEYIN_RUSH_APPROACH=off 关闭）：本服
 	// 登录方言下客户端无本地「按下即走」，远距受理后只会无限期挂起。已证伪
@@ -1961,10 +1987,12 @@ func issueAreaGroundRushDash(link sceneMessageConnection, player *playerActor,
 		return 0
 	}
 	destX, destY, destZ := ground.X, ground.Y, ground.Z
-	// 高→低判定：范围技 castAt/ground 均为 211 客户端自报坐标（同一坐标
-	// 系，无 NPC 内部 y 口径问题），1.5m 与 clientAirborneAbove/
-	// rushAirborneAboveMeters 同阈值。
-	airborne := castAt.Y-ground.Y > rushAirborneAboveMeters
+	// 空中档判定（v30，用户补充「范围冲锋也是一样」）：castAt/ground 均
+	// 211 客户端自报坐标（同一坐标系，无 NPC 内部 y 口径问题）。高→低
+	// >1.5m（rushAirborneAboveMeters，技能4.pcapng 实证）或 低→高 >0.5m
+	//（rushChargeUpliftAirborneMeters，低地冲高地=空中奔袭非地面跑步）
+	// → 空中档 15m/s + c61 flag2；同平面/小落差=25 高速跑 + State=run。
+	airborne := rushChargeAirborne(castAt.Y, ground.Y)
 	speed := rushDriveDashSpeedMeters
 	slack := 120 * time.Millisecond
 	if airborne {
@@ -1998,7 +2026,7 @@ func issueAreaGroundRushDash(link sceneMessageConnection, player *playerActor,
 		}
 	}
 	dashDest := worldcore.Transform{X: destX, Y: destY, Z: destZ, Orient: orientTowardTarget(castAt.X, castAt.Z, ground.X, ground.Z)}
-	_ = link.WriteFrame(rushDriveEntryV13(dashDest, speed, 1))
+	driveRushDest(link, player, nil, castAt, dashDest, speed, airborne)
 	airTag := ""
 	if airborne {
 		airTag = " air"
@@ -2102,6 +2130,10 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 	if player.rushDashIssuedSnapshot() {
 		return
 	}
+	// v30 二轮勘定（2026-11-16 用户澄清）：高度规则只作用于空/地混层
+	//（角色空-目标地 / 目标空-角色地 / 双空，可测信号=|Δy|>1m）；双方
+	// 同层地面（|Δy|≤1m）距离分带行为与 v29 完全一致——平地带内照常
+	// 地面冲锋，本处不再设闸。
 	// v29 分档带（staging 时按方言表/族规则填入 pending.dashWindowLo/Hi）：
 	// 3m 族=(直收带, GRushRange 5]——进入即驱动冲刺到目标身前 bind
 	//（1~1.5m，空中终点 y+1.0），ETA 到点释放；6m 族=无带（hi<=0 直接
@@ -2126,6 +2158,51 @@ func tryRushArrival(link sceneMessageConnection, player *playerActor, world *sce
 	rushDashDrive(link, player, world, geometry, x, y, z, remote)
 }
 
+// rushAirDiagonalStep 空中奔袭斜线路标的下发间隔（var 化供测试压缩）。
+var rushAirDiagonalStep = 80 * time.Millisecond
+
+// driveRushDest 冲锋位移条目下发（v30.1 斜线路标驱动，2026-11-16 用户
+// 反馈「空中奔袭=斜线冲向目标，非粗暴直拉/直接拉到目标近前」）：单条目
+// 直写终点时垂直分量无过渡——客户端 self-mover 平面插值，y 全靠落地
+// 0x1F 锚一次吞掉=瞬移观感。空中档改为沿起→终点线性插值逐段发路标：
+// t=0 即发第一档，此后每 step 一档（前瞻一档让 mover 恒有距离可吃），
+// y 随平距同步爬升/俯冲=斜线奔袭；ETA 落地锚与末档终点重合、无残差
+// 瞬移。地面档（同层无 y 差）与超短程（≤step）维持单条目。逐段重发
+// 只用已证真的 v13 条目形状，与官方 NPC 0x21 移动流同构；pending 非
+// nil 时被 212 落地/取消/rearm 收走即停发。
+func driveRushDest(link sceneMessageConnection, player *playerActor, pending *pendingCastState,
+	start, dest worldcore.Transform, speed float32, airborne bool) {
+	if !airborne {
+		_ = link.WriteFrame(rushDriveEntryV13(dest, speed, 1))
+		return
+	}
+	pureSec := math.Sqrt(float64(square(dest.X-start.X)+square(dest.Z-start.Z)+square(dest.Y-start.Y))) / float64(speed)
+	if pureSec <= rushAirDiagonalStep.Seconds() {
+		_ = link.WriteFrame(rushDriveEntryV13(dest, speed, 1))
+		return
+	}
+	n := int(math.Ceil(pureSec / rushAirDiagonalStep.Seconds()))
+	waypoint := func(k int) worldcore.Transform {
+		t := float32(k) / float32(n)
+		return worldcore.Transform{
+			X: start.X + (dest.X-start.X)*t,
+			Y: start.Y + (dest.Y-start.Y)*t,
+			Z: start.Z + (dest.Z-start.Z)*t,
+			Orient: dest.Orient,
+		}
+	}
+	_ = link.WriteFrame(rushDriveEntryV13(waypoint(1), speed, 1))
+	for k := 2; k <= n; k++ {
+		k := k
+		time.AfterFunc(time.Duration(float64(k-1)*pureSec/float64(n)*float64(time.Second)), func() {
+			if pending != nil && player.peekPendingCast(time.Now().UTC()) != pending {
+				return
+			}
+			_ = link.WriteFrame(rushDriveEntryV13(waypoint(k), speed, 1))
+		})
+	}
+}
+
 // rushDashDrive 冲刺驱动（v24 终版）：逃逸门三明治 [LogicState=106] +
 // [0x21 intent=1 s5=25 dest=bind]（唯一真位移方言），106 保持到 ETA+富余
 // （冲刺不可打断=用户定版）；ETA=距离/25 到点直接 resumePendingCastAt 释放
@@ -2142,9 +2219,14 @@ func rushDashDrive(link sceneMessageConnection, player *playerActor, world *scen
 		return
 	}
 	bindX, _, bindZ := rushBindPoint(geometry, fromX, fromZ, pending.bindDistance)
-	airborne := player.clientAirborneAbove(geometry.Y)
+	// v30 空中档（2026-11-16 用户补充）：低→高 >0.5m 亦空中奔袭——原
+	// clientAirborneAbove 只识高→低 >1.5m，低地冲高地被判地面档=贴地
+	// 跑步爬墙根因。
+	airborne := rushChargeAirborne(fromY, geometry.Y)
 	destY := geometry.Y
-	if airborne {
+	if airborne && fromY > geometry.Y {
+		// 高→低俯冲：到点 +1.0 小跳悬停弧线（官方）；低→高：终点=目标
+		// 所在平面本体（再抬 1.0 会冲过平台面悬空）。
 		destY = geometry.Y + rushDashLiftMeters
 	}
 	// v27（技能4.pcapng 分档）：空中/高对低走 AirRushSpeed=15、ETA 取 3D
@@ -2229,7 +2311,7 @@ func rushDashDrive(link sceneMessageConnection, player *playerActor, world *scen
 		}
 	}
 	dashDest := worldcore.Transform{X: bindX, Y: destY, Z: bindZ, Orient: orientTowardTarget(bindX, bindZ, geometry.X, geometry.Z)}
-	_ = link.WriteFrame(rushDriveEntryV13(dashDest, speed, 1))
+	driveRushDest(link, player, pending, worldcore.Transform{X: fromX, Y: fromY, Z: fromZ}, dashDest, speed, airborne)
 	player.markRushDashIssued(airborne)
 	airTag := ""
 	if airborne {

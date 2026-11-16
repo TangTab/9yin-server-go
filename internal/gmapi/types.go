@@ -98,6 +98,8 @@ type CommandBody struct {
 	SkillLevel  int32   `json:"skillLevel"`  // 目标层数（0=各自满级；游戏侧按目录上限逐技钳制）
 	Config      string  `json:"config"`      // enter_clone 副本 config（cloneinfo.ini 节名原样）
 	Fun         int32   `json:"fun"`         // enter_clone 难度档 1=普通 2=困难 3=地狱
+	DummyHp     int32   `json:"dummyHp"`     // spawn_dummy 训练木桩血量
+	Count       int32   `json:"count"`       // spawn_dummy 生成数量 1..20（0 视为 1）
 }
 
 // Command 是校验通过后的命令纯数据。原 cmd/protocol-probe 的 gmCommand
@@ -174,6 +176,8 @@ type Command struct {
 	SkillLevel     int32   // learn_taolu/learn_neigong 目标层数（0=各自满级，游戏侧逐技钳上限）
 	Config         string  // enter_clone 副本 config（cloneinfo.ini 节名原样；目录成员性校验在游戏侧）
 	Fun            int32   // enter_clone 难度档 1=普通 2=困难 3=地狱（该档存在性校验在游戏侧）
+	DummyHp        int32   // spawn_dummy 训练木桩血量
+	Count          int32   // spawn_dummy 生成数量（校验层归一到 1..20）
 }
 
 // PlayerState 是 GET 会话列表端点的行结构。原 gmPlayerState 原样搬来

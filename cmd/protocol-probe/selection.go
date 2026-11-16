@@ -46,7 +46,8 @@ func handleAttackTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	if world.closed {
 		return nil
 	}
-	if _, exists := world.npcMeta(worldcore.EntityID(targetID)); !exists {
+	meta, exists := world.npcMeta(worldcore.EntityID(targetID))
+	if !exists {
 		// 未知对象：回零目标授权（客户端清接近态），不报错断链。
 		frame, err := serverCustomIntMessage(209, customInt(15), customObject(0, 0), customInt(0))
 		if err != nil {
@@ -61,9 +62,20 @@ func handleAttackTargetCustom(world *sceneLifecycle, custom clientCustomMessage,
 	if err := world.conn.WriteFrame(frame); err != nil {
 		return fmt.Errorf("send attack target ack: %w", err)
 	}
-	// 298 语义即攻击意图：镜像选中（211 选靶读取）。
-	world.selectedObject = targetID
-	world.selectedOwner = targetOwner
+	// 298 语义即攻击意图：镜像选中（211 选靶读取）。镜像前须过
+	// livingCombatSelectionLocked 同口径校验（存在+owner 匹配+战斗
+	// 交互+存活）：客户端在视口变化时会对视口内非战斗 NPC（FuncNpc/
+	// WorldNpc）批量发 298，无条件镜像会把 selectedObject 污染成非
+	// 战斗对象，守卫随即把玩家手动选中的活目标判成「无目标」，
+	// autoSelectAttackerTargets 便在被其它怪打时反复顶替（2026-11-16
+	// 真机 52015 会话 21:15:45~57 每 3s 换靶实证）。209 授权应答不受
+	// 影响，照常回帧。
+	if meta.ownerID == targetOwner && meta.interaction == npcInteractionCombat {
+		if vitals, ok := world.run.combat.Vitals(worldcore.EntityID(targetID)); ok && vitals.HP > 0 {
+			world.selectedObject = targetID
+			world.selectedOwner = targetOwner
+		}
+	}
 	log.Printf("%s: attack target ack id=%d owner=%d", remote, targetID, targetOwner)
 	return nil
 }

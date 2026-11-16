@@ -11,6 +11,9 @@ package entity
 const (
 	LogicStateNormal   uint8 = 0
 	LogicStateFighting uint8 = 1
+	// LogicStateWarning 是 Z 拔刀预警态（LS_WARNING=2，m292 翻转的
+	// 对偶目标；server2 权威方言：客户端收 463=2 播拔刀挂剑）。
+	LogicStateWarning uint8 = 2
 	// LogicStateSitcross 是新版原生的 LS_SITCROSS 状态。动画由客户端
 	// 负责，而何时允许进入该状态由服务器决定。
 	LogicStateSitcross uint8 = 102

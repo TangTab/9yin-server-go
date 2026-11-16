@@ -218,6 +218,39 @@ func TestValidateMountRide(t *testing.T) {
 	}
 }
 
+// spawn_dummy（训练木桩）：血量界值 + 数量 0 视为 1、超界拒绝；
+// clear_dummies 无负载。
+func TestValidateSpawnDummy(t *testing.T) {
+	command, err := validateBody(t, `{"action":"spawn_dummy","dummyHp":1000000,"count":5}`)
+	if err != nil {
+		t.Fatalf("validate spawn_dummy: %v", err)
+	}
+	if command.DummyHp != 1000000 || command.Count != 5 {
+		t.Fatalf("DummyHp/Count=%d/%d", command.DummyHp, command.Count)
+	}
+	// 数量缺省/0=1（单只），血量缺省仍须显式给出界值错误。
+	command, err = validateBody(t, `{"action":"spawn_dummy","dummyHp":50000}`)
+	if err != nil {
+		t.Fatalf("validate spawn_dummy default count: %v", err)
+	}
+	if command.Count != 1 {
+		t.Fatalf("default Count=%d want 1", command.Count)
+	}
+	for _, bad := range []string{
+		`{"action":"spawn_dummy","dummyHp":0}`,
+		`{"action":"spawn_dummy","dummyHp":2000000001}`,
+		`{"action":"spawn_dummy","dummyHp":100,"count":-1}`,
+		`{"action":"spawn_dummy","dummyHp":100,"count":21}`,
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("spawn_dummy body %q should fail", bad)
+		}
+	}
+	if _, err := validateBody(t, `{"action":"clear_dummies"}`); err != nil {
+		t.Fatalf("validate clear_dummies: %v", err)
+	}
+}
+
 // binglu（兵录设置）：bingluArgs 非空闸（形状由游戏侧执行器校验）。
 func TestValidateBinglu(t *testing.T) {
 	command, err := validateBody(t, `{"action":"binglu","bingluArgs":"set 1 7 120 15"}`)

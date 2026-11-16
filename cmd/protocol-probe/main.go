@@ -1017,6 +1017,37 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			gmSession.setAction(fmt.Sprintf("已在当前位置生成世界宝箱（实体 %d，内含 %d 件，未拾超时消失）", chestID, len(contents)))
 			log.Printf("%s: GM spawned world chest entity=%d items=%d", conn.RemoteAddr(), chestID, len(contents))
+		case "spawn_dummy":
+			// GM 训练木桩（面板「战斗与演练」组）：官方木人桩模板纯沙包，
+			// 血量/数量自定义，环形摆在角色身边；打空 15s 满血复活。
+			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
+				gmSession.setAction("训练木桩生成失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			dummyRun := runtime.world.run
+			dummyRun.mu.Lock()
+			if dummyRun.closed {
+				dummyRun.mu.Unlock()
+				gmSession.setAction("训练木桩生成失败：场景已关闭")
+				return fmt.Errorf("scene run closed")
+			}
+			dummyIDs := dummyRun.spawnTrainingDummiesLocked(runtime.activeRole.Location.Position, command.DummyHp, int(command.Count))
+			dummyRun.mu.Unlock()
+			dummyRun.flushPendingObjectFrames()
+			if len(dummyIDs) == 0 {
+				gmSession.setAction("训练木桩生成失败：模板解析或实体注册未成")
+				return fmt.Errorf("training dummy register failed")
+			}
+			gmSession.setAction(fmt.Sprintf("已生成 %d 只训练木桩（血量 %d，环绕角色；纯沙包不还手，打空后 15 秒满血复活，清除走「清除全部木桩」）", len(dummyIDs), command.DummyHp))
+			log.Printf("%s: GM spawned %d training dummies hp=%d ids=%v", conn.RemoteAddr(), len(dummyIDs), command.DummyHp, dummyIDs)
+		case "clear_dummies":
+			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
+				gmSession.setAction("清除训练木桩失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			cleared := runtime.world.run.clearTrainingDummies()
+			gmSession.setAction(fmt.Sprintf("已清除 %d 只训练木桩", cleared))
+			log.Printf("%s: GM cleared %d training dummies", conn.RemoteAddr(), cleared)
 		case "set_autosave_interval":
 			seconds := int32(command.Value)
 			setAutosaveInterval(time.Duration(seconds) * time.Second)

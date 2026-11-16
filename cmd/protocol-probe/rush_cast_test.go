@@ -569,7 +569,8 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 
 	// 重新暂存后走完整冲锋链：上报点距目标 4m ∈ 3m 族冲锋带 (3.5,5] →
 	// v29 c61 授予簇（c61 + CantMove/CantParry=1 + CD/MP + State=run）+
-	// 0x21 s5=25 驱动，终点=目标身前 bind。
+	// 0x21 s5=25 驱动，终点=目标身前 bind（v30 二轮澄清：同层平地带内
+	// 照常地面冲锋，高度规则只管空/地混层）。
 	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
 		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 10, "test"); err != nil {
 		t.Fatal(err)
@@ -709,7 +710,7 @@ func TestRushMovementUpload220DrivesArrival(t *testing.T) {
 
 	// 212 冲刺落地：14 帧外服私服簇（同 msg15 链）。
 	if handled, err := handleCastDashLanding(conn, player, world, dashLandingMessage(8.5, 0, 0, 0.5), "test"); err != nil || !handled {
-		t.Fatalf("landing after 220 handled=%t err=%v", handled, err)
+		t.Fatalf("landing handled=%t err=%v", handled, err)
 	}
 	frames = conn.Frames()[base:]
 	if len(frames) != 18 || int32(binary.LittleEndian.Uint32(frames[11][4:])) != 19 {
@@ -832,6 +833,42 @@ func TestAreaGroundRushDashTierSelection(t *testing.T) {
 		t.Fatalf("area air c61 flag = %+v, want 2", c61)
 	}
 
+	// v30 低→高（落差 2m，用户补充「范围冲锋也是一样」）：空中奔袭档 15 +
+	// c61 flag2，无 State=run；v30.1 斜线路标梯（首档即发、末档到点选平面）。
+	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 6, Y: 2})
+	framesUp := conn.Frames()
+	if len(framesUp) != 3 || framesUp[2][0] != 0x21 || len(framesUp[2]) != 47 {
+		t.Fatalf("area uplift frames=%x, want [106]+[c61 flag2]+[0x21]", framesUp)
+	}
+	if got := math.Float32frombits(binary.LittleEndian.Uint32(framesUp[2][27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) > 0.01 {
+		t.Fatalf("area uplift drive s5=%v, want 15", got)
+	}
+	c61Up := decodeCustomValuesFrame(t, framesUp[1])
+	if len(c61Up) < 7 || c61Up[6].Type != 2 || c61Up[6].Int32 != 2 {
+		t.Fatalf("area uplift c61 flag = %+v, want 2", c61Up)
+	}
+	time.Sleep(500 * time.Millisecond) // 斜线梯走完（本几何 ~0.42s）
+	var ladderUp []float32
+	for _, f := range conn.Frames() {
+		if f[0] != 0x21 || len(f) != 47 || binary.LittleEndian.Uint32(f[43:]) != 1 {
+			continue
+		}
+		if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) < 0.01 {
+			ladderUp = append(ladderUp, math.Float32frombits(binary.LittleEndian.Uint32(f[15:])))
+		}
+	}
+	if len(ladderUp) < 3 {
+		t.Fatalf("area uplift ladder must have >=3 waypoints, got %v", ladderUp)
+	}
+	for i := 1; i < len(ladderUp); i++ {
+		if ladderUp[i] <= ladderUp[i-1] {
+			t.Fatalf("area uplift ladder must ascend monotonically, got %v", ladderUp)
+		}
+	}
+	if math.Abs(float64(ladderUp[len(ladderUp)-1]-2)) > 0.1 {
+		t.Fatalf("area uplift last waypoint y=%v, want clicked plane 2", ladderUp[len(ladderUp)-1])
+	}
+
 	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 12}) // 远距同款
 	frames3 := conn.Frames()
 	if len(frames3) != 4 || frames3[3][0] != 0x21 || len(frames3[3]) != 47 {
@@ -869,7 +906,8 @@ func TestRushDashBandDrive(t *testing.T) {
 		t.Fatalf("staging frames=%d, want 11", got)
 	}
 
-	// 客户端自走进入冲刺带：位置 (16,0,0) → 距目标 4m ∈ (3,5]
+	// 客户端自走进入冲刺带：位置 (16,0,0) → 距目标 4m ∈ (3,5]（同层平地
+	// v29 原样，v30 高度规则只管空/地混层）。
 	base := len(conn.Frames())
 	if _, err := handleMovementUpload(conn, player, world,
 		walkUploadMessage(-1610608895, 7, 16, 0, 0, 20, 0, 4.5, 0), "test"); err != nil {
@@ -1036,4 +1074,195 @@ func TestRushSixMeterFamilyNoChargeBand(t *testing.T) {
 	if player.peekPendingCast(time.Now()) != nil || player.rushInFlightSnapshot() {
 		t.Fatal("walk-in landing must consume pending")
 	}
+}
+
+// v30 低→高空中奔袭档（2026-11-16 用户补充）：目标高出施法者 >0.5m 的
+// 冲锋走空中档——c61 flag2 + fastruning 动画 + 15m/s，终点 y=目标平面
+//（无 +1.0 抬升），无 State=run 地面跑步帧。
+func TestRushUpliftChargeAirTier(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 91)
+	player := newPlayerActor("低冲高侠", 0)
+	definition := combatSkillDefinition{id: "CS_rush_up", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3,
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_2h_01"}
+	// 带外受理（distance 6 > 直收带 3.5，不触发立即冲锋），目标在 2m 高台。
+	if _, err := stageRushCast(conn, player, world, definition, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 10, Y: 2, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 6, "test"); err != nil {
+		t.Fatal(err)
+	}
+	base := len(conn.Frames())
+
+	// 平距 4m ∈ (3.5,5] 带内照常触发；低→高 2m>0.5m → 空中奔袭档。
+	if _, err := handleMovementUpload(conn, player, world,
+		walkUploadMessage(-1610608895, 7, 6, 0, 0, 10, 0, 4.5, 0), "test"); err != nil {
+		t.Fatal(err)
+	}
+	// v30.1 斜线路标梯：即发第一档（y=首段插值，非终点）。
+	ladderYs := func() []float32 {
+		var ys []float32
+		for _, f := range conn.Frames()[base:] {
+			if f[0] != 0x21 || len(f) != 47 || binary.LittleEndian.Uint32(f[43:]) != 1 {
+				continue
+			}
+			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) < 0.01 {
+				ys = append(ys, math.Float32frombits(binary.LittleEndian.Uint32(f[15:])))
+			}
+		}
+		return ys
+	}
+	frames := conn.Frames()[base:]
+	var sawAirDash, sawC61Uplift, sawRun bool
+	for _, f := range frames {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) < 0.01 {
+				sawAirDash = true
+			}
+		}
+		if f[0] == 0x1E {
+			values := decodeCustomValuesFrame(t, f)
+			if len(values) >= 8 && values[0].Type == 2 && values[0].Int32 == 24 &&
+				values[2].Type == 2 && values[2].Int32 == msgRushCommand &&
+				values[6].Type == 2 && values[6].Int32 == 2 &&
+				values[7].Type == 6 && values[7].Text == "qg_fastruning_s_2h_01" {
+				sawC61Uplift = true
+			}
+		}
+		if f[0] == 0x10 && len(f) >= 18 &&
+			binary.LittleEndian.Uint16(f[12:]) == npcStatePropertyIndex && bytes.Contains(f, []byte("run")) {
+			sawRun = true
+		}
+	}
+	if !sawAirDash {
+		t.Fatalf("uplift charge must drive s5=%v, frames=%x", rushDriveAirDashSpeedMeters, frames)
+	}
+	if !sawC61Uplift {
+		t.Fatalf("uplift charge must grant c61 flag=2 fastruning, frames=%x", frames)
+	}
+	if sawRun {
+		t.Fatal("uplift charge must not carry State=run (aerial, not ground run)")
+	}
+	if first := ladderYs(); len(first) == 0 || first[0] >= 2 {
+		t.Fatalf("first diagonal waypoint y must be mid-slope (<2), got %v", first)
+	}
+
+	// 斜线梯走完（本几何 ~0.21s）后：路标 y 单调爬升至目标平面 2.0
+	//（低→高无 +1.0 抬升），且空中授予随帧 m707[29]（+40~80ms）。
+	time.Sleep(350 * time.Millisecond)
+	ys := ladderYs()
+	if len(ys) < 3 {
+		t.Fatalf("diagonal ladder must have >=3 waypoints, got %v", ys)
+	}
+	for i := 1; i < len(ys); i++ {
+		if ys[i] <= ys[i-1] {
+			t.Fatalf("diagonal waypoints must ascend monotonically, got %v", ys)
+		}
+	}
+	if math.Abs(float64(ys[len(ys)-1]-2)) > 0.1 {
+		t.Fatalf("last waypoint y=%v, want target plane 2", ys[len(ys)-1])
+	}
+	saw707 := false
+	for _, f := range conn.Frames()[base:] {
+		if f[0] != 0x1E {
+			continue
+		}
+		values := decodeCustomValuesFrame(t, f)
+		if len(values) >= 2 && values[0].Type == 2 && values[0].Int32 == 707 &&
+			values[1].Type == 2 && values[1].Int32 == 29 {
+			saw707 = true
+		}
+	}
+	if !saw707 {
+		t.Fatal("uplift air grant must follow with m707[29]")
+	}
+	time.Sleep(700 * time.Millisecond) // 排空 ETA 落地 AfterFunc
+}
+
+// v30 近身高差立即冲锋（直发 stageRushCast 层）：直收带内但 Δy>1m——
+// 受理簇后立即冲锋（低→高 2m → 空中奔袭 15m/s），ETA 到点释放。
+func TestNearHeightGapStagesAndChargesImmediately(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 91)
+	player := newPlayerActor("台侠", 0)
+	definition := combatSkillDefinition{id: "CS_rush_near", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3,
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_2h_01"}
+	base := len(conn.Frames())
+	// 平距 2m ≤ 直收带 3.5（v29 会直收原地普攻），目标高 2m → 立即冲锋。
+	if handled, err := stageRushCast(conn, player, world, definition, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 4, Y: 2, Z: 0}, worldcore.Transform{X: 2, Y: 0, Z: 0}, 2, "test"); err != nil || !handled {
+		t.Fatalf("stage handled=%t err=%v", handled, err)
+	}
+	if !player.rushDashIssuedSnapshot() {
+		t.Fatal("near height-gap cast must issue dash at staging")
+	}
+	sawAirDash := false
+	for _, f := range conn.Frames()[base:] {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) < 0.01 {
+				sawAirDash = true
+			}
+		}
+	}
+	if !sawAirDash {
+		t.Fatal("near height-gap cast must drive aerial dash (uplift tier)")
+	}
+	time.Sleep(700 * time.Millisecond) // 排空 ETA 落地 AfterFunc
+	if player.peekPendingCast(time.Now()) != nil {
+		t.Fatal("ETA landing must consume pending")
+	}
+}
+
+// v30 211 直收分流高度闸：直收带内但 |出招位 y−目标 y|>1m 不再
+// executeRushDirect（原地普攻=隔空打高处/低处目标），改走暂存链并立即冲锋。
+func TestNearHeightGap211ChargesInsteadOfDirect(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	var definition combatSkillDefinition
+	found := false
+	for _, candidate := range installedCombatSkillCatalog.levelOne {
+		if candidate.stagedRushFamily() && candidate.requiresTarget {
+			definition = candidate
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Skip("fixture catalog has no staged rush family selected-target skill")
+	}
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 91)
+	placeTestNPC(t, world, 91, float32(math.Max(0.5, rushDirectCastMeters(definition)-1)), 0)
+	player := newPlayerActor("冲锋侠", 0)
+	player.mu.Lock()
+	player.learnedSkills[definition.id] = 1
+	player.mu.Unlock()
+	if err := handleSelectTargetCustom(world, player, warningToggleMessage(clientCustomSelectTarget,
+		clientCustomValue{Type: 8, Raw: packTestObject(forkNPCID(91), npcTestOwner(91))}), "test"); err != nil {
+		t.Fatal(err)
+	}
+	// 平距在直收带内、出招位高出目标 2m：直收被高度闸拦下 → 暂存+立即冲锋。
+	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 2, 0), "test"); err != nil || !handled {
+		t.Fatalf("height-gap cast handled=%t err=%v", handled, err)
+	}
+	if player.peekPendingCast(time.Now()) == nil {
+		t.Fatal("near height-gap cast must stage, not direct-execute")
+	}
+	if !player.rushDashIssuedSnapshot() {
+		t.Fatal("near height-gap cast must issue dash immediately after staging")
+	}
+	time.Sleep(700 * time.Millisecond) // 排空 ETA 落地 AfterFunc
 }

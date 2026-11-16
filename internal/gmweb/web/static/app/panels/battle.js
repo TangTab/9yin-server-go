@@ -10,24 +10,31 @@ function renderDummy(host) {
   const { section, body } = panelSection({
     id: "sec-dummy",
     title: "训练木桩",
-    desc: "在角色当前位置生成一只纯沙包怪物：移动速度 0、不会还手、血量自定义，打空即死（可反复生成）。测输出/测技能专用。",
+    desc: "在角色身边生成纯沙包木桩（官方木人桩模板）：移动速度 0、不会还手、血量/数量自定义；多只时环绕角色均匀摆放。打空血 15 秒后满血复活，可反复测输出。",
   });
   const hp = numField({ label: "血量", value: 100000, min: 1, width: "120px" });
+  const count = numField({ label: "数量", value: 1, min: 1, max: 20, width: "90px" });
   body.appendChild(
     h("div", { class: "field-row" }, [
       hp.node,
+      count.node,
       actionBtn({
         label: "生成木桩",
-        build: () => ({ action: "spawn_dummy", dummyHp: hp.get() ?? 0 }),
+        build: () => ({ action: "spawn_dummy", dummyHp: hp.get() ?? 100000, count: count.get() ?? 1 }),
         okText: "木桩已生成",
         section: "训练木桩",
       }),
       actionBtn({
         label: "生成 100 万血木桩",
-        build: () => ({ action: "spawn_dummy", dummyHp: 1000000 }),
+        build: () => ({ action: "spawn_dummy", dummyHp: 1000000, count: count.get() ?? 1 }),
         okText: "百万血木桩已生成",
         section: "训练木桩",
       }),
+    ])
+  );
+  body.appendChild(
+    h("div", { class: "actions-row" }, [
+      cmdBtn({ label: "清除全部木桩", danger: true, action: "clear_dummies", section: "训练木桩" }),
     ])
   );
   host.appendChild(section);
