@@ -1,6 +1,8 @@
 package skillscript
 
 import (
+	"strings"
+
 	"github.com/iceisfun/golua/v2/vm"
 	"github.com/local/9yin-go-server/internal/modulevm"
 )
@@ -62,6 +64,10 @@ func (s *Scripts) convertOverlay(skillID string, table vm.LuaTable) *Overlay {
 		case "channel":
 			if channel, ok := s.convertChannelSpec(skillID, value); ok {
 				overlay.Channel, set = channel, true
+			}
+		case "rush":
+			if rush, ok := s.convertRushSpec(skillID, value); ok {
+				overlay.Rush, set = rush, true
 			}
 		default:
 			s.host.WarnOnce(skillID+":"+name, "skillscript: %s compile 返回白名单外指令 %s=%s，已丢弃", skillID, name, modulevm.ValueString(value))
@@ -158,6 +164,65 @@ func (s *Scripts) convertChannelSpec(skillID string, value vm.Value) (*ChannelSp
 		Waves: waves, FirstWaveMS: firstWave, IntervalMS: interval, SpPerWave: spPerWave,
 		VictimBuff: victimBuff, SelfBuff: selfBuff, SelfBuffStatic: staticData,
 	}, true
+}
+
+// convertRushSpec 解析 rush{direct_band_m, charge_lo_m, charge_range_m,
+// level, action, air_action}（v29 武技冲锋扩展点：落尘式 3m 冲锋→20m）。
+// 距离须 (0,60] 米、level 0..2；动作名白名单前缀 qg_/fi_/swim_（客户端
+// 冲刺动作族）。字段级校验、逐项丢弃（零值=不覆盖，与 Overlay 增量语义
+// 一致）——全部字段无效时整条丢弃。
+func (s *Scripts) convertRushSpec(skillID string, value vm.Value) (*RushSpec, bool) {
+	if !value.IsTable() {
+		s.host.WarnOnce(skillID+":rush", "skillscript: %s rush %s 非表，整条丢弃", skillID, modulevm.ValueString(value))
+		return nil, false
+	}
+	table := value.AsTable()
+	spec := &RushSpec{}
+	valid := false
+	readDistance := func(field string) (float64, bool) {
+		number, ok := modulevm.LuaFloat(modulevm.Field(table, field))
+		if !ok || number <= 0 || number > 60 {
+			s.host.WarnOnce(skillID+":"+field, "skillscript: %s rush.%s %s 须为 (0,60] 米，已丢弃",
+				skillID, field, modulevm.ValueString(modulevm.Field(table, field)))
+			return 0, false
+		}
+		return number, true
+	}
+	if v, ok := readDistance("direct_band_m"); ok {
+		spec.DirectBandM, valid = v, true
+	}
+	if v, ok := readDistance("charge_lo_m"); ok {
+		spec.ChargeLoM, valid = v, true
+	}
+	if v, ok := readDistance("charge_range_m"); ok {
+		spec.ChargeHiM, valid = v, true
+	}
+	if level, ok := modulevm.LuaInt(modulevm.Field(table, "level")); ok {
+		if level < 0 || level > 2 {
+			s.host.WarnOnce(skillID+":level", "skillscript: %s rush.level %s 须为 0..2，已丢弃",
+				skillID, modulevm.ValueString(modulevm.Field(table, "level")))
+		} else if level > 0 {
+			spec.Level, valid = level, true
+		}
+	}
+	for _, field := range []struct{ key string; dst *string }{
+		{"action", &spec.Action}, {"air_action", &spec.AirAction},
+	} {
+		name := modulevm.Field(table, field.key).AsString()
+		if name == "" {
+			continue
+		}
+		if !strings.HasPrefix(name, "qg_") && !strings.HasPrefix(name, "fi_") && !strings.HasPrefix(name, "swim_") {
+			s.host.WarnOnce(skillID+":"+field.key, "skillscript: %s rush.%s %q 须 qg_/fi_/swim_ 前缀，已丢弃", skillID, field.key, name)
+			continue
+		}
+		*field.dst, valid = name, true
+	}
+	if !valid {
+		s.host.WarnOnce(skillID+":rush", "skillscript: %s rush 无任何有效字段，整条丢弃", skillID)
+		return nil, false
+	}
+	return spec, true
 }
 
 // convertDamage 解析 damage{amount, waves}。

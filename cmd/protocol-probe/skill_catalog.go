@@ -553,7 +553,10 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 	// 半径6米"）不是可攻击距离——外服私服语义（b/e.pcapng 重解码 2026-11-08）：
 	// bind 身位内直接施法，bind~RushRange 之间走冲锋链（客户端自动接近+
 	// 6.5m 内服务端 c61 冲刺），超 RushRange 拒。缺列回退 max(射程, 15m)。
-	rushRange := iniFloat(static, "RushRange")
+	// rushRangeRaw 保留原始列值（<=0=缺列）供武技扩程判定——回退值是发起
+	// 上限语义，不能当扩程实据（v29）。
+	rushRangeRaw := iniFloat(static, "RushRange")
+	rushRange := rushRangeRaw
 	if rushRange <= 0 {
 		rushRange = float32(math.Max(float64(castRange), rushStageMaxMeters))
 	}
@@ -599,6 +602,9 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		actionName: action, actionDuration: actionDuration, followupActions: followups,
 		castRange: castRange,
 		rushRange: rushRange,
+		// v29 武技冲锋扩展：RushRange 列实据/手勘表扩带 + lua rush 指令
+		//（scripts/module/skill/<技能ID>.lua，热更 lua_reload）。
+		rushOverride: resolveRushChargeOverride(skillID, castRange, rushRangeRaw),
 		canRush:   iniInt(static, "CanRush") != 0,
 		lockSkill: strings.EqualFold(script, "skilllock") || iniInt(static, "CanRush") != 0 ||
 			(iniInt(static, "TargetType") == 4 && iniInt(static, "DamageType") != 0),
@@ -758,6 +764,83 @@ func resolveChannelSkillSpec(skillID string, level int32, tables skillResourceTa
 		return nil
 	}
 	return &seed
+}
+
+// resolveRushChargeOverride 合成技能的冲锋分档覆盖（v29 武技扩展点，
+// 2026-11-16）。三级来源：
+//  1. skill_static.RushRange 列实据（rushRangeRaw>0 时）——高于直收带
+//     （3m 族 GRushRange 5 / 6m 族 castRange+1）即扩带；
+//  2. 手勘实据表 rushDashChargeRangeSeeds（缺列兜底）：落英飞花·落尘
+//     （wuji_CS_jz_lyfh05）RushRange=20，技能4.pcapng 13m 外受理即冲
+//     实证（「3m 冲锋改变到 20m」类武技）；
+//  3. lua 覆盖模块 M.compile 的 rush 指令（scripts/module/skill/<技能ID>
+//     .lua，热更走 lua_reload）——字段级覆盖 ①②，可带 charge_lo/hi/
+//     direct_band/level/action/air_action 全量语义。
+//
+// 无任何有效字段时返回 nil（方言表/族规则照旧）。注意 rushRangeRaw 是
+// INI 原始列值（<=0=缺列）——缺列回退值 max(castRange,15) 是发起上限
+// 语义，不能当扩程实据（否则全体 6m 技被误扩带）。
+func resolveRushChargeOverride(skillID string, castRange, rushRangeRaw float32) *rushChargeOverride {
+	var override *rushChargeOverride
+	ensure := func() *rushChargeOverride {
+		if override == nil {
+			override = &rushChargeOverride{}
+		}
+		return override
+	}
+	directBand := float64(castRange) + 1
+	if castRange < 5 {
+		directBand = float64(castRange) + 0.5
+	}
+	// ①② 武技扩程实据（INI 列优先，缺列回落手勘表）。
+	chargeHi := float64(rushRangeRaw)
+	if chargeHi <= 0 {
+		chargeHi = rushDashChargeRangeSeeds[skillID]
+	}
+	if chargeHi > directBand && chargeHi > rushGRushRangeMeters {
+		ensure().chargeHi = chargeHi
+	}
+	// ③ lua 武技覆盖（字段级优先于 ①②）。
+	if skillScripts != nil && skillScripts.Enabled() && skillScripts.HasOverlay(skillID) {
+		if overlay := skillScripts.Overlay(skillID, nil); overlay != nil && overlay.Rush != nil {
+			override = mergeRushSpec(override, overlay.Rush)
+		}
+	}
+	if override == nil {
+		return nil
+	}
+	if override.chargeHi <= 0 && override.chargeLo <= 0 && override.directBand <= 0 &&
+		override.level == 0 && override.groundAction == "" && override.airAction == "" {
+		return nil
+	}
+	return override
+}
+
+// mergeRushSpec 把 lua rush 指令的字段级覆盖合入既有 override（可为
+// nil——纯 lua 场景）。零值字段=保留底层值（Overlay 增量语义）。
+func mergeRushSpec(override *rushChargeOverride, spec *skillscript.RushSpec) *rushChargeOverride {
+	if override == nil {
+		override = &rushChargeOverride{}
+	}
+	if spec.DirectBandM > 0 {
+		override.directBand = spec.DirectBandM
+	}
+	if spec.ChargeLoM > 0 {
+		override.chargeLo = spec.ChargeLoM
+	}
+	if spec.ChargeHiM > 0 {
+		override.chargeHi = spec.ChargeHiM
+	}
+	if spec.Level != 0 {
+		override.level = int32(spec.Level)
+	}
+	if spec.Action != "" {
+		override.groundAction = spec.Action
+	}
+	if spec.AirAction != "" {
+		override.airAction = spec.AirAction
+	}
+	return override
 }
 
 type combatSkillCacheKey struct {

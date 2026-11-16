@@ -157,6 +157,12 @@ type combatSkillDefinition struct {
 	bindDistance     float32
 	groundRushAction string
 	airRushAction    string // 空中冲刺动作（LockARushAction/fastruning_s 族，v26）
+	// rushOverride：v29 武技冲锋扩展点（2026-11-16）——武技可改写冲锋
+	// 分档（落英飞花·落尘 wuji_CS_jz_lyfh05 把 3m 冲锋扩到 20m）。来源
+	// 两级：skill_static.RushRange>GRushRange 实据扩带 + lua 覆盖模块
+	// M.compile 的 rush 指令（字段级覆盖，热更走 lua_reload）。nil=方言
+	// 表/族规则（skill_catalog.resolveRushChargeOverride 填充）。
+	rushOverride *rushChargeOverride
 }
 
 // stagedRushFamily 报告该技能是否走冲锋暂存链。

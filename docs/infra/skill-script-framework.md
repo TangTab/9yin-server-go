@@ -137,6 +137,14 @@ function M.compile(def)
       -- control=true：受控到租约终点（fight.control，同 INI 有害精确 buff 语义）
       -- frame=true：加发 msg169 目标 debuff 帧（武技 169 帧的脚本化泛化，默认关）
     },
+    rush = {                                      -- 武技冲锋分档覆盖（v29，2026-11-16）：
+      direct_band_m = 3.5,                        --   落英飞花·落尘把 3m 冲锋扩到 20m 类；
+      charge_lo_m = 3.5,                          --   零值字段=回落 INI/族规则（增量语义）
+      charge_range_m = 20,                        --   冲锋带上界=扩程值（缺省 GRushRange 5）
+      level = 2,                                  --   c61 档 1=地面G/2=空中A（0=随高度自动）
+      action = "qg_fastrun_2h_01",                --   动作名覆盖（qg_/fi_/swim_ 前缀白名单）
+      air_action = "qg_fastruning_s_2h_01",       --   校验：距离 (0,60]m、level 0..2，
+    },                                            --   字段级逐项丢弃；见 冲锋与打坐 §五-B
     channel = {                                   -- 通道型引导参数（寒心恨雪族，2026-11-13）：
       waves = 8, first_wave_ms = 180,             --   声明即通道技（SP 预扣清零、逐波扣），
       interval_ms = 440, sp_per_wave = 10,        --   波次/索敌/帧序方言由 Go 引擎驱动不下放
@@ -167,7 +175,8 @@ end
 不 markBroken 公式引擎，compile 契约不受牵连。
 
 已接覆盖脚本：`CS_yhwq_hsqs04`（35s/槽5）、`CS_yhwq_hsqs05`（槽6+红霸体）、`CS_wd_tjq04`（架势轮换）、
-`CS_wd_tjq05`（槽8）、`CS_wd_tjq07`（槽9）、`CS_wd_tjq08`（红霸体）。未列技能走 effects_data → INI 默认编译。
+`CS_wd_tjq05`（槽8）、`CS_wd_tjq07`（槽9）、`CS_wd_tjq08`（红霸体）、
+`wuji_CS_jz_lyfh05`（落尘武技冲锋扩程 20m，v29）。未列技能走 effects_data → INI 默认编译。
 
 ## item/&lt;configId&gt;.lua（使用物效果，msg31）
 

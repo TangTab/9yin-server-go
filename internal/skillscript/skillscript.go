@@ -180,6 +180,20 @@ type BuffSpec struct {
 	Slot       int64 // 0/缺省=自动找空槽
 }
 
+// RushSpec 是 M.compile 的 rush 指令（v29 武技冲锋扩展点，2026-11-16）：
+// 武技可改写冲锋分档——如 落英飞花·落尘（wuji_CS_jz_lyfh05）把 3m 基础
+// 冲锋扩到 20m（skill_static.RushRange=20，技能4.pcapng 13m 外受理即冲
+// 实证）。零值字段=回落 INI 编译值/族规则；消费方 cmd/protocol-probe 的
+// rushChargeOverride。
+type RushSpec struct {
+	DirectBandM float64 // 直收带上界覆盖（米；0=族规则 3m族 castRange+0.5 / 6m族 +1）
+	ChargeLoM   float64 // 冲锋带下界覆盖（米；0=族规则=直收带）
+	ChargeHiM   float64 // 冲锋带上界覆盖（米；0=族规则 GRushRange 5；落尘=20）
+	Level       int64   // c61 档覆盖（0=随地面/空中自动；1=G 类 / 2=A 类）
+	Action      string  // 地面动作名覆盖（空=lock 表 LockGRushAction）
+	AirAction   string  // 空中动作名覆盖（空=lock 表 LockARushAction/推导）
+}
+
 // TargetEffect 是目标效果（有害精确 buff 的目标控制）。
 type TargetEffect struct {
 	BuffSpec
@@ -198,6 +212,7 @@ type Overlay struct {
 	SelfBuffs       []BuffSpec     // self_buffs：多自 buff（整组取代）
 	TargetEffects   []TargetEffect // target_effects（整组取代）
 	Channel         *ChannelSpec   // channel：通道型引导参数（spCost 预扣清零、逐波扣）
+	Rush            *RushSpec      // rush：武技冲锋分档覆盖（v29 扩展点）
 }
 
 // LevelDelta 是 by_level[level] 与 L1 基准的差集。字段全集按 effects_data

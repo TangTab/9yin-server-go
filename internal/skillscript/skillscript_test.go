@@ -52,13 +52,14 @@ func writeModule(t *testing.T, dir, name, src string) {
 
 func TestLoadRealSkillScripts(t *testing.T) {
 	s := newRealScripts(t, &logSink{})
-	if s.Loaded() != 10 {
-		t.Fatalf("Loaded = %d, want 10 (8 overlays + effects_data + desc_effects)", s.Loaded())
+	if s.Loaded() != 11 {
+		t.Fatalf("Loaded = %d, want 11 (9 overlays + effects_data + desc_effects)", s.Loaded())
 	}
 	want := []string{
 		"CS_jh_hyjf08", "CS_jh_tqjf08",
 		"CS_wd_tjq04", "CS_wd_tjq05", "CS_wd_tjq07", "CS_wd_tjq08",
 		"CS_yhwq_hsqs04", "CS_yhwq_hsqs05",
+		"wuji_CS_jz_lyfh05",
 	}
 	if got := s.Overlays(); len(got) != len(want) {
 		t.Fatalf("Overlays = %v, want %v", got, want)
@@ -510,5 +511,71 @@ func TestDisabled(t *testing.T) {
 	}
 	if s.Overlay("CS_wd_tjq04", &BuffDef{}) != nil || s.HitRatio("CS_wd_tjq04", &HitCtx{}) != nil || s.EffectData("CS_wd_tjq01") != nil {
 		t.Fatal("disabled queries must be nil")
+	}
+}
+
+// rush 指令校验（v29 武技扩展点）：字段级白名单（距离 (0,60] 米、
+// level 0..2、动作 qg_/fi_/swim_ 前缀），逐项丢弃；全无效整条丢弃。
+func TestRushSpecValidation(t *testing.T) {
+	dir := t.TempDir()
+	base := `local M = {}
+function M.compile(def)
+  return { rush = { charge_range_m = %s, charge_lo_m = %s, direct_band_m = %s,
+                    level = %s, action = %s, air_action = %s } }
+end
+return M
+`
+	full := func(chargeRange, chargeLo, direct, level, action, airAction string) string {
+		return fmt.Sprintf(base, chargeRange, chargeLo, direct, level, action, airAction)
+	}
+	writeModule(t, dir, "probe_good.lua", full("20", "3.5", "3.5", "2", `"qg_fastrun_2h_01"`, `"qg_fastruning_s_2h_01"`))
+	writeModule(t, dir, "probe_range.lua", full("200", "3.5", "3.5", "2", `"qg_fastrun_2h_01"`, `"qg_fastruning_s_2h_01"`))
+	writeModule(t, dir, "probe_level.lua", full("20", "3.5", "3.5", "5", `"qg_fastrun_2h_01"`, `"qg_fastruning_s_2h_01"`))
+	writeModule(t, dir, "probe_action.lua", full("20", "3.5", "3.5", "2", `"body_slash_1_self"`, `"qg_fastruning_s_2h_01"`))
+	writeModule(t, dir, "probe_empty.lua", `local M = {}
+function M.compile(def) return { rush = {} } end
+return M`)
+	sink := &logSink{}
+	s := New(dir, sink.printf)
+	if _, err := s.Load(); err != nil {
+		t.Fatal(err)
+	}
+	good := s.Overlay("probe_good", &BuffDef{})
+	if good == nil || good.Rush == nil {
+		t.Fatalf("good overlay = %+v, want rush increment", good)
+	}
+	want := &RushSpec{DirectBandM: 3.5, ChargeLoM: 3.5, ChargeHiM: 20, Level: 2,
+		Action: "qg_fastrun_2h_01", AirAction: "qg_fastruning_s_2h_01"}
+	if *good.Rush != *want {
+		t.Fatalf("good rush = %+v, want %+v", good.Rush, want)
+	}
+	// 畸形字段逐项丢弃、合法字段保留（增量语义）。
+	partial := s.Overlay("probe_range", &BuffDef{})
+	if partial == nil || partial.Rush == nil || partial.Rush.ChargeHiM != 0 || partial.Rush.ChargeLoM != 3.5 {
+		t.Fatalf("range-dropped rush = %+v, want charge_range dropped only", partial)
+	}
+	if !sink.has("probe_range rush.charge_range_m") {
+		t.Fatalf("missing range drop warning in %q", sink.lines)
+	}
+	if levelBad := s.Overlay("probe_level", &BuffDef{}); levelBad == nil || levelBad.Rush == nil || levelBad.Rush.Level != 0 {
+		t.Fatalf("level-dropped rush = %+v", levelBad)
+	}
+	if actionBad := s.Overlay("probe_action", &BuffDef{}); actionBad == nil || actionBad.Rush == nil || actionBad.Rush.Action != "" {
+		t.Fatalf("action-dropped rush = %+v", actionBad)
+	}
+	if empty := s.Overlay("probe_empty", &BuffDef{}); empty != nil && empty.Rush != nil {
+		t.Fatalf("empty rush = %+v, want dropped", empty)
+	}
+}
+
+// 真实落尘武技模块钉子（wuji_CS_jz_lyfh05.lua）：3m 冲锋扩到 20m。
+func TestRealWujiRushOverlay(t *testing.T) {
+	s := newRealScripts(t, &logSink{})
+	overlay := s.Overlay("wuji_CS_jz_lyfh05", &BuffDef{})
+	if overlay == nil || overlay.Rush == nil {
+		t.Fatalf("wuji_lyfh05 overlay = %+v, want rush increment", overlay)
+	}
+	if overlay.Rush.ChargeHiM != 20 || overlay.Rush.AirAction != "qg_fastruning_s_2h_01" {
+		t.Fatalf("wuji_lyfh05 rush = %+v, want charge_range=20 + air fastruning_s", overlay.Rush)
 	}
 }
