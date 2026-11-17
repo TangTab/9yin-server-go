@@ -1,5 +1,7 @@
 /* 九阴角色模型浏览器 — three.js 前端
  * 数据流: /api/catalog → 列表; /api/model → SkinnedMesh; /api/anim → 骨架+轨道
+ * 装配: 多部件 (身体/脸/发型/头饰…) 共享同一骨架, 各自 xmod 按骨名绑定;
+ *       性别总标签 (男/女) 驱动部件过滤 + 默认骨架 + 默认身体。
  * 蒙皮: 动画文件内嵌 bind 变换 → three.Skeleton (bind 时自动取逆);
  *       每帧按轨道 slerp/lerp 驱动骨骼局部变换。
  */
@@ -10,7 +12,8 @@ import { DDSLoader } from 'three/addons/loaders/DDSLoader.js';
 /* ================= 状态 ================= */
 const S = {
   catalog: null,
-  model: null,          // /api/model 载荷
+  parts: new Map(),     // id → {data, meshes[]} 已装配部件 (共享骨架)
+  gender: '男',         // 总标签: 驱动部件/动画过滤与默认装配
   anim: null,           // /api/anim 载荷
   rig: null,            // {bones[], root, skeleton, matched, meshBones}
   playing: false,
@@ -20,6 +23,37 @@ const S = {
   showTexture: true,
   bindOnly: false,      // true = 只装配骨架停在绑定姿势, 不应用轨道
 };
+
+/* 性别默认身体+脸型 (总标签切换 / 初始装配) */
+const DEFAULT_BODY = {
+  '男': 'b_beiyuan06/b_beiyuan06.xmod',
+  '女': 'g_beiyuan06/g_beiyuan06.xmod',
+};
+const DEFAULT_FACE = {
+  '男': 'b_face/b_face.xmod',
+  '女': 'g_face/g_face.xmod',
+};
+
+/* 互斥槽位: 同槽装配新部件自动替换旧件 (武器/发型/胡子/脸/面饰/面具/头饰/衣/裤/鞋/披风 各一件;
+   未知类别按类别名互斥). 时装按类型 (上衣/下装/鞋…) 各占一槽. */
+function slotOf(m) {
+  const cat = m.category || '';
+  const stem = (m.name || '').toLowerCase();
+  if (cat.startsWith('武器·')) return 'weapon';
+  if (cat === '发型') return 'hair';
+  if (cat === '特殊脸(s_face)' || cat === '蒙面头') return 'face';
+  if (cat === '脸型/胡子') return stem.includes('huzi') ? 'beard' : 'face';
+  if (cat === '脸型') return 'face';
+  if (cat === '脸部饰件') return 'facecloth';
+  if (cat === '面具') return 'mask';
+  if (cat === '头饰') return 'helmet';
+  if (cat === '身体参考' || cat === '身体/套装') return 'body';
+  if (cat === '上衣/时装') return 'top';
+  if (cat === '下装') return 'pants';
+  if (cat === '鞋') return 'shoes';
+  if (cat === '披风') return 'cloak';
+  return cat || 'misc';
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -75,73 +109,239 @@ async function loadCatalog() {
   S.catalog = await fetchJSON('/api/catalog');
   const c = S.catalog.counts;
   $('lib-info').textContent = '';
-  $('model-count').textContent = `${c.modelsOk}/${c.models}`;
   $('anim-count').textContent = `${c.animsOk}/${c.anims}`;
   buildModelGroups();
   buildAnimList();
+  await setGender('男', true);
 }
 
-/* ---------- 模型列表 ---------- */
+// 调试/自动化: 目录+默认装配就绪信号
+window.__ready = loadCatalog();
+
+/* ---------- 性别总标签 ---------- */
+async function setGender(g, initial = false) {
+  if (S.gender === g && !initial) return;
+  S.gender = g;
+  document.querySelectorAll('.gtab').forEach((b) =>
+    b.classList.toggle('active', b.dataset.gender === g));
+  buildModelGroups();        // 重建分组数据 (M.groups 按性别过滤) — 只 renderModelList 的话列表还是旧性别
+  refreshAnimList();
+  // 卸下异性别部件 (武器不分性别, 保留); body/face 槽缺省时自动装配默认件
+  for (const [id, p] of [...S.parts]) {
+    if (id.startsWith('weapon/')) continue;
+    if (p.cat.gender !== g) removePart(id);
+  }
+  const slots = new Set([...S.parts.values()].map((p) => p.slot));
+  if (!slots.has('body')) {
+    const body = S.catalog.models.find((m) => m.id === DEFAULT_BODY[g] && m.status === 'ok');
+    if (body) await addPart(body);
+  }
+  if (!slots.has('face')) {
+    const face = S.catalog.models.find((m) => m.id === DEFAULT_FACE[g] && m.status === 'ok');
+    if (face) await addPart(face);
+  }
+  if (!S.anim) await loadDefaultSkeleton();
+  else attachAnim(S.anim);
+  frameCamera();
+  updateModelHud();
+}
+
+/* 性别默认骨架 (无动画时 bind 展示) */
+async function loadDefaultSkeleton() {
+  const tpose = S.gender === '男' ? 'b_action/tpose.xskt' : 'g_action/tpose.xskt';
+  const entry = S.catalog.anims.find((a) => a.id === tpose);
+  if (entry) await selectAnim(entry.id, { bindOnly: true });
+}
+
+/* ---------- 模型列表 (分组折叠 + 搜索; 点击条目装配/卸下) ---------- */
+const M = { groups: [], expanded: new Set() };
+const W = { groups: [], expanded: new Set() };   // 武器 (不受性别标签影响)
+
+const isWeapon = (m) => m.id.startsWith('weapon/');
+const dispName = (m) => m.label || m.name;
+
+function modelMatches(m, q) {
+  if (isWeapon(m)) return false;                 // 武器走独立面板
+  if (m.gender !== S.gender && m.gender !== '通用') return false;
+  if (!q) return true;
+  return m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
+    || (m.label || '').toLowerCase().includes(q);
+}
+
 function buildModelGroups() {
   const groups = new Map();
   for (const m of S.catalog.models) {
-    const key = `${m.gender} · ${m.category}`;
+    if (isWeapon(m) || (m.gender !== S.gender && m.gender !== '通用')) continue;
+    if (!groups.has(m.category)) groups.set(m.category, []);
+    groups.get(m.category).push(m);
+  }
+  M.groups = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0], 'zh'));
+  M.expanded = new Set(M.groups.length <= 8 ? M.groups.map(([k]) => k) : []);
+  buildWeaponGroups();
+  renderModelList();
+  renderWeaponList();
+}
+
+/* ---------- 武器面板 ---------- */
+function buildWeaponGroups() {
+  const groups = new Map();
+  let n = 0;
+  for (const m of S.catalog.models) {
+    if (!isWeapon(m)) continue;
+    const key = m.category.replace('武器·', '') || '其它';
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(m);
+    n++;
   }
+  W.groups = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
+  $('weapon-count').textContent = `${n}`;
+}
+
+function renderWeaponList() {
+  const q = $('weapon-search').value.trim().toLowerCase();
+  const searching = !!q;
+  const box = $('weapon-groups');
+  box.innerHTML = '';
+  for (const [key, items] of W.groups) {
+    const vis = searching
+      ? items.filter((m) => m.name.toLowerCase().includes(q)
+        || m.id.toLowerCase().includes(q) || (m.label || '').toLowerCase().includes(q))
+      : items;
+    if (searching && !vis.length) continue;
+    const open = searching || W.expanded.has(key);
+    const h = document.createElement('div');
+    h.className = 'mgroup-header' + (open ? ' open' : '');
+    h.innerHTML = `<span class="tw">${open ? '▾' : '▸'}</span>${key}
+      <span class="cnt">${vis.length}</span>`;
+    h.onclick = () => {
+      if (W.expanded.has(key)) W.expanded.delete(key); else W.expanded.add(key);
+      renderWeaponList();
+    };
+    box.appendChild(h);
+    if (!open) continue;
+    const cap = 200;
+    for (const m of vis.slice(0, cap)) {
+      box.appendChild(weaponItem(m));
+    }
+    if (vis.length > cap) {
+      const more = document.createElement('div');
+      more.className = 'mgroup-more';
+      more.textContent = `… 其余 ${vis.length - cap} 项请用搜索定位`;
+      box.appendChild(more);
+    }
+  }
+}
+
+function weaponItem(m) {
+  const el = document.createElement('div');
+  el.className = 'mitem';
+  el.dataset.id = m.id;
+  const badge = m.status !== 'ok'
+    ? `<span class="badge unsup" title="${m.error || ''}">${m.status === 'unsupported' ? '版本' : '错误'}</span>` : '';
+  const on = S.parts.has(m.id) ? '<span class="on">✓</span>' : '';
+  el.innerHTML = `${on}<span class="nm">${m.label
+    ? `<span class="lbl">${m.label}</span><span class="orig">${m.name}</span>`
+    : m.name}</span>${badge}
+    <span class="meta">${m.vertices}v</span>`;
+  el.title = `${m.label || ''}\n${m.id}`;
+  el.classList.toggle('active', S.parts.has(m.id));
+  el.onclick = () => togglePart(m.id);
+  return el;
+}
+
+function renderModelList() {
+  if (!S.catalog) return;
+  const q = $('model-search').value.trim().toLowerCase();
+  const searching = !!q;
   const box = $('model-groups');
   box.innerHTML = '';
-  for (const [key, items] of groups) {
+  let shown = 0;
+  for (const [key, items] of M.groups) {
+    const vis = searching ? items.filter((m) => modelMatches(m, q)) : items;
+    if (searching && !vis.length) continue;
+    const open = searching || M.expanded.has(key);
     const h = document.createElement('div');
-    h.className = 'mgroup-header';
-    h.textContent = `${key} (${items.length})`;
+    h.className = 'mgroup-header' + (open ? ' open' : '');
+    h.innerHTML = `<span class="tw">${open ? '▾' : '▸'}</span>${key}
+      <span class="cnt">${vis.length}${vis.length !== items.length ? `/${items.length}` : ''}</span>`;
+    h.onclick = () => {
+      if (M.expanded.has(key)) M.expanded.delete(key); else M.expanded.add(key);
+      renderModelList();
+    };
     box.appendChild(h);
-    for (const m of items) {
+    if (!open) continue;
+    // 大组内截断显示 (搜索时放行全部命中)
+    const cap = searching ? Infinity : 400;
+    for (const m of vis.slice(0, cap)) {
       const el = document.createElement('div');
       el.className = 'mitem';
       el.dataset.id = m.id;
       const badge = m.status !== 'ok'
         ? `<span class="badge unsup" title="${m.error || ''}">${m.status === 'unsupported' ? '版本' : '错误'}</span>` : '';
-      el.innerHTML = `<span class="nm">${m.name}</span>${badge}
+      const on = S.parts.has(m.id) ? '<span class="on">✓</span>' : '';
+      el.innerHTML = `${on}<span class="nm">${m.label
+        ? `<span class="lbl">${m.label}</span><span class="orig">${m.name}</span>`
+        : m.name}</span>${badge}
         <span class="meta">${m.vertices}v ${m.triangles}t</span>`;
-      el.title = m.id + (m.status !== 'ok' ? `\n${m.error || ''}` : '');
-      el.onclick = () => selectModel(m.id);
+      el.title = `${m.label || ''}\n${m.id}` + (m.status !== 'ok' ? `\n${m.error || ''}` : '');
+      el.classList.toggle('active', S.parts.has(m.id));
+      el.onclick = () => togglePart(m.id);
       box.appendChild(el);
+      shown++;
+    }
+    if (vis.length > cap) {
+      const more = document.createElement('div');
+      more.className = 'mgroup-more';
+      more.textContent = `… 其余 ${vis.length - cap} 项请用搜索定位`;
+      box.appendChild(more);
     }
   }
+  const c = S.catalog.counts;
+  $('model-list-status').textContent =
+    `${shown} 项显示 · 已装配 ${S.parts.size} 部件 (可解析 ${c.modelsOk}/${c.models})`;
 }
 
-/* ---------- 动画虚拟列表 ---------- */
-const A = { filtered: [], itemH: 26, rendered: new Map() };
+$('model-search').addEventListener('input', renderModelList);
+$('weapon-search').addEventListener('input', renderWeaponList);
+$('weapons-head').onclick = () => $('weapons-panel').classList.toggle('closed');
+document.querySelectorAll('.gtab').forEach((b) => { b.onclick = () => setGender(b.dataset.gender); });
+$('btn-clear-parts').onclick = () => { clearParts(); updateModelHud(); renderModelList(); renderWeaponList(); };
 
-function animFilter() {
-  const q = $('anim-search').value.trim().toLowerCase();
-  const g = $('anim-gender').value;
-  const cat = $('anim-cat').value;
-  return S.catalog.anims.filter((a) => {
-    if (g && a.gender !== g) return false;
-    if (cat && a.category !== cat) return false;
-    if (!q) return true;
-    return a.id.toLowerCase().includes(q) || a.names.some((n) => n.toLowerCase().includes(q));
-  });
+/* ---------- 动画列表: 分类折叠分组 + 搜索 (虚拟滚动, 行高恒定 26px) ---------- */
+const A = { rows: [], itemH: 26, rendered: new Map(), opened: new Set() };
+
+function animMatches(a, q) {
+  if (a.gender !== S.gender) return false;
+  if (!q) return true;
+  return a.id.toLowerCase().includes(q) || a.names.some((n) => n.toLowerCase().includes(q));
 }
 
 function buildAnimList() {
-  const cats = [...new Set(S.catalog.anims.map((a) => a.category))].sort();
-  const sel = $('anim-cat');
-  for (const c of cats) {
-    const o = document.createElement('option');
-    o.textContent = c; o.value = c;
-    sel.appendChild(o);
-  }
   refreshAnimList();
 }
 
 function refreshAnimList() {
-  A.filtered = animFilter();
-  $('anim-list-spacer').style.height = `${A.filtered.length * A.itemH}px`;
+  const q = $('anim-search').value.trim().toLowerCase();
+  const searching = !!q;
+  const groups = new Map();
+  let total = 0;
+  for (const a of S.catalog.anims) {
+    if (!animMatches(a, q)) continue;
+    if (!groups.has(a.category)) groups.set(a.category, []);
+    groups.get(a.category).push(a);
+    total++;
+  }
+  const rows = [];
+  for (const cat of [...groups.keys()].sort((x, y) => x.localeCompare(y, "zh"))) {
+    const items = groups.get(cat);
+    const open = searching || A.opened.has(cat);   // 默认全折叠, 只展开用户点开的
+    rows.push({ type: 'h', cat, n: items.length, open });
+    if (open) for (const a of items) rows.push({ type: 'i', a });
+  }
+  A.rows = rows;
+  $('anim-list-spacer').style.height = `${rows.length * A.itemH}px`;
   $('anim-list-status').textContent =
-    `${A.filtered.length} 条 / 共 ${S.catalog.anims.length}${$('anim-search').value ? ' (已过滤)' : ''}`;
+    `${total} 条 · ${groups.size} 分类 · ${S.gender}性${searching ? ' (搜索中)' : ''}`;
   renderAnimWindow();
 }
 
@@ -150,72 +350,76 @@ function renderAnimWindow() {
   const list = $('anim-list');
   const top = wrap.scrollTop, h = wrap.clientHeight;
   const first = Math.max(0, Math.floor(top / A.itemH) - 5);
-  const last = Math.min(A.filtered.length, Math.ceil((top + h) / A.itemH) + 5);
+  const last = Math.min(A.rows.length, Math.ceil((top + h) / A.itemH) + 5);
   const keep = new Set();
   for (let i = first; i < last; i++) {
-    const a = A.filtered[i];
-    keep.add(a.id);
-    let el = A.rendered.get(a.id);
+    const row = A.rows[i];
+    const key = row.type === 'h' ? `h:${row.cat}` : row.a.id;
+    keep.add(key);
+    let el = A.rendered.get(key);
     if (!el) {
-      el = document.createElement('div');
-      el.className = 'aitem';
-      el.dataset.id = a.id;
-      const badge = a.status !== 'ok'
-        ? `<span class="badge unsup" title="${a.error || ''}">✕</span>` : '';
-      el.innerHTML = `<span class="nm" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-          ${a.names[0]}${a.names.length > 1 ? ` <span style="color:var(--fg-dim)">+${a.names.length - 1}</span>` : ''}</span>
-        ${badge}<span class="meta">${a.frames}f</span>
-        <span class="meta">${a.bones || '-'}骨</span>`;
-      el.title = `${a.names.join(' / ')}\n${a.id}\n${a.frames}帧 ${a.duration}s ${a.bones}骨` +
-        (a.status !== 'ok' ? `\n${a.error}` : '');
-      el.onclick = () => selectAnim(a.id);
-      A.rendered.set(a.id, el);
+      if (row.type === 'h') {
+        el = document.createElement('div');
+        el.className = 'agroup-header';
+        el.innerHTML = `<span class="tw">${row.open ? '▾' : '▸'}</span>${row.cat}
+          <span class="cnt">${row.n}</span>`;
+        el.onclick = () => {
+          if (A.opened.has(row.cat)) A.opened.delete(row.cat);
+          else A.opened.add(row.cat);
+          refreshAnimList();
+        };
+      } else {
+        const a = row.a;
+        el = document.createElement('div');
+        el.className = 'aitem';
+        el.dataset.id = a.id;
+        const badge = a.status !== 'ok'
+          ? `<span class="badge unsup" title="${a.error || ''}">✕</span>` : '';
+        el.innerHTML = `<span class="nm" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            ${a.names[0]}${a.names.length > 1 ? ` <span style="color:var(--fg-dim)">+${a.names.length - 1}</span>` : ''}</span>
+          ${badge}<span class="meta">${a.frames}f</span>
+          <span class="meta">${a.bones || '-'}骨</span>`;
+        el.title = `${a.names.join(' / ')}\n${a.id}\n${a.frames}帧 ${a.duration}s ${a.bones}骨` +
+          (a.status !== 'ok' ? `\n${a.error}` : '');
+        el.onclick = () => selectAnim(a.id);
+      }
+      A.rendered.set(key, el);
     }
     el.style.top = `${i * A.itemH}px`;
     if (el.parentNode !== list) list.appendChild(el);
   }
-  for (const [id, el] of A.rendered) {
-    if (!keep.has(id)) { el.remove(); A.rendered.delete(id); }
+  for (const [key, el] of A.rendered) {
+    if (!keep.has(key)) { el.remove(); A.rendered.delete(key); }
   }
 }
 
 $('anim-list-wrap').addEventListener('scroll', renderAnimWindow);
 $('anim-search').addEventListener('input', refreshAnimList);
-$('anim-gender').addEventListener('change', refreshAnimList);
-$('anim-cat').addEventListener('change', refreshAnimList);
 
-/* ---------- Tab 切换 ---------- */
-document.querySelectorAll('.tab').forEach((t) => {
-  t.onclick = () => {
-    document.querySelectorAll('.tab').forEach((x) => x.classList.remove('active'));
-    document.querySelectorAll('.tabpane').forEach((x) => x.classList.remove('active'));
-    t.classList.add('active');
-    $(`tab-${t.dataset.tab}`).classList.add('active');
-    if (t.dataset.tab === 'anims') renderAnimWindow();
-  };
-});
+/* ================= 部件装配 (多 xmod 共享骨架) ================= */
+let modelGroup = null;   // 场景内全部部件的容器
+let currentMeshes = [];  // 全部部件的网格平铺 (骨架换装时统一转 SkinnedMesh)
 
-/* ================= 模型/动画装载 ================= */
-let modelGroup = null;   // 场景内当前模型容器
-let currentMeshes = [];
-
-function disposeModel() {
-  if (modelGroup) {
-    scene.remove(modelGroup);
-    modelGroup.traverse((o) => {
-      if (o.geometry) o.geometry.dispose();
-      if (o.material) {
-        for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
-          for (const k of ['map', 'specularMap', 'emissiveMap']) m[k]?.dispose?.();
-          m.dispose();
-        }
-      }
-    });
+function ensureGroup() {
+  if (!modelGroup) {
+    modelGroup = new THREE.Group();
+    scene.add(modelGroup);
   }
-  modelGroup = null;
+  return modelGroup;
+}
+
+function disposeMesh(mesh) {
+  mesh.geometry?.dispose();
+  const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+  for (const m of mats) {
+    for (const k of ['map', 'specularMap', 'emissiveMap', 'normalMap']) m[k]?.dispose?.();
+    m.dispose();
+  }
+}
+
+function rebuildMeshList() {
   currentMeshes = [];
-  S.rig = null;
-  if (skeletonHelper) { scene.remove(skeletonHelper); skeletonHelper = null; }
+  for (const p of S.parts.values()) currentMeshes.push(...p.meshes);
 }
 
 const ddsLoader = new DDSLoader();
@@ -231,59 +435,108 @@ function loadTexture(url) {
   });
 }
 
-async function selectModel(id, keepAnim = true) {
-  document.querySelectorAll('.mitem').forEach((el) =>
-    el.classList.toggle('active', el.dataset.id === id));
-  $('hud-model').innerHTML = `<span class="t">模型</span>载入中…`;
+/** 装配一个部件 (可叠加: 身体+脸+发型+头饰…全部绑到同一骨架). */
+async function addPart(catEntry) {
+  if (S.parts.has(catEntry.id)) return;
+  const slot = slotOf(catEntry);
+  // 同槽互斥: 自动卸下旧件 (武器/发型/衣裤鞋/脸… 每槽一件)
+  for (const [id, p] of [...S.parts]) {
+    if (p.slot === slot) removePart(id);
+  }
+  $('hud-model').innerHTML = `<span class="t">装配</span>${catEntry.name} 载入中…`;
   try {
-    const data = await fetchJSON(`/api/model?id=${encodeURIComponent(id)}`);
-    disposeModel();
-    S.model = data;
-    buildModel(data);
-    updateModelHud();
-    if (!keepAnim || !S.anim) {
-      const cat = S.catalog.models.find((m) => m.id === id);
-      if (cat?.skeleton) await selectAnim(cat.skeleton, { bindOnly: true });
-    } else if (S.anim) {
-      attachAnim(S.anim);   // 用现有动画重建骨架
+    const data = await fetchJSON(`/api/model?id=${encodeURIComponent(catEntry.id)}`);
+    const group = ensureGroup();
+    const meshes = [];
+    for (const sm of data.submeshes) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(sm.positions, 3));
+      geo.setAttribute('normal', new THREE.Float32BufferAttribute(sm.normals, 3));
+      // DDS 压缩纹理块序与 D3D 一致 (v=0 = 顶行), UV 原样使用, 不做翻转
+      geo.setAttribute('uv', new THREE.Float32BufferAttribute(sm.uvs, 2));
+      geo.setIndex(sm.indices);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0xb8b8c0, roughness: 0.75, metalness: 0.05,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.userData.sm = sm;
+      mesh.userData.partId = catEntry.id;
+      group.add(mesh);
+      meshes.push(mesh);
+      if (sm.textures.diffuse) {
+        loadTexture(sm.textures.diffuse).then((tex) => {
+          if (tex) { mat.map = tex; mat.color.set(0xffffff); mat.needsUpdate = true; }
+        });
+      }
     }
+    S.parts.set(catEntry.id, { id: catEntry.id, data, cat: catEntry, meshes, slot });
+    rebuildMeshList();
+    if (S.anim) attachAnim(S.anim);        // 已有动画 → 全部件重建蒙皮
+    else await loadDefaultSkeleton();
+    updateModelHud();
+    renderModelList();
+    renderWeaponList();
+    frameCamera();
   } catch (e) {
-    $('hud-model').innerHTML = `<span class="t">模型</span>载入失败: ${e.message}`;
+    $('hud-model').innerHTML = `<span class="t">装配</span>${catEntry.name} 失败: ${e.message}`;
   }
 }
 
-function buildModel(data) {
-  modelGroup = new THREE.Group();
-  scene.add(modelGroup);
-  for (const sm of data.submeshes) {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(sm.positions, 3));
-    geo.setAttribute('normal', new THREE.Float32BufferAttribute(sm.normals, 3));
-    // DDS 压缩纹理块序与 D3D 一致 (v=0 = 顶行), UV 原样使用, 不做翻转
-    geo.setAttribute('uv', new THREE.Float32BufferAttribute(sm.uvs, 2));
-    geo.setIndex(sm.indices);
-    const mat = new THREE.MeshStandardMaterial({
-      color: 0xb8b8c0, roughness: 0.75, metalness: 0.05,
-      side: THREE.DoubleSide,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.userData.sm = sm;
-    modelGroup.add(mesh);
-    currentMeshes.push(mesh);
-    if (sm.textures.diffuse) {
-      loadTexture(sm.textures.diffuse).then((tex) => {
-        if (tex) { mat.map = tex; mat.color.set(0xffffff); mat.needsUpdate = true; }
-      });
-    }
+function removePart(id) {
+  const p = S.parts.get(id);
+  if (!p) return;
+  for (const mesh of p.meshes) {
+    mesh.parent?.remove(mesh);      // 可能在 modelGroup 或手骨 (武器挂接)
+    disposeMesh(mesh);
   }
+  S.parts.delete(id);
+  rebuildMeshList();
+  if (S.anim) attachAnim(S.anim);
+  else if (!S.parts.size) {                // 空了 → 连骨架一起清
+    if (S.rig?.root && modelGroup) modelGroup.remove(S.rig.root);
+    S.rig = null;
+    if (skeletonHelper) { scene.remove(skeletonHelper); skeletonHelper = null; }
+  }
+  updateModelHud();
+  renderModelList();
+  renderWeaponList();
   frameCamera();
 }
 
+function clearParts() {
+  for (const id of [...S.parts.keys()]) removePart(id);
+}
+
+async function togglePart(id) {
+  if (S.parts.has(id)) { removePart(id); return; }
+  const cat = S.catalog.models.find((m) => m.id === id);
+  if (!cat) return;
+  await addPart(cat);
+}
+
+/** 视口内已装配部件 chips (× 卸下) */
+function updateAssemblyBar() {
+  const bar = $('assembly-bar');
+  bar.innerHTML = '';
+  for (const p of S.parts.values()) {
+    const chip = document.createElement('div');
+    chip.className = 'part-chip';
+    chip.innerHTML = `<span>${p.cat.label || p.cat.name}</span><span class="x" title="卸下">✕</span>`;
+    chip.querySelector('.x').onclick = () => removePart(p.id);
+    bar.appendChild(chip);
+  }
+}
+
 function frameCamera() {
-  // 用文件 AABB (bind 空间) 取景
-  const b = S.model.aabb;
-  const box = new THREE.Box3(
-    new THREE.Vector3(b[0], b[1], b[2]), new THREE.Vector3(b[3], b[4], b[5]));
+  // 用全部件文件 AABB 并集 (bind 空间) 取景
+  if (!S.parts.size) return;
+  const box = new THREE.Box3();
+  for (const p of S.parts.values()) {
+    const b = p.data.aabb;
+    box.union(new THREE.Box3(
+      new THREE.Vector3(b[0], b[1], b[2]), new THREE.Vector3(b[3], b[4], b[5])));
+  }
   const size = box.getSize(new THREE.Vector3()).length() || 1.8;
   const center = box.getCenter(new THREE.Vector3());
   controls.target.copy(center);
@@ -297,11 +550,24 @@ function frameCamera() {
 }
 
 function updateModelHud() {
-  const d = S.model;
-  const v = d.submeshes.reduce((s, x) => s + x.vertexCount, 0);
-  const t = d.submeshes.reduce((s, x) => s + x.indices.length / 3, 0);
+  updateAssemblyBar();
+  if (!S.parts.size) {
+    $('hud-model').innerHTML = `<span class="t">装配</span>空 — 点击左侧部件装载 (可多选叠加)`;
+    return;
+  }
+  let v = 0, t = 0, subs = 0;
+  const names = [];
+  for (const p of S.parts.values()) {
+    for (const sm of p.data.submeshes) {
+      v += sm.vertexCount;
+      t += sm.indices.length / 3;
+      subs++;
+    }
+    names.push(p.cat.label || p.cat.name);
+  }
   $('hud-model').innerHTML =
-    `<span class="t">模型</span>${d.name} · ${d.submeshes.length} 子网格 · ${v} 顶点 · ${Math.round(t)} 三角`;
+    `<span class="t">装配</span>${S.parts.size} 部件 · ${subs} 子网格 · ${v} 顶点 · ${Math.round(t)} 三角` +
+    `<br><span style="color:var(--fg-dim)">${names.join(' + ')}</span>`;
 }
 
 /* ---------- 动画 → 骨架装配 ---------- */
@@ -322,7 +588,7 @@ async function selectAnim(id, opts = {}) {
 }
 
 function attachAnim(data) {
-  if (!S.model) return;
+  if (!S.parts.size) return;
   convertToSkinned(data);
   if (S.bindOnly) {
     // 绑定姿势: 骨架已停在 bind, 不应用轨道帧
@@ -336,7 +602,8 @@ function attachAnim(data) {
 function convertToSkinned(data) {
   // 换骨架前清旧
   if (skeletonHelper) { scene.remove(skeletonHelper); skeletonHelper = null; }
-  if (S.rig?.root) modelGroup.remove(S.rig.root);
+  if (S.rig?.root && modelGroup) modelGroup.remove(S.rig.root);
+  rebuildMeshList();   // 防御: 一律从部件重建网格清单, 杜绝陈旧引用
 
   const bones = data.bones.map((b) => {
     const bone = new THREE.Bone();
@@ -357,8 +624,11 @@ function convertToSkinned(data) {
   const skeleton = new THREE.Skeleton(bones);
   S.rig = { bones, root, data, idxMap };
 
-  // 骨架匹配率 (网格骨名 ∩ 动画骨架)
-  const meshBoneNames = new Set(S.model.boneNames.map((n) => n.toLowerCase()));
+  // 骨架匹配率 (全部件骨名并集 ∩ 动画骨架)
+  const meshBoneNames = new Set();
+  for (const p of S.parts.values()) {
+    for (const n of p.data.boneNames) meshBoneNames.add(n.toLowerCase());
+  }
   let hit = 0;
   for (const n of meshBoneNames) if (idxMap.has(n)) hit++;
   const ratio = meshBoneNames.size ? hit / meshBoneNames.size : 0;
@@ -369,9 +639,17 @@ function convertToSkinned(data) {
     : '';
 
   // 子网格 → SkinnedMesh (root 挂 modelGroup, 多网格共享一个骨架)
+  // 武器部件例外: 握柄建模在原点, 直接挂到手骨 Bip01 R Hand (不蒙皮, 跟手刚体运动)
+  const handBone = bones.find((b) => b.name.toLowerCase() === 'bip01 r hand');
   const newMeshes = [];
   for (const mesh of currentMeshes) {
     const sm = mesh.userData.sm;
+    if (mesh.userData.partId?.startsWith('weapon/')) {
+      mesh.parent?.remove(mesh);
+      (handBone || modelGroup).add(mesh);
+      newMeshes.push(mesh);
+      continue;
+    }
     const geo = mesh.geometry;
     const n = sm.vertexCount;
     const si = new Uint16Array(n * 4);
@@ -382,8 +660,8 @@ function convertToSkinned(data) {
       for (let k = 0; k < 4; k++) {
         if (k < cnt) {
           const pair = sm.weights[wpos++];
-          const bn = sm.boneNames[pair[0]].toLowerCase();
-          si[vi * 4 + k] = idxMap.has(bn) ? idxMap.get(bn) : 0;
+          const bn = sm.boneNames[pair[0]]?.toLowerCase();   // 刚体网格无骨名 blob → undefined
+          si[vi * 4 + k] = bn && idxMap.has(bn) ? idxMap.get(bn) : 0;
           sw[vi * 4 + k] = pair[1];
         }
       }
@@ -399,6 +677,15 @@ function convertToSkinned(data) {
     newMeshes.push(skinned);
   }
   currentMeshes = newMeshes;
+  // 写回各部件的网格引用: convertToSkinned 用新 SkinnedMesh 替换了构建时的普通 Mesh,
+  // 不写回的话 removePart/rebuildMeshList 会拿到已脱离场景的旧网格 (卸不掉/重复渲染)
+  {
+    let k = 0;
+    for (const p of S.parts.values()) {
+      p.meshes = newMeshes.slice(k, k + p.meshes.length);
+      k += p.meshes.length;
+    }
+  }
   window.__skel = skeleton;   // 调试: 手动检查骨架状态
 
   skeletonHelper = new THREE.SkeletonHelper(root);
@@ -436,10 +723,25 @@ window.__unskin = () => {
 };
 // 调试: 模块作用域桥接 (自动化测试用)
 window.__test = {
-  loadModel: async (id) => {
-    await selectModel(id, false);
-    return { verts: S.model.submeshes.reduce((a, x) => a + x.vertexCount, 0) };
+  loadModel: async (id) => {          // 独占装载 (清空其余部件)
+    clearParts();
+    const cat = S.catalog.models.find((m) => m.id === id);
+    if (!cat) throw new Error(`目录中无 ${id}`);
+    await addPart(cat);
+    let verts = 0;
+    for (const p of S.parts.values()) {
+      for (const sm of p.data.submeshes) verts += sm.vertexCount;
+    }
+    return { verts };
   },
+  addPart: async (id) => {            // 叠加装配
+    const cat = S.catalog.models.find((m) => m.id === id);
+    if (!cat) throw new Error(`目录中无 ${id}`);
+    await addPart(cat);
+    return { parts: S.parts.size };
+  },
+  parts: () => [...S.parts.keys()],
+  gender: (g) => setGender(g),
   loadAnim: async (id) => {
     const d = await (await fetch(`/api/anim?id=${encodeURIComponent(id)}`)).json();
     S.anim = d; S.frame = 0;
@@ -489,6 +791,96 @@ window.__dbg2 = () => {
     })) : null,
     rigRootInGroup: !!(S.rig && modelGroup && S.rig.root.parent === modelGroup),
     sceneKids: scene.children.map((c) => c.type),
+  };
+};
+// 调试: 贴图装载状态探针
+window.__tex = () => currentMeshes.map((m) => ({
+  sm: m.userData.sm?.name,
+  url: m.userData.sm?.textures?.diffuse,
+  hasMap: !!m.material.map,
+  mapOk: !!m.material.map?.image,
+  mips: m.material.map?.image?.mipmaps?.length,
+  color: m.material.color.getHexString(),
+}));
+// 调试: CPU 蒙皮直渲 — 把蒙皮结果烘进 position, 换成静态 Mesh (对比 GPU 蒙皮)
+window.__cpuskin = () => {
+  if (S.rig?.root) S.rig.root.updateMatrixWorld(true);
+  const m = new THREE.Matrix4();
+  for (const sk of currentMeshes) {
+    if (!sk.isSkinnedMesh) return 'already cpuskinned';
+    const sm = sk.userData.sm;
+    const pos = new Float32Array(sm.positions.length);
+    for (let vi = 0; vi < sm.vertexCount; vi++) {
+      const v = new THREE.Vector3(sm.positions[vi * 3], sm.positions[vi * 3 + 1], sm.positions[vi * 3 + 2]);
+      const a = new THREE.Vector3();
+      const woff = sm.weightCounts.slice(0, vi).reduce((x, y) => x + y, 0);
+      for (let k = 0; k < sm.weightCounts[vi]; k++) {
+        const [bi, w] = sm.weights[woff + k];
+        const si = S.rig.idxMap.get(sm.boneNames[bi].toLowerCase());
+        m.multiplyMatrices(sk.skeleton.bones[si].matrixWorld, sk.skeleton.boneInverses[si]);
+        a.addScaledVector(v.clone().applyMatrix4(m), w);
+      }
+      pos[vi * 3] = a.x; pos[vi * 3 + 1] = a.y; pos[vi * 3 + 2] = a.z;
+    }
+    const geo = sk.geometry.clone();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.deleteAttribute('skinIndex');
+    geo.deleteAttribute('skinWeight');
+    const plain = new THREE.Mesh(geo, sk.material);
+    plain.userData.sm = sm;
+    modelGroup.remove(sk);
+    modelGroup.add(plain);
+    const idx = currentMeshes.indexOf(sk);
+    currentMeshes[idx] = plain;
+  }
+  renderer.render(scene, camera);
+  return 'cpuskinned';
+};
+// 调试: bind 姿态恒等性探针 (最高顶点的权重/蒙皮结果 + CPU 包围盒)
+window.__probe = () => {
+  const firstPart = S.parts.values().next().value;
+  if (!firstPart) return { noParts: true };
+  const sm = firstPart.data.submeshes[0];
+  const sk = currentMeshes[0];
+  const idxMap = S.rig.idxMap;
+  let hi = 0;
+  for (let i = 1; i < sm.vertexCount; i++) {
+    if (sm.positions[i * 3 + 1] > sm.positions[hi * 3 + 1]) hi = i;
+  }
+  const woff = sm.weightCounts.slice(0, hi).reduce((a, b) => a + b, 0);
+  const wps = [];
+  for (let k = 0; k < sm.weightCounts[hi]; k++) {
+    const [bi, w] = sm.weights[woff + k];
+    wps.push([sm.boneNames[bi], w]);
+  }
+  const inBind = S.anim.bones.every((b, i) => {
+    const q = S.rig.bones[i].quaternion;
+    return q.x === b.bindQuat[0] && q.y === b.bindQuat[1]
+      && q.z === b.bindQuat[2] && q.w === b.bindQuat[3];
+  });
+  const m = new THREE.Matrix4();
+  const box = new THREE.Box3();
+  const rawBox = new THREE.Box3();
+  for (let vi = 0; vi < sm.vertexCount; vi++) {
+    const v = new THREE.Vector3(sm.positions[vi * 3], sm.positions[vi * 3 + 1], sm.positions[vi * 3 + 2]);
+    rawBox.expandByPoint(v);
+    const a = new THREE.Vector3();
+    let wsum = 0;
+    for (let k = 0; k < sm.weightCounts[vi]; k++) {
+      const [bi, w] = sm.weights[sm.weightCounts.slice(0, vi).reduce((x, y) => x + y, 0) + k];
+      const si = idxMap.get(sm.boneNames[bi].toLowerCase());
+      wsum += w;
+      if (si === undefined) continue;
+      m.multiplyMatrices(sk.skeleton.bones[si].matrixWorld, sk.skeleton.boneInverses[si]);
+      a.addScaledVector(v.clone().applyMatrix4(m), w);
+    }
+    if (Math.abs(wsum - 1) > 1e-3) a.multiplyScalar(1 / wsum);   // 归一化后再比较
+    box.expandByPoint(a);
+  }
+  return {
+    hi, origY: sm.positions[hi * 3 + 1], wps, inBind,
+    rawBox: rawBox.min.toArray().concat(rawBox.max.toArray()).map((x) => +x.toFixed(3)),
+    cpuBox: box.min.toArray().concat(box.max.toArray()).map((x) => +x.toFixed(3)),
   };
 };
 window.__dbg = () => {
@@ -690,10 +1082,9 @@ rafChain();
 stoChain();
 
 /* ---------- 启动 ---------- */
-loadCatalog().then(async () => {
-  // 默认载入男全身参考体 + 跑步循环 (第0帧=站立姿势, 播放时最易辨认)
+window.__ready.then(async () => {
+  // loadCatalog → setGender('男') 已装配默认身体; 再挂跑步循环 (贴图/蒙皮/动画全链路即刻可验)
   try {
-    await selectModel('b_action/tpose.xmod', false);
     const run = S.catalog.anims.find((a) => a.id === 'b_action/base/run.xskt');
     if (run) {
       await selectAnim(run.id);

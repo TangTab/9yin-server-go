@@ -166,6 +166,7 @@ var (
 	propMPUpSpeed                = clientdata.MustPlayerProperty("MPUpSpeed").Index             // MPUpSpeed（fork=616）
 	propMPUpSpeedAdd             = clientdata.MustPlayerProperty("MPUpSpeedAdd").Index          // MPUpSpeedAdd（fork=620）
 	propCurSkillTarget           = clientdata.MustPlayerProperty("CurSkillTarget").Index        // CurSkillTarget Object（fork=627）
+	propCurIsAirSkill            = clientdata.MustPlayerProperty("CurIsAirSkill").Index         // CurIsAirSkill Int32（fork=625；空中受理=4，技能4/5 受理簇实证）
 	propModifySkillLockTime      = clientdata.MustPlayerProperty("ModifySkillLockTime").Index   // ModifySkillLockTime（fork=221）
 	propSkillCanUse              = clientdata.MustPlayerProperty("CanUse").Index                // CanUse Byte(外服私服怒气灰化心跳簇同索引)（fork=2236）
 	propSkillCurTargetCount      = clientdata.MustPlayerProperty("CurTargetCount").Index        // CurTargetCount（fork=577）

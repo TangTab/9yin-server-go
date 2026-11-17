@@ -47,14 +47,37 @@ def _round_list(xs, nd=4):
 
 
 def _resolve_texture(fm, root: str, rel_base: str, texture_ref: str):
-    """贴图引用 (相对 xmod/mtl 目录) → /res/<相对路径> URL 或 None."""
+    """贴图引用 (相对 xmod/mtl 目录) → /res/<key> URL 或 None."""
     if not texture_ref:
         return None
     p = texture_ref.replace("\\", "/")
     cand = fm.resolve(p) if p.lower().startswith("obj/") else fm.resolve(f"{rel_base}/{p}")
     if cand:
-        return "/res/" + os.path.relpath(cand, root).replace("\\", "/")
+        return "/res/" + fm.url_key(cand)
     return None
+
+
+def _map_texture_slots(dds_strs, fm, root, rel_dir):
+    """贴图串列表 → {diffuse, specular, normal} URL.
+    串内常见重复 (槽位成对); 按后缀语义分配: _d=diffuse _s=specular _n=normal,
+    无后缀标记时首串作 diffuse."""
+    resolved = []
+    for s in dds_strs:
+        u = _resolve_texture(fm, root, rel_dir, s)
+        if u and u not in resolved:
+            resolved.append(u)
+    slots = {"diffuse": None, "specular": None, "normal": None}
+    for u in resolved:
+        stem = u.rsplit("/", 1)[-1].rsplit(".", 1)[0].lower()
+        if stem.endswith("_d") and not slots["diffuse"]:
+            slots["diffuse"] = u
+        elif stem.endswith("_s") and not slots["specular"]:
+            slots["specular"] = u
+        elif stem.endswith("_n") and not slots["normal"]:
+            slots["normal"] = u
+    if not slots["diffuse"] and resolved:
+        slots["diffuse"] = resolved[0]
+    return slots
 
 
 def build_model_payload(fm, root: str, rel: str) -> dict:
@@ -62,7 +85,7 @@ def build_model_payload(fm, root: str, rel: str) -> dict:
     if not full or not full.lower().endswith(".xmod"):
         raise FileNotFoundError(rel)
     m = xmod.parse_file(full)
-    rel_dir = os.path.dirname(os.path.relpath(full, root)).replace("\\", "/")
+    rel_dir = os.path.dirname(rel).replace("\\", "/")
 
     # mtl 材质映射: 小节名标准化 (Standard_1 → standard_1 / material #0)
     mtl_sections = {}
@@ -70,7 +93,7 @@ def build_model_payload(fm, root: str, rel: str) -> dict:
     mtl_key = rel.lower()[:-5] + ".mtl"
     if mtl_key in fm.by_key:
         mtl_full = fm.by_key[mtl_key]
-        mtl_rel = os.path.relpath(mtl_full, root).replace("\\", "/")
+        mtl_rel = fm.url_key(mtl_full)
         for sec, kv in resindex.parse_ini_sections(resindex.read_gbk(mtl_full)).items():
             mtl_sections[sec.strip().lower()] = kv
 
@@ -92,10 +115,12 @@ def build_model_payload(fm, root: str, rel: str) -> dict:
                 if v and not textures[slot]:
                     textures[slot] = _resolve_texture(fm, root, rel_dir, v)
         dds_strs = [s for s in sm.textures if s.lower().endswith(".dds")]
-        if not textures["diffuse"] and dds_strs:
-            textures["diffuse"] = _resolve_texture(fm, root, rel_dir, dds_strs[0])
-        if not textures["specular"] and len(dds_strs) >= 3:
-            textures["specular"] = _resolve_texture(fm, root, rel_dir, dds_strs[2])
+        slots = _map_texture_slots(dds_strs, fm, root, rel_dir)
+        if not textures["diffuse"]:
+            textures["diffuse"] = slots["diffuse"]
+        if not textures["specular"]:
+            textures["specular"] = slots["specular"]
+        textures["normal"] = slots["normal"]
         submeshes.append({
             "name": sm.name,
             "vertexCount": sm.vertex_count,
@@ -262,11 +287,18 @@ def main():
     ap.add_argument("--port", type=int, default=int(os.environ.get("NINEYIN_VIEWER_PORT", 8901)))
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--root", default=resindex.DEFAULT_ROOT)
+    ap.add_argument("--weapons", default=resindex.DEFAULT_WEAPON_ROOT,
+                    help="obj_weapon 解包根 (catalog id 前缀 weapon/)")
+    ap.add_argument("--resources", default=resindex.DEFAULT_RESOURCES,
+                    help="服务器资源根 (中文名映射表)")
     args = ap.parse_args()
 
-    print(f"资源根: {args.root}")
+    extra = []
+    if args.weapons and os.path.isdir(args.weapons):
+        extra.append(("weapon/", args.weapons))
+    print(f"资源根: {args.root}  武器根: {args.weapons}  资源表: {args.resources}")
     Handler.root = args.root
-    Handler.fm = resindex.FileMap(args.root)
+    Handler.fm = resindex.FileMap(args.root, extra)
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     url = f"http://{args.host}:{args.port}"
     print(f"模型浏览工具就绪: {url}  (目录在首次访问 /api/catalog 时构建, 约 12s)")

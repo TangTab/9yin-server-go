@@ -17,24 +17,24 @@
 <div id="app">
   <aside id="sidebar">
     <div id="logo">九阴 · 角色模型浏览器 <span id="lib-info"></span></div>
-    <div id="tabs">
-      <button class="tab active" data-tab="models">模型 <span id="model-count" class="cnt"></span></button>
-      <button class="tab" data-tab="anims">动画 <span id="anim-count" class="cnt"></span></button>
+    <div id="gender-tabs">
+      <button class="gtab active" data-gender="男">男</button>
+      <button class="gtab" data-gender="女">女</button>
     </div>
-    <div id="tab-models" class="tabpane active">
+    <div class="filters">
+      <input id="model-search" type="text" placeholder="搜索部件名 / 文件名…（点击条目装配/卸下）">
+      <button id="btn-clear-parts" title="卸下全部部件">清空</button>
+    </div>
+    <div id="model-groups-wrap">
       <div id="model-groups"></div>
     </div>
-    <div id="tab-anims" class="tabpane">
-      <div id="anim-filters">
-        <input id="anim-search" type="text" placeholder="搜索动画名 / 文件名…">
-        <select id="anim-gender"><option value="">全部性别</option><option>男</option><option>女</option></select>
-        <select id="anim-cat"><option value="">全部分类</option></select>
+    <div id="model-list-status"></div>
+    <div id="weapons-panel">
+      <div id="weapons-head">武器 <span id="weapon-count" class="cnt"></span></div>
+      <div class="filters">
+        <input id="weapon-search" type="text" placeholder="搜索武器…">
       </div>
-      <div id="anim-list-wrap">
-        <div id="anim-list-spacer"></div>
-        <div id="anim-list"></div>
-      </div>
-      <div id="anim-list-status"></div>
+      <div id="weapon-groups-wrap"><div id="weapon-groups"></div></div>
     </div>
   </aside>
   <main id="main">
@@ -51,6 +51,18 @@
       <label><input type="checkbox" id="opt-rotate"> 自动旋转</label>
       <label><input type="checkbox" id="opt-dark-bg" checked> 深色背景</label>
     </div>
+    <div id="assembly-bar"></div>
+  </main>
+  <aside id="animbar">
+    <div id="animbar-head">骨骼动画 <span id="anim-count" class="cnt"></span></div>
+    <div class="filters">
+      <input id="anim-search" type="text" placeholder="搜索动画名 / 文件名…（分类可折叠）">
+    </div>
+    <div id="anim-list-wrap">
+      <div id="anim-list-spacer"></div>
+      <div id="anim-list"></div>
+    </div>
+    <div id="anim-list-status"></div>
     <div id="playbar">
       <button id="btn-play" title="空格">▶</button>
       <select id="speed">
@@ -59,11 +71,13 @@
         <option value="2">2×</option><option value="4">4×</option>
       </select>
       <input id="frame-slider" type="range" min="0" max="100" value="0" step="any">
-      <span id="frame-label">0 / 0</span>
-      <span id="time-label">0.00s</span>
       <label class="loop"><input type="checkbox" id="opt-loop" checked> 循环</label>
     </div>
-  </main>
+    <div id="playbar-labels">
+      <span id="frame-label">0 / 0</span>
+      <span id="time-label">0.00s</span>
+    </div>
+  </aside>
 </div>
 <script type="module" src="/static/app.js"></script>
 </body>

@@ -43,13 +43,8 @@ func TestRushDashAirTierDrive(t *testing.T) {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()[base:]
-	var sawAirDash, sawC61Air bool
+	var sawC61Air bool
 	for _, f := range frames {
-		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
-			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-rushDriveAirDashSpeedMeters)) < 0.01 {
-				sawAirDash = true
-			}
-		}
 		if f[0] == 0x1E {
 			values := decodeCustomValuesFrame(t, f)
 			if len(values) >= 8 && values[0].Type == 2 && values[0].Int32 == 24 &&
@@ -59,8 +54,12 @@ func TestRushDashAirTierDrive(t *testing.T) {
 			}
 		}
 	}
-	if !sawAirDash {
-		t.Fatalf("air dash must drive s5=%v, frames=%x", rushDriveAirDashSpeedMeters, frames)
+	// v31（2026-11-17 去 0x21）：空中档不再有 0x21 驱动条目——c61 授予即
+	// 冲锋（客户端自走，技能5.pcapng 官方模型）。
+	for _, f := range frames {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			t.Fatalf("v31 client self-run must not emit 0x21 drive entries: %x", f)
+		}
 	}
 	if !sawC61Air {
 		t.Fatalf("air grant must be c61 flag=2, frames=%x", frames)

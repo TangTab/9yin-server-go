@@ -230,6 +230,13 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 // 不物化、无 Vitals/Brain，因此也永不进入死亡→重生刷新循环。
 // eventtrigger.xml（任务触发生成器）另在 npc_catalog.go 装载期排除。
 //
+// 任务闸门（2026-11-17）：creator 条目带 TaskSubId（如成都
+// AttackNpc_Creator.xml TaskSubId=11034 铁剑门弟子×6）是任务触发
+// 才生成的口径——官方只在对应任务激活时物化。全资源 5714 条
+// 分布：AttackNpc_Creator 4071、TaskGatherNpc_Creator 1350、
+// GatherNpc_Creator 293。无任务归属判定前一律不注册，
+// 与 EventNpc 同语义：不进共享世界、无 Vitals/Brain。
+//
 // 子场景闸门（2026-11-08）：creator 条目带 SubSceneNo（成都实测
 // AttackNpc.xml 219 条中 135 条，如夜探守卫 newworld_nangong_yetan_*
 // SubSceneNo=8961）是活动/分线态内容——外服私服只在子场景激活时由脚本
@@ -238,6 +245,9 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 // 平民带 SubSceneNo 的照常注册（站桩无害，避免误伤活动对话内容）。
 func npcSpawnEligible(npc npcSpawn) bool {
 	if strings.EqualFold(strings.TrimSpace(npc.resolved.ScriptClass), "EventNpc") {
+		return false
+	}
+	if taskSubID, exists := npc.resolved.Extensions["creator.TaskSubId"]; exists && taskSubID != "" {
 		return false
 	}
 	if subScene, exists := npc.resolved.Extensions["creator.SubSceneNo"]; exists && subScene != "" {

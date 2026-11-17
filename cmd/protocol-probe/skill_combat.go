@@ -1557,7 +1557,7 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 				// 刺（c61 动画+0x21 驱动），ETA 后以冲刺终点**重放本 211**——
 				// 届时距地面点 ≤3.5 不再触发冲刺，主施法路径在终点正常执行
 				//（旧版主路径当场原地出招=「原地」根因）。
-				if eta := issueAreaGroundRushDash(link, player, definition, castAt, ground, remote); eta > 0 {
+				if eta := issueAreaGroundRushDash(link, player, world, definition, castAt, ground, remote); eta > 0 {
 					// v28：重放 211 落点=点选平面点本体（与冲刺终点一致；
 					// 旧 rushBindPoint 身前 1.5m 系单体方言误植）。
 					replay := custom

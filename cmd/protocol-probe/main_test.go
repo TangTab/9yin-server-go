@@ -233,6 +233,58 @@ func TestSubSceneCombatNPCIsNotMaterialized(t *testing.T) {
 	}
 }
 
+// TestTaskGatedSpawnIsNotMaterialized 任务闸门：creator 条目带 TaskSubId
+// （触发某个任务才生成的怪/采集物，如成都 AttackNpc_Creator.xml
+// TaskSubId=11034 铁剑门弟子、TaskGatherNpc_Creator.xml TaskSubId=50008
+// 打狗棒）只在对应任务激活时由官方物化。外服私服无任务驱动生成，
+// 一律不注册、不物化、无 Vitals/Brain——与 EventNpc 同语义。
+// 同文件内无 TaskSubId 的常规随机怪保持可注册。
+func TestTaskGatedSpawnIsNotMaterialized(t *testing.T) {
+	taskMonster := testNPCSpawn()
+	taskMonster.resolved.ConfigID = "monrc053000"
+	taskMonster.resolved.ScriptClass = "AttackNpc"
+	taskMonster.resolved.Extensions["creator.TaskSubId"] = "11034"
+	taskMonster.resolved.Extensions["creator.TaskSubType"] = "1"
+
+	taskGather := testNPCSpawn()
+	taskGather.resolved.ConfigID = "Gather_qy_gb302_bang"
+	taskGather.resolved.ScriptClass = "GatherNpc"
+	taskGather.resolved.Extensions["creator.TaskSubId"] = "50008"
+	taskGather.resolved.Extensions["creator.TaskSubType"] = "2"
+
+	wild := testNPCSpawn() // 同文件无 TaskSubId 的常规怪，保持可注册
+	wild.resolved.ScriptClass = "AttackNpc"
+
+	if npcSpawnEligible(taskMonster) {
+		t.Fatal("TaskSubId-gated attack spawn must be excluded from the base scene")
+	}
+	if npcSpawnEligible(taskGather) {
+		t.Fatal("TaskSubId-gated gather spawn must be excluded from the base scene")
+	}
+	if !npcSpawnEligible(wild) {
+		t.Fatal("attack spawn without TaskSubId must stay eligible")
+	}
+
+	// 共享场景准入同闸门：任务怪不进世界（ID 间隙与 EventNpc/SubSceneNo
+	// 同语义，目录下标→wire ID 映射不受影响）。
+	lifecycle := newSceneLifecycle("test", discardMessageConnection{})
+	if err := lifecycle.begin("scene", "resource", []npcSpawn{taskMonster, taskGather, wild}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := lifecycle.npcMetaByID(forkNPCID(2)); ok {
+		t.Fatal("task-gated monster entered the shared scene world")
+	}
+	if _, ok := lifecycle.npcMetaByID(forkNPCID(3)); ok {
+		t.Fatal("task-gated gather spawn entered the shared scene world")
+	}
+	if _, ok := lifecycle.npcMetaByID(forkNPCID(4)); !ok {
+		t.Fatal("ordinary attack spawn must stay registered")
+	}
+	if _, ok := lifecycle.run.combat.Vitals(worldcore.EntityID(forkNPCID(2))); ok {
+		t.Fatal("task-gated monster must never gain combat vitals or a respawn cycle")
+	}
+}
+
 func TestSceneLifecycleWaitsForPostReadyClientActivity(t *testing.T) {
 	// 关 0x28 详情帧：net.Pipe 无缓冲，物化后 0x28 伴发帧若无人读会令
 	// clientActivity 写阻塞挂死。本测试只考察 ready/activity 时序
