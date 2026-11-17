@@ -686,7 +686,16 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		// OFFICIAL 档（NINEYIN_NPC_0X28_OFFICIAL=1）：按外服 AOI 簇
 		// 16-prop 模板全新生成（fork 大档字段集外服客户端读不懂，
 		// 15:28 会话实证不建对象）。
-		if npcOfficial0x28Enabled() {
+		// 假人是玩家形对象（dummyAddObject 的 0x0D 玩家大档，字段按
+		// official2433 表按名解析、fork-only 行缺席即跳）：OFFICIAL 档下
+		// 不能重写为 NPC 16-prop 小档——sceneEntity 只给 ConfigID="dummy"/
+		// 空 Resource，npc 目录无此配置，官方客户端建对象后查不到模型
+		// 不渲染（2026-11-17 23:34 真机实证：物化帧已发而全程零显示）。
+		// 改走 0x28 mode=0x46 明文包装（官方家族建对象通道，信封与玩家
+		// 档案帧/官服 AOI 同构），保留外观/门派/实力全字段。
+		if npcOfficial0x28Enabled() && isDummyObjectID(uint32(id)) && payload[0] == 0x0D {
+			payload = wrapObjectAddAsOp28(payload)
+		} else if npcOfficial0x28Enabled() {
 			// NpcType 功能分派位透传（真机+head_game.lua 定案：61~69=头顶
 			// 功能图标族，45=忽略；schema 真值优先，缺省 14=官方怪通用值）。
 			npcType := schemaInt(func(name string) (clientdata.Value, bool) {

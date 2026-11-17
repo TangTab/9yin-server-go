@@ -1,6 +1,6 @@
 # 九阴角色模型浏览器
 
-浏览 `obj_char_unpacked` / `obj_weapon_unpacked` 解包资源中的角色/武器网格、贴图、骨骼动画，
+浏览游戏资源根（`obj\char` / `obj\weapon` / `obj\effect*`）中的角色/武器/特效网格、贴图、骨骼动画，
 任意部件 × 任意动画自由配对，带服务器资源表中文名映射。
 纯 Python 标准库后端 + three.js 前端，无 npm 依赖。
 
@@ -12,11 +12,16 @@ python server.py            # 默认 127.0.0.1:8901
 # 打开 http://127.0.0.1:8901
 ```
 
-可选参数：`--port`、`--host`、`--root <char目录>`、`--weapons <weapon目录>`、`--resources <服务器资源根>`
-（默认分别为 `E:\...\adata\obj_char_unpacked\res\obj\char`、`E:\...\adata\obj_weapon_unpacked\res\obj\weapon`、
-`E:\...\9yin_server-go\resources`，或环境变量 `NINEYIN_CHAR_ROOT` / `NINEYIN_WEAPON_ROOT` / `NINEYIN_RESOURCES`）。
+**资源根 `--res`**（默认 `F:\Game\Online\9yin\res`，或环境变量 `NINEYIN_RES_ROOT`）：
+其余所有路径都相对它推导 — `obj\char`=角色、`obj\weapon`=武器、
+`obj\effect` / `obj\effect_sns` / `obj\effect_weapon`=特效（三树进目录，id 加 `effect*/` 前缀，
+分类「特效 / 特效·SNS / 特效·武器」；obj/effect 平铺 1.7 万文件中约 1 成可解析为网格，
+其余粒子/物理件按状态标记 ✕）。
+单个子根仍可显式覆盖：`--root <角色目录>`、`--weapons <武器目录>`
+（或 `NINEYIN_CHAR_ROOT` / `NINEYIN_WEAPON_ROOT`）。
+中文名映射表默认取本仓库 `resources/`（`--resources` / `NINEYIN_RESOURCES` 覆盖）。
 
-首次访问 `/api/catalog` 时构建目录（8.9k 模型 + 12k 动画全量解析 + 名称映射，约 3–5 分钟），之后常驻内存。
+首次访问 `/api/catalog` 时构建目录（char+weapon ~1.1 万 + effect ~1 万全量解析 + 名称映射，约 3–6 分钟），之后常驻内存。
 
 ## 界面
 
@@ -42,8 +47,12 @@ python server.py            # 默认 127.0.0.1:8901
 - **视口**：轨道相机；骨架叠加 / 线框 / 贴图开关；网格与所选动画骨架按骨名匹配，
   匹配率 <50% 时保持绑定姿态并提示。贴图按 `_d`/`_s`/`_n` 后缀映射 diffuse/specular/normal。
   **缺失骨回退**：动画骨架没有的骨名（如面部表情骨 Bone01-43 只存在于脸专属骨架）
-  回退挂到该子网格权重最大的已匹配骨（脸→Bip01 Head）——否则这些顶点只跟根位移，跑步时脸会滞后错位。
-  任意装配 × 任意动画自由配对（例：脸+身体+武器 × `skill/` 下任意招式）。
+  回退挂到该子网格权重最大的已匹配骨；子网格全未匹配（眼球 submesh）再取整个部件的
+  最大已匹配骨（脸→Bip01 Head）——否则这些顶点只跟根位移，跑步时脸会滞后错位、眼球飞出眼眶
+  （蒙皮重建必须传递 `userData.partId`，丢失会把全部件并成一组、回退骨退化成全身最大权重骨）。
+  **刚体挂件**：无骨名 blob 网格（脸饰 facecloth 等占位权重 `[0,1.0]`）与武器同为原点建模——
+  头部件类（face/hair/helmet/mask）挂 Bip01 Head 随头刚体运动，特效/测试件留原地。
+  任意装配 × 任意动画自由配对（例：脸+面饰+身体+武器 × `skill/` 下任意招式）。
 
 ## 中文名映射链（resindex.build_name_index）
 

@@ -363,8 +363,10 @@ func TestOutOfRangeStagedRushFamilySkillStagesViaSkill211(t *testing.T) {
 		t.Fatal("staging did not mark rush in flight")
 	}
 
-	// 直收带外不远处的按下（直收带+1.5m）：同样只发受理 5 帧。
-	conn, player, world = build(float32(nearCast + 1.5))
+	// 直收带外、地面冲锋带外不远处的按下（>方言窗上界）：同样只发受理
+	// 5 帧（带内按压现受理即授 c61，见 TestRushGroundBandPressGrantsImmediately）。
+	closeBeyond := math.Max(nearCast+1.5, rushDashDialectFor(definition).windowHi+1)
+	conn, player, world = build(float32(closeBeyond))
 	base = len(conn.Frames())
 	if handled, err := handleSkillCustom(conn, player, world, nil, useSkillMessageAt(definition.id, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("close cast handled=%t err=%v", handled, err)
@@ -530,8 +532,9 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 		t.Fatalf("far movement emitted %d frames=%x, want 0 (client self-approach)", len(frames), frames)
 	}
 
-	// v29：6m（3m 族冲锋带 (3.5,5] 外）仅官方回显，无驱动帧（含 0x21 s5=25）。
-	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(4, 0, 0, 0), "test"); err != nil || !handled {
+	// 带外（7m，3m 族冲锋带 (3.5,6.5] 外）：仅官方回显，无驱动帧（含
+	// 0x21 s5=25）。
+	if handled, err := handleMovementUpload(conn, player, world, movementUploadMessage(3, 0, 0, 0), "test"); err != nil || !handled {
 		t.Fatalf("out-of-band movement handled=%t err=%v", handled, err)
 	}
 	for _, f := range conn.Frames()[base:] {
@@ -558,8 +561,10 @@ func TestMovementUploadDrivesRushArrival(t *testing.T) {
 	// 自冲落地（上报点距目标 ≤3m，未发 c61=步行落地形态）：
 	// PauseSkill+msg26+LogicState 对+fight_relation+0x1F×1+337+c1=40+
 	// msg19+CantMove/CantParry=11 帧（步行无 CantMove 清前导、单 0x1F）。
+	// 按压位 7m=带外受理（带内按压现受理即授 c61，见
+	// TestRushGroundBandPressGrantsImmediately）。
 	if _, err := stageRushCast(conn, player, nil, definition, forkNPCID(91), npcTestOwner(91),
-		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 5, Y: 0, Z: 0}, 5, "test"); err != nil {
+		worldcore.Transform{X: 10, Y: 0, Z: 0}, worldcore.Transform{X: 3, Y: 0, Z: 0}, 7, "test"); err != nil {
 		t.Fatal(err)
 	}
 	base = len(conn.Frames())
@@ -797,6 +802,7 @@ func TestUseSkillGroundPointTransform(t *testing.T) {
 // ≤3.5 直收零帧；落点=点选平面点本体；簇=纯 c61（观察者另收 AOI 裸广播）
 // ——地面 flag1 / 高→低·低→高 flag2，无 106/State=run/0x21 位移。
 func TestAreaGroundRushDashTierSelection(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_SYNC_PAIR", "1") // v31.2 同步条目默认关；本测试验证开态方言
 	definition := combatSkillDefinition{
 		id: "CS_jh_hyjf07", canRush: true, castRange: 15,
 		bindDistance: defaultRushBindDistance, groundRushAction: defaultGroundRushAction,
@@ -835,43 +841,70 @@ func TestAreaGroundRushDashTierSelection(t *testing.T) {
 		t.Fatalf("near-ground emitted %d frames, want 0", got)
 	}
 
-	// v31 地面：纯 c61 flag1 dest=点选点本体，零 0x21/106/State 帧。
+	// syncOf 校验 v31.2 成对 0x21 冲刺同步条目（47B：intent/s5/dest.x）。
+	syncOf := func(t *testing.T, frames [][]byte, wantIntent uint32, wantSpeed, wantDestX float32, name string) {
+		t.Helper()
+		for _, f := range frames {
+			if f[0] != 0x21 || len(f) != 47 {
+				continue
+			}
+			if got := binary.LittleEndian.Uint32(f[43:]); got != wantIntent {
+				t.Fatalf("%s: sync intent=0x%X, want 0x%X", name, got, wantIntent)
+			}
+			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[27:])); math.Abs(float64(got-wantSpeed)) > 0.01 {
+				t.Fatalf("%s: sync s5=%v, want %v", name, got, wantSpeed)
+			}
+			if got := math.Float32frombits(binary.LittleEndian.Uint32(f[11:])); math.Abs(float64(got-wantDestX)) > 0.01 {
+				t.Fatalf("%s: sync dest x=%v, want %v", name, got, wantDestX)
+			}
+			return
+		}
+		t.Fatalf("%s: no 47B 0x21 sync entry in frames=%x", name, frames)
+	}
+
+	// v31.2 地面：c61 flag1（dest.y=点+1.0）+ 成对 0x21 同步条目
+	//（s5=35、intent=0x4701、dest.xz=点选点本体、y=平面）。
 	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 5})
 	frames := conn.Frames()
-	if len(frames) != 1 || frames[0][0] != 0x1E {
-		t.Fatalf("area ground frames=%x, want bare c61 only (no 0x21 dialect)", frames)
+	if len(frames) != 2 || frames[0][0] != 0x1E || frames[1][0] != 0x21 || len(frames[1]) != 47 {
+		t.Fatalf("area ground frames=%x, want [c61]+[0x21 sync 47B]", frames)
 	}
 	c61Of(t, frames, 1, 5, "area ground")
+	syncOf(t, frames, 0x4701, rushAreaSyncSpeedMeters, 5, "area ground")
 
-	// v31 高→低（落差 4m）：c61 flag2，无任何驱动帧。
+	// v31.2 高→低（落差 4m）：c61 flag2 + 同步条 s5=15/intent=0x4704。
 	conn = newCase(worldcore.Transform{Y: 4}, worldcore.Transform{X: 8})
 	frames2 := conn.Frames()
-	if len(frames2) != 1 || frames2[0][0] != 0x1E {
-		t.Fatalf("area air frames=%x, want bare c61 only", frames2)
+	if len(frames2) != 2 || frames2[0][0] != 0x1E || frames2[1][0] != 0x21 {
+		t.Fatalf("area air frames=%x, want [c61]+[0x21 sync]", frames2)
 	}
 	c61Of(t, frames2, 2, 8, "area air")
+	syncOf(t, frames2, 0x4704, rushDriveAirDashSpeedMeters, 8, "area air")
 
-	// v31 低→高（落差 2m，用户补充「范围冲锋也是一样」）：c61 flag2。
+	// v31.2 低→高（落差 2m，用户补充「范围冲锋也是一样」）：c61 flag2。
 	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 6, Y: 2})
 	framesUp := conn.Frames()
-	if len(framesUp) != 1 || framesUp[0][0] != 0x1E {
-		t.Fatalf("area uplift frames=%x, want bare c61 only", framesUp)
+	if len(framesUp) != 2 || framesUp[0][0] != 0x1E {
+		t.Fatalf("area uplift frames=%x, want [c61]+[0x21 sync]", framesUp)
 	}
 	c61Of(t, framesUp, 2, 6, "area uplift")
+	syncOf(t, framesUp, 0x4704, rushDriveAirDashSpeedMeters, 6, "area uplift")
 
 	// 远距同款（12m）。
 	conn = newCase(worldcore.Transform{}, worldcore.Transform{X: 12})
 	frames3 := conn.Frames()
-	if len(frames3) != 1 || frames3[0][0] != 0x1E {
-		t.Fatalf("area far frames=%x, want bare c61 only", frames3)
+	if len(frames3) != 2 || frames3[1][0] != 0x21 || len(frames3[1]) != 47 {
+		t.Fatalf("area far frames=%x, want [c61]+[0x21 sync 47B]", frames3)
 	}
 	c61Of(t, frames3, 1, 12, "area far")
+	syncOf(t, frames3, 0x4701, rushAreaSyncSpeedMeters, 12, "area far")
 }
 
 // TestRushDashBandDrive v24 终版（用户拍板）：受理簇纯官方 9 帧（服务端
 // 不再控制步行）；客户端移动上报进入冲刺带 (3,5] 触发 25m/s 冲刺驱动
 // （逃逸门方言 [106]+[0x21]），ETA 到点 bind（1~1.5m）直接释放。
 func TestRushDashBandDrive(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_SYNC_PAIR", "1") // v31.2 同步条目默认关；本测试验证开态 91B 方言
 	conn := &captureMessageConnection{}
 	world := newSceneLifecycle("test", conn)
 	if err := world.begin("scene", "resource", nil); err != nil {
@@ -898,18 +931,26 @@ func TestRushDashBandDrive(t *testing.T) {
 		t.Fatalf("staging frames=%d, want 11", got)
 	}
 
-	// 客户端自走进入冲刺带：位置 (16,0,0) → 距目标 4m ∈ (3,5]（同层平地
-	// v29 原样，v30 高度规则只管空/地混层）。
+	// 客户端自走进入冲刺带：位置 (16,0,0) → 距目标 4m ∈ (3.5,6.5]（同层
+	// 平地；v30 高度规则只管空/地混层）。
 	base := len(conn.Frames())
 	if _, err := handleMovementUpload(conn, player, world,
 		walkUploadMessage(-1610608895, 7, 16, 0, 0, 20, 0, 4.5, 0), "test"); err != nil {
 		t.Fatal(err)
 	}
 	frames := conn.Frames()[base:]
-	var sawC61 bool
+	var sawC61, sawSync91 bool
 	for _, f := range frames {
 		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
 			t.Fatalf("v31 client self-run must not emit 0x21 drive entries: %x", f)
+		}
+		// v31.2 成对 91B 双条目：entry1=s5=25/intent=0x4701、dest=bind xz；
+		// entry2（f[87:91]）=空置回显 0xA0000700（dest=按压位 16,0,0）。
+		if f[0] == 0x21 && len(f) == 91 && binary.LittleEndian.Uint32(f[43:47]) == 0x4701 &&
+			math.Abs(float64(math.Float32frombits(binary.LittleEndian.Uint32(f[27:]))-rushDriveDashSpeedMeters)) < 0.01 &&
+			math.Abs(float64(math.Float32frombits(binary.LittleEndian.Uint32(f[11:]))-18.5)) < 0.05 &&
+			binary.LittleEndian.Uint32(f[87:91]) == 0xA0000700 {
+			sawSync91 = true
 		}
 		if f[0] == 0x1E {
 			values := decodeCustomValuesFrame(t, f)
@@ -925,7 +966,10 @@ func TestRushDashBandDrive(t *testing.T) {
 		}
 	}
 	if !sawC61 {
-		t.Fatalf("dash band must grant c61 flag1 dest=bind (no 0x21 dialect), frames=%x", frames)
+		t.Fatalf("dash band must grant c61 flag1 dest=bind, frames=%x", frames)
+	}
+	if !sawSync91 {
+		t.Fatalf("dash band must carry v31.2 paired 91B sync (0x4701 s5=25 + idle echo), frames=%x", frames)
 	}
 	if !player.rushDashIssuedSnapshot() {
 		t.Fatal("dash band must mark dash issued")
@@ -965,8 +1009,8 @@ func TestRushChargeBandFamilySelection(t *testing.T) {
 		t.Fatalf("3m family direct band=%v, want 3.5", got)
 	}
 	dialect := rushDashDialectFor(three)
-	if math.Abs(dialect.windowLo-3.5) > 1e-6 || math.Abs(dialect.windowHi-rushGRushRangeMeters) > 1e-6 {
-		t.Fatalf("3m family charge band=%+v, want (3.5, 5]", dialect)
+	if math.Abs(dialect.windowLo-3.5) > 1e-6 || math.Abs(dialect.windowHi-rushGroundChargeHiMeters) > 1e-6 {
+		t.Fatalf("3m family charge band=%+v, want (3.5, 6.5]", dialect)
 	}
 	six := combatSkillDefinition{id: "CS_six", canRush: true, castRange: 6, bindDistance: defaultRushBindDistance}
 	if got := rushDirectCastMeters(six); math.Abs(got-7) > 1e-6 {
@@ -1205,6 +1249,172 @@ func TestNearHeightGapStagesAndChargesImmediately(t *testing.T) {
 	}
 }
 
+// 地面冲锋带按压即授（规格 §二/§三；2026-11-17 真机「地面带无效果」修复）：
+// 同层（|Δy|≤混层线）且按压 2D 距离已在 (直收带, GRushRange 5] 内——本服
+// 登录方言下客户端无「按下即走」，站立按压零 m15/m220 上报，进带判定须以
+// 按压 211 位置即刻完成（官服「3~5m 立即冲锋」）；6m 族同距无带不授。
+func TestRushGroundBandPressGrantsImmediately(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 91)
+	placeTestNPC(t, world, 91, 8, 0)
+	player := newPlayerActor("带侠", 0)
+	definition := combatSkillDefinition{id: "CS_rush_band", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3, groundRushAction: defaultGroundRushAction}
+	base := len(conn.Frames())
+	// 同层平距 4m ∈ (3.5, 5]：受理簇尾直接授予地面档 c61（flag1、dest=目标
+	// 身前 bind 8-1.5=6.5）。
+	if handled, err := stageRushCast(conn, player, world, definition, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 8, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 4, "test"); err != nil || !handled {
+		t.Fatalf("stage handled=%t err=%v", handled, err)
+	}
+	if !player.rushDashIssuedSnapshot() {
+		t.Fatal("in-band ground press must issue dash at staging")
+	}
+	if player.rushDashAirborneSnapshot() {
+		t.Fatal("same-layer press must grant ground tier, not air")
+	}
+	sawC61Ground := false
+	for _, f := range conn.Frames()[base:] {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			t.Fatalf("v31 client self-run must not emit 0x21 drive entries: %x", f)
+		}
+		if f[0] == 0x1E {
+			values := decodeCustomValuesFrame(t, f)
+			if len(values) >= 7 && values[0].Type == 2 && values[0].Int32 == 24 &&
+				values[2].Type == 2 && values[2].Int32 == msgRushCommand &&
+				values[6].Type == 2 && values[6].Int32 == 1 {
+				if math.Abs(float64(values[3].Float32-6.5)) > 0.05 {
+					t.Fatalf("c61 dest x=%v, want bind 6.5", values[3].Float32)
+				}
+				sawC61Ground = true // 地面档 flag1（受理即带内 → 受理簇尾授予）
+			}
+		}
+	}
+	if !sawC61Ground {
+		t.Fatal("in-band ground press must grant c61 flag=1 at staging")
+	}
+	time.Sleep(50 * time.Millisecond) // 排空 m707 AfterFunc（ETA 呆坐哨在测试窗外）
+
+	// 6m 族同距无带（v29）：受理不授（仅 3m 族有地面带）。
+	conn6 := &captureMessageConnection{}
+	player6 := newPlayerActor("六米侠", 0)
+	six := combatSkillDefinition{id: "CS_rush_band6", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 6, groundRushAction: defaultGroundRushAction}
+	if _, err := stageRushCast(conn6, player6, world, six, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 8, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 4, "test"); err != nil {
+		t.Fatal(err)
+	}
+	if player6.rushDashIssuedSnapshot() {
+		t.Fatal("6m family has no ground band: press must not issue dash")
+	}
+	for _, f := range conn6.Frames() {
+		if f[0] == 0x1E {
+			values := decodeCustomValuesFrame(t, f)
+			if len(values) >= 3 && values[0].Type == 2 && values[0].Int32 == 24 && values[2].Int32 == msgRushCommand {
+				t.Fatalf("6m family must not grant c61 at staging: %x", f)
+			}
+		}
+	}
+	time.Sleep(50 * time.Millisecond)
+
+	// 真机回归锚（2026-11-17 22:51「地面还是没有冲锋」）：客户端自动接近
+	// 稳定停在 5.19~5.43m 等授予并狂发 212——v29 hi=GRushRange 5.0 把带卡
+	// 死在停点外；带扩到 (直收带, GRushRange+Add 6.5] 后停点 m220 即授予。
+	connA := &captureMessageConnection{}
+	worldA := newSceneLifecycle("test", connA)
+	if err := worldA.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, worldA, 91)
+	playerA := newPlayerActor("自走侠", 0)
+	auto := combatSkillDefinition{id: "CS_rush_auto", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3, groundRushAction: defaultGroundRushAction}
+	if _, err := stageRushCast(connA, playerA, worldA, auto, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 8, Y: 0, Z: 0}, worldcore.Transform{X: 0, Y: 0, Z: 0}, 8, "test"); err != nil {
+		t.Fatal(err)
+	}
+	baseA := len(connA.Frames())
+	// 自走停点 5.43m（真机 22:51:45 样本复刻）→ m220 停点上报 ∈ (3.5,6.5]。
+	stop220 := clientCustomMessage{Opcode: 0x1E, Values: []clientCustomValue{
+		{Type: 2, Int32: clientCustomRushMoveUpload},
+		{Type: 4, Float32: 2.57}, {Type: 4, Float32: 0}, {Type: 4, Float32: 0},
+		{Type: 4, Float32: 0.5},
+	}}
+	if handled, err := handleRushMovementUpload(connA, playerA, worldA, stop220, "test"); err != nil || !handled {
+		t.Fatalf("autopath-stop 220 handled=%t err=%v", handled, err)
+	}
+	sawStopGrant := false
+	for _, f := range connA.Frames()[baseA:] {
+		if f[0] == 0x1E {
+			values := decodeCustomValuesFrame(t, f)
+			if len(values) >= 3 && values[0].Type == 2 && values[0].Int32 == 24 &&
+				values[2].Type == 2 && values[2].Int32 == msgRushCommand {
+				sawStopGrant = true
+			}
+		}
+	}
+	if !sawStopGrant || !playerA.rushDashIssuedSnapshot() {
+		t.Fatal("autopath stop at 5.43m must grant c61 (band hi=GRushRange+Add 6.5)")
+	}
+	time.Sleep(50 * time.Millisecond)
+
+	// 高→低 0.8m（旧 1.5 线下=地面档；2026-11-17 用户拍板双向对称 0.5）：
+	// 空中档=按压不即授（m220/m15 驱动），走进带授予 c61 flag2 空中奔袭、
+	// dest.y=目标 y+1.0 悬停弧线（唯低→高空中档=平面本体）。
+	connS := &captureMessageConnection{}
+	worldS := newSceneLifecycle("test", connS)
+	if err := worldS.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, worldS, 91)
+	playerS := newPlayerActor("浅降侠", 0)
+	shallow := combatSkillDefinition{id: "CS_rush_shallow", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3,
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_2h_01"}
+	if _, err := stageRushCast(connS, playerS, worldS, shallow, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 8, Y: -0.8, Z: 0}, worldcore.Transform{X: 4, Y: 0, Z: 0}, 4, "test"); err != nil {
+		t.Fatal(err)
+	}
+	if playerS.rushDashIssuedSnapshot() {
+		t.Fatal("airborne press must not take the ground press-grant path")
+	}
+	baseS := len(connS.Frames())
+	if _, err := handleMovementUpload(connS, playerS, worldS,
+		walkUploadMessage(-1610608895, 7, 4, 0, 0, 8, 0, 4.5, 0), "test"); err != nil {
+		t.Fatal(err)
+	}
+	sawC61ShallowAir := false
+	for _, f := range connS.Frames()[baseS:] {
+		if f[0] == 0x21 && len(f) == 47 && binary.LittleEndian.Uint32(f[43:]) == 1 {
+			t.Fatalf("v31 client self-run must not emit 0x21 drive entries: %x", f)
+		}
+		if f[0] == 0x1E {
+			values := decodeCustomValuesFrame(t, f)
+			if len(values) >= 7 && values[0].Type == 2 && values[0].Int32 == 24 &&
+				values[2].Type == 2 && values[2].Int32 == msgRushCommand {
+				if values[6].Int32 != 2 {
+					t.Fatalf("shallow high→low 0.8m must grant air tier flag2, got flag=%d", values[6].Int32)
+				}
+				// 3D 距离 √(3.5²… 报告位(4,0,0)→目标(8,-0.8,0)=√(16+0.64)≈4.08 ∈ (3.5,14.5]；
+				// dest.y=目标 y+1.0=0.2（高→低俯冲悬停弧线）。
+				if math.Abs(float64(values[4].Float32-0.2)) > 0.05 {
+					t.Fatalf("c61 dest y=%v, want target+1.0=0.2", values[4].Float32)
+				}
+				sawC61ShallowAir = true
+			}
+		}
+	}
+	if !sawC61ShallowAir {
+		t.Fatal("shallow high→low 0.8m walk-in must grant air-tier c61")
+	}
+	time.Sleep(50 * time.Millisecond)
+}
+
 // v30 211 直收分流高度闸：直收带内但 |出招位 y−目标 y|>1m 不再
 // executeRushDirect（原地普攻=隔空打高处/低处目标），改走暂存链并立即冲锋。
 func TestNearHeightGap211ChargesInsteadOfDirect(t *testing.T) {
@@ -1247,6 +1457,58 @@ func TestNearHeightGap211ChargesInsteadOfDirect(t *testing.T) {
 		t.Fatal("near height-gap cast must issue dash immediately after staging")
 	}
 	time.Sleep(700 * time.Millisecond) // 排空 ETA 落地 AfterFunc
+}
+
+// v33 冲锋动作 {W}h=套路武器位（2026-11-18 用户定版）：锁表逐技能块优先
+//（含官方异武器档动画），武器推导只填缺行；use_limit 解析取 ItemType 行。
+func TestRushActionWeaponSlotDerivation(t *testing.T) {
+	if got := rushActionForSlot("qg_fastrun", 5); got != "qg_fastrun_5h_01" {
+		t.Fatalf("ground construct=%q", got)
+	}
+	if got := rushActionForSlot("qg_fastruning_s", 8); got != "qg_fastruning_s_8h_01" {
+		t.Fatalf("air construct=%q", got)
+	}
+	// 逐技能块配对：同一 LockType 包内两技能各归其位（旧 iniValue 末值
+	// 会把邻技能动作拿给先出招的技能）。
+	lock := iniTable{"42": []iniField{
+		{key: "HitAction", value: "CS_a_sword"},
+		{key: "LockGRushAction", value: "qg_fastrun_2h_01"},
+		{key: "LockARushAction", value: "qg_fastruning_s_2h_01"},
+		{key: "HitAction", value: "CS_b_fist"},
+		{key: "LockGRushAction", value: "qg_fastrun_0h_01"},
+		{key: "LockARushAction", value: "qg_fastruning_s_0h_01"},
+	}}
+	per := buildRushLockActions(lock)
+	if got := per["CS_a_sword"]; got.ground != "qg_fastrun_2h_01" || got.air != "qg_fastruning_s_2h_01" {
+		t.Fatalf("sword block=%+v", got)
+	}
+	if got := per["CS_b_fist"]; got.ground != "qg_fastrun_0h_01" || got.air != "qg_fastruning_s_0h_01" {
+		t.Fatalf("fist block=%+v", got)
+	}
+	// 武器位解析：ItemType 行（非 ItemType 忽略、暗器族=不可推导）。
+	tables := skillResourceTables{useLimit: iniTable{
+		"2": []iniField{{key: "r", value: "0,ItemType,102,==,"}},
+		"7": []iniField{
+			{key: "r", value: "0,School,3,==,"},
+			{key: "r", value: "0,ItemType,105,==,"},
+		},
+		"9": []iniField{{key: "r", value: "0,ItemType,111|116,==,"}},
+	}}
+	if got := rushWeaponSlotOf(tables, "2"); got != 2 {
+		t.Fatalf("use_limit 2 slot=%d, want 2 (单手剑)", got)
+	}
+	if got := rushWeaponSlotOf(tables, "7"); got != 5 {
+		t.Fatalf("use_limit 7 slot=%d, want 5 (双剑)", got)
+	}
+	if got := rushWeaponSlotOf(tables, "9"); got != 0 {
+		t.Fatalf("暗器族 slot=%d, want 0 不可推导", got)
+	}
+	if got := rushWeaponSlotOf(tables, "404"); got != 0 {
+		t.Fatalf("missing section slot=%d, want 0", got)
+	}
+	if got := rushWeaponSlotOf(tables, ""); got != 0 {
+		t.Fatalf("empty id slot=%d, want 0", got)
+	}
 }
 
 // hasQinggongRelease 断言辅助：0x21 空置条目 speed=0/intent=0xA0000700

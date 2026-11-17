@@ -105,6 +105,87 @@ func iniFloat(fields []iniField, key string) float32 {
 	return float32(value)
 }
 
+// rushWeaponSlotByItemType 冲锋动作 {W}h=武器位（v33，2026-11-18 用户定版：
+// 按当前套路的武器构造，动作名不再固定写死）。三链全表统计定版
+//（skill_lock_data 逐技能动作 × skill_new.UseLimit × skill_use_limit
+// ItemType，245 可推导中 230 与锁表一致）：101刀→1h / 102单手剑→2h /
+// 103匕首→3h / 104双刀→4h / 105双剑→5h / 106双刺→6h / 107长棍→7h /
+// 108短棍→8h（129→29h 孤例）。空中族 qg_fastruning_s_1h_01~8h_01 同表
+//（动作库实测，模型查看器）。锁表逐技能值优先（15 个官方异档动画如
+// whjf02 剑技用 5h 系有意为之），武器位只填锁表缺行的技能。
+var rushWeaponSlotByItemType = map[string]int{
+	"101": 1, "102": 2, "103": 3, "104": 4,
+	"105": 5, "106": 6, "107": 7, "108": 8, "129": 29,
+}
+
+// rushLockActions 锁表包内单技能块的冲刺动作对。
+type rushLockActions struct {
+	ground, air string
+}
+
+// buildRushLockActions 解析 skill_lock_data 的逐技能块：节内以
+// HitAction=<技能ID> 开块，随后的首个 LockGRushAction/LockARushAction
+// 归属该技能（同一技能多包重复时首发胜——与逐帧观测方言表一致的保守取）。
+func buildRushLockActions(lockData iniTable) map[string]rushLockActions {
+	out := make(map[string]rushLockActions)
+	for _, fields := range lockData {
+		var skill string
+		entry := rushLockActions{}
+		flush := func() {
+			if skill != "" && (entry.ground != "" || entry.air != "") {
+				if _, ok := out[skill]; !ok {
+					out[skill] = entry
+				}
+			}
+		}
+		for _, field := range fields {
+			switch {
+			case strings.EqualFold(field.key, "HitAction"):
+				flush()
+				skill = strings.TrimSpace(field.value)
+				entry = rushLockActions{}
+			case strings.EqualFold(field.key, "LockGRushAction") && skill != "" && entry.ground == "":
+				entry.ground = strings.TrimSpace(field.value)
+			case strings.EqualFold(field.key, "LockARushAction") && skill != "" && entry.air == "":
+				entry.air = strings.TrimSpace(field.value)
+			}
+		}
+		flush()
+	}
+	return out
+}
+
+// rushWeaponSlotOf 套路武器位解析：skill_new.UseLimit=<id> →
+// skill_use_limit.ini [<id>] 的 r=0,ItemType,<code|code> 行（Java
+// CombatSkillCatalog.compileWeaponItemTypes 同源）→ 首个已知武器
+// ItemType 的位号（0=不可推导）。
+func rushWeaponSlotOf(tables skillResourceTables, useLimitID string) int {
+	useLimitID = strings.TrimSpace(useLimitID)
+	if useLimitID == "" {
+		return 0
+	}
+	for _, field := range tables.useLimit[useLimitID] {
+		if !strings.EqualFold(field.key, "r") {
+			continue
+		}
+		parts := strings.Split(field.value, ",")
+		if len(parts) < 3 || strings.TrimSpace(parts[1]) != "ItemType" {
+			continue
+		}
+		for _, code := range strings.Split(parts[2], "|") {
+			if slot, ok := rushWeaponSlotByItemType[strings.TrimSpace(code)]; ok {
+				return slot
+			}
+		}
+	}
+	return 0
+}
+
+// rushActionForSlot 按武器位构造 G/A 族动作名。
+func rushActionForSlot(family string, slot int) string {
+	return fmt.Sprintf("%s_%dh_01", family, slot)
+}
+
 type skillResourceTables struct {
 	skillNew    iniTable
 	skillStatic iniTable
@@ -115,6 +196,11 @@ type skillResourceTables struct {
 	hitShape    iniTable
 	targetShape iniTable
 	lockData    iniTable
+	useLimit    iniTable
+	// lockActions：skill_lock_data 逐技能块动作（节=数字 LockType 包，包内
+	// 多技能按 HitAction=<技能ID> 分块；v33.1 逐块配对取代 iniValue 末值
+	// 匹配——末值可能拿到同包邻技能的动作）。
+	lockActions map[string]rushLockActions
 	actions     iniTable
 	buffNew     iniTable
 	buffStatic  iniTable
@@ -173,6 +259,10 @@ func loadSkillResourceTables() (skillResourceTables, error) {
 	if result.lockData, err = loadOptional("skill_lock_data.ini"); err != nil {
 		return result, err
 	}
+	if result.useLimit, err = loadOptional("skill_use_limit.ini"); err != nil {
+		return result, err
+	}
+	result.lockActions = buildRushLockActions(result.lockData)
 	result.actions = make(iniTable)
 	for _, name := range modernPlayerSkillActionFiles {
 		actionTable, loadErr := load(filepath.Join(modernSkillActionRoot, name))
@@ -566,12 +656,37 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		bindDistance = defaultRushBindDistance
 	}
 	groundRushAction := iniValue(lockRow, "LockGRushAction")
+	airRushAction := iniValue(lockRow, "LockARushAction")
+	// v33.1 逐技能块优先：锁表节=数字 LockType 包、包内多技能按
+	// HitAction 分块，iniValue 末值可能拿到邻技能动作；命中本技能块
+	// （官方逐技能选择，含 15 个异武器档动画如 whjf02 剑技 5h）时以块值
+	// 为准。
+	if perSkill, ok := tables.lockActions[skillID]; ok {
+		if perSkill.ground != "" {
+			groundRushAction = perSkill.ground
+		}
+		if perSkill.air != "" {
+			airRushAction = perSkill.air
+		}
+	}
+	// v33 武器位兜底（2026-11-18 用户定版，规格 §四）：锁表无本技能块/
+	// 动作缺列时，按**套路武器**构造（skill_new.UseLimit → skill_use_limit
+	// ItemType：101刀→1h…108短棍→8h），不再固定 2h 默认。
+	if groundRushAction == "" || airRushAction == "" {
+		if slot := rushWeaponSlotOf(tables, iniValue(newFields, "UseLimit")); slot > 0 {
+			if groundRushAction == "" {
+				groundRushAction = rushActionForSlot("qg_fastrun", slot)
+			}
+			if airRushAction == "" {
+				airRushAction = rushActionForSlot("qg_fastruning_s", slot)
+			}
+		}
+	}
 	if groundRushAction == "" {
 		groundRushAction = defaultGroundRushAction
 	}
 	// v26：空中冲刺动作=LockARushAction（fastruning_s 族）；缺列由 G 类名
 	// 推导（qg_fastrun→qg_fastruning_s），再回落默认 2h 位。
-	airRushAction := iniValue(lockRow, "LockARushAction")
 	if airRushAction == "" {
 		airRushAction = strings.Replace(groundRushAction, "qg_fastrun", "qg_fastruning_s", 1)
 	}

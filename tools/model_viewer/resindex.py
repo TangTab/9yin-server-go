@@ -1,15 +1,17 @@
 """资源目录扫描: 模型清单 + 动画索引链 (GBK ini) → catalog.
 
-数据源: obj_char_unpacked\\res\\obj\\char (可用 NINEYIN_CHAR_ROOT 覆盖)
-        obj_weapon_unpacked\\res\\obj\\weapon (NINEYIN_WEAPON_ROOT; catalog id 加 weapon/ 前缀)
-        9yin_server-go\\resources (NINEYIN_RESOURCES; 中文名映射: equipment→itemartstatic→文本表)
+资源根 (--res / NINEYIN_RES_ROOT, 默认 F:\\Game\\Online\\9yin\\res):
+  其余路径都相对它推导 — obj\\char=角色  obj\\weapon=武器
+  obj\\effect / obj\\effect_sns / obj\\effect_weapon=特效
+  (各子根仍可用 --root/--weapons 或 NINEYIN_CHAR_ROOT/NINEYIN_WEAPON_ROOT 显式覆盖)
 - 模型: 全部 .xmod (性别/类别归类 + 配套贴图/材质 + 默认骨架解析 + 中文显示名)
 - 武器: 按目录前缀归类 (剑/刀/长兵/…), 不分性别
+- 特效: obj_effect* 三树, catalog id 加 effect*/ 前缀, 不分性别
 - 动画: b_action/g_action 的 action.ini → 分类 index.ini → [小节] Skeleton= 路径
   (GBK、反斜杠、大小写混杂 → 归一化 + 大小写不敏感文件映射)
 - 每个动画文件快速解析头部 (不解码轨道) 取 N/fps/骨数; 失败标记 status
 
-CLI: python resindex.py [--root PATH] [--out catalog.json]
+CLI: python resindex.py [--res PATH] [--out catalog.json]
 """
 from __future__ import annotations
 
@@ -24,15 +26,57 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from format import xmod, xskt
 
+# 资源根: 其余路径都相对它 (obj/char obj/weapon obj/effect*)
+DEFAULT_RES_ROOT = os.environ.get("NINEYIN_RES_ROOT", r"F:\Game\Online\9yin\res")
+# 特效三树 (obj/ 下) → FileMap 前缀与 catalog 分类
+EFFECT_PREFIXES = ("effect", "effect_sns", "effect_weapon")
+EFFECT_CATEGORIES = {"effect": "特效", "effect_sns": "特效·SNS", "effect_weapon": "特效·武器"}
+# 显式覆盖 / 资源根不存在时的回退 (历史解包目录)
 DEFAULT_ROOT = os.environ.get(
     "NINEYIN_CHAR_ROOT",
     r"E:\Workspace\project\game\adata\obj_char_unpacked\res\obj\char")
 DEFAULT_WEAPON_ROOT = os.environ.get(
     "NINEYIN_WEAPON_ROOT",
     r"E:\Workspace\project\game\adata\obj_weapon_unpacked\res\obj\weapon")
+_REPO_RESOURCES = os.path.normpath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "..", "resources"))
 DEFAULT_RESOURCES = os.environ.get(
     "NINEYIN_RESOURCES",
-    r"E:\Workspace\project\game\9yin_server-go\resources")
+    _REPO_RESOURCES if os.path.isdir(_REPO_RESOURCES)
+    else r"E:\Workspace\project\game\9yin_server-go\resources")
+
+
+def sub_roots(res_root: str) -> dict:
+    """资源根 → {子树名: 物理路径} (只含 obj/ 下实际存在的目录)."""
+    out = {}
+    for name in ("char", "weapon", *EFFECT_PREFIXES):
+        p = os.path.join(res_root, "obj", name)
+        if os.path.isdir(p):
+            out[name] = p
+    return out
+
+
+def derive_resources(res_root: str | None) -> str | None:
+    """资源根 → 同级服务器资源表 (<res 父>/9yin-server-go/resources, 中文名映射).
+    找不到返回 None (调用方回退 --resources/环境变量默认)."""
+    parent = os.path.dirname(os.path.abspath(res_root).rstrip("\\/"))
+    cand = os.path.join(parent, "9yin-server-go", "resources")
+    if os.path.isdir(os.path.join(cand, "modern", "share", "item")):
+        return cand
+    return None
+
+
+def resolve_roots(res_root: str | None = None, char_root: str | None = None,
+                  weapons_root: str | None = None) -> tuple:
+    """资源根推导 + 显式覆盖 → (char, weapon, {特效名: 路径}, 实际资源根).
+    优先级: 显式 char/weapons 参数 > 资源根下 obj/char|weapon > 旧默认."""
+    res_root = res_root or DEFAULT_RES_ROOT
+    subs = sub_roots(res_root)
+    char = char_root or subs.get("char") or DEFAULT_ROOT
+    weapons = (weapons_root if weapons_root is not None
+               else subs.get("weapon") or DEFAULT_WEAPON_ROOT)
+    effects = {k: subs[k] for k in EFFECT_PREFIXES if k in subs}
+    return char, weapons, effects, res_root
 
 
 def norm_key(rel_path: str) -> str:
@@ -67,10 +111,17 @@ class FileMap:
         return self._key_of.get(full.lower())
 
     def resolve(self, ini_path: str) -> str | None:
-        """ini 内路径 (obj\\char\\... 或相对 char) → 实际文件路径."""
+        """ini 内路径 → 实际文件路径.
+        支持: obj\\char\\… (char 树相对键) / obj\\weapon|effect*/… (附加前缀键) /
+        相对 char 的裸路径."""
         p = ini_path.replace("\\", "/")
-        p = re.sub(r"^obj/char/", "", p, count=1, flags=re.IGNORECASE)
-        return self.by_key.get(norm_key(p))
+        for cand in (p,
+                     re.sub(r"^obj/char/", "", p, count=1, flags=re.IGNORECASE),
+                     re.sub(r"^obj/", "", p, count=1, flags=re.IGNORECASE)):
+            hit = self.by_key.get(norm_key(cand))
+            if hit:
+                return hit
+        return None
 
     def exists(self, rel: str) -> bool:
         return norm_key(rel) in self.by_key
@@ -236,6 +287,9 @@ def classify_model(rel: str) -> tuple:
     # _h 后缀 = 发型 (配套的 *_h.xmod)
     if low.endswith("_h.xmod"):
         return gender, "发型"
+    # b_facecloth/g_facecloth 以 b_face/g_face 开头但语义独立 (面纱/眼罩等), 先于前缀判定
+    if "facecloth" in d.lower() or "facecloth" in low:
+        return gender, "脸部饰件"
     if d.startswith("b_face"):
         return gender, "脸型/胡子"
     if d.startswith("g_face"):
@@ -279,8 +333,9 @@ def default_skeleton(fm: FileMap, rel_model: str) -> str | None:
 def build_models(fm: FileMap, path_label: dict | None = None) -> list:
     path_label = path_label or {}
     models = []
+    skip = ("weapon/", *(f"{n}/" for n in EFFECT_PREFIXES))
     for key in sorted(fm.by_key):
-        if not key.endswith(".xmod") or key.startswith("weapon/"):
+        if not key.endswith(".xmod") or key.startswith(skip):
             continue
         full = fm.by_key[key]
         rel = os.path.relpath(full, fm.root).replace("\\", "/")
@@ -301,6 +356,35 @@ def build_weapons(fm: FileMap, path_label: dict | None = None) -> list:
         entry = _model_entry(fm, key, rel, "通用", f"武器·{weapon_category(rel)}", path_label)
         models.append(entry)
     return models
+
+
+def build_effects(fm: FileMap, path_label: dict | None = None) -> list:
+    """obj_effect* 三树 (catalog id 带 effect*/ 前缀, 由 FileMap 附加根提供)."""
+    path_label = path_label or {}
+    models = []
+    for key in sorted(fm.by_key):
+        if not key.endswith(".xmod"):
+            continue
+        m = re.match(r"(effect(?:_sns|_weapon)?)/", key)
+        if not m:
+            continue
+        models.append(_model_entry(fm, key, key, "通用", EFFECT_CATEGORIES[m.group(1)],
+                                   path_label))
+    return models
+
+
+_DDS_CACHE: dict = {}          # 目录 → 排序 dds 文件名 (obj/effect 平铺 1.7 万文件)
+
+
+def _dir_dds(d: str) -> list:
+    lst = _DDS_CACHE.get(d)
+    if lst is None:
+        try:
+            lst = sorted(fn for fn in os.listdir(d) if fn.lower().endswith(".dds"))
+        except OSError:
+            lst = []
+        _DDS_CACHE[d] = lst
+    return lst
 
 
 def _model_entry(fm: FileMap, key: str, rel: str, gender: str, cat: str,
@@ -327,16 +411,21 @@ def _model_entry(fm: FileMap, key: str, rel: str, gender: str, cat: str,
     if not label and dir_key.startswith("weapon/"):
         label = path_label.get(dir_key[len("weapon/"):])
     entry["label"] = label
-    # 配套贴图/材质 (同目录)
+    # 配套贴图/材质 (同目录; 平铺大目录只收同 stem 前若干张, 防目录爆体积)
     mtl_key = key[:-5] + ".mtl"
     if mtl_key in fm.by_key:
         entry["mtl"] = fm.url_key(fm.by_key[mtl_key])
     dds_dir = os.path.dirname(full)
-    for fn in sorted(os.listdir(dds_dir)):
-        if fn.lower().endswith(".dds"):
-            uk = fm.url_key(os.path.join(dds_dir, fn))
-            if uk:
-                entry["textures"].append(uk)
+    dds_list = _dir_dds(dds_dir)
+    big_dir = len(dds_list) > 64
+    for fn in dds_list:
+        if len(entry["textures"]) >= 8:
+            break
+        if big_dir and not fn.lower().startswith(stem[:6].lower()):
+            continue        # 大目录 (如 obj/effect 平铺): 只收 stem 相近的贴图
+        uk = fm.url_key(os.path.join(dds_dir, fn))
+        if uk:
+            entry["textures"].append(uk)
     try:
         m = xmod.parse_file(full)
         entry["vertices"] = sum(sm.vertex_count for sm in m.submeshes)
@@ -450,23 +539,35 @@ def _add_anim(fm, anims, key, names, gender, cat, meta=None):
     return e
 
 
-def build_catalog(root: str = None, weapons_root: str = None, resources_root: str = None) -> dict:
-    root = root or DEFAULT_ROOT
-    weapons_root = weapons_root if weapons_root is not None else DEFAULT_WEAPON_ROOT
+def build_catalog(root: str = None, weapons_root: str = None, resources_root: str = None,
+                  res_root: str = None, effect_roots: dict | None = None) -> dict:
+    """root/weapons_root=None 时由资源根推导 (resolve_roots);
+    effect_roots=None 时同样取资源根下 obj/effect* 实际存在的目录."""
+    res_root = res_root or DEFAULT_RES_ROOT
+    root, weapons_root, derived_effects, res_root = resolve_roots(
+        res_root, char_root=root, weapons_root=weapons_root)
     resources_root = (resources_root if resources_root is not None
-                      else DEFAULT_RESOURCES)
+                      else derive_resources(res_root) or DEFAULT_RESOURCES)
+    effect_roots = effect_roots if effect_roots is not None else derived_effects
     extra = []
     if weapons_root and os.path.isdir(weapons_root):
         extra.append(("weapon/", weapons_root))
+    for name in EFFECT_PREFIXES:
+        p = effect_roots.get(name)
+        if p and os.path.isdir(p):
+            extra.append((f"{name}/", p))
     fm = FileMap(root, extra)
     t0 = time.time()
     path_label = build_name_index(resources_root) if os.path.isdir(resources_root) else {}
-    models = build_models(fm, path_label) + build_weapons(fm, path_label)
+    models = build_models(fm, path_label) + build_weapons(fm, path_label) \
+        + build_effects(fm, path_label)
     anims = build_anims(fm)
     labeled = sum(1 for m in models if m["label"])
     return {
         "root": root,
+        "resRoot": res_root,
         "weaponsRoot": weapons_root,
+        "effectRoots": {k: effect_roots[k] for k in EFFECT_PREFIXES if k in effect_roots},
         "generated": time.strftime("%Y-%m-%d %H:%M:%S"),
         "buildSeconds": round(time.time() - t0, 1),
         "models": models,
@@ -475,6 +576,7 @@ def build_catalog(root: str = None, weapons_root: str = None, resources_root: st
             "models": len(models),
             "modelsOk": sum(1 for m in models if m["status"] == "ok"),
             "modelsLabeled": labeled,
+            "effects": sum(1 for m in models if m["category"] in EFFECT_CATEGORIES.values()),
             "anims": len(anims),
             "animsOk": sum(1 for a in anims if a["status"] == "ok"),
         },
@@ -483,13 +585,16 @@ def build_catalog(root: str = None, weapons_root: str = None, resources_root: st
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", default=DEFAULT_ROOT)
-    ap.add_argument("--weapons", default=DEFAULT_WEAPON_ROOT)
+    ap.add_argument("--res", default=DEFAULT_RES_ROOT,
+                    help=f"资源根, 其余路径相对它 (默认 {DEFAULT_RES_ROOT})")
+    ap.add_argument("--root", default=None, help="角色根 (默认 <res>/obj/char)")
+    ap.add_argument("--weapons", default=None, help="武器根 (默认 <res>/obj/weapon)")
     ap.add_argument("--resources", default=DEFAULT_RESOURCES)
     ap.add_argument("--out", default=os.path.join(os.path.dirname(
         os.path.abspath(__file__)), "catalog.json"))
     args = ap.parse_args()
-    cat = build_catalog(args.root, args.weapons, args.resources)
+    cat = build_catalog(root=args.root, weapons_root=args.weapons,
+                        resources_root=args.resources, res_root=args.res)
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(cat, f, ensure_ascii=False)
     c = cat["counts"]

@@ -1,7 +1,11 @@
 """九阴角色模型浏览工具 — 本地 HTTP 服务 (纯标准库).
 
-用法: python server.py [--port 8901] [--root CHAR_ROOT]
+用法: python server.py [--port 8901] [--res F:\\Game\\Online\\9yin\\res]
 打开 http://127.0.0.1:8901
+
+--res 资源根: 其余路径都相对它推导 —
+  obj\\char=角色  obj\\weapon=武器  obj\\effect / obj\\effect_sns / obj\\effect_weapon=特效
+  (可用 NINEYIN_RES_ROOT 环境变量覆盖默认; --root/--weapons 仍可显式指定)
 
 API:
   GET /api/catalog           模型+动画目录 (首次构建后缓存)
@@ -35,10 +39,12 @@ STATIC_DIR = os.path.join(TOOL_DIR, "static")
 _state = {"catalog": None, "lock": threading.Lock()}
 
 
-def get_catalog(root: str):
+def get_catalog(roots: dict):
     with _state["lock"]:
         if _state["catalog"] is None:
-            _state["catalog"] = resindex.build_catalog(root)
+            _state["catalog"] = resindex.build_catalog(
+                root=roots["root"], weapons_root=roots["weapons"],
+                resources_root=Handler.resources, res_root=roots["res"])
         return _state["catalog"]
 
 
@@ -187,6 +193,8 @@ def build_anim_payload(fm, root: str, rel: str) -> dict:
 
 class Handler(BaseHTTPRequestHandler):
     root = DEFAULT_ROOT = resindex.DEFAULT_ROOT
+    resources = resindex.DEFAULT_RESOURCES
+    roots = None                   # {"root","weapons","res"} — main() 里填充
     fm = None
 
     def log_message(self, fmt, *args):
@@ -243,7 +251,7 @@ class Handler(BaseHTTPRequestHandler):
         self._json({"error": "not found"}, 404)
 
     def _api(self, path, q):
-        cat = get_catalog(self.root)
+        cat = get_catalog(self.roots)
         if path == "/api/catalog":
             self._json(cat)
             return
@@ -286,22 +294,37 @@ def main():
     ap = argparse.ArgumentParser(description="九阴角色模型浏览工具")
     ap.add_argument("--port", type=int, default=int(os.environ.get("NINEYIN_VIEWER_PORT", 8901)))
     ap.add_argument("--host", default="127.0.0.1")
-    ap.add_argument("--root", default=resindex.DEFAULT_ROOT)
-    ap.add_argument("--weapons", default=resindex.DEFAULT_WEAPON_ROOT,
-                    help="obj_weapon 解包根 (catalog id 前缀 weapon/)")
-    ap.add_argument("--resources", default=resindex.DEFAULT_RESOURCES,
-                    help="服务器资源根 (中文名映射表)")
+    ap.add_argument("--res", default=resindex.DEFAULT_RES_ROOT,
+                    help=f"资源根, 其余路径相对它 (默认 {resindex.DEFAULT_RES_ROOT}; "
+                         "obj/char=角色 obj/weapon=武器 obj/effect*=特效)")
+    ap.add_argument("--root", default=None, help="角色根 (默认 <res>/obj/char)")
+    ap.add_argument("--weapons", default=None, help="武器根 (默认 <res>/obj/weapon)")
+    ap.add_argument("--resources", default=None,
+                    help="服务器资源根 (默认 <res>同级 9yin-server-go/resources, 再回退内置默认)")
     args = ap.parse_args()
 
+    char_root, weapons_root, effect_roots, res_root = resindex.resolve_roots(
+        args.res, args.root, args.weapons)
+    resources = (args.resources or resindex.derive_resources(res_root)
+                 or resindex.DEFAULT_RESOURCES)
     extra = []
-    if args.weapons and os.path.isdir(args.weapons):
-        extra.append(("weapon/", args.weapons))
-    print(f"资源根: {args.root}  武器根: {args.weapons}  资源表: {args.resources}")
-    Handler.root = args.root
-    Handler.fm = resindex.FileMap(args.root, extra)
+    if weapons_root and os.path.isdir(weapons_root):
+        extra.append(("weapon/", weapons_root))
+    for name in resindex.EFFECT_PREFIXES:
+        p = effect_roots.get(name)
+        if p and os.path.isdir(p):
+            extra.append((f"{name}/", p))
+    eff_desc = ", ".join(f"{n}={effect_roots[n]}" for n in resindex.EFFECT_PREFIXES
+                         if n in effect_roots) or "无"
+    print(f"资源根: {res_root}\n  角色: {char_root}\n  武器: {weapons_root}"
+          f"\n  特效: {eff_desc}\n  资源表: {resources}")
+    Handler.root = char_root
+    Handler.resources = resources
+    Handler.roots = {"root": char_root, "weapons": weapons_root, "res": res_root}
+    Handler.fm = resindex.FileMap(char_root, extra)
     srv = ThreadingHTTPServer((args.host, args.port), Handler)
     url = f"http://{args.host}:{args.port}"
-    print(f"模型浏览工具就绪: {url}  (目录在首次访问 /api/catalog 时构建, 约 12s)")
+    print(f"模型浏览工具就绪: {url}  (目录在首次访问 /api/catalog 时构建, 含特效树需数分钟)")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

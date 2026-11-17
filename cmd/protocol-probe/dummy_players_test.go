@@ -2,10 +2,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"math/rand"
 	"testing"
 	"time"
 
+	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/role"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
@@ -151,6 +153,48 @@ func TestDummyAddObjectSmoke(t *testing.T) {
 	clothModel := equipmentModels.resolve("cloth_g0003", 1)
 	if !bytes.Contains(payload, []byte(clothModel)) {
 		t.Fatalf("服装模型 %q 未入档", clothModel)
+	}
+}
+
+// TestDummyAddObjectWrapsAsOfficial0x28 锁定 OFFICIAL 档假人物化方言：
+// 假人是玩家形大档（0x0D），物化时必须走 wrapObjectAddAsOp28 包装成
+// 0x28 mode=0x46 明文帧，而不是被 officialNPC0x28Frame 重写成
+// ConfigID="dummy" 的 NPC 壳（npc 目录无此配置，官方客户端查不到模型
+// 不渲染——2026-11-17 23:34 真机实证）。
+func TestDummyAddObjectWrapsAsOfficial0x28(t *testing.T) {
+	dummy := dummyPlayer{
+		Name:   "岳隐锋",
+		Sex:    0,
+		School: "school_wudang",
+		Level:  44,
+		Scene:  "city01",
+		Pos:    dummyPosition{X: 610, Y: -94, Z: 439, Orient: 0.179},
+	}
+	payload := dummyAddObject(dummyObjectIDBase+1, dummy, time.Now())
+	if payload[0] != 0x0D {
+		t.Fatalf("opcode = %#x，wrap 前必须是 0x0D 大档", payload[0])
+	}
+	frame := wrapObjectAddAsOp28(payload)
+	if frame[0] != 0x28 || frame[1] != 0x46 {
+		t.Fatalf("包装帧头 = %x，应为 28 46", frame[:2])
+	}
+	body := frame[10:]
+	if len(body) != len(payload)-1 {
+		t.Fatalf("体长 %d，应为 %d（0x0D 平移-1）", len(body), len(payload)-1)
+	}
+	// 外服 0x28 内层布局锚：值对数 u16@0x3C 非零（大档字段在）。
+	if got := binaryLE16(body[0x3C:]); got == 0 {
+		t.Fatal("体 [0x3C] 值对数为 0——大档字段丢失")
+	}
+	// 玩家形身份锚：Type=2 值对必须仍在体内（字节级存在性即可）。
+	typeIdx := make([]byte, 2)
+	typeEntry, ok := clientdata.PlayerProperty("Type")
+	if !ok {
+		t.Fatal("Type 属性在当前表缺席")
+	}
+	binary.LittleEndian.PutUint16(typeIdx, typeEntry.Index)
+	if !bytes.Contains(body, typeIdx) {
+		t.Fatal("Type 属性值对不在包装体内")
 	}
 }
 

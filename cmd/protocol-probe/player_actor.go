@@ -335,13 +335,6 @@ type playerActor struct {
 	clientReportY  float32
 	clientReportZ  float32
 	clientReportAt time.Time
-	// approachDest/Speed/Active：服务端驱动接近当前段；Cancelled=手动打断闩
-	//（v13：打断后旧 c61 瞬移兜底关闭，暂存走官方过期/重按语义）。
-	approachDest      worldcore.Transform
-	approachSpeed     float32
-	approachActive    bool
-	approachCancelled bool
-	approachDashing   bool
 	// 物品域会话模型（msg30/31/34/36 的权威内存态；登录时从
 	// inventoryStore 恢复，操作后写穿 DB）。行类型直接复用读侧
 	// bagRow/equipRow（帧构造器同型）。锁纪律仍走 p.mu。

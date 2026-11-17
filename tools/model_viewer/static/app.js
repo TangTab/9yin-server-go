@@ -105,8 +105,13 @@ async function fetchJSON(url) {
 }
 
 async function loadCatalog() {
-  $('lib-info').textContent = '加载目录…';
-  S.catalog = await fetchJSON('/api/catalog');
+  $('lib-info').textContent = '加载目录… (首次启动需全量解析, 约 4 分钟, 请勿关闭页面)';
+  try {
+    S.catalog = await fetchJSON('/api/catalog');
+  } catch (e) {
+    $('lib-info').textContent = `目录加载失败: ${e.message} — 服务未启动或已退出, 重启后刷新本页`;
+    throw e;
+  }
   const c = S.catalog.counts;
   $('lib-info').textContent = '';
   $('anim-count').textContent = `${c.animsOk}/${c.anims}`;
@@ -641,7 +646,48 @@ function convertToSkinned(data) {
   // 子网格 → SkinnedMesh (root 挂 modelGroup, 多网格共享一个骨架)
   // 武器部件例外: 握柄建模在原点, 直接挂到手骨 Bip01 R Hand (不蒙皮, 跟手刚体运动)
   const handBone = bones.find((b) => b.name.toLowerCase() === 'bip01 r hand');
+  // 缺失骨回退目标: 骨名不在动画骨架 (如脸部表情骨 Bone01-43) 时挂到该子网格
+  // 权重最大的已匹配骨; 子网格全未匹配 (如眼球/眼皮 submesh 只认表情骨) 再取
+  // 整个部件的最大已匹配骨 (脸→Bip01 Head); 部件也全未匹配才落骨架根 (index 0)
+  const fbOf = new Map();            // mesh → 回退骨 index | null
+  {
+    const partBest = new Map();      // partId → [bestW, bestIdx]
+    for (const mesh of currentMeshes) {
+      const sm = mesh.userData.sm;
+      let best = null, bestW = -1;
+      if (sm?.boneNames && sm.weights) {
+        const bw = new Map();        // 骨名(小写) → 累计权重
+        let wp = 0;
+        for (let vi = 0; vi < sm.vertexCount; vi++) {
+          for (let k = 0; k < sm.weightCounts[vi]; k++) {
+            const pr = sm.weights[wp++];
+            const bn = sm.boneNames[pr[0]]?.toLowerCase();
+            if (bn) bw.set(bn, (bw.get(bn) || 0) + pr[1]);
+          }
+        }
+        for (const [bn, w] of bw) {
+          const bi = idxMap.get(bn);
+          if (bi !== undefined && w > bestW) { bestW = w; best = bi; }
+        }
+      }
+      fbOf.set(mesh, best);
+      const pid = mesh.userData.partId || '';
+      if (best !== null && (!partBest.has(pid) || bestW > partBest.get(pid)[0]))
+        partBest.set(pid, [bestW, best]);
+    }
+    for (const [mesh, best] of fbOf) {
+      if (best === null)
+        fbOf.set(mesh, partBest.get(mesh.userData.partId || '')?.[1] ?? null);
+    }
+  }
+  window.__fb = () => currentMeshes.map((m) => ({   // 调试: 各网格回退骨
+    part: (m.userData.partId || '(none)').split('/').pop(),
+    sm: m.userData.sm?.name, nVerts: m.userData.sm?.vertexCount,
+    fb: m.userData.fb ?? '?',
+  }));
   const newMeshes = [];
+  // 头骨: 近头刚体件 (脸饰/零骨件) 的挂载目标
+  const headBone = bones.find((b) => b.name.toLowerCase() === 'bip01 head');
   for (const mesh of currentMeshes) {
     const sm = mesh.userData.sm;
     if (mesh.userData.partId?.startsWith('weapon/')) {
@@ -650,10 +696,30 @@ function convertToSkinned(data) {
       newMeshes.push(mesh);
       continue;
     }
+    // 刚体网格 (脸饰 facecloth 等无骨名 blob 件, 解析器占位权重[0,1.0]): 蒙皮无从谈起.
+    // 原点建模挂件 (同武器语义: 几何在局部原点, 引擎运行时挂骨) 且部件属头部类
+    // → 挂 Bip01 Head (add 原点语义, 幂等); 其余 (特效/测试件) 留原地
+    if (sm && (!sm.boneNames?.length || !sm.weightCounts?.some((c) => c > 0))) {
+      const pid = (mesh.userData.partId || '').toLowerCase();
+      const headPart = !pid.startsWith('effect') && /face|hair|helmet|mask/.test(pid);
+      const bb = mesh.geometry.boundingBox
+        || (mesh.geometry.computeBoundingBox(), mesh.geometry.boundingBox);
+      const atOrigin = bb.getCenter(new THREE.Vector3()).length() < 0.6;
+      if (headPart && atOrigin && headBone) {
+        mesh.parent?.remove(mesh);
+        headBone.add(mesh);
+        mesh.userData.fb = '(rigid→' + headBone.name + ')';
+      } else {
+        mesh.userData.fb = '(rigid, kept)';
+      }
+      newMeshes.push(mesh);
+      continue;
+    }
     const geo = mesh.geometry;
     const n = sm.vertexCount;
     const si = new Uint16Array(n * 4);
     const sw = new Float32Array(n * 4);
+    const fb = fbOf.get(mesh) ?? 0;   // 缺失骨回退目标 (子网格→部件→根)
     let wpos = 0;
     for (let vi = 0; vi < n; vi++) {
       const cnt = sm.weightCounts[vi];
@@ -661,7 +727,7 @@ function convertToSkinned(data) {
         if (k < cnt) {
           const pair = sm.weights[wpos++];
           const bn = sm.boneNames[pair[0]]?.toLowerCase();   // 刚体网格无骨名 blob → undefined
-          si[vi * 4 + k] = bn && idxMap.has(bn) ? idxMap.get(bn) : 0;
+          si[vi * 4 + k] = bn && idxMap.has(bn) ? idxMap.get(bn) : fb;
           sw[vi * 4 + k] = pair[1];
         }
       }
@@ -671,6 +737,8 @@ function convertToSkinned(data) {
 
     const skinned = new THREE.SkinnedMesh(geo, mesh.material);
     skinned.userData.sm = sm;
+    skinned.userData.partId = mesh.userData.partId;   // 必须传递: 丢失会使后续转换把全部件并成一组 (回退骨/武器挂手全失效)
+    skinned.userData.fb = bones[fb]?.name ?? '(root)';
     skinned.bind(skeleton);
     modelGroup.remove(mesh);
     modelGroup.add(skinned);
@@ -722,7 +790,51 @@ window.__unskin = () => {
   return 'unskinned';
 };
 // 调试: 模块作用域桥接 (自动化测试用)
+window.__cam = {
+  get: () => ({ pos: camera.position.toArray(), target: controls.target.toArray() }),
+  set: (pos, target) => {
+    camera.position.set(...pos);
+    controls.target.set(...target);
+    controls.update();
+    renderer.render(scene, camera);
+  },
+};
 window.__test = {
+  // 蒙皮跟随探针: 逐帧量 眼球/脸部皮肤 质心到头骨(或指定骨)的世界距离
+  // 距离随帧波动大 = 该网格没跟住头骨 (错位/外冒); 刚体跟随时应近似恒定
+  eyeProbe: (boneName = 'Bip01 Head', frames = [0, 5, 10, 15, 20]) => {
+    if (!S.rig) return 'no rig';
+    const bone = S.rig.bones.find((b) => b.name.toLowerCase() === boneName.toLowerCase());
+    if (!bone) return 'no bone ' + boneName;
+    const v = new THREE.Vector3();
+    const centroid = (mesh) => {
+      const g = mesh.geometry, pos = g.getAttribute('position');
+      v.set(0, 0, 0);
+      const tmp = new THREE.Vector3();
+      for (let i = 0; i < pos.count; i += 7) {   // 抽样 1/7
+        tmp.fromBufferAttribute(pos, i);
+        (mesh.boneTransform || mesh.applyBoneTransform).call(mesh, i, tmp);
+        v.add(tmp);
+      }
+      v.divideScalar(Math.ceil(pos.count / 7));
+      return v;
+    };
+    const out = [];
+    for (const f of frames) {
+      setFrame(f);
+      S.rig.root.updateMatrixWorld(true);
+      const bw = bone.getWorldPosition(new THREE.Vector3());
+      const row = { f, boneY: +bw.y.toFixed(3) };
+      for (const mesh of currentMeshes) {
+        if (!mesh.isSkinnedMesh) continue;   // 刚体挂件无蒙皮变换, 质心走世界坐标无意义
+        const nm = mesh.userData.sm?.name;
+        if (nm === 'Standard_3' || nm === 'Standard_1' || nm === '01 - Default')
+          row[nm] = +centroid(mesh).sub(bw).length().toFixed(4);
+      }
+      out.push(row);
+    }
+    return out;
+  },
   loadModel: async (id) => {          // 独占装载 (清空其余部件)
     clearParts();
     const cat = S.catalog.models.find((m) => m.id === id);
