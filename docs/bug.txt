@@ -127,12 +127,6 @@ rush_cast.go：删走踢帧 rushWalkKickFrame（+150ms 双入口 0x21）与 sche
 officialTimeSyncReplyFrame 改外服私服帧级方言：[294, client_ms 回显, reqid=应答时刻 FILETIME ms（外服私服样本逐位吻合，与 CD 行同纪元）, unix 秒, uptime=46335.831 常量]
 ③ 速度族外服私服值
 
-player_actor.go：0x0D 档 WalkSpeed 7.5→1.28（旧值系与 DriftSpeed 混淆）、MoveSpeed=RunSpeed 5.0→3.9（服务端无模拟消费方，仅属性下发，零风险）
-验证
-空中突然落地，本来该释放技能，但立即落地才释放技能、
-短距离冲锋 地面和空中 不同（3m）
-
-
 坐骑
 留给真机的校准点（照 Java 文档口径）
 Mount 属性非空是否驱动引擎挂模型动画（候选补发 CurRideMount@361）
@@ -158,3 +152,5 @@ BingLuType@2153 恒 0 是否足够（外服私服未观测到非零；可能关�
 兵录熟练度随战斗上涨的投放（fill 值——Java 也只有 GM 设置，官方按武器类型击中数积累，捕获无样本；需要时可在击杀链按当前武器类型 +fill）
 
 格挡
+
+使用初始号进行透传测试

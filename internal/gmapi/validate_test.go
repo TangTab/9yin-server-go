@@ -218,6 +218,31 @@ func TestValidateMountRide(t *testing.T) {
 	}
 }
 
+// set_dummy_limit（人群假人上限）：count=-1/0/>0 三档；超界拒绝。
+func TestValidateSetDummyLimit(t *testing.T) {
+	for _, body := range []string{
+		`{"action":"set_dummy_limit","count":-1}`,
+		`{"action":"set_dummy_limit","count":0}`,
+		`{"action":"set_dummy_limit","count":500}`,
+	} {
+		command, err := validateBody(t, body)
+		if err != nil {
+			t.Fatalf("validate %s: %v", body, err)
+		}
+		if command.Action != "set_dummy_limit" {
+			t.Fatalf("action=%s", command.Action)
+		}
+	}
+	for _, bad := range []string{
+		`{"action":"set_dummy_limit","count":-2}`,
+		`{"action":"set_dummy_limit","count":100001}`,
+	} {
+		if _, err := validateBody(t, bad); err == nil {
+			t.Fatalf("set_dummy_limit body %q should fail", bad)
+		}
+	}
+}
+
 // spawn_dummy（训练木桩）：血量界值 + 数量 0 视为 1、超界拒绝；
 // clear_dummies 无负载。
 func TestValidateSpawnDummy(t *testing.T) {
@@ -363,11 +388,11 @@ func TestValidateRecastAffix(t *testing.T) {
 		t.Fatalf("command=%+v", command)
 	}
 	for _, bad := range []string{
-		`{"action":"recast_add_affix","slot":2,"packIDs":[13040],"affixKind":"prop"}`,   // 非法槽
-		`{"action":"recast_add_affix","slot":22,"packIDs":[],"affixKind":"prop"}`,       // 空 packIDs
-		`{"action":"recast_add_affix","slot":22,"packIDs":[0],"affixKind":"prop"}`,      // 越界包号
-		`{"action":"recast_add_affix","slot":22,"packIDs":[13040],"affixKind":"mix"}`,   // 未知归属
-		`{"action":"recast_clear_affix","slot":121}`,                                    // 背包视图不可寻址
+		`{"action":"recast_add_affix","slot":2,"packIDs":[13040],"affixKind":"prop"}`, // 非法槽
+		`{"action":"recast_add_affix","slot":22,"packIDs":[],"affixKind":"prop"}`,     // 空 packIDs
+		`{"action":"recast_add_affix","slot":22,"packIDs":[0],"affixKind":"prop"}`,    // 越界包号
+		`{"action":"recast_add_affix","slot":22,"packIDs":[13040],"affixKind":"mix"}`, // 未知归属
+		`{"action":"recast_clear_affix","slot":121}`,                                  // 背包视图不可寻址
 	} {
 		if _, err := validateBody(t, bad); err == nil {
 			t.Fatalf("invalid body %s should fail", bad)
@@ -385,7 +410,7 @@ func TestValidateGenerateWeaponSkillTaolu(t *testing.T) {
 	}
 	for _, bad := range []string{
 		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillTaolu":"cs_jh_sfj","skillKeys":["a","b","c","d","e","f","g"]}`, // >6 招式
-		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillKeys":["  "]}`,     // 空项
+		`{"action":"gm_generate_weapon","weaponType":102,"crafter":"cook","skillKeys":["  "]}`,                                                 // 空项
 	} {
 		if _, err := validateBody(t, bad); err == nil {
 			t.Fatalf("invalid body %s should fail", bad)

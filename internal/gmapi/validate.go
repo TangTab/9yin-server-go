@@ -117,6 +117,14 @@ func Validate(body CommandBody) (Command, error) {
 		}
 	case "clear_dummies":
 		// 无负载动作：清除当前场景全部 GM 训练木桩（活体与尸体）。
+	case "set_dummy_limit":
+		// 人群假人总量控制（dummy_players.go）：每场景安装上限，进程级
+		// 立即对全部共享场景生效。count=-1 恢复全量（默认），0=禁用，
+		// >0=按配置序取前 N 只安装（确定性裁剪）。
+		if body.Count < -1 || body.Count > 100_000 {
+			return command, fmt.Errorf("dummy limit must be between -1 and 100000 (-1 = unlimited, 0 = disabled)")
+		}
+		command.Count = body.Count
 	case "set_autosave_interval":
 		// 在线玩家内功/经脉快照的自动存盘周期（秒）：0=关闭（仅断线
 		// 与 Ctrl+C 关服时存）。进程级，改动即刻对全部在线会话生效。

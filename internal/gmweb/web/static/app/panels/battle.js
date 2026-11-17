@@ -1,4 +1,4 @@
-// battle.js —— 组7「战斗与演练」：训练木桩 / 战斗假人 / 伙伴系统 / 御风神水。
+// battle.js —— 组7「战斗与演练」：训练木桩 / 人群假人 / 战斗假人 / 伙伴系统 / 御风神水。
 
 import { h, panelSection, numField, textField, cmdBtn, actionBtn, hint, toast } from "../ui.js";
 import { catalog, command } from "../api.js";
@@ -35,6 +35,43 @@ function renderDummy(host) {
   body.appendChild(
     h("div", { class: "actions-row" }, [
       cmdBtn({ label: "清除全部木桩", danger: true, action: "clear_dummies", section: "训练木桩" }),
+    ])
+  );
+  host.appendChild(section);
+  renderCrowdDummy(host);
+}
+
+/* ---------------- 人群假人（城镇氛围） ---------------- */
+
+function renderCrowdDummy(host) {
+  const { section, body } = panelSection({
+    id: "sec-crowd-dummy",
+    title: "人群假人",
+    desc: "城镇人群假人总量控制（server_dummy_players 库表投放，默认每场景全量）：设置每场景安装上限后立即对全部场景生效；-1=恢复全量，0=禁用人群假人。每名玩家视口仍按预算（110 只）渐进入场，优先展示走动假人。",
+  });
+  const limit = numField({ label: "每场上限", value: 500, min: -1, max: 100000, width: "110px" });
+  body.appendChild(
+    h("div", { class: "field-row" }, [
+      limit.node,
+      actionBtn({
+        label: "应用上限",
+        build: () => ({ action: "set_dummy_limit", count: limit.get() ?? -1 }),
+        okText: "人群假人上限已生效",
+        section: "人群假人",
+      }),
+      actionBtn({
+        label: "恢复全量",
+        build: () => ({ action: "set_dummy_limit", count: -1 }),
+        okText: "人群假人已恢复全量",
+        section: "人群假人",
+      }),
+      actionBtn({
+        label: "关闭人群假人",
+        theme: "",
+        build: () => ({ action: "set_dummy_limit", count: 0 }),
+        okText: "人群假人已禁用",
+        section: "人群假人",
+      }),
     ])
   );
   host.appendChild(section);

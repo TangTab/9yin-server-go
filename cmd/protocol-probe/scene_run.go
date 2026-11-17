@@ -54,22 +54,22 @@ type sceneRun struct {
 	// 波次域（dungeon_wave.go）：副本实例的 NpcProgress 逐波揭示。
 	// waveMode 由 populate 时目录含波次数据开启；waveAlive 清空即
 	// 波次结算点（Lua dungeon_wave_cleared 可接管推进节奏）。
-	waveMode         bool
-	currentWave      int                  // 当前在场波次值（0=无波次数据）
-	waveGroups       map[int][]int        // 波次值 → 目录下标集
-	pendingWaves     []int                // 尚未注册的波次值（升序）
-	waveAlive        map[uint32]struct{}  // 当前波在场 NPC 的 wire ID
-	waveClearedFired int                  // 已发过 wave_cleared 的波次值（防重发）
-	dungeonKills     int                  // 副本内击杀累计
+	waveMode          bool
+	currentWave       int                 // 当前在场波次值（0=无波次数据）
+	waveGroups        map[int][]int       // 波次值 → 目录下标集
+	pendingWaves      []int               // 尚未注册的波次值（升序）
+	waveAlive         map[uint32]struct{} // 当前波在场 NPC 的 wire ID
+	waveClearedFired  int                 // 已发过 wave_cleared 的波次值（防重发）
+	dungeonKills      int                 // 副本内击杀累计
 	dungeonDifficulty int                 // 难度档（attachRun 后由 GM 路径回填）
-	finished         bool                 // 末波全灭（收尾已排程）
-	viewsDirty       bool                 // 有新波物化，待 tick 外 reconcile 全体视口
-	scripts          *luascript.Host      // 副本事件宿主（enter 时注入；nil=无脚本走默认引擎）
-	finishHook       func()               // 收尾回调（dungeonManager.markFinished；epoch 防护后锁外执行）
-	tickStop       chan struct{}
-	tickDone       chan struct{}
-	npcFuncs       *npcfunc.Registry
-	nextWireID     uint32
+	finished          bool                // 末波全灭（收尾已排程）
+	viewsDirty        bool                // 有新波物化，待 tick 外 reconcile 全体视口
+	scripts           *luascript.Host     // 副本事件宿主（enter 时注入；nil=无脚本走默认引擎）
+	finishHook        func()              // 收尾回调（dungeonManager.markFinished；epoch 防护后锁外执行）
+	tickStop          chan struct{}
+	tickDone          chan struct{}
+	npcFuncs          *npcfunc.Registry
+	nextWireID        uint32
 	// 刷新域（npc_refresh.go）：目录保留供尸体清除后的重注册；
 	// deadNPCs 登记等待批量/定时重生的尸体；lootBoxes 是在场掉落宝箱。
 	catalog             []npcSpawn
@@ -90,6 +90,15 @@ type sceneRun struct {
 	// 成对出现；docs/official/外服登录帧对照与缺口清单.md §13.5）。实体注销时
 	// 连带清除。run.mu 保护。
 	npcMoveState map[uint32]bool
+	// 假人域（dummy_players.go/dummy_scene.go）：dummies 是按场景过滤后
+	// 全量注册的假人（display-only，无 Vitals/Brain）；dummyMotion 为移动
+	// 假人权威步进；dummyPatrolPoints 为随机人流目的地池（官方 NPC 坐标）。
+	// dummiesDeferred 标记 DB 快照未就绪、tick 重试安装。run.mu 保护。
+	dummies           []registeredDummy
+	dummyMotion       map[uint32]*dummyMotionState
+	dummyPatrolPoints []worldcore.Transform
+	dummiesInstalled  bool
+	dummiesDeferred   bool
 	// 路点图导航域（mapnav_chase.go）：nav/navPlanner/navLoaded 由
 	// warmNav（sync.Once，创建时后台预热）在 run.mu 内写入；追击分支
 	// 在 run.mu 内经 navGraphLocked() 取用，未就绪本拍走直线兜底。
@@ -220,6 +229,9 @@ func (r *sceneRun) populate(catalog []npcSpawn) error {
 	// 与玩家共用 0x11000000 类型位前缀）；远程玩家 wireID 仍从无前缀的
 	// 低位空间自增，与 NPC 的前缀空间和玩家保留 ID 0x11000001 永不碰撞。
 	r.nextWireID = uint32(len(catalog)) + 2
+	// 人群假人安装（dummy_players.go）：DB 快照就绪即全量注册；未就绪
+	// 挂起，tickOnce 重试。
+	r.installDummiesLocked(catalog)
 	log.Printf("scene run populated config=%s resource=%s registered=%d skipped=%d", r.key.config, r.key.resource, registered, len(catalog)-registered)
 	return nil
 }
@@ -419,6 +431,7 @@ func (r *sceneRun) tickOnce(now time.Time) {
 	r.patrolTick(now)
 	r.refreshTick(now)
 	r.waveTick(now)
+	r.dummyTick(now)
 	r.mu.Lock()
 	dirty := r.viewsDirty
 	r.mu.Unlock()

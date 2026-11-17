@@ -282,6 +282,9 @@ func main() {
 	// S1 装载循环 + S2 目录预热：都放后台，不阻塞开服。
 	go gmItemNames.start(store.db, gmNameRetryInterval)
 	go warmGMCatalogDirs()
+	// 假人系统（dummy_players.go）：server_dummy_players + game_cards 全量
+	// 后台装载（server2 人群假人移植，数据源 MySQL 权威存档 0021）。
+	startDummyStore(store.db, gmNameRetryInterval)
 	// 经脉目录（面板「经脉周天设置」下拉）：共享库 game_meridians 直查
 	//（Java GmCatalogDb.meridians 同款 SQL）；缺表/缺库回落包级目录。
 	gm.meridianRows = func() []gmMeridianRow {
@@ -952,47 +955,47 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				gmSession.setAction("宝箱存留已关闭：宝箱保留到被拾空")
 			}
 			log.Printf("%s: GM set lootbox ttl=%ds", conn.RemoteAddr(), seconds)
-			case "set_npc_chase":
-				enabled := setNPCChaseEnabled(command.Enabled == 1)
-				if enabled {
-					gmSession.setAction("NPC 自动追击已开启：怪沿路点图寻路折线逼近（无图场景直线贴地）")
-				} else {
-					gmSession.setAction("NPC 自动追击已关闭：仇恨照常持有，怪停在出生点（冲锋测试方言）")
-				}
-				log.Printf("%s: GM set npc chase enabled=%v", conn.RemoteAddr(), enabled)
-			case "set_npc_feint":
-				// 选中怪虚招标记：被标怪的攻击按虚招结算（命中格挡中的
-				// 玩家即破防 + 不可格挡窗）。作用于当前角色的选中目标。
-				if runtime == nil || runtime.world == nil || runtime.world.run == nil {
-					gmSession.setAction("虚招标记失败：角色尚未进入场景")
-					return fmt.Errorf("character has not entered a scene")
-				}
-				feintRun := runtime.world.run
-				feintRun.mu.Lock()
-				selected := runtime.world.selectedObject
-				if selected != 0 && feintRun.npcFeintMarks == nil {
-					feintRun.npcFeintMarks = map[uint32]bool{}
-				}
-				marked := false
-				if selected != 0 {
-					marked = command.Enabled == 1
-					if marked {
-						feintRun.npcFeintMarks[selected] = true
-					} else {
-						delete(feintRun.npcFeintMarks, selected)
-					}
-				}
-				feintRun.mu.Unlock()
-				if selected == 0 {
-					gmSession.setAction("虚招标记失败：请先点选一只怪物作为目标")
-					return fmt.Errorf("no selected target")
-				}
+		case "set_npc_chase":
+			enabled := setNPCChaseEnabled(command.Enabled == 1)
+			if enabled {
+				gmSession.setAction("NPC 自动追击已开启：怪沿路点图寻路折线逼近（无图场景直线贴地）")
+			} else {
+				gmSession.setAction("NPC 自动追击已关闭：仇恨照常持有，怪停在出生点（冲锋测试方言）")
+			}
+			log.Printf("%s: GM set npc chase enabled=%v", conn.RemoteAddr(), enabled)
+		case "set_npc_feint":
+			// 选中怪虚招标记：被标怪的攻击按虚招结算（命中格挡中的
+			// 玩家即破防 + 不可格挡窗）。作用于当前角色的选中目标。
+			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
+				gmSession.setAction("虚招标记失败：角色尚未进入场景")
+				return fmt.Errorf("character has not entered a scene")
+			}
+			feintRun := runtime.world.run
+			feintRun.mu.Lock()
+			selected := runtime.world.selectedObject
+			if selected != 0 && feintRun.npcFeintMarks == nil {
+				feintRun.npcFeintMarks = map[uint32]bool{}
+			}
+			marked := false
+			if selected != 0 {
+				marked = command.Enabled == 1
 				if marked {
-					gmSession.setAction(fmt.Sprintf("怪物 %d 已标记为虚招：攻击命中格挡中的角色将击破格挡并禁格挡 3 秒（官方 buf_CantParry 方言）", selected))
+					feintRun.npcFeintMarks[selected] = true
 				} else {
-					gmSession.setAction(fmt.Sprintf("怪物 %d 的虚招标记已移除：攻击恢复普通（被格挡零伤）", selected))
+					delete(feintRun.npcFeintMarks, selected)
 				}
-				log.Printf("%s: GM set npc feint id=%d enabled=%v", conn.RemoteAddr(), selected, marked)
+			}
+			feintRun.mu.Unlock()
+			if selected == 0 {
+				gmSession.setAction("虚招标记失败：请先点选一只怪物作为目标")
+				return fmt.Errorf("no selected target")
+			}
+			if marked {
+				gmSession.setAction(fmt.Sprintf("怪物 %d 已标记为虚招：攻击命中格挡中的角色将击破格挡并禁格挡 3 秒（官方 buf_CantParry 方言）", selected))
+			} else {
+				gmSession.setAction(fmt.Sprintf("怪物 %d 的虚招标记已移除：攻击恢复普通（被格挡零伤）", selected))
+			}
+			log.Printf("%s: GM set npc feint id=%d enabled=%v", conn.RemoteAddr(), selected, marked)
 		case "spawn_chest":
 			if runtime == nil || runtime.world == nil || runtime.world.run == nil {
 				gmSession.setAction("世界宝箱生成失败：角色尚未进入场景")
@@ -1048,6 +1051,22 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			cleared := runtime.world.run.clearTrainingDummies()
 			gmSession.setAction(fmt.Sprintf("已清除 %d 只训练木桩", cleared))
 			log.Printf("%s: GM cleared %d training dummies", conn.RemoteAddr(), cleared)
+		case "set_dummy_limit":
+			// 人群假人总量控制：每场景安装上限（-1=全量 / 0=禁用 / >0=前 N），
+			// 进程级，立即对全部共享场景重装生效（裁剪走各客户端 reconcile
+			// 的 0x0E，补回走 0x0D），后续新场景在安装时直接按上限裁剪。
+			limit := command.Count
+			setDummyInstallLimit(limit)
+			scenes, total := applyDummyLimitToAllScenes()
+			switch {
+			case limit < 0:
+				gmSession.setAction(fmt.Sprintf("人群假人已恢复全量：当前 %d 个场景共安装 %d 只（视口仍按预算渐进入场）", scenes, total))
+			case limit == 0:
+				gmSession.setAction("人群假人已禁用：全部场景假人即刻退场")
+			default:
+				gmSession.setAction(fmt.Sprintf("人群假人每场景上限设为 %d：当前 %d 个场景共安装 %d 只", limit, scenes, total))
+			}
+			log.Printf("%s: GM set crowd dummy install limit=%d scenes=%d total=%d", conn.RemoteAddr(), limit, scenes, total)
 		case "set_autosave_interval":
 			seconds := int32(command.Value)
 			setAutosaveInterval(time.Duration(seconds) * time.Second)

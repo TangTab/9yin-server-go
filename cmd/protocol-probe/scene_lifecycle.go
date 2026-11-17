@@ -44,6 +44,7 @@ type sceneLifecycle struct {
 	mu           sync.Mutex
 	closed       bool
 	visibleNPCs  map[uint32]struct{}
+	dummyVisible map[uint32]struct{} // 假人视口准入工作集（dummy_scene.go）
 	center       role.Position
 	radius       float32
 	replayTimers []*time.Timer
@@ -279,12 +280,17 @@ func (s *sceneLifecycle) detachMember() {
 }
 
 // updateMemberPosition 同步场景侧权威位置并刷新本视图可见集。
-// 返回可见集是否发生变化（调用方据此触发 reconcile）。
+// 返回可见集是否发生变化（调用方据此触发 reconcile）。假人准入工作集
+// 随移动包推进（server2 同语义：NPC 可见集不变但人群工作集可能变化）。
 func (s *sceneLifecycle) updateMemberPosition(position role.Position, catalog []npcSpawn) bool {
 	if s.wireID != 0 {
 		s.run.updateMemberPosition(s.wireID, position)
 	}
-	return s.refreshVisibility(catalog, position)
+	changed := s.refreshVisibility(catalog, position)
+	s.run.mu.Lock()
+	dummyChanged := s.dummyAdmissionLocked()
+	s.run.mu.Unlock()
+	return changed || dummyChanged
 }
 
 // playerLiveTransform 返回本视图玩家的场景权威位置（成员表条目；
@@ -424,6 +430,7 @@ func (s *sceneLifecycle) beginKey(key sceneKey, catalog []npcSpawn) error {
 	s.viewport = worldcore.NewViewport()
 	s.mu.Lock()
 	s.visibleNPCs = make(map[uint32]struct{})
+	s.dummyVisible = nil
 	s.mu.Unlock()
 	s.selectedObject = 0
 	s.selectedOwner = 0
@@ -569,7 +576,9 @@ func (s *sceneLifecycle) clientActivity() error {
 		log.Printf("%s: replace-entry overlay; native materialization active, replay hook suppressed", s.remote)
 	}
 	log.Printf("%s: post-ready client activity; materializing scene objects", s.remote)
-	if err := s.reconcileViewportLocked(); err != nil {
+	// 走加锁版 reconcileViewport（run.mu 内做假人准入/快照过滤）：此前
+	// 直调 Locked 版与中央 tick 的 ECS 写并发，属潜在竞态，一并修正。
+	if err := s.reconcileViewport(); err != nil {
 		return err
 	}
 	s.armed = false
@@ -603,12 +612,21 @@ func (s *sceneLifecycle) reconcileViewport() error {
 }
 
 func (s *sceneLifecycle) reconcileViewportLocked() error {
+	// 假人视口准入（要求调用方已持有 s.run.mu——reconcileViewport/dummyTick
+	// 两路都满足）：预算/迟滞/限流维护本连接工作集，随后把快照里未准入的
+	// 假人剔除——Plan 只看得见工作集内的假人，退场自然走 Removes→0x0E。
+	s.dummyAdmissionLocked()
 	s.mu.Lock()
 	center := s.center
 	radius := s.radius
 	s.mu.Unlock()
-	delta := s.viewport.Plan(s.run.scene.SnapshotWithin(center.X, center.Z, radius, worldcore.EntityID(s.wireID)))
+	delta := s.viewport.Plan(s.filterDummySnapshot(s.run.scene.SnapshotWithin(center.X, center.Z, radius, worldcore.EntityID(s.wireID))))
 	for _, update := range delta.Updates {
+		// 假人位移由 0x20/0x1F 专链拥有（dummyMotionTick），Updates 巡检
+		// 日志对其静默。
+		if isDummyObjectID(uint32(update.Entity.ID)) {
+			continue
+		}
 		entity, exists := s.npcMeta(update.Entity.ID)
 		if !exists {
 			return fmt.Errorf("missing property encoder for scene object %d", update.Entity.ID)
@@ -655,6 +673,11 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		// 权威 Transform（巡逻 tick 每秒插值），从时间表当前位置续走。
 		payload := append([]byte(nil), entity.payload...)
 		if entity.schedule != nil {
+			patchAddObjectTransform(payload, transform)
+		}
+		// 假人重进视口：0x0D 落点同样重打为当前权威位置（移动假人的
+		// ECS Transform 由 dummyMotionTick 每拍插值刷新），从行进位置续走。
+		if isDummyObjectID(uint32(id)) {
 			patchAddObjectTransform(payload, transform)
 		}
 		// B 路线（外服家族客户端）：物化帧改走 0x28 明文方言
@@ -731,6 +754,15 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 			location := serverLocation(entity.id, entity.ownerID, transform)
 			if err := s.conn.WriteFrame(location); err != nil {
 				return fmt.Errorf("locate scene object %d: %w", entity.id, err)
+			}
+		}
+		// 行进中的假人重进视口：紧补当前步 0x20 serverMoving，客户端从
+		// 插值位置续走（与移动 tick 的起步步帧同方言）。
+		if isDummyObjectID(uint32(id)) {
+			if motion, exists := s.run.dummyMotion[uint32(id)]; exists && motion.moving {
+				if err := s.conn.WriteFrame(serverMoving(motion.id, 1, motionFromDest(motion.to))); err != nil {
+					return fmt.Errorf("resume dummy move %d: %w", motion.id, err)
+				}
 			}
 		}
 		// 重放的 0x0D 是注册期快照（满血活怪）。若该 NPC 当前是尸体
