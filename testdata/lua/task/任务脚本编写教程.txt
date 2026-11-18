@@ -1,0 +1,39 @@
+任务的唯一标识别为任务编号：例如: 5005号任务
+
+1. 打开Excel表  Task.xls   找到5005号任务， 在属性列LuaScript中添加脚本名称task\task5005.lua
+
+2. 在路径：版本配置库\02_Server\Cons\Res\lua\task文件夹下，建立task5005.lua, 所有任务相关逻辑都在此脚本中处理
+
+3. 复制task.lua文件中的所有内容到你刚建的文件task5005.lua中
+
+4. 如果该任务需求比较特殊, 不能用规定好的类型进行EXCEL配置，或者可以和现有的类型组合，则在几个相关接口中查询做响应处理. 现在提供接口主要有4个
+
+(1)
+-- 任务承接条件判断，在接任务前看是否有接任务的条件
+function Task_Accept_Condition(player, npc, taskid)
+	return 1
+end
+
+(2)
+-- 任务接受后，处理任务接受后各种不通用的事件
+function Task_After_Accept(player, npc, taskid)
+	return 1
+end
+
+(3)
+-- 任务完成条件判断，在交任务前看是否可以完成任务
+function Task_Complete_Condition(player, npc, taskid)
+	return 1
+end
+
+(4)
+-- 任务完成后出，处理任务提交后的不通用事件
+function Task_After_Complete(player, npc, taskid)
+	return 1
+end
+
+
+5. 以上4个接口参数player, npc, taskid分别代表, 玩家; NPC; 任务编号, 进行相关逻辑处理，可以用lua_ext中的接口. 
+
+
+6. 策划在配置过程中，可以参考其他已经配置好的任务格式，可以查询相关接口，也可以询问程序. 实验性的书写过几个脚本后，就会对流程熟悉，逐步可以自己书写任务脚本.

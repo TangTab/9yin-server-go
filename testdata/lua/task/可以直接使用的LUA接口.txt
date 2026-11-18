@@ -1,0 +1,758 @@
+// 原型：int nx_msgbox(string info)
+// 功能：显示一个Windows信息对话框
+
+
+// 原型：void nx_trace(string info)
+// 功能：输出一段信息到Trace Log文件
+
+
+// 原型：void nx_echo(string info)
+// 功能：输出一段信息到Echo窗口
+
+
+// 原型：bool nx_findmodule(string name)
+// 功能：查找指定名称的功能模块是否已被加载
+
+
+// 原型：int nx_get_district_id()
+// 功能：获得当前分区号
+
+
+// 原型：int nx_get_server_id()
+// 功能：获得当前服务器编号
+
+
+// 原型：bool nx_sysinfo(object obj, int type, string stringid, ...);
+// 功能：发送系统信息，使用服务端的字符串ID
+
+
+// 原型：bool nx_sysinfo_byname(wstring name, int type, string stringid, ...);
+// 功能：发送系统信息，使用服务端的字符串ID
+
+
+// 原型：bool nx_sysinfo_bychannel(int channel, int type, string stringid, ...);
+// 功能：发送系统信息，使用服务端的字符串ID
+
+
+// 原型：bool nx_sysinfo_byscene(int sceneid, int type, string stringid, ...);
+// 功能：发送系统信息，使用服务端的字符串ID
+
+
+// 原型：bool nx_sysinfo_bygroup(int groupid, int type, string stringid, ...);
+// 功能：发送系统信息，使用服务端的字符串ID
+
+
+// 原型：bool nx_sysinfo_broadcast(int type, string stringid, ...);
+// 功能：发送系统信息，使用服务端的字符串ID
+
+
+// 原型：int nx_begin_menu(object opplayer, object target)
+// 功能：开始一个用户菜单
+
+
+// 原型：bool nx_ex_add_title(object opplayer, string stringid, ...);
+// 功能：添加菜单标题，使用字符串ID
+
+
+// 原型：bool nx_add_menu(object opplayer, int funcid, string stringid, ...);
+// 功能：添加菜单项，使用字符串ID
+
+
+// 原型：int nx_end_menu(object opplayer, object target)
+// 功能：结束一个用户菜单
+
+
+// 原型：bool nx_close_menu(object opplayer);
+// 功能：关闭客户端的菜单
+
+
+// 原型：int nx_custom(object obj, ...)
+// 功能：发自定义消息到obj的客户端，target是自定义消息的目标对象
+// 注意：在传CVarList可变长常数参数时，必须用nx_float来明确的表示浮点数
+// nx_custom(obj, target, 1, 0.1) -- 错误，0.1会被认为是0
+// nx_custom(obj, target, 1, nx_float(0.1)) -- 正确，在CVarList里是浮点数了
+
+
+// 原型：bool nx_custom_byname(wstring player, ...)
+// 功能：通过玩家名称向客户端发送自定义消息
+
+
+// 原型：bool nx_custom_byken(object self, ...)
+// 功能：通过玩家名称向客户端发送自定义消息
+
+
+// 原型：bool nx_custom_byscene(int sceneid, ...)
+// 功能：向指定场景的客户端发送自定义消息
+
+
+// 原型：bool nx_custom_bygroup(int groupid,  ...)
+// 功能：向指定分组ID的客户端发送自定义消息
+
+
+// 原型：bool nx_custom_byworld(...)
+// 功能：通过玩家名称向客户端发送自定义消息
+
+
+// 原型：bool nx_custom_bychannel(int channel, ...)
+// 功能：通过玩家名称向客户端发送自定义消息
+
+// 原型：int nx_command(object obj, object target, ...)
+// 功能：由对象obj向对对象target发送命令
+
+
+// 原型：int nx_command_byname(wstring name, ...)
+// 功能：向名为name的玩家发送命令
+
+
+// 原型：int nx_command_byscene(int scene_id, ...)
+// 功能：向场景号为scene_id的场景的所有玩家发送命令
+
+
+// 原型：int nx_command_bygroup(int groupid, ...)
+// 功能：向组号为groupid的所有玩家发送命令
+
+// 原型：int nx_command_byworld(...)
+// 功能：向游戏世界内的所有玩家发送命令
+
+
+// 原型：int nx_command_toscene(int scene_id, ...)
+// 功能：向场景号为scene_id的场景发送命令
+
+
+// 原型：int nx_command_toallscene(...)
+// 功能：向所有场景发送命令
+
+
+// 原型：int nx_command_toscenegroup(int scene_id, int group, ...)
+// 功能：向场景号为scene_id的场景发送命令
+
+
+// 原型：bool nx_find_property(object obj, string propname)
+// 功能：查询对象是否存在指定的属性名
+
+
+//原型：table nx_get_property_list(object obj)
+//功能：获得对象的所有属性名称
+
+// 原型：var nx_get_property_type(object obj, string propname)
+// 功能：查询对象属性的类型
+
+
+// 原型：var nx_query_property(object obj, string propname)
+// 功能：查询对象属性的值
+
+
+// 原型：bool nx_set_property(object obj, string propname, value)
+// 功能：设置对象属性的值
+
+
+// 原型：bool nx_inc_property(object obj, string propname, value)
+// 功能：增加对象属性的值
+
+// 原型：bool nx_set_property_flag(object obj, string propname, int 标志位)
+// 功能：用属性实现位标志操作（目的是节约存储，属性类型必须为整数）
+
+
+// 原型：bool nx_clear_property_flag(object obj, string propname, int 标志位)
+// 功能：清除标志(0-31)
+
+
+// 原型：bool nx_test_property_flag(object obj, string propname, int 标志位)
+// 功能：测试标志(0-31)
+
+
+// 原型：bool nx_find_data(object obj, string propname)
+// 功能：查询对象是否存在指定的属性名
+
+
+
+// 原型：var nx_get_data_type(object obj, string propname)
+// 功能：查询对象临时数据的类型
+
+// 原型：bool nx_add_data(object obj, string propname, int type)
+// 功能：添加临时属性
+
+
+// 原型：bool nx_add_data(object obj, string propname)
+
+
+// 原型：var nx_query_data(object obj, string propname)
+// 功能：查询对象临时数据的值
+
+// 原型：bool nx_set_data(object obj, string propname, value)
+// 功能：设置对象临时数据的值
+
+
+// 原型：bool nx_find_record(object obj, string recname)
+// 功能：在查询对象身上是否存在指定表格
+
+
+//原型：table nx_get_record_list(object obj)
+//功能：获得对象的所有表格名称
+
+
+// 原型：int nx_get_record_rows(object obj, string recname)
+// 功能：获得指定表格的行数
+
+
+// 原型：int nx_get_record_cols(object obj, string recname)
+// 功能：获得指定表格的列数
+
+
+// 原型：int nx_get_record_coltype(object obj, string recname, int col)
+// 功能：获得指定表格的指定列的数据类型
+
+
+// 原型：int nx_add_record_row(object obj, string recname)
+// 功能：在表格的最后插入一行，返回行号
+
+
+// 原型：int nx_add_record_row_values(object obj, string recname, ...)
+// 功能：在表格的最后插入一行数据，返回行号
+
+// 原型：int nx_find_record_value(object obj, string recname, int col, value)
+// 功能：在表格中的指定列寻找是否存在指定类型的值
+
+// 原型：var nx_query_record_value(object obj, string recname, int row, int col)
+// 功能：查询表格指定行，列的数据值
+
+
+// 原型：table nx_query_record_row_values(object obj, string recname, int row)
+// 功能：查询表格指定一行的数据
+
+
+// 原型：bool nx_set_record_value(object obj, string recname, int row, int col, value) 
+// 功能：设置表格指定行列的值
+
+// 原型：bool nx_set_record_row_values(object obj, string recname, int row, ...)
+// 功能：设置表格一行的数据
+
+// 原型：bool nx_remove_record_row(object obj, string recname, int row)
+// 功能：删除在表格中的指定行
+
+
+// 原型：bool nx_clear_record(object obj, string recname)
+// 功能：清除表格的内容
+
+//原型：bool nx_set_record_flag(object obj, string recname, int pos)
+//功能：把表格作为标志位用
+
+//原型：bool nx_test_record_flag(object obj, string recname, int pos)
+//功能：把表格作为标志位用
+
+
+//原型：bool nx_test_record_flag(object obj, string recname, int pos)
+//功能：把表格作为标志位用
+
+
+//原型：bool nx_find_pubspace(string space)
+//功能：查找是否存在指定公共空间
+
+
+//原型：int nx_get_pubspace_count()
+//功能：获得公共数据空间数量
+
+
+//原型：table nx_get_pubspace_list()
+//功能：获得公共数据空间名称列表
+
+
+//原型：table nx_get_pubdata_list(string space)
+//功能：获得某个公共数据的所有属性
+
+
+//原型：int nx_get_pubdata_count(string space)
+//功能：获得某个公共数据的所有数据项的数量
+
+
+//原型：bool nx_find_pubdata(string space, wstring data)
+//功能：查找指定公共空间是否存在指定数据
+
+
+//原型：string nx_get_pubdata_uid(string pubspace, wstring data)
+//功能：获得公共数据空间中某个数据项的UID
+
+
+//原型：bool nx_find_pubdata_property(string space, wstring data, string prop)
+//功能：查找指定公共空间的指定数据是否存在指定的属性名称
+
+//原型：table nx_get_pubdata_property_list(string space, wstring data)
+//功能：查找指定公共空间的指定数据的属性列表
+
+
+//原型：int nx_get_pubdata_property_type(string space, wstring data, string prop)
+//功能：获得指定公共空间的指定数据是否存在指定的属性类型
+
+
+//原型：var nx_query_pubdata_property(string space, wstring data, string prop)
+//功能：获得指定公共空间的指定数据是否存在指定的属性类型
+
+
+//原型：bool nx_find_pubdata_record(string space, wstring data, string record)
+//功能：查找指定公共空间的指定数据是否存在指定的表格名称
+
+
+//原型：table nx_get_pubdata_record_list(string space, wstring data)
+//功能：查找指定公共空间的指定数据的表格列表
+
+
+//原型：int nx_get_pubdata_record_cols(string space, wstring data, string record)
+//功能：查找指定公共空间的指定数据指定的表格的列数
+
+
+//原型：int nx_get_pubdata_record_rows(string space, wstring data, string record)
+//功能：查找指定公共空间的指定数据指定的表格的行数
+
+
+//原型：int nx_get_pubdata_record_coltype(string space, wstring data, string record, int col)
+//功能：获得指定公共空间的指定数据的指定表格的指定列的数据类型
+
+
+//原型：int nx_find_pubdata_record_value(string space, wstring data, string record, int col, var value)
+//功能：在指定公共空间的指定数据的指定表格的中查找指定列的指定值，返回行号
+
+
+//原型：table nx_query_pubdata_record_row_values(string space, wstring data, string record, int row)
+//功能：获得指定公共空间的指定数据的指定表格的指定某行的数据
+
+}
+
+//原型：var nx_query_pubdata_record_value(string space, wstring data, string record, int row, int col)
+//功能：获得指定公共空间的指定数据的指定表格的指定某行某列的数据
+
+// 原型：bool nx_load_config(object obj)
+// 功能：重新加载对象的配置文件
+
+
+// 原型：string nx_get_config_property(int configid, string prop)
+// 功能：物品未创建时，就可以直接根据id查询到配置文件中填写的某个属性的值
+
+
+// 原型：object nx_create_from_config(object container, string config)
+// 功能：根据配置文件创建物品
+
+
+// 原型：object nx_create(object obj, string script)
+// 功能：根据脚本创建物品
+
+
+// 原型：object nx_create_container(object obj, string script, int capacity)
+// 功能：根据脚本创建容器
+
+
+// 原型：bool nx_expand_container(object obj, int capacity)
+// 功能：增大容器的容量
+
+
+// 原型：bool nx_shrink_container(object obj, int capacity)
+// 功能：缩小容器的容量
+
+
+// 原型：object nx_create_clone(object container, object prototype)
+// 功能：复制物品
+
+
+// 原型：object nx_create_to(object obj, string script, float x, float y, float z, float orient, int capacity)
+// 功能：根据脚本创建物体到场景的指定坐标
+
+
+// 原型：object nx_create_obj(string config, int capacity, float x, float y, float z, float orient)
+// 功能：创建物品到场景中的坐标位置
+
+
+// 原型：bool nx_destroy_self(object item)
+// 功能：删除某个物品
+
+
+// 原型：int nx_select(object self, object target, int funcid)
+// 功能：对指定对象执行选择操作
+
+
+// 原型：object nx_get_scene()
+// 功能：获得当前场景
+
+
+// 原型：int nx_get_scene_id()
+// 功能：获得当前场景ID
+
+
+// 原型：int nx_get_scene_maxid()
+// 功能：获得最大的普通场景ID
+
+
+// 原型：string nx_get_scene_script(int scene_id)
+// 功能：获得普通场景逻辑类名
+
+
+// 原型：string nx_get_scene_config(int scene_id)
+// 功能：获得普通场景配置名
+
+// 原型：int nx_find_scene_id(string config)
+// 功能：查找指定配置名的普通场景编号，返回-1表示没找到
+
+
+// 原型：bool nx_scene_exists(int scene_id)
+// 功能：判断指定编号的场景是否存在
+
+
+// 原型：int nx_get_scene_player_count(int scene_id)
+// 功能：获得指定场景内的玩家数量
+
+
+// 原型：table nx_get_scene_players(int scene_id)
+// 功能：获得指定场景内的玩家名称列表（id为0表示所有场景）
+
+
+// 原型：int nx_get_scene_class()
+// 功能：取当前场景的类型（0-普通场景，1-副本场景的原型，2-副本场景）
+
+
+// 原型：bool nx_clone_scene(int prototype_scene_id)
+// 功能：创建副本场景，返回场景号（大于等于1024，0表示失败）
+
+
+// 原型：int nx_get_clone_scene_count(int prototype_scene_id)
+// 功能：获得指定原型场景号的副本数量
+
+
+// 原型：table nx_get_clone_scene_list(int prototype_scene_id)
+// 功能：获得指定原型场景号的副本场景的场景号列表
+
+
+// 原型：int nx_get_prototype_scene_id(int clone_scene_id)
+// 功能：获得副本场景的原型场景ID
+
+// 原型：bool nx_is_prototype_scene(int scene_id)
+// 功能：指定场景号是否是副本场景的原型场景
+
+// 原型：float, float, float, float nx_get_region()
+// 功能：取地图范围（left,top,right,bottom 返回左上和右下角的坐标）
+
+
+// 原型：float nx_get_height(float x, float z)
+// 功能：取高度(y值)
+
+// 原型：int nx_get_map_type(float x, float z)
+// 功能：取地表类型
+
+// 原型：int nx_get_walk_type(float x, float z)
+// 功能：取行走类型
+
+
+// 原型：bool nx_can_walk(float x, float z)
+// 功能：测试一个点是否可行走区域
+
+
+// 原型：bool nx_obj_can_walk(object obj, float x, float z)
+// 功能：测试一个点对象是否可行走
+
+
+// 原型：bool nx_line_can_walk(float step, float src_x, float src_z, float dst_x, float dst_z)
+// 功能：测试直线是否可行走
+
+
+// 原型：bool nx_obj_line_can_walk(object obj, float step, float src_x, float src_z, float dst_x, float dst_z)
+// 功能：测试对象直线是否可行走
+
+
+// 原型：float, float, float, float nx_get_position(object obj)
+// 功能：取对象坐标(返回x, y, z, orient)
+
+
+// 原型：bool nx_set_position_y(object obj, float y)
+// 功能：设置对象当前高度
+
+
+// 原型：float nx_get_move_speed(object obj)
+// 功能：取对象速度
+
+// 原型：float nx_get_rotate_speed(object obj)
+// 功能：取转向速度
+
+
+// 原型：bool nx_moveto(object obj, float x, float y, float z, float orient)
+// 功能：切换到本场景的指定位置
+
+
+// 原型：bool nx_rotate(object obj, string leftstate, string rightstate, float angle, float rotatespeed)
+// 功能：旋转角度
+
+
+// 原型：bool nx_motion(object obj, string state, string leftstate, string rightstate,
+//					float speed, float rotatespeed, float x, float y, float z)
+// 功能：控制对象运动
+
+
+// 原型：bool nx_motion_no_rotate(object obj, string state, float speed, float x, float y, float z)
+// 功能：控制对象运动，不做旋转
+
+
+// 原型：bool nx_stop(object obj)
+// 功能：停止运动（移动和旋转）
+
+
+// 原型：bool nx_stop_walk(object obj)
+// 功能：停止运动（移动）
+
+
+// 原型：bool nx_stop_rotate(object obj)
+// 功能：停止运动（旋转）
+
+// 原型：float, float nx_get_dest_position(object obj)
+// 功能：取目标点(返回x, z)
+
+
+// 原型：float nx_distance(object obj, object other)
+// 功能：两对象的二维空间距离（x, z）
+
+
+// 原型：float nx_distance3d(object obj, object other)
+// 功能：两对象的三维空间距离（x, y, z）
+
+
+// 原型：float nx_angle(object obj, object other)
+// 功能：一个对象相对自己前方向的角度
+
+
+// 原型：float nx_dot_angle(object obj, float x, float z)
+// 功能：一个点相对自己前方向的角度
+
+
+// 原型：int, float, float, float, float nx_get_location(string location)
+// 功能：获得全局场景切换点的场景号和坐标信息
+
+
+// 原型：bool nx_switch_locate(object obj, int scene, float x, float y, float z, float orient)
+// 功能：切换场景到指定的场景号和坐标
+
+
+// 原型：bool nx_switch_born(object obj, int scene)
+// 功能：切换到指定场景的出生点
+
+
+// 原型：float, float, float, float nx_get_scene_born()
+// 功能：获得场景的出生点位置
+
+
+// 原型：bool nx_set_scene_born(float x, float y, float z, float orient)
+// 功能：设置场景的出生点位置
+
+
+// 原型：int nx_type(object obj)
+// 功能：获得对象的类型
+// TYPE_SCENE	= 1,	// 场景
+// TYPE_PLAYER	= 2,	// 玩家
+// TYPE_NPC	= 4,	// NPC
+// TYPE_ITEM	= 8,	// 物品
+// TYPE_HELPER	= 16,	// 辅助对象
+
+
+// 原型：string nx_get_config(object obj)
+// 功能：获得物品的配置文件
+
+
+// 原型：string nx_get_script(object obj)
+// 功能：获得物品的脚本文件
+
+
+// 原型：bool nx_exists(object obj)
+// 功能：对象是否存在
+
+
+// 原型：object nx_parent(object obj)
+// 功能：取父对象
+
+
+// 原型：int nx_get_capacity(object obj)
+// 功能：返回容器的容量
+
+
+// 原型：int nx_get_child_count(object obj)
+// 功能：返回子对象数量
+
+
+// 原型：object nx_get_item(object obj, int pos)
+// 功能：取容器指定位置的子对象（pos从1开始）
+
+
+// 原型：int nx_get_index(object obj)
+// 功能：取对象在容器中的位置
+
+
+// 原型：object nx_get_child(object obj, wstring name)
+// 功能：用名字查找子对象
+
+
+// 原型：table nx_get_child_list(object obj, int classtype)
+// 功能：获得子对象列表
+
+
+// 原型：table nx_get_around_list(object obj, float radius, int classtype, int max, int binvisible)
+// 功能：获得指定对象周围的对象列表
+
+
+// 原型：table nx_get_point_list(object obj, float x, float z, float radius, int classtype, int max, int binvisible)
+// 功能：获得指定对象周围的对象列表
+
+
+// 原型：int nx_new_gourpid()
+// 功能：获得唯一的组号
+
+
+// 原型：table nx_group_child_list(int groupid, int classtype)
+// 功能：获得指定组的子对象列表
+
+
+// 原型：bool nx_place(object obj, object container)
+// 功能：将对象移动另一个容器中
+
+
+// 原型：bool nx_placepos(object obj, object container, int pos)
+// 功能：将对象移动另一个容器中
+
+// 原型：bool nx_placeto(object obj, object container, float x, float y, float z, float orient)
+// 功能：将对象移动另一个容器中
+
+
+// 原型：bool nx_exchange(object container1, int pos1, object container2, int pos2)
+// 功能：将对象移动另一个容器中
+
+
+// 原型：bool nx_speech(object obj, string stringid, ...)
+// 功能：将对象移动另一个容器中
+
+
+// 原型：bool nx_add_heartbeat(object obj, string func, int time)
+// 功能：添加心跳函数
+
+
+// 原型：bool nx_add_countbeat(object obj, string func, int time, int count)
+// 功能：添加心跳函数
+
+
+// 原型：bool nx_remove_heartbeat(object obj, string func)
+// 功能：添加心跳函数
+
+
+// 原型：bool nx_clear_heartbeat(object obj)
+// 功能：清除心跳函数
+
+
+// 原型：bool nx_find_heartbeat(object obj, string func)
+// 功能：添加心跳函数
+
+
+// 原型：bool nx_add_viewport(object opplayer, int viewid, object container)
+// 功能：给玩家添加容器视窗
+
+
+// 原型：bool nx_remove_viewport(object opplayer, int viewid)
+// 功能：玩家删除容器视窗
+
+
+// 原型：bool nx_find_viewport(object opplayer, int viewid)
+// 功能：玩家的视窗是否存在
+
+
+// 原型：object nx_get_viewport_container(object opplayer, int viewid)
+// 功能：获得玩家视窗对应的容器
+
+
+// 原型：bool nx_clear_viewport(object opplayer)
+// 功能：清除玩家所有视窗
+
+
+// 原型：int nx_get_viewers(object container)
+// 功能：取容器的视窗数
+
+
+// 原型：bool nx_close_viewers(object container)
+// 功能：关闭容器的所有视窗
+
+
+// 原型：bool nx_set_landpoint(object obj, string point)
+// 功能：设置登陆点名
+
+
+// 原型：bool nx_set_landposition(object obj, int sceneid, float x, float y, float z, float orient)
+// 功能：设置登陆位置
+
+
+// 原型：bool nx_break_player(object obj)
+// 功能：强制玩家下线
+
+
+// 原型：bool nx_break_account(string account)
+// 功能：强制指定帐号的玩家下线
+
+
+// 原型：bool nx_break_byname(wstring name)
+// 功能：强制指定名称的玩家下线
+
+
+// 原型：bool nx_block_player(wstring name, int year, int month, int day, int hour, int min, int sec)
+// 功能：禁止角色上线直到指定的时间为止
+
+
+// 原型：object nx_find_player(wstring name)
+// 功能：在当前场景内查找玩家
+
+
+// 原型：int nx_get_player_scene(wstring name)
+// 功能：取玩家所在场景号
+
+
+// 原型：int nx_get_player_count()
+// 功能：取游戏在线玩家数量
+
+
+// 原型：bool nx_send_public_message(...);
+// 功能：发送消息到公共数据服务器
+
+
+// 原型：bool nx_send_charge_message(...);
+// 功能：发送消息到计费系统
+
+// 原型：bool nx_send_stat_message(...);
+// 功能：发送消息到统计系统
+
+
+// 原型：bool nx_show_messagebox(object obj, int type, int button_count, ...buttom_tips, string stringid, ...);
+// 功能：要求客户端显示一个对话框
+
+// 原型：bool nx_show_messagebox_byname(wstring name, int type, int button_count, ...buttom_tips, string stringid, ...);
+// 功能：要求客户端显示一个对话框
+
+// 原型：bool nx_show_messagebox_bychannel(int channel, int type, int button_count, ...buttom_tips, string stringid, ...);
+// 功能：要求客户端显示一个对话框
+
+
+// 原型：bool nx_show_messagebox_byscene(int sceneid, int type, int button_count, ...buttom_tips, string stringid, ...);
+// 功能：要求客户端显示一个对话框
+
+
+// 原型：bool nx_show_messagebox_bygroup(int groupid, int type, int button_count, ...buttom_tips, string stringid, ...);
+// 功能：要求客户端显示一个对话框
+
+
+// 原型：bool nx_show_messagebox_byworld(int groupid, int type, int button_count, ...buttom_tips, string stringid, ...);
+// 功能：要求客户端显示一个对话框
+
+
+// 原型：bool nx_show_inputbox(object obj, int type, int stringid, ...);
+// 功能：要求客户端显示一个输入框
+
+// 原型：table nx_split_string(string info, string delims);
+// 功能：分割字符串(split_info:根据哪些字符来进行分割，可以同时指定多个字符)
+
+
+// 原型：table nx_split_wstring(wstring info, wstring delims);
+// 功能：分割字符串(split_info:根据哪些字符来进行分割，可以同时指定多个字符)
+
+
+// 原型：int nx_get_ticks();
+// 功能：
+
+
+// 原型：bool nx_execute(string luafile, string luafunc, ...)
+// 功能：执行某个脚本的某个函数

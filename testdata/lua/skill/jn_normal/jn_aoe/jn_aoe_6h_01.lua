@@ -1,0 +1,84 @@
+--AOE七絃無形杀
+--等级1：外功伤害=120+武器伤害*2.0
+--等级2：外功伤害=140+武器伤害*2.1
+--等级3：外功伤害=170+武器伤害*2.3
+--等级4：外功伤害=210+武器伤害*2.6
+--等级5：外功伤害=250+武器伤害*3.0
+
+require("define")
+
+--刷新技能之间相互影响的属性
+function refresh_property(self, skill)
+end
+
+--技能开始准备
+function skill_prepare(self, skill, usetype, target, x, y, z)
+end
+
+--技能准备之后
+function skill_after_prepare(self, skill, usetype, target, x, y, z)
+end
+
+--技能命中之前
+function skill_before_hit(self, skill)
+	return 1
+end
+
+--技能命中对象
+function skill_after_hit(self, skill, target)
+end
+
+--技能使用结束
+function skill_finish(self, skill)
+end
+
+--技能被打断
+function skill_break(self, skill)
+end
+
+--计算技能伤害(每一次命中都会调用一次), 返回5种伤害(外功, 刚, 柔, 阴, 阳)
+function get_damage(self, skill, target)
+	--取自己技能的级别
+	local level = nx_query_property(skill, "Level")
+
+	--取自己的连击数
+	local hits = nx_query_property(self, "Hits")
+
+	--角色当前内功，如果存在则获取内功级别
+	local neigong_level = 0
+	local cur_neigong = nx_get_current_neigong(self)
+	if nx_exists(cur_neigong) then
+		--角色存在当前内功
+		--内功级别
+		neigong_level = nx_query_property(cur_neigong, "Level")
+	end
+
+	--获取武器伤害
+	local MaxMeleeDamage = nx_query_property(self, "MaxMeleeDamage")
+	local MinMeleeDamage = nx_query_property(self, "MinMeleeDamage")
+	local MeleeDamage = math.random(MinMeleeDamage,MaxMeleeDamage)
+
+	--临时变量：物理伤害
+	local PhyDamage = 0
+
+	--等级1：外功伤害=120+武器伤害*2.0
+	--等级2：外功伤害=140+武器伤害*2.1
+	--等级3：外功伤害=170+武器伤害*2.3
+	--等级4：外功伤害=210+武器伤害*2.6
+	--等级5：外功伤害=250+武器伤害*3.0
+	if level == 1 then
+		PhyDamage = 120 + MeleeDamage*2.0
+	elseif level == 2 then
+		PhyDamage = 140 + MeleeDamage*2.1
+	elseif level == 3 then
+		PhyDamage = 170 + MeleeDamage*2.3
+	elseif level == 4 then
+		PhyDamage = 210 + MeleeDamage*2.6
+	elseif level == 5 then
+		PhyDamage = 250 + MeleeDamage*3.0
+	end
+
+
+	--输出伤害
+	return MAX_HIT, 0, 0, 0, 0
+end

@@ -26,3 +26,10 @@ __pycache__
 tmp_*
 mitm_log
 start_view.bat
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
