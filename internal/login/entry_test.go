@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"testing"
+	"time"
 )
 
 func TestEntrySceneFrameLayout(t *testing.T) {
@@ -109,13 +110,16 @@ func TestFlowEntrySceneOverGateway(t *testing.T) {
 	if got := string(entry[15+2+4+8+2+2+2+4 : 15+2+4+8+2+2+2+4+len(BirthScene.Config)]); got != BirthScene.Config {
 		t.Fatalf("进场 Config %q", got)
 	}
+	// 0x0B 写回与 OnEnterScene 同处一个 handler：读到帧时回调可能尚未
+	// 执行（写回先于回调），有界等待而非零等待 select。
+	var enteredRole *Role
 	select {
-	case r := <-entered:
-		if r.Scene.Resource != "school09" {
-			t.Fatalf("回调场景 %q", r.Scene.Resource)
-		}
-	default:
+	case enteredRole = <-entered:
+	case <-time.After(2 * time.Second):
 		t.Fatal("OnEnterScene 未触发")
+	}
+	if enteredRole.Scene.Resource != "school09" {
+		t.Fatalf("回调场景 %q", enteredRole.Scene.Resource)
 	}
 
 	// 重复 op04（真机重试方言）：0x0B 仍回发，但物化事件只发一次
