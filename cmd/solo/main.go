@@ -7,6 +7,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -17,9 +18,11 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/ecs"
 	"github.com/lizhanyin/9yin-server-go/internal/engine"
 	"github.com/lizhanyin/9yin-server-go/internal/login"
+	"github.com/lizhanyin/9yin-server-go/internal/proc"
+	"github.com/lizhanyin/9yin-server-go/internal/scene"
 )
 
-const version = "0.5.0-solo-create-role"
+const version = "0.6.0-solo-entry-scene"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
@@ -33,7 +36,11 @@ const version = "0.5.0-solo-create-role"
 //     worldInfo（golden=login-connect-001.bin 首飞线路帧）
 //   - [x] 建角：op05 → 有角色 0x04（6 值 TVarList 追加段 + rolePara
 //     36 字段；内存 RoleStore，重连保留）
-//   - [ ] login 主干续：选角 op04 → 进场景 + AOI + 属性全量集下发
+//   - [x] 选角进场：op04 → 0x0B EntryScene（idx178/1468/7/8 四属性，
+//     出生=移花宫 school09）+ proc.Bus login.enter_scene → Spawner
+//     tick 物化 ECS 实体（login 链与内核合流）
+//   - [ ] login 主干续：0x09 属性表/0x0A 记录表 → ClientReady 后
+//     视图/属性全量集下发 + AOI
 //   - [ ] persist：DDL 建库 + 角色存取
 func main() {
 	var (
@@ -80,12 +87,37 @@ func main() {
 		})
 	})
 
-	// ---- 网关：客户端线路（EE+XOR），心跳 + 登录首段分派 ----
+	// ---- 网关：客户端线路（EE+XOR），心跳 + 登录链分派 ----
 	var gateway *login.Gateway
 	if *listen != "" {
+		spawner := scene.NewSpawner()
+		spawner.OnSpawn = func(w *ecs.World, entity ecs.EntityID, ev scene.EnterSceneEvent) {
+			fmt.Printf("world: 物化玩家 %q → 实体 %d（场景 %s）\n", ev.RoleName, entity, ev.Resource)
+		}
 		flow := &login.Flow{
 			Logf: func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+			OnEnterScene: func(sess *login.Session, role *login.Role) {
+				payload, _ := json.Marshal(scene.EnterSceneEvent{
+					Account:  sess.Account,
+					RoleName: role.Name,
+					Config:   role.Scene.Config,
+					Resource: role.Scene.Resource,
+				})
+				if err := app.Bus.Publish(proc.Envelope{
+					From:    proc.RoleEntry,
+					Topic:   scene.TopicEnterScene,
+					Payload: payload,
+				}); err != nil {
+					fmt.Println("solo: 进场事件发布失败:", err)
+				}
+			},
 		}
+		app.OnStart(func(*engine.App) {
+			if err := app.Bus.Subscribe(proc.RoleWorld, scene.TopicEnterScene, spawner.Handle); err != nil {
+				fatal(err)
+			}
+			app.Sched.AddFunc("spawn_players", spawner.Tick)
+		})
 		gateway = &login.Gateway{
 			Addr:    *listen,
 			OnFrame: flow.Handle,

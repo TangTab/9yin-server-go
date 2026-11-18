@@ -207,10 +207,70 @@ func probeLogin(addr, flightPath string, opt net.Options, plain bool) int {
 		}
 	}
 
+	// 选角 op04 → 0x0B EntryScene（断言场景串回显）
+	if err := conn.WriteMsg([]byte{0x04}); err != nil {
+		fatal(err)
+	}
+	entry, err := conn.ReadMsg()
+	if err != nil {
+		fatal(err)
+	}
+	if !validateEntryScene(entry, "school09") {
+		fail++
+	}
+
 	if fail > 0 {
 		return 1
 	}
 	return 0
+}
+
+// validateEntryScene 断言 0x0B 进场帧：头部 + 四属性段走位，
+// idx7/idx8 场景串须为预期出生场景。
+func validateEntryScene(entry []byte, wantResource string) bool {
+	if len(entry) < 15 || entry[0] != 0x0B {
+		fmt.Printf("probe: FAIL — 0x0B 形态不符（op=%02X len=%d）\n", entry[0], len(entry))
+		return false
+	}
+	u16 := func(off int) uint16 { return binary.LittleEndian.Uint16(entry[off:]) }
+	u32 := func(off int) uint32 { return binary.LittleEndian.Uint32(entry[off:]) }
+	if n := u16(13); n != 4 {
+		fmt.Printf("probe: FAIL — 0x0B 属性数 %d want 4\n", n)
+		return false
+	}
+	off := 15
+	strs := map[uint16]string{}
+	for i := 0; i < 4 && off+2 <= len(entry); i++ {
+		idx := u16(off)
+		off += 2
+		switch idx {
+		case 178: // [u32 8][8B 遮蔽常量]
+			off += 4 + 8
+		case 1468: // u16
+			off += 2
+		default: // 窄串 [u32 len 含 NUL][字节][NUL]
+			n := int(u32(off))
+			off += 4
+			if n < 1 || off+n > len(entry) {
+				fmt.Printf("probe: FAIL — 0x0B 属性 %d 越界\n", idx)
+				return false
+			}
+			strs[idx] = string(entry[off : off+n-1])
+			off += n
+		}
+	}
+	cfg, hasCfg := strs[7]
+	res, hasRes := strs[8]
+	if !hasCfg || !hasRes {
+		fmt.Printf("probe: FAIL — 0x0B 缺 idx7/idx8（%v）\n", strs)
+		return false
+	}
+	if res != wantResource {
+		fmt.Printf("probe: FAIL — 0x0B 场景 %q want %q\n", res, wantResource)
+		return false
+	}
+	fmt.Printf("probe: PASS — 0x0B 进场 config=%q resource=%q\n", cfg, res)
+	return true
 }
 
 // buildProbeCreateRole 构造 op05 建角请求（女号外观样本）。

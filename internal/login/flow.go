@@ -14,8 +14,9 @@ import (
 const (
 	OpClientLogin    byte = 0x02 // 账号登录（四槽结构，见 auth.go）
 	OpClientWorldReq byte = 0x03 // 世界信息请求 → 0x05 worldInfo 应答
-	OpClientRoleSel  byte = 0x04 // 选角（重连带会话恢复字段）
+	OpClientRoleSel  byte = 0x04 // 选角（重连带会话恢复字段）→ 0x0B 进场
 	OpClientRoleNew  byte = 0x05 // 建角
+	OpClientReady    byte = 0x09 // ClientReady（进场后就绪，视图/属性簇接入点）
 )
 
 // noRoleLoginSuccessFrame 生成无角色 0x04 ServerPlayerRoles 应答（41B）：
@@ -67,6 +68,8 @@ type Flow struct {
 	Roles *RoleStore
 	// OnLogin 账号通过结构校验后的回调（身份摘要入账号域/落库挂点）。
 	OnLogin func(sess *Session, identity AccountIdentity)
+	// OnEnterScene 选角进场回调（0x0B 已发出；ECS 物化/总线事件挂点）。
+	OnEnterScene func(sess *Session, role *Role)
 
 	defaultRoles *RoleStore
 }
@@ -134,9 +137,23 @@ func (f *Flow) Handle(sess *Session, frame []byte) {
 			f.logf("flow: 会话 %d 无角色却选角，忽略", sess.ID)
 			return
 		}
-		// 选角后旧服直接开始进场景风暴（op0B EntryScene + 快照）——
-		// 进场景环接入点，当前保持会话等待。
-		f.logf("flow: 会话 %d 选角 %q（进场景待接入）", sess.ID, sess.Role.Name)
+		if err := sess.Conn.WriteMsg(entrySceneFrame(sess.Role.Scene)); err != nil {
+			return
+		}
+		sess.Entered = true
+		if f.OnEnterScene != nil {
+			f.OnEnterScene(sess, sess.Role)
+		}
+		f.logf("flow: 会话 %d 选角 %q 进场 %s",
+			sess.ID, sess.Role.Name, sess.Role.Scene.Resource)
+	case OpClientReady:
+		if !sess.Entered {
+			f.logf("flow: 会话 %d 未进场却 ClientReady，忽略", sess.ID)
+			return
+		}
+		// 就绪后旧服开始技能/视图大簇 + 玩家全量属性集——
+		// 0x09 属性表/0x0A 记录表下发是前置，属性全量集环接入。
+		f.logf("flow: 会话 %d ClientReady（视图/属性簇待接入）", sess.ID)
 	default:
 		f.logf("flow: 会话 %d 登录前未处理帧 op=%02X len=%d", sess.ID, frame[0], len(frame))
 	}

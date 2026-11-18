@@ -25,7 +25,8 @@ import (
 // Role 是账号下的一名角色（当前为内存形态；persist 里程碑接 DB）。
 type Role struct {
 	Name       string
-	Appearance []string // 建角请求的 tag6 串列表（索引语义见 roleVisualOf）
+	Appearance []string  // 建角请求的 tag6 串列表（索引语义见 roleVisualOf）
+	Scene      SceneRef  // 所在场景（建角默认出生场景）
 }
 
 // RoleStore 账号→角色的内存仓（每账号一角色，与旧分支无角色/单角色
@@ -49,11 +50,15 @@ func (s *RoleStore) Get(account string) *Role {
 	return nil
 }
 
-// Create 建角（覆盖同账号旧角色——单角色形态）。
+// Create 建角（覆盖同账号旧角色——单角色形态；场景=默认出生点）。
 func (s *RoleStore) Create(account, name string, appearance []string) *Role {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	r := &Role{Name: name, Appearance: append([]string(nil), appearance...)}
+	r := &Role{
+		Name:       name,
+		Appearance: append([]string(nil), appearance...),
+		Scene:      BirthScene,
+	}
 	s.roles[account] = r
 	return r
 }
