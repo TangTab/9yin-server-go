@@ -7,23 +7,34 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
+	gonet "net"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/config"
 	"github.com/lizhanyin/9yin-server-go/internal/ecs"
 	"github.com/lizhanyin/9yin-server-go/internal/engine"
 	"github.com/lizhanyin/9yin-server-go/internal/login"
+	"github.com/lizhanyin/9yin-server-go/internal/net"
 	"github.com/lizhanyin/9yin-server-go/internal/persist"
 	"github.com/lizhanyin/9yin-server-go/internal/proc"
 	"github.com/lizhanyin/9yin-server-go/internal/scene"
 )
 
-const version = "0.7.0-solo-account-db"
+// defaultGameEntryINI 是内置默认配置（官方小写系 game_entry.ini 方言）：
+// 未指定 -config 且当前目录没有 game_entry.ini 时释放到当前目录并采用
+//（已存在的绝不覆盖）——内置一份作为保险，部署机缺文件也能起服。
+//
+//go:embed game_entry.ini
+var defaultGameEntryINI []byte
+
+const version = "0.8.0-solo-entry-config"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
@@ -43,6 +54,9 @@ const version = "0.7.0-solo-account-db"
 //   - [x] 账号接入 MySQL：op02 凭据落 nx_district.dc_accounts
 //     （密文摘要域；首登自动注册、密码不符断连；-mysql-dsn /
 //     NINEYIN_MYSQL_DSN，空=内存模式不校验）
+//   - [x] entry 官方规格：game_entry.ini 接入（内置默认保险 +
+//     旗标优先）、op02 版本门（[1:5]≠期望回 {0x03,0x4E85} 断连）、
+//     传输键 ini 可配（MessageEncodeKey hex→u32，默认=现代客户端键）
 //   - [ ] login 主干续：0x09 属性表/0x0A 记录表 → ClientReady 后
 //     视图/属性全量集下发 + AOI
 //   - [ ] persist 续：角色存取（nx_chunks blob 逆向）
@@ -50,8 +64,10 @@ func main() {
 	var (
 		scenesPath = flag.String("scenes", "testdata/ini/scenes.xml", "scenes.xml 路径")
 		logicPath  = flag.String("logicclass", "testdata/ini/logic_class.xml", "logic_class.xml 路径")
-		listen     = flag.String("listen", "127.0.0.1:9600", "客户端网关监听地址（空=不监听）")
+		listen     = flag.String("listen", "127.0.0.1:9600", "客户端网关监听地址（空=不监听；未显式给出时取配置 [Outer]）")
 		svrlist    = flag.String("svrlist", "127.0.0.1:9601", "区服列表分发监听地址（空=不监听；通告地址/端口跟随 -listen）")
+		clientVer  = flag.Int("client-version", 0, "op02 版本门（0=不校验；未显式给出时取配置 [Main] ClientVersion）")
+		configPath = flag.String("config", "", "game_entry.ini 配置路径（默认：当前目录 game_entry.ini，没有则释放内置默认并采用；官方小写系方言）")
 		mysqlDSN   = flag.String("mysql-dsn", os.Getenv("NINEYIN_MYSQL_DSN"),
 			"账号库 MySQL DSN（空=内存模式不校验凭据；默认取 NINEYIN_MYSQL_DSN）")
 		tps    = flag.Int("tps", 60, "每秒 tick 数（0=全速）")
@@ -60,6 +76,58 @@ func main() {
 	flag.Parse()
 
 	fmt.Printf("9yin-server-go solo %s\n", version)
+
+	// 配置装载：显式 -config 须存在（缺文件报错）；默认路径当前目录
+	// game_entry.ini（官方小写系命名），不存在则释放内置默认
+	//（已存在的绝不覆盖）。监听/版本门/传输键取配置，显式旗标优先。
+	var cfgData []byte
+	released := false
+	if *configPath != "" {
+		data, err := os.ReadFile(*configPath)
+		if err != nil {
+			fatal(err)
+		}
+		cfgData = data
+	} else {
+		data, created, err := login.LoadOrCreateGameEntryINI("game_entry.ini", defaultGameEntryINI)
+		if err != nil {
+			fatal(err)
+		}
+		cfgData, released = data, created
+	}
+	cfg, err := login.ParseGameEntryINI(cfgData)
+	if err != nil {
+		fatal(err)
+	}
+	if released {
+		fmt.Println("当前目录未找到 game_entry.ini，已释放内置默认配置（修改后重启生效）")
+	}
+	given := map[string]bool{}
+	flag.Visit(func(f *flag.Flag) { given[f.Name] = true })
+	if !given["listen"] {
+		*listen = gonet.JoinHostPort(cfg.OuterAddr, strconv.Itoa(cfg.OuterPort))
+	}
+	if !given["client-version"] {
+		*clientVer = cfg.ClientVersion
+	}
+	// 传输 XOR 键：官方 ini MessageEncodeKey（hex→u32）→ net 双向 Cipher；
+	// 空/缺省=net 内置现代客户端键（0xFA6D3BCC），零值 Options 等价。
+	var netOptions net.Options
+	if cfg.MessageEncodeKey != "" {
+		keyValue, err := login.ConvertEncodeKey(cfg.MessageEncodeKey)
+		if err != nil {
+			fatal(err)
+		}
+		key := net.NewKey(keyValue)
+		netOptions = net.Options{
+			ReadCipher:  net.NewXorCipher(key),
+			WriteCipher: net.NewXorCipher(key),
+		}
+	}
+	fmt.Printf("已加载配置：IDC=%d DistrictID=%d ServerID=%d EntryID=%d MaxConnects=%d "+
+		"ClientVersion=%d EncodeKey=%s VerifyDll=%q（MaxConnects/VerifyDll 未接线）\n",
+		cfg.IDC, cfg.DistrictID, cfg.ServerID, cfg.EntryID, cfg.MaxConnects,
+		*clientVer, orDefaultKey(cfg.MessageEncodeKey), cfg.MessageVerifyDll)
 
 	// ---- 装配：配置 + 引擎 ----
 	app := engine.New(engine.Options{TPS: *tps})
@@ -120,8 +188,9 @@ func main() {
 			fmt.Printf("world: 物化玩家 %q → 实体 %d（场景 %s）\n", ev.RoleName, entity, ev.Resource)
 		}
 		flow := &login.Flow{
-			Accounts: accounts,
-			Logf:     func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+			Accounts:      accounts,
+			ClientVersion: *clientVer,
+			Logf:          func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
 			OnEnterScene: func(sess *login.Session, role *login.Role) {
 				payload, _ := json.Marshal(scene.EnterSceneEvent{
 					Account:  sess.Account,
@@ -145,9 +214,10 @@ func main() {
 			app.Sched.AddFunc("spawn_players", spawner.Tick)
 		})
 		gateway = &login.Gateway{
-			Addr:    *listen,
-			OnFrame: flow.Handle,
-			Logf:    func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+			Addr:       *listen,
+			NetOptions: netOptions,
+			OnFrame:    flow.Handle,
+			Logf:       func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
 		}
 		app.OnStart(func(*engine.App) {
 			addr, err := gateway.Listen()
@@ -206,4 +276,12 @@ func main() {
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "solo:", err)
 	os.Exit(1)
+}
+
+// orDefaultKey 呈现用：未配置传输键时显示内置现代键。
+func orDefaultKey(configured string) string {
+	if configured == "" {
+		return fmt.Sprintf("%08X(内置)", net.InitialKeyValue)
+	}
+	return configured
 }

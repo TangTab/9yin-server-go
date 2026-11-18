@@ -13,12 +13,14 @@ import (
 // XOR+EE 解码后 121B）：
 //
 //	[0x00]      opcode 0x02
-//	[0x01:0x05] u32（值 333，语义未证）
-//	[0x15:0x19] u32 accountLen（16~256，%16==0）
+//	[0x01:0x05] u32 客户端版本号（golden=333；BGserverCJ FsSoloEntry
+//	            CheckMessageIllegal 版本门实证：帧 [1:5] 与期望版本比对，
+//	            不符回 {0x03, u32 0x4E85} 并断连）
+//	[0x15:0x19] u32 accountLen（16~64，%16==0；上限=官方 0x40 实证）
 //	[0x19:..]   account 密文槽
-//	u32 pwLen（16~512，%16==0）+ 密文槽
+//	u32 pwLen（16~64，%16）+ 密文槽（上限=官方 0x40 实证）
 //	u32 client-type 值（不占槽）
-//	u32 loginStringLen（16~512，%16==0）+ 槽
+//	u32 loginStringLen（16~512，%16）+ 槽（官方该函数未检，维持旧界）
 //	u32 login-type —— 必须恰好收在帧尾（拒绝尾部数据）
 //
 // 双槽密文（account/password）不做解密——客户端加扰算法未破（fxcli
@@ -27,9 +29,10 @@ import (
 const (
 	loginHeaderSize = 25
 	loginAcctMin    = 16
-	loginAcctMax    = 256
+	loginAcctMax    = 64
 	loginSecretMin  = 16
-	loginSecretMax  = 512
+	loginSecretMax  = 64
+	loginStringMax  = 512
 
 	// loginAccountDomain / accountKeyPrefix 是 acct:v1 键的哈希域与前缀。
 	loginAccountDomain = "nineyin/login-account/v1"
@@ -39,6 +42,9 @@ const (
 	// dc_accounts.password varchar(32) 列宽——仅做密文域等值比对，
 	// 不承载明文密码语义，抗碰撞性非目标。
 	loginSecretDomain = "nineyin/login-secret/v1"
+
+	// LoginVersionOffset 是版本号在 op02 帧内的偏移（版本门读取处）。
+	LoginVersionOffset = 1
 )
 
 // AccountIdentity 是登录方账号的身份摘要（同密文同键，跨会话稳定）。
@@ -113,7 +119,7 @@ func ParseLoginCredentials(message []byte) (AccountIdentity, string, error) {
 	if !ok {
 		return AccountIdentity{}, "", fmt.Errorf("login: missing login-string length")
 	}
-	if err := validateSlotLength("login string", loginStringLength, loginSecretMin, loginSecretMax); err != nil {
+	if err := validateSlotLength("login string", loginStringLength, loginSecretMin, loginStringMax); err != nil {
 		return AccountIdentity{}, "", err
 	}
 	cursor, ok = advance(next, loginStringLength, len(message))

@@ -56,6 +56,15 @@ func worldInfoFrame(infoType uint16, text string) []byte {
 // openBooks 五书开放世界串（op03 应答载荷，真机回放值）。
 const openBooks = "0,book1,0,book2,0,book4,0,book5,0,book8,0,0"
 
+// versionMismatchFrame 生成官方版本门不符应答（5B）：{0x03, LE u32
+// 0x4E85=20101}（BGserverCJ CheckMessageIllegal 反汇编逐字节实证）。
+func versionMismatchFrame() []byte {
+	msg := make([]byte, 5)
+	msg[0] = 0x03
+	binary.LittleEndian.PutUint32(msg[1:], 0x4E85)
+	return msg
+}
+
 // Flow 是登录链分派器：Gateway.OnFrame 的第一接入点。
 // 当前覆盖：op02 账号登录（有/无角色 0x04）、op03 世界信息（五书）、
 // op05 建角（回有角色 0x04）。选角 op04 与进场景随主干推进扩展。
@@ -69,6 +78,9 @@ type Flow struct {
 	// Accounts 账号仓（nil=不校验凭据；persist 接 MySQL dc_accounts
 	// 时注入——首登自动注册、密码摘要不符拒绝）。
 	Accounts AccountStore
+	// ClientVersion 版本门（0=不校验；>0 时 op02 帧 [1:5] u32 须相等，
+	// 不符回官方 {0x03, u32 0x4E85} 并断连。取值见 GameEntryConfig）。
+	ClientVersion int
 	// OnLogin 账号通过结构校验后的回调（身份摘要入账号域/落库挂点）。
 	OnLogin func(sess *Session, identity AccountIdentity)
 	// OnEnterScene 选角进场回调（0x0B 已发出；ECS 物化/总线事件挂点）。
@@ -100,6 +112,17 @@ func (f *Flow) Handle(sess *Session, frame []byte) {
 			f.logf("flow: 会话 %d 拒绝登录结构: %v", sess.ID, err)
 			sess.Conn.Close() // 拒绝即断连
 			return
+		}
+		if f.ClientVersion > 0 {
+			client := binary.LittleEndian.Uint32(frame[LoginVersionOffset : LoginVersionOffset+4])
+			if client != uint32(f.ClientVersion) {
+				if err := sess.Conn.WriteMsg(versionMismatchFrame()); err != nil {
+					return
+				}
+				sess.Conn.Close()
+				f.logf("flow: 会话 %d 版本不符：%d want %d，回 0x4E85 断连", sess.ID, client, f.ClientVersion)
+				return
+			}
 		}
 		registered := false
 		if f.Accounts != nil {

@@ -50,6 +50,107 @@ func TestCapturedLoginIdentity(t *testing.T) {
 	}
 }
 
+// buildLoginFrame 按 auth.go 钉死的 op02 布局造合法帧（官方走位：
+// 头 25B → 账号槽 → 密码槽 → client-type u32 → login-string 槽 →
+// login-type u32 恰收尾；版本号可注入——版本门测试用）。
+func buildLoginFrame(t *testing.T, version uint32, acct, pw, loginStr []byte) []byte {
+	t.Helper()
+	msg := make([]byte, 0, 25+4+len(acct)+4+len(pw)+4+4+len(loginStr)+4)
+	msg = append(msg, OpClientLogin)
+	var u32 [4]byte
+	put := func(v uint32) { binary.LittleEndian.PutUint32(u32[:], v); msg = append(msg, u32[:]...) }
+	put(version) // [0x01:0x05] 版本号（golden=333）
+	msg = append(msg, make([]byte, 16)...)
+	put(uint32(len(acct)))
+	msg = append(msg, acct...)
+	put(uint32(len(pw)))
+	msg = append(msg, pw...)
+	put(1) // client-type（u32 值，不占槽）
+	put(uint32(len(loginStr)))
+	msg = append(msg, loginStr...)
+	put(1) // login-type —— 必须恰好收尾
+	return msg
+}
+
+// TestLoginSlotBoundOfficial 官方 0x40 上限实证（FsSoloEntry 登录走位）：
+// 账号/密码槽超 64 字节应拒绝；login-string 槽维持旧界 512。
+func TestLoginSlotBoundOfficial(t *testing.T) {
+	acct := make([]byte, 80) // 5×16，%16 合法但超 0x40
+	if _, _, err := ParseLoginCredentials(buildLoginFrame(t, 333, acct, make([]byte, 16), make([]byte, 16))); err == nil {
+		t.Fatal("账号槽 80B 超 0x40 应拒绝")
+	}
+	pw := make([]byte, 80)
+	if _, _, err := ParseLoginCredentials(buildLoginFrame(t, 333, make([]byte, 16), pw, make([]byte, 16))); err == nil {
+		t.Fatal("密码槽 80B 超 0x40 应拒绝")
+	}
+	// 64B 边界值应通过（官方 jbe=含边界）。
+	if _, _, err := ParseLoginCredentials(buildLoginFrame(t, 333, make([]byte, 64), make([]byte, 64), make([]byte, 16))); err != nil {
+		t.Fatalf("双槽恰 64B 不应拒绝：%v", err)
+	}
+	// login-string 384B ≤512：应通过（官方未检该槽上限）。
+	long := make([]byte, 384)
+	if _, _, err := ParseLoginCredentials(buildLoginFrame(t, 333, make([]byte, 16), make([]byte, 16), long)); err != nil {
+		t.Fatalf("login-string 384B 不应拒绝：%v", err)
+	}
+}
+
+// TestVersionGateOverGateway 版本门端到端（官方方言 {0x03, u32 0x4E85}）：
+// 帧版本不符回 5B 应答后断连；相符则照常 0x04。
+func TestVersionGateOverGateway(t *testing.T) {
+	flight := capturedFirstFlight(t)
+	bad := append([]byte(nil), flight...)
+	binary.LittleEndian.PutUint32(bad[LoginVersionOffset:LoginVersionOffset+4], 999)
+
+	fixed := time.Date(2026, 11, 19, 0, 0, 0, 0, time.Local)
+	flow := &Flow{
+		ClientVersion: 333,
+		Clock:         func() time.Time { return fixed },
+	}
+	g := &Gateway{Addr: "127.0.0.1:0", OnFrame: flow.Handle}
+	addr, err := g.Listen()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { g.Close() })
+	go g.Serve()
+
+	// 不符版本：应答 5B 官方版本帧并断连
+	conn, err := net.Dial(addr.String(), net.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := conn.WriteMsg(bad); err != nil {
+		t.Fatal(err)
+	}
+	reply, err := conn.ReadMsg()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := versionMismatchFrame(); !bytes.Equal(reply, want) {
+		t.Fatalf("版本门应答 %x want %x", reply, want)
+	}
+	if _, err := conn.ReadMsg(); err == nil {
+		t.Fatal("版本不符应断连")
+	}
+
+	// 相符版本（golden 原值 333）：照常无角色 0x04
+	conn2, err := net.Dial(addr.String(), net.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn2.Close()
+	if err := conn2.WriteMsg(flight); err != nil {
+		t.Fatal(err)
+	}
+	reply2, err := conn2.ReadMsg()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := noRoleLoginSuccessFrame(fixed); !bytes.Equal(reply2, want) {
+		t.Fatalf("版本相符应回 0x04：got %d 字节", len(reply2))
+	}
+}
+
 // TestParseLoginCredentialsSecret golden 首飞的密码摘要：md5hex-32、
 // 同帧同摘要（确定性），且与账号身份互相独立。
 func TestParseLoginCredentialsSecret(t *testing.T) {

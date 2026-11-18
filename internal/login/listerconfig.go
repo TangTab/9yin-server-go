@@ -77,6 +77,11 @@ func ParseGameListerINI(data []byte) (GameListerConfig, error) {
 // def 写到 path 并返回（created=true）。用于 exe 内置配置的首次释放：
 // 已存在的文件绝不覆盖，用户改动得以保留。
 func LoadOrCreateGameListerINI(path string, def []byte) (data []byte, created bool, err error) {
+	return loadOrCreateINI(path, def)
+}
+
+// loadOrCreateINI 是 lister/entry 两族 INI 共用的装载-释放逻辑。
+func loadOrCreateINI(path string, def []byte) (data []byte, created bool, err error) {
 	data, err = os.ReadFile(path)
 	if err == nil {
 		return data, false, nil
