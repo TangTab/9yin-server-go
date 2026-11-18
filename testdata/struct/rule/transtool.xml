@@ -15,7 +15,7 @@
 	</properties>
 	<records>
 		<!-- 记录玩家在FlyNpc上下线后传送的位置 -->
-		<record name="FlyNpcStoreRec" cols="3" maxrows=1 save="true" public="false" private="false" desc="FlyNpc下线传送表">
+		<record name="FlyNpcStoreRec" cols="3" maxrows="1" save="true" public="false" private="false" desc="FlyNpc下线传送表">
 			<column type="float" desc="坐标x"/>
 			<column type="float" desc="坐标y"/>
 			<column type="float" desc="坐标z"/>

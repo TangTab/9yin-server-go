@@ -13,8 +13,8 @@ import (
 const version = "0.0.1-solo-skeleton"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
-//   - [ ] ecs 内核（World/Entity/Storage/Query）
-//   - [ ] structgen 产出 component + 元数据
+//   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
+//   - [x] structgen 产出 component + 元数据（208 对象/1666 属性/306 表格）
 //   - [ ] config 加载 scenes.xml / logic_class.xml
 //   - [ ] engine tick 循环 + proc/inproc Bus
 //   - [ ] net/proto 最小集：握手 + 心跳（probe 对拍）
