@@ -1,6 +1,7 @@
 package login
 
 import (
+	"crypto/md5"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
@@ -20,8 +21,9 @@ import (
 //	u32 loginStringLen（16~512，%16==0）+ 槽
 //	u32 login-type —— 必须恰好收在帧尾（拒绝尾部数据）
 //
-// 双槽密文（account/password）不做解密——身份只取 account 槽摘要；
-// 密码比对属 persist/账号域，后续接入。
+// 双槽密文（account/password）不做解密——客户端加扰算法未破（fxcli
+// 定位见逆向档案），但密文无 nonce、确定性（test001 162 次登录槽恒定），
+// 故身份/凭据均落在密文摘要域：同明文同摘要，跨会话稳定。
 const (
 	loginHeaderSize = 25
 	loginAcctMin    = 16
@@ -32,6 +34,11 @@ const (
 	// loginAccountDomain / accountKeyPrefix 是 acct:v1 键的哈希域与前缀。
 	loginAccountDomain = "nineyin/login-account/v1"
 	accountKeyPrefix   = "acct:v1:"
+
+	// loginSecretDomain 是密码槽摘要的哈希域；取 md5hex-32 是为对齐
+	// dc_accounts.password varchar(32) 列宽——仅做密文域等值比对，
+	// 不承载明文密码语义，抗碰撞性非目标。
+	loginSecretDomain = "nineyin/login-secret/v1"
 )
 
 // AccountIdentity 是登录方账号的身份摘要（同密文同键，跨会话稳定）。
@@ -51,20 +58,22 @@ func (identity AccountIdentity) Prefix() string {
 	return identity.id[:prefixLength]
 }
 
-// ParseLoginAccountIdentity 校验 op02 结构并取账号身份。
+// ParseLoginCredentials 校验 op02 结构并取账号身份与密码摘要。
+// secret 是密码槽密文域摘要（md5hex-32）：密文确定性→同明文密码同
+// 摘要，供 AccountStore 等值比对（首登注册、改密换摘要）。
 // 结构非法即报错（调用方应拒绝该连接）。
-func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
+func ParseLoginCredentials(message []byte) (AccountIdentity, string, error) {
 	if len(message) < loginHeaderSize || message[0] != OpClientLogin {
-		return AccountIdentity{}, fmt.Errorf("login: missing login header")
+		return AccountIdentity{}, "", fmt.Errorf("login: missing login header")
 	}
 	cursor := loginHeaderSize
 	accountLength := binary.LittleEndian.Uint32(message[0x15:0x19])
 	if err := validateSlotLength("account", accountLength, loginAcctMin, loginAcctMax); err != nil {
-		return AccountIdentity{}, err
+		return AccountIdentity{}, "", err
 	}
 	accountEnd, ok := advance(cursor, accountLength, len(message))
 	if !ok {
-		return AccountIdentity{}, fmt.Errorf("login: truncated account slot")
+		return AccountIdentity{}, "", fmt.Errorf("login: truncated account slot")
 	}
 
 	digest := sha256.New()
@@ -78,41 +87,56 @@ func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
 
 	passwordLength, next, ok := readU32(message, cursor)
 	if !ok {
-		return AccountIdentity{}, fmt.Errorf("login: missing password length")
+		return AccountIdentity{}, "", fmt.Errorf("login: missing password length")
 	}
 	if err := validateSlotLength("password", passwordLength, loginSecretMin, loginSecretMax); err != nil {
-		return AccountIdentity{}, err
+		return AccountIdentity{}, "", err
 	}
-	cursor, ok = advance(next, passwordLength, len(message))
+	passwordEnd, ok := advance(next, passwordLength, len(message))
 	if !ok {
-		return AccountIdentity{}, fmt.Errorf("login: truncated password slot")
+		return AccountIdentity{}, "", fmt.Errorf("login: truncated password slot")
 	}
+	secretDigest := md5.New()
+	_, _ = secretDigest.Write([]byte(loginSecretDomain))
+	_, _ = secretDigest.Write([]byte{0})
+	binary.LittleEndian.PutUint32(encodedLength[:], passwordLength)
+	_, _ = secretDigest.Write(encodedLength[:])
+	_, _ = secretDigest.Write(message[next:passwordEnd])
+	cursor = passwordEnd
 
 	// client-system/type：u32 值，不属于账号身份。
 	if _, cursor, ok = readU32(message, cursor); !ok {
-		return AccountIdentity{}, fmt.Errorf("login: missing client type")
+		return AccountIdentity{}, "", fmt.Errorf("login: missing client type")
 	}
 
 	loginStringLength, next, ok := readU32(message, cursor)
 	if !ok {
-		return AccountIdentity{}, fmt.Errorf("login: missing login-string length")
+		return AccountIdentity{}, "", fmt.Errorf("login: missing login-string length")
 	}
 	if err := validateSlotLength("login string", loginStringLength, loginSecretMin, loginSecretMax); err != nil {
-		return AccountIdentity{}, err
+		return AccountIdentity{}, "", err
 	}
 	cursor, ok = advance(next, loginStringLength, len(message))
 	if !ok {
-		return AccountIdentity{}, fmt.Errorf("login: truncated login-string slot")
+		return AccountIdentity{}, "", fmt.Errorf("login: truncated login-string slot")
 	}
 
 	// login-type 是最后一个 u32，必须恰好收尾——两种布局无法共用同一种解释。
 	if _, next, ok = readU32(message, cursor); !ok {
-		return AccountIdentity{}, fmt.Errorf("login: missing login type")
+		return AccountIdentity{}, "", fmt.Errorf("login: missing login type")
 	}
 	if next != len(message) {
-		return AccountIdentity{}, fmt.Errorf("login: trailing login data")
+		return AccountIdentity{}, "", fmt.Errorf("login: trailing login data")
 	}
-	return AccountIdentity{id: accountKeyPrefix + hex.EncodeToString(digest.Sum(nil))}, nil
+	return AccountIdentity{
+		id: accountKeyPrefix + hex.EncodeToString(digest.Sum(nil)),
+	}, hex.EncodeToString(secretDigest.Sum(nil)), nil
+}
+
+// ParseLoginAccountIdentity 校验 op02 结构并取账号身份（密码摘要弃用）。
+func ParseLoginAccountIdentity(message []byte) (AccountIdentity, error) {
+	identity, _, err := ParseLoginCredentials(message)
+	return identity, err
 }
 
 func validateSlotLength(name string, length, minimum, maximum uint32) error {

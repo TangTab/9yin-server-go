@@ -18,11 +18,12 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/ecs"
 	"github.com/lizhanyin/9yin-server-go/internal/engine"
 	"github.com/lizhanyin/9yin-server-go/internal/login"
+	"github.com/lizhanyin/9yin-server-go/internal/persist"
 	"github.com/lizhanyin/9yin-server-go/internal/proc"
 	"github.com/lizhanyin/9yin-server-go/internal/scene"
 )
 
-const version = "0.6.0-solo-entry-scene"
+const version = "0.7.0-solo-account-db"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
@@ -39,17 +40,22 @@ const version = "0.6.0-solo-entry-scene"
 //   - [x] 选角进场：op04 → 0x0B EntryScene（idx178/1468/7/8 四属性，
 //     出生=移花宫 school09）+ proc.Bus login.enter_scene → Spawner
 //     tick 物化 ECS 实体（login 链与内核合流）
+//   - [x] 账号接入 MySQL：op02 凭据落 nx_district.dc_accounts
+//     （密文摘要域；首登自动注册、密码不符断连；-mysql-dsn /
+//     NINEYIN_MYSQL_DSN，空=内存模式不校验）
 //   - [ ] login 主干续：0x09 属性表/0x0A 记录表 → ClientReady 后
 //     视图/属性全量集下发 + AOI
-//   - [ ] persist：DDL 建库 + 角色存取
+//   - [ ] persist 续：角色存取（nx_chunks blob 逆向）
 func main() {
 	var (
 		scenesPath = flag.String("scenes", "testdata/ini/scenes.xml", "scenes.xml 路径")
 		logicPath  = flag.String("logicclass", "testdata/ini/logic_class.xml", "logic_class.xml 路径")
 		listen     = flag.String("listen", "127.0.0.1:9600", "客户端网关监听地址（空=不监听）")
 		svrlist    = flag.String("svrlist", "127.0.0.1:9601", "区服列表分发监听地址（空=不监听；通告地址/端口跟随 -listen）")
-		tps        = flag.Int("tps", 60, "每秒 tick 数（0=全速）")
-		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
+		mysqlDSN   = flag.String("mysql-dsn", os.Getenv("NINEYIN_MYSQL_DSN"),
+			"账号库 MySQL DSN（空=内存模式不校验凭据；默认取 NINEYIN_MYSQL_DSN）")
+		tps    = flag.Int("tps", 60, "每秒 tick 数（0=全速）")
+		runFor = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
 	)
 	flag.Parse()
 
@@ -90,12 +96,32 @@ func main() {
 	// ---- 网关：客户端线路（EE+XOR），心跳 + 登录链分派 ----
 	var gateway *login.Gateway
 	if *listen != "" {
+		// 账号仓：DSN 显式给出即 DB 模式（故障大声死）；空=内存模式。
+		var accounts login.AccountStore
+		if *mysqlDSN != "" {
+			bootCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			store, err := persist.OpenAccountStore(bootCtx, *mysqlDSN)
+			cancel()
+			if err != nil {
+				fatal(err)
+			}
+			accounts = store
+			app.OnStop(func(*engine.App) {
+				if err := store.Close(); err != nil {
+					fmt.Fprintln(os.Stderr, "solo: 账号库关闭:", err)
+				}
+			})
+			fmt.Println("账号库就绪：MySQL nx_district.dc_accounts（首登自动注册，密码不符断连）")
+		} else {
+			fmt.Println("账号库未配置（-mysql-dsn / NINEYIN_MYSQL_DSN 空）：内存模式，凭据不校验")
+		}
 		spawner := scene.NewSpawner()
 		spawner.OnSpawn = func(w *ecs.World, entity ecs.EntityID, ev scene.EnterSceneEvent) {
 			fmt.Printf("world: 物化玩家 %q → 实体 %d（场景 %s）\n", ev.RoleName, entity, ev.Resource)
 		}
 		flow := &login.Flow{
-			Logf: func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+			Accounts: accounts,
+			Logf:     func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
 			OnEnterScene: func(sess *login.Session, role *login.Role) {
 				payload, _ := json.Marshal(scene.EnterSceneEvent{
 					Account:  sess.Account,

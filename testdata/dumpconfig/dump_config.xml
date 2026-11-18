@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- edited with XMLSpy v2010 (http://www.altova.com) by hahah (memem) -->
+
 <config>
 	<diction path="dumpconfig\diction\"/>
 	<!-- 一些静态的sql配置  path 对应于Res的目录 table 为数据库中的表格名称 -->

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- edited with XMLSpy v2010 (http://www.altova.com) by hahah (memem) -->
+
 <Object>
 	<record desc="货币表" rec_name="capital_rec" col_num="3" col_0="capital_name" col_1="capital_type" col_2="capital_number"/>
 </Object>

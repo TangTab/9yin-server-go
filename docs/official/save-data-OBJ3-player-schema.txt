@@ -1,0 +1,422 @@
+player 实体 schema 全表（OBJ3, 官方 2016 真档实证）
+= 属性 304（新角=星蓝 lv1 / 熟档=詹妮弗劳伦斯 lv40, ≠=值不同）=
+
+≠ Name                           '星蓝'                                                       | '詹妮弗劳伦斯'
+  Sex                            1                                                          | 1
+≠ Photo                          'gui\\BG_team\\TeamRole\\Teamrole_zq_dwaF_001.PNG'         | 'gui\\BG_team\\TeamRole\\Teamrole_zq_humF_001.PNG'
+  Camp                           1                                                          | 1
+≠ Race                           3                                                          | 1
+≠ Job                            1                                                          | 21
+≠ Level                          1                                                          | 40
+≠ RoleCreateTime                 '13105141463148'                                           | '13105113583940'
+≠ LeaveSceneTime                 1460667873                                                 | 1460853890
+≠ MacAddress                     ''                                                         | 'BC5FF493273B'
+  CurTalkID                      0                                                          | 0
+≠ CurArea                        31500000                                                   | 11400000
+≠ SceneTriggerConfig             ''                                                         | 'kewerj01'
+  DisabledEquipPosList           0                                                          | 0
+  SilenceTick                    0                                                          | 0
+  SkillEnergyList                '0:1;2:1;6:1'                                              | '0:1;2:1;6:1'
+  HideSkillTip                   0                                                          | 0
+≠ Coin_LLQD                      0                                                          | 56
+≠ ActiveScene                    '44'                                                       | '46,8,39,29,9,10,47,17,53,4,18,2,33,55,35,44'
+≠ Pre_SceneID                    0                                                          | 7
+≠ Pre_PosX                       0.0                                                        | -3250.72
+≠ Pre_PosY                       0.0                                                        | 100.8677
+≠ Pre_PosZ                       0.0                                                        | 941.9299
+≠ MountItemId                    ''                                                         | 'Mount_00015_04'
+  WedgedTime                     0                                                          | 0
+≠ EnergyUpgradeNum               0                                                          | 100
+  EnergyPreUpgradeNum            0                                                          | 0
+  IsHunterTreasure               1                                                          | 1
+  LastEquipPrtId                 ''                                                         | ''
+  AdjustOrient                   1                                                          | 1
+≠ HP                             585                                                        | 16494
+≠ MP                             79                                                         | 0
+≠ Str                            7                                                          | 54
+≠ Dex                            4                                                          | 58
+≠ Ing                            5                                                          | 7
+≠ Spi                            5                                                          | 28
+≠ Sta                            8                                                          | 49
+≠ Esth                           6                                                          | 26
+  CurTargetCount                 0                                                          | 0
+≠ FightPower                     340                                                        | 10093
+  RC                             0                                                          | 0
+≠ AV                             100                                                        | 0
+≠ EY                             100                                                        | 0
+  FS                             0                                                          | 0
+  DP                             100                                                        | 100
+  RequestSet                     0                                                          | 0
+≠ ArtKey                         103011                                                     | 101011
+  HideHat                        0                                                          | 0
+≠ HideMantle                     0                                                          | 1
+  HideOtherPet                   0                                                          | 0
+  HideSkins                      ''                                                         | ''
+≠ HatIndex                       5                                                          | 3
+≠ FaceIndex                      2                                                          | 3
+  EyesIndex                      0                                                          | 0
+  BeardIndex                     0                                                          | 0
+  EarsIndex                      0                                                          | 0
+  TailIndex                      0                                                          | 0
+  FingerIndex                    0                                                          | 0
+  ClothIndex                     0                                                          | 0
+  PantsIndex                     0                                                          | 0
+  ShoesIndex                     0                                                          | 0
+  GlovesIndex                    0                                                          | 0
+≠ HairColorIndex                 0                                                          | 1
+  SkinColorIndex                 0                                                          | 0
+  SkinMtlIndex                   0                                                          | 0
+  TraitIndex                     0                                                          | 0
+≠ Stature                        2                                                          | 3
+  TattooIndex                    0                                                          | 0
+  TattooColor                    16777215                                                   | 16777215
+≠ ExBody                         'Face,2;Hat,5;Eyes,0;Beard,0;Ears,0;Tail,0;Finger,0;Clot   | 'Face,3;Hat,3;Eyes,0;Beard,0;Ears,0;Tail,0;Finger,0;Clot
+  HandType                       0                                                          | 0
+≠ HeadDetail                     ''                                                         | '19-100|4-1|5-1|1-1|3-1|51-55|52-1|53-1|46-100|50-100|48
+  PKMode                         0                                                          | 0
+  PKValue                        0                                                          | 0
+  ShaQi                          0                                                          | 0
+≠ KillCount                      0                                                          | 2
+≠ BeKillCount                    0                                                          | 2
+  ArrestValue                    0                                                          | 0
+  ArrestState                    0                                                          | 0
+  RedNameEffect                  0                                                          | 0
+  ChangePKModule                 1                                                          | 1
+  PKProtected                    -1                                                         | -1
+  LastKillTime                   0.0                                                        | 0.0
+  OldArrestValue                 0                                                          | 0
+≠ OldChangePKModule              0                                                          | 1
+≠ OldPKProtected                 0                                                          | -1
+  OldArrestState                 0                                                          | 0
+  LastBeKilledTime               0.0                                                        | 0.0
+  SystemAwardsNum                0                                                          | 0
+  Dead                           0                                                          | 0
+≠ AttributeID                    9                                                          | 1
+  GuardSkill                     '1111'                                                     | '1111'
+  SiegeDamageDeepenProb          0.0                                                        | 0.0
+  SiegeDamageResistProb          0.0                                                        | 0.0
+  DamageType                     ''                                                         | ''
+  CurSkillLevel                  0                                                          | 0
+  OnTransToolState               0                                                          | 0
+  LinkObj                        (0, 0)                                                     | (0, 0)
+  OnSwitchTransState             0                                                          | 0
+  TransToolID                    ''                                                         | ''
+≠ FlyStep                        0                                                          | -1
+≠ FromTo                         0                                                          | -1
+≠ RoadType                       0                                                          | -1
+  StoreHeight                    0.0                                                        | 0.0
+  TransJobList                   '21,22,23'                                                 | '21,22,23'
+  CantTransJob                   '1,1;1,1;1,1'                                              | '1,1;1,1;1,1'
+≠ DoTransJob                     0                                                          | 1
+≠ NoTransJob                     0                                                          | 1
+  TransConditionId               '151;151;151'                                              | '151;151;151'
+≠ CurInsPoint                    0                                                          | 39
+  ExileStatus                    0                                                          | 0
+  ExileLockDate                  0.0                                                        | 0.0
+  ExileLockTime                  0                                                          | 0
+  ForceVersion                   0                                                          | 0
+≠ Force                          3                                                          | 1
+  BackStageFlag                  2                                                          | 2
+≠ GuildName                      ''                                                         | '天朝帝国'
+≠ GuildPosition                  0                                                          | 1
+  GuildQuitTime                  0.0                                                        | 0.0
+  RespondedGuildName             ''                                                         | ''
+≠ MountID                        0                                                          | 46
+≠ MountItemID                    ''                                                         | '0111-001-1460646812-9669'
+  MountType                      0                                                          | 0
+≠ SafeTime                       180                                                        | 60
+  SafeModeEquipLv                2                                                          | 2
+  SafeModeEquipStar              2                                                          | 2
+  SafeModePsw                    ''                                                         | ''
+  IsHaveSafeModePsw              0                                                          | 0
+≠ SafeModeEquipStr               '1,1,1,1,1,1,1,1,1,1,1,1'                                  | '0,1,0,0,0,0,0,0,0,0,0,1,'
+≠ SafeModeJewelStr               '1,1,1,1,1,1,1,1,1,1,1,1'                                  | '1,1,1,0,0,0,0,0,1,1,0,1,'
+≠ LastOffLineTime                42475.211493                                               | 42477.364468
+  LastAddress                    '182.41.42.154'                                            | '182.41.42.154'
+  LastCarrierID                  ''                                                         | ''
+≠ LastCarrierPathStep            0                                                          | -1
+  LastCarrierHP                  0                                                          | 0
+  LastCarrierMP                  0                                                          | 0
+  TeamID                         0                                                          | 0
+≠ JoinTeamTime                   0.0                                                        | 42476.410532
+  TeamType                       0                                                          | 0
+  TeamUniqueID                   ''                                                         | ''
+  TeamSceneSign                  ''                                                         | ''
+≠ ShortcutKey                    ''                                                         | '1:87,7,38,7;2:83,7,40,7;3:65,7,37,7;4:68,7,39,7;5:81,7,
+  GunManLeftSkill                ''                                                         | ''
+  killed_monster                 0                                                          | 0
+  killed_boss                    0                                                          | 0
+  damage_total                   0                                                          | 0
+  CurCloneSceneLevel             0                                                          | 0
+  CloneSceneScoreTop             0                                                          | 0
+  CloneScoreTopRefreshTime       13104864467852                                             | 13104864467852
+  CloneWeekLimitCount            7                                                          | 7
+  CloneWeekLimitCountMax         7                                                          | 7
+  TitleID                        0                                                          | 0
+  GunManBullet                   ''                                                         | ''
+  GunManSkill                    ''                                                         | ''
+  PunisherState                  0                                                          | 0
+  RFC                            0                                                          | 0
+  CurrentESId                    0                                                          | 0
+≠ ArenaSinglePoints              1000                                                       | 1216
+≠ ArenaSingleEveryWeekPoints     0                                                          | 216
+  ClearEveryWeekPointsTime       0                                                          | 0
+  ArenaTeamName                  ''                                                         | ''
+  IsArenaTeamCaptain             0                                                          | 0
+  CurrentTime                    0                                                          | 0
+  OffineSec                      0                                                          | 0
+  SpecialTime                    0                                                          | 0
+  LastDeadExp                    0                                                          | 0
+  KillerName                     ''                                                         | ''
+  NpcKillerType                  0                                                          | 0
+  LastKillerType                 0                                                          | 0
+  IsUseItem                      0                                                          | 0
+≠ AchievePoint                   0                                                          | 120
+  ActDegree                      0                                                          | 0
+  ActPhase                       0                                                          | 0
+  QueueId                        0                                                          | 0
+  BattleSceneID                  0                                                          | 0
+  BattleOffTime                  0                                                          | 0
+  BattleOnlineTime               0                                                          | 0
+  BattleWarID                    0                                                          | 0
+≠ BattleWarRand                  0                                                          | 1
+  glory                          0                                                          | 0
+  MainRoleChange                 ''                                                         | ''
+  bCampChange                    0                                                          | 0
+  bRoleChange                    0                                                          | 0
+  RoleChangeType                 0                                                          | 0
+  ChangeCostTime                 0                                                          | 0
+  ChangeLeftTime                 0                                                          | 0
+  ChangeSkill                    ''                                                         | ''
+  ReBuildTime                    0                                                          | 0
+  WeaponNimbus1                  0                                                          | 0
+  WeaponNimbus2                  0                                                          | 0
+  WeaponNimbus3                  0                                                          | 0
+  WeaponNimbus4                  0                                                          | 0
+  NimbusAtk1                     0                                                          | 0
+  NimbusDef1                     0                                                          | 0
+  NimbusAtk2                     0                                                          | 0
+  NimbusDef2                     0                                                          | 0
+  NimbusAtk3                     0                                                          | 0
+  NimbusDef3                     0                                                          | 0
+  NimbusAtk4                     0                                                          | 0
+  NimbusDef4                     0                                                          | 0
+  Notify_X_Pos                   18                                                         | 18
+  Notify_Y_Pos                   370                                                        | 370
+≠ RelivePositon                  '7,-1039.000000,104.598999,2413.708008,1.910000'           | '1,-514.361023,21.870001,847.015991,2.632000'
+≠ ReliveLocalFirst               1                                                          | 0
+  RelivePerfectFirst             1                                                          | 1
+≠ ReliveCityFirst                1                                                          | 0
+  ReliveTime                     0                                                          | 0
+  ReliveNoNearPos                1                                                          | 1
+  RelivePosSelectOpen            0                                                          | 0
+  HotelPosx                      0.0                                                        | 0.0
+  HotelPosy                      0.0                                                        | 0.0
+  HotelPosz                      0.0                                                        | 0.0
+  HotelSence                     0                                                          | 0
+  HotelexPerience                0                                                          | 0
+  PlayerExp                      0                                                          | 0
+≠ PlayerUpgradeExp               130                                                        | 0
+≠ Declare                        0                                                          | 2
+  PlayerHonor                    0                                                          | 0
+  RankLevel                      1                                                          | 1
+  UpgradeHonor                   850                                                        | 850
+  CanAddHonorPoint               1000                                                       | 1000
+≠ HonorLastRefresh               1460606400                                                 | 1460779200
+≠ EveRecActiveRefresh            1460649600                                                 | 1460822400
+  DepotMoney                     0                                                          | 0
+  AddDepotBagNum                 0                                                          | 0
+≠ AddToolBagNum                  0                                                          | 1
+  Link                           0                                                          | 0
+  GuideState                     0                                                          | 0
+  GuideType                      0                                                          | 0
+≠ LifeOccupFirstType             0                                                          | 5
+≠ LifeOccupFirstExp              0                                                          | 106
+≠ LifeJobLevel                   0                                                          | 2
+≠ Physical                       58                                                         | 117
+  MatureTicketDay                0                                                          | 0
+≠ DayMaxGainGold                 0                                                          | 10000000
+  AutoQuestFlag                  1                                                          | 1
+≠ PVPTaskLastRefreshTime         1460649600                                                 | 1460822400
+  PVPTaskGiveUpTime              0                                                          | 0
+  PvpLocalX                      0.0                                                        | 0.0
+  PvpLocalY                      0.0                                                        | 0.0
+  PvpLocalZ                      0.0                                                        | 0.0
+  PvpLocalO                      0.0                                                        | 0.0
+  PvpLocalS                      0                                                          | 0
+  PvpTaskLastSection             0                                                          | 0
+  PracticeWaitTime               0                                                          | 0
+≠ PracticeFightTime              0                                                          | 1475
+  IsPractice                     0                                                          | 0
+  HorseRaceRank                  0                                                          | 0
+  PVPTowerPlayerState            0                                                          | 0
+  IsInNewUserLead                0                                                          | 0
+≠ IsGetAward                     0                                                          | 1
+  EveRecActive                   0                                                          | 0
+≠ EveRecLevel                    1                                                          | 40
+  EvePVECount                    0                                                          | 0
+  EvePVPCount                    0                                                          | 0
+  EveEventCount                  0                                                          | 0
+  EveBattleCount                 0                                                          | 0
+  EveAthleticsCount              0                                                          | 0
+  EveSceneCount                  0                                                          | 0
+≠ OfflineTime                    '2016/4/15/5/4/33'                                         | '2016/4/17/8/44/50'
+≠ OnlineTime                     '15/5/4/23'                                                | '17/8/19/11'
+≠ LogoutTime                     13105141473048                                             | 13105327490845
+  OffLineExp                     0                                                          | 0
+  IsVip                          0                                                          | 0
+≠ VipEndTime                     ''                                                         | '2016-04-16 08:39:20'
+  VipCloneNum                    0                                                          | 0
+  VipCloneTime                   ''                                                         | ''
+  VipPointTransferNum            0                                                          | 0
+  VipPointTransTime              ''                                                         | ''
+  VipReliveNum                   0                                                          | 0
+  VipReliveTime                  ''                                                         | ''
+≠ VipGiftTime                    ''                                                         | '2016-04-16 07:45:42'
+  EWId                           ''                                                         | ''
+  PreForce                       0                                                          | 0
+  EWResFightState                0                                                          | 0
+  guildwar_offline_x             0.0                                                        | 0.0
+  guildwar_offline_y             0.0                                                        | 0.0
+  guildwar_offline_z             0.0                                                        | 0.0
+  ChargeMode                     0                                                          | 0
+  ChargeTime                     0                                                          | 0
+≠ CarrierLogOutOfflineTime       13105141473048                                             | 13105327490845
+  RidePoint                      0                                                          | 0
+  RideAutoRepairHP               0                                                          | 0
+  RideAutoRepairMP               0                                                          | 0
+  RideAutoRecharge               0                                                          | 0
+  RidePointLock                  0                                                          | 0
+≠ EWTaskTokenTime                0                                                          | 1460649600
+  EWDonateTime                   0                                                          | 0
+  EWDonateCount                  0                                                          | 0
+  EWContributeCount              0                                                          | 0
+  SecondWord                     ''                                                         | ''
+  IsHaveSecondWord               0                                                          | 0
+  WordBeLock                     0                                                          | 0
+  WordBeLockTime                 0.0                                                        | 0.0
+  WordCheckNum                   0                                                          | 0
+  NetBarReceiveState             0                                                          | 0
+  NetBarDayPrize                 0                                                          | 0
+  FirstChargeTime                ''                                                         | ''
+  LastConsumeTime                ''                                                         | ''
+  IsMobileAuthentic              0                                                          | 0
+  SnDaReceiveState               0                                                          | 0
+  SnDaNetBarDayPrize             0                                                          | 0
+  OnceBarTime                    0                                                          | 0
+  WeekBarTime                    0                                                          | 0
+
+= 记录表 112（cap/rows/cols/列类型）=
+
+OpenMapRec                 cap=32 rows=1 cols=1 types=['int'] [128]
+OpenTransPointRec          cap=8 rows=4 cols=1 types=['int'] [-2147354614]; [-262144]
+capital_rec                cap=10 rows=0 cols=3 types=['string', 'int', 'int64'] 
+SkillType_Lock_State_Rec   cap=200 rows=1 cols=1 types=['string'] ['1']
+SkillType_Rec              cap=200 rows=1 cols=1 types=['int'] [0]
+NormalSkill_Pos_Rec        cap=1 rows=1 cols=3 types=['int', 'int', 'int'] [33, 45, 57]
+open_prompt_rec            cap=256 rows=63 cols=2 types=['int', 'int'] [1, 0]; [2, 0]
+count_limit_rec            cap=256 rows=0 cols=3 types=['int', 'int', 'double'] 
+HeadDetailRecord           cap=64 rows=0 cols=2 types=['int', 'int'] 
+cooldown_rec               cap=512 rows=2 cols=4 types=['int', 'int64', 'int64', 'int'] [231025, 13105141463149, 13105141483149, 231025]; [1, 13105141463149, 13105141463649, -1]
+nocooldown_team_rec        cap=128 rows=0 cols=1 types=['int'] 
+nocooldown_skill_rec       cap=128 rows=0 cols=2 types=['int', 'int'] 
+buff_anti_type_rec         cap=128 rows=0 cols=3 types=['int', 'int', 'int64'] 
+FlyNpcStoreRec             cap=1 rows=0 cols=3 types=['float', 'float', 'float'] 
+fly_path_rec               cap=2048 rows=0 cols=4 types=['float', 'float', 'float', 'int'] 
+ForceReputeRecord          cap=256 rows=64 cols=9 types=['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'] [1, 1, 5, 0, 5000, 1, 1, 0, 0]; [2, 2, 5, 0, 5000, 1, 1, 0, 0]
+requested_guild            cap=1024 rows=0 cols=1 types=['widestr'] 
+ReduceCountRec             cap=1 rows=0 cols=3 types=['int', 'int', 'int'] 
+TomplimitRec               cap=1 rows=0 cols=4 types=['int64', 'int64', 'int64', 'int64'] 
+ChargeBuyRec               cap=16 rows=0 cols=7 types=['string', 'int', 'int', 'string', 'widestr', 'widestr', 'widestr'] 
+ChargeBoxRec               cap=512 rows=0 cols=5 types=['string', 'int', 'int', 'int64', 'int64'] 
+ChargeHistoryRec           cap=128 rows=0 cols=4 types=['string', 'int', 'int64', 'int64'] 
+ChargeCollectRec           cap=128 rows=0 cols=4 types=['string', 'int', 'int64', 'int64'] 
+friend_rec                 cap=50 rows=0 cols=19 types=['widestr', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'string', 'string', 'int', 'int', 'double', 'double', 'double', 'double', 'string', 'int', 'int'] 
+friendvalueevent_rec       cap=50 rows=0 cols=21 types=['widestr', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'string', 'int', 'int', 'int', 'int', 'int'] 
+unfamiliar_rec             cap=20 rows=0 cols=8 types=['widestr', 'int', 'int', 'int', 'int', 'string', 'int', 'int'] 
+blacklist_rec              cap=30 rows=0 cols=7 types=['widestr', 'int', 'int', 'int', 'string', 'int', 'int'] 
+enemy_rec                  cap=30 rows=0 cols=8 types=['widestr', 'int', 'int', 'int', 'int', 'int', 'string', 'int'] 
+shortcut_rec               cap=1024 rows=5 cols=4 types=['int', 'string', 'string', 'int'] [111, 'skill', 'Skill_sitcross_01', 8]; [102, 'skill', 'Skill_In1032_01_1', 8]
+equip_skill_rec            cap=1024 rows=1 cols=4 types=['int', 'string', 'int', 'int'] [0, 'Skill_In1025_01_1', 1, 34]
+equip_skill_rec_all        cap=18 rows=18 cols=5 types=['int', 'string', 'int', 'int', 'int'] [0, 'Skill_In1025_01_1', 1, 34, 2]; [0, '', 0, 0, 1]
+clone_info_record          cap=256 rows=40 cols=13 types=['int', 'int', 'int', 'int', 'int', 'int64', 'string', 'int', 'int', 'widestr', 'int', 'string', 'int64'] [101, 0, -1, 0, -1, 0, '', 0, 1010, '', -1, '', 0]; [101, 0, -1, 1, -1, 0, '', 0, 1011, '', -1, '', 0]
+clone_pass_info_record     cap=256 rows=40 cols=15 types=['int', 'int', 'int', 'int64', 'int64', 'int', 'int64', 'int', 'string', 'int', 'string', 'string', 'string', 'int', 'string'] [101, 0, 1010, 0, 0, 0, 0, 0, '', -1, '', '', '', 0, '']; [101, 1, 1011, 0, 0, 0, 0, 0, '', -1, '', '', '', 0, '']
+clone_boss_fight_info_rec  cap=128 rows=0 cols=3 types=['int', 'string', 'string'] 
+clone_player_fight_info_rec cap=128 rows=0 cols=4 types=['int', 'int', 'int', 'string'] 
+clone_pass_info_max_record cap=256 rows=40 cols=15 types=['int', 'int', 'int', 'int64', 'int64', 'int', 'int64', 'int', 'string', 'int', 'string', 'string', 'string', 'int', 'int64'] [101, 0, 1010, 0, 0, 0, 0, 0, '', -1, '', '', '', 0, -1]; [101, 1, 1011, 0, 0, 0, 0, 0, '', -1, '', '', '', 0, -1]
+clone_boss_fight_info_max_rec cap=128 rows=0 cols=3 types=['int', 'string', 'string'] 
+clone_player_fight_info_max_rec cap=128 rows=0 cols=4 types=['int', 'int', 'int', 'string'] 
+clone_team_first_into_rec  cap=128 rows=0 cols=5 types=['int', 'widestr', 'int', 'string', 'string'] 
+title_rec                  cap=400 rows=1 cols=5 types=['int', 'int', 'double', 'int', 'double'] [100, 0, 42475.211377, 1, 42475.211377]
+title_unlock_rec           cap=400 rows=0 cols=4 types=['int', 'int', 'double', 'int'] 
+title_progress_rec         cap=400 rows=8 cols=3 types=['int', 'int', 'int'] [0, 1, 1]; [1, 1, 1]
+formula_rec                cap=1024 rows=0 cols=1 types=['string'] 
+chatpage_rec               cap=10 rows=6 cols=22 types=['int', 'widestr', 'int', 'int', 'int', 'int', 'float', 'float', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'] [0, 'ui_zonghe', 1, 1, 1, 255, 0.0, 0.63, 400, 214, 1, 1, 1,; [1, 'ui_zhandou', 1, 1, 0, 255, 0.05, 0.624, 400, 214, 0, 0,
+PlayerESRec                cap=1024 rows=0 cols=4 types=['int', 'int', 'int64', 'int'] 
+PlayerESCriteriaRec        cap=1024 rows=0 cols=6 types=['int', 'int', 'int', 'int', 'int', 'int'] 
+PlayerESRewardRec          cap=1024 rows=0 cols=8 types=['int', 'int', 'int', 'float', 'string', 'int', 'int', 'int'] 
+arena_request_rec          cap=3 rows=0 cols=1 types=['widestr'] 
+player_arena_info_rec      cap=2 rows=2 cols=10 types=['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int'] [1, 1000, 0, 0, 0, 0, 0, 0, 0, 0]; [1, 1000, 0, 0, 0, 0, 0, 0, 0, 0]
+AchievementCriteriaProgress cap=1024 rows=0 cols=6 types=['int', 'int', 'int', 'int', 'int', 'int'] 
+AchievementCompleted       cap=1024 rows=0 cols=3 types=['int', 'int', 'string'] 
+AchievementTotalProgress   cap=64 rows=15 cols=4 types=['int', 'int', 'int', 'int'] [1, 0, 12, 0]; [20, 0, 4, 0]
+AchievementBonus           cap=256 rows=0 cols=1 types=['int'] 
+AchievementTrace           cap=5 rows=0 cols=1 types=['int'] 
+ActivityRec                cap=32 rows=0 cols=2 types=['int', 'int'] 
+Pet_CanSwapScene_Rec       cap=64 rows=0 cols=5 types=['string', 'int', 'int', 'int', 'int'] 
+Pet_Buff_Rec               cap=2048 rows=0 cols=5 types=['string', 'string', 'int', 'int', 'int64'] 
+Pet_MagicianStar_Rec       cap=5 rows=0 cols=7 types=['int', 'string', 'string', 'string', 'string', 'string', 'int'] 
+Pet_OrcSoul_Rec            cap=1 rows=0 cols=2 types=['string', 'string'] 
+Pet_Last_AddBuff_Rec       cap=1 rows=0 cols=3 types=['string', 'string', 'string'] 
+pet_mac_rec                cap=64 rows=0 cols=8 types=['string', 'string', 'int', 'int', 'int', 'int', 'int', 'int'] 
+pointdisp_rec              cap=256 rows=0 cols=2 types=['string', 'int'] 
+pet_active_rec             cap=64 rows=0 cols=18 types=['string', 'string', 'string', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'string'] 
+pet_hortation_rec          cap=64 rows=0 cols=1 types=['string'] 
+pet_item_rec               cap=1024 rows=0 cols=2 types=['string', 'widestr'] 
+pet_in_castle_rec          cap=1024 rows=0 cols=1 types=['string'] 
+RecvLetterRec              cap=128 rows=0 cols=15 types=['widestr', 'string', 'int', 'int64', 'int', 'int', 'widestr', 'widestr', 'string', 'string', 'string', 'int', 'string', 'string', 'int'] 
+RecvLetterMidRec           cap=128 rows=0 cols=13 types=['widestr', 'string', 'int64', 'int', 'int', 'widestr', 'widestr', 'string', 'string', 'string', 'int', 'string', 'string'] 
+RecvLetterDealRec          cap=128 rows=0 cols=13 types=['widestr', 'string', 'int64', 'int', 'int', 'widestr', 'widestr', 'string', 'string', 'string', 'int', 'string', 'string'] 
+BackstageLetterRec         cap=128 rows=0 cols=8 types=['string', 'string', 'int', 'widestr', 'widestr', 'string', 'string', 'int'] 
+GiftWaitPostGetRec         cap=20 rows=0 cols=3 types=['int', 'string', 'int'] 
+AreaLvOneExploreRec        cap=64 rows=1 cols=1 types=['int'] [30000000]
+MapMarksRec                cap=32 rows=0 cols=4 types=['widestr', 'int', 'int', 'int'] 
+consum_capital_limit       cap=10 rows=0 cols=4 types=['int', 'int64', 'int', 'int64'] 
+daygain_capital_limit      cap=10 rows=0 cols=3 types=['int', 'int64', 'int'] 
+exchange_ticket_rec        cap=10 rows=0 cols=3 types=['double', 'int64', 'int64'] 
+exchange_gold_rec          cap=10 rows=0 cols=3 types=['double', 'int64', 'int64'] 
+QuestRecord                cap=25 rows=1 cols=4 types=['int', 'int', 'int', 'int'] [10001, 1, 1, 0]
+QuestCriteriaRecord        cap=256 rows=1 cols=6 types=['int', 'int', 'int', 'int', 'int', 'int'] [51057, 1, 0, 1, 10001, 1]
+QuestRewarded              cap=2048 rows=0 cols=1 types=['int'] 
+QuestRepeatRecord          cap=32 rows=0 cols=4 types=['int', 'int', 'int', 'int64'] 
+QuestTimeLimitRecord       cap=32 rows=0 cols=3 types=['int', 'int64', 'int64'] 
+QuestHideRecord            cap=128 rows=0 cols=3 types=['int', 'string', 'string'] 
+Quest_Fail_OnLoad_Rec      cap=25 rows=0 cols=1 types=['int'] 
+QuestSeriesRecord          cap=128 rows=1 cols=3 types=['string', 'int', 'int'] ['series_023', 1, 10001]
+CloneRepeatQuestRec        cap=32 rows=0 cols=4 types=['int', 'int', 'int', 'int'] 
+PVPTaskProgressRecord      cap=64 rows=8 cols=2 types=['string', 'int'] ['Task10', 0]; ['Task20', 0]
+PVPTaskCurrentRecord       cap=1 rows=0 cols=6 types=['string', 'int', 'int', 'int64', 'int', 'int'] 
+PVPTaskSubRecord           cap=10 rows=0 cols=3 types=['int', 'int', 'int'] 
+PVPPryTaskNPCRecord        cap=50 rows=0 cols=2 types=['int', 'object'] 
+PVPTaskTransBackRecord     cap=1 rows=0 cols=5 types=['int', 'float', 'float', 'float', 'float'] 
+PVPTaskPracticeRecord      cap=64 rows=0 cols=1 types=['int'] 
+PVPHorseRaceTimeRecord     cap=1 rows=0 cols=3 types=['int64', 'int64', 'int64'] 
+PVPTowerWarTimeRecord      cap=1 rows=0 cols=7 types=['int64', 'int64', 'int64', 'int64', 'int64', 'int', 'int'] 
+new_use_lead_shortcut_rec  cap=1024 rows=0 cols=4 types=['int', 'string', 'string', 'int'] 
+everydayrecommend_rec      cap=200 rows=0 cols=3 types=['string', 'int', 'int'] 
+boxstate_rec               cap=50 rows=0 cols=3 types=['string', 'int', 'int'] 
+pvetask_rec                cap=500 rows=0 cols=1 types=['int'] 
+pvptask_rec                cap=500 rows=0 cols=1 types=['string'] 
+eventtask_rec              cap=500 rows=1 cols=1 types=['int'] [14039]
+clonescene_rec             cap=50 rows=0 cols=1 types=['int'] 
+player_signin_rec          cap=3 rows=3 cols=7 types=['int', 'int', 'int', 'int64', 'string', 'string', 'int'] [15, 0, 0, 0, 'Baoshi_0001E_1,1;S_Drug_003C,5', '', 0]; [16, 0, 0, 0, 'Baoshi_0001A_1,1;S_Drug_003C,5', '', 0]
+mode_selected_rec          cap=1024 rows=0 cols=5 types=['int', 'int', 'int64', 'int64', 'int'] 
+charge_config_rec          cap=1024 rows=0 cols=4 types=['int', 'string', 'string', 'int'] 
+charge_capital_rec         cap=1024 rows=0 cols=4 types=['int', 'int64', 'int64', 'int64'] 
+PersonalCarrierMake        cap=1 rows=0 cols=7 types=['string', 'int', 'object', 'int64', 'int64', 'string', 'string'] 
+PersonalCarrierStore       cap=100 rows=0 cols=6 types=['string', 'int', 'int', 'int', 'int', 'string'] 
+player_energy_well_record  cap=256 rows=9 cols=6 types=['int', 'int', 'int', 'int', 'int', 'widestr'] [10001, 1, 0, 1, 0, '']; [10002, 1, 0, 2, 0, '']
+rec_my_consign             cap=150 rows=0 cols=1 types=['string'] 
+rec_my_bid                 cap=200 rows=0 cols=2 types=['string', 'int64'] 
+RecAskToBuyBillArgs        cap=100 rows=0 cols=3 types=['string', 'int', 'int64'] 
+netbar_right_rec           cap=64 rows=0 cols=5 types=['int', 'int', 'int', 'int', 'string'] 

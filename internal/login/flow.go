@@ -66,6 +66,9 @@ type Flow struct {
 	Logf func(format string, args ...any)
 	// Roles 角色仓（nil=Flow 内建内存仓；persist 接 DB 时替换）。
 	Roles *RoleStore
+	// Accounts 账号仓（nil=不校验凭据；persist 接 MySQL dc_accounts
+	// 时注入——首登自动注册、密码摘要不符拒绝）。
+	Accounts AccountStore
 	// OnLogin 账号通过结构校验后的回调（身份摘要入账号域/落库挂点）。
 	OnLogin func(sess *Session, identity AccountIdentity)
 	// OnEnterScene 选角进场回调（0x0B 已发出；ECS 物化/总线事件挂点）。
@@ -92,11 +95,19 @@ func (f *Flow) Handle(sess *Session, frame []byte) {
 	}
 	switch frame[0] {
 	case OpClientLogin:
-		identity, err := ParseLoginAccountIdentity(frame)
+		identity, secret, err := ParseLoginCredentials(frame)
 		if err != nil {
 			f.logf("flow: 会话 %d 拒绝登录结构: %v", sess.ID, err)
 			sess.Conn.Close() // 拒绝即断连
 			return
+		}
+		registered := false
+		if f.Accounts != nil {
+			if registered, err = f.Accounts.Verify(identity, secret); err != nil {
+				f.logf("flow: 会话 %d 账号 %s 凭据不符: %v", sess.ID, identity.Prefix(), err)
+				sess.Conn.Close() // 密码不符/存储故障同口径：拒绝即断连
+				return
+			}
 		}
 		if f.OnLogin != nil {
 			f.OnLogin(sess, identity)
@@ -112,7 +123,8 @@ func (f *Flow) Handle(sess *Session, frame []byte) {
 		if err := sess.Conn.WriteMsg(reply); err != nil {
 			return
 		}
-		f.logf("flow: 会话 %d 账号 %s 登录（角色=%t）", sess.ID, identity.Prefix(), sess.Role != nil)
+		f.logf("flow: 会话 %d 账号 %s 登录（角色=%t 注册=%t）",
+			sess.ID, identity.Prefix(), sess.Role != nil, registered)
 	case OpClientWorldReq:
 		if err := sess.Conn.WriteMsg(worldInfoFrame(0, openBooks)); err != nil {
 			return

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
-<!-- edited with XMLSpy v2010 (http://www.altova.com) by qiuyi (qiuyi) -->
+
+
 <Object>
 	<Property ID="1" Name="蒸汽大陆" Member="0" Script="scene" Config="ini\scene\westzq" Clonable="0" Resource="westzq" CollidePath="westzq" Born="ChushengWS000001" ReliveLocation="ReliveWS100001,ReliveWS100002,ReliveWS100007,ReliveWS100008,ReliveWS100009,ReliveWS100010,ReliveWS100011,ReliveWS100012,ReliveWS100013,ReliveWS100014,ReliveWS100015,ReliveWS100016,ReliveWS100017,ReliveWS100018,ReliveWS100019,ReliveWS100020,ReliveWS100021,ReliveWS100022,ReliveWS100023,ReliveWS100024,ReliveWS100025,ReliveWS100026,ReliveWS100027,ReliveWS100028,ReliveWS100029,Relive_kadiya_zq,Relive_kadiya_qh" Grouping="1" IsNight="0"/>
 	<Property ID="7" Name="蒸汽大陆2" Member="0" Script="scene" Config="ini\scene\westzq2" Clonable="0" Resource="westzq2" CollidePath="westzq2" Born="ChushengWS000001" ReliveLocation="ReliveWS100001,ReliveWS100002,ReliveWS100007,ReliveWS100008,ReliveWS100009,ReliveWS100010,ReliveWS100011,ReliveWS100012,ReliveWS100013,ReliveWS100014,ReliveWS100015,ReliveWS100016,ReliveWS100017,ReliveWS100018,ReliveWS100019,ReliveWS100020,ReliveWS100021,ReliveWS100022,ReliveWS100023,ReliveWS100024,ReliveWS100025,ReliveWS100026,ReliveWS100027,ReliveWS100028,ReliveWS100029,Relive_kadiya_zq,Relive_kadiya_qh" Grouping="1" IsNight="0"/>

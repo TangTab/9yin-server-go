@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 编辑使用 XMLSpy v2006 U (http://www.altova.com) 由 any (any) -->
-<!-- 被2011 rel. 2 sp1 (TeaM DJiNN) 使用XMLSpy vTeaM DJiNN编辑的 (http://www.altova.com) by -->
+
+
 <!-- ID对应 阵营10 + 种族10 + 职业1 -->
 <Object>
 	<Property ID="10101" HP="55" MP="38" Physical="58" GuardSkill="1111" AttributeID="1" TransJobList="21,22,23" DoTransJob="0" CantTransJob="1,1;1,1;1,1" TransConditionId="151;151;151" AutoQuestFlag="1"/>

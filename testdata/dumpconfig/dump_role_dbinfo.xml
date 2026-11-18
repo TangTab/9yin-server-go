@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- edited with XMLSpy v2010 (http://www.altova.com) by hahah (memem) -->
+
 <table name="nx_role_dumpinfo" primary="role_name" index="role_uid">
 	<property desc="玩家名" col="role_name" dbtype="nvarchar" type="prop" prop="Name" child="" createsql="role_name varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL"/>
 	<property desc="UID" col="role_uid" dbtype="varchar" type="prop" prop="Uid" child="" createsql="role_uid varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>

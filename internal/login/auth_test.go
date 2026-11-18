@@ -50,6 +50,56 @@ func TestCapturedLoginIdentity(t *testing.T) {
 	}
 }
 
+// TestParseLoginCredentialsSecret golden 首飞的密码摘要：md5hex-32、
+// 同帧同摘要（确定性），且与账号身份互相独立。
+func TestParseLoginCredentialsSecret(t *testing.T) {
+	plain := capturedFirstFlight(t)
+	identity, secret, err := ParseLoginCredentials(plain)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if identity.String() != capturedIdentity {
+		t.Fatalf("身份 %s want %s", identity.String(), capturedIdentity)
+	}
+	if len(secret) != 32 {
+		t.Fatalf("密码摘要长度 %d want 32（md5hex）", len(secret))
+	}
+	for _, c := range secret {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+			t.Fatalf("密码摘要含非 hex 字符 %q", c)
+		}
+	}
+	if _, again, err := ParseLoginCredentials(plain); err != nil || again != secret {
+		t.Fatalf("同帧密码摘要不稳定：%q vs %q（err=%v）", secret, again, err)
+	}
+}
+
+// TestPasswordMutationChangesSecret 密码槽变化必须换摘要
+// （凭据比对依赖：同明文同摘要、异明文异摘要）。
+func TestPasswordMutationChangesSecret(t *testing.T) {
+	plain := capturedFirstFlight(t)
+	acctLen := int(binary.LittleEndian.Uint32(plain[0x15:0x19]))
+	pwLenOff := 0x19 + acctLen
+	pwLen := int(binary.LittleEndian.Uint32(plain[pwLenOff : pwLenOff+4]))
+	pwStart := pwLenOff + 4
+
+	mutated := append([]byte(nil), plain...)
+	for i := pwStart; i < pwStart+pwLen; i++ {
+		mutated[i] ^= 0x5A
+	}
+	_, first, err := ParseLoginCredentials(plain)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, second, err := ParseLoginCredentials(mutated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first == second {
+		t.Fatal("密码槽变更应改变摘要")
+	}
+}
+
 // TestPasswordMutationStableIdentity 密码槽变化不改变账号身份
 // （身份只摘要 account 槽——多端改密不改键的方言基础）。
 func TestPasswordMutationStableIdentity(t *testing.T) {
