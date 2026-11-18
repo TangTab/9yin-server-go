@@ -117,4 +117,18 @@ func TestFlowEntrySceneOverGateway(t *testing.T) {
 	default:
 		t.Fatal("OnEnterScene 未触发")
 	}
+
+	// 重复 op04（真机重试方言）：0x0B 仍回发，但物化事件只发一次
+	if err := conn.WriteMsg([]byte{OpClientRoleSel}); err != nil {
+		t.Fatal(err)
+	}
+	reply, err := conn.ReadMsg()
+	if err != nil || reply[0] != OpEntryScene {
+		t.Fatalf("重复选角应答 %x %v", reply, err)
+	}
+	select {
+	case <-entered:
+		t.Fatal("重复 op04 不应再次物化")
+	default:
+	}
 }

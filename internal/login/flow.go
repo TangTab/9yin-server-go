@@ -140,12 +140,15 @@ func (f *Flow) Handle(sess *Session, frame []byte) {
 		if err := sess.Conn.WriteMsg(entrySceneFrame(sess.Role.Scene)); err != nil {
 			return
 		}
-		sess.Entered = true
-		if f.OnEnterScene != nil {
-			f.OnEnterScene(sess, sess.Role)
-		}
-		f.logf("flow: 会话 %d 选角 %q 进场 %s",
-			sess.ID, sess.Role.Name, sess.Role.Scene.Resource)
+		sess.EnterCount++
+		if !sess.Entered {
+			sess.Entered = true
+			if f.OnEnterScene != nil {
+				f.OnEnterScene(sess, sess.Role)
+			}
+		} // 已进场重复 op04：0x0B 幂等重发，不再重复物化（真机重试实测）
+		f.logf("flow: 会话 %d 选角 %q 进场 %s（第 %d 次）",
+			sess.ID, sess.Role.Name, sess.Role.Scene.Resource, sess.EnterCount)
 	case OpClientReady:
 		if !sess.Entered {
 			f.logf("flow: 会话 %d 未进场却 ClientReady，忽略", sess.ID)
