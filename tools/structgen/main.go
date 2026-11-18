@@ -25,14 +25,27 @@ import (
 )
 
 func main() {
-	in := flag.String("in", "testdata/struct", "struct XML 输入目录")
+	in := flag.String("in", "", "struct XML 输入目录（默认 testdata/struct；设置 NINEYIN_DATA 指向原版根目录时直读 <NINEYIN_DATA>/Res/struct）")
 	out := flag.String("out", "internal/component", "生成产物目录")
 	flag.Parse()
 
-	if err := run(*in, *out); err != nil {
+	dir := resolveIn(*in, filepath.Join("Res", "struct"), "testdata/struct")
+	if err := run(dir, *out); err != nil {
 		fmt.Fprintln(os.Stderr, "structgen:", err)
 		os.Exit(1)
 	}
+}
+
+// resolveIn 输入目录解析优先级：-in 显式参数 > NINEYIN_DATA 环境变量
+// （原版根目录，直读不拷贝）> 仓库内 testdata 快照（保证无外部依赖可构建）。
+func resolveIn(flagVal, envSub, fallback string) string {
+	if flagVal != "" {
+		return flagVal
+	}
+	if root := os.Getenv("NINEYIN_DATA"); root != "" {
+		return filepath.Join(root, filepath.FromSlash(envSub))
+	}
+	return fallback
 }
 
 func run(in, out string) error {

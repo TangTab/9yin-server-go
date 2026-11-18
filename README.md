@@ -15,6 +15,19 @@ go test ./...                  # 全量测试（含 golden 对拍）
 
 本地无 make 时直接使用上述 go 命令；Makefile 仅作等价包装。
 
+### 直读原版数据（可选）
+
+structgen / protogen 默认读仓库内 `testdata/` 快照（无外部依赖、构建可复现）。
+设置环境变量后**直读原版目录，不经过拷贝**：
+
+```sh
+export NINEYIN_DATA="E:\Workspace\project\game\九阴真经ol\BGserverCJ"
+go generate ./...   # protogen → $NINEYIN_DATA/Res/lua/share；structgen → $NINEYIN_DATA/Res/struct
+```
+
+优先级：`-in` 显式参数 > `NINEYIN_DATA` > `testdata/` 快照。
+（运行时 script 层同理：solo 的 `-scripts` 参数直接挂原版 `Res\lua`，只读。）
+
 ## 源码目录
 
 ```
@@ -46,6 +59,10 @@ build/                  编译产物（gitignore）
 ```
 
 各包职责与设计边界的详细说明见各包 `doc.go`。
+
+## 任务与进度
+
+里程碑清单、已完成工作明细、关键决策记录与下一步计划见 [docs/任务与进度.md](docs/任务与进度.md)。
 
 许可证
 本仓库的自有代码（cmd/、internal/、tools、及根工程配置）以 BSD 3-Clause 许可发布
