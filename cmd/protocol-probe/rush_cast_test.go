@@ -1202,6 +1202,145 @@ func TestRushUpliftChargeAirTier(t *testing.T) {
 	time.Sleep(700 * time.Millisecond) // 排空呆坐哨 AfterFunc
 }
 
+// v33 空中带限制（2026-11-18 真机复测定案）：无加成 3m 技空中授予窗收
+// (直收带, GRushRange 5]——v32 把 ARushRange+Add 14.5 整族铺开=启动距离远超
+// 官服「3~5m 立即冲锋」启动区间；方言表窗（sky 技本就是空中样本）与武技
+// 扩程窗空中原样优先（v32 曾被 14.5 反向覆写/截窄），未列 6m 族维持
+// (castRange+1, 14.5]（无地面带，空中仍须有带）。
+func TestRushAirBandUnlisted3MStartupCap(t *testing.T) {
+	t.Setenv("NINEYIN_RUSH_APPROACH", "off")
+	airReport := func(x, y, z float32) clientCustomMessage {
+		return clientCustomMessage{Opcode: 0x1E, Values: []clientCustomValue{
+			{Type: 2, Int32: clientCustomRushMoveUpload},
+			{Type: 4, Float32: x}, {Type: 4, Float32: y}, {Type: 4, Float32: z},
+			{Type: 4, Float32: 0.5},
+		}}
+	}
+	sawGrant := func(frames [][]byte, wantFlag int32) bool {
+		for _, f := range frames {
+			if f[0] != 0x1E {
+				continue
+			}
+			values := decodeCustomValuesFrame(t, f)
+			if len(values) >= 7 && values[0].Type == 2 && values[0].Int32 == 24 &&
+				values[2].Type == 2 && values[2].Int32 == msgRushCommand {
+				if values[6].Int32 != wantFlag {
+					t.Fatalf("c61 flag=%d, want %d", values[6].Int32, wantFlag)
+				}
+				return true
+			}
+		}
+		return false
+	}
+	conn := &captureMessageConnection{}
+	world := newSceneLifecycle("test", conn)
+	if err := world.begin("scene", "resource", nil); err != nil {
+		t.Fatal(err)
+	}
+	registerTestCombatNPC(t, world, 91)
+
+	// —— 无加成 3m 技：带外 8.5m 不授（v32 即授），带内 (3.5,5] 授 flag2 ——
+	player := newPlayerActor("空冲侠", 0)
+	capped := combatSkillDefinition{id: "CS_rush_aircap", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3,
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_2h_01"}
+	// 出招位 (4,3,0)、目标 (12,0,0)：高→低 3m=空中档；按压 3D≈8.5m 带外受理。
+	if _, err := stageRushCast(conn, player, world, capped, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 12, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 3, Z: 0}, 8.5, "test"); err != nil {
+		t.Fatal(err)
+	}
+	base := len(conn.Frames())
+	// m220 (4,3,0)：3D=√(64+9)≈8.5m > 5 → 不授。
+	if handled, err := handleRushMovementUpload(conn, player, world, airReport(4, 3, 0), "test"); err != nil || !handled {
+		t.Fatalf("air 220 handled=%t err=%v", handled, err)
+	}
+	if sawGrant(conn.Frames()[base:], 2) || player.rushDashIssuedSnapshot() {
+		t.Fatal("no-bonus 3m air report at 8.5m must not grant c61 (air cap GRushRange 5)")
+	}
+	// m220 (9,3,0)：3D=√(9+9)≈4.24 ∈ (3.5,5] → 空中档 flag2 授予。
+	if _, err := handleRushMovementUpload(conn, player, world, airReport(9, 3, 0), "test"); err != nil {
+		t.Fatal(err)
+	}
+	if !sawGrant(conn.Frames()[base:], 2) || !player.rushDashAirborneSnapshot() {
+		t.Fatal("no-bonus 3m air report within (3.5,5] must grant air-tier c61 flag2")
+	}
+	time.Sleep(50 * time.Millisecond) // 排空 m707[29] AfterFunc
+	// 212 收尾消费 pending（呆坐哨 AfterFunc 随之早退）。
+	if handled, err := handleCastDashLanding(conn, player, world, dashLandingMessage(10, 0, 0, 0), "test"); err != nil || !handled {
+		t.Fatalf("dash landing handled=%t err=%v", handled, err)
+	}
+
+	// —— 方言表 sky 窗空中原样：xytf02_sky (11,14.5]，3D≈12.4m 照授 ——
+	connS := &captureMessageConnection{}
+	playerS := newPlayerActor("天冲侠", 0)
+	sky := combatSkillDefinition{id: "CS_jz_xytf02_sky", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3,
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_0h_01"}
+	if _, err := stageRushCast(connS, playerS, world, sky, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 16, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 3, Z: 0}, 12.4, "test"); err != nil {
+		t.Fatal(err)
+	}
+	baseS := len(connS.Frames())
+	// m220 (4,3,0)：3D=√(144+9)≈12.37 ∈ (11,14.5] → 表窗授予。
+	if _, err := handleRushMovementUpload(connS, playerS, world, airReport(4, 3, 0), "test"); err != nil {
+		t.Fatal(err)
+	}
+	if !sawGrant(connS.Frames()[baseS:], 2) {
+		t.Fatal("dialect-table sky window (11,14.5] must stay effective in air")
+	}
+	time.Sleep(50 * time.Millisecond)
+	if handled, err := handleCastDashLanding(connS, playerS, world, dashLandingMessage(14, 0, 0, 0), "test"); err != nil || !handled {
+		t.Fatalf("sky dash landing handled=%t err=%v", handled, err)
+	}
+
+	// —— 武技扩程窗空中不缩水：chargeHi=20，3D≈15.3m（>14.5）照授 ——
+	connW := &captureMessageConnection{}
+	playerW := newPlayerActor("落尘侠", 0)
+	wuji := combatSkillDefinition{id: "wuji_CS_rush_airtest", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 3,
+		rushOverride:     &rushChargeOverride{chargeHi: 20},
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_2h_01"}
+	if _, err := stageRushCast(connW, playerW, world, wuji, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 19, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 3, Z: 0}, 15.3, "test"); err != nil {
+		t.Fatal(err)
+	}
+	baseW := len(connW.Frames())
+	// m220 (4,3,0)：3D=√(225+9)≈15.3 ∈ (3.5,20]（v32 空中截窄 14.5 会漏授）。
+	if _, err := handleRushMovementUpload(connW, playerW, world, airReport(4, 3, 0), "test"); err != nil {
+		t.Fatal(err)
+	}
+	if !sawGrant(connW.Frames()[baseW:], 2) {
+		t.Fatal("wuji-extended window must not be narrowed in air (chargeHi=20)")
+	}
+	time.Sleep(50 * time.Millisecond)
+	if handled, err := handleCastDashLanding(connW, playerW, world, dashLandingMessage(17, 0, 0, 0), "test"); err != nil || !handled {
+		t.Fatalf("wuji dash landing handled=%t err=%v", handled, err)
+	}
+
+	// —— 未列 6m 族空中带保留：(castRange+1, 14.5]，3D≈8.5m 照授 ——
+	conn6 := &captureMessageConnection{}
+	player6 := newPlayerActor("六米空侠", 0)
+	six := combatSkillDefinition{id: "CS_rush_aircap6", canRush: true, script: "skilllock",
+		bindDistance: defaultRushBindDistance, castRange: 6,
+		groundRushAction: defaultGroundRushAction, airRushAction: "qg_fastruning_s_2h_01"}
+	if _, err := stageRushCast(conn6, player6, world, six, forkNPCID(91), npcTestOwner(91),
+		worldcore.Transform{X: 12, Y: 0, Z: 0}, worldcore.Transform{X: 4, Y: 3, Z: 0}, 8.5, "test"); err != nil {
+		t.Fatal(err)
+	}
+	base6 := len(conn6.Frames())
+	// m220 (4,3,0)：3D≈8.5 ∈ (7,14.5] → 授予（6m 族空中带是受理唯一出口）。
+	if _, err := handleRushMovementUpload(conn6, player6, world, airReport(4, 3, 0), "test"); err != nil {
+		t.Fatal(err)
+	}
+	if !sawGrant(conn6.Frames()[base6:], 2) {
+		t.Fatal("unlisted 6m family must keep air band (castRange+1, 14.5]")
+	}
+	time.Sleep(50 * time.Millisecond)
+	if handled, err := handleCastDashLanding(conn6, player6, world, dashLandingMessage(10, 0, 0, 0), "test"); err != nil || !handled {
+		t.Fatalf("6m dash landing handled=%t err=%v", handled, err)
+	}
+}
+
 // v30 近身高差立即冲锋（直发 stageRushCast 层）：直收带内但 Δy>1m——
 // 受理簇后立即冲锋（低→高 2m → 空中奔袭 15m/s），ETA 到点释放。
 func TestNearHeightGapStagesAndChargesImmediately(t *testing.T) {

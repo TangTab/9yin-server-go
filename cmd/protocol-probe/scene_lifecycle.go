@@ -687,13 +687,17 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		// 16-prop 模板全新生成（fork 大档字段集外服客户端读不懂，
 		// 15:28 会话实证不建对象）。
 		// 假人是玩家形对象（dummyAddObject 的 0x0D 玩家大档，字段按
-		// official2433 表按名解析、fork-only 行缺席即跳）：OFFICIAL 档下
-		// 不能重写为 NPC 16-prop 小档——sceneEntity 只给 ConfigID="dummy"/
-		// 空 Resource，npc 目录无此配置，官方客户端建对象后查不到模型
-		// 不渲染（2026-11-17 23:34 真机实证：物化帧已发而全程零显示）。
-		// 改走 0x28 mode=0x46 明文包装（官方家族建对象通道，信封与玩家
-		// 档案帧/官服 AOI 同构），保留外观/门派/实力全字段。
-		if npcOfficial0x28Enabled() && isDummyObjectID(uint32(id)) && payload[0] == 0x0D {
+		// official2433 表按名解析、fork-only 行缺席即跳）：**恒**走 0x28
+		// mode=0x46 明文包装（官方家族建对象通道，信封与玩家档案帧/官服
+		// AOI 同构），保留外观/门派/实力全字段——2026-11-18 复盘：此前
+		// 仅在 NINEYIN_NPC_0X28_OFFICIAL=1 时包装，而本服属性表恒为
+		// official2433（客户端即官方家族），env 未设时修复分支整段不跑，
+		// 裸 0x0D 大档官方客户端不建对象（15:28 实证），故去 env 门控。
+		// NPC 16-prop 小档重写路线对假人仍禁用：sceneEntity 只有
+		// ConfigID="dummy"/空 Resource，npc 目录无此配置，建对象后查不到
+		// 模型不渲染（2026-11-17 23:34 真机实证：物化帧已发而全程零显示）。
+		dummyObject := isDummyObjectID(uint32(id))
+		if dummyObject && payload[0] == 0x0D {
 			payload = wrapObjectAddAsOp28(payload)
 		} else if npcOfficial0x28Enabled() {
 			// NpcType 功能分派位透传（真机+head_game.lua 定案：61~69=头顶
@@ -733,7 +737,10 @@ func (s *sceneLifecycle) reconcileViewportLocked() error {
 		// 身份策略迥异故共同点排除身份串、指向时序；外服私服 #1776→#1777
 		// 先 0x28 配对疑为 op29 批量预载对象特例，新对象应先物化后详情
 		//（=1 探针首测同教训 c1cd1b9）。
-		if npcDetail0x28Enabled() {
+		// 假人（玩家形对象）跳过：NPC 详情记录携带 npc 方言身份行
+		//（ConfigID="dummy" 客户端 npc 表无此配置），会覆盖刚物化的玩家
+		// 档案身份 → 建对象后查不到模型不渲染（23:34 实证同路径）。
+		if npcDetail0x28Enabled() && !dummyObject {
 			// v3（2026-11-11）：mode=0x46 明文方言程序化构造——0x47 LZ
 			// 模板路线四连崩定案退役（根因=模板保真段的池回引 token 依赖
 			// 客户端全会话字典状态，见 docs/official/op28-fxnet2-lz-decoder.md）；

@@ -555,3 +555,63 @@ func TestDummyInstallLimitTrimAndRestore(t *testing.T) {
 		t.Fatalf("禁用后 = %d，应为 0", disabled)
 	}
 }
+
+// TestDummyMaterializeFrameSequenceDefaultMode 回归锁（2026-11-18 诊断定案）：
+// 默认 env（无 NINEYIN_NPC_0X28_OFFICIAL / ADD_AS）下完整驱动
+// begin→attach→准入→clientActivity，假人物化帧序必须是
+// [0x28 mode=0x46 包装的玩家大档] + [0x31 linkpair] + [0x1F 落位]——
+// 不发裸 0x0D（官方家族客户端不建对象，15:28 实证），不发 NPC 0x28
+// 详情帧（ConfigID="dummy" 无模型覆盖身份，23:34 实证同路径）。
+func TestDummyMaterializeFrameSequenceDefaultMode(t *testing.T) {
+	dummies := []dummyPlayer{
+		{Name: "诊断假人甲", Sex: 1, School: "school_emei", Level: 30, Scene: "city05",
+			Pos: dummyPosition{X: 1, Z: 1}},
+		{Name: "诊断假人乙", Sex: 0, School: "school_wudang", Level: 31, Scene: "city05",
+			Pos: dummyPosition{X: 2, Z: 2}},
+	}
+	setDummyTestSnapshot(t, dummies)
+	conn := &captureMessageConnection{}
+	view := newSceneLifecycle("dummy-diag", conn)
+	if err := view.begin(role.Scene{Config: `ini\scene\city05_ChengDu`, Resource: "city05"}.Config, "city05", nil); err != nil {
+		t.Fatalf("begin: %v", err)
+	}
+	view.radius = 120
+	view.attachMember(nil, role.Position{X: 0, Y: 0, Z: 0}, roleVisual{})
+	if changed := view.updateMemberPosition(role.Position{X: 0, Y: 0, Z: 0}, nil); !changed {
+		t.Fatal("准入未产生变化")
+	}
+	if err := view.clientReady(); err != nil {
+		t.Fatalf("clientReady: %v", err)
+	}
+	if err := view.clientActivity(); err != nil {
+		t.Fatalf("clientActivity: %v", err)
+	}
+	// 每只假人：0x28(0x46) 包装物化 → 0x31 绑定 → 0x1F 落位（无 NPC 详情帧）。
+	sequence := [][]byte{}
+	for _, frame := range conn.Frames() {
+		sequence = append(sequence, frame)
+	}
+	if len(sequence) != 6 {
+		t.Fatalf("下发帧数 = %d，应为 6（2 假人×3 帧）", len(sequence))
+	}
+	for i := 0; i < 2; i++ {
+		add, link, locate := sequence[i*3], sequence[i*3+1], sequence[i*3+2]
+		if add[0] != 0x28 || add[1] != 0x46 {
+			t.Fatalf("假人#%d 物化帧头 = %x，应为 28 46（明文包装）", i, add[:2])
+		}
+		// 体 = 0x0D 帧去掉首字节：体首 4 字节是 objectID。
+		bodyID := binaryLE(add[10:14])
+		if bodyID != dummyObjectIDBase+uint32(i) {
+			t.Fatalf("假人#%d 包装体 objectID = %#x", i, bodyID)
+		}
+		if link[0] != 0x31 {
+			t.Fatalf("假人#%d 第二帧 op=%#x，应为 0x31", i, link[0])
+		}
+		if locate[0] != 0x1F {
+			t.Fatalf("假人#%d 第三帧 op=%#x，应为 0x1F", i, locate[0])
+		}
+		if locateID := binaryLE(locate[1:5]); locateID != dummyObjectIDBase+uint32(i) {
+			t.Fatalf("假人#%d 落位帧 objectID = %#x", i, locateID)
+		}
+	}
+}
