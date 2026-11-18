@@ -1,6 +1,0 @@
-{
-  "version": 1,
-  "_comment": "技能级位移受击覆写表（skill_hurt_reaction.go 第 37 轮建，第 40 轮加 final_hit_only）。优先级最高，盖过技能描述文本与 trigger 表判定。reactions 取值：up=击飞/浮空，down=击倒/倒地，back=击退，normal=原地受击。final_hit_only 列出『位移只在最后一跳生效』的技能（描述写『终结之一击可砸飞』『招式最后一击可击倒』这类），列表里的技能仍用 reactions 或描述给的类别，只是限定跳跃——中间各击只播普通受击。第 40 轮实测描述表已能自动认出 104 个仅末击技能（CS_jh_sfgp08 关门打狗、CS_sl_dmgf05 万棍齐出等），本表只在描述缺失或判定不合意时手工补。",
-  "reactions": {},
-  "final_hit_only": []
-}

@@ -1,7 +1,15 @@
+
+gmtest-sandbox/
+.zcode
+.zcode-tmp
 /artifacts/
 /build/
+/captures/
+/data/
+/data-legacy-*.tar.gz
 /logs/
 /resources/
+/tmp/
 *.exe
 *.exe~
 *.log
@@ -10,6 +18,11 @@
 *.i64
 *.pdb
 *.dmp
+*.7z
 
-
-resources
+/res*.*
+env.server
+__pycache__
+tmp_*
+mitm_log
+start_view.bat
