@@ -16,22 +16,25 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/config"
 	"github.com/lizhanyin/9yin-server-go/internal/ecs"
 	"github.com/lizhanyin/9yin-server-go/internal/engine"
+	"github.com/lizhanyin/9yin-server-go/internal/login"
 )
 
-const version = "0.1.0-solo-skeleton"
+const version = "0.2.0-solo-gateway"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
 //   - [x] structgen 产出 component + 元数据（208 对象/1666 属性/306 表格）
 //   - [x] config 加载 scenes.xml / logic_class.xml（含通用 Object/Property 加载器）
 //   - [x] engine tick 循环 + proc/inproc Bus
-//   - [ ] net/proto 最小集：握手 + 心跳（probe 对拍）
+//   - [x] net/proto 最小集：EE+XOR 线路 + 引擎级消息/自定义消息目录 + 心跳网关
+//     （cmd/probe 对拍：golden ping→pong 真 TCP 往返）
 //   - [ ] login 主干：进场景 + AOI + 属性全量集下发
 //   - [ ] persist：DDL 建库 + 角色存取
 func main() {
 	var (
 		scenesPath = flag.String("scenes", "testdata/ini/scenes.xml", "scenes.xml 路径")
 		logicPath  = flag.String("logicclass", "testdata/ini/logic_class.xml", "logic_class.xml 路径")
+		listen     = flag.String("listen", "127.0.0.1:9600", "客户端网关监听地址（空=不监听）")
 		tps        = flag.Int("tps", 60, "每秒 tick 数（0=全速）")
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
 	)
@@ -70,6 +73,29 @@ func main() {
 			}
 		})
 	})
+
+	// ---- 网关：客户端线路（EE+XOR），当前只应答心跳 ----
+	var gateway *login.Gateway
+	if *listen != "" {
+		gateway = &login.Gateway{
+			Addr: *listen,
+			Logf: func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+		}
+		app.OnStart(func(*engine.App) {
+			addr, err := gateway.Listen()
+			if err != nil {
+				fatal(err)
+			}
+			fmt.Printf("网关就绪：%s（EE+XOR，心跳应答；probe 对拍：./build/probe.exe -addr %s）\n",
+				addr, addr)
+			go gateway.Serve()
+		})
+		app.OnStop(func(*engine.App) {
+			if err := gateway.Close(); err != nil {
+				fmt.Fprintln(os.Stderr, "solo: 网关关闭:", err)
+			}
+		})
+	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
