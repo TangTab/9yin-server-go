@@ -713,7 +713,7 @@ func wearGMTemplate(h *itemSession, template gmItemRow, entries []gmAffixEntry, 
 	worn.propBuilt = propBuiltOfAffixes(affixes)
 	h.player.replaceEquipSlot(worn)
 	if framesErr := pushWearFrames(h.link, h.roleID, h.player.visualSexOf(),
-		effectiveShowEquipType(h.player), worn, h.player.sessionEquips()); framesErr != nil {
+		effectiveShowEquipType(h.player), worn, h.player.sessionEquips(), h.player.blendSnapshot()); framesErr != nil {
 		return "", framesErr
 	}
 	// 模板包 record（镇派兵器词条官方通道 394/395）+ 宝物/娃娃随机属性

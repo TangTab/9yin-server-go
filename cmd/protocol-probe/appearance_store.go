@@ -20,11 +20,12 @@ import (
 // 走默认（显示类型 0），写入错误由调用方降级日志。
 const appearanceQueryTimeout = 5 * time.Second
 
-// appearanceStores 聚合外观域三个存储（customConfigStores 同款装配层）。
+// appearanceStores 聚合外观域四个存储（customConfigStores 同款装配层）。
 type appearanceStores struct {
 	appearance *appearanceDBStore
 	fashion    *fashionSuitDBStore
 	skins      *skinDBStore
+	blends     *blendDBStore
 }
 
 func newAppearanceStores(db *sql.DB) appearanceStores {
@@ -32,6 +33,7 @@ func newAppearanceStores(db *sql.DB) appearanceStores {
 		appearance: newAppearanceDBStore(db),
 		fashion:    newFashionSuitDBStore(db),
 		skins:      newSkinDBStore(db),
+		blends:     newBlendDBStore(db),
 	}
 }
 

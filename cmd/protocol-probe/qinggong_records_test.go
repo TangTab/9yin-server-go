@@ -30,6 +30,7 @@ func TestQingGongRecordSchemaAndRowLayout(t *testing.T) {
 		"ActiveQGSkillRec":   recordActiveQingGong,
 		"active_jingmai_rec": recordActiveJingMai,
 		"FashionSuitRec":     recordFashionSuit,
+		"blend_collect_rec":  recordBlendCollect,
 		"CardRec":            recordCard,
 		"UseCardRec":         recordUseCard,
 	} {
@@ -52,6 +53,13 @@ func TestQingGongRecordSchemaAndRowLayout(t *testing.T) {
 	if schema, _ := clientdata.RecordSchemaByIndex(int(recordActiveQingGong)); len(schema.ColumnTypes) != 2 ||
 		schema.ColumnTypes[0] != recordColumnString || schema.ColumnTypes[1] != recordColumnByte {
 		t.Fatalf("active qinggong schema=%+v", schema)
+	}
+	// blend_collect_rec（梳妆阁图纸收藏）：string + int32 + int32 + byte
+	//（末列 ACTIVE 是 byte，int32 会让编码器拒收——官方表实测）。
+	if schema, _ := clientdata.RecordSchemaByIndex(int(recordBlendCollect)); len(schema.ColumnTypes) != 4 ||
+		schema.ColumnTypes[0] != recordColumnString || schema.ColumnTypes[1] != recordColumnInt ||
+		schema.ColumnTypes[2] != recordColumnInt || schema.ColumnTypes[3] != recordColumnByte {
+		t.Fatalf("blend collect schema=%+v", schema)
 	}
 	row := serverRecordAddString(1, 1, recordQingGong, "qinggong_8")
 	if len(row) != 16+4+len("qinggong_8")+1 || row[0] != 0x11 || row[1] != 0 {

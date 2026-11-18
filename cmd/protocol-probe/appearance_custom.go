@@ -24,9 +24,10 @@ import (
 )
 
 const (
-	clientCustomShowEquipType int32 = 61 // CLIENT_CUSTOMMSG_SHOWEQUIP_TYPE
-	clientCustomFashionSuit   int32 = 19 // CLIENT_CUSTOMMSG_FASHION_SUIT
-	clientCustomWardrobeCard  int32 = 180
+	clientCustomShowEquipType    int32 = 61 // CLIENT_CUSTOMMSG_SHOWEQUIP_TYPE
+	clientCustomFashionSuit      int32 = 19 // CLIENT_CUSTOMMSG_FASHION_SUIT
+	clientCustomWardrobeCard     int32 = 180
+	clientCustomAttireEquipBlend int32 = 692 // CLIENT_CUSTOMMSG_ATTIRE_EQUIP_BLEND（梳妆阁保存，attire_blend.go）
 )
 
 // appearanceSession 外观域 handler 的会话上下文（itemSession 同款参数包）。
@@ -36,6 +37,7 @@ type appearanceSession struct {
 	inventory    *inventoryStore     // 可为 nil（纯内存降级）
 	appearance   *appearanceDBStore  // 可为 nil
 	fashionStore *fashionSuitDBStore // 可为 nil
+	blends       *blendDBStore       // 梳妆阁图纸存档（可为 nil；attire_blend.go）
 	ctx          context.Context
 	roleID       role.RoleID
 	remote       string
@@ -115,7 +117,7 @@ func pushAppearanceRefresh(link sceneMessageConnection, player *playerActor) err
 	showEquipType := effectiveShowEquipType(player)
 	equips := player.sessionEquips()
 	sex := player.visualSexOf()
-	frame, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipType, sex, equips)
+	frame, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipType, sex, equips, player.blendOverlay(sex, equips))
 	if err != nil {
 		return err
 	}
@@ -135,10 +137,12 @@ func pushAppearanceRefresh(link sceneMessageConnection, player *playerActor) err
 // 已同步停发，本帧是唯一我方外观源）。
 func pushEquipAppearance(link sceneMessageConnection, player *playerActor, equips []equipRow) error {
 	showEquipType := effectiveShowEquipType(player)
-	if !appearanceOverlayOccupied(equips, showEquipType) && !replayNativeFramesEnabled() {
+	sex := player.visualSexOf()
+	blend := player.blendOverlay(sex, equips)
+	if !appearanceOverlayOccupied(equips, showEquipType, blend) && !replayNativeFramesEnabled() {
 		return nil
 	}
-	frame, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipType, player.visualSexOf(), equips)
+	frame, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipType, sex, equips, blend)
 	if err != nil {
 		return err
 	}
@@ -269,7 +273,7 @@ func wearFashionSuit(h *appearanceSession, configID string) error {
 	h.player.replaceEquipSlot(worn)
 	equipsNow := h.player.sessionEquips()
 	sex := h.player.visualSexOf()
-	if err := pushWearFrames(h.link, h.roleID, sex, effectiveShowEquipType(h.player), worn, equipsNow); err != nil {
+	if err := pushWearFrames(h.link, h.roleID, sex, effectiveShowEquipType(h.player), worn, equipsNow, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: fashion wear push frames: %v", h.remote, err)
 	}
 	// 穿戴即切显示类型（与存档不同才落库）。
@@ -436,7 +440,7 @@ func roleListLookOf(ctx context.Context, inventory *inventoryStore, appearance a
 		return look
 	}
 	if effective == showEquipIdentity || effective == showEquipFashion {
-		finals := finalModels(effective, base.sex, equips)
+		finals := finalModels(effective, base.sex, equips, nil) // 选角预览无会话绑定态
 		if model := finals[partCloth]; model != "" {
 			merged.cloth = model
 		}

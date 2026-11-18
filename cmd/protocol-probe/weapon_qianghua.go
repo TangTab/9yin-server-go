@@ -279,7 +279,7 @@ func handleQiangHuaCustom(h *itemSession, custom clientCustomMessage) (bool, err
 		wornItem.propBuilt = built
 		h.player.replaceEquipSlot(wornItem)
 		if err := pushWearFrames(h.link, h.roleID, h.player.visualSexOf(),
-			effectiveShowEquipType(h.player), wornItem, h.player.sessionEquips()); err != nil {
+			effectiveShowEquipType(h.player), wornItem, h.player.sessionEquips(), h.player.blendSnapshot()); err != nil {
 			log.Printf("%s: qianghua 861 wear frames: %v", h.remote, err)
 		}
 	} else {
@@ -289,7 +289,7 @@ func handleQiangHuaCustom(h *itemSession, custom clientCustomMessage) (bool, err
 		}
 		h.player.updateBagRowPropBuilt(uint16(view), index, built)
 		if fresh, _, ok := bagItemAtForView(h.player, uint16(view), index); ok {
-			if err := pushBagItemFrames(h.link, h.roleID, fresh); err != nil {
+			if err := pushBagItemFrames(h.link, h.roleID, fresh, h.player.blendSnapshot()); err != nil {
 				log.Printf("%s: qianghua 861 bag frames: %v", h.remote, err)
 			}
 			// 清格+重发同槽位也会清掉客户端挂着的模板包/随机属性行，

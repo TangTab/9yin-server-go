@@ -181,12 +181,13 @@ func (p *playerActor) freeBagSlot(category int32) int32 {
 // ---- 帧组助手（Java pushBagItemFrames/pushWearFrames 同序） ----
 
 // pushBagItemFrames 入包帧组：0x19(view,slot) 预清 → 0x18 行 → 0x19(镜像页,slot)。
-func pushBagItemFrames(link sceneMessageConnection, roleID role.RoleID, item bagRow) error {
+// blends 是梳妆阁图纸绑定表（行图标替换用，nil=无绑定）。
+func pushBagItemFrames(link sceneMessageConnection, roleID role.RoleID, item bagRow, blends map[string]string) error {
 	view := bagViewOf(item.viewID)
 	if err := link.WriteFrame(serverViewRemove(view, uint16(item.slot))); err != nil {
 		return err
 	}
-	frame, err := bagRowViewAdd(roleID, item)
+	frame, err := bagRowViewAdd(roleID, item, blends)
 	if err != nil {
 		return fmt.Errorf("encode bag row %s: %w", item.configID, err)
 	}
@@ -202,12 +203,13 @@ func pushBagItemFrames(link sceneMessageConnection, roleID role.RoleID, item bag
 // pushWearFrames 穿戴帧组：纸娃娃清格 → 行 → 时装镜像槽成对 → 外观
 // 0x10（appearanceFrame：ShowEquipType + 三模式裁决模型 + 武器三属性
 // 显式清除——Java pushWearFrames 同序；词缀重算 applyEquipBonuses 属
-// 词缀专项未移植，跳过）。
-func pushWearFrames(link sceneMessageConnection, roleID role.RoleID, sex byte, showEquipType int, equip equipRow, equips []equipRow) error {
+// 词缀专项未移植，跳过）。blends 是图纸绑定表：行图标替换 + 逐槽模型
+// 覆盖（blendOverlayFor 派生，nil=无绑定）。
+func pushWearFrames(link sceneMessageConnection, roleID role.RoleID, sex byte, showEquipType int, equip equipRow, equips []equipRow, blends map[string]string) error {
 	if err := link.WriteFrame(serverViewRemove(viewDoll, uint16(equip.slot))); err != nil {
 		return err
 	}
-	frame, err := equipmentViewAdd(roleID, equip)
+	frame, err := equipmentViewAdd(roleID, equip, blends)
 	if err != nil {
 		return fmt.Errorf("encode equip row %s: %w", equip.configID, err)
 	}
@@ -220,7 +222,7 @@ func pushWearFrames(link sceneMessageConnection, roleID role.RoleID, sex byte, s
 		}
 		mirrored := equip
 		mirrored.slot = mirror
-		mirrorFrame, err := equipmentViewAdd(roleID, mirrored)
+		mirrorFrame, err := equipmentViewAdd(roleID, mirrored, nil) // 镜像槽位非图纸绑定 key
 		if err != nil {
 			return fmt.Errorf("encode mirrored equip row %s: %w", equip.configID, err)
 		}
@@ -228,7 +230,7 @@ func pushWearFrames(link sceneMessageConnection, roleID role.RoleID, sex byte, s
 			return err
 		}
 	}
-	appearance, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipType, sex, equips)
+	appearance, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipType, sex, equips, blendOverlayFor(roleID, blends, sex, equips))
 	if err != nil {
 		return fmt.Errorf("encode appearance frame: %w", err)
 	}
@@ -351,7 +353,7 @@ func (h *itemSession) consumeBagItemCount(item bagRow, count int32) bool {
 	if remaining > 0 {
 		updated := item
 		updated.amount = remaining
-		if err := pushBagItemFrames(h.link, h.roleID, updated); err != nil {
+		if err := pushBagItemFrames(h.link, h.roleID, updated, h.player.blendSnapshot()); err != nil {
 			log.Printf("%s: push consumed row: %v", h.remote, err)
 		}
 	} else {
@@ -409,7 +411,7 @@ func (h *itemSession) addToBagItemCount(item bagRow, count int32) bool {
 	h.player.mu.Unlock()
 	updated := item
 	updated.amount = total
-	if err := pushBagItemFrames(h.link, h.roleID, updated); err != nil {
+	if err := pushBagItemFrames(h.link, h.roleID, updated, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: push stacked row: %v", h.remote, err)
 	}
 	return true
@@ -453,7 +455,7 @@ func (h *itemSession) grantBagItemRow(entry grantableItem, amount int32) (bagRow
 	h.player.mu.Lock()
 	h.player.bag = append(h.player.bag, inserted)
 	h.player.mu.Unlock()
-	if err := pushBagItemFrames(h.link, h.roleID, inserted); err != nil {
+	if err := pushBagItemFrames(h.link, h.roleID, inserted, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: push granted row: %v", h.remote, err)
 	}
 	h.pushRandomPropsForBag(inserted.configID, inserted.uid, inserted.viewID, inserted.slot)
@@ -540,7 +542,7 @@ func unequipFromDoll(h *itemSession, equipSlot, toView, toSlot int32) {
 			log.Printf("%s: unequip clear mirror: %v", h.remote, err)
 		}
 	}
-	if err := pushBagItemFrames(h.link, h.roleID, landed); err != nil {
+	if err := pushBagItemFrames(h.link, h.roleID, landed, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: unequip push bag row: %v", h.remote, err)
 	}
 	// 宝物/娃娃脱下入包：record 跟随 uid 整推到背包槽位；镇派兵器
@@ -553,7 +555,7 @@ func unequipFromDoll(h *itemSession, equipSlot, toView, toSlot int32) {
 	}
 	// 外观整刷（Java pushAppearanceRefresh 同口径：脱下后按有效显示
 	// 类型重推最终模型 + 武器三属性显式清除）。
-	if appearance, err := appearanceFrame(playerObjectID, playerOwnerID, effectiveShowEquipType(h.player), sex, equipsNow); err != nil {
+	if appearance, err := appearanceFrame(playerObjectID, playerOwnerID, effectiveShowEquipType(h.player), sex, equipsNow, h.player.blendOverlay(sex, equipsNow)); err != nil {
 		log.Printf("%s: unequip appearance encode: %v", h.remote, err)
 	} else if err := h.link.WriteFrame(appearance); err != nil {
 		log.Printf("%s: unequip appearance frame: %v", h.remote, err)
@@ -655,13 +657,13 @@ func wearFromBag(h *itemSession, fromView, fromSlot, toSlot int32) bool {
 		}
 	}
 	if hasOld {
-		if err := pushBagItemFrames(h.link, h.roleID, landedOld); err != nil {
+		if err := pushBagItemFrames(h.link, h.roleID, landedOld, h.player.blendSnapshot()); err != nil {
 			log.Printf("%s: wear push swapped row: %v", h.remote, err)
 		}
 		// 让位旧宝物/娃娃回背包：record 跟随 uid 整推到背包槽位。
 		h.pushRandomPropsForBag(landedOld.configID, landedOld.uid, landedOld.viewID, landedOld.slot)
 	}
-	if err := pushWearFrames(h.link, h.roleID, sex, effectiveShowEquipType(h.player), worn, equipsNow); err != nil {
+	if err := pushWearFrames(h.link, h.roleID, sex, effectiveShowEquipType(h.player), worn, equipsNow, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: wear push frames: %v", h.remote, err)
 	}
 	// 宝物/娃娃穿上：record 整推到纸娃娃槽位；镇派兵器武器槽：动态 4
@@ -745,7 +747,7 @@ func moveBagRowBetweenViews(h *itemSession, fromView, fromSlot, toView, toSlot i
 			log.Printf("%s: move clear source mirror: %v", h.remote, err)
 		}
 	}
-	if err := pushBagItemFrames(h.link, h.roleID, moved); err != nil {
+	if err := pushBagItemFrames(h.link, h.roleID, moved, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: move push row: %v", h.remote, err)
 	}
 	// 属性 record 跟随槽位：0x19 清格会连带清掉客户端挂在旧 (view,slot)
@@ -796,7 +798,7 @@ func swapBagRows(h *itemSession, fromView, fromSlot int32, src bagRow, srcIndex 
 		}
 	}
 	for _, row := range []bagRow{movedSrc, movedDst} {
-		if err := pushBagItemFrames(h.link, h.roleID, row); err != nil {
+		if err := pushBagItemFrames(h.link, h.roleID, row, h.player.blendSnapshot()); err != nil {
 			log.Printf("%s: swap push row: %v", h.remote, err)
 		}
 		// 交换后属性 record 须按各自新槽位重推：清格已把客户端挂在旧
@@ -850,7 +852,7 @@ func mergeBagRows(h *itemSession, fromView, fromSlot int32, src, dst bagRow) {
 	}
 	merged := dst
 	merged.amount = total
-	if err := pushBagItemFrames(h.link, h.roleID, merged); err != nil {
+	if err := pushBagItemFrames(h.link, h.roleID, merged, h.player.blendSnapshot()); err != nil {
 		log.Printf("%s: merge push row: %v", h.remote, err)
 	}
 	log.Printf("%s: move 30 merge bag[%d:%d] into bag[%d:%d] %s x%d -> total %d",
@@ -1011,7 +1013,7 @@ func handleArrangeItemCustom(h *itemSession, custom clientCustomMessage) (bool, 
 	for _, move := range moves {
 		moved := move.row
 		moved.slot = move.to
-		if err := pushBagItemFrames(h.link, h.roleID, moved); err != nil {
+		if err := pushBagItemFrames(h.link, h.roleID, moved, h.player.blendSnapshot()); err != nil {
 			log.Printf("%s: arrange push row: %v", h.remote, err)
 		}
 		// 同 swap：槽位变化后按新槽位整推属性 record（无包无随机零帧）。

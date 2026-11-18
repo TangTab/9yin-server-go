@@ -78,7 +78,7 @@ func persistRecastAffixes(h *itemSession, row equipRow, entries []gmAffixEntry, 
 	row.propBuilt = propBuiltOfAffixes(affixes)
 	h.player.replaceEquipSlot(row)
 	if framesErr := pushWearFrames(h.link, h.roleID, h.player.visualSexOf(),
-		effectiveShowEquipType(h.player), row, h.player.sessionEquips()); framesErr != nil {
+		effectiveShowEquipType(h.player), row, h.player.sessionEquips(), h.player.blendSnapshot()); framesErr != nil {
 		return "", framesErr
 	}
 	return receipt, nil

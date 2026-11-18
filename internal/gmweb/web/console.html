@@ -736,6 +736,18 @@
         <div id="hair-hint" class="muted"></div>
       </section>
       <section>
+        <h2>梳妆阁图纸</h2>
+        <p class="muted">
+          图纸收藏（blend_collect_rec）登录即全解锁——游戏内 C 面板打开梳妆阁
+          选中图纸保存即可绑定到装备件（替换该件外观模型与图标，跨登录保留；
+          优先级 时装 &gt; 图纸 &gt; 身份装套装 &gt; 装备）。客户端「恢复默认」
+          是纯本地预览，服务端还原走下方按钮。
+        </p>
+        <button onclick="command({ action: 'clear_attire_blends' })">
+          清空全部图纸绑定（外观/图标回落）
+        </button>
+      </section>
+      <section>
         <h2>五维属性</h2>
         <p class="muted">
           直接修改角色五维（臂力/体魄/身法/内息/罡气），改动后立即重算派生战斗属性并实时刷新客户端面板。留空或填

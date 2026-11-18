@@ -431,7 +431,7 @@ func recastConfirm(h *itemSession, view, slot, opType int32) {
 		}
 		h.player.updateBagRowPropBuilt(uint16(session.viewID), session.slot, built)
 		if row, _, ok := bagItemAtForView(h.player, uint16(session.viewID), session.slot); ok {
-			if err := pushBagItemFrames(h.link, h.roleID, row); err != nil {
+			if err := pushBagItemFrames(h.link, h.roleID, row, h.player.blendSnapshot()); err != nil {
 				log.Printf("%s: recast confirm bag frames: %v", h.remote, err)
 			}
 			// 同 qianghua：清格+重发后按原槽位补推属性 record。
@@ -447,7 +447,7 @@ func recastConfirm(h *itemSession, view, slot, opType int32) {
 			row.propBuilt = built
 			h.player.replaceEquipSlot(row)
 			if err := pushWearFrames(h.link, h.roleID, h.player.visualSexOf(),
-				effectiveShowEquipType(h.player), row, h.player.sessionEquips()); err != nil {
+				effectiveShowEquipType(h.player), row, h.player.sessionEquips(), h.player.blendSnapshot()); err != nil {
 				log.Printf("%s: recast confirm wear frames: %v", h.remote, err)
 			}
 		}

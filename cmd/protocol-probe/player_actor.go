@@ -253,9 +253,9 @@ type playerActor struct {
 	currentSkillEpoch uint64
 	// skillViewRows 是 View40 行号映射（configID → 行号，出招 CanUse
 	// 行帧寻址用；登录 merge 与秘籍重建时随视图帧一起刷新）。
-	skillViewRows  map[string]uint16
-	activeParry    activeParryRequest
-	parrying       bool
+	skillViewRows map[string]uint16
+	activeParry   activeParryRequest
+	parrying      bool
 	// parryBaseline 令牌方言 m54 的状态基调值（0=未采集）：官服族客户端
 	// 每帧广播当前格挡状态（值=基调=未格挡、值≠基调=格挡中），基调取
 	// 登录后首条上报（parryStateReport）。
@@ -274,7 +274,7 @@ type playerActor struct {
 	// 全删撑持后 52506 会话 6 按塌 5 实证回退，现恢复）。
 	parryPreBlockState byte
 	skillLockUntil     time.Time
-	reviveAt       time.Time
+	reviveAt           time.Time
 	// 通道技能运行态（skill_channel.go，挑战.pcapng 2026-11-12 寒心恨雪
 	// 定版）：channelUntil=通道有效期（受理起 waves×interval+余量，窗口
 	// 外 m914 静默吞）；channelTransform=客户端逐段上报的最新位置/朝向
@@ -303,7 +303,7 @@ type playerActor struct {
 	pendingCast    *pendingCastState
 	// skillPauseTimer 是 msg25/msg26 配对看门狗（armSkillPauseRelease，
 	// rush_cast.go）：诅咒族消息开必有合，官服从不孤悬。
-	skillPauseTimer *time.Timer
+	skillPauseTimer  *time.Timer
 	rushInFlight     bool
 	rushDashIssued   bool
 	rushDashAirborne bool // 冲刺发出时的空中档标记（轻功释放帧随所有出口下发）
@@ -396,8 +396,14 @@ type playerActor struct {
 	skinsPushed      bool
 	skinRows         uint32 // 已推 CardRec 位图行数（整刷前先倒序删）
 	skinMountedRows  uint32 // 已推 UseCardRec 挂载行数
-	gold             int32  // CapitalType0（会话级；购买扣 1 金）
-	silverCard       int32  // CapitalType2（会话级；fork 同口径不落库）
+	// 梳妆阁图纸域（attire_blend.go）：uid→图纸 configID 绑定表
+	//（role_attire_blends 持久化）；blendRowsPushed 是 blend_collect_rec
+	// 全解锁行的 ClientReady 一次性闸（行内容静态，0x0C 重入直接重放）。
+	roleID          role.RoleID
+	attireBlends    map[string]string
+	blendRowsPushed bool
+	gold            int32 // CapitalType0（会话级；购买扣 1 金）
+	silverCard      int32 // CapitalType2（会话级；fork 同口径不落库）
 	// 称号域（msg295）：佩戴位挂在玩家对象 TitleID@360；拥有集合与佩戴
 	// 状态持久化 role_titles（title_db.go），title_rec 记录行进世界重放。
 	titleID     int32

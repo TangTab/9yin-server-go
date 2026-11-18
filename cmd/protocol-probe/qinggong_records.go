@@ -46,6 +46,7 @@ func init() {
 		"ActiveQGSkillRec":   recordActiveQingGong,
 		"active_jingmai_rec": recordActiveJingMai,
 		"FashionSuitRec":     recordFashionSuit,
+		"blend_collect_rec":  recordBlendCollect,
 		"CardRec":            recordCard,
 		"UseCardRec":         recordUseCard,
 		"data_record":        recordDataRecord,
@@ -201,6 +202,7 @@ const (
 	recordActiveSkill    uint16 = 446 // active_skill_rec（[7]，出招行，动作总时长后 0x12 删）
 	recordActiveJingMai  uint16 = 162 // active_jingmai_rec（[7]）
 	recordFashionSuit    uint16 = 315 // FashionSuitRec（[7,3,3,4,3,3]）
+	recordBlendCollect   uint16 = 179 // blend_collect_rec（[7,3,3,1] 梳妆阁图纸收藏，末列 byte）
 	recordCard           uint16 = 322 // CardRec（[3]）
 	recordUseCard        uint16 = 324 // UseCardRec（[2,2]）
 	recordDataRecord     uint16 = 120 // data_record（[2]，九阴志事件状态行）

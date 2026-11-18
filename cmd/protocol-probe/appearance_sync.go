@@ -88,8 +88,17 @@ func configAt(equips []equipRow, slot int32) string {
 // Hat/Plants/ShoesArtPack 分件有则覆盖）；时装=槽 17-19（套装式 FashionCoat
 // 自带帽/鞋 ArtPack 先行，单件帽/鞋槽再覆盖；时装无裤件——套装衣模型自带
 // 下身，Pants 保持装备值）。
-func finalModels(showEquipType int, sex byte, equips []equipRow) map[string]string {
+//
+// blend（梳妆阁图纸，attire_blend.go）：按穿着件 uid 绑定逐槽替换该件
+// 模型——优先级 时装槽17-19 > 图纸融合 > 身份装套装 > 真实装备：先替换
+// 基层 worn，身份装套装分件对被绑定部件让位；时装档保持 17-19 全覆盖。
+func finalModels(showEquipType int, sex byte, equips []equipRow, blend map[int32]string) map[string]string {
 	worn := wornModels(sex, equips)
+	for slot, model := range blend {
+		if isValidBlendSlot(slot) && model != "" {
+			worn[slot] = model
+		}
+	}
 	finals := make(map[string]string, 4)
 	putModel(finals, partCloth, worn[slotCloth])
 	putModel(finals, partPants, worn[slotPants])
@@ -98,10 +107,13 @@ func finalModels(showEquipType int, sex byte, equips []equipRow) map[string]stri
 	switch showEquipType {
 	case showEquipIdentity:
 		if suit := configAt(equips, slotSuit); suit != "" {
-			putModel(finals, partCloth, equipmentModels.resolve(suit, sex))
-			putModel(finals, partHat, equipmentModels.resolveHat(suit, sex))
-			putModel(finals, partPants, equipmentModels.resolvePants(suit, sex))
-			putModel(finals, partShoes, equipmentModels.resolveShoes(suit, sex))
+			// 主 ArtPack=衣：该件被图纸绑定时让位（图纸 > 套装）。
+			if _, blended := blend[slotCloth]; !blended {
+				putModel(finals, partCloth, equipmentModels.resolve(suit, sex))
+			}
+			putBlendAware(finals, blend, slotHat, partHat, equipmentModels.resolveHat(suit, sex))
+			putBlendAware(finals, blend, slotPants, partPants, equipmentModels.resolvePants(suit, sex))
+			putBlendAware(finals, blend, slotShoes, partShoes, equipmentModels.resolveShoes(suit, sex))
 		}
 	case showEquipFashion:
 		if coat := configAt(equips, slotFashionCoat); coat != "" {
@@ -114,6 +126,14 @@ func finalModels(showEquipType int, sex byte, equips []equipRow) map[string]stri
 		putModel(finals, partShoes, resolveSlotModel(equips, slotFashionShoes, sex))
 	}
 	return finals
+}
+
+// putBlendAware 套装分件覆盖：被图纸绑定的槽让位（图纸 > 套装）。
+func putBlendAware(finals map[string]string, blend map[int32]string, slot int32, part, model string) {
+	if _, blended := blend[slot]; blended {
+		return
+	}
+	putModel(finals, part, model)
 }
 
 func resolveSlotModel(equips []equipRow, slot int32, sex byte) string {
@@ -152,10 +172,11 @@ func mergeVisual(base roleVisual, equips []equipRow) roleVisual {
 // 后的衣/裤/鞋/帽主通道 + 时装镜像通道（FashionCoat/Hat/Shoes 原始模型）
 // + 武器三属性（Weapon/ShotWeapon/ActionSet——引擎挂 obj\weapon\<名>，
 // 外服私服实证；空串=收武器显式清除，衣裤鞋空值仍跳过保持客户端当前值）。
-// 登录期 addObject 后补帧、穿戴/切换后实时推送共用。
-func appearanceFrame(objectID, ownerID uint32, showEquipType int, sex byte, equips []equipRow) ([]byte, error) {
+// 登录期 addObject 后补帧、穿戴/切换后实时推送共用。blend 是梳妆阁图纸
+// 逐槽模型覆盖（nil=无绑定；blendOverlayFor 派生）。
+func appearanceFrame(objectID, ownerID uint32, showEquipType int, sex byte, equips []equipRow, blend map[int32]string) ([]byte, error) {
 	models := wornModels(sex, equips)
-	finals := finalModels(showEquipType, sex, equips)
+	finals := finalModels(showEquipType, sex, equips, blend)
 	weapon := weaponVisualOf(sex, equips)
 	weaponActionSet := weapon.actionSet
 	if !weapon.armed() {
@@ -194,10 +215,13 @@ func addOptionalString(properties *[]clientdata.IndexedProperty, index uint16, n
 }
 
 // appearanceOverlayOccupied 登录补帧门槛（Java pushEquipAppearance 同口径）：
-// 帽/身份装/时装任一槽有占用，或显示类型非默认江湖装，才需要 0x10 补帧；
-// 否则零帧（帧序对齐 golden——addObject 已带装备合并视觉）。
-func appearanceOverlayOccupied(equips []equipRow, showEquipType int) bool {
+// 帽/身份装/时装任一槽占用、有图纸融合覆盖、或显示类型非默认江湖装，才
+// 需要 0x10 补帧；否则零帧（帧序对齐 golden——addObject 已带装备合并视觉）。
+func appearanceOverlayOccupied(equips []equipRow, showEquipType int, blend map[int32]string) bool {
 	if showEquipType != showEquipGear {
+		return true
+	}
+	if len(blend) > 0 {
 		return true
 	}
 	for _, equip := range equips {

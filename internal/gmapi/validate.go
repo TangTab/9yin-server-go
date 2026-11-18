@@ -468,7 +468,7 @@ func Validate(body CommandBody) (Command, error) {
 			return command, fmt.Errorf("cardId must be a positive skin id")
 		}
 		command.CardId = body.CardId
-	case "grant_identity_suits", "grant_all_fashion", "unequip_card", "grant_all_cards":
+	case "grant_identity_suits", "grant_all_fashion", "unequip_card", "grant_all_cards", "clear_attire_blends":
 		// 无负载动作：目录/存档校验在会话循环内完成。
 	case "learn_all_taolu", "forget_all_taolu", "learn_all_neigong":
 		// 武学三动作（面板「门派/武学套路」区块）：已学集/目录空态由

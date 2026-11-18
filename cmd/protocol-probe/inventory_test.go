@@ -264,7 +264,7 @@ func TestInventoryFramesPairedRows(t *testing.T) {
 		{slot: 91, configID: "overflow_x", itemType: 1, amount: 1, viewID: 1, seq: 200},
 		{slot: 2, configID: "sword_test", itemType: 102, amount: 1, viewID: 2, equipType: "Weapon", seq: 3},
 	}
-	frames, err := inventoryFrames(618, 0, equips, items)
+	frames, err := inventoryFrames(618, 0, equips, items, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -315,7 +315,7 @@ func TestInventoryFramesCommonProps(t *testing.T) {
 	injectStubInventoryEquipment(t)
 	frames, err := inventoryFrames(665, 1, nil, []bagRow{
 		{slot: 4, configID: "box_wnhd_dllb01", itemType: 2102, amount: 1, viewID: 1, seq: 0, uid: ""},
-	})
+	}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -455,7 +455,7 @@ func TestInventoryDBLiveRowsEncodeFrames(t *testing.T) {
 		if len(items) == 0 && len(equips) == 0 {
 			continue
 		}
-		frames, frameErr := inventoryFrames(id, 0, equips, items)
+		frames, frameErr := inventoryFrames(id, 0, equips, items, nil)
 		if frameErr != nil {
 			t.Fatalf("role %d frames: %v", id, frameErr)
 		}

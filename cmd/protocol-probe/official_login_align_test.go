@@ -318,3 +318,47 @@ func TestWriteOfficialLoginBuffFrames(t *testing.T) {
 		t.Fatalf("first buff frame missing group flag: % X", frames[0])
 	}
 }
+
+// 装备内功 m169 重登记：换书（215/GM）后图标刷新的唯一驱动帧。
+// 无装备书（curNeiGong 空）时零帧。
+func TestWriteEquippedNeiGongBuffFrame(t *testing.T) {
+	player := playerWithBag()
+	conn := &captureMessageConnection{}
+	if !writeEquippedNeiGongBuffFrame(conn, player, "test") {
+		t.Fatal("equipped neigong buff frame not sent")
+	}
+	frames := conn.Frames()
+	if len(frames) != 1 {
+		t.Fatalf("frames=%d want 1", len(frames))
+	}
+	frame := frames[0]
+	if frame[0] != 0x1e {
+		t.Fatalf("opcode=%02X want 0x1E", frame[0])
+	}
+	if id := binary.LittleEndian.Uint32(frame[4:]); id != 169 {
+		t.Fatalf("msg id=%d want=169", id)
+	}
+	player.mu.Lock()
+	want := ""
+	if book := player.progress.book(player.progress.curNeiGong); book != nil {
+		want = book.buffID
+	}
+	player.mu.Unlock()
+	if want == "" {
+		t.Fatal("seed progress has no equipped buff id")
+	}
+	if !bytes.Contains(frame, []byte(want)) {
+		t.Fatalf("frame missing equipped buff %s: % X", want, frame)
+	}
+	// 清空装备书：helper 静默零帧。
+	conn.resetFrames()
+	player.mu.Lock()
+	player.progress.curNeiGong = ""
+	player.mu.Unlock()
+	if writeEquippedNeiGongBuffFrame(conn, player, "test") {
+		t.Fatal("frame sent without equipped book")
+	}
+	if frames := conn.Frames(); len(frames) != 0 {
+		t.Fatalf("frames=%d want 0", len(frames))
+	}
+}

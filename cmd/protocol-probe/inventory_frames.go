@@ -65,6 +65,11 @@ var (
 	propPlayerShotWpn  = clientdata.MustPlayerProperty("ShotWeapon").Index    // ShotWeapon String（fork=398）
 	propPlayerActionSt = clientdata.MustPlayerProperty("ActionSet").Index     // ActionSet String（fork=406）
 	propItemPhoto      = clientdata.MustPlayerProperty("Photo").Index         // Photo String（玩家/视图域末次出现）（fork=184）
+	// 梳妆阁图纸图标替换对（官方抓包 1967/1968 实证：ReplacePack=数字
+	// 美术 id（图纸 ArtPack）、ReplaceID=图纸 ConfigID；绑定行须撤直发
+	// Photo——直发 Photo 优先级最高会遮住 ReplacePack）。
+	propReplacePack = clientdata.MustPlayerProperty("ReplacePack").Index // ReplacePack Int32（fork=1967）
+	propReplaceID   = clientdata.MustPlayerProperty("ReplaceID").Index   // ReplaceID String（fork=1968）
 	// 洗炼域（0x09 表视图域；洗炼界面 QueryProp 校验用，缺发会被
 	// form_treasure_reset[_add] 拒收或报 nil 比较）。
 	propLockStatus     = clientdata.MustPlayerProperty("LockStatus").Index        // LockStatus Int32（fork=1899）
@@ -248,11 +253,12 @@ func actionSetFor(configID string, itemType int32) string {
 
 // inventoryFrames 登录背包/纸娃娃整推：纸娃娃行 → 背包成对行 →
 // 武器外观。背包行为 remove(槽位预清)+add(真实槽位)+remove(镜像页清位)
-// 成对（计数器误删 add 行的防回归形态）。
-func inventoryFrames(roleID role.RoleID, sex byte, equips []equipRow, items []bagRow) ([][]byte, error) {
+// 成对（计数器误删 add 行的防回归形态）。blends 是梳妆阁图纸绑定表
+// （uid→图纸 configID，nil=无绑定；行图标替换用）。
+func inventoryFrames(roleID role.RoleID, sex byte, equips []equipRow, items []bagRow, blends map[string]string) ([][]byte, error) {
 	frames := make([][]byte, 0, len(equips)+len(items)*3+1)
 	for _, equip := range equips {
-		frame, err := equipmentViewAdd(roleID, equip)
+		frame, err := equipmentViewAdd(roleID, equip, blends)
 		if err != nil {
 			return nil, err
 		}
@@ -264,7 +270,7 @@ func inventoryFrames(roleID role.RoleID, sex byte, equips []equipRow, items []ba
 		}
 		view := bagViewOf(item.viewID)
 		frames = append(frames, serverViewRemove(view, uint16(item.slot)))
-		frame, err := bagRowViewAdd(roleID, item)
+		frame, err := bagRowViewAdd(roleID, item, blends)
 		if err != nil {
 			return nil, err
 		}
@@ -287,8 +293,9 @@ func inventoryFrames(roleID role.RoleID, sex byte, equips []equipRow, items []ba
 }
 
 // equipmentViewAdd View1 纸娃娃行（index=身体槽位）：ConfigID/数量/
-// 类型/EquipType(真值)/耐久/精炼/UniqueID/Photo。
-func equipmentViewAdd(roleID role.RoleID, equip equipRow) ([]byte, error) {
+// 类型/EquipType(真值)/耐久/精炼/UniqueID/Photo。blends 命中该行 uid 时
+// 撤 Photo、换发 ReplacePack/ReplaceID（图纸图标）。
+func equipmentViewAdd(roleID role.RoleID, equip equipRow, blends map[string]string) ([]byte, error) {
 	stat := equipmentModels.itemStatic(equip.configID)
 	props := itemCommonProps(roleID, equip.configID, equip.itemType, "equip", equip.slot, equip.uid, equip.seq)
 	props = append(props, viewString(propEquipType, equip.equipType))
@@ -315,15 +322,20 @@ func equipmentViewAdd(roleID role.RoleID, equip equipRow) ([]byte, error) {
 	case stat != nil && stat.effectPackID != 0:
 		props = append(props, viewInt(propEffectPackID, stat.effectPackID))
 	}
-	if stat != nil && stat.photo != "" {
+	// 图纸绑定行：撤直发 Photo、追加 ReplacePack/ReplaceID（图标改查
+	// itemartstatic[ReplacePack]；直发 Photo 优先级最高会遮住替换对）。
+	replace := blendReplaceViewProps(roleID, "equip", equip.uid, equip.seq, equip.slot, blends)
+	if stat != nil && stat.photo != "" && replace == nil {
 		props = append(props, viewString(propItemPhoto, stat.photo))
 	}
+	props = append(props, replace...)
 	return serverViewAdd(viewDoll, uint16(equip.slot), props)
 }
 
 // bagRowViewAdd 背包行：非装备 6 项；装备类补至 14-16 项
-// （EquipType 必须真值否则不渲染）。
-func bagRowViewAdd(roleID role.RoleID, item bagRow) ([]byte, error) {
+// （EquipType 必须真值否则不渲染）。blends 命中该行 uid 时撤 Photo、
+// 换发 ReplacePack/ReplaceID（图纸图标跟物品走）。
+func bagRowViewAdd(roleID role.RoleID, item bagRow, blends map[string]string) ([]byte, error) {
 	stat := equipmentModels.itemStatic(item.configID)
 	props := itemCommonProps(roleID, item.configID, item.itemType, "bag", item.slot, item.uid, item.seq)
 	if stat != nil || item.equipType != "" {
@@ -355,9 +367,13 @@ func bagRowViewAdd(roleID role.RoleID, item bagRow) ([]byte, error) {
 		if stat != nil && stat.effectPackID != 0 {
 			props = append(props, viewInt(propEffectPackID, stat.effectPackID))
 		}
-		if stat != nil && stat.photo != "" {
+		// 图纸绑定行：撤直发 Photo、追加 ReplacePack/ReplaceID（同
+		// equipmentViewAdd——图标跟着物品走，卸到背包也是图纸图标）。
+		replace := blendReplaceViewProps(roleID, "bag", item.uid, item.seq, item.slot, blends)
+		if stat != nil && stat.photo != "" && replace == nil {
 			props = append(props, viewString(propItemPhoto, stat.photo))
 		}
+		props = append(props, replace...)
 		// 精炼词缀（PropBuilt）：装备行同款条件（equipmentViewAdd :313——
 		// 词条与特效包互斥；非空且非模板包物品下发，洗炼二期 00020 通道）。
 		if item.propBuilt != "" && !randomEquipCatalogOf().hasTemplatePacks(item.configID) {

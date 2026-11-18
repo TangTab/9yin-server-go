@@ -287,7 +287,7 @@ func TestBagRowViewAddCarriesPropBuilt(t *testing.T) {
 		viewID: 2, slot: 5, configID: "blade_test", itemType: 200,
 		equipType: "weapon", amount: 1, propBuilt: "1,13040;2,13234",
 	}
-	frame, err := bagRowViewAdd(1, item)
+	frame, err := bagRowViewAdd(1, item, nil)
 	if err != nil {
 		t.Fatalf("viewAdd: %v", err)
 	}
@@ -296,7 +296,7 @@ func TestBagRowViewAddCarriesPropBuilt(t *testing.T) {
 	}
 	// 空词条不下发。
 	item.propBuilt = ""
-	frame, err = bagRowViewAdd(1, item)
+	frame, err = bagRowViewAdd(1, item, nil)
 	if err != nil {
 		t.Fatalf("viewAdd empty: %v", err)
 	}

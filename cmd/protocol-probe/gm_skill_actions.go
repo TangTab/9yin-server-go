@@ -839,6 +839,16 @@ func applyGMForgetNeiGong(link sceneMessageConnection, player *playerActor, role
 	}
 	// 换书战斗面板增量（CurNeiGongWuXing/五维 Add 变化项）。
 	pushCombatAttributeDelta(link, player, combatBefore, remote)
+	if reequipped != "" {
+		// 自动换装后重推 buff 槽属性（BufferListStr/BufferInfo4 随新书
+		// 租约重写）+ m169 重登记（215 换书同款；漏发则图标停留旧书）。
+		if state, stateErr := player.vitalUpdate(); stateErr != nil {
+			return "", stateErr
+		} else if writeErr := link.WriteFrame(state); writeErr != nil {
+			return "", writeErr
+		}
+		writeEquippedNeiGongBuffFrame(link, player, remote)
+	}
 	message := fmt.Sprintf("已移除《%s》（书架剩 %d 本）", gmNeiGongName(id), remaining)
 	if reequipped != "" {
 		message += fmt.Sprintf("，装备书已换为《%s》", gmNeiGongName(reequipped))

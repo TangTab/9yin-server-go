@@ -656,12 +656,13 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 		}
 		return pushBingluFrames(link, player)
 	}
-	// 外观域会话上下文（msg61/19 共用）。
+	// 外观域会话上下文（msg61/19/692 共用）。
 	newAppearanceSession := func() *appearanceSession {
 		return &appearanceSession{
 			link: link, player: player, inventory: inventory,
 			appearance: appearanceCfg.appearance, fashionStore: appearanceCfg.fashion,
-			ctx: ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
+			blends: appearanceCfg.blends,
+			ctx:    ctx, roleID: currentRoleID(), remote: conn.RemoteAddr().String(),
 		}
 	}
 	grantStarterProgress := func() error {
@@ -1922,7 +1923,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return wearErr
 				}
 				player.replaceEquipSlot(worn)
-				if framesErr := pushWearFrames(link, selected.ID, player.visualSexOf(), effectiveShowEquipType(player), worn, player.sessionEquips()); framesErr != nil {
+				if framesErr := pushWearFrames(link, selected.ID, player.visualSexOf(), effectiveShowEquipType(player), worn, player.sessionEquips(), player.blendSnapshot()); framesErr != nil {
 					gmSession.setAction("穿戴帧推送失败：" + framesErr.Error())
 					return framesErr
 				}
@@ -2099,6 +2100,19 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			gmSession.setAction("已卸载全部皮肤（图鉴保留）")
 			log.Printf("%s: GM unequip_card role=%d", conn.RemoteAddr(), selected.ID)
+		case "clear_attire_blends":
+			// 梳妆阁图纸绑定全清（测试/运维用——客户端「恢复默认」是纯
+			// 本地预览行为，不发服务端消息，唯一的服务端还原通道）。
+			if len(player.blendSnapshot()) == 0 {
+				gmSession.setAction("当前无图纸绑定")
+				return nil
+			}
+			if clearErr := clearAttireBlendsForRole(link, appearanceCfg.blends, player, selected.ID, conn.RemoteAddr().String()); clearErr != nil {
+				gmSession.setAction("图纸绑定清空失败：" + clearErr.Error())
+				return clearErr
+			}
+			gmSession.setAction("已清空全部图纸绑定（外观/图标回落）")
+			log.Printf("%s: GM clear_attire_blends role=%d", conn.RemoteAddr(), selected.ID)
 		case "grant_all_cards":
 			allIDs := skinCards.allIDs()
 			if len(allIDs) == 0 {
@@ -2701,6 +2715,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			visual := resolveRoleVisual(activeRole.Appearance.Values)
 			player = newPlayerActor(activeRole.Name, starterSilver)
+			player.roleID = activeRole.ID // 图纸 uid 派生/绑定键用（创建期一次写入）
 			setPlayerWireIdentity(uint32(activeRole.ID))
 			// B 线第十三轮：会话身份整体借用外服抓包对
 			//（NINEYIN_REPLAY_SELF_IDS="obj,own" 十六进制）——0x0B/化身
@@ -2740,6 +2755,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			if saved, ok := appearanceCfg.skins.Load(activeRole.ID); ok {
 				player.restoreSkins(saved)
 				log.Printf("%s: restored skins role=%d collected=%d mounted=%d", conn.RemoteAddr(), activeRole.ID, len(saved.collected), len(saved.mounted))
+			}
+			// 梳妆阁图纸绑定（role_attire_blends，软依赖同上：缺表/坏行
+			// 按空绑定，登录外观/图标链路自然回落）。
+			if saved, ok := appearanceCfg.blends.Load(activeRole.ID); ok && len(saved) > 0 {
+				player.restoreBlends(saved)
+				log.Printf("%s: restored attire blends role=%d bindings=%d", conn.RemoteAddr(), activeRole.ID, len(saved))
 			}
 			if saved, exists := facultyStore.Load(activeRole.ID); exists {
 				player.restoreFaculty(saved, time.Now())
@@ -3294,7 +3315,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			}
 			log.Printf("%s: granted OpenMapRec bitmap and MapMaskRec row for %s", conn.RemoteAddr(), activeRole.Location.Scene.Resource)
 			if equipErr == nil && bagErr == nil && (len(equips) > 0 || len(bagItems) > 0) {
-				frames, frameErr := inventoryFrames(activeRole.ID, visual.sex, equips, bagItems)
+				frames, frameErr := inventoryFrames(activeRole.ID, visual.sex, equips, bagItems, player.blendSnapshot())
 				if frameErr != nil {
 					log.Printf("%s: encode inventory (skip): %v", conn.RemoteAddr(), frameErr)
 				} else {
@@ -3423,6 +3444,12 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 						log.Printf("%s: restore fashion rows after stable re-entry: %v", conn.RemoteAddr(), fashionErr)
 						return
 					}
+					// 梳妆阁图纸收藏行（blend_collect_rec，静态全解锁）同随
+					// 0x0C 清空，重入整体重放。
+					if blendErr := pushBlendCollectRows(link); blendErr != nil {
+						log.Printf("%s: restore blend rows after stable re-entry: %v", conn.RemoteAddr(), blendErr)
+						return
+					}
 					if appearanceErr := pushAppearanceRefresh(link, player); appearanceErr != nil {
 						log.Printf("%s: restore appearance after stable re-entry: %v", conn.RemoteAddr(), appearanceErr)
 						return
@@ -3448,6 +3475,8 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					// 此处整推重建（与 spawn 后 ClientReady 推送同序同源）。
 					writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), player.name, time.Now())
 					writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
+					// 0x0C 重入同样存在窗体重建竞态：延迟重登记（见就绪簇注记）。
+					scheduleLoginBuffReregistration(link, player, conn.RemoteAddr().String())
 					if timedFrames, terr := player.timedBuffLoginReplayFrames(time.Now()); terr != nil {
 						log.Printf("%s: replay timed buffs after 0x0C re-entry: %v", conn.RemoteAddr(), terr)
 					} else {
@@ -3590,7 +3619,7 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					player.setEquipAttributeAdds(equipAttributeSums(equips, randomPropsStore.LoadAll(ctx, runtime.activeRole.ID)))
 				}
 				if equipErr == nil && bagErr == nil && (len(equips) > 0 || len(bagItems) > 0) {
-					frames, frameErr := inventoryFrames(runtime.activeRole.ID, roleVisual.sex, equips, bagItems)
+					frames, frameErr := inventoryFrames(runtime.activeRole.ID, roleVisual.sex, equips, bagItems, player.blendSnapshot())
 					if frameErr != nil {
 						log.Printf("%s: encode inventory (skip): %v", conn.RemoteAddr(), frameErr)
 					} else {
@@ -3696,6 +3725,15 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					return
 				}
 			}
+			// 梳妆阁图纸收藏行（blend_collect_rec 全解锁，静态内容）：
+			// ClientReady 一次性闸 + 0x0C 重入整放（记录行随玩家对象清空）。
+			if player != nil && !player.blendRowsPushedFlag() {
+				player.setBlendRowsPushed()
+				if pushErr := pushBlendCollectRows(link); pushErr != nil {
+					log.Printf("%s: push blend collect rows: %v", conn.RemoteAddr(), pushErr)
+					return
+				}
+			}
 			if player != nil && !shortcutRowsSent {
 				shortcutRowsSent = true
 				// DB 无玩家编辑基线时补 starter 打坐条目；有基线则以玩家
@@ -3731,6 +3769,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 				officialReadyInfoPushed = true
 				writeOfficialReadyInfoFrames(link, conn.RemoteAddr().String(), officialAccountLabel(loginAccountName), player.name, time.Now())
 				writeOfficialLoginBuffFrames(link, player, conn.RemoteAddr().String())
+				// 内功 buff 图标时隐修复：就绪簇紧跟 ClientReady，首轮 m169
+				// 可能早于客户端 buff 栏窗体建成被吞——延迟重登记一轮
+				// （对位官方 c.pcapng 0.1s+4.7s 双发的第二发）。
+				scheduleLoginBuffReregistration(link, player, conn.RemoteAddr().String())
 				// 限时 buff 就绪重放（m169 九值时间形态，v7=到期unix毫秒；
 				// 外服私服登录期 buf_baosd_02 语义的带时间对应物）。
 				if timedFrames, terr := player.timedBuffLoginReplayFrames(time.Now()); terr != nil {
@@ -4231,6 +4273,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 					if _, handleErr := handleWardrobeCardCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity wardrobe card: %v", conn.RemoteAddr(), handleErr)
 					}
+				case clientCustomAttireEquipBlend:
+					if _, handleErr := handleAttireEquipBlendCustom(newAppearanceSession(), custom); handleErr != nil {
+						log.Printf("%s: handle activity attire blend: %v", conn.RemoteAddr(), handleErr)
+					}
 				case clientCustomShopBuy:
 					if _, handleErr := handleShopBuyCustom(newItemSession(), custom); handleErr != nil {
 						log.Printf("%s: handle activity shop buy: %v", conn.RemoteAddr(), handleErr)
@@ -4524,6 +4570,10 @@ func handle(conn net.Conn, store *roleStore, facultyStore *facultyDBStore, inven
 			case clientCustomWardrobeCard:
 				if _, handleErr := handleWardrobeCardCustom(newItemSession(), custom); handleErr != nil {
 					log.Printf("%s: handle wardrobe card: %v", conn.RemoteAddr(), handleErr)
+				}
+			case clientCustomAttireEquipBlend:
+				if _, handleErr := handleAttireEquipBlendCustom(newAppearanceSession(), custom); handleErr != nil {
+					log.Printf("%s: handle attire blend: %v", conn.RemoteAddr(), handleErr)
 				}
 			case clientCustomShopBuy:
 				if _, handleErr := handleShopBuyCustom(newItemSession(), custom); handleErr != nil {

@@ -69,6 +69,7 @@ func activityCustomMsgKnown(id int32) bool {
 		clientCustomChangeWarning,
 		clientCustomMoveItem, clientCustomUseItem, clientCustomDeleteItem, clientCustomArrangeBag,
 		clientCustomShowEquipType, clientCustomFashionSuit, clientCustomWardrobeCard,
+		clientCustomAttireEquipBlend,
 		clientCustomShopBuy, clientCustomShopSell, clientCustomSetTitle,
 		clientCustomJingMaiCultivate, clientCustomJingMaiActive,
 		clientCustomFreshManChoice, clientCustomGuideAddSchool, clientCustomSchoolMessage,
@@ -404,6 +405,53 @@ func writeOfficialLoginBuffFrames(link sceneMessageConnection, player *playerAct
 		}
 	}
 	log.Printf("%s: pushed official login buffs %v (player=%s)", remote, names, name)
+}
+
+// writeEquippedNeiGongBuffFrame 重登记当前装备内功的可见 buff（m169 两值
+// 形态，登录舞步同款）。客户端 BuffStore/buff 栏图标只由 m169
+// on_buffer_change 驱动，BufferListStr/BufferInfo 属性帧只是倒计时与
+// 引擎数据源——漏发 m169 时内功图标时隐，直到任一后续 m169 事件触发
+// 刷新才「复活」（真机实证：GM 添加 buff 后内功图标显示）。215 换书与
+// GM 换书后必须重发本帧，否则图标停留在旧书（或消失）。返回是否发出。
+func writeEquippedNeiGongBuffFrame(link sceneMessageConnection, player *playerActor, remote string) bool {
+	if player == nil {
+		return false
+	}
+	player.mu.Lock()
+	var buffID string
+	if book := player.progress.book(player.progress.curNeiGong); book != nil {
+		buffID = book.buffID
+	}
+	player.mu.Unlock()
+	if buffID == "" {
+		return false
+	}
+	frame, err := serverCustomIntMessage(169, customString(buffID), customObject(playerObjectID, playerOwnerID))
+	if err != nil {
+		log.Printf("%s: encode equipped neigong buff %s: %v", remote, buffID, err)
+		return false
+	}
+	if err := link.WriteFrame(frame); err != nil {
+		log.Printf("%s: write equipped neigong buff %s: %v", remote, buffID, err)
+		return false
+	}
+	log.Printf("%s: registered equipped neigong buff %s", remote, buffID)
+	return true
+}
+
+// loginBuffReregisterDelay 登录 buff 延迟重登记间隔：官方就绪簇（c.pcapng
+// 4.7-4.8s）距 ClientReady（0.1s）约 4.6s，即官方第二次 m169 登记落在
+// 客户端 buff 栏窗体建成之后。我方就绪簇紧跟 ClientReady 一次性发出，
+// 首轮 m169 可能早于窗体建成被吞——补一轮延迟重登记对齐官方双发时序
+// （官方登录本就双发同名 buff，重复登记幂等）。
+const loginBuffReregisterDelay = 4 * time.Second
+
+// scheduleLoginBuffReregistration 就绪簇后延迟重发一次完整登录 buff 舞步
+// （组标志 + 装备内功）。连接已断时 WriteFrame 报错仅记日志。
+func scheduleLoginBuffReregistration(link sceneMessageConnection, player *playerActor, remote string) {
+	time.AfterFunc(loginBuffReregisterDelay, func() {
+		writeOfficialLoginBuffFrames(link, player, remote)
+	})
 }
 
 // equipAttributeSums 普通装备属性折算：已穿戴装备的随机属性

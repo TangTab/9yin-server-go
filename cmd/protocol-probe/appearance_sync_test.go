@@ -55,7 +55,7 @@ func stubAppearanceEquips() []equipRow {
 // 江湖装（0）：衣取装备槽 3，身份/时装槽不参与。
 func TestFinalModelsGearUsesWornEquipment(t *testing.T) {
 	injectStubAppearanceResolver(t)
-	finals := finalModels(showEquipGear, 0, stubAppearanceEquips())
+	finals := finalModels(showEquipGear, 0, stubAppearanceEquips(), nil)
 	if finals[partCloth] != `obj\m\gear_cloth` {
 		t.Fatalf("cloth=%q, want 装备模型", finals[partCloth])
 	}
@@ -67,7 +67,7 @@ func TestFinalModelsGearUsesWornEquipment(t *testing.T) {
 // 身份装（1）：槽 16 整套——主 ArtPack=衣 + Hat/Plants/Shoes 分件覆盖。
 func TestFinalModelsIdentitySuitOverridesAllParts(t *testing.T) {
 	injectStubAppearanceResolver(t)
-	finals := finalModels(showEquipIdentity, 0, stubAppearanceEquips())
+	finals := finalModels(showEquipIdentity, 0, stubAppearanceEquips(), nil)
 	if finals[partCloth] != `obj\m\suit_cloth` || finals[partHat] != `obj\m\suit_hat` ||
 		finals[partPants] != `obj\m\suit_pants` || finals[partShoes] != `obj\m\suit_shoes` {
 		t.Fatalf("identity finals=%+v, want 整套四件全覆", finals)
@@ -78,7 +78,7 @@ func TestFinalModelsIdentitySuitOverridesAllParts(t *testing.T) {
 // 不产生部位（套装衣无裤件——Pants 保持装备值）。
 func TestFinalModelsFashionCoatWithSinglePieceOverride(t *testing.T) {
 	injectStubAppearanceResolver(t)
-	finals := finalModels(showEquipFashion, 0, stubAppearanceEquips())
+	finals := finalModels(showEquipFashion, 0, stubAppearanceEquips(), nil)
 	if finals[partCloth] != `obj\m\fashion_coat` {
 		t.Fatalf("cloth=%q, want 套装衣", finals[partCloth])
 	}
@@ -96,7 +96,7 @@ func TestFinalModelsFashionCoatWithSinglePieceOverride(t *testing.T) {
 // 女性按 FemaleModel 取列；分件同样按性别。
 func TestFinalModelsFemaleColumns(t *testing.T) {
 	injectStubAppearanceResolver(t)
-	finals := finalModels(showEquipFashion, 1, stubAppearanceEquips())
+	finals := finalModels(showEquipFashion, 1, stubAppearanceEquips(), nil)
 	if finals[partCloth] != `obj\f\fashion_coat` || finals[partHat] != `obj\f\fashion_hat` {
 		t.Fatalf("female finals=%+v", finals)
 	}
@@ -119,7 +119,7 @@ func TestMergeVisualOverridesWornPartsOnly(t *testing.T) {
 // 武器三属性恒写（空手 ActionSet 回 1h 基线）。
 func TestAppearanceFramePropertyOrderAndSkips(t *testing.T) {
 	injectStubAppearanceResolver(t)
-	frame, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipIdentity, 0, stubAppearanceEquips())
+	frame, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipIdentity, 0, stubAppearanceEquips(), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +140,7 @@ func TestAppearanceFramePropertyOrderAndSkips(t *testing.T) {
 	}
 
 	// 空穿戴：只剩 ShowEquipType + 武器三属性（衣裤鞋帽全跳过）。
-	bare, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipGear, 0, nil)
+	bare, err := appearanceFrame(playerObjectID, playerOwnerID, showEquipGear, 0, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,13 +151,13 @@ func TestAppearanceFramePropertyOrderAndSkips(t *testing.T) {
 
 // 登录补帧门槛：帽/16-19 任一占用或非江湖装 → 需要补帧；纯衣裤鞋+0 型零帧。
 func TestAppearanceOverlayOccupiedGate(t *testing.T) {
-	if !appearanceOverlayOccupied(stubAppearanceEquips(), showEquipGear) {
+	if !appearanceOverlayOccupied(stubAppearanceEquips(), showEquipGear, nil) {
 		t.Fatal("fashion slots occupied should require top-up")
 	}
-	if appearanceOverlayOccupied([]equipRow{{configID: "cloth_gear", slot: 3}}, showEquipGear) {
+	if appearanceOverlayOccupied([]equipRow{{configID: "cloth_gear", slot: 3}}, showEquipGear, nil) {
 		t.Fatal("plain gear at type 0 should skip top-up（帧序对齐 golden）")
 	}
-	if !appearanceOverlayOccupied([]equipRow{{configID: "cloth_gear", slot: 3}}, showEquipFashion) {
+	if !appearanceOverlayOccupied([]equipRow{{configID: "cloth_gear", slot: 3}}, showEquipFashion, nil) {
 		t.Fatal("non-gear display type always requires top-up")
 	}
 }

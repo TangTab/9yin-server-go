@@ -190,6 +190,20 @@ func (r *equipmentResolver) resolve(config string, sex byte) string {
 	return config
 }
 
+// resolveArt 按数字美术 id 直查 itemartstatic（梳妆阁图纸模型链：
+// tool_item.ini [Tab_*].ArtPack 是数字节名，如 14233；该节数字段由
+// loadEquipmentResolver 与字符串节同表装载）。缺表返回空串。
+func (r *equipmentResolver) resolveArt(art string, sex byte) string {
+	if art == "" {
+		return ""
+	}
+	models := r.models[art]
+	if sex == 1 && models.female != "" {
+		return models.female
+	}
+	return models.male
+}
+
 // resolveComponent 套装分件解析（Java EquipmentResolver.resolvePack）：
 // 配置空/已是模型路径 → "";分件 ArtPack 空或 "-1" 哨兵（该件缺席）→ "";
 // 按性别取 MaleModel/FemaleModel（无表值空串——与 resolve 不同,不回退

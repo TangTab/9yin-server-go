@@ -1360,6 +1360,10 @@ func handlePlayerProgressCustom(link sceneMessageConnection, player *playerActor
 			return true, err
 		}
 		syncCombatPanel(combatBefore)
+		// 换书后重登记新书的可见内功 buff（m169 两值形态）：buff 栏图标
+		// 只由 m169 驱动，属性帧（BufferListStr/BufferInfo4）不足以换图标
+		// ——旧书图标随本次刷新从列表消失，新书图标由此帧登记。
+		writeEquippedNeiGongBuffFrame(link, player, "215-equip")
 		return true, nil
 
 	case livepointInfoMsg: // CLIENT_CUSTOMMSG_LIVEPOINT_INFO（历练/潜能赎回）
