@@ -3,7 +3,7 @@ require("share\\server_custom_define")
 require("share\\static_data_type")
 require("gm_util")
 
---»ñµÃµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏó
+--è·å¾—å½“å‰å±æ€§æ“ä½œå¯¹è±¡
 function get_prop_target(gm)
 	if not nx_find_data(gm, "GMPropTarget") then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not exist property operate target!"));
@@ -41,7 +41,7 @@ function ss(gm, ...)
 	end
 end
 
--- ²éÑ¯Ö¸¶¨³¡¾°idµÄÍæ¼ÒĞÅÏ¢
+-- æŸ¥è¯¢æŒ‡å®šåœºæ™¯idçš„ç©å®¶ä¿¡æ¯
 function scene_player_info(gm, ...)
     if table.getn(arg) ~= 1 then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "arg num error ...");
@@ -80,7 +80,7 @@ function scene_player_info(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "====================");
 end
 
--- ²éÑ¯µ±Ç°³¡¾°id
+-- æŸ¥è¯¢å½“å‰åœºæ™¯id
 function get_cur_scene_id(gm, ...)
 	local scene_id = nx_get_scene_id();
 
@@ -133,16 +133,16 @@ function setunderwaternocost(gm,...)
 
 end
 
---ÊôĞÔ²Ù×÷	ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏó	setobj [¶ÔÏó] [¿ÉÑ¡Ïî]
---					setobj			ÉèÖÃ×ÔÉíÎªÊôĞÔÉèÖÃ²Ù×÷µÄ¶ÔÏó
---					setobj gm		ÉèÖÃ×ÔÉíÎªÊôĞÔÉèÖÃ²Ù×÷µÄ¶ÔÏó
---					setobj select		ÉèÖÃµ±Ç°Ñ¡ÖĞµÄ¶ÔÏóÎªÊôĞÔ²Ù×÷¶ÔÏó
---					setobj scene		ÉèÖÃµ±Ç°³¡¾°ÎªÊôĞÔ²Ù×÷µÄ¶ÔÏó
---					setobj child XXXXX	ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóµÄÖ¸¶¨Ãû³ÆµÄ×Ó¶ÔÏóÎªµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏó
---					setobj index XXXXX	ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóÖ¸¶¨Î»ÖÃµÄ×Ó¶ÔÏóÎªµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏó
---					setobj id XXXXX		ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóÎªÖ¸¶¨PERSISTIDµÄ¶ÔÏó
---					setobj config XXXXX	ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóÎªÖ¸¶¨CONFIGIDµÄ¶ÔÏó
---					setobj script XXXXX	ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóÎªÖ¸¶¨ScriptµÄ¶ÔÏó
+--å±æ€§æ“ä½œ	è®¾ç½®å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡	setobj [å¯¹è±¡] [å¯é€‰é¡¹]
+--					setobj			è®¾ç½®è‡ªèº«ä¸ºå±æ€§è®¾ç½®æ“ä½œçš„å¯¹è±¡
+--					setobj gm		è®¾ç½®è‡ªèº«ä¸ºå±æ€§è®¾ç½®æ“ä½œçš„å¯¹è±¡
+--					setobj select		è®¾ç½®å½“å‰é€‰ä¸­çš„å¯¹è±¡ä¸ºå±æ€§æ“ä½œå¯¹è±¡
+--					setobj scene		è®¾ç½®å½“å‰åœºæ™¯ä¸ºå±æ€§æ“ä½œçš„å¯¹è±¡
+--					setobj child XXXXX	è®¾ç½®å½“å‰å±æ€§æ“ä½œå¯¹è±¡çš„æŒ‡å®šåç§°çš„å­å¯¹è±¡ä¸ºå½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡
+--					setobj index XXXXX	è®¾ç½®å½“å‰å±æ€§æ“ä½œå¯¹è±¡æŒ‡å®šä½ç½®çš„å­å¯¹è±¡ä¸ºå½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡
+--					setobj id XXXXX		è®¾ç½®å½“å‰å±æ€§æ“ä½œå¯¹è±¡ä¸ºæŒ‡å®šPERSISTIDçš„å¯¹è±¡
+--					setobj config XXXXX	è®¾ç½®å½“å‰å±æ€§æ“ä½œå¯¹è±¡ä¸ºæŒ‡å®šCONFIGIDçš„å¯¹è±¡
+--					setobj script XXXXX	è®¾ç½®å½“å‰å±æ€§æ“ä½œå¯¹è±¡ä¸ºæŒ‡å®šScriptçš„å¯¹è±¡
 
 function setobj(gm, ...)
 	if not nx_find_data(gm, "GMPropTarget") then
@@ -150,7 +150,7 @@ function setobj(gm, ...)
 	end
 	if table.getn(arg) == 0 then
 		nx_set_data(gm, "GMPropTarget", gm);
-		--ÉèÖÃÊôĞÔ²Ù×÷¶ÔÏó³É¹¦£¡
+		--è®¾ç½®å±æ€§æ“ä½œå¯¹è±¡æˆåŠŸï¼
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Set object property succeed!"));
 		return;
 	end
@@ -164,12 +164,12 @@ function setobj(gm, ...)
 		nx_set_data(gm, "GMPropTarget", nx_get_scene());
 	elseif para0 == "id" then
 		if table.getn(arg) < 2 then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setobj id <objectid>"));--¸ñÊ½£ºsetobj id ĞòÁĞºÅ(xx.xx)
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setobj id <objectid>"));--æ ¼å¼ï¼šsetobj id åºåˆ—å·(xx.xx)
 			return;
 		end
 		local child = nx_object(arg[2]);
 		if not nx_exists(child) then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found object"));--Î´ÕÒµ½¶ÔÏó[{@0:Ãû³Æ}]
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found object"));--æœªæ‰¾åˆ°å¯¹è±¡[{@0:åç§°}]
 			return;
 		end
 		nx_set_data(gm, "GMPropTarget", child);
@@ -193,38 +193,38 @@ function setobj(gm, ...)
 
 		if para0 == "child" then
 			if table.getn(arg) < 2 then
-				--¸ñÊ½£ºsetobj child ×Ó¶ÔÏóÃû³Æ
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format£ºsetobj child name"));
+				--æ ¼å¼ï¼šsetobj child å­å¯¹è±¡åç§°
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("formatï¼šsetobj child name"));
 				return;
 			end
 			local child = nx_get_child(target, nx_widestr(arg[2]))
 			if not nx_exists(child) then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("not found child[{@0:Ãû³Æ}]"));
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("not found child[{@0:åç§°}]"));
 				return;
 			end
 			nx_set_data(gm, "GMPropTarget", child);
 		elseif para0 == "index" then
 			if table.getn(arg) < 2 then
-				--¸ñÊ½£ºsetobj index ĞòºÅ
+				--æ ¼å¼ï¼šsetobj index åºå·
 				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setoj index <no>"));
 				return;
 			end
 			local child = nx_get_item(target, nx_int(arg[2]))
 			if not nx_exists(child) then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("No object at index:" .. nx_string(arg[2])));--Î´ÕÒµ½×Ó¶ÔÏó[{@0:Ãû³Æ}]
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("No object at index:" .. nx_string(arg[2])));--æœªæ‰¾åˆ°å­å¯¹è±¡[{@0:åç§°}]
 				return;
 			end
 			nx_set_data(gm, "GMPropTarget", child);
 		elseif para0 == "parent" then
 			local parent = nx_parent(target);
 			if not nx_exists(parent) then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("No parent"));--Î´ÕÒµ½¸¸¶ÔÏó
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("No parent"));--æœªæ‰¾åˆ°çˆ¶å¯¹è±¡
 				return;
 			end
 			nx_set_data(gm, "GMPropTarget", parent);
 		elseif para0 == "config" then
 			if table.getn(arg) < 2 then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setobj config <configd>"));--¸ñÊ½£ºsetobj config configid
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setobj config <configd>"));--æ ¼å¼ï¼šsetobj config configid
 				return;
 			end
 			local configid = nx_int(arg[2]);
@@ -237,13 +237,13 @@ function setobj(gm, ...)
 				end
 			end
 			if not nx_exists(proptarget) then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found child object configid is:" .. configid));--Î´ÕÒµ½×Ó¶ÔÏó
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found child object configid is:" .. configid));--æœªæ‰¾åˆ°å­å¯¹è±¡
 				return;
 			end
 			nx_set_data(gm, "GMPropTarget", proptarget);
 		elseif para0 == "script" then
 			if table.getn(arg) < 2 then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setobj script <sctipt>"));--¸ñÊ½£ºsetobj script <script>
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setobj script <sctipt>"));--æ ¼å¼ï¼šsetobj script <script>
 				return;
 			end
 			local script = nx_string(arg[2]);
@@ -256,15 +256,15 @@ function setobj(gm, ...)
 				end
 			end
 			if not nx_exists(proptarget) then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found child object script is:" .. script));--Î´ÕÒµ½×Ó¶ÔÏó
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found child object script is:" .. script));--æœªæ‰¾åˆ°å­å¯¹è±¡
 				return;
 			end
 			nx_set_data(gm, "GMPropTarget", proptarget);
 		else
-			--Ö±½Ó¸ù¾İÃû³Æ²éÕÒ×Ó¶ÔÏó
+			--ç›´æ¥æ ¹æ®åç§°æŸ¥æ‰¾å­å¯¹è±¡
 			local child = nx_get_child(target, nx_widestr(arg[1]))
 			if not nx_exists(child) then
-				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found child object name:" .. nx_string(arg[1])));--Î´ÕÒµ½×Ó¶ÔÏó[{@0:Ãû³Æ}]
+				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found child object name:" .. nx_string(arg[1])));--æœªæ‰¾åˆ°å­å¯¹è±¡[{@0:åç§°}]
 				return;
 			end
 			nx_set_data(gm, "GMPropTarget", child);
@@ -273,7 +273,7 @@ function setobj(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "Set object property succeed!");
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞ×Ó¶ÔÏó
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰å­å¯¹è±¡
 function child(gm, ...)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -310,10 +310,10 @@ function capacity(gm)
 	end
 
 	local cap = nx_get_capacity(target);
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(nx_query_property(target, "Name")) .. " Capacity:" .. cap));--[{@0:Ãû³Æ}]ÈİÁ¿:{@1:ÊıÖµ}
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(nx_query_property(target, "Name")) .. " Capacity:" .. cap));--[{@0:åç§°}]å®¹é‡:{@1:æ•°å€¼}
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞÊôĞÔ
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰å±æ€§
 function property(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -324,18 +324,18 @@ function property(gm)
 	local total  = 0;
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. nx_string(nx_query_property(target, "Name")) .. " Property List Begin:" .. "====="));
 	for i = 1, table.getn(proplist) do
-		--[{@0:ÊôĞÔ}]={@1:ÊıÖµ}
+		--[{@0:å±æ€§}]={@1:æ•°å€¼}
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(proplist[i] .. "=" .. nx_string(nx_query_property(target, proplist[i]))));
 		total = i;
 	end
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("======" .. nx_string(nx_query_property(target, "Name")) .. " Property List End.total:" ..nx_string(total) .."======"));
 end
 
---ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄÊôĞÔÖµ
---set ÊôĞÔÃû ÊôĞÔÖµ
+--è®¾ç½®å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„å±æ€§å€¼
+--set å±æ€§å å±æ€§å€¼
 function set(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set <property> <value>"));--¸ñÊ½£ºset ÊôĞÔÃû³Æ ÊôĞÔÖµ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set <property> <value>"));--æ ¼å¼ï¼šset å±æ€§åç§° å±æ€§å€¼
 		return;
 	end
 
@@ -345,17 +345,17 @@ function set(gm, ...)
 	end
 
 	local prop = nx_string(arg[1]);
-	--²»ÄÜÉèÖÃµÄÊôĞÔÁĞ±í
+	--ä¸èƒ½è®¾ç½®çš„å±æ€§åˆ—è¡¨
 	local cant_set_prop_lst = {"GameMaster"};
 	for i, prop_temp in pairs(cant_set_prop_lst) do
 		if prop == prop_temp then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "Can not set this property.");--²»ÄÜÉèÖÃ´ËÊôĞÔ
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "Can not set this property.");--ä¸èƒ½è®¾ç½®æ­¤å±æ€§
 			return;
 		end
 	end
 
 	if not nx_find_property(target, prop) then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found property:" .. prop));--Î´ÕÒµ½ÊôĞÔ£º{@0:ÊôĞÔÃû}
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found property:" .. prop));--æœªæ‰¾åˆ°å±æ€§ï¼š{@0:å±æ€§å}
 		return;
 	end
 
@@ -366,7 +366,7 @@ function set(gm, ...)
 		elseif type == VTYPE_WIDESTR then
 			nx_set_property(target, prop, nx_widestr(""));
 		else
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set <property> <value>"));--¸ñÊ½£ºset ÊôĞÔÃû³Æ ÊôĞÔÖµ
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set <property> <value>"));--æ ¼å¼ï¼šset å±æ€§åç§° å±æ€§å€¼
 			return
 		end
 	else
@@ -394,14 +394,14 @@ function set(gm, ...)
 		end
 	end
 
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Set " .. prop .. " succeed."));--ÉèÖÃÊôĞÔ{@0:ÊôĞÔÃû}³É¹¦
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Set " .. prop .. " succeed."));--è®¾ç½®å±æ€§{@0:å±æ€§å}æˆåŠŸ
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄÊôĞÔÖµ
---query ÊôĞÔÃû
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„å±æ€§å€¼
+--query å±æ€§å
 function query(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:query <property>"));--¸ñÊ½£ºquery ÊôĞÔÃû³Æ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:query <property>"));--æ ¼å¼ï¼šquery å±æ€§åç§°
 		return;
 	end
 
@@ -413,15 +413,15 @@ function query(gm, ...)
 	local prop = nx_string(arg[1]);
 
 	if not nx_find_property(target, prop) then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(target) .. " --- Not found property:" .. prop));--Î´ÕÒµ½ÊôĞÔ£º{@0:ÊôĞÔÃû}
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(target) .. " --- Not found property:" .. prop));--æœªæ‰¾åˆ°å±æ€§ï¼š{@0:å±æ€§å}
 		return;
 	end
 
 	local value = nx_query_property(target, prop);
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(target) .. " --- " .. prop .. "=" .. nx_string(value)));--[{@0:ÊôĞÔ}]={@1:ÊıÖµ}
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(target) .. " --- " .. prop .. "=" .. nx_string(value)));--[{@0:å±æ€§}]={@1:æ•°å€¼}
 end
 
--- ²éÑ¯npcµÄ¾²Ì¬ÊôĞÔ
+-- æŸ¥è¯¢npcçš„é™æ€å±æ€§
 function query_npc_prop(gm, ...)
     if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: query_npc_prop <property>"));
@@ -442,7 +442,7 @@ function query_npc_prop(gm, ...)
     end
 end
 
--- ÉèÖÃnpcµÄ¾²Ì¬ÊôĞÔ
+-- è®¾ç½®npcçš„é™æ€å±æ€§
 function set_npc_prop(gm, ...)
     if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set_npc_prop <property> <value>"));
@@ -465,11 +465,11 @@ function set_npc_prop(gm, ...)
     end
 end
 
---ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄÊôĞÔÖµ
---setdata ÊôĞÔÃû ÊôĞÔÖµ
+--è®¾ç½®å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„å±æ€§å€¼
+--setdata å±æ€§å å±æ€§å€¼
 function setdata(gm, ...)
 	if table.getn(arg) < 2 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setdata <dataname> <value>"));--¸ñÊ½£ºset ÊôĞÔÃû³Æ ÊôĞÔÖµ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setdata <dataname> <value>"));--æ ¼å¼ï¼šset å±æ€§åç§° å±æ€§å€¼
 		return;
 	end
 
@@ -482,7 +482,7 @@ function setdata(gm, ...)
 	local value = arg[2];
 
 	if not nx_find_data(target, prop) then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found data named:" .. prop));--Î´ÕÒµ½ÊôĞÔ£º{@0:ÊôĞÔÃû}
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found data named:" .. prop));--æœªæ‰¾åˆ°å±æ€§ï¼š{@0:å±æ€§å}
 		return;
 	end
 
@@ -503,14 +503,14 @@ function setdata(gm, ...)
 		nx_set_data(target, prop, nx_object(value));
 	end
 
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Set data " .. prop .. " succeed."));--ÉèÖÃData{@0:ÊôĞÔÃû}³É¹¦
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Set data " .. prop .. " succeed."));--è®¾ç½®Data{@0:å±æ€§å}æˆåŠŸ
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄÊôĞÔÖµ
---querydata ÊôĞÔÃû
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„å±æ€§å€¼
+--querydata å±æ€§å
 function querydata(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:querydata <dataname>"));--¸ñÊ½£ºquerydata DataÃû³Æ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:querydata <dataname>"));--æ ¼å¼ï¼šquerydata Dataåç§°
 		return;
 	end
 
@@ -521,15 +521,15 @@ function querydata(gm, ...)
 
 	local prop = nx_string(arg[1]);
 	if not nx_find_data(target, prop) then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found data named:" .. prop));--Î´ÕÒµ½ÊôĞÔ£º{@0:ÊôĞÔÃû}
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not found data named:" .. prop));--æœªæ‰¾åˆ°å±æ€§ï¼š{@0:å±æ€§å}
 		return;
 	end
 
 	local value = nx_query_data(target, prop);
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(prop.. "=" .. nx_string(value)));--[{@0:ÊôĞÔ}]={@1:ÊıÖµ}
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(prop.. "=" .. nx_string(value)));--[{@0:å±æ€§}]={@1:æ•°å€¼}
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞ±í¸ñÃû
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰è¡¨æ ¼å
 function record(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -546,8 +546,8 @@ function record(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("======" .. nx_string(nx_query_property(target, "Name")) .. " Record List End.total:" ..nx_string(total).. "======"));
 end
 
---ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄ±í¸ñÖµ
---recordset ±í¸ñÃû ĞĞºÅ ÁĞºÅ Öµ
+--è®¾ç½®å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„è¡¨æ ¼å€¼
+--recordset è¡¨æ ¼å è¡Œå· åˆ—å· å€¼
 function recordset(gm, ...)
 	if table.getn(arg) < 4 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordset <recname> <row> <col> <value>"));
@@ -594,8 +594,8 @@ function recordset(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set record " .. recname .. " value succeed!"));
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄ±í¸ñÄÚÈİ
---recordquery ±í¸ñÃû
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„è¡¨æ ¼å†…å®¹
+--recordquery è¡¨æ ¼å
 function recordquery(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordquery <recname>"));
@@ -625,8 +625,8 @@ function recordquery(gm, ...)
 	end
 end
 
--- ¸ñÊ½»¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄ±í¸ñÄÚÈİ
--- recordshow ±í¸ñÃû
+-- æ ¼å¼åŒ–å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„è¡¨æ ¼å†…å®¹
+-- recordshow è¡¨æ ¼å
 function recordshow(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordshow <recname>"))
@@ -644,14 +644,14 @@ function recordshow(gm, ...)
 		return
 	end
 
-	-- ´òÓ¡±íÃû
+	-- æ‰“å°è¡¨å
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("================"
 	 .. nx_string(nx_query_property(target, "Name")) .. ":" .. recname .. "================"))
 
-	-- ¿í¶È±í
+	-- å®½åº¦è¡¨
 	local width_table = {}
 
-	-- ±éÀúÈ¡µÃÃ¿ÁĞµÄ×î´ó¿í¶È
+	-- éå†å–å¾—æ¯åˆ—çš„æœ€å¤§å®½åº¦
 	local rows = nx_get_record_rows(target, recname)
 	local cols = nx_get_record_cols(target, recname)
 	local total_width = cols + 1
@@ -670,15 +670,15 @@ function recordshow(gm, ...)
 		total_width = total_width + max_width
 	end
 
-	-- ĞĞ·Ö¸îÏß
+	-- è¡Œåˆ†å‰²çº¿
 	local row_split_text = ""
 	for e = 1, total_width do
 		row_split_text = row_split_text .. "-"
 	end
 
-	-- ¸ñÊ½»¯Êä³ö±íÄÚÈİ
+	-- æ ¼å¼åŒ–è¾“å‡ºè¡¨å†…å®¹
 	for row = 0, rows - 1 do
-		-- ·Ö¸îÏß
+		-- åˆ†å‰²çº¿
 		--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(row_split_text))
 
 		local text = "|"
@@ -694,16 +694,16 @@ function recordshow(gm, ...)
 			text = text .. "|"
 		end
 
-		-- Êä³ö
+		-- è¾“å‡º
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(text))
 	end
 
-	-- ·Ö¸îÏß
+	-- åˆ†å‰²çº¿
 	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(row_split_text))
 end
 
---Ìí¼ÓÒ»ĞĞ
---recordaddrow ±í¸ñÃû ...
+--æ·»åŠ ä¸€è¡Œ
+--recordaddrow è¡¨æ ¼å ...
 function recordaddrow(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "Format: recordaddrow recname <row> ...");
@@ -750,8 +750,8 @@ function recordaddrow(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Add row succeed!"));
 end
 
---É¾³ı±í¸ñµÄÖ¸¶¨ĞĞµÄÊı¾İ
---recordremoverow ±í¸ñÃû ĞĞºÅ
+--åˆ é™¤è¡¨æ ¼çš„æŒ‡å®šè¡Œçš„æ•°æ®
+--recordremoverow è¡¨æ ¼å è¡Œå·
 function recordremoverow(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordremoverow recname row"));
@@ -778,8 +778,8 @@ function recordremoverow(gm, ...)
 	end
 end
 
---Çå³ıÖ¸¶¨±í¸ñµÄÄÚÈİ
---recordclear ±í¸ñÃû
+--æ¸…é™¤æŒ‡å®šè¡¨æ ¼çš„å†…å®¹
+--recordclear è¡¨æ ¼å
 function recordclear(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "Format: recordclear recname");
@@ -805,8 +805,8 @@ function recordclear(gm, ...)
 	end
 end
 
---ÉèÖÃ±í¸ñ±ê¼ÇÎ»
---recordsetflag ±í¸ñÃû Î»Êı
+--è®¾ç½®è¡¨æ ¼æ ‡è®°ä½
+--recordsetflag è¡¨æ ¼å ä½æ•°
 function recordsetflag(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordsetflag <recname> <pos>"));
@@ -833,8 +833,8 @@ function recordsetflag(gm, ...)
 	end
 end
 
---Çå¿Õ±í¸ñ±ê¼ÇÎ»
---recordclearflag ±í¸ñÃû Î»Êı
+--æ¸…ç©ºè¡¨æ ¼æ ‡è®°ä½
+--recordclearflag è¡¨æ ¼å ä½æ•°
 function recordclearflag(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordsetflag <recname> <pos>"));
@@ -861,8 +861,8 @@ function recordclearflag(gm, ...)
 	end
 end
 
---²âÊÔ±í¸ñ±ê¼ÇÎ»
---recordtestflag ±í¸ñÃû Î»Êı
+--æµ‹è¯•è¡¨æ ¼æ ‡è®°ä½
+--recordtestflag è¡¨æ ¼å ä½æ•°
 function recordtestflag(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: recordtestflag <recname> <pos>"));
@@ -889,7 +889,7 @@ function recordtestflag(gm, ...)
 	end
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄ´´½¨½Å±¾ºÍÅäÖÃÎÄ¼şÃû³Æ
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„åˆ›å»ºè„šæœ¬å’Œé…ç½®æ–‡ä»¶åç§°
 function see(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -899,8 +899,8 @@ function see(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Type: " .. nx_type(target) .. " Script: " .. nx_get_script(target) .. " Config:" .. nx_get_config(target)));
 end
 
---Ñ¡Ôñµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóÎªÑ¡ÖĞ¶ÔÏó
---select ¶ÔÏóÃû³Æ
+--é€‰æ‹©å½“å‰å±æ€§æ“ä½œå¯¹è±¡ä¸ºé€‰ä¸­å¯¹è±¡
+--select å¯¹è±¡åç§°
 function select(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -911,7 +911,7 @@ function select(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Selected " .. nx_string(nx_query_property(target, "Name")) .. " succeed!"));
 end
 
---¶Ôµ±Ç°Ñ¡ÖĞ¶ÔÏóÖ´ĞĞdoselect²Ù×÷
+--å¯¹å½“å‰é€‰ä¸­å¯¹è±¡æ‰§è¡Œdoselectæ“ä½œ
 function doselect(gm, funcid)
 	local target = nx_query_property(gm, "LastObject");
 	if nx_exists(target) then
@@ -921,12 +921,12 @@ function doselect(gm, funcid)
 	end
 end
 
---ÔÚµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóÖĞ£¬´´½¨Ò»¸ö×ÓÓÎÏ·¶ÔÏó
---cobjchild ¶ÔÏóID
+--åœ¨å½“å‰å±æ€§æ“ä½œå¯¹è±¡ä¸­ï¼Œåˆ›å»ºä¸€ä¸ªå­æ¸¸æˆå¯¹è±¡
+--cobjchild å¯¹è±¡ID
 function cobjchild(gm, ...)
 
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjchild <id> [<amount>]"));--¸ñÊ½£ºcobjchild id
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjchild <id> [<amount>]"));--æ ¼å¼ï¼šcobjchild id
 		return;
 	end
 
@@ -958,10 +958,10 @@ function cobjchild(gm, ...)
 	end
 end
 
---Ìí¼Ó¸½´ø´ò¿×µÈĞÅÏ¢µÄ×°±¸
+--æ·»åŠ é™„å¸¦æ‰“å­”ç­‰ä¿¡æ¯çš„è£…å¤‡
 function cobjequip(gm, ...)
     if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjequip <id> [<amount>]"));--¸ñÊ½£ºcobjchild id
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjequip <id> [<amount>]"));--æ ¼å¼ï¼šcobjchild id
 		return;
 	end
 
@@ -973,8 +973,8 @@ function cobjequip(gm, ...)
 	local id = nx_string(arg[1]);
 
 	local amount = 1;
-	local hole = 0--´ò¿×ÊıÁ¿
-	local star = 0--Ç¿»¯µÈ¼¶
+	local hole = 0--æ‰“å­”æ•°é‡
+	local star = 0--å¼ºåŒ–ç­‰çº§
 
 	if table.getn(arg) > 1 then
 	   amount = nx_int(arg[2]);
@@ -1007,10 +1007,10 @@ function cobjequip(gm, ...)
 
 end
 
---Ìí¼Ó¿Éµş¼ÓµÄITEM
+--æ·»åŠ å¯å åŠ çš„ITEM
 function cobjadditem(gm, ...)
     if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjequip <id> [<amount>]"));--¸ñÊ½£ºcobjchild id
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjequip <id> [<amount>]"));--æ ¼å¼ï¼šcobjchild id
 		return;
 	end
 
@@ -1047,10 +1047,10 @@ function cobjadditem(gm, ...)
 
 end
 
---Ìí¼ÓËæ»úÊôĞÔµÀ¾ß
+--æ·»åŠ éšæœºå±æ€§é“å…·
 function cobjchild1(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjchild <id> [<amount>]"));--¸ñÊ½£ºcobjchild id
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: cobjchild <id> [<amount>]"));--æ ¼å¼ï¼šcobjchild id
 		return
 	end
 
@@ -1081,11 +1081,11 @@ function cobjchild1(gm, ...)
 	end
 end
 
---´´½¨Ò»¸öÓÎÏ·¶ÔÏó
---cobj ¶ÔÏóID
+--åˆ›å»ºä¸€ä¸ªæ¸¸æˆå¯¹è±¡
+--cobj å¯¹è±¡ID
 function cobj(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobj <ID> [<amount>]"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobj <ID> [<amount>]"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return;
 	end
 
@@ -1107,10 +1107,10 @@ function cobj(gm, ...)
 	end
 end
 
---ÓÚÄ¿±ê´¦´´½¨¶ÔÏó
+--äºç›®æ ‡å¤„åˆ›å»ºå¯¹è±¡
 function cobjthere(gm,...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobjthere <ID> [<amount>]"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobjthere <ID> [<amount>]"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return;
 	end
 
@@ -1137,7 +1137,7 @@ function cobjthere(gm,...)
 	end
 end
 
---É¾³ıµ±Ç°Ñ¡ÖĞµÄ¶ÔÏó
+--åˆ é™¤å½“å‰é€‰ä¸­çš„å¯¹è±¡
 function del(gm)
 	local target = nx_query_property(gm, "LastObject");
 	if not nx_exists(target) then
@@ -1153,7 +1153,7 @@ function del(gm)
 	end
 end
 
---½«µ±Ç°Ñ¡ÖĞ¶ÔÏóÒÆ¶¯µ½GM×Ô¼ºÕâÀï
+--å°†å½“å‰é€‰ä¸­å¯¹è±¡ç§»åŠ¨åˆ°GMè‡ªå·±è¿™é‡Œ
 function here(gm)
 	local target = nx_query_property(gm, "LastObject");
 	if not nx_exists(target) then
@@ -1191,7 +1191,7 @@ function motionthere(gm)
 	nx_motion(gm, runspeed, anglespeed, x, z);
 end
 
---×Ô¼ºË²ÒÆµ½Ñ¡¶¨Ä¿±êµÄ×ø±ê: there
+--è‡ªå·±ç¬ç§»åˆ°é€‰å®šç›®æ ‡çš„åæ ‡: there
 function there(gm)
 	local target = nx_query_property(gm, "LastObject");
 	if not nx_exists(target) then
@@ -1203,10 +1203,10 @@ function there(gm)
 	nx_moveto(gm, x, y, z, orient);
 end
 
---Ö¸¶¨Íæ¼ÒË²ÒÆµ½×Ô¼ºµÄ×ø±ê: herebyname [Íæ¼ÒÃû]
+--æŒ‡å®šç©å®¶ç¬ç§»åˆ°è‡ªå·±çš„åæ ‡: herebyname [ç©å®¶å]
 function herebyname(gm, ...)
 	if table.getn(arg) == 0 then
-		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1949);--¸ñÊ½£ºherebyname Íæ¼ÒÃû
+		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1949);--æ ¼å¼ï¼šherebyname ç©å®¶å
 		--return;
 		arg[1] = getcurobjname(gm);
 	end
@@ -1220,10 +1220,10 @@ function herebyname(gm, ...)
 	nx_moveto(target, x, y, z, orient);
 end
 
---×Ô¼ºË²ÒÆµ½Ö¸¶¨Íæ¼ÒµÄ×ø±ê: therebyname [Íæ¼ÒÃû]
+--è‡ªå·±ç¬ç§»åˆ°æŒ‡å®šç©å®¶çš„åæ ‡: therebyname [ç©å®¶å]
 function therebyname(gm, ...)
 	if table.getn(arg) == 0 then
-		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1950);--¸ñÊ½£ºtherebyname Íæ¼ÒÃû
+		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1950);--æ ¼å¼ï¼štherebyname ç©å®¶å
 		--return;
 		arg[1] = getcurobjname(gm);
 	end
@@ -1236,7 +1236,7 @@ function therebyname(gm, ...)
 	nx_moveto(gm, x, y, z, orient);
 end
 
---Ë²ÒÆµ½Ä³¸öµã: goto [x] [z]
+--ç¬ç§»åˆ°æŸä¸ªç‚¹: goto [x] [z]
 function goto(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: goto <x> <z>"));
@@ -1255,7 +1255,7 @@ function goto(gm, ...)
 	end
 end
 
---ÒÆ¶¯µ½Ä³¸öµã: motionto [x] [z]
+--ç§»åŠ¨åˆ°æŸä¸ªç‚¹: motionto [x] [z]
 function motionto(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: motionto <x> <z>"));
@@ -1275,7 +1275,7 @@ function motionto(gm, ...)
 	end
 end
 
---Ç°ÒÆÒ»¶Î¾àÀë: goahead [¾àÀë]
+--å‰ç§»ä¸€æ®µè·ç¦»: goahead [è·ç¦»]
 function goahead(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: goahead <distance>"));
@@ -1289,11 +1289,11 @@ function goahead(gm, ...)
 	local destz = nx_float(nx_number(z) + nx_number(dist)*math.cos(nx_number(orient)));
 	y = nx_get_height(destx, destz);
 
-	--ÔÚÒÆ¶¯Ö®Ç°ÏÈ¼ì²éÄ¿±êµã¿É·ñ×ß(´ıÌí¼Ó)
+	--åœ¨ç§»åŠ¨ä¹‹å‰å…ˆæ£€æŸ¥ç›®æ ‡ç‚¹å¯å¦èµ°(å¾…æ·»åŠ )
 	nx_moveto(gm, destx, y, destz, orient);
 end
 
---µ±Ç°Ñ¡ÖĞ¶ÔÏóÇ°ÒÆÒ»¶Î¾àÀë: goaheadobj [¾àÀë]
+--å½“å‰é€‰ä¸­å¯¹è±¡å‰ç§»ä¸€æ®µè·ç¦»: goaheadobj [è·ç¦»]
 function goaheadobj(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: goaheadobj <distance>"));
@@ -1313,11 +1313,11 @@ function goaheadobj(gm, ...)
 	local destz = nx_float(nx_number(z) + nx_number(dist)*math.cos(nx_number(orient)));
 	y = nx_get_height(destx, destz);
 
-	--ÔÚÒÆ¶¯Ö®Ç°ÏÈ¼ì²éÄ¿±êµã¿É·ñ×ß(´ıÌí¼Ó)
+	--åœ¨ç§»åŠ¨ä¹‹å‰å…ˆæ£€æŸ¥ç›®æ ‡ç‚¹å¯å¦èµ°(å¾…æ·»åŠ )
 	nx_moveto(target, destx, y, destz, orient);
 end
 
---²éÑ¯GMµ±Ç°Î»ÖÃĞÅÏ¢
+--æŸ¥è¯¢GMå½“å‰ä½ç½®ä¿¡æ¯
 function pos(gm)
 	local x, y, z, orient = nx_get_position(gm);
 	local height = nx_get_height(x, z);
@@ -1326,7 +1326,7 @@ function pos(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Map Height:" .. nx_number(height)));
 end
 
---²éÑ¯Ñ¡ÖĞ¶ÔÏóµÄÎ»ÖÃĞÅÏ¢
+--æŸ¥è¯¢é€‰ä¸­å¯¹è±¡çš„ä½ç½®ä¿¡æ¯
 function posobj(gm)
 	local target = nx_query_property(gm, "LastObject");
 	if not nx_exists(target) then
@@ -1338,7 +1338,7 @@ function posobj(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("X:" .. nx_number(x) .. " Y:" .. nx_number(y) .. " Z:" .. nx_number(z) .. " Orient:" .. nx_number(orient)));
 end
 
---²éÑ¯Óëµ±Ç°Ñ¡ÖĞ¶ÔÏóµÄ¾àÀë
+--æŸ¥è¯¢ä¸å½“å‰é€‰ä¸­å¯¹è±¡çš„è·ç¦»
 function dist(gm)
 	local target = nx_query_property(gm, "LastObject");
 	if not nx_exists(target) then
@@ -1350,7 +1350,7 @@ function dist(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Distance:" .. nx_number(distance)));
 end
 
---²éÑ¯Óëµ±Ç°Ñ¡ÖĞ¶ÔÏóµÄ·½Ïò
+--æŸ¥è¯¢ä¸å½“å‰é€‰ä¸­å¯¹è±¡çš„æ–¹å‘
 function angle(gm)
 	local target = nx_query_property(gm, "LastObject");
 	if not nx_exists(target) then
@@ -1362,52 +1362,52 @@ function angle(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Angle:" .. nx_number(angle)));
 end
 
---ÂúHP: hp
+--æ»¡HP: hp
 function hp(gm)
 	nx_set_property( gm, "HP", nx_query_property(gm,"MaxHP") +  nx_query_property(gm,"MaxHPAdd"));
 	return 1
 end
 
---ÂúMP: mp
+--æ»¡MP: mp
 function mp(gm)
 	nx_set_property( gm, "MP", nx_query_property(gm,"MaxMP") + nx_query_property(gm,"MaxMPAdd"));
 	return 1
 end
 
---ÂúRC: rc
+--æ»¡RC: rc
 function rc(gm)
 	nx_set_property( gm, "RC", nx_query_property(gm,"MaxRC") + nx_query_property(gm,"MaxRCAdd"));
 	return 1
 end
 
---ÂúEY: ey
+--æ»¡EY: ey
 function ey(gm)
 	nx_set_property( gm, "EY", nx_query_property(gm,"MaxEY") + nx_query_property(gm,"MaxEYAdd"));
 	return 1
 end
 
---ÂúAV: av
+--æ»¡AV: av
 function av(gm)
 	nx_set_property( gm, "AV", nx_query_property(gm,"MaxAV") + nx_query_property(gm,"MaxAVAdd"));
 	return 1
 end
 
---ÂúFS: fs
+--æ»¡FS: fs
 function fs(gm)
 	nx_set_property( gm, "FS", nx_query_property(gm,"MaxFS") + nx_query_property(gm,"MaxFSAdd"));
 	return 1
 end
 
---ÂúDP: dp
+--æ»¡DP: dp
 function dp(gm)
 	nx_set_property( gm, "DP", nx_query_property(gm,"MaxDP") + nx_query_property(gm,"MaxDPAdd"));
 	return 1
 end
 
---ÉèÖÃÖ¸¶¨ÊôĞÔÖµ
+--è®¾ç½®æŒ‡å®šå±æ€§å€¼
 function propValue(gm,...)
 	if table.getn(arg) < 2 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set <property> <value>"));--¸ñÊ½£ºset ÊôĞÔÃû³Æ ÊôĞÔÖµ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set <property> <value>"));--æ ¼å¼ï¼šset å±æ€§åç§° å±æ€§å€¼
 	end
 
 	local target = get_prop_target(gm)
@@ -1428,29 +1428,29 @@ function propValue(gm,...)
 	return 1
 end
 
---ÒÆµ½Ä³¸öÍæ¼ÒËùÔÚ×ø±ê: goplayer [Íæ¼ÒÃû]
+--ç§»åˆ°æŸä¸ªç©å®¶æ‰€åœ¨åæ ‡: goplayer [ç©å®¶å]
 function goplayer(gm, ...)
 	if table.getn(arg) == 0 then
-		--¸ñÊ½£º
-		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1943);--¸ñÊ½£ºgoplayer Íæ¼ÒÃû³Æ
+		--æ ¼å¼ï¼š
+		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1943);--æ ¼å¼ï¼šgoplayer ç©å®¶åç§°
 		--return;
 		arg[1] = getcurobjname(gm);
 	end
 
 	player = nx_find_player( arg[1] );
 	if not nx_exists(player) then
-		scene_id = nx_get_player_scene(arg[1]); --È¡Íæ¼Ò³¡¾°ºÅ
+		scene_id = nx_get_player_scene(arg[1]); --å–ç©å®¶åœºæ™¯å·
 		if scene_id > 0 then
-			--[{@0:Ãû³Æ}]ÔÚ{@1:ÊıÖµ}ºÅ³¡¾°ÖĞ£¬ÇëÏÈÇĞ»»µ½¸Ã³¡¾°
+			--[{@0:åç§°}]åœ¨{@1:æ•°å€¼}å·åœºæ™¯ä¸­ï¼Œè¯·å…ˆåˆ‡æ¢åˆ°è¯¥åœºæ™¯
 			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(arg[1]) .. " is in scene:" .. scene_id));
 		else
 			local serverid = nx_get_player_serverid(arg[1]);
 			if (serverid > 0) then
 				local servername = nx_get_servername(serverid);
-				--[{@0:Ãû³Æ}]ÔÚ[{@1:·şÎñÆ÷Ãû}]
+				--[{@0:åç§°}]åœ¨[{@1:æœåŠ¡å™¨å}]
 				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(nx_string(arg[1]) .. " is in server:" .. nx_string(servername)));
 			else
-				--ÕÒ²»µ½Ãû³ÆÎª[{@0:Ãû³Æ}]µÄÍæ¼Ò
+				--æ‰¾ä¸åˆ°åç§°ä¸º[{@0:åç§°}]çš„ç©å®¶
 				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("can't find player:" .. nx_string(arg[1])));
 			end
 		end
@@ -1460,12 +1460,12 @@ function goplayer(gm, ...)
 	end
 end
 
---²éÑ¯ÔÚÏßÍæ¼ÒÊıÄ¿: playernum
+--æŸ¥è¯¢åœ¨çº¿ç©å®¶æ•°ç›®: playernum
 function playernum(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("player count:" .. nx_number(nx_get_player_count())));
 end
 
---°ÑÑ¡ÔñÄ¿±êÒÆ¶¯µ½Ä³¸ö³¡¾°
+--æŠŠé€‰æ‹©ç›®æ ‡ç§»åŠ¨åˆ°æŸä¸ªåœºæ™¯
 function movescene(gm, ...)
     local target = nx_query_property(gm, "LastObject")
 
@@ -1474,7 +1474,7 @@ function movescene(gm, ...)
         nx_switch_born(target, id);
 	end
 end
---°ÑÑ¡ÔñÄ¿±êÒÆ¶¯µ½Ä³¸öµã
+--æŠŠé€‰æ‹©ç›®æ ‡ç§»åŠ¨åˆ°æŸä¸ªç‚¹
 function moveto(gm, ...)
     local target = nx_query_property(gm, "LastObject")
 
@@ -1489,39 +1489,39 @@ function moveto(gm, ...)
      end
 end
 
---ÒşÉí: hide
+--éšèº«: hide
 function hide(gm)
 	--if nx_query_property(gm,"Invisible") == 0 then
 	--	nx_set_property(gm,"Invisible", 1);
 	if nx_query_property(gm,"RoleHide") == 0 then
 		nx_set_property(gm,"RoleHide", 1);
-		--¿ªÊ¼ÒşÉí
+		--å¼€å§‹éšèº«
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Begin hide."));
 	else
-		--ÒÑ¾­´¦ÓÚÒşÉí×´Ì¬ÖĞ
+		--å·²ç»å¤„äºéšèº«çŠ¶æ€ä¸­
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Begin hide."));
 	end
 end
 
---ÏÖÉí: show
+--ç°èº«: show
 function show(gm)
 	--if nx_query_property(gm,"Invisible") == 1 then
 	--	nx_set_property(gm,"Invisible", 0);
 	if nx_query_property(gm,"RoleHide") == 1 then
 		nx_set_property(gm,"RoleHide", 0);
-		--¿ªÊ¼ÏÖÉí
+		--å¼€å§‹ç°èº«
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("End hide."));
 	else
-		--ÒÑ¾­´¦ÓÚÏÖÉí×´Ì¬ÖĞ
+		--å·²ç»å¤„äºç°èº«çŠ¶æ€ä¸­
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("End hide."));
 	end
 end
 
---ÌßÈË: kick [Íæ¼ÒÃû] <XXX·ÖÖÓ>
+--è¸¢äºº: kick [ç©å®¶å] <XXXåˆ†é’Ÿ>
 function kick(gm, ...)
 	if table.getn(arg) == 0 then
-		--¸ñÊ½£º
-		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1945);--¸ñÊ½£ºkick Íæ¼ÒÃû³Æ ·ÖÖÓ
+		--æ ¼å¼ï¼š
+		--nx_sysinfo(gm, TIPSTYPE_GMINFO, 0, 1945);--æ ¼å¼ï¼škick ç©å®¶åç§° åˆ†é’Ÿ
 		--return;
 		arg[1] = getcurobjname(gm);
 	end
@@ -1536,33 +1536,33 @@ function kick(gm, ...)
 	end
 
 	if nx_break_byname(arg[1]) then
-		--½«[{@0:Ãû³Æ}]ÌßÏÂÏßÁË
+		--å°†[{@0:åç§°}]è¸¢ä¸‹çº¿äº†
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("kick off " .. nx_string(arg[1])));
 	end
 end
 
---ÌßÕËºÅ£ºlogout [ÕËºÅ]
+--è¸¢è´¦å·ï¼šlogout [è´¦å·]
 function logout(gm, ...)
 	if table.getn(arg) == 0 then
-		--¸ñÊ½£º
+		--æ ¼å¼ï¼š
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: logout account"));
 		return;
 	end
 
 	if nx_break_account(nx_string(arg[1])) then
-		--½«[{@0:Ãû³Æ}]ÌßÏÂÏßÁË
+		--å°†[{@0:åç§°}]è¸¢ä¸‹çº¿äº†
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("kick out account " .. nx_string(arg[1]) .. " succeed."));
 	else
-		--Ê§°Ü
+		--å¤±è´¥
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("kick out account " .. nx_string(arg[1]) .. " failed."));
 	end
 end
 
---¹ã²¥ÏûÏ¢: broadcast [ÏûÏ¢]
+--å¹¿æ’­æ¶ˆæ¯: broadcast [æ¶ˆæ¯]
 function broadcast(gm, ...)
 	if table.getn(arg) == 0 then
-		--¸ñÊ½£º
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("broadcast info"));--¸ñÊ½£ºbroadcast ÄÚÈİ£¨²»ÄÜ°üº¬¿Õ¸ñ£©
+		--æ ¼å¼ï¼š
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("broadcast info"));--æ ¼å¼ï¼šbroadcast å†…å®¹ï¼ˆä¸èƒ½åŒ…å«ç©ºæ ¼ï¼‰
 		return;
 	end
 
@@ -1570,10 +1570,10 @@ function broadcast(gm, ...)
 	nx_sysinfo_broadcast(nx_int(TIPSTYPE_IMPORTANTINFO), "0", info);
 end
 
---¹ã²¥ÏûÏ¢: broadcast [ÏûÏ¢]
+--å¹¿æ’­æ¶ˆæ¯: broadcast [æ¶ˆæ¯]
 function bc(gm, ...)
 	if table.getn(arg) == 0 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("bc info"));--¸ñÊ½£ºbc ÄÚÈİ£¨²»ÄÜ°üº¬¿Õ¸ñ£©
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("bc info"));--æ ¼å¼ï¼šbc å†…å®¹ï¼ˆä¸èƒ½åŒ…å«ç©ºæ ¼ï¼‰
 		return;
 	end
 
@@ -1581,10 +1581,10 @@ function bc(gm, ...)
 	nx_sysinfo_broadcast(nx_int(TIPSTYPE_IMPORTANTINFO), "0", info);
 end
 
---¹ã²¥ÏûÏ¢: bctest [ÏûÏ¢]
+--å¹¿æ’­æ¶ˆæ¯: bctest [æ¶ˆæ¯]
 function bctest(gm, ...)
 	if table.getn(arg) == 0 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format bctest contet(can't include space)"));--¸ñÊ½£ºbctest ÄÚÈİ£¨²»ÄÜ°üº¬¿Õ¸ñ£©
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format bctest contet(can't include space)"));--æ ¼å¼ï¼šbctest å†…å®¹ï¼ˆä¸èƒ½åŒ…å«ç©ºæ ¼ï¼‰
 		return;
 	end
 
@@ -1592,10 +1592,10 @@ function bctest(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", info);
 end
 
---¹ã²¥ÏûÏ¢: bchaha [ÏûÏ¢]
+--å¹¿æ’­æ¶ˆæ¯: bchaha [æ¶ˆæ¯]
 function bchaha(gm, ...)
 	if table.getn(arg) == 0 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format bchaha stringid para1, ..., paran"));--¸ñÊ½£ºbctest ÄÚÈİ£¨²»ÄÜ°üº¬¿Õ¸ñ£©
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format bchaha stringid para1, ..., paran"));--æ ¼å¼ï¼šbctest å†…å®¹ï¼ˆä¸èƒ½åŒ…å«ç©ºæ ¼ï¼‰
 		return;
 	end
 
@@ -1613,21 +1613,21 @@ function bchaha(gm, ...)
 	end
 end
 
---×Ô¼º×ö¶¯×÷: action [¶¯×÷Ãû]
+--è‡ªå·±åšåŠ¨ä½œ: action [åŠ¨ä½œå]
 function action(gm, action_name)
 	nx_custom_byken(gm, SERVER_CUSTOMMSG_ACTION, gm, nx_string(action_name));
 end
 
---Ñ¡ÔñÄ¿±ê×ö¶¯×÷
+--é€‰æ‹©ç›®æ ‡åšåŠ¨ä½œ
 function actionobj(gm, action_name)
 	local target = nx_query_property(gm, "LastObject");
 	nx_custom_byken(target, SERVER_CUSTOMMSG_ACTION, target, nx_string(action_name));
 end
 
---½ûÑÔÍæ¼Ò£ºsilence [Íæ¼ÒÃû] [·ÖÖÓ]
+--ç¦è¨€ç©å®¶ï¼šsilence [ç©å®¶å] [åˆ†é’Ÿ]
 function silence(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:silence <rolename> <minute>"));--¸ñÊ½£ºsilence Íæ¼ÒÃû ·ÖÖÓ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:silence <rolename> <minute>"));--æ ¼å¼ï¼šsilence ç©å®¶å åˆ†é’Ÿ
 		return;
 	elseif table.getn(arg) < 2 then
 		arg[2] = arg[1];
@@ -1641,13 +1641,13 @@ function silence(gm, ...)
 	local CHATTYPE_SILENCE = 0;
 	nx_command_byname(playername, COMMAND_CHAT, CHATTYPE_SILENCE, tick);
 	if minute == 0 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("[".. nx_string(playername) .. "] has released from silence."));--[{@0:Ãû³Æ}]ÒÑ±»½â³ı½ûÑÔ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("[".. nx_string(playername) .. "] has released from silence."));--[{@0:åç§°}]å·²è¢«è§£é™¤ç¦è¨€
 	else
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("[".. nx_string(playername) .. "] has silenced " .. nx_number(minute) .. " minute."));--[{@0:Ãû³Æ}]ÒÑ±»½ûÑÔ{@1:·ÖÖÓ}·ÖÖÓ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("[".. nx_string(playername) .. "] has silenced " .. nx_number(minute) .. " minute."));--[{@0:åç§°}]å·²è¢«ç¦è¨€{@1:åˆ†é’Ÿ}åˆ†é’Ÿ
 	end
 end
 
---²âÊÔÄ³µãÊÇ·ñ¿É×ß
+--æµ‹è¯•æŸç‚¹æ˜¯å¦å¯èµ°
 function canwalk( gm, x, z )
 	if nx_can_walk( nx_float(x), nx_float(z) ) then
 		nx_gminfo( gm, "0", nx_widestr("Can walk."));
@@ -1656,7 +1656,7 @@ function canwalk( gm, x, z )
 	end
 end
 
---²âÊÔµ½Ä³µãÖ®¼äÊÇ·ñ¿É×ß
+--æµ‹è¯•åˆ°æŸç‚¹ä¹‹é—´æ˜¯å¦å¯èµ°
 function canwalkto(gm, ...)
 	if table.getn(arg) ~= 2 then
 		nx_gminfo( gm, "0", nx_widestr("canwalkto: linecanwalk x z."));
@@ -1673,7 +1673,7 @@ function canwalkto(gm, ...)
 	end
 end
 
---ÖØĞÂÔØÈëµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóµÄÅäÖÃÎÄ¼ş
+--é‡æ–°è½½å…¥å½“å‰å±æ€§æ“ä½œå¯¹è±¡çš„é…ç½®æ–‡ä»¶
 function reload(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -1705,8 +1705,8 @@ function state(gm, ...)
 	end
 end
 
---²éÑ¯¹«»áËùÓĞµÄÊôĞÔÃû³Æ
---guildproperty ¹«»áÃû
+--æŸ¥è¯¢å…¬ä¼šæ‰€æœ‰çš„å±æ€§åç§°
+--guildproperty å…¬ä¼šå
 function guildproperty(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: guildproperty <guildname>"));
@@ -1727,8 +1727,8 @@ function guildproperty(gm, ...)
 	end
 end
 
---²éÑ¯¹«»áËùÓĞµÄ±í¸ñÃû³Æ
---guildrecord ¹«»áÃû
+--æŸ¥è¯¢å…¬ä¼šæ‰€æœ‰çš„è¡¨æ ¼åç§°
+--guildrecord å…¬ä¼šå
 function guildrecord(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: guildrecord <guildname>"));
@@ -1749,8 +1749,8 @@ function guildrecord(gm, ...)
 	end
 end
 
---²éÑ¯¹«»á±í¸ñµÄÄÚÈİ
---guildrecordquery ¹«»áÃû ±í¸ñÃû
+--æŸ¥è¯¢å…¬ä¼šè¡¨æ ¼çš„å†…å®¹
+--guildrecordquery å…¬ä¼šå è¡¨æ ¼å
 function guildrecordquery(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: guildrecordquery <guildname> <recname>"));
@@ -1798,7 +1798,7 @@ function guildquery(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(prop .. ":" .. nx_string(value)));
 end
 
---²éÑ¯¹«»áµÄUID
+--æŸ¥è¯¢å…¬ä¼šçš„UID
 function queryguildid(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: queryguildid <guildname>"));
@@ -2051,7 +2051,7 @@ function testradomint(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("scale : " .. scale .. ". mininum number appear times : " .. count_0));
 end
 
---¸øµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏó¼ÓÒ»¸öĞÄÌø
+--ç»™å½“å‰å±æ€§æ“ä½œå¯¹è±¡åŠ ä¸€ä¸ªå¿ƒè·³
 function addhb(gm, ...)
 	if table.getn(arg) == 0 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format : addhb <function name> <interval>"));
@@ -2073,7 +2073,7 @@ function addhb(gm, ...)
 	end
 end
 
---É¾³ıµ±Ç°ÊôĞÔ²Ù×÷¶ÔÏóµÄÒ»¸öĞÄÌø
+--åˆ é™¤å½“å‰å±æ€§æ“ä½œå¯¹è±¡çš„ä¸€ä¸ªå¿ƒè·³
 function removehb(gm, ...)
 	if table.getn(arg) == 0 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("format : removehb <function name>"));
@@ -2154,7 +2154,7 @@ function pubdataset(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(value));
 end
 
---¹«¹²Êı¾İ±í²éÑ¯
+--å…¬å…±æ•°æ®è¡¨æŸ¥è¯¢
 function pubrecquery(gm, ...)
 	if table.getn(arg) < 3 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: pubrecquery <pub_space_name> <pub_data_name> <rec_name>"));
@@ -2205,8 +2205,8 @@ function pubrecclear(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Clear record: " .. rec_name .. " success!") );
 end
 
---Ìí¼ÓÒ»ĞĞ
---recordaddrow ±í¸ñÃû ...
+--æ·»åŠ ä¸€è¡Œ
+--recordaddrow è¡¨æ ¼å ...
 function pubrecaddrow(gm, ...)
 	if table.getn(arg) < 3 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: pubrecaddrow <pub_space_name> <pub_data_name> <rec_name>"));
@@ -2238,7 +2238,7 @@ function pubrecaddrow(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Add row succeed!"));
 end
 
--- É¾³ıÒ»ĞĞ
+-- åˆ é™¤ä¸€è¡Œ
 function pubrecremoverow(gm, ...)
 	if table.getn(arg) < 4 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: pubrecremoverow <pub_space_name> <pub_data_name> <rec_name> <row>"));
@@ -2260,8 +2260,8 @@ function pubrecremoverow(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Remove row succeed!"));
 end
 
---ÉèÖÃ¹«¹²Êı¾İµÄ±í¸ñÖµ
---pubrecset ¿Õ¼äÃû³Æ ±í¸ñÃû³Æ ĞĞºÅ ÁĞºÅ Öµ
+--è®¾ç½®å…¬å…±æ•°æ®çš„è¡¨æ ¼å€¼
+--pubrecset ç©ºé—´åç§° è¡¨æ ¼åç§° è¡Œå· åˆ—å· å€¼
 function pubrecset(gm, ...)
 	if table.getn(arg) < 6 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: pubrecset <pub_space_name> <pub_data_name> <rec_name> <row> <col> <value>"));
@@ -2377,7 +2377,7 @@ function useskill(gm, ...)
 	nx_use_skill_to_target(gm, skill);
 end
 
---É¾³ı¼¼ÄÜ
+--åˆ é™¤æŠ€èƒ½
 function delskill(gm, ...)
 
 	local id = nx_string(arg[1]);
@@ -2404,7 +2404,7 @@ function addshoufa(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("add shoufa " .. id .. " succeed"))
 end
 
---Ñ¡ÔñÄ¿±ê·Å¼¼ÄÜ
+--é€‰æ‹©ç›®æ ‡æ”¾æŠ€èƒ½
 function useskillobj(gm, ...)
 	local target = nx_query_property(gm, "LastObject");
 	local id = nx_string(arg[1]);
@@ -2481,8 +2481,8 @@ function getconfigprop(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("ConfigID:" .. configid .. " " .. prop .. "=" .. value));
 end
 
---²âÊÔNPCµòÂäÎïÆ·
---       testdrop value1 value2        value1±íÊ¾NPCµÄConfigID; value2±íÊ¾NPCµÄÊıÁ¿
+--æµ‹è¯•NPCå‡‹è½ç‰©å“
+--       testdrop value1 value2        value1è¡¨ç¤ºNPCçš„ConfigID; value2è¡¨ç¤ºNPCçš„æ•°é‡
 function testdrop(gm, ...)
 	local id = nx_string(arg[1]);
 	local times = nx_int(arg[2]);
@@ -2492,7 +2492,7 @@ function testdrop(gm, ...)
 		if nx_int(bosslevel) <= 0 then
 		--nx_msgbox(nx_string(id))
 		    local dropnormalitems = nx_get_normal_dropitems(nx_get_scene(), id);
-		    --ÏÔÊ¾ÆÕÍ¨µôÂäÎïÆ·
+		    --æ˜¾ç¤ºæ™®é€šæ‰è½ç‰©å“
 		    for i = 1, table.getn(dropnormalitems) do
                 local name_id = nx_get_config(dropnormalitems[i]);
                 local cur_count = item_count[name_id];
@@ -2502,10 +2502,10 @@ function testdrop(gm, ...)
 		    	item_count[name_id] = cur_count + 1;
 		    end
 		else
-			--BosssµôÂäÊôĞÔ
+			--Bosssæ‰è½å±æ€§
 			local proplevel = nx_get_config_property(id, "PropLevel");
 			local dropbossitems = nx_get_boss_dropitems(nx_get_scene(), id, nx_int(bosslevel), nx_int(proplevel));
-			--ÏÔÊ¾BOSSµôÂäÎïÆ·
+			--æ˜¾ç¤ºBOSSæ‰è½ç‰©å“
 		    for i = 1, table.getn(dropbossitems) do
                 local name_id = nx_get_config(dropbossitems[i]);
                 local cur_count = item_count[name_id];
@@ -2518,8 +2518,8 @@ function testdrop(gm, ...)
 	end
 
 	local total = 0;
-	--ÏÔÊ¾ÎïÆ·ĞÅÏ¢
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. times .. "¸ö" .. nx_string(id) .. "µÄ" .. " Items List Begin:" .. "====="));
+	--æ˜¾ç¤ºç‰©å“ä¿¡æ¯
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. times .. "ä¸ª" .. nx_string(id) .. "çš„" .. " Items List Begin:" .. "====="));
 	for name_id, count in pairs(item_count) do
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(name_id .. "-- amount : " .. count));
 		total = total + count;
@@ -2535,8 +2535,8 @@ function testdroptime(gm, ...)
 
 	local tick = nx_get_ticks();
 
-	local dropid = nx_string(arg[1]);--µôÂä±àºÅ
-	local times = 0;--²âÊÔ´ÎÊı
+	local dropid = nx_string(arg[1]);--æ‰è½ç¼–å·
+	local times = 0;--æµ‹è¯•æ¬¡æ•°
 	if table.getn(arg) > 1 then
 		times = nx_int(arg[2]);
 	end
@@ -2544,7 +2544,7 @@ function testdroptime(gm, ...)
 		times = 1;
 	end
 
-	local scene = nx_get_scene();--µ±Ç°³¡¾°
+	local scene = nx_get_scene();--å½“å‰åœºæ™¯
 	local x,y,z,o = nx_get_position(gm);
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====Begin Test NormalDrop " .. dropid .. " ====="));
@@ -2638,8 +2638,8 @@ function test_move_item(gm, ...)
 	nx_test_move_item(gm, srcviewid, srcpos, destviewid, destpos);
 end
 
--- ´´½¨¸±±¾³¡¾°
--- clone_scene ³¡¾°ĞòÁĞºÅ
+-- åˆ›å»ºå‰¯æœ¬åœºæ™¯
+-- clone_scene åœºæ™¯åºåˆ—å·
 function clone_scene(gm, ...)
     if table.getn(arg) < 1 then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: clonescene scene_serial"));
@@ -2656,7 +2656,7 @@ function clone_scene(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(clone_scene_id));
 end
 
--- »ñÈ¡¸±±¾Í¨¹Ø½±ÀøÎïÆ·È¨Öµ
+-- è·å–å‰¯æœ¬é€šå…³å¥–åŠ±ç‰©å“æƒå€¼
 function get_pass_award(gm,...)
     if table.getn(arg) < 4 then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0",nx_widestr("Format: get_pass_award <clone_id> <clone_difficulty> <passLevel> <awardTimes>"));
@@ -2665,17 +2665,17 @@ function get_pass_award(gm,...)
     nx_get_pass_award(gm, nx_int(arg[1]),nx_int(arg[2]),nx_int(arg[3]),nx_int(arg[4]))
 end
 
---ÖØÖÃ¸±±¾´ÎÊı
+--é‡ç½®å‰¯æœ¬æ¬¡æ•°
 function clear_clone_times(gm, ...)
     nx_clear_clone_times(gm, nx_int(arg[1]));
 end
 
---Í¨¹Ø¸±±¾
+--é€šå…³å‰¯æœ¬
 function clone_pass(gm, ...)
     nx_clone_pass(gm);
 end
 
--- ¹Ø±Õµ±Ç°¸±±¾
+-- å…³é—­å½“å‰å‰¯æœ¬
 -- close_clone
 function close_clone(gm, ...)
     nx_close_clone();
@@ -2683,7 +2683,7 @@ end
 
 function getclonenum(gm, ...)
 	if table.getn(arg) == 0 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format£ºgetclonenum <sceneid>"));
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Formatï¼šgetclonenum <sceneid>"));
 		return;
 	end
 
@@ -2697,7 +2697,7 @@ function test_curse(gm, ...)
 	nx_custom(gm, SERVER_CUSTOMMSG_BEGIN_CURSE, ticks)
 end
 
---ÉèÖÃ¸±±¾½øÈë´ÎÊı
+--è®¾ç½®å‰¯æœ¬è¿›å…¥æ¬¡æ•°
 function set_clone_enter_count(gm, ...)
 	if table.getn(arg) < 3 then
 		return
@@ -2710,7 +2710,7 @@ function set_clone_enter_count(gm, ...)
 	nx_set_clone_enter_count(gm, protoscene, difficuty, count)
 end
 
---ÉèÖÃ¸±±¾ÆÀ·Ö
+--è®¾ç½®å‰¯æœ¬è¯„åˆ†
 function set_clone_pass_score(gm, ...)
 	if table.getn(arg) < 3 then
 		return
@@ -2733,7 +2733,7 @@ function set_reward(gm, ...)
 	nx_set_reward_rand_count(gm, count)
 end
 
--- ×ªÖ°
+-- è½¬èŒ
 function setjob(gm, ...)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -2749,7 +2749,7 @@ function setjob(gm, ...)
 
 	--local job_id = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	--if nx_trans_job(gm, job_id) then
 	--	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("setjob " .. nx_string(job_id) .. "succeed."))
 	--else
@@ -2757,7 +2757,7 @@ function setjob(gm, ...)
 	--end
 end
 
--- Ç¿ÖÆ½ÓÊÜÄ³ÈÎÎñ accepttask [task_id]
+-- å¼ºåˆ¶æ¥å—æŸä»»åŠ¡ accepttask [task_id]
 function accepttask(gm, ...)
 	if table.getn(arg) == 0 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: accepttask <taskid>"))
@@ -2766,7 +2766,7 @@ function accepttask(gm, ...)
 
 	local taskid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_accept_task(gm, taskid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Accept task " .. nx_string(taskid) .. "succeed."))
 	else
@@ -2899,11 +2899,11 @@ function inc_job_level(gm,...)
 	nx_inc_job_level(gm, jobid, value)
 end
 
---´´½¨Ò»¸öÓÎÏ·¶ÔÏó
---cobj ¶ÔÏóID
+--åˆ›å»ºä¸€ä¸ªæ¸¸æˆå¯¹è±¡
+--cobj å¯¹è±¡ID
 function cAdventureNpc(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobj <ID>"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobj <ID>"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return;
 	end
 
@@ -2921,7 +2921,7 @@ end
 
 function SetOfflinePrizeTime(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobj <ID>"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:cobj <ID>"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return;
 	end
 
@@ -2934,52 +2934,52 @@ function SetOfflinePrizeTime(gm, ...)
 end
 
 
--- ĞŞ¸ÄÉùÍû
+-- ä¿®æ”¹å£°æœ›
 -- setrepute repute_id repute_value
 function changerepute(gm, ...)
 
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:changerepute <name> <value>"))
 		return
 	end
 
-	-- µÃµ½²ÎÊı
+	-- å¾—åˆ°å‚æ•°
 	local name = nx_string(arg[1])
 	local value = nx_int(arg[2])
 
-	-- ÅĞ¶ÏÊÇ·ñÊÇÉùÍûÃû
+	-- åˆ¤æ–­æ˜¯å¦æ˜¯å£°æœ›å
 	if not nx_is_repute(name) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Not a repute name!"))
 		return
 	end
 
-	-- Ö´ĞĞ¹æÔò
+	-- æ‰§è¡Œè§„åˆ™
 	nx_modify_repute(gm, name, value)
 
 end
 
 
--- ÊéĞ´¾ç±¾
+-- ä¹¦å†™å‰§æœ¬
 -- writedrama drama_id
 function writedrama(gm, ...)
 
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:writedrama <drama_name>"))
 		return
 	end
 
-	-- µÃµ½²ÎÊı
+	-- å¾—åˆ°å‚æ•°
 	local drama_id = nx_string(arg[1])
 
-	-- ÉêÇëĞ´¾ç±¾
+	-- ç”³è¯·å†™å‰§æœ¬
 	nx_require_write_drama(gm, drama_id)
 
 end
 
 function reload_config(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:reload_config <config file>"))
 		return
@@ -3017,10 +3017,10 @@ function reload_buffer_res(gm, ...)
     end
 end
 
---¸øÊÂ¼şÓµÓĞÕßÌí¼ÓÒ»¸öbuff
+--ç»™äº‹ä»¶æ‹¥æœ‰è€…æ·»åŠ ä¸€ä¸ªbuff
 function add_buff(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: add_buff buffid"));--¸ñÊ½£ºset ÊôĞÔÃû³Æ ÊôĞÔÖµ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: add_buff buffid"));--æ ¼å¼ï¼šset å±æ€§åç§° å±æ€§å€¼
 		return;
 	end
 
@@ -3042,7 +3042,7 @@ function add_buff(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("add buffer " .. buff_id .. " succeed."))
 end
 
---ÒÆ³ıÒ»Ö¸¶¨µÄBUFF
+--ç§»é™¤ä¸€æŒ‡å®šçš„BUFF
 function remove_buff(gm, ...)
 
 	if table.getn(arg) < 1 then
@@ -3068,13 +3068,13 @@ function remove_buff(gm, ...)
 
 end
 
---ÖØĞÂ¼ÓÔØ¸±±¾½øÈë¹æÔò
+--é‡æ–°åŠ è½½å‰¯æœ¬è¿›å…¥è§„åˆ™
 function reload_clone_config(gm, ...)
 	nx_reload_clone_config()
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_clone_config "  .. " ok."))
 end
 
---ÖØÔØNPC, ÖØÔØNPC£¬ĞèÒªĞÂ´´½¨µÄNPC²ÅÄÜÆğĞ§¹û
+--é‡è½½NPC, é‡è½½NPCï¼Œéœ€è¦æ–°åˆ›å»ºçš„NPCæ‰èƒ½èµ·æ•ˆæœ
 function reload_normal_npc_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_npc_config "  .. " begin."))
 
@@ -3084,7 +3084,7 @@ function reload_normal_npc_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_npc_config "  .. " ok."))
 end
 
---ÖØÔØ×°±¸ºÍÎïÆ·ÅäÖÃ, Íæ¼ÒÎïÆ·ĞèÖØĞÂµÇÂ½²ÅÄÜÆğĞ§
+--é‡è½½è£…å¤‡å’Œç‰©å“é…ç½®, ç©å®¶ç‰©å“éœ€é‡æ–°ç™»é™†æ‰èƒ½èµ·æ•ˆ
 function reload_item_config(gm, ...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_item_config "  .. " begin."))
@@ -3092,13 +3092,13 @@ function reload_item_config(gm, ...)
 --	nx_reload_static_data(STATIC_DATA_ITEM_ART)
 --	nx_reload_static_data(STATIC_DATA_ITEM_LOGIC)
 --	nx_reload_static_data(STATIC_DATA_ITEM_FUNC)
---	nx_reload_static_data(STATIC_DATA_ITEM_COPY)		-- ¸±±¾µÀ¾ß×¨ÓÃ°ü
---	nx_reload_static_data(STATIC_DATA_ITEM_INGREDIENT)	-- Åä·½µÀ¾ß×¨ÓÃ°ü
---	nx_reload_static_data(STATIC_DATA_ITEM_TASK)		-- ÈÎÎñµÀ¾ß×¨ÓÃ°ü
---	nx_reload_static_data(STATIC_DATA_ITEM_USESKILL)	-- Ê¹ÓÃ¼¼ÄÜµÀ¾ß×¨ÓÃ°ü
---	nx_reload_static_data(STATIC_DATA_ITEM_LEARNSKILL)	-- Ñ§Ï°¼¼ÄÜµÀ¾ß×¨ÓÃ°ü
---	nx_reload_static_data(STATIC_DATA_ITEM_SEED)		-- ÖÖ×ÓµÀ¾ß×¨ÓÃ°ü
---	nx_reload_static_data(STATIC_DATA_ITEM_MATERIAL)	-- Éú»î²ÄÁÏµÀ¾ß×¨ÓÃ°ü
+--	nx_reload_static_data(STATIC_DATA_ITEM_COPY)		-- å‰¯æœ¬é“å…·ä¸“ç”¨åŒ…
+--	nx_reload_static_data(STATIC_DATA_ITEM_INGREDIENT)	-- é…æ–¹é“å…·ä¸“ç”¨åŒ…
+--	nx_reload_static_data(STATIC_DATA_ITEM_TASK)		-- ä»»åŠ¡é“å…·ä¸“ç”¨åŒ…
+--	nx_reload_static_data(STATIC_DATA_ITEM_USESKILL)	-- ä½¿ç”¨æŠ€èƒ½é“å…·ä¸“ç”¨åŒ…
+--	nx_reload_static_data(STATIC_DATA_ITEM_LEARNSKILL)	-- å­¦ä¹ æŠ€èƒ½é“å…·ä¸“ç”¨åŒ…
+--	nx_reload_static_data(STATIC_DATA_ITEM_SEED)		-- ç§å­é“å…·ä¸“ç”¨åŒ…
+--	nx_reload_static_data(STATIC_DATA_ITEM_MATERIAL)	-- ç”Ÿæ´»ææ–™é“å…·ä¸“ç”¨åŒ…
 --	nx_reload_static_data(STATIC_DATA_ITEM_PROPMODIFY)
     nx_reload_item_xml()
 --	nx_reload_config("ini\\item\\Equipment.xml")
@@ -3106,7 +3106,7 @@ function reload_item_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_item_config "  .. " ok."))
 end
 
---ÖØÔØBUFFERÅäÖÃ,  ĞÂBUFFERÆğĞ§
+--é‡è½½BUFFERé…ç½®,  æ–°BUFFERèµ·æ•ˆ
 function reload_buffer_config(gm, ...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_buffer_config "  .. " begin."))
@@ -3117,7 +3117,7 @@ function reload_buffer_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_buffer_config "  .. " ok."))
 end
 
---ÖØÔØ¼¼ÄÜÅäÖÃ£¬ĞèÖØĞÂµÇÂ½
+--é‡è½½æŠ€èƒ½é…ç½®ï¼Œéœ€é‡æ–°ç™»é™†
 function reload_skill_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_skill_config "  .. " begin."))
 
@@ -3135,7 +3135,7 @@ function reload_skill_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_skill_config "  .. " ok."))
 end
 
---ÖØĞÂ¼ÓÔØÂ·µãÅäÖÃ
+--é‡æ–°åŠ è½½è·¯ç‚¹é…ç½®
 function reload_transport_roadpoint(gm, ...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_transport_roadpoint "  .. " begin."))
@@ -3147,7 +3147,7 @@ function reload_transport_roadpoint(gm, ...)
 
 end
 
---É¾³ıÍæ¼ÒÉíÉÏµÄÁãÊ±±äÁ¿
+--åˆ é™¤ç©å®¶èº«ä¸Šçš„é›¶æ—¶å˜é‡
 function del_owner_data(gm, ...)
 	local dataname = nx_string(arg[1])
 	if  nx_find_data(gm, dataname) then
@@ -3155,7 +3155,7 @@ function del_owner_data(gm, ...)
 	end
 end
 
---ÏÔÊ¾µ±Ç°³¡¾°ÀëÏß´ò¹¤×´Ì¬
+--æ˜¾ç¤ºå½“å‰åœºæ™¯ç¦»çº¿æ‰“å·¥çŠ¶æ€
 function offlinejob(gm, ...)
 	local scene = nx_get_scene_id()
 
@@ -3185,27 +3185,27 @@ function offlinejob(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(text))
 end
 
---ĞÂÔöÀëÏßĞĞÎª
+--æ–°å¢ç¦»çº¿è¡Œä¸º
 function addofflinejob(gm, ...)
 	if table.getn(arg) == 1 then
 
-		--Çå¿Õ±í¸ñ
+		--æ¸…ç©ºè¡¨æ ¼
 		nx_clear_record(gm, "OffLineJob")
 		nx_clear_record(gm, "OffLineJob_Log")
 
-		--Ìí¼ÓĞĞÎª
+		--æ·»åŠ è¡Œä¸º
 		nx_get_offline_job(gm, nx_string(arg[1]))
 
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Add OffLineJob succeed"))
 	end
 end
 
---³õÊ¼»¯Â·¾¶
+--åˆå§‹åŒ–è·¯å¾„
 function initoffLinepath(gm, ...)
 
 	if table.getn(arg) == 1 then
 
-		--³õÊ¼»¯Â·¾¶
+		--åˆå§‹åŒ–è·¯å¾„
 		if not nx_find_data(gm, "PATH_ID") then
 			nx_add_data(gm, "PATH_ID", VTYPE_STRING)
 		end
@@ -3215,7 +3215,7 @@ function initoffLinepath(gm, ...)
 	end
 end
 
--- ÖØĞÂÔØÈëÀëÏß×ÊÔ´
+-- é‡æ–°è½½å…¥ç¦»çº¿èµ„æº
 function reload_offline_resource(gm,...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_offline_resource "  .. " begin."))
@@ -3230,7 +3230,7 @@ function reload_offline_resource(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_offline_resource "  .. " end."))
 end
 
---ÉèÖÃÈÎÎñ±ê¼ÇÎªÍê³É
+--è®¾ç½®ä»»åŠ¡æ ‡è®°ä¸ºå®Œæˆ
 function finishtask(gm, ...)
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: finishtask task_id"));
@@ -3241,7 +3241,7 @@ function finishtask(gm, ...)
 	nx_set_task_complete(gm, taskId)
 end
 
---ÉèÖÃÈÎÎñ±ê¼ÇÎªÍê³É
+--è®¾ç½®ä»»åŠ¡æ ‡è®°ä¸ºå®Œæˆ
 function resettask(gm, ...)
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: finishtask task_id"));
@@ -3278,7 +3278,7 @@ function get_player_count(gm, ...)
 	end
 end
 
---¸Ä±äµ±Ç°¸±±¾½ø¶ÈÎª
+--æ”¹å˜å½“å‰å‰¯æœ¬è¿›åº¦ä¸º
 function set_clone_progress(gm,...)
 	if table.getn(arg) < 1 then
 		return
@@ -3290,7 +3290,7 @@ function set_clone_progress(gm,...)
 	end
 end
 
---Çå³ı±í
+--æ¸…é™¤è¡¨
 function clear_record(gm,...)
 	if table.getn(arg) < 1 then
 		return
@@ -3299,7 +3299,7 @@ function clear_record(gm,...)
 	nx_clear_record(gm, name)
 end
 
---²¥·ÅµçÓ°
+--æ’­æ”¾ç”µå½±
 function play_movie(gm,...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: play_movie <movie_id>"))
@@ -3314,18 +3314,18 @@ end
 
 
 --[[
-±ğ²ÎÊı
-//1 ×°±¸
-//2 ÕĞÊ½
-//3 ÄÚ¹¦
-//4 ĞÄ·¨
-//5 Çá¹¦
-//6 ¼¼ÄÜ
-//7 µÀ¾ß
-//8 ÈÎÎñ
-//9 »î¶¯
-//14¾­Âö
-//15Ñ¨Î»
+åˆ«å‚æ•°
+//1 è£…å¤‡
+//2 æ‹›å¼
+//3 å†…åŠŸ
+//4 å¿ƒæ³•
+//5 è½»åŠŸ
+//6 æŠ€èƒ½
+//7 é“å…·
+//8 ä»»åŠ¡
+//9 æ´»åŠ¨
+//14ç»è„‰
+//15ç©´ä½
 ]]
 
 function remove_obj(gm, ...)
@@ -3366,7 +3366,7 @@ function reload_award_resource(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_award_resource "  .. " end."))
 end
 --
--- ÖØĞÂÔØÈëÈÎÎñ×ÊÔ´
+-- é‡æ–°è½½å…¥ä»»åŠ¡èµ„æº
 function reload_task_resource(gm,...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_task_resource "  .. " begin."))
@@ -3381,7 +3381,7 @@ function reload_task_resource(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_task_resource "  .. " end."))
 end
 
--- ÖØĞÂÔØÈëÉ¸Ñ¡×ÊÔ´
+-- é‡æ–°è½½å…¥ç­›é€‰èµ„æº
 function reload_option_resource(gm,...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_option_resource "  .. " begin."))
@@ -3396,7 +3396,7 @@ function reload_option_resource(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_option_resource "  .. " end."))
 end
 
---·ÅÆúÈÎÎñ
+--æ”¾å¼ƒä»»åŠ¡
 function giveuptask(gm,...)
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: giveuptask taskid"));
@@ -3407,13 +3407,13 @@ function giveuptask(gm,...)
 	nx_giveup_task(gm, task_id);
 end
 
---²ÎÊıËµÃ÷
--- ? »òÕß h ±íÊ¾°ïÖú,ÁĞ³öËùÓĞ²ÎÊıËµÃ÷
--- g »òÕß ±íÊ¾·ÅÆúÈÎÎñ ÈÎÎñ±àºÅ
--- a »òÕß ±íÊ¾½ÓÊÜÈÎÎñ ÈÎÎñ±àºÅ
--- p »òÕß ±íÊ¾ÏÔÊ¾ÈÎÎñ±í 1 ÈÎÎñ³Ğ½Ó±í 2 ÈÎÎñ½ø¶È±í 3 ÈÎÎñÍê³É±í
+--å‚æ•°è¯´æ˜
+-- ? æˆ–è€… h è¡¨ç¤ºå¸®åŠ©,åˆ—å‡ºæ‰€æœ‰å‚æ•°è¯´æ˜
+-- g æˆ–è€… è¡¨ç¤ºæ”¾å¼ƒä»»åŠ¡ ä»»åŠ¡ç¼–å·
+-- a æˆ–è€… è¡¨ç¤ºæ¥å—ä»»åŠ¡ ä»»åŠ¡ç¼–å·
+-- p æˆ–è€… è¡¨ç¤ºæ˜¾ç¤ºä»»åŠ¡è¡¨ 1 ä»»åŠ¡æ‰¿æ¥è¡¨ 2 ä»»åŠ¡è¿›åº¦è¡¨ 3 ä»»åŠ¡å®Œæˆè¡¨
 -- s
--- c »òÕß ±íÊ¾Çå¿ÕÈÎÎñ±í
+-- c æˆ–è€… è¡¨ç¤ºæ¸…ç©ºä»»åŠ¡è¡¨
 local g_task_rec =
 {
 	"Task_Accepted",
@@ -3428,35 +3428,35 @@ function task(gm, ...)
 	if table.getn(arg) < 1 then cmd = "?"; else cmd = nx_string(arg[1]) end
 
 	if string.find(cmd, "?") ~= nil or string.find(cmd, "h") then
-		-- ´òÓ¡°ïÖú
+		-- æ‰“å°å¸®åŠ©
 		task_help(gm, TIPSTYPE_GMINFO);
 		return
 	elseif string.find(cmd, "g") then
 		if table.getn(arg) < 2 then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("¾¯¸æ: ÕıÔÚÉ¾³ıËùÓĞÈÎÎñ......"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("è­¦å‘Š: æ­£åœ¨åˆ é™¤æ‰€æœ‰ä»»åŠ¡......"));
 			local rows = nx_get_record_rows(gm, "Task_Accepted");
 			for i = 0, rows-1 do
 				local id = nx_query_record_value(gm, "Task_Accepted", i, 0);
 				nx_giveup_task(gm, id);
 			end
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("³É¹¦·ÅÆúËùÓĞÈÎÎñ"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("æˆåŠŸæ”¾å¼ƒæ‰€æœ‰ä»»åŠ¡"));
 		else
 			local id = nx_int(arg[2])
 			nx_giveup_task(gm, id)
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("³É¹¦·ÅÆúÈÎÎñ[......"..nx_string(id).."]"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("æˆåŠŸæ”¾å¼ƒä»»åŠ¡[......"..nx_string(id).."]"));
 		end
 	elseif string.find(cmd, "a") then
 		if table.getn(arg) < 2 then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("²ÎÊıÌ«ÉÙ,Ïê¼û°ïÖú...."));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("å‚æ•°å¤ªå°‘,è¯¦è§å¸®åŠ©...."));
 			task_help(gm, TIPSTYPE_GMINFO);
 			return
 		end
 		local id = nx_int(arg[2]);
 		nx_accept_task(gm, id)
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("³É¹¦³Ğ½ÓÈÎÎñ[......"..nx_string(id).."]"));
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("æˆåŠŸæ‰¿æ¥ä»»åŠ¡[......"..nx_string(id).."]"));
 	elseif string.find(cmd, "p") then
 		if table.getn(arg) < 2 then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("²ÎÊıÌ«ÉÙ,Ïê¼û°ïÖú...."));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("å‚æ•°å¤ªå°‘,è¯¦è§å¸®åŠ©...."));
 			task_help(gm, TIPSTYPE_GMINFO);
 			return
 		end
@@ -3478,13 +3478,13 @@ function task(gm, ...)
 				nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(text));
 			end
 		else
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("±í¸ñid±àºÅ´íÎó,Ïê¼û°ïÖú...."));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("è¡¨æ ¼idç¼–å·é”™è¯¯,è¯¦è§å¸®åŠ©...."));
 			task_help(gm, TIPSTYPE_GMINFO);
 			return
 		end
 	elseif string.find(cmd, "s") then
 		if table.getn(arg) < 5 then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("²ÎÊıÌ«ÉÙ,Ïê¼û°ïÖú...."));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("å‚æ•°å¤ªå°‘,è¯¦è§å¸®åŠ©...."));
 			task_help(gm, TIPSTYPE_GMINFO);
 			return
 		end
@@ -3499,11 +3499,11 @@ function task(gm, ...)
 			return;
 		end
 		if row >= nx_get_record_rows(gm, rec) then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("´íÎó ĞĞºÅ³¬³ö±í¸ñ×î´óĞĞ: " .. rec));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("é”™è¯¯ è¡Œå·è¶…å‡ºè¡¨æ ¼æœ€å¤§è¡Œ: " .. rec));
 			return
 		end
 		if col >= nx_get_record_cols(gm, rec) then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("´íÎó ÁĞºÅ³¬³ö±í¸ñ×î´óÁĞ: " .. rec));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("é”™è¯¯ åˆ—å·è¶…å‡ºè¡¨æ ¼æœ€å¤§åˆ—: " .. rec));
 			return
 		end
 
@@ -3524,43 +3524,43 @@ function task(gm, ...)
 			nx_set_record_value(gm, rec, row, col, nx_object(value));
 		end
 
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("ÉèÖÃ±í¸ñ³É¹¦: " .. rec));
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("è®¾ç½®è¡¨æ ¼æˆåŠŸ: " .. rec));
 	elseif string.find(cmd, "c") then
-		-- Çå¿Õ½ø¶È±í
+		-- æ¸…ç©ºè¿›åº¦è¡¨
 		local bret = nx_clear_record(gm, "Task_Record");
 		if bret then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("³É¹¦Çå¿ÕÈÎÎñ½ø¶È±í"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("æˆåŠŸæ¸…ç©ºä»»åŠ¡è¿›åº¦è¡¨"));
 		end
 
 		bret = nx_clear_record(gm, "Task_Accepted");
 		if bret then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("³É¹¦Çå¿ÕÈÎÎñ½ÓÊÜ±í"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("æˆåŠŸæ¸…ç©ºä»»åŠ¡æ¥å—è¡¨"));
 		end
 
-		-- Çå¿ÕÈÎÎñ¼ÇÂ¼±í
+		-- æ¸…ç©ºä»»åŠ¡è®°å½•è¡¨
 		bret = nx_clear_record(gm, "Task_Completed");
 		if bret then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("³É¹¦Çå¿ÕÈÎÎñÍê³É±í"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("æˆåŠŸæ¸…ç©ºä»»åŠ¡å®Œæˆè¡¨"));
 		end
 	end
 end
 
---Çå¿ÕËùÓĞÈÎÎñ±í¸ñ
+--æ¸…ç©ºæ‰€æœ‰ä»»åŠ¡è¡¨æ ¼
 function clearalltask(gm,...)
 	local bClearCompleted = false;
 	if table.getn(arg) > 0 then
 		local flag = nx_string(arg[1]);
 		if flag == nx_string("-help") then
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clearalltask ÃüÁîºóÃæ¿ÉÒÔ¸½¼ÓÒ»¸ö²ÎÊı: "));
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("²ÎÊıÎª[-help], Ôò´òÓ¡±¾°ïÖúĞÅÏ¢"));
-			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("²ÎÊıÎª[-record], ÔòÉ¾³ıËùÓĞÈÎÎñµÄÍ¬Ê±É¾³ıÈÎÎñ¼ÇÂ¼"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clearalltask å‘½ä»¤åé¢å¯ä»¥é™„åŠ ä¸€ä¸ªå‚æ•°: "));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("å‚æ•°ä¸º[-help], åˆ™æ‰“å°æœ¬å¸®åŠ©ä¿¡æ¯"));
+			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("å‚æ•°ä¸º[-record], åˆ™åˆ é™¤æ‰€æœ‰ä»»åŠ¡çš„åŒæ—¶åˆ é™¤ä»»åŠ¡è®°å½•"));
 			return
 		elseif flag == nx_string("-record") then
 			bClearCompleted = true;
 		end
 	end
 
-	-- ÏÈ·ÅÆúËùÓĞÈÎÎñ
+	-- å…ˆæ”¾å¼ƒæ‰€æœ‰ä»»åŠ¡
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Warning: trying to giveup all task......"));
 	local rows = nx_get_record_rows(gm, "Task_Accepted");
 	for i = 0, rows-1 do
@@ -3568,7 +3568,7 @@ function clearalltask(gm,...)
 		nx_giveup_task(gm, id);
 	end
 
-	-- Çå¿Õ½ø¶È±í
+	-- æ¸…ç©ºè¿›åº¦è¡¨
 	--local bret = nx_clear_record(gm, "Task_Record");
 	--if bret then
 		--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear task_record succeed"));
@@ -3579,7 +3579,7 @@ function clearalltask(gm,...)
 		--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear task_accepted succeed"));
 	--end
 
-	-- Çå¿ÕÈÎÎñ¼ÇÂ¼±í
+	-- æ¸…ç©ºä»»åŠ¡è®°å½•è¡¨
 	if bClearCompleted then
 		local bret = nx_clear_record(gm, "Task_Completed");
 		if bret then
@@ -3589,7 +3589,7 @@ function clearalltask(gm,...)
 end
 
 
---ÖØĞÂÔØÈëÉú»î¼¼ÄÜÏà¹Øini
+--é‡æ–°è½½å…¥ç”Ÿæ´»æŠ€èƒ½ç›¸å…³ini
 function reload_lifejob_config(gm,...)
 
 	local res = nx_reload_lifejob_config()
@@ -3602,7 +3602,7 @@ function reload_lifejob_config(gm,...)
 
 end
 
---ÖØĞÂÔØÈë¾²Ì¬ÊôĞÔ×ÊÔ´ÎÄ¼ş
+--é‡æ–°è½½å…¥é™æ€å±æ€§èµ„æºæ–‡ä»¶
 function reload_static_data(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_static_data "  .. "begin ..."))
 
@@ -3611,7 +3611,7 @@ function reload_static_data(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_static_data "  .. "ok."))
 end
 
---ÖØÔØ½»Í¨ÏµÍ³Ïà¹ØÅäÖÃ,Èç¹ûÂ·µãĞÅÏ¢¸Ä±äÔòÒªÖØÆô¿Í»§¶Ë
+--é‡è½½äº¤é€šç³»ç»Ÿç›¸å…³é…ç½®,å¦‚æœè·¯ç‚¹ä¿¡æ¯æ”¹å˜åˆ™è¦é‡å¯å®¢æˆ·ç«¯
 function reload_trans_config(gm, ...)
 	nx_reload_config("ini\\Npc\\TransObj\\TransPathRec.xml")
 	nx_reload_trans_func_id();
@@ -3619,7 +3619,7 @@ function reload_trans_config(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_trans_config "  .. " ok."))
 end
 
---ÖØĞÂÔØÈë¼¼ÄÜÊÂ¼şÅäÖÃÏà¹Øini
+--é‡æ–°è½½å…¥æŠ€èƒ½äº‹ä»¶é…ç½®ç›¸å…³ini
 function reload_skill_event(gm,...)
 
 	local res = nx_reload_skill_event()
@@ -3632,7 +3632,7 @@ function reload_skill_event(gm,...)
 
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞ±£´æÊôĞÔ
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰ä¿å­˜å±æ€§
 function property_save(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -3644,7 +3644,7 @@ function property_save(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. nx_string(nx_query_property(target, "Name")) .. " Save Property List Begin:" .. "====="));
 	for i = 1, table.getn(proplist) do
 		if nx_get_attr_saving(target, proplist[i]) then
-			--[{@0:ÊôĞÔ}]={@1:ÊıÖµ}
+			--[{@0:å±æ€§}]={@1:æ•°å€¼}
 			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(proplist[i] .. "=" .. nx_string(nx_query_property(target, proplist[i]))));
 			total = total + 1
 		end
@@ -3652,7 +3652,7 @@ function property_save(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("======" .. nx_string(nx_query_property(target, "Name")) .. " Save Property List End .total:" ..nx_string(total).. "======"));
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞ¿ÉÊÓÊôĞÔ
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰å¯è§†å±æ€§
 function property_visible(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -3665,7 +3665,7 @@ function property_visible(gm)
 	for i = 1, table.getn(proplist) do
 
 		if nx_get_attr_visible(target, proplist[i]) then
-			--[{@0:ÊôĞÔ}]={@1:ÊıÖµ}
+			--[{@0:å±æ€§}]={@1:æ•°å€¼}
 			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(proplist[i] .. "=" .. nx_string(nx_query_property(target, proplist[i]))));
 			total = total + 1
 		end
@@ -3673,7 +3673,7 @@ function property_visible(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("======" .. nx_string(nx_query_property(target, "Name")) .. " Visible Property List End.total:" ..nx_string(total).. "======"));
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞ±£´æ±í¸ñÃû
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰ä¿å­˜è¡¨æ ¼å
 function record_save(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -3692,7 +3692,7 @@ function record_save(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("======" .. nx_string(nx_query_property(target, "Name")) .. " Save Record List End.total:" ..nx_string(total).. "======"));
 end
 
---²éÑ¯µ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄËùÓĞ¿ÉÊÓ±í¸ñÃû
+--æŸ¥è¯¢å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„æ‰€æœ‰å¯è§†è¡¨æ ¼å
 function record_visible(gm)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -3711,17 +3711,17 @@ function record_visible(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("======" .. nx_string(nx_query_property(target, "Name")) .. " Visible Record List End.total:" ..nx_string(total).. "======"));
 end
 
---´«ËÍµ½Ä³¸ö·Ö×é×Ó³¡¾°
+--ä¼ é€åˆ°æŸä¸ªåˆ†ç»„å­åœºæ™¯
 function switch_to_sub_secne(gm,...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:switch_to_sub_secne <subsceneid>"));--¸ñÊ½£ºsilence Íæ¼ÒÃû ·ÖÖÓ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:switch_to_sub_secne <subsceneid>"));--æ ¼å¼ï¼šsilence ç©å®¶å åˆ†é’Ÿ
 		return;
 	end
 	local subsceneid = arg[1];
 	nx_switch_to_subscene(gm,nx_int(subsceneid))
 end
 
--- ²éÑ¯Ä³IDµÄNPC¾ßÌåÎ»ÖÃĞÅÏ¢
+-- æŸ¥è¯¢æŸIDçš„NPCå…·ä½“ä½ç½®ä¿¡æ¯
 function gps(gm,...)
 	if table.getn(arg) < 1 then
 
@@ -3758,11 +3758,11 @@ function gps(gm,...)
 
 end
 
---´´½¨±¦Ïä
+--åˆ›å»ºå®ç®±
 function get_box(gm, ...)
 
 	if table.getn(arg) < 2 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:get_box <ID> <ownername>"));--¸ñÊ½£ºget_box ±àºÅ ÓµÓĞÕß
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:get_box <ID> <ownername>"));--æ ¼å¼ï¼šget_box ç¼–å· æ‹¥æœ‰è€…
 		return;
 	end
 
@@ -3781,7 +3781,7 @@ end
 
 function fight_test(gm, ...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:fight_test <mount> "));--¸ñÊ½£ºget_box ±àºÅ ÓµÓĞÕß
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:fight_test <mount> "));--æ ¼å¼ï¼šget_box ç¼–å· æ‹¥æœ‰è€…
 		return;
 	end
 	local num = nx_int(arg[1])
@@ -3806,10 +3806,10 @@ function fight_test(gm, ...)
 	end
 end
 
---¸ø³¡¾°Ìí¼ÓÁÙÊ±Êı¾İ
+--ç»™åœºæ™¯æ·»åŠ ä¸´æ—¶æ•°æ®
 function add_scenedata(gm,...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:add_scenedata <ID> "))--¸ñÊ½£ºadd_scenedata Êı¾İID
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:add_scenedata <ID> "))--æ ¼å¼ï¼šadd_scenedata æ•°æ®ID
 		return 0
 	end
 	local dataname = nx_string(arg[1])
@@ -3823,10 +3823,10 @@ function add_scenedata(gm,...)
 	end
 end
 
---É¾³ı³¡¾°ÁÙÊ±Êı¾İ
+--åˆ é™¤åœºæ™¯ä¸´æ—¶æ•°æ®
 function del_scenedata(gm,...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:del_scenedata <ID> "));--¸ñÊ½£ºdel_scenedata Êı¾İID
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:del_scenedata <ID> "));--æ ¼å¼ï¼šdel_scenedata æ•°æ®ID
 	end
 	local dataname = nx_string(arg[1])
 	local scene = nx_get_scene()
@@ -3839,10 +3839,10 @@ function del_scenedata(gm,...)
 	end
 end
 
---É¾³ıGMÉíÉÏÁÙÊ±Êı¾İ
+--åˆ é™¤GMèº«ä¸Šä¸´æ—¶æ•°æ®
 function del_playerdata(gm,...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:del_playerdata <ID> "));--¸ñÊ½£ºdel_playerdata Êı¾İID
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:del_playerdata <ID> "));--æ ¼å¼ï¼šdel_playerdata æ•°æ®ID
 	end
 	local dataname = nx_string(arg[1])
 	local scene = nx_get_scene()
@@ -3877,9 +3877,9 @@ function init_player_data(gm)
 					for k = 0, cols-1 do
 						local coltype = nx_get_record_coltype(gm, recname, k)
 						if coltype == VTYPE_STRING then
-							nx_set_record_value(gm,recname,temprow, k, "ÎÒ¶¥" )
+							nx_set_record_value(gm,recname,temprow, k, "æˆ‘é¡¶" )
 						elseif coltype == VTYPE_WIDESTR then
-							nx_set_record_value(gm,recname,temprow, k, nx_widestr("ÎÒ¶¥") )
+							nx_set_record_value(gm,recname,temprow, k, nx_widestr("æˆ‘é¡¶") )
 						end
 					end
 				end
@@ -3890,7 +3890,7 @@ function init_player_data(gm)
 end
 
 function init_player_data1(gm)
-	--¼¼ÄÜ
+	--æŠ€èƒ½
 	local skillbox = nx_get_child(gm, nx_widestr("SkillContainer"))
 	for i = 5, 200 do
 		nx_create_from_config(skillbox,"zs_default_01");
@@ -3900,7 +3900,7 @@ end
 function AddPosionToWeapon(gm, ...)
 
 	if table.getn(arg) < 4 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:AddPosionToWeapon <BuffID> <times> <ratio> <type>"));--AddPosionToWeapon buffID ´ÎÊı ¼¸ÂÊ£¨0-100£© ÀàĞÍ£¨0 ÎäÆ÷ 1°µÆ÷£©
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:AddPosionToWeapon <BuffID> <times> <ratio> <type>"));--AddPosionToWeapon buffID æ¬¡æ•° å‡ ç‡ï¼ˆ0-100ï¼‰ ç±»å‹ï¼ˆ0 æ­¦å™¨ 1æš—å™¨ï¼‰
 		return
 	end
 	local buffid = nx_string(arg[1])
@@ -3947,12 +3947,12 @@ function runtest( gm, ... )
 	nx_run_test( gm, nx_query_property(gm, "LastObject") );
 end
 
--- Çå¿Õ±³°ü
+-- æ¸…ç©ºèƒŒåŒ…
 function cleartoolbox(gm)
 	nx_clear_container(gm)
 end
 
---ÖØĞÂ¼ÓÔØµÀ¾ßÕûÀíÅÅĞò¹æÔòÎÄ¼ş: item_arrange_order.xml
+--é‡æ–°åŠ è½½é“å…·æ•´ç†æ’åºè§„åˆ™æ–‡ä»¶: item_arrange_order.xml
 function reload_item_arrange(gm, ...)
 	if nx_reload_item_arrange_xml(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("item_arrange_order.xml reload succeed "))
@@ -3962,12 +3962,12 @@ function reload_item_arrange(gm, ...)
 end
 
 
---¼ÓÔØµöÓãÊı¾İ
+--åŠ è½½é’“é±¼æ•°æ®
 function reload_fishing_data(gm)
 	nx_reload_fishing_config(gm)
 end
 
---Ìí¼Ó¿ÕÖĞ¼¼ÄÜµã
+--æ·»åŠ ç©ºä¸­æŠ€èƒ½ç‚¹
 function add_airskillpoint( gm, ... )
 
 	if table.getn(arg) < 1 then
@@ -3983,7 +3983,7 @@ function add_airskillpoint( gm, ... )
 
 end
 
---¿ªÊ¼Ò»¸öĞ¡ÓÎÏ·
+--å¼€å§‹ä¸€ä¸ªå°æ¸¸æˆ
 function start_game(gm,...)
 	local game = nx_string(arg[1])
 	local level = nx_int(arg[2])
@@ -4019,7 +4019,7 @@ function effecttest(gm,...)
 
 end
 
---Ôö¼Ó³ÆºÅ
+--å¢åŠ ç§°å·
 function addtitle(gm, ...)
 	local id = nx_int(arg[1])
 	if not nx_add_playertitle(gm, id) then
@@ -4030,7 +4030,7 @@ function addtitle(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("add addtitle " .. id .. " succeed"))
 end
 
---É¾³ı³ÆºÅ
+--åˆ é™¤ç§°å·
 function removetitle(gm, ...)
 	local id = nx_int(arg[1])
 	if not nx_remove_playertitle(gm, id) then
@@ -4045,17 +4045,17 @@ function neigpkmem(gm,...)
 	local str = nx_get_neigpk_data();
 	local tb = nx_split_string(str, "|");
 	local len = table.getn(tb);
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "====================ÄÚ¹¦±ÈÆ´ÄÚ´æÊı¾İ:=======================")
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "====================å†…åŠŸæ¯”æ‹¼å†…å­˜æ•°æ®:=======================")
 	for i = 1, len do
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", tb[i])
 	end
-	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "====================/ÄÚ¹¦±ÈÆ´ÄÚ´æÊı¾İ=======================")
+	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "====================/å†…åŠŸæ¯”æ‹¼å†…å­˜æ•°æ®=======================")
 end
 
 function publish_news(gm, ...)
 	local argnum = table.getn(arg)
 	if argnum < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "·¢²¼ĞÂÎÅĞèÒªÒ»¸ö×Ö·û´®²ÎÊı")
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "å‘å¸ƒæ–°é—»éœ€è¦ä¸€ä¸ªå­—ç¬¦ä¸²å‚æ•°")
 		return
 	end
 
@@ -4067,7 +4067,7 @@ function publish_news(gm, ...)
 	if num > 2 then count = nx_int(arg[3]) end
 
 	if nx_publish_news(ty, count, info) then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "·¢²¼ĞÂÎÅ³É¹¦")
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "å‘å¸ƒæ–°é—»æˆåŠŸ")
 	end
 end
 
@@ -4096,13 +4096,13 @@ function create_world_trans(gm,...)
 	end
 end
 
--- Çå³ı¹Ø¿¨ÀïËùÓĞnpcÉú³ÉÆ÷
+-- æ¸…é™¤å…³å¡é‡Œæ‰€æœ‰npcç”Ÿæˆå™¨
 function clear_all_npc(gm,...)
 	nx_clear_allnpc()
-	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "Çå³ı¹Ø¿¨ÀïËùÓĞnpc³É¹¦")
+	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "æ¸…é™¤å…³å¡é‡Œæ‰€æœ‰npcæˆåŠŸ")
 end
 
---ÉèÖÃ¹¥»÷Õß
+--è®¾ç½®æ”»å‡»è€…
 function SetAttacker(gm,...)
 	if not nx_find_data(gm, "GMAttacker") then
 		nx_add_data(gm, "GMAttacker", VTYPE_OBJECT);
@@ -4113,7 +4113,7 @@ function SetAttacker(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Set Attacker succeed"));
 end
 
---ÉèÖÃ±»¹¥»÷Õß
+--è®¾ç½®è¢«æ”»å‡»è€…
 function SetAttackTarget(gm,...)
 	if not nx_find_data(gm, "GMAttackTarget") then
 		nx_add_data(gm, "GMAttackTarget", VTYPE_OBJECT);
@@ -4126,7 +4126,7 @@ function SetAttackTarget(gm,...)
 end
 
 
---±©»÷
+--æš´å‡»
 function  Fight_Effect(gm,...)
 
 	local para0 = nx_string(arg[1]);
@@ -4156,7 +4156,7 @@ function  Fight_Effect(gm,...)
 
 end
 
---±äÉí²Ù×÷
+--å˜èº«æ“ä½œ
 function  chagemodel_role(gm,...)
     local bchange = nx_int(arg[1]);
 
@@ -4165,7 +4165,7 @@ function  chagemodel_role(gm,...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("chagemodel_role succeed"))
 end
 
---ÕÙ»½³èÎï²Ù×÷
+--å¬å”¤å® ç‰©æ“ä½œ
 function  showpet(gm,...)
 	local name = nx_string(arg[1]);
 	if nx_show_pet(gm,name) then
@@ -4175,7 +4175,7 @@ function  showpet(gm,...)
 	end
 end
 
---»ØÊÕ³èÎï²Ù×÷
+--å›æ”¶å® ç‰©æ“ä½œ
 function  destroypet(gm,...)
 	local para0 = nx_string(arg[1]);
 	if para0 == "select" then
@@ -4196,7 +4196,7 @@ function  destroypet(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("destroypet failed"))
 end
 
---¼ì²é¼¼ÄÜ
+--æ£€æŸ¥æŠ€èƒ½
 function  checkSkill(gm,...)
 	local name = nx_string(arg[1]);
 	if nx_show_pet(gm,name) then
@@ -4206,7 +4206,7 @@ function  checkSkill(gm,...)
 	end
 end
 
--- ´´½¨Ò»¸öÕ½¶·ÔØ¾ß
+-- åˆ›å»ºä¸€ä¸ªæˆ˜æ–—è½½å…·
 function  showbc(gm,...)
 	local name = nx_string(arg[1]);
 	if nx_show_battlecarrier(gm,name) then
@@ -4215,7 +4215,7 @@ function  showbc(gm,...)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("show battle carrier failed"))
 	end
 end
--- ´´½¨Ò»¸öÕ½¶·ÔØ¾ß£¬ Ìá¹©×ø±êµã
+-- åˆ›å»ºä¸€ä¸ªæˆ˜æ–—è½½å…·ï¼Œ æä¾›åæ ‡ç‚¹
 function  showbc_at_pos(gm,...)
 	local name = nx_string(arg[1]);
 	x = nx_float(arg[2]);
@@ -4226,7 +4226,7 @@ function  showbc_at_pos(gm,...)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("show battle carrier failed"))
 	end
 end
--- ÌøÏÂÕ½¶·ÔØ¾ß
+-- è·³ä¸‹æˆ˜æ–—è½½å…·
 function  getoffbc(gm)
 	if nx_getoff_bc(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("getoff battle carrier succeed"))
@@ -4234,7 +4234,7 @@ function  getoffbc(gm)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("getoffba ttle carrier failed"))
 	end
 end
--- ÖØĞÂ×°ÔØÕ½¶·ÔØ¾ßÂ·µã×ÊÔ´
+-- é‡æ–°è£…è½½æˆ˜æ–—è½½å…·è·¯ç‚¹èµ„æº
 function  reload_bc_path(gm)
 	if nx_reload_bc_roadpoint(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload battle carrier load path poiint succeed"))
@@ -4243,7 +4243,7 @@ function  reload_bc_path(gm)
 	end
 end
 
--- ×Ô¶¯ĞĞ×ßµÄÕ½¶·ÔØ¾ß·µ»Ø
+-- è‡ªåŠ¨è¡Œèµ°çš„æˆ˜æ–—è½½å…·è¿”å›
 function  bc_return(gm)
 	if nx_return_start_point(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set battle carrier return succeed"))
@@ -4251,7 +4251,7 @@ function  bc_return(gm)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set battle carrier return failed"))
 	end
 end
--- ±äÉíÎªÒ»¸öÕ½¶·ÔØ¾ß
+-- å˜èº«ä¸ºä¸€ä¸ªæˆ˜æ–—è½½å…·
 function  changerole_to_bc(gm,...)
 	local name = nx_string(arg[1]);
 	if nx_battlecarrier_change_role(gm,name) then
@@ -4262,7 +4262,7 @@ function  changerole_to_bc(gm,...)
 end
 
 
---Çå¿ÕÕ½³¡ÅÅ¶Ó±í
+--æ¸…ç©ºæˆ˜åœºæ’é˜Ÿè¡¨
 function  clear_battlewar_rec(gm)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("nx_clear_battlewar_recg ok"))
@@ -4270,7 +4270,7 @@ function  clear_battlewar_rec(gm)
 
 end
 
--- ÆïÂí£¬²ÎÊıÎª¼¼ÄÜID
+-- éª‘é©¬ï¼Œå‚æ•°ä¸ºæŠ€èƒ½ID
 function  getonride(gm,...)
 	local skill_id = nx_string(arg[1]);
 	if get_on_ride(gm,skill_id) then
@@ -4280,7 +4280,7 @@ function  getonride(gm,...)
 	end
 end
 
--- Ö´ĞĞQte£¬²ÎÊıÎªQteÊÂ¼şµÄ±àºÅ
+-- æ‰§è¡ŒQteï¼Œå‚æ•°ä¸ºQteäº‹ä»¶çš„ç¼–å·
 function qte_start(gm, ...)
 	local event_id = nx_string(arg[1]);
 	if qte_excute_event(gm, event_id) then
@@ -4290,9 +4290,9 @@ function qte_start(gm, ...)
 	end
 end
 
--- Ö´ĞĞQte£¬²ÎÊıÎªQteÊÂ¼şµÄ±àºÅ
---(²âÊÔÓÉCLIENT_CUSTOMMSG_QTEEVENT_START·¢À´µÄÊı¾İ)
---´Ëº¯Êı²ÎÊıºÍ qte_startĞÎÊ½ÊÇµÈÍ¬
+-- æ‰§è¡ŒQteï¼Œå‚æ•°ä¸ºQteäº‹ä»¶çš„ç¼–å·
+--(æµ‹è¯•ç”±CLIENT_CUSTOMMSG_QTEEVENT_STARTå‘æ¥çš„æ•°æ®)
+--æ­¤å‡½æ•°å‚æ•°å’Œ qte_startå½¢å¼æ˜¯ç­‰åŒ
 function qte_cstart(gm, ...)
 	local event_id = nx_string(arg[1]);
 	if qte_custom_excute_event(gm, event_id) then
@@ -4302,7 +4302,7 @@ function qte_cstart(gm, ...)
 	end
 end
 
--- Í£Ö¹Qte
+-- åœæ­¢Qte
 function qte_stop(gm, ...)
 	if qte_stop_event(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("stop qte succeed "))
@@ -4311,7 +4311,7 @@ function qte_stop(gm, ...)
 	end
 end
 
--- Qte ÖØĞÂ¼ÓÔØ×ÊÔ´
+-- Qte é‡æ–°åŠ è½½èµ„æº
 function qte_reload(gm, ...)
 	if qte_reload_resource(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("qte reload succeed "))
@@ -4320,7 +4320,7 @@ function qte_reload(gm, ...)
 	end
 end
 
--- ÖØĞÂ¼ÓÔØÖ´ĞĞÆ÷ÎÄ¼ş²¢Ë¢ĞÂ³¡¾°
+-- é‡æ–°åŠ è½½æ‰§è¡Œå™¨æ–‡ä»¶å¹¶åˆ·æ–°åœºæ™¯
 function reload_scene_trigger(gm, ...)
 	if nx_reload_processor_resource(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload processor files succeed "))
@@ -4329,7 +4329,7 @@ function reload_scene_trigger(gm, ...)
 	end
 end
 
--- ÖØĞÂ¼ÓÔØÖ´ĞĞÆ÷ÎÄ¼ş²¢Ë¢ĞÂ³¡¾°
+-- é‡æ–°åŠ è½½æ‰§è¡Œå™¨æ–‡ä»¶å¹¶åˆ·æ–°åœºæ™¯
 function reload_processor_resource(gm, ...)
 	if nx_reload_processor_resource(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload processor files succeed "))
@@ -4338,7 +4338,7 @@ function reload_processor_resource(gm, ...)
 	end
 end
 
--- Ô­µØ¸´»î
+-- åŸåœ°å¤æ´»
 function relive(gm, ...)
     if nx_relive(gm, nx_int(1)) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("player relive succeed ..."));
@@ -4347,7 +4347,7 @@ function relive(gm, ...)
     end
 end
 
--- ¿ªÊ¼³¡¾°´¥·¢Æ÷ÊÂ¼ş
+-- å¼€å§‹åœºæ™¯è§¦å‘å™¨äº‹ä»¶
 function start_es(gm, ...)
     if nx_start_es(gm, nx_int(arg[1])) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("start event spring succeed ..."));
@@ -4356,7 +4356,7 @@ function start_es(gm, ...)
     end
 end
 
--- ½áÊø³¡¾°´¥·¢Æ÷ÊÂ¼ş
+-- ç»“æŸåœºæ™¯è§¦å‘å™¨äº‹ä»¶
 function end_es(gm, ...)
     if nx_end_es(gm, nx_int(arg[1])) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("end event spring succeed ..."));
@@ -4365,14 +4365,14 @@ function end_es(gm, ...)
     end
 end
 
--- ÖØÔØ³¡¾°´¥·¢Æ÷×ÊÔ´
+-- é‡è½½åœºæ™¯è§¦å‘å™¨èµ„æº
 function reload_es(gm, ...)
     if nil == nx_reload_es(gm) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload event spring fail ..."));
     end
 end
 
--- ÖØÔØscenes.ini
+-- é‡è½½scenes.ini
 function reload_scene_base_info(gm, ...)
     if nx_reload_scene_base_info(gm) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload scene base info succeed ..."));
@@ -4381,7 +4381,7 @@ function reload_scene_base_info(gm, ...)
     end
 end
 
--- »ñÈ¡³¡¾°×î´óÈËÊı
+-- è·å–åœºæ™¯æœ€å¤§äººæ•°
 function get_scene_max_player(gm, ...)
     local max_player = nx_get_scene_max_player(gm, nx_int(arg[1]));
     if max_player then
@@ -4391,7 +4391,7 @@ function get_scene_max_player(gm, ...)
     end
 end
 
--- ÉèÖÃ³¡¾°×î´óÈËÊı
+-- è®¾ç½®åœºæ™¯æœ€å¤§äººæ•°
 function set_scene_max_player(gm, ...)
     if nx_set_scene_max_player(gm, nx_int(arg[1]), nx_int(arg[2])) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set scene max plyaer succeed ..."));
@@ -4400,7 +4400,7 @@ function set_scene_max_player(gm, ...)
     end
 end
 
--- ²éÑ¯Ë¢¹ÖÆ÷intÊôĞÔ
+-- æŸ¥è¯¢åˆ·æ€ªå™¨intå±æ€§
 function query_creator_prop_int(gm, ...)
 	local npc = get_prop_target(gm);
 	if not nx_exists(npc) then
@@ -4416,7 +4416,7 @@ function query_creator_prop_int(gm, ...)
     end
 end
 
--- ÉèÖÃË¢¹ÖÆ÷intÊôĞÔ
+-- è®¾ç½®åˆ·æ€ªå™¨intå±æ€§
 function set_creator_prop_int(gm, ...)
 	local npc = get_prop_target(gm);
 	if not nx_exists(npc) then
@@ -4432,7 +4432,7 @@ function set_creator_prop_int(gm, ...)
     end
 end
 
--- ²éÑ¯Ë¢¹ÖÆ÷floatÊôĞÔ
+-- æŸ¥è¯¢åˆ·æ€ªå™¨floatå±æ€§
 function query_creator_prop_float(gm, ...)
 	local npc = get_prop_target(gm);
 	if not nx_exists(npc) then
@@ -4448,7 +4448,7 @@ function query_creator_prop_float(gm, ...)
     end
 end
 
--- ÉèÖÃË¢¹ÖÆ÷floatÊôĞÔ
+-- è®¾ç½®åˆ·æ€ªå™¨floatå±æ€§
 function set_creator_prop_float(gm, ...)
 	local npc = get_prop_target(gm);
 	if not nx_exists(npc) then
@@ -4464,7 +4464,7 @@ function set_creator_prop_float(gm, ...)
     end
 end
 
--- µÃµ½µ±Ç°µÄÇøÓòid
+-- å¾—åˆ°å½“å‰çš„åŒºåŸŸid
 function get_area_id(gm, ...)
     local area_id = nx_get_area_id(gm);
     if area_id then
@@ -4474,7 +4474,7 @@ function get_area_id(gm, ...)
     end
 end
 
--- ²âÊÔ¶ÔÏóÖ±ÏßÊÇ·ñ¿ÉĞĞ×ß
+-- æµ‹è¯•å¯¹è±¡ç›´çº¿æ˜¯å¦å¯è¡Œèµ°
 function trace_line_walk(gm, ...)
 	local x,y,z,o = nx_get_position(gm);
 
@@ -4491,10 +4491,10 @@ function trace_line_walk(gm, ...)
     end
 end
 
---ĞŞ¸Ä»õ±Ò
+--ä¿®æ”¹è´§å¸
 function setcapital(gm,...)
-    local sequence = arg[1] --»õ±ÒÀàĞÍ
-    local mount = arg[2]    --»õ±ÒÁ¿
+    local sequence = arg[1] --è´§å¸ç±»å‹
+    local mount = arg[2]    --è´§å¸é‡
 
     if mount==nil then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("setcapital  money_type  money_count"))
@@ -4508,10 +4508,10 @@ function setcapital(gm,...)
     end
 end
 
---ĞŞ¸Ä»õ±Ò(²»ÊÜÃ¿ÈÕÏŞÖÆ)
+--ä¿®æ”¹è´§å¸(ä¸å—æ¯æ—¥é™åˆ¶)
 function setcapital_nolimit(gm,...)
-    local sequence = arg[1] --»õ±ÒÀàĞÍ
-    local mount = arg[2]    --»õ±ÒÁ¿
+    local sequence = arg[1] --è´§å¸ç±»å‹
+    local mount = arg[2]    --è´§å¸é‡
 
     if mount==nil then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("setcapital  money_type  money_count"))
@@ -4540,7 +4540,7 @@ function clear_all_skill_cd(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear_all_skill_cd succeed"));
 end
 
---Çå³ıËùÓĞcd
+--æ¸…é™¤æ‰€æœ‰cd
 function clear_all_cd(gm, ...)
     nx_clear_all_cooldown(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear_all_cd succeed"));
@@ -4555,7 +4555,7 @@ function delcompletedquest(gm, ...)
 
 	local questid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_del_completed_quest(gm, questid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Del Completed quest " .. nx_string(questid) .. " succeed."))
 	else
@@ -4574,7 +4574,7 @@ function search_player_in_scene(gm, ...)
 		custom_scene_id = nx_int(arg[1])
 	end
 
-	--·µ»Ø½á¹û¶¨Òå
+	--è¿”å›ç»“æœå®šä¹‰
 	local SUCCESS = 0
 	local OBJ_NOT_EXIST = 1
 	local SCENE_ID_NOT_EXIST = 2
@@ -4612,7 +4612,7 @@ end
 
 function delallquests(gm,...)
 
-	-- ÏÈ·ÅÆúËùÓĞÈÎÎñ
+	-- å…ˆæ”¾å¼ƒæ‰€æœ‰ä»»åŠ¡
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Warning: trying to giveup all quest......"));
 	nx_clear_quest_data(gm)
 
@@ -4627,7 +4627,7 @@ function acceptquest(gm,...)
 
 	local questid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_accept_quest(gm, questid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Accept quest " .. nx_string(questid) .. "succeed."))
 	else
@@ -4643,7 +4643,7 @@ function submitquest(gm,...)
 
 	local questid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_submit_quest(gm, questid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Submit quest " .. nx_string(questid) .. "succeed."))
 	else
@@ -4659,7 +4659,7 @@ function giveupquest(gm,...)
 
 	local questid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_giveup_quest(gm, questid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Submit quest " .. nx_string(questid) .. "succeed."))
 	else
@@ -4675,7 +4675,7 @@ function showacceptpage(gm,...)
 
 	local questid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_show_accept_quest(gm, questid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Show accept quest " .. nx_string(questid) .. "succeed."))
 	else
@@ -4691,7 +4691,7 @@ function showsubmitpage(gm,...)
 
 	local questid = nx_int(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_show_submit_quest(gm, questid) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Show Submit quest " .. nx_string(questid) .. "succeed."))
 	else
@@ -4824,7 +4824,7 @@ function getcriterias(gm, ...)
 end
 
 function reload_skillpack(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:reload_config <config file>"))
 		return
@@ -4839,7 +4839,7 @@ function reload_skillpack(gm, ...)
 end
 
 function reload_petfight(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:reload_petfight <config file>"))
 		return
@@ -4853,9 +4853,9 @@ function reload_petfight(gm, ...)
 	end
 end
 
---¼ì²é¼¼ÄÜÊÇ·ñÕıÈ·
+--æ£€æŸ¥æŠ€èƒ½æ˜¯å¦æ­£ç¡®
 function check_skill(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_skill <config file>"))
 		return
@@ -4869,9 +4869,9 @@ function check_skill(gm, ...)
 	end
 end
 
---¼ì²énpcÅäÖÃÊÇ·ñÕıÈ·
+--æ£€æŸ¥npcé…ç½®æ˜¯å¦æ­£ç¡®
 function check_npcConfig(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_npcConfig <config file>"))
 		return
@@ -4885,9 +4885,9 @@ function check_npcConfig(gm, ...)
 	end
 end
 
---Ê¹ÓÃ¼¼ÄÜ
+--ä½¿ç”¨æŠ€èƒ½
 function npc_use_skill(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_skill <config file>"))
 		return
@@ -4897,9 +4897,9 @@ function npc_use_skill(gm, ...)
 	nx_npc_use_skill(gm,file_name)
 end
 
---¼¼ÄÜCD
+--æŠ€èƒ½CD
 function npc_query_skillCD(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:npc_query_skillCD <config file>"))
 		return
@@ -4909,7 +4909,7 @@ function npc_query_skillCD(gm, ...)
 	nx_npc_query_skillCD(gm,file_name)
 end
 
--- ²éÑ¯npcµÄ¼¼ÄÜÁĞ±í
+-- æŸ¥è¯¢npcçš„æŠ€èƒ½åˆ—è¡¨
 function npc_query_skill_list(gm, ...)
     local target = get_prop_target(gm)
 	local skill_list = nx_npc_query_skill_list(target);
@@ -4928,7 +4928,7 @@ function npc_query_skill_list(gm, ...)
 end
 
 
---ÖØĞÂÔØÈëini×ÊÔ´ÎÄ¼ş¡£
+--é‡æ–°è½½å…¥inièµ„æºæ–‡ä»¶ã€‚
 function reload_path_resource(gm,...)
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_path_resource "  .. " begin."))
@@ -4945,7 +4945,7 @@ function reload_path_resource(gm,...)
 end
 
 function reload_npc_path(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:reload_npc_path <config file>"))
 		return
@@ -4956,9 +4956,9 @@ function reload_npc_path(gm, ...)
 
 end
 
---²éÑ¯ÊÂ¼şÖĞ²»´æÔÚµÄÌõ¼ş£¬ĞĞÎªµÈ
+--æŸ¥è¯¢äº‹ä»¶ä¸­ä¸å­˜åœ¨çš„æ¡ä»¶ï¼Œè¡Œä¸ºç­‰
 function check_event_spring(gm, ...)
-	-- ¼ì²é²ÎÊıÊıÁ¿
+	-- æ£€æŸ¥å‚æ•°æ•°é‡
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: <es_id> 0 to check all events"))
 		return
@@ -4966,112 +4966,112 @@ function check_event_spring(gm, ...)
 	local es_id = nx_string(arg[1])
 
 	local es_list  = nx_get_event_by_id(gm,es_id)
-	--´ò¿ªÊÂ¼şLOGÎÄ¼ş
+	--æ‰“å¼€äº‹ä»¶LOGæ–‡ä»¶
 	nx_open_event_log()
 	for i = 1, table.getn(es_list) do
-		--¼ì²ébehavior_idÊÇ·ñ´æÔÚ
+		--æ£€æŸ¥behavior_idæ˜¯å¦å­˜åœ¨
 		local beh_list = nx_not_exist_behavior_id(gm,es_list[i])
 		for j = 1, table.getn(beh_list) do
 			--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "event_id " .. nx_string(es_list[i]) .. " behavior_id " .. nx_string(beh_list[j]) .. " not exist")
 			nx_write_event_log(gm,"event_id " .. nx_string(es_list[i]) .. " behavior_id " .. nx_string(beh_list[j]) .. " not exist\n")
 		end
 
-		--¼ì²écondition_idÊÇ·ñ´æÔÚ
+		--æ£€æŸ¥condition_idæ˜¯å¦å­˜åœ¨
 		local con_list = nx_not_exist_condition_id(gm,es_list[i])
 		for j = 1, table.getn(con_list) do
 			--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "event_id " .. nx_string(es_list[i]) .. " condition_id " .. nx_string(con_list[j]) .. " not exist")
 			nx_write_event_log(gm,"event_id " .. nx_string(es_list[i]) .. " condition_id " .. nx_string(con_list[j]) .. " not exist\n")
 		end
 
-		--¼ì²énotice_idÊÇ·ñ´æÔÚ
+		--æ£€æŸ¥notice_idæ˜¯å¦å­˜åœ¨
 		local notice_list = nx_not_exist_notice_id(gm,es_list[i])
 		for j = 1, table.getn(notice_list) do
 			--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "event_id " .. nx_string(es_list[i]) .. " notice_id " .. nx_string(notice_list[j]) .. " not exist")
 			nx_write_event_log(gm,"event_id " .. nx_string(es_list[i]) .. " notice_id " .. nx_string(notice_list[j]) .. " not exist\n")
 		end
 
-		--¼ì²éreward_idÊÇ·ñ´æÔÚ
+		--æ£€æŸ¥reward_idæ˜¯å¦å­˜åœ¨
 		local reward_list = nx_not_exist_reward_id(gm,es_list[i])
 		for j = 1, table.getn(reward_list) do
 			--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "event_id " .. nx_string(es_list[i]) .. " reward_id " .. nx_string(reward_list[j]) .. " not exist")
 			nx_write_event_log(gm,"event_id " .. nx_string(es_list[i]) .. " reward_id " .. nx_string(reward_list[j]) .. " not exist\n")
 		end
 
-		--¼ì²éswitch_idÊÇ·ñ´æÔÚ
+		--æ£€æŸ¥switch_idæ˜¯å¦å­˜åœ¨
 		local switch_list = nx_not_exist_switch_id(gm,es_list[i])
 		for j = 1, table.getn(switch_list) do
 			--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "event_id " .. nx_string(es_list[i]) .. " switch_id " .. nx_string(switch_list[j]) .. " not exist")
 			nx_write_event_log(gm,"event_id " .. nx_string(es_list[i]) .. " switch_id " .. nx_string(switch_list[j]) .. " not exist\n")
 		end
 
-		--¼ì²écondition_idÊÇ·ñ´æÔÚ
+		--æ£€æŸ¥condition_idæ˜¯å¦å­˜åœ¨
 		local task_list = nx_not_exist_task_id(gm,es_list[i])
 		for j = 1, table.getn(task_list) do
 			--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "event_id " .. nx_string(es_list[i]) .. " task_id " .. nx_string(task_list[j]) .. " not exist")
 			nx_write_event_log(gm,"event_id " .. nx_string(es_list[i]) .. " task_id " .. nx_string(task_list[j]) .. " not exist\n")
 		end
 	end
-	--¹Ø±ÕÊÂ¼şLOGÎÄ¼ş
+	--å…³é—­äº‹ä»¶LOGæ–‡ä»¶
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "check event error succeed !")
 
 	nx_close_event_log()
 end
 
---Çå³ıÍæ¼ÒÉíÉÏBUFF±í
+--æ¸…é™¤ç©å®¶èº«ä¸ŠBUFFè¡¨
 function clear_all_buff(gm, ...)
 	nx_clear_all_buff(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear buff ok !")
 end
 
---Çå³ıÍæ¼ÒµÚ¶şÖ°Òµ
+--æ¸…é™¤ç©å®¶ç¬¬äºŒèŒä¸š
 function clear_life_occupation(gm, ...)
 	nx_clear_life_occupation(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear life occupation ok !")
 end
 
---Çå³ıÍæ¼ÒºÃÓÑÁĞ±í
+--æ¸…é™¤ç©å®¶å¥½å‹åˆ—è¡¨
 function clear_friend_list(gm, ...)
 	nx_clear_friend_list(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear friend list ok !")
 end
 
---Çå³ıÍæ¼ÒºÚÃûµ¥ÁĞ±í
+--æ¸…é™¤ç©å®¶é»‘åå•åˆ—è¡¨
 function clear_black_list(gm, ...)
 	nx_clear_black_list(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear black list ok !")
 end
 
---Çå³ıÍæ¼Ò³ğÈËÁĞ±í
+--æ¸…é™¤ç©å®¶ä»‡äººåˆ—è¡¨
 function clear_enemy_list(gm, ...)
 	nx_clear_enemy_list(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear enemy list ok !")
 end
 
---Çå³ıÍæ¼Ò¶ÓÎéĞÅÏ¢
+--æ¸…é™¤ç©å®¶é˜Ÿä¼ä¿¡æ¯
 function clear_team_info(gm, ...)
 	nx_clear_team_info(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear team info ok !")
 end
 
---Çå³ı¸±±¾½ø¶È
+--æ¸…é™¤å‰¯æœ¬è¿›åº¦
 function clear_clone_progress(gm, ...)
 	--nx_clear_clone_progress(gm)
 	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear black list ok !")
 end
 
---Çå³ı¾º¼¼³¡ĞÅÏ¢
+--æ¸…é™¤ç«æŠ€åœºä¿¡æ¯
 function clear_arena_info(gm, ...)
 	--nx_clear_arena_info(gm)
 	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear black list ok !")
 end
 
---Çå³ıÕ½³¡ĞÅÏ¢
+--æ¸…é™¤æˆ˜åœºä¿¡æ¯
 function clear_battlewar_info(gm, ...)
 	--nx_clear_battlewar_info(gm)
 	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", "clear black list ok !")
 end
 
---ÉèÖÃÊÂ¼şCD
+--è®¾ç½®äº‹ä»¶CD
 function set_event_cd(gm, ...)
 
 	if table.getn(arg) ~= 2 then
@@ -5092,7 +5092,7 @@ function set_event_cd(gm, ...)
 	--end
 end
 
---ÉèÖÃPVPÈÎÎñCD
+--è®¾ç½®PVPä»»åŠ¡CD
 function set_pvp_task_cd(gm, ...)
 
 	if table.getn(arg) ~= 2 then
@@ -5112,7 +5112,7 @@ function reload_arenaplane_resource(gm,...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload arenaplane_resource succeed."))
 end
 
--- ¿ªÊ¼ÖØÖÃ½ÇÉ«Êı¾İ
+-- å¼€å§‹é‡ç½®è§’è‰²æ•°æ®
 function start_revert(gm, ...)
     if nx_start_revert(gm) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("start revert spring succeed ..."));
@@ -5121,38 +5121,38 @@ function start_revert(gm, ...)
     end
 end
 
--- ½â³ı½ÇÉ«ÎäÆ÷×°±¸ÏŞÖÆ
+-- è§£é™¤è§’è‰²æ­¦å™¨è£…å¤‡é™åˆ¶
 function removelimit(gm)
 	nx_set_property( gm, "RemoveLimit", 1 )
 	return 1
 end
 
--- ´ò¿ª²âÊÔ»úÆ÷ÈË½çÃæ
+-- æ‰“å¼€æµ‹è¯•æœºå™¨äººç•Œé¢
 function open_test_robot_form(gm)
     nx_open_test_robot_form(gm)
 end
 
--- ÖØ½¨ÅÄÂôĞĞ±í
+-- é‡å»ºæ‹å–è¡Œè¡¨
 function rebuild_ah_recs(gm)
     nx_rebuild_ah_recs(gm)
 end
 
--- Çå¿ÕÅÄÂôĞĞÊı¾İ
+-- æ¸…ç©ºæ‹å–è¡Œæ•°æ®
 function clear_ah_data(gm)
     nx_clear_ah_data(gm)
 end
 
--- ÖØ½¨Çó¹ºĞĞ±í
+-- é‡å»ºæ±‚è´­è¡Œè¡¨
 function rebuild_asktobuy_recs(gm)
     nx_rebuild_asktobuy_recs(gm)
 end
 
--- Çå¿ÕÇó¹ºĞĞÊı¾İ
+-- æ¸…ç©ºæ±‚è´­è¡Œæ•°æ®
 function clear_asktobuy_data(gm)
     nx_clear_asktobuy_data(gm)
 end
 
--- ÄÜÁ¿¾®Ãâ·ÑÖÆÔìÔØ¾ß£¨ÎŞĞèÈ¨ÏŞ£¬²»×ßÍêÕûÁ÷³Ì£©
+-- èƒ½é‡äº•å…è´¹åˆ¶é€ è½½å…·ï¼ˆæ— éœ€æƒé™ï¼Œä¸èµ°å®Œæ•´æµç¨‹ï¼‰
 function produce_carrier_free(gm, ...)
     if table.getn(arg) ~= 3 then
         nx_sysinfo(
@@ -5170,7 +5170,7 @@ function produce_carrier_free(gm, ...)
     nx_creat_ew_carrier(gm, ew_id, camp, car_id)
 end
 
--- ÄÜÁ¿¾®Ãâ·Ñ¿ªÆôÖÆÔìÔØ¾ß£¨ĞèÒªÈ¨ÏŞ£¬×ßÕı³£Á÷³Ì£©
+-- èƒ½é‡äº•å…è´¹å¼€å¯åˆ¶é€ è½½å…·ï¼ˆéœ€è¦æƒé™ï¼Œèµ°æ­£å¸¸æµç¨‹ï¼‰
 function begin_carrier_produce(gm, ...)
     if table.getn(arg) ~= 2 then
         nx_sysinfo(
@@ -5187,7 +5187,7 @@ function begin_carrier_produce(gm, ...)
     nx_begin_carrier_produce(gm, ew_id, car_id)
 end
 
--- ÄÜÁ¿¾®Ãâ·Ñ¼ÓËÙÖÆÔìÔØ¾ß£¨ĞèÒªÈ¨ÏŞ£¬×ßÕı³£Á÷³Ì£©
+-- èƒ½é‡äº•å…è´¹åŠ é€Ÿåˆ¶é€ è½½å…·ï¼ˆéœ€è¦æƒé™ï¼Œèµ°æ­£å¸¸æµç¨‹ï¼‰
 function speed_up_carrier_produce(gm, ...)
     if table.getn(arg) ~= 1 then
         nx_sysinfo(
@@ -5203,7 +5203,7 @@ function speed_up_carrier_produce(gm, ...)
     nx_speed_up_carrier_produce(gm, ew_id)
 end
 
--- ÄÜÁ¿¾®Ãâ·ÑÖÆÔìÍ£³µÎ»£¨ÎŞĞèÈ¨ÏŞ£¬²»×ßÍêÕûÁ÷³Ì£©
+-- èƒ½é‡äº•å…è´¹åˆ¶é€ åœè½¦ä½ï¼ˆæ— éœ€æƒé™ï¼Œä¸èµ°å®Œæ•´æµç¨‹ï¼‰
 function produce_parkingspace_free(gm, ...)
     if table.getn(arg) ~= 3 then
         nx_sysinfo(
@@ -5249,7 +5249,7 @@ function setexplored(gm, ...)
 
 	local area_id = nx_string(arg[1])
 
-	-- Ç¿ÖÆ½Ó
+	-- å¼ºåˆ¶æ¥
 	if nx_set_explored(gm, area_id) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set explored " .. nx_string(area_id) .. "succeed."))
 	else
@@ -5284,7 +5284,7 @@ function reloadachieve(gm)
 	nx_reload_achieve_resource(gm)
 end
 
---ÉèÖÃÖ¸¶¨IDµÄpvpÈÎÎñÍê³É´ÎÊı
+--è®¾ç½®æŒ‡å®šIDçš„pvpä»»åŠ¡å®Œæˆæ¬¡æ•°
 function setpvptaskcount(gm,...)
 	if table.getn(arg) < 2 then
 		return
@@ -5298,7 +5298,7 @@ function setpvptaskcount(gm,...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("nx_set_pvptask_complete_count complete "))
 end
 
---ÉèÖÃÖ¸¶¨IDµÄpvp»î¶¯×´Ì¬
+--è®¾ç½®æŒ‡å®šIDçš„pvpæ´»åŠ¨çŠ¶æ€
 function setpvpactivitystate(gm,...)
 	if table.getn(arg) < 5 then
 		return
@@ -5317,19 +5317,19 @@ function setpvpactivitystate(gm,...)
     end
 end
 
---ÖØÖÃpvpÈÎÎñÍê³É´ÎÊıÎª0
+--é‡ç½®pvpä»»åŠ¡å®Œæˆæ¬¡æ•°ä¸º0
 function reset_pvptask_complete_count(gm)
 	nx_reset_pvptask_complete_count(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reset_pvptask_complete_count succeed "))
 end
 
---Çå¿ÕpvpÈÎÎñ(´ÎÊı£¬µ±Ç°½ÓÊÜµÄÈÎÎñ)
+--æ¸…ç©ºpvpä»»åŠ¡(æ¬¡æ•°ï¼Œå½“å‰æ¥å—çš„ä»»åŠ¡)
 function clear_pvptask(gm)
 	nx_clear_pvptask(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear_pvptask succeed "))
 end
 
---ÖØÔØpvpÈÎÎñ×ÊÔ´
+--é‡è½½pvpä»»åŠ¡èµ„æº
 function reload_pvptask(gm)
 	nx_reload_pvptask(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_pvptask succeed "))
@@ -5340,11 +5340,11 @@ function battlewarbegin(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("begin battlewar succeed."))
 end
 
---ĞŞ¸´±³°üÀïÃæ×°±¸ÄÍ¾Ã
+--ä¿®å¤èƒŒåŒ…é‡Œé¢è£…å¤‡è€ä¹…
 function repair_hardiness(gm, ...)
     repairall_hardiness(gm,2)
 end
---ĞŞ¸´×°±¸À¸×°±¸ÄÍ¾Ã
+--ä¿®å¤è£…å¤‡æ è£…å¤‡è€ä¹…
 function repair_equipbox(gm,...)
     repairall_hardiness(gm,1)
 end
@@ -5380,8 +5380,8 @@ function battlewarnum(gm,...)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("change battlewar queuenum failed."))
 	end
 end
---Ä£ÄâÉ±ËÀNPCµòÂäÎïÆ·
---npcdropn value1 value2        value1±íÊ¾NPCµÄConfigID; value2±íÊ¾É±ËÀµÄ´ÎÊı
+--æ¨¡æ‹Ÿæ€æ­»NPCå‡‹è½ç‰©å“
+--npcdropn value1 value2        value1è¡¨ç¤ºNPCçš„ConfigID; value2è¡¨ç¤ºæ€æ­»çš„æ¬¡æ•°
 function npcdropn(gm, ...)
 	local id
 	local num
@@ -5393,32 +5393,32 @@ function npcdropn(gm, ...)
 		id = arg[1];
 		num = arg[2];
 	else
-	--ÊäÈë²»ÕıÈ·
+	--è¾“å…¥ä¸æ­£ç¡®
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("npcdropn failed."));
 	end
-	--ÏÔÊ¾ÎïÆ·ĞÅÏ¢
+	--æ˜¾ç¤ºç‰©å“ä¿¡æ¯
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "npcdropn  List Begin:" .. "====="));
 
-	--ÌØÊâµôÂä ¼òµ¥¹æÔò
+	--ç‰¹æ®Šæ‰è½ ç®€å•è§„åˆ™
 	local dropspecialitems = nx_get_special_npcdropn(nx_get_scene(),nx_string(id),nx_int(num))
 	if  table.getn(dropspecialitems) ~= 0 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "npcdropn  specialDropID  ItemList Begin:" .. "====="));
-		--ÏÔÊ¾µôÂäÎïÆ·
+		--æ˜¾ç¤ºæ‰è½ç‰©å“
 		for i = 1, table.getn(dropspecialitems) do
-		--»ñµÃ¸ñÊ½ Ãû³Æ  num
+		--è·å¾—æ ¼å¼ åç§°  num
 			local name_id = dropspecialitems[i];
 			nx_sysinfo(gm, TIPSTYPE_GMINFO,"drop", nx_widestr(name_id));
 		end
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "npcdropn  specialDropID  ItemList end" .. "====="));
 	end
 
-	--worldµôÂä ¸´ÔÓ¹æÔò
+	--worldæ‰è½ å¤æ‚è§„åˆ™
 	local dropworlditems = nx_get_world_npcdropn(nx_get_scene(),nx_string(id),nx_int(num))
 	if table.getn(dropworlditems) ~= 0 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "npcdropn  WorldDropID  ItemList Begin:" .. "====="));
-		--ÏÔÊ¾µôÂäÎïÆ·
+		--æ˜¾ç¤ºæ‰è½ç‰©å“
 		for i = 1, table.getn(dropworlditems) do
-		--»ñµÃ¸ñÊ½ Ãû³Æ  num
+		--è·å¾—æ ¼å¼ åç§°  num
 			local name_id = dropworlditems[i];
 			nx_sysinfo(gm, TIPSTYPE_GMINFO,"drop", nx_widestr(name_id));
 		end
@@ -5429,8 +5429,8 @@ function npcdropn(gm, ...)
 end
 
 
---Ä£ÄâÄ³¸öµôÂä°üµòÂäÎïÆ·
---DropIDdropn value1 value2        value1±íÊ¾µôÂä°ü; value2±íÊ¾É±ËÀµÄ´ÎÊı
+--æ¨¡æ‹ŸæŸä¸ªæ‰è½åŒ…å‡‹è½ç‰©å“
+--DropIDdropn value1 value2        value1è¡¨ç¤ºæ‰è½åŒ…; value2è¡¨ç¤ºæ€æ­»çš„æ¬¡æ•°
 function DropIDdropn(gm, ...)
 	local id
 	local num
@@ -5438,32 +5438,32 @@ function DropIDdropn(gm, ...)
 		id = arg[1];
 		num = arg[2];
 	else
-	--ÊäÈë²»ÕıÈ·
+	--è¾“å…¥ä¸æ­£ç¡®
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("DropIDdropn failed."));
 	end
-	--ÏÔÊ¾ÎïÆ·ĞÅÏ¢
+	--æ˜¾ç¤ºç‰©å“ä¿¡æ¯
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "DropIDdropn  List Begin:" .. "====="));
 
-	--ÌØÊâµôÂä ¼òµ¥¹æÔò
+	--ç‰¹æ®Šæ‰è½ ç®€å•è§„åˆ™
 	local dropspecialitems = nx_get_special_DropIDdropn(nx_get_scene(),nx_string(id),nx_int(num))
 	if table.getn(dropspecialitems) ~= 0  then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "DropIDdropn  specialDropID  ItemList Begin:" .. "====="));
-		--ÏÔÊ¾µôÂäÎïÆ·
+		--æ˜¾ç¤ºæ‰è½ç‰©å“
 		for i = 1, table.getn(dropspecialitems) do
-		--»ñµÃ¸ñÊ½ Ãû³Æ  num
+		--è·å¾—æ ¼å¼ åç§°  num
 			local name_id = dropspecialitems[i];
 			nx_sysinfo(gm, TIPSTYPE_GMINFO, "drop", nx_widestr(name_id));
 		end
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "DropIDdropn  specialDropID  ItemList end" .. "====="));
 	end
 
-	--worldµôÂä ¸´ÔÓ¹æÔò
+	--worldæ‰è½ å¤æ‚è§„åˆ™
 	local dropworlditems = nx_get_world_DropIDdropn(nx_get_scene(),nx_string(id),nx_int(num))
 	if table.getn(dropworlditems) ~= 0  then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "DropIDdropn  WorldDropID  ItemList Begin:" .. "====="));
-		--ÏÔÊ¾µôÂäÎïÆ·
+		--æ˜¾ç¤ºæ‰è½ç‰©å“
 		for i = 1, table.getn(dropworlditems) do
-		--»ñµÃ¸ñÊ½ Ãû³Æ  num
+		--è·å¾—æ ¼å¼ åç§°  num
 			local name_id = dropworlditems[i];
 
 			nx_sysinfo(gm, TIPSTYPE_GMINFO, "drop", nx_widestr(name_id));
@@ -5474,7 +5474,7 @@ function DropIDdropn(gm, ...)
 
 end
 
---ÇåÀíµÀ¾ß¼à¿Ø¹«·şÊı¾İ
+--æ¸…ç†é“å…·ç›‘æ§å…¬æœæ•°æ®
 function cleardropitem(gm, ...)
 	local b_success =  nx_clear_dropitem_Manage(nx_get_scene())
 	if b_success then
@@ -5484,7 +5484,7 @@ function cleardropitem(gm, ...)
 	end
 end
 
--- ´´½¨¹«»á
+-- åˆ›å»ºå…¬ä¼š
 function createguild(gm, ...)
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("arguments error"))
@@ -5499,7 +5499,7 @@ function createguild(gm, ...)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", info)
 	end
 end
--- Çå³ı¹«»áĞÅÏ¢
+-- æ¸…é™¤å…¬ä¼šä¿¡æ¯
 function clearguild(gm, ...)
 	if nx_clear_guild(gm) then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear guild data succeed"))
@@ -5507,7 +5507,7 @@ function clearguild(gm, ...)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear guild data failed"))
 	end
 end
--- ÉèÖÃ¹«»á³ÉÔ±ÈËÊıÉÏÏŞ
+-- è®¾ç½®å…¬ä¼šæˆå‘˜äººæ•°ä¸Šé™
 function setguildtoplimit(gm, ...)
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("arguments error"))
@@ -5521,45 +5521,45 @@ function setguildtoplimit(gm, ...)
 	end
 end
 
---ÉèÖÃ¸±±¾½ø¶È
+--è®¾ç½®å‰¯æœ¬è¿›åº¦
 function set_clonescene_progress(gm,...)
     nx_set_clonescene_progress(gm,nx_int(arg[1]))
 	--nx_msgbox(nx_string(arg[1]))
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set clonescene progress ok ! "));
 end
 
---Ñ§Ï°Éú»î¼¼ÄÜ
+--å­¦ä¹ ç”Ÿæ´»æŠ€èƒ½
 function studyjob(gm,...)
     nx_learn_life_occupation(gm,nx_int(arg[1]))
 	--nx_msgbox(nx_string(arg[1]))
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("learn life occupation ok ! "));
 end
 
---Éı¼¶Éú»î¼¼ÄÜ
+--å‡çº§ç”Ÿæ´»æŠ€èƒ½
 function life_occup_level(gm,...)
 	nx_life_occup_level(gm,nx_int(arg[1]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set life occupation level ok ! "));
 end
 
---ÉèÖÃ×î´óÌåÁ¦Öµ
+--è®¾ç½®æœ€å¤§ä½“åŠ›å€¼
 function set_max_physical(gm,...)
 	nx_set_max_physical(gm,nx_int(arg[1]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set max physical ok ! "));
 end
 
---ÉèÖÃÌåÁ¦Öµ
+--è®¾ç½®ä½“åŠ›å€¼
 function set_physical(gm,...)
 	nx_set_physical(gm,nx_int(arg[1]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set max physical ok ! "));
 end
 
---ÉèÖÃÉú»îÖ°ÒµÊìÁ·¶È
+--è®¾ç½®ç”Ÿæ´»èŒä¸šç†Ÿç»ƒåº¦
 function set_job_exp(gm,...)
 	nx_set_job_exp(gm,nx_int(arg[1]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set job Exp ok! "));
 end
 
---½ÓÊÜPVPÈÎÎñ
+--æ¥å—PVPä»»åŠ¡
 function setPVPtask(gm,...)
 	local id = nx_string(arg[1]);
 
@@ -5571,63 +5571,63 @@ function setPVPtask(gm,...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("add pvptask failed! ".. id));
 end
 
---¾º¼¼³¡¾º¼¼ÊôĞÔ
+--ç«æŠ€åœºç«æŠ€å±æ€§
 function arena_update_property(gm,...)
 	nx_arena_update_property(gm, nx_int(arg[1]), nx_int(arg[2]), nx_widestr(arg[3]), nx_int(arg[4]), nx_int(arg[5]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set arena_update_property ok! "));
 end
 
---¾º¼¼³¡ÈÙÒ«Öµ
+--ç«æŠ€åœºè£è€€å€¼
 function arena_honour(gm,...)
 
 	nx_arena_honour(gm, nx_widestr(arg[1]), nx_int(arg[2]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set arena_honour ok! "));
 end
 
---¾º¼¼³¡Èü¼¾Ê±¼ä
+--ç«æŠ€åœºèµ›å­£æ—¶é—´
 function arena_match_time(gm,...)
 	nx_arena_match_time(gm, nx_string(arg[1]), nx_int(arg[2]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set arena_match_time ok! "));
 end
 
---¾º¼¼³¡Ç¿ÖÆÊ¤Àû
+--ç«æŠ€åœºå¼ºåˆ¶èƒœåˆ©
 function arena_force_win(gm,...)
 	nx_arena_force_win(gm, nx_int(arg[1]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set arena_force_win ok! "));
 end
 
---¾º¼¼³¡µÀ¾ßÏŞÖÆ
+--ç«æŠ€åœºé“å…·é™åˆ¶
 function arena_limit_item(gm,...)
 	nx_arena_limit_item(gm, nx_string(arg[1]), nx_int(arg[2]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set arena_limit_item ok! "));
 end
 
---¾º¼¼³¡µÈ¼¶ÏŞÖÆ
+--ç«æŠ€åœºç­‰çº§é™åˆ¶
 function arena_limit_level(gm,...)
 	nx_arena_limit_level(gm, nx_int(arg[1]))
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set arena_limit_level ok! "));
 end
 
--- ÉèÖÃvip
+-- è®¾ç½®vip
 function addvip(gm, ...)
 	-- nx_add_vip_time(gm, nx_int(arg[1]) )
 	-- nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set vip time ok! "));
 end
 
--- ²éÑ¯µ±Ç°ÓÎÏ·ÊÀ½ç×Ê½ğÇé¿ö
+-- æŸ¥è¯¢å½“å‰æ¸¸æˆä¸–ç•Œèµ„é‡‘æƒ…å†µ
 function sgmoney(gm, ...)
 	nx_show_total_capidal(gm)
 end
 
--- ÉèÖÃµ±Ç°ÓÎÏ·ÊÀ½ç×Ê½ğÇé¿ö Õâ¸ögmÃüÁî½ö¹©²âÊÔ
+-- è®¾ç½®å½“å‰æ¸¸æˆä¸–ç•Œèµ„é‡‘æƒ…å†µ è¿™ä¸ªgmå‘½ä»¤ä»…ä¾›æµ‹è¯•
 function setgmoney(gm, ...)
 	local num = table.getn(arg)
 	if num < 3 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "para too less! Format: setgmoney capital_type type value");
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "typeÖ»ÄÜÊÇ 1, 2, 3, 4, 10, 11");
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "1±íÊ¾µ÷ÕûÏµÍ³×Ê½ğ×ÜÁ¿, 2±íÊ¾½«¿É³öÊÛ×Ê½ğ»®·Öµ½¿É½±Àø×Ê½ğÖĞ");
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "3±íÊ¾ÉèÖÃ¶Ò»»¿ª¹Ø, 4±íÊ¾ÉèÖÃ½±Àø¿ª¹Ø");
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "11±íÊ¾ÉèÖÃÀëÏß½±ÀøÊıÁ¿, 10±íÊ¾ÉèÖÃÀëÏß½±Àø¿ª¹Ø");
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "typeåªèƒ½æ˜¯ 1, 2, 3, 4, 10, 11");
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "1è¡¨ç¤ºè°ƒæ•´ç³»ç»Ÿèµ„é‡‘æ€»é‡, 2è¡¨ç¤ºå°†å¯å‡ºå”®èµ„é‡‘åˆ’åˆ†åˆ°å¯å¥–åŠ±èµ„é‡‘ä¸­");
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "3è¡¨ç¤ºè®¾ç½®å…‘æ¢å¼€å…³, 4è¡¨ç¤ºè®¾ç½®å¥–åŠ±å¼€å…³");
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "11è¡¨ç¤ºè®¾ç½®ç¦»çº¿å¥–åŠ±æ•°é‡, 10è¡¨ç¤ºè®¾ç½®ç¦»çº¿å¥–åŠ±å¼€å…³");
 		return
 	end
 
@@ -5638,22 +5638,22 @@ function setgmoney(gm, ...)
 	local can_op = {[1] = 1, [2] = 1, [3] = 1, [4] = 1, [10] = 1, [11] = 1}
 
 	if can_op[type] == nil then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "typeÖ»ÄÜÊÇ 1, 2, 3, 4, 10, 11");
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "typeåªèƒ½æ˜¯ 1, 2, 3, 4, 10, 11");
 		return
 	end
 
 	nx_set_total_money(gm, capital_type, nx_int(type), value)
 end
 
---ÖØÖÃÉı¼¶¼¼ÄÜ
+--é‡ç½®å‡çº§æŠ€èƒ½
 function ResetSkill(gm,...)
 	nx_reset_skill_level(gm);
 
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reset skill succeed"));
 end
 
---ÉèÖÃµ±Ç°ÊôĞÔ²Ù×÷µÄ¶ÔÏóµÄÉí·İÎªX¼¶·¸ÈËºÍ·âÍ£Ê±¼ä
---setexilestatus Éí·İ Ê±¼ä
+--è®¾ç½®å½“å‰å±æ€§æ“ä½œçš„å¯¹è±¡çš„èº«ä»½ä¸ºXçº§çŠ¯äººå’Œå°åœæ—¶é—´
+--setexilestatus èº«ä»½ æ—¶é—´
 function setexilestatus(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: setexilestatus <status> <time>"));
@@ -5673,21 +5673,21 @@ function setexilestatus(gm, ...)
 	--nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("SetExileStatus succeed."));
 end
 
---¼¼ÄÜÎŞÏûºÄ
+--æŠ€èƒ½æ— æ¶ˆè€—
 function noconsume(gm,...)
     nx_skill_noconsume(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("change consume succeed"));
 end
 
---¼¼ÄÜÎŞCD
+--æŠ€èƒ½æ— CD
 function nocooldown(gm,...)
     nx_skill_nocooldown(gm)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("change cooldowntime succeed"));
 end
 
---²éÑ¯ÊÂ¼ş×î´óÊÕÒæ
+--æŸ¥è¯¢äº‹ä»¶æœ€å¤§æ”¶ç›Š
 function query_es_reward(gm, ...)
-	--Ã»ÓĞÔò²éÑ¯ËùÓĞÊÂ¼ş
+	--æ²¡æœ‰åˆ™æŸ¥è¯¢æ‰€æœ‰äº‹ä»¶
 	if table.getn(arg) == 0 then
 		nx_open_event_log()
 		local reward_list = nx_query_es_reward(gm,0)
@@ -5700,7 +5700,7 @@ function query_es_reward(gm, ...)
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("all ok"))
 		return
 	end
-	--²éÑ¯Ä³¸öÊÂ¼ş
+	--æŸ¥è¯¢æŸä¸ªäº‹ä»¶
 	if table.getn(arg) == 1 then
 
 		local reward_list = nx_query_es_reward(gm,nx_int(arg[1]))
@@ -5718,7 +5718,7 @@ function query_es_reward(gm, ...)
 
 end
 
--- ²éÑ¯µ±Ç°³¡¾°µÄËùÓĞÔ¤¼ÓÔØnpc
+-- æŸ¥è¯¢å½“å‰åœºæ™¯çš„æ‰€æœ‰é¢„åŠ è½½npc
 function query_preload_npc(gm, ...)
     local ret = nx_query_preload_npc(gm);
 
@@ -5745,7 +5745,7 @@ function query_preload_npc(gm, ...)
     nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("===================="));
 end
 
---ÉèÖÃpvpÈÎÎñÊµÁ¦Öµ·ßÅ­Öµ
+--è®¾ç½®pvpä»»åŠ¡å®åŠ›å€¼æ„¤æ€’å€¼
 function add_pvp_prop(gm, ...)
     local prop_name = nx_string(arg[1]);
     local camp = nx_int(arg[2])
@@ -5757,14 +5757,14 @@ function add_pvp_prop(gm, ...)
 
 end
 
--- ÉèÖÃµ±Ç°½ÇÉ«ÄÜÁ¿¾®¾ÓÃñÉí·İµÈ¼¶
+-- è®¾ç½®å½“å‰è§’è‰²èƒ½é‡äº•å±…æ°‘èº«ä»½ç­‰çº§
 function setEnergyWellStatus(gm, ...)
 	local well_id = nx_string(arg[1])
 	local level = nx_int(arg[2])
 	nv_set_wellResidentLevel(gm, well_id, level)
 end
 
---Çå³ıÄÜÁ¿¾®ÉêÇë±í
+--æ¸…é™¤èƒ½é‡äº•ç”³è¯·è¡¨
 function ew_clear_apply_rec(gm,...)
 	nx_ew_clear_apply_rec(gm)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set ew_clear_apply_rec ok! "));
@@ -5788,14 +5788,14 @@ function ew_clear_well_own(gm,...)
 	local ew_id = nx_string(arg[1])
 	nx_ew_clear_well_own(gm,ew_id)
 end
---Ç¿ÖÆÄÜÁ¿¾®Õ½³¡½áÊø
+--å¼ºåˆ¶èƒ½é‡äº•æˆ˜åœºç»“æŸ
 function ew_force_fight_end(gm,...)
 	local ew_id = nx_string(arg[1])
 	nx_ew_force_fight_end(gm, ew_id)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set ew_force_fight_end ok! "));
 end
 
---Ç¿ÖÆÄÜÁ¿¾®Õ½³¡½áÊø
+--å¼ºåˆ¶èƒ½é‡äº•æˆ˜åœºç»“æŸ
 function ew_force_fight_open(gm,...)
 	local ew_id = nx_string(arg[1])
 	nx_ew_force_fight_open(gm, ew_id)
@@ -5806,7 +5806,7 @@ function revertprop(gm)
 	nx_revert_prop(gm)
 end
 
--- Çå³ıÅÅĞĞ°ñ
+-- æ¸…é™¤æ’è¡Œæ¦œ
 function clear_rank(gm, ...)
     if nx_clear_rank(gm) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("clear rank succeed ..."));
@@ -5816,10 +5816,10 @@ function clear_rank(gm, ...)
 end
 
 
---ÉèÖÃITEMµÄÊ£ÓàÓĞĞ§Ê±¼ä
+--è®¾ç½®ITEMçš„å‰©ä½™æœ‰æ•ˆæ—¶é—´
 function set_leftime(gm,...)
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: nx_set_leftime  <value>"));--¸ñÊ½£ºset ÊôĞÔÃû³Æ ÊôĞÔÖµ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: nx_set_leftime  <value>"));--æ ¼å¼ï¼šset å±æ€§åç§° å±æ€§å€¼
 		return;
 	end
 
@@ -5858,7 +5858,7 @@ function openprompt_setstate(gm, ...)
 	end
 end
 
---ÉèÖÃÇ¿»¯µÈ¼¶
+--è®¾ç½®å¼ºåŒ–ç­‰çº§
 function set_star_level(gm, ...)
     if table.getn(arg) < 1 then
         return  0
@@ -5873,7 +5873,7 @@ function set_star_level(gm, ...)
     nx_strengthen(target,nx_int(star_level) )
 end
 
---treasureboxranpro param1 param2   param1:±¦Ïäid  param2:²âÊÔ´ò¿ª´ÎÊı
+--treasureboxranpro param1 param2   param1:å®ç®±id  param2:æµ‹è¯•æ‰“å¼€æ¬¡æ•°
 function treasureboxranpro(gm, ...)
 	local id
 	local num
@@ -5881,16 +5881,16 @@ function treasureboxranpro(gm, ...)
 		id = arg[1];
 		num = arg[2];
 	else
-	--ÊäÈë²»ÕıÈ·
+	--è¾“å…¥ä¸æ­£ç¡®
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("test_treasurebox failed."));
 	end
-	--ÏÔÊ¾ÎïÆ·ĞÅÏ¢
+	--æ˜¾ç¤ºç‰©å“ä¿¡æ¯
 	local lst_items = nx_treasurebox_ranpro(nx_string(id),nx_int(num))
 	if table.getn(lst_items) ~= 0  then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "test_treasurebox  ItemList Begin:" .. "====="));
-		--ÏÔÊ¾±¦ÏäÖĞÎïÆ·
+		--æ˜¾ç¤ºå®ç®±ä¸­ç‰©å“
 		for i = 1, table.getn(lst_items) do
-		    --»ñµÃ¸ñÊ½ Ãû³Æ  num
+		    --è·å¾—æ ¼å¼ åç§°  num
 			local name_id = lst_items[i];
 			nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr(name_id));
 		end
@@ -5898,7 +5898,7 @@ function treasureboxranpro(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("=====" .. "test_treasurebox   ItemList end" .. "====="));
 end
 
---ÉèÖÃÕ½³¡»ı·Ö
+--è®¾ç½®æˆ˜åœºç§¯åˆ†
 function set_battlewar_point(gm, ...)
     local camp = nx_int(arg[1])
     local point = nx_int(arg[2])
@@ -5906,14 +5906,14 @@ function set_battlewar_point(gm, ...)
     nx_set_battlewar_point(camp, point)
 end
 
---ÉèÖÃÃ¿ÈÕÕ½³¡´ÎÊı
+--è®¾ç½®æ¯æ—¥æˆ˜åœºæ¬¡æ•°
 function set_day_battlewar_count(gm, ...)
     local count = nx_int(arg[1])
 
     nx_set_day_battlewar_count(gm, count)
 end
 
--- Ìî³äplayerÉíÉÏµÄ´æµµ±í(»úÆ÷ÈË²âÊÔÓÃ)
+-- å¡«å……playerèº«ä¸Šçš„å­˜æ¡£è¡¨(æœºå™¨äººæµ‹è¯•ç”¨)
 function fill_records(gm, ...)
     if nx_fill_records(gm) then
         nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("fill records succeed ..."));
@@ -5923,7 +5923,7 @@ function fill_records(gm, ...)
 end
 
 --add by hutian 2013-3-29
--- ÉèÖÃ»î¶¯¿ª¹Ø
+-- è®¾ç½®æ´»åŠ¨å¼€å…³
 function set_switch(gm, ...)
 	if table.getn(arg) < 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set_switch <id> <bopen>"))
@@ -5942,7 +5942,7 @@ function set_switch(gm, ...)
 	end
 end
 
--- ²éÑ¯»î¶¯¿ª¹Ø
+-- æŸ¥è¯¢æ´»åŠ¨å¼€å…³
 function query_switch(gm, ...)
 	if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: query_switch <id>"))
@@ -5956,7 +5956,7 @@ function query_switch(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("query_switch :"..nx_string(flag)))
 end
 
---ÖØÔØ¿ª¹Ø×ÊÔ´ \ini\Rule\SwitchManager.xml
+--é‡è½½å¼€å…³èµ„æº \ini\Rule\SwitchManager.xml
 function reload_switch_resource(gm, ...)
 	nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("reload_switch_resource "  .. " begin."))
 
@@ -5966,7 +5966,7 @@ function reload_switch_resource(gm, ...)
 end
 
 
---¿ªÊ¼¼ÇÂ¼Ä³¸öÍæ¼ÒÉÏ·¢µÄÏûÏ¢
+--å¼€å§‹è®°å½•æŸä¸ªç©å®¶ä¸Šå‘çš„æ¶ˆæ¯
 function begin_logmsg(gm,...)
 	local target = get_prop_target(gm)
 	if not nx_exists(target) then
@@ -5974,7 +5974,7 @@ function begin_logmsg(gm,...)
 	end
 
 	if not nx_exists(target) or nx_type(target) ~= 2 then --TYPE_PLAYER	= 2
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("cur obj not player object"));--µ±Ç°Ñ¡È¡¶ÔÏó²»ÊÇÍæ¼Ò¶ÔÏó
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("cur obj not player object"));--å½“å‰é€‰å–å¯¹è±¡ä¸æ˜¯ç©å®¶å¯¹è±¡
 		return
 	end
 
@@ -5982,12 +5982,12 @@ function begin_logmsg(gm,...)
 	nx_begin_logmsg(target, gm)
 end
 
---Í£Ö¹¼ÇÂ¼Íæ¼ÒÉÏ·¢
+--åœæ­¢è®°å½•ç©å®¶ä¸Šå‘
 function stop_logmsg(gm,...)
 	nx_stop_logmsg()
 end
 
---¹ºÂòÒ»¸öµµ°¸
+--è´­ä¹°ä¸€ä¸ªæ¡£æ¡ˆ
 function buy_charge_order(gm,...)
     if table.getn(arg) < 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("param "))
@@ -5999,7 +5999,7 @@ function buy_charge_order(gm,...)
 end
 
 --add by huanglh 2013-5-15
--- ÉèÖÃÈÕÖ¾¿ª¹Ø
+-- è®¾ç½®æ—¥å¿—å¼€å…³
 function set_log_switch(gm, ...)
 	if table.getn(arg) ~= 2 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set_log_switch <index> <bopen>"))
@@ -6018,8 +6018,8 @@ function set_log_switch(gm, ...)
 	end
 end
 
---ÉèÖÃ¼ÇÂ¼logĞÄÌøÊÂ¼ş
-function set_time_money(gm, ...)  --Ê±¼äµ¥Î»¡ª¡ª·ÖÖÓ
+--è®¾ç½®è®°å½•logå¿ƒè·³äº‹ä»¶
+function set_time_money(gm, ...)  --æ—¶é—´å•ä½â€”â€”åˆ†é’Ÿ
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: set_time_money <value>"))
 		return
@@ -6035,13 +6035,13 @@ function set_time_money(gm, ...)  --Ê±¼äµ¥Î»¡ª¡ª·ÖÖÓ
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("set_time_money failed"))
 	end
 end
---Çå³ıÄÜÁ¿¾®Êı¾İ
-function clear_domain_ew_data(gm, ...)  --Ê±¼äµ¥Î»¡ª¡ª·ÖÖÓ
+--æ¸…é™¤èƒ½é‡äº•æ•°æ®
+function clear_domain_ew_data(gm, ...)  --æ—¶é—´å•ä½â€”â€”åˆ†é’Ÿ
 	nx_clear_domain_ew_data()
 end
 
---¾èÏ×ÄÜÁ¿¾®²ÄÁÏ
-function contribute_ew_mats(gm, ...)  --Ê±¼äµ¥Î»¡ª¡ª·ÖÖÓ
+--æçŒ®èƒ½é‡äº•ææ–™
+function contribute_ew_mats(gm, ...)  --æ—¶é—´å•ä½â€”â€”åˆ†é’Ÿ
 	if table.getn(arg) ~= 1 then
 		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format: contribute_ew_mats <sum> "))
 		return

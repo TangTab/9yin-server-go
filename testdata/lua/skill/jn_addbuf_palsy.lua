@@ -1,46 +1,46 @@
---Âé±Ô,ÓÐÉËº¦(Ô¶³ÌÍâ¹¦ÎªÖ÷),²¢¼¸ÂÊÏòÄ¿±êÌí¼Ó"buf_palsy"
---buffÆÚ¼ä½ÇÉ«ÎÞ·¨ÒÆ¶¯,½øÐÐ¹¥»÷,±»¹¥»÷ÎÞ·¨»Ø±Ü,¸ñµ²;ÊÜµ½ÉËº¦Ê±buff×Ô¶¯ÒÆ³ý
---»ù´¡¼¸ÂÊ70%,¼¼ÄÜLevel,²î×î´óÓ°Ïì 3% * Level
+--éº»ç—¹,æœ‰ä¼¤å®³(è¿œç¨‹å¤–åŠŸä¸ºä¸»),å¹¶å‡ çŽ‡å‘ç›®æ ‡æ·»åŠ "buf_palsy"
+--buffæœŸé—´è§’è‰²æ— æ³•ç§»åŠ¨,è¿›è¡Œæ”»å‡»,è¢«æ”»å‡»æ— æ³•å›žé¿,æ ¼æŒ¡;å—åˆ°ä¼¤å®³æ—¶buffè‡ªåŠ¨ç§»é™¤
+--åŸºç¡€å‡ çŽ‡70%,æŠ€èƒ½Level,å·®æœ€å¤§å½±å“ 3% * Level
 --LifeTime = 1 + Level / 5
---buffÐ§¹û×÷ÓÃÊ±,²¥·Ådebuff_01¶¯×÷
+--buffæ•ˆæžœä½œç”¨æ—¶,æ’­æ”¾debuff_01åŠ¨ä½œ
 --1hit
 
 require("define")
 require("command_define")
 require("share\\server_custom_define")
 
---Ë¢ÐÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôÐÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±žæ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹åŽ
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 
 end
 
---¼¼ÄÜÃüÖÐÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖÐ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖÐ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›ž5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
 	local level = nx_query_property(skill, "Level")
 	local damage = (1 + level * 0.1) * math.random(nx_query_property(self, "MinShotDamage"), nx_query_property(self, "MaxShotDamage"))
@@ -51,7 +51,7 @@ function get_damage(self, skill, target)
 	local dex_self = nx_query_property(self, "Dex") + nx_query_property(self, "DexAdd")
 	local sta_target = nx_query_property(target, "Sta") + nx_query_property(target, "StaAdd")
 	
-	--¼ì¶¨buffÊÇ·ñÃüÖÐ
+	--æ£€å®šbuffæ˜¯å¦å‘½ä¸­
 	local rate = math.random(0,100)
 	if dex_self - sta_target > 50 then
 		rate = rate + 3 * level
@@ -69,10 +69,10 @@ function get_damage(self, skill, target)
 end
 
 function add_buffer(self, target, level)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØÐë´æÔÚÓÚBuffer±íÖÐ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºŽBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_palsy")
 	
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æžœåˆ›å»ºå¤±è´¥åˆ™è¿”å›ž
 	if not nx_exists(buffer) then
 		return false
 	end
@@ -81,13 +81,13 @@ function add_buffer(self, target, level)
 		
 	nx_set_property(buffer, "ReplaceLevel", level)
 	nx_set_property(buffer, "ReplaceType", 0)
-	--ÉúÃüÆÚ
+	--ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime", nx_number(1 + level / 5))
-	--bufferÔÚXÃëÄÚÓÐÐ§
+	--bufferåœ¨Xç§’å†…æœ‰æ•ˆ
 	nx_set_property(buffer, "EffectType", 1)
 	nx_set_property(buffer, "LifeTimeType", 1)
 
-	--Ìí¼Óµ½DirectPropertyRec
+	--æ·»åŠ åˆ°DirectPropertyRec
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantMove", 1, 0, 0)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantAttack", 1, 0, 0)	
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "DodgeProb", -100, 1, 0)
@@ -98,10 +98,10 @@ function add_buffer(self, target, level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "MagicParryProbAdd", -100, 1, 0)
 	nx_set_property(self, "State", debuff_01)
 	
-	--Ìí¼Óµ½EventEffectRec
+	--æ·»åŠ åˆ°EventEffectRec
 	nx_add_record_row_values(buffer, "EventEffectRec", COMMAND_BEDAMAGE)
 	
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ý´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æžœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
  		nx_destroy_self(buffer)
 		return false

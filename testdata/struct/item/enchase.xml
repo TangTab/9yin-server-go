@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÏâÇ¶µÀ¾ßµÄ»ù´¡ÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--é•¶åµŒé“å…·çš„åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="RandSerial" type="string" public="false" private="false" save="false" desc="Ëæ»úºÅID"/>
-		<property name="JewelLevel" type="int" public="false" private="true" save="false" desc="±¦Ê¯µÈ¼¶"/>
-		<property name="CantCompound" type="byte" public="false" private="false" save="false" desc="±¦Ê¯ÊÇ·ñ²»ÄÜºÏ³É"/>
+		<property name="RandSerial" type="string" public="false" private="false" save="false" desc="éšæœºå·ID"/>
+		<property name="JewelLevel" type="int" public="false" private="true" save="false" desc="å®çŸ³ç­‰çº§"/>
+		<property name="CantCompound" type="byte" public="false" private="false" save="false" desc="å®çŸ³æ˜¯å¦ä¸èƒ½åˆæˆ"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

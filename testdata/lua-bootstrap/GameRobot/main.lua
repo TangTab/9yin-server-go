@@ -1,69 +1,69 @@
---»úÆ÷ÈËÖ÷¿Ø½Å±¾
+--æœºå™¨äººä¸»æ§è„šæœ¬
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(console)
 	nx_set_value("console", console)
 	
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	console.Color = "White"
 	
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 	
-	--ÈÕÖ¾»º³å³Ø
+	--æ—¥å¿—ç¼“å†²æ± 
 	local log_pool = nx_create("LogPool")
 	
-	--ÈÕÖ¾ÎÄ¼şÇ°×º
+	--æ—¥å¿—æ–‡ä»¶å‰ç¼€
 	log_pool.FilePrefix = nx_work_path() .. "log\\robot"
-	--»º³åÊıÁ¿
+	--ç¼“å†²æ•°é‡
 	log_pool.TraceMax = 256
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	log_pool.EveryDayAlone = false
 	
 	if nx_is_debug() then
-		--ÔÚµ÷ÊÔ°æÀï½«ÈÕÖ¾ĞÅÏ¢Êä³öµ½¿ØÖÆÌ¨
+		--åœ¨è°ƒè¯•ç‰ˆé‡Œå°†æ—¥å¿—ä¿¡æ¯è¾“å‡ºåˆ°æ§åˆ¶å°
 		log_pool.Console = console
 	end
 	
-	--Æô¶¯ÈÕÖ¾¼ÇÂ¼
+	--å¯åŠ¨æ—¥å¿—è®°å½•
 	log_pool:Start()
 	
 	nx_set_value("log_pool", log_pool)
 	
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 	
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	ini.FileName = "GameRobot.ini"
 	
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
-		nx_msgbox("ÎŞ·¨¶ÁÈ¡³ÌĞòÅäÖÃÎÄ¼ş")
+		nx_msgbox("æ— æ³•è¯»å–ç¨‹åºé…ç½®æ–‡ä»¶")
 		nx_destroy(ini)
 		return 0
 	end
 	
-	--Í¨Ñ¶Ïß³ÌÊı
+	--é€šè®¯çº¿ç¨‹æ•°
 	local sock_threads = ini:ReadInteger("Main", "SockThreads", 1)
-	--×î´óÁ¬½ÓÊı
+	--æœ€å¤§è¿æ¥æ•°
 	local max_player = ini:ReadInteger("Main", "MaxPlayer", 1024)
-	--Í¨Ñ¶¼ÓÃÜ¼ü
+	--é€šè®¯åŠ å¯†é”®
 	local msg_encode_key = ini:ReadString("Main", "MessageEncodeKey", "")
 	
-	--ÍâÍøµØÖ·
+	--å¤–ç½‘åœ°å€
 	local outer_addr = ini:ReadString("Outer", "Addr", "127.0.0.1")
 	local outer_port = ini:ReadInteger("Outer", "Port", 2001)
 	
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15900
 	
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 	
-	--ÕÊºÅºÍÃÜÂëÇ°×º
+	--å¸å·å’Œå¯†ç å‰ç¼€
 	local account_prefix = "robot"
 	local password_prefix = "robot"
 	
@@ -72,7 +72,7 @@ function main(console)
 	
 	nx_destroy(ini)
 	
-	--´´½¨Î¬»¤Á¬½Ó·şÎñ
+	--åˆ›å»ºç»´æŠ¤è¿æ¥æœåŠ¡
 	local echo_sock = nx_create("EchoSock")
 	
 	echo_sock.Address = echo_addr
@@ -80,7 +80,7 @@ function main(console)
 	
 	nx_bind_script(echo_sock, "echo", "echo_init")
 	
-	--´´½¨¿Í»§¶ËÁ¬½ÓÍ¨Ñ¶·şÎñ
+	--åˆ›å»ºå®¢æˆ·ç«¯è¿æ¥é€šè®¯æœåŠ¡
 	local multi_sock = nx_create("MultiSock")
 	
 	multi_sock.Address = outer_addr
@@ -90,7 +90,7 @@ function main(console)
 	multi_sock.InBufLen = 16 * 1024
 	multi_sock.OutBufLen = 64 * 1024
 	
-	--´´½¨»úÆ÷ÈË
+	--åˆ›å»ºæœºå™¨äºº
 	local game_robot = nx_create("GameRobot")
 	
 	nx_set_value("game_robot", game_robot)
@@ -102,20 +102,20 @@ function main(console)
 	game_robot.EchoSock = echo_sock
 	game_robot.MultiSock = multi_sock
 	
-	--Æô¶¯¿Í»§¶ËÁ¬½Ó
+	--å¯åŠ¨å®¢æˆ·ç«¯è¿æ¥
 	multi_sock:Start()
 	
-	--Æô¶¯Î¬»¤Á¬½Ó
+	--å¯åŠ¨ç»´æŠ¤è¿æ¥
 	echo_sock:Start()
 	
-	--Æô¶¯½ÓÈë·şÎñ
+	--å¯åŠ¨æ¥å…¥æœåŠ¡
 	game_robot:Start()
 	
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	console:WriteLine("Echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	console:WriteLine("Outer socket " .. outer_addr .. ":" .. nx_string(outer_port))
 	
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	console:WriteLine("Game robot started")
 	
 	nx_execute(nx_current(), "begin_connect", multi_sock, max_player)
@@ -123,7 +123,7 @@ function main(console)
 	return 1
 end
 
---Æô¶¯¿Í»§Á¬½Ó
+--å¯åŠ¨å®¢æˆ·è¿æ¥
 function begin_connect(multi_sock, connect_num)
 	local i = 0
 	
@@ -136,14 +136,14 @@ function begin_connect(multi_sock, connect_num)
 	end
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local console = nx_value("console")
 	local game_robot = nx_value("game_robot")
 	local multi_sock = game_robot.MultiSock
 	local echo_sock = game_robot.EchoSock
 	
-	--¹Ø±ÕÍâÍøÁ¬½Ó
+	--å…³é—­å¤–ç½‘è¿æ¥
 	console:WriteLine("client socket shutdown...")
 	
 	multi_sock:CloseAll()
@@ -154,22 +154,22 @@ function close()
 	
 	multi_sock:Stop()
 	
-	--¹Ø±ÕÎ¬»¤Á¬½Ó
+	--å…³é—­ç»´æŠ¤è¿æ¥
 	console:WriteLine("echo socket shutdown...")
 	
 	echo_sock:Stop()
 	
-	--¹Ø±Õ»úÆ÷ÈË
+	--å…³é—­æœºå™¨äºº
 	console:WriteLine("entry server shutdown...")
 	
 	game_robot:Stop()
 	
-	--¹Ø±ÕÈÕÖ¾»º³å
+	--å…³é—­æ—¥å¿—ç¼“å†²
 	local log_pool = nx_value("log_pool")
 	
 	log_pool:Stop()
 	
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 	
 	return true

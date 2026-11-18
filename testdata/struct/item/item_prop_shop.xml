@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÎïÆ·µÄÉÌµêÏà¹ØµÄÊôÐÔ-->
+<!--ç‰©å“çš„å•†åº—ç›¸å…³çš„å±žæ€§-->
 <object>
 	<properties>
-		<property name="ItemCosts" type="string" public="false" private="true" save="false" desc="¹ºÂòËùÐèÏûºÄµÄÎïÆ·×Ö·û´®"/>
+		<property name="ItemCosts" type="string" public="false" private="true" save="false" desc="è´­ä¹°æ‰€éœ€æ¶ˆè€—çš„ç‰©å“å­—ç¬¦ä¸²"/>
 
-		<property name="MaxBuyNumPer" type="int" public="false" private="true" save="false" desc="Ò»´Î¹ºÂò×î´óÊýÁ¿"/>
+		<property name="MaxBuyNumPer" type="int" public="false" private="true" save="false" desc="ä¸€æ¬¡è´­ä¹°æœ€å¤§æ•°é‡"/>
 
-		<property name="BuyConditionID" type="string" public="false" private="true" save="false" desc="µÀ¾ß¹ºÂòµÄÌõ¼þ"/>
-		<property name="BuyNumLimit" type="int" public="false" private="true" save="false" desc="ÏÞ¹ºÊýÁ¿"/>
-		<property name="BuyNumRest" type="int" public="false" private="true" save="false" desc="Ê£ÓàÊýÁ¿"/>
-		<property name="BuyCoolTime" type="int" public="false" private="true" save="false" desc="ÊÛÂôÀäÈ´Ê±¼ä£¬µ¥Î»ºÁÃë"/>
-		<property name="BuyCoolTimeRest" type="int" public="false" private="true" save="false" desc="ÊÛÂôÊ£ÓàÀäÈ´Ê±¼ä£¬µ¥Î»ºÁÃë"/>
+		<property name="BuyConditionID" type="string" public="false" private="true" save="false" desc="é“å…·è´­ä¹°çš„æ¡ä»¶"/>
+		<property name="BuyNumLimit" type="int" public="false" private="true" save="false" desc="é™è´­æ•°é‡"/>
+		<property name="BuyNumRest" type="int" public="false" private="true" save="false" desc="å‰©ä½™æ•°é‡"/>
+		<property name="BuyCoolTime" type="int" public="false" private="true" save="false" desc="å”®å–å†·å´æ—¶é—´ï¼Œå•ä½æ¯«ç§’"/>
+		<property name="BuyCoolTimeRest" type="int" public="false" private="true" save="false" desc="å”®å–å‰©ä½™å†·å´æ—¶é—´ï¼Œå•ä½æ¯«ç§’"/>
 		
-		<property name="ShopBuyPrice" type="int" public="false" private="true" save="false" desc="µÀ¾ß´ÓÉÌµê¹ºÂòµÄ¼Û¸ñ"/>
-		<property name="ShopSellPrice" type="int" public="false" private="false" save="false" desc="µÀ¾ß´ÓÉÌµêÂô³öµÄ¼Û¸ñ"/>
+		<property name="ShopBuyPrice" type="int" public="false" private="true" save="false" desc="é“å…·ä»Žå•†åº—è´­ä¹°çš„ä»·æ ¼"/>
+		<property name="ShopSellPrice" type="int" public="false" private="false" save="false" desc="é“å…·ä»Žå•†åº—å–å‡ºçš„ä»·æ ¼"/>
 
-		<property name="ClearTime" type="int64" public="false" private="false" save="true" desc="µÀ¾ß´Ó»Ø¹ºÀ¸É¾³ýµÄÊ±¼ä"/>
+		<property name="ClearTime" type="int64" public="false" private="false" save="true" desc="é“å…·ä»Žå›žè´­æ åˆ é™¤çš„æ—¶é—´"/>
 	</properties>
 </object>

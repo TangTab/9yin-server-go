@@ -1,28 +1,28 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task7003.lua
--- @ ½Å±¾¹¦ÄÜ: IDÎª7003µÄÈÎÎñÖ´ĞĞ½Å±¾Âß¼­(³åÏ´Ã©·¿)
--- @ ´´½¨Õß:   dReAmSun
--- @ ´´½¨ÈÕÆÚ: 2009.6.4
+-- @ è„šæœ¬åç§°: task7003.lua
+-- @ è„šæœ¬åŠŸèƒ½: IDä¸º7003çš„ä»»åŠ¡æ‰§è¡Œè„šæœ¬é€»è¾‘(å†²æ´—èŒ…æˆ¿)
+-- @ åˆ›å»ºè€…:   dReAmSun
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.6.4
 -----------------------------------------
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 	
-	-- µ±Ç°³¡¾°
+	-- å½“å‰åœºæ™¯
 	local scene = nx_get_scene()
 	local scene_id = nx_query_property(scene, "ConfigID")
 	local scene_name = nx_query_property(scene, "Name")
 	
-	local npc_name = nx_string("Ê¹ÓÃË®Í°´òË®")
+	local npc_name = nx_string("ä½¿ç”¨æ°´æ¡¶æ‰“æ°´")
 	
-    -- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ
+    -- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ
 	local row = nx_add_record_row_values(player, "Task_Record", nx_int(taskid), nx_int(8),
 	               nx_int(0), nx_int(2), npc_name, nx_string(scene_id), nx_string(scene_name))
 				   
@@ -34,14 +34,14 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 
 	return 1

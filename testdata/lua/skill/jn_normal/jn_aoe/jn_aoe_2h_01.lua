@@ -1,58 +1,58 @@
---AOEÑİÊ¾00
---½ü¾àÀë»ñµÃ¾Ş´óÉËº¦£¬Ô¶¾àÀëĞ¡ÉËº¦
+--AOEæ¼”ç¤º00
+--è¿‘è·ç¦»è·å¾—å·¨å¤§ä¼¤å®³ï¼Œè¿œè·ç¦»å°ä¼¤å®³
 
 require("define")
 
---Éè¶¨×î´óHITÖµ
+--è®¾å®šæœ€å¤§HITå€¼
 MAX_HIT=17
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
-	--È¡×Ô¼º¼¼ÄÜµÄ¼¶±ğ
+	--å–è‡ªå·±æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
 
-	--È¡×Ô¼ºµÄÁ¬»÷Êı
+	--å–è‡ªå·±çš„è¿å‡»æ•°
 	local hits = nx_query_property(self, "Hits")
 
-	--»ñÈ¡ÎäÆ÷ÉËº¦
+	--è·å–æ­¦å™¨ä¼¤å®³
 	local MaxMeleeDamage = nx_query_property(self, "MaxMeleeDamage")
 	local MinMeleeDamage = nx_query_property(self, "MinMeleeDamage")
 	local MeleeDamage = math.random(MinMeleeDamage,MaxMeleeDamage)
 
-	--Íâ¹¦ÉËº¦
+	--å¤–åŠŸä¼¤å®³
 	local phyDamage = 0
 
-	--¸ÕÊôĞÔÉËº¦
+	--åˆšå±æ€§ä¼¤å®³
 	local stiDamage = 0
 
 	local distance = cal_distance(self, target)
@@ -81,7 +81,7 @@ function get_damage(self, skill, target)
 
 	phyDamage = (phyDamage / MAX_HIT)
 	
-	phyDamage = pwrlevel * phyDamage --	¸ù¾İÍşÁ¦Ôö¼ÓÍşÁ¦
+	phyDamage = pwrlevel * phyDamage --	æ ¹æ®å¨åŠ›å¢åŠ å¨åŠ›
 
 	return phyDamage, stiDamage, 0, 0, 0
 end

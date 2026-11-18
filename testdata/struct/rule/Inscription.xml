@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Íæ¼ÒµÄÃú¿ÌÎ»-->
+<!--çŽ©å®¶çš„é“­åˆ»ä½-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="CurInsPoint" type="int" public="false" private="true" save="true" desc="µ±Ç°ÓµÓÐµÄÃú¿ÌµãÊý"/>
+		<property name="CurInsPoint" type="int" public="false" private="true" save="true" desc="å½“å‰æ‹¥æœ‰çš„é“­åˆ»ç‚¹æ•°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<!--
 	<records>
-		<record name="inscription_rec" cols="2" maxrows="28" save="true" public="false" private="true" desc="ÒÑÃú¿ÌµÄÃú¿Ì¿×ÁÐ±í">
-			<column type="dword" desc="Ãú¿Ì¿×ID"/>
-			<column type="string" desc="ÏâÇ¶µÄÎïÆ·ID"/>
+		<record name="inscription_rec" cols="2" maxrows="28" save="true" public="false" private="true" desc="å·²é“­åˆ»çš„é“­åˆ»å­”åˆ—è¡¨">
+			<column type="dword" desc="é“­åˆ»å­”ID"/>
+			<column type="string" desc="é•¶åµŒçš„ç‰©å“ID"/>
 		</record>
 	</records>
 	-->

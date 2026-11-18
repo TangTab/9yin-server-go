@@ -1,71 +1,71 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ArenaID"     type="int" public="false" private="false" save="false" desc="¶ÔÓ¦¾º¼¼³¡id"/>
-		<property name="ATeamPoints" type="int" public="false" private="false" save="false" desc="A¶Ó»ý·Ö"/>
-		<property name="BTeamPoints" type="int" public="false" private="false" save="false" desc="B¶Ó»ý·Ö"/>
-		<property name="ATeamKills"  type="int" public="false" private="false" save="false" desc="A¶Ó»÷É±"/>
-		<property name="BTeamKills"  type="int" public="false" private="false" save="false" desc="B¶Ó»÷É±"/>
-		<property name="ATeamAN"     type="int" public="false" private="false" save="false" desc="¾º¼¼³¡¿ªÆôÊ±A¶ÓÊµ¼ÊÈËÊý"/>
-		<property name="BTeamAN"     type="int" public="false" private="false" save="false" desc="¾º¼¼³¡¿ªÆôÊ±B¶ÓÊµ¼ÊÈËÊý"/>
-		<property name="ATeamUid"    type="int64" public="false" private="false" save="false" desc="A¶ÓÅÅ¶ÓµÄuid"/>
-		<property name="BTeamUid"    type="int64" public="false" private="false" save="false" desc="B¶ÓÅÅ¶ÓµÄuid"/>
-		<property name="ArenaSceneState"    type="int" public="false" private="false" save="false" desc="¾º¼¼³¡µÄ×´Ì¬"/>
+		<property name="ArenaID"     type="int" public="false" private="false" save="false" desc="å¯¹åº”ç«žæŠ€åœºid"/>
+		<property name="ATeamPoints" type="int" public="false" private="false" save="false" desc="Aé˜Ÿç§¯åˆ†"/>
+		<property name="BTeamPoints" type="int" public="false" private="false" save="false" desc="Bé˜Ÿç§¯åˆ†"/>
+		<property name="ATeamKills"  type="int" public="false" private="false" save="false" desc="Aé˜Ÿå‡»æ€"/>
+		<property name="BTeamKills"  type="int" public="false" private="false" save="false" desc="Bé˜Ÿå‡»æ€"/>
+		<property name="ATeamAN"     type="int" public="false" private="false" save="false" desc="ç«žæŠ€åœºå¼€å¯æ—¶Aé˜Ÿå®žé™…äººæ•°"/>
+		<property name="BTeamAN"     type="int" public="false" private="false" save="false" desc="ç«žæŠ€åœºå¼€å¯æ—¶Bé˜Ÿå®žé™…äººæ•°"/>
+		<property name="ATeamUid"    type="int64" public="false" private="false" save="false" desc="Aé˜ŸæŽ’é˜Ÿçš„uid"/>
+		<property name="BTeamUid"    type="int64" public="false" private="false" save="false" desc="Bé˜ŸæŽ’é˜Ÿçš„uid"/>
+		<property name="ArenaSceneState"    type="int" public="false" private="false" save="false" desc="ç«žæŠ€åœºçš„çŠ¶æ€"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="arena_info_rec" cols="13" maxrows="10" save="false" public="false" private="false" desc="¾º¼¼³¡Í³¼Æ±í">
-			<column type="widestr" desc="½ÇÉ«Ãû"/>
-			<column type="dword"   desc="µÈ¼¶"/>
-			<column type="dword"   desc="Ö°Òµ"/>
-			<column type="dword"   desc="»÷É±Êý"/>
-			<column type="dword"   desc="ËÀÍöÊý"/>
-			<column type="dword"   desc="ÉËº¦Á¿"/>
-			<column type="dword"   desc="ÖÎÁÆÁ¿"/>
-			<column type="dword"   desc="µ±Ç°µÄ»ý·Ö"/>
-			<column type="dword"   desc="±¾³¡»ñµÃµÄ»ý·Ö"/>
-			<column type="dword"   desc="¾º¼¼³¡ÖÐµÄÕóÓª"/>
-			<column type="dword"   desc="½ðÇ®"/>
-			<column type="dword"   desc="Ó¢ÓÂµãÊý"/>
-			<column type="dword"   desc="¾­Ñé"/>
+		<record name="arena_info_rec" cols="13" maxrows="10" save="false" public="false" private="false" desc="ç«žæŠ€åœºç»Ÿè®¡è¡¨">
+			<column type="widestr" desc="è§’è‰²å"/>
+			<column type="dword"   desc="ç­‰çº§"/>
+			<column type="dword"   desc="èŒä¸š"/>
+			<column type="dword"   desc="å‡»æ€æ•°"/>
+			<column type="dword"   desc="æ­»äº¡æ•°"/>
+			<column type="dword"   desc="ä¼¤å®³é‡"/>
+			<column type="dword"   desc="æ²»ç–—é‡"/>
+			<column type="dword"   desc="å½“å‰çš„ç§¯åˆ†"/>
+			<column type="dword"   desc="æœ¬åœºèŽ·å¾—çš„ç§¯åˆ†"/>
+			<column type="dword"   desc="ç«žæŠ€åœºä¸­çš„é˜µè¥"/>
+			<column type="dword"   desc="é‡‘é’±"/>
+			<column type="dword"   desc="è‹±å‹‡ç‚¹æ•°"/>
+			<column type="dword"   desc="ç»éªŒ"/>
 		</record>
-		<record name="special_teama_rec" cols="14" maxrows="5" save="false" public="false" private="false" desc="¾º¼¼³¡¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="string"  desc="Í·Ïñ"/>
-			<column type="float"   desc="×ø±êX"/>
-			<column type="float"   desc="×ø±êZ"/>
-			<column type="byte"    desc="ÑªÁ¿"/>
-			<column type="byte"    desc="ÄÜÁ¿"/>
+		<record name="special_teama_rec" cols="14" maxrows="5" save="false" public="false" private="false" desc="ç«žæŠ€åœºé˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="string"  desc="å¤´åƒ"/>
+			<column type="float"   desc="åæ ‡X"/>
+			<column type="float"   desc="åæ ‡Z"/>
+			<column type="byte"    desc="è¡€é‡"/>
+			<column type="byte"    desc="èƒ½é‡"/>
 			<column type="string"  desc="Buffers"/>
-      <column type="int64"   desc="ÉÏ´ÎÀëÏßÊ±¼ä"/> 
-  		<column type="byte"    desc="µÈ¼¶"/>
-   		<column type="byte"    desc="Ö°Òµ"/>
-  	  <column type="byte"    desc="×´Ì¬"/>
-  		<column type="byte"    desc="¶ÓÎéÖÐµÄÎ»ÖÃ"/>
-  	  <column type="byte"    desc="¶ÓÎéÖÐµÄÖ°Î»"/>
-			<column type="string"  desc="±ê¼Ç×Ö·û´®"/>  
+      <column type="int64"   desc="ä¸Šæ¬¡ç¦»çº¿æ—¶é—´"/> 
+  		<column type="byte"    desc="ç­‰çº§"/>
+   		<column type="byte"    desc="èŒä¸š"/>
+  	  <column type="byte"    desc="çŠ¶æ€"/>
+  		<column type="byte"    desc="é˜Ÿä¼ä¸­çš„ä½ç½®"/>
+  	  <column type="byte"    desc="é˜Ÿä¼ä¸­çš„èŒä½"/>
+			<column type="string"  desc="æ ‡è®°å­—ç¬¦ä¸²"/>  
 		</record>
-		<record name="special_teamb_rec" cols="14" maxrows="5" save="false" public="false" private="false" desc="¾º¼¼³¡¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="string"  desc="Í·Ïñ"/>
-			<column type="float"   desc="×ø±êX"/>
-			<column type="float"   desc="×ø±êZ"/>
-			<column type="byte"    desc="ÑªÁ¿"/>
-			<column type="byte"    desc="ÄÜÁ¿"/>
+		<record name="special_teamb_rec" cols="14" maxrows="5" save="false" public="false" private="false" desc="ç«žæŠ€åœºé˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="string"  desc="å¤´åƒ"/>
+			<column type="float"   desc="åæ ‡X"/>
+			<column type="float"   desc="åæ ‡Z"/>
+			<column type="byte"    desc="è¡€é‡"/>
+			<column type="byte"    desc="èƒ½é‡"/>
 			<column type="string"  desc="Buffers"/>
-      <column type="int64"   desc="ÉÏ´ÎÀëÏßÊ±¼ä"/> 
-  		<column type="byte"    desc="µÈ¼¶"/>
-   		<column type="byte"    desc="Ö°Òµ"/>
-  		<column type="byte"    desc="×´Ì¬"/>
-  		<column type="byte"    desc="¶ÓÎéÖÐµÄÎ»ÖÃ"/>
-  	  <column type="byte"    desc="¶ÓÎéÖÐµÄÖ°Î»"/>
-			<column type="string"  desc="±ê¼Ç×Ö·û´®"/>  
+      <column type="int64"   desc="ä¸Šæ¬¡ç¦»çº¿æ—¶é—´"/> 
+  		<column type="byte"    desc="ç­‰çº§"/>
+   		<column type="byte"    desc="èŒä¸š"/>
+  		<column type="byte"    desc="çŠ¶æ€"/>
+  		<column type="byte"    desc="é˜Ÿä¼ä¸­çš„ä½ç½®"/>
+  	  <column type="byte"    desc="é˜Ÿä¼ä¸­çš„èŒä½"/>
+			<column type="string"  desc="æ ‡è®°å­—ç¬¦ä¸²"/>  
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

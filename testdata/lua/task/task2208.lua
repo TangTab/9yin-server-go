@@ -1,42 +1,42 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task2208.lua
--- @ ½Å±¾¹¦ÄÜ: ÈÎÎñÄ¬ÈÏÖ´ĞĞ½Å±¾
--- @ ´´½¨Õß:   yinxiang
--- @ ´´½¨ÈÕÆÚ: 2010.5.27
+-- @ è„šæœ¬åç§°: task2208.lua
+-- @ è„šæœ¬åŠŸèƒ½: ä»»åŠ¡é»˜è®¤æ‰§è¡Œè„šæœ¬
+-- @ åˆ›å»ºè€…:   yinxiang
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.5.27
 -----------------------------------------
 
--- Ã¿¸öµ¥¶ÀµÄÈÎÎñ½Å±¾¿ÉÒÔ¸´ÖÆ´ËÄ£°å£¬ĞŞ¸ÄÂß¼­
+-- æ¯ä¸ªå•ç‹¬çš„ä»»åŠ¡è„šæœ¬å¯ä»¥å¤åˆ¶æ­¤æ¨¡æ¿ï¼Œä¿®æ”¹é€»è¾‘
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)     
     return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end
 
---ĞÂÔö½Ó¿Ú£¬ÓÃÓÚ·ÅÆúÈÎÎñÊ±ÌØ¶¨Âß¼­µÄ´¦Àí
+--æ–°å¢æ¥å£ï¼Œç”¨äºæ”¾å¼ƒä»»åŠ¡æ—¶ç‰¹å®šé€»è¾‘çš„å¤„ç†
 function on_task_giveup(self, task_id)
     local lastObject
     local target_config_id = "NpcClone005051"
       
-    --ÅĞ¶ÏplayerÊÇ·ñ°ó¶¨ÁËÕıÔÚÖÎÁÆµÄÄ¿±ênpc
+    --åˆ¤æ–­playeræ˜¯å¦ç»‘å®šäº†æ­£åœ¨æ²»ç–—çš„ç›®æ ‡npc
     if  nx_find_data(self, "ItemTarget") then
         lastObject = nx_query_data(self, "ItemTarget")
     else
@@ -46,25 +46,25 @@ function on_task_giveup(self, task_id)
         return 1
     end
     
-    --ÉèÖÃplayer×´Ì¬ÎªÆÕÍ¨×´Ì¬
+    --è®¾ç½®playerçŠ¶æ€ä¸ºæ™®é€šçŠ¶æ€
     nx_set_property(self, "State", "")
     
-    --ÅĞ¶Ï¸ÃÄ¿±ênpcÊÇ·ñÎªÊÜÉËµÄ´åÃñ
+    --åˆ¤æ–­è¯¥ç›®æ ‡npcæ˜¯å¦ä¸ºå—ä¼¤çš„æ‘æ°‘
     local config_id_now = nx_query_property(lastObject, "ConfigID")
     if config_id_now ~= target_config_id then
          return 0
     end
     
-    --ÅĞ¶Ï¸ÃÄ¿±ênpcÊÇ·ñÕıÔÚ²¥·ÅÌØĞ§
+    --åˆ¤æ–­è¯¥ç›®æ ‡npcæ˜¯å¦æ­£åœ¨æ’­æ”¾ç‰¹æ•ˆ
     if nx_find_data(lastObject, "Effect") then
         local effectname = nx_query_data(lastObject, "Effect")
         nx_custom_destory_effect(lastObject, nx_string(effectname))
         
-        --É¾³ınpcÁÙÊ±Êı¾İ
+        --åˆ é™¤npcä¸´æ—¶æ•°æ®
         nx_remove_data(lastObject, "Effect")
     end
     
-    --É¾³ıplayerÉíÉÏÁÙÊ±Êı¾İ
+    --åˆ é™¤playerèº«ä¸Šä¸´æ—¶æ•°æ®
     if nx_find_data(self, "ItemTarget") then
         nx_remove_data(self, "ItemTarget")
     end

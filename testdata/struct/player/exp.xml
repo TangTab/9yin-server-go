@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÂÃ¹ÝÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ—…é¦†ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PlayerExp" type="int" public="false" private="true" save="true" desc="µ±Ç°¾­ÑéÖµ"/>
-		<property name="PlayerUpgradeExp" type="int" public="false" private="true" save="true" desc="Éý¼¶ÐèÇó¾­ÑéÖµ"/>
+		<property name="PlayerExp" type="int" public="false" private="true" save="true" desc="å½“å‰ç»éªŒå€¼"/>
+		<property name="PlayerUpgradeExp" type="int" public="false" private="true" save="true" desc="å‡çº§éœ€æ±‚ç»éªŒå€¼"/>
 
-		<property name="PlayerExpMulti" type="float" public="false" private="false" save="false" desc="´ò¹Ö»ñµÃ¾­ÑéµÄ±¶ÂÊ"/>
-		<property name="PlayerQuestExpMulti" type="float" public="false" private="false" save="false" desc="ÈÎÎñ»ñµÃ¾­ÑéµÄ±¶ÂÊ"/>
-		<property name="InnatePoint" type="int" public="false" private="false" save="false" desc="µ±Ç°Ìì¸³µã"/>
-		<property name="AllInnatePoint" type="int" public="false" private="false" save="false" desc="»ñµÃ×ÜÌì¸³µã"/>
+		<property name="PlayerExpMulti" type="float" public="false" private="false" save="false" desc="æ‰“æ€ªèŽ·å¾—ç»éªŒçš„å€çŽ‡"/>
+		<property name="PlayerQuestExpMulti" type="float" public="false" private="false" save="false" desc="ä»»åŠ¡èŽ·å¾—ç»éªŒçš„å€çŽ‡"/>
+		<property name="InnatePoint" type="int" public="false" private="false" save="false" desc="å½“å‰å¤©èµ‹ç‚¹"/>
+		<property name="AllInnatePoint" type="int" public="false" private="false" save="false" desc="èŽ·å¾—æ€»å¤©èµ‹ç‚¹"/>
 	</properties>
 	<records>
 	</records>

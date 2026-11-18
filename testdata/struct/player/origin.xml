@@ -1,42 +1,42 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎï¾ç±¾Ïà¹ØÊôÐÔ¶¨Òå-->
+<!--äººç‰©å‰§æœ¬ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 		<property name="ShowOrigin" type="int" public="true" private="true" save="true" desc=""/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<!-- Éí·Ý¼¤»î¼ÇÂ¼±í£¬°´Î»²Ù×÷ -->
-		<record name="Origin_Active" cols="1" maxrows="64" save="true" public="false" private="true" desc="¼¤»îÉí·Ý±í">
-			<column type="dword" desc="Éí·Ý±àºÅÎ»¼¯"/>
+		<!-- èº«ä»½æ¿€æ´»è®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="Origin_Active" cols="1" maxrows="64" save="true" public="false" private="true" desc="æ¿€æ´»èº«ä»½è¡¨">
+			<column type="dword" desc="èº«ä»½ç¼–å·ä½é›†"/>
 		</record>
 
-		<!-- »ñÈ¡Éí·ÝÌáÊ¾±í£¬°´Î»²Ù×÷ -->
-		<record name="Origin_Notify" cols="1" maxrows="64" save="true" public="false" private="true" desc="Éí·Ý»ñµÃÌáÊ¾±í">
-			<column type="dword" desc="Éí·Ý±àºÅÎ»¼¯"/>
+		<!-- èŽ·å–èº«ä»½æç¤ºè¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="Origin_Notify" cols="1" maxrows="64" save="true" public="false" private="true" desc="èº«ä»½èŽ·å¾—æç¤ºè¡¨">
+			<column type="dword" desc="èº«ä»½ç¼–å·ä½é›†"/>
 		</record>
 
-		<!-- Éí·Ý»ñµÃ¼ÇÂ¼±í£¬°´Î»²Ù×÷ -->
-		<record name="Origin_Completed" cols="1" maxrows="64" save="true" public="false" private="true" desc="»ñµÃÉí·Ý±í">
-			<column type="dword" desc="Éí·Ý±àºÅÎ»¼¯"/>
+		<!-- èº«ä»½èŽ·å¾—è®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="Origin_Completed" cols="1" maxrows="64" save="true" public="false" private="true" desc="èŽ·å¾—èº«ä»½è¡¨">
+			<column type="dword" desc="èº«ä»½ç¼–å·ä½é›†"/>
 		</record>
 
-		<!-- ½±Àø»ñµÃ¼ÇÂ¼±í£¬°´Î»²Ù×÷ -->
-		<record name="Origin_Prized" cols="1" maxrows="64" save="true" public="false" private="true" desc="½±Àø»ñµÃ±í">
-			<column type="dword" desc="Éí·Ý±àºÅÎ»¼¯"/>
+		<!-- å¥–åŠ±èŽ·å¾—è®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="Origin_Prized" cols="1" maxrows="64" save="true" public="false" private="true" desc="å¥–åŠ±èŽ·å¾—è¡¨">
+			<column type="dword" desc="èº«ä»½ç¼–å·ä½é›†"/>
 		</record>
 
-		<!-- Éí·Ý½ø¶È±í -->
-		<record name="Origin_Record" cols="7" maxrows="256" save="true" public="false" private="true" desc="Éí·Ý½ø¶È±í">
-			<column type="dword" desc="Éí·Ý±àºÅ"/>
-			<column type="byte" desc="½ø¶ÈÀàÐÍ"/>
-			<column type="string" desc="±êÊ¶"/>
-			<column type="byte" desc="µ±Ç°ÊýÁ¿"/>
-			<column type="byte" desc="ÐèÇóÊýÁ¿"/>
-			<column type="byte" desc="½ø¶ÈÈÝÆ÷ÏÂ±ê"/>
-			<column type="string" desc="ÎÄ×ÖÃèÊö"/>
+		<!-- èº«ä»½è¿›åº¦è¡¨ -->
+		<record name="Origin_Record" cols="7" maxrows="256" save="true" public="false" private="true" desc="èº«ä»½è¿›åº¦è¡¨">
+			<column type="dword" desc="èº«ä»½ç¼–å·"/>
+			<column type="byte" desc="è¿›åº¦ç±»åž‹"/>
+			<column type="string" desc="æ ‡è¯†"/>
+			<column type="byte" desc="å½“å‰æ•°é‡"/>
+			<column type="byte" desc="éœ€æ±‚æ•°é‡"/>
+			<column type="byte" desc="è¿›åº¦å®¹å™¨ä¸‹æ ‡"/>
+			<column type="string" desc="æ–‡å­—æè¿°"/>
 		</record>
 	</records>
 </object>

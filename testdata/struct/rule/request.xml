@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÇëÇóÍæ¼Ò½ÇÉ«¹²ÓÃ)-->
+<!--è¯·æ±‚çŽ©å®¶è§’è‰²å…±ç”¨)-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="RequestSet" type="int" public="false" private="true" save="true" desc="ÇëÇóÊý¾Ý"/>
+		<property name="RequestSet" type="int" public="false" private="true" save="true" desc="è¯·æ±‚æ•°æ®"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

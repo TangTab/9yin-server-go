@@ -1,45 +1,45 @@
---»úÆ÷ÈËÖ÷¿Ø½Å±¾
+--æœºå™¨äººä¸»æ§è„šæœ¬
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(robot)
 	nx_set_value("robot", robot)
 
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	robot:SetConsoleColor("White")
 
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	--ini.FileName = "game_robot.ini"
 	ini.FileName = nx_main_config()
 
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
 		nx_msgbox("can't read config file!")
 		nx_destroy(ini)
 		return 0
 	end
 
-	--×î´óÁ¬½ÓÊı
+	--æœ€å¤§è¿æ¥æ•°
 	local max_player = ini:ReadInteger("Main", "MaxPlayer", 1024)
-	--²¢·¢Á¬½ÓÈËÊı
+	--å¹¶å‘è¿æ¥äººæ•°
 	local connect_concurrent = ini:ReadInteger("Main", "ConnectConcurrent", 10)
-	--Ã¿ÃëÁ¬½ÓÈËÊı
+	--æ¯ç§’è¿æ¥äººæ•°
 	local connect_speed = ini:ReadInteger("Main", "ConnectSpeed", 50)
-	--Í¨Ñ¶¼ÓÃÜ¼ü
+	--é€šè®¯åŠ å¯†é”®
 	local msg_encode_key = ini:ReadString("Main", "MessageEncodeKey", "")
-	--½øÈëÓÎÏ·ºó¶àÉÙÃëÖÓÒÆ¶¯Ò»´Î
+	--è¿›å…¥æ¸¸æˆåå¤šå°‘ç§’é’Ÿç§»åŠ¨ä¸€æ¬¡
 	local move_seconds = ini:ReadInteger("Main", "MoveSeconds", 5)
-	--ÕÊºÅºÍÃÜÂëÇ°×º
+	--å¸å·å’Œå¯†ç å‰ç¼€
 	local account_prefix = ini:ReadString("Main", "AccountPrefix", "robot")
 	local password_prefix = ini:ReadString("Main", "PasswordPrefix", "robot")
 
-	--ÍâÍøµØÖ·
+	--å¤–ç½‘åœ°å€
 	local outer_addr = ini:ReadString("Outer", "Addr", "127.0.0.1")
 	local outer_port = ini:ReadInteger("Outer", "Port", 2001)
 
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15009
 
@@ -48,7 +48,7 @@ function main(robot)
 
 	nx_destroy(ini)
 
-	--°ó¶¨½Å±¾
+	--ç»‘å®šè„šæœ¬
 	nx_bind_script(robot, "main", "echo_init")
 
 	robot.MaxConnects = max_player
@@ -62,36 +62,36 @@ function main(robot)
 	robot.EchoAddr = echo_addr
 	robot.EchoPort = echo_port
 
-	--Æô¶¯½ÓÈë·şÎñ
+	--å¯åŠ¨æ¥å…¥æœåŠ¡
 	robot:Start()
 
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	robot:WriteLine("echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	robot:WriteLine("outer socket " .. outer_addr .. ":" .. nx_string(outer_port))
 
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	robot:WriteLine("game robot started")
 
 	return 1
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local robot = nx_value("robot")
 
-	--¹Ø±Õ»úÆ÷ÈË
+	--å…³é—­æœºå™¨äºº
 	robot:WriteLine("game robot shutdown...")
 	robot:Stop()
 
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 
 	return true
 end
 
---Î¬»¤Á¬½Ó½Å±¾
+--ç»´æŠ¤è¿æ¥è„šæœ¬
 
---³õÊ¼»¯
+--åˆå§‹åŒ–
 function echo_init(self)
 	nx_callback(self, "on_open", "echo_open")
 	nx_callback(self, "on_close", "echo_close")
@@ -112,7 +112,7 @@ function echo_init(self)
 	return 1
 end
 
---Î¬»¤Á¬½Ó´ò¿ª
+--ç»´æŠ¤è¿æ¥æ‰“å¼€
 function echo_open(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " connected")
@@ -121,21 +121,21 @@ function echo_open(self, addr, port)
 	return 1
 end
 
---Î¬»¤Á¬½Ó¹Ø±Õ
+--ç»´æŠ¤è¿æ¥å…³é—­
 function echo_close(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " closed")
 	return 1
 end
 
---´¦ÀíÎ¬»¤ÊäÈëÃüÁî
+--å¤„ç†ç»´æŠ¤è¾“å…¥å‘½ä»¤
 function echo_input(self, command)
 	if command == "quit" then
-		--ÍË³ö³ÌĞò
+		--é€€å‡ºç¨‹åº
 		echo_response(self, "server will shutdown...")
 		close()
 	elseif command == "end" then
-		--¹Ø±ÕÁ¬½Ó
+		--å…³é—­è¿æ¥
 		self:CloseEcho()
 	else
 		echo_response(self, "undefined command: " .. command)
@@ -144,14 +144,14 @@ function echo_input(self, command)
 	return 1
 end
 
---·¢ËÍ»ØÓ¦ĞÅÏ¢
+--å‘é€å›åº”ä¿¡æ¯
 function echo_response(self, info)
 	self:SendEchoLine(">" .. info .. "\r")
 	self:WriteLine(info)
 	return true
 end
 
---²éÕÒÊµÌå
+--æŸ¥æ‰¾å®ä½“
 function get_entity(entity_name)
 	local id = nx_value(entity_name)
 
@@ -174,7 +174,7 @@ function get_entity(entity_name)
 	return nil
 end
 
---×ª»»µ½ºÏÊÊµÄÀàĞÍ
+--è½¬æ¢åˆ°åˆé€‚çš„ç±»å‹
 function get_new_value(old_v, value)
 	local type = nx_type(old_v)
 
@@ -201,7 +201,7 @@ function get_new_value(old_v, value)
 	return nil
 end
 
---²éÑ¯ÊµÌåÄÚ²¿ÊôĞÔ
+--æŸ¥è¯¢å®ä½“å†…éƒ¨å±æ€§
 function echo_input_getp(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -221,7 +221,7 @@ function echo_input_getp(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌåÄÚ²¿ÊôĞÔ
+--è®¾ç½®å®ä½“å†…éƒ¨å±æ€§
 function echo_input_setp(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -250,7 +250,7 @@ function echo_input_setp(self, entity, prop, value)
 	return 1
 end
 
---²éÑ¯ÊµÌå×Ô¶¨ÒåÊôĞÔ
+--æŸ¥è¯¢å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_getc(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -270,7 +270,7 @@ function echo_input_getc(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌå×Ô¶¨ÒåÊôĞÔ
+--è®¾ç½®å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_setc(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -299,7 +299,7 @@ function echo_input_setc(self, entity, prop, value)
 	return 1
 end
 
---Ö´ĞĞÊµÌå·½·¨
+--æ‰§è¡Œå®ä½“æ–¹æ³•
 function echo_input_method(self, entity, method, ...)
 	if entity == nil or method == nil then
 		return 0
@@ -328,7 +328,7 @@ function echo_input_method(self, entity, method, ...)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞÄÚ²¿ÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰å†…éƒ¨å±æ€§
 function echo_input_listp(self, entity)
 	if entity == nil then
 		return 0
@@ -353,7 +353,7 @@ function echo_input_listp(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ×Ô¶¨ÒåÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰è‡ªå®šä¹‰å±æ€§
 function echo_input_listc(self, entity)
 	if entity == nil then
 		return 0
@@ -378,7 +378,7 @@ function echo_input_listc(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ·½·¨
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰æ–¹æ³•
 function echo_input_listm(self, entity)
 	if entity == nil then
 		return 0
@@ -403,7 +403,7 @@ function echo_input_listm(self, entity)
 	return 1
 end
 
---ÁĞ³öËùÓĞÈ«¾Ö±äÁ¿
+--åˆ—å‡ºæ‰€æœ‰å…¨å±€å˜é‡
 function echo_input_listg(self)
 	local global_table = nx_value_list()
 
@@ -421,7 +421,7 @@ function echo_input_listg(self)
 	return 1
 end
 
---Ö´ĞĞ½Å±¾À©Õ¹º¯Êı
+--æ‰§è¡Œè„šæœ¬æ‰©å±•å‡½æ•°
 function echo_input_function(self, func, ...)
 	if func == nil or func == "" then
 		return 0
@@ -441,7 +441,7 @@ function echo_input_function(self, func, ...)
 
 	return 1
 end
---µ÷ÊÔº¯Êı
+--è°ƒè¯•å‡½æ•°
 function echo_input_debugger(self, entity, method, ...)
 	if entity == nil or entity == "" or method == nil or method == "" then
 		return 0

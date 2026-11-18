@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="PropRefreshCompute" cols="7" maxrows="128" save="false" public="false" private="true" desc="ÊôÐÔÓ°Ïì±í">
-			<column type="string" desc="ÊôÐÔÃû"/>
-			<column type="byte" 	desc="ÊôÐÔÃûË÷ÒýÖµ"/>
-			<column type="double" desc="Í¨¹ý³õÊ¼ÉèÖÃ×ª»»À´Ô´¼Ó³ÉµÄÊýÖµ"/>
-			<column type="double" desc="Í¨¹ý»ù±¾ÊôÐÔ×ª»»À´Ô´¼Ó³ÉµÄÊýÖµ"/>
-			<column type="double" desc="Í¨¹ý¸½¼ÓÊôÐÔ×ª»»À´Ô´¼Ó³ÉµÄÊýÖµ"/>
-			<column type="double" desc="Í¨¹ý×°±¸×ª»»À´Ô´¼Ó³ÉµÄÊýÖµ"/>
-			<column type="double" desc="Í¨¹ýÔöÒæ×ª»»À´Ô´¼Ó³ÉµÄÊýÖµ"/>
+		<record name="PropRefreshCompute" cols="7" maxrows="128" save="false" public="false" private="true" desc="å±žæ€§å½±å“è¡¨">
+			<column type="string" desc="å±žæ€§å"/>
+			<column type="byte" 	desc="å±žæ€§åç´¢å¼•å€¼"/>
+			<column type="double" desc="é€šè¿‡åˆå§‹è®¾ç½®è½¬æ¢æ¥æºåŠ æˆçš„æ•°å€¼"/>
+			<column type="double" desc="é€šè¿‡åŸºæœ¬å±žæ€§è½¬æ¢æ¥æºåŠ æˆçš„æ•°å€¼"/>
+			<column type="double" desc="é€šè¿‡é™„åŠ å±žæ€§è½¬æ¢æ¥æºåŠ æˆçš„æ•°å€¼"/>
+			<column type="double" desc="é€šè¿‡è£…å¤‡è½¬æ¢æ¥æºåŠ æˆçš„æ•°å€¼"/>
+			<column type="double" desc="é€šè¿‡å¢žç›Šè½¬æ¢æ¥æºåŠ æˆçš„æ•°å€¼"/>
 		</record>
 	</records>
 </object>

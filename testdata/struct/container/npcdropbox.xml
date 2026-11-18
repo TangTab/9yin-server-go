@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈÝÆ÷¸½¼ÓÀ¸ÈÝÆ÷µÄÊôÐÔ¶¨Òå-->
+<!--å®¹å™¨é™„åŠ æ å®¹å™¨çš„å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
-		<!-- Ð¡°ü¹üµÄ¼¶±ðÈÝÁ¿¶¨Òå -->
-		<record name="QuestDropRecord" cols="2" maxrows="50" save="false" public="false" private="false" desc="ÎïÆ·µôÂä°ü">
+		<!-- å°åŒ…è£¹çš„çº§åˆ«å®¹é‡å®šä¹‰ -->
+		<record name="QuestDropRecord" cols="2" maxrows="50" save="false" public="false" private="false" desc="ç‰©å“æŽ‰è½åŒ…">
 			<column type="widestr" desc=""/>
 			<column type="string" desc=""/>
 		</record>
-		<record name="PVPTaskDropBoxRecord" cols="2" maxrows="50" save="false" public="false" private="false" desc="ÎïÆ·µôÂä°ü">
+		<record name="PVPTaskDropBoxRecord" cols="2" maxrows="50" save="false" public="false" private="false" desc="ç‰©å“æŽ‰è½åŒ…">
 			<column type="widestr" desc=""/>
 			<column type="string" desc=""/>
 		</record>

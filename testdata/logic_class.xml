@@ -1,122 +1,122 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--·þÎñÆ÷Âß¼­¶ÔÏóÀàÐÍ¶¨Òå-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æœåŠ¡å™¨é€»è¾‘å¯¹è±¡ç±»åž‹å®šä¹‰-->
 <logicclass>
-    <class id="player" type="TYPE_PLAYER" desc="½ÇÉ«µÄ»ùÀà£¬·þÎñÆ÷Ä¬ÈÏÀàÐÍ">
-        <class id="role" desc="½ÇÉ«´´½¨Ê±£¬ÏµÍ³ÄÚ²¿µ÷ÓÃµÄ¶ÔÏó¶¨Òå£¬·þÎñÆ÷Ä¬ÈÏÀàÐÍ"/>
+    <class id="player" type="TYPE_PLAYER" desc="è§’è‰²çš„åŸºç±»ï¼ŒæœåŠ¡å™¨é»˜è®¤ç±»åž‹">
+        <class id="role" desc="è§’è‰²åˆ›å»ºæ—¶ï¼Œç³»ç»Ÿå†…éƒ¨è°ƒç”¨çš„å¯¹è±¡å®šä¹‰ï¼ŒæœåŠ¡å™¨é»˜è®¤ç±»åž‹"/>
     </class>
-    <class id="scene" type="TYPE_SCENE" desc="³¡¾°µÄ»ùÀà£¬·þÎñÆ÷Ä¬ÈÏÀàÐÍ">
-        <class id="NormalScene" desc="ÆÕÍ¨³¡¾°"/>
-        <class id="CloneScene" desc="¸±±¾³¡¾°"/>
-        <class id="BattleWarScene" desc="Õ½³¡³¡¾°"/>
-        <class id="ArenaScene" desc="¾º¼¼³¡³¡¾°"/>
-        <class id="EWScene" desc="ÄÜÁ¿¾®Õ½³¡³¡¾°"/>
-		<class id="PVPTaskScene" desc="PVPÃ°ÏÕÕ½³¡³¡¾°"/>
+    <class id="scene" type="TYPE_SCENE" desc="åœºæ™¯çš„åŸºç±»ï¼ŒæœåŠ¡å™¨é»˜è®¤ç±»åž‹">
+        <class id="NormalScene" desc="æ™®é€šåœºæ™¯"/>
+        <class id="CloneScene" desc="å‰¯æœ¬åœºæ™¯"/>
+        <class id="BattleWarScene" desc="æˆ˜åœºåœºæ™¯"/>
+        <class id="ArenaScene" desc="ç«žæŠ€åœºåœºæ™¯"/>
+        <class id="EWScene" desc="èƒ½é‡äº•æˆ˜åœºåœºæ™¯"/>
+		<class id="PVPTaskScene" desc="PVPå†’é™©æˆ˜åœºåœºæ™¯"/>
     </class>
-    <class id="npc" type="TYPE_NPC" desc="npc»ùÀà">
-        <class id="HiddenNpc" desc="ÒþÐÎnpc">
-            <class id="AreaNpc" desc="ÇøÓònpc"/>
-            <class id="FormationNpc" desc="ÕóÐÍnpc"/>
+    <class id="npc" type="TYPE_NPC" desc="npcåŸºç±»">
+        <class id="HiddenNpc" desc="éšå½¢npc">
+            <class id="AreaNpc" desc="åŒºåŸŸnpc"/>
+            <class id="FormationNpc" desc="é˜µåž‹npc"/>
         </class>
-        <class id="VisibleNpc" desc="¿ÉÊÓnpc">
-            <class id="AttackNpc" desc="Õ½¶·npc">
-                <class id="CommonNpc" desc="ÆÕÍ¨Õ½¶·npc"/>
-                <class id="ConvoyNpc" desc="»¤ËÍnpc"/>
-                <class id="SummonNpc" desc="ÕÙ»½npc"/>
+        <class id="VisibleNpc" desc="å¯è§†npc">
+            <class id="AttackNpc" desc="æˆ˜æ–—npc">
+                <class id="CommonNpc" desc="æ™®é€šæˆ˜æ–—npc"/>
+                <class id="ConvoyNpc" desc="æŠ¤é€npc"/>
+                <class id="SummonNpc" desc="å¬å”¤npc"/>
             </class>
-            <class id="FunctionNpc" desc="¹¦ÄÜnpc">
-                <class id="BannerNpc" desc="ÆìÖÄnpc"/>
-                <class id="FlyNpc" desc="·ÉÐÐnpc">
-                    <class id="CastleNpc" desc="³Ç±¤npc"/>
+            <class id="FunctionNpc" desc="åŠŸèƒ½npc">
+                <class id="BannerNpc" desc="æ——å¸œnpc"/>
+                <class id="FlyNpc" desc="é£žè¡Œnpc">
+                    <class id="CastleNpc" desc="åŸŽå ¡npc"/>
                 </class>
-                <class id="GivingNpc" desc="¸øÓènpc"/>
-                <class id="MultiSkillNpc" desc="¶àÈË¼¼ÄÜnpc"/>
-                <class id="OrganNpc" desc="»ú¹Ønpc"/>
-                <class id="SkillEffectNpc" desc="¼¼ÄÜÊ¹ÓÃµÄÌØÊâNPC"/>
-                <class id="SwitchDoor" desc="´«ËÍÃÅ"/>
-                <class id="SkillNpc" desc="ÊÍ·Å¼¼ÄÜµÄNPC"/>
-                <class id="TechnologyNpc" desc="¿Æ¼¼npc"/>
+                <class id="GivingNpc" desc="ç»™äºˆnpc"/>
+                <class id="MultiSkillNpc" desc="å¤šäººæŠ€èƒ½npc"/>
+                <class id="OrganNpc" desc="æœºå…³npc"/>
+                <class id="SkillEffectNpc" desc="æŠ€èƒ½ä½¿ç”¨çš„ç‰¹æ®ŠNPC"/>
+                <class id="SwitchDoor" desc="ä¼ é€é—¨"/>
+                <class id="SkillNpc" desc="é‡Šæ”¾æŠ€èƒ½çš„NPC"/>
+                <class id="TechnologyNpc" desc="ç§‘æŠ€npc"/>
             </class>
-			      <class id="BattleCarrier" desc="Õ½¶·ÔØ¾ß"/>
-            <class id="Pet" desc="³èÎï"/>
+			      <class id="BattleCarrier" desc="æˆ˜æ–—è½½å…·"/>
+            <class id="Pet" desc="å® ç‰©"/>
         </class>
     </class>
-    <class id="item" type="TYPE_ITEM" desc="ËùÓÐÎïÆ·µÄ»ùÀà">
-        <class id="Equipment" desc="¿É×°±¸ÎïÆ·">
-            <class id="EnergyShield" desc="ÄÜÁ¿¶Ü"/>
+    <class id="item" type="TYPE_ITEM" desc="æ‰€æœ‰ç‰©å“çš„åŸºç±»">
+        <class id="Equipment" desc="å¯è£…å¤‡ç‰©å“">
+            <class id="EnergyShield" desc="èƒ½é‡ç›¾"/>
         </class>
-        <class id="ArmorItem" desc="×°¼×²¿¼þ"/>
-        <class id="Enchase" desc="ÏâÇ¶ÎïÆ·"/>
-        <class id="Material" desc="²ÄÁÏ"/>
-        <class id="BlackGold" desc="ºÚ½ð"/>
-        <class id="Bag" desc="Ð¡±³°ü"/>
-        <class id="ToolItem" desc="µÀ¾ßÎïÆ·">
-            <class id="TransItem" desc="´«ËÍÀàITEM"/>
-						<class id="CarrierItem" desc="ÔØ¾ßÀàITEM"/>
-            <class id="EnergyTin" desc="ÄÜÁ¿¹Þ"/>
-            <class id="Expill" desc="¾­Ñéµ¤"/>
-            <class id="VipItem" desc="VIPµÀ¾ß"/>
-						<class id="TreasureItem" desc="²Ø±¦Í¼µÀ¾ß"/>
-						<class id="EnergyItem" desc="³äÄÜÀà"/>
+        <class id="ArmorItem" desc="è£…ç”²éƒ¨ä»¶"/>
+        <class id="Enchase" desc="é•¶åµŒç‰©å“"/>
+        <class id="Material" desc="ææ–™"/>
+        <class id="BlackGold" desc="é»‘é‡‘"/>
+        <class id="Bag" desc="å°èƒŒåŒ…"/>
+        <class id="ToolItem" desc="é“å…·ç‰©å“">
+            <class id="TransItem" desc="ä¼ é€ç±»ITEM"/>
+						<class id="CarrierItem" desc="è½½å…·ç±»ITEM"/>
+            <class id="EnergyTin" desc="èƒ½é‡ç½"/>
+            <class id="Expill" desc="ç»éªŒä¸¹"/>
+            <class id="VipItem" desc="VIPé“å…·"/>
+						<class id="TreasureItem" desc="è—å®å›¾é“å…·"/>
+						<class id="EnergyItem" desc="å……èƒ½ç±»"/>
         </class>
-        <class id="PetMount" desc="³èÎïÎïÆ·"/>
-        <class id="DropMoneyItem" desc="µôÂäÖÐµÄ½ðÇ®ÏÔÊ¾ÎïÆ·"/>
-        <class id="Rune" desc="·ûÎÄÎïÆ·"/>
-        <class id="Fashion" desc="Ê±×°"/>
+        <class id="PetMount" desc="å® ç‰©ç‰©å“"/>
+        <class id="DropMoneyItem" desc="æŽ‰è½ä¸­çš„é‡‘é’±æ˜¾ç¤ºç‰©å“"/>
+        <class id="Rune" desc="ç¬¦æ–‡ç‰©å“"/>
+        <class id="Fashion" desc="æ—¶è£…"/>
     </class>
-    <class id="container" type="TYPE_ITEM" desc="ËùÓÐÍæ¼Ò¿É²Ù×÷ÈÝÆ÷µÄ»ùÀà">
-        <class id="AddContainer" desc="¸½¼ÓÓÚ»ù´¡ÈÝÆ÷µÄÀ¸Î»£¬´Ë¸½¼ÓµÄÈÝÆ÷°üº¬n¸öBagµÀ¾ß£¬Ã¿¸öBagµÀ¾ß¿É¼¤»î»ù´¡ÈÝÁ¿Ö®ÍâµÄÒ»Ð©ÈÝÁ¿">
-            <class id="AddToolBox" desc="±³°üµÄ¸½¼ÓÀ¸Î»"/>
-            <class id="AddDepotBox" desc="²Ö¿âµÄ¸½¼ÓÀ¸Î»"/>
+    <class id="container" type="TYPE_ITEM" desc="æ‰€æœ‰çŽ©å®¶å¯æ“ä½œå®¹å™¨çš„åŸºç±»">
+        <class id="AddContainer" desc="é™„åŠ äºŽåŸºç¡€å®¹å™¨çš„æ ä½ï¼Œæ­¤é™„åŠ çš„å®¹å™¨åŒ…å«nä¸ªBagé“å…·ï¼Œæ¯ä¸ªBagé“å…·å¯æ¿€æ´»åŸºç¡€å®¹é‡ä¹‹å¤–çš„ä¸€äº›å®¹é‡">
+            <class id="AddToolBox" desc="èƒŒåŒ…çš„é™„åŠ æ ä½"/>
+            <class id="AddDepotBox" desc="ä»“åº“çš„é™„åŠ æ ä½"/>
         </class>
-        <class id="ToolBox" desc="±³°ü"/>
-        <class id="DepotBox" desc="²Ö¿â"/>
-        <class id="EquipBox" desc="×°±¸À¸"/>
-        <class id="FashionBox" desc="Ê±×°À¸"/>
-        <class id="ArmorBox" desc="×°¼×²¿¼þÀ¸"/>
-        <class id="MountBox" desc="×°±¸µ±Ç°¿É³ËÆïµÄ×øÆïµÄ×°±¸À¸"/>
-        <class id="MountPetBox" desc="×°±¸µ±Ç°¿ÉÕÙ»½³èÎïµÄ×°±¸À¸"/>
-        <class id="MountPetWildBox" desc="×°±¸µ±Ç°×¨¾«µÄ×°±¸À¸"/>
-        <class id="RecvPostBox" desc="ÊÕÓÊ¼þÈÝÆ÷"/>
-        <class id="ReclaimBox" desc="ÊÛ³öÎïÆ·»Ø¹ºÈÝÆ÷"/>
-        <class id="InscriptionBox" desc="Ãú¿ÌÈÝÆ÷"/>
-        <class id="EnhanceBox" desc="¼¼ÄÜ×¨¾«ÈÝÆ÷"/>
-        <class id="BlackGoldBox" desc="ºÚ½ðÄÜÁ¿ÈÝÆ÷"/>
-        <class id="BladeRunnerBox" desc="µ¶·æÕ½Ê¿ÎüÊÕµÄÎäÆ÷Ö®ÁéÈÝÆ÷"/>
-        <class id="PetStarSkillBox" desc="³èÎïÐÇ¼¶¼¼ÄÜÈÝÆ÷"/>
-        <class id="PetStarOrcSoulBox" desc="³èÎïÊÞ»ê×éºÏÈÝÆ÷"/>
-        <class id="PetStarOrcSoulSeclectBox" desc="³èÎïÊÞ»êÑ¡ÔñÈÝÆ÷"/>
-        <class id="PetStarStrengthenItemBox" desc="³èÎïÐÇ¼¶¼¼ÄÜÄ§»¯ºóÎïÆ·"/>
-        <class id="PetStarStrengthenBuffBox" desc="³èÎïÄ§»¯ºóBUFF"/>
-        <class id="HortationItemBox" desc="ÊÞ»ê×¨¾«½±Æ·ÈÝÆ÷"/>
-        <class id="AHTestBox" desc="ÅÄÂôÐÐ²âÊÔÓÃÈÝÆ÷"/>
-        <class id="GulidStorage" desc="¹«»á²Ö¿â"/>
-        <class id="CopyToolBox" desc="±³°üµÄ¸±±¾"/>
-        <class id="NpcDropBox" desc="NPCµôÂä°ü"/>
-        <class id="WebExBox" desc="ÏßÏÂ½»Ò×"/>
+        <class id="ToolBox" desc="èƒŒåŒ…"/>
+        <class id="DepotBox" desc="ä»“åº“"/>
+        <class id="EquipBox" desc="è£…å¤‡æ "/>
+        <class id="FashionBox" desc="æ—¶è£…æ "/>
+        <class id="ArmorBox" desc="è£…ç”²éƒ¨ä»¶æ "/>
+        <class id="MountBox" desc="è£…å¤‡å½“å‰å¯ä¹˜éª‘çš„åéª‘çš„è£…å¤‡æ "/>
+        <class id="MountPetBox" desc="è£…å¤‡å½“å‰å¯å¬å”¤å® ç‰©çš„è£…å¤‡æ "/>
+        <class id="MountPetWildBox" desc="è£…å¤‡å½“å‰ä¸“ç²¾çš„è£…å¤‡æ "/>
+        <class id="RecvPostBox" desc="æ”¶é‚®ä»¶å®¹å™¨"/>
+        <class id="ReclaimBox" desc="å”®å‡ºç‰©å“å›žè´­å®¹å™¨"/>
+        <class id="InscriptionBox" desc="é“­åˆ»å®¹å™¨"/>
+        <class id="EnhanceBox" desc="æŠ€èƒ½ä¸“ç²¾å®¹å™¨"/>
+        <class id="BlackGoldBox" desc="é»‘é‡‘èƒ½é‡å®¹å™¨"/>
+        <class id="BladeRunnerBox" desc="åˆ€é”‹æˆ˜å£«å¸æ”¶çš„æ­¦å™¨ä¹‹çµå®¹å™¨"/>
+        <class id="PetStarSkillBox" desc="å® ç‰©æ˜Ÿçº§æŠ€èƒ½å®¹å™¨"/>
+        <class id="PetStarOrcSoulBox" desc="å® ç‰©å…½é­‚ç»„åˆå®¹å™¨"/>
+        <class id="PetStarOrcSoulSeclectBox" desc="å® ç‰©å…½é­‚é€‰æ‹©å®¹å™¨"/>
+        <class id="PetStarStrengthenItemBox" desc="å® ç‰©æ˜Ÿçº§æŠ€èƒ½é­”åŒ–åŽç‰©å“"/>
+        <class id="PetStarStrengthenBuffBox" desc="å® ç‰©é­”åŒ–åŽBUFF"/>
+        <class id="HortationItemBox" desc="å…½é­‚ä¸“ç²¾å¥–å“å®¹å™¨"/>
+        <class id="AHTestBox" desc="æ‹å–è¡Œæµ‹è¯•ç”¨å®¹å™¨"/>
+        <class id="GulidStorage" desc="å…¬ä¼šä»“åº“"/>
+        <class id="CopyToolBox" desc="èƒŒåŒ…çš„å‰¯æœ¬"/>
+        <class id="NpcDropBox" desc="NPCæŽ‰è½åŒ…"/>
+        <class id="WebExBox" desc="çº¿ä¸‹äº¤æ˜“"/>
     </class>
-    <class id="fixcontainer" type="TYPE_ITEM" desc="ËùÓÐÍæ¼Ò²»¿É²Ù×÷µÄÈÝÆ÷µÄ»ùÀà">
+    <class id="fixcontainer" type="TYPE_ITEM" desc="æ‰€æœ‰çŽ©å®¶ä¸å¯æ“ä½œçš„å®¹å™¨çš„åŸºç±»">
         <class id="SkillContainer" desc="SkillContainer"/>
         <class id="TempSkillContainer" desc="SkillContainer"/>
         <class id="ItemSkillBox" desc="SkillContainer"/>
         <class id="BufferContainer" desc="BufferContainer"/>
-        <class id="ShopBox" desc="Ò»°ãÉÌµêµÄÈÝÆ÷"/>
+        <class id="ShopBox" desc="ä¸€èˆ¬å•†åº—çš„å®¹å™¨"/>
     </class>
-    <class id="Skill" type="TYPE_ITEM" desc="¼¼ÄÜ">
-        <class id="SkillNormal" desc="ÆÕÍ¨¼¼ÄÜ"/>
-        <class id="SkillLock" desc="Ëø¶¨¼¼ÄÜ"/>
+    <class id="Skill" type="TYPE_ITEM" desc="æŠ€èƒ½">
+        <class id="SkillNormal" desc="æ™®é€šæŠ€èƒ½"/>
+        <class id="SkillLock" desc="é”å®šæŠ€èƒ½"/>
     </class>
     <class id="Buffer" type="TYPE_ITEM" desc="Buffer"/>
-    <class id="basicweakbox" type="TYPE_WEAKBOX" desc="Èõ¹ØÁªÈÝÆ÷µÄ»ùÀà">
-        <class id="ExchangeBox" desc="Íæ¼Ò½»Ò×À¸"/>
-        <class id="ProcessBox" desc="Íæ¼Ò¼Ó¹¤À¸ Ö»ÓÐÒ»¸öÎïÆ·"/>
-        <class id="SendPostBox" desc="·¢ÓÊ¼þÈÝÆ÷"/>
-        <class id="SendDealPostBox" desc="ÓÊÏä·¢ËÍÖÁ½»Ò×ÐÐÈÝÆ÷"/>
-        <class id="SendBankPostBox" desc="ÓÊÏä·¢ËÍÖÁÒøÐÐÈÝÆ÷"/>
-        <class id="CompoundItemBox" desc="ÎïÆ·ºÏ³ÉÈÝÆ÷"/>
-        <class id="UsingItemSkill" desc="Ê¹ÓÃITEMÁÙÊ±¼¼ÄÜËø¶¨"/>
-        <class id="JewelCompoundBox" desc="±¦Ê¯ºÏ³ÉÈÝÆ÷"/>
-        <class id="AsktobuySellBox" desc="Çó¹ºÐÐ³öÊÛÈÝÆ÷"/>
-        <class id="AsktobuyFastSellBox" desc="Çó¹ºÐÐ¿ì½Ý³öÊÛÈÝÆ÷"/>
+    <class id="basicweakbox" type="TYPE_WEAKBOX" desc="å¼±å…³è”å®¹å™¨çš„åŸºç±»">
+        <class id="ExchangeBox" desc="çŽ©å®¶äº¤æ˜“æ "/>
+        <class id="ProcessBox" desc="çŽ©å®¶åŠ å·¥æ  åªæœ‰ä¸€ä¸ªç‰©å“"/>
+        <class id="SendPostBox" desc="å‘é‚®ä»¶å®¹å™¨"/>
+        <class id="SendDealPostBox" desc="é‚®ç®±å‘é€è‡³äº¤æ˜“è¡Œå®¹å™¨"/>
+        <class id="SendBankPostBox" desc="é‚®ç®±å‘é€è‡³é“¶è¡Œå®¹å™¨"/>
+        <class id="CompoundItemBox" desc="ç‰©å“åˆæˆå®¹å™¨"/>
+        <class id="UsingItemSkill" desc="ä½¿ç”¨ITEMä¸´æ—¶æŠ€èƒ½é”å®š"/>
+        <class id="JewelCompoundBox" desc="å®çŸ³åˆæˆå®¹å™¨"/>
+        <class id="AsktobuySellBox" desc="æ±‚è´­è¡Œå‡ºå”®å®¹å™¨"/>
+        <class id="AsktobuyFastSellBox" desc="æ±‚è´­è¡Œå¿«æ·å‡ºå”®å®¹å™¨"/>
     </class>
 </logicclass>
 

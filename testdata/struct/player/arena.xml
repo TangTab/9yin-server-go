@@ -1,36 +1,36 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--¾º¼¼³¡Ïà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--ç«žæŠ€åœºç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ArenaID" type="int" public="false" private="true" save="false" desc="¾º¼¼³¡id(Îª0±íÊ¾²»ÔÚ¾º¼¼³¡ÄÚ)"/>
-		<property name="ArenaState" type="int" public="false" private="true" save="false" desc="¾º¼¼³¡×´Ì¬"/>
-		<property name="ArenaSinglePoints" type="int" public="false" private="true" save="true" desc="¾º¼¼³¡¸öÈË»ý·Ö"/>
-		<property name="ArenaSingleEveryWeekPoints" type="int" public="false" private="false" save="true" desc="¾º¼¼³¡Ã¿ÖÜµÄ¸öÈË»ý·Ö"/>
-		<property name="ClearEveryWeekPointsTime" type="int64" public="false" private="false" save="true" desc="Íæ¼ÒÃ¿ÖÜ»ý·ÖÇå³ýÊ±¼ä"/>
-		<property name="ArenaTeamName" type="widestr" public="true" private="true" save="true" desc="¾º¼¼³¡Õ½¶ÓÃû³Æ"/>
-		<property name="IsArenaTeamCaptain" type="int" public="false" private="true" save="true" desc="ÊÇ·ñÊÇÕ½¶ÓµÄ¶Ó³¤"/>
-		<property name="ArenaQueueID" type="int64" public="false" private="false" save="false" desc="¾º¼¼³¡ÅÅ¶ÓµÄÎ¨Ò»id"/>
-		<property name="ArenaSceneID" type="int" public="false" private="false" save="false" desc="¾º¼¼³¡³¡¾°id"/>
-		<property name="ArenaTeamType" type="int" public="false" private="true" save="false" desc="¾º¼¼³¡¶ÓÎéÀàÐÍ"/>
-		<property name="ArenaMatchType" type="int" public="false" private="true" save="false" desc="¾º¼¼³¡Æ¥ÅäÀàÐÍ"/>
-		<property name="ArenaKill" type="int" public="false" private="true" save="false" desc="¾º¼¼³¡Á¬É±"/>
+		<property name="ArenaID" type="int" public="false" private="true" save="false" desc="ç«žæŠ€åœºid(ä¸º0è¡¨ç¤ºä¸åœ¨ç«žæŠ€åœºå†…)"/>
+		<property name="ArenaState" type="int" public="false" private="true" save="false" desc="ç«žæŠ€åœºçŠ¶æ€"/>
+		<property name="ArenaSinglePoints" type="int" public="false" private="true" save="true" desc="ç«žæŠ€åœºä¸ªäººç§¯åˆ†"/>
+		<property name="ArenaSingleEveryWeekPoints" type="int" public="false" private="false" save="true" desc="ç«žæŠ€åœºæ¯å‘¨çš„ä¸ªäººç§¯åˆ†"/>
+		<property name="ClearEveryWeekPointsTime" type="int64" public="false" private="false" save="true" desc="çŽ©å®¶æ¯å‘¨ç§¯åˆ†æ¸…é™¤æ—¶é—´"/>
+		<property name="ArenaTeamName" type="widestr" public="true" private="true" save="true" desc="ç«žæŠ€åœºæˆ˜é˜Ÿåç§°"/>
+		<property name="IsArenaTeamCaptain" type="int" public="false" private="true" save="true" desc="æ˜¯å¦æ˜¯æˆ˜é˜Ÿçš„é˜Ÿé•¿"/>
+		<property name="ArenaQueueID" type="int64" public="false" private="false" save="false" desc="ç«žæŠ€åœºæŽ’é˜Ÿçš„å”¯ä¸€id"/>
+		<property name="ArenaSceneID" type="int" public="false" private="false" save="false" desc="ç«žæŠ€åœºåœºæ™¯id"/>
+		<property name="ArenaTeamType" type="int" public="false" private="true" save="false" desc="ç«žæŠ€åœºé˜Ÿä¼ç±»åž‹"/>
+		<property name="ArenaMatchType" type="int" public="false" private="true" save="false" desc="ç«žæŠ€åœºåŒ¹é…ç±»åž‹"/>
+		<property name="ArenaKill" type="int" public="false" private="true" save="false" desc="ç«žæŠ€åœºè¿žæ€"/>
 	</properties>
 	<records>
-		<record name="arena_request_rec" cols="1" maxrows="3" save="true" public="false" private="true" desc="¾º¼¼³¡Õ½¶ÓÉêÇë±í">
-			<column type="widestr" desc="Õ½¶ÓÃû³Æ"/>
+		<record name="arena_request_rec" cols="1" maxrows="3" save="true" public="false" private="true" desc="ç«žæŠ€åœºæˆ˜é˜Ÿç”³è¯·è¡¨">
+			<column type="widestr" desc="æˆ˜é˜Ÿåç§°"/>
 		</record>
-		<record name="player_arena_info_rec" cols="10" maxrows="2" save="true" public="false" private="true" desc="¾º¼¼³¡ÐÅÏ¢±í">
-		  <column type="byte"  desc="¾º¼¼³¡ÐÅÏ¢ÀàÐÍ"/>
-			<column type="dword" desc="¾º¼¼³¡»ý·Ö"/>
-			<column type="dword" desc="²ÎÊý´ÎÊý"/>
-			<column type="dword" desc="Ê¤Àû´ÎÊý"/>
-			<column type="dword" desc="Ê§°Ü´ÎÊý"/>
-			<column type="word"  desc="µ±Ç°Á¬Ê¤"/>
-			<column type="word"  desc="×î´óÁ¬Ê¤"/>
-			<column type="byte" desc="µ±Ç°ÅÅÃû"/>
-			<column type="byte" desc="ÉÏ´ÎÅÅÃû"/>
-			<column type="byte" desc="Ã¿ÖÜ»ý·Ö"/>
+		<record name="player_arena_info_rec" cols="10" maxrows="2" save="true" public="false" private="true" desc="ç«žæŠ€åœºä¿¡æ¯è¡¨">
+		  <column type="byte"  desc="ç«žæŠ€åœºä¿¡æ¯ç±»åž‹"/>
+			<column type="dword" desc="ç«žæŠ€åœºç§¯åˆ†"/>
+			<column type="dword" desc="å‚æ•°æ¬¡æ•°"/>
+			<column type="dword" desc="èƒœåˆ©æ¬¡æ•°"/>
+			<column type="dword" desc="å¤±è´¥æ¬¡æ•°"/>
+			<column type="word"  desc="å½“å‰è¿žèƒœ"/>
+			<column type="word"  desc="æœ€å¤§è¿žèƒœ"/>
+			<column type="byte" desc="å½“å‰æŽ’å"/>
+			<column type="byte" desc="ä¸Šæ¬¡æŽ’å"/>
+			<column type="byte" desc="æ¯å‘¨ç§¯åˆ†"/>
 		</record>
 	</records>
 </object>

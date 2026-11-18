@@ -1,25 +1,25 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task\\task_baishi.lua
--- @ ½Å±¾¹¦ÄÜ: °İÊ¦ÈÎÎñÌØÊâ´¦ÀíÂß¼­
--- @ ´´½¨Õß:   liang
--- @ ´´½¨ÈÕÆÚ: 2010.5.8
+-- @ è„šæœ¬åç§°: task\\task_baishi.lua
+-- @ è„šæœ¬åŠŸèƒ½: æ‹œå¸ˆä»»åŠ¡ç‰¹æ®Šå¤„ç†é€»è¾‘
+-- @ åˆ›å»ºè€…:   liang
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.5.8
 -----------------------------------------
 require("task\\task_define")
 
--- Ã¿¸öµ¥¶ÀµÄÈÎÎñ½Å±¾¿ÉÒÔ¸´ÖÆ´ËÄ£°å£¬ĞŞ¸ÄÂß¼­
+-- æ¯ä¸ªå•ç‹¬çš„ä»»åŠ¡è„šæœ¬å¯ä»¥å¤åˆ¶æ­¤æ¨¡æ¿ï¼Œä¿®æ”¹é€»è¾‘
 
---¸ÃÈÎÎñµÄºóĞøÈÎÎñÁĞ±í
+--è¯¥ä»»åŠ¡çš„åç»­ä»»åŠ¡åˆ—è¡¨
 local g_menpai = {
-		[41] = "school_shaolin", --ÉÙÁÖ
-		[42] = "school_wudang",  --Îäµ±
-		[43] = "school_emei",    --¶ëáÒ
-		[44] = "school_gaibang", --Ø¤°ï
-		[45] = "school_juzitang",--¾ı×ÓÌÃ
-		[46] = "school_tangmen", --ÌÆÃÅ
-		[47] = "school_jilegu",  --¼«ÀÖ¹È
-		[48] = "school_jinyiwei",--½õÒÂÎÀ
+		[41] = "school_shaolin", --å°‘æ—
+		[42] = "school_wudang",  --æ­¦å½“
+		[43] = "school_emei",    --å³¨åµ‹
+		[44] = "school_gaibang", --ä¸å¸®
+		[45] = "school_juzitang",--å›å­å ‚
+		[46] = "school_tangmen", --å”é—¨
+		[47] = "school_jilegu",  --æä¹è°·
+		[48] = "school_jinyiwei",--é”¦è¡£å«
 };
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	for id, cfg in pairs(g_menpai) do
 		if nx_is_doing_task(player, nx_int(id)) then
@@ -34,19 +34,19 @@ function Task_Accept_Condition(player, npc, taskid)
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	local table_preid = {24048,22048}
 	local rows = table.getn(table_preid)
@@ -65,15 +65,15 @@ function Task_After_Complete(player, npc, taskid)
 		nx_join_school(player, menp)
 	end
 
-	--  ×Ô¶¯³Ğ½ÓµÚ¶şÕÂµÚÒ»¸öÈÎÎñ
+	--  è‡ªåŠ¨æ‰¿æ¥ç¬¬äºŒç« ç¬¬ä¸€ä¸ªä»»åŠ¡
 	--local houxu_id = 24049
 	--if nx_test_accept_task(player, nx_null_obj(), houxu_id) > 0 then
 		--nx_accept_task(player, houxu_id)
 	--end
--- ¸Ä±ä½ø¶È
+-- æ”¹å˜è¿›åº¦
 
 
-	--  ×Ô¶¯Ìá½»ÈÎÎñ
+	--  è‡ªåŠ¨æäº¤ä»»åŠ¡
 	--local id = 500;
 	--if nx_is_doing_task(player, id) then
 		--nx_auto_submit_task(player, npc, id)

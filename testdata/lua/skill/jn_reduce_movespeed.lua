@@ -1,37 +1,37 @@
---¹¥»÷Ä¿±ê²¢½µµÍÆäÒÆ¶¯ËÙ¶È
---½µµÍËÙ¶È µÈ¼¶*7%
+--æ”»å‡»ç›®æ ‡å¹¶é™ä½å…¶ç§»åŠ¨é€Ÿåº¦
+--é™ä½é€Ÿåº¦ ç­‰çº§*7%
 require("define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
 
 	if not nx_exists(skill) then
@@ -47,7 +47,7 @@ function get_damage(self, skill, target)
 
 	damage = math.random(minshotdamage, maxshotdamage) + shotpower
 	
-	--Éä»÷ÉËº¦,strÓ°ÏìÎÈ¶¨
+	--å°„å‡»ä¼¤å®³,strå½±å“ç¨³å®š
 	if dex > str then
 		damage = damage - math.random(0, dex - str)
 	end
@@ -67,23 +67,23 @@ end
 
 
 function add_buffer(self, target, buff_value, buff_lifetime)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_sub_movespeed")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime", buff_lifetime)
 	
-	--BUFFER¸Ä±äµÄÊôĞÔ(Ìí¼Óµ½BufferµÄDirectPropertyRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERæ”¹å˜çš„å±æ€§(æ·»åŠ åˆ°Bufferçš„DirectPropertyRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "MoveSpeed", nx_double(buff_value), 1, 0)
 		
 	--nx_msgbox(tostring(buff_value))
 	
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

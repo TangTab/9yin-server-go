@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--°²È«Ä£Ê½Ïà¹ØµÄÊôÐÔ-->
+<!--å®‰å…¨æ¨¡å¼ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-    <property name="SafeTime" type="int" public="false" private="true" save="true" desc="°²È«Ê±¼ä"/>
-    <property name="CurSafeTime" type="int" public="false" private="true" save="false" desc="µ±Ç°°²È«Ê±¼ä"/>
-    <property name="SafeModeEquipLv" type="byte" public="false" private="true" save="true" desc="°²È«Ä£Ê½×°±¸µÈ¼¶"/>
-    <property name="SafeModeEquipStar" type="byte" public="false" private="true" save="true" desc="°²È«Ä£Ê½×°±¸ÐÇ¼¶"/>
-    <property name="SafeModePsw" type="widestr" public="false" private="false" save="true" desc="°²È«Ä£Ê½ÃÜÂë"/>
-    <property name="IsHaveSafeModePsw" type="byte" public="false" private="true" save="true" desc="ÊÇ·ñÓÐ°²È«Ä£Ê½ÃÜÂë"/>
-    <property name="IsTempUnLock" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÁÙÊ±½âËø"/>
-    <property name="IsSafeModeUnLock" type="byte" public="false" private="true" save="false" desc="±¾´ÎµÇÂ½ÊÇ·ñÒÑ¾­½âËø°²È«Ä£Ê½"/>
-    <property name="SafeModeEquipStr" type="string" public="false" private="true" save="true" desc="°²È«Ä£Ê½×°±¸±£»¤×Ö·û´®"/>
-    <property name="SafeModeJewelStr" type="string" public="false" private="true" save="true" desc="°²È«Ä£Ê½±¦Ê¯±£»¤×Ö·û´®"/>
-		<property name="LastOffLineTime" type="double" public="false" private="true" save="true" desc="½ÇÉ«ÉÏ´ÎÏÂÏßµÄÊ±¼ä"/>
-		<property name="LastAddress" type="string" public="false" private="true" save="true" desc="½ÇÉ«ÉÏ´ÎµÇÂ½IPµØÖ·"/>
+    <property name="SafeTime" type="int" public="false" private="true" save="true" desc="å®‰å…¨æ—¶é—´"/>
+    <property name="CurSafeTime" type="int" public="false" private="true" save="false" desc="å½“å‰å®‰å…¨æ—¶é—´"/>
+    <property name="SafeModeEquipLv" type="byte" public="false" private="true" save="true" desc="å®‰å…¨æ¨¡å¼è£…å¤‡ç­‰çº§"/>
+    <property name="SafeModeEquipStar" type="byte" public="false" private="true" save="true" desc="å®‰å…¨æ¨¡å¼è£…å¤‡æ˜Ÿçº§"/>
+    <property name="SafeModePsw" type="widestr" public="false" private="false" save="true" desc="å®‰å…¨æ¨¡å¼å¯†ç "/>
+    <property name="IsHaveSafeModePsw" type="byte" public="false" private="true" save="true" desc="æ˜¯å¦æœ‰å®‰å…¨æ¨¡å¼å¯†ç "/>
+    <property name="IsTempUnLock" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦ä¸´æ—¶è§£é”"/>
+    <property name="IsSafeModeUnLock" type="byte" public="false" private="true" save="false" desc="æœ¬æ¬¡ç™»é™†æ˜¯å¦å·²ç»è§£é”å®‰å…¨æ¨¡å¼"/>
+    <property name="SafeModeEquipStr" type="string" public="false" private="true" save="true" desc="å®‰å…¨æ¨¡å¼è£…å¤‡ä¿æŠ¤å­—ç¬¦ä¸²"/>
+    <property name="SafeModeJewelStr" type="string" public="false" private="true" save="true" desc="å®‰å…¨æ¨¡å¼å®çŸ³ä¿æŠ¤å­—ç¬¦ä¸²"/>
+		<property name="LastOffLineTime" type="double" public="false" private="true" save="true" desc="è§’è‰²ä¸Šæ¬¡ä¸‹çº¿çš„æ—¶é—´"/>
+		<property name="LastAddress" type="string" public="false" private="true" save="true" desc="è§’è‰²ä¸Šæ¬¡ç™»é™†IPåœ°å€"/>
 	</properties>
 </object>

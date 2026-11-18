@@ -1,31 +1,31 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="TeamID" type="int" public="false" private="true" save="true" desc="¶ÓÎé±àºÅ"/>
-		<property name="JoinTeamTime" type="double" public="false" private="false" save="true" desc="Èë¶ÓÊ±¼ä"/>
-		<property name="TeamCaptain" type="widestr" public="true" private="true" save="false" desc="ÆÕÍ¨¶ÓÎéµÄ¶Ó³¤"/>
-		<property name="TeamPickMode" type="byte" public="true" private="true" save="false" desc="¶ÓÎéÊ°È¡·ÖÅäÄ£Ê½"/>
-		<property name="TeamPickQuality" type="byte" public="true" private="true" save="false" desc="¶ÓÎéÊ°È¡·ÖÅäÆ·ÖÊ"/>
-		<property name="TeamPickRoll" type="byte" public="false" private="false" save="false" desc="¶ÓÎéÊ°È¡ÂÖÁ÷ÐòºÅ"/>
-		<property name="TeamCamp" type="byte" public="false" private="false" save="false" desc="¶ÓÎéÕóÓªÄ£Ê½"/>
-		<property name="TeamType" type="byte" public="true" private="true" save="true" desc="¶ÓÎéÀàÐÍ"/>	
-		<property name="TeamUniqueID" type="string" public="false" private="false" save="true" desc="¶ÓÎéÎ¨Ò»ID"/>
-		<property name="IsReady" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñ×¼±¸"/>
-		<property name="AcceptRequest" type="byte" public="false" private="true" save="false" desc="¾Ü¾øÇëÇó¿ª¹Ø"/>
-		<property name="CurMembers" type="byte" public="true" private="true" save="false" desc="¶ÓÎéµ±Ç°ÈËÊý"/>
-		<property name="TeamSceneSign" type="string" public="false" private="true" save="true" desc="¶ÓÎé³¡¾°±ê¼Ç"/>
-		<!-- ÌØÊâ¶ÓÎéµÄÊôÐÔ -->
-		<property name="STeamCaptain" type="widestr" public="false" private="true" save="false" desc="ÌØÊâ¶ÓÎéµÄ¶Ó³¤"/>
-		<property name="STeamType" type="byte" public="true" private="true" save="false" desc="¶ÓÎéÀàÐÍ"/>	
+		<property name="TeamID" type="int" public="false" private="true" save="true" desc="é˜Ÿä¼ç¼–å·"/>
+		<property name="JoinTeamTime" type="double" public="false" private="false" save="true" desc="å…¥é˜Ÿæ—¶é—´"/>
+		<property name="TeamCaptain" type="widestr" public="true" private="true" save="false" desc="æ™®é€šé˜Ÿä¼çš„é˜Ÿé•¿"/>
+		<property name="TeamPickMode" type="byte" public="true" private="true" save="false" desc="é˜Ÿä¼æ‹¾å–åˆ†é…æ¨¡å¼"/>
+		<property name="TeamPickQuality" type="byte" public="true" private="true" save="false" desc="é˜Ÿä¼æ‹¾å–åˆ†é…å“è´¨"/>
+		<property name="TeamPickRoll" type="byte" public="false" private="false" save="false" desc="é˜Ÿä¼æ‹¾å–è½®æµåºå·"/>
+		<property name="TeamCamp" type="byte" public="false" private="false" save="false" desc="é˜Ÿä¼é˜µè¥æ¨¡å¼"/>
+		<property name="TeamType" type="byte" public="true" private="true" save="true" desc="é˜Ÿä¼ç±»åž‹"/>	
+		<property name="TeamUniqueID" type="string" public="false" private="false" save="true" desc="é˜Ÿä¼å”¯ä¸€ID"/>
+		<property name="IsReady" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦å‡†å¤‡"/>
+		<property name="AcceptRequest" type="byte" public="false" private="true" save="false" desc="æ‹’ç»è¯·æ±‚å¼€å…³"/>
+		<property name="CurMembers" type="byte" public="true" private="true" save="false" desc="é˜Ÿä¼å½“å‰äººæ•°"/>
+		<property name="TeamSceneSign" type="string" public="false" private="true" save="true" desc="é˜Ÿä¼åœºæ™¯æ ‡è®°"/>
+		<!-- ç‰¹æ®Šé˜Ÿä¼çš„å±žæ€§ -->
+		<property name="STeamCaptain" type="widestr" public="false" private="true" save="false" desc="ç‰¹æ®Šé˜Ÿä¼çš„é˜Ÿé•¿"/>
+		<property name="STeamType" type="byte" public="true" private="true" save="false" desc="é˜Ÿä¼ç±»åž‹"/>	
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="team_rec" cols="21" maxrows="25" save="false" public="false" private="true" desc="¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
+		<record name="team_rec" cols="21" maxrows="25" save="false" public="false" private="true" desc="é˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
 			<column type="string" desc="Photo"/>
-			<column type="string" desc="³¡¾°±àºÅ"/>
+			<column type="string" desc="åœºæ™¯ç¼–å·"/>
 			<column type="float" desc="X"/>
 			<column type="float" desc="Y"/>
 			<column type="float" desc="Z"/>
@@ -33,37 +33,37 @@
 			<column type="byte" desc="EGRatio"/>
 			<column type="string" desc="Buffers"/>
 			<column type="byte" desc="IsFighting"/>
-			<column type="byte" desc="¶ÓÎéÖÐÎ»ÖÃ"/>
-			<column type="byte" desc="¶ÓÎéµÄÖ°Î»"/>
-			<column type="int64" desc="ÉÏ´ÎÀëÏßÊ±¼ä"/> 
-			<column type="string" desc="±ê¼Ç×Ö·û´®"/> 
-			<column type="byte" desc="×¼±¸È·ÈÏ"/> 
-     		<column type="byte" desc="µÈ¼¶"/>
-     		<column type="byte" desc="Ö°Òµ"/>
+			<column type="byte" desc="é˜Ÿä¼ä¸­ä½ç½®"/>
+			<column type="byte" desc="é˜Ÿä¼çš„èŒä½"/>
+			<column type="int64" desc="ä¸Šæ¬¡ç¦»çº¿æ—¶é—´"/> 
+			<column type="string" desc="æ ‡è®°å­—ç¬¦ä¸²"/> 
+			<column type="byte" desc="å‡†å¤‡ç¡®è®¤"/> 
+     		<column type="byte" desc="ç­‰çº§"/>
+     		<column type="byte" desc="èŒä¸š"/>
 			<column type="byte" desc="Camp"/>  
-			<column type="string" desc="Íæ¼ÒËùÔÚÇøÓò"/>
+			<column type="string" desc="çŽ©å®¶æ‰€åœ¨åŒºåŸŸ"/>
 			<column type="dword" desc="MaxHP"/>
 			<column type="dword" desc="MaxEG"/>
 		</record>
-    <record name="team_recruit_info_rec" cols="5" maxrows="25" save="false" public="false" private="true" desc="ÕÐÄ¼¶ÓÎéÏêÇé±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
+    <record name="team_recruit_info_rec" cols="5" maxrows="25" save="false" public="false" private="true" desc="æ‹›å‹Ÿé˜Ÿä¼è¯¦æƒ…è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
 			<column type="byte" desc="JOB"/>
 			<column type="byte" desc="Level"/>
 			<column type="byte" desc="TeamType"/>
 			<column type="byte" desc="pos"/>
 		</record>
-    <record name="team_recruit_rec" cols="11" maxrows="500" save="false" public="false" private="true" desc="ÕÐÄ¼ÁÐ±í">
-			<column type="byte" desc="¶ÓÎé±àºÅ"/>
-			<column type="widestr" desc="¶Ó³¤Ãû×Ö"/>
-			<column type="byte" desc="¶Ó³¤Ö°Òµ"/>
-			<column type="byte" desc="¶Ó³¤µÈ¼¶"/>
-			<column type="byte" desc="×îÐ¡µÈ¼¶ÏÞÖÆ"/>
-			<column type="byte" desc="×î´óµÈ¼¶ÏÞÖÆ"/>
-			<column type="byte" desc="µ±Ç°¶ÓÎéÈËÊý"/>
-			<column type="byte" desc="×î´óÄ¼¼¯ÈËÊý"/>
-			<column type="byte" desc="¶ÓÎéÕóÓª"/>
-			<column type="widestr" desc="¶ÓÎéËµÃ÷"/>
-			<column type="int64" desc="·¢²¼ÕÐÄ¼µÄÊ±¼ä"/>
+    <record name="team_recruit_rec" cols="11" maxrows="500" save="false" public="false" private="true" desc="æ‹›å‹Ÿåˆ—è¡¨">
+			<column type="byte" desc="é˜Ÿä¼ç¼–å·"/>
+			<column type="widestr" desc="é˜Ÿé•¿åå­—"/>
+			<column type="byte" desc="é˜Ÿé•¿èŒä¸š"/>
+			<column type="byte" desc="é˜Ÿé•¿ç­‰çº§"/>
+			<column type="byte" desc="æœ€å°ç­‰çº§é™åˆ¶"/>
+			<column type="byte" desc="æœ€å¤§ç­‰çº§é™åˆ¶"/>
+			<column type="byte" desc="å½“å‰é˜Ÿä¼äººæ•°"/>
+			<column type="byte" desc="æœ€å¤§å‹Ÿé›†äººæ•°"/>
+			<column type="byte" desc="é˜Ÿä¼é˜µè¥"/>
+			<column type="widestr" desc="é˜Ÿä¼è¯´æ˜Ž"/>
+			<column type="int64" desc="å‘å¸ƒæ‹›å‹Ÿçš„æ—¶é—´"/>
 		</record>
 	</records>
 </object>

@@ -1,34 +1,34 @@
---BUFF³ÖĞø¹ı³ÌÖĞ£¬Èç¹ûÍæ¼ÒÊ¹ÓÃÁËÊµÕĞ£¬ÔòËğÊ§µ±Ç°HPµÄ50%
+--BUFFæŒç»­è¿‡ç¨‹ä¸­ï¼Œå¦‚æœç©å®¶ä½¿ç”¨äº†å®æ‹›ï¼Œåˆ™æŸå¤±å½“å‰HPçš„50%
 
 require("define")
 require("share\\server_custom_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
---¼ÆÊ±»ò¼Æ´ÎÊ±µÄĞ§¹û
---Èç¹ûÊÇ¼Æ´Î£¬·µ»Ø1Ê±£º±¾´Î¼Æ´ÎÓĞĞ§£¬·µ»Ø0Ê±£º±¾´Î²»¼Æ´Î
+--è®¡æ—¶æˆ–è®¡æ¬¡æ—¶çš„æ•ˆæœ
+--å¦‚æœæ˜¯è®¡æ¬¡ï¼Œè¿”å›1æ—¶ï¼šæœ¬æ¬¡è®¡æ¬¡æœ‰æ•ˆï¼Œè¿”å›0æ—¶ï¼šæœ¬æ¬¡ä¸è®¡æ¬¡
 function buffer_timer(self, buffer)
 
-    --ÅĞ¶Ï»ñÈ¡½ÇÉ«µ±Ç°Ê¹ÓÃ¼¼ÄÜµÄĞĞÎª
+    --åˆ¤æ–­è·å–è§’è‰²å½“å‰ä½¿ç”¨æŠ€èƒ½çš„è¡Œä¸º
 	local cur_skill = nx_query_property(self, "CurSkill")
 	
-	--Èç¹ûÃ»ÓĞÊ¹ÓÃ¼¼ÄÜ£¬Ôò·µ»Ø
+	--å¦‚æœæ²¡æœ‰ä½¿ç”¨æŠ€èƒ½ï¼Œåˆ™è¿”å›
 	if not nx_exists(cur_skill) then
 		return 0
 	end
 	
-	--Èç¹ûÃ»ÓĞÊ¹ÓÃÊµÕĞ£¬Ôò·µ»Ø
+	--å¦‚æœæ²¡æœ‰ä½¿ç”¨å®æ‹›ï¼Œåˆ™è¿”å›
 	if nx_query_property(cur_skill, "EffectType") ~= 1 then
 		return 0
 	end
 	
-	--Ê¹ÓÃÁËÊµÕĞ£¬¿Û³ıµ±Ç°HPµÄ50%
+	--ä½¿ç”¨äº†å®æ‹›ï¼Œæ‰£é™¤å½“å‰HPçš„50%
 	local curDamage = nx_query_property(self, "HP") * 0.5
 	if curDamage >= 1 then
 		local sender = nx_query_property(buffer, "Sender")
@@ -38,6 +38,6 @@ function buffer_timer(self, buffer)
 	return 1
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end

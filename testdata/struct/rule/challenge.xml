@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Íæ¼ÒÌôÕ½ÏµÍ³ÊôÐÔ±í-->
+<!--çŽ©å®¶æŒ‘æˆ˜ç³»ç»Ÿå±žæ€§è¡¨-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ChallengeState" type="int" public="true" private="true" save="false" desc="ÇÐ´è¶ÔÏó×´Ì¬"/>
-		<property name="ChallengeName" type="widestr" public="true" private="true" save="false" desc="ÇÐ´è¶ÔÏóÃû³Æ"/>
-		<property name="ChallengeX" type="float" public="false" private="false" save="false" desc="ÇÐ´èÖÐÐÄµã×ø±ê"/>
-		<property name="ChallengeY" type="float" public="false" private="false" save="false" desc="ÇÐ´èÖÐÐÄµã×ø±ê"/>
-		<property name="ChallengeZ" type="float" public="false" private="false" save="false" desc="ÇÐ´èÖÐÐÄµã×ø±ê"/>
+		<property name="ChallengeState" type="int" public="true" private="true" save="false" desc="åˆ‡ç£‹å¯¹è±¡çŠ¶æ€"/>
+		<property name="ChallengeName" type="widestr" public="true" private="true" save="false" desc="åˆ‡ç£‹å¯¹è±¡åç§°"/>
+		<property name="ChallengeX" type="float" public="false" private="false" save="false" desc="åˆ‡ç£‹ä¸­å¿ƒç‚¹åæ ‡"/>
+		<property name="ChallengeY" type="float" public="false" private="false" save="false" desc="åˆ‡ç£‹ä¸­å¿ƒç‚¹åæ ‡"/>
+		<property name="ChallengeZ" type="float" public="false" private="false" save="false" desc="åˆ‡ç£‹ä¸­å¿ƒç‚¹åæ ‡"/>
 		
 	</properties>
-	<!-- ±í¸ñ -->
+	<!-- è¡¨æ ¼ -->
 	<records>
 	</records>
 </object>

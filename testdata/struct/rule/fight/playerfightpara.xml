@@ -1,84 +1,84 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÉËº¦Ïà¹ØÊôÐÔ-->
+<!--ä¼¤å®³ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--property name="DamageReduce" type="float" public="false" private="false" save="false" desc="ÉËº¦¼õÉÙ"/-->
-    <!--property name="DamageReduceMul" type="float" public="false" private="false" save="false" desc="ÉËº¦¼õÉÙ±¶ÂÊ"/-->
-  	<property name="DamagePlus" type="float" public="false" private="false" save="false" desc="ÉËº¦¸½¼Ó,Í¨¹ýÖ÷ÊôÐÔÌáÉý"/>
-  	<property name="DamagePlusAdd" type="float" public="false" private="false" save="false" desc="ÉËº¦¸½¼Ó,Í¨¹ýÖ÷ÊôÐÔÌáÉý"/>
-    <property name="HealPlus" type="float" public="false" private="false" save="false" desc="ÖÎÁÆ¸½¼Ó,Í¨¹ýÖ÷ÊôÐÔÌáÉý"/>
-    <property name="HealPlusAdd" type="float" public="false" private="false" save="false" desc="ÖÎÁÆ¸½¼Ó,Í¨¹ýÖ÷ÊôÐÔÌáÉý"/>
-    <property name="HolyAnti" type="float" public="false" private="false" save="false" desc="ÉñÊ¥¿¹ÐÔ,Í¨¹ýÖ÷ÊôÐÔÌáÉý"/>
-    <property name="HolyAntiAdd" type="float" public="false" private="false" save="false" desc="ÉñÊ¥¿¹ÐÔ,Í¨¹ýÖ÷ÊôÐÔÌáÉý"/>
+		<!--property name="DamageReduce" type="float" public="false" private="false" save="false" desc="ä¼¤å®³å‡å°‘"/-->
+    <!--property name="DamageReduceMul" type="float" public="false" private="false" save="false" desc="ä¼¤å®³å‡å°‘å€çŽ‡"/-->
+  	<property name="DamagePlus" type="float" public="false" private="false" save="false" desc="ä¼¤å®³é™„åŠ ,é€šè¿‡ä¸»å±žæ€§æå‡"/>
+  	<property name="DamagePlusAdd" type="float" public="false" private="false" save="false" desc="ä¼¤å®³é™„åŠ ,é€šè¿‡ä¸»å±žæ€§æå‡"/>
+    <property name="HealPlus" type="float" public="false" private="false" save="false" desc="æ²»ç–—é™„åŠ ,é€šè¿‡ä¸»å±žæ€§æå‡"/>
+    <property name="HealPlusAdd" type="float" public="false" private="false" save="false" desc="æ²»ç–—é™„åŠ ,é€šè¿‡ä¸»å±žæ€§æå‡"/>
+    <property name="HolyAnti" type="float" public="false" private="false" save="false" desc="ç¥žåœ£æŠ—æ€§,é€šè¿‡ä¸»å±žæ€§æå‡"/>
+    <property name="HolyAntiAdd" type="float" public="false" private="false" save="false" desc="ç¥žåœ£æŠ—æ€§,é€šè¿‡ä¸»å±žæ€§æå‡"/>
 
-    <property name="DodgeLevel" type="int" public="false" private="false" save="false" desc="ÉÁ±ÜµÈ¼¶"/>
-    <property name="DodgeLevelAdd" type="int" public="false" private="false" save="false" desc="ÉÁ±ÜµÈ¼¶"/>
-    <property name="MagdodgeLevel" type="int" public="false" private="false" save="false" desc="·¨ÊõÉÁ±ÜµÈ¼¶"/>
-    <property name="MagdodgeLevelAdd" type="int" public="false" private="false" save="false" desc="·¨ÊõÉÁ±ÜµÈ¼¶"/>
+    <property name="DodgeLevel" type="int" public="false" private="false" save="false" desc="é—ªé¿ç­‰çº§"/>
+    <property name="DodgeLevelAdd" type="int" public="false" private="false" save="false" desc="é—ªé¿ç­‰çº§"/>
+    <property name="MagdodgeLevel" type="int" public="false" private="false" save="false" desc="æ³•æœ¯é—ªé¿ç­‰çº§"/>
+    <property name="MagdodgeLevelAdd" type="int" public="false" private="false" save="false" desc="æ³•æœ¯é—ªé¿ç­‰çº§"/>
     
-		<property name="CritLevel" type="int" public="false" private="false" save="false" desc="±©»÷µÈ¼¶"/>
-		<property name="CritMulLevel" type="int" public="false" private="false" save="false" desc="±©»÷±¶ÂÊµÈ¼¶"/>
-    <property name="CritLevelAdd" type="int" public="false" private="false" save="false" desc="±©»÷µÈ¼¶"/>
-    <property name="CritMulLevelAdd" type="int" public="false" private="false" save="false" desc="±©»÷±¶ÂÊµÈ¼¶"/>
+		<property name="CritLevel" type="int" public="false" private="false" save="false" desc="æš´å‡»ç­‰çº§"/>
+		<property name="CritMulLevel" type="int" public="false" private="false" save="false" desc="æš´å‡»å€çŽ‡ç­‰çº§"/>
+    <property name="CritLevelAdd" type="int" public="false" private="false" save="false" desc="æš´å‡»ç­‰çº§"/>
+    <property name="CritMulLevelAdd" type="int" public="false" private="false" save="false" desc="æš´å‡»å€çŽ‡ç­‰çº§"/>
     
-    <property name="MagCritLevel" type="int" public="false" private="false" save="false" desc="·¨Êõ±©»÷µÈ¼¶"/>
-    <property name="MagCritLevelAdd" type="int" public="false" private="false" save="false" desc="·¨Êõ±©»÷µÈ¼¶"/>
-    <property name="ElementDeepenLevel" type="int" public="false" private="false" save="false" desc="ÔªËØ¼ÓÉîµÈ¼¶"/>
-    <property name="ElementDeepenLevelAdd" type="int" public="false" private="false" save="false" desc="ÔªËØ¼ÓÉîµÈ¼¶"/>
+    <property name="MagCritLevel" type="int" public="false" private="false" save="false" desc="æ³•æœ¯æš´å‡»ç­‰çº§"/>
+    <property name="MagCritLevelAdd" type="int" public="false" private="false" save="false" desc="æ³•æœ¯æš´å‡»ç­‰çº§"/>
+    <property name="ElementDeepenLevel" type="int" public="false" private="false" save="false" desc="å…ƒç´ åŠ æ·±ç­‰çº§"/>
+    <property name="ElementDeepenLevelAdd" type="int" public="false" private="false" save="false" desc="å…ƒç´ åŠ æ·±ç­‰çº§"/>
 
     
-    <property name="DefenseLevel" type="int" public="false" private="false" save="false" desc="·ÀÓùµÈ¼¶"/>
-    <property name="DefenseLevelAdd" type="int" public="false" private="false" save="false" desc="·ÀÓùµÈ¼¶"/>
+    <property name="DefenseLevel" type="int" public="false" private="false" save="false" desc="é˜²å¾¡ç­‰çº§"/>
+    <property name="DefenseLevelAdd" type="int" public="false" private="false" save="false" desc="é˜²å¾¡ç­‰çº§"/>
     
-    <property name="Guard" type="int" public="false" private="false" save="false" desc="»¤¼×Öµ"/>
-    <property name="GuardAdd" type="int" public="false" private="false" save="false" desc="»¤¼×Öµ"/>
-		<property name="PenetrateLevel" type="int" public="false" private="false" save="false" desc="»¤¼×´©Í¸µÈ¼¶"/>
-    <property name="PenetrateLevelAdd" type="int" public="false" private="false" save="false" desc="»¤¼×´©Í¸µÈ¼¶"/>
-    <property name="ElementResistLevel" type="int" public="false" private="false" save="false" desc="ÔªËØ¼õÃâµÈ¼¶"/>
-    <property name="ElementResistLevelAdd" type="int" public="false" private="false" save="false" desc="ÔªËØ¼õÃâµÈ¼¶"/>
+    <property name="Guard" type="int" public="false" private="false" save="false" desc="æŠ¤ç”²å€¼"/>
+    <property name="GuardAdd" type="int" public="false" private="false" save="false" desc="æŠ¤ç”²å€¼"/>
+		<property name="PenetrateLevel" type="int" public="false" private="false" save="false" desc="æŠ¤ç”²ç©¿é€ç­‰çº§"/>
+    <property name="PenetrateLevelAdd" type="int" public="false" private="false" save="false" desc="æŠ¤ç”²ç©¿é€ç­‰çº§"/>
+    <property name="ElementResistLevel" type="int" public="false" private="false" save="false" desc="å…ƒç´ å‡å…ç­‰çº§"/>
+    <property name="ElementResistLevelAdd" type="int" public="false" private="false" save="false" desc="å…ƒç´ å‡å…ç­‰çº§"/>
 
 		
-    <property name="AccurateLevel" type="int" public="false" private="false" save="false" desc="¾«×¼µÈ¼¶"/>
-    <property name="AccurateLevelAdd" type="int" public="false" private="false" save="false" desc="¾«×¼µÈ¼¶"/>
-		<property name="MagPrecLevel" type="int" public="false" private="false" save="false" desc="·¨Êõ¾«×¼µÈ¼¶"/>
-    <property name="MagPrecLevelAdd" type="int" public="false" private="false" save="false" desc="·¨Êõ¾«×¼µÈ¼¶"/>
+    <property name="AccurateLevel" type="int" public="false" private="false" save="false" desc="ç²¾å‡†ç­‰çº§"/>
+    <property name="AccurateLevelAdd" type="int" public="false" private="false" save="false" desc="ç²¾å‡†ç­‰çº§"/>
+		<property name="MagPrecLevel" type="int" public="false" private="false" save="false" desc="æ³•æœ¯ç²¾å‡†ç­‰çº§"/>
+    <property name="MagPrecLevelAdd" type="int" public="false" private="false" save="false" desc="æ³•æœ¯ç²¾å‡†ç­‰çº§"/>
 		
-    <property name="AllResist" type="int" public="false" private="false" save="false" desc="È«Ïµ¿¹ÐÔ"/>
-    <property name="AllResistAdd" type="int" public="false" private="false" save="false" desc="È«Ïµ¿¹ÐÔ"/>
+    <property name="AllResist" type="int" public="false" private="false" save="false" desc="å…¨ç³»æŠ—æ€§"/>
+    <property name="AllResistAdd" type="int" public="false" private="false" save="false" desc="å…¨ç³»æŠ—æ€§"/>
     
-    <property name="SCritProb"  type="float" public="false" private="false" save="false" desc="¾ø¶Ô±©»÷ÂÊ"/>
-    <property name="SCritProbAdd" type="float" public="false" private="false" save="false" desc="¾ø¶Ô±©»÷¼¸ÂÊ"/>
+    <property name="SCritProb"  type="float" public="false" private="false" save="false" desc="ç»å¯¹æš´å‡»çŽ‡"/>
+    <property name="SCritProbAdd" type="float" public="false" private="false" save="false" desc="ç»å¯¹æš´å‡»å‡ çŽ‡"/>
     
-    <property name="SDodgeProb"  type="float" public="false" private="false" save="false" desc="¾ø¶ÔÉÁ±ÜÂÊ"/>
-    <property name="SDodgeProbAdd" type="float" public="false" private="false" save="false" desc="¾ø¶ÔÉÁ±Ü¼¸ÂÊ"/>
+    <property name="SDodgeProb"  type="float" public="false" private="false" save="false" desc="ç»å¯¹é—ªé¿çŽ‡"/>
+    <property name="SDodgeProbAdd" type="float" public="false" private="false" save="false" desc="ç»å¯¹é—ªé¿å‡ çŽ‡"/>
     
-    <property name="SGuardRateProb"  type="float" public="false" private="false" save="false" desc="¾ø¶Ô»¤¼×¼õÉËÂÊ"/>
-    <property name="SGuardRateProbAdd" type="float" public="false" private="false" save="false" desc="¾ø¶Ô»¤¼×¼õÉË¼¸ÂÊ"/>
+    <property name="SGuardRateProb"  type="float" public="false" private="false" save="false" desc="ç»å¯¹æŠ¤ç”²å‡ä¼¤çŽ‡"/>
+    <property name="SGuardRateProbAdd" type="float" public="false" private="false" save="false" desc="ç»å¯¹æŠ¤ç”²å‡ä¼¤å‡ çŽ‡"/>
     
-    <property name="SMagCritProb"  type="float" public="false" private="false" save="false" desc="¾ø¶Ô·¨Êõ±©»÷ÂÊ"/>
-    <property name="SMagCritProbAdd" type="float" public="false" private="false" save="false" desc="¾ø¶Ô·¨Êõ±©»÷¼¸ÂÊ"/>
+    <property name="SMagCritProb"  type="float" public="false" private="false" save="false" desc="ç»å¯¹æ³•æœ¯æš´å‡»çŽ‡"/>
+    <property name="SMagCritProbAdd" type="float" public="false" private="false" save="false" desc="ç»å¯¹æ³•æœ¯æš´å‡»å‡ çŽ‡"/>
     
-    <property name="SMagdodgeProb"  type="float" public="false" private="false" save="false" desc="¾ø¶Ô·¨Êõ¶ã±Ü¼¸ÂÊ"/>
-    <property name="SMagdodgeProbAdd" type="float" public="false" private="false" save="false" desc="¾ø¶Ô·¨ÊõÉÁ±Ü¼¸ÂÊ"/>
+    <property name="SMagdodgeProb"  type="float" public="false" private="false" save="false" desc="ç»å¯¹æ³•æœ¯èº²é¿å‡ çŽ‡"/>
+    <property name="SMagdodgeProbAdd" type="float" public="false" private="false" save="false" desc="ç»å¯¹æ³•æœ¯é—ªé¿å‡ çŽ‡"/>
     
-    <property name="SAllResistProb" type="float" public="false" private="false" save="false" desc="¾ø¶Ô·¨Êõ¼õÉËÂÊ"/>
-    <property name="SAllResistProbAdd" type="float" public="false" private="false" save="false" desc="È«Ïµ¿¹ÐÔ"/>
+    <property name="SAllResistProb" type="float" public="false" private="false" save="false" desc="ç»å¯¹æ³•æœ¯å‡ä¼¤çŽ‡"/>
+    <property name="SAllResistProbAdd" type="float" public="false" private="false" save="false" desc="å…¨ç³»æŠ—æ€§"/>
     
 
-		<!--ÓÃÓÚÍ¨ÓÃ¼ÆËãµÄÊôÐÔ£¬Ö÷ÒªÔÚÕ½¶·¼ÆËãÊ±ÉèÖÃ»ñÈ¡µ±Ç°¹¥»÷Ä¿±êÊýÁ¿  -->
-		<property name="CurTargetCount" type="int" public="false" private="false" save="true" desc="¶¨ÐÔ²ÎÊý2"/>	
+		<!--ç”¨äºŽé€šç”¨è®¡ç®—çš„å±žæ€§ï¼Œä¸»è¦åœ¨æˆ˜æ–—è®¡ç®—æ—¶è®¾ç½®èŽ·å–å½“å‰æ”»å‡»ç›®æ ‡æ•°é‡  -->
+		<property name="CurTargetCount" type="int" public="false" private="false" save="true" desc="å®šæ€§å‚æ•°2"/>	
 		
-		<property name="Stiff" type="float" public="false" private="false" save="false" desc="Ó²Ö±"/>
-		<property name="HateRatio" type="int" public="false" private="false" save="false" desc="³ðºÞÏµÊý ¿ÉÒÔ±»buffÐÞÕýÄ¬ÈÏ0"/>
-		<property name="DownFallDamageRatio" type="int" public="false" private="false" save="false" desc="µøÂäÉËº¦ÐÞÕýÏµÊý Ä¬ÈÏ0"/>
-		<property name="HealMul" type="float" public="false" private="false" save="false" desc="ÖÎÁÆ±¶ÂÊ"/>
-		<property name="HardinessDecRatio" type="float" public="false" private="false" save="false" desc="×°±¸ÄÍ¾Ã¼õÉÙ±ÈÀý"/>
-		<!--Õ½¶·Á¦  -->
-		<property name="FightPower" type="int" public="false" private="true" save="true" desc="Õ½¶·Á¦"/>
-		<!--ÐÒÔËÖµ  -->
-		<property name="FortunateValue" type="int" public="false" private="false" save="false" desc="ÐÒÔËÖµ"/>
-		<property name="FortunateValueAdd" type="int" public="false" private="false" save="false" desc="ÐÒÔËÖµ"/>
+		<property name="Stiff" type="float" public="false" private="false" save="false" desc="ç¡¬ç›´"/>
+		<property name="HateRatio" type="int" public="false" private="false" save="false" desc="ä»‡æ¨ç³»æ•° å¯ä»¥è¢«buffä¿®æ­£é»˜è®¤0"/>
+		<property name="DownFallDamageRatio" type="int" public="false" private="false" save="false" desc="è·Œè½ä¼¤å®³ä¿®æ­£ç³»æ•° é»˜è®¤0"/>
+		<property name="HealMul" type="float" public="false" private="false" save="false" desc="æ²»ç–—å€çŽ‡"/>
+		<property name="HardinessDecRatio" type="float" public="false" private="false" save="false" desc="è£…å¤‡è€ä¹…å‡å°‘æ¯”ä¾‹"/>
+		<!--æˆ˜æ–—åŠ›  -->
+		<property name="FightPower" type="int" public="false" private="true" save="true" desc="æˆ˜æ–—åŠ›"/>
+		<!--å¹¸è¿å€¼  -->
+		<property name="FortunateValue" type="int" public="false" private="false" save="false" desc="å¹¸è¿å€¼"/>
+		<property name="FortunateValueAdd" type="int" public="false" private="false" save="false" desc="å¹¸è¿å€¼"/>
 	</properties>
 </object>

@@ -4,10 +4,10 @@ require("share\\pk_define")
 require("share\\logicstate_define")
 require("share\\item_static_data_define")
 
--- ÄÜ·ñÊ¹ÓÃÒ»¸öÎïÆ·µÄÅĞ¶Ï
+-- èƒ½å¦ä½¿ç”¨ä¸€ä¸ªç‰©å“çš„åˆ¤æ–­
 function can_use(item, target)
 
-	-- ±£»¤
+	-- ä¿æŠ¤
 	if not nx_exists(item) then
 		return 0
 	end
@@ -15,18 +15,18 @@ function can_use(item, target)
 	return 1
 end
 
---Ê¹ÓÃÎïÆ·µÄÍ¨ÓÃ½Å±¾
---·µ»Ø0Ê¹ÓÃ³É¹¦
---·µ»Ø1Ê¹ÓÃÊ§°Ü
+--ä½¿ç”¨ç‰©å“çš„é€šç”¨è„šæœ¬
+--è¿”å›0ä½¿ç”¨æˆåŠŸ
+--è¿”å›1ä½¿ç”¨å¤±è´¥
 function on_use(item, target)
-	-- ÓĞĞ§ĞÔ¼ì²é£º¸ÃÎïÆ·ÊÇ·ñ´æÔÚ
+	-- æœ‰æ•ˆæ€§æ£€æŸ¥ï¼šè¯¥ç‰©å“æ˜¯å¦å­˜åœ¨
 	if not nx_exists(item) then
 		return 0
 	end
 		
-    local selftype = nx_query_property(target,"Type")--×ÔÉíÀàĞÍ,ÊÇNPC»¹ÊÇplayer
+    local selftype = nx_query_property(target,"Type")--è‡ªèº«ç±»å‹,æ˜¯NPCè¿˜æ˜¯player
 	local skill_id = nx_query_property(item, "Skill1")
-    --Ö÷¶¯´¥·¢¼¼ÄÜ
+    --ä¸»åŠ¨è§¦å‘æŠ€èƒ½
     local skill
 	if selftype == TYPE_PLAYER  and skill_id~=nil and skill_id~=""then 
 	    skill =get_temp_skillobj(target,skill_id)
@@ -36,24 +36,24 @@ function on_use(item, target)
 	
     if  nx_exists(skill) then
            local result =  nx_use_skill_to_target(target, skill)
-           if result ~=1 then--Ê¹ÓÃÊ§°Ü
+           if result ~=1 then--ä½¿ç”¨å¤±è´¥
                return 0
            end
     end
-	--ÎïÆ·ÀàĞÍ
+	--ç‰©å“ç±»å‹
 	local itemtype = nx_query_property(item, "ItemType")
 	--[[
-	elseif itemtype == ITEMTYPE_HUICHENG_TONGPIAO then	--ÂÃµêÍ¨Æ±»Ø¼Ò
+	elseif itemtype == ITEMTYPE_HUICHENG_TONGPIAO then	--æ—…åº—é€šç¥¨å›å®¶
 		return useitem_return(item, target)--]]
-	if itemtype == ITEMTYPE_COMPOSITE_FORMULA then --ºÏ³ÉÅä·½
+	if itemtype == ITEMTYPE_COMPOSITE_FORMULA then --åˆæˆé…æ–¹
 		return useitem_formula(item, target)
-	--elseif itemtype == ITEMTYPE_GOHOME then -- Ê¹ÓÃ»Ø³ÇµÀ¾ß
+	--elseif itemtype == ITEMTYPE_GOHOME then -- ä½¿ç”¨å›åŸé“å…·
 	--	return useitem_go_home(item, target)
-	elseif itemtype == ITEMTYPE_ADD_TASK then -- ´¥·¢ÈÎÎñ
+	elseif itemtype == ITEMTYPE_ADD_TASK then -- è§¦å‘ä»»åŠ¡
 		return useitem_trigger_task(item, target)
 	elseif itemtype == ITEMTYPE_DEBUF then
         return useitem_remove_debuffer(item, target)
-    elseif itemtype == ITEMTYPE_FRAGMENT_COMPOSE then --ËéÆ¬ºÏ³É
+    elseif itemtype == ITEMTYPE_FRAGMENT_COMPOSE then --ç¢ç‰‡åˆæˆ
         return useitem_fragment_compose(item, target)
 	end
 	
@@ -107,7 +107,7 @@ function useitem_remove_debuffer(item, target)
 	end
 
 	
-	--Çå³ı
+	--æ¸…é™¤
 	local ncount = table.getn(array)
   	for k = 1, ncount do
  	    if nx_string(array[k]) ~= "" then
@@ -142,12 +142,12 @@ function useitem_return(item, target)
   nx_switch_locate(target,senceid,x,y,z,orient)
 end
 
---Ìí¼ÓÅä·½
+--æ·»åŠ é…æ–¹
 function useitem_formula(item, target)	
 	--[[
 	local formula_name = nx_item_static_query(item, Item_IngredientPack_FormulaID)
 	if 1 == nx_add_formula_to_player(target, formula_name) then
-		--Ìí¼Ó³É¹¦,¼õÉÙÊıÁ¿
+		--æ·»åŠ æˆåŠŸ,å‡å°‘æ•°é‡
 		nx_inc_property(item, "Amount", -1)
 	end
 	--]]
@@ -161,15 +161,15 @@ function useitem_formula(item, target)
 	return false;
 end
 
--- ÄÜ·ñÊ¹ÓÃ»Ø³ÇµÀ¾ß
+-- èƒ½å¦ä½¿ç”¨å›åŸé“å…·
 function can_useitem_go_home(item, player)
 	local stall_state = nx_query_property(player, "StallState")
-	-- °ÚÌ¯×¼±¸ »ò °ÚÌ¯ÖĞ
+	-- æ‘†æ‘Šå‡†å¤‡ æˆ– æ‘†æ‘Šä¸­
 	if nx_int(stall_state) == nx_int(1) or nx_int(stall_state) == nx_int(2) then
 		return 0
 	end
 
-	-- Èç¹ûÔÚÕ½¶·×´Ì¬ÅĞ¶ÏÄÜ²»ÄÜÊ¹ÓÃ¸ÃÎïÆ·
+	-- å¦‚æœåœ¨æˆ˜æ–—çŠ¶æ€åˆ¤æ–­èƒ½ä¸èƒ½ä½¿ç”¨è¯¥ç‰©å“
 	--[[
 	if not nx_find_property(item, "Para4") then
 		return 0
@@ -186,21 +186,21 @@ function can_useitem_go_home(item, player)
 	return 1
 end
 
--- Ê¹ÓÃ»Ø³ÇµÀ¾ß
+-- ä½¿ç”¨å›åŸé“å…·
 function useitem_go_home(item, player)
 	nx_inc_property(item, "Amount", -1)
 	nx_go_home(player)
 	return 1
 end
 
--- Ê¹ÓÃ»Ø³ÇµÀ¾ß¿ªÊ¼ÀäÈ´ºó
+-- ä½¿ç”¨å›åŸé“å…·å¼€å§‹å†·å´å
 function after_cooldown_useitem_go_home(item, player)
 	if not nx_find_property(item, "Para1") then
 		return
 	end	
 	local ret_type = nx_query_property(item, "Para1")
 
-	if nx_int(ret_type) == nx_int(0) then     -- »Ø³Ç ×î½ü°ó¶¨µã
+	if nx_int(ret_type) == nx_int(0) then     -- å›åŸ æœ€è¿‘ç»‘å®šç‚¹
 		if not nx_find_property(player, "RelivePositon") then
 			return
 		end
@@ -220,23 +220,23 @@ function after_cooldown_useitem_go_home(item, player)
 		local orient = nx_float(pos_table[5])
 
 
-		-- 2010-4-8 wanglei ÕâÀïÒªÏÈ¼õĞ¡ÎïÆ·µÄÊıÁ¿ È»ºóÔÚÇĞ»»³¡¾°
-		-- ±¾ÈËÈÏÎª µ±ÇĞ»»³¡¾°Ê± Íæ¼ÒµÄÊı¾İ»á¿½±´Ò»·İ ´«ËÍµ½ ÁíÒ»¸ö³¡¾°
-		-- ËùÒÔÓ¦¸ÃÔÚÇĞ»»³¡¾°Ç° ¼õĞ¡Êı¾İ
-		-- Èç¹ûÔÚÇĞ»»³¡¾°ºó ½«ÊıÁ¿¼õĞ¡ Ö»»á¸Ä±äµ±Ç°³¡¾°ÖĞµÄÎïÆ·Êı¾İ
-		-- ¶ø ĞÂ¿½±´µÄÊı¾İ ²»»á¸Ä±ä
+		-- 2010-4-8 wanglei è¿™é‡Œè¦å…ˆå‡å°ç‰©å“çš„æ•°é‡ ç„¶ååœ¨åˆ‡æ¢åœºæ™¯
+		-- æœ¬äººè®¤ä¸º å½“åˆ‡æ¢åœºæ™¯æ—¶ ç©å®¶çš„æ•°æ®ä¼šæ‹·è´ä¸€ä»½ ä¼ é€åˆ° å¦ä¸€ä¸ªåœºæ™¯
+		-- æ‰€ä»¥åº”è¯¥åœ¨åˆ‡æ¢åœºæ™¯å‰ å‡å°æ•°æ®
+		-- å¦‚æœåœ¨åˆ‡æ¢åœºæ™¯å å°†æ•°é‡å‡å° åªä¼šæ”¹å˜å½“å‰åœºæ™¯ä¸­çš„ç‰©å“æ•°æ®
+		-- è€Œ æ–°æ‹·è´çš„æ•°æ® ä¸ä¼šæ”¹å˜
 		nx_inc_property(item, "Amount", -1)
 
 		nx_switch_locate(player, scene_id, x, y, z, orient)
 
-	elseif nx_int(ret_type) == nx_int(1) then -- »Ø³öÉúµã
+	elseif nx_int(ret_type) == nx_int(1) then -- å›å‡ºç”Ÿç‚¹
 		local scene_id = nx_int(nx_get_scene_id())
 
-		-- 2010-4-8 wanglei ÕâÀïÒªÏÈ¼õĞ¡ÎïÆ·µÄÊıÁ¿ È»ºóÔÚÇĞ»»³¡¾°
-		-- ±¾ÈËÈÏÎª µ±ÇĞ»»³¡¾°Ê± Íæ¼ÒµÄÊı¾İ»á¿½±´Ò»·İ ´«ËÍµ½ ÁíÒ»¸ö³¡¾°
-		-- ËùÒÔÓ¦¸ÃÔÚÇĞ»»³¡¾°Ç° ¼õĞ¡Êı¾İ
-		-- Èç¹ûÔÚÇĞ»»³¡¾°ºó ½«ÊıÁ¿¼õĞ¡ Ö»»á¸Ä±äµ±Ç°³¡¾°ÖĞµÄÎïÆ·Êı¾İ
-		-- ¶ø ĞÂ¿½±´µÄÊı¾İ ²»»á¸Ä±ä
+		-- 2010-4-8 wanglei è¿™é‡Œè¦å…ˆå‡å°ç‰©å“çš„æ•°é‡ ç„¶ååœ¨åˆ‡æ¢åœºæ™¯
+		-- æœ¬äººè®¤ä¸º å½“åˆ‡æ¢åœºæ™¯æ—¶ ç©å®¶çš„æ•°æ®ä¼šæ‹·è´ä¸€ä»½ ä¼ é€åˆ° å¦ä¸€ä¸ªåœºæ™¯
+		-- æ‰€ä»¥åº”è¯¥åœ¨åˆ‡æ¢åœºæ™¯å‰ å‡å°æ•°æ®
+		-- å¦‚æœåœ¨åˆ‡æ¢åœºæ™¯å å°†æ•°é‡å‡å° åªä¼šæ”¹å˜å½“å‰åœºæ™¯ä¸­çš„ç‰©å“æ•°æ®
+		-- è€Œ æ–°æ‹·è´çš„æ•°æ® ä¸ä¼šæ”¹å˜
 		nx_inc_property(item, "Amount", -1)
 
 		nx_switch_born(player, scene_id)
@@ -245,39 +245,39 @@ function after_cooldown_useitem_go_home(item, player)
 
 end
 
---ÊÇ·ñÊÇ±¦Ê¯
+--æ˜¯å¦æ˜¯å®çŸ³
 function accord_inlay(item)
 
     local itemtype = nx_query_property(item, "ItemType")
    
-    if ITEMTYPE_INLAY1<=itemtype and itemtype<=ITEMTYPE_INLAY4 then -- ÊÇ±¦Ê¯
+    if ITEMTYPE_INLAY1<=itemtype and itemtype<=ITEMTYPE_INLAY4 then -- æ˜¯å®çŸ³
         return 1
     end
     
     return 0
 end
 
---´´½¨»ñÈ¡ÁÙÊ±µÀ¾ß²úÉúµÄ¼¼ÄÜ¶ÔÏó
+--åˆ›å»ºè·å–ä¸´æ—¶é“å…·äº§ç”Ÿçš„æŠ€èƒ½å¯¹è±¡
 function get_temp_skillobj(self,skill_id)
 
     local skill 
     local container = nx_get_container_fromconfigid(self,nx_widestr("OtherSkillContainer"))
 
     if nx_exists(container) then
-         skill = nx_container_find_item(container,skill_id) --ÏÈÕÒ
+         skill = nx_container_find_item(container,skill_id) --å…ˆæ‰¾
          if  not nx_exists(skill) then
-            skill = nx_create_from_config(container,skill_id)--ÕÒ²»µ½¾Í²å£¡!
+            skill = nx_create_from_config(container,skill_id)--æ‰¾ä¸åˆ°å°±æ’ï¼!
          end
     end
     
     return skill
 end
 
---µÀ¾ßµÄÊ¹ÓÃÏûÊ§ÎÊÌâ
+--é“å…·çš„ä½¿ç”¨æ¶ˆå¤±é—®é¢˜
 function use_item_disappear(item)
-    nx_inc_property(item,"CurrentUseNumber",1)--Ê¹ÓÃ´ÎÊı+1
+    nx_inc_property(item,"CurrentUseNumber",1)--ä½¿ç”¨æ¬¡æ•°+1
     local disappear = nx_query_property(item,"Disappear")
-    if nx_number(disappear)>0 then--ÒªÏûÊ§µÄ
+    if nx_number(disappear)>0 then--è¦æ¶ˆå¤±çš„
         nx_inc_property(item, "Amount", -1)
     end
 end

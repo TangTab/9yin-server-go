@@ -1,168 +1,168 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--³èÎï»ù´¡ÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--å® ç‰©åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="CarrierType" type="string" public="true" private="false" save="false" desc="¿ÉÒÔÅäÖÃ¶à¸öÊôÐÔÓÃ¶ººÅ·Ö¸î 0-¿ÉÂ½µØÐÐ×ß 1-Ë®ÖÐ 2-¿ÕÖÐ"/>
-		<property name="CarrierCtlType" type="int" public="true" private="false"  save="false" desc="Õ½¶·ÔØ¾ß¿ØÖÆÀàÐÍ£¬0-Íæ¼Ò¿ÉÒÔ¿ØÖÆ 1-¹Ì¶¨Â·µãNPC"/>
-		<property name="PatrolModule" type="int" public="false" private="false" save="false" desc="¹Ì¶¨Â·µãÔØ¾ßnpcÑ²ÂßÄ£Ê½"/>
-		<property name="PatrolTimes" type="int" public="false" private="false" save="false" desc="¹Ì¶¨Â·µãÔØ¾ßnpc,Ñ²Âß´ÎÊý,0-Ä¬ÈÏ1´Î£¬-1-ÎÞÊý´Î"/>
-		<property name="CarrierPathId" type="string" public="false" private="false" save="false" desc="Õ½¶·ÔØ¾ßÂ·¾¶µãÅäÖÃ"/>
-		<property name="CarrierPathCyc" type="int" public="false" private="false" save="false" desc="Õ½¶·ÔØ¾ßÂ·¾¶Ñ­»·ÐÐ×ß 0-²»Ñ­»· 1-Ñ­»·×ß"/>
-		<property name="CarrierMoveType" type="int" public="false" private="false" save="false" desc="ÐÐ×ß·½Ê½ 1-×ÔÓÉÐÐ¶¯ 2-²»¿ÉÌø 3-Ö»ÄÜÐý×ª 4-²»ÄÜÈÎºÎ²Ù×÷"/>
-		<property name="CarrierDownInFight" type="int" public="true" private="false" save="false" desc="ÊÇ·ñÔÊÐíÕ½¶·ÖÐÏÂÀ´ 0-ÔÊÐí  1-²»ÔÊÐí"/>
-		<property name="CarrierViewAngle" type="int" public="true" private="false" save="false" desc="Õ½¶·ÔØ¾ß³õÊ¼»¯ÊÓ½Ç 0-×ÔÓÉÊÓ½Ç  1-TPS  2-FPS 3-¾Ñ»÷"/>
-		<property name="CarrierViews" type="string" public="false" private="false" save="false" desc="Õ½¶·ÔØ¾ßÔÊÐíÇÐ»»µÄÊÓ½Ç, ¿ÉÑ¡ÓÐ 0-×ÔÓÉÊÓ½Ç 1-TPS  2-FPS 3-¾Ñ»÷, ¸ñÊ½:1,2,3 µÃ°´Ë³ÐòÀ´"/>
-		<property name="DeflectAngle" type="float" public="false" private="false" save="false" desc="ÔØ¾ßµÚÈýÊÓ½ÇÆ«ÒÆ½Ç¶È,ÕýÊýÏòÓÒÆ«£¬¸ºÊýÏò×óÆ«"/>
-		<property name="DeflectRadius" type="float" public="false" private="false" save="false" desc="ÔØ¾ßµÚÈýÊÓ½ÇÉãÏñ»ú¹Û²ì°ë¾¶,Ä¬ÈÏ5.0"/>
-		<property name="CarrierAy" type="float" public="true" private="false" save="false" desc="µ±Ç°½Ç¶È"/>
-		<property name="FaceAngle" type="float" public="true" private="false" save="false" desc="ÃæÏò"/>
-		<property name="CarrierLevel" type="int" public="false" private="false" save="false" desc="ÉÏÔØ¾ßÆï³ËµÈ¼¶ÏÞÖÆ"/>
-		<property name="BackImage" type="string" public="false" private="false" save="false" desc="ÔØ¾ßÇÐÃæÍ¼±³¾°Í¼Æ¬Â·¾¶"/>
-		<property name="BulletPath" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ¾ßÓÐµ¯µÀÅ×ÎïÏß"/>
-		<property name="BulletPathMinSpeed" type="float" public="false" private="false" save="false" desc="µ¯µÀÅ×ÎïÏßËÙ¶ÈµÄ×îÐ¡ËÙ¶È"/>
-		<property name="BulletPathSpeed" type="float" public="false" private="false" save="false" desc="µ¯µÀÅ×ÎïÏßËÙ¶È"/>
-		<property name="MountUseConditionID" type="int" public="false" private="false" save="false" desc="ÉÏÔØ¾ßÌõ¼þ£¬ÈçÈÎÎñµÈ"/>
-		<property name="CreateErrorState" type="string" public="false" private="false" save="false" desc="Íæ¼ÒÔÚÈçÑ£ÔÎ£¬µÈ×´Ì¬ÏÂ²»ÄÜÕÙ»½ÔØ¾ß,ÓëbuffµÄÀàÐÍºÅÏà¶ÔÓ¦"/>
-		<property name="Belongpeople" type="byte" public="false" private="false" save="false" desc="µ±Ç°ÔØ¾ßÉè²»ÉèÖÃÖ÷ÈË£¬0Ä¬ÈÏÉèÖ÷ÈË£¬1²»ÉèÖÃÖ÷ÈË"/>
-		<property name="Master" type="widestr" public="true" private="false" save="false" desc="Ö÷ÈË"/>
-		<property name="CameraBindHeight" type="float" public="false" private="false" save="false" desc="ÉãÏñ»ú°ó¶¨¸ß¶È"/>
-		<property name="SeatSkillPackID" type="string" public="false" private="false" save="false" desc="×ùÎ»¼¼ÄÜ°ü, ¸ñÊ½:0,skillpack1,skillpack2;1,skillpack3,skillpack4  0-×ÔÓÉÊÓ½Ç 1-TPS 2-FPS 3-¾Ñ»÷"/>
-		<property name="SeatPackID" type="string" public="false" private="false" save="false" desc="×ùÎ»°ü"/>
-		<property name="NDeleteCarrier" type="int" public="false" private="false" save="false" desc="ÈËÔ±ÏÂÀ´ºóÊÇ·ñÉ¾³ýÔØ¾ß 1 ²»ÐèÒªÉ¾³ý"/>
-		<property name="DeadDeleteCarrier" type="int" public="false" private="false" save="false" desc="ËÀÍöºóÊÇ·ñÁ¢¿ÌÉ¾³ýÔØ¾ß 1 ²»ÐèÒªÉ¾³ý"/>
-		<property name="CarrierCanGetExp" type="int" public="false" private="false" save="false" desc="ÔØ¾ßÉ±ËÀNpcÊÇ·ñ¿ÉÒÔ»ñµÃ¾­Ñé 1 ¿ÉÒÔ»ñµÃ"/>
-		<property name="AngleSpeed" type="float" public="false" private="false" save="false" desc="ÔØ¾ßÐý×ªËÙ¶È"/>
-		<property name="RollSpeed" type="float" public="true" private="false" save="false" desc="Ðý×ªËÙ¶È"/>
-		<property name="IsHide" type="int" public="false" private="false" save="false" desc="ÔØ¼¼ÄÜ¿ØÖÆ½çÃæÊÇ·ñÒþ²Ø"/>
-		<property name="BCLiftTime" type="int" public="false" private="false" save="false" desc="ÔØ¾ßÉúÃüÖÜÆÚ"/>
-		<property name="CarrierAim" type="string" public="false" private="false" save="false" desc="µÚÒ»ÈË³ÆÃé×¼½çÃæÂ·¾¶"/>
-		<property name="BoneRollProp" type="string" public="false" private="false" save="false" desc="µÚÒ»ÈË³ÆÔØ¾ß¹Ç÷ÀÐý×ªÊôÐÔ"/>
-		<property name="MainObj" type="object" public="true" private="true" save="false" desc="¸½ÊôÖ÷ÌåÔØ¾ßPERSISTID"/>
-		<property name="SeatIndex" type="int" public="true" private="true" save="false" desc="ËùÊô×ùÎ»ºÅ"/>
-		<property name="EnergyWellID" type="int" public="true" private="false" save="false" desc="ÄÜÁ¿¾®ID"/>
-		<property name="IsPlayGetOnAction" type="int" public="true" private="true" save="false" desc="ÊÇ·ñ²¥·ÅÉÏÔØ¾ßµÄ¶¯»­"/>
-		<property name="GetOnCarrierLimitDistance" type="float" public="false" private="false" save="false" desc="ÔÊÐíÉÏÔØ¾ßµÄ¾àÀë"/>
+		<property name="CarrierType" type="string" public="true" private="false" save="false" desc="å¯ä»¥é…ç½®å¤šä¸ªå±žæ€§ç”¨é€—å·åˆ†å‰² 0-å¯é™†åœ°è¡Œèµ° 1-æ°´ä¸­ 2-ç©ºä¸­"/>
+		<property name="CarrierCtlType" type="int" public="true" private="false"  save="false" desc="æˆ˜æ–—è½½å…·æŽ§åˆ¶ç±»åž‹ï¼Œ0-çŽ©å®¶å¯ä»¥æŽ§åˆ¶ 1-å›ºå®šè·¯ç‚¹NPC"/>
+		<property name="PatrolModule" type="int" public="false" private="false" save="false" desc="å›ºå®šè·¯ç‚¹è½½å…·npcå·¡é€»æ¨¡å¼"/>
+		<property name="PatrolTimes" type="int" public="false" private="false" save="false" desc="å›ºå®šè·¯ç‚¹è½½å…·npc,å·¡é€»æ¬¡æ•°,0-é»˜è®¤1æ¬¡ï¼Œ-1-æ— æ•°æ¬¡"/>
+		<property name="CarrierPathId" type="string" public="false" private="false" save="false" desc="æˆ˜æ–—è½½å…·è·¯å¾„ç‚¹é…ç½®"/>
+		<property name="CarrierPathCyc" type="int" public="false" private="false" save="false" desc="æˆ˜æ–—è½½å…·è·¯å¾„å¾ªçŽ¯è¡Œèµ° 0-ä¸å¾ªçŽ¯ 1-å¾ªçŽ¯èµ°"/>
+		<property name="CarrierMoveType" type="int" public="false" private="false" save="false" desc="è¡Œèµ°æ–¹å¼ 1-è‡ªç”±è¡ŒåŠ¨ 2-ä¸å¯è·³ 3-åªèƒ½æ—‹è½¬ 4-ä¸èƒ½ä»»ä½•æ“ä½œ"/>
+		<property name="CarrierDownInFight" type="int" public="true" private="false" save="false" desc="æ˜¯å¦å…è®¸æˆ˜æ–—ä¸­ä¸‹æ¥ 0-å…è®¸  1-ä¸å…è®¸"/>
+		<property name="CarrierViewAngle" type="int" public="true" private="false" save="false" desc="æˆ˜æ–—è½½å…·åˆå§‹åŒ–è§†è§’ 0-è‡ªç”±è§†è§’  1-TPS  2-FPS 3-ç‹™å‡»"/>
+		<property name="CarrierViews" type="string" public="false" private="false" save="false" desc="æˆ˜æ–—è½½å…·å…è®¸åˆ‡æ¢çš„è§†è§’, å¯é€‰æœ‰ 0-è‡ªç”±è§†è§’ 1-TPS  2-FPS 3-ç‹™å‡», æ ¼å¼:1,2,3 å¾—æŒ‰é¡ºåºæ¥"/>
+		<property name="DeflectAngle" type="float" public="false" private="false" save="false" desc="è½½å…·ç¬¬ä¸‰è§†è§’åç§»è§’åº¦,æ­£æ•°å‘å³åï¼Œè´Ÿæ•°å‘å·¦å"/>
+		<property name="DeflectRadius" type="float" public="false" private="false" save="false" desc="è½½å…·ç¬¬ä¸‰è§†è§’æ‘„åƒæœºè§‚å¯ŸåŠå¾„,é»˜è®¤5.0"/>
+		<property name="CarrierAy" type="float" public="true" private="false" save="false" desc="å½“å‰è§’åº¦"/>
+		<property name="FaceAngle" type="float" public="true" private="false" save="false" desc="é¢å‘"/>
+		<property name="CarrierLevel" type="int" public="false" private="false" save="false" desc="ä¸Šè½½å…·éª‘ä¹˜ç­‰çº§é™åˆ¶"/>
+		<property name="BackImage" type="string" public="false" private="false" save="false" desc="è½½å…·åˆ‡é¢å›¾èƒŒæ™¯å›¾ç‰‡è·¯å¾„"/>
+		<property name="BulletPath" type="int" public="false" private="false" save="false" desc="æ˜¯å¦å…·æœ‰å¼¹é“æŠ›ç‰©çº¿"/>
+		<property name="BulletPathMinSpeed" type="float" public="false" private="false" save="false" desc="å¼¹é“æŠ›ç‰©çº¿é€Ÿåº¦çš„æœ€å°é€Ÿåº¦"/>
+		<property name="BulletPathSpeed" type="float" public="false" private="false" save="false" desc="å¼¹é“æŠ›ç‰©çº¿é€Ÿåº¦"/>
+		<property name="MountUseConditionID" type="int" public="false" private="false" save="false" desc="ä¸Šè½½å…·æ¡ä»¶ï¼Œå¦‚ä»»åŠ¡ç­‰"/>
+		<property name="CreateErrorState" type="string" public="false" private="false" save="false" desc="çŽ©å®¶åœ¨å¦‚çœ©æ™•ï¼Œç­‰çŠ¶æ€ä¸‹ä¸èƒ½å¬å”¤è½½å…·,ä¸Žbuffçš„ç±»åž‹å·ç›¸å¯¹åº”"/>
+		<property name="Belongpeople" type="byte" public="false" private="false" save="false" desc="å½“å‰è½½å…·è®¾ä¸è®¾ç½®ä¸»äººï¼Œ0é»˜è®¤è®¾ä¸»äººï¼Œ1ä¸è®¾ç½®ä¸»äºº"/>
+		<property name="Master" type="widestr" public="true" private="false" save="false" desc="ä¸»äºº"/>
+		<property name="CameraBindHeight" type="float" public="false" private="false" save="false" desc="æ‘„åƒæœºç»‘å®šé«˜åº¦"/>
+		<property name="SeatSkillPackID" type="string" public="false" private="false" save="false" desc="åº§ä½æŠ€èƒ½åŒ…, æ ¼å¼:0,skillpack1,skillpack2;1,skillpack3,skillpack4  0-è‡ªç”±è§†è§’ 1-TPS 2-FPS 3-ç‹™å‡»"/>
+		<property name="SeatPackID" type="string" public="false" private="false" save="false" desc="åº§ä½åŒ…"/>
+		<property name="NDeleteCarrier" type="int" public="false" private="false" save="false" desc="äººå‘˜ä¸‹æ¥åŽæ˜¯å¦åˆ é™¤è½½å…· 1 ä¸éœ€è¦åˆ é™¤"/>
+		<property name="DeadDeleteCarrier" type="int" public="false" private="false" save="false" desc="æ­»äº¡åŽæ˜¯å¦ç«‹åˆ»åˆ é™¤è½½å…· 1 ä¸éœ€è¦åˆ é™¤"/>
+		<property name="CarrierCanGetExp" type="int" public="false" private="false" save="false" desc="è½½å…·æ€æ­»Npcæ˜¯å¦å¯ä»¥èŽ·å¾—ç»éªŒ 1 å¯ä»¥èŽ·å¾—"/>
+		<property name="AngleSpeed" type="float" public="false" private="false" save="false" desc="è½½å…·æ—‹è½¬é€Ÿåº¦"/>
+		<property name="RollSpeed" type="float" public="true" private="false" save="false" desc="æ—‹è½¬é€Ÿåº¦"/>
+		<property name="IsHide" type="int" public="false" private="false" save="false" desc="è½½æŠ€èƒ½æŽ§åˆ¶ç•Œé¢æ˜¯å¦éšè—"/>
+		<property name="BCLiftTime" type="int" public="false" private="false" save="false" desc="è½½å…·ç”Ÿå‘½å‘¨æœŸ"/>
+		<property name="CarrierAim" type="string" public="false" private="false" save="false" desc="ç¬¬ä¸€äººç§°çž„å‡†ç•Œé¢è·¯å¾„"/>
+		<property name="BoneRollProp" type="string" public="false" private="false" save="false" desc="ç¬¬ä¸€äººç§°è½½å…·éª¨éª¼æ—‹è½¬å±žæ€§"/>
+		<property name="MainObj" type="object" public="true" private="true" save="false" desc="é™„å±žä¸»ä½“è½½å…·PERSISTID"/>
+		<property name="SeatIndex" type="int" public="true" private="true" save="false" desc="æ‰€å±žåº§ä½å·"/>
+		<property name="EnergyWellID" type="int" public="true" private="false" save="false" desc="èƒ½é‡äº•ID"/>
+		<property name="IsPlayGetOnAction" type="int" public="true" private="true" save="false" desc="æ˜¯å¦æ’­æ”¾ä¸Šè½½å…·çš„åŠ¨ç”»"/>
+		<property name="GetOnCarrierLimitDistance" type="float" public="false" private="false" save="false" desc="å…è®¸ä¸Šè½½å…·çš„è·ç¦»"/>
 		
-		<property name="SwitchSceneID" type="dword" public="false" private="false" save="false" desc="´«ËÍ½øÄÜÁ¿¾®¹«»áÕ½³¡Ç°µÄ³¡¾°ID"/>
-		<property name="SwitchXpos" type="float" public="false" private="false" save="false" desc="´«ËÍ½øÄÜÁ¿¾®¹«»áÕ½³¡Ç°µÄx"/>
-		<property name="SwitchYpos" type="float" public="false" private="false" save="false" desc="´«ËÍ½øÄÜÁ¿¾®¹«»áÕ½³¡Ç°µÄy"/>
-		<property name="SwitchZpos" type="float" public="false" private="false" save="false" desc="´«ËÍ½øÄÜÁ¿¾®¹«»áÕ½³¡Ç°µÄz"/>
-		<property name="SwitchOri" type="float" public="false" private="false" save="false" desc="´«ËÍ½øÄÜÁ¿¾®¹«»áÕ½³¡Ç°µÄo"/>
-		<property name="ParkingState" type="dword" public="false" private="false" save="false" desc="ÔØ¾ßµÄÍ£¿¿×´Ì¬"/>
-		<property name="OutputCarrier" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÊÇÄÜÁî¾®Éú³ÉµÄÔØ¾ß"/>
-		<property name="CarrierSerialNo" type="string" public="false" private="false" save="false" desc="ÔØ¾ßÉú³ÉµÄÐòÁÐºÅ"/>
-		<property name="EWCarrierID" type="int" public="true" private="false" save="false" desc="ÄÜÁ¿¾®ÔØ¾ßID"/>
-		<property name="EWCarrierState" type="int" public="true" private="false" save="false" desc="ÄÜÁ¿¾®ÔØ¾ß×´Ì¬"/>
-		<property name="CarrierOwner" type="widestr" public="true" private="false" save="false" desc="ÔØ¾ßËùÓÐÕß"/>
-		<property name="CarrierRobber" type="widestr" public="false" private="false" save="false" desc="ÔØ¾ßÍµµÁÕß"/>
-		<property name="IsTemp" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÊÇÁÙÊ±ÏÔÊ¾ÓÃÔØ¾ß"/>
-		<property name="DelaySkill" type="object" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·ÅµÄ¼¼ÄÜ"/>
-		<property name="DelaySkillType" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÀàÐÍ£¬0ÎÞÄ¿±êµã¼¼ÄÜ£¬1ÓÐÄ¿±êµã¼¼ÄÜ"/>
-		<property name="DelaySkillHandType" type="int" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜ×óÓÒÊÖÀàÐÍ"/>
-		<property name="DelaySkillX" type="float" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜÄ¿±êµãx"/>
-		<property name="DelaySkillY" type="float" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜÄ¿±êµãy"/>
-		<property name="DelaySkillZ" type="float" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜÄ¿±êµãz"/>
-		<property name="DelaySkillTime" type="int" public="false" private="true" save="false" desc="¼¼ÄÜÑÓ³ÙÊ±¼äms"/>
-        <property name="TransPath" type="string" public="true" private="false" save="false" desc="µ±Ç°³¡¾°Â·ÏßÁÐ±í"/>
-        <property name="TransStep" type="int" public="true" private="false" save="false" desc="²½Êý"/>
-        <property name="TransSecID" type="string" public="true" private="false" save="false" desc="µ±Ç°Â·Ïß"/>
-		<property name="UpperRideAction" type="string" public="false" private="false" save="false" desc="Íæ¼ÒÆï³ËÔØ¾ßµÄÉÏ°ëÉí¶¯×÷Ãû"/>
-		<property name="FullRideAction" type="string" public="false" private="false" save="false" desc="Íæ¼ÒÆï³ËÔØ¾ßµÄÈ«Éí¶¯×÷Ãû"/>
-		<property name="ClimbInAction" type="string" public="false" private="false" save="false" desc="Íæ¼ÒÅÀ½øÔØ¾ßµÄ¶¯×÷Ãû"/>
-		<!--ÄÜÁ¿ÏûºÄ-->
-		<property name="CapacityID" type="string" public="false" private="false" save="false" desc="ÄÜÁ¿ÏûºÄ°ü"/>
+		<property name="SwitchSceneID" type="dword" public="false" private="false" save="false" desc="ä¼ é€è¿›èƒ½é‡äº•å…¬ä¼šæˆ˜åœºå‰çš„åœºæ™¯ID"/>
+		<property name="SwitchXpos" type="float" public="false" private="false" save="false" desc="ä¼ é€è¿›èƒ½é‡äº•å…¬ä¼šæˆ˜åœºå‰çš„x"/>
+		<property name="SwitchYpos" type="float" public="false" private="false" save="false" desc="ä¼ é€è¿›èƒ½é‡äº•å…¬ä¼šæˆ˜åœºå‰çš„y"/>
+		<property name="SwitchZpos" type="float" public="false" private="false" save="false" desc="ä¼ é€è¿›èƒ½é‡äº•å…¬ä¼šæˆ˜åœºå‰çš„z"/>
+		<property name="SwitchOri" type="float" public="false" private="false" save="false" desc="ä¼ é€è¿›èƒ½é‡äº•å…¬ä¼šæˆ˜åœºå‰çš„o"/>
+		<property name="ParkingState" type="dword" public="false" private="false" save="false" desc="è½½å…·çš„åœé çŠ¶æ€"/>
+		<property name="OutputCarrier" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ˜¯èƒ½ä»¤äº•ç”Ÿæˆçš„è½½å…·"/>
+		<property name="CarrierSerialNo" type="string" public="false" private="false" save="false" desc="è½½å…·ç”Ÿæˆçš„åºåˆ—å·"/>
+		<property name="EWCarrierID" type="int" public="true" private="false" save="false" desc="èƒ½é‡äº•è½½å…·ID"/>
+		<property name="EWCarrierState" type="int" public="true" private="false" save="false" desc="èƒ½é‡äº•è½½å…·çŠ¶æ€"/>
+		<property name="CarrierOwner" type="widestr" public="true" private="false" save="false" desc="è½½å…·æ‰€æœ‰è€…"/>
+		<property name="CarrierRobber" type="widestr" public="false" private="false" save="false" desc="è½½å…·å·ç›—è€…"/>
+		<property name="IsTemp" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ˜¯ä¸´æ—¶æ˜¾ç¤ºç”¨è½½å…·"/>
+		<property name="DelaySkill" type="object" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾çš„æŠ€èƒ½"/>
+		<property name="DelaySkillType" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½ç±»åž‹ï¼Œ0æ— ç›®æ ‡ç‚¹æŠ€èƒ½ï¼Œ1æœ‰ç›®æ ‡ç‚¹æŠ€èƒ½"/>
+		<property name="DelaySkillHandType" type="int" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½å·¦å³æ‰‹ç±»åž‹"/>
+		<property name="DelaySkillX" type="float" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½ç›®æ ‡ç‚¹x"/>
+		<property name="DelaySkillY" type="float" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½ç›®æ ‡ç‚¹y"/>
+		<property name="DelaySkillZ" type="float" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½ç›®æ ‡ç‚¹z"/>
+		<property name="DelaySkillTime" type="int" public="false" private="true" save="false" desc="æŠ€èƒ½å»¶è¿Ÿæ—¶é—´ms"/>
+        <property name="TransPath" type="string" public="true" private="false" save="false" desc="å½“å‰åœºæ™¯è·¯çº¿åˆ—è¡¨"/>
+        <property name="TransStep" type="int" public="true" private="false" save="false" desc="æ­¥æ•°"/>
+        <property name="TransSecID" type="string" public="true" private="false" save="false" desc="å½“å‰è·¯çº¿"/>
+		<property name="UpperRideAction" type="string" public="false" private="false" save="false" desc="çŽ©å®¶éª‘ä¹˜è½½å…·çš„ä¸ŠåŠèº«åŠ¨ä½œå"/>
+		<property name="FullRideAction" type="string" public="false" private="false" save="false" desc="çŽ©å®¶éª‘ä¹˜è½½å…·çš„å…¨èº«åŠ¨ä½œå"/>
+		<property name="ClimbInAction" type="string" public="false" private="false" save="false" desc="çŽ©å®¶çˆ¬è¿›è½½å…·çš„åŠ¨ä½œå"/>
+		<!--èƒ½é‡æ¶ˆè€—-->
+		<property name="CapacityID" type="string" public="false" private="false" save="false" desc="èƒ½é‡æ¶ˆè€—åŒ…"/>
 
-		<!-- µ¯Ò©ÏûºÄ-->
-    <property name="AmmoID"       type="string" public="false" private="false" save="false" desc="µ¯Ò©°üID"/>
-		<property name="AmmoValue"    type="string" public="true" private="true" save="false" realtime="false" desc="µ±Ç°µ¯Ò©ÖµÅäÖÃ"/>
-		<property name="AmmoValueMax" type="string" public="true" private="true" save="false" realtime="false" desc="µ±Ç°µ¯Ò©×î´óÅäÖÃ"/>
-    <property name="AmmoState"    type="string" public="false" private="false" save="false" realtime="false" desc="µ±Ç°µ¯¼Ð×´Ì¬"/>
-    <property name="AmmoNum"      type="int"    public="true" private="true" save="false" realtime="false" desc="µ±Ç°µ¯¼ÐÊýÁ¿ÅäÖÃ"/>
+		<!-- å¼¹è¯æ¶ˆè€—-->
+    <property name="AmmoID"       type="string" public="false" private="false" save="false" desc="å¼¹è¯åŒ…ID"/>
+		<property name="AmmoValue"    type="string" public="true" private="true" save="false" realtime="false" desc="å½“å‰å¼¹è¯å€¼é…ç½®"/>
+		<property name="AmmoValueMax" type="string" public="true" private="true" save="false" realtime="false" desc="å½“å‰å¼¹è¯æœ€å¤§é…ç½®"/>
+    <property name="AmmoState"    type="string" public="false" private="false" save="false" realtime="false" desc="å½“å‰å¼¹å¤¹çŠ¶æ€"/>
+    <property name="AmmoNum"      type="int"    public="true" private="true" save="false" realtime="false" desc="å½“å‰å¼¹å¤¹æ•°é‡é…ç½®"/>
 
 
-		<!--ÒÆ¶¯ÏÞÖÆÊôÐÔ-->
-		<property name="CantMove" type="byte" public="true" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»ÒÆ¶¯ 0:¿ÉÒÆ¶¯ 1:²»ÄÜÒÆ¶¯"/>
-		<property name="CantMoveAdd" type="byte" public="true" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»ÒÆ¶¯ 0:¿ÉÒÆ¶¯ 1:²»ÄÜÒÆ¶¯"/>
-		<property name="CantRotate" type="byte" public="true" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»×ª¶¯ 0:¿É×ª¶¯ 1:²»ÄÜ×ª¶¯"/>
-		<property name="CantAttack" type="byte" public="true" private="true" save="false" desc="ÊÇ·ñÄÜ¹»¹¥»÷"/>
-		<property name="CantBeAttack" type="byte" public="true" private="true" save="false" desc="ÊÇ·ñÄÜ¹»±»¹¥»÷ 0:¿É±»¹¥»÷ 1£º²»¿É±»¹¥»÷"/>
-		<property name="CantBeAttack2" type="byte" public="true" private="true" save="false" desc="²»ÄÜ±»¹¥»÷£¬µ«²»Àë¿ªÕ½¶·"/>
-		<property name="LockAction" type="int" public="true" private="false" save="false" desc="²»ÄÜ±»´ò¶Ï£¬²»ÄÜÊ¹ÓÃ¼¼ÄÜ£¬²»ÄÜÒÆ¶¯"/>
-		<!--<property name="CantBreakAction" type="int" public="true" private="true" save="false" desc="²»ÄÜ´ò¶Ïµ±Ç°Ê©·¨¼°ÃüÖÐ¶¯×÷"/>-->
-		<property name="CantUseSkill" type="byte" public="true" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃ¼¼ÄÜ"/>
-		<property name="CantUseSkillAdd" type="byte" public="true" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃ¼¼ÄÜ"/>
-		<property name="CantUseItem" type="byte" public="true" private="true" save="false" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃµÀ¾ß"/>
-		<property name="CantUseItemAdd" type="byte" public="true" private="true" save="false" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃµÀ¾ß"/>
-		<property name="CanBeKilled" type="byte" public="true" private="false" save="false" desc="ÊÇ·ñÄÜ¹»±»É±ËÀ"/>
-		<property name="CantRotateAdd" type="byte" public="true" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»×ª¶¯ 0:¿É×ª¶¯ 1:²»ÄÜ×ª¶¯"/>
-		<property name="CantAttackAdd" type="byte" public="true" private="true" save="false" desc="ÊÇ·ñÄÜ¹»¹¥»÷"/>
-		<property name="CantBeLtd" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜÏÞÖÆ(°üÀ¨ÏÂÃæµÄ¼¸ÖÖ)"/>
-		<property name="CantBeLtdSpd" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜ¼õËÙ"/>
-		<property name="CantBeLtdHitMove" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜ»÷·É»÷ÍË»÷µ¹µÈ"/>
-		<property name="CantBeLtdMove" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜ²»ÄÜÒÆ¶¯"/>
-		<property name="CantBeLtdUseSkill" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜ²»ÄÜÊ¹ÓÃ¼¼ÄÜÏÞÖÆ"/>
-		<property name="CantBeLtdAttack" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜ¹¥»÷ÏÞÖÆ"/>
-		<property name="CantBeLtdShift" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÊÜ±äÐÎÏÞÖÆ"/>
-		<property name="CantBeLtdRotate" type="byte" public="true" private="false" save="false" realtime="true" desc="²»ÄÜ×ªÉíÏÞÖÆ"/>
-		<property name="PauseAction" type="int" public="true" private="true" save="false" desc="¶¯×÷ÔÝÍ£"/>
-		<property name="StrCantUseSkill" type="byte" public="true" private="false" save="false" realtime="true" desc="ÈÎºÎÇé¿ö¶¼²»ÄÜÊÍ·Å¼¼ÄÜ"/>
-		<property name="StrCantUseSkillAdd" type="byte" public="true" private="false" save="false" realtime="true" desc="ÈÎºÎÇé¿ö¶¼²»ÄÜÊÍ·Å¼¼ÄÜ"/>
-		<property name="CantJump" type="byte" public="true" private="true" save="false" realtime="true" desc="²»ÄÜÌøÔ¾"/>
-		<property name="damagedeffect" type="string" public="true" private="true" save="false" realtime="true" desc="ÆÆËðÌØÐ§"/>
-		<property name="CarrierCollideRadius" type="float" public="false" private="false" save="false" desc="ÔØ¾ßÅö×²°ë¾¶£¬ÓÃÓÚÒÆ¶¯Ê±µÄÅö×²¼ì²â£¬Ä¬ÈÏ0.5"/>
+		<!--ç§»åŠ¨é™åˆ¶å±žæ€§-->
+		<property name="CantMove" type="byte" public="true" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿç§»åŠ¨ 0:å¯ç§»åŠ¨ 1:ä¸èƒ½ç§»åŠ¨"/>
+		<property name="CantMoveAdd" type="byte" public="true" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿç§»åŠ¨ 0:å¯ç§»åŠ¨ 1:ä¸èƒ½ç§»åŠ¨"/>
+		<property name="CantRotate" type="byte" public="true" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿè½¬åŠ¨ 0:å¯è½¬åŠ¨ 1:ä¸èƒ½è½¬åŠ¨"/>
+		<property name="CantAttack" type="byte" public="true" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿæ”»å‡»"/>
+		<property name="CantBeAttack" type="byte" public="true" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿè¢«æ”»å‡» 0:å¯è¢«æ”»å‡» 1ï¼šä¸å¯è¢«æ”»å‡»"/>
+		<property name="CantBeAttack2" type="byte" public="true" private="true" save="false" desc="ä¸èƒ½è¢«æ”»å‡»ï¼Œä½†ä¸ç¦»å¼€æˆ˜æ–—"/>
+		<property name="LockAction" type="int" public="true" private="false" save="false" desc="ä¸èƒ½è¢«æ‰“æ–­ï¼Œä¸èƒ½ä½¿ç”¨æŠ€èƒ½ï¼Œä¸èƒ½ç§»åŠ¨"/>
+		<!--<property name="CantBreakAction" type="int" public="true" private="true" save="false" desc="ä¸èƒ½æ‰“æ–­å½“å‰æ–½æ³•åŠå‘½ä¸­åŠ¨ä½œ"/>-->
+		<property name="CantUseSkill" type="byte" public="true" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨æŠ€èƒ½"/>
+		<property name="CantUseSkillAdd" type="byte" public="true" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨æŠ€èƒ½"/>
+		<property name="CantUseItem" type="byte" public="true" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨é“å…·"/>
+		<property name="CantUseItemAdd" type="byte" public="true" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨é“å…·"/>
+		<property name="CanBeKilled" type="byte" public="true" private="false" save="false" desc="æ˜¯å¦èƒ½å¤Ÿè¢«æ€æ­»"/>
+		<property name="CantRotateAdd" type="byte" public="true" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿè½¬åŠ¨ 0:å¯è½¬åŠ¨ 1:ä¸èƒ½è½¬åŠ¨"/>
+		<property name="CantAttackAdd" type="byte" public="true" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿæ”»å‡»"/>
+		<property name="CantBeLtd" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—é™åˆ¶(åŒ…æ‹¬ä¸‹é¢çš„å‡ ç§)"/>
+		<property name="CantBeLtdSpd" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—å‡é€Ÿ"/>
+		<property name="CantBeLtdHitMove" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—å‡»é£žå‡»é€€å‡»å€’ç­‰"/>
+		<property name="CantBeLtdMove" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—ä¸èƒ½ç§»åŠ¨"/>
+		<property name="CantBeLtdUseSkill" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—ä¸èƒ½ä½¿ç”¨æŠ€èƒ½é™åˆ¶"/>
+		<property name="CantBeLtdAttack" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—æ”»å‡»é™åˆ¶"/>
+		<property name="CantBeLtdShift" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸å—å˜å½¢é™åˆ¶"/>
+		<property name="CantBeLtdRotate" type="byte" public="true" private="false" save="false" realtime="true" desc="ä¸èƒ½è½¬èº«é™åˆ¶"/>
+		<property name="PauseAction" type="int" public="true" private="true" save="false" desc="åŠ¨ä½œæš‚åœ"/>
+		<property name="StrCantUseSkill" type="byte" public="true" private="false" save="false" realtime="true" desc="ä»»ä½•æƒ…å†µéƒ½ä¸èƒ½é‡Šæ”¾æŠ€èƒ½"/>
+		<property name="StrCantUseSkillAdd" type="byte" public="true" private="false" save="false" realtime="true" desc="ä»»ä½•æƒ…å†µéƒ½ä¸èƒ½é‡Šæ”¾æŠ€èƒ½"/>
+		<property name="CantJump" type="byte" public="true" private="true" save="false" realtime="true" desc="ä¸èƒ½è·³è·ƒ"/>
+		<property name="damagedeffect" type="string" public="true" private="true" save="false" realtime="true" desc="ç ´æŸç‰¹æ•ˆ"/>
+		<property name="CarrierCollideRadius" type="float" public="false" private="false" save="false" desc="è½½å…·ç¢°æ’žåŠå¾„ï¼Œç”¨äºŽç§»åŠ¨æ—¶çš„ç¢°æ’žæ£€æµ‹ï¼Œé»˜è®¤0.5"/>
 
-		<property name="StrengthType" type="byte" public="true" private="true" save="false" realtime="true" desc="ÄÜÁ¦´óÐ¡£¬0£º´óÐÍ  1£ºÖÐÐÍ  2£ºÐ¡ÐÍ"/>
+		<property name="StrengthType" type="byte" public="true" private="true" save="false" realtime="true" desc="èƒ½åŠ›å¤§å°ï¼Œ0ï¼šå¤§åž‹  1ï¼šä¸­åž‹  2ï¼šå°åž‹"/>
 		
-		<property name="CarrierVisualRange" type="float" public="false" private="false" save="false" desc="Íæ¼ÒÉÏÔØ¾ßºó£¬¿ÉÊÓ¾àÀë"/>
-		<property name="CarrierUseSkillHeight" type="float" public="false" private="false" save="false" desc="ÔØ¾ßÊÍ·Å¼¼ÄÜ£¬ÀëµØ±í¸ß¶È"/>
+		<property name="CarrierVisualRange" type="float" public="false" private="false" save="false" desc="çŽ©å®¶ä¸Šè½½å…·åŽï¼Œå¯è§†è·ç¦»"/>
+		<property name="CarrierUseSkillHeight" type="float" public="false" private="false" save="false" desc="è½½å…·é‡Šæ”¾æŠ€èƒ½ï¼Œç¦»åœ°è¡¨é«˜åº¦"/>
 	</properties>
 
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="bc_seat_rec" cols="9" maxrows="8" save="false" public="true" private="false" desc="Õ½¶·ÔØ¾ß×ùÎ»±í">
-			<column type="byte" desc="×ùÎ»Index"/>
-			<column type="byte" desc="ÈËÔ±¹¦ÄÜ 1 Îª¿ØÖÆ"/>
-			<column type="widestr" desc="ÈËÃû"/>
-			<column type="byte" desc="Íæ¼ÒÊÇ·ñ¿É¼û0--×øÔÚÄÚ²¿£¬1--×øÔÚÍâÃæ"/>
-			<column type="dword" desc="Ïà¶ÔÓÚ¿ØÖÆ½çÃæµÄleft×ø±ê"/>
-			<column type="dword" desc="Ïà¶ÔÓÚ¿ØÖÆ½çÃæµÄtop×ø±ê"/>
-			<column type="string" desc="×ó¼ü°ó¶¨¼¼ÄÜ"/>
-			<column type="string" desc="ÓÒ¼ü°ó¶¨¼¼ÄÜ"/>
-			<column type="object" desc="µ±Ç°×ùÎ»Á´½ÓnpcµÄpersistid" />
+		<record name="bc_seat_rec" cols="9" maxrows="8" save="false" public="true" private="false" desc="æˆ˜æ–—è½½å…·åº§ä½è¡¨">
+			<column type="byte" desc="åº§ä½Index"/>
+			<column type="byte" desc="äººå‘˜åŠŸèƒ½ 1 ä¸ºæŽ§åˆ¶"/>
+			<column type="widestr" desc="äººå"/>
+			<column type="byte" desc="çŽ©å®¶æ˜¯å¦å¯è§0--ååœ¨å†…éƒ¨ï¼Œ1--ååœ¨å¤–é¢"/>
+			<column type="dword" desc="ç›¸å¯¹äºŽæŽ§åˆ¶ç•Œé¢çš„leftåæ ‡"/>
+			<column type="dword" desc="ç›¸å¯¹äºŽæŽ§åˆ¶ç•Œé¢çš„topåæ ‡"/>
+			<column type="string" desc="å·¦é”®ç»‘å®šæŠ€èƒ½"/>
+			<column type="string" desc="å³é”®ç»‘å®šæŠ€èƒ½"/>
+			<column type="object" desc="å½“å‰åº§ä½é“¾æŽ¥npcçš„persistid" />
 		</record>
 
-		<record name="bc_seatskill_rec" cols="4" maxrows="20" save="false" public="false" private="false" desc="Õ½¶·ÔØ¾ß¼¼ÄÜ±í">
-			<column type="byte" desc="×ùÎ»Index"/>
-			<column type="string" desc="¼¼ÄÜID"/>
-			<column type="byte" desc="ÓµÓÐ¼¼ÄÜÕß£¬0---ÔØ¾ß  1--Íæ¼Ò"/>
-			<column type="byte" desc="ÊÇ·ñÊ¹ÓÃÅ×ÎïÏß£¬0---ÔØ¾ß  1--Å×ÎïÏß"/>
+		<record name="bc_seatskill_rec" cols="4" maxrows="20" save="false" public="false" private="false" desc="æˆ˜æ–—è½½å…·æŠ€èƒ½è¡¨">
+			<column type="byte" desc="åº§ä½Index"/>
+			<column type="string" desc="æŠ€èƒ½ID"/>
+			<column type="byte" desc="æ‹¥æœ‰æŠ€èƒ½è€…ï¼Œ0---è½½å…·  1--çŽ©å®¶"/>
+			<column type="byte" desc="æ˜¯å¦ä½¿ç”¨æŠ›ç‰©çº¿ï¼Œ0---è½½å…·  1--æŠ›ç‰©çº¿"/>
 		</record>
 
-		<record name="bc_path_rec" cols="4" maxrows="1024" save="false" public="false" private="false" desc="°ó¶¨µã±í">
-			<column type="float" desc="Â·¾¶x"/>
-			<column type="float" desc="Â·¾¶y"/>
-			<column type="float" desc="Â·¾¶z"/>
-			<column type="string" desc="¶¯×÷"/>
+		<record name="bc_path_rec" cols="4" maxrows="1024" save="false" public="false" private="false" desc="ç»‘å®šç‚¹è¡¨">
+			<column type="float" desc="è·¯å¾„x"/>
+			<column type="float" desc="è·¯å¾„y"/>
+			<column type="float" desc="è·¯å¾„z"/>
+			<column type="string" desc="åŠ¨ä½œ"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+		<path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
 		<path name="struct\rule\Common\autorestore.xml" desc=""/>
 		<path name="struct\rule\Common\commonfighter.xml" desc=""/>
 		<path name="struct\rule\Common\cooldown_new.xml" desc=""/>
 		<path name="struct\rule\Common\damage.xml" desc=""/>
 		<path name="struct\rule\Common\Fightbag.xml" desc=""/>
 		<path name="struct\rule\Common\flow_new.xml" desc=""/>
-		<path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+		<path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
 		<path name="struct\rule\Common\range_new.xml" desc=""/>
 		<path name="struct\rule\Common\relation.xml" desc=""/>
 		<path name="struct\rule\Common\skilluse.xml" desc=""/>
 		<path name="struct\rule\Common\bufferuse.xml" desc=""/>
 		<path name="struct\rule\Common\basefighterdata.xml" desc=""/>
-		<path name="struct\npc_property\ai_motion.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_path.xml" desc="AIÊôÐÔ"/>
+		<path name="struct\npc_property\ai_motion.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_path.xml" desc="AIå±žæ€§"/>
 	</includes>
 </object>

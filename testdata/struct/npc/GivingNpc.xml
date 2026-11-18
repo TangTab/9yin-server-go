@@ -1,43 +1,43 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¸øÓèÀàNPC»ù´¡ÊôÐÔ-->
+<!--ç»™äºˆç±»NPCåŸºç¡€å±žæ€§-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-	<property name="RefreshTime" type="int" public="false" private="false" save="false" desc="Ë¢ÐÂÊ±¼ä0Á¢¼´Ë¢,-1²»Ë¢"/>
-    <property name="GiveTaskID" type="int" public="false" private="false" save="false" desc="¸øÓèÈÎÎñID"/>
-    <property name="GiveDropID" type="string" public="false" private="false" save="false" desc="¸øÓèµôÂä°üID"/>
-    <property name="OpenAction" type="string" public="false" private="false" save="false" desc="NPC±»´ò¿ª¶¯×÷×´Ì¬"/>
-    <property name="GiveItemID" type="string" public="false" private="false" save="false" desc="¸øÓèÎïÆ·/×ÊÔ´ID"/>
-    <property name="BeSpringEffect" type="string" public="false" private="false" save="false" desc="¿É´¥·¢ÌØÐ§"/>
-    <property name="GiveResNum" type="int" public="false" private="false" save="false" desc="¸øÓè×ÊÔ´Á¿(Ã¿´Î)"/>
-    <property name="GiveResTNum" type="int" public="false" private="false" save="false" desc="¸øÓè×ÊÔ´×ÜÁ¿"/>
-    <property name="PlayerNum" type="int" public="false" private="false" save="false" desc="×ÊÔ´¿É¸øÓèµÄ×î´óÈËÊý(Í¬Ê±)"/>
-    <property name="IsIncessancy" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ¿É³ÖÐø²É¼¯(Ö»ÊÊÓÃÓÚ×ÊÔ´²É¼¯ÀàNPCTYPE=104)"/>
-    <property name="GiveItem_PID" type="string" public="false" private="false" save="false" desc="²É¼¯¸½¼ÓÎïÆ·°ü(Ö»ÊÊÓÃÓÚ×ÊÔ´²É¼¯ÀàNPCTYPE=104)"/>
-	<property name="RefreshType" type="int" public="false" private="false" save="false" desc="³ö¹ÖÀàÐÍ¡ª¡ªÌîÐ´0¡ª2µÄintÐÍ 0¡ª¡ª²»Ë¢¹Ö 1¡ª¡ª¿ªÊ¼ÊÍ·Å¼¼ÄÜË¢¹Ö 2¡ª¡ªÊÍ·Å¼¼ÄÜ½áÊøË¢¹Ö"/>
-	<property name="RefreshPro" type="float" public="false" private="false" save="false" desc="³ö¹Ö¼¸ÂÊ¡ª¡ªÌîÐ´0¡ª1µÄ¸¡µãÐÍ"/>
-	<property name="MonsterCount" type="int" public="false" private="false" save="false" desc="³ö¹ÖÊýÁ¿¡ª¡ªÄ¬ÈÏÎª0£¬±íÊ¾²»²ú³öÈÎºÎ¹ÖÎï"/>
-	<property name="MonsterID" type="string" public="false" private="false" save="false" desc="³ö¹ÖID¡ª¡ªÌîÐ´¹ÖÎïµÄID£¬ÓÃ¡°£¬¡±¸ô¿ª£¬¿ÉÒÔÌîÐ´¶à¸öID"/>
-	<property name="MonsterLifeTime" type="int" public="false" private="false" save="false" desc="´æ»îÊ±¼ä µ¥Î»£ºÃë"/>
-	<property name="RandomRadius" type="float" public="false" private="false" save="false" desc="Ë¢¹ÖËæ»ú°ë¾¶"/>
+	<property name="RefreshTime" type="int" public="false" private="false" save="false" desc="åˆ·æ–°æ—¶é—´0ç«‹å³åˆ·,-1ä¸åˆ·"/>
+    <property name="GiveTaskID" type="int" public="false" private="false" save="false" desc="ç»™äºˆä»»åŠ¡ID"/>
+    <property name="GiveDropID" type="string" public="false" private="false" save="false" desc="ç»™äºˆæŽ‰è½åŒ…ID"/>
+    <property name="OpenAction" type="string" public="false" private="false" save="false" desc="NPCè¢«æ‰“å¼€åŠ¨ä½œçŠ¶æ€"/>
+    <property name="GiveItemID" type="string" public="false" private="false" save="false" desc="ç»™äºˆç‰©å“/èµ„æºID"/>
+    <property name="BeSpringEffect" type="string" public="false" private="false" save="false" desc="å¯è§¦å‘ç‰¹æ•ˆ"/>
+    <property name="GiveResNum" type="int" public="false" private="false" save="false" desc="ç»™äºˆèµ„æºé‡(æ¯æ¬¡)"/>
+    <property name="GiveResTNum" type="int" public="false" private="false" save="false" desc="ç»™äºˆèµ„æºæ€»é‡"/>
+    <property name="PlayerNum" type="int" public="false" private="false" save="false" desc="èµ„æºå¯ç»™äºˆçš„æœ€å¤§äººæ•°(åŒæ—¶)"/>
+    <property name="IsIncessancy" type="int" public="false" private="false" save="false" desc="æ˜¯å¦å¯æŒç»­é‡‡é›†(åªé€‚ç”¨äºŽèµ„æºé‡‡é›†ç±»NPCTYPE=104)"/>
+    <property name="GiveItem_PID" type="string" public="false" private="false" save="false" desc="é‡‡é›†é™„åŠ ç‰©å“åŒ…(åªé€‚ç”¨äºŽèµ„æºé‡‡é›†ç±»NPCTYPE=104)"/>
+	<property name="RefreshType" type="int" public="false" private="false" save="false" desc="å‡ºæ€ªç±»åž‹â€”â€”å¡«å†™0â€”2çš„intåž‹ 0â€”â€”ä¸åˆ·æ€ª 1â€”â€”å¼€å§‹é‡Šæ”¾æŠ€èƒ½åˆ·æ€ª 2â€”â€”é‡Šæ”¾æŠ€èƒ½ç»“æŸåˆ·æ€ª"/>
+	<property name="RefreshPro" type="float" public="false" private="false" save="false" desc="å‡ºæ€ªå‡ çŽ‡â€”â€”å¡«å†™0â€”1çš„æµ®ç‚¹åž‹"/>
+	<property name="MonsterCount" type="int" public="false" private="false" save="false" desc="å‡ºæ€ªæ•°é‡â€”â€”é»˜è®¤ä¸º0ï¼Œè¡¨ç¤ºä¸äº§å‡ºä»»ä½•æ€ªç‰©"/>
+	<property name="MonsterID" type="string" public="false" private="false" save="false" desc="å‡ºæ€ªIDâ€”â€”å¡«å†™æ€ªç‰©çš„IDï¼Œç”¨â€œï¼Œâ€éš”å¼€ï¼Œå¯ä»¥å¡«å†™å¤šä¸ªID"/>
+	<property name="MonsterLifeTime" type="int" public="false" private="false" save="false" desc="å­˜æ´»æ—¶é—´ å•ä½ï¼šç§’"/>
+	<property name="RandomRadius" type="float" public="false" private="false" save="false" desc="åˆ·æ€ªéšæœºåŠå¾„"/>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="give_player_rec" cols="1" maxrows="50" public="false" private="false" save="false" desc="ÕýÔÚ²É¼¯µÄÍæ¼ÒÁÐ±í">
-        <column type="object" desc="Íæ¼ÒID"/>		
+    <record name="give_player_rec" cols="1" maxrows="50" public="false" private="false" save="false" desc="æ­£åœ¨é‡‡é›†çš„çŽ©å®¶åˆ—è¡¨">
+        <column type="object" desc="çŽ©å®¶ID"/>		
     </record>
 	
-	<record name="pickup_member_rec" cols="2" maxrows="50" public="true" private="false" save="false" desc="PickUpModuleÒÆÖ²¶øÀ´">
-            <column type="widestr" desc="¿ÉÊ°È¡µÄÍæ¼ÒÃû³Æ"/>
-			<column type="word" desc="¿ÉÊ°È¡µÄÍæ¼ÒµÄÊ°È¡ÓÅÏÈ¼¶ ÖµÔ½´óÔ½ÏÈÊ°È¡"/>
+	<record name="pickup_member_rec" cols="2" maxrows="50" public="true" private="false" save="false" desc="PickUpModuleç§»æ¤è€Œæ¥">
+            <column type="widestr" desc="å¯æ‹¾å–çš„çŽ©å®¶åç§°"/>
+			<column type="word" desc="å¯æ‹¾å–çš„çŽ©å®¶çš„æ‹¾å–ä¼˜å…ˆçº§ å€¼è¶Šå¤§è¶Šå…ˆæ‹¾å–"/>
         </record>
 		
-	<record name="open_player_rec" cols="1" maxrows="50" public="false" private="false" save="false" desc="PickUpModuleÒÆÖ²¶øÀ´">
+	<record name="open_player_rec" cols="1" maxrows="50" public="false" private="false" save="false" desc="PickUpModuleç§»æ¤è€Œæ¥">
             <column type="widestr" desc=""/>
         </record>
   </records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
   <includes>
 	<path name="struct\rule\Common\Fightbag.xml" desc=""/>
 	<path name="struct\rule\Common\commonfighter.xml" desc=""/>
@@ -48,7 +48,7 @@
 	<path name="struct\rule\Common\relation.xml" desc=""/>
 	<path name="struct\rule\Common\autorestore.xml" desc=""/>
 	<path name="struct\rule\Common\skilluse.xml" desc=""/>
-	<path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+	<path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
 	<path name="struct\rule\Common\basefighterdata.xml" desc=""/>
 	<path name="struct\rule\Common\bufferuse.xml" desc=""/>
 	

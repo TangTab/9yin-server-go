@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--AIÒÆ¶¯Ïà¹Ø-->
+<!--AIç§»åŠ¨ç›¸å…³-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="AIMotioning" 	type="int"	 	public="false"  private="false" 	save="false" desc="AIMotionÐÐ¶¯ÖÐ"/>
-		<property name="PathFinding"	type="int"		public="false"  private="false" 	save="false" desc="ÊÇ·ñÑ°Â·ÖÐ"/>
-		<property name="FindPathX" 		type="float"	public="false"  private="false" 	save="false" desc="µ±Ç°Ä¿±êµãX"/>
-		<property name="FindPathZ" 		type="float" 	public="false"  private="false" 	save="false" desc="µ±Ç°Ä¿±êµãZ"/>
-		<property name="FlyHeightMax" 	type="float"  	public="false"  private="false"   	save="false" desc="NPC×î´ó·ÉÐÐ¸ß¶È"/>
-		<property name="FlyHeightMin" 	type="float"  	public="false"  private="false"   	save="false" desc="NPC×îÐ¡·ÉÐÐ¸ß¶È"/>
+		<property name="AIMotioning" 	type="int"	 	public="false"  private="false" 	save="false" desc="AIMotionè¡ŒåŠ¨ä¸­"/>
+		<property name="PathFinding"	type="int"		public="false"  private="false" 	save="false" desc="æ˜¯å¦å¯»è·¯ä¸­"/>
+		<property name="FindPathX" 		type="float"	public="false"  private="false" 	save="false" desc="å½“å‰ç›®æ ‡ç‚¹X"/>
+		<property name="FindPathZ" 		type="float" 	public="false"  private="false" 	save="false" desc="å½“å‰ç›®æ ‡ç‚¹Z"/>
+		<property name="FlyHeightMax" 	type="float"  	public="false"  private="false"   	save="false" desc="NPCæœ€å¤§é£žè¡Œé«˜åº¦"/>
+		<property name="FlyHeightMin" 	type="float"  	public="false"  private="false"   	save="false" desc="NPCæœ€å°é£žè¡Œé«˜åº¦"/>
 	</properties>
 	<records>
-		<record name="AIFindPathRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="Ñ°Â·±í">
+		<record name="AIFindPathRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="å¯»è·¯è¡¨">
 			<column type="float" desc="x"/>
 			<column type="float" desc="z"/>
 		</record>

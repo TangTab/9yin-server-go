@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÉÌµêÎïÆ·ÈÝÆ÷ÊôÐÔ-->
+<!--å•†åº—ç‰©å“å®¹å™¨å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!-- ÒÔÏÂÎªÉÌµêÊÓÍ¼µÄÊôÐÔ -->
-		<property name="ShopID" type="string" public="false" private="true" save="false" desc="ÉÌµêID"/>
-		<property name="NumPerPage" type="int" public="false" private="true" save="false" desc="Ò»Ò³ÎïÆ·ÊýÁ¿"/>
-		<property name="RepairType" type="int" public="false" private="true" save="false" desc="ÉÌµêµÄÐÞÀíÀàÐÍ"/>
-		<property name="FineRepairFeeCoe" type="double" public="false" private="true" save="false" desc="ÉÌµê¾«ÐÞ·ÑÏµÊý"/>
-		<property name="NormalRepairFeeCoe" type="double" public="false" private="true" save="false" desc="ÉÌµêÆÕÐÞ·ÑÏµÊý"/>
-		<property name="HardinessRecoverFeeCoe" type="double" public="false" private="true" save="false" desc="×î´óÄÍ¾Ã»Ö¸´·ÑÏµÊý"/>
-		<property name="Discount" type="int" public="false" private="true" save="false" desc="ÉÌµêµÄÕÛ¿Û"/>
-		<property name="ShopCondition" type="string" public="false" private="true" save="false" desc="ÉÌµêÕûÌåÌõ¼þÏÞÖÆ"/>
+		<!-- ä»¥ä¸‹ä¸ºå•†åº—è§†å›¾çš„å±žæ€§ -->
+		<property name="ShopID" type="string" public="false" private="true" save="false" desc="å•†åº—ID"/>
+		<property name="NumPerPage" type="int" public="false" private="true" save="false" desc="ä¸€é¡µç‰©å“æ•°é‡"/>
+		<property name="RepairType" type="int" public="false" private="true" save="false" desc="å•†åº—çš„ä¿®ç†ç±»åž‹"/>
+		<property name="FineRepairFeeCoe" type="double" public="false" private="true" save="false" desc="å•†åº—ç²¾ä¿®è´¹ç³»æ•°"/>
+		<property name="NormalRepairFeeCoe" type="double" public="false" private="true" save="false" desc="å•†åº—æ™®ä¿®è´¹ç³»æ•°"/>
+		<property name="HardinessRecoverFeeCoe" type="double" public="false" private="true" save="false" desc="æœ€å¤§è€ä¹…æ¢å¤è´¹ç³»æ•°"/>
+		<property name="Discount" type="int" public="false" private="true" save="false" desc="å•†åº—çš„æŠ˜æ‰£"/>
+		<property name="ShopCondition" type="string" public="false" private="true" save="false" desc="å•†åº—æ•´ä½“æ¡ä»¶é™åˆ¶"/>
 	</properties>
 </object>

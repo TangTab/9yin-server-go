@@ -1,101 +1,101 @@
---ÓÎÏ··şÎñÆ÷Ö÷¿Ø½Å±¾
+--æ¸¸æˆæœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---³ÌĞò×´Ì¬
-local WAPS_UNKNOWN = 0	--Î´Öª
-local WAPS_STARTING = 1	--ÕıÔÚÆô¶¯
-local WAPS_READY = 2	--¾ÍĞ÷£¨µ«ÊÇÎ´¿ª·Å·şÎñ£©
-local WAPS_OPENING = 3	--ÕıÔÚ¿ª·Å·şÎñ
-local WAPS_OPENED = 4	--ÒÑ¿ª·Å·şÎñ
-local WAPS_CLOSING = 5	--ÕıÔÚ¹Ø±Õ
-local WAPS_CLOSED = 6	--ÒÑ¹Ø±Õ·şÎñ
-local WAPS_QUITING = 7	--ÕıÔÚÍË³ö
+--ç¨‹åºçŠ¶æ€
+local WAPS_UNKNOWN = 0	--æœªçŸ¥
+local WAPS_STARTING = 1	--æ­£åœ¨å¯åŠ¨
+local WAPS_READY = 2	--å°±ç»ªï¼ˆä½†æ˜¯æœªå¼€æ”¾æœåŠ¡ï¼‰
+local WAPS_OPENING = 3	--æ­£åœ¨å¼€æ”¾æœåŠ¡
+local WAPS_OPENED = 4	--å·²å¼€æ”¾æœåŠ¡
+local WAPS_CLOSING = 5	--æ­£åœ¨å…³é—­
+local WAPS_CLOSED = 6	--å·²å…³é—­æœåŠ¡
+local WAPS_QUITING = 7	--æ­£åœ¨é€€å‡º
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(console)
 	nx_set_value("console", console)
 	
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	console.Color = "Gray"
 	
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 	
-	--ÈÕÖ¾»º³å³Ø
+	--æ—¥å¿—ç¼“å†²æ± 
 	local log_pool = nx_create("LogPool")
 	
-	--ÈÕÖ¾ÎÄ¼şÇ°×º
+	--æ—¥å¿—æ–‡ä»¶å‰ç¼€
 	log_pool.FilePrefix = nx_work_path() .. "log\\member"
-	--»º³åÊıÁ¿
+	--ç¼“å†²æ•°é‡
 	log_pool.TraceMax = 256
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	log_pool.EveryDayAlone = false
 	
 	if nx_is_debug() then
-		--ÔÚµ÷ÊÔ°æÀï½«ÈÕÖ¾ĞÅÏ¢Êä³öµ½¿ØÖÆÌ¨
+		--åœ¨è°ƒè¯•ç‰ˆé‡Œå°†æ—¥å¿—ä¿¡æ¯è¾“å‡ºåˆ°æ§åˆ¶å°
 		log_pool.Console = console
 	end
 	
 	nx_set_value("log_pool", log_pool)
 	
-	--Æô¶¯ÈÕÖ¾¼ÇÂ¼
+	--å¯åŠ¨æ—¥å¿—è®°å½•
 	log_pool:Start()
 	
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 	
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	ini.FileName = "GameMember.ini"
 	
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
-		nx_msgbox("ÎŞ·¨¶ÁÈ¡³ÌĞòÅäÖÃÎÄ¼ş")
+		nx_msgbox("æ— æ³•è¯»å–ç¨‹åºé…ç½®æ–‡ä»¶")
 		nx_destroy(ini)
 		return 0
 	end
 	
-	--ÓÎÏ··ÖÇø±àºÅ
+	--æ¸¸æˆåˆ†åŒºç¼–å·
 	local district_id = ini:ReadInteger("Main", "DistrictID", 1)
-	--ÓÎÏ··şÎñÆ÷±àºÅ
+	--æ¸¸æˆæœåŠ¡å™¨ç¼–å·
 	local server_id = ini:ReadInteger("Main", "ServerID", 1)
-	--³¡¾°·şÎñÆ÷±àºÅ
+	--åœºæ™¯æœåŠ¡å™¨ç¼–å·
 	local member_id = ini:ReadInteger("Main", "MemberID", 0)
-	--³¡¾°Åö×²ĞÅÏ¢ÎÄ¼şµÄ¸ùÄ¿Â¼
+	--åœºæ™¯ç¢°æ’ä¿¡æ¯æ–‡ä»¶çš„æ ¹ç›®å½•
 	local collide_root_path = ini:ReadString("Main", "CollideRootPath", "")
 	
 	if collide_root_path ~= "" then
 		collide_root_path = nx_function("ext_get_full_path", collide_root_path)
 	end
 	
-	--ÄÚÍøµØÖ·
+	--å†…ç½‘åœ°å€
 	local inner_addr = "127.0.0.1"
 	local inner_port = 16300 + member_id
 	
 	inner_addr = ini:ReadString("Inner", "Addr", inner_addr)
 	inner_port = ini:ReadInteger("Inner", "Port", inner_port)
 	
-	--¹ã²¥µØÖ·
+	--å¹¿æ’­åœ°å€
 	local broad_addr = "127.255.255.255"
 	local broad_port = 15000
 	
 	broad_addr = ini:ReadString("Broadcast", "Addr", broad_addr)
 	broad_port = ini:ReadInteger("Broadcast", "Port", broad_port)
 	
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15300 + member_id
 	
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 	
-	--Âß¼­Ä£¿é
+	--é€»è¾‘æ¨¡å—
 	local logic_loader = nx_create("LogicLoader")
 	
 	local logic_path = ini:ReadString("Logic", "Path", "")
 	local modules = ini:ReadInteger("Logic", "Modules", 0)
 	
-	--Âß¼­Ä£¿é
+	--é€»è¾‘æ¨¡å—
 	local logic_loader = nx_create("LogicLoader")
 	
 	local logic_path = ini:ReadString("Logic", "Path", "")
@@ -141,10 +141,10 @@ function main(console)
 	
 	nx_destroy(ini)
 	
-	--³¡¾°Åö×²ĞÅÏ¢
+	--åœºæ™¯ç¢°æ’ä¿¡æ¯
 	local collide_manager = nx_create("CollideManager")
 	
-	--´´½¨Î¬»¤Á¬½Ó·şÎñ
+	--åˆ›å»ºç»´æŠ¤è¿æ¥æœåŠ¡
 	local echo_sock = nx_create("EchoSock")
 	
 	echo_sock.Address = echo_addr
@@ -152,34 +152,34 @@ function main(console)
 	
 	nx_bind_script(echo_sock, "echo", "echo_init")
 	
-	--´´½¨¹ã²¥Í¨Ñ¶
+	--åˆ›å»ºå¹¿æ’­é€šè®¯
 	local broad_sock = nx_create("BroadSock")
 	
 	broad_sock.BindAddress = inner_addr
 	broad_sock.BroadcastAddress = broad_addr
 	broad_sock.BroadcastPort = broad_port
 	
-	--´´½¨½ø³Ì¼à¿Ø
+	--åˆ›å»ºè¿›ç¨‹ç›‘æ§
 	local app_manager = nx_create("AppManager")
 	
 	app_manager.AppName = "member_" .. nx_string(server_id) .. "_" .. nx_string(member_id)
 	app_manager.AppAddress = echo_addr .. ":" .. nx_string(echo_port)
 	
-	--´´½¨ÄÚ²¿Í¨Ñ¶
+	--åˆ›å»ºå†…éƒ¨é€šè®¯
 	local adapter = nx_create("Adapter")
 	
-	--ÄÚ²¿Í¨Ñ¶µØÖ·
+	--å†…éƒ¨é€šè®¯åœ°å€
 	adapter.Address = inner_addr
 	adapter.Port = inner_port
-	--×î´óÄÚÍøÁ¬½ÓÊıÁ¿
+	--æœ€å¤§å†…ç½‘è¿æ¥æ•°é‡
 	adapter.ConnectMax = 64
-	--¹¤×÷Ïß³ÌÊıÁ¿
+	--å·¥ä½œçº¿ç¨‹æ•°é‡
 	adapter.WorkThreads = 1
-	--»º³åÇø³ß´ç
+	--ç¼“å†²åŒºå°ºå¯¸
 	adapter.InBufLen = 1024 * 1024
 	adapter.OutBufLen = 1024 * 1024
 	
-	--´´½¨³¡¾°·şÎñ
+	--åˆ›å»ºåœºæ™¯æœåŠ¡
 	local game_member = nx_create("GameMember")
 	
 	nx_set_value("game_member", game_member)
@@ -198,48 +198,48 @@ function main(console)
 	game_member.TaskPath = nx_resource_path() .. "task\\"
 	game_member.CollideRootPath = collide_root_path
 	
-	--¼ÓÔØÃû×Ö¹ıÂËÎÄ¼ş
+	--åŠ è½½åå­—è¿‡æ»¤æ–‡ä»¶
 	game_member:LoadNameFilter(nx_resource_path() .. "filter.txt")
 	
-	--¼ÓÔØÈ«¾ÖµãĞÅÏ¢
+	--åŠ è½½å…¨å±€ç‚¹ä¿¡æ¯
 	game_member:LoadLocations(nx_resource_path() .. "location.ini")
 	
-	--Æô¶¯½ø³Ì¼à¿Ø
+	--å¯åŠ¨è¿›ç¨‹ç›‘æ§
 	app_manager:Start()
 	
-	--ÉèÖÃ½ø³ÌÆô¶¯×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¯åŠ¨çŠ¶æ€
 	app_manager:SetAppState(WAPS_STARTING)
 	
-	--Æô¶¯ÄÚ²¿Í¨Ñ¶
+	--å¯åŠ¨å†…éƒ¨é€šè®¯
 	adapter:Start()
 	
-	--Æô¶¯¹ã²¥Í¨Ñ¶
+	--å¯åŠ¨å¹¿æ’­é€šè®¯
 	broad_sock:Start()
 	
-	--Æô¶¯Î¬»¤Á¬½Ó
+	--å¯åŠ¨ç»´æŠ¤è¿æ¥
 	echo_sock:Start()
 	
-	--Æô¶¯³¡¾°·şÎñ
+	--å¯åŠ¨åœºæ™¯æœåŠ¡
 	game_member:Start()
 	
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	console:WriteLine("App name " .. app_manager.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	console:WriteLine("Echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	console:WriteLine("Inner socket " .. inner_addr .. ":" .. nx_string(inner_port))
 	console:WriteLine("Broadcast socket " .. broad_addr .. ":" .. nx_string(broad_port))
 	
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	console:WriteLine("Game server " .. nx_string(server_id) 
 		.. " member " .. nx_string(member_id) .. " started")
 	
-	--ÉèÖÃ½ø³Ì¿ªÆô×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¼€å¯çŠ¶æ€
 	app_manager:SetAppState(WAPS_OPENED);
 	
 	return 1
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local console = nx_value("console")
 	
@@ -250,37 +250,37 @@ function close()
 	local echo_sock = game_member.EchoSock
 	local adapter = game_member.Adapter
 	
-	--¹Ø±Õ¹ã²¥
+	--å…³é—­å¹¿æ’­
 	console:WriteLine("broad shutdown...")
 	
 	broad_sock:Stop()
 	
-	--¹Ø±ÕÄÚÍøÍ¨Ñ¶
+	--å…³é—­å†…ç½‘é€šè®¯
 	console:WriteLine("adapter shutdown...")
 	
 	adapter:Stop()
 	
-	--¹Ø±ÕÎ¬»¤Á¬½Ó
+	--å…³é—­ç»´æŠ¤è¿æ¥
 	console:WriteLine("echo socket shutdown...")
 	
 	echo_sock:Stop()
 	
-	--¹Ø±Õ³¡¾°·şÎñ
+	--å…³é—­åœºæ™¯æœåŠ¡
 	console:WriteLine("member server shutdown...")
 	
 	game_member:Stop()
 	
-	--¹Ø±Õ½ø³Ì¼à¿Ø
+	--å…³é—­è¿›ç¨‹ç›‘æ§
 	console:WriteLine("app_manager shutdown...")
 	
 	app_manager:Stop()
 	
-	--¹Ø±ÕÈÕÖ¾»º³å
+	--å…³é—­æ—¥å¿—ç¼“å†²
 	local log_pool = nx_value("log_pool")
 	
 	log_pool:Stop()
 	
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 	
 	return true

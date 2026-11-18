@@ -1,74 +1,74 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Õ½³¡³¡¾°¸±±¾ÊôÐÔ-->
+<!--æˆ˜åœºåœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="QueueRecName" type="string" public="false" private="false" save="false" desc="ÅÅ¶Ó±íÃû×Ö"/>
-		<property name="QueueId" type="int" public="false" private="false" save="false" desc="ÅÅ¶Ó±íID"/>
-		<property name="SKingBeKilleds" type="int" public="false" private="false" save="false" desc="ÕôÆûÍõ±»É±´ÎÊý"/>
-		<property name="MKingBeKilleds" type="int" public="false" private="false" save="false" desc="Ææ»ÃÍõ±»É±´ÎÊý"/>
-		<property name="SignState" type="int" public="false" private="false" save="false" desc="Æì×Ó×´Ì¬"/>
-		<property name="BattleWarID" type="int" public="false" private="false" save="false" desc="¶ÔÓ¦Õ½³¡id"/>
-		<property name="STCaptain" type="widestr" public="false" private="false" save="false" desc="ÕôÆû¶Ó³¤"/>
-		<property name="MTCaptain" type="widestr" public="false" private="false" save="false" desc="Ææ»Ã¶Ó³¤"/>
-		<property name="SteamPoint" type="int" public="false" private="false" save="false" desc="ÕôÆû·½»ý·Ö"/>
-		<property name="MagicPoint" type="int" public="false" private="false" save="false" desc="Ææ»Ã·½»ý·Ö"/>
+		<property name="QueueRecName" type="string" public="false" private="false" save="false" desc="æŽ’é˜Ÿè¡¨åå­—"/>
+		<property name="QueueId" type="int" public="false" private="false" save="false" desc="æŽ’é˜Ÿè¡¨ID"/>
+		<property name="SKingBeKilleds" type="int" public="false" private="false" save="false" desc="è’¸æ±½çŽ‹è¢«æ€æ¬¡æ•°"/>
+		<property name="MKingBeKilleds" type="int" public="false" private="false" save="false" desc="å¥‡å¹»çŽ‹è¢«æ€æ¬¡æ•°"/>
+		<property name="SignState" type="int" public="false" private="false" save="false" desc="æ——å­çŠ¶æ€"/>
+		<property name="BattleWarID" type="int" public="false" private="false" save="false" desc="å¯¹åº”æˆ˜åœºid"/>
+		<property name="STCaptain" type="widestr" public="false" private="false" save="false" desc="è’¸æ±½é˜Ÿé•¿"/>
+		<property name="MTCaptain" type="widestr" public="false" private="false" save="false" desc="å¥‡å¹»é˜Ÿé•¿"/>
+		<property name="SteamPoint" type="int" public="false" private="false" save="false" desc="è’¸æ±½æ–¹ç§¯åˆ†"/>
+		<property name="MagicPoint" type="int" public="false" private="false" save="false" desc="å¥‡å¹»æ–¹ç§¯åˆ†"/>
 	</properties>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<records>
-		<record name="battlewar_steam_team_rec" cols="15" maxrows="25" save="false" public="false" private="false" desc="ÕôÆû¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="string" desc="Í·Ïñ"/>
-			<column type="float" desc="×ø±êX"/>
-			<column type="float" desc="×ø±êZ"/>
-			<column type="byte" desc="ÑªÁ¿"/>
-			<column type="byte" desc="ÄÜÁ¿"/>
+		<record name="battlewar_steam_team_rec" cols="15" maxrows="25" save="false" public="false" private="false" desc="è’¸æ±½é˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="string" desc="å¤´åƒ"/>
+			<column type="float" desc="åæ ‡X"/>
+			<column type="float" desc="åæ ‡Z"/>
+			<column type="byte" desc="è¡€é‡"/>
+			<column type="byte" desc="èƒ½é‡"/>
 			<column type="string" desc="Buffers"/>
-      			<column type="int64" desc="ÉÏ´ÎÀëÏßÊ±¼ä"/> 
-  		   	<column type="byte" desc="µÈ¼¶"/>
-   		  	<column type="byte" desc="Ö°Òµ"/>
-  		   	<column type="byte" desc="×´Ì¬"/>
-  		   	<column type="byte" desc="¶ÓÎéÖÐµÄÎ»ÖÃ"/>
-  			<column type="byte" desc="¶ÓÎéÖÐµÄÖ°Î»"/>
-			<column type="string" desc="±ê¼Ç×Ö·û´®"/>
-      <column type="byte" desc="ÌØÊâÍæ·¨µÄÒ»Ð©×´Ì¬"/>
+      			<column type="int64" desc="ä¸Šæ¬¡ç¦»çº¿æ—¶é—´"/> 
+  		   	<column type="byte" desc="ç­‰çº§"/>
+   		  	<column type="byte" desc="èŒä¸š"/>
+  		   	<column type="byte" desc="çŠ¶æ€"/>
+  		   	<column type="byte" desc="é˜Ÿä¼ä¸­çš„ä½ç½®"/>
+  			<column type="byte" desc="é˜Ÿä¼ä¸­çš„èŒä½"/>
+			<column type="string" desc="æ ‡è®°å­—ç¬¦ä¸²"/>
+      <column type="byte" desc="ç‰¹æ®ŠçŽ©æ³•çš„ä¸€äº›çŠ¶æ€"/>
     </record>
-		<record name="battlewar_magic_team_rec" cols="15" maxrows="25" save="false" public="false" private="false" desc="Ææ»Ã¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="string" desc="Í·Ïñ"/>
-			<column type="float" desc="×ø±êX"/>
-			<column type="float" desc="×ø±êZ"/>
-			<column type="byte" desc="ÑªÁ¿"/>
-			<column type="byte" desc="ÄÜÁ¿"/>
+		<record name="battlewar_magic_team_rec" cols="15" maxrows="25" save="false" public="false" private="false" desc="å¥‡å¹»é˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="string" desc="å¤´åƒ"/>
+			<column type="float" desc="åæ ‡X"/>
+			<column type="float" desc="åæ ‡Z"/>
+			<column type="byte" desc="è¡€é‡"/>
+			<column type="byte" desc="èƒ½é‡"/>
 			<column type="string" desc="Buffers"/>
-      			<column type="int64" desc="ÉÏ´ÎÀëÏßÊ±¼ä"/> 
-  		   	<column type="byte" desc="µÈ¼¶"/>
-   		  	<column type="byte" desc="Ö°Òµ"/>
-  		   	<column type="byte" desc="×´Ì¬"/>
-  		   	<column type="byte" desc="¶ÓÎéÖÐµÄÎ»ÖÃ"/>
-  			<column type="byte" desc="¶ÓÎéÖÐµÄÖ°Î»"/>
-			<column type="string" desc="±ê¼Ç×Ö·û´®"/>
-      		<column type="byte" desc="ÌØÊâÍæ·¨µÄÒ»Ð©×´Ì¬"/>
+      			<column type="int64" desc="ä¸Šæ¬¡ç¦»çº¿æ—¶é—´"/> 
+  		   	<column type="byte" desc="ç­‰çº§"/>
+   		  	<column type="byte" desc="èŒä¸š"/>
+  		   	<column type="byte" desc="çŠ¶æ€"/>
+  		   	<column type="byte" desc="é˜Ÿä¼ä¸­çš„ä½ç½®"/>
+  			<column type="byte" desc="é˜Ÿä¼ä¸­çš„èŒä½"/>
+			<column type="string" desc="æ ‡è®°å­—ç¬¦ä¸²"/>
+      		<column type="byte" desc="ç‰¹æ®ŠçŽ©æ³•çš„ä¸€äº›çŠ¶æ€"/>
 		</record>
-		<record name="steam_space_postion_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="ÕôÆûÍÅ¶Ó¿ÕÓàÎ»ÖÃ±í">
-			<column type="byte" desc="¿ÕÓàµÄÎ»ÖÃ"/>
+		<record name="steam_space_postion_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="è’¸æ±½å›¢é˜Ÿç©ºä½™ä½ç½®è¡¨">
+			<column type="byte" desc="ç©ºä½™çš„ä½ç½®"/>
 		</record>
-		<record name="magic_space_postion_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="Ææ»ÃÍÅ¶Ó¿ÕÓàÎ»ÖÃ±í">
-			<column type="byte" desc="¿ÕÓàµÄÎ»ÖÃ"/>
+		<record name="magic_space_postion_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="å¥‡å¹»å›¢é˜Ÿç©ºä½™ä½ç½®è¡¨">
+			<column type="byte" desc="ç©ºä½™çš„ä½ç½®"/>
 		</record>
-		<record name="battlewar_statistics_scene" cols="10" maxrows="50" save="false" public="false" private="false" desc="Õ½³¡Í³¼Æ±í">
-			<column type="byte" desc="ÅÅÃû"/>
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="byte" desc="Ö°Òµ"/>
-			<column type="byte" desc="µÈ¼¶"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="dword" desc="ÖÎÁÆÁ¿"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="ËÀÍö"/>
-			<!--column type="word" desc="Õ½³¡ÈÙÓþ"/-->
-			<column type="byte" desc="ÕóÓª"/>
-			<column type="int64" desc="ÌØÊâÍæ·¨"/>
+		<record name="battlewar_statistics_scene" cols="10" maxrows="50" save="false" public="false" private="false" desc="æˆ˜åœºç»Ÿè®¡è¡¨">
+			<column type="byte" desc="æŽ’å"/>
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="byte" desc="èŒä¸š"/>
+			<column type="byte" desc="ç­‰çº§"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="dword" desc="æ²»ç–—é‡"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="æ­»äº¡"/>
+			<!--column type="word" desc="æˆ˜åœºè£èª‰"/-->
+			<column type="byte" desc="é˜µè¥"/>
+			<column type="int64" desc="ç‰¹æ®ŠçŽ©æ³•"/>
 		</record>
 	</records>
 	<includes>

@@ -1,38 +1,38 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task.lua
--- @ ½Å±¾¹¦ÄÜ: ÈÎÎñÄ¬ÈÏÖ´ĞĞ½Å±¾
--- @ ´´½¨Õß:   yinxiang
--- @ ´´½¨ÈÕÆÚ: 2010.5.27
+-- @ è„šæœ¬åç§°: task.lua
+-- @ è„šæœ¬åŠŸèƒ½: ä»»åŠ¡é»˜è®¤æ‰§è¡Œè„šæœ¬
+-- @ åˆ›å»ºè€…:   yinxiang
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.5.27
 -----------------------------------------
 require("define")
 require("share\\server_custom_define")
--- Ã¿¸öµ¥¶ÀµÄÈÎÎñ½Å±¾¿ÉÒÔ¸´ÖÆ´ËÄ£°å£¬ĞŞ¸ÄÂß¼­
+-- æ¯ä¸ªå•ç‹¬çš„ä»»åŠ¡è„šæœ¬å¯ä»¥å¤åˆ¶æ­¤æ¨¡æ¿ï¼Œä¿®æ”¹é€»è¾‘
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-    --¿ªÊ¼Ğ¡ÓÎÏ·
+    --å¼€å§‹å°æ¸¸æˆ
 	nx_start_game(player)
 	
-	--ÉèÖÃplayerÊÇ·ñÕıÔÚÓÎÏ·µÄÁÙÊ±Êı¾İ
+	--è®¾ç½®playeræ˜¯å¦æ­£åœ¨æ¸¸æˆçš„ä¸´æ—¶æ•°æ®
 	if not nx_find_data(player, "Gameing") then
 	   nx_add_data(player, "Gameing", VTYPE_INT)
 	end
     nx_set_data(player, "Gameing", 1)
     
-    --ÉèÖÃÍæ¼ÒÕıÔÚ½øĞĞµÄÈÎÎñ£¬ÓÃÓÚÓÎÏ·Á÷³ÌÖĞÍ£Ö¹ÓÎÏ·Ê±µ÷ÓÃÈÎÎñÊ§°Ü½Ó¿Ú
+    --è®¾ç½®ç©å®¶æ­£åœ¨è¿›è¡Œçš„ä»»åŠ¡ï¼Œç”¨äºæ¸¸æˆæµç¨‹ä¸­åœæ­¢æ¸¸æˆæ—¶è°ƒç”¨ä»»åŠ¡å¤±è´¥æ¥å£
     if not nx_find_data(player, "Tasking_Id") then
        nx_add_data(player, "Tasking_Id", VTYPE_INT)
     end
      nx_set_data(player, "Tasking_Id", taskid)      
     
-    --½ÓÊÜÈÎÎñºó²¥·ÅÌØĞ§
+    --æ¥å—ä»»åŠ¡åæ’­æ”¾ç‰¹æ•ˆ
 	if not nx_find_data(player, "Effect") then
 	   nx_add_data(player, "Effect", VTYPE_STRING)
 	end
@@ -43,15 +43,15 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
-	--Í£Ö¹Ğ¡ÓÎÏ·
+	--åœæ­¢å°æ¸¸æˆ
     nx_stop_game(player) 
     
     if nx_find_data(player, "Gameing") then
@@ -62,7 +62,7 @@ function Task_After_Complete(player, npc, taskid)
         nx_remove_data(player, "Tasking_Id")
     end
   
-    --Ïû³ıÌØĞ§
+    --æ¶ˆé™¤ç‰¹æ•ˆ
     if nx_find_data(player, "Effect") then
        local effectname = nx_query_data(player, "Effect")
        nx_custom_destory_effect(player, nx_string(effectname))
@@ -71,9 +71,9 @@ function Task_After_Complete(player, npc, taskid)
 	return 1
 end
 
---·ÅÆúÈÎÎñ
+--æ”¾å¼ƒä»»åŠ¡
 function on_task_giveup(player, task_id)
-	--Í£Ö¹Ğ¡ÓÎÏ·
+	--åœæ­¢å°æ¸¸æˆ
     nx_stop_game(player)    
 
    if nx_find_data(player, "Gameing") then
@@ -84,7 +84,7 @@ function on_task_giveup(player, task_id)
         nx_remove_data(player, "Tasking_Id")
     end
     
- --ÈÎÎñ·ÅÆúºó£¬Í£Ö¹ÁàË®ÌØĞ§
+ --ä»»åŠ¡æ”¾å¼ƒåï¼Œåœæ­¢æ‹æ°´ç‰¹æ•ˆ
     if nx_find_data(player, "Effect") then
        local effectname = nx_query_data(player, "Effect")    
        nx_custom_destory_effect(player, effectname)
@@ -94,9 +94,9 @@ function on_task_giveup(player, task_id)
 end
 
 
---ÈÎÎñÊ§°ÜÖ®ºóµÄ´¦Àí
+--ä»»åŠ¡å¤±è´¥ä¹‹åçš„å¤„ç†
 function on_task_failed(player, task_id)
-	--Í£Ö¹Ğ¡ÓÎÏ·
+	--åœæ­¢å°æ¸¸æˆ
     nx_stop_game(player)    
 
    if nx_find_data(player, "Gameing") then
@@ -107,7 +107,7 @@ function on_task_failed(player, task_id)
         nx_remove_data(player, "Tasking_Id")
     end
     
- --ÈÎÎñ·ÅÆúºó£¬Í£Ö¹ÁàË®ÌØĞ§
+ --ä»»åŠ¡æ”¾å¼ƒåï¼Œåœæ­¢æ‹æ°´ç‰¹æ•ˆ
     if nx_find_data(player, "Effect") then
        local effectname = nx_query_data(player, "Effect")
        nx_custom_destory_effect(player, nx_string(effectname))

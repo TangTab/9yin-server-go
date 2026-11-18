@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Object>
 <Property ID = "-1" CCHPTargetType = "15" CCHPType = "16" CCMPTargetType = "17" CCMPType = "18" CCQGPTargetType = "19" CCQGPType = "20" Category = "3" ClearRec = "14" DeadClear = "11" EffectType = "4" EventProcess = "12" Immunity = "13" IsDamage = "2" LifeTimeType = "5" LuaScript = "21" MaxVarPropNo = "23" MinVarPropNo = "22" OffLineClear = "10" Photo = "0" ReplaceCategory = "6" ReplaceType = "7" TargetClassType = "8" TargetRelationType = "9" Visible = "1" />
 <Property ID = "0" CCHPTargetType = "2" CCHPType = "2" CCMPTargetType = "2" CCMPType = "2" CCQGPTargetType = "2" CCQGPType = "2" Category = "2" ClearRec = "2" DeadClear = "2" EffectType = "2" EventProcess = "2" Immunity = "2" IsDamage = "2" LifeTimeType = "2" LuaScript = "6" MaxVarPropNo = "2" MinVarPropNo = "2" OffLineClear = "2" Photo = "6" ReplaceCategory = "2" ReplaceType = "2" TargetClassType = "2" TargetRelationType = "2" Visible = "2" />

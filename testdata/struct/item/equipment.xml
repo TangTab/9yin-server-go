@@ -1,73 +1,73 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Equip_ItemµÄÊôÐÔ±í£¬¼Ì³Ð×ÔNim_Item£¬ËùÓÐ¿É×°±¸µÄÎïÆ·µÄ»ùÀà-->
+<!--Equip_Itemçš„å±žæ€§è¡¨ï¼Œç»§æ‰¿è‡ªNim_Itemï¼Œæ‰€æœ‰å¯è£…å¤‡çš„ç‰©å“çš„åŸºç±»-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 		
-		<property name="StiffAdd" type="float" public="false" private="false" save="false" desc="+yingÖµ"/>
-		<property name="StiffDel" type="float" public="false" private="false" save="false" desc="-yingÖµ"/>
-		<property name="Hardiness" type="int" public="false" private="true" save="true" desc="×°±¸µ±Ç°ÄÍ¾Ã"/>
-		<property name="MaxHardiness" type="int" public="false" private="true" save="true" desc="×°±¸×î´óÄÍ¾Ã"/>
-		<property name="HardinessCount" type="int" public="false" private="false" save="true" desc="ÄÍ¾ÃÄÚ²¿¼ÆÊý, ¿Û³ýÄÍ¾ÃÓÃ"/>
-		<property name="TransPre" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÊÇ×ªÖ°Ö®Ç°(0ÊÇ£¬´óÓÚ0µÄ²»ÊÇ)"/>
-		<property name="ResolvePack" type="int" public="false" private="false" save="false" desc="·Ö½â°ü"/>
-		<property name="PropPack" type="string" public="false" private="true" save="true" desc="¹Ì¶¨ÊôÐÔ°ü"/>
-		<property name="PropBuilt" type="string" public="false" private="true" save="true" desc="¹Ì¶¨ÊôÐÔÇ¿»¯°ü"/>
-		<property name="PropRanBuilt" type="string" public="false" private="true" save="true" desc="Ëæ»úÊôÐÔÇ¿»¯°ü"/>
+		<property name="StiffAdd" type="float" public="false" private="false" save="false" desc="+yingå€¼"/>
+		<property name="StiffDel" type="float" public="false" private="false" save="false" desc="-yingå€¼"/>
+		<property name="Hardiness" type="int" public="false" private="true" save="true" desc="è£…å¤‡å½“å‰è€ä¹…"/>
+		<property name="MaxHardiness" type="int" public="false" private="true" save="true" desc="è£…å¤‡æœ€å¤§è€ä¹…"/>
+		<property name="HardinessCount" type="int" public="false" private="false" save="true" desc="è€ä¹…å†…éƒ¨è®¡æ•°, æ‰£é™¤è€ä¹…ç”¨"/>
+		<property name="TransPre" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦æ˜¯è½¬èŒä¹‹å‰(0æ˜¯ï¼Œå¤§äºŽ0çš„ä¸æ˜¯)"/>
+		<property name="ResolvePack" type="int" public="false" private="false" save="false" desc="åˆ†è§£åŒ…"/>
+		<property name="PropPack" type="string" public="false" private="true" save="true" desc="å›ºå®šå±žæ€§åŒ…"/>
+		<property name="PropBuilt" type="string" public="false" private="true" save="true" desc="å›ºå®šå±žæ€§å¼ºåŒ–åŒ…"/>
+		<property name="PropRanBuilt" type="string" public="false" private="true" save="true" desc="éšæœºå±žæ€§å¼ºåŒ–åŒ…"/>
 				
-		<property name="EquipType" type="String" public="false" private="true" save="false" desc="×°±¸À¸Î»ÀàÐÍ, ¼ûEquipDefine.iniÎÄ¼þÖÐµÄ¶¨Òå"/>
-		<property name="HoldType" type="byte" public="false" private="false" save="false" desc="Ë«ÊÖ:4"/>
-		<property name="HandPos" type="byte" public="false" private="false" save="false" desc="0:Ö÷ÊÖ 1 ¸±ÊÖ 2 Ö÷¸±ÊÖ"/>
+		<property name="EquipType" type="String" public="false" private="true" save="false" desc="è£…å¤‡æ ä½ç±»åž‹, è§EquipDefine.iniæ–‡ä»¶ä¸­çš„å®šä¹‰"/>
+		<property name="HoldType" type="byte" public="false" private="false" save="false" desc="åŒæ‰‹:4"/>
+		<property name="HandPos" type="byte" public="false" private="false" save="false" desc="0:ä¸»æ‰‹ 1 å‰¯æ‰‹ 2 ä¸»å‰¯æ‰‹"/>
 		
-		<property name="SkillRandPack" type="int" public="false" private="false" save="false" desc="¼¼ÄÜËæ»ú°ü()"/>
-		<property name="SkillRand" type="string" public="false" private="true" save="true" desc="Ëæ»ú¸øµÄ¼¼ÄÜ"/>
-		<property name="EquipSetSkillPack" type="int" public="false" private="false" save="false" desc="Ì××°Ëæ»ú°ü()"/>
-		<property name="EquipSetSkillRand" type="string" public="false" private="true" save="true" desc="Ì××°¼¼ÄÜ(ºÍSkillRand±¾ÖÊÉÏÃ»ÓÐÈÎºÎÇø±ð,ÎªÁËÏÔÊ¾Ð§¹û)"/>
+		<property name="SkillRandPack" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½éšæœºåŒ…()"/>
+		<property name="SkillRand" type="string" public="false" private="true" save="true" desc="éšæœºç»™çš„æŠ€èƒ½"/>
+		<property name="EquipSetSkillPack" type="int" public="false" private="false" save="false" desc="å¥—è£…éšæœºåŒ…()"/>
+		<property name="EquipSetSkillRand" type="string" public="false" private="true" save="true" desc="å¥—è£…æŠ€èƒ½(å’ŒSkillRandæœ¬è´¨ä¸Šæ²¡æœ‰ä»»ä½•åŒºåˆ«,ä¸ºäº†æ˜¾ç¤ºæ•ˆæžœ)"/>
 		
-		<property name="ActionKey" type="string" public="false" private="false" save="false" desc="ÊÕ°ÎÎäÆ÷°óµã"/>
-		<property name="PointKey" type="string" public="false" private="false" save="false" desc="ÊÕ°ÎÎäÆ÷¶¯×÷"/>
+		<property name="ActionKey" type="string" public="false" private="false" save="false" desc="æ”¶æ‹”æ­¦å™¨ç»‘ç‚¹"/>
+		<property name="PointKey" type="string" public="false" private="false" save="false" desc="æ”¶æ‹”æ­¦å™¨åŠ¨ä½œ"/>
 		
-		<property name="CommonPack" type="string" public="false" private="false" save="false" desc="ÆÕÍ¨°ü(ÊôÐÔ²»¿É±»Ç¿»¯)"/>
+		<property name="CommonPack" type="string" public="false" private="false" save="false" desc="æ™®é€šåŒ…(å±žæ€§ä¸å¯è¢«å¼ºåŒ–)"/>
 		
-		<property name="ArmourType" type="byte" public="false" private="false" save="false" desc="ÖØ¼×ÀàÐÍ:ÖØ¼×,Çá¼×µÈ"/>
-		<property name="CurHoleCount" type="int" public="false" private="true" save="true" desc="×°±¸ÒÑ´ò¿×Êý"/>
-		<property name="RandNum" type="string" public="false" private="false" save="false" desc="Ëæ»úÊôÐÔºÅID"/>
+		<property name="ArmourType" type="byte" public="false" private="false" save="false" desc="é‡ç”²ç±»åž‹:é‡ç”²,è½»ç”²ç­‰"/>
+		<property name="CurHoleCount" type="int" public="false" private="true" save="true" desc="è£…å¤‡å·²æ‰“å­”æ•°"/>
+		<property name="RandNum" type="string" public="false" private="false" save="false" desc="éšæœºå±žæ€§å·ID"/>
 				
-		<property name="EquipSet" type="int" public="false" private="false" save="false" desc="Ì××°"/>
-		<property name="StarLevel" type="int" public="false" private="true" save="true" desc="×°±¸ÐÇ¼¶:Ç¿»¯µÈ¼¶"/>
-		<property name="Proadd" type="float" public="false" private="true" save="true" desc="ÊôÐÔÌá¸ßÂÊ"/>
-		<property name="AppendLefttime" type="int" public="false" private="true" save="true" desc="¸½Ä§Ê±¼ä"/>
-		<property name="PetCanStronger" type="word"   public="false" private="false" save="false"  desc="³èÎïÄÜ·ñ±»Ç¿»¯;1:±íÊ¾¿ÉÒÔÇ¿»¯,0:±íÊ¾²»ÄÜÇ¿»¯"/>
-		<property name="PetConfigID"    type="string" public="false" private="true" save="false"  desc="³èÎïµÄconfigID,Ò»¸ö×°±¸¶ÔÓ¦Ò»¸ö³èÎï"/>
-		<property name="SpecialType" type="string" public="false" private="true" save="false" desc="ÌØÊâ×°±¸¶¨Òå"/>
+		<property name="EquipSet" type="int" public="false" private="false" save="false" desc="å¥—è£…"/>
+		<property name="StarLevel" type="int" public="false" private="true" save="true" desc="è£…å¤‡æ˜Ÿçº§:å¼ºåŒ–ç­‰çº§"/>
+		<property name="Proadd" type="float" public="false" private="true" save="true" desc="å±žæ€§æé«˜çŽ‡"/>
+		<property name="AppendLefttime" type="int" public="false" private="true" save="true" desc="é™„é­”æ—¶é—´"/>
+		<property name="PetCanStronger" type="word"   public="false" private="false" save="false"  desc="å® ç‰©èƒ½å¦è¢«å¼ºåŒ–;1:è¡¨ç¤ºå¯ä»¥å¼ºåŒ–,0:è¡¨ç¤ºä¸èƒ½å¼ºåŒ–"/>
+		<property name="PetConfigID"    type="string" public="false" private="true" save="false"  desc="å® ç‰©çš„configID,ä¸€ä¸ªè£…å¤‡å¯¹åº”ä¸€ä¸ªå® ç‰©"/>
+		<property name="SpecialType" type="string" public="false" private="true" save="false" desc="ç‰¹æ®Šè£…å¤‡å®šä¹‰"/>
 	
-		<property name="CombineIf" type="byte" public="false" private="false" save="false" desc="×°±¸ÊÇ·ñ¿ÉÒÔºÏ³É£º1-·ñ 0-ÊÇ"/>
-		<property name="EquipWeaponPack" type="word" public="false" private="false" save="false" desc="ÎäÆ÷ºÍ×°±¸µÄ°ü"/>
-		<property name="OverLayPack" type="word" public="false" private="false" save="false" desc="¸½¼ÓÊôÐÔµþ¼Ó°ü"/>
+		<property name="CombineIf" type="byte" public="false" private="false" save="false" desc="è£…å¤‡æ˜¯å¦å¯ä»¥åˆæˆï¼š1-å¦ 0-æ˜¯"/>
+		<property name="EquipWeaponPack" type="word" public="false" private="false" save="false" desc="æ­¦å™¨å’Œè£…å¤‡çš„åŒ…"/>
+		<property name="OverLayPack" type="word" public="false" private="false" save="false" desc="é™„åŠ å±žæ€§å åŠ åŒ…"/>
 	</properties>
 	
-	<!--²ß»®ÒªÇó×°±¸µÄÐÞÕý±í±ØÐë±£´æ²»µÃÖØË¢-->
+	<!--ç­–åˆ’è¦æ±‚è£…å¤‡çš„ä¿®æ­£è¡¨å¿…é¡»ä¿å­˜ä¸å¾—é‡åˆ·-->
 	<records>
 	  
-		<record name="RaPropertyRec" cols="3" maxrows="10" save="true" public="false" private="true" desc="×°±¸Ëæ»úÊôÐÔ±í">
-			<column type="byte" desc="ÊôÐÔÃûË÷Òý"/>
-			<column type="float" desc="ÊôÐÔÖµ"/>	
-			<column type="float" desc="Ï´µã¸Ä±äµÄ±ÈÂÊ"/>	
+		<record name="RaPropertyRec" cols="3" maxrows="10" save="true" public="false" private="true" desc="è£…å¤‡éšæœºå±žæ€§è¡¨">
+			<column type="byte" desc="å±žæ€§åç´¢å¼•"/>
+			<column type="float" desc="å±žæ€§å€¼"/>	
+			<column type="float" desc="æ´—ç‚¹æ”¹å˜çš„æ¯”çŽ‡"/>	
 		</record>
 		
-    <record name="EnchaseRec" cols="3" maxrows="3" save="true" public="false" private="true" desc="×°±¸ÏâÇ¶±í">
-      <column type="byte" desc="ÏâÇ¶¿×ºÅ"/>
-      <column type="string" desc="ÏâÇ¶ÎïÆ·ID"/>
-      <column type="string" desc="ÊôÐÔ×Ö·û´®"/>
+    <record name="EnchaseRec" cols="3" maxrows="3" save="true" public="false" private="true" desc="è£…å¤‡é•¶åµŒè¡¨">
+      <column type="byte" desc="é•¶åµŒå­”å·"/>
+      <column type="string" desc="é•¶åµŒç‰©å“ID"/>
+      <column type="string" desc="å±žæ€§å­—ç¬¦ä¸²"/>
     </record>
     
-     <record name="AddMagicRec" cols="1" maxrows="8" save="true" public="false" private="true" desc="¸½Ä§ÊôÐÔ±í">
-       <column type="DWORD" desc="¸½Ä§µÄÊôÐÔID"/>
+     <record name="AddMagicRec" cols="1" maxrows="8" save="true" public="false" private="true" desc="é™„é­”å±žæ€§è¡¨">
+       <column type="DWORD" desc="é™„é­”çš„å±žæ€§ID"/>
     </record>
     
 	</records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>	
 </object>

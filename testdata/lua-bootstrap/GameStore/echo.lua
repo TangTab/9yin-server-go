@@ -1,6 +1,6 @@
---Î¬»¤Á¬½Ó½Å±¾
+--ç»´æŠ¤è¿žæŽ¥è„šæœ¬
 
---³õÊ¼»¯
+--åˆå§‹åŒ–
 function echo_init(self)
 	nx_callback(self, "on_open", "echo_open")
 	nx_callback(self, "on_close", "echo_close")
@@ -21,7 +21,7 @@ function echo_init(self)
 	return 1
 end
 
---Î¬»¤Á¬½Ó´ò¿ª
+--ç»´æŠ¤è¿žæŽ¥æ‰“å¼€
 function echo_open(self, addr, port)
 	local console = nx_value("console")
 
@@ -36,7 +36,7 @@ function echo_open(self, addr, port)
 	return 1
 end
 
---Î¬»¤Á¬½Ó¹Ø±Õ
+--ç»´æŠ¤è¿žæŽ¥å…³é—­
 function echo_close(self, addr, port)
 	local console = nx_value("console")
 
@@ -46,10 +46,10 @@ function echo_close(self, addr, port)
 	return 1
 end
 
---´¦ÀíÎ¬»¤ÊäÈëÃüÁî
+--å¤„ç†ç»´æŠ¤è¾“å…¥å‘½ä»¤
 function echo_input(self, command)
 	if command == "quit" then
-		--ÍË³ö³ÌÐò
+		--é€€å‡ºç¨‹åº
 		if not nx_running("main", "close") then
 			echo_response(self, "server will shutdown...")
 
@@ -58,7 +58,7 @@ function echo_input(self, command)
 			echo_response(self, "server in closing...")
 		end
 	elseif command == "end" then
-		--¹Ø±ÕÁ¬½Ó
+		--å…³é—­è¿žæŽ¥
 		self:Close()
 	else
 		echo_response(self, "Undefined command: " .. command)
@@ -67,7 +67,7 @@ function echo_input(self, command)
 	return 1
 end
 
---²éÕÒÊµÌå
+--æŸ¥æ‰¾å®žä½“
 function get_entity(entity_name)
 	local id = nx_value(entity_name)
 
@@ -90,7 +90,7 @@ function get_entity(entity_name)
 	return nil
 end
 
---×ª»»µ½ºÏÊÊµÄÀàÐÍ
+--è½¬æ¢åˆ°åˆé€‚çš„ç±»åž‹
 function get_new_value(old_v, value)
 	local type = nx_type(old_v)
 
@@ -117,7 +117,7 @@ function get_new_value(old_v, value)
 	return nil
 end
 
---²éÑ¯ÊµÌåÄÚ²¿ÊôÐÔ
+--æŸ¥è¯¢å®žä½“å†…éƒ¨å±žæ€§
 function echo_input_getp(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -137,7 +137,7 @@ function echo_input_getp(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌåÄÚ²¿ÊôÐÔ
+--è®¾ç½®å®žä½“å†…éƒ¨å±žæ€§
 function echo_input_setp(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -166,7 +166,7 @@ function echo_input_setp(self, entity, prop, value)
 	return 1
 end
 
---²éÑ¯ÊµÌå×Ô¶¨ÒåÊôÐÔ
+--æŸ¥è¯¢å®žä½“è‡ªå®šä¹‰å±žæ€§
 function echo_input_getc(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -186,7 +186,7 @@ function echo_input_getc(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌå×Ô¶¨ÒåÊôÐÔ
+--è®¾ç½®å®žä½“è‡ªå®šä¹‰å±žæ€§
 function echo_input_setc(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -215,7 +215,7 @@ function echo_input_setc(self, entity, prop, value)
 	return 1
 end
 
---Ö´ÐÐÊµÌå·½·¨
+--æ‰§è¡Œå®žä½“æ–¹æ³•
 function echo_input_method(self, entity, method, ...)
 	if entity == nil or method == nil then
 		return 0
@@ -244,7 +244,7 @@ function echo_input_method(self, entity, method, ...)
 	return 1
 end
 
---ÁÐ³öÊµÌåµÄËùÓÐÄÚ²¿ÊôÐÔ
+--åˆ—å‡ºå®žä½“çš„æ‰€æœ‰å†…éƒ¨å±žæ€§
 function echo_input_listp(self, entity)
 	if entity == nil then
 		return 0
@@ -269,7 +269,7 @@ function echo_input_listp(self, entity)
 	return 1
 end
 
---ÁÐ³öÊµÌåµÄËùÓÐ×Ô¶¨ÒåÊôÐÔ
+--åˆ—å‡ºå®žä½“çš„æ‰€æœ‰è‡ªå®šä¹‰å±žæ€§
 function echo_input_listc(self, entity)
 	if entity == nil then
 		return 0
@@ -294,7 +294,7 @@ function echo_input_listc(self, entity)
 	return 1
 end
 
---ÁÐ³öÊµÌåµÄËùÓÐ·½·¨
+--åˆ—å‡ºå®žä½“çš„æ‰€æœ‰æ–¹æ³•
 function echo_input_listm(self, entity)
 	if entity == nil then
 		return 0
@@ -319,7 +319,7 @@ function echo_input_listm(self, entity)
 	return 1
 end
 
---ÁÐ³öËùÓÐÈ«¾Ö±äÁ¿
+--åˆ—å‡ºæ‰€æœ‰å…¨å±€å˜é‡
 function echo_input_listg(self)
 	local global_table = nx_value_list()
 
@@ -337,7 +337,7 @@ function echo_input_listg(self)
 	return 1
 end
 
---Ö´ÐÐ½Å±¾À©Õ¹º¯Êý
+--æ‰§è¡Œè„šæœ¬æ‰©å±•å‡½æ•°
 function echo_input_function(self, func, ...)
 	if func == nil or func == "" then
 		return 0
@@ -358,7 +358,7 @@ function echo_input_function(self, func, ...)
 	return 1
 end
 
---·¢ËÍ»ØÓ¦ÐÅÏ¢
+--å‘é€å›žåº”ä¿¡æ¯
 function echo_response(echo_sock, info)
 	echo_sock:SendLine(">" .. info .. "\r")
 
@@ -369,7 +369,7 @@ function echo_response(echo_sock, info)
 	return true
 end
 
---µ÷ÊÔº¯Êý
+--è°ƒè¯•å‡½æ•°
 function echo_input_debugger(self, entity, method, ...)
 	if entity == nil or entity == "" or method == nil or method == "" then
 		return 0

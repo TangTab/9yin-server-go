@@ -1,30 +1,30 @@
--- ? »òÕß h ±íÊ¾°ïÖú,ÁĞ³öËùÓĞ²ÎÊıËµÃ÷
--- g »òÕß ±íÊ¾·ÅÆúÈÎÎñ ÈÎÎñ±àºÅ
--- a »òÕß ±íÊ¾½ÓÊÜÈÎÎñ ÈÎÎñ±àºÅ
--- p »òÕß ±íÊ¾ÏÔÊ¾ÈÎÎñ±í 1 ÈÎÎñ³Ğ½Ó±í 2 ÈÎÎñ½ø¶È±í 3 ÈÎÎñÍê³É±í
--- s ±íÊ¾ÉèÖÃ±í
--- c »òÕß ±íÊ¾Çå¿ÕÈÎÎñ±í
+-- ? æˆ–è€… h è¡¨ç¤ºå¸®åŠ©,åˆ—å‡ºæ‰€æœ‰å‚æ•°è¯´æ˜
+-- g æˆ–è€… è¡¨ç¤ºæ”¾å¼ƒä»»åŠ¡ ä»»åŠ¡ç¼–å·
+-- a æˆ–è€… è¡¨ç¤ºæ¥å—ä»»åŠ¡ ä»»åŠ¡ç¼–å·
+-- p æˆ–è€… è¡¨ç¤ºæ˜¾ç¤ºä»»åŠ¡è¡¨ 1 ä»»åŠ¡æ‰¿æ¥è¡¨ 2 ä»»åŠ¡è¿›åº¦è¡¨ 3 ä»»åŠ¡å®Œæˆè¡¨
+-- s è¡¨ç¤ºè®¾ç½®è¡¨
+-- c æˆ–è€… è¡¨ç¤ºæ¸…ç©ºä»»åŠ¡è¡¨
 function task_help(gm, type)
-	-- ´òÓ¡°ïÖú
-	nx_sysinfo(gm, type, "0", nx_widestr("========================gmÃüÁî[task]==============================="));
-	nx_sysinfo(gm, type, "0", nx_widestr("gmÃüÁî[task] ²ÎÊı±íËµÃ÷: "));
-	nx_sysinfo(gm, type, "0", nx_widestr("(1), ±ÈÈç: task ? ±íÊ¾ÏÔÊ¾°ïÖú"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     ±ÈÈç: task g 24 ±íÊ¾·ÅÆú24ºÅÈÎÎñ"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     ±ÈÈç: task g ±íÊ¾·ÅÆúËùÓĞÈÎÎñ"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     ±ÈÈç: task a 24 ±íÊ¾Ç¿ÖÆ³Ğ½Ó24ºÅÈÎÎñ"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     ±ÈÈç: task p 1 ±íÊ¾ÏÔÊ¾³Ğ½ÓÈÎÎñ±íÄÚÈİ"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     ±ÈÈç: task s 2 0 4 1 ±íÊ¾ÉèÖÃÈÎÎñ½ø¶È±íµÚ0ĞĞ4ÁĞÎª1"));
-	nx_sysinfo(gm, type, "0", nx_widestr("(2), ? »ò h ÓÃÀ´ÏÔÊ¾°ïÖúĞÅÏ¢"));
-	nx_sysinfo(gm, type, "0", nx_widestr("(3), a [id] ¼´accept ±íÊ¾½ÓÊÜÈÎÎñ task a 24 ±íÊ¾Ç¿ÖÆ½ÓÊÜ24ºÅÈÎÎñ"));
-	nx_sysinfo(gm, type, "0", nx_widestr("(4), p [id] ¼´print ±íÊ¾´òÓ¡ÈÎÎñ±í idÎªÕûÊıËµÃ÷ÈçÏÂ:"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     1:³Ğ½ÓÈÎÎñ±í           Task_Accepted"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     2:ÈÎÎñ½ø¶È±í           Task_Record"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     3:ÈÎÎñÍê³É±í           Task_Completed"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     4:¿ÉÖØ¸´ÈÎÎñ±í         TaskRepeatRec"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     5:Òş²Ønpc±í            Task_Hide_Rec"));
-	nx_sysinfo(gm, type, "0", nx_widestr("     6:±íÊ¾Íê³ÉµÄ¸±±¾ÈÎÎñ±í CmpltCloneTaskRec"));
-	nx_sysinfo(gm, type, "0", nx_widestr("(5), s [id row col value] ¼´set ±íÊ¾ÉèÖÃÈÎÎñ±í "));
-	nx_sysinfo(gm, type, "0", nx_widestr("     idÍ¬ÉÏ row¼´ĞĞÊı,col¼´ÁĞ,value¼´ÒªĞŞ¸ÄµÄÖµ"));
-	nx_sysinfo(gm, type, "0", nx_widestr("(6), c ¼´clear Çå¿ÕËùÓĞÈÎÎñ±í"));
-	nx_sysinfo(gm, type, "0", nx_widestr("========================/gmÃüÁî[task]==============================="));
+	-- æ‰“å°å¸®åŠ©
+	nx_sysinfo(gm, type, "0", nx_widestr("========================gmå‘½ä»¤[task]==============================="));
+	nx_sysinfo(gm, type, "0", nx_widestr("gmå‘½ä»¤[task] å‚æ•°è¡¨è¯´æ˜: "));
+	nx_sysinfo(gm, type, "0", nx_widestr("(1), æ¯”å¦‚: task ? è¡¨ç¤ºæ˜¾ç¤ºå¸®åŠ©"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     æ¯”å¦‚: task g 24 è¡¨ç¤ºæ”¾å¼ƒ24å·ä»»åŠ¡"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     æ¯”å¦‚: task g è¡¨ç¤ºæ”¾å¼ƒæ‰€æœ‰ä»»åŠ¡"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     æ¯”å¦‚: task a 24 è¡¨ç¤ºå¼ºåˆ¶æ‰¿æ¥24å·ä»»åŠ¡"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     æ¯”å¦‚: task p 1 è¡¨ç¤ºæ˜¾ç¤ºæ‰¿æ¥ä»»åŠ¡è¡¨å†…å®¹"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     æ¯”å¦‚: task s 2 0 4 1 è¡¨ç¤ºè®¾ç½®ä»»åŠ¡è¿›åº¦è¡¨ç¬¬0è¡Œ4åˆ—ä¸º1"));
+	nx_sysinfo(gm, type, "0", nx_widestr("(2), ? æˆ– h ç”¨æ¥æ˜¾ç¤ºå¸®åŠ©ä¿¡æ¯"));
+	nx_sysinfo(gm, type, "0", nx_widestr("(3), a [id] å³accept è¡¨ç¤ºæ¥å—ä»»åŠ¡ task a 24 è¡¨ç¤ºå¼ºåˆ¶æ¥å—24å·ä»»åŠ¡"));
+	nx_sysinfo(gm, type, "0", nx_widestr("(4), p [id] å³print è¡¨ç¤ºæ‰“å°ä»»åŠ¡è¡¨ idä¸ºæ•´æ•°è¯´æ˜å¦‚ä¸‹:"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     1:æ‰¿æ¥ä»»åŠ¡è¡¨           Task_Accepted"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     2:ä»»åŠ¡è¿›åº¦è¡¨           Task_Record"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     3:ä»»åŠ¡å®Œæˆè¡¨           Task_Completed"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     4:å¯é‡å¤ä»»åŠ¡è¡¨         TaskRepeatRec"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     5:éšè—npcè¡¨            Task_Hide_Rec"));
+	nx_sysinfo(gm, type, "0", nx_widestr("     6:è¡¨ç¤ºå®Œæˆçš„å‰¯æœ¬ä»»åŠ¡è¡¨ CmpltCloneTaskRec"));
+	nx_sysinfo(gm, type, "0", nx_widestr("(5), s [id row col value] å³set è¡¨ç¤ºè®¾ç½®ä»»åŠ¡è¡¨ "));
+	nx_sysinfo(gm, type, "0", nx_widestr("     idåŒä¸Š rowå³è¡Œæ•°,colå³åˆ—,valueå³è¦ä¿®æ”¹çš„å€¼"));
+	nx_sysinfo(gm, type, "0", nx_widestr("(6), c å³clear æ¸…ç©ºæ‰€æœ‰ä»»åŠ¡è¡¨"));
+	nx_sysinfo(gm, type, "0", nx_widestr("========================/gmå‘½ä»¤[task]==============================="));
 end

@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--¾º¼¼ÏµÍ³Ïà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--ç«žæŠ€ç³»ç»Ÿç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="In_ArenaPlane" type="int" public="false" private="true" save="true" desc="¾º¼¼×´Ì¬"/>
-		<property name="Plane_ID" type="int" public="false" private="false" save="true" desc="¾º¼¼Æ½Ì¨ID"/>
-		<property name="Coin_Dota" type="int" public="false" private="true" save="true" desc="Dota½ðÇ®"/>
-		<property name="Plane_SceneID" type="int" public="false" private="false" save="true" desc="¾º¼¼³¡¾°ID"/>
-		<property name="Plane_PosX" type="float" public="false" private="false" save="true" desc="¾º¼¼³¡¾°X×ø±ê"/>
-		<property name="Plane_PosY" type="float" public="false" private="false" save="true" desc="¾º¼¼³¡¾°Y×ø±ê"/>
-		<property name="Plane_PosZ" type="float" public="false" private="false" save="true" desc="¾º¼¼³¡¾°Z×ø±ê"/>
-		<property name="Plane_SceneCTime" type="int64" public="false" private="false" save="true" desc="¾º¼¼³¡¾°´´½¨Ê±¼ä"/>
-		<property name="Plane_RID" type="string" public="false" private="false" save="true" desc="¶ÓÎéÎ¨Ò»×Ö´®"/>
+		<property name="In_ArenaPlane" type="int" public="false" private="true" save="true" desc="ç«žæŠ€çŠ¶æ€"/>
+		<property name="Plane_ID" type="int" public="false" private="false" save="true" desc="ç«žæŠ€å¹³å°ID"/>
+		<property name="Coin_Dota" type="int" public="false" private="true" save="true" desc="Dotaé‡‘é’±"/>
+		<property name="Plane_SceneID" type="int" public="false" private="false" save="true" desc="ç«žæŠ€åœºæ™¯ID"/>
+		<property name="Plane_PosX" type="float" public="false" private="false" save="true" desc="ç«žæŠ€åœºæ™¯Xåæ ‡"/>
+		<property name="Plane_PosY" type="float" public="false" private="false" save="true" desc="ç«žæŠ€åœºæ™¯Yåæ ‡"/>
+		<property name="Plane_PosZ" type="float" public="false" private="false" save="true" desc="ç«žæŠ€åœºæ™¯Zåæ ‡"/>
+		<property name="Plane_SceneCTime" type="int64" public="false" private="false" save="true" desc="ç«žæŠ€åœºæ™¯åˆ›å»ºæ—¶é—´"/>
+		<property name="Plane_RID" type="string" public="false" private="false" save="true" desc="é˜Ÿä¼å”¯ä¸€å­—ä¸²"/>
 	</properties>
 	<records>
 	</records>

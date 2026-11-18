@@ -1,4 +1,4 @@
---×°±¸µÄÑÕÉ«¼¶±ð
+--è£…å¤‡çš„é¢œè‰²çº§åˆ«
 function refresh_color(equip)
 	local colorlevel = 0;
 	for i = 0, 3 do

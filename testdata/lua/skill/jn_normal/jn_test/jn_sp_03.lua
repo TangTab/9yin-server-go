@@ -2,11 +2,11 @@ require("define")
 require("skill\\AddBuff\\jn_normal\\jn_test\\jn_sp_03a")
 require("skill\\AddBuff\\jn_normal\\jn_test\\jn_sp_03b")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 	if not nx_add_data(skill, "Phase", VTYPE_INT) then
 		return 0
@@ -15,15 +15,15 @@ function skill_prepare(self, skill, usetype, target, x, y, z)
 	return 1
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 	local target = nx_query_property(self, "LastObject")
 	local phase = nx_query_data(skill, "Phase")
@@ -34,48 +34,48 @@ function skill_after_hit(self, skill, target)
 			return 0
 		end
 	]]
-		AddBuff_a(self, target, 1)		-- ¸ø¶Ô·½¼ÓÔöÒæ
-		AddBuff_b(self, self, 1)		-- ¸ø×Ô¼º¼Ó¼õÒæ
+		AddBuff_a(self, target, 1)		-- ç»™å¯¹æ–¹åŠ å¢ç›Š
+		AddBuff_b(self, self, 1)		-- ç»™è‡ªå·±åŠ å‡ç›Š
 	elseif phase == 2 then
 	--[[
 		if not DecMP(self, 30) then
 			return 0
 		end
 	]]
-		AddBuff_a(self, target, 2)		-- ¸ø¶Ô·½¼ÓÔöÒæ
-		AddBuff_b(self, self, 2)		-- ¸ø×Ô¼º¼Ó¼õÒæ
+		AddBuff_a(self, target, 2)		-- ç»™å¯¹æ–¹åŠ å¢ç›Š
+		AddBuff_b(self, self, 2)		-- ç»™è‡ªå·±åŠ å‡ç›Š
 	elseif phase == 3 then
 	--[[
 		if not DecMP(self, 30) then
 			return 0
 		end
 	]]
-		AddBuff_a(self, target, 3)		-- ¸ø¶Ô·½¼ÓÔöÒæ
-		AddBuff_b(self, self, 3)		-- ¸ø×Ô¼º¼Ó¼õÒæ
+		AddBuff_a(self, target, 3)		-- ç»™å¯¹æ–¹åŠ å¢ç›Š
+		AddBuff_b(self, self, 3)		-- ç»™è‡ªå·±åŠ å‡ç›Š
 	elseif phase == 4 then
 	--[[
 		if not DecMP(self, 30) then
 			return 0
 		end
 	]]
-		AddBuff_a(self, target, 4)		-- ¸ø¶Ô·½¼ÓÔöÒæ
-		AddBuff_b(self, self, 4)		-- ¸ø×Ô¼º¼Ó¼õÒæ
+		AddBuff_a(self, target, 4)		-- ç»™å¯¹æ–¹åŠ å¢ç›Š
+		AddBuff_b(self, self, 4)		-- ç»™è‡ªå·±åŠ å‡ç›Š
 	elseif phase == 5 then
 	--[[
 		if not DecMP(self, 30) then
 			return 0
 		end
 	]]
-		AddBuff_a(self, target, 5)		-- ¸ø¶Ô·½¼ÓÔöÒæ
-		AddBuff_b(self, self, 5)		-- ¸ø×Ô¼º¼Ó¼õÒæ
+		AddBuff_a(self, target, 5)		-- ç»™å¯¹æ–¹åŠ å¢ç›Š
+		AddBuff_b(self, self, 5)		-- ç»™è‡ªå·±åŠ å‡ç›Š
 	elseif phase == 6 then
 	--[[
 		if not DecMP(self, 30) then
 			return 0
 		end
 	]]
-		AddBuff_a(self, target, 6)		-- ¸ø¶Ô·½¼ÓÔöÒæ
-		AddBuff_b(self, self, 6)		-- ¸ø×Ô¼º¼Ó¼õÒæ
+		AddBuff_a(self, target, 6)		-- ç»™å¯¹æ–¹åŠ å¢ç›Š
+		AddBuff_b(self, self, 6)		-- ç»™è‡ªå·±åŠ å‡ç›Š
 	end
 
 	phase = phase + 1
@@ -85,15 +85,15 @@ function skill_after_hit(self, skill, target)
 	return 1
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---ºÄÀ¶
+--è€—è“
 function DecMP(object, value)
 	local currMP = nx_query_property(object, "MP")
 	if currMP < value then

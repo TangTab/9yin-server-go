@@ -1,72 +1,72 @@
---Æø¹¦	Æø¹¦ÕÆ	ÉËº¦ÖÜÎ§µĞÈË
+--æ°”åŠŸ	æ°”åŠŸæŒ	ä¼¤å®³å‘¨å›´æ•Œäºº
 
 require("define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
-	--È¡×Ô¼º¼¼ÄÜµÄ¼¶±ğ
+	--å–è‡ªå·±æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
 	
-	--»ñÈ¡×Ô¼ºµÄÒâÖ¾£¨SPI£©
+	--è·å–è‡ªå·±çš„æ„å¿—ï¼ˆSPIï¼‰
 	local spi = nx_query_property(self, "Spi") + nx_query_property(self, "SpiAdd")
 	
-	--»ñµÃ×Ô¼ºµÄÄÚ¹¦ÍşÁ¦
+	--è·å¾—è‡ªå·±çš„å†…åŠŸå¨åŠ›
 	local magicPower = nx_query_property(self, "MagicPower") + nx_query_property(self, "MagicPowerAdd")
 
-	--ÁÙÊ±±äÁ¿£ºÉËº¦³õÊ¼»¯
+	--ä¸´æ—¶å˜é‡ï¼šä¼¤å®³åˆå§‹åŒ–
 	local masDamage = 0
 
---µÈ¼¶1£ºÑôÉËº¦=100+ÄÚ¹¦ÍşÁ¦+ÒâÖ¾*1
+--ç­‰çº§1ï¼šé˜³ä¼¤å®³=100+å†…åŠŸå¨åŠ›+æ„å¿—*1
 	if level == 1 then
 		masDamage = (math.random(50,150) + magicPower + spi * 1)
 
---µÈ¼¶2£ºÑôÉËº¦=150+ÄÚ¹¦ÍşÁ¦+ÒâÖ¾*1.5	
+--ç­‰çº§2ï¼šé˜³ä¼¤å®³=150+å†…åŠŸå¨åŠ›+æ„å¿—*1.5	
 	elseif level == 2 then
 		masDamage = (math.random(100,200) + magicPower + spi * 1.5)
 
---µÈ¼¶3£ºÑôÉËº¦=200+ÄÚ¹¦ÍşÁ¦+ÒâÖ¾*2
+--ç­‰çº§3ï¼šé˜³ä¼¤å®³=200+å†…åŠŸå¨åŠ›+æ„å¿—*2
 	elseif level == 3 then
 		masDamage = (math.random(150,250) + magicPower + spi * 2)
 		
---µÈ¼¶4£ºÑôÉËº¦=250+ÄÚ¹¦ÍşÁ¦+ÒâÖ¾*2.5
+--ç­‰çº§4ï¼šé˜³ä¼¤å®³=250+å†…åŠŸå¨åŠ›+æ„å¿—*2.5
 	elseif level == 4 then
 		masDamage = (math.random(200,300) + magicPower + spi * 2.5)
 		
---µÈ¼¶5£ºÑôÉËº¦=300+ÄÚ¹¦ÍşÁ¦+ÒâÖ¾*3	
+--ç­‰çº§5ï¼šé˜³ä¼¤å®³=300+å†…åŠŸå¨åŠ›+æ„å¿—*3	
 	elseif level == 5 then
 		masDamage = (math.random(250,350) + magicPower + spi * 3)
 	end
 	
-	--Êä³öÍâ¹¦ÉËº¦
+	--è¾“å‡ºå¤–åŠŸä¼¤å®³
 	return 0, 0, 0, 0, masDamage
 end
 

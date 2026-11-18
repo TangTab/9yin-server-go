@@ -1,37 +1,37 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎï¾ç±¾Ïà¹ØÊôÐÔ¶¨Òå-->
+<!--äººç‰©å‰§æœ¬ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="AchievePoint" type="int" public="false" private="true" save="true" desc="³É¾ÍµãÊý"/>
+		<property name="AchievePoint" type="int" public="false" private="true" save="true" desc="æˆå°±ç‚¹æ•°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="AchievementCriteriaProgress" cols="6" maxrows="1024" save="true" public="false" private="true" desc="³É¾Í½ø¶È±í">
-			<column type="dword" desc="³É¾Í×ÓÄ£°å±àºÅ"/>
-			<column type="dword" desc="¹éÊôµÄÖ÷³É¾Í±àºÅ"/>
-			<column type="byte" desc="½ø¶È±êÊ¶"/>
-			<column type="dword" desc="µ±Ç°½ø¶È"/>
-			<column type="dword" desc="ÐèÇó½ø¶È"/>
-			<column type="dword" desc="³É¾Í±àºÅ"/>
+		<record name="AchievementCriteriaProgress" cols="6" maxrows="1024" save="true" public="false" private="true" desc="æˆå°±è¿›åº¦è¡¨">
+			<column type="dword" desc="æˆå°±å­æ¨¡æ¿ç¼–å·"/>
+			<column type="dword" desc="å½’å±žçš„ä¸»æˆå°±ç¼–å·"/>
+			<column type="byte" desc="è¿›åº¦æ ‡è¯†"/>
+			<column type="dword" desc="å½“å‰è¿›åº¦"/>
+			<column type="dword" desc="éœ€æ±‚è¿›åº¦"/>
+			<column type="dword" desc="æˆå°±ç¼–å·"/>
 		</record>
-		<record name="AchievementCompleted" cols="3" maxrows="1024" save="true" public="false" private="true" desc="³É¾ÍÍê³É±í">
-			<column type="dword" desc="³É¾Í±àºÅ"/>
-			<column type="byte" desc="ÁìÈ¡½±Àø±êÊ¶"/>
-			<column type="string" desc="Íê³ÉÊ±¼ä"/>
+		<record name="AchievementCompleted" cols="3" maxrows="1024" save="true" public="false" private="true" desc="æˆå°±å®Œæˆè¡¨">
+			<column type="dword" desc="æˆå°±ç¼–å·"/>
+			<column type="byte" desc="é¢†å–å¥–åŠ±æ ‡è¯†"/>
+			<column type="string" desc="å®Œæˆæ—¶é—´"/>
 		</record>
-		<record name="AchievementTotalProgress" cols="4" maxrows="64" save="true" public="false" private="true" desc="×Ó·ÖÀà½ø¶È±í">
-			<column type="byte" desc="×Ó·ÖÀà±àºÅ"/>
-			<column type="dword" desc="µ±Ç°Íê³ÉÊýÁ¿"/>
-			<column type="dword" desc="×î´óÊýÁ¿"/>
-			<column type="dword" desc="³É¾ÍµãÊý"/>
+		<record name="AchievementTotalProgress" cols="4" maxrows="64" save="true" public="false" private="true" desc="å­åˆ†ç±»è¿›åº¦è¡¨">
+			<column type="byte" desc="å­åˆ†ç±»ç¼–å·"/>
+			<column type="dword" desc="å½“å‰å®Œæˆæ•°é‡"/>
+			<column type="dword" desc="æœ€å¤§æ•°é‡"/>
+			<column type="dword" desc="æˆå°±ç‚¹æ•°"/>
 		</record>
-		<record name="AchievementBonus" cols="1" maxrows="256" save="true" public="false" private="true" desc="Òþ²Ø³É¾ÍÁÐ±í">
-			<column type="dword" desc="Òþ²Ø³É¾Í±àºÅ"/>
+		<record name="AchievementBonus" cols="1" maxrows="256" save="true" public="false" private="true" desc="éšè—æˆå°±åˆ—è¡¨">
+			<column type="dword" desc="éšè—æˆå°±ç¼–å·"/>
 		</record>
-		<record name="AchievementTrace" cols="1" maxrows="5" save="true" public="false" private="true" desc="³É¾Í×·×Ù±í">
-			<column type="dword" desc="³É¾Í±àºÅ"/>
+		<record name="AchievementTrace" cols="1" maxrows="5" save="true" public="false" private="true" desc="æˆå°±è¿½è¸ªè¡¨">
+			<column type="dword" desc="æˆå°±ç¼–å·"/>
 		</record>
 	</records>
 </object>

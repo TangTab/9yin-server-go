@@ -1,42 +1,42 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="BattleWarState" type="int" public="false" private="true" save="false" desc="Õ½³¡×´Ì¬"/>
-		<property name="QueueId"  type="int" public="false" private="false" save="true" desc="ÅÅ¶Ó±íID"/>
-		<property name="BattleSceneID"  type="int" public="false" private="false" save="true" desc="¶ÏÏßÊ±ËùÔÚÕ½³¡³¡¾°µÄid"/>
-		<property name="BattleOffTime"  type="int64" public="false" private="false" save="true" desc="ÔÚÕ½³¡ÖÐ¶ÏÏßÀë¿ªµÄÊ±¼ä"/>
-    <property name="BattleOnlineTime"  type="int64" public="false" private="false" save="true" desc="ÔÚÕ½³¡ÔÚÏßµÄÊ±¼ä"/>
-    <property name="LeaveGive"  type="int" public="false" private="true" save="false" desc="Àë¿ªÕ½³¡ÄÜ·ñ»ñÈ¡½±Àø"/>
-    <property name="BattleWarID"    type="int" public="false" private="true" save="true" desc="½øÈëÕ½³¡µÄid"/>
-		<property name="BattleWarRand"  type="int" public="false" private="true" save="true" desc="ÊÇ·ñÊÇËæ»úÉêÇëÕ½³¡"/>
-		<property name="SteamPoint" type="int" public="false" private="false" save="false" desc="ÕôÆû·½»ý·Ö"/>
-		<property name="MagicPoint" type="int" public="false" private="false" save="false" desc="Ææ»Ã·½»ý·Ö"/>
-		<property name="LastKillEnemyTime"  type="int64" public="false" private="false" save="false" desc="ÉÏÒ»´ÎÉ±ÈËµÄÊ±¼ä"/>
-		<property name="KeepKillNum"  type="int" public="false" private="false" save="false" desc="Õ½³¡Á¬Õ¶"/>
-		<property name="MaxKeepKillNum"  type="int" public="false" private="true" save="false" desc="±¾³¡×î¸ßÁ¬Õ¶"/>
-		<property name="KillEnemyNum"  type="int" public="false" private="false" save="false" desc="Õ½³¡¶àÉ±"/>
-		<property name="MaxKillEnemyNum"  type="int" public="false" private="true" save="false" desc="±¾³¡×î¸ß¶àÉ±"/>
-		<property name="TotalKillEnemyNum"  type="int" public="false" private="false" save="false" desc="±¾³¡×Ü¹²É±ÈËÈËÊý"/>
-		<property name="BWDeadNum"  type="int" public="false" private="true" save="false" desc="Õ½³¡±»É±´ÎÊý"/>
-		<property name="glory" type="int" public="false" private="false" save="true" desc="Õ½³¡ÈÙÓþ"/>
-		<property name="CampaignStatus" type="int64" public="false" private="true" save="false" desc="»¥³â»î¶¯×´Ì¬"/>
+		<property name="BattleWarState" type="int" public="false" private="true" save="false" desc="æˆ˜åœºçŠ¶æ€"/>
+		<property name="QueueId"  type="int" public="false" private="false" save="true" desc="æŽ’é˜Ÿè¡¨ID"/>
+		<property name="BattleSceneID"  type="int" public="false" private="false" save="true" desc="æ–­çº¿æ—¶æ‰€åœ¨æˆ˜åœºåœºæ™¯çš„id"/>
+		<property name="BattleOffTime"  type="int64" public="false" private="false" save="true" desc="åœ¨æˆ˜åœºä¸­æ–­çº¿ç¦»å¼€çš„æ—¶é—´"/>
+    <property name="BattleOnlineTime"  type="int64" public="false" private="false" save="true" desc="åœ¨æˆ˜åœºåœ¨çº¿çš„æ—¶é—´"/>
+    <property name="LeaveGive"  type="int" public="false" private="true" save="false" desc="ç¦»å¼€æˆ˜åœºèƒ½å¦èŽ·å–å¥–åŠ±"/>
+    <property name="BattleWarID"    type="int" public="false" private="true" save="true" desc="è¿›å…¥æˆ˜åœºçš„id"/>
+		<property name="BattleWarRand"  type="int" public="false" private="true" save="true" desc="æ˜¯å¦æ˜¯éšæœºç”³è¯·æˆ˜åœº"/>
+		<property name="SteamPoint" type="int" public="false" private="false" save="false" desc="è’¸æ±½æ–¹ç§¯åˆ†"/>
+		<property name="MagicPoint" type="int" public="false" private="false" save="false" desc="å¥‡å¹»æ–¹ç§¯åˆ†"/>
+		<property name="LastKillEnemyTime"  type="int64" public="false" private="false" save="false" desc="ä¸Šä¸€æ¬¡æ€äººçš„æ—¶é—´"/>
+		<property name="KeepKillNum"  type="int" public="false" private="false" save="false" desc="æˆ˜åœºè¿žæ–©"/>
+		<property name="MaxKeepKillNum"  type="int" public="false" private="true" save="false" desc="æœ¬åœºæœ€é«˜è¿žæ–©"/>
+		<property name="KillEnemyNum"  type="int" public="false" private="false" save="false" desc="æˆ˜åœºå¤šæ€"/>
+		<property name="MaxKillEnemyNum"  type="int" public="false" private="true" save="false" desc="æœ¬åœºæœ€é«˜å¤šæ€"/>
+		<property name="TotalKillEnemyNum"  type="int" public="false" private="false" save="false" desc="æœ¬åœºæ€»å…±æ€äººäººæ•°"/>
+		<property name="BWDeadNum"  type="int" public="false" private="true" save="false" desc="æˆ˜åœºè¢«æ€æ¬¡æ•°"/>
+		<property name="glory" type="int" public="false" private="false" save="true" desc="æˆ˜åœºè£èª‰"/>
+		<property name="CampaignStatus" type="int64" public="false" private="true" save="false" desc="äº’æ–¥æ´»åŠ¨çŠ¶æ€"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="battlewar_prosecute_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="Õ½³¡ÄÚ¾Ù±¨ÆäËûÍæ¼ÒµÄ±í">
-			<column type="widestr" desc="Íæ¼ÒÃû"/>
+		<record name="battlewar_prosecute_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="æˆ˜åœºå†…ä¸¾æŠ¥å…¶ä»–çŽ©å®¶çš„è¡¨">
+			<column type="widestr" desc="çŽ©å®¶å"/>
 		</record>
-		<record name="battlewar_team_join_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="×é¶Ó¼ÓÈëÊ±¿ç³¡¾°¶ÓÔ±×´Ì¬±í">
-			<column type="widestr" desc="Íæ¼ÒÃû"/>
+		<record name="battlewar_team_join_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="ç»„é˜ŸåŠ å…¥æ—¶è·¨åœºæ™¯é˜Ÿå‘˜çŠ¶æ€è¡¨">
+			<column type="widestr" desc="çŽ©å®¶å"/>
 		</record>
-		<record name="battlewar_queued_rec" cols="5" maxrows="3" save="false" public="false" private="true" desc="ÒÑÅÅµÄÕ½³¡±í»ò¼ÓÈëµÄ¿ªÕ½±í">
-			<column type="dword" desc="Õ½³¡id"/>
-			<column type="string" desc="±íÃû³Æ"/>
-			<column type="word" desc="¶ÓÁÐID"/>
-			<column type="int64" desc="Æ½¾ùµÈ´ýÊ±¼ä"/>
-			<column type="byte" desc="ÅÅ¶Ó·½Ê½,1 ¸öÈËÅÅ¶Ó£¬0 ×é¶ÓÅÅ¶Ó£¬ 2 ÒÑ¿ªÕ½"/>
+		<record name="battlewar_queued_rec" cols="5" maxrows="3" save="false" public="false" private="true" desc="å·²æŽ’çš„æˆ˜åœºè¡¨æˆ–åŠ å…¥çš„å¼€æˆ˜è¡¨">
+			<column type="dword" desc="æˆ˜åœºid"/>
+			<column type="string" desc="è¡¨åç§°"/>
+			<column type="word" desc="é˜Ÿåˆ—ID"/>
+			<column type="int64" desc="å¹³å‡ç­‰å¾…æ—¶é—´"/>
+			<column type="byte" desc="æŽ’é˜Ÿæ–¹å¼,1 ä¸ªäººæŽ’é˜Ÿï¼Œ0 ç»„é˜ŸæŽ’é˜Ÿï¼Œ 2 å·²å¼€æˆ˜"/>
 		</record>
 	</records>
 </object>

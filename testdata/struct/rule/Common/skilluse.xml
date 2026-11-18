@@ -1,63 +1,63 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¼¼ÄÜÊ¹ÓÃÏà¹ØµÄÊôÐÔ(npc,Íæ¼Ò½ÇÉ«¹²ÓÃ)-->
+<!--æŠ€èƒ½ä½¿ç”¨ç›¸å…³çš„å±žæ€§(npc,çŽ©å®¶è§’è‰²å…±ç”¨)-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="DamageType" type="string" public="false" private="false" save="true" desc="¿ÉÒÔ¸øÄ¿±êÔì³ÉµÄÉËº¦ÀàÐÍ×éºÏ 1·ç2»ð3À×4ÍÁ5Ë®6°µ7×ÔÈ»8ÕôÆû9È«·¨Êõ"/>
-		<property name="InstantCast" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ¼¼ÄÜÌø¹ý×¼±¸Á¢¼´ÊÍ·Å"/>
-		<property name="CastTimeMul" type="float" public="false" private="false" save="false" desc="¼¼ÄÜÒþ²Ø¼°Òýµ¼Ê±¼ä±¶ÂÊ"/>
-		<property name="ShamDead" type="int" public="true" private="true" save="false" desc="¼ÙËÀ×´Ì¬ 0:·Ç¼ÙËÀ 1:¼ÙËÀ"/>
-		<property name="CurSkillID" type="string" public="true" private="true" save="false" realtime="true" desc="µ±Ç°ÕýÔÚÊ¹ÓÃµÄ¼¼ÄÜ"/>
-		<property name="CurSkillEffectID" type="string" public="true" private="true" save="false" realtime="true" desc="µ±Ç°ÕýÔÚÊ¹ÓÃµÄ¼¼ÄÜÐ§¹ûID"/>
-		<property name="NextSkill" type="object" public="false" private="false" save="false" desc="×¼±¸Ê¹ÓÃµÄ¼¼ÄÜ"/>
-		<property name="CurSkill" type="object" public="false" private="false" save="false" desc="µ±Ç°ÕýÔÚÊ¹ÓÃµÄ¼¼ÄÜ"/>
-		<property name="CurSkillUUID" type="int64" public="false" private="false" save="false" desc="µ±Ç°ÕýÔÚÊ¹ÓÃ¼¼ÄÜµÄ64Î»Î¨Ò»±êÖ¾"/>
-		<property name="CurSkillType" type="int" public="false" private="false" save="false" realtime="true" desc="µ±Ç°ÕýÔÚÊ¹ÓÃµÄ¼¼ÄÜ·½Ê½"/>
-		<property name="CurSkillTarget" type="object" public="true" private="true" save="false" realtime="true" desc="µ±Ç°µÄ¼¼ÄÜÄ¿±ê"/>
-		<property name="CurSkillTargetX" type="float" public="false" private="false" save="false" realtime="true" desc="µ±Ç°µÄ¼¼ÄÜ×ø±ê"/>
-		<property name="CurSkillTargetY" type="float" public="false" private="false" save="false" realtime="true" desc="µ±Ç°µÄ¼¼ÄÜ×ø±ê"/>
-		<property name="CurSkillTargetZ" type="float" public="false" private="false" save="false" realtime="true" desc="µ±Ç°µÄ¼¼ÄÜ×ø±ê"/>
-		<property name="CurSkillLevel" type="int" public="true" private="true" save="true" desc="µ±Ç°¼¼ÄÜµÈ¼¶"/>
-		<property name="TauntStatus" type="int" public="false" private="false" save="false" desc="´óÓÚ0±íÊ¾´¦ÓÚ³°·í×´Ì¬"/>
-		<property name="RestoreRatio" type="int" public="false" private="false" save="false" desc="»Ø¸´Àà¼¼ÄÜµÄ»Ø¸´°Ù·Ö±È"/>
-		<!-- ¼¼ÄÜËø¶¨Ê±Ê¹ÓÃµ½µÄÊôÐÔ -->
-		<property name="LockedTarget" type="object" public="false" private="false" save="false" desc="Ëø¶¨µÄ¶ÔÏó"/>
-		<property name="BeLockedSrc" type="object" public="false" private="false" save="false" desc="±»Ëø¶¨Ê±µÄ·¢ÆðÕß"/>
+		<property name="DamageType" type="string" public="false" private="false" save="true" desc="å¯ä»¥ç»™ç›®æ ‡é€ æˆçš„ä¼¤å®³ç±»åž‹ç»„åˆ 1é£Ž2ç«3é›·4åœŸ5æ°´6æš—7è‡ªç„¶8è’¸æ±½9å…¨æ³•æœ¯"/>
+		<property name="InstantCast" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æŠ€èƒ½è·³è¿‡å‡†å¤‡ç«‹å³é‡Šæ”¾"/>
+		<property name="CastTimeMul" type="float" public="false" private="false" save="false" desc="æŠ€èƒ½éšè—åŠå¼•å¯¼æ—¶é—´å€çŽ‡"/>
+		<property name="ShamDead" type="int" public="true" private="true" save="false" desc="å‡æ­»çŠ¶æ€ 0:éžå‡æ­» 1:å‡æ­»"/>
+		<property name="CurSkillID" type="string" public="true" private="true" save="false" realtime="true" desc="å½“å‰æ­£åœ¨ä½¿ç”¨çš„æŠ€èƒ½"/>
+		<property name="CurSkillEffectID" type="string" public="true" private="true" save="false" realtime="true" desc="å½“å‰æ­£åœ¨ä½¿ç”¨çš„æŠ€èƒ½æ•ˆæžœID"/>
+		<property name="NextSkill" type="object" public="false" private="false" save="false" desc="å‡†å¤‡ä½¿ç”¨çš„æŠ€èƒ½"/>
+		<property name="CurSkill" type="object" public="false" private="false" save="false" desc="å½“å‰æ­£åœ¨ä½¿ç”¨çš„æŠ€èƒ½"/>
+		<property name="CurSkillUUID" type="int64" public="false" private="false" save="false" desc="å½“å‰æ­£åœ¨ä½¿ç”¨æŠ€èƒ½çš„64ä½å”¯ä¸€æ ‡å¿—"/>
+		<property name="CurSkillType" type="int" public="false" private="false" save="false" realtime="true" desc="å½“å‰æ­£åœ¨ä½¿ç”¨çš„æŠ€èƒ½æ–¹å¼"/>
+		<property name="CurSkillTarget" type="object" public="true" private="true" save="false" realtime="true" desc="å½“å‰çš„æŠ€èƒ½ç›®æ ‡"/>
+		<property name="CurSkillTargetX" type="float" public="false" private="false" save="false" realtime="true" desc="å½“å‰çš„æŠ€èƒ½åæ ‡"/>
+		<property name="CurSkillTargetY" type="float" public="false" private="false" save="false" realtime="true" desc="å½“å‰çš„æŠ€èƒ½åæ ‡"/>
+		<property name="CurSkillTargetZ" type="float" public="false" private="false" save="false" realtime="true" desc="å½“å‰çš„æŠ€èƒ½åæ ‡"/>
+		<property name="CurSkillLevel" type="int" public="true" private="true" save="true" desc="å½“å‰æŠ€èƒ½ç­‰çº§"/>
+		<property name="TauntStatus" type="int" public="false" private="false" save="false" desc="å¤§äºŽ0è¡¨ç¤ºå¤„äºŽå˜²è®½çŠ¶æ€"/>
+		<property name="RestoreRatio" type="int" public="false" private="false" save="false" desc="å›žå¤ç±»æŠ€èƒ½çš„å›žå¤ç™¾åˆ†æ¯”"/>
+		<!-- æŠ€èƒ½é”å®šæ—¶ä½¿ç”¨åˆ°çš„å±žæ€§ -->
+		<property name="LockedTarget" type="object" public="false" private="false" save="false" desc="é”å®šçš„å¯¹è±¡"/>
+		<property name="BeLockedSrc" type="object" public="false" private="false" save="false" desc="è¢«é”å®šæ—¶çš„å‘èµ·è€…"/>
 		
-		<property name="TargetSkill" type="object" public="false" private="false" save="false" desc="ÏàÐÔ±È½ÏÊ±,¶Ô·½²ÎÓë±È½ÏµÄ¼¼ÄÜ"/>
+		<property name="TargetSkill" type="object" public="false" private="false" save="false" desc="ç›¸æ€§æ¯”è¾ƒæ—¶,å¯¹æ–¹å‚ä¸Žæ¯”è¾ƒçš„æŠ€èƒ½"/>
 		
-		<!-- Ç¿ÆÈ¹¥»÷Ê¹ÓÃµ½µÄÊôÐÔ -->
-        	<property name="AttackForcedType" type="int" public="false" private="false" save="false" desc="Ç¿ÆÈµÄÀàÐÍ"/>
-		<!-- Á¬ÕÐÌ×Â·Ê¹ÓÃµ½µÄÊôÐÔ -->
-		<property name="Hits" type="int" public="false" private="false" save="false" realtime="true" desc="Á¬»÷Êý,¶à´ÎÃüÖÐÀà¼¼ÄÜµ±Ç°ÃüÖÐÊý"/>
+		<!-- å¼ºè¿«æ”»å‡»ä½¿ç”¨åˆ°çš„å±žæ€§ -->
+        	<property name="AttackForcedType" type="int" public="false" private="false" save="false" desc="å¼ºè¿«çš„ç±»åž‹"/>
+		<!-- è¿žæ‹›å¥—è·¯ä½¿ç”¨åˆ°çš„å±žæ€§ -->
+		<property name="Hits" type="int" public="false" private="false" save="false" realtime="true" desc="è¿žå‡»æ•°,å¤šæ¬¡å‘½ä¸­ç±»æŠ€èƒ½å½“å‰å‘½ä¸­æ•°"/>
 
-		<!-- ²¹µ¶Ê±Ê¹ÓÃµ½µÄÊôÐÔ -->
-		<!--<property name="BuDao" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÔÚ²¹µ¶(ÓÃËø¶¨¼¼ÄÜ¹¥»÷ÒÑ±»±ðÈËËø¶¨µÄ¶ÔÏó)"/>
-		<property name="BuDaoHitAction" type="string" public="false" private="false" save="false" desc="²¹µ¶µÄÃüÖÐ¶¯×÷(Ëæ»ú²úÉúµÄ)"/>-->
+		<!-- è¡¥åˆ€æ—¶ä½¿ç”¨åˆ°çš„å±žæ€§ -->
+		<!--<property name="BuDao" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦åœ¨è¡¥åˆ€(ç”¨é”å®šæŠ€èƒ½æ”»å‡»å·²è¢«åˆ«äººé”å®šçš„å¯¹è±¡)"/>
+		<property name="BuDaoHitAction" type="string" public="false" private="false" save="false" desc="è¡¥åˆ€çš„å‘½ä¸­åŠ¨ä½œ(éšæœºäº§ç”Ÿçš„)"/>-->
 		
-		<!-- ½«¶ÔÏó×öÎªÒ»¸ö¼¼ÄÜÊ¹ÓÃÊ±ÐèÒªÊ¹ÓÃµ½µÄÊôÐÔ -->
-		<property name="SkillType" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÀàÐÍ"/>
-		<property name="CanUse" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñ¿ÉÒÔÊ¹ÓÃ"/>
-		<property name="IsDamage" type="byte" public="false" private="false" save="false" desc="ÔöÒæµÄ»¹ÊÇÉËº¦µÄ1:ÉËº¦µÄ"/>
-		<property name="IncludeDead" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñ°üº¬ËÀÍöµÄ¶ÔÏó 0:²»°üÀ¨"/>
-		<property name="LauchType" type="int" public="false" private="false" save="false" desc="·¢¶¯ÀàÐÍ 0Ö÷¶¯ÐÍ"/>
-    <property name="SkillRandNum" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÊÍ·ÅÊ±²úÉúµÄËæ»úÊý£¬ÓÃÓÚ¼¼ÄÜÊÍ·ÅÁ÷³Ì"/>
+		<!-- å°†å¯¹è±¡åšä¸ºä¸€ä¸ªæŠ€èƒ½ä½¿ç”¨æ—¶éœ€è¦ä½¿ç”¨åˆ°çš„å±žæ€§ -->
+		<property name="SkillType" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½ç±»åž‹"/>
+		<property name="CanUse" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦å¯ä»¥ä½¿ç”¨"/>
+		<property name="IsDamage" type="byte" public="false" private="false" save="false" desc="å¢žç›Šçš„è¿˜æ˜¯ä¼¤å®³çš„1:ä¼¤å®³çš„"/>
+		<property name="IncludeDead" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦åŒ…å«æ­»äº¡çš„å¯¹è±¡ 0:ä¸åŒ…æ‹¬"/>
+		<property name="LauchType" type="int" public="false" private="false" save="false" desc="å‘åŠ¨ç±»åž‹ 0ä¸»åŠ¨åž‹"/>
+    <property name="SkillRandNum" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½é‡Šæ”¾æ—¶äº§ç”Ÿçš„éšæœºæ•°ï¼Œç”¨äºŽæŠ€èƒ½é‡Šæ”¾æµç¨‹"/>
   </properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="change_prop_rec" cols="3" maxrows="128" save="false" public="false" private="false" desc="±¾´ÎÊ¹ÓÃµÄ¼¼ÄÜµÄÊôÐÔ±ä»¯">
-			<column type="string" desc="ÊôÐÔÃû"/>
-			<column type="string" desc="ÊôÐÔÖµ"/>
-			<column type="word" desc="±ä»¯ÀàÐÍ:0:Ö±½ÓÌæ»»£¬1£ºÔö¼Ó¾ø¶ÔÖµ£¬2£ºÔö¼Ó°Ù·Ö±È"/>
+		<record name="change_prop_rec" cols="3" maxrows="128" save="false" public="false" private="false" desc="æœ¬æ¬¡ä½¿ç”¨çš„æŠ€èƒ½çš„å±žæ€§å˜åŒ–">
+			<column type="string" desc="å±žæ€§å"/>
+			<column type="string" desc="å±žæ€§å€¼"/>
+			<column type="word" desc="å˜åŒ–ç±»åž‹:0:ç›´æŽ¥æ›¿æ¢ï¼Œ1ï¼šå¢žåŠ ç»å¯¹å€¼ï¼Œ2ï¼šå¢žåŠ ç™¾åˆ†æ¯”"/>
 		</record>
-		<record name="buff_anti_type_rec" cols="3" maxrows="128" save="true" public="false" private="false" desc="BUFFÀàÐÍË¥¼õ±í">
-			<column type="int" desc="Ë¥¼õÀàÐÍ"/>
-			<column type="int" desc="Times´ÎÊý"/>
-			<column type="int64" desc="ÉÏ´Î¼ÓÈëÊ±¼ä"/>
+		<record name="buff_anti_type_rec" cols="3" maxrows="128" save="true" public="false" private="false" desc="BUFFç±»åž‹è¡°å‡è¡¨">
+			<column type="int" desc="è¡°å‡ç±»åž‹"/>
+			<column type="int" desc="Timesæ¬¡æ•°"/>
+			<column type="int64" desc="ä¸Šæ¬¡åŠ å…¥æ—¶é—´"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

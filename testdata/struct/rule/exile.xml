@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--·ÅÖðÖ®µØÄ£¿éÊôÐÔ±íby jiangkai 2012Äê12ÔÂ13ÈÕ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ”¾é€ä¹‹åœ°æ¨¡å—å±žæ€§è¡¨by jiangkai 2012å¹´12æœˆ13æ—¥-->
 <object>
 	<properties>
-    <property name="ExileStatus" type="int" public="false" private="true" save="true" desc="Íæ¼ÒÉí·Ý"/>
-    <property name="ExileLockDate" type="double" public="false" private="false" save="true" desc="Íæ¼Ò·âÍ£ÈÕÆÚ"/>
-    <property name="ExileLockTime" type="int" public="false" private="false" save="true" desc="Íæ¼Ò·âÍ£Ê±¼ä(Ìì)"/>
+    <property name="ExileStatus" type="int" public="false" private="true" save="true" desc="çŽ©å®¶èº«ä»½"/>
+    <property name="ExileLockDate" type="double" public="false" private="false" save="true" desc="çŽ©å®¶å°åœæ—¥æœŸ"/>
+    <property name="ExileLockTime" type="int" public="false" private="false" save="true" desc="çŽ©å®¶å°åœæ—¶é—´(å¤©)"/>
   </properties>
 </object>

@@ -1,86 +1,86 @@
---¼à¿Ø·şÎñÆ÷Ö÷¿Ø½Å±¾
+--ç›‘æ§æœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(console)
 	nx_set_value("console", console)
 	
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	console.Color = "Purple"
 	
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 	
-	--ÈÕÖ¾»º³å³Ø
+	--æ—¥å¿—ç¼“å†²æ± 
 	local log_pool = nx_create("LogPool")
 	
-	--ÈÕÖ¾ÎÄ¼şÇ°×º
+	--æ—¥å¿—æ–‡ä»¶å‰ç¼€
 	log_pool.FilePrefix = nx_work_path() .. "log\\charge"
-	--»º³åÊıÁ¿
+	--ç¼“å†²æ•°é‡
 	log_pool.TraceMax = 256
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	log_pool.EveryDayAlone = false
 	
 	if nx_is_debug() then
-		--ÔÚµ÷ÊÔ°æÀï½«ÈÕÖ¾ĞÅÏ¢Êä³öµ½¿ØÖÆÌ¨
+		--åœ¨è°ƒè¯•ç‰ˆé‡Œå°†æ—¥å¿—ä¿¡æ¯è¾“å‡ºåˆ°æ§åˆ¶å°
 		log_pool.Console = console
 	end
 	
-	--Æô¶¯ÈÕÖ¾¼ÇÂ¼
+	--å¯åŠ¨æ—¥å¿—è®°å½•
 	log_pool:Start()
 	
 	nx_set_value("log_pool", log_pool)
 	
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 	
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	ini.FileName = "GameCharge.ini"
 	
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
-		nx_msgbox("ÎŞ·¨¶ÁÈ¡³ÌĞòÅäÖÃÎÄ¼ş")
+		nx_msgbox("æ— æ³•è¯»å–ç¨‹åºé…ç½®æ–‡ä»¶")
 		nx_destroy(ini)
 		return 0
 	end
 	
-	--×î´óÁ¬½ÓÊı
+	--æœ€å¤§è¿æ¥æ•°
 	local max_client = ini:ReadInteger("Main", "MaxClient", 16)
-	--ÓÎÏ·±àºÅ
+	--æ¸¸æˆç¼–å·
 	local game_id = ini:ReadInteger("Main", "GameID", 1)
-	--ÓÎÏ··şÎñÆ÷ÆğÊ¼±àºÅ
+	--æ¸¸æˆæœåŠ¡å™¨èµ·å§‹ç¼–å·
 	local server_id_offset = ini:ReadInteger("Main", "ServerIDOffset", 0)
-	--Ã¿µã¶ÔÓ¦µÄÓÎÏ·Ê±¼ä£¨·ÖÖÓ£©
+	--æ¯ç‚¹å¯¹åº”çš„æ¸¸æˆæ—¶é—´ï¼ˆåˆ†é’Ÿï¼‰
 	local point_minutes = ini:ReadFloat("Main", "PointMinutes", 10)
-	--¶¨Ê±µ¼³öÓÃ»§ĞÅÏ¢¼ä¸ôÊ±¼ä£¨·ÖÖÓ£©
+	--å®šæ—¶å¯¼å‡ºç”¨æˆ·ä¿¡æ¯é—´éš”æ—¶é—´ï¼ˆåˆ†é’Ÿï¼‰
 	local auto_dump_minutes = ini:ReadInteger("Main", "AutoDumpMinutes", 0) 
-	--ÌáĞÑÓà¶î²»×ã¼ä¸ôÊ±¼ä£¨Ãë£©
+	--æé†’ä½™é¢ä¸è¶³é—´éš”æ—¶é—´ï¼ˆç§’ï¼‰
 	local awake_time = ini:ReadInteger("Main", "AwakeTime", 60)
-	--Á¬Ğø¶àÉÙ´Î¿Û·Ñ²»³É¹¦Ê±×ªÈë³ÌĞò×ÔÖ÷ÅĞ¶Ï£¬Èç¹û·ÑÓÃ²»¹»½«°ÑÍæ¼ÒÌßÏÂÏß
+	--è¿ç»­å¤šå°‘æ¬¡æ‰£è´¹ä¸æˆåŠŸæ—¶è½¬å…¥ç¨‹åºè‡ªä¸»åˆ¤æ–­ï¼Œå¦‚æœè´¹ç”¨ä¸å¤Ÿå°†æŠŠç©å®¶è¸¢ä¸‹çº¿
 	local flush_error_max = ini:ReadInteger("Main", "FlushErrorMax", 0)
-	--ÓÃ»§²»»î¶¯µÄ×î´óÊ±¼ä£¨Ãë£©£¬³¬¹ıÕâ¸öÊ±¼äÏµÍ³×Ô¶¯½«´ËÓÃ»§ĞÅÏ¢Çå³ı£¨ÔİÊ±Î´ÓÃ£©
+	--ç”¨æˆ·ä¸æ´»åŠ¨çš„æœ€å¤§æ—¶é—´ï¼ˆç§’ï¼‰ï¼Œè¶…è¿‡è¿™ä¸ªæ—¶é—´ç³»ç»Ÿè‡ªåŠ¨å°†æ­¤ç”¨æˆ·ä¿¡æ¯æ¸…é™¤ï¼ˆæš‚æ—¶æœªç”¨ï¼‰
 	local user_shake_time = ini:ReadInteger("Main", "UserShakeTime", 0)
-	--Ğ´ÈÕÖ¾µ½¿ØÖÆÌ¨
+	--å†™æ—¥å¿—åˆ°æ§åˆ¶å°
 	local console_log = nx_boolean(ini:ReadString("Main", "ConsoleLog", ""))
-	--Ğ´ÈÕÖ¾µ½ÎÄ¼ş
+	--å†™æ—¥å¿—åˆ°æ–‡ä»¶
 	local file_log = nx_boolean(ini:ReadString("Main", "FileLog", ""))
-	--ÊÇ·ñ¼ÇÂ¼¿Û·Ñ³É¹¦ÈÕÖ¾£¨²»¼ÇµÄ»°¿ÉÒÔ¼õÉÙÈÕÖ¾ÎÄ¼ş´óĞ¡£©
+	--æ˜¯å¦è®°å½•æ‰£è´¹æˆåŠŸæ—¥å¿—ï¼ˆä¸è®°çš„è¯å¯ä»¥å‡å°‘æ—¥å¿—æ–‡ä»¶å¤§å°ï¼‰
 	local flush_log = nx_boolean(ini:ReadString("Main", "FlushLog", ""))
-	--·ÖÇøÊı¾İÁ¬½ÓÊıÁ¿
+	--åˆ†åŒºæ•°æ®è¿æ¥æ•°é‡
 	local access_pools = ini:ReadInteger("District", "ConnPool", 0)
-	--·ÖÇøÊı¾İÁ¬½Ó´®
+	--åˆ†åŒºæ•°æ®è¿æ¥ä¸²
 	local access_conn_string = ini:ReadString("District", "ConnString", "")
-	--ÖĞĞÄÊı¾İÁ¬½ÓÊıÁ¿
+	--ä¸­å¿ƒæ•°æ®è¿æ¥æ•°é‡
 	local center_pools = ini:ReadInteger("Center", "ConnPool", 0)
-	--ÖĞĞÄÊı¾İÁ¬½Ó´®
+	--ä¸­å¿ƒæ•°æ®è¿æ¥ä¸²
 	local center_conn_string = ini:ReadString("Center", "ConnString", "")
 	
-	--ÍâÍøµØÖ·
+	--å¤–ç½‘åœ°å€
 	local outer_addr = ini:ReadString("Outer", "Addr", "127.0.0.1")
 	local outer_port = ini:ReadInteger("Outer", "Port", 7000)
 	
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15008
 	
@@ -89,7 +89,7 @@ function main(console)
 	
 	nx_destroy(ini)
 	
-	--´´½¨Î¬»¤Á¬½Ó·şÎñ
+	--åˆ›å»ºç»´æŠ¤è¿æ¥æœåŠ¡
 	local echo_sock = nx_create("EchoSock")
 	
 	echo_sock.Address = echo_addr
@@ -97,7 +97,7 @@ function main(console)
 	
 	nx_bind_script(echo_sock, "echo", "echo_init")
 	
-	--´´½¨¿Í»§¶Ë½ÓÈëÍ¨Ñ¶·şÎñ
+	--åˆ›å»ºå®¢æˆ·ç«¯æ¥å…¥é€šè®¯æœåŠ¡
 	local mass_sock = nx_create("MassSock")
 	
 	mass_sock.Address = outer_addr
@@ -108,16 +108,16 @@ function main(console)
 	mass_sock.OutBufLen = 1024 * 1024
 	mass_sock.ListenPendings = 5
 	
-	--´´½¨½ø³Ì¼à¿Ø
+	--åˆ›å»ºè¿›ç¨‹ç›‘æ§
 	local app_manager = nx_create("AppManager")
 	
 	app_manager.AppName = "charge"
 	app_manager.AppAddress = echo_addr .. ":" .. nx_string(echo_port)
 	
-	--´´½¨Êı¾İ¿âÏµÍ³
+	--åˆ›å»ºæ•°æ®åº“ç³»ç»Ÿ
 	local db_system = nx_create("SqlDBSystem")
 	
-	--´´½¨¼Æ·Ñ·şÎñ
+	--åˆ›å»ºè®¡è´¹æœåŠ¡
 	local game_charge = nx_create("GameCharge")
 	
 	nx_set_value("game_charge", game_charge)
@@ -140,36 +140,36 @@ function main(console)
 	game_charge.AppManager = app_manager
 	game_charge.DBSystem = db_system
 	
-	--Æô¶¯½ø³Ì¼à¿Ø
+	--å¯åŠ¨è¿›ç¨‹ç›‘æ§
 	app_manager:Start()
 	
-	--Ôİ²»½ÓÊÜÁ¬½Ó
+	--æš‚ä¸æ¥å—è¿æ¥
 	mass_sock.Closed = true
-	--Æô¶¯¿Í»§¶ËÁ¬½Ó
+	--å¯åŠ¨å®¢æˆ·ç«¯è¿æ¥
 	mass_sock:Start()
 	
-	--Æô¶¯Î¬»¤Á¬½Ó
+	--å¯åŠ¨ç»´æŠ¤è¿æ¥
 	echo_sock:Start()
 	
-	--Æô¶¯¼à¿Ø·şÎñ
+	--å¯åŠ¨ç›‘æ§æœåŠ¡
 	game_charge:Start()
 	
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	console:WriteLine("App name " .. app_manager.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	console:WriteLine("Echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	console:WriteLine("Outer socket " .. outer_addr .. ":" .. nx_string(outer_port))
 	
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	console:WriteLine("Game charge server started")
 	
-	--¿ªÊ¼½ÓÊÜÁ¬½Ó
+	--å¼€å§‹æ¥å—è¿æ¥
 	mass_sock.Closed = false
 	
 	return 1
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local console = nx_value("console")
 	
@@ -179,7 +179,7 @@ function close()
 	local mass_sock = game_charge.MassSock
 	local echo_sock = game_charge.EchoSock
 	
-	--¹Ø±ÕÍâÍøÁ¬½Ó
+	--å…³é—­å¤–ç½‘è¿æ¥
 	console:WriteLine("client socket shutdown...")
 	
 	mass_sock.Closed = true
@@ -191,27 +191,27 @@ function close()
 	
 	mass_sock:Stop()
 	
-	--¹Ø±ÕÎ¬»¤Á¬½Ó
+	--å…³é—­ç»´æŠ¤è¿æ¥
 	console:WriteLine("echo socket shutdown...")
 	
 	echo_sock:Stop()
 	
-	--¹Ø±Õ¼Æ·Ñ·şÎñ
+	--å…³é—­è®¡è´¹æœåŠ¡
 	console:WriteLine("charge server shutdown...")
 	
 	game_charge:Stop()
 	
-	--¹Ø±Õ½ø³Ì¼à¿Ø
+	--å…³é—­è¿›ç¨‹ç›‘æ§
 	console:WriteLine("app_manager shutdown...")
 	
 	app_manager:Stop()
 	
-	--¹Ø±ÕÈÕÖ¾»º³å
+	--å…³é—­æ—¥å¿—ç¼“å†²
 	local log_pool = nx_value("log_pool")
 	
 	log_pool:Stop()
 	
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 	
 	return true

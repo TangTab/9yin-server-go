@@ -1,13 +1,13 @@
--- ÔöÒæbuff
--- lv1:Íâ¹¦¹¥»÷Ôö¼Ó18µã, ³ÖĞø30·ÖÖÓ
--- lv2:Íâ¹¦¹¥»÷Ôö¼Ó20µã, ³ÖĞø30·ÖÖÓ
--- lv3:Íâ¹¦¹¥»÷Ôö¼Ó24µã, ³ÖĞø30·ÖÖÓ
--- lv4:Íâ¹¦¹¥»÷Ôö¼Ó30µã, ³ÖĞø30·ÖÖÓ
--- lv5:Íâ¹¦¹¥»÷Ôö¼Ó38µã, ³ÖĞø30·ÖÖÓ
+-- å¢ç›Šbuff
+-- lv1:å¤–åŠŸæ”»å‡»å¢åŠ 18ç‚¹, æŒç»­30åˆ†é’Ÿ
+-- lv2:å¤–åŠŸæ”»å‡»å¢åŠ 20ç‚¹, æŒç»­30åˆ†é’Ÿ
+-- lv3:å¤–åŠŸæ”»å‡»å¢åŠ 24ç‚¹, æŒç»­30åˆ†é’Ÿ
+-- lv4:å¤–åŠŸæ”»å‡»å¢åŠ 30ç‚¹, æŒç»­30åˆ†é’Ÿ
+-- lv5:å¤–åŠŸæ”»å‡»å¢åŠ 38ç‚¹, æŒç»­30åˆ†é’Ÿ
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_mp_sl_04_01")
 	if not nx_exists(buffer) then
 		return false
@@ -28,11 +28,11 @@ function AddBuff(self, target, level)
 		dmg_add = 38
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "PhyDamageAdd", nx_double(dmg_add), 0,0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

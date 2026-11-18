@@ -3,7 +3,7 @@ require("define")
 function on_load(self)
 end
 
---Ìí¼Ó¼²²¡×´Ì¬DebuffµÄBUFFER
+--æ·»åŠ ç–¾ç—…çŠ¶æ€Debuffçš„BUFFER
 function add_debuff_buf(self, debuff_id)
-	--¸ù¾İ²ß»®À´È·¶¨ ¸÷¸öDebuffµÄÊôĞÔ£¬µÈ´ı²ß»®°¸
+	--æ ¹æ®ç­–åˆ’æ¥ç¡®å®š å„ä¸ªDebuffçš„å±æ€§ï¼Œç­‰å¾…ç­–åˆ’æ¡ˆ
 end

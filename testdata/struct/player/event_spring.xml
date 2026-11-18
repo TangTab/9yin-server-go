@@ -1,33 +1,33 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
     <properties>
-        <property name="CurrentESId" type="int" public="false" private="true" save="true" desc="playerµ±Ç°ÕýÔÚ²ÎÓëµÄÊÂ¼þid"/>
+        <property name="CurrentESId" type="int" public="false" private="true" save="true" desc="playerå½“å‰æ­£åœ¨å‚ä¸Žçš„äº‹ä»¶id"/>
     </properties>
 	<records>
-		<record name="PlayerESRec" cols="4" maxrows="1024" save="true" public="false" private="true" desc="Íæ¼ÒÕýÔÚ²ÎÓëµÄÊÂ¼þ±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="word" desc="³¡¾°id"/>
-			<column type="int64" desc="ÊÂ¼þ¿ªÊ¼Ê±¼ä"/>
-            <column type="byte" desc="playerÇøÓò×´Ì¬"/>
+		<record name="PlayerESRec" cols="4" maxrows="1024" save="true" public="false" private="true" desc="çŽ©å®¶æ­£åœ¨å‚ä¸Žçš„äº‹ä»¶è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="word" desc="åœºæ™¯id"/>
+			<column type="int64" desc="äº‹ä»¶å¼€å§‹æ—¶é—´"/>
+            <column type="byte" desc="playeråŒºåŸŸçŠ¶æ€"/>
 		</record>
-		<record name="PlayerESCriteriaRec" cols="6" maxrows="1024" save="true" public="false" private="true" desc="Íæ¼Ò½ÓÊÜµÄÊÂ¼þ×ÓÄ¿±ê±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="dword" desc="×ÓÄ¿±êid"/>
-			<column type="byte" desc="ÊÇ·ñÒþ²Ø×ÓÄ¿±ê"/>
-			<column type="byte" desc="ÊÇ·ñ¹²Ïí×ÓÄ¿±ê"/>
-			<column type="dword" desc="×ÓÄ¿±êµ±Ç°¸öÊý"/>
-			<column type="dword" desc="×ÓÄ¿±ê×î´ó¸öÊý"/>
+		<record name="PlayerESCriteriaRec" cols="6" maxrows="1024" save="true" public="false" private="true" desc="çŽ©å®¶æŽ¥å—çš„äº‹ä»¶å­ç›®æ ‡è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="dword" desc="å­ç›®æ ‡id"/>
+			<column type="byte" desc="æ˜¯å¦éšè—å­ç›®æ ‡"/>
+			<column type="byte" desc="æ˜¯å¦å…±äº«å­ç›®æ ‡"/>
+			<column type="dword" desc="å­ç›®æ ‡å½“å‰ä¸ªæ•°"/>
+			<column type="dword" desc="å­ç›®æ ‡æœ€å¤§ä¸ªæ•°"/>
 		</record>
-		<record name="PlayerESRewardRec" cols="8" maxrows="1024" save="true" public="false" private="true" desc="ÊÂ¼þ½áÊøºóÍæ¼ÒµÃµ½µÄ½±Àø±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="byte" desc="½±ÀøÀàÐÍ(0: ÍÅ¶ÓÄ¿±ê½±Àø; 1: ×ÓÄ¿±ê½±Àø)"/>
-			<column type="byte" desc="ÊÂ¼þ¹±Ï×ÀàÐÍ(0: Ä¿±ê¹±Ï×; 1: boss¹±Ï×)"/>
-			<column type="float" desc="Ä¿±êÍê³É¶È"/>
-			<column type="string" desc="µÀ¾ßid"/>
-			<column type="dword" desc="¾­Ñé"/>
-			<column type="dword" desc="½ðÇ®"/>
-			<column type="dword" desc="ÁÔÉ±µãÊý"/>
+		<record name="PlayerESRewardRec" cols="8" maxrows="1024" save="true" public="false" private="true" desc="äº‹ä»¶ç»“æŸåŽçŽ©å®¶å¾—åˆ°çš„å¥–åŠ±è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="byte" desc="å¥–åŠ±ç±»åž‹(0: å›¢é˜Ÿç›®æ ‡å¥–åŠ±; 1: å­ç›®æ ‡å¥–åŠ±)"/>
+			<column type="byte" desc="äº‹ä»¶è´¡çŒ®ç±»åž‹(0: ç›®æ ‡è´¡çŒ®; 1: bossè´¡çŒ®)"/>
+			<column type="float" desc="ç›®æ ‡å®Œæˆåº¦"/>
+			<column type="string" desc="é“å…·id"/>
+			<column type="dword" desc="ç»éªŒ"/>
+			<column type="dword" desc="é‡‘é’±"/>
+			<column type="dword" desc="çŒŽæ€ç‚¹æ•°"/>
 		</record>
 	</records>
 </object>

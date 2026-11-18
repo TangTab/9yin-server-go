@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Õâ¼¸¸öÐÞÕý±íÖ»ÓÐÍæ¼ÒÓÐ-->
+<!--è¿™å‡ ä¸ªä¿®æ­£è¡¨åªæœ‰çŽ©å®¶æœ‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
-		<record name="EquipModifyRec" cols="7" maxrows="1024" save="false" public="false" private="false" desc="Íæ¼Ò×°±¸ÐÞÕý±í">
-			<column type="string" desc="×°±¸À¸Î»"/>
-			<column type="byte" desc="×°±¸×ÓÀàÐÍ"/>
-			<column type="string" desc="×°±¸id"/>
-			<column type="string" desc="ÐÞÕýÊôÐÔÃû"/>
-			<column type="double" desc="ÐÞÕýÊôÐÔÖµ"/>
-			<column type="byte" desc="¼ÆËã·½Ê½"/>
-			<column type="string" desc="ÐÞÕýÀ´Ô´"/>
+		<record name="EquipModifyRec" cols="7" maxrows="1024" save="false" public="false" private="false" desc="çŽ©å®¶è£…å¤‡ä¿®æ­£è¡¨">
+			<column type="string" desc="è£…å¤‡æ ä½"/>
+			<column type="byte" desc="è£…å¤‡å­ç±»åž‹"/>
+			<column type="string" desc="è£…å¤‡id"/>
+			<column type="string" desc="ä¿®æ­£å±žæ€§å"/>
+			<column type="double" desc="ä¿®æ­£å±žæ€§å€¼"/>
+			<column type="byte" desc="è®¡ç®—æ–¹å¼"/>
+			<column type="string" desc="ä¿®æ­£æ¥æº"/>
 		</record>
-		<record name="TaskModifyRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="Íæ¼ÒÈÎÎñÐÞÕý±í">
-			<column type="string" desc="ÐÞÕýÈÎÎñid"/>
-			<column type="string" desc="ÐÞÕýÊôÐÔÃû"/>
-			<column type="double" desc="ÐÞÕýÊôÐÔÖµ"/>
-			<column type="byte" desc="¼ÆËã·½Ê½"/>
-			<column type="string" desc="ÐÞÕýÀ´Ô´"/>
+		<record name="TaskModifyRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="çŽ©å®¶ä»»åŠ¡ä¿®æ­£è¡¨">
+			<column type="string" desc="ä¿®æ­£ä»»åŠ¡id"/>
+			<column type="string" desc="ä¿®æ­£å±žæ€§å"/>
+			<column type="double" desc="ä¿®æ­£å±žæ€§å€¼"/>
+			<column type="byte" desc="è®¡ç®—æ–¹å¼"/>
+			<column type="string" desc="ä¿®æ­£æ¥æº"/>
 		</record>
 	</records>
 </object>

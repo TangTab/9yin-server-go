@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÂÃ¹ÝÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ—…é¦†ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="DepotMoney" type="int64" public="false" private="true" save="true" desc="²Ö¿â´æ´¢µÄ½ðÇ®"/>
-		<property name="AddDepotBagNum" type="byte" public="false" private="true" save="true" desc="²Ö¿â°ü¹üÔö¼ÓÊýÁ¿"/>
-		<property name="AddToolBagNum" type="byte" public="false" private="true" save="true" desc="±³°ü°ü¹üÔö¼ÓÊýÁ¿"/>
+		<property name="DepotMoney" type="int64" public="false" private="true" save="true" desc="ä»“åº“å­˜å‚¨çš„é‡‘é’±"/>
+		<property name="AddDepotBagNum" type="byte" public="false" private="true" save="true" desc="ä»“åº“åŒ…è£¹å¢žåŠ æ•°é‡"/>
+		<property name="AddToolBagNum" type="byte" public="false" private="true" save="true" desc="èƒŒåŒ…åŒ…è£¹å¢žåŠ æ•°é‡"/>
 		
-		<property name="Link" type="byte" public="false" private="true" save="true" desc="Á¬½Ó"/>
+		<property name="Link" type="byte" public="false" private="true" save="true" desc="è¿žæŽ¥"/>
 	</properties>
 	<records>
 	</records>

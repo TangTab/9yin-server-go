@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
@@ -39,14 +40,23 @@ var (
 	}
 )
 
-// parseDefineFile 解析一个 *_custom_define.lua（GBK）。
+// toUTF8 编码自适应：合法 UTF-8 直通，否则 GBK 转码
+// （testdata 快照为 UTF-8，NINEYIN_DATA 直读原版为 GBK）。
+func toUTF8(raw []byte) ([]byte, error) {
+	if utf8.Valid(raw) {
+		return raw, nil
+	}
+	return simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+}
+
+// parseDefineFile 解析一个 *_custom_define.lua。
 // 结构约定：`--注释`（含“格式：”行）紧邻 `NAME = value` 定义行。
 func parseDefineFile(path string) ([]MsgDef, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	utf8, err := simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+	utf8, err := toUTF8(raw)
 	if err != nil {
 		return nil, fmt.Errorf("%s: GBK 转码失败: %w", path, err)
 	}

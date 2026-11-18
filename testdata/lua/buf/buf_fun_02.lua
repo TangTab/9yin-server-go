@@ -1,12 +1,12 @@
--- Ëùµ½Ö®´¦´ç²İ²»ÉúÈËĞó½ÔËÀ
+-- æ‰€åˆ°ä¹‹å¤„å¯¸è‰ä¸ç”Ÿäººç•œçš†æ­»
 
 require("define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
@@ -31,6 +31,6 @@ function buffer_timer(self, buffer)
 	return 1
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end

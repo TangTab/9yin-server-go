@@ -3,11 +3,11 @@ require("logdefine")
 require("gift_config")
 
 
---ÎïÆ·IDµ½Ãû³Æ¶ÔÓ¦±í  
+--ç‰©å“IDåˆ°åç§°å¯¹åº”è¡¨  
 ItemNameMap = {};
 
 bInit = 0;
---³õÊ¼»¯ÎïÆ·IDÓëNameµÄ¶ÔÓ¦±í    
+--åˆå§‹åŒ–ç‰©å“IDä¸Nameçš„å¯¹åº”è¡¨    
 function InitNameMap(npc)
 	if bInit == 1 then
 		return 1;
@@ -17,12 +17,12 @@ function InitNameMap(npc)
 		for j , sub in pairs(it.items) do
 			if ItemNameMap[sub.id] == nil then
 				ItemNameMap[sub.id] = {};
-				--ÏÈÓÃ½Ó¿ÚÈ¡NameID
+				--å…ˆç”¨æ¥å£å–NameID
 				local item_name = nx_get_config_property(sub.id,"NameID");
 				local item_amount = nx_get_config_property(sub.id,"Amount");
 				local item_maxamt = nx_get_config_property(sub.id,"MaxAmount");
 				local item_bind = 0;
-				--Èç¹û½Ó¿ÚÈ¡²»µ½ ´´½¨ÎïÆ·ÔÙÈ¡NameIDÊôĞÔ
+				--å¦‚æœæ¥å£å–ä¸åˆ° åˆ›å»ºç‰©å“å†å–NameIDå±æ€§
 				if item_name == nil or item_name == "" or item_amount == nil or item_amount == "" or item_maxamt == nil or item_maxamt == "" then
 					local titem = nx_create_from_id(npc,sub.id);
 					if titem ~= nil and nx_exists(titem) then
@@ -74,9 +74,9 @@ function InitNameMap(npc)
 	end
 end
 
---²éÑ¯¸ÃµÈ¼¶µÄ½±ÀøÊÇ·ñÒÑ¾­·¢·Å¹ı
+--æŸ¥è¯¢è¯¥ç­‰çº§çš„å¥–åŠ±æ˜¯å¦å·²ç»å‘æ”¾è¿‡
 function LevelGift_IsAdded(player,gift)
-	   --ÔÚÒÑ¾­Íê³ÉµÄµÈ¼¶½±Àø±íÖĞ²éÕÒ
+	   --åœ¨å·²ç»å®Œæˆçš„ç­‰çº§å¥–åŠ±è¡¨ä¸­æŸ¥æ‰¾
 	   local row = nx_find_record_value(player,"FreeGiftCompleted",0,gift);
 	   if row >= 0 then
 			return true;
@@ -84,9 +84,9 @@ function LevelGift_IsAdded(player,gift)
 	   return false;
 end
 
---·¢·ÅÒ»¸öµÈ¼¶½±Àø
+--å‘æ”¾ä¸€ä¸ªç­‰çº§å¥–åŠ±
 function AddOneTaskGift(player,giftName,num)
-	--0ÊıÁ¿
+	--0æ•°é‡
 	if num < 1 then
 	    return;
 	end
@@ -97,7 +97,7 @@ function AddOneTaskGift(player,giftName,num)
 	return
 end
 
---Íê³ÉÒ»¸öµÈ¼¶½±ÀøÁìÈ¡
+--å®Œæˆä¸€ä¸ªç­‰çº§å¥–åŠ±é¢†å–
 function CompleteOneTaskGift(player,giftName,num)
 	local row = nx_find_record_value(player,"FreeGiftCompleted",0,giftName);
 	if row >= 0 then
@@ -112,14 +112,14 @@ function CompleteOneTaskGift(player,giftName,num)
 	end
 end 
 
---»ñµÃÈÎÎñĞÍ½±Àø
+--è·å¾—ä»»åŠ¡å‹å¥–åŠ±
 function GetLevelGift(npc,player)
 
 	for name , it in pairs(PresenterGitf) do
-		--ÅĞ¶Ï ÊÇ·ñÂú×ãÁìÈ¡Ìõ¼ş	
+		--åˆ¤æ–­ æ˜¯å¦æ»¡è¶³é¢†å–æ¡ä»¶	
 		local br = JudgeGiftSend(player,name);
 		if br == 1 then
-		--ÅĞ¶ÏÊÇ·ñÒÑ¾­ÁìÈ¡
+		--åˆ¤æ–­æ˜¯å¦å·²ç»é¢†å–
             if not LevelGift_IsAdded(player,name) then
                 	AddOneTaskGift(player,name,1);
 			end
@@ -129,7 +129,7 @@ end
 
 function ViewWaitingInfo(self, sender,mark)
 	nx_begin_menu(sender,self);
-	--ÌáÊ¾Íæ¼Ò½øĞĞµÈ´ı
+	--æç¤ºç©å®¶è¿›è¡Œç­‰å¾…
 	if mark == 0 then
 		nx_add_title(sender, "gift_str_1");
 	else
@@ -141,7 +141,7 @@ end
 function JudgeGiftSend(sender,name)
 	local giftJudge = PresenterGitf[name];
 	if giftJudge ~= nil then
-		--ÅĞ¶Ï ÊÇ·ñÂú×ãÁìÈ¡Ìõ¼ş
+		--åˆ¤æ–­ æ˜¯å¦æ»¡è¶³é¢†å–æ¡ä»¶
 		for j , fn in ipairs(giftJudge) do
 			if fn.cmp ~= nil then
 				if not fn.cmp(sender,name,nx_int(fn.val)) then
@@ -174,7 +174,7 @@ function InsertItemAction(sender,name)
 		PrizeGiftItems[name].items = {};
 		PrizeGiftItems[name].title = item_name;
 		
-	    --²åÈëÎïÆ· 
+	    --æ’å…¥ç‰©å“ 
 		local inItem = {};
 		inItem.num  = 1; 
 		inItem.id   = itemId;					
@@ -183,7 +183,7 @@ function InsertItemAction(sender,name)
 		inItem.maxamt = item_maxamt;       
 		inItem.bind = 0;
 
-		--²åÈë»î¶¯
+		--æ’å…¥æ´»åŠ¨
 		table.insert(PrizeGiftItems[name].items,inItem);				
 		--nx_msgbox("insert");
 		--nx_msgbox(name);
@@ -193,12 +193,12 @@ function InsertItemAction(sender,name)
 	return PrizeGiftItems[name];		
 end
 
---»î¶¯ÁĞ±í
+--æ´»åŠ¨åˆ—è¡¨
 function ViewActionList(self,sender)
     --nx_add_record_row_values(sender,"PrizeGiftList",14110901,1,"TZ_14110901",0);
 	--nx_add_record_row_values(sender,"PrizeGiftList",10000002,1,"TZ_10000002",0);
 
-	--ÏÔÊ¾ËùÓĞ¿ÉÒÔ½ÓÊÜµÄ»î¶¯
+	--æ˜¾ç¤ºæ‰€æœ‰å¯ä»¥æ¥å—çš„æ´»åŠ¨
 	local bMenu = true;
 	local rows = nx_get_record_rows(sender,"PrizeGiftList");
 	for i = 0,rows - 1 do
@@ -212,13 +212,13 @@ function ViewActionList(self,sender)
 		
 		--[[nx_msgbox("11");
 		nx_msgbox(name);
-		--Ã»ÓĞÅäÖÃµÄÎïÆ·½±Àø
+		--æ²¡æœ‰é…ç½®çš„ç‰©å“å¥–åŠ±
 		if it == nil then
-			--µ«±ØĞëÊÇÎïÆ·£¬"TZ_100.....",²»ÊÇÎïÆ·
+			--ä½†å¿…é¡»æ˜¯ç‰©å“ï¼Œ"TZ_100.....",ä¸æ˜¯ç‰©å“
 			local pos = string.find(name,"_100")			 
-			--¿´¿´ÊÇ²»ÊÇÎïÆ·ĞÍµÄ½±Àø			
+			--çœ‹çœ‹æ˜¯ä¸æ˜¯ç‰©å“å‹çš„å¥–åŠ±			
 			if pos == nil or pos < 1 then 	
-				--²åÈëÒ»¸öÎïÆ·½±Àø 
+				--æ’å…¥ä¸€ä¸ªç‰©å“å¥–åŠ± 
 				nx_msgbox("1ww");
 				it = InsertItemAction(sender,name);	
 			end					 
@@ -233,15 +233,15 @@ function ViewActionList(self,sender)
 			if bShow then
 				--nx_msgbox(it.title);
 				if bMenu then
-					--ÏÔÊ¾ÁìÈ¡²Ëµ¥
+					--æ˜¾ç¤ºé¢†å–èœå•
 				    bMenu = false;
 					nx_begin_menu(sender, self);
-					--ÁìÈ¡ÎïÆ·
+					--é¢†å–ç‰©å“
 					nx_add_title(sender, "1020X", nx_query_property(self, "Name"));
 				end
 				
 				if type == 0 and it.each_count ~= nil then
-				    --Ã¿´ÎÓĞÏŞÖÆ´ÎÊı
+				    --æ¯æ¬¡æœ‰é™åˆ¶æ¬¡æ•°
 				    if it.each_count < num then
 				        nx_set_record_value(sender,"PrizeGiftList",i,1,it.each_count);
 				    end
@@ -253,7 +253,7 @@ function ViewActionList(self,sender)
 	end
 		
 	if not bMenu then
-		--Àë¿ª
+		--ç¦»å¼€
 		nx_add_menu(sender, 9600, "gift_str_5");
 		nx_end_menu(sender, self);
 	else
@@ -262,9 +262,9 @@ function ViewActionList(self,sender)
 	return 0;
 end    
 
---½±ÀøĞÅÏ¢ÁĞ±í
+--å¥–åŠ±ä¿¡æ¯åˆ—è¡¨
 function ViewPrizeInfo(self, sender, idx)    
-	--ÌáÊ¾»ñµÃµÄ½±Àø
+	--æç¤ºè·å¾—çš„å¥–åŠ±
 	nx_begin_menu(sender, self);
 
 	local prizeNum  = nx_query_record_value(sender,"PrizeGiftList",idx,1);
@@ -280,7 +280,7 @@ function ViewPrizeInfo(self, sender, idx)
 		return 0;
 	end 	
 
-	--ÒÔÎªÊÇÒì²½ÁìÈ¡ËùÒÔ°ï¶¨Ò»¸öÁÙÊ±µÄÊı¾İ
+	--ä»¥ä¸ºæ˜¯å¼‚æ­¥é¢†å–æ‰€ä»¥å¸®å®šä¸€ä¸ªä¸´æ—¶çš„æ•°æ®
 	if not nx_find_data(sender,"GetPrizeNum") then
 		nx_add_data(sender,"GetPrizeNum",2);
 	end
@@ -290,7 +290,7 @@ function ViewPrizeInfo(self, sender, idx)
 	local sParam = {};	
 	items = item.items;
 	if items ~= nil then
-        --ÎïÆ·ĞÅÏ¢
+        --ç‰©å“ä¿¡æ¯
 		for i,it in ipairs(items) do
 		    local aindex = (i - 1)*2;
 		    local sItem = "{@" .. aindex + 0 .. "} X {@" .. aindex + 1 .. "}<br/>";			
@@ -300,7 +300,7 @@ function ViewPrizeInfo(self, sender, idx)
 		end
 		
 
-		--¼ì²é±³°üÄÜ²»ÄÜ×°ÏÂËùÓĞµÄÎïÆ·
+		--æ£€æŸ¥èƒŒåŒ…èƒ½ä¸èƒ½è£…ä¸‹æ‰€æœ‰çš„ç‰©å“
 		for n = 1 , prizeNum  do
 	    	for i,it in pairs(items) do
 				local str = "" .. tostring(it.id) .. " " .. tostring(it.amount) .. " " .. tostring(it.maxamt) .. " " .. tostring(it.bind);
@@ -309,13 +309,13 @@ function ViewPrizeInfo(self, sender, idx)
 				end
 	    	end
 	    end
-	    --²»ÄÜÈ«²¿×°ÏÂµÄ»° ¼ì²éÄÜ²»ÄÜ·ÖÅúÁìÈ¡
+	    --ä¸èƒ½å…¨éƒ¨è£…ä¸‹çš„è¯ æ£€æŸ¥èƒ½ä¸èƒ½åˆ†æ‰¹é¢†å–
 		local toolbox = nx_get_child(sender,nx_widestr("ToolBox"));
 		if nx_container_testplace_items(toolbox,unpack(sParam)) == 0 then
 			local type = nx_query_record_value(sender,"PrizeGiftList",idx,3);
-			--ÌáÊ¾¿Õ¼ä²»×ã
-			if type == 0 then       --Êı¾İ¿âÖĞµÄ½±Àø¿ÉÒÔ·ÖÅúÈ¡
-				--¼ÆËã±³°ü¿ÉÒÔÈİÄÉ¶àÉÙ¸ö
+			--æç¤ºç©ºé—´ä¸è¶³
+			if type == 0 then       --æ•°æ®åº“ä¸­çš„å¥–åŠ±å¯ä»¥åˆ†æ‰¹å–
+				--è®¡ç®—èƒŒåŒ…å¯ä»¥å®¹çº³å¤šå°‘ä¸ª
 				local realnum = CalcToolBoxCapacity(toolbox,prizeName,prizeNum);
 				if realnum <= 0 then
 					nx_sysinfo(sender,TIPSTYPE_SYSTEMNO,"gift_str_7");
@@ -323,20 +323,20 @@ function ViewPrizeInfo(self, sender, idx)
 				end
 				nx_set_data(sender,"GetPrizeNum",realnum);	
 				
-			elseif type == 1 then   --¹«¹²Êı¾İÖĞµÄ½±Àø ²»ÄÜ·ÖÅúÈ¡
+			elseif type == 1 then   --å…¬å…±æ•°æ®ä¸­çš„å¥–åŠ± ä¸èƒ½åˆ†æ‰¹å–
 				nx_sysinfo(sender,TIPSTYPE_SYSTEMNO,"gift_str_7");
 				return 0;
-			elseif type == 2 then   --Éı¼¶½±Àø ²»ÄÜ·ÖÅúÈ¡
+			elseif type == 2 then   --å‡çº§å¥–åŠ± ä¸èƒ½åˆ†æ‰¹å–
 				nx_sysinfo(sender,TIPSTYPE_SYSTEMNO,"gift_str_7");
 				return 0;
 			end
 	    end
 	end
 
-	--ÉèÖÃÊıÁ¿
+	--è®¾ç½®æ•°é‡
 	nx_set_data(sender,"GetPrizeNum",prizeNum);
 
-	--Àë¿ª
+	--ç¦»å¼€
 	nx_add_title(sender, sTitle , unpack(sArg));
 	nx_add_menu(sender, 55400 + idx, "gift_str_6");
 	nx_add_menu(sender, 5600, "gift_str_5");
@@ -346,7 +346,7 @@ end
 
 
 
---¼ÆËãµ±Ç°±³°ü¿ÉÒÔÈİÄÉ¶àÉÙ¼şprize
+--è®¡ç®—å½“å‰èƒŒåŒ…å¯ä»¥å®¹çº³å¤šå°‘ä»¶prize
 function CalcToolBoxCapacity(toolbox,prize_name,num)
 
 	  local prize = PrizeGiftItems[prize_name];
@@ -355,7 +355,7 @@ function CalcToolBoxCapacity(toolbox,prize_name,num)
       local szParam = "";
 	  local titems = {};
 	  for i = 1 , num do
-		--Ã¿¼şprizeÀïµÄÎïÆ·
+		--æ¯ä»¶prizeé‡Œçš„ç‰©å“
 		for j , it in pairs(items) do
 			szParam  = szParam .. tostring(it.id) .. " " .. tostring(it.amount) .. " " .. tostring(it.maxamt) .. " " .. tostring(it.bind) .. "|";
 			if string.len(szParam) <= 0 then
@@ -364,7 +364,7 @@ function CalcToolBoxCapacity(toolbox,prize_name,num)
 			table.insert(titems,szParam);
 		end
 
-		--²âÊÔÄÜ²»ÄÜ·ÅÏÂ
+		--æµ‹è¯•èƒ½ä¸èƒ½æ”¾ä¸‹
 		if nx_container_testplace_items(toolbox,unpack(titems)) <= 0 then
 			return anum;
 		end
@@ -374,19 +374,19 @@ function CalcToolBoxCapacity(toolbox,prize_name,num)
 	  return anum;
 end
 
---Íæ¼ÒÑ¡ÔñOk²Ëµ¥
+--ç©å®¶é€‰æ‹©Okèœå•
 function OnMenuOk(self, sender, idx)
  	local giftId   = nx_query_record_value(sender,"PrizeGiftList",idx,0);
 	local prizeNum = nx_query_record_value(sender,"PrizeGiftList",idx,1);
 	local type     = nx_query_record_value(sender,"PrizeGiftList",idx,3);
 	local prizename = nx_query_record_value(sender,"PrizeGiftList",idx,2);
 
-	--ÒòÎªÊÇÒì²½ËùÒÔ±£´æindex
+	--å› ä¸ºæ˜¯å¼‚æ­¥æ‰€ä»¥ä¿å­˜index
 	if not nx_find_data(sender,"GetPrizeIndex") then
 	    nx_add_data(sender,"GetPrizeIndex",2);
 	end
 
-    --È¡³öÒªÁìÈ¡µÄÊıÁ¿ (½öÊı¾İ¿âÖĞÁìÈ¡µÄÊ±ºòÓĞĞ§)
+    --å–å‡ºè¦é¢†å–çš„æ•°é‡ (ä»…æ•°æ®åº“ä¸­é¢†å–çš„æ—¶å€™æœ‰æ•ˆ)
 	if not nx_find_data(sender,"GetPrizeNum") then
 		return 0;
 	end
@@ -396,14 +396,14 @@ function OnMenuOk(self, sender, idx)
 	    return 0;
 	end
 
-	if type == 0 then --Êı¾İ¿âÖĞ½±Àø 
-	    --¼ì²éÄÜ·Å½ø¶àÉÙ¸ö
+	if type == 0 then --æ•°æ®åº“ä¸­å¥–åŠ± 
+	    --æ£€æŸ¥èƒ½æ”¾è¿›å¤šå°‘ä¸ª
 	    local realnum = CalcToolBoxCapacity(nx_get_child(sender,nx_widestr("ToolBox")),prizename,pNum);
 	    if realnum <= 0 then
 			return 0;
 		end
 		nx_get_gift(sender,giftId,prizename,realnum);
-	elseif type == 1 then --¹«¹²Êı¾İ¼ÇÂ¼µÄ½±Àø 
+	elseif type == 1 then --å…¬å…±æ•°æ®è®°å½•çš„å¥–åŠ± 
 	    if OnGetGift(self,sender,giftId,prizeNum,prizename) == 1 then
 	        if not nx_romove_failgift_row(sender,giftId,prizename,prizeNum) then
 		    	local pName = nx_query_property(sender,"Name");
@@ -411,7 +411,7 @@ function OnMenuOk(self, sender, idx)
 				nx_save_playerlog(pName,PLAYER_LOG_GIFT,nx_widestr(sLog));
 			end 
 	    end
-	elseif type == 2 then 	--ÈÎÎñĞÍ½±Àø
+	elseif type == 2 then 	--ä»»åŠ¡å‹å¥–åŠ±
 	    OnGetGift(self,sender,giftId,prizeNum,prizename);
 	end
 
@@ -437,9 +437,9 @@ function OnGetGift(npc,sender,actionId,num,name)
 	local sParam = {};
 	items = action.items;
 	
-	--²âÊÔËùÓĞÎïÆ·ÄÜ²»ÄÜ·Å½ø±³°ü
+	--æµ‹è¯•æ‰€æœ‰ç‰©å“èƒ½ä¸èƒ½æ”¾è¿›èƒŒåŒ…
 	if items ~= nil then
-	    --ÎïÆ·ĞÅÏ¢´®
+	    --ç‰©å“ä¿¡æ¯ä¸²
 		for n = 1 , num  do
 	    	for i,it in pairs(items) do
 				local str = "" .. tostring(it.id) .. " " .. tostring(it.amount) .. " " .. tostring(it.maxamt) .. " " .. tostring(it.bind);
@@ -450,14 +450,14 @@ function OnGetGift(npc,sender,actionId,num,name)
 	    end
 	end
 	
-    --²»ÄÜÈ«²¿×°ÏÂµÄ»°Ê§°Ü
+    --ä¸èƒ½å…¨éƒ¨è£…ä¸‹çš„è¯å¤±è´¥
 	local toolbox = nx_get_child(sender,nx_widestr("ToolBox"));
 	if nx_container_testplace_items(toolbox,unpack(sParam)) == 0 then 		
 		return 0;
 	end
 	
 	local vt = {};
-	--´´½¨ÎïÆ··Å½ø±³°ü
+	--åˆ›å»ºç‰©å“æ”¾è¿›èƒŒåŒ…
 	if items ~= nil then
 		for n = 1 , num do
 		
@@ -466,7 +466,7 @@ function OnGetGift(npc,sender,actionId,num,name)
 				for j = 1 ,it.num do 
 					local item = nx_create_from_id(nx_get_scene(),it.id);
 					if item == nil then
-						--Èç¹ûÓĞÒ»¸öÊ§°ÜÈ«²¿É¾³ı
+						--å¦‚æœæœ‰ä¸€ä¸ªå¤±è´¥å…¨éƒ¨åˆ é™¤
 						for v , vitem in pairs(vt) do
       						nx_destroy_self(vitem);
 						end
@@ -488,7 +488,7 @@ function OnGetGift(npc,sender,actionId,num,name)
 		end
 	end
 	
-	--ÌáÊ¾»ñµÃµÄÎïÆ·
+	--æç¤ºè·å¾—çš„ç‰©å“
 	local sLog = "get gift:" .. name .. ",items="; 
 	for i , it in pairs(vt) do		
 		sLog = sLog .. nx_get_config(it);
@@ -516,7 +516,7 @@ end
 function ViewSuccessInfo(self,sender,title)
     --nx_sysinfo(sender,1,"tostring(funcid)")
 	nx_begin_menu(sender, self);
-	--»¶Ó­¹âÁÙ
+	--æ¬¢è¿å…‰ä¸´
 	nx_add_title(sender, "gift_getgift", nx_widestr(title));
 	nx_add_menu(sender, 2, "gift_str_8");
 	nx_add_menu(sender, 5600, "gift_str_5");
@@ -524,18 +524,18 @@ function ViewSuccessInfo(self,sender,title)
 	nx_end_menu(sender, self);	
 end  
 
---NPC¶ÁÈ¡ÅäÖÃÎÄ¼şÖ®ºó
+--NPCè¯»å–é…ç½®æ–‡ä»¶ä¹‹å
 function npc_on_load_npc(self, sender)
 	return InitNameMap(self);
 end
 
---ÓĞÍæ¼ÒÑ¡ÔñÁËNPC
+--æœ‰ç©å®¶é€‰æ‹©äº†NPC
 function npc_on_select_giftnpc(self, sender, func)
 	nx_begin_menu(sender);
 	
-	nx_add_title(sender, "10011");--´Ë¹¦ÄÜÎ´¿ª·Å
+	nx_add_title(sender, "10011");--æ­¤åŠŸèƒ½æœªå¼€æ”¾
 	
-	nx_add_menu(sender, 2, "10002");--·µ»Ø
+	nx_add_menu(sender, 2, "10002");--è¿”å›
 	
 	nx_end_menu(sender, self);	
 	
@@ -555,10 +555,10 @@ end
 
 function npc_func_55000(self, sender)
 	nx_begin_menu(sender, self);
-	--ÁìÈ¡ÎïÆ· 
+	--é¢†å–ç‰©å“ 
 	nx_add_title(sender, "1020X", nx_query_property(self, "Name"));
-	nx_add_menu(sender, 55100, "gift_str_4"); --²ì¿´ÎïÆ· 
-	--nx_add_menu(sender, 55002, "get_exp_mul"); -- 1.5±¶¾­Ñé
+	nx_add_menu(sender, 55100, "gift_str_4"); --å¯Ÿçœ‹ç‰©å“ 
+	--nx_add_menu(sender, 55002, "get_exp_mul"); -- 1.5å€ç»éªŒ
 	nx_add_menu(sender, 56000, "gift_str_5");
 	nx_end_menu(sender, self);
 end
@@ -569,17 +569,17 @@ end
 
 
 function npc_func_55100(self,sender)
-	--³õÊ¼»¯Ãû×Ö±í 
+	--åˆå§‹åŒ–åå­—è¡¨ 
 	InitNameMap(self);
 
-	--¿ªÊ¼²éÑ¯	
+	--å¼€å§‹æŸ¥è¯¢	
 	StartQueryGift(sender);
 	
-	--½±ÀøÁĞ±íÇå¿Õ 
+	--å¥–åŠ±åˆ—è¡¨æ¸…ç©º 
 	nx_clear_record(sender,"PrizeGiftList");
 	                                                                                
 	if nx_query_gift(sender) then
-		--»ñµÃÈÎÎñĞÍ½±Àø 
+		--è·å¾—ä»»åŠ¡å‹å¥–åŠ± 
 		GetLevelGift(self,sender);
 		return ViewWaitingInfo(self,sender,0);
 	end
@@ -587,14 +587,14 @@ end
 
 
 function npc_func_55200(self,sender,func)
-		--µã»÷½±Àø 
+		--ç‚¹å‡»å¥–åŠ± 
 		local row = func - 55200;
 		ViewPrizeInfo(self,sender,row);
 		return 0;
 end
 
 function npc_func_55400(self,sender,func)
-		--µãÈ·¶¨
+		--ç‚¹ç¡®å®š
 	    local row = func - 55400;
 	    OnMenuOk(self,sender,row);
 	    return 0;

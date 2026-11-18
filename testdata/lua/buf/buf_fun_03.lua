@@ -1,13 +1,13 @@
--- Ìì³¯ÍşÎä
+-- å¤©æœå¨æ­¦
 
 require("define")
 require("share\\server_custom_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
@@ -17,7 +17,7 @@ function buffer_timer(self, buffer)
 
 	for i = 1, table.getn(NearbyList) do
 		tar = nx_object(NearbyList[i])
-		nx_custom_byken(tar, SERVER_CUSTOMMSG_NPC_TALK, tar, "Ìì³¯ÍşÎä!")
+		nx_custom_byken(tar, SERVER_CUSTOMMSG_NPC_TALK, tar, "å¤©æœå¨æ­¦!")
 	end
 
 	-- TYPE_ITEM
@@ -25,12 +25,12 @@ function buffer_timer(self, buffer)
 
 	for i = 1, table.getn(NearbyList) do
 		tar = nx_object(NearbyList[i])
-		nx_custom_byken(tar, SERVER_CUSTOMMSG_NPC_TALK, tar, "Ìì³¯ÍşÎä!")
+		nx_custom_byken(tar, SERVER_CUSTOMMSG_NPC_TALK, tar, "å¤©æœå¨æ­¦!")
 	end
 
 	return 1
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end

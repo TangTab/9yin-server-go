@@ -1,50 +1,50 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task40.lua
--- @ ½Å±¾¹¦ÄÜ: 40ÈÎÎñÌØÊâ´¦ÀíÂß¼­
--- @ ´´½¨Õß:   fengqw
--- @ ´´½¨ÈÕÆÚ: 2010.4.30
+-- @ è„šæœ¬åç§°: task40.lua
+-- @ è„šæœ¬åŠŸèƒ½: 40ä»»åŠ¡ç‰¹æ®Šå¤„ç†é€»è¾‘
+-- @ åˆ›å»ºè€…:   fengqw
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.4.30
 -----------------------------------------
 
--- Ã¿¸öµ¥¶ÀµÄÈÎÎñ½Å±¾¿ÉÒÔ¸´ÖÆ´ËÄ£°å£¬ĞŞ¸ÄÂß¼­
+-- æ¯ä¸ªå•ç‹¬çš„ä»»åŠ¡è„šæœ¬å¯ä»¥å¤åˆ¶æ­¤æ¨¡æ¿ï¼Œä¿®æ”¹é€»è¾‘
 
---¸ÃÈÎÎñµÄºóĞøÈÎÎñÁĞ±í
+--è¯¥ä»»åŠ¡çš„åç»­ä»»åŠ¡åˆ—è¡¨
 local g_task = {
-		["WorldNpc00212"] = 41,	--ÉÙÁÖ
-		["WorldNpc04401"] = 42,	--Îäµ±
-		["WorldNpc02604"] = 43,	--¶ëáÒ
-		["WorldNpc03003"] = 44,	--Ø¤°ï
-		["WorldNpc03305"] = 45,	--¾ı×ÓÌÃ
-		["WorldNpc02201"] = 46,	--ÌÆÃÅ
-		["WorldNpc03816"] = 47,	--¼«ÀÖ¹È
-		["WorldNpc04101"] = 48,	--½õÒÂÎÀ
+		["WorldNpc00212"] = 41,	--å°‘æ—
+		["WorldNpc04401"] = 42,	--æ­¦å½“
+		["WorldNpc02604"] = 43,	--å³¨åµ‹
+		["WorldNpc03003"] = 44,	--ä¸å¸®
+		["WorldNpc03305"] = 45,	--å›å­å ‚
+		["WorldNpc02201"] = 46,	--å”é—¨
+		["WorldNpc03816"] = 47,	--æä¹è°·
+		["WorldNpc04101"] = 48,	--é”¦è¡£å«
 };
 
--- ÃÅÅÉÕĞÊÕµÜ×ÓÏŞÖÆ
+-- é—¨æ´¾æ‹›æ”¶å¼Ÿå­é™åˆ¶
 local g_task_limit = {
 	["WorldNpc00212"] = { sex = 0, ui = "ui_shaolin_sex_limit_info",},
 	["WorldNpc02604"] = { sex = 1, ui = "ui_emei_sex_limit_info",},
 };
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	-- ¿ªÆôĞÂÊÖ°ïÖú
+	-- å¼€å¯æ–°æ‰‹å¸®åŠ©
 	nx_set_property(player, "HelpStepID", "workhelp_00")
 	return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	local config = nx_query_property(npc, "ConfigID");
 	local nextTask = g_task[config];
@@ -54,22 +54,22 @@ function Task_After_Complete(player, npc, taskid)
 	return 1
 end
 
--- Ìá½»ÈÎÎñÖ®Ç°×Ô¶¨Òå²Ëµ¥£¬Èç¹û·µ»Ø1Ôò»á×èÖ¹Ìá½»ÈÎÎñ¡£
+-- æäº¤ä»»åŠ¡ä¹‹å‰è‡ªå®šä¹‰èœå•ï¼Œå¦‚æœè¿”å›1åˆ™ä¼šé˜»æ­¢æäº¤ä»»åŠ¡ã€‚
 function complete_menu(player, npc, id)
-	-- °²È«ÅĞ¶¨
+	-- å®‰å…¨åˆ¤å®š
 	if not nx_exists(player) or not nx_exists(npc) or id < 0 then
 		--nx_msgbox("not obj")
 		return 0
 	end
 
-	-- ¼ì²énpcÅäÖÃ
+	-- æ£€æŸ¥npcé…ç½®
 	local config = nx_query_property(npc, "ConfigID")
 	local cfg = g_task_limit[config]
 	if cfg == nil then
 		return 0
 	end
 
-	-- ĞÔ±ğÅĞ¶¨
+	-- æ€§åˆ«åˆ¤å®š
 	local sex = nx_query_property(player, "Sex");
 	if sex == cfg.sex then
 		return 0

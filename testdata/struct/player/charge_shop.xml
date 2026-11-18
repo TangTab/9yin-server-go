@@ -1,43 +1,43 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2010 (http://www.altova.com) by hahah (memem) -->
-<!--ÈËÎï»ù´¡ÊôÐÔ-->
+<!--äººç‰©åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<!-- ÊÕ·ÑÉÌµê¹ºÂò»òÕßÔùËÍµÄ¸½¼ÓÐÅÏ¢ -->
-		<record name="ChargeBuyRec" cols="7" maxrows="16" save="true" public="false" private="false" desc="ÊÕ·ÑÉÌµê¹ºÂò»òÕßÔùËÍµÄ¸½¼ÓÐÅÏ¢">
-			<column type="string" desc="µÀ¾ßid"/>
-			<column type="byte" desc="ÊýÁ¿"/>
-			<column type="byte" desc="µÀ¾ß½«±»´æ·ÅµÄÈÝÆ÷ÀàÐÍ"/>
-			<column type="string" desc="ÔùËÍÕÊºÅ"/>
-			<column type="widestr" desc="ÔùËÍ½ÇÉ«Ãû³Æ"/>
-			<column type="widestr" desc="ÔùËÍµÄ±êÌâ"/>
-			<column type="widestr" desc="ÔùËÍÁôÑÔ"/>
+		<!-- æ”¶è´¹å•†åº—è´­ä¹°æˆ–è€…èµ é€çš„é™„åŠ ä¿¡æ¯ -->
+		<record name="ChargeBuyRec" cols="7" maxrows="16" save="true" public="false" private="false" desc="æ”¶è´¹å•†åº—è´­ä¹°æˆ–è€…èµ é€çš„é™„åŠ ä¿¡æ¯">
+			<column type="string" desc="é“å…·id"/>
+			<column type="byte" desc="æ•°é‡"/>
+			<column type="byte" desc="é“å…·å°†è¢«å­˜æ”¾çš„å®¹å™¨ç±»åž‹"/>
+			<column type="string" desc="èµ é€å¸å·"/>
+			<column type="widestr" desc="èµ é€è§’è‰²åç§°"/>
+			<column type="widestr" desc="èµ é€çš„æ ‡é¢˜"/>
+			<column type="widestr" desc="èµ é€ç•™è¨€"/>
 		</record>
-		<!-- ÊÕ·ÑÉÌµê-ÎÒµÄÎïÆ·À¸ -->
-		<record name="ChargeBoxRec" cols="5" maxrows="512" save="true" public="false" private="true" desc="ÊÕ·ÑÉÌµêÎÒµÄÎïÆ·À¸">
-			<column type="string" desc="µÀ¾ßConfigID"/>
-			<column type="WORD" desc="µÀ¾ß¼Æ·ÑID"/>
-			<column type="byte" desc="ÊýÁ¿amount"/>
-			<column type="int64" desc="¹ºÂòÊ±¼ä"/>
-			<column type="int64" desc="µ½ÆÚÊ±¼ä"/>
+		<!-- æ”¶è´¹å•†åº—-æˆ‘çš„ç‰©å“æ  -->
+		<record name="ChargeBoxRec" cols="5" maxrows="512" save="true" public="false" private="true" desc="æ”¶è´¹å•†åº—æˆ‘çš„ç‰©å“æ ">
+			<column type="string" desc="é“å…·ConfigID"/>
+			<column type="WORD" desc="é“å…·è®¡è´¹ID"/>
+			<column type="byte" desc="æ•°é‡amount"/>
+			<column type="int64" desc="è´­ä¹°æ—¶é—´"/>
+			<column type="int64" desc="åˆ°æœŸæ—¶é—´"/>
 		</record>
-		<!-- ÊÕ·ÑÉÌµê-ÀúÊ·¹ºÂò¼ÇÂ¼ -->
-		<record name="ChargeHistoryRec" cols="4" maxrows="128" save="true" public="false" private="true" desc="ÀúÊ·¹ºÂò¼ÇÂ¼">
-			<column type="string" desc="µÀ¾ßConfigID"/>
-			<column type="WORD" desc="µÀ¾ß¼Æ·ÑID"/>
-			<column type="int64" desc="¹ºÂòÊ±¼ä"/>
-			<column type="int64" desc="µ½ÆÚÊ±¼ä"/>
+		<!-- æ”¶è´¹å•†åº—-åŽ†å²è´­ä¹°è®°å½• -->
+		<record name="ChargeHistoryRec" cols="4" maxrows="128" save="true" public="false" private="true" desc="åŽ†å²è´­ä¹°è®°å½•">
+			<column type="string" desc="é“å…·ConfigID"/>
+			<column type="WORD" desc="é“å…·è®¡è´¹ID"/>
+			<column type="int64" desc="è´­ä¹°æ—¶é—´"/>
+			<column type="int64" desc="åˆ°æœŸæ—¶é—´"/>
 		</record>
-		<!-- ÊÕ·ÑÉÌµê-ÊÕ²ØÁÐ±í -->
-		<record name="ChargeCollectRec" cols="4" maxrows="128" save="true" public="false" private="true" desc="ÊÕ·ÑÉÌµê-ÊÕ²ØÁÐ±í">
-			<column type="string" desc="µÀ¾ßConfigID"/>
-			<column type="WORD" desc="µÀ¾ß¼Æ·ÑID"/>
-			<column type="int64" desc="ÊÕ²ØÊ±¼ä"/>
-			<column type="int64" desc="µ½ÆÚÊ±¼ä"/>
+		<!-- æ”¶è´¹å•†åº—-æ”¶è—åˆ—è¡¨ -->
+		<record name="ChargeCollectRec" cols="4" maxrows="128" save="true" public="false" private="true" desc="æ”¶è´¹å•†åº—-æ”¶è—åˆ—è¡¨">
+			<column type="string" desc="é“å…·ConfigID"/>
+			<column type="WORD" desc="é“å…·è®¡è´¹ID"/>
+			<column type="int64" desc="æ”¶è—æ—¶é—´"/>
+			<column type="int64" desc="åˆ°æœŸæ—¶é—´"/>
 		</record>
 	</records>
 </object>

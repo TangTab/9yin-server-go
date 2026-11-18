@@ -8,7 +8,7 @@ function on_use(item, self)
 	reduce_item(item)
 end
 
---¼õÉÙITEMÊıÁ¿
+--å‡å°‘ITEMæ•°é‡
 function reduce_item(item)
     nx_inc_property(item, "Amount", -1)
 end

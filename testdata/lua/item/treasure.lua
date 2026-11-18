@@ -2,51 +2,51 @@ require("share\\view_define")
 require("share\\item_static_data_define")
 require("define")
 require("share\\server_custom_define")
---´ò¿ª´óÀñ°ü²Ù×÷
+--æ‰“å¼€å¤§ç¤¼åŒ…æ“ä½œ
 function on_use(item, self)
     if not nx_exists(item) then
 		return 0
 	end
 	
-	local opened = nx_query_property(item, "Opened") --»ñÈ¡ÊÇ·ñ´ò¿ªµÄ±ê¼Ç
+	local opened = nx_query_property(item, "Opened") --è·å–æ˜¯å¦æ‰“å¼€çš„æ ‡è®°
 	local uid    = nx_query_property(item,"UniqueID")
 	
-	if not nx_find_data(self,"pickitem") then --¼ÇÂ¼´ò¿ªµÄ±¦Ïäitem
+	if not nx_find_data(self,"pickitem") then --è®°å½•æ‰“å¼€çš„å®ç®±item
 	    nx_add_data(self,"pickitem",VTYPE_OBJECT)
 	end
 	
 	nx_set_data(self,"pickitem",item)
 	
-	if opened >=1 then --ÒÑ¾­´ò¿ª¹ı£¬²»ÔÙ´¦Àí
-	    nx_custom(self,SERVER_CUSTOMMSG_PICK_ITEM,nx_string(uid))--Í¨ÖªUIÏÔÊ¾
+	if opened >=1 then --å·²ç»æ‰“å¼€è¿‡ï¼Œä¸å†å¤„ç†
+	    nx_custom(self,SERVER_CUSTOMMSG_PICK_ITEM,nx_string(uid))--é€šçŸ¥UIæ˜¾ç¤º
 	    return 0
 	end
-		-- ÅĞ¶ÏitemµÄÀñ°ü±àºÅ
+		-- åˆ¤æ–­itemçš„ç¤¼åŒ…ç¼–å·
 	local result = nx_item_static_query(item, Item_MaterialPack_Result)
-	local count  = nx_item_static_query(item, ITEM_MaterialPack_Count)--ÒªËæ»ú³öÀ´µÄ¸öÊı
-	local array =  nx_split_string(result, ";")         --Êı×éµ¥¸öÔªËØ;configid,count,proability
+	local count  = nx_item_static_query(item, ITEM_MaterialPack_Count)--è¦éšæœºå‡ºæ¥çš„ä¸ªæ•°
+	local array =  nx_split_string(result, ";")         --æ•°ç»„å•ä¸ªå…ƒç´ ;configid,count,proability
 	local tablecount = table.getn(array)
 
-	if tablecount < count then              --°²È«
+	if tablecount < count then              --å®‰å…¨
 	    return 0
 	end
 		
-	local bit={}--Ëæ»ú±êÖ¾Êı×é,¼°³õÊ¼»¯
-	local proabilty={} --Ã¿¸öitemµÄ¸ÅÂÊ
-	local proabilitysum = 0.0 --¸ÅÂÊÖ®ºÍ
+	local bit={}--éšæœºæ ‡å¿—æ•°ç»„,åŠåˆå§‹åŒ–
+	local proabilty={} --æ¯ä¸ªitemçš„æ¦‚ç‡
+	local proabilitysum = 0.0 --æ¦‚ç‡ä¹‹å’Œ
 	for i=1,tablecount do
 	    bit[i] = false
 	    local m = nx_split_string(array[i], ",") 
-	    proabilty[i] = m[3]         --¸ÅÂÊ
+	    proabilty[i] = m[3]         --æ¦‚ç‡
 	    proabilitysum = proabilitysum + proabilty[i]
 	end
 
-	--²úÉúËæ»úĞòÁĞ£¬±£´æÔÚ×îºó
+	--äº§ç”Ÿéšæœºåºåˆ—ï¼Œä¿å­˜åœ¨æœ€å
 	for i=1,count do
 	    local n = math.random(0,nx_number(proabilitysum*100))
 	    local m = 0.0
 	    for j=1,tablecount do
-	        if not bit[j] then--Ã»ÓĞ±»Ñ¡ÖĞ
+	        if not bit[j] then--æ²¡æœ‰è¢«é€‰ä¸­
 	            m = m + proabilty[j]
 	        end
 	        if m*100 > n then  --
@@ -58,20 +58,20 @@ function on_use(item, self)
 	    end
 	end
 	
-	local stresult = "" --±£´æÑ¡ÖĞµÄ½á¹û
+	local stresult = "" --ä¿å­˜é€‰ä¸­çš„ç»“æœ
 	for i=1,tablecount do
 	    if bit[i] then
-            local ar = nx_split_string(array[i], ",") --1:configid,2:¸öÊı
+            local ar = nx_split_string(array[i], ",") --1:configid,2:ä¸ªæ•°
             local configid= ar[1]
             local config_count = ar[2]
             stresult = configid..","..config_count..";"..stresult
 	    end
 	end
-	--±£´æ½á¹û
+	--ä¿å­˜ç»“æœ
 	nx_set_property(item,"ItemContain",stresult)
-	--ÉèÖÃ´ò¿ª±ê¼Ç
+	--è®¾ç½®æ‰“å¼€æ ‡è®°
 	nx_set_property(item,"Opened",1)
 	
-	nx_custom(self,SERVER_CUSTOMMSG_PICK_ITEM,nx_string(uid))--Í¨ÖªUIÏÔÊ¾
+	nx_custom(self,SERVER_CUSTOMMSG_PICK_ITEM,nx_string(uid))--é€šçŸ¥UIæ˜¾ç¤º
 end
 

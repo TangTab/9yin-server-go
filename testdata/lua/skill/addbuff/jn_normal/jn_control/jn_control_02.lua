@@ -1,11 +1,11 @@
 --[[
 buf_control_02
-½ûÖ¹ĞĞ¶¯
+ç¦æ­¢è¡ŒåŠ¨
 ]]
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_control_02")
 
 	if not nx_exists(buffer) then
@@ -14,7 +14,7 @@ function AddBuff(self, target, level)
 
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantMove", nx_double(1), 0,0)
 
-	--Ìí¼Óµ½Ä¿±ê
+	--æ·»åŠ åˆ°ç›®æ ‡
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="energy_well_npc_rec" cols="3" maxrows="2048" save="false" public="false" private="false" desc="ÄÜÁ¿¾®NPC±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="dword" desc="NPCÐòºÅ"/>
-			<column type="object" desc="NPC¶ÔÏó"/>
+		<record name="energy_well_npc_rec" cols="3" maxrows="2048" save="false" public="false" private="false" desc="èƒ½é‡äº•NPCè¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="dword" desc="NPCåºå·"/>
+			<column type="object" desc="NPCå¯¹è±¡"/>
 		</record>
-		<record name="ew_machine_npc_rec" cols="2" maxrows="2048" save="false" public="false" private="false" desc="ÄÜÁ¿¾®ÖÆÔì»úÆ÷NPC±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="object" desc="NPC¶ÔÏó"/>
+		<record name="ew_machine_npc_rec" cols="2" maxrows="2048" save="false" public="false" private="false" desc="èƒ½é‡äº•åˆ¶é€ æœºå™¨NPCè¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="object" desc="NPCå¯¹è±¡"/>
 		</record>
 	</records>
 </object>

@@ -1,61 +1,61 @@
 require("define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
-	--Ìí¼ÓBUFFER
+	--æ·»åŠ BUFFER
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_testbuff_jingchundu")
 	if not nx_exists(buffer) then
 		return false
 	end
 	
-	--¼¼ÄÜµÄ¼¶±ğ
+	--æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
 	
-	--ÉèÖÃBufferµÄÊôĞÔ
-	--BufferµÄ×÷ÓÃÀàĞÍ(0:Ë²Ê±Buffer,1:ÔÚXÃëÄÚÓĞĞ§,2:ÔÚXÃëÄÚY´ÎÊÂ¼şÓĞĞ§,3:ÔÚXÃëÄÚÓĞĞ§,Ã¿YÃë´¥·¢Ò»´Î)
+	--è®¾ç½®Bufferçš„å±æ€§
+	--Bufferçš„ä½œç”¨ç±»å‹(0:ç¬æ—¶Buffer,1:åœ¨Xç§’å†…æœ‰æ•ˆ,2:åœ¨Xç§’å†…Yæ¬¡äº‹ä»¶æœ‰æ•ˆ,3:åœ¨Xç§’å†…æœ‰æ•ˆ,æ¯Yç§’è§¦å‘ä¸€æ¬¡)
 	nx_set_property(buffer, "EffectType", 1)
-	--ÉèÖÃBufferÉËº¦Ğ§¹ûÊÇ·ñÏÔÊ¾
+	--è®¾ç½®Bufferä¼¤å®³æ•ˆæœæ˜¯å¦æ˜¾ç¤º
 	nx_set_property(buffer, "IsDamage", 1)
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime", 60 * 1000)
-	--BufferµÄÉúÃüÆÚÀàĞÍ(0:Ö»¼ÆËãÔÚÏßÊ±¼ä,1:¼ÆËãÈ«²¿Ê±¼ä,°üÀ¨ÏÂÏßÊ±¼ä)
+	--Bufferçš„ç”Ÿå‘½æœŸç±»å‹(0:åªè®¡ç®—åœ¨çº¿æ—¶é—´,1:è®¡ç®—å…¨éƒ¨æ—¶é—´,åŒ…æ‹¬ä¸‹çº¿æ—¶é—´)
 	nx_set_property(buffer, "LifeTimeType", 1)
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 0)
-	--BufferÃ¿´Î´¥·¢Ê±ÊÇ·ñ³É¹¦×÷ÓÃµÄ³É¹¦ÂÊ£¬°Ù·Ö±ÈÊı
+	--Bufferæ¯æ¬¡è§¦å‘æ—¶æ˜¯å¦æˆåŠŸä½œç”¨çš„æˆåŠŸç‡ï¼Œç™¾åˆ†æ¯”æ•°
 	nx_set_property(buffer, "EffectRatio", 100)
 	
-	--BUFFER¸Ä±äµÄÊôĞÔ(Ìí¼Óµ½BufferµÄDirectPropertyRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERæ”¹å˜çš„å±æ€§(æ·»åŠ åˆ°Bufferçš„DirectPropertyRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 2, "", "CurPurity", nx_double(-20.0 - level * 2), 1, 0)
 	
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false
 	end
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end

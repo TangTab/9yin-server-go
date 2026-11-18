@@ -1,32 +1,32 @@
 require("define")
 require("share\\server_custom_define")
--- ÈËÎïÏûÊ§£¬Ë²ÒÆÖÁÄ¿±êÎ»ÖÃ
+-- äººç‰©æ¶ˆå¤±ï¼Œç¬ç§»è‡³ç›®æ ‡ä½ç½®
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
-	--ÒşÉí
+	--éšèº«
 --	if nx_query_property(self,"Invisible") == 0 then
 --		nx_set_property(self,"Invisible", 1)
 --	end
 
-	--²¥·Å¶¯×÷
+	--æ’­æ”¾åŠ¨ä½œ
 	--nx_custom_byken(self, SERVER_CUSTOMMSG_ACTION, gm, nx_string("2h_qg_swim_run")
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 	local x,y,z,o = nx_get_position(target)
 	o = get_orient(self)
@@ -40,12 +40,12 @@ function skill_after_hit(self, skill, target)
 	nx_custom_byken(self, SERVER_CUSTOMMSG_ACTION, self, "2h_qg_jump03")
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 

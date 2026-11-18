@@ -1,26 +1,26 @@
---±¯ËÖÇå·ç	Ïò½ÇÉ«ÖÜÎ§·¶Î§ÄÚÊ©·Å´ó¹æÄ£¶¾Êõ£¬¶¾Êõ¶Ô×ÔÉíÓĞĞ§£¬½¨ÒéÏÈÓÃ½âÒ©(´¥·¢µÖ¿¹buff)
---½µµÍ5µãÌåÖÊ£¬60ÃëÄÚÃ¿2Ãë¼õÉÙ50µÄÑªÁ¿
+--æ‚²é…¥æ¸…é£	å‘è§’è‰²å‘¨å›´èŒƒå›´å†…æ–½æ”¾å¤§è§„æ¨¡æ¯’æœ¯ï¼Œæ¯’æœ¯å¯¹è‡ªèº«æœ‰æ•ˆï¼Œå»ºè®®å…ˆç”¨è§£è¯(è§¦å‘æŠµæŠ—buff)
+--é™ä½5ç‚¹ä½“è´¨ï¼Œ60ç§’å†…æ¯2ç§’å‡å°‘50çš„è¡€é‡
 
 require("define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 
 	-- TYPE_NPC | TYPE_PLAYER =6
@@ -31,43 +31,43 @@ function skill_after_hit(self, skill, target)
 		add_buffer(self, tar)
 	end
 
-	-- ×Ô¼ºÒ²ÖĞÕĞ£¡
+	-- è‡ªå·±ä¹Ÿä¸­æ‹›ï¼
 	add_buffer(self, self)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
 function add_buffer(self, target)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_poison_02")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime",60000)
 
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 2000)
 
-	--BUFFER³ÖĞø¸Ä±äµÄÊôĞÔ£¨½µµÍÃüÖĞ£©
+	--BUFFERæŒç»­æ”¹å˜çš„å±æ€§ï¼ˆé™ä½å‘½ä¸­ï¼‰
 	nx_add_record_row_values(buffer, "RolePropRec", "Sta", nx_double(-5))
 
-	--BUFFERÁ¬Ğø¸Ä±äµÄÊôĞÔ£¨Á¬Ğø¿ÛÑª£©
+	--BUFFERè¿ç»­æ”¹å˜çš„å±æ€§ï¼ˆè¿ç»­æ‰£è¡€ï¼‰
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(-50),0)
 
-	--Ìí¼Óµ½Ä¿±êÉíÉÏ,Í¬Ê±¼ÇÂ¼½á¹û
+	--æ·»åŠ åˆ°ç›®æ ‡èº«ä¸Š,åŒæ—¶è®°å½•ç»“æœ
 	local result = nx_add_buffer(target, self, buffer)
 
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not result then
 		nx_destroy_self(buffer)
 		return false

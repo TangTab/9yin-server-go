@@ -1,5 +1,5 @@
 function skill_finish(self, skill)
-	-- ÆïÂí
+	-- éª‘é©¬
 	if not nx_is_riding(self) then
 		if nx_go_ride(self) then
 			add_buffer(self)
@@ -9,7 +9,7 @@ end
 
 
 function add_buffer(self)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local mount_box = nx_get_child(self, nx_widestr("MountBox"))
 
 	if nx_exists(mount_box) then
@@ -19,16 +19,16 @@ function add_buffer(self)
 			buffer_id = nx_query_property(mount_item, "RideBuffer")
 			local buffer = nx_create_from_config(nx_get_scene(), buffer_id)
 		
-			--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+			--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 			if not nx_exists(buffer) then
 				return false
 			end
 			
 			
-			--Ìí¼Óµ½Ä¿±êÉíÉÏ,Í¬Ê±¼ÇÂ¼½á¹û
+			--æ·»åŠ åˆ°ç›®æ ‡èº«ä¸Š,åŒæ—¶è®°å½•ç»“æœ
 			local result = nx_add_buffer(self, self, buffer)
 
-			--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+			--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 			if not result then
 				nx_destroy_self(buffer)
 				return false

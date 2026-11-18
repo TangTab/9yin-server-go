@@ -1,10 +1,10 @@
--- Ã¿Ò»´Î´¥·¢Ôì³É¸ü´óµÄÉËº¦
+-- æ¯ä¸€æ¬¡è§¦å‘é€ æˆæ›´å¤§çš„ä¼¤å®³
 require("define")
 require("share\\server_custom_define")
 
 function OnInit(self, buffer)
 	if not nx_add_data(buffer, "CustomTimer", VTYPE_INT) then
-		nx_echo("Ìí¼Ó×Ô¶¨ÒåÊı¾İÊ§°Ü")
+		nx_echo("æ·»åŠ è‡ªå®šä¹‰æ•°æ®å¤±è´¥")
 		return
 	end
 

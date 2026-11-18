@@ -1,75 +1,75 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÓÊ¼þÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--é‚®ä»¶ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
 		<record name="RecvLetterRec" cols="15" maxrows="128" save="true" public="false" private="true" desc="">
-			<column type="widestr" desc="¼ÄÐÅÈËÐÕÃû"/>
-			<column type="string" desc="¼ÄÐÅÈËUID"/>
-			<column type="byte" desc="¼ÄÐÅÈËUID"/>
-			<column type="int64" desc="¼ÄÐÅÈËUID"/>
-			<column type="byte" desc="ÐÅ¼þÀàÐÍ"/>
-			<column type="byte" desc="ÐÅ¼þ¼Ó¼±"/>
-			<column type="widestr" desc="ÐÅ¼þÌâÄ¿"/>
-			<column type="widestr" desc="ÐÅ¼þÄÚÈÝ"/>
-			<column type="string" desc="»Æ½ð¸½¼þ"/>
-			<column type="string" desc="ÎïÆ·¸½¼þ"/>
-			<column type="string" desc="¼ÄÐÅÈÕÆÚ"/>
-			<column type="byte" desc="ÒÑ¶Á±ê¼Ç"/>
-			<column type="string" desc="ÐÅ¼þÁ÷Ë®ºÅ"/>
-			<column type="string" desc="ÌáÈ¡¸½¼þÓ¦¸¶½ð¶î£¨Ö»ÔÚ½»Ò×ÀàÐÅ¼þÆðÐ§£©"/>
-			<column type="byte" desc="¼±¼þNPCÊÇ·ñÒÑÕÙ»½£¨Ö»ÔÚ¼Ó¼±ÓÊ¼þÆðÐ§£©"/>
+			<column type="widestr" desc="å¯„ä¿¡äººå§“å"/>
+			<column type="string" desc="å¯„ä¿¡äººUID"/>
+			<column type="byte" desc="å¯„ä¿¡äººUID"/>
+			<column type="int64" desc="å¯„ä¿¡äººUID"/>
+			<column type="byte" desc="ä¿¡ä»¶ç±»åž‹"/>
+			<column type="byte" desc="ä¿¡ä»¶åŠ æ€¥"/>
+			<column type="widestr" desc="ä¿¡ä»¶é¢˜ç›®"/>
+			<column type="widestr" desc="ä¿¡ä»¶å†…å®¹"/>
+			<column type="string" desc="é»„é‡‘é™„ä»¶"/>
+			<column type="string" desc="ç‰©å“é™„ä»¶"/>
+			<column type="string" desc="å¯„ä¿¡æ—¥æœŸ"/>
+			<column type="byte" desc="å·²è¯»æ ‡è®°"/>
+			<column type="string" desc="ä¿¡ä»¶æµæ°´å·"/>
+			<column type="string" desc="æå–é™„ä»¶åº”ä»˜é‡‘é¢ï¼ˆåªåœ¨äº¤æ˜“ç±»ä¿¡ä»¶èµ·æ•ˆï¼‰"/>
+			<column type="byte" desc="æ€¥ä»¶NPCæ˜¯å¦å·²å¬å”¤ï¼ˆåªåœ¨åŠ æ€¥é‚®ä»¶èµ·æ•ˆï¼‰"/>
 		</record>
 		
-		<record name="RecvLetterMidRec" cols="13" maxrows="128" save="true" public="false" private="false" desc="ÖÐ¼ä±í">
-			<column type="widestr" desc="¼ÄÐÅÈËÐÕÃû"/>
-			<column type="string" desc="¼ÄÐÅÈËUID"/>
-			<column type="int64" desc="Ê£ÓàÊ±¼ä"/>
-			<column type="dword" desc="ÐÅ¼þÀàÐÍ"/>
-			<column type="dword" desc="ÐÅ¼þ¼Ó¼±"/>
-			<column type="widestr" desc="ÐÅ¼þÌâÄ¿"/>
-			<column type="widestr" desc="ÐÅ¼þÄÚÈÝ"/>
-			<column type="string" desc="»Æ½ð¸½¼þ"/>
-			<column type="string" desc="ÎïÆ·¸½¼þ"/>
-			<column type="string" desc="¼ÄÐÅÈÕÆÚ"/>
-			<column type="dword" desc="ÒÑ¶Á±ê¼Ç"/>
-			<column type="string" desc="ÐÅ¼þÁ÷Ë®ºÅ"/>
-			<column type="string" desc="ÌáÈ¡¸½¼þÓ¦¸¶½ð¶î£¨Ö»ÔÚ½»Ò×ÀàÐÅ¼þÆðÐ§£©"/>
+		<record name="RecvLetterMidRec" cols="13" maxrows="128" save="true" public="false" private="false" desc="ä¸­é—´è¡¨">
+			<column type="widestr" desc="å¯„ä¿¡äººå§“å"/>
+			<column type="string" desc="å¯„ä¿¡äººUID"/>
+			<column type="int64" desc="å‰©ä½™æ—¶é—´"/>
+			<column type="dword" desc="ä¿¡ä»¶ç±»åž‹"/>
+			<column type="dword" desc="ä¿¡ä»¶åŠ æ€¥"/>
+			<column type="widestr" desc="ä¿¡ä»¶é¢˜ç›®"/>
+			<column type="widestr" desc="ä¿¡ä»¶å†…å®¹"/>
+			<column type="string" desc="é»„é‡‘é™„ä»¶"/>
+			<column type="string" desc="ç‰©å“é™„ä»¶"/>
+			<column type="string" desc="å¯„ä¿¡æ—¥æœŸ"/>
+			<column type="dword" desc="å·²è¯»æ ‡è®°"/>
+			<column type="string" desc="ä¿¡ä»¶æµæ°´å·"/>
+			<column type="string" desc="æå–é™„ä»¶åº”ä»˜é‡‘é¢ï¼ˆåªåœ¨äº¤æ˜“ç±»ä¿¡ä»¶èµ·æ•ˆï¼‰"/>
 		</record>
 		
-		<record name="RecvLetterDealRec" cols="13" maxrows="128" save="true" public="false" private="false" desc="·¢ËÍ½»Ò×ÓÊ¼þ±¸·Ý±í">
-			<column type="widestr" desc="¼ÄÐÅÈËÐÕÃû"/>
-			<column type="string" desc="¼ÄÐÅÈËUID"/>
-			<column type="int64" desc="Ê£ÓàÊ±¼ä"/>
-			<column type="dword" desc="ÐÅ¼þÀàÐÍ"/>
-			<column type="dword" desc="ÐÅ¼þ¼Ó¼±"/>
-			<column type="widestr" desc="ÐÅ¼þÌâÄ¿"/>
-			<column type="widestr" desc="ÐÅ¼þÄÚÈÝ"/>
-			<column type="string" desc="»Æ½ð¸½¼þ"/>
-			<column type="string" desc="ÎïÆ·¸½¼þ"/>
-			<column type="string" desc="¼ÄÐÅÈÕÆÚ"/>
-			<column type="dword" desc="ÒÑ¶Á±ê¼Ç"/>
-			<column type="string" desc="ÐÅ¼þÁ÷Ë®ºÅ"/>
-			<column type="string" desc="ÌáÈ¡¸½¼þÓ¦¸¶½ð¶î£¨Ö»ÔÚ½»Ò×ÀàÐÅ¼þÆðÐ§£©"/>
+		<record name="RecvLetterDealRec" cols="13" maxrows="128" save="true" public="false" private="false" desc="å‘é€äº¤æ˜“é‚®ä»¶å¤‡ä»½è¡¨">
+			<column type="widestr" desc="å¯„ä¿¡äººå§“å"/>
+			<column type="string" desc="å¯„ä¿¡äººUID"/>
+			<column type="int64" desc="å‰©ä½™æ—¶é—´"/>
+			<column type="dword" desc="ä¿¡ä»¶ç±»åž‹"/>
+			<column type="dword" desc="ä¿¡ä»¶åŠ æ€¥"/>
+			<column type="widestr" desc="ä¿¡ä»¶é¢˜ç›®"/>
+			<column type="widestr" desc="ä¿¡ä»¶å†…å®¹"/>
+			<column type="string" desc="é»„é‡‘é™„ä»¶"/>
+			<column type="string" desc="ç‰©å“é™„ä»¶"/>
+			<column type="string" desc="å¯„ä¿¡æ—¥æœŸ"/>
+			<column type="dword" desc="å·²è¯»æ ‡è®°"/>
+			<column type="string" desc="ä¿¡ä»¶æµæ°´å·"/>
+			<column type="string" desc="æå–é™„ä»¶åº”ä»˜é‡‘é¢ï¼ˆåªåœ¨äº¤æ˜“ç±»ä¿¡ä»¶èµ·æ•ˆï¼‰"/>
 		</record>
 
-		<record name="BackstageLetterRec" cols="8" maxrows="128" save="true" public="false" private="true" desc="ºóÌ¨ÓÊ¼þÅäÖÃ±í">
-			<column type="string" desc="¿ªÊ¼Ê±¼ä"/>
-			<column type="string" desc="½áÊøÊ±¼ä"/>
-			<column type="byte" desc="ÐÅ¼þ¼Ó¼±"/>
-			<column type="widestr" desc="ÐÅ¼þÌâÄ¿"/>
-			<column type="widestr" desc="ÐÅ¼þÄÚÈÝ"/>
-			<column type="string" desc="»Æ½ð¸½¼þ"/>
-			<column type="string" desc="ÎïÆ·¸½¼þ"/>
-			<column type="byte" desc="ÒÑ·¢±ê¼Ç"/>
+		<record name="BackstageLetterRec" cols="8" maxrows="128" save="true" public="false" private="true" desc="åŽå°é‚®ä»¶é…ç½®è¡¨">
+			<column type="string" desc="å¼€å§‹æ—¶é—´"/>
+			<column type="string" desc="ç»“æŸæ—¶é—´"/>
+			<column type="byte" desc="ä¿¡ä»¶åŠ æ€¥"/>
+			<column type="widestr" desc="ä¿¡ä»¶é¢˜ç›®"/>
+			<column type="widestr" desc="ä¿¡ä»¶å†…å®¹"/>
+			<column type="string" desc="é»„é‡‘é™„ä»¶"/>
+			<column type="string" desc="ç‰©å“é™„ä»¶"/>
+			<column type="byte" desc="å·²å‘æ ‡è®°"/>
 		</record>
 		
-		<record name="GiftWaitPostGetRec" cols="3" maxrows="20" save="true" public="false" private="false" desc="ÕËºÅÁì½±µÈ´ýÊÕÈ¡±í">
-			<column type="int" desc="ÀñÎïid"/>
-			<column type="string" desc="ÀñÎïÃû³Æ"/>
-			<column type="int" desc="ÀñÎïÊýÁ¿"/>
+		<record name="GiftWaitPostGetRec" cols="3" maxrows="20" save="true" public="false" private="false" desc="è´¦å·é¢†å¥–ç­‰å¾…æ”¶å–è¡¨">
+			<column type="int" desc="ç¤¼ç‰©id"/>
+			<column type="string" desc="ç¤¼ç‰©åç§°"/>
+			<column type="int" desc="ç¤¼ç‰©æ•°é‡"/>
 		</record>
 	</records>
 </object>

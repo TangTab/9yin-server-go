@@ -1,14 +1,14 @@
 --[[
 buf_heal_04
-µ¥ÌåË²Ê±»Ø¸´
---Lv1:30+¾«Éñ*1.2
---Lv2:60+¾«Éñ*1.6
---Lv3:90+¾«Éñ*2.0
---Lv4:180+¾«Éñ*2.4
---Lv5:360+¾«Éñ*2.8
+å•ä½“ç¬æ—¶å›å¤
+--Lv1:30+ç²¾ç¥*1.2
+--Lv2:60+ç²¾ç¥*1.6
+--Lv3:90+ç²¾ç¥*2.0
+--Lv4:180+ç²¾ç¥*2.4
+--Lv5:360+ç²¾ç¥*2.8
 ]]
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
 	local Spi = nx_query_property(self, "Spi") + nx_query_property(self, "SpiAdd")
 
@@ -26,17 +26,17 @@ function AddBuff(self, target, level)
 		healpoint = 360 + Spi * 2.8
 	end
 
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_04")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "HP", nx_double(healpoint), 0,1)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

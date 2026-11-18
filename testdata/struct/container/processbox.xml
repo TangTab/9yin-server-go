@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--½»Ò×Ê±µÄ¼Ó¹¤ÈÝÆ÷Ïà¹ØÊôÐÔ-->
+<!--äº¤æ˜“æ—¶çš„åŠ å·¥å®¹å™¨ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-    <property name="IsProcess"     type="int" public="true" private="true" save="false"    desc="ÊÇ·ñÒÑ´¦Àí"/>
-    <property name="ProcessType"   type="int" public="true" private="true" save="false"    desc="¼Ó¹¤ÀàÐÍ"/>
-    <property name="ProcessArgs"   type="string" public="true" private="true" save="false" desc="¼Ó¹¤¾ßÌå²ÎÊý"/>
+    <property name="IsProcess"     type="int" public="true" private="true" save="false"    desc="æ˜¯å¦å·²å¤„ç†"/>
+    <property name="ProcessType"   type="int" public="true" private="true" save="false"    desc="åŠ å·¥ç±»åž‹"/>
+    <property name="ProcessArgs"   type="string" public="true" private="true" save="false" desc="åŠ å·¥å…·ä½“å‚æ•°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

@@ -1,58 +1,58 @@
---ÏòÄ¿±êµ¥ÌåÊ©·Å¶¾buff£¬buffµÄĞ§¹û»áÓ°Ïìµ½ÖĞbuffµÄÄ¿±êÖÜÎ§Ò»¶¨·¶Î§µÄËùÓĞ½ÇÉ«¡£
---³ÖĞø30s£¬Ã¿5s´¥·¢Ò»´Î£¬Ã¿´Î¶Ô×Ô¼ºÉËº¦200£¬¶Ô¸½½ü10Ã×·¶Î§ÄÚµÄµ¥Î»Ôì³É100µãÉËº¦
+--å‘ç›®æ ‡å•ä½“æ–½æ”¾æ¯’buffï¼Œbuffçš„æ•ˆæœä¼šå½±å“åˆ°ä¸­buffçš„ç›®æ ‡å‘¨å›´ä¸€å®šèŒƒå›´çš„æ‰€æœ‰è§’è‰²ã€‚
+--æŒç»­30sï¼Œæ¯5sè§¦å‘ä¸€æ¬¡ï¼Œæ¯æ¬¡å¯¹è‡ªå·±ä¼¤å®³200ï¼Œå¯¹é™„è¿‘10ç±³èŒƒå›´å†…çš„å•ä½é€ æˆ100ç‚¹ä¼¤å®³
 
 require("define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_poison_04")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime",30000)
 
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 5000)
 
-	--BUFFERÁ¬Ğø¸Ä±äµÄÊôĞÔ£¨Á¬Ğø¿ÛÑª£©
+	--BUFFERè¿ç»­æ”¹å˜çš„å±æ€§ï¼ˆè¿ç»­æ‰£è¡€ï¼‰
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(-200), 0)
 
-	--Ìí¼Óµ½Ä¿±êÉíÉÏ,Í¬Ê±¼ÇÂ¼½á¹û
+	--æ·»åŠ åˆ°ç›®æ ‡èº«ä¸Š,åŒæ—¶è®°å½•ç»“æœ
 	local result = nx_add_buffer(target, self, buffer)
 
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not result then
 		nx_destroy_self(buffer)
 		return false
 	end
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end

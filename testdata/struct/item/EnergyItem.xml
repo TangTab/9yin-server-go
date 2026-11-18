@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¾­Ñéµ¤ÊôÐÔ-->
+<!--ç»éªŒä¸¹å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="EnergyID" type="string" public="false" private="false" save="false" desc="³äÄÜËùÓÃµÄÐÞÕý°üID"/>
-		<property name="DurationTime" type="int" public="false" private="false" save="false" desc="³ÖÐøÊ±¼ä"/>
-		<property name="PartPose" type="string" public="false" private="false" save="false" desc="²¿Î»ÏÞÖÆ"/>
-		<property name="PartLevel" type="int" public="false" private="false" save="false" desc="²¿Î»µÈ¼¶ÏÞÖÆ"/>
+		<property name="EnergyID" type="string" public="false" private="false" save="false" desc="å……èƒ½æ‰€ç”¨çš„ä¿®æ­£åŒ…ID"/>
+		<property name="DurationTime" type="int" public="false" private="false" save="false" desc="æŒç»­æ—¶é—´"/>
+		<property name="PartPose" type="string" public="false" private="false" save="false" desc="éƒ¨ä½é™åˆ¶"/>
+		<property name="PartLevel" type="int" public="false" private="false" save="false" desc="éƒ¨ä½ç­‰çº§é™åˆ¶"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 
 	</includes>

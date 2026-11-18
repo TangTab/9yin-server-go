@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--½»Ò×ÈÝÆ÷Ïà¹ØÊôÐÔ-->
+<!--äº¤æ˜“å®¹å™¨ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ExchangeMoney"       type="int" public="false" private="true" save="false" desc="½»Ò×½ðÇ®"/>
-		<property name="ExchangeIsLock"      type="int" public="false" private="true" save="false" desc="½»Ò×ÊÇ·ñËø¶¨"/>
-		<property name="ExchangeIsOk"        type="int" public="false" private="true" save="false" desc="½»Ò×ÊÇ·ñÈ·¶¨"/>
-		<property name="ExchangeTarget"      type="widestr" public="false" private="true" save="false" desc="½»Ò×Íæ¼Ò"/>
-		<property name="ExchangeTargetLevel" type="int" public="false" private="true" save="false" desc="½»Ò×Íæ¼ÒµÈ¼¶"/>
-		<property name="ExchangeTargetJob"   type="int" public="false" private="true" save="false" desc="½»Ò×Íæ¼ÒÖ°Òµ"/>
-		<property name="ExchangeTargetObj"   type="Object" public="false" private="true" save="false" desc="½»Ò×Íæ¼Ò¶ÔÏó"/>
+		<property name="ExchangeMoney"       type="int" public="false" private="true" save="false" desc="äº¤æ˜“é‡‘é’±"/>
+		<property name="ExchangeIsLock"      type="int" public="false" private="true" save="false" desc="äº¤æ˜“æ˜¯å¦é”å®š"/>
+		<property name="ExchangeIsOk"        type="int" public="false" private="true" save="false" desc="äº¤æ˜“æ˜¯å¦ç¡®å®š"/>
+		<property name="ExchangeTarget"      type="widestr" public="false" private="true" save="false" desc="äº¤æ˜“çŽ©å®¶"/>
+		<property name="ExchangeTargetLevel" type="int" public="false" private="true" save="false" desc="äº¤æ˜“çŽ©å®¶ç­‰çº§"/>
+		<property name="ExchangeTargetJob"   type="int" public="false" private="true" save="false" desc="äº¤æ˜“çŽ©å®¶èŒä¸š"/>
+		<property name="ExchangeTargetObj"   type="Object" public="false" private="true" save="false" desc="äº¤æ˜“çŽ©å®¶å¯¹è±¡"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

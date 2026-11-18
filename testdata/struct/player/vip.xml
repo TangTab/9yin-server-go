@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ËÀÍö¸´»îÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ­»äº¡å¤æ´»ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="IsVip" type="byte" public="true" private="true" save="true" desc="ÊÇ·ñÊÇvip"/>
-		<property name="VipEndTime" type="string" public="false" private="true" save="true" desc="vipµ½ÆÚÊ±¼ä"/>
-		<property name="VipCloneNum" type="DWORD" public="false" private="true" save="true" desc="¸±±¾´ÎÊý"/>
-		<property name="VipCloneTime" type="string" public="false" private="true" save="true" desc="ÉÏ´Î¸±±¾¼ÇÂ¼µÄÊ±¼ä"/>
-		<property name="VipPointTransferNum" type="DWORD" public="false" private="true" save="true" desc="½ç±®´«ËÍ´ÎÊý"/>
-		<property name="VipPointTransTime" type="string" public="false" private="true" save="true" desc="ÉÏ´Î½ç±®´«ËÍ¼ÇÂ¼µÄÊ±¼ä"/>
-		<property name="VipReliveNum" type="DWORD" public="false" private="true" save="true" desc="¸´»î´ÎÊý"/>
-		<property name="VipReliveTime" type="string" public="false" private="true" save="true" desc="ÉÏ´Î¸´»î¼ÇÂ¼µÄÊ±¼ä"/>
-		<property name="VipGiftTime" type="string" public="false" private="true" save="true" desc="ÉÏ´ÎÁìÈ¡Àñ°üÊ±¼ä"/>
+		<property name="IsVip" type="byte" public="true" private="true" save="true" desc="æ˜¯å¦æ˜¯vip"/>
+		<property name="VipEndTime" type="string" public="false" private="true" save="true" desc="vipåˆ°æœŸæ—¶é—´"/>
+		<property name="VipCloneNum" type="DWORD" public="false" private="true" save="true" desc="å‰¯æœ¬æ¬¡æ•°"/>
+		<property name="VipCloneTime" type="string" public="false" private="true" save="true" desc="ä¸Šæ¬¡å‰¯æœ¬è®°å½•çš„æ—¶é—´"/>
+		<property name="VipPointTransferNum" type="DWORD" public="false" private="true" save="true" desc="ç•Œç¢‘ä¼ é€æ¬¡æ•°"/>
+		<property name="VipPointTransTime" type="string" public="false" private="true" save="true" desc="ä¸Šæ¬¡ç•Œç¢‘ä¼ é€è®°å½•çš„æ—¶é—´"/>
+		<property name="VipReliveNum" type="DWORD" public="false" private="true" save="true" desc="å¤æ´»æ¬¡æ•°"/>
+		<property name="VipReliveTime" type="string" public="false" private="true" save="true" desc="ä¸Šæ¬¡å¤æ´»è®°å½•çš„æ—¶é—´"/>
+		<property name="VipGiftTime" type="string" public="false" private="true" save="true" desc="ä¸Šæ¬¡é¢†å–ç¤¼åŒ…æ—¶é—´"/>
 	</properties>
 	<records>
 	</records>

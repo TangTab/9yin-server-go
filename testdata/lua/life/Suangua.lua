@@ -1,40 +1,40 @@
 ----------------------------------------------------------------------
--- ÎÄ¼şÃû:		Suangua.lua
--- ÄÚ  Èİ:		ËãØÔÏà¹ØÅĞ¶¨½Å±¾
--- Ëµ  Ã÷:
--- ´´½¨ÈÕÆÚ:	2009Äê11ÔÂ10ÈÕ
--- ´´½¨ÈË:		xuch
--- °æÈ¨ËùÓĞ:	ËÕÖİÎÏÅ£µç×ÓÓĞÏŞ¹«Ë¾
+-- æ–‡ä»¶å:		Suangua.lua
+-- å†…  å®¹:		ç®—å¦ç›¸å…³åˆ¤å®šè„šæœ¬
+-- è¯´  æ˜:
+-- åˆ›å»ºæ—¥æœŸ:	2009å¹´11æœˆ10æ—¥
+-- åˆ›å»ºäºº:		xuch
+-- ç‰ˆæƒæ‰€æœ‰:	è‹å·èœ—ç‰›ç”µå­æœ‰é™å…¬å¸
 ----------------------------------------------------------------------
 
 require("define")
 require("share\\itemtype_define")
 --************************
---ÊÇ·ñÄÜ¹»ËãØÔ
+--æ˜¯å¦èƒ½å¤Ÿç®—å¦
 --************************
 function can_Suangua(player, target)
 
 	if not nx_exists(target) then
-		--ËãØÔÄ¿±ê²»´æÔÚ
+		--ç®—å¦ç›®æ ‡ä¸å­˜åœ¨
 		nx_sysinfo(player, TIPSTYPE_TIPSINFO, "12500")
 		return 0
 	end
 	
 	if not (nx_query_property(target, "CanSuanguaFlag") == 1) then
-		--Ä¿±ê²»¿É±»ËãØÔ
+		--ç›®æ ‡ä¸å¯è¢«ç®—å¦
 		nx_sysinfo(player, TIPSTYPE_TIPSINFO, "12501")
 		return 0
 	end
 
-	--playerÊÇ·ñÑ§Ï°ËãØÔ¼¼ÄÜ,ÊÇ·ñ´ïµ½ËãØÔµÈ¼¶
-		-- ²éÕÒÓĞÃ»ÓĞÕâ¸ö¼¼ÄÜ
+	--playeræ˜¯å¦å­¦ä¹ ç®—å¦æŠ€èƒ½,æ˜¯å¦è¾¾åˆ°ç®—å¦ç­‰çº§
+		-- æŸ¥æ‰¾æœ‰æ²¡æœ‰è¿™ä¸ªæŠ€èƒ½
 	local skill_type = "sh_gs";
 	local therow = nx_find_record_value(player, "job_rec", 0, nx_string(skill_type))
 	if therow < 0 then
 		nx_sysinfo(player, 2, "11714", nx_string(skill_type))
 		return 0
 	end 
-		-- ²éÑ¯¼¶±ğ¹»²»¹»
+		-- æŸ¥è¯¢çº§åˆ«å¤Ÿä¸å¤Ÿ
 	local has_level = nx_query_record_value(player, "job_rec", therow, 1)
 	local skill_level = nx_int(nx_query_property(target, "SuanguaLevel"))
 	local job_name = nx_query_record_value(player, "job_rec", therow, 0)
@@ -44,36 +44,36 @@ function can_Suangua(player, target)
 		return 0
 	end	
 
-	--¾àÀëÅĞ¶Ï
+	--è·ç¦»åˆ¤æ–­
 	local dist = nx_number(nx_distance3d(player, target))
 	if dist > 3.0 then
-		--¾àÀëÌ«Ô¶£¬ÎŞ·¨ËãØÔ
+		--è·ç¦»å¤ªè¿œï¼Œæ— æ³•ç®—å¦
 		nx_sysinfo(player, TIPSTYPE_TIPSINFO, "12502")
 		return 0
 	end
 	
-	--ÊÇ·ñÔÚÒÑ¾­ËãØÔ¹ı
+	--æ˜¯å¦åœ¨å·²ç»ç®—å¦è¿‡
 	if nx_exist_Suanguarecord(player, target) then
-		--ËãØÔ¹ıÁË£¬ÎŞ·¨ÔÙ´ÎËãØÔ
+		--ç®—å¦è¿‡äº†ï¼Œæ— æ³•å†æ¬¡ç®—å¦
 		nx_sysinfo(player, TIPSTYPE_TIPSINFO, "12503")
   	return 0;
   end
   
-  --ÅĞ¶ÏÊÇ·ñ´æÔÚËãØÔ¹¤¾ß
-	local ToolBox = nx_get_child(player, nx_widestr("ToolBox"))	-- »ñµÃÈËÎï×°±¸À¸
-	-- ÅĞ¶ÏÍæ¼Ò×°±¸À¸ÀïµÄÎïÆ·ÊÇ·ñÊÇ¸Ã¹¤¾ß
+  --åˆ¤æ–­æ˜¯å¦å­˜åœ¨ç®—å¦å·¥å…·
+	local ToolBox = nx_get_child(player, nx_widestr("ToolBox"))	-- è·å¾—äººç‰©è£…å¤‡æ 
+	-- åˆ¤æ–­ç©å®¶è£…å¤‡æ é‡Œçš„ç‰©å“æ˜¯å¦æ˜¯è¯¥å·¥å…·
 	local need_item_num = nx_container_get_itemcount(ToolBox, "sh_guijia")
 	if need_item_num <= 0 then
-		-- ±ØĞë×°±¸¹¤¾ßÌáÊ¾
+		-- å¿…é¡»è£…å¤‡å·¥å…·æç¤º
 		nx_sysinfo(player, 2, "12504")
 		return 0
 	end  
 	
-	--ÔÚÆïÂíÊ±²»ÄÜËãØÔ
+	--åœ¨éª‘é©¬æ—¶ä¸èƒ½ç®—å¦
 	if nx_find_property(player, "Mount") then
 		local mount = nx_query_property(player, "Mount");
 		if mount ~= nil and string.len(mount) > 0 then
-			--³öÌáÊ¾ ÕıÔÚÆïÂí£¬ÎŞ·¨½øĞĞËãØÔ
+			--å‡ºæç¤º æ­£åœ¨éª‘é©¬ï¼Œæ— æ³•è¿›è¡Œç®—å¦
 			nx_sysinfo(player, 2, "12505");
 			return 0;
 		end
@@ -83,107 +83,107 @@ function can_Suangua(player, target)
 end
 
 --************************
---¿ªÊ¼ËãØÔ
+--å¼€å§‹ç®—å¦
 --************************
 function begin_Suangua(player, target)
-	--player×öËãØÔ¶¯×÷
+	--playeråšç®—å¦åŠ¨ä½œ
 	local npc = nx_query_property(player, "LastObject")
 	local action_name = nx_query_property(npc, "SuanguaAction")	
-	--Èç¹ûÔ­À´Íæ¼Ò³öÓÚÕ½¶·»òÕß¾¯½ä×´Ì¬£¬ÏÔÊ¾ÎäÆ÷
+	--å¦‚æœåŸæ¥ç©å®¶å‡ºäºæˆ˜æ–—æˆ–è€…è­¦æˆ’çŠ¶æ€ï¼Œæ˜¾ç¤ºæ­¦å™¨
 --	if nx_int(nx_query_property(player, "LogicState"))==nx_int(2) or nx_int(nx_query_property(player, "LogicState"))==nx_int(1) then
-		--ÒÔÏÂ"shenghuo_action"¶ÔÓ¦µÄÏûÏ¢ÎªSERVER_CUSTOMMSG_SHENGHUO_ACTION
+		--ä»¥ä¸‹"shenghuo_action"å¯¹åº”çš„æ¶ˆæ¯ä¸ºSERVER_CUSTOMMSG_SHENGHUO_ACTION
 		--nx_custom_byken(player, "shenghuo_action", player, 0)	
 --	end
 
-	--8:LIFETOOL_SUANGUA ÏÔÊ¾ÆÆÍë
+	--8:LIFETOOL_SUANGUA æ˜¾ç¤ºç ´ç¢—
 	nx_set_property(player, "LifeJobTool", 8)
 
-	--²¥·Å¶¯×÷
+	--æ’­æ”¾åŠ¨ä½œ
 	nx_custom_stateaction(player, action_name)
-	--Ä¿±ê×ö±»ËãØÔ¶¯×÷
+	--ç›®æ ‡åšè¢«ç®—å¦åŠ¨ä½œ
 	--nx_custom_byken(target, SERVER_CUSTOMMSG_ACTION, target, "beBag");
 	
-	--¿ªÊ¼ËãØÔ
+	--å¼€å§‹ç®—å¦
 	nx_sysinfo(player, TIPSTYPE_TIPSINFO, "12506")
 	
 	return 1
 end
 
 --************************
---½áÊø£¨·ÅÆú£©ËãØÔ
+--ç»“æŸï¼ˆæ”¾å¼ƒï¼‰ç®—å¦
 --************************
 function end_Suangua(player, target)
 	
-	-- ÉèÖÃ¶¯×÷
+	-- è®¾ç½®åŠ¨ä½œ
 	local action_name = ""
 	nx_custom_stateaction(player, action_name)
 	
-	--ËãØÔÍ£Ö¹
+	--ç®—å¦åœæ­¢
 	nx_sysinfo(player, TIPSTYPE_TIPSINFO, "12507")
 	
-	--Èç¹ûÔ­À´Íæ¼Ò³öÓÚÕ½¶·»òÕß¾¯½ä×´Ì¬£¬ÏÔÊ¾ÎäÆ÷
+	--å¦‚æœåŸæ¥ç©å®¶å‡ºäºæˆ˜æ–—æˆ–è€…è­¦æˆ’çŠ¶æ€ï¼Œæ˜¾ç¤ºæ­¦å™¨
 --	if nx_int(nx_query_property(player, "LogicState"))==nx_int(2) or nx_int(nx_query_property(player, "LogicState"))==nx_int(1) then
-		--ÒÔÏÂ"shenghuo_action"¶ÔÓ¦µÄÏûÏ¢ÎªSERVER_CUSTOMMSG_SHENGHUO_ACTION
+		--ä»¥ä¸‹"shenghuo_action"å¯¹åº”çš„æ¶ˆæ¯ä¸ºSERVER_CUSTOMMSG_SHENGHUO_ACTION
 --		nx_custom_byken(player, "shenghuo_action", player, 1)	
 --	end
-	--0:LIFETOOL_NOTHING ÏÔÊ¾ÎäÆ÷
+	--0:LIFETOOL_NOTHING æ˜¾ç¤ºæ­¦å™¨
 	nx_set_property(player, "LifeJobTool", 0)
 	return 1;
 end
 --************************
---×¼±¸ËãØÔ£¨ÎŞÓÃ£©
+--å‡†å¤‡ç®—å¦ï¼ˆæ— ç”¨ï¼‰
 --************************
 function on_prepare(player)
 	return 1;
 end
 
 --************************
---ËãØÔÃüÖĞ
+--ç®—å¦å‘½ä¸­
 --************************
 function on_hit(player, target)
-	--µÃµ½ËãØÔNPC
+	--å¾—åˆ°ç®—å¦NPC
 	local npc = target
 	if not nx_exists(npc) then
 		return 0
 	end	
 	
-	-- -- ÌåÁ¦ÏŞÖÆ
+	-- -- ä½“åŠ›é™åˆ¶
 	local need_ene = nx_query_property(npc, "SuanguaNeedEne")
 	local have_ene = nx_query_property(player, "Ene")
 		
 	if have_ene < need_ene then
-		-- ÌáÊ¾ÌåÁ¦²»×ã
+		-- æç¤ºä½“åŠ›ä¸è¶³
 		nx_sysinfo(player, 2, "12508")
-		-- ½áÊøÁ÷³Ì
+		-- ç»“æŸæµç¨‹
 		end_Suangua(player)
 		return 0
 	end
 	
-	-- ¼õÉÙÌåÁ¦
+	-- å‡å°‘ä½“åŠ›
 	have_ene = have_ene - need_ene
 	nx_set_property(player, "Ene", have_ene)
 	nx_sysinfo(player, 2, "11712", need_ene)	
 	
-	-- ËãØÔ¾­ÑéÖµÔö¼Ó
+	-- ç®—å¦ç»éªŒå€¼å¢åŠ 
 	nx_process_life_exp_package( player, npc )
 
-	-- ËãØÔµôÂäÌí¼Ó
+	-- ç®—å¦æ‰è½æ·»åŠ 
 	nx_process_life_drop_package( player, npc )
 
 
-	--¸üĞÂNPCÊı¾İ£¬Ôö¼ÓÍæ¼ÒËãØÔ¼ÇÂ¼
+	--æ›´æ–°NPCæ•°æ®ï¼Œå¢åŠ ç©å®¶ç®—å¦è®°å½•
 	nx_updata_Suanguanpc(player, target);	
 
 
-	--Èç¹ûÔ­À´Íæ¼Ò³öÓÚÕ½¶·»òÕß¾¯½ä×´Ì¬£¬ÏÔÊ¾ÎäÆ÷
+	--å¦‚æœåŸæ¥ç©å®¶å‡ºäºæˆ˜æ–—æˆ–è€…è­¦æˆ’çŠ¶æ€ï¼Œæ˜¾ç¤ºæ­¦å™¨
 --	if nx_int(nx_query_property(player, "LogicState"))==nx_int(2) or nx_int(nx_query_property(player, "LogicState"))==nx_int(1) then
-		--ÒÔÏÂ"shenghuo_action"¶ÔÓ¦µÄÏûÏ¢ÎªSERVER_CUSTOMMSG_SHENGHUO_ACTION
+		--ä»¥ä¸‹"shenghuo_action"å¯¹åº”çš„æ¶ˆæ¯ä¸ºSERVER_CUSTOMMSG_SHENGHUO_ACTION
 --		nx_custom_byken(player, "shenghuo_action", player, 1)	
 --	end
-	--0:LIFETOOL_NOTHING ÏÔÊ¾ÎäÆ÷
+	--0:LIFETOOL_NOTHING æ˜¾ç¤ºæ­¦å™¨
 	nx_set_property(player, "LifeJobTool", 0)	
 	
-	-- ÉèÖÃ¶¯×÷
+	-- è®¾ç½®åŠ¨ä½œ
 	local action_name = ""
 	nx_custom_stateaction(player, action_name)	
 end

@@ -1,6 +1,6 @@
 
 --require("task\\task_define")
---Ê¹ÓÃµÄ±í¸ñ
+--ä½¿ç”¨çš„è¡¨æ ¼
 REC_TASK_ACCEPT	= "Task_Accepted"
 REC_TASK_PLAN	= "Task_Record"
 REC_TASK_COMPLETE	= "Task_Completed"
@@ -8,56 +8,56 @@ REC_TASK_DAILY	= "TaskDayRec"
 random_round_rec_name = "RoundRandomTaskRec"
 choice_round_rec_name = "RoundChoiceTaskRec"
 
---ÈÎÎñ×Ó¹¦ÄÜÀàĞÍ
-subtype_hunter		= 1				-- ÁÔÉ±ÀàĞÍ
-subtype_collect		= 2				-- ÊÕ¼¯Àà
-subtype_interactive	= 3				-- ½»»¥ÀàĞÍ
-subtype_convoy		= 4				-- »¤ËÍÀà
-subtype_quest		= 5				-- ÎÊ´ğÀà
-subtype_story		= 6				-- ¹ÊÊÂÀà
-subtype_useitem		= 7				-- Ê¹ÓÃµÀ¾ßÀà
-subtype_special		= 8				-- ÌØÊâÈÎÎñÀàĞÍ
+--ä»»åŠ¡å­åŠŸèƒ½ç±»å‹
+subtype_hunter		= 1				-- çŒæ€ç±»å‹
+subtype_collect		= 2				-- æ”¶é›†ç±»
+subtype_interactive	= 3				-- äº¤äº’ç±»å‹
+subtype_convoy		= 4				-- æŠ¤é€ç±»
+subtype_quest		= 5				-- é—®ç­”ç±»
+subtype_story		= 6				-- æ•…äº‹ç±»
+subtype_useitem		= 7				-- ä½¿ç”¨é“å…·ç±»
+subtype_special		= 8				-- ç‰¹æ®Šä»»åŠ¡ç±»å‹
 
--- ÈÎÎñÏß·ÖÀà
-task_line_undefined	= 0				-- Î´·ÖÀà
-task_line_main		= 1				-- Ö÷Ïß
-task_line_wuxue		= 2				-- ÎäÑ§
-task_line_shenghuo	= 3				-- Éú»î
-task_line_menpai	= 4				-- ÃÅÅÉ
-task_line_side		= 5				-- Ö§Ïß
-task_line_clone		= 6				-- ¸±±¾
-task_line_cycle		= 7				-- »·Ê½
+-- ä»»åŠ¡çº¿åˆ†ç±»
+task_line_undefined	= 0				-- æœªåˆ†ç±»
+task_line_main		= 1				-- ä¸»çº¿
+task_line_wuxue		= 2				-- æ­¦å­¦
+task_line_shenghuo	= 3				-- ç”Ÿæ´»
+task_line_menpai	= 4				-- é—¨æ´¾
+task_line_side		= 5				-- æ”¯çº¿
+task_line_clone		= 6				-- å‰¯æœ¬
+task_line_cycle		= 7				-- ç¯å¼
 
--- ÈÎÎñ½ÓÊÜ±í½á¹¹ <Task_Accepted>
-accept_rec_id		= 0				-- ÈÎÎñid
-accept_rec_line		= 1				-- ÈÎÎñÏß
-accept_rec_server	= 2				-- ·şÎñÆ÷Ãû³Æ
-accept_rec_submit_scene	= 3				-- Ìá½»³¡¾°Ãû³Æ
-accept_rec_submit_npc	= 4				-- Ìá½»npcÃû³Æ
-accept_rec_title	= 5				-- ÈÎÎñ±êÌâ
-accept_rec_status	= 6				-- ÈÎÎñ×´Ì¬
-accept_rec_track_flag	= 7				-- ÈÎÎñ×·×Ù±êÖ¾
+-- ä»»åŠ¡æ¥å—è¡¨ç»“æ„ <Task_Accepted>
+accept_rec_id		= 0				-- ä»»åŠ¡id
+accept_rec_line		= 1				-- ä»»åŠ¡çº¿
+accept_rec_server	= 2				-- æœåŠ¡å™¨åç§°
+accept_rec_submit_scene	= 3				-- æäº¤åœºæ™¯åç§°
+accept_rec_submit_npc	= 4				-- æäº¤npcåç§°
+accept_rec_title	= 5				-- ä»»åŠ¡æ ‡é¢˜
+accept_rec_status	= 6				-- ä»»åŠ¡çŠ¶æ€
+accept_rec_track_flag	= 7				-- ä»»åŠ¡è¿½è¸ªæ ‡å¿—
 
---ÈÎÎñ½ø¶È±í½á¹¹ <Task_Record>
-task_rec_id		= 0				-- ÈÎÎñid
-task_rec_subtype	= 1				-- ×ÓÈÎÎñÀàĞÍ
-task_rec_index		= 2				-- ÈÎÎñ×Óid
-task_rec_order		= 3				-- ½ø¶ÈÍê³ÉË³Ğò
-task_rec_curnum		= 4				-- µ±Ç°½ø¶È
-task_rec_maxnum		= 5 				-- ×î´ó½ø¶È
-task_rec_key		= 6				-- ¹Ø¼üÊı¾İ,ÈçÊ¹ÓÃµÀ¾ßconfig,»¤ËÍnpc,µÈ
-task_rec_scene		= 7				-- Ä¿±ê³¡¾°config
-task_rec_trackinfo	= 8				-- ×·×ÙĞÅÏ¢
+--ä»»åŠ¡è¿›åº¦è¡¨ç»“æ„ <Task_Record>
+task_rec_id		= 0				-- ä»»åŠ¡id
+task_rec_subtype	= 1				-- å­ä»»åŠ¡ç±»å‹
+task_rec_index		= 2				-- ä»»åŠ¡å­id
+task_rec_order		= 3				-- è¿›åº¦å®Œæˆé¡ºåº
+task_rec_curnum		= 4				-- å½“å‰è¿›åº¦
+task_rec_maxnum		= 5 				-- æœ€å¤§è¿›åº¦
+task_rec_key		= 6				-- å…³é”®æ•°æ®,å¦‚ä½¿ç”¨é“å…·config,æŠ¤é€npc,ç­‰
+task_rec_scene		= 7				-- ç›®æ ‡åœºæ™¯config
+task_rec_trackinfo	= 8				-- è¿½è¸ªä¿¡æ¯
 
 
--- »·Ê½Ëæ»ú±í½á¹¹
-rand_col_parent_id	= 0				-- Ö÷ÈÎÎñid
-rand_col_child_id	= 1				-- ×ÓÈÎÎñid
-rand_col_turn		= 2				-- µ±Ç°ÂÖ
-rand_col_max_turn	= 3				-- ×î´óÂÖ
-rand_col_cycle		= 4				-- µ±Ç°»·
-rand_col_max_cycle	= 5				-- ×î´ó»·
-rand_col_giveup_nums	= 6				-- µ±ÈÕ×ÓÈÎÎñ·ÅÆú´ÎÊı
-rand_col_firs_accept	= 7				-- µ±ÈÕ×ÓÈÎÎñµÚÒ»´Î³Ğ½ÓÊ±¼ä
+-- ç¯å¼éšæœºè¡¨ç»“æ„
+rand_col_parent_id	= 0				-- ä¸»ä»»åŠ¡id
+rand_col_child_id	= 1				-- å­ä»»åŠ¡id
+rand_col_turn		= 2				-- å½“å‰è½®
+rand_col_max_turn	= 3				-- æœ€å¤§è½®
+rand_col_cycle		= 4				-- å½“å‰ç¯
+rand_col_max_cycle	= 5				-- æœ€å¤§ç¯
+rand_col_giveup_nums	= 6				-- å½“æ—¥å­ä»»åŠ¡æ”¾å¼ƒæ¬¡æ•°
+rand_col_firs_accept	= 7				-- å½“æ—¥å­ä»»åŠ¡ç¬¬ä¸€æ¬¡æ‰¿æ¥æ—¶é—´
 
 

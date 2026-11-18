@@ -1,32 +1,32 @@
---17040502	µÑDeBuf	OtherSkill
+--17040502	ç¬›DeBuf	OtherSkill
 require("define")
 
 local neigong_buffer_id = "buf_neigong_effect"
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, usetype, target, x, z, skill)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, usetype, target, x, z, skill)
-	--Ìí¼ÓÒ»¸öÈ«ÉíÌØĞ§
+	--æ·»åŠ ä¸€ä¸ªå…¨èº«ç‰¹æ•ˆ
 	nx_set_property(self, "NeiGongEffect", "neigong_di")
 	nx_inc_property(self, "CantMove", 1)
 	
 	nx_add_data(skill, "BeginTime", VTYPE_INT)
 	nx_set_data(skill, "BeginTime", nx_get_ticks())
 	
-	--Æø³¡Ç¿¶ÈÇå0
+	--æ°”åœºå¼ºåº¦æ¸…0
 	nx_set_property(self, "NeiGongPower", 0)
 end
 
---¼¼ÄÜÃüÖĞ
+--æŠ€èƒ½å‘½ä¸­
 function skill_before_hit(self, skill)
-	--ÏûºÄMP
+	--æ¶ˆè€—MP
 	local self_cur_neigong_id = nx_query_property(self, "CurNeiGong")
 	local self_cur_neigong = nx_find_neigong(self, self_cur_neigong_id)
 	if not nx_exists(self_cur_neigong) then
@@ -36,19 +36,19 @@ function skill_before_hit(self, skill)
 	local consume_mp = nx_query_property(self_cur_neigong, "ConsumeMP")
 	local cur_mp = nx_query_property(self, "MP")
 	if cur_mp < consume_mp then
-		--²»¹»ÏûºÄ
+		--ä¸å¤Ÿæ¶ˆè€—
 		return 0
 	end
 	
 	nx_set_property(self, "MP", cur_mp - consume_mp)
 	
-	--Ôö¼ÓÆø³¡Ç¿¶È
+	--å¢åŠ æ°”åœºå¼ºåº¦
 	nx_inc_property(self, "NeiGongPower", 1)
 	
 	return 1
 end
 
---¼¼ÄÜ±»ÃüÖĞÖ®ºó
+--æŠ€èƒ½è¢«å‘½ä¸­ä¹‹å
 function skill_after_hit(self, target, skill)
 	if can_effect(self, target, skill) then
 		local row = nx_find_record_value(self, "neigong_effect_obj_rec", 0, target)
@@ -66,24 +66,24 @@ function skill_after_hit(self, target, skill)
 	end
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 	clear_effect(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 	clear_effect(self, skill)
 end
 
---Çå³ıÊı¾İ
+--æ¸…é™¤æ•°æ®
 function clear_effect(self, skill)
 	if nx_query_property(self, "NeiGongEffect") ~= "" then
 		nx_set_property(self, "NeiGongEffect", "")
 		nx_inc_property(self, "CantMove", -1)
 	end
 	
-	--Çå³ı±»×ÔÒÑÓ°ÏìµÄ¶ÔÏó
+	--æ¸…é™¤è¢«è‡ªå·²å½±å“çš„å¯¹è±¡
 	local rows = nx_get_record_rows(self, "neigong_effect_obj_rec")
 	for i = 0, rows - 1 do
 		local target = nx_query_record_value(self, "neigong_effect_obj_rec", i, 0)
@@ -93,9 +93,9 @@ function clear_effect(self, skill)
 	nx_clear_record(self, "neigong_effect_obj_rec")
 end
 
---ÄÜ·ñÓ°ÏìËûÈË
+--èƒ½å¦å½±å“ä»–äºº
 function can_effect(self, target, skill)
-	--¼¤»îµÄÄÚ¹¦
+	--æ¿€æ´»çš„å†…åŠŸ
 	local self_cur_neigong = nx_null()
 	local target_cur_neigong = nx_null()
 	
@@ -107,7 +107,7 @@ function can_effect(self, target, skill)
 		target_cur_neigong = nx_find_neigong(target, target_cur_neigong_id)
 	end
 
-	--ÄÚ¹¦ÀàĞÍµÄÏàÉúÏà¿Ë
+	--å†…åŠŸç±»å‹çš„ç›¸ç”Ÿç›¸å…‹
 	local self_type = nx_query_property(self_cur_neigong, "EffectType")
 	local target_type = 0
 	if nx_exists(target_cur_neigong) then
@@ -115,7 +115,7 @@ function can_effect(self, target, skill)
 	end
 
 	if self_type == target_type then
-		--ÄÚ¹¦ÀàĞÍÏàµÈ£¬¸ù¾İÄÚ¹¦µÄ¼¶±ğ
+		--å†…åŠŸç±»å‹ç›¸ç­‰ï¼Œæ ¹æ®å†…åŠŸçš„çº§åˆ«
 		local self_neigong_level = nx_query_property(self_cur_neigong, "Level")
 		local target_neigong_level = 0
 		
@@ -129,7 +129,7 @@ function can_effect(self, target, skill)
 			return false
 		end
 
-		--¼¶±ğÏàÍ¬£¬¸ù¾İ¾³½ç
+		--çº§åˆ«ç›¸åŒï¼Œæ ¹æ®å¢ƒç•Œ
 		local self_neigong_jingjie = nx_query_property(self_cur_neigong, "JingJie")
 		local target_neigong_jingjie = 0
 		if nx_exists(target_cur_neigong) then
@@ -146,50 +146,50 @@ function can_effect(self, target, skill)
 	end
 
 	if target_type == 0 or self_type == 4 then
-		--¶Ô·½µÄÄÚ¹¦ÀàĞÍ±»ËùÓĞÀàĞÍÏà¿Ë
+		--å¯¹æ–¹çš„å†…åŠŸç±»å‹è¢«æ‰€æœ‰ç±»å‹ç›¸å…‹
 		return true
 	end
 
 	if self_type == 0 or target_type == 4 then
-		--×Ô¼ºµÄÄÚ¹¦ÀàĞÍ±»ËùÓĞÀàĞÍÏà¿Ë
+		--è‡ªå·±çš„å†…åŠŸç±»å‹è¢«æ‰€æœ‰ç±»å‹ç›¸å…‹
 		return false
 	end
 
 	if (self_type == 2 and target_type == 3) or
 		(self_type == 3 and target_type == 1) or
 		(self_type == 1 and target_type == 2) then
-		--Ìì¿ËµØ, µØ¿ËÈË,ÈË¿ËµØ
+		--å¤©å…‹åœ°, åœ°å…‹äºº,äººå…‹åœ°
 		return true
 	else
 		return false
 	end
 end
 
---Ó°ÏìËûÈË
+--å½±å“ä»–äºº
 function effect(self, target, skill)
-	--Ìí¼ÓBUFFER
+	--æ·»åŠ BUFFER
 	local buffer = nx_create_from_config(nx_get_scene(), neigong_buffer_id)
 	if not nx_exists(buffer) then
 		return false
 	end
 	
-	--ÉèÖÃBufferµÄÊôĞÔ
-	--BufferµÄ×÷ÓÃÀàĞÍ(0:Ë²Ê±Buffer,1:ÔÚXÃëÄÚÓĞĞ§,2:ÔÚXÃëÄÚY´ÎÊÂ¼şÓĞĞ§,3:ÔÚXÃëÄÚÓĞĞ§,Ã¿YÃë´¥·¢Ò»´Î)
+	--è®¾ç½®Bufferçš„å±æ€§
+	--Bufferçš„ä½œç”¨ç±»å‹(0:ç¬æ—¶Buffer,1:åœ¨Xç§’å†…æœ‰æ•ˆ,2:åœ¨Xç§’å†…Yæ¬¡äº‹ä»¶æœ‰æ•ˆ,3:åœ¨Xç§’å†…æœ‰æ•ˆ,æ¯Yç§’è§¦å‘ä¸€æ¬¡)
 	nx_set_property(buffer, "EffectType", 1)
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	local begin_time = nx_query_data(skill, "BeginTime")
 	local now = nx_get_ticks()
 	local skill_period = nx_query_property(skill, "LeadTime")
 
 	local life_time = skill_period - (now - begin_time)
 	nx_set_property(buffer, "LifeTime", life_time)
-	--BufferµÄÉúÃüÆÚÀàĞÍ(0:Ö»¼ÆËãÔÚÏßÊ±¼ä,1:¼ÆËãÈ«²¿Ê±¼ä,°üÀ¨ÏÂÏßÊ±¼ä)
+	--Bufferçš„ç”Ÿå‘½æœŸç±»å‹(0:åªè®¡ç®—åœ¨çº¿æ—¶é—´,1:è®¡ç®—å…¨éƒ¨æ—¶é—´,åŒ…æ‹¬ä¸‹çº¿æ—¶é—´)
 	nx_set_property(buffer, "LifeTimeType", 1)
-	--BUFFER¸Ä±äµÄÊôĞÔ(Ìí¼Óµ½BufferµÄDirectPropertyRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERæ”¹å˜çš„å±æ€§(æ·»åŠ åˆ°Bufferçš„DirectPropertyRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantMove", nx_double(1.0), 0, 0)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantUseSkill", nx_double(1.0), 0, 0)
 	
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false
@@ -200,7 +200,7 @@ function effect(self, target, skill)
 	return true
 end
 
---È¡Ïû¶ÔËûÈËµÄÓ°Ïì
+--å–æ¶ˆå¯¹ä»–äººçš„å½±å“
 function uneffect(self, target)
 	nx_remove_buffer(target, self, neigong_buffer_id)
 end

@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
-	<!-- ±íÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="rec_consign_args" cols="4" maxrows="300" save="false" public="false" private="false" desc="¼ÄÊÛ²ÎÊý±í">
+		<record name="rec_consign_args" cols="4" maxrows="300" save="false" public="false" private="false" desc="å¯„å”®å‚æ•°è¡¨">
 			<column type="string" desc="ConfigID"/>
 			<column type="int64"  desc="StartPriceEach"/>
 			<column type="int64"  desc="FixedPriceEach"/>
 			<column type="int"    desc="keepingHour"/>
 		</record>
 		
-		<record name="rec_search_args" cols="13" maxrows="1" save="false" public="false" private="false" desc="ËÑË÷²ÎÊý±í">
+		<record name="rec_search_args" cols="13" maxrows="1" save="false" public="false" private="false" desc="æœç´¢å‚æ•°è¡¨">
             <column type="word"    desc="PropIndex1"/>
             <column type="word"    desc="PropVar1"/>
             <column type="word"    desc="PropIndex2"/>
@@ -27,13 +27,13 @@
 			<column type="int64"   desc="MaxPrice"/>
 		</record>
 		
-		<record name="rec_my_consign" cols="1" maxrows="150" save="true" public="false" private="false" desc="ÎÒµÄ¼ÄÊÛÁÐ±í">
-			<column type="string" desc="ÎïÆ·µÄUid"/>
+		<record name="rec_my_consign" cols="1" maxrows="150" save="true" public="false" private="false" desc="æˆ‘çš„å¯„å”®åˆ—è¡¨">
+			<column type="string" desc="ç‰©å“çš„Uid"/>
 		</record>	
 
-		<record name="rec_my_bid" cols="2" maxrows="200" save="true" public="false" private="false" desc="ÎÒµÄ¾ºÅÄÁÐ±í">
-			<column type="string" desc="ÎïÆ·µÄUid"/>
-			<column type="int64"  desc="×îºóÒ»´Î¾ºÅÄÊ±¼ä"/>
+		<record name="rec_my_bid" cols="2" maxrows="200" save="true" public="false" private="false" desc="æˆ‘çš„ç«žæ‹åˆ—è¡¨">
+			<column type="string" desc="ç‰©å“çš„Uid"/>
+			<column type="int64"  desc="æœ€åŽä¸€æ¬¡ç«žæ‹æ—¶é—´"/>
 		</record>
 	</records>
 </object>

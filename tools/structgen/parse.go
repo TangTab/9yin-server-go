@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
@@ -129,13 +130,22 @@ var (
 // 原版解析器容忍此写法）。带空白/标签边界约束，避免误伤引号内文本。
 var attrFixup = regexp.MustCompile(`(\s)([A-Za-z_][A-Za-z0-9_]*)=([0-9]+)([\s/>])`)
 
-// parseObject 解析单个 struct XML：GBK 转码 → 剥注释 → 修属性 → 解码。
+// toUTF8 编码自适应：合法 UTF-8（含纯 ASCII）直通，否则按 GBK 转码。
+// testdata 快照已是 UTF-8；NINEYIN_DATA 直读原版时为 GBK——两条路统一走这里。
+func toUTF8(raw []byte) ([]byte, error) {
+	if utf8.Valid(raw) {
+		return raw, nil
+	}
+	return simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+}
+
+// parseObject 解析单个 struct XML：编码自适应 → 剥注释 → 修属性 → 解码。
 func parseObject(path string) (*ObjectDef, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	utf8, err := simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+	utf8, err := toUTF8(raw)
 	if err != nil {
 		return nil, fmt.Errorf("%s: GBK 转码失败: %w", path, err)
 	}

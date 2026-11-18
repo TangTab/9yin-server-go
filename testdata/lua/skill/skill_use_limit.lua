@@ -1,13 +1,13 @@
 require ("define")
---¼¼ÄÜÊ¹ÓÃÊ±µÄÏŞÖÆº¯Êı¶¨Òå£¬·µ»Ø0±íÊ¾´Ë¼¼ÄÜ²»ÄÜÊ¹ÓÃ£¬·µ»Ø1±íÊ¾¿ÉÒÔÊ¹ÓÃ
+--æŠ€èƒ½ä½¿ç”¨æ—¶çš„é™åˆ¶å‡½æ•°å®šä¹‰ï¼Œè¿”å›0è¡¨ç¤ºæ­¤æŠ€èƒ½ä¸èƒ½ä½¿ç”¨ï¼Œè¿”å›1è¡¨ç¤ºå¯ä»¥ä½¿ç”¨
 
---targetµÄhpÎ´ÂúÊ±£¬¿ÉÒÔÊ¹ÓÃ£¬ÒÑÂú£¬Ôò²»ÄÜÊ¹ÓÃ
+--targetçš„hpæœªæ»¡æ—¶ï¼Œå¯ä»¥ä½¿ç”¨ï¼Œå·²æ»¡ï¼Œåˆ™ä¸èƒ½ä½¿ç”¨
 function hp_not_full(self, skill, target, x, y, z)
-	--hpÎ´Âú
+	--hpæœªæ»¡
 	return 1;
 end
 
---HPÎ´µÍÓÚ25%
+--HPæœªä½äº25%
 function hp_less_25percent(self, skill, target, x, y, z)
 	if not nx_exists(target) then
 		return 0;
@@ -18,15 +18,15 @@ function hp_less_25percent(self, skill, target, x, y, z)
 	local hp = nx_query_property(target, "HP");
 	local maxhp = nx_query_property(target, "MaxHP") + nx_query_property(target, "MaxHPAdd");
 	if (hp / maxhp) > 0.25 then
-		--hp´óÓÚ25%
+		--hpå¤§äº25%
 		return 0;
 	else
-		--Ğ¡ÓÚµÈÓÚ25%
+		--å°äºç­‰äº25%
 		return 1;
 	end
 end
 
---targetµÄmpÎ´ÂúÊ±£¬¿ÉÒÔÊ¹ÓÃ£¬ÒÑÂú£¬Ôò²»ÄÜÊ¹ÓÃ
+--targetçš„mpæœªæ»¡æ—¶ï¼Œå¯ä»¥ä½¿ç”¨ï¼Œå·²æ»¡ï¼Œåˆ™ä¸èƒ½ä½¿ç”¨
 function mp_not_full(self, skill, target, x, y, z)
 	if not nx_exists(target) then
 		return 0;
@@ -37,28 +37,28 @@ function mp_not_full(self, skill, target, x, y, z)
 	local mp = nx_query_property(target, "MP");
 	local maxmp = nx_query_property(target, "MaxMP") + nx_query_property(target, "MaxMPAdd");
 	if mp >= maxmp then
-		--mpÒÑÂú
+		--mpå·²æ»¡
 		if nx_type(self) == TYPE_PLAYER then
-			--MPÒÑÂú£¬ÎŞĞè²¹³ä
+			--MPå·²æ»¡ï¼Œæ— éœ€è¡¥å……
 			nx_sysinfo(self, TIPSTYPE_TIPSINFO, "9201");
 		end
 		return 0;
 	else
-		--mpÎ´Âú
+		--mpæœªæ»¡
 		return 1;
 	end
 end
 
---targetÎ´ËÀ²»ÄÜÊ¹ÓÃ
+--targetæœªæ­»ä¸èƒ½ä½¿ç”¨
 function targe_is_dead(self, skill, target, x, y, z)
 	if not nx_exists(target) then
 		return 0;
 	end
 
 	if nx_query_property(target, "Dead") == 0 then
-		--Ä¿±ê±ØĞëÔÚËÀÍöÖĞ
+		--ç›®æ ‡å¿…é¡»åœ¨æ­»äº¡ä¸­
 		if nx_type(self) == TYPE_PLAYER then
-			--MPÒÑÂú£¬ÎŞĞè²¹³ä
+			--MPå·²æ»¡ï¼Œæ— éœ€è¡¥å……
 			nx_sysinfo(self, TIPSTYPE_TIPSINFO, "9202");
 		end
 		return 0;
@@ -68,12 +68,12 @@ function targe_is_dead(self, skill, target, x, y, z)
 	
 end
 
---½ÇÉ«µ±Ç°ÊÖ²¿ÎäÆ÷ÊÇ±¦½£Ê±£¬²ÅÄÜÊ¹ÓÃÕâ¸ö¼¼ÄÜ£¬ÎäÆ÷ÊôĞÔEquipCategory=101
+--è§’è‰²å½“å‰æ‰‹éƒ¨æ­¦å™¨æ˜¯å®å‰‘æ—¶ï¼Œæ‰èƒ½ä½¿ç”¨è¿™ä¸ªæŠ€èƒ½ï¼Œæ­¦å™¨å±æ€§EquipCategory=101
 function sword_skill_use(self, skill, target, x, y, z)
-	--½ÇÉ«µÄ×°±¸À¸
+	--è§’è‰²çš„è£…å¤‡æ 
 	local equipbox = nx_null();
 	local weapon = nx_null();
-	if nx_type(self) == TYPE_PLAYER then --Íæ¼Ò
+	if nx_type(self) == TYPE_PLAYER then --ç©å®¶
 		equipbox = nx_get_child(self, nx_widestr("EquipBox"));
 		if nx_exists(equipbox) then
 			weapon = nx_get_item(equipbox, 8);
@@ -81,14 +81,14 @@ function sword_skill_use(self, skill, target, x, y, z)
 	end
 	
 	if not nx_exists(weapon) then
-		--Î´×°±¸ÎäÆ÷
+		--æœªè£…å¤‡æ­¦å™¨
 		nx_sysinfo(self, TIPSTYPE_TIPSINFO, "9050");
 		return 0;
 	end
 	
 	local equip_category = nx_query_property(weapon, "EquipCategory");
 	if equip_category ~= 101 then
-		--×°±¸µÄ²»ÊÇÒ»°Ñ½£
+		--è£…å¤‡çš„ä¸æ˜¯ä¸€æŠŠå‰‘
 		nx_sysinfo(self, TIPSTYPE_TIPSINFO, "9051");
 		return 0;
 	end

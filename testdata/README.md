@@ -1,22 +1,32 @@
 # testdata — 规格输入与对拍资产
 
-本目录内容**仅限研究用途**（见根 README 许可证声明），来源与用途如下：
+本目录内容**仅限研究用途**（见根 README 许可证声明），来源与用途如下。
+
+## 编码说明（已全量转为 UTF-8）
+
+本目录全部 `.xml` / `.lua` 文件已由原版 GBK **转码为 UTF-8**，XML 头声明
+同步改写为 `encoding="utf-8"`（共 610 文件转码、217 声明改写）。
+
+- 所有解析入口（structgen / protogen / config）已改为**编码自适应**：
+  合法 UTF-8 直通、否则按 GBK 转码——因此本快照（UTF-8）与
+  `NINEYIN_DATA` 直读原版（GBK）两条路径均可工作
+- 转码已验证无损：转码前后生成器产物逐字节一致
+- 将来从原版刷新快照时，拷入后需重跑一次转码（GBK 检测 + 声明改写）
+
+相对原版副本的本地修正（转码之外）：
+
+- `player/PetShow.xml:166` — 装饰分隔注释整行横线（注释体含 `--`），
+  改为 `=` 线（原文件不合法 XML，原版引擎解析器容忍）
+- `rule/transtool.xml:18` — `maxrows=1` 属性值未加引号，补为 `maxrows="1"`
+
+structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删——将来换入九阴
+正版 struct 仍可能有同类问题，作为兜底。
 
 ## struct/ — 对象属性定义（structgen 的输入）
 
 原版服务端 `Res/struct/` 的全量副本（208 个 XML）。这是对象模型的事实源：
 每个游戏对象的属性名/类型/`public/private/save/realtime` 标志。
 `tools/structgen` 读取本目录生成 `internal/component`。
-
-注意：文件为 GBK（gb2312）编码，解析前需转 UTF-8。
-
-相对原版副本的两处本地修正（原文件不合法 XML，原版引擎解析器容忍）：
-
-- `player/PetShow.xml:166` — 装饰分隔注释整行横线（注释体含 `--`），改为 `=` 线
-- `rule/transtool.xml:18` — `maxrows=1` 属性值未加引号，补为 `maxrows="1"`
-
-structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删——将来换入九阴
-正版 struct 仍可能有同类问题，作为兜底。
 
 关键文件：
 
@@ -37,7 +47,7 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
 
 ## lua/ — 行为逻辑脚本全量副本（script 层的移植目标与 API 语料）
 
-原版服务端 `Res/lua/` 全量副本（361 个脚本，GBK 编码）。按引用状态分三类
+原版服务端 `Res/lua/` 全量副本（361 个脚本，已转 UTF-8）。按引用状态分三类
 （引用计数来自 ini/Skill/skill_static.xml + buff_static.xml 的 211 处引用）：
 
 - **活脚本**（黑金运行时实际加载，也是本项目 `internal/script` 的移植目标

@@ -1,107 +1,107 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--½ÇÉ«ºô³öµÄ³èÎïÁÐ±í-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--è§’è‰²å‘¼å‡ºçš„å® ç‰©åˆ—è¡¨-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-	<!--ÐÞ¸Ä:ÊôÐÔÐÞ¸Ä³É¿É±£´æµÄpublic-->
-		<record name="petshow_rec" cols="2" maxrows="8" save="false" public="false" private="true" desc="ºô³öµÄ³èÎïÁÐ±í">
-			<column type="object" desc="ºô³ö³èÎïid"/>
-			<column type="string" desc="ºô³ö³èÎïÃû³Æ"/>
+	<!--ä¿®æ”¹:å±žæ€§ä¿®æ”¹æˆå¯ä¿å­˜çš„public-->
+		<record name="petshow_rec" cols="2" maxrows="8" save="false" public="false" private="true" desc="å‘¼å‡ºçš„å® ç‰©åˆ—è¡¨">
+			<column type="object" desc="å‘¼å‡ºå® ç‰©id"/>
+			<column type="string" desc="å‘¼å‡ºå® ç‰©åç§°"/>
 		</record>
-		<record name="Pet_CanSwapScene_Rec" cols="5" maxrows="64" save="true" public="false" private="false" desc="¿ç³¡¾°ÐèÒª±£´æµÄ³èÎïÁÐ±í">
-			<column type="string" desc="±£´æµÄ³èÎïÃû³Æ"/>
-			<column type="word" desc="±£´æµÄ·½Ê½"/>
-			<column type="word" desc="µ±Ç°HP"/>
-			<column type="word" desc="µ±Ç°MP"/>		
+		<record name="Pet_CanSwapScene_Rec" cols="5" maxrows="64" save="true" public="false" private="false" desc="è·¨åœºæ™¯éœ€è¦ä¿å­˜çš„å® ç‰©åˆ—è¡¨">
+			<column type="string" desc="ä¿å­˜çš„å® ç‰©åç§°"/>
+			<column type="word" desc="ä¿å­˜çš„æ–¹å¼"/>
+			<column type="word" desc="å½“å‰HP"/>
+			<column type="word" desc="å½“å‰MP"/>		
 			<column type="word" desc="LifeTime"/>				
 		</record>
-		<record name="Pet_Buff_Rec" cols="5" maxrows="2048" save="true" public="false" private="false" desc="¿ç³¡¾°ÐèÒª±£´æµÄ³èÎïbuffÁÐ±í">
-			<column type="string" desc="±£´æµÄ³èÎïÃû³Æ"/>
-			<column type="string" desc="BUFFµÄË÷Òý"/>
+		<record name="Pet_Buff_Rec" cols="5" maxrows="2048" save="true" public="false" private="false" desc="è·¨åœºæ™¯éœ€è¦ä¿å­˜çš„å® ç‰©buffåˆ—è¡¨">
+			<column type="string" desc="ä¿å­˜çš„å® ç‰©åç§°"/>
+			<column type="string" desc="BUFFçš„ç´¢å¼•"/>
 			<column type="word" desc="LifeTime"/>
 			<column type="word" desc="LifeTimeType"/>
 			<column type="int64" desc="SaveTime"/>
 		</record>
-		<record name="Pet_MagicianStar_Rec" cols="7" maxrows="5" save="true" public="false" private="true" desc="³èÎïµÄÊõÊ¿ÐÇ¼¶ÊÞ»êÅäÖÃ±£´æ±í">
-			<column type="byte" desc="ÐÇ¼¶ÐòºÅ"/>
-			<column type="string" desc="ÊÞ»ê1"/>
-			<column type="string" desc="ÊÞ»ê2"/>
-			<column type="string" desc="ÊÞ»ê3"/>
-			<column type="string" desc="ÊÞ»ê4"/>
-			<column type="string" desc="ÊÞ»ê5"/>
-			<column type="byte" desc="´ËÐÇÊÇ·ñ¿ÉÒÔÓÃ"/>
+		<record name="Pet_MagicianStar_Rec" cols="7" maxrows="5" save="true" public="false" private="true" desc="å® ç‰©çš„æœ¯å£«æ˜Ÿçº§å…½é­‚é…ç½®ä¿å­˜è¡¨">
+			<column type="byte" desc="æ˜Ÿçº§åºå·"/>
+			<column type="string" desc="å…½é­‚1"/>
+			<column type="string" desc="å…½é­‚2"/>
+			<column type="string" desc="å…½é­‚3"/>
+			<column type="string" desc="å…½é­‚4"/>
+			<column type="string" desc="å…½é­‚5"/>
+			<column type="byte" desc="æ­¤æ˜Ÿæ˜¯å¦å¯ä»¥ç”¨"/>
 		</record>
 		
-		<record name="Pet_OrcSoul_Rec" cols="2" maxrows="1" save="true" public="false" private="false" desc="ÊõÊ¿ÕÙ»½°¡Ä§ÎïÈÚºÏ°¡µÄÁÙÊ±±£´æ±í">
-			<column type="string" desc="ÉÏ´ÎÕÙ»½µÄPET_CFGID"/>
-			<column type="string" desc="ÉÏ´ÎÄ§ÎïÈÚºÏµÄPET_ID"/>
+		<record name="Pet_OrcSoul_Rec" cols="2" maxrows="1" save="true" public="false" private="false" desc="æœ¯å£«å¬å”¤å•Šé­”ç‰©èžåˆå•Šçš„ä¸´æ—¶ä¿å­˜è¡¨">
+			<column type="string" desc="ä¸Šæ¬¡å¬å”¤çš„PET_CFGID"/>
+			<column type="string" desc="ä¸Šæ¬¡é­”ç‰©èžåˆçš„PET_ID"/>
 		</record>
 		
-		<record name="Pet_Last_AddBuff_Rec" cols="3" maxrows="1" save="true" public="false" private="false" desc="ÉÏ´ÎÐÇÕó¼¼ÄÜ¸½¼ÓµÄBUFF,ÏÂ´Î±äÉíÒªÉ¾³ý[ÒòÖÐÍ¾ÊõÊ¿Åä·½¿ÉÒÔÐÞ¸Ä,ËùÒÔ±ØÐë±£´æ]">
+		<record name="Pet_Last_AddBuff_Rec" cols="3" maxrows="1" save="true" public="false" private="false" desc="ä¸Šæ¬¡æ˜Ÿé˜µæŠ€èƒ½é™„åŠ çš„BUFF,ä¸‹æ¬¡å˜èº«è¦åˆ é™¤[å› ä¸­é€”æœ¯å£«é…æ–¹å¯ä»¥ä¿®æ”¹,æ‰€ä»¥å¿…é¡»ä¿å­˜]">
 			<column type="string" desc="BUFF1"/>
 			<column type="string" desc="BUFF2"/>
 			<column type="string" desc="BUFF3"/>
 		</record>
 		
-		<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
-		<!--@×÷ÓÃ:ÎªÁË½«´Ë±íÔÚÓÐµÀ¾ßµÄÊ±ºò¾Í¶Á³ö,ËùÒÔ¹Òµ½ÈËÉíÉÏ,ÈÕÆÚ:2011Äê11ÔÂ25ÈÕ;ÏÈÐ´ÕâÃ´¶à,ÐèÒªÔÙ¼Ó-->
-		<record name = "pet_mac_rec" cols="8" maxrows="64" save="true" public="false" private="true" desc="Íæ¼ÒËù´øµÄËùÓÐ³èÎïÁÐ±í">
-			<column type="string" desc="³èÎïÃû³Æ"/>
-			<column type="string" desc="³èÎïÊ¹ÓÃµÄbuffer"/>
-			<column type="byte"   desc="³èÎïµÄµÈ¼¶"/>	
-			<column type="word"   desc="×ÜÏûºÄµãÊý"/>           
-			<column type="word"   desc="×Ü¸ÄÔì·ÑÓÃ(Í­)"/>
-			<column type="byte"   desc="»úÌåµÈ¼¶"/>
-			<column type="word"   desc="Ê£ÏÂµÄµãÊý"/>
-			<column type="byte"   desc="ÊÇ·ñ³õÊ¼»¯¹ýµÄ±ê¼Ç"/>
+		<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
+		<!--@ä½œç”¨:ä¸ºäº†å°†æ­¤è¡¨åœ¨æœ‰é“å…·çš„æ—¶å€™å°±è¯»å‡º,æ‰€ä»¥æŒ‚åˆ°äººèº«ä¸Š,æ—¥æœŸ:2011å¹´11æœˆ25æ—¥;å…ˆå†™è¿™ä¹ˆå¤š,éœ€è¦å†åŠ -->
+		<record name = "pet_mac_rec" cols="8" maxrows="64" save="true" public="false" private="true" desc="çŽ©å®¶æ‰€å¸¦çš„æ‰€æœ‰å® ç‰©åˆ—è¡¨">
+			<column type="string" desc="å® ç‰©åç§°"/>
+			<column type="string" desc="å® ç‰©ä½¿ç”¨çš„buffer"/>
+			<column type="byte"   desc="å® ç‰©çš„ç­‰çº§"/>	
+			<column type="word"   desc="æ€»æ¶ˆè€—ç‚¹æ•°"/>           
+			<column type="word"   desc="æ€»æ”¹é€ è´¹ç”¨(é“œ)"/>
+			<column type="byte"   desc="æœºä½“ç­‰çº§"/>
+			<column type="word"   desc="å‰©ä¸‹çš„ç‚¹æ•°"/>
+			<column type="byte"   desc="æ˜¯å¦åˆå§‹åŒ–è¿‡çš„æ ‡è®°"/>
 		</record>
 		
-		<!--Ç¿»¯ºó½Úµã×´Ì¬-->
-		<record name="pointdisp_rec" cols="2" maxrows="256" save="true" public="false" private="true" desc="¸÷¸ö½ÚµãµÄ×´Ì¬">
-			    <column type="string" desc="½Úµã"/>
-				<column type="byte"   desc="½ÚµãµÄ×´Ì¬:1:´ú±í²»¿É¼¤»î;2:¿É¼¤»î;3:ÒÑ¾­¼¤»î,±íÊÇ°´²ã´æ·ÅµÄ"/>
+		<!--å¼ºåŒ–åŽèŠ‚ç‚¹çŠ¶æ€-->
+		<record name="pointdisp_rec" cols="2" maxrows="256" save="true" public="false" private="true" desc="å„ä¸ªèŠ‚ç‚¹çš„çŠ¶æ€">
+			    <column type="string" desc="èŠ‚ç‚¹"/>
+				<column type="byte"   desc="èŠ‚ç‚¹çš„çŠ¶æ€:1:ä»£è¡¨ä¸å¯æ¿€æ´»;2:å¯æ¿€æ´»;3:å·²ç»æ¿€æ´»,è¡¨æ˜¯æŒ‰å±‚å­˜æ”¾çš„"/>
 				
 		</record>
 		
-		<!--ÊÞ»ê×¨¾«½ø¶È±£´æ±í-->
-		<record name = "pet_active_rec" cols="18" maxrows="64" save="true" public="false" private="true" desc="ÊÞ»ê×¨¾«½ø¶È±£´æ±í">
-			<column type="string" desc="Ïµ±ð"/>
-			<column type="string" desc="Ïµ±ðÍ¼Æ¬"/>
-			<column type="string" desc="Ïµ±ðµÈ¼¶Í¼Æ¬"/>
-			<column type="byte"   desc="Ïµ±ðµÄ×´Ì¬:-1ÒÑ¶³½á,0Î´¼¤»î,1ÒÑ¼¤»î"/>
-			<column type="byte"   desc="µ±Ç°Ñ¡ÖÐÏµ±ðÊÞ»êµÄµ±Ç°¸öÊý"/>
-			<column type="byte"   desc="µ±Ç°Ñ¡ÖÐÏµ±ðÊÞ»êµÄ×î´ó¸öÊý"/>
-			<column type="byte"   desc="µ±Ç°Ñ¡ÖÐÏµ±ðµÄ×¨¾«µÈ¼¶"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="byte"   desc="½±Àø×´Ì¬ÊÇ·ñ¿ªÆô"/>
-			<column type="string"   desc="ÎïÖÖÀà±ð"/>
+		<!--å…½é­‚ä¸“ç²¾è¿›åº¦ä¿å­˜è¡¨-->
+		<record name = "pet_active_rec" cols="18" maxrows="64" save="true" public="false" private="true" desc="å…½é­‚ä¸“ç²¾è¿›åº¦ä¿å­˜è¡¨">
+			<column type="string" desc="ç³»åˆ«"/>
+			<column type="string" desc="ç³»åˆ«å›¾ç‰‡"/>
+			<column type="string" desc="ç³»åˆ«ç­‰çº§å›¾ç‰‡"/>
+			<column type="byte"   desc="ç³»åˆ«çš„çŠ¶æ€:-1å·²å†»ç»“,0æœªæ¿€æ´»,1å·²æ¿€æ´»"/>
+			<column type="byte"   desc="å½“å‰é€‰ä¸­ç³»åˆ«å…½é­‚çš„å½“å‰ä¸ªæ•°"/>
+			<column type="byte"   desc="å½“å‰é€‰ä¸­ç³»åˆ«å…½é­‚çš„æœ€å¤§ä¸ªæ•°"/>
+			<column type="byte"   desc="å½“å‰é€‰ä¸­ç³»åˆ«çš„ä¸“ç²¾ç­‰çº§"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="byte"   desc="å¥–åŠ±çŠ¶æ€æ˜¯å¦å¼€å¯"/>
+			<column type="string"   desc="ç‰©ç§ç±»åˆ«"/>
 		</record>
-        <record name = "pet_hortation_rec" cols="1" maxrows="64" save="true" public="false" private="false" desc="ÊÞ»ê×¨¾«½±Àø±í">
-			<column type="string" desc="½±Àø²ÛË÷ÒýID"/>
-		</record>
-		
-		<record name = "pet_item_rec" cols="2" maxrows="1024" save="true" public="false" private="true" desc="´æ·Å³èÎïµÀ¾ß±í">
-			<column type="string" desc="³èÎïµÀ¾ßµÄconfigID"/>
-			<column type="widestr" desc="³èÎï¸ÄÃûÖ®ºóµÄÃû×Ö"/>
+        <record name = "pet_hortation_rec" cols="1" maxrows="64" save="true" public="false" private="false" desc="å…½é­‚ä¸“ç²¾å¥–åŠ±è¡¨">
+			<column type="string" desc="å¥–åŠ±æ§½ç´¢å¼•ID"/>
 		</record>
 		
-		<record name = "pet_in_castle_rec" cols="1" maxrows="1024" save="true" public="false" private="false" desc="±£´æ³èÎïÉÏ³Ç±¤µÄ³èÎïConfigID±í">
-			<column type="string" desc="³èÎïÉÏ³Ç±¤ÐèÒª±£´æµÄ·Ç·ÉÐÐ³èÎïµÄconfigID"/>
+		<record name = "pet_item_rec" cols="2" maxrows="1024" save="true" public="false" private="true" desc="å­˜æ”¾å® ç‰©é“å…·è¡¨">
+			<column type="string" desc="å® ç‰©é“å…·çš„configID"/>
+			<column type="widestr" desc="å® ç‰©æ”¹åä¹‹åŽçš„åå­—"/>
 		</record>
 		
-		<!--³èÎïÍ¬ÃûÏÔÊ¾Ê±ºòÐèÒªÌí¼ÓµÄ±í-->
-		<record name = "pet_info_rec" cols="41" maxrows="5" save="false" public="false" private="true" desc="±£´æ³èÎïÍ¬ÆÁÏÔÊ¾»ù±¾ÊôÐÔ±í">
+		<record name = "pet_in_castle_rec" cols="1" maxrows="1024" save="true" public="false" private="false" desc="ä¿å­˜å® ç‰©ä¸ŠåŸŽå ¡çš„å® ç‰©ConfigIDè¡¨">
+			<column type="string" desc="å® ç‰©ä¸ŠåŸŽå ¡éœ€è¦ä¿å­˜çš„éžé£žè¡Œå® ç‰©çš„configID"/>
+		</record>
+		
+		<!--å® ç‰©åŒåæ˜¾ç¤ºæ—¶å€™éœ€è¦æ·»åŠ çš„è¡¨-->
+		<record name = "pet_info_rec" cols="41" maxrows="5" save="false" public="false" private="true" desc="ä¿å­˜å® ç‰©åŒå±æ˜¾ç¤ºåŸºæœ¬å±žæ€§è¡¨">
 			<column type="string" desc="PetConfigID"/>
 			
 			<column type="word"   desc="MinPhyAttack"/>
@@ -150,18 +150,18 @@
 			<column type="float"   desc="FlyHeightMin"/>
 			<column type="float"   desc="FlyHeightMax"/>
 
-			<!--»ù±¾µÄÕ½¶·ÊôÐÔ-->
+			<!--åŸºæœ¬çš„æˆ˜æ–—å±žæ€§-->
 		</record>
 
-		<record name="npc_cooldown_rec" cols="4" maxrows="128" save="false" public="false" private="true" desc="ÀäÈ´±í">
-			<column type="dword" desc="ÀäÈ´·ÖÀàID"/>
-			<column type="int64" desc="ÀäÈ´¿ªÊ¼Ê±¼ä£¬ÏÖÊµ64Î»Ê±¼äÊý¾Ý"/>
-			<column type="int64" desc="ÀäÈ´½áÊøÊ±¼ä£¬ÏÖÊµ64Î»Ê±¼äÊý¾Ý"/>
-			<column type="dword" desc="ÀäÈ´´ó·ÖÀàID,¸üÉÏÒ»²ãµÄ·ÖÀà"/>
+		<record name="npc_cooldown_rec" cols="4" maxrows="128" save="false" public="false" private="true" desc="å†·å´è¡¨">
+			<column type="dword" desc="å†·å´åˆ†ç±»ID"/>
+			<column type="int64" desc="å†·å´å¼€å§‹æ—¶é—´ï¼ŒçŽ°å®ž64ä½æ—¶é—´æ•°æ®"/>
+			<column type="int64" desc="å†·å´ç»“æŸæ—¶é—´ï¼ŒçŽ°å®ž64ä½æ—¶é—´æ•°æ®"/>
+			<column type="dword" desc="å†·å´å¤§åˆ†ç±»ID,æ›´ä¸Šä¸€å±‚çš„åˆ†ç±»"/>
 		</record>
-		<!-- ¼¤»îµÄ¼¼ÄÜ -->
-		<record name="active_skill_rec" cols="1" maxrows="16" save="false" public="false" private="true" desc="PET¼¤»îµÄ×Ô¶¯ÊÍ·Å¼¼ÄÜ">
-			<column type="string" desc="¼¼ÄÜÃû"/>
+		<!-- æ¿€æ´»çš„æŠ€èƒ½ -->
+		<record name="active_skill_rec" cols="1" maxrows="16" save="false" public="false" private="true" desc="PETæ¿€æ´»çš„è‡ªåŠ¨é‡Šæ”¾æŠ€èƒ½">
+			<column type="string" desc="æŠ€èƒ½å"/>
 		</record>
 		<!-- ============================================================ -->
 	</records>

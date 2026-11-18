@@ -1,41 +1,41 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÄÜÁ¿¾®¾ÓÃñÉí·ÝÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--èƒ½é‡äº•å±…æ°‘èº«ä»½ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="RidePoint" type="int" public="false" private="true" save="true" desc="³ËÆïµãÊý"/>
-		<property name="RideAutoRepairHP" type="byte" public="false" private="false" save="true" desc="×Ô¶¯ÐÞ¸´HP"/>
-		<property name="RideAutoRepairMP" type="byte" public="false" private="false" save="true" desc="×Ô¶¯ÐÞ¸´MP"/>
-		<property name="RideAutoRecharge" type="int" public="false" private="false" save="true" desc="×Ô¶¯³äÖµ"/>
-		<property name="RidePointLock" type="int" public="false" private="false" save="true" desc="³ËÆµµãËø"/>
-		<property name="EWTaskTokenTime" type="int64" public="false" private="false" save="true" desc="ÁìÈ¡ÈÎÎñÁîÅÆÊ±¼ä"/>
-		<property name="EWDonateTime" type="int64" public="false" private="false" save="true" desc="ÉÏ´Î´ò¿ª¾èÏ×½çÃæÊ±¼ä"/>
-		<property name="EWDonateCount" type="int" public="false" private="false" save="true" desc="±¾ÈÕ¾èÏ×ºÚ½ðÊý"/>
-		<property name="EWContributeCount" type="int" public="false" private="false" save="true" desc="±¾ÈÕ¾èÏ×¹±Ï×¶È"/>
+		<property name="RidePoint" type="int" public="false" private="true" save="true" desc="ä¹˜éª‘ç‚¹æ•°"/>
+		<property name="RideAutoRepairHP" type="byte" public="false" private="false" save="true" desc="è‡ªåŠ¨ä¿®å¤HP"/>
+		<property name="RideAutoRepairMP" type="byte" public="false" private="false" save="true" desc="è‡ªåŠ¨ä¿®å¤MP"/>
+		<property name="RideAutoRecharge" type="int" public="false" private="false" save="true" desc="è‡ªåŠ¨å……å€¼"/>
+		<property name="RidePointLock" type="int" public="false" private="false" save="true" desc="ä¹˜é¢‘ç‚¹é”"/>
+		<property name="EWTaskTokenTime" type="int64" public="false" private="false" save="true" desc="é¢†å–ä»»åŠ¡ä»¤ç‰Œæ—¶é—´"/>
+		<property name="EWDonateTime" type="int64" public="false" private="false" save="true" desc="ä¸Šæ¬¡æ‰“å¼€æçŒ®ç•Œé¢æ—¶é—´"/>
+		<property name="EWDonateCount" type="int" public="false" private="false" save="true" desc="æœ¬æ—¥æçŒ®é»‘é‡‘æ•°"/>
+		<property name="EWContributeCount" type="int" public="false" private="false" save="true" desc="æœ¬æ—¥æçŒ®è´¡çŒ®åº¦"/>
 	</properties>
 	<records>
-		<record name="player_energy_well_record" cols="6" maxrows="256" save="true" public="false" private="true" desc="ÄÜÁ¿¾®¶àÖØ¾ÓÃñÉí·Ý±í">
-			<column type="dword" desc="ËùÊôÄÜÁ¿¾®id"/>
-			<column type="byte" desc="ÄÜÁ¿¾®ÉùÍûµÈ¼¶"/>
-			<column type="dword" desc="µ±Ç°ÉùÍûÖµ"/>
-			<column type="byte" desc="ÕóÓª"/>
-			<column type="byte" desc="×´Ì¬"/>
-			<column type="widestr" desc="Õ¼Áì¹«»á"/>
+		<record name="player_energy_well_record" cols="6" maxrows="256" save="true" public="false" private="true" desc="èƒ½é‡äº•å¤šé‡å±…æ°‘èº«ä»½è¡¨">
+			<column type="dword" desc="æ‰€å±žèƒ½é‡äº•id"/>
+			<column type="byte" desc="èƒ½é‡äº•å£°æœ›ç­‰çº§"/>
+			<column type="dword" desc="å½“å‰å£°æœ›å€¼"/>
+			<column type="byte" desc="é˜µè¥"/>
+			<column type="byte" desc="çŠ¶æ€"/>
+			<column type="widestr" desc="å é¢†å…¬ä¼š"/>
 		</record>
-		<record name="player_battle_carrier_record" cols="13" maxrows="256" save="false" public="false" private="true" desc="ÄÜÁ¿¾®¶àÖØ¾ÓÃñÉí·Ý±í">
-			<column type="string" desc="ÔØ¾ßÐòÁÐºÅ"/>
-			<column type="dword" desc="ÔØ¾ßID"/>
-			<column type="dword" desc="ËùÊôÄÜÁ¿¾®id"/>
-			<column type="dword" desc="ÐÞÀíÖ¸Êý"/>
-			<column type="dword" desc="ÔØ¾ß×´Ì¬"/>
-			<column type="dword" desc="³¡¾°ID"/>
+		<record name="player_battle_carrier_record" cols="13" maxrows="256" save="false" public="false" private="true" desc="èƒ½é‡äº•å¤šé‡å±…æ°‘èº«ä»½è¡¨">
+			<column type="string" desc="è½½å…·åºåˆ—å·"/>
+			<column type="dword" desc="è½½å…·ID"/>
+			<column type="dword" desc="æ‰€å±žèƒ½é‡äº•id"/>
+			<column type="dword" desc="ä¿®ç†æŒ‡æ•°"/>
+			<column type="dword" desc="è½½å…·çŠ¶æ€"/>
+			<column type="dword" desc="åœºæ™¯ID"/>
 			<column type="dword" desc="HP"/>
 			<column type="dword" desc="MP"/>
-            <column type="widestr" desc="ËùÓÐÕß"/>
+            <column type="widestr" desc="æ‰€æœ‰è€…"/>
 			<column type="int64" desc="Times"/>
-            <column type="widestr" desc="ÍµµÁÕß"/>
+            <column type="widestr" desc="å·ç›—è€…"/>
 			<column type="int64" desc="Times"/>
-			<column type="dword" desc="³¡¾°Ô­ÐÍID"/>
+			<column type="dword" desc="åœºæ™¯åŽŸåž‹ID"/>
 		</record>
 	</records>
 </object>

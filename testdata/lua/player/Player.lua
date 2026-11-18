@@ -1,17 +1,17 @@
 require("share\\server_custom_define")
 
--- Íæ¼Ò¾ÍĞ÷
+-- ç©å®¶å°±ç»ª
 function on_ready(self, first)
 	if first > 0 then
-		--µÚÒ»´ÎÉÏÏß
+		--ç¬¬ä¸€æ¬¡ä¸Šçº¿
 		nx_custom_byken(self, SERVER_CUSTOMMSG_EFFECT, self, "BORN")
 	end
 	
-	--ÇĞ»»³¡¾°ºó£¬´ò¶ÏÇĞ´è
+	--åˆ‡æ¢åœºæ™¯åï¼Œæ‰“æ–­åˆ‡ç£‹
 	if nx_find_data(self, "fight_guid_start") then
-		-- ÒÆ³ıÍæ¼ÒÉíÉÏÇĞ´è±êÊ¶
+		-- ç§»é™¤ç©å®¶èº«ä¸Šåˆ‡ç£‹æ ‡è¯†
 		nx_remove_data(self, "fight_guid_start")
-		-- µ±Ç°¼¼ÄÜÍ£Ö¹ÉÁË¸
+		-- å½“å‰æŠ€èƒ½åœæ­¢é—ªçƒ
 		nx_custom(self, nx_string("skill_icon_flash"), nx_int(1), nx_int(0))
 	end
 end

@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-    <record name="user_guide_fight_info_rec" cols="5" maxrows="128" save="true" public="false" private="false" desc="³¡¾°ÄÚËùÓÐÍæ¼Ò±í">      
-      <column type="string" desc="Íæ¼Ò"/>
-      <column type="dword" desc="ÉËº¦Êä³ö"/>
-      <column type="dword" desc="ÖÎÁÆÊä³ö"/>
-      <column type="dword" desc="³ÐÊÜÉËº¦"/>
-      <column type="dword" desc="ËÀÍö´ÎÊý"/>
+    <record name="user_guide_fight_info_rec" cols="5" maxrows="128" save="true" public="false" private="false" desc="åœºæ™¯å†…æ‰€æœ‰çŽ©å®¶è¡¨">      
+      <column type="string" desc="çŽ©å®¶"/>
+      <column type="dword" desc="ä¼¤å®³è¾“å‡º"/>
+      <column type="dword" desc="æ²»ç–—è¾“å‡º"/>
+      <column type="dword" desc="æ‰¿å—ä¼¤å®³"/>
+      <column type="dword" desc="æ­»äº¡æ¬¡æ•°"/>
     </record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

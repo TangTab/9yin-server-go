@@ -1,8 +1,8 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task\\task_fight_guid.lua
--- @ ½Å±¾¹¦ÄÜ: Õ½¶·½ÌÑ§
--- @ ´´½¨Õß:   mrkk
--- @ ´´½¨ÈÕÆÚ: 2010Äê4ÔÂ20ÈÕ
+-- @ è„šæœ¬åç§°: task\\task_fight_guid.lua
+-- @ è„šæœ¬åŠŸèƒ½: æˆ˜æ–—æ•™å­¦
+-- @ åˆ›å»ºè€…:   mrkk
+-- @ åˆ›å»ºæ—¥æœŸ: 2010å¹´4æœˆ20æ—¥
 -----------------------------------------
 require("task\\task_define")
 
@@ -12,61 +12,61 @@ local g_track_info = {
 [3] = {track = "jiaoxue_jia", key_word = "Qiecuo_jiaoxue_jia",},
 }
 
--- ¸±±¾³¡¾°±àºÅ
+-- å‰¯æœ¬åœºæ™¯ç¼–å·
 local scene_id = 0
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
--- ÈÎÎñÍê³ÉÌõ¼ş
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	-- ½ø¶ÈµÄ¸öÊı
+	-- è¿›åº¦çš„ä¸ªæ•°
 	local len = table.getn(g_track_info)
 
-	-- ½ø¶È±íÌí¼Ó
+	-- è¿›åº¦è¡¨æ·»åŠ 
 	for i = 1, len do
 		nx_add_record_row_values(player, "Task_Record", nx_int(taskid), subtype_hunter, nx_int(0), nx_int(i), nx_int(0), nx_int(1), g_track_info[i].key_word, "55", g_track_info[i].track, nx_int(0), g_track_info[i].key_word, nx_int64(0))
 	end
 
-	-- ĞŞ¸Ä½ÓÊÜ±íµÄË³Ğò×Ö¶Î
+	-- ä¿®æ”¹æ¥å—è¡¨çš„é¡ºåºå­—æ®µ
 	local row = nx_find_record_value(player, "Task_Accepted", 0, taskid)
 	if row >= 0 then
 		nx_set_record_value(player, "Task_Accepted", row, 8, 1)
 	end
 
-	-- Ö±½Ó½øÈë¸±±¾
+	-- ç›´æ¥è¿›å…¥å‰¯æœ¬
 	nx_switch_to_subscene(player, nx_int(scene_id))
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
   --nx_msgbox("task complete")
-  --É¾³ıÏŞÖÆÈ¦£¬ÇåÀí´´½¨µÄ¶ÔÏó
+  --åˆ é™¤é™åˆ¶åœˆï¼Œæ¸…ç†åˆ›å»ºçš„å¯¹è±¡
 	--nx_custom(player, nx_string("task_fight_guid_msg"), nx_int(2));
   --del_created_npc(player, taskid)
   return 1
 end
 
--- ÈÎÎñ·ÅÆú
+-- ä»»åŠ¡æ”¾å¼ƒ
 function on_task_giveup(self, task_id)
-  --É¾³ıÏŞÖÆÈ¦£¬ÇåÀí´´½¨µÄ¶ÔÏó
+  --åˆ é™¤é™åˆ¶åœˆï¼Œæ¸…ç†åˆ›å»ºçš„å¯¹è±¡
   --nx_custom(self, nx_string("task_fight_guid_msg"), nx_int(2));
   --del_created_npc(self, task_id)
   return 1;
 end
 
--- ÈÎÎñÊ§°Ü
+-- ä»»åŠ¡å¤±è´¥
 function on_task_failed(self, task_id)
-  --É¾³ıÏŞÖÆÈ¦£¬ÇåÀí´´½¨µÄ¶ÔÏó
+  --åˆ é™¤é™åˆ¶åœˆï¼Œæ¸…ç†åˆ›å»ºçš„å¯¹è±¡
   --nx_custom(self, nx_string("task_fight_guid_msg"), nx_int(2));
   --del_created_npc(self, task_id)
 end

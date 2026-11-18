@@ -1,69 +1,69 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--NPC»ù´¡ÊôÐÔ-->
+<!--NPCåŸºç¡€å±žæ€§-->
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-		<property name="Level" type="int" public="true" private="false" save="false" desc="npcµÄµÈ¼¶"/>
-        <property name="CollideType" type="int" public="true" private="false" save="false" desc="Åö×²ÀàÐÍ(Í¨¹ý´ËÊôÐÔÀà¿ØÖÆÒýÇæµÄÄÚ²¿ÊôÐÔNoCollide)"/>
-        <property name="FightID" type="string" public="false" private="false" save="false" desc="Õ½¶·°üID"/>
-        <property name="Type" type="byte" public="true" private="false" save="false" desc="ÀàÐÍ"/>
-        <property name="CantShowHeadInfo" type="byte" public="true" private="false" save="false" desc="ÊÇ·ñÏÔÊ¾Í·¶¥ÐÅÏ¢"/>
-        <property name="Resource" type="string" public="true" private="false" save="false" desc="×ÊÔ´"/>
-        <property name="Scale" type="string" public="true" private="false" save="false" desc="Ä£ÐÍËõ·Å±ÈÀý"/>
-        <property name="ConfigID" type="string" public="true" private="false" save="false" desc="±àºÅ"/>
-        <property name="NpcType" type="byte" public="true" private="false" save="false" desc="NPCÀàÐÍ"/>
-        <property name="SelectState" type="byte" public="true" private="false" save="false" desc="Ñ¡ÔñÀàÐÍ"/>
-        <property name="Camp" type="int" public="true" private="false" save="false" desc="ÕóÓª"/>
-        <property name="Force" type="int" public="true" private="false" save="false" desc="ÊÆÁ¦"/>
-        <property name="MotionNoRotate" type="byte" public="true" private="false" save="false" desc="NPCÒÆ¶¯Ê±·½ÏòÊÇ·ñ²»±ä"/>
-        <property name="NeedRotate" type="int" public="true" private="false" save="false" desc="npcÊÇ·ñÐèÒª×ªÏòÍæ¼Ò"/>
-        <property name="CreatorIndex" type="int" public="false" private="false" save="false" desc="ÐÂÉú³ÉÆ÷µÄ±àºÅ"/>
-        <property name="StaticId" type="string" public="false" private="false" save="false" desc="¾²Ì¬id¹¤¾ßÉú³É"/>
+		<property name="Level" type="int" public="true" private="false" save="false" desc="npcçš„ç­‰çº§"/>
+        <property name="CollideType" type="int" public="true" private="false" save="false" desc="ç¢°æ’žç±»åž‹(é€šè¿‡æ­¤å±žæ€§ç±»æŽ§åˆ¶å¼•æ“Žçš„å†…éƒ¨å±žæ€§NoCollide)"/>
+        <property name="FightID" type="string" public="false" private="false" save="false" desc="æˆ˜æ–—åŒ…ID"/>
+        <property name="Type" type="byte" public="true" private="false" save="false" desc="ç±»åž‹"/>
+        <property name="CantShowHeadInfo" type="byte" public="true" private="false" save="false" desc="æ˜¯å¦æ˜¾ç¤ºå¤´é¡¶ä¿¡æ¯"/>
+        <property name="Resource" type="string" public="true" private="false" save="false" desc="èµ„æº"/>
+        <property name="Scale" type="string" public="true" private="false" save="false" desc="æ¨¡åž‹ç¼©æ”¾æ¯”ä¾‹"/>
+        <property name="ConfigID" type="string" public="true" private="false" save="false" desc="ç¼–å·"/>
+        <property name="NpcType" type="byte" public="true" private="false" save="false" desc="NPCç±»åž‹"/>
+        <property name="SelectState" type="byte" public="true" private="false" save="false" desc="é€‰æ‹©ç±»åž‹"/>
+        <property name="Camp" type="int" public="true" private="false" save="false" desc="é˜µè¥"/>
+        <property name="Force" type="int" public="true" private="false" save="false" desc="åŠ¿åŠ›"/>
+        <property name="MotionNoRotate" type="byte" public="true" private="false" save="false" desc="NPCç§»åŠ¨æ—¶æ–¹å‘æ˜¯å¦ä¸å˜"/>
+        <property name="NeedRotate" type="int" public="true" private="false" save="false" desc="npcæ˜¯å¦éœ€è¦è½¬å‘çŽ©å®¶"/>
+        <property name="CreatorIndex" type="int" public="false" private="false" save="false" desc="æ–°ç”Ÿæˆå™¨çš„ç¼–å·"/>
+        <property name="StaticId" type="string" public="false" private="false" save="false" desc="é™æ€idå·¥å…·ç”Ÿæˆ"/>
         <property name="AwardRepute" type="string" public="false" private="false" save="false" desc=""/>
-        <property name="BeatBackType" type="int" public="false" private="false" save="false" desc="·´»÷ÀàÐÍ(0: ÊÜµ½ÉËº¦»á·´»÷  1: ÊÜµ½ÉËº¦²»·´»÷)"/>
-        <property name="SuicideTime" type="int" public="false" private="false" save="false" desc="Õ½¶·½áÊøºó¼ä¸ô¶àÉÙÃëÏú»Ù×ÔÉí(Ãë)"/>
-        <property name="CanPick" type="byte" public="true" private="false" save="false" desc="ÄÜ·ñÊ°È¡"/>
-        <property name="VisType" type="int" public="true" private="false" save="false" desc="¿É¼ûÐÔÀàÐÍ(0:ËùÓÐÈË¶¼¿É¼û£¬1:Ö¸¶¨¶ÔÏó¿É¼û£¬2:Ö¸¶¨ÍÅ¶Ó¿É¼û£¬3:Ö¸¶¨ÊÆÁ¦¿É¼û£¬4:Ö¸¶¨ÕóÓª¿É¼û)"/>
-        <property name="VisDataInt" type="int" public="true" private="false" save="false" desc="¿É¼ûÐÔÊý¾Ý(int)"/>	
-        <property name="VisDataStr" type="widestr" public="true" private="false" save="false" desc="¿É¼ûÐÔÊý¾Ý(widestr)"/>
-        <property name="SelectSound" type="string" public="false" private="false" save="false" desc="npc±»Ñ¡ÔñÊ±µÄÒôÐ§"/>
-        <property name="NPCCanSelect" type="word" public="true" private="false" save="false" desc="npcÄÜ·ñ±»Ñ¡ÖÐ,0±»Ñ¡ÖÐ,1²»±»Ñ¡ÖÐ"/>
-        <property name="FirstAttacker" type="widestr" public="false" private="false" save="false" desc="¹¥»÷µÄµÚÒ»¸öÈË"/>
-		<property name="Stiff" type="float" public="false" private="false" save="false" desc="Ó²Ö±"/>
-        <property name="PeaceAction" type="string" public="false" private="false" save="false" desc="ºÍÆ½´ý»ú¶¯×÷¼¯(¹©²ß»®ÅäÖÃ)"/>
-        <property name="FightAction" type="string" public="false" private="false" save="false" desc="Õ½¶·´ý»ú¶¯×÷¼¯(¹©²ß»®ÅäÖÃ)"/>
-        <property name="TalkAction" type="string" public="false" private="false" save="false" desc="Ëµ»°´ý»ú¶¯×÷¼¯(¹©²ß»®ÅäÖÃ)"/>
-        <property name="PeaceRandomAction" type="string" public="true" private="false" save="false" desc="ºÍÆ½´ý»ú¶¯×÷¼¯(¹©client²éÑ¯)"/>
-        <property name="FightRandomAction" type="string" public="true" private="false" save="false" desc="Õ½¶·´ý»ú¶¯×÷¼¯(¹©client²éÑ¯)"/>
-        <property name="TalkRandomAction" type="string" public="true" private="false" save="false" desc="Ëµ»°´ý»ú¶¯×÷¼¯(¹©client²éÑ¯)"/>
-        <property name="BornTime" type="int64" public="true" private="false" save="false" desc="npc³öÉúµÄ·þÎñÆ÷Ê±¼ä"/>
-		<property name="HeadEffect" type="int" public="true" private="false" save="false" desc="Í·¶¥ÏÔÊ¾ÌØÐ§ÀàÐÍ"/>
-		<property name="NpcNickName" type="widestr" public="true" private="false" save="false" desc="±ðÃû"/>
+        <property name="BeatBackType" type="int" public="false" private="false" save="false" desc="åå‡»ç±»åž‹(0: å—åˆ°ä¼¤å®³ä¼šåå‡»  1: å—åˆ°ä¼¤å®³ä¸åå‡»)"/>
+        <property name="SuicideTime" type="int" public="false" private="false" save="false" desc="æˆ˜æ–—ç»“æŸåŽé—´éš”å¤šå°‘ç§’é”€æ¯è‡ªèº«(ç§’)"/>
+        <property name="CanPick" type="byte" public="true" private="false" save="false" desc="èƒ½å¦æ‹¾å–"/>
+        <property name="VisType" type="int" public="true" private="false" save="false" desc="å¯è§æ€§ç±»åž‹(0:æ‰€æœ‰äººéƒ½å¯è§ï¼Œ1:æŒ‡å®šå¯¹è±¡å¯è§ï¼Œ2:æŒ‡å®šå›¢é˜Ÿå¯è§ï¼Œ3:æŒ‡å®šåŠ¿åŠ›å¯è§ï¼Œ4:æŒ‡å®šé˜µè¥å¯è§)"/>
+        <property name="VisDataInt" type="int" public="true" private="false" save="false" desc="å¯è§æ€§æ•°æ®(int)"/>	
+        <property name="VisDataStr" type="widestr" public="true" private="false" save="false" desc="å¯è§æ€§æ•°æ®(widestr)"/>
+        <property name="SelectSound" type="string" public="false" private="false" save="false" desc="npcè¢«é€‰æ‹©æ—¶çš„éŸ³æ•ˆ"/>
+        <property name="NPCCanSelect" type="word" public="true" private="false" save="false" desc="npcèƒ½å¦è¢«é€‰ä¸­,0è¢«é€‰ä¸­,1ä¸è¢«é€‰ä¸­"/>
+        <property name="FirstAttacker" type="widestr" public="false" private="false" save="false" desc="æ”»å‡»çš„ç¬¬ä¸€ä¸ªäºº"/>
+		<property name="Stiff" type="float" public="false" private="false" save="false" desc="ç¡¬ç›´"/>
+        <property name="PeaceAction" type="string" public="false" private="false" save="false" desc="å’Œå¹³å¾…æœºåŠ¨ä½œé›†(ä¾›ç­–åˆ’é…ç½®)"/>
+        <property name="FightAction" type="string" public="false" private="false" save="false" desc="æˆ˜æ–—å¾…æœºåŠ¨ä½œé›†(ä¾›ç­–åˆ’é…ç½®)"/>
+        <property name="TalkAction" type="string" public="false" private="false" save="false" desc="è¯´è¯å¾…æœºåŠ¨ä½œé›†(ä¾›ç­–åˆ’é…ç½®)"/>
+        <property name="PeaceRandomAction" type="string" public="true" private="false" save="false" desc="å’Œå¹³å¾…æœºåŠ¨ä½œé›†(ä¾›clientæŸ¥è¯¢)"/>
+        <property name="FightRandomAction" type="string" public="true" private="false" save="false" desc="æˆ˜æ–—å¾…æœºåŠ¨ä½œé›†(ä¾›clientæŸ¥è¯¢)"/>
+        <property name="TalkRandomAction" type="string" public="true" private="false" save="false" desc="è¯´è¯å¾…æœºåŠ¨ä½œé›†(ä¾›clientæŸ¥è¯¢)"/>
+        <property name="BornTime" type="int64" public="true" private="false" save="false" desc="npcå‡ºç”Ÿçš„æœåŠ¡å™¨æ—¶é—´"/>
+		<property name="HeadEffect" type="int" public="true" private="false" save="false" desc="å¤´é¡¶æ˜¾ç¤ºç‰¹æ•ˆç±»åž‹"/>
+		<property name="NpcNickName" type="widestr" public="true" private="false" save="false" desc="åˆ«å"/>
 		<property name="ExtraInfo" type="string" public="true" private="false" save="false" desc="Tip"/>
-		<property name="Guid" type="string" public="false" private="false" save="false" desc="npcµÄguid"/>
-		<property name="RoleHideAdd" type="int" public="false" private="false" save="false" desc="NPCµÄÏÔÊ¾ºÍÒþÉí"/>
+		<property name="Guid" type="string" public="false" private="false" save="false" desc="npcçš„guid"/>
+		<property name="RoleHideAdd" type="int" public="false" private="false" save="false" desc="NPCçš„æ˜¾ç¤ºå’Œéšèº«"/>
     </properties>
-    <!-- ±íÊôÐÔ -->
+    <!-- è¡¨å±žæ€§ -->
     <records>
-        <record name="skill_queue_rec" cols="8" maxrows="16" save="false" public="false" private="false" desc="npc¼¼ÄÜµÈ´ýÊÍ·ÅÁÐ±í">
-          <column type="object" desc="¼¼ÄÜ¶ÔÏó"/>
-          <column type="object" desc="¼¼ÄÜÊÍ·ÅÄ¿±ê"/>
-          <column type="dword" desc="Ñ­»·ÊÍ·Å´ÎÊý"/>
-          <column type="dword" desc="¼¼ÄÜÓÅÏÈ¼¶"/>
-          <column type="dword" desc="ÊÇ·ñÊÇ¶ÔÖ¸¶¨µØµãÊÍ·ÅµÄ¼¼ÄÜ"/>
-          <column type="float" desc="Ä¿±êx×ø±ê"/>
-          <column type="float" desc="Ä¿±êy×ø±ê"/>
-          <column type="float" desc="Ä¿±êz×ø±ê"/>
+        <record name="skill_queue_rec" cols="8" maxrows="16" save="false" public="false" private="false" desc="npcæŠ€èƒ½ç­‰å¾…é‡Šæ”¾åˆ—è¡¨">
+          <column type="object" desc="æŠ€èƒ½å¯¹è±¡"/>
+          <column type="object" desc="æŠ€èƒ½é‡Šæ”¾ç›®æ ‡"/>
+          <column type="dword" desc="å¾ªçŽ¯é‡Šæ”¾æ¬¡æ•°"/>
+          <column type="dword" desc="æŠ€èƒ½ä¼˜å…ˆçº§"/>
+          <column type="dword" desc="æ˜¯å¦æ˜¯å¯¹æŒ‡å®šåœ°ç‚¹é‡Šæ”¾çš„æŠ€èƒ½"/>
+          <column type="float" desc="ç›®æ ‡xåæ ‡"/>
+          <column type="float" desc="ç›®æ ‡yåæ ‡"/>
+          <column type="float" desc="ç›®æ ‡zåæ ‡"/>
         </record>
     </records>
-    <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+    <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
     <includes>
-        <path name="struct\internals\internals_npc.xml" desc="ÄÚ²¿ÊôÐÔ"/>
-        <path name="struct\rule\Common\motion.xml" desc="ÒÆ¶¯"/>
-        <path name="struct\rule\Common\state.xml" desc="Í¨ÓÃ×´Ì¬ÊôÐÔ"/>
-        <path name="struct\rule\Common\hide.xml" desc="ÒþÉí"/>
-        <path name="struct\npc_property\npcchange.xml" desc="npc±äÉí"/>
-        <path name="struct\common\trigger.xml" desc="´¥·¢Æ÷"/>
+        <path name="struct\internals\internals_npc.xml" desc="å†…éƒ¨å±žæ€§"/>
+        <path name="struct\rule\Common\motion.xml" desc="ç§»åŠ¨"/>
+        <path name="struct\rule\Common\state.xml" desc="é€šç”¨çŠ¶æ€å±žæ€§"/>
+        <path name="struct\rule\Common\hide.xml" desc="éšèº«"/>
+        <path name="struct\npc_property\npcchange.xml" desc="npcå˜èº«"/>
+        <path name="struct\common\trigger.xml" desc="è§¦å‘å™¨"/>
     </includes>
 </object>

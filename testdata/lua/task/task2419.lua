@@ -1,25 +1,25 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task2419.lua
--- @ ½Å±¾¹¦ÄÜ: 2419ºÅÈÎÎñÖ´ĞĞ½Å±¾
--- @ ´´½¨Õß:   huangmw
--- @ ´´½¨ÈÕÆÚ: 2009.4.22
+-- @ è„šæœ¬åç§°: task2419.lua
+-- @ è„šæœ¬åŠŸèƒ½: 2419å·ä»»åŠ¡æ‰§è¡Œè„šæœ¬
+-- @ åˆ›å»ºè€…:   huangmw
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.4.22
 -----------------------------------------
 require("define")
 
---¸úËæNPCµÄID
+--è·ŸéšNPCçš„ID
 local CONVOY_NPC_ID = "Convoy2419"
---ÒªÉ¾³ıµÄNPC ID
+--è¦åˆ é™¤çš„NPC ID
 local DELETE_NPC_ID = "BossClone009001"
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	--Íæ¼Ò½ÓÊÜ2419ºÅÈÎÎñºó,É¾³ıÔ­npc,°Ñ¸úËænpc·Åµ½Ô­Î»ÖÃÉÏ
+	--ç©å®¶æ¥å—2419å·ä»»åŠ¡å,åˆ é™¤åŸnpc,æŠŠè·Ÿéšnpcæ”¾åˆ°åŸä½ç½®ä¸Š
 	if not nx_exists(npc) then
 		return
 	end
@@ -28,7 +28,7 @@ function Task_After_Accept(player, npc, taskid)
 		return
 	end
 	
-	--1500ºÁÃëºóÉ¾³ıÔ­npc
+	--1500æ¯«ç§’ååˆ é™¤åŸnpc
 	if nx_type(npc) ~= 2 then
 		if nx_find_property(npc, "LifeTime") then
 			nx_set_property(npc, "LifeTime", nx_int(1500))
@@ -39,13 +39,13 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)	
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end

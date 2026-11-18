@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-
-	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 // LogicClass 是服务器逻辑对象类型树的节点（logic_class.xml）。
@@ -34,13 +32,13 @@ type xmlClass struct {
 	Children []xmlClass `xml:"class"`
 }
 
-// LoadLogicClass 解析 logic_class.xml（GBK，嵌套任意深度）。
+// LoadLogicClass 解析 logic_class.xml（UTF-8/GBK 自适应，嵌套任意深度）。
 func LoadLogicClass(path string) (*LogicClassTree, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	utf8, err := simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+	utf8, err := toUTF8(raw)
 	if err != nil {
 		return nil, fmt.Errorf("%s: GBK 转码失败: %w", path, err)
 	}

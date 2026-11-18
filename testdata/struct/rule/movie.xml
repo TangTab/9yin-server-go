@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¾çÇéÏà¹ØµÄÊôÐÔ-->
+<!--å‰§æƒ…ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
-		<record name="TeamMovieRec" cols="1" maxrows="256" save="false" public="false" private="false" desc="×é¶Ó¾çÇéµÄÆäËûÍæ¼Ò">
-			<column type="object" desc="ÆäËû¶ÓÓÑ"/>
+		<record name="TeamMovieRec" cols="1" maxrows="256" save="false" public="false" private="false" desc="ç»„é˜Ÿå‰§æƒ…çš„å…¶ä»–çŽ©å®¶">
+			<column type="object" desc="å…¶ä»–é˜Ÿå‹"/>
 		</record>
 	</records>
 </object>

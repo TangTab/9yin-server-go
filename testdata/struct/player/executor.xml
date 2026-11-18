@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--Ö´ÐÐÕßÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ‰§è¡Œè€…ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="EXEV" type="int" public="false" private="false" save="false" desc="µ±Ç°Ö´ÐÐÁ¦"/>
-		<property name="ExecutorState" type="int" public="false" private="false" save="false" desc="µ±Ç°×ËÌ¬"/>
+		<property name="EXEV" type="int" public="false" private="false" save="false" desc="å½“å‰æ‰§è¡ŒåŠ›"/>
+		<property name="ExecutorState" type="int" public="false" private="false" save="false" desc="å½“å‰å§¿æ€"/>
 	</properties>
 	<records>
 	</records>

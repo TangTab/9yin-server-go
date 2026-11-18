@@ -1,28 +1,28 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task_s_24002.lua
--- @ ½Å±¾¹¦ÄÜ: 24002ºÅÈÎÎñÌí¼ÓÒ»ĞĞ½ø¶È£¬×î´ó½ø¶ÈÎª1
--- @ ´´½¨Õß:   fengqw
--- @ ´´½¨ÈÕÆÚ: 2009.10.27
+-- @ è„šæœ¬åç§°: task_s_24002.lua
+-- @ è„šæœ¬åŠŸèƒ½: 24002å·ä»»åŠ¡æ·»åŠ ä¸€è¡Œè¿›åº¦ï¼Œæœ€å¤§è¿›åº¦ä¸º1
+-- @ åˆ›å»ºè€…:   fengqw
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.10.27
 -----------------------------------------
 require("task\\task_define")
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
-	-- µ±Ç°³¡¾°
+	-- å½“å‰åœºæ™¯
 	local scene = nx_get_scene()
 	local scene_id = nx_query_property(scene, "ConfigID")
 	local scene_name = nx_query_property(scene, "Name")
 	local track_info = "useitem24124"
 	local target_config = "monf042200"
 
-	-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ
+	-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ
 	--local row = nx_add_record_row_values(player, REC_TASK_PLAN, nx_int(taskid), subtype_useitem, 0,
 	               --0, nx_int(0), nx_int(1), "useitem_17f", nx_string(target_config), track_info, 0)
 	local row = nx_add_taskrecord_row_values(player, nx_int(taskid), subtype_useitem, 0,
@@ -38,13 +38,13 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end

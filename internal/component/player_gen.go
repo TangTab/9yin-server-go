@@ -733,15 +733,15 @@ var PlayerChatroomMeta = ComponentMeta{
 	Name: "PlayerChatroom",
 	File: "player/chatroom.xml",
 	Fields: []FieldMeta{
-		{GoName: "ChatRoomID", PropName: "ChatRoomID", PropType: "int", GoType: "int32", Private: true, Desc: "鑱婂ぉ瀹�d鍙�"},
-		{GoName: "Identity", PropName: "Identity", PropType: "byte", GoType: "uint8", Desc: "韬�唤"},
-		{GoName: "ChatRoomTitle", PropName: "ChatRoomTitle", PropType: "widestr", GoType: "string", Private: true, Desc: "鑱婂ぉ瀹や富棰�"},
+		{GoName: "ChatRoomID", PropName: "ChatRoomID", PropType: "int", GoType: "int32", Private: true, Desc: "聊天室id号"},
+		{GoName: "Identity", PropName: "Identity", PropType: "byte", GoType: "uint8", Desc: "身份"},
+		{GoName: "ChatRoomTitle", PropName: "ChatRoomTitle", PropType: "widestr", GoType: "string", Private: true, Desc: "聊天室主题"},
 	},
 	Records: []RecordMeta{
-		{Name: "chatroom_playerlist_rec", Cols: 3, MaxRows: 11, Private: true, Desc: "闃熶紞鎴愬憳鍒楄〃", Columns: []ColumnMeta{
-			{Index: 0, PropType: "widestr", GoType: "string", Desc: "闃熷憳鍚�"},
+		{Name: "chatroom_playerlist_rec", Cols: 3, MaxRows: 11, Private: true, Desc: "队伍成员列表", Columns: []ColumnMeta{
+			{Index: 0, PropType: "widestr", GoType: "string", Desc: "队员名"},
 			{Index: 1, PropType: "string", GoType: "string", Desc: "Photo"},
-			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "韬�唤"},
+			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "身份"},
 		}},
 	},
 }
@@ -1569,27 +1569,27 @@ var PlayerPersonalcarrierMeta = ComponentMeta{
 	Name: "PlayerPersonalcarrier",
 	File: "player/personalcarrier.xml",
 	Fields: []FieldMeta{
-		{GoName: "CurCarrierPageIndex", PropName: "CurCarrierPageIndex", PropType: "int", GoType: "int32", Desc: "褰撳墠娴忚�杞﹀簱椤甸潰绱㈠紩"},
-		{GoName: "CurDepartCarrier", PropName: "CurDepartCarrier", PropType: "Object", GoType: "ecs.EntityID", Desc: "褰撳墠鍙�敜鐨勮浇鍏�"},
-		{GoName: "CarrierLogOutOfflineTime", PropName: "CarrierLogOutOfflineTime", PropType: "int64", GoType: "int64", Save: true, Desc: "鐧诲嚭鏃堕棿"},
+		{GoName: "CurCarrierPageIndex", PropName: "CurCarrierPageIndex", PropType: "int", GoType: "int32", Desc: "当前浏览车库页面索引"},
+		{GoName: "CurDepartCarrier", PropName: "CurDepartCarrier", PropType: "Object", GoType: "ecs.EntityID", Desc: "当前召唤的载具"},
+		{GoName: "CarrierLogOutOfflineTime", PropName: "CarrierLogOutOfflineTime", PropType: "int64", GoType: "int64", Save: true, Desc: "登出时间"},
 	},
 	Records: []RecordMeta{
-		{Name: "PersonalCarrierMake", Cols: 7, MaxRows: 1, Save: true, Desc: "涓�汉杞藉叿鍒堕€犺溅闂磋〃", Columns: []ColumnMeta{
-			{Index: 0, PropType: "string", GoType: "string", Desc: "杞藉叿搴忓垪鍙�"},
-			{Index: 1, PropType: "word", GoType: "uint16", Desc: "杞藉叿ID"},
-			{Index: 2, PropType: "Object", GoType: "ecs.EntityID", Desc: "鐢熶骇涓�复鏃舵樉绀虹殑杞藉叿瀵硅薄 "},
-			{Index: 3, PropType: "int64", GoType: "int64", Desc: "寮€濮嬫椂闂�"},
-			{Index: 4, PropType: "int64", GoType: "int64", Desc: "缁撴潫鏃堕棿"},
-			{Index: 5, PropType: "string", GoType: "string", Desc: "寮€鍚�埗閫犵殑鐜╁�UID"},
-			{Index: 6, PropType: "string", GoType: "string", Desc: "涓�汉鏉愭枡娑堣€� 鏍煎紡:鐗╁搧A,鏁伴噺;鐗╁搧B,鏁伴噺B..."},
+		{Name: "PersonalCarrierMake", Cols: 7, MaxRows: 1, Save: true, Desc: "个人载具制造车间表", Columns: []ColumnMeta{
+			{Index: 0, PropType: "string", GoType: "string", Desc: "载具序列号"},
+			{Index: 1, PropType: "word", GoType: "uint16", Desc: "载具ID"},
+			{Index: 2, PropType: "Object", GoType: "ecs.EntityID", Desc: "生产中临时显示的载具对象 "},
+			{Index: 3, PropType: "int64", GoType: "int64", Desc: "开始时间"},
+			{Index: 4, PropType: "int64", GoType: "int64", Desc: "结束时间"},
+			{Index: 5, PropType: "string", GoType: "string", Desc: "开启制造的玩家UID"},
+			{Index: 6, PropType: "string", GoType: "string", Desc: "个人材料消耗 格式:物品A,数量;物品B,数量B..."},
 		}},
-		{Name: "PersonalCarrierStore", Cols: 6, MaxRows: 100, Private: true, Save: true, Desc: "涓�汉杞藉叿鍒堕€犺溅闂磋〃", Columns: []ColumnMeta{
-			{Index: 0, PropType: "string", GoType: "string", Desc: "杞藉叿搴忓垪鍙�"},
-			{Index: 1, PropType: "word", GoType: "uint16", Desc: "杞藉叿ID"},
-			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "鐘舵€� 0 - 鍋滈潬鐘舵€� - 1 鍑哄彂鐘舵€�"},
-			{Index: 3, PropType: "word", GoType: "uint16", Desc: "杞藉叿琛€閲�"},
-			{Index: 4, PropType: "word", GoType: "uint16", Desc: "杞藉叿鑳介噺"},
-			{Index: 5, PropType: "string", GoType: "string", Desc: "鍒堕€犳椂闂�"},
+		{Name: "PersonalCarrierStore", Cols: 6, MaxRows: 100, Private: true, Save: true, Desc: "个人载具制造车间表", Columns: []ColumnMeta{
+			{Index: 0, PropType: "string", GoType: "string", Desc: "载具序列号"},
+			{Index: 1, PropType: "word", GoType: "uint16", Desc: "载具ID"},
+			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "状态 0 - 停靠状态 - 1 出发状态"},
+			{Index: 3, PropType: "word", GoType: "uint16", Desc: "载具血量"},
+			{Index: 4, PropType: "word", GoType: "uint16", Desc: "载具能量"},
+			{Index: 5, PropType: "string", GoType: "string", Desc: "制造时间"},
 		}},
 	},
 }
@@ -2081,28 +2081,28 @@ var PlayerShortcutMeta = ComponentMeta{
 	Name: "PlayerShortcut",
 	File: "player/shortcut.xml",
 	Fields: []FieldMeta{
-		{GoName: "ShortcutKey", PropName: "ShortcutKey", PropType: "string", GoType: "string", Private: true, Save: true, Desc: "蹇�嵎閿�"},
-		{GoName: "GunManLeftSkill", PropName: "GunManLeftSkill", PropType: "string", GoType: "string", Private: true, Save: true, Desc: "绁炴灙鎵嬪乏閿�偣鍑婚噴鏀炬妧鑳絀D"},
+		{GoName: "ShortcutKey", PropName: "ShortcutKey", PropType: "string", GoType: "string", Private: true, Save: true, Desc: "快捷键"},
+		{GoName: "GunManLeftSkill", PropName: "GunManLeftSkill", PropType: "string", GoType: "string", Private: true, Save: true, Desc: "神枪手左键点击释放技能ID"},
 	},
 	Records: []RecordMeta{
-		{Name: "shortcut_rec", Cols: 4, MaxRows: 1024, Private: true, Save: true, Desc: "蹇�嵎鏍忚〃", Columns: []ColumnMeta{
-			{Index: 0, PropType: "word", GoType: "uint16", Desc: "搴忓彿"},
-			{Index: 1, PropType: "string", GoType: "string", Desc: "鍙傛暟1"},
-			{Index: 2, PropType: "string", GoType: "string", Desc: "鍙傛暟2"},
-			{Index: 3, PropType: "byte", GoType: "uint8", Desc: "绫诲瀷锛屽ぇ浜�0鐨勪笉鑳戒粠蹇�嵎鏍忓垹闄�"},
+		{Name: "shortcut_rec", Cols: 4, MaxRows: 1024, Private: true, Save: true, Desc: "快捷栏表", Columns: []ColumnMeta{
+			{Index: 0, PropType: "word", GoType: "uint16", Desc: "序号"},
+			{Index: 1, PropType: "string", GoType: "string", Desc: "参数1"},
+			{Index: 2, PropType: "string", GoType: "string", Desc: "参数2"},
+			{Index: 3, PropType: "byte", GoType: "uint8", Desc: "类型，大于0的不能从快捷栏删除"},
 		}},
-		{Name: "equip_skill_rec", Cols: 4, MaxRows: 1024, Private: true, Save: true, Desc: "鎶€鑳芥爮瑁呭�琛�", Columns: []ColumnMeta{
-			{Index: 0, PropType: "word", GoType: "uint16", Desc: "搴忓彿"},
-			{Index: 1, PropType: "string", GoType: "string", Desc: "鎶€鑳藉彿"},
-			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "榛樿�1寰呮墿灞曠敤"},
-			{Index: 3, PropType: "word", GoType: "uint16", Desc: "shortcut_rec涓�殑index"},
+		{Name: "equip_skill_rec", Cols: 4, MaxRows: 1024, Private: true, Save: true, Desc: "技能栏装备表", Columns: []ColumnMeta{
+			{Index: 0, PropType: "word", GoType: "uint16", Desc: "序号"},
+			{Index: 1, PropType: "string", GoType: "string", Desc: "技能号"},
+			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "默认1待扩展用"},
+			{Index: 3, PropType: "word", GoType: "uint16", Desc: "shortcut_rec中的index"},
 		}},
-		{Name: "equip_skill_rec_all", Cols: 5, MaxRows: 18, Private: true, Save: true, Desc: "鎶€鑳芥爮瑁呭�琛ㄦ€昏〃锛堝寘鍚�笁涓�妧鑳芥爮鐨勮�褰曪紝鍓�6琛屼负SKILLTYPE1锛屼腑闂�6琛屼负SKILLTYPE2锛屾渶鍚�6琛屼负SKILLTYPE3锛�", Columns: []ColumnMeta{
-			{Index: 0, PropType: "word", GoType: "uint16", Desc: "搴忓彿"},
-			{Index: 1, PropType: "string", GoType: "string", Desc: "鎶€鑳藉彿"},
-			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "榛樿�1寰呮墿灞曠敤"},
-			{Index: 3, PropType: "word", GoType: "uint16", Desc: "shortcut_rec涓�殑index"},
-			{Index: 4, PropType: "byte", GoType: "uint8", Desc: "1琛ㄧず绌猴紝2琛ㄧず闈炵┖"},
+		{Name: "equip_skill_rec_all", Cols: 5, MaxRows: 18, Private: true, Save: true, Desc: "技能栏装备表总表（包含三个技能栏的记录，前6行为SKILLTYPE1，中间6行为SKILLTYPE2，最后6行为SKILLTYPE3）", Columns: []ColumnMeta{
+			{Index: 0, PropType: "word", GoType: "uint16", Desc: "序号"},
+			{Index: 1, PropType: "string", GoType: "string", Desc: "技能号"},
+			{Index: 2, PropType: "byte", GoType: "uint8", Desc: "默认1待扩展用"},
+			{Index: 3, PropType: "word", GoType: "uint16", Desc: "shortcut_rec中的index"},
+			{Index: 4, PropType: "byte", GoType: "uint8", Desc: "1表示空，2表示非空"},
 		}},
 	},
 }

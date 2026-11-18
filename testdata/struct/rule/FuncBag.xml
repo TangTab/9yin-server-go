@@ -1,40 +1,40 @@
 <?xml version='1.0' encoding='gb2312' ?>
 <object>
 	<properties>
-	<property name="PrayFunc"  type="int" public="false" private="true" save="false" desc="Æí¸£¹¦ÄÜ" />
-	<property name="GuildFunc"  type="int" public="false" private="true" save="false" desc="¹¤»á¹¦ÄÜ" />
-	<property name="TransPoint"  type="int" public="true" private="true" save="false" desc="½»Í¨µã±àºÅ" />
-	<property name="OpenOtherPoints"  type="string" public="false" private="true" save="false" desc="¶îÍâ¼¤»îµÄ·ÉÐÐµã" />
-	<property name="BConfigId"  type="string" public="false" private="true" save="false" desc="Õ½¶·ÔØ¾ß¹¦ÄÜ" />
-	<property name="BCFunc"  type="string" public="false" private="true" save="false" desc="Õ½¶·ÔØ¾ß¹¦ÄÜ" />
-	<property name="BCDesc"  type="string" public="false" private="true" save="false" desc="Õ½¶·ÔØ¾ß¹¦ÄÜ,¶Ô»°ÏÔÊ¾ÎÄ×ÖµÄid" />
-	<property name="BattlewarFunc"  type="int" public="false" private="true" save="false" desc="Õ½³¡¹¦ÄÜ" />
-	<property name="StrengthFunc"  type="int" public="false" private="true" save="false" desc="µÀ¾ßÀà¹¦ÄÜ" />
-	<property name="CompoundFunc"  type="int" public="false" private="true" save="false" desc="µÀ¾ßÀà¹¦ÄÜ" />
-	<property name="HotelFunc"  type="int" public="false" private="true" save="false" desc="ÂÃµê" />
-	<property name="SlotFunc"  type="int" public="false" private="true" save="false" desc="µÀ¾ßÀà¹¦ÄÜ" />
-	<property name="TransJob"  type="string" public="false" private="true" save="false" desc="×ªÖ°¹¦ÄÜ" />
-	<property name="AH_Camp"  type="int" public="false" private="true" save="false" desc="ÅÄÂôÐÐÕóÓª" />
-	<property name="ResourceFunc"  type="int" public="true" private="true" save="false" desc="¹ú¼Ò×ÊÔ´" />
-	<property name="AreaId"  type="string" public="true" private="true" save="false" desc="¹ú¼Ò×ÊÔ´" />
-	<property name="FactoryFunc"  type="int" public="true" private="true" save="false" desc="¹¤³§¹¦ÄÜ" />
-	<property name="DepotID"  type="int" public="false" private="true" save="false" desc="²Ö¿â¹¦ÄÜ" />
-	<property name="ArenaFunc"  type="int" public="false" private="true" save="false" desc="¾º¼¼³¡¹¦ÄÜ" />
-	<property name="HasBlackMarketCSM"  type="int" public="false" private="true" save="false" desc="ºÚÊÐ¹Òµ¥¹¦ÄÜ" />
-	<property name="HasBlackMarketShow"  type="int" public="false" private="true" save="false" desc="ºÚÊÐ¾ºÅÄ¹¦ÄÜ" />
-	<property name="ManorFightFunc"  type="int" public="false" private="true" save="false" desc="¹ÍÓ¶±ø" />
-	<property name="OpenBoxFunc"  type="int" public="false" private="true" save="false" desc="ÁìµØÕù¶á´ò¿ª±¦Ïä" />
-	<property name="FireWarFunc"  type="int" public="false" private="true" save="false" desc="ÁìµØÕ½ÐûÕ½" />   
-  <property name="MakeBlack"  type="int" public="false" private="false" save="false" desc="Éú²úºÚ½ð¹¦ÄÜ²Ëµ¥" /> 
-  <property name="AddMake"  type="int" public="false" private="false" save="false" desc="Éú²úºÚ½ð¹¦ÄÜ²Ëµ¥" /> 
-  <property name="MenuDesc"  type="string" public="false" private="true" save="false" desc="´¥·¢Æ÷²Ëµ¥" />
-  <property name="ArenaPlaneFunc"  type="int" public="false" private="true" save="false" desc="¾º¼¼ÏµÍ³" />
-  <property name="HasResourceMarket"  type="int" public="false" private="true" save="false" desc="×ÊÔ´ÊÐ³¡¹¦ÄÜ²Ëµ¥" />
+	<property name="PrayFunc"  type="int" public="false" private="true" save="false" desc="ç¥ˆç¦åŠŸèƒ½" />
+	<property name="GuildFunc"  type="int" public="false" private="true" save="false" desc="å·¥ä¼šåŠŸèƒ½" />
+	<property name="TransPoint"  type="int" public="true" private="true" save="false" desc="äº¤é€šç‚¹ç¼–å·" />
+	<property name="OpenOtherPoints"  type="string" public="false" private="true" save="false" desc="é¢å¤–æ¿€æ´»çš„é£žè¡Œç‚¹" />
+	<property name="BConfigId"  type="string" public="false" private="true" save="false" desc="æˆ˜æ–—è½½å…·åŠŸèƒ½" />
+	<property name="BCFunc"  type="string" public="false" private="true" save="false" desc="æˆ˜æ–—è½½å…·åŠŸèƒ½" />
+	<property name="BCDesc"  type="string" public="false" private="true" save="false" desc="æˆ˜æ–—è½½å…·åŠŸèƒ½,å¯¹è¯æ˜¾ç¤ºæ–‡å­—çš„id" />
+	<property name="BattlewarFunc"  type="int" public="false" private="true" save="false" desc="æˆ˜åœºåŠŸèƒ½" />
+	<property name="StrengthFunc"  type="int" public="false" private="true" save="false" desc="é“å…·ç±»åŠŸèƒ½" />
+	<property name="CompoundFunc"  type="int" public="false" private="true" save="false" desc="é“å…·ç±»åŠŸèƒ½" />
+	<property name="HotelFunc"  type="int" public="false" private="true" save="false" desc="æ—…åº—" />
+	<property name="SlotFunc"  type="int" public="false" private="true" save="false" desc="é“å…·ç±»åŠŸèƒ½" />
+	<property name="TransJob"  type="string" public="false" private="true" save="false" desc="è½¬èŒåŠŸèƒ½" />
+	<property name="AH_Camp"  type="int" public="false" private="true" save="false" desc="æ‹å–è¡Œé˜µè¥" />
+	<property name="ResourceFunc"  type="int" public="true" private="true" save="false" desc="å›½å®¶èµ„æº" />
+	<property name="AreaId"  type="string" public="true" private="true" save="false" desc="å›½å®¶èµ„æº" />
+	<property name="FactoryFunc"  type="int" public="true" private="true" save="false" desc="å·¥åŽ‚åŠŸèƒ½" />
+	<property name="DepotID"  type="int" public="false" private="true" save="false" desc="ä»“åº“åŠŸèƒ½" />
+	<property name="ArenaFunc"  type="int" public="false" private="true" save="false" desc="ç«žæŠ€åœºåŠŸèƒ½" />
+	<property name="HasBlackMarketCSM"  type="int" public="false" private="true" save="false" desc="é»‘å¸‚æŒ‚å•åŠŸèƒ½" />
+	<property name="HasBlackMarketShow"  type="int" public="false" private="true" save="false" desc="é»‘å¸‚ç«žæ‹åŠŸèƒ½" />
+	<property name="ManorFightFunc"  type="int" public="false" private="true" save="false" desc="é›‡ä½£å…µ" />
+	<property name="OpenBoxFunc"  type="int" public="false" private="true" save="false" desc="é¢†åœ°äº‰å¤ºæ‰“å¼€å®ç®±" />
+	<property name="FireWarFunc"  type="int" public="false" private="true" save="false" desc="é¢†åœ°æˆ˜å®£æˆ˜" />   
+  <property name="MakeBlack"  type="int" public="false" private="false" save="false" desc="ç”Ÿäº§é»‘é‡‘åŠŸèƒ½èœå•" /> 
+  <property name="AddMake"  type="int" public="false" private="false" save="false" desc="ç”Ÿäº§é»‘é‡‘åŠŸèƒ½èœå•" /> 
+  <property name="MenuDesc"  type="string" public="false" private="true" save="false" desc="è§¦å‘å™¨èœå•" />
+  <property name="ArenaPlaneFunc"  type="int" public="false" private="true" save="false" desc="ç«žæŠ€ç³»ç»Ÿ" />
+  <property name="HasResourceMarket"  type="int" public="false" private="true" save="false" desc="èµ„æºå¸‚åœºåŠŸèƒ½èœå•" />
   <property name="PVPTaskID"  type="string" public="false" private="true" save="false" desc="PVP_Convoy_TaskID" />    
   </properties>
 
  
- <!-- ±íÊôÐÔ -->
+ <!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
 </object>

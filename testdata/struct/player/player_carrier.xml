@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="gb2312" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Íæ¼ÒÆï³Ë-->
+<!--çŽ©å®¶éª‘ä¹˜-->
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-		<property name="LastCarrierID" type="string" public="false" private="false" save="true" desc="¼ÇÂ¼ÏÂÏß¹Ì¶¨Â·ÏßµÄÔØ¾ßid"/>
-		<property name="LastCarrierPathStep" type="int" public="false" private="false" save="true" desc="¼ÇÂ¼ÔØ¾ß¹Ì¶¨Â·ÏßµÄµÚ¼¸²½"/>
-		<property name="LastCarrierHP" type="int" public="false" private="false" save="true" desc="¼ÇÂ¼ÔØ¾ßµÄÑªÁ¿"/>
-		<property name="LastCarrierMP" type="int" public="false" private="false" save="true" desc="¼ÇÂ¼ÔØ¾ßµÄÀ¶"/>
-		<property name="LastCarrierBuffID"    type="string" public="false" private="false" save="false" desc="¼ÇÂ¼ÔØ¾ß¶à¸öbuffµÄbuffid"/>
-		<property name="LastCarrierLeaveTime" type="string" public="false" private="false" save="false" desc="¼ÇÂ¼ÔØ¾ß¶à¸öbuffÊ£ÓàµÄÊ±¼ä"/>
+		<property name="LastCarrierID" type="string" public="false" private="false" save="true" desc="è®°å½•ä¸‹çº¿å›ºå®šè·¯çº¿çš„è½½å…·id"/>
+		<property name="LastCarrierPathStep" type="int" public="false" private="false" save="true" desc="è®°å½•è½½å…·å›ºå®šè·¯çº¿çš„ç¬¬å‡ æ­¥"/>
+		<property name="LastCarrierHP" type="int" public="false" private="false" save="true" desc="è®°å½•è½½å…·çš„è¡€é‡"/>
+		<property name="LastCarrierMP" type="int" public="false" private="false" save="true" desc="è®°å½•è½½å…·çš„è“"/>
+		<property name="LastCarrierBuffID"    type="string" public="false" private="false" save="false" desc="è®°å½•è½½å…·å¤šä¸ªbuffçš„buffid"/>
+		<property name="LastCarrierLeaveTime" type="string" public="false" private="false" save="false" desc="è®°å½•è½½å…·å¤šä¸ªbuffå‰©ä½™çš„æ—¶é—´"/>
     </properties>
 </object>

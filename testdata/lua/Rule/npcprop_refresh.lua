@@ -1,11 +1,11 @@
 ---------------------------------------------------
--- @ ÎÄ¼şÃû³Æ: npc_prop_refresh.lua
--- @ ÎÄ¼ş¹¦ÄÜ: ¼ÆËãNPCÊôĞÔË¢ĞÂ
--- @ ×÷Õß    : dReAmSun (ËïÃ÷½Ü)
--- @ ÈÕÆÚ    : 2010-3-10
+-- @ æ–‡ä»¶åç§°: npc_prop_refresh.lua
+-- @ æ–‡ä»¶åŠŸèƒ½: è®¡ç®—NPCå±æ€§åˆ·æ–°
+-- @ ä½œè€…    : dReAmSun (å­™æ˜æ°)
+-- @ æ—¥æœŸ    : 2010-3-10
 ---------------------------------------------------
 
--- ÊôĞÔÃ¶¾Ù
+-- å±æ€§æšä¸¾
 local Npc_HPBase = 2
 local Npc_MPBase = 3
 local Npc_PhyDefBase = 9
@@ -18,32 +18,32 @@ local Npc_JujDefBase = 15
 local Npc_MasDefBase = 16
 local Npc_StiDefBase = 17
 
--- ¸ù¾İÒ»¼¶ÊôĞÔ¼ÆËã¶ş¼¶ÊôĞÔ
+-- æ ¹æ®ä¸€çº§å±æ€§è®¡ç®—äºŒçº§å±æ€§
 function compute_prop_value(self)
 	
-	-- ±£»¤
+	-- ä¿æŠ¤
 	if not nx_exists(self) then
 		return
 	end
 	
-	-- µÈ¼¶
+	-- ç­‰çº§
 	local level = nx_query_property(self, "Level")
 
-	-- µÃµ½Ò»¼¶ÊôĞÔÖµ
+	-- å¾—åˆ°ä¸€çº§å±æ€§å€¼
 	local str = nx_query_property(self, "Str")
 	local dex = nx_query_property(self, "Dex")
 	local ing = nx_query_property(self, "Ing")
 	local spi = nx_query_property(self, "Spi")
 	local sta = nx_query_property(self, "Sta")
 	
-	-- µÃµ½¸½¼ÓÊôĞÔÊıÖµ
+	-- å¾—åˆ°é™„åŠ å±æ€§æ•°å€¼
 	local strAdd = nx_query_property(self, "StrAdd")
 	local dexAdd = nx_query_property(self, "DexAdd")
 	local ingAdd = nx_query_property(self, "IngAdd")
 	local spiAdd = nx_query_property(self, "SpiAdd")
 	local staAdd = nx_query_property(self, "StaAdd")
 	
-	-- µÃµ½·ÀÓùÏµÊı
+	-- å¾—åˆ°é˜²å¾¡ç³»æ•°
 	local phydefbase = nx_query_npc_float(self, Npc_PhyDefBase)
 	local pimagicdefbase = nx_query_npc_float(self, Npc_PIMagicDefBase)
 	local aimagicdefbase = nx_query_npc_float(self, Npc_AIMagicDefBase)
@@ -54,7 +54,7 @@ function compute_prop_value(self)
 	local masdefbase = nx_query_npc_float(self, Npc_MasDefBase)
 	local stidefbase = nx_query_npc_float(self, Npc_StiDefBase)
 		
-	-- ¸ù¾İ¹«Ê½¼ÆËã¶ş¼¶ÊôĞÔ
+	-- æ ¹æ®å…¬å¼è®¡ç®—äºŒçº§å±æ€§
 	-- MaxHP
 	local maxhp = 2 * (str + strAdd) + 10 * (sta + staAdd)
 	maxhp = maxhp * (1 + level * 0.02) + 10 * sta * nx_number(nx_query_npc_float(self, Npc_HPBase))

@@ -2,9 +2,9 @@
 -- FILENAME	: movie\\after_movie_action.lua
 -- COPYRIGHT: Snail Game
 -- AUTHOR	: Mrkk
--- DATE		: 2010Äê4ÔÂ8ÈÕ
+-- DATE		: 2010å¹´4æœˆ8æ—¥
 -------------------------------------------------------------------------------
--- DESC		: ¹ØÓÚ Îäµ±ÈÎÎñÖ®"ÎªÃñ³ı¶ñ"¾çÇé2 µÄ´¦ÀíÂß¼­
+-- DESC		: å…³äº æ­¦å½“ä»»åŠ¡ä¹‹"ä¸ºæ°‘é™¤æ¶"å‰§æƒ…2 çš„å¤„ç†é€»è¾‘
 ---****************************************************************************
 
 local npc_id_3 = "FunnpcClone007004";
@@ -17,9 +17,9 @@ local z1=757.395569
 local o1=0.646116
 --local accept_task_1 = 2303;
 --local accept_task_2 = 2304;
--- ½áÊø¾çÇéºóµÄÌØÊâ´¦Àí
+-- ç»“æŸå‰§æƒ…åçš„ç‰¹æ®Šå¤„ç†
 function after_end_movie(player, movie_id)
-	--ÉèÖÃÈÎÎñÍê³É
+	--è®¾ç½®ä»»åŠ¡å®Œæˆ
 	local rows = nx_get_record_rows(player, "Task_Record");
 	for i = 0, rows-1 do
 		local id = nx_query_record_value(player, "Task_Record", i, 0);
@@ -28,7 +28,7 @@ function after_end_movie(player, movie_id)
 			nx_set_record_value(player, "Task_Record", i, 2, total);
 		end
 	end
---´´½¨ÏôÇ§Äı
+--åˆ›å»ºè§åƒå‡
 	local npc = nx_null_obj();
 	if nx_find_data(player, "task_event_npc") then
 		npc = nx_query_data(player, "task_event_npc");
@@ -38,18 +38,18 @@ function after_end_movie(player, movie_id)
 		return;
 	end
 
-	--Èç¹ûÒÑ¾­´´½¨ÁË,Ôò²»ÖØ¸´´´½¨
+	--å¦‚æœå·²ç»åˆ›å»ºäº†,åˆ™ä¸é‡å¤åˆ›å»º
 	local obj_3 = nx_query_data(npc, "CreateObj_3");
 	if nx_exists(obj_3) then
 		return;
 	end
 
-	--´´½¨
+	--åˆ›å»º
 	--local x, y, z, o = nx_get_position(npc);
 	--nx_sysinfo_broadcast( 1, "x,"..tostring(x).." y,"..tostring(y).." z,"..tostring(z) );
 	obj_3 = nx_create_obj(nx_string(npc_id_3), npc_cp_3, x1, y1, z1, o1);
 
-	--ÉèÖÃnpcµÄ¸¸¶ÔÏóÎª´¥·¢npc,²¢ÉèÖÃ´¥·¢npcµÄ×Ô¶ÔÏóÎª´´½¨µÄ¹ÖÎï
+	--è®¾ç½®npcçš„çˆ¶å¯¹è±¡ä¸ºè§¦å‘npc,å¹¶è®¾ç½®è§¦å‘npcçš„è‡ªå¯¹è±¡ä¸ºåˆ›å»ºçš„æ€ªç‰©
 	if nx_exists(obj_3) then
 		nx_set_data(npc, "CreateObj_3", obj_3);
 		nx_add_data(obj_3, "ParentNpc", 8);
@@ -57,7 +57,7 @@ function after_end_movie(player, movie_id)
 		nx_set_property(obj_3, "LifeTime", lifeTime);
 	end
 
-	--Èç¹ûÂú×ã³Ğ½ÓÏÂÒ»¸öÈÎÎñµÄÌõ¼ş,Ôò×Ô¶¯³Ğ½ÓÈÎÎñ
+	--å¦‚æœæ»¡è¶³æ‰¿æ¥ä¸‹ä¸€ä¸ªä»»åŠ¡çš„æ¡ä»¶,åˆ™è‡ªåŠ¨æ‰¿æ¥ä»»åŠ¡
 --	if nx_test_accept_task(player, nx_null_obj(), accept_task_1) then
 --		nx_accept_task(player, accept_task_1);
 --	end

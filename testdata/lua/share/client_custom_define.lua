@@ -1,717 +1,717 @@
---ÁÄÌìÃüÁî£¬¸ñÊ½£ºint msgid int chat_type wstring content(ÓÃ¿Õ¸ñ·Ö¸ôµÄÒ»¸ö¿í×Ö·û´®) [wstring targetname](Ë½ÁÄ×¨ÓÃ£ºÄ¿±êÃû³Æ)
+--èŠå¤©å‘½ä»¤ï¼Œæ ¼å¼ï¼šint msgid int chat_type wstring content(ç”¨ç©ºæ ¼åˆ†éš”çš„ä¸€ä¸ªå®½å­—ç¬¦ä¸²) [wstring targetname](ç§èŠä¸“ç”¨ï¼šç›®æ ‡åç§°)
 CLIENT_CUSTOMMSG_CHAT = 1
 
---·¢ËÍGMÃüÁî£¬¸ñÊ½£ºint msgid wstring info
+--å‘é€GMå‘½ä»¤ï¼Œæ ¼å¼ï¼šint msgid wstring info
 CLIENT_CUSTOMMSG_GM = 2
 
---ÇĞ»»ÒÆ¶¯×´Ì¬£¬¸ñÊ½£ºint msgid int move_type(0:ÅÜ²½ 1:×ßÂ·)
+--åˆ‡æ¢ç§»åŠ¨çŠ¶æ€ï¼Œæ ¼å¼ï¼šint msgid int move_type(0:è·‘æ­¥ 1:èµ°è·¯)
 CLIENT_CUSTOMMSG_MOVE_TYPE = 3
 
---·µ»ØMessageBoxµÄÓ¦´ğ½á¹û£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid int msgboxid int answer(¿Í»§¶Ëµã»÷µÄ°´Å¦Ë÷Òı)
+--è¿”å›MessageBoxçš„åº”ç­”ç»“æœï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid int msgboxid int answer(å®¢æˆ·ç«¯ç‚¹å‡»çš„æŒ‰çº½ç´¢å¼•)
 CLIENT_CUSTOMMSG_ANSWERMESSAGEBOX = 5
---·µ»ØInputBoxµÄÓ¦´ğ½á¹û£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid int inputboxid wstring input(¿Í»§¶ËÊäÈëµÄÄÚÈİ)
+--è¿”å›InputBoxçš„åº”ç­”ç»“æœï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid int inputboxid wstring input(å®¢æˆ·ç«¯è¾“å…¥çš„å†…å®¹)
 CLIENT_CUSTOMMSG_ANSWERINPUTBOX = 6
 
---»ù´¡ÊôĞÔ¼Óµã£¬ÏûÏ¢¸ñÊ½£ºint msgid string prop1 int addpoint1(Ìí¼ÓµÄµãÊı) .. string propn int addpointn(Ìí¼ÓµÄµãÊı)
+--åŸºç¡€å±æ€§åŠ ç‚¹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šint msgid string prop1 int addpoint1(æ·»åŠ çš„ç‚¹æ•°) .. string propn int addpointn(æ·»åŠ çš„ç‚¹æ•°)
 CLIENT_CUSTOMMSG_BASEPROP_ADDPOINT = 10
---»ù´¡ÊôĞÔÏ´µã£¬ÏûÏ¢¸ñÊ½£ºint msgid string prop1 int decpoint1(¼õÉÙµÄµãÊı) .. string propn int decpointn(¼õÉÙµÄµãÊı)
+--åŸºç¡€å±æ€§æ´—ç‚¹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šint msgid string prop1 int decpoint1(å‡å°‘çš„ç‚¹æ•°) .. string propn int decpointn(å‡å°‘çš„ç‚¹æ•°)
 CLIENT_CUSTOMMSG_BASEPROP_DECPOINT = 11
 
---Ñ¹Á¦²âÊÔ×¨ÓÃÏûÏ¢int msgid string test_type..¸÷ÖÖ²âÊÔ¶ÔÓ¦²ÎÊı
+--å‹åŠ›æµ‹è¯•ä¸“ç”¨æ¶ˆæ¯int msgid string test_type..å„ç§æµ‹è¯•å¯¹åº”å‚æ•°
 CLIENT_CUSTOMMSG_STRESS_TEST = 12
 
---ÈİÆ÷²Ù×÷Ïà¹ØÃüÁî
---¿Í»§¶ËÉÏ´«Ê¹ÓÃÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos int dstviewid int dstpos
+--å®¹å™¨æ“ä½œç›¸å…³å‘½ä»¤
+--å®¢æˆ·ç«¯ä¸Šä¼ ä½¿ç”¨ç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos int dstviewid int dstpos
 CLIENT_CUSTOMMSG_USEITEM_ON_ITEM = 29
---¿Í»§¶ËÉÏ´«ÒÆ¶¯ÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos int destviewid int destpos
+--å®¢æˆ·ç«¯ä¸Šä¼ ç§»åŠ¨ç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos int destviewid int destpos
 CLIENT_CUSTOMMSG_MOVEITEM = 30
---¿Í»§¶ËÉÏ´«Ê¹ÓÃÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos
+--å®¢æˆ·ç«¯ä¸Šä¼ ä½¿ç”¨ç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos
 CLIENT_CUSTOMMSG_USEITEM = 31
---¿Í»§¶ËÉÏ´«¶ªÆúÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos int amount(ÊıÁ¿£¬Îª0Ê±¶ªÆúÈ«²¿ÎïÆ·)
+--å®¢æˆ·ç«¯ä¸Šä¼ ä¸¢å¼ƒç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos int amount(æ•°é‡ï¼Œä¸º0æ—¶ä¸¢å¼ƒå…¨éƒ¨ç‰©å“)
 CLIENT_CUSTOMMSG_CHUCKITEM = 32
---¿Í»§¶ËÉÏ´«²ğ·ÖÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos int destviewid int destpos int amount
+--å®¢æˆ·ç«¯ä¸Šä¼ æ‹†åˆ†ç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos int destviewid int destpos int amount
 CLIENT_CUSTOMMSG_SPLITITEM = 33
---¿Í»§¶ËÉÏ´«É¾³ıÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos int amount(ÊıÁ¿£¬Îª0Ê±¶ªÆúÈ«²¿ÎïÆ·)
+--å®¢æˆ·ç«¯ä¸Šä¼ åˆ é™¤ç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos int amount(æ•°é‡ï¼Œä¸º0æ—¶ä¸¢å¼ƒå…¨éƒ¨ç‰©å“)
 CLIENT_CUSTOMMSG_DELETEITEM = 34
---¿Í»§¶ËÉÏ´«Ëø¶¨ÎïÆ·µÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos
+--å®¢æˆ·ç«¯ä¸Šä¼ é”å®šç‰©å“çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos
 CLIENT_CUSTOMMSG_LOCKITEM = 35
---¿Í»§¶ËÉÏ´«ÕûÀíÈİÆ÷ÖĞµÄÎïÆ·£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int beginpos int endpos
+--å®¢æˆ·ç«¯ä¸Šä¼ æ•´ç†å®¹å™¨ä¸­çš„ç‰©å“ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int beginpos int endpos
 CLIENT_CUSTOMMSG_ARANGEITEM = 36
 
---¿Í»§¶ËÉÏ´«Ö÷¶¯¹Ø±ÕÄ³¸öÈİÆ÷£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid
+--å®¢æˆ·ç«¯ä¸Šä¼ ä¸»åŠ¨å…³é—­æŸä¸ªå®¹å™¨ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid
 CLIENT_CUSTOMMSG_CLOSTVIEW = 39
 
---¿Í»§¶ËÉÏ´«ĞŞÀíÈİÆ÷ÖĞµÄ×°±¸£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid int srcpos
+--å®¢æˆ·ç«¯ä¸Šä¼ ä¿®ç†å®¹å™¨ä¸­çš„è£…å¤‡ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid int srcpos
 CLIENT_CUSTOMMSG_REPAIRITEM = 40
---¿Í»§¶ËÉÏ´«ĞŞÀíÈİÆ÷ÖĞµÄÈ«²¿×°±¸£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int srcviewid
+--å®¢æˆ·ç«¯ä¸Šä¼ ä¿®ç†å®¹å™¨ä¸­çš„å…¨éƒ¨è£…å¤‡ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int srcviewid
 CLIENT_CUSTOMMSG_REPAIRALL = 41
 
---ÎïÆ·²Ù×÷Ïà¹Ø42-59
---¼ø¶¨ÎïÆ· ÏûÏ¢¸ñÊ½: unsigned cmdid
+--ç‰©å“æ“ä½œç›¸å…³42-59
+--é‰´å®šç‰©å“ æ¶ˆæ¯æ ¼å¼: unsigned cmdid
 CLIENT_CUSTOMMSG_IDENTIFY = 42
 
---ÏÔÊ¾ÄÄĞ©×°±¸ ÏûÏ¢¸ñÊ½: unsigned cmdid int set
+--æ˜¾ç¤ºå“ªäº›è£…å¤‡ æ¶ˆæ¯æ ¼å¼: unsigned cmdid int set
 CLIENT_CUSTOMMSG_SHOWEQUIP_SET = 60
---ÏÔÊ¾ÄÇÀà×°±¸ ÏûÏ¢¸ñÊ½: unsigned cmdid int type(0:ÏÔÊ¾½­ºş×°1:ÏÔÊ¾ÃÅÅÉ×°2:ÏÔÊ¾Ê±×°)
+--æ˜¾ç¤ºé‚£ç±»è£…å¤‡ æ¶ˆæ¯æ ¼å¼: unsigned cmdid int type(0:æ˜¾ç¤ºæ±Ÿæ¹–è£…1:æ˜¾ç¤ºé—¨æ´¾è£…2:æ˜¾ç¤ºæ—¶è£…)
 CLIENT_CUSTOMMSG_SHOWEQUIP_TYPE = 61
 
---¿Í»§¶ËÉÏ´«´ÓÆÕÍ¨ÉÌµêÖĞ¹ºÂòÎïÆ·£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int shopid int itemid
+--å®¢æˆ·ç«¯ä¸Šä¼ ä»æ™®é€šå•†åº—ä¸­è´­ä¹°ç‰©å“ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int shopid int itemid
 CLIENT_CUSTOMMSG_BUY_FROM_SHOP = 70
---¿Í»§¶Ë³öÊÛÎïÆ·µ½ÆÕÍ¨ÉÌµê£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int shopid int src_viewid int src_viewindex
+--å®¢æˆ·ç«¯å‡ºå”®ç‰©å“åˆ°æ™®é€šå•†åº—ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int shopid int src_viewid int src_viewindex
 CLIENT_CUSTOMMSG_SELL_TO_SHOP = 71
---¿Í»§¶ËÉÏ´«´ÓËæ»úÉÌµêÖĞ¹ºÂòÎïÆ·£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int pos
+--å®¢æˆ·ç«¯ä¸Šä¼ ä»éšæœºå•†åº—ä¸­è´­ä¹°ç‰©å“ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int pos
 CLIENT_CUSTOMMSG_BUY_FROM_RANDOMSHOP = 72
---¿Í»§¶ËÉÏ´«´ÓÅÜÉÌÉÌµê¹ºÂòÎïÆ·ÏûÏ¢¸ñÊ½£ºunsigned msgidstring shopidint posint amountobject npc
+--å®¢æˆ·ç«¯ä¸Šä¼ ä»è·‘å•†å•†åº—è´­ä¹°ç‰©å“æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgidstring shopidint posint amountobject npc
 CLIENT_CUSTOMMSG_BUY_FROM_BUSINESSSHOP = 74
---¿Í»§¶ËÉÏ´«´ÓÅÜÉÌÉÌµê¹ºÂòÎïÆ·£¬ÏûÏ¢¸ñÊ½£ºunsigned msgidstring shopidint posint amount
+--å®¢æˆ·ç«¯ä¸Šä¼ ä»è·‘å•†å•†åº—è´­ä¹°ç‰©å“ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgidstring shopidint posint amount
 CLIENT_CUSTOMMSG_SELL_TO_BUSINESSSHOP = 75
---¿Í»§¶ËÉÏ´«´ÓÅÜÉÌÉÌµê¹ºÂôÎïÆ·ÇëÇó£¬ÏûÏ¢¸ñÊ½£ºunsigned msgidstring shopidint posint amount
+--å®¢æˆ·ç«¯ä¸Šä¼ ä»è·‘å•†å•†åº—è´­å–ç‰©å“è¯·æ±‚ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgidstring shopidint posint amount
 CLIENT_CUSTOMMSG_SELL_TO_BUSINESSSHOP_REQUEST = 76
---¿Í»§¶ËÉÏ´«ÅÜÉÌÉÌµêµÄ»õÎï¼Û¸ñË¢ĞÂÇëÇóÏûÏ¢¸ñÊ½£ºunsigned msgidstring shopid
+--å®¢æˆ·ç«¯ä¸Šä¼ è·‘å•†å•†åº—çš„è´§ç‰©ä»·æ ¼åˆ·æ–°è¯·æ±‚æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgidstring shopid
 CLIENT_CUSTOMMSG_REQUEST_REFRESH_ITEM_INFO = 77
---¿Í»§¶ËÉÏ´«ÅÜÉÌÉÌµêµÄ»õÎï¼Û¸ñË¢ĞÂÇëÇóÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å®¢æˆ·ç«¯ä¸Šä¼ è·‘å•†å•†åº—çš„è´§ç‰©ä»·æ ¼åˆ·æ–°è¯·æ±‚æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_REQUEST_BUSINESS_FINISH = 78
 
 
---´ò¿×¡¢ÏâÇ¶¡¢·Ö½â
---¿Í»§¶Ë´ò¿ªÏâÇ¶´°¿Ú£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object npc, string formname
+--æ‰“å­”ã€é•¶åµŒã€åˆ†è§£
+--å®¢æˆ·ç«¯æ‰“å¼€é•¶åµŒçª—å£ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object npc, string formname
 CLIENT_CUSTOMMSG_ENCHASE_OPNE = 90
---¿Í»§¶Ë¹Ø±ÕÏâÇ¶´°¿Ú£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å®¢æˆ·ç«¯å…³é—­é•¶åµŒçª—å£ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_ENCHASE_CLOSE = 91
---¿Í»§¶ËÑ¡ÔñÒ»¸ö×°±¸£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid,int srcviewid, int srcpos
+--å®¢æˆ·ç«¯é€‰æ‹©ä¸€ä¸ªè£…å¤‡ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid,int srcviewid, int srcpos
 CLIENT_CUSTOMMSG_EQUIP_SELECT = 92
---¿Í»§¶Ë·ÅÆúÑ¡ÖĞ×°±¸£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å®¢æˆ·ç«¯æ”¾å¼ƒé€‰ä¸­è£…å¤‡ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_EQUIP_GIVEUP = 93
---¿Í»§¶ËÌí¼ÓÒ»¸öÏâÇ¶£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid,int srcpos, int dstpos
+--å®¢æˆ·ç«¯æ·»åŠ ä¸€ä¸ªé•¶åµŒï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid,int srcpos, int dstpos
 CLIENT_CUSTOMMSG_ADD_ENCHASE = 94
---¿Í»§¶ËÈ¡ÏûÒ»¸öÏâÇ¶£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid,int pos
+--å®¢æˆ·ç«¯å–æ¶ˆä¸€ä¸ªé•¶åµŒï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid,int pos
 CLIENT_CUSTOMMSG_DEL_ENCHASE = 95
---¿Í»§¶ËÇëÇóÖ´ĞĞ´ò¿×£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å®¢æˆ·ç«¯è¯·æ±‚æ‰§è¡Œæ‰“å­”ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_EQUIP_ADDHOLE = 96
---¿Í»§¶ËÇëÇóÖ´ĞĞÏâÇ¶£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å®¢æˆ·ç«¯è¯·æ±‚æ‰§è¡Œé•¶åµŒï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_EQUIP_ENCHASE = 97
---¿Í»§¶ËÇëÇóÖ´ĞĞ²ğ·Ö£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, int pos...
+--å®¢æˆ·ç«¯è¯·æ±‚æ‰§è¡Œæ‹†åˆ†ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, int pos...
 CLIENT_CUSTOMMSG_EQUIP_SEPARATE = 98
 
 
---ÓÃ»§½»»¥ÇëÇó£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int request_type wstring name(±»ÇëÇóÕß½ÇÉ«Ãû³Æ)
+--ç”¨æˆ·äº¤äº’è¯·æ±‚ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int request_type wstring name(è¢«è¯·æ±‚è€…è§’è‰²åç§°)
 CLIENT_CUSTOMMSG_REQUEST = 100
---ÓÃ»§½»»¥ÇëÇó»ØÓ¦£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int request_type wstring name(±»ÇëÇóÕß½ÇÉ«Ãû³Æ) int result(0:¾Ü¾ø1:Í¬Òâ)
+--ç”¨æˆ·äº¤äº’è¯·æ±‚å›åº”ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int request_type wstring name(è¢«è¯·æ±‚è€…è§’è‰²åç§°) int result(0:æ‹’ç»1:åŒæ„)
 CLIENT_CUSTOMMSG_REQUEST_ANSWER = 101
---ÓÃ»§ÉèÖÃ¶ÔÆäËûÓÃ»§µÄÇëÇó¿ª¹Ø£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int newvalue(Ã¿Î»¶ÔÓ¦request_typeµÄÒ»ÖÖÀàĞÍ)
+--ç”¨æˆ·è®¾ç½®å¯¹å…¶ä»–ç”¨æˆ·çš„è¯·æ±‚å¼€å…³ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int newvalue(æ¯ä½å¯¹åº”request_typeçš„ä¸€ç§ç±»å‹)
 CLIENT_CUSTOMMSG_REQUEST_SET = 102
 
---²é¿´ÆäËû½ÇÉ«µÄÈ«Éí×°±¸ĞÅÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring name(±»ÇëÇóÕß½ÇÉ«Ãû³Æ)
+--æŸ¥çœ‹å…¶ä»–è§’è‰²çš„å…¨èº«è£…å¤‡ä¿¡æ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring name(è¢«è¯·æ±‚è€…è§’è‰²åç§°)
 CLIENT_CUSTOMMSG_LOOK_EQUIPS = 105
---²é¿´ÆäËû½ÇÉ«µÄ±³°üÖĞµÄÄ³¼ş×°±¸µÄĞÅÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring name(±»ÇëÇóÕß½ÇÉ«Ãû³Æ) string item_uniqueid
+--æŸ¥çœ‹å…¶ä»–è§’è‰²çš„èƒŒåŒ…ä¸­çš„æŸä»¶è£…å¤‡çš„ä¿¡æ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring name(è¢«è¯·æ±‚è€…è§’è‰²åç§°) string item_uniqueid
 CLIENT_CUSTOMMSG_LOOK_ITEM = 106
 
--- ºÃÓÑÄ£¿é
--- ¿Í»§¶ËÇëÇó¼ÓºÃÓÑ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring name(ºÃÓÑÃû³Æ)
+-- å¥½å‹æ¨¡å—
+-- å®¢æˆ·ç«¯è¯·æ±‚åŠ å¥½å‹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring name(å¥½å‹åç§°)
 CLIENT_CUSTOMMSG_ADD_FRIEND = 110
--- ¿Í»§¶ËÇëÇóÉ¾ºÃÓÑ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring name(ºÃÓÑÃû³Æ)
+-- å®¢æˆ·ç«¯è¯·æ±‚åˆ å¥½å‹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring name(å¥½å‹åç§°)
 CLIENT_CUSTOMMSG_DEL_FRIEND = 111
--- ¿Í»§¶ËÇëÇó¼ÓºÚÃûµ¥£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring name(ºÚÃûµ¥Ãû³Æ)
+-- å®¢æˆ·ç«¯è¯·æ±‚åŠ é»‘åå•ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring name(é»‘åå•åç§°)
 CLIENT_CUSTOMMSG_ADD_BLACKLIST = 112
--- ¿Í»§¶ËÇëÇóÉ¾ºÚÃûµ¥£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring name(ºÚÃûµ¥Ãû³Æ)
+-- å®¢æˆ·ç«¯è¯·æ±‚åˆ é»‘åå•ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring name(é»‘åå•åç§°)
 CLIENT_CUSTOMMSG_DEL_BLACKLIST = 113
--- ¿Í»§¶ËÇëÇó¼Ó³ğÈË£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, wstring name(³ğÈËÃû³Æ)
+-- å®¢æˆ·ç«¯è¯·æ±‚åŠ ä»‡äººï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, wstring name(ä»‡äººåç§°)
 CLIENT_CUSTOMMSG_ADD_ENEMY = 114
--- ¿Í»§¶ËÇëÇóÉ¾³ğÈË£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, wstring name(³ğÈËÃû³Æ)
+-- å®¢æˆ·ç«¯è¯·æ±‚åˆ ä»‡äººï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, wstring name(ä»‡äººåç§°)
 CLIENT_CUSTOMMSG_DEL_ENEMY = 115
--- ¿Í»§¶ËÇëÇó°ÑºÃÓÑÒÆ¶¯µ½ºÚÃûµ¥£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, wstring name(ºÃÓÑÃû³Æ)
+-- å®¢æˆ·ç«¯è¯·æ±‚æŠŠå¥½å‹ç§»åŠ¨åˆ°é»‘åå•ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, wstring name(å¥½å‹åç§°)
 CLIENT_CUSTOMMSG_MOVE_TO_BLACKLIST = 116
 
---Ê°È¡Àñ°üitem
+--æ‹¾å–ç¤¼åŒ…item
 CLIENT_CUSTOMMSG_PICK_ITEM =123
--- ¸±±¾Ä£¿é
--- ¿Í»§¶ËÇëÇóÖØÖÃËùÓĞÆÕÍ¨¸±±¾
+-- å‰¯æœ¬æ¨¡å—
+-- å®¢æˆ·ç«¯è¯·æ±‚é‡ç½®æ‰€æœ‰æ™®é€šå‰¯æœ¬
 CLIENT_CUSTOMMSG_RESET_ALL_CLONE = 130
---¿Í»§¶ËÇëÇóÍÅ¶Ó¸±±¾ÖØÖÃµÄÊ£ÓàÊ±¼ä
+--å®¢æˆ·ç«¯è¯·æ±‚å›¢é˜Ÿå‰¯æœ¬é‡ç½®çš„å‰©ä½™æ—¶é—´
 CLIENT_CUSTOMMSG_GET_LEAVE_TIME_CLONE = 140
 
---¾­ÂöÏµÍ³(150~170)
---Éı¼¶¾­Âö£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, string jingmaiid
+--ç»è„‰ç³»ç»Ÿ(150~170)
+--å‡çº§ç»è„‰ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, string jingmaiid
 CLIENT_CUSTOMMSG_UPGRADE_JINGMAI = 150
 
---Í¨¹ıÒ³ÊıÇëÇóË¢ĞÂÌôÕ½ÅÅĞĞ×Ü±í unsigned msgid,  int page
+--é€šè¿‡é¡µæ•°è¯·æ±‚åˆ·æ–°æŒ‘æˆ˜æ’è¡Œæ€»è¡¨ unsigned msgid,  int page
 CLIENT_CUSTOMMSG_GET_CHALLENGE_RANK_BY_PAGE = 190
---Í¨¹ıÃû×ÖÇëÇóË¢ĞÂÌôÕ½ÅÅĞĞ×Ü±í unsigned msgid,  wstring name
+--é€šè¿‡åå­—è¯·æ±‚åˆ·æ–°æŒ‘æˆ˜æ’è¡Œæ€»è¡¨ unsigned msgid,  wstring name
 CLIENT_CUSTOMMSG_GET_CHALLENGE_RANK_BY_NAME = 191
---»ñµÃ×Ô¼ºµ±Ç°µÄÌôÕ½Ä¿±êÃûµ¥unsigned msgid,
+--è·å¾—è‡ªå·±å½“å‰çš„æŒ‘æˆ˜ç›®æ ‡åå•unsigned msgid,
 CLIENT_CUSTOMMSG_GET_CHALLENGE_TARGET_LIST = 192
---´òÌıÄ³¸öÍæ¼ÒµÄÎ»ÖÃunsigned msgid,  wstring name
+--æ‰“å¬æŸä¸ªç©å®¶çš„ä½ç½®unsigned msgid,  wstring name
 CLIENT_CUSTOMMSG_GET_PLAYER_POSITION = 193
 	
---¿ì½İÀ¸²Ù×÷ÃüÁî
---ÉèÖÃÄ³¸ö¼üÎ»£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int no int para1 int para2
+--å¿«æ·æ æ“ä½œå‘½ä»¤
+--è®¾ç½®æŸä¸ªé”®ä½ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int no int para1 int para2
 CLIENT_CUSTOMMSG_SETSHORTCUT = 200
---É¾³ıÄ³¸ö¼üÎ»£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int no
+--åˆ é™¤æŸä¸ªé”®ä½ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int no
 CLIENT_CUSTOMMSG_REMOVESHORTCUT = 201
 
---²Ö¿â²Ù×÷
---´ò¿ªÔ¶³Ì²Ö¿â£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--ä»“åº“æ“ä½œ
+--æ‰“å¼€è¿œç¨‹ä»“åº“ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_OPEN_DIRECTDEPOT = 202
---¹ºÂò»òĞø·ÑÔ¶³Ì²Ö¿â£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--è´­ä¹°æˆ–ç»­è´¹è¿œç¨‹ä»“åº“ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_BUY_DIRECTDEPOT = 203
 
---×Ê½ğ²Ù×÷Ïà¹ØÃüÁî
---´æ¿î£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int captial_type int value ...  int capital_type int value
+--èµ„é‡‘æ“ä½œç›¸å…³å‘½ä»¤
+--å­˜æ¬¾ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int captial_type int value ...  int capital_type int value
 CLIENT_CUSTOMMSG_SAVECAPITAL = 205
---È¡¿î£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int captial_type int value ...  int capital_type int value
+--å–æ¬¾ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int captial_type int value ...  int capital_type int value
 CLIENT_CUSTOMMSG_UNSAVECAPITAL = 206
---×ªÕË£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid widestr destname int captial_value1 ... int capital_valuen
+--è½¬è´¦ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid widestr destname int captial_value1 ... int capital_valuen
 CLIENT_CUSTOMMSG_TRANSFER = 207
 
---Õ½¶·¼¼ÄÜÏà¹ØÃüÁî
+--æˆ˜æ–—æŠ€èƒ½ç›¸å…³å‘½ä»¤
 
---Ê¹ÓÃ¼¼ÄÜ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid string skillid
+--ä½¿ç”¨æŠ€èƒ½ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid string skillid
 CLIENT_CUSTOMMSG_USE_SKILL = 211
---¼ÌĞøÔİÍ£µÄ¼¼ÄÜ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, x, y, z, orient
+--ç»§ç»­æš‚åœçš„æŠ€èƒ½ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, x, y, z, orient
 CLIENT_CUSTOMMSG_RESUME_SKILL = 212
---Ê¹ÓÃ×¼±¸¼¼ÄÜ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, string skillid
+--ä½¿ç”¨å‡†å¤‡æŠ€èƒ½ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, string skillid
 CLIENT_CUSTOMMSG_USE_NEXT_SKILL = 213
 
---Ê¹ÓÃÄÚ¹¦£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid string neigongid
+--ä½¿ç”¨å†…åŠŸï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid string neigongid
 CLIENT_CUSTOMMSG_USE_NEIGONG = 215
 
---Éı¼¶ÄÚ¹¦£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid string neigongid int inclevel
+--å‡çº§å†…åŠŸï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid string neigongid int inclevel
 CLIENT_CUSTOMMSG_UPGRAD_NEIGONG = 222
 
 
---Í¨ÓÃ¼¼ÄÜµÄÊ¹ÓÃ
---´ò×ø(È¡Ïû´ò×ø)£ºunsigned msgid
+--é€šç”¨æŠ€èƒ½çš„ä½¿ç”¨
+--æ‰“å(å–æ¶ˆæ‰“å)ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_SITCROSS	= 240
---ÌøÎè(È¡ÏûÌøÎè)£ºunsigned msgid
+--è·³èˆ(å–æ¶ˆè·³èˆ)ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_DANCING	= 241
 
---Æï³Ë(È¡ÏûÆï³Ë)£ºunsigned msgid
+--éª‘ä¹˜(å–æ¶ˆéª‘ä¹˜)ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_RIDE	= 243
---Æï³Ë³å´Ì£ºunsigned msgid
+--éª‘ä¹˜å†²åˆºï¼šunsigned msgid
 CLIENT_CUSTOMMSG_RIDE_SPURT	= 244
 
---Ê°È¡Å©×÷Îï£ºunsigned msgid int index
+--æ‹¾å–å†œä½œç‰©ï¼šunsigned msgid int index
 CLIENT_CUSTOMMSG_PICK_CROP = 250
---Ê°È¡È«²¿Å©×÷Îï£ºunsigned msgid
+--æ‹¾å–å…¨éƒ¨å†œä½œç‰©ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_PICK_ALL_CROP = 251
---Ê°È¡Å©×÷Îï´°¿Ú¹Ø±Õ£ºunsigned msgid
+--æ‹¾å–å†œä½œç‰©çª—å£å…³é—­ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_PICK_CROP_CLOSE = 252
 
---¸´»îÃüÁî£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int relive_type
+--å¤æ´»å‘½ä»¤ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int relive_type
 CLIENT_CUSTOMMSG_RELIVE = 290
---ÉèÖÃPKÄ£Ê½£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int pkmode
+--è®¾ç½®PKæ¨¡å¼ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int pkmode
 CLIENT_CUSTOMMSG_SETPKMODE = 291
---¸Ä±ä¾¯½ä×´Ì¬£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--æ”¹å˜è­¦æˆ’çŠ¶æ€ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_CHANGEWARNING = 292
---¸Ä±äPK±£»¤ÊôĞÔ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int pkprotect int checked
+--æ”¹å˜PKä¿æŠ¤å±æ€§ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int pkprotect int checked
 CLIENT_CUSTOMMSG_SETPKPROTECT = 293
---ÉèÖÃµ±Ç°³ÆºÅ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid string title
+--è®¾ç½®å½“å‰ç§°å·ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid string title
 CLIENT_CUSTOMMSG_SETTITLE = 295
 
--- ÈÎÎñÄ£¿é¿Í»§¶Ë²Ù×÷
--- ·ÅÆúÈÎÎñ ÏûÏ¢¸ñÊ½: unsigned msgid int task_id
+-- ä»»åŠ¡æ¨¡å—å®¢æˆ·ç«¯æ“ä½œ
+-- æ”¾å¼ƒä»»åŠ¡ æ¶ˆæ¯æ ¼å¼: unsigned msgid int task_id
 --CLIENT_CUSTOMMSG_GIVEUP_TASK    =   300
--- ·ÖÖ§ÀàĞÍĞèÒª¶Ô»°¿ò²Ù×÷·µ»ØÑ¡Ôñ½á¹û¸ø·şÎñÆ÷¶Ë£º ÏûÏ¢¸ñÊ½ unsigned msgid int task_id int select_index
+-- åˆ†æ”¯ç±»å‹éœ€è¦å¯¹è¯æ¡†æ“ä½œè¿”å›é€‰æ‹©ç»“æœç»™æœåŠ¡å™¨ç«¯ï¼š æ¶ˆæ¯æ ¼å¼ unsigned msgid int task_id int select_index
 --CLIENT_CUSTOMMSG_SELECT_RESULT 	=	301
--- ²éÑ¯Í·¶¥±ê¼Ç ÏûÏ¢¸ñÊ½ unsigned msgid obj npc
+-- æŸ¥è¯¢å¤´é¡¶æ ‡è®° æ¶ˆæ¯æ ¼å¼ unsigned msgid obj npc
 --CLIENT_CUSTOM_MSG_QUERY_TASK_FLAG = 302
--- ²éÑ¯ÊÇ·ñÓĞÁ£×ÓÌØĞ§ ÏûÏ¢¸ñÊ½ unsigned msgid obj npc
+-- æŸ¥è¯¢æ˜¯å¦æœ‰ç²’å­ç‰¹æ•ˆ æ¶ˆæ¯æ ¼å¼ unsigned msgid obj npc
 --CLIENT_CUSTOM_MSG_QUERY_TASK_EFFECT = 303
--- ×Ô¶¯½ÓÈÎÎñ ÏûÏ¢¸ñÊ½ unsigned msgid task_id
+-- è‡ªåŠ¨æ¥ä»»åŠ¡ æ¶ˆæ¯æ ¼å¼ unsigned msgid task_id
 --CLIENT_CUSTOM_MSG_ACCEPT_TASK = 304
--- ¹²ÏíÈÎÎñ£¬ÏûÏ¢¸ñÊ½: unsigned msgid int task_id
+-- å…±äº«ä»»åŠ¡ï¼Œæ¶ˆæ¯æ ¼å¼: unsigned msgid int task_id
 --CLIENT_CUSTOMMSG_SHARE_TASK = 305
--- ·µ»Ø¹²ÏíÑ¡Ôñ½á¹û£¬ÏûÏ¢¸ñÊ½: unsigned msgid int task_id wide_str sharer_name int result
+-- è¿”å›å…±äº«é€‰æ‹©ç»“æœï¼Œæ¶ˆæ¯æ ¼å¼: unsigned msgid int task_id wide_str sharer_name int result
 --CLIENT_CUSTOMMSG_RETURN_SHARE_RESULT = 306
--- ¿Í»§¶ËÇëÇóÍê³ÉÈÎÎñ, ÏûÏ¢¸ñÊ½: unsigned msg_id, int task_id, int present_id, PERSISTID npc
+-- å®¢æˆ·ç«¯è¯·æ±‚å®Œæˆä»»åŠ¡, æ¶ˆæ¯æ ¼å¼: unsigned msg_id, int task_id, int present_id, PERSISTID npc
 --CLIENT_CUSTOM_MSG_COMPLETE_TASK = 307
 
--- ¶ÓÎéÄ£¿é
--- ÉèÖÃ¶ÓÎéÖĞÈËÎïÊôĞÔ£¬ÏûÏ¢¸ñÊ½ unsigned msgid unsigned set_type usigned set_param wstring target
+-- é˜Ÿä¼æ¨¡å—
+-- è®¾ç½®é˜Ÿä¼ä¸­äººç‰©å±æ€§ï¼Œæ¶ˆæ¯æ ¼å¼ unsigned msgid unsigned set_type usigned set_param wstring target
 CLIENT_CUSTOMMSG_TEAM_MEMBER_SET = 308
--- ÉèÖÃ¶ÓÎéÄ£Ê½£¬ÏûÏ¢¸ñÊ½ unsigned msgid unsigned team_type
+-- è®¾ç½®é˜Ÿä¼æ¨¡å¼ï¼Œæ¶ˆæ¯æ ¼å¼ unsigned msgid unsigned team_type
 CLIENT_CUSTOMMSG_TEAM_TYPE_SET = 309
--- Ö±½Óµ¥ÈË´´½¨¶ÓÎé£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+-- ç›´æ¥å•äººåˆ›å»ºé˜Ÿä¼ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_TEAM_CREATE = 310
--- T³ö¶ÓÎé£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring target
+-- Tå‡ºé˜Ÿä¼ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring target
 CLIENT_CUSTOMMSG_TEAM_KICKOUT = 311
--- ÍË³ö¶ÓÎé£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+-- é€€å‡ºé˜Ÿä¼ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_TEAM_LEAVE = 312
--- ÒÆ½»¶Ó³¤£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid wstring target
+-- ç§»äº¤é˜Ÿé•¿ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid wstring target
 CLIENT_CUSTOMMSG_TEAM_CHANGE_CAPTAIN = 313
--- ÉèÖÃ¶ÓÎéËµÃ÷ĞÅÏ¢ÏûÏ¢¸ñÊ½:unsigned cmdid widestr info
+-- è®¾ç½®é˜Ÿä¼è¯´æ˜ä¿¡æ¯æ¶ˆæ¯æ ¼å¼:unsigned cmdid widestr info
 CLIENT_CUSTOMMSG_TEAM_SET_INFO = 314
--- ÉèÖÃ¶ÓÎéÊ°È¡·ÖÅäÆ·ÖÊÏûÏ¢¸ñÊ½:unsigned cmdid int quality
+-- è®¾ç½®é˜Ÿä¼æ‹¾å–åˆ†é…å“è´¨æ¶ˆæ¯æ ¼å¼:unsigned cmdid int quality
 CLIENT_CUSTOMMSG_TEAM_SET_PICK_QUALITY = 314
---ÉèÖÃ¶ÓÎéÊ°È¡·ÖÅä·½Ê½ÏûÏ¢¸ñÊ½:unsigned cmdid int mode
+--è®¾ç½®é˜Ÿä¼æ‹¾å–åˆ†é…æ–¹å¼æ¶ˆæ¯æ ¼å¼:unsigned cmdid int mode
 CLIENT_CUSTOMMSG_TEAM_SET_PICK_MODE = 315
---ÒªÇó¼ÓÈë¶ÓÎéÏûÏ¢¸ñÊ½:unsigned cmdid wstring target
+--è¦æ±‚åŠ å…¥é˜Ÿä¼æ¶ˆæ¯æ ¼å¼:unsigned cmdid wstring target
 CLIENT_CUSTOMMSG_TEAM_REQUEST_JOIN = 316
---Ë¢ĞÂÕĞÄ¼Ñ°×éÊı¾İÏûÏ¢¸ñÊ½:unsigned cmdid
+--åˆ·æ–°æ‹›å‹Ÿå¯»ç»„æ•°æ®æ¶ˆæ¯æ ¼å¼:unsigned cmdid
 CLIENT_CUSTOMMSG_TEAM_REFRESH_INFO = 317
--- Ìí¼ÓÕĞÄ¼Ñ°×éĞÅÏ¢ÏûÏ¢¸ñÊ½:unsigned cmdidint LVwstring Typewstring Missionwstring Info
+-- æ·»åŠ æ‹›å‹Ÿå¯»ç»„ä¿¡æ¯æ¶ˆæ¯æ ¼å¼:unsigned cmdidint LVwstring Typewstring Missionwstring Info
 CLIENT_CUSTOMMSG_TEAM_ADD_INFO = 318
---É¾³ıÕĞÄ¼Ñ°×éĞÅÏ¢ÏûÏ¢¸ñÊ½:unsigned cmdid
+--åˆ é™¤æ‹›å‹Ÿå¯»ç»„ä¿¡æ¯æ¶ˆæ¯æ ¼å¼:unsigned cmdid
 CLIENT_CUSTOMMSG_TEAM_REMOVE_INFO = 319
 
---Íæ¼Ò½»Ò×ÏµÍ³
---È·¶¨		ÃüÁî¸ñÊ½: unsigned cmdid
+--ç©å®¶äº¤æ˜“ç³»ç»Ÿ
+--ç¡®å®š		å‘½ä»¤æ ¼å¼: unsigned cmdid
 CLIENT_CUSTOMMSG_EXCHANGE_OK		=   320
---Ëø¶¨		ÃüÁî¸ñÊ½: unsigned cmdid
+--é”å®š		å‘½ä»¤æ ¼å¼: unsigned cmdid
 CLIENT_CUSTOMMSG_EXCHANGE_LOCK		=	321
---È¡Ïû		ÃüÁî¸ñÊ½: unsigned cmdid
+--å–æ¶ˆ		å‘½ä»¤æ ¼å¼: unsigned cmdid
 CLIENT_CUSTOMMSG_EXCHANGE_CANCEL	=	322
---Money		ÃüÁî¸ñÊ½: unsigned cmdid  int moneytype  int money
+--Money		å‘½ä»¤æ ¼å¼: unsigned cmdid  int moneytype  int money
 CLIENT_CUSTOMMSG_EXCHANGE_MONEY		= 323
---Íæ¼ÒÌí¼Ó½»»»À¸ÎïÆ·  ÃüÁî¸ñÊ½£ºunsigned cmdid, int src_viewid, int src_pos, int dest_viewid, int dest_pos
+--ç©å®¶æ·»åŠ äº¤æ¢æ ç‰©å“  å‘½ä»¤æ ¼å¼ï¼šunsigned cmdid, int src_viewid, int src_pos, int dest_viewid, int dest_pos
 CLIENT_CUSTOMMSG_EXCHANGE_ADD_ITEM	=324
---Íæ¼ÒÉ¾³ı½»»»À¸ÎïÆ·  ÃüÁî¸ñÊ½: unsigned cmdid, int pos
+--ç©å®¶åˆ é™¤äº¤æ¢æ ç‰©å“  å‘½ä»¤æ ¼å¼: unsigned cmdid, int pos
 CLIENT_CUSTOMMSG_EXCHANGE_REMOVE_ITEM	=325
 
---ÍÅ¶ÓÏûÏ¢²¹³ä
---ÉèÖÃ±ê¼Ç  ÃüÁî¸ñÊ½: unsigned cmdid,string sign_str
+--å›¢é˜Ÿæ¶ˆæ¯è¡¥å……
+--è®¾ç½®æ ‡è®°  å‘½ä»¤æ ¼å¼: unsigned cmdid,string sign_str
 CLIENT_CUSTOMMSG_TEAM_SET_SIGN	=326
 
--- ÈÎÎñÏµÍ³ÏûÏ¢
+-- ä»»åŠ¡ç³»ç»Ÿæ¶ˆæ¯
 CLIENT_CUSTOMMSG_TASK_MSG	= 327
 
---Íæ¼ÒÌí¼Ó¼Ó¹¤À¸ÎïÆ·  ÃüÁî¸ñÊ½£ºunsigned cmdid, int src_viewid, int src_pos, int dest_viewid, int dest_pos
+--ç©å®¶æ·»åŠ åŠ å·¥æ ç‰©å“  å‘½ä»¤æ ¼å¼ï¼šunsigned cmdid, int src_viewid, int src_pos, int dest_viewid, int dest_pos
 CLIENT_CUSTOMMSG_PROCESS_ADD_ITEM	=328
---Íæ¼ÒÉ¾³ı¼Ó¹¤À¸ÎïÆ·  ÃüÁî¸ñÊ½: unsigned cmdid, int pos
+--ç©å®¶åˆ é™¤åŠ å·¥æ ç‰©å“  å‘½ä»¤æ ¼å¼: unsigned cmdid, int pos
 CLIENT_CUSTOMMSG_PROCESS_REMOVE_ITEM	=329
 
--- °ÚÌ¯ÏµÍ³
--- Íæ¼Ò´ò¿ªÌ¯Î»£¬ÃüÁî¸ñÊ½£ºunsigned cmdidwidestr shopname
+-- æ‘†æ‘Šç³»ç»Ÿ
+-- ç©å®¶æ‰“å¼€æ‘Šä½ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdidwidestr shopname
 CLIENT_CUSTOMMSG_OPEN_STALL = 330
--- Íæ¼Ò¿ªÊ¼°ÚÌ¯£¬ÃüÁî¸ñÊ½£ºunsigned cmdid
+-- ç©å®¶å¼€å§‹æ‘†æ‘Šï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid
 CLIENT_CUSTOMMSG_BEGIN_STALL = 331
--- Íæ¼Ò½áÊø°ÚÌ¯»òÕß¹Ø±ÕÊÓÍ¼£¬ÃüÁî¸ñÊ½£ºunsigned cmdid
+-- ç©å®¶ç»“æŸæ‘†æ‘Šæˆ–è€…å…³é—­è§†å›¾ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid
 CLIENT_CUSTOMMSG_CLOSE_STALL = 332
--- Íæ¼ÒÉèÖÃ³öÊÛÎïÆ·£¬ÃüÁî¸ñÊ½£ºunsigned cmdid int pos(ÔÚ°ü¹üÀ¸ÖĞµÄÎ»ÖÃ) int pos(ÔÚÌ¯Î»À¸ÖĞµÄÎ»ÖÃ) int64 gold int64 silver
+-- ç©å®¶è®¾ç½®å‡ºå”®ç‰©å“ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid int pos(åœ¨åŒ…è£¹æ ä¸­çš„ä½ç½®) int pos(åœ¨æ‘Šä½æ ä¸­çš„ä½ç½®) int64 gold int64 silver
 CLIENT_CUSTOMMSG_ADD_STALL_ITEM = 333
--- Íæ¼ÒÒÆ³ı³öÊÛÎïÆ·£¬ÃüÁî¸ñÊ½£ºunsigned cmdid int pos(ÔÚÌ¯Î»À¸ÖĞµÄÎ»ÖÃ)
+-- ç©å®¶ç§»é™¤å‡ºå”®ç‰©å“ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid int pos(åœ¨æ‘Šä½æ ä¸­çš„ä½ç½®)
 CLIENT_CUSTOMMSG_REMOVE_STALL_ITEM = 334
 
--- Íæ¼ÒÉèÖÃ³öÊÛÎïÆ·¼Û¸ñ£¬ÃüÁî¸ñÊ½£ºunsigned cmdid int pos int gold int silver
+-- ç©å®¶è®¾ç½®å‡ºå”®ç‰©å“ä»·æ ¼ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid int pos int gold int silver
 CLIENT_CUSTOMMSG_SET_STALL_ITEMPRICE = 336
--- Íæ¼ÒÂòÁËÒ»¼şÉÌÆ·£¬ÃüÁî¸ñÊ½£ºunsigned cmdidint posint count int gold int silver
+-- ç©å®¶ä¹°äº†ä¸€ä»¶å•†å“ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdidint posint count int gold int silver
 CLIENT_CUSTOMMSG_BUY_OTHERONE_STALL = 337
--- Íæ¼ÒĞèÒª¸Ä±ä³öÊÛµÄÎïÆ·ĞÅÏ¢£ºunsigned cmdid
+-- ç©å®¶éœ€è¦æ”¹å˜å‡ºå”®çš„ç‰©å“ä¿¡æ¯ï¼šunsigned cmdid
 CLIENT_CUSTOMMSG_END_STALL = 338
--- Íæ¼ÒÇëÇó´ò¿ªÄ³¸öÌ¯Î»£¬ÃüÁî¸ñÊ½: unsigned cmdid widestr playername
+-- ç©å®¶è¯·æ±‚æ‰“å¼€æŸä¸ªæ‘Šä½ï¼Œå‘½ä»¤æ ¼å¼: unsigned cmdid widestr playername
 CLIENT_CUSTOMMSG_OPEN_LOOKUP_STALL = 341
--- Íæ¼ÒÇëÇó¹Ø±Õ¹Û²ìÌ¯Î»£¬ÃüÁî¸ñÊ½: unsigned cmdid
+-- ç©å®¶è¯·æ±‚å…³é—­è§‚å¯Ÿæ‘Šä½ï¼Œå‘½ä»¤æ ¼å¼: unsigned cmdid
 CLIENT_CUSTOMMSG_CLOSE_LOOKUP_STALL = 342
--- Íæ¼ÒÇëÇóÌí¼ÓÊÕ¹ºÎïÆ·£¬ÃüÁî¸ñÊ½£ºunsigned cmdid int pos string configid int count int64 gold int64 silver
+-- ç©å®¶è¯·æ±‚æ·»åŠ æ”¶è´­ç‰©å“ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid int pos string configid int count int64 gold int64 silver
 CLIENT_CUSTOMMSG_SET_PURCHASE_ITEM = 343
--- Íæ¼ÒÇëÇóÉ¾³ıÊÕ¹ºÎïÆ·£¬ÃüÁî¸ñÊ½£ºunsigned cmdid int pos
+-- ç©å®¶è¯·æ±‚åˆ é™¤æ”¶è´­ç‰©å“ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsigned cmdid int pos
 CLIENT_CUSTOMMSG_DEL_PURCHASE_ITEM = 344
--- Íæ¼Ò´ÓÌ¯Î»µÄÊÕ¹ºÀ¸Âô³öÁËÎïÆ·£¬ÃüÁî¸ñÊ½£ºunsignd cmdid int pos string configid int count int64 gold int64 silver
+-- ç©å®¶ä»æ‘Šä½çš„æ”¶è´­æ å–å‡ºäº†ç‰©å“ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsignd cmdid int pos string configid int count int64 gold int64 silver
 CLIENT_CUSTOMMSG_SEL_PURCHASE_ITEM = 345
---Íæ¼Ò´ÓÌ¯Î»µÄÊÕ¹ºÀ¸Âô³öÁËÎïÆ·(Í¨¹ı×ó¼ü»òÓÒ¼üµã»÷ÊÕ¹ºÎïÆ·)£¬ÃüÁî¸ñÊ½£ºunsignd cmdid,  int pos, int sellnum
+--ç©å®¶ä»æ‘Šä½çš„æ”¶è´­æ å–å‡ºäº†ç‰©å“(é€šè¿‡å·¦é”®æˆ–å³é”®ç‚¹å‡»æ”¶è´­ç‰©å“)ï¼Œå‘½ä»¤æ ¼å¼ï¼šunsignd cmdid,  int pos, int sellnum
 CLIENT_CUSTOMMSG_SEL_PURCHASE_ITEM_SELECT = 346
---Íæ¼ÒÇëÇó°ÚÌ¯ ÃüÁî¸ñÊ½£ºunsignd cmdid
+--ç©å®¶è¯·æ±‚æ‘†æ‘Š å‘½ä»¤æ ¼å¼ï¼šunsignd cmdid
 CLIENT_CUSTOMMSG_REQUEST_STALL = 347
--- 340-349ÓÉ°ÚÌ¯ÏûÏ¢Õ¼ÓÃ£¬Çë²»ÒªÖØ¸´ £º£©
+-- 340-349ç”±æ‘†æ‘Šæ¶ˆæ¯å ç”¨ï¼Œè¯·ä¸è¦é‡å¤ ï¼šï¼‰
 
---ÓÊ¼ÄÏµÍ³Ïà¹Ø²Ù×÷
---Íæ¼Ò´ò¿ªÓÊ¼Ä½çÃæÃüÁî¸ñÊ½£ºunsigned cmdidint type
+--é‚®å¯„ç³»ç»Ÿç›¸å…³æ“ä½œ
+--ç©å®¶æ‰“å¼€é‚®å¯„ç•Œé¢å‘½ä»¤æ ¼å¼ï¼šunsigned cmdidint type
 CLIENT_CUSTOMMSG_POST_OPENBOX = 350
---Íæ¼ÒÈ¡Ïû¼ÄĞÅ
+--ç©å®¶å–æ¶ˆå¯„ä¿¡
 CLIENT_CUSTOMMSG_POST_CANCEL = 351
---Íæ¼Ò¼ÄĞÅÃüÁî¸ñÊ½£ºunsigned cmdid widestr targetnamewidestr letternamewidestr content int money
+--ç©å®¶å¯„ä¿¡å‘½ä»¤æ ¼å¼ï¼šunsigned cmdid widestr targetnamewidestr letternamewidestr content int money
 CLIENT_CUSTOMMSG_POST_SEND = 352
---Íæ¼Ò¶ÁĞÅ
+--ç©å®¶è¯»ä¿¡
 CLIENT_CUSTOMMSG_POST_READ = 353
---Íæ¼ÒÌáÈ¡ÒøÁ½
+--ç©å®¶æå–é“¶ä¸¤
 CLIENT_CUSTOMMSG_POST_GET_MONEY = 354
---Íæ¼ÒÌáÈ¡ÎïÆ·
+--ç©å®¶æå–ç‰©å“
 CLIENT_CUSTOMMSG_POST_GET_ITEM = 355
---Íæ¼ÒÉ¾³ıÓÊ¼ş
+--ç©å®¶åˆ é™¤é‚®ä»¶
 CLIENT_CUSTOMMSG_POST_DEl = 356
---Íæ¼Ò¹Ø±ÕÓÊ¼Ä½çÃæ
+--ç©å®¶å…³é—­é‚®å¯„ç•Œé¢
 CLIENT_CUSTOMMSG_POST_CLOSEBOX = 357
---Íæ¼Ò¹Ø±Õ¶ÁĞÅ½çÃæ
+--ç©å®¶å…³é—­è¯»ä¿¡ç•Œé¢
 CLIENT_CUSTOMMSG_POST_CLOSE_READBOX = 358
---Íæ¼ÒÌáÈ¡¸½¼ş
+--ç©å®¶æå–é™„ä»¶
 CLIENT_CUSTOMMSG_POST_GET_APPEDIX = 359
---Íæ¼ÒÉ¾³ıÈ«²¿ÓÊ¼ş
+--ç©å®¶åˆ é™¤å…¨éƒ¨é‚®ä»¶
 CLIENT_CUSTOMMSG_POST_DEl_ALL = 360
 
 
--- °İÊ¦ÏûÏ¢£¬ÔİÊ±( 370 - 385)
--- µ¥·½½â³ıÊ¦Í½¹ØÏµ £¬ÏûÏ¢¸ñÊ½£ºunsigned msgid int Flag widestr targetname
+-- æ‹œå¸ˆæ¶ˆæ¯ï¼Œæš‚æ—¶( 370 - 385)
+-- å•æ–¹è§£é™¤å¸ˆå¾’å…³ç³» ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid int Flag widestr targetname
 CLIENT_CUSTOMMSG_SINGLEFREETEACHPRNRELATION	= 370
--- Ö÷¶¯¼ÓÈëÊ¦Í½ºòÑ¡Ãûµ¥ÏûÏ¢¸ñÊ½£º unsigned msgid int Flag (0ÎªÊ¦¸µºòÑ¡£¬1ÎªÍ½µÜºòÑ¡)
+-- ä¸»åŠ¨åŠ å…¥å¸ˆå¾’å€™é€‰åå•æ¶ˆæ¯æ ¼å¼ï¼š unsigned msgid int Flag (0ä¸ºå¸ˆå‚…å€™é€‰ï¼Œ1ä¸ºå¾’å¼Ÿå€™é€‰)
 CLIENT_CUSTOMMSG_JOINTEACHPRNELIST = 371
--- Ö÷¶¯ÍË³öÊ¦Í½ºòÑ¡Ãûµ¥ÏûÏ¢¸ñÊ½£º unsigned msgid int Flag (0ÎªÊ¦¸µºòÑ¡£¬1ÎªÍ½µÜºòÑ¡)
+-- ä¸»åŠ¨é€€å‡ºå¸ˆå¾’å€™é€‰åå•æ¶ˆæ¯æ ¼å¼ï¼š unsigned msgid int Flag (0ä¸ºå¸ˆå‚…å€™é€‰ï¼Œ1ä¸ºå¾’å¼Ÿå€™é€‰)
 CLIENT_CUSTOMMSG_EXITTEACHPRNELIST = 372
--- ²é¿´Ê¦Í½ºòÑ¡Ãûµ¥ÏûÏ¢¸ñÊ½£º unsigned msgid int Flag (0ÎªÊ¦¸µºòÑ¡£¬1ÎªÍ½µÜºòÑ¡)£¬int PageType(·­Ò³ÀàĞÍ)
+-- æŸ¥çœ‹å¸ˆå¾’å€™é€‰åå•æ¶ˆæ¯æ ¼å¼ï¼š unsigned msgid int Flag (0ä¸ºå¸ˆå‚…å€™é€‰ï¼Œ1ä¸ºå¾’å¼Ÿå€™é€‰)ï¼Œint PageType(ç¿»é¡µç±»å‹)
 CLIENT_CUSTOMMSG_QUERYTEACHPRNELIST = 373
--- µÃµ½Ê¦Í½ÍÆ¼öÃûµ¥ÏûÏ¢¸ñÊ½£º unsigned msgid int sex
+-- å¾—åˆ°å¸ˆå¾’æ¨èåå•æ¶ˆæ¯æ ¼å¼ï¼š unsigned msgid int sex
 CLIENT_CUSTOMMSG_GETLISTBYCONDITION = 374
---Ê¦¸µµÃµ½Í½µÜÊÕÒæ:    unsigned msgidwstring name;
+--å¸ˆå‚…å¾—åˆ°å¾’å¼Ÿæ”¶ç›Š:    unsigned msgidwstring name;
 CLIENT_CUSTOMMSG_GETPRENTICE_INCOME = 375
---²é¿´×Ô¼ºµÄËùÓĞÍ½µÜÃûµ¥:    unsigned msgid
+--æŸ¥çœ‹è‡ªå·±çš„æ‰€æœ‰å¾’å¼Ÿåå•:    unsigned msgid
 CLIENT_CUSTOMMSG_QUERYALLPRENTICELIST = 376
---ÆÀ¼ÛÊ¦¸µ½á¹û:    unsigned msgid int ResType
+--è¯„ä»·å¸ˆå‚…ç»“æœ:    unsigned msgid int ResType
 CLIENT_CUSTOMMSG_JUDGETEACH_RESULT		= 377
 
---µôÂä¼ñÈ¡ÏûÏ¢
---´ÓµôÂäÊÓ´°¼ñÈ¡Ä³¼ş¶«Î÷ÏûÏ¢¸ñÊ½£º unsigned cmdid int pos(posÎª0Ê±±íÊ¾Ê°È¡ËùÓĞ¿ÉÊ°È¡µÄÎïÆ·)
+--æ‰è½æ¡å–æ¶ˆæ¯
+--ä»æ‰è½è§†çª—æ¡å–æŸä»¶ä¸œè¥¿æ¶ˆæ¯æ ¼å¼ï¼š unsigned cmdid int pos(posä¸º0æ—¶è¡¨ç¤ºæ‹¾å–æ‰€æœ‰å¯æ‹¾å–çš„ç‰©å“)
 CLIENT_CUSTOMMSG_PICKUP_DROPITEM = 380
---¿Í»§¶ËÉêÇë¹Ø±Õµ±Ç°²é¿´µÄµôÂäÊÓ´°£¬ÏûÏ¢¸ñÊ½:unsigned cmdid
+--å®¢æˆ·ç«¯ç”³è¯·å…³é—­å½“å‰æŸ¥çœ‹çš„æ‰è½è§†çª—ï¼Œæ¶ˆæ¯æ ¼å¼:unsigned cmdid
 CLIENT_CUSTOMMSG_CLOSE_DROPBOX = 382
---Íæ¼Ò÷»×Ó½á¹ûÏûÏ¢¸ñÊ½£ºunsigned cmdid object item int mode
+--ç©å®¶éª°å­ç»“æœæ¶ˆæ¯æ ¼å¼ï¼šunsigned cmdid object item int mode
 CLIENT_CUSTOMMSG_ROLL_ITEM_RESULT = 387
---¶Ó³¤·ÖÅäÎïÆ·£¬ÏûÏ¢¸ñÊ½: unsigned cmdid int pos widestr targetplayer
+--é˜Ÿé•¿åˆ†é…ç‰©å“ï¼Œæ¶ˆæ¯æ ¼å¼: unsigned cmdid int pos widestr targetplayer
 CLIENT_CUSTOMMSG_TEAMLEADER_ALLOC_ITEM = 388
 
---½á»éÏûÏ¢
---×é¶ÓÉêÇë½á»é
+--ç»“å©šæ¶ˆæ¯
+--ç»„é˜Ÿç”³è¯·ç»“å©š
 CLIENT_CUSTOMMSG_REQUEST_MARRIAGE = 390
 
---ÁµÈËÏûÏ¢
---½â³ıÁµÈË ÏûÏ¢¸ñÊ½: widstr name
+--æ‹äººæ¶ˆæ¯
+--è§£é™¤æ‹äºº æ¶ˆæ¯æ ¼å¼: widstr name
 CLIENT_CUSTOMMSG_REQUEST_LOVER_FREE = 400
 
---ÍĞ¹ÜÏµÍ³Ïà¹Ø²Ù×÷--410-420
---¿ªÊ¼¹Ò»ú£¬ÏûÏ¢¸ñÊ½£ºunsigned cmdid£¬unsigned trusteetype
+--æ‰˜ç®¡ç³»ç»Ÿç›¸å…³æ“ä½œ--410-420
+--å¼€å§‹æŒ‚æœºï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned cmdidï¼Œunsigned trusteetype
 CLIENT_CUSTOMMSG_START_TRUSTEE = 410
---Í£Ö¹¹Ò»úÏûÏ¢¸ñÊ½£ºunsigned cmdid
+--åœæ­¢æŒ‚æœºæ¶ˆæ¯æ ¼å¼ï¼šunsigned cmdid
 CLIENT_CUSTOMMSG_STOP_TRUSTEE = 411
---ĞŞ¸Ä¹Ò»úÉèÖÃ
+--ä¿®æ”¹æŒ‚æœºè®¾ç½®
 CLIENT_CUSTOMMSG_SET_TRUSTEE = 412
---Çå³ı¹Ò»úlog
+--æ¸…é™¤æŒ‚æœºlog
 CLIENT_CUSTOMMSG_CLEAR_TRUSTEE_LOG = 413
 
---Ëæ»úÉÌµêÏûÏ¢
-CLIENT_CUSTOMMSG_RANDOM_SHOP_CLOSE = 420 --Ëæ»úÉÌµê¹Ø±Õ
+--éšæœºå•†åº—æ¶ˆæ¯
+CLIENT_CUSTOMMSG_RANDOM_SHOP_CLOSE = 420 --éšæœºå•†åº—å…³é—­
 
--- ±íÇé¶¯×÷ÏûÏ¢ 430-439
--- ÉÏ´«¶¯×÷ÇëÇó ÏûÏ¢¸ñÊ½: unsigned cmdid string action_id
+-- è¡¨æƒ…åŠ¨ä½œæ¶ˆæ¯ 430-439
+-- ä¸Šä¼ åŠ¨ä½œè¯·æ±‚ æ¶ˆæ¯æ ¼å¼: unsigned cmdid string action_id
 CLIENT_CUSTOMMSG_REQUEST_ACTION = 430
 
---³·ÏúÑ¡ÖĞ¶ÔÏó
+--æ’¤é”€é€‰ä¸­å¯¹è±¡
 CLIENT_CUSTOMMSG_SELECT_CANCEL = 440
 
---×é¶ÓÏûÏ¢£¨Ìí¼Ó£©
-CLIENT_CUSTOMMSG_TEAM_INFO_GET = 441--È¡µÃµ±Ç°ÕĞÄ¼ÏûÏ¢µÄ¾ßÌåÄÚÈİ
---Íæ¼Ò´ò¿ª×é¶ÓÕĞÄ¼½çÃæµÄÊ±ºò£¬Í¨Öª·şÎñÆ÷¼ÇÂ¼
+--ç»„é˜Ÿæ¶ˆæ¯ï¼ˆæ·»åŠ ï¼‰
+CLIENT_CUSTOMMSG_TEAM_INFO_GET = 441--å–å¾—å½“å‰æ‹›å‹Ÿæ¶ˆæ¯çš„å…·ä½“å†…å®¹
+--ç©å®¶æ‰“å¼€ç»„é˜Ÿæ‹›å‹Ÿç•Œé¢çš„æ—¶å€™ï¼Œé€šçŸ¥æœåŠ¡å™¨è®°å½•
 CLIENT_CUSTOMMSG_TEAM_PLAYER_OPEN = 442
---Íæ¼Ò¹Ø±Õ×é¶ÓÕĞÄ¼½çÃæµÄÊ±ºò£¬Í¨Öª·şÎñÆ÷É¾³ı
+--ç©å®¶å…³é—­ç»„é˜Ÿæ‹›å‹Ÿç•Œé¢çš„æ—¶å€™ï¼Œé€šçŸ¥æœåŠ¡å™¨åˆ é™¤
 CLIENT_CUSTOMMSG_TEAM_PLAYER_CLOSE = 443
---½âÉ¢¶ÓÎé
+--è§£æ•£é˜Ÿä¼
 CLIENT_CUSTOMMSG_TEAM_DESTROY = 444
---ÑûÇëÍæ¼Ò¼ÓÈë
+--é‚€è¯·ç©å®¶åŠ å…¥
 CLIENT_CUSTOMMSG_TEAM_INVITE = 445
 
---Çá¹¦ÒÆ¶¯
+--è½»åŠŸç§»åŠ¨
 CLIENT_CUSTOMMSG_QGMOVE = 450
 
--- ´«ÊÚĞŞÎª È·¶¨¿ªÊ¼ unsigned cmdid, int ImpartValue,
+-- ä¼ æˆä¿®ä¸º ç¡®å®šå¼€å§‹ unsigned cmdid, int ImpartValue,
 CLIENT_CUSTOMMSG_IMPART_BEGIN = 460
--- ´«ÊÚĞŞÎª È¡Ïû
+-- ä¼ æˆä¿®ä¸º å–æ¶ˆ
 CLIENT_CUSTOMMSG_IMPART_CANCEL = 461
 
--- ¿Í»§¶ËÉÏ·¢Êé·¨ÓÎÏ·²Ù×÷ÏûÏ¢
+-- å®¢æˆ·ç«¯ä¸Šå‘ä¹¦æ³•æ¸¸æˆæ“ä½œæ¶ˆæ¯
 CLIENT_CUSTOMMSG_MINIGAME_HANDWRITING_RESULT = 482
--- ¿Í»§¶ËÓÎÏ·½á¹ûÉÏ´«: unsigned cmdid£¬string gamename int result int time
+-- å®¢æˆ·ç«¯æ¸¸æˆç»“æœä¸Šä¼ : unsigned cmdidï¼Œstring gamename int result int time
 --CLIENT_CUSTOMMSG_GAME_RESULT = 500
 
--- ¿Í»§¶ËÇëÇóÌØÊâÎäÆ÷²éÑ¯: unsigned cmdid£¬int type
+-- å®¢æˆ·ç«¯è¯·æ±‚ç‰¹æ®Šæ­¦å™¨æŸ¥è¯¢: unsigned cmdidï¼Œint type
 CLIENT_CUSTOMMSG_SPECIAL_ITEM_QUERY = 510
 
--- ÆæÓöÄ£¿é(Ô¤ÁôID·¶Î§520-529)
--- ÆæÓö½çÃæ´ò¿ªÇëÇó·şÎñÆ÷ÑéÖ¤: unsigned cmdid
+-- å¥‡é‡æ¨¡å—(é¢„ç•™IDèŒƒå›´520-529)
+-- å¥‡é‡ç•Œé¢æ‰“å¼€è¯·æ±‚æœåŠ¡å™¨éªŒè¯: unsigned cmdid
 CLIENT_CUSTOMMSG_REFRESH_ADVENTURE	= 520
 
--- ÆæÓöµÀ¾ßÊ¹ÓÃ°´Å¥: unsigned cmdid
+-- å¥‡é‡é“å…·ä½¿ç”¨æŒ‰é’®: unsigned cmdid
 CLIENT_CUSTOMMSG_USE_ADVENTURE_ITEM = 521
 
--- ÆæÓö½ÓÊÜ°´Å¥: unsigned cmdid int index
+-- å¥‡é‡æ¥å—æŒ‰é’®: unsigned cmdid int index
 CLIENT_CUSTOMMSG_CLICK_ADVENTURE_ACCEPT = 522
 
--- ÆæÓö¾Ü¾ø°´Å¥: unsigned cmdid int index
+-- å¥‡é‡æ‹’ç»æŒ‰é’®: unsigned cmdid int index
 CLIENT_CUSTOMMSG_CLICK_ADVENTURE_DEFUSE = 523
 
--- ¹²ÏíÆæÓö¸øºÃÓÑ: unsigned cmdid int taskid widestr friendname
+-- å…±äº«å¥‡é‡ç»™å¥½å‹: unsigned cmdid int taskid widestr friendname
 CLIENT_CUSTOMMSG_SHARE_ADVENTURE = 524
 
--- ÆæÓöºÃÓÑ¹²Ïí½çÃæ´ò¿ªÇëÇó·şÎñÆ÷ÑéÖ¤: unsigned cmdid
+-- å¥‡é‡å¥½å‹å…±äº«ç•Œé¢æ‰“å¼€è¯·æ±‚æœåŠ¡å™¨éªŒè¯: unsigned cmdid
 CLIENT_CUSTOMMSG_REFRESH_ADVENTURE_SHAREMSG	= 525
 
--- ½ÓÊÜ»ò¾Ü¾ø¹²ÏíÆæÓöµÄÏûÏ¢: unsigned cmdid int taskid widestr friendname int result
+-- æ¥å—æˆ–æ‹’ç»å…±äº«å¥‡é‡çš„æ¶ˆæ¯: unsigned cmdid int taskid widestr friendname int result
 CLIENT_CUSTOMMSG_DO_SHARE_RESULT = 526
 
--- ·ÅÆúÒÑ¾­¼¤»îµÄ¹²ÏíÆæÓö: unsigned cmdid int row
+-- æ”¾å¼ƒå·²ç»æ¿€æ´»çš„å…±äº«å¥‡é‡: unsigned cmdid int row
 CLIENT_CUSTOMMSG_GIVEUP_SHARE_ADV = 527
 
 
--- ×Ô¶¨Òå±à¼­ÈÎÎñÄ£¿é(Ô¤ÁôID·¶Î§530-549)
--- ´ò¿ª»ò¹Ø±Õ½±ÀøÈİÆ÷: unsigned cmdid int flag
+-- è‡ªå®šä¹‰ç¼–è¾‘ä»»åŠ¡æ¨¡å—(é¢„ç•™IDèŒƒå›´530-549)
+-- æ‰“å¼€æˆ–å…³é—­å¥–åŠ±å®¹å™¨: unsigned cmdid int flag
 CLIENT_CUSTOMMSG_AUTO_PRIZE_BOX = 530
 
--- ¿Í»§¶Ë·¢²¼ÊÕ¼¯ÀàÈÎÎñ: unsigned cmdid wstring title string collect_info int golden int silver int time_limit
+-- å®¢æˆ·ç«¯å‘å¸ƒæ”¶é›†ç±»ä»»åŠ¡: unsigned cmdid wstring title string collect_info int golden int silver int time_limit
 CLIENT_CUSTOMMSG_PUBLISH_COLLECT_TASK = 531
 
--- ¿Í»§¶Ë´ò¿ª·¢²¼ÈÎÎñ×Ü½çÃæ: unsigned cmdid
+-- å®¢æˆ·ç«¯æ‰“å¼€å‘å¸ƒä»»åŠ¡æ€»ç•Œé¢: unsigned cmdid
 CLIENT_CUSTOMMSG_OPEN_PUBLISH_FORM = 532
 
--- ¿Í»§¶Ë´ò¿ª²éÑ¯·¢²¼ÈÎÎñ½çÃæ: unsigned cmdid
+-- å®¢æˆ·ç«¯æ‰“å¼€æŸ¥è¯¢å‘å¸ƒä»»åŠ¡ç•Œé¢: unsigned cmdid
 CLIENT_CUSTOMMSG_OPEN_QUERY_EDIT_FORM = 533
 
--- ¸ù¾İÈÎÎñÀàĞÍ½øĞĞ²éÑ¯: unsigned cmdid int type
+-- æ ¹æ®ä»»åŠ¡ç±»å‹è¿›è¡ŒæŸ¥è¯¢: unsigned cmdid int type
 CLIENT_CUSTOMMSG_QUERY_TYPE_TASK = 534
 
--- ÉÏÒ»Ò³ÏÂÒ»Ò³ÏûÏ¢: unsigned cmd_id string prev_next int type int taskid
+-- ä¸Šä¸€é¡µä¸‹ä¸€é¡µæ¶ˆæ¯: unsigned cmd_id string prev_next int type int taskid
 CLIENT_CUSTOMMSG_QUERY_PREV_NEXT_PAGE = 535
 
--- Í¨¹ıÈÎÎñID²éÑ¯ËùÓĞÈÎÎñĞÅÏ¢
+-- é€šè¿‡ä»»åŠ¡IDæŸ¥è¯¢æ‰€æœ‰ä»»åŠ¡ä¿¡æ¯
 CLIENT_CUSTOMMSG_QUERY_SELECT_TASK_INFO = 536
 
--- ½ÓÊÜÍæ¼Ò±à¼­µÄÈÎÎñ: unsigned cmdid int taskid
+-- æ¥å—ç©å®¶ç¼–è¾‘çš„ä»»åŠ¡: unsigned cmdid int taskid
 CLIENT_CUSTOMMSG_ACCEPT_EDIT_TASK = 537
 
--- ¿Í»§¶Ë´ò¿ªÒÑ½Ó±à¼­ÈÎÎñ½çÃæ: unsigned cmdid
+-- å®¢æˆ·ç«¯æ‰“å¼€å·²æ¥ç¼–è¾‘ä»»åŠ¡ç•Œé¢: unsigned cmdid
 CLIENT_CUSTOMMSG_OPEN_EDIT_FORM_ACCEPTED = 538
 
--- ·ÅÆúÒÑ¾­½ÓÊÜµÄ±à¼­ÈÎÎñ: unsigned cmdid int taskid widestr title
+-- æ”¾å¼ƒå·²ç»æ¥å—çš„ç¼–è¾‘ä»»åŠ¡: unsigned cmdid int taskid widestr title
 CLIENT_CUSTOMMSG_GIVEUP_EDIT_TASK = 539
 
--- Ìá½»ÒÑ¾­½ÓÊÜµÄ±à¼­ÈÎÎñ: unsigned cmdid int taskid
+-- æäº¤å·²ç»æ¥å—çš„ç¼–è¾‘ä»»åŠ¡: unsigned cmdid int taskid
 CLIENT_CUSTOMMSG_SUBMIT_EDIT_TASK = 540
 
--- ´ò¿ª»ò¹Ø±ÕÊÕ¼¯ÎïÆ·Ìá½»ÈİÆ÷: unsigned cmdid int flag
+-- æ‰“å¼€æˆ–å…³é—­æ”¶é›†ç‰©å“æäº¤å®¹å™¨: unsigned cmdid int flag
 CLIENT_CUSTOMMSG_SHOW_SUBMIT_BOX = 541
 
--- ¿Í»§¶ËÈ·ÈÏÌá½»ÊÕ¼¯ÀàÈÎÎñ: unsigned cmdid int taskid
+-- å®¢æˆ·ç«¯ç¡®è®¤æäº¤æ”¶é›†ç±»ä»»åŠ¡: unsigned cmdid int taskid
 CLIENT_CUSTOMMSG_SUBMIT_COLLECT_EDITTASK = 542
 
---¿Í»§¶Ë´´½¨ÊÀ½çÂí³µ£ºunsigned cmd_id int string to
+--å®¢æˆ·ç«¯åˆ›å»ºä¸–ç•Œé©¬è½¦ï¼šunsigned cmd_id int string to
 CLIENT_CUSTOMMSG_CREATE_WORLD_TRANS_TOOL = 550
 
--- Éú»î¼¼ÄÜÏà¹ØÏûÏ¢
--- ¿Í»§¶ËÉÏ·¢ºÏ³ÉÏûÏ¢£ºunsigned cmd_id, string formula_name
+-- ç”Ÿæ´»æŠ€èƒ½ç›¸å…³æ¶ˆæ¯
+-- å®¢æˆ·ç«¯ä¸Šå‘åˆæˆæ¶ˆæ¯ï¼šunsigned cmd_id, string formula_name
 CLIENT_CUSTOMMSG_COMPOSITE = 600
 
--- ¿Í»§¶ËÉÏ·¢ÆòÌÖÇëÇó£ºunsigned cmd_id
+-- å®¢æˆ·ç«¯ä¸Šå‘ä¹è®¨è¯·æ±‚ï¼šunsigned cmd_id
 CLIENT_CUSTOMMSG_BEG = 601
 
--- ¿Í»§¶ËÉÏ·¢ËãØÔÇëÇó£ºunsigned cmd_id
+-- å®¢æˆ·ç«¯ä¸Šå‘ç®—å¦è¯·æ±‚ï¼šunsigned cmd_id
 CLIENT_CUSTOMMSG_SUANGUA = 602
 
--- ºÏ³ÉÏà¹Ø
--- ºÏ³ÉÊÓÍ¼´ò¿ª
+-- åˆæˆç›¸å…³
+-- åˆæˆè§†å›¾æ‰“å¼€
 CLIENT_CUSTOMMSG_OPEN_COMPOSITEBOX = 603
--- ºÏ³ÉÊÓ´°¹Ø±Õ
+-- åˆæˆè§†çª—å…³é—­
 CLIENT_CUSTOMMSG_CLOSE_COMPOSITEBOX = 604
--- ºÏ³ÉÊÓÍ¼µÄÎïÆ·Ìí¼Ó
+-- åˆæˆè§†å›¾çš„ç‰©å“æ·»åŠ 
 CLIENT_CUSTOMMSG_COMPOSITEBOX_ADDITEM = 605
--- ºÏ³ÉÊÓÍ¼µÄÎïÆ·É¾³ı
+-- åˆæˆè§†å›¾çš„ç‰©å“åˆ é™¤
 CLIENT_CUSTOMMSG_COMPOSITEBOX_REMOVEITEM = 606
---ºÏ³ÉÎïÆ·×Ô¶¯·ÅÖÃ
+--åˆæˆç‰©å“è‡ªåŠ¨æ”¾ç½®
 CLIENT_CUSTOMMSG_COMPOSITEBOX_AUTO_PUT = 607
 
 
--- Éí·İÏà¹ØĞÅÏ¢
--- ¿Í»§¶ËÉÏ·¢ÇëÇó¼¤»îÉí·İ£ºunsigned cmd_id, int origin_id
+-- èº«ä»½ç›¸å…³ä¿¡æ¯
+-- å®¢æˆ·ç«¯ä¸Šå‘è¯·æ±‚æ¿€æ´»èº«ä»½ï¼šunsigned cmd_id, int origin_id
 CLIENT_CUSTOMMSG_ACTIVE_ORIGIN = 700
 
--- ¿Í»§¶ËÉÏ·¢Í·¶¥ÏÔÊ¾Éí·İĞÅÏ¢
+-- å®¢æˆ·ç«¯ä¸Šå‘å¤´é¡¶æ˜¾ç¤ºèº«ä»½ä¿¡æ¯
 CLIENT_CUSTOMMSG_SET_SHOW_ORIGIN = 701
 
--- ¿Í»§¶Ë·¢ËÍ»ñÈ¡½±ÀøÇëÇó: unsigned cmd_id, int origin_id
+-- å®¢æˆ·ç«¯å‘é€è·å–å¥–åŠ±è¯·æ±‚: unsigned cmd_id, int origin_id
 CLIENT_CUSTOMMSG_GET_ORIGIN_PRIZE = 702
 
--- ¿Í»§¶Ë·¢ËÍ»ñÈ¡Éí·İÇëÇó: unsigned cmd_id, int origin_id
+-- å®¢æˆ·ç«¯å‘é€è·å–èº«ä»½è¯·æ±‚: unsigned cmd_id, int origin_id
 CLIENT_CUSTOMMSG_GET_ORIGIN = 705
 
--- ¿Í»§¶Ë·¢ËÍÇëÇóÌáÊ¾Éí·İ»ñÈ¡ĞÅÏ¢: unsigned cmd_id, int origin_id
+-- å®¢æˆ·ç«¯å‘é€è¯·æ±‚æç¤ºèº«ä»½è·å–ä¿¡æ¯: unsigned cmd_id, int origin_id
 CLIENT_CUSTOMMSG_REQUIRE_NOTIFY_ORIGIN = 706
 
--- ¿Í»§¶ËÈ·ÈÏÏûÏ¢ cmd_id, string submsg, int ret
+-- å®¢æˆ·ç«¯ç¡®è®¤æ¶ˆæ¯ cmd_id, string submsg, int ret
 CLIENT_CUSTOMMSG_CONFIRM = 710
 
---ÀëÏßÏà¹ØĞÅÏ¢
---¿Í»§¶ËÉÏ·¢ÀëÏßÉèÖÃÉêÇëĞÅÏ¢£ºunsigned cmd_id, string off_id
+--ç¦»çº¿ç›¸å…³ä¿¡æ¯
+--å®¢æˆ·ç«¯ä¸Šå‘ç¦»çº¿è®¾ç½®ç”³è¯·ä¿¡æ¯ï¼šunsigned cmd_id, string off_id
 CLIENT_CUSTOMMSG_OFFLINE_ADD_ACT = 800
 
---¿Í»§¶ËÉÏ·¢ÀëÏßÉèÖÃÉêÇëĞÅÏ¢£ºunsigned cmd_id, int index
+--å®¢æˆ·ç«¯ä¸Šå‘ç¦»çº¿è®¾ç½®ç”³è¯·ä¿¡æ¯ï¼šunsigned cmd_id, int index
 CLIENT_CUSTOMMSG_OFFLINE_DEL_ACT = 801
 
---¿Í»§¶ËÉÏ·¢¿ªÊ¼¹Ò»úÏûÏ¢ unsigned cmd_id
+--å®¢æˆ·ç«¯ä¸Šå‘å¼€å§‹æŒ‚æœºæ¶ˆæ¯ unsigned cmd_id
 CLIENT_CUSTOMMSG_START_OFFLIN = 802
 
---¿Í»§¶ËÇëÇóÁìÀëÏß½±Àø
+--å®¢æˆ·ç«¯è¯·æ±‚é¢†ç¦»çº¿å¥–åŠ±
 CLIENT_CUSTOMMSG_OFFLINE_GET_PRIZE = 803
 
---¿Í»§¶ËÇëÇó·ÅÆúÀëÏß½±Àø
+--å®¢æˆ·ç«¯è¯·æ±‚æ”¾å¼ƒç¦»çº¿å¥–åŠ±
 CLIENT_CUSTOMMSG_OFFLINE_GIVEUP_PRIZE = 804
 
---¿Í»§¶ËÉèÖÃÀëÏßÖ´ĞĞÍĞ¹ÜÊÂ¼ş unsigned cmd_id
+--å®¢æˆ·ç«¯è®¾ç½®ç¦»çº¿æ‰§è¡Œæ‰˜ç®¡äº‹ä»¶ unsigned cmd_id
 CLIENT_CUSTOMMSG_OFFLINE_SET_ACT = 805
 
---¿Í»§¶Ë¾çÇé½áÊø
+--å®¢æˆ·ç«¯å‰§æƒ…ç»“æŸ
 CLIENT_CUSTOMMSG_END_MOVIE = 806
 
---¿Í»§¶ËÉÏ·¢½áÊø¹Ò»úÏûÏ¢ unsigned cmd_id
+--å®¢æˆ·ç«¯ä¸Šå‘ç»“æŸæŒ‚æœºæ¶ˆæ¯ unsigned cmd_id
 CLIENT_CUSTOMMSG_END_OFFLIN = 807
 
---¿Í»§¶ËÇëÇó¾çÇé
+--å®¢æˆ·ç«¯è¯·æ±‚å‰§æƒ…
 CLIENT_CUSTOMMSG_START_MOVIE = 808
 
---¿Í»§¶ËÉÏ·¢¿ªÊ¼¹Ò»úÏûÏ¢ unsigned cmd_id
+--å®¢æˆ·ç«¯ä¸Šå‘å¼€å§‹æŒ‚æœºæ¶ˆæ¯ unsigned cmd_id
 CLIENT_CUSTOMMSG_START_OFFLINE_JOB = 809
 
---¿Í»§¶ËÉÏ·¢½áÊø¹Ò»úÏûÏ¢ unsigned cmd_id
+--å®¢æˆ·ç«¯ä¸Šå‘ç»“æŸæŒ‚æœºæ¶ˆæ¯ unsigned cmd_id
 CLIENT_CUSTOMMSG_END_OFFLINE_JOB = 810
 
---¿Í»§¶ËÉÏ·¢ÀëÏß½»»¥BUFFÏûÏ¢ unsigned cmd_id
+--å®¢æˆ·ç«¯ä¸Šå‘ç¦»çº¿äº¤äº’BUFFæ¶ˆæ¯ unsigned cmd_id
 CLIENT_CUSTOMMSG_OFFLINE_JOB_BUFF = 811
 
---¿Í»§¶ËÉÏ·¢ÇëÇóÍ¬²½Î»ÖÃÏûÏ¢ unsigned cmd_id
+--å®¢æˆ·ç«¯ä¸Šå‘è¯·æ±‚åŒæ­¥ä½ç½®æ¶ˆæ¯ unsigned cmd_id
 CLIENT_CUSTOMMSG_UPDATE_PLAYER_POS = 812
 
---¿Í»§¶ËÉÏ·¢ÀëÏß´ò¹¤ÈÕÖ¾ÔÄ¶ÁÏûÏ¢ unsigned cmd_id date
+--å®¢æˆ·ç«¯ä¸Šå‘ç¦»çº¿æ‰“å·¥æ—¥å¿—é˜…è¯»æ¶ˆæ¯ unsigned cmd_id date
 CLIENT_CUSTOMMSG_UPDATE_LOG_READ = 813
 
---¿Í»§¶ËÉÏ·¢¿ªÊ¼ÀëÏß´ò¹ÖÏûÏ¢
+--å®¢æˆ·ç«¯ä¸Šå‘å¼€å§‹ç¦»çº¿æ‰“æ€ªæ¶ˆæ¯
 CLIENT_CUSTOMMSG_START_OFFLINE_FIGHT = 814
 
---¿Í»§¶ËÉÏ·¢Í£Ö¹ÀëÏß´ò¹ÖÏûÏ¢
+--å®¢æˆ·ç«¯ä¸Šå‘åœæ­¢ç¦»çº¿æ‰“æ€ªæ¶ˆæ¯
 CLIENT_CUSTOMMSG_END_OFFLINE_FIGHT = 815
 
---¿Í»§¶ËÉÏ·¢ÀëÏß½»»¥ÏûÏ¢
+--å®¢æˆ·ç«¯ä¸Šå‘ç¦»çº¿äº¤äº’æ¶ˆæ¯
 CLIENT_CUSTOMMSG_OFFLINE_INTERACT = 816
 
---¿Í»§¶ËÉÏ·¢»ñµÃÀëÏß´òÉÍ½±ÀøÏûÏ¢
+--å®¢æˆ·ç«¯ä¸Šå‘è·å¾—ç¦»çº¿æ‰“èµå¥–åŠ±æ¶ˆæ¯
 CLIENT_CUSTOMMSG_OFFLINE_GET_FEE_PRIZE = 817
 
---¿Í»§¶ËÉÏ·¢»ñµÃÀëÏßÃ¿ÈÕ½±ÀøÏûÏ¢
+--å®¢æˆ·ç«¯ä¸Šå‘è·å¾—ç¦»çº¿æ¯æ—¥å¥–åŠ±æ¶ˆæ¯
 CLIENT_CUSTOMMSG_OFFLINE_GET_DAILY_PRIZE = 818
 
---¿Í»§¶ËÉÏ·¢Í¬Òâ²¥·Å¾çÇé
+--å®¢æˆ·ç«¯ä¸Šå‘åŒæ„æ’­æ”¾å‰§æƒ…
 CLIENT_CUSTOMMSG_AGREE_MOVIE = 820
 
---¿Í»§¶ËÇëÇó×¼±¸ËãØÔ°ÚÌ¯
+--å®¢æˆ·ç«¯è¯·æ±‚å‡†å¤‡ç®—å¦æ‘†æ‘Š
 CLIENT_CUSTOMMSG_PREPARE_FORTUNETELLING = 853
 
---¿Í»§¶ËÇëÇó¿ªÊ¼ËãØÔ°ÚÌ¯
+--å®¢æˆ·ç«¯è¯·æ±‚å¼€å§‹ç®—å¦æ‘†æ‘Š
 CLIENT_CUSTOMMSG_BEGIN_FORTUNETELLING = 854
 
---¿Í»§¶ËÇëÇóÍ£Ö¹ËãØÔ
+--å®¢æˆ·ç«¯è¯·æ±‚åœæ­¢ç®—å¦
 CLIENT_CUSTOMMSG_END_FORTUNETELLING = 855
 
---¿Í»§¶ËÇëÇóÒªËãØÔ
+--å®¢æˆ·ç«¯è¯·æ±‚è¦ç®—å¦
 CLIENT_CUSTOMMSG_REQUEST_FORTUNETELLING = 856
 
---¿Í»§¶Ëµã»÷¿ªÊ¼µöÓã
+--å®¢æˆ·ç«¯ç‚¹å‡»å¼€å§‹é’“é±¼
 CLIENT_CUSTOMMSG_BEGIN_FISHING = 850
 
---¿Í»§¶Ëµã»÷¿ªÊ¼µöÓã²Ù×÷
+--å®¢æˆ·ç«¯ç‚¹å‡»å¼€å§‹é’“é±¼æ“ä½œ
 CLIENT_CUSTOMMSG_OP_FISHING = 851
 
---¿Í»§¶Ëµã»÷¿ªÊ¼³­Â¼²Ù×÷
+--å®¢æˆ·ç«¯ç‚¹å‡»å¼€å§‹æŠ„å½•æ“ä½œ
 CLIENT_CUSTOMMSG_BEGIN_COPY = 852
 
---¿Í»§¶Ë²éÑ¯»·Ê½ÈÎÎñ×´Ì¬ÊÇ·ñ¿ÉÒÔ³Ğ½ÓĞÅÏ¢: unsigned int cmd_id, string taskids
+--å®¢æˆ·ç«¯æŸ¥è¯¢ç¯å¼ä»»åŠ¡çŠ¶æ€æ˜¯å¦å¯ä»¥æ‰¿æ¥ä¿¡æ¯: unsigned int cmd_id, string taskids
 --CLIENT_CUSTOMMSG_REQUEST_TASK_STATE_CAN_ACCEPT = 900
 
--- ¿Í»§¶ËÍê³ÉĞÂÊÖ°ïÖú²½Öè: unsigned int cmd_id int stepID
+-- å®¢æˆ·ç«¯å®Œæˆæ–°æ‰‹å¸®åŠ©æ­¥éª¤: unsigned int cmd_id int stepID
 CLIENT_CUSTOMMSG_COMPLETE_FRESHMAN_HELP_STEP = 950
 
--- ½áÊøĞÂÊÖ½Ì³Ì
+-- ç»“æŸæ–°æ‰‹æ•™ç¨‹
 CLIENT_CUSTOMMSG_END_FRESHMAN_HELP = 951
 
--- ¿Í»§¶ËÇëÇó¿ªÊ¼´òÌúĞ¡ÓÎÏ·
+-- å®¢æˆ·ç«¯è¯·æ±‚å¼€å§‹æ‰“é“å°æ¸¸æˆ
 CLIENT_CUSTOMMSG_START_FORGE = 952
 
--- ¿Í»§¶ËÇëÇó½áÊø´òÌúĞ¡ÓÎÏ·
+-- å®¢æˆ·ç«¯è¯·æ±‚ç»“æŸæ‰“é“å°æ¸¸æˆ
 CLIENT_CUSTOMMSG_END_FORGE = 953
 
--- ¿Í»§¶ËÇëÇó¡¾ÃüÖĞ²âÊÔ¡¿
+-- å®¢æˆ·ç«¯è¯·æ±‚ã€å‘½ä¸­æµ‹è¯•ã€‘
 CLIENT_CUSTOMMSG_TEST_FORGE_STEP_HIT = 954
 
--- ¿Í»§¶ËÇëÇó¡¾È¡ÏûStep¡¿
+-- å®¢æˆ·ç«¯è¯·æ±‚ã€å–æ¶ˆStepã€‘
 CLIENT_CUSTOMMSG_CANCEL_STEP = 955
 
 
---¿Í»§¶ËÌøÉÏ¸¡Ì¨ÇëÇó°ó¶¨,unsigned int cmd_id, obj npc, float x, float y, float z, float orient
+--å®¢æˆ·ç«¯è·³ä¸Šæµ®å°è¯·æ±‚ç»‘å®š,unsigned int cmd_id, obj npc, float x, float y, float z, float orient
 CLIENT_CUSTOMMSG_LINK_TO_FLOAT = 980
---¿Í»§¶ËÇëÇóÁ´½ÓÇé¿öÏÂµÄÒÆ¶¯,unsigned int cmd_id, float off_x, float off_y, float off_z, float off_orient
+--å®¢æˆ·ç«¯è¯·æ±‚é“¾æ¥æƒ…å†µä¸‹çš„ç§»åŠ¨,unsigned int cmd_id, float off_x, float off_y, float off_z, float off_orient
 CLIENT_CUSTOMMSG_LINK_MOVE = 981
 
---ÇëÇó·şÎñÆ÷Í¬²½µ½NPCµÄ¿Í»§¶ËÎ»ÖÃ(NPC±ØĞëÒÑËÀÍö),unsigned int cmd_id, PERSISTID npc, float x, float y, float z
+--è¯·æ±‚æœåŠ¡å™¨åŒæ­¥åˆ°NPCçš„å®¢æˆ·ç«¯ä½ç½®(NPCå¿…é¡»å·²æ­»äº¡),unsigned int cmd_id, PERSISTID npc, float x, float y, float z
 CLIENT_CUSTOMMSG_SYN_NPC_POS = 990
 
--- ¿Í»§¶ËÇëÇó¾ç±¾ unsigned int cmd_id, obj obj_ident, string drama_name, unsigned int chapter_id, unsigned int round_id
+-- å®¢æˆ·ç«¯è¯·æ±‚å‰§æœ¬ unsigned int cmd_id, obj obj_ident, string drama_name, unsigned int chapter_id, unsigned int round_id
 CLIENT_CUSTOMMSG_DRAMA = 1000
 
--- ¿Í»§¶ËÇëÇó[¾ÈÖú]
+-- å®¢æˆ·ç«¯è¯·æ±‚[æ•‘åŠ©]
 CLIENT_CUSTOMMSG_RESCUE_REQUEST = 1001
 
--- ¿Í»§¶ËÇëÇó[¶ÔÄ³¸öÍæ¼ÒÊµÊ©¾ÈÖú] string player_name
+-- å®¢æˆ·ç«¯è¯·æ±‚[å¯¹æŸä¸ªç©å®¶å®æ–½æ•‘åŠ©] string player_name
 CLIENT_CUSTOMMSG_RESCUE_DEAL = 1002
 
--- ¿Í»§¶ËÇëÇó[È¡Ïû¾ÈÖú]
+-- å®¢æˆ·ç«¯è¯·æ±‚[å–æ¶ˆæ•‘åŠ©]
 CLIENT_CUSTOMMSG_RESCUE_CANCEL = 1003
 
--- ¿Í»§¶ËÇëÇó[Ä³Íæ¼ÒµÄ×°±¸ĞÅÏ¢] string player_name
+-- å®¢æˆ·ç«¯è¯·æ±‚[æŸç©å®¶çš„è£…å¤‡ä¿¡æ¯] string player_name
 CLIENT_CUSTOMMSG_GET_EQUIP_INFO = 1004
 
--- ¿Í»§¶ËÇëÇó[Ä³Íæ¼ÒµÄ»ù±¾ĞÅÏ¢] string player_name
+-- å®¢æˆ·ç«¯è¯·æ±‚[æŸç©å®¶çš„åŸºæœ¬ä¿¡æ¯] string player_name
 CLIENT_CUSTOMMSG_GET_BASE_INFO = 1005
 
--- ¿Í»§¶ËÇëÇóĞŞÎªÏà¹ØÏûÏ¢
+-- å®¢æˆ·ç«¯è¯·æ±‚ä¿®ä¸ºç›¸å…³æ¶ˆæ¯
 CLIENT_CUSTOMMSG_FACULTY_INFO = 1006
 
--- ¿Í»§¶ËÍ¨Öª·şÎñ¶Ë¶¯»­²¥·ÅÍê±Ï string ani_name
+-- å®¢æˆ·ç«¯é€šçŸ¥æœåŠ¡ç«¯åŠ¨ç”»æ’­æ”¾å®Œæ¯• string ani_name
 CLIENT_CUSTOMMSG_FIGHT_ENT_ANI_END = 1007
 
--- Ê°È¡µôÂä½ğÇ® : int msd_id, int index
+-- æ‹¾å–æ‰è½é‡‘é’± : int msd_id, int index
 CLIENT_CUSTOMMSG_GET_DROP_MONEY_ITEM = 1008
 
---¿Í»§¶Ë²¥·Å¾çÇéºÚÄ»³öÏÖ
+--å®¢æˆ·ç«¯æ’­æ”¾å‰§æƒ…é»‘å¹•å‡ºç°
 CLIENT_CUSTOMMSG_SCENARIO_BLACK = 1009
 
--- ¿Í»§¶ËÇëÇóÏâÇ¶£¬ÏûÏ¢ int msg_id, int inlay_type, int tool_box_pos, int inlay_pos
+-- å®¢æˆ·ç«¯è¯·æ±‚é•¶åµŒï¼Œæ¶ˆæ¯ int msg_id, int inlay_type, int tool_box_pos, int inlay_pos
 CLIENT_CUSTOMMSG_REQUEST_INLAY = 1010
 
--- ¿Í»§¶Ë»ØÓ¦ÏâÇ¶£¬ÏûÏ¢ int msg_id, int inlay_ok_or_cancel
+-- å®¢æˆ·ç«¯å›åº”é•¶åµŒï¼Œæ¶ˆæ¯ int msg_id, int inlay_ok_or_cancel
 CLIENT_CUSTOMMSG_RESPONE_INLAY = 1011
 
---¿Í»§¶ËÇëÇó½â³ıÍæ¼ÒÓë»ğÅÚnpcµÄ°ó¶¨
+--å®¢æˆ·ç«¯è¯·æ±‚è§£é™¤ç©å®¶ä¸ç«ç‚®npcçš„ç»‘å®š
 CLIENT_CUSTOMMSG_STOP_BIND = 1012
 
---¿Í»§¶ËÇëÇóÊ¹ÓÃNPC¼¼ÄÜ
+--å®¢æˆ·ç«¯è¯·æ±‚ä½¿ç”¨NPCæŠ€èƒ½
 CLIENT_CUSTOMMSG_USE_NPC_SKILL = 1013
 
--- ¿Í»§¶ËÇëÇó´´½¨¹«»á int msg_id, wstring guild_name, wstring guild_purpose
+-- å®¢æˆ·ç«¯è¯·æ±‚åˆ›å»ºå…¬ä¼š int msg_id, wstring guild_name, wstring guild_purpose
 CLIENT_CUSTOMMSG_GUILD = 1014
 
--- ÃÅÅÉÕ½¿Í»§¶ËÇëÇóÏûÏ¢
+-- é—¨æ´¾æˆ˜å®¢æˆ·ç«¯è¯·æ±‚æ¶ˆæ¯
 CLIENT_CUSTOMMSG_SCHOOL_WAR = 1015
 
---¿Í»§¶ËÉÏ·¢£¬È¡ÏûÇá¹¦µÈÔöÒæBUFFER£¬ÏûÏ¢: int msd_id, string buffer_id
+--å®¢æˆ·ç«¯ä¸Šå‘ï¼Œå–æ¶ˆè½»åŠŸç­‰å¢ç›ŠBUFFERï¼Œæ¶ˆæ¯: int msd_id, string buffer_id
 CLIENT_CUSTOMMSG_REMOVE_BUFFER = 1021
 
--- ¿Í»§¶ËÇëÇóÉèÖÃÈÎÎñ¸ú×ÙĞÅÏ¢, ÏûÏ¢: int msg_id, int task_id, int row
+-- å®¢æˆ·ç«¯è¯·æ±‚è®¾ç½®ä»»åŠ¡è·Ÿè¸ªä¿¡æ¯, æ¶ˆæ¯: int msg_id, int task_id, int row
 --CLIENT_CUSTOMMSG_UPDATE_TASK_TRACE = 1022
 
---¿ªÊ¼ÄÚ¹¦±ÈÆ´£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, Object target
+--å¼€å§‹å†…åŠŸæ¯”æ‹¼ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, Object target
 CLIENT_CUSTOMMSG_REQ_START_NEIGONG_COMPARE = 230
 
---ÄÚ¹¦±ÈÆ´Íæ¼ÒÏÂ×¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å†…åŠŸæ¯”æ‹¼ç©å®¶ä¸‹æ³¨ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 CLIENT_CUSTOMMSG_REQ_CHIP_IN = 231
 
---ÇëÇóÄÚ¹¦±ÈÆ´, ÏûÏ¢¸ñÊ½: unsigned msgid, int requesttype, obj target
+--è¯·æ±‚å†…åŠŸæ¯”æ‹¼, æ¶ˆæ¯æ ¼å¼: unsigned msgid, int requesttype, obj target
 CLIENT_COUSOMMSG_REQUEST_NEIG_PK = 232
 
---¼ÓÈëÄÚ¹¦±ÈÆ´ msgid, obj target
+--åŠ å…¥å†…åŠŸæ¯”æ‹¼ msgid, obj target
 CLIENT_CUSTOMMSG_JOIN_NEIG_PK = 233
 
---¿Í»§¶ËÏò·şÎñ¶ËÍ¬²½Ê±¼ä
+--å®¢æˆ·ç«¯å‘æœåŠ¡ç«¯åŒæ­¥æ—¶é—´
 CLIENT_CUSTOMMSG_AS_TIME = 1020

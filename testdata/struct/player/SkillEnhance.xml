@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--¼¼ÄÜ×¨¾«-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æŠ€èƒ½ä¸“ç²¾-->
 <object>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="skill_enhance_rec" cols="7" maxrows="400" public="false" private="false" save="false" desc="¼¼ÄÜ×¨¾«±í">
-			<column type="string" desc="¼¼ÄÜID"/>
-			<column type="word" desc="×÷ÓÃÀàÐÍ"/>
-			<column type="word" desc="¼ÆËãÀàÐÍ"/>
-			<column type="float" desc="¼ÆËãÖµ"/>
+		<record name="skill_enhance_rec" cols="7" maxrows="400" public="false" private="false" save="false" desc="æŠ€èƒ½ä¸“ç²¾è¡¨">
+			<column type="string" desc="æŠ€èƒ½ID"/>
+			<column type="word" desc="ä½œç”¨ç±»åž‹"/>
+			<column type="word" desc="è®¡ç®—ç±»åž‹"/>
+			<column type="float" desc="è®¡ç®—å€¼"/>
       <column type="string" desc="param1"/>
       <column type="string" desc="param2"/>
       <column type="string" desc="param3"/>

@@ -1,36 +1,36 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÒÆ¶¯Ïà¹ØµÄÊôÐÔ-->
+<!--ç§»åŠ¨ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!-- ×øÆï -->
-		<property name="MountID" type="int" public="true" private="true" save="true" desc="×øÆïµÄ¾²Ì¬id"/>
-		<property name="MountItemID" type="string" public="false" private="true" save="true" desc="×øÆïÀ¸Ê¹ÓÃµÀ¾ßµÄid"/>
-		<property name="MountType" type="byte" public="true" private="true" save="true" desc="×øÆïÀàÐÍ"/>
+		<!-- åéª‘ -->
+		<property name="MountID" type="int" public="true" private="true" save="true" desc="åéª‘çš„é™æ€id"/>
+		<property name="MountItemID" type="string" public="false" private="true" save="true" desc="åéª‘æ ä½¿ç”¨é“å…·çš„id"/>
+		<property name="MountType" type="byte" public="true" private="true" save="true" desc="åéª‘ç±»åž‹"/>
         
-		<!-- ×øÆï£¬¶àÈË×øÆïÖÐ -->
-		<property name="MountSeatIndex" type="int" public="true" private="true" save="false" desc="¶àÈËÆï³ËÖÐ,ÇÒ±êÃ÷ÁË×ùÎ»ºÅ"/>
-		<property name="MultiMountOwner" type="object" public="false" private="false" save="false" desc="µ±Ç°ËùÔÚ×øÆï¿ØÖÆÕß"/>
+		<!-- åéª‘ï¼Œå¤šäººåéª‘ä¸­ -->
+		<property name="MountSeatIndex" type="int" public="true" private="true" save="false" desc="å¤šäººéª‘ä¹˜ä¸­,ä¸”æ ‡æ˜Žäº†åº§ä½å·"/>
+		<property name="MultiMountOwner" type="object" public="false" private="false" save="false" desc="å½“å‰æ‰€åœ¨åéª‘æŽ§åˆ¶è€…"/>
 		
-		<!-- ¶àÈË×øÆï×ùÎ»ÐÅÏ¢ -->
-		<property name="MultiSeatNum" type="byte" public="true" private="true" save="false" desc="µ±Ç°×øÆï×Ü×ùÎ»ÊýÁ¿"/>
-		<property name="SeatPlayer2" type="object" public="true" private="true" save="false" desc="µ±Ç°ËùÔÚ×øÆï¸±¼ÝÊ»2ºÅÎ»"/>
-		<property name="SeatPlayer3" type="object" public="true" private="true" save="false" desc="µ±Ç°ËùÔÚ×øÆï¸±¼ÝÊ»3ºÅÎ»"/>
-		<property name="SeatPlayer4" type="object" public="true" private="true" save="false" desc="µ±Ç°ËùÔÚ×øÆï¸±¼ÝÊ»4ºÅÎ»"/>
-		<property name="SeatPlayer5" type="object" public="true" private="true" save="false" desc="µ±Ç°ËùÔÚ×øÆï¸±¼ÝÊ»5ºÅÎ»"/>
+		<!-- å¤šäººåéª‘åº§ä½ä¿¡æ¯ -->
+		<property name="MultiSeatNum" type="byte" public="true" private="true" save="false" desc="å½“å‰åéª‘æ€»åº§ä½æ•°é‡"/>
+		<property name="SeatPlayer2" type="object" public="true" private="true" save="false" desc="å½“å‰æ‰€åœ¨åéª‘å‰¯é©¾é©¶2å·ä½"/>
+		<property name="SeatPlayer3" type="object" public="true" private="true" save="false" desc="å½“å‰æ‰€åœ¨åéª‘å‰¯é©¾é©¶3å·ä½"/>
+		<property name="SeatPlayer4" type="object" public="true" private="true" save="false" desc="å½“å‰æ‰€åœ¨åéª‘å‰¯é©¾é©¶4å·ä½"/>
+		<property name="SeatPlayer5" type="object" public="true" private="true" save="false" desc="å½“å‰æ‰€åœ¨åéª‘å‰¯é©¾é©¶5å·ä½"/>
 	
-		<!-- Õ½¶·ÔØ¾ß -->
-		<property name="Carrier" type="object" public="false" private="false" save="false" desc="Æï³ËµÄÕ½¶·ÔØ¾ß"/>
+		<!-- æˆ˜æ–—è½½å…· -->
+		<property name="Carrier" type="object" public="false" private="false" save="false" desc="éª‘ä¹˜çš„æˆ˜æ–—è½½å…·"/>
 	</properties>
 
 	<records>
-        <!-- Õ½¶·ÔØ¾ß -->
-		<record name="bc_cooldown_rec" cols="4" maxrows="128" save="false" public="false" private="true" desc="Õ½¶·ÔØ¾ß¼¼ÄÜÀäÈ´±í£¬Ö»ÓÐ¿ØÖÆÕß²Å¿ÉÒÔ·¢Õ½¶·ÔØ¾ßµÄ¼¼ÄÜ£¬Õâ¸ö±í¸ñ°ÑÕ½¶·ÔØ¾ßµÄÀäÈ´±í¸´ÖÆ¹ýÀ´">
-			<column type="dword" desc="ÀäÈ´·ÖÀàID"/>
-      			<column type="int64" desc="ÀäÈ´¿ªÊ¼Ê±¼ä£¬ÏÖÊµ64Î»Ê±¼äÊý¾Ý"/>
-      			<column type="int64" desc="ÀäÈ´½áÊøÊ±¼ä£¬ÏÖÊµ64Î»Ê±¼äÊý¾Ý"/>
-      			<column type="dword" desc="ÀäÈ´´ó·ÖÀàID,¸üÉÏÒ»²ãµÄ·ÖÀà"/>
+        <!-- æˆ˜æ–—è½½å…· -->
+		<record name="bc_cooldown_rec" cols="4" maxrows="128" save="false" public="false" private="true" desc="æˆ˜æ–—è½½å…·æŠ€èƒ½å†·å´è¡¨ï¼Œåªæœ‰æŽ§åˆ¶è€…æ‰å¯ä»¥å‘æˆ˜æ–—è½½å…·çš„æŠ€èƒ½ï¼Œè¿™ä¸ªè¡¨æ ¼æŠŠæˆ˜æ–—è½½å…·çš„å†·å´è¡¨å¤åˆ¶è¿‡æ¥">
+			<column type="dword" desc="å†·å´åˆ†ç±»ID"/>
+      			<column type="int64" desc="å†·å´å¼€å§‹æ—¶é—´ï¼ŒçŽ°å®ž64ä½æ—¶é—´æ•°æ®"/>
+      			<column type="int64" desc="å†·å´ç»“æŸæ—¶é—´ï¼ŒçŽ°å®ž64ä½æ—¶é—´æ•°æ®"/>
+      			<column type="dword" desc="å†·å´å¤§åˆ†ç±»ID,æ›´ä¸Šä¸€å±‚çš„åˆ†ç±»"/>
 		</record>
 	</records>
 </object>

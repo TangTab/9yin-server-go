@@ -1,69 +1,69 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°»ù´¡ÊôÐÔ-->
+<!--åœºæ™¯åŸºç¡€å±žæ€§-->
 <object>
 	<records>
-		<record name="ConditionInfoRec" cols="4" maxrows="1024" save="false" public="false" private="false" desc="³¡¾°ÖÐµÄÕýÔÚÅÐ¶ÏµÄÌõ¼þÐÅÏ¢±í">
-			<column type="dword" desc="Ìõ¼þÐÅÏ¢id"/>
-			<column type="dword" desc="Ìõ¼þÀà±ðid"/>
-			<column type="dword" desc="intÐÍ²ÎÊý(²»Í¬id, ¸Ã²ÎÊýµÄÒâÒåÒ²²»Í¬)"/>
-			<column type="int64" desc="int64ÐÍ²ÎÊý(²»Í¬id, ¸Ã²ÎÊýµÄÒâÒåÒ²²»Í¬)"/>
+		<record name="ConditionInfoRec" cols="4" maxrows="1024" save="false" public="false" private="false" desc="åœºæ™¯ä¸­çš„æ­£åœ¨åˆ¤æ–­çš„æ¡ä»¶ä¿¡æ¯è¡¨">
+			<column type="dword" desc="æ¡ä»¶ä¿¡æ¯id"/>
+			<column type="dword" desc="æ¡ä»¶ç±»åˆ«id"/>
+			<column type="dword" desc="intåž‹å‚æ•°(ä¸åŒid, è¯¥å‚æ•°çš„æ„ä¹‰ä¹Ÿä¸åŒ)"/>
+			<column type="int64" desc="int64åž‹å‚æ•°(ä¸åŒid, è¯¥å‚æ•°çš„æ„ä¹‰ä¹Ÿä¸åŒ)"/>
         </record>
-		<record name="BehaviorNpcRec" cols="13" maxrows="1024" save="false" public="false" private="false" desc="³¡¾°ÖÐ´´½¨npcÐÐÎª´´½¨³öÀ´µÄnpc">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="dword" desc="ÐÐÎªÐÅÏ¢id"/>
-			<column type="object" desc="npcµÄid"/>
-			<column type="string" desc="npcµÄconfig"/>
-			<column type="float" desc="npcµÄÎ»ÖÃx"/>
-			<column type="float" desc="npcµÄÎ»ÖÃy"/>
-			<column type="float" desc="npcµÄÎ»ÖÃz"/>
-			<column type="float" desc="npcµÄ³¯Ïò"/>
-			<column type="dword" desc="npcÑÓ³Ù´´½¨Ê±¼ä"/>
-			<column type="dword" desc="npcÑÓ³ÙÏú»ÙÊ±¼ä"/>
-			<column type="int64" desc="ÊÂ¼þ¿ªÊ¼Ê±¼ä"/>
-			<column type="int64" desc="ÊÂ¼þ½áÊøÊ±¼ä"/>
-			<column type="dword" desc="Í·¶¥ÏÔÊ¾ÀàÐÍ"/>
+		<record name="BehaviorNpcRec" cols="13" maxrows="1024" save="false" public="false" private="false" desc="åœºæ™¯ä¸­åˆ›å»ºnpcè¡Œä¸ºåˆ›å»ºå‡ºæ¥çš„npc">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="dword" desc="è¡Œä¸ºä¿¡æ¯id"/>
+			<column type="object" desc="npcçš„id"/>
+			<column type="string" desc="npcçš„config"/>
+			<column type="float" desc="npcçš„ä½ç½®x"/>
+			<column type="float" desc="npcçš„ä½ç½®y"/>
+			<column type="float" desc="npcçš„ä½ç½®z"/>
+			<column type="float" desc="npcçš„æœå‘"/>
+			<column type="dword" desc="npcå»¶è¿Ÿåˆ›å»ºæ—¶é—´"/>
+			<column type="dword" desc="npcå»¶è¿Ÿé”€æ¯æ—¶é—´"/>
+			<column type="int64" desc="äº‹ä»¶å¼€å§‹æ—¶é—´"/>
+			<column type="int64" desc="äº‹ä»¶ç»“æŸæ—¶é—´"/>
+			<column type="dword" desc="å¤´é¡¶æ˜¾ç¤ºç±»åž‹"/>
         </record>
-		<record name="DelayedBehaviorRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="ÑÓ³ÙÐÐÎª±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="dword" desc="ÐÐÎªÐÅÏ¢id"/>
-			<column type="dword" desc="ÐÐÎªÀà±ðid"/>
-			<column type="dword" desc="ÑÓ³ÙÊ±¼ä"/>
-			<column type="int64" desc="ÊÂ¼þ¿ªÊ¼Ê±¼ä"/>
+		<record name="DelayedBehaviorRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="å»¶è¿Ÿè¡Œä¸ºè¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="dword" desc="è¡Œä¸ºä¿¡æ¯id"/>
+			<column type="dword" desc="è¡Œä¸ºç±»åˆ«id"/>
+			<column type="dword" desc="å»¶è¿Ÿæ—¶é—´"/>
+			<column type="int64" desc="äº‹ä»¶å¼€å§‹æ—¶é—´"/>
         </record>
-		<record name="ESAreaRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="ÊÂ¼þ´¥·¢ÏµÍ³ÕýÔÚ¼à¿ØµÄÇøÓòÁÐ±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="dword" desc="ÇøÓòid"/>
+		<record name="ESAreaRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="äº‹ä»¶è§¦å‘ç³»ç»Ÿæ­£åœ¨ç›‘æŽ§çš„åŒºåŸŸåˆ—è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="dword" desc="åŒºåŸŸid"/>
         </record>
-		<record name="ESPlayerRec" cols="10" maxrows="1024" save="false" public="false" private="false" desc="ÊÂ¼þ´¥·¢ÏµÍ³ÕýÔÚ¼à¿ØµÄÍæ¼ÒÁÐ±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="widestr" desc="Íæ¼ÒÐÕÃû"/>
-			<column type="object" desc="Íæ¼ÒÔÚµ±Ç°³¡¾°µÄid"/>
-			<column type="dword" desc="Íæ¼ÒÕóÓª"/>
-			<column type="dword" desc="Íæ¼ÒÖ°Òµ"/>
-			<column type="dword" desc="Íæ¼ÒµÈ¼¶"/>
-			<column type="dword" desc="Íæ¼ÒµÄÇøÓò×´Ì¬"/>
-			<column type="dword" desc="Íæ¼Ò»÷É±ÆäËûÍæ¼ÒµÄ´ÎÊý"/>
-			<column type="dword" desc="Íæ¼ÒËÀÍöµÄ´ÎÊý"/>
-			<column type="string" desc="Íæ¼ÒµÄ×ÓÄ£°æÍê³É¶ÈÐÅÏ¢(playerÀë¿ª³¡¾°Ê±±£´æ)"/>
+		<record name="ESPlayerRec" cols="10" maxrows="1024" save="false" public="false" private="false" desc="äº‹ä»¶è§¦å‘ç³»ç»Ÿæ­£åœ¨ç›‘æŽ§çš„çŽ©å®¶åˆ—è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="widestr" desc="çŽ©å®¶å§“å"/>
+			<column type="object" desc="çŽ©å®¶åœ¨å½“å‰åœºæ™¯çš„id"/>
+			<column type="dword" desc="çŽ©å®¶é˜µè¥"/>
+			<column type="dword" desc="çŽ©å®¶èŒä¸š"/>
+			<column type="dword" desc="çŽ©å®¶ç­‰çº§"/>
+			<column type="dword" desc="çŽ©å®¶çš„åŒºåŸŸçŠ¶æ€"/>
+			<column type="dword" desc="çŽ©å®¶å‡»æ€å…¶ä»–çŽ©å®¶çš„æ¬¡æ•°"/>
+			<column type="dword" desc="çŽ©å®¶æ­»äº¡çš„æ¬¡æ•°"/>
+			<column type="string" desc="çŽ©å®¶çš„å­æ¨¡ç‰ˆå®Œæˆåº¦ä¿¡æ¯(playerç¦»å¼€åœºæ™¯æ—¶ä¿å­˜)"/>
         </record>
-		<record name="ESDurationRec" cols="3" maxrows="1024" save="false" public="false" private="false" desc="ÊÂ¼þ´¥·¢ÏµÍ³³ÖÐøÊ±¼ä±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="int64" desc="ÊÂ¼þ¿ªÊ¼Ê±¼ä"/>
-			<column type="dword" desc="ÊÂ¼þËæ»úµÄÇøÓòid(Ö»ÓÐÅäÖÃÁËËæ»úÇøÓò²Å»áÉèÖÃ)"/>
+		<record name="ESDurationRec" cols="3" maxrows="1024" save="false" public="false" private="false" desc="äº‹ä»¶è§¦å‘ç³»ç»ŸæŒç»­æ—¶é—´è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="int64" desc="äº‹ä»¶å¼€å§‹æ—¶é—´"/>
+			<column type="dword" desc="äº‹ä»¶éšæœºçš„åŒºåŸŸid(åªæœ‰é…ç½®äº†éšæœºåŒºåŸŸæ‰ä¼šè®¾ç½®)"/>
         </record>
-		<record name="ESCriteriaRec" cols="8" maxrows="1024" save="false" public="false" private="false" desc="ÊÂ¼þ´¥·¢ÏµÍ³×ÓÄ¿±ê±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
-			<column type="dword" desc="ÕóÓª"/>
-			<column type="dword" desc="×ÓÄ¿±êid"/>
-			<column type="float" desc="×ÓÄ¿±ê·ÖÅä¸ÅÂÊ"/>
-			<column type="dword" desc="ÊÇ·ñÒþ²Ø×ÓÄ¿±ê"/>
-			<column type="dword" desc="ÊÇ·ñ¹²Ïí×ÓÄ¿±ê"/>
-			<column type="dword" desc="¹²Ïí×ÓÄ¿±êµ±Ç°¸öÊý"/>
-			<column type="dword" desc="¹²Ïí×ÓÄ¿±ê×î´ó¸öÊý"/>
+		<record name="ESCriteriaRec" cols="8" maxrows="1024" save="false" public="false" private="false" desc="äº‹ä»¶è§¦å‘ç³»ç»Ÿå­ç›®æ ‡è¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
+			<column type="dword" desc="é˜µè¥"/>
+			<column type="dword" desc="å­ç›®æ ‡id"/>
+			<column type="float" desc="å­ç›®æ ‡åˆ†é…æ¦‚çŽ‡"/>
+			<column type="dword" desc="æ˜¯å¦éšè—å­ç›®æ ‡"/>
+			<column type="dword" desc="æ˜¯å¦å…±äº«å­ç›®æ ‡"/>
+			<column type="dword" desc="å…±äº«å­ç›®æ ‡å½“å‰ä¸ªæ•°"/>
+			<column type="dword" desc="å…±äº«å­ç›®æ ‡æœ€å¤§ä¸ªæ•°"/>
         </record>
-		 <record name="ESMainNpcRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="ÊÂ¼þNPC±í">
-			<column type="dword" desc="ÊÂ¼þid"/>
+		 <record name="ESMainNpcRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="äº‹ä»¶NPCè¡¨">
+			<column type="dword" desc="äº‹ä»¶id"/>
 			<column type="object" desc="npc"/>
 		 </record>
 	</records>

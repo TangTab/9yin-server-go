@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÂÃ¹ÝÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ—…é¦†ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PVPIncomeMul" type="float" public="false" private="false" save="false" desc="PVPÊÕÒæÔö¼Ó"/>
-		<property name="DamageCatMul" type="float" public="false" private="false" save="false" desc="¶ÔÃ¨ÈË×åµÄÉËº¦Ôö¼Ó"/>
-		<property name="CollectionSpeedMul" type="float" public="false" private="false" save="false" desc="×ÊÔ´²É¼¯ËÙ¶ÈÔö¼Ó"/>
-		<property name="ResourceGenRateMul" type="float" public="false" private="false" save="false" desc="×ÊÔ´»ñÈ¡±ÈÂÊÔö¼Ó"/>
-		<property name="MachineCreateRateMul" type="float" public="false" private="false" save="false" desc="ÖÆ×÷»úÐµÀàÎïÆ·£¬³É¹¦ÂÊÔö¼Ó"/>
-		<property name="MachineUseEfficiencyMul" type="float" public="false" private="false" save="false" desc="Ê¹ÓÃ»úÐµÀàÎïÆ·£¬Ð§ÓÃÔö¼Ó"/>
-		<property name="MachineCreateEfficiencyMul" type="float" public="false" private="false" save="false" desc="»úÐµÖÆÔìÐ§ÂÊÔö¼Ó"/>
+		<property name="PVPIncomeMul" type="float" public="false" private="false" save="false" desc="PVPæ”¶ç›Šå¢žåŠ "/>
+		<property name="DamageCatMul" type="float" public="false" private="false" save="false" desc="å¯¹çŒ«äººæ—çš„ä¼¤å®³å¢žåŠ "/>
+		<property name="CollectionSpeedMul" type="float" public="false" private="false" save="false" desc="èµ„æºé‡‡é›†é€Ÿåº¦å¢žåŠ "/>
+		<property name="ResourceGenRateMul" type="float" public="false" private="false" save="false" desc="èµ„æºèŽ·å–æ¯”çŽ‡å¢žåŠ "/>
+		<property name="MachineCreateRateMul" type="float" public="false" private="false" save="false" desc="åˆ¶ä½œæœºæ¢°ç±»ç‰©å“ï¼ŒæˆåŠŸçŽ‡å¢žåŠ "/>
+		<property name="MachineUseEfficiencyMul" type="float" public="false" private="false" save="false" desc="ä½¿ç”¨æœºæ¢°ç±»ç‰©å“ï¼Œæ•ˆç”¨å¢žåŠ "/>
+		<property name="MachineCreateEfficiencyMul" type="float" public="false" private="false" save="false" desc="æœºæ¢°åˆ¶é€ æ•ˆçŽ‡å¢žåŠ "/>
 	</properties>
 	<records>
 	</records>

@@ -1,111 +1,111 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--NPCAIÏà¹Ø-->
+<!--NPCAIç›¸å…³-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	<!-- 2011-03-21 -->
-		<property name="WarnType" type="int" public="true" private="false" save="false" desc="¾¯½äÀàÐÍ(0: ±»¶¯  1: Ö÷¶¯Çò¾¯½ä  2: Ö÷¶¯Ô²Öù¾¯½ä  3: Ö÷¶¯ÉÈÖù¾¯½ä  4: Ö÷¶¯Çò+ÉÈÖù¾¯½ä)"/>
-		<property name="WarnTime" type="int" public="false" private="false" save="false" desc="¾¯½äÊ±¼ä"/>
-		<property name="SphereRadius" type="float" public="false" private="false" save="false" desc="Çò°ë¾¶"/>
-		<property name="CylinderRadius" type="float" public="false" private="false" save="false" desc="Ô²Öù°ë¾¶»òÉÈÖù°ë¾¶"/>
-		<property name="CylinderLowerHeight" type="float" public="false" private="false" save="false" desc="Ô²ÖùÏÂ¸ß»òÉÈÖùÏÂ¸ß"/>
-		<property name="CylinderUpperHeight" type="float" public="false" private="false" save="false" desc="Ô²ÖùÉÏ¸ß»òÉÈÖùÉÏ¸ß"/>
-        <property name="SectorHalfAngle" type="float" public="false" private="false" save="false" desc="ÉÈÖù½Ç¶ÈµÄÒ»°ë(½Ç¶ÈÖÆ)"/>
-		<property name="WorldDropID"  type="string" public="false" private="false" save="false" Desc="ÊÀ½çµôÂä"/>
-		<property name="AITemplate" type="int" public="false" private="false" save="false" desc="AIÄ£°å±àºÅ"/>
-		<property name="CurState" type="int" public="false" private="false" save="false" desc="µ±Ç°×´Ì¬"/>
-		<property name="SubState" type="int" public="false" private="false" save="false" desc="×Ó×´Ì¬"/>
-		<property name="PreState" type="int" public="false" private="false" save="false" desc="Ç°Ò»×´Ì¬"/>
-		<property name="BornX" type="float" public="false" private="false" save="false" desc="³öÉúµãX"/>
-		<property name="BornY" type="float" public="false" private="false" save="false" desc="³öÉúµãY"/>
-		<property name="BornZ" type="float" public="false" private="false" save="false" desc="³öÉúµãZ"/>
-		<property name="BFX" type="float" public="false" private="false" save="false" desc="¿ªÊ¼Õ½¶·X"/>
-		<property name="BFY" type="float" public="false" private="false" save="false" desc="¿ªÊ¼Õ½¶·Y"/>
-		<property name="BFZ" type="float" public="false" private="false" save="false" desc="¿ªÊ¼Õ½¶·Z"/>
-		<property name="CantBeKilled" type="int" public="false" private="false" save="false" desc="NPCÊÇ·ñ¿ÉÒÔ±»É±ËÀ"/>
-		<property name="AIEffect" type="string" public="true" private="false" save="false" desc="AIÌØÐ§"/>
-		<property name="PathID" type="string" public="false" private="false" save="false" desc="Â·¾¶ID"/>
-		<property name="PatrolMode" type="int" public="false" private="false" save="false" desc="Ñ²ÂßÄ£Ê½"/>
-		<property name="PatrolRange" type="float" public="true" private="false" save="false" desc="Ñ²Âß·¶Î§"/>
-		<property name="CallHelpType" type="int" public="false" private="false" save="false" desc="Çó¾ÈÀàÐÍ"/>
-		<property name="CallHelpRange" type="float" public="false" private="false" save="false" desc="Çó¾È°ë¾¶"/>
-		<property name="ActiveEscapPos" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÆôÓÃÌÓÅÜµã×÷Îª»î¶¯µã"/>
-		<property name="LevelWrap" type="string" public="false" private="false" save="false" desc="npcµÄµÈ¼¶°ü"/>
-		<property name="AIFirstAttacker" type="object" public="false" private="false" save="false" desc="AIµÚÒ»¹¥»÷Ä¿±ê"/>
-		<property name="ChaseRange" type="float" public="false" private="false" save="false" desc="×·»÷·¶Î§"/>
-		<property name="ChaseType" type="int" public="false" private="false" save="false" desc="ÐÂ×·»÷¾àÀë"/>
-		<property name="ChaseProbability" type="float" public="false" private="false" save="false" desc="×·»÷¸ÅÂÊ"/>
-		<property name="ChaseWalkPro" type="float" public="false" private="false" save="false" desc="×·»÷Ê±ÐÐ×ßµÄ¸ÅÂÊ"/>
-		<property name="LastObject" type="object" public="true" private="false" save="false" desc="µ±Ç°Ñ¡ÔñµÄ¶ÔÏó"/>
-		<property name="StopAI" type="int" public="false" private="false" save="false" desc="Í£Ö¹AI"/>
-		<property name="StopPatrol" type="int" public="false" private="false" save="false" desc="Í£Ö¹Ñ²Âß"/>
-		<property name="Resting" type="int" public="false" private="false" save="false" desc="ÐÝÏ¢ÖÐ"/>
-		<property name="DropID" type="string" public="false" private="false" save="false" desc="µôÂäID"/>
-		<property name="Owner" type="widestr" public="true" private="false" save="false" desc="ÓµÓÐÕß"/>
-		<property name="AttackPlayer" type="widestr" public="true" private="false" save="false" desc="¹¥»÷Íæ¼ÒÃû×Ö"/>
-		<property name="RefreshTime" type="int" public="false" private="false" save="false" desc="Ë¢ÐÂÊ±¼ä"/>
-		<property name="WeaponName" type="string" public="true" private="false" save="false" desc="ÎäÆ÷Ãû³Æ"/>
-		<property name="WeaponMode" type="string" public="true" private="false" save="false" desc="ÎäÆ÷³ÖÎÕ·½Ê½"/>
-		<property name="EveTriProID" type="int" public="false" private="false" save="false" desc="ÊÂ¼þ¶ÔÓ¦´¥·¢Æ÷°ü"/>
-		<property name="CharacterPackID" type="string" public="false" private="false" save="false" desc="NPCÐÔ¸ñ°üID"/>
-		<property name="ChatTypeID" type="string" public="false" private="false" save="false" desc="NPCÁÄÌìÀàÐÍID"/>
-		<property name="SkillPackID" type="string" public="false" private="false" save="false" desc="Skill°üID"/>
-		<property name="MasterID" type="object" public="true"  private="false"    save="false" desc="Ö÷ÈËµÄID"/>
-		<property name="FollowProtectRadius" type="float" public="false"  private="false"    save="false" desc="¸úËæ±£»¤°ë¾¶"/>
-		<property name="FollowProbability" type="float" public="false"  private="false"    save="false" desc="¸úËæ¸ÅÂÊ"/>
-		<property name="FollowType" type="int" public="false"  private="false"    save="false" desc="¸úËæÀàÐÍ"/>
-		<property name="AIInstruction" type="int" public="false"  private="false"    save="false" desc="Ö÷ÈËÃüÁî"/>
-		<property name="AIControlMode" type="int" public="false"  private="false"    save="false" desc="¿ØÖÆÄ£Ê½"/>
-		<property name="NoRotate" type="int" public="false"  private="false"    save="false" desc="NPCÊÇ·ñÄÜ×ªÏò,0ÎªÄÜ×ª,1Îª²»ÄÜ×ª"/>
-        <property name="AttackArrest" type="int" public="false"  private="false"    save="false" desc="NPCÊÇ·ñ¿ÉÒÔ¹¥»÷ºìÃûÍæ¼Ò,1¿ÉÒÔ 0²»¿ÉÒÔ"/>
-        <property name="PathPointType" type="int" public="true" private="false" save="false" desc="µ±Ç°Ä¿±êÑ²ÂßµãµÄÀàÐÍ(1:Í£Áôµã 0:¹ýÂ·µã)"/>
-        <property name="BornBuff" type="string" public="false" private="false" save="false" desc="npcµÄ³öÉúbuff"/>
-		<property name="HateTransferScale" type="float" public="false" private="false" save="false" desc="×ªÒÆ¸ømasterµÄ³ðºÞ±ÈÀý"/>
-		<property name="NeedBackBFPoint" type="int" public="false" private="false" save="false" desc="Õ½¶·½áÊø,ÊÇ·ñÐèÒª·µ»ØÕ½¶·µã0,·µ»Ø,1²»·µ»Ø"/>
-		<property name="CallHelpHP" type="int" public="false" private="false" save="false" desc="Çó¾ÈÑªÁ¿,100·ÖÖ§¶àÉÙ"/>
-		<property name="BornBanTime" type="int" public="false" private="false" save="false" desc="³öÉúºóÊÇ·ñÏÞÖÆ"/>
-		<property name="BornBanBuff" type="string" public="false" private="false" save="false" desc="npcµÄ³öÉúºóÏÞÖÆÊôÐÔµÄbuff"/>
-		<property name="OwnerList" type="widestr" public="true" private="false" save="false" desc="npcÓµÓÐÕßÁÐ±í"/>
+		<property name="WarnType" type="int" public="true" private="false" save="false" desc="è­¦æˆ’ç±»åž‹(0: è¢«åŠ¨  1: ä¸»åŠ¨çƒè­¦æˆ’  2: ä¸»åŠ¨åœ†æŸ±è­¦æˆ’  3: ä¸»åŠ¨æ‰‡æŸ±è­¦æˆ’  4: ä¸»åŠ¨çƒ+æ‰‡æŸ±è­¦æˆ’)"/>
+		<property name="WarnTime" type="int" public="false" private="false" save="false" desc="è­¦æˆ’æ—¶é—´"/>
+		<property name="SphereRadius" type="float" public="false" private="false" save="false" desc="çƒåŠå¾„"/>
+		<property name="CylinderRadius" type="float" public="false" private="false" save="false" desc="åœ†æŸ±åŠå¾„æˆ–æ‰‡æŸ±åŠå¾„"/>
+		<property name="CylinderLowerHeight" type="float" public="false" private="false" save="false" desc="åœ†æŸ±ä¸‹é«˜æˆ–æ‰‡æŸ±ä¸‹é«˜"/>
+		<property name="CylinderUpperHeight" type="float" public="false" private="false" save="false" desc="åœ†æŸ±ä¸Šé«˜æˆ–æ‰‡æŸ±ä¸Šé«˜"/>
+        <property name="SectorHalfAngle" type="float" public="false" private="false" save="false" desc="æ‰‡æŸ±è§’åº¦çš„ä¸€åŠ(è§’åº¦åˆ¶)"/>
+		<property name="WorldDropID"  type="string" public="false" private="false" save="false" Desc="ä¸–ç•ŒæŽ‰è½"/>
+		<property name="AITemplate" type="int" public="false" private="false" save="false" desc="AIæ¨¡æ¿ç¼–å·"/>
+		<property name="CurState" type="int" public="false" private="false" save="false" desc="å½“å‰çŠ¶æ€"/>
+		<property name="SubState" type="int" public="false" private="false" save="false" desc="å­çŠ¶æ€"/>
+		<property name="PreState" type="int" public="false" private="false" save="false" desc="å‰ä¸€çŠ¶æ€"/>
+		<property name="BornX" type="float" public="false" private="false" save="false" desc="å‡ºç”Ÿç‚¹X"/>
+		<property name="BornY" type="float" public="false" private="false" save="false" desc="å‡ºç”Ÿç‚¹Y"/>
+		<property name="BornZ" type="float" public="false" private="false" save="false" desc="å‡ºç”Ÿç‚¹Z"/>
+		<property name="BFX" type="float" public="false" private="false" save="false" desc="å¼€å§‹æˆ˜æ–—X"/>
+		<property name="BFY" type="float" public="false" private="false" save="false" desc="å¼€å§‹æˆ˜æ–—Y"/>
+		<property name="BFZ" type="float" public="false" private="false" save="false" desc="å¼€å§‹æˆ˜æ–—Z"/>
+		<property name="CantBeKilled" type="int" public="false" private="false" save="false" desc="NPCæ˜¯å¦å¯ä»¥è¢«æ€æ­»"/>
+		<property name="AIEffect" type="string" public="true" private="false" save="false" desc="AIç‰¹æ•ˆ"/>
+		<property name="PathID" type="string" public="false" private="false" save="false" desc="è·¯å¾„ID"/>
+		<property name="PatrolMode" type="int" public="false" private="false" save="false" desc="å·¡é€»æ¨¡å¼"/>
+		<property name="PatrolRange" type="float" public="true" private="false" save="false" desc="å·¡é€»èŒƒå›´"/>
+		<property name="CallHelpType" type="int" public="false" private="false" save="false" desc="æ±‚æ•‘ç±»åž‹"/>
+		<property name="CallHelpRange" type="float" public="false" private="false" save="false" desc="æ±‚æ•‘åŠå¾„"/>
+		<property name="ActiveEscapPos" type="int" public="false" private="false" save="false" desc="æ˜¯å¦å¯ç”¨é€ƒè·‘ç‚¹ä½œä¸ºæ´»åŠ¨ç‚¹"/>
+		<property name="LevelWrap" type="string" public="false" private="false" save="false" desc="npcçš„ç­‰çº§åŒ…"/>
+		<property name="AIFirstAttacker" type="object" public="false" private="false" save="false" desc="AIç¬¬ä¸€æ”»å‡»ç›®æ ‡"/>
+		<property name="ChaseRange" type="float" public="false" private="false" save="false" desc="è¿½å‡»èŒƒå›´"/>
+		<property name="ChaseType" type="int" public="false" private="false" save="false" desc="æ–°è¿½å‡»è·ç¦»"/>
+		<property name="ChaseProbability" type="float" public="false" private="false" save="false" desc="è¿½å‡»æ¦‚çŽ‡"/>
+		<property name="ChaseWalkPro" type="float" public="false" private="false" save="false" desc="è¿½å‡»æ—¶è¡Œèµ°çš„æ¦‚çŽ‡"/>
+		<property name="LastObject" type="object" public="true" private="false" save="false" desc="å½“å‰é€‰æ‹©çš„å¯¹è±¡"/>
+		<property name="StopAI" type="int" public="false" private="false" save="false" desc="åœæ­¢AI"/>
+		<property name="StopPatrol" type="int" public="false" private="false" save="false" desc="åœæ­¢å·¡é€»"/>
+		<property name="Resting" type="int" public="false" private="false" save="false" desc="ä¼‘æ¯ä¸­"/>
+		<property name="DropID" type="string" public="false" private="false" save="false" desc="æŽ‰è½ID"/>
+		<property name="Owner" type="widestr" public="true" private="false" save="false" desc="æ‹¥æœ‰è€…"/>
+		<property name="AttackPlayer" type="widestr" public="true" private="false" save="false" desc="æ”»å‡»çŽ©å®¶åå­—"/>
+		<property name="RefreshTime" type="int" public="false" private="false" save="false" desc="åˆ·æ–°æ—¶é—´"/>
+		<property name="WeaponName" type="string" public="true" private="false" save="false" desc="æ­¦å™¨åç§°"/>
+		<property name="WeaponMode" type="string" public="true" private="false" save="false" desc="æ­¦å™¨æŒæ¡æ–¹å¼"/>
+		<property name="EveTriProID" type="int" public="false" private="false" save="false" desc="äº‹ä»¶å¯¹åº”è§¦å‘å™¨åŒ…"/>
+		<property name="CharacterPackID" type="string" public="false" private="false" save="false" desc="NPCæ€§æ ¼åŒ…ID"/>
+		<property name="ChatTypeID" type="string" public="false" private="false" save="false" desc="NPCèŠå¤©ç±»åž‹ID"/>
+		<property name="SkillPackID" type="string" public="false" private="false" save="false" desc="SkillåŒ…ID"/>
+		<property name="MasterID" type="object" public="true"  private="false"    save="false" desc="ä¸»äººçš„ID"/>
+		<property name="FollowProtectRadius" type="float" public="false"  private="false"    save="false" desc="è·Ÿéšä¿æŠ¤åŠå¾„"/>
+		<property name="FollowProbability" type="float" public="false"  private="false"    save="false" desc="è·Ÿéšæ¦‚çŽ‡"/>
+		<property name="FollowType" type="int" public="false"  private="false"    save="false" desc="è·Ÿéšç±»åž‹"/>
+		<property name="AIInstruction" type="int" public="false"  private="false"    save="false" desc="ä¸»äººå‘½ä»¤"/>
+		<property name="AIControlMode" type="int" public="false"  private="false"    save="false" desc="æŽ§åˆ¶æ¨¡å¼"/>
+		<property name="NoRotate" type="int" public="false"  private="false"    save="false" desc="NPCæ˜¯å¦èƒ½è½¬å‘,0ä¸ºèƒ½è½¬,1ä¸ºä¸èƒ½è½¬"/>
+        <property name="AttackArrest" type="int" public="false"  private="false"    save="false" desc="NPCæ˜¯å¦å¯ä»¥æ”»å‡»çº¢åçŽ©å®¶,1å¯ä»¥ 0ä¸å¯ä»¥"/>
+        <property name="PathPointType" type="int" public="true" private="false" save="false" desc="å½“å‰ç›®æ ‡å·¡é€»ç‚¹çš„ç±»åž‹(1:åœç•™ç‚¹ 0:è¿‡è·¯ç‚¹)"/>
+        <property name="BornBuff" type="string" public="false" private="false" save="false" desc="npcçš„å‡ºç”Ÿbuff"/>
+		<property name="HateTransferScale" type="float" public="false" private="false" save="false" desc="è½¬ç§»ç»™masterçš„ä»‡æ¨æ¯”ä¾‹"/>
+		<property name="NeedBackBFPoint" type="int" public="false" private="false" save="false" desc="æˆ˜æ–—ç»“æŸ,æ˜¯å¦éœ€è¦è¿”å›žæˆ˜æ–—ç‚¹0,è¿”å›ž,1ä¸è¿”å›ž"/>
+		<property name="CallHelpHP" type="int" public="false" private="false" save="false" desc="æ±‚æ•‘è¡€é‡,100åˆ†æ”¯å¤šå°‘"/>
+		<property name="BornBanTime" type="int" public="false" private="false" save="false" desc="å‡ºç”ŸåŽæ˜¯å¦é™åˆ¶"/>
+		<property name="BornBanBuff" type="string" public="false" private="false" save="false" desc="npcçš„å‡ºç”ŸåŽé™åˆ¶å±žæ€§çš„buff"/>
+		<property name="OwnerList" type="widestr" public="true" private="false" save="false" desc="npcæ‹¥æœ‰è€…åˆ—è¡¨"/>
 	</properties>
 	<records>
-		<record name="HateList" cols="4" maxrows="60" save="false" public="false" private="false" desc="³ðºÞÁÐ±í">
-			<column type="object" desc="³ðºÞ¶ÔÏóID"/>
-			<column type="dword" desc="³ðºÞÖµ"/>
-			<column type="int64" desc="×î½ü¹¥»÷Ê±¼ä"/>
-			<column type="dword" desc="ÓÅÏÈ¼¶"/>
+		<record name="HateList" cols="4" maxrows="60" save="false" public="false" private="false" desc="ä»‡æ¨åˆ—è¡¨">
+			<column type="object" desc="ä»‡æ¨å¯¹è±¡ID"/>
+			<column type="dword" desc="ä»‡æ¨å€¼"/>
+			<column type="int64" desc="æœ€è¿‘æ”»å‡»æ—¶é—´"/>
+			<column type="dword" desc="ä¼˜å…ˆçº§"/>
 		</record>
-		<record name="SpringList" cols="1" maxrows="512" save="false" public="false" private="false" desc="´¥·¢ÁÐ±í">
-			<column type="object" desc="´¥·¢·¶Î§ÄÚµÄ¶ÔÏóID"/>
+		<record name="SpringList" cols="1" maxrows="512" save="false" public="false" private="false" desc="è§¦å‘åˆ—è¡¨">
+			<column type="object" desc="è§¦å‘èŒƒå›´å†…çš„å¯¹è±¡ID"/>
 		</record>
-		<record name="AIGroupPosRec" cols="2" maxrows="1280" save="false" public="false" private="false" desc="µ÷ÕûÎ»ÖÃ±í">
+		<record name="AIGroupPosRec" cols="2" maxrows="1280" save="false" public="false" private="false" desc="è°ƒæ•´ä½ç½®è¡¨">
 			<column type="float" desc="x"/>
 			<column type="float" desc="z"/>
 		</record>
-		<record name="AttackerPosRec" cols="1" maxrows="1024" save="false" public="false" private="false" desc="¹¥»÷ÕßÎ»ÖÃ±í">
-            <column type="object" desc="npcµÄid"/>
+		<record name="AttackerPosRec" cols="1" maxrows="1024" save="false" public="false" private="false" desc="æ”»å‡»è€…ä½ç½®è¡¨">
+            <column type="object" desc="npcçš„id"/>
 		</record>
-		<record name="AI_Chat_rec" cols="3" maxrows="1" save="false" public="false" private="false" desc="Ëµ»°ÄÚÈÝ">
-			<column type="object" desc="¶ÔË­Ëµ"/>
-			<column type="string" desc="ËµµÄÄÄ¶Î»°"/>
-			<column type="word" desc="ÒªËµµÄµÚ¼¸¾ä"/>
+		<record name="AI_Chat_rec" cols="3" maxrows="1" save="false" public="false" private="false" desc="è¯´è¯å†…å®¹">
+			<column type="object" desc="å¯¹è°è¯´"/>
+			<column type="string" desc="è¯´çš„å“ªæ®µè¯"/>
+			<column type="word" desc="è¦è¯´çš„ç¬¬å‡ å¥"/>
 		</record>
-		<record name="AI_SpringChat_rec" cols="1" maxrows="3" save="false" public="false" private="false" desc="ÁÄÌì´¥·¢·¶Î§ÄÚ¶ÔÏó">
-            <column type="object" desc="npcµÄid"/>
+		<record name="AI_SpringChat_rec" cols="1" maxrows="3" save="false" public="false" private="false" desc="èŠå¤©è§¦å‘èŒƒå›´å†…å¯¹è±¡">
+            <column type="object" desc="npcçš„id"/>
 		</record>
-		<record name="npc_owner_rec" cols="1" maxrows="500" public="false" private="false" save="false" desc="npcÓµÓÐÕß±í£¬É±Ð¡¹ÖÊ±ÓÃ">
-            <column type="widestr" desc="ÓµÓÐÕßÐÕÃû"/>
+		<record name="npc_owner_rec" cols="1" maxrows="500" public="false" private="false" save="false" desc="npcæ‹¥æœ‰è€…è¡¨ï¼Œæ€å°æ€ªæ—¶ç”¨">
+            <column type="widestr" desc="æ‹¥æœ‰è€…å§“å"/>
         </record>
-		<record name="boss_owner_rec" cols="3" maxrows="1024" public="false" private="false" save="false" desc="npcÓµÓÐÕß±í£¬É±bossÊ±ÓÃ">
-			<column type="byte" desc="ÀàÐÍ,1¸öÈË£¬2¶ÓÎé"/>
-            <column type="widestr" desc="ÓµÓÐÕßÐÕÃû£¬»òÕßÊÇ¶ÓÎéµÄid"/>
-			<column type="word" desc="Ôì³ÉµÄÉËº¦Á¿"/>
+		<record name="boss_owner_rec" cols="3" maxrows="1024" public="false" private="false" save="false" desc="npcæ‹¥æœ‰è€…è¡¨ï¼Œæ€bossæ—¶ç”¨">
+			<column type="byte" desc="ç±»åž‹,1ä¸ªäººï¼Œ2é˜Ÿä¼"/>
+            <column type="widestr" desc="æ‹¥æœ‰è€…å§“åï¼Œæˆ–è€…æ˜¯é˜Ÿä¼çš„id"/>
+			<column type="word" desc="é€ æˆçš„ä¼¤å®³é‡"/>
         </record>
-		<record name="BornBuffRec" cols="1" maxrows="64" public="false" private="false" save="false" desc="BornBuff½âÎöºó´æÔÚ±í¸ñÖÐ">
-			<column type="string" desc="buffµÄid"/>
+		<record name="BornBuffRec" cols="1" maxrows="64" public="false" private="false" save="false" desc="BornBuffè§£æžåŽå­˜åœ¨è¡¨æ ¼ä¸­">
+			<column type="string" desc="buffçš„id"/>
         </record>
-		<record name="npc_not_give_exp_rec" cols="1" maxrows="500" public="false" private="false" save="false" desc="²¿·ÖÇé¿öÏÂ£¬npc±»´òËÀ²»Ìá¹©¾­Ñé">
-            <column type="widestr" desc="ÓµÓÐÕßÐÕÃû"/>
+		<record name="npc_not_give_exp_rec" cols="1" maxrows="500" public="false" private="false" save="false" desc="éƒ¨åˆ†æƒ…å†µä¸‹ï¼Œnpcè¢«æ‰“æ­»ä¸æä¾›ç»éªŒ">
+            <column type="widestr" desc="æ‹¥æœ‰è€…å§“å"/>
         </record>
 	</records>
 </object>

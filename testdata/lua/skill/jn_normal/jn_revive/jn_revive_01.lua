@@ -1,20 +1,20 @@
--- ¸´»îµ¥Ìå¶ÔÏó£¬²¢°´ÕÕ¼¼ÄÜµÈ¼¶»Ø¸´ÑªÁ¿
--- lv1: 10%ÑªÁ¿, 5%Ä§·¨
--- lv2: 20%ÑªÁ¿£¬10%Ä§·¨
--- lv3: 40%ÑªÁ¿£¬15%Ä§·¨
--- lv4: 60%ÑªÁ¿£¬20%Ä§·¨
--- lv5: 80%ÑªÁ¿£¬25%Ä§·¨
+-- å¤æ´»å•ä½“å¯¹è±¡ï¼Œå¹¶æŒ‰ç…§æŠ€èƒ½ç­‰çº§å›å¤è¡€é‡
+-- lv1: 10%è¡€é‡, 5%é­”æ³•
+-- lv2: 20%è¡€é‡ï¼Œ10%é­”æ³•
+-- lv3: 40%è¡€é‡ï¼Œ15%é­”æ³•
+-- lv4: 60%è¡€é‡ï¼Œ20%é­”æ³•
+-- lv5: 80%è¡€é‡ï¼Œ25%é­”æ³•
 
 require("define")
 require("share\\logicstate_define")
 require("share\\server_custom_define")
 
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 	--math.random(0,-1)
 	target = nx_query_property(self, "LastObject")
@@ -24,33 +24,33 @@ function skill_prepare(self, skill, usetype, target, x, y, z)
 	end
 
 	if nx_query_property(target, "Dead") == 0 then
-		nx_sysinfo(target, TIPSTYPE_TIPSINFO, "0", nx_widestr(nx_string("ÎŞĞ§µÄÄ¿±ê.")))
+		nx_sysinfo(target, TIPSTYPE_TIPSINFO, "0", nx_widestr(nx_string("æ— æ•ˆçš„ç›®æ ‡.")))
 		return 0
 	end
 
 	return 1
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	target = nx_query_property(self, "LastObject")
 
 	if nx_query_property(target, "Dead") == 0 then
-		nx_sysinfo(target, TIPSTYPE_TIPSINFO, "0", nx_widestr(nx_string("ÎŞĞ§µÄÄ¿±ê.")))
+		nx_sysinfo(target, TIPSTYPE_TIPSINFO, "0", nx_widestr(nx_string("æ— æ•ˆçš„ç›®æ ‡.")))
 		return 0
 	end
 
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 --[[	if nx_query_property(target, "Dead") == 0 then
-		nx_sysinfo(target, TIPSTYPE_TIPSINFO, "0", nx_widestr(nx_string("ÎŞĞ§µÄÄ¿±ê.")))
+		nx_sysinfo(target, TIPSTYPE_TIPSINFO, "0", nx_widestr(nx_string("æ— æ•ˆçš„ç›®æ ‡.")))
 		return
 	end
 ]]
@@ -63,11 +63,11 @@ function skill_after_hit(self, skill, target)
 
 	local max_mp = nx_query_property(target, "MaxMP") + nx_query_property(target, "MaxMPAdd")
 
-	-- lv1: 10%ÑªÁ¿, 5%Ä§·¨
-	-- lv2: 20%ÑªÁ¿£¬10%Ä§·¨
-	-- lv3: 40%ÑªÁ¿£¬15%Ä§·¨
-	-- lv4: 60%ÑªÁ¿£¬20%Ä§·¨
-	-- lv5: 80%ÑªÁ¿£¬25%Ä§·¨
+	-- lv1: 10%è¡€é‡, 5%é­”æ³•
+	-- lv2: 20%è¡€é‡ï¼Œ10%é­”æ³•
+	-- lv3: 40%è¡€é‡ï¼Œ15%é­”æ³•
+	-- lv4: 60%è¡€é‡ï¼Œ20%é­”æ³•
+	-- lv5: 80%è¡€é‡ï¼Œ25%é­”æ³•
 	if level == 1 then
 		hp = max_hp * 0.1
 		mp = max_mp * 0.05
@@ -89,10 +89,10 @@ function skill_after_hit(self, skill, target)
 	nx_set_property(target, "MP", mp)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end

@@ -2,19 +2,19 @@ require("share\\logicstate_define")
 require("share\\server_custom_define")
 require("define")
 
--- ÌØÊâ¼¼ÄÜ ´ò×øµ÷Ï¢ µÄConfigID
+-- ç‰¹æ®ŠæŠ€èƒ½ æ‰“åè°ƒæ¯ çš„ConfigID
 function sitcross_skill_configId()
 	return "zs_default_01"
 end
 
---ÊÇ·ñ¿ÉÒÔ´ò×ø
+--æ˜¯å¦å¯ä»¥æ‰“å
 function can_sitcross(self)
 
 	local skill_id = sitcross_skill_configId()
 
 	local sitcross_skill = nx_find_skill(self, skill_id)
 
-	-- Èç¹ûÃ»ÓĞ´ò×øµ÷Ï¢Ôò·µ»ØÊ§°Ü
+	-- å¦‚æœæ²¡æœ‰æ‰“åè°ƒæ¯åˆ™è¿”å›å¤±è´¥
 	if not sitcross_skill then
 		return 0
 	end
@@ -22,66 +22,66 @@ function can_sitcross(self)
 	return 1
 end
 
---¿ªÊ¼´ò×ø
+--å¼€å§‹æ‰“å
 function begin_sitcross(self)
 
-	--½áÊøÆäËûËùÓĞµÄÁ÷³Ì
+	--ç»“æŸå…¶ä»–æ‰€æœ‰çš„æµç¨‹
 	nx_break_any_flow(self)
 
 	--[[local skill_id = sitcross_skill_configId()
 
 	local sitcross_skill = nx_find_skill(self, skill_id)
 
-	-- Èç¹ûÃ»ÓĞ´ò×øµ÷Ï¢Ôò·µ»ØÊ§°Ü
+	-- å¦‚æœæ²¡æœ‰æ‰“åè°ƒæ¯åˆ™è¿”å›å¤±è´¥
 	if sitcross_skill then
 		--local perpareAction = nx_query_property(sitcross_skill, "PrepareAction")
 
 		--local stateAction = nx_query_property(sitcross_skill, "LeadAction")
 
-		-- ¸Ä±ä¶¯×÷×´Ì¬
+		-- æ”¹å˜åŠ¨ä½œçŠ¶æ€
 		--nx_set_property(self, "State", stateAction)
 
-		--×ö¶¯×÷
+		--åšåŠ¨ä½œ
 		--nx_custom_byken(self, SERVER_CUSTOMMSG_ACTION, self, perpareAction)
 	end]]
 
 
-	--ÉèÖÃÂß¼­×´Ì¬
+	--è®¾ç½®é€»è¾‘çŠ¶æ€
 	nx_set_property(self, "LogicState", LS_SITCROSS)
 
-	--¿ªÊ¼´ò×ø
+	--å¼€å§‹æ‰“å
 	nx_sysinfo(self, TIPSTYPE_TIPSINFO, "9400")
 
 	return 1
 end
 
---½áÊø´ò×ø
+--ç»“æŸæ‰“å
 function end_sitcross(self)
 
-	-- ±ä»ØÔ­À´µÄ¶¯×÷×´Ì¬
+	-- å˜å›åŸæ¥çš„åŠ¨ä½œçŠ¶æ€
 	--nx_set_property(self, "State", "")
 
 	--[[local skill_id = sitcross_skill_configId()
 
 	local sitcross_skill = nx_find_skill(self, skill_id)
 
-	-- Èç¹ûÃ»ÓĞ´ò×øµ÷Ï¢Ôò·µ»ØÊ§°Ü
+	-- å¦‚æœæ²¡æœ‰æ‰“åè°ƒæ¯åˆ™è¿”å›å¤±è´¥
 	if sitcross_skill then
 		local finishAction = nx_query_property(sitcross_skill, "FinishAction")
 
-		--×ö¶¯×÷
+		--åšåŠ¨ä½œ
 		nx_custom_byken(self, SERVER_CUSTOMMSG_ACTION, self, finishAction)
 	end]]
 
-	--»¹Ô­Âß¼­×´Ì¬
+	--è¿˜åŸé€»è¾‘çŠ¶æ€
 	nx_set_property(self, "LogicState", LS_NORMAL)
-	--½áÊø´ò×ø
+	--ç»“æŸæ‰“å
 	nx_sysinfo(self, TIPSTYPE_TIPSINFO, "9401")
 
 	return 1
 end
 
--- ½áÊø»Øµ÷
+-- ç»“æŸå›è°ƒ
 function on_finish(self)
 	restore(self)
 end
@@ -91,7 +91,7 @@ function restore(self)
 
 	local sitcross_skill = nx_find_skill(self, skill_id)
 
-	-- Èç¹ûÃ»ÓĞ´ò×øµ÷Ï¢Ôò·µ»ØÊ§°Ü
+	-- å¦‚æœæ²¡æœ‰æ‰“åè°ƒæ¯åˆ™è¿”å›å¤±è´¥
 	if not sitcross_skill then
 		return false
 	end
@@ -126,7 +126,7 @@ function restore(self)
 		return false
 	end
 
-	--Ö´ĞĞ´ò×øµÄĞ§¹û
+	--æ‰§è¡Œæ‰“åçš„æ•ˆæœ
 	if hp_add > 0 then
 		nx_inc_property(self, "HP", hp_add)
 		nx_custom(self, SERVER_CUSTOMMSG_EFFECT, self, "ADDHP", hp_add)
@@ -140,14 +140,14 @@ function restore(self)
 	return true
 end
 
---ĞŞÁ¶ÄÚ¹¦
+--ä¿®ç‚¼å†…åŠŸ
 function practice_neigong(self)
 	local neigong_id = nx_query_property(self, "CurNeiGong")
 	if string.len(neigong_id) == 0 then
 		return
 	end
 
-	--Ôö¼Óµ±Ç°ÄÚ¹¦¾­Ñé
+	--å¢åŠ å½“å‰å†…åŠŸç»éªŒ
 	local level = nx_query_property(self, "Level")
 	local exp = level
 	nx_add_neigong_exp(self, neigong_id, exp)

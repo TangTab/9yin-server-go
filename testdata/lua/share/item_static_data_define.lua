@@ -1,28 +1,28 @@
 --
 -- File: item_static_data_define.h
---	 NB: (±äÁ¿¶¨ÒåºÍItemPropQuery.h±£³ÖÒ»ÖÂ)
--- Desp: µÀ¾ß¾²Ì¬ÊôĞÔ²éÑ¯
+--	 NB: (å˜é‡å®šä¹‰å’ŒItemPropQuery.hä¿æŒä¸€è‡´)
+-- Desp: é“å…·é™æ€å±æ€§æŸ¥è¯¢
 -- Auth: YeHui
 -- Date: 2010-6-25
 --
 
 	--
-	-- µÀ¾ßÂß¼­°ü
+	-- é“å…·é€»è¾‘åŒ…
 	--
-	--	BindType		°ó¶¨ÀàĞÍ		2
-	--	BindStatus		°ó¶¨×´Ì¬		2
-	--	SpecialItem		Î¨Ò»µÀ¾ß		2
-	--	CantDepot		ÄÜ·ñ·ÅÈë²Ö¿â	2
-	--	CantExchange	ÄÜ·ñ½»Ò×		2
-	--	CantDelete		ÊÇ·ñÄÜÉ¾³ı		2
-	--	CantChuck		ÊÇ·ñÄÜ¶ªÆú		2
-	--	CantMove		ÊÇ·ñÄÜÒÆ¶¯		2
-	--	CantSell		ÊÇ·ñÄÜ³öÊÛ		2
-	--	DropRatio		µôÂä¼¸ÂÊ		2
-	--	ValidTime		ÓĞĞ§ÆÚ			2
-	--	ValidType		¼ÆÊ±ÀàĞÍ		2
-	--	InlayType		ÏâÇ¶ÀàĞÍ		2
-	--	UseIndirect		ÊÇ·ñ±ØĞë¼ä½ÓÊ¹ÓÃ
+	--	BindType		ç»‘å®šç±»å‹		2
+	--	BindStatus		ç»‘å®šçŠ¶æ€		2
+	--	SpecialItem		å”¯ä¸€é“å…·		2
+	--	CantDepot		èƒ½å¦æ”¾å…¥ä»“åº“	2
+	--	CantExchange	èƒ½å¦äº¤æ˜“		2
+	--	CantDelete		æ˜¯å¦èƒ½åˆ é™¤		2
+	--	CantChuck		æ˜¯å¦èƒ½ä¸¢å¼ƒ		2
+	--	CantMove		æ˜¯å¦èƒ½ç§»åŠ¨		2
+	--	CantSell		æ˜¯å¦èƒ½å‡ºå”®		2
+	--	DropRatio		æ‰è½å‡ ç‡		2
+	--	ValidTime		æœ‰æ•ˆæœŸ			2
+	--	ValidType		è®¡æ—¶ç±»å‹		2
+	--	InlayType		é•¶åµŒç±»å‹		2
+	--	UseIndirect		æ˜¯å¦å¿…é¡»é—´æ¥ä½¿ç”¨
 	--
 	Item_LogicPack_Begin	= 0
 	Item_BindType			= 0
@@ -41,7 +41,7 @@
 	Item_LogicPack_End		= 19
 
 	--
-	-- µÀ¾ß¹¦ÄÜ°ü
+	-- é“å…·åŠŸèƒ½åŒ…
 	--	
 	--	LuaScript		
 	--	PrepareAction
@@ -51,10 +51,10 @@
 	--	Level
 	--	CropID
 	--	Rare
-	--	CoolDownCategory		ÀäÈ´ÀàĞÍ±àºÅ
-	--	CoolDownTime			ÀäÈ´Ê±¼ä
-	--	CoolDownTeam			ÀäÈ´Ó°Ïì·Ö×é±àºÅ
-	--	AddCoolDownTime			¸½¼ÓÀäÈ´Ê±¼ä
+	--	CoolDownCategory		å†·å´ç±»å‹ç¼–å·
+	--	CoolDownTime			å†·å´æ—¶é—´
+	--	CoolDownTeam			å†·å´å½±å“åˆ†ç»„ç¼–å·
+	--	AddCoolDownTime			é™„åŠ å†·å´æ—¶é—´
 	--	
 	--
 	Item_FuncPack_Begin		= 20
@@ -64,7 +64,7 @@
 	Item_FuncPack_End		= 29
 
 	--
-	-- ÃÀÊõ°ü
+	-- ç¾æœ¯åŒ…
 	--	Photo
 	--
 	Item_ArtPack_Begin		= 30
@@ -72,17 +72,17 @@
 	Item_ArtPack_End		= 39
 
 	--
-	-- [¸±±¾µÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
+	-- [å‰¯æœ¬é“å…·]ä¸“æœ‰é™æ€å±æ€§
 	--
-	--	TaskID				ÈÎÎñ±àºÅ
-	--	LuaScript			½Å±¾
-	--	PrepareAction		×¼±¸¶¯×÷
-	--	PrepareTime			×¼±¸Ê±¼ä
-	--	CanCopy				ÊÇ·ñÄÜ³­Â¼
-	--	CanMusic			ÊÇ·ñÄÜ×àÀÖ
-	--	Level				µÈ¼¶
-	--	CoolDownCategory	ÀäÈ´ÀàĞÍ
-	--	CoolDownTime		ÀäÈ´Ê±¼ä
+	--	TaskID				ä»»åŠ¡ç¼–å·
+	--	LuaScript			è„šæœ¬
+	--	PrepareAction		å‡†å¤‡åŠ¨ä½œ
+	--	PrepareTime			å‡†å¤‡æ—¶é—´
+	--	CanCopy				æ˜¯å¦èƒ½æŠ„å½•
+	--	CanMusic			æ˜¯å¦èƒ½å¥ä¹
+	--	Level				ç­‰çº§
+	--	CoolDownCategory	å†·å´ç±»å‹
+	--	CoolDownTime		å†·å´æ—¶é—´
 	--
 	--
 	Item_CopyPack_Begin		= 40
@@ -90,14 +90,14 @@
 	Item_CopyPack_End		= 49
 
 	--
-	-- [Åä·½µÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
+	-- [é…æ–¹é“å…·]ä¸“æœ‰é™æ€å±æ€§
 	--
-	--	FormulaID			ºÏ³É¹«Ê½ID	Para1
-	--	LuaScript			½Å±¾
-	--	PrepareAction		×¼±¸¶¯×÷
-	--	PrepareTime			×¼±¸Ê±¼ä
-	--	CoolDownCategory	ÀäÈ´ÀàĞÍ
-	--	CoolDownTime		ÀäÈ´Ê±¼ä
+	--	FormulaID			åˆæˆå…¬å¼ID	Para1
+	--	LuaScript			è„šæœ¬
+	--	PrepareAction		å‡†å¤‡åŠ¨ä½œ
+	--	PrepareTime			å‡†å¤‡æ—¶é—´
+	--	CoolDownCategory	å†·å´ç±»å‹
+	--	CoolDownTime		å†·å´æ—¶é—´
 	--
 	--
 	Item_IngredientPack_Begin		= 50
@@ -105,17 +105,17 @@
 	Item_IngredientPack_End			= 59
 
 	--
-	-- [ÈÎÎñµÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
+	-- [ä»»åŠ¡é“å…·]ä¸“æœ‰é™æ€å±æ€§
 	--
-	--	TaskID				ÈÎÎñ±àºÅ	Para1
-	--	LuaScript			½Å±¾
-	--	PrepareAction		×¼±¸¶¯×÷
-	--	PrepareTime			×¼±¸Ê±¼ä
-	--	CanCopy				ÊÇ·ñÄÜ³­Â¼
-	--	CanMusic			ÊÇ·ñÄÜ×àÀÖ
-	--	Level				µÈ¼¶
-	--	CoolDownCategory	ÀäÈ´ÀàĞÍ
-	--	CoolDownTime		ÀäÈ´Ê±¼ä
+	--	TaskID				ä»»åŠ¡ç¼–å·	Para1
+	--	LuaScript			è„šæœ¬
+	--	PrepareAction		å‡†å¤‡åŠ¨ä½œ
+	--	PrepareTime			å‡†å¤‡æ—¶é—´
+	--	CanCopy				æ˜¯å¦èƒ½æŠ„å½•
+	--	CanMusic			æ˜¯å¦èƒ½å¥ä¹
+	--	Level				ç­‰çº§
+	--	CoolDownCategory	å†·å´ç±»å‹
+	--	CoolDownTime		å†·å´æ—¶é—´
 	--
 	--
 	Item_TaskPack_Begin		= 60
@@ -124,16 +124,16 @@
 
 
 	--
-	-- [Ê¹ÓÃ¼¼ÄÜÀàµÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
+	-- [ä½¿ç”¨æŠ€èƒ½ç±»é“å…·]ä¸“æœ‰é™æ€å±æ€§
 	--
-	--	SkillID				¼¼ÄÜ±àºÅ	Para1
-	--	PrepareAction		×¼±¸¶¯×÷
-	--	PrepareTime			×¼±¸Ê±¼ä
-	--	CanCopy				ÊÇ·ñÄÜ³­Â¼
-	--	CanMusic			ÊÇ·ñÄÜ×àÀÖ
-	--	Level				µÈ¼¶
-	--	CoolDownCategory	ÀäÈ´ÀàĞÍ
-	--	CoolDownTime		ÀäÈ´Ê±¼ä
+	--	SkillID				æŠ€èƒ½ç¼–å·	Para1
+	--	PrepareAction		å‡†å¤‡åŠ¨ä½œ
+	--	PrepareTime			å‡†å¤‡æ—¶é—´
+	--	CanCopy				æ˜¯å¦èƒ½æŠ„å½•
+	--	CanMusic			æ˜¯å¦èƒ½å¥ä¹
+	--	Level				ç­‰çº§
+	--	CoolDownCategory	å†·å´ç±»å‹
+	--	CoolDownTime		å†·å´æ—¶é—´
 	--
 	--
 	Item_UseSkillPack_Begin			= 70
@@ -143,17 +143,17 @@
 
 
 	--
-	-- [Ñ§Ï°¼¼ÄÜÀàµÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
+	-- [å­¦ä¹ æŠ€èƒ½ç±»é“å…·]ä¸“æœ‰é™æ€å±æ€§
 	--
-	--	TragetID			Ñ§Ï°¼¼ÄÜ/ÄÚ¹¦µÄID		Para1
-	--	TargetCondition		Ê¹ÓÃµÀ¾ßµÄÌõ¼ş			Para2
-	--	TargetLevel			Ñ§Ï°¼¼ÄÜ/ÄÚ¹¦µÄµÈ¼¶		Para3
-	--	PrepareAction		×¼±¸¶¯×÷
-	--	PrepareTime			×¼±¸Ê±¼ä
-	--	CanCopy				ÊÇ·ñÄÜ³­Â¼
-	--	CanMusic			ÊÇ·ñÄÜ×àÀÖ
-	--	CoolDownCategory	ÀäÈ´ÀàĞÍ
-	--	CoolDownTime		ÀäÈ´Ê±¼ä
+	--	TragetID			å­¦ä¹ æŠ€èƒ½/å†…åŠŸçš„ID		Para1
+	--	TargetCondition		ä½¿ç”¨é“å…·çš„æ¡ä»¶			Para2
+	--	TargetLevel			å­¦ä¹ æŠ€èƒ½/å†…åŠŸçš„ç­‰çº§		Para3
+	--	PrepareAction		å‡†å¤‡åŠ¨ä½œ
+	--	PrepareTime			å‡†å¤‡æ—¶é—´
+	--	CanCopy				æ˜¯å¦èƒ½æŠ„å½•
+	--	CanMusic			æ˜¯å¦èƒ½å¥ä¹
+	--	CoolDownCategory	å†·å´ç±»å‹
+	--	CoolDownTime		å†·å´æ—¶é—´
 	--
 	--
 	Item_LearnSkillPack_Begin			= 80
@@ -170,14 +170,14 @@
 
 
 	--
-	-- [ÖÖ×ÓµÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
+	-- [ç§å­é“å…·]ä¸“æœ‰é™æ€å±æ€§
 	--
-	--	SeedTime			²¥ÖÖÊ±¼ä(ms)
-	--	SeedAction			²¥ÖÖ¶¯×÷
-	--	Level				µÈ¼¶
-	--	CropID				Å©×÷Îïid
-	--	ToolType			¹¤¾ßÀàĞÍ
-	--	NeedTool			ĞèÒª¹¤¾ß
+	--	SeedTime			æ’­ç§æ—¶é—´(ms)
+	--	SeedAction			æ’­ç§åŠ¨ä½œ
+	--	Level				ç­‰çº§
+	--	CropID				å†œä½œç‰©id
+	--	ToolType			å·¥å…·ç±»å‹
+	--	NeedTool			éœ€è¦å·¥å…·
 	--
 	Item_SeedPack_Begin			= 90
 	Item_SeedPack_SeedTime		= 90
@@ -189,9 +189,9 @@
 	Item_SeedPack_End			= 99
 
 	--
-	-- [±¦ÏäµÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ(´ı¶¨)
+	-- [å®ç®±é“å…·]ä¸“æœ‰é™æ€å±æ€§(å¾…å®š)
 	--
-	--	Para1				ÎïÆ·¼¯ºÏ
+	--	Para1				ç‰©å“é›†åˆ
 	--
 	--
 	Item_MaterialPack_Begin		= 100
@@ -200,9 +200,9 @@
 	Item_MaterialPack_End		= 109
 
 	--
-	-- [ÊôĞÔĞŞ¸ÄµÀ¾ß]×¨ÓĞ¾²Ì¬ÊôĞÔ
-	--	PropName			ÊôĞÔÃû³Æ
-	--	PropValue			ÊôĞÔÖµ
+	-- [å±æ€§ä¿®æ”¹é“å…·]ä¸“æœ‰é™æ€å±æ€§
+	--	PropName			å±æ€§åç§°
+	--	PropValue			å±æ€§å€¼
 	--
 	Item_PropModifyPack_Begin		= 110
 	Item_PropModifyPack_PropName	= 110

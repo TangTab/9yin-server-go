@@ -1,53 +1,53 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task4.lua
--- @ ½Å±¾¹¦ÄÜ: IDÎª4µÄÈÎÎñÖ´ĞĞ½Å±¾Âß¼­
--- @ ´´½¨Õß:   dReAmSun
--- @ ´´½¨ÈÕÆÚ: 2009.3.10
+-- @ è„šæœ¬åç§°: task4.lua
+-- @ è„šæœ¬åŠŸèƒ½: IDä¸º4çš„ä»»åŠ¡æ‰§è¡Œè„šæœ¬é€»è¾‘
+-- @ åˆ›å»ºè€…:   dReAmSun
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.3.10
 -----------------------------------------
 
--- Òª¸ßÁÁÏÔÊ¾µÄÎäÆ÷±àºÅ
+-- è¦é«˜äº®æ˜¾ç¤ºçš„æ­¦å™¨ç¼–å·
 local task_weapon_config = "sword_1001"
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	-- »ñµÃÈËÎï×°±¸À¸
+	-- è·å¾—äººç‰©è£…å¤‡æ 
 	local EquipBox = nx_get_child(player, nx_widestr("EquipBox"))
 	if not nx_exists(EquipBox) then
 		return 0
 	end
 	
-	-- »ñµÃÈËÎï°ü¹ü
+	-- è·å¾—äººç‰©åŒ…è£¹
 	local toolbox = nx_get_child(player, nx_widestr("ToolBox"))
 	if not nx_exists(toolbox) then
 		return 0
 	end
 	
-	-- 22ÎªÎäÆ÷ÔÚ×°±¸À¸ÖĞµÄÎ»ÖÃ£¬¼ûini/rule/EquipBox.ini
+	-- 22ä¸ºæ­¦å™¨åœ¨è£…å¤‡æ ä¸­çš„ä½ç½®ï¼Œè§ini/rule/EquipBox.ini
 	local weapon = nx_get_item(EquipBox, nx_int(22)) 
 	
-	-- ÎäÆ÷À¸Ã»ÓĞÎäÆ÷£¬×Ô¶¯µ¯³ö±³°ü£¬¸ßÁÁÏÔÊ¾ÎäÆ÷
+	-- æ­¦å™¨æ æ²¡æœ‰æ­¦å™¨ï¼Œè‡ªåŠ¨å¼¹å‡ºèƒŒåŒ…ï¼Œé«˜äº®æ˜¾ç¤ºæ­¦å™¨
 	if not nx_exists(weapon) then
 		nx_custom(player, nx_string("open_tool_box"))
 		
-		-- µÃµ½ÒªÏÔÊ¾µÄÎäÆ÷ÔÚ×°±¸À¸ÖĞµÄÎ»ÖÃ
+		-- å¾—åˆ°è¦æ˜¾ç¤ºçš„æ­¦å™¨åœ¨è£…å¤‡æ ä¸­çš„ä½ç½®
 		local pos = nx_find_item_pos(toolbox, nx_string(task_weapon_config))
 		local realpos = nx_int(pos) - nx_int(1)
 		
-		-- Èç¹ûµÃµ½ÕıÈ·Î»ÖÃÔò¸ßÁÁÏÔÊ¾´Ë×°±¸
+		-- å¦‚æœå¾—åˆ°æ­£ç¡®ä½ç½®åˆ™é«˜äº®æ˜¾ç¤ºæ­¤è£…å¤‡
 		if nx_int(pos) > nx_int(0) then
 			nx_custom(player, nx_string("show_animation"), nx_string("BoxShow"), nx_int(realpos))
 		end
 		
 	end
 	
-	-- ½«±êÖ¾Î»ÖÃ1±íÊ¾ÏÖÔÚÕıÔÚ´¦ÀíµÄÈÎÎñ
+	-- å°†æ ‡å¿—ä½ç½®1è¡¨ç¤ºç°åœ¨æ­£åœ¨å¤„ç†çš„ä»»åŠ¡
 	local flag = nx_query_property(player, "NewPlayerFlag1")
 	if flag == 0 then
 		nx_set_property(player, "NewPlayerFlag1", 1)
@@ -57,18 +57,18 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
-	-- »ñµÃÈËÎï×°±¸À¸
+	-- è·å¾—äººç‰©è£…å¤‡æ 
 	local EquipBox = nx_get_child(player, nx_widestr("EquipBox"))
 	if not nx_exists(EquipBox) then
 		return 0
 	end
 	
-	-- 17ÎªÎäÆ÷ÔÚ×°±¸À¸ÖĞµÄÎ»ÖÃ£¬¼ûini/rule/EquipBox.ini
+	-- 17ä¸ºæ­¦å™¨åœ¨è£…å¤‡æ ä¸­çš„ä½ç½®ï¼Œè§ini/rule/EquipBox.ini
 	local weapon = nx_get_item(EquipBox, nx_int(22)) 
 	
-	-- ÎäÆ÷À¸Ã»ÓĞÎäÆ÷, ÔòÃ»ÓĞÍê³É
+	-- æ­¦å™¨æ æ²¡æœ‰æ­¦å™¨, åˆ™æ²¡æœ‰å®Œæˆ
 	if not nx_exists(weapon) then
 		return 0
 	end
@@ -77,9 +77,9 @@ function Task_Complete_Condition(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
-	-- ½«¼ì²â±êÖ¾Î»ÖÃ0
+	-- å°†æ£€æµ‹æ ‡å¿—ä½ç½®0
 	nx_set_property(player, "NewPlayerFlag1", 0)
 	
 	return 1

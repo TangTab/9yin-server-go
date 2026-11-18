@@ -1,23 +1,23 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÊÕÒæµÝ¼õÏà¹Ø´ÎÊý¼ÇÂ¼-->
+<!--æ”¶ç›Šé€’å‡ç›¸å…³æ¬¡æ•°è®°å½•-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
-		<!-- Íæ¼ÒÊÕÒæµÝ¼õÏà¹ØÊÂ¼þÕ½³¡´ÎÊý¼ÇÂ¼±í -->
-		<record name="ReduceCountRec" cols="3" maxrows="1" save="true" public="false" private="true" desc="¾­ÑéÊÕÒæµÝ¼õ´ÎÊý¼ÇÂ¼±í">
-			<column type="byte" desc="ÊÂ¼þ¼ÆÊý"/>
-			<column type="byte" desc="Õ½³¡¼ÆÊý"/>
-			<column type="byte" desc="¾º¼¼³¡¼ÆÊý"/>
+		<!-- çŽ©å®¶æ”¶ç›Šé€’å‡ç›¸å…³äº‹ä»¶æˆ˜åœºæ¬¡æ•°è®°å½•è¡¨ -->
+		<record name="ReduceCountRec" cols="3" maxrows="1" save="true" public="false" private="true" desc="ç»éªŒæ”¶ç›Šé€’å‡æ¬¡æ•°è®°å½•è¡¨">
+			<column type="byte" desc="äº‹ä»¶è®¡æ•°"/>
+			<column type="byte" desc="æˆ˜åœºè®¡æ•°"/>
+			<column type="byte" desc="ç«žæŠ€åœºè®¡æ•°"/>
 		</record>
-    <!-- Íæ¼ÒÊÕÒæÉÏÏÞÏà¹ØÊÂ¼þÕ½³¡¼ÇÂ¼±í -->
-    <record name="TomplimitRec" cols="4" maxrows="1" save="true" public="false" private="true" desc="ÊÕÒæÉÏÏÞ¼ÇÂ¼±í">
-      <column type="int64" desc="Õ½³¡×î´ó½ðÇ®ÉèÖÃ"/>
-      <column type="int64" desc="Õ½³¡×î´óÈÙÓþÉèÖÃ"/>
-      <column type="int64" desc="Õ½³¡×î´ó¾­ÑéÉèÖÃ"/>
-      <column type="int64" desc="Õ½³¡×î´óÓ¢ÓÂµãÊýÉèÖÃ"/>
+    <!-- çŽ©å®¶æ”¶ç›Šä¸Šé™ç›¸å…³äº‹ä»¶æˆ˜åœºè®°å½•è¡¨ -->
+    <record name="TomplimitRec" cols="4" maxrows="1" save="true" public="false" private="true" desc="æ”¶ç›Šä¸Šé™è®°å½•è¡¨">
+      <column type="int64" desc="æˆ˜åœºæœ€å¤§é‡‘é’±è®¾ç½®"/>
+      <column type="int64" desc="æˆ˜åœºæœ€å¤§è£èª‰è®¾ç½®"/>
+      <column type="int64" desc="æˆ˜åœºæœ€å¤§ç»éªŒè®¾ç½®"/>
+      <column type="int64" desc="æˆ˜åœºæœ€å¤§è‹±å‹‡ç‚¹æ•°è®¾ç½®"/>
     </record>
 	</records>
 </object>

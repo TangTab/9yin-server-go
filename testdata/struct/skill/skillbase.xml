@@ -1,59 +1,59 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¼¼ÄÜµÄÊôÐÔÊý¾Ý-->
+<!--æŠ€èƒ½çš„å±žæ€§æ•°æ®-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="QName" type="widestr" public="false" private="false" save="false" desc="²éÑ¯ÓÃÃû³Æ"/>
-		<property name="QTypeID" type="int" public="false" private="false" save="false" desc="²éÑ¯ÓÃ±àºÅ"/>
-		<property name="ItemType" type="int" public="false" private="true" save="false" desc="ÎïÆ·ÀàÐÍ"/>
-		<property name="ConfigID" type="string" public="false" private="true" save="false" desc="¼¼ÄÜ±àºÅ"/>
-		<property name="CanUse" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñ¿ÉÒÔÊ¹ÓÃ"/>
-		<!--<property name="CurTargetCount" type="int" public="false" private="true" save="false" desc="Ä¿±êÊýÁ¿"/>-->
+		<property name="QName" type="widestr" public="false" private="false" save="false" desc="æŸ¥è¯¢ç”¨åç§°"/>
+		<property name="QTypeID" type="int" public="false" private="false" save="false" desc="æŸ¥è¯¢ç”¨ç¼–å·"/>
+		<property name="ItemType" type="int" public="false" private="true" save="false" desc="ç‰©å“ç±»åž‹"/>
+		<property name="ConfigID" type="string" public="false" private="true" save="false" desc="æŠ€èƒ½ç¼–å·"/>
+		<property name="CanUse" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦å¯ä»¥ä½¿ç”¨"/>
+		<!--<property name="CurTargetCount" type="int" public="false" private="true" save="false" desc="ç›®æ ‡æ•°é‡"/>-->
 
-		<!-- ºÍÖÖ¾²Ì¬ÊôÐÔ°üºÍ¹¦ÄÜ°ü -->
-		<!--<property name="StaticData" type="int" public="true" private="true" save="false" desc="¾²Ì¬Êý¾Ý°ü"/>-->
-		<property name="Skill_Use_Limit" type="string" public="false" private="false" save="false" desc="³ýÏûºÄÏÞÖÆÍâµÄÊ¹ÓÃÏÞÖÆ°ü"/>
-		<!--<property name="DamageCalculate" type="int" public="false" private="false" save="false" desc="ÉËº¦¼ÆËã°ü"/>-->
-		<!--<property name="Consume" type="int" public="false" private="false" save="false" desc="ÏûºÄ°ü"/>-->
-		<!--<property name="TargetShapePkg" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÉä³Ì·¶Î§"/>-->
-		<!--<property name="HitShapePkg" type="int" public="false" private="false" save="false" desc="¼¼ÄÜ²¨¼°·¶Î§"/>-->
-		<!--<property name="HurtCount" type="int" public="false" private="false" save="false" desc="ÃüÖÐ´ÎÊý,ÓÃÓÚ¼ÆËãÉËº¦"/>-->
-		<property name="Level" type="int" public="false" private="true" save="true" desc="¼¶±ð"/>
-		<!--<property name="VarPropNo" type="int" public="false" private="true" save="true" desc="µ±Ç°¿É±äÊôÐÔ±àºÅ"/>-->
-		<!--<property name="Exp" type="int64" public="false" private="true" save="true" desc="µ±Ç°¾­ÑéÖµ"/>-->
-		<!--<property name="UpgradeExp" type="int64" public="false" private="true" save="false" desc="Éý¼¶ËùÐè¾­ÑéÖµ"/>-->
-		<!--<property name="PauseTime" type="int" public="false" private="false" save="false" desc="flowÃüÖÐÇ°µÄµÈ´ýÊ±¼ä£¬ÄîÖäÊ±¼ä,ÆðÊÖÊ½Ê±¼ä"/>-->
-		<!--<property name="HeightDiff" type="float" public="false" private="fasle" save="false" desc="¼¼ÄÜ¹¥»÷Ê±µÄ¸ß¶È²î"/>-->
-		<!--<property name="BreakPackage" type="int" public="false" private="true" save="false" desc="´ò¶Ï°üID"/>-->
-		<property name="Skill_Main" type="string" public="false" private="false" save="false" desc="¼¼ÄÜÖ÷°ü"/>
-		<property name="Skill_Damage" type="string" public="false" private="false" save="false" desc="ÉËº¦°ü"/>
-		<property name="Skill_Effect" type="string" public="false" private="false" save="false" desc="ÌØÐ§°ü"/>
-		<property name="Skill_Display" type="string" public="false" private="false" save="false" desc="±íÏÖ°ü"/>
-		<property name="SkillEditClass" type="string" public="false" private="false" save="false" desc="±à¼­Æ÷·ÖÀà"/>
-		<property name="Description" type="string" public="false" private="false" save="false" desc="¼¼ÄÜÃèÊö"/>
-		<!--<property name="Mount_ID" type="int" public="true" private="true" save="false" desc="Æï³Ë°ü"/>-->
-		<property name="StrUseSkill" type="byte" public="false" private="false" save="false" desc="Ç¿ÖÆÊÍ·Å¼¼ÄÜ"/>
-		<property name="AheadSendTime" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÌáÇ°ÊÍ·ÅÊ±¼ä"/>
-		<!--<property name="Flow" type="int" public="true" private="true" save="false" desc="Á÷¿ØÖÆ°ü"/>-->
-		<!--<property name="LastLoadTime" type="int64" public="false" private="false" save="false" desc="ÉÏ´ÎÔØÈë¾²Ì¬°üÊ±¼ä"/>-->
-		<!--<property name="StaticDataPoint" type="int64" public="false" private="false" save="false" desc="¾²Ì¬°üÖ¸Õë"/>-->
-    <property name="Stiff" type="float" public="false" private="false" save="false" desc="Ó²Ö±"/>
-    <property name="SkillAddRate" type="float" public="false" private="false" save="false" desc="¼¼ÄÜÆ«Ïò¼Ó³É"/>
-    <property name="ConsumeAddRate" type="float" public="false" private="false" save="false" desc="¼¼ÄÜÏûºÄ¼Ó³É"/>
-	<property name="BeActived" type="byte" public="false" private="true" save="true" desc="±»¶¯¼¼ÄÜÊÇ·ñ±»¼¤»î"/>
+		<!-- å’Œç§é™æ€å±žæ€§åŒ…å’ŒåŠŸèƒ½åŒ… -->
+		<!--<property name="StaticData" type="int" public="true" private="true" save="false" desc="é™æ€æ•°æ®åŒ…"/>-->
+		<property name="Skill_Use_Limit" type="string" public="false" private="false" save="false" desc="é™¤æ¶ˆè€—é™åˆ¶å¤–çš„ä½¿ç”¨é™åˆ¶åŒ…"/>
+		<!--<property name="DamageCalculate" type="int" public="false" private="false" save="false" desc="ä¼¤å®³è®¡ç®—åŒ…"/>-->
+		<!--<property name="Consume" type="int" public="false" private="false" save="false" desc="æ¶ˆè€—åŒ…"/>-->
+		<!--<property name="TargetShapePkg" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½å°„ç¨‹èŒƒå›´"/>-->
+		<!--<property name="HitShapePkg" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½æ³¢åŠèŒƒå›´"/>-->
+		<!--<property name="HurtCount" type="int" public="false" private="false" save="false" desc="å‘½ä¸­æ¬¡æ•°,ç”¨äºŽè®¡ç®—ä¼¤å®³"/>-->
+		<property name="Level" type="int" public="false" private="true" save="true" desc="çº§åˆ«"/>
+		<!--<property name="VarPropNo" type="int" public="false" private="true" save="true" desc="å½“å‰å¯å˜å±žæ€§ç¼–å·"/>-->
+		<!--<property name="Exp" type="int64" public="false" private="true" save="true" desc="å½“å‰ç»éªŒå€¼"/>-->
+		<!--<property name="UpgradeExp" type="int64" public="false" private="true" save="false" desc="å‡çº§æ‰€éœ€ç»éªŒå€¼"/>-->
+		<!--<property name="PauseTime" type="int" public="false" private="false" save="false" desc="flowå‘½ä¸­å‰çš„ç­‰å¾…æ—¶é—´ï¼Œå¿µå’’æ—¶é—´,èµ·æ‰‹å¼æ—¶é—´"/>-->
+		<!--<property name="HeightDiff" type="float" public="false" private="fasle" save="false" desc="æŠ€èƒ½æ”»å‡»æ—¶çš„é«˜åº¦å·®"/>-->
+		<!--<property name="BreakPackage" type="int" public="false" private="true" save="false" desc="æ‰“æ–­åŒ…ID"/>-->
+		<property name="Skill_Main" type="string" public="false" private="false" save="false" desc="æŠ€èƒ½ä¸»åŒ…"/>
+		<property name="Skill_Damage" type="string" public="false" private="false" save="false" desc="ä¼¤å®³åŒ…"/>
+		<property name="Skill_Effect" type="string" public="false" private="false" save="false" desc="ç‰¹æ•ˆåŒ…"/>
+		<property name="Skill_Display" type="string" public="false" private="false" save="false" desc="è¡¨çŽ°åŒ…"/>
+		<property name="SkillEditClass" type="string" public="false" private="false" save="false" desc="ç¼–è¾‘å™¨åˆ†ç±»"/>
+		<property name="Description" type="string" public="false" private="false" save="false" desc="æŠ€èƒ½æè¿°"/>
+		<!--<property name="Mount_ID" type="int" public="true" private="true" save="false" desc="éª‘ä¹˜åŒ…"/>-->
+		<property name="StrUseSkill" type="byte" public="false" private="false" save="false" desc="å¼ºåˆ¶é‡Šæ”¾æŠ€èƒ½"/>
+		<property name="AheadSendTime" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½æå‰é‡Šæ”¾æ—¶é—´"/>
+		<!--<property name="Flow" type="int" public="true" private="true" save="false" desc="æµæŽ§åˆ¶åŒ…"/>-->
+		<!--<property name="LastLoadTime" type="int64" public="false" private="false" save="false" desc="ä¸Šæ¬¡è½½å…¥é™æ€åŒ…æ—¶é—´"/>-->
+		<!--<property name="StaticDataPoint" type="int64" public="false" private="false" save="false" desc="é™æ€åŒ…æŒ‡é’ˆ"/>-->
+    <property name="Stiff" type="float" public="false" private="false" save="false" desc="ç¡¬ç›´"/>
+    <property name="SkillAddRate" type="float" public="false" private="false" save="false" desc="æŠ€èƒ½åå‘åŠ æˆ"/>
+    <property name="ConsumeAddRate" type="float" public="false" private="false" save="false" desc="æŠ€èƒ½æ¶ˆè€—åŠ æˆ"/>
+	<property name="BeActived" type="byte" public="false" private="true" save="true" desc="è¢«åŠ¨æŠ€èƒ½æ˜¯å¦è¢«æ¿€æ´»"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 		<path name="struct\rule\fight\consume.xml" desc=""/>
 		<path name="struct\rule\fight\range_new.xml" desc=""/>
 		<path name="struct\rule\fight\relation.xml" desc=""/>
 		<path name="struct\rule\fight\cooldown_new.xml" desc=""/>
 		<path name="struct\rule\fight\flow_new.xml" desc=""/>
-		<path name="struct\common\trigger.xml" desc="´¥·¢Æ÷"/>
-    <!--<path name="struct\rule\fight\modifyhurt.xml" desc="ÓÃÓÚ±»ÐÞÕý"/>-->
+		<path name="struct\common\trigger.xml" desc="è§¦å‘å™¨"/>
+    <!--<path name="struct\rule\fight\modifyhurt.xml" desc="ç”¨äºŽè¢«ä¿®æ­£"/>-->
 	</includes>	
 </object>

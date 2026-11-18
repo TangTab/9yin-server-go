@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2010 (http://www.altova.com) by hahah (memem) -->
 <table name="nx_role_dumpinfo" primary="role_name" index="role_uid">
-	<property desc="Íæ¼ÒÃû" col="role_name" dbtype="nvarchar" type="prop" prop="Name" child="" createsql="role_name varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL"/>
+	<property desc="çŽ©å®¶å" col="role_name" dbtype="nvarchar" type="prop" prop="Name" child="" createsql="role_name varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL"/>
 	<property desc="UID" col="role_uid" dbtype="varchar" type="prop" prop="Uid" child="" createsql="role_uid varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
-	<property desc="ÕÊºÅ" col="role_account" dbtype="varchar" type="prop" prop="Account" child="" createsql="role_account varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
-	<property desc="´´½¨Ê±¼ä" col="create_time" dbtype="datetime" type="prop" prop="CreateTime" child="" createsql="create_time datetime NULL"/>
-	<property desc="É¾³ýÊ±¼ä" col="delete_time" dbtype="datetime" type="default" prop="1" child="" createsql="delete_time datetime NULL"/>
-	<property desc="ÊÇ·ñÉ¾³ý" col="deleted" dbtype="int" type="default" prop="0" child="" createsql="deleted int NULL"/>
-	<property desc="×ÜÔÚÏßÊ±³¤" col="total_sec" dbtype="int" type="prop" prop="TotalSec" child="" createsql="total_sec int NULL"/>
-	<property desc="ÐÔ±ð" col="sex" dbtype="int" type="prop" prop="Sex" child="" createsql="sex int NULL"/>
-	<property desc="ÕóÓª" col="camp" dbtype="int" type="prop" prop="Camp" child="" createsql="camp int NULL"/>
-	<property desc="ÖÖ×å" col="race" dbtype="int" type="prop" prop="Race" child="" createsql="race int NULL"/>
-	<property desc="Ö°Òµ" col="job" dbtype="int" type="prop" prop="Job" child="" createsql="job int NULL"/>
-	<property desc="µÈ¼¶" col="level" dbtype="int" type="prop" prop="Level" child="" createsql="level int NULL"/>
-	<property desc="ÊµÁ¦" col="fight_power" dbtype="int" type="prop" prop="FightPower" child="" createsql="fight_power int NULL"/>
-	<property desc="¹«»á" col="guild" dbtype="nvarchar" type="prop" prop="GuildName" child="" createsql="guild varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
-	<property desc="»õ±Ò±í" col="money_rec" dbtype="varchar" type="record" prop="capital_rec" createsql="money_rec varchar(4096) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
+	<property desc="å¸å·" col="role_account" dbtype="varchar" type="prop" prop="Account" child="" createsql="role_account varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
+	<property desc="åˆ›å»ºæ—¶é—´" col="create_time" dbtype="datetime" type="prop" prop="CreateTime" child="" createsql="create_time datetime NULL"/>
+	<property desc="åˆ é™¤æ—¶é—´" col="delete_time" dbtype="datetime" type="default" prop="1" child="" createsql="delete_time datetime NULL"/>
+	<property desc="æ˜¯å¦åˆ é™¤" col="deleted" dbtype="int" type="default" prop="0" child="" createsql="deleted int NULL"/>
+	<property desc="æ€»åœ¨çº¿æ—¶é•¿" col="total_sec" dbtype="int" type="prop" prop="TotalSec" child="" createsql="total_sec int NULL"/>
+	<property desc="æ€§åˆ«" col="sex" dbtype="int" type="prop" prop="Sex" child="" createsql="sex int NULL"/>
+	<property desc="é˜µè¥" col="camp" dbtype="int" type="prop" prop="Camp" child="" createsql="camp int NULL"/>
+	<property desc="ç§æ—" col="race" dbtype="int" type="prop" prop="Race" child="" createsql="race int NULL"/>
+	<property desc="èŒä¸š" col="job" dbtype="int" type="prop" prop="Job" child="" createsql="job int NULL"/>
+	<property desc="ç­‰çº§" col="level" dbtype="int" type="prop" prop="Level" child="" createsql="level int NULL"/>
+	<property desc="å®žåŠ›" col="fight_power" dbtype="int" type="prop" prop="FightPower" child="" createsql="fight_power int NULL"/>
+	<property desc="å…¬ä¼š" col="guild" dbtype="nvarchar" type="prop" prop="GuildName" child="" createsql="guild varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
+	<property desc="è´§å¸è¡¨" col="money_rec" dbtype="varchar" type="record" prop="capital_rec" createsql="money_rec varchar(4096) CHARACTER SET utf8 COLLATE utf8_bin NULL"/>
 </table>

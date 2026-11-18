@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <property name="MaxHPAdd" type="int" public="true" private="true" save="false" desc="×î´óÉúÃüÖµ"/>
-	  <property name="MaxMPAdd" type="int" public="true" private="true" save="false" desc="×î´óÄ§·¨Öµ"/>
-	  <property name="HPRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°MP°Ù·Ö±È"/>
-	  <property name="MPRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°MP°Ù·Ö±È"/>
+    <property name="MaxHPAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§ç”Ÿå‘½å€¼"/>
+	  <property name="MaxMPAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§é­”æ³•å€¼"/>
+	  <property name="HPRatio" type="int" public="true" private="true" save="false" desc="å½“å‰MPç™¾åˆ†æ¯”"/>
+	  <property name="MPRatio" type="int" public="true" private="true" save="false" desc="å½“å‰MPç™¾åˆ†æ¯”"/>
 	
-	  <property name="MaxHP" type="int" public="true" private="true" save="false" desc="×î´óÉúÃüÖµ"/>
-	  <property name="MaxMP" type="int" public="true" private="true" save="false" desc="×î´óÄ§·¨Öµ"/>
-	  <property name="HP"  type="int" public="true" private="true" save="true" desc="µ±Ç°ÉúÃüÖµ"/>
-    <property name="MP"  type="int" public="true" private="true" save="true" desc="µ±Ç°·¨Á¦Öµ"/>
+	  <property name="MaxHP" type="int" public="true" private="true" save="false" desc="æœ€å¤§ç”Ÿå‘½å€¼"/>
+	  <property name="MaxMP" type="int" public="true" private="true" save="false" desc="æœ€å¤§é­”æ³•å€¼"/>
+	  <property name="HP"  type="int" public="true" private="true" save="true" desc="å½“å‰ç”Ÿå‘½å€¼"/>
+    <property name="MP"  type="int" public="true" private="true" save="true" desc="å½“å‰æ³•åŠ›å€¼"/>
 	
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
 
   </records>

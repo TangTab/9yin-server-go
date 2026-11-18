@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--×ªÖ°Ïà¹ØÖ°ÒµÊôÐÔ-->
+<!--è½¬èŒç›¸å…³èŒä¸šå±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-	<property name="TransJobList" type="string" public="false" private="true" save="true" desc="×ªÖ°Ö°ÒµÁÐ±í"/>
-	<property name="CantTransJob" type="string" public="false" private="true" save="true" desc="ÊÇ·ñÄÜ¹»×ªÖ°"/>
-	<property name="DoTransJob" type="int" public="false" private="true" save="true" desc="ÊÇ·ñÒÑ¾­×ªÖ°"/>
-	<property name="NoTransJob" type="int" public="false" private="false" save="true" desc="×ªÖ°Ç°Ö°Òµ"/>
-	<property name="TransConditionId" type="string" public="false" private="true" save="true" desc="×ªÖ°Ç°±ØÐëÂú×ãµÄÌõ¼þID"/>
+	<property name="TransJobList" type="string" public="false" private="true" save="true" desc="è½¬èŒèŒä¸šåˆ—è¡¨"/>
+	<property name="CantTransJob" type="string" public="false" private="true" save="true" desc="æ˜¯å¦èƒ½å¤Ÿè½¬èŒ"/>
+	<property name="DoTransJob" type="int" public="false" private="true" save="true" desc="æ˜¯å¦å·²ç»è½¬èŒ"/>
+	<property name="NoTransJob" type="int" public="false" private="false" save="true" desc="è½¬èŒå‰èŒä¸š"/>
+	<property name="TransConditionId" type="string" public="false" private="true" save="true" desc="è½¬èŒå‰å¿…é¡»æ»¡è¶³çš„æ¡ä»¶ID"/>
 	</properties>
 </object>

@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿ÚÁî¼ì²âµÄÊôÐÔÊý¾Ý-->
+<!--å£ä»¤æ£€æµ‹çš„å±žæ€§æ•°æ®-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="SecondWord" type="widestr" public="false" private="false" save="true" desc="¶þ¼¶¿ÚÁîÃÜÂë"/>
-		<property name="IsHaveSecondWord" type="byte" public="false" private="true" save="true" desc="ÊÇ·ñÓÐ¶þ¼¶¿ÚÁîÃÜÂë"/>
-		<property name="WordBeLock" type="byte" public="false" private="true" save="true" desc="¿ÚÁî±»Ëø¶¨"/>
-		<property name="WordBeLockTime" type="double" public="false" private="false" save="true" desc="±»Ëø¶¨µÄ¿ªÊ¼Ê±¼ä"/>
-		<property name="WordCheckNum" type="int" public="false" private="true" save="true" desc="ÑéÖ¤´ÎÊý"/>
-		<property name="IsCheckPass" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñÑéÖ¤Í¨¹ý"/>
+		<property name="SecondWord" type="widestr" public="false" private="false" save="true" desc="äºŒçº§å£ä»¤å¯†ç "/>
+		<property name="IsHaveSecondWord" type="byte" public="false" private="true" save="true" desc="æ˜¯å¦æœ‰äºŒçº§å£ä»¤å¯†ç "/>
+		<property name="WordBeLock" type="byte" public="false" private="true" save="true" desc="å£ä»¤è¢«é”å®š"/>
+		<property name="WordBeLockTime" type="double" public="false" private="false" save="true" desc="è¢«é”å®šçš„å¼€å§‹æ—¶é—´"/>
+		<property name="WordCheckNum" type="int" public="false" private="true" save="true" desc="éªŒè¯æ¬¡æ•°"/>
+		<property name="IsCheckPass" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦éªŒè¯é€šè¿‡"/>
 	</properties>	
 </object>

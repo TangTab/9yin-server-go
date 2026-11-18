@@ -1,5 +1,5 @@
 
---Í¨¼©Öµ¼õÉÙ²Ù×÷
+--é€šç¼‰å€¼å‡å°‘æ“ä½œ
 function on_use(item, self)
 
     if not nx_exists(item) then
@@ -11,7 +11,7 @@ function on_use(item, self)
 	    return
 	end
 	
-	local arrest_value = nx_query_property(self, "ArrestValue") --»ñÈ¡Í¨¼©Öµ
+	local arrest_value = nx_query_property(self, "ArrestValue") --è·å–é€šç¼‰å€¼
 	if nx_number(arrest_value)>nx_number(0) then
 	    arrest_value = arrest_value - 100 
 	    if arrest_value < 0 then
@@ -23,7 +23,7 @@ function on_use(item, self)
 	reduce_item(item)
 end
 
---¼õÉÙITEMÊıÁ¿
+--å‡å°‘ITEMæ•°é‡
 function reduce_item(item)
     nx_inc_property(item, "Amount", -1)
 end

@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¼¼ÄÜÐ§¹ûNPC»ù´¡ÊôÐÔ-->
+<!--æŠ€èƒ½æ•ˆæžœNPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-	  <property name="se_movetype" type="int" public="false" private="false" save="false" desc="ÒÆ¶¯·½Ê½0£ºÖ±Ïß"/>
-	  <property name="se_move_param1" type="int" public="false" private="false" save="false" desc="ÒÆ¶¯²ÎÊý"/>
+	  <property name="se_movetype" type="int" public="false" private="false" save="false" desc="ç§»åŠ¨æ–¹å¼0ï¼šç›´çº¿"/>
+	  <property name="se_move_param1" type="int" public="false" private="false" save="false" desc="ç§»åŠ¨å‚æ•°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!-- è¡¨å±žæ€§ -->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-        <path name="struct\npc_property\ai_motion.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
+        <path name="struct\npc_property\ai_motion.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
         <path name="struct\npc_property\ai_path.xml" desc=""/>
-        <path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+        <path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
         <path name="struct\rule\Common\Fightbag.xml" desc=""/>
         <path name="struct\rule\Common\commonfighter.xml" desc=""/>
         <path name="struct\rule\Common\skilluse.xml" desc=""/>

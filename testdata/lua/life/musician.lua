@@ -1,17 +1,17 @@
 ----------------------------------------------------------------------
--- ÎÄ¼şÃû:		musician.lua
--- ÄÚ  Èİ:		ÇÙÊ¦µÄÇÙÆ×Ê¹ÓÃ½Å±¾
--- Ëµ  Ã÷:
--- ´´½¨ÈÕÆÚ:	2009Äê11ÔÂ9ÈÕ
--- ´´½¨ÈË:		ÍõÕ÷ºÆ
--- °æÈ¨ËùÓĞ:	ËÕÖİÎÏÅ£µç×ÓÓĞÏŞ¹«Ë¾
+-- æ–‡ä»¶å:		musician.lua
+-- å†…  å®¹:		ç´å¸ˆçš„ç´è°±ä½¿ç”¨è„šæœ¬
+-- è¯´  æ˜:
+-- åˆ›å»ºæ—¥æœŸ:	2009å¹´11æœˆ9æ—¥
+-- åˆ›å»ºäºº:		ç‹å¾æµ©
+-- ç‰ˆæƒæ‰€æœ‰:	è‹å·èœ—ç‰›ç”µå­æœ‰é™å…¬å¸
 ----------------------------------------------------------------------
 require("define")
 
---Ê¹ÓÃÇÙÆ×
+--ä½¿ç”¨ç´è°±
 function on_use(music, user)
 
-	--¼ì²éÊÇ·ñ¿ÉÒÔÊ¹ÓÃ
+	--æ£€æŸ¥æ˜¯å¦å¯ä»¥ä½¿ç”¨
 	if true ~= can_use(user, music) then
 		return 0
 	end
@@ -20,7 +20,7 @@ function on_use(music, user)
 	return 0
 end
 
---ÊÇ·ñ¿ÉÒÔÊ¹ÓÃ
+--æ˜¯å¦å¯ä»¥ä½¿ç”¨
 function can_use(user, music)	
 
 	local result = nx_can_music(user, music)
@@ -28,10 +28,10 @@ function can_use(user, music)
 	return result
 end
 
---Ìí¼Óbuffer
+--æ·»åŠ buffer
 function add_buffer(self)
 
-	--Íæ¼ÒÉíÉÏÇÙÇúµÄÁÙÊ±Êı¾İ
+	--ç©å®¶èº«ä¸Šç´æ›²çš„ä¸´æ—¶æ•°æ®
 	if not nx_find_data(self, "Musician") then
 		return false
 	end
@@ -42,14 +42,14 @@ function add_buffer(self)
 	end
 
 
-	--»ñÈ¡buffer
+	--è·å–buffer
 	local bufferid = nx_query_property(music, "Para4")
 	local buffer = nx_create_from_config(nx_get_scene(), nx_string(bufferid))
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃbuffer
+	--è®¾ç½®buffer
 	nx_set_property(buffer, "EffectType", 1)
 	nx_set_property(buffer, "LifeTime", 100000)
 	if not nx_find_data(buffer, "LifeSkill") then

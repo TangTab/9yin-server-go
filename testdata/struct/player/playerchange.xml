@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--½ÇÉ«±äÉíÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--è§’è‰²å˜èº«ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>		
-		<property name="MainRoleChange" type="string" public="true" private="true" save="true" desc="µ±Ç°±äÉí×ÊÔ´Â·¾¶"/>
-		<property name="bCampChange" type="int" public="false" private="false" save="true" desc="ÊÇ·ñÕóÓª±äÉí"/>
-    <property name="PreChangeIndex" type="int" public="true" private="true" save="false" desc="Ô¤¼ÓÔØ±äÉí±àºÅ"/>
-		<property name="ChangeIndex" type="int" public="true" private="true" save="false" desc="±äÉí±àºÅ"/>
-		<property name="bRoleChange" type="int" public="true" private="true" save="true" desc="µ±Ç°ÊÇ·ñ±äÉí"/>
-		<property name="RoleChangeType" type="int" public="false" private="true" save="true" desc="µ±Ç°½ÇÉ«±äÉíÀàÐÍ"/>
-		<property name="ChangeCostTime" type="int" public="false" private="false" save="true" desc="±äÉíÒÑÏûºÄµÄÊ±¼ä-×î´óÎª1h"/>
-		<property name="ChangeLeftTime" type="int" public="false" private="false" save="true" desc="±äÉíÀëÏûºÄºÚ½ðÊ£ÓàµÄÊ±¼ä-×î´óÎª1h"/>
-		<property name="ChangeSkill" type="string" public="false" private="false" save="true" desc="±äÉíµÄ¼¼ÄÜ"/>
+		<property name="MainRoleChange" type="string" public="true" private="true" save="true" desc="å½“å‰å˜èº«èµ„æºè·¯å¾„"/>
+		<property name="bCampChange" type="int" public="false" private="false" save="true" desc="æ˜¯å¦é˜µè¥å˜èº«"/>
+    <property name="PreChangeIndex" type="int" public="true" private="true" save="false" desc="é¢„åŠ è½½å˜èº«ç¼–å·"/>
+		<property name="ChangeIndex" type="int" public="true" private="true" save="false" desc="å˜èº«ç¼–å·"/>
+		<property name="bRoleChange" type="int" public="true" private="true" save="true" desc="å½“å‰æ˜¯å¦å˜èº«"/>
+		<property name="RoleChangeType" type="int" public="false" private="true" save="true" desc="å½“å‰è§’è‰²å˜èº«ç±»åž‹"/>
+		<property name="ChangeCostTime" type="int" public="false" private="false" save="true" desc="å˜èº«å·²æ¶ˆè€—çš„æ—¶é—´-æœ€å¤§ä¸º1h"/>
+		<property name="ChangeLeftTime" type="int" public="false" private="false" save="true" desc="å˜èº«ç¦»æ¶ˆè€—é»‘é‡‘å‰©ä½™çš„æ—¶é—´-æœ€å¤§ä¸º1h"/>
+		<property name="ChangeSkill" type="string" public="false" private="false" save="true" desc="å˜èº«çš„æŠ€èƒ½"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records/>
 </object>

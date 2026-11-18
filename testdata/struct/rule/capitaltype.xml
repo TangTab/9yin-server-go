@@ -1,45 +1,45 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--×Ê½ðÏà¹ØÊôÐÔ-->
+<!--èµ„é‡‘ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="MatureTicketDay" type="int" public="false" private="true" save="true" desc="Ê¹ÓÃµãÈ¯¿ªÍ¨Ã¿ÈÕ½ð±ÒÉÏÏÞµ½ÆÚÈÕ"/>
-		<property name="DayMaxGainGold" type="int64" public="false" private="true" save="true" desc="Ã¿ÈÕ½ð±Ò»ñµÃÉÏÏÞ"/>
+		<property name="MatureTicketDay" type="int" public="false" private="true" save="true" desc="ä½¿ç”¨ç‚¹åˆ¸å¼€é€šæ¯æ—¥é‡‘å¸ä¸Šé™åˆ°æœŸæ—¥"/>
+		<property name="DayMaxGainGold" type="int64" public="false" private="true" save="true" desc="æ¯æ—¥é‡‘å¸èŽ·å¾—ä¸Šé™"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<!-- ¿Û³ý½ð±Ò¶ÓÁÐ -->
-		<record name="DecPointQRec" cols="5" maxrows="0" save="false" public="false" private="false" desc="Íæ¼Ò¿Û³ýµãÈ¯ÊÂ¼þÅÅ¶Ó±í">
-			<column type="string" desc="¿Û³ýÊÂ¼þµÄÎ¨Ò»id"/>
-			<column type="int" desc="»Øµ÷ÃüÁîÖµ"/>
-			<column type="int64" desc="¿Û³ý½ð±ÒµÄÖµ"/>
-			<column type="string" desc="¿Û³ýÔ­Òò"/>
-			<column type="string" desc="¿Û³ýµÄ¸½¼Ó²ÎÊý,ÓÃ×÷»Øµ÷ÓÃ»§º¯ÊýµÄ²ÎÊý"/>
+		<!-- æ‰£é™¤é‡‘å¸é˜Ÿåˆ— -->
+		<record name="DecPointQRec" cols="5" maxrows="0" save="false" public="false" private="false" desc="çŽ©å®¶æ‰£é™¤ç‚¹åˆ¸äº‹ä»¶æŽ’é˜Ÿè¡¨">
+			<column type="string" desc="æ‰£é™¤äº‹ä»¶çš„å”¯ä¸€id"/>
+			<column type="int" desc="å›žè°ƒå‘½ä»¤å€¼"/>
+			<column type="int64" desc="æ‰£é™¤é‡‘å¸çš„å€¼"/>
+			<column type="string" desc="æ‰£é™¤åŽŸå› "/>
+			<column type="string" desc="æ‰£é™¤çš„é™„åŠ å‚æ•°,ç”¨ä½œå›žè°ƒç”¨æˆ·å‡½æ•°çš„å‚æ•°"/>
 		</record>
-		<record name="consum_capital_limit" cols="4" maxrows="10" save="true" public="false" private="true" desc="Íæ¼ÒÃ¿ÌìÏûºÄ×Ê½ðÏÞÖÆ±í">
-			<column type="byte" desc="×Ê½ðÀàÐÍ"/>
-			<column type="int64" desc="µ±Ç°ÏûºÄÖµ"/>
-			<column type="word" desc="µ±Ç°µÚÒ»´ÎÏûºÄÊ±¼ä"/>
-			<column type="int64" desc="Íæ¼Ò×ÔÉèÖµ"/>
+		<record name="consum_capital_limit" cols="4" maxrows="10" save="true" public="false" private="true" desc="çŽ©å®¶æ¯å¤©æ¶ˆè€—èµ„é‡‘é™åˆ¶è¡¨">
+			<column type="byte" desc="èµ„é‡‘ç±»åž‹"/>
+			<column type="int64" desc="å½“å‰æ¶ˆè€—å€¼"/>
+			<column type="word" desc="å½“å‰ç¬¬ä¸€æ¬¡æ¶ˆè€—æ—¶é—´"/>
+			<column type="int64" desc="çŽ©å®¶è‡ªè®¾å€¼"/>
 		</record>
-		<record name="daygain_capital_limit" cols="3" maxrows="10" save="true" public="false" private="true" desc="Íæ¼ÒÃ¿Ìì»ñµÃ×Ê½ðÏÞÖÆ±í">
-			<column type="byte" desc="×Ê½ðÀàÐÍ"/>
-			<column type="int64" desc="µ±Ç°»ñµÃÖµ"/>
-			<column type="word" desc="µ±Ç°µÚÒ»´Î»ñµÃÊ±¼ä"/>
+		<record name="daygain_capital_limit" cols="3" maxrows="10" save="true" public="false" private="true" desc="çŽ©å®¶æ¯å¤©èŽ·å¾—èµ„é‡‘é™åˆ¶è¡¨">
+			<column type="byte" desc="èµ„é‡‘ç±»åž‹"/>
+			<column type="int64" desc="å½“å‰èŽ·å¾—å€¼"/>
+			<column type="word" desc="å½“å‰ç¬¬ä¸€æ¬¡èŽ·å¾—æ—¶é—´"/>
 		</record>
-		<record name="exchange_ticket_rec" cols="3" maxrows="10" save="true" public="false" private="true" desc="Íæ¼ÒµãÈ¯¶Ò»»ºÚ½ðÀúÊ·¼ÇÂ¼±í">
-			<column type="double" desc="¶Ò»»Ê±¼ä"/>
-			<column type="int64" desc="»ñµÃºÚ½ð"/>
-			<column type="int64" desc="ÏûºÄµãÈ¯"/>
+		<record name="exchange_ticket_rec" cols="3" maxrows="10" save="true" public="false" private="true" desc="çŽ©å®¶ç‚¹åˆ¸å…‘æ¢é»‘é‡‘åŽ†å²è®°å½•è¡¨">
+			<column type="double" desc="å…‘æ¢æ—¶é—´"/>
+			<column type="int64" desc="èŽ·å¾—é»‘é‡‘"/>
+			<column type="int64" desc="æ¶ˆè€—ç‚¹åˆ¸"/>
 		</record>
-		<record name="exchange_gold_rec" cols="3" maxrows="10" save="true" public="false" private="true" desc="Íæ¼ÒºÚ½ð¶Ò»»½ð±ÒÀúÊ·¼ÇÂ¼±í">
-			<column type="double" desc="¶Ò»»Ê±¼ä"/>
-			<column type="int64" desc="»ñµÃ½ð±Ò"/>
-			<column type="int64" desc="ÏûºÄºÚ½ð"/>
+		<record name="exchange_gold_rec" cols="3" maxrows="10" save="true" public="false" private="true" desc="çŽ©å®¶é»‘é‡‘å…‘æ¢é‡‘å¸åŽ†å²è®°å½•è¡¨">
+			<column type="double" desc="å…‘æ¢æ—¶é—´"/>
+			<column type="int64" desc="èŽ·å¾—é‡‘å¸"/>
+			<column type="int64" desc="æ¶ˆè€—é»‘é‡‘"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

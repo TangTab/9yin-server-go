@@ -1,44 +1,44 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--FlyNPCµÄÊôÐÔ-->
+<!--FlyNPCçš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="AITemplate" type="int" public="false" private="false" save="false" desc="AIÄ£°å±àºÅ"/>
-		<property name="CurState" type="int" public="false" private="false" save="false" desc="µ±Ç°×´Ì¬"/>
-		<property name="SubState" type="int" public="false" private="false" save="false" desc="×Ó×´Ì¬"/>
-		<property name="PreState" type="int" public="false" private="false" save="false" desc="Ç°Ò»×´Ì¬"/>
-		<property name="BornX" type="float" public="false" private="false" save="false" desc="³öÉúµãX"/>
-		<property name="BornY" type="float" public="false" private="false" save="false" desc="³öÉúµãY"/>
-		<property name="BornZ" type="float" public="false" private="false" save="false" desc="³öÉúµãZ"/>
-		<property name="PathID" type="string" public="false" private="false" save="false" desc="Â·¾¶ID"/>
-		<property name="PatrolMode" type="int" public="false" private="false" save="false" desc="Ñ²ÂßÄ£Ê½"/>
-		<property name="StopPatrol" type="int" public="false" private="false" save="false" desc="Í£Ö¹Ñ²Âß"/>
-		<property name="AIEffect" type="string" public="true" private="false" save="false" desc="AIÌØÐ§"/>
-		<property name="StandHeight" type="float" public="false" private="false" save="false" desc="Ïà¶ÔÓÚ×ÔÉíµÄ¿ÉÕ¾Á¢¸ß¶È"/>
-		<property name="StandShape" type="byte" public="false" private="false" save="false" desc="XzÆ½ÃæÉÏ¿ÉÕ¾Á¢·¶Î§ÀàÐÎ0,Ô²ÐÎ1.ÊÇ·½ÐÎ"/>
-		<property name="ShapePara1" type="byte" public="false" private="false" save="false" desc="StandShape=0Ê±Îª°ë¾¶StandShape=1Ê±Îª³¤"/>
-		<property name="ShapePara2" type="byte" public="false" private="false" save="false" desc="StandShape=1Ê±Îª¿í,Æ½ÐÐÓÚÃæÏò"/>
-		<property name="PathList" type="string" public="false" private="false" save="false" desc="ËùÓÐÑ²ÂßÂ·¾¶"/>
-		<property name="RollSpeed" type="float" public="true" private="false" save="false" desc="Ðý×ªËÙ¶È"/>
-        <property name="TransPath" type="string" public="true" private="false" save="false" desc="µ±Ç°³¡¾°Â·ÏßÁÐ±í"/>
-        <property name="TransStep" type="int" public="true" private="false" save="false" desc="²½Êý"/>
-        <property name="TransSecID" type="string" public="true" private="false" save="false" desc="µ±Ç°Â·Ïß"/>
+		<property name="AITemplate" type="int" public="false" private="false" save="false" desc="AIæ¨¡æ¿ç¼–å·"/>
+		<property name="CurState" type="int" public="false" private="false" save="false" desc="å½“å‰çŠ¶æ€"/>
+		<property name="SubState" type="int" public="false" private="false" save="false" desc="å­çŠ¶æ€"/>
+		<property name="PreState" type="int" public="false" private="false" save="false" desc="å‰ä¸€çŠ¶æ€"/>
+		<property name="BornX" type="float" public="false" private="false" save="false" desc="å‡ºç”Ÿç‚¹X"/>
+		<property name="BornY" type="float" public="false" private="false" save="false" desc="å‡ºç”Ÿç‚¹Y"/>
+		<property name="BornZ" type="float" public="false" private="false" save="false" desc="å‡ºç”Ÿç‚¹Z"/>
+		<property name="PathID" type="string" public="false" private="false" save="false" desc="è·¯å¾„ID"/>
+		<property name="PatrolMode" type="int" public="false" private="false" save="false" desc="å·¡é€»æ¨¡å¼"/>
+		<property name="StopPatrol" type="int" public="false" private="false" save="false" desc="åœæ­¢å·¡é€»"/>
+		<property name="AIEffect" type="string" public="true" private="false" save="false" desc="AIç‰¹æ•ˆ"/>
+		<property name="StandHeight" type="float" public="false" private="false" save="false" desc="ç›¸å¯¹äºŽè‡ªèº«çš„å¯ç«™ç«‹é«˜åº¦"/>
+		<property name="StandShape" type="byte" public="false" private="false" save="false" desc="Xzå¹³é¢ä¸Šå¯ç«™ç«‹èŒƒå›´ç±»å½¢0,åœ†å½¢1.æ˜¯æ–¹å½¢"/>
+		<property name="ShapePara1" type="byte" public="false" private="false" save="false" desc="StandShape=0æ—¶ä¸ºåŠå¾„StandShape=1æ—¶ä¸ºé•¿"/>
+		<property name="ShapePara2" type="byte" public="false" private="false" save="false" desc="StandShape=1æ—¶ä¸ºå®½,å¹³è¡ŒäºŽé¢å‘"/>
+		<property name="PathList" type="string" public="false" private="false" save="false" desc="æ‰€æœ‰å·¡é€»è·¯å¾„"/>
+		<property name="RollSpeed" type="float" public="true" private="false" save="false" desc="æ—‹è½¬é€Ÿåº¦"/>
+        <property name="TransPath" type="string" public="true" private="false" save="false" desc="å½“å‰åœºæ™¯è·¯çº¿åˆ—è¡¨"/>
+        <property name="TransStep" type="int" public="true" private="false" save="false" desc="æ­¥æ•°"/>
+        <property name="TransSecID" type="string" public="true" private="false" save="false" desc="å½“å‰è·¯çº¿"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<!-- ÒÑÌøµ½´ËNPCÉÏ½øÐÐ°ó¶¨µÄÍæ¼Ò±í -->
-		<record name="link_rec" cols="6" maxrows="512" save="false" public="true" private="false" desc="link±í¼ÇÂ¼">
-			<column type="widestr" desc="Íæ¼ÒÃû"/>
-			<column type="float" desc="Íæ¼ÒÆ«ÒÆÁ¿x"/>
-			<column type="float" desc="Íæ¼ÒÆ«ÒÆÁ¿y"/>
-			<column type="float" desc="Íæ¼ÒÆ«ÒÆÁ¿z"/>
-			<column type="float" desc="Íæ¼Ò³¯Ïò"/>
-			<column type="object" desc="Íæ¼ÒPERSISTID"/>
+		<!-- å·²è·³åˆ°æ­¤NPCä¸Šè¿›è¡Œç»‘å®šçš„çŽ©å®¶è¡¨ -->
+		<record name="link_rec" cols="6" maxrows="512" save="false" public="true" private="false" desc="linkè¡¨è®°å½•">
+			<column type="widestr" desc="çŽ©å®¶å"/>
+			<column type="float" desc="çŽ©å®¶åç§»é‡x"/>
+			<column type="float" desc="çŽ©å®¶åç§»é‡y"/>
+			<column type="float" desc="çŽ©å®¶åç§»é‡z"/>
+			<column type="float" desc="çŽ©å®¶æœå‘"/>
+			<column type="object" desc="çŽ©å®¶PERSISTID"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\npc_property\ai_path.xml" desc="AIÊôÐÔ"/>
+		<path name="struct\npc_property\ai_path.xml" desc="AIå±žæ€§"/>
 	</includes>
 </object>

@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎï¾ç±¾Ïà¹ØÊôÐÔ¶¨Òå-->
+<!--äººç‰©å‰§æœ¬ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-	<!--»î¶¯ÁÐ±í-->
-		<record name="PvpPlayerActivityState" cols="2" maxrows="64" save="false" public="false" private="true" desc="PVPÍæ¼Ò»î¶¯×´Ì¬±í">
-			<column type="string" desc="»î¶¯ID"/>
-			<column type="byte" desc="»î¶¯×´Ì¬"/>
+	<!--æ´»åŠ¨åˆ—è¡¨-->
+		<record name="PvpPlayerActivityState" cols="2" maxrows="64" save="false" public="false" private="true" desc="PVPçŽ©å®¶æ´»åŠ¨çŠ¶æ€è¡¨">
+			<column type="string" desc="æ´»åŠ¨ID"/>
+			<column type="byte" desc="æ´»åŠ¨çŠ¶æ€"/>
 		</record>
 	</records>
 </object>

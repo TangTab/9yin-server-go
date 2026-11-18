@@ -1,53 +1,53 @@
---´æ´¢·şÎñÆ÷Ö÷¿Ø½Å±¾
+--å­˜å‚¨æœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---³ÌĞò×´Ì¬
-local WAPS_UNKNOWN = 0	--Î´Öª
-local WAPS_STARTING = 1	--ÕıÔÚÆô¶¯
-local WAPS_READY = 2	--¾ÍĞ÷£¨µ«ÊÇÎ´¿ª·Å·şÎñ£©
-local WAPS_OPENING = 3	--ÕıÔÚ¿ª·Å·şÎñ
-local WAPS_OPENED = 4	--ÒÑ¿ª·Å·şÎñ
-local WAPS_CLOSING = 5	--ÕıÔÚ¹Ø±Õ
-local WAPS_CLOSED = 6	--ÒÑ¹Ø±Õ·şÎñ
-local WAPS_QUITING = 7	--ÕıÔÚÍË³ö
+--ç¨‹åºçŠ¶æ€
+local WAPS_UNKNOWN = 0	--æœªçŸ¥
+local WAPS_STARTING = 1	--æ­£åœ¨å¯åŠ¨
+local WAPS_READY = 2	--å°±ç»ªï¼ˆä½†æ˜¯æœªå¼€æ”¾æœåŠ¡ï¼‰
+local WAPS_OPENING = 3	--æ­£åœ¨å¼€æ”¾æœåŠ¡
+local WAPS_OPENED = 4	--å·²å¼€æ”¾æœåŠ¡
+local WAPS_CLOSING = 5	--æ­£åœ¨å…³é—­
+local WAPS_CLOSED = 6	--å·²å…³é—­æœåŠ¡
+local WAPS_QUITING = 7	--æ­£åœ¨é€€å‡º
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(store)
 	nx_set_value("store", store)
 
-	--¿ìËÙÈÕÖ¾ÏµÍ³
+	--å¿«é€Ÿæ—¥å¿—ç³»ç»Ÿ
 	store.UseQuickLog = true
-	--Ó¦ÓÃ½ø³Ì¼ÇÂ¼
+	--åº”ç”¨è¿›ç¨‹è®°å½•
 	store.UseAppRecord = true
 
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	store:SetConsoleColor("LightYellow")
 
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	--ini.FileName = "game_store.ini"
 	ini.FileName = nx_main_config()
 
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
 		nx_msgbox("can't read config file!")
 		nx_destroy(ini)
 		return 0
 	end
 
-	--ÓÎÏ··ÖÇø±àºÅ
+	--æ¸¸æˆåˆ†åŒºç¼–å·
 	local district_id = ini:ReadInteger("Main", "DistrictID", 1)
-	--·şÎñÆ÷±àºÅ
+	--æœåŠ¡å™¨ç¼–å·
 	local server_id = ini:ReadInteger("Main", "ServerID", 1)
-	--×éÄÚ´æ´¢±àºÅ
+	--ç»„å†…å­˜å‚¨ç¼–å·
 	local store_id = ini:ReadInteger("Main", "StoreID", 0)
-	--Ê¹ÓÃMYSQLÊı¾İ¿â
+	--ä½¿ç”¨MYSQLæ•°æ®åº“
 	local use_mysql = nx_boolean(ini:ReadString("Main", "UseMysql", "false"))
-	--¼ÇÂ¼Êı¾İ¿â´æÈ¡ĞÔÄÜ
+	--è®°å½•æ•°æ®åº“å­˜å–æ€§èƒ½
 	local log_db_perf = nx_boolean(ini:ReadString("Main", "LogDBPerformance", "false"))
 
-	--ÄÚÍøµØÖ·
+	--å†…ç½‘åœ°å€
 	local inner_addr = "127.0.0.1"
 	local inner_port = 0
 	--local inner_port = 16100 + store_id
@@ -55,21 +55,21 @@ function main(store)
 	inner_addr = ini:ReadString("Inner", "Addr", inner_addr)
 	inner_port = ini:ReadInteger("Inner", "Port", inner_port)
 
-	--¹ã²¥µØÖ·
+	--å¹¿æ’­åœ°å€
 	local broad_addr = "127.255.255.255"
 	local broad_port = 15000
 
 	broad_addr = ini:ReadString("Broadcast", "Addr", broad_addr)
 	broad_port = ini:ReadInteger("Broadcast", "Port", broad_port)
 
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15100 + store_id
 
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 
-	--»½ĞÑÁ¬½ÓµØÖ·
+	--å”¤é†’è¿æ¥åœ°å€
 	local wake_addr = "127.0.0.1"
 	local wake_port = 0
 	--local wake_port = 16800 + store_id
@@ -77,7 +77,7 @@ function main(store)
 	wake_addr = ini:ReadString("Wake", "Addr", wake_addr)
 	wake_port = ini:ReadInteger("Wake", "Port", wake_port)
 
-	--Êı¾İ¿âÁ¬½Ó
+	--æ•°æ®åº“è¿æ¥
 	local account_base = ini:ReadString("Account", "ConnectString", "")
 	local account_pool = ini:ReadInteger("Account", "ConnectPool", 0)
 
@@ -95,7 +95,7 @@ function main(store)
 
 	nx_destroy(ini)
 
-	--´´½¨Êı¾İ¿âÏµÍ³
+	--åˆ›å»ºæ•°æ®åº“ç³»ç»Ÿ
 	local db_system
 
 	if use_mysql then
@@ -104,7 +104,7 @@ function main(store)
 		db_system = nx_create("SqlDBSystem")
 	end
 
-	--°ó¶¨½Å±¾
+	--ç»‘å®šè„šæœ¬
 	nx_bind_script(store, "main", "echo_init")
 
 	store.AppName = "store_" .. nx_string(server_id) .. "_" .. nx_string(store_id)
@@ -130,41 +130,41 @@ function main(store)
 	store.EchoPort = echo_port
 	store.WakeAddr = wake_addr
 	store.WakePort = wake_port
-	--¼ÇÂ¼Êı¾İ¿â´æÈ¡ĞÔÄÜÈÕÖ¾
+	--è®°å½•æ•°æ®åº“å­˜å–æ€§èƒ½æ—¥å¿—
 	store.LogDBPerformance = log_db_perf
-	--±£Ö¤Æô¶¯ÈÕÖ¾·şÎñ
+	--ä¿è¯å¯åŠ¨æ—¥å¿—æœåŠ¡
 	store.LogLauncher = "game_log game_log.ini daemon"
 
 	init_custom_log(store)
 
-	--Æô¶¯´æ´¢·şÎñ
+	--å¯åŠ¨å­˜å‚¨æœåŠ¡
 	store:Start()
 
-	--Êµ¼ÊÊ¹ÓÃµÄÄÚÍøÕìÌı¶Ë¿Ú
+	--å®é™…ä½¿ç”¨çš„å†…ç½‘ä¾¦å¬ç«¯å£
 	inner_port = store.InnerPort
-	--Êµ¼ÊÊ¹ÓÃµÄ»½ĞÑÕìÌı¶Ë¿Ú
+	--å®é™…ä½¿ç”¨çš„å”¤é†’ä¾¦å¬ç«¯å£
 	wake_port = store.WakePort
 
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	store:WriteLine("app name " .. store.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	store:WriteLine("echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	store:WriteLine("inner socket " .. inner_addr .. ":" .. nx_string(inner_port))
 	store:WriteLine("broadcast socket " .. broad_addr .. ":" .. nx_string(broad_port))
 	store:WriteLine("wake socket " .. wake_addr .. ":" .. nx_string(wake_port))
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	store:WriteLine("game server " .. nx_string(server_id) .. " store "
 		.. nx_string(store_id) .. " started")
 
-	--ÉèÖÃ½ø³Ì¿ªÆô×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¼€å¯çŠ¶æ€
 	store:SetAppState(WAPS_OPENED);
 
 	return 1
 end
 
---ÉèÖÃ×Ô¶¨ÒåµÄÓÎÏ·ÈÕÖ¾Êı¾İ¿â±í¸ñ½á¹¹
+--è®¾ç½®è‡ªå®šä¹‰çš„æ¸¸æˆæ—¥å¿—æ•°æ®åº“è¡¨æ ¼ç»“æ„
 function init_custom_log(store)
-	--ÎïÆ·ÈÕÖ¾±í
+	--ç‰©å“æ—¥å¿—è¡¨
 	store:AddLogTable("item_log")
 	store:AddLogField("item_log", "time", "datetime", 8)
 	store:AddLogField("item_log", "itemfrom", "nvarchar", 64)
@@ -178,7 +178,7 @@ function init_custom_log(store)
 	store:AddLogField("item_log", "comment3", "nvarchar", 255)
 
 
-	--Íæ¼Ò½»Ò×±í
+	--ç©å®¶äº¤æ˜“è¡¨
 	store:AddLogTable("deal_log")
 	store:AddLogField("deal_log", "tradeid", "varchar", 64)
 	store:AddLogField("deal_log", "time", "datetime", 8)
@@ -200,7 +200,7 @@ function init_custom_log(store)
 	store:AddLogField("game_player_action_log", "n_act_value", "int", 4)
 
 
-	--Íæ¼ÒµÇÂ½ÈÕÖ¾±í
+	--ç©å®¶ç™»é™†æ—¥å¿—è¡¨
 	store:AddLogTable("role_log")
 	store:AddLogField("role_log", "account", "varchar", 100)
 	store:AddLogField("role_log", "role", "nvarchar", 64)
@@ -208,7 +208,7 @@ function init_custom_log(store)
 	store:AddLogField("role_log", "logouttime", "datetime", 8)
 
 
-	--Íæ¼ÒÉı¼¶ÈÕÖ¾±í
+	--ç©å®¶å‡çº§æ—¥å¿—è¡¨
 	--store:AddLogTable("role_upgrade_log")
 	--store:AddLogField("role_upgrade_log", "time", "datetime", 8)
 	--store:AddLogField("role_upgrade_log", "role", "nvarchar", 64)
@@ -219,14 +219,14 @@ function init_custom_log(store)
 	--store:AddLogField("role_upgrade_log", "ip", "varchar", 16)
 	--store:AddLogField("role_upgrade_log", "mac", "varchar", 16)
 
-	--ÈÎÎñÈÕÖ¾±í
+	--ä»»åŠ¡æ—¥å¿—è¡¨
 	store:AddLogTable("task_log")
 	store:AddLogField("task_log", "time", "datetime", 8)
 	store:AddLogField("task_log", "role", "nvarchar", 64)
 	store:AddLogField("task_log", "task", "int", 4)
 	store:AddLogField("task_log", "logtype", "int", 4)
 
-	--¸±±¾ÈÕÖ¾±í
+	--å‰¯æœ¬æ—¥å¿—è¡¨
 	store:AddLogTable("instance_log")
 	store:AddLogField("instance_log", "instanceid", "varchar", 32)
 	store:AddLogField("instance_log", "instancetypeid", "varchar", 32)
@@ -236,7 +236,7 @@ function init_custom_log(store)
 	store:AddLogField("instance_log", "troop_count1", "int", 4)
 	store:AddLogField("instance_log", "troop_count2", "int", 4)
 
-    --¸±±¾ÈÕÖ¾±í2
+    --å‰¯æœ¬æ—¥å¿—è¡¨2
 	store:AddLogTable("instance_role_log")
 	store:AddLogField("instance_role_log", "instanceid", "varchar", 32)
 	store:AddLogField("instance_role_log", "instancetypeid", "varchar", 32)
@@ -255,14 +255,14 @@ function init_custom_log(store)
     store:AddLogField("instance_npc_log", "ip", "varchar", 16)
 	store:AddLogField("instance_npc_log", "mac", "varchar", 16)
 
-	--³¡¾°ÈÕÖ¾±í
+	--åœºæ™¯æ—¥å¿—è¡¨
 	store:AddLogTable("scene_log")
 	store:AddLogField("scene_log", "sceneid", "int", 4)
 	store:AddLogField("scene_log", "date", "datetime", 8)
 	store:AddLogField("scene_log", "enter", "int", 4)
 	store:AddLogField("scene_log", "totaltime", "decimal", 8)
 
-	--³Í·£ÈÕÖ¾±í
+	--æƒ©ç½šæ—¥å¿—è¡¨
 	store:AddLogTable("punish_log")
 	store:AddLogField("punish_log", "time", "datetime", 8)
 	store:AddLogField("punish_log", "operator", "varchar", 100)
@@ -279,7 +279,7 @@ function init_custom_log(store)
 	store:AddLogField("program_log", "endtime", "datetime", 8)
 
 
-	--ÓÎÏ·ÊÀ½ç×Ê½ğ×ÜÁ¿µ÷ÕûÈÕÖ¾
+	--æ¸¸æˆä¸–ç•Œèµ„é‡‘æ€»é‡è°ƒæ•´æ—¥å¿—
 	store:AddLogTable("total_capital_log")
 	store:AddLogField("total_capital_log", "time", "datetime", 8)
 	store:AddLogField("total_capital_log", "type", "int", 4)
@@ -291,7 +291,7 @@ function init_custom_log(store)
 	store:AddLogField("total_capital_log", "gm", "varchar", 128)
 	store:AddLogField("total_capital_log", "comment", "nvarchar", 255)
 
-	--Íæ¼Ò¾­ÑéÈÕÖ¾±í
+	--ç©å®¶ç»éªŒæ—¥å¿—è¡¨
 	store:AddLogTable("player_exp_log")
 	store:AddLogField("player_exp_log", "time", "datetime", 8)
 	store:AddLogField("player_exp_log", "role", "nvarchar", 64)
@@ -301,7 +301,7 @@ function init_custom_log(store)
     store:AddLogField("player_exp_log", "ip", "varchar", 16)
 	store:AddLogField("player_exp_log", "mac", "varchar", 16)
 
-    --ĞĞÎªÍ³¼ÆÈÕÖ¾
+    --è¡Œä¸ºç»Ÿè®¡æ—¥å¿—
 	store:AddLogTable("deed_log")
 	store:AddLogField("deed_log", "role", "nvarchar", 64)
 	store:AddLogField("deed_log", "d_create", "datetime", 8)
@@ -311,7 +311,7 @@ function init_custom_log(store)
 	store:AddLogField("deed_log", "ip", "varchar", 16)
 	store:AddLogField("deed_log", "mac", "varchar", 16)
 
-    --½ÇÉ«´«ËÍÈÕÖ¾
+    --è§’è‰²ä¼ é€æ—¥å¿—
     store:AddLogTable("role_transmit_log")
     store:AddLogField("role_transmit_log", "time", "datetime", 8)
     store:AddLogField("role_transmit_log", "log_type", "int", 4)
@@ -327,7 +327,7 @@ function init_custom_log(store)
     store:AddLogField("role_transmit_log", "target_y", "decimal", 8)
     store:AddLogField("role_transmit_log", "target_z", "decimal", 8)
 
-    --½ÇÉ«¾­ÑéÈÕÖ¾
+    --è§’è‰²ç»éªŒæ—¥å¿—
     store:AddLogTable("role_experience_log")
     store:AddLogField("role_experience_log", "time", "datetime", 8)
     store:AddLogField("role_experience_log", "log_type", "int", 4)
@@ -343,7 +343,7 @@ function init_custom_log(store)
     store:AddLogField("role_experience_log", "cur_exp", "int", 4)
     store:AddLogField("role_experience_log", "comment", "nvarchar", 128)
 
-    --½ÇÉ«ÎïÆ·ÔöÇ¿ÈÕÖ¾
+    --è§’è‰²ç‰©å“å¢å¼ºæ—¥å¿—
     store:AddLogTable("role_item_change_log")
     store:AddLogField("role_item_change_log", "time", "datetime", 8)
     store:AddLogField("role_item_change_log", "log_type", "int", 4)
@@ -360,7 +360,7 @@ function init_custom_log(store)
     store:AddLogField("role_item_change_log", "consume_material", "varchar", 256)
     store:AddLogField("role_item_change_log", "comment", "nvarchar", 128)
 
-    --½ÇÉ«µÇÂ¼ÈÕÖ¾
+    --è§’è‰²ç™»å½•æ—¥å¿—
     store:AddLogTable("role_login_log")
     store:AddLogField("role_login_log", "account", "varchar", 64)
     store:AddLogField("role_login_log", "time", "datetime", 8)
@@ -375,7 +375,7 @@ function init_custom_log(store)
     store:AddLogField("role_login_log", "entry_time", "datetime", 8)
     store:AddLogField("role_login_log", "duration", "int", 4)
 
-    --½ÇÉ«ÇĞ³¡¾°ÈÕÖ¾
+    --è§’è‰²åˆ‡åœºæ™¯æ—¥å¿—
     store:AddLogTable("role_scene_log")
     store:AddLogField("role_scene_log", "time", "datetime", 8)
     store:AddLogField("role_scene_log", "log_type", "int", 4)
@@ -389,7 +389,7 @@ function init_custom_log(store)
     store:AddLogField("role_scene_log", "entry_time", "datetime", 8)
     store:AddLogField("role_scene_log", "duration", "int", 4)
 
-    --ÅÅĞĞ°ñ ÈÕÖ¾
+    --æ’è¡Œæ¦œ æ—¥å¿—
     store:AddLogTable("sys_rank_log")
     store:AddLogField("sys_rank_log", "time", "datetime", 8)
     store:AddLogField("sys_rank_log", "rank_name", "varchar", 64)
@@ -402,7 +402,7 @@ function init_custom_log(store)
     store:AddLogField("sys_rank_log", "camp_or_job", "int", 4)
     store:AddLogField("sys_rank_log", "guild", "nvarchar", 64)
 
-    --½ÇÉ«ÈÎÎñÈÕÖ¾
+    --è§’è‰²ä»»åŠ¡æ—¥å¿—
     store:AddLogTable("role_task_log")
     store:AddLogField("role_task_log", "time", "datetime", 8)
     store:AddLogField("role_task_log", "account", "varchar", 64)
@@ -416,7 +416,7 @@ function init_custom_log(store)
     store:AddLogField("role_task_log", "cur_z", "decimal", 8)
     store:AddLogField("role_task_log", "task_id", "int", 4)
 
-	--¹«»á ÈÕÖ¾
+	--å…¬ä¼š æ—¥å¿—
     store:AddLogTable("role_guild_log")
     store:AddLogField("role_guild_log", "time", "datetime", 8)
     store:AddLogField("role_guild_log", "account", "varchar", 64)
@@ -432,14 +432,14 @@ function init_custom_log(store)
 	store:AddLogField("role_guild_log", "guild_name", "nvarchar", 64)
 	store:AddLogField("role_guild_log", "comment", "nvarchar", 128)
 
-	--½ÇÉ«´´½¨É¾³ı ÈÕÖ¾
+	--è§’è‰²åˆ›å»ºåˆ é™¤ æ—¥å¿—
     store:AddLogTable("role_cre_del_log")
     store:AddLogField("role_cre_del_log", "time", "datetime", 8)
     store:AddLogField("role_cre_del_log", "log_type", "int", 4)
     store:AddLogField("role_cre_del_log", "account", "varchar", 64)
     store:AddLogField("role_cre_del_log", "role_name", "nvarchar", 64)
 
-    --½ÇÉ«Éı¼¶ÈÕÖ¾
+    --è§’è‰²å‡çº§æ—¥å¿—
     store:AddLogTable("role_upgrade_log")
     store:AddLogField("role_upgrade_log", "time", "datetime", 8)
     store:AddLogField("role_upgrade_log", "role", "nvarchar", 64)
@@ -449,7 +449,7 @@ function init_custom_log(store)
     store:AddLogField("role_upgrade_log", "skill_id", "varchar", 32)
     store:AddLogField("role_upgrade_log", "account", "varchar", 64)
 
-    --½ÇÉ«ÎïÆ·ÈÕÖ¾
+    --è§’è‰²ç‰©å“æ—¥å¿—
     store:AddLogTable("role_item_log")
     store:AddLogField("role_item_log", "time", "datetime", 8)
     store:AddLogField("role_item_log", "log_type", "int", 4)
@@ -465,7 +465,7 @@ function init_custom_log(store)
     store:AddLogField("role_item_log", "amount", "decimal", 8)
     store:AddLogField("role_item_log", "comment", "nvarchar", 128)
 
-    --½ÇÉ«ÅÄÂôĞĞÈÕÖ¾
+    --è§’è‰²æ‹å–è¡Œæ—¥å¿—
     store:AddLogTable("role_auction_log")
     store:AddLogField("role_auction_log", "time", "datetime", 8)
     store:AddLogField("role_auction_log", "log_type", "int", 4)
@@ -482,7 +482,7 @@ function init_custom_log(store)
     store:AddLogField("role_auction_log", "money", "int", 4)
     store:AddLogField("role_auction_log", "comment", "nvarchar", 128)
 
-	--Íæ·¨ ÈÕÖ¾
+	--ç©æ³• æ—¥å¿—
     store:AddLogTable("role_enjoy_log")
     store:AddLogField("role_enjoy_log", "time", "datetime", 8)
     store:AddLogField("role_enjoy_log", "account", "varchar", 64)
@@ -501,7 +501,7 @@ function init_custom_log(store)
 	store:AddLogField("role_enjoy_log", "guild_name", "nvarchar", 64)
 	store:AddLogField("role_enjoy_log", "comment", "nvarchar", 128)
 
-	--·Ç·¨ÏûÏ¢ ÈÕÖ¾
+	--éæ³•æ¶ˆæ¯ æ—¥å¿—
     store:AddLogTable("role_illegal_req_log")
     store:AddLogField("role_illegal_req_log", "time", "datetime", 8)
     store:AddLogField("role_illegal_req_log", "log_type", "int", 4)
@@ -519,7 +519,7 @@ function init_custom_log(store)
 	store:AddLogField("role_illegal_req_log", "sub_msg_id", "int", 4)
 	store:AddLogField("role_illegal_req_log", "comment", "nvarchar", 128)
 
-	--ÓÎÏ·ÊÀ½ç×Ê½ğ×ÜÁ¿Í³¼Æ ÈÕÖ¾
+	--æ¸¸æˆä¸–ç•Œèµ„é‡‘æ€»é‡ç»Ÿè®¡ æ—¥å¿—
     store:AddLogTable("sys_total_capital_snap")
     store:AddLogField("sys_total_capital_snap", "time", "datetime", 8)
     store:AddLogField("sys_total_capital_snap", "log_type", "int", 4)
@@ -536,33 +536,33 @@ function init_custom_log(store)
 	return true
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local store = nx_value("store")
 
-	--ÉèÖÃ½ø³ÌÕıÔÚ¹Ø±Õ×´Ì¬
+	--è®¾ç½®è¿›ç¨‹æ­£åœ¨å…³é—­çŠ¶æ€
 	--store:SetAppState(WAPS_CLOSING);
 
-	--µÈ´ıËùÓĞÊı¾İ¿â²Ù×÷Íê³É
+	--ç­‰å¾…æ‰€æœ‰æ•°æ®åº“æ“ä½œå®Œæˆ
 	--store:WriteLine("waiting all access finish...")
 
 	--while not store:AccessEmpty() do
 	--	nx_pause(0.0)
 	--end
 
-	--¹Ø±Õ´æ´¢·şÎñ
+	--å…³é—­å­˜å‚¨æœåŠ¡
 	store:WriteLine("store server shutdown...")
 	store:Stop()
 
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 
 	return true
 end
 
---Î¬»¤Á¬½Ó½Å±¾
+--ç»´æŠ¤è¿æ¥è„šæœ¬
 
---³õÊ¼»¯
+--åˆå§‹åŒ–
 function echo_init(self)
 	nx_callback(self, "on_open", "echo_open")
 	nx_callback(self, "on_close", "echo_close")
@@ -583,7 +583,7 @@ function echo_init(self)
 	return 1
 end
 
---Î¬»¤Á¬½Ó´ò¿ª
+--ç»´æŠ¤è¿æ¥æ‰“å¼€
 function echo_open(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " connected")
@@ -592,28 +592,28 @@ function echo_open(self, addr, port)
 	return 1
 end
 
---Î¬»¤Á¬½Ó¹Ø±Õ
+--ç»´æŠ¤è¿æ¥å…³é—­
 function echo_close(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " closed")
 	return 1
 end
 
---·¢ËÍ»ØÓ¦ĞÅÏ¢
+--å‘é€å›åº”ä¿¡æ¯
 function echo_response(self, info)
 	self:SendEchoLine(">" .. info .. "\r")
 	self:WriteLine(info)
 	return true
 end
 
---´¦ÀíÎ¬»¤ÊäÈëÃüÁî
+--å¤„ç†ç»´æŠ¤è¾“å…¥å‘½ä»¤
 function echo_input(self, command)
 	if command == "quit" then
-		--ÍË³ö³ÌĞò
+		--é€€å‡ºç¨‹åº
 		echo_response(self, "server will shutdown...")
 		close()
 	elseif command == "end" then
-		--¹Ø±ÕÁ¬½Ó
+		--å…³é—­è¿æ¥
 		self:CloseEcho()
 	else
 		echo_response(self, "undefined command: " .. command)
@@ -622,7 +622,7 @@ function echo_input(self, command)
 	return 1
 end
 
---²éÕÒÊµÌå
+--æŸ¥æ‰¾å®ä½“
 function get_entity(entity_name)
 	local id = nx_value(entity_name)
 
@@ -645,7 +645,7 @@ function get_entity(entity_name)
 	return nil
 end
 
---×ª»»µ½ºÏÊÊµÄÀàĞÍ
+--è½¬æ¢åˆ°åˆé€‚çš„ç±»å‹
 function get_new_value(old_v, value)
 	local type = nx_type(old_v)
 
@@ -672,7 +672,7 @@ function get_new_value(old_v, value)
 	return nil
 end
 
---²éÑ¯ÊµÌåÄÚ²¿ÊôĞÔ
+--æŸ¥è¯¢å®ä½“å†…éƒ¨å±æ€§
 function echo_input_getp(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -692,7 +692,7 @@ function echo_input_getp(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌåÄÚ²¿ÊôĞÔ
+--è®¾ç½®å®ä½“å†…éƒ¨å±æ€§
 function echo_input_setp(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -721,7 +721,7 @@ function echo_input_setp(self, entity, prop, value)
 	return 1
 end
 
---²éÑ¯ÊµÌå×Ô¶¨ÒåÊôĞÔ
+--æŸ¥è¯¢å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_getc(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -741,7 +741,7 @@ function echo_input_getc(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌå×Ô¶¨ÒåÊôĞÔ
+--è®¾ç½®å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_setc(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -770,7 +770,7 @@ function echo_input_setc(self, entity, prop, value)
 	return 1
 end
 
---Ö´ĞĞÊµÌå·½·¨
+--æ‰§è¡Œå®ä½“æ–¹æ³•
 function echo_input_method(self, entity, method, ...)
 	if entity == nil or method == nil then
 		return 0
@@ -799,7 +799,7 @@ function echo_input_method(self, entity, method, ...)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞÄÚ²¿ÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰å†…éƒ¨å±æ€§
 function echo_input_listp(self, entity)
 	if entity == nil then
 		return 0
@@ -824,7 +824,7 @@ function echo_input_listp(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ×Ô¶¨ÒåÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰è‡ªå®šä¹‰å±æ€§
 function echo_input_listc(self, entity)
 	if entity == nil then
 		return 0
@@ -849,7 +849,7 @@ function echo_input_listc(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ·½·¨
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰æ–¹æ³•
 function echo_input_listm(self, entity)
 	if entity == nil then
 		return 0
@@ -874,7 +874,7 @@ function echo_input_listm(self, entity)
 	return 1
 end
 
---ÁĞ³öËùÓĞÈ«¾Ö±äÁ¿
+--åˆ—å‡ºæ‰€æœ‰å…¨å±€å˜é‡
 function echo_input_listg(self)
 	local global_table = nx_value_list()
 
@@ -892,7 +892,7 @@ function echo_input_listg(self)
 	return 1
 end
 
---Ö´ĞĞ½Å±¾À©Õ¹º¯Êı
+--æ‰§è¡Œè„šæœ¬æ‰©å±•å‡½æ•°
 function echo_input_function(self, func, ...)
 	if func == nil or func == "" then
 		return 0
@@ -913,7 +913,7 @@ function echo_input_function(self, func, ...)
 	return 1
 end
 
---µ÷ÊÔº¯Êı
+--è°ƒè¯•å‡½æ•°
 function echo_input_debugger(self, entity, method, ...)
 	if entity == nil or entity == "" or method == nil or method == "" then
 		return 0

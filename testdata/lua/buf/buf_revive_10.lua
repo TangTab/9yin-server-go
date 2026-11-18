@@ -1,13 +1,13 @@
--- ËÀºóÔ­µØ¸´»î£¬ÂúÑªÂú×´Ì¬
+-- æ­»ååŸåœ°å¤æ´»ï¼Œæ»¡è¡€æ»¡çŠ¶æ€
 
 require("define")
 require("share\\logicstate_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
@@ -24,6 +24,6 @@ function buffer_timer(self, buffer, sender, cmdid)
 	return 1
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end

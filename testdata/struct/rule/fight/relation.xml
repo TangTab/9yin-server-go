@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Õ½¶·¡¢¼¼ÄÜÏµÍ³ÅÐ¶ÏÄÜ·ñ¶ÔÄ¿±êÊ¹ÓÃµÄ¹ØÏµÏà¹ØµÄÊôÐÔ±í, ÓÃÓÚÄ¿±êÑ¡Ôñ-->
+<!--æˆ˜æ–—ã€æŠ€èƒ½ç³»ç»Ÿåˆ¤æ–­èƒ½å¦å¯¹ç›®æ ‡ä½¿ç”¨çš„å…³ç³»ç›¸å…³çš„å±žæ€§è¡¨, ç”¨äºŽç›®æ ‡é€‰æ‹©-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="TargetClassType" type="int" public="false" private="false" save="false" desc="×÷ÓÃ¶ÔÏóµÄÖÖÀàµÄÀàÐÍ 0:ËùÓÐ¶ÔÏó1:Íæ¼Ò½ÇÉ«2:NPC"/>
-		<property name="TargetRelationType" type="int" public="false" private="false" save="false" desc="×÷ÓÃ¶ÔÏóµÄ¹ØÏµÀàÐÍ 0:ËùÓÐ¶ÔÏó1:µÐ¶Ô·½2:ÓÑºÃ·½3:¶ÓÓÑ,4:³èÎï,5:Ö÷ÈË"/>
-		<!--<property name="TargetOrientType" type="int" public="false" private="false" save="false" desc="¶Ô·½µÄ·½ÏòÅÐ¶¨ 0:ÎÞ·½ÏòÅÐ¶¨1:±ØÐëÔÚ¶Ô·½µÄ±³Ãæ2:±ØÐëÔÚ¶Ô·½µÄÕýÃæ"/>-->
+		<property name="TargetClassType" type="int" public="false" private="false" save="false" desc="ä½œç”¨å¯¹è±¡çš„ç§ç±»çš„ç±»åž‹ 0:æ‰€æœ‰å¯¹è±¡1:çŽ©å®¶è§’è‰²2:NPC"/>
+		<property name="TargetRelationType" type="int" public="false" private="false" save="false" desc="ä½œç”¨å¯¹è±¡çš„å…³ç³»ç±»åž‹ 0:æ‰€æœ‰å¯¹è±¡1:æ•Œå¯¹æ–¹2:å‹å¥½æ–¹3:é˜Ÿå‹,4:å® ç‰©,5:ä¸»äºº"/>
+		<!--<property name="TargetOrientType" type="int" public="false" private="false" save="false" desc="å¯¹æ–¹çš„æ–¹å‘åˆ¤å®š 0:æ— æ–¹å‘åˆ¤å®š1:å¿…é¡»åœ¨å¯¹æ–¹çš„èƒŒé¢2:å¿…é¡»åœ¨å¯¹æ–¹çš„æ­£é¢"/>-->
 	</properties>
 </object>

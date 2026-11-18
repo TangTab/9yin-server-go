@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿ÕÄÜÁ¿¹ÞµÄ»ù´¡ÊôÐÔ-->
+<!--ç©ºèƒ½é‡ç½çš„åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-			<property name="AppendID" type="int" public="false" private="false" save="false" desc="³äÄÜ°üID"/>	
+			<property name="AppendID" type="int" public="false" private="false" save="false" desc="å……èƒ½åŒ…ID"/>	
 	</properties>
 	
 	<records>
 
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>	
 </object>

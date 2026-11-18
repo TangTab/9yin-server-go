@@ -1,46 +1,46 @@
---ÆÕÍ¨ÎïÀí¼¼ÄÜ
---strÎªÖ÷Òª²ÎÊý,dexÓ°ÏìÎÈ¶¨
---Éä»÷dexÎªÖ÷Òª²ÎÊý,strÓ°ÏìÎÈ¶¨
+--æ™®é€šç‰©ç†æŠ€èƒ½
+--strä¸ºä¸»è¦å‚æ•°,dexå½±å“ç¨³å®š
+--å°„å‡»dexä¸ºä¸»è¦å‚æ•°,strå½±å“ç¨³å®š
 --5 hit
 
 require("define")
 
---Ë¢ÐÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôÐÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±žæ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹åŽ
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖÐÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖÐ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖÐ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›ž5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
 	local atktype = nx_query_property(self, "AttackType")
 	local str = nx_query_property(self, "Str") + nx_query_property(self, "StrAdd")
 	local dex = nx_query_property(self, "Dex") + nx_query_property(self, "DexAdd")
 	local damage = 0
-	--¼ÆËã´ò»÷ÉËº¦
+	--è®¡ç®—æ‰“å‡»ä¼¤å®³
 	if 0 == atktype then
 		local minmeleedamage = nx_query_property(self, "MinMeleeDamage")
 		local maxmeleedamage = nx_query_property(self, "MaxMeleeDamage")
@@ -49,14 +49,14 @@ function get_damage(self, skill, target)
 	
 		damage = math.random(minmeleedamage, maxmeleedamage) + meleepower
 
-		--´ò»÷ÉËº¦,dexÓ°ÏìÎÈ¶¨
+		--æ‰“å‡»ä¼¤å®³,dexå½±å“ç¨³å®š
 		if str > dex then
 			damage = damage - math.random(0, str - dex)
 		end
 		
 		damage = damage * (meleepowerprob + 100) * 0.01
 
-	--¼ÆËãÉä»÷ÉËº¦
+	--è®¡ç®—å°„å‡»ä¼¤å®³
 	elseif 1 == atktype then
 		local minshotdamage = nx_query_property(self, "MinShotDamage")
 		local maxshotdamage = nx_query_property(self, "MaxShotDamage")
@@ -65,7 +65,7 @@ function get_damage(self, skill, target)
 
 		damage = math.random(minshotdamage, maxshotdamage) + shotpower
 		
-		--Éä»÷ÉËº¦,strÓ°ÏìÎÈ¶¨
+		--å°„å‡»ä¼¤å®³,strå½±å“ç¨³å®š
 		if dex > str then
 			damage = damage - math.random(0, dex - str)
 		end
@@ -73,7 +73,7 @@ function get_damage(self, skill, target)
 		damage = damage * (shotpowerprob + 100) * 0.01
 	end
 	
-	--·ÖHitÊä³ö	
+	--åˆ†Hitè¾“å‡º	
 	local hits = nx_query_property(self, "Hits")
 	if 1 == hits then
 		damage = damage * 0.2 + 1

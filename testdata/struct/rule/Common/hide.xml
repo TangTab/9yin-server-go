@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¼¼ÄÜÊ¹ÓÃÏà¹ØµÄÊôÐÔ(npc,Íæ¼Ò½ÇÉ«¹²ÓÃ)-->
+<!--æŠ€èƒ½ä½¿ç”¨ç›¸å…³çš„å±žæ€§(npc,çŽ©å®¶è§’è‰²å…±ç”¨)-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <property name="RoleHide" type="int" public="true" private="true" save="false" desc="ÈËÎïÒþÉí:0ÏÖÉí,´óÓÚ0 ÒþÉí(¿Éµþ¼Ó)"/>
-    <property name="TrueSight" type="int" public="true" private="true" save="false" desc="´óÓÚ0,¿É¿´¼ûÒþÉíµ¥Î»"/>
-    <property name="ShowHide" type="int" public="true" private="true" save="false" desc="´óÓÚ0,ÒþÉíÊ±±»¿ÉÊÓ"/>
-    <property name="AreaHide" type="int" public="true" private="true" save="false" desc="ÇøÓòÒþ²Ø"/>
-    <property name="WarFogRadius" type="float" public="true" private="true" save="false" desc="Õ½ÕùÃÔÎíÊÓÒ°"/>
-    <property name="HideActionSet" type="int" public="true" private="true" save="false" desc="ÒþÉí¶¯×÷¼¯ Hi_"/>
+    <property name="RoleHide" type="int" public="true" private="true" save="false" desc="äººç‰©éšèº«:0çŽ°èº«,å¤§äºŽ0 éšèº«(å¯å åŠ )"/>
+    <property name="TrueSight" type="int" public="true" private="true" save="false" desc="å¤§äºŽ0,å¯çœ‹è§éšèº«å•ä½"/>
+    <property name="ShowHide" type="int" public="true" private="true" save="false" desc="å¤§äºŽ0,éšèº«æ—¶è¢«å¯è§†"/>
+    <property name="AreaHide" type="int" public="true" private="true" save="false" desc="åŒºåŸŸéšè—"/>
+    <property name="WarFogRadius" type="float" public="true" private="true" save="false" desc="æˆ˜äº‰è¿·é›¾è§†é‡Ž"/>
+    <property name="HideActionSet" type="int" public="true" private="true" save="false" desc="éšèº«åŠ¨ä½œé›† Hi_"/>
   </properties>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
   <includes>
   </includes>
 </object>

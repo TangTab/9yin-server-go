@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Object>
 <Property ID = "-1" CoolDownCategory = "3" CoolDownTeam = "5" CoolEffectType = "4" DamageType = "10" EffectType = "2" IsDamage = "9" LauchType = "0" LockType = "13" LuaScript = "14" MaxVarPropNo = "16" MinVarPropNo = "15" Photo = "7" ShowName = "6" SkillType = "1" TaoLu = "8" TargetType = "11" TargetSelect = "12" NormalAttack = "17" Loop = "18" HiddenWeapon = "19" UseSkillLockTime = "20" CanBreakOther = "21" IsAirSkill = "22" CanAirUse = "23" AirSkill = "24" IsZhenFaSkill = "25" ZhenFaMap = "26" ColorLevel = "27" />
 <Property ID = "0" CoolDownCategory = "2" CoolDownTeam = "2" CoolEffectType = "2" DamageType = "2" EffectType = "2" IsDamage = "2" LauchType = "2" LockType = "2" LuaScript = "6" MaxVarPropNo = "2" MinVarPropNo = "2" Photo = "6" ShowName = "2" SkillType = "2" TaoLu = "6" TargetType = "2" TargetSelect = "2" Loop = "2" NormalAttack = "2" HiddenWeapon = "2" UseSkillLockTime = "2" CanBreakOther = "2" IsAirSkill = "2" CanAirUse = "2" AirSkill = "6" IsZhenFaSkill = "2" ZhenFaMap = "2" ColorLevel = "2" />

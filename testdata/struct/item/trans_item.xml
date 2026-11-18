@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--´«ËÍÀàµÀ¾ßµÄ»ù´¡ÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--ä¼ é€ç±»é“å…·çš„åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="SceneID" type="int"   public="false" private="false" save="true" desc="¼ÇÂ¼µÄ³¡¾°ID"/>
-		<property name="Locatex" type="float" public="false" private="false" save="true" desc="¼ÇÂ¼µÄX×ø±ê"/>		
-		<property name="Locatey" type="float" public="false" private="false" save="true" desc="¼ÇÂ¼µÄy×ø±ê"/>
-		<property name="Locatez" type="float" public="false" private="false" save="true" desc="¼ÇÂ¼µÄz×ø±ê"/>	
-		<property name="Orient"  type="float" public="false" private="false" save="true" desc="¼ÇÂ¼µÄ·½Ïò"/>	
+		<property name="SceneID" type="int"   public="false" private="false" save="true" desc="è®°å½•çš„åœºæ™¯ID"/>
+		<property name="Locatex" type="float" public="false" private="false" save="true" desc="è®°å½•çš„Xåæ ‡"/>		
+		<property name="Locatey" type="float" public="false" private="false" save="true" desc="è®°å½•çš„yåæ ‡"/>
+		<property name="Locatez" type="float" public="false" private="false" save="true" desc="è®°å½•çš„zåæ ‡"/>	
+		<property name="Orient"  type="float" public="false" private="false" save="true" desc="è®°å½•çš„æ–¹å‘"/>	
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

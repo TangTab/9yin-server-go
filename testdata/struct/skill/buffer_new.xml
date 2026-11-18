@@ -1,101 +1,101 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Ã¿ÏîBufferµÄÊôÐÔÊý¾Ý£¬¸½¼ÓIDMATCH.xml-->
+<!--æ¯é¡¹Bufferçš„å±žæ€§æ•°æ®ï¼Œé™„åŠ IDMATCH.xml-->
 <object>
-  <!-- ÄÚ²¿ÊôÐÔ -->
+  <!-- å†…éƒ¨å±žæ€§ -->
   <internals>
-    <property name="LifeTime" type="int" public="false" private="false" save="true" desc="³ÖÐøÊ±¼ä(ms) Èç¹ûÎª0,Ôò³Ö¾ÃÓÐÐ§"/>
+    <property name="LifeTime" type="int" public="false" private="false" save="true" desc="æŒç»­æ—¶é—´(ms) å¦‚æžœä¸º0,åˆ™æŒä¹…æœ‰æ•ˆ"/>
   </internals>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <!-- BUFFERµÄ¹Ì¶¨ÊôÐÔ -->
-    <property name="ConfigID" type="string" public="false" private="false" save="false" desc="¼¼ÄÜ±àºÅ"/>
-    <property name="UniqueID" type="string" public="false" private="false" save="true" desc="Î¨Ò»±àºÅ"/>
-    <property name="Level" type="int" public="false" private="false" save="false" desc="¼¶±ð"/>
-    <property name="Category" type="int" public="false" private="false" save="false" desc="·ÖÀà±àºÅ"/>
-    <property name="ReplaceLevel" type="int" public="false" private="false" save="false" desc="Ìæ»»¼¶±ð"/>
-    <property name="LuaScript" type="string" public="false" private="false" save="false" desc="½Å±¾ÎÄ¼þÃû" Description="°üº¬buffer_active¡¢buffer_timer¡¢buffer_eventº¯Êý,Èç¹û´Ë²»Îª¿Õ£¬Ôòactive,time,eventµÈÊÂ¼þ·¢ÉúÊ±¾Í»áÖ´ÐÐÕâÐ©½Å±¾£¬È»ºóÖ±½Ó·µ»Ø"/>
-    <property name="StaticData" type="int" public="false" private="false" save="false" desc="BUFF¾²Ì¬Êý¾Ý±àºÅ"/>
-    <property name="MaxOverlayNumber" type="int" public="false" private="false" save="false" desc="BUFFµþ¼Ó´ÎÊý"/>
-    <property name="OverlayType" type="int" public="false" private="false" save="false" desc="BUFFµþ¼ÓÀàÐÍ"/>
-    <property name="RemoveType" type="int" public="false" private="false" save="false" desc="BUFFÒÆ³ýÀàÐÍ"/>
-    <property name="EffectType" type="int" public="false" private="false" save="false" desc="×÷ÓÃÀàÐÍ"/>
-    <property name="LifeTimeType" type="int" public="false" private="false" save="false" desc="¼ÆËãÀàÐÍ"/>
-    <property name="LifeTimeAdd" type="string" public="false" private="false" save="true" desc="(±í´ïÊ½)¶îÍâÔö¼ÓµÄbuff³ÖÐøÊ±¼ä(ms)"/>
-    <property name="Visible" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ¿ÉÊÓ"/>
-    <property name="CanFlowWord" type="int" public="false" private="false" save="false" desc="ÂúÑªºóÊÇ·ñ¿ÉÒÔÆ®×Ö"/>
-    <property name="IsDamage" type="int" public="false" private="true" save="false" desc="¹¥»÷ÐÔÖÊ"/>
-    <property name="CantClear" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ²»ÄÜÇå³ý"/>
-    <property name="OffLineClear" type="int" public="false" private="false" save="false" desc="ÏÂÏßÊÇ·ñÇå³ý"/>
-    <property name="DeadClear" type="int" public="false" private="false" save="false" desc="ËÀÍöÇå³ý"/>
-    <property name="ReplaceCategory" type="int" public="false" private="false" save="false" desc="Ìæ»»·ÖÀàºÅ"/>
-    <property name="ReplaceType" type="int" public="false" private="false" save="false" desc="Ìæ»»·½Ê½"/>
-    <property name="HideFightStats" type="int" public="false" private="false" save="false" desc="Òþ²ØÕ½¶·ÐÅÏ¢"/>
-    <property name="CCHP" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄHP"/>
-    <property name="CCHPValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄHP"/>
-    <property name="CCHPType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄHP·½Ê½"/>
-    <property name="CCMP" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄMP"/>
-    <property name="CCMPValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄMP"/>
-    <property name="CCMPType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄMP·½Ê½"/>
-    <property name="CCRC" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄRC"/>
-    <property name="CCRCValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄRC"/>
-    <property name="CCRCType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄRC·½Ê½"/>
-    <property name="CCAV" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄAV"/>
-    <property name="CCAVValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄAV"/>
-    <property name="CCAVType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄAV·½Ê½"/>
-    <property name="CCEY" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄEY"/>
-    <property name="CCEYValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄEY"/>
-    <property name="CCEYType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄEY·½Ê½"/>
-    <property name="CCFS" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄFSÊý"/>
-    <property name="CCFSValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄFS"/>
-    <property name="CCFSType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄFS·½Ê½"/>
-    <property name="CCDP" type="string" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄDPÊý"/>
-    <property name="CCDPValue" type="float" public="false" private="false" save="true" desc="³ÖÐøÐÞ¸ÄDP"/>
-    <property name="CCDPType" type="int" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄDP·½Ê½"/>
+    <!-- BUFFERçš„å›ºå®šå±žæ€§ -->
+    <property name="ConfigID" type="string" public="false" private="false" save="false" desc="æŠ€èƒ½ç¼–å·"/>
+    <property name="UniqueID" type="string" public="false" private="false" save="true" desc="å”¯ä¸€ç¼–å·"/>
+    <property name="Level" type="int" public="false" private="false" save="false" desc="çº§åˆ«"/>
+    <property name="Category" type="int" public="false" private="false" save="false" desc="åˆ†ç±»ç¼–å·"/>
+    <property name="ReplaceLevel" type="int" public="false" private="false" save="false" desc="æ›¿æ¢çº§åˆ«"/>
+    <property name="LuaScript" type="string" public="false" private="false" save="false" desc="è„šæœ¬æ–‡ä»¶å" Description="åŒ…å«buffer_activeã€buffer_timerã€buffer_eventå‡½æ•°,å¦‚æžœæ­¤ä¸ä¸ºç©ºï¼Œåˆ™active,time,eventç­‰äº‹ä»¶å‘ç”Ÿæ—¶å°±ä¼šæ‰§è¡Œè¿™äº›è„šæœ¬ï¼Œç„¶åŽç›´æŽ¥è¿”å›ž"/>
+    <property name="StaticData" type="int" public="false" private="false" save="false" desc="BUFFé™æ€æ•°æ®ç¼–å·"/>
+    <property name="MaxOverlayNumber" type="int" public="false" private="false" save="false" desc="BUFFå åŠ æ¬¡æ•°"/>
+    <property name="OverlayType" type="int" public="false" private="false" save="false" desc="BUFFå åŠ ç±»åž‹"/>
+    <property name="RemoveType" type="int" public="false" private="false" save="false" desc="BUFFç§»é™¤ç±»åž‹"/>
+    <property name="EffectType" type="int" public="false" private="false" save="false" desc="ä½œç”¨ç±»åž‹"/>
+    <property name="LifeTimeType" type="int" public="false" private="false" save="false" desc="è®¡ç®—ç±»åž‹"/>
+    <property name="LifeTimeAdd" type="string" public="false" private="false" save="true" desc="(è¡¨è¾¾å¼)é¢å¤–å¢žåŠ çš„buffæŒç»­æ—¶é—´(ms)"/>
+    <property name="Visible" type="int" public="false" private="false" save="false" desc="æ˜¯å¦å¯è§†"/>
+    <property name="CanFlowWord" type="int" public="false" private="false" save="false" desc="æ»¡è¡€åŽæ˜¯å¦å¯ä»¥é£˜å­—"/>
+    <property name="IsDamage" type="int" public="false" private="true" save="false" desc="æ”»å‡»æ€§è´¨"/>
+    <property name="CantClear" type="int" public="false" private="false" save="false" desc="æ˜¯å¦ä¸èƒ½æ¸…é™¤"/>
+    <property name="OffLineClear" type="int" public="false" private="false" save="false" desc="ä¸‹çº¿æ˜¯å¦æ¸…é™¤"/>
+    <property name="DeadClear" type="int" public="false" private="false" save="false" desc="æ­»äº¡æ¸…é™¤"/>
+    <property name="ReplaceCategory" type="int" public="false" private="false" save="false" desc="æ›¿æ¢åˆ†ç±»å·"/>
+    <property name="ReplaceType" type="int" public="false" private="false" save="false" desc="æ›¿æ¢æ–¹å¼"/>
+    <property name="HideFightStats" type="int" public="false" private="false" save="false" desc="éšè—æˆ˜æ–—ä¿¡æ¯"/>
+    <property name="CCHP" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹HP"/>
+    <property name="CCHPValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹HP"/>
+    <property name="CCHPType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹HPæ–¹å¼"/>
+    <property name="CCMP" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹MP"/>
+    <property name="CCMPValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹MP"/>
+    <property name="CCMPType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹MPæ–¹å¼"/>
+    <property name="CCRC" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹RC"/>
+    <property name="CCRCValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹RC"/>
+    <property name="CCRCType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹RCæ–¹å¼"/>
+    <property name="CCAV" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹AV"/>
+    <property name="CCAVValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹AV"/>
+    <property name="CCAVType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹AVæ–¹å¼"/>
+    <property name="CCEY" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹EY"/>
+    <property name="CCEYValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹EY"/>
+    <property name="CCEYType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹EYæ–¹å¼"/>
+    <property name="CCFS" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹FSæ•°"/>
+    <property name="CCFSValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹FS"/>
+    <property name="CCFSType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹FSæ–¹å¼"/>
+    <property name="CCDP" type="string" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹DPæ•°"/>
+    <property name="CCDPValue" type="float" public="false" private="false" save="true" desc="æŒç»­ä¿®æ”¹DP"/>
+    <property name="CCDPType" type="int" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹DPæ–¹å¼"/>
 
-    <property name="TargetClassType" type="int" public="false" private="true" save="false" desc="×÷ÓÃ¶ÔÏóÀàÐÍ"/>
-    <property name="TargetRelationType" type="int" public="false" private="true" save="false" desc="×÷ÓÃ¶ÔÏó¹ØÏµÀàÐÍ"/>
-    <property name="BuffClearID" type="string" public="false" private="false" save="false" desc="Çå³ýÀàÐÍ"/>
-    <property name="BuffImmunID" type="string" public="false" private="false" save="false" desc="ÃâÒßÀàÐÍ"/>
-    <!-- BUFFERµÄÊ©¼ÓÀ´Ô´ÊôÐÔ -->
-    <property name="Sender" type="object" public="false" private="false" save="false" desc="BUFFERµÄÊ©¼ÓÕß"/>
-    <property name="SenderType" type="int" public="false" private="false" save="true" desc="BUFFERµÄÊ©¼ÓÕßÃû³Æ£¨Íæ¼ÒÓÐÐ§£©"/>
-    <property name="SenderName" type="widestr" public="false" private="false" save="true" desc="BUFFERµÄÊ©¼ÓÕßÃû³Æ£¨Íæ¼ÒÓÐÐ§£©"/>
-    <property name="OwnerShip" type="int" public="false" private="false" save="false" desc="BUFFERµÄÊ©¼ÓÕßÃû³Æ£¨Íæ¼ÒÓÐÐ§£©"/>
-    <property name="Skill" type="object" public="false" private="false" save="false" desc="²úÉúBUFFERµÄ¼¼ÄÜ"/>
-    <!-- ¹¥»÷Ïà¹Ø(Ö»ÓÐÔÚBUFFERµÄEffectTypeÊôÐÔÎª1»ò2Ê±µÄÃ¿´Î¼¤»îÊ±ÓÐÐ§) -->
-    <property name="DirectAttack" type="int" public="false" private="false" save="false" desc="¼¤»îÊ±ÊÇ·ñÊÇÖ±½Ó¹¥»÷ 0:²»ÊÇ(¸¨Öú¼¼ÄÜ)1:ÊÇ(¸ù¾ÝÕ½¶·¹æÔò¼ÆËã¸ø¶Ô·½µÄÉËº¦)"/>
-    <property name="AttackObjType" type="int" public="false" private="false" save="false" desc="¹¥»÷Ä¿±êÀàÐÍ 0:±»Ê©¼ÓÕß×ÔÉí,1:Ê©¼ÓÕß,2:ÊÂ¼þ¶ÔÏó"/>
+    <property name="TargetClassType" type="int" public="false" private="true" save="false" desc="ä½œç”¨å¯¹è±¡ç±»åž‹"/>
+    <property name="TargetRelationType" type="int" public="false" private="true" save="false" desc="ä½œç”¨å¯¹è±¡å…³ç³»ç±»åž‹"/>
+    <property name="BuffClearID" type="string" public="false" private="false" save="false" desc="æ¸…é™¤ç±»åž‹"/>
+    <property name="BuffImmunID" type="string" public="false" private="false" save="false" desc="å…ç–«ç±»åž‹"/>
+    <!-- BUFFERçš„æ–½åŠ æ¥æºå±žæ€§ -->
+    <property name="Sender" type="object" public="false" private="false" save="false" desc="BUFFERçš„æ–½åŠ è€…"/>
+    <property name="SenderType" type="int" public="false" private="false" save="true" desc="BUFFERçš„æ–½åŠ è€…åç§°ï¼ˆçŽ©å®¶æœ‰æ•ˆï¼‰"/>
+    <property name="SenderName" type="widestr" public="false" private="false" save="true" desc="BUFFERçš„æ–½åŠ è€…åç§°ï¼ˆçŽ©å®¶æœ‰æ•ˆï¼‰"/>
+    <property name="OwnerShip" type="int" public="false" private="false" save="false" desc="BUFFERçš„æ–½åŠ è€…åç§°ï¼ˆçŽ©å®¶æœ‰æ•ˆï¼‰"/>
+    <property name="Skill" type="object" public="false" private="false" save="false" desc="äº§ç”ŸBUFFERçš„æŠ€èƒ½"/>
+    <!-- æ”»å‡»ç›¸å…³(åªæœ‰åœ¨BUFFERçš„EffectTypeå±žæ€§ä¸º1æˆ–2æ—¶çš„æ¯æ¬¡æ¿€æ´»æ—¶æœ‰æ•ˆ) -->
+    <property name="DirectAttack" type="int" public="false" private="false" save="false" desc="æ¿€æ´»æ—¶æ˜¯å¦æ˜¯ç›´æŽ¥æ”»å‡» 0:ä¸æ˜¯(è¾…åŠ©æŠ€èƒ½)1:æ˜¯(æ ¹æ®æˆ˜æ–—è§„åˆ™è®¡ç®—ç»™å¯¹æ–¹çš„ä¼¤å®³)"/>
+    <property name="AttackObjType" type="int" public="false" private="false" save="false" desc="æ”»å‡»ç›®æ ‡ç±»åž‹ 0:è¢«æ–½åŠ è€…è‡ªèº«,1:æ–½åŠ è€…,2:äº‹ä»¶å¯¹è±¡"/>
 
-    <!-- BUFFERµÄ¹ý³Ì¹ÜÀíÊôÐÔ -->
-    <property name="AddTime" type="int64" public="false" private="false" save="true" desc="BUFFERÌí¼ÓµÄÊ±¼ä µ¥Î»s(time_t)"/>
-    <property name="Active" type="int" public="false" private="false" save="true" desc="BUFFERÊÇ·ñÓÐÐ§"/>
-    <property name="Counter" type="int" public="false" private="false" save="true" desc="BUFFERÒÑ¼Æ´ÎµÄ´ÎÊý"/>
-    <property name="Timer" type="int" public="false" private="false" save="true" desc="BUFFERÒÑ´æÔÚµÄÊ±¼ä µ¥Î»ms"/>
-    <!-- ÓÉ¼¼ÄÜÌí¼ÓµÄÊôÐÔ -->
-    <property name="EffectTimer" type="int" public="false" private="false" save="true" desc="¼ÆÊ±»ò¼Æ´Î" Description="ÀàÐÍ1:¼Æ´ÎµÄ´ÎÊý;ÀàÐÍ2:¼ä¸ôµÄÊ±¼ä(ms)"/>
-    <property name="EffectRatio" type="int" public="false" private="false" save="true" desc="×÷ÓÃ³É¹¦ÂÊ" Description="EffectTypeÀàÐÍ1¡¢2:Ã¿´Î´¥·¢Ê±ÊÇ·ñ³É¹¦×÷ÓÃµÄ³É¹¦ÂÊ£¬°Ù·Ö±ÈÊý"/>
-    <property name="BreakRatio" type="int" public="false" private="false" save="true" desc="±»ÊÂ¼þ´ò¶ÏµÄ»úÂÊ °Ù·ÖÊý"/>
-    <property name="VarPropNo" type="int" public="false" private="false" save="true" desc="µ±Ç°¿É±äÊôÐÔ±àºÅ"/>
-    <Property name="MinVarPropNo" type="int" public="false" private="false" save="false" desc="×îÐ¡¿É±äÊôÐÔ±àºÅ"/>
-    <Property name="MaxVarPropNo" type="int" public="false" private="false" save="false" desc="×î´ó¿É±äÊôÐÔ±àºÅ"/>
+    <!-- BUFFERçš„è¿‡ç¨‹ç®¡ç†å±žæ€§ -->
+    <property name="AddTime" type="int64" public="false" private="false" save="true" desc="BUFFERæ·»åŠ çš„æ—¶é—´ å•ä½s(time_t)"/>
+    <property name="Active" type="int" public="false" private="false" save="true" desc="BUFFERæ˜¯å¦æœ‰æ•ˆ"/>
+    <property name="Counter" type="int" public="false" private="false" save="true" desc="BUFFERå·²è®¡æ¬¡çš„æ¬¡æ•°"/>
+    <property name="Timer" type="int" public="false" private="false" save="true" desc="BUFFERå·²å­˜åœ¨çš„æ—¶é—´ å•ä½ms"/>
+    <!-- ç”±æŠ€èƒ½æ·»åŠ çš„å±žæ€§ -->
+    <property name="EffectTimer" type="int" public="false" private="false" save="true" desc="è®¡æ—¶æˆ–è®¡æ¬¡" Description="ç±»åž‹1:è®¡æ¬¡çš„æ¬¡æ•°;ç±»åž‹2:é—´éš”çš„æ—¶é—´(ms)"/>
+    <property name="EffectRatio" type="int" public="false" private="false" save="true" desc="ä½œç”¨æˆåŠŸçŽ‡" Description="EffectTypeç±»åž‹1ã€2:æ¯æ¬¡è§¦å‘æ—¶æ˜¯å¦æˆåŠŸä½œç”¨çš„æˆåŠŸçŽ‡ï¼Œç™¾åˆ†æ¯”æ•°"/>
+    <property name="BreakRatio" type="int" public="false" private="false" save="true" desc="è¢«äº‹ä»¶æ‰“æ–­çš„æœºçŽ‡ ç™¾åˆ†æ•°"/>
+    <property name="VarPropNo" type="int" public="false" private="false" save="true" desc="å½“å‰å¯å˜å±žæ€§ç¼–å·"/>
+    <Property name="MinVarPropNo" type="int" public="false" private="false" save="false" desc="æœ€å°å¯å˜å±žæ€§ç¼–å·"/>
+    <Property name="MaxVarPropNo" type="int" public="false" private="false" save="false" desc="æœ€å¤§å¯å˜å±žæ€§ç¼–å·"/>
 
-    <property name="EffectRange" type="float" public="false" private="true" save="true" desc="Ó°Ïì·¶Î§"/>
-    <property name="HitCount" type="int" public="false" private="false" save="false" desc="Éæ¼°ÈËÊý"/>
-    <property name="HaloShapeType" type="int" public="false" private="false" save="true" desc="¹â»·Ó°Ïì·¶Î§ÀàÐÍ"/>
-    <property name="TargetShapePara1" type="float" public="false" private="false" save="true" desc="¹â»·¿í¶È»òÕß°ë¾¶"/>
-    <property name="TargetShapePara2" type="float" public="false" private="false" save="true" desc="¹â»·³¤¶È"/>
+    <property name="EffectRange" type="float" public="false" private="true" save="true" desc="å½±å“èŒƒå›´"/>
+    <property name="HitCount" type="int" public="false" private="false" save="false" desc="æ¶‰åŠäººæ•°"/>
+    <property name="HaloShapeType" type="int" public="false" private="false" save="true" desc="å…‰çŽ¯å½±å“èŒƒå›´ç±»åž‹"/>
+    <property name="TargetShapePara1" type="float" public="false" private="false" save="true" desc="å…‰çŽ¯å®½åº¦æˆ–è€…åŠå¾„"/>
+    <property name="TargetShapePara2" type="float" public="false" private="false" save="true" desc="å…‰çŽ¯é•¿åº¦"/>
 
-    <property name="CCQGP" type="float" public="false" private="false" save="false" desc="³ÖÐøÐÞ¸ÄÇá¹¦µã"/>
+    <property name="CCQGP" type="float" public="false" private="false" save="false" desc="æŒç»­ä¿®æ”¹è½»åŠŸç‚¹"/>
 
-    <property name="EventProcess" type="int" public="false" private="true" save="true" desc="»Øµ÷ÊÂ¼þ´¦Àí°ü"/>
-    <property name="Immunity" type="int" public="false" private="false" save="true" desc="ÃâÒß±í"/>
-    <property name="ClearRec" type="int" public="false" private="false" save="true" desc="Çå³ý±í"/>
-    <property name="Buff_Display" type="string" public="false" private="true" save="true" desc="±íÏÖ°ü"/>
-    <property name="Buff_Effect" type="string" public="false" private="false" save="true" desc="Ð§¹û°ü"/>
-    <property name="Buff_Modify" type="string" public="false" private="false" save="true" desc="ÐÞÕý°ü"/>
+    <property name="EventProcess" type="int" public="false" private="true" save="true" desc="å›žè°ƒäº‹ä»¶å¤„ç†åŒ…"/>
+    <property name="Immunity" type="int" public="false" private="false" save="true" desc="å…ç–«è¡¨"/>
+    <property name="ClearRec" type="int" public="false" private="false" save="true" desc="æ¸…é™¤è¡¨"/>
+    <property name="Buff_Display" type="string" public="false" private="true" save="true" desc="è¡¨çŽ°åŒ…"/>
+    <property name="Buff_Effect" type="string" public="false" private="false" save="true" desc="æ•ˆæžœåŒ…"/>
+    <property name="Buff_Modify" type="string" public="false" private="false" save="true" desc="ä¿®æ­£åŒ…"/>
 
-    <property name="HaloBuffer" type="string" public="false" private="false" save="true" desc="¹â»·buffer·ÖbufferµÄid"/>
+    <property name="HaloBuffer" type="string" public="false" private="false" save="true" desc="å…‰çŽ¯bufferåˆ†bufferçš„id"/>
 
     <property name="PropPropName1" type="string" public="false" private="false" save="false" desc="PropPropName1"/>
     <property name="PropPropValue1" type="string" public="false" private="false" save="false" desc="PropPropValue1"/>
@@ -106,28 +106,28 @@
     <property name="PropPropName3" type="string" public="false" private="false" save="false" desc="PropPropName3"/>
     <property name="PropPropValue3" type="string" public="false" private="false" save="false" desc="PropPropValue3"/>
     <property name="PropCalType3" type="int" public="false" private="false" save="false" desc="PropCalType3"/>
-    <property name="BaseHatred" type="int" public="false" private="false" save="false" desc="»ù´¡³ðºÞÖµ"/>
-    <property name="HatredMultiplier" type="float" public="false" private="false" save="false" desc="³ðºÞ±¶ÂÊ"/>
-    <property name="AntiType" type="int" public="false" private="false" save="false" desc="Ë¥¼õÀàÐÍ"/>
-    <property name="BufferAddRate" type="float" public="false" private="false" save="false" desc="BUFFÆ«Ïò¼Ó³É"/>
-	<property name="CantCustomRemove" type="int" public="false" private="false" save="false" desc="Ë¥¼õÀàÐÍ"/>
-    <property name="Description" type="string" public="false" private="true" save="false" desc="BUFFÃèÊö"/>
-    <property name="IsShow" type="byte" public="false" private="false" save="false" desc="buffÑ£ÔÎÊÇ·ñÏÔÊ¾Ö÷½çÃæ"/>
-    <property name="FightAlarm" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÔÚÕ½¶·ÐÅÏ¢"/>
+    <property name="BaseHatred" type="int" public="false" private="false" save="false" desc="åŸºç¡€ä»‡æ¨å€¼"/>
+    <property name="HatredMultiplier" type="float" public="false" private="false" save="false" desc="ä»‡æ¨å€çŽ‡"/>
+    <property name="AntiType" type="int" public="false" private="false" save="false" desc="è¡°å‡ç±»åž‹"/>
+    <property name="BufferAddRate" type="float" public="false" private="false" save="false" desc="BUFFåå‘åŠ æˆ"/>
+	<property name="CantCustomRemove" type="int" public="false" private="false" save="false" desc="è¡°å‡ç±»åž‹"/>
+    <property name="Description" type="string" public="false" private="true" save="false" desc="BUFFæè¿°"/>
+    <property name="IsShow" type="byte" public="false" private="false" save="false" desc="buffçœ©æ™•æ˜¯å¦æ˜¾ç¤ºä¸»ç•Œé¢"/>
+    <property name="FightAlarm" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦åœ¨æˆ˜æ–—ä¿¡æ¯"/>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <!-- ÓÉ¼¼ÄÜÌí¼ÓµÄ±í¸ñ -->
+    <!-- ç”±æŠ€èƒ½æ·»åŠ çš„è¡¨æ ¼ -->
 
-    <record name="overlay_buff_time_rec" cols="2" maxrows="512" save="true" public="false" private="false" desc="µþ¼ÓbufferÊ±¼äÁÐ±í£¬ÓÐÐèÇóÒª±£´æÕâ¸ö±í">
-      <column type="int" desc="bufferÒÑ¾­¹ýÈ¥µÄÊ±¼ä"/>
-      <column type="int64" desc="bufferÌí¼ÓµÄÊÂ¼þµÄÊ±¼ä(·þÎñÆ÷Ê±¼ä ms)"/>
+    <record name="overlay_buff_time_rec" cols="2" maxrows="512" save="true" public="false" private="false" desc="å åŠ bufferæ—¶é—´åˆ—è¡¨ï¼Œæœ‰éœ€æ±‚è¦ä¿å­˜è¿™ä¸ªè¡¨">
+      <column type="int" desc="bufferå·²ç»è¿‡åŽ»çš„æ—¶é—´"/>
+      <column type="int64" desc="bufferæ·»åŠ çš„äº‹ä»¶çš„æ—¶é—´(æœåŠ¡å™¨æ—¶é—´ ms)"/>
     </record>
   </records>
   <includes>
     <!-- <path name="struct\rule\fight\ignoreresist.xml" desc=""/> -->
-    <path name="struct\rule\ModifyPack.xml" desc="ÓÃÓÚÐÞÕýÆäËü"/>
-    <path name="struct\common\trigger.xml" desc="´¥·¢Æ÷"/>
-    <!--<path name="struct\rule\fight\modifyhurt.xml" desc="ÓÃÓÚ±»ÐÞÕý"/>-->
+    <path name="struct\rule\ModifyPack.xml" desc="ç”¨äºŽä¿®æ­£å…¶å®ƒ"/>
+    <path name="struct\common\trigger.xml" desc="è§¦å‘å™¨"/>
+    <!--<path name="struct\rule\fight\modifyhurt.xml" desc="ç”¨äºŽè¢«ä¿®æ­£"/>-->
   </includes>
 </object>

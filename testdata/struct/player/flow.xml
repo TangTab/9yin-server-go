@@ -1,35 +1,35 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--Á÷³ÌÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æµç¨‹ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 		<property name="FlowPrepareTime" type="int" public="false" private="false" save="false" desc=""/>
 		<property name="FlowHitTimes" type="int" public="false" private="false" save="false" desc=""/>
 		<property name="FlowLeadTime" type="int" public="false" private="false" save="false" desc=""/>
 		<property name="FlowLeadSepTime" type="int" public="false" private="false" save="false" desc=""/>
 		<property name="FlowHits" type="int" public="false" private="false" save="false" desc=""/>
-		<property name="FlowCategory" type="string" public="false" private="false" save="false" desc="µ±Ç°Ê¹ÓÃµÄÁ÷³ÌµÄ·ÖÀàÃû³Æ"/>
-		<property name="FlowType" type="int" public="false" private="false" save="false" desc="Á÷³ÌÀàÐÍ£º0£ºÆÕÍ¨¼¼ÄÜÁ÷³Ì£¬1£ºÒýµ¼¼¼ÄÜÁ÷³Ì"/>
+		<property name="FlowCategory" type="string" public="false" private="false" save="false" desc="å½“å‰ä½¿ç”¨çš„æµç¨‹çš„åˆ†ç±»åç§°"/>
+		<property name="FlowType" type="int" public="false" private="false" save="false" desc="æµç¨‹ç±»åž‹ï¼š0ï¼šæ™®é€šæŠ€èƒ½æµç¨‹ï¼Œ1ï¼šå¼•å¯¼æŠ€èƒ½æµç¨‹"/>
 		
-		<property name="FlowBeginTime" type="int" public="false" private="false" save="false" desc="Á÷³Ì¿ªÊ¼µÄÊ±¼ä"/>
-		<property name="FlowPauseTime" type="int" public="false" private="false" save="false" desc="Á÷³Ì¿ªÊ¼ÔÝÍ£µÄÊ±¼ä"/>
-		<property name="FlowResumeRestore" type="int" public="false" private="false" save="false" desc="Á÷³ÌÔÝÍ£ºó»Ö¸´Ê±ÊÇ·ñÖØ½¨×¼±¸ÐÄÌø"/>
-		<property name="FlowPauseBreak" type="int" public="false" private="false" save="false" desc="Á÷³ÌÔÝÍ£ºóµ½ÆÚºóÊÇ·ñÖÕÖ¹Á÷³Ì"/>
+		<property name="FlowBeginTime" type="int" public="false" private="false" save="false" desc="æµç¨‹å¼€å§‹çš„æ—¶é—´"/>
+		<property name="FlowPauseTime" type="int" public="false" private="false" save="false" desc="æµç¨‹å¼€å§‹æš‚åœçš„æ—¶é—´"/>
+		<property name="FlowResumeRestore" type="int" public="false" private="false" save="false" desc="æµç¨‹æš‚åœåŽæ¢å¤æ—¶æ˜¯å¦é‡å»ºå‡†å¤‡å¿ƒè·³"/>
+		<property name="FlowPauseBreak" type="int" public="false" private="false" save="false" desc="æµç¨‹æš‚åœåŽåˆ°æœŸåŽæ˜¯å¦ç»ˆæ­¢æµç¨‹"/>
 		
-		<property name="Flowing" type="int" public="false" private="false" 	save="false" desc="ÊÇ·ñÔÚÁ÷³ÌÖÐ"/>
-		<property name="FlowPausing" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÔÚÔÝÍ£ÖÐ"/>
+		<property name="Flowing" type="int" public="false" private="false" 	save="false" desc="æ˜¯å¦åœ¨æµç¨‹ä¸­"/>
+		<property name="FlowPausing" type="int" public="false" private="false" save="false" desc="æ˜¯å¦åœ¨æš‚åœä¸­"/>
 	</properties>
 	<records>
-		<!--ÃüÖÐÊ±¼äÁÐ±í£¨¿ÉÒÔÓÐ¶à¸öÃüÖÐ£¬Ã¿´ÎÃüÖÐÊ±¼ä²»µÈ£©-->
+		<!--å‘½ä¸­æ—¶é—´åˆ—è¡¨ï¼ˆå¯ä»¥æœ‰å¤šä¸ªå‘½ä¸­ï¼Œæ¯æ¬¡å‘½ä¸­æ—¶é—´ä¸ç­‰ï¼‰-->
 		<record name="flow_hittime_rec" cols="2" maxrows="64" save="false" public="false" private="false" desc="">
 			<column type="word" desc=""/>
 			<column type="word" desc=""/>
 		</record>
 
-    <!--Òýµ¼¶¨Ê±ÁÐ±í£¨ÎªÁË±ÜÃâÒýÇæµÄÊ±¼äÎó²îÀÛ¼Ó£¬Ìá¸ß¾«¶È£¬ÓÃ´Ë·½Ê½£©-->
+    <!--å¼•å¯¼å®šæ—¶åˆ—è¡¨ï¼ˆä¸ºäº†é¿å…å¼•æ“Žçš„æ—¶é—´è¯¯å·®ç´¯åŠ ï¼Œæé«˜ç²¾åº¦ï¼Œç”¨æ­¤æ–¹å¼ï¼‰-->
     <record name="flow_lead_timer_rec" cols="2" maxrows="64" save="false" public="false" private="false" desc="">
-      <column type="int64" desc="¿ªÊ¼Ê±¼ä"/>
-      <column type="int64" desc="¶¨Ê±Ê±¼ä"/>
+      <column type="int64" desc="å¼€å§‹æ—¶é—´"/>
+      <column type="int64" desc="å®šæ—¶æ—¶é—´"/>
     </record>
 	</records>
 </object>

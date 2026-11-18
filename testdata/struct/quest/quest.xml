@@ -1,96 +1,96 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÓÎÏ·¶ÔÏóÊôÐÔ¶¨ÒåÄ£°æÎÄ¼þ-->
+<!--æ¸¸æˆå¯¹è±¡å±žæ€§å®šä¹‰æ¨¡ç‰ˆæ–‡ä»¶-->
 <object>
 	<properties>
-		<property name="QuestOnShare" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÊÇÕýÔÚ¹²ÏíµÄÈÎÎñ"/>
-		<property name="AutoQuestFlag" type="int" public="false" private="true" save="true" desc="ÊÇ·ñÊÇ×Ô¶¯½»½ÓÈÎÎñ¹¦ÄÜ±êÊ¶ 0²»×Ô¶¯ 1×Ô¶¯"/>
-		<property name="ConvoyEndTime" type="int64" public="false" private="false" save="false" desc="»¤ËÍ½áÊøÊ±¼ä"/>
-		<property name="ConvoyCriteriaID" type="word" public="false" private="false" save="false" desc="»¤ËÍ×ÓÄ£°å±àºÅ"/>
+		<property name="QuestOnShare" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ˜¯æ­£åœ¨å…±äº«çš„ä»»åŠ¡"/>
+		<property name="AutoQuestFlag" type="int" public="false" private="true" save="true" desc="æ˜¯å¦æ˜¯è‡ªåŠ¨äº¤æŽ¥ä»»åŠ¡åŠŸèƒ½æ ‡è¯† 0ä¸è‡ªåŠ¨ 1è‡ªåŠ¨"/>
+		<property name="ConvoyEndTime" type="int64" public="false" private="false" save="false" desc="æŠ¤é€ç»“æŸæ—¶é—´"/>
+		<property name="ConvoyCriteriaID" type="word" public="false" private="false" save="false" desc="æŠ¤é€å­æ¨¡æ¿ç¼–å·"/>
 	</properties>
 	<records>
-		<!-- ÈÎÎñ³Ð½Ó±í£¬·²ÊÇ½Óµ½µÄÈÎÎñ¾ùÔÚ´Ë×¢²á -->
-		<record name="QuestRecord" cols="4" maxrows="25" save="true" public="false" private="true" desc="ÈÎÎñ³Ð½Ó±í">
-			<column type="word" desc="ÈÎÎñ±àºÅ"/>
-			<column type="byte" desc="ÈÎÎñ×´Ì¬"/>
-			<column type="byte" desc="×·×Ù±êÖ¾"/>
-			<column type="word" desc="ÈÎÎñµ±Ç°²½ÖèµÄ×ÓÄ£°å"/>
+		<!-- ä»»åŠ¡æ‰¿æŽ¥è¡¨ï¼Œå‡¡æ˜¯æŽ¥åˆ°çš„ä»»åŠ¡å‡åœ¨æ­¤æ³¨å†Œ -->
+		<record name="QuestRecord" cols="4" maxrows="25" save="true" public="false" private="true" desc="ä»»åŠ¡æ‰¿æŽ¥è¡¨">
+			<column type="word" desc="ä»»åŠ¡ç¼–å·"/>
+			<column type="byte" desc="ä»»åŠ¡çŠ¶æ€"/>
+			<column type="byte" desc="è¿½è¸ªæ ‡å¿—"/>
+			<column type="word" desc="ä»»åŠ¡å½“å‰æ­¥éª¤çš„å­æ¨¡æ¿"/>
 		</record>
-		<!-- ÈÎÎñ½ø¶È±í£¬¼ÇÂ¼ÈÎÎñµ±Ç°½ø¶È -->
-		<record name="QuestCriteriaRecord" cols="6" maxrows="256" save="true" public="false" private="true" desc="ÈÎÎñ½ø¶È±í">
-			<column type="word" desc="ÈÎÎñ×ÓÄ£°å±àºÅ"/>
-			<column type="byte" desc="ÈÎÎñ×ÓÄ£°å×´Ì¬"/>
-			<column type="word" desc="µ±Ç°½ø¶È"/>
-			<column type="word" desc="×Ü½ø¶È"/>
-			<column type="word" desc="×ÓÄ£°åµÄ¸¸¹¦ÄÜ±àºÅ"/>
-			<column type="byte" desc="×ÓÄ£°åµÄ¸¸¹¦ÄÜÀàÐÍ"/>
+		<!-- ä»»åŠ¡è¿›åº¦è¡¨ï¼Œè®°å½•ä»»åŠ¡å½“å‰è¿›åº¦ -->
+		<record name="QuestCriteriaRecord" cols="6" maxrows="256" save="true" public="false" private="true" desc="ä»»åŠ¡è¿›åº¦è¡¨">
+			<column type="word" desc="ä»»åŠ¡å­æ¨¡æ¿ç¼–å·"/>
+			<column type="byte" desc="ä»»åŠ¡å­æ¨¡æ¿çŠ¶æ€"/>
+			<column type="word" desc="å½“å‰è¿›åº¦"/>
+			<column type="word" desc="æ€»è¿›åº¦"/>
+			<column type="word" desc="å­æ¨¡æ¿çš„çˆ¶åŠŸèƒ½ç¼–å·"/>
+			<column type="byte" desc="å­æ¨¡æ¿çš„çˆ¶åŠŸèƒ½ç±»åž‹"/>
 		</record>
-		<!-- ÈÎÎñÍê³É¼ÇÂ¼±í£¬°´Î»²Ù×÷ -->
-		<record name="QuestRewarded" cols="1" maxrows="2048" save="true" public="false" private="true" desc="ÈÎÎñÍê³É">
-			<column type="dword" desc="ÈÎÎñ±àºÅÎ»¼¯"/>
+		<!-- ä»»åŠ¡å®Œæˆè®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="QuestRewarded" cols="1" maxrows="2048" save="true" public="false" private="true" desc="ä»»åŠ¡å®Œæˆ">
+			<column type="dword" desc="ä»»åŠ¡ç¼–å·ä½é›†"/>
 		</record>
-		<record name="QuestRepeatRecord" cols="4" maxrows="32" save="true" public="false" private="true" desc="¿ÉÖØ¸´ÈÎÎñ±í">
-			<column type="word" desc="ÈÎÎñ±àºÅ"/>
-			<column type="word" desc="³Ð½Ó´ÎÊý"/>
-			<column type="word" desc="ÉÏÏÞ´ÎÊý"/>
-			<column type="int64" desc="ÈÎÎñË¢ÐÂÊ±¼ä"/>
+		<record name="QuestRepeatRecord" cols="4" maxrows="32" save="true" public="false" private="true" desc="å¯é‡å¤ä»»åŠ¡è¡¨">
+			<column type="word" desc="ä»»åŠ¡ç¼–å·"/>
+			<column type="word" desc="æ‰¿æŽ¥æ¬¡æ•°"/>
+			<column type="word" desc="ä¸Šé™æ¬¡æ•°"/>
+			<column type="int64" desc="ä»»åŠ¡åˆ·æ–°æ—¶é—´"/>
 		</record>
-		<!-- ÈÎÎñÊ±¼äÏÞÖÆ±í -->
-		<record name="QuestTimeLimitRecord" cols="3" maxrows="32" save="true" public="false" private="true" desc="ÈÎÎñÊ±¼äÏÞÖÆ±í">
-			<column type="word" desc="ÈÎÎñ±àºÅ"/>
-			<column type="int64" desc="½ÓÈÎÎñÊ±¼ä"/>
-			<column type="int64" desc="ÈÎÎñµ½ÆÚÊ±¼ä"/>
+		<!-- ä»»åŠ¡æ—¶é—´é™åˆ¶è¡¨ -->
+		<record name="QuestTimeLimitRecord" cols="3" maxrows="32" save="true" public="false" private="true" desc="ä»»åŠ¡æ—¶é—´é™åˆ¶è¡¨">
+			<column type="word" desc="ä»»åŠ¡ç¼–å·"/>
+			<column type="int64" desc="æŽ¥ä»»åŠ¡æ—¶é—´"/>
+			<column type="int64" desc="ä»»åŠ¡åˆ°æœŸæ—¶é—´"/>
 		</record>
-		<!-- ¶Ô¸ÃÍæ¼ÒÒþÉíµÄnpc±í -->
-		<record name="QuestHideRecord" cols="3" maxrows="128" save="true" public="false" private="false" desc="ÈÎÎñÒþ²Ønpc±í">
-			<column type="word" desc="×Ó¹¦ÄÜid"/>
+		<!-- å¯¹è¯¥çŽ©å®¶éšèº«çš„npcè¡¨ -->
+		<record name="QuestHideRecord" cols="3" maxrows="128" save="true" public="false" private="false" desc="ä»»åŠ¡éšè—npcè¡¨">
+			<column type="word" desc="å­åŠŸèƒ½id"/>
 			<column type="string" desc="npcId"/>
-			<column type="string" desc="²éÑ¯¹Ø¼ü×Ö"/>
+			<column type="string" desc="æŸ¥è¯¢å…³é”®å­—"/>
 		</record>
-				<!-- ¼ÇÂ¼Íæ¼ÒÏÂÏßºó¿Ï¶¨»áÊ§°ÜµÄÈÎÎñ -->
-		<record name="Quest_Fail_OnLoad_Rec" cols="1" maxrows="25" save="true" public="false" private="false" desc="ÏÂÏßÈÎÎñ×¢²áÊ§°Ü±í">
-			<column type="word" desc="ÈÎÎñid"/>
-		</record>
-		
-		<record name="QuestSeriesRecord" cols="3" maxrows="128" save="true" public="false" private="true" desc="ÈÎÎñÏµÁÐ½ø¶È±í">
-			<column type="string" desc="ÏµÁÐ±àºÅ"/>
-			<column type="byte" desc="ÏµÁÐÍê³É×´Ì¬"/>
-			<column type="word" desc="µ±Ç°½øÐÐµÄÈÎÎñ±àºÅ"/>
+				<!-- è®°å½•çŽ©å®¶ä¸‹çº¿åŽè‚¯å®šä¼šå¤±è´¥çš„ä»»åŠ¡ -->
+		<record name="Quest_Fail_OnLoad_Rec" cols="1" maxrows="25" save="true" public="false" private="false" desc="ä¸‹çº¿ä»»åŠ¡æ³¨å†Œå¤±è´¥è¡¨">
+			<column type="word" desc="ä»»åŠ¡id"/>
 		</record>
 		
-		<!--±£»¤¶ÔÏó±í-->
-		<record name="Convoy_ProtectObj_Rec" cols="5" maxrows="32" save="false" public="false" private="false" desc="±£»¤¶ÔÏó±í">
-			<column type="string" desc="¶ÔÏóÃû³Æ"/>
-			<column type="word" desc="¶ÔÏóµ±Ç°×´Ì¬"/>
-			<column type="word" desc="¶ÔÏóÀàÐÍ"/>
-			<column type="word" desc="ÊÇ·ñµ½´ï×ø±ê×´Ì¬"/>
-			<column type="object" desc="¶ÔÏó"/>
-		</record>
-		<!--±£»¤¶ÔÏó¹ý³ÌÖÐÁÔÉ±¹ÖÎï±í-->
-		<record name="Convoy_KillMonster_Rec" cols="2" maxrows="128" save="false" public="false" private="false" desc="±£»¤¶ÔÏó¹ý³ÌÖÐÁÔÉ±¹ÖÎï±í">
-			<column type="object" desc="¶ÔÏó"/>
-			<column type="word" desc="¶ÔÏóµ±Ç°×´Ì¬"/>
+		<record name="QuestSeriesRecord" cols="3" maxrows="128" save="true" public="false" private="true" desc="ä»»åŠ¡ç³»åˆ—è¿›åº¦è¡¨">
+			<column type="string" desc="ç³»åˆ—ç¼–å·"/>
+			<column type="byte" desc="ç³»åˆ—å®ŒæˆçŠ¶æ€"/>
+			<column type="word" desc="å½“å‰è¿›è¡Œçš„ä»»åŠ¡ç¼–å·"/>
 		</record>
 		
-		<!-- ²Ëµ¥×¢²á±í -->
-		<record name="Menu_Verify_Rec" cols="3" maxrows="128" save="false" public="false" private="true" desc="²Ëµ¥×¢²á±í">
-			<column type="word" desc="²Ëµ¥ÀàÐÍ"/>
-			<column type="string" desc="²Ëµ¥±êÌâÎÄ±¾"/>
-			<column type="word" desc="²Ëµ¥¸½¼ÓÐÅÏ¢"/>
+		<!--ä¿æŠ¤å¯¹è±¡è¡¨-->
+		<record name="Convoy_ProtectObj_Rec" cols="5" maxrows="32" save="false" public="false" private="false" desc="ä¿æŠ¤å¯¹è±¡è¡¨">
+			<column type="string" desc="å¯¹è±¡åç§°"/>
+			<column type="word" desc="å¯¹è±¡å½“å‰çŠ¶æ€"/>
+			<column type="word" desc="å¯¹è±¡ç±»åž‹"/>
+			<column type="word" desc="æ˜¯å¦åˆ°è¾¾åæ ‡çŠ¶æ€"/>
+			<column type="object" desc="å¯¹è±¡"/>
+		</record>
+		<!--ä¿æŠ¤å¯¹è±¡è¿‡ç¨‹ä¸­çŒŽæ€æ€ªç‰©è¡¨-->
+		<record name="Convoy_KillMonster_Rec" cols="2" maxrows="128" save="false" public="false" private="false" desc="ä¿æŠ¤å¯¹è±¡è¿‡ç¨‹ä¸­çŒŽæ€æ€ªç‰©è¡¨">
+			<column type="object" desc="å¯¹è±¡"/>
+			<column type="word" desc="å¯¹è±¡å½“å‰çŠ¶æ€"/>
+		</record>
+		
+		<!-- èœå•æ³¨å†Œè¡¨ -->
+		<record name="Menu_Verify_Rec" cols="3" maxrows="128" save="false" public="false" private="true" desc="èœå•æ³¨å†Œè¡¨">
+			<column type="word" desc="èœå•ç±»åž‹"/>
+			<column type="string" desc="èœå•æ ‡é¢˜æ–‡æœ¬"/>
+			<column type="word" desc="èœå•é™„åŠ ä¿¡æ¯"/>
 		</record>
 
-		<record name="CriteriaChangeRec" cols="4" maxrows="128" save="false" public="false" private="false" desc="×ÓÄ£°å½ø¶È¸Ä±ä±í">
-			<column type="word" desc="×ÓÄ£°å±àºÅ"/>
-			<column type="word" desc="×ÓÄ£°å¹éÊôÖ÷ÈÎÎñ(ÊÂ¼þ)±àºÅ"/>
-			<column type="word"	desc="µ±Ç°×ÓÄ£°å½ø¶È"/>
-			<column type="word" desc="×ÓÄ£°å½ø¶È±ä»¯Á¿"/>
+		<record name="CriteriaChangeRec" cols="4" maxrows="128" save="false" public="false" private="false" desc="å­æ¨¡æ¿è¿›åº¦æ”¹å˜è¡¨">
+			<column type="word" desc="å­æ¨¡æ¿ç¼–å·"/>
+			<column type="word" desc="å­æ¨¡æ¿å½’å±žä¸»ä»»åŠ¡(äº‹ä»¶)ç¼–å·"/>
+			<column type="word"	desc="å½“å‰å­æ¨¡æ¿è¿›åº¦"/>
+			<column type="word" desc="å­æ¨¡æ¿è¿›åº¦å˜åŒ–é‡"/>
 		</record>
 		
-		<record name="CloneRepeatQuestRec" cols="4" maxrows="32" save="true" public="false" private="true" desc="¸±±¾ÄÚÖØÖÃÈÎÎñ±í">
-			<column type="word" desc="ÈÎÎñ±àºÅ"/>
-			<column type="word" desc="µ±Ç°Íê³É´ÎÊý"/>
-			<column type="word" desc="¿ÉÖØ¸´´ÎÊý"/>
-			<column type="word" desc="´¥·¢ÖØÖÃµÄ¸±±¾±àºÅ"/>
+		<record name="CloneRepeatQuestRec" cols="4" maxrows="32" save="true" public="false" private="true" desc="å‰¯æœ¬å†…é‡ç½®ä»»åŠ¡è¡¨">
+			<column type="word" desc="ä»»åŠ¡ç¼–å·"/>
+			<column type="word" desc="å½“å‰å®Œæˆæ¬¡æ•°"/>
+			<column type="word" desc="å¯é‡å¤æ¬¡æ•°"/>
+			<column type="word" desc="è§¦å‘é‡ç½®çš„å‰¯æœ¬ç¼–å·"/>
 		</record>
 	</records>
 </object>

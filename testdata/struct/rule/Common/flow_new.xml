@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Õ½¶·Á÷³ÌÏà¹ØÊôÐÔ-->
+<!--æˆ˜æ–—æµç¨‹ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!-- ¶¯×÷ -->
-		<!--<property name="PrepareAction" type="string" public="false" private="true" save="false" desc="×¼±¸¶¯×÷"/>-->
-		<!--<property name="PrepareState" type="string" public="false" private="true" save="false" desc="×¼±¸×´Ì¬"/>-->
-		<!--<property name="HitAction" type="string" public="false" private="true" save="false" desc="ÃüÖÐ¶¯×÷"/>-->
-		<!--<property name="LeadAction" type="string" public="false" private="true" save="false" desc="Òýµ¼¶¯×÷"/>-->
-		<!--<property name="FinishAction" type="string" public="false" private="true" save="false" desc="Òýµ¼¶¯×÷"/>-->
+		<!-- åŠ¨ä½œ -->
+		<!--<property name="PrepareAction" type="string" public="false" private="true" save="false" desc="å‡†å¤‡åŠ¨ä½œ"/>-->
+		<!--<property name="PrepareState" type="string" public="false" private="true" save="false" desc="å‡†å¤‡çŠ¶æ€"/>-->
+		<!--<property name="HitAction" type="string" public="false" private="true" save="false" desc="å‘½ä¸­åŠ¨ä½œ"/>-->
+		<!--<property name="LeadAction" type="string" public="false" private="true" save="false" desc="å¼•å¯¼åŠ¨ä½œ"/>-->
+		<!--<property name="FinishAction" type="string" public="false" private="true" save="false" desc="å¼•å¯¼åŠ¨ä½œ"/>-->
 
-		<!-- Ê±¼ä -->
-		<property name="PrepareTime" type="int" public="false" private="true" save="false" desc="×¼±¸Ê±¼ä µ¥Î»ms"/>
-		<property name="HitTime" type="int" public="false" private="false" save="false" desc="ÃüÖÐÊ±¼ä µ¥Î»ms"/>
-		<property name="LeadTime" type="int" public="false" private="true" save="false" desc="Òýµ¼³ÖÐøÊ±¼ä µ¥Î»ms"/>
-		<property name="LeadSepTime" type="int" public="false" private="false" save="false" desc="Òýµ¼¼ä¸ôÊ±¼ä µ¥Î»ms"/>
+		<!-- æ—¶é—´ -->
+		<property name="PrepareTime" type="int" public="false" private="true" save="false" desc="å‡†å¤‡æ—¶é—´ å•ä½ms"/>
+		<property name="HitTime" type="int" public="false" private="false" save="false" desc="å‘½ä¸­æ—¶é—´ å•ä½ms"/>
+		<property name="LeadTime" type="int" public="false" private="true" save="false" desc="å¼•å¯¼æŒç»­æ—¶é—´ å•ä½ms"/>
+		<property name="LeadSepTime" type="int" public="false" private="false" save="false" desc="å¼•å¯¼é—´éš”æ—¶é—´ å•ä½ms"/>
 
-		<!-- »úÂÊ -->
-		<property name="BreakRatio" type="int" public="false" private="false" save="false" desc="×¼±¸Ê±±»´ò¶ÏµÄ¸ÅÂÊ °Ù·ÖÊý"/>
-		<!--<property name="BreakTime" type="int" public="false" private="false" save="false" desc="Î´±»´ò¶ÏÑÓ³¤µÄ×¼±¸Ê±¼ä µ¥Î»ms"/>-->
+		<!-- æœºçŽ‡ -->
+		<property name="BreakRatio" type="int" public="false" private="false" save="false" desc="å‡†å¤‡æ—¶è¢«æ‰“æ–­çš„æ¦‚çŽ‡ ç™¾åˆ†æ•°"/>
+		<!--<property name="BreakTime" type="int" public="false" private="false" save="false" desc="æœªè¢«æ‰“æ–­å»¶é•¿çš„å‡†å¤‡æ—¶é—´ å•ä½ms"/>-->
 	</properties>
 </object>

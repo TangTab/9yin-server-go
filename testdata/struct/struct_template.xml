@@ -1,52 +1,52 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÓÎÏ·¶ÔÏóÊôÐÔ¶¨ÒåÄ£°æÎÄ¼þ-->
+<!--æ¸¸æˆå¯¹è±¡å±žæ€§å®šä¹‰æ¨¡ç‰ˆæ–‡ä»¶-->
 <object>
-	<!-- ÄÚ²¿ÊôÐÔ¶¨Òå
-		 ÄÚ²¿ÊôÐÔÊÇ·þÎñÆ÷ÒýÇæÎªÓÎÏ·¶ÔÏó¶¨ÒåµÄÊôÐÔ, ³õÊ¼¾ùÊÇ²»¿ÉÊÓ,²»¿É±£´æµÄ
-		 ÔÚÕâÀï, ¿ÉÒÔÐÞ¸ÄÕâÐ©ÄÚ²¿ÊôÐÔµÄ¿ÉÊÓÓë±£´æµÄ·½Ê½
+	<!-- å†…éƒ¨å±žæ€§å®šä¹‰
+		 å†…éƒ¨å±žæ€§æ˜¯æœåŠ¡å™¨å¼•æ“Žä¸ºæ¸¸æˆå¯¹è±¡å®šä¹‰çš„å±žæ€§, åˆå§‹å‡æ˜¯ä¸å¯è§†,ä¸å¯ä¿å­˜çš„
+		 åœ¨è¿™é‡Œ, å¯ä»¥ä¿®æ”¹è¿™äº›å†…éƒ¨å±žæ€§çš„å¯è§†ä¸Žä¿å­˜çš„æ–¹å¼
 	 -->
 	<internals>
-		<property name="name" type="widestr" public="true" private="true" save="true" desc="Ãû³Æ"/>
+		<property name="name" type="widestr" public="true" private="true" save="true" desc="åç§°"/>
 		<property name="fixed" type="byte" public="true" private="true" save="true" realtime="true" desc=""/>
 	</internals>
-	<!-- »ù±¾ÊôÐÔ
-		 ÔÚÕâÀï, ÎÒÃÇ¿ÉÒÔÎªÓÎÏ·¶ÔÏóÌí¼ÓÊôÐÔ
-		 name:	ÊôÐÔÃû³Æ
-		 type:	ÊôÐÔµÄÊý¾ÝÀàÐÍ,¿ÉÒÔÌîÐ´µÄÖµÓÐ:byte, word, int, int64, float, double, string, widestr, object
-		 public:ÊôÐÔÊÇ·ñ¹«¹²¿ÉÊÓ, ¿ÉÒÔÌîÐ´true, false
-		 private:ÊôÐÔÊÇ·ñË½ÓÐ¿ÉÊÓ, ¿ÉÒÔÌîÐ´true, false
-		 save:	ÊôÐÔÊÇ·ñÐèÒª±£´æ, ¿ÉÒÔÌîÐ´true, false
-		 [realtime]: ÊôÐÔÊÇ·ñÊÇÊµÊ±ÊôÐÔ, ¿ÉÒÔÌîÐ´true, false
-		 desc:	ÊôÐÔµÄËµÃ÷ÐÅÏ¢,Ã»ÓÐÒâÒå
+	<!-- åŸºæœ¬å±žæ€§
+		 åœ¨è¿™é‡Œ, æˆ‘ä»¬å¯ä»¥ä¸ºæ¸¸æˆå¯¹è±¡æ·»åŠ å±žæ€§
+		 name:	å±žæ€§åç§°
+		 type:	å±žæ€§çš„æ•°æ®ç±»åž‹,å¯ä»¥å¡«å†™çš„å€¼æœ‰:byte, word, int, int64, float, double, string, widestr, object
+		 public:å±žæ€§æ˜¯å¦å…¬å…±å¯è§†, å¯ä»¥å¡«å†™true, false
+		 private:å±žæ€§æ˜¯å¦ç§æœ‰å¯è§†, å¯ä»¥å¡«å†™true, false
+		 save:	å±žæ€§æ˜¯å¦éœ€è¦ä¿å­˜, å¯ä»¥å¡«å†™true, false
+		 [realtime]: å±žæ€§æ˜¯å¦æ˜¯å®žæ—¶å±žæ€§, å¯ä»¥å¡«å†™true, false
+		 desc:	å±žæ€§çš„è¯´æ˜Žä¿¡æ¯,æ²¡æœ‰æ„ä¹‰
 	 -->
 	<properties>
-		<property name="Photo" type="string" public="true" private="true" save="true" desc="Í¼Ïñ"/>
-		<property name="State" type="string" public="true" private="true" save="false" realtime="true" desc="×´Ì¬"/>
-		<property name="Sex" type="byte" public="true" private="true" save="true" desc="ÐÔ±ð 0:ÄÐÐÔ,1:Å®ÐÔ"/>
+		<property name="Photo" type="string" public="true" private="true" save="true" desc="å›¾åƒ"/>
+		<property name="State" type="string" public="true" private="true" save="false" realtime="true" desc="çŠ¶æ€"/>
+		<property name="Sex" type="byte" public="true" private="true" save="true" desc="æ€§åˆ« 0:ç”·æ€§,1:å¥³æ€§"/>
 	</properties>
-	<!-- ±íÊôÐÔ
-		ÔÚÕâÀï, ÎÒÃÇÎªÓÎÏ·¶ÔÏóÌí¼Ó±í¸ñ
-		name:	±í¸ñÃû³Æ
-		cols:	±í¸ñÁÐÊý
-		maxrows:±í¸ñ×î´óÐÐÊý
-		save:	±í¸ñÊÇ·ñÐèÒª±£´æ
-		public:±í¸ñÊÇ·ñ¹«¹²¿ÉÊÓ
-    private:±í¸ñÊÇ·ñË½ÓÐ¿ÉÊÓ
-		desc:	ÎÞÒâÒå
+	<!-- è¡¨å±žæ€§
+		åœ¨è¿™é‡Œ, æˆ‘ä»¬ä¸ºæ¸¸æˆå¯¹è±¡æ·»åŠ è¡¨æ ¼
+		name:	è¡¨æ ¼åç§°
+		cols:	è¡¨æ ¼åˆ—æ•°
+		maxrows:è¡¨æ ¼æœ€å¤§è¡Œæ•°
+		save:	è¡¨æ ¼æ˜¯å¦éœ€è¦ä¿å­˜
+		public:è¡¨æ ¼æ˜¯å¦å…¬å…±å¯è§†
+    private:è¡¨æ ¼æ˜¯å¦ç§æœ‰å¯è§†
+		desc:	æ— æ„ä¹‰
 	 -->
 	<records>
-		<record name="kiki_rec" cols="1" maxrows="1024" save="false" public="false" private="false" desc="²âÊÔ±í¸ñ">
-			<!-- ±í¸ñÁÐ¶¨Òå
-				ÔÚÕâÀï, ÎÒÃÇ¿ÉÒÔ¶¨Òå±í¸ñ¸÷ÁÐµÄÊý¾ÝÀàÐÍ
-				type:	±í¸ñÁÐµÄÊý¾ÝÀàÐÍ,¿ÉÒÔÌîÐ´µÄÖµÓÐ:byte, word, int, int64, float, double, string, widestr, object
+		<record name="kiki_rec" cols="1" maxrows="1024" save="false" public="false" private="false" desc="æµ‹è¯•è¡¨æ ¼">
+			<!-- è¡¨æ ¼åˆ—å®šä¹‰
+				åœ¨è¿™é‡Œ, æˆ‘ä»¬å¯ä»¥å®šä¹‰è¡¨æ ¼å„åˆ—çš„æ•°æ®ç±»åž‹
+				type:	è¡¨æ ¼åˆ—çš„æ•°æ®ç±»åž‹,å¯ä»¥å¡«å†™çš„å€¼æœ‰:byte, word, int, int64, float, double, string, widestr, object
 			 -->
-			<column type="int" desc="²âÊÔÁÐ"/>
+			<column type="int" desc="æµ‹è¯•åˆ—"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ
-		ÎÒÃÇ»¹¿ÉÒÔ´ÓÆäËûÖ¸¶¨µÄÎÄ¼þÖÐÎªÓÎÏ·¶ÔÏóÌí¼ÓÊôÐÔºÍ±í¸ñ
-		name:	Ïà¶ÔÓÚÓÎÏ··þÎñÆ÷µÄ×ÊÔ´ËùÔÚÄ¿Â¼µÄÎÄ¼þÂ·¾¶ÓëÃû³Æ
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§
+		æˆ‘ä»¬è¿˜å¯ä»¥ä»Žå…¶ä»–æŒ‡å®šçš„æ–‡ä»¶ä¸­ä¸ºæ¸¸æˆå¯¹è±¡æ·»åŠ å±žæ€§å’Œè¡¨æ ¼
+		name:	ç›¸å¯¹äºŽæ¸¸æˆæœåŠ¡å™¨çš„èµ„æºæ‰€åœ¨ç›®å½•çš„æ–‡ä»¶è·¯å¾„ä¸Žåç§°
 	 -->
 	<includes>
 		<path name="struct\rule\fight.xml" desc=""/>

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¸½¼ÓµÄÐ¡°ü¹ü-->
+<!--é™„åŠ çš„å°åŒ…è£¹-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="BeginPos" type="word" public="false" private="true" save="true" desc="¶ÔÓ¦µÄ±³°üÀ¸µÄÆðÊ¼Î»ÖÃ"/>
-		<property name="EndPos" type="word" public="false" private="true" save="true" desc="¶ÔÓ¦µÄ±³°üÀ¸µÄ½áÊøÎ»ÖÃ"/>
+		<property name="BeginPos" type="word" public="false" private="true" save="true" desc="å¯¹åº”çš„èƒŒåŒ…æ çš„èµ·å§‹ä½ç½®"/>
+		<property name="EndPos" type="word" public="false" private="true" save="true" desc="å¯¹åº”çš„èƒŒåŒ…æ çš„ç»“æŸä½ç½®"/>
 	</properties>
 </object>

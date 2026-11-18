@@ -1,61 +1,61 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--LeaderNPCµÄÊôÐÔ-->
+<!--LeaderNPCçš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="Type" type="byte" public="true" private="false" save="false" desc="ÀàÐÍ"/>
-		<property name="NpcType" type="byte" public="true" private="false" save="false" desc="NPCÀàÐÍ"/>
-		<property name="Camp" type="int" public="true" private="false" save="false" desc="ÕóÓª"/>
-		<property name="Force" type="int" public="true" private="false" save="false" desc="ÊÆÁ¦"/>
-		<property name="MotionNoRotate" type="byte" public="true" private="false" save="false" desc="NPCÒÆ¶¯Ê±·½ÏòÊÇ·ñ²»±ä"/>
-		<property name="NeedRotate" type="int" public="true" private="false" save="false" desc="npcÊÇ·ñÐèÒª×ªÏòÍæ¼Ò"/>
-		<property name="FightID" type="string" public="false" private="false" save="false" desc="Õ½¶·°üID"/>
-		<property name="Resource" type="string" public="true" private="false" save="false" desc="×ÊÔ´"/>
-		<property name="Scale" type="string" public="true" private="false" save="false" desc="Ä£ÐÍËõ·Å±ÈÀý"/>
-		<property name="SelectState" type="byte" public="true" private="false" save="false" desc="Ñ¡ÔñÀàÐÍ"/>
-		<property name="Exp" type="int" public="false" private="false" save="false" desc="ÉùÍû½±Àø"/>
-		<property name="SuicideTime" type="int" public="false" private="false" save="false" desc="Õ½¶·½áÊøºó¼ä¸ô¶àÉÙÃëÏú»Ù×ÔÉí(Ãë)"/>
-		<property name="CreatorIndex" type="int" public="false" private="false" save="false" desc="ÐÂÉú³ÉÆ÷µÄ±àºÅ"/>
-		<property name="FormName" type="string" public="false" private="false" save="false" desc="Ö÷±à¶Ó°üµÄName"/>
-		<property name="Teammodel" type="string" public="false" private="false" save="false" desc="Ö÷±à¶ÓNPCµÄÄ£ÐÍ"/>
-		<property name="HoldForm" type="int" public="false" private="false" save="false" desc="±à¶ÓÊÇ·ñ±£³Ö¶ÓÐÎ"/>
-		<property name="ActionEqual" type="int" public="false" private="false" save="false" desc="Ö÷ÒªÊÇ´ý»úÊ±µÄ¶¯×÷ÊÇ·ñÏàÍ¬"/>
-		<property name="FormLimit" type="float" public="false" private="false" save="false" desc="Ô¼ÊøÖµµ¥Î»(Ã×)"/>		
-		<property name="FormNpcList" type="string" public="false" private="false" save="false" desc="±àºÅ"/>
-		<property name="PosList" type="string" public="false" private="false" save="false" desc="×Ó¹ÖÏà¶ÔÎ»ÖÃÐòÁÐ"/>
-		<property name="ChildList" type="string" public="false" private="false" save="false" desc="×Ó¹Ö±àºÅÐòÁÐ"/>
-		<property name="ChilePatrolType" type="int" public="false" private="false" save="false" desc="×Ó¹ÖÑ²ÂßÀàÐÍ£¬0.¸úËæ£¬1.Â·µã"/>
+		<property name="Type" type="byte" public="true" private="false" save="false" desc="ç±»åž‹"/>
+		<property name="NpcType" type="byte" public="true" private="false" save="false" desc="NPCç±»åž‹"/>
+		<property name="Camp" type="int" public="true" private="false" save="false" desc="é˜µè¥"/>
+		<property name="Force" type="int" public="true" private="false" save="false" desc="åŠ¿åŠ›"/>
+		<property name="MotionNoRotate" type="byte" public="true" private="false" save="false" desc="NPCç§»åŠ¨æ—¶æ–¹å‘æ˜¯å¦ä¸å˜"/>
+		<property name="NeedRotate" type="int" public="true" private="false" save="false" desc="npcæ˜¯å¦éœ€è¦è½¬å‘çŽ©å®¶"/>
+		<property name="FightID" type="string" public="false" private="false" save="false" desc="æˆ˜æ–—åŒ…ID"/>
+		<property name="Resource" type="string" public="true" private="false" save="false" desc="èµ„æº"/>
+		<property name="Scale" type="string" public="true" private="false" save="false" desc="æ¨¡åž‹ç¼©æ”¾æ¯”ä¾‹"/>
+		<property name="SelectState" type="byte" public="true" private="false" save="false" desc="é€‰æ‹©ç±»åž‹"/>
+		<property name="Exp" type="int" public="false" private="false" save="false" desc="å£°æœ›å¥–åŠ±"/>
+		<property name="SuicideTime" type="int" public="false" private="false" save="false" desc="æˆ˜æ–—ç»“æŸåŽé—´éš”å¤šå°‘ç§’é”€æ¯è‡ªèº«(ç§’)"/>
+		<property name="CreatorIndex" type="int" public="false" private="false" save="false" desc="æ–°ç”Ÿæˆå™¨çš„ç¼–å·"/>
+		<property name="FormName" type="string" public="false" private="false" save="false" desc="ä¸»ç¼–é˜ŸåŒ…çš„Name"/>
+		<property name="Teammodel" type="string" public="false" private="false" save="false" desc="ä¸»ç¼–é˜ŸNPCçš„æ¨¡åž‹"/>
+		<property name="HoldForm" type="int" public="false" private="false" save="false" desc="ç¼–é˜Ÿæ˜¯å¦ä¿æŒé˜Ÿå½¢"/>
+		<property name="ActionEqual" type="int" public="false" private="false" save="false" desc="ä¸»è¦æ˜¯å¾…æœºæ—¶çš„åŠ¨ä½œæ˜¯å¦ç›¸åŒ"/>
+		<property name="FormLimit" type="float" public="false" private="false" save="false" desc="çº¦æŸå€¼å•ä½(ç±³)"/>		
+		<property name="FormNpcList" type="string" public="false" private="false" save="false" desc="ç¼–å·"/>
+		<property name="PosList" type="string" public="false" private="false" save="false" desc="å­æ€ªç›¸å¯¹ä½ç½®åºåˆ—"/>
+		<property name="ChildList" type="string" public="false" private="false" save="false" desc="å­æ€ªç¼–å·åºåˆ—"/>
+		<property name="ChilePatrolType" type="int" public="false" private="false" save="false" desc="å­æ€ªå·¡é€»ç±»åž‹ï¼Œ0.è·Ÿéšï¼Œ1.è·¯ç‚¹"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>		
-		<record name="FormationPosRec" cols="7" maxrows="1024" save="false" public="false" private="false" desc="NPCÏà¶ÔÖ÷¶ÔÏóµÄÎ»ÖÃ±í">
-			<column type="string" desc="NPCµÄËùÔÚµÄÕóÐÍºÍÖ÷NPCµÄGUID"/>
-			<column type="object" desc="NPCµÄPERSISTID"/>
-			<column type="int" desc="NPCËùÔÚÎ»ÖÃµÄ±àºÅ(0~amount)"/>
-			<column type="float" desc="NPCÏà¶Ôx"/>
-			<column type="float" desc="NPCÏà¶Ôy"/>
-			<column type="float" desc="NPCÏà¶Ôz"/>
-			<column type="int" desc="×´Ì¬"/>
+		<record name="FormationPosRec" cols="7" maxrows="1024" save="false" public="false" private="false" desc="NPCç›¸å¯¹ä¸»å¯¹è±¡çš„ä½ç½®è¡¨">
+			<column type="string" desc="NPCçš„æ‰€åœ¨çš„é˜µåž‹å’Œä¸»NPCçš„GUID"/>
+			<column type="object" desc="NPCçš„PERSISTID"/>
+			<column type="int" desc="NPCæ‰€åœ¨ä½ç½®çš„ç¼–å·(0~amount)"/>
+			<column type="float" desc="NPCç›¸å¯¹x"/>
+			<column type="float" desc="NPCç›¸å¯¹y"/>
+			<column type="float" desc="NPCç›¸å¯¹z"/>
+			<column type="int" desc="çŠ¶æ€"/>
 		</record>
-		<record name="ChildNpcPatorlRec" cols="3" maxrows="1024" save="false" public="false" private="false" desc="×ÓNPCÑ²Âß×ø±ê±í">
+		<record name="ChildNpcPatorlRec" cols="3" maxrows="1024" save="false" public="false" private="false" desc="å­NPCå·¡é€»åæ ‡è¡¨">
 			<column type="float" desc="x"/>
 			<column type="float" desc="z"/>
 			<column type="float" desc="orient"/>
 		</record>
-		<record name="ChildNpcAdjustPosRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="×ÓNPCµ÷Õû¶ÓÐÎ×ø±ê±í">
+		<record name="ChildNpcAdjustPosRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="å­NPCè°ƒæ•´é˜Ÿå½¢åæ ‡è¡¨">
 			<column type="float" desc="x"/>
 			<column type="float" desc="z"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
-		<path name="struct\npc_property\ai_motion.xml" desc="AIÊôÐÔ"/>
+		<path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
+		<path name="struct\npc_property\ai_motion.xml" desc="AIå±žæ€§"/>
 		<path name="struct\rule\Common\commonfighter.xml" desc=""/>
-		<path name="struct\npc_property\ai_path.xml" desc="AIÊôÐÔ"/>
-		<path name="struct\rule\Common\motion.xml" desc="ÒÆ¶¯"/>
-		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="¿ØÖÆÊôÐÔ"/>
-		<path name="struct\rule\Common\hide.xml" desc="ÒþÉí"/>
+		<path name="struct\npc_property\ai_path.xml" desc="AIå±žæ€§"/>
+		<path name="struct\rule\Common\motion.xml" desc="ç§»åŠ¨"/>
+		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="æŽ§åˆ¶å±žæ€§"/>
+		<path name="struct\rule\Common\hide.xml" desc="éšèº«"/>
 	</includes>
 </object>

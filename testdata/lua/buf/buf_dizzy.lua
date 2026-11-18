@@ -1,28 +1,28 @@
---Ñ£ÔÎbuff,½ÇÉ«Ò»¶¨Ê±¼äÎŞ·¨ÒÆ¶¯,½øĞĞ¹¥»÷
---buffÒÆ³ı»ò½áÊøºó,½ÇÉ«»Ö¸´stand¶¯×÷
+--çœ©æ™•buff,è§’è‰²ä¸€å®šæ—¶é—´æ— æ³•ç§»åŠ¨,è¿›è¡Œæ”»å‡»
+--buffç§»é™¤æˆ–ç»“æŸå,è§’è‰²æ¢å¤standåŠ¨ä½œ
 
 require("define")
 require("command_define")
 require("share\\server_custom_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
---¼ÆÊ±»ò¼Æ´ÎÊ±µÄĞ§¹û
---Èç¹ûÊÇ¼Æ´Î£¬·µ»Ø1Ê±£º±¾´Î¼Æ´ÎÓĞĞ§£¬·µ»Ø0Ê±£º±¾´Î²»¼Æ´Î
+--è®¡æ—¶æˆ–è®¡æ¬¡æ—¶çš„æ•ˆæœ
+--å¦‚æœæ˜¯è®¡æ¬¡ï¼Œè¿”å›1æ—¶ï¼šæœ¬æ¬¡è®¡æ¬¡æœ‰æ•ˆï¼Œè¿”å›0æ—¶ï¼šæœ¬æ¬¡ä¸è®¡æ¬¡
 function buffer_timer(self, buffer, sender)
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end
 
---AIÄ£¿é½Ó¿Ú,buffÏûÊ§»òÒÆ³ıÊ±µ÷ÓÃ
+--AIæ¨¡å—æ¥å£,buffæ¶ˆå¤±æˆ–ç§»é™¤æ—¶è°ƒç”¨
 function on_buffer_remove(buffer, self)
 	local name = nx_query_property(buffer, "ConfigID")
 	if name == "buf_dizzy" then

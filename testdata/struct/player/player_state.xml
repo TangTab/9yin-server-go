@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Íæ¼Ò×´Ì¬-->
+<!--çŽ©å®¶çŠ¶æ€-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="LoginProtect" type="int" public="false" private="false" save="false" desc="µÇÂ½±£»¤×´Ì¬"/>
-		<property name="GuideState" type="int64" public="false" private="false" save="true" desc="ÐÂÊÖÒýµ¼µÄ×´Ì¬"/>
-		<property name="GuideType" type="int" public="false" private="true" save="true" desc="ÐÂÊÖÒýµ¼µÄÀàÐÍ"/>
+		<property name="LoginProtect" type="int" public="false" private="false" save="false" desc="ç™»é™†ä¿æŠ¤çŠ¶æ€"/>
+		<property name="GuideState" type="int64" public="false" private="false" save="true" desc="æ–°æ‰‹å¼•å¯¼çš„çŠ¶æ€"/>
+		<property name="GuideType" type="int" public="false" private="true" save="true" desc="æ–°æ‰‹å¼•å¯¼çš„ç±»åž‹"/>
 	</properties>
 </object>

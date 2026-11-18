@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¸±±¾´«ËÍÃÅNPC»ù´¡ÊôÐÔ-->
+<!--å‰¯æœ¬ä¼ é€é—¨NPCåŸºç¡€å±žæ€§-->
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-        <property name="DoorPackageID" type="string" public="false" private="false" save="false" desc="´«ËÍID×Ö·û´®"/>
-        <property name="EnergyWellLimit" type="int" public="false" private="false" save="false" desc="¸±±¾ÃÇÄÜÁ¿¾®ÏÞÖÆ"/>
-        <property name="DoorReturnPos" type="string" public="false" private="false" save="false" desc="·µ»Ø´«ËÍID×Ö·û´®"/>
+        <property name="DoorPackageID" type="string" public="false" private="false" save="false" desc="ä¼ é€IDå­—ç¬¦ä¸²"/>
+        <property name="EnergyWellLimit" type="int" public="false" private="false" save="false" desc="å‰¯æœ¬ä»¬èƒ½é‡äº•é™åˆ¶"/>
+        <property name="DoorReturnPos" type="string" public="false" private="false" save="false" desc="è¿”å›žä¼ é€IDå­—ç¬¦ä¸²"/>
     </properties>
-    <!-- ±íÊôÐÔ -->
-    <record name="AroundPlayer" cols="2" maxrows="500" save="false" public="false" private="false" desc="¸±±¾ÃÅÖÜÎ§Íæ¼Ò">
-        <column type="object" desc="ÈËÎïid"/>
+    <!-- è¡¨å±žæ€§ -->
+    <record name="AroundPlayer" cols="2" maxrows="500" save="false" public="false" private="false" desc="å‰¯æœ¬é—¨å‘¨å›´çŽ©å®¶">
+        <column type="object" desc="äººç‰©id"/>
     </record>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	
 	</includes>

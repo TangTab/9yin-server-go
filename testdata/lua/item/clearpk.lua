@@ -1,6 +1,6 @@
 require("share\\item_static_data_define")
 
---Çå³ýÍ¨¼©ÖµµãÊý
+--æ¸…é™¤é€šç¼‰å€¼ç‚¹æ•°
 function on_use(item, target)
     nx_item_decpkvalue(target)
 	return 1

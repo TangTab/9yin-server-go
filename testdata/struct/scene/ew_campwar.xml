@@ -1,88 +1,88 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 
-		<record name="rec_ew_cw_battle_info" cols="2" maxrows="4096" save="true" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½Õ½³¡ÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="dword" desc="ÄÜÁ¿¾®Õ½³¡ÀàÐÍ"/>
+		<record name="rec_ew_cw_battle_info" cols="2" maxrows="4096" save="true" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜æˆ˜åœºä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="dword" desc="èƒ½é‡äº•æˆ˜åœºç±»åž‹"/>
 		</record>
 		
-		<record name="rec_ew_cw_person" cols="13" maxrows="4096" save="true" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½¸öÈËÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="widestr" desc="Íæ¼ÒÐÕÃû"/>
-			<column type="dword" desc="Íæ¼ÒÖ°Òµ"/>
-			<column type="dword" desc="Íæ¼ÒµÈ¼¶"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="±»É±"/>
-			<column type="dword" desc="ÈÎÎñ×ÜÊýÁ¿"/>
-			<column type="dword" desc="ÈÎÎñÍê³ÉÊýÁ¿"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="dword" desc="ÖÎÁÆÁ¿"/>
-			<column type="dword" desc="ÕóÓª"/>
-			<column type="dword" desc="¹¥orÊØ·½"/>
-			<column type="dword" desc="ÆÀ·Ö"/>
+		<record name="rec_ew_cw_person" cols="13" maxrows="4096" save="true" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜ä¸ªäººä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="widestr" desc="çŽ©å®¶å§“å"/>
+			<column type="dword" desc="çŽ©å®¶èŒä¸š"/>
+			<column type="dword" desc="çŽ©å®¶ç­‰çº§"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="è¢«æ€"/>
+			<column type="dword" desc="ä»»åŠ¡æ€»æ•°é‡"/>
+			<column type="dword" desc="ä»»åŠ¡å®Œæˆæ•°é‡"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="dword" desc="æ²»ç–—é‡"/>
+			<column type="dword" desc="é˜µè¥"/>
+			<column type="dword" desc="æ”»orå®ˆæ–¹"/>
+			<column type="dword" desc="è¯„åˆ†"/>
 		</record>
 		
-		<record name="rec_ew_cw_guild" cols="13" maxrows="4096" save="true" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½¹«»áÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="widestr" desc="¹«»áÃû"/>
-			<column type="dword" desc="¹«»áµÈ¼¶"/>
-			<column type="widestr" desc="¹«»á»á³¤"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="±»É±"/>
-			<column type="dword" desc="ÈÎÎñ×ÜÊýÁ¿"/>
-			<column type="dword" desc="ÈÎÎñÍê³ÉÊýÁ¿"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="dword" desc="ÖÎÁÆÁ¿"/>
-			<column type="dword" desc="ÕóÓª"/>
-			<column type="dword" desc="¹¥orÊØ·½"/>
-			<column type="dword" desc="ÆÀ·Ö"/>
+		<record name="rec_ew_cw_guild" cols="13" maxrows="4096" save="true" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜å…¬ä¼šä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="widestr" desc="å…¬ä¼šå"/>
+			<column type="dword" desc="å…¬ä¼šç­‰çº§"/>
+			<column type="widestr" desc="å…¬ä¼šä¼šé•¿"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="è¢«æ€"/>
+			<column type="dword" desc="ä»»åŠ¡æ€»æ•°é‡"/>
+			<column type="dword" desc="ä»»åŠ¡å®Œæˆæ•°é‡"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="dword" desc="æ²»ç–—é‡"/>
+			<column type="dword" desc="é˜µè¥"/>
+			<column type="dword" desc="æ”»orå®ˆæ–¹"/>
+			<column type="dword" desc="è¯„åˆ†"/>
 		</record>
 		
-		<record name="rec_ew_cw_camp" cols="10" maxrows="4096" save="true" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½ÕóÓªÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="dword" desc="ÕóÓª"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="±»É±"/>
-			<column type="dword" desc="ÈÎÎñ×ÜÊýÁ¿"/>
-			<column type="dword" desc="ÈÎÎñÍê³ÉÊýÁ¿"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="dword" desc="ÖÎÁÆÁ¿"/>
-			<column type="dword" desc="¹¥orÊØ·½"/>
-			<column type="dword" desc="ÆÀ·Ö"/>
+		<record name="rec_ew_cw_camp" cols="10" maxrows="4096" save="true" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜é˜µè¥ä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="dword" desc="é˜µè¥"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="è¢«æ€"/>
+			<column type="dword" desc="ä»»åŠ¡æ€»æ•°é‡"/>
+			<column type="dword" desc="ä»»åŠ¡å®Œæˆæ•°é‡"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="dword" desc="æ²»ç–—é‡"/>
+			<column type="dword" desc="æ”»orå®ˆæ–¹"/>
+			<column type="dword" desc="è¯„åˆ†"/>
 		</record>
 		
-		<record name="rec_ew_cw_boss" cols="4" maxrows="4096" save="true" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½bossÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
+		<record name="rec_ew_cw_boss" cols="4" maxrows="4096" save="true" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜bossä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
 			<column type="object" desc="BOSS"/>
-			<column type="dword" desc="µ±Ç°ÑªÁ¿"/>
-			<column type="dword" desc="×î´óÑªÁ¿"/>
+			<column type="dword" desc="å½“å‰è¡€é‡"/>
+			<column type="dword" desc="æœ€å¤§è¡€é‡"/>
 		</record>
 		
-		<record name="rec_ew_cw_npc" cols="2" maxrows="1024" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½npcÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
+		<record name="rec_ew_cw_npc" cols="2" maxrows="1024" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜npcä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
 			<column type="object" desc="npc"/>
 		</record>
 		
-		<record name="rec_ew_cw_pillar" cols="2" maxrows="64" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÕóÓªÕ½ÄÜÁ¿ÖùnpcÐÅÏ¢±í">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
+		<record name="rec_ew_cw_pillar" cols="2" maxrows="64" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„é˜µè¥æˆ˜èƒ½é‡æŸ±npcä¿¡æ¯è¡¨">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
 			<column type="object" desc="npc"/>
 		</record>
 		
-		<record name="rec_ew_relive" cols="2" maxrows="32" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂ¸´»îµãnpc">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="object" desc="¸´»îµãnpc"/>
+		<record name="rec_ew_relive" cols="2" maxrows="32" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹å¤æ´»ç‚¹npc">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="object" desc="å¤æ´»ç‚¹npc"/>
 		</record>
 		
-		<record name="rec_ew_relivepos" cols="2" maxrows="32" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂ¸´»îµã">
-			<column type="dword" desc="ÄÜÁ¿¾®ID"/>
-			<column type="string" desc="¸´»îµã×Ö·û´®x,y,z,camp;x,y,z,camp;  "/>
+		<record name="rec_ew_relivepos" cols="2" maxrows="32" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹å¤æ´»ç‚¹">
+			<column type="dword" desc="èƒ½é‡äº•ID"/>
+			<column type="string" desc="å¤æ´»ç‚¹å­—ç¬¦ä¸²x,y,z,camp;x,y,z,camp;  "/>
 		</record>
 		
 	</records>

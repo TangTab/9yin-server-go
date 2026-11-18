@@ -1,81 +1,81 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÎïÆ·»ù´¡ÊôÐÔ-->
+<!--ç‰©å“åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ConfigID" type="string" public="false" private="true" save="false" desc="±àºÅ"/>
-		<property name="only" type="byte" public="false" private="false" save="false" desc="0Îª²»Î¨Ò»;1Îª×°±¸Î¨;2ÎªÎ¨Ò»"/>
-		<property name="CoreLevel" type="int" public="false" private="false" save="false" desc="ºËÐÄÎïÆ·µÈ¼¶"/>
+		<property name="ConfigID" type="string" public="false" private="true" save="false" desc="ç¼–å·"/>
+		<property name="only" type="byte" public="false" private="false" save="false" desc="0ä¸ºä¸å”¯ä¸€;1ä¸ºè£…å¤‡å”¯;2ä¸ºå”¯ä¸€"/>
+		<property name="CoreLevel" type="int" public="false" private="false" save="false" desc="æ ¸å¿ƒç‰©å“ç­‰çº§"/>
 
-		<property name="Type" type="int" public="false" private="true" save="false" desc="×ÓÀàÐÍ"/>
-		<property name="Level" type="int" public="false" private="true" save="false" desc="µÀ¾ßµÈ¼¶"/>
+		<property name="Type" type="int" public="false" private="true" save="false" desc="å­ç±»åž‹"/>
+		<property name="Level" type="int" public="false" private="true" save="false" desc="é“å…·ç­‰çº§"/>
 
-		<property name="Photo" type="string" public="false" private="false" save="false" desc="Í¼Æ¬"/>
-		<property name="ItemType" type="int" public="false" private="true" save="false" desc="ÎïÆ·ÀàÐÍ"/>
-		<property name="TextureType" type="int" public="false" private="false" save="false" desc="²ÄÖÊÀàÐÍ"/>
-		<property name="ColorLevel" type="int" public="false" private="true" save="false" desc="ÑÕÉ«µÈ¼¶"/>
-		<property name="HaloLevel" type="int" public="false" private="false" save="false" desc="µÀ¾ßÌØÐ§±ß¿òµÈ¼¶"/>
-		<property name="Owner" type="widestr" public="false" private="true" save="true" desc="Ç©Ãû"/>
-		<property name="Description" type="string" public="false" private="false" save="false" desc="±à¼­Æ÷ÓÃ"/>
-		<property name="Desc" type="widestr" public="false" private="false" save="false" desc="±à¼­Æ÷ÓÃ"/>
+		<property name="Photo" type="string" public="false" private="false" save="false" desc="å›¾ç‰‡"/>
+		<property name="ItemType" type="int" public="false" private="true" save="false" desc="ç‰©å“ç±»åž‹"/>
+		<property name="TextureType" type="int" public="false" private="false" save="false" desc="æè´¨ç±»åž‹"/>
+		<property name="ColorLevel" type="int" public="false" private="true" save="false" desc="é¢œè‰²ç­‰çº§"/>
+		<property name="HaloLevel" type="int" public="false" private="false" save="false" desc="é“å…·ç‰¹æ•ˆè¾¹æ¡†ç­‰çº§"/>
+		<property name="Owner" type="widestr" public="false" private="true" save="true" desc="ç­¾å"/>
+		<property name="Description" type="string" public="false" private="false" save="false" desc="ç¼–è¾‘å™¨ç”¨"/>
+		<property name="Desc" type="widestr" public="false" private="false" save="false" desc="ç¼–è¾‘å™¨ç”¨"/>
 
-		<property name="UniqueID" type="string" public="false" private="true" save="true" desc="Î¨Ò»±àºÅ"/>
+		<property name="UniqueID" type="string" public="false" private="true" save="true" desc="å”¯ä¸€ç¼–å·"/>
 
-		<property name="Amount" type="int" public="false" private="true" save="true" desc="µ±Ç°ÊýÁ¿"/>
-		<property name="MaxAmount" type="int" public="false" private="true" save="false" desc="×î´óÊýÁ¿"/>
-		<property name="MaxCount" type="int" public="false" private="false" save="false" desc="¿ÉÓµÓÐ×î´óÊýÁ¿"/>
-		<property name="Task" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñÈÎÎñµÀ¾ß"/>
-		<property name="SkillPack" type="int" public="false" private="false" save="false" desc="¾²Ì¬¼¼ÄÜ°ü"/>
+		<property name="Amount" type="int" public="false" private="true" save="true" desc="å½“å‰æ•°é‡"/>
+		<property name="MaxAmount" type="int" public="false" private="true" save="false" desc="æœ€å¤§æ•°é‡"/>
+		<property name="MaxCount" type="int" public="false" private="false" save="false" desc="å¯æ‹¥æœ‰æœ€å¤§æ•°é‡"/>
+		<property name="Task" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦ä»»åŠ¡é“å…·"/>
+		<property name="SkillPack" type="int" public="false" private="false" save="false" desc="é™æ€æŠ€èƒ½åŒ…"/>
 
-		<property name="BindType" type="int" public="false" private="true" save="false" desc="°ó¶¨ÀàÐÍ"/>
+		<property name="BindType" type="int" public="false" private="true" save="false" desc="ç»‘å®šç±»åž‹"/>
 		<property name="BindStatus" type="int" public="false" private="true" save="true"
-				desc="°ó¶¨×´Ì¬, 0:Î´°ó¶¨, 1:ÒÑ°ó¶¨"/>
+				desc="ç»‘å®šçŠ¶æ€, 0:æœªç»‘å®š, 1:å·²ç»‘å®š"/>
     <property name="IsCanConsign" type="int" public="false" private="true" save="false"
-				desc="°ó¶¨×´Ì¬, 0:²»¿É½»Ò×, 1:¿É½»Ò×"/>
+				desc="ç»‘å®šçŠ¶æ€, 0:ä¸å¯äº¤æ˜“, 1:å¯äº¤æ˜“"/>
     <property name="LockStatus" type="int" public="false" private="true" save="false"
-				desc="Ëø¶¨×´Ì¬, 0:Î´Ëø¶¨, 1:ÒÑËø¶¨"/>
+				desc="é”å®šçŠ¶æ€, 0:æœªé”å®š, 1:å·²é”å®š"/>
 
-		<property name="BuyType" type="int" public="false" private="true" save="false" desc="¹ºÂòÀàÐÍ"/>
-		<property name="SellPrice0" type="int" public="false" private="true" save="false" desc="ÊÛ¼Û0"/>
-		<property name="SellPrice1" type="int" public="false" private="true" save="false" desc="ÊÛ¼Û1"/>
+		<property name="BuyType" type="int" public="false" private="true" save="false" desc="è´­ä¹°ç±»åž‹"/>
+		<property name="SellPrice0" type="int" public="false" private="true" save="false" desc="å”®ä»·0"/>
+		<property name="SellPrice1" type="int" public="false" private="true" save="false" desc="å”®ä»·1"/>
 
-		<property name="BuyPrice0"  type="int" public="false" private="true" save="false" desc="Âò¼Û0"/>
-		<property name="BuyPrice1"  type="int" public="false" private="true" save="false" desc="Âò¼Û1"/>
-		<property name="BuyPrice2"  type="int" public="false" private="false" save="false" desc="Âò¼Û2"/>
-		<property name="BuyPrice3"  type="int" public="false" private="false" save="false" desc="Âò¼Û3"/>
-		<property name="BuyPrice4"  type="int" public="false" private="false" save="false" desc="Âò¼Û4"/>
+		<property name="BuyPrice0"  type="int" public="false" private="true" save="false" desc="ä¹°ä»·0"/>
+		<property name="BuyPrice1"  type="int" public="false" private="true" save="false" desc="ä¹°ä»·1"/>
+		<property name="BuyPrice2"  type="int" public="false" private="false" save="false" desc="ä¹°ä»·2"/>
+		<property name="BuyPrice3"  type="int" public="false" private="false" save="false" desc="ä¹°ä»·3"/>
+		<property name="BuyPrice4"  type="int" public="false" private="false" save="false" desc="ä¹°ä»·4"/>
 
-		<property name="LimitedPack" type="int" public="false" private="false" save="false" desc="×°±¸Ìõ¼þ°ü"/>
+		<property name="LimitedPack" type="int" public="false" private="false" save="false" desc="è£…å¤‡æ¡ä»¶åŒ…"/>
 
-		<property name="ArtPack" type="int" public="false" private="true" save="false" desc="ÃÀÊõ¾²Ì¬Êý¾Ý°ü"/>
-		<property name="CantDepot" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÄÜ·ÅÈë²Ö¿â,´óÓÚ0Ê±²»¿É"/>
-		<property name="CantSell" type="byte" public="false" private="false" save="false" desc="ÄÜ·ñ··Âô"/>
-		<property name="CantDelete" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÄÜÉ¾³ý,´óÓÚ0Ê±²»¿É"/>
-		<property name="LogicPack" type="int" public="false" private="false" save="false" desc="Âß¼­°ü£¬°üº¬½»Ò×Êý¾Ý"/>
-		<property name="ExpiredTime" type="string" public="false" private="true" save="false" desc="ÎïÆ·µ½ÆÚÊ±¼äµã Äê.ÔÂ.ÈÕ.Ê±.·Ö"/>
+		<property name="ArtPack" type="int" public="false" private="true" save="false" desc="ç¾Žæœ¯é™æ€æ•°æ®åŒ…"/>
+		<property name="CantDepot" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦èƒ½æ”¾å…¥ä»“åº“,å¤§äºŽ0æ—¶ä¸å¯"/>
+		<property name="CantSell" type="byte" public="false" private="false" save="false" desc="èƒ½å¦è´©å–"/>
+		<property name="CantDelete" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦èƒ½åˆ é™¤,å¤§äºŽ0æ—¶ä¸å¯"/>
+		<property name="LogicPack" type="int" public="false" private="false" save="false" desc="é€»è¾‘åŒ…ï¼ŒåŒ…å«äº¤æ˜“æ•°æ®"/>
+		<property name="ExpiredTime" type="string" public="false" private="true" save="false" desc="ç‰©å“åˆ°æœŸæ—¶é—´ç‚¹ å¹´.æœˆ.æ—¥.æ—¶.åˆ†"/>
 		<property name="ValidTime" type="int" public="false" private="true" save="false"
-				desc="ÓÐÐ§ÆÚ, µ¥Î»ÎªÐ¡Ê±,´ËÖµÎª0Ê±,±íÊ¾´ËÎïÆ·Ã»ÓÐÓÐÐ§ÆÚÏÞÖÆ"/>
+				desc="æœ‰æ•ˆæœŸ, å•ä½ä¸ºå°æ—¶,æ­¤å€¼ä¸º0æ—¶,è¡¨ç¤ºæ­¤ç‰©å“æ²¡æœ‰æœ‰æ•ˆæœŸé™åˆ¶"/>
 		<property name="NotValid" type="byte" public="false" private="true" save="true"
-				desc="³¬¹ýÓÐÐ§ÆÚºóÉèÖÃÎÞÐ§"/>
+				desc="è¶…è¿‡æœ‰æ•ˆæœŸåŽè®¾ç½®æ— æ•ˆ"/>
 		<property name="LeftTime" type="int" public="false" private="true" save="true"
-				desc="Ê£ÓàÊ±¼ä, µ¥Î»Îª·ÖÖÓ"/>
+				desc="å‰©ä½™æ—¶é—´, å•ä½ä¸ºåˆ†é’Ÿ"/>
 		<property name="BeginTime" type="int64" public="false" private="false" save="true"
-				desc="ÎïÆ·¿ªÊ¼¼ÆÊ±Ê±¼ä, time_t,ÓÐÐ§ÆÚ¿ªÊ¼¼ÆËãµÄÊ±¼ä"/>
+				desc="ç‰©å“å¼€å§‹è®¡æ—¶æ—¶é—´, time_t,æœ‰æ•ˆæœŸå¼€å§‹è®¡ç®—çš„æ—¶é—´"/>
 		<property name="ValidTimeType" type="byte" public="false" private="false" save="false" 
-	      desc="Ê±Ð§ÐÔµÀ¾ßÓÐÐ§Ê±¼äµÄ¼ÆËãÀàÐÍ,´óÓÚ0Ê±±íÊ¾¼ÆËãÔÚÏßºÍÏÂÏßµÄÈ«²¿Ê±¼ä,·ñÔòÖ»¼ÆËãÔÚÏßÊ±¼ä"/>
+	      desc="æ—¶æ•ˆæ€§é“å…·æœ‰æ•ˆæ—¶é—´çš„è®¡ç®—ç±»åž‹,å¤§äºŽ0æ—¶è¡¨ç¤ºè®¡ç®—åœ¨çº¿å’Œä¸‹çº¿çš„å…¨éƒ¨æ—¶é—´,å¦åˆ™åªè®¡ç®—åœ¨çº¿æ—¶é—´"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-    <!-- Ìí¼Ó¼ÇÂ¼¿ÉÖÀ÷»µÄ³ÉÔ±Ãûµ¥µÄ±í¸ñ -->
-        <record name="dice_member_rec" cols="3" maxrows="50" public="true" private="false" save="false" desc="PickUpModuleÒÆÖ²¶øÀ´">
-            <column type="widestr" desc="¿ÉÊ°È¡µÄÍæ¼ÒÃû³Æ"/>
-            <column type="byte" desc="´æ·ÅÍ¶ÖÀµÄµãÊý"/>
-            <column type="byte" desc="´æ·Å³ÉÔ±Í¶ÖÀ·½Ê½£¨ÐèÇó¡¢Ì°À·£©"/>
+    <!-- æ·»åŠ è®°å½•å¯æŽ·éª°çš„æˆå‘˜åå•çš„è¡¨æ ¼ -->
+        <record name="dice_member_rec" cols="3" maxrows="50" public="true" private="false" save="false" desc="PickUpModuleç§»æ¤è€Œæ¥">
+            <column type="widestr" desc="å¯æ‹¾å–çš„çŽ©å®¶åç§°"/>
+            <column type="byte" desc="å­˜æ”¾æŠ•æŽ·çš„ç‚¹æ•°"/>
+            <column type="byte" desc="å­˜æ”¾æˆå‘˜æŠ•æŽ·æ–¹å¼ï¼ˆéœ€æ±‚ã€è´ªå©ªï¼‰"/>
         </record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\item\item_prop_shop.xml" desc="ÉÌµêÏà¹Ø"/>
+		<path name="struct\item\item_prop_shop.xml" desc="å•†åº—ç›¸å…³"/>
 	</includes>
 </object>

@@ -1,92 +1,92 @@
-TIPSTYPE_SYSTEMINFO = 0	--ÏµÍ³ĞÅÏ¢(ÒıÇæÄ£¿é·¢ËÍµÄÌáÊ¾ĞÅÏ¢ÓÃ£¬Âß¼­Ä£¿é²»ÒªÊ¹ÓÃ)
-TIPSTYPE_SYSTEMNO = 1	--ÏµÍ³ÌáÊ¾(¿Í»§¶ËÏÔÊ¾¼Ó[ÌáÊ¾]Ç°×º)
-TIPSTYPE_TIPSINFO = 2	--Ö÷»­ÃæÏòÉÏ¹ö¶¯µÄÌáÊ¾ĞÅÏ¢
-TIPSTYPE_GMINFO = 99	--GMµ÷ÊÔĞÅÏ¢
-TIPSTYPE_DEBUGINFO = 100	--¿ª·¢µ÷ÊÔĞÅÏ¢
+TIPSTYPE_SYSTEMINFO = 0	--ç³»ç»Ÿä¿¡æ¯(å¼•æ“æ¨¡å—å‘é€çš„æç¤ºä¿¡æ¯ç”¨ï¼Œé€»è¾‘æ¨¡å—ä¸è¦ä½¿ç”¨)
+TIPSTYPE_SYSTEMNO = 1	--ç³»ç»Ÿæç¤º(å®¢æˆ·ç«¯æ˜¾ç¤ºåŠ [æç¤º]å‰ç¼€)
+TIPSTYPE_TIPSINFO = 2	--ä¸»ç”»é¢å‘ä¸Šæ»šåŠ¨çš„æç¤ºä¿¡æ¯
+TIPSTYPE_GMINFO = 99	--GMè°ƒè¯•ä¿¡æ¯
+TIPSTYPE_DEBUGINFO = 100	--å¼€å‘è°ƒè¯•ä¿¡æ¯
 
---ÏµÍ³ÏûÏ¢£¬¸ñÊ½£ºint msgid, int tipstype, string stringid, ...(²ÎÊı±í)
+--ç³»ç»Ÿæ¶ˆæ¯ï¼Œæ ¼å¼ï¼šint msgid, int tipstype, string stringid, ...(å‚æ•°è¡¨)
 SERVER_CUSTOMMSG_SYSINFO	= "sysinfo"
---·şÎñÆ÷Í¬²½Ê±¼ä£¬¸ñÊ½£ºint msgid, int64 server_time
+--æœåŠ¡å™¨åŒæ­¥æ—¶é—´ï¼Œæ ¼å¼ï¼šint msgid, int64 server_time
 SERVER_CUSTOMMSG_ASYN_TIME	= "asyntime"
---NPC·¢³öµÄÁÄÌìĞÅÏ¢£¬¸ñÊ½£ºint msgid, string stringid, ...(²ÎÊı±í)
+--NPCå‘å‡ºçš„èŠå¤©ä¿¡æ¯ï¼Œæ ¼å¼ï¼šint msgid, string stringid, ...(å‚æ•°è¡¨)
 SERVER_CUSTOMMSG_SPEECH		= "speech"
 
---²Ëµ¥ÏûÏ¢
---¿ªÊ¼²Ëµ¥£¬¸ñÊ½£ºint msgid
+--èœå•æ¶ˆæ¯
+--å¼€å§‹èœå•ï¼Œæ ¼å¼ï¼šint msgid
 SERVER_CUSTOMMSG_BEGIN_MENU	= "begin_menu"
---Ìí¼ÓTitle£¬¸ñÊ½£ºint msgid, string stringid, ...(²ÎÊı±í)
+--æ·»åŠ Titleï¼Œæ ¼å¼ï¼šint msgid, string stringid, ...(å‚æ•°è¡¨)
 SERVER_CUSTOMMSG_ADD_TITLE	= "add_title"
---Ìí¼ÓÑ¡ÔñÏî£¬¸ñÊ½£ºint msgid, int func, string stringid, ...(²ÎÊı±í)
+--æ·»åŠ é€‰æ‹©é¡¹ï¼Œæ ¼å¼ï¼šint msgid, int func, string stringid, ...(å‚æ•°è¡¨)
 SERVER_CUSTOMMSG_ADD_MENU	= "add_menu"
---½áÊø²Ëµ¥£¬¸ñÊ½£ºint msgid, object target
+--ç»“æŸèœå•ï¼Œæ ¼å¼ï¼šint msgid, object target
 SERVER_CUSTOMMSG_END_MENU	= "end_menu"
---¹Ø±Õµ±Ç°²Ëµ¥£¬¸ñÊ½£ºint msgid
+--å…³é—­å½“å‰èœå•ï¼Œæ ¼å¼ï¼šint msgid
 SERVER_CUSTOMMSG_CLOSE_MENU	= "close_menu"
 
---Í¨Öª¿Í»§¶Ëµ¯³öÒ»¸öMessageBox£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid, int msgboxid, int count(°´Å¦¸öÊı), ...(°´Å¦µÄÌáÊ¾ĞÅÏ¢ÎÄ±¾ID), string stringid(ÌáÊ¾ĞÅÏ¢ÎÄ±¾ID), ...(ÌáÊ¾ĞÅÏ¢²ÎÊı)
+--é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºä¸€ä¸ªMessageBoxï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid, int msgboxid, int count(æŒ‰çº½ä¸ªæ•°), ...(æŒ‰çº½çš„æç¤ºä¿¡æ¯æ–‡æœ¬ID), string stringid(æç¤ºä¿¡æ¯æ–‡æœ¬ID), ...(æç¤ºä¿¡æ¯å‚æ•°)
 SERVER_CUSTOMMSG_SHOWMESSAGEBOX	= "show_msgbox"
---Í¨Öª¿Í»§¶Ëµ¯³öÒ»¸öInputBox£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid, int inputboxid, int type(0:Ö»ÄÜÊıÖµ,1:ÎÄ±¾), string stringid(ÌáÊ¾ĞÅÏ¢ÎÄ±¾ID), ...(ÌáÊ¾ĞÅÏ¢²ÎÊı)
+--é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºä¸€ä¸ªInputBoxï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid, int inputboxid, int type(0:åªèƒ½æ•°å€¼,1:æ–‡æœ¬), string stringid(æç¤ºä¿¡æ¯æ–‡æœ¬ID), ...(æç¤ºä¿¡æ¯å‚æ•°)
 SERVER_CUSTOMMSG_SHOWINPUTBOX	= "show_inputbox"
 
---Ïò¿Í»§¶Ë·¢ËÍ×Ô¶¨ÒåµÄĞéÄâ±í¸ñµÄÄÚÈİ£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid, string recname, ...(µÚÒ»ĞĞÊı¾İ), ..., ...(µÚnĞĞÊı¾İ)
+--å‘å®¢æˆ·ç«¯å‘é€è‡ªå®šä¹‰çš„è™šæ‹Ÿè¡¨æ ¼çš„å†…å®¹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid, string recname, ...(ç¬¬ä¸€è¡Œæ•°æ®), ..., ...(ç¬¬nè¡Œæ•°æ®)
 SERVER_CUSTOMMSG_VIRTUALREC_ADD			= "virtualrec_add"
---Í¨Öª¿Í»§¶ËÇå³ı×Ô¶¨ÒåµÄĞéÄâ±í¸ñµÄÄÚÈİ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, string recname
+--é€šçŸ¥å®¢æˆ·ç«¯æ¸…é™¤è‡ªå®šä¹‰çš„è™šæ‹Ÿè¡¨æ ¼çš„å†…å®¹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, string recname
 SERVER_CUSTOMMSG_VIRTUALREC_CLEAR		= "virtualrec_clear"
---Í¨Öª¿Í»§¶Ë¸üĞÂ×Ô¶¨ÒåµÄĞéÄâ±í¸ñµÄÄ³ĞĞÄ³ÁĞµÄÄÚÈİ£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid, string recname, int row(ĞĞºÅ), int col(ÁĞºÅ),(Êı¾İ)
+--é€šçŸ¥å®¢æˆ·ç«¯æ›´æ–°è‡ªå®šä¹‰çš„è™šæ‹Ÿè¡¨æ ¼çš„æŸè¡ŒæŸåˆ—çš„å†…å®¹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid, string recname, int row(è¡Œå·), int col(åˆ—å·),(æ•°æ®)
 SERVER_CUSTOMMSG_VIRTUALREC_UPDATE		= "virtualrec_update"
---Í¨Öª¿Í»§¶Ë¸üĞÂ×Ô¶¨ÒåµÄĞéÄâ±í¸ñµÄÄ³ĞĞµÄÄÚÈİ£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid, string recname, int row(ĞĞºÅ), ...(ĞĞÊı¾İ)
+--é€šçŸ¥å®¢æˆ·ç«¯æ›´æ–°è‡ªå®šä¹‰çš„è™šæ‹Ÿè¡¨æ ¼çš„æŸè¡Œçš„å†…å®¹ï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid, string recname, int row(è¡Œå·), ...(è¡Œæ•°æ®)
 SERVER_CUSTOMMSG_VIRTUALREC_UPDATE_ROW	= "virtualrec_updaterow"
---Í¨Öª¿Í»§¶ËÉ¾³ı×Ô¶¨ÒåµÄĞéÄâ±í¸ñµÄÄ³ĞĞ£¬ÏûÏ¢¸ñÊ½£º
---unsigned msgid, string recname, int row(ĞĞºÅ)
+--é€šçŸ¥å®¢æˆ·ç«¯åˆ é™¤è‡ªå®šä¹‰çš„è™šæ‹Ÿè¡¨æ ¼çš„æŸè¡Œï¼Œæ¶ˆæ¯æ ¼å¼ï¼š
+--unsigned msgid, string recname, int row(è¡Œå·)
 SERVER_CUSTOMMSG_VIRTUALREC_REMOVE_ROW	= "virtualrec_removerow"
 
---ÁÄÌìÏûÏ¢
+--èŠå¤©æ¶ˆæ¯
 SERVER_CUSTOMMSG_CHAT			= "chat"
 
---¶¯×÷ÏûÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, string action, int loop(0|1)
+--åŠ¨ä½œæ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, string action, int loop(0|1)
 SERVER_CUSTOMMSG_ACTION			= "action"
 
---Ö´ĞĞ¼¼ÄÜÎ»ÒÆ¶¯×÷£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, object lock_target, string action,
+--æ‰§è¡ŒæŠ€èƒ½ä½ç§»åŠ¨ä½œï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, object lock_target, string action,
 --								float x1, float y1, float z1, float orient1,
 --								float x2, float y2, float z2, float orient2, float sepdist
 SERVER_CUSTOMMSG_SKILL_ACTION_WITH_TRANSLATE = "skill_action_translate"
 
---Ö´ĞĞ¼¼ÄÜÎ»ÒÆ¶¯×÷£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, object lock_target, string action, float begx, float begy, float begz, float orient, float dist
+--æ‰§è¡ŒæŠ€èƒ½ä½ç§»åŠ¨ä½œï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, object lock_target, string action, float begx, float begy, float begz, float orient, float dist
 SERVER_CUSTOMMSG_SKILL_ACTION = "skill_action"
 
---Ö´ĞĞÌ×Â·¶¯×÷£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, ...(¶¯×÷ÁĞ±í)
+--æ‰§è¡Œå¥—è·¯åŠ¨ä½œï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, ...(åŠ¨ä½œåˆ—è¡¨)
 SERVER_CUSTOMMSG_TAOLU_START	= "taolu_start"
 
---½áÊøÌ×Â·¶¯×÷£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--ç»“æŸå¥—è·¯åŠ¨ä½œï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 SERVER_CUSTOMMSG_TAOLU_STOP		= "taolu_stop"
 
---×Ô¶¨ÒåÌØĞ§£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, ...(ÓÉ¿Í»§¶Ë³ÌĞòÈ·¶¨)
+--è‡ªå®šä¹‰ç‰¹æ•ˆï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, ...(ç”±å®¢æˆ·ç«¯ç¨‹åºç¡®å®š)
 SERVER_CUSTOMMSG_EFFECT			= "effect"
 
---¿ªÊ¼ÄîÖä£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, int tick(Ê±¼ä£¬µ¥Î»ms)
+--å¼€å§‹å¿µå’’ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, int tick(æ—¶é—´ï¼Œå•ä½ms)
 SERVER_CUSTOMMSG_BEGIN_CURSE	= "begin_curse"
 
---¿ªÊ¼ÄîÖä£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid
+--å¼€å§‹å¿µå’’ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 SERVER_CUSTOMMSG_END_CURSE		= "end_curse"
 
---É¾³ı×Óµ¯ÌØĞ§£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object owner
+--åˆ é™¤å­å¼¹ç‰¹æ•ˆï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object owner
 SERVER_CUSTOMMSG_DESTROY_BULLET	= "destroy_bullet"
 
---ÓÃ»§½»»¥ÇëÇó£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, int request_type, wstring name(ÇëÇóÕß½ÇÉ«Ãû³Æ), ...(²ÎÊı£¬¸ù¾İrequest_typeµÄ²»Í¬¶ø²»Í¬)
+--ç”¨æˆ·äº¤äº’è¯·æ±‚ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, int request_type, wstring name(è¯·æ±‚è€…è§’è‰²åç§°), ...(å‚æ•°ï¼Œæ ¹æ®request_typeçš„ä¸åŒè€Œä¸åŒ)
 SERVER_CUSTOMMSG_REQUEST		= "request"
 
---ÏÂ·¢Ä³¸ö½ÇÉ«µÄ×°±¸ĞÅÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, wstring name, wstring roleinfo, string equips_info_1, ..., string equips_info_n
+--ä¸‹å‘æŸä¸ªè§’è‰²çš„è£…å¤‡ä¿¡æ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, wstring name, wstring roleinfo, string equips_info_1, ..., string equips_info_n
 SERVER_CUSTOMMSG_LOOK_EQUIPS_ECHO	= "look_equip_echo"
 
---ÏÂ·¢Ä³¸ö½ÇÉ«µÄÎïÆ·ĞÅÏ¢£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, wstring name, string item_info
+--ä¸‹å‘æŸä¸ªè§’è‰²çš„ç‰©å“ä¿¡æ¯ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, wstring name, string item_info
 SERVER_CUSTOMMSG_LOOK_ITEM_ECHO		= "look_item_echo"
 
---Í¨Öª¿Í»§¶Ë´ò¿ªÉÌµê½çÃæ£¬ÏûÏ¢¸ñÊ½£ºstring msgid, string shop_id
+--é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€å•†åº—ç•Œé¢ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šstring msgid, string shop_id
 SERVER_CUSTOMMSG_OPEN_SHOP		= "openshop"
 
 
@@ -94,466 +94,466 @@ SERVER_CUSTOMMSG_OPEN_SHOP		= "openshop"
 
 
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÈÎÎñ¹ÜÀí½çÃæ£¬ ÏûÏ¢¸ñÊ½: string msgid, int task_id
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€ä»»åŠ¡ç®¡ç†ç•Œé¢ï¼Œ æ¶ˆæ¯æ ¼å¼: string msgid, int task_id
 SERVER_CUSTOMMSG_OPEN_TASKMANAGER =	"open_task_manager_board"
 
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÎ´Íê³ÉÈÎÎñĞÅÏ¢½çÃæ£¬ÏûÏ¢¸ñÊ½: string msgid, int task_id, object npc, int recid
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€æœªå®Œæˆä»»åŠ¡ä¿¡æ¯ç•Œé¢ï¼Œæ¶ˆæ¯æ ¼å¼: string msgid, int task_id, object npc, int recid
 SERVER_CUSTOMMSG_NOT_COMPLETE_TASK_INFO = "open_task_not_complete_info"
 
--- Í¨Öª¿Í»§¶ËĞŞ¸ÄÈÎÎñnpcÍ·¶¥±ê¼Ç, ÏûÏ¢¸ñÊ½: string msgid, object npc, int flagtype
+-- é€šçŸ¥å®¢æˆ·ç«¯ä¿®æ”¹ä»»åŠ¡npcå¤´é¡¶æ ‡è®°, æ¶ˆæ¯æ ¼å¼: string msgid, object npc, int flagtype
 SERVER_CUSTOMMSG_NOTICE_NPCFLAG = "change_tasknpc_flag"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ª»·Ê½ÈÎÎñµÄ½ÓÊÜĞÅÏ¢½çÃæ,ÏûÏ¢¸ñÊ½: string msgid, int task_id, object npc
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€ç¯å¼ä»»åŠ¡çš„æ¥å—ä¿¡æ¯ç•Œé¢,æ¶ˆæ¯æ ¼å¼: string msgid, int task_id, object npc
 SERVER_CUSTOMMSG_OPEN_RANDOM_ACCEPT_TASKINFO = "open_random_task_accept_info"
 
 
--- ´ò¿ªÑ¡ÔñÀàÈÎÎñ¶Ô»°¿ò£¬ÏûÏ¢¸ñÊ½: string msgid, int taskid, string textid
+-- æ‰“å¼€é€‰æ‹©ç±»ä»»åŠ¡å¯¹è¯æ¡†ï¼Œæ¶ˆæ¯æ ¼å¼: string msgid, int taskid, string textid
 SERVER_CUSTOMMSG_SHOW_SELECT_DIALOG = "show_task_select_dialog"
 
--- Í¨Öª¿Í»§¶ËÎ¬»¤npcµÄÈÎÎñÌØĞ§£¬ÏûÏ¢¸ñÊ½: string msgid, object npc, int type
+-- é€šçŸ¥å®¢æˆ·ç«¯ç»´æŠ¤npcçš„ä»»åŠ¡ç‰¹æ•ˆï¼Œæ¶ˆæ¯æ ¼å¼: string msgid, object npc, int type
 SREVER_CUSTOMMSG_NOTICE_NPCEFFECT = "change_tasknpc_effect"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ª¹²ÏíÈÎÎñµÄ½ÓÊÜ²Ëµ¥£¬ÏûÏ¢¸ñÊ½: string msg_id, int task_id, wide_str sharer_name
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€å…±äº«ä»»åŠ¡çš„æ¥å—èœå•ï¼Œæ¶ˆæ¯æ ¼å¼: string msg_id, int task_id, wide_str sharer_name
 SERVER_CUSTOMMSG_SHOW_SHARE_TASK_MENU = "show_share_task_menu"
 
--- Í¨Öª¿Í»§¶ËÔÚÄ³µã²¥·ÅÉùÒô,ÏûÏ¢¸ñÊ½: string msg_id, string sound_name, float x, float y, float z
+-- é€šçŸ¥å®¢æˆ·ç«¯åœ¨æŸç‚¹æ’­æ”¾å£°éŸ³,æ¶ˆæ¯æ ¼å¼: string msg_id, string sound_name, float x, float y, float z
 SERVER_CUSTOMMSG_PLAY_SOUND	= "play_point_sound"
 
--- ·¢ËÍÒªÏÔÊ¾µÄ±à¼­ÈÎÎñĞÅÏ¢´®¸ø¿Í»§¶Ë: string msg_id, int id, wstring title, int hours, wstring name, ...
+-- å‘é€è¦æ˜¾ç¤ºçš„ç¼–è¾‘ä»»åŠ¡ä¿¡æ¯ä¸²ç»™å®¢æˆ·ç«¯: string msg_id, int id, wstring title, int hours, wstring name, ...
 SERVER_CUSTOMMSG_SHOW_QUERY_EDIT_TASK_INFO = "show_query_edit_task_info"
 
--- ·¢ËÍ²éÑ¯µÄÈÎÎñĞÅÏ¢¸ø¿Í»§¶Ë: string msg_id, int type, string require, string prop, string item_info
+-- å‘é€æŸ¥è¯¢çš„ä»»åŠ¡ä¿¡æ¯ç»™å®¢æˆ·ç«¯: string msg_id, int type, string require, string prop, string item_info
 SERVER_CUSTOMMSG_SEND_SELECT_TASK_INFO = "show_select_edittask_info"
 
--- ¿Í»§¶ËNPCËµ»°ÏûÏ¢: string msg_id, object npc, string talk_id
+-- å®¢æˆ·ç«¯NPCè¯´è¯æ¶ˆæ¯: string msg_id, object npc, string talk_id
 SERVER_CUSTOMMSG_NPC_TALK = "npc_talk_text"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÒ»¸öÈ·ÈÏ¶Ô»°¿ò: string msg_id, string tetx_id
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€ä¸€ä¸ªç¡®è®¤å¯¹è¯æ¡†: string msg_id, string tetx_id
 SERVER_CUSTOMMSG_OPEN_CONFIRM_BOX = "show_task_confirm_box"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÌá½»ÊÕ¼¯ÎïÆ·ÈİÆ÷½çÃæ: string msg_id, int task_id(task_idÎª0´ú±í¹Ø±Õ)
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€æäº¤æ”¶é›†ç‰©å“å®¹å™¨ç•Œé¢: string msg_id, int task_id(task_idä¸º0ä»£è¡¨å…³é—­)
 SERVER_CUSTOMMSG_OPENSUBMIT_COLLECT_BOX = "open_submit_collect_box"
 
--- Í¨Öª¿Í»§¶ËÖ»¶Ô×Ô¼ºÒş²ØÄ³NPC: string msg_id, object npc
+-- é€šçŸ¥å®¢æˆ·ç«¯åªå¯¹è‡ªå·±éšè—æŸNPC: string msg_id, object npc
 SERVER_CUSTOMMSG_HIDE_NPC_ONLY_SELF	= "hide_npc_for_self"
 
--- Í¨Öª¿Í»§¶ËË¢ĞÂÈÎÎñ¸ú×ÙĞÅÏ¢ string msg_id
+-- é€šçŸ¥å®¢æˆ·ç«¯åˆ·æ–°ä»»åŠ¡è·Ÿè¸ªä¿¡æ¯ string msg_id
 SERVER_CUSTOMMSG_REFRESH_TASK_TRACKINFO = "refresh_track_info"
 
--- Í¨Öª¿Í»§¶ËÏÔÊ¾Ò»¸ö±»ÒşÉíµÄ¶ÔÏó(´¿¿Í»§¶ËÒşÉí) string msg_id obj
+-- é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºä¸€ä¸ªè¢«éšèº«çš„å¯¹è±¡(çº¯å®¢æˆ·ç«¯éšèº«) string msg_id obj
 --SERVER_CUSTOMMSG_SHOW_HIDE_NPC = "show_hide_npc"
 
--- Ë¢ĞÂ¿Í»§¶ËÖ¸¶¨¶ÔÏóµÄÍ·¶¥ĞÅÏ¢ string msg_id obj
+-- åˆ·æ–°å®¢æˆ·ç«¯æŒ‡å®šå¯¹è±¡çš„å¤´é¡¶ä¿¡æ¯ string msg_id obj
 SERVER_CUSTOMMSG_REFRESH_HEAD_GAME = "refresh_head_game"
 
---Í¨Öª¿Í»§¶Ë·¢ĞÅ½á¹û£¬ÏûÏ¢¸ñÊ½; unsigned msgid£¬int result
+--é€šçŸ¥å®¢æˆ·ç«¯å‘ä¿¡ç»“æœï¼Œæ¶ˆæ¯æ ¼å¼; unsigned msgidï¼Œint result
 SERVER_CUSTOMMSG_SEND_LETTER_RESULT = "send_letter_result"
 
---Í¨Öª¿Í»§¶ËÌáÈ¡½ğÇ®¸½¼ş³É¹¦£¬ÏûÏ¢¸ñÊ½; unsigned msgid£¬int ntype
+--é€šçŸ¥å®¢æˆ·ç«¯æå–é‡‘é’±é™„ä»¶æˆåŠŸï¼Œæ¶ˆæ¯æ ¼å¼; unsigned msgidï¼Œint ntype
 SERVER_CUSTOMMSG_GET_LETTER_MONEY_SUCCESS = "get_letter_money_success"
 
---Í¨Öª¿Í»§¶ËÊ¦Í½ºòÑ¡¶Ô»°¿òÒ³ÊıĞÅÏ¢£¬ÏûÏ¢¸ñÊ½:int Flag,int MaxPages,int CurPage,int count
+--é€šçŸ¥å®¢æˆ·ç«¯å¸ˆå¾’å€™é€‰å¯¹è¯æ¡†é¡µæ•°ä¿¡æ¯ï¼Œæ¶ˆæ¯æ ¼å¼:int Flag,int MaxPages,int CurPage,int count
 SERVER_CUSTOMMSG_SEND_TEACHPREN_CANDIDATE_PAGE_INFO = "send_teachpren_candidate_list"
 
---Íæ¼Òµã»÷NPCµ¯³ö°İÊ¦¶Ô»°¿ò ÏûÏ¢¸ñÊ½: unsigned msgid,int DlgType
+--ç©å®¶ç‚¹å‡»NPCå¼¹å‡ºæ‹œå¸ˆå¯¹è¯æ¡† æ¶ˆæ¯æ ¼å¼: unsigned msgid,int DlgType
 SERVER_CUSTOMMSG_POP_TEACHERNPC_DLG  = "pop_teachernpc_dlg"
 
---Í¨Öª¿Í»§¶Ëµ¯³öÍÆ¼ö°İÊ¦ÌáÊ¾¶Ô»°¿ò£¬ÏûÏ¢¸ñÊ½: unsigned msgid,
+--é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºæ¨èæ‹œå¸ˆæç¤ºå¯¹è¯æ¡†ï¼Œæ¶ˆæ¯æ ¼å¼: unsigned msgid,
 SERVER_CUSTOMMSG_NOTICE_COMMEND_TEACHER_DLG = "notice_commend_teacher_dlg"
 
---Í¨Öª¿Í»§¶Ëµ¯³öÊ¦¸µÆÀ¼Û¶Ô»°¿ò£¬ÏûÏ¢¸ñÊ½: unsigned msgid,
+--é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºå¸ˆå‚…è¯„ä»·å¯¹è¯æ¡†ï¼Œæ¶ˆæ¯æ ¼å¼: unsigned msgid,
 SERVER_CUSTOMMSG_POP_JUDGETEACHER_DLG  = "pop_judgeteacher_dlg"
 
---Í¨Öª¿Í»§¶Ëµ¯³öÍÆ¼ö°İÊ¦È·ÈÏ¶Ô»°¿ò£¬ÏûÏ¢¸ñÊ½: unsigned msgid,
+--é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºæ¨èæ‹œå¸ˆç¡®è®¤å¯¹è¯æ¡†ï¼Œæ¶ˆæ¯æ ¼å¼: unsigned msgid,
 SERVER_CUSTOMMSG_CONFIRM_COMMEND_TEACHER_DLG = "confirm_commend_teacher_dlg"
 
 
--- Í¨Öª¿Í»§¶Ëµ¯³ö¹ØÓÚ»éÒöµÄÅäÅ¼µÄÊäÈë¿ò
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºå…³äºå©šå§»çš„é…å¶çš„è¾“å…¥æ¡†
 SERVER_CUSTOMMSG_INPUT_COMMEND_MARRIAGE_DLG = "input_commend_marriage_dlg"
 
--- Í¨Öª¿Í»§¶Ë¼ÓÈëÒ»¸ö÷»×Ó¾ºÕùµÀ¾ß,ÏûÏ¢¸ñÊ½£ºunsigned msgid, object npc, object item, string configid, int time
+-- é€šçŸ¥å®¢æˆ·ç«¯åŠ å…¥ä¸€ä¸ªéª°å­ç«äº‰é“å…·,æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object npc, object item, string configid, int time
 SERVER_CUSTOMMSG_PUSH_ROLL_ITEM = "push_roll_item_info"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ª¶Ó³¤·ÖÅä½çÃæ,ÏûÏ¢¸ñÊ½£ºunsigned msgid
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€é˜Ÿé•¿åˆ†é…ç•Œé¢,æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 SERVER_CUSTOMMSG_POP_ASSIGN_DLG = "pop_team_assign_dlg"
 
--- Í¨Öª¿Í»§¶Ëµ¯³öËæ»úÉÌµê½çÃæ
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºéšæœºå•†åº—ç•Œé¢
 SERVER_CUSTOMMSG_SHOW_RANDOMSHOP  = "show_randomshop"
 
--- Í¨Öª¿Í»§¶Ëµ¯³öÅÜÉÌÉÌµê½çÃæ
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºè·‘å•†å•†åº—ç•Œé¢
 SERVER_CUSTOMMSG_SHOW_BUSINESSSHOP = "show_businessshop"
 
--- Í¨Öª¿Í»§¶Ëµ¯³öÅÜÉÌÉÌµê²éÑ¯½çÃæ
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºè·‘å•†å•†åº—æŸ¥è¯¢ç•Œé¢
 SERVER_CUSTOMMSG_SHOW_BUSINESSQUERYDIALOG = "show_businessquerydialog"
 
--- Í¨Öª¿Í»§¶Ëµ¯³öÅÜÉÌ³öÊÛÉÌÆ·µÄ¼Û¸ñ£¬ÏûÏ¢¸ñÊ½£ºint money
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼¹å‡ºè·‘å•†å‡ºå”®å•†å“çš„ä»·æ ¼ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šint money
 SERVER_CUSTOMMSG_SHOW_MONEY_BUSINESSITEM = "show_money_businessitem"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ª°ü¹ü½çÃæ
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€åŒ…è£¹ç•Œé¢
 SERVER_CUSTOMMSG_OPEN_TOOLBOX = "open_tool_box"
 
---Í¨Öª¿Í»§¶ËÏÔÊ¾¶¯»­,ÏûÏ¢¸ñÊ½£ºunsigned msgid,string animationname
+--é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºåŠ¨ç”»,æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid,string animationname
 SERVER_CUSTOMMSG_SHOW_ANIMATION = "show_animation"
 
---Í¨Öª¿Í»§¶Ë¹Ø±Õ¶¯»­,ÏûÏ¢¸ñÊ½:unsigned msgid,string animationname
+--é€šçŸ¥å®¢æˆ·ç«¯å…³é—­åŠ¨ç”»,æ¶ˆæ¯æ ¼å¼:unsigned msgid,string animationname
 SERVER_CUSTOMMSG_DEL_ANIMATION  = "del_animation"
 
---Í¨Öª¿Í»§¶ËÍæ¼ÒµÚÒ»´Î½øÈëÓÎÏ·£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, ...(ÓÉ¿Í»§¶Ë³ÌĞòÈ·¶¨)
+--é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶ç¬¬ä¸€æ¬¡è¿›å…¥æ¸¸æˆï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, ...(ç”±å®¢æˆ·ç«¯ç¨‹åºç¡®å®š)
 SERVER_CUSTOMMSG_BORN			= "born"
 
--- Í¨Öª¿Í»§¶Ë¿ªÊ¼Ä³¸öĞ¡ÓÎÏ·£¬ÏûÏ¢¸ñÊ½£ºstring msgid, string game_name
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼€å§‹æŸä¸ªå°æ¸¸æˆï¼Œæ¶ˆæ¯æ ¼å¼ï¼šstring msgid, string game_name
 SERVER_CUSTOMMSG_MINIGAME_START = "game_minigame_start"
 
--- Í¨Öª¿Í»§¶Ë½áÊøÄ³¸öĞ¡ÓÎÏ·
+-- é€šçŸ¥å®¢æˆ·ç«¯ç»“æŸæŸä¸ªå°æ¸¸æˆ
 SERVER_CUSTOMMSG_MINIGAME_STOP = "game_minigame_stop"
 
--- Í¨Öª¿Í»§¶ËÍæ¼Ò¿ªÊ¼Õ¾×®Ğ¡ÓÎÏ·,ÏûÏ¢¸ñÊ½£ºunsigned msgid, int time
+-- é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶å¼€å§‹ç«™æ¡©å°æ¸¸æˆ,æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, int time
 SERVER_CUSTOMMSG_GAME_START_STUMP = "game_stump_start"
 
--- Í¨Öª¿Í»§¶ËÍæ¼ÒÖÕÖ¹Õ¾×®Ğ¡ÓÎÏ·,ÏûÏ¢¸ñÊ½£ºunsigned msgid
+-- é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶ç»ˆæ­¢ç«™æ¡©å°æ¸¸æˆ,æ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid
 SERVER_CUSTOMMSG_GAME_STOP_STUMP  = "game_stump_stop"
 
---Í¨Öª¿Í»§¶Ë¼ÆÊ±,ÏûÏ¢¸ñÊ½:unsigned msgid, int ntype =,int time
+--é€šçŸ¥å®¢æˆ·ç«¯è®¡æ—¶,æ¶ˆæ¯æ ¼å¼:unsigned msgid, int ntype =,int time
 SERVER_CUSTOMMSG_START_TIMER  = "start_timer"
 
---Í¨Öª¿Í»§¶ËÂíÉÏÒª½øĞĞÇĞ³¡¾°£¬¿ÉÒÔ×¼±¸½øĞĞÔ¤´¦Àíunsigned msgid, float x, float y, float z
+--é€šçŸ¥å®¢æˆ·ç«¯é©¬ä¸Šè¦è¿›è¡Œåˆ‡åœºæ™¯ï¼Œå¯ä»¥å‡†å¤‡è¿›è¡Œé¢„å¤„ç†unsigned msgid, float x, float y, float z
 SERVER_CUSTOMMSG_SWITCH_SCENE_BEGIN = "switch_scene_begin"
 
---Í¨Öª¿Í»§¶ËÔÚ¹æ¶¨Ê±¼äÄÚÍê³ÉÒÆ¶¯Ä£Äâ,unsigned msgid, float fTime
+--é€šçŸ¥å®¢æˆ·ç«¯åœ¨è§„å®šæ—¶é—´å†…å®Œæˆç§»åŠ¨æ¨¡æ‹Ÿ,unsigned msgid, float fTime
 SERVER_CUSTOMMSG_NPC_MOVE  = "npc_move"
 
---´ò¿ª¿Í»§¶Ë½çÃæstring msg, int compose_type
+--æ‰“å¼€å®¢æˆ·ç«¯ç•Œé¢string msg, int compose_type
 SERVER_CUSTOMMSG_OPEN_COMPOSE  = "open_compose"
 
--- Í¨Öªclient¶Ë£º»ñÈ¡ÁËÒ»¸öĞÂÉí·İ: string msg_id, int origin_id
+-- é€šçŸ¥clientç«¯ï¼šè·å–äº†ä¸€ä¸ªæ–°èº«ä»½: string msg_id, int origin_id
 SERVER_CUSTOMMSG_GET_A_NEW_ORIGIN = "get_a_new_origin"
 
--- Í¨Öª¿Í»§¶ËË¢ĞÂÉí·İ×´Ì¬: string msg_id, int command_id
+-- é€šçŸ¥å®¢æˆ·ç«¯åˆ·æ–°èº«ä»½çŠ¶æ€: string msg_id, int command_id
 SERVER_CUSTOMMSG_REFRESH_ORIGIN	= "refresh_origin_condition"
 
--- Í¨Öª¿Í»§¶Ë²¥·ÅÉú»î¼¼ÄÜ£¬ÏûÏ¢¸ñÊ½£ºunsigned msgid, object target, string action, int loop(0|1)
+-- é€šçŸ¥å®¢æˆ·ç«¯æ’­æ”¾ç”Ÿæ´»æŠ€èƒ½ï¼Œæ¶ˆæ¯æ ¼å¼ï¼šunsigned msgid, object target, string action, int loop(0|1)
 SERVER_CUSTOMMSG_SHENGHUO_ACTION = "shenghuo_action"
 
--- Í¨Öª¿Í»§¶Ë£¬Éú»î¼¼ÄÜÊÍ·ÅÁ÷³Ì½áÊø£¬command¡¢flow_name¡¢result
+-- é€šçŸ¥å®¢æˆ·ç«¯ï¼Œç”Ÿæ´»æŠ€èƒ½é‡Šæ”¾æµç¨‹ç»“æŸï¼Œcommandã€flow_nameã€result
 SERVER_CUSTOMMSG_LIFE_SKILL_FLOW_HIT = "lift_skill_flow_hit"
 
---Í¨Öª¿Í»§¶ËÓĞÀëÏß½±Àø
+--é€šçŸ¥å®¢æˆ·ç«¯æœ‰ç¦»çº¿å¥–åŠ±
 SERVER_CUSTOMMSG_HAVE_OFFLINE_PRIZE  = "have_offline_prize"
 
---Í¨Öª¿Í»§¶ËÍæ¼Ò½øÈë³¡¾°×¼±¸¾ÍĞ÷
+--é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶è¿›å…¥åœºæ™¯å‡†å¤‡å°±ç»ª
 SERVER_CUSTOMMSG_PLAYER_ONREADY = "player_enter_scene_onready"
 
---Í¨Öª¿Í»§¶ËÍæ¼Ò¼ÌĞøÁ¬½Ó
+--é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶ç»§ç»­è¿æ¥
 SERVER_CUSTOMMSG_PLAYER_ONCONTINUE = "player_enter_scene_oncontinue"
 
--- Í¨Öª¿Í»§¶ËÍæ¼ÒÏÔÊ¾Ä£Ê½¶Ô»°¿ò£¬ÄÚÈİÎªÌáÊ¾ĞÅÏ¢£ºstring string_id, ...
+-- é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶æ˜¾ç¤ºæ¨¡å¼å¯¹è¯æ¡†ï¼Œå†…å®¹ä¸ºæç¤ºä¿¡æ¯ï¼šstring string_id, ...
 SERVER_CUSTOMMSG_SHOW_MODEL_DIALOG_INFO = "show_model_dialog_info"
 
--- Í¨Öª¿Í»§¶Ë¿ªÊ¼Ò»¶Î¾çÇé, ²ÎÊı¸ñÊ½: string cmd_id, Object NPC, int movie_id, int focus_type
+-- é€šçŸ¥å®¢æˆ·ç«¯å¼€å§‹ä¸€æ®µå‰§æƒ…, å‚æ•°æ ¼å¼: string cmd_id, Object NPC, int movie_id, int focus_type
 SERVER_CUSTOMMSG_START_MOVIE = "start_movie"
 
---Í¨Öª¿Í»§¶ËÓĞÒ»¶Î¾çÇéµÈ´ı²¥·Å£¬²ÎÊı¸ñÊ½£ºstring cmd_id, Object NPC, int movie_id
+--é€šçŸ¥å®¢æˆ·ç«¯æœ‰ä¸€æ®µå‰§æƒ…ç­‰å¾…æ’­æ”¾ï¼Œå‚æ•°æ ¼å¼ï¼šstring cmd_id, Object NPC, int movie_id
 SERVER_CUSTOMMSG_MOVIE_REQUEST = "movie_request"
 
---Í¨Öª¿Í»§¶ËĞÂ½øÈëÒ»¸ö³¡¾°,ÏÔÊ¾ÌØĞ§:string city_name
+--é€šçŸ¥å®¢æˆ·ç«¯æ–°è¿›å…¥ä¸€ä¸ªåœºæ™¯,æ˜¾ç¤ºç‰¹æ•ˆ:string city_name
 SERVER_CUSTOMMSG_ENTER_NEW_SCENE = "enter_new_scene"
 
--- ¿Í»§¶Ë²éÑ¯ÈÎÎñÊÇ·ñÄÜ³Ğ½ÓµÄ½á¹û
+-- å®¢æˆ·ç«¯æŸ¥è¯¢ä»»åŠ¡æ˜¯å¦èƒ½æ‰¿æ¥çš„ç»“æœ
 SERVER_CUSTOMMSG_RESPONSE_TASK_CAN_ACCEPT = "task_can_accept"
 
---Í¨Öª¿Í»§¶ËÎ´Íê³ÉÀëÏßÈÎÎñ
+--é€šçŸ¥å®¢æˆ·ç«¯æœªå®Œæˆç¦»çº¿ä»»åŠ¡
 SERVER_CUSTOMMSG_NOT_FINISH_OFFLINEWORK = "not_finish_offlinework"
 
---Í¨Öª¿Í»§¶ËÏÔÊ¾ÀëÏßÈÕÖ¾
+--é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºç¦»çº¿æ—¥å¿—
 SERVER_CUSTOMMSG_SHOW_OFFLINE_JOB_LOG = "show_offline_job_log"
 
---Í¨Öª¿Í»§¶ËÏÔÊ¾ÀëÏßÃ¿ÈÕÈÕÖ¾
+--é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºç¦»çº¿æ¯æ—¥æ—¥å¿—
 SERVER_CUSTOMMSG_SHOW_OFFLINE_JOB_DAILY = "show_offline_job_daily"
 
---Í¨Öª¿Í»§¶ËÒş²ØÀëÏßÃ¿ÈÕÈÕÖ¾
+--é€šçŸ¥å®¢æˆ·ç«¯éšè—ç¦»çº¿æ¯æ—¥æ—¥å¿—
 SERVER_CUSTOMMSG_HIDE_OFFLINE_JOB_DAILY = "hide_offline_job_daily"
 
---Í¨Öª¿Í»§¶ËÏÔÊ¾ÀëÏß½»»¥½çÃæ
+--é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºç¦»çº¿äº¤äº’ç•Œé¢
 SERVER_CUSTOMMSG_SHOW_OFFLINE_JOB_INTERACT = "show_offline_job_interact"
 
---Í¨Öª¿Í»§¶ËÒş²ØÀëÏß½»»¥½çÃæ
+--é€šçŸ¥å®¢æˆ·ç«¯éšè—ç¦»çº¿äº¤äº’ç•Œé¢
 SERVER_CUSTOMMSG_HIDE_OFFLINE_JOB_INTERACT = "hide_offline_job_interact"
 
---Í¨Öª¿Í»§¶ËÏÔÊ¾ÀëÏß½»»¥½±Àø½çÃæ
+--é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºç¦»çº¿äº¤äº’å¥–åŠ±ç•Œé¢
 SERVER_CUSTOMMSG_SHOW_OFFLINE_JOB_INTERACT_PRIZE = "show_offline_job_interact_prize"
 
---Í¨Öª¿Í»§¶ËÒş²ØÀëÏßÀëÏß½»»¥½±Àø½çÃæ
+--é€šçŸ¥å®¢æˆ·ç«¯éšè—ç¦»çº¿ç¦»çº¿äº¤äº’å¥–åŠ±ç•Œé¢
 SERVER_CUSTOMMSG_HIDE_OFFLINE_JOB_INTERACT_PRIZE = "hide_offline_job_interact_prize"
 
---Í¨Öª¿Í»§¶ËÍ¬²½Ö÷½ÇÍæ¼Òµ±Ç°Î»ÖÃ
+--é€šçŸ¥å®¢æˆ·ç«¯åŒæ­¥ä¸»è§’ç©å®¶å½“å‰ä½ç½®
 SERVER_CUSTOMMSG_UPDATE_PLAYER_POS = "update_player_pos"
 
---Í¨Öª¿Í»§¶ËÍ¬²½Ò»¶¨·¶Î§ÄÚ¿ÉÊÓ¶ÔÏóÎ»ÖÃ
+--é€šçŸ¥å®¢æˆ·ç«¯åŒæ­¥ä¸€å®šèŒƒå›´å†…å¯è§†å¯¹è±¡ä½ç½®
 SERVER_CUSTOMMSG_UPDATE_VISUAL_OBJ_POS = "update_visual_obj_pos"
 
---Í¨Öª¿Í»§¶ËÑ§Ï°µ½ĞÂµÄÉú»îÖ°Òµ
+--é€šçŸ¥å®¢æˆ·ç«¯å­¦ä¹ åˆ°æ–°çš„ç”Ÿæ´»èŒä¸š
 SERVER_CUSTOMMSG_GET_A_NEW_LIFEJOB = "get_a_new_lifejob"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªĞÂÊÖ°ïÖú½çÃæ int task_id
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€æ–°æ‰‹å¸®åŠ©ç•Œé¢ int task_id
 SERVER_CUSTOMMSG_OPEN_HELP_FORM	= "open_help_form"
 
---Í¨Öª¿Í»§¶ËÏÔÊ¾¶ş´ÎÉÏÏßµÄÀëÏßĞ§¹û
+--é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºäºŒæ¬¡ä¸Šçº¿çš„ç¦»çº¿æ•ˆæœ
 SERVER_CUSTOMMSG_OFFLINEWORK_ONLINE_EFFECT = "offlinework_online_effect"
 
---Í¨Öª¿Í»§¶ËÑ§Ï°µ½ĞÂµÄÉú»îÖ°Òµ
+--é€šçŸ¥å®¢æˆ·ç«¯å­¦ä¹ åˆ°æ–°çš„ç”Ÿæ´»èŒä¸š
 SERVER_CUSTOMMSG_GET_A_NEW_SKILL = "get_a_new_skill"
 
--- Í¨Öª¿Í»§¶ËÆô¶¯µ¹¼ÆÊ±£¬¸ñÊ½: string cmd, int type, int id, int time
+-- é€šçŸ¥å®¢æˆ·ç«¯å¯åŠ¨å€’è®¡æ—¶ï¼Œæ ¼å¼: string cmd, int type, int id, int time
 SERVER_CUSTOMMSG_BEGIN_TIME_LIMIT_SHOW = "time_limit_show"
 
--- Í¨Öª¿Í»§¶ËĞÂÊÖ°ïÖúµÄ²½Öè string cmd, int stepID
+-- é€šçŸ¥å®¢æˆ·ç«¯æ–°æ‰‹å¸®åŠ©çš„æ­¥éª¤ string cmd, int stepID
 SERVER_CUSTOMMSG_FRESHMAN_HELP_STEP = "freshman_help_step"
 
--- Í¨Öª¿Í»§¶Ë½»»¥NPCºÍÍæ¼Ò¿ªÊ¼×ö°ó¶¨µÄ¶¯×÷: string cmd, object player, object npc,
+-- é€šçŸ¥å®¢æˆ·ç«¯äº¤äº’NPCå’Œç©å®¶å¼€å§‹åšç»‘å®šçš„åŠ¨ä½œ: string cmd, object player, object npc,
 --											string player_action, string npc_action
 SERVER_CUSTOMMSG_START_INTERACTIVE_ACTION =	"start_interactive_action"
 
--- Í¨Öª¿Í»§¶Ë½»»¥NPCºÍÍæ¼Ò½áÊø×ö°ó¶¨µÄ¶¯×÷: string cmd, object player, object npc
+-- é€šçŸ¥å®¢æˆ·ç«¯äº¤äº’NPCå’Œç©å®¶ç»“æŸåšç»‘å®šçš„åŠ¨ä½œ: string cmd, object player, object npc
 SERVER_CUSTOMMSG_END_INTERACTIVE_ACTION	= "end_interactive_action"
 
--- Í¨Öª¿Í»§¶ËÍæ¼Ò°ó¶¨¸´»îµã³É¹¦£¬ÏÔÊ¾¶¯»­
+-- é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶ç»‘å®šå¤æ´»ç‚¹æˆåŠŸï¼Œæ˜¾ç¤ºåŠ¨ç”»
 SERVER_CUSTOMMSG_BAND_RELIVE_POS =	"band_relive_pos"
 
--- Í¨Öª¿Í»§¶ËÍæ¼Ò¸´»î
+-- é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶å¤æ´»
 SERVER_CUSTOMMSG_RELIVE_END	= "relive_end"
 
--- Í¨Öª¿Í»§¶Ë´òÌúÓÎÏ·¿ªÊ¼
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“é“æ¸¸æˆå¼€å§‹
 SERVER_CUSTOMMSG_FORGE_STARTED = "forge_started"
 
--- Í¨Öª¿Í»§¶Ë´òÌúÓÎÏ·½áÊø
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“é“æ¸¸æˆç»“æŸ
 SERVER_CUSTOMMSG_FORGE_STOPPED = "forge_stopped"
 
--- Í¨Öª¿Í»§¶ËForgeÓÎÏ·timeout
+-- é€šçŸ¥å®¢æˆ·ç«¯Forgeæ¸¸æˆtimeout
 SERVER_CUSTOMMSG_FORGE_TIMEOUT = "forge_timeout"
 
--- Í¨Öª¿Í»§¶ËStepÊ±¼ä²âÊÔµÄ²îÖµ
+-- é€šçŸ¥å®¢æˆ·ç«¯Stepæ—¶é—´æµ‹è¯•çš„å·®å€¼
 SERVER_CUSTOMMSG_FORGE_STEP_DIFF = "forge_step_diff"
 
--- Í¨Öª¿Í»§¶ËÈ¡ÏûÄ³¸öStep
+-- é€šçŸ¥å®¢æˆ·ç«¯å–æ¶ˆæŸä¸ªStep
 SERVER_CUSTOMMSG_CANCEL_STEP = "forge_cancel_step"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÂ·±ê½çÃæ
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€è·¯æ ‡ç•Œé¢
 SERVER_CUSTOMMSG_SHOW_ROADSIGN = "show_roadsign"
 
--- Í¨Öª¿Í»§¶Ë½ÓÊÕ¾ç±¾ĞÅÏ¢ÏûÏ¢
+-- é€šçŸ¥å®¢æˆ·ç«¯æ¥æ”¶å‰§æœ¬ä¿¡æ¯æ¶ˆæ¯
 SERVER_CUSTOMMSG_SHOW_DRAMA_INFO = "show_drama_info"
 
--- Í¨Öª¿Í»§¶Ë[²éÑ¯Ä³Íæ¼Ò»ù±¾ĞÅÏ¢µÄ½á¹û]
+-- é€šçŸ¥å®¢æˆ·ç«¯[æŸ¥è¯¢æŸç©å®¶åŸºæœ¬ä¿¡æ¯çš„ç»“æœ]
 SERVER_CUSTOMMSG_SHOW_BASE_INFO	= "show_base_info"
 
--- Í¨Öª¿Í»§¶Ë[²éÑ¯Ä³Íæ¼Ò×°±¸ĞÅÏ¢µÄ½á¹û]
+-- é€šçŸ¥å®¢æˆ·ç«¯[æŸ¥è¯¢æŸç©å®¶è£…å¤‡ä¿¡æ¯çš„ç»“æœ]
 SERVER_CUSTOMMSG_SHOW_EQUIP_INFO = "show_equip_info"
 
---Í¨Öª¿Í»§¶ËÄ³npcÍ·ÉÏÏÔÊ¾×Ö
+--é€šçŸ¥å®¢æˆ·ç«¯æŸnpcå¤´ä¸Šæ˜¾ç¤ºå­—
 SERVER_CUSTOMMSG_NPC_SAY  = "npc_say"
 
---Í¨Öª¿Í»§¶ËÍæ¼ÒÍ·ÉÏÏÔÊ¾×Ö
+--é€šçŸ¥å®¢æˆ·ç«¯ç©å®¶å¤´ä¸Šæ˜¾ç¤ºå­—
 SERVER_CUSTOMMSG_PLAYER_SAY = "player_say"
 
---¿ÉÒÔ°ÚÌ¯
+--å¯ä»¥æ‘†æ‘Š
 SERVER_CUSTOMMSG_CAN_FORTUNETELLINGSTALL = "can_fortunetellingstall"
 
---°ÚÌ¯³É¹¦
+--æ‘†æ‘ŠæˆåŠŸ
 SERVER_CUSTOMMSG_FORTUNETELLINGSTALL_OKAY = "fortunetellingstall_okay"
 
---³·Ïú°ÚÌ¯
+--æ’¤é”€æ‘†æ‘Š
 SERVER_CUSTOMMSG_FORTUNETELLINGSTALL_CANCELED = "fortunetellingstall_canceled"
 
---Ñ¯ÎÊÊÇ·ñĞèÒªËãØÔ
+--è¯¢é—®æ˜¯å¦éœ€è¦ç®—å¦
 SERVER_CUSTOMMSG_NEED_FORTUNETELLING = "need_fortunetelling"
 
---¿ÉÒÔ°ÚÌ¯
+--å¯ä»¥æ‘†æ‘Š
 SERVER_CUSTOMMSG_CAN_STALL = "can_stall"
 
--- Í¨Öª¿Í»§¶Ë½øĞĞ³¡¾°ÄÚ´«ËÍ
+-- é€šçŸ¥å®¢æˆ·ç«¯è¿›è¡Œåœºæ™¯å†…ä¼ é€
 SERVER_CUSTOMMSG_GOTO = "scene_goto_event"
 
--- °ÚÌ¯³É¹¦
+-- æ‘†æ‘ŠæˆåŠŸ
 SERVER_CUSTOMMSG_STALL_OKAY = "stall_okay"
 
--- °ÚÌ¯ÒÑÈ¡Ïû
+-- æ‘†æ‘Šå·²å–æ¶ˆ
 SERVER_CUSTOMMSG_STALL_CANCELED = "stall_canceled"
 
--- Í¨Öª¿Í»§¶Ë¹ÖÎï¿ªÊ¼Ê¹ÓÃ¼¼ÄÜ¶ÁÌõ: string cmd_id, object npc, int time
+-- é€šçŸ¥å®¢æˆ·ç«¯æ€ªç‰©å¼€å§‹ä½¿ç”¨æŠ€èƒ½è¯»æ¡: string cmd_id, object npc, int time
 SERVER_CUSTOMMSG_BEGIN_PAUSE_SKILL = "begin_pause_skill"
 
--- Í¨Öª¿Í»§¶Ë¹ÖÎï½áÊøÊ¹ÓÃ¼¼ÄÜ¶ÁÌõ: string cmd_id, object npc
+-- é€šçŸ¥å®¢æˆ·ç«¯æ€ªç‰©ç»“æŸä½¿ç”¨æŠ€èƒ½è¯»æ¡: string cmd_id, object npc
 SERVER_CUSTOMMSG_END_PAUSE_SKILL = "end_pause_skill"
 
--- Í¨ÖªÅ©×÷ÎïÌØĞ§¸Ä±ä
+-- é€šçŸ¥å†œä½œç‰©ç‰¹æ•ˆæ”¹å˜
 SERVER_CUSTOMMSG_CROP_EFFECT_CHANGE = "crop_effect_change"
 
--- Í¨Öªnpc²¥·Å¿ªÊ¼Õ½¶·¶¯»­:string ani_name
+-- é€šçŸ¥npcæ’­æ”¾å¼€å§‹æˆ˜æ–—åŠ¨ç”»:string ani_name
 SERVER_CUSTOMMSG_NPC_FIGHT_ANI_START = "npc_fight_ani_start"
 
--- Í¨Öª¿Í»§¶ËĞŞÎªÏà¹ØÏûÏ¢: string subCmd param1 ...
+-- é€šçŸ¥å®¢æˆ·ç«¯ä¿®ä¸ºç›¸å…³æ¶ˆæ¯: string subCmd param1 ...
 SERVER_CUSTOMMSG_FACULTY_MSG = "faculty_msg"
 
 
---Í¨Öª¿Í»§¶Ë²¥·Å»ú¹Ø±»´¥·¢µÄ¹ı³Ì
+--é€šçŸ¥å®¢æˆ·ç«¯æ’­æ”¾æœºå…³è¢«è§¦å‘çš„è¿‡ç¨‹
 SERVER_CUSTOMMSG_MACNPC_SPRING_ACT_START = "machine_npc_spring_act_start"
 
---Í¨Öª¿Í»§¶Ë²¥·Å»ú¹Ø´¥·¢¶¯×÷½áÊø
+--é€šçŸ¥å®¢æˆ·ç«¯æ’­æ”¾æœºå…³è§¦å‘åŠ¨ä½œç»“æŸ
 SERVER_CUSTOMMSG_MACNPC_SPRING_ACT_END = "machine_npc_spring_act_end"
 
---Í¨Öª¿Í»§¶Ë´ò¿ªºÏ³É
+--é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€åˆæˆ
 SERVER_CUSTOMMSG_OPEN_COMPOSITEBOX = "open_composite_box"
 
--- Í¨Öª¿Í»§¶Ë¹¥»÷ÌØĞ§
+-- é€šçŸ¥å®¢æˆ·ç«¯æ”»å‡»ç‰¹æ•ˆ
 SERVER_CUSTOMMSG_TRIGGER_SKILL_EFFECT = "trigger_skill_effect"
 
--- Í¨Öª¿Í»§¶Ë¼¼ÄÜÍ¼±êÉÁË¸ string msg, int skill_index, int start_or_end
+-- é€šçŸ¥å®¢æˆ·ç«¯æŠ€èƒ½å›¾æ ‡é—ªçƒ string msg, int skill_index, int start_or_end
 SERVER_CUSTOMMSG_SKILL_ICON_FLASH = "skill_icon_flash"
 
--- Õ½¶·½ÌÑ§ÈÎÎñ string msg, int subType(1,¿ªÊ¼, 2,½áÊø)
+-- æˆ˜æ–—æ•™å­¦ä»»åŠ¡ string msg, int subType(1,å¼€å§‹, 2,ç»“æŸ)
 SERVER_CUSTOMMSG_FIGHT_GUID = "task_fight_guid_msg"
 
---Í¨Öª¿Í»§¶Ë²¥·ÅÒôÀÖ string msg int flag(0¹Ø±Õ1²¥·Å) string musicname(ÒôÀÖÂ·¾¶)
+--é€šçŸ¥å®¢æˆ·ç«¯æ’­æ”¾éŸ³ä¹ string msg int flag(0å…³é—­1æ’­æ”¾) string musicname(éŸ³ä¹è·¯å¾„)
 SERVER_CUSTOMMSG_PLAY_MUSIC  = "play_music"
 
--- Í¨Öª¿Í»§¶Ë²¥·Å»òÕßÍ£Ö¹²É¼¯ÌØĞ§ string msg, obj npc, int type(0|1), int time(-1), string effectName(""), string effectPos("")
+-- é€šçŸ¥å®¢æˆ·ç«¯æ’­æ”¾æˆ–è€…åœæ­¢é‡‡é›†ç‰¹æ•ˆ string msg, obj npc, int type(0|1), int time(-1), string effectName(""), string effectPos("")
 SERVER_CUSTOMMSG_GATHER_EFFECT = "gather_effect"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÏâÇ¶µÀ¾ß½çÃæ string msg
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€é•¶åµŒé“å…·ç•Œé¢ string msg
 SERVER_CUSTOMMSG_OPEN_FORM_INLAY = "open_form_inlay"
 
--- ÈÎÎñÏµÍ³Ö÷ÏûÏ¢ string msg£¬ int subType.....
+-- ä»»åŠ¡ç³»ç»Ÿä¸»æ¶ˆæ¯ string msgï¼Œ int subType.....
 SERVER_CUSTOMMSG_TASK_MSG = "task_msg"
 
---ÏÔÊ¾È·ÈÏ¶Ô»°¿ò string msg, string info
+--æ˜¾ç¤ºç¡®è®¤å¯¹è¯æ¡† string msg, string info
 SERVER_CUSTOMMSG_CONFIRM_MSG = "confirm_box"
 
---ÏÔÊ¾È·ÈÏ¶Ô»°¿ò string msg, string info
+--æ˜¾ç¤ºç¡®è®¤å¯¹è¯æ¡† string msg, string info
 SERVER_CUSTOMMSG_TIPS_MSG = "tips_box"
 
--- Í¨Öª¿Í»§¶ËÀë¿ª¸±±¾µ¹¼ÆÊ± string msg£¬ int time.....
+-- é€šçŸ¥å®¢æˆ·ç«¯ç¦»å¼€å‰¯æœ¬å€’è®¡æ—¶ string msgï¼Œ int time.....
 SERVER_CUSTOMMSG_OUT_CLONE_TIME = "out_clone_time"
 
--- Í¨Öª¿Í»§¶ËÏÔÊ¾½øÈë¸±±¾²Ëµ¥ string msg, int npcid, int cloneid,....
+-- é€šçŸ¥å®¢æˆ·ç«¯æ˜¾ç¤ºè¿›å…¥å‰¯æœ¬èœå• string msg, int npcid, int cloneid,....
 SERVER_CUSTOMMSG_SHOW_CLONE_MENU = "show_clone_menu"
 
--- Í¨Öª¿Í»§¶Ë¹Ø±Õ½øÈë¸±±¾²Ëµ¥ string msg....
+-- é€šçŸ¥å®¢æˆ·ç«¯å…³é—­è¿›å…¥å‰¯æœ¬èœå• string msg....
 SERVER_CUSTOMMSG_CLOSE_CLONE_MENU = "close_clone_menu"
 
--- Ñ¯ÎÊ¿Í»§¶ËÊÇ·ñÍ¬²½¸±±¾½ø¶È string msg....
+-- è¯¢é—®å®¢æˆ·ç«¯æ˜¯å¦åŒæ­¥å‰¯æœ¬è¿›åº¦ string msg....
 SERVER_CUSTOMMSG_INPHASE_CLONE_MENU = "inphase_clone_menu"
 
--- ¿Í»§¶ËÏÔÊ¾Í¨¹ØÒıµ¼½çÃæ string msg, ¹Ø¿¨ºÅ,....
+-- å®¢æˆ·ç«¯æ˜¾ç¤ºé€šå…³å¼•å¯¼ç•Œé¢ string msg, å…³å¡å·,....
 SERVER_CUSTOMMSG_CLONE_LEAD_OPEN = "clone_lead_form_open"
 
--- ¿Í»§¶Ë¹Ø±ÕÍ¨¹ØÒıµ¼½çÃæ string msg, ¹Ø¿¨ºÅ,....
+-- å®¢æˆ·ç«¯å…³é—­é€šå…³å¼•å¯¼ç•Œé¢ string msg, å…³å¡å·,....
 SERVER_CUSTOMMSG_CLONE_LEAD_CLOSE = "clone_lead_form_close"
 
--- ¿Í»§¶Ë¸Ä±äÍ¨¹ØĞÅÏ¢ string msg, »ú¹ØºÅ£¬¹Ø¿¨ºÅ£¬¹Ø¿¨´¥·¢±ê¼Ç,....
+-- å®¢æˆ·ç«¯æ”¹å˜é€šå…³ä¿¡æ¯ string msg, æœºå…³å·ï¼Œå…³å¡å·ï¼Œå…³å¡è§¦å‘æ ‡è®°,....
 SERVER_CUSTOMMSG_CLONE_LEAD_CHANGE = "clone_lead_form_change"
 
--- Í¨Öª¿Í»§¶Ë¶ÔÎäÑ§°´Å¥½øĞĞÉÁË¸
+-- é€šçŸ¥å®¢æˆ·ç«¯å¯¹æ­¦å­¦æŒ‰é’®è¿›è¡Œé—ªçƒ
 SERVER_CUSTOMMSG_WUXUE_FLASH = "wuxue_flash"
 
--- ¿Í»§¶Ë´ò¿ª²Ù×÷npc¼¼ÄÜ½çÃæ
+-- å®¢æˆ·ç«¯æ‰“å¼€æ“ä½œnpcæŠ€èƒ½ç•Œé¢
 SERVER_CUSTOMMSG_DRIVE_SKILL_OPEN = "drive_skill_open"
 
--- ¿Í»§¶ËÏÔÊ¾Ô­µØ±£»¤Ê±¼ä
+-- å®¢æˆ·ç«¯æ˜¾ç¤ºåŸåœ°ä¿æŠ¤æ—¶é—´
 SERVER_CUSTOMMSG_CONVOY_TIME_LIMIT = "convoy_time_limit"
 
--- ¹«»áÏà¹ØÏÂ·¢ÏûÏ¢Ö÷ÏûÏ¢
+-- å…¬ä¼šç›¸å…³ä¸‹å‘æ¶ˆæ¯ä¸»æ¶ˆæ¯
 SERVER_CUSTOMMSG_GUILD = "guild"
 
--- ¿ªÊ¼¿ÕÖĞ¼¼ÄÜ½øĞĞ¸¡¿Õ
+-- å¼€å§‹ç©ºä¸­æŠ€èƒ½è¿›è¡Œæµ®ç©º
 SERVER_CUSTOMMSG_BEGIN_AIR_STOP = "begin_air_stop"
 
--- ½áÊø¿ÕÖĞ¼¼ÄÜ¸¡¿Õ
+-- ç»“æŸç©ºä¸­æŠ€èƒ½æµ®ç©º
 SERVER_CUSTOMMSG_END_AIR_STOP = "end_air_stop"
 
--- ĞŞÎª´«ÊÚÏûÏ¢
+-- ä¿®ä¸ºä¼ æˆæ¶ˆæ¯
 SERVER_CUSTOMMSG_IMPART = "faculty_impart"
 
--- ´ò¿ª»ò¹Ø±ÕµôÂäÊÓÍ¼
+-- æ‰“å¼€æˆ–å…³é—­æ‰è½è§†å›¾
 SERVER_CUSTOMMSG_SHOW_HIED_DROP_VIEW = "show_hide_drop_view"
 
--- ½øĞĞÌØÊâÔØ¾ßÆï³Ë²Ù×÷
+-- è¿›è¡Œç‰¹æ®Šè½½å…·éª‘ä¹˜æ“ä½œ
 SERVER_CUSTOMMSG_START_SPECIAL_RIDE = "start_special_ride"
 
--- È¡ÏûÌØÊâÔØ¾ßÆï³Ë²Ù×÷
+-- å–æ¶ˆç‰¹æ®Šè½½å…·éª‘ä¹˜æ“ä½œ
 SERVER_CUSTOMMSG_END_SPECIAL_RIDE = "end_special_ride"
 
 
--- ¿ªÆôÊÀ½çæäÕ¾½çÃæ
+-- å¼€å¯ä¸–ç•Œé©¿ç«™ç•Œé¢
 SERVER_CUSTOMMSG_START_WORLD_TRANS = "start_world_trans"
 
--- ¹Ø±ÕÊÀ½çæäÕ¾½çÃæ
+-- å…³é—­ä¸–ç•Œé©¿ç«™ç•Œé¢
 SERVER_CUSTOMMSG_END_WORLD_TRANS = "end_world_trans"
 
--- ·¢²¼¹«¸æ type, info_id ...
+-- å‘å¸ƒå…¬å‘Š type, info_id ...
 SERVERMSG_PUSLISH_NEWS = "Publish_news"
 
--- Í¨Öª¿Í»§¶Ë´ò¿ªÏâÇ¶´°¿Ú string msg_id, string formname, object npc
+-- é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€é•¶åµŒçª—å£ string msg_id, string formname, object npc
 SERVER_CUSTOMMSG_SHOW_ENCHASE_FORM = "show_enchase_form"
 
--- ·¢ËÍÑ¡ÖĞ×°±¸µÄÊÓÍ¼ºÍË÷Òı string msg_id, string formname, int view_id, int index
+-- å‘é€é€‰ä¸­è£…å¤‡çš„è§†å›¾å’Œç´¢å¼• string msg_id, string formname, int view_id, int index
 SERVER_CUSTOMMSG_ENCHASE_EQUIP_SELECT = "enchase_equip_select"
 
--- ·¢ËÍÑ¡ÖĞ×°±¸ÏâÇ¶ĞÅÏ¢¸üĞÂ string msg_id, string formname
+-- å‘é€é€‰ä¸­è£…å¤‡é•¶åµŒä¿¡æ¯æ›´æ–° string msg_id, string formname
 SERVER_CUSTOMMSG_REFRESH_ENCHASE_ITEMS = "refresh_enchase_items"
 
---Í¨Öª¿Í»§¶ËÂí³µ¼ÌĞøĞĞÊ»
+--é€šçŸ¥å®¢æˆ·ç«¯é©¬è½¦ç»§ç»­è¡Œé©¶
 SERVER_CUSTOMMSG_TRANSTOOL_CONTINUE_MOVE = "transtool_continue_move"
 
---·¢ËÍÏÔÊ¾Ê±¼äÏŞÖÆ´°Ìå ¸ñÊ½£ºstring form_name, int time (²ÎÊı±í)
+--å‘é€æ˜¾ç¤ºæ—¶é—´é™åˆ¶çª—ä½“ æ ¼å¼ï¼šstring form_name, int time (å‚æ•°è¡¨)
 SERVER_CUSTOMMSG_SHOW_TIME_LIMIT_FORM = "show_time_limit_form"
 
---¹Ø±ÕÏÔÊ¾Ê±¼äÏŞÖÆ´°Ìå ¸ñÊ½£ºstring form_name(²ÎÊı±í)
+--å…³é—­æ˜¾ç¤ºæ—¶é—´é™åˆ¶çª—ä½“ æ ¼å¼ï¼šstring form_name(å‚æ•°è¡¨)
 SERVER_CUSTOMMSG_CLOSE_TIME_LIMIT_FORM = "close_time_limit_form"
 
---·¢ËÍÏÔÊ¾¼ÆÊı´°Ìå
+--å‘é€æ˜¾ç¤ºè®¡æ•°çª—ä½“
 SERVER_CUSTOMMSG_SHOW_COUNT_LIMIT_FORM = "show_count_limit_form"
 
---·¢ËÍÔö¼Ó¼ÆÊı´°ÌåÖĞµÄ¼ÆÊıÖµ
+--å‘é€å¢åŠ è®¡æ•°çª—ä½“ä¸­çš„è®¡æ•°å€¼
 SERVER_CUSTOMMSG_INC_COUNT_LIMIT_FORM = "inc_count_limit_form"
 
---·¢ËÍ¹Ø±Õ¼ÆÊı´°Ìå
+--å‘é€å…³é—­è®¡æ•°çª—ä½“
 SERVER_CUSTOMMSG_CLOSE_COUNT_LIMIT_FORM = "close_count_limit_form"
 
---·¢ËÍ·şÎñÆ÷Ê±¼ä
+--å‘é€æœåŠ¡å™¨æ—¶é—´
 SERVER_CUSTOMMSG_ASYN_SERVER_TIME = "asyn_server_time"
 
---Í¨Öª¿Í»§¶ËË¢ĞÂ¿ÉÌôÕ½ÁĞ±í
+--é€šçŸ¥å®¢æˆ·ç«¯åˆ·æ–°å¯æŒ‘æˆ˜åˆ—è¡¨
 SERVER_CUSTOMMSG_CHALLENGE_RANK_LIST_UPDATE = "challenge_rank_list_update"
 
---Í¨Öª¿Í»§¶Ë×ÜÅÅĞĞ±í
+--é€šçŸ¥å®¢æˆ·ç«¯æ€»æ’è¡Œè¡¨
 SERVER_CUSTOMMSG_CHALLENGE_RANK_UPDATE = "challenge_rank_update"
 
--- ÃÅÅÉÕ½
+-- é—¨æ´¾æˆ˜
 SERVER_CUSTOMMSG_SCHOOL_WAR = "school_war"
 
--- Í·¶¥Ã°×Ö
+-- å¤´é¡¶å†’å­—
 SERVER_CUSTOMMSG_HEAD_TEXT = "head_text"
 
--- ¿ªÊ¼Ë®ÏÂºôÎü¼ÆËã
+-- å¼€å§‹æ°´ä¸‹å‘¼å¸è®¡ç®—
 SERVER_CUSTOMMSG_BEGIN_BREATH_IN_WATER = "begin_breath_in_water"
 
--- Í£Ö¹Ë®ÏÂºôÎü¼ÆËã
+-- åœæ­¢æ°´ä¸‹å‘¼å¸è®¡ç®—
 SERVER_CUSTOMMSG_END_BREATH_IN_WATER = "end_breath_in_water"
 
---ÌôÕ½³¯Ïòµ÷Õû
+--æŒ‘æˆ˜æœå‘è°ƒæ•´
 SERVER_CUSTOMMSG_CHALLENGE_ORIENT = "challenge_orient"
 
---Í¨Öª¿Í»§¶Ë ÏÔÊ¾ÀëÏß¹Ò»úÖ÷½çÃæ
+--é€šçŸ¥å®¢æˆ·ç«¯ æ˜¾ç¤ºç¦»çº¿æŒ‚æœºä¸»ç•Œé¢
 SERVER_CUSTOMMSG_OFFLINE_ONHAND_SHOWFORM = "showform_offline_onhand"
 
 
--- ´ò¿ªÓÊ¼Ä¼şÏä
+-- æ‰“å¼€é‚®å¯„ä»¶ç®±
 SERVER_CUSTOMMSG_OPEN_MAIL_BOX = "open_mail_box"
 
--- ´ò¿ª¼±¼şÓÊÏä
+-- æ‰“å¼€æ€¥ä»¶é‚®ç®±
 SERVER_CUSTOMMSG_OPEN_URGENT_MAIL_BOX = "open_urgent_mail_box"
 
---Í¨Öª´ò¿ªÊ°È¡Àñ°ü´°¿Ú
+--é€šçŸ¥æ‰“å¼€æ‹¾å–ç¤¼åŒ…çª—å£
 SERVER_CUSTOMMSG_PICK_ITEM  = "pick_item"
 

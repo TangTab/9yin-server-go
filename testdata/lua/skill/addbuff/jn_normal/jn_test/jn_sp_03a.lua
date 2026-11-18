@@ -1,14 +1,14 @@
 --[[
-´«¹¦ÔËÆø£¬»ñµÃÔöÒæ
+ä¼ åŠŸè¿æ°”ï¼Œè·å¾—å¢ç›Š
 ]]
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff_a(self, target, level)
 	if level<=1 and level>=6 then
 		return false
 	end
 
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_sp_03a")
 
 	if not nx_exists(buffer) then
@@ -39,11 +39,11 @@ function AddBuff_a(self, target, level)
 	end
 
 
-	--ÉèÖÃBuffer
+	--è®¾ç½®Buffer
 	nx_set_property(buffer, "LifeTime", lifetime)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "StrAdd", nx_double(value), 1,0)
 
-	--Ìí¼Óµ½Ä¿±ê
+	--æ·»åŠ åˆ°ç›®æ ‡
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

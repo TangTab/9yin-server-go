@@ -1,31 +1,31 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task504.lua
--- @ ½Å±¾¹¦ÄÜ: 504ÈÎÎñÌØÊâ´¦ÀíÂß¼­
--- @ ´´½¨Õß:   wanglei
--- @ ´´½¨ÈÕÆÚ: 2009.12.17
+-- @ è„šæœ¬åç§°: task504.lua
+-- @ è„šæœ¬åŠŸèƒ½: 504ä»»åŠ¡ç‰¹æ®Šå¤„ç†é€»è¾‘
+-- @ åˆ›å»ºè€…:   wanglei
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.12.17
 -----------------------------------------
 
--- Ã¿¸öµ¥¶ÀµÄÈÎÎñ½Å±¾¿ÉÒÔ¸´ÖÆ´ËÄ£°å£¬ĞŞ¸ÄÂß¼­
+-- æ¯ä¸ªå•ç‹¬çš„ä»»åŠ¡è„šæœ¬å¯ä»¥å¤åˆ¶æ­¤æ¨¡æ¿ï¼Œä¿®æ”¹é€»è¾‘
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
-	-- µ±Ç°³¡¾°
+	-- å½“å‰åœºæ™¯
 	local scene = nx_get_scene()
 	local scene_id = nx_query_property(scene, "ConfigID")
 	local origin_id = "sta_slin0101"
 	local config_id = "tasklua_504" 
 
-	-- Èç¹ûÓµÓĞÕâ¸öÉí·İÖ±½ÓË¢ĞÂ½ø¶È
+	-- å¦‚æœæ‹¥æœ‰è¿™ä¸ªèº«ä»½ç›´æ¥åˆ·æ–°è¿›åº¦
 	if nx_is_owned_origin(player, origin_id) then
-		-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ
+		-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ
 		local row = nx_add_record_row_values(player, "Task_Record", nx_int(taskid), nx_int(0),
 					   nx_int(1), nx_int(1), origin_id, nx_string(scene_id), config_id)
 
@@ -33,11 +33,11 @@ function Task_After_Accept(player, npc, taskid)
 			return 0
 		end
 
-		--Ë¢ĞÂÈÎÎñ½ø¶È
+		--åˆ·æ–°ä»»åŠ¡è¿›åº¦
 		nx_refresh_task_flag(player)
 
 	else
-		-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ
+		-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ
 		local row = nx_add_record_row_values(player, "Task_Record", nx_int(taskid), nx_int(0),
 					   nx_int(0), nx_int(1), origin_id, nx_string(scene_id), config_id)
 
@@ -51,7 +51,7 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 
 
@@ -59,7 +59,7 @@ function Task_Complete_Condition(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 
 	return 1

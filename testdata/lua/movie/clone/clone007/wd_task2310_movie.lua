@@ -2,17 +2,17 @@
 -- FILENAME	: movie\\after_movie_action.lua
 -- COPYRIGHT: Snail Game
 -- AUTHOR	: yurc
--- DATE		: 2010Äê4ÔÂ8ÈÕ
+-- DATE		: 2010å¹´4æœˆ8æ—¥
 -------------------------------------------------------------------------------
--- DESC		: ¹ØÓÚ´´½¨Ô¬ÆëµÄ´¦ÀíÂß¼­
+-- DESC		: å…³äºåˆ›å»ºè¢é½çš„å¤„ç†é€»è¾‘
 ---****************************************************************************
--- ½áÊø¾çÇéºóµÄÌØÊâ´¦Àí
+-- ç»“æŸå‰§æƒ…åçš„ç‰¹æ®Šå¤„ç†
 local npc_id_1 = "NpcClone007008";
 local npc_cp_1 = 1;
 local lifeTime = 600000;
 
 function after_end_movie(player, npc, movie_id)
-	--»ñµÃÍæ¼ÒÉíÉÏ±£´æµÄ´¥·¢npc
+	--è·å¾—ç©å®¶èº«ä¸Šä¿å­˜çš„è§¦å‘npc
 	local npc = nx_null_obj();
 	if nx_find_data(player, "task_event_npc") then
 		npc = nx_query_data(player, "task_event_npc");
@@ -22,18 +22,18 @@ function after_end_movie(player, npc, movie_id)
 		return;
 	end
 
-	--Èç¹ûÒÑ¾­´´½¨ÁË¹ÖÎï,Ôò²»ÖØ¸´´´½¨
+	--å¦‚æœå·²ç»åˆ›å»ºäº†æ€ªç‰©,åˆ™ä¸é‡å¤åˆ›å»º
 	local obj_1 = nx_query_data(npc, "CreateObj_1");
 	if nx_exists(obj_1) then
 		return;
 	end
 
-	--´´½¨¹ÖÎï
+	--åˆ›å»ºæ€ªç‰©
 	local x, y, z, o = nx_get_position(npc);
 	--nx_sysinfo_broadcast( 1, "x,"..tostring(x).." y,"..tostring(y).." z,"..tostring(z) );
 	obj_1 = nx_create_obj(nx_string(npc_id_1), npc_cp_1, x, y, z, o);
 
-	--ÉèÖÃ¹ÖÎïµÄ¸¸¶ÔÏóÎª´¥·¢npc,²¢ÉèÖÃ´¥·¢npcµÄ×Ô¶ÔÏóÎª´´½¨µÄ¹ÖÎï
+	--è®¾ç½®æ€ªç‰©çš„çˆ¶å¯¹è±¡ä¸ºè§¦å‘npc,å¹¶è®¾ç½®è§¦å‘npcçš„è‡ªå¯¹è±¡ä¸ºåˆ›å»ºçš„æ€ªç‰©
 	if nx_exists(obj_1) then
 		nx_set_data(npc, "CreateObj_1", obj_1);
 		nx_add_data(obj_1, "ParentNpc", 8);

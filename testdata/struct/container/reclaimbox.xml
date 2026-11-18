@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÉÌµê»Ø¹ºÈÝÆ÷ÊôÐÔ-->
+<!--å•†åº—å›žè´­å®¹å™¨å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!-- ÒÔÏÂÎª»Ø¹ºÊÓÍ¼µÄÊôÐÔ -->
-		<property name="MaxItemNum" type="int" public="false" private="true" save="true" desc="×î´óÎïÆ·ÊýÁ¿"/>
+		<!-- ä»¥ä¸‹ä¸ºå›žè´­è§†å›¾çš„å±žæ€§ -->
+		<property name="MaxItemNum" type="int" public="false" private="true" save="true" desc="æœ€å¤§ç‰©å“æ•°é‡"/>
 	</properties>
 </object>

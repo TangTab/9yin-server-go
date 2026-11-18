@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- Í¨¸æÊôÐÔ -->
+	<!-- é€šå‘Šå±žæ€§ -->
 	<properties>
-	<property name="Notify_X_Pos" type="int" public="false" private="false" save="true" desc="Í¨¸æ½çÃæX×ø±êÖá"/>
-	<property name="Notify_Y_Pos" type="int" public="false" private="false" save="true" desc="Í¨¸æ½çÃæY×ø±êÖá"/>
+	<property name="Notify_X_Pos" type="int" public="false" private="false" save="true" desc="é€šå‘Šç•Œé¢Xåæ ‡è½´"/>
+	<property name="Notify_Y_Pos" type="int" public="false" private="false" save="true" desc="é€šå‘Šç•Œé¢Yåæ ‡è½´"/>
 	</properties>
 
 </object>

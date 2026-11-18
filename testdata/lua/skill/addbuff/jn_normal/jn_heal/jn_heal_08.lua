@@ -1,14 +1,14 @@
 --[[
 buf_heal_08
-µ¥ÌåË²Ê±»Ø¸´+»Ø¸´buffer
---µÈ¼¶1£º100+¾«Éñ*2,40Ãë|Ã¿5Ãë»Ø¸´lv*50ÆøÑª
---µÈ¼¶2£º200+¾«Éñ*2.4,40Ãë|Ã¿5Ãë»Ø¸´lv*50ÆøÑª
---µÈ¼¶3£º400+¾«Éñ*2.8,40Ãë|Ã¿5Ãë»Ø¸´lv*50ÆøÑª
---µÈ¼¶4£º800+¾«Éñ*3.2,40Ãë|Ã¿5Ãë»Ø¸´lv*50ÆøÑª
---µÈ¼¶5£º1200+¾«Éñ*3.6,40Ãë|Ã¿5Ãë»Ø¸´lv*50ÆøÑª
+å•ä½“ç¬æ—¶å›å¤+å›å¤buffer
+--ç­‰çº§1ï¼š100+ç²¾ç¥*2,40ç§’|æ¯5ç§’å›å¤lv*50æ°”è¡€
+--ç­‰çº§2ï¼š200+ç²¾ç¥*2.4,40ç§’|æ¯5ç§’å›å¤lv*50æ°”è¡€
+--ç­‰çº§3ï¼š400+ç²¾ç¥*2.8,40ç§’|æ¯5ç§’å›å¤lv*50æ°”è¡€
+--ç­‰çº§4ï¼š800+ç²¾ç¥*3.2,40ç§’|æ¯5ç§’å›å¤lv*50æ°”è¡€
+--ç­‰çº§5ï¼š1200+ç²¾ç¥*3.6,40ç§’|æ¯5ç§’å›å¤lv*50æ°”è¡€
 ]]
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
 	local healpower = nx_query_property(self, "HealPower") + nx_query_property(self, "HealPowerAdd")
 	local Spi = nx_query_property(self, "Spi") + nx_query_property(self, "SpiAdd")
@@ -33,33 +33,33 @@ function AddBuff(self, target, level)
 		inc_value = healpower*50
 	end
 
-	--´´½¨Buffer, Ë²Ê±»Ø¸´
+	--åˆ›å»ºBuffer, ç¬æ—¶å›å¤
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_08a")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "HP", nx_double(healpoint), 0,1)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false
 	end
 
-	--´´½¨Buffer, ÖÜÆÚĞÔ»ØÑª
+	--åˆ›å»ºBuffer, å‘¨æœŸæ€§å›è¡€
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_08b")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(inc_value), 0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

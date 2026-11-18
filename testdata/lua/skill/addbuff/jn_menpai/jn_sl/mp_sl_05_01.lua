@@ -1,11 +1,11 @@
--- ÔöÒæbuff´ó·ùÔö¼Ó±ÛÁ¦
--- lv1:30·ÖÖÓÄÚÔö¼Ó±ÛÁ¦10µã
--- lv2:35·ÖÖÓÄÚÔö¼Ó±ÛÁ¦15µã
--- lv3:40·ÖÖÓÄÚÔö¼Ó±ÛÁ¦20µã
--- lv4:50·ÖÖÓÄÚÔö¼Ó±ÛÁ¦25µã
--- lv5:60·ÖÖÓÄÚÔö¼Ó±ÛÁ¦30µã
+-- å¢ç›Šbuffå¤§å¹…å¢åŠ è‡‚åŠ›
+-- lv1:30åˆ†é’Ÿå†…å¢åŠ è‡‚åŠ›10ç‚¹
+-- lv2:35åˆ†é’Ÿå†…å¢åŠ è‡‚åŠ›15ç‚¹
+-- lv3:40åˆ†é’Ÿå†…å¢åŠ è‡‚åŠ›20ç‚¹
+-- lv4:50åˆ†é’Ÿå†…å¢åŠ è‡‚åŠ›25ç‚¹
+-- lv5:60åˆ†é’Ÿå†…å¢åŠ è‡‚åŠ›30ç‚¹
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
 	local strAdd = 0
 
@@ -21,17 +21,17 @@ function AddBuff(self, target, level)
 		strAdd = 30
 	end
 
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_mp_sl_05_01")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "StrAdd", nx_double(strAdd), 0,0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

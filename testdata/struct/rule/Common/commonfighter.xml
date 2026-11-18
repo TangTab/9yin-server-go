@@ -1,92 +1,92 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Ò»¸öÕ½¶·¶ÔÏó(npc»òÍæ¼Ò)µÄËùÓÐÊôÐÔ, NPCµÄÊôÐÔÖ÷Òª´ÓÅäÖÃÎÄ¼þ¶ÁÈ¡, ½ÇÉ«ÔòÊÇËùÓÐ×°±¸µÄ¼¯ºÏ-->
+<!--ä¸€ä¸ªæˆ˜æ–—å¯¹è±¡(npcæˆ–çŽ©å®¶)çš„æ‰€æœ‰å±žæ€§, NPCçš„å±žæ€§ä¸»è¦ä»Žé…ç½®æ–‡ä»¶è¯»å–, è§’è‰²åˆ™æ˜¯æ‰€æœ‰è£…å¤‡çš„é›†åˆ-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="LogicState" type="byte" public="true" private="true" save="false" realtime="true" desc="Âß¼­×´Ì¬"/>
-		<property name="Dead" type="byte" public="true" private="true" save="true" realtime="true" desc="ËÀÍö×´Ì¬0:Î´ËÀÍö,1:ÒÑËÀÍö"/>
-		<property name="CurAttackType" type="int" public="false" private="false" save="false" desc="µ±Ç°µÄ¹¥»÷·½Ê½0:´ò»÷,1:Éä»÷"/>
-		<property name="AttributeID" type="int" public="false" private="false" save="true" desc="Ö÷½ÇÕ½¶·ÊôÐÔID"/>
-		<property name="GuardSkill" type="string" public="false" private="true" save="true" desc="»¤¼×¼¼ÄÜ"/>
-    <property name="ModelScale" type="float" public="true" private="true" save="false" desc="Ä£ÐÍËõ·Å¸½¼Ó±¶ÂÊ£¬³õÊ¼Îª0"/>
-    <property name="PvpFlag" type="byte" public="true" private="false" save="false" desc="ÊÇ·ñÎªpvp»î¶¯NPC1 ÊÇ 0·ñ"/>
-    <property name="PvpType" type="byte" public="true" private="false" save="false" desc="pvp»î¶¯ÔØ¾ßÀàÐÍ1 ¹¥»÷ÔØ¾ß 0·ÀÓùÔØ¾ß"/>
+		<property name="LogicState" type="byte" public="true" private="true" save="false" realtime="true" desc="é€»è¾‘çŠ¶æ€"/>
+		<property name="Dead" type="byte" public="true" private="true" save="true" realtime="true" desc="æ­»äº¡çŠ¶æ€0:æœªæ­»äº¡,1:å·²æ­»äº¡"/>
+		<property name="CurAttackType" type="int" public="false" private="false" save="false" desc="å½“å‰çš„æ”»å‡»æ–¹å¼0:æ‰“å‡»,1:å°„å‡»"/>
+		<property name="AttributeID" type="int" public="false" private="false" save="true" desc="ä¸»è§’æˆ˜æ–—å±žæ€§ID"/>
+		<property name="GuardSkill" type="string" public="false" private="true" save="true" desc="æŠ¤ç”²æŠ€èƒ½"/>
+    <property name="ModelScale" type="float" public="true" private="true" save="false" desc="æ¨¡åž‹ç¼©æ”¾é™„åŠ å€çŽ‡ï¼Œåˆå§‹ä¸º0"/>
+    <property name="PvpFlag" type="byte" public="true" private="false" save="false" desc="æ˜¯å¦ä¸ºpvpæ´»åŠ¨NPC1 æ˜¯ 0å¦"/>
+    <property name="PvpType" type="byte" public="true" private="false" save="false" desc="pvpæ´»åŠ¨è½½å…·ç±»åž‹1 æ”»å‡»è½½å…· 0é˜²å¾¡è½½å…·"/>
 
   </properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="cooldown_rec" cols="4" maxrows="512" save="true" public="false" private="true" desc="ÀäÈ´±í">
-			<column type="dword" desc="ÀäÈ´·ÖÀàID"/>
-			<column type="int64" desc="ÀäÈ´¿ªÊ¼Ê±¼ä£¬ÏÖÊµ64Î»Ê±¼äÊý¾Ý"/>
-			<column type="int64" desc="ÀäÈ´½áÊøÊ±¼ä£¬ÏÖÊµ64Î»Ê±¼äÊý¾Ý"/>
-			<column type="dword" desc="ÀäÈ´´ó·ÖÀàID,¸üÉÏÒ»²ãµÄ·ÖÀà"/>
+		<record name="cooldown_rec" cols="4" maxrows="512" save="true" public="false" private="true" desc="å†·å´è¡¨">
+			<column type="dword" desc="å†·å´åˆ†ç±»ID"/>
+			<column type="int64" desc="å†·å´å¼€å§‹æ—¶é—´ï¼ŒçŽ°å®ž64ä½æ—¶é—´æ•°æ®"/>
+			<column type="int64" desc="å†·å´ç»“æŸæ—¶é—´ï¼ŒçŽ°å®ž64ä½æ—¶é—´æ•°æ®"/>
+			<column type="dword" desc="å†·å´å¤§åˆ†ç±»ID,æ›´ä¸Šä¸€å±‚çš„åˆ†ç±»"/>
 		</record>
-		<record name="nocooldown_team_rec" cols="1" maxrows="128" save="true" public="false" private="true" desc="ÁÙÊ±²»ÊÜ´«µÝÀäÈ´Ó°ÏìµÄ·Ö×é">
-			<column type="dword" desc="ÀäÈ´·ÖÀàID"/>
+		<record name="nocooldown_team_rec" cols="1" maxrows="128" save="true" public="false" private="true" desc="ä¸´æ—¶ä¸å—ä¼ é€’å†·å´å½±å“çš„åˆ†ç»„">
+			<column type="dword" desc="å†·å´åˆ†ç±»ID"/>
 		</record>
-		<record name="nocooldown_skill_rec" cols="2" maxrows="128" save="true" public="false" private="true" desc="ÁÙÊ±²»ÊÜÀäÈ´Ó°ÏìµÄ¼¼ÄÜ">
-			<column type="dword" desc="ÀäÈ´·ÖÀàID"/>
-			<column type="dword" desc="ÀäÈ´×é·ÖÀàID"/>
+		<record name="nocooldown_skill_rec" cols="2" maxrows="128" save="true" public="false" private="true" desc="ä¸´æ—¶ä¸å—å†·å´å½±å“çš„æŠ€èƒ½">
+			<column type="dword" desc="å†·å´åˆ†ç±»ID"/>
+			<column type="dword" desc="å†·å´ç»„åˆ†ç±»ID"/>
 		</record>
-		<record name="fight_relation_rec" cols="2" maxrows="512" save="false" public="false" private="true" desc="Õ½¶·¹ØÏµ±í">
+		<record name="fight_relation_rec" cols="2" maxrows="512" save="false" public="false" private="true" desc="æˆ˜æ–—å…³ç³»è¡¨">
 			<column type="object" desc=""/>
-			<column type="word" desc="Õ½¶·¹ØÏµ¿ªÊ¼µÄÊ±¼ä"/>
+			<column type="word" desc="æˆ˜æ–—å…³ç³»å¼€å§‹çš„æ—¶é—´"/>
 		</record>
-		<record name="attack_back_rec" cols="3" maxrows="128" save="false" public="false" private="true" desc="»¹»÷¹ØÏµ±í">
+		<record name="attack_back_rec" cols="3" maxrows="128" save="false" public="false" private="true" desc="è¿˜å‡»å…³ç³»è¡¨">
 			<column type="object" desc=""/>
-			<column type="byte" desc="±»¹¥»÷¿ªÊ¼µÄÊ±¼ä"/>
-			<column type="widestr" desc="Íæ¼ÒÃû×Ö"/>
+			<column type="byte" desc="è¢«æ”»å‡»å¼€å§‹çš„æ—¶é—´"/>
+			<column type="widestr" desc="çŽ©å®¶åå­—"/>
 		</record>
-    <record name="damage_tansfer_rec" cols="4" maxrows="50" save="false" public="false" private="false" desc="ÉËº¦×ªÒÆ">
-      <column type="object" desc="ÉËº¦×ªÒÆ¶ÔÏó"/>
-      <column type="dword" desc="ÉËº¦ÀàÐÍ"/>
-      <column type="float" desc="×ªÒÆ°Ù·Ö±È"/>
-      <column type="string" desc="bufferµÄConfigID"/>
+    <record name="damage_tansfer_rec" cols="4" maxrows="50" save="false" public="false" private="false" desc="ä¼¤å®³è½¬ç§»">
+      <column type="object" desc="ä¼¤å®³è½¬ç§»å¯¹è±¡"/>
+      <column type="dword" desc="ä¼¤å®³ç±»åž‹"/>
+      <column type="float" desc="è½¬ç§»ç™¾åˆ†æ¯”"/>
+      <column type="string" desc="bufferçš„ConfigID"/>
     </record>
-    <record name="hate_transfer_rec" cols="4" maxrows="50" save="false" public="false" private="false" desc="³ðºÞ×ªÒÆ">
-      <column type="object" desc="³ðºÞ×ªÒÆ¶ÔÏó"/>
-      <column type="dword" desc="³ðºÞ×ªÒÆ°Ù·Ö±È"/>
-	<column type="object"  desc="buffer¶ÔÏó"/>
-      <column type="string" desc="bufferµÄConfigID"/>
+    <record name="hate_transfer_rec" cols="4" maxrows="50" save="false" public="false" private="false" desc="ä»‡æ¨è½¬ç§»">
+      <column type="object" desc="ä»‡æ¨è½¬ç§»å¯¹è±¡"/>
+      <column type="dword" desc="ä»‡æ¨è½¬ç§»ç™¾åˆ†æ¯”"/>
+	<column type="object"  desc="bufferå¯¹è±¡"/>
+      <column type="string" desc="bufferçš„ConfigID"/>
     </record>
-    <record name="damage_next_rec" cols="8" maxrows="50" save="false" public="false" private="false" desc="ÉËº¦ÎüÊÕ£¬¸½¼Óµ½ÏÂ´Î¹¥»÷">
-      <column type="dword" desc="ÉËº¦ÀàÐÍ"/>
-      <column type="dword" desc="ÎüÊÕ´ÎÊý"/>
-      <column type="float" desc="±£´æÉËº¦µÄ°Ù·Ö±È"/>
-      <column type="dword" desc="ÒÑ¾­Ê¹ÓÃ´ÎÊý"/>
-      <column type="dword" desc="ÒÑ±£´æµÄ×ÜÉËº¦"/>
-      <column type="object" desc="buff¶ÔÏó"/>	  
-      <column type="string" desc="bufferµÄConfigID"/>
-      <column type="object" desc="sender¶ÔÏó"/>
+    <record name="damage_next_rec" cols="8" maxrows="50" save="false" public="false" private="false" desc="ä¼¤å®³å¸æ”¶ï¼Œé™„åŠ åˆ°ä¸‹æ¬¡æ”»å‡»">
+      <column type="dword" desc="ä¼¤å®³ç±»åž‹"/>
+      <column type="dword" desc="å¸æ”¶æ¬¡æ•°"/>
+      <column type="float" desc="ä¿å­˜ä¼¤å®³çš„ç™¾åˆ†æ¯”"/>
+      <column type="dword" desc="å·²ç»ä½¿ç”¨æ¬¡æ•°"/>
+      <column type="dword" desc="å·²ä¿å­˜çš„æ€»ä¼¤å®³"/>
+      <column type="object" desc="buffå¯¹è±¡"/>	  
+      <column type="string" desc="bufferçš„ConfigID"/>
+      <column type="object" desc="senderå¯¹è±¡"/>
     </record>
-    <record name="damage_absorb_rec" cols="6" maxrows="50" save="false" public="false" private="false" desc="ÉËº¦ÎüÊÕ">
-        <column type="dword" desc="ÎüÊÕÉËº¦ÀàÐÍ"/>
-        <column type="dword" desc="ÎüÊÕÉËº¦µãÊý"/>
-        <column type="object" desc="buffer¶ÔÏó"/>
-        <column type="string" desc="ÉËº¦µãÊ¹ÓÃÍêÖ®ºóÊÍ·ÅµÄ¼¼ÄÜ"/>
-		<column type="object" desc="sender¶ÔÏó"/>
+    <record name="damage_absorb_rec" cols="6" maxrows="50" save="false" public="false" private="false" desc="ä¼¤å®³å¸æ”¶">
+        <column type="dword" desc="å¸æ”¶ä¼¤å®³ç±»åž‹"/>
+        <column type="dword" desc="å¸æ”¶ä¼¤å®³ç‚¹æ•°"/>
+        <column type="object" desc="bufferå¯¹è±¡"/>
+        <column type="string" desc="ä¼¤å®³ç‚¹ä½¿ç”¨å®Œä¹‹åŽé‡Šæ”¾çš„æŠ€èƒ½"/>
+		<column type="object" desc="senderå¯¹è±¡"/>
 		<column type="string" desc="bufferID"/>
     </record>
-    <record name="damage_Immunity_rec" cols="5" maxrows="50" save="false" public="false" private="false" desc="ÊÜ»÷Ê±ÃâÒß">
-      <column type="dword" desc="ÃâÒßÉËº¦ÀàÐÍ"/>
-      <column type="dword" desc="°Ù·Ö±È»òÕßÃâÒßµãÊý"/>
-      <column type="dword" desc="Ñ¡Ïî(1:°Ù·Ö±È, 0:ÃâÒßµãÊý)"/>
-      <column type="string" desc="bufferµÄConfigID"/>
-      <column type="object" desc="bufferµÄSender"/>	
+    <record name="damage_Immunity_rec" cols="5" maxrows="50" save="false" public="false" private="false" desc="å—å‡»æ—¶å…ç–«">
+      <column type="dword" desc="å…ç–«ä¼¤å®³ç±»åž‹"/>
+      <column type="dword" desc="ç™¾åˆ†æ¯”æˆ–è€…å…ç–«ç‚¹æ•°"/>
+      <column type="dword" desc="é€‰é¡¹(1:ç™¾åˆ†æ¯”, 0:å…ç–«ç‚¹æ•°)"/>
+      <column type="string" desc="bufferçš„ConfigID"/>
+      <column type="object" desc="bufferçš„Sender"/>	
     </record>
-    <record name="damage_resume_rec" cols="5" maxrows="50" save="false" public="false" private="false" desc="ÊÜ»÷»Ö¸´">
-        <column type="float" desc="»Ø¸´µÄÕ¼ÉËº¦°Ù·Ö±È"/>
-        <column type="dword" desc="»Ö¸´ÀàÐÍ"/>
-        <column type="object" desc="buffer¶ÔÏó"/>
-		<column type="string" desc="bufferµÄConfigID"/>
-        <column type="object" desc="bufferµÄSender"/>	
+    <record name="damage_resume_rec" cols="5" maxrows="50" save="false" public="false" private="false" desc="å—å‡»æ¢å¤">
+        <column type="float" desc="å›žå¤çš„å ä¼¤å®³ç™¾åˆ†æ¯”"/>
+        <column type="dword" desc="æ¢å¤ç±»åž‹"/>
+        <column type="object" desc="bufferå¯¹è±¡"/>
+		<column type="string" desc="bufferçš„ConfigID"/>
+        <column type="object" desc="bufferçš„Sender"/>	
     </record>
-    <record name="damage_note_rec" cols="4" maxrows="50" save="false" public="false" private="false" desc="±ê¼Ç¼ÇÂ¼">
-        <column type="object" desc="±ê¼ÇÊ©¼ÓÕß"/>
-        <column type="float" desc="Ôö¼Ó°Ù·Ö±È"/>
-        <column type="object" desc="buff¶ÔÏó"/>
-		<column type="string" desc="bufferµÄConfigID"/>
+    <record name="damage_note_rec" cols="4" maxrows="50" save="false" public="false" private="false" desc="æ ‡è®°è®°å½•">
+        <column type="object" desc="æ ‡è®°æ–½åŠ è€…"/>
+        <column type="float" desc="å¢žåŠ ç™¾åˆ†æ¯”"/>
+        <column type="object" desc="buffå¯¹è±¡"/>
+		<column type="string" desc="bufferçš„ConfigID"/>
     </record>
   </records>
 </object>

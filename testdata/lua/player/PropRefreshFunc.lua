@@ -1,7 +1,7 @@
 require("share\\server_custom_define")
 
 
---»ñÈ¡ÎïÀí¹¥»÷Ç¿¶È
+--è·å–ç‰©ç†æ”»å‡»å¼ºåº¦
 function nx_get_intphyattack(self, index)
 	local str = nx_query_property_record(self, "Str", index)
 	local sta = nx_query_property_record(self, "Sta", index)	
@@ -9,7 +9,7 @@ function nx_get_intphyattack(self, index)
 	return value
 end
 
---»ñÈ¡×î´óÎïÀí¹¥»÷
+--è·å–æœ€å¤§ç‰©ç†æ”»å‡»
 function nx_get_phymaxattack(self, index)
 	--local level = nx_query_property(self, "Level")
 	--local dodge_level = nx_query_property(self, "DodgeLevel")
@@ -18,7 +18,7 @@ function nx_get_phymaxattack(self, index)
 	return value
 end
 
---»ñÈ¡×îĞ¡ÎïÀí¹¥»÷
+--è·å–æœ€å°ç‰©ç†æ”»å‡»
 function nx_get_phyminattack(self, index)
 	--local level = nx_query_property(self, "Level")
 	--local dodge_level = nx_query_property(self, "DodgeLevel")
@@ -27,7 +27,7 @@ function nx_get_phyminattack(self, index)
 	return value
 end
 
---»ñÈ¡±©»÷µÈ¼¶
+--è·å–æš´å‡»ç­‰çº§
 function nx_get_critlevel(self, index)
 	local dex = nx_query_property_record(self, "Dex", index)
 	local esth = nx_query_property_record(self, "Esth", index)
@@ -35,7 +35,7 @@ function nx_get_critlevel(self, index)
 	return value
 end
 
---»ñÈ¡±©»÷ÂÊ
+--è·å–æš´å‡»ç‡
 function nx_get_critprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -44,7 +44,7 @@ function nx_get_critprob(self, index)
 	return value
 end
 
---»ñÈ¡»¤¼×´©Í¸ÂÊ
+--è·å–æŠ¤ç”²ç©¿é€ç‡
 function nx_get_penetrateprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -53,7 +53,7 @@ function nx_get_penetrateprob(self, index)
 	return value
 end
 
---»ñÈ¡¾«×¼µÈ¼¶
+--è·å–ç²¾å‡†ç­‰çº§
 function nx_get_accuratelevel(self, index)
 	local dex = nx_query_property_record(self, "Dex", index)
 	local esth = nx_query_property_record(self, "Esth", index)
@@ -61,7 +61,7 @@ function nx_get_accuratelevel(self, index)
 	return value
 end
 
---»ñÈ¡¾«×¼ÂÊ
+--è·å–ç²¾å‡†ç‡
 function nx_get_accurateprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -70,7 +70,7 @@ function nx_get_accurateprob(self, index)
 	return value
 end
 
---»ñÈ¡±©»÷±¶ÂÊ
+--è·å–æš´å‡»å€ç‡
 function nx_get_critmulprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -79,7 +79,7 @@ function nx_get_critmulprob(self, index)
 	return value
 end
 
---»ñÈ¡·¨Êõ¹¥»÷Ç¿¶È
+--è·å–æ³•æœ¯æ”»å‡»å¼ºåº¦
 function nx_get_intmagattack(self, index)
 	local ing = nx_query_property_record(self, "Ing", index)
 	local spi = nx_query_property_record(self, "Spi", index)
@@ -87,21 +87,21 @@ function nx_get_intmagattack(self, index)
 	return value
 end
 
---»ñÈ¡×î´ó·¨Êõ¹¥»÷
+--è·å–æœ€å¤§æ³•æœ¯æ”»å‡»
 function nx_get_magicmaxattack(self, index)
 	local intensitymagicattack = nx_query_property_record(self,"IntensityMagicAttack", index)
 	local value = intensitymagicattack * 1.2
 	return value
 end
 
---»ñÈ¡×îĞ¡·¨Êõ¹¥»÷
+--è·å–æœ€å°æ³•æœ¯æ”»å‡»
 function nx_get_magicminattack(self, index)
 	local intensitymagicattack = nx_query_property_record(self,"IntensityMagicAttack", index)
 	local value = intensitymagicattack * 0.8
 	return value
 end
 
---»ñÈ¡·¨Êõ±©»÷µÈ¼¶
+--è·å–æ³•æœ¯æš´å‡»ç­‰çº§
 function nx_get_magcritlevel(self, index)
 	local dex = nx_query_property_record(self, "Dex", index)
 	local esth = nx_query_property_record(self, "Esth", index)
@@ -109,7 +109,7 @@ function nx_get_magcritlevel(self, index)
 	return value
 end
 
---»ñÈ¡·¨Êõ±©»÷ÂÊ
+--è·å–æ³•æœ¯æš´å‡»ç‡
 function nx_get_magcritprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -118,7 +118,7 @@ function nx_get_magcritprob(self, index)
 	return value
 end
 
---»ñÈ¡·¨Êõ¾«×¼µÈ¼¶
+--è·å–æ³•æœ¯ç²¾å‡†ç­‰çº§
 function nx_get_magpreclevel(self, index)
 	local dex = nx_query_property_record(self, "Dex", index)
 	local esth = nx_query_property_record(self, "Esth", index)
@@ -126,7 +126,7 @@ function nx_get_magpreclevel(self, index)
 	return value
 end
 
---»ñÈ¡·¨Êõ¾«×¼ÂÊ
+--è·å–æ³•æœ¯ç²¾å‡†ç‡
 function nx_get_magprecprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -135,7 +135,7 @@ function nx_get_magprecprob(self, index)
 	return value
 end
 
---»ñÈ¡»¤¼×¼õÉËÂÊ
+--è·å–æŠ¤ç”²å‡ä¼¤ç‡
 function nx_get_guardrateprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -144,7 +144,7 @@ function nx_get_guardrateprob(self, index)
 	return value
 end
 
---»ñÈ¡ÉÁ±ÜµÈ¼¶
+--è·å–é—ªé¿ç­‰çº§
 function nx_get_dodgelevel(self, index)
 	local dex = nx_query_property_record(self, "Dex", index)
 	local esth = nx_query_property_record(self, "Esth", index)
@@ -152,7 +152,7 @@ function nx_get_dodgelevel(self, index)
 	return value
 end
 
---»ñÈ¡ÉÁ±ÜÂÊ
+--è·å–é—ªé¿ç‡
 function nx_get_dodgeprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -161,7 +161,7 @@ function nx_get_dodgeprob(self, index)
 	return value
 end
 
---»ñÈ¡·¨ÊõÉÁ±ÜµÈ¼¶
+--è·å–æ³•æœ¯é—ªé¿ç­‰çº§
 function nx_get_magdodgelevel(self, index)
 	local dex = nx_query_property_record(self, "Dex", index)
 	local esth = nx_query_property_record(self, "Esth", index)
@@ -169,7 +169,7 @@ function nx_get_magdodgelevel(self, index)
 	return value
 end
 
---»ñÈ¡·¨ÊõÉÁ±ÜÂÊ
+--è·å–æ³•æœ¯é—ªé¿ç‡
 function nx_get_magdodgeprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -178,7 +178,7 @@ function nx_get_magdodgeprob(self, index)
 	return value
 end
 
---»ñÈ¡·ÀÓù¼¸ÂÊ
+--è·å–é˜²å¾¡å‡ ç‡
 function nx_get_defenseprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -187,7 +187,7 @@ function nx_get_defenseprob(self, index)
 	return value
 end
 
---»ñÈ¡È«·¨ÊõµÖ¿¹
+--è·å–å…¨æ³•æœ¯æŠµæŠ—
 function nx_get_allresist(self, index)
 	local ing = nx_query_property_record(self, "Ing", index)
 	local spi = nx_query_property_record(self, "Spi", index)
@@ -195,7 +195,7 @@ function nx_get_allresist(self, index)
 	return value
 end
 
---»ñÈ¡·¨Êõ¼õÉËÂÊ
+--è·å–æ³•æœ¯å‡ä¼¤ç‡
 function nx_get_allresistprob(self, index)
 	local level = nx_query_property(self, "Level")
 	local max_level = nx_query_max_level(self)
@@ -204,7 +204,7 @@ function nx_get_allresistprob(self, index)
 	return value
 end
 
---»ñÈ¡HP»Ø¸´ËÙ¶È(×¢Ïú²¿·ÖÎª°´±ÈÀı»Ö¸´)
+--è·å–HPå›å¤é€Ÿåº¦(æ³¨é”€éƒ¨åˆ†ä¸ºæŒ‰æ¯”ä¾‹æ¢å¤)
 function nx_get_hp_upspeed(self, index)
    --local max_hp = nx_query_property(self, "MaxHP") + nx_query_property(self, "MaxHPAdd")
    --local value = max_hp * 0.1
@@ -214,7 +214,7 @@ function nx_get_hp_upspeed(self, index)
    return value
 end
 
---»ñÈ¡MP»Ø¸´ËÙ¶È(×¢Ïú²¿·ÖÎª°´±ÈÀı»Ö¸´)
+--è·å–MPå›å¤é€Ÿåº¦(æ³¨é”€éƒ¨åˆ†ä¸ºæŒ‰æ¯”ä¾‹æ¢å¤)
 function nx_get_mp_upspeed(self, index)
    --local max_mp = nx_query_property(self, "MaxMP") + nx_query_property(self, "MaxMPAdd")
    --local value = max_mp * 0.1
@@ -223,7 +223,7 @@ function nx_get_mp_upspeed(self, index)
    return value
 end
 
---»ñÈ¡EY»Ø¸´ËÙ¶È(×¢Ïú²¿·ÖÎª°´±ÈÀı»Ö¸´)
+--è·å–EYå›å¤é€Ÿåº¦(æ³¨é”€éƒ¨åˆ†ä¸ºæŒ‰æ¯”ä¾‹æ¢å¤)
 function nx_get_ey_upspeed(self, index)
    --local max_ey = nx_query_property(self, "MaxEY") + nx_query_property(self, "MaxEYAdd")
    --local value = max_ey * 0.1
@@ -232,7 +232,7 @@ function nx_get_ey_upspeed(self, index)
    return value
 end
 
---»ñÈ¡AV»Ø¸´ËÙ¶È(×¢Ïú²¿·ÖÎª°´±ÈÀı»Ö¸´)
+--è·å–AVå›å¤é€Ÿåº¦(æ³¨é”€éƒ¨åˆ†ä¸ºæŒ‰æ¯”ä¾‹æ¢å¤)
 function nx_get_av_upspeed(self, index)
    --local max_av = nx_query_property(self, "MaxAV") + nx_query_property(self, "MaxAVAdd")
    --local value = max_av * 0.1
@@ -241,33 +241,33 @@ function nx_get_av_upspeed(self, index)
    return value
 end
 
---»ñÈ¡RCµİ¼õËÙ¶È
+--è·å–RCé€’å‡é€Ÿåº¦
 function nx_get_rc_upspeed(self, index)
 	local value = -2
 	return value
 end
 
---»ñÈ¡DP»Ø¸´ËÙ¶È
+--è·å–DPå›å¤é€Ÿåº¦
 function nx_get_dp_upspeed(self, index)
 	local value = 5
 	return value
 end
 
---»ñÈ¡ÔªËØ¼ÓÉîÂÊ
+--è·å–å…ƒç´ åŠ æ·±ç‡
 function nx_get_elementDeepenProb(self, index)
    local elementDeepenLevel = nx_query_property_record(self, "ElementDeepenLevel", index)
    local value = elementDeepenLevel * 0.005
    return value
 end
 
---»ñÈ¡ÔªËØ¼õÉËÂÊ
+--è·å–å…ƒç´ å‡ä¼¤ç‡
 function nx_get_elementResistProb(self, index)
    local elementResistLevel = nx_query_property_record(self, "ElementResistLevel", index)
    local value = elementResistLevel * 0.005
    return value
 end
 
---»ñÈ¡×î´óHP
+--è·å–æœ€å¤§HP
 function nx_get_max_hp(self, index)
    local str = nx_query_property_record(self, "Str", index)
    local sta = nx_query_property_record(self, "Sta", index)	
@@ -275,14 +275,14 @@ function nx_get_max_hp(self, index)
    return value
 end
 
---»ñÈ¡×î´óMP
+--è·å–æœ€å¤§MP
 function nx_get_max_mp(self, index)
    local ing = nx_query_property_record(self, "Ing", index)	
    local value = ing * 22.5
    return value
 end
 
---»ñÈ¡×î´óEY
+--è·å–æœ€å¤§EY
 function nx_get_max_ey(self, index)
    local str = nx_query_property_record(self, "Str", index)	
    local value = str * 15

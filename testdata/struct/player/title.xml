@@ -1,36 +1,36 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÈËÎï³ÆºÅÏà¹ØÊôÐÔ¶¨Òå-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--äººç‰©ç§°å·ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- µ±Ç°³ÆºÅ -->
+	<!-- å½“å‰ç§°å· -->
 	<properties>
-		<property name="TitleID" type="int" public="true" private="true" save="true" desc="µ±Ç°³ÆºÅID"/>
+		<property name="TitleID" type="int" public="true" private="true" save="true" desc="å½“å‰ç§°å·ID"/>
 	</properties>
 
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="title_rec" cols="5" maxrows="400" public="false" private="true" save="true" desc="³ÆºÅÁÐ±í">
-			<column type="dword" desc="³ÆºÅID"/>
-			<column type="dword" desc="³ÆºÅÊ±Ð§"/>       <!-- 0 ÓÀ¾Ã   -1 ¹ýÆÚ  ÕýÊý ÓÐÐ§Ê±¼ä ¼ÆËãµ¥Î»Îª·ÖÖÓ -->
-			<column type="double" desc="»ñÈ¡µÄÊ±¼ä"/>
-			<column type="byte" desc="³ÆºÅÀàÐÍ"/>
-			<column type="double" desc="×îºó³äÖµµÄÊ±¼ä"/>
+		<record name="title_rec" cols="5" maxrows="400" public="false" private="true" save="true" desc="ç§°å·åˆ—è¡¨">
+			<column type="dword" desc="ç§°å·ID"/>
+			<column type="dword" desc="ç§°å·æ—¶æ•ˆ"/>       <!-- 0 æ°¸ä¹…   -1 è¿‡æœŸ  æ­£æ•° æœ‰æ•ˆæ—¶é—´ è®¡ç®—å•ä½ä¸ºåˆ†é’Ÿ -->
+			<column type="double" desc="èŽ·å–çš„æ—¶é—´"/>
+			<column type="byte" desc="ç§°å·ç±»åž‹"/>
+			<column type="double" desc="æœ€åŽå……å€¼çš„æ—¶é—´"/>
 		</record>
-		<!-- ³ÆºÅÒÑ½âËø±íÊôÐÔ¶¨Òå -->
-		<record name="title_unlock_rec" cols="4" maxrows="400" public="false" private="true" save="true" desc="³ÆºÅÁÐ±í">
-			<column type="dword" desc="³ÆºÅID"/>
-			<column type="dword" desc="³ÆºÅÊ±Ð§"/>       <!-- 0 ÓÀ¾Ã   -1 ¹ýÆÚ  ÕýÊý ÓÐÐ§Ê±¼ä ¼ÆËãµ¥Î»Îª·ÖÖÓ -->
-			<column type="double" desc="»ñÈ¡µÄÊ±¼ä"/>
-			<column type="byte" desc="³ÆºÅÀàÐÍ"/>
+		<!-- ç§°å·å·²è§£é”è¡¨å±žæ€§å®šä¹‰ -->
+		<record name="title_unlock_rec" cols="4" maxrows="400" public="false" private="true" save="true" desc="ç§°å·åˆ—è¡¨">
+			<column type="dword" desc="ç§°å·ID"/>
+			<column type="dword" desc="ç§°å·æ—¶æ•ˆ"/>       <!-- 0 æ°¸ä¹…   -1 è¿‡æœŸ  æ­£æ•° æœ‰æ•ˆæ—¶é—´ è®¡ç®—å•ä½ä¸ºåˆ†é’Ÿ -->
+			<column type="double" desc="èŽ·å–çš„æ—¶é—´"/>
+			<column type="byte" desc="ç§°å·ç±»åž‹"/>
 		</record>
-		<!-- ½ø¶È±í -->
-		<record name="title_progress_rec" cols="3" maxrows="400" public="false" private="true" save="true" desc="³ÆºÅÁÐ±í">
-			<column type="dword" desc="³ÆºÅÀàÐÍ"/>
-			<column type="byte" desc="ÒÑÍê³É"/>
-			<column type="byte" desc="×ÜÊýÁ¿"/>       
+		<!-- è¿›åº¦è¡¨ -->
+		<record name="title_progress_rec" cols="3" maxrows="400" public="false" private="true" save="true" desc="ç§°å·åˆ—è¡¨">
+			<column type="dword" desc="ç§°å·ç±»åž‹"/>
+			<column type="byte" desc="å·²å®Œæˆ"/>
+			<column type="byte" desc="æ€»æ•°é‡"/>       
 		</record>
-		<!-- Íæ¼Ò×Ü±í 
-		<record name="title_total_rec" cols="1" maxrows="200" public="false" private="true" save="true" desc="³ÆºÅÁÐ±í">
-			<column type="dword" desc="³ÆºÅÀàÐÍ"/>    
+		<!-- çŽ©å®¶æ€»è¡¨ 
+		<record name="title_total_rec" cols="1" maxrows="200" public="false" private="true" save="true" desc="ç§°å·åˆ—è¡¨">
+			<column type="dword" desc="ç§°å·ç±»åž‹"/>    
 		</record>
 		-->
 	</records>

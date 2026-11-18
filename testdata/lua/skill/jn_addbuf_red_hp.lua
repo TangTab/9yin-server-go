@@ -1,43 +1,43 @@
---Á÷Ñª,½üÉíÍâ¹¦ÉËº¦,¼¸ÂÊÏòÄ¿±êÌí¼Ó"buf_red_hp"
---buffÆÚ¼äHP³ÖĞø¼õÉÙ
+--æµè¡€,è¿‘èº«å¤–åŠŸä¼¤å®³,å‡ ç‡å‘ç›®æ ‡æ·»åŠ "buf_red_hp"
+--buffæœŸé—´HPæŒç»­å‡å°‘
 --LifeTime = 5 + Level
---buffÃ¿Ãë´¥·¢1´Î,Ã¿´Î¼õÉÙ1%MaxHP
+--buffæ¯ç§’è§¦å‘1æ¬¡,æ¯æ¬¡å‡å°‘1%MaxHP
 --1hits
 
 require("define")
 require("command_define")
 require("share\\server_custom_define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
 	local level = nx_query_property(skill, "Level")
 	
@@ -52,10 +52,10 @@ function get_damage(self, skill, target)
 end
 
 function add_buffer(self, target, level)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_bleed")
 	
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
@@ -65,19 +65,19 @@ function add_buffer(self, target, level)
 		
 	nx_set_property(buffer, "ReplaceLevel", level)
 	nx_set_property(buffer, "ReplaceType", 0)
-	--ÉúÃüÆÚ
+	--ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime", nx_number(5 + level))
-	--bufferÔÚXÃëÄÚÓĞĞ§
+	--bufferåœ¨Xç§’å†…æœ‰æ•ˆ
 	nx_set_property(buffer, "EffectType", 3)
 	nx_set_property(buffer, "LifeTimeType", 0)
 	nx_set_property(buffer, "EffectTimer", 1000)
-	--´¥·¢¼¸ÂÊ
+	--è§¦å‘å‡ ç‡
 	nx_set_property(buffer, "EffectRatio", 100)
 	
-	--Ìí¼Óµ½DirectPropertyRec
+	--æ·»åŠ åˆ°DirectPropertyRec
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(reduce_hp), 0)
 	
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
  		nx_destroy_self(buffer)
 		return false

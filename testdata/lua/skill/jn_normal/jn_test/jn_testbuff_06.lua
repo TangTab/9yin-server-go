@@ -1,41 +1,41 @@
---²âÊÔ¼¼ÄÜ£¬Á¢¿Ì»Ö¸´ÉúÃü£¬ĞìĞì»Ö¸´ÉúÃü
+--æµ‹è¯•æŠ€èƒ½ï¼Œç«‹åˆ»æ¢å¤ç”Ÿå‘½ï¼Œå¾å¾æ¢å¤ç”Ÿå‘½
 
 require("define")
 require("share\\server_custom_define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 
 	local level = nx_query_property(skill, "Level")
 	
-	--»ñµÃ×Ô¼ºµÄÖÎÁÆµÈ¼¶
+	--è·å¾—è‡ªå·±çš„æ²»ç–—ç­‰çº§
 	local healpower = nx_query_property(self, "HealPower") + nx_query_property(self, "HealPowerAdd")
 
 	local healpoint = 0
 	local inc_value = 0
 
---µÈ¼¶1£¬»Ö¸´ÉúÃü£¬60+ÖÎÁÆµÈ¼¶*1£¬Ã¿3Ãë»Ö¸´ÉúÃü=20+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶2£¬»Ö¸´ÉúÃü£¬120+ÖÎÁÆµÈ¼¶*1.5£¬Ã¿3Ãë»Ö¸´ÉúÃü=40+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶3£¬»Ö¸´ÉúÃü£¬180+ÖÎÁÆµÈ¼¶*2£¬Ã¿3Ãë»Ö¸´ÉúÃü=60+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶4£¬»Ö¸´ÉúÃü£¬240+ÖÎÁÆµÈ¼¶*2.5£¬Ã¿3Ãë»Ö¸´ÉúÃü=80+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶5£¬»Ö¸´ÉúÃü£¬320+ÖÎÁÆµÈ¼¶*3£¬Ã¿3Ãë»Ö¸´ÉúÃü=100+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
+--ç­‰çº§1ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ60+æ²»ç–—ç­‰çº§*1ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=20+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§2ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ120+æ²»ç–—ç­‰çº§*1.5ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=40+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§3ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ180+æ²»ç–—ç­‰çº§*2ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=60+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§4ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ240+æ²»ç–—ç­‰çº§*2.5ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=80+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§5ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ320+æ²»ç–—ç­‰çº§*3ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=100+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
 	if level == 1 then
 		healpoint = 60 + healpower * 1
 		inc_value = 20 + healpower
@@ -58,42 +58,42 @@ function skill_after_hit(self, skill, target)
 	end
 
 	nx_inc_property(target, "HP", healpoint)
-	--Í¨ÖªÊÓÒ°·¶Î§ÄÚµÄ¿Í»§¶ËÏÔÊ¾¼ÓÑªÌØĞ§
+	--é€šçŸ¥è§†é‡èŒƒå›´å†…çš„å®¢æˆ·ç«¯æ˜¾ç¤ºåŠ è¡€ç‰¹æ•ˆ
 	nx_custom_byken(target, SERVER_CUSTOMMSG_EFFECT, target, "ADDHP", healpoint)
 	
-	--Ìí¼ÓBUFFER
+	--æ·»åŠ BUFFER
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_testbuff_06")
 	if not nx_exists(buffer) then
 		return false
 	end
 	
-	--ÉèÖÃBufferµÄÊôĞÔ
-	--BufferµÄ×÷ÓÃÀàĞÍ(0:Ë²Ê±Buffer,1:ÔÚXÃëÄÚÓĞĞ§,2:ÔÚXÃëÄÚY´ÎÊÂ¼şÓĞĞ§,3:ÔÚXÃëÄÚÓĞĞ§,Ã¿YÃë´¥·¢Ò»´Î)
+	--è®¾ç½®Bufferçš„å±æ€§
+	--Bufferçš„ä½œç”¨ç±»å‹(0:ç¬æ—¶Buffer,1:åœ¨Xç§’å†…æœ‰æ•ˆ,2:åœ¨Xç§’å†…Yæ¬¡äº‹ä»¶æœ‰æ•ˆ,3:åœ¨Xç§’å†…æœ‰æ•ˆ,æ¯Yç§’è§¦å‘ä¸€æ¬¡)
 	nx_set_property(buffer, "EffectType", 3)
-	--ÉèÖÃBufferÉËº¦Ğ§¹ûÊÇ·ñÏÔÊ¾
+	--è®¾ç½®Bufferä¼¤å®³æ•ˆæœæ˜¯å¦æ˜¾ç¤º
 	nx_set_property(buffer, "IsDamage", 1)
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime", 30000)
-	--BufferµÄÉúÃüÆÚÀàĞÍ(0:Ö»¼ÆËãÔÚÏßÊ±¼ä,1:¼ÆËãÈ«²¿Ê±¼ä,°üÀ¨ÏÂÏßÊ±¼ä)
+	--Bufferçš„ç”Ÿå‘½æœŸç±»å‹(0:åªè®¡ç®—åœ¨çº¿æ—¶é—´,1:è®¡ç®—å…¨éƒ¨æ—¶é—´,åŒ…æ‹¬ä¸‹çº¿æ—¶é—´)
 	nx_set_property(buffer, "LifeTimeType", 1)
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 3000)
-	--BufferÃ¿´Î´¥·¢Ê±ÊÇ·ñ³É¹¦×÷ÓÃµÄ³É¹¦ÂÊ£¬°Ù·Ö±ÈÊı
+	--Bufferæ¯æ¬¡è§¦å‘æ—¶æ˜¯å¦æˆåŠŸä½œç”¨çš„æˆåŠŸç‡ï¼Œç™¾åˆ†æ¯”æ•°
 	nx_set_property(buffer, "EffectRatio", 100)
-	--BUFFER¸Ä±äµÄÊôĞÔ(Ìí¼Óµ½BufferµÄContinuePropertyRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERæ”¹å˜çš„å±æ€§(æ·»åŠ åˆ°Bufferçš„ContinuePropertyRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(inc_value), 0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false
 	end
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end

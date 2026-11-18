@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÈËÎïÀëÏßÏà¹ØÊôÐÔ¶¨Òå-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--äººç‰©ç¦»çº¿ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
 	<properties>
-		<property name="LogoutTime" type="int64" public="false" private="false" save="true" desc="µÇ³öÊ±¼ä"/>
-		<property name="OffLineExp" type="int" public="false" private="true" save="true" desc="ÀëÏß»ñµÃµÄ¾­Ñé"/>
+		<property name="LogoutTime" type="int64" public="false" private="false" save="true" desc="ç™»å‡ºæ—¶é—´"/>
+		<property name="OffLineExp" type="int" public="false" private="true" save="true" desc="ç¦»çº¿èŽ·å¾—çš„ç»éªŒ"/>
 	</properties>
 </object>

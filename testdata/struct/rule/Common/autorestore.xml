@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--×Ô¶¯»Ø¸´Ïà¹ØÊôÐÔ-->
+<!--è‡ªåŠ¨å›žå¤ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--¼´Ê±»Ø¸´Ïà¹ØÊý¾Ý-->
-		<property name="HPUpSpeed" type="int" public="false" private="false" save="false" desc="ÉúÃü»Ø¸´ËÙ¶È"/>
-		<property name="MPUpSpeed" type="int" public="false" private="true" save="false" desc="Ä§·¨»Ø¸´ËÙ¶È"/>
+		<!--å³æ—¶å›žå¤ç›¸å…³æ•°æ®-->
+		<property name="HPUpSpeed" type="int" public="false" private="false" save="false" desc="ç”Ÿå‘½å›žå¤é€Ÿåº¦"/>
+		<property name="MPUpSpeed" type="int" public="false" private="true" save="false" desc="é­”æ³•å›žå¤é€Ÿåº¦"/>
 		<property name="HPUpSpeedAdd" type="int" public="false" private="false" save="false" desc=""/>
 		<property name="MPUpSpeedAdd" type="int" public="true" private="false" save="false" desc=""/>
 	</properties>

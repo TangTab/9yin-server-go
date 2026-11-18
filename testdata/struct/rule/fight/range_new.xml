@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Õ½¶·¡¢¼¼ÄÜÏµÍ³·¶Î§Ïà¹ØµÄÊôÐÔ±í-->
+<!--æˆ˜æ–—ã€æŠ€èƒ½ç³»ç»ŸèŒƒå›´ç›¸å…³çš„å±žæ€§è¡¨-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--<property name="TargetType" type="byte" public="false" private="true" save="false" desc="Ä¿±ê·ÖÀà 1:µØÃæ£¬2:×Ô¼º£¬4:Ñ¡Ôñ¶ÔÏó£¬8:×Ô¼ºµÄ½Åµ×µØÃæ£¬¿É×éºÏ"/>-->
-		<!--<property name="TargetShape" type="byte" public="false" private="true" save="false" desc="¼¼ÄÜÄ¿±êµÄ·¶Î§ÀàÐÍ" 
-			Description="1:ÒÔ×Ô¼ºÎªÔ²ÐÄµÄÔ²ÄÚ£¬3:×Ô¼ºÕýÃæµÄÒ»¸öÉÈÐÎÇøÓò£¬Ô²ÐÄÊÇ×Ô¼º£¬4:×Ô¼ºÕýÃæµÄÒ»¸ö¾ØÐÎÇøÓò"/>-->
-		<!--<property name="HitShape" type="byte" public="false" private="true" save="false" desc="¼¼ÄÜ×÷ÓÃ¶ÔÏóµÄ·¶Î§ÀàÐÍ" 
-			Description="0:·Ç·¶Î§ÀàÐÍ£¬½ö×÷ÓÃÓÚµ±Ç°¼¼ÄÜ¶ÔÏó£¬1:ÒÔ×Ô¼ºÎªÔ²ÐÄµÄÔ²ÄÚ£¬2:ÒÔ¼¼ÄÜ×÷ÓÃÄ¿±êÎªÔ²ÐÄµÄÔ²ÄÚ£¬3:×Ô¼ºÕýÃæµÄÒ»¸öÉÈÐÎÇøÓò£¬Ô²ÐÄÊÇ×Ô¼º£¬4:×Ô¼ºÕýÃæµÄÒ»¸ö¾ØÐÎÇøÓò"/>-->
+		<!--<property name="TargetType" type="byte" public="false" private="true" save="false" desc="ç›®æ ‡åˆ†ç±» 1:åœ°é¢ï¼Œ2:è‡ªå·±ï¼Œ4:é€‰æ‹©å¯¹è±¡ï¼Œ8:è‡ªå·±çš„è„šåº•åœ°é¢ï¼Œå¯ç»„åˆ"/>-->
+		<!--<property name="TargetShape" type="byte" public="false" private="true" save="false" desc="æŠ€èƒ½ç›®æ ‡çš„èŒƒå›´ç±»åž‹" 
+			Description="1:ä»¥è‡ªå·±ä¸ºåœ†å¿ƒçš„åœ†å†…ï¼Œ3:è‡ªå·±æ­£é¢çš„ä¸€ä¸ªæ‰‡å½¢åŒºåŸŸï¼Œåœ†å¿ƒæ˜¯è‡ªå·±ï¼Œ4:è‡ªå·±æ­£é¢çš„ä¸€ä¸ªçŸ©å½¢åŒºåŸŸ"/>-->
+		<!--<property name="HitShape" type="byte" public="false" private="true" save="false" desc="æŠ€èƒ½ä½œç”¨å¯¹è±¡çš„èŒƒå›´ç±»åž‹" 
+			Description="0:éžèŒƒå›´ç±»åž‹ï¼Œä»…ä½œç”¨äºŽå½“å‰æŠ€èƒ½å¯¹è±¡ï¼Œ1:ä»¥è‡ªå·±ä¸ºåœ†å¿ƒçš„åœ†å†…ï¼Œ2:ä»¥æŠ€èƒ½ä½œç”¨ç›®æ ‡ä¸ºåœ†å¿ƒçš„åœ†å†…ï¼Œ3:è‡ªå·±æ­£é¢çš„ä¸€ä¸ªæ‰‡å½¢åŒºåŸŸï¼Œåœ†å¿ƒæ˜¯è‡ªå·±ï¼Œ4:è‡ªå·±æ­£é¢çš„ä¸€ä¸ªçŸ©å½¢åŒºåŸŸ"/>-->
 		
-		<property name="TargetShapePara1" type="float" public="false" private="true" save="false" desc="·¶Î§ÀàÐÍÊ¹ÓÃµÄµÚÒ»¸ö²ÎÊý" 
-			Description="Ô²µÄ×îÐ¡°ë¾¶£¬ÉÈÐÎµÄ½Ç¶È£¬¾ØÐÎµÄ¿í"/>
-		<property name="TargetShapePara2" type="float" public="false" private="true" save="false" desc="·¶Î§ÀàÐÍÊ¹ÓÃµÄµÚ¶þ¸ö²ÎÊý" 
-			Description="Ô²µÄ×î´ó°ë¾¶£¬ÉÈÐÎµÄ°ë¾¶£¬¾ØÐÎµÄ³¤"/>
+		<property name="TargetShapePara1" type="float" public="false" private="true" save="false" desc="èŒƒå›´ç±»åž‹ä½¿ç”¨çš„ç¬¬ä¸€ä¸ªå‚æ•°" 
+			Description="åœ†çš„æœ€å°åŠå¾„ï¼Œæ‰‡å½¢çš„è§’åº¦ï¼ŒçŸ©å½¢çš„å®½"/>
+		<property name="TargetShapePara2" type="float" public="false" private="true" save="false" desc="èŒƒå›´ç±»åž‹ä½¿ç”¨çš„ç¬¬äºŒä¸ªå‚æ•°" 
+			Description="åœ†çš„æœ€å¤§åŠå¾„ï¼Œæ‰‡å½¢çš„åŠå¾„ï¼ŒçŸ©å½¢çš„é•¿"/>
 			
-		<!-- ¼¼ÄÜµÄÃüÖÐÄ¿±êÓë·¶Î§ -->
-		<property name="HitShapePara1" type="float" public="false" private="true" save="false" desc="·¶Î§ÀàÐÍÊ¹ÓÃµÄµÚÒ»¸ö²ÎÊý" 
-			Description="Ô²µÄ×îÐ¡°ë¾¶£»ÉÈÐÎµÄ½Ç¶È£»¾ØÐÎµÄ¿í¶È"/>
-		<property name="HitShapePara2" type="float" public="false" private="true" save="false" desc="·¶Î§ÀàÐÍÊ¹ÓÃµÄµÚ¶þ¸ö²ÎÊý" 
-			Description="Ô²µÄ×î´ó°ë¾¶£»ÉÈÐÎµÄ°ë¾¶£»¾ØÐÎµÄ³¤¶È"/>
-		<property name="HitCount" type="byte" public="false" private="false" save="false" desc="·¶Î§ÀàÐÍµÄ×î´óÓ°ÏìÈËÊý ³¬¹ýÕâ¸öÉÏÏÞ£¬¾Í²»ÔÙ¼ÆËãÐ§¹ûÁË"/>
+		<!-- æŠ€èƒ½çš„å‘½ä¸­ç›®æ ‡ä¸ŽèŒƒå›´ -->
+		<property name="HitShapePara1" type="float" public="false" private="true" save="false" desc="èŒƒå›´ç±»åž‹ä½¿ç”¨çš„ç¬¬ä¸€ä¸ªå‚æ•°" 
+			Description="åœ†çš„æœ€å°åŠå¾„ï¼›æ‰‡å½¢çš„è§’åº¦ï¼›çŸ©å½¢çš„å®½åº¦"/>
+		<property name="HitShapePara2" type="float" public="false" private="true" save="false" desc="èŒƒå›´ç±»åž‹ä½¿ç”¨çš„ç¬¬äºŒä¸ªå‚æ•°" 
+			Description="åœ†çš„æœ€å¤§åŠå¾„ï¼›æ‰‡å½¢çš„åŠå¾„ï¼›çŸ©å½¢çš„é•¿åº¦"/>
+		<property name="HitCount" type="byte" public="false" private="false" save="false" desc="èŒƒå›´ç±»åž‹çš„æœ€å¤§å½±å“äººæ•° è¶…è¿‡è¿™ä¸ªä¸Šé™ï¼Œå°±ä¸å†è®¡ç®—æ•ˆæžœäº†"/>
 	</properties>
 </object>

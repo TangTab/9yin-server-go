@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Åä·½Ïà¹ØµÄÊôÐÔ-->
+<!--é…æ–¹ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>	
 		<!-- 
-		MaterialList¸ñÊ½: material 1:num;material 2:num;material 3:num;material 4:num
+		MaterialListæ ¼å¼: material 1:num;material 2:num;material 3:num;material 4:num
 		-->	
-		<property name="MaterialList" type="string" public="false" private="true" save="true" desc="Åä·½²ÄÁÏÁÐ±í"/>
-		<property name="FormulaMValue" type="int" public="false" private="true" save="true" desc="Åä·½ÖÐÖµ£¬ÓÃÓÚ¼ÆËãÅä·½Éú²ú³ö²úÆ·µÄµÈ¼¶"/>
+		<property name="MaterialList" type="string" public="false" private="true" save="true" desc="é…æ–¹ææ–™åˆ—è¡¨"/>
+		<property name="FormulaMValue" type="int" public="false" private="true" save="true" desc="é…æ–¹ä¸­å€¼ï¼Œç”¨äºŽè®¡ç®—é…æ–¹ç”Ÿäº§å‡ºäº§å“çš„ç­‰çº§"/>
 	</properties>
 </object>

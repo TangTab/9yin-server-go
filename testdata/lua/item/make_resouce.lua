@@ -1,15 +1,15 @@
 -----------------------------------------
--- @ ½Å±¾¹¦ÄÜ: ºÚ½ğÉú²ú¼ÛÖµ¼ÆËãºÍ¹«Ê½µ÷Õû
+-- @ è„šæœ¬åŠŸèƒ½: é»‘é‡‘ç”Ÿäº§ä»·å€¼è®¡ç®—å’Œå…¬å¼è°ƒæ•´
 -----------------------------------------
 
---¼ÆËãÃ¿¸öITEM¼ÛÖµ
+--è®¡ç®—æ¯ä¸ªITEMä»·å€¼
 function get_sum(item)
     local sum = 0.0
     sum = nx_query_property(item, "Worth")*nx_query_property(item, "Amount")
     return sum
 end
 
---Éú³ÉµÄÊıÁ¿
+--ç”Ÿæˆçš„æ•°é‡
 function get_count(sumvalue,camp)
     local count = sumvalue/500
     local config = nx_string("EnergyF_ty_00003C")

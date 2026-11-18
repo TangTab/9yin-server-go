@@ -1,16 +1,16 @@
---²âÊÔ¼¼ÄÜ£¬Á¢¿Ì»Ö¸´ÉúÃü£¬ĞìĞì»Ö¸´ÉúÃü
+--æµ‹è¯•æŠ€èƒ½ï¼Œç«‹åˆ»æ¢å¤ç”Ÿå‘½ï¼Œå¾å¾æ¢å¤ç”Ÿå‘½
 
 --[[
 buf_heal_10
-µ¥ÌåË²Ê±»Ø¸´
---µÈ¼¶1£¬»Ö¸´ÉúÃü£¬60+ÖÎÁÆµÈ¼¶*1£¬Ã¿3Ãë»Ö¸´ÉúÃü=20+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶2£¬»Ö¸´ÉúÃü£¬120+ÖÎÁÆµÈ¼¶*1.5£¬Ã¿3Ãë»Ö¸´ÉúÃü=40+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶3£¬»Ö¸´ÉúÃü£¬180+ÖÎÁÆµÈ¼¶*2£¬Ã¿3Ãë»Ö¸´ÉúÃü=60+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶4£¬»Ö¸´ÉúÃü£¬240+ÖÎÁÆµÈ¼¶*2.5£¬Ã¿3Ãë»Ö¸´ÉúÃü=80+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
---µÈ¼¶5£¬»Ö¸´ÉúÃü£¬320+ÖÎÁÆµÈ¼¶*3£¬Ã¿3Ãë»Ö¸´ÉúÃü=100+ÖÎÁÆµÈ¼¶£¬³ÖĞø30Ãë
+å•ä½“ç¬æ—¶å›å¤
+--ç­‰çº§1ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ60+æ²»ç–—ç­‰çº§*1ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=20+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§2ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ120+æ²»ç–—ç­‰çº§*1.5ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=40+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§3ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ180+æ²»ç–—ç­‰çº§*2ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=60+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§4ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ240+æ²»ç–—ç­‰çº§*2.5ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=80+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
+--ç­‰çº§5ï¼Œæ¢å¤ç”Ÿå‘½ï¼Œ320+æ²»ç–—ç­‰çº§*3ï¼Œæ¯3ç§’æ¢å¤ç”Ÿå‘½=100+æ²»ç–—ç­‰çº§ï¼ŒæŒç»­30ç§’
 ]]
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
 	local healpower = nx_query_property(self, "HealPower") + nx_query_property(self, "HealPowerAdd")
 
@@ -38,33 +38,33 @@ function AddBuff(self, target, level)
 		inc_value = 100 + healpower
 	end
 
-	--´´½¨Buffer, Ë²Ê±»Ø¸´
+	--åˆ›å»ºBuffer, ç¬æ—¶å›å¤
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_10a")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "HP", nx_double(healpoint), 0,1)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false
 	end
 
-	--´´½¨Buffer, ÖÜÆÚĞÔ»ØÑª
+	--åˆ›å»ºBuffer, å‘¨æœŸæ€§å›è¡€
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_10b")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(inc_value), 0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

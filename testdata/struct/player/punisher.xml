@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--³Í·£ÕßÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æƒ©ç½šè€…ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PunisherState" type="int" public="false" private="false" save="true" desc="µ±Ç°×ËÌ¬"/>
-		<property name="HateModifyMul" type="float" public="false" private="false" save="false" desc="³ðºÞÐÞÕý±¶ÂÊ"/>
-		<property name="RFC" type="int" public="false" private="true" save="true" desc="Å­»ð"/>
-		<property name="RFCPara" type="float" public="false" private="false" save="false" desc="Å­»ðÏµÊý"/>
-		<property name="PunisherSkillID" type="string" public="false" private="false" save="false" desc="µ±Ç°×ËÌ¬¼¼ÄÜconfigid"/>
+		<property name="PunisherState" type="int" public="false" private="false" save="true" desc="å½“å‰å§¿æ€"/>
+		<property name="HateModifyMul" type="float" public="false" private="false" save="false" desc="ä»‡æ¨ä¿®æ­£å€çŽ‡"/>
+		<property name="RFC" type="int" public="false" private="true" save="true" desc="æ€’ç«"/>
+		<property name="RFCPara" type="float" public="false" private="false" save="false" desc="æ€’ç«ç³»æ•°"/>
+		<property name="PunisherSkillID" type="string" public="false" private="false" save="false" desc="å½“å‰å§¿æ€æŠ€èƒ½configid"/>
 	</properties>
 	<records>
 	</records>

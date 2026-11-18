@@ -7,18 +7,18 @@ require("share\\view_define")
 require("share\\server_custom_define")
 
 function on_use(self,eventype)
-    	-- ±£»¤
+    	-- ä¿æŠ¤
 	if not nx_exists(self) then
 		return 0
 	end
 
-	if eventype == CLIENT_CUSTOMMSG_PICK_ITEM then--±¦ÏäÊÂ¼ş
+	if eventype == CLIENT_CUSTOMMSG_PICK_ITEM then--å®ç®±äº‹ä»¶
 	   return pick_all(self)
 	end
 	return 0
 end
 
---Ê°È¡Àñ°üµÄÈ«²¿item
+--æ‹¾å–ç¤¼åŒ…çš„å…¨éƒ¨item
 function pick_all(self)    
  
     local item = nx_query_data(self,"pickitem")
@@ -36,7 +36,7 @@ function pick_all(self)
         end
 
         local a,configid,count
-        --´´½¨¶ÔÏó
+        --åˆ›å»ºå¯¹è±¡
         for i=1,table.getn(arr) do
             a = nx_split_string(arr[i], ",")
             configid = a[1]
@@ -49,14 +49,14 @@ function pick_all(self)
                 end
                 nx_set_property(item1,"Amount",nx_int(count))
                 nx_add_ranpro(item1)
-                nx_place(item1,toolcontainer) --·ÅÈë±³°üÖ®ÖĞ
+                nx_place(item1,toolcontainer) --æ”¾å…¥èƒŒåŒ…ä¹‹ä¸­
             end
         end
-        	--±£´æ½á¹û
+        	--ä¿å­˜ç»“æœ
 	    nx_set_property(item,"ItemContain","")
 	   
 	    local uid = nx_query_property(item,"UniqueID")
-	    nx_custom(self,SERVER_CUSTOMMSG_PICK_ITEM,nx_string(uid))--Í¨ÖªUIÏÔÊ¾
+	    nx_custom(self,SERVER_CUSTOMMSG_PICK_ITEM,nx_string(uid))--é€šçŸ¥UIæ˜¾ç¤º
 	    use_item_disappear(item)
     end
    --[[ ]]--
@@ -64,11 +64,11 @@ function pick_all(self)
     return 0
 end
 
---µÀ¾ßµÄÊ¹ÓÃÏûÊ§ÎÊÌâ
+--é“å…·çš„ä½¿ç”¨æ¶ˆå¤±é—®é¢˜
 function use_item_disappear(item)
-    nx_inc_property(item,"CurrentUseNumber",1)--Ê¹ÓÃ´ÎÊı+1
+    nx_inc_property(item,"CurrentUseNumber",1)--ä½¿ç”¨æ¬¡æ•°+1
     local disappear = nx_query_property(item,"Disappear")
-    if nx_number(disappear)>0 then--ÒªÏûÊ§µÄ
+    if nx_number(disappear)>0 then--è¦æ¶ˆå¤±çš„
         nx_inc_property(item, "Amount", -1)
     end
 end

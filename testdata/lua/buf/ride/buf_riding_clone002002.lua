@@ -1,4 +1,4 @@
---实现下马时于player身边创建马匹NPC功能
+--瀹炵幇涓嬮┈鏃朵簬player韬竟鍒涘缓椹尮NPC鍔熻兘
 function on_buffer_remove(self, buffer)
 		
 		local dn_result = nx_dn_special_ride(self)
@@ -6,7 +6,7 @@ function on_buffer_remove(self, buffer)
 		
 		if dn_result and del_result then
 		
-			--创建NPC
+			--鍒涘缓NPC
 			local x,y,z,o = nx_get_position(self)
 			local X,Y,Z,O = nx_number(x)+math.sin(nx_number(o)+math.pi/2)*0.5,y,nx_number(z)+math.cos(nx_number(o)+math.pi/2)*0.5,o
 			nx_create_obj("carriernpc002002",0,X,Y,Z,O)

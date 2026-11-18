@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--pvptaskÃ°ÏÕ³¡¾°¸±±¾ÊôÐÔ-->
+<!--pvptaskå†’é™©åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PVPSceneState"    type="byte" public="false" private="false" save="true" desc="ÔØ¾ßËþ·À¸±±¾×´Ì¬"/>
-		 <property name="ZQTowerWarPoint"    type="word" public="false" private="false" save="true" desc="ÔØ¾ßËþ·ÀÕôÆû·½»ý·Ö"/>
-		 <property name="QHTowerWarPoint"    type="word" public="false" private="false" save="true" desc="ÔØ¾ßËþ·ÀÕôÆû·½»ý·Ö"/>
+		<property name="PVPSceneState"    type="byte" public="false" private="false" save="true" desc="è½½å…·å¡”é˜²å‰¯æœ¬çŠ¶æ€"/>
+		 <property name="ZQTowerWarPoint"    type="word" public="false" private="false" save="true" desc="è½½å…·å¡”é˜²è’¸æ±½æ–¹ç§¯åˆ†"/>
+		 <property name="QHTowerWarPoint"    type="word" public="false" private="false" save="true" desc="è½½å…·å¡”é˜²è’¸æ±½æ–¹ç§¯åˆ†"/>
 	</properties>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<records>
-		<record name="pvptask_steam_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="ÕôÆû¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
+		<record name="pvptask_steam_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="è’¸æ±½é˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
 		</record>
-		<record name="pvptask_magic_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="Ææ»Ã¶ÓÎé³ÉÔ±ÁÐ±í">
-			<column type="widestr" desc="¶ÓÔ±Ãû"/> 
+		<record name="pvptask_magic_rec" cols="1" maxrows="25" save="false" public="false" private="false" desc="å¥‡å¹»é˜Ÿä¼æˆå‘˜åˆ—è¡¨">
+			<column type="widestr" desc="é˜Ÿå‘˜å"/> 
 		</record>
 	</records>
 	<includes>

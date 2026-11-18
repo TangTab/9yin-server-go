@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎïµØÍ¼Ì½Ë÷Ïà¹ØÊôÐÔ¶¨Òå-->
+<!--äººç‰©åœ°å›¾æŽ¢ç´¢ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="AreaLvOneExploreRec" cols="1" maxrows="64" save="true" public="false" private="true" desc="Ò»¼¶Çø¿éÌ½Ë÷±í">
-			<column type="dword" desc="Ò»¼¶Çø¿é±àºÅ"/>
+		<record name="AreaLvOneExploreRec" cols="1" maxrows="64" save="true" public="false" private="true" desc="ä¸€çº§åŒºå—æŽ¢ç´¢è¡¨">
+			<column type="dword" desc="ä¸€çº§åŒºå—ç¼–å·"/>
 		</record>
-		<record name="MapMarksRec" cols="4" maxrows="32" save="true" public="false" private="true" desc="µØÍ¼±ê¼Ç¼ÇÂ¼±í">
-			<column type="widestr" desc="±ê¼ÇÃû³Æ"/>
-			<column type="byte" desc="±ê¼ÇÀàÐÍ"/>
-			<column type="dword" desc="×ø±êX"/>
-			<column type="dword" desc="×ø±êZ"/>
+		<record name="MapMarksRec" cols="4" maxrows="32" save="true" public="false" private="true" desc="åœ°å›¾æ ‡è®°è®°å½•è¡¨">
+			<column type="widestr" desc="æ ‡è®°åç§°"/>
+			<column type="byte" desc="æ ‡è®°ç±»åž‹"/>
+			<column type="dword" desc="åæ ‡X"/>
+			<column type="dword" desc="åæ ‡Z"/>
 		</record>
 	</records>
 </object>

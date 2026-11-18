@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÒÆ¶¯Ïà¹ØµÄÊôÐÔ-->
+<!--ç§»åŠ¨ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="JumpSpeed"       type="float" public="true" private="true" save="false" desc="ÌøÔ¾ËÙ¶È"/>
-		<property name="JumpSpeedAdd"    type="float" public="false" private="false" save="false" desc="ÌøÔ¾ËÙ¶È¸½¼Ó"/>
-		<property name="MoveSpeed" type="float" public="true" private="true" save="false" desc="ÒÆ¶¯ËÙ¶È"/>
-		<property name="MoveType" type="byte" public="false" private="false" save="false"  desc="ÒÆ¶¯ÀàÐÍ0£ºÅÜ²½£¬1£º×ßÂ·"/>
-		<property name="MoveSite" type="byte" public="false" private="false" save="false"  desc="»î¶¯³¡Ëù 1£ºÂ½µØ£¨Ä¬ÈÏÖ»ÄÜÂ½µØ£©£¬2£ºË®ÖÐ£¬4£º¿ÕÖÐ£¨¿É×éºÏ£©"/>
-		<property name="WalkSpeed" type="float" public="true" private="true" save="false" desc="ÐÐ×ßËÙ¶È"/>
-		<property name="RunSpeed" type="float" public="true" private="true" save="false" desc="ÅÜ¶¯ËÙ¶È"/>
-		<property name="DropHeightPub" type="float" public="false" private="true" save="false" desc="µøÂä¸ß¶È"/>
-		<property name="WalkSpeedAdd" type="float" public="false" private="false" save="false" desc="ÒÆ¶¯ËÙ¶ÈµÄ¸Ä±ä"/>
-		<property name="RunSpeedAdd" type="float" public="true" private="true" save="false" desc="ÒÆ¶¯ËÙ¶ÈµÄ¸Ä±ä"/>
-		<property name="SpeedRatio" type="int" public="true" private="true" save="false" desc="¶¯×÷ËÙÂÊ,°Ù·ÖÊý,¸ºÊýÎª¼õÂý,ÕýÊýÎª¼Ó¿ì,ÊÜËûÈËÄÚ¹¦Ó°Ïì,¿ÉÓ°ÏìÄîÖä\ÃüÖÐ\ÀäÈ´µÄÊ±¼äÒÔ¼°ÒÆ¶¯ËÙ¶È"/>
-		<property name="CantRun" type="byte" public="false" private="false" save="false" desc="²»ÄÜÅÜÂ·"/>
-    <property name="LastMoveMode" type="int" public="false" private="false" save="false" desc="ÉÏ´ÎÉÏ·¢µÄÍ¬²½ÀàÐÍ"/>
-    <property name="LastStopX" type="float" public="false" private="false" save="false" desc="ÉÏ´ÎÍ£Ö¹X×ø±ê"/>
-		<property name="LastStopY" type="float" public="false" private="false" save="false" desc="ÉÏ´ÎÍ£Ö¹Y×ø±ê"/>
-		<property name="LastStopZ" type="float" public="false" private="false" save="false" desc="ÉÏ´ÎÍ£Ö¹Z×ø±ê"/>
-    <property name="LastStopTime" type="int64" public="false" private="false" save="false" desc="ÉÏ´ÎÍ£Ö¹Ê±¼ä"/>
+		<property name="JumpSpeed"       type="float" public="true" private="true" save="false" desc="è·³è·ƒé€Ÿåº¦"/>
+		<property name="JumpSpeedAdd"    type="float" public="false" private="false" save="false" desc="è·³è·ƒé€Ÿåº¦é™„åŠ "/>
+		<property name="MoveSpeed" type="float" public="true" private="true" save="false" desc="ç§»åŠ¨é€Ÿåº¦"/>
+		<property name="MoveType" type="byte" public="false" private="false" save="false"  desc="ç§»åŠ¨ç±»åž‹0ï¼šè·‘æ­¥ï¼Œ1ï¼šèµ°è·¯"/>
+		<property name="MoveSite" type="byte" public="false" private="false" save="false"  desc="æ´»åŠ¨åœºæ‰€ 1ï¼šé™†åœ°ï¼ˆé»˜è®¤åªèƒ½é™†åœ°ï¼‰ï¼Œ2ï¼šæ°´ä¸­ï¼Œ4ï¼šç©ºä¸­ï¼ˆå¯ç»„åˆï¼‰"/>
+		<property name="WalkSpeed" type="float" public="true" private="true" save="false" desc="è¡Œèµ°é€Ÿåº¦"/>
+		<property name="RunSpeed" type="float" public="true" private="true" save="false" desc="è·‘åŠ¨é€Ÿåº¦"/>
+		<property name="DropHeightPub" type="float" public="false" private="true" save="false" desc="è·Œè½é«˜åº¦"/>
+		<property name="WalkSpeedAdd" type="float" public="false" private="false" save="false" desc="ç§»åŠ¨é€Ÿåº¦çš„æ”¹å˜"/>
+		<property name="RunSpeedAdd" type="float" public="true" private="true" save="false" desc="ç§»åŠ¨é€Ÿåº¦çš„æ”¹å˜"/>
+		<property name="SpeedRatio" type="int" public="true" private="true" save="false" desc="åŠ¨ä½œé€ŸçŽ‡,ç™¾åˆ†æ•°,è´Ÿæ•°ä¸ºå‡æ…¢,æ­£æ•°ä¸ºåŠ å¿«,å—ä»–äººå†…åŠŸå½±å“,å¯å½±å“å¿µå’’\å‘½ä¸­\å†·å´çš„æ—¶é—´ä»¥åŠç§»åŠ¨é€Ÿåº¦"/>
+		<property name="CantRun" type="byte" public="false" private="false" save="false" desc="ä¸èƒ½è·‘è·¯"/>
+    <property name="LastMoveMode" type="int" public="false" private="false" save="false" desc="ä¸Šæ¬¡ä¸Šå‘çš„åŒæ­¥ç±»åž‹"/>
+    <property name="LastStopX" type="float" public="false" private="false" save="false" desc="ä¸Šæ¬¡åœæ­¢Xåæ ‡"/>
+		<property name="LastStopY" type="float" public="false" private="false" save="false" desc="ä¸Šæ¬¡åœæ­¢Yåæ ‡"/>
+		<property name="LastStopZ" type="float" public="false" private="false" save="false" desc="ä¸Šæ¬¡åœæ­¢Zåæ ‡"/>
+    <property name="LastStopTime" type="int64" public="false" private="false" save="false" desc="ä¸Šæ¬¡åœæ­¢æ—¶é—´"/>
 	</properties>
 </object>

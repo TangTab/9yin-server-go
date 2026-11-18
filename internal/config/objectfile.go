@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
@@ -73,14 +74,23 @@ var (
 	commentClose = []byte("-->")
 )
 
-// LoadObjectFile 加载通用 Object/Property XML（GBK/gb2312）。
+// toUTF8 编码自适应：合法 UTF-8 直通，否则 GBK 转码
+// （testdata 快照为 UTF-8，NINEYIN_DATA 直读原版为 GBK）。
+func toUTF8(raw []byte) ([]byte, error) {
+	if utf8.Valid(raw) {
+		return raw, nil
+	}
+	return simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+}
+
+// LoadObjectFile 加载通用 Object/Property XML（UTF-8 或 GBK 自适应）。
 // 该格式覆盖原版绝大部分数值表与注册表（scenes.xml、ini\**\*.xml）。
 func LoadObjectFile(path string) (*ObjectDoc, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	utf8, err := simplifiedchinese.GBK.NewDecoder().Bytes(raw)
+	utf8, err := toUTF8(raw)
 	if err != nil {
 		return nil, fmt.Errorf("%s: GBK 转码失败: %w", path, err)
 	}

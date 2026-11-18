@@ -1,9 +1,9 @@
--- ËÙ¶ÈÓÉ·Ç³£Âı±äµÃ·Ç³£¿ì£¬Öğ½¥¼ÓËÙ
+-- é€Ÿåº¦ç”±éå¸¸æ…¢å˜å¾—éå¸¸å¿«ï¼Œé€æ¸åŠ é€Ÿ
 
 require("define")
 require("share\\logicstate_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 	local RatioChange = -120
 
@@ -20,7 +20,7 @@ function buffer_active(self, buffer)
 
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 	local RatioChange = nx_query_data(buffer , "IncSpeedRatio")
 	local oldRatio = nx_query_property(self, "SpeedRatio")
@@ -40,6 +40,6 @@ function buffer_timer(self, buffer)
 	return 1
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end

@@ -1,37 +1,37 @@
---´ßÃß,ÎŞÉËº¦(ÄÚ¹¦ĞÔÖÊ),¼¸ÂÊÏòÄ¿±êÌí¼Ó"buf_sleep"
---ÎŞÉËº¦,buffÆÚ¼ä½ÇÉ«ÎŞ·¨ÒÆ¶¯,½øĞĞ¹¥»÷,±»¹¥»÷ÎŞ·¨»Ø±Ü,¸ñµ²;ÊÜµ½ÉËº¦Ê±buff×Ô¶¯ÒÆ³ı
---»ù´¡¼¸ÂÊ50%,¼¼ÄÜLevel,ingÓë¶Ô·½spi²î×î´óÓ°Ïì 3% * Level
+--å‚¬çœ ,æ— ä¼¤å®³(å†…åŠŸæ€§è´¨),å‡ ç‡å‘ç›®æ ‡æ·»åŠ "buf_sleep"
+--æ— ä¼¤å®³,buffæœŸé—´è§’è‰²æ— æ³•ç§»åŠ¨,è¿›è¡Œæ”»å‡»,è¢«æ”»å‡»æ— æ³•å›é¿,æ ¼æŒ¡;å—åˆ°ä¼¤å®³æ—¶buffè‡ªåŠ¨ç§»é™¤
+--åŸºç¡€å‡ ç‡50%,æŠ€èƒ½Level,ingä¸å¯¹æ–¹spiå·®æœ€å¤§å½±å“ 3% * Level
 --LifeTime = 3 * Level
---buffĞ§¹û×÷ÓÃÊ±,²¥·Ådebuff_01¶¯×÷
+--buffæ•ˆæœä½œç”¨æ—¶,æ’­æ”¾debuff_01åŠ¨ä½œ
 
 require("define")
 require("command_define")
 require("share\\server_custom_define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 	local level = nx_query_property(skill, "Level")
 	local ing_self = nx_query_property(self, "Ing") + nx_query_property(self, "IngAdd")
 	local spi_target = nx_query_property(target, "Spi") + nx_query_property(target, "SpiAdd")
 	
-	--¼ì¶¨buffÊÇ·ñÃüÖĞ
+	--æ£€å®šbuffæ˜¯å¦å‘½ä¸­
 	local rate = math.random(0,100)
 	if ing_self - spi_target > 50 then
 		rate = rate + 3 * level
@@ -47,24 +47,24 @@ function skill_after_hit(self, skill, target)
 	end
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
 end
 
 function add_buffer(self, target, level)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_sleep")
 	
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
@@ -73,16 +73,16 @@ function add_buffer(self, target, level)
 		
 	nx_set_property(buffer, "ReplaceLevel", level)
 	nx_set_property(buffer, "ReplaceType", 0)
-	--ÉúÃüÆÚ
+	--ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime", nx_number(3 * level))
-	--bufferÔÚXÃëÄÚÓĞĞ§
+	--bufferåœ¨Xç§’å†…æœ‰æ•ˆ
 	nx_set_property(buffer, "EffectType", 1)
 	nx_set_property(buffer, "LifeTimeType", 1)
-	--´¥·¢¼¸ÂÊ
+	--è§¦å‘å‡ ç‡
 	nx_set_property(buffer, "EffectRatio", 100)
 	
 	
-	--Ìí¼Óµ½DirectPropertyRec
+	--æ·»åŠ åˆ°DirectPropertyRec
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantMove", 1, 0, 0)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "CantAttack", 1, 0, 0)	
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "DodgeProb", -100, 1, 0)
@@ -93,10 +93,10 @@ function add_buffer(self, target, level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "MagicParryProbAdd", -100, 1, 0)
 	nx_set_property(self, "State", debuff_01)
 
-	--Ìí¼Óµ½EventEffectRec
+	--æ·»åŠ åˆ°EventEffectRec
 	nx_add_record_row_values(buffer, "EventEffectRec", COMMAND_BEDAMAGE)
 	
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
  		nx_destroy_self(buffer)
 		return false

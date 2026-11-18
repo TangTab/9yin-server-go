@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Íæ¼ÒµÄÉú»îÖ°Òµ -->
+<!--çŽ©å®¶çš„ç”Ÿæ´»èŒä¸š -->
 
 <object>
 	<properties>	
-		<property name="ItemSet" type="string" public="false" private="true" save="false" desc="×°±¸Ï´µã²Ù×÷µÄuniqueid"/>
-		<property name="DecomposeUID" type="string" public="false" private="true" save="false" desc="·Ö½â×°±¸²Ù×÷µÄuniqueid"/>
-		<property name="DecomMaterial" type="string" public="false" private="true" save="false" desc="·Ö½â×°±¸ËùÐè²ÄÁÏ"/>
+		<property name="ItemSet" type="string" public="false" private="true" save="false" desc="è£…å¤‡æ´—ç‚¹æ“ä½œçš„uniqueid"/>
+		<property name="DecomposeUID" type="string" public="false" private="true" save="false" desc="åˆ†è§£è£…å¤‡æ“ä½œçš„uniqueid"/>
+		<property name="DecomMaterial" type="string" public="false" private="true" save="false" desc="åˆ†è§£è£…å¤‡æ‰€éœ€ææ–™"/>
 	</properties>
 	<records>
-		<record name="item_box" cols="2" maxrows="100" save="false" public="false" private="true" desc="ÈËÎï¿ªÆô±¦Ïä">
+		<record name="item_box" cols="2" maxrows="100" save="false" public="false" private="true" desc="äººç‰©å¼€å¯å®ç®±">
 			<column type="string" desc="ConfigID"/>
-			<column type="dword" desc="ÊýÁ¿"/>
+			<column type="dword" desc="æ•°é‡"/>
 		</record>
 	</records>
 </object>

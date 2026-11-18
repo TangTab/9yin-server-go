@@ -1,64 +1,64 @@
-	--µÈ¼¶1£º´¥·¢ÏŞÖÆBUFF£¬ÏŞÖÆĞéÕĞµÄÊ¹ÓÃ£¬½µµÍÍâ¹¦±¶ÂÊ£¨0.3~0.9£©
-	--Í¬ÉÏ
+	--ç­‰çº§1ï¼šè§¦å‘é™åˆ¶BUFFï¼Œé™åˆ¶è™šæ‹›çš„ä½¿ç”¨ï¼Œé™ä½å¤–åŠŸå€ç‡ï¼ˆ0.3~0.9ï¼‰
+	--åŒä¸Š
 	
 require("define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
---¼ÆÊ±»ò¼Æ´ÎÊ±µÄĞ§¹û
---Èç¹ûÊÇ¼Æ´Î£¬·µ»Ø1Ê±£º±¾´Î¼Æ´ÎÓĞĞ§£¬·µ»Ø0Ê±£º±¾´Î²»¼Æ´Î
+--è®¡æ—¶æˆ–è®¡æ¬¡æ—¶çš„æ•ˆæœ
+--å¦‚æœæ˜¯è®¡æ¬¡ï¼Œè¿”å›1æ—¶ï¼šæœ¬æ¬¡è®¡æ¬¡æœ‰æ•ˆï¼Œè¿”å›0æ—¶ï¼šæœ¬æ¬¡ä¸è®¡æ¬¡
 function buffer_timer(self, buffer)
-    --ÅĞ¶Ï»ñÈ¡½ÇÉ«µ±Ç°Ê¹ÓÃ¼¼ÄÜµÄĞĞÎª
+    --åˆ¤æ–­è·å–è§’è‰²å½“å‰ä½¿ç”¨æŠ€èƒ½çš„è¡Œä¸º
 	local cur_skill = nx_query_property(self, "CurSkill")
 	
-	--Èç¹ûÃ»ÓĞÊ¹ÓÃ¼¼ÄÜ£¬Ôò·µ»Ø
+	--å¦‚æœæ²¡æœ‰ä½¿ç”¨æŠ€èƒ½ï¼Œåˆ™è¿”å›
 	if not nx_exists(cur_skill) then
 		return 0
 	end
 	
-	--Èç¹ûÃ»ÓĞÊ¹ÓÃĞéÕĞ£¬Ôò·µ»Ø
+	--å¦‚æœæ²¡æœ‰ä½¿ç”¨è™šæ‹›ï¼Œåˆ™è¿”å›
 	if nx_query_property(cur_skill, "EffectType") ~= 2 then
 		return 0
 	end
 
 	local sender = nx_query_property(buffer, "Sender")
 		
-	--Ê¹ÓÃÁËĞéÕĞ£¬¼¤»îÁËÁíÒ»¸öBUFF	
+	--ä½¿ç”¨äº†è™šæ‹›ï¼Œæ¿€æ´»äº†å¦ä¸€ä¸ªBUFF	
 	add_buffer(sender, self)
 		return 1	
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end
 
 function add_buffer(self, target, level)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_jn_lmsj_05a")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 	
 	local inc_value = math.random(30,90) * 0.01
 	
-	--BufferµÄ×÷ÓÃÀàĞÍ
-	--0:Ë²Ê±Buffer,1:ÔÚXÃëÄÚÓĞĞ§,2:ÔÚXÃëÄÚY´ÎÊÂ¼şÓĞĞ§,3:ÔÚXÃëÄÚÓĞĞ§,Ã¿YÃë´¥·¢Ò»´Î)
+	--Bufferçš„ä½œç”¨ç±»å‹
+	--0:ç¬æ—¶Buffer,1:åœ¨Xç§’å†…æœ‰æ•ˆ,2:åœ¨Xç§’å†…Yæ¬¡äº‹ä»¶æœ‰æ•ˆ,3:åœ¨Xç§’å†…æœ‰æ•ˆ,æ¯Yç§’è§¦å‘ä¸€æ¬¡)
 	nx_set_property(buffer, "EffectType", 1)
 
-	--BufferµÄÉúÃüÆÚ£¨Ê±¼ä°´ÕÕ¼¼ÄÜµÈ¼¶»ñÈ¡£©
+	--Bufferçš„ç”Ÿå‘½æœŸï¼ˆæ—¶é—´æŒ‰ç…§æŠ€èƒ½ç­‰çº§è·å–ï¼‰
 	nx_set_property(buffer, "LifeTime",30000)
-	--BUFFER¸Ä±äµÄÊôĞÔ(Ìí¼Óµ½BufferµÄRolePropRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERæ”¹å˜çš„å±æ€§(æ·»åŠ åˆ°Bufferçš„RolePropRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "RolePropRec", "PhyDamageMul", nx_double(- inc_value))
 		
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

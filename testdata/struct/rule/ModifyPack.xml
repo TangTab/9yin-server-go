@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÒÆ¶¯Ïà¹ØµÄÊôÐÔ-->
-<!--·ÅÔÚ×°±¸ºÍbuffÉÏµÄÐÞÕý°ü±í-->
+<!--ç§»åŠ¨ç›¸å…³çš„å±žæ€§-->
+<!--æ”¾åœ¨è£…å¤‡å’Œbuffä¸Šçš„ä¿®æ­£åŒ…è¡¨-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
-		<record name="PropModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="ÊôÐÔÐÞÕý°ü±í">
-			<column type="DWORD" desc="ÊôÐÔÐÞÕý°üid"/>
+		<record name="PropModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="å±žæ€§ä¿®æ­£åŒ…è¡¨">
+			<column type="DWORD" desc="å±žæ€§ä¿®æ­£åŒ…id"/>
 		</record>
-		<record name="SkillModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="¼¼ÄÜÐÞÕý°ü±í">
-			<column type="DWORD" desc="¼¼ÄÜÐÞÕý°üid"/>
+		<record name="SkillModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="æŠ€èƒ½ä¿®æ­£åŒ…è¡¨">
+			<column type="DWORD" desc="æŠ€èƒ½ä¿®æ­£åŒ…id"/>
 		</record>
-		<record name="BuffModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="buffÐÞÕý°ü±í">
-			<column type="DWORD" desc="buffÐÞÕý°üid"/>
+		<record name="BuffModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="buffä¿®æ­£åŒ…è¡¨">
+			<column type="DWORD" desc="buffä¿®æ­£åŒ…id"/>
 		</record>
-		<record name="EquipModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="×°±¸ÐÞÕý°ü±í">
-			<column type="DWORD" desc="×°±¸ÊôÐÔÐÞÕý°üid"/>
+		<record name="EquipModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="è£…å¤‡ä¿®æ­£åŒ…è¡¨">
+			<column type="DWORD" desc="è£…å¤‡å±žæ€§ä¿®æ­£åŒ…id"/>
 		</record>
-		<record name="TaskModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="ÈÎÎñÐÞÕý°ü±í">
-			<column type="DWORD" desc="ÈÎÎñÊôÐÔÐÞÕý°üid"/>
+		<record name="TaskModifyPackRec" cols="1" maxrows="32" save="false" public="fasle" private="fasle" desc="ä»»åŠ¡ä¿®æ­£åŒ…è¡¨">
+			<column type="DWORD" desc="ä»»åŠ¡å±žæ€§ä¿®æ­£åŒ…id"/>
 		</record>
 	</records>
 </object>

@@ -1,4 +1,4 @@
---µÈÓÚÄ³¸öµÈ¼¶   
+--ç­‰äºæŸä¸ªç­‰çº§   
 function lv_equ(player,actName,val)
 	local lv = nx_query_property(player,"Level");
 	if lv == val then
@@ -7,7 +7,7 @@ function lv_equ(player,actName,val)
 	return false;
 end
 
---´óÓÚÄ³¸öµÈ¼¶
+--å¤§äºæŸä¸ªç­‰çº§
 function lv_lthan(player,actName,val)
 	local lv = nx_query_property(player,"Level");
 	if lv > val then
@@ -15,7 +15,7 @@ function lv_lthan(player,actName,val)
 	end
 	return false;
 end
---´óÓÚµÈÓÚÄ³¸öµÈ¼¶
+--å¤§äºç­‰äºæŸä¸ªç­‰çº§
 function lv_lequ(player,actName,val)
 	local lv = nx_query_property(player,"Level");  
 	if lv >= val then
@@ -23,7 +23,7 @@ function lv_lequ(player,actName,val)
 	end
 	return false;
 end
---Ğ¡ÓÚÄ³¸öµÈ¼¶
+--å°äºæŸä¸ªç­‰çº§
 function lv_sthan(player,actName,val)
     local lv = nx_query_property(player,"Level");
 	if lv < val then
@@ -31,7 +31,7 @@ function lv_sthan(player,actName,val)
 	end
 	return false;
 end
---Ğ¡ÓÚµÈÓÚÄ³¸öµÈ¼¶
+--å°äºç­‰äºæŸä¸ªç­‰çº§
 function lv_seque(player,actName,val)
 	local lv = nx_query_property(player,"Level");
 	if lv <= val then
@@ -40,7 +40,7 @@ function lv_seque(player,actName,val)
 	return false;
 end
 	
---ÊôÓÚÄ³¸ö¹ú¼Ò
+--å±äºæŸä¸ªå›½å®¶
 function nation_equ(player,actName,val)
 	local nation = nx_query_property(player,"Nation");
 	if nation == val then
@@ -49,7 +49,7 @@ function nation_equ(player,actName,val)
 	return false;
 end
 
---²»ÊôÓÚÄ³¸ö¹ú¼Ò
+--ä¸å±äºæŸä¸ªå›½å®¶
 function nation_nequ(player,actName,val)
 	local nation = nx_query_property(player,"Nation");
 	if nation ~= val then
@@ -58,9 +58,9 @@ function nation_nequ(player,actName,val)
 	return false;
 end 
 
---ÉÏÏßËÍ½±Æ·Ê±¼ä
+--ä¸Šçº¿é€å¥–å“æ—¶é—´
 
---ÁìÈ¡½±Æ· 
+--é¢†å–å¥–å“ 
 function login_time(player,actName,val)
     if nx_query_property(player,"Level") < 30 then
 	return false;
@@ -95,7 +95,7 @@ function login_time(player,actName,val)
 	return false;
 end
 
---ÁìÈ¡½±Æ· 
+--é¢†å–å¥–å“ 
 function Get_time(player,actName,val)
     if nx_query_property(player,"Level") < 30 then
 	return false;
@@ -190,14 +190,14 @@ function bugle2(player,actName,val)
 	return false;	
 end
 
---ÆßÌì½±ÀøÁìÈ¡ÅĞ¶Ï 
+--ä¸ƒå¤©å¥–åŠ±é¢†å–åˆ¤æ–­ 
 function SevenDateJudge(player,actName)
 	local bJudge = SevenDateJudgeSub(player,actName);
 	if not bJudge then
 		return false;
 	end
 	
-	--Ò»´ÎÖ»ÄÜÁìÈ¡Ò»¸ö
+	--ä¸€æ¬¡åªèƒ½é¢†å–ä¸€ä¸ª
 	--if nx_find_data(player,"SevenDateJudge") then
 	--	return false;
 	--end
@@ -211,19 +211,19 @@ function SevenDateJudgeSub(player,actName)
     local firstGetTime = nx_query_property(player,"SevenDateTime");
     
 	if firstGetTime == 0 then
-    	--µÚÒ»´ÎÁìÈ¡£¬¶¼¿ÉÒÔÄÃ
+    	--ç¬¬ä¸€æ¬¡é¢†å–ï¼Œéƒ½å¯ä»¥æ‹¿
     	if nx_query_property(player,"Level") >= 10 then
     		return true;
 		end
 		return false;
     end
 
-    --7Ììºó²»ÄÜÁìÈ¡,¿ªÊ¼ÊÂ¼äÊÇ¹é0µÄ 
+    --7å¤©åä¸èƒ½é¢†å–,å¼€å§‹äº‹é—´æ˜¯å½’0çš„ 
 	if math.abs(curTime - firstGetTime) > (7*24*60*60) then	
 		return false;
 	end
 	
-	--Ò»ÌìÖ»ÄÜÁìÈ¡Ò»´Î 
+	--ä¸€å¤©åªèƒ½é¢†å–ä¸€æ¬¡ 
     local timeTab; 
 	timeTab = os.date("*t",curTime);
 	
@@ -237,7 +237,7 @@ function SevenDateJudgeSub(player,actName)
 		and timeTab.day == lastTab.day  then
 			 return false;            
 		else
-		    --Ã¿Ìì´ó5¼¶
+		    --æ¯å¤©å¤§5çº§
    			timeTab.hour = 0;
     		timeTab.min = 0;
     		timeTab.sec = 0;
@@ -265,8 +265,8 @@ function SevenDateSucceed(player,actName)
 		return;   	
     end
     
-    --µÚÒ»´ÎÁìÈ¡£¬¼ÇÂ¼¿ªÊ¼ÊÂ¼ä 
-    --7Ììºó²»ÄÜÁìÈ¡,¿ªÊ¼ÊÂ¼äÊÇ¹é0µÄ 
+    --ç¬¬ä¸€æ¬¡é¢†å–ï¼Œè®°å½•å¼€å§‹äº‹é—´ 
+    --7å¤©åä¸èƒ½é¢†å–,å¼€å§‹äº‹é—´æ˜¯å½’0çš„ 
     local timeTab; 
 	timeTab = os.date("*t",curTime);
     timeTab.hour = 0;
@@ -282,14 +282,14 @@ function StartQueryGift(player)
 	--end
 end
 
---½±ÀøÎïÆ·µÄÌõ¼şÅäÖÃ
---16000	µÈ¼¶ÅĞ¶Ï
---16001 ÖÖ×åÌõ¼ş
---16002 Ê±¼äÅĞ¶Ï
---16003 ÷ÈÁ¦½±ÅĞ¶Ï
---16004 µÇÂ½½±Àø
---16005 ÄĞÊ¿÷ÈÁ¦½±Àø
---16006 Å®Ê¿÷ÈÁ¦½±Àø
+--å¥–åŠ±ç‰©å“çš„æ¡ä»¶é…ç½®
+--16000	ç­‰çº§åˆ¤æ–­
+--16001 ç§æ—æ¡ä»¶
+--16002 æ—¶é—´åˆ¤æ–­
+--16003 é­…åŠ›å¥–åˆ¤æ–­
+--16004 ç™»é™†å¥–åŠ±
+--16005 ç”·å£«é­…åŠ›å¥–åŠ±
+--16006 å¥³å£«é­…åŠ›å¥–åŠ±
 PresenterGitf = {    	
     ["9000003"] = {
 	    [1] =  { cmp = login_time , val = "1" , desc = "16002"}
@@ -309,17 +309,17 @@ PresenterGitf = {
 };
 
 
---½±ÀøÎïÆ·±í  
+--å¥–åŠ±ç‰©å“è¡¨  
 PrizeGiftItems = {
 	
-	--ÔùËÍÎïÆ· 18-22
+	--èµ é€ç‰©å“ 18-22
 	["9000003"] = {title = "16004",
 	        items = {
 	                [1] = { id = 14110501 , num = 10 },
 	                [2] = { id = 14110801 , num = 10 }
 			}
 	} ,
-	--ÔùËÍÎïÆ·10-13
+	--èµ é€ç‰©å“10-13
 	["9000004"] = {title = "16004",
 	        items = {
 	                [1] = { id = 14110901 , num = 10 },
@@ -327,7 +327,7 @@ PrizeGiftItems = {
 			}
 	} ,
 
-	--Ğ¡À®°È
+	--å°å–‡å­
 	["9000006"] = {title = "16004",
 		items = {
 			[1] = {id = 14110002, num = 1}
@@ -338,13 +338,13 @@ PrizeGiftItems = {
 			[1] = {id = 14110002, num = 1}
 		}	
 	},
-	--Åû·ç
+	--æŠ«é£
 	--["9000100"] = {title = "16053",
 	--	items = {
 	--		[1] = {id = 14110503,num = 1}
 	--	}			
 	--},	
-	--ĞÂÊÖ¿¨
+	--æ–°æ‰‹å¡
 	["TZ_10000001"] = {title = "16031",
 	        items = {
 	                [1] = { id = 14240711 , num = 1 },
@@ -390,7 +390,7 @@ PrizeGiftItems = {
 	                
 		}
 	},
-	--»î¶¯½±Àø1
+	--æ´»åŠ¨å¥–åŠ±1
 	["TZ_10000004"] = {title = "16054",
 	        items = {
 	                [1] = { id = 14220103 , num = 1 },
@@ -409,7 +409,7 @@ PrizeGiftItems = {
 	                
 		}
 	},
-	--»î¶¯½±Àø2
+	--æ´»åŠ¨å¥–åŠ±2
 	["TZ_10000005"] = {title = "16055",
 	        items = {
 	                [1] = { id = 14220103 , num = 1 },
@@ -423,7 +423,7 @@ PrizeGiftItems = {
 	                
 		}
 	},
-	--»î¶¯½±Àø3
+	--æ´»åŠ¨å¥–åŠ±3
 	["TZ_10000006"] = {title = "16056",
 	        items = {
 	                [1] = { id = 14220103 , num = 1 },
@@ -434,7 +434,7 @@ PrizeGiftItems = {
 	                [6] = { id = 14250102 , num = 1 }
 		}
 	},
-	--»î¶¯½±Àø4
+	--æ´»åŠ¨å¥–åŠ±4
 	["TZ_10000007"] = {title = "16057",
 	        items = {
 	                [1] = { id = 14220102 , num = 1 },
@@ -453,55 +453,55 @@ PrizeGiftItems = {
 	                
 		}
 	},
-	--»î¶¯½±Àø5
+	--æ´»åŠ¨å¥–åŠ±5
 	["TZ_10000008"] = {title = "16058",
 	        items = {
          [1] = { id = 14220102 , num = 1 }
 		}
 	},
-		--¿ª¿¨ËÍºÃÀñÒ»
+		--å¼€å¡é€å¥½ç¤¼ä¸€
 	["TZ_10000009"] = {title = "16125",
 	        items = {
          [1] = { id = 14110004 , num = 10 }
 		}
 	},
-		--¿ª¿¨ËÍºÃÀñ¶ş
+		--å¼€å¡é€å¥½ç¤¼äºŒ
 	["TZ_10000010"] = {title = "16126",
 	        items = {
          [1] = { id = 14110204 , num = 2 }
 		}
 	},
-		--¿ª¿¨ËÍºÃÀñÈı
+		--å¼€å¡é€å¥½ç¤¼ä¸‰
 	["TZ_10000011"] = {title = "16127",
 	        items = {
          [1] = { id = 14010108 , num = 30 }
 		}
 	},
-		--¿ª¿¨ËÍºÃÀñËÄ
+		--å¼€å¡é€å¥½ç¤¼å››
 	["TZ_10000012"] = {title = "16128",
 	        items = {
          [1] = { id = 13170014 , num = 1 }
 		}
 	},
-		--¿ª¿¨ËÍºÃÀñÎå
+		--å¼€å¡é€å¥½ç¤¼äº”
 	["TZ_10000013"] = {title = "16129",
 	        items = {
          [1] = { id = 14226604 , num = 1 }
 		}
 	},
-		--¿ª¿¨ËÍºÃÀñÁù
+		--å¼€å¡é€å¥½ç¤¼å…­
 	["TZ_10000014"] = {title = "16130",
 	        items = {
          [1] = { id = 14226605 , num = 1 }
 		}
 	},
-	--ÖĞ¼¶¾­Ñé¾í
+	--ä¸­çº§ç»éªŒå·
 	["14110202"] = {title = "Exp_Add_02",
 	        items = {
          [1] = { id = 14110202 , num = 1 }
 		}
 	},
-	--Ìì×ÓµÛÍõ¿¨
+	--å¤©å­å¸ç‹å¡
 	["TZ_10000015"] = {title = "TZ_Gift_01",
 	        items = {
 	                [1] = { id = 14241030 , num = 1 },
@@ -521,7 +521,7 @@ PrizeGiftItems = {
 	                
 		}
 	},
-	--Áú·ï»éÇìÀñ°ü
+	--é¾™å‡¤å©šåº†ç¤¼åŒ…
 	["TZ_10000016"] = {title = "TZ_Gift_02",
 	        items = {
          [1] = { id = 14110801 , num = 10 },

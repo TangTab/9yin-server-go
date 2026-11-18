@@ -1,27 +1,27 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎï»ù´¡ÊôÐÔ-->
+<!--äººç‰©åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!-- ÈËÎï»ù´¡ÊôÐÔ -->
-		<property name="Str" type="int" public="false" private="false" save="true" desc="Á¦Á¿"/>
-		<property name="Dex" type="int" public="false" private="false" save="true" desc="Ãô½Ý"/>
-		<property name="Ing" type="int" public="false" private="false" save="true" desc="ÖÇÁ¦"/>
-		<property name="Spi" type="int" public="false" private="false" save="true" desc="¾«Éñ"/>
-		<property name="Sta" type="int" public="false" private="false" save="true" desc="ÌåÖÊ"/>
-		<property name="Esth" type="int" public="false" private="false" save="true" desc="¸ÐÖª"/>
+		<!-- äººç‰©åŸºç¡€å±žæ€§ -->
+		<property name="Str" type="int" public="false" private="false" save="true" desc="åŠ›é‡"/>
+		<property name="Dex" type="int" public="false" private="false" save="true" desc="æ•æ·"/>
+		<property name="Ing" type="int" public="false" private="false" save="true" desc="æ™ºåŠ›"/>
+		<property name="Spi" type="int" public="false" private="false" save="true" desc="ç²¾ç¥ž"/>
+		<property name="Sta" type="int" public="false" private="false" save="true" desc="ä½“è´¨"/>
+		<property name="Esth" type="int" public="false" private="false" save="true" desc="æ„ŸçŸ¥"/>
 		
-		<!-- ÈËÎï»ù´¡ÊôÐÔ¸½¼Ó -->
-		<property name="StrAdd" type="int" public="false" private="false" save="false" desc="Á¦Á¿"/>
-		<property name="DexAdd" type="int" public="false" private="false" save="false" desc="Ãô½Ý"/>
-		<property name="IngAdd" type="int" public="false" private="false" save="false" desc="ÖÇÁ¦"/>
-		<property name="SpiAdd" type="int" public="false" private="false" save="false" desc="¾«Éñ"/>
-		<property name="StaAdd" type="int" public="false" private="false" save="false" desc="ÌåÖÊ"/>
-		<property name="EsthAdd" type="int" public="false" private="false" save="false" desc="¸ÐÖª"/>
+		<!-- äººç‰©åŸºç¡€å±žæ€§é™„åŠ  -->
+		<property name="StrAdd" type="int" public="false" private="false" save="false" desc="åŠ›é‡"/>
+		<property name="DexAdd" type="int" public="false" private="false" save="false" desc="æ•æ·"/>
+		<property name="IngAdd" type="int" public="false" private="false" save="false" desc="æ™ºåŠ›"/>
+		<property name="SpiAdd" type="int" public="false" private="false" save="false" desc="ç²¾ç¥ž"/>
+		<property name="StaAdd" type="int" public="false" private="false" save="false" desc="ä½“è´¨"/>
+		<property name="EsthAdd" type="int" public="false" private="false" save="false" desc="æ„ŸçŸ¥"/>
 	</properties>
 	
 	<includes>
-		<path name="struct\rule\PropRefreshCompute.xml" desc="ÊôÐÔÓ°Ïì±í"/>
+		<path name="struct\rule\PropRefreshCompute.xml" desc="å±žæ€§å½±å“è¡¨"/>
 	</includes>
 </object>

@@ -1,42 +1,42 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--LeaderNPCµÄÊôÐÔ-->
+<!--LeaderNPCçš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="DestPointX" type="float" public="false" private="false" save="false" desc="Ä¿±êµãX"/>
-		<property name="DestPointZ" type="float" public="false" private="false" save="false" desc="Ä¿±êµãZ"/>
-		<property name="TargetScene" type="int" public="false" private="false" save="false" desc="Ä¿±ê³¡¾°ºÅ"/>
-		<property name="TargetPosX" type="float" public="false" private="false" save="false" desc="Ä¿±êµãX"/>
-		<property name="TargetPosZ" type="float" public="false" private="false" save="false" desc="Ä¿±êµãZ"/>
-		<property name="ConvoyType" type="int" public="true" private="false" save="false" desc="»¤ËÍÀàÐÍ"/>
-		<property name="Master" type="widestr" public="true" private="false" save="false" desc="»¤ËÍÈË"/>
-		<property name="ConvoyCriteriaID" type="int" public="false" private="false" save="false" desc="×ÓÄ£°å±àºÅ"/>
-		<property name="ToDestFlag" type="int" public="false" private="false" save="false" desc="µ½´ïÄ¿±êµãµÄ±êÖ¾"/>
-		<property name="ConvoyPathID" type="string" public="false" private="false" save="false" desc="Ñ²ÂßÂ·¾¶"/>
-		<property name="EventPatrolType" type="int" public="false" private="false" save="false" desc="ÊÂ¼þÑ²ÂßÀàÐÍ£¬0ÊÂ¼þ¿ªÆô¿ªÊ¼Ñ²Âß£¬1³öÉú¿ªÊ¼Ñ²Âß"/>
+		<property name="DestPointX" type="float" public="false" private="false" save="false" desc="ç›®æ ‡ç‚¹X"/>
+		<property name="DestPointZ" type="float" public="false" private="false" save="false" desc="ç›®æ ‡ç‚¹Z"/>
+		<property name="TargetScene" type="int" public="false" private="false" save="false" desc="ç›®æ ‡åœºæ™¯å·"/>
+		<property name="TargetPosX" type="float" public="false" private="false" save="false" desc="ç›®æ ‡ç‚¹X"/>
+		<property name="TargetPosZ" type="float" public="false" private="false" save="false" desc="ç›®æ ‡ç‚¹Z"/>
+		<property name="ConvoyType" type="int" public="true" private="false" save="false" desc="æŠ¤é€ç±»åž‹"/>
+		<property name="Master" type="widestr" public="true" private="false" save="false" desc="æŠ¤é€äºº"/>
+		<property name="ConvoyCriteriaID" type="int" public="false" private="false" save="false" desc="å­æ¨¡æ¿ç¼–å·"/>
+		<property name="ToDestFlag" type="int" public="false" private="false" save="false" desc="åˆ°è¾¾ç›®æ ‡ç‚¹çš„æ ‡å¿—"/>
+		<property name="ConvoyPathID" type="string" public="false" private="false" save="false" desc="å·¡é€»è·¯å¾„"/>
+		<property name="EventPatrolType" type="int" public="false" private="false" save="false" desc="äº‹ä»¶å·¡é€»ç±»åž‹ï¼Œ0äº‹ä»¶å¼€å¯å¼€å§‹å·¡é€»ï¼Œ1å‡ºç”Ÿå¼€å§‹å·¡é€»"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="ConvoyPointRec" cols="4" maxrows="64" save="false" public="false" private="false" desc="Â·¾¶µã±í">
+		<record name="ConvoyPointRec" cols="4" maxrows="64" save="false" public="false" private="false" desc="è·¯å¾„ç‚¹è¡¨">
 			<column type="float" desc="x"/>
 			<column type="float" desc="z"/>
 			<column type="int" desc="time"/>
 			<column type="string" desc="talk"/>
 		</record>
-		<record name="ConvoyEventRec" cols="2" maxrows="32" save="false" public="false" private="false" desc="»¤ËÍÊÂ¼þ±í">
-			<column type="int" desc="³öÉúµ½²úÉúÊÂ¼þµÄÊ±¼ä"/>
-			<column type="int" desc="ÕÙ»½µÐÈËÊÂ¼þ,0´ú±í»¤ËÍ³É¹¦"/>
+		<record name="ConvoyEventRec" cols="2" maxrows="32" save="false" public="false" private="false" desc="æŠ¤é€äº‹ä»¶è¡¨">
+			<column type="int" desc="å‡ºç”Ÿåˆ°äº§ç”Ÿäº‹ä»¶çš„æ—¶é—´"/>
+			<column type="int" desc="å¬å”¤æ•Œäººäº‹ä»¶,0ä»£è¡¨æŠ¤é€æˆåŠŸ"/>
 		</record>
-		<!-- ×é¶Ó»¤ËÍÊ±,¼ÇÂ¼³õÊ¼¶ÓÎé±í -->
-		<record name="PlayerTeamRec" cols="1" maxrows="32" save="false" public="false" private="false" desc="»¤ËÍÊÂ¼þ±í">
-			<column type="widestr" desc="Íæ¼ÒÐÕÃû"/>
+		<!-- ç»„é˜ŸæŠ¤é€æ—¶,è®°å½•åˆå§‹é˜Ÿä¼è¡¨ -->
+		<record name="PlayerTeamRec" cols="1" maxrows="32" save="false" public="false" private="false" desc="æŠ¤é€äº‹ä»¶è¡¨">
+			<column type="widestr" desc="çŽ©å®¶å§“å"/>
 		</record>
-		<record name="PartnerRec" cols="1" maxrows="32" save="false" public="false" private="false" desc="»ï°é±í">
-			<column type="object" desc="»ï°é"/>
+		<record name="PartnerRec" cols="1" maxrows="32" save="false" public="false" private="false" desc="ä¼™ä¼´è¡¨">
+			<column type="object" desc="ä¼™ä¼´"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	
 	</includes>

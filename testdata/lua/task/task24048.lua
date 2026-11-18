@@ -1,26 +1,26 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task24048.lua
--- @ ½Å±¾¹¦ÄÜ: 24048»ñµÃÃÅÅÉÉí·İ½Å±¾
--- @ ´´½¨Õß:   fengqw
--- @ ´´½¨ÈÕÆÚ: 2010.4.17
+-- @ è„šæœ¬åç§°: task24048.lua
+-- @ è„šæœ¬åŠŸèƒ½: 24048è·å¾—é—¨æ´¾èº«ä»½è„šæœ¬
+-- @ åˆ›å»ºè€…:   fengqw
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.4.17
 -----------------------------------------
 
--- Ã¿¸öµ¥¶ÀµÄÈÎÎñ½Å±¾¿ÉÒÔ¸´ÖÆ´ËÄ£°å£¬ĞŞ¸ÄÂß¼­
+-- æ¯ä¸ªå•ç‹¬çš„ä»»åŠ¡è„šæœ¬å¯ä»¥å¤åˆ¶æ­¤æ¨¡æ¿ï¼Œä¿®æ”¹é€»è¾‘
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
-	-- µ±Ç°³¡¾°
+	-- å½“å‰åœºæ™¯
 	local config_id = "tasklua_24048"
 
-	-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ
+	-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ
 	local row = nx_add_record_row_values(player, "Task_Record", nx_int(taskid), nx_int(0),nx_int(0), nx_int(1), "", "", config_id)
 	local max_rows = nx_get_record_rows(target, "Task_Record")
 	for i = 0, max_rows-1 do
@@ -28,13 +28,13 @@ function Task_After_Accept(player, npc, taskid)
 		local config = nx_query_record_value(target, "Task_Record", i, 6)
 		if nx_int(taskid) == nx_int(id) then
 			if config_id == config then
-				--²éÑ¯µ±Ç°½ø¶È
+				--æŸ¥è¯¢å½“å‰è¿›åº¦
 				local numnow = nx_query_record_value(target, "Task_Record", i, 2)
 				local numneed = nx_query_record_value(target, "Task_Record", i, 3)
 				if numnow < numneed then
 					return 1
 				else
-				--Ìá½»ÈÎÎñ
+				--æäº¤ä»»åŠ¡
 				nx_command(player, player, 165, taskid)
 				end
 			end
@@ -44,7 +44,7 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 
 
@@ -52,7 +52,7 @@ function Task_Complete_Condition(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 
 	return 1

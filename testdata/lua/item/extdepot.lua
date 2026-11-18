@@ -10,7 +10,7 @@ function on_use(item, self)
 	    return
 	end
 	
-	local ext_depot_value = nx_query_property(self, "AddDepotBagNum") --À©Õ¹²ÛÎ»Öµ
+	local ext_depot_value = nx_query_property(self, "AddDepotBagNum") --æ‰©å±•æ§½ä½å€¼
 	if nx_number(ext_depot_value) >= nx_number(0) and nx_number(ext_depot_value) < nx_number(2) then
 	    ext_depot_value = ext_depot_value + 1
 	    if ext_depot_value < 0 then
@@ -24,7 +24,7 @@ function on_use(item, self)
 	end
 end
 
---¼õÉÙITEMÊýÁ¿
+--å‡å°‘ITEMæ•°é‡
 function reduce_item(item)
     nx_inc_property(item, "Amount", -1)
 end

@@ -1,66 +1,66 @@
---¼à¿Ø·şÎñÆ÷Ö÷¿Ø½Å±¾
+--ç›‘æ§æœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(console)
 	nx_set_value("console", console)
 	
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	console.Color = "LightPurple"
 	
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 	
-	--ÈÕÖ¾»º³å³Ø
+	--æ—¥å¿—ç¼“å†²æ± 
 	local log_pool = nx_create("LogPool")
 	
-	--ÈÕÖ¾ÎÄ¼şÇ°×º
+	--æ—¥å¿—æ–‡ä»¶å‰ç¼€
 	log_pool.FilePrefix = nx_work_path() .. "log\\watch"
-	--»º³åÊıÁ¿
+	--ç¼“å†²æ•°é‡
 	log_pool.TraceMax = 256
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	log_pool.EveryDayAlone = false
 	
 	if nx_is_debug() then
-		--ÔÚµ÷ÊÔ°æÀï½«ÈÕÖ¾ĞÅÏ¢Êä³öµ½¿ØÖÆÌ¨
+		--åœ¨è°ƒè¯•ç‰ˆé‡Œå°†æ—¥å¿—ä¿¡æ¯è¾“å‡ºåˆ°æ§åˆ¶å°
 		log_pool.Console = console
 	end
 	
-	--Æô¶¯ÈÕÖ¾¼ÇÂ¼
+	--å¯åŠ¨æ—¥å¿—è®°å½•
 	log_pool:Start()
 	
 	nx_set_value("log_pool", log_pool)
 	
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 	
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	ini.FileName = "GameWatch.ini"
 	
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
-		nx_msgbox("ÎŞ·¨¶ÁÈ¡³ÌĞòÅäÖÃÎÄ¼ş")
+		nx_msgbox("æ— æ³•è¯»å–ç¨‹åºé…ç½®æ–‡ä»¶")
 		nx_destroy(ini)
 		return 0
 	end
 	
-	--×î´óÁ¬½ÓÊı
+	--æœ€å¤§è¿æ¥æ•°
 	local max_client = ini:ReadInteger("Main", "MaxClient", 16)
-	--¼à¿ØÃÜÂë
+	--ç›‘æ§å¯†ç 
 	local monitor_password = ini:ReadString("main", "MonitorPassword", "")
-	--¸üĞÂÃÜÂë
+	--æ›´æ–°å¯†ç 
 	local update_password = ini:ReadString("main", "UpdatePassword", "")
-	--²éÑ¯ÃÜÂë
+	--æŸ¥è¯¢å¯†ç 
 	local query_password = ini:ReadString("main", "QueryPassword", "")
-	--³ÌĞòÆô¶¯ºóÊÇ·ñËø¶¨ÏµÍ³
+	--ç¨‹åºå¯åŠ¨åæ˜¯å¦é”å®šç³»ç»Ÿ
 	local lock_system = nx_boolean(ini:ReadString("main", "LockSystem", ""))
 	
-	--ÍâÍøµØÖ·
+	--å¤–ç½‘åœ°å€
 	local outer_addr = ini:ReadString("Outer", "Addr", "127.0.0.1")
 	local outer_port = ini:ReadInteger("Outer", "Port", 6000)
 	
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15006
 	
@@ -69,7 +69,7 @@ function main(console)
 	
 	--nx_destroy(ini)
 	
-	--´´½¨Î¬»¤Á¬½Ó·şÎñ
+	--åˆ›å»ºç»´æŠ¤è¿æ¥æœåŠ¡
 	local echo_sock = nx_create("EchoSock")
 	
 	echo_sock.Address = echo_addr
@@ -77,7 +77,7 @@ function main(console)
 	
 	nx_bind_script(echo_sock, "echo", "echo_init")
 	
-	--´´½¨¿Í»§¶Ë½ÓÈëÍ¨Ñ¶·şÎñ
+	--åˆ›å»ºå®¢æˆ·ç«¯æ¥å…¥é€šè®¯æœåŠ¡
 	local mass_sock = nx_create("MassSock")
 	
 	mass_sock.Address = outer_addr
@@ -88,23 +88,23 @@ function main(console)
 	mass_sock.OutBufLen = 1024 * 1024
 	mass_sock.ListenPendings = 5
 	
-	--´´½¨½ø³Ì¼à¿Ø
+	--åˆ›å»ºè¿›ç¨‹ç›‘æ§
 	local app_manager = nx_create("AppManager")
 	
 	app_manager.AppName = "watch"
 	app_manager.AppAddress = echo_addr .. ":" .. nx_string(echo_port)
-	--¼à¿Ø³ÌĞò²ÅĞèÒª¶¨Ê±¼ì²âÆäËûÓ¦ÓÃÊÇ·ñ´æÔÚ
+	--ç›‘æ§ç¨‹åºæ‰éœ€è¦å®šæ—¶æ£€æµ‹å…¶ä»–åº”ç”¨æ˜¯å¦å­˜åœ¨
 	app_manager.NeedCheckApp = true
 	
-	--´´½¨Êı¾İ¿âÏµÍ³
+	--åˆ›å»ºæ•°æ®åº“ç³»ç»Ÿ
 	local db_system = nx_create("SqlDBSystem")
 	
-	--´´½¨¼à¿Ø·şÎñ
+	--åˆ›å»ºç›‘æ§æœåŠ¡
 	local game_watch = nx_create("GameWatch")
 	
 	nx_set_value("game_watch", game_watch)
 	
-	--½ø³ÌÂ·¾¶
+	--è¿›ç¨‹è·¯å¾„
 	local server_table = ini:GetItemList("Servers")
 	
 	for i = 1, table.getn(server_table) do
@@ -116,7 +116,7 @@ function main(console)
 		end
 	end
 	
-	--¿ÉÖ´ĞĞÎÄ¼şÂ·¾¶
+	--å¯æ‰§è¡Œæ–‡ä»¶è·¯å¾„
 	local exe_path_table = ini:GetItemList("ExePath")
 	
 	for i = 1, table.getn(exe_path_table) do
@@ -128,7 +128,7 @@ function main(console)
 		end
 	end
 	
-	--×ÊÔ´ÎÄ¼şÂ·¾¶
+	--èµ„æºæ–‡ä»¶è·¯å¾„
 	local res_path_table = ini:GetItemList("ResPath")
 	
 	for i = 1, table.getn(res_path_table) do
@@ -140,7 +140,7 @@ function main(console)
 		end
 	end
 	
-	--ÔÊĞíÁ¬½ÓµÄºÏ·¨¿Í»§¶ËµØÖ·
+	--å…è®¸è¿æ¥çš„åˆæ³•å®¢æˆ·ç«¯åœ°å€
 	local addr_num = ini:ReadInteger("Address", "AddressNum", 0)
 	
 	for i = 0, (addr_num - 1) do
@@ -153,7 +153,7 @@ function main(console)
 	
 	nx_destroy(ini)
 	
-	--¼ÓÔØÊı¾İ¿âÁ¬½ÓÅäÖÃÎÄ¼ş
+	--åŠ è½½æ•°æ®åº“è¿æ¥é…ç½®æ–‡ä»¶
 	game_watch:LoadAccessConfig("access.ini")
 	
 	game_watch.MonitorPassword = monitor_password
@@ -166,36 +166,36 @@ function main(console)
 	game_watch.AppManager = app_manager
 	game_watch.DBSystem = db_system
 	
-	--Æô¶¯½ø³Ì¼à¿Ø
+	--å¯åŠ¨è¿›ç¨‹ç›‘æ§
 	app_manager:Start()
 	
-	--Ôİ²»½ÓÊÜÁ¬½Ó
+	--æš‚ä¸æ¥å—è¿æ¥
 	mass_sock.Closed = true
-	--Æô¶¯¿Í»§¶ËÁ¬½Ó
+	--å¯åŠ¨å®¢æˆ·ç«¯è¿æ¥
 	mass_sock:Start()
 	
-	--Æô¶¯Î¬»¤Á¬½Ó
+	--å¯åŠ¨ç»´æŠ¤è¿æ¥
 	echo_sock:Start()
 	
-	--Æô¶¯¼à¿Ø·şÎñ
+	--å¯åŠ¨ç›‘æ§æœåŠ¡
 	game_watch:Start()
 	
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	console:WriteLine("App name " .. app_manager.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	console:WriteLine("Echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	console:WriteLine("Outer socket " .. outer_addr .. ":" .. nx_string(outer_port))
 	
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	console:WriteLine("Game watch server started")
 	
-	--¿ªÊ¼½ÓÊÜÁ¬½Ó
+	--å¼€å§‹æ¥å—è¿æ¥
 	mass_sock.Closed = false
 	
 	return 1
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local console = nx_value("console")
 	
@@ -205,7 +205,7 @@ function close()
 	local mass_sock = game_watch.MassSock
 	local echo_sock = game_watch.EchoSock
 	
-	--¹Ø±ÕÍâÍøÁ¬½Ó
+	--å…³é—­å¤–ç½‘è¿æ¥
 	console:WriteLine("client socket shutdown...")
 	
 	mass_sock.Closed = true
@@ -217,27 +217,27 @@ function close()
 	
 	mass_sock:Stop()
 	
-	--¹Ø±ÕÎ¬»¤Á¬½Ó
+	--å…³é—­ç»´æŠ¤è¿æ¥
 	console:WriteLine("echo socket shutdown...")
 	
 	echo_sock:Stop()
 	
-	--¹Ø±Õ¼à¿Ø·şÎñ
+	--å…³é—­ç›‘æ§æœåŠ¡
 	console:WriteLine("watch server shutdown...")
 	
 	game_watch:Stop()
 	
-	--¹Ø±Õ½ø³Ì¼à¿Ø
+	--å…³é—­è¿›ç¨‹ç›‘æ§
 	console:WriteLine("app_manager shutdown...")
 	
 	app_manager:Stop()
 	
-	--¹Ø±ÕÈÕÖ¾»º³å
+	--å…³é—­æ—¥å¿—ç¼“å†²
 	local log_pool = nx_value("log_pool")
 	
 	log_pool:Stop()
 	
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 	
 	return true

@@ -84,9 +84,9 @@ function check_prop_less_byid(Owner,sender, ...)
 	local PropName = nx_string(arg[2]);
 	local Value    = nx_int(arg[3]);
 
-    --È¡µ±Ç°³¡¾°¶ÔÏó
+    --å–å½“å‰åœºæ™¯å¯¹è±¡
 	local scene = nx_get_scene()
-	--È¥µ±Ç°³¡¾°ÄÚnpcÁĞ±í
+	--å»å½“å‰åœºæ™¯å†…npcåˆ—è¡¨
 	local list = nx_get_child_list(scene, 0)
 
 	for n = 1, table.getn(list) do
@@ -122,7 +122,7 @@ end
 function check_prop_equal(Owner,sender, ...)
 
 	if table.getn(arg) < 2 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_prop_equal <PropName> <Value>"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_prop_equal <PropName> <Value>"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return 0;
 	end
 	local PropName = nx_string(arg[1]);
@@ -179,7 +179,7 @@ end
 function check_cur_use_skill(Owner,sender, ...)
 
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_cur_use_skill <skillid>"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_cur_use_skill <skillid>"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return 0;
 	end
 
@@ -196,20 +196,20 @@ function check_cur_use_skill(Owner,sender, ...)
 end
 
 
---ÅĞ¶ÏÄ³config idµÄ»ú¹ØnpcÊÇ·ñ¶¼±»´¥·¢
+--åˆ¤æ–­æŸconfig idçš„æœºå…³npcæ˜¯å¦éƒ½è¢«è§¦å‘
 function check_alltype_MachineNpc(Owner,sender, ...)
 
 	if table.getn(arg) < 1 then
-		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_cur_use_skill <skillid>"));--¸ñÊ½£ºcobj ±àºÅ
+		nx_sysinfo(gm, TIPSTYPE_GMINFO, "0", nx_widestr("Format:check_cur_use_skill <skillid>"));--æ ¼å¼ï¼šcobj ç¼–å·
 		return 0
 	end
 
 	local npcid = nx_string(arg[1]);
 	
-	-- È¡µ±Ç°³¡¾°¶ÔÏó
+	-- å–å½“å‰åœºæ™¯å¯¹è±¡
 	local scene = nx_get_scene()
 	
-	-- È¡npcÁĞ±í
+	-- å–npcåˆ—è¡¨
 	local npclist = nx_find_child_list_byconfig(nx_get_scene(),npcid,TYPE_NPC)
 	
 	for i = 1, table.getn(npclist) do
@@ -222,7 +222,7 @@ function check_alltype_MachineNpc(Owner,sender, ...)
 		end
 	end
 	
-	-- È¡npcÁĞ±í
+	-- å–npcåˆ—è¡¨
 	local npclist2 = nx_find_child_list_byconfig(nx_get_scene(),npcid,TYPE_ITEM)
 	
 	for i = 1, table.getn(npclist2) do
@@ -238,7 +238,7 @@ function check_alltype_MachineNpc(Owner,sender, ...)
 	return 1
 end
 
---ÅĞ¶ÏÄ³config idµÄ»ú¹ØnpcÊÇ·ñÃ»ÓĞ¶¼±»´¥·¢
+--åˆ¤æ–­æŸconfig idçš„æœºå…³npcæ˜¯å¦æ²¡æœ‰éƒ½è¢«è§¦å‘
 function check_not_all_machine_spring(Owner,sender, ...)
 
 	if table.getn(arg) < 1 then
@@ -247,10 +247,10 @@ function check_not_all_machine_spring(Owner,sender, ...)
 
 	local npcid = nx_string(arg[1]);
 	
-	--È¡µ±Ç°³¡¾°¶ÔÏó
+	--å–å½“å‰åœºæ™¯å¯¹è±¡
 	local scene = nx_get_scene()
 	
-	--È¥µ±Ç°³¡¾°ÄÚnpcÁĞ±í
+	--å»å½“å‰åœºæ™¯å†…npcåˆ—è¡¨
 	local list = nx_get_child_list(scene, 0)
 	
 	for i = 1, table.getn(list) do
@@ -273,7 +273,7 @@ function check_not_all_machine_spring(Owner,sender, ...)
 	return 0
 end
 
---¼ì²â´¥·¢·¶Î§ÄÚÍæ¼ÒÊıÁ¿ÊÇ·ñ¹»Ò»¶¨ÊıÄ¿
+--æ£€æµ‹è§¦å‘èŒƒå›´å†…ç©å®¶æ•°é‡æ˜¯å¦å¤Ÿä¸€å®šæ•°ç›®
 function check_spring_players(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -289,7 +289,7 @@ function check_spring_players(Owner,sender, ...)
 	return 0
 end
 
---¼ì²â´¥·¢·¶Î§ÄÚÓĞÄ³¸önpc
+--æ£€æµ‹è§¦å‘èŒƒå›´å†…æœ‰æŸä¸ªnpc
 function check_spring_npc_by_id(Owner,sender, ...)
 	if table.getn(arg) < 3 then
 		return 0
@@ -317,7 +317,7 @@ function check_spring_npc_by_id(Owner,sender, ...)
 	return 0
 end
 
---¼ì²â´¥·¢·¶Î§ÄÚÊıÁ¿²»×ãÄ³¸önpc
+--æ£€æµ‹è§¦å‘èŒƒå›´å†…æ•°é‡ä¸è¶³æŸä¸ªnpc
 function check_spring_npc_by_id_less(Owner,sender, ...)
 	if table.getn(arg) < 3 then
 		return 0
@@ -345,7 +345,7 @@ function check_spring_npc_by_id_less(Owner,sender, ...)
 	return 1
 end
 
---¼ì²âËŞÖ÷ÊÇ·ñ´æ»î
+--æ£€æµ‹å®¿ä¸»æ˜¯å¦å­˜æ´»
 function check_owner_is_live(Owner,sender, ...)
 
 	if not nx_exists(Owner) then
@@ -356,7 +356,7 @@ function check_owner_is_live(Owner,sender, ...)
 	
 		local dead = nx_query_property(Owner,"Dead") 
 		
-		-- ÅĞ¶Ï¶ÔÏóDeadÊôĞÔÊÇ·ñÎª´æ»î
+		-- åˆ¤æ–­å¯¹è±¡Deadå±æ€§æ˜¯å¦ä¸ºå­˜æ´»
 		if nx_int(dead) == nx_int(0) then
 			return 1		
 		end
@@ -367,7 +367,7 @@ function check_owner_is_live(Owner,sender, ...)
 end
 
 
---¼ì²â·¶Î§ÄÚÄ³¸öidµÄnpc´æ»î
+--æ£€æµ‹èŒƒå›´å†…æŸä¸ªidçš„npcå­˜æ´»
 function check_range_npc_live(Owner,sender, ...)
 	if table.getn(arg) < 2 then
 		return 0
@@ -376,7 +376,7 @@ function check_range_npc_live(Owner,sender, ...)
 	local npcid = nx_string(arg[1])
 	local range = nx_int(arg[2])
 
-	-- ÅĞ¶Ïnpc
+	-- åˆ¤æ–­npc
 	local list = nx_get_around_list(Owner, range, TYPE_NPC, 100, 1)
 	
 	local count = 0
@@ -399,7 +399,7 @@ function check_range_npc_live(Owner,sender, ...)
 		
 	end
 
-	-- ÅĞ¶ÏitemÎï¼ş
+	-- åˆ¤æ–­itemç‰©ä»¶
 	local list = nx_get_around_list(Owner, range, TYPE_ITEM, 100, 1)
 	
 	local count = 0
@@ -427,7 +427,7 @@ end
 
 
 
---¼ì²â ´¥·¢Õßid
+--æ£€æµ‹ è§¦å‘è€…id
 function check_sender_id(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -440,7 +440,7 @@ function check_sender_id(Owner,sender, ...)
 	return 0
 end
 
---¼ì²âÍæ¼Ò±³°üÊÇ·ñ²»¹»n¸öµÀ¾ß
+--æ£€æµ‹ç©å®¶èƒŒåŒ…æ˜¯å¦ä¸å¤Ÿnä¸ªé“å…·
 function check_item_less(Owner, sender,...)
 	if table.getn(arg) < 2 then
 		return 0
@@ -463,7 +463,7 @@ function check_item_less(Owner, sender,...)
 	return 0
 end
 
---¼ì²âÍæ¼Ò±³°üÊÇ·ñ¶àÓÚµÈÓÚn¸öµÀ¾ß
+--æ£€æµ‹ç©å®¶èƒŒåŒ…æ˜¯å¦å¤šäºç­‰äºnä¸ªé“å…·
 function check_item_more(Owner, sender,...)
 	if table.getn(arg) < 2 then
 		return 0
@@ -533,7 +533,7 @@ function check_scene_player_num_less(Owner, sender,...)
 	return 0
 end
 
---¼ì²â ´¥·¢ÕßÊÇ·ñÓĞÄ³¸öbuff
+--æ£€æµ‹ è§¦å‘è€…æ˜¯å¦æœ‰æŸä¸ªbuff
 function check_sender_buff(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -549,7 +549,7 @@ function check_sender_buff(Owner,sender, ...)
 	return 0
 end
 
---¼ì²â ´¥·¢ÕßÊÇ·ñÃ»ÓĞÄ³¸öbuff
+--æ£€æµ‹ è§¦å‘è€…æ˜¯å¦æ²¡æœ‰æŸä¸ªbuff
 function check_sender_no_buff(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -565,7 +565,7 @@ function check_sender_no_buff(Owner,sender, ...)
 	return 0
 end
 
---¼ì²â ËŞÖ÷ÊÇ·ñÓĞÄ³¸öbuff
+--æ£€æµ‹ å®¿ä¸»æ˜¯å¦æœ‰æŸä¸ªbuff
 function check_owner_buff(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -579,7 +579,7 @@ function check_owner_buff(Owner,sender, ...)
 	return 0
 end
 
---¼ì²â ËŞÖ÷ÊÇ·ñÃ»ÓĞÄ³¸öbuff
+--æ£€æµ‹ å®¿ä¸»æ˜¯å¦æ²¡æœ‰æŸä¸ªbuff
 function check_owner_no_buff(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -593,7 +593,7 @@ function check_owner_no_buff(Owner,sender, ...)
 	return 0
 end
 
---ÅĞ¶ÏÄ³config idµÄnpcÊÇ·ñ¶¼ÒÑ¾­ËÀÍö
+--åˆ¤æ–­æŸconfig idçš„npcæ˜¯å¦éƒ½å·²ç»æ­»äº¡
 function check_all_npcdead_byid(Owner,sender, ...)
 
 	if table.getn(arg) < 1 then
@@ -601,13 +601,13 @@ function check_all_npcdead_byid(Owner,sender, ...)
 	end
 
 	local npcid = nx_string(arg[1]);
-	--È¡µ±Ç°³¡¾°¶ÔÏó
+	--å–å½“å‰åœºæ™¯å¯¹è±¡
 	local scene = nx_get_scene()
-	--È¥µ±Ç°³¡¾°ÄÚnpcÁĞ±í
+	--å»å½“å‰åœºæ™¯å†…npcåˆ—è¡¨
 	local list = nx_get_child_list(scene, 0)
 	for i = 1, table.getn(list) do
 		npc = nx_object(list[i])
-		--¼ì²ânpc¡°Dead¡±ÊôĞÔÊÇ·ñÂú×ãÌõ¼ş
+		--æ£€æµ‹npcâ€œDeadâ€å±æ€§æ˜¯å¦æ»¡è¶³æ¡ä»¶
 		if npcid == nx_get_config(npc) then
 			if nx_find_property(npc,"Dead") and nx_find_property(npc, "Invisible") then
 				if nx_query_property(npc, "Dead") == 0 and
@@ -621,7 +621,7 @@ function check_all_npcdead_byid(Owner,sender, ...)
 	return 1
 end
 
---ÅĞ¶ÏÄ³config idµÄnpcÊÇ·ñÓĞ»îµÄ
+--åˆ¤æ–­æŸconfig idçš„npcæ˜¯å¦æœ‰æ´»çš„
 function check_has_npcalive_byid(Owner,sender, ...)
 
 	if table.getn(arg) < 1 then
@@ -629,13 +629,13 @@ function check_has_npcalive_byid(Owner,sender, ...)
 	end
 
 	local npcid = nx_string(arg[1]);
-	--È¡µ±Ç°³¡¾°¶ÔÏó
+	--å–å½“å‰åœºæ™¯å¯¹è±¡
 	local scene = nx_get_scene()
-	--È¥µ±Ç°³¡¾°ÄÚnpcÁĞ±í
+	--å»å½“å‰åœºæ™¯å†…npcåˆ—è¡¨
 	local list = nx_get_child_list(scene, 0)
 	for i = 1, table.getn(list) do
 		npc = nx_object(list[i])
-		--¼ì²ânpc¡°Dead¡±ÊôĞÔÊÇ·ñÂú×ãÌõ¼ş
+		--æ£€æµ‹npcâ€œDeadâ€å±æ€§æ˜¯å¦æ»¡è¶³æ¡ä»¶
 		if npcid == nx_get_config(npc) then
 			if nx_find_property(npc,"Dead") and nx_find_property(npc, "Invisible") then
 				if nx_query_property(npc, "Dead") == 0 and
@@ -648,7 +648,7 @@ function check_has_npcalive_byid(Owner,sender, ...)
 	return 0
 end
 
---ÅĞ¶Ï  Ä³¸ö·¶Î§ Ä³configid µÄnpcÊÇ·ñ¶¼ÒÑ¾­ËÀÍö
+--åˆ¤æ–­  æŸä¸ªèŒƒå›´ æŸconfigid çš„npcæ˜¯å¦éƒ½å·²ç»æ­»äº¡
 function check_around_npcdead_byid(Owner,sender, ...)
 
 	if table.getn(arg) < 2 then
@@ -695,7 +695,7 @@ function check_around_npcdead_byid(Owner,sender, ...)
 end
 
 
---¼ì²âÏµÍ³Ê±¼äÊÇ·ñ´óÓÚÒ»¸öÊ±¼äµã
+--æ£€æµ‹ç³»ç»Ÿæ—¶é—´æ˜¯å¦å¤§äºä¸€ä¸ªæ—¶é—´ç‚¹
 function check_time_after(Owner,sender, ...)
 		if table.getn(arg) < 6 then
 				return 0
@@ -730,7 +730,7 @@ function check_time_after(Owner,sender, ...)
 end
 
 
---¼ì²âÏµÍ³Ê±¼äÊÇ·ñĞ¡ÓÚÒ»¸öÊ±¼äµã
+--æ£€æµ‹ç³»ç»Ÿæ—¶é—´æ˜¯å¦å°äºä¸€ä¸ªæ—¶é—´ç‚¹
 function check_time_before(Owner,sender, ...)
 		if table.getn(arg) < 6 then
 				return 0
@@ -763,7 +763,7 @@ function check_time_before(Owner,sender, ...)
 		return 0
 end
 
---¼ì²âÊÇÒ»ÌìÖĞµÄÒ»¸öÊ±¼äµã£¨¾«È·µ½Ãë£©
+--æ£€æµ‹æ˜¯ä¸€å¤©ä¸­çš„ä¸€ä¸ªæ—¶é—´ç‚¹ï¼ˆç²¾ç¡®åˆ°ç§’ï¼‰
 function check_time(Owner,sender, ...)
 		if table.getn(arg) < 4 then
 				return 0
@@ -803,7 +803,7 @@ function check_time(Owner,sender, ...)
 		return 0
 end
 
---±È½ÏÈÕ
+--æ¯”è¾ƒæ—¥
 function check_date(Owner,sender, ...)
 		if table.getn(arg) < 2 then
 				return 0
@@ -838,7 +838,7 @@ function check_date(Owner,sender, ...)
 		return 0
 end
 
---±È½ÏÖÜÈÕ£¨0ÎªĞÇÆÚÌì£©
+--æ¯”è¾ƒå‘¨æ—¥ï¼ˆ0ä¸ºæ˜ŸæœŸå¤©ï¼‰
 function check_day(Owner,sender, ...)
 		if table.getn(arg) < 2 then
 				return 0
@@ -870,7 +870,7 @@ function check_day(Owner,sender, ...)
 		return 0
 end
 
---±È½ÏÔÂ·İ
+--æ¯”è¾ƒæœˆä»½
 function check_month(Owner,sender, ...)
 		if table.getn(arg) < 2 then
 				return 0
@@ -906,7 +906,7 @@ function check_month(Owner,sender, ...)
 end
 
 
---ÅĞ¶ÏÊ¹ÓÃµÄµÀ¾ßµÄidÊÇ·ñ·ûºÏ
+--åˆ¤æ–­ä½¿ç”¨çš„é“å…·çš„idæ˜¯å¦ç¬¦åˆ
 function check_use_item_id(Owner,sender, ...)
 		if table.getn(arg) < 1 then
 				return 0
@@ -927,7 +927,7 @@ function check_use_item_id(Owner,sender, ...)
 		return 0
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñÊÇ¶Ó³¤
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦æ˜¯é˜Ÿé•¿
 function check_sender_captain(Owner,sender, ...)
 	
 	if not nx_exists(sender) then
@@ -946,7 +946,7 @@ function check_sender_captain(Owner,sender, ...)
 	
 end
 
---¼ì²âÊÂ¼şÓµÓĞÕßÊÇ·ñÊÇ¶Ó³¤
+--æ£€æµ‹äº‹ä»¶æ‹¥æœ‰è€…æ˜¯å¦æ˜¯é˜Ÿé•¿
 function check_owner_captain(Owner,sender, ...)
 
 	if not nx_exists(Owner) then
@@ -966,7 +966,7 @@ function check_owner_captain(Owner,sender, ...)
 end
 
 
---¼ì²â´¥·¢ÕßÄÜ·ñ´ÓÊÂ¼şÓµÓĞÕßÉíÉÏ½Óµ½Ä³¸öÈÎÎñ
+--æ£€æµ‹è§¦å‘è€…èƒ½å¦ä»äº‹ä»¶æ‹¥æœ‰è€…èº«ä¸Šæ¥åˆ°æŸä¸ªä»»åŠ¡
 function check_sender_can_accept_task(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 				return 0
@@ -975,7 +975,7 @@ function check_sender_can_accept_task(Owner,sender, ...)
 	return nx_test_accept_task(sender, Owner, taskid)
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñÕıÔÚ½øĞĞÄ³¸öÈÎÎñ
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦æ­£åœ¨è¿›è¡ŒæŸä¸ªä»»åŠ¡
 function check_sender_is_doing_task(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 				return 0
@@ -988,7 +988,7 @@ function check_sender_is_doing_task(Owner,sender, ...)
 	end
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñÃ»ÓĞ½øĞĞÄ³¸öÈÎÎñ
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦æ²¡æœ‰è¿›è¡ŒæŸä¸ªä»»åŠ¡
 function check_sender_is_not_doing_task(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 				return 0
@@ -1001,7 +1001,7 @@ function check_sender_is_not_doing_task(Owner,sender, ...)
 	end
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñÍê³É¹ıÄ³¸öÈÎÎñ
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦å®Œæˆè¿‡æŸä¸ªä»»åŠ¡
 function check_sender_done_task(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 				return 0
@@ -1015,7 +1015,7 @@ function check_sender_done_task(Owner,sender, ...)
 	end
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñÃ»Íê³É¹ıÄ³¸öÈÎÎñ
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦æ²¡å®Œæˆè¿‡æŸä¸ªä»»åŠ¡
 function check_sender_not_done_task(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 				return 0
@@ -1029,7 +1029,7 @@ function check_sender_not_done_task(Owner,sender, ...)
 	end
 end
 
---¼ì²âËùÓĞÍæ¼ÒÊÇ·ñÓĞÍê³É¹ıÄ³¸öÈÎÎñ
+--æ£€æµ‹æ‰€æœ‰ç©å®¶æ˜¯å¦æœ‰å®Œæˆè¿‡æŸä¸ªä»»åŠ¡
 function check_players_done_task(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0
@@ -1055,7 +1055,7 @@ function check_players_done_task(Owner,sender, ...)
 	return 0
 end
 
---¼ì²âËŞÖ÷±»Ñ¡ÔñµÄ¶Ô»°¿òid
+--æ£€æµ‹å®¿ä¸»è¢«é€‰æ‹©çš„å¯¹è¯æ¡†id
 function check_select_funcid(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0;
@@ -1069,7 +1069,7 @@ function check_select_funcid(Owner,sender, ...)
 	local funcid = nx_int(arg[1]);
 	local tempid = nx_query_data(sender, "select_id")
 
-	--// ÒÆ³ıÁÙÊ±Êı¾İ£¬·ÀÖ¹ºóÀ´µÄÅĞ¶Ï³öÏÖ´íÂÒ
+	--// ç§»é™¤ä¸´æ—¶æ•°æ®ï¼Œé˜²æ­¢åæ¥çš„åˆ¤æ–­å‡ºç°é”™ä¹±
 	nx_remove_data (sender, "select_id")
 
 	if funcid == tempid then
@@ -1080,7 +1080,7 @@ function check_select_funcid(Owner,sender, ...)
 	return 0;
 end
 
---¼ì²âËŞÖ÷µÄÒ»¸öÁÙÊ±ÊôĞÔÊÇ·ñµÈÓÚ
+--æ£€æµ‹å®¿ä¸»çš„ä¸€ä¸ªä¸´æ—¶å±æ€§æ˜¯å¦ç­‰äº
 function check_owner_data_equal(Owner,sender, ...)
 	if not nx_exists(Owner) then
 		return
@@ -1119,7 +1119,7 @@ function check_owner_data_equal(Owner,sender, ...)
 	end
 end
 
---¼ì²âËŞÖ÷µÄÒ»¸öÁÙÊ±ÊôĞÔÊÇ·ñ²»µÈÓÚ
+--æ£€æµ‹å®¿ä¸»çš„ä¸€ä¸ªä¸´æ—¶å±æ€§æ˜¯å¦ä¸ç­‰äº
 function check_owner_data_not_equal(Owner,sender, ...)
 	if not nx_exists(Owner) then
 		return
@@ -1158,7 +1158,7 @@ function check_owner_data_not_equal(Owner,sender, ...)
 	end
 end
 
---¼ì²â´¥·¢ÕßµÄÒ»¸öÁÙÊ±ÊôĞÔÊÇ·ñµÈÓÚ
+--æ£€æµ‹è§¦å‘è€…çš„ä¸€ä¸ªä¸´æ—¶å±æ€§æ˜¯å¦ç­‰äº
 function check_sender_data_equal(Owner,sender, ...)
 	if not nx_exists(sender) then
 		return
@@ -1197,7 +1197,7 @@ function check_sender_data_equal(Owner,sender, ...)
 	end
 end
 
---¼ì²â´¥·¢ÕßµÄÒ»¸öÁÙÊ±ÊôĞÔÊÇ·ñ²»µÈÓÚ
+--æ£€æµ‹è§¦å‘è€…çš„ä¸€ä¸ªä¸´æ—¶å±æ€§æ˜¯å¦ä¸ç­‰äº
 function check_sender_data_not_equal(Owner,sender, ...)
 	if not nx_exists(sender) then
 		return
@@ -1209,7 +1209,7 @@ function check_sender_data_not_equal(Owner,sender, ...)
 	local dataname = nx_string(arg[1])
 	local datatype = nx_int(arg[2])
 
-	--Ã»ÓĞÕâ¸öÊôĞÔ,Ïàµ±ÓÚ²»µÈÓÚ
+	--æ²¡æœ‰è¿™ä¸ªå±æ€§,ç›¸å½“äºä¸ç­‰äº
 	if not nx_find_data(sender, dataname) then
 		return 1
 	end
@@ -1237,7 +1237,7 @@ function check_sender_data_not_equal(Owner,sender, ...)
 	end
 end
 
---¼ì²ânpcµÄÒ»¸öÁÙÊ±ÊôĞÔÊÇ·ñ²»µÈÓÚ
+--æ£€æµ‹npcçš„ä¸€ä¸ªä¸´æ—¶å±æ€§æ˜¯å¦ä¸ç­‰äº
 function check_npc_data_not_equal(Owner,sender, ...)
 	if table.getn(arg) < 4 then
 		return
@@ -1245,21 +1245,21 @@ function check_npc_data_not_equal(Owner,sender, ...)
 	local npcid = nx_string(arg[1]);
 	local dataname = nx_string(arg[2])
 	local datatype = nx_int(arg[3])
-	--È¡µ±Ç°³¡¾°¶ÔÏó
+	--å–å½“å‰åœºæ™¯å¯¹è±¡
 	local scene = nx_get_scene()
-	--È¥µ±Ç°³¡¾°ÄÚnpcÁĞ±í
+	--å»å½“å‰åœºæ™¯å†…npcåˆ—è¡¨
 	local list = nx_get_child_list(scene, 0)
 	local npc = nil
 	for i = 1, table.getn(list) do
 		npc = nx_object(list[i])
-		--¼ì²ânpc¡°Dead¡±ÊôĞÔÊÇ·ñÂú×ãÌõ¼ş
+		--æ£€æµ‹npcâ€œDeadâ€å±æ€§æ˜¯å¦æ»¡è¶³æ¡ä»¶
 		if npcid == nx_get_config(npc) then
             break
 		end
 	end
 
     if npc == nil then return 0 end
-	--Ã»ÓĞÕâ¸öÊôĞÔ,Ïàµ±ÓÚ²»µÈÓÚ
+	--æ²¡æœ‰è¿™ä¸ªå±æ€§,ç›¸å½“äºä¸ç­‰äº
 	if not nx_find_data(npc, dataname) then
 		return 1
 	end
@@ -1287,7 +1287,7 @@ function check_npc_data_not_equal(Owner,sender, ...)
 	end
 end
 
---¼ì²âÄ³IDµÄNPCÒ»¸öÁÙÊ±Êı¾İÊÇ·ñÏàµÈ
+--æ£€æµ‹æŸIDçš„NPCä¸€ä¸ªä¸´æ—¶æ•°æ®æ˜¯å¦ç›¸ç­‰
 function check_npc_data_equal(Owner,sender, ...)
 	if table.getn(arg) < 4 then
 		return 0
@@ -1295,22 +1295,22 @@ function check_npc_data_equal(Owner,sender, ...)
 	local npcid = nx_string(arg[1]);
 	local dataname = nx_string(arg[2])
 	local datatype = nx_int(arg[3])
-	--È¡µ±Ç°³¡¾°ÄÚnpcÁĞ±í
+	--å–å½“å‰åœºæ™¯å†…npcåˆ—è¡¨
 	local list = nx_get_child_list(nx_get_scene(), 0)
 	local npc = nil
 	for i = 1, table.getn(list) do
 		npc = nx_object(list[i])
-		--¼ì²ânpc configidÊÇ·ñÏàÍ¬
+		--æ£€æµ‹npc configidæ˜¯å¦ç›¸åŒ
 		if npcid == nx_get_config(npc) then
     	break
 		end
 	end
 	
-	--²»´æÔÚ´Ëconfigid¶ÔÏó£¬·µ»Ø²»ÏàµÈ
+	--ä¸å­˜åœ¨æ­¤configidå¯¹è±¡ï¼Œè¿”å›ä¸ç›¸ç­‰
   if npc == nil then 
   	return 0 
   end
-	--Ã»ÓĞÕâ¸öÊôĞÔ,Ïàµ±ÓÚ²»µÈÓÚ
+	--æ²¡æœ‰è¿™ä¸ªå±æ€§,ç›¸å½“äºä¸ç­‰äº
 	if not nx_find_data(npc, dataname) then
 		return 0
 	end
@@ -1338,7 +1338,7 @@ function check_npc_data_equal(Owner,sender, ...)
 	end
 end
 
---¼ì²âËŞÖ÷µÄÒ»¸öÁÙÊ±ÊôĞÔÊÇ·ñµÈÓÚ´¥·¢ÕßID
+--æ£€æµ‹å®¿ä¸»çš„ä¸€ä¸ªä¸´æ—¶å±æ€§æ˜¯å¦ç­‰äºè§¦å‘è€…ID
 function check_owner_data_equal_sender_id(Owner,sender, ...)
 
 	if table.getn(arg) < 3 then
@@ -1359,7 +1359,7 @@ function check_owner_data_equal_sender_id(Owner,sender, ...)
 
 end
 
---¼ì²âµ±Ç°¸±±¾½ø¶È
+--æ£€æµ‹å½“å‰å‰¯æœ¬è¿›åº¦
 function check_clone_progress_by_op(Owner,sender, ...)
 	if table.getn(arg) < 2 then
 		return 0;
@@ -1391,7 +1391,7 @@ function check_clone_progress_by_op(Owner,sender, ...)
 end
 
 
---²âÊÔÄÜ·ñ½«n¸öÍ¬Ò»idµÄµÀ¾ß·Å½ø´¥·¢Õß±³°ü
+--æµ‹è¯•èƒ½å¦å°†nä¸ªåŒä¸€idçš„é“å…·æ”¾è¿›è§¦å‘è€…èƒŒåŒ…
 function check_sender_can_placeitem(Owner,sender, ...)
 	if table.getn(arg) < 2 then
 		return 0;
@@ -1415,18 +1415,18 @@ function check_sender_can_placeitem(Owner,sender, ...)
 	return 0
 end
 
--- ¼ì²âÓµÓĞÕß¸ß¶ÈÊÇ·ñÂú×ãÌõ¼ş
+-- æ£€æµ‹æ‹¥æœ‰è€…é«˜åº¦æ˜¯å¦æ»¡è¶³æ¡ä»¶
 function check_owner_height(Owner, sender, ...)
 	if table.getn(arg) < 2 then
 		return 0
 	end
 
-	-- ±È½Ï·ûºÅ
+	-- æ¯”è¾ƒç¬¦å·
 	local compare = tostring(arg[1])
-	-- ±È½Ï¸ß¶È
+	-- æ¯”è¾ƒé«˜åº¦
 	local height  = nx_int(arg[2])
 
-	-- ownerÎ»ÖÃ
+	-- ownerä½ç½®
 	local old_x, old_y, old_z, old_o = nx_get_position(Owner)
 
 	if compare == ">" then
@@ -1454,7 +1454,7 @@ function check_owner_height(Owner, sender, ...)
 	return 0
 end
 
--- ¼ì²â´¥·¢ÕßÄ³ÊôĞÔÊÇ·ñµÈÓÚ
+-- æ£€æµ‹è§¦å‘è€…æŸå±æ€§æ˜¯å¦ç­‰äº
 function check_sender_prop_equal(Owner,sender, ...)
 
 	if table.getn(arg) < 2 then
@@ -1495,7 +1495,7 @@ function check_sender_prop_equal(Owner,sender, ...)
 	return 0
 end
 
---ÅĞ¶ÏÄ³¸ö·¶Î§ÄÚµÄÍæ¼ÒÊÇ·ñ¶¼ÒÑ¾­ËÀÍö
+--åˆ¤æ–­æŸä¸ªèŒƒå›´å†…çš„ç©å®¶æ˜¯å¦éƒ½å·²ç»æ­»äº¡
 function check_range_player_dead(Owner,sender, ...)
 
 	if table.getn(arg) < 1 then
@@ -1526,7 +1526,7 @@ function check_range_player_dead(Owner,sender, ...)
 	return 1
 end
 
--- ÅĞ¶Ï´¥·¢ÕßÊÇ·ñ´¦ÓÚ´æ»î×´Ì¬
+-- åˆ¤æ–­è§¦å‘è€…æ˜¯å¦å¤„äºå­˜æ´»çŠ¶æ€
 function check_sender_not_dead(Owner,sender, ...)
 
 	if not nx_exists(sender) then
@@ -1544,7 +1544,7 @@ function check_sender_not_dead(Owner,sender, ...)
 	return 1
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñ´æÔÚÁÙÊ±ÊôĞÔ
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦å­˜åœ¨ä¸´æ—¶å±æ€§
 function check_sender_data_exist(Owner,sender,...)
 	
 	if table.getn(arg) < 1 then
@@ -1564,7 +1564,7 @@ function check_sender_data_exist(Owner,sender,...)
 	return 0
 end
 
---¼ì²â´¥·¢ÕßÊÇ·ñ´æÔÚÁÙÊ±ÊôĞÔ
+--æ£€æµ‹è§¦å‘è€…æ˜¯å¦å­˜åœ¨ä¸´æ—¶å±æ€§
 function check_sender_data_not_exist(Owner,sender,...)
 	
 	if table.getn(arg) < 1 then
@@ -1584,7 +1584,7 @@ function check_sender_data_not_exist(Owner,sender,...)
 	return 0
 end
 
---¼ì²â³¡¾°ÊÇ·ñ´æÔÚÁÙÊ±ÊôĞÔ
+--æ£€æµ‹åœºæ™¯æ˜¯å¦å­˜åœ¨ä¸´æ—¶å±æ€§
 function check_scene_data_exist(Owner,sender,...)
 
 	if table.getn(arg) < 1 then
@@ -1601,7 +1601,7 @@ function check_scene_data_exist(Owner,sender,...)
 	return 0
 end
 
---¼ì²â³¡¾°ÊÇ·ñ²»´æÔÚÁÙÊ±ÊôĞÔ
+--æ£€æµ‹åœºæ™¯æ˜¯å¦ä¸å­˜åœ¨ä¸´æ—¶å±æ€§
 function check_scene_data_not_exist(Owner,sender,...)
 
 	if table.getn(arg) < 1 then
@@ -1619,7 +1619,7 @@ function check_scene_data_not_exist(Owner,sender,...)
 end
 
 
---¼ì²â´¥·¢ÕßºÍËŞÖ÷ÊÇ·ñ´¦ÓÚÕ½¶·¹ØÏµ
+--æ£€æµ‹è§¦å‘è€…å’Œå®¿ä¸»æ˜¯å¦å¤„äºæˆ˜æ–—å…³ç³»
 function check_owner_hostile_to_player(Owner,sender,...)
 	
 	return 0
@@ -1627,10 +1627,10 @@ function check_owner_hostile_to_player(Owner,sender,...)
 end
 
 
--- ¼ì²âownerÊÇ·ñÊÇÔÚÕıÔÚ²¥·Å¾çÇé
+-- æ£€æµ‹owneræ˜¯å¦æ˜¯åœ¨æ­£åœ¨æ’­æ”¾å‰§æƒ…
 function owner_is_in_movie(Owner, sender,...)
 
-	-- ±£»¤
+	-- ä¿æŠ¤
 	if not nx_exists(Owner) then
 		return 0
 	end
@@ -1649,10 +1649,10 @@ function owner_is_in_movie(Owner, sender,...)
 	return 0
 end
 
--- ¼ì²âsenderÊÇ·ñÊÇÔÚÕıÔÚ²¥·Å¾çÇé
+-- æ£€æµ‹senderæ˜¯å¦æ˜¯åœ¨æ­£åœ¨æ’­æ”¾å‰§æƒ…
 function sender_is_in_movie(Owner, sender,...)
 
-	-- ±£»¤
+	-- ä¿æŠ¤
 	if not nx_exists(sender) then
 		return 0
 	end
@@ -1671,7 +1671,7 @@ function sender_is_in_movie(Owner, sender,...)
 	return 0
 end
 
---¼ì²â´¥·¢ÕßidÊÇ·ñÔÚID±íÖĞ
+--æ£€æµ‹è§¦å‘è€…idæ˜¯å¦åœ¨IDè¡¨ä¸­
 function check_sender_id_inarray(Owner,sender, ...)
 	if table.getn(arg) < 1 then
 		return 0

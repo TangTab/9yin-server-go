@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÈËÎïÊÐÀï×´Ì¬Ïà¹ØÊôÐÔ¶¨Òå-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--äººç‰©å¸‚é‡ŒçŠ¶æ€ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- µ±Ç°³ÆºÅ -->
+	<!-- å½“å‰ç§°å· -->
 	<properties>
-		<property name="ForceState" type="int" public="false" private="false" save="false" desc="ÊÆÁ¦×´Ì¬"/>
+		<property name="ForceState" type="int" public="false" private="false" save="false" desc="åŠ¿åŠ›çŠ¶æ€"/>
 	</properties>
 
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records/>
 </object>

@@ -1,38 +1,38 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÏûºÄÏà¹ØÊôÐÔ-->
+<!--æ¶ˆè€—ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--ÏûºÄÏà¹Ø-->
-		<!--ÊôÐÔÏûºÄ-->
-		<property name="AConsumeCurHP" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄHPµãÊý"/>
-		<property name="PConsumeCurHP" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄHP(°Ù·ÖÊý)"/>
-		<property name="AConsumeCurMP" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄMPµãÊý"/>
-		<property name="PConsumeCurMP" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄMP(°Ù·ÖÊý)"/>
-		<property name="AConsumeEnergy" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄÕôÆûÄÜÁ¿ÖµµãÊý"/>
-		<property name="PConsumeEnergy" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄÕôÆûÄÜÁ¿Öµ(°Ù·ÖÊý)"/>
-		<property name="AConsumeCuranger" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄÅ­ÆøÖµµãÊý"/>
-		<property name="PConsumeCuranger" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄÅ­ÆøÖµ(°Ù·ÖÊý)"/>
-		<property name="AConsumeCurmobile" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄ¾«ÉñÄÜÁ¿Öµ"/>
-		<property name="PConsumeCurmobile" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄ¾«ÉñÄÜÁ¿Öµ(°Ù·ÖÊý)"/>
-    <property name="AConsumeCurFS" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄÏÈ×æÖ®Á¦Öµ"/>
-    <property name="PConsumeCurFS" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄÏÈ×æÖ®Á¦Öµ"/>
-    <property name="AConsumeCurDP" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄ¶ãÉÁÖµ"/>
-    <property name="PConsumeCurDP" type="float" public="false" private="true" save="false" desc="°Ù·Ö±ÈÏûºÄ¶ãÉÁÖµ"/>
-    <property name="AConsumeCurARMHP" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄ»ú¼×ÉúÃüÖµ"/>
-    <property name="PConsumeCurARMHP" type="float" public="false" private="false" save="false" desc="°Ù·Ö±ÈÏûºÄ»ú¼×ÉúÃüÖµ"/>
-    <property name="AConsumeCurARMEY" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄ»ú¼×ÄÜÁ¿Öµ"/>
-    <property name="PConsumeCurARMEY" type="float" public="false" private="false" save="false" desc="°Ù·Ö±ÈÏûºÄ»ú¼×ÄÜÁ¿Öµ"/>
-    <property name="AConsumeRFC" type="int" public="false" private="true" save="false" desc="Ö±½ÓÏûºÄÅ­»ð"/>
-    <property name="AConsumeAmmo" type="string" public="false" private="true" save="false" desc="Ö±½ÓÔØ¾ß×Óµ¯"/>
-    <!--ÎïÆ·ÏûºÄ-->
-		<property name="ConsumeItemID" type="string" public="false" private="true" save="false" desc="ÏûºÄÎïÆ·µÄID "/>
-		<property name="ConsumeItemCount" type="int" public="false" private="true" save="false" desc="ÏûºÄÎïÆ·µÄÊýÁ¿ "/>
-		<!--ÏûºÄµ¶·æÖ®ÁéµÄÀàÐÍ-->
-		<property name="WeaponNimbus1" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÏûºÄ¸ÃÁéÆø"/>
-		<property name="WeaponNimbus2" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÏûºÄ¸ÃÁéÆø "/>
-		<property name="WeaponNimbus3" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÏûºÄ¸ÃÁéÆø"/>
-		<property name="WeaponNimbus4" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÏûºÄ¸ÃÁéÆø "/>
+		<!--æ¶ˆè€—ç›¸å…³-->
+		<!--å±žæ€§æ¶ˆè€—-->
+		<property name="AConsumeCurHP" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—HPç‚¹æ•°"/>
+		<property name="PConsumeCurHP" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—HP(ç™¾åˆ†æ•°)"/>
+		<property name="AConsumeCurMP" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—MPç‚¹æ•°"/>
+		<property name="PConsumeCurMP" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—MP(ç™¾åˆ†æ•°)"/>
+		<property name="AConsumeEnergy" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—è’¸æ±½èƒ½é‡å€¼ç‚¹æ•°"/>
+		<property name="PConsumeEnergy" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—è’¸æ±½èƒ½é‡å€¼(ç™¾åˆ†æ•°)"/>
+		<property name="AConsumeCuranger" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—æ€’æ°”å€¼ç‚¹æ•°"/>
+		<property name="PConsumeCuranger" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—æ€’æ°”å€¼(ç™¾åˆ†æ•°)"/>
+		<property name="AConsumeCurmobile" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—ç²¾ç¥žèƒ½é‡å€¼"/>
+		<property name="PConsumeCurmobile" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—ç²¾ç¥žèƒ½é‡å€¼(ç™¾åˆ†æ•°)"/>
+    <property name="AConsumeCurFS" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—å…ˆç¥–ä¹‹åŠ›å€¼"/>
+    <property name="PConsumeCurFS" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—å…ˆç¥–ä¹‹åŠ›å€¼"/>
+    <property name="AConsumeCurDP" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—èº²é—ªå€¼"/>
+    <property name="PConsumeCurDP" type="float" public="false" private="true" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—èº²é—ªå€¼"/>
+    <property name="AConsumeCurARMHP" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—æœºç”²ç”Ÿå‘½å€¼"/>
+    <property name="PConsumeCurARMHP" type="float" public="false" private="false" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—æœºç”²ç”Ÿå‘½å€¼"/>
+    <property name="AConsumeCurARMEY" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—æœºç”²èƒ½é‡å€¼"/>
+    <property name="PConsumeCurARMEY" type="float" public="false" private="false" save="false" desc="ç™¾åˆ†æ¯”æ¶ˆè€—æœºç”²èƒ½é‡å€¼"/>
+    <property name="AConsumeRFC" type="int" public="false" private="true" save="false" desc="ç›´æŽ¥æ¶ˆè€—æ€’ç«"/>
+    <property name="AConsumeAmmo" type="string" public="false" private="true" save="false" desc="ç›´æŽ¥è½½å…·å­å¼¹"/>
+    <!--ç‰©å“æ¶ˆè€—-->
+		<property name="ConsumeItemID" type="string" public="false" private="true" save="false" desc="æ¶ˆè€—ç‰©å“çš„ID "/>
+		<property name="ConsumeItemCount" type="int" public="false" private="true" save="false" desc="æ¶ˆè€—ç‰©å“çš„æ•°é‡ "/>
+		<!--æ¶ˆè€—åˆ€é”‹ä¹‹çµçš„ç±»åž‹-->
+		<property name="WeaponNimbus1" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ¶ˆè€—è¯¥çµæ°”"/>
+		<property name="WeaponNimbus2" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ¶ˆè€—è¯¥çµæ°” "/>
+		<property name="WeaponNimbus3" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ¶ˆè€—è¯¥çµæ°”"/>
+		<property name="WeaponNimbus4" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æ¶ˆè€—è¯¥çµæ°” "/>
 	</properties>
 </object>

@@ -1,9 +1,9 @@
 
 
 function nx_get_CritProb(self, target)
-	--»ù±¾±©»÷ÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--åŸºæœ¬æš´å‡»çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "CritProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ±©»÷ÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æš´å‡»çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "CritProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -25,9 +25,9 @@ function nx_get_CritProb(self, target)
 end
 
 function nx_get_MagCritProb(self, target)
-	--»ù±¾·¨Êõ±©»÷ÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--åŸºæœ¬æ³•æœ¯æš´å‡»çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "MagCritProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ·¨Êõ±©»÷ÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æ³•æœ¯æš´å‡»çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "MagCritProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -48,9 +48,9 @@ function nx_get_MagCritProb(self, target)
 	return value
 end
 function nx_get_CritMulProb(self, target)
-	--»ù±¾±©»÷±¶ÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--åŸºæœ¬æš´å‡»å€çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "CritMulProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ±©»÷±¶ÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æš´å‡»å€çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "CritMulProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -71,9 +71,9 @@ function nx_get_CritMulProb(self, target)
 	return value
 end
 function nx_get_DefenseProb(self, target)
-	--»ù±¾±©»÷·ÀÓùÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--åŸºæœ¬æš´å‡»é˜²å¾¡çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "DefenseProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ±©»÷·ÀÓùÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æš´å‡»é˜²å¾¡çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "DefenseProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -94,9 +94,9 @@ function nx_get_DefenseProb(self, target)
 	return value
 end
 function nx_get_PenetrateProb(self, target)
-	--»ù±¾»¤¼×´©Í¸ÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--åŸºæœ¬æŠ¤ç”²ç©¿é€çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "PenetrateProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ»¤¼×´©Í¸ÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æŠ¤ç”²ç©¿é€çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "PenetrateProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -117,9 +117,9 @@ function nx_get_PenetrateProb(self, target)
 	return value
 end
 function nx_get_GuardRateProb(self, target)
-	--»ù±¾»¤¼×¼õÉËÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--åŸºæœ¬æŠ¤ç”²å‡ä¼¤çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "GuardRateProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ»¤¼×¼õÉËÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æŠ¤ç”²å‡ä¼¤çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "GuardRateProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -140,9 +140,9 @@ function nx_get_GuardRateProb(self, target)
 	return value
 end
 function nx_get_AllResistProb(self, target)
-	--È«¿¹¼õÉËÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--å…¨æŠ—å‡ä¼¤çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "AllResistProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄÈ«¿¹¼õÉËÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„å…¨æŠ—å‡ä¼¤çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "AllResistProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -163,9 +163,9 @@ function nx_get_AllResistProb(self, target)
 	return value
 end
 function nx_get_AccurateProb(self, target)
-	--¾«×¼ÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--ç²¾å‡†çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "AccurateProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ¾«×¼ÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„ç²¾å‡†çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "AccurateProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -187,9 +187,9 @@ function nx_get_AccurateProb(self, target)
 	
 end
 function nx_get_MagPrecProb(self, target)
-	--·¨Êõ¾«×¼ÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--æ³•æœ¯ç²¾å‡†çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "MagPrecProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ·¨Êõ¾«×¼ÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æ³•æœ¯ç²¾å‡†çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "MagPrecProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -209,9 +209,9 @@ function nx_get_MagPrecProb(self, target)
 	return value
 end
 function nx_get_DodgeProb(self, target)
-	--ÉÁ±ÜÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--é—ªé¿çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "DodgeProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄÉÁ±ÜÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„é—ªé¿çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "DodgeProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")
@@ -232,9 +232,9 @@ function nx_get_DodgeProb(self, target)
 	return value
 end
 function nx_get_MagdodgeProb(self, target)
-	--·¨ÊõÉÁ±ÜÂÊ°üº¬´Î¼¶ÊôÐÔÓ°ÏìµÄ
+	--æ³•æœ¯é—ªé¿çŽ‡åŒ…å«æ¬¡çº§å±žæ€§å½±å“çš„
 	local base_prob = nx_number( nx_query_prob_by_record(self, "MagdodgeProb", 0) )
-	--×°±¸ÓëbuffÖ±½ÓÌá¹©µÄ·¨ÊõÉÁ±ÜÂÊ
+	--è£…å¤‡ä¸Žbuffç›´æŽ¥æä¾›çš„æ³•æœ¯é—ªé¿çŽ‡
 	local add_prob = nx_number( nx_query_prob_by_record(self, "MagdodgeProb", 1) )
 	
 	local target_level = nx_query_property(target, "Level")

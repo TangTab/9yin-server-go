@@ -1,56 +1,56 @@
---Êı¾İ×ª´¢·şÎñÆ÷Ö÷¿Ø½Å±¾
+--æ•°æ®è½¬å‚¨æœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(console)
 	nx_set_value("console", console)
 	
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	console.Color = "Yellow"
 	
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 	
-	--ÈÕÖ¾»º³å³Ø
+	--æ—¥å¿—ç¼“å†²æ± 
 	local log_pool = nx_create("LogPool")
 	
-	--ÈÕÖ¾ÎÄ¼şÇ°×º
+	--æ—¥å¿—æ–‡ä»¶å‰ç¼€
 	log_pool.FilePrefix = nx_work_path() .. "log\\dumper"
-	--»º³åÊıÁ¿
+	--ç¼“å†²æ•°é‡
 	log_pool.TraceMax = 256
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	log_pool.EveryDayAlone = false
 	
 	if nx_is_debug() then
-		--ÔÚµ÷ÊÔ°æÀï½«ÈÕÖ¾ĞÅÏ¢Êä³öµ½¿ØÖÆÌ¨
+		--åœ¨è°ƒè¯•ç‰ˆé‡Œå°†æ—¥å¿—ä¿¡æ¯è¾“å‡ºåˆ°æ§åˆ¶å°
 		log_pool.Console = console
 	end
 	
-	--Æô¶¯ÈÕÖ¾¼ÇÂ¼
+	--å¯åŠ¨æ—¥å¿—è®°å½•
 	log_pool:Start()
 	
 	nx_set_value("log_pool", log_pool)
 	
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 	
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	ini.FileName = "GameDumper.ini"
 	
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
-		nx_msgbox("ÎŞ·¨¶ÁÈ¡³ÌĞòÅäÖÃÎÄ¼ş")
+		nx_msgbox("æ— æ³•è¯»å–ç¨‹åºé…ç½®æ–‡ä»¶")
 		nx_destroy(ini)
 		return 0
 	end
 	
-	--Êı¾İ×ª´¢Âß¼­DLLÎÄ¼ş
+	--æ•°æ®è½¬å‚¨é€»è¾‘DLLæ–‡ä»¶
 	local logic_dll = ini:ReadString("Main", "DumpLogicDll", "")
-	--Ê¹ÓÃMYSQLÊı¾İ¿â
+	--ä½¿ç”¨MYSQLæ•°æ®åº“
 	local use_mysql = nx_boolean(ini:ReadString("Main", "UseMysql", "true"))
 	
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15009
 
@@ -60,7 +60,7 @@ function main(console)
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 	
-	--´´½¨Î¬»¤Á¬½Ó·şÎñ
+	--åˆ›å»ºç»´æŠ¤è¿æ¥æœåŠ¡
 	local echo_sock = nx_create("EchoSock")
 	
 	echo_sock.Address = echo_addr
@@ -68,13 +68,13 @@ function main(console)
 	
 	nx_bind_script(echo_sock, "echo", "echo_init")
 	
-	--´´½¨½ø³Ì¼à¿Ø
+	--åˆ›å»ºè¿›ç¨‹ç›‘æ§
 	local app_manager = nx_create("AppManager")
 	
 	app_manager.AppName = "dumper"
 	app_manager.AppAddress = echo_addr .. ":" .. nx_string(echo_port)
 	
-	--´´½¨Êı¾İ¿âÏµÍ³
+	--åˆ›å»ºæ•°æ®åº“ç³»ç»Ÿ
 	local db_system
 	
 	if use_mysql then
@@ -83,17 +83,17 @@ function main(console)
 		db_system = nx_create("SqlDBSystem")
 	end
 	
-	--´´½¨Êı¾İ×ª´¢·şÎñ
+	--åˆ›å»ºæ•°æ®è½¬å‚¨æœåŠ¡
 	local game_dumper = nx_create("GameDumper")
 	
 	nx_set_value("game_dumper", game_dumper)
 	
-	--ÉèÖÃÊı¾İ¿âÁ¬½ÓÅäÖÃ
+	--è®¾ç½®æ•°æ®åº“è¿æ¥é…ç½®
 	local role_db, public_db, manage_db, output_db = get_db_config(ini)
     
 	nx_destroy(ini)
 	
-	--Âß¼­Ä£¿é
+	--é€»è¾‘æ¨¡å—
 	local logic_loader = nx_create("LogicLoader")
 	
 	if logic_dll ~= "" then
@@ -115,31 +115,31 @@ function main(console)
 	game_dumper:AddAccess("manage", manage_db)
 	game_dumper:AddAccess("output", output_db)
 	
---ÉèÖÃ·şÎñÆ÷Á¬½Ó¶Ë¿Ú
+--è®¾ç½®æœåŠ¡å™¨è¿æ¥ç«¯å£
 	game_dumper:SetOutAddr(outer_addr, outer_port)
-	--Æô¶¯½ø³Ì¼à¿Ø
+	--å¯åŠ¨è¿›ç¨‹ç›‘æ§
 	app_manager:Start()
 	
-	--Æô¶¯Î¬»¤Á¬½Ó
+	--å¯åŠ¨ç»´æŠ¤è¿æ¥
 	echo_sock:Start()
 	
-	--Æô¶¯Êı¾İ×ª´¢·şÎñ
+	--å¯åŠ¨æ•°æ®è½¬å‚¨æœåŠ¡
 	game_dumper:Start()
 	
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	console:WriteLine("App name " .. app_manager.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	console:WriteLine("Echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	console:WriteLine("Game dumper server started")
 	
 	return 1
 end
 
---»ñµÃÊı¾İ¿âÁ¬½ÓµÄÅäÖÃĞÅÏ¢
+--è·å¾—æ•°æ®åº“è¿æ¥çš„é…ç½®ä¿¡æ¯
 function get_db_config(ini)
-	--³¢ÊÔ´ÓÁªºÏ·şÎñÆ÷µÄÅäÖÃ¶ÁÈ¡
+	--å°è¯•ä»è”åˆæœåŠ¡å™¨çš„é…ç½®è¯»å–
 	local unite_ini = nx_create("IniDocument")
 	
 	unite_ini.FileName = "GameDumper.ini"
@@ -169,7 +169,7 @@ function get_db_config(ini)
 	
 	nx_destroy(unite_ini)
 	
-	--³¢ÊÔ´Ó´æ´¢·şÎñÆ÷µÄÅäÖÃ¶ÁÈ¡
+	--å°è¯•ä»å­˜å‚¨æœåŠ¡å™¨çš„é…ç½®è¯»å–
 	local store_ini = nx_create("IniDocument")
 	
 	store_ini.FileName = "GameStore.ini"
@@ -199,7 +199,7 @@ function get_db_config(ini)
 	
 	nx_destroy(store_ini)
 	
-	--´ÓÊı¾İ×ª´¢·şÎñÆ÷µÄÅäÖÃ¶ÁÈ¡
+	--ä»æ•°æ®è½¬å‚¨æœåŠ¡å™¨çš„é…ç½®è¯»å–
 	local role_db = ini:ReadString("Role", "ConnectString", "")
 	local public_db = ini:ReadString("Public", "ConnectString", "")
 	local manage_db = ini:ReadString("Manage", "ConnectString", "")
@@ -220,34 +220,34 @@ function get_db_config(ini)
 	return role_db, public_db, manage_db, output_db
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local console = nx_value("console")
 	local game_dumper = nx_value("game_dumper")
 	local app_manager = game_dumper.AppManager
 	local echo_sock = game_dumper.EchoSock
 	
-	--¹Ø±ÕÎ¬»¤Á¬½Ó
+	--å…³é—­ç»´æŠ¤è¿æ¥
 	console:WriteLine("echo socket shutdown...")
 	
 	echo_sock:Stop()
 	
-	--¹Ø±ÕÊı¾İ×ª´¢·şÎñ
+	--å…³é—­æ•°æ®è½¬å‚¨æœåŠ¡
 	console:WriteLine("dumper server shutdown...")
 	
 	game_dumper:Stop()
 	
-	--¹Ø±Õ½ø³Ì¼à¿Ø
+	--å…³é—­è¿›ç¨‹ç›‘æ§
 	console:WriteLine("app_manager shutdown...")
 	
 	app_manager:Stop()
 	
-	--¹Ø±ÕÈÕÖ¾»º³å
+	--å…³é—­æ—¥å¿—ç¼“å†²
 	local log_pool = nx_value("log_pool")
 	
 	log_pool:Stop()
 	
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 	
 	return true

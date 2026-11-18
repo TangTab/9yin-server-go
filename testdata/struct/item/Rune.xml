@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿ÉÊ¹ÓÃµÄµÀ¾ßµÄ»ù´¡ÊôÐÔ-->
+<!--å¯ä½¿ç”¨çš„é“å…·çš„åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ConsumePoint" type="int" public="false" private="false" save="false" desc="Ãú¿Ì¼¼ÄÜÀà"/>
-		<property name="RuneSkillType" type="int" public="false" private="false" save="false" desc="Ãú¿Ì¼¼ÄÜÀà"/>
-    <property name="RuneSkillPoint" type="int" public="false" private="false" save="false" desc="Ãú¿Ì¼¼ÄÜÀà"/>
-    <property name="RuneEffect" type="string" public="false" private="false" save="false" desc="¼¼ÄÜ×¨¾«Ð§¹û"/>
+		<property name="ConsumePoint" type="int" public="false" private="false" save="false" desc="é“­åˆ»æŠ€èƒ½ç±»"/>
+		<property name="RuneSkillType" type="int" public="false" private="false" save="false" desc="é“­åˆ»æŠ€èƒ½ç±»"/>
+    <property name="RuneSkillPoint" type="int" public="false" private="false" save="false" desc="é“­åˆ»æŠ€èƒ½ç±»"/>
+    <property name="RuneEffect" type="string" public="false" private="false" save="false" desc="æŠ€èƒ½ä¸“ç²¾æ•ˆæžœ"/>
 
   </properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 
 	</includes>

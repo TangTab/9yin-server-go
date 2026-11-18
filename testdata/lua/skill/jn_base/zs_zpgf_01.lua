@@ -1,61 +1,61 @@
---ÔÓÅÆ¹÷·¨	3HIT ÊµÕĞ
+--æ‚ç‰Œæ£æ³•	3HIT å®æ‹›
 
 require("define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
-	--È¡×Ô¼º¼¼ÄÜµÄ¼¶±ğ
+	--å–è‡ªå·±æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
-	--»ñÈ¡¼¼ÄÜµÄHitsÊı
+	--è·å–æŠ€èƒ½çš„Hitsæ•°
 	local hits = nx_query_property(self, "Hits")
-	--»ñÈ¡½ÇÉ«µÄÁ¦Á¿£¨±ÛÁ¦£©
+	--è·å–è§’è‰²çš„åŠ›é‡ï¼ˆè‡‚åŠ›ï¼‰
 	local str = nx_query_property(self, "Str") + nx_query_property(self, "StrAdd")
-	--»ñÈ¡×Ô¼ºµÄÃô½İ£¨Éí·¨£©
+	--è·å–è‡ªå·±çš„æ•æ·ï¼ˆèº«æ³•ï¼‰
 	local dex = nx_query_property(self, "Dex") + nx_query_property(self, "DexAdd")
-	--»ñµÃ×Ô¼ºµ±Ç°ÎäÆ÷×î´ó¹¥»÷
+	--è·å¾—è‡ªå·±å½“å‰æ­¦å™¨æœ€å¤§æ”»å‡»
 	local maxdamage = nx_query_property(self, "MaxMeleeDamage")
-	--»ñµÃ×Ô¼ºµ±Ç°ÎäÆ÷×îĞ¡¹¥»÷
+	--è·å¾—è‡ªå·±å½“å‰æ­¦å™¨æœ€å°æ”»å‡»
 	local mindamage = nx_query_property(self, "MinMeleeDamage")
-	--µ±Ç°ÎäÆ÷¹¥»÷£¨Ëæ»úÈ¡Öµ£©
+	--å½“å‰æ­¦å™¨æ”»å‡»ï¼ˆéšæœºå–å€¼ï¼‰
 	local curdamage = math.random(mindamage,maxdamage)	
 	
-	--ÁÙÊ±±äÁ¿£ºÍâ¹¦ÉËº¦³õÊ¼»¯
+	--ä¸´æ—¶å˜é‡ï¼šå¤–åŠŸä¼¤å®³åˆå§‹åŒ–
 	local phyDamage = 0
 	
-	--µÈ¼¶1£ºÍâ¹¦ÉËº¦=50+±ÛÁ¦*1+ÎäÆ÷ÍşÁ¦*1.5
-	--µÈ¼¶2£ºÍâ¹¦ÉËº¦=100+±ÛÁ¦*1.2+ÎäÆ÷ÍşÁ¦*2
-	--µÈ¼¶3£ºÍâ¹¦ÉËº¦=150+±ÛÁ¦*1.5+ÎäÆ÷ÍşÁ¦*2.5
-	--µÈ¼¶4£ºÍâ¹¦ÉËº¦=200+±ÛÁ¦*1.7+ÎäÆ÷ÍşÁ¦*3
-	--µÈ¼¶5£ºÍâ¹¦ÉËº¦=250+±ÛÁ¦*2+ÎäÆ÷ÍşÁ¦*3.5
+	--ç­‰çº§1ï¼šå¤–åŠŸä¼¤å®³=50+è‡‚åŠ›*1+æ­¦å™¨å¨åŠ›*1.5
+	--ç­‰çº§2ï¼šå¤–åŠŸä¼¤å®³=100+è‡‚åŠ›*1.2+æ­¦å™¨å¨åŠ›*2
+	--ç­‰çº§3ï¼šå¤–åŠŸä¼¤å®³=150+è‡‚åŠ›*1.5+æ­¦å™¨å¨åŠ›*2.5
+	--ç­‰çº§4ï¼šå¤–åŠŸä¼¤å®³=200+è‡‚åŠ›*1.7+æ­¦å™¨å¨åŠ›*3
+	--ç­‰çº§5ï¼šå¤–åŠŸä¼¤å®³=250+è‡‚åŠ›*2+æ­¦å™¨å¨åŠ›*3.5
 	
 	if level == 1 then
 		phyDamage = math.random(45,55) + str * 1 + curdamage * 1.5
@@ -75,6 +75,6 @@ function get_damage(self, skill, target)
 	
 	phyDamage = phyDamage * 0.33
 	
-	--Êä³öÍâ¹¦ÉËº¦
+	--è¾“å‡ºå¤–åŠŸä¼¤å®³
 	return phyDamage, 0, 0, 0, 0
 end

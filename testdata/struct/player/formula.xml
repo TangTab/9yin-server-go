@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--角色配方-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--瑙掕壊閰嶆柟-->
 <object>
 	<records>
- 		<record name="formula_rec" cols="1" maxrows="1024" public="false" private="true" save="true" desc="配方列表">
-			<column type="string" desc="配方名字" />
+ 		<record name="formula_rec" cols="1" maxrows="1024" public="false" private="true" save="true" desc="閰嶆柟鍒楄〃">
+			<column type="string" desc="閰嶆柟鍚嶅瓧" />
 		</record>
 	</records>
 </object>

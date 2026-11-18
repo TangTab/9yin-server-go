@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÈÙÓþÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--è£èª‰ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PlayerHonor" type="int" public="false" private="true" save="true" desc="µ±Ç°ÈÙÓþÖµ"/>
-		<property name="RankLevel" type="int" public="false" private="true" save="true" desc="¾ü½×µÈ¼¶"/>
-		<property name="UpgradeHonor" type="int" public="false" private="true" save="true" desc="Éý¼¶ÐèÒªÈÙÓþÖµ"/>
-		<property name="CanAddHonorPoint" type="int" public="false" private="true" save="true" desc="Ã¿ÈÕ¿É»ñÈ¡ÈÙÓþÖµ"/>
-		<property name="HonorLastRefresh" type="int64" public="false" private="false" save="true" desc="ÉÏ´ÎÈÙÓþÖµË¢ÐÂÊ±¼ä"/>
-		<property name="EveRecActiveRefresh" type="int64" public="false" private="false" save="true" desc="ÉÏ´Î»îÔ¾¶ÈË¢ÐÂÊ±¼ä"/>
+		<property name="PlayerHonor" type="int" public="false" private="true" save="true" desc="å½“å‰è£èª‰å€¼"/>
+		<property name="RankLevel" type="int" public="false" private="true" save="true" desc="å†›é˜¶ç­‰çº§"/>
+		<property name="UpgradeHonor" type="int" public="false" private="true" save="true" desc="å‡çº§éœ€è¦è£èª‰å€¼"/>
+		<property name="CanAddHonorPoint" type="int" public="false" private="true" save="true" desc="æ¯æ—¥å¯èŽ·å–è£èª‰å€¼"/>
+		<property name="HonorLastRefresh" type="int64" public="false" private="false" save="true" desc="ä¸Šæ¬¡è£èª‰å€¼åˆ·æ–°æ—¶é—´"/>
+		<property name="EveRecActiveRefresh" type="int64" public="false" private="false" save="true" desc="ä¸Šæ¬¡æ´»è·ƒåº¦åˆ·æ–°æ—¶é—´"/>
 	</properties>
 	<records>
 	</records>

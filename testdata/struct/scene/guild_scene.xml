@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  (É£¿¡¿¡) -->
-<!--¼ÇÂ¼ÔÚ¸Ã³¡¾°ÉÏ´´½¨µÄ¹«»áÁÐ±í-->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  (æ¡‘ä¿Šä¿Š) -->
+<!--è®°å½•åœ¨è¯¥åœºæ™¯ä¸Šåˆ›å»ºçš„å…¬ä¼šåˆ—è¡¨-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="founded_guilds_rec" cols="1" maxrows="1024" save="true" public="false" private="false" desc="ÔÚ¸Ã³¡¾°ÉÏ´´½¨µÄ¹«»áÁÐ±í">
-      <column type="widestr" desc="¹«»áÃû³Æ"/>
+    <record name="founded_guilds_rec" cols="1" maxrows="1024" save="true" public="false" private="false" desc="åœ¨è¯¥åœºæ™¯ä¸Šåˆ›å»ºçš„å…¬ä¼šåˆ—è¡¨">
+      <column type="widestr" desc="å…¬ä¼šåç§°"/>
     </record>
   </records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
   <includes>
   </includes>
 </object>

@@ -1,37 +1,37 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task5.lua
--- @ ½Å±¾¹¦ÄÜ: IDÎª5µÄÈÎÎñÖ´ĞĞ½Å±¾Âß¼­
--- @ ´´½¨Õß:   dReAmSun
--- @ ´´½¨ÈÕÆÚ: 2009.3.11
+-- @ è„šæœ¬åç§°: task5.lua
+-- @ è„šæœ¬åŠŸèƒ½: IDä¸º5çš„ä»»åŠ¡æ‰§è¡Œè„šæœ¬é€»è¾‘
+-- @ åˆ›å»ºè€…:   dReAmSun
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.3.11
 -----------------------------------------
 require("share\\view_define")
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	-- µÃµ½npcµÄÉÌµêID±àºÅ
+	-- å¾—åˆ°npcçš„å•†åº—IDç¼–å·
 	local shop_id = nx_query_property(npc, "ShopID")
 	
-	-- ×Ô¶¯µ¯³ö¸ÃÉÌµê½çÃæ
+	-- è‡ªåŠ¨å¼¹å‡ºè¯¥å•†åº—ç•Œé¢
 	open_shopbox(npc, player, shop_id)
 	
-	-- µÃµ½ÉÌµêÈİÆ÷
+	-- å¾—åˆ°å•†åº—å®¹å™¨
 	local shopbox = nx_get_child(npc, nx_widestr("ShopBox"))
 	if not nx_exists(shopbox) then
 		return 0
 	end
 	
-	-- Ñ°ÕÒÉÌµêÖĞµÄÒª¹ºÂòµÄÎïÆ·taskitem_2¸ßÁÁÏÔÊ¾
+	-- å¯»æ‰¾å•†åº—ä¸­çš„è¦è´­ä¹°çš„ç‰©å“taskitem_2é«˜äº®æ˜¾ç¤º
 	local pos = nx_find_item_pos(shopbox, nx_string("taskitem_2"))
 	local realpos = nx_int(pos) - nx_int(1)
 		
-	-- Èç¹ûµÃµ½ÕıÈ·Î»ÖÃÔò¸ßÁÁÏÔÊ¾´Ë×°±¸
+	-- å¦‚æœå¾—åˆ°æ­£ç¡®ä½ç½®åˆ™é«˜äº®æ˜¾ç¤ºæ­¤è£…å¤‡
 	if nx_int(pos) > nx_int(0) then
 		nx_custom(player, nx_string("show_animation"), nx_string("ShopBoxShow"), nx_int(realpos))
 	end
@@ -39,28 +39,28 @@ function Task_After_Accept(player, npc, taskid)
 	return 1
 end
 
---´ò¿ªÆÕÍ¨ÉÌµê
+--æ‰“å¼€æ™®é€šå•†åº—
 function open_shopbox(self, sender, shop_id)
 
-	--Í¨Öª¿Í»§¶Ë´ò¿ªÖ¸¶¨µÄÉÌµê
+	--é€šçŸ¥å®¢æˆ·ç«¯æ‰“å¼€æŒ‡å®šçš„å•†åº—
 	if nx_find_viewport(sender, VIEWPORT_SHOP) then
 		nx_remove_viewport(sender, VIEWPORT_SHOP);
 	end
 
 	local shopbox = nx_get_child(self, nx_widestr("ShopBox"));
 
-	nx_add_viewport(sender, VIEWPORT_SHOP, shopbox);--´ò¿ª²Ö¿âÈİÆ÷µÄÊÓÍ¼
+	nx_add_viewport(sender, VIEWPORT_SHOP, shopbox);--æ‰“å¼€ä»“åº“å®¹å™¨çš„è§†å›¾
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 
 	return 1

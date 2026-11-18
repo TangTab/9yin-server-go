@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!-- Ã¿ÈÕÍÆ¼ö±í¸ñ¶¨Òå -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- æ¯æ—¥æŽ¨èè¡¨æ ¼å®šä¹‰ -->
 <object>
 	<properties>
-		<property name="EWId" type="string" public="false" private="true" save="true" desc="ÄÜÁ¿¾®ID"/>
-		<property name="PreForce" type="int" public="false" private="true" save="true" desc="Íæ¼ÒÒÔÇ°µÄÊÆÁ¦"/>
-		<property name="EWResFightState" type="int" public="false" private="true" save="true" desc="×´Ì¬"/>
+		<property name="EWId" type="string" public="false" private="true" save="true" desc="èƒ½é‡äº•ID"/>
+		<property name="PreForce" type="int" public="false" private="true" save="true" desc="çŽ©å®¶ä»¥å‰çš„åŠ¿åŠ›"/>
+		<property name="EWResFightState" type="int" public="false" private="true" save="true" desc="çŠ¶æ€"/>
 	</properties>
 </object>

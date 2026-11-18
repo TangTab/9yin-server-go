@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈÝÆ÷¸½¼ÓÀ¸ÈÝÆ÷µÄÊôÐÔ¶¨Òå-->
+<!--å®¹å™¨é™„åŠ æ å®¹å™¨çš„å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="MainContainer" type="object" public="false" private="false" save="false" desc="Ö÷ÈÝÆ÷"/>
-		<property name="BagMaxLevel" type="int" public="false" private="false" save="false" desc="°ü¹üµÄ×î´ó¼¶±ð"/>
-		<property name="BagMaxCap" type="int" public="false" private="false" save="false" desc="Ã¿¸öÐ¡°ü¹üµÄ×î´óÈÝÁ¿"/>
+		<property name="MainContainer" type="object" public="false" private="false" save="false" desc="ä¸»å®¹å™¨"/>
+		<property name="BagMaxLevel" type="int" public="false" private="false" save="false" desc="åŒ…è£¹çš„æœ€å¤§çº§åˆ«"/>
+		<property name="BagMaxCap" type="int" public="false" private="false" save="false" desc="æ¯ä¸ªå°åŒ…è£¹çš„æœ€å¤§å®¹é‡"/>
 	</properties>
 	<records>
-		<!-- Ð¡°ü¹üµÄ¼¶±ðÈÝÁ¿¶¨Òå -->
-		<record name="baglevel_cap_rec" cols="1" maxrows="16" save="false" public="false" private="false" desc="Ð¡°ü¹üµÄ¼¶±ðÈÝÁ¿¶¨Òå">
-			<column type="int" desc="ÈÝÁ¿"/>
+		<!-- å°åŒ…è£¹çš„çº§åˆ«å®¹é‡å®šä¹‰ -->
+		<record name="baglevel_cap_rec" cols="1" maxrows="16" save="false" public="false" private="false" desc="å°åŒ…è£¹çš„çº§åˆ«å®¹é‡å®šä¹‰">
+			<column type="int" desc="å®¹é‡"/>
 		</record>
 	</records>
 </object>

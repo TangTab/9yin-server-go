@@ -1,63 +1,63 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="post_state_rec" cols="3" maxrows="10" save="false" public="false" private="false" desc="ÄÜÁ¿Öù×´Ì¬±í">
-			<column type="string" desc="ÄÜÁ¿ÖùID"/>
-			<column type="dword" desc="ÇøÓòID"/>
-			<column type="byte" desc="×´Ì¬ 1Õ¼Áì 0Î´Õ¼Áì"/>
+		<record name="post_state_rec" cols="3" maxrows="10" save="false" public="false" private="false" desc="èƒ½é‡æŸ±çŠ¶æ€è¡¨">
+			<column type="string" desc="èƒ½é‡æŸ±ID"/>
+			<column type="dword" desc="åŒºåŸŸID"/>
+			<column type="byte" desc="çŠ¶æ€ 1å é¢† 0æœªå é¢†"/>
 		</record>
-		<record name="guild_force_rec" cols="2" maxrows="50" save="false" public="false" private="false" desc="¹«»á×´Ì¬±í">
-			<column type="widestr" desc="¹«»áÃû"/>
-			<column type="byte" desc="104¹¥·½ 105ÊØ·½"/>
-		</record>
-		
-		<record name="person_info_rec" cols="11" maxrows="400" save="false" public="false" private="false" desc="¸öÈËÍ³¼Æ±í">
-			<column type="widestr" desc="Íæ¼ÒÃû"/>
-			<column type="widestr" desc="¹«»áÃû"/>
-			<column type="byte" desc="Ö°Òµ"/>
-			<column type="byte" desc="µÈ¼¶"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="ËÀÍö"/>
-			<column type="dword" desc="´Ý»ÙÔØ¾ß"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="byte" desc="ÊÆÁ¦"/>
-			<column type="byte" desc="ÕóÓª"/>
-			<column type="dword" desc="×Ü»ý·Ö"/>
+		<record name="guild_force_rec" cols="2" maxrows="50" save="false" public="false" private="false" desc="å…¬ä¼šçŠ¶æ€è¡¨">
+			<column type="widestr" desc="å…¬ä¼šå"/>
+			<column type="byte" desc="104æ”»æ–¹ 105å®ˆæ–¹"/>
 		</record>
 		
-		<record name="person_index_rec" cols="2" maxrows="400" save="false" public="false" private="false" desc="¸öÈËÍ³¼ÆË÷Òý±í">
-			<column type="byte" desc="ÐòºÅ"/>
-			<column type="byte" desc="¶ÔÓ¦µÄÐÐ"/>
+		<record name="person_info_rec" cols="11" maxrows="400" save="false" public="false" private="false" desc="ä¸ªäººç»Ÿè®¡è¡¨">
+			<column type="widestr" desc="çŽ©å®¶å"/>
+			<column type="widestr" desc="å…¬ä¼šå"/>
+			<column type="byte" desc="èŒä¸š"/>
+			<column type="byte" desc="ç­‰çº§"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="æ­»äº¡"/>
+			<column type="dword" desc="æ‘§æ¯è½½å…·"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="byte" desc="åŠ¿åŠ›"/>
+			<column type="byte" desc="é˜µè¥"/>
+			<column type="dword" desc="æ€»ç§¯åˆ†"/>
 		</record>
 		
-		<record name="guild_info_rec" cols="10" maxrows="400" save="false" public="false" private="false" desc="¹«»áÍ³¼Æ±í">
-			<column type="widestr" desc="¹«»áÃû"/>
-			<column type="widestr" desc="»á³¤Ãû"/>
-			<column type="byte" desc="ÈËÊýÍ³¼Æ"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="ËÀÍö"/>
-			<column type="dword" desc="´Ý»ÙÔØ¾ß"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="byte" desc="ÊÆÁ¦"/>
-			<column type="byte" desc="ÕóÓª"/>
-			<column type="dword" desc="×Ü»ý·Ö"/>
+		<record name="person_index_rec" cols="2" maxrows="400" save="false" public="false" private="false" desc="ä¸ªäººç»Ÿè®¡ç´¢å¼•è¡¨">
+			<column type="byte" desc="åºå·"/>
+			<column type="byte" desc="å¯¹åº”çš„è¡Œ"/>
 		</record>
 		
-		<record name="guild_index_rec" cols="2" maxrows="400" save="false" public="false" private="false" desc="¹«»áÍ³¼ÆË÷Òý±í">
-			<column type="byte" desc="ÐòºÅ"/>
-			<column type="byte" desc="¶ÔÓ¦µÄÐÐ"/>
+		<record name="guild_info_rec" cols="10" maxrows="400" save="false" public="false" private="false" desc="å…¬ä¼šç»Ÿè®¡è¡¨">
+			<column type="widestr" desc="å…¬ä¼šå"/>
+			<column type="widestr" desc="ä¼šé•¿å"/>
+			<column type="byte" desc="äººæ•°ç»Ÿè®¡"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="æ­»äº¡"/>
+			<column type="dword" desc="æ‘§æ¯è½½å…·"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="byte" desc="åŠ¿åŠ›"/>
+			<column type="byte" desc="é˜µè¥"/>
+			<column type="dword" desc="æ€»ç§¯åˆ†"/>
 		</record>
 		
-		<record name="ew_res_fight_out_line_rec" cols="3" maxrows="1024" save="true" public="false" private="false" desc="ÔÚ¸Ã³¡¾°ÉÏ´´½¨µÄÄÜÁ¿¾®×ÊÔ´Õ½Íæ¼ÒÀëÏß±í">
-			<column type="string" desc="Íæ¼ÒUID"/>
-			<column type="int64" desc="Íæ¼ÒÏÂÏßÊ±¼ä"/>
-			<column type="string" desc="ÄÜÁ¿¾®ID"/>
+		<record name="guild_index_rec" cols="2" maxrows="400" save="false" public="false" private="false" desc="å…¬ä¼šç»Ÿè®¡ç´¢å¼•è¡¨">
+			<column type="byte" desc="åºå·"/>
+			<column type="byte" desc="å¯¹åº”çš„è¡Œ"/>
+		</record>
+		
+		<record name="ew_res_fight_out_line_rec" cols="3" maxrows="1024" save="true" public="false" private="false" desc="åœ¨è¯¥åœºæ™¯ä¸Šåˆ›å»ºçš„èƒ½é‡äº•èµ„æºæˆ˜çŽ©å®¶ç¦»çº¿è¡¨">
+			<column type="string" desc="çŽ©å®¶UID"/>
+			<column type="int64" desc="çŽ©å®¶ä¸‹çº¿æ—¶é—´"/>
+			<column type="string" desc="èƒ½é‡äº•ID"/>
 		</record>
 		
 	</records>

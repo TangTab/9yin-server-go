@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--×Ô¶¯»Ø¸´Ïà¹ØÊôÐÔ-->
+<!--è‡ªåŠ¨å›žå¤ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--¼´Ê±»Ø¸´Ïà¹ØÊý¾Ý-->
-		<property name="RCUpSpeed" type="int" public="false" private="false" save="false" desc="Å­Æø»Ø¸´ËÙ¶È"/>
-		<property name="RCGenASpeed" type="float" public="false" private="false" save="false" desc="Å­ÆøÖ°ÒµÐÞÕýÖµ(¹¥»÷)"/>
-    <property name="RCGenHSpeed" type="float" public="false" private="false" save="false" desc="Å­ÆøÖ°ÒµÐÞÕýÖµ(±»ÉËº¦)"/>    
-		<property name="AVUpSpeed" type="int" public="false" private="false" save="false" desc="¾«ÉñÄÜÁ¿»Ø¸´ËÙ¶È"/>
-		<property name="EYUpSpeed" type="int" public="false" private="false" save="false" desc="ÕôÆûÄÜÁ¿»Ø¸´ËÙ¶È"/>
-		<property name="FSUpSpeed" type="int" public="false" private="false" save="false" desc="ÏÈ×æÖ®Á¦»Ø¸´ËÙ¶È"/>
-    <property name="FSGenASpeed" type="float" public="false" private="false" save="false" desc="ÏÈ×æÖ®Á¦Ö°ÒµÐÞÕýÖµ(¹¥»÷)"/>
-    <property name="FSGenHSpeed" type="float" public="false" private="false" save="false" desc="ÏÈ×æÖ®Á¦Ö°ÒµÐÞÕýÖµ(±»ÉËº¦)"/>
-    <property name="DPUpSpeed" type="int" public="false" private="false" save="false" desc="¶ãÉÁÖµ»Ø¸´ËÙ¶È"/>
-		<property name="ArmHPUpSpeed" type="int" public="true" private="false" save="false" desc="×°¼×ÉúÃü»Ø¸´ËÙ¶È"/>
-		<property name="ArmEYUpSpeed" type="int" public="true" private="false" save="false" desc="×°¼×ÄÜÁ¿»Ø¸´ËÙ¶È"/>
+		<!--å³æ—¶å›žå¤ç›¸å…³æ•°æ®-->
+		<property name="RCUpSpeed" type="int" public="false" private="false" save="false" desc="æ€’æ°”å›žå¤é€Ÿåº¦"/>
+		<property name="RCGenASpeed" type="float" public="false" private="false" save="false" desc="æ€’æ°”èŒä¸šä¿®æ­£å€¼(æ”»å‡»)"/>
+    <property name="RCGenHSpeed" type="float" public="false" private="false" save="false" desc="æ€’æ°”èŒä¸šä¿®æ­£å€¼(è¢«ä¼¤å®³)"/>    
+		<property name="AVUpSpeed" type="int" public="false" private="false" save="false" desc="ç²¾ç¥žèƒ½é‡å›žå¤é€Ÿåº¦"/>
+		<property name="EYUpSpeed" type="int" public="false" private="false" save="false" desc="è’¸æ±½èƒ½é‡å›žå¤é€Ÿåº¦"/>
+		<property name="FSUpSpeed" type="int" public="false" private="false" save="false" desc="å…ˆç¥–ä¹‹åŠ›å›žå¤é€Ÿåº¦"/>
+    <property name="FSGenASpeed" type="float" public="false" private="false" save="false" desc="å…ˆç¥–ä¹‹åŠ›èŒä¸šä¿®æ­£å€¼(æ”»å‡»)"/>
+    <property name="FSGenHSpeed" type="float" public="false" private="false" save="false" desc="å…ˆç¥–ä¹‹åŠ›èŒä¸šä¿®æ­£å€¼(è¢«ä¼¤å®³)"/>
+    <property name="DPUpSpeed" type="int" public="false" private="false" save="false" desc="èº²é—ªå€¼å›žå¤é€Ÿåº¦"/>
+		<property name="ArmHPUpSpeed" type="int" public="true" private="false" save="false" desc="è£…ç”²ç”Ÿå‘½å›žå¤é€Ÿåº¦"/>
+		<property name="ArmEYUpSpeed" type="int" public="true" private="false" save="false" desc="è£…ç”²èƒ½é‡å›žå¤é€Ÿåº¦"/>
 
 		<property name="RCUpSpeedAdd" type="int" public="false" private="false" save="false" desc=""/>
 		<property name="RCGenASpeedAdd" type="float" public="false" private="false" save="false" desc=""/>
@@ -26,7 +26,7 @@
     <property name="FSGenASpeedAdd" type="float" public="false" private="false" save="false" desc=""/>
     <property name="FSGenHSpeedAdd" type="float" public="false" private="false" save="false" desc=""/>
     <property name="DPUpSpeedAdd" type="int" public="false" private="false" save="false" desc=""/>		
-		<property name="ArmHPUpSpeedAdd" type="int" public="false" private="false" save="false" desc="×°¼×ÉúÃü»Ø¸´ËÙ¶È"/>
-		<property name="ArmEYUpSpeedAdd" type="int" public="false" private="false" save="false" desc="×°¼×ÄÜÁ¿»Ø¸´ËÙ¶È"/>
+		<property name="ArmHPUpSpeedAdd" type="int" public="false" private="false" save="false" desc="è£…ç”²ç”Ÿå‘½å›žå¤é€Ÿåº¦"/>
+		<property name="ArmEYUpSpeedAdd" type="int" public="false" private="false" save="false" desc="è£…ç”²èƒ½é‡å›žå¤é€Ÿåº¦"/>
 	</properties>
 </object>

@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--Íæ¼Ò¸÷ÈËËùÊôµÄÌØÊâNPCÐÅÏ¢-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--çŽ©å®¶å„äººæ‰€å±žçš„ç‰¹æ®ŠNPCä¿¡æ¯-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-	<!--ÐÞ¸Ä:ÊôÐÔÐÞ¸Ä³É¿É±£´æµÄpublic-->
+	<!--ä¿®æ”¹:å±žæ€§ä¿®æ”¹æˆå¯ä¿å­˜çš„public-->
 		<record name="special_npc_rec" cols="6" maxrows="20" save="false" public="false" private="true" desc="">
 			<column type="object" desc="uid"/>
 			<column type="string" desc="configid"/>

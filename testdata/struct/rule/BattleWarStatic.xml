@@ -1,23 +1,23 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="battlewar_statistics" cols="10" maxrows="50" save="false" public="false" private="true" desc="Õ½³¡Í³¼Æ±í">
-			<column type="byte" desc="ÅÅÃû"/>
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="byte" desc="Ö°Òµ"/>
-			<column type="byte" desc="µÈ¼¶"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="dword" desc="ÖÎÁÆÁ¿"/>
-			<column type="dword" desc="»÷É±"/>
-      <column type="dword" desc="ËÀÍö"/>
-			<!--column type="word" desc="Õ½³¡ÈÙÓþ"/-->
-			<column type="byte" desc="ÕóÓª"/>
-      <column type="int64" desc="ÌØÊâÍæ·¨"/>
+		<record name="battlewar_statistics" cols="10" maxrows="50" save="false" public="false" private="true" desc="æˆ˜åœºç»Ÿè®¡è¡¨">
+			<column type="byte" desc="æŽ’å"/>
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="byte" desc="èŒä¸š"/>
+			<column type="byte" desc="ç­‰çº§"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="dword" desc="æ²»ç–—é‡"/>
+			<column type="dword" desc="å‡»æ€"/>
+      <column type="dword" desc="æ­»äº¡"/>
+			<!--column type="word" desc="æˆ˜åœºè£èª‰"/-->
+			<column type="byte" desc="é˜µè¥"/>
+      <column type="int64" desc="ç‰¹æ®ŠçŽ©æ³•"/>
 		</record>
 	</records>
 </object>

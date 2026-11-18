@@ -1,32 +1,32 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: origin_rule.lua
--- @ ½Å±¾¹¦ÄÜ: Éí·İ¹æÔò½Å±¾ÎÄ¼ş
--- @ ´´½¨Õß:   dReAmSun
--- @ ´´½¨ÈÕÆÚ: 2009.12.11
+-- @ è„šæœ¬åç§°: origin_rule.lua
+-- @ è„šæœ¬åŠŸèƒ½: èº«ä»½è§„åˆ™è„šæœ¬æ–‡ä»¶
+-- @ åˆ›å»ºè€…:   dReAmSun
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.12.11
 -----------------------------------------
 
--- Éí·İÀàĞÍ
-local ORIGIN_TYPE_BASE		= 0		-- »ù´¡
-local ORIGIN_TYPE_BORN		= 1		-- ³öÉú
-local ORIGIN_TYPE_JIANGHU	= 2		-- ½­ºş
-local ORIGIN_TYPE_MENPAI	= 3		-- ÃÅÅÉ
-local ORIGIN_TYPE_LIFE		= 4		-- Éú»î
-local ORIGIN_TYPE_BANGPAI 	= 5		-- °ïÅÉ
+-- èº«ä»½ç±»å‹
+local ORIGIN_TYPE_BASE		= 0		-- åŸºç¡€
+local ORIGIN_TYPE_BORN		= 1		-- å‡ºç”Ÿ
+local ORIGIN_TYPE_JIANGHU	= 2		-- æ±Ÿæ¹–
+local ORIGIN_TYPE_MENPAI	= 3		-- é—¨æ´¾
+local ORIGIN_TYPE_LIFE		= 4		-- ç”Ÿæ´»
+local ORIGIN_TYPE_BANGPAI 	= 5		-- å¸®æ´¾
 
--- »ñµÃÉí·İµÄÍ¬Ê±¼ÓÈëÃÅÅÉµÄÉí·İ±í
+-- è·å¾—èº«ä»½çš„åŒæ—¶åŠ å…¥é—¨æ´¾çš„èº«ä»½è¡¨
 local school_origin_table = {
-							 	-- ÅäÖÃ·½·¨ ´ú±íÉí·İÃû£¬´ú±í¶ÔÓ¦µÄÃÅÅÉÃû
+							 	-- é…ç½®æ–¹æ³• ä»£è¡¨èº«ä»½åï¼Œä»£è¡¨å¯¹åº”çš„é—¨æ´¾å
 								 "sta_slin0101", "school_shaolin",
 										
 								 "sta_emei0101", "school_emei"
 							}
 
 
--- ÄÜ·ñ½ÓÊÜÒ»¸öÉí·İÌôÕ½
+-- èƒ½å¦æ¥å—ä¸€ä¸ªèº«ä»½æŒ‘æˆ˜
 function can_accept_origin(player, origin_id)
 
-	-- ¸ù¾İ²ß»®µÄÒªÇó£¬µ±Ç°ÄÚ²¿²âÊÔ°æ±¾Ö»¿ª·ÅÃÅÅÉÉí·İ
-	-- Ö»ÓĞÃÅÅÉÉí·İÄÜ¹»½ÓÊÜ£¬ dReAmSun-2009-12-11
+	-- æ ¹æ®ç­–åˆ’çš„è¦æ±‚ï¼Œå½“å‰å†…éƒ¨æµ‹è¯•ç‰ˆæœ¬åªå¼€æ”¾é—¨æ´¾èº«ä»½
+	-- åªæœ‰é—¨æ´¾èº«ä»½èƒ½å¤Ÿæ¥å—ï¼Œ dReAmSun-2009-12-11
 	local type = nx_get_origin_type(origin_id)
 
 	if type ~= ORIGIN_TYPE_MENPAI then
@@ -37,17 +37,17 @@ function can_accept_origin(player, origin_id)
 end
 
 
--- ½ÓÊÜÉí·İÌôÕ½ºó
+-- æ¥å—èº«ä»½æŒ‘æˆ˜å
 function after_accept_origin(player, origin_id)
 
 	return 1
 end
 
 
--- ÄÜ·ñ»ñµÃÒ»¸öÉí·İ
+-- èƒ½å¦è·å¾—ä¸€ä¸ªèº«ä»½
 function can_get_origin(player, origin_id)
 
-	-- Í¬Ñù×öÖ»ÓĞÃÅÅÉ¿É»ñµÃµÄÏŞÖÆ
+	-- åŒæ ·åšåªæœ‰é—¨æ´¾å¯è·å¾—çš„é™åˆ¶
 	local type = nx_get_origin_type(origin_id)
 
 	if type ~= ORIGIN_TYPE_MENPAI then
@@ -58,26 +58,26 @@ function can_get_origin(player, origin_id)
 end
 
 
--- »ñµÃÉí·İºó
+-- è·å¾—èº«ä»½å
 function after_get_origin(player, origin_id)
 
-	-- ÈÎÎñ½ø¶È´¦Àí ÓĞĞ©ÈÎÎñĞèÒª»ñµÃÉí·İ
+	-- ä»»åŠ¡è¿›åº¦å¤„ç† æœ‰äº›ä»»åŠ¡éœ€è¦è·å¾—èº«ä»½
 	need_origin_task(player, origin_id)
 	
-	-- ÅĞ¶ÏÊÇ·ñĞèÒªÖÃÏìÓ¦µÄÃÅÅÉÊôĞÔ
+	-- åˆ¤æ–­æ˜¯å¦éœ€è¦ç½®å“åº”çš„é—¨æ´¾å±æ€§
 	need_change_school_property(player, origin_id)
 	
-	-- 1032ºÅÈÎÎñÌØÊâ´¦Àí
+	-- 1032å·ä»»åŠ¡ç‰¹æ®Šå¤„ç†
 	do_special_task(player, origin_id)
 	
-	-- »ñµÃÉí·İºóÓĞĞ©ÈÎÎñ¿ÉÒÔ³Ğ½Ó£¬Ë¢ĞÂÈÎÎñ±ê¼Ç
+	-- è·å¾—èº«ä»½åæœ‰äº›ä»»åŠ¡å¯ä»¥æ‰¿æ¥ï¼Œåˆ·æ–°ä»»åŠ¡æ ‡è®°
 	nx_refresh_task_flag(player)
 
 	return 1
 end
 
 
--- ĞèÇóÌØ¶¨Éí·İµÄÈÎÎñ´¦Àí
+-- éœ€æ±‚ç‰¹å®šèº«ä»½çš„ä»»åŠ¡å¤„ç†
 function need_origin_task(player, origin_id)
 
 	local rows = nx_get_record_rows(player, "Task_Record")
@@ -87,12 +87,12 @@ function need_origin_task(player, origin_id)
 
 		local task_need_origin = nx_query_record_value(player, "Task_Record", nx_int(row), nx_int(4))
 		
-		-- »ñµÃÉí·İÈÎÎñ½ø¶ÈË¢ĞÂ
+		-- è·å¾—èº«ä»½ä»»åŠ¡è¿›åº¦åˆ·æ–°
 		if tostring(task_need_origin) == tostring(origin_id) then
 			local need_num = nx_query_record_value(player, "Task_Record", nx_int(row), nx_int(3))
 			nx_set_record_value(player, "Task_Record", nx_int(row), nx_int(2), nx_int(need_num))
 
-			--Ë¢ĞÂÈÎÎñ½ø¶È
+			--åˆ·æ–°ä»»åŠ¡è¿›åº¦
 			nx_refresh_task_flag(player)
 			break
 		end
@@ -103,21 +103,21 @@ function need_origin_task(player, origin_id)
 end
 
 
--- ÅĞ¶ÏÊÇ·ñĞèÒª±ä¸üÃÅÅÉÊôĞÔ
+-- åˆ¤æ–­æ˜¯å¦éœ€è¦å˜æ›´é—¨æ´¾å±æ€§
 function need_change_school_property(player, origin_id)
 	
-	-- ÅĞ¶ÏÉí·İÊÇ·ñÔÚ±íÖĞ
+	-- åˆ¤æ–­èº«ä»½æ˜¯å¦åœ¨è¡¨ä¸­
 	local count = table.getn(school_origin_table) / 2
 	
 	for i = 1, count do
 		
-		-- Éí·İÅäÖÃ
+		-- èº«ä»½é…ç½®
 		local origin_name = school_origin_table[i*2 - 1]
 		
-		-- Æ¥Åä
+		-- åŒ¹é…
 		if origin_name == origin_id then
 		
-			-- ÉèÖÃÃÅÅÉÊôĞÔ
+			-- è®¾ç½®é—¨æ´¾å±æ€§
 			nx_set_property(player, "School", school_origin_table[i*2])
 			return 1
 			
@@ -129,37 +129,37 @@ end
 
 
 
--- Ò»Ğ©ÈÎÎñÌØÊâ´¦Àí
+-- ä¸€äº›ä»»åŠ¡ç‰¹æ®Šå¤„ç†
 function do_special_task(player, origin_id)
 
-	-- ÅĞ¶ÏÊÇ²»ÊÇÃÅÅÉ³õÊ¼Éí·İ
+	-- åˆ¤æ–­æ˜¯ä¸æ˜¯é—¨æ´¾åˆå§‹èº«ä»½
 	local count = table.getn(school_origin_table) / 2
 	
 	for i = 1, count do
 		
-		-- Éí·İÅäÖÃ
+		-- èº«ä»½é…ç½®
 		local origin_name = school_origin_table[i*2 - 1]
 		
-		-- Æ¥Åä
+		-- åŒ¹é…
 		if origin_name == origin_id then
 				
-			-- ÅĞ¶ÏÊÇ·ñÓĞ1032ºÅÈÎÎñ
+			-- åˆ¤æ–­æ˜¯å¦æœ‰1032å·ä»»åŠ¡
 			local findrow = nx_find_record_value(player, "Task_Record", nx_int(0), nx_int(1032))
 			if findrow < 0 then
 				return
 			end
 			
-			-- ÅĞ¶ÏÊÇ·ñÔÚ½ø¶ÈÒªÇó·¶Î§ÄÚ
+			-- åˆ¤æ–­æ˜¯å¦åœ¨è¿›åº¦è¦æ±‚èŒƒå›´å†…
 			local nowNum = nx_query_record_value(player, "Task_Record", findrow, nx_int(2))
 		
 			if nowNum > 0 then
 				return
 			end
 			
-			-- ÉèÖÃÍê³ÉÈÎÎñ
+			-- è®¾ç½®å®Œæˆä»»åŠ¡
 			nx_set_record_value(player, "Task_Record", findrow, nx_int(2), nx_int(1))
 			
-			--Ë¢ĞÂÈÎÎñ½ø¶È
+			--åˆ·æ–°ä»»åŠ¡è¿›åº¦
 			nx_refresh_task_flag(player)
 			
 		end

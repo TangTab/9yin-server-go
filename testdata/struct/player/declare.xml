@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÂÃ¹ÝÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ—…é¦†ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="Declare" type="int" public="false" private="true" save="true" desc="µ±Ç°ÐûÑÔ"/>
+		<property name="Declare" type="int" public="false" private="true" save="true" desc="å½“å‰å®£è¨€"/>
 	</properties>
 	<records>
 	</records>

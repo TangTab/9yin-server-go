@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--½»Ò×ÈÝÆ÷Ïà¹ØÊôÐÔ-->
+<!--äº¤æ˜“å®¹å™¨ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PostMoney" type="int" public="false" private="false" save="false" desc="ÓÊ¼ÄµÄ½ðÇ®"/>
-		<property name="Postage" type="int" public="false" private="false" save="false" desc="ÓÊ×Ê"/>
-		<property name="PostTradeSerialno" type="string" public="false" private="false" save="false" desc="¸¶·ÑÓÊ¼þµÄÁ÷Ë®ºÅ"/>
-    <property name="PostDelItemInfo" type="string" public="false" private="false" save="false" desc="É¾³ýÎïÆ·ÐÅÏ¢"/>
-    <property name="PostTitle" type="widestr" public="false" private="false" save="false" desc="ÓÊ¼þ±êÌâ"/>
+		<property name="PostMoney" type="int" public="false" private="false" save="false" desc="é‚®å¯„çš„é‡‘é’±"/>
+		<property name="Postage" type="int" public="false" private="false" save="false" desc="é‚®èµ„"/>
+		<property name="PostTradeSerialno" type="string" public="false" private="false" save="false" desc="ä»˜è´¹é‚®ä»¶çš„æµæ°´å·"/>
+    <property name="PostDelItemInfo" type="string" public="false" private="false" save="false" desc="åˆ é™¤ç‰©å“ä¿¡æ¯"/>
+    <property name="PostTitle" type="widestr" public="false" private="false" save="false" desc="é‚®ä»¶æ ‡é¢˜"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

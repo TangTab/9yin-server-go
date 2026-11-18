@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿Æ¼¼ÀàNPC»ù´¡ÊôÐÔ-->
+<!--ç§‘æŠ€ç±»NPCåŸºç¡€å±žæ€§-->
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-		<property name="fEnergyType" type="byte" public="false" private="false" save="false" desc="·¨ÕóµÄÀàÐÍ"/>
-        <property name="fDestoryDis" type="float" public="false" private="false" save="false" desc="npcµÄÏú»Ù¾àÀë"/>
-        <property name="sSelfForeverBuffer" type="string" public="false" private="false" save="false" desc="×ÔÉíÓÀ¾Ãbuffer"/>
-		<property name="sSelfTimeBuffer" type="string" public="false" private="false" save="false" desc="×ÔÉí·ÇÓÀ¾Ãbuffer"/>
-		<property name="sSelfHalo" type="string" public="false" private="false" save="false" desc="ÃØ·¨Ê¦±¾Éí¹â»·"/>
-		<property name="sOtherHalo" type="string" public="false" private="false" save="false" desc="ÆäËûÈË½øÈë·¨Õó¼ÓµÄ¹â»·"/>
-		<property name="nBeatTimes" type="int" public="false" private="false" save="false" desc="ÐÄÌøÊ±¼ä£¬bufferÏûÊ§µÄÊ±¼ä"/>
-		<property name="nBeatDisTimes" type="int" public="false" private="false" save="false" desc="ÐÄÌøÊ±¼ä£¬¸ô¶à³¤Ê±¼ä¼ì²âÒ»´ÎÖ÷ÈËÓë·¨ÕóµÄ¾àÀë"/>
+		<property name="fEnergyType" type="byte" public="false" private="false" save="false" desc="æ³•é˜µçš„ç±»åž‹"/>
+        <property name="fDestoryDis" type="float" public="false" private="false" save="false" desc="npcçš„é”€æ¯è·ç¦»"/>
+        <property name="sSelfForeverBuffer" type="string" public="false" private="false" save="false" desc="è‡ªèº«æ°¸ä¹…buffer"/>
+		<property name="sSelfTimeBuffer" type="string" public="false" private="false" save="false" desc="è‡ªèº«éžæ°¸ä¹…buffer"/>
+		<property name="sSelfHalo" type="string" public="false" private="false" save="false" desc="ç§˜æ³•å¸ˆæœ¬èº«å…‰çŽ¯"/>
+		<property name="sOtherHalo" type="string" public="false" private="false" save="false" desc="å…¶ä»–äººè¿›å…¥æ³•é˜µåŠ çš„å…‰çŽ¯"/>
+		<property name="nBeatTimes" type="int" public="false" private="false" save="false" desc="å¿ƒè·³æ—¶é—´ï¼Œbufferæ¶ˆå¤±çš„æ—¶é—´"/>
+		<property name="nBeatDisTimes" type="int" public="false" private="false" save="false" desc="å¿ƒè·³æ—¶é—´ï¼Œéš”å¤šé•¿æ—¶é—´æ£€æµ‹ä¸€æ¬¡ä¸»äººä¸Žæ³•é˜µçš„è·ç¦»"/>
 	</properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="teamers_in_energy" cols="1" maxrows="64" public="false" private="false" save="false" desc="´¦ÓÚÄÜÁ¿·¨ÕóµÄ¶ÓÓÑÃÇ">
-      <column type="object" desc="¶ÓÓÑid"/>
+    <record name="teamers_in_energy" cols="1" maxrows="64" public="false" private="false" save="false" desc="å¤„äºŽèƒ½é‡æ³•é˜µçš„é˜Ÿå‹ä»¬">
+      <column type="object" desc="é˜Ÿå‹id"/>
     </record>
   </records>
 </object>

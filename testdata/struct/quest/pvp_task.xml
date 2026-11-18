@@ -1,164 +1,164 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÓÎÏ·¶ÔÏóÊôÐÔ¶¨ÒåÄ£°æÎÄ¼þ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ¸¸æˆå¯¹è±¡å±žæ€§å®šä¹‰æ¨¡ç‰ˆæ–‡ä»¶-->
 <object>
 	<properties>
-		<property name="PVPTaskLastRefreshTime" type="int64" public="false" private="false" save="true" desc="ÉÏ´Î¸üÐÂÈÎÎñ´ÎÊýÊ±¼ä£¬±¾µØÊ±¼ä"/>
-		<property name="PVPChangeForce" type="int" public="true" private="true" save="false" desc="pvp¸Ä±äÊÆÁ¦"/>
-    <property name="Pvp_markpryexpose" type="int" public="false" private="false" save="false" desc="pvp´ÌÌ½±©Â¶×´Ì¬"/>
-    <property name="PVPTaskGiveUpTime" type="int64" public="false" private="false" save="true" desc="·ÅÆúÊ±µÄÊ±¼ä£¬´ÌÉ±ÈÎÎñ·ÅÆúºóÒ»¶ÎÊ±¼ä²ÅÄÜÔÙ´Î½ÓÈÎÎñ£¬UTCÊ±¼ä"/>
-    <property name="PVPAttackPerfect" type="int" public="false" private="true" save="false" desc="pvp¿ÕÏ®ÈÎÎñÍêÃÀÍê³É"/>
-    <property name="FightScapegoatState" type="int" public="false" private="false" save="false" desc="¹¥»÷ÌæÉí×´Ì¬£¬0Î´¹¥»÷£¬1ÒÑ¹¥»÷"/>
-    <property name="PVPTaskCanAccept" type="int" public="false" private="true" save="false" desc="ÊÇ·ñÓÐÄÜ½ÓÊÜµÄPVPÈÎÎñ£¬0Ã»ÓÐ£¬1ÓÐ"/>
-    <property name="PvpLock" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñ±»Ëø¶¨£¬Î´Ëø¶¨Îª1£¬ÒÑËø¶¨Îª2"/>
-    <property name="PvpLocalX" type="float" public="false" private="false" save="true" desc="ÆðÊ¼×ø±êX"/>
-    <property name="PvpLocalY" type="float" public="false" private="false" save="true" desc="ÆðÊ¼×ø±êY"/>
-    <property name="PvpLocalZ" type="float" public="false" private="false" save="true" desc="ÆðÊ¼×ø±êZ"/>
-    <property name="PvpLocalO" type="float" public="false" private="false" save="true" desc="ÆðÊ¼×ø±êO"/>
-    <property name="PvpLocalS" type="byte" public="false" private="false" save="true" desc="ÆðÊ¼×ø±ê³¡¾°ID"/>
-	  <property name="SwitchBeforeTime" type="int" public="false" private="true" save="false" desc="Íæ¼ÒÇÐ³¡¾°Ç°¼¸Ãëµ¹¼ÆÊ±"/>
-	  <property name="TransBackTaskPlayer" type="widestr" public="false" private="fasle" save="false" desc="ºÃÓÑ´«ËÍ¼ÇÂ¼ÈÎÎñÍæ¼Ò"/>
+		<property name="PVPTaskLastRefreshTime" type="int64" public="false" private="false" save="true" desc="ä¸Šæ¬¡æ›´æ–°ä»»åŠ¡æ¬¡æ•°æ—¶é—´ï¼Œæœ¬åœ°æ—¶é—´"/>
+		<property name="PVPChangeForce" type="int" public="true" private="true" save="false" desc="pvpæ”¹å˜åŠ¿åŠ›"/>
+    <property name="Pvp_markpryexpose" type="int" public="false" private="false" save="false" desc="pvpåˆºæŽ¢æš´éœ²çŠ¶æ€"/>
+    <property name="PVPTaskGiveUpTime" type="int64" public="false" private="false" save="true" desc="æ”¾å¼ƒæ—¶çš„æ—¶é—´ï¼Œåˆºæ€ä»»åŠ¡æ”¾å¼ƒåŽä¸€æ®µæ—¶é—´æ‰èƒ½å†æ¬¡æŽ¥ä»»åŠ¡ï¼ŒUTCæ—¶é—´"/>
+    <property name="PVPAttackPerfect" type="int" public="false" private="true" save="false" desc="pvpç©ºè¢­ä»»åŠ¡å®Œç¾Žå®Œæˆ"/>
+    <property name="FightScapegoatState" type="int" public="false" private="false" save="false" desc="æ”»å‡»æ›¿èº«çŠ¶æ€ï¼Œ0æœªæ”»å‡»ï¼Œ1å·²æ”»å‡»"/>
+    <property name="PVPTaskCanAccept" type="int" public="false" private="true" save="false" desc="æ˜¯å¦æœ‰èƒ½æŽ¥å—çš„PVPä»»åŠ¡ï¼Œ0æ²¡æœ‰ï¼Œ1æœ‰"/>
+    <property name="PvpLock" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦è¢«é”å®šï¼Œæœªé”å®šä¸º1ï¼Œå·²é”å®šä¸º2"/>
+    <property name="PvpLocalX" type="float" public="false" private="false" save="true" desc="èµ·å§‹åæ ‡X"/>
+    <property name="PvpLocalY" type="float" public="false" private="false" save="true" desc="èµ·å§‹åæ ‡Y"/>
+    <property name="PvpLocalZ" type="float" public="false" private="false" save="true" desc="èµ·å§‹åæ ‡Z"/>
+    <property name="PvpLocalO" type="float" public="false" private="false" save="true" desc="èµ·å§‹åæ ‡O"/>
+    <property name="PvpLocalS" type="byte" public="false" private="false" save="true" desc="èµ·å§‹åæ ‡åœºæ™¯ID"/>
+	  <property name="SwitchBeforeTime" type="int" public="false" private="true" save="false" desc="çŽ©å®¶åˆ‡åœºæ™¯å‰å‡ ç§’å€’è®¡æ—¶"/>
+	  <property name="TransBackTaskPlayer" type="widestr" public="false" private="fasle" save="false" desc="å¥½å‹ä¼ é€è®°å½•ä»»åŠ¡çŽ©å®¶"/>
 
-    <property name="PvpTaskLastSection" type="byte" public="false" private="fasle" save="true" desc="¼ÇÂ¼ÊÔÁ·³¡ÉÏ¸ö½×¶Î"/>
-    <property name="PracticeWaitTime" type="word" public="false" private="true" save="true" desc="¼ÇÂ¼ÊÔÁ·³¡½×¶ÎµÈ´ýÊ±¼ä"/>
-    <property name="PracticeFightTime" type="word" public="false" private="true" save="true" desc="¼ÇÂ¼ÊÔÁ·³¡½×¶ÎµÈ´ýÊ±¼ä"/>
+    <property name="PvpTaskLastSection" type="byte" public="false" private="fasle" save="true" desc="è®°å½•è¯•ç»ƒåœºä¸Šä¸ªé˜¶æ®µ"/>
+    <property name="PracticeWaitTime" type="word" public="false" private="true" save="true" desc="è®°å½•è¯•ç»ƒåœºé˜¶æ®µç­‰å¾…æ—¶é—´"/>
+    <property name="PracticeFightTime" type="word" public="false" private="true" save="true" desc="è®°å½•è¯•ç»ƒåœºé˜¶æ®µç­‰å¾…æ—¶é—´"/>
     
-    <property name="AskedHelpOrKill" type="byte" public="false" private="fasle" save="false" desc="ºÃÓÑÊÇ·ñ±»ºÃÓÑÇóÖúºÍºô¾È"/>
-    <property name="IsPractice" type="byte" public="false" private="true" save="true" desc="Íæ¼ÒÊÇ·ñÔÚÊÔÁ·³¡"/>
-	<property name="HorseRacePathID" type="string" public="false" private="true" save="false" desc="¼ÇÂ¼Íæ¼Òµ±Ç°ÈüÂíÒÑ¾­¾­¹ýµÄÂ·¾¶µã"/>
-	<property name="HorseRaceRank" type="int" public="false" private="true" save="true" desc="¼ÇÂ¼Íæ¼Òµ±Ç°ÈüÂíµÄÃû´Î"/>
-	<property name="PVPTowerPlayerState" type="int" public="false" private="true" save="true" desc="¼ÇÂ¼Íæ¼Òµ±Ç°ÔØ¾ßËþ·À¸±±¾µÄ×´Ì¬"/>
+    <property name="AskedHelpOrKill" type="byte" public="false" private="fasle" save="false" desc="å¥½å‹æ˜¯å¦è¢«å¥½å‹æ±‚åŠ©å’Œå‘¼æ•‘"/>
+    <property name="IsPractice" type="byte" public="false" private="true" save="true" desc="çŽ©å®¶æ˜¯å¦åœ¨è¯•ç»ƒåœº"/>
+	<property name="HorseRacePathID" type="string" public="false" private="true" save="false" desc="è®°å½•çŽ©å®¶å½“å‰èµ›é©¬å·²ç»ç»è¿‡çš„è·¯å¾„ç‚¹"/>
+	<property name="HorseRaceRank" type="int" public="false" private="true" save="true" desc="è®°å½•çŽ©å®¶å½“å‰èµ›é©¬çš„åæ¬¡"/>
+	<property name="PVPTowerPlayerState" type="int" public="false" private="true" save="true" desc="è®°å½•çŽ©å®¶å½“å‰è½½å…·å¡”é˜²å‰¯æœ¬çš„çŠ¶æ€"/>
 
   </properties>
 	<records>
-		<!-- PVPÈÎÎñÈ«²¿ÈÎÎñ -->
-		<record name="PVPTaskProgressRecord" cols="2" maxrows="64" save="true" public="false" private="true" desc="PVPÈÎÎñÈ«²¿ÈÎÎñÍê³É´ÎÊý">
-			<column type="string" desc="ÈÎÎñ±àºÅ"/>
-			<column type="word" desc="µ±Ç°ÒÑÍê³É´ÎÊý"/>
+		<!-- PVPä»»åŠ¡å…¨éƒ¨ä»»åŠ¡ -->
+		<record name="PVPTaskProgressRecord" cols="2" maxrows="64" save="true" public="false" private="true" desc="PVPä»»åŠ¡å…¨éƒ¨ä»»åŠ¡å®Œæˆæ¬¡æ•°">
+			<column type="string" desc="ä»»åŠ¡ç¼–å·"/>
+			<column type="word" desc="å½“å‰å·²å®Œæˆæ¬¡æ•°"/>
 		</record>
-		<!-- µ±Ç°³Ð½ÓµÄPVPÈÎÎñ -->
-		<record name="PVPTaskCurrentRecord" cols="6" maxrows="1" save="true" public="false" private="true" desc="µ±Ç°PVPÈÎÎñ×´Ì¬">
-			<column type="string" desc="ÈÎÎñ±àºÅ"/>
-			<!--<column type="dword" desc="µ±Ç°½ø¶È"/>-->
-			<column type="byte" desc="ÈÎÎñ×´Ì¬"/>
-			<column type="word" desc="Ëæ»úÈÎÎñ"/>
-			<column type="int64" desc="ÈÎÎñµ½ÆÚÊ±¼ä"/>
-			<column type="byte" desc="ÈÎÎñ×Ó×´Ì¬,º¬ÒåËæÈÎÎñ²»Í¬¶øÒì"/>
-      <column type="byte" desc="ÈÎÎñ½×¶Î£¬ÈÎÎñ×·×ÙÃæ°åÓÃ"/>
+		<!-- å½“å‰æ‰¿æŽ¥çš„PVPä»»åŠ¡ -->
+		<record name="PVPTaskCurrentRecord" cols="6" maxrows="1" save="true" public="false" private="true" desc="å½“å‰PVPä»»åŠ¡çŠ¶æ€">
+			<column type="string" desc="ä»»åŠ¡ç¼–å·"/>
+			<!--<column type="dword" desc="å½“å‰è¿›åº¦"/>-->
+			<column type="byte" desc="ä»»åŠ¡çŠ¶æ€"/>
+			<column type="word" desc="éšæœºä»»åŠ¡"/>
+			<column type="int64" desc="ä»»åŠ¡åˆ°æœŸæ—¶é—´"/>
+			<column type="byte" desc="ä»»åŠ¡å­çŠ¶æ€,å«ä¹‰éšä»»åŠ¡ä¸åŒè€Œå¼‚"/>
+      <column type="byte" desc="ä»»åŠ¡é˜¶æ®µï¼Œä»»åŠ¡è¿½è¸ªé¢æ¿ç”¨"/>
 		</record>
-		<!-- µ±Ç°³Ð½ÓµÄPVPÈÎÎñµÄ×ÓÈÎÎñ -->
-		<record name="PVPTaskSubRecord" cols="3" maxrows="10" save="true" public="false" private="true" desc="µ±Ç°PVPÈÎÎñµÄ×ÓÈÎÎñ">
-			<column type="word" desc="×ÓÈÎÎñ±àºÅ"/>
-			<!--<column type="word" desc="×ÓÈÎÎñÀàÐÍ"/>-->
-			<column type="word" desc="µ±Ç°Íê³ÉÊýÁ¿"/> 
-			<column type="word" desc="µ±Ç°Íê³É½ø¶È"/>
+		<!-- å½“å‰æ‰¿æŽ¥çš„PVPä»»åŠ¡çš„å­ä»»åŠ¡ -->
+		<record name="PVPTaskSubRecord" cols="3" maxrows="10" save="true" public="false" private="true" desc="å½“å‰PVPä»»åŠ¡çš„å­ä»»åŠ¡">
+			<column type="word" desc="å­ä»»åŠ¡ç¼–å·"/>
+			<!--<column type="word" desc="å­ä»»åŠ¡ç±»åž‹"/>-->
+			<column type="word" desc="å½“å‰å®Œæˆæ•°é‡"/> 
+			<column type="word" desc="å½“å‰å®Œæˆè¿›åº¦"/>
 		</record>
 		
-		<!-- µ±Ç°³Ð½ÓµÄ´ÌÌ½PVPÈÎÎñµÄÒÑ¾­×÷ÓÃµÄnpc¶ÔÏóÁÐ±í -->
-		<record name="PVPPryTaskNPCRecord" cols="2" maxrows="50" save="true" public="false" private="false" desc="npc ¶ÔÏóÁÐ±í">
-			<column type="word" desc="ÀàÐÍ"/>
-			<column type="object" desc="¶ÔÏó"/>
+		<!-- å½“å‰æ‰¿æŽ¥çš„åˆºæŽ¢PVPä»»åŠ¡çš„å·²ç»ä½œç”¨çš„npcå¯¹è±¡åˆ—è¡¨ -->
+		<record name="PVPPryTaskNPCRecord" cols="2" maxrows="50" save="true" public="false" private="false" desc="npc å¯¹è±¡åˆ—è¡¨">
+			<column type="word" desc="ç±»åž‹"/>
+			<column type="object" desc="å¯¹è±¡"/>
 		</record>
 
-    <!-- ´ÌÉ±ÌæÉíÈÎÎñ ÔÚÈÎÎñÍæ¼ÒÉíÉÏ-->
-    <record name="PVPTaskScapegoatRecord" cols="7" maxrows="10" save="false" public="false" private="true" desc="µ±Ç°PVPÈÎÎñµÄ×ÓÈÎÎñ">
-      <column type="word" desc="³¡¾°ID"/>
-      <column type="widestr" desc="ÌæÉíÍæ¼ÒÃû×Ö"/>
-      <column type="widestr" desc="ÌæÉínpcÃû×Ö"/>
-      <column type="dword" desc="2¼¶ÇøÓò"/>
-      <column type="float" desc="x×ø±ê"/>
-      <column type="float" desc="y×ø±ê"/>
-      <column type="float" desc="z×ø±ê"/>
+    <!-- åˆºæ€æ›¿èº«ä»»åŠ¡ åœ¨ä»»åŠ¡çŽ©å®¶èº«ä¸Š-->
+    <record name="PVPTaskScapegoatRecord" cols="7" maxrows="10" save="false" public="false" private="true" desc="å½“å‰PVPä»»åŠ¡çš„å­ä»»åŠ¡">
+      <column type="word" desc="åœºæ™¯ID"/>
+      <column type="widestr" desc="æ›¿èº«çŽ©å®¶åå­—"/>
+      <column type="widestr" desc="æ›¿èº«npcåå­—"/>
+      <column type="dword" desc="2çº§åŒºåŸŸ"/>
+      <column type="float" desc="xåæ ‡"/>
+      <column type="float" desc="yåæ ‡"/>
+      <column type="float" desc="zåæ ‡"/>
     </record>
     
-	<!-- ±»Ñ¯ÎÊÊÇ·ñÒ»Æð´ÌÉ±ÌæÉínpcÊ±£¬±£´æÍ¬Òâ´ÌÉ±ÌæÉíµÄÍæ¼ÒÐÅÏ¢ ±í·ÅÔÚÈÎÎñÍæ¼ÒÉíÉÏ-->
-    <record name="PVPTaskFriendKillScapegoatRecord" cols="1" maxrows="50" save="false" public="false" private="true" desc="¼ÇÂ¼Í¬Òâ¹ýÀ´°ïÃ¦´ÌÉ±ÌæÉíµÄÍæ¼Ò">
-      <column type="widestr" desc="ÈÎÎñÍæ¼ÒÃû×Ö£¬×öÎªÎ¨Ò»¼üÖµ"/>
+	<!-- è¢«è¯¢é—®æ˜¯å¦ä¸€èµ·åˆºæ€æ›¿èº«npcæ—¶ï¼Œä¿å­˜åŒæ„åˆºæ€æ›¿èº«çš„çŽ©å®¶ä¿¡æ¯ è¡¨æ”¾åœ¨ä»»åŠ¡çŽ©å®¶èº«ä¸Š-->
+    <record name="PVPTaskFriendKillScapegoatRecord" cols="1" maxrows="50" save="false" public="false" private="true" desc="è®°å½•åŒæ„è¿‡æ¥å¸®å¿™åˆºæ€æ›¿èº«çš„çŽ©å®¶">
+      <column type="widestr" desc="ä»»åŠ¡çŽ©å®¶åå­—ï¼Œåšä¸ºå”¯ä¸€é”®å€¼"/>
     </record>
 
-    <!-- ´ÌÉ±ÌæÉíÈÎÎñÌæÉíÎ»ÖÃ ÔÚ±»ÌæÉíÍæ¼ÒÉíÉÏ-->
-    <record name="PVPTaskScapegoatPosRecord" cols="8" maxrows="50" save="false" public="false" private="true" desc="´ÌÉ±ÌæÉíÈÎÎñÌæÉíÎ»ÖÃ">
-      <column type="widestr" desc="ÈÎÎñÍæ¼ÒÃû×Ö"/>
-      <column type="word" desc="³¡¾°ID"/>
-      <column type="float" desc="x×ø±ê"/>
-      <column type="float" desc="y×ø±ê"/>
-      <column type="float" desc="z×ø±ê"/>
-      <column type="byte" desc="ÊÇ·ñÐèÒª´«ËÍ"/>
-      <column type="int64" desc="¼ÇÂ¼ÌæÉínpcÉú³ÉÊ±¼ä"/>
-	  <column type="dword" desc="2¼¶ÇøÓò"/>
+    <!-- åˆºæ€æ›¿èº«ä»»åŠ¡æ›¿èº«ä½ç½® åœ¨è¢«æ›¿èº«çŽ©å®¶èº«ä¸Š-->
+    <record name="PVPTaskScapegoatPosRecord" cols="8" maxrows="50" save="false" public="false" private="true" desc="åˆºæ€æ›¿èº«ä»»åŠ¡æ›¿èº«ä½ç½®">
+      <column type="widestr" desc="ä»»åŠ¡çŽ©å®¶åå­—"/>
+      <column type="word" desc="åœºæ™¯ID"/>
+      <column type="float" desc="xåæ ‡"/>
+      <column type="float" desc="yåæ ‡"/>
+      <column type="float" desc="zåæ ‡"/>
+      <column type="byte" desc="æ˜¯å¦éœ€è¦ä¼ é€"/>
+      <column type="int64" desc="è®°å½•æ›¿èº«npcç”Ÿæˆæ—¶é—´"/>
+	  <column type="dword" desc="2çº§åŒºåŸŸ"/>
     </record>
 
-	<!-- ±»Ñ¯ÎÊÊÇ·ñÒ»Æð±£»¤ÌæÉínpcÊ±£¬±£´æÍ¬Òâ±£»¤ÌæÉíµÄÍæ¼ÒÐÅÏ¢ ±í·ÅÔÚ±»ÌæÉíÍæ¼ÒÉíÉÏ-->
-    <record name="PVPTaskFriendHelpScapegoatRecord" cols="1" maxrows="50" save="false" public="false" private="true" desc="¼ÇÂ¼Í¬Òâ¹ýÀ´°ïÃ¦±£»¤ÌæÉíµÄÍæ¼Ò">
-      <column type="widestr" desc="ÈÎÎñÍæ¼ÒÃû×Ö£¬×öÎªÎ¨Ò»¼üÖµ"/>
+	<!-- è¢«è¯¢é—®æ˜¯å¦ä¸€èµ·ä¿æŠ¤æ›¿èº«npcæ—¶ï¼Œä¿å­˜åŒæ„ä¿æŠ¤æ›¿èº«çš„çŽ©å®¶ä¿¡æ¯ è¡¨æ”¾åœ¨è¢«æ›¿èº«çŽ©å®¶èº«ä¸Š-->
+    <record name="PVPTaskFriendHelpScapegoatRecord" cols="1" maxrows="50" save="false" public="false" private="true" desc="è®°å½•åŒæ„è¿‡æ¥å¸®å¿™ä¿æŠ¤æ›¿èº«çš„çŽ©å®¶">
+      <column type="widestr" desc="ä»»åŠ¡çŽ©å®¶åå­—ï¼Œåšä¸ºå”¯ä¸€é”®å€¼"/>
     </record>
 
-    <!-- ±»Ñ¯ÎÊÊÇ·ñÒ»Æð»÷É±ÌæÉínpcÊ±£¬±£´æÌæÉínpcµÄÎ»ÖÃ ±í·ÅÔÚÈÎÎñÍæ¼ÒµÄºÃÓÑÉíÉÏ-->
-    <record name="PVPTaskKillScapegoatPosRecord" cols="6" maxrows="50" save="false" public="false" private="fasle" desc="±»Ñ¯ÎÊÊÇ·ñÒ»Æð»÷É±ÌæÉínpcÊ±£¬±£´æÌæÉínpcµÄÎ»ÖÃ">
-      <column type="widestr" desc="ÈÎÎñÍæ¼ÒÃû×Ö£¬×öÎªÎ¨Ò»¼üÖµ"/>
-      <column type="word" desc="³¡¾°ID"/>
-      <column type="float" desc="x×ø±ê"/>
-      <column type="float" desc="y×ø±ê"/>
-      <column type="float" desc="z×ø±ê"/>
-      <column type="int64" desc="·¢ËÍÇëÇóÊ±¼ä"/>
+    <!-- è¢«è¯¢é—®æ˜¯å¦ä¸€èµ·å‡»æ€æ›¿èº«npcæ—¶ï¼Œä¿å­˜æ›¿èº«npcçš„ä½ç½® è¡¨æ”¾åœ¨ä»»åŠ¡çŽ©å®¶çš„å¥½å‹èº«ä¸Š-->
+    <record name="PVPTaskKillScapegoatPosRecord" cols="6" maxrows="50" save="false" public="false" private="fasle" desc="è¢«è¯¢é—®æ˜¯å¦ä¸€èµ·å‡»æ€æ›¿èº«npcæ—¶ï¼Œä¿å­˜æ›¿èº«npcçš„ä½ç½®">
+      <column type="widestr" desc="ä»»åŠ¡çŽ©å®¶åå­—ï¼Œåšä¸ºå”¯ä¸€é”®å€¼"/>
+      <column type="word" desc="åœºæ™¯ID"/>
+      <column type="float" desc="xåæ ‡"/>
+      <column type="float" desc="yåæ ‡"/>
+      <column type="float" desc="zåæ ‡"/>
+      <column type="int64" desc="å‘é€è¯·æ±‚æ—¶é—´"/>
     </record>
 
-    <!-- ±»Ñ¯ÎÊÊÇ·ñÒ»Æð±£»¤ÌæÉínpcÊ±£¬±£´æÌæÉínpcµÄÎ»ÖÃ ±í·ÅÔÚ±»ÌæÉíÍæ¼ÒµÄºÃÓÑÉíÉÏ-->
-    <record name="PVPTaskProtectScapegoatPosRecord" cols="6" maxrows="50" save="false" public="false" private="false" desc="±»Ñ¯ÎÊÊÇ·ñÒ»Æð±£»¤ÌæÉínpcÊ±£¬±£´æÌæÉínpcµÄÎ»ÖÃ">
-      <column type="widestr" desc="ÈÎÎñÍæ¼ÒÃû×Ö£¬×öÎªÎ¨Ò»¼üÖµ"/>
-      <column type="word" desc="³¡¾°ID"/>
-      <column type="float" desc="x×ø±ê"/>
-      <column type="float" desc="y×ø±ê"/>
-      <column type="float" desc="z×ø±ê"/>
-      <column type="int64" desc="·¢ËÍÇëÇóÊ±¼ä"/>
+    <!-- è¢«è¯¢é—®æ˜¯å¦ä¸€èµ·ä¿æŠ¤æ›¿èº«npcæ—¶ï¼Œä¿å­˜æ›¿èº«npcçš„ä½ç½® è¡¨æ”¾åœ¨è¢«æ›¿èº«çŽ©å®¶çš„å¥½å‹èº«ä¸Š-->
+    <record name="PVPTaskProtectScapegoatPosRecord" cols="6" maxrows="50" save="false" public="false" private="false" desc="è¢«è¯¢é—®æ˜¯å¦ä¸€èµ·ä¿æŠ¤æ›¿èº«npcæ—¶ï¼Œä¿å­˜æ›¿èº«npcçš„ä½ç½®">
+      <column type="widestr" desc="ä»»åŠ¡çŽ©å®¶åå­—ï¼Œåšä¸ºå”¯ä¸€é”®å€¼"/>
+      <column type="word" desc="åœºæ™¯ID"/>
+      <column type="float" desc="xåæ ‡"/>
+      <column type="float" desc="yåæ ‡"/>
+      <column type="float" desc="zåæ ‡"/>
+      <column type="int64" desc="å‘é€è¯·æ±‚æ—¶é—´"/>
     </record>
     
-    <!-- ÈÎÎñÍæ¼Ò±»¹¥»÷¼ÇÂ¼£¬ÓÃÓÚÔö¼Ó±£»¤ÌæÉíÈÎÎñºÃÓÑ¶È-->
-    <record name="PVPTaskBeAttackRecord" cols="1" maxrows="50" save="false" public="false" private="false" desc="ÈÎÎñÍæ¼Ò±»¹¥»÷¼ÇÂ¼£¬ÓÃÓÚÔö¼Ó±£»¤ÌæÉíÈÎÎñºÃÓÑ¶È">
-      <column type="object" desc="¹¥»÷Õß"/>
+    <!-- ä»»åŠ¡çŽ©å®¶è¢«æ”»å‡»è®°å½•ï¼Œç”¨äºŽå¢žåŠ ä¿æŠ¤æ›¿èº«ä»»åŠ¡å¥½å‹åº¦-->
+    <record name="PVPTaskBeAttackRecord" cols="1" maxrows="50" save="false" public="false" private="false" desc="ä»»åŠ¡çŽ©å®¶è¢«æ”»å‡»è®°å½•ï¼Œç”¨äºŽå¢žåŠ ä¿æŠ¤æ›¿èº«ä»»åŠ¡å¥½å‹åº¦">
+      <column type="object" desc="æ”»å‡»è€…"/>
     </record>
     
-    <!-- ¼ÇÂ¼´«ËÍµã£¬ÓÃÓÚÈÎÎñÍê³ÉÊ±´«»Ø-->
-    <record name="PVPTaskTransBackRecord" cols="5" maxrows="1" save="true" public="false" private="false" desc="ÌæÉíÈÎÎñ£¬¼ÇÂ¼´«ËÍµã£¬ÓÃÓÚÈÎÎñÍê³ÉÊ±´«»Ø">
-      <!--<column type="word" desc="´«ËÍÀàÐÍ 1´ÌÉ±ÌæÉí£¬2±£»¤ÌæÉí"/>-->
-      <column type="word" desc="³¡¾°ID"/>
-      <column type="float" desc="x×ø±ê"/>
-      <column type="float" desc="y×ø±ê"/>
-      <column type="float" desc="z×ø±ê"/>
-      <column type="float" desc="o³¯Ïò"/>
-      <!--<column type="word" desc="Ä¿±ê³¡¾°"/>-->
+    <!-- è®°å½•ä¼ é€ç‚¹ï¼Œç”¨äºŽä»»åŠ¡å®Œæˆæ—¶ä¼ å›ž-->
+    <record name="PVPTaskTransBackRecord" cols="5" maxrows="1" save="true" public="false" private="false" desc="æ›¿èº«ä»»åŠ¡ï¼Œè®°å½•ä¼ é€ç‚¹ï¼Œç”¨äºŽä»»åŠ¡å®Œæˆæ—¶ä¼ å›ž">
+      <!--<column type="word" desc="ä¼ é€ç±»åž‹ 1åˆºæ€æ›¿èº«ï¼Œ2ä¿æŠ¤æ›¿èº«"/>-->
+      <column type="word" desc="åœºæ™¯ID"/>
+      <column type="float" desc="xåæ ‡"/>
+      <column type="float" desc="yåæ ‡"/>
+      <column type="float" desc="zåæ ‡"/>
+      <column type="float" desc="oæœå‘"/>
+      <!--<column type="word" desc="ç›®æ ‡åœºæ™¯"/>-->
     </record>
 
-    <!-- ÓÃÓÚ¼ÇÂ¼ÊÔÁ·³¡ÈÎÎñÖÐÍæ¼ÒÍê³É½×¶Î-->
-    <record name="PVPTaskPracticeRecord" cols="1" maxrows="64" save="true" public="false" private="false" desc="ÌæÉíÈÎÎñ£¬¼ÇÂ¼´«ËÍµã£¬ÓÃÓÚÈÎÎñÍê³ÉÊ±´«»Ø">
-      <!--<column type="byte" desc="Íê³É½×¶Î"/>-->
-    <column type="byte" desc="Íê³É½×¶ÎID"/>
+    <!-- ç”¨äºŽè®°å½•è¯•ç»ƒåœºä»»åŠ¡ä¸­çŽ©å®¶å®Œæˆé˜¶æ®µ-->
+    <record name="PVPTaskPracticeRecord" cols="1" maxrows="64" save="true" public="false" private="false" desc="æ›¿èº«ä»»åŠ¡ï¼Œè®°å½•ä¼ é€ç‚¹ï¼Œç”¨äºŽä»»åŠ¡å®Œæˆæ—¶ä¼ å›ž">
+      <!--<column type="byte" desc="å®Œæˆé˜¶æ®µ"/>-->
+    <column type="byte" desc="å®Œæˆé˜¶æ®µID"/>
     </record>
 
-	<!-- ÈüÂí»î¶¯Ê±¼ä-->
-    <record name="PVPHorseRaceTimeRecord" cols="3" maxrows="1" save="true" public="false" private="true" desc="¼ÇÂ¼ÈüÂí»î¶¯×¼±¸£¬¿ªÆôÊ±¼ä">
-      <column type="int64" desc="×¼±¸Ê±¼ä"/>
-      <column type="int64" desc="¿ªÆôÊ±¼ä"/>
-      <column type="int64" desc="Ô¤ÁôÊ±¼ä"/>
+	<!-- èµ›é©¬æ´»åŠ¨æ—¶é—´-->
+    <record name="PVPHorseRaceTimeRecord" cols="3" maxrows="1" save="true" public="false" private="true" desc="è®°å½•èµ›é©¬æ´»åŠ¨å‡†å¤‡ï¼Œå¼€å¯æ—¶é—´">
+      <column type="int64" desc="å‡†å¤‡æ—¶é—´"/>
+      <column type="int64" desc="å¼€å¯æ—¶é—´"/>
+      <column type="int64" desc="é¢„ç•™æ—¶é—´"/>
     </record>
 	
-	<!-- ÔØ¾ßËþ·À»î¶¯±í-->
-	<record name="pvp_tower_queued_rec" cols="5" maxrows="1" save="false" public="false" private="false" desc="ÒÑÅÅµÄ»î¶¯±í»ò¼ÓÈëµÄ¿ªÕ½±í">
-			<column type="string" desc="¸±±¾id"/>
-			<column type="string" desc="±íÃû³Æ"/>
-			<column type="word" desc="¶ÓÁÐID"/>
-			<column type="string" desc="»î¶¯id"/>
-			<column type="byte" desc="ÅÅ¶Ó·½Ê½,1 ¸öÈËÅÅ¶Ó, 2 ÒÑ¿ªÕ½"/>
+	<!-- è½½å…·å¡”é˜²æ´»åŠ¨è¡¨-->
+	<record name="pvp_tower_queued_rec" cols="5" maxrows="1" save="false" public="false" private="false" desc="å·²æŽ’çš„æ´»åŠ¨è¡¨æˆ–åŠ å…¥çš„å¼€æˆ˜è¡¨">
+			<column type="string" desc="å‰¯æœ¬id"/>
+			<column type="string" desc="è¡¨åç§°"/>
+			<column type="word" desc="é˜Ÿåˆ—ID"/>
+			<column type="string" desc="æ´»åŠ¨id"/>
+			<column type="byte" desc="æŽ’é˜Ÿæ–¹å¼,1 ä¸ªäººæŽ’é˜Ÿ, 2 å·²å¼€æˆ˜"/>
 		</record>
 
-	 <!-- ÔØ¾ßËþ·À¸±±¾»î¶¯Ê±¼ä-->
-    <record name="PVPTowerWarTimeRecord" cols="7" maxrows="1" save="true" public="false" private="true" desc="¼ÇÂ¼ÔØ¾ßËþ·À¸±±¾×¼±¸£¬¿ªÆôÊ±¼ä">
-      <column type="int64" desc="¿ªÊ¼Ê±¼ä"/>
-      <column type="int64" desc="×¼±¸½áÊøÊ±¼ä"/>
-      <column type="int64" desc="¿ÉÍ¶½µÊ±¼ä"/>
-	  <column type="int64" desc="¸±±¾½áÊøÊ±¼ä"/>
-	  <column type="int64" desc="Ç¿ÖÆÀë¿ª¸±±¾Ê±¼ä"/>
-	  <column type="word" desc="ÕôÆû·½»ý·Ö"/>
-	  <column type="word" desc="Ææ»Ã·½»ý·Ö"/>
+	 <!-- è½½å…·å¡”é˜²å‰¯æœ¬æ´»åŠ¨æ—¶é—´-->
+    <record name="PVPTowerWarTimeRecord" cols="7" maxrows="1" save="true" public="false" private="true" desc="è®°å½•è½½å…·å¡”é˜²å‰¯æœ¬å‡†å¤‡ï¼Œå¼€å¯æ—¶é—´">
+      <column type="int64" desc="å¼€å§‹æ—¶é—´"/>
+      <column type="int64" desc="å‡†å¤‡ç»“æŸæ—¶é—´"/>
+      <column type="int64" desc="å¯æŠ•é™æ—¶é—´"/>
+	  <column type="int64" desc="å‰¯æœ¬ç»“æŸæ—¶é—´"/>
+	  <column type="int64" desc="å¼ºåˆ¶ç¦»å¼€å‰¯æœ¬æ—¶é—´"/>
+	  <column type="word" desc="è’¸æ±½æ–¹ç§¯åˆ†"/>
+	  <column type="word" desc="å¥‡å¹»æ–¹ç§¯åˆ†"/>
     </record>
 
   </records>

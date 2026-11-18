@@ -1,42 +1,42 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÒÆ¶¯Ïà¹ØµÄÊôÐÔ-->
-<!--Õâ¼¸¸öÐÞÕý±íÍæ¼ÒºÍnpc¶¼ÒªÓÐ-->
+<!--ç§»åŠ¨ç›¸å…³çš„å±žæ€§-->
+<!--è¿™å‡ ä¸ªä¿®æ­£è¡¨çŽ©å®¶å’Œnpcéƒ½è¦æœ‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
 	<records>
-		<record name="PropModifyRec" cols="8" maxrows="1024" save="false" public="false" private="false" desc="¶ÔÏóÊôÐÔÐÞÕý±í">
-			<column type="string" desc="ÐÞÕýÊôÐÔÃû"/>
-			<column type="double" desc="ÐÞÕýÊôÐÔÖµ"/>
-			<column type="byte" desc="¼ÆËã·½Ê½"/>
-			<column type="string" desc="ÐÞÕýÀ´Ô´"/>
-			<column type="byte" desc="ÐÞÕý¶ÔÏó"/>
-			<column type="byte" desc="ÐÞÕýÀ´Ô´"/>
-			<column type="byte" desc="ÐÞÕýÄÄÐ©Ä¿±ê"/>
-			<column type="string" desc="ÐÞÕýÏà¹ØµÄÊôÐÔÃû"/>
+		<record name="PropModifyRec" cols="8" maxrows="1024" save="false" public="false" private="false" desc="å¯¹è±¡å±žæ€§ä¿®æ­£è¡¨">
+			<column type="string" desc="ä¿®æ­£å±žæ€§å"/>
+			<column type="double" desc="ä¿®æ­£å±žæ€§å€¼"/>
+			<column type="byte" desc="è®¡ç®—æ–¹å¼"/>
+			<column type="string" desc="ä¿®æ­£æ¥æº"/>
+			<column type="byte" desc="ä¿®æ­£å¯¹è±¡"/>
+			<column type="byte" desc="ä¿®æ­£æ¥æº"/>
+			<column type="byte" desc="ä¿®æ­£å“ªäº›ç›®æ ‡"/>
+			<column type="string" desc="ä¿®æ­£ç›¸å…³çš„å±žæ€§å"/>
 		</record>
-		<record name="SkillModifyRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="¶ÔÏó¼¼ÄÜÐÞÕý±í">
-			<column type="string" desc="ÐÞÕý¼¼ÄÜid"/>
-			<column type="string" desc="ÐÞÕýÊôÐÔÃû"/>
-			<column type="double" desc="ÐÞÕýÊôÐÔÖµ"/>
-			<column type="byte" desc="¼ÆËã·½Ê½"/>
-			<column type="string" desc="ÐÞÕýÀ´Ô´"/>		
+		<record name="SkillModifyRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="å¯¹è±¡æŠ€èƒ½ä¿®æ­£è¡¨">
+			<column type="string" desc="ä¿®æ­£æŠ€èƒ½id"/>
+			<column type="string" desc="ä¿®æ­£å±žæ€§å"/>
+			<column type="double" desc="ä¿®æ­£å±žæ€§å€¼"/>
+			<column type="byte" desc="è®¡ç®—æ–¹å¼"/>
+			<column type="string" desc="ä¿®æ­£æ¥æº"/>		
 		</record>
-		<record name="BuffModifyRecIn" cols="5" maxrows="1024" save="false" public="false" private="false" desc="¶ÔÏóbuffÐÞÕý±í">
-			<column type="string" desc="ÐÞÕýbuffid"/>
-			<column type="string" desc="ÐÞÕýÊôÐÔÃû"/>
-			<column type="double" desc="ÐÞÕýÊôÐÔÖµ"/>
-			<column type="byte" desc="¼ÆËã·½Ê½"/>
-			<column type="string" desc="ÐÞÕýÀ´Ô´"/>			
+		<record name="BuffModifyRecIn" cols="5" maxrows="1024" save="false" public="false" private="false" desc="å¯¹è±¡buffä¿®æ­£è¡¨">
+			<column type="string" desc="ä¿®æ­£buffid"/>
+			<column type="string" desc="ä¿®æ­£å±žæ€§å"/>
+			<column type="double" desc="ä¿®æ­£å±žæ€§å€¼"/>
+			<column type="byte" desc="è®¡ç®—æ–¹å¼"/>
+			<column type="string" desc="ä¿®æ­£æ¥æº"/>			
 		</record>
-		<record name="BuffModifyRecOut" cols="5" maxrows="1024" save="false" public="false" private="false" desc="¶ÔÏóbuffÐÞÕý±í">
-			<column type="string" desc="ÐÞÕýbuffid"/>
-			<column type="string" desc="ÐÞÕýÊôÐÔÃû"/>
-			<column type="double" desc="ÐÞÕýÊôÐÔÖµ"/>
-			<column type="byte" desc="¼ÆËã·½Ê½"/>
-			<column type="string" desc="ÐÞÕýÀ´Ô´"/>			
+		<record name="BuffModifyRecOut" cols="5" maxrows="1024" save="false" public="false" private="false" desc="å¯¹è±¡buffä¿®æ­£è¡¨">
+			<column type="string" desc="ä¿®æ­£buffid"/>
+			<column type="string" desc="ä¿®æ­£å±žæ€§å"/>
+			<column type="double" desc="ä¿®æ­£å±žæ€§å€¼"/>
+			<column type="byte" desc="è®¡ç®—æ–¹å¼"/>
+			<column type="string" desc="ä¿®æ­£æ¥æº"/>			
 		</record>
 	</records>
 </object>

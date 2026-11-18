@@ -1,8 +1,8 @@
 require("define")
 function StressTest(self,...)
 		local msgid = nx_int(arg[1]);
-		local msg_type = nx_string(arg[2])--ÏûÏ¢ÀàĞÍ
-		if msg_type == "npcÕ½¶·²âÊÔ"or msg_type == "npcfight" then
+		local msg_type = nx_string(arg[2])--æ¶ˆæ¯ç±»å‹
+		if msg_type == "npcæˆ˜æ–—æµ‹è¯•"or msg_type == "npcfight" then
 			local x,y,z,o = nx_get_position(self);
 			local npc1 = nx_create_obj("monc023700", 0, nx_number(x)+2, y,  nx_number(z)+2, o);
 			nx_add_record_row_values(npc1, "EnemyNpcRec", "monc023600")
@@ -20,11 +20,11 @@ function StressTest(self,...)
 		--	nx_add_record_row_values(npc4, "EnemyNpcRec", "monv030500")		
 		--	nx_add_record_row_values(npc4, "EnemyNpcRec", "monv030600")
 		--	nx_add_record_row_values(npc4, "EnemyNpcRec", "monrm054200")
-		elseif msg_type == "buff²âÊÔ" or msg_type == "bufftest" then
+		elseif msg_type == "buffæµ‹è¯•" or msg_type == "bufftest" then
 			add_buffer(self, self)
-		elseif msg_type == "´´½¨¸±±¾" or msg_type == "createclone"then
-			nx_clone_scene(self, 27)--¿×È¸É½×¯
-		elseif msg_type == "ÇĞ»»³¡¾°" or msg_type == "switch_born"then
+		elseif msg_type == "åˆ›å»ºå‰¯æœ¬" or msg_type == "createclone"then
+			nx_clone_scene(self, 27)--å­”é›€å±±åº„
+		elseif msg_type == "åˆ‡æ¢åœºæ™¯" or msg_type == "switch_born"then
 			local sceneid = nx_int(arg[3])
 			local curSceneid = nx_get_scene_id()
 			if curSceneid == 1 then
@@ -36,14 +36,14 @@ function StressTest(self,...)
 			if curSceneid == 9 then
 				nx_switch_born(self, nx_int(1))
 			end
-		elseif msg_type == "randomÎ»ÖÃ" or msg_type == "randomMove" then
+		elseif msg_type == "randomä½ç½®" or msg_type == "randomMove" then
 			local x = nx_int(arg[3])
 			local z = nx_int(arg[4])
 			local y = nx_get_height(x, z);
 			local scene = nx_get_scene_id()
 			--nx_msgbox(nx_string(x).."/"..nx_string(y).."/"..nx_string(z).."/"..nx_string(scene))
 			nx_moveto(self, x, y, z, 0)
-		elseif msg_type == "³õÊ¼»¯ÀëÏßĞĞÎª" or msg_type == "InitOffLineJob" then
+		elseif msg_type == "åˆå§‹åŒ–ç¦»çº¿è¡Œä¸º" or msg_type == "InitOffLineJob" then
 
 			nx_clear_record(self,"OffLine_Job");
 			nx_clear_record(self,"OffLine_Job_Log");
@@ -55,23 +55,23 @@ function StressTest(self,...)
 end
 
 function add_buffer(self, target)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_newrole_test")
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--Ìí¼Óµ½Ä¿±êÉíÉÏ,Í¬Ê±¼ÇÂ¼½á¹û
+	--æ·»åŠ åˆ°ç›®æ ‡èº«ä¸Š,åŒæ—¶è®°å½•ç»“æœ
 	local result = nx_add_buffer(target, self, buffer)
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not result then
 		nx_destroy_self(buffer)
 		return false
 	end
 end
 
---³õÊ¼»¯ÀëÏßĞĞÎª
+--åˆå§‹åŒ–ç¦»çº¿è¡Œä¸º
 function init_offlinejob_id(self)
 	nx_set_property(self, "CantMove", 0)
 end

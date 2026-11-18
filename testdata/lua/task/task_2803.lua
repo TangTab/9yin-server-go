@@ -1,8 +1,8 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task_2803.lua
--- @ ½Å±¾¹¦ÄÜ: ÈÎÎñÄ¬ÈÏÖ´ÐÐ½Å±¾
--- @ ´´½¨Õß:   
--- @ ´´½¨ÈÕÆÚ: 2010.6.25
+-- @ è„šæœ¬åç§°: task_2803.lua
+-- @ è„šæœ¬åŠŸèƒ½: ä»»åŠ¡é»˜è®¤æ‰§è¡Œè„šæœ¬
+-- @ åˆ›å»ºè€…:   
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.6.25
 -----------------------------------------
 require("define")
 require("share\\server_custom_define")
@@ -10,37 +10,37 @@ require("share\\server_custom_define")
 local buffer_id = "buf_useitemclone017001_01"
 local npc_camp = 91
 
--- ÈÎÎñ³Ð½ÓÌõ¼þÅÐ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓÐ½ÓÈÎÎñµÄÌõ¼þ
+-- ä»»åŠ¡æ‰¿æŽ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æŽ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æŽ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼þ
+-- ä»»åŠ¡æŽ¥å—åŽï¼Œå¤„ç†ä»»åŠ¡æŽ¥å—åŽå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
     return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼þÅÐ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼þ
+-- ä»»åŠ¡å®ŒæˆåŽï¼Œå¤„ç†ä»»åŠ¡æäº¤åŽçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	remove_buffer(player)
 	return 1
 end
 
---·ÅÆúÈÎÎñ
+--æ”¾å¼ƒä»»åŠ¡
 function on_task_giveup(player, task_id)
 	remove_buffer(player)
 	return 1
 end
 
 
---ÈÎÎñÊ§°ÜÖ®ºóµÄ´¦Àí
+--ä»»åŠ¡å¤±è´¥ä¹‹åŽçš„å¤„ç†
 function on_task_failed(player, task_id)
 	return 1
 end
@@ -51,10 +51,10 @@ function remove_buffer(player)
 		nx_remove_buffer(player, buffer)
 	end
 
-	--ÖØÖÃ·þ×°
+	--é‡ç½®æœè£…
 	nx_set_property(player, "WorkCloth", "")
 
-	--»Ö¸´µÐ¶Ô¹ØÏµ
+	--æ¢å¤æ•Œå¯¹å…³ç³»
 	local row = nx_find_record_value(player, "ForceRec", 0, nx_int(npc_camp))
 	if row > 0 then	
 		nx_remove_record_row(player, "ForceRec", row)

@@ -1,37 +1,37 @@
---ÈÕÖ¾·şÎñÆ÷Ö÷¿Ø½Å±¾
+--æ—¥å¿—æœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(logger)
 	nx_set_value("logger", logger)
 
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 
-	--ÈÕÖ¾ÎÄ¼ş´æ·ÅÄ¿Â¼
+	--æ—¥å¿—æ–‡ä»¶å­˜æ”¾ç›®å½•
 	logger.LogFileDir = nx_work_path() .. "log\\"
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	logger.EveryDayAlone = true
 
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	logger:SetConsoleColor("LightBlue")
 
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	--ini.FileName = "game_log.ini"
 	ini.FileName = nx_main_config()
 
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
 		nx_msgbox("can't read config file!")
 		nx_destroy(ini)
 		return 0
 	end
 
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15011
 
@@ -40,43 +40,43 @@ function main(logger)
 
 	nx_destroy(ini)
 
-	--°ó¶¨½Å±¾
+	--ç»‘å®šè„šæœ¬
 	nx_bind_script(logger, "main", "echo_init")
 
-	--ÉèÖÃÁĞ±í·şÎñ
+	--è®¾ç½®åˆ—è¡¨æœåŠ¡
 	logger.EchoAddr = echo_addr
 	logger.EchoPort = echo_port
 
-	--Æô¶¯ÈÕÖ¾·şÎñ
+	--å¯åŠ¨æ—¥å¿—æœåŠ¡
 	logger:Start()
 
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	logger:WriteLine("log server")
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	logger:WriteLine("echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	logger:WriteLine("game log server started")
 
 	return 1
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local logger = nx_value("logger")
 
-	--¹Ø±ÕÈÕÖ¾·şÎñ
+	--å…³é—­æ—¥å¿—æœåŠ¡
 	logger:WriteLine("log server shutdown...")
 	logger:Stop()
 
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 
 	return true
 end
 
---Î¬»¤Á¬½Ó½Å±¾
+--ç»´æŠ¤è¿æ¥è„šæœ¬
 
---³õÊ¼»¯
+--åˆå§‹åŒ–
 function echo_init(self)
 	nx_callback(self, "on_open", "echo_open")
 	nx_callback(self, "on_close", "echo_close")
@@ -97,7 +97,7 @@ function echo_init(self)
 	return 1
 end
 
---Î¬»¤Á¬½Ó´ò¿ª
+--ç»´æŠ¤è¿æ¥æ‰“å¼€
 function echo_open(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " connected")
@@ -105,28 +105,28 @@ function echo_open(self, addr, port)
 	return 1
 end
 
---Î¬»¤Á¬½Ó¹Ø±Õ
+--ç»´æŠ¤è¿æ¥å…³é—­
 function echo_close(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " closed")
 	return 1
 end
 
---·¢ËÍ»ØÓ¦ĞÅÏ¢
+--å‘é€å›åº”ä¿¡æ¯
 function echo_response(self, info)
 	self:SendEchoLine(">" .. info .. "\r")
 	self:WriteLine(info)
 	return true
 end
 
---´¦ÀíÎ¬»¤ÊäÈëÃüÁî
+--å¤„ç†ç»´æŠ¤è¾“å…¥å‘½ä»¤
 function echo_input(self, command)
 	if command == "quit" then
-		--ÍË³ö³ÌĞò
+		--é€€å‡ºç¨‹åº
 		echo_response(self, "server will shutdown...")
 		close()
 	elseif command == "end" then
-		--¹Ø±ÕÁ¬½Ó
+		--å…³é—­è¿æ¥
 		self:CloseEcho()
 	else
 		echo_response(self, "undefined command: " .. command)
@@ -135,7 +135,7 @@ function echo_input(self, command)
 	return 1
 end
 
---²éÕÒÊµÌå
+--æŸ¥æ‰¾å®ä½“
 function get_entity(entity_name)
 	local id = nx_value(entity_name)
 
@@ -158,7 +158,7 @@ function get_entity(entity_name)
 	return nil
 end
 
---×ª»»µ½ºÏÊÊµÄÀàĞÍ
+--è½¬æ¢åˆ°åˆé€‚çš„ç±»å‹
 function get_new_value(old_v, value)
 	local type = nx_type(old_v)
 
@@ -185,7 +185,7 @@ function get_new_value(old_v, value)
 	return nil
 end
 
---²éÑ¯ÊµÌåÄÚ²¿ÊôĞÔ
+--æŸ¥è¯¢å®ä½“å†…éƒ¨å±æ€§
 function echo_input_getp(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -205,7 +205,7 @@ function echo_input_getp(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌåÄÚ²¿ÊôĞÔ
+--è®¾ç½®å®ä½“å†…éƒ¨å±æ€§
 function echo_input_setp(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -233,7 +233,7 @@ function echo_input_setp(self, entity, prop, value)
 	return 1
 end
 
---²éÑ¯ÊµÌå×Ô¶¨ÒåÊôĞÔ
+--æŸ¥è¯¢å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_getc(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -253,7 +253,7 @@ function echo_input_getc(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌå×Ô¶¨ÒåÊôĞÔ
+--è®¾ç½®å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_setc(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -281,7 +281,7 @@ function echo_input_setc(self, entity, prop, value)
 	return 1
 end
 
---Ö´ĞĞÊµÌå·½·¨
+--æ‰§è¡Œå®ä½“æ–¹æ³•
 function echo_input_method(self, entity, method, ...)
 	if entity == nil or method == nil then
 		return 0
@@ -310,7 +310,7 @@ function echo_input_method(self, entity, method, ...)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞÄÚ²¿ÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰å†…éƒ¨å±æ€§
 function echo_input_listp(self, entity)
 	if entity == nil then
 		return 0
@@ -334,7 +334,7 @@ function echo_input_listp(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ×Ô¶¨ÒåÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰è‡ªå®šä¹‰å±æ€§
 function echo_input_listc(self, entity)
 	if entity == nil then
 		return 0
@@ -358,7 +358,7 @@ function echo_input_listc(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ·½·¨
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰æ–¹æ³•
 function echo_input_listm(self, entity)
 	if entity == nil then
 		return 0
@@ -382,7 +382,7 @@ function echo_input_listm(self, entity)
 	return 1
 end
 
---ÁĞ³öËùÓĞÈ«¾Ö±äÁ¿
+--åˆ—å‡ºæ‰€æœ‰å…¨å±€å˜é‡
 function echo_input_listg(self)
 	local global_table = nx_value_list()
 	local num = table.getn(global_table)
@@ -399,7 +399,7 @@ function echo_input_listg(self)
 	return 1
 end
 
---Ö´ĞĞ½Å±¾À©Õ¹º¯Êı
+--æ‰§è¡Œè„šæœ¬æ‰©å±•å‡½æ•°
 function echo_input_function(self, func, ...)
 	if func == nil or func == "" then
 		return 0
@@ -420,7 +420,7 @@ function echo_input_function(self, func, ...)
 	return 1
 end
 
---µ÷ÊÔº¯Êı
+--è°ƒè¯•å‡½æ•°
 function echo_input_debugger(self, entity, method, ...)
 	if entity == nil or entity == "" or method == nil or method == "" then
 		return 0

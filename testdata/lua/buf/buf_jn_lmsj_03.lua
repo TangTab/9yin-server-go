@@ -1,33 +1,33 @@
-	--�ȼ�1����������BUFF��30����ʹ�ü��ܣ���ʧ����=�������ĵ�MP*3
-	--�ȼ�2����������BUFF��30����ʹ�ü��ܣ���ʧ����=�������ĵ�MP*6
-	--�ȼ�3����������BUFF��30����ʹ�ü��ܣ���ʧ����=�������ĵ�MP*9
-	--�ȼ�4����������BUFF��30����ʹ�ü��ܣ���ʧ����=�������ĵ�MP*12
-	--�ȼ�5����������BUFF��30����ʹ�ü��ܣ���ʧ����=�������ĵ�MP*15
+	--等级1：触发限制BUFF，30秒内使用技能，损失生命=技能消耗的MP*3
+	--等级2：触发限制BUFF，30秒内使用技能，损失生命=技能消耗的MP*6
+	--等级3：触发限制BUFF，30秒内使用技能，损失生命=技能消耗的MP*9
+	--等级4：触发限制BUFF，30秒内使用技能，损失生命=技能消耗的MP*12
+	--等级5：触发限制BUFF，30秒内使用技能，损失生命=技能消耗的MP*15
 	
 require("define")
 require("share\\server_custom_define")
 
---Buffer������
+--Buffer被激活
 function buffer_active(self, buffer)
 end
 
---Bufferδ������
+--Buffer未被激活
 function buffer_deactive(self, buffer)
 end
 
---��ʱ��ƴ�ʱ��Ч��
---����ǼƴΣ�����1ʱ�����μƴ���Ч������0ʱ�����β��ƴ�
+--计时或计次时的效果
+--如果是计次，返回1时：本次计次有效，返回0时：本次不计次
 function buffer_timer(self, buffer)
-	--��ȡBUFF�ȼ�
+	--获取BUFF等级
 	local level = nx_query_property(buffer, "Level")
-    --�жϻ�ȡ��ɫ��ǰʹ�ü��ܵ���Ϊ
+    --判断获取角色当前使用技能的行为
 	local cur_skill = nx_query_property(self, "CurSkill")
-	--���û��ʹ�ü��ܣ��򷵻�
+	--如果没有使用技能，则返回
 	if not nx_exists(cur_skill) then
 		return 0
 	end
 
-	--ʹ�ü��ܣ�ʹ�ü��ܣ���ʧ����=�������ĵ�MP*1
+	--使用技能，使用技能，损失生命=技能消耗的MP*1
 	local consume_mp = nx_query_property(cur_skill, "AConsumeMP")
 	local percent_mp = nx_query_property(cur_skill, "PConsumeMP")
 
@@ -56,6 +56,6 @@ function buffer_timer(self, buffer)
 	return 1
 end
 
---״̬�����
+--状态被打断
 function buffer_break(self, buffer)
 end

@@ -1,4 +1,4 @@
---²»Í¬ÃÅÅÉ·ÖÅäµÄÊôĞÔµã
+--ä¸åŒé—¨æ´¾åˆ†é…çš„å±æ€§ç‚¹
 school_baseprop_lst = {
 	["school_shaolin"] = {
 			["Dex"] = 2,
@@ -35,7 +35,7 @@ school_baseprop_lst = {
 		},
 }
 
--- ÎªÈËÎï·ÖÅä»ù´¡ÊôĞÔ
+-- ä¸ºäººç‰©åˆ†é…åŸºç¡€å±æ€§
 function alloc_baseprop_point(self, newlevel, oldlevel)
 	for level = oldlevel + 1, newlevel do
 		if level <= 10 then
@@ -45,10 +45,10 @@ function alloc_baseprop_point(self, newlevel, oldlevel)
 			nx_inc_property(self, "Spi", 1)
 			nx_inc_property(self, "Sta", 1)
 		else
-			--¸ù¾İÃÅÅÉµÄ²»Í¬·ÖÅä²»Í¬µÄÊôĞÔµã
+			--æ ¹æ®é—¨æ´¾çš„ä¸åŒåˆ†é…ä¸åŒçš„å±æ€§ç‚¹
 			local school = nx_query_property(self, "School")
 			if string.len(school) == 0 or school_baseprop_lst[school] == nil then
-				--ÎŞÃÅÅÉ,¼Ó3µãÁ¦Á¿
+				--æ— é—¨æ´¾,åŠ 3ç‚¹åŠ›é‡
 				nx_inc_property(self, "Str", 3)
 			else
 				for prop, value in pairs(school_baseprop_lst[school]) do

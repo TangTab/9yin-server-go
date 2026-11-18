@@ -1,4 +1,4 @@
---×°±¸µÄÑÕÉ«¼¶±ð
+--è£…å¤‡çš„é¢œè‰²çº§åˆ«
 function compute_hole(item)
     local colorlevel = nx_query_property(item, "ColorLevel")
     
@@ -6,14 +6,14 @@ function compute_hole(item)
         return
     end
     
-    local probabilty = 0 --Ëæ»ú³öÀ´µÄµ±Ç°¿×
+    local probabilty = 0 --éšæœºå‡ºæ¥çš„å½“å‰å­”
     local curhole = 0
     
-    if colorlevel>=2 then --ÂÌÉ«
+    if colorlevel>=2 then --ç»¿è‰²
         probabilty = math.random(0,100)
 		--nx_msgbox("probabilty:"..nx_string(probabilty))
 		--[[
-        if probabilty <= 1 then  --1%¸ÅÂÊ
+        if probabilty <= 1 then  --1%æ¦‚çŽ‡
             curhole = 2
         elseif probabilty <= 100 then
             curhole = 1

@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--´«ËÍ¹¦ÄÜNPC»ù´¡ÊôÐÔ-->
+<!--ä¼ é€åŠŸèƒ½NPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-    <property name="ConvoyCriteriaID" type="int" public="false" private="false" save="false" desc="×ÓÄ£°åID"/>
-    <property name="Summoner" type="object" public="false" private="false" save="false" desc="ÕÙ»½Õß"/>
+    <property name="ConvoyCriteriaID" type="int" public="false" private="false" save="false" desc="å­æ¨¡æ¿ID"/>
+    <property name="Summoner" type="object" public="false" private="false" save="false" desc="å¬å”¤è€…"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="MasterPlayerRec" cols="1" maxrows="32" save="false" public="false" private="false" desc="»¤ËÍÊÂ¼þ±í">
-			<column type="widestr" desc="Íæ¼ÒÐÕÃû"/>
+		<record name="MasterPlayerRec" cols="1" maxrows="32" save="false" public="false" private="false" desc="æŠ¤é€äº‹ä»¶è¡¨">
+			<column type="widestr" desc="çŽ©å®¶å§“å"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	
 	</includes>

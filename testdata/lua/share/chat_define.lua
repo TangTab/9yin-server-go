@@ -1,43 +1,43 @@
---адлЛюЮпм╤╗рЕ
+--Х│┼Е╓╘Г╠╩Е·▀Е╝ Д╧┴
 
-	--╫Шят
+	--Г╕│Х╗─
 	CHATTYPE_SILENCE = 0
-	--©ийс╥╤н╖адлЛ
+	--Е▐╞Х╖├Х▄┐Е⌡╢Х│┼Е╓╘
 	CHATTYPE_VISUALRANGE = 1
-	--фум╗Ё║╬╟адлЛ
+	--Ф≥╝И─ Е°╨Ф≥╞Х│┼Е╓╘
 	CHATTYPE_SCENE = 2
-	--к╫ад
+	--Г╖│Х│┼
 	CHATTYPE_WHISPER = 3
-	--вИ╤садлЛ
+	--Г╩└И≤÷Х│┼Е╓╘
 	CHATTYPE_TEAM = 4
-	--╨цсяадлЛ
+	--Е╔╫Е▐▀Х│┼Е╓╘
 	CHATTYPE_FRIEND = 5
-	--╧╚╩АадлЛ
+	--Е┘╛Д╪ Х│┼Е╓╘
 	CHATTYPE_GUILD = 6
-	--а╙цкадлЛ
+	--Х│■Г⌡÷Х│┼Е╓╘
 	CHATTYPE_UNION = 7
-	--цееиадлЛ
+	--И≈╗Ф╢╬Х│┼Е╓╘
 	CHATTYPE_SCHOOL = 8
-	--йю╫ГадлЛ
+	--Д╦√Г∙▄Х│┼Е╓╘
 	CHATTYPE_WORLD = 9
-  --аВятадлЛ
+  --Ф╣│Х╗─Х│┼Е╓╘
   CHATTYPE_GOSSIP = 10
-	--п║ю╝╟х
+	--Е╟▐Е√┤Е▐╜
 	CHATTYPE_SMALL_SPEAKER = 12
-	--юКоъй╠м╥╤╔пео╒
+	--Г╕╩Г╨©Ф≈╤Е╓╢И║╤Д©║Ф│╞
 	CHATINFO_OFFLINE = 13
-	--у╫╤╥пео╒
+	--Ф┬≤Ф√≈Д©║Ф│╞
 	CHATINFO_FIGHT = 13
 	
-	--вт╤╞╡╔╥е╬ГгИл╗╢й
+	--Х┤╙Е┼╗Ф▓╜Ф■╬Е┴╖Ф┐┘Е▐╟Х╞█
 	CHATTYPE_MOVIE = 14
 	
-	--bossадлЛпео╒
+	--bossХ│┼Е╓╘Д©║Ф│╞
 	CHATINFO_BOSS = 15
 
-	--к╫ад╩ьот
+	--Г╖│Х│┼Е⌡·Ф≤╬
 	CHATTYPE_WHISPER_ECHO = 103
-	--╤ткЫсп╨цсяадлЛ╩ьот
+	--Е╞╧Ф┴─Ф°┴Е╔╫Е▐▀Х│┼Е╓╘Е⌡·Ф≤╬
 	CHATTYPE_FRIEND_ECHO = 105
 
 	CHATTYPE_MAX = 256

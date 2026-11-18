@@ -1,50 +1,50 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!-- Ã¿ÈÕÍÆ¼ö±í¸ñ¶¨Òå -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- æ¯æ—¥æŽ¨èè¡¨æ ¼å®šä¹‰ -->
 <object>
 	<properties>
-		<property name="EveRecActive" type="int" public="false" private="true" save="true" desc="µ±Ç°»îÔ¾¶È"/>
-		<property name="EveRecLevel"  type="int" public="false" private="true" save="true" desc="Ã¿ÈÕÍÆ¼öÊ¹ÓÃµÈ¼¶"/>
-		<property name="EvePVECount" type="int" public="false" private="true" save="true" desc="Íê³ÉµÄPVE´ÎÊý"/>
-		<property name="EvePVPCount" type="int" public="false" private="true" save="true" desc="Íê³ÉµÄPVP´ÎÊý"/>
-		<property name="EveEventCount" type="int" public="false" private="true" save="true" desc="´¥·¢µÄÊÂ¼þ´ÎÊý"/>
-		<property name="EveBattleCount" type="int" public="false" private="true" save="true" desc="Íê³ÉµÄÕ½³¡´ÎÊý"/>
-		<property name="EveAthleticsCount" type="int" public="false" private="true" save="true" desc="Íê³ÉµÄ¾º¼¼³¡´ÎÊý"/>
-		<property name="EveSceneCount" type="int" public="false" private="true" save="true" desc="Íê³ÉµÄ¸±±¾´ÎÊý"/>
-		<property name="OfflineTime" type="string" public="false" private="false" save="true" desc="ÏÂÏßÊ±¼ä"/>
-		<property name="OnlineTime" type="string" public="false" private="true" save="true" desc="ÉÏÏßÊ±¼ä"/>
+		<property name="EveRecActive" type="int" public="false" private="true" save="true" desc="å½“å‰æ´»è·ƒåº¦"/>
+		<property name="EveRecLevel"  type="int" public="false" private="true" save="true" desc="æ¯æ—¥æŽ¨èä½¿ç”¨ç­‰çº§"/>
+		<property name="EvePVECount" type="int" public="false" private="true" save="true" desc="å®Œæˆçš„PVEæ¬¡æ•°"/>
+		<property name="EvePVPCount" type="int" public="false" private="true" save="true" desc="å®Œæˆçš„PVPæ¬¡æ•°"/>
+		<property name="EveEventCount" type="int" public="false" private="true" save="true" desc="è§¦å‘çš„äº‹ä»¶æ¬¡æ•°"/>
+		<property name="EveBattleCount" type="int" public="false" private="true" save="true" desc="å®Œæˆçš„æˆ˜åœºæ¬¡æ•°"/>
+		<property name="EveAthleticsCount" type="int" public="false" private="true" save="true" desc="å®Œæˆçš„ç«žæŠ€åœºæ¬¡æ•°"/>
+		<property name="EveSceneCount" type="int" public="false" private="true" save="true" desc="å®Œæˆçš„å‰¯æœ¬æ¬¡æ•°"/>
+		<property name="OfflineTime" type="string" public="false" private="false" save="true" desc="ä¸‹çº¿æ—¶é—´"/>
+		<property name="OnlineTime" type="string" public="false" private="true" save="true" desc="ä¸Šçº¿æ—¶é—´"/>
 	</properties>
 
 	<records>
-		<record name="everydayrecommend_rec" cols="3" maxrows="200" public="false" private="true" save="true" desc="Ã¿ÈÕÍÆ¼ö±í">
-			<column type="string" desc="ÈÎÎñID"/>
-			<column type="byte" desc="ÈÎÎñÀàÐÍ"/>
-			<column type="byte" desc="ÈÎÎñ×´Ì¬"/>
+		<record name="everydayrecommend_rec" cols="3" maxrows="200" public="false" private="true" save="true" desc="æ¯æ—¥æŽ¨èè¡¨">
+			<column type="string" desc="ä»»åŠ¡ID"/>
+			<column type="byte" desc="ä»»åŠ¡ç±»åž‹"/>
+			<column type="byte" desc="ä»»åŠ¡çŠ¶æ€"/>
 		</record>
-		<record name="boxstate_rec" cols="3" maxrows="50" public="false" private="true" save="true" desc="±¦ÏäÁìÈ¡×´Ì¬±í">
-			<column type="string" desc="±¦ÏäID"/>
-			<column type="byte" desc="±¦Ïä×´Ì¬"/> 
-			<column type="byte" desc="±¦ÏäÊÇ·ñ±»¼¤»î"/> 
+		<record name="boxstate_rec" cols="3" maxrows="50" public="false" private="true" save="true" desc="å®ç®±é¢†å–çŠ¶æ€è¡¨">
+			<column type="string" desc="å®ç®±ID"/>
+			<column type="byte" desc="å®ç®±çŠ¶æ€"/> 
+			<column type="byte" desc="å®ç®±æ˜¯å¦è¢«æ¿€æ´»"/> 
 		</record>
-		<record name="pvetask_rec" cols="1" maxrows="500" public="false" private="false" save="true" desc="ÈÎÎñ½±Àø×´Ì¬±í">
-			<column type="dword" desc="pveÈÎÎñID"/>
+		<record name="pvetask_rec" cols="1" maxrows="500" public="false" private="false" save="true" desc="ä»»åŠ¡å¥–åŠ±çŠ¶æ€è¡¨">
+			<column type="dword" desc="pveä»»åŠ¡ID"/>
 		</record>
-		<record name="pvptask_rec" cols="1" maxrows="500" public="false" private="false" save="true" desc="ÈÎÎñ½±Àø×´Ì¬±í">
-			<column type="string" desc="pvpÈÎÎñID"/>
+		<record name="pvptask_rec" cols="1" maxrows="500" public="false" private="false" save="true" desc="ä»»åŠ¡å¥–åŠ±çŠ¶æ€è¡¨">
+			<column type="string" desc="pvpä»»åŠ¡ID"/>
 		</record>
-		<record name="eventtask_rec" cols="1" maxrows="500" public="false" private="false" save="true" desc="ÈÎÎñ½±Àø×´Ì¬±í">
-			<column type="dword" desc="eventÈÎÎñID"/>
+		<record name="eventtask_rec" cols="1" maxrows="500" public="false" private="false" save="true" desc="ä»»åŠ¡å¥–åŠ±çŠ¶æ€è¡¨">
+			<column type="dword" desc="eventä»»åŠ¡ID"/>
 		</record>
-		<record name="clonescene_rec" cols="1" maxrows="50" public="false" private="false" save="true" desc="ÈÎÎñ½±Àø×´Ì¬±í">
-			<column type="dword" desc="¸±±¾±í"/>
+		<record name="clonescene_rec" cols="1" maxrows="50" public="false" private="false" save="true" desc="ä»»åŠ¡å¥–åŠ±çŠ¶æ€è¡¨">
+			<column type="dword" desc="å‰¯æœ¬è¡¨"/>
 		</record>
-		<record name="player_signin_rec" cols="7" maxrows="3" public="false" private="true" save="true" desc="Ç©µ½±í">
-			<column type="byte" desc="ÁìÈ¡ÈÕÆÚ"/>
-			<column type="dword" desc="¾­Ñé½±Àø"/>
-			<column type="dword" desc="Ê±¼äÏÞÖÆ"/>
-			<column type="int64" desc="½ðÇ®½±Àø"/>
-			<column type="string" desc="ÎïÆ·½±Àø³Ø"/>
+		<record name="player_signin_rec" cols="7" maxrows="3" public="false" private="true" save="true" desc="ç­¾åˆ°è¡¨">
+			<column type="byte" desc="é¢†å–æ—¥æœŸ"/>
+			<column type="dword" desc="ç»éªŒå¥–åŠ±"/>
+			<column type="dword" desc="æ—¶é—´é™åˆ¶"/>
+			<column type="int64" desc="é‡‘é’±å¥–åŠ±"/>
+			<column type="string" desc="ç‰©å“å¥–åŠ±æ± "/>
 			<column type="string" desc="bufferid"/>
-			<column type="byte" desc="ÊÇ·ñÒÑ¾­ÁìÈ¡"/>
+			<column type="byte" desc="æ˜¯å¦å·²ç»é¢†å–"/>
 		</record>
 	</records>
 </object>

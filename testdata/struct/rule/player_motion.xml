@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÒÆ¶¯Ïà¹ØµÄÊôÐÔ-->
+<!--ç§»åŠ¨ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-    <property name="DriftSpeed"    type="float" public="false" private="false" save="false" desc="Ë®ÃæÒÆ¶¯ËÙ¶È"/>
-		<property name="DriftSpeedAdd" type="float" public="false" private="false" save="false" desc="Ë®ÃæÒÆ¶¯ËÙ¶È¸½¼Ó"/>
-		<property name="DriftJumpSpeed" 	 type="float" public="false" private="false" save="false" desc="Ë®ÃæÌøÔ¾ËÙ¶È"/>
-		<property name="DriftJumpSpeedAdd" type="float" public="false" private="false" save="false" desc="Ë®ÃæÌøÔ¾ËÙ¶È¸½¼Ó"/>
-		<property name="Gravity"           type="float" public="false" private="true" save="false" desc="ÖØÁ¦¼ÓËÙ¶È"/>
-		<property name="GravityAdd"        type="float" public="false" private="false" save="false" desc="ÖØÁ¦¼ÓËÙ¶È¸½¼Ó"/>
+    <property name="DriftSpeed"    type="float" public="false" private="false" save="false" desc="æ°´é¢ç§»åŠ¨é€Ÿåº¦"/>
+		<property name="DriftSpeedAdd" type="float" public="false" private="false" save="false" desc="æ°´é¢ç§»åŠ¨é€Ÿåº¦é™„åŠ "/>
+		<property name="DriftJumpSpeed" 	 type="float" public="false" private="false" save="false" desc="æ°´é¢è·³è·ƒé€Ÿåº¦"/>
+		<property name="DriftJumpSpeedAdd" type="float" public="false" private="false" save="false" desc="æ°´é¢è·³è·ƒé€Ÿåº¦é™„åŠ "/>
+		<property name="Gravity"           type="float" public="false" private="true" save="false" desc="é‡åŠ›åŠ é€Ÿåº¦"/>
+		<property name="GravityAdd"        type="float" public="false" private="false" save="false" desc="é‡åŠ›åŠ é€Ÿåº¦é™„åŠ "/>
 	</properties>
   <includes>
-    <path name="struct\rule\Common\motion.xml" desc="ÒÆ¶¯"/>
+    <path name="struct\rule\Common\motion.xml" desc="ç§»åŠ¨"/>
   </includes>
 </object>

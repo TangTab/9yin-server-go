@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÊÇ·ñÕýÔÚ½»Ò×,(Íæ¼Ò×¨ÓÃ)-->
+<!--æ˜¯å¦æ­£åœ¨äº¤æ˜“,(çŽ©å®¶ä¸“ç”¨)-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="IsExchange" type="byte" public="false" private="false" save="false" desc="µ±Ç°Ñ¡ÔñµÄ¶ÔÏó"/>
-		<property name="ExchangeStateExit" type="byte" public="false" private="false" save="false" desc="µ±Ç°¶ÔÏó½»Ò×ÍË³ö×´Ì¬"/>
+		<property name="IsExchange" type="byte" public="false" private="false" save="false" desc="å½“å‰é€‰æ‹©çš„å¯¹è±¡"/>
+		<property name="ExchangeStateExit" type="byte" public="false" private="false" save="false" desc="å½“å‰å¯¹è±¡äº¤æ˜“é€€å‡ºçŠ¶æ€"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--»Ø¸´Ïà¹ØÊôÐÔ-->
+<!--å›žå¤ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--»Ø¸´Ïà¹ØÊý¾Ý-->
-		<property name="HealPoint" type="int" public="false" private="true" save="false" desc="ÖÎÁÆÁ¿"/>
+		<!--å›žå¤ç›¸å…³æ•°æ®-->
+		<property name="HealPoint" type="int" public="false" private="true" save="false" desc="æ²»ç–—é‡"/>
 	</properties>
 </object>

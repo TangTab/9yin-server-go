@@ -1,28 +1,28 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Å©×÷ÎïNPC»ù´¡ÊôÐÔ-->
+<!--å†œä½œç‰©NPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="Owner" type="widestr" public="true" private="false" save="true" desc="ÓµÓÐÕß"/>
-		<property name="Life" type="int" public="true" private="false" save="true" desc="ÉúÃüÖµ"/>
-		<property name="TempPhase" type="int" public="true" private="false" save="true" desc="µ±Ç°Ëù´¦½×¶Î"/>
-		<property name="TempPhaseValue" type="int" public="false" private="false" save="true" desc="µ±Ç°Ëù´¦½×¶ÎÉý¼¶ËùÐèÊ±¼ä"/>
-		<property name="IsRipe" type="int" public="false" private="false" save="true" desc="ÊÇ·ñ³ÉÊì"/>
-		<property name="RipeTime" type="int64" public="false" private="false" save="true" desc="³ÉÊìµÄÊ±¼ä"/>
-		<property name="CropTempState" type="int" public="true" private="false" save="true" desc="µ±Ç°×´Ì¬0 ½¡¿µ 0x001³æ 0x010¸É 0x100ÔÓ"/>	
-		<property name="WormyRatio" type="int" public="false" private="false" save="false" desc="³æÔÖ¸ÅÂÊ"/>
-		<property name="DryRatio" type="int" public="false" private="false" save="false" desc="¸Éºµ¸ÅÂÊ"/>
-		<property name="WeedRatio" type="int" public="false" private="false" save="false" desc="ÔÓ²Ý¸ÅÂÊ²¡¸ÅÂÊ"/>
+		<property name="Owner" type="widestr" public="true" private="false" save="true" desc="æ‹¥æœ‰è€…"/>
+		<property name="Life" type="int" public="true" private="false" save="true" desc="ç”Ÿå‘½å€¼"/>
+		<property name="TempPhase" type="int" public="true" private="false" save="true" desc="å½“å‰æ‰€å¤„é˜¶æ®µ"/>
+		<property name="TempPhaseValue" type="int" public="false" private="false" save="true" desc="å½“å‰æ‰€å¤„é˜¶æ®µå‡çº§æ‰€éœ€æ—¶é—´"/>
+		<property name="IsRipe" type="int" public="false" private="false" save="true" desc="æ˜¯å¦æˆç†Ÿ"/>
+		<property name="RipeTime" type="int64" public="false" private="false" save="true" desc="æˆç†Ÿçš„æ—¶é—´"/>
+		<property name="CropTempState" type="int" public="true" private="false" save="true" desc="å½“å‰çŠ¶æ€0 å¥åº· 0x001è™« 0x010å¹² 0x100æ‚"/>	
+		<property name="WormyRatio" type="int" public="false" private="false" save="false" desc="è™«ç¾æ¦‚çŽ‡"/>
+		<property name="DryRatio" type="int" public="false" private="false" save="false" desc="å¹²æ—±æ¦‚çŽ‡"/>
+		<property name="WeedRatio" type="int" public="false" private="false" save="false" desc="æ‚è‰æ¦‚çŽ‡ç—…æ¦‚çŽ‡"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="model_rec" cols="2" maxrows="3" save="false" public="false" private="false" desc="Ä£ÐÍÁÐ±í(ResourceÊôÐÔ)">
-			<column type="int" desc="½×¶ÎËùÐèÊ±¼ä µ¥Î»·ÖÖÓ"/>
-			<column type="string" desc="Resource ½×¶Î¶ÔÓ¦Ä£ÐÍ"/>
+		<record name="model_rec" cols="2" maxrows="3" save="false" public="false" private="false" desc="æ¨¡åž‹åˆ—è¡¨(Resourceå±žæ€§)">
+			<column type="int" desc="é˜¶æ®µæ‰€éœ€æ—¶é—´ å•ä½åˆ†é’Ÿ"/>
+			<column type="string" desc="Resource é˜¶æ®µå¯¹åº”æ¨¡åž‹"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	
 	</includes>

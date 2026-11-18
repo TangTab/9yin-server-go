@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÂÃ¹ÝÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ—…é¦†ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="HotelPosx" type="float" public="false" private="false" save="true" desc="ÂÃ¹Ý±£´æµÄx×ø±ê"/>
-		<property name="HotelPosy" type="float" public="false" private="false" save="true" desc="ÂÃ¹Ý±£´æµÄy×ø±ê"/>
-		<property name="HotelPosz" type="float" public="false" private="false" save="true" desc="ÂÃ¹Ý±£´æµÄz×ø±ê"/>
-		<property name="HotelSence" type="int" public="false" private="false" save="true" desc="ÂÃ¹Ý±£´æµÄ³¡¾°±àºÅ"/>
-		<property name="HotelexPerience" type="int64" public="false" private="true" save="true" desc="ÔÚÂÃ¹Ý»ñµÃµÄ¾­ÑéÖµ"/>
-		<property name="HoteleLoginTime" type="int64" public="false" private="false" save="false" desc="½ÇÉ«½øÈëÂÃ¹ÝµÄÊ±¼ä"/>
+		<property name="HotelPosx" type="float" public="false" private="false" save="true" desc="æ—…é¦†ä¿å­˜çš„xåæ ‡"/>
+		<property name="HotelPosy" type="float" public="false" private="false" save="true" desc="æ—…é¦†ä¿å­˜çš„yåæ ‡"/>
+		<property name="HotelPosz" type="float" public="false" private="false" save="true" desc="æ—…é¦†ä¿å­˜çš„zåæ ‡"/>
+		<property name="HotelSence" type="int" public="false" private="false" save="true" desc="æ—…é¦†ä¿å­˜çš„åœºæ™¯ç¼–å·"/>
+		<property name="HotelexPerience" type="int64" public="false" private="true" save="true" desc="åœ¨æ—…é¦†èŽ·å¾—çš„ç»éªŒå€¼"/>
+		<property name="HoteleLoginTime" type="int64" public="false" private="false" save="false" desc="è§’è‰²è¿›å…¥æ—…é¦†çš„æ—¶é—´"/>
 	</properties>
 	<records>
 	</records>

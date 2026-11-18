@@ -4,11 +4,11 @@ require("share\\pk_define")
 require("share\\logicstate_define")
 require("share\\item_static_data_define")
 
---Ê¹ÓÃÎïÆ·µÄÍ¨ÓÃ½Å±¾
---·µ»Ø0Ê¹ÓÃ³É¹¦
---·µ»Ø1Ê¹ÓÃÊ§°Ü
+--ä½¿ç”¨ç‰©å“çš„é€šç”¨è„šæœ¬
+--è¿”å›0ä½¿ç”¨æˆåŠŸ
+--è¿”å›1ä½¿ç”¨å¤±è´¥
 function on_use(item, target)
-	-- ÓĞĞ§ĞÔ¼ì²é£º¸ÃÎïÆ·ÊÇ·ñ´æÔÚ
+	-- æœ‰æ•ˆæ€§æ£€æŸ¥ï¼šè¯¥ç‰©å“æ˜¯å¦å­˜åœ¨
 	if not nx_exists(item) then
 		return 0
 	end
@@ -16,14 +16,14 @@ function on_use(item, target)
 	return 0
 end
 
---ÊÇ·ñ¿ÉÒÔÊ¹ÓÃ
+--æ˜¯å¦å¯ä»¥ä½¿ç”¨
 function can_use(item, target)	
-	-- ÓĞĞ§ĞÔ¼ì²é£º¸ÃÎïÆ·ÊÇ·ñ´æÔÚ
+	-- æœ‰æ•ˆæ€§æ£€æŸ¥ï¼šè¯¥ç‰©å“æ˜¯å¦å­˜åœ¨
 	if not nx_exists(item) then
 		return 0
 	end
 	
-	-- Ö´ĞĞC++º¯ÊıÅĞ¶ÏÂ¯Ê¯ÊÇ·ñÄÜÊ¹ÓÃ ÄÜ£º1£¬²»ÄÜ£º0
+	-- æ‰§è¡ŒC++å‡½æ•°åˆ¤æ–­ç‚‰çŸ³æ˜¯å¦èƒ½ä½¿ç”¨ èƒ½ï¼š1ï¼Œä¸èƒ½ï¼š0
 	local result = nx_canuse(item, target)
 	
 	return result

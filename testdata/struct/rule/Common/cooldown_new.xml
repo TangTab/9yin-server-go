@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÀäÈ´Ïà¹ØµÄÊôÐÔ-->
+<!--å†·å´ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--<property name="CoolDownCategory" type="Int" public="false" private="true" save="false" desc="ÀäÈ´ÀàÐÍ±àºÅ"/>-->
-    <property name="CoolDownTime" type="int" public="false" private="false" save="false" desc="ÀäÈ´Ê±¼ä,µ¥Î»Îªms"/>
-    <property name="CoolDownTimeAdd" type="string" public="false" private="false" save="false" desc="ÀäÈ´Ê±¼ä,µ¥Î»Îªms"/>
-    <!--<property name="CoolDownTeam" type="Int" public="false" private="false" save="false" desc="ÀäÈ´Ó°Ïì·Ö×é±àºÅ"/>-->
-		<property name="AddCoolDownTime" type="int" public="false" private="false" save="false" desc="¸½¼ÓÀäÈ´Ê±¼ä,µ¥Î»Îªms"/>
+		<!--<property name="CoolDownCategory" type="Int" public="false" private="true" save="false" desc="å†·å´ç±»åž‹ç¼–å·"/>-->
+    <property name="CoolDownTime" type="int" public="false" private="false" save="false" desc="å†·å´æ—¶é—´,å•ä½ä¸ºms"/>
+    <property name="CoolDownTimeAdd" type="string" public="false" private="false" save="false" desc="å†·å´æ—¶é—´,å•ä½ä¸ºms"/>
+    <!--<property name="CoolDownTeam" type="Int" public="false" private="false" save="false" desc="å†·å´å½±å“åˆ†ç»„ç¼–å·"/>-->
+		<property name="AddCoolDownTime" type="int" public="false" private="false" save="false" desc="é™„åŠ å†·å´æ—¶é—´,å•ä½ä¸ºms"/>
 	</properties>
 </object>

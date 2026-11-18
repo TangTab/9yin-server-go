@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--NPC±äÉíÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--NPCå˜èº«ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="MainNpcChange" type="string" public="true" private="false" save="false" desc="µ±Ç°NPC±äÉí×ÊÔ´Â·¾¶"/>
-		<property name="bNpcChange" type="int" public="true" private="false" save="false" desc="µ±Ç°NPCÊÇ·ñ±äÉí"/>
-		<property name="NpcChangeType" type="int" public="true" private="false" save="false" desc="NPC±äÉíÀàÐÍ:0:Ä¬ÈÏ;1:¿ËÂ¡"/>
+		<property name="MainNpcChange" type="string" public="true" private="false" save="false" desc="å½“å‰NPCå˜èº«èµ„æºè·¯å¾„"/>
+		<property name="bNpcChange" type="int" public="true" private="false" save="false" desc="å½“å‰NPCæ˜¯å¦å˜èº«"/>
+		<property name="NpcChangeType" type="int" public="true" private="false" save="false" desc="NPCå˜èº«ç±»åž‹:0:é»˜è®¤;1:å…‹éš†"/>
 	</properties>
 </object>

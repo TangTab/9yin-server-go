@@ -2,41 +2,41 @@
 -- FILENAME	: Rule\\faculty_convert.lua
 -- COPYRIGHT: Snail Game
 -- AUTHOR	: Mrkk
--- DATE		: 2010Äê3ÔÂ1ÈÕ
+-- DATE		: 2010å¹´3æœˆ1æ—¥
 -------------------------------------------------------------------------------
--- DESC		: ¹ØÓÚ Ê¹ÓÃĞŞ×ª»¯ÎªÎäÑ§¾­Ñé µÄ´¦ÀíÂß¼­
+-- DESC		: å…³äº ä½¿ç”¨ä¿®è½¬åŒ–ä¸ºæ­¦å­¦ç»éªŒ çš„å¤„ç†é€»è¾‘
 ---****************************************************************************
 
 -------------------------------------------------------------------------------
 -- name	:  convert ( self, convert_type, name, value )
--- desc	:  ¿Û³ıĞŞÎªÖµ£¬Ôö¼ÓÏàÓ¦µÄÎäÑ§¾­ÑéÖµ
--- ²ÎÊı	:  self£¨Íæ¼Ò£©£¬ convert_type£¨ÏûºÄÀàĞÍ int£©£¬
---		   name£¨ÎäÑ§¾ßÌåÃû³Æ£©£¬ value£¨ÏûºÄĞŞÎªÖµ£©
+-- desc	:  æ‰£é™¤ä¿®ä¸ºå€¼ï¼Œå¢åŠ ç›¸åº”çš„æ­¦å­¦ç»éªŒå€¼
+-- å‚æ•°	:  selfï¼ˆç©å®¶ï¼‰ï¼Œ convert_typeï¼ˆæ¶ˆè€—ç±»å‹ intï¼‰ï¼Œ
+--		   nameï¼ˆæ­¦å­¦å…·ä½“åç§°ï¼‰ï¼Œ valueï¼ˆæ¶ˆè€—ä¿®ä¸ºå€¼ï¼‰
 -------------------------------------------------------------------------------
-local STARTCONVERT_RESULT_SUCCEED = 1                -- ³É¹¦
-local STARTCONVERT_RESULT_ERROR_NG_MUST_LIMIT = 10   -- ÄÚ¹¦±ØÒªÏŞÖÆ
-local STARTCONVERT_RESULT_ERROR_SK_MUST_LIMIT = 11   -- ¼¼ÄÜ±ØÒªÏŞÖÆ
-local STARTCONVERT_RESULT_ERROR_QG_MUST_LIMIT = 12   -- Çá¹¦±ØÒªÏŞÖÆ
+local STARTCONVERT_RESULT_SUCCEED = 1                -- æˆåŠŸ
+local STARTCONVERT_RESULT_ERROR_NG_MUST_LIMIT = 10   -- å†…åŠŸå¿…è¦é™åˆ¶
+local STARTCONVERT_RESULT_ERROR_SK_MUST_LIMIT = 11   -- æŠ€èƒ½å¿…è¦é™åˆ¶
+local STARTCONVERT_RESULT_ERROR_QG_MUST_LIMIT = 12   -- è½»åŠŸå¿…è¦é™åˆ¶
 
 
--- ĞŞÎªÁ÷³Ì½áÊøÊ±µ÷ÓÃ
+-- ä¿®ä¸ºæµç¨‹ç»“æŸæ—¶è°ƒç”¨
 function convert_wuxue_exp(self, convert_type, name)
-	-- ¼ì²âÌõ¼ş
+	-- æ£€æµ‹æ¡ä»¶
 	local result = nx_can_convert(self, convert_type, name)
 
 	if tonumber(result) == STARTCONVERT_RESULT_SUCCEED then
 
-		--»ñµÃĞèÒª¿Û³ıµÄĞŞÎªµãÊı,±¾´Î×ª»¯µÄ¾­ÑéÖµ
+		--è·å¾—éœ€è¦æ‰£é™¤çš„ä¿®ä¸ºç‚¹æ•°,æœ¬æ¬¡è½¬åŒ–çš„ç»éªŒå€¼
 		local value_table = nx_get_convert_value( self, convert_type, name )
-		local decValue = nx_int(-tonumber(value_table[1])) -- ÏûºÄµÄĞŞÎªÖµ
-		local addValue = nx_int(value_table[2])            -- Ôö¼ÓµÄ¾­ÑéÖµ
+		local decValue = nx_int(-tonumber(value_table[1])) -- æ¶ˆè€—çš„ä¿®ä¸ºå€¼
+		local addValue = nx_int(value_table[2])            -- å¢åŠ çš„ç»éªŒå€¼
 		
-		--×ª»¯ÎªÄÚ¹¦¾­Ñé
+		--è½¬åŒ–ä¸ºå†…åŠŸç»éªŒ
 		if convert_type == 1 then
 			nx_add_neigong_exp(self, name, addValue)
 			nx_inc_faculty(self, decValue, "to add neigong exp: " .. name)
 		end
-		--×ª»¯ÎªÕĞÊ½¾­Ñé
+		--è½¬åŒ–ä¸ºæ‹›å¼ç»éªŒ
 		if convert_type == 2 then
 
 			local skill = nx_find_skill(self, name)
@@ -47,12 +47,12 @@ function convert_wuxue_exp(self, convert_type, name)
 			local cur_exp = nx_int64(nx_query_property(skill, "Exp"))
 			local upgrade_exp = nx_int64(nx_query_property(skill, "UpgradeExp"))
 
-			-- ÉÏ´ÎÌõ¼ş¼¼ÄÜÉı¼¶Ìõ¼ş²»×ã
+			-- ä¸Šæ¬¡æ¡ä»¶æŠ€èƒ½å‡çº§æ¡ä»¶ä¸è¶³
 			if nx_int64_compare_int64(cur_exp, upgrade_exp) then
 				nx_add_skill_exp(self, name, 1)
 			else
-				-- Èç¹ûÔÙ¼ÓÒ»´Î¾­Ñé¾ÍÉı¼¶ÁË ÔòÅĞ¶ÏÊÇ·ñ³¬¹ı×î¸ßÉı¼¶¾­Ñé
-				-- Èç¹û³¬¹ıÁËÉı¼¶¾­ÑéÔò ¼ÓÓëÉı¼¶¾­ÑéÏà²îµÄ¾­ÑéÖµ °´°Ù·Ö±È¿Û³ıĞŞÎªÖµ
+				-- å¦‚æœå†åŠ ä¸€æ¬¡ç»éªŒå°±å‡çº§äº† åˆ™åˆ¤æ–­æ˜¯å¦è¶…è¿‡æœ€é«˜å‡çº§ç»éªŒ
+				-- å¦‚æœè¶…è¿‡äº†å‡çº§ç»éªŒåˆ™ åŠ ä¸å‡çº§ç»éªŒç›¸å·®çš„ç»éªŒå€¼ æŒ‰ç™¾åˆ†æ¯”æ‰£é™¤ä¿®ä¸ºå€¼
 				if nx_int64_large_int64(nx_int64_inc_int64(cur_exp, nx_int64(addValue)), upgrade_exp) then
 					local real_add_value = nx_int(nx_int64_dec_int64(upgrade_exp, cur_exp))
 
@@ -79,43 +79,43 @@ function convert_wuxue_exp(self, convert_type, name)
 			end
 
 		end
-		--×ª»¯ÎªÇá¹¦¼¼ÄÜ¾­Ñé
+		--è½¬åŒ–ä¸ºè½»åŠŸæŠ€èƒ½ç»éªŒ
 		if convert_type == 3 then
-			--Çá¹¦¼¼ÄÜ¶ÔÏó
+			--è½»åŠŸæŠ€èƒ½å¯¹è±¡
 			local qgskill = nx_find_qgskill(self, name)
 			if not qgskill or not nx_exists(qgskill) then
 				return
 			end
 		
-			--µ±Ç°¾­Ñé,Éı¼¶¾­Ñé
+			--å½“å‰ç»éªŒ,å‡çº§ç»éªŒ
 			local cur_exp = nx_int(nx_query_property(qgskill, "Exp"))
 			local upgrade_exp = nx_int(nx_query_property(qgskill, "UpgradeExp"))
 			
-			--ºÏ·¨ĞÔ
+			--åˆæ³•æ€§
 			if nx_int(cur_exp) > nx_int(upgrade_exp) or nx_int(upgrade_exp) < 1 then
 				return
 			end
 
-			--µ±Ç°¾­ÑéµÈÓÚÉı¼¶¾­Ñé,Ô­ÒòÊÇÉÏ´ÎÉı¼¶Î´Âú×ãÌõ¼ş,Ö±½Ó¼Ó1µã¾­Ñé³¢ÊÔË¢ĞÂ
+			--å½“å‰ç»éªŒç­‰äºå‡çº§ç»éªŒ,åŸå› æ˜¯ä¸Šæ¬¡å‡çº§æœªæ»¡è¶³æ¡ä»¶,ç›´æ¥åŠ 1ç‚¹ç»éªŒå°è¯•åˆ·æ–°
 			if nx_int(cur_exp) == nx_int(upgrade_exp) then
 				nx_add_qgskill_exp(self, name, 1)
 				return
 			end
 
-			--µ±Ç°¾­Ñé¼ÓÉÏ±¾´ÎÔö¼ÓµÄ¾­Ñéºó,³¬¹ıÉı¼¶ÒªÇóµÄ¾­Ñé,Ôò¼ÆËãÊµ¼ÊÓ¦¸ÃÔö¼ÓµÄ¾­ÑéºÍ¿Û³ıµÄĞŞÎª
+			--å½“å‰ç»éªŒåŠ ä¸Šæœ¬æ¬¡å¢åŠ çš„ç»éªŒå,è¶…è¿‡å‡çº§è¦æ±‚çš„ç»éªŒ,åˆ™è®¡ç®—å®é™…åº”è¯¥å¢åŠ çš„ç»éªŒå’Œæ‰£é™¤çš„ä¿®ä¸º
 			if nx_int(cur_exp) + nx_int(addValue) > nx_int(upgrade_exp) then
-				--µ½Éı¼¶Êµ¼ÊĞèÒªµÄ¾­Ñé
+				--åˆ°å‡çº§å®é™…éœ€è¦çš„ç»éªŒ
 				local real_add_value = upgrade_exp - cur_exp
 
-				--ĞèÒª¼õÉÙµÄÊµ¼ÊĞŞÎª
+				--éœ€è¦å‡å°‘çš„å®é™…ä¿®ä¸º
 				local real_dec_value = nx_int(real_add_value)*-1
 				
-				--Êµ¼ÊÊôĞÔ¸üĞÂ
+				--å®é™…å±æ€§æ›´æ–°
 				nx_add_qinggong_exp( self, name, real_add_value )
 				nx_inc_faculty( self, real_dec_value, "to add qinggong exp: " .. name)
 
 			else
-				--µ±Ç°¾­Ñé¼ÓÉÏ±¾´ÎÔö¼ÓµÄ¾­Ñéºó,²»×ã»òµÈÓÚÉı¼¶ÒªÇóµÄ¾­Ñé,Ö±½ÓÔö¼Ó¾­Ñé
+				--å½“å‰ç»éªŒåŠ ä¸Šæœ¬æ¬¡å¢åŠ çš„ç»éªŒå,ä¸è¶³æˆ–ç­‰äºå‡çº§è¦æ±‚çš„ç»éªŒ,ç›´æ¥å¢åŠ ç»éªŒ
 				nx_add_qgskill_exp( self, name, addValue )
 				nx_inc_faculty( self, decValue, "to add qinggong exp: " .. name)
 			end
@@ -129,15 +129,15 @@ end
 
 
 
--- ¿ªÊ¼ĞŞÎª»Øµ÷
+-- å¼€å§‹ä¿®ä¸ºå›è°ƒ
 function start_convert(self, convert_type, name)
-	-- ¿ªÊ¼Á÷³ÌÊ±ÏÈ½øÈë ÔË¹¦×´Ì¬
-	-- È»ºó²¥·ÅÈÚÈë¶¯×÷
-	-- µ±ÈÚÈë¶¯×÷½áÊøºó Íæ¼Ò»á×Ô¶¯·µ»ØÔË¹¦×´Ì¬
+	-- å¼€å§‹æµç¨‹æ—¶å…ˆè¿›å…¥ è¿åŠŸçŠ¶æ€
+	-- ç„¶åæ’­æ”¾èå…¥åŠ¨ä½œ
+	-- å½“èå…¥åŠ¨ä½œç»“æŸå ç©å®¶ä¼šè‡ªåŠ¨è¿”å›è¿åŠŸçŠ¶æ€
 	--nx_set_property(self, "State", "ng_yg_cs")
 end
 
--- ´ò¶ÏĞŞÎª»Øµ÷
+-- æ‰“æ–­ä¿®ä¸ºå›è°ƒ
 function break_convert(self, convert_type, name)
 
 end

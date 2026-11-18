@@ -1,33 +1,33 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="HorseRaceCount" type="string" public="true" private="false" save="false" desc="µ±Ç°²Î¼ÓÈüÂí»î¶¯µÄÈËÊý"/>
+		<property name="HorseRaceCount" type="string" public="true" private="false" save="false" desc="å½“å‰å‚åŠ èµ›é©¬æ´»åŠ¨çš„äººæ•°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-    <record name="PvpActivityNpc" cols="2" maxrows="1024" save="false" public="false" private="false" desc="¼ÇÂ¼PVP»î¶¯NPC´´½¨">
-      <column type="object" desc="NPCµÄPERSISTID"/>
-      <column type="string" desc="NPCµÄ»î¶¯ID"/>
+    <record name="PvpActivityNpc" cols="2" maxrows="1024" save="false" public="false" private="false" desc="è®°å½•PVPæ´»åŠ¨NPCåˆ›å»º">
+      <column type="object" desc="NPCçš„PERSISTID"/>
+      <column type="string" desc="NPCçš„æ´»åŠ¨ID"/>
     </record>
-    <record name="PvpSceneActivityState" cols="2" maxrows="64" save="false" public="false" private="false" desc="PVP³¡¾°»î¶¯×´Ì¬±í">
-      <column type="string" desc="»î¶¯ID"/>
-      <column type="dword" desc="»î¶¯×´Ì¬"/>
+    <record name="PvpSceneActivityState" cols="2" maxrows="64" save="false" public="false" private="false" desc="PVPåœºæ™¯æ´»åŠ¨çŠ¶æ€è¡¨">
+      <column type="string" desc="æ´»åŠ¨ID"/>
+      <column type="dword" desc="æ´»åŠ¨çŠ¶æ€"/>
     </record>
-	 <record name="PVPHorseRacePathNpcRec" cols="1" maxrows="512" save="false" public="false" private="false" desc="PVPÈüÂí»î¶¯Â·¾¶npcË¢ÐÂ±í">
-       <column type="object" desc="NPCµÄPERSISTID"/>
+	 <record name="PVPHorseRacePathNpcRec" cols="1" maxrows="512" save="false" public="false" private="false" desc="PVPèµ›é©¬æ´»åŠ¨è·¯å¾„npcåˆ·æ–°è¡¨">
+       <column type="object" desc="NPCçš„PERSISTID"/>
     </record>
-    <record name="PVPHorseRaceCreateNpcRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="PVPÈüÂí»î¶¯ÐèÒª´´½¨µÀ¾ßnpcË¢ÐÂ±í">
-      <column type="string" desc="NPCµÄconfigid"/>
-      <column type="float" desc="x×ø±ê"/>
-      <column type="float" desc="y×ø±ê"/>
-      <column type="float" desc="z×ø±ê"/>
-      <column type="int64" desc="Ë¢ÐÂ´´½¨npcÊ±¼ä"/>
+    <record name="PVPHorseRaceCreateNpcRec" cols="5" maxrows="1024" save="false" public="false" private="false" desc="PVPèµ›é©¬æ´»åŠ¨éœ€è¦åˆ›å»ºé“å…·npcåˆ·æ–°è¡¨">
+      <column type="string" desc="NPCçš„configid"/>
+      <column type="float" desc="xåæ ‡"/>
+      <column type="float" desc="yåæ ‡"/>
+      <column type="float" desc="zåæ ‡"/>
+      <column type="int64" desc="åˆ·æ–°åˆ›å»ºnpcæ—¶é—´"/>
     </record>
   </records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

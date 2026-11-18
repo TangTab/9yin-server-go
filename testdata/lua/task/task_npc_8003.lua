@@ -1,16 +1,16 @@
--- È«¾ÖÊı¾İ
+-- å…¨å±€æ•°æ®
 local task_id = 8003
 local text_id = "select_task_text"
 
 
--- npcÔØÈë
+-- npcè½½å…¥
 function on_load(self, sender)
 end
 
--- ´¥·¢
+-- è§¦å‘
 function on_spring(npc, player)
 
-	-- ÅĞ¶ÏÍæ¼ÒÊÇ·ñÓĞ¸ÃÈÎÎñ
+	-- åˆ¤æ–­ç©å®¶æ˜¯å¦æœ‰è¯¥ä»»åŠ¡
 	if not nx_find_record(player, "StateTaskRec") then
 		return 0
 	end
@@ -20,13 +20,13 @@ function on_spring(npc, player)
 		return 0
 	end
 	
-	-- ÅĞ¶ÏÊÇ·ñÒÑ¾­´¥·¢²¢Ñ¡Ôñ¹ı, Îª0´ú±íÃ»Ñ¡Ôñ¹ı£¬ 1Õı£¬ 2Ğ°£¬ 3ÖĞÁ¢
+	-- åˆ¤æ–­æ˜¯å¦å·²ç»è§¦å‘å¹¶é€‰æ‹©è¿‡, ä¸º0ä»£è¡¨æ²¡é€‰æ‹©è¿‡ï¼Œ 1æ­£ï¼Œ 2é‚ªï¼Œ 3ä¸­ç«‹
 	local flag = nx_query_record_value(player, "StateTaskRec", nx_int(row), 1)
 	if nx_int(flag) > 0 then
 		return 0
 	end
 	
-	-- µ¯³öÑ¡Ôñ¶Ô»°¿ò: ·şÎñÆ÷·¢Íù¿Í»§¶ËµÄÏûÏ¢£¬ÏûÏ¢¸ñÊ½ msgid, taskid, textid
+	-- å¼¹å‡ºé€‰æ‹©å¯¹è¯æ¡†: æœåŠ¡å™¨å‘å¾€å®¢æˆ·ç«¯çš„æ¶ˆæ¯ï¼Œæ¶ˆæ¯æ ¼å¼ msgid, taskid, textid
 	nx_custom(player, "show_task_select_dialog", task_id, text_id)
 
 end

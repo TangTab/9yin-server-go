@@ -1,67 +1,67 @@
 require("define")
---Í½ÊÖÆÕÍ¨¹¥»÷£¨È­½Å¹¦·ò£©
+--å¾’æ‰‹æ™®é€šæ”»å‡»ï¼ˆæ‹³è„šåŠŸå¤«ï¼‰
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆÄÜ¼ÆËãÉËº¦, ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡èƒ½è®¡ç®—ä¼¤å®³, è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
-	--µ±Ç°µÚ¼¸»÷
+	--å½“å‰ç¬¬å‡ å‡»
 	local hits = nx_query_property(self, "Hits")
 
-	--¼¼ÄÜµÄ¼¶±ğ
+	--æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
 	local damage = 0
 
-	--½ÇÉ«Á¦Á¿
+	--è§’è‰²åŠ›é‡
 	local str = nx_query_property(self, "Str") + nx_query_property(self, "StrAdd")
 
-	--½ÇÉ«Ãô½İ	
+	--è§’è‰²æ•æ·	
 	local dex = nx_query_property(self, "Dex") + nx_query_property(self, "DexAdd")
 
-	--Íâ¹¦Ç¿¶È
+	--å¤–åŠŸå¼ºåº¦
 	local meleePowerProb = nx_number(nx_query_property(self, "MeleePowerProb")) + nx_number(nx_query_property(self, "MeleePowerProbAdd"))
 	
-	--ÉËº¦(Íâ¹¦)= (1+Íâ¹¦Ç¿¶È/100)*(Á¦Á¿+Ãô½İ)*Ëæ»ú(0.5µ½0.75)
+	--ä¼¤å®³(å¤–åŠŸ)= (1+å¤–åŠŸå¼ºåº¦/100)*(åŠ›é‡+æ•æ·)*éšæœº(0.5åˆ°0.75)
 	damage = (1 + meleePowerProb * 0.01) * (str + dex) * math.random(50, 75) / 200
 	
 	if hits == 1 then
-		--µÚÒ»»÷
+		--ç¬¬ä¸€å‡»
 		damage = damage * 0.4 + 1
 	elseif hits == 2 then
-		--µÚ¶ş»÷
+		--ç¬¬äºŒå‡»
 		damage = damage * 0.6 + 2
 	else
-		--ÆäËûÇé¿ö
+		--å…¶ä»–æƒ…å†µ
 		damage = damage * 0.5
 	end
 	
-	--Êä³öÍâ¹¦ÉËº¦
+	--è¾“å‡ºå¤–åŠŸä¼¤å®³
 	return damage, 0, 0, 0, 0
 end

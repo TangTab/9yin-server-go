@@ -1,72 +1,72 @@
---ÎïÆ·ÀàÐÍ¶¨Òå
+--ç‰©å“ç±»åž‹å®šä¹‰
 --==========================================
---1-99µÀ¾ßÀà
+--1-99é“å…·ç±»
 ITEMTYPE_TOOLITEM_MIN = 1
 ITEMTYPE_TOOLITEM_MAX = 99
 --==========================================
 
---ÒÔÏÂÎªµÀ¾ßµÄ¾ßÌå·ÖÀà
-ITEMTYPE_ADDHP = 1	--ºìÒ©
-ITEMTYPE_ADDMP = 2	--À¶Ò©
+--ä»¥ä¸‹ä¸ºé“å…·çš„å…·ä½“åˆ†ç±»
+ITEMTYPE_ADDHP = 1	--çº¢è¯
+ITEMTYPE_ADDMP = 2	--è“è¯
 
-ITEMTYPE_PET_ADDHP = 4 --³èÎïºìÒ©
-ITEMTYPE_PET_ADDMP = 5 --³èÎïÀ¶Ò©
+ITEMTYPE_PET_ADDHP = 4 --å® ç‰©çº¢è¯
+ITEMTYPE_PET_ADDMP = 5 --å® ç‰©è“è¯
 
-ITEMTYPE_MOUNT_ADDPOWER = 6 --×øÆïÄÍÁ¦Ò©
+ITEMTYPE_MOUNT_ADDPOWER = 6 --åéª‘è€åŠ›è¯
 
-ITEMTYPE_ADDENE = 7	-- Ôö¼ÓÌåÁ¦
-ITEMTYPE_ADDSAT = 8	-- Ôö¼Ó±¥Ê³¶È
-ITEMTYPE_ADDACT = 9	-- Ôö¼Ó»îÔ¾¶È
-ITEMTYPE_ADDILL = 10	-- Ôö¼Ó¼²²¡Öµ
+ITEMTYPE_ADDENE = 7	-- å¢žåŠ ä½“åŠ›
+ITEMTYPE_ADDSAT = 8	-- å¢žåŠ é¥±é£Ÿåº¦
+ITEMTYPE_ADDACT = 9	-- å¢žåŠ æ´»è·ƒåº¦
+ITEMTYPE_ADDILL = 10	-- å¢žåŠ ç–¾ç—…å€¼
 
-ITEMTYPE_DEBUF	= 13			--Ïû³ýËÀÍö¸´»îµÀ¾ß
-ITEMTYPE_FRAGMENT_COMPOSE = 14  --ËéÆ¬Éú³É
+ITEMTYPE_DEBUF	= 13			--æ¶ˆé™¤æ­»äº¡å¤æ´»é“å…·
+ITEMTYPE_FRAGMENT_COMPOSE = 14  --ç¢Žç‰‡ç”Ÿæˆ
 
-ITEMTYPE_ADDHP_SUPER = 11	--ÎÞÓÇºìÒ©
-ITEMTYPE_ADDMP_SUPER = 12	--ÎÞÓÇÀ¶Ò©
+ITEMTYPE_ADDHP_SUPER = 11	--æ— å¿§çº¢è¯
+ITEMTYPE_ADDMP_SUPER = 12	--æ— å¿§è“è¯
 
-ITEMTYPE_ADD_TASK = 18	--´¥·¢ÈÎÎñ
+ITEMTYPE_ADD_TASK = 18	--è§¦å‘ä»»åŠ¡
 
-ITEMTYPE_ZHAOSHI_BOOK = 23	--ÕÐÊ½ÃØ¼®
-ITEMTYPE_AIQI_BOOK = 26     --°µÆ÷ÊÖ·¨ÃØ¼®
+ITEMTYPE_ZHAOSHI_BOOK = 23	--æ‹›å¼ç§˜ç±
+ITEMTYPE_AIQI_BOOK = 26     --æš—å™¨æ‰‹æ³•ç§˜ç±
 
-ITEMTYPE_CATCH_NPC	= 30	--×¥²¶NPCµÄµÀ¾ß(×øÆï»ò³èÎï)
-ITEMTYPE_ADDBAG = 31 --Ð¡±³°ü
-ITEMTYPE_HUICHENG_TONGPIAO = 32 --ÂÃµêÍ¨Æ±
+ITEMTYPE_CATCH_NPC	= 30	--æŠ“æ•NPCçš„é“å…·(åéª‘æˆ–å® ç‰©)
+ITEMTYPE_ADDBAG = 31 --å°èƒŒåŒ…
+ITEMTYPE_HUICHENG_TONGPIAO = 32 --æ—…åº—é€šç¥¨
 
-ITEMTYPE_COMPOSITE_FORMULA = 35  --ºÏ³ÉÅä·½
-ITEMTYPE_WEALTH            = 36  --±¦Ïä
+ITEMTYPE_COMPOSITE_FORMULA = 35  --åˆæˆé…æ–¹
+ITEMTYPE_WEALTH            = 36  --å®ç®±
 
-ITEMTYPE_SEED = 40			 --Å©×÷ÎïÖÖ×Ó
-ITEMTYPE_CURE_CROP = 41  --ÖÎÁÆÅ©×÷ÎïÎïÆ·
+ITEMTYPE_SEED = 40			 --å†œä½œç‰©ç§å­
+ITEMTYPE_CURE_CROP = 41  --æ²»ç–—å†œä½œç‰©ç‰©å“
 
-ITEMTYPE_TASKTOOL = 60		-- ¿ÉÒÔÊ¹ÓÃµÄÈÎÎñµÀ¾ß
+ITEMTYPE_TASKTOOL = 60		-- å¯ä»¥ä½¿ç”¨çš„ä»»åŠ¡é“å…·
 
-ITEMTYPE_CLONEUSE = 70		-- ¿ÉÒÔÊ¹ÓÃµÄ¸±±¾µÀ¾ß
+ITEMTYPE_CLONEUSE = 70		-- å¯ä»¥ä½¿ç”¨çš„å‰¯æœ¬é“å…·
 
-ITEMTYPE_ADDBUFFER = 71     -- ¸ø ×Ô¼º£¬ÆäËûÍæ¼Ò£¬npc Ìí¼Óbuffer
+ITEMTYPE_ADDBUFFER = 71     -- ç»™ è‡ªå·±ï¼Œå…¶ä»–çŽ©å®¶ï¼Œnpc æ·»åŠ buffer
 
-ITEMTYPE_GOHOME = 72        -- »Ø³Ì ÎïÆ·
+ITEMTYPE_GOHOME = 72        -- å›žç¨‹ ç‰©å“
 
-ITEMTYPE_INLAY1 = 75         --  1Àà±¦Ê¯ÏâÇ¶
-ITEMTYPE_INLAY2 = 76         --  2±¦Ê¯ÏâÇ¶
-ITEMTYPE_INLAY3 = 77         --  3±¦Ê¯ÏâÇ¶
-ITEMTYPE_INLAY4 = 78         --  4±¦Ê¯ÏâÇ¶
+ITEMTYPE_INLAY1 = 75         --  1ç±»å®çŸ³é•¶åµŒ
+ITEMTYPE_INLAY2 = 76         --  2å®çŸ³é•¶åµŒ
+ITEMTYPE_INLAY3 = 77         --  3å®çŸ³é•¶åµŒ
+ITEMTYPE_INLAY4 = 78         --  4å®çŸ³é•¶åµŒ
 
-ITEMTYPE_RUNE_A        = 80            --AÀà·ûÎÄ
-ITEMTYPE_RUNE_B        = 81            --BÀà·ûÎÄ
-ITEMTYPE_RUNE_C        = 82            --CÀà·ûÎÄ
-ITEMTYPE_RUNE_D        = 83            --DÀà·ûÎÄ
+ITEMTYPE_RUNE_A        = 80            --Aç±»ç¬¦æ–‡
+ITEMTYPE_RUNE_B        = 81            --Bç±»ç¬¦æ–‡
+ITEMTYPE_RUNE_C        = 82            --Cç±»ç¬¦æ–‡
+ITEMTYPE_RUNE_D        = 83            --Dç±»ç¬¦æ–‡
 
 
-ITEMTYPE_BATTLE_CARRIER        = 89           --Õ½¶·ÔØ¾ß
+ITEMTYPE_BATTLE_CARRIER        = 89           --æˆ˜æ–—è½½å…·
 
-ITEMTYPE_USED		   = 2104 --ÏûºÄÀàµÀ¾ß
+ITEMTYPE_USED		   = 2104 --æ¶ˆè€—ç±»é“å…·
 
 --==========================================
---µÀ¾ß·ÖÀà½áÊø
+--é“å…·åˆ†ç±»ç»“æŸ
 --==========================================
---90-99ÀëÏß¹¦ÄÜÊ¹ÓÃµÄµÀ¾ß
+--90-99ç¦»çº¿åŠŸèƒ½ä½¿ç”¨çš„é“å…·
 ITEMTYPE_OFFLINE_MIN	= 90
 ITEMTYPE_OFFLINE_EXP	= 91
 ITEMTYPE_OFFLINE_JINMAI = 92
@@ -76,122 +76,122 @@ ITEMTYPE_OFFLINE_KEY	= 98
 ITEMTYPE_OFFLINE_MAX	= 99
 
 --==========================================
---100-199×°±¸Àà
+--100-199è£…å¤‡ç±»
 ITEMTYPE_EQUIP_MIN = 100
 ITEMTYPE_EQUIP_MAX = 199
 ITEMTYPE_WEAPON_MIN = 100
 ITEMTYPE_WEAPON_MAX = 119
 --==========================================
 
---ÒÔÏÂÎª×°±¸µÄ¾ßÌå·ÖÀà
+--ä»¥ä¸‹ä¸ºè£…å¤‡çš„å…·ä½“åˆ†ç±»
 --==========================================
-ITEMTYPE_WEAPON_SWORD = 101		--½£
-ITEMTYPE_WEAPON_DAGGER = 102	--Ø°Ê×
-ITEMTYPE_WEAPON_MACE = 103		--´¸
-ITEMTYPE_WEAPON_AXE = 104		--¸«×Ó
-ITEMTYPE_WEAPON_CRY = 105		--Ë®¾§Çò
-ITEMTYPE_WEAPON_SPEAR = 106		--³¤±úÎäÆ÷
-ITEMTYPE_WEAPON_SHIELD = 107	--¶ÜÅÆ
-ITEMTYPE_WEAPON_RUNE = 108		--Ä§°ô
-ITEMTYPE_WEAPON_BOW    = 109    --¹­
-ITEMTYPE_WEAPON_CROSS  = 110    --åó
-ITEMTYPE_WEAPON_THROW  = 111    --Í¶ÖÀÎäÆ÷
-ITEMTYPE_WEAPON_JAVELIN = 112   --±êÇ¹
-ITEMTYPE_WEAPON_GUNSWORD = 113  --Ç¹ÈÍ
-ITEMTYPE_WEAPON_HANDGUN = 114   --ÊÖÇ¹
-ITEMTYPE_WEAPON_GUN  = 115      --Ç¹Ðµ
-ITEMTYPE_WEAPON_HOLY  = 116     --Ê¥Îï
+ITEMTYPE_WEAPON_SWORD = 101		--å‰‘
+ITEMTYPE_WEAPON_DAGGER = 102	--åŒ•é¦–
+ITEMTYPE_WEAPON_MACE = 103		--é”¤
+ITEMTYPE_WEAPON_AXE = 104		--æ–§å­
+ITEMTYPE_WEAPON_CRY = 105		--æ°´æ™¶çƒ
+ITEMTYPE_WEAPON_SPEAR = 106		--é•¿æŸ„æ­¦å™¨
+ITEMTYPE_WEAPON_SHIELD = 107	--ç›¾ç‰Œ
+ITEMTYPE_WEAPON_RUNE = 108		--é­”æ£’
+ITEMTYPE_WEAPON_BOW    = 109    --å¼“
+ITEMTYPE_WEAPON_CROSS  = 110    --å¼©
+ITEMTYPE_WEAPON_THROW  = 111    --æŠ•æŽ·æ­¦å™¨
+ITEMTYPE_WEAPON_JAVELIN = 112   --æ ‡æžª
+ITEMTYPE_WEAPON_GUNSWORD = 113  --æžªéŸ§
+ITEMTYPE_WEAPON_HANDGUN = 114   --æ‰‹æžª
+ITEMTYPE_WEAPON_GUN  = 115      --æžªæ¢°
+ITEMTYPE_WEAPON_HOLY  = 116     --åœ£ç‰©
 
-ITEMTYPE_EQUIP_JOB = 137 --Ö°ÒµÀº
-ITEMTYPE_EQUIP_badge = 138 --»ÕÕÂ
-ITEMTYPE_EQUIP_BELT = 139 --Ñü´ø
-ITEMTYPE_EQUIP_HAT = 140 --Í·¿ø
-ITEMTYPE_EQUIP_CLOTH = 141 --ÉÏÒÂ
-ITEMTYPE_EQUIP_PANTS = 142 --¿ã×Ó
-ITEMTYPE_EQUIP_SHONES = 143 --Ð¬×Ó
-ITEMTYPE_EQUIP_WRIST = 145 --»¤Íó
-ITEMTYPE_EQUIP_HAND = 146 --ÊÖÌ×
-ITEMTYPE_EQUIP_NECK = 147 --ÏîÁ´
-ITEMTYPE_EQUIP_MANTLE = 148 --Åû·ç
-ITEMTYPE_EQUIP_RING = 149 --½äÖ¸
-ITEMTYPE_EQUIP_JEWELRY = 150 --×°ÊÎÆ·
+ITEMTYPE_EQUIP_JOB = 137 --èŒä¸šç¯®
+ITEMTYPE_EQUIP_badge = 138 --å¾½ç« 
+ITEMTYPE_EQUIP_BELT = 139 --è…°å¸¦
+ITEMTYPE_EQUIP_HAT = 140 --å¤´ç›”
+ITEMTYPE_EQUIP_CLOTH = 141 --ä¸Šè¡£
+ITEMTYPE_EQUIP_PANTS = 142 --è£¤å­
+ITEMTYPE_EQUIP_SHONES = 143 --éž‹å­
+ITEMTYPE_EQUIP_WRIST = 145 --æŠ¤è…•
+ITEMTYPE_EQUIP_HAND = 146 --æ‰‹å¥—
+ITEMTYPE_EQUIP_NECK = 147 --é¡¹é“¾
+ITEMTYPE_EQUIP_MANTLE = 148 --æŠ«é£Ž
+ITEMTYPE_EQUIP_RING = 149 --æˆ’æŒ‡
+ITEMTYPE_EQUIP_JEWELRY = 150 --è£…é¥°å“
 
---°µÆ÷
+--æš—å™¨
 ITEMTYPE_WEAPON_HIDDEN = 110
---ÊôÐÔÊé
+--å±žæ€§ä¹¦
 ITEMTYPE_WEAPON_BOOK = 190
 
---×°±¸·ÖÀà½áÊø
+--è£…å¤‡åˆ†ç±»ç»“æŸ
 --==========================================
 
---200-299¹¦ÄÜÀàµÀ¾ß
-ITEMTYPE_MOUNT		= 200	--ÕÙ»½×øÆïµÄµÀ¾ß
-ITEMTYPE_PET1       = 201   --³èÎï1
-ITEMTYPE_PET2       = 202   --³èÎï2
+--200-299åŠŸèƒ½ç±»é“å…·
+ITEMTYPE_MOUNT		= 200	--å¬å”¤åéª‘çš„é“å…·
+ITEMTYPE_PET1       = 201   --å® ç‰©1
+ITEMTYPE_PET2       = 202   --å® ç‰©2
 
---1000ÒÔÉÏ£¬ÆäËûÀàÐÍ
+--1000ä»¥ä¸Šï¼Œå…¶ä»–ç±»åž‹
 ITEMTYPE_ZHAOSHI	    = 1000
 ITEMTYPE_LOCKZHAOAHI	= 1001
 
--- ¹ÖÎïµôÂä½ðÇ®Îï¼þÀàÐÍ
+-- æ€ªç‰©æŽ‰è½é‡‘é’±ç‰©ä»¶ç±»åž‹
 ITEMTYPE_DROPMONEY  = 1100
--- ÔÓÎï,Ö»ÄÜ¼ñÈ¡µÃµ½£¬Ö»ÄÜÂôµ½ÉÌµê,Ã»ÓÐÆäËü¹¦ÄÜ
+-- æ‚ç‰©,åªèƒ½æ¡å–å¾—åˆ°ï¼Œåªèƒ½å–åˆ°å•†åº—,æ²¡æœ‰å…¶å®ƒåŠŸèƒ½
 ITEMTYPE_ZAWU	= 1200
--- ÉÌÒý
+-- å•†å¼•
 ITEMTYPE_SHANGYIN = 1201
 
-ITEMTYPE_ZHAOSHI_SPECIAL	= 1301  --ÔÝ¶¨ÎªÖ»ÓÐ×°±¸ÁË²ÅÄÜÊ¹ÓÃÄ³ÖÖÎäÑ§¼¼ÄÜµÄÎäÑ§µÀ¾ß
-ITEMTYPE_ZHAOSHI_NEIGONG	= 1302  --ÔÝ¶¨ÎªÖ»ÓÐ×°±¸ÁË²ÅÄÜÊ¹ÓÃÄ³ÖÖÄÚ¹¦µÄÎäÑ§µÀ¾ß
-ITEMTYPE_SHENGHUO_SPECIAL	= 1303  --ÔÝ¶¨ÎªÖ»ÓÐ×°±¸ÁË²ÅÄÜÊ¹ÓÃÄ³ÖÖÉú»î¼¼ÄÜµÄÉú»îµÀ¾ß
+ITEMTYPE_ZHAOSHI_SPECIAL	= 1301  --æš‚å®šä¸ºåªæœ‰è£…å¤‡äº†æ‰èƒ½ä½¿ç”¨æŸç§æ­¦å­¦æŠ€èƒ½çš„æ­¦å­¦é“å…·
+ITEMTYPE_ZHAOSHI_NEIGONG	= 1302  --æš‚å®šä¸ºåªæœ‰è£…å¤‡äº†æ‰èƒ½ä½¿ç”¨æŸç§å†…åŠŸçš„æ­¦å­¦é“å…·
+ITEMTYPE_SHENGHUO_SPECIAL	= 1303  --æš‚å®šä¸ºåªæœ‰è£…å¤‡äº†æ‰èƒ½ä½¿ç”¨æŸç§ç”Ÿæ´»æŠ€èƒ½çš„ç”Ÿæ´»é“å…·
 
 
 
---ÒÔÏÂÎªºÏ³É²ÄÁÏµÄ¾ßÌå·ÖÀà 2010 ~ 2200
+--ä»¥ä¸‹ä¸ºåˆæˆææ–™çš„å…·ä½“åˆ†ç±» 2010 ~ 2200
 --==========================================
--- ¿ªÊ¼
-ITEMTYPE_COMPOSE_MATRIAL_MIN= 2010      --¿ªÊ¼
---Óæ·ò
-ITEMTYPE_COMPOSE_YU		= 2011		--Óã
-ITEMTYPE_COMPOSE_YUROU		= 2012		--ÓãÈâ
---¿ó¹¤
-ITEMTYPE_COMPOSE_KUANGWU	= 2021		--¿óÎï
-ITEMTYPE_COMPOSE_KUANGSHI	= 2022		--¿óÊ¯
---éÔ·ò
-ITEMTYPE_COMPOSE_MULIAO		= 2031		--Ä¾ÁÏ
-ITEMTYPE_COMPOSE_MUBAN		= 2033		--Ä¾°å
-ITEMTYPE_COMPOSE_MULIAO		= 2034		--Ä¾Ì¼
---Å©·ò
-ITEMTYPE_COMPOSE_MIANZHONG	= 2041		--ÃÞÂéÖÖ×Ó
-ITEMTYPE_COMPOSE_NONGZHONG 	= 2042		--Å©ÎïÖÖ×Ó
-ITEMTYPE_COMPOSE_MIANMA		= 2043		--ÃÞÂé
-ITEMTYPE_COMPOSE_NONGWU		= 2044		--Å©Îï
-ITEMTYPE_COMPOSE_BUPI		= 2045		--²¼Æ¥
-ITEMTYPE_COMPOSE_SHILIAO	= 2046		--Ê³ÁÏ
-ITEMTYPE_COMPOSE_SHILIAO	= 2047		--Ë¿Ïß£¨ÊÎÆ·Àà£©
---ÁÔ»§
-ITEMTYPE_COMPOSE_PIMAO		= 2051		--Æ¤Ã«
-ITEMTYPE_COMPOSE_HUNSHI		= 2052		--»çÊ³
-ITEMTYPE_COMPOSE_HUNSHI		= 2053		--Ò©Òý
-ITEMTYPE_COMPOSE_HUNSHI		= 2054          --¹ÇÍ·
-ITEMTYPE_COMPOSE_HUNSHI		= 2055          --ÑÀ³Ý
---ÇÙÊ¦
-ITEMTYPE_COMPOSE_QUPU		= 2061		--ÇúÆ×
---ÊéÉú
-ITEMTYPE_COMPOSE_CANJUAN	= 2071		--¹ÅÎÄ²Ð¾í
---Ò©Ê¦
-ITEMTYPE_COMPOSE_CAOYAO		= 2081		--²ÝÒ©
-ITEMTYPE_COMPOSE_YAOSAN		= 2082		--Ò©É¢
---¶¾Ê¦
-ITEMTYPE_COMPOSE_DUCAO		= 2091		--¶¾²Ý
-ITEMTYPE_COMPOSE_DUYAO		= 2092		--¶¾Ò©
---³øÊ¦
-ITEMTYPE_COMPOSE_SHIWU		= 2101		--²ËëÈ
---ÆäËüÀà
-ITEMTYPE_COMPOSE_LINGWU         = 2110          --ÁéÎï
-ITEMTYPE_COMPOSE_TUZHI          = 2150          --Í¼Ö½
+-- å¼€å§‹
+ITEMTYPE_COMPOSE_MATRIAL_MIN= 2010      --å¼€å§‹
+--æ¸”å¤«
+ITEMTYPE_COMPOSE_YU		= 2011		--é±¼
+ITEMTYPE_COMPOSE_YUROU		= 2012		--é±¼è‚‰
+--çŸ¿å·¥
+ITEMTYPE_COMPOSE_KUANGWU	= 2021		--çŸ¿ç‰©
+ITEMTYPE_COMPOSE_KUANGSHI	= 2022		--çŸ¿çŸ³
+--æ¨µå¤«
+ITEMTYPE_COMPOSE_MULIAO		= 2031		--æœ¨æ–™
+ITEMTYPE_COMPOSE_MUBAN		= 2033		--æœ¨æ¿
+ITEMTYPE_COMPOSE_MULIAO		= 2034		--æœ¨ç¢³
+--å†œå¤«
+ITEMTYPE_COMPOSE_MIANZHONG	= 2041		--æ£‰éº»ç§å­
+ITEMTYPE_COMPOSE_NONGZHONG 	= 2042		--å†œç‰©ç§å­
+ITEMTYPE_COMPOSE_MIANMA		= 2043		--æ£‰éº»
+ITEMTYPE_COMPOSE_NONGWU		= 2044		--å†œç‰©
+ITEMTYPE_COMPOSE_BUPI		= 2045		--å¸ƒåŒ¹
+ITEMTYPE_COMPOSE_SHILIAO	= 2046		--é£Ÿæ–™
+ITEMTYPE_COMPOSE_SHILIAO	= 2047		--ä¸çº¿ï¼ˆé¥°å“ç±»ï¼‰
+--çŒŽæˆ·
+ITEMTYPE_COMPOSE_PIMAO		= 2051		--çš®æ¯›
+ITEMTYPE_COMPOSE_HUNSHI		= 2052		--è¤é£Ÿ
+ITEMTYPE_COMPOSE_HUNSHI		= 2053		--è¯å¼•
+ITEMTYPE_COMPOSE_HUNSHI		= 2054          --éª¨å¤´
+ITEMTYPE_COMPOSE_HUNSHI		= 2055          --ç‰™é½¿
+--ç´å¸ˆ
+ITEMTYPE_COMPOSE_QUPU		= 2061		--æ›²è°±
+--ä¹¦ç”Ÿ
+ITEMTYPE_COMPOSE_CANJUAN	= 2071		--å¤æ–‡æ®‹å·
+--è¯å¸ˆ
+ITEMTYPE_COMPOSE_CAOYAO		= 2081		--è‰è¯
+ITEMTYPE_COMPOSE_YAOSAN		= 2082		--è¯æ•£
+--æ¯’å¸ˆ
+ITEMTYPE_COMPOSE_DUCAO		= 2091		--æ¯’è‰
+ITEMTYPE_COMPOSE_DUYAO		= 2092		--æ¯’è¯
+--åŽ¨å¸ˆ
+ITEMTYPE_COMPOSE_SHIWU		= 2101		--èœè‚´
+--å…¶å®ƒç±»
+ITEMTYPE_COMPOSE_LINGWU         = 2110          --çµç‰©
+ITEMTYPE_COMPOSE_TUZHI          = 2150          --å›¾çº¸
 
 
---½áÊø
-ITEMTYPE_COMPOSE_MATRIAL_MAX= 2200      --½áÊø
+--ç»“æŸ
+ITEMTYPE_COMPOSE_MATRIAL_MAX= 2200      --ç»“æŸ
 
 --=========================================================

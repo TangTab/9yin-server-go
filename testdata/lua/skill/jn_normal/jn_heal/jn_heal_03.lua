@@ -1,40 +1,40 @@
---jn_heal_03	Ãî·¨Á«»ª	¸ø×ÔÉíÒ»¶¨·¶Î§µÄÓÑ·½µ¥Î»»Ø¸´ÆøÑª
---Lv1:60+¾«Éñ*1
---Lv2:120+¾«Éñ*2
---Lv3:240+¾«Éñ*3
---Lv4:480+¾«Éñ*4
---Lv5:960+¾«Éñ*5
+--jn_heal_03	å¦™æ³•è²å	ç»™è‡ªèº«ä¸€å®šèŒƒå›´çš„å‹æ–¹å•ä½å›å¤æ°”è¡€
+--Lv1:60+ç²¾ç¥*1
+--Lv2:120+ç²¾ç¥*2
+--Lv3:240+ç²¾ç¥*3
+--Lv4:480+ç²¾ç¥*4
+--Lv5:960+ç²¾ç¥*5
 
 require("define")
 require("skill\\AddBuff\\jn_normal\\jn_heal\\jn_heal_03")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 	local level = nx_query_property(skill, "Level")
 	AddBuff(self, target, level)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end

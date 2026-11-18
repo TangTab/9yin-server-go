@@ -1,72 +1,72 @@
---¶ş¼¶¹«»áÂß¼­½Å±¾
---ÄÜ·ñ´´½¨¹«»á
+--äºŒçº§å…¬ä¼šé€»è¾‘è„šæœ¬
+--èƒ½å¦åˆ›å»ºå…¬ä¼š
 function can_create_guild(self, guild)
 end
 
---ÄÜ·ñ½âÉ¢¹«»á
+--èƒ½å¦è§£æ•£å…¬ä¼š
 function can_disband_guild(self, guild)
 end
 
---Íæ¼ÒÉÏÏß
+--ç©å®¶ä¸Šçº¿
 function on_player_recover(self)
 end
 
---´´½¨¹«»á
+--åˆ›å»ºå…¬ä¼š
 function create_guild(self, guild)
 end
 
---½âÉ¢¹«»á
+--è§£æ•£å…¬ä¼š
 function disband_guild(self, guild)
 end
 
---¼ÓÈë¹«»á
+--åŠ å…¥å…¬ä¼š
 function join_guild(self, invitor, guild)
 end
 
---Àë¿ª¹«»á
+--ç¦»å¼€å…¬ä¼š
 function leave_guild(self)
 end
 
---¿ª³ı³ÉÔ±
+--å¼€é™¤æˆå‘˜
 function dismiss_member(self, name)
 end
 
---¸ü»»³ÉÔ±Ö°Î»
+--æ›´æ¢æˆå‘˜èŒä½
 function change_member_position(self, name, newpos)
 end
 
---¸ü»»¹ÜÀíÔ±
+--æ›´æ¢ç®¡ç†å‘˜
 function change_commander(self, name)
 end
 
---Íæ¼ÒÑéÖ¤¹«»áĞÅÏ¢»Øµ÷
+--ç©å®¶éªŒè¯å…¬ä¼šä¿¡æ¯å›è°ƒ
 function on_check_playerinfo(self, result)
 end
 
---´´½¨¹«»á»Øµ÷
+--åˆ›å»ºå…¬ä¼šå›è°ƒ
 function on_create_guild(self, result, guild)
 end
 
---½âÉ¢¹«»á»Øµ÷
+--è§£æ•£å…¬ä¼šå›è°ƒ
 function on_disband_guild(self, result, guild)
 end
 
---¼ÓÈë¹«»á»Øµ÷
+--åŠ å…¥å…¬ä¼šå›è°ƒ
 function on_join_guild(self, result, invitor, guild)
 end
 
---Àë¿ª¹«»á»Øµ÷
+--ç¦»å¼€å…¬ä¼šå›è°ƒ
 function on_leave_guild(self, result, guild)
 end
 
---¿ª³ı³ÉÔ±»Øµ÷
+--å¼€é™¤æˆå‘˜å›è°ƒ
 function on_dismiss_member(self, result, name)
 end
 
---¸ü»»³ÉÔ±Ö°Î»»Øµ÷
+--æ›´æ¢æˆå‘˜èŒä½å›è°ƒ
 function on_change_member_position(self, result, name, newpos)
 end
 
---¸ü»»¹ÜÀíÔ±»Øµ÷
+--æ›´æ¢ç®¡ç†å‘˜å›è°ƒ
 function on_change_commander(self, result, name)
 end

@@ -1,52 +1,52 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-        <property name="CloneDifficulty" type="int" public="false" private="true" save="false" desc="¸±±¾ÄÑ¶È(0-³õ¼¶ 1-ÖÐ¼¶ 2-¸ß¼¶)"/>
-        <property name="CloneProgress" type="int" public="false" private="false" save="false" desc="¸±±¾½ø¶È"/>
-        <property name="CloneUniqueID" type="string" public="false" private="false" save="false" desc="¸±±¾³¡¾°Î¨Ò»id"/>
-        <property name="CloneOwnerType" type="int" public="false" private="false" save="false" desc="¸±±¾ÓµÓÐÕßÀàÐÍ(0-²»ÊôÓÚÈÎºÎÈË»ò¶ÓÎé 1-¸öÈË 2-Ð¡¶Ó 3-ÍÅ¶Ó)"/>
-        <property name="CloneOwnerID" type="int" public="false" private="false" save="false" desc="µ±ÓµÓÐÕßÊÇ¶ÓÎé£¬ÄÇÃ´¾ÍÊÇ¶ÓÎéID,Èç¹ûÊÇÍÅ¶Ó¾ÍÊÇÍÅ¶ÓµÄid" />
-        <property name="CloneOwnerName" type="widestr" public="false" private="false" save="false" desc="¸±±¾´´½¨ÕßµÄÃû×Ö" />        
-        <property name="BossBeKilledCount" type="int" public="false" private="false" save="false" desc="ÊýÁ¿" />	
-        <property name="PassStageTime" type="int64" public="false" private="false" save="false" desc="Í¨¹ØÊ±¼ä" />
-        <property name="BossTimeCount" type="int64" public="false" private="false" save="false" desc="É±ËÀBossµÄÊ±¼ä" />
-        <property name="PlayerDeadCount" type="int" public="false" private="false" save="false" desc="playerËÀÍöµÄ×ÜÊý" />
-        <property name="PScore1" type="int" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö1" />
-        <property name="PScore2" type="int" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö2" />
-        <property name="PScore3" type="int" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö3" />
-        <property name="PScore4" type="int" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö4" />
-        <property name="PScoreText1" type="string" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö¿Í»§¶Ë¶ÔÓ¦µÄÖÐÎÄ°ü1" />
-        <property name="PScoreText2" type="string" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö¿Í»§¶Ë¶ÔÓ¦µÄÖÐÎÄ°ü2" />
-        <property name="PScoreText3" type="string" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö¿Í»§¶Ë¶ÔÓ¦µÄÖÐÎÄ°ü3" />
-        <property name="PScoreText4" type="string" public="false" private="false" save="false" desc="´¥·¢Æ÷ÆÀ·Ö¿Í»§¶Ë¶ÔÓ¦µÄÖÐÎÄ°ü4" />
-        <property name="CloneBeginTime" type="int64" public="false" private="false" save="false" desc="¸±±¾µ¹¼ÆÊ±¿ªÊ¼Ê±¼ä" />
-        <property name="GmPassClone" type="int" public="false" private="false" save="false" desc="gmÍ¨¹Ø"/>
-        <property name="nMobTurn" type="int" public="false" private="false" save="false" desc="·Ö²¨³ö¹Ö¸±±¾ÖÐ, µ±Ç°²¨´Î"/>
+        <property name="CloneDifficulty" type="int" public="false" private="true" save="false" desc="å‰¯æœ¬éš¾åº¦(0-åˆçº§ 1-ä¸­çº§ 2-é«˜çº§)"/>
+        <property name="CloneProgress" type="int" public="false" private="false" save="false" desc="å‰¯æœ¬è¿›åº¦"/>
+        <property name="CloneUniqueID" type="string" public="false" private="false" save="false" desc="å‰¯æœ¬åœºæ™¯å”¯ä¸€id"/>
+        <property name="CloneOwnerType" type="int" public="false" private="false" save="false" desc="å‰¯æœ¬æ‹¥æœ‰è€…ç±»åž‹(0-ä¸å±žäºŽä»»ä½•äººæˆ–é˜Ÿä¼ 1-ä¸ªäºº 2-å°é˜Ÿ 3-å›¢é˜Ÿ)"/>
+        <property name="CloneOwnerID" type="int" public="false" private="false" save="false" desc="å½“æ‹¥æœ‰è€…æ˜¯é˜Ÿä¼ï¼Œé‚£ä¹ˆå°±æ˜¯é˜Ÿä¼ID,å¦‚æžœæ˜¯å›¢é˜Ÿå°±æ˜¯å›¢é˜Ÿçš„id" />
+        <property name="CloneOwnerName" type="widestr" public="false" private="false" save="false" desc="å‰¯æœ¬åˆ›å»ºè€…çš„åå­—" />        
+        <property name="BossBeKilledCount" type="int" public="false" private="false" save="false" desc="æ•°é‡" />	
+        <property name="PassStageTime" type="int64" public="false" private="false" save="false" desc="é€šå…³æ—¶é—´" />
+        <property name="BossTimeCount" type="int64" public="false" private="false" save="false" desc="æ€æ­»Bossçš„æ—¶é—´" />
+        <property name="PlayerDeadCount" type="int" public="false" private="false" save="false" desc="playeræ­»äº¡çš„æ€»æ•°" />
+        <property name="PScore1" type="int" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†1" />
+        <property name="PScore2" type="int" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†2" />
+        <property name="PScore3" type="int" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†3" />
+        <property name="PScore4" type="int" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†4" />
+        <property name="PScoreText1" type="string" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†å®¢æˆ·ç«¯å¯¹åº”çš„ä¸­æ–‡åŒ…1" />
+        <property name="PScoreText2" type="string" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†å®¢æˆ·ç«¯å¯¹åº”çš„ä¸­æ–‡åŒ…2" />
+        <property name="PScoreText3" type="string" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†å®¢æˆ·ç«¯å¯¹åº”çš„ä¸­æ–‡åŒ…3" />
+        <property name="PScoreText4" type="string" public="false" private="false" save="false" desc="è§¦å‘å™¨è¯„åˆ†å®¢æˆ·ç«¯å¯¹åº”çš„ä¸­æ–‡åŒ…4" />
+        <property name="CloneBeginTime" type="int64" public="false" private="false" save="false" desc="å‰¯æœ¬å€’è®¡æ—¶å¼€å§‹æ—¶é—´" />
+        <property name="GmPassClone" type="int" public="false" private="false" save="false" desc="gmé€šå…³"/>
+        <property name="nMobTurn" type="int" public="false" private="false" save="false" desc="åˆ†æ³¢å‡ºæ€ªå‰¯æœ¬ä¸­, å½“å‰æ³¢æ¬¡"/>
     </properties>
-    <!-- ±íÊôÐÔ -->
+    <!-- è¡¨å±žæ€§ -->
     <records>
-        <record name="clone_scene_player_rec" cols="7" maxrows="128" save="true" public="false" private="false" desc="¸±±¾µÄËùÓÐÍæ¼Ò±í">
+        <record name="clone_scene_player_rec" cols="7" maxrows="128" save="true" public="false" private="false" desc="å‰¯æœ¬çš„æ‰€æœ‰çŽ©å®¶è¡¨">
             <column type="string" desc="playerName"/>
-            <column type="word" desc="InScene,1ÔÚ,0²»ÔÚ"/>
-            <column type="word" desc="µÈ¼¶"/>
-            <column type="word" desc="Ö°Òµ"/>
-            <column type="word" desc="Õ½¶·Á¦"/>
-            <column type="word" desc="ËùÔÚ³¡¾°"/>
-            <column type="string" desc="±¦Ïä¿ªÆôÇé¿ö,0:½ûÓÃ,1:Î´ÁìÈ¡,2:ÒÑÁìÈ¡(0,1,1,2,1,2)"/>
+            <column type="word" desc="InScene,1åœ¨,0ä¸åœ¨"/>
+            <column type="word" desc="ç­‰çº§"/>
+            <column type="word" desc="èŒä¸š"/>
+            <column type="word" desc="æˆ˜æ–—åŠ›"/>
+            <column type="word" desc="æ‰€åœ¨åœºæ™¯"/>
+            <column type="string" desc="å®ç®±å¼€å¯æƒ…å†µ,0:ç¦ç”¨,1:æœªé¢†å–,2:å·²é¢†å–(0,1,1,2,1,2)"/>
         </record>
-        <record name="clone_scene_boss_fight_info_rec" cols="2" maxrows="128" save="false" public="false" private="false" desc="¸±±¾µÄbossºÄÊ±±í">
+        <record name="clone_scene_boss_fight_info_rec" cols="2" maxrows="128" save="false" public="false" private="false" desc="å‰¯æœ¬çš„bossè€—æ—¶è¡¨">
             <column type="string" desc="BossName"/>
             <column type="int64" desc="BossTime"/>
         </record>
-        <record name="clone_scene_player_fight_info_rec" cols="5" maxrows="128" save="false" public="false" private="false" desc="¸±±¾µÄËùÓÐÍæ¼Ò±í">      
-            <column type="string" desc="Íæ¼Ò"/>
-            <column type="dword" desc="ÉËº¦Êä³ö"/>
-            <column type="dword" desc="ÖÎÁÆÊä³ö"/>
-            <column type="dword" desc="³ÐÊÜÉËº¦"/>
-            <column type="dword" desc="ËÀÍö´ÎÊý"/>
+        <record name="clone_scene_player_fight_info_rec" cols="5" maxrows="128" save="false" public="false" private="false" desc="å‰¯æœ¬çš„æ‰€æœ‰çŽ©å®¶è¡¨">      
+            <column type="string" desc="çŽ©å®¶"/>
+            <column type="dword" desc="ä¼¤å®³è¾“å‡º"/>
+            <column type="dword" desc="æ²»ç–—è¾“å‡º"/>
+            <column type="dword" desc="æ‰¿å—ä¼¤å®³"/>
+            <column type="dword" desc="æ­»äº¡æ¬¡æ•°"/>
         </record>
-        <record name="clone_boss_pos" cols="5" maxrows="128" save="false" public="false" private="false" desc="ËùÔÚ¶ÓÎé¶Ó³¤½ø¹ý¸±±¾±í">
+        <record name="clone_boss_pos" cols="5" maxrows="128" save="false" public="false" private="false" desc="æ‰€åœ¨é˜Ÿä¼é˜Ÿé•¿è¿›è¿‡å‰¯æœ¬è¡¨">
 			<column type="object" desc="uid"/>
 			<column type="string" desc="configid"/>
 			<column type="float" desc="x"/>
@@ -54,9 +54,9 @@
 			<column type="float" desc="z"/>
         </record>
     </records>
-    <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+    <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
     <includes>
-      <!--path name="struct\scene\practice_scene.xml" desc="ÊÔÁ·³¡¸±±¾"-->
+      <!--path name="struct\scene\practice_scene.xml" desc="è¯•ç»ƒåœºå‰¯æœ¬"-->
     </includes>
 </object>
 

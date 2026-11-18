@@ -1,33 +1,33 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ËÀÍö¸´»îÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ­»äº¡å¤æ´»ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ChargeMode" type="byte" public="false" private="true" save="true" desc="ÊÕ·ÑÄ£Ê½"/>
-		<property name="ChargeTime" type="int" public="false" private="true" save="true" desc="Ô¤¹ºÄ£Ê½µÄÊ£ÓàÊ±¼ä:·ÖÖÓ"/>
+		<property name="ChargeMode" type="byte" public="false" private="true" save="true" desc="æ”¶è´¹æ¨¡å¼"/>
+		<property name="ChargeTime" type="int" public="false" private="true" save="true" desc="é¢„è´­æ¨¡å¼çš„å‰©ä½™æ—¶é—´:åˆ†é’Ÿ"/>
 	</properties>
 	<records>
 			
-			<record name="mode_selected_rec" cols="5" maxrows="1024" save="true" public="false" private="true" desc="ÊÕÒæITEM±í">
-				<column type="word" desc="ËùÊôµµ°¸±àºÅ£¬ÒÀ´ÎµÝÔö"/>
-				<column type="word" desc="Ñ¡ÔñµÄÄ£Ê½±àºÅ"/>
-				<column type="int64" desc="¿ªÊ¼Ê±¼ä"/>
-				<column type="int64" desc="½áÊøÊ±¼ä(Èç¹ûÎª¿Õ£¬±íÊ¾´¦ÓÚµ±Ç°´æµµÆÚ¼ä)"/>
-				<column type="word" desc="¸ÄÄ£Ê½ÀÛ»ýÔÚÏßÊ±¼ä"/>
+			<record name="mode_selected_rec" cols="5" maxrows="1024" save="true" public="false" private="true" desc="æ”¶ç›ŠITEMè¡¨">
+				<column type="word" desc="æ‰€å±žæ¡£æ¡ˆç¼–å·ï¼Œä¾æ¬¡é€’å¢ž"/>
+				<column type="word" desc="é€‰æ‹©çš„æ¨¡å¼ç¼–å·"/>
+				<column type="int64" desc="å¼€å§‹æ—¶é—´"/>
+				<column type="int64" desc="ç»“æŸæ—¶é—´(å¦‚æžœä¸ºç©ºï¼Œè¡¨ç¤ºå¤„äºŽå½“å‰å­˜æ¡£æœŸé—´)"/>
+				<column type="word" desc="æ”¹æ¨¡å¼ç´¯ç§¯åœ¨çº¿æ—¶é—´"/>
 			</record>
 			
-			<record name="charge_config_rec" cols="4" maxrows="1024" save="true" public="false" private="true" desc="ÊÕÒæITEM±í">
-				<column type="word" desc="ËùÊôµµ°¸±àºÅ"/>
+			<record name="charge_config_rec" cols="4" maxrows="1024" save="true" public="false" private="true" desc="æ”¶ç›ŠITEMè¡¨">
+				<column type="word" desc="æ‰€å±žæ¡£æ¡ˆç¼–å·"/>
 				<column type="string" desc="configid"/>
-				<column type="string" desc="ÊôÐÔ"/>
-				<column type="word" desc="ÊýÁ¿"/>
+				<column type="string" desc="å±žæ€§"/>
+				<column type="word" desc="æ•°é‡"/>
 			</record>
 			
-			<record name="charge_capital_rec" cols="4" maxrows="1024" save="true" public="false" private="true" desc="ÊÕÒæ»õ±Ò±í">
-				<column type="word" desc="ËùÊôµµ°¸±àºÅ"/>
-				<column type="int64" desc="ºÚ½ð"/>
-				<column type="int64" desc="ÁÔÉ±µã"/>
-				<column type="int64" desc="Ó¢ÓÂµã"/>
+			<record name="charge_capital_rec" cols="4" maxrows="1024" save="true" public="false" private="true" desc="æ”¶ç›Šè´§å¸è¡¨">
+				<column type="word" desc="æ‰€å±žæ¡£æ¡ˆç¼–å·"/>
+				<column type="int64" desc="é»‘é‡‘"/>
+				<column type="int64" desc="çŒŽæ€ç‚¹"/>
+				<column type="int64" desc="è‹±å‹‡ç‚¹"/>
 			</record>
 			
 	</records>

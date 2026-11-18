@@ -2,26 +2,26 @@ require("define")
 require("share\\server_custom_define")
 require("command_define")
 
---Ñ¡¶¨Ò»¸öÄ¿±ê£¬½»»»ÑªÁ¿±È
+--é€‰å®šä¸€ä¸ªç›®æ ‡ï¼Œäº¤æ¢è¡€é‡æ¯”
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 	local target_hp_ratio = nx_query_property(target, "HPRatio")/100
 	local target_max_hp = nx_query_property(target, "MaxHP")
@@ -31,20 +31,20 @@ function skill_after_hit(self, skill, target)
 	nx_set_property(target, "HP", target_max_hp*self_hp_ratio)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆÄÜ¼ÆËãÉËº¦, ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡èƒ½è®¡ç®—ä¼¤å®³, è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
 
-  --ÉËº¦³õÊ¼»¯
+  --ä¼¤å®³åˆå§‹åŒ–
 	local damage = 0
-	--Ìí¼ÓBUFF
+	--æ·»åŠ BUFF
 	--add_buffer(self, target, skill)
 	return damage, 0, 0, 0, 0
 

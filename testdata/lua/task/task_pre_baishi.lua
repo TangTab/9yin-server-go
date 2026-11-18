@@ -1,38 +1,38 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task_pre_baishi.lua
--- @ ½Å±¾¹¦ÄÜ: °İÊ¦ÈëÃÅÈÎÎñÌØÊâ´¦ÀíÂß¼­
--- @ ´´½¨Õß:   yinxiang
--- @ ´´½¨ÈÕÆÚ: 2010.8.19
+-- @ è„šæœ¬åç§°: task_pre_baishi.lua
+-- @ è„šæœ¬åŠŸèƒ½: æ‹œå¸ˆå…¥é—¨ä»»åŠ¡ç‰¹æ®Šå¤„ç†é€»è¾‘
+-- @ åˆ›å»ºè€…:   yinxiang
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.8.19
 -----------------------------------------
 local g_tab_task = {[1]={id = 40, sence_id = 1, x = 645, z = 671, o = 1,},
 					[2]={id = 49, sence_id = 3, x = 463, z = 705, o = 1,},
 					--[3]={id = 50, sence_id = 2, x = 645, z = 671, o = 1,},
 				}
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
 	local trace_info = "interact_"..nx_string(taskid)
-	-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ,ÓÃÓÚÓëÃÅÅÉÖ¸ÒıÈË½»»¥
+	-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ,ç”¨äºä¸é—¨æ´¾æŒ‡å¼•äººäº¤äº’
 	nx_add_taskrecord_row_values(player, nx_int(taskid), nx_int(8),
 			nx_int(0), 1, 0, nx_int(1), "", "", trace_info)
 	return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end
@@ -51,7 +51,7 @@ function on_task_giveup(player, taskid)
 			complete_times = nx_get_completed_task_times(player, task_id)
 
 			if complete_times > 0 then
-				--Èô·ÅÆúÈÎÎñÔò×Ô¶¯³Ğ½Ó°İÊ¦ÈëÃÅÈÎÎñ
+				--è‹¥æ”¾å¼ƒä»»åŠ¡åˆ™è‡ªåŠ¨æ‰¿æ¥æ‹œå¸ˆå…¥é—¨ä»»åŠ¡
 				nx_accept_task(player, task_id)
 
 				nx_switch_locate(player, nx_int(baishi.sence_id), nx_float(baishi.x),

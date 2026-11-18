@@ -1,53 +1,53 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿Æ¼¼ÀàNPC»ù´¡ÊôÐÔ-->
+<!--ç§‘æŠ€ç±»NPCåŸºç¡€å±žæ€§-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <property name="BelongType" type="int" public="false" private="false" save="false" desc="¹éÊôÈ¨ÀàÐÍ(1:ÕóÓª 2:ÊÆÁ¦ 3:×éÖ¯ 4:¹«»á 5:ÍÅ¶Ó 6:Ð¡¶Ó 7:¸öÈË)"/>
-    <property name="BelongID" type="string" public="false" private="false" save="false" desc="¹éÊôÈ¨ID"/>
-    <property name="ResourcePackageID" type="string" public="false" private="false" save="false" desc="×ÊÔ´°üID"/>
-    <property name="ObjectPackageID" type="string" public="false" private="false" save="false" desc="¶ÔÏó°üID"/>
-    <property name="ProduceEffect" type="string" public="false" private="false" save="false" desc="Éú²úÊ±µÄÌØÐ§"/>
-    <property name="BannerID" type="string" public="false" private="false" save="false" desc="ÆìÖÄID"/>
-    <property name="BannerPosX" type="float" public="false" private="false" save="false" desc="ÆìÖÄxÎ»ÖÃ(Ïà¶Ô×ÔÉí)"/>
-    <property name="BannerPosZ" type="float" public="false" private="false" save="false" desc="ÆìÖÄzÎ»ÖÃ(Ïà¶Ô×ÔÉí)"/>
-    <property name="ObjectPosX" type="float" public="false" private="false" save="false" desc="²ú³ö¶ÔÏóÆðÊ¼xÎ»ÖÃ(Ïà¶Ô×ÔÉí)"/>
-    <property name="ObjectPosZ" type="float" public="false" private="false" save="false" desc="²ú³ö¶ÔÏóÆðÊ¼zÎ»ÖÃ(Ïà¶Ô×ÔÉí)"/>
-    <property name="StartTimesNo" type="dword" public="false" private="false" save="false" desc="¿ªÊ¼²¨Êý"/>
-    <property name="StopTimesNo" type="dword" public="false" private="false" save="false" desc="½áÊø²¨Êý"/>
-    <property name="TimesInterval" type="dword" public="false" private="false" save="false" desc="²¨Êý¼ä¸ô"/>
-    <property name="IntervalCalcType" type="dword" public="false" private="false" save="false" desc="²¨Êý¼ä¸ô¼ÆËãÀàÐÍ(1:Ë³Ðò¼ÆËã 2:Ã¿²¨¹ÖÎïËÀÍöºó¼ÆËã)"/>
-	<property name="RefreshRadius" type="dword" public="false" private="false" save="false" desc="Ë¢ÐÂ°ë¾¶ 0-20"/>
+    <property name="BelongType" type="int" public="false" private="false" save="false" desc="å½’å±žæƒç±»åž‹(1:é˜µè¥ 2:åŠ¿åŠ› 3:ç»„ç»‡ 4:å…¬ä¼š 5:å›¢é˜Ÿ 6:å°é˜Ÿ 7:ä¸ªäºº)"/>
+    <property name="BelongID" type="string" public="false" private="false" save="false" desc="å½’å±žæƒID"/>
+    <property name="ResourcePackageID" type="string" public="false" private="false" save="false" desc="èµ„æºåŒ…ID"/>
+    <property name="ObjectPackageID" type="string" public="false" private="false" save="false" desc="å¯¹è±¡åŒ…ID"/>
+    <property name="ProduceEffect" type="string" public="false" private="false" save="false" desc="ç”Ÿäº§æ—¶çš„ç‰¹æ•ˆ"/>
+    <property name="BannerID" type="string" public="false" private="false" save="false" desc="æ——å¸œID"/>
+    <property name="BannerPosX" type="float" public="false" private="false" save="false" desc="æ——å¸œxä½ç½®(ç›¸å¯¹è‡ªèº«)"/>
+    <property name="BannerPosZ" type="float" public="false" private="false" save="false" desc="æ——å¸œzä½ç½®(ç›¸å¯¹è‡ªèº«)"/>
+    <property name="ObjectPosX" type="float" public="false" private="false" save="false" desc="äº§å‡ºå¯¹è±¡èµ·å§‹xä½ç½®(ç›¸å¯¹è‡ªèº«)"/>
+    <property name="ObjectPosZ" type="float" public="false" private="false" save="false" desc="äº§å‡ºå¯¹è±¡èµ·å§‹zä½ç½®(ç›¸å¯¹è‡ªèº«)"/>
+    <property name="StartTimesNo" type="dword" public="false" private="false" save="false" desc="å¼€å§‹æ³¢æ•°"/>
+    <property name="StopTimesNo" type="dword" public="false" private="false" save="false" desc="ç»“æŸæ³¢æ•°"/>
+    <property name="TimesInterval" type="dword" public="false" private="false" save="false" desc="æ³¢æ•°é—´éš”"/>
+    <property name="IntervalCalcType" type="dword" public="false" private="false" save="false" desc="æ³¢æ•°é—´éš”è®¡ç®—ç±»åž‹(1:é¡ºåºè®¡ç®— 2:æ¯æ³¢æ€ªç‰©æ­»äº¡åŽè®¡ç®—)"/>
+	<property name="RefreshRadius" type="dword" public="false" private="false" save="false" desc="åˆ·æ–°åŠå¾„ 0-20"/>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="resource_rec" cols="5" maxrows="32" public="false" private="false" save="false" desc="×ÊÔ´°ü">
-      <column type="string" desc="×ÊÔ´ID"/>
-      <column type="dword" desc="×ÊÔ´×ÜÊý"/>
-      <column type="dword" desc="Éú²úÄÜÁ¦(²úÁ¿)"/>
-      <column type="dword" desc="Éú²úÖÜÆÚ(Ãë)"/>
-      <column type="dword" desc="Ê£Óà×ÊÔ´Êý"/>
+    <record name="resource_rec" cols="5" maxrows="32" public="false" private="false" save="false" desc="èµ„æºåŒ…">
+      <column type="string" desc="èµ„æºID"/>
+      <column type="dword" desc="èµ„æºæ€»æ•°"/>
+      <column type="dword" desc="ç”Ÿäº§èƒ½åŠ›(äº§é‡)"/>
+      <column type="dword" desc="ç”Ÿäº§å‘¨æœŸ(ç§’)"/>
+      <column type="dword" desc="å‰©ä½™èµ„æºæ•°"/>
     </record>
-    <record name="object_rec" cols="9" maxrows="32" public="false" private="false" save="false" desc="¶ÔÏó°ü">
-      <column type="string" desc="¶ÔÏóID"/>
-      <column type="dword" desc="¶ÔÏó×ÜÊý"/>
-      <column type="dword" desc="Éú²úÄÜÁ¦(²úÁ¿)"/>
-      <column type="dword" desc="²¨ºÅ"/>
-      <column type="dword" desc="Éú²úÖÜÆÚ(Ãë)"/>
-      <column type="string" desc="ÏûºÄ×ÊÔ´(×ÊÔ´ºÅ,ÊýÁ¿;......)"/>
-      <column type="string" desc="¹éÊôÈ¨ID"/>
-      <column type="dword" desc="Ñ°Â··½Ê½"/>
-      <column type="string" desc="Ñ°Â·Ä¿±ê"/>
+    <record name="object_rec" cols="9" maxrows="32" public="false" private="false" save="false" desc="å¯¹è±¡åŒ…">
+      <column type="string" desc="å¯¹è±¡ID"/>
+      <column type="dword" desc="å¯¹è±¡æ€»æ•°"/>
+      <column type="dword" desc="ç”Ÿäº§èƒ½åŠ›(äº§é‡)"/>
+      <column type="dword" desc="æ³¢å·"/>
+      <column type="dword" desc="ç”Ÿäº§å‘¨æœŸ(ç§’)"/>
+      <column type="string" desc="æ¶ˆè€—èµ„æº(èµ„æºå·,æ•°é‡;......)"/>
+      <column type="string" desc="å½’å±žæƒID"/>
+      <column type="dword" desc="å¯»è·¯æ–¹å¼"/>
+      <column type="string" desc="å¯»è·¯ç›®æ ‡"/>
     </record>
-	<record name="fill_object_rec" cols="4" maxrows="2048" public="false" private="false" save="false" desc="¶ÔÏó°ü">
-      <column type="object" desc="´´½¨µÄNPC PERSISTID"/>
+	<record name="fill_object_rec" cols="4" maxrows="2048" public="false" private="false" save="false" desc="å¯¹è±¡åŒ…">
+      <column type="object" desc="åˆ›å»ºçš„NPC PERSISTID"/>
       <column type="object" desc="TechnologyNpc PERSISTID"/>
-	  <column type="dword" desc="´´½¨¶ÔÏóÄ£°åµÄROWºÅ"/>
-	  <column type="int64" desc="¶ÔÏóËÀÍöÊ±¼ä"/>
+	  <column type="dword" desc="åˆ›å»ºå¯¹è±¡æ¨¡æ¿çš„ROWå·"/>
+	  <column type="int64" desc="å¯¹è±¡æ­»äº¡æ—¶é—´"/>
     </record>
   </records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
   <includes>
     <path name="struct\rule\Common\Fightbag.xml" desc=""/>
 	<path name="struct\rule\Common\commonfighter.xml" desc=""/>
@@ -59,6 +59,6 @@
 	<path name="struct\rule\Common\autorestore.xml" desc=""/>
 	<path name="struct\rule\Common\skilluse.xml" desc=""/>
 	<path name="struct\rule\Common\basefighterdata.xml" desc=""/>
-	<path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
+	<path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
   </includes>
 </object>

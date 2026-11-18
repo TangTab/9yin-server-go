@@ -1,13 +1,13 @@
--- ÔöÒæbuff
--- lv1:Ôö¼ÓÄ¿±êÍâ¹¦·ÀÓù40µã, Á¦Á¿2µã£¬ ³ÖĞø30·ÖÖÓ
--- lv2:Ôö¼ÓÄ¿±êÍâ¹¦·ÀÓù50µã, Á¦Á¿4µã£¬ ³ÖĞø30·ÖÖÓ
--- lv3:Ôö¼ÓÄ¿±êÍâ¹¦·ÀÓù60µã, Á¦Á¿6µã£¬ ³ÖĞø30·ÖÖÓ
--- lv4:Ôö¼ÓÄ¿±êÍâ¹¦·ÀÓù70µã, Á¦Á¿8µã£¬ ³ÖĞø30·ÖÖÓ
--- lv5:Ôö¼ÓÄ¿±êÍâ¹¦·ÀÓù80µã, Á¦Á¿10µã£¬ ³ÖĞø30·ÖÖÓ
+-- å¢ç›Šbuff
+-- lv1:å¢åŠ ç›®æ ‡å¤–åŠŸé˜²å¾¡40ç‚¹, åŠ›é‡2ç‚¹ï¼Œ æŒç»­30åˆ†é’Ÿ
+-- lv2:å¢åŠ ç›®æ ‡å¤–åŠŸé˜²å¾¡50ç‚¹, åŠ›é‡4ç‚¹ï¼Œ æŒç»­30åˆ†é’Ÿ
+-- lv3:å¢åŠ ç›®æ ‡å¤–åŠŸé˜²å¾¡60ç‚¹, åŠ›é‡6ç‚¹ï¼Œ æŒç»­30åˆ†é’Ÿ
+-- lv4:å¢åŠ ç›®æ ‡å¤–åŠŸé˜²å¾¡70ç‚¹, åŠ›é‡8ç‚¹ï¼Œ æŒç»­30åˆ†é’Ÿ
+-- lv5:å¢åŠ ç›®æ ‡å¤–åŠŸé˜²å¾¡80ç‚¹, åŠ›é‡10ç‚¹ï¼Œ æŒç»­30åˆ†é’Ÿ
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_mp_sl_01_01")
 	if not nx_exists(buffer) then
 		return false
@@ -33,12 +33,12 @@ function AddBuff(self, target, level)
 		str_inc = 10
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "PhyDefAdd", nx_double(phy_def), 0,0)
 	nx_add_record_row_values(buffer, "RolePropRec", "StrAdd", nx_double(str_inc))
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

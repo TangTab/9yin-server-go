@@ -1,15 +1,15 @@
 ----------------------------------------
--- @ Ãû³Æ: gather.lua
--- @ ¹¦ÄÜ: Ö´ĞĞ²É¼¯ÎïÆ·µÄ½Å±¾Âß¼­
--- @ ×÷Õß: dReAmSun
--- @ ÈÕÆÚ: 2009-3-11
+-- @ åç§°: gather.lua
+-- @ åŠŸèƒ½: æ‰§è¡Œé‡‡é›†ç‰©å“çš„è„šæœ¬é€»è¾‘
+-- @ ä½œè€…: dReAmSun
+-- @ æ—¥æœŸ: 2009-3-11
 ----------------------------------------
 
--- ²É¼¯NPCµÄÀàĞÍ
+-- é‡‡é›†NPCçš„ç±»å‹
 local GATHER_TYPE_TASK = 1
 local GATHER_TYPE_LIFE = 2
 local GATHER_TYPE_OTHER = 3
-local GATHER_TYPE_DESTROY = 4;		--²É¼¯ÈÎÎñ(ÒşÉíÄ³ÎïÌå)
+local GATHER_TYPE_DESTROY = 4;		--é‡‡é›†ä»»åŠ¡(éšèº«æŸç‰©ä½“)
 local GATHER_TYPE_TASK_NO_RECORD = 5;
 local SERVER_CUSTOMMSG_SHENGHUO_ACTION = "shenghuo_action"
 
@@ -25,64 +25,64 @@ local gather_rule = {
 	[8] = 300,
 }
 
--- ÊÇ·ñÄÜ²É¼¯
+-- æ˜¯å¦èƒ½é‡‡é›†
 function can_gather(player, npc)
 	--[[
-	-- ±£»¤
+	-- ä¿æŠ¤
 	if not nx_exists(npc) then
 		return 0
 	end
 
-	-- ÕıÔÚ»Ø¸´ÖĞ,²»ÄÜ²É¼¯
+	-- æ­£åœ¨å›å¤ä¸­,ä¸èƒ½é‡‡é›†
 	if nx_find_heartbeat(npc, "GatherModule::H_EndEff") then
 		return 0
 	end
 
-	-- ÅĞ¶ÏNPCÊÇ²»ÊÇÕıÔÚ±»²É¼¯ÖĞ
+	-- åˆ¤æ–­NPCæ˜¯ä¸æ˜¯æ­£åœ¨è¢«é‡‡é›†ä¸­
 	local is_using = nx_int(nx_query_property(npc, "IsUsing"))
 	if nx_int(is_using) > nx_int(0) then
 		nx_sysinfo(player, 2, "9688")
 		return 0
 	end
 
-	--ÔÚÆïÂíÊ±²»ÄÜ²É¼¯
+	--åœ¨éª‘é©¬æ—¶ä¸èƒ½é‡‡é›†
 	if nx_find_property(player, "Mount") then
 		local mount = nx_query_property(player, "Mount");
 		if mount ~= nil and string.len(mount) > 0 then
-			--³öÌáÊ¾ ÕıÔÚÆïÂí£¬ÎŞ·¨½øĞĞ²É¼¯
+			--å‡ºæç¤º æ­£åœ¨éª‘é©¬ï¼Œæ— æ³•è¿›è¡Œé‡‡é›†
 			nx_sysinfo(player, 2, "1147");
 			return 0;
 		end
 	end
 
---	-- ÅĞ¶ÏÍæ¼ÒÊÇ·ñ×°±¸ÁËĞèÒªµÄ¹¤¾ß
+--	-- åˆ¤æ–­ç©å®¶æ˜¯å¦è£…å¤‡äº†éœ€è¦çš„å·¥å…·
 --	local need_tool = nx_query_property(npc, "NeedTool")
 --	local ToolType  = nx_query_property(npc, "ToolType")
 --	if need_tool ~= nil and need_tool ~= "" then
---	--Í³Ò»±ê×¼Éú»î²É¼¯µÀ¾ßÈ«²¿¼ì²â±³°üÀ¸
---	-- »ñµÃÈËÎï×°±¸À¸
+--	--ç»Ÿä¸€æ ‡å‡†ç”Ÿæ´»é‡‡é›†é“å…·å…¨éƒ¨æ£€æµ‹èƒŒåŒ…æ 
+--	-- è·å¾—äººç‰©è£…å¤‡æ 
 --		local ToolBox = nx_get_child(player, nx_widestr("ToolBox"))
 --
---		-- ÅĞ¶ÏÍæ¼Ò×°±¸À¸ÀïµÄÎïÆ·ÊÇ·ñÊÇ¸Ã¹¤¾ß
+--		-- åˆ¤æ–­ç©å®¶è£…å¤‡æ é‡Œçš„ç‰©å“æ˜¯å¦æ˜¯è¯¥å·¥å…·
 --		local need_item_num = nx_container_get_itemcount(ToolBox, need_tool)
 --		if need_item_num <= 0 then
---			-- ±ØĞë×°±¸¹¤¾ßÌáÊ¾
+--			-- å¿…é¡»è£…å¤‡å·¥å…·æç¤º
 --			nx_sysinfo(player, 2, "1144")
 --			return 0
 --		end
 --	end
 
-	-- ÅĞ¶Ï²É¼¯NPCµÄÀàĞÍ
+	-- åˆ¤æ–­é‡‡é›†NPCçš„ç±»å‹
 	local npctype = nx_query_property(npc, "GatherType")
 	local npc_config = nx_query_property(npc, "ConfigID")
 	local dropstr = nx_query_property(npc, "DropID")
 
 	if npctype == GATHER_TYPE_TASK then
-		-- ÈÎÎñid, ½ø¶È ÁĞ±í
+		-- ä»»åŠ¡id, è¿›åº¦ åˆ—è¡¨
 		local str_taskids = nx_query_property(npc, "GatherPara1")
 		local str_orders  = nx_query_property(npc, "GatherPara2")
 
-		-- ·ÀÖ¹Ã»ÓĞÅäÕâ¸öÊôĞÔ
+		-- é˜²æ­¢æ²¡æœ‰é…è¿™ä¸ªå±æ€§
 		if "" == str_orders then
 			str_orders = "0"
 		end
@@ -103,34 +103,34 @@ function can_gather(player, npc)
 
 		for count = 1, task_num do
 
-			-- ÈÎÎñÎïÆ·²É¼¯
+			-- ä»»åŠ¡ç‰©å“é‡‡é›†
 			local taskid = nx_int(taskids_table[count])
 			local order = nx_int(orders_table[count])
 
-			-- ±éÀúÈÎÎñ¼ÇÂ¼±í,²éÕÒÊÇ·ñÓĞ¸ÃÀàĞÍÈÎÎñ,ÕÒµ½µÚÒ»¸öÂú×ãÌõ¼şµÄ
+			-- éå†ä»»åŠ¡è®°å½•è¡¨,æŸ¥æ‰¾æ˜¯å¦æœ‰è¯¥ç±»å‹ä»»åŠ¡,æ‰¾åˆ°ç¬¬ä¸€ä¸ªæ»¡è¶³æ¡ä»¶çš„
 			local rows = nx_get_record_rows(player, "Task_Record");
 			--local findrow = nx_find_record_value(player, "Task_Record", 0, taskid)
 			for i = 0, rows-1 do
 				local id = nx_query_record_value(player, "Task_Record", i, 0);
 				if id == taskid then
-					-- Èç¹ûÓĞ½ø¶ÈÒªÇó£¬²»µ½½ø¶È²»ÄÜ²É¼¯
+					-- å¦‚æœæœ‰è¿›åº¦è¦æ±‚ï¼Œä¸åˆ°è¿›åº¦ä¸èƒ½é‡‡é›†
 					if nx_int(order) > nx_int(0) then
 						local cur_order = nx_query_record_value(player, "Task_Record", i, 2)
 
 						if nx_int(cur_order + 1) == nx_int(order) then
-							-- ËµÃ÷ÓĞÈÎÎñµ±Ç°¿ÉÒÔ²É¼¯
+							-- è¯´æ˜æœ‰ä»»åŠ¡å½“å‰å¯ä»¥é‡‡é›†
 							b_find = true
 
 							break
 						end
-					else -- 0 ÎªÃ»ÓĞ½ø¶ÈÒªÇó
+					else -- 0 ä¸ºæ²¡æœ‰è¿›åº¦è¦æ±‚
 
 						local config = nx_query_record_value(player, "Task_Record", i, 4)
 						if config == dropstr or npc_config == dropstr then
 							local now_num = nx_query_record_value(player, "Task_Record", i, 2)
 							local max_num = nx_query_record_value(player, "Task_Record", i, 3)
 
-							-- ËµÃ÷ÓĞÈÎÎñµ±Ç°¿ÉÒÔ²É¼¯
+							-- è¯´æ˜æœ‰ä»»åŠ¡å½“å‰å¯ä»¥é‡‡é›†
 							if now_num < max_num then
 								b_find = true
 
@@ -151,11 +151,11 @@ function can_gather(player, npc)
 		end
 	elseif npctype == GATHER_TYPE_LIFE then
 
-		-- Éú»î¼¼ÄÜ²É¼¯
+		-- ç”Ÿæ´»æŠ€èƒ½é‡‡é›†
 		local skill_type = nx_query_property(npc, "GatherPara1")
 		local skill_level = nx_int(nx_query_property(npc, "GatherPara2"))
 
-		-- ²éÕÒÓĞÃ»ÓĞÕâ¸ö¼¼ÄÜ
+		-- æŸ¥æ‰¾æœ‰æ²¡æœ‰è¿™ä¸ªæŠ€èƒ½
 		local therow = nx_find_record_value(player, "job_rec", 0, nx_string(skill_type))
 		if therow < 0 then
 			--nx_sysinfo(player, 2, "11714", nx_string(skill_type))
@@ -175,7 +175,7 @@ function can_gather(player, npc)
 			return 0
 		end
 
-		-- ²éÑ¯¼¶±ğ¹»²»¹»
+		-- æŸ¥è¯¢çº§åˆ«å¤Ÿä¸å¤Ÿ
 		local has_level = nx_query_record_value(player, "job_rec", therow, 1)
 		local job_name = nx_query_record_value(player, "job_rec", therow, 0)
 
@@ -206,30 +206,30 @@ function can_gather(player, npc)
 			return 0
 		end
 
-		-- ÅĞ¶ÏÊıÁ¿
+		-- åˆ¤æ–­æ•°é‡
 		local left_count = nx_int(nx_query_property(npc, "LeftCount"))
 		if left_count <= 0 then
 			return 0
 		end
 
-		-- ÌåÁ¦ÏŞÖÆ
+		-- ä½“åŠ›é™åˆ¶
 		local need_ene = nx_query_property(npc, "NeedEne")
 		local have_ene = nx_query_property(player, "Ene")
 
 		if have_ene < need_ene then
-			-- ÌáÊ¾ÌåÁ¦²»×ã
+			-- æç¤ºä½“åŠ›ä¸è¶³
 			nx_sysinfo(player, 2, "1145")
 			return 0
 		end
 	elseif npctype == GATHER_TYPE_OTHER then
-		-- ÆäËûÀàĞÍÔİÊ±²»ÉèÖÃÏŞÖÆ
+		-- å…¶ä»–ç±»å‹æš‚æ—¶ä¸è®¾ç½®é™åˆ¶
 	elseif npctype == GATHER_TYPE_DESTROY then
 
-		-- ÈÎÎñid, ½ø¶È ÁĞ±í
+		-- ä»»åŠ¡id, è¿›åº¦ åˆ—è¡¨
 		local str_taskids = nx_query_property(npc, "GatherPara1")
 		local str_orders  = nx_query_property(npc, "GatherPara2")
 
-		-- ·ÀÖ¹Ã»ÓĞÅäÕâ¸öÊôĞÔ
+		-- é˜²æ­¢æ²¡æœ‰é…è¿™ä¸ªå±æ€§
 		if "" == str_orders then
 			str_orders = "0"
 		end
@@ -249,33 +249,33 @@ function can_gather(player, npc)
 
 		for count = 1, task_num do
 
-			-- ÈÎÎñÎïÆ·²É¼¯
+			-- ä»»åŠ¡ç‰©å“é‡‡é›†
 			local taskid = nx_int(taskids_table[count])
 			local order = nx_int(orders_table[count])
 
-			-- ²éÕÒÊÇ·ñÓĞ¸ÃÈÎÎñ
+			-- æŸ¥æ‰¾æ˜¯å¦æœ‰è¯¥ä»»åŠ¡
 			local findrow = nx_find_record_value(player, "Task_Record", 0, taskid)
 
 			if nx_int(findrow) >= nx_int(0) then
 
-				-- Èç¹ûÓĞ½ø¶ÈÒªÇó£¬²»µ½½ø¶È²»ÄÜ²É¼¯
+				-- å¦‚æœæœ‰è¿›åº¦è¦æ±‚ï¼Œä¸åˆ°è¿›åº¦ä¸èƒ½é‡‡é›†
 				if nx_int(order) > nx_int(0) then
 					local cur_order = nx_query_record_value(player, "Task_Record", findrow, 2)
 
 					if nx_int(cur_order + 1) == nx_int(order) then
-						-- ËµÃ÷ÓĞÈÎÎñµ±Ç°¿ÉÒÔ²É¼¯
+						-- è¯´æ˜æœ‰ä»»åŠ¡å½“å‰å¯ä»¥é‡‡é›†
 						b_find = true
 
 						break
 					end
-				else -- 0 ÎªÃ»ÓĞ½ø¶ÈÒªÇó
+				else -- 0 ä¸ºæ²¡æœ‰è¿›åº¦è¦æ±‚
 
 					local config = nx_query_record_value(player, "Task_Record", findrow, 4)
 					if config == npc_config then
 						local now_num = nx_query_record_value(player, "Task_Record", findrow, 2)
 						local max_num = nx_query_record_value(player, "Task_Record", findrow, 3)
 
-						-- ËµÃ÷ÓĞÈÎÎñµ±Ç°¿ÉÒÔ²É¼¯
+						-- è¯´æ˜æœ‰ä»»åŠ¡å½“å‰å¯ä»¥é‡‡é›†
 						if now_num < max_num then
 							b_find = true
 
@@ -292,11 +292,11 @@ function can_gather(player, npc)
 			return 0
 		end
 	elseif npctype == GATHER_TYPE_TASK_NO_RECORD then
-		-- ÈÎÎñid, ½ø¶È ÁĞ±í
+		-- ä»»åŠ¡id, è¿›åº¦ åˆ—è¡¨
 		local str_taskids = nx_query_property(npc, "GatherPara1")
 		local str_orders  = nx_query_property(npc, "GatherPara2")
 
-		-- ·ÀÖ¹Ã»ÓĞÅäÕâ¸öÊôĞÔ
+		-- é˜²æ­¢æ²¡æœ‰é…è¿™ä¸ªå±æ€§
 		if "" == str_orders then
 			str_orders = "0"
 		end
@@ -316,14 +316,14 @@ function can_gather(player, npc)
 		local b_find = false
 
 		for count = 1, task_num do
-			-- ÈÎÎñÎïÆ·²É¼¯
+			-- ä»»åŠ¡ç‰©å“é‡‡é›†
 			local taskid = nx_int(taskids_table[count])
-			-- Èç¹ûÃ»ÓĞÅäÖÃ»òÕßÅäÖÃÎªÒ»¸ö¸ºÊı£¬Ôò×ÜÊÇ¿ÉÒÔ²É¼¯
+			-- å¦‚æœæ²¡æœ‰é…ç½®æˆ–è€…é…ç½®ä¸ºä¸€ä¸ªè´Ÿæ•°ï¼Œåˆ™æ€»æ˜¯å¯ä»¥é‡‡é›†
 			if taskid <= 0 then
 				return 1;
 			end
 
-			-- Íæ¼ÒÈÎÎñ±íÖĞÓĞ¸Ã±àºÅµÄÈÎÎñ£¬Ôò¿ÉÒÔ²É¼¯
+			-- ç©å®¶ä»»åŠ¡è¡¨ä¸­æœ‰è¯¥ç¼–å·çš„ä»»åŠ¡ï¼Œåˆ™å¯ä»¥é‡‡é›†
 			local row = nx_find_record_value(player, "Task_Record", 0, taskid);
 			if row >= 0 then
 				return 1;
@@ -331,22 +331,22 @@ function can_gather(player, npc)
 		end
 	end
 	--]]
-	-- ·µ»Ø³É¹¦
+	-- è¿”å›æˆåŠŸ
 	return 1
 
 end
 
--- ¿ªÊ¼²É¼¯
+-- å¼€å§‹é‡‡é›†
 function begin_gather(player)
 
-	-- ²¥·Å²É¼¯¶¯×÷
+	-- æ’­æ”¾é‡‡é›†åŠ¨ä½œ
 	local npc = nx_query_property(player, "LastObject")
 
 	if not nx_exists(npc) then
 		return 0
 	end
 
-	-- µÃµ½¶¯×÷Ãû
+	-- å¾—åˆ°åŠ¨ä½œå
 	local action_name = nx_query_property(npc, "GatherAction")
 
 	if action_name ~= "" and action_name ~= nil then
@@ -357,75 +357,75 @@ function begin_gather(player)
 end
 
 
--- ½áÊø²É¼¯
+-- ç»“æŸé‡‡é›†
 function end_gather(player)
 
-	-- ½«Á÷³ÌÃû×Ö¸Ä±äÎª¿Õ
+	-- å°†æµç¨‹åå­—æ”¹å˜ä¸ºç©º
 	nx_set_property(player, "FlowCategory", "")
 
-	-- µÃµ½²É¼¯NPC
+	-- å¾—åˆ°é‡‡é›†NPC
 	local npc = nx_query_data(player, "GatherNpc")
 	if not nx_exists(npc) then
 		return 1
 	end
 
-	--¶¯×÷¸´Ô­
+	--åŠ¨ä½œå¤åŸ
 	nx_custom_stateaction(player, "")
 
-	--ÊÖÖĞµÀ¾ßÇå¿Õ
+	--æ‰‹ä¸­é“å…·æ¸…ç©º
 	nx_set_property(player, "ToolEffect", "")
 
 	return 1
 end
 
--- ×¼±¸½áÊø´¦ÀíÂß¼­
+-- å‡†å¤‡ç»“æŸå¤„ç†é€»è¾‘
 function on_prepare(player)
 end
 
--- ÃüÖĞºó
+-- å‘½ä¸­å
 function on_hit(player)
 
 --[[
-	--¶¯×÷¸´Ô­
+	--åŠ¨ä½œå¤åŸ
 	nx_custom_stateaction(player, "")
 
-	--ÊÖÖĞµÀ¾ßÇå¿Õ
+	--æ‰‹ä¸­é“å…·æ¸…ç©º
 	nx_set_property(player, "LifeJobTool", 0)
 
-	-- µÃµ½²É¼¯NPC
+	-- å¾—åˆ°é‡‡é›†NPC
 	local npc = nx_query_data(player, "GatherNpc")
 	if not nx_exists(npc) then
 		return 0
 	end
 
-	-- ÉèÖÃNPC²»ÔÚ±»¿ª²ÉÖĞ
+	-- è®¾ç½®NPCä¸åœ¨è¢«å¼€é‡‡ä¸­
 	local is_use = nx_int(nx_query_property(npc, "IsUsing"))
 	if is_use > 0 then
 		nx_set_property(npc, "IsUsing", 0)
 	end
 
-	-- µÃµ½²É¼¯ÀàĞÍ
+	-- å¾—åˆ°é‡‡é›†ç±»å‹
 	local type = nx_int(nx_query_property(npc, "GatherType"))
 	local npc_config = nx_query_property(npc, "ConfigID")
 	local dropstr = nx_query_property(npc, "DropID")
 
 	if type == GATHER_TYPE_TASK then
 
-		-- ÈÎÎñÎïÆ·²É¼¯
+		-- ä»»åŠ¡ç‰©å“é‡‡é›†
 		local invisible = nx_int(nx_query_property(npc, "Invisible"))
 		if invisible > 0 then
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- µÃµ½°ü¹ü
+		-- å¾—åˆ°åŒ…è£¹
 		local bag = nx_get_child(player, nx_widestr("ToolBox"))
 		if not nx_exists(bag) then
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- ¼ì²éÄÜ·ñ·ÅÏÂÊÕ¼¯ÎïÆ·
+		-- æ£€æŸ¥èƒ½å¦æ”¾ä¸‹æ”¶é›†ç‰©å“
 		local get_item = nx_query_property(npc, "DropID")
 		local item = 0
 
@@ -437,7 +437,7 @@ function on_hit(player)
 			end
 
 			if nx_container_can_placeitem(bag, item) <= 0 then
-				-- É¾³ı
+				-- åˆ é™¤
 				nx_destroy_self(item)
 				nx_sysinfo(player, 2, "9627")
 				nx_end_gather(player)
@@ -445,19 +445,19 @@ function on_hit(player)
 			end
 		end
 
-		-- ÅĞ¶ÏĞèÒªÉÏ½ÉµÄÎïÆ·ÊÇ·ñ×ã¹»
+		-- åˆ¤æ–­éœ€è¦ä¸Šç¼´çš„ç‰©å“æ˜¯å¦è¶³å¤Ÿ
 		local items_str = nx_query_property(npc, "LostItems")
 
 		local str_table = nx_split_string(items_str, "|")
 		local item_count = table.getn(str_table)
 
-		-- ÒÀ´ÎÅĞ¶ÏÊÇ·ñÒªÉÏ½ÉµÄÎïÆ·×ã¹»
+		-- ä¾æ¬¡åˆ¤æ–­æ˜¯å¦è¦ä¸Šç¼´çš„ç‰©å“è¶³å¤Ÿ
 		local bEnough = true
 
 		for n = 1, item_count do
 			local formal_table = nx_split_string(str_table[n], "-")
 
-			-- ÊôĞÔ
+			-- å±æ€§
 			local configid = formal_table[1]
 			local need_amount = nx_int(formal_table[2])
 
@@ -468,40 +468,40 @@ function on_hit(player)
 			end
 		end
 
-		-- Èç¹û²»×ã¾Í½áÊø
+		-- å¦‚æœä¸è¶³å°±ç»“æŸ
 		if not bEnough then
 			nx_sysinfo(player, 2, "9630")
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- É¾³ıÉÏ½ÉÎïÆ·
+		-- åˆ é™¤ä¸Šç¼´ç‰©å“
 		for n = 1, item_count do
 			local formal_table = nx_split_string(str_table[n], "-")
 
-			-- ÊôĞÔ
+			-- å±æ€§
 			local configid = formal_table[1]
 			local need_amount = nx_int(formal_table[2])
 
-			-- É¾³ı
+			-- åˆ é™¤
 			nx_container_remove_itemcount(bag, configid, need_amount)
 		end
 
-		-- ¸øÓè²É¼¯ÎïÆ·
+		-- ç»™äºˆé‡‡é›†ç‰©å“
 		if item ~= 0 then
 			if nx_exists(item) then
 				nx_container_placeitem(bag, item)
 
-				-- ÌáÊ¾
+				-- æç¤º
 				nx_sysinfo(player, 2, "9645", get_item, 1)
 			end
 		end
 
-		-- ÈÎÎñid, ½ø¶È ÁĞ±í
+		-- ä»»åŠ¡id, è¿›åº¦ åˆ—è¡¨
 		local str_taskids = nx_query_property(npc, "GatherPara1")
 		local str_orders  = nx_query_property(npc, "GatherPara2")
 
-		-- ·ÀÖ¹Ã»ÓĞÅäÕâ¸öÊôĞÔ
+		-- é˜²æ­¢æ²¡æœ‰é…è¿™ä¸ªå±æ€§
 		if "" == str_orders then
 			str_orders = "0"
 		end
@@ -523,28 +523,28 @@ function on_hit(player)
 		local b_find = false
 
 		for count = 1, task_num do
-			-- ÈÎÎñ²É¼¯µÄ²ÎÊıÒâÒå
+			-- ä»»åŠ¡é‡‡é›†çš„å‚æ•°æ„ä¹‰
 			local taskid = nx_int(taskids_table[count])
 			local order = nx_int(orders_table[count])
 			local findrow = nx_find_record_value(player, "Task_Record", 0, taskid)
 
-			-- Èç¹û½ÇÉ«ÉíÉÏÃ»ÓĞÕâ¸öÈÎÎñ¾Í²»ÄÜ²É¼¯
+			-- å¦‚æœè§’è‰²èº«ä¸Šæ²¡æœ‰è¿™ä¸ªä»»åŠ¡å°±ä¸èƒ½é‡‡é›†
 			if nx_int(findrow) >= nx_int(0) then
 
 				if nx_int(order) > nx_int(0) then
 
 					b_find = true
 
-					-- µ±Ç°½ø¶È
+					-- å½“å‰è¿›åº¦
 					local now_num = nx_query_record_value(player, "Task_Record", findrow, 2)
 
-					-- Ë¢ĞÂ½ø¶ÈÄ¿±ê
+					-- åˆ·æ–°è¿›åº¦ç›®æ ‡
 					nx_refresh_order_target(player, taskid, findrow, order)
 
-					-- Ôö¼Ó½ø¶È
+					-- å¢åŠ è¿›åº¦
 					nx_set_record_value(player, "Task_Record", findrow, 2, nx_int(now_num + 1))
 
-					-- Ë¢ĞÂ±ê¼Ç
+					-- åˆ·æ–°æ ‡è®°
 					nx_refresh_task_flag(player)
 
 				else
@@ -559,7 +559,7 @@ function on_hit(player)
 						else
 							b_find = true
 
-							-- Ë¢ĞÂ±ê¼Ç
+							-- åˆ·æ–°æ ‡è®°
 							nx_refresh_task_flag(player)
 						end
 					end
@@ -574,7 +574,7 @@ function on_hit(player)
 			return 0
 		end
 
-		-- ´ÎÊı¼õ1
+		-- æ¬¡æ•°å‡1
 		nx_set_property(npc, "LeftCount", cur_num - 1)
 		if cur_num - 1 == 0 then
 
@@ -588,30 +588,30 @@ function on_hit(player)
 
 	elseif type == GATHER_TYPE_LIFE then
 
-		-- -- ÌåÁ¦ÏŞÖÆ
+		-- -- ä½“åŠ›é™åˆ¶
 		local need_ene = nx_query_property(npc, "NeedEne")
 		local have_ene = nx_query_property(player, "Ene")
 
 		if have_ene < need_ene then
-			-- ÌáÊ¾ÌåÁ¦²»×ã
+			-- æç¤ºä½“åŠ›ä¸è¶³
 			nx_sysinfo(player, 2, "1145")
-			-- ½áÊøÁ÷³Ì
+			-- ç»“æŸæµç¨‹
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- ¼õÉÙÌåÁ¦
+		-- å‡å°‘ä½“åŠ›
 		have_ene = have_ene - need_ene
 		nx_set_property(player, "Ene", have_ene)
 		nx_sysinfo(player, 2, "11712", need_ene)
 
 
-		-- ²ÎÊıÒâÒå
+		-- å‚æ•°æ„ä¹‰
 		local skill_type = nx_query_property(npc, "GatherPara1")
 		local skill_level = nx_int(nx_query_property(npc, "GatherPara2"))
 		local skill_shexp = nx_int(nx_query_property(npc, "ShExp"))
 
-		-- Éú»î¼¼ÄÜ²É¼¯
+		-- ç”Ÿæ´»æŠ€èƒ½é‡‡é›†
 		local cur_num = nx_int(nx_query_property(npc, "LeftCount"))
 		local max_num = nx_int(nx_query_property(npc, "MaxCount"))
 
@@ -620,14 +620,14 @@ function on_hit(player)
 			return 0
 		end
 --
---		-- µôÂäÉèÖÃ
+--		-- æ‰è½è®¾ç½®
 --		local drop_id = nx_string(nx_query_property(npc, "DropID"))
 --		if nil == drop_id or 0 == string.len(drop_id) then
 --			nx_end_gather(player)
 --			return 0
 --		end
 --
---		-- ´´½¨µôÂä°ü
+--		-- åˆ›å»ºæ‰è½åŒ…
 --		local drop_box = nx_get_child(npc, nx_widestr("NpcDropBox"))
 --		if nx_exists(drop_box) then
 --			nx_destroy_self(drop_box)
@@ -648,31 +648,31 @@ function on_hit(player)
 --			nx_destroy_self(drop_box)
 --		end
 --
---		-- Ê°È¡¿òÉú³É
---		-- ÕâÀïµÄ 80 ÊÇ VIEWPORT_DROP_BOX Ã¶¾Ù wl
+--		-- æ‹¾å–æ¡†ç”Ÿæˆ
+--		-- è¿™é‡Œçš„ 80 æ˜¯ VIEWPORT_DROP_BOX æšä¸¾ wl
 --		if nx_find_viewport(player, 80) then
 --			nx_remove_viewport(player, 80)
 --		end
 --
 --		nx_add_viewport(player, 80, drop_box)
 
-		-- ´ÎÊı¼õ1
+		-- æ¬¡æ•°å‡1
 		nx_set_property(npc, "LeftCount", cur_num - 1)
 		if cur_num - 1 == 0 then
 			nx_destroy_self(npc)
 		end
 
-	-- Éú»îµôÂäÌí¼Ó
+	-- ç”Ÿæ´»æ‰è½æ·»åŠ 
 	nx_process_life_drop_package( player, npc )
 
-	-- Ôö¼ÓÏà¹ØÖ°Òµ¾­ÑéµÈ¼¶
+	-- å¢åŠ ç›¸å…³èŒä¸šç»éªŒç­‰çº§
 --	nx_inc_job_level(player, skill_type, skill_level, skill_shexp)
 	nx_process_life_exp_package( player, npc )
 
 
 	elseif type == GATHER_TYPE_OTHER then
 
-		-- ±¦ÏäÀà²É¼¯NPC£¬Ö±½Óµ÷ÓÃµôÂä¿â
+		-- å®ç®±ç±»é‡‡é›†NPCï¼Œç›´æ¥è°ƒç”¨æ‰è½åº“
 		local cur_num = nx_int(nx_query_property(npc, "LeftCount"))
 		local max_num = nx_int(nx_query_property(npc, "MaxCount"))
 
@@ -681,14 +681,14 @@ function on_hit(player)
 			return 0
 		end
 
-		-- µôÂäÉèÖÃ
+		-- æ‰è½è®¾ç½®
 		local drop_id = nx_string(nx_query_property(npc, "DropID"))
 		if nil == drop_id or 0 == string.len(drop_id) then
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- ´´½¨µôÂä°ü
+		-- åˆ›å»ºæ‰è½åŒ…
 		local drop_box = nx_get_child(npc, nx_widestr("NpcDropBox"))
 		if nx_exists(drop_box) then
 			nx_destroy_self(drop_box)
@@ -702,7 +702,7 @@ function on_hit(player)
 
 		nx_set_property(drop_box, "Name", nx_widestr("NpcDropBox"))
 
-		-- »ñµÃµôÂäÁĞ±í
+		-- è·å¾—æ‰è½åˆ—è¡¨
 		local dropitems
 		dropitems = nx_get_normal_dropitems(drop_box, drop_id)
 
@@ -710,28 +710,28 @@ function on_hit(player)
 			nx_destroy_self(drop_box)
 		end
 
-		-- Ê°È¡¿òÉú³É
+		-- æ‹¾å–æ¡†ç”Ÿæˆ
 		if nx_find_viewport(player, 80) then
 			nx_remove_viewport(player, 80)
 		end
 
 		nx_add_viewport(player, 80, drop_box)
 
-		-- ´ÎÊı¼õ1
+		-- æ¬¡æ•°å‡1
 		nx_set_property(npc, "LeftCount", cur_num - 1)
 
 		if cur_num - 1 == 0 then
-			-- É¾³ı
+			-- åˆ é™¤
 			nx_destroy_self(npc)
 		end
 
 	elseif type == GATHER_TYPE_DESTROY then
 
-		-- ÈÎÎñid, ½ø¶È ÁĞ±í
+		-- ä»»åŠ¡id, è¿›åº¦ åˆ—è¡¨
 		local str_taskids = nx_query_property(npc, "GatherPara1")
 		local str_orders  = nx_query_property(npc, "GatherPara2")
 
-		-- ·ÀÖ¹Ã»ÓĞÅäÕâ¸öÊôĞÔ
+		-- é˜²æ­¢æ²¡æœ‰é…è¿™ä¸ªå±æ€§
 		if "" == str_orders then
 			str_orders = "0"
 		end
@@ -752,28 +752,28 @@ function on_hit(player)
 		local b_find = false
 
 		for count = 1, task_num do
-			-- ÈÎÎñ²É¼¯µÄ²ÎÊıÒâÒå
+			-- ä»»åŠ¡é‡‡é›†çš„å‚æ•°æ„ä¹‰
 			local taskid = nx_int(taskids_table[count])
 			local order = nx_int(orders_table[count])
 			local findrow = nx_find_record_value(player, "Task_Record", 0, taskid)
 
-			-- Èç¹û½ÇÉ«ÉíÉÏÃ»ÓĞÕâ¸öÈÎÎñ¾Í²»ÄÜ²É¼¯
+			-- å¦‚æœè§’è‰²èº«ä¸Šæ²¡æœ‰è¿™ä¸ªä»»åŠ¡å°±ä¸èƒ½é‡‡é›†
 			if nx_int(findrow) >= nx_int(0) then
 
 				if nx_int(order) > nx_int(0) then
 
 					b_find = true
 
-					-- µ±Ç°½ø¶È
+					-- å½“å‰è¿›åº¦
 					local now_num = nx_query_record_value(player, "Task_Record", findrow, 2)
 
-					-- Ë¢ĞÂ½ø¶ÈÄ¿±ê
+					-- åˆ·æ–°è¿›åº¦ç›®æ ‡
 					nx_refresh_order_target(player, taskid, findrow, order)
 
-					-- Ôö¼Ó½ø¶È
+					-- å¢åŠ è¿›åº¦
 					nx_set_record_value(player, "Task_Record", findrow, 2, nx_int(now_num + 1))
 
-					-- Ë¢ĞÂ±ê¼Ç
+					-- åˆ·æ–°æ ‡è®°
 					nx_refresh_task_flag(player);
 				else
 					local config = nx_query_record_value(player, "Task_Record", findrow, 4)
@@ -787,9 +787,9 @@ function on_hit(player)
 						else
 							b_find = true
 
-							-- Ôö¼Ó½ø¶È
+							-- å¢åŠ è¿›åº¦
 							nx_set_record_value(player, "Task_Record", findrow, 2, nx_int(now_num + 1))
-							-- Ë¢ĞÂ±ê¼Ç
+							-- åˆ·æ–°æ ‡è®°
 							nx_refresh_task_flag(player)
 						end
 					end
@@ -809,34 +809,34 @@ function on_hit(player)
 			return 0
 		end
 
-		-- ´ÎÊı¼õ1
+		-- æ¬¡æ•°å‡1
 		nx_set_property(npc, "LeftCount", cur_num - 1)
 		if cur_num - 1 == 0 then
 			local eff = nx_query_property(npc, "EffectsTime");
 			if eff > 0 then
 				nx_add_countbeat(npc, "GatherModule::H_EndEff", eff, 1);
 			else
-				-- Ë¢ĞÂĞÄÌø
+				-- åˆ·æ–°å¿ƒè·³
 				nx_destroy_self(npc)
 			end
 		end
 	elseif type == GATHER_TYPE_TASK_NO_RECORD then
 
-		-- ÈÎÎñÎïÆ·²É¼¯
+		-- ä»»åŠ¡ç‰©å“é‡‡é›†
 		local invisible = nx_int(nx_query_property(npc, "Invisible"))
 		if invisible > 0 then
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- µÃµ½°ü¹ü
+		-- å¾—åˆ°åŒ…è£¹
 		local bag = nx_get_child(player, nx_widestr("ToolBox"))
 		if not nx_exists(bag) then
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- ¼ì²éÄÜ·ñ·ÅÏÂÊÕ¼¯ÎïÆ·
+		-- æ£€æŸ¥èƒ½å¦æ”¾ä¸‹æ”¶é›†ç‰©å“
 		local get_item = nx_query_property(npc, "DropID")
 		local item = 0
 
@@ -848,7 +848,7 @@ function on_hit(player)
 			end
 
 			if nx_container_can_placeitem(bag, item) <= 0 then
-				-- É¾³ı
+				-- åˆ é™¤
 				nx_destroy_self(item)
 				nx_sysinfo(player, 2, "9627")
 				nx_end_gather(player)
@@ -856,19 +856,19 @@ function on_hit(player)
 			end
 		end
 
-		-- ÅĞ¶ÏĞèÒªÉÏ½ÉµÄÎïÆ·ÊÇ·ñ×ã¹»
+		-- åˆ¤æ–­éœ€è¦ä¸Šç¼´çš„ç‰©å“æ˜¯å¦è¶³å¤Ÿ
 		local items_str = nx_query_property(npc, "LostItems")
 
 		local str_table = nx_split_string(items_str, "|")
 		local item_count = table.getn(str_table)
 
-		-- ÒÀ´ÎÅĞ¶ÏÊÇ·ñÒªÉÏ½ÉµÄÎïÆ·×ã¹»
+		-- ä¾æ¬¡åˆ¤æ–­æ˜¯å¦è¦ä¸Šç¼´çš„ç‰©å“è¶³å¤Ÿ
 		local bEnough = true
 
 		for n = 1, item_count do
 			local formal_table = nx_split_string(str_table[n], "-")
 
-			-- ÊôĞÔ
+			-- å±æ€§
 			local configid = formal_table[1]
 			local need_amount = nx_int(formal_table[2])
 
@@ -879,31 +879,31 @@ function on_hit(player)
 			end
 		end
 
-		-- Èç¹û²»×ã¾Í½áÊø
+		-- å¦‚æœä¸è¶³å°±ç»“æŸ
 		if not bEnough then
 			nx_sysinfo(player, 2, "9630")
 			nx_end_gather(player)
 			return 0
 		end
 
-		-- É¾³ıÉÏ½ÉÎïÆ·
+		-- åˆ é™¤ä¸Šç¼´ç‰©å“
 		for n = 1, item_count do
 			local formal_table = nx_split_string(str_table[n], "-")
 
-			-- ÊôĞÔ
+			-- å±æ€§
 			local configid = formal_table[1]
 			local need_amount = nx_int(formal_table[2])
 
-			-- É¾³ı
+			-- åˆ é™¤
 			nx_container_remove_itemcount(bag, configid, need_amount)
 		end
 
-		-- ¸øÓè²É¼¯ÎïÆ·
+		-- ç»™äºˆé‡‡é›†ç‰©å“
 		if item ~= 0 then
 			if nx_exists(item) then
 				nx_container_placeitem(bag, item)
 
-				-- ÌáÊ¾
+				-- æç¤º
 				nx_sysinfo(player, 2, "9645", get_item, 1)
 			end
 		end
@@ -915,7 +915,7 @@ function on_hit(player)
 			return 0
 		end
 
-		-- ´ÎÊı¼õ1
+		-- æ¬¡æ•°å‡1
 		nx_set_property(npc, "LeftCount", cur_num - 1)
 		if cur_num - 1 == 0 then
 			local eff = nx_query_property(npc, "EffectsTime");
@@ -927,15 +927,15 @@ function on_hit(player)
 		end
 	end
 
-	-- ½áÊøÁ÷³Ì
+	-- ç»“æŸæµç¨‹
 	nx_end_gather(player)
 --]]
-	-- ³É¹¦·µ»Ø
+	-- æˆåŠŸè¿”å›
 	return 1
 
 end
 
---²éÕÒ·ûºÏÒªÇó(ÈÎÎñ±àºÅºÍÈÎÎñÀàĞÍ)µÚÒ»¸öÈÎÎñĞĞºÅ
+--æŸ¥æ‰¾ç¬¦åˆè¦æ±‚(ä»»åŠ¡ç¼–å·å’Œä»»åŠ¡ç±»å‹)ç¬¬ä¸€ä¸ªä»»åŠ¡è¡Œå·
 function get_gather_task_row(self, id, type)
 
 	local findrow = nx_find_record_value(player, "Task_Record", 0, taskid)

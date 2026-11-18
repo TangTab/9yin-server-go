@@ -2,80 +2,80 @@
 <object>
 
   <properties>
-    <property name="MinPhyAttack"  type="int" public="false" private="false" save="false" desc="½üÕ½×îÐ¡ÎïÀí¹¥»÷Á¦"/>
-    <property name="MaxPhyAttack"  type="int" public="false" private="false" save="false" desc="½üÕ½×î´óÎïÀí¹¥»÷Á¦"/>
-    <property name="MinMagicAttack"  type="int" public="false" private="false" save="false" desc="·¨Êõ×îÐ¡¹¥»÷Á¦"/>
-    <property name="MaxMagicAttack"  type="int" public="false" private="false" save="false" desc="·¨Êõ×î´ó¹¥»÷Á¦"/>
+    <property name="MinPhyAttack"  type="int" public="false" private="false" save="false" desc="è¿‘æˆ˜æœ€å°ç‰©ç†æ”»å‡»åŠ›"/>
+    <property name="MaxPhyAttack"  type="int" public="false" private="false" save="false" desc="è¿‘æˆ˜æœ€å¤§ç‰©ç†æ”»å‡»åŠ›"/>
+    <property name="MinMagicAttack"  type="int" public="false" private="false" save="false" desc="æ³•æœ¯æœ€å°æ”»å‡»åŠ›"/>
+    <property name="MaxMagicAttack"  type="int" public="false" private="false" save="false" desc="æ³•æœ¯æœ€å¤§æ”»å‡»åŠ›"/>
 
 
-    <property name="CritProb"  type="float" public="false" private="false" save="false" desc="±©»÷ÂÊ"/>
-    <property name="CritProbAdd" type="float" public="false" private="false" save="false" desc="±©»÷¼¸ÂÊ"/>
-    <property name="CritMulProb"  type="float" public="false" private="false" save="false" desc="±©»÷±¶ÂÊ"/>
-    <property name="CritMulProbAdd" type="float" public="false" private="false" save="false" desc="±©»÷±¶ÂÊ¼¸ÂÊ"/>
-    <property name="CritHurt"  type="int" public="false" private="false" save="false" desc="±©»÷ÉËº¦"/>
-    <property name="CritHurtAdd" type="int" public="false" private="false" save="false" desc="±©»÷ÉËº¦¸½¼Ó"/>
-    <property name="MagCritProb"  type="float" public="false" private="false" save="false" desc="·¨Êõ±©»÷ÂÊ"/>
-    <property name="MagCritProbAdd" type="float" public="false" private="false" save="false" desc="·¨Êõ±©»÷¼¸ÂÊ"/>
+    <property name="CritProb"  type="float" public="false" private="false" save="false" desc="æš´å‡»çŽ‡"/>
+    <property name="CritProbAdd" type="float" public="false" private="false" save="false" desc="æš´å‡»å‡ çŽ‡"/>
+    <property name="CritMulProb"  type="float" public="false" private="false" save="false" desc="æš´å‡»å€çŽ‡"/>
+    <property name="CritMulProbAdd" type="float" public="false" private="false" save="false" desc="æš´å‡»å€çŽ‡å‡ çŽ‡"/>
+    <property name="CritHurt"  type="int" public="false" private="false" save="false" desc="æš´å‡»ä¼¤å®³"/>
+    <property name="CritHurtAdd" type="int" public="false" private="false" save="false" desc="æš´å‡»ä¼¤å®³é™„åŠ "/>
+    <property name="MagCritProb"  type="float" public="false" private="false" save="false" desc="æ³•æœ¯æš´å‡»çŽ‡"/>
+    <property name="MagCritProbAdd" type="float" public="false" private="false" save="false" desc="æ³•æœ¯æš´å‡»å‡ çŽ‡"/>
 
 
-    <property name="AccurateProb" type="float" public="false" private="false" save="false" desc="¾«×¼¼¸ÂÊ"/>
-    <property name="AccurateProbAdd" type="float" public="false" private="false" save="false" desc="¾«×¼¼¸ÂÊ"/>
-    <property name="MagPrecProb" type="float" public="false" private="false" save="false" desc="·¨Êõ¾«×¼ÂÊ"/>
-    <property name="MagPrecProbAdd" type="float" public="false" private="false" save="false" desc="·¨Êõ¾«×¼¼¸ÂÊ"/>
+    <property name="AccurateProb" type="float" public="false" private="false" save="false" desc="ç²¾å‡†å‡ çŽ‡"/>
+    <property name="AccurateProbAdd" type="float" public="false" private="false" save="false" desc="ç²¾å‡†å‡ çŽ‡"/>
+    <property name="MagPrecProb" type="float" public="false" private="false" save="false" desc="æ³•æœ¯ç²¾å‡†çŽ‡"/>
+    <property name="MagPrecProbAdd" type="float" public="false" private="false" save="false" desc="æ³•æœ¯ç²¾å‡†å‡ çŽ‡"/>
 
 
-    <property name="DodgeProb"  type="float" public="false" private="false" save="false" desc="ÉÁ±ÜÂÊ"/>
-    <property name="DodgeProbAdd" type="float" public="false" private="false" save="false" desc="ÉÁ±Ü¼¸ÂÊ"/>
-    <property name="MagdodgeProb"  type="float" public="false" private="false" save="false" desc="·¨Êõ¶ã±Ü¼¸ÂÊ"/>
-    <property name="MagdodgeProbAdd" type="float" public="false" private="false" save="false" desc="·¨ÊõÉÁ±Ü¼¸ÂÊ"/>
+    <property name="DodgeProb"  type="float" public="false" private="false" save="false" desc="é—ªé¿çŽ‡"/>
+    <property name="DodgeProbAdd" type="float" public="false" private="false" save="false" desc="é—ªé¿å‡ çŽ‡"/>
+    <property name="MagdodgeProb"  type="float" public="false" private="false" save="false" desc="æ³•æœ¯èº²é¿å‡ çŽ‡"/>
+    <property name="MagdodgeProbAdd" type="float" public="false" private="false" save="false" desc="æ³•æœ¯é—ªé¿å‡ çŽ‡"/>
 
 
     
-    <property name="GuardRateProb"  type="float" public="false" private="false" save="false" desc="»¤¼×¼õÉËÂÊ"/>
-    <property name="GuardRateProbAdd" type="float" public="false" private="false" save="false" desc="»¤¼×¼õÉË¼¸ÂÊ"/>
+    <property name="GuardRateProb"  type="float" public="false" private="false" save="false" desc="æŠ¤ç”²å‡ä¼¤çŽ‡"/>
+    <property name="GuardRateProbAdd" type="float" public="false" private="false" save="false" desc="æŠ¤ç”²å‡ä¼¤å‡ çŽ‡"/>
     
-    <property name="PenetrateProb"  type="float" public="false" private="false" save="false" desc="»¤¼×´©Í¸"/>
-    <property name="PenetrateProbAdd" type="float" public="false" private="false" save="false" desc="»¤¼×´©Í¸¼¸ÂÊ"/>
-    <!--property name="PenetTheurgy" type="int" public="false" private="false" save="false" desc="·¨Êõ´©Í¸" /-->
+    <property name="PenetrateProb"  type="float" public="false" private="false" save="false" desc="æŠ¤ç”²ç©¿é€"/>
+    <property name="PenetrateProbAdd" type="float" public="false" private="false" save="false" desc="æŠ¤ç”²ç©¿é€å‡ çŽ‡"/>
+    <!--property name="PenetTheurgy" type="int" public="false" private="false" save="false" desc="æ³•æœ¯ç©¿é€" /-->
 
     
     
-    <property name="WeakdefVal" type="int" public="false" private="false" save="false" desc="ÉËº¦µÖÓùÖµ"/>
-    <property name="WeakdefValAdd" type="int" public="false" private="false" save="false" desc="ÉËº¦µÖÓùÖµ"/>
+    <property name="WeakdefVal" type="int" public="false" private="false" save="false" desc="ä¼¤å®³æŠµå¾¡å€¼"/>
+    <property name="WeakdefValAdd" type="int" public="false" private="false" save="false" desc="ä¼¤å®³æŠµå¾¡å€¼"/>
     
-    <property name="DefenseProb"  type="float" public="false" private="false" save="false" desc="·ÀÓù¼¸ÂÊ"/>
-    <property name="DefenseProbAdd" type="float" public="false" private="false" save="false" desc="·ÀÓù¼¸ÂÊ"/>
+    <property name="DefenseProb"  type="float" public="false" private="false" save="false" desc="é˜²å¾¡å‡ çŽ‡"/>
+    <property name="DefenseProbAdd" type="float" public="false" private="false" save="false" desc="é˜²å¾¡å‡ çŽ‡"/>
     
-    <!--property name="WeakdefProb" type="float" public="false" private="true" save="false" desc="µÖÓùÉËº¦¼¸ÂÊ"/-->
-    <!--property name="HitProb"  type="float" public="false" private="true" save="false" desc="ÃüÖÐÂÊ"/-->
-    <property name="WindAttack" type="int" public="false" private="false" save="false" desc="·çÏµ¹¥»÷"/>
-    <property name="FireAttack" type="int" public="false" private="false" save="false" desc="»ðÏµ¹¥»÷"/>
-    <property name="EarthAttack" type="int" public="false" private="false" save="false" desc="ÍÁÏµ¹¥»÷"/>
-    <property name="WaterAttack" type="int" public="false" private="false" save="false" desc="Ë®Ïµ¹¥»÷"/>
-    <property name="LightningAttack" type="int" public="false" private="false" save="false" desc="À×Ïµ¹¥»÷"/>
-    <property name="SteamAttack" type="int" public="false" private="false" save="false" desc="ÕôÆû¹¥»÷"/>
-    <property name="NatureAttack" type="int" public="false" private="false" save="false" desc="×ÔÈ»¹¥»÷"/>
-    <property name="DarkAttack" type="int" public="false" private="false" save="false" desc="°µÏµ¹¥»÷"/>
-    <property name="Wind" type="int" public="false" private="false" save="false" desc="·çÏµ¿¹ÐÔ"/>
-    <property name="Fire" type="int" public="false" private="false" save="false" desc="»ðÏµ¿¹ÐÔ"/>
-    <property name="Earth" type="int" public="false" private="false" save="false" desc="ÍÁÏµ¿¹ÐÔ"/>
-    <property name="Water" type="int" public="false" private="false" save="false" desc="Ë®Ïµ¿¹ÐÔ"/>
-    <property name="Dark" type="int" public="false" private="false" save="false" desc="°µÏµ¿¹ÐÔ"/>
-    <property name="Nature" type="int" public="false" private="false" save="false" desc="×ÔÈ»Ïµ¿¹ÐÔ"/>
-    <property name="Steam" type="int" public="false" private="false" save="false" desc="ÕôÆûÏµ¿¹ÐÔ"/>
-    <property name="Lightning" type="int" public="false" private="false" save="false" desc="À×Ïµ¿¹ÐÔ"/>
-    <property name="AllResistProb" type="float" public="false" private="false" save="false" desc="È«¿¹ÐÔµÖ¿¹ÂÊ"/>
-    <property name="AllResistProbAdd" type="float" public="false" private="false" save="false" desc="È«Ïµ¿¹ÐÔ"/>
+    <!--property name="WeakdefProb" type="float" public="false" private="true" save="false" desc="æŠµå¾¡ä¼¤å®³å‡ çŽ‡"/-->
+    <!--property name="HitProb"  type="float" public="false" private="true" save="false" desc="å‘½ä¸­çŽ‡"/-->
+    <property name="WindAttack" type="int" public="false" private="false" save="false" desc="é£Žç³»æ”»å‡»"/>
+    <property name="FireAttack" type="int" public="false" private="false" save="false" desc="ç«ç³»æ”»å‡»"/>
+    <property name="EarthAttack" type="int" public="false" private="false" save="false" desc="åœŸç³»æ”»å‡»"/>
+    <property name="WaterAttack" type="int" public="false" private="false" save="false" desc="æ°´ç³»æ”»å‡»"/>
+    <property name="LightningAttack" type="int" public="false" private="false" save="false" desc="é›·ç³»æ”»å‡»"/>
+    <property name="SteamAttack" type="int" public="false" private="false" save="false" desc="è’¸æ±½æ”»å‡»"/>
+    <property name="NatureAttack" type="int" public="false" private="false" save="false" desc="è‡ªç„¶æ”»å‡»"/>
+    <property name="DarkAttack" type="int" public="false" private="false" save="false" desc="æš—ç³»æ”»å‡»"/>
+    <property name="Wind" type="int" public="false" private="false" save="false" desc="é£Žç³»æŠ—æ€§"/>
+    <property name="Fire" type="int" public="false" private="false" save="false" desc="ç«ç³»æŠ—æ€§"/>
+    <property name="Earth" type="int" public="false" private="false" save="false" desc="åœŸç³»æŠ—æ€§"/>
+    <property name="Water" type="int" public="false" private="false" save="false" desc="æ°´ç³»æŠ—æ€§"/>
+    <property name="Dark" type="int" public="false" private="false" save="false" desc="æš—ç³»æŠ—æ€§"/>
+    <property name="Nature" type="int" public="false" private="false" save="false" desc="è‡ªç„¶ç³»æŠ—æ€§"/>
+    <property name="Steam" type="int" public="false" private="false" save="false" desc="è’¸æ±½ç³»æŠ—æ€§"/>
+    <property name="Lightning" type="int" public="false" private="false" save="false" desc="é›·ç³»æŠ—æ€§"/>
+    <property name="AllResistProb" type="float" public="false" private="false" save="false" desc="å…¨æŠ—æ€§æŠµæŠ—çŽ‡"/>
+    <property name="AllResistProbAdd" type="float" public="false" private="false" save="false" desc="å…¨ç³»æŠ—æ€§"/>
     
-	<property name="ElementDeepenProb" type="float" public="false" private="false" save="false" desc="ÔªËØ¼ÓÉîÂÊ"/>
-	<property name="ElementDeepenProbAdd" type="float" public="false" private="false" save="false" desc="ÔªËØ¼ÓÉîÂÊ"/>
-	<property name="ElementResistProb" type="float" public="false" private="false" save="false" desc="ÔªËØ¼õÃâÂÊ"/>
-	<property name="ElementResistProbAdd" type="float" public="false" private="false" save="false" desc="ÔªËØ¼õÃâÂÊ"/>
+	<property name="ElementDeepenProb" type="float" public="false" private="false" save="false" desc="å…ƒç´ åŠ æ·±çŽ‡"/>
+	<property name="ElementDeepenProbAdd" type="float" public="false" private="false" save="false" desc="å…ƒç´ åŠ æ·±çŽ‡"/>
+	<property name="ElementResistProb" type="float" public="false" private="false" save="false" desc="å…ƒç´ å‡å…çŽ‡"/>
+	<property name="ElementResistProbAdd" type="float" public="false" private="false" save="false" desc="å…ƒç´ å‡å…çŽ‡"/>
     
-    <property name="SiegeDamageDeepenProb" type="float" public="false" private="false" save="true" desc="¹¥³ÇÉËº¦¼Ó³ÉÂÊ"/>
-    <property name="SiegeDamageResistProb" type="float" public="false" private="false" save="true" desc="¹¥³ÇÉËº¦¼õÃâÂÊ"/>
+    <property name="SiegeDamageDeepenProb" type="float" public="false" private="false" save="true" desc="æ”»åŸŽä¼¤å®³åŠ æˆçŽ‡"/>
+    <property name="SiegeDamageResistProb" type="float" public="false" private="false" save="true" desc="æ”»åŸŽä¼¤å®³å‡å…çŽ‡"/>
 
-    <!--property name="Guard"  type="int" public="false" private="true" save="false" desc="»¤¼×Öµ"/-->
+    <!--property name="Guard"  type="int" public="false" private="true" save="false" desc="æŠ¤ç”²å€¼"/-->
   </properties>
 
 </object>

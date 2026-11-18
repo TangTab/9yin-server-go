@@ -1,29 +1,29 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2009 (http://www.altova.com) by ylp (EMBRACE) -->
-<!--·ÇÕ½¶·NPC»ù´¡ÊôÐÔ-->
+<!--éžæˆ˜æ–—NPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <property name="SpringType" type="int" public="true" private="false" save="false" desc="´¥·¢·½Ê½"/>
-    <property name="CampLimit" type="int" public="false" private="false" save="false" desc="ÕóÓªÏÞÖÆ"/>
-    <property name="ForceLimit" type="int" public="false" private="false" save="false" desc="ÊÆÁ¦ÏÞÖÆ"/>
-    <property name="LevelLimit" type="string" public="false" private="false" save="false" desc="µÈ¼¶ÏÞÖÆ"/>
-    <property name="ItemIDLimit" type="string" public="false" private="false" save="false" desc="µÀ¾ßIDÏÞÖÆ"/>
-    <property name="SkillIDLimit" type="string" public="false" private="false" save="false" desc="¼¼ÄÜÏÞÖÆID"/>
-    <property name="SkillLevelLimit" type="int" public="false" private="false" save="false" desc="¼¼ÄÜµÈ¼¶ÏÞÖÆ"/>
-    <property name="TaskIDLimit" type="int" public="false" private="false" save="false" desc="ÈÎÎñÏÞÖÆ"/>
-    <property name="Num" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÊÍ·ÅµÄ´ÎÊý"/>
-    <property name="Time" type="float" public="false" private="false" save="false" desc="¼¼ÄÜÊÍ·ÅµÄÊ±¼ä¼ä¸ô(s)"/>
-    <property name="RoadSignID" type="int" public="true" private="false" save="false" desc="Â·ÅÆ±àºÅ"/>
+    <property name="SpringType" type="int" public="true" private="false" save="false" desc="è§¦å‘æ–¹å¼"/>
+    <property name="CampLimit" type="int" public="false" private="false" save="false" desc="é˜µè¥é™åˆ¶"/>
+    <property name="ForceLimit" type="int" public="false" private="false" save="false" desc="åŠ¿åŠ›é™åˆ¶"/>
+    <property name="LevelLimit" type="string" public="false" private="false" save="false" desc="ç­‰çº§é™åˆ¶"/>
+    <property name="ItemIDLimit" type="string" public="false" private="false" save="false" desc="é“å…·IDé™åˆ¶"/>
+    <property name="SkillIDLimit" type="string" public="false" private="false" save="false" desc="æŠ€èƒ½é™åˆ¶ID"/>
+    <property name="SkillLevelLimit" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½ç­‰çº§é™åˆ¶"/>
+    <property name="TaskIDLimit" type="int" public="false" private="false" save="false" desc="ä»»åŠ¡é™åˆ¶"/>
+    <property name="Num" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½é‡Šæ”¾çš„æ¬¡æ•°"/>
+    <property name="Time" type="float" public="false" private="false" save="false" desc="æŠ€èƒ½é‡Šæ”¾çš„æ—¶é—´é—´éš”(s)"/>
+    <property name="RoadSignID" type="int" public="true" private="false" save="false" desc="è·¯ç‰Œç¼–å·"/>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="levellimit_rec" cols="1" maxrows="2" public="false" private="false" save="false" desc="µÈ¼¶ÏÞÖÆ±í">
-        <column type="byte" desc="µÈ¼¶"/>
+    <record name="levellimit_rec" cols="1" maxrows="2" public="false" private="false" save="false" desc="ç­‰çº§é™åˆ¶è¡¨">
+        <column type="byte" desc="ç­‰çº§"/>
     </record>
   </records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
   <includes>
-	<path name="struct\rule\Common\base_ctrl_prop.xml" desc="¿ØÖÆÊôÐÔ"/>
+	<path name="struct\rule\Common\base_ctrl_prop.xml" desc="æŽ§åˆ¶å±žæ€§"/>
   </includes>
 </object>

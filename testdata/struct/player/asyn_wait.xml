@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--Òì²½µÈ´ýÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--å¼‚æ­¥ç­‰å¾…ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="AsynWait" 					type="int" public="false"  private="false" 	save="false" desc="Òì²½µÈ´ý"/>
-		<property name="AsynWaitBeginTime"	type="int" public="false"  private="false" 	save="false" desc="Òì²½µÈ´ý¿ªÊ¼Ê±¼ä"/>
+		<property name="AsynWait" 					type="int" public="false"  private="false" 	save="false" desc="å¼‚æ­¥ç­‰å¾…"/>
+		<property name="AsynWaitBeginTime"	type="int" public="false"  private="false" 	save="false" desc="å¼‚æ­¥ç­‰å¾…å¼€å§‹æ—¶é—´"/>
 	</properties>
 	<records>
 	</records>

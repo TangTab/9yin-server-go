@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¼¼ÄÜÊ¹ÓÃÏà¹ØµÄÊôÐÔ(npc,Íæ¼Ò½ÇÉ«¹²ÓÃ)-->
+<!--æŠ€èƒ½ä½¿ç”¨ç›¸å…³çš„å±žæ€§(npc,çŽ©å®¶è§’è‰²å…±ç”¨)-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="BufferListStr" type="string" public="true" private="true" save="false" desc="×Ö·û´®Æ´½ÓµÄBufferÁÐ±í"/>
+		<property name="BufferListStr" type="string" public="true" private="true" save="false" desc="å­—ç¬¦ä¸²æ‹¼æŽ¥çš„Bufferåˆ—è¡¨"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

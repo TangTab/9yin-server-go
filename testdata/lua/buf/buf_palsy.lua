@@ -1,20 +1,20 @@
---Âé±Ôbuff,½ÇÉ«Ò»¶¨Ê±¼äÎŞ·¨ÒÆ¶¯,½øĞĞ¹¥»÷,±»¹¥»÷ÎŞ·¨»Ø±Ü,¸ñµ²;ÊÜµ½ÉËº¦Ê±buff×Ô¶¯ÒÆ³ı
---buffÒÆ³ı»ò½áÊøºó,½ÇÉ«»Ö¸´stand¶¯×÷
+--éº»ç—¹buff,è§’è‰²ä¸€å®šæ—¶é—´æ— æ³•ç§»åŠ¨,è¿›è¡Œæ”»å‡»,è¢«æ”»å‡»æ— æ³•å›é¿,æ ¼æŒ¡;å—åˆ°ä¼¤å®³æ—¶buffè‡ªåŠ¨ç§»é™¤
+--buffç§»é™¤æˆ–ç»“æŸå,è§’è‰²æ¢å¤standåŠ¨ä½œ
 
 require("define")
 require("command_define")
 require("share\\server_custom_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
---¼ÆÊ±»ò¼Æ´ÎÊ±µÄĞ§¹û
---Èç¹ûÊÇ¼Æ´Î£¬·µ»Ø1Ê±£º±¾´Î¼Æ´ÎÓĞĞ§£¬·µ»Ø0Ê±£º±¾´Î²»¼Æ´Î
+--è®¡æ—¶æˆ–è®¡æ¬¡æ—¶çš„æ•ˆæœ
+--å¦‚æœæ˜¯è®¡æ¬¡ï¼Œè¿”å›1æ—¶ï¼šæœ¬æ¬¡è®¡æ¬¡æœ‰æ•ˆï¼Œè¿”å›0æ—¶ï¼šæœ¬æ¬¡ä¸è®¡æ¬¡
 function buffer_timer(self, buffer, sender, cmdid, damage, damagetype)
 	if cmdid ~= COMMAND_BEDAMAGE then
 		return 0
@@ -24,11 +24,11 @@ function buffer_timer(self, buffer, sender, cmdid, damage, damagetype)
 	
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end
 
---AIÄ£¿é½Ó¿Ú,buffÏûÊ§»òÒÆ³ıÊ±µ÷ÓÃ
+--AIæ¨¡å—æ¥å£,buffæ¶ˆå¤±æˆ–ç§»é™¤æ—¶è°ƒç”¨
 function on_buffer_remove(buffer, self)
 	local name = nx_query_property(buffer, "ConfigID")
 	if name == "buf_palsy" then

@@ -1,6 +1,6 @@
 
 
-该文件记录scenes.ini中所配置的各个member对应的场景id, 方便查询: 
+璇ユ枃浠惰褰晄cenes.ini涓墍閰嶇疆鐨勫悇涓猰ember瀵瑰簲鐨勫満鏅痠d, 鏂逛究鏌ヨ: 
 
 
 Member=0: 1

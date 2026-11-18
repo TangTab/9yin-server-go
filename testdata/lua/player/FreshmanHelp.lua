@@ -1,42 +1,42 @@
 -----------------------------------
---  @ Ãû³Æ: FreshmanHelp.lua
---  @ ¹¦ÄÜ: Íæ¼Ò½øÈë³¡¾°Ê±µÄ´¦Àí
---  @ ×÷Õß: wanglei
---  @ Ê±¼ä: 2009Äê12ÔÂ25ÈÕ
+--  @ åç§°: FreshmanHelp.lua
+--  @ åŠŸèƒ½: ç©å®¶è¿›å…¥åœºæ™¯æ—¶çš„å¤„ç†
+--  @ ä½œè€…: wanglei
+--  @ æ—¶é—´: 2009å¹´12æœˆ25æ—¥
 -----------------------------------
 
 local endStepID = "Freshman_End"
--- °İÊ¦ÈÎÎñ
+-- æ‹œå¸ˆä»»åŠ¡
 local g_baishi_task_id = {
-		["born04"] = 40 ,--Ç§µÆÕò
-		["born03"] = 49 ,--ÑÌÓê×¯
-		["city02"] = 50 ,--ËÕÖİ
+		["born04"] = 40 ,--åƒç¯é•‡
+		["born03"] = 49 ,--çƒŸé›¨åº„
+		["city02"] = 50 ,--è‹å·
 
 		};
 
--- Íæ¼Ò½øÈë³¡¾°Ê±µÄ´¦Àí, ²ÎÊı1:player, ²ÎÊı2: ËùÔÚ³¡¾°Ãû(Resource)
+-- ç©å®¶è¿›å…¥åœºæ™¯æ—¶çš„å¤„ç†, å‚æ•°1:player, å‚æ•°2: æ‰€åœ¨åœºæ™¯å(Resource)
 function on_ready(player, scene_name)
 
 	local curStepID = nx_query_property(player, "HelpStepID")
-	-- ËµÃ÷Íæ¼ÒÊÇĞÂÊÖ
+	-- è¯´æ˜ç©å®¶æ˜¯æ–°æ‰‹
 	if tostring(curStepID) == "" then
 
-		if tostring(scene_name) == "born03" then-- ÑÌÓê×¯
+		if tostring(scene_name) == "born03" then-- çƒŸé›¨åº„
 			curStepID = "yanyuzhuang_00"
 			nx_require_write_drama(player, "yyz01_7")
 			nx_accept_task(player, 22001)
-		elseif tostring(scene_name) == "city02" then-- ËÕÖİ
+		elseif tostring(scene_name) == "city02" then-- è‹å·
 			curStepID = "suzhou_00"
 			nx_require_write_drama(player, "sz01_21")
 			nx_accept_task(player, 1)
-		elseif tostring(scene_name) == "born04" then -- Ç§µÆÕò
+		elseif tostring(scene_name) == "born04" then -- åƒç¯é•‡
 			curStepID = "qiandengzhen_00"
 			--nx_require_write_drama(player, "qdz01_8")
 			nx_accept_task(player, 24001)
 		else
 			curStepID = endStepID
 		end
-		-- Íæ¼Ò×Ô¶¯½Óµ½°İÊ¦ÈÎÎñ
+		-- ç©å®¶è‡ªåŠ¨æ¥åˆ°æ‹œå¸ˆä»»åŠ¡
 		local taskid = g_baishi_task_id[scene_name]
 		if taskid ~= nil then
 			nx_accept_task(player, taskid);
@@ -49,7 +49,7 @@ function on_ready(player, scene_name)
 
 end
 
--- ½øÈëÏÂÒ»²½µÄ»Øµ÷
+-- è¿›å…¥ä¸‹ä¸€æ­¥çš„å›è°ƒ
 function on_next_step(player, nextStepID)
 	if nextStepID == "" then
 		return

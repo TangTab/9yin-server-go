@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Equip_ItemµÄÊôÐÔ±í£¬¼Ì³Ð×ÔNim_Item£¬ËùÓÐ¿É×°±¸µÄÎïÆ·µÄ»ùÀà-->
+<!--Equip_Itemçš„å±žæ€§è¡¨ï¼Œç»§æ‰¿è‡ªNim_Itemï¼Œæ‰€æœ‰å¯è£…å¤‡çš„ç‰©å“çš„åŸºç±»-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PetWildConfigID1" type="string" public="false" private="false" save="false"  desc="µÀ¾ß¶ÔÓ¦µÄÊÞ»êID,Òì½ÌÍ½Ö°Òµ"/>
-		<property name="PetWildConfigID2" type="string" public="false" private="false" save="false"  desc="µÀ¾ß¶ÔÓ¦µÄÊÞ»êID,á÷ÁÔÕßÖ°Òµ"/>
-		<property name="CanUse" type="word" public="true" private="true" save="true"  desc="ÊÇ·ñÄÜÊ¹ÓÃ"/>
+		<property name="PetWildConfigID1" type="string" public="false" private="false" save="false"  desc="é“å…·å¯¹åº”çš„å…½é­‚ID,å¼‚æ•™å¾’èŒä¸š"/>
+		<property name="PetWildConfigID2" type="string" public="false" private="false" save="false"  desc="é“å…·å¯¹åº”çš„å…½é­‚ID,ç‹©çŒŽè€…èŒä¸š"/>
+		<property name="CanUse" type="word" public="true" private="true" save="true"  desc="æ˜¯å¦èƒ½ä½¿ç”¨"/>
 	</properties>
 	
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>	
 </object>

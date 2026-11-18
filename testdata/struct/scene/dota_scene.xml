@@ -1,47 +1,47 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Dota³¡¾°ÊôÐÔ-->
+<!--Dotaåœºæ™¯å±žæ€§-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="dotabattlewar_scene_rec" cols="25" maxrows="10" save="false" public="false" private="false" desc="DotaÕ½³¡Í³¼Æ±í">
-      <column type="string" desc="Íæ¼ÒÍ¼Æ¬"/>
-			<column type="widestr" desc="¶ÓÔ±Ãû"/>
-			<column type="byte" desc="µÈ¼¶"/>
-			<column type="byte" desc="ÕóÓª"/>
-			<column type="dword" desc="»÷É±"/>
-			<column type="dword" desc="ËÀÍö"/>
-			<column type="dword" desc="Öú¹¥"/>
-			<column type="dword" desc="»÷É±Ð¡±øÊý"/>
-			<column type="string" desc="¼¼ÄÜ1"/>
-			<column type="string" desc="¼¼ÄÜ2"/>
-			<column type="string" desc="µÀ¾ß1"/>
-			<column type="string" desc="µÀ¾ß2"/>
-			<column type="string" desc="µÀ¾ß3"/>
-			<column type="string" desc="µÀ¾ß4"/>
-			<column type="string" desc="µÀ¾ß5"/>
-			<column type="string" desc="µÀ¾ß6"/>
-			<column type="dword" desc="×´Ì¬"/>
-			<column type="dword" desc="¸´»îÊ±¼ä"/>
-			<column type="dword" desc="Á¬ÐøËÀÍö/»÷É±´ÎÊý"/>
+    <record name="dotabattlewar_scene_rec" cols="25" maxrows="10" save="false" public="false" private="false" desc="Dotaæˆ˜åœºç»Ÿè®¡è¡¨">
+      <column type="string" desc="çŽ©å®¶å›¾ç‰‡"/>
+			<column type="widestr" desc="é˜Ÿå‘˜å"/>
+			<column type="byte" desc="ç­‰çº§"/>
+			<column type="byte" desc="é˜µè¥"/>
+			<column type="dword" desc="å‡»æ€"/>
+			<column type="dword" desc="æ­»äº¡"/>
+			<column type="dword" desc="åŠ©æ”»"/>
+			<column type="dword" desc="å‡»æ€å°å…µæ•°"/>
+			<column type="string" desc="æŠ€èƒ½1"/>
+			<column type="string" desc="æŠ€èƒ½2"/>
+			<column type="string" desc="é“å…·1"/>
+			<column type="string" desc="é“å…·2"/>
+			<column type="string" desc="é“å…·3"/>
+			<column type="string" desc="é“å…·4"/>
+			<column type="string" desc="é“å…·5"/>
+			<column type="string" desc="é“å…·6"/>
+			<column type="dword" desc="çŠ¶æ€"/>
+			<column type="dword" desc="å¤æ´»æ—¶é—´"/>
+			<column type="dword" desc="è¿žç»­æ­»äº¡/å‡»æ€æ¬¡æ•°"/>
 			<column type="object" desc="PID"/>
-			<column type="dword" desc="ÉËº¦Á¿"/>
-			<column type="dword" desc="ÖÎÁÆÁ¿"/>
-      <column type="byte" desc="Ö°Òµ"/>
-      <column type="dword" desc="×Ü»ý·Ö"/>
-      <column type="dword" desc="¸öÈË»ý·Ö"/>
+			<column type="dword" desc="ä¼¤å®³é‡"/>
+			<column type="dword" desc="æ²»ç–—é‡"/>
+      <column type="byte" desc="èŒä¸š"/>
+      <column type="dword" desc="æ€»ç§¯åˆ†"/>
+      <column type="dword" desc="ä¸ªäººç§¯åˆ†"/>
     </record>
-    <record name="arenaplane_teama_rec" cols="1" maxrows="5" save="false" public="false" private="false" desc="¾º¼¼¶ÓÎéA³ÉÔ±±í">
-      <column type="widestr" desc="¶ÓÔ±Ãû"/>
+    <record name="arenaplane_teama_rec" cols="1" maxrows="5" save="false" public="false" private="false" desc="ç«žæŠ€é˜Ÿä¼Aæˆå‘˜è¡¨">
+      <column type="widestr" desc="é˜Ÿå‘˜å"/>
     </record>
-    <record name="arenaplane_teamb_rec" cols="1" maxrows="5" save="false" public="false" private="false" desc="¾º¼¼¶ÓÎéB³ÉÔ±±í">
-      <column type="widestr" desc="¶ÓÔ±Ãû"/>
+    <record name="arenaplane_teamb_rec" cols="1" maxrows="5" save="false" public="false" private="false" desc="ç«žæŠ€é˜Ÿä¼Bæˆå‘˜è¡¨">
+      <column type="widestr" desc="é˜Ÿå‘˜å"/>
     </record>
   </records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
   <includes>
   </includes>
 </object>

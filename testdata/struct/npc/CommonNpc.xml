@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!-- ÓÎÏ·NPC»ù´¡ÊôÐÔ -->
+<!-- æ¸¸æˆNPCåŸºç¡€å±žæ€§ -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="QueryData" type="string" public="true" private="false" save="false" desc="²éÑ¯Êý¾ÝÎÄ¼þÃû"/>
-		<property name="PostmanMasterName" type="widestr" public="false" private="false" save="false" desc="ÓÊµÝÔ±ÕÙ»½Õß"/>
-		<property name="UrgentSerialNo" type="string" public="false" private="false" save="false" desc="¼Ó¼±ÓÊ¼þÁ÷Ë®ºÅ"/>
-		<property name="ParkingSpaceNpc" type="object" public="false" private="false" save="false" desc="³µ¿â¹ÜÀíÔ±¶ÔÓ¦µÄ³µ¿âPERSISTID"/>
-		<property name="ParkingSpaceManager" type="object" public="false" private="false" save="false" desc="³µ¿â¹ÜÀíÔ±¶ÔÓ¦µÄ³µ¿âPERSISTID"/>
-		<property name="ParkingSpaceEW" type="int" public="false" private="false" save="false" desc="³µ¿âÄÜÁ¿¾®ID"/>
-		<property name="ParkingSpaceID" type="int" public="false" private="false" save="false" desc="³µ¿âÄÜÁ¿¾®ID"/>
-		<property name="ParkingSpaceState" type="int" public="false" private="false" save="false" desc="³µ¿â×´Ì¬"/>
+		<property name="QueryData" type="string" public="true" private="false" save="false" desc="æŸ¥è¯¢æ•°æ®æ–‡ä»¶å"/>
+		<property name="PostmanMasterName" type="widestr" public="false" private="false" save="false" desc="é‚®é€’å‘˜å¬å”¤è€…"/>
+		<property name="UrgentSerialNo" type="string" public="false" private="false" save="false" desc="åŠ æ€¥é‚®ä»¶æµæ°´å·"/>
+		<property name="ParkingSpaceNpc" type="object" public="false" private="false" save="false" desc="è½¦åº“ç®¡ç†å‘˜å¯¹åº”çš„è½¦åº“PERSISTID"/>
+		<property name="ParkingSpaceManager" type="object" public="false" private="false" save="false" desc="è½¦åº“ç®¡ç†å‘˜å¯¹åº”çš„è½¦åº“PERSISTID"/>
+		<property name="ParkingSpaceEW" type="int" public="false" private="false" save="false" desc="è½¦åº“èƒ½é‡äº•ID"/>
+		<property name="ParkingSpaceID" type="int" public="false" private="false" save="false" desc="è½¦åº“èƒ½é‡äº•ID"/>
+		<property name="ParkingSpaceState" type="int" public="false" private="false" save="false" desc="è½¦åº“çŠ¶æ€"/>
 
 	</properties>
 	 <records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÎïÆ·»ù´¡ÊôÐÔ-->
+<!--ç‰©å“åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="BattleCarrierHP" type="int" public="false" private="false" save="true" desc="ÔØ¾ßµÀ¾ßÑªÁ¿"/>
-		<property name="BattleCarrierMP" type="int" public="false" private="false" save="true" desc="ÔØ¾ßµÀ¾ßÀ¶Á¿"/>
+		<property name="BattleCarrierHP" type="int" public="false" private="false" save="true" desc="è½½å…·é“å…·è¡€é‡"/>
+		<property name="BattleCarrierMP" type="int" public="false" private="false" save="true" desc="è½½å…·é“å…·è“é‡"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

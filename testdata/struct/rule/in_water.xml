@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Ë®ÏÂºôÎüµÄÊôÐÔÊý¾Ý-->
+<!--æ°´ä¸‹å‘¼å¸çš„å±žæ€§æ•°æ®-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="UnderWaterSpeed" type="float" public="false" private="true" save="false" desc="Íæ¼ÒºôÎüÖµ¼õÉÙµÄËÙ¶È"/>
-		<property name="UnderWaterModifySpeed" type="float" public="false" private="false" save="false" desc="¶Ô¼õÉÙËÙ¶ÈµÄÐÞÕý"/>
-		<property name="CurUnderWaterValue" type="float" public="false" private="true" save="false" desc="Íæ¼Òµ±Ç°µÄºôÎüÖµ"/>
+		<property name="UnderWaterSpeed" type="float" public="false" private="true" save="false" desc="çŽ©å®¶å‘¼å¸å€¼å‡å°‘çš„é€Ÿåº¦"/>
+		<property name="UnderWaterModifySpeed" type="float" public="false" private="false" save="false" desc="å¯¹å‡å°‘é€Ÿåº¦çš„ä¿®æ­£"/>
+		<property name="CurUnderWaterValue" type="float" public="false" private="true" save="false" desc="çŽ©å®¶å½“å‰çš„å‘¼å¸å€¼"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

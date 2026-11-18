@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Ê¹ÓÃÕó·¨µÄÊôÐÔÊý¾Ý-->
+<!--ä½¿ç”¨é˜µæ³•çš„å±žæ€§æ•°æ®-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ForceVersion" type="int" public="false" private="false" save="true" desc="Íæ¼ÒÊÆÁ¦¹ØÏµ°æ±¾"/>
-		<property name="Force" type="int" public="true" private="true" save="true" desc="Íæ¼ÒÖ÷³ÇÊÆÁ¦¹éÊô"/>
+		<property name="ForceVersion" type="int" public="false" private="false" save="true" desc="çŽ©å®¶åŠ¿åŠ›å…³ç³»ç‰ˆæœ¬"/>
+		<property name="Force" type="int" public="true" private="true" save="true" desc="çŽ©å®¶ä¸»åŸŽåŠ¿åŠ›å½’å±ž"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="ForceReputeRecord" cols="9" maxrows="256" save="true" public="false" private="true" desc="ÊÆÁ¦ÉùÍû±í">
-			<column type="word" desc="ÊÆÁ¦±àºÅ"/>
-			<column type="word" desc="ÊÆÁ¦Ãû³Æ"/>
-			<column type="word" desc="ÉùÍû¹ØÏµ"/>
-			<column type="word" desc="µ±Ç°¹ØÏµµÈ¼¶ÏÂµÄÉùÍûÖµ"/>
-			<column type="word" desc="µ±Ç°¹ØÏµµÈ¼¶ÏÂµÄÉùÍûÖµÉÏÏÞ"/>
-			<column type="byte" desc="¸ÃÌõÊÆÁ¦ÊÇ·ñ¶Ô¿Í»§¶Ë¿É¼û"/>
-			<column type="byte" desc="ËùÊôÕóÓª"/>
-			<column type="word" desc="ËùÊô°æ±¾"/>
-			<column type="word" desc="ÁÙÊ±¹ØÏµ±ä¸ü"/>
+		<record name="ForceReputeRecord" cols="9" maxrows="256" save="true" public="false" private="true" desc="åŠ¿åŠ›å£°æœ›è¡¨">
+			<column type="word" desc="åŠ¿åŠ›ç¼–å·"/>
+			<column type="word" desc="åŠ¿åŠ›åç§°"/>
+			<column type="word" desc="å£°æœ›å…³ç³»"/>
+			<column type="word" desc="å½“å‰å…³ç³»ç­‰çº§ä¸‹çš„å£°æœ›å€¼"/>
+			<column type="word" desc="å½“å‰å…³ç³»ç­‰çº§ä¸‹çš„å£°æœ›å€¼ä¸Šé™"/>
+			<column type="byte" desc="è¯¥æ¡åŠ¿åŠ›æ˜¯å¦å¯¹å®¢æˆ·ç«¯å¯è§"/>
+			<column type="byte" desc="æ‰€å±žé˜µè¥"/>
+			<column type="word" desc="æ‰€å±žç‰ˆæœ¬"/>
+			<column type="word" desc="ä¸´æ—¶å…³ç³»å˜æ›´"/>
 		</record>
 	</records>
 </object>

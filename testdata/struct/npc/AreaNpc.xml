@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2009 (http://www.altova.com) by ylp (EMBRACE) -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-        <property name="NpcType" type="byte" public="true" private="false" save="false" desc="NPCÀàÐÍ"/>
-        <property name="Resource" type="string" public="true" private="false" save="false" desc="×ÊÔ´"/>
+        <property name="NpcType" type="byte" public="true" private="false" save="false" desc="NPCç±»åž‹"/>
+        <property name="Resource" type="string" public="true" private="false" save="false" desc="èµ„æº"/>
     </properties>
-    <!-- ±íÊôÐÔ -->
+    <!-- è¡¨å±žæ€§ -->
     <records>
     </records>
-    <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+    <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
     <includes>
-        <path name="struct\common\trigger.xml" desc="´¥·¢Æ÷"/>
+        <path name="struct\common\trigger.xml" desc="è§¦å‘å™¨"/>
     </includes>
 </object>

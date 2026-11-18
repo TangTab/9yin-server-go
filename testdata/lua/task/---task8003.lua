@@ -1,20 +1,20 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task8003.lua
--- @ ½Å±¾¹¦ÄÜ: IDÎª8003µÄÈÎÎñÖ´ĞĞ½Å±¾Âß¼­
--- @ ´´½¨Õß:   dReAmSun
--- @ ´´½¨ÈÕÆÚ: 2009.3.31
+-- @ è„šæœ¬åç§°: task8003.lua
+-- @ è„šæœ¬åŠŸèƒ½: IDä¸º8003çš„ä»»åŠ¡æ‰§è¡Œè„šæœ¬é€»è¾‘
+-- @ åˆ›å»ºè€…:   dReAmSun
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.3.31
 -----------------------------------------
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	-- Ôö¼Ó±ê¼Ç¼ÇÂ¼±íÒ»ĞĞ
+	-- å¢åŠ æ ‡è®°è®°å½•è¡¨ä¸€è¡Œ
 	local row = nx_add_record_row_values(player, "StateTaskRec", nx_int(taskid), nx_int(0))
 	
 	if row < 0 then
@@ -25,10 +25,10 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 
-	-- ÅĞ¶ÏÊÇ·ñÒÑ¾­Ñ¡Ôñ¹ı
+	-- åˆ¤æ–­æ˜¯å¦å·²ç»é€‰æ‹©è¿‡
 	if not nx_find_record(player, "StateTaskRec") then
 		return 0
 	end
@@ -39,7 +39,7 @@ function Task_Complete_Condition(player, npc, taskid)
 		return 0
 	end
 	
-	-- ÅĞ¶ÏÊÇ·ñÒÑ¾­´¥·¢²¢Ñ¡Ôñ¹ı, Îª0´ú±íÃ»Ñ¡Ôñ¹ı£¬ 1Õı£¬ 2Ğ°£¬ 3ÖĞÁ¢
+	-- åˆ¤æ–­æ˜¯å¦å·²ç»è§¦å‘å¹¶é€‰æ‹©è¿‡, ä¸º0ä»£è¡¨æ²¡é€‰æ‹©è¿‡ï¼Œ 1æ­£ï¼Œ 2é‚ªï¼Œ 3ä¸­ç«‹
 	local flag = nx_query_record_value(player, "StateTaskRec", nx_int(row), 1)
 	
 
@@ -52,9 +52,9 @@ function Task_Complete_Condition(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
-	-- ¸ù¾İ±ê¼Ç¸øÓèÏàÓ¦µÄÈÎÎñÎïÆ·
+	-- æ ¹æ®æ ‡è®°ç»™äºˆç›¸åº”çš„ä»»åŠ¡ç‰©å“
 	if not nx_find_record(player, "StateTaskRec") then
 		return 0
 	end
@@ -65,7 +65,7 @@ function Task_After_Complete(player, npc, taskid)
 		return 0
 	end
 	
-	-- ¶ÁÈ¡±ê¼Ç
+	-- è¯»å–æ ‡è®°
 	local select_index = nx_query_record_value(player, "StateTaskRec", row, 1)
 	
 	if nx_int(select_index) == 1 then
@@ -76,14 +76,14 @@ function Task_After_Complete(player, npc, taskid)
 		create_obj_to_player(player, nx_string("taskitem_26"))
 	end
 	
-	-- É¾³ı±ê¼ÇĞĞ
+	-- åˆ é™¤æ ‡è®°è¡Œ
 	nx_remove_record_row(player, "StateTaskRec", row)
 	
 	return 1
 end
 
 
--- ´´½¨ÎïÆ·
+-- åˆ›å»ºç‰©å“
 function create_obj_to_player(player, configid)
 
 		local ToolBox = nx_get_child(player, nx_widestr("ToolBox"))
@@ -100,7 +100,7 @@ function create_obj_to_player(player, configid)
 		
 		if not nx_container_placeitem(ToolBox, item) then
 			nx_destroy_self(item)
-			-- ÌáÊ¾¿Õ¼ä²»×ã
+			-- æç¤ºç©ºé—´ä¸è¶³
 			nx_sysinfo(target, 1, "9627")
 			nx_sysinfo(target, 2, "9627")
 		end		

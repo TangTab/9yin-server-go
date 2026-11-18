@@ -1,38 +1,38 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--³èÎï»ù´¡ÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--å® ç‰©åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-	    <!--ÊôÐÔÖÐµÄ¹ý³ÌÏÖÔÚÈ«²¿¸ÄÎªtrue;×÷Õß:ÖÜÉÛÈ«;ÈÕÆÚ:2011Äê10ÔÂ17ÈÕ-->
-		<!--¹¦ÄÜ:Ìí¼ÓµÄ³èÎïÊôÐÔ;×÷Õß:ÖÜÉÛÈ«;ÈÕÆÚ:2011Äê10ÔÂ26ÈÕ-->
-		<!--ID´úÌæÁË-->
-		<property name="GeneralType"    	type="word"    public="true"   private="false"   save="false"  desc="³èÎïµÄ×ÜÀàÐÍ"/>
-		<property name="FightType"      	type="word"    public="false"   private="false"   save="false"  desc="Õ½¶·µÄ×ÓÀàÐÍ"/>
-		<property name="Species"  		 	type="string"  public="true"   private="false"   save="false"  desc="ÎïÖÖÀàÐÍ"/>
-		<property name="Sex"  			 	type="word"    public="true"   private="false"   save="false"  desc="ÐÔ±ð"/>
-		<property name="PetLimitPackID"  	type="word"    public="false"   private="false"   save="false"  desc="³èÎïÏÞÖÆ°ü"/>
-		<property name="PetItemConfigID"    type="string"  public="false"   private="false"   save="false"  desc="³èÎï¶ÔÓ¦µÄµÀ¾ß,ÎªÖ°Òµ×°±¸Ê¹ÓÃ"/>
-		<property name="PetSerie"     		type="string"  public="false"   private="false"   save="false"  desc="³èÎïÏµ±ðµÄ×Ö¶Î,ÓÃÓÚá÷ÁÔÕß"/>
-		<property name="PetCanSwapScene" 	type="word"    public="false"   private="false"  save="false"  desc="³èÎïÊÇ·ñÄÜ¿ç³¡¾°¸úËæ"/>
-		<property name="PetLogoutSave"   	type="word"    public="false"   private="false"  save="false"  desc="³èÎïÊÇ·ñÏÂÏßºó±£´æ"/>
-		<property name="PetRideSave"   	type="word"    public="false"   private="false"  save="false"  desc="³èÎïÊÇ·ñÉÏÂíºó±£´æ"/>
-		<property name="CantDismiss"   	type="word"    public="false"   private="false"  save="false"  desc="³èÎïÊÇ·ñÄÜ±»Ö÷¶¯½âÉ¢ss"/>
-		<property name="OrcSoulBuff"     	type="string"  public="false"   private="false"  save="false"  desc="³èÎï¶ÔÓ¦µÄÄ§ÎïÈÚºÏBUFF"/>
-		<property name="PetCanChangeName"   type="word"    public="false"   private="false"  save="false"  desc="³èÎïÄÜ·ñ¸ÄÃû0:ÄÜ¸ÄÃû;1:²»ÄÜ¸ÄÃû"/>
-		<property name="PetCanOperateTable" type="word"    public="false"   private="false"  save="false"  desc="³èÎïÄÜ·ñÓÐ²Ù×÷À¸0:ÄÜÓÐ²Ù×÷À¸;1:Ã»ÓÐ²Ù×÷À¸"/>
-	        <property name="Photo" type="string" public="true" private="false" save="false" desc="Í¼Æ¬"/>
-		<property name="SummonNum" type="word" public="false" private="false" save="false" desc="×î´ó¿ÉÕÙ»½Êý"/>
+	    <!--å±žæ€§ä¸­çš„è¿‡ç¨‹çŽ°åœ¨å…¨éƒ¨æ”¹ä¸ºtrue;ä½œè€…:å‘¨é‚µå…¨;æ—¥æœŸ:2011å¹´10æœˆ17æ—¥-->
+		<!--åŠŸèƒ½:æ·»åŠ çš„å® ç‰©å±žæ€§;ä½œè€…:å‘¨é‚µå…¨;æ—¥æœŸ:2011å¹´10æœˆ26æ—¥-->
+		<!--IDä»£æ›¿äº†-->
+		<property name="GeneralType"    	type="word"    public="true"   private="false"   save="false"  desc="å® ç‰©çš„æ€»ç±»åž‹"/>
+		<property name="FightType"      	type="word"    public="false"   private="false"   save="false"  desc="æˆ˜æ–—çš„å­ç±»åž‹"/>
+		<property name="Species"  		 	type="string"  public="true"   private="false"   save="false"  desc="ç‰©ç§ç±»åž‹"/>
+		<property name="Sex"  			 	type="word"    public="true"   private="false"   save="false"  desc="æ€§åˆ«"/>
+		<property name="PetLimitPackID"  	type="word"    public="false"   private="false"   save="false"  desc="å® ç‰©é™åˆ¶åŒ…"/>
+		<property name="PetItemConfigID"    type="string"  public="false"   private="false"   save="false"  desc="å® ç‰©å¯¹åº”çš„é“å…·,ä¸ºèŒä¸šè£…å¤‡ä½¿ç”¨"/>
+		<property name="PetSerie"     		type="string"  public="false"   private="false"   save="false"  desc="å® ç‰©ç³»åˆ«çš„å­—æ®µ,ç”¨äºŽç‹©çŒŽè€…"/>
+		<property name="PetCanSwapScene" 	type="word"    public="false"   private="false"  save="false"  desc="å® ç‰©æ˜¯å¦èƒ½è·¨åœºæ™¯è·Ÿéš"/>
+		<property name="PetLogoutSave"   	type="word"    public="false"   private="false"  save="false"  desc="å® ç‰©æ˜¯å¦ä¸‹çº¿åŽä¿å­˜"/>
+		<property name="PetRideSave"   	type="word"    public="false"   private="false"  save="false"  desc="å® ç‰©æ˜¯å¦ä¸Šé©¬åŽä¿å­˜"/>
+		<property name="CantDismiss"   	type="word"    public="false"   private="false"  save="false"  desc="å® ç‰©æ˜¯å¦èƒ½è¢«ä¸»åŠ¨è§£æ•£ss"/>
+		<property name="OrcSoulBuff"     	type="string"  public="false"   private="false"  save="false"  desc="å® ç‰©å¯¹åº”çš„é­”ç‰©èžåˆBUFF"/>
+		<property name="PetCanChangeName"   type="word"    public="false"   private="false"  save="false"  desc="å® ç‰©èƒ½å¦æ”¹å0:èƒ½æ”¹å;1:ä¸èƒ½æ”¹å"/>
+		<property name="PetCanOperateTable" type="word"    public="false"   private="false"  save="false"  desc="å® ç‰©èƒ½å¦æœ‰æ“ä½œæ 0:èƒ½æœ‰æ“ä½œæ ;1:æ²¡æœ‰æ“ä½œæ "/>
+	        <property name="Photo" type="string" public="true" private="false" save="false" desc="å›¾ç‰‡"/>
+		<property name="SummonNum" type="word" public="false" private="false" save="false" desc="æœ€å¤§å¯å¬å”¤æ•°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="NpcToRoleRec" cols="2" maxrows="50" save="false" public="true" private="false" desc="NPC±ä½ÇÉ«">
-			<column type="string" desc="ÐÞ¸Ä²¿¼þ"/>
-			<column type="string" desc="²¿¼þ×ÊÔ´"/>
+		<record name="NpcToRoleRec" cols="2" maxrows="50" save="false" public="true" private="false" desc="NPCå˜è§’è‰²">
+			<column type="string" desc="ä¿®æ”¹éƒ¨ä»¶"/>
+			<column type="string" desc="éƒ¨ä»¶èµ„æº"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="¿ØÖÆÊôÐÔ"/>
+		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="æŽ§åˆ¶å±žæ€§"/>
         <path name="struct\rule\Common\Fightbag.xml" desc=""/>
         <path name="struct\rule\Common\commonfighter.xml" desc=""/>
         <path name="struct\rule\Common\damage.xml" desc=""/>
@@ -43,11 +43,11 @@
         <path name="struct\rule\Common\autorestore.xml" desc=""/>
         <path name="struct\rule\Common\skilluse.xml" desc=""/>
         <path name="struct\rule\Common\bufferuse.xml" desc=""/>
-        <path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+        <path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
         <path name="struct\rule\Common\attack.xml" desc=""/>
         <path name="struct\rule\Common\basefighterdata.xml" desc=""/>
-        <path name="struct\npc_property\ai_motion.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+        <path name="struct\npc_property\ai_motion.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
+        <path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
 	</includes>
 </object>

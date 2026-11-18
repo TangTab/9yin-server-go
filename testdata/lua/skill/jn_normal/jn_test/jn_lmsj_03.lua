@@ -1,53 +1,53 @@
---jn_lmsj_03	ÁùÂöÉñ½£	ÖĞ³å½£	ÒõÊôĞÔÉËº¦	²úÉúBUFF	BUFFÊ±¼äÄÚÊ¹ÓÃ¼¼ÄÜ	»áËğÊ§ÉúÃü
+--jn_lmsj_03	å…­è„‰ç¥å‰‘	ä¸­å†²å‰‘	é˜´å±æ€§ä¼¤å®³	äº§ç”ŸBUFF	BUFFæ—¶é—´å†…ä½¿ç”¨æŠ€èƒ½	ä¼šæŸå¤±ç”Ÿå‘½
 require("define")
 require("command_define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¼ÆËã¼¼ÄÜÉËº¦(Ã¿Ò»´ÎÃüÖĞ¶¼»áµ÷ÓÃÒ»´Î), ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—æŠ€èƒ½ä¼¤å®³(æ¯ä¸€æ¬¡å‘½ä¸­éƒ½ä¼šè°ƒç”¨ä¸€æ¬¡), è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, skill, target)
-	--È¡×Ô¼º¼¼ÄÜµÄ¼¶±ğ
+	--å–è‡ªå·±æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
-	--»ñµÃ×Ô¼ºµÄ×î´óÄÚÁ¦ÉÏÏŞ
+	--è·å¾—è‡ªå·±çš„æœ€å¤§å†…åŠ›ä¸Šé™
   	local maxMP = nx_query_property(self, "MaxMP") + nx_query_property(self, "MaxMPAdd")
-	--»ñµÃ×Ô¼ºµÄÄÚ¹¦ÍşÁ¦
+	--è·å¾—è‡ªå·±çš„å†…åŠŸå¨åŠ›
 	local magicPower = nx_query_property(self, "MagicPower") + nx_query_property(self, "MagicPowerAdd")
-	--ÁÙÊ±±äÁ¿
+	--ä¸´æ—¶å˜é‡
 	local negDamage = 0
 	inc_value = 0
 	
---µÈ¼¶1£ºÒõÉËº¦=50+ÄÚ¹¦ÍşÁ¦*1£¬30£¥¼¸ÂÊÊ©¼ÓBUFF£¬BUFFÊ±¼äÄÚÊ¹ÓÃ¼¼ÄÜ£¬»áËğÊ§ÉúÃü£¨¼¼ÄÜºÄÄ§*±¶ÂÊ£©
---µÈ¼¶2£ºÒõÉËº¦=100+ÄÚ¹¦ÍşÁ¦*1.5£¬30£¥¼¸ÂÊÊ©¼ÓBUFF£¬BUFFÊ±¼äÄÚÊ¹ÓÃ¼¼ÄÜ£¬»áËğÊ§ÉúÃü£¨¼¼ÄÜºÄÄ§*±¶ÂÊ£©
---µÈ¼¶3£ºÒõÉËº¦=150+ÄÚ¹¦ÍşÁ¦*2£¬30£¥¼¸ÂÊÊ©¼ÓBUFF£¬BUFFÊ±¼äÄÚÊ¹ÓÃ¼¼ÄÜ£¬»áËğÊ§ÉúÃü£¨¼¼ÄÜºÄÄ§*±¶ÂÊ£©
---µÈ¼¶4£ºÒõÉËº¦=200+ÄÚ¹¦ÍşÁ¦*2.5£¬30£¥¼¸ÂÊÊ©¼ÓBUFF£¬BUFFÊ±¼äÄÚÊ¹ÓÃ¼¼ÄÜ£¬»áËğÊ§ÉúÃü£¨¼¼ÄÜºÄÄ§*±¶ÂÊ£©
---µÈ¼¶5£ºÒõÉËº¦=250+ÄÚ¹¦ÍşÁ¦*3£¬30£¥¼¸ÂÊÊ©¼ÓBUFF£¬BUFFÊ±¼äÄÚÊ¹ÓÃ¼¼ÄÜ£¬»áËğÊ§ÉúÃü£¨¼¼ÄÜºÄÄ§*±¶ÂÊ£©
+--ç­‰çº§1ï¼šé˜´ä¼¤å®³=50+å†…åŠŸå¨åŠ›*1ï¼Œ30ï¼…å‡ ç‡æ–½åŠ BUFFï¼ŒBUFFæ—¶é—´å†…ä½¿ç”¨æŠ€èƒ½ï¼Œä¼šæŸå¤±ç”Ÿå‘½ï¼ˆæŠ€èƒ½è€—é­”*å€ç‡ï¼‰
+--ç­‰çº§2ï¼šé˜´ä¼¤å®³=100+å†…åŠŸå¨åŠ›*1.5ï¼Œ30ï¼…å‡ ç‡æ–½åŠ BUFFï¼ŒBUFFæ—¶é—´å†…ä½¿ç”¨æŠ€èƒ½ï¼Œä¼šæŸå¤±ç”Ÿå‘½ï¼ˆæŠ€èƒ½è€—é­”*å€ç‡ï¼‰
+--ç­‰çº§3ï¼šé˜´ä¼¤å®³=150+å†…åŠŸå¨åŠ›*2ï¼Œ30ï¼…å‡ ç‡æ–½åŠ BUFFï¼ŒBUFFæ—¶é—´å†…ä½¿ç”¨æŠ€èƒ½ï¼Œä¼šæŸå¤±ç”Ÿå‘½ï¼ˆæŠ€èƒ½è€—é­”*å€ç‡ï¼‰
+--ç­‰çº§4ï¼šé˜´ä¼¤å®³=200+å†…åŠŸå¨åŠ›*2.5ï¼Œ30ï¼…å‡ ç‡æ–½åŠ BUFFï¼ŒBUFFæ—¶é—´å†…ä½¿ç”¨æŠ€èƒ½ï¼Œä¼šæŸå¤±ç”Ÿå‘½ï¼ˆæŠ€èƒ½è€—é­”*å€ç‡ï¼‰
+--ç­‰çº§5ï¼šé˜´ä¼¤å®³=250+å†…åŠŸå¨åŠ›*3ï¼Œ30ï¼…å‡ ç‡æ–½åŠ BUFFï¼ŒBUFFæ—¶é—´å†…ä½¿ç”¨æŠ€èƒ½ï¼Œä¼šæŸå¤±ç”Ÿå‘½ï¼ˆæŠ€èƒ½è€—é­”*å€ç‡ï¼‰
 	
 	if level == 1 then
 		negDamage = math.random(25,75) + magicPower * 1
@@ -74,39 +74,39 @@ function get_damage(self, skill, target)
 		add_buffer(self, target, buf_level)
 	end
 	
-	--Êä³öÒõÊôĞÔÉËº¦
+	--è¾“å‡ºé˜´å±æ€§ä¼¤å®³
 	return 0, 0, 0, negDamage, 0
 end
 ----------------------------------------------------------------------------------------------------
 
---¶¨ÒåBufferº¯Êı£¬»ñÈ¡²ÎÊı
+--å®šä¹‰Bufferå‡½æ•°ï¼Œè·å–å‚æ•°
 function add_buffer(self, target, buf_level)
 
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_jn_lmsj_03")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 	
-	--ÉèÖÃBufferµÄÊôĞÔ	
+	--è®¾ç½®Bufferçš„å±æ€§	
 	nx_set_property(buffer, "Level", buf_level)
 	
-	--BufferµÄ×÷ÓÃÀàĞÍ
-	--0:Ë²Ê±Buffer,1:ÔÚXÃëÄÚÓĞĞ§,2:ÔÚXÃëÄÚY´ÎÊÂ¼şÓĞĞ§,3:ÔÚXÃëÄÚÓĞĞ§,Ã¿YÃë´¥·¢Ò»´Î)
+	--Bufferçš„ä½œç”¨ç±»å‹
+	--0:ç¬æ—¶Buffer,1:åœ¨Xç§’å†…æœ‰æ•ˆ,2:åœ¨Xç§’å†…Yæ¬¡äº‹ä»¶æœ‰æ•ˆ,3:åœ¨Xç§’å†…æœ‰æ•ˆ,æ¯Yç§’è§¦å‘ä¸€æ¬¡)
 	nx_set_property(buffer, "EffectType", 2)
 		
-	--BufferµÄÉúÃüÆÚ£¨Ê±¼ä°´ÕÕ¼¼ÄÜµÈ¼¶»ñÈ¡£©
+	--Bufferçš„ç”Ÿå‘½æœŸï¼ˆæ—¶é—´æŒ‰ç…§æŠ€èƒ½ç­‰çº§è·å–ï¼‰
 	nx_set_property(buffer, "LifeTime",30000)
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 5)
-	--BufferÃ¿´Î´¥·¢Ê±ÊÇ·ñ³É¹¦×÷ÓÃµÄ³É¹¦ÂÊ£¬°Ù·Ö±ÈÊı
+	--Bufferæ¯æ¬¡è§¦å‘æ—¶æ˜¯å¦æˆåŠŸä½œç”¨çš„æˆåŠŸç‡ï¼Œç™¾åˆ†æ¯”æ•°
 	nx_set_property(buffer, "EffectRatio", 100)
-	--BUFFERµÄÊÂ¼ş´¥·¢(Ìí¼Óµ½BufferµÄEventEffectRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERçš„äº‹ä»¶è§¦å‘(æ·»åŠ åˆ°Bufferçš„EventEffectRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "EventEffectRec", COMMAND_SKILL_BEGIN)	
 	
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

@@ -1,225 +1,225 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎï»ù´¡ÊôÐÔ-->
+<!--äººç‰©åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="Type" type="byte" public="true" private="true" save="false" desc="ÀàÐÍ: 1-TYPE_SCENE,2-TYPE_PLAYER,4-TYPE_NPC,8-TYPE_ITEM"/>
-		<property name="Sex" type="byte" public="true" private="true" save="true" desc="ÐÔ±ð 0:ÄÐÐÔ,1:Å®ÐÔ"/>
-		<property name="Photo" type="string" public="true" private="true" save="true" desc="Í¼Ïñ,Í·Ïñ"/>
-		<property name="Camp" type="int" public="true" private="true" save="true" desc="½ÇÉ«ÕóÓª ²Î¼û½ÇÉ«ËµÃ÷ÎÄ±¾"/>
-		<property name="Race" type="int" public="true" private="true" save="true" desc="½ÇÉ«ÖÖ×å ²Î¼û½ÇÉ«ËµÃ÷ÎÄ±¾"/>
-		<property name="Job"  type="int" public="true" private="true" save="true" desc="½ÇÉ«Ö°Òµ ²Î¼û½ÇÉ«ËµÃ÷ÎÄ±¾"/>
-		<property name="Level" type="int" public="true" private="true" save="true" desc="½ÇÉ«µÈ¼¶"/>
-		<property name="RoleCreateTime" type="string" public="false" private="false" save="true" desc="½ÇÉ«´´½¨Ê±¼ä"/>
-		<property name="LoginTime" type="int64" public="false" private="false" save="false" desc="½ÇÉ«±¾´Î½øÈëÓÎÏ·µÄÊ±¼ä"/>
-		<property name="EntrySceneTime" type="int64" public="false" private="false" save="false" desc="½ÇÉ«½øÈë³¡¾°µÄÊ±¼ä"/>
-		<property name="LeaveSceneTime" type="int64" public="false" private="false" save="true" desc="½ÇÉ«ÍË³ö³¡¾°µÄÊ±¼ä"/>
-		<property name="MacAddress" type="string" public="false" private="false" save="true" desc="MacµØÖ·"/>
-		<property name="Protected" type="int" public="false" private="false" save="false" desc="npcÊÇ±£»¤×´Ì¬, 0:³·Ïú±£»¤, 1:ÉèÖÃ±£»¤"/>
-		<property name="StopAI" type="int" public="false" private="false" save="false" desc="AIÍ£Ö¹ 0:Æô¶¯AI ,1:Í£Ö¹AI"/>
-		<property name="CurTalkID" type="int" public="false" private="false" save="true" desc="µ±Ç°¶Ô»°±àºÅ"/>
-		<property name="CurArea" type="int" public="false" private="true" save="true" desc="µ±Ç°ÇøÓò" />
-		<property name="SceneTriggerConfig" type="string" public="false" private="true" save="true" desc="µ±Ç°³¡¾°»·¾³´¥·¢Æ÷ÅäÖÃÃû"/>
-		<property name="ToolEffect" type="string" public="true" private="true" save="false" desc="Íæ¼Òµ±Ç°Ê¹ÓÃµÄÉú»î¹¤¾ßÌØÐ§"/>
-		<property name="DisabledEquipPosList" type="int64" public="false" private="false" save="true" desc="×°±¸À¸½ûÓÃÀ¸Î»±êÊ¶£¬¶ÔÓ¦Î»Îª1Ôò±íÊ¾±»½ûÓÃ"/>
-		<property name="SilenceTick" type="int" public="false" private="false" save="true" desc="½ûÑÔµÄÊ±¼ä"/>
-		<property name="SkillEnergyList" type="string" public="true" private="true" save="true" desc="½ÇÉ«µ±Ç°¼¼ÄÜÊ¹ÓÃÄÜÁ¿¼¯ºÏ"/>
-		<property name="RemoveLimit" type="int" public="false" private="false" save="false" desc="½â³ý×°±¸ÏÞÖÆ 0:Î´½â³ý, 1:½â³ý(²âÊÔÓÃ)"/>
-		<property name="HideSkillTip" type="int" public="false" private="true" save="true" desc="ÊÇ·ñÏÔÊ¾¼¼ÄÜÌáÊ¾ 0:²»Òþ²Ø, 1:Òþ²Ø"/>
-		<property name="Coin_LLQD" type="int" public="false" private="true" save="true" desc="Á÷ÀËÈºµº¸±±¾Íæ¼Ò³ÖÓÐ½ðÇ®Êý"/>
-		<property name="ActiveScene" type="string" public="false" private="false" save="true" desc="¼¤»îÁËµÄ´óµØÍ¼´«ËÍ³¡¾°"/>
-		<property name="DelaySkill" type="object" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·ÅµÄ¼¼ÄÜ"/>
-		<property name="DelaySkillType" type="int" public="false" private="false" save="false" desc="¼¼ÄÜÀàÐÍ£¬0ÎÞÄ¿±êµã¼¼ÄÜ£¬1ÓÐÄ¿±êµã¼¼ÄÜ"/>
-		<property name="DelaySkillHandType" type="int" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜ×óÓÒÊÖÀàÐÍ"/>
-		<property name="DelaySkillX" type="float" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜÄ¿±êµãx"/>
-		<property name="DelaySkillY" type="float" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜÄ¿±êµãy"/>
-		<property name="DelaySkillZ" type="float" public="false" private="false" save="false" desc="ÑÓ³ÙÊÍ·Å¼¼ÄÜÄ¿±êµãz"/>
-		<property name="DelaySkillTime" type="int" public="false" private="true" save="false" desc="¼¼ÄÜÑÓ³ÙÊ±¼äms"/>
-		<property name="Pre_SceneID" type="int" public="false" private="true" save="true" desc="Ç°¸ö³¡¾°ID"/>
-		<property name="Pre_PosX" type="float" public="false" private="true" save="true" desc="Ç°¸ö³¡¾°X×ø±ê"/>
-		<property name="Pre_PosY" type="float" public="false" private="true" save="true" desc="Ç°¸ö³¡¾°Y×ø±ê"/>
-		<property name="Pre_PosZ" type="float" public="false" private="true" save="true" desc="Ç°¸ö³¡¾°Z×ø±ê"/>
-		<property name="MountItemId" type="string" public="false" private="true" save="true" desc="×øÆïID"/>
-		<property name="WedgedTime" type="int64" public="false" private="true" save="true" desc="¿ÉÒÔÊ¹ÓÃÍÑÀë¿¨ËÀÊ±¼ä"/>
-		<property name="EnergyLevel" type="byte" public="true" private="true" save="false" desc="ÒÑ×°±¸µÄÄÜÁ¿¶ÜµÄ¾­ÑéµÈ¼¶"/>
-		<property name="EnergyUpgradeNum" type="byte" public="false" private="true" save="true" desc="½ð±ÒÇ¿»¯ÄÜÁ¿¶Ü´ÎÊýÏÞÖÆ"/>
-		<property name="EnergyPreUpgradeNum" type="byte" public="false" private="true" save="true" desc="µãÈ¯Ç¿»¯ÄÜÁ¿¶Ü´ÎÊýÏÞÖÆ"/>
-    	<property name="SpecState" type="byte" public="true" private="true" save="false" desc="ÌØÊâÍæ·¨ ÐèÒªÓÃµ½µÄÒ»¸ö×´Ì¬"/>
-		<!--²Ø±¦Í¼ÖÐÊ¹ÓÃ,ÐèÒªÏÂÏß±£´æ,ËùÒÔÉèÖÃÔÚÍæ¼ÒÕâ±ß,add by zsq-->
-		<property name="IsHunterTreasure" type="byte" public="false" private="true" save="true" desc="Íæ¼ÒÊÇ·ñÔÚÑ°±¦×´Ì¬"/>
-    <property name="CheckMoniterTime" type="int64" public="false" private="false" save="false" desc="¼ì²â¿Í»§¶Ë¼ÓËÙÊ±¼ä"/>
-    <property name="LastMoniterX" type="float" public="false" private="false" save="false" desc="¼ì²âÉÏ´ÎÍ£Ö¹Î»ÖÃ"/>
-    <property name="LastMoniterY" type="float" public="false" private="false" save="false" desc="¼ì²âÉÏ´ÎÍ£Ö¹Î»ÖÃ"/>
-    <property name="LastMoniterZ" type="float" public="false" private="false" save="false" desc="¼ì²âÉÏ´ÎÍ£Ö¹Î»ÖÃ"/>
-    <property name="LastEquipPrtId" type="string" public="false" private="false" save="true" desc="×°±¸×¨¾«»ñÈ¡ÉÏ´Î¼¤»îµÄbufferid"/>
-	  <property name="RoleHideAdd" type="int" public="false" private="false" save="false" desc="Íæ¼ÒµÄÏÔÊ¾ºÍÒþÉí"/>
-    <property name="AdjustOrientClient" type="byte" public="false" private="false" save="false" desc="¿Í»§¶ËÊÇ·ñÐèÒª×Ô¶¯Ä¿±ê½ÃÕý"/>
-    <property name="AdjustOrient" type="byte" public="false" private="true" save="true" desc="ÊÇ·ñ×Ô¶¯Ä¿±ê½ÃÕý"/>
-    <property name="AdjustTarget" type="byte" public="false" private="false" save="false" desc="½ÃÕýµÄÄ¿±ê"/>
+		<property name="Type" type="byte" public="true" private="true" save="false" desc="ç±»åž‹: 1-TYPE_SCENE,2-TYPE_PLAYER,4-TYPE_NPC,8-TYPE_ITEM"/>
+		<property name="Sex" type="byte" public="true" private="true" save="true" desc="æ€§åˆ« 0:ç”·æ€§,1:å¥³æ€§"/>
+		<property name="Photo" type="string" public="true" private="true" save="true" desc="å›¾åƒ,å¤´åƒ"/>
+		<property name="Camp" type="int" public="true" private="true" save="true" desc="è§’è‰²é˜µè¥ å‚è§è§’è‰²è¯´æ˜Žæ–‡æœ¬"/>
+		<property name="Race" type="int" public="true" private="true" save="true" desc="è§’è‰²ç§æ— å‚è§è§’è‰²è¯´æ˜Žæ–‡æœ¬"/>
+		<property name="Job"  type="int" public="true" private="true" save="true" desc="è§’è‰²èŒä¸š å‚è§è§’è‰²è¯´æ˜Žæ–‡æœ¬"/>
+		<property name="Level" type="int" public="true" private="true" save="true" desc="è§’è‰²ç­‰çº§"/>
+		<property name="RoleCreateTime" type="string" public="false" private="false" save="true" desc="è§’è‰²åˆ›å»ºæ—¶é—´"/>
+		<property name="LoginTime" type="int64" public="false" private="false" save="false" desc="è§’è‰²æœ¬æ¬¡è¿›å…¥æ¸¸æˆçš„æ—¶é—´"/>
+		<property name="EntrySceneTime" type="int64" public="false" private="false" save="false" desc="è§’è‰²è¿›å…¥åœºæ™¯çš„æ—¶é—´"/>
+		<property name="LeaveSceneTime" type="int64" public="false" private="false" save="true" desc="è§’è‰²é€€å‡ºåœºæ™¯çš„æ—¶é—´"/>
+		<property name="MacAddress" type="string" public="false" private="false" save="true" desc="Macåœ°å€"/>
+		<property name="Protected" type="int" public="false" private="false" save="false" desc="npcæ˜¯ä¿æŠ¤çŠ¶æ€, 0:æ’¤é”€ä¿æŠ¤, 1:è®¾ç½®ä¿æŠ¤"/>
+		<property name="StopAI" type="int" public="false" private="false" save="false" desc="AIåœæ­¢ 0:å¯åŠ¨AI ,1:åœæ­¢AI"/>
+		<property name="CurTalkID" type="int" public="false" private="false" save="true" desc="å½“å‰å¯¹è¯ç¼–å·"/>
+		<property name="CurArea" type="int" public="false" private="true" save="true" desc="å½“å‰åŒºåŸŸ" />
+		<property name="SceneTriggerConfig" type="string" public="false" private="true" save="true" desc="å½“å‰åœºæ™¯çŽ¯å¢ƒè§¦å‘å™¨é…ç½®å"/>
+		<property name="ToolEffect" type="string" public="true" private="true" save="false" desc="çŽ©å®¶å½“å‰ä½¿ç”¨çš„ç”Ÿæ´»å·¥å…·ç‰¹æ•ˆ"/>
+		<property name="DisabledEquipPosList" type="int64" public="false" private="false" save="true" desc="è£…å¤‡æ ç¦ç”¨æ ä½æ ‡è¯†ï¼Œå¯¹åº”ä½ä¸º1åˆ™è¡¨ç¤ºè¢«ç¦ç”¨"/>
+		<property name="SilenceTick" type="int" public="false" private="false" save="true" desc="ç¦è¨€çš„æ—¶é—´"/>
+		<property name="SkillEnergyList" type="string" public="true" private="true" save="true" desc="è§’è‰²å½“å‰æŠ€èƒ½ä½¿ç”¨èƒ½é‡é›†åˆ"/>
+		<property name="RemoveLimit" type="int" public="false" private="false" save="false" desc="è§£é™¤è£…å¤‡é™åˆ¶ 0:æœªè§£é™¤, 1:è§£é™¤(æµ‹è¯•ç”¨)"/>
+		<property name="HideSkillTip" type="int" public="false" private="true" save="true" desc="æ˜¯å¦æ˜¾ç¤ºæŠ€èƒ½æç¤º 0:ä¸éšè—, 1:éšè—"/>
+		<property name="Coin_LLQD" type="int" public="false" private="true" save="true" desc="æµæµªç¾¤å²›å‰¯æœ¬çŽ©å®¶æŒæœ‰é‡‘é’±æ•°"/>
+		<property name="ActiveScene" type="string" public="false" private="false" save="true" desc="æ¿€æ´»äº†çš„å¤§åœ°å›¾ä¼ é€åœºæ™¯"/>
+		<property name="DelaySkill" type="object" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾çš„æŠ€èƒ½"/>
+		<property name="DelaySkillType" type="int" public="false" private="false" save="false" desc="æŠ€èƒ½ç±»åž‹ï¼Œ0æ— ç›®æ ‡ç‚¹æŠ€èƒ½ï¼Œ1æœ‰ç›®æ ‡ç‚¹æŠ€èƒ½"/>
+		<property name="DelaySkillHandType" type="int" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½å·¦å³æ‰‹ç±»åž‹"/>
+		<property name="DelaySkillX" type="float" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½ç›®æ ‡ç‚¹x"/>
+		<property name="DelaySkillY" type="float" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½ç›®æ ‡ç‚¹y"/>
+		<property name="DelaySkillZ" type="float" public="false" private="false" save="false" desc="å»¶è¿Ÿé‡Šæ”¾æŠ€èƒ½ç›®æ ‡ç‚¹z"/>
+		<property name="DelaySkillTime" type="int" public="false" private="true" save="false" desc="æŠ€èƒ½å»¶è¿Ÿæ—¶é—´ms"/>
+		<property name="Pre_SceneID" type="int" public="false" private="true" save="true" desc="å‰ä¸ªåœºæ™¯ID"/>
+		<property name="Pre_PosX" type="float" public="false" private="true" save="true" desc="å‰ä¸ªåœºæ™¯Xåæ ‡"/>
+		<property name="Pre_PosY" type="float" public="false" private="true" save="true" desc="å‰ä¸ªåœºæ™¯Yåæ ‡"/>
+		<property name="Pre_PosZ" type="float" public="false" private="true" save="true" desc="å‰ä¸ªåœºæ™¯Zåæ ‡"/>
+		<property name="MountItemId" type="string" public="false" private="true" save="true" desc="åéª‘ID"/>
+		<property name="WedgedTime" type="int64" public="false" private="true" save="true" desc="å¯ä»¥ä½¿ç”¨è„±ç¦»å¡æ­»æ—¶é—´"/>
+		<property name="EnergyLevel" type="byte" public="true" private="true" save="false" desc="å·²è£…å¤‡çš„èƒ½é‡ç›¾çš„ç»éªŒç­‰çº§"/>
+		<property name="EnergyUpgradeNum" type="byte" public="false" private="true" save="true" desc="é‡‘å¸å¼ºåŒ–èƒ½é‡ç›¾æ¬¡æ•°é™åˆ¶"/>
+		<property name="EnergyPreUpgradeNum" type="byte" public="false" private="true" save="true" desc="ç‚¹åˆ¸å¼ºåŒ–èƒ½é‡ç›¾æ¬¡æ•°é™åˆ¶"/>
+    	<property name="SpecState" type="byte" public="true" private="true" save="false" desc="ç‰¹æ®ŠçŽ©æ³• éœ€è¦ç”¨åˆ°çš„ä¸€ä¸ªçŠ¶æ€"/>
+		<!--è—å®å›¾ä¸­ä½¿ç”¨,éœ€è¦ä¸‹çº¿ä¿å­˜,æ‰€ä»¥è®¾ç½®åœ¨çŽ©å®¶è¿™è¾¹,add by zsq-->
+		<property name="IsHunterTreasure" type="byte" public="false" private="true" save="true" desc="çŽ©å®¶æ˜¯å¦åœ¨å¯»å®çŠ¶æ€"/>
+    <property name="CheckMoniterTime" type="int64" public="false" private="false" save="false" desc="æ£€æµ‹å®¢æˆ·ç«¯åŠ é€Ÿæ—¶é—´"/>
+    <property name="LastMoniterX" type="float" public="false" private="false" save="false" desc="æ£€æµ‹ä¸Šæ¬¡åœæ­¢ä½ç½®"/>
+    <property name="LastMoniterY" type="float" public="false" private="false" save="false" desc="æ£€æµ‹ä¸Šæ¬¡åœæ­¢ä½ç½®"/>
+    <property name="LastMoniterZ" type="float" public="false" private="false" save="false" desc="æ£€æµ‹ä¸Šæ¬¡åœæ­¢ä½ç½®"/>
+    <property name="LastEquipPrtId" type="string" public="false" private="false" save="true" desc="è£…å¤‡ä¸“ç²¾èŽ·å–ä¸Šæ¬¡æ¿€æ´»çš„bufferid"/>
+	  <property name="RoleHideAdd" type="int" public="false" private="false" save="false" desc="çŽ©å®¶çš„æ˜¾ç¤ºå’Œéšèº«"/>
+    <property name="AdjustOrientClient" type="byte" public="false" private="false" save="false" desc="å®¢æˆ·ç«¯æ˜¯å¦éœ€è¦è‡ªåŠ¨ç›®æ ‡çŸ«æ­£"/>
+    <property name="AdjustOrient" type="byte" public="false" private="true" save="true" desc="æ˜¯å¦è‡ªåŠ¨ç›®æ ‡çŸ«æ­£"/>
+    <property name="AdjustTarget" type="byte" public="false" private="false" save="false" desc="çŸ«æ­£çš„ç›®æ ‡"/>
   </properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="talk_rec" cols="2" maxrows="16" save="false" public="false" private="false" desc="Íæ¼Ò¶¨Ê±Ì¨´Ê±í(Í·¶¥Ëµ»°)">
-			<column type="string" desc="Ì¨´Êid"/>
-			<column type="byte" desc="¶¨Ê±Ê±³¤"/>
+		<record name="talk_rec" cols="2" maxrows="16" save="false" public="false" private="false" desc="çŽ©å®¶å®šæ—¶å°è¯è¡¨(å¤´é¡¶è¯´è¯)">
+			<column type="string" desc="å°è¯id"/>
+			<column type="byte" desc="å®šæ—¶æ—¶é•¿"/>
 		</record>
-		<!-- ³¡¾°¼¤»î¼ÇÂ¼±í£¬°´Î»²Ù×÷ -->
-		<record name="OpenMapRec" cols="1" maxrows="32" save="true" public="false" private="false" desc="³¡¾°¼¤»î¼ÇÂ¼±í">
-			<column type="dword" desc="³¡¾°±àºÅ(¾­Óë²ß»®¹µÍ¨, ºÚ½ð³¡¾°id×î´óÊÇ999, Òò´Ë×î´óÐÐÊýÉèÎª32)"/>
+		<!-- åœºæ™¯æ¿€æ´»è®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="OpenMapRec" cols="1" maxrows="32" save="true" public="false" private="false" desc="åœºæ™¯æ¿€æ´»è®°å½•è¡¨">
+			<column type="dword" desc="åœºæ™¯ç¼–å·(ç»ä¸Žç­–åˆ’æ²Ÿé€š, é»‘é‡‘åœºæ™¯idæœ€å¤§æ˜¯999, å› æ­¤æœ€å¤§è¡Œæ•°è®¾ä¸º32)"/>
 		</record>
-		<!-- ·ÉÐÐµã¼¤»î¼ÇÂ¼±í£¬°´Î»²Ù×÷ -->
-		<record name="OpenTransPointRec" cols="1" maxrows="8" save="true" public="false" private="true" desc="·ÉÐÐµã¼¤»î¼ÇÂ¼±í£¬°´Î»²Ù×÷">
-			<column type="dword" desc="·ÉÐÐµã±àºÅ"/>
+		<!-- é£žè¡Œç‚¹æ¿€æ´»è®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ -->
+		<record name="OpenTransPointRec" cols="1" maxrows="8" save="true" public="false" private="true" desc="é£žè¡Œç‚¹æ¿€æ´»è®°å½•è¡¨ï¼ŒæŒ‰ä½æ“ä½œ">
+			<column type="dword" desc="é£žè¡Œç‚¹ç¼–å·"/>
 		</record>
-		<record name="capital_rec" cols="3" maxrows="10" save="true" public="false" private="true" desc="×Ê²ú±í">
-			<column type="string" desc="×Ê²úÃû³Æ"/>
-			<column type="byte" desc="×Ê²úÀàÐÍ"/>
-			<column type="int64" desc="×Ê²úÊýÁ¿"/>
+		<record name="capital_rec" cols="3" maxrows="10" save="true" public="false" private="true" desc="èµ„äº§è¡¨">
+			<column type="string" desc="èµ„äº§åç§°"/>
+			<column type="byte" desc="èµ„äº§ç±»åž‹"/>
+			<column type="int64" desc="èµ„äº§æ•°é‡"/>
 		</record>
-		<record name="damage_npc_rec" cols="1" maxrows="1000" save="false" public="false" private="false" desc="ÕÕ³ÉÉËº¦µÄboss±í">
-			<column type="object" desc="±»¹¥»÷µÄboss"/>
+		<record name="damage_npc_rec" cols="1" maxrows="1000" save="false" public="false" private="false" desc="ç…§æˆä¼¤å®³çš„bossè¡¨">
+			<column type="object" desc="è¢«æ”»å‡»çš„boss"/>
 		</record>
-		<record name="player_movie_rec" cols="2" maxrows="1000" save="false" public="false" private="false" desc="¾çÇéÊÇ·ñ²¥·Å¹ýµÄ±í">
-			<column type="byte" desc="¾çÇéid"/>
-			<column type="byte" desc="0:¾çÇéÎ´²¥·Å¹ý£»1£º¾çÇé²¥·Å¹ýÁË"/>
+		<record name="player_movie_rec" cols="2" maxrows="1000" save="false" public="false" private="false" desc="å‰§æƒ…æ˜¯å¦æ’­æ”¾è¿‡çš„è¡¨">
+			<column type="byte" desc="å‰§æƒ…id"/>
+			<column type="byte" desc="0:å‰§æƒ…æœªæ’­æ”¾è¿‡ï¼›1ï¼šå‰§æƒ…æ’­æ”¾è¿‡äº†"/>
 		</record>
-		<record name="QTE_OnlyOnce_Rec" cols="1" maxrows="200" save="false" public="false" private="false" desc="¼ÇÂ¼Ö»ÏìÓ¦Ò»´ÎµÄQTEÊÂ¼þ">
-			<column type="string" desc="ÊÂ¼þID"/>
+		<record name="QTE_OnlyOnce_Rec" cols="1" maxrows="200" save="false" public="false" private="false" desc="è®°å½•åªå“åº”ä¸€æ¬¡çš„QTEäº‹ä»¶">
+			<column type="string" desc="äº‹ä»¶ID"/>
 		</record>
-		<record name="SkillType_Lock_State_Rec" cols="1" maxrows="200" save="true" public="false" private="true" desc="¼ÇÂ¼¼¼ÄÜ¿ì½ÝÀ¸Ëø¶¨×´">
-			<column type="string" desc="¼¼ÄÜ¿ì½ÝÀ¸ID"/>
+		<record name="SkillType_Lock_State_Rec" cols="1" maxrows="200" save="true" public="false" private="true" desc="è®°å½•æŠ€èƒ½å¿«æ·æ é”å®šçŠ¶">
+			<column type="string" desc="æŠ€èƒ½å¿«æ·æ ID"/>
 		</record>
-		<record name="SkillType_Rec" cols="1" maxrows="200" save="true" public="false" private="true" desc="¼ÇÂ¼µ±Ç°Ê¹ÓÃµÄ¿ì½ÝÀ¸¼°">
-			<column type="DWORD" desc="¼¼ÄÜ¿ì½ÝÀ¸ID"/>
+		<record name="SkillType_Rec" cols="1" maxrows="200" save="true" public="false" private="true" desc="è®°å½•å½“å‰ä½¿ç”¨çš„å¿«æ·æ åŠ">
+			<column type="DWORD" desc="æŠ€èƒ½å¿«æ·æ ID"/>
 		</record>
-		<record name="NormalSkill_Pos_Rec" cols="3" maxrows="1" save="true" public="fasle" private="true" desc="ÆÕÍ¨¹¥»÷¼¼ÄÜÔÚ¼¸¸ö¿ì½ÝÀ¸ÀïµÄÎ»ÖÃ">
-			<column type="WORD" desc="µÚÒ»À¸µÄÎ»ÖÃ"/>
-			<column type="WORD" desc="µÚ¶þÀ¸µÄÎ»ÖÃ"/>
-			<column type="WORD" desc="µÚÈýÀ¸µÄÎ»ÖÃ"/>
+		<record name="NormalSkill_Pos_Rec" cols="3" maxrows="1" save="true" public="fasle" private="true" desc="æ™®é€šæ”»å‡»æŠ€èƒ½åœ¨å‡ ä¸ªå¿«æ·æ é‡Œçš„ä½ç½®">
+			<column type="WORD" desc="ç¬¬ä¸€æ çš„ä½ç½®"/>
+			<column type="WORD" desc="ç¬¬äºŒæ çš„ä½ç½®"/>
+			<column type="WORD" desc="ç¬¬ä¸‰æ çš„ä½ç½®"/>
 		</record>
-		<record name="EquipmentSetRec" cols="3" maxrows="32" save="false" public="fasle" private="false" desc="Íæ¼Òµ±Ç°Ì××°×éºÏ±í">
-			<column type="DWORD" desc="Ì××°±àºÅ"/>
-			<column type="string" desc="ÊôÓÚ¸ÃÌ××°µÄ×°±¸ÁÐ±í"/>
-			<column type="string" desc="¼¤»îµÄÊôÐÔÁÐ±í"/>
+		<record name="EquipmentSetRec" cols="3" maxrows="32" save="false" public="fasle" private="false" desc="çŽ©å®¶å½“å‰å¥—è£…ç»„åˆè¡¨">
+			<column type="DWORD" desc="å¥—è£…ç¼–å·"/>
+			<column type="string" desc="å±žäºŽè¯¥å¥—è£…çš„è£…å¤‡åˆ—è¡¨"/>
+			<column type="string" desc="æ¿€æ´»çš„å±žæ€§åˆ—è¡¨"/>
 		</record>
-		<record name="RequstRec" cols="3" maxrows="32" save="false" public="fasle" private="false" desc="Íæ¼Òµ±Ç°ÑûÇë±ðÈËµÄÐÅÏ¢">
-			<column type="byte" desc="ÇëÇóÀàÐÍ"/>
-			<column type="widestr" desc="Íæ¼ÒÃû"/>
-			<column type="int64" desc="ÑûÇëµÄÊ±¿Ì"/>
+		<record name="RequstRec" cols="3" maxrows="32" save="false" public="fasle" private="false" desc="çŽ©å®¶å½“å‰é‚€è¯·åˆ«äººçš„ä¿¡æ¯">
+			<column type="byte" desc="è¯·æ±‚ç±»åž‹"/>
+			<column type="widestr" desc="çŽ©å®¶å"/>
+			<column type="int64" desc="é‚€è¯·çš„æ—¶åˆ»"/>
 		</record>
-		<record name="open_prompt_rec" cols="2" maxrows="256" save="true" public="false" private="false" desc="ÏµÍ³¹¦ÄÜ¿ª·Å±í">
-			<column type="byte" desc="ÏµÍ³¹¦ÄÜID"/>
-			<column type="byte" desc="ÊÇ·ñÒÑµã»÷"/>
+		<record name="open_prompt_rec" cols="2" maxrows="256" save="true" public="false" private="false" desc="ç³»ç»ŸåŠŸèƒ½å¼€æ”¾è¡¨">
+			<column type="byte" desc="ç³»ç»ŸåŠŸèƒ½ID"/>
+			<column type="byte" desc="æ˜¯å¦å·²ç‚¹å‡»"/>
 		</record>
-		<record name="count_limit_rec" cols="3" maxrows="256" save="true" public="false" private="true" desc="ÎïÆ·Ê¹ÓÃ´ÎÊýÏÞÖÆ±í">
-			<column type="WORD" desc="ÏÞÖÆID"/>
-			<column type="WORD" desc="ÒÑÊ¹ÓÃ´ÎÊý"/>
-			<column type="double" desc="µÀ¾ß¿ªÊ¼ÐÂÒ»ÂÖÍ³¼ÆÊ¹ÓÃ´ÎÊýµÄÊ±¼ä"/>
+		<record name="count_limit_rec" cols="3" maxrows="256" save="true" public="false" private="true" desc="ç‰©å“ä½¿ç”¨æ¬¡æ•°é™åˆ¶è¡¨">
+			<column type="WORD" desc="é™åˆ¶ID"/>
+			<column type="WORD" desc="å·²ä½¿ç”¨æ¬¡æ•°"/>
+			<column type="double" desc="é“å…·å¼€å§‹æ–°ä¸€è½®ç»Ÿè®¡ä½¿ç”¨æ¬¡æ•°çš„æ—¶é—´"/>
 		</record>
-		<record name="connect_skill_rec" cols="3" maxrows="32" save="false" public="false" private="true" desc="¼¼ÄÜÁ¬»÷ÐÅÏ¢±í">
-			<column type="string" desc="¼¼ÄÜID"/>
-			<column type="int64" desc="Á¬»÷¼¼ÄÜÊÍ·ÅÊ±¼ä"/>
+		<record name="connect_skill_rec" cols="3" maxrows="32" save="false" public="false" private="true" desc="æŠ€èƒ½è¿žå‡»ä¿¡æ¯è¡¨">
+			<column type="string" desc="æŠ€èƒ½ID"/>
+			<column type="int64" desc="è¿žå‡»æŠ€èƒ½é‡Šæ”¾æ—¶é—´"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\internals\internals_player.xml" desc="ÄÚ²¿ÊôÐÔ"/>
-		<path name="struct\rule\Common\autorestore.xml" desc="NPCºÍplayer¹«ÓÃ»Ö¸´ÊôÐÔ"/>
-		<path name="struct\rule\Common\state.xml" desc="Í¨ÓÃ×´Ì¬ÊôÐÔ"/>
-		<path name="struct\rule\Common\basefighterdata.xml" desc="»ù´¡Í¨ÓÃÊôÐÔ"/>
-		<path name="struct\player\player_autostore.xml" desc="player×Ô¼ºµÄ»Ö¸´ÊôÐÔ"/>
-		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="¿ØÖÆÊôÐÔ"/>
-		<path name="struct\rule\Common\hide.xml" desc="ÒþÉí"/>
-		<path name="struct\rule\Common\attack.xml" desc="¹¥»÷ËÙ¶ÈÏà¹Ø"/>
-		<path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
-		<path name="struct\rule\baseprop\baseprop.xml" desc="»ù´¡ÊôÐÔ"/>
-		<path name="struct\rule\fight\playerfightpara.xml" desc="Õ½¶·ÊôÐÔÏà¹Ø"/>
-		<path name="struct\rule\fight\maxpara.xml" desc="½ÇÉ«ÏûºÄÄÜÁ¿ÊôÐÔÏà¹Ø"/>
-		<path name="struct\rule\player_motion.xml" desc="ÒÆ¶¯Ïà¹Ø"/>
-		<path name="struct\rule\request.xml" desc="Íæ¼Ò¼äµÄÇëÇó"/>
-		<path name="struct\rule\visequip.xml" desc="Íæ¼Ò¿ÉÊÓ×°±¸"/>
-		<path name="struct\rule\isexchange.xml" desc="Íæ¼Ò¼äµÄ½»Ò×Ïà¹Ø"/>
-		<path name="struct\rule\doselect.xml" desc="Ö´ÐÐÑ¡Ôñ"/>
-		<path name="struct\rule\unenthrall.xml" desc="·À³ÁÃÔÏà¹ØÊôÐÔ"/>
-		<path name="struct\rule\post.xml" desc="ÓÊ¼ÄÏµÍ³Ïà¹ØÊôÐÔ"/>
-		<path name="struct\rule\pk.xml" desc="PKÄ£Ê½¼°pvpÏà¹ØÊôÐÔ"/>
-		<path name="struct\rule\challenge.xml" desc="Íæ¼ÒÇÐ´èÏà¹ØÊôÐÔ"/>
-		<path name="struct\rule\playerfighterdata.xml" desc="Õ½¶·Ïà¹ØÊôÐÔ"/>
-		<path name="struct\rule\transtool.xml" desc="½»Í¨¹¤¾ßÊôÐÔ"/>
-		<path name="struct\rule\ModifyPlayer.xml" desc="ÈÎÎñ£¬×°±¸ÐÞÕý±í"/>
-		<path name="struct\rule\in_water.xml" desc="Íæ¼ÒË®ÏÂºôÎüÏà¹ØÊôÐÔ"/>
-		<path name="struct\rule\TransitionJob.xml" desc="½ÇÉ«×ªÖ°Ö°Òµ"/>
-		<path name="struct\rule\BattleWarStatic.xml" desc="Õ½³¡½áËã±í"/>
-		<path name="struct\rule\Inscription.xml" desc="Ãú¿Ì±í"/>
-		<path name="struct\rule\exile.xml" desc="·ÅÖðÖ®µØ"/>
-		<!--path name="struct\rule\rabbi.xml" desc="·¨Ê¦ÏµÁÐÊôÐÔ"/-->
-		<path name="struct\rule\force_repute.xml" desc="ÊÆÁ¦ÉùÍû±í"/>
-		<path name="struct\rule\back_stage.xml" desc="ÒÆ¶¯Ïà¹ØµÄÊôÐÔ"/>
-		<path name="struct\rule\movie.xml" desc="¾çÇéÏà¹ØµÄÊôÐÔ"/>
-		<path name="struct\rule\guild_data.xml" desc="ÈËÎï¹«»áÏà¹ØÊôÐÔ¶¨Òå"/>
-		<path name="struct\rule\ride.xml" desc="ÒÆ¶¯Ïà¹ØµÄÊôÐÔ"/>
-		<path name="struct\rule\income_reduce.xml" desc="ÊÕÒæµÝ¼õÏà¹Ø´ÎÊý¼ÇÂ¼"/>
-		<path name="struct\rule\safemode.xml" desc="°²È«Ä£Ê½"/>
+		<path name="struct\internals\internals_player.xml" desc="å†…éƒ¨å±žæ€§"/>
+		<path name="struct\rule\Common\autorestore.xml" desc="NPCå’Œplayerå…¬ç”¨æ¢å¤å±žæ€§"/>
+		<path name="struct\rule\Common\state.xml" desc="é€šç”¨çŠ¶æ€å±žæ€§"/>
+		<path name="struct\rule\Common\basefighterdata.xml" desc="åŸºç¡€é€šç”¨å±žæ€§"/>
+		<path name="struct\player\player_autostore.xml" desc="playerè‡ªå·±çš„æ¢å¤å±žæ€§"/>
+		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="æŽ§åˆ¶å±žæ€§"/>
+		<path name="struct\rule\Common\hide.xml" desc="éšèº«"/>
+		<path name="struct\rule\Common\attack.xml" desc="æ”»å‡»é€Ÿåº¦ç›¸å…³"/>
+		<path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
+		<path name="struct\rule\baseprop\baseprop.xml" desc="åŸºç¡€å±žæ€§"/>
+		<path name="struct\rule\fight\playerfightpara.xml" desc="æˆ˜æ–—å±žæ€§ç›¸å…³"/>
+		<path name="struct\rule\fight\maxpara.xml" desc="è§’è‰²æ¶ˆè€—èƒ½é‡å±žæ€§ç›¸å…³"/>
+		<path name="struct\rule\player_motion.xml" desc="ç§»åŠ¨ç›¸å…³"/>
+		<path name="struct\rule\request.xml" desc="çŽ©å®¶é—´çš„è¯·æ±‚"/>
+		<path name="struct\rule\visequip.xml" desc="çŽ©å®¶å¯è§†è£…å¤‡"/>
+		<path name="struct\rule\isexchange.xml" desc="çŽ©å®¶é—´çš„äº¤æ˜“ç›¸å…³"/>
+		<path name="struct\rule\doselect.xml" desc="æ‰§è¡Œé€‰æ‹©"/>
+		<path name="struct\rule\unenthrall.xml" desc="é˜²æ²‰è¿·ç›¸å…³å±žæ€§"/>
+		<path name="struct\rule\post.xml" desc="é‚®å¯„ç³»ç»Ÿç›¸å…³å±žæ€§"/>
+		<path name="struct\rule\pk.xml" desc="PKæ¨¡å¼åŠpvpç›¸å…³å±žæ€§"/>
+		<path name="struct\rule\challenge.xml" desc="çŽ©å®¶åˆ‡ç£‹ç›¸å…³å±žæ€§"/>
+		<path name="struct\rule\playerfighterdata.xml" desc="æˆ˜æ–—ç›¸å…³å±žæ€§"/>
+		<path name="struct\rule\transtool.xml" desc="äº¤é€šå·¥å…·å±žæ€§"/>
+		<path name="struct\rule\ModifyPlayer.xml" desc="ä»»åŠ¡ï¼Œè£…å¤‡ä¿®æ­£è¡¨"/>
+		<path name="struct\rule\in_water.xml" desc="çŽ©å®¶æ°´ä¸‹å‘¼å¸ç›¸å…³å±žæ€§"/>
+		<path name="struct\rule\TransitionJob.xml" desc="è§’è‰²è½¬èŒèŒä¸š"/>
+		<path name="struct\rule\BattleWarStatic.xml" desc="æˆ˜åœºç»“ç®—è¡¨"/>
+		<path name="struct\rule\Inscription.xml" desc="é“­åˆ»è¡¨"/>
+		<path name="struct\rule\exile.xml" desc="æ”¾é€ä¹‹åœ°"/>
+		<!--path name="struct\rule\rabbi.xml" desc="æ³•å¸ˆç³»åˆ—å±žæ€§"/-->
+		<path name="struct\rule\force_repute.xml" desc="åŠ¿åŠ›å£°æœ›è¡¨"/>
+		<path name="struct\rule\back_stage.xml" desc="ç§»åŠ¨ç›¸å…³çš„å±žæ€§"/>
+		<path name="struct\rule\movie.xml" desc="å‰§æƒ…ç›¸å…³çš„å±žæ€§"/>
+		<path name="struct\rule\guild_data.xml" desc="äººç‰©å…¬ä¼šç›¸å…³å±žæ€§å®šä¹‰"/>
+		<path name="struct\rule\ride.xml" desc="ç§»åŠ¨ç›¸å…³çš„å±žæ€§"/>
+		<path name="struct\rule\income_reduce.xml" desc="æ”¶ç›Šé€’å‡ç›¸å…³æ¬¡æ•°è®°å½•"/>
+		<path name="struct\rule\safemode.xml" desc="å®‰å…¨æ¨¡å¼"/>
 
-		<path name="struct\player\charge_shop.xml" desc="ºÚ½ðÉÌ³ÇµÄÏà¹ØÊôÐÔ"/>
-		<path name="struct\player\player_carrier.xml" desc="Íæ¼ÒÆï³Ë"/>
-		<path name="struct\player\friend.xml" desc="ºÃÓÑ"/>
-		<path name="struct\player\team.xml" desc="¶ÓÎé"/>
-		<path name="struct\player\shortcut.xml" desc="¿ì½ÝÀ¸"/>
-		<path name="struct\player\clone_scene.xml" desc="¸±±¾ÐÅÏ¢"/>
-		<path name="struct\player\title.xml" desc="³ÆºÅÊôÐÔ"/>
-		<path name="struct\player\formula.xml" desc="½ÇÉ«Åä·½"/>
-		<path name="struct\player\GunMan.xml" desc="Ç¹ÊÖÏà¹Ø"/>
-		<path name="struct\player\executor.xml" desc="Ö´ÐÐÕßÏà¹Ø"/>
-		<path name="struct\player\punisher.xml" desc="³Í·£ÕßÏà¹Ø"/>
-		<path name="struct\player\wizard.xml" desc="·ûÖäÊ¦Ïà¹Ø"/>
-		<path name="struct\player\swordman.xml" desc="Ä§½£Ê¿Ïà¹Ø"/>
-		<path name="struct\player\witch.xml" desc="Å®Î×Ïà¹Ø"/>
-		<path name="struct\player\chatpage.xml" desc="ÓÃ»§×Ô¶¨ÒåÁÄÌì±íµ¥"/>
-		<path name="struct\player\chatroom.xml" desc="ÁÄÌìÊÒ"/>
-		<path name="struct\player\event_spring.xml" desc="ÊÂ¼þ´¥·¢ÏµÍ³Ïà¹ØÊý¾Ý"/>
-		<path name="struct\player\arena.xml" desc="¾º¼¼³¡±í"/>
-		<path name="struct\player\DeadAvenge.xml" desc="Íæ¼ÒËÀÍö¸´³ðÏà¹ØÊôÐÔ"/>
-		<path name="struct\player\Achievement.xml" desc="³É¾Í±í"/>
-		<path name="struct\player\Activity.xml" desc="»î¶¯±í"/>
-		<path name="struct\player\Battlewar.xml" desc="Õ½³¡±í"/>
-		<path name="struct\player\playerchange.xml" desc="±äÉíÊôÐÔÏà¹Ø"/>
-		<path name="struct\player\BladeRunnerMan.xml" desc="µ¶·æÕ½Ê¿Ö°ÒµÏà¹Ø"/>
-		<path name="struct\player\PetShow.xml" desc="ºô³öµÄ³èÎï±í"/>
-		<path name="struct\player\notify_list.xml" desc="Í¨¸æÏà¹Ø"/>
-		<path name="struct\player\relive.xml" desc="ËÀÍö¸´»î"/>
-		<path name="struct\player\hotel.xml" desc="ÂÃ¹ÝÏà¹Ø"/>
-        <path name="struct\player\exp.xml" desc="½ÇÉ«¾­ÑéÏà¹Ø"/>
-        <path name="struct\player\declare.xml" desc="½ÇÉ«ÐûÑÔÏà¹Ø"/>
-		<path name="struct\player\honor.xml" desc="½ÇÉ«ÈÙÓþÏà¹Ø"/>
-		<path name="struct\player\depot_bag.xml" desc="²Ö¿â±³°üÏà¹Ø"/>
-		<path name="struct\player\talent.xml" desc="Ìì¸³Ó°ÏìÊôÐÔÏà¹Ø"/>
-		<path name="struct\player\asyn_wait.xml" desc="Òì²½µÈ´ý"/>
-		<path name="struct\player\force_state.xml" desc="ÈËÎïÊÆÁ¦×´Ì¬Ïà¹ØÊôÐÔ¶¨Òå"/>
-		<path name="struct\player\flow.xml" desc="Á÷³ÌÏà¹Ø"/>
-		<path name="struct\player\letter.xml" desc="ÓÊ¼þÏà¹Ø"/>
-		<path name="struct\player\player_state.xml" desc="ÌØÊâÎäÆ÷Ïà¹Ø"/>
-		<path name="struct\player\life_occupation.xml" desc="Éú»îÖ°Òµ"/>
-		<path name="struct\player\map_data.xml" desc="µØÍ¼Ì½Ë÷Ïà¹Ø"/>
-		<path name="struct\npc_property\ai_motion.xml" desc="AIÒÆ¶¯Ïà¹Ø"/>
-		<path name="struct\npc_property\ai_path.xml" desc="Â·¾¶±í"/>
-		<path name="struct\rule\capitaltype.xml" desc="×Ê½ð"/>
-    <path name="struct\quest\quest.xml" desc="ÈÎÎñÏà¹Ø"/>
-    <path name="struct\quest\pvp_task.xml" desc="ÈÎÎñÏà¹Ø"/>
-    <path name="struct\common\trigger.xml" desc="´¥·¢Æ÷"/>
-    <path name="struct\player\PvpActivity.xml" desc="PVP»î¶¯×´Ì¬±í"/>
-		<path name="struct\player\NewUserLead.xml" desc="ÌåÑéÐÔ¸±±¾Êý¾Ý±£´æ"/>
-		<path name="struct\player\item_op.xml" desc="Ïà¹ØITEM²Ù×÷"/>
-		<path name="struct\player\everydayrecommand.xml" desc="Ã¿ÈÕÍÆ¼öÏà¹Ø"/>
-		<path name="struct\player\offline_compensate.xml" desc="ÀëÏß²¹³¥Ïà¹Ø"/>
-		<path name="struct\player\vip.xml" desc="VIPÏà¹Ø"/>
-		<path name="struct\player\energywellresfight.xml" desc="ÄÜÁ¿¾®×ÊÔ´Õ½"/>
-		<path name="struct\player\SpecialNpc.xml" desc="ÌØÊâNPCÐÅÏ¢"/>
-		<path name="struct\player\energywell_guildwar.xml" desc="ÄÜÁ¿¾®¹«»áÕ½"/>
-    <path name="struct\player\OnlineCharge.xml" desc="ºÚ½ðÊ±¼äÊÕ·ÑÅäÖÃ"/>
-    <path name="struct\player\SkillEnhance.xml" desc="¼¼ÄÜ×¨¾«"/>
-    <path name="struct\player\energywell_campwar.xml" desc="ÄÜÁ¿¾®Õ½³¡ÕóÓªÕ½"/>
-	<path name="struct\player\personalcarrier.xml" desc="¸öÈËÔØ¾ßÏà¹Ø"/>
+		<path name="struct\player\charge_shop.xml" desc="é»‘é‡‘å•†åŸŽçš„ç›¸å…³å±žæ€§"/>
+		<path name="struct\player\player_carrier.xml" desc="çŽ©å®¶éª‘ä¹˜"/>
+		<path name="struct\player\friend.xml" desc="å¥½å‹"/>
+		<path name="struct\player\team.xml" desc="é˜Ÿä¼"/>
+		<path name="struct\player\shortcut.xml" desc="å¿«æ·æ "/>
+		<path name="struct\player\clone_scene.xml" desc="å‰¯æœ¬ä¿¡æ¯"/>
+		<path name="struct\player\title.xml" desc="ç§°å·å±žæ€§"/>
+		<path name="struct\player\formula.xml" desc="è§’è‰²é…æ–¹"/>
+		<path name="struct\player\GunMan.xml" desc="æžªæ‰‹ç›¸å…³"/>
+		<path name="struct\player\executor.xml" desc="æ‰§è¡Œè€…ç›¸å…³"/>
+		<path name="struct\player\punisher.xml" desc="æƒ©ç½šè€…ç›¸å…³"/>
+		<path name="struct\player\wizard.xml" desc="ç¬¦å’’å¸ˆç›¸å…³"/>
+		<path name="struct\player\swordman.xml" desc="é­”å‰‘å£«ç›¸å…³"/>
+		<path name="struct\player\witch.xml" desc="å¥³å·«ç›¸å…³"/>
+		<path name="struct\player\chatpage.xml" desc="ç”¨æˆ·è‡ªå®šä¹‰èŠå¤©è¡¨å•"/>
+		<path name="struct\player\chatroom.xml" desc="èŠå¤©å®¤"/>
+		<path name="struct\player\event_spring.xml" desc="äº‹ä»¶è§¦å‘ç³»ç»Ÿç›¸å…³æ•°æ®"/>
+		<path name="struct\player\arena.xml" desc="ç«žæŠ€åœºè¡¨"/>
+		<path name="struct\player\DeadAvenge.xml" desc="çŽ©å®¶æ­»äº¡å¤ä»‡ç›¸å…³å±žæ€§"/>
+		<path name="struct\player\Achievement.xml" desc="æˆå°±è¡¨"/>
+		<path name="struct\player\Activity.xml" desc="æ´»åŠ¨è¡¨"/>
+		<path name="struct\player\Battlewar.xml" desc="æˆ˜åœºè¡¨"/>
+		<path name="struct\player\playerchange.xml" desc="å˜èº«å±žæ€§ç›¸å…³"/>
+		<path name="struct\player\BladeRunnerMan.xml" desc="åˆ€é”‹æˆ˜å£«èŒä¸šç›¸å…³"/>
+		<path name="struct\player\PetShow.xml" desc="å‘¼å‡ºçš„å® ç‰©è¡¨"/>
+		<path name="struct\player\notify_list.xml" desc="é€šå‘Šç›¸å…³"/>
+		<path name="struct\player\relive.xml" desc="æ­»äº¡å¤æ´»"/>
+		<path name="struct\player\hotel.xml" desc="æ—…é¦†ç›¸å…³"/>
+        <path name="struct\player\exp.xml" desc="è§’è‰²ç»éªŒç›¸å…³"/>
+        <path name="struct\player\declare.xml" desc="è§’è‰²å®£è¨€ç›¸å…³"/>
+		<path name="struct\player\honor.xml" desc="è§’è‰²è£èª‰ç›¸å…³"/>
+		<path name="struct\player\depot_bag.xml" desc="ä»“åº“èƒŒåŒ…ç›¸å…³"/>
+		<path name="struct\player\talent.xml" desc="å¤©èµ‹å½±å“å±žæ€§ç›¸å…³"/>
+		<path name="struct\player\asyn_wait.xml" desc="å¼‚æ­¥ç­‰å¾…"/>
+		<path name="struct\player\force_state.xml" desc="äººç‰©åŠ¿åŠ›çŠ¶æ€ç›¸å…³å±žæ€§å®šä¹‰"/>
+		<path name="struct\player\flow.xml" desc="æµç¨‹ç›¸å…³"/>
+		<path name="struct\player\letter.xml" desc="é‚®ä»¶ç›¸å…³"/>
+		<path name="struct\player\player_state.xml" desc="ç‰¹æ®Šæ­¦å™¨ç›¸å…³"/>
+		<path name="struct\player\life_occupation.xml" desc="ç”Ÿæ´»èŒä¸š"/>
+		<path name="struct\player\map_data.xml" desc="åœ°å›¾æŽ¢ç´¢ç›¸å…³"/>
+		<path name="struct\npc_property\ai_motion.xml" desc="AIç§»åŠ¨ç›¸å…³"/>
+		<path name="struct\npc_property\ai_path.xml" desc="è·¯å¾„è¡¨"/>
+		<path name="struct\rule\capitaltype.xml" desc="èµ„é‡‘"/>
+    <path name="struct\quest\quest.xml" desc="ä»»åŠ¡ç›¸å…³"/>
+    <path name="struct\quest\pvp_task.xml" desc="ä»»åŠ¡ç›¸å…³"/>
+    <path name="struct\common\trigger.xml" desc="è§¦å‘å™¨"/>
+    <path name="struct\player\PvpActivity.xml" desc="PVPæ´»åŠ¨çŠ¶æ€è¡¨"/>
+		<path name="struct\player\NewUserLead.xml" desc="ä½“éªŒæ€§å‰¯æœ¬æ•°æ®ä¿å­˜"/>
+		<path name="struct\player\item_op.xml" desc="ç›¸å…³ITEMæ“ä½œ"/>
+		<path name="struct\player\everydayrecommand.xml" desc="æ¯æ—¥æŽ¨èç›¸å…³"/>
+		<path name="struct\player\offline_compensate.xml" desc="ç¦»çº¿è¡¥å¿ç›¸å…³"/>
+		<path name="struct\player\vip.xml" desc="VIPç›¸å…³"/>
+		<path name="struct\player\energywellresfight.xml" desc="èƒ½é‡äº•èµ„æºæˆ˜"/>
+		<path name="struct\player\SpecialNpc.xml" desc="ç‰¹æ®ŠNPCä¿¡æ¯"/>
+		<path name="struct\player\energywell_guildwar.xml" desc="èƒ½é‡äº•å…¬ä¼šæˆ˜"/>
+    <path name="struct\player\OnlineCharge.xml" desc="é»‘é‡‘æ—¶é—´æ”¶è´¹é…ç½®"/>
+    <path name="struct\player\SkillEnhance.xml" desc="æŠ€èƒ½ä¸“ç²¾"/>
+    <path name="struct\player\energywell_campwar.xml" desc="èƒ½é‡äº•æˆ˜åœºé˜µè¥æˆ˜"/>
+	<path name="struct\player\personalcarrier.xml" desc="ä¸ªäººè½½å…·ç›¸å…³"/>
   </includes>
 </object>

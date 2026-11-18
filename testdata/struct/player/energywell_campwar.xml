@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--Ç¹ÊÖÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æžªæ‰‹ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="camp_war_task" type="string" public="false" private="true" save="false" desc="ÕóÓªÕ½×¨ÊôÈÎÎñ"/>
-		<property name="camp_war_relive" type="string" public="false" private="true" save="false" desc="ÕóÓªÕ½¹éÊô¸´»îµã: x,z,camp;x,z,camp"/>
-		<property name="camp_war_pillar" type="string" public="false" private="true" save="false" desc="ÕóÓªÕ½ÄÜÁ¿Öùµã: x,z,camp;x,z,camp"/>
+		<property name="camp_war_task" type="string" public="false" private="true" save="false" desc="é˜µè¥æˆ˜ä¸“å±žä»»åŠ¡"/>
+		<property name="camp_war_relive" type="string" public="false" private="true" save="false" desc="é˜µè¥æˆ˜å½’å±žå¤æ´»ç‚¹: x,z,camp;x,z,camp"/>
+		<property name="camp_war_pillar" type="string" public="false" private="true" save="false" desc="é˜µè¥æˆ˜èƒ½é‡æŸ±ç‚¹: x,z,camp;x,z,camp"/>
 	</properties>
 	
 	<records>

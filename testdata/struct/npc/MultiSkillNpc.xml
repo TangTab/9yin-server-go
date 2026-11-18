@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--³èÎï»ù´¡ÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--å® ç‰©åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-	<!--ÐÞ¸Ä:ÊôÐÔÐÞ¸Ä³É¿É±£´æµÄpublic-->
-		<record name="RoleIdList" cols="1" maxrows="50" save="false" public="false" private="false" desc="¼¼ÄÜNPC°ó¶¨µÄÈËÎïÁÐ±í">
-			<column type="object" desc="ÈËÎïid"/>
+	<!--ä¿®æ”¹:å±žæ€§ä¿®æ”¹æˆå¯ä¿å­˜çš„public-->
+		<record name="RoleIdList" cols="1" maxrows="50" save="false" public="false" private="false" desc="æŠ€èƒ½NPCç»‘å®šçš„äººç‰©åˆ—è¡¨">
+			<column type="object" desc="äººç‰©id"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
         <path name="struct\rule\Common\Fightbag.xml" desc=""/>
         <path name="struct\rule\Common\commonfighter.xml" desc=""/>
@@ -24,10 +24,10 @@
         <path name="struct\rule\Common\autorestore.xml" desc=""/>
         <path name="struct\rule\Common\skilluse.xml" desc=""/>
         <path name="struct\rule\Common\bufferuse.xml" desc=""/>
-        <path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+        <path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
         <path name="struct\rule\Common\basefighterdata.xml" desc=""/>
-        <path name="struct\npc_property\ai_motion.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+        <path name="struct\npc_property\ai_motion.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
+        <path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
 	</includes>
 </object>

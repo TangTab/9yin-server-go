@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-    <property name="CurrentSection"    type="byte" public="false" private="false" save="true" desc="ÊÔÁ·³¡ÈÎÎñµ±Ç°½×¶ÎID"/>
-    <property name="TaskOpen"    type="byte" public="false" private="false" save="true" desc="ÊÔÁ·³¡ÈÎÎñÊÇ·ñ¿ªÆô"/>
-    <property name="PracticeType"    type="byte" public="false" private="false" save="true" desc="Á·³¡¸±±¾ÀàÐÍ£¬µ¥ÈË»ò¶àÈË"/>
+    <property name="CurrentSection"    type="byte" public="false" private="false" save="true" desc="è¯•ç»ƒåœºä»»åŠ¡å½“å‰é˜¶æ®µID"/>
+    <property name="TaskOpen"    type="byte" public="false" private="false" save="true" desc="è¯•ç»ƒåœºä»»åŠ¡æ˜¯å¦å¼€å¯"/>
+    <property name="PracticeType"    type="byte" public="false" private="false" save="true" desc="ç»ƒåœºå‰¯æœ¬ç±»åž‹ï¼Œå•äººæˆ–å¤šäºº"/>
   </properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
   </records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

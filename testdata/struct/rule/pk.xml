@@ -1,31 +1,31 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--PKÏµÍ³ÊôÐÔ±í-->
+<!--PKç³»ç»Ÿå±žæ€§è¡¨-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="PKMode" type="byte" public="true" private="true" save="true" desc="PKÄ£Ê½"/>
-		<property name="PKValue" type="int" public="true" private="true" save="true" desc="PKÖµ"/>
-		<property name="ShaQi" type="int" public="false" private="true" save="true" desc="É±Æø"/>
-		<property name="KillCount" type="int" public="false" private="false" save="true" desc="É±ÈË´ÎÊý"/>		
-		<property name="BeKillCount" type="int" public="false" private="false" save="true" desc="±»É±´ÎÊý"/>
+		<property name="PKMode" type="byte" public="true" private="true" save="true" desc="PKæ¨¡å¼"/>
+		<property name="PKValue" type="int" public="true" private="true" save="true" desc="PKå€¼"/>
+		<property name="ShaQi" type="int" public="false" private="true" save="true" desc="æ€æ°”"/>
+		<property name="KillCount" type="int" public="false" private="false" save="true" desc="æ€äººæ¬¡æ•°"/>		
+		<property name="BeKillCount" type="int" public="false" private="false" save="true" desc="è¢«æ€æ¬¡æ•°"/>
 
-		<property name="ArenaSide" type="int" public="true" private="true" save="false" desc="¾º¼¼³¡ÄÚÕóÓª Ã¶¾ÙÎª£º¶ÀÁ¢/A/B/C/D/E "/>
+		<property name="ArenaSide" type="int" public="true" private="true" save="false" desc="ç«žæŠ€åœºå†…é˜µè¥ æžšä¸¾ä¸ºï¼šç‹¬ç«‹/A/B/C/D/E "/>
 
 
-		<property name="ArrestValue"        type="WORD" public="false" private="true" save="true" desc="ºìÃûÄ£¿éÖÐÓÃµ½µÄÍ¨¼©Öµ"/>
-		<property name="ArrestState"        type="byte" public="true" private="true"  save="true" desc="Í¨¼©×´Ì¬"/>
-		<property name="RedNameEffect"      type="int"  public="true" private="true"  save="true" desc="ºìÃûÄ£¿éÖÐÓÃµ½µÄÐ§¹û°ü"/>
-		<property name="ChangePKModule"     type="WORD" public="true" private="true" save="true" desc="ÈËÉíÉÏÉèÖÃµÄPKÄ£Ê½µÄÖµ"/>
-		<property name="PKProtected"        type="int" public="true" private="true" save="true" desc="PK±£»¤µÄÖµ"/>
-		<property name="LastKillTime"       type="double" public="false" private="false" save="true" desc="ÉÏ´ÎÉ±ºìÃûÈËÊ±¼ä"/>
-		<property name="OldArrestValue"     type="WORD" public="false" private="false" save="true" desc="½øÈëÕ½³¡ºÍ¸±±¾Ç°¾ÉµÄÍ¨¼©Öµ"/>
-		<property name="OldChangePKModule"  type="WORD" public="false" private="false" save="true" desc="½øÈëÕ½³¡ºÍ¸±±¾Ç°¾ÉµÄPKÄ£Ê½µÄÖµ"/>
-		<property name="OldPKProtected"     type="WORD" public="false" private="false" save="true" desc="½øÈëÕ½³¡ºÍ¸±±¾Ç°¾ÉµÄPK±£»¤µÄÖµ"/>
-		<property name="OldArrestState"     type="WORD" public="false" private="false" save="true" desc="½øÈëÕ½³¡ºÍ¸±±¾Ç°¾ÉµÄÍ¨¼©×´Ì¬"/>
+		<property name="ArrestValue"        type="WORD" public="false" private="true" save="true" desc="çº¢åæ¨¡å—ä¸­ç”¨åˆ°çš„é€šç¼‰å€¼"/>
+		<property name="ArrestState"        type="byte" public="true" private="true"  save="true" desc="é€šç¼‰çŠ¶æ€"/>
+		<property name="RedNameEffect"      type="int"  public="true" private="true"  save="true" desc="çº¢åæ¨¡å—ä¸­ç”¨åˆ°çš„æ•ˆæžœåŒ…"/>
+		<property name="ChangePKModule"     type="WORD" public="true" private="true" save="true" desc="äººèº«ä¸Šè®¾ç½®çš„PKæ¨¡å¼çš„å€¼"/>
+		<property name="PKProtected"        type="int" public="true" private="true" save="true" desc="PKä¿æŠ¤çš„å€¼"/>
+		<property name="LastKillTime"       type="double" public="false" private="false" save="true" desc="ä¸Šæ¬¡æ€çº¢åäººæ—¶é—´"/>
+		<property name="OldArrestValue"     type="WORD" public="false" private="false" save="true" desc="è¿›å…¥æˆ˜åœºå’Œå‰¯æœ¬å‰æ—§çš„é€šç¼‰å€¼"/>
+		<property name="OldChangePKModule"  type="WORD" public="false" private="false" save="true" desc="è¿›å…¥æˆ˜åœºå’Œå‰¯æœ¬å‰æ—§çš„PKæ¨¡å¼çš„å€¼"/>
+		<property name="OldPKProtected"     type="WORD" public="false" private="false" save="true" desc="è¿›å…¥æˆ˜åœºå’Œå‰¯æœ¬å‰æ—§çš„PKä¿æŠ¤çš„å€¼"/>
+		<property name="OldArrestState"     type="WORD" public="false" private="false" save="true" desc="è¿›å…¥æˆ˜åœºå’Œå‰¯æœ¬å‰æ—§çš„é€šç¼‰çŠ¶æ€"/>
 
-		<property name="LastBeKilledTime"   type="double" public="false" private="false" save="true" desc="ÉÏÒ»´Î±»¶Ô·½ÕóÓªÉ±ËÀµÄÊ±¼ä"/>
-		<property name="SystemAwardsNum"    type="int" public="false" private="false" save="true" desc="½ñÌìÏµÍ³½±ÀøµÄ´ÎÊý"/>
+		<property name="LastBeKilledTime"   type="double" public="false" private="false" save="true" desc="ä¸Šä¸€æ¬¡è¢«å¯¹æ–¹é˜µè¥æ€æ­»çš„æ—¶é—´"/>
+		<property name="SystemAwardsNum"    type="int" public="false" private="false" save="true" desc="ä»Šå¤©ç³»ç»Ÿå¥–åŠ±çš„æ¬¡æ•°"/>
 	</properties>
-		<!-- ±í¸ñ -->
+		<!-- è¡¨æ ¼ -->
 </object>

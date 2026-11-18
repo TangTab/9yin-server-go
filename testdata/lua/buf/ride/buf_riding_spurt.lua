@@ -1,4 +1,4 @@
---AI模块接口,buff消失或移除时调用
+--AI妯″潡鎺ュ彛,buff娑堝け鎴栫Щ闄ゆ椂璋冪敤
 function on_buffer_remove(self, buffer)
 	local isRideSpurt = nx_query_property(self, "IsRideSpurt")
 	if isRideSpurt == 1 then

@@ -1,29 +1,29 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-        <property name="NetBarRight" type="int" public="false" private="true" save="false"   desc="ÎÏÅ£Íø°ÉÈ¨ÏÞ 0-ÆÕÍ¨ 1-ÒøÅÆ 2-½ðÅÆ 3-×êÊ¯"/>
-        <property name="NetBarReceiveState" type="int" public="false" private="true" save="true"   desc="ÎÏÅ£Íø°ÉÈ¨ÏÞ 0-Î´ÁìÈ¡ 1-ÁìÈ¡ÒøÅÆ 2-ÁìÈ¡½ðÅÆ 3-ÁìÈ¡×êÊ¯"/>
-        <property name="NetBarDayPrize" type="int" public="false" private="true" save="true"   desc="ÉÏ´Î»ñµÃµ±ÈÕ½±ÀøµÄÈÕÆÚ"/>
-        <property name="FirstChargeTime" type="string" public="false" private="false" save="true"   desc="·ÖÇøÊ×³åÊ±¼ä"/>
-        <property name="LastConsumeTime" type="string" public="false" private="false" save="true"   desc="ÉÏ´ÎÏû·ÑÊ±¼ä"/>
-        <property name="IsMobileAuthentic" type="byte" public="false" private="false" save="true"   desc="¼ÇÂ¼¸ÃÕËºÅÊÇ·ñÒÑ¾­½øÐÐÊÖ»úÈÏÖ¤"/>
-        <property name="SnDaNetBarRight" type="int" public="false" private="true" save="false"   desc="Ê¢´óÍø°ÉÈ¨ÏÞ 0-ÆÕÍ¨ 1-ÒøÅÆ 2-½ðÅÆ 3-×êÊ¯"/>
-        <property name="SnDaReceiveState" type="int" public="false" private="true" save="true"   desc="Ê¢´óÍø°ÉÈ¨ÏÞ 0-Î´ÁìÈ¡ 1-ÁìÈ¡ÒøÅÆ 2-ÁìÈ¡½ðÅÆ 3-ÁìÈ¡×êÊ¯"/>
-        <property name="SnDaNetBarDayPrize" type="int" public="false" private="true" save="true"   desc="ÉÏ´Î»ñµÃµ±ÈÕ½±ÀøµÄÈÕÆÚ"/>
-        <property name="IsBarManager" type="int" public="false" private="false" save="false"   desc="Íø¹Ü±êÖ¾ 0-·Ç 1-ÊÇ"/>
-        <property name="OnceBarTime" type="int" public="false" private="false" save="true"   desc="ÉÏ´ÎÁìÈ¡Ò»´ÎÐÔÍø¹Ü½±ÀøµÄÈÕÆÚ"/>
-        <property name="WeekBarTime" type="int64" public="false" private="false" save="true"   desc="ÉÏ´ÎÁìÈ¡Ã¿ÖÜÍø¹Ü½±ÀøµÄÈÕÆÚ"/>
+        <property name="NetBarRight" type="int" public="false" private="true" save="false"   desc="èœ—ç‰›ç½‘å§æƒé™ 0-æ™®é€š 1-é“¶ç‰Œ 2-é‡‘ç‰Œ 3-é’»çŸ³"/>
+        <property name="NetBarReceiveState" type="int" public="false" private="true" save="true"   desc="èœ—ç‰›ç½‘å§æƒé™ 0-æœªé¢†å– 1-é¢†å–é“¶ç‰Œ 2-é¢†å–é‡‘ç‰Œ 3-é¢†å–é’»çŸ³"/>
+        <property name="NetBarDayPrize" type="int" public="false" private="true" save="true"   desc="ä¸Šæ¬¡èŽ·å¾—å½“æ—¥å¥–åŠ±çš„æ—¥æœŸ"/>
+        <property name="FirstChargeTime" type="string" public="false" private="false" save="true"   desc="åˆ†åŒºé¦–å†²æ—¶é—´"/>
+        <property name="LastConsumeTime" type="string" public="false" private="false" save="true"   desc="ä¸Šæ¬¡æ¶ˆè´¹æ—¶é—´"/>
+        <property name="IsMobileAuthentic" type="byte" public="false" private="false" save="true"   desc="è®°å½•è¯¥è´¦å·æ˜¯å¦å·²ç»è¿›è¡Œæ‰‹æœºè®¤è¯"/>
+        <property name="SnDaNetBarRight" type="int" public="false" private="true" save="false"   desc="ç››å¤§ç½‘å§æƒé™ 0-æ™®é€š 1-é“¶ç‰Œ 2-é‡‘ç‰Œ 3-é’»çŸ³"/>
+        <property name="SnDaReceiveState" type="int" public="false" private="true" save="true"   desc="ç››å¤§ç½‘å§æƒé™ 0-æœªé¢†å– 1-é¢†å–é“¶ç‰Œ 2-é¢†å–é‡‘ç‰Œ 3-é¢†å–é’»çŸ³"/>
+        <property name="SnDaNetBarDayPrize" type="int" public="false" private="true" save="true"   desc="ä¸Šæ¬¡èŽ·å¾—å½“æ—¥å¥–åŠ±çš„æ—¥æœŸ"/>
+        <property name="IsBarManager" type="int" public="false" private="false" save="false"   desc="ç½‘ç®¡æ ‡å¿— 0-éž 1-æ˜¯"/>
+        <property name="OnceBarTime" type="int" public="false" private="false" save="true"   desc="ä¸Šæ¬¡é¢†å–ä¸€æ¬¡æ€§ç½‘ç®¡å¥–åŠ±çš„æ—¥æœŸ"/>
+        <property name="WeekBarTime" type="int64" public="false" private="false" save="true"   desc="ä¸Šæ¬¡é¢†å–æ¯å‘¨ç½‘ç®¡å¥–åŠ±çš„æ—¥æœŸ"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="netbar_right_rec" cols="5" maxrows="64" save="true" public="false" private="true" desc="Íø°ÉÀÛ»ý¼ÇÂ¼±í">
-			<column type="byte" Name="Íø°É¼¶±ð"/>
-			<column type="dword" Name="ÀÛ¼ÆÌìÊý"/>
-			<column type="dword" Name="ÉÏ´Î¼ÇÂ¼ÈÕÆÚ"/>
-			<column type="dword" Name="À©Õ¹×Ö¶Î1"/>
-			<column type="string" Name="À©Õ¹×Ö¶Î2"/>
+		<record name="netbar_right_rec" cols="5" maxrows="64" save="true" public="false" private="true" desc="ç½‘å§ç´¯ç§¯è®°å½•è¡¨">
+			<column type="byte" Name="ç½‘å§çº§åˆ«"/>
+			<column type="dword" Name="ç´¯è®¡å¤©æ•°"/>
+			<column type="dword" Name="ä¸Šæ¬¡è®°å½•æ—¥æœŸ"/>
+			<column type="dword" Name="æ‰©å±•å­—æ®µ1"/>
+			<column type="string" Name="æ‰©å±•å­—æ®µ2"/>
 		</record>
 	</records>
 </object>

@@ -2,9 +2,9 @@
 -- FILENAME	: movie\\after_movie_action.lua
 -- COPYRIGHT: Snail Game
 -- AUTHOR	: yrc
--- DATE		: 2010Äê4ÔÂ8ÈÕ
+-- DATE		: 2010å¹´4æœˆ8æ—¥
 -------------------------------------------------------------------------------
--- DESC		: ¹ØÓÚ Îäµ±ÈÎÎñÖ®"ëøÀ×´³É½"¾çÇé µÄ´¦ÀíÂß¼­
+-- DESC		: å…³äº æ­¦å½“ä»»åŠ¡ä¹‹"æ»•é›·é—¯å±±"å‰§æƒ… çš„å¤„ç†é€»è¾‘
 ---****************************************************************************
 
 local x = 526.76;
@@ -12,11 +12,11 @@ local y = 109.68;
 local z = 465.52;
 local o = 4.7;
 local complete_task = 2307;
--- ½áÊø¾çÇéºóµÄÌØÊâ´¦Àí
+-- ç»“æŸå‰§æƒ…åçš„ç‰¹æ®Šå¤„ç†
 function after_end_movie(player, movie_id)
-	--ÇĞ»»µ½±¾³¡¾°µÄÖ¸¶¨Î»ÖÃ
+	--åˆ‡æ¢åˆ°æœ¬åœºæ™¯çš„æŒ‡å®šä½ç½®
 	nx_moveto(player, x, y, z, o);
-	--ÉèÖÃÈÎÎñÍê³É
+	--è®¾ç½®ä»»åŠ¡å®Œæˆ
 	local rows = nx_get_record_rows(player, "Task_Record");
 	for i = 0, rows-1 do
 		local id = nx_query_record_value(player, "Task_Record", i, 0);

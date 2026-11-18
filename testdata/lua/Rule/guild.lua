@@ -1,17 +1,17 @@
--- ¹«»áÂß¼­½Å±¾
+-- å…¬ä¼šé€»è¾‘è„šæœ¬
 
--- ÄÜ·ñ´´½¨¹«»á
+-- èƒ½å¦åˆ›å»ºå…¬ä¼š
 function can_create_guild(self, guild_name)
 	
 	return 1
 end
 
--- ´´½¨¹«»áºó
+-- åˆ›å»ºå…¬ä¼šå
 function after_create_guild(self, guild_name)
 
 end
 
--- ÄÜ·ñÉı¼¶¹«»á
+-- èƒ½å¦å‡çº§å…¬ä¼š
 function can_upgrade_guild(self, guild_name)
 
 end

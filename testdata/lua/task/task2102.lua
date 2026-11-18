@@ -1,21 +1,21 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task2102.lua
--- @ ½Å±¾¹¦ÄÜ: 2102ÈÎÎñÂß¼­
--- @ ´´½¨Õß:   huangmw
--- @ ´´½¨ÈÕÆÚ: 2010.11.8
+-- @ è„šæœ¬åç§°: task2102.lua
+-- @ è„šæœ¬åŠŸèƒ½: 2102ä»»åŠ¡é€»è¾‘
+-- @ åˆ›å»ºè€…:   huangmw
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.11.8
 -----------------------------------------
 require("define")
 
 local SEARCH_RANGE = 5
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	--ĞŞ¸ÄNPC£ºSTEP_1_IDÎª¿É¹¥»÷
+	--ä¿®æ”¹NPCï¼šSTEP_1_IDä¸ºå¯æ”»å‡»
 	--local list = nx_get_point_list(npc, 581, 367, 
 		--SEARCH_RANGE, TYPE_NPC, 20, 1)
 	local group_id = nx_query_property(player, "GroupID")
@@ -36,15 +36,15 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
-	--1¡¢NPC£ºfunnpcclone003102ÑØÂ·¾¶groupscene002_001ĞĞ×ß1ÃëºóÉ¾³ı
+	--1ã€NPCï¼šfunnpcclone003102æ²¿è·¯å¾„groupscene002_001è¡Œèµ°1ç§’ååˆ é™¤
 	--local npc = get_obj_around_point(npc, 586, 367, "funnpcclone003102", SEARCH_RANGE)
 	local npc = get_group_npc(player, "funnpcclone003102")
 			
@@ -54,22 +54,22 @@ function Task_After_Complete(player, npc, taskid)
 		nx_set_property(npc, "LifeTime", 1000)
 	end
 	
-	--2¡¢µ÷ÓÃ½Ó¿Ú£¬½«Íæ¼Ò´Ó·Ö×é³¡¾°ÖĞ´«ËÍ³ö£¬ÖÁËÕÖİµÄ(608.708,2.388,417,1.67)
+	--2ã€è°ƒç”¨æ¥å£ï¼Œå°†ç©å®¶ä»åˆ†ç»„åœºæ™¯ä¸­ä¼ é€å‡ºï¼Œè‡³è‹å·çš„(608.708,2.388,417,1.67)
 	nx_switch_locate(player, nx_int(14), 573.802, 2.388, 420.28, 5.581)
 	
 	return 1
 end
 
---Íê³ÉÈÎÎñÄ³Ò»²½ºóµÄ´¦Àí
+--å®Œæˆä»»åŠ¡æŸä¸€æ­¥åçš„å¤„ç†
 function on_complete_step(player, task_id, subFuncId, subFuncType, subFuncOrder)
 	if nx_number(task_id) == 2102 then
 		if nx_number(subFuncOrder) == 1 then
-			--Íê³ÉÈÎÎñ2102µÄµÚÒ»²½ºóµÄ´¦Àí
+			--å®Œæˆä»»åŠ¡2102çš„ç¬¬ä¸€æ­¥åçš„å¤„ç†
 			
-			--²¥·Å¶¯»­481
+			--æ’­æ”¾åŠ¨ç”»481
 			nx_beigin_movie(player, nx_null(), 481)
 			
-			--É¾³ı×ø±ê(586 10 367)¸½½ü1M·¶Î§ÄÚµÄNPC
+			--åˆ é™¤åæ ‡(586 10 367)é™„è¿‘1MèŒƒå›´å†…çš„NPC
 			--local npc = get_obj_around_point(player, 586, 367, "funnpcclone003013", SEARCH_RANGE)
 			local npc = get_group_npc(player, "funnpcclone003013")
 			
@@ -79,9 +79,9 @@ function on_complete_step(player, task_id, subFuncId, subFuncType, subFuncOrder)
 				nx_set_property(npc, "LifeTime", 1000)
 			end
 		elseif nx_number(subFuncOrder) == 3 then
-			--Íê³ÉÈÎÎñ2102µÄµÚ¶ş²½ºóµÄ´¦Àí
+			--å®Œæˆä»»åŠ¡2102çš„ç¬¬äºŒæ­¥åçš„å¤„ç†
 			
-			--1¡¢NPC£ºfunnpcclone003101ÑØÂ·¾¶groupscene002_002£¬ĞĞ×ß6ÃëºóÉ¾³ı
+			--1ã€NPCï¼šfunnpcclone003101æ²¿è·¯å¾„groupscene002_002ï¼Œè¡Œèµ°6ç§’ååˆ é™¤
 			--local npc = get_obj_around_point(player, 586, 367, "funnpcclone003101", SEARCH_RANGE)
 			local npc = get_group_npc(player, "funnpcclone003101")
 			
@@ -94,7 +94,7 @@ function on_complete_step(player, task_id, subFuncId, subFuncType, subFuncOrder)
 	end
 end
 
---ÔÚ·Ö×éNPCÖĞÈ¡µÃÒ»¸öÖ¸¶¨configidµÄÄ¿±ê
+--åœ¨åˆ†ç»„NPCä¸­å–å¾—ä¸€ä¸ªæŒ‡å®šconfigidçš„ç›®æ ‡
 function get_group_npc(player, config_id)
 	if (not config_id) or (config_id == "") then
 		return
@@ -117,7 +117,7 @@ function get_group_npc(player, config_id)
 	return
 end
 
---ÔÚµãÖÜÎ§È¡µÃÒ»¸öÖ¸¶¨configidµÄÄ¿±ê
+--åœ¨ç‚¹å‘¨å›´å–å¾—ä¸€ä¸ªæŒ‡å®šconfigidçš„ç›®æ ‡
 function get_obj_around_point(npc, x, z, config_id, range)
 	if (not config_id) or (config_id == "") then
 		return

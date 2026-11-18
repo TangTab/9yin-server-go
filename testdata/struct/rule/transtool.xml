@@ -1,30 +1,30 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÒÆ¶¯Ïà¹ØµÄÊôÐÔ-->
+<!--ç§»åŠ¨ç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="OnTransToolState" type="byte" public="true" private="true" save="true" desc="³Ë×ø×´Ì¬"/>
-		<property name="LinkObj" type="object" public="true" private="true" save="true" desc="µ±Ç°Á´½ÓÔÚ´Ë¶ÔÏóÉÏ"/>
-		<property name="OnSwitchTransState" type="byte" public="true" private="true" save="true" desc="¿ç³¡¾°½»Í¨¹¤¾ß³Ë×ø×´Ì¬"/>
-		<property name="TransToolID" type="string" public="true" private="true" save="true" desc="¿ç³¡¾°½»Í¨¹¤¾ß¾²Ì¬ID"/>
-		<property name="FlyStep" type="dword" public="true" private="true" save="true" desc="·ÉÐÐ²½Êý"/>
-		<property name="FromTo" type="dword" public="true" private="true" save="true" desc="Â·ÏßºÅ"/>
-		<property name="RoadType" type="byte" public="false" private="false" save="true" desc="Â·ÏßÀàÐÍ"/>
-		<property name="StoreHeight" type="float" public="true" private="true" save="true" desc="±£´æ¸ß¶È"/>
+		<property name="OnTransToolState" type="byte" public="true" private="true" save="true" desc="ä¹˜åçŠ¶æ€"/>
+		<property name="LinkObj" type="object" public="true" private="true" save="true" desc="å½“å‰é“¾æŽ¥åœ¨æ­¤å¯¹è±¡ä¸Š"/>
+		<property name="OnSwitchTransState" type="byte" public="true" private="true" save="true" desc="è·¨åœºæ™¯äº¤é€šå·¥å…·ä¹˜åçŠ¶æ€"/>
+		<property name="TransToolID" type="string" public="true" private="true" save="true" desc="è·¨åœºæ™¯äº¤é€šå·¥å…·é™æ€ID"/>
+		<property name="FlyStep" type="dword" public="true" private="true" save="true" desc="é£žè¡Œæ­¥æ•°"/>
+		<property name="FromTo" type="dword" public="true" private="true" save="true" desc="è·¯çº¿å·"/>
+		<property name="RoadType" type="byte" public="false" private="false" save="true" desc="è·¯çº¿ç±»åž‹"/>
+		<property name="StoreHeight" type="float" public="true" private="true" save="true" desc="ä¿å­˜é«˜åº¦"/>
 	</properties>
 	<records>
-		<!-- ¼ÇÂ¼Íæ¼ÒÔÚFlyNpcÉÏÏÂÏßºó´«ËÍµÄÎ»ÖÃ -->
-		<record name="FlyNpcStoreRec" cols="3" maxrows="1" save="true" public="false" private="false" desc="FlyNpcÏÂÏß´«ËÍ±í">
-			<column type="float" desc="×ø±êx"/>
-			<column type="float" desc="×ø±êy"/>
-			<column type="float" desc="×ø±êz"/>
+		<!-- è®°å½•çŽ©å®¶åœ¨FlyNpcä¸Šä¸‹çº¿åŽä¼ é€çš„ä½ç½® -->
+		<record name="FlyNpcStoreRec" cols="3" maxrows="1" save="true" public="false" private="false" desc="FlyNpcä¸‹çº¿ä¼ é€è¡¨">
+			<column type="float" desc="åæ ‡x"/>
+			<column type="float" desc="åæ ‡y"/>
+			<column type="float" desc="åæ ‡z"/>
 		</record>
-		<record name="fly_path_rec" cols="4" maxrows="2048" save="true" public="false" private="true" desc="Íæ¼Ò·ÉÐÐÂ·Ïß">
-			<column type="float" desc="×ø±êx"/>
-			<column type="float" desc="×ø±êy"/>
-			<column type="float" desc="×ø±êz"/>
-			<column type="word" desc="³¡¾°±àºÅ"/>
+		<record name="fly_path_rec" cols="4" maxrows="2048" save="true" public="false" private="true" desc="çŽ©å®¶é£žè¡Œè·¯çº¿">
+			<column type="float" desc="åæ ‡x"/>
+			<column type="float" desc="åæ ‡y"/>
+			<column type="float" desc="åæ ‡z"/>
+			<column type="word" desc="åœºæ™¯ç¼–å·"/>
 		</record>
 	</records>
 </object>

@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!-- Çó¹ºÐÐÍæ¼ÒÉíÉÏÊôÐÔ/±í -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- æ±‚è´­è¡ŒçŽ©å®¶èº«ä¸Šå±žæ€§/è¡¨ -->
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
-    <!-- ±íÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
+    <!-- è¡¨å±žæ€§ -->
     <records>
-        <record name="RecAskToBuyBillArgs" cols="3" maxrows="100" save="true" public="false" private="false" desc="¹Òµ¥²ÎÊý±í">
-            <column type="string" desc="ÎïÆ·ConfigID"/>
-            <column type="int"    desc="ÊýÁ¿"/>
-            <column type="int64"  desc="µ¥¼Û"/>
+        <record name="RecAskToBuyBillArgs" cols="3" maxrows="100" save="true" public="false" private="false" desc="æŒ‚å•å‚æ•°è¡¨">
+            <column type="string" desc="ç‰©å“ConfigID"/>
+            <column type="int"    desc="æ•°é‡"/>
+            <column type="int64"  desc="å•ä»·"/>
         </record>
 
-        <record name="RecAskToBuyQueryArgs" cols="5" maxrows="1" save="false" public="false" private="false" desc="ËÑË÷²ÎÊý±í">
-            <column type="int"     desc="ÎïÆ·ÀàÐÍ"/>
-            <column type="int"     desc="ÎïÆ·Æ·ÖÊ"/>
-            <column type="int64"   desc="×îÐ¡µ¥¼Û"/>
-            <column type="int"     desc="×îÐ¡µÈ¼¶"/>
-            <column type="widestr" desc="ÎïÆ·Ãû³Æ"/>
+        <record name="RecAskToBuyQueryArgs" cols="5" maxrows="1" save="false" public="false" private="false" desc="æœç´¢å‚æ•°è¡¨">
+            <column type="int"     desc="ç‰©å“ç±»åž‹"/>
+            <column type="int"     desc="ç‰©å“å“è´¨"/>
+            <column type="int64"   desc="æœ€å°å•ä»·"/>
+            <column type="int"     desc="æœ€å°ç­‰çº§"/>
+            <column type="widestr" desc="ç‰©å“åç§°"/>
         </record>
     </records>
 </object>

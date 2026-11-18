@@ -1,23 +1,23 @@
--- Ã¿´Î´¥·¢ÑªÁ¿¼õ°ë£¬²¢´«È¾ÖÜÎ§3Ã×ÄÚµÄµ¥Î»
+-- æ¯æ¬¡è§¦å‘è¡€é‡å‡åŠï¼Œå¹¶ä¼ æŸ“å‘¨å›´3ç±³å†…çš„å•ä½
 
 require("define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
---¼ÆÊ±»ò¼Æ´ÎÊ±µÄĞ§¹û
---Èç¹ûÊÇ¼Æ´Î£¬·µ»Ø1Ê±£º±¾´Î¼Æ´ÎÓĞĞ§£¬·µ»Ø0Ê±£º±¾´Î²»¼Æ´Î
+--è®¡æ—¶æˆ–è®¡æ¬¡æ—¶çš„æ•ˆæœ
+--å¦‚æœæ˜¯è®¡æ¬¡ï¼Œè¿”å›1æ—¶ï¼šæœ¬æ¬¡è®¡æ¬¡æœ‰æ•ˆï¼Œè¿”å›0æ—¶ï¼šæœ¬æ¬¡ä¸è®¡æ¬¡
 function buffer_timer(self, buffer)
-	--×Ô¼ºÑªÁ¿¼õ°ë
+	--è‡ªå·±è¡€é‡å‡åŠ
 	local max_hp = nx_query_property(self, "MaxHP") + nx_query_property(self, "MaxHPAdd")
 	local dmg = max_hp / 2
 
-	--¸ĞÈ¾ÖÜÎ§µ¥Î»
+	--æ„ŸæŸ“å‘¨å›´å•ä½
 
 	-- TYPE_NPC | TYPE_PLAYER =6
 	local NearbyList = nx_get_around_list(self, 3, 6, 50, 1)
@@ -28,11 +28,11 @@ function buffer_timer(self, buffer)
 	return 1
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end
 
---¼ÆËãÉËº¦, ·µ»Ø5ÖÖÉËº¦(Íâ¹¦, ¸Õ, Èá, Òõ, Ñô)
+--è®¡ç®—ä¼¤å®³, è¿”å›5ç§ä¼¤å®³(å¤–åŠŸ, åˆš, æŸ”, é˜´, é˜³)
 function get_damage(self, buffer, target)
 	return 100,0,0,0,0
 end
@@ -40,24 +40,24 @@ end
 
 
 function add_buffer(self, target)
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_poison_05")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--BufferµÄÉúÃüÆÚ
+	--Bufferçš„ç”Ÿå‘½æœŸ
 	nx_set_property(buffer, "LifeTime",30000)
 
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 5000)
 
-	--Ìí¼Óµ½Ä¿±êÉíÉÏ,Í¬Ê±¼ÇÂ¼½á¹û
+	--æ·»åŠ åˆ°ç›®æ ‡èº«ä¸Š,åŒæ—¶è®°å½•ç»“æœ
 	local result = nx_add_buffer(target, self, buffer)
 
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not result then
 		nx_destroy_self(buffer)
 		return false

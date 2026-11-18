@@ -3,7 +3,7 @@ require("share\\skill_define")
 require("share\\server_custom_define")
 require("share\\skill_static_data_define")
 
---Íæ¼Ò×Ô¶¯»¹»÷¼¼ÄÜËùÔÚµÄ¿ì½İÀ¸
+--ç©å®¶è‡ªåŠ¨è¿˜å‡»æŠ€èƒ½æ‰€åœ¨çš„å¿«æ·æ 
 auto_counter_attack_index = 10
 
 function on_load(self)
@@ -13,7 +13,7 @@ function on_load(self)
 	end
 	
 --[[
-	--Ìí¼ÓÄ¬ÈÏµÄÆÕÍ¨¹¥»÷¼¼ÄÜ
+	--æ·»åŠ é»˜è®¤çš„æ™®é€šæ”»å‡»æŠ€èƒ½
 	for _, skill_id in pairs(normal_attack_action_id) do
 		local skill = nx_create_from_config(skill_container, skill_id)
 		if nx_exists(skill) then
@@ -33,7 +33,7 @@ function on_load(self)
         end
     end
 	
-	--Ìí¼Ó»ù´¡¼¼ÄÜ
+	--æ·»åŠ åŸºç¡€æŠ€èƒ½
 	local skill_id_lst = {"zs_zpqf_01", "zs_zpqf_02", "zs_zpqf_03"}
 	
 	for _, skill_id in pairs(skill_id_lst) do
@@ -49,8 +49,8 @@ function on_load(self)
 	end
 end
 
---ÕıÊ½Ê¹ÓÃÉËº¦Àà¼¼ÄÜÇ°µÄÅĞ¶Ï
---·µ»Ø0±íÊ¾²»ÄÜ¶Ô´Ë¶ÔÏóÊ¹ÓÃÖ¸¶¨µÄ¼¼ÄÜ
+--æ­£å¼ä½¿ç”¨ä¼¤å®³ç±»æŠ€èƒ½å‰çš„åˆ¤æ–­
+--è¿”å›0è¡¨ç¤ºä¸èƒ½å¯¹æ­¤å¯¹è±¡ä½¿ç”¨æŒ‡å®šçš„æŠ€èƒ½
 function before_skill_effecttype_compare(self, target, skill)
 	
 	if not nx_exists(skill) then
@@ -58,9 +58,9 @@ function before_skill_effecttype_compare(self, target, skill)
 	end
 
 
-	-- boss¼¼ÄÜÊÍ·ÅÁ÷³ÌÖĞ,Íæ¼Ò¶ÔbossÊ¹ÓÃÆ´ÕĞ¼¼ÄÜÊ±£¬boss²»ÊÜÓ°Ïì¡£
+	-- bossæŠ€èƒ½é‡Šæ”¾æµç¨‹ä¸­,ç©å®¶å¯¹bossä½¿ç”¨æ‹¼æ‹›æŠ€èƒ½æ—¶ï¼Œbossä¸å—å½±å“ã€‚
 	if nx_type(self) == TYPE_PLAYER and nx_type(target) == TYPE_NPC then
-		-- ÅĞ¶ÏÊÇ·ñÊÇboss
+		-- åˆ¤æ–­æ˜¯å¦æ˜¯boss
 		local npcscript = nx_string(nx_get_script(target))
 		
 		if npcscript == "BossNpc" then
@@ -72,65 +72,65 @@ function before_skill_effecttype_compare(self, target, skill)
 		
 	local static_data = nx_query_property(skill, "StaticData")
 	
-	--¼¼ÄÜÀàĞÍ, 0:ÎŞÀà±ğ,1:ÊµÕĞ,2:ĞéÕĞ,3:¼ÜÕĞ
+	--æŠ€èƒ½ç±»å‹, 0:æ— ç±»åˆ«,1:å®æ‹›,2:è™šæ‹›,3:æ¶æ‹›
 	local effect_type = nx_query_skill_int(skill, static_data, Skill_EffectType)
 
-	--¼¼ÄÜconfigid
+	--æŠ€èƒ½configid
 	local self_skill_id = nx_get_config(skill)
 	
 	if nx_type(target) == TYPE_NPC then
-		--NPC,ÌØÊâ´¦Àí,Èç¹ûAIÔİÍ£ÁË£¬²»´¦Àí
+		--NPC,ç‰¹æ®Šå¤„ç†,å¦‚æœAIæš‚åœäº†ï¼Œä¸å¤„ç†
 		local stopAi = nx_query_property(target, "StopAI")
 		if stopAi > 0 then
 			return 1
 		end
 		
-		-- ¹ÖÎïµÄ¼¼ÄÜÑ¡Ôñ
+		-- æ€ªç‰©çš„æŠ€èƒ½é€‰æ‹©
 		local sel_skill = nx_query_property(target, "SelSkill")
 		
-		-- ÏÈÅĞ¶Ï¹ÖÎïÊÇ·ñĞèÒª×÷±×
+		-- å…ˆåˆ¤æ–­æ€ªç‰©æ˜¯å¦éœ€è¦ä½œå¼Š
 		local bFraud = false
 		
 		if not nx_exists(sel_skill) then
-			--·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
+			--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
 			send_skill_effecttype_compare_result(self, target,  
 				self_skill_id, "no", effect_type, -1, 2)
 			return 1
 		end
 		
-		-- µÃµ½±ÈÊÔ½á¹û
+		-- å¾—åˆ°æ¯”è¯•ç»“æœ
 		local result = skill_effecttype_compare(self, target, skill, sel_skill)
 
-		-- µÃµ½NPCµÄ½Å±¾
+		-- å¾—åˆ°NPCçš„è„šæœ¬
 		local lua_name = nx_query_property(target, "LuaScript")
 		if lua_name ~= "" and lua_name ~= nil and lua_name ~= 0  then
-			-- ½«±ÈÊÔ½á¹û·¢ËÍµ½AIÄ£¿é¹©BossÊ¹ÓÃ
+			-- å°†æ¯”è¯•ç»“æœå‘é€åˆ°AIæ¨¡å—ä¾›Bossä½¿ç”¨
 			nx_execute(nx_string(lua_name), "ai_skill_compare_result", target, sel_skill, nx_int(result))
 		end
 		
-		-- ÔÙ·¢
+		-- å†å‘
 		if nx_type(self) == TYPE_NPC then
-			-- µÃµ½NPCµÄ½Å±¾
+			-- å¾—åˆ°NPCçš„è„šæœ¬
 			local self_lua_name = nx_query_property(self, "LuaScript")
 			if self_lua_name ~= "" and self_lua_name ~= nil and self_lua_name ~= 0  then
-				-- ½«±ÈÊÔ½á¹û·¢ËÍµ½AIÄ£¿é¹©BossÊ¹ÓÃ
+				-- å°†æ¯”è¯•ç»“æœå‘é€åˆ°AIæ¨¡å—ä¾›Bossä½¿ç”¨
 				nx_execute(nx_string(self_lua_name), "ai_skill_compare_result", self, skill, nx_int(2-result))
 			end
 		end
 		
-		-- ½á¹û´¦Àí
+		-- ç»“æœå¤„ç†
 		if result == 0 then
-			-- npc»ñÊ¤£¬Ê¹ÓÃ¼¼ÄÜ
+			-- npcè·èƒœï¼Œä½¿ç”¨æŠ€èƒ½
 			nx_use_skill_to_target(target, sel_skill)
 			return 0
 		elseif result == 1 then
-			-- Ë«·½¶¼²»»ñÊ¤
+			-- åŒæ–¹éƒ½ä¸è·èƒœ
 			nx_break_any_flow(self)
 			nx_break_any_flow(target)
 			return 0
 		else
-			-- ¹¥»÷·½»ñÊ¤
-			-- ²éÑ¯Ëø¶¨Ê±¼ä, ·ÇËø¶¨¼¼ÄÜ²»´ò¶Ï
+			-- æ”»å‡»æ–¹è·èƒœ
+			-- æŸ¥è¯¢é”å®šæ—¶é—´, éé”å®šæŠ€èƒ½ä¸æ‰“æ–­
 			local lock_time = nx_number(nx_query_skill_int(skill, static_data, Skill_LockSrcTime))
 			
 			if lock_time > 0 then
@@ -140,9 +140,9 @@ function before_skill_effecttype_compare(self, target, skill)
 			return 1
 		end
 	else
-		--Íæ¼Ò
+		--ç©å®¶
 		
-		--·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
+		--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
 		send_skill_effecttype_compare_result(self, target, 
 			self_skill_id, "no", effect_type, -1, 2)
 			
@@ -150,11 +150,11 @@ function before_skill_effecttype_compare(self, target, skill)
 		
 		--[[
 		
-		--×Ô¶¯»¹»÷¼¼ÄÜ±àºÅ
+		--è‡ªåŠ¨è¿˜å‡»æŠ€èƒ½ç¼–å·
 		local row = nx_find_record_value(target, "shortcut_rec", 0, auto_counter_attack_index)
 		if row < 0 then
-			--Î´¶¨Òå
-			--·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
+			--æœªå®šä¹‰
+			--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
 			send_skill_effecttype_compare_result(self, target, self_skill_id, "no", effect_type, -1, 2)
 			return 1
 		end
@@ -162,39 +162,39 @@ function before_skill_effecttype_compare(self, target, skill)
 		local auto_skill_id = nx_query_record_value(target, "shortcut_rec", row, 2)
 		local auto_skill = nx_find_skill(target, auto_skill_id)
 		if not nx_exists(auto_skill) then
-			--¼¼ÄÜÎ´ÕÒµ½
-			--·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
+			--æŠ€èƒ½æœªæ‰¾åˆ°
+			--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
 			send_skill_effecttype_compare_result(self, target, 
 				self_skill_id, "no", effect_type, -1, 2)
 			return 1
 		end
 		
 		if nx_can_use_skill_to_target(target, self, auto_skill) ~= 1 then
-			--target²»ÄÜÊ¹ÓÃ×Ô¶¯»¹»÷¼¼ÄÜ¹¥»÷¹¥»÷Õß
-			--·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
+			--targetä¸èƒ½ä½¿ç”¨è‡ªåŠ¨è¿˜å‡»æŠ€èƒ½æ”»å‡»æ”»å‡»è€…
+			--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
 			send_skill_effecttype_compare_result(self, target, 
 				self_skill_id, "no", effect_type, -1, 2)
 			return 1
 		end
 		
-		--±È½Ï¼¼ÄÜ
+		--æ¯”è¾ƒæŠ€èƒ½
 		result = skill_effecttype_compare(self, target, skill, auto_skill)
 		if result == 2 then
-			--¹¥»÷·½µÄ¼¼ÄÜ±È×Ô¶¯»¹»÷¼¼ÄÜÀ÷º¦, ¹¥»÷·½µÄ¼¼ÄÜ¼ÌĞø
+			--æ”»å‡»æ–¹çš„æŠ€èƒ½æ¯”è‡ªåŠ¨è¿˜å‡»æŠ€èƒ½å‰å®³, æ”»å‡»æ–¹çš„æŠ€èƒ½ç»§ç»­
 			return 1
 		else		
 			if result == 0 then
-				--targetµÄ×Ô¶¯»¹»÷¼¼ÄÜ»ñÊ¤
-				--targetµÄµ±Ç°Ñ¡Ôñ¶ÔÏóÇĞ»»
+				--targetçš„è‡ªåŠ¨è¿˜å‡»æŠ€èƒ½è·èƒœ
+				--targetçš„å½“å‰é€‰æ‹©å¯¹è±¡åˆ‡æ¢
 				nx_set_property(target, "LastObject", self)
-				--target¿ªÊ¼Ê¹ÓÃauto_skill¼¼ÄÜ
+				--targetå¼€å§‹ä½¿ç”¨auto_skillæŠ€èƒ½
 				nx_use_skill_to_target(target, auto_skill)
 			elseif result == 1 then
-				--ÓëtargetµÄ×Ô¶¯»¹»÷¼¼ÄÜ´ò³ÉÆ½ÊÖ, Ö´ĞĞÆ½ÊÖÌØĞ§
+				--ä¸targetçš„è‡ªåŠ¨è¿˜å‡»æŠ€èƒ½æ‰“æˆå¹³æ‰‹, æ‰§è¡Œå¹³æ‰‹ç‰¹æ•ˆ
 				nx_execute("rull\\skill_effect.lua", "do_deuce_effect", self, target, skill)
 			end
 		
-			--·µ»Ø0, ÖÕÖ¹selfµÄµ±Ç°¼¼ÄÜÁ÷³Ì
+			--è¿”å›0, ç»ˆæ­¢selfçš„å½“å‰æŠ€èƒ½æµç¨‹
 			return 0
 		end
 		
@@ -205,7 +205,7 @@ function before_skill_effecttype_compare(self, target, skill)
 	return 1
 end
 
---µ÷ÓÃ¼¼ÄÜ½Å±¾ĞŞÕı¼¼ÄÜÏàĞÔÏàÍ¬Ê±±È½ÏÓÃµÄÖµ
+--è°ƒç”¨æŠ€èƒ½è„šæœ¬ä¿®æ­£æŠ€èƒ½ç›¸æ€§ç›¸åŒæ—¶æ¯”è¾ƒç”¨çš„å€¼
 function effecttype_compare_value_add(skill, value)
 	
 	local static_data = nx_query_property(skill, "StaticData")
@@ -224,12 +224,12 @@ function effecttype_compare_value_add(skill, value)
 	return added_value[1]
 end
 
---¼¼ÄÜÏàĞÔ±È½Ï
---·µ»Ø0, selfÊä; ·µ»Ø1, Ë«·½¶¼Êä; ·µ»Ø2, selfÓ®
+--æŠ€èƒ½ç›¸æ€§æ¯”è¾ƒ
+--è¿”å›0, selfè¾“; è¿”å›1, åŒæ–¹éƒ½è¾“; è¿”å›2, selfèµ¢
 function skill_effecttype_compare(self, target, self_skill, target_skill)
 	local result = 2
 	
-	--¼¼ÄÜÏàĞÔÀàĞÍ
+	--æŠ€èƒ½ç›¸æ€§ç±»å‹
 	local self_effect_type, target_effect_type = 0, 0
 	local self_static_data = nx_query_property(self_skill, "StaticData")
 	local self_effect_type = nx_query_skill_int(self_skill, self_static_data, Skill_EffectType)
@@ -237,28 +237,28 @@ function skill_effecttype_compare(self, target, self_skill, target_skill)
 	local target_static_data = nx_query_property(target_skill, "StaticData")
 	local target_effect_type = nx_query_skill_int(self_skill, target_static_data, Skill_EffectType)
 	
-	--0:ÎŞÀà±ğ,1:ÊµÕĞ,2:ĞéÕĞ,3:¼ÜÕĞ
+	--0:æ— ç±»åˆ«,1:å®æ‹›,2:è™šæ‹›,3:æ¶æ‹›
 	if self_effect_type == target_effect_type and self_effect_type > 0 then
-		--ÏàĞÔÏàµÈÇÒÓĞÏàĞÔÀà±ğ, ±È½Ï½ÇÉ«ÊôĞÔ
+		--ç›¸æ€§ç›¸ç­‰ä¸”æœ‰ç›¸æ€§ç±»åˆ«, æ¯”è¾ƒè§’è‰²å±æ€§
 		local self_value, target_value = 0, 0
 		
 		if self_effect_type == 1 then
-			--ÊµÕĞ±ÈÁ¦Á¿
+			--å®æ‹›æ¯”åŠ›é‡
 			self_value = nx_query_property(self, "Str") + nx_query_property(self, "StrAdd")
 			target_value = nx_query_property(target, "Str") + nx_query_property(target, "StrAdd")
 		elseif self_effect_type == 2 then
-			--ĞéÕĞ±ÈÃô½İ
+			--è™šæ‹›æ¯”æ•æ·
 			self_value = nx_query_property(self, "Dex") + nx_query_property(self, "DexAdd")
 			target_value = nx_query_property(target, "Dex") + nx_query_property(target, "DexAdd")
 		elseif self_effect_type == 3 then
-			--Ë«·½¶¼ÊÇ¼ÜÕĞ, ±È½ÏÁ¦Á¿ÓëÃô½İµÄ³Ë»ı
+			--åŒæ–¹éƒ½æ˜¯æ¶æ‹›, æ¯”è¾ƒåŠ›é‡ä¸æ•æ·çš„ä¹˜ç§¯
 			self_value = (nx_query_property(self, "Str") + nx_query_property(self, "StrAdd"))
 						* (nx_query_property(self, "Dex") + nx_query_property(self, "DexAdd"))
 			target_value = (nx_query_property(target, "Str") + nx_query_property(target, "StrAdd"))
 						* nx_query_property(target, "Dex") + nx_query_property(target, "DexAdd")
 		end
 		
-		--µ÷ÓÃ¼¼ÄÜ½Å±¾ĞŞÕı¶Ô±ÈÓÃµÄÖµ
+		--è°ƒç”¨æŠ€èƒ½è„šæœ¬ä¿®æ­£å¯¹æ¯”ç”¨çš„å€¼
 		self_value = effecttype_compare_value_add(self_skill, self_value)
 		target_value = effecttype_compare_value_add(target_skill, target_value)
 		
@@ -270,41 +270,41 @@ function skill_effecttype_compare(self, target, self_skill, target_skill)
 			result =0
 		end
 	elseif target_effect_type == 0 then
-		--ËùÓĞµÄÀà±ğ¿ËÖÆ0, Ó®
+		--æ‰€æœ‰çš„ç±»åˆ«å…‹åˆ¶0, èµ¢
 		result = 2
 	elseif (self_effect_type == 1 and target_effect_type == 2) or
 			(self_effect_type == 2 and target_effect_type == 3) or
 			(self_effect_type == 3 and target_effect_type == 1) then
-		--1¿Ë2, 2¿Ë3, 3¿Ë1, Ó®
+		--1å…‹2, 2å…‹3, 3å…‹1, èµ¢
 		result = 2
 	else
-		--ÆäËûÇé¿ö, Êä
+		--å…¶ä»–æƒ…å†µ, è¾“
 		result = 0
 	end
 
 	local self_skill_id = nx_get_config(self_skill)
 	local target_skill_id = nx_get_config(target_skill)
 	
-	--·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
+	--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
 	send_skill_effecttype_compare_result(self, target,
 				self_skill_id, target_skill_id,
 				self_effect_type, target_effect_type, result)
 	
-	--Ó®ÁË¶Ô·½µÄÊ²Ã´ÕĞÊ½,¼ÇÂ¼ÏÂÀ´,¼ÆËãÉËº¦Ê±¿ÉÄÜ»áÓÃµ½
+	--èµ¢äº†å¯¹æ–¹çš„ä»€ä¹ˆæ‹›å¼,è®°å½•ä¸‹æ¥,è®¡ç®—ä¼¤å®³æ—¶å¯èƒ½ä¼šç”¨åˆ°
 	if result == 0 then
-		--selfÊä
+		--selfè¾“
 		nx_set_property(target, "TargetSkill", self_skill)
 	elseif result == 2 then
-		--selfÓ®
+		--selfèµ¢
 		nx_set_property(self, "TargetSkill", target_skill)
 	end
 	
 	return result
 end
 
---·¢ËÍ¼¼ÄÜÏàĞÅÅĞ¶Ï½á¹ûµÄ×Ô¶¨ÒåÏûÏ¢
---result:0,selfÊä; 1,Æ½ÊÖ; 2,selfÓ®
---xxx_effect_type:0:ÎŞÀà±ğ,1:ÊµÕĞ,2:ĞéÕĞ,3:¼ÜÕĞ
+--å‘é€æŠ€èƒ½ç›¸ä¿¡åˆ¤æ–­ç»“æœçš„è‡ªå®šä¹‰æ¶ˆæ¯
+--result:0,selfè¾“; 1,å¹³æ‰‹; 2,selfèµ¢
+--xxx_effect_type:0:æ— ç±»åˆ«,1:å®æ‹›,2:è™šæ‹›,3:æ¶æ‹›
 function send_skill_effecttype_compare_result(self, target,
 				self_skill_id, target_skill_id,
 				self_effect_type, target_effect_type, result)

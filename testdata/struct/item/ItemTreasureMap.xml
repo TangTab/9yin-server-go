@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿ÉÊ¹ÓÃµÄµÀ¾ßµÄ»ù´¡ÊôÐÔ-->
+<!--å¯ä½¿ç”¨çš„é“å…·çš„åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<!--²Ø±¦Í¼Ê¹ÓÃ-->
-		<property name="Picture"  type="string" public="false" private="true"  save="false"  desc="²Ø±¦Í¼±³¾°Í¼Æ¬"/>		
-		<property name="RealArea" type="string" public="false" private="true"  save="false"  desc="²Ø±¦Í¼ÍÚÈ¡µÀ¾ßËùÔÚµÄµØµã"/>	
-		<property name="MapArea"  type="string" public="false" private="true"  save="false"  desc="²Ø±¦Í¼ÍÚÈ¡µÀ¾ßËùÔÚµÄÐ¡µØÍ¼µÄµØµã"/>	
-		<property name="GainPack" type="int"    public="false" private="false" save="false"  desc="²Ø±¦Í¼ÍÚµ½µÀ¾ßµÄ»ñµÃ°ü"/>
-		<property name="Radio"    type="int"    public="false" private="false" save="false"  desc="»ñµÃ»ñµÃ°üµÄ¸ÅÂÊ"/>
-		<property name="HasOpenFlag"       type="byte"    public="false" private="true" save="true"  desc="²Ø±¦Í¼½çÃæÊÇ·ñ¿ªÆôµÄ±êÖ¾,0:Î´¿ªÆô;1:¿ªÆô"/>
+		<!--è—å®å›¾ä½¿ç”¨-->
+		<property name="Picture"  type="string" public="false" private="true"  save="false"  desc="è—å®å›¾èƒŒæ™¯å›¾ç‰‡"/>		
+		<property name="RealArea" type="string" public="false" private="true"  save="false"  desc="è—å®å›¾æŒ–å–é“å…·æ‰€åœ¨çš„åœ°ç‚¹"/>	
+		<property name="MapArea"  type="string" public="false" private="true"  save="false"  desc="è—å®å›¾æŒ–å–é“å…·æ‰€åœ¨çš„å°åœ°å›¾çš„åœ°ç‚¹"/>	
+		<property name="GainPack" type="int"    public="false" private="false" save="false"  desc="è—å®å›¾æŒ–åˆ°é“å…·çš„èŽ·å¾—åŒ…"/>
+		<property name="Radio"    type="int"    public="false" private="false" save="false"  desc="èŽ·å¾—èŽ·å¾—åŒ…çš„æ¦‚çŽ‡"/>
+		<property name="HasOpenFlag"       type="byte"    public="false" private="true" save="true"  desc="è—å®å›¾ç•Œé¢æ˜¯å¦å¼€å¯çš„æ ‡å¿—,0:æœªå¼€å¯;1:å¼€å¯"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

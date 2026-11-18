@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ËÀÍöºó¸´³ðÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ­»äº¡åŽå¤ä»‡ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="CurrentTime" type="int" public="false" private="false" save="true" desc="¸´»îºó¾­¹ýµÄÊ±¼äºÁÃë£¬ÆÕÍ¨¸´³ð"/>
-    <property name="OffineSec" type="int64" public="false" private="false" save="true" desc="¸´³ðÏÂÏßÊ±¼ä"/>
-    <property name="SpecialTime" type="int" public="false" private="false" save="true" desc="¸´»îºó¾­¹ýµÄÊ±¼äºÁÃë£¬ÌØÊâ¸´³ð"/>
-		<property name="LastDeadExp" type="int" public="false" private="false" save="true" desc="×îºóÒ»´ÎËÀÍöËðÊ§µÄ¾­ÑéÖµ"/>
-    <property name="KillerName" type="widestr" public="false" private="false" save="true" desc="Íæ¼ÒÃû×Ö"/>
-    <property name="NpcKillerType" type="int" public="false" private="false" save="true" desc="NPCÀàÐÍ"/>
-    <property name="LastKillerType" type="int" public="false" private="false" save="true" desc="NÐ×ÊÖÀàÐÍ"/>
-    <property name="IsUseItem" type="int" public="false" private="false" save="true" desc="×î½üÒ»´Î¸´»îÊÇ·ñÊ¹ÓÃÁËµÀ¾ß"/>
+		<property name="CurrentTime" type="int" public="false" private="false" save="true" desc="å¤æ´»åŽç»è¿‡çš„æ—¶é—´æ¯«ç§’ï¼Œæ™®é€šå¤ä»‡"/>
+    <property name="OffineSec" type="int64" public="false" private="false" save="true" desc="å¤ä»‡ä¸‹çº¿æ—¶é—´"/>
+    <property name="SpecialTime" type="int" public="false" private="false" save="true" desc="å¤æ´»åŽç»è¿‡çš„æ—¶é—´æ¯«ç§’ï¼Œç‰¹æ®Šå¤ä»‡"/>
+		<property name="LastDeadExp" type="int" public="false" private="false" save="true" desc="æœ€åŽä¸€æ¬¡æ­»äº¡æŸå¤±çš„ç»éªŒå€¼"/>
+    <property name="KillerName" type="widestr" public="false" private="false" save="true" desc="çŽ©å®¶åå­—"/>
+    <property name="NpcKillerType" type="int" public="false" private="false" save="true" desc="NPCç±»åž‹"/>
+    <property name="LastKillerType" type="int" public="false" private="false" save="true" desc="Nå‡¶æ‰‹ç±»åž‹"/>
+    <property name="IsUseItem" type="int" public="false" private="false" save="true" desc="æœ€è¿‘ä¸€æ¬¡å¤æ´»æ˜¯å¦ä½¿ç”¨äº†é“å…·"/>
   </properties>
 	<records>
 	</records>

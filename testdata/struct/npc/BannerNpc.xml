@@ -1,26 +1,26 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÆìÖÄÀàNPC»ù´¡ÊôÐÔ-->
+<!--æ——å¸œç±»NPCåŸºç¡€å±žæ€§-->
 <object>
     <properties>
-        <property name="OccupiedType" type="int" public="false" private="false" save="false" desc="±»Õ¼ÁìÀàÐÍ(0: ÊÍ·Å¼¼ÄÜÐÍ, 1: ¾ÝµãÐÍ)"/>
-        <property name="SkillID" type="string" public="false" private="false" save="false" desc="Õ¼Áì¼¼ÄÜID"/>
-        <property name="OccupancyEffect" type="string" public="false" private="false" save="false" desc="Õ¼ÁìÌØÐ§ID"/>
-        <property name="MaterialPath" type="string" public="true" private="false" save="false" desc="¸ü»»²ÄÖÊµÄ´æ·ÅÂ·¾¶"/>
-        <property name="BelongType" type="int" public="true" private="false" save="false" desc="¹éÊôÈ¨ÀàÐÍ"/>
-        <property name="BelongID" type="string" public="true" private="false" save="false" desc="µ±Ç°¹éÊô·½"/>
-        <property name="HaveGuildLimit" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÓÐ¹¤»á²ÅÄÜÕ¼Áì"/>
-        <property name="PointOccupiedValue" type="int" public="false" private="false" save="false" desc="¾ÝµãÐÍÆìÖÄnpcµÄÕ¼ÁìÖµ"/>
-        <property name="PointMaxValue" type="int" public="true" private="false" save="false" desc="¾ÝµãÐÍÆìÖÄnpcµÄ×î´óÖµ"/>
-        <property name="PlayerNumDiff" type="int" public="false" private="false" save="false" desc="¾ÝµãÐÍÆìÖÄnpc´¥·¢·¶Î§ÄÚµÄplayerÊý²îÖµ(¸º±íÊ¾ste, Õý±íÊ¾fan)"/>
-        <property name="PointCurrentValue" type="int" public="true" private="false" save="false" desc="¾ÝµãÐÍÆìÖÄnpcµÄ¾ÝµãÖµ(¸º±íÊ¾ste, Õý±íÊ¾fan)"/>
-        <property name="PointOccupiedCamp" type="int" public="false" private="false" save="false" desc="¾ÝµãÐÍÆìÖÄnpcµÄ±»Õ¼ÓÐÕóÓª(1±íÊ¾ste, 2±íÊ¾fan, 3±íÊ¾ÖÐÁ¢)"/>
-        <property name="PicType" type="string" public="false" private="false" save="false" desc="ÌîÐ´Í¼Æ¬Ãû³Æ£¬·½±ãÖ÷½çÃæÏÔÊ¾"/>
+        <property name="OccupiedType" type="int" public="false" private="false" save="false" desc="è¢«å é¢†ç±»åž‹(0: é‡Šæ”¾æŠ€èƒ½åž‹, 1: æ®ç‚¹åž‹)"/>
+        <property name="SkillID" type="string" public="false" private="false" save="false" desc="å é¢†æŠ€èƒ½ID"/>
+        <property name="OccupancyEffect" type="string" public="false" private="false" save="false" desc="å é¢†ç‰¹æ•ˆID"/>
+        <property name="MaterialPath" type="string" public="true" private="false" save="false" desc="æ›´æ¢æè´¨çš„å­˜æ”¾è·¯å¾„"/>
+        <property name="BelongType" type="int" public="true" private="false" save="false" desc="å½’å±žæƒç±»åž‹"/>
+        <property name="BelongID" type="string" public="true" private="false" save="false" desc="å½“å‰å½’å±žæ–¹"/>
+        <property name="HaveGuildLimit" type="int" public="false" private="false" save="false" desc="æ˜¯å¦æœ‰å·¥ä¼šæ‰èƒ½å é¢†"/>
+        <property name="PointOccupiedValue" type="int" public="false" private="false" save="false" desc="æ®ç‚¹åž‹æ——å¸œnpcçš„å é¢†å€¼"/>
+        <property name="PointMaxValue" type="int" public="true" private="false" save="false" desc="æ®ç‚¹åž‹æ——å¸œnpcçš„æœ€å¤§å€¼"/>
+        <property name="PlayerNumDiff" type="int" public="false" private="false" save="false" desc="æ®ç‚¹åž‹æ——å¸œnpcè§¦å‘èŒƒå›´å†…çš„playeræ•°å·®å€¼(è´Ÿè¡¨ç¤ºste, æ­£è¡¨ç¤ºfan)"/>
+        <property name="PointCurrentValue" type="int" public="true" private="false" save="false" desc="æ®ç‚¹åž‹æ——å¸œnpcçš„æ®ç‚¹å€¼(è´Ÿè¡¨ç¤ºste, æ­£è¡¨ç¤ºfan)"/>
+        <property name="PointOccupiedCamp" type="int" public="false" private="false" save="false" desc="æ®ç‚¹åž‹æ——å¸œnpcçš„è¢«å æœ‰é˜µè¥(1è¡¨ç¤ºste, 2è¡¨ç¤ºfan, 3è¡¨ç¤ºä¸­ç«‹)"/>
+        <property name="PicType" type="string" public="false" private="false" save="false" desc="å¡«å†™å›¾ç‰‡åç§°ï¼Œæ–¹ä¾¿ä¸»ç•Œé¢æ˜¾ç¤º"/>
     </properties>
 
     <records>
-        <record name="PointSpringList" cols="1" maxrows="512" save="false" public="false" private="false" desc="¾ÝµãÐÍÆìÖÄnpcµÄ´¥·¢ÁÐ±í">
-            <column type="object" desc="´¥·¢·¶Î§ÄÚµÄÍæ¼ÒID"/>
+        <record name="PointSpringList" cols="1" maxrows="512" save="false" public="false" private="false" desc="æ®ç‚¹åž‹æ——å¸œnpcçš„è§¦å‘åˆ—è¡¨">
+            <column type="object" desc="è§¦å‘èŒƒå›´å†…çš„çŽ©å®¶ID"/>
         </record>
     </records>
 

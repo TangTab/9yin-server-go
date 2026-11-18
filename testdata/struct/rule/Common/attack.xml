@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¹¥»÷ËÙ¶ÈÏà¹ØÊôÐÔ(Ö»ÓÐÕ½¶·¶ÔÏó, ÎäÆ÷ºÍ¹¥»÷Àà¼¼ÄÜ²ÅÓÐ´ËÊôÐÔ)-->
+<!--æ”»å‡»é€Ÿåº¦ç›¸å…³å±žæ€§(åªæœ‰æˆ˜æ–—å¯¹è±¡, æ­¦å™¨å’Œæ”»å‡»ç±»æŠ€èƒ½æ‰æœ‰æ­¤å±žæ€§)-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="AttackHaste" type="int" public="false" private="false" save="false" desc="¹¥»÷ÌáËÙ±ÈÂÊ"/>
-		<property name="AttackType" type="byte" public="false" private="false" save="false" desc="¹¥»÷ÀàÐÍ:0:´ò»÷,1Éä»÷"/>
-		<property name="AttackTime" type="int" public="false" private="false" save="false" desc="¹¥»÷¼ä¸ôÊ±¼ä"/>
+		<property name="AttackHaste" type="int" public="false" private="false" save="false" desc="æ”»å‡»æé€Ÿæ¯”çŽ‡"/>
+		<property name="AttackType" type="byte" public="false" private="false" save="false" desc="æ”»å‡»ç±»åž‹:0:æ‰“å‡»,1å°„å‡»"/>
+		<property name="AttackTime" type="int" public="false" private="false" save="false" desc="æ”»å‡»é—´éš”æ—¶é—´"/>
 	</properties>
 </object>

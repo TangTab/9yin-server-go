@@ -1,56 +1,56 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2009 (http://www.altova.com) by ylp (EMBRACE) -->
-<!--Õ½¶·NPC»ù´¡ÊôÐÔ-->
+<!--æˆ˜æ–—NPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="AttackNpcType" 		type="int" 		public="true"	 private="false" 	save="false" desc="¹¥»÷npcÀàÐÍ(0: ÆÕÍ¨  1: ¾«Ó¢  2: Ï¡ÓÐ  3: boss 4:Ó°²Øboss)"/>
-		<property name="EventSpringID"		type="int"		public="false"	 private="false"	save="false" desc="ÊÂ¼þÖ÷Ä¿±êNPC"/>
+		<property name="AttackNpcType" 		type="int" 		public="true"	 private="false" 	save="false" desc="æ”»å‡»npcç±»åž‹(0: æ™®é€š  1: ç²¾è‹±  2: ç¨€æœ‰  3: boss 4:å½±è—boss)"/>
+		<property name="EventSpringID"		type="int"		public="false"	 private="false"	save="false" desc="äº‹ä»¶ä¸»ç›®æ ‡NPC"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="event_talk_rec" cols="2" maxrows="32" public="false" private="false" save="false" desc="npcËµ»°±í">
-            <column type="float" desc="ÓëÇ°Ò»¾ä»°µÄ¼ä¸ô"/>
-			<column type="word" desc="Ì¨´Êid"/>
+		<record name="event_talk_rec" cols="2" maxrows="32" public="false" private="false" save="false" desc="npcè¯´è¯è¡¨">
+            <column type="float" desc="ä¸Žå‰ä¸€å¥è¯çš„é—´éš”"/>
+			<column type="word" desc="å°è¯id"/>
         </record>
 		
-		<record name="pickup_member_rec" cols="2" maxrows="50" public="true" private="false" save="false" desc="PickUpModuleÒÆÖ²¶øÀ´">
-            <column type="widestr" desc="¿ÉÊ°È¡µÄÍæ¼ÒÃû³Æ"/>
-			<column type="byte" desc="¿ÉÊ°È¡µÄÍæ¼ÒµÄÊ°È¡ÓÅÏÈ¼¶ ÖµÔ½´óÔ½ÏÈÊ°È¡"/>
+		<record name="pickup_member_rec" cols="2" maxrows="50" public="true" private="false" save="false" desc="PickUpModuleç§»æ¤è€Œæ¥">
+            <column type="widestr" desc="å¯æ‹¾å–çš„çŽ©å®¶åç§°"/>
+			<column type="byte" desc="å¯æ‹¾å–çš„çŽ©å®¶çš„æ‹¾å–ä¼˜å…ˆçº§ å€¼è¶Šå¤§è¶Šå…ˆæ‹¾å–"/>
         </record>
 		
-		<record name="open_player_rec" cols="1" maxrows="50" public="false" private="false" save="false" desc="PickUpModuleÒÆÖ²¶øÀ´">
+		<record name="open_player_rec" cols="1" maxrows="50" public="false" private="false" save="false" desc="PickUpModuleç§»æ¤è€Œæ¥">
             <column type="widestr" desc=""/>
         </record>
 		
-		<record name="DamageStatRec" cols="5" maxrows="256" public="false" private="false" save="false" desc="PickUpModuleÒÆÖ²¶øÀ´">
-            <column type="widestr" desc="¿ÉÊ°È¡µÄÍæ¼ÒÃû³Æ"/>
-			<column type="dword" desc="ÉËº¦"/>
-			<column type="dword" desc="ÖÎÁÆ"/>
-			<column type="dword" desc="³ðºÞÀÛ¼Æ"/>
-			<column type="widestr" desc="Íæ¼Ò¹¤»áÃû³Æ"/>
+		<record name="DamageStatRec" cols="5" maxrows="256" public="false" private="false" save="false" desc="PickUpModuleç§»æ¤è€Œæ¥">
+            <column type="widestr" desc="å¯æ‹¾å–çš„çŽ©å®¶åç§°"/>
+			<column type="dword" desc="ä¼¤å®³"/>
+			<column type="dword" desc="æ²»ç–—"/>
+			<column type="dword" desc="ä»‡æ¨ç´¯è®¡"/>
+			<column type="widestr" desc="çŽ©å®¶å·¥ä¼šåç§°"/>
         </record>
 		
-		<record name="AllDamagePlayerRec" cols="1" maxrows="1024" public="false" private="false" save="false" desc="Ôì³É¹ýnpcÉËº¦µÄÍæ¼ÒÃû³Æ±í">
-            <column type="widestr" desc="Ôì³É¹ýÉËº¦µÄÍæ¼ÒÃû³Æ"/>
+		<record name="AllDamagePlayerRec" cols="1" maxrows="1024" public="false" private="false" save="false" desc="é€ æˆè¿‡npcä¼¤å®³çš„çŽ©å®¶åç§°è¡¨">
+            <column type="widestr" desc="é€ æˆè¿‡ä¼¤å®³çš„çŽ©å®¶åç§°"/>
         </record>
 		
 		
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
-		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="¿ØÖÆÊôÐÔ"/>
-        <path name="struct\npc_property\ai_motion.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\npc_property\ai_path.xml" desc="AIÊôÐÔ"/>
-        <path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+		<path name="struct\rule\Common\base_ctrl_prop.xml" desc="æŽ§åˆ¶å±žæ€§"/>
+        <path name="struct\npc_property\ai_motion.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
+        <path name="struct\npc_property\ai_path.xml" desc="AIå±žæ€§"/>
+        <path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
         <path name="struct\rule\Common\autorestore.xml" desc=""/>
         <path name="struct\rule\Common\commonfighter.xml" desc=""/>
         <path name="struct\rule\Common\cooldown_new.xml" desc=""/>
         <path name="struct\rule\Common\damage.xml" desc=""/>
         <path name="struct\rule\Common\Fightbag.xml" desc=""/>
         <path name="struct\rule\Common\flow_new.xml" desc=""/>
-        <path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+        <path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
         <!--<path name="struct\rule\Common\range_new.xml" desc=""/>-->
         <!--<path name="struct\rule\Common\relation.xml" desc=""/>-->
         <path name="struct\rule\Common\skilluse.xml" desc=""/>

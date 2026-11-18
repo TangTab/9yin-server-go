@@ -1,43 +1,43 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°¸±±¾ÊôÐÔ-->
+<!--åœºæ™¯å‰¯æœ¬å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 
-		<record name="rec_energywell_guildwar_member" cols="12" maxrows="2048" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÄÜÁ¿¾®¹«»áÕ½³ÉÔ±">
-			<column type="widestr" desc="½ÇÉ«Ãû"/>
-			<column type="byte"    desc="Ö°Òµ"/>
-			<column type="byte"    desc="µÈ¼¶"/>
-			<column type="widestr" desc="¹«»áÃû"/>
-			<column type="dword"   desc="»÷É±Êý"/>
-			<column type="dword"   desc="±»»÷É±Êý"/>
-			<column type="dword"   desc="»÷É±ÔØ¾ßÊý"/>
-			<column type="int64"   desc="ÉËº¦Á¿"/>
-			<column type="int64"   desc="ÖÎÁÆÁ¿"/>
-			<column type="byte"    desc="ÊÆÁ¦"/>
-			<column type="byte"    desc="ËùÊôÕóÓª"/>
-			<column type="dword"   desc="ÆÀ·Ö"/>
+		<record name="rec_energywell_guildwar_member" cols="12" maxrows="2048" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„èƒ½é‡äº•å…¬ä¼šæˆ˜æˆå‘˜">
+			<column type="widestr" desc="è§’è‰²å"/>
+			<column type="byte"    desc="èŒä¸š"/>
+			<column type="byte"    desc="ç­‰çº§"/>
+			<column type="widestr" desc="å…¬ä¼šå"/>
+			<column type="dword"   desc="å‡»æ€æ•°"/>
+			<column type="dword"   desc="è¢«å‡»æ€æ•°"/>
+			<column type="dword"   desc="å‡»æ€è½½å…·æ•°"/>
+			<column type="int64"   desc="ä¼¤å®³é‡"/>
+			<column type="int64"   desc="æ²»ç–—é‡"/>
+			<column type="byte"    desc="åŠ¿åŠ›"/>
+			<column type="byte"    desc="æ‰€å±žé˜µè¥"/>
+			<column type="dword"   desc="è¯„åˆ†"/>
 		</record>
 		
-		<record name="rec_energywell_guildwar_relive" cols="2" maxrows="2048" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÄÜÁ¿¾®¹«»áÕ½¸´»îµã">
-			<column type="string" desc="¸´»îµãID"/>
-			<column type="byte"   desc="ËùÊôÊÆÁ¦"/>
+		<record name="rec_energywell_guildwar_relive" cols="2" maxrows="2048" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„èƒ½é‡äº•å…¬ä¼šæˆ˜å¤æ´»ç‚¹">
+			<column type="string" desc="å¤æ´»ç‚¹ID"/>
+			<column type="byte"   desc="æ‰€å±žåŠ¿åŠ›"/>
 		</record>
 		
-		<record name="rec_energywell_pillar_state" cols="4" maxrows="2048" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÄÜÁ¿¾®¹«»áÕ½ÄÜÁ¿ÖùÐÅÏ¢">
-			<column type="string" desc="ÄÜÁ¿ÖùID"/>
-			<column type="byte"   desc="ËùÊôÊÆÁ¦"/>
-			<column type="dword"  desc="×î´óÑªÁ¿"/>
-			<column type="dword"  desc="µ±Ç°ÑªÁ¿"/>
+		<record name="rec_energywell_pillar_state" cols="4" maxrows="2048" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„èƒ½é‡äº•å…¬ä¼šæˆ˜èƒ½é‡æŸ±ä¿¡æ¯">
+			<column type="string" desc="èƒ½é‡æŸ±ID"/>
+			<column type="byte"   desc="æ‰€å±žåŠ¿åŠ›"/>
+			<column type="dword"  desc="æœ€å¤§è¡€é‡"/>
+			<column type="dword"  desc="å½“å‰è¡€é‡"/>
 		</record>
 
-		<record name="rec_energywell_ride_info" cols="2" maxrows="2048" save="false" public="false" private="true" desc="´Ë³¡¾°¹ÜÀíÏÂµÄÄÜÁ¿¾®¹«»áÕ½¹ºÂòµÄÔØ¾ßÐÅÏ¢">
-			<column type="object" desc="¹ºÂòµÄÔØ¾ßÊµÌå"/>
-			<column type="byte"   desc="ËùÊôÊÆÁ¦"/>
+		<record name="rec_energywell_ride_info" cols="2" maxrows="2048" save="false" public="false" private="true" desc="æ­¤åœºæ™¯ç®¡ç†ä¸‹çš„èƒ½é‡äº•å…¬ä¼šæˆ˜è´­ä¹°çš„è½½å…·ä¿¡æ¯">
+			<column type="object" desc="è´­ä¹°çš„è½½å…·å®žä½“"/>
+			<column type="byte"   desc="æ‰€å±žåŠ¿åŠ›"/>
 		</record>
 		
 	</records>

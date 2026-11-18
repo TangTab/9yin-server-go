@@ -1,97 +1,97 @@
-<?xml version="1.0" encoding="gb2312" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¿ì½ÝÀ¸Ïà¹ØÏà¶¨Òå-->
+<!--å¿«æ·æ ç›¸å…³ç›¸å®šä¹‰-->
 <object>
-    <!-- »ù±¾ÊôÐÔ -->
+    <!-- åŸºæœ¬å±žæ€§ -->
     <properties>
-        <property name="killed_monster" type="int" public="false" private="false" save="true" desc="»÷É±¹ÖÎïÊý"/>
-        <property name="killed_boss" type="int" public="false" private="false" save="true" desc="»÷É±bossÊý"/>
-        <property name="damage_total" type="int" public="false" private="false" save="true" desc="Êä³ö×ÜÁ¿"/>
-        <property name="CurCloneSceneLevel" type="dword" public="false" private="true" save="true" desc="µ±Ç°ÄÑ¶È"/>
-        <property name="CloneSceneScoreTop" type="int64" public="false" private="true" save="true" desc="Í¨¹Ø·ÖÊý"/>
-        <property name="CloneScoreTopRefreshTime" type="int64" public="false" private="true" save="true" desc="Í¨¹Ø·ÖÊýË¢ÐÂÊ±¼ä"/>
-        <property name="CloneWeekLimitCount" type="int" public="false" private="true" save="true" desc="Ã¿ÖÜ½øÈë¸±±¾µÄÊ£Óà´ÎÊý"/>
-        <property name="CloneWeekLimitCountMax" type="int" public="false" private="true" save="true" desc="Ã¿ÖÜ½øÈë¸±±¾µÄ×Ü´ÎÊý"/>
+        <property name="killed_monster" type="int" public="false" private="false" save="true" desc="å‡»æ€æ€ªç‰©æ•°"/>
+        <property name="killed_boss" type="int" public="false" private="false" save="true" desc="å‡»æ€bossæ•°"/>
+        <property name="damage_total" type="int" public="false" private="false" save="true" desc="è¾“å‡ºæ€»é‡"/>
+        <property name="CurCloneSceneLevel" type="dword" public="false" private="true" save="true" desc="å½“å‰éš¾åº¦"/>
+        <property name="CloneSceneScoreTop" type="int64" public="false" private="true" save="true" desc="é€šå…³åˆ†æ•°"/>
+        <property name="CloneScoreTopRefreshTime" type="int64" public="false" private="true" save="true" desc="é€šå…³åˆ†æ•°åˆ·æ–°æ—¶é—´"/>
+        <property name="CloneWeekLimitCount" type="int" public="false" private="true" save="true" desc="æ¯å‘¨è¿›å…¥å‰¯æœ¬çš„å‰©ä½™æ¬¡æ•°"/>
+        <property name="CloneWeekLimitCountMax" type="int" public="false" private="true" save="true" desc="æ¯å‘¨è¿›å…¥å‰¯æœ¬çš„æ€»æ¬¡æ•°"/>
     </properties>
-    <!-- ±íÊôÐÔ -->
+    <!-- è¡¨å±žæ€§ -->
     <records>
-        <record name="clone_info_record" cols="13" maxrows="256" save="true" public="false" private="true" desc="¸±±¾ÐÅÏ¢±í">
-            <column type="word" desc="¸±±¾Ô­ÐÍid"/>			
-            <column type="byte" desc="½øÈë´ÎÊý"/>
-            <column type="byte" desc="¸±±¾µ±Ç°½ø¶È"/>
-            <column type="byte" desc="¸±±¾ÄÑ¶È"/>
-            <column type="word" desc="¸±±¾³¡¾°ID"/>
-            <column type="int64" desc="¸±±¾Ë¢ÐÂÊ±¼ä"/>
-            <column type="string" desc="¸±±¾Î¨Ò»UID"/>
-            <column type="byte" desc="ÊÇ·ñ¿ªÆô"/>
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
-            <column type="widestr" desc="¸±±¾ÓµÓÐÕß"/>
-            <column type="byte" desc="¸±±¾ÀàÐÍ(¸öÈË£¬¶ÓÎé)"/>
-            <column type="string" desc="¸±±¾ÒÑ´ò¹ýµÄBoss"/>
-            <column type="int64" desc="¸±±¾¿ªÆôÊ±¼ä"/>
+        <record name="clone_info_record" cols="13" maxrows="256" save="true" public="false" private="true" desc="å‰¯æœ¬ä¿¡æ¯è¡¨">
+            <column type="word" desc="å‰¯æœ¬åŽŸåž‹id"/>			
+            <column type="byte" desc="è¿›å…¥æ¬¡æ•°"/>
+            <column type="byte" desc="å‰¯æœ¬å½“å‰è¿›åº¦"/>
+            <column type="byte" desc="å‰¯æœ¬éš¾åº¦"/>
+            <column type="word" desc="å‰¯æœ¬åœºæ™¯ID"/>
+            <column type="int64" desc="å‰¯æœ¬åˆ·æ–°æ—¶é—´"/>
+            <column type="string" desc="å‰¯æœ¬å”¯ä¸€UID"/>
+            <column type="byte" desc="æ˜¯å¦å¼€å¯"/>
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
+            <column type="widestr" desc="å‰¯æœ¬æ‹¥æœ‰è€…"/>
+            <column type="byte" desc="å‰¯æœ¬ç±»åž‹(ä¸ªäººï¼Œé˜Ÿä¼)"/>
+            <column type="string" desc="å‰¯æœ¬å·²æ‰“è¿‡çš„Boss"/>
+            <column type="int64" desc="å‰¯æœ¬å¼€å¯æ—¶é—´"/>
         </record>
-        <record name="clone_pass_info_record" cols="15" maxrows="256" save="true" public="false" private="true" desc="¸±±¾ÐÅÏ¢±í">
-            <column type="word" desc="¸±±¾Ô­ÐÍid"/>			
-            <column type="byte" desc="¸±±¾ÄÑ¶È"/>
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
-            <column type="int64" desc="Í¨¹ØµÄÊ±¼ä"/>
-            <column type="int64" desc="É±ËÀBossµÄÊ±¼ä"/>
-            <column type="word" desc="playerËÀÍöµÄ×ÜÊý"/>
-            <column type="int64" desc="Í¨¹ØµÄµÃ·Ö"/>
-            <column type="byte" desc="ÊÇ·ñ¿ªÆô"/>
-            <column type="string" desc="¸±±¾µÄÍæ¼Ò"/>
-            <column type="byte" desc="¶ÓÎéÀàÐÍ"/>
-            <column type="string" desc="´¥·¢Æ÷ÆÀ·ÖµÄÖÐÎÄ°üID"/>
-            <column type="string" desc="´¥·¢Æ÷ÆÀ·Ö"/>
-            <column type="string" desc="Ëæ»úµôÂäµÄµÀ¾ß, id,ÊýÁ¿,¼¸ÂÊ(¶à¸ö)"/>
-            <column type="byte" desc="½±Àø´ÎÊý"/>
-            <column type="string" desc="ÒÑ¾­Áì¹ýµÄ±¦Ïä£¬ÐòºÅ£¬id|"/>
+        <record name="clone_pass_info_record" cols="15" maxrows="256" save="true" public="false" private="true" desc="å‰¯æœ¬ä¿¡æ¯è¡¨">
+            <column type="word" desc="å‰¯æœ¬åŽŸåž‹id"/>			
+            <column type="byte" desc="å‰¯æœ¬éš¾åº¦"/>
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
+            <column type="int64" desc="é€šå…³çš„æ—¶é—´"/>
+            <column type="int64" desc="æ€æ­»Bossçš„æ—¶é—´"/>
+            <column type="word" desc="playeræ­»äº¡çš„æ€»æ•°"/>
+            <column type="int64" desc="é€šå…³çš„å¾—åˆ†"/>
+            <column type="byte" desc="æ˜¯å¦å¼€å¯"/>
+            <column type="string" desc="å‰¯æœ¬çš„çŽ©å®¶"/>
+            <column type="byte" desc="é˜Ÿä¼ç±»åž‹"/>
+            <column type="string" desc="è§¦å‘å™¨è¯„åˆ†çš„ä¸­æ–‡åŒ…ID"/>
+            <column type="string" desc="è§¦å‘å™¨è¯„åˆ†"/>
+            <column type="string" desc="éšæœºæŽ‰è½çš„é“å…·, id,æ•°é‡,å‡ çŽ‡(å¤šä¸ª)"/>
+            <column type="byte" desc="å¥–åŠ±æ¬¡æ•°"/>
+            <column type="string" desc="å·²ç»é¢†è¿‡çš„å®ç®±ï¼Œåºå·ï¼Œid|"/>
         </record>
-        <record name="clone_boss_fight_info_rec" cols="3" maxrows="128" save="true" public="false" private="true" desc="¸±±¾BossºÄÊ±±í">
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
+        <record name="clone_boss_fight_info_rec" cols="3" maxrows="128" save="true" public="false" private="true" desc="å‰¯æœ¬Bossè€—æ—¶è¡¨">
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
             <column type="string" desc="BossName"/>
             <column type="string" desc="BossTime"/>
         </record>
-        <record name="clone_player_fight_info_rec" cols="4" maxrows="128" save="true" public="false" private="true" desc="¸±±¾µÄËùÓÐÍæ¼Ò±í">
-            <column type="word" desc="¸±±¾Ô­ÐÍid"/>
-            <column type="byte" desc="¸±±¾ÄÑ¶È"/>
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
-            <column type="string" desc="Íæ¼Ò|ÉËº¦Êä³ö|ÖÎÁÆÊä³ö|³ÐÊÜÉËº¦|ËÀÍö´ÎÊý"/>
+        <record name="clone_player_fight_info_rec" cols="4" maxrows="128" save="true" public="false" private="true" desc="å‰¯æœ¬çš„æ‰€æœ‰çŽ©å®¶è¡¨">
+            <column type="word" desc="å‰¯æœ¬åŽŸåž‹id"/>
+            <column type="byte" desc="å‰¯æœ¬éš¾åº¦"/>
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
+            <column type="string" desc="çŽ©å®¶|ä¼¤å®³è¾“å‡º|æ²»ç–—è¾“å‡º|æ‰¿å—ä¼¤å®³|æ­»äº¡æ¬¡æ•°"/>
         </record>
-        <record name="clone_pass_info_max_record" cols="15" maxrows="256" save="true" public="false" private="true" desc="¸±±¾ÐÅÏ¢±í">
-            <column type="word" desc="¸±±¾Ô­ÐÍid"/>
-            <column type="byte" desc="¸±±¾ÄÑ¶È"/>
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
-            <column type="int64" desc="Í¨¹ØµÄÊ±¼ä"/>
-            <column type="int64" desc="É±ËÀBossµÄÊ±¼ä"/>
-            <column type="word" desc="playerËÀÍöµÄ×ÜÊý"/>
-            <column type="int64" desc="Í¨¹ØµÄµÃ·Ö"/>
-            <column type="byte" desc="ÊÇ·ñ¿ªÆô"/>
-            <column type="string" desc="¸±±¾µÄÍæ¼Ò"/>
-            <column type="byte" desc="¶ÓÎéÀàÐÍ"/>
-            <column type="string" desc="´¥·¢Æ÷ÆÀ·ÖµÄÖÐÎÄ°üID"/>
-            <column type="string" desc="´¥·¢Æ÷ÆÀ·Ö"/>
-            <column type="string" desc="Ëæ»úµôÂäµÄµÀ¾ß, id,ÊýÁ¿,¼¸ÂÊ(¶à¸ö)"/>
-            <column type="word"  desc="×î´óµÄÉËº¦"/>
-            <column type="int64"  desc="×î´óµÄÍ¨¹ØÊ±¼ä"/>
+        <record name="clone_pass_info_max_record" cols="15" maxrows="256" save="true" public="false" private="true" desc="å‰¯æœ¬ä¿¡æ¯è¡¨">
+            <column type="word" desc="å‰¯æœ¬åŽŸåž‹id"/>
+            <column type="byte" desc="å‰¯æœ¬éš¾åº¦"/>
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
+            <column type="int64" desc="é€šå…³çš„æ—¶é—´"/>
+            <column type="int64" desc="æ€æ­»Bossçš„æ—¶é—´"/>
+            <column type="word" desc="playeræ­»äº¡çš„æ€»æ•°"/>
+            <column type="int64" desc="é€šå…³çš„å¾—åˆ†"/>
+            <column type="byte" desc="æ˜¯å¦å¼€å¯"/>
+            <column type="string" desc="å‰¯æœ¬çš„çŽ©å®¶"/>
+            <column type="byte" desc="é˜Ÿä¼ç±»åž‹"/>
+            <column type="string" desc="è§¦å‘å™¨è¯„åˆ†çš„ä¸­æ–‡åŒ…ID"/>
+            <column type="string" desc="è§¦å‘å™¨è¯„åˆ†"/>
+            <column type="string" desc="éšæœºæŽ‰è½çš„é“å…·, id,æ•°é‡,å‡ çŽ‡(å¤šä¸ª)"/>
+            <column type="word"  desc="æœ€å¤§çš„ä¼¤å®³"/>
+            <column type="int64"  desc="æœ€å¤§çš„é€šå…³æ—¶é—´"/>
         </record>
-        <record name="clone_boss_fight_info_max_rec" cols="3" maxrows="128" save="true" public="false" private="true" desc="¸±±¾BossºÄÊ±±í">
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
+        <record name="clone_boss_fight_info_max_rec" cols="3" maxrows="128" save="true" public="false" private="true" desc="å‰¯æœ¬Bossè€—æ—¶è¡¨">
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
             <column type="string" desc="BossName"/>
             <column type="string" desc="BossTime"/>
         </record>
-        <record name="clone_player_fight_info_max_rec" cols="4" maxrows="128" save="true" public="false" private="true" desc="¸±±¾µÄËùÓÐÍæ¼Ò±í">
-            <column type="word" desc="¸±±¾Ô­ÐÍid"/>
-            <column type="byte" desc="¸±±¾ÄÑ¶È"/>
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
-            <column type="string" desc="Íæ¼Ò|ÉËº¦Êä³ö|ÖÎÁÆÊä³ö|³ÐÊÜÉËº¦|ËÀÍö´ÎÊý"/>
+        <record name="clone_player_fight_info_max_rec" cols="4" maxrows="128" save="true" public="false" private="true" desc="å‰¯æœ¬çš„æ‰€æœ‰çŽ©å®¶è¡¨">
+            <column type="word" desc="å‰¯æœ¬åŽŸåž‹id"/>
+            <column type="byte" desc="å‰¯æœ¬éš¾åº¦"/>
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
+            <column type="string" desc="çŽ©å®¶|ä¼¤å®³è¾“å‡º|æ²»ç–—è¾“å‡º|æ‰¿å—ä¼¤å®³|æ­»äº¡æ¬¡æ•°"/>
         </record>
-        <record name="clone_team_first_into_rec" cols="5" maxrows="128" save="true" public="false" private="true" desc="ËùÔÚ¶ÓÎé¶Ó³¤½ø¹ý¸±±¾±í">
-            <column type="word" desc="¸±±¾±êÊ¶(¸±±¾ID³ËÒÔ10¼ÓÉÏÄÑ¶È)"/>
-            <column type="widestr" desc="¸±±¾Ê×ÏÈ½øÈëµÄÍæ¼Ò"/>
-            <column type="word" desc="¸±±¾³¡¾°ID"/>
-            <column type="string" desc="¸±±¾Î¨Ò»UID"/>
-            <column type="string" desc="»÷É±µÄboss"/>
+        <record name="clone_team_first_into_rec" cols="5" maxrows="128" save="true" public="false" private="true" desc="æ‰€åœ¨é˜Ÿä¼é˜Ÿé•¿è¿›è¿‡å‰¯æœ¬è¡¨">
+            <column type="word" desc="å‰¯æœ¬æ ‡è¯†(å‰¯æœ¬IDä¹˜ä»¥10åŠ ä¸Šéš¾åº¦)"/>
+            <column type="widestr" desc="å‰¯æœ¬é¦–å…ˆè¿›å…¥çš„çŽ©å®¶"/>
+            <column type="word" desc="å‰¯æœ¬åœºæ™¯ID"/>
+            <column type="string" desc="å‰¯æœ¬å”¯ä¸€UID"/>
+            <column type="string" desc="å‡»æ€çš„boss"/>
         </record>
     </records>
 </object>

@@ -1,79 +1,79 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2010 (http://www.altova.com) by MESMERiZE (MiZE) -->
-<!--×°±¸ÏµÍ³Ïà¹ØµÄÊôÐÔ-->
+<!--è£…å¤‡ç³»ç»Ÿç›¸å…³çš„å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="ArtKey" type="int" public="true" private="true" save="true" desc="ÂãÄ£ÃÀÊõ±àºÅ"/>
-		<property name="HideHat" type="int" public="false" private="false" save="true" desc="ÊÇ·ñÒþ²ØÍ·¿ø"/>
-		<property name="HideMantle" type="int" public="false" private="false" save="true" desc="ÊÇ·ñÒþ²ØÅû·ç"/>
-		<property name="HidePlayer" type="int" public="false" private="true" save="false" desc="ÊÇ·ñÒþ²ØÆäËûÍæ¼Ò"/>
-		<property name="HideOtherPet" type="int" public="false" private="true" save="true" desc="ÊÇ·ñÒþ²ØÆäËûÍæ¼ÒµÄ³èÎï"/>
+		<property name="ArtKey" type="int" public="true" private="true" save="true" desc="è£¸æ¨¡ç¾Žæœ¯ç¼–å·"/>
+		<property name="HideHat" type="int" public="false" private="false" save="true" desc="æ˜¯å¦éšè—å¤´ç›”"/>
+		<property name="HideMantle" type="int" public="false" private="false" save="true" desc="æ˜¯å¦éšè—æŠ«é£Ž"/>
+		<property name="HidePlayer" type="int" public="false" private="true" save="false" desc="æ˜¯å¦éšè—å…¶ä»–çŽ©å®¶"/>
+		<property name="HideOtherPet" type="int" public="false" private="true" save="true" desc="æ˜¯å¦éšè—å…¶ä»–çŽ©å®¶çš„å® ç‰©"/>
 		
-		<property name="Hair" type="string" public="false" private="false" save="false" desc="Í··¢"/>
-		<property name="Face" type="string" public="true" private="true" save="false" desc="Á³"/>
-		<property name="Eyes" type="string" public="true" private="true" save="false" desc="ÑÛ¾¦"/>
-		<property name="Beard" type="string" public="true" private="true" save="false" desc="ºúÐë"/>
-		<property name="Ears" type="string" public="true" private="true" save="false" desc="¶ú¶ä"/>
-		<property name="Tail" type="string" public="true" private="true" save="false" desc="Î²°Í"/>
-		<property name="Finger" type="string" public="true" private="true" save="false" desc="Ö¸¼×"/>
-		<property name="HideParts" type="string" public="true" private="true" save="false" desc="Òþ²Ø²¿¼þ"/>
-		<property name="HideSkins" type="string" public="true" private="true" save="true" desc="Òþ²Ø²¿·ÖÃÉÆ¤"/>
+		<property name="Hair" type="string" public="false" private="false" save="false" desc="å¤´å‘"/>
+		<property name="Face" type="string" public="true" private="true" save="false" desc="è„¸"/>
+		<property name="Eyes" type="string" public="true" private="true" save="false" desc="çœ¼ç›"/>
+		<property name="Beard" type="string" public="true" private="true" save="false" desc="èƒ¡é¡»"/>
+		<property name="Ears" type="string" public="true" private="true" save="false" desc="è€³æœµ"/>
+		<property name="Tail" type="string" public="true" private="true" save="false" desc="å°¾å·´"/>
+		<property name="Finger" type="string" public="true" private="true" save="false" desc="æŒ‡ç”²"/>
+		<property name="HideParts" type="string" public="true" private="true" save="false" desc="éšè—éƒ¨ä»¶"/>
+		<property name="HideSkins" type="string" public="true" private="true" save="true" desc="éšè—éƒ¨åˆ†è’™çš®"/>
 
-		<!-- ÒÔÏÂÎªÂãÄ£Ë÷Òý²¿·Ö -->
-		<property name="HatIndex" type="int" public="false" private="false" save="true" desc="Í··¢Ë÷Òý"/>
-		<property name="FaceIndex" type="int" public="false" private="false" save="true" desc="Á³Ë÷Òý"/>
-		<property name="EyesIndex" type="int" public="false" private="false" save="true" desc="ÑÛ¾¦Ë÷Òý"/>
-		<property name="BeardIndex" type="int" public="false" private="false" save="true" desc="ºúÐëË÷Òý"/>
-		<property name="EarsIndex" type="int" public="false" private="false" save="true" desc="¶ú¶äË÷Òý"/>
-		<property name="TailIndex" type="int" public="false" private="false" save="true" desc="Î²°ÍË÷Òý"/>
-		<property name="FingerIndex" type="int" public="false" private="false" save="true" desc="Ö¸¼×Ë÷Òý"/>
-		<property name="ClothIndex" type="int" public="false" private="false" save="true" desc="ÉÏ°ëÉí(ÒÂ·þ)Ë÷Òý"/>
-		<property name="PantsIndex" type="int" public="false" private="false" save="true" desc="ÏÂ°ëÉí(¿ã×Ó)Ë÷Òý"/>
-		<property name="ShoesIndex" type="int" public="false" private="false" save="true" desc="½Å(Ð¬×Ó)Ë÷Òý"/>
-		<property name="GlovesIndex" type="int" public="false" private="false" save="true" desc="ÊÖ(ÊÖÌ×)Ë÷Òý"/>
-		<property name="HairColorIndex" type="int" public="false" private="false" save="true" desc="·¢É«Ë÷Òý"/>
-		<property name="SkinColorIndex" type="int" public="false" private="false" save="true" desc="·ôÉ«Ë÷Òý"/>
-		<property name="SkinMtlIndex" type="int" public="false" private="false" save="true" desc="·ôÉ«Ë÷Òý"/>
-		<property name="TraitIndex" type="int" public="false" private="false" save="true" desc="ÌØÕ÷Ë÷Òý"/>
-		<property name="Stature" type="int" public="true" private="true" save="true" desc="½ÇÉ«ÌåÐÍË÷Òý"/>
-		<property name="TattooIndex" type="int" public="false" private="false" save="true" desc="ÃæÎÆË÷Òý"/>
-		<property name="TattooColor" type="int" public="true" private="true" save="true" desc="ÃæÎÆÑÕÉ«"/>
+		<!-- ä»¥ä¸‹ä¸ºè£¸æ¨¡ç´¢å¼•éƒ¨åˆ† -->
+		<property name="HatIndex" type="int" public="false" private="false" save="true" desc="å¤´å‘ç´¢å¼•"/>
+		<property name="FaceIndex" type="int" public="false" private="false" save="true" desc="è„¸ç´¢å¼•"/>
+		<property name="EyesIndex" type="int" public="false" private="false" save="true" desc="çœ¼ç›ç´¢å¼•"/>
+		<property name="BeardIndex" type="int" public="false" private="false" save="true" desc="èƒ¡é¡»ç´¢å¼•"/>
+		<property name="EarsIndex" type="int" public="false" private="false" save="true" desc="è€³æœµç´¢å¼•"/>
+		<property name="TailIndex" type="int" public="false" private="false" save="true" desc="å°¾å·´ç´¢å¼•"/>
+		<property name="FingerIndex" type="int" public="false" private="false" save="true" desc="æŒ‡ç”²ç´¢å¼•"/>
+		<property name="ClothIndex" type="int" public="false" private="false" save="true" desc="ä¸ŠåŠèº«(è¡£æœ)ç´¢å¼•"/>
+		<property name="PantsIndex" type="int" public="false" private="false" save="true" desc="ä¸‹åŠèº«(è£¤å­)ç´¢å¼•"/>
+		<property name="ShoesIndex" type="int" public="false" private="false" save="true" desc="è„š(éž‹å­)ç´¢å¼•"/>
+		<property name="GlovesIndex" type="int" public="false" private="false" save="true" desc="æ‰‹(æ‰‹å¥—)ç´¢å¼•"/>
+		<property name="HairColorIndex" type="int" public="false" private="false" save="true" desc="å‘è‰²ç´¢å¼•"/>
+		<property name="SkinColorIndex" type="int" public="false" private="false" save="true" desc="è‚¤è‰²ç´¢å¼•"/>
+		<property name="SkinMtlIndex" type="int" public="false" private="false" save="true" desc="è‚¤è‰²ç´¢å¼•"/>
+		<property name="TraitIndex" type="int" public="false" private="false" save="true" desc="ç‰¹å¾ç´¢å¼•"/>
+		<property name="Stature" type="int" public="true" private="true" save="true" desc="è§’è‰²ä½“åž‹ç´¢å¼•"/>
+		<property name="TattooIndex" type="int" public="false" private="false" save="true" desc="é¢çº¹ç´¢å¼•"/>
+		<property name="TattooColor" type="int" public="true" private="true" save="true" desc="é¢çº¹é¢œè‰²"/>
 		
-		<property name="SkinMtl" type="string" public="true" private="true" save="false" desc="·¢É«"/>
-		<property name="HairColor" type="string" public="true" private="true" save="false" desc="·¢É«"/>
-		<property name="SkinColor" type="string" public="true" private="true" save="false" desc="·ôÉ«"/>
-		<property name="ExBody" type="string" public="false" private="false" save="true" desc="ÂãÄ£²¿¼þ×éºÏ"/>
-		<!-- ÒÔÏÂÎªÈËÎï×°±¸ÁËÎïÆ·ºóÏÔÊ¾µÄÄ£ÐÍÖ®ÀàµÄÊôÐÔ -->
-		<property name="Hat" type="string" public="true" private="true" save="false" desc="Ã±×Ó"/>
-		<property name="Cloth" type="string" public="true" private="true" save="false" desc="ÒÂ·þ"/>
-		<property name="Pants" type="string" public="true" private="true" save="false" desc="¿ã×Ó"/>
-		<property name="Shoes" type="string" public="true" private="true" save="false" desc="Ð¬×Ó"/>
-		<property name="Gloves" type="string" public="true" private="true" save="false" desc="ÊÖÌ×"/>
-		<property name="Tattoo" type="string" public="true" private="true" save="false" desc="ÃæÎÆ"/>
-		<property name="Special" type="string" public="true" private="true" save="false" desc="ÌØÊâÀ¸Î»"/>
-		<property name="Mantle" type="string" public="true" private="true" save="false" desc="Åû·ç"/>
-		<property name="Trait" type="string" public="true" private="true" save="false" desc="ÌØÕ÷"/>
-		<property name="LWeapon" type="string" public="true" private="true" save="false" desc="×óÊÖÎäÆ÷"/>
-		<property name="RWeapon" type="string" public="true" private="true" save="false" desc="ÓÒÊÖÎäÆ÷"/>
-		<property name="LWeaponID" type="string" public="true" private="true" save="false" desc="×óÊÖÎäÆ÷±àºÅ"/>
-		<property name="RWeaponID" type="string" public="true" private="true" save="false" desc="ÓÒÊÖÎäÆ÷±àºÅ"/>
-		<property name="ActionSet" type="string" public="true" private="true" save="false" desc="µ±Ç°¶¯×÷¼¯£¬µ±Ç°Ê¹ÓÃµÄÎäÆ÷À´Çø·Ö"/>
-		<property name="HandType" type="byte" public="true" private="true" save="true" desc="ÎäÆ÷ÊÖÀàÐÍ"/>
-		<property name="WeaponState" type="byte" public="true" private="true" save="false" desc="ÎäÆ÷Õ¹Ê¾×´Ì¬"/>
-		<property name="WeaponStateType" type="byte" public="true" private="true" save="false" desc="ÎäÆ÷Õ¹Ê¾´¥·¢×´Ì¬"/>
+		<property name="SkinMtl" type="string" public="true" private="true" save="false" desc="å‘è‰²"/>
+		<property name="HairColor" type="string" public="true" private="true" save="false" desc="å‘è‰²"/>
+		<property name="SkinColor" type="string" public="true" private="true" save="false" desc="è‚¤è‰²"/>
+		<property name="ExBody" type="string" public="false" private="false" save="true" desc="è£¸æ¨¡éƒ¨ä»¶ç»„åˆ"/>
+		<!-- ä»¥ä¸‹ä¸ºäººç‰©è£…å¤‡äº†ç‰©å“åŽæ˜¾ç¤ºçš„æ¨¡åž‹ä¹‹ç±»çš„å±žæ€§ -->
+		<property name="Hat" type="string" public="true" private="true" save="false" desc="å¸½å­"/>
+		<property name="Cloth" type="string" public="true" private="true" save="false" desc="è¡£æœ"/>
+		<property name="Pants" type="string" public="true" private="true" save="false" desc="è£¤å­"/>
+		<property name="Shoes" type="string" public="true" private="true" save="false" desc="éž‹å­"/>
+		<property name="Gloves" type="string" public="true" private="true" save="false" desc="æ‰‹å¥—"/>
+		<property name="Tattoo" type="string" public="true" private="true" save="false" desc="é¢çº¹"/>
+		<property name="Special" type="string" public="true" private="true" save="false" desc="ç‰¹æ®Šæ ä½"/>
+		<property name="Mantle" type="string" public="true" private="true" save="false" desc="æŠ«é£Ž"/>
+		<property name="Trait" type="string" public="true" private="true" save="false" desc="ç‰¹å¾"/>
+		<property name="LWeapon" type="string" public="true" private="true" save="false" desc="å·¦æ‰‹æ­¦å™¨"/>
+		<property name="RWeapon" type="string" public="true" private="true" save="false" desc="å³æ‰‹æ­¦å™¨"/>
+		<property name="LWeaponID" type="string" public="true" private="true" save="false" desc="å·¦æ‰‹æ­¦å™¨ç¼–å·"/>
+		<property name="RWeaponID" type="string" public="true" private="true" save="false" desc="å³æ‰‹æ­¦å™¨ç¼–å·"/>
+		<property name="ActionSet" type="string" public="true" private="true" save="false" desc="å½“å‰åŠ¨ä½œé›†ï¼Œå½“å‰ä½¿ç”¨çš„æ­¦å™¨æ¥åŒºåˆ†"/>
+		<property name="HandType" type="byte" public="true" private="true" save="true" desc="æ­¦å™¨æ‰‹ç±»åž‹"/>
+		<property name="WeaponState" type="byte" public="true" private="true" save="false" desc="æ­¦å™¨å±•ç¤ºçŠ¶æ€"/>
+		<property name="WeaponStateType" type="byte" public="true" private="true" save="false" desc="æ­¦å™¨å±•ç¤ºè§¦å‘çŠ¶æ€"/>
     
-		<property name="LArmorWeapon" type="string" public="true" private="true" save="false" desc="×óÊÖ×°¼×ÎäÆ÷"/>
-		<property name="RArmorWeapon" type="string" public="true" private="true" save="false" desc="ÓÒÊÖ×°¼×ÎäÆ÷"/>
-		<property name="LArmorWeaponID" type="string" public="true" private="true" save="false" desc="×óÊÖ×°¼×ÎäÆ÷"/>
-		<property name="RArmorWeaponID" type="string" public="true" private="true" save="false" desc="ÓÒÊÖ×°¼×ÎäÆ÷"/>
+		<property name="LArmorWeapon" type="string" public="true" private="true" save="false" desc="å·¦æ‰‹è£…ç”²æ­¦å™¨"/>
+		<property name="RArmorWeapon" type="string" public="true" private="true" save="false" desc="å³æ‰‹è£…ç”²æ­¦å™¨"/>
+		<property name="LArmorWeaponID" type="string" public="true" private="true" save="false" desc="å·¦æ‰‹è£…ç”²æ­¦å™¨"/>
+		<property name="RArmorWeaponID" type="string" public="true" private="true" save="false" desc="å³æ‰‹è£…ç”²æ­¦å™¨"/>
 		
-		<property name="HeadDetail" type="string" public="false" private="true" save="true" desc="Ãæ²¿Ï¸½Ú"/>
+		<property name="HeadDetail" type="string" public="false" private="true" save="true" desc="é¢éƒ¨ç»†èŠ‚"/>
 	</properties>
 	<records>
-		<record name="HeadDetailRecord" cols="2" maxrows="64" save="true" public="true" private="true" desc="Ãæ²¿Ï¸½Ú±í">
-			<column type="byte" desc="¿ØÖÆÆ÷Ãû³Æ"/>
-			<column type="byte" desc="¿ØÖÆÆ÷Ñ¡¶¨Öµ"/>
+		<record name="HeadDetailRecord" cols="2" maxrows="64" save="true" public="true" private="true" desc="é¢éƒ¨ç»†èŠ‚è¡¨">
+			<column type="byte" desc="æŽ§åˆ¶å™¨åç§°"/>
+			<column type="byte" desc="æŽ§åˆ¶å™¨é€‰å®šå€¼"/>
 		</record>
 	</records>
 </object>

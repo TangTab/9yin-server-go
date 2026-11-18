@@ -1,63 +1,63 @@
-USESKILL_RESULT_ERR_OTHER = 0;			--ÆäËü´íÎó
+USESKILL_RESULT_ERR_OTHER = 0;			--å…¶å®ƒé”™è¯¯
 
 USESKILL_RESULT_SUCCEED = 1;
 
-USESKILL_RESULT_ERR_CONSUME = 2;	--ÏûºÄ²»×ã
-USESKILL_RESULT_ERR_PROPERTY = 3;	--ÊôÐÔÖµ²»ÄÜÂú×ãÒªÇó
-USESKILL_RESULT_ERR_RECORD = 4;		--±í¸ñÖµ²»ÄÜÂú×ãÒªÇó
-USESKILL_RESULT_ERR_SCENE = 5;		--³¡¾°²»·ûºÏÒªÇó
-USESKILL_RESULT_ERR_EVENT = 8;		--ÊÂ¼þ²»·ûºÏÒªÇó
-USESKILL_RESULT_ERR_COOLDOWN = 9;	--¼¼ÄÜÔÚÀäÈ´ÖÐ
+USESKILL_RESULT_ERR_CONSUME = 2;	--æ¶ˆè€—ä¸è¶³
+USESKILL_RESULT_ERR_PROPERTY = 3;	--å±žæ€§å€¼ä¸èƒ½æ»¡è¶³è¦æ±‚
+USESKILL_RESULT_ERR_RECORD = 4;		--è¡¨æ ¼å€¼ä¸èƒ½æ»¡è¶³è¦æ±‚
+USESKILL_RESULT_ERR_SCENE = 5;		--åœºæ™¯ä¸ç¬¦åˆè¦æ±‚
+USESKILL_RESULT_ERR_EVENT = 8;		--äº‹ä»¶ä¸ç¬¦åˆè¦æ±‚
+USESKILL_RESULT_ERR_COOLDOWN = 9;	--æŠ€èƒ½åœ¨å†·å´ä¸­
 
-USESKILL_RESULT_ERR_NOSKILL = 10;		--¶ÔÏóÉíÉÏÃ»ÓÐÕâ¸ö¼¼ÄÜ
-USESKILL_RESULT_ERR_INITIATIVE = 14;	--²»ÊÇÖ÷¶¯¼¼ÄÜ£¬²»ÄÜÖ÷¶¯Ê©·Å
-USESKILL_RESULT_ERR_TARGETDEAD = 16;	--¶ÔÏóÒÑËÀÍö
+USESKILL_RESULT_ERR_NOSKILL = 10;		--å¯¹è±¡èº«ä¸Šæ²¡æœ‰è¿™ä¸ªæŠ€èƒ½
+USESKILL_RESULT_ERR_INITIATIVE = 14;	--ä¸æ˜¯ä¸»åŠ¨æŠ€èƒ½ï¼Œä¸èƒ½ä¸»åŠ¨æ–½æ”¾
+USESKILL_RESULT_ERR_TARGETDEAD = 16;	--å¯¹è±¡å·²æ­»äº¡
 
-USESKILL_RESULT_ERR_FILTERLIMIT = 18;	--²»Âú×ã¸Ã¼¼ÄÜµÄÊ¹ÓÃÒªÇó£¡
-USESKILL_RESULT_ERR_EQUIPLIMIT = 19;	--²»ÄÜÂú×ã¸Ã¼¼ÄÜµÄ×°±¸ÐèÇó£¡
+USESKILL_RESULT_ERR_FILTERLIMIT = 18;	--ä¸æ»¡è¶³è¯¥æŠ€èƒ½çš„ä½¿ç”¨è¦æ±‚ï¼
+USESKILL_RESULT_ERR_EQUIPLIMIT = 19;	--ä¸èƒ½æ»¡è¶³è¯¥æŠ€èƒ½çš„è£…å¤‡éœ€æ±‚ï¼
 
-USESKILL_RESULT_ERR_HPLESS = 20;		--»úÌåÄÍ¾Ã¶È²»×ã£¡
-USESKILL_RESULT_ERR_MPLESS = 21;		--»úÌåÄÜÁ¿²»×ã£¡
-USESKILL_RESULT_ERR_SPLESS = 22;		--»úÌåÄÜÁ¿²»×ã£¡
+USESKILL_RESULT_ERR_HPLESS = 20;		--æœºä½“è€ä¹…åº¦ä¸è¶³ï¼
+USESKILL_RESULT_ERR_MPLESS = 21;		--æœºä½“èƒ½é‡ä¸è¶³ï¼
+USESKILL_RESULT_ERR_SPLESS = 22;		--æœºä½“èƒ½é‡ä¸è¶³ï¼
 
-USESKILL_RESULT_ERR_CANT_USE_IN_AIR = 26;  --´Ë¼¼ÄÜ²»ÄÜÔÚ¿ÕÖÐÊ¹ÓÃ
-USESKILL_RESULT_ERR_CANT_USE_NOT_IN_AIR = 27;   --´Ë¼¼ÄÜÖ»ÄÜÔÚ¿ÕÖÐÊ¹ÓÃ
+USESKILL_RESULT_ERR_CANT_USE_IN_AIR = 26;  --æ­¤æŠ€èƒ½ä¸èƒ½åœ¨ç©ºä¸­ä½¿ç”¨
+USESKILL_RESULT_ERR_CANT_USE_NOT_IN_AIR = 27;   --æ­¤æŠ€èƒ½åªèƒ½åœ¨ç©ºä¸­ä½¿ç”¨
 
-USESKILL_RESULT_ERR_NOTARGET = 30;		--Ã»ÓÐÑ¡Ôñ¼¼ÄÜÊ¹ÓÃÄ¿±ê£¡
-USESKILL_RESULT_ERR_CANTUSESKILL = 31;	--²»ÄÜÊ¹ÓÃ¼¼ÄÜ
-USESKILL_RESULT_ERR_FUNCLIMIT = 32;		--²»Âú×ã¸Ã¼¼ÄÜµÄ½Å±¾ÒªÇó
-USESKILL_RESULT_ERR_OTHERSKILL_ISHITING = 33;--ÆäËû¼¼ÄÜÕýÔÚÊ¹ÓÃÖÐ
+USESKILL_RESULT_ERR_NOTARGET = 30;		--æ²¡æœ‰é€‰æ‹©æŠ€èƒ½ä½¿ç”¨ç›®æ ‡ï¼
+USESKILL_RESULT_ERR_CANTUSESKILL = 31;	--ä¸èƒ½ä½¿ç”¨æŠ€èƒ½
+USESKILL_RESULT_ERR_FUNCLIMIT = 32;		--ä¸æ»¡è¶³è¯¥æŠ€èƒ½çš„è„šæœ¬è¦æ±‚
+USESKILL_RESULT_ERR_OTHERSKILL_ISHITING = 33;--å…¶ä»–æŠ€èƒ½æ­£åœ¨ä½¿ç”¨ä¸­
 
-USESKILL_RESULT_ERR_NEIGONG_LAUCHED = 35;	--±ØÐëÏÈ·¢¶¯ÄÚ¹¦
-USESKILL_RESULT_ERR_NEIGONG_EFFECTED = 36;	--Ä¿±ê±ØÐëÔÚÒÑ·¢¶¯ÄÚ¹¦µÄÓ°Ïì·¶Î§ÄÚ
+USESKILL_RESULT_ERR_NEIGONG_LAUCHED = 35;	--å¿…é¡»å…ˆå‘åŠ¨å†…åŠŸ
+USESKILL_RESULT_ERR_NEIGONG_EFFECTED = 36;	--ç›®æ ‡å¿…é¡»åœ¨å·²å‘åŠ¨å†…åŠŸçš„å½±å“èŒƒå›´å†…
 
-USESKILL_RESULT_ERR_LEADING_BUSY = 37;	--ÕýÔÚÒýµ¼¼¼ÄÜ£¬²»ÄÜÊ¹ÓÃÆäËû¼¼ÄÜ
-USESKILL_RESULT_ERR_PREPARE_BUSY = 38;	--ÕýÔÚ×¼±¸¼¼ÄÜ£¬²»ÄÜÊ¹ÓÃÆäËû¼¼ÄÜ
+USESKILL_RESULT_ERR_LEADING_BUSY = 37;	--æ­£åœ¨å¼•å¯¼æŠ€èƒ½ï¼Œä¸èƒ½ä½¿ç”¨å…¶ä»–æŠ€èƒ½
+USESKILL_RESULT_ERR_PREPARE_BUSY = 38;	--æ­£åœ¨å‡†å¤‡æŠ€èƒ½ï¼Œä¸èƒ½ä½¿ç”¨å…¶ä»–æŠ€èƒ½
 
 
 
     
-TARGETFILTER_RESULT_ERR_TOONEAR = 40;	--¾àÀëÌ«½ü
-TARGETFILTER_RESULT_ERR_TOOFAR = 41;	--¾àÀëÌ«Ô¶
-TARGETFILTER_RESULT_ERR_HORI = 42;		--²»ÔÚË®Æ½½Ç¶È·¶Î§
-TARGETFILTER_RESULT_ERR_VERT = 43;		--²»ÔÚ´¹Ö±½Ç¶È·¶Î§
-TARGETFILTER_RESULT_ERR_COLLIDE = 44;	--Ö±Ïß¾àÀëÖ®¼äÓÐÅö×²
-TARGETFILTER_RESULT_ERR_RECTANGLE = 45;	--²»ÔÚ¾ØÐÎ·¶Î§ÄÚ
+TARGETFILTER_RESULT_ERR_TOONEAR = 40;	--è·ç¦»å¤ªè¿‘
+TARGETFILTER_RESULT_ERR_TOOFAR = 41;	--è·ç¦»å¤ªè¿œ
+TARGETFILTER_RESULT_ERR_HORI = 42;		--ä¸åœ¨æ°´å¹³è§’åº¦èŒƒå›´
+TARGETFILTER_RESULT_ERR_VERT = 43;		--ä¸åœ¨åž‚ç›´è§’åº¦èŒƒå›´
+TARGETFILTER_RESULT_ERR_COLLIDE = 44;	--ç›´çº¿è·ç¦»ä¹‹é—´æœ‰ç¢°æ’ž
+TARGETFILTER_RESULT_ERR_RECTANGLE = 45;	--ä¸åœ¨çŸ©å½¢èŒƒå›´å†…
 
-TARGETFILTER_RESULT_ERR_OBJTYPE_SELF = 60;		--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇ×Ô¼º£¡
-TARGETFILTER_RESULT_ERR_OBJTYPE_PET = 62;		--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇ³èÎï£¡
-TARGETFILTER_RESULT_ERR_OBJTYPE_OWNER = 63;		--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇ³èÎïµÄÖ÷ÈË£¡
-TARGETFILTER_RESULT_ERR_OBJTYPE_SELECT = 64;	--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇÑ¡Ôñ¶ÔÏó£¡
-TARGETFILTER_RESULT_ERR_OBJTYPE_SELECTORSELF = 65;--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇ×Ô¼º»òÑ¡Ôñ¶ÔÏó£¡
+TARGETFILTER_RESULT_ERR_OBJTYPE_SELF = 60;		--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯è‡ªå·±ï¼
+TARGETFILTER_RESULT_ERR_OBJTYPE_PET = 62;		--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯å® ç‰©ï¼
+TARGETFILTER_RESULT_ERR_OBJTYPE_OWNER = 63;		--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯å® ç‰©çš„ä¸»äººï¼
+TARGETFILTER_RESULT_ERR_OBJTYPE_SELECT = 64;	--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯é€‰æ‹©å¯¹è±¡ï¼
+TARGETFILTER_RESULT_ERR_OBJTYPE_SELECTORSELF = 65;--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯è‡ªå·±æˆ–é€‰æ‹©å¯¹è±¡ï¼
 
-TARGETFILTER_RESULT_ERR_CLASSTYPE_PLAYER = 70;	--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇÍæ¼Ò£¡
-TARGETFILTER_RESULT_ERR_CLASSTYPE_NPC = 71;		--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇNPC£¡
+TARGETFILTER_RESULT_ERR_CLASSTYPE_PLAYER = 70;	--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯çŽ©å®¶ï¼
+TARGETFILTER_RESULT_ERR_CLASSTYPE_NPC = 71;		--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯NPCï¼
 
-TARGETFILTER_RESULT_ERR_RELATIONTYPE_ENIMY = 80;--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇµÐ¶ÔÕóÓªµÄ£¡
-TARGETFILTER_RESULT_ERR_RELATIONTYPE_FRIEND = 81;--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÍ¬Ò»ÕóÓªµÄ£¡
-TARGETFILTER_RESULT_ERR_RELATIONTYPE_TEAM = 82;	--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐë¶ÓÓÑ£¡
-TARGETFILTER_RESULT_ERR_RELATIONTYPE_GUILD = 83;--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇÍ¬Ò»¹«»á³ÉÔ±£¡
-TARGETFILTER_RESULT_ERR_CANTATTACKTARGET = 84;	--¼¼ÄÜÊ¹ÓÃÄ¿±ê±ØÐëÊÇÍ¬Ò»¹«»á³ÉÔ±£¡
+TARGETFILTER_RESULT_ERR_RELATIONTYPE_ENIMY = 80;--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯æ•Œå¯¹é˜µè¥çš„ï¼
+TARGETFILTER_RESULT_ERR_RELATIONTYPE_FRIEND = 81;--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»åŒä¸€é˜µè¥çš„ï¼
+TARGETFILTER_RESULT_ERR_RELATIONTYPE_TEAM = 82;	--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»é˜Ÿå‹ï¼
+TARGETFILTER_RESULT_ERR_RELATIONTYPE_GUILD = 83;--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯åŒä¸€å…¬ä¼šæˆå‘˜ï¼
+TARGETFILTER_RESULT_ERR_CANTATTACKTARGET = 84;	--æŠ€èƒ½ä½¿ç”¨ç›®æ ‡å¿…é¡»æ˜¯åŒä¸€å…¬ä¼šæˆå‘˜ï¼
 
-TARGETFILTER_RESULT_ERR_DIRTYPE_FRONT = 90;		--±ØÐëÔÚ¼¼ÄÜÊ¹ÓÃÄ¿±êµÄÕýÃæ²ÅÄÜÊ¹ÓÃ¸Ã¼¼ÄÜ£¡
-TARGETFILTER_RESULT_ERR_DIRTYPE_BACK = 91;		--±ØÐëÔÚ¼¼ÄÜÊ¹ÓÃÄ¿±êµÄºóÃæ²ÅÄÜÊ¹ÓÃ¸Ã¼¼ÄÜ£¡
+TARGETFILTER_RESULT_ERR_DIRTYPE_FRONT = 90;		--å¿…é¡»åœ¨æŠ€èƒ½ä½¿ç”¨ç›®æ ‡çš„æ­£é¢æ‰èƒ½ä½¿ç”¨è¯¥æŠ€èƒ½ï¼
+TARGETFILTER_RESULT_ERR_DIRTYPE_BACK = 91;		--å¿…é¡»åœ¨æŠ€èƒ½ä½¿ç”¨ç›®æ ‡çš„åŽé¢æ‰èƒ½ä½¿ç”¨è¯¥æŠ€èƒ½ï¼

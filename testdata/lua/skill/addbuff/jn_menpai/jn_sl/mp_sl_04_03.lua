@@ -1,11 +1,11 @@
--- ÔöÒæbuff
--- lv1:30ÃëÄÚÃ¿3Ãë»Ø¸´20µã
--- lv2:30ÃëÄÚÃ¿3Ãë»Ø¸´30µã
--- lv3:30ÃëÄÚÃ¿3Ãë»Ø¸´40µã
--- lv4:30ÃëÄÚÃ¿3Ãë»Ø¸´50µã
--- lv5:30ÃëÄÚÃ¿3Ãë»Ø¸´60µã
+-- å¢ç›Šbuff
+-- lv1:30ç§’å†…æ¯3ç§’å›å¤20ç‚¹
+-- lv2:30ç§’å†…æ¯3ç§’å›å¤30ç‚¹
+-- lv3:30ç§’å†…æ¯3ç§’å›å¤40ç‚¹
+-- lv4:30ç§’å†…æ¯3ç§’å›å¤50ç‚¹
+-- lv5:30ç§’å†…æ¯3ç§’å›å¤60ç‚¹
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
 	local healpoint = 0
 
@@ -21,17 +21,17 @@ function AddBuff(self, target, level)
 		healpoint = 60
 	end
 
-	--´´½¨Buffer
+	--åˆ›å»ºBuffer
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_mp_sl_04_03")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(healpoint), 0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

@@ -1,79 +1,79 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎïÅóÓÑÏà¹ØÊôÐÔ¶¨Òå-->
+<!--äººç‰©æœ‹å‹ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="friend_rec" cols="19" maxrows="50" save="true" public="false" private="true" desc="ºÃÓÑÃûµ¥ÁÐ±í">
-			<column type="widestr" desc="ºÃÓÑÃû³Æ"/>
-			<column type="byte" desc="ºÃÓÑµÈ¼¶"/>
-			<column type="byte" desc="ºÃÓÑÖ°Òµ"/>
-			<column type="byte" desc="ºÃÓÑÊÇ·ñÔÚÏß"/>
-			<column type="word" desc="ËùÔÚ³¡¾°"/>
-			<column type="byte" desc="ËùÔÚ¶ÓÎéÈËÊý"/>
-			<column type="word" desc="ºÃÓÑ¶È"/>
-			<column type="byte" desc="Á¼ÐÔ¹ØÏµÃ¶¾Ù"/>
-			<column type="string" desc="ºÃÓÑUID"/>
-			<column type="string" desc="ºÃÓÑÃÅÅÉÉí·Ý"/>
-			<column type="dword" desc="Í¨¼©Öµ"/>			
-			<column type="dword" desc="¹²Í¬É±¹ÖÊý"/>	
-			<column type="double" desc="¼ÆÊýµÄÓÐÐ§Ê±¼ä"/>		
-			<column type="double" desc="Èë¶ÓÊ±¼ä"/>
-			<column type="double" desc="¿ªÊ¼Ì½Ë÷Ê±¼ä"/>
-			<column type="double" desc="³Ë×ø×øÆïÀÛ¼ÆÊ±¼ä"/>
-			<column type="string" desc="Íæ¼ÒËùÔÚÇøÓò"/>
+		<record name="friend_rec" cols="19" maxrows="50" save="true" public="false" private="true" desc="å¥½å‹åå•åˆ—è¡¨">
+			<column type="widestr" desc="å¥½å‹åç§°"/>
+			<column type="byte" desc="å¥½å‹ç­‰çº§"/>
+			<column type="byte" desc="å¥½å‹èŒä¸š"/>
+			<column type="byte" desc="å¥½å‹æ˜¯å¦åœ¨çº¿"/>
+			<column type="word" desc="æ‰€åœ¨åœºæ™¯"/>
+			<column type="byte" desc="æ‰€åœ¨é˜Ÿä¼äººæ•°"/>
+			<column type="word" desc="å¥½å‹åº¦"/>
+			<column type="byte" desc="è‰¯æ€§å…³ç³»æžšä¸¾"/>
+			<column type="string" desc="å¥½å‹UID"/>
+			<column type="string" desc="å¥½å‹é—¨æ´¾èº«ä»½"/>
+			<column type="dword" desc="é€šç¼‰å€¼"/>			
+			<column type="dword" desc="å…±åŒæ€æ€ªæ•°"/>	
+			<column type="double" desc="è®¡æ•°çš„æœ‰æ•ˆæ—¶é—´"/>		
+			<column type="double" desc="å…¥é˜Ÿæ—¶é—´"/>
+			<column type="double" desc="å¼€å§‹æŽ¢ç´¢æ—¶é—´"/>
+			<column type="double" desc="ä¹˜ååéª‘ç´¯è®¡æ—¶é—´"/>
+			<column type="string" desc="çŽ©å®¶æ‰€åœ¨åŒºåŸŸ"/>
 		</record>
-		<record name="friendvalueevent_rec" cols="21" maxrows="50" save="true" public="false" private="false" desc="ºÃÓÑ¶ÈÔö¼ÓÊÂ¼þÌõ¼þ¿ØÖÆ±í">
-			<column type="widestr" desc="¶Ô·½Ãû³Æ"/>
-			<column type="string" desc="¶Ô·½UID"/>
-			<column type="string" desc="ÔÚÏßÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>			
-			<column type="string" desc="ÁÄÌìÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>			
-			<column type="string" desc="×é¶ÓÉ±¹ÖÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="×é¶ÓÈÎÎñÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="×é¶Ó¸±±¾ÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="×é¶ÓPKÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="×é¶ÓÕ½³¡ÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="×é¶Ó¾º¼¼³¡ÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="ÓéÀÖÌ½Ë÷ÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="ÓéÀÖµÀ¾ßÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="ÓéÀÖ×øÆïÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="ÓéÀÖµöÓãÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="ÓéÀÖ°üÔúÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>		
-			<column type="string" desc="ËÍÀñÐÐÎªºÃÓÑ¶ÈÔö¼ÓÌõ¼þ"/>	
-			<column type="dword" desc="ÔÚÏßºÃÓÑ¶È½±Àø¼ÆÊý"/>	
-			<column type="dword" desc="ÁÄÌìºÃÓÑ¶È½±Àø¼ÆÊý"/>	
-			<column type="dword" desc="×é¶ÓºÃÓÑ¶È½±Àø¼ÆÊý"/>	
-			<column type="dword" desc="Ì½Ë÷ºÃÓÑ¶È½±Àø¼ÆÊý"/>	
-			<column type="dword" desc="ËÍÀñºÃÓÑ¶È½±Àø¼ÆÊý"/>	
+		<record name="friendvalueevent_rec" cols="21" maxrows="50" save="true" public="false" private="false" desc="å¥½å‹åº¦å¢žåŠ äº‹ä»¶æ¡ä»¶æŽ§åˆ¶è¡¨">
+			<column type="widestr" desc="å¯¹æ–¹åç§°"/>
+			<column type="string" desc="å¯¹æ–¹UID"/>
+			<column type="string" desc="åœ¨çº¿è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>			
+			<column type="string" desc="èŠå¤©è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>			
+			<column type="string" desc="ç»„é˜Ÿæ€æ€ªè¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="ç»„é˜Ÿä»»åŠ¡è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="ç»„é˜Ÿå‰¯æœ¬è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="ç»„é˜ŸPKè¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="ç»„é˜Ÿæˆ˜åœºè¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="ç»„é˜Ÿç«žæŠ€åœºè¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="å¨±ä¹æŽ¢ç´¢è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="å¨±ä¹é“å…·è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="å¨±ä¹åéª‘è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="å¨±ä¹é’“é±¼è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="å¨±ä¹åŒ…æ‰Žè¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>		
+			<column type="string" desc="é€ç¤¼è¡Œä¸ºå¥½å‹åº¦å¢žåŠ æ¡ä»¶"/>	
+			<column type="dword" desc="åœ¨çº¿å¥½å‹åº¦å¥–åŠ±è®¡æ•°"/>	
+			<column type="dword" desc="èŠå¤©å¥½å‹åº¦å¥–åŠ±è®¡æ•°"/>	
+			<column type="dword" desc="ç»„é˜Ÿå¥½å‹åº¦å¥–åŠ±è®¡æ•°"/>	
+			<column type="dword" desc="æŽ¢ç´¢å¥½å‹åº¦å¥–åŠ±è®¡æ•°"/>	
+			<column type="dword" desc="é€ç¤¼å¥½å‹åº¦å¥–åŠ±è®¡æ•°"/>	
 		</record>
-		<record name="unfamiliar_rec" cols="8" maxrows="20" save="true" public="false" private="true" desc="Ä°ÉúÈËÁÐ±í">
-			<column type="widestr" desc="¶Ô·½Ãû³Æ"/>
-			<column type="byte" desc="¶Ô·½µÈ¼¶"/>
-			<column type="byte" desc="¶Ô·½Ö°Òµ"/>
-			<column type="byte" desc="¶Ô·½ÊÇ·ñÔÚÏß"/>
-			<column type="dword" desc="ºÃÓÑ¶È"/>
-			<column type="string" desc="¶Ô·½UID"/>
-			<column type="word" desc="ËùÔÚ³¡¾°"/>
+		<record name="unfamiliar_rec" cols="8" maxrows="20" save="true" public="false" private="true" desc="é™Œç”Ÿäººåˆ—è¡¨">
+			<column type="widestr" desc="å¯¹æ–¹åç§°"/>
+			<column type="byte" desc="å¯¹æ–¹ç­‰çº§"/>
+			<column type="byte" desc="å¯¹æ–¹èŒä¸š"/>
+			<column type="byte" desc="å¯¹æ–¹æ˜¯å¦åœ¨çº¿"/>
+			<column type="dword" desc="å¥½å‹åº¦"/>
+			<column type="string" desc="å¯¹æ–¹UID"/>
+			<column type="word" desc="æ‰€åœ¨åœºæ™¯"/>
 		</record>
-		<record name="blacklist_rec" cols="7" maxrows="30" save="true" public="false" private="true" desc="ºÚÃûµ¥ÁÐ±í">
-			<column type="widestr" desc="¶Ô·½Ãû³Æ"/>
-			<column type="byte" desc="¶Ô·½µÈ¼¶"/>
-			<column type="byte" desc="¶Ô·½Ö°Òµ"/>
-			<column type="byte" desc="¶Ô·½ÊÇ·ñÔÚÏß"/>
-			<column type="string" desc="¶Ô·½UID"/>
-			<column type="dword" desc="ËùÔÚ³¡¾°"/>
+		<record name="blacklist_rec" cols="7" maxrows="30" save="true" public="false" private="true" desc="é»‘åå•åˆ—è¡¨">
+			<column type="widestr" desc="å¯¹æ–¹åç§°"/>
+			<column type="byte" desc="å¯¹æ–¹ç­‰çº§"/>
+			<column type="byte" desc="å¯¹æ–¹èŒä¸š"/>
+			<column type="byte" desc="å¯¹æ–¹æ˜¯å¦åœ¨çº¿"/>
+			<column type="string" desc="å¯¹æ–¹UID"/>
+			<column type="dword" desc="æ‰€åœ¨åœºæ™¯"/>
 		</record>
-		<record name="enemy_rec" cols="8" maxrows="30" save="true" public="false" private="true" desc="³ðÈËÁÐ±í">
-			<column type="widestr" desc="¶Ô·½Ãû³Æ"/>
-			<column type="byte" desc="¶Ô·½µÈ¼¶"/>
-			<column type="byte" desc="¶Ô·½Ö°Òµ"/>
-			<column type="byte" desc="¶Ô·½ÊÇ·ñÔÚÏß"/>
-			<column type="dword" desc="ËùÔÚ³¡¾°"/>
-			<column type="dword" desc="³ðºÞ¶È"/>
-			<column type="string" desc="³ðÈËUID"/>
+		<record name="enemy_rec" cols="8" maxrows="30" save="true" public="false" private="true" desc="ä»‡äººåˆ—è¡¨">
+			<column type="widestr" desc="å¯¹æ–¹åç§°"/>
+			<column type="byte" desc="å¯¹æ–¹ç­‰çº§"/>
+			<column type="byte" desc="å¯¹æ–¹èŒä¸š"/>
+			<column type="byte" desc="å¯¹æ–¹æ˜¯å¦åœ¨çº¿"/>
+			<column type="dword" desc="æ‰€åœ¨åœºæ™¯"/>
+			<column type="dword" desc="ä»‡æ¨åº¦"/>
+			<column type="string" desc="ä»‡äººUID"/>
 		</record>
 	</records>
 </object>

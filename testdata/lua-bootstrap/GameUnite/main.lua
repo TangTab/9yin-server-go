@@ -1,125 +1,125 @@
---ÓÎÏ··şÎñÆ÷Ö÷¿Ø½Å±¾
+--æ¸¸æˆæœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---³ÌĞò×´Ì¬
-local WAPS_UNKNOWN = 0	--Î´Öª
-local WAPS_STARTING = 1	--ÕıÔÚÆô¶¯
-local WAPS_READY = 2	--¾ÍĞ÷£¨µ«ÊÇÎ´¿ª·Å·şÎñ£©
-local WAPS_OPENING = 3	--ÕıÔÚ¿ª·Å·şÎñ
-local WAPS_OPENED = 4	--ÒÑ¿ª·Å·şÎñ
-local WAPS_CLOSING = 5	--ÕıÔÚ¹Ø±Õ
-local WAPS_CLOSED = 6	--ÒÑ¹Ø±Õ·şÎñ
-local WAPS_QUITING = 7	--ÕıÔÚÍË³ö
+--ç¨‹åºçŠ¶æ€
+local WAPS_UNKNOWN = 0	--æœªçŸ¥
+local WAPS_STARTING = 1	--æ­£åœ¨å¯åŠ¨
+local WAPS_READY = 2	--å°±ç»ªï¼ˆä½†æ˜¯æœªå¼€æ”¾æœåŠ¡ï¼‰
+local WAPS_OPENING = 3	--æ­£åœ¨å¼€æ”¾æœåŠ¡
+local WAPS_OPENED = 4	--å·²å¼€æ”¾æœåŠ¡
+local WAPS_CLOSING = 5	--æ­£åœ¨å…³é—­
+local WAPS_CLOSED = 6	--å·²å…³é—­æœåŠ¡
+local WAPS_QUITING = 7	--æ­£åœ¨é€€å‡º
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(console)
 	nx_set_value("console", console)
 	
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	console.Color = "White"
 	
-	--´´½¨ÈÕÖ¾Ä¿Â¼
+	--åˆ›å»ºæ—¥å¿—ç›®å½•
 	if not nx_path_exists(nx_work_path() .. "log") then
 		nx_path_create(nx_work_path() .. "log")
 	end
 	
-	--ÈÕÖ¾»º³å³Ø
+	--æ—¥å¿—ç¼“å†²æ± 
 	local log_pool = nx_create("LogPool")
 	
-	--ÈÕÖ¾ÎÄ¼şÇ°×º
+	--æ—¥å¿—æ–‡ä»¶å‰ç¼€
 	log_pool.FilePrefix = nx_work_path() .. "log\\unite"
-	--»º³åÊıÁ¿
+	--ç¼“å†²æ•°é‡
 	log_pool.TraceMax = 256
-	--ÊÇ·ñÃ¿ÌìÒ»¸öÈÕÖ¾ÎÄ¼ş
+	--æ˜¯å¦æ¯å¤©ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶
 	log_pool.EveryDayAlone = false
 	
 	if nx_is_debug() then
-		--ÔÚµ÷ÊÔ°æÀï½«ÈÕÖ¾ĞÅÏ¢Êä³öµ½¿ØÖÆÌ¨
+		--åœ¨è°ƒè¯•ç‰ˆé‡Œå°†æ—¥å¿—ä¿¡æ¯è¾“å‡ºåˆ°æ§åˆ¶å°
 		log_pool.Console = console
 	end
 	
 	nx_set_value("log_pool", log_pool)
 	
-	--Æô¶¯ÈÕÖ¾¼ÇÂ¼
+	--å¯åŠ¨æ—¥å¿—è®°å½•
 	log_pool:Start()
 	
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 	
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	ini.FileName = "GameUnite.ini"
 	
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
 		nx_msgbox("can't load configure file")
 		nx_destroy(ini)
 		return 0
 	end
 	
-	--ÓÎÏ··ÖÇø±àºÅ
+	--æ¸¸æˆåˆ†åŒºç¼–å·
 	local district_id = ini:ReadInteger("Main", "DistrictID", 1)
-	--·şÎñÆ÷±àºÅ
+	--æœåŠ¡å™¨ç¼–å·
 	local server_id = ini:ReadInteger("Main", "ServerID", 1)
-	--·şÎñÆ÷Ãû³Æ
+	--æœåŠ¡å™¨åç§°
 	local server_name = ini:ReadString("Main", "ServerName", "")
-	--¹«¹²Êı¾İÂß¼­DLLÎÄ¼ş
+	--å…¬å…±æ•°æ®é€»è¾‘DLLæ–‡ä»¶
 	local public_logic_dll = ini:ReadString("Main", "PublicLogicDll", "")
-	--×î´óÏßÈËÊı
+	--æœ€å¤§çº¿äººæ•°
 	local max_players = ini:ReadInteger("Main", "MaxPlayers", 8192)
-	--³¡¾°Åö×²ĞÅÏ¢ÎÄ¼şµÄ¸ùÄ¿Â¼
+	--åœºæ™¯ç¢°æ’ä¿¡æ¯æ–‡ä»¶çš„æ ¹ç›®å½•
 	local collide_root_path = ini:ReadString("Main", "CollideRootPath", "")
-	--Ê¹ÓÃMYSQLÊı¾İ¿â
+	--ä½¿ç”¨MYSQLæ•°æ®åº“
 	local use_mysql = nx_boolean(ini:ReadString("Main", "UseMysql", "false"))
-	--Í¨Ñ¶¼ÓÃÜ¼ü
+	--é€šè®¯åŠ å¯†é”®
 	local msg_encode_key = ini:ReadString("Main", "MessageEncodeKey", "")
-	--Í¨Ñ¶Ğ£ÑéDLL
+	--é€šè®¯æ ¡éªŒDLL
 	local msg_verify_dll = ini:ReadString("Main", "MessageVerifyDll", "")
 	
 	if collide_root_path ~= "" then
 		collide_root_path = nx_function("ext_get_full_path", collide_root_path)
 	end
 	
-	--ÄÚÍøµØÖ·
+	--å†…ç½‘åœ°å€
 	local inner_addr = "127.0.0.1"
 	local inner_port = 16000
 	
 	inner_addr = ini:ReadString("Inner", "Addr", inner_addr)
 	inner_port = ini:ReadInteger("Inner", "Port", inner_port)
 	
-	--¹ã²¥µØÖ·
+	--å¹¿æ’­åœ°å€
 	local broad_addr = "127.255.255.255"
 	local broad_port = 15000
 	
 	broad_addr = ini:ReadString("Broadcast", "Addr", broad_addr)
 	broad_port = ini:ReadInteger("Broadcast", "Port", broad_port)
 	
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15001
 	
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 	
-	--¼Æ·Ñ·şÎñÆ÷
+	--è®¡è´¹æœåŠ¡å™¨
 	local charge_inuse = nx_boolean(ini:ReadString("Charge", "Inuse", ""))
 	local charge_addr = ini:ReadString("Charge", "Addr", "")
 	local charge_port = ini:ReadInteger("Charge", "Port", 0)
 	
-	--¿Í·ş·şÎñÆ÷
+	--å®¢æœæœåŠ¡å™¨
 	local gmcc_inuse = nx_boolean(ini:ReadString("Gmcc", "Inuse", ""))
 	local gmcc_addr = ini:ReadString("Gmcc", "Addr", "")
 	local gmcc_port = ini:ReadInteger("Gmcc", "Port", 0)
 	
-	--Í³¼Æ·şÎñÆ÷
+	--ç»Ÿè®¡æœåŠ¡å™¨
 	local stat_inuse = nx_boolean(ini:ReadString("Stat", "Inuse", ""))
 	local stat_addr = ini:ReadString("Stat", "Addr", "")
 	local stat_port = ini:ReadInteger("Stat", "Port", 0)
 	
-	--¹ÜÀí·şÎñÆ÷
+	--ç®¡ç†æœåŠ¡å™¨
 	local manage_inuse = nx_boolean(ini:ReadString("ManageServer", "Inuse", ""))
 	local manage_addr = ini:ReadString("ManageServer", "Addr", "")
 	local manage_port = ini:ReadInteger("ManageServer", "Port", 0)
 	
-	--Êı¾İ¿âÁ¬½Ó
+	--æ•°æ®åº“è¿æ¥
 	local account_base = ini:ReadString("Account", "ConnectString", "")
 	local account_pool = ini:ReadInteger("Account", "ConnectPool", 0)
 	
@@ -135,14 +135,14 @@ function main(console)
 	local manage_base = ini:ReadString("Manage", "ConnectString", "")
 	local manage_pool = ini:ReadInteger("Manage", "ConnectPool", 0)
 	
-	--ÍâÍøµØÖ·
+	--å¤–ç½‘åœ°å€
 	local outer_addr = ini:ReadString("Outer", "Addr", "127.0.0.1")
 	local outer_port = ini:ReadInteger("Outer", "Port", 2001)
 	
-	--ÊÚÈ¨ÎÄ¼şÃû
+	--æˆæƒæ–‡ä»¶å
 	local license = outer_addr .. ".lic"
 	
-	--Âß¼­Ä£¿é
+	--é€»è¾‘æ¨¡å—
 	local logic_loader = nx_create("LogicLoader")
 	
 	local logic_path = ini:ReadString("Logic", "Path", "")
@@ -180,7 +180,7 @@ function main(console)
 	
 	nx_destroy(ini)
 	
-	--¹«¹²Êı¾İÂß¼­Ä£¿é
+	--å…¬å…±æ•°æ®é€»è¾‘æ¨¡å—
 	local public_logic_loader = nx_create("LogicLoader")
 	
 	if public_logic_dll ~= "" then
@@ -191,10 +191,10 @@ function main(console)
 		end
 	end
 	
-	--³¡¾°Åö×²ĞÅÏ¢
+	--åœºæ™¯ç¢°æ’ä¿¡æ¯
 	local collide_manager = nx_create("CollideManager")
 	
-	--´´½¨Î¬»¤Á¬½Ó·şÎñ
+	--åˆ›å»ºç»´æŠ¤è¿æ¥æœåŠ¡
 	local echo_sock = nx_create("EchoSock")
 	
 	echo_sock.Address = echo_addr
@@ -202,7 +202,7 @@ function main(console)
 	
 	nx_bind_script(echo_sock, "echo", "echo_init")
 	
-	--´´½¨¹ã²¥Í¨Ñ¶
+	--åˆ›å»ºå¹¿æ’­é€šè®¯
 	local world_broad_sock = nx_create("BroadSock")
 	
 	world_broad_sock.BindAddress = inner_addr
@@ -233,13 +233,13 @@ function main(console)
 	member_broad_sock.BroadcastAddress = broad_addr
 	member_broad_sock.BroadcastPort = broad_port
 	
-	--´´½¨½ø³Ì¼à¿Ø
+	--åˆ›å»ºè¿›ç¨‹ç›‘æ§
 	local app_manager = nx_create("AppManager")
 	
 	app_manager.AppName = "unite_" .. nx_string(server_id)
 	app_manager.AppAddress = echo_addr .. ":" .. nx_string(echo_port)
 	
-	--´´½¨¿Í»§¶Ë½ÓÈëÍ¨Ñ¶·şÎñ
+	--åˆ›å»ºå®¢æˆ·ç«¯æ¥å…¥é€šè®¯æœåŠ¡
 	local mass_sock = nx_create("MassSock")
 	
 	mass_sock.Address = outer_addr
@@ -250,73 +250,73 @@ function main(console)
 	mass_sock.OutBufLen = 64 * 1024
 	mass_sock.ListenPendings = 20
 	
-	--´´½¨ÄÚ²¿Í¨Ñ¶
+	--åˆ›å»ºå†…éƒ¨é€šè®¯
 	local world_adapter = nx_create("Adapter")
 	
-	--ÄÚ²¿Í¨Ñ¶µØÖ·
+	--å†…éƒ¨é€šè®¯åœ°å€
 	world_adapter.Address = inner_addr
 	world_adapter.Port = inner_port + 1
-	--×î´óÄÚÍøÁ¬½ÓÊıÁ¿
+	--æœ€å¤§å†…ç½‘è¿æ¥æ•°é‡
 	world_adapter.ConnectMax = 64
-	--¹¤×÷Ïß³ÌÊıÁ¿
+	--å·¥ä½œçº¿ç¨‹æ•°é‡
 	world_adapter.WorkThreads = 1
-	--»º³åÇø³ß´ç
+	--ç¼“å†²åŒºå°ºå¯¸
 	world_adapter.InBufLen = 1024 * 1024
 	world_adapter.OutBufLen = 1024 * 1024
 	
 	local public_adapter = nx_create("Adapter")
 	
-	--ÄÚ²¿Í¨Ñ¶µØÖ·
+	--å†…éƒ¨é€šè®¯åœ°å€
 	public_adapter.Address = inner_addr
 	public_adapter.Port = inner_port + 2
-	--×î´óÄÚÍøÁ¬½ÓÊıÁ¿
+	--æœ€å¤§å†…ç½‘è¿æ¥æ•°é‡
 	public_adapter.ConnectMax = 64
-	--¹¤×÷Ïß³ÌÊıÁ¿
+	--å·¥ä½œçº¿ç¨‹æ•°é‡
 	public_adapter.WorkThreads = 1
-	--»º³åÇø³ß´ç
+	--ç¼“å†²åŒºå°ºå¯¸
 	public_adapter.InBufLen = 1024 * 1024
 	public_adapter.OutBufLen = 1024 * 1024
 	
 	local store_adapter = nx_create("Adapter")
 	
-	--ÄÚ²¿Í¨Ñ¶µØÖ·
+	--å†…éƒ¨é€šè®¯åœ°å€
 	store_adapter.Address = inner_addr
 	store_adapter.Port = inner_port + 100
-	--×î´óÄÚÍøÁ¬½ÓÊıÁ¿
+	--æœ€å¤§å†…ç½‘è¿æ¥æ•°é‡
 	store_adapter.ConnectMax = 64
-	--¹¤×÷Ïß³ÌÊıÁ¿
+	--å·¥ä½œçº¿ç¨‹æ•°é‡
 	store_adapter.WorkThreads = 1
-	--»º³åÇø³ß´ç
+	--ç¼“å†²åŒºå°ºå¯¸
 	store_adapter.InBufLen = 1024 * 1024
 	store_adapter.OutBufLen = 1024 * 1024
 	
 	local entry_adapter = nx_create("Adapter")
 	
-	--ÄÚ²¿Í¨Ñ¶µØÖ·
+	--å†…éƒ¨é€šè®¯åœ°å€
 	entry_adapter.Address = inner_addr
 	entry_adapter.Port = inner_port + 200
-	--×î´óÄÚÍøÁ¬½ÓÊıÁ¿
+	--æœ€å¤§å†…ç½‘è¿æ¥æ•°é‡
 	entry_adapter.ConnectMax = 64
-	--¹¤×÷Ïß³ÌÊıÁ¿
+	--å·¥ä½œçº¿ç¨‹æ•°é‡
 	entry_adapter.WorkThreads = 1
-	--»º³åÇø³ß´ç
+	--ç¼“å†²åŒºå°ºå¯¸
 	entry_adapter.InBufLen = 1024 * 1024
 	entry_adapter.OutBufLen = 1024 * 1024
 	
 	local member_adapter = nx_create("Adapter")
 	
-	--ÄÚ²¿Í¨Ñ¶µØÖ·
+	--å†…éƒ¨é€šè®¯åœ°å€
 	member_adapter.Address = inner_addr
 	member_adapter.Port = inner_port + 300
-	--×î´óÄÚÍøÁ¬½ÓÊıÁ¿
+	--æœ€å¤§å†…ç½‘è¿æ¥æ•°é‡
 	member_adapter.ConnectMax = 64
-	--¹¤×÷Ïß³ÌÊıÁ¿
+	--å·¥ä½œçº¿ç¨‹æ•°é‡
 	member_adapter.WorkThreads = 1
-	--»º³åÇø³ß´ç
+	--ç¼“å†²åŒºå°ºå¯¸
 	member_adapter.InBufLen = 1024 * 1024
 	member_adapter.OutBufLen = 1024 * 1024
 	
-	--´´½¨Êı¾İ¿âÏµÍ³
+	--åˆ›å»ºæ•°æ®åº“ç³»ç»Ÿ
 	local db_system
 	
 	if use_mysql then
@@ -325,7 +325,7 @@ function main(console)
 		db_system = nx_create("SqlDBSystem")
 	end
 	
-	--´´½¨ÓÎÏ··şÎñ
+	--åˆ›å»ºæ¸¸æˆæœåŠ¡
 	local game_world = nx_create("GameWorld")
 	
 	nx_set_value("game_world", game_world)
@@ -334,7 +334,7 @@ function main(console)
 	game_world.ServerId = server_id
 	game_world.ServerName = nx_widestr(server_name)
 	game_world.MaxPlayers = max_players
-	--Ã¿¸öÕÊºÅ¿ÉÒÔ´´½¨µÄ½ÇÉ«ÊıÁ¿
+	--æ¯ä¸ªå¸å·å¯ä»¥åˆ›å»ºçš„è§’è‰²æ•°é‡
 	game_world.AccountRoles = 1
 	game_world.Console = console
 	game_world.EchoSock = echo_sock
@@ -342,13 +342,13 @@ function main(console)
 	game_world.AppManager = app_manager
 	game_world.Adapter = world_adapter
 	
-	--¼ÓÔØÃû×Ö¹ıÂËÎÄ¼ş
+	--åŠ è½½åå­—è¿‡æ»¤æ–‡ä»¶
 	game_world:LoadNameFilter(nx_resource_path() .. "filter.txt")
 	
-	--Ìí¼ÓÆÕÍ¨³¡¾°
+	--æ·»åŠ æ™®é€šåœºæ™¯
 	load_scene_config()
 	
-	--´´½¨´æ´¢·şÎñ
+	--åˆ›å»ºå­˜å‚¨æœåŠ¡
 	local game_store = nx_create("GameStore")
 	
 	nx_set_value("game_store", game_store)
@@ -373,7 +373,7 @@ function main(console)
 	
 	init_custom_log(game_store)
 	
-	--´´½¨¹«¹²Êı¾İ·şÎñ
+	--åˆ›å»ºå…¬å…±æ•°æ®æœåŠ¡
 	local game_public = nx_create("GamePublic")
 	
 	nx_set_value("game_public", game_public)
@@ -385,11 +385,11 @@ function main(console)
 	game_public.Adapter = public_adapter
 	game_public.LogicLoader = public_logic_loader
 	
-	--Ìí¼Ó¹«¹²Êı¾İ¿Õ¼ä
+	--æ·»åŠ å…¬å…±æ•°æ®ç©ºé—´
 	game_public:AddPubSpace("pubdata", "nx_pubdata")
 	game_public:AddPubSpace("guild", "nx_guilds")
 	
-	--´´½¨½ÓÈë·şÎñ
+	--åˆ›å»ºæ¥å…¥æœåŠ¡
 	local game_entry = nx_create("GameEntry")
 	
 	nx_set_value("game_entry", game_entry)
@@ -407,12 +407,12 @@ function main(console)
 	game_entry.MassSock = mass_sock
 	game_entry.BroadSock = entry_broad_sock
 	game_entry.Adapter = entry_adapter
-	--¼ÇÂ¼Óë¿Í»§¶ËµÄÊÕ·¢ÏûÏ¢µ½message.logÎÄ¼ş
+	--è®°å½•ä¸å®¢æˆ·ç«¯çš„æ”¶å‘æ¶ˆæ¯åˆ°message.logæ–‡ä»¶
 	--game_entry.LogConnect = true
 	--game_entry.LogSend = true
 	--game_entry.LogReceive = true
 	
-	--´´½¨³¡¾°·şÎñ
+	--åˆ›å»ºåœºæ™¯æœåŠ¡
 	local game_member = nx_create("GameMember")
 	
 	nx_set_value("game_member", game_member)
@@ -420,9 +420,9 @@ function main(console)
 	game_member.DistrictId = district_id
 	game_member.ServerId = server_id
 	game_member.MemberId = 0
-	--Ã¿¸öÍæ¼ÒÊ¹ÓÃµ¥¶ÀµÄÏûÏ¢»º³åÇø
+	--æ¯ä¸ªç©å®¶ä½¿ç”¨å•ç‹¬çš„æ¶ˆæ¯ç¼“å†²åŒº
 	game_member.PlayerSingleBuffer = true
-	--¿ªÆôÊÓÒ°ÏûÏ¢ÓÅ»¯
+	--å¼€å¯è§†é‡æ¶ˆæ¯ä¼˜åŒ–
 	game_member.SightOptimize = true
 	game_member.Console = console
 	game_member.BroadSock = member_broad_sock
@@ -433,13 +433,13 @@ function main(console)
 	game_member.TaskPath = nx_resource_path() .. "task\\"
 	game_member.CollideRootPath = collide_root_path
 	
-	--¼ÓÔØÃû×Ö¹ıÂËÎÄ¼ş
+	--åŠ è½½åå­—è¿‡æ»¤æ–‡ä»¶
 	game_member:LoadNameFilter(nx_resource_path() .. "filter.txt")
 	
-	--¼ÓÔØÈ«¾ÖµãĞÅÏ¢
+	--åŠ è½½å…¨å±€ç‚¹ä¿¡æ¯
 	game_member:LoadLocations(nx_resource_path() .. "location.ini")
 	
-	--¼Æ·ÑÁ¬½Ó
+	--è®¡è´¹è¿æ¥
 	if charge_inuse then
 		local charge_sock = nx_create("UserSock")
 		
@@ -452,7 +452,7 @@ function main(console)
 		charge_sock:Start()
 	end
 	
-	--¿Í·şÁ¬½Ó
+	--å®¢æœè¿æ¥
 	if gmcc_inuse then
 		local gmcc_sock = nx_create("UserSock")
 		
@@ -465,7 +465,7 @@ function main(console)
 		gmcc_sock:Start()
 	end
 	
-	--Í³¼ÆÁ¬½Ó
+	--ç»Ÿè®¡è¿æ¥
 	if stat_inuse then
 		local stat_sock = nx_create("UserSock")
 		
@@ -478,7 +478,7 @@ function main(console)
 		stat_sock:Start()
 	end
 	
-	--¹ÜÀíÁ¬½Ó
+	--ç®¡ç†è¿æ¥
 	if manage_inuse then
 		local manage_sock = nx_create("MassSock")
 		
@@ -495,52 +495,52 @@ function main(console)
 		manage_sock:Start()
 	end
 	
-	--Æô¶¯½ø³Ì¼à¿Ø
+	--å¯åŠ¨è¿›ç¨‹ç›‘æ§
 	app_manager:Start()
 	
-	--ÉèÖÃ½ø³ÌÆô¶¯×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¯åŠ¨çŠ¶æ€
 	app_manager:SetAppState(WAPS_STARTING)
 	
-	--Æô¶¯ÄÚ²¿Í¨Ñ¶
+	--å¯åŠ¨å†…éƒ¨é€šè®¯
 	world_adapter:Start()
 	store_adapter:Start()
 	public_adapter:Start()
 	entry_adapter:Start()
 	member_adapter:Start()
 	
-	--Æô¶¯¹ã²¥Í¨Ñ¶
+	--å¯åŠ¨å¹¿æ’­é€šè®¯
 	world_broad_sock:Start()
 	store_broad_sock:Start()
 	public_broad_sock:Start()
 	entry_broad_sock:Start()
 	member_broad_sock:Start()
 	
-	--Ôİ²»½ÓÊÜÁ¬½Ó
+	--æš‚ä¸æ¥å—è¿æ¥
 	mass_sock.Closed = true
-	--Æô¶¯¿Í»§¶ËÁ¬½Ó
+	--å¯åŠ¨å®¢æˆ·ç«¯è¿æ¥
 	mass_sock:Start()
 	
-	--Æô¶¯Î¬»¤Á¬½Ó
+	--å¯åŠ¨ç»´æŠ¤è¿æ¥
 	echo_sock:Start()
 	
-	--Æô¶¯ÓÎÏ··şÎñ
+	--å¯åŠ¨æ¸¸æˆæœåŠ¡
 	game_world:Start()
 	
-	--Æô¶¯´æ´¢·şÎñ
+	--å¯åŠ¨å­˜å‚¨æœåŠ¡
 	game_store:Start()
 	
-	--Æô¶¯¹«¹²Êı¾İ·şÎñ
+	--å¯åŠ¨å…¬å…±æ•°æ®æœåŠ¡
 	game_public:Start()
 	
-	--Æô¶¯½ÓÈë·şÎñ
+	--å¯åŠ¨æ¥å…¥æœåŠ¡
 	game_entry:Start()
 	
-	--Æô¶¯³¡¾°·şÎñ
+	--å¯åŠ¨åœºæ™¯æœåŠ¡
 	game_member:Start()
 	
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	console:WriteLine("App name " .. app_manager.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	console:WriteLine("Echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	console:WriteLine("Inner socket " .. inner_addr .. ":" .. nx_string(inner_port))
 	console:WriteLine("Broadcast socket " .. broad_addr .. ":" .. nx_string(broad_port))
@@ -550,22 +550,22 @@ function main(console)
 		console:WriteLine("Manage socket " .. manage_addr .. ":" .. nx_string(manage_port))
 	end
 	
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	console:WriteLine("Game server " .. nx_string(server_id) .. " starting...")
 	
-	--ÉèÖÃ½ø³Ì¿ªÆô×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¼€å¯çŠ¶æ€
 	app_manager:SetAppState(WAPS_OPENED);
 	
 	return 1
 end
 
---¼ÓÔØ³¡¾°ÅäÖÃÎÄ¼ş
+--åŠ è½½åœºæ™¯é…ç½®æ–‡ä»¶
 function load_scene_config()
 	local game_world = nx_value("game_world")
 	
 	local ini = nx_create("IniDocument")
 	
-	--³¡¾°ÅäÖÃÎÄ¼şÃû
+	--åœºæ™¯é…ç½®æ–‡ä»¶å
 	ini.FileName = nx_resource_path() .. "scenes.ini"
 	
 	if not ini:LoadFromFile() then
@@ -578,22 +578,22 @@ function load_scene_config()
 	for i = 1, table.getn(sect_table) do
 		local sect = sect_table[i]
 		
-		--³¡¾°±àºÅ
+		--åœºæ™¯ç¼–å·
 		local scene_id = nx_number(sect)
-		--ËùÔÚ³¡¾°·şÎñÆ÷±àºÅ
+		--æ‰€åœ¨åœºæ™¯æœåŠ¡å™¨ç¼–å·
 		local member_id = ini:ReadInteger(sect, "Member", 0)
-		--Âß¼­ÀàÃû
+		--é€»è¾‘ç±»å
 		local script = ini:ReadString(sect, "Script", "scene")
-		--³¡¾°ÅäÖÃÃû
+		--åœºæ™¯é…ç½®å
 		local config = ini:ReadString(sect, "Config", "")
-		--ÊÇ·ñÊÇ¸±±¾³¡¾°Ô­ĞÍ
+		--æ˜¯å¦æ˜¯å‰¯æœ¬åœºæ™¯åŸå‹
 		local clonable = nx_boolean(ini:ReadString(sect, "Clonable", ""))
 		
 		if clonable then
-			--¸±±¾Ô­ĞÍ³¡¾°
+			--å‰¯æœ¬åŸå‹åœºæ™¯
 			game_world:AddPrototypeScene(scene_id, member_id, script, config)
 		else
-			--ÆÕÍ¨³¡¾°
+			--æ™®é€šåœºæ™¯
 			game_world:AddScene(scene_id, member_id, script, config)
 		end
 	end
@@ -603,10 +603,10 @@ function load_scene_config()
 	return true
 end
 
---ÉèÖÃ×Ô¶¨ÒåµÄÓÎÏ·ÈÕÖ¾Êı¾İ¿â±í¸ñ½á¹¹
+--è®¾ç½®è‡ªå®šä¹‰çš„æ¸¸æˆæ—¥å¿—æ•°æ®åº“è¡¨æ ¼ç»“æ„
 function init_custom_log(game_store)
-	--ÎïÆ·ÈÕÖ¾±í
-	--ÎïÆ·ÈÕÖ¾±í
+	--ç‰©å“æ—¥å¿—è¡¨
+	--ç‰©å“æ—¥å¿—è¡¨
 	game_store:AddLogTable("item_log")
 	game_store:AddLogField("item_log", "time", "datetime", 8)
 	game_store:AddLogField("item_log", "logtype", "int", 4)
@@ -621,7 +621,7 @@ function init_custom_log(game_store)
 	game_store:AddLogField("item_log", "ip", "varchar", 16)
 	game_store:AddLogField("item_log", "mac", "varchar", 16)
 	
-	--Íæ¼Ò½»Ò×±í
+	--ç©å®¶äº¤æ˜“è¡¨
 	game_store:AddLogTable("deal_log")
 	game_store:AddLogField("deal_log", "tradeid", "varchar", 50)
 	game_store:AddLogField("deal_log", "time", "datetime", 8)
@@ -636,7 +636,7 @@ function init_custom_log(game_store)
 	game_store:AddLogField("deal_log", "mac_get", "varchar", 16)
 	game_store:AddLogField("deal_log", "mac_lost", "varchar", 16)
 	
-	--Íæ¼ÒµÇÂ½ÈÕÖ¾±í
+	--ç©å®¶ç™»é™†æ—¥å¿—è¡¨
 	game_store:AddLogTable("role_log")
 	game_store:AddLogField("role_log", "account", "varchar", 100)
 	game_store:AddLogField("role_log", "role", "nvarchar", 64)
@@ -645,7 +645,7 @@ function init_custom_log(game_store)
 	game_store:AddLogField("role_log", "ip", "varchar", 16)
 	game_store:AddLogField("role_log", "mac", "varchar", 16)
 	
-	--Íæ¼ÒÉı¼¶ÈÕÖ¾±í
+	--ç©å®¶å‡çº§æ—¥å¿—è¡¨
 	game_store:AddLogTable("role_upgrade_log")
 	game_store:AddLogField("role_upgrade_log", "time", "datetime", 8)
 	game_store:AddLogField("role_upgrade_log", "role", "nvarchar", 64)
@@ -656,7 +656,7 @@ function init_custom_log(game_store)
 	game_store:AddLogField("role_upgrade_log", "ip", "varchar", 16)
 	game_store:AddLogField("role_upgrade_log", "mac", "varchar", 16)
 	
-	--ÈÎÎñÈÕÖ¾±í
+	--ä»»åŠ¡æ—¥å¿—è¡¨
 	game_store:AddLogTable("task_log")
 	game_store:AddLogField("task_log", "time", "datetime", 8)
 	game_store:AddLogField("task_log", "role", "nvarchar", 64)
@@ -665,7 +665,7 @@ function init_custom_log(game_store)
     game_store:AddLogField("task_log", "ip", "varchar", 16)
 	game_store:AddLogField("task_log", "mac", "varchar", 16)
 	
-	--¸±±¾ÈÕÖ¾±í
+	--å‰¯æœ¬æ—¥å¿—è¡¨
 	game_store:AddLogTable("instance_log")
 	game_store:AddLogField("instance_log", "cloneid", "int", 4)
 	game_store:AddLogField("instance_log", "prototype", "int", 4)
@@ -694,7 +694,7 @@ function init_custom_log(game_store)
     game_store:AddLogField("instance_npc_log", "ip", "varchar", 16)
 	game_store:AddLogField("instance_npc_log", "mac", "varchar", 16)
 
-	--³¡¾°ÈÕÖ¾±í
+	--åœºæ™¯æ—¥å¿—è¡¨
 	game_store:AddLogTable("scene_log")
 	game_store:AddLogField("scene_log", "entertime", "datetime", 8)
 	game_store:AddLogField("scene_log", "leavetime", "datetime", 8)
@@ -704,7 +704,7 @@ function init_custom_log(game_store)
 	game_store:AddLogField("scene_log", "ip", "varchar", 16)
 	game_store:AddLogField("scene_log", "mac", "varchar", 16)
 
-	--³Í·£ÈÕÖ¾±í
+	--æƒ©ç½šæ—¥å¿—è¡¨
 	game_store:AddLogTable("punish_log")
 	game_store:AddLogField("punish_log", "time", "datetime", 8)
 	game_store:AddLogField("punish_log", "operator", "varchar", 100)
@@ -713,7 +713,7 @@ function init_custom_log(game_store)
 	game_store:AddLogField("punish_log", "type", "int", 4)
 	
 	
-	--»î¶¯ÈÕÖ¾±í
+	--æ´»åŠ¨æ—¥å¿—è¡¨
 	game_store:AddLogTable("program_log")
 	game_store:AddLogField("program_log", "programid", "int", 4)
 	game_store:AddLogField("program_log", "programname", "varchar", 64)
@@ -723,11 +723,11 @@ function init_custom_log(game_store)
 	return true
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local console = nx_value("console")
 	
-	--ÓÎÏ··şÎñ
+	--æ¸¸æˆæœåŠ¡
 	local game_world = nx_value("game_world")
 	
 	local app_manager = game_world.AppManager
@@ -738,38 +738,38 @@ function close()
 	local gmcc_sock = game_world.GmccSock
 	local stat_sock = game_world.StatSock
 	
-	--´æ´¢·şÎñ
+	--å­˜å‚¨æœåŠ¡
 	local game_store = nx_value("game_store")
 	
 	local store_broad_sock = game_store.BroadSock
 	local store_adapter = game_store.Adapter
 	
-	--¹«¹²Êı¾İ·şÎñ
+	--å…¬å…±æ•°æ®æœåŠ¡
 	local game_public = nx_value("game_public")
 	
 	local public_broad_sock = game_public.BroadSock
 	local public_adapter = game_public.Adapter
 	
-	--½ÓÈë·şÎñ
+	--æ¥å…¥æœåŠ¡
 	local game_entry = nx_value("game_entry")
 	
 	local entry_mass_sock = game_entry.MassSock
 	local entry_broad_sock = game_entry.BroadSock
 	local entry_adapter = game_entry.Adapter
 	
-	--³¡¾°·şÎñ
+	--åœºæ™¯æœåŠ¡
 	local game_member = nx_value("game_member")
 	
 	local member_broad_sock = game_member.BroadSock
 	local member_adapter = game_member.Adapter
 	
 	if game_world.State ~= "Closed" then
-		--·¢³ö¹Ø±Õ·şÎñÆ÷ÃüÁî
+		--å‘å‡ºå…³é—­æœåŠ¡å™¨å‘½ä»¤
 		game_world:CloseServer()
 		
 		console:WriteLine("waiting server close...")
 		
-		--µÈ´ı·şÎñÆ÷¹Ø±Õ
+		--ç­‰å¾…æœåŠ¡å™¨å…³é—­
 		while game_world.State ~= "Closed" do
 			nx_pause(0.0)
 		end
@@ -777,7 +777,7 @@ function close()
 		console:WriteLine("server close finished")
 	end
 	
-	--¹Ø±ÕÍâÍøÁ¬½Ó
+	--å…³é—­å¤–ç½‘è¿æ¥
 	console:WriteLine("client socket shutdown...")
 	
 	entry_mass_sock.Closed = true
@@ -790,21 +790,21 @@ function close()
 	
 	--entry_mass_sock:Stop()
 	
-	--µÈ´ıËùÓĞÍæ¼ÒÍË³öÓÎÏ·
+	--ç­‰å¾…æ‰€æœ‰ç©å®¶é€€å‡ºæ¸¸æˆ
 	--console:WriteLine("waiting players exit...")
 	
 	--while game_world.PlayerCount > 0 do
 	--	nx_pause(0.0)
 	--end
 	
-	--µÈ´ıËùÓĞÊı¾İ¿â²Ù×÷Íê³É
+	--ç­‰å¾…æ‰€æœ‰æ•°æ®åº“æ“ä½œå®Œæˆ
 	--console:WriteLine("waiting store finished...")
 	
 	--while not game_store:AccessEmpty() do
 	--	nx_pause(0.0)
 	--end
 	
-	--¹Ø±Õ¹ã²¥
+	--å…³é—­å¹¿æ’­
 	console:WriteLine("broad shutdown...")
 	
 	world_broad_sock:Stop()
@@ -813,7 +813,7 @@ function close()
 	entry_broad_sock:Stop()
 	member_broad_sock:Stop()
 	
-	--¹Ø±ÕÄÚÍøÍ¨Ñ¶
+	--å…³é—­å†…ç½‘é€šè®¯
 	console:WriteLine("adapter shutdown...")
 	
 	world_adapter:Stop()
@@ -822,12 +822,12 @@ function close()
 	entry_adapter:Stop()
 	member_adapter:Stop()
 	
-	--¹Ø±ÕÎ¬»¤Á¬½Ó
+	--å…³é—­ç»´æŠ¤è¿æ¥
 	console:WriteLine("echo socket shutdown...")
 	
 	echo_sock:Stop()
 	
-	--¹Ø±ÕÓÎÏ··şÎñ
+	--å…³é—­æ¸¸æˆæœåŠ¡
 	console:WriteLine("world server shutdown...")
 	
 	game_world:Stop()
@@ -844,37 +844,37 @@ function close()
 		stat_sock:Stop()
 	end
 	
-	--¹Ø±Õ´æ´¢·şÎñ
+	--å…³é—­å­˜å‚¨æœåŠ¡
 	console:WriteLine("store server shutdown...")
 	
 	game_store:Stop()
 	
-	--¹Ø±Õ¹«¹²Êı¾İ·şÎñ
+	--å…³é—­å…¬å…±æ•°æ®æœåŠ¡
 	console:WriteLine("public server shutdown...")
 	
 	game_public:Stop()
 	
-	--¹Ø±Õ½ÓÈë·şÎñ
+	--å…³é—­æ¥å…¥æœåŠ¡
 	console:WriteLine("entry server shutdown...")
 	
 	game_entry:Stop()
 	
-	--¹Ø±Õ³¡¾°·şÎñ
+	--å…³é—­åœºæ™¯æœåŠ¡
 	console:WriteLine("member server shutdown...")
 	
 	game_member:Stop()
 	
-	--¹Ø±Õ½ø³Ì¼à¿Ø
+	--å…³é—­è¿›ç¨‹ç›‘æ§
 	console:WriteLine("app_manager shutdown...")
 	
 	app_manager:Stop()
 	
-	--¹Ø±ÕÈÕÖ¾»º³å
+	--å…³é—­æ—¥å¿—ç¼“å†²
 	local log_pool = nx_value("log_pool")
 	
 	log_pool:Stop()
 	
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 	
 	return true

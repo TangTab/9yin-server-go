@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Íæ¼Ò¿É²Ù×÷ÈÝÆ÷µÄ»ù´¡ÊôÐÔ-->
+<!--çŽ©å®¶å¯æ“ä½œå®¹å™¨çš„åŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="BaseCap" type="int" public="false" private="true" save="false" desc="»ù´¡ÈÝÁ¿, Îª0Ê±Ê¹ÓÃ×î´óÈÝÁ¿"/>
-		<property name="AddContainer" type="object" public="false" private="false" save="false" desc="¸½¼ÓµÄÈÝÆ÷, ´Ë¸½¼ÓµÄÈÝÆ÷°üº¬n¸öBagµÀ¾ß£¬Ã¿¸öBagµÀ¾ß¿É¼¤»î»ù´¡ÈÝÁ¿Ö®ÍâµÄÒ»Ð©ÈÝÁ¿"/>
-		<property name="CantAdd" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ²»ÄÜÌí¼ÓÎïÆ·µ½ÈÝÆ÷ÖÐ"/>
-		<property name="CantRemove" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ²»ÄÜ½«ÎïÆ·´ÓÈÝÆ÷ÖÐÒÆ×ß"/>
-		<property name="CantArrange" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ²»ÄÜÖ´ÐÐÕûÀí²Ù×÷"/>
-		<property name="CanOP" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ²»ÄÜÖ´ÐÐÕûÀí²Ù×÷" /> 
-		<property name="IsCanBW" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÍæ¼Ò¿É²Ù×÷µÄÈõ¹ØÁªÈÝÆ÷±êÖ¾" /> 
+		<property name="BaseCap" type="int" public="false" private="true" save="false" desc="åŸºç¡€å®¹é‡, ä¸º0æ—¶ä½¿ç”¨æœ€å¤§å®¹é‡"/>
+		<property name="AddContainer" type="object" public="false" private="false" save="false" desc="é™„åŠ çš„å®¹å™¨, æ­¤é™„åŠ çš„å®¹å™¨åŒ…å«nä¸ªBagé“å…·ï¼Œæ¯ä¸ªBagé“å…·å¯æ¿€æ´»åŸºç¡€å®¹é‡ä¹‹å¤–çš„ä¸€äº›å®¹é‡"/>
+		<property name="CantAdd" type="int" public="false" private="false" save="false" desc="æ˜¯å¦ä¸èƒ½æ·»åŠ ç‰©å“åˆ°å®¹å™¨ä¸­"/>
+		<property name="CantRemove" type="int" public="false" private="false" save="false" desc="æ˜¯å¦ä¸èƒ½å°†ç‰©å“ä»Žå®¹å™¨ä¸­ç§»èµ°"/>
+		<property name="CantArrange" type="int" public="false" private="false" save="false" desc="æ˜¯å¦ä¸èƒ½æ‰§è¡Œæ•´ç†æ“ä½œ"/>
+		<property name="CanOP" type="int" public="false" private="false" save="false" desc="æ˜¯å¦ä¸èƒ½æ‰§è¡Œæ•´ç†æ“ä½œ" /> 
+		<property name="IsCanBW" type="int" public="false" private="false" save="false" desc="æ˜¯å¦çŽ©å®¶å¯æ“ä½œçš„å¼±å…³è”å®¹å™¨æ ‡å¿—" /> 
 
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

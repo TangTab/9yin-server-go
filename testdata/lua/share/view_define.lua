@@ -1,55 +1,55 @@
-VIEWPORT_EQUIP			= 1 	--×°±¸À¸
-VIEWPORT_TOOL			= 2 	--µÀ¾ßÀ¸
-VIEWPORT_ADDTOOLBOX		= 3 	--¸½¼ÓµÄ°ü¹üÀ¸
-VIEWPORT_DEPOT			= 4 	--²Ö¿âÀ¸
-VIEWPORT_ADDDEPOTBOX    = 5    --¸½¼ÓµÄ²Ö¿âÀ¸
+VIEWPORT_EQUIP			= 1 	--è£…å¤‡æ 
+VIEWPORT_TOOL			= 2 	--é“å…·æ 
+VIEWPORT_ADDTOOLBOX		= 3 	--é™„åŠ çš„åŒ…è£¹æ 
+VIEWPORT_DEPOT			= 4 	--ä»“åº“æ 
+VIEWPORT_ADDDEPOTBOX    = 5    --é™„åŠ çš„ä»“åº“æ 
 
-VIEWPORT_PET			= 7 	--³èÎïÀ¹
-VIEWPORT_RIDE			= 8 	--Æï³ËÀ¹
+VIEWPORT_PET			= 7 	--å® ç‰©æ‹¦
+VIEWPORT_RIDE			= 8 	--éª‘ä¹˜æ‹¦
 
-VIEWPORT_IDENTIFY		= 10 	--×°±¸¼ø¶¨À¸
+VIEWPORT_IDENTIFY		= 10 	--è£…å¤‡é‰´å®šæ 
 
-VIEWPORT_EQUIPUPGRADE	= 11 	--×°±¸Éý¼¶À¸
-VIEWPORT_ADDSTAR		= 12 	--¼ÓÐÇÀ¸
-VIEWPORT_ENCHASE		= 13 	--ÏâÇ¶À¸
-VIEWPORT_ADDHOLE		= 14 	--´ò¿×À¸
-VIEWPORT_ADDMAGIC		= 15 	--¸½Ä§À¸
-VIEWPORT_ADDMAGICUPGRADE = 16 	--¸½Ä§Éý¼¶À¸
-VIEWPORT_REBUILD		= 17 	--¸ÄÔìÀ¸
-VIEWPORT_EQUIPSIGN		= 18 	--×°±¸Ç©ÃûÀ¸
-VIEWPORT_BIND			= 19 	--ÎïÆ·°ó¶¨²Ù×÷À¸
-VIEWPORT_RELINK			= 20 	--ÎïÆ·ÎåÐÐ¡¢Áé»êËøÁ´ÖØÖÃµÄ²Ù×÷À¸
-VIEWPORT_EQUIPBLESS		= 21 	--×°±¸×£¸£À¸
-VIEWPORT_EQUIPTRANSLATE	= 22 	--×°±¸×ª»»À¸
+VIEWPORT_EQUIPUPGRADE	= 11 	--è£…å¤‡å‡çº§æ 
+VIEWPORT_ADDSTAR		= 12 	--åŠ æ˜Ÿæ 
+VIEWPORT_ENCHASE		= 13 	--é•¶åµŒæ 
+VIEWPORT_ADDHOLE		= 14 	--æ‰“å­”æ 
+VIEWPORT_ADDMAGIC		= 15 	--é™„é­”æ 
+VIEWPORT_ADDMAGICUPGRADE = 16 	--é™„é­”å‡çº§æ 
+VIEWPORT_REBUILD		= 17 	--æ”¹é€ æ 
+VIEWPORT_EQUIPSIGN		= 18 	--è£…å¤‡ç­¾åæ 
+VIEWPORT_BIND			= 19 	--ç‰©å“ç»‘å®šæ“ä½œæ 
+VIEWPORT_RELINK			= 20 	--ç‰©å“äº”è¡Œã€çµé­‚é”é“¾é‡ç½®çš„æ“ä½œæ 
+VIEWPORT_EQUIPBLESS		= 21 	--è£…å¤‡ç¥ç¦æ 
+VIEWPORT_EQUIPTRANSLATE	= 22 	--è£…å¤‡è½¬æ¢æ 
 
-VIEWPORT_SELFEXCHANGE	= 30 	--×Ô¼ºµÄ½»»»À¸
-VIEWPORT_OTHEREXCHANGE	= 31 	--ÆäËûÍæ¼ÒµÄ½»»»À¸
+VIEWPORT_SELFEXCHANGE	= 30 	--è‡ªå·±çš„äº¤æ¢æ 
+VIEWPORT_OTHEREXCHANGE	= 31 	--å…¶ä»–çŽ©å®¶çš„äº¤æ¢æ 
 
-VIEWPORT_SELFSHOP		= 32 	--×Ô¼ºµÄ³öÊÛÀ¸
-VIEWPORT_OTHERSHOP		= 33 	--ÆäËûÍæ¼ÒµÄ³öÊÛÀ¸
+VIEWPORT_SELFSHOP		= 32 	--è‡ªå·±çš„å‡ºå”®æ 
+VIEWPORT_OTHERSHOP		= 33 	--å…¶ä»–çŽ©å®¶çš„å‡ºå”®æ 
 
-VIEWPORT_POST_BOX       = 35	--ÓÊ¼Ä¼ÄÎïÆ·µÄÈÝÆ÷
-VIEWPORT_RECV_POST_BOX  = 36	--ÓÊ¼ÄÊÕÎïÆ·µÄÈÝÆ÷
+VIEWPORT_POST_BOX       = 35	--é‚®å¯„å¯„ç‰©å“çš„å®¹å™¨
+VIEWPORT_RECV_POST_BOX  = 36	--é‚®å¯„æ”¶ç‰©å“çš„å®¹å™¨
 
-VIEWPORT_SKILL			= 40	--¼¼ÄÜÈÝÆ÷
-VIEWPORT_NORMALATTACK	= 41	--ÆÕÍ¨¹¥»÷¼¼ÄÜÈÝÆ÷
-VIEWPORT_BUFFER			= 42	--BUFFERÈÝÆ÷
+VIEWPORT_SKILL			= 40	--æŠ€èƒ½å®¹å™¨
+VIEWPORT_NORMALATTACK	= 41	--æ™®é€šæ”»å‡»æŠ€èƒ½å®¹å™¨
+VIEWPORT_BUFFER			= 42	--BUFFERå®¹å™¨
 
-VIEWPORT_PET_EQUIP		= 50	--µ±Ç°³èÎïµÄ×°±¸ÈÝÆ÷
+VIEWPORT_PET_EQUIP		= 50	--å½“å‰å® ç‰©çš„è£…å¤‡å®¹å™¨
 
-VIEWPORT_RANDOM_SHOP    = 60   --Ëæ»úÉÌµêµÄµÀ¾ßÈÝÆ÷
-VIEWPORT_SHOP           = 61   --ÆÕÍ¨ÉÌµêÈÝÆ÷  
-VIEWPORT_BUSINESS_SHOP  = 62   --ÅÜÉÌÉÌµêÈÝÆ÷
-VIEWPORT_BUSINESS_PLAYERBOX = 63 --ÅÜÉÌµÄÍæ¼ÒÈÝÆ÷
+VIEWPORT_RANDOM_SHOP    = 60   --éšæœºå•†åº—çš„é“å…·å®¹å™¨
+VIEWPORT_SHOP           = 61   --æ™®é€šå•†åº—å®¹å™¨  
+VIEWPORT_BUSINESS_SHOP  = 62   --è·‘å•†å•†åº—å®¹å™¨
+VIEWPORT_BUSINESS_PLAYERBOX = 63 --è·‘å•†çš„çŽ©å®¶å®¹å™¨
 
-VIEWPORT_DROP_BOX 		= 80	-- NPCµôÂäÊ°È¡ÈÝÆ÷
-VIEWPORT_CROP_BOX		= 81	-- Å©×÷ÎïµÈÀàËÆ×ÊÔ´ÀàNPCµÄµôÂäÀ¸
+VIEWPORT_DROP_BOX 		= 80	-- NPCæŽ‰è½æ‹¾å–å®¹å™¨
+VIEWPORT_CROP_BOX		= 81	-- å†œä½œç‰©ç­‰ç±»ä¼¼èµ„æºç±»NPCçš„æŽ‰è½æ 
 
 
-VIEWPORT_EDIT_PRIZE_BOX	= 90	-- ±à¼­ÈÎÎñ½±ÀøÈÝÆ÷
-VIEWPORT_SUBMIT_COLLECT = 91    -- Ìá½»ÊÕ¼¯Àà±à¼­ÈÎÎñÈÝÆ÷
+VIEWPORT_EDIT_PRIZE_BOX	= 90	-- ç¼–è¾‘ä»»åŠ¡å¥–åŠ±å®¹å™¨
+VIEWPORT_SUBMIT_COLLECT = 91    -- æäº¤æ”¶é›†ç±»ç¼–è¾‘ä»»åŠ¡å®¹å™¨
 
-VIEWPORT_PROCESS_SELF	= 92	--½»Ò×Ê±×Ô¼ºµÄÎïÆ·¼Ó¹¤À¸
-VIEWPORT_PROCESS_OTHER	= 93	--½»Ò×Ê±¶Ô·½µÄÎïÆ·¼Ó¹¤À¸
+VIEWPORT_PROCESS_SELF	= 92	--äº¤æ˜“æ—¶è‡ªå·±çš„ç‰©å“åŠ å·¥æ 
+VIEWPORT_PROCESS_OTHER	= 93	--äº¤æ˜“æ—¶å¯¹æ–¹çš„ç‰©å“åŠ å·¥æ 
 
-VIEWPORT_COMPOSITE_BOX	= 100	-- ºÏ³ÉÈÝÆ÷
+VIEWPORT_COMPOSITE_BOX	= 100	-- åˆæˆå®¹å™¨

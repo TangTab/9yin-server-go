@@ -1,36 +1,36 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÈËÎï¹«»áÏà¹ØÊôÐÔ¶¨Òå-->
+<!--äººç‰©å…¬ä¼šç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="GuildName" type="widestr" public="true" private="true" save="true" desc="¹«»áÃû³Æ"/>
-		<property name="GuildPosition" type="int" public="true" private="true" save="true" desc="Íæ¼Ò¹«»áÖ°Î»" />
-		<property name="GuildUid" type="int" public="false" private="false" save="false" desc="¹«»áUID"/>
-		<property name="GuildQuitTime" type="double" public="false" private="false" save="true" desc="Íæ¼ÒÍË³ö¼ÓÈë¹ýµÄ¹«»áµÄÊ±¼ä"/>
-		<property name="RespondedGuildName" type="widestr" public="false" private="false" save="true" desc="¹«»áÃû³Æ"/>
+		<property name="GuildName" type="widestr" public="true" private="true" save="true" desc="å…¬ä¼šåç§°"/>
+		<property name="GuildPosition" type="int" public="true" private="true" save="true" desc="çŽ©å®¶å…¬ä¼šèŒä½" />
+		<property name="GuildUid" type="int" public="false" private="false" save="false" desc="å…¬ä¼šUID"/>
+		<property name="GuildQuitTime" type="double" public="false" private="false" save="true" desc="çŽ©å®¶é€€å‡ºåŠ å…¥è¿‡çš„å…¬ä¼šçš„æ—¶é—´"/>
+		<property name="RespondedGuildName" type="widestr" public="false" private="false" save="true" desc="å…¬ä¼šåç§°"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="requested_guild" cols="1" maxrows="1024" save="true" public="false" private="false" desc="ÉêÇë¹ýµÄ¹«»á">
-			<column type="widestr" desc="ÉêÇë¹ýµÄ¹«»áÃû³Æ"/>
+		<record name="requested_guild" cols="1" maxrows="1024" save="true" public="false" private="false" desc="ç”³è¯·è¿‡çš„å…¬ä¼š">
+			<column type="widestr" desc="ç”³è¯·è¿‡çš„å…¬ä¼šåç§°"/>
 		</record>
-		<record name="guild_seek_mate" cols="5" maxrows="1024" save="false" public="false" private="false" desc="²éÑ¯¹«»á¹ýÂË±í">
-			<column type="widestr" desc="¹«»áÃû³Æ"/>
-			<column type="widestr" desc="»á³¤Ãû³Æ"/>
-			<column type="WORD" desc="¹«»áÈËÊý"/>
-			<column type="byte" desc="¹«»á¹ØÏµ"/>
-			<column type="byte" desc="ÉêÇë×´Ì¬"/>
+		<record name="guild_seek_mate" cols="5" maxrows="1024" save="false" public="false" private="false" desc="æŸ¥è¯¢å…¬ä¼šè¿‡æ»¤è¡¨">
+			<column type="widestr" desc="å…¬ä¼šåç§°"/>
+			<column type="widestr" desc="ä¼šé•¿åç§°"/>
+			<column type="WORD" desc="å…¬ä¼šäººæ•°"/>
+			<column type="byte" desc="å…¬ä¼šå…³ç³»"/>
+			<column type="byte" desc="ç”³è¯·çŠ¶æ€"/>
 		</record>
-		<record name="guild_player_ralation_record" cols="2" maxrows="10" save="false" public="false" private="true" desc="ºÍÍæ¼Ò½¨Á¢¹ØÏµµÄ¹«»á±í">
-			<column type="widestr" desc="¹«»áÃû³Æ"/>
-			<column type="byte" desc="¹«»á¹ØÏµ"/>
+		<record name="guild_player_ralation_record" cols="2" maxrows="10" save="false" public="false" private="true" desc="å’ŒçŽ©å®¶å»ºç«‹å…³ç³»çš„å…¬ä¼šè¡¨">
+			<column type="widestr" desc="å…¬ä¼šåç§°"/>
+			<column type="byte" desc="å…¬ä¼šå…³ç³»"/>
 		</record>
-		<record name="guild_sort_list_record" cols="4" maxrows="1024" save="false" public="false" private="false" desc="ÅÅÐò¹«»áÁÐ±í">
-			<column type="widestr" desc="¹«»áÃû³Æ"/>
-			<column type="widestr" desc="»á³¤Ãû³Æ"/>
-			<column type="WORD" desc="¹«»áÈËÊý"/>
-			<column type="byte" desc="ÉêÇë×´Ì¬"/>
+		<record name="guild_sort_list_record" cols="4" maxrows="1024" save="false" public="false" private="false" desc="æŽ’åºå…¬ä¼šåˆ—è¡¨">
+			<column type="widestr" desc="å…¬ä¼šåç§°"/>
+			<column type="widestr" desc="ä¼šé•¿åç§°"/>
+			<column type="WORD" desc="å…¬ä¼šäººæ•°"/>
+			<column type="byte" desc="ç”³è¯·çŠ¶æ€"/>
 		</record>
 	</records>
 </object>

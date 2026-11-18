@@ -1,39 +1,39 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task22006.lua
--- @ ½Å±¾¹¦ÄÜ: ÈÎÎñÄ¬ÈÏÖ´ĞĞ½Å±¾
--- @ ´´½¨Õß:   yinxiang
--- @ ´´½¨ÈÕÆÚ: 2010.9.9
+-- @ è„šæœ¬åç§°: task22006.lua
+-- @ è„šæœ¬åŠŸèƒ½: ä»»åŠ¡é»˜è®¤æ‰§è¡Œè„šæœ¬
+-- @ åˆ›å»ºè€…:   yinxiang
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.9.9
 -----------------------------------------
 require("define")
 require("share\\server_custom_define")
 require("task\\task_define")
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
-	--»ñµÃ×øÍü¹¦µÈ¼¶
+	--è·å¾—åå¿˜åŠŸç­‰çº§
 	local neigong_zwg = nx_find_neigong(player, "ng_jh_001")
 	local neigong_level = nx_query_property(neigong_zwg, "Level")
 
-	--Èô×øÍü¹¦µÈ¼¶Ğ¡ÓÚ2¼¶£¬ÔòÏò¿Í»§¶Ë·¢ËÍĞŞÁ¶ÄÚ¹¦°´Å¥ÌáÊ¾
+	--è‹¥åå¿˜åŠŸç­‰çº§å°äº2çº§ï¼Œåˆ™å‘å®¢æˆ·ç«¯å‘é€ä¿®ç‚¼å†…åŠŸæŒ‰é’®æç¤º
 	if neigong_level < 2 then
 		nx_custom(player, SERVER_CUSTOMMSG_WUXUE_FLASH)
 
-		-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ,½ø¶ÈÎª0
+		-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œ,è¿›åº¦ä¸º0
 		--nx_add_record_row_values(player, "Task_Record", nx_int(taskid), nx_int(8),
 		--		nx_int(0), 1, 0, nx_int(1), "TaskLimit", "", "interact22006", 0)
 		nx_add_taskrecord_row_values(player, nx_int(taskid), nx_int(8),
 				nx_int(0), 1, 0, nx_int(1), "TaskLimit", "", "interact22006")
 
 	else
-		-- ÈÎÎñ½ø¶È±íÔö¼ÓÒ»ĞĞ£¬½ø¶ÈÎª1
+		-- ä»»åŠ¡è¿›åº¦è¡¨å¢åŠ ä¸€è¡Œï¼Œè¿›åº¦ä¸º1
 		--nx_add_record_row_values(player, "Task_Record", nx_int(taskid), nx_int(8),
 		--		nx_int(0), 1, 1, nx_int(1), "TaskLimit", "", "interact22006", 0)
 		nx_add_taskrecord_row_values(player, nx_int(taskid), nx_int(8),
@@ -45,13 +45,13 @@ function Task_After_Accept(player, npc, taskid)
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end

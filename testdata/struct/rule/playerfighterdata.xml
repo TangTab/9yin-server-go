@@ -1,32 +1,32 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Ò»¸öÕ½¶·¶ÔÏó(npc»òÍæ¼Ò)µÄËùÓÐÊôÐÔ, NPCµÄÊôÐÔÖ÷Òª´ÓÅäÖÃÎÄ¼þ¶ÁÈ¡, ½ÇÉ«ÔòÊÇËùÓÐ×°±¸µÄ¼¯ºÏ-->
+<!--ä¸€ä¸ªæˆ˜æ–—å¯¹è±¡(npcæˆ–çŽ©å®¶)çš„æ‰€æœ‰å±žæ€§, NPCçš„å±žæ€§ä¸»è¦ä»Žé…ç½®æ–‡ä»¶è¯»å–, è§’è‰²åˆ™æ˜¯æ‰€æœ‰è£…å¤‡çš„é›†åˆ-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
-	<!-- ±íÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-    <record name="fight_spite_rec" cols="3" maxrows="30" save="false" public="false" private="false" desc="PVP¶ñÒâ±í">
-      <column type="object" desc="¶ñÒâÍæ¼Ò"/>
-      <column type="word" desc="Õ½¶·¶ñÒâ¿ªÊ¼µÄÊ±¼ä"/>
-      <column type="word" desc="¶ñÒâÖµ"/>
+    <record name="fight_spite_rec" cols="3" maxrows="30" save="false" public="false" private="false" desc="PVPæ¶æ„è¡¨">
+      <column type="object" desc="æ¶æ„çŽ©å®¶"/>
+      <column type="word" desc="æˆ˜æ–—æ¶æ„å¼€å§‹çš„æ—¶é—´"/>
+      <column type="word" desc="æ¶æ„å€¼"/>
     </record>
     
-    <record name="relive_point_rec" cols="2" maxrows="128" save="false" public="false" private="true" desc="¸´»îµãÁÐ±í">
-      <column type="byte" desc="ÅÅÁÐÐòºÅ"/>
-      <column type="string" desc="¸´»îµãID"/>
+    <record name="relive_point_rec" cols="2" maxrows="128" save="false" public="false" private="true" desc="å¤æ´»ç‚¹åˆ—è¡¨">
+      <column type="byte" desc="æŽ’åˆ—åºå·"/>
+      <column type="string" desc="å¤æ´»ç‚¹ID"/>
     </record>
     
-    <record name="first_attack_rec" cols="1" maxrows="512" save="false" public="false" private="false" desc="Ê×ÏÈ¹¥»÷ÎÒµÄÍæ¼Ò">
-      <column type="widestr" desc="Ê×ÏÈ¹¥»÷ÎÒµÄÍæ¼ÒName"/>
+    <record name="first_attack_rec" cols="1" maxrows="512" save="false" public="false" private="false" desc="é¦–å…ˆæ”»å‡»æˆ‘çš„çŽ©å®¶">
+      <column type="widestr" desc="é¦–å…ˆæ”»å‡»æˆ‘çš„çŽ©å®¶Name"/>
     </record>
 
-    <record name="target_hate_rec" cols="2" maxrows="512" save="false" public="false" private="true" desc="Íæ¼ÒÑ¡ÖÐÄ¿±êµÄ³ðºÞ">
-      <column type="widestr" desc="Ä¿±êName"/>
-      <column type="dword" desc="Ä¿±ê³ðºÞÖµ"/>
+    <record name="target_hate_rec" cols="2" maxrows="512" save="false" public="false" private="true" desc="çŽ©å®¶é€‰ä¸­ç›®æ ‡çš„ä»‡æ¨">
+      <column type="widestr" desc="ç›®æ ‡Name"/>
+      <column type="dword" desc="ç›®æ ‡ä»‡æ¨å€¼"/>
     </record>
     
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
         <path name="struct\rule\Common\commonfighter.xml" desc=""/>
         <path name="struct\rule\Common\damage.xml" desc=""/>

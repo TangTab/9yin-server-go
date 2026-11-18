@@ -1,21 +1,21 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task10132.lua
--- @ ½Å±¾¹¦ÄÜ: 10132ÈÎÎñÂß¼­
--- @ ´´½¨Õß:   wwl
--- @ ´´½¨ÈÕÆÚ: 2009.10.27
+-- @ è„šæœ¬åç§°: task10132.lua
+-- @ è„šæœ¬åŠŸèƒ½: 10132ä»»åŠ¡é€»è¾‘
+-- @ åˆ›å»ºè€…:   wwl
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.10.27
 -----------------------------------------
 
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
-	   -- Ê¹ÓÃÎïÆ·
-    local npc_name = nx_string("Ê¹ÓÃÃ«±ÊĞûÖ½")
+	   -- ä½¿ç”¨ç‰©å“
+    local npc_name = nx_string("ä½¿ç”¨æ¯›ç¬”å®£çº¸")
 	function create_obj_to_player(player, configid)
 
 		local ToolBox = nx_get_child(player, nx_widestr("ToolBox"))
@@ -29,14 +29,14 @@ function Task_After_Accept(player, npc, taskid)
 		
 		if not nx_container_placeitem(ToolBox, item) then
 			nx_destroy_self(item)
-			-- ÌáÊ¾¿Õ¼ä²»×ã
+			-- æç¤ºç©ºé—´ä¸è¶³
 			nx_sysinfo(target, 1, "9627")
 			nx_sysinfo(target, 2, "9627")
 		end		
 end	
 
 
-        -- Ôö¼Ó±ê¼Ç¼ÇÂ¼±íÒ»ĞĞ
+        -- å¢åŠ æ ‡è®°è®°å½•è¡¨ä¸€è¡Œ
 	local row = nx_add_record_row_values(player, "StateTaskRec", nx_int(taskid), nx_int(2))
 	
 	if row < 0 then
@@ -47,13 +47,13 @@ end
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end

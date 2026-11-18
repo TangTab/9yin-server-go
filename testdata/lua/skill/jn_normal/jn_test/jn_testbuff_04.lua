@@ -1,76 +1,76 @@
---²âÊÔ	µãÑ¨	ÏŞÖÆĞéÕĞ
+--æµ‹è¯•	ç‚¹ç©´	é™åˆ¶è™šæ‹›
 	
 require("define")
 require("command_define")
 
---Ë¢ĞÂ¼¼ÄÜÖ®¼äÏà»¥Ó°ÏìµÄÊôĞÔ
+--åˆ·æ–°æŠ€èƒ½ä¹‹é—´ç›¸äº’å½±å“çš„å±æ€§
 function refresh_property(self, skill)
 end
 
---¼¼ÄÜ¿ªÊ¼×¼±¸
+--æŠ€èƒ½å¼€å§‹å‡†å¤‡
 function skill_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜ×¼±¸Ö®ºó
+--æŠ€èƒ½å‡†å¤‡ä¹‹å
 function skill_after_prepare(self, skill, usetype, target, x, y, z)
 end
 
---¼¼ÄÜÃüÖĞÖ®Ç°
+--æŠ€èƒ½å‘½ä¸­ä¹‹å‰
 function skill_before_hit(self, skill)
 	return 1
 end
 
---¼¼ÄÜÃüÖĞ¶ÔÏó
+--æŠ€èƒ½å‘½ä¸­å¯¹è±¡
 function skill_after_hit(self, skill, target)
-	--È¡×Ô¼º¼¼ÄÜµÄ¼¶±ğ
+	--å–è‡ªå·±æŠ€èƒ½çš„çº§åˆ«
 	local level = nx_query_property(skill, "Level")
 	
-	--µÈ¼¶1£º´¥·¢ÏŞÖÆBUFF£¬15ÃëÄÚ³öĞéÕĞ£¬ÃüÖĞ½µµÍ60µã£¬³ÖĞø30Ãë
-	--µÈ¼¶2£º´¥·¢ÏŞÖÆBUFF£¬15ÃëÄÚ³öĞéÕĞ£¬ÃüÖĞ½µµÍ70µã£¬³ÖĞø30Ãë
-	--µÈ¼¶3£º´¥·¢ÏŞÖÆBUFF£¬15ÃëÄÚ³öĞéÕĞ£¬ÃüÖĞ½µµÍ80µã£¬³ÖĞø30Ãë
-	--µÈ¼¶4£º´¥·¢ÏŞÖÆBUFF£¬15ÃëÄÚ³öĞéÕĞ£¬ÃüÖĞ½µµÍ90µã£¬³ÖĞø30Ãë
-	--µÈ¼¶5£º´¥·¢ÏŞÖÆBUFF£¬15ÃëÄÚ³öĞéÕĞ£¬ÃüÖĞ½µµÍ100µã£¬³ÖĞø30Ãë
+	--ç­‰çº§1ï¼šè§¦å‘é™åˆ¶BUFFï¼Œ15ç§’å†…å‡ºè™šæ‹›ï¼Œå‘½ä¸­é™ä½60ç‚¹ï¼ŒæŒç»­30ç§’
+	--ç­‰çº§2ï¼šè§¦å‘é™åˆ¶BUFFï¼Œ15ç§’å†…å‡ºè™šæ‹›ï¼Œå‘½ä¸­é™ä½70ç‚¹ï¼ŒæŒç»­30ç§’
+	--ç­‰çº§3ï¼šè§¦å‘é™åˆ¶BUFFï¼Œ15ç§’å†…å‡ºè™šæ‹›ï¼Œå‘½ä¸­é™ä½80ç‚¹ï¼ŒæŒç»­30ç§’
+	--ç­‰çº§4ï¼šè§¦å‘é™åˆ¶BUFFï¼Œ15ç§’å†…å‡ºè™šæ‹›ï¼Œå‘½ä¸­é™ä½90ç‚¹ï¼ŒæŒç»­30ç§’
+	--ç­‰çº§5ï¼šè§¦å‘é™åˆ¶BUFFï¼Œ15ç§’å†…å‡ºè™šæ‹›ï¼Œå‘½ä¸­é™ä½100ç‚¹ï¼ŒæŒç»­30ç§’
 
-	--Ìí¼ÓBUFF	
+	--æ·»åŠ BUFF	
 	add_buffer(self, target, level)
 end
 
---¼¼ÄÜÊ¹ÓÃ½áÊø
+--æŠ€èƒ½ä½¿ç”¨ç»“æŸ
 function skill_finish(self, skill)
 end
 
---¼¼ÄÜ±»´ò¶Ï
+--æŠ€èƒ½è¢«æ‰“æ–­
 function skill_break(self, skill)
 end
 
---¶¨ÒåBufferº¯Êı£¬»ñÈ¡²ÎÊı
+--å®šä¹‰Bufferå‡½æ•°ï¼Œè·å–å‚æ•°
 function add_buffer(self, target, level)
 
-	--´´½¨Ò»¸öBuffer¶ÔÏó,BufferID±ØĞë´æÔÚÓÚBuffer±íÖĞ
+	--åˆ›å»ºä¸€ä¸ªBufferå¯¹è±¡,BufferIDå¿…é¡»å­˜åœ¨äºBufferè¡¨ä¸­
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_testbuff_04")
 
-	--Èç¹û´´½¨Ê§°ÜÔò·µ»Ø
+	--å¦‚æœåˆ›å»ºå¤±è´¥åˆ™è¿”å›
 	if not nx_exists(buffer) then
 		return false
 	end
 	
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	
-	--BufferµÄ×÷ÓÃÀàĞÍ
-	--0:Ë²Ê±Buffer,1:ÔÚXÃëÄÚÓĞĞ§,2:ÔÚXÃëÄÚY´ÎÊÂ¼şÓĞĞ§,3:ÔÚXÃëÄÚÓĞĞ§,Ã¿YÃë´¥·¢Ò»´Î)
+	--Bufferçš„ä½œç”¨ç±»å‹
+	--0:ç¬æ—¶Buffer,1:åœ¨Xç§’å†…æœ‰æ•ˆ,2:åœ¨Xç§’å†…Yæ¬¡äº‹ä»¶æœ‰æ•ˆ,3:åœ¨Xç§’å†…æœ‰æ•ˆ,æ¯Yç§’è§¦å‘ä¸€æ¬¡)
 	nx_set_property(buffer, "EffectType", 2)
 
-	--BufferµÄÉúÃüÆÚ£¨Ê±¼ä°´ÕÕ¼¼ÄÜµÈ¼¶»ñÈ¡£©
+	--Bufferçš„ç”Ÿå‘½æœŸï¼ˆæ—¶é—´æŒ‰ç…§æŠ€èƒ½ç­‰çº§è·å–ï¼‰
 	nx_set_property(buffer, "LifeTime",15000)
-	--Buffer¼ÆÊ±µÄ¼ä¸ôÊ±¼ä»ò¼Æ´ÎµÄ´ÎÊı
+	--Bufferè®¡æ—¶çš„é—´éš”æ—¶é—´æˆ–è®¡æ¬¡çš„æ¬¡æ•°
 	nx_set_property(buffer, "EffectTimer", 1)
-	--BufferÃ¿´Î´¥·¢Ê±ÊÇ·ñ³É¹¦×÷ÓÃµÄ³É¹¦ÂÊ£¬°Ù·Ö±ÈÊı
+	--Bufferæ¯æ¬¡è§¦å‘æ—¶æ˜¯å¦æˆåŠŸä½œç”¨çš„æˆåŠŸç‡ï¼Œç™¾åˆ†æ¯”æ•°
 	nx_set_property(buffer, "EffectRatio", 100)
-	--BUFFERµÄÊÂ¼ş´¥·¢(Ìí¼Óµ½BufferµÄEventEffectRec±í¸ñÖĞ£¬²Î¼ûbuffer.xmlÎÄ¼şÖĞ´Ë±í¸ñµÄ¶¨Òå)
+	--BUFFERçš„äº‹ä»¶è§¦å‘(æ·»åŠ åˆ°Bufferçš„EventEffectRecè¡¨æ ¼ä¸­ï¼Œå‚è§buffer.xmlæ–‡ä»¶ä¸­æ­¤è¡¨æ ¼çš„å®šä¹‰)
 	nx_add_record_row_values(buffer, "EventEffectRec", COMMAND_SKILL_BEGIN)
 	
-	--Èç¹ûÌí¼ÓÊ§°Ü,ÔòÉ¾³ı´´½¨µÄBuffer¶ÔÏó
+	--å¦‚æœæ·»åŠ å¤±è´¥,åˆ™åˆ é™¤åˆ›å»ºçš„Bufferå¯¹è±¡
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

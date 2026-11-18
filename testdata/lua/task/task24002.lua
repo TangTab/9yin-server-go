@@ -1,21 +1,21 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task515.lua
--- @ ½Å±¾¹¦ÄÜ: 515ÈÎÎñÂß¼­
--- @ ´´½¨Õß:   fengqw
--- @ ´´½¨ÈÕÆÚ: 2009.12.14
+-- @ è„šæœ¬åç§°: task515.lua
+-- @ è„šæœ¬åŠŸèƒ½: 515ä»»åŠ¡é€»è¾‘
+-- @ åˆ›å»ºè€…:   fengqw
+-- @ åˆ›å»ºæ—¥æœŸ: 2009.12.14
 -----------------------------------------
 require("define")
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
-	--¶Ô×Ô¼ºÒş²Ønpc
+	--å¯¹è‡ªå·±éšè—npc
 	--if not nx_find_data(player, "TargetNpc") then
 	--	nx_add_data(player, "TargetNpc", VTYPE_OBJECT)
 	--	nx_set_data(player, "TargetNpc", npc)
@@ -24,22 +24,22 @@ function Task_After_Accept(player, npc, taskid)
 
 
 	local movie_cfg = "born04_QianDengZhen\\qdz001"
-	--²¥·Å¶¯»­ini
+	--æ’­æ”¾åŠ¨ç”»ini
 	nx_custom(player, "npc_fight_ani_start", movie_cfg)
 	return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 
-	--¶Ô×Ô¼ºÏÔÊ¾npc
+	--å¯¹è‡ªå·±æ˜¾ç¤ºnpc
 	--if nx_find_data(player, "TargetNpc") then
 	--	local show_npc = nx_query_data(player, "TargetNpc")
 	--	nx_remove_data(player, "TargetNpc")

@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ËÀÍö¸´»îÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æ­»äº¡å¤æ´»ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="RelivePositon" type="string" public="false" private="true" save="true" desc="Íæ¼Ò¼ÇÂ¼µÄËÀÍö»Ø³ÇµÄµØµã[name£¬x£¬y£¬z£¬o]"/>
-		<property name="ReliveLocalFirst" type="int" public="false" private="true" save="true" desc="ÊÇ·ñµÚÒ»´ÎÊ¹ÓÃ´ËÀà¸´»î0 ·ñ 1 ÊÇ"/>
-		<property name="RelivePerfectFirst" type="int" public="false" private="true" save="true" desc="ÊÇ·ñµÚÒ»´ÎÊ¹ÓÃ´ËÀà¸´»î"/>
-		<property name="ReliveCityFirst" type="int" public="false" private="true" save="true" desc="ÊÇ·ñµÚÒ»´ÎÊ¹ÓÃ´ËÀà¸´»î"/>
-    <property name="ReliveTime" type="int" public="false" private="true" save="true" desc="¸´»îÊ±¼ä"/>
-    <property name="ReliveCdTime" type="int" public="false" private="true" save="false" desc="¾àÀëÉÏ´Î¸´»îµÄCDÊ±¼ä"/>
-    <property name="ReliveNoNearPos" type="int" public="false" private="true" save="true" desc="½ûÓÃ×î½ü¸´»îµã¸´»î0½û 1²»½û "/>
-    <property name="RelivePosSelectOpen" type="int" public="false" private="true" save="true" desc="¸´»îµã¿ÉÑ¡¹¦ÄÜ0½û 1²»½û "/>
+		<property name="RelivePositon" type="string" public="false" private="true" save="true" desc="çŽ©å®¶è®°å½•çš„æ­»äº¡å›žåŸŽçš„åœ°ç‚¹[nameï¼Œxï¼Œyï¼Œzï¼Œo]"/>
+		<property name="ReliveLocalFirst" type="int" public="false" private="true" save="true" desc="æ˜¯å¦ç¬¬ä¸€æ¬¡ä½¿ç”¨æ­¤ç±»å¤æ´»0 å¦ 1 æ˜¯"/>
+		<property name="RelivePerfectFirst" type="int" public="false" private="true" save="true" desc="æ˜¯å¦ç¬¬ä¸€æ¬¡ä½¿ç”¨æ­¤ç±»å¤æ´»"/>
+		<property name="ReliveCityFirst" type="int" public="false" private="true" save="true" desc="æ˜¯å¦ç¬¬ä¸€æ¬¡ä½¿ç”¨æ­¤ç±»å¤æ´»"/>
+    <property name="ReliveTime" type="int" public="false" private="true" save="true" desc="å¤æ´»æ—¶é—´"/>
+    <property name="ReliveCdTime" type="int" public="false" private="true" save="false" desc="è·ç¦»ä¸Šæ¬¡å¤æ´»çš„CDæ—¶é—´"/>
+    <property name="ReliveNoNearPos" type="int" public="false" private="true" save="true" desc="ç¦ç”¨æœ€è¿‘å¤æ´»ç‚¹å¤æ´»0ç¦ 1ä¸ç¦ "/>
+    <property name="RelivePosSelectOpen" type="int" public="false" private="true" save="true" desc="å¤æ´»ç‚¹å¯é€‰åŠŸèƒ½0ç¦ 1ä¸ç¦ "/>
 	</properties>
 	<records>
 	</records>

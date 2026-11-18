@@ -1,61 +1,61 @@
---ÓÎÏ··şÎñÆ÷Ö÷¿Ø½Å±¾
+--æ¸¸æˆæœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---³ÌĞò×´Ì¬
-local WAPS_UNKNOWN = 0	--Î´Öª
-local WAPS_STARTING = 1	--ÕıÔÚÆô¶¯
-local WAPS_READY = 2	--¾ÍĞ÷£¨µ«ÊÇÎ´¿ª·Å·şÎñ£©
-local WAPS_OPENING = 3	--ÕıÔÚ¿ª·Å·şÎñ
-local WAPS_OPENED = 4	--ÒÑ¿ª·Å·şÎñ
-local WAPS_CLOSING = 5	--ÕıÔÚ¹Ø±Õ
-local WAPS_CLOSED = 6	--ÒÑ¹Ø±Õ·şÎñ
-local WAPS_QUITING = 7	--ÕıÔÚÍË³ö
+--ç¨‹åºçŠ¶æ€
+local WAPS_UNKNOWN = 0	--æœªçŸ¥
+local WAPS_STARTING = 1	--æ­£åœ¨å¯åŠ¨
+local WAPS_READY = 2	--å°±ç»ªï¼ˆä½†æ˜¯æœªå¼€æ”¾æœåŠ¡ï¼‰
+local WAPS_OPENING = 3	--æ­£åœ¨å¼€æ”¾æœåŠ¡
+local WAPS_OPENED = 4	--å·²å¼€æ”¾æœåŠ¡
+local WAPS_CLOSING = 5	--æ­£åœ¨å…³é—­
+local WAPS_CLOSED = 6	--å·²å…³é—­æœåŠ¡
+local WAPS_QUITING = 7	--æ­£åœ¨é€€å‡º
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(world)
 	nx_set_value("world", world)
 
-	--¿ìËÙÈÕÖ¾ÏµÍ³
+	--å¿«é€Ÿæ—¥å¿—ç³»ç»Ÿ
 	world.UseQuickLog = true
-	--Ó¦ÓÃ½ø³Ì¼ÇÂ¼
+	--åº”ç”¨è¿›ç¨‹è®°å½•
 	world.UseAppRecord = true
 
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	world:SetConsoleColor("LightGreen")
 
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	--ini.FileName = "game_world.ini"
 	ini.FileName = nx_main_config()
 
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
 		nx_msgbox("can't read config file!")
 		nx_destroy(ini)
 		return 0
 	end
 
-	--ÓÎÏ··ÖÇø±àºÅ
+	--æ¸¸æˆåˆ†åŒºç¼–å·
 	local district_id = ini:ReadInteger("Main", "DistrictID", 1)
-	--·şÎñÆ÷±àºÅ
+	--æœåŠ¡å™¨ç¼–å·
 	local server_id = ini:ReadInteger("Main", "ServerID", 1)
-	--·şÎñÆ÷Ãû³Æ
+	--æœåŠ¡å™¨åç§°
 	local server_name = ini:ReadString("Main", "ServerName", "")
-	--×î´óÏßÈËÊı
+	--æœ€å¤§çº¿äººæ•°
 	local max_players = ini:ReadInteger("Main", "MaxPlayers", 8192)
-	--±£´æÍæ¼ÒÊı¾İµÄ¼ä¸ô·ÖÖÓÊı
+	--ä¿å­˜ç©å®¶æ•°æ®çš„é—´éš”åˆ†é’Ÿæ•°
 	local save_minutes = ini:ReadInteger("Main", "SaveMinutes", 20)
-	--Ë¢ĞÂÕË»§ĞÅÏ¢µÄ¼ä¸ô·ÖÖÓÊı
+	--åˆ·æ–°è´¦æˆ·ä¿¡æ¯çš„é—´éš”åˆ†é’Ÿæ•°
 	local flush_minutes = ini:ReadInteger("Main", "FlushMinutes", 0)
-	--´´½¨½ÇÉ«¶Ô½ÇÉ«Ãû×Ö³¤¶ÈµÄÏŞÖÆ
+	--åˆ›å»ºè§’è‰²å¯¹è§’è‰²åå­—é•¿åº¦çš„é™åˆ¶
 	local rolenamesizelimit = ini:ReadInteger("Main", "RoleNameSizeLimit", 16)
-	--ÊÇ·ñĞèÒªµÇÂ¼ÅÅ¶Ó
+	--æ˜¯å¦éœ€è¦ç™»å½•æ’é˜Ÿ
 	local player_queue = nx_boolean(ini:ReadString("Main", "PlayerQueue", "true"))
-	--ÊÇ·ñ¿ªÆôVIPÓÅÏÈÅÅ¶Ó¹¦ÄÜ
+	--æ˜¯å¦å¼€å¯VIPä¼˜å…ˆæ’é˜ŸåŠŸèƒ½
 	local vip_queue = nx_boolean(ini:ReadString("Main", "VipQueue", "true"))
 
-	--ÄÚÍøµØÖ·
+	--å†…ç½‘åœ°å€
 	local inner_addr = "127.0.0.1"
 	local inner_port = 0
 	--local inner_port = 16001
@@ -63,48 +63,48 @@ function main(world)
 	inner_addr = ini:ReadString("Inner", "Addr", inner_addr)
 	inner_port = ini:ReadInteger("Inner", "Port", inner_port)
 
-	--¹ã²¥µØÖ·
+	--å¹¿æ’­åœ°å€
 	local broad_addr = "127.255.255.255"
 	local broad_port = 15000
 
 	broad_addr = ini:ReadString("Broadcast", "Addr", broad_addr)
 	broad_port = ini:ReadInteger("Broadcast", "Port", broad_port)
 
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15001
 
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 
-	--¼Æ·Ñ·şÎñÆ÷
+	--è®¡è´¹æœåŠ¡å™¨
 	local charge_inuse = nx_boolean(ini:ReadString("Charge", "Inuse", ""))
 	local charge_addr = ini:ReadString("Charge", "Addr", "")
 	local charge_port = ini:ReadInteger("Charge", "Port", 0)
 
-	--¿Í·ş·şÎñÆ÷
+	--å®¢æœæœåŠ¡å™¨
 	local gmcc_inuse = nx_boolean(ini:ReadString("Gmcc", "Inuse", ""))
 	local gmcc_addr = ini:ReadString("Gmcc", "Addr", "")
 	local gmcc_port = ini:ReadInteger("Gmcc", "Port", 0)
 
-	--¹ÜÀí·şÎñÆ÷
+	--ç®¡ç†æœåŠ¡å™¨
 	local manage_inuse = nx_boolean(ini:ReadString("ManageServer", "Inuse", ""))
 	local manage_addr = ini:ReadString("ManageServer", "Addr", "")
 	local manage_port = ini:ReadInteger("ManageServer", "Port", 0)
 
-    --¼à¿Ø·şÎñÆ÷
+    --ç›‘æ§æœåŠ¡å™¨
 	local monitor_inuse = nx_boolean(ini:ReadString("Monitor", "Inuse", ""))
 	local monitor_addr = ini:ReadString("Monitor", "Addr", "")
 	local monitor_port = ini:ReadInteger("Monitor", "Port", 0)
 
-    --×ª´¢·şÎñÆ÷
+    --è½¬å‚¨æœåŠ¡å™¨
 	local dumpserver_inuse = nx_boolean(ini:ReadString("DumpServer", "Inuse", ""))
 	local dumpserver_addr = ini:ReadString("DumpServer", "Addr", "")
 	local dumpserver_port = ini:ReadInteger("DumpServer", "Port", 0)
 
 	nx_destroy(ini)
 
-	--°ó¶¨½Å±¾
+	--ç»‘å®šè„šæœ¬
 	nx_bind_script(world, "main", "echo_init")
 
 	world.AppName = "world_" .. nx_string(server_id)
@@ -116,9 +116,9 @@ function main(world)
 	world.FlushMinutes = flush_minutes
 	world.PlayerQueue = player_queue
 	world.VipQueue = vip_queue
-	--Ã¿¸öÕÊºÅ¿ÉÒÔ´´½¨µÄ½ÇÉ«ÊıÁ¿
+	--æ¯ä¸ªå¸å·å¯ä»¥åˆ›å»ºçš„è§’è‰²æ•°é‡
 	world.AccountRoles = 5
-	--´´½¨½ÇÉ«¶Ô½ÇÉ«Ãû×Ö³¤¶ÈµÄÏŞÖÆ
+	--åˆ›å»ºè§’è‰²å¯¹è§’è‰²åå­—é•¿åº¦çš„é™åˆ¶
 	world.RoleNameSizeLimit = rolenamesizelimit
 	world.InnerAddr = inner_addr
 	world.InnerPort = inner_port
@@ -126,42 +126,42 @@ function main(world)
 	world.BroadPort = broad_port
 	world.EchoAddr = echo_addr
 	world.EchoPort = echo_port
-	--±£Ö¤Æô¶¯ÈÕÖ¾·şÎñ
+	--ä¿è¯å¯åŠ¨æ—¥å¿—æœåŠ¡
 	world.LogLauncher = "game_log game_log.ini daemon"
 
-	--¼ÓÔØÃû×Ö¹ıÂËÎÄ¼ş
+	--åŠ è½½åå­—è¿‡æ»¤æ–‡ä»¶
 	world:LoadNameFilter(nx_resource_path() .. "filter.txt")
 
-	--¼ÓÔØÑéÖ¤Âë×Ö·ûÍ¼Ïñ
+	--åŠ è½½éªŒè¯ç å­—ç¬¦å›¾åƒ
 	load_char_image(world)
 
-	--Ìí¼ÓÆÕÍ¨³¡¾°
+	--æ·»åŠ æ™®é€šåœºæ™¯
 	load_scene_config(world)
 
-	--¼Æ·ÑÁ¬½Ó
+	--è®¡è´¹è¿æ¥
 	if charge_inuse then
 		world:SetChargeAddress(charge_addr, charge_port)
 	end
 
-	--¿Í·şÁ¬½Ó
+	--å®¢æœè¿æ¥
 	if gmcc_inuse then
 		world:SetGmccAddress(gmcc_addr, gmcc_port)
 	end
 
-	--¹ÜÀíÁ¬½Ó
+	--ç®¡ç†è¿æ¥
 	if manage_inuse then
 		world:SetManageAddress(manage_addr, manage_port)
 	end
 
-	--Æô¶¯ÓÎÏ··şÎñ
+	--å¯åŠ¨æ¸¸æˆæœåŠ¡
 	world:Start()
 
-	--Êµ¼ÊÊ¹ÓÃµÄÄÚÍøÕìÌı¶Ë¿Ú
+	--å®é™…ä½¿ç”¨çš„å†…ç½‘ä¾¦å¬ç«¯å£
 	inner_port = world.InnerPort
 
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	world:WriteLine("app name " .. world.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	world:WriteLine("echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	world:WriteLine("inner socket " .. inner_addr .. ":" .. nx_string(inner_port))
 	world:WriteLine("broadcast socket " .. broad_addr .. ":" .. nx_string(broad_port))
@@ -186,16 +186,16 @@ function main(world)
 	    world:SetExtraAddress(2, dumpserver_addr, dumpserver_port)
 	end
 
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	world:WriteLine("game server " .. nx_string(server_id) .. " starting...")
 
-	--ÉèÖÃ½ø³Ì¿ªÆô×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¼€å¯çŠ¶æ€
 	world:SetAppState(WAPS_OPENED);
 
 	return 1
 end
 
---¼ÓÔØÑéÖ¤Âë×Ö·ûÍ¼Ïñ
+--åŠ è½½éªŒè¯ç å­—ç¬¦å›¾åƒ
 function load_char_image(world)
 	world:LoadCharImage("0", nx_resource_path() .. "bmp\\0.bmp")
 	world:LoadCharImage("1", nx_resource_path() .. "bmp\\1.bmp")
@@ -219,11 +219,11 @@ function load_char_image(world)
 	return true
 end
 
---¼ÓÔØ³¡¾°ÅäÖÃÎÄ¼ş
+--åŠ è½½åœºæ™¯é…ç½®æ–‡ä»¶
 function load_scene_config(world)
 	local ini = nx_create("IniDocument")
 
-	--³¡¾°ÅäÖÃÎÄ¼şÃû
+	--åœºæ™¯é…ç½®æ–‡ä»¶å
 	ini.FileName = nx_resource_path() .. "scenes.ini"
 
 	if not ini:LoadFromFile() then
@@ -236,22 +236,22 @@ function load_scene_config(world)
 	for i = 1, table.getn(sect_table) do
 		local sect = sect_table[i]
 
-		--³¡¾°±àºÅ
+		--åœºæ™¯ç¼–å·
 		local scene_id = nx_number(sect)
-		--ËùÔÚ³¡¾°·şÎñÆ÷±àºÅ
+		--æ‰€åœ¨åœºæ™¯æœåŠ¡å™¨ç¼–å·
 		local member_id = ini:ReadInteger(sect, "Member", 0)
-		--Âß¼­ÀàÃû
+		--é€»è¾‘ç±»å
 		local script = ini:ReadString(sect, "Script", "scene")
-		--³¡¾°ÅäÖÃÃû
+		--åœºæ™¯é…ç½®å
 		local config = ini:ReadString(sect, "Config", "")
-		--ÊÇ·ñÊÇ¸±±¾³¡¾°Ô­ĞÍ
+		--æ˜¯å¦æ˜¯å‰¯æœ¬åœºæ™¯åŸå‹
 		local clonable = nx_boolean(ini:ReadInteger(sect, "Clonable", 0))
 
 		if clonable then
-			--¸±±¾Ô­ĞÍ³¡¾°
+			--å‰¯æœ¬åŸå‹åœºæ™¯
 			world:AddPrototypeScene(scene_id, member_id, script, config)
 		else
-			--ÆÕÍ¨³¡¾°
+			--æ™®é€šåœºæ™¯
 			world:AddScene(scene_id, member_id, script, config)
 		end
 	end
@@ -261,16 +261,16 @@ function load_scene_config(world)
 	return true
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local world = nx_value("world")
 
 	if world.State == "Closed" then
 		force_close()
 	else
-		--½øÈë¹Ø±Õ×´Ì¬ºó×Ô¶¯ÍË³ö³ÌĞò
+		--è¿›å…¥å…³é—­çŠ¶æ€åè‡ªåŠ¨é€€å‡ºç¨‹åº
 		world.QuitOnClosed = true
-		--·¢³ö¹Ø±Õ·şÎñÆ÷ÃüÁî
+		--å‘å‡ºå…³é—­æœåŠ¡å™¨å‘½ä»¤
 		world:CloseServer()
 		world:WriteLine("waiting server close...")
 	end
@@ -278,23 +278,23 @@ function close()
 	return true
 end
 
---Ç¿ÖÆ¹Ø±Õ
+--å¼ºåˆ¶å…³é—­
 function force_close()
 	local world = nx_value("world")
 
-	--¹Ø±ÕÓÎÏ··şÎñ
+	--å…³é—­æ¸¸æˆæœåŠ¡
 	world:WriteLine("world server shutdown...")
 	world:Stop()
 
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 
 	return true
 end
 
---Î¬»¤Á¬½Ó½Å±¾
+--ç»´æŠ¤è¿æ¥è„šæœ¬
 
---³õÊ¼»¯
+--åˆå§‹åŒ–
 function echo_init(self)
 	nx_callback(self, "on_open", "echo_open")
 	nx_callback(self, "on_close", "echo_close")
@@ -315,7 +315,7 @@ function echo_init(self)
 	return 1
 end
 
---Î¬»¤Á¬½Ó´ò¿ª
+--ç»´æŠ¤è¿æ¥æ‰“å¼€
 function echo_open(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " connected")
@@ -323,35 +323,35 @@ function echo_open(self, addr, port)
 	return 1
 end
 
---Î¬»¤Á¬½Ó¹Ø±Õ
+--ç»´æŠ¤è¿æ¥å…³é—­
 function echo_close(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " closed")
 	return 1
 end
 
---´¦ÀíÎ¬»¤ÊäÈëÃüÁî
+--å¤„ç†ç»´æŠ¤è¾“å…¥å‘½ä»¤
 function echo_input(self, command)
 	if command == "quit" then
-		--ÍË³ö³ÌĞò
+		--é€€å‡ºç¨‹åº
 		echo_response(self, "server will shutdown...")
 		close()
 	elseif command == "fquit" then
-		--Ç¿ÖÆÍË³ö
+		--å¼ºåˆ¶é€€å‡º
 		echo_response(self, "server will shutdown...")
 		force_close()
 	elseif command == "end" then
-		--¹Ø±ÕÁ¬½Ó
+		--å…³é—­è¿æ¥
 		self:CloseEcho()
 	elseif command == "players" then
-		--·µ»ØÔÚÏßÈËÊı
+		--è¿”å›åœ¨çº¿äººæ•°
 		echo_response(self, "player: " .. nx_string(self.PlayerCount)
 			.. ", online: " .. nx_string(self.OnlineCount)
 			.. ", offline: " .. nx_string(self.OfflineCount)
 			.. ", active: " .. nx_string(self.ActiveCount)
 			.. ", queuing: " .. nx_string(self.QueueCount))
 	elseif command == "open" then
-		--¿ªÆô·şÎñ
+		--å¼€å¯æœåŠ¡
 		if self.State == "Opened" then
 			echo_response(self, "game server already opened")
 			return 0
@@ -366,7 +366,7 @@ function echo_input(self, command)
 			echo_response(self, "send open command to game server")
 		end
 	elseif command == "close" then
-		--¹Ø±Õ·şÎñ
+		--å…³é—­æœåŠ¡
 		if self.State ~= "Opened" then
 			echo_response(self, "game server not open")
 			return 0
@@ -376,7 +376,7 @@ function echo_input(self, command)
 			echo_response(self, "send close command to game server")
 		end
 	elseif command == "status" then
-		--µ±Ç°·şÎñ×´Ì¬
+		--å½“å‰æœåŠ¡çŠ¶æ€
 		echo_response(self, "game server state is " .. self.State)
 	else
 		echo_response(self, "undefined command: " .. command)
@@ -385,14 +385,14 @@ function echo_input(self, command)
 	return 1
 end
 
---·¢ËÍ»ØÓ¦ĞÅÏ¢
+--å‘é€å›åº”ä¿¡æ¯
 function echo_response(self, info)
 	self:SendEchoLine(">" .. info .. "\r")
 	self:WriteLine(info)
 	return true
 end
 
---²éÕÒÊµÌå
+--æŸ¥æ‰¾å®ä½“
 function get_entity(entity_name)
 	local id = nx_value(entity_name)
 
@@ -415,7 +415,7 @@ function get_entity(entity_name)
 	return nil
 end
 
---×ª»»µ½ºÏÊÊµÄÀàĞÍ
+--è½¬æ¢åˆ°åˆé€‚çš„ç±»å‹
 function get_new_value(old_v, value)
 	local type = nx_type(old_v)
 
@@ -442,7 +442,7 @@ function get_new_value(old_v, value)
 	return nil
 end
 
---²éÑ¯ÊµÌåÄÚ²¿ÊôĞÔ
+--æŸ¥è¯¢å®ä½“å†…éƒ¨å±æ€§
 function echo_input_getp(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -462,7 +462,7 @@ function echo_input_getp(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌåÄÚ²¿ÊôĞÔ
+--è®¾ç½®å®ä½“å†…éƒ¨å±æ€§
 function echo_input_setp(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -491,7 +491,7 @@ function echo_input_setp(self, entity, prop, value)
 	return 1
 end
 
---²éÑ¯ÊµÌå×Ô¶¨ÒåÊôĞÔ
+--æŸ¥è¯¢å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_getc(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -511,7 +511,7 @@ function echo_input_getc(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌå×Ô¶¨ÒåÊôĞÔ
+--è®¾ç½®å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_setc(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -540,7 +540,7 @@ function echo_input_setc(self, entity, prop, value)
 	return 1
 end
 
---Ö´ĞĞÊµÌå·½·¨
+--æ‰§è¡Œå®ä½“æ–¹æ³•
 function echo_input_method(self, entity, method, ...)
 	if entity == nil or method == nil then
 		return 0
@@ -569,7 +569,7 @@ function echo_input_method(self, entity, method, ...)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞÄÚ²¿ÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰å†…éƒ¨å±æ€§
 function echo_input_listp(self, entity)
 	if entity == nil then
 		return 0
@@ -594,7 +594,7 @@ function echo_input_listp(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ×Ô¶¨ÒåÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰è‡ªå®šä¹‰å±æ€§
 function echo_input_listc(self, entity)
 	if entity == nil then
 		return 0
@@ -619,7 +619,7 @@ function echo_input_listc(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ·½·¨
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰æ–¹æ³•
 function echo_input_listm(self, entity)
 	if entity == nil then
 		return 0
@@ -644,7 +644,7 @@ function echo_input_listm(self, entity)
 	return 1
 end
 
---ÁĞ³öËùÓĞÈ«¾Ö±äÁ¿
+--åˆ—å‡ºæ‰€æœ‰å…¨å±€å˜é‡
 function echo_input_listg(self)
 	local global_table = nx_value_list()
 
@@ -662,7 +662,7 @@ function echo_input_listg(self)
 	return 1
 end
 
---Ö´ĞĞ½Å±¾À©Õ¹º¯Êı
+--æ‰§è¡Œè„šæœ¬æ‰©å±•å‡½æ•°
 function echo_input_function(self, func, ...)
 	if func == nil or func == "" then
 		return 0
@@ -683,7 +683,7 @@ function echo_input_function(self, func, ...)
 	return 1
 end
 
---µ÷ÊÔº¯Êı
+--è°ƒè¯•å‡½æ•°
 function echo_input_debugger(self, entity, method, ...)
 	if entity == nil or entity == "" or method == nil or method == "" then
 		return 0

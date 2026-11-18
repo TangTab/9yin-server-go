@@ -1,19 +1,19 @@
---´ò»÷ÄÚÁ¦buff,ÎïÀí¹¥»÷Ê±,¼õÉÙÄ¿±êÒ»¶¨Á¿mp
---´ò»÷±ÈÀı = 0.05 * bufferµÈ¼¶
+--æ‰“å‡»å†…åŠ›buff,ç‰©ç†æ”»å‡»æ—¶,å‡å°‘ç›®æ ‡ä¸€å®šé‡mp
+--æ‰“å‡»æ¯”ä¾‹ = 0.05 * bufferç­‰çº§
 
 require("define")
 require("command_define")
 
---Buffer±»¼¤»î
+--Bufferè¢«æ¿€æ´»
 function buffer_active(self, buffer)
 end
 
---BufferÎ´±»¼¤»î
+--Bufferæœªè¢«æ¿€æ´»
 function buffer_deactive(self, buffer)
 end
 
---¼ÆÊ±»ò¼Æ´ÎÊ±µÄĞ§¹û
---Èç¹ûÊÇ¼Æ´Î£¬·µ»Ø1Ê±£º±¾´Î¼Æ´ÎÓĞĞ§£¬·µ»Ø0Ê±£º±¾´Î²»¼Æ´Î
+--è®¡æ—¶æˆ–è®¡æ¬¡æ—¶çš„æ•ˆæœ
+--å¦‚æœæ˜¯è®¡æ¬¡ï¼Œè¿”å›1æ—¶ï¼šæœ¬æ¬¡è®¡æ¬¡æœ‰æ•ˆï¼Œè¿”å›0æ—¶ï¼šæœ¬æ¬¡ä¸è®¡æ¬¡
 function buffer_timer(self, buffer, sender, cmdid, target, damage, damagetype)
 	if cmdid ~= COMMAND_DAMAGETARGET then
 		return 0
@@ -30,6 +30,6 @@ function buffer_timer(self, buffer, sender, cmdid, target, damage, damagetype)
 
 end
 
---×´Ì¬±»´ò¶Ï
+--çŠ¶æ€è¢«æ‰“æ–­
 function buffer_break(self, buffer)
 end

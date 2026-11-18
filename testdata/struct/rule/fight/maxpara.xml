@@ -1,33 +1,33 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--Õ½¶·Ê±µÄÏà¹Ø²ÎÊýÊôÐÔ-->
+<!--æˆ˜æ–—æ—¶çš„ç›¸å…³å‚æ•°å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="RC" type="int" public="true" private="true" save="true" desc="µ±Ç°Å­Æø"/>
-		<property name="AV" type="int" public="true" private="true" save="true" desc="µ±Ç°¾«ÉñÄÜÁ¿Öµ"/>
-		<property name="EY" type="int" public="true" private="true" save="true" desc="µ±Ç°ÕôÆûÄÜÁ¿Öµ"/>
-		<property name="FS" type="int" public="true" private="true" save="true" desc="µ±Ç°ÏÈ×æÖ®Á¦Öµ"/>
-		<property name="DP" type="int" public="true" private="true" save="true" desc="µ±Ç°¶ãÉÁÖµ"/>
+		<property name="RC" type="int" public="true" private="true" save="true" desc="å½“å‰æ€’æ°”"/>
+		<property name="AV" type="int" public="true" private="true" save="true" desc="å½“å‰ç²¾ç¥žèƒ½é‡å€¼"/>
+		<property name="EY" type="int" public="true" private="true" save="true" desc="å½“å‰è’¸æ±½èƒ½é‡å€¼"/>
+		<property name="FS" type="int" public="true" private="true" save="true" desc="å½“å‰å…ˆç¥–ä¹‹åŠ›å€¼"/>
+		<property name="DP" type="int" public="true" private="true" save="true" desc="å½“å‰èº²é—ªå€¼"/>
 
-		<property name="RCRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°Å­Æø°Ù·Ö±È"/>
-		<property name="AVRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°¾«ÉñÄÜÁ¿°Ù·Ö±È"/>
-		<property name="EYRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°ÄÜÁ¿Öµ°Ù·Ö±È"/>
-		<property name="FSRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°ÏÈ×æÖ®Á¦°Ù·Ö±È"/>
-		<property name="DPRatio" type="int" public="true" private="true" save="false" desc="µ±Ç°¶ãÉÁÖµ°Ù·Ö±È"/>
+		<property name="RCRatio" type="int" public="true" private="true" save="false" desc="å½“å‰æ€’æ°”ç™¾åˆ†æ¯”"/>
+		<property name="AVRatio" type="int" public="true" private="true" save="false" desc="å½“å‰ç²¾ç¥žèƒ½é‡ç™¾åˆ†æ¯”"/>
+		<property name="EYRatio" type="int" public="true" private="true" save="false" desc="å½“å‰èƒ½é‡å€¼ç™¾åˆ†æ¯”"/>
+		<property name="FSRatio" type="int" public="true" private="true" save="false" desc="å½“å‰å…ˆç¥–ä¹‹åŠ›ç™¾åˆ†æ¯”"/>
+		<property name="DPRatio" type="int" public="true" private="true" save="false" desc="å½“å‰èº²é—ªå€¼ç™¾åˆ†æ¯”"/>
 		
 
-		<property name="MaxRC" type="int" public="true" private="true" save="false" desc="×î´óÅ­ÆøÖµ"/>
-		<property name="MaxAV" type="int" public="true" private="true" save="false" desc="×î´ó¾«ÉñÄÜÁ¿Öµ"/>
-		<property name="MaxEY" type="int" public="true" private="true" save="false" desc="×î´óÕôÆûÄÜÁ¿Öµ"/>
-		<property name="MaxFS" type="int" public="true" private="true" save="false" desc="×î´óÏÈ×æÖ®Á¦Öµ"/>
-		<property name="MaxDP" type="int" public="true" private="true" save="false" desc="×î´ó¶ãÉÁÖµ"/>
+		<property name="MaxRC" type="int" public="true" private="true" save="false" desc="æœ€å¤§æ€’æ°”å€¼"/>
+		<property name="MaxAV" type="int" public="true" private="true" save="false" desc="æœ€å¤§ç²¾ç¥žèƒ½é‡å€¼"/>
+		<property name="MaxEY" type="int" public="true" private="true" save="false" desc="æœ€å¤§è’¸æ±½èƒ½é‡å€¼"/>
+		<property name="MaxFS" type="int" public="true" private="true" save="false" desc="æœ€å¤§å…ˆç¥–ä¹‹åŠ›å€¼"/>
+		<property name="MaxDP" type="int" public="true" private="true" save="false" desc="æœ€å¤§èº²é—ªå€¼"/>
 
 		
-		<property name="MaxRCAdd" type="int" public="true" private="true" save="false" desc="×î´óÅ­ÆøÖµ"/>
-		<property name="MaxAVAdd" type="int" public="true" private="true" save="false" desc="×î´ó¾«ÉñÄÜÁ¿Öµ"/>
-		<property name="MaxEYAdd" type="int" public="true" private="true" save="false" desc="×î´óÕôÆûÄÜÁ¿Öµ"/>
-		<property name="MaxFSAdd" type="int" public="true" private="true" save="false" desc="×î´óÏÈ×æÖ®Á¦Öµ"/>
-		<property name="MaxDPAdd" type="int" public="true" private="true" save="false" desc="×î´ó¶ãÉÁÖµ"/>
+		<property name="MaxRCAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§æ€’æ°”å€¼"/>
+		<property name="MaxAVAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§ç²¾ç¥žèƒ½é‡å€¼"/>
+		<property name="MaxEYAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§è’¸æ±½èƒ½é‡å€¼"/>
+		<property name="MaxFSAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§å…ˆç¥–ä¹‹åŠ›å€¼"/>
+		<property name="MaxDPAdd" type="int" public="true" private="true" save="false" desc="æœ€å¤§èº²é—ªå€¼"/>
 	</properties>
 </object>

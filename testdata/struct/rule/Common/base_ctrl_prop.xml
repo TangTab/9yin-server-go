@@ -1,35 +1,35 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--¼¼ÄÜ¿ØÖÆÊôÐÔ-->
+<!--æŠ€èƒ½æŽ§åˆ¶å±žæ€§-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <property name="CantMove" type="byte" public="false" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»ÒÆ¶¯ 0:¿ÉÒÆ¶¯ 1:²»ÄÜÒÆ¶¯"/>
-    <property name="CantMoveAdd" type="byte" public="false" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»ÒÆ¶¯ 0:¿ÉÒÆ¶¯ 1:²»ÄÜÒÆ¶¯"/>
-    <property name="CantRotate" type="byte" public="false" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»×ª¶¯ 0:¿É×ª¶¯ 1:²»ÄÜ×ª¶¯"/>
-    <property name="CantAttack" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñÄÜ¹»¹¥»÷"/>
-    <property name="CantBeAttack" type="byte" public="true" private="true" save="false" desc="ÊÇ·ñÄÜ¹»±»¹¥»÷ 0:¿É±»¹¥»÷ 1£º²»¿É±»¹¥»÷"/>
-    <property name="CantBeAttack2" type="byte" public="true" private="true" save="false" desc="²»ÄÜ±»¹¥»÷£¬µ«²»Àë¿ªÕ½¶·"/>
-    <property name="LockAction" type="int" public="false" private="false" save="false" desc="²»ÄÜ±»´ò¶Ï£¬²»ÄÜÊ¹ÓÃ¼¼ÄÜ£¬²»ÄÜÒÆ¶¯"/>
-    <!--<property name="CantBreakAction" type="int" public="true" private="true" save="false" desc="²»ÄÜ´ò¶Ïµ±Ç°Ê©·¨¼°ÃüÖÐ¶¯×÷"/>-->
-    <property name="CantUseSkill" type="byte" public="false" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃ¼¼ÄÜ"/>
-    <property name="CantUseSkillAdd" type="byte" public="false" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃ¼¼ÄÜ"/>
-    <property name="CantUseItem" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃµÀ¾ß"/>
-    <property name="CantUseItemAdd" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñÄÜ¹»Ê¹ÓÃµÀ¾ß"/>
-    <property name="CanBeKilled" type="byte" public="false" private="false" save="false" desc="ÊÇ·ñÄÜ¹»±»É±ËÀ"/>
-    <property name="CantRotateAdd" type="byte" public="false" private="true" save="false" realtime="true" desc="ÊÇ·ñÄÜ¹»×ª¶¯ 0:¿É×ª¶¯ 1:²»ÄÜ×ª¶¯"/>
-    <property name="CantAttackAdd" type="byte" public="false" private="true" save="false" desc="ÊÇ·ñÄÜ¹»¹¥»÷"/>
-    <property name="CantBeLtd" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜÏÞÖÆ(°üÀ¨ÏÂÃæµÄ¼¸ÖÖ)"/>
-    <property name="CantBeLtdSpd" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜ¼õËÙ"/>
-    <property name="CantBeLtdHitMove" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜ»÷·É»÷ÍË»÷µ¹µÈ"/>
-    <property name="CantBeLtdMove" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜ²»ÄÜÒÆ¶¯"/>
-    <property name="CantBeLtdUseSkill" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜ²»ÄÜÊ¹ÓÃ¼¼ÄÜÏÞÖÆ"/>
-    <property name="CantBeLtdAttack" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜ¹¥»÷ÏÞÖÆ"/>
-    <property name="CantBeLtdShift" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÊÜ±äÐÎÏÞÖÆ"/>
-    <property name="CantBeLtdRotate" type="byte" public="false" private="false" save="false" realtime="true" desc="²»ÄÜ×ªÉíÏÞÖÆ"/>
-    <property name="PauseAction" type="int" public="true" private="true" save="false" desc="¶¯×÷ÔÝÍ£"/>
-    <property name="StrCantUseSkill" type="byte" public="false" private="false" save="false" realtime="true" desc="ÈÎºÎÇé¿ö¶¼²»ÄÜÊÍ·Å¼¼ÄÜ"/>
-    <property name="StrCantUseSkillAdd" type="byte" public="false" private="false" save="false" realtime="true" desc="ÈÎºÎÇé¿ö¶¼²»ÄÜÊÍ·Å¼¼ÄÜ"/>
-    <property name="CantJump" type="byte" public="false" private="true" save="false" realtime="true" desc="²»ÄÜÌøÔ¾"/>
+    <property name="CantMove" type="byte" public="false" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿç§»åŠ¨ 0:å¯ç§»åŠ¨ 1:ä¸èƒ½ç§»åŠ¨"/>
+    <property name="CantMoveAdd" type="byte" public="false" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿç§»åŠ¨ 0:å¯ç§»åŠ¨ 1:ä¸èƒ½ç§»åŠ¨"/>
+    <property name="CantRotate" type="byte" public="false" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿè½¬åŠ¨ 0:å¯è½¬åŠ¨ 1:ä¸èƒ½è½¬åŠ¨"/>
+    <property name="CantAttack" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿæ”»å‡»"/>
+    <property name="CantBeAttack" type="byte" public="true" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿè¢«æ”»å‡» 0:å¯è¢«æ”»å‡» 1ï¼šä¸å¯è¢«æ”»å‡»"/>
+    <property name="CantBeAttack2" type="byte" public="true" private="true" save="false" desc="ä¸èƒ½è¢«æ”»å‡»ï¼Œä½†ä¸ç¦»å¼€æˆ˜æ–—"/>
+    <property name="LockAction" type="int" public="false" private="false" save="false" desc="ä¸èƒ½è¢«æ‰“æ–­ï¼Œä¸èƒ½ä½¿ç”¨æŠ€èƒ½ï¼Œä¸èƒ½ç§»åŠ¨"/>
+    <!--<property name="CantBreakAction" type="int" public="true" private="true" save="false" desc="ä¸èƒ½æ‰“æ–­å½“å‰æ–½æ³•åŠå‘½ä¸­åŠ¨ä½œ"/>-->
+    <property name="CantUseSkill" type="byte" public="false" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨æŠ€èƒ½"/>
+    <property name="CantUseSkillAdd" type="byte" public="false" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨æŠ€èƒ½"/>
+    <property name="CantUseItem" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨é“å…·"/>
+    <property name="CantUseItemAdd" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿä½¿ç”¨é“å…·"/>
+    <property name="CanBeKilled" type="byte" public="false" private="false" save="false" desc="æ˜¯å¦èƒ½å¤Ÿè¢«æ€æ­»"/>
+    <property name="CantRotateAdd" type="byte" public="false" private="true" save="false" realtime="true" desc="æ˜¯å¦èƒ½å¤Ÿè½¬åŠ¨ 0:å¯è½¬åŠ¨ 1:ä¸èƒ½è½¬åŠ¨"/>
+    <property name="CantAttackAdd" type="byte" public="false" private="true" save="false" desc="æ˜¯å¦èƒ½å¤Ÿæ”»å‡»"/>
+    <property name="CantBeLtd" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—é™åˆ¶(åŒ…æ‹¬ä¸‹é¢çš„å‡ ç§)"/>
+    <property name="CantBeLtdSpd" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—å‡é€Ÿ"/>
+    <property name="CantBeLtdHitMove" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—å‡»é£žå‡»é€€å‡»å€’ç­‰"/>
+    <property name="CantBeLtdMove" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—ä¸èƒ½ç§»åŠ¨"/>
+    <property name="CantBeLtdUseSkill" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—ä¸èƒ½ä½¿ç”¨æŠ€èƒ½é™åˆ¶"/>
+    <property name="CantBeLtdAttack" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—æ”»å‡»é™åˆ¶"/>
+    <property name="CantBeLtdShift" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸å—å˜å½¢é™åˆ¶"/>
+    <property name="CantBeLtdRotate" type="byte" public="false" private="false" save="false" realtime="true" desc="ä¸èƒ½è½¬èº«é™åˆ¶"/>
+    <property name="PauseAction" type="int" public="true" private="true" save="false" desc="åŠ¨ä½œæš‚åœ"/>
+    <property name="StrCantUseSkill" type="byte" public="false" private="false" save="false" realtime="true" desc="ä»»ä½•æƒ…å†µéƒ½ä¸èƒ½é‡Šæ”¾æŠ€èƒ½"/>
+    <property name="StrCantUseSkillAdd" type="byte" public="false" private="false" save="false" realtime="true" desc="ä»»ä½•æƒ…å†µéƒ½ä¸èƒ½é‡Šæ”¾æŠ€èƒ½"/>
+    <property name="CantJump" type="byte" public="false" private="true" save="false" realtime="true" desc="ä¸èƒ½è·³è·ƒ"/>
   </properties>
 </object>

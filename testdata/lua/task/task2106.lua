@@ -1,43 +1,43 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task2106.lua
--- @ ½Å±¾¹¦ÄÜ: 2106ÈÎÎñÂß¼­
--- @ ´´½¨Õß:   huangmw
--- @ ´´½¨ÈÕÆÚ: 2010.11.8
+-- @ è„šæœ¬åç§°: task2106.lua
+-- @ è„šæœ¬åŠŸèƒ½: 2106ä»»åŠ¡é€»è¾‘
+-- @ åˆ›å»ºè€…:   huangmw
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.11.8
 -----------------------------------------
 require("define")
 
 local NPC_ID = "funnpcclone003002"
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)	
 	return 1
 	
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end
 
---Íê³ÉÈÎÎñÄ³Ò»²½ºóµÄ´¦Àí
+--å®Œæˆä»»åŠ¡æŸä¸€æ­¥åçš„å¤„ç†
 function on_complete_step(player, task_id, subFuncId, subFuncType, subFuncOrder)
-	--Íê³ÉÈÎÎñ2106µÄµÚ¶ş²½ºóµÄ´¦Àí
+	--å®Œæˆä»»åŠ¡2106çš„ç¬¬äºŒæ­¥åçš„å¤„ç†
 	if nx_number(task_id) == 2106 then
 		if nx_number(subFuncOrder) == 2 then
-			--ÈÃNPC¿ªÊ¼Ñ²Âß£¬15ÃëºóÉ¾³ı
+			--è®©NPCå¼€å§‹å·¡é€»ï¼Œ15ç§’ååˆ é™¤
 			local npc = get_obj_around_target(player, NPC_ID, 5)
 			
 			if npc ~= nil 
@@ -49,7 +49,7 @@ function on_complete_step(player, task_id, subFuncId, subFuncType, subFuncOrder)
 	end
 end
 
---ÔÚÄ¿±êµÄÖÜÎ§È¡µÃÒ»¸öÖ¸¶¨configidµÄÄ¿±ê
+--åœ¨ç›®æ ‡çš„å‘¨å›´å–å¾—ä¸€ä¸ªæŒ‡å®šconfigidçš„ç›®æ ‡
 function get_obj_around_target(target, config_id, range)
 	if not nx_exists(target) then
 		return

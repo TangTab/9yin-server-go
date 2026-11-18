@@ -1,94 +1,94 @@
-ITEM_LOG_TYPE_BUY_FROM_NPC 		= 1; --Íæ¼Ò´ÓNPC´¦¹ºÂò
-ITEM_LOG_TYPE_SELL_TO_NPC		= 2; --Íæ¼Ò³öÊÛ¸øNPC
-ITEM_LOG_TYPE_DROP_FROM_NPC		= 3; --NPCËÀÍöºóµôÂä
-ITEM_LOG_TYPE_PICK_UP			= 4; --Íæ¼Ò´Ó³¡¾°ÖÐÊ°È¡ÎïÆ·
-ITEM_LOG_TYPE_RECYCLE			= 5; --ÎïÆ·±»ÏµÍ³»ØÊÕ
-ITEM_LOG_TYPE_AWARDS			= 6; --½±ÀøÎïÆ·
+ITEM_LOG_TYPE_BUY_FROM_NPC 		= 1; --çŽ©å®¶ä»ŽNPCå¤„è´­ä¹°
+ITEM_LOG_TYPE_SELL_TO_NPC		= 2; --çŽ©å®¶å‡ºå”®ç»™NPC
+ITEM_LOG_TYPE_DROP_FROM_NPC		= 3; --NPCæ­»äº¡åŽæŽ‰è½
+ITEM_LOG_TYPE_PICK_UP			= 4; --çŽ©å®¶ä»Žåœºæ™¯ä¸­æ‹¾å–ç‰©å“
+ITEM_LOG_TYPE_RECYCLE			= 5; --ç‰©å“è¢«ç³»ç»Ÿå›žæ”¶
+ITEM_LOG_TYPE_AWARDS			= 6; --å¥–åŠ±ç‰©å“
 
-ITEM_LOG_TYPE_USED				= 10; --ÎïÆ·±»ÏûºÄ
-ITEM_LOG_TYPE_USED_UP			= 11; --ÎïÆ·±»ÏûºÄÍê
-ITEM_LOG_TYPE_CHUCK 			= 13; --±»Íæ¼Ò¶ªÆú
-ITEM_LOG_TYPE_DELETE			= 14; --ÎïÆ·±»Íæ¼ÒÉ¾³ý
-ITEM_LOG_TYPE_SPLIT				= 15; --ÎïÆ·±»²ð·Ö
-ITEM_LOG_TYPE_SPLIT_CREATE		= 15; --ÓÉÓÚÁíÒ»¸öÎïÆ·±»²ð·Ö¶øµ¼ÖÂÒ»¸öÎïÆ·±»´´½¨
-ITEM_LOG_TYPE_UNITE				= 17; --ÎïÆ·ºÏ²¢
-ITEM_LOG_TYPE_UNITE_DELETE		= 18; --ÓÉÓÚºÏ²¢µ½ÆäËüÎïÆ·£¬¶øÉ¾³ý
-ITEM_LOG_TYPE_EXCHANGE			= 19; --Íæ¼Ò¼äÎïÆ·½»Ò×
-ITEM_LOG_TYPE_DIE_DROP			= 20; --Íæ¼ÒËÀÍöºó´Ó±³°üÖÐµôÂä
+ITEM_LOG_TYPE_USED				= 10; --ç‰©å“è¢«æ¶ˆè€—
+ITEM_LOG_TYPE_USED_UP			= 11; --ç‰©å“è¢«æ¶ˆè€—å®Œ
+ITEM_LOG_TYPE_CHUCK 			= 13; --è¢«çŽ©å®¶ä¸¢å¼ƒ
+ITEM_LOG_TYPE_DELETE			= 14; --ç‰©å“è¢«çŽ©å®¶åˆ é™¤
+ITEM_LOG_TYPE_SPLIT				= 15; --ç‰©å“è¢«æ‹†åˆ†
+ITEM_LOG_TYPE_SPLIT_CREATE		= 15; --ç”±äºŽå¦ä¸€ä¸ªç‰©å“è¢«æ‹†åˆ†è€Œå¯¼è‡´ä¸€ä¸ªç‰©å“è¢«åˆ›å»º
+ITEM_LOG_TYPE_UNITE				= 17; --ç‰©å“åˆå¹¶
+ITEM_LOG_TYPE_UNITE_DELETE		= 18; --ç”±äºŽåˆå¹¶åˆ°å…¶å®ƒç‰©å“ï¼Œè€Œåˆ é™¤
+ITEM_LOG_TYPE_EXCHANGE			= 19; --çŽ©å®¶é—´ç‰©å“äº¤æ˜“
+ITEM_LOG_TYPE_DIE_DROP			= 20; --çŽ©å®¶æ­»äº¡åŽä»ŽèƒŒåŒ…ä¸­æŽ‰è½
 
-ITEM_LOG_TYPE_COMPOSE			= 30; --×°±¸ºÏ³É
-ITEM_LOG_TYPE_REBUILD			= 31; --×°±¸¸ÄÔì
-ITEM_LOG_TYPE_ADDHOLE			= 32; --×°±¸´ò¿×
-ITEM_LOG_TYPE_ADDMAGIC			= 33; --×°±¸¸½Ä§
-ITEM_LOG_TYPE_ADDMAGICUPGRADE	= 34; --¸½Ä§Éý¼¶
-ITEM_LOG_TYPE_ADDSTAR			= 35; --×°±¸¼ÓÐÇ
-ITEM_LOG_TYPE_SIGN				= 36; --×°±¸Ç©Ãû
-ITEM_LOG_TYPE_EQUIPUPGRADE		= 37; --×°±¸Éý¼¶
-ITEM_LOG_TYPE_ENCHASE			= 38; --ÏâÇ¶
-ITEM_LOG_TYPE_UNENCHASE			= 39; --ÏâÇ¶²ð³ý
-ITEM_LOG_TYPE_RELINK			= 40; --×°±¸ÎåÐÐ¡¢Áé»êËøÁ´ÖØÖÃ
-ITEM_LOG_TYPE_IDENTIFY			= 41; --×°±¸¼ø¶¨
-ITEM_LOG_TYPE_BLESS				= 42; --×°±¸×£¸£
-ITEM_LOG_TYPE_EQUIPTRANSLATE	= 43; --×°±¸×ª»»
-
-
-ITEM_LOG_TYPE_LOCKED			= 50; --ÎïÆ·±»Ëø¶¨
-ITEM_LOG_TYPE_BIND				= 51; --°ó¶¨
-
-ITEM_LOG_TYPE_INTO_STALL		= 60; --½øÈë°ÚÌ¯
-ITEM_LOG_TYPE_OUTFROM_STALL		= 61; --´Ó°ÚÌ¯À¸Î»ÊÕ»Ø
-ITEM_LOG_TYPE_BUYFROM_STALL		= 62; --´Ó°ÚÌ¯À¸Î»¹ºÂòÎïÆ·
-
-ITEM_LOG_TYPE_PUTTOBOURSE		= 63; --ÉÏ´«µ½½»Ò×Ëù
-ITEM_LOG_TYPE_GETFROMBOURSE		= 64; --´Ó½»Ò×ËùÈ¡»Ø
-ITEM_LOG_TYPE_BUYFROMBOURSE		= 65; --´Ó½»Ò×ËùÂòÎïÆ·
-
-ITEM_LOG_TYPE_SELLTOPOCKETSTORE	= 66; --³öÊÛÎïÆ·¸øËæÉíÉÌµê
-ITEM_LOG_TYPE_BUYFROMPOCKETSTORE= 67; --´ÓËæÉíÉÌµê¹ºÂòÎïÆ·
-
-ITEM_LOG_TYPE_PETWHISTLE_OBTAIN = 80; --³èÎïÉÚ×Ó»ñµÃ
-ITEM_LOG_TYPE_PETWHISTLE_REFINE = 81; --³èÎïÉÚ×ÓÁ¶»¯
-ITEM_LOG_TYPE_PETWHISTLE_CHUCK  = 82; --³èÎïÉÚ×Ó·ÅÉú
-
-ITEM_LOG_TYPE_PETWHISTLE_UPGRADE  = 85; --³èÎïÉÚ×ÓÉý¼¶
-ITEM_LOG_TYPE_PETWHISTLE_PROP_UP  = 86; --³èÎïÉÚ×ÓÊôÐÔµã·ÖÅä
-
-PLAYER_LOG_LEVEL_UP				= 1001; --Éý¼¶
-PLAYER_LOG_PROP_UP				= 1002; --·ÖÅäÊôÐÔµã
-PLAYER_LOG_SKILL_UP				= 1004; --·ÖÅä¼¼ÄÜµã
-PLAYER_LOG_PROP_CLEAR			= 1006; --ÊôÐÔµãÏ´µã
-PLAYER_LOG_SKILL_CLEAR			= 1007; --¼¼ÄÜµãÏ´µã
-
-PLAYER_LOG_DIEDECEXP			= 1013; --ËÀÍö¼õÉÙ¾­Ñé
-
-PLAYER_LOG_CAPITAL				= 1021; --×Ê½ð±ä»¯
-PLAYER_LOG_DEPOT_LEVEL			= 1022; --Éý¼¶²Ö¿â
-PLAYER_LOG_EXCHANGE				= 1023; --Íæ¼Ò¼ä×Ê½ð½»»»
-PLAYER_LOG_BUY_DIRECTDEPOT		= 1024; --¹ºÂòÔ¶³Ì²Ö¿â
-PLAYER_LOG_FACULTY				= 1025,	--ÐÞÎªÖµ±ä»¯
-
-PLAYER_LOG_GUILD				= 1040; --¹«»áÏà¹Ø
-
-PLAYER_LOG_VIRTUALSTORE			= 1050; --ÔÚÏßÉÌ³ÇÂò¶«Î÷
-PLAYER_LOG_GIFT					= 1051; --ÁìÈ¡½±Æ·
-PLAYER_LOG_GET_ITEM				= 1052; --ÁìÈ¡»ñÈ¡ÎïÆ·
-PLAYER_LOG_CLONE				= 1053; --¸±±¾Ïà¹Ø
-PLAYER_LOG_COMPETE				= 1054; --¾º¼¼Ïà¹Ø
-PLAYER_LOG_CITYWAR				= 1055; --¹¥³ÇÕ½Ïà¹Ø
-PLAYER_LOG_NATION_BATTLE		= 1056; --¹úÕ½Ïà¹Ø
-
-PLAYER_LOG_TASK					= 1060; --ÈÎÎñÏà¹Ø
-PLAYER_LOG_TEACH				= 1061; --Ê¦Í½Ïà¹Ø
-PLAYER_LOG_MARRIAGE				= 1062; --·òÆÞÏà¹Ø
-PLAYER_LOG_BROTHER				= 1063; --½á°ÝÏà¹Ø
-PLAYER_LOG_EXCHANGE_ITEMS		= 1064; --Íæ¼Ò½»Ò×ÎïÆ·
-PLAYER_LOG_EXCHANGE_MONEY		= 1065; --Íæ¼Ò½»Ò×Ç®
+ITEM_LOG_TYPE_COMPOSE			= 30; --è£…å¤‡åˆæˆ
+ITEM_LOG_TYPE_REBUILD			= 31; --è£…å¤‡æ”¹é€ 
+ITEM_LOG_TYPE_ADDHOLE			= 32; --è£…å¤‡æ‰“å­”
+ITEM_LOG_TYPE_ADDMAGIC			= 33; --è£…å¤‡é™„é­”
+ITEM_LOG_TYPE_ADDMAGICUPGRADE	= 34; --é™„é­”å‡çº§
+ITEM_LOG_TYPE_ADDSTAR			= 35; --è£…å¤‡åŠ æ˜Ÿ
+ITEM_LOG_TYPE_SIGN				= 36; --è£…å¤‡ç­¾å
+ITEM_LOG_TYPE_EQUIPUPGRADE		= 37; --è£…å¤‡å‡çº§
+ITEM_LOG_TYPE_ENCHASE			= 38; --é•¶åµŒ
+ITEM_LOG_TYPE_UNENCHASE			= 39; --é•¶åµŒæ‹†é™¤
+ITEM_LOG_TYPE_RELINK			= 40; --è£…å¤‡äº”è¡Œã€çµé­‚é”é“¾é‡ç½®
+ITEM_LOG_TYPE_IDENTIFY			= 41; --è£…å¤‡é‰´å®š
+ITEM_LOG_TYPE_BLESS				= 42; --è£…å¤‡ç¥ç¦
+ITEM_LOG_TYPE_EQUIPTRANSLATE	= 43; --è£…å¤‡è½¬æ¢
 
 
-PLAYER_LOG_PET_ATTACH			= 1080;	--³èÎï¸½Ìå
-PLAYER_LOG_PET_DETTACH			= 1081;	--³èÎï½â¸½
-PLAYER_LOG_BOSS_DROP			= 1082;	--BOSSµôÂä
+ITEM_LOG_TYPE_LOCKED			= 50; --ç‰©å“è¢«é”å®š
+ITEM_LOG_TYPE_BIND				= 51; --ç»‘å®š
 
-PLAYER_LOG_LOGIN				= 1090; --ÏÂÏß¼ÇÂ¼ÔÚÏßÊ±¼ä
-PLAYER_LOG_LOGOUT				= 1091; --ÏÂÏß¼ÇÂ¼ÔÚÏßÊ±¼ä
-PLAYER_LOG_EXCEPTION			= 1092; --Òì³£²Ù×÷
+ITEM_LOG_TYPE_INTO_STALL		= 60; --è¿›å…¥æ‘†æ‘Š
+ITEM_LOG_TYPE_OUTFROM_STALL		= 61; --ä»Žæ‘†æ‘Šæ ä½æ”¶å›ž
+ITEM_LOG_TYPE_BUYFROM_STALL		= 62; --ä»Žæ‘†æ‘Šæ ä½è´­ä¹°ç‰©å“
+
+ITEM_LOG_TYPE_PUTTOBOURSE		= 63; --ä¸Šä¼ åˆ°äº¤æ˜“æ‰€
+ITEM_LOG_TYPE_GETFROMBOURSE		= 64; --ä»Žäº¤æ˜“æ‰€å–å›ž
+ITEM_LOG_TYPE_BUYFROMBOURSE		= 65; --ä»Žäº¤æ˜“æ‰€ä¹°ç‰©å“
+
+ITEM_LOG_TYPE_SELLTOPOCKETSTORE	= 66; --å‡ºå”®ç‰©å“ç»™éšèº«å•†åº—
+ITEM_LOG_TYPE_BUYFROMPOCKETSTORE= 67; --ä»Žéšèº«å•†åº—è´­ä¹°ç‰©å“
+
+ITEM_LOG_TYPE_PETWHISTLE_OBTAIN = 80; --å® ç‰©å“¨å­èŽ·å¾—
+ITEM_LOG_TYPE_PETWHISTLE_REFINE = 81; --å® ç‰©å“¨å­ç‚¼åŒ–
+ITEM_LOG_TYPE_PETWHISTLE_CHUCK  = 82; --å® ç‰©å“¨å­æ”¾ç”Ÿ
+
+ITEM_LOG_TYPE_PETWHISTLE_UPGRADE  = 85; --å® ç‰©å“¨å­å‡çº§
+ITEM_LOG_TYPE_PETWHISTLE_PROP_UP  = 86; --å® ç‰©å“¨å­å±žæ€§ç‚¹åˆ†é…
+
+PLAYER_LOG_LEVEL_UP				= 1001; --å‡çº§
+PLAYER_LOG_PROP_UP				= 1002; --åˆ†é…å±žæ€§ç‚¹
+PLAYER_LOG_SKILL_UP				= 1004; --åˆ†é…æŠ€èƒ½ç‚¹
+PLAYER_LOG_PROP_CLEAR			= 1006; --å±žæ€§ç‚¹æ´—ç‚¹
+PLAYER_LOG_SKILL_CLEAR			= 1007; --æŠ€èƒ½ç‚¹æ´—ç‚¹
+
+PLAYER_LOG_DIEDECEXP			= 1013; --æ­»äº¡å‡å°‘ç»éªŒ
+
+PLAYER_LOG_CAPITAL				= 1021; --èµ„é‡‘å˜åŒ–
+PLAYER_LOG_DEPOT_LEVEL			= 1022; --å‡çº§ä»“åº“
+PLAYER_LOG_EXCHANGE				= 1023; --çŽ©å®¶é—´èµ„é‡‘äº¤æ¢
+PLAYER_LOG_BUY_DIRECTDEPOT		= 1024; --è´­ä¹°è¿œç¨‹ä»“åº“
+PLAYER_LOG_FACULTY				= 1025,	--ä¿®ä¸ºå€¼å˜åŒ–
+
+PLAYER_LOG_GUILD				= 1040; --å…¬ä¼šç›¸å…³
+
+PLAYER_LOG_VIRTUALSTORE			= 1050; --åœ¨çº¿å•†åŸŽä¹°ä¸œè¥¿
+PLAYER_LOG_GIFT					= 1051; --é¢†å–å¥–å“
+PLAYER_LOG_GET_ITEM				= 1052; --é¢†å–èŽ·å–ç‰©å“
+PLAYER_LOG_CLONE				= 1053; --å‰¯æœ¬ç›¸å…³
+PLAYER_LOG_COMPETE				= 1054; --ç«žæŠ€ç›¸å…³
+PLAYER_LOG_CITYWAR				= 1055; --æ”»åŸŽæˆ˜ç›¸å…³
+PLAYER_LOG_NATION_BATTLE		= 1056; --å›½æˆ˜ç›¸å…³
+
+PLAYER_LOG_TASK					= 1060; --ä»»åŠ¡ç›¸å…³
+PLAYER_LOG_TEACH				= 1061; --å¸ˆå¾’ç›¸å…³
+PLAYER_LOG_MARRIAGE				= 1062; --å¤«å¦»ç›¸å…³
+PLAYER_LOG_BROTHER				= 1063; --ç»“æ‹œç›¸å…³
+PLAYER_LOG_EXCHANGE_ITEMS		= 1064; --çŽ©å®¶äº¤æ˜“ç‰©å“
+PLAYER_LOG_EXCHANGE_MONEY		= 1065; --çŽ©å®¶äº¤æ˜“é’±
+
+
+PLAYER_LOG_PET_ATTACH			= 1080;	--å® ç‰©é™„ä½“
+PLAYER_LOG_PET_DETTACH			= 1081;	--å® ç‰©è§£é™„
+PLAYER_LOG_BOSS_DROP			= 1082;	--BOSSæŽ‰è½
+
+PLAYER_LOG_LOGIN				= 1090; --ä¸‹çº¿è®°å½•åœ¨çº¿æ—¶é—´
+PLAYER_LOG_LOGOUT				= 1091; --ä¸‹çº¿è®°å½•åœ¨çº¿æ—¶é—´
+PLAYER_LOG_EXCEPTION			= 1092; --å¼‚å¸¸æ“ä½œ

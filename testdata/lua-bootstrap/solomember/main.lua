@@ -1,59 +1,59 @@
---³¡¾°·şÎñÆ÷Ö÷¿Ø½Å±¾
+--åœºæ™¯æœåŠ¡å™¨ä¸»æ§è„šæœ¬
 
---³ÌĞò×´Ì¬
-local WAPS_UNKNOWN = 0	--Î´Öª
-local WAPS_STARTING = 1	--ÕıÔÚÆô¶¯
-local WAPS_READY = 2	--¾ÍĞ÷£¨µ«ÊÇÎ´¿ª·Å·şÎñ£©
-local WAPS_OPENING = 3	--ÕıÔÚ¿ª·Å·şÎñ
-local WAPS_OPENED = 4	--ÒÑ¿ª·Å·şÎñ
-local WAPS_CLOSING = 5	--ÕıÔÚ¹Ø±Õ
-local WAPS_CLOSED = 6	--ÒÑ¹Ø±Õ·şÎñ
-local WAPS_QUITING = 7	--ÕıÔÚÍË³ö
+--ç¨‹åºçŠ¶æ€
+local WAPS_UNKNOWN = 0	--æœªçŸ¥
+local WAPS_STARTING = 1	--æ­£åœ¨å¯åŠ¨
+local WAPS_READY = 2	--å°±ç»ªï¼ˆä½†æ˜¯æœªå¼€æ”¾æœåŠ¡ï¼‰
+local WAPS_OPENING = 3	--æ­£åœ¨å¼€æ”¾æœåŠ¡
+local WAPS_OPENED = 4	--å·²å¼€æ”¾æœåŠ¡
+local WAPS_CLOSING = 5	--æ­£åœ¨å…³é—­
+local WAPS_CLOSED = 6	--å·²å…³é—­æœåŠ¡
+local WAPS_QUITING = 7	--æ­£åœ¨é€€å‡º
 
---Èë¿Úº¯Êı
+--å…¥å£å‡½æ•°
 function main(member)
 	nx_set_value("member", member)
 
-	--¿ìËÙÈÕÖ¾ÏµÍ³
+	--å¿«é€Ÿæ—¥å¿—ç³»ç»Ÿ
 	member.UseQuickLog = true
-	--Ó¦ÓÃ½ø³Ì¼ÇÂ¼
+	--åº”ç”¨è¿›ç¨‹è®°å½•
 	member.UseAppRecord = true
 
-	--ÆÁÄ»Êä³ö×Ö·ûÑÕÉ«
+	--å±å¹•è¾“å‡ºå­—ç¬¦é¢œè‰²
 	member:SetConsoleColor("Gray")
 
-	--¶ÁÈ¡³ÌĞòÅäÖÃ
+	--è¯»å–ç¨‹åºé…ç½®
 	local ini = nx_create("IniDocument")
 
-	--ÅäÖÃÎÄ¼şÃû
+	--é…ç½®æ–‡ä»¶å
 	--ini.FileName = "game_member.ini"
 	ini.FileName = nx_main_config()
 
-	--¼ÓÔØÅäÖÃ
+	--åŠ è½½é…ç½®
 	if not ini:LoadFromFile() then
 		nx_msgbox("can't read config file!")
 		nx_destroy(ini)
 		return 0
 	end
 
-	--°ó¶¨CPUºËĞÄ
+	--ç»‘å®šCPUæ ¸å¿ƒ
 	local bind_core = ini:ReadInteger("Main", "BindCore", -1)
-	--ÓÎÏ··ÖÇø±àºÅ
+	--æ¸¸æˆåˆ†åŒºç¼–å·
 	local district_id = ini:ReadInteger("Main", "DistrictID", 1)
-	--ÓÎÏ··şÎñÆ÷±àºÅ
+	--æ¸¸æˆæœåŠ¡å™¨ç¼–å·
 	local server_id = ini:ReadInteger("Main", "ServerID", 1)
-	--³¡¾°·şÎñÆ÷±àºÅ
+	--åœºæ™¯æœåŠ¡å™¨ç¼–å·
 	local member_id = ini:ReadInteger("Main", "MemberID", 0)
-	--³öÏÖ´íÎóÊÇ·ñÌáÊ¾
+	--å‡ºç°é”™è¯¯æ˜¯å¦æç¤º
 	local debug_halt = nx_boolean(ini:ReadString("Main", "DebugHalt", "true"))
-	--³¡¾°Åö×²ĞÅÏ¢ÎÄ¼şµÄ¸ùÄ¿Â¼
+	--åœºæ™¯ç¢°æ’ä¿¡æ¯æ–‡ä»¶çš„æ ¹ç›®å½•
 	local collide_root_path = ini:ReadString("Main", "CollideRootPath", "")
 
 	if collide_root_path ~= "" then
 		collide_root_path = nx_function("ext_get_full_path", collide_root_path)
 	end
 
-	--ÄÚÍøµØÖ·
+	--å†…ç½‘åœ°å€
 	local inner_addr = "127.0.0.1"
 	local inner_port = 0
 	--local inner_port = 16300 + member_id
@@ -61,27 +61,27 @@ function main(member)
 	inner_addr = ini:ReadString("Inner", "Addr", inner_addr)
 	inner_port = ini:ReadInteger("Inner", "Port", inner_port)
 
-	--¹ã²¥µØÖ·
+	--å¹¿æ’­åœ°å€
 	local broad_addr = "127.255.255.255"
 	local broad_port = 15000
 
 	broad_addr = ini:ReadString("Broadcast", "Addr", broad_addr)
 	broad_port = ini:ReadInteger("Broadcast", "Port", broad_port)
 
-	--Î¬»¤Á¬½ÓµØÖ·
+	--ç»´æŠ¤è¿æ¥åœ°å€
 	local echo_addr = "127.0.0.1"
 	local echo_port = 15300 + member_id
 
 	echo_addr = ini:ReadString("Echo", "Addr", echo_addr)
 	echo_port = ini:ReadInteger("Echo", "Port", echo_port)
 
-	--Âß¼­Ä£¿é
+	--é€»è¾‘æ¨¡å—
 	local logic_loader = nx_create("LogicLoader")
 
 	local logic_path = ini:ReadString("Logic", "Path", "")
 	local modules = ini:ReadInteger("Logic", "Modules", 0)
 
-	--Âß¼­Ä£¿é
+	--é€»è¾‘æ¨¡å—
 	local logic_loader = nx_create("LogicLoader")
 
 	local logic_path = ini:ReadString("Logic", "Path", "")
@@ -119,10 +119,10 @@ function main(member)
 
 	nx_destroy(ini)
 
-	--³¡¾°Åö×²ĞÅÏ¢
+	--åœºæ™¯ç¢°æ’ä¿¡æ¯
 	local collide_manager = nx_create("CollideManager")
 
-	--°ó¶¨½Å±¾
+	--ç»‘å®šè„šæœ¬
 	nx_bind_script(member, "main", "echo_init")
 
 	member.AppName = "member_" .. nx_string(server_id) .. "_" .. nx_string(member_id)
@@ -143,61 +143,61 @@ function main(member)
 	member.BroadPort = broad_port
 	member.EchoAddr = echo_addr
 	member.EchoPort = echo_port
-	--±£Ö¤Æô¶¯ÈÕÖ¾·şÎñ
+	--ä¿è¯å¯åŠ¨æ—¥å¿—æœåŠ¡
 	member.LogLauncher = "game_log game_log.ini daemon"
-	--ÊÇ·ñ¿ªÆôÊÓÒ°ÏûÏ¢ÓÅ»¯
+	--æ˜¯å¦å¼€å¯è§†é‡æ¶ˆæ¯ä¼˜åŒ–
 	--member.SightOptimize = true
-	--ÊÇ·ñ²»·¢ËÍÎªÈ±Ê¡¿ÕÖµµÄ¶ÔÏóÊôĞÔ
+	--æ˜¯å¦ä¸å‘é€ä¸ºç¼ºçœç©ºå€¼çš„å¯¹è±¡å±æ€§
 	member.HideEmptyProperty = true
-	--¿ªÆô¶ÔÏóÊôĞÔ±ä»¯ÏûÏ¢ºÏ²¢
+	--å¼€å¯å¯¹è±¡å±æ€§å˜åŒ–æ¶ˆæ¯åˆå¹¶
 	member.MergeProperty = true
-	--¿ªÆô¶ÔÏóÌí¼ÓÒÆ³ıÏûÏ¢ºÏ²¢
+	--å¼€å¯å¯¹è±¡æ·»åŠ ç§»é™¤æ¶ˆæ¯åˆå¹¶
 	member.MergeObjects = true
 
-	--¼ÓÔØÃû×Ö¹ıÂËÎÄ¼ş
+	--åŠ è½½åå­—è¿‡æ»¤æ–‡ä»¶
 	member:LoadNameFilter(nx_resource_path() .. "filter.txt")
-	--¼ÓÔØÈ«¾ÖµãĞÅÏ¢
+	--åŠ è½½å…¨å±€ç‚¹ä¿¡æ¯
 	member:LoadLocations(nx_resource_path() .. "location.xml")
 
-	--Æô¶¯³¡¾°·şÎñ
+	--å¯åŠ¨åœºæ™¯æœåŠ¡
 	member:Start()
 
-	--Êµ¼ÊÊ¹ÓÃµÄÄÚÍøÕìÌı¶Ë¿Ú
+	--å®é™…ä½¿ç”¨çš„å†…ç½‘ä¾¦å¬ç«¯å£
 	inner_port = member.InnerPort
 
-	--ÏÔÊ¾Ó¦ÓÃ³ÌĞòÃû
+	--æ˜¾ç¤ºåº”ç”¨ç¨‹åºå
 	member:WriteLine("app name " .. member.AppName)
-	--ÏÔÊ¾Í¨Ñ¶µØÖ·ºÍ¶Ë¿Ú
+	--æ˜¾ç¤ºé€šè®¯åœ°å€å’Œç«¯å£
 	member:WriteLine("echo socket " .. echo_addr .. ":" .. nx_string(echo_port))
 	member:WriteLine("inner socket " .. inner_addr .. ":" .. nx_string(inner_port))
 	member:WriteLine("broadcast socket " .. broad_addr .. ":" .. nx_string(broad_port))
-	--Æô¶¯Íê³É
+	--å¯åŠ¨å®Œæˆ
 	member:WriteLine("game server " .. nx_string(server_id)
 		.. " member " .. nx_string(member_id) .. " started")
 
-	--ÉèÖÃ½ø³Ì¿ªÆô×´Ì¬
+	--è®¾ç½®è¿›ç¨‹å¼€å¯çŠ¶æ€
 	member:SetAppState(WAPS_OPENED);
 
 	return 1
 end
 
---¹Ø±Õ
+--å…³é—­
 function close()
 	local member = nx_value("member")
 
-	--¹Ø±Õ³¡¾°·şÎñ
+	--å…³é—­åœºæ™¯æœåŠ¡
 	member:WriteLine("member server shutdown...")
 	member:Stop()
 
-	--½áÊø³ÌĞò
+	--ç»“æŸç¨‹åº
 	nx_quit()
 
 	return true
 end
 
---Î¬»¤Á¬½Ó½Å±¾
+--ç»´æŠ¤è¿æ¥è„šæœ¬
 
---³õÊ¼»¯
+--åˆå§‹åŒ–
 function echo_init(self)
 	nx_callback(self, "on_open", "echo_open")
 	nx_callback(self, "on_close", "echo_close")
@@ -218,7 +218,7 @@ function echo_init(self)
 	return 1
 end
 
---Î¬»¤Á¬½Ó´ò¿ª
+--ç»´æŠ¤è¿æ¥æ‰“å¼€
 function echo_open(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " connected")
@@ -227,24 +227,24 @@ function echo_open(self, addr, port)
 	return 1
 end
 
---Î¬»¤Á¬½Ó¹Ø±Õ
+--ç»´æŠ¤è¿æ¥å…³é—­
 function echo_close(self, addr, port)
 	self:WriteLine("echo client " .. nx_string(addr)
 		.. ":" .. nx_string(port) .. " closed")
 	return 1
 end
 
---´¦ÀíÎ¬»¤ÊäÈëÃüÁî
+--å¤„ç†ç»´æŠ¤è¾“å…¥å‘½ä»¤
 function echo_input(self, command)
 	if command == "quit" then
-		--ÍË³ö³ÌĞò
+		--é€€å‡ºç¨‹åº
 		echo_response(self, "server will shutdown...")
 		close()
 	elseif command == "end" then
-		--¹Ø±ÕÁ¬½Ó
+		--å…³é—­è¿æ¥
 		self:CloseEcho()
 	elseif command == "perf" then
-		--µ¼³öÂß¼­Ä£¿éĞÔÄÜÍ³¼ÆÊı¾İ
+		--å¯¼å‡ºé€»è¾‘æ¨¡å—æ€§èƒ½ç»Ÿè®¡æ•°æ®
 		self:DumpPerformance("perf..nx_string(self.ServerId)..txt")
 		echo_response(self, "dump logic module performance...")
 	else
@@ -254,14 +254,14 @@ function echo_input(self, command)
 	return 1
 end
 
---·¢ËÍ»ØÓ¦ĞÅÏ¢
+--å‘é€å›åº”ä¿¡æ¯
 function echo_response(self, info)
 	self:SendEchoLine(">" .. info .. "\r")
 	self:WriteLine(info)
 	return true
 end
 
---²éÕÒÊµÌå
+--æŸ¥æ‰¾å®ä½“
 function get_entity(entity_name)
 	local id = nx_value(entity_name)
 
@@ -284,7 +284,7 @@ function get_entity(entity_name)
 	return nil
 end
 
---×ª»»µ½ºÏÊÊµÄÀàĞÍ
+--è½¬æ¢åˆ°åˆé€‚çš„ç±»å‹
 function get_new_value(old_v, value)
 	local type = nx_type(old_v)
 
@@ -311,7 +311,7 @@ function get_new_value(old_v, value)
 	return nil
 end
 
---²éÑ¯ÊµÌåÄÚ²¿ÊôĞÔ
+--æŸ¥è¯¢å®ä½“å†…éƒ¨å±æ€§
 function echo_input_getp(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -331,7 +331,7 @@ function echo_input_getp(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌåÄÚ²¿ÊôĞÔ
+--è®¾ç½®å®ä½“å†…éƒ¨å±æ€§
 function echo_input_setp(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -360,7 +360,7 @@ function echo_input_setp(self, entity, prop, value)
 	return 1
 end
 
---²éÑ¯ÊµÌå×Ô¶¨ÒåÊôĞÔ
+--æŸ¥è¯¢å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_getc(self, entity, prop)
 	if entity == nil or prop == nil then
 		return 0
@@ -380,7 +380,7 @@ function echo_input_getc(self, entity, prop)
 	return 1
 end
 
---ÉèÖÃÊµÌå×Ô¶¨ÒåÊôĞÔ
+--è®¾ç½®å®ä½“è‡ªå®šä¹‰å±æ€§
 function echo_input_setc(self, entity, prop, value)
 	if entity == nil or prop == nil then
 		return 0
@@ -409,7 +409,7 @@ function echo_input_setc(self, entity, prop, value)
 	return 1
 end
 
---Ö´ĞĞÊµÌå·½·¨
+--æ‰§è¡Œå®ä½“æ–¹æ³•
 function echo_input_method(self, entity, method, ...)
 	if entity == nil or method == nil then
 		return 0
@@ -438,7 +438,7 @@ function echo_input_method(self, entity, method, ...)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞÄÚ²¿ÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰å†…éƒ¨å±æ€§
 function echo_input_listp(self, entity)
 	if entity == nil then
 		return 0
@@ -463,7 +463,7 @@ function echo_input_listp(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ×Ô¶¨ÒåÊôĞÔ
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰è‡ªå®šä¹‰å±æ€§
 function echo_input_listc(self, entity)
 	if entity == nil then
 		return 0
@@ -488,7 +488,7 @@ function echo_input_listc(self, entity)
 	return 1
 end
 
---ÁĞ³öÊµÌåµÄËùÓĞ·½·¨
+--åˆ—å‡ºå®ä½“çš„æ‰€æœ‰æ–¹æ³•
 function echo_input_listm(self, entity)
 	if entity == nil then
 		return 0
@@ -513,7 +513,7 @@ function echo_input_listm(self, entity)
 	return 1
 end
 
---ÁĞ³öËùÓĞÈ«¾Ö±äÁ¿
+--åˆ—å‡ºæ‰€æœ‰å…¨å±€å˜é‡
 function echo_input_listg(self)
 	local global_table = nx_value_list()
 
@@ -531,7 +531,7 @@ function echo_input_listg(self)
 	return 1
 end
 
---Ö´ĞĞ½Å±¾À©Õ¹º¯Êı
+--æ‰§è¡Œè„šæœ¬æ‰©å±•å‡½æ•°
 function echo_input_function(self, func, ...)
 	if func == nil or func == "" then
 		return 0
@@ -552,7 +552,7 @@ function echo_input_function(self, func, ...)
 	return 1
 end
 
---µ÷ÊÔº¯Êı
+--è°ƒè¯•å‡½æ•°
 function echo_input_debugger(self, entity, method, ...)
 	if entity == nil or entity == "" or method == nil or method == "" then
 		return 0

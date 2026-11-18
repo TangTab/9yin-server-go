@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--´«ËÍ¹¦ÄÜNPC»ù´¡ÊôÐÔ-->
+<!--ä¼ é€åŠŸèƒ½NPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="LastObject" type="object" public="true" private="false" save="false" desc="µ±Ç°Ñ¡ÔñµÄ¶ÔÏó"/>
-		<property name="ItemBeUsed" type="int" public="false" private="false" save="false" desc="ÓÐµÀ¾ßÏÞÖÆµÄ»ú¹ØNpcÊÇ·ñÒªÏûºÄµÀ¾ß"/>
+		<property name="LastObject" type="object" public="true" private="false" save="false" desc="å½“å‰é€‰æ‹©çš„å¯¹è±¡"/>
+		<property name="ItemBeUsed" type="int" public="false" private="false" save="false" desc="æœ‰é“å…·é™åˆ¶çš„æœºå…³Npcæ˜¯å¦è¦æ¶ˆè€—é“å…·"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 		<path name="struct\rule\Common\Fightbag.xml" desc=""/>
 		<path name="struct\rule\Common\commonfighter.xml" desc=""/>
@@ -21,10 +21,10 @@
 		<path name="struct\rule\Common\relation.xml" desc=""/>
 		<path name="struct\rule\Common\autorestore.xml" desc=""/>
 		<path name="struct\rule\Common\skilluse.xml" desc=""/>
-		<path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+		<path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
 		<path name="struct\rule\Common\basefighterdata.xml" desc=""/>
 		
-		<path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+		<path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
 	
 	</includes>
 </object>

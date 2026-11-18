@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÓÎÏ·¶ÔÏóÊôÐÔ¶¨ÒåÄ£°æÎÄ¼þ-->
+<!--æ¸¸æˆå¯¹è±¡å±žæ€§å®šä¹‰æ¨¡ç‰ˆæ–‡ä»¶-->
 <object>
 	<properties>
 	</properties>
 	<records>
-		<!--´¥·¢Æ÷±í¸ñ-->
-		<record name="TriggerRecord" cols="2" maxrows="32" save="false" public="false" private="false" desc="´¥·¢Æ÷±í¸ñ">
-			<column type="int" desc="´¥·¢Æ÷ÊÂ¼þ±àºÅ"/>
-			<column type="int" desc="´¥·¢Æ÷Ö´ÐÐÆ÷±àºÅ"/>
+		<!--è§¦å‘å™¨è¡¨æ ¼-->
+		<record name="TriggerRecord" cols="2" maxrows="32" save="false" public="false" private="false" desc="è§¦å‘å™¨è¡¨æ ¼">
+			<column type="int" desc="è§¦å‘å™¨äº‹ä»¶ç¼–å·"/>
+			<column type="int" desc="è§¦å‘å™¨æ‰§è¡Œå™¨ç¼–å·"/>
 		</record>
 	</records>
 </object>

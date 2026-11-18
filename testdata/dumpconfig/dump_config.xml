@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2010 (http://www.altova.com) by hahah (memem) -->
 <config>
 	<diction path="dumpconfig\diction\"/>
-	<!-- Ò»Ð©¾²Ì¬µÄsqlÅäÖÃ  path ¶ÔÓ¦ÓÚResµÄÄ¿Â¼ table ÎªÊý¾Ý¿âÖÐµÄ±í¸ñÃû³Æ -->
+	<!-- ä¸€äº›é™æ€çš„sqlé…ç½®  path å¯¹åº”äºŽResçš„ç›®å½• table ä¸ºæ•°æ®åº“ä¸­çš„è¡¨æ ¼åç§° -->
 	<static>
 		<sql path="dumpconfig\game_enum.sql"/>
 		<sql path="dumpconfig\ratio_action.sql"/>
@@ -11,20 +11,20 @@
 	</static>
 	<logdefine path="ini\logdefine.xml"/>
 	<!--
-		path:Òª×ª´¢µÄÎÄ¼þÃû »ò Ä¿Â¼
-		bfile:ÊÇÎÄ¼þ »¹ÊÇ Ä¿Â¼
-		type:ÀàÐÍ
+		path:è¦è½¬å‚¨çš„æ–‡ä»¶å æˆ– ç›®å½•
+		bfile:æ˜¯æ–‡ä»¶ è¿˜æ˜¯ ç›®å½•
+		type:ç±»åž‹
 		type definition:
-			1  µÀ¾ß
-			5  ÆÕÍ¨ÈÎÎñ
-			7  ³¡¾°
-			8  ¼¼ÄÜ
+			1  é“å…·
+			5  æ™®é€šä»»åŠ¡
+			7  åœºæ™¯
+			8  æŠ€èƒ½
 			14 NPC
-			15 ÅäÖÃ°ü
-			17 ÆÕÍ¨¹ÖµôÂä
+			15 é…ç½®åŒ…
+			17 æ™®é€šæ€ªæŽ‰è½
 	-->
 	<move>
-		<!--µÀ¾ß-->
+		<!--é“å…·-->
 		<file bfile="1" type="1" table="nx_res_dumpinfo" path="ini/Item/Equipment.xml"/>
 		<file bfile="1" type="1" table="nx_res_dumpinfo" path="ini/Item/ItemUse.xml"/>
 		<file bfile="1" type="1" table="nx_res_dumpinfo" path="ini/Item/ItemPetUse.xml"/>
@@ -34,11 +34,11 @@
         <file bfile="1" type="1" table="nx_res_dumpinfo" path="ini/Item/Rune.xml"/>
         <file bfile="1" type="1" table="nx_res_dumpinfo" path="ini/Item/TaskItemUse.xml"/>
         <file bfile="1" type="1" table="nx_res_dumpinfo" path="ini/Item/TaskMaterial.xml"/>
-		<!--!ÈÎÎñ-->
+		<!--!ä»»åŠ¡-->
 		<file bfile="1" type="5" table="nx_res_dumpinfo" path="ini/Quest/Quest.xml"/>
-		<!--!³¡¾°-->
+		<!--!åœºæ™¯-->
 		<file bfile="1" type="7" table="nx_res_dumpinfo" path="scenes.ini"/>
-		<!--¼¼ÄÜ-->
+		<!--æŠ€èƒ½-->
 		<file bfile="1" type="8" table="nx_res_dumpinfo" path="ini/Skill/ZQPlayerSkill/Skill_Main_ZQPlayer.xml"/>
 		<file bfile="1" type="8" table="nx_res_dumpinfo" path="ini/Skill/TestSkill/Skill_Main_Test.xml"/>
 		<file bfile="1" type="8" table="nx_res_dumpinfo" path="ini/Skill/SpecialSkill/Skill_Main_Special.xml"/>
@@ -47,16 +47,16 @@
 		<file bfile="1" type="8" table="nx_res_dumpinfo" path="ini/Skill/NpcSkill/Skill_Main_Npc.xml"/>
 		<file bfile="1" type="8" table="nx_res_dumpinfo" path="ini/Skill/FBNpcBSkill/Skill_Main_FBNpcB.xml"/>
 		<file bfile="1" type="8" table="nx_res_dumpinfo" path="ini/Skill/FBNpcASkill/Skill_Main_FBNpcA.xml"/>
-		<!-- PVPÈÎÎñ -->
+		<!-- PVPä»»åŠ¡ -->
 		<file bfile="1" type="10" table="nx_res_dumpinfo" path="ini/PVPTask/PVPTask.xml"/>
 		<!--NPC!-->
 		<file bfile="1" type="14" table="nx_res_dumpinfo" path="ini/Npc/path_config.xml"/>
-		<!--!¾²Ì¬Êý¾Ý°ü!-->
+		<!--!é™æ€æ•°æ®åŒ…!-->
 		<file bfile="1" type="15" table="nx_res_dumpinfo" path="ini/Rule/static_data.xml"/>
-		<!--!µôÂä°ü!-->
+		<!--!æŽ‰è½åŒ…!-->
 		<file bfile="1" type="17" table="nx_res_dumpinfo" path="ini/Drop/World_Drop_Simple.xml"/>
 		<file bfile="1" type="17" table="nx_res_dumpinfo" path="ini/Drop/Spec_Drop_Simple.xml"/>
-		<!--¸´»îµã-->
+		<!--å¤æ´»ç‚¹-->
 		<file bfile="1" type="19" table="nx_res_dumpinfo" path="location.xml"/>
 	</move>
 </config>

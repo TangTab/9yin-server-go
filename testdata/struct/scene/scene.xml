@@ -1,69 +1,69 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--³¡¾°»ù´¡ÊôÐÔ-->
+<!--åœºæ™¯åŸºç¡€å±žæ€§-->
 <object>
-  <!-- »ù±¾ÊôÐÔ -->
+  <!-- åŸºæœ¬å±žæ€§ -->
   <properties>
-    <property name="ConfigID" type="string" public="true" private="true" save="false" desc="³¡¾°±àºÅ"/>
-    <property name="Resource" type="string" public="true" private="true" save="false" desc="³¡¾°»ù´¡×ÊÔ´Ãû³Æ"/>
-    <property name="ReliveLocation" type="string" public="false" private="false" save="false" desc="³¡¾°¸´»îµã"/>
-    <property name="PKMode" type="byte" public="true" private="false" save="false" desc="³¡¾°ÊÇ·ñÔÊÐíPK"/>
-    <property name="GroupNum" type="int" public="true" private="true" save="false" desc="³¡¾°·Ö×é×ÜÊý"/>
-    <property name="CurrentTime" type="int64" public="true" private="false" save="false" desc="ÏµÍ³µ±Ç°Ê±¼ä, Í¨¹ýÐÄÌø²»¶Ï¸üÐÂ"/>
-    <property name="ServerTime" type="int64" public="true" private="false" save="false" desc="ÏµÍ³µ±Ç°Ê±¼ä, Í¨¹ýÐÄÌø²»¶Ï¸üÐÂ"/>
-    <property name="CommonGroupID" type="int" public="false" private="false" save="false" desc="ÆÕÍ¨³¡¾°µÄ¹«¹²GroupID"/>
-    <property name="AutoGrouping" type="int" public="false" private="false" save="false" desc="ÊÇ·ñÍæ¼Ò½øÈë×Ô¶¯·Ö×é"/>
-    <property name="AreaCreatorFlag" type="int" public="false" private="false" save="false" desc="¸Ã³¡¾°ÊÇ·ñ¿ªÆô°´ÇøÓòË¢¹Ö(0: ²»¿ªÆô, 1: ¿ªÆô)"/>
-    <property name="PlayerVisualRange" type="float" public="false" private="false" save="false" desc="¸Ã³¡¾°playerµÄ¿ÉÊÓ¾àÀë"/>
-    <property name="ProtoSceneID" type="int" public="true" private="false" save="false" desc="Ô­ÐÎ³¡¾°±àºÅ"/>
-    <property name="CloneSceneID" type="int" public="true" private="false" save="false" desc="¸±±¾³¡¾°±àºÅ"/>
-	<property name="EnableWarFog" type="int" public="false" private="false" save="false" desc="ÊÇ·ñ¿ªÆôÕ½ÕùÃÔÎí"/>
+    <property name="ConfigID" type="string" public="true" private="true" save="false" desc="åœºæ™¯ç¼–å·"/>
+    <property name="Resource" type="string" public="true" private="true" save="false" desc="åœºæ™¯åŸºç¡€èµ„æºåç§°"/>
+    <property name="ReliveLocation" type="string" public="false" private="false" save="false" desc="åœºæ™¯å¤æ´»ç‚¹"/>
+    <property name="PKMode" type="byte" public="true" private="false" save="false" desc="åœºæ™¯æ˜¯å¦å…è®¸PK"/>
+    <property name="GroupNum" type="int" public="true" private="true" save="false" desc="åœºæ™¯åˆ†ç»„æ€»æ•°"/>
+    <property name="CurrentTime" type="int64" public="true" private="false" save="false" desc="ç³»ç»Ÿå½“å‰æ—¶é—´, é€šè¿‡å¿ƒè·³ä¸æ–­æ›´æ–°"/>
+    <property name="ServerTime" type="int64" public="true" private="false" save="false" desc="ç³»ç»Ÿå½“å‰æ—¶é—´, é€šè¿‡å¿ƒè·³ä¸æ–­æ›´æ–°"/>
+    <property name="CommonGroupID" type="int" public="false" private="false" save="false" desc="æ™®é€šåœºæ™¯çš„å…¬å…±GroupID"/>
+    <property name="AutoGrouping" type="int" public="false" private="false" save="false" desc="æ˜¯å¦çŽ©å®¶è¿›å…¥è‡ªåŠ¨åˆ†ç»„"/>
+    <property name="AreaCreatorFlag" type="int" public="false" private="false" save="false" desc="è¯¥åœºæ™¯æ˜¯å¦å¼€å¯æŒ‰åŒºåŸŸåˆ·æ€ª(0: ä¸å¼€å¯, 1: å¼€å¯)"/>
+    <property name="PlayerVisualRange" type="float" public="false" private="false" save="false" desc="è¯¥åœºæ™¯playerçš„å¯è§†è·ç¦»"/>
+    <property name="ProtoSceneID" type="int" public="true" private="false" save="false" desc="åŽŸå½¢åœºæ™¯ç¼–å·"/>
+    <property name="CloneSceneID" type="int" public="true" private="false" save="false" desc="å‰¯æœ¬åœºæ™¯ç¼–å·"/>
+	<property name="EnableWarFog" type="int" public="false" private="false" save="false" desc="æ˜¯å¦å¼€å¯æˆ˜äº‰è¿·é›¾"/>
   </properties>
-  <!-- ±íÊôÐÔ -->
+  <!-- è¡¨å±žæ€§ -->
   <records>
-    <record name="GuildManorFightRec" cols="8" maxrows="1024" save="false" public="false" private="false" desc="¹«»áÕ½³¡²Î¼ÓÕ½¶·µÄÍæ¼ÒÁÐ±í">
-      <column type="widestr" desc="Íæ¼ÒÐÕÃû"/>
-      <column type="string" desc="Íæ¼ÒÇøÓòID"/>
-      <column type="dword" desc="Íæ¼ÒÖ°Òµ"/>
-      <column type="dword" desc="Íæ¼ÒµÈ¼¶"/>
-      <column type="dword" desc="Íæ¼ÒÉ±µÐ·½Íæ¼ÒÊýÁ¿"/>
-      <column type="dword" desc="Íæ¼Ò±»É±ÊýÁ¿"/>
-      <column type="dword" desc="Íæ¼ÒÕ¼Áì¾ÝµãÊý"/>
-      <column type="dword" desc="Íæ¼ÒÕóÓª"/>
+    <record name="GuildManorFightRec" cols="8" maxrows="1024" save="false" public="false" private="false" desc="å…¬ä¼šæˆ˜åœºå‚åŠ æˆ˜æ–—çš„çŽ©å®¶åˆ—è¡¨">
+      <column type="widestr" desc="çŽ©å®¶å§“å"/>
+      <column type="string" desc="çŽ©å®¶åŒºåŸŸID"/>
+      <column type="dword" desc="çŽ©å®¶èŒä¸š"/>
+      <column type="dword" desc="çŽ©å®¶ç­‰çº§"/>
+      <column type="dword" desc="çŽ©å®¶æ€æ•Œæ–¹çŽ©å®¶æ•°é‡"/>
+      <column type="dword" desc="çŽ©å®¶è¢«æ€æ•°é‡"/>
+      <column type="dword" desc="çŽ©å®¶å é¢†æ®ç‚¹æ•°"/>
+      <column type="dword" desc="çŽ©å®¶é˜µè¥"/>
     </record>
-    <record name="AreaStateRec" cols="3" maxrows="100" save="false" public="false" private="false" desc="³¡¾°ÇøÓòÐÅÏ¢">
-      <column type="string" desc="ÇøÓòid"/>
-      <column type="dword" desc="ÇøÓò×´Ì¬ 0ÖÐÁ¢ 1²»¿ÉÕ¼ÁìÕóÓª³õÊ¼ÅäÖÃ 2ÐûÕ½×´Ì¬ 3Õ½¶·×´Ì¬ 4Õ¼Áì×´Ì¬"/>
-      <column type="dword" desc="ÇøÓòÕ½Õù¿ªÆôµÈ´ýÊ±¼ä"/>
+    <record name="AreaStateRec" cols="3" maxrows="100" save="false" public="false" private="false" desc="åœºæ™¯åŒºåŸŸä¿¡æ¯">
+      <column type="string" desc="åŒºåŸŸid"/>
+      <column type="dword" desc="åŒºåŸŸçŠ¶æ€ 0ä¸­ç«‹ 1ä¸å¯å é¢†é˜µè¥åˆå§‹é…ç½® 2å®£æˆ˜çŠ¶æ€ 3æˆ˜æ–—çŠ¶æ€ 4å é¢†çŠ¶æ€"/>
+      <column type="dword" desc="åŒºåŸŸæˆ˜äº‰å¼€å¯ç­‰å¾…æ—¶é—´"/>
     </record>
-    <record name="TriggerAreaNpcRec" cols="2" maxrows="100" save="false" public="false" private="false" desc="³¡¾°ÉÏ´øÓÐ´¥·¢Æ÷µÄÇøÓòNPCÁÐ±í">
-      <column type="int" desc="ÇøÓòid"/>
-      <column type="object" desc="NPC¶ÔÏó"/>
+    <record name="TriggerAreaNpcRec" cols="2" maxrows="100" save="false" public="false" private="false" desc="åœºæ™¯ä¸Šå¸¦æœ‰è§¦å‘å™¨çš„åŒºåŸŸNPCåˆ—è¡¨">
+      <column type="int" desc="åŒºåŸŸid"/>
+      <column type="object" desc="NPCå¯¹è±¡"/>
     </record>
-    <record name="PreloadNpcRec" cols="7" maxrows="32" save="false" public="false" private="false" desc="Ô¤¼ÓÔØnpcÐÅÏ¢±í">
-        <column type="string" desc="npcµÄident"/>
-        <column type="string" desc="npcµÄid"/>
-        <column type="float" desc="npcµÄ×ø±êx"/>
-        <column type="float" desc="npcµÄ×ø±êy"/>
-        <column type="float" desc="npcµÄ×ø±êz"/>
-        <column type="float" desc="npcµÄ×ø±êorient"/>
-        <column type="string" desc="npcµÄscale"/>
+    <record name="PreloadNpcRec" cols="7" maxrows="32" save="false" public="false" private="false" desc="é¢„åŠ è½½npcä¿¡æ¯è¡¨">
+        <column type="string" desc="npcçš„ident"/>
+        <column type="string" desc="npcçš„id"/>
+        <column type="float" desc="npcçš„åæ ‡x"/>
+        <column type="float" desc="npcçš„åæ ‡y"/>
+        <column type="float" desc="npcçš„åæ ‡z"/>
+        <column type="float" desc="npcçš„åæ ‡orient"/>
+        <column type="string" desc="npcçš„scale"/>
     </record>
-    <record name="AreaCreatorRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="ÇøÓòË¢¹ÖÆ÷±í, ÓÃÀ´¼ÇÂ¼³¡¾°ÉÏËùÓÐÇøÓòµÄË¢¹ÖÆ÷, ÓÃÓÚnpcµÄ¶¯Ì¬Ë¢ÐÂ">
-        <column type="int" desc="ÇøÓòid"/>
-        <column type="int" desc="Ë¢¹ÖÆ÷id"/>
+    <record name="AreaCreatorRec" cols="2" maxrows="1024" save="false" public="false" private="false" desc="åŒºåŸŸåˆ·æ€ªå™¨è¡¨, ç”¨æ¥è®°å½•åœºæ™¯ä¸Šæ‰€æœ‰åŒºåŸŸçš„åˆ·æ€ªå™¨, ç”¨äºŽnpcçš„åŠ¨æ€åˆ·æ–°">
+        <column type="int" desc="åŒºåŸŸid"/>
+        <column type="int" desc="åˆ·æ€ªå™¨id"/>
     </record>
   </records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
     <includes>
-        <path name="struct\internals\internals_scene.xml" desc="ÄÚ²¿ÊôÐÔ"/>
-        <path name="struct\scene\event_spring.xml" desc="ÊÂ¼þ´¥·¢ÏµÍ³Ïà¹ØÊý¾Ý" />
-        <path name="struct\scene\guild_scene.xml" desc="¹¤»á"/>
-        <path name="struct\scene\user_guide.xml" desc="ÐÂÊÖÒýµ¼¸±±¾"/>
-        <path name="struct\common\trigger.xml" desc="´¥·¢Æ÷"/>
-        <path name="struct\scene\activity_scene.xml" desc="pvp»î¶¯"/>
-		<path name="struct\scene\ew_gw_scene.xml" desc="ÄÜÁ¿¾®¹«»áÕ½¸±±¾³¡¾°Êý¾Ý"/>
-		<path name="struct\scene\ew_campwar.xml" desc="ÄÜÁ¿¾®ÕóÓª³¡¾°Êý¾Ý"/>
-		<path name="struct\scene\energywell.xml" desc="ÄÜÁ¿¾®×ÊÔ´Õ½"/>
+        <path name="struct\internals\internals_scene.xml" desc="å†…éƒ¨å±žæ€§"/>
+        <path name="struct\scene\event_spring.xml" desc="äº‹ä»¶è§¦å‘ç³»ç»Ÿç›¸å…³æ•°æ®" />
+        <path name="struct\scene\guild_scene.xml" desc="å·¥ä¼š"/>
+        <path name="struct\scene\user_guide.xml" desc="æ–°æ‰‹å¼•å¯¼å‰¯æœ¬"/>
+        <path name="struct\common\trigger.xml" desc="è§¦å‘å™¨"/>
+        <path name="struct\scene\activity_scene.xml" desc="pvpæ´»åŠ¨"/>
+		<path name="struct\scene\ew_gw_scene.xml" desc="èƒ½é‡äº•å…¬ä¼šæˆ˜å‰¯æœ¬åœºæ™¯æ•°æ®"/>
+		<path name="struct\scene\ew_campwar.xml" desc="èƒ½é‡äº•é˜µè¥åœºæ™¯æ•°æ®"/>
+		<path name="struct\scene\energywell.xml" desc="èƒ½é‡äº•èµ„æºæˆ˜"/>
     </includes>
 </object>

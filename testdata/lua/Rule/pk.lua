@@ -1,7 +1,7 @@
 require("define")
 
---PK³Í·£ÏµÊı(PKÊıÖµ°´10µÈ¼¶)
---PKÖµ·¶Î§
+--PKæƒ©ç½šç³»æ•°(PKæ•°å€¼æŒ‰10ç­‰çº§)
+--PKå€¼èŒƒå›´
 --0~999
 --1000~1999
 --2000~2999
@@ -13,7 +13,7 @@ require("define")
 --8000~8999
 --9000~9999
 --10000
--- ½ğÇ®µôÂäÏµÊı	 ×°±¸ÄÍ¾ÃËğÊ§ÏµÊı	ĞŞÎª¼õÉÙÏµÊı	ÄÍ¾Ã¹éÁã¼¸ÂÊ
+-- é‡‘é’±æ‰è½ç³»æ•°	 è£…å¤‡è€ä¹…æŸå¤±ç³»æ•°	ä¿®ä¸ºå‡å°‘ç³»æ•°	è€ä¹…å½’é›¶å‡ ç‡
 pkvaule_publish = 
 {
 	["0"]  = { 1.0,	 1.0,	 1.0,		0 },
@@ -29,13 +29,13 @@ pkvaule_publish =
 	["10"] = { 5.5,	 5.5,	 5.5,		0.70 },
 }
 
---É±ËÀ¶Ô·½µÄ³Í·£
+--æ€æ­»å¯¹æ–¹çš„æƒ©ç½š
 function kill_punish(self)
 end
 
---É±ËÀ¶Ô·½µÄÊÕÒæ
+--æ€æ­»å¯¹æ–¹çš„æ”¶ç›Š
 function kill_income(self,target)
-    	-- ±£»¤
+    	-- ä¿æŠ¤
 	if not nx_exists(self) then
 		return 0
 	end
@@ -43,20 +43,20 @@ function kill_income(self,target)
 	nx_kill_income(self,target)
 end
 
---±»É±ËÀºóµÄ³Í·£
+--è¢«æ€æ­»åçš„æƒ©ç½š
 function bekill_punish(self, attacker)
-	-- ±£»¤
+	-- ä¿æŠ¤
 	if not nx_exists(self) then
 		return 0
 	end
 	
-	--¸øNPCÉ±ËÀ»òÕß×ÔÈ»ËÀÍö
+	--ç»™NPCæ€æ­»æˆ–è€…è‡ªç„¶æ­»äº¡
 --	local moneyper     = 0.1
 	local exper   = 0.0
 	local hardinessper = 0.0
 	local arrestvalue = 0
 
-	--Èç¹ûÊÇ±»Íæ¼ÒÉ±ËÀ
+	--å¦‚æœæ˜¯è¢«ç©å®¶æ€æ­»
 	if nx_exists(attacker) then-- and 
 --	   nx_type(attacker) == TYPE_PLAYER then
 		
@@ -73,19 +73,19 @@ function bekill_punish(self, attacker)
 	
 	end
 	
-	--»ñÈ¡×Ô¼ºµÄPKÏµÊı
+	--è·å–è‡ªå·±çš„PKç³»æ•°
 --	local index = "1"
 --	if nx_find_property(self, "PKValue") then
 --		index = nx_string(nx_int(nx_query_property(self, "PKValue")/1000))
 --	end
 	
 	
-	--ÏµÊıÉúĞ§
+	--ç³»æ•°ç”Ÿæ•ˆ
 --	moneyper      = moneyper * pkvaule_publish[index][1]
 	--facultyper    = facultyper * pkvaule_publish[index][2]
 	--hardinessper  = hardinessper * pkvaule_publish[index][3]
 --	local zeroper = pkvaule_publish[index][4]
 	
-	--´«·şÎñÆ÷¿Û³ı
+	--ä¼ æœåŠ¡å™¨æ‰£é™¤
 	local success = nx_deadpunish(self,exper, hardinessper,arrestvalue)
 end

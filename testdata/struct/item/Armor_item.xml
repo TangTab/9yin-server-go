@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<Property name="CantEquipMore" type="int" public="false" private="true" save="false" desc="ÄÜ·ñ×°±¸¶à¼þ"/>
-		<property name="NeedJob" type="string" public="false" private="false" save="false" desc="×°±¸µÄÖ°ÒµÐèÇó"/>
-		<property name="NeedEnergy" type="int" public="false" private="true" save="false" desc="×°±¸µÄÄÜÁ¿ÐèÇó"/>
-		<property name="ArmorType" type="String" public="false" private="true" save="false" desc="×°¼×À¸Î»ÀàÐÍ"/>
-		<property name="HoldType" type="byte" public="false" private="true" save="false" desc="0:µ¥ÊÖ 1:Ë«ÊÖ 2:³¤±ú"/>
-		<property name="HandPos" type="byte" public="false" private="true" save="false" desc="0:Ö÷ÊÖ 1 ¸±ÊÖ 2 Ö÷¸±ÊÖ"/>
-		<property name="EffectNo" type="string" public="false" private="false" save="false" desc="ÌØÐ§±àºÅ"/>
+		<Property name="CantEquipMore" type="int" public="false" private="true" save="false" desc="èƒ½å¦è£…å¤‡å¤šä»¶"/>
+		<property name="NeedJob" type="string" public="false" private="false" save="false" desc="è£…å¤‡çš„èŒä¸šéœ€æ±‚"/>
+		<property name="NeedEnergy" type="int" public="false" private="true" save="false" desc="è£…å¤‡çš„èƒ½é‡éœ€æ±‚"/>
+		<property name="ArmorType" type="String" public="false" private="true" save="false" desc="è£…ç”²æ ä½ç±»åž‹"/>
+		<property name="HoldType" type="byte" public="false" private="true" save="false" desc="0:å•æ‰‹ 1:åŒæ‰‹ 2:é•¿æŸ„"/>
+		<property name="HandPos" type="byte" public="false" private="true" save="false" desc="0:ä¸»æ‰‹ 1 å‰¯æ‰‹ 2 ä¸»å‰¯æ‰‹"/>
+		<property name="EffectNo" type="string" public="false" private="false" save="false" desc="ç‰¹æ•ˆç¼–å·"/>
 	</properties>
 	<records>
 	</records>
-  <!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+  <!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>	
 </object>	

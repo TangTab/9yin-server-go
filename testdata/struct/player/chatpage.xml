@@ -1,29 +1,29 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <object>
 	<records>
-		<record name="chatpage_rec" cols="22" maxrows="10" public="false" private="true" save="true" desc="±íµ¥±í">
-			<column type="byte"   desc="±íµ¥Ë÷Òý"/>
-			<column type="widestr" desc="±íµ¥Ãû³Æ"/>
-			<column type="byte"   desc="ÊÇ·ñÕ½¶·±íµ¥"/>
-			<column type="byte"   desc="×éºÏ×´Ì¬ 1×éºÏ×´Ì¬£¬0·Ö½â×´Ì¬"/>
-			<column type="byte"   desc="Ëø¶¨×´Ì¬ 1Ëø¶¨£¬0½âËø"/>
-			<column type="word"   desc="Í¸Ã÷¶ÈÖµ"/>
-			<column type="float"   desc="x×ø±ê"/>
-			<column type="float"   desc="y×ø±ê"/>
-			<column type="dword"   desc="±íµ¥¿í¶È"/>
-			<column type="dword"   desc="±íµ¥¸ß¶È"/>
-			<column type="byte"   desc="¸½½üÆµµÀ"/>
-			<column type="byte"   desc="ÃÜÁÄÆµµÀ"/>
-			<column type="byte"   desc="º°»°ÆµµÀ"/>
-			<column type="byte"   desc="ÇøÓòÆµµÀ"/>
-			<column type="byte"   desc="ÊÀ½çÆµµÀ"/>
-			<column type="byte"   desc="¶ÓÎéÆµµÀ"/>
-			<column type="byte"   desc="ÍÅ¶ÓÆµµÀ"/>
-			<column type="byte"   desc="¹¤»áÆµµÀ"/>
-			<column type="byte"   desc="Õ½³¡ÆµµÀ"/>
-			<column type="byte"   desc="ÕÐÄ¼ÆµµÀ"/>
-			<column type="byte"   desc="ÏµÍ³ÆµµÀ"/>
-			<column type="byte"   desc="Õ½¶·ÆµµÀ"/>
+		<record name="chatpage_rec" cols="22" maxrows="10" public="false" private="true" save="true" desc="è¡¨å•è¡¨">
+			<column type="byte"   desc="è¡¨å•ç´¢å¼•"/>
+			<column type="widestr" desc="è¡¨å•åç§°"/>
+			<column type="byte"   desc="æ˜¯å¦æˆ˜æ–—è¡¨å•"/>
+			<column type="byte"   desc="ç»„åˆçŠ¶æ€ 1ç»„åˆçŠ¶æ€ï¼Œ0åˆ†è§£çŠ¶æ€"/>
+			<column type="byte"   desc="é”å®šçŠ¶æ€ 1é”å®šï¼Œ0è§£é”"/>
+			<column type="word"   desc="é€æ˜Žåº¦å€¼"/>
+			<column type="float"   desc="xåæ ‡"/>
+			<column type="float"   desc="yåæ ‡"/>
+			<column type="dword"   desc="è¡¨å•å®½åº¦"/>
+			<column type="dword"   desc="è¡¨å•é«˜åº¦"/>
+			<column type="byte"   desc="é™„è¿‘é¢‘é“"/>
+			<column type="byte"   desc="å¯†èŠé¢‘é“"/>
+			<column type="byte"   desc="å–Šè¯é¢‘é“"/>
+			<column type="byte"   desc="åŒºåŸŸé¢‘é“"/>
+			<column type="byte"   desc="ä¸–ç•Œé¢‘é“"/>
+			<column type="byte"   desc="é˜Ÿä¼é¢‘é“"/>
+			<column type="byte"   desc="å›¢é˜Ÿé¢‘é“"/>
+			<column type="byte"   desc="å·¥ä¼šé¢‘é“"/>
+			<column type="byte"   desc="æˆ˜åœºé¢‘é“"/>
+			<column type="byte"   desc="æ‹›å‹Ÿé¢‘é“"/>
+			<column type="byte"   desc="ç³»ç»Ÿé¢‘é“"/>
+			<column type="byte"   desc="æˆ˜æ–—é¢‘é“"/>
 		</record>
 	</records>
 </object>

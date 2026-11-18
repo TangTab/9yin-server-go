@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--½ðÇ®Àà-->
+<!--é‡‘é’±ç±»-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="CapitalType" type="int" public="false" private="false" save="false" desc="×Ê²úÀàÐÍ"/>
+		<property name="CapitalType" type="int" public="false" private="false" save="false" desc="èµ„äº§ç±»åž‹"/>
 	</properties>
 </object>

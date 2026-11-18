@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--Ç¹ÊÖÏà¹ØÊôÐÔ-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--æžªæ‰‹ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="GunMan" type="int" public="false" private="true" save="false" desc="Ç¹ÊÖÄ£Ê½"/>
-		<property name="GunManBullet" type="string" public="false" private="true" save="true" desc="×Óµ¯buffer"/>
-		<property name="GunManSkill" type="string" public="false" private="false" save="true" desc="¿ªÇ¹¼¼ÄÜ"/>
+		<property name="GunMan" type="int" public="false" private="true" save="false" desc="æžªæ‰‹æ¨¡å¼"/>
+		<property name="GunManBullet" type="string" public="false" private="true" save="true" desc="å­å¼¹buffer"/>
+		<property name="GunManSkill" type="string" public="false" private="false" save="true" desc="å¼€æžªæŠ€èƒ½"/>
 	</properties>
 	<records>
 

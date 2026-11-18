@@ -1,22 +1,22 @@
---��ʼʹ��ĳ��ܣ������ʽ��unsigned cmdid, object skill
+--开始使用某项技能，命令格式：unsigned cmdid, object skill
 COMMAND_SKILL_BEGIN = 600
 
---ʹ�ü��ܳ��Թ�����unsigned cmdid, object target, object skill
+--使用技能尝试攻击：unsigned cmdid, object target, object skill
 COMMAND_SKILL_TRY_ATTACK = 605
 
---��Ŀ��ʹ�����漼�ܣ������ʽ��unsigned cmdid, object target
+--对目标使用增益技能，命令格式：unsigned cmdid, object target
 COMMAND_ENHANCETARGET = 609
---����Ŀ�꣬�����ʽ��unsigned cmdid, object target
+--攻击目标，命令格式：unsigned cmdid, object target
 COMMAND_ATTACKTARGET = 610
---�˺�Ŀ��֮ǰ�������ʽ��unsigned cmdid, object target
+--伤害目标之前，命令格式：unsigned cmdid, object target
 COMMAND_BEFORE_DAMAGETARGET = 611
---���˺�֮ǰ�������ʽ��unsigned cmdid(sender:src)
+--被伤害之前，命令格式：unsigned cmdid(sender:src)
 COMMAND_BEFORE_BEDAMAGE = 612
---�˺�Ŀ�꣬�����ʽ��unsigned cmdid, object target, int damage, int damagetype
+--伤害目标，命令格式：unsigned cmdid, object target, int damage, int damagetype
 COMMAND_DAMAGETARGET = 613
---�������������ʽ��unsigned cmdid, int damage, int damagetype(sender:src)
+--被攻击，命令格式：unsigned cmdid, int damage, int damagetype(sender:src)
 COMMAND_BEDAMAGE = 614
---��ɱĿ�꣬�����ʽ��unsigned cmdid, object target
+--击杀目标，命令格式：unsigned cmdid, object target
 COMMAND_KILLTARGET = 615
---����ɱ�������ʽ��unsigned cmdid(sender:src)
+--被击杀，命令格式：unsigned cmdid(sender:src)
 COMMAND_BEKILL = 616

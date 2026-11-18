@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÄÜÁ¿¶ÜÊôÐÔ-->
+<!--èƒ½é‡ç›¾å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="EnergyValue" type="int" public="false" private="true" save="true" desc="ÄÜÁ¿¶Üµ±Ç°ÄÜÁ¿Öµ"/>
-		<property name="MaxEnergyValue" type="int" public="false" private="true" save="false" desc="ÄÜÁ¿¶Ü×î´óÄÜÁ¿Öµ"/>
-		<property name="RequireLevel" type="int" public="false" private="false" save="false" desc="ÄÜÁ¿¶Ü³äÄÜÐèÇóµÈ¼‰"/>
-		<property name="EnergyExpLv" type="byte" public="false" private="true" save="true" desc="ÄÜÁ¿¶ÜÇ¿»¯¾­ÑéµÈ¼¶"/>
-		<property name="EnergyExp" type="int" public="false" private="true" save="true" desc="ÄÜÁ¿¶ÜÇ¿»¯µ±Ç°¾­ÑéµÈ¼¶¾­ÑéÖµ"/>
-		<property name="EnergyRetain" type="int" public="false" private="false" save="true" desc="ÄÜÁ¿¶ÜÄÜÁ¿³ÖÐøÊ±¼ä(·ÖÖÓ)"/>
+		<property name="EnergyValue" type="int" public="false" private="true" save="true" desc="èƒ½é‡ç›¾å½“å‰èƒ½é‡å€¼"/>
+		<property name="MaxEnergyValue" type="int" public="false" private="true" save="false" desc="èƒ½é‡ç›¾æœ€å¤§èƒ½é‡å€¼"/>
+		<property name="RequireLevel" type="int" public="false" private="false" save="false" desc="èƒ½é‡ç›¾å……èƒ½éœ€æ±‚ç­‰ç´š"/>
+		<property name="EnergyExpLv" type="byte" public="false" private="true" save="true" desc="èƒ½é‡ç›¾å¼ºåŒ–ç»éªŒç­‰çº§"/>
+		<property name="EnergyExp" type="int" public="false" private="true" save="true" desc="èƒ½é‡ç›¾å¼ºåŒ–å½“å‰ç»éªŒç­‰çº§ç»éªŒå€¼"/>
+		<property name="EnergyRetain" type="int" public="false" private="false" save="true" desc="èƒ½é‡ç›¾èƒ½é‡æŒç»­æ—¶é—´(åˆ†é’Ÿ)"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 
 	</includes>

@@ -1,17 +1,17 @@
 ----------------------------------------------------------------------
--- ÎÄ¼şÃû:		arena.lua
--- ÄÚ  Èİ:		¾º¼¼³¡Ïà¹ØÅĞ¶¨½Å±¾
--- Ëµ  Ã÷:
--- ´´½¨ÈÕÆÚ:	2012Äê10ÔÂ09ÈÕ
--- ´´½¨ÈË:		ÕÅĞ¤·å
--- °æÈ¨ËùÓĞ:	ËÕÖİÎÏÅ£µç×ÓÓĞÏŞ¹«Ë¾
+-- æ–‡ä»¶å:		arena.lua
+-- å†…  å®¹:		ç«æŠ€åœºç›¸å…³åˆ¤å®šè„šæœ¬
+-- è¯´  æ˜:
+-- åˆ›å»ºæ—¥æœŸ:	2012å¹´10æœˆ09æ—¥
+-- åˆ›å»ºäºº:		å¼ è‚–å³°
+-- ç‰ˆæƒæ‰€æœ‰:	è‹å·èœ—ç‰›ç”µå­æœ‰é™å…¬å¸
 ----------------------------------------------------------------------
 
--- ¾º¼¼ÏµÍ³»ı·Ö¼ÆËã
--- ²ÎÊı:Ê¤Àû·½³¡¾°ÄÚ¶ÓÎéºÅ A¶Ó»ı·Ö B¶Ó»ı·Ö
+-- ç«æŠ€ç³»ç»Ÿç§¯åˆ†è®¡ç®—
+-- å‚æ•°:èƒœåˆ©æ–¹åœºæ™¯å†…é˜Ÿä¼å· Aé˜Ÿç§¯åˆ† Bé˜Ÿç§¯åˆ†
 function score_calculate(win_team, match_score_a, match_score_b)
-	local ARENAPLANE_TEAM_A = 1		--A¶Ó
-	local ARENAPLANE_TEAM_B = 2		--B¶Ó
+	local ARENAPLANE_TEAM_A = 1		--Aé˜Ÿ
+	local ARENAPLANE_TEAM_B = 2		--Bé˜Ÿ
 	local basescore = 48
 	local basepara1 = 10
 	local basepara2 = 400
@@ -28,10 +28,10 @@ function score_calculate(win_team, match_score_a, match_score_b)
 	return 0, 0
 end
 
--- ¾º¼¼³¡¿ª·ÅÊ±¼ä¼ÆËã
--- ²ÎÊı£ºµ±Ç°ÄêÔÂÈÕÖÜĞ¡Ê±·ÖÖÓ
+-- ç«æŠ€åœºå¼€æ”¾æ—¶é—´è®¡ç®—
+-- å‚æ•°ï¼šå½“å‰å¹´æœˆæ—¥å‘¨å°æ—¶åˆ†é’Ÿ
 function arena_canopen()
-	--ÀûÓÃdatetable±í»ñµÃ¶ÔÓ¦ÈÕÆÚÊı¾İ(year,month,day,yday,wday,hour,min,sec,isdst)
+	--åˆ©ç”¨datetableè¡¨è·å¾—å¯¹åº”æ—¥æœŸæ•°æ®(year,month,day,yday,wday,hour,min,sec,isdst)
 	local datetable = os.date("*t")
 	
 	if datetable.wday - 1 == 3 then

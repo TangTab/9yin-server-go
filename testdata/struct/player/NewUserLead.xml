@@ -1,25 +1,25 @@
-<?xml version="1.0" encoding="gb2312"?>
-<!--ÈËÎï³ÆºÅÏà¹ØÊôÐÔ¶¨Òå-->
+<?xml version="1.0" encoding="utf-8"?>
+<!--äººç‰©ç§°å·ç›¸å…³å±žæ€§å®šä¹‰-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="IsInNewUserLead" type="int" public="false" private="true" save="true" desc="ÊÇ·ñÔÚÌåÑé¸±±¾"/>
-		<property name="IsGetAward" type="int" public="false" private="false" save="true" desc="ÊÇ·ñÁìÈ¡¹ý½±Àø"/>
+		<property name="IsInNewUserLead" type="int" public="false" private="true" save="true" desc="æ˜¯å¦åœ¨ä½“éªŒå‰¯æœ¬"/>
+		<property name="IsGetAward" type="int" public="false" private="false" save="true" desc="æ˜¯å¦é¢†å–è¿‡å¥–åŠ±"/>
 	</properties>
 	
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 
-		<record name="new_use_lead_skill_rec" cols="2" maxrows="256" public="false" private="true" save="false" desc="ÁÙÊ±±£´æ¼¼ÄÜµÄ±í">
-			<column type="string" desc="¼¼ÄÜ¶ÔÏó"/>
-			<column type="widestr" desc="ËùÔÚÈÝÆ÷µÄÃû×Ö"/>
+		<record name="new_use_lead_skill_rec" cols="2" maxrows="256" public="false" private="true" save="false" desc="ä¸´æ—¶ä¿å­˜æŠ€èƒ½çš„è¡¨">
+			<column type="string" desc="æŠ€èƒ½å¯¹è±¡"/>
+			<column type="widestr" desc="æ‰€åœ¨å®¹å™¨çš„åå­—"/>
 		</record>
 		
-		<record name="new_use_lead_shortcut_rec" cols="4" maxrows="1024" save="true" public="false" private="false" desc="¿ì½ÝÀ¸±í">
-			<column type="dword" desc="ÐòºÅ"/>
-			<column type="string" desc="²ÎÊý1"/>
-			<column type="string" desc="²ÎÊý2"/>
-			<column type="dword" desc="ÀàÐÍ£¬´óÓÚ0µÄ²»ÄÜ´Ó¿ì½ÝÀ¸É¾³ý"/>
+		<record name="new_use_lead_shortcut_rec" cols="4" maxrows="1024" save="true" public="false" private="false" desc="å¿«æ·æ è¡¨">
+			<column type="dword" desc="åºå·"/>
+			<column type="string" desc="å‚æ•°1"/>
+			<column type="string" desc="å‚æ•°2"/>
+			<column type="dword" desc="ç±»åž‹ï¼Œå¤§äºŽ0çš„ä¸èƒ½ä»Žå¿«æ·æ åˆ é™¤"/>
 		</record>
 
 	</records>

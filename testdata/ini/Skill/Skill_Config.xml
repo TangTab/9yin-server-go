@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Object>
 	<Property ID="2" Type="Skill_Main" Path="Skill/FBNpcASkill/Skill_Main_FBNpcA.xml"/>
 	<Property ID="3" Type="Skill_Main" Path="Skill/FBNpcBSkill/Skill_Main_FBNpcB.xml"/>
@@ -25,7 +25,7 @@
 	<Property ID="24" Type="Skill_Effect" Path="Skill/SpecialSkill/Skill_Effect_Special.xml"/>
 	<Property ID="25" Type="Skill_Effect" Path="Skill/TestSkill/Skill_Effect_Test.xml"/>
 	<Property ID="26" Type="Skill_Formula" Path="Skill/formula.xml"/>
-	<!--Skill_MulDamage.xml   这个表客户端没有使用-->
+	<!--Skill_MulDamage.xml   杩欎釜琛ㄥ鎴风娌℃湁浣跨敤-->
 	<Property ID="34" Type="Skill_MulDamage" Path="Skill/FBNpcASkill/Skill_MulDamage_FBNpcA.xml"/>
 	<Property ID="35" Type="Skill_MulDamage" Path="Skill/FBNpcBSkill/Skill_MulDamage_FBNpcB.xml"/>
 	<Property ID="36" Type="Skill_MulDamage" Path="Skill/NpcSkill/Skill_MulDamage_Npc.xml"/>

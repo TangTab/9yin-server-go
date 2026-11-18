@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <object>
-	<!-- 基本属性 -->
+	<!-- 鍩烘湰灞炴�� -->
 	<properties>
-		<property name="BulletNum" type="int" public="false" private="true" save="false" desc="几个子弹栏位"/>
+		<property name="BulletNum" type="int" public="false" private="true" save="false" desc="鍑犱釜瀛愬脊鏍忎綅"/>
 	</properties>
 </object>

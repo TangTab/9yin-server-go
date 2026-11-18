@@ -1,44 +1,44 @@
 -----------------------------------------
--- @ ½Å±¾Ãû³Æ: task2101.lua
--- @ ½Å±¾¹¦ÄÜ: 2101ÈÎÎñÂß¼­
--- @ ´´½¨Õß:   huangmw
--- @ ´´½¨ÈÕÆÚ: 2010.11.16
+-- @ è„šæœ¬åç§°: task2101.lua
+-- @ è„šæœ¬åŠŸèƒ½: 2101ä»»åŠ¡é€»è¾‘
+-- @ åˆ›å»ºè€…:   huangmw
+-- @ åˆ›å»ºæ—¥æœŸ: 2010.11.16
 -----------------------------------------
 require("define")
 
--- ÈÎÎñ³Ğ½ÓÌõ¼şÅĞ¶Ï£¬ÔÚ½ÓÈÎÎñÇ°¿´ÊÇ·ñÓĞ½ÓÈÎÎñµÄÌõ¼ş
+-- ä»»åŠ¡æ‰¿æ¥æ¡ä»¶åˆ¤æ–­ï¼Œåœ¨æ¥ä»»åŠ¡å‰çœ‹æ˜¯å¦æœ‰æ¥ä»»åŠ¡çš„æ¡ä»¶
 function Task_Accept_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñ½ÓÊÜºó£¬´¦ÀíÈÎÎñ½ÓÊÜºó¸÷ÖÖ²»Í¨ÓÃµÄÊÂ¼ş
+-- ä»»åŠ¡æ¥å—åï¼Œå¤„ç†ä»»åŠ¡æ¥å—åå„ç§ä¸é€šç”¨çš„äº‹ä»¶
 function Task_After_Accept(player, npc, taskid)
 
-	-- ĞŞ¸Ä½ÓÊÜ±íµÄË³Ğò×Ö¶Î
+	-- ä¿®æ”¹æ¥å—è¡¨çš„é¡ºåºå­—æ®µ
 	local row = nx_find_record_value(player, "Task_Accepted", 0, taskid)
 	if row >= 0 then
 		nx_set_record_value(player, "Task_Accepted", row, 8, 1)
 	end
 
-	--µ÷ÓÃ½Ó¿Ú½«Íæ¼Ò´«ËÍÖÁ·Ö×é³¡¾°groupscene002£¬¼´56ºÅ³¡¾°
+	--è°ƒç”¨æ¥å£å°†ç©å®¶ä¼ é€è‡³åˆ†ç»„åœºæ™¯groupscene002ï¼Œå³56å·åœºæ™¯
 	nx_switch_to_subscene(player, nx_int(1))
 
 	return 1
 end
 
 
--- ÈÎÎñÍê³ÉÌõ¼şÅĞ¶Ï£¬ÔÚ½»ÈÎÎñÇ°¿´ÊÇ·ñ¿ÉÒÔÍê³ÉÈÎÎñ
+-- ä»»åŠ¡å®Œæˆæ¡ä»¶åˆ¤æ–­ï¼Œåœ¨äº¤ä»»åŠ¡å‰çœ‹æ˜¯å¦å¯ä»¥å®Œæˆä»»åŠ¡
 function Task_Complete_Condition(player, npc, taskid)
 	return 1
 end
 
 
--- ÈÎÎñÍê³Éºó³ö£¬´¦ÀíÈÎÎñÌá½»ºóµÄ²»Í¨ÓÃÊÂ¼ş
+-- ä»»åŠ¡å®Œæˆåå‡ºï¼Œå¤„ç†ä»»åŠ¡æäº¤åçš„ä¸é€šç”¨äº‹ä»¶
 function Task_After_Complete(player, npc, taskid)
 	return 1
 end
 
---Íê³ÉÈÎÎñÄ³Ò»²½ºóµÄ´¦Àí
+--å®Œæˆä»»åŠ¡æŸä¸€æ­¥åçš„å¤„ç†
 function on_complete_step(player, task_id, subFuncId, subFuncType, subFuncOrder)
 end

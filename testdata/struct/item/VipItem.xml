@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="UseTime" type="int" public="false" private="false" save="false" desc="Ê¹ÓÃºó»ñµÃVIPµÄÊ±¼ä"/>
+		<property name="UseTime" type="int" public="false" private="false" save="false" desc="ä½¿ç”¨åŽèŽ·å¾—VIPçš„æ—¶é—´"/>
 	</properties>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

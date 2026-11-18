@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÊÍ·Å¼¼ÄÜNPC»ù´¡ÊôÐÔ-->
+<!--é‡Šæ”¾æŠ€èƒ½NPCåŸºç¡€å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-    		<property name="UseSkillID" type="string" public="false" private="false" save="false" desc="ÊÍ·Å¼¼ÄÜID"/>
+    		<property name="UseSkillID" type="string" public="false" private="false" save="false" desc="é‡Šæ”¾æŠ€èƒ½ID"/>
 	</properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
-		<record name="SkillNPCDemageList" cols="2" maxrows="16" save="false" public="false" private="false" desc="link±í¼ÇÂ¼">
-			<column type="object" desc="Íæ¼ÒPERSISTID"/>
-			<column type="word" desc="Ê£ÓàÉËº¦´ÎÊý"/>
+		<record name="SkillNPCDemageList" cols="2" maxrows="16" save="false" public="false" private="false" desc="linkè¡¨è®°å½•">
+			<column type="object" desc="çŽ©å®¶PERSISTID"/>
+			<column type="word" desc="å‰©ä½™ä¼¤å®³æ¬¡æ•°"/>
 		</record>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 		<path name="struct\rule\Common\Fightbag.xml" desc=""/>
 		<path name="struct\rule\Common\commonfighter.xml" desc=""/>
@@ -24,10 +24,10 @@
 		<path name="struct\rule\Common\relation.xml" desc=""/>
 		<path name="struct\rule\Common\autorestore.xml" desc=""/>
 		<path name="struct\rule\Common\skilluse.xml" desc=""/>
-		<path name="struct\rule\Common\ModifyBase.xml" desc="ÊôÐÔ ¼¼ÄÜ buffÐÞÕý±í"/>
+		<path name="struct\rule\Common\ModifyBase.xml" desc="å±žæ€§ æŠ€èƒ½ buffä¿®æ­£è¡¨"/>
 		<path name="struct\rule\Common\basefighterdata.xml" desc=""/>
-		<path name="struct\npc_property\ai_npc_data.xml" desc="AIÊôÐÔ"/>
-		<path name="struct\player\flow.xml" desc="´Ó´úÂëÖÐÒÆ¶¯¹ýÀ´µÄ"/>
+		<path name="struct\npc_property\ai_npc_data.xml" desc="AIå±žæ€§"/>
+		<path name="struct\player\flow.xml" desc="ä»Žä»£ç ä¸­ç§»åŠ¨è¿‡æ¥çš„"/>
 		
 	</includes>
 </object>

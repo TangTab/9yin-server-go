@@ -1,89 +1,89 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- edited with XMLSpy v2005 rel. 3 U (http://www.altova.com) by  () -->
-<!--ÉËº¦Ïà¹ØÊôÐÔ-->
+<!--ä¼¤å®³ç›¸å…³å±žæ€§-->
 <object>
-	<!-- »ù±¾ÊôÐÔ -->
+	<!-- åŸºæœ¬å±žæ€§ -->
 	<properties>
-		<property name="MaxPhyAttackAdd" type="int" public="false" private="false" save="false" desc="×î´óÎïÀí¹¥»÷Á¦"/>
-		<property name="MinPhyAttackAdd" type="int" public="false" private="false" save="false" desc="×îÐ¡ÎïÀí¹¥»÷Á¦"/>
-		<property name="MaxMagicAttackAdd" type="int" public="false" private="false" save="false" desc="×î´ó·¨Êõ¹¥»÷Á¦"/>
-		<property name="MinMagicAttackAdd" type="int" public="false" private="false" save="false" desc="×îÐ¡·¨Êõ¹¥»÷Á¦"/>
+		<property name="MaxPhyAttackAdd" type="int" public="false" private="false" save="false" desc="æœ€å¤§ç‰©ç†æ”»å‡»åŠ›"/>
+		<property name="MinPhyAttackAdd" type="int" public="false" private="false" save="false" desc="æœ€å°ç‰©ç†æ”»å‡»åŠ›"/>
+		<property name="MaxMagicAttackAdd" type="int" public="false" private="false" save="false" desc="æœ€å¤§æ³•æœ¯æ”»å‡»åŠ›"/>
+		<property name="MinMagicAttackAdd" type="int" public="false" private="false" save="false" desc="æœ€å°æ³•æœ¯æ”»å‡»åŠ›"/>
 		
-		<property name="IntensityPhyAttack" type="int" public="false" private="false" save="false" desc="ÎïÀí¹¥»÷Ç¿¶È"/>
-		<property name="IntensityMagicAttack" type="int" public="false" private="false" save="false" desc="·¨Êõ¹¥»÷Ç¿¶È"/>
+		<property name="IntensityPhyAttack" type="int" public="false" private="false" save="false" desc="ç‰©ç†æ”»å‡»å¼ºåº¦"/>
+		<property name="IntensityMagicAttack" type="int" public="false" private="false" save="false" desc="æ³•æœ¯æ”»å‡»å¼ºåº¦"/>
 		
-		<property name="IntensityPhyAttackAdd" type="int" public="false" private="false" save="false" desc="ÎïÀí¹¥»÷Ç¿¶È"/>
-		<property name="IntensityMagicAttackAdd" type="int" public="false" private="false" save="false" desc="·¨Êõ¹¥»÷Ç¿¶È"/>
+		<property name="IntensityPhyAttackAdd" type="int" public="false" private="false" save="false" desc="ç‰©ç†æ”»å‡»å¼ºåº¦"/>
+		<property name="IntensityMagicAttackAdd" type="int" public="false" private="false" save="false" desc="æ³•æœ¯æ”»å‡»å¼ºåº¦"/>
 		
-		<property name="WindAdd" type="int" public="false" private="false" save="false" desc="·çÏµ¿¹ÐÔ"/>	
-		<property name="FireAdd" type="int" public="false" private="false" save="false" desc="»ðÏµ¿¹ÐÔ"/>
-		<property name="EarthAdd" type="int" public="false" private="false" save="false" desc="ÍÁÏµ¿¹ÐÔ"/>
-		<property name="DarkAdd" type="int" public="false" private="false" save="false" desc="°µÏµ¿¹ÐÔ"/>
-		<property name="NatureAdd" type="int" public="false" private="false" save="false" desc="×ÔÈ»Ïµ¿¹ÐÔ"/>	
-		<property name="SteamAdd" type="int" public="false" private="false" save="false" desc="ÕôÆûÏµ¿¹ÐÔ"/>	
-		<property name="LightningAdd" type="int" public="false" private="false" save="false" desc="À×Ïµ¿¹ÐÔ"/>
-		<property name="WaterAdd" type="int" public="false" private="false" save="false" desc="Ë®Ïµ¿¹ÐÔ"/>
+		<property name="WindAdd" type="int" public="false" private="false" save="false" desc="é£Žç³»æŠ—æ€§"/>	
+		<property name="FireAdd" type="int" public="false" private="false" save="false" desc="ç«ç³»æŠ—æ€§"/>
+		<property name="EarthAdd" type="int" public="false" private="false" save="false" desc="åœŸç³»æŠ—æ€§"/>
+		<property name="DarkAdd" type="int" public="false" private="false" save="false" desc="æš—ç³»æŠ—æ€§"/>
+		<property name="NatureAdd" type="int" public="false" private="false" save="false" desc="è‡ªç„¶ç³»æŠ—æ€§"/>	
+		<property name="SteamAdd" type="int" public="false" private="false" save="false" desc="è’¸æ±½ç³»æŠ—æ€§"/>	
+		<property name="LightningAdd" type="int" public="false" private="false" save="false" desc="é›·ç³»æŠ—æ€§"/>
+		<property name="WaterAdd" type="int" public="false" private="false" save="false" desc="æ°´ç³»æŠ—æ€§"/>
 		
-		<property name="SteamAttackAdd" type="int" public="false" private="false" save="false" desc="ÕôÆû¹¥»÷"/>
-		<property name="NatureAttackAdd" type="int" public="false" private="false" save="false" desc="×ÔÈ»¹¥»÷"/>
-		<property name="WindAttackAdd" type="int" public="false" private="false" save="false" desc="·çÏµ¹¥»÷"/>
-		<property name="FireAttackAdd" type="int" public="false" private="false" save="false" desc="»ðÏµ¹¥»÷"/>
-		<property name="EarthAttackAdd" type="int" public="false" private="false" save="false" desc="ÍÁÏµ¹¥»÷"/>
-		<property name="DarkAttackAdd" type="int" public="false" private="false" save="false" desc="°µÏµ¹¥»÷"/>
-		<property name="WaterAttackAdd" type="int" public="false" private="false" save="false" desc="Ë®Ïµ¹¥»÷"/>
-		<property name="LightningAttackAdd" type="int" public="false" private="false" save="false" desc="À×Ïµ¹¥»÷"/>
+		<property name="SteamAttackAdd" type="int" public="false" private="false" save="false" desc="è’¸æ±½æ”»å‡»"/>
+		<property name="NatureAttackAdd" type="int" public="false" private="false" save="false" desc="è‡ªç„¶æ”»å‡»"/>
+		<property name="WindAttackAdd" type="int" public="false" private="false" save="false" desc="é£Žç³»æ”»å‡»"/>
+		<property name="FireAttackAdd" type="int" public="false" private="false" save="false" desc="ç«ç³»æ”»å‡»"/>
+		<property name="EarthAttackAdd" type="int" public="false" private="false" save="false" desc="åœŸç³»æ”»å‡»"/>
+		<property name="DarkAttackAdd" type="int" public="false" private="false" save="false" desc="æš—ç³»æ”»å‡»"/>
+		<property name="WaterAttackAdd" type="int" public="false" private="false" save="false" desc="æ°´ç³»æ”»å‡»"/>
+		<property name="LightningAttackAdd" type="int" public="false" private="false" save="false" desc="é›·ç³»æ”»å‡»"/>
 
 
-    <property name="HPHealInc" type="int" public="false" private="false" save="false" desc="ÖÎÁÆ»Ø¸´¸½¼Ó"/>
-    <property name="HPBeHealInc" type="int" public="false" private="false" save="false" desc="±»ÖÎÁÆ»Ø¸´¸½¼Ó"/>
-    <property name="PhyDamageInc" type="int" public="false" private="false" save="false" desc="ÎïÀíÉËº¦¸½¼Ó"/>
-    <property name="WindDamageInc" type="int" public="false" private="false" save="false" desc="·çÉËº¦¸½¼Ó"/>
-    <property name="FireDamageInc" type="int" public="false" private="false" save="false" desc="»ðÉËº¦¸½¼Ó"/>
-    <property name="LightningDamageInc" type="int" public="false" private="false" save="false" desc="À×ÉËº¦¸½¼Ó"/>
-    <property name="EarthDamageInc" type="int" public="false" private="false" save="false" desc="µØÉËº¦¸½¼Ó"/>
-    <property name="WaterDamageInc" type="int" public="false" private="false" save="false" desc="Ë®ÉËº¦¸½¼Ó"/>
-    <property name="DarkDamageInc" type="int" public="false" private="false" save="false" desc="°µÉËº¦¸½¼Ó"/>
-    <property name="NatureDamageInc" type="int" public="false" private="false" save="false" desc="×ÔÈ»ÉËº¦¸½¼Ó"/>
-    <property name="SteamDamageInc" type="int" public="false" private="false" save="false" desc="ÕôÆûÉËº¦¸½¼Ó"/>
-    <property name="MagicDamageInc" type="int" public="false" private="false" save="false" desc="Ä§·¨ÉËº¦¸½¼Ó"/>
-    <property name="DamageInc" type="int" public="false" private="false" save="false" desc="ÉËº¦¸½¼Ó"/>
-    <property name="HPConsumeInc" type="int" public="false" private="true" save="false" desc="ÉúÃüÏûºÄ¸½¼Ó"/>
-    <property name="MPConsumeInc" type="int" public="false" private="true" save="false" desc="Ä§·¨ÏûºÄ¸½¼Ó"/>
-    <property name="EYConsumeInc" type="int" public="false" private="true" save="false" desc="EYÏûºÄ¸½¼Ó"/>
-    <property name="RCConsumeInc" type="int" public="false" private="true" save="false" desc="RCÏûºÄ¸½¼Ó"/>
-    <property name="AVConsumeInc" type="int" public="false" private="true" save="false" desc="AVÏûºÄ¸½¼Ó"/>
-    <property name="FSConsumeInc" type="int" public="false" private="true" save="false" desc="FSÏûºÄ¸½¼Ó"/>
-    <property name="DPConsumeInc" type="int" public="false" private="true" save="false" desc="DPÏûºÄ¸½¼Ó"/>
-    <property name="ARMHPConsumeInc" type="int" public="false" private="true" save="false" desc="ARMHPÏûºÄ¸½¼Ó"/>
-    <property name="ARMEYConsumeInc" type="int" public="false" private="true" save="false" desc="ARMEYÏûºÄ¸½¼Ó"/>
+    <property name="HPHealInc" type="int" public="false" private="false" save="false" desc="æ²»ç–—å›žå¤é™„åŠ "/>
+    <property name="HPBeHealInc" type="int" public="false" private="false" save="false" desc="è¢«æ²»ç–—å›žå¤é™„åŠ "/>
+    <property name="PhyDamageInc" type="int" public="false" private="false" save="false" desc="ç‰©ç†ä¼¤å®³é™„åŠ "/>
+    <property name="WindDamageInc" type="int" public="false" private="false" save="false" desc="é£Žä¼¤å®³é™„åŠ "/>
+    <property name="FireDamageInc" type="int" public="false" private="false" save="false" desc="ç«ä¼¤å®³é™„åŠ "/>
+    <property name="LightningDamageInc" type="int" public="false" private="false" save="false" desc="é›·ä¼¤å®³é™„åŠ "/>
+    <property name="EarthDamageInc" type="int" public="false" private="false" save="false" desc="åœ°ä¼¤å®³é™„åŠ "/>
+    <property name="WaterDamageInc" type="int" public="false" private="false" save="false" desc="æ°´ä¼¤å®³é™„åŠ "/>
+    <property name="DarkDamageInc" type="int" public="false" private="false" save="false" desc="æš—ä¼¤å®³é™„åŠ "/>
+    <property name="NatureDamageInc" type="int" public="false" private="false" save="false" desc="è‡ªç„¶ä¼¤å®³é™„åŠ "/>
+    <property name="SteamDamageInc" type="int" public="false" private="false" save="false" desc="è’¸æ±½ä¼¤å®³é™„åŠ "/>
+    <property name="MagicDamageInc" type="int" public="false" private="false" save="false" desc="é­”æ³•ä¼¤å®³é™„åŠ "/>
+    <property name="DamageInc" type="int" public="false" private="false" save="false" desc="ä¼¤å®³é™„åŠ "/>
+    <property name="HPConsumeInc" type="int" public="false" private="true" save="false" desc="ç”Ÿå‘½æ¶ˆè€—é™„åŠ "/>
+    <property name="MPConsumeInc" type="int" public="false" private="true" save="false" desc="é­”æ³•æ¶ˆè€—é™„åŠ "/>
+    <property name="EYConsumeInc" type="int" public="false" private="true" save="false" desc="EYæ¶ˆè€—é™„åŠ "/>
+    <property name="RCConsumeInc" type="int" public="false" private="true" save="false" desc="RCæ¶ˆè€—é™„åŠ "/>
+    <property name="AVConsumeInc" type="int" public="false" private="true" save="false" desc="AVæ¶ˆè€—é™„åŠ "/>
+    <property name="FSConsumeInc" type="int" public="false" private="true" save="false" desc="FSæ¶ˆè€—é™„åŠ "/>
+    <property name="DPConsumeInc" type="int" public="false" private="true" save="false" desc="DPæ¶ˆè€—é™„åŠ "/>
+    <property name="ARMHPConsumeInc" type="int" public="false" private="true" save="false" desc="ARMHPæ¶ˆè€—é™„åŠ "/>
+    <property name="ARMEYConsumeInc" type="int" public="false" private="true" save="false" desc="ARMEYæ¶ˆè€—é™„åŠ "/>
 
-    <property name="HPHealMul" type="float" public="false" private="false" save="false" desc="ÖÎÁÆ»Ø¸´±¶ÂÊ"/>
-    <property name="HPBeHealMul" type="float" public="false" private="false" save="false" desc="±»ÖÎÁÆ»Ø¸´±¶ÂÊ"/>
-    <property name="PhyDamageMul" type="float" public="false" private="false" save="false" desc="ÎïÀíÉËº¦±¶ÂÊ"/>
-    <property name="WindDamageMul" type="float" public="false" private="false" save="false" desc="·çÉËº¦±¶ÂÊ"/>
-    <property name="FireDamageMul" type="float" public="false" private="false" save="false" desc="»ðÉËº¦±¶ÂÊ"/>
-    <property name="LightningDamageMul" type="float" public="false" private="false" save="false" desc="À×ÉËº¦±¶ÂÊ"/>
-    <property name="EarthDamageMul" type="float" public="false" private="false" save="false" desc="µØÉËº¦±¶ÂÊ"/>
-    <property name="WaterDamageMul" type="float" public="false" private="false" save="false" desc="Ë®ÉËº¦±¶ÂÊ"/>
-    <property name="DarkDamageMul" type="float" public="false" private="false" save="false" desc="°µÉËº¦±¶ÂÊ"/>
-    <property name="NatureDamageMul" type="float" public="false" private="false" save="false" desc="×ÔÈ»ÉËº¦±¶ÂÊ"/>
-    <property name="SteamDamageMul" type="float" public="false" private="false" save="false" desc="ÕôÆûÉËº¦±¶ÂÊ"/>
-    <property name="MagicDamageMul" type="float" public="false" private="false" save="false" desc="Ä§·¨ÉËº¦±¶ÂÊ"/>
-    <property name="DamageMul" type="float" public="false" private="false" save="false" desc="ÉËº¦±¶ÂÊ"/>
-    <property name="HPConsumeMul" type="float" public="false" private="true" save="false" desc="ÉúÃüÏûºÄ±¶ÂÊ"/>
-    <property name="MPConsumeMul" type="float" public="false" private="true" save="false" desc="Ä§·¨ÏûºÄ±¶ÂÊ"/>
-    <property name="EYConsumeMul" type="float" public="false" private="true" save="false" desc="EYÏûºÄ±¶ÂÊ"/>
-    <property name="RCConsumeMul" type="float" public="false" private="true" save="false" desc="RCÏûºÄ±¶ÂÊ"/>
-    <property name="AVConsumeMul" type="float" public="false" private="true" save="false" desc="AVÏûºÄ±¶ÂÊ"/>
-    <property name="FSConsumeMul" type="float" public="false" private="true" save="false" desc="FSÏûºÄ±¶ÂÊ"/>
-    <property name="DPConsumeMul" type="float" public="false" private="true" save="false" desc="DPÏûºÄ±¶ÂÊ"/>
-    <property name="ARMHPConsumeMul" type="float" public="false" private="true" save="false" desc="ARMHPÏûºÄ±¶ÂÊ"/>
-    <property name="ARMEYConsumeMul" type="float" public="false" private="true" save="false" desc="ARMEYÏûºÄ±¶ÂÊ"/>
+    <property name="HPHealMul" type="float" public="false" private="false" save="false" desc="æ²»ç–—å›žå¤å€çŽ‡"/>
+    <property name="HPBeHealMul" type="float" public="false" private="false" save="false" desc="è¢«æ²»ç–—å›žå¤å€çŽ‡"/>
+    <property name="PhyDamageMul" type="float" public="false" private="false" save="false" desc="ç‰©ç†ä¼¤å®³å€çŽ‡"/>
+    <property name="WindDamageMul" type="float" public="false" private="false" save="false" desc="é£Žä¼¤å®³å€çŽ‡"/>
+    <property name="FireDamageMul" type="float" public="false" private="false" save="false" desc="ç«ä¼¤å®³å€çŽ‡"/>
+    <property name="LightningDamageMul" type="float" public="false" private="false" save="false" desc="é›·ä¼¤å®³å€çŽ‡"/>
+    <property name="EarthDamageMul" type="float" public="false" private="false" save="false" desc="åœ°ä¼¤å®³å€çŽ‡"/>
+    <property name="WaterDamageMul" type="float" public="false" private="false" save="false" desc="æ°´ä¼¤å®³å€çŽ‡"/>
+    <property name="DarkDamageMul" type="float" public="false" private="false" save="false" desc="æš—ä¼¤å®³å€çŽ‡"/>
+    <property name="NatureDamageMul" type="float" public="false" private="false" save="false" desc="è‡ªç„¶ä¼¤å®³å€çŽ‡"/>
+    <property name="SteamDamageMul" type="float" public="false" private="false" save="false" desc="è’¸æ±½ä¼¤å®³å€çŽ‡"/>
+    <property name="MagicDamageMul" type="float" public="false" private="false" save="false" desc="é­”æ³•ä¼¤å®³å€çŽ‡"/>
+    <property name="DamageMul" type="float" public="false" private="false" save="false" desc="ä¼¤å®³å€çŽ‡"/>
+    <property name="HPConsumeMul" type="float" public="false" private="true" save="false" desc="ç”Ÿå‘½æ¶ˆè€—å€çŽ‡"/>
+    <property name="MPConsumeMul" type="float" public="false" private="true" save="false" desc="é­”æ³•æ¶ˆè€—å€çŽ‡"/>
+    <property name="EYConsumeMul" type="float" public="false" private="true" save="false" desc="EYæ¶ˆè€—å€çŽ‡"/>
+    <property name="RCConsumeMul" type="float" public="false" private="true" save="false" desc="RCæ¶ˆè€—å€çŽ‡"/>
+    <property name="AVConsumeMul" type="float" public="false" private="true" save="false" desc="AVæ¶ˆè€—å€çŽ‡"/>
+    <property name="FSConsumeMul" type="float" public="false" private="true" save="false" desc="FSæ¶ˆè€—å€çŽ‡"/>
+    <property name="DPConsumeMul" type="float" public="false" private="true" save="false" desc="DPæ¶ˆè€—å€çŽ‡"/>
+    <property name="ARMHPConsumeMul" type="float" public="false" private="true" save="false" desc="ARMHPæ¶ˆè€—å€çŽ‡"/>
+    <property name="ARMEYConsumeMul" type="float" public="false" private="true" save="false" desc="ARMEYæ¶ˆè€—å€çŽ‡"/>
   </properties>
-	<!-- ±íÊôÐÔ -->
+	<!-- è¡¨å±žæ€§ -->
 	<records>
 	</records>
-	<!--´ÓÆäËûÎÄ¼þ¼ÓÔØÊôÐÔ-->
+	<!--ä»Žå…¶ä»–æ–‡ä»¶åŠ è½½å±žæ€§-->
 	<includes>
 	</includes>
 </object>

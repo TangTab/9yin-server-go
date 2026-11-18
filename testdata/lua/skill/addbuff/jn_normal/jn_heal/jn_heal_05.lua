@@ -1,14 +1,14 @@
 --[[
 buf_heal_05
-µ¥ÌåË²Ê±»Ø¸´+»Ø¸´buffer
---Lv1:20+¾«Éñ*1,30Ãë|Ã¿5Ãë»Ø¸´lv*20ÆøÑª
---Lv2:40+¾«Éñ*2,30Ãë|Ã¿5Ãë»Ø¸´lv*20ÆøÑª
---Lv3:80+¾«Éñ*3,30Ãë|Ã¿5Ãë»Ø¸´lv*20ÆøÑª
---Lv4:160+¾«Éñ*4,30Ãë|Ã¿5Ãë»Ø¸´lv*20ÆøÑª
---Lv5:320+¾«Éñ*5,30Ãë|Ã¿5Ãë»Ø¸´lv*20ÆøÑª
+å•ä½“ç¬æ—¶å›å¤+å›å¤buffer
+--Lv1:20+ç²¾ç¥*1,30ç§’|æ¯5ç§’å›å¤lv*20æ°”è¡€
+--Lv2:40+ç²¾ç¥*2,30ç§’|æ¯5ç§’å›å¤lv*20æ°”è¡€
+--Lv3:80+ç²¾ç¥*3,30ç§’|æ¯5ç§’å›å¤lv*20æ°”è¡€
+--Lv4:160+ç²¾ç¥*4,30ç§’|æ¯5ç§’å›å¤lv*20æ°”è¡€
+--Lv5:320+ç²¾ç¥*5,30ç§’|æ¯5ç§’å›å¤lv*20æ°”è¡€
 ]]
 
--- Ê©·ÅÕß¶ÔÏó, ±»ÊÍ·ÅÕß¶ÔÏó, ¼¼ÄÜµÈ¼¶
+-- æ–½æ”¾è€…å¯¹è±¡, è¢«é‡Šæ”¾è€…å¯¹è±¡, æŠ€èƒ½ç­‰çº§
 function AddBuff(self, target, level)
 	local healpower = nx_query_property(self, "HealPower") + nx_query_property(self, "HealPowerAdd")
 	local Spi = nx_query_property(self, "Spi") + nx_query_property(self, "SpiAdd")
@@ -33,33 +33,33 @@ function AddBuff(self, target, level)
 		inc_value = healpower * 20
 	end
 
-	--´´½¨Buffer, Ë²Ê±»Ø¸´
+	--åˆ›å»ºBuffer, ç¬æ—¶å›å¤
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_05a")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "DirectPropertyRec", 0, 0, "", "HP", nx_double(healpoint), 0,1)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false
 	end
 
-	--´´½¨Buffer, ÖÜÆÚĞÔ»ØÑª
+	--åˆ›å»ºBuffer, å‘¨æœŸæ€§å›è¡€
 	local buffer = nx_create_from_config(nx_get_scene(), "buf_heal_05b")
 	if not nx_exists(buffer) then
 		return false
 	end
 
-	--ÉèÖÃBufferµÄÊôĞÔ
+	--è®¾ç½®Bufferçš„å±æ€§
 	nx_set_property(buffer, "Level", level)
 	nx_add_record_row_values(buffer, "ContinuePropertyRec", 0, 0, "", "HP", nx_double(inc_value), 0)
 
-	--Ìí¼Óµ½¶Ô·½
+	--æ·»åŠ åˆ°å¯¹æ–¹
 	if not nx_add_buffer(target, self, buffer) then
 		nx_destroy_self(buffer)
 		return false

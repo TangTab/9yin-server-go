@@ -1,37 +1,37 @@
 ----------------------------------------------------
---ËµÃ÷:		¹ÖÎï»÷É±ºóµÄ½±ÀøÂß¼­
+--è¯´æ˜Ž:		æ€ªç‰©å‡»æ€åŽçš„å¥–åŠ±é€»è¾‘
 ----------------------------------------------------
 require("define")
 
 local TEAM_REC_NAME	= "team_rec"
 --[[
-ÄÚ¹¦	¹¦ÄÜ	ÄÚ¹¦ºÍ¹ÖÎïÖ®¼ä¼¶±ð²î´øÀ´µÄ³Í·£
-Èô£¨Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð-¹ÖÎïµÄ¼¶±ð£©=1 ¾­Ñé*0.8
-Èô£¨Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð-¹ÖÎïµÄ¼¶±ð£©=2 ¾­Ñé*0.65
-Èô£¨Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð-¹ÖÎïµÄ¼¶±ð£©=3 ¾­Ñé*0.5
-Èô£¨Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð-¹ÖÎïµÄ¼¶±ð£©=4 ¾­Ñé*0.35
-Èô£¨Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð-¹ÖÎïµÄ¼¶±ð£©=5 ¾­Ñé*0.25
-Èô£¨Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð-¹ÖÎïµÄ¼¶±ð£©=6 ¾­Ñé*0.15
+å†…åŠŸ	åŠŸèƒ½	å†…åŠŸå’Œæ€ªç‰©ä¹‹é—´çº§åˆ«å·®å¸¦æ¥çš„æƒ©ç½š
+è‹¥ï¼ˆçŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«-æ€ªç‰©çš„çº§åˆ«ï¼‰=1 ç»éªŒ*0.8
+è‹¥ï¼ˆçŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«-æ€ªç‰©çš„çº§åˆ«ï¼‰=2 ç»éªŒ*0.65
+è‹¥ï¼ˆçŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«-æ€ªç‰©çš„çº§åˆ«ï¼‰=3 ç»éªŒ*0.5
+è‹¥ï¼ˆçŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«-æ€ªç‰©çš„çº§åˆ«ï¼‰=4 ç»éªŒ*0.35
+è‹¥ï¼ˆçŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«-æ€ªç‰©çš„çº§åˆ«ï¼‰=5 ç»éªŒ*0.25
+è‹¥ï¼ˆçŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«-æ€ªç‰©çš„çº§åˆ«ï¼‰=6 ç»éªŒ*0.15
 
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=0 ¾­Ñé²»±ä
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=1 ¾­Ñé²»±ä
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=2 ¾­Ñé²»±ä
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=3 ¾­Ñé²»±ä
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=4 ¾­Ñé*0.8
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=5 ¾­Ñé*0.65
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=6 ¾­Ñé*0.5
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=7 ¾­Ñé*0.35
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=8 ¾­Ñé*0.25
-Èô£¨¹ÖÎïµÄ¼¶±ð-Íæ¼Ò¼¤»îÄÚ¹¦¼¶±ð£©=9 ¾­Ñé*0.15
-  ÆäËüËùÓÐÇé¿ö£¬µÃµ½¾­ÑéÎª 1
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=0 ç»éªŒä¸å˜
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=1 ç»éªŒä¸å˜
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=2 ç»éªŒä¸å˜
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=3 ç»éªŒä¸å˜
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=4 ç»éªŒ*0.8
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=5 ç»éªŒ*0.65
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=6 ç»éªŒ*0.5
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=7 ç»éªŒ*0.35
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=8 ç»éªŒ*0.25
+è‹¥ï¼ˆæ€ªç‰©çš„çº§åˆ«-çŽ©å®¶æ¿€æ´»å†…åŠŸçº§åˆ«ï¼‰=9 ç»éªŒ*0.15
+  å…¶å®ƒæ‰€æœ‰æƒ…å†µï¼Œå¾—åˆ°ç»éªŒä¸º 1
   
-ÄÚ¹¦	¹¦ÄÜ	×é¶Ó´ò¹Ö£¬»ñµÃÐÞÎªµÄÐÞÕý¼ÆËã
-ÊýÖµÌÖÂÛ
-²ÎÊý1£º¶ÓÎéÖÐ¶ÓÔ±µÄÊýÁ¿
-N¸ö¶ÓÔ±Ã¿¸öPLAYERµÃµ½µÄ¾­ÑéÎª(1+5%*N)/N
+å†…åŠŸ	åŠŸèƒ½	ç»„é˜Ÿæ‰“æ€ªï¼ŒèŽ·å¾—ä¿®ä¸ºçš„ä¿®æ­£è®¡ç®—
+æ•°å€¼è®¨è®º
+å‚æ•°1ï¼šé˜Ÿä¼ä¸­é˜Ÿå‘˜çš„æ•°é‡
+Nä¸ªé˜Ÿå‘˜æ¯ä¸ªPLAYERå¾—åˆ°çš„ç»éªŒä¸º(1+5%*N)/N
 ]]--
 
---ÖµÏàµÈ
+--å€¼ç›¸ç­‰
 function lua_number_equal(a, b, dist)
 
 	if (math.abs(a-b) < dist) then
@@ -42,11 +42,11 @@ function lua_number_equal(a, b, dist)
 
 end
 
---¸ù¾ÝÍæ¼ÒºÍNPCÖ®¼äµÄÒÔ¼°Íæ¼ÒÄÚ¹¦ÓënpcÖ®¼äµÄ¹ØÏµ¼ÆËãÄÚ¹¦½±Àø
---²ÎÊý1: object owner		Íæ¼Ò
---²ÎÊý2: object npc			±»É±NPC
---²ÎÊý3: object neigong		µ±Ç°ÄÚ¹¦ID
---²ÎÊý4: int inc_exp		Ô­ÄÚÄÚ¹¦½±Àø¾­Ñé
+--æ ¹æ®çŽ©å®¶å’ŒNPCä¹‹é—´çš„ä»¥åŠçŽ©å®¶å†…åŠŸä¸Žnpcä¹‹é—´çš„å…³ç³»è®¡ç®—å†…åŠŸå¥–åŠ±
+--å‚æ•°1: object owner		çŽ©å®¶
+--å‚æ•°2: object npc			è¢«æ€NPC
+--å‚æ•°3: object neigong		å½“å‰å†…åŠŸID
+--å‚æ•°4: int inc_exp		åŽŸå†…å†…åŠŸå¥–åŠ±ç»éªŒ
 function neigong_awards(owner, npc, inc_exp)
 	
 	--nx_msgbox("neigong_awards1")
@@ -59,21 +59,21 @@ function neigong_awards(owner, npc, inc_exp)
 		return false
 	end
 	
-	--½±ÀøÄÚ¹¦Öµ×îÐ¡Îª1
+	--å¥–åŠ±å†…åŠŸå€¼æœ€å°ä¸º1
 	if inc_exp < 1 then
 		inc_exp = 1
 	end
 	
-	--ÊÇ·ñÕýÔÚ¶ÓÎéÀï,Ö»ÓÐ×ÔÒÑÒ»¸öÈË¶ÓÎé²»Ëã
+	--æ˜¯å¦æ­£åœ¨é˜Ÿä¼é‡Œ,åªæœ‰è‡ªå·²ä¸€ä¸ªäººé˜Ÿä¼ä¸ç®—
 	if is_in_team(owner) then
 	
 		add_team_members_neigong_exp(owner, npc, inc_exp)
 	
 	else
-		--»ñÈ¡×ÔÒÑµ±Ç°ÄÚ¹¦Ó¦µÃµÄ¾­Ñé
+		--èŽ·å–è‡ªå·²å½“å‰å†…åŠŸåº”å¾—çš„ç»éªŒ
 		local neigong_config_id = nx_query_property(owner, "CurNeiGong")
 		
-		--µ±Ç°ÄÚ¹¦
+		--å½“å‰å†…åŠŸ
 		local neigong_obj = nx_find_neigong(owner, neigong_config_id)
 		
 		if nx_exists(neigong_obj) then
@@ -81,12 +81,12 @@ function neigong_awards(owner, npc, inc_exp)
 			local my_inc_exp = get_my_inc_exp(neigong_obj, npc, inc_exp)
 		
 			--nx_msgbox("my_inc_exp=" .. nx_string(my_inc_exp))
-			--Ö±½ÓÌí¼ÓÍæ¼ÒÄÚ¹¦¾­Ñé
+			--ç›´æŽ¥æ·»åŠ çŽ©å®¶å†…åŠŸç»éªŒ
 			nx_add_neigong_exp(owner, neigong_config_id, my_inc_exp)
 			
-			--Êµ¼Ê»ñµÃµÄ¾­ÑéÐ¡ÓÚÓ¦µÃµÄ£¬ÔòÌáÊ¾³Í·£
+			--å®žé™…èŽ·å¾—çš„ç»éªŒå°äºŽåº”å¾—çš„ï¼Œåˆ™æç¤ºæƒ©ç½š
 			if my_inc_exp < inc_exp then
-				--ÄÚ¹¦µÈ¼¶ºÍ¹ÖÎïµÈ¼¶²î¾àµ¼ÖÂ´¦·£
+				--å†…åŠŸç­‰çº§å’Œæ€ªç‰©ç­‰çº§å·®è·å¯¼è‡´å¤„ç½š
 				nx_sysinfo(owner, TIPSTYPE_SYSTEMNO, "8007")
 			end
 		end
@@ -94,7 +94,7 @@ function neigong_awards(owner, npc, inc_exp)
 	
 end
 
---µÃµ½×ÔÒÑÄÚ¹¦Ó¦µÃµÄ¾­Ñé
+--å¾—åˆ°è‡ªå·²å†…åŠŸåº”å¾—çš„ç»éªŒ
 function get_my_inc_exp(neigong, npc, inc_exp)
 
 	local neigong_level = nx_query_property(neigong, "Level");
@@ -103,7 +103,7 @@ function get_my_inc_exp(neigong, npc, inc_exp)
 	
 	local final_inc_exp = 1
 	
-	--ÄÚ¹¦µÈ¼¶´óÓÚNPCµÈ¼¶
+	--å†…åŠŸç­‰çº§å¤§äºŽNPCç­‰çº§
 	if neigong_level > npc_level then
 		
 		local sub_level = neigong_level - npc_level
@@ -134,7 +134,7 @@ function get_my_inc_exp(neigong, npc, inc_exp)
 		
 		end
 		
-	else --ÄÚ¹¦µÈ¼¶Ð¡ÓÚNPCµÈ¼¶
+	else --å†…åŠŸç­‰çº§å°äºŽNPCç­‰çº§
 		
 		local sub_level = npc_level - neigong_level
 		
@@ -174,14 +174,14 @@ function get_my_inc_exp(neigong, npc, inc_exp)
 	
 end
 
---¼ì²éÍæ¼ÒÊÇ·ñÔÚ¶ÓÎéÖÐ
+--æ£€æŸ¥çŽ©å®¶æ˜¯å¦åœ¨é˜Ÿä¼ä¸­
 function is_in_team(player)
 
 	local team_id = nx_query_property(player, "TeamID")
 	
 	if team_id > 0 then
 		
-		--ÕâÀïÖ»ÓÐÒ»¸öÈËÔÚ¶ÓÎéÀïÊ±£¬²»×÷×é¶Ó·ÖÅä
+		--è¿™é‡Œåªæœ‰ä¸€ä¸ªäººåœ¨é˜Ÿä¼é‡Œæ—¶ï¼Œä¸ä½œç»„é˜Ÿåˆ†é…
 		local row_count = nx_get_record_rows(player, TEAM_REC_NAME)
 		
 		if row_count == 1 then
@@ -198,15 +198,15 @@ function is_in_team(player)
 	
 end
 
---»ñÈ¡¶ÓÎéÖÐµÄËùÓÐÍæ¼Ò
+--èŽ·å–é˜Ÿä¼ä¸­çš„æ‰€æœ‰çŽ©å®¶
 function add_team_members_neigong_exp(player, npc, total_exp)
 
-	--¼ÆËãÃ¿¸öÈË·Öµ½µÄÄÚ¹¦
+	--è®¡ç®—æ¯ä¸ªäººåˆ†åˆ°çš„å†…åŠŸ
 	local row_count = nx_get_record_rows(player, TEAM_REC_NAME)
 	
 	local every_one_exp = nx_int((1 + 0.05 * row_count) * total_exp / row_count)
 	
-	--×îÉÙÒ»µã
+	--æœ€å°‘ä¸€ç‚¹
 	if every_one_exp < 1 then
 		every_one_exp = 1
 	end
@@ -218,32 +218,32 @@ function add_team_members_neigong_exp(player, npc, total_exp)
 		local player_obj = nx_find_player(team_member_name)
 	
 		--nx_msgbox(nx_string(team_member_name) .. " every_one_exp =" .. nx_string(every_one_exp))
-		--¼ì²éÍæ¼ÒÊÇ·ñÔÚÍ¬·þ
+		--æ£€æŸ¥çŽ©å®¶æ˜¯å¦åœ¨åŒæœ
 		if nx_exists(player_obj) then
 
-			--Ö±½ÓÌí¼ÓÍæ¼ÒÄÚ¹¦¾­Ñé
+			--ç›´æŽ¥æ·»åŠ çŽ©å®¶å†…åŠŸç»éªŒ
 			local neigong_config_id = nx_query_property(player_obj, "CurNeiGong")
 			
-			--»ñÈ¡×é¶Ó¶ÓÔ±µ±Ç°ÄÚ¹¦
+			--èŽ·å–ç»„é˜Ÿé˜Ÿå‘˜å½“å‰å†…åŠŸ
 			local neigong_obj = nx_find_neigong(player_obj, neigong_config_id)
 			
 			if nx_exists(neigong_obj) then
 				
-				--¸ú¾Óµ±Ç°ÄÚ¹¦ºÍNPCÖØËãÓ¦¸Ã»ñµÃµÄÄÚ¹¦¾­Ñé
+				--è·Ÿå±…å½“å‰å†…åŠŸå’ŒNPCé‡ç®—åº”è¯¥èŽ·å¾—çš„å†…åŠŸç»éªŒ
 				local my_inc_exp = get_my_inc_exp(neigong_obj, npc, every_one_exp)
 				
 				local neigong_config_id = nx_get_config(neigong_obj)
-				--×îÉÙÒ»µã
+				--æœ€å°‘ä¸€ç‚¹
 				if my_inc_exp < 1 then
 					my_inc_exp = 1
 				end
 				--nx_msgbox("my_inc_exp=" .. nx_string(my_inc_exp))
-				--Ìí¼ÓÄÚ¹¦¾­Ñé
+				--æ·»åŠ å†…åŠŸç»éªŒ
 				nx_add_neigong_exp(player_obj, neigong_config_id, my_inc_exp)
 				
-				--Êµ¼Ê»ñµÃµÄ¾­ÑéÐ¡ÓÚÓ¦µÃµÄ£¬ÔòÌáÊ¾³Í·£
+				--å®žé™…èŽ·å¾—çš„ç»éªŒå°äºŽåº”å¾—çš„ï¼Œåˆ™æç¤ºæƒ©ç½š
 				if my_inc_exp < every_one_exp then
-					--ÄÚ¹¦µÈ¼¶ºÍ¹ÖÎïµÈ¼¶²î¾àµ¼ÖÂ´¦·£
+					--å†…åŠŸç­‰çº§å’Œæ€ªç‰©ç­‰çº§å·®è·å¯¼è‡´å¤„ç½š
 					nx_sysinfo(player_obj, TIPSTYPE_SYSTEMNO, "8007")
 				end
 			end
@@ -251,8 +251,8 @@ function add_team_members_neigong_exp(player, npc, total_exp)
 	end
 end
 
---»÷É±¹ÖÎïºó½±ÀøÐÞÎªÖµ self£ºÍæ¼Ò×ÔÉí£¬npc£º±»»÷É±µÄ¹ÖÎï£¬ inc_value£º»÷É±ºóÔö¼ÓµÄÐÞÎªÖµ
---nx_inc_faculty£¨self£¬ value£¬ ¡°¡± £©
+--å‡»æ€æ€ªç‰©åŽå¥–åŠ±ä¿®ä¸ºå€¼ selfï¼šçŽ©å®¶è‡ªèº«ï¼Œnpcï¼šè¢«å‡»æ€çš„æ€ªç‰©ï¼Œ inc_valueï¼šå‡»æ€åŽå¢žåŠ çš„ä¿®ä¸ºå€¼
+--nx_inc_facultyï¼ˆselfï¼Œ valueï¼Œ â€œâ€ ï¼‰
 function award_faculty( self, npc, inc_value )
 	return nx_inc_faculty(self, inc_value, "kill npc" );
 end
