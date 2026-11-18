@@ -120,6 +120,9 @@ func (w *World) Count[T any]() int { return w.store[T]().len() }
 // CurrentTick 返回调度器推进到的帧号（从 1 起；0 表示尚未 tick）。
 func (w *World) CurrentTick() uint64 { return w.tick }
 
+// EntityCount 返回当前存活实体数。
+func (w *World) EntityCount() int { return len(w.slots) - len(w.free) }
+
 // ---- 查询 ----
 
 // matchAll 求组件集合交集：选最小 dense 作驱动遍历，none 为排除集。
