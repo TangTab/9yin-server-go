@@ -56,17 +56,29 @@ func worldInfoFrame(infoType uint16, text string) []byte {
 const openBooks = "0,book1,0,book2,0,book4,0,book5,0,book8,0,0"
 
 // Flow 是登录链分派器：Gateway.OnFrame 的第一接入点。
-// 当前覆盖首段：op02 账号登录（结构校验+身份摘要，回无角色 0x04）、
-// op03 世界信息（回五书 worldInfo）。选角/建角/进场景随主干推进扩展。
+// 当前覆盖：op02 账号登录（有/无角色 0x04）、op03 世界信息（五书）、
+// op05 建角（回有角色 0x04）。选角 op04 与进场景随主干推进扩展。
 type Flow struct {
 	// Clock 时间源（应答帧日期字段；测试可注入）。
 	Clock func() time.Time
 	// Logf 可选日志钩子。
 	Logf func(format string, args ...any)
+	// Roles 角色仓（nil=Flow 内建内存仓；persist 接 DB 时替换）。
+	Roles *RoleStore
 	// OnLogin 账号通过结构校验后的回调（身份摘要入账号域/落库挂点）。
 	OnLogin func(sess *Session, identity AccountIdentity)
 
-	now func() time.Time
+	defaultRoles *RoleStore
+}
+
+func (f *Flow) roles() *RoleStore {
+	if f.Roles == nil {
+		if f.defaultRoles == nil {
+			f.defaultRoles = NewRoleStore()
+		}
+		return f.defaultRoles
+	}
+	return f.Roles
 }
 
 // Handle 处理一帧心跳外的客户端帧，应答直接写回会话连接。
@@ -86,15 +98,45 @@ func (f *Flow) Handle(sess *Session, frame []byte) {
 		if f.OnLogin != nil {
 			f.OnLogin(sess, identity)
 		}
-		if err := sess.Conn.WriteMsg(noRoleLoginSuccessFrame(f.clock())); err != nil {
+		sess.Account = identity.String()
+		sess.Role = f.roles().Get(sess.Account)
+		var reply []byte
+		if sess.Role != nil {
+			reply = oneRoleLoginSuccessFrame(f.clock(), sess.Role)
+		} else {
+			reply = noRoleLoginSuccessFrame(f.clock())
+		}
+		if err := sess.Conn.WriteMsg(reply); err != nil {
 			return
 		}
-		f.logf("flow: 会话 %d 账号 %s 登录（无角色应答）", sess.ID, identity.Prefix())
+		f.logf("flow: 会话 %d 账号 %s 登录（角色=%t）", sess.ID, identity.Prefix(), sess.Role != nil)
 	case OpClientWorldReq:
 		if err := sess.Conn.WriteMsg(worldInfoFrame(0, openBooks)); err != nil {
 			return
 		}
 		f.logf("flow: 会话 %d worldInfo（五书开放）", sess.ID)
+	case OpClientRoleNew:
+		if sess.Account == "" {
+			f.logf("flow: 会话 %d 未登录建角，忽略", sess.ID)
+			return
+		}
+		name, appearance := parseCreateRole(frame)
+		if name == "" {
+			name = "本地角色" // 旧分支同款回退
+		}
+		sess.Role = f.roles().Create(sess.Account, name, appearance)
+		if err := sess.Conn.WriteMsg(oneRoleLoginSuccessFrame(f.clock(), sess.Role)); err != nil {
+			return
+		}
+		f.logf("flow: 会话 %d 建角 %q（外观串 %d 个）", sess.ID, name, len(appearance))
+	case OpClientRoleSel:
+		if sess.Role == nil {
+			f.logf("flow: 会话 %d 无角色却选角，忽略", sess.ID)
+			return
+		}
+		// 选角后旧服直接开始进场景风暴（op0B EntryScene + 快照）——
+		// 进场景环接入点，当前保持会话等待。
+		f.logf("flow: 会话 %d 选角 %q（进场景待接入）", sess.ID, sess.Role.Name)
 	default:
 		f.logf("flow: 会话 %d 登录前未处理帧 op=%02X len=%d", sess.ID, frame[0], len(frame))
 	}

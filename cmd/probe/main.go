@@ -23,6 +23,7 @@ import (
 	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/net"
+	"github.com/lizhanyin/9yin-server-go/internal/proto"
 )
 
 // goldenPings 旧分支心跳对拍的实测样本（ping→pong，首字节 18→38 其余逐字节回显）。
@@ -104,8 +105,8 @@ func main() {
 }
 
 // probeLogin 登录模式：解码 golden 首飞线路帧得 121B 明文 op02，经
-// 同装配线路重放，断言 41B 无角色 0x04 应答（含日期字段合理性）与
-// op03 → 0x05 五书 worldInfo。
+// 同装配线路重放，断言 41B 无角色 0x04 应答（含日期字段合理性）、
+// op03 → 0x05 五书 worldInfo、op05 建角 → 有角色 0x04。
 func probeLogin(addr, flightPath string, opt net.Options, plain bool) int {
 	raw, err := os.ReadFile(flightPath)
 	if err != nil {
@@ -142,9 +143,14 @@ func probeLogin(addr, flightPath string, opt net.Options, plain bool) int {
 		fatal(err)
 	}
 	fail := 0
-	if len(reply) != 0x29 || reply[0] != 0x04 {
+	// 0x04 两种合法形态：41B 无角色 / 追加段有角色（服务端角色仓持久，
+	// 重复运行 probe 时首登即有角色）
+	hasRole := len(reply) > 0x29
+	if (len(reply) != 0x29 && !hasRole) || reply[0] != 0x04 {
 		fmt.Printf("probe: FAIL — 0x04 应答形态不符（op=%02X len=%d）\n", reply[0], len(reply))
 		fail++
+	} else if hasRole {
+		fmt.Printf("probe: PASS — 0x04 有角色应答（len=%d，账号已有角色）\n", len(reply))
 	} else {
 		u32 := func(off int) uint32 { return binary.LittleEndian.Uint32(reply[off:]) }
 		now := time.Now()
@@ -179,10 +185,61 @@ func probeLogin(addr, flightPath string, opt net.Options, plain bool) int {
 			binary.LittleEndian.Uint16(info[1:]), string(utf16.Decode(units)))
 	}
 
+	// 建角 op05 → 有角色 0x04（追加段 TVarList 回显名字与 rolePara）
+	if err := conn.WriteMsg(buildProbeCreateRole("小虾米")); err != nil {
+		fatal(err)
+	}
+	created, err := conn.ReadMsg()
+	if err != nil {
+		fatal(err)
+	}
+	if len(created) <= 0x29 || created[0] != 0x04 {
+		fmt.Printf("probe: FAIL — 建角应答形态不符（op=%02X len=%d）\n", created[0], len(created))
+		fail++
+	} else {
+		body, err := proto.DecodeVarList(created[0x29:])
+		if err != nil || len(body.Values) != 6 || body.Values[2].Text != "小虾米" {
+			fmt.Printf("probe: FAIL — 建角追加段不符（err=%v 值数=%d）\n", err, len(body.Values))
+			fail++
+		} else {
+			fmt.Printf("probe: PASS — 建角 0x04 名字=%q 剧本=%q\n",
+				body.Values[2].Text, strings.Split(body.Values[3].Text, ",")[32])
+		}
+	}
+
 	if fail > 0 {
 		return 1
 	}
 	return 0
+}
+
+// buildProbeCreateRole 构造 op05 建角请求（女号外观样本）。
+func buildProbeCreateRole(name string) []byte {
+	appearance := []string{
+		"book1",
+		`icon\players\girl01_create.png`,
+		"", "",
+		`obj\char\g_hair\g_hair1`,
+		"cloth_g0001", "pants_g0001", "shoes_g0001",
+		"1",
+	}
+	units := utf16.Encode([]rune(name))
+	frame := make([]byte, 5, 5+len(units)*2+16*len(appearance))
+	frame[0] = 0x05
+	for _, u := range units {
+		frame = binary.LittleEndian.AppendUint16(frame, u)
+	}
+	frame = append(frame, 0, 0)
+	for len(frame) < 0x49 {
+		frame = append(frame, 0)
+	}
+	for _, s := range appearance {
+		frame = append(frame, 6)
+		frame = binary.LittleEndian.AppendUint32(frame, uint32(len(s)+1))
+		frame = append(frame, s...)
+		frame = append(frame, 0)
+	}
+	return frame
 }
 
 // probeSvrlist svrlist 模式：发 golden 请求、读应答至断连、按方言断言。

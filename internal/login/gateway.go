@@ -36,11 +36,13 @@ type Gateway struct {
 	wg     sync.WaitGroup
 }
 
-// Session 单条客户端线路的会话态宿主：后续账号票据、角色选择、
-// 键轮换结果都挂这里；当前只承载连接与编号。
+// Session 单条客户端线路的会话态宿主：账号身份、角色选择、
+// 键轮换结果都挂这里。
 type Session struct {
-	ID   uint64
-	Conn *net.Connection
+	ID      uint64
+	Conn    *net.Connection
+	Account string // 登录后的账号身份键（acct:v1:…，空=未登录）
+	Role    *Role  // 已建/已选角色（空=无角色）
 }
 
 // Listen 绑定端口并返回实际地址（solo 的 OnStart 调用一次；

@@ -19,7 +19,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/login"
 )
 
-const version = "0.4.0-solo-login-first-flight"
+const version = "0.5.0-solo-create-role"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
@@ -31,7 +31,9 @@ const version = "0.4.0-solo-login-first-flight"
 //   - [x] svrlist 区服列表分发（login 链第一环；cmd/lister 独立载体）
 //   - [x] 登录首段：op02 四槽解析+身份摘要 → 无角色 0x04；op03 → 五书
 //     worldInfo（golden=login-connect-001.bin 首飞线路帧）
-//   - [ ] login 主干续：建角/选角 → 进场景 + AOI + 属性全量集下发
+//   - [x] 建角：op05 → 有角色 0x04（6 值 TVarList 追加段 + rolePara
+//     36 字段；内存 RoleStore，重连保留）
+//   - [ ] login 主干续：选角 op04 → 进场景 + AOI + 属性全量集下发
 //   - [ ] persist：DDL 建库 + 角色存取
 func main() {
 	var (
