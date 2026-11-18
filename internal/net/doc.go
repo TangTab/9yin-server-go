@@ -1,11 +1,28 @@
-// Package net 实现通讯层，对应原版 FsComm：TCP 监听/连接、封包帧、
-// 编码/校验/加密。
+// Package net 实现线路层：成帧（Framer）与编码（Cipher）两个正交维度
+// 的自由组合，对应 Fs 框架通讯层（FsComm/FsVerify）的机制形态。
 //
-// 已知原版线索（待对拍确认细节）：
-//   - game_unite.ini 的 MessageEncodeKey（通讯编码加密键，须与客户端一致）
-//   - MessageVerifyDll=fsverify.dll（校验模块挂载点）
-//   - 内网/外网/广播三组地址配置段
+// # 四项框架能力
 //
-// 职责边界：本包只管字节流 ↔ 消息帧，不认识消息号语义（那是 proto 的事），
-// 也不管理连接会话状态（那是 engine/session 的事）。
+//  1. 键注入机制：XOR 键不编译进代码，由配置/握手注入（对应原版 ini 的
+//     MessageEncodeKey）；Connection.SetReadKey/SetWriteKey 支持登录协商
+//     后的运行中键轮换，读写方向独立。
+//
+//  2. 可插拔编码层：Cipher 接口（对应原版 MessageVerifyDll 可插拔语义）。
+//     内置 XorCipher（九阴现代客户端线路）与 IdentityCipher（明文，对应
+//     黑金 CJ 分支 MessageEncodeKey 注释掉的默认运行形态）。
+//
+//  3. 前缀式内部协议：PrefixFramer（[4B 小端长度][帧体]），对应黑金
+//     FsComm 反汇编确认的内部前缀帧形态（UserSock::SendMsg 的前缀缓冲），
+//     用于 proc 总线等可信链路；客户端线路用 EscapeFramer（EE 定界）。
+//
+//  4. 代码生成器：编解码结构由 tools/protogen 生成（规格→代码），
+//     对应原版 FsVerEnc 的 gen_encode_cpp/h/imp 生成器机制；本包只提供
+//     稳定的 Framer/Cipher 接缝，生成物在其上组装。
+//
+// # 帧格式速查
+//
+//	EscapeFramer：帧体 EE 00=字面 EE、EE EE=帧终止，无长度前缀
+//	PrefixFramer：[4B LE len][body]，无转义
+//
+// 本包不包含任何登录或游戏消息语义（那属于 proto/login）。
 package net
