@@ -154,6 +154,9 @@ type combatTickOutcome struct {
 	// parryBreaks 虚招破防事件（锁内结算已清玩家格挡态/令牌/闲时看门狗
 	// 并开启不可格挡窗；锁外据此补发手动格挡释放序 + CantParry 窗帧）。
 	parryBreaks []parryBreakEvent
+	// controls 内功反震受控事件（control_lease.go，规格书 §7.2：on_parry
+	// 的 control 指令——锁外经 applyNeiGongControls 对攻击 NPC 落帧簇+租约）。
+	controls []npcControlEvent
 }
 
 // parryBreakEvent 一次虚招破防的锁外表现素材：受害者成员（锁外取
@@ -229,6 +232,7 @@ func (r *sceneRun) combatTick(now time.Time) {
 	r.broadcastNPCFrames(outcome.members, outcome.moves, outcome.updates)
 	r.broadcastNPCAttacks(outcome.attacks)
 	r.broadcastParryBreaks(outcome.parryBreaks)
+	applyNeiGongControls(outcome.controls)
 }
 
 // broadcastParryBreaks 虚招破防锁外表现（格挡.pcapng 官方方言逐帧定版，
@@ -454,6 +458,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 	threatened := make(map[uint32]bool, len(targets))
 	var rage map[uint32][]byte
 	var parryBreaks []parryBreakEvent
+	var controls []npcControlEvent
 	attacks := make([]npcAttackPresentation, 0, 2)
 	// eachCombatNPCFullLocked 以 EntityID 升序一次遍历交付全部组件指针；
 	// 分支逻辑与单连接时代逐行等价，就地修改即生效。
@@ -625,6 +630,14 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		if outcome.breakParry {
 			parryBreaks = append(parryBreaks, parryBreakEvent{victim: target, npc: meta.id, npcOwner: meta.ownerID})
 		}
+		// on_parry 特效（control 指令，规格书 §7.2）对攻击 NPC 的反震
+		// 受控：锁内只收集素材（applyControlSpecFrames 自持 run.mu）。
+		if outcome.neigongControl != nil && vitals.HP > 0 {
+			controls = append(controls, npcControlEvent{
+				npcID: meta.id, ownerID: meta.ownerID,
+				player: target.player, view: target.view, control: outcome.neigongControl,
+			})
+		}
 		// on_victim 特效（reflect 指令）反打 NPC：走同一 NPC 伤亡链
 		//（威胁清理/重生排程/属性帧）。
 		if outcome.neigongReflect > 0 && vitals.HP > 0 {
@@ -702,7 +715,7 @@ func (r *sceneRun) simulateLocked(now time.Time) *combatTickOutcome {
 		}
 	}
 	r.mu.Unlock()
-	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage, attacks: attacks, parryBreaks: parryBreaks}
+	return &combatTickOutcome{members: members, moves: moves, updates: updates, changed: changed, rageFrames: rage, attacks: attacks, parryBreaks: parryBreaks, controls: controls}
 }
 
 // appendNPCReturnHomeLocked 清仇恨并按栓绳规则回位：正常脱战（目标

@@ -69,6 +69,10 @@ func (s *Scripts) convertOverlay(skillID string, table vm.LuaTable) *Overlay {
 			if rush, ok := s.convertRushSpec(skillID, value); ok {
 				overlay.Rush, set = rush, true
 			}
+		case "control":
+			if control, ok := s.convertControlSpec(skillID, "compile", value); ok {
+				overlay.Control, set = control, true
+			}
 		default:
 			s.host.WarnOnce(skillID+":"+name, "skillscript: %s compile 返回白名单外指令 %s=%s，已丢弃", skillID, name, modulevm.ValueString(value))
 		}
@@ -221,6 +225,76 @@ func (s *Scripts) convertRushSpec(skillID string, value vm.Value) (*RushSpec, bo
 	if !valid {
 		s.host.WarnOnce(skillID+":rush", "skillscript: %s rush 无任何有效字段，整条丢弃", skillID)
 		return nil, false
+	}
+	return spec, true
+}
+
+// convertControlSpec 解析 control{kind, dur_ms, air_ms, dist_m, angle_deg,
+// condition, chance}（规格书《击飞击退击倒机制规格书》§五①/on_hit 键，
+// 2026-11-18）。kind 白名单 launch/push/knockdown/coma/stun/dizzy（pull
+// 二期不受理）；condition 白名单 unparried/parry_broken；dur/chance 越界
+// 整条丢弃（受控参数错误会导致帧序/租约错乱，不做部分采纳）。零值
+// 字段=消费方缺省表回落。
+func (s *Scripts) convertControlSpec(owner, field string, value vm.Value) (*ControlSpec, bool) {
+	if !value.IsTable() {
+		s.host.WarnOnce(owner+":"+field, "skillscript: %s %s.control %s 非表，整条丢弃", owner, field, modulevm.ValueString(value))
+		return nil, false
+	}
+	table := value.AsTable()
+	kind := modulevm.Field(table, "kind").AsString()
+	switch kind {
+	case "launch", "push", "knockdown", "coma", "stun", "dizzy":
+	default:
+		s.host.WarnOnce(owner+":"+field+":kind", "skillscript: %s %s.control.kind %q 须为 launch/push/knockdown/coma/stun/dizzy，整条丢弃", owner, field, kind)
+		return nil, false
+	}
+	spec := &ControlSpec{Kind: kind}
+	if dur, ok := modulevm.LuaInt(modulevm.Field(table, "dur_ms")); ok {
+		if dur <= 0 || dur > 30000 {
+			s.host.WarnOnce(owner+":"+field+":dur_ms", "skillscript: %s %s.control.dur_ms %s 须为 (0,30000] 毫秒，整条丢弃",
+				owner, field, modulevm.ValueString(modulevm.Field(table, "dur_ms")))
+			return nil, false
+		}
+		spec.DurMS = dur
+	}
+	if air, ok := modulevm.LuaInt(modulevm.Field(table, "air_ms")); ok {
+		if air <= 0 || air > 10000 {
+			s.host.WarnOnce(owner+":"+field+":air_ms", "skillscript: %s %s.control.air_ms %s 须为 (0,10000] 毫秒，整条丢弃",
+				owner, field, modulevm.ValueString(modulevm.Field(table, "air_ms")))
+			return nil, false
+		}
+		spec.AirMS = air
+	}
+	if dist, ok := modulevm.LuaFloat(modulevm.Field(table, "dist_m")); ok {
+		if dist < 0 || dist > 60 {
+			s.host.WarnOnce(owner+":"+field+":dist_m", "skillscript: %s %s.control.dist_m %s 须为 [0,60] 米，整条丢弃",
+				owner, field, modulevm.ValueString(modulevm.Field(table, "dist_m")))
+			return nil, false
+		}
+		spec.DistM = dist
+	}
+	if angle, ok := modulevm.LuaFloat(modulevm.Field(table, "angle_deg")); ok {
+		if angle < 0 || angle >= 360 {
+			s.host.WarnOnce(owner+":"+field+":angle_deg", "skillscript: %s %s.control.angle_deg %s 须为 [0,360) 度，整条丢弃",
+				owner, field, modulevm.ValueString(modulevm.Field(table, "angle_deg")))
+			return nil, false
+		}
+		spec.AngleDeg = angle
+	}
+	spec.Condition = modulevm.Field(table, "condition").AsString()
+	switch spec.Condition {
+	case "", "unparried", "parry_broken":
+	default:
+		s.host.WarnOnce(owner+":"+field+":condition", "skillscript: %s %s.control.condition %q 须为 unparried/parry_broken，整条丢弃", owner, field, spec.Condition)
+		return nil, false
+	}
+	if chance, ok := modulevm.LuaFloat(modulevm.Field(table, "chance")); ok {
+		if chance < 0 || chance > 1 {
+			s.host.WarnOnce(owner+":"+field+":chance", "skillscript: %s %s.control.chance %s 须为 [0,1]，整条丢弃",
+				owner, field, modulevm.ValueString(modulevm.Field(table, "chance")))
+			return nil, false
+		}
+		spec.Chance = chance
 	}
 	return spec, true
 }

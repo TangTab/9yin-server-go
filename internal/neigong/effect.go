@@ -19,6 +19,23 @@ type Effect struct {
 	Reflect     *Reflect       // reflect：反打（数值或 {amount,kind} 双形态）
 	ParryReduce *ParryReduce   // parry_reduce：格挡减伤拆分（解析占位）
 	State       map[string]any // state：扁平状态回写，下次经 Ctx.State 传回
+	Control     *ControlEffect // control：特效造成受控（规格书 §7.2，反打震退类）
+	BreakControl bool          // break_control：解控（清自身受控租约并起身，金蝉脱壳类）
+	ControlImmune *ControlImmune // control_immune：免控窗（霸体穴/铁布衫类）
+}
+
+// ControlEffect 是内功特效造成受控的指令（on_parry 反震击退攻击者等）。
+// Kind 白名单 launch/push/knockdown/coma/stun/dizzy；帧簇与租约语义同
+// 技能侧（消费方 cmd/protocol-probe 的受控应用路径）。
+type ControlEffect struct {
+	Kind  string
+	DurMS int64
+	DistM float64
+}
+
+// ControlImmune 是免控窗指令：life_ms 期间受控条件门恒过（§4.5）。
+type ControlImmune struct {
+	LifeMS int64
 }
 
 // ExtraDamage 是附加伤害指令（kind 现管线统一外功，透传）。
@@ -137,6 +154,22 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 			} else {
 				e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s state %s 非表，已丢弃", buffID, event, modulevm.ValueString(value))
 			}
+		case "control":
+			if control, ok := e.convertControlEffect(buffID, event, value); ok {
+				effect.Control, set = control, true
+			}
+		case "break_control":
+			if value.IsBool() {
+				if value.AsBool() {
+					effect.BreakControl, set = true, true
+				}
+			} else {
+				e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s break_control %s 非布尔，已丢弃", buffID, event, modulevm.ValueString(value))
+			}
+		case "control_immune":
+			if immune, ok := e.convertControlImmune(buffID, event, value); ok {
+				effect.ControlImmune, set = immune, true
+			}
 		default:
 			e.host.WarnOnce(buffID+":"+name, "neigong: %s: %s 返回白名单外指令 %s=%s，已丢弃", buffID, event, name, modulevm.ValueString(value))
 		}
@@ -145,6 +178,64 @@ func (e *Effects) convertEffect(buffID, event string, table vm.LuaTable) *Effect
 		return nil
 	}
 	return effect
+}
+
+// convertControlEffect 解析 control{kind, dur_ms?, dist_m?}（规格书
+// §7.2：内功特效造成受控）。kind 白名单与技能侧一致（pull 二期不受理）；
+// dur_ms 缺省 0=消费方按 §五缺省表回落，越界整条丢弃。
+func (e *Effects) convertControlEffect(buffID, event string, value vm.Value) (*ControlEffect, bool) {
+	table, ok := e.tableOf(buffID, "control", value)
+	if !ok {
+		return nil, false
+	}
+	kind := modulevm.Field(table, "kind").AsString()
+	switch kind {
+	case "launch", "push", "knockdown", "coma", "stun", "dizzy":
+	default:
+		e.host.WarnOnce(buffID+":control:kind", "neigong: %s: %s control.kind %q 须为 launch/push/knockdown/coma/stun/dizzy，整条丢弃", buffID, event, kind)
+		return nil, false
+	}
+	control := &ControlEffect{Kind: kind}
+	if dur, ok := modulevm.LuaInt(modulevm.Field(table, "dur_ms")); ok {
+		if dur <= 0 || dur > 30000 {
+			e.host.WarnOnce(buffID+":control:dur_ms", "neigong: %s: %s control.dur_ms %s 须为 (0,30000] 毫秒，整条丢弃",
+				buffID, event, modulevm.ValueString(modulevm.Field(table, "dur_ms")))
+			return nil, false
+		}
+		control.DurMS = dur
+	}
+	if dist, ok := modulevm.LuaFloat(modulevm.Field(table, "dist_m")); ok {
+		if dist < 0 || dist > 60 {
+			e.host.WarnOnce(buffID+":control:dist_m", "neigong: %s: %s control.dist_m %s 须为 [0,60] 米，整条丢弃",
+				buffID, event, modulevm.ValueString(modulevm.Field(table, "dist_m")))
+			return nil, false
+		}
+		control.DistM = dist
+	}
+	return control, true
+}
+
+// convertControlImmune 解析 control_immune 双形态：裸数值/表 {life_ms=X}
+// 均为窗口毫秒，须 (0,30000]。
+func (e *Effects) convertControlImmune(buffID, event string, value vm.Value) (*ControlImmune, bool) {
+	if value.IsNumber() {
+		if ms, ok := modulevm.LuaInt(value); ok && ms > 0 && ms <= 30000 {
+			return &ControlImmune{LifeMS: ms}, true
+		}
+		e.host.WarnOnce(buffID+":control_immune", "neigong: %s: %s control_immune %s 须为 (0,30000] 毫秒，已丢弃", buffID, event, modulevm.ValueString(value))
+		return nil, false
+	}
+	table, ok := e.tableOf(buffID, "control_immune", value)
+	if !ok {
+		return nil, false
+	}
+	ms, msOK := modulevm.LuaInt(modulevm.Field(table, "life_ms"))
+	if !msOK || ms <= 0 || ms > 30000 {
+		e.host.WarnOnce(buffID+":control_immune", "neigong: %s: %s control_immune.life_ms %s 须为 (0,30000] 毫秒，整条丢弃",
+			buffID, event, modulevm.ValueString(modulevm.Field(table, "life_ms")))
+		return nil, false
+	}
+	return &ControlImmune{LifeMS: ms}, true
 }
 
 // convertAmountKind 解析 {amount, kind?} 形态（extra_damage/reflect 共用）。

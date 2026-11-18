@@ -720,6 +720,10 @@ func compileCombatSkill(skillID string, level int32, tables skillResourceTables)
 		// v29 武技冲锋扩展：RushRange 列实据/手勘表扩带 + lua rush 指令
 		//（scripts/module/skill/<技能ID>.lua，热更 lua_reload）。
 		rushOverride: resolveRushChargeOverride(skillID, castRange, rushRangeRaw),
+		// 受控规格（规格书《击飞击退击倒机制规格书》§五①）：M.compile
+		// 的 control 指令编译期直存（最高优先级）；on_hit 运行期键与
+		// desc_effects 数据面在 control_lease.go resolveControlSpec 逐命中回落。
+		control:  resolveControlCompileOverride(skillID),
 		canRush:   iniInt(static, "CanRush") != 0,
 		lockSkill: strings.EqualFold(script, "skilllock") || iniInt(static, "CanRush") != 0 ||
 			(iniInt(static, "TargetType") == 4 && iniInt(static, "DamageType") != 0),
@@ -929,6 +933,20 @@ func resolveRushChargeOverride(skillID string, castRange, rushRangeRaw float32) 
 		return nil
 	}
 	return override
+}
+
+// resolveControlCompileOverlay 读 M.compile 的 control 指令（受控规格
+// 最高优先级层，规格书 §五①；scripts/module/skill/<技能ID>.lua，热更走
+// lua_reload）。宿主未启用/无模块/无指令 → nil（解析链继续 on_hit/desc）。
+func resolveControlCompileOverride(skillID string) *skillscript.ControlSpec {
+	if skillScripts == nil || !skillScripts.Enabled() || !skillScripts.HasOverlay(skillID) {
+		return nil
+	}
+	overlay := skillScripts.Overlay(skillID, nil)
+	if overlay == nil {
+		return nil
+	}
+	return overlay.Control
 }
 
 // mergeRushSpec 把 lua rush 指令的字段级覆盖合入既有 override（可为

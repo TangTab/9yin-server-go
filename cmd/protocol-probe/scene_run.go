@@ -84,6 +84,11 @@ type sceneRun struct {
 	// 「玩家对象 → 受害 NPC」的逐击累加（抓包 143→210→277 每击 +67）。
 	// NPC 死亡清除，重生后从零累计。run.mu 保护。
 	fightRelation map[uint32]int32
+	// npcControl 是受害 NPC 的受控租约表（control_lease.go，规格书
+	// 《击飞击退击倒机制规格书》§六）：击飞/击退/击倒/昏迷的帧簇外
+	// 权威状态（AI 冻结经 Brain.ControlledUntil；恢复定时器按
+	// recoverAt 对账）。NPC 死亡/注销清除。run.mu 保护。
+	npcControl map[uint32]*npcControlLease
 	// npcMoveState 是 NPC 行走状态水位（patrolTick 读写）：id → 最近一次
 	// 下发的 moving 标志。检出翻转时发 0x10 State(183)="walk"/"stand"
 	// （外服私服 NPC 行为通道：起走发 walk、驻停发 stand，与 0x21 路点帧

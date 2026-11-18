@@ -13,6 +13,7 @@ import (
 	"github.com/local/9yin-go-server/internal/combatcalc"
 	"github.com/local/9yin-go-server/internal/entity"
 	"github.com/local/9yin-go-server/internal/sim"
+	"github.com/local/9yin-go-server/internal/skillscript"
 	worldcore "github.com/local/9yin-go-server/internal/world"
 )
 
@@ -163,6 +164,11 @@ type combatSkillDefinition struct {
 	// M.compile 的 rush 指令（字段级覆盖，热更走 lua_reload）。nil=方言
 	// 表/族规则（skill_catalog.resolveRushChargeOverride 填充）。
 	rushOverride *rushChargeOverride
+	// control：受控规格（规格书《击飞击退击倒机制规格书》§五①，2026-11-18）
+	// ——M.compile 的 control 指令编译期直存；nil=解析链继续走
+	// M.on_hit 运行期键与 desc_effects 数据面（control_lease.go
+	// resolveControlSpec，逐命中解析）。
+	control *skillscript.ControlSpec
 }
 
 // stagedRushFamily 报告该技能是否走冲锋暂存链。
@@ -1034,6 +1040,7 @@ func (s *sceneLifecycle) applySkillDamageToNPC(id, ownerID uint32, amount int32,
 		}
 		if state.HP <= 0 {
 			brain.Threat = 0
+			s.run.clearNPCControlLocked(id) // 受控租约随死亡清场（规格书 §六死亡优先）
 			if npcRespawnBatchInterval() > 0 {
 				// 批量刷新：不设每怪计时，refreshTick 扫描统一复活。
 				brain.RespawnAt = time.Time{}
@@ -1168,6 +1175,12 @@ func writeSkillSettleFrames(link sceneMessageConnection, world *sceneLifecycle, 
 					return totalLoot, err
 				}
 			}
+		}
+		// 受控帧簇（规格书《击飞击退击倒机制规格书》§三/§四）：解析链
+		// overlay > on_hit > desc 逐命中判定；击杀命中跳过（死亡链优先，
+		// §六）。环境总闸 NINEYIN_CONTROL=off 时零帧零租约。
+		if !hit.outcome.killed {
+			applyControlFrames(link, world, definition, player, hit.ref.id, hit.ref.ownerID, time.Now())
 		}
 		if hit.outcome.killed {
 			// 击杀簇（外服私服序）：fight_relation 撤销 → 死亡面板 →
@@ -1442,6 +1455,12 @@ func handleSkillCustom(link sceneMessageConnection, player *playerActor, world *
 	}
 	if player == nil {
 		log.Printf("%s: reject skill before player spawn id=%s", remote, definition.id)
+		return true, nil
+	}
+	// 受控封招闸（规格书 §六：封招族租约活跃期 m211 静默拒——官方受控
+	// 零受理回包，群战 12/13 期间受害者零 m211 实证）。push 族不封。
+	if kind := player.controlCastBlocked(time.Now()); kind != "" {
+		log.Printf("%s: reject skill id=%s: controlled (%s)", remote, definition.id, kind)
 		return true, nil
 	}
 	// 骑乘中发非白名单（普通武学）技能：闸拒绝（骑乘白名单外的出招

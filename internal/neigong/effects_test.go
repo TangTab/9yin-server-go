@@ -536,3 +536,57 @@ func TestHookConvertsBruiseRestoreForms(t *testing.T) {
 		t.Fatalf("missing WARN for out-of-range percent: %v", sink.lines)
 	}
 }
+
+// TestControlEffectWhitelist 受控域三条指令（规格书 §7.2）：
+// control 表形 / break_control 布尔 / control_immune 双形态 + 畸形丢弃。
+func TestControlEffectWhitelist(t *testing.T) {
+	e := newTestEffects(t, "testdata", &logSink{})
+	// on_attack：control 指令（反震击退攻击者）。
+	effect := e.Hook("probe_control", "on_attack", probeCtx())
+	if effect == nil || effect.Control == nil ||
+		effect.Control.Kind != "push" || effect.Control.DurMS != 900 || effect.Control.DistM != 2.5 {
+		t.Fatalf("control = %+v", effect)
+	}
+	// on_victim：break_control + control_immune 裸数值形态 + ctx 控制字段投递。
+	ctx := probeCtx()
+	ctx.Controlled = true
+	ctx.ControlKind = "knockdown"
+	ctx.ControlRemainMS = 1200
+	effect = e.Hook("probe_control", "on_victim", ctx)
+	if effect == nil || !effect.BreakControl {
+		t.Fatalf("break_control effect = %+v", effect)
+	}
+	if effect.ControlImmune == nil || effect.ControlImmune.LifeMS != 2500 {
+		t.Fatalf("control_immune = %+v", effect.ControlImmune)
+	}
+	if effect.State == nil || effect.State["control_kind"] != "knockdown" || effect.State["control_remain"] != int64(1200) {
+		t.Fatalf("ctx control fields not delivered: %v", effect.State)
+	}
+}
+
+// TestControlEffectRejectsBadKind 白名单外 kind/畸形值整条丢弃。
+func TestControlEffectRejectsBadKind(t *testing.T) {
+	dir := t.TempDir()
+	writeModule(t, dir, "probe_bad.lua", `local M = {}
+M.meta = { id = "probe_bad", name = "坏探针", book = "ng_probe_bad", category = "hit", max_tier = 1 }
+function M.on_attack(ctx)
+  return { control = { kind = "pull" } }
+end
+function M.on_victim(ctx)
+  return { control_immune = 999999 }
+end
+return M
+`)
+	sink := &logSink{}
+	e := newTestEffects(t, dir, sink)
+	// 唯一指令被丢弃 → 整表无效，effect 为 nil（convertEffect 契约）。
+	if effect := e.Hook("probe_bad", "on_attack", probeCtx()); effect != nil && effect.Control != nil {
+		t.Fatalf("pull control must drop, got %+v", effect)
+	}
+	if effect := e.Hook("probe_bad", "on_victim", probeCtx()); effect != nil && effect.ControlImmune != nil {
+		t.Fatalf("out-of-range immune must drop, got %+v", effect)
+	}
+	if !sink.has("control.kind") || !sink.has("control_immune") {
+		t.Fatalf("missing WARNs: %v", sink.lines)
+	}
+}

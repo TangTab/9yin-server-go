@@ -579,3 +579,81 @@ func TestRealWujiRushOverlay(t *testing.T) {
 		t.Fatalf("wuji_lyfh05 rush = %+v, want charge_range=20 + air fastruning_s", overlay.Rush)
 	}
 }
+
+// TestControlSpecValidation control 指令校验（规格书 §五①/on_hit 键）：
+// kind/condition 白名单、dur/air/dist/angle/chance 越界整条丢弃。
+func TestControlSpecValidation(t *testing.T) {
+	dir := t.TempDir()
+	base := `local M = {}
+function M.compile(def)
+  return { control = { kind = %s, dur_ms = %s, condition = %s, chance = %s } }
+end
+function M.on_hit(ctx)
+  return { ratio = 88, control = { kind = "stun", dur_ms = 1700 } }
+end
+return M
+`
+	writeModule(t, dir, "probe_good.lua", fmt.Sprintf(base, `"knockdown"`, "2600", `"unparried"`, "0.35"))
+	writeModule(t, dir, "probe_kind.lua", fmt.Sprintf(base, `"pull"`, "2600", `"unparried"`, "0.35"))
+	writeModule(t, dir, "probe_dur.lua", fmt.Sprintf(base, `"knockdown"`, "999999", `"unparried"`, "0.35"))
+	writeModule(t, dir, "probe_cond.lua", fmt.Sprintf(base, `"knockdown"`, "2600", `"drunk"`, "0.35"))
+	writeModule(t, dir, "probe_chance.lua", fmt.Sprintf(base, `"knockdown"`, "2600", `"unparried"`, "1.5"))
+	sink := &logSink{}
+	s := New(dir, sink.printf)
+	if _, err := s.Load(); err != nil {
+		t.Fatal(err)
+	}
+	good := s.Overlay("probe_good", &BuffDef{})
+	if good == nil || good.Control == nil || good.Control.Kind != "knockdown" ||
+		good.Control.DurMS != 2600 || good.Control.Condition != "unparried" || good.Control.Chance != 0.35 {
+		t.Fatalf("good overlay control = %+v", good)
+	}
+	for _, id := range []string{"probe_kind", "probe_dur", "probe_cond", "probe_chance"} {
+		if overlay := s.Overlay(id, &BuffDef{}); overlay != nil && overlay.Control != nil {
+			t.Fatalf("%s control = %+v, want dropped", id, overlay.Control)
+		}
+		if !sink.has(id) {
+			t.Fatalf("missing drop warning for %s in %q", id, sink.lines)
+		}
+	}
+}
+
+// TestOnHitControlKey on_hit 单次调用双键：ratio 与 control 同取，
+// HitRatio 兼容委托不受影响。
+func TestOnHitControlKey(t *testing.T) {
+	dir := t.TempDir()
+	writeModule(t, dir, "probe_dual.lua", `local M = {}
+function M.on_hit(ctx)
+  return { ratio = 120, control = { kind = "stun", dur_ms = 1700 } }
+end
+return M
+`)
+	writeModule(t, dir, "probe_bare.lua", `local M = {}
+function M.on_hit(ctx)
+  return { ratio = 66 }
+end
+return M
+`)
+	s := New(dir, nil)
+	if _, err := s.Load(); err != nil {
+		t.Fatal(err)
+	}
+	dual := s.OnHit("probe_dual", &HitCtx{Ratio: 100, Level: 1})
+	if dual == nil || dual.Ratio == nil || *dual.Ratio != 100 { // 120 夹 100
+		t.Fatalf("dual ratio = %+v", dual)
+	}
+	if dual.Control == nil || dual.Control.Kind != "stun" || dual.Control.DurMS != 1700 {
+		t.Fatalf("dual control = %+v", dual.Control)
+	}
+	bare := s.OnHit("probe_bare", &HitCtx{Ratio: 50, Level: 1})
+	if bare == nil || bare.Control != nil || bare.Ratio == nil || *bare.Ratio != 66 {
+		t.Fatalf("bare = %+v", bare)
+	}
+	// HitRatio 委托兼容。
+	if ratio := s.HitRatio("probe_dual", &HitCtx{Ratio: 100}); ratio == nil || *ratio != 100 {
+		t.Fatalf("HitRatio delegation = %v", ratio)
+	}
+	if s.OnHit("probe_missing", nil) != nil {
+		t.Fatal("missing module should return nil")
+	}
+}

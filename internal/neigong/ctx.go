@@ -39,6 +39,12 @@ type Ctx struct {
 	Crit       bool  // 本次事件暴击
 	Controlled bool  // 自身处于禁轻功/定身/昏迷类控制
 
+	// ControlKind/ControlRemainMS 是自身受控租约细节（规格书 §7.2，
+	// 2026-11-18 接真值）：ControlKind 空串=无租约，脚本可按控制类型
+	// 分支（如「被击倒时起身」）。RemainMS<0=未知/无租约。
+	ControlKind     string
+	ControlRemainMS int64
+
 	SinceLastMS int64 // 距上次有效触发的毫秒数；<0 表示未知/无上次触发
 
 	Self        SelfStats
@@ -60,6 +66,8 @@ func buildCtxTable(v *vm.VM, ctx *Ctx) *vm.Table {
 	t.SetString("parried", vm.NewBool(ctx.Parried))
 	t.SetString("crit", vm.NewBool(ctx.Crit))
 	t.SetString("controlled", vm.NewBool(ctx.Controlled))
+	t.SetString("control_kind", vm.NewString(ctx.ControlKind))
+	t.SetString("control_remain_ms", vm.NewInt(ctx.ControlRemainMS))
 	t.SetString("since_last_ms", vm.NewInt(ctx.SinceLastMS))
 
 	self := vm.NewEmptyTable()

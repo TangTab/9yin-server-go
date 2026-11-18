@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/local/9yin-go-server/internal/neigong"
@@ -137,6 +138,7 @@ func (p *playerActor) hookNeiGong(event string, rollSalt uint64, rollOID uint32,
 		return nil
 	}
 	snapshot := p.vitals.ActorState(playerObjectID, playerOwnerID)
+	controlKind, controlRemain, controlled := p.controlSnapshotLocked(now)
 	ctx := &neigong.Ctx{
 		BookLevel:    int(book.level),
 		BookMaxLevel: int(book.maxLevel),
@@ -146,8 +148,11 @@ func (p *playerActor) hookNeiGong(event string, rollSalt uint64, rollOID uint32,
 			HP: int64(snapshot.HP), MaxHP: int64(snapshot.MaxHP),
 			MP: int64(snapshot.MP), MaxMP: int64(snapshot.MaxMP),
 		},
-		State: p.neigongState,
-		RProc: float64(combatPercentRoll(rollOID, now, rollSalt)) / 100,
+		State:           p.neigongState,
+		RProc:           float64(combatPercentRoll(rollOID, now, rollSalt)) / 100,
+		Controlled:      controlled,
+		ControlKind:     controlKind,
+		ControlRemainMS: controlRemain,
 	}
 	if fill != nil {
 		fill(ctx)
@@ -161,6 +166,17 @@ func (p *playerActor) hookNeiGong(event string, rollSalt uint64, rollOID uint32,
 	p.mu.Lock()
 	if effect.State != nil {
 		p.neigongState = effect.State
+	}
+	// 受控域指令（规格书 §7.2）：免控窗/解控在骨架内直接落账；
+	// control（对攻击者施加受控）由事件调用方锁外经 applyControlFrames
+	// 走 NPC 受控链（帧簇+AI 冻结）。
+	if effect.ControlImmune != nil {
+		p.applyPlayerControlImmune(effect.ControlImmune.LifeMS, now)
+	}
+	if effect.BreakControl {
+		if p.breakPlayerControlLocked(now) {
+			log.Printf("player %d-%d neigong %s break_control: lease cleared", playerObjectID, playerOwnerID, book.buffID)
+		}
 	}
 	if effect.Shield != nil {
 		p.neigongShields = append(p.neigongShields, neigongShield{
@@ -267,14 +283,19 @@ func (p *playerActor) dispatchNeiGongVictim(attackerOID uint32, incoming int32, 
 }
 
 // dispatchNeiGongParry 派发 on_parry（玩家格挡下 NPC 攻击）。当前管线
-// 格挡零伤，只落 state/heal/mp/shield（对齐参考服语义）。
-func (p *playerActor) dispatchNeiGongParry(attackerOID uint32, incoming int32, now time.Time) bool {
+// 格挡零伤，只落 state/heal/mp/shield（对齐参考服语义）。返回效果是否
+// 落账与 control 指令（规格书 §7.2：反震击退攻击者——由战斗 tick 在
+// 锁外经 applyNeiGongControl 走 NPC 受控帧簇+租约）。
+func (p *playerActor) dispatchNeiGongParry(attackerOID uint32, incoming int32, now time.Time) (bool, *neigong.ControlEffect) {
 	effect := p.hookNeiGong("on_parry", neigongRollParry, attackerOID, now, func(ctx *neigong.Ctx) {
 		ctx.Incoming = int64(incoming)
 		ctx.AttackerOID = attackerOID
 		ctx.Parried = true
 	})
-	return effect != nil
+	if effect == nil {
+		return false, nil
+	}
+	return true, effect.Control
 }
 
 // dispatchNeiGongAttack 派发 on_attack（玩家技能实中目标，miss 不触发）。

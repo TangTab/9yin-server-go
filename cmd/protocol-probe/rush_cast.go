@@ -391,6 +391,12 @@ func (p *playerActor) mirrorJumpTimes(link sceneMessageConnection, state int32, 
 	// 能力查询须在持锁前（hasActiveBuff 自取 p.mu）。
 	hasTriple := p.hasActiveBuff(qgDHadd3rdBuffSlot, 1579, time.Now())
 	p.mu.Lock()
+	// 受控封轻功闸（规格书 §六）：封招族租约活跃期不授 JumpTimes——
+	// 镜像授权位即天然闸门（被击飞/倒地/昏迷中客户端起跳配额不得复活）。
+	if p.controlCastBlockedLocked(time.Now()) {
+		p.mu.Unlock()
+		return
+	}
 	wasAir, consumed, lastY := p.airFlightActive, p.airFlightConsumed, p.airFlightLastY
 	var grant int32  // >0=授予值
 	var consume bool // 归零

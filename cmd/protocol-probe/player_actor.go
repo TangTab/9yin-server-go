@@ -11,6 +11,7 @@ import (
 
 	"github.com/local/9yin-go-server/internal/clientdata"
 	"github.com/local/9yin-go-server/internal/entity"
+	"github.com/local/9yin-go-server/internal/neigong"
 	"github.com/local/9yin-go-server/internal/role"
 	"github.com/local/9yin-go-server/internal/sim"
 
@@ -429,6 +430,11 @@ type playerActor struct {
 	neigongDodge      neigongDodgeWindow
 	neigongPeriodicAt time.Time
 	neigongPassive    neigongPassiveCache
+	// 受控域（control_lease.go，规格书 §六/§7.2）：controlLease 是玩家
+	// 受害者租约（当前无施加源——PvP/NPC 控制技二期，闸门先行）；
+	// controlImmuneUntil 是内功 control_immune 免控窗终点。
+	controlLease       playerControlLease
+	controlImmuneUntil time.Time
 }
 
 // playerMotion 是刻意由服务器持有的 GM 状态。其值通过常规的现代对象
@@ -919,6 +925,10 @@ type npcAttackOutcome struct {
 	// neigongReflect 是 on_victim 特效（reflect 指令）产生的反打值，
 	// 由战斗 tick 在锁外反打 NPC（击杀走 NPC 常规死亡链）。
 	neigongReflect int32
+	// neigongControl 是 on_parry 特效（control 指令，规格书 §7.2）对
+	// 攻击 NPC 施加的受控规格，由战斗 tick 在锁外经 applyNeiGongControl
+	// 萰帧簇+租约（反震击退类）。
+	neigongControl *neigong.ControlEffect
 }
 
 // resolveNPCAttack 是服务器权威的受击裁定。当前客户端已提供 C2S 的
@@ -950,8 +960,8 @@ func (p *playerActor) resolveNPCAttack(attackerID uint32, damage int32, feint bo
 	if (activeWindow || (p.parryingSnapshot() && !p.cantParrySnapshot())) && !feint {
 		// 招架内的攻击按"格挡状态被揍"得怒（零伤，特效只落
 		// state/heal/mp/shield）。
-		triggered := p.dispatchNeiGongParry(attackerID, damage, now)
-		return npcAttackOutcome{parried: true, stateChanged: triggered, rageDelta: ragGainParriedHit}
+		triggered, control := p.dispatchNeiGongParry(attackerID, damage, now)
+		return npcAttackOutcome{parried: true, stateChanged: triggered, rageDelta: ragGainParriedHit, neigongControl: control}
 	}
 	// 闪避掷 = 基础 + 脚本常驻被动（M.passive evasion_add）+ 闪避窗
 	//（dodge_add，料敌先机 Proc 期间）。闪避成功派发 on_dodge（移花接玉）。

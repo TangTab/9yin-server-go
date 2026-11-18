@@ -194,6 +194,21 @@ type RushSpec struct {
 	AirAction   string  // 空中动作名覆盖（空=lock 表 LockARushAction/推导）
 }
 
+// ControlSpec 是受控规格（击飞/击退/击倒/昏迷，规格书 §五）：M.compile
+// 的 control 指令与 M.on_hit 返回表的 control 键共用本形态。Kind 白名单
+// launch/push/knockdown/coma/stun/dizzy（pull 二期不受理）；零值字段=
+// 消费方（cmd/protocol-probe resolveControlSpec）按 §五缺省表回落。
+// Condition 白名单 unparried/parry_broken（§4.5 条件门）。
+type ControlSpec struct {
+	Kind      string  // launch/push/knockdown/coma/stun/dizzy
+	DurMS     int64   // 租约毫秒（0=缺省表）
+	AirMS     int64   // 击飞空中段毫秒（0=1200；仅 launch 用）
+	DistM     float64 // 击退距离米（0=客户端动画自定）
+	AngleDeg  float64 // c78 方位参数（§4.4 待钉死；0=按攻击线 atan2）
+	Condition string  // ""/unparried/parry_broken
+	Chance    float64 // 触发几率 0..1（0=必发）
+}
+
 // TargetEffect 是目标效果（有害精确 buff 的目标控制）。
 type TargetEffect struct {
 	BuffSpec
@@ -213,6 +228,7 @@ type Overlay struct {
 	TargetEffects   []TargetEffect // target_effects（整组取代）
 	Channel         *ChannelSpec   // channel：通道型引导参数（spCost 预扣清零、逐波扣）
 	Rush            *RushSpec      // rush：武技冲锋分档覆盖（v29 扩展点）
+	Control         *ControlSpec   // control：受控规格覆盖（规格书 §五①，2026-11-18）
 }
 
 // LevelDelta 是 by_level[level] 与 L1 基准的差集。字段全集按 effects_data
@@ -335,6 +351,25 @@ type HitCtx struct {
 // HitRatio 调用技能的 M.on_hit，返回调整后的倍率（夹 [0,100]）。nil 表示
 // 不调整（无钩子/返回 nil/非正数）——无钩子技能 RNG 序列零扰动。
 func (s *Scripts) HitRatio(skillID string, ctx *HitCtx) *float64 {
+	result := s.OnHit(skillID, ctx)
+	if result == nil {
+		return nil
+	}
+	return result.Ratio
+}
+
+// OnHitResult 是 M.on_hit 单次调用的产物：Ratio 是倍率调整（nil=不调整），
+// Control 是运行期受控指令（规格书 §五②，on_hit 返回表的 control 键；
+// nil=本次不下发）。单次调用同时取两键——调用方不得再经 HitRatio 二次
+// 调用同一次命中（触发型脚本的 state 窗口会双计）。
+type OnHitResult struct {
+	Ratio   *float64
+	Control *ControlSpec
+}
+
+// OnHit 调用技能的 M.on_hit，一次取回倍率与受控指令。随机数仍由调用方
+// 预掷（HitCtx.RAdjust，每调用恒 1 枚）；返回表两个键均可缺省。
+func (s *Scripts) OnHit(skillID string, ctx *HitCtx) *OnHitResult {
 	if ctx == nil {
 		ctx = &HitCtx{}
 	}
@@ -350,14 +385,17 @@ func (s *Scripts) HitRatio(skillID string, ctx *HitCtx) *float64 {
 	if !ok || result.IsNil() || !result.IsTable() {
 		return nil
 	}
-	ratio, ratioOK := modulevm.LuaFloat(modulevm.Field(result.AsTable(), "ratio"))
-	if !ratioOK || ratio <= 0 {
-		return nil
+	out := &OnHitResult{}
+	if ratio, ratioOK := modulevm.LuaFloat(modulevm.Field(result.AsTable(), "ratio")); ratioOK && ratio > 0 {
+		if ratio > 100 {
+			ratio = 100
+		}
+		out.Ratio = &ratio
 	}
-	if ratio > 100 {
-		ratio = 100
+	if control, cOK := s.convertControlSpec(skillID, "on_hit", modulevm.Field(result.AsTable(), "control")); cOK {
+		out.Control = control
 	}
-	return &ratio
+	return out
 }
 
 // EffectData 查询效果汇总表（装载时快照）。nil 表示无条目——调用方回退
