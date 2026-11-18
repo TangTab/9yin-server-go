@@ -69,6 +69,18 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
 展示了进程实体装配顺序（SoloMember/SoloPublic/SoloEntry/... 的创建链），
 是 engine 装配与 proc 角色定义的参考。
 
+## mysql/ — 原版 MySQL DDL 快照（persist 里程碑事实源）
+
+原版服务端 `Res/mysql/` 全量副本（7 个文件，与 `BGserverCJ\Res\mysql\`
+逐字节一致），覆盖三库两形态：
+
+- `nx_base` / `nx_district` / `nx_log`：正式库名
+- 同名 `*cj.sql`：黑金 CJ 分支部署库名变体（表结构相同，仅库名不同）
+- `create_account.sql`：建账号库脚本
+
+用途：里程碑 7（persist）的建库 DDL 与 `nx_chunks` blob 逆向的表结构
+参照（FsSql.pdb 挂符号后交叉验证）。快照只含 DDL，不含表内数据。
+
 ## captures/ — 原服抓包与 golden 用例
 
 `cmd/probe` 对原服抓包的落盘位置。约定：
