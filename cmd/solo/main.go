@@ -19,7 +19,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/login"
 )
 
-const version = "0.2.0-solo-gateway"
+const version = "0.3.0-solo-svrlist"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
@@ -28,6 +28,7 @@ const version = "0.2.0-solo-gateway"
 //   - [x] engine tick 循环 + proc/inproc Bus
 //   - [x] net/proto 最小集：EE+XOR 线路 + 引擎级消息/自定义消息目录 + 心跳网关
 //     （cmd/probe 对拍：golden ping→pong 真 TCP 往返）
+//   - [x] svrlist 区服列表分发（login 链第一环；cmd/lister 独立载体）
 //   - [ ] login 主干：进场景 + AOI + 属性全量集下发
 //   - [ ] persist：DDL 建库 + 角色存取
 func main() {
@@ -35,6 +36,7 @@ func main() {
 		scenesPath = flag.String("scenes", "testdata/ini/scenes.xml", "scenes.xml 路径")
 		logicPath  = flag.String("logicclass", "testdata/ini/logic_class.xml", "logic_class.xml 路径")
 		listen     = flag.String("listen", "127.0.0.1:9600", "客户端网关监听地址（空=不监听）")
+		svrlist    = flag.String("svrlist", "127.0.0.1:9601", "区服列表分发监听地址（空=不监听；通告地址/端口跟随 -listen）")
 		tps        = flag.Int("tps", 60, "每秒 tick 数（0=全速）")
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
 	)
@@ -93,6 +95,29 @@ func main() {
 		app.OnStop(func(*engine.App) {
 			if err := gateway.Close(); err != nil {
 				fmt.Fprintln(os.Stderr, "solo: 网关关闭:", err)
+			}
+		})
+	}
+
+	// ---- svrlist：区服列表分发（明文 ASCII 行协议，通告跟随 -listen）----
+	if *svrlist != "" {
+		svl := &login.Lister{
+			Addr:  *svrlist,
+			Entry: login.DefaultListerEntry(*listen),
+			Logf:  func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+		}
+		app.OnStart(func(*engine.App) {
+			addr, err := svl.Listen()
+			if err != nil {
+				fatal(err)
+			}
+			fmt.Printf("svrlist 就绪：%s → 通告 %s:%d（probe 对拍：./build/probe.exe -svrlist %s）\n",
+				addr, svl.Entry.Host, svl.Entry.Port, addr)
+			go svl.Serve()
+		})
+		app.OnStop(func(*engine.App) {
+			if err := svl.Close(); err != nil {
+				fmt.Fprintln(os.Stderr, "solo: svrlist 关闭:", err)
 			}
 		})
 	}

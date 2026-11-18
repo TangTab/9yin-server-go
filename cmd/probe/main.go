@@ -1,7 +1,10 @@
 // probe 是协议探测与对拍客户端（全项目的 oracle 基础设施）：
 //
-// 阶段一（本实现）：连本服网关跑「握手+心跳往返」——TCP 建立（线路握手）
-// + golden ping（fork 49840 抓包 326 对钉死的字节形态）逐字节断言 pong。
+// 阶段一（本实现）：
+//   - 默认模式：连本服网关跑「握手+心跳往返」——TCP 建立（线路握手）
+//     + golden ping（fork 49840 抓包 326 对钉死的字节形态）逐字节断言 pong
+//   - -svrlist 模式：连区服列表分发服务，发 golden 请求 "svrlist\n"，
+//     断言应答符合方言（$svrlist #名字 $地址 端口 尾标 CRLF）
 //
 // 后续阶段：连原版服务端回放登录流首段、原始字节落盘 testdata/captures/
 // 供 golden 用例；对拍基线可切明文（-plain，对应 CJ 分支）。
@@ -11,7 +14,9 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	gonet "net"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/net"
@@ -25,12 +30,17 @@ var goldenPings = [][2]string{
 
 func main() {
 	var (
-		addr     = flag.String("addr", "127.0.0.1:9600", "目标服务地址")
+		addr     = flag.String("addr", "127.0.0.1:9600", "目标服务地址（心跳模式）")
+		svrlist  = flag.String("svrlist", "", "svrlist 模式：区服列表服务地址（空=心跳模式）")
 		count    = flag.Int("count", 3, "心跳轮数")
 		interval = flag.Duration("interval", time.Second, "轮间隔")
 		plain    = flag.Bool("plain", false, "明文线路（CJ 对拍基线，不用 XOR）")
 	)
 	flag.Parse()
+
+	if *svrlist != "" {
+		os.Exit(probeSvrlist(*svrlist))
+	}
 
 	opt := net.Options{}
 	if *plain {
@@ -78,6 +88,63 @@ func main() {
 	if fail > 0 {
 		os.Exit(1)
 	}
+}
+
+// probeSvrlist svrlist 模式：发 golden 请求、读应答至断连、按方言断言。
+func probeSvrlist(addr string) int {
+	conn, err := gonet.DialTimeout("tcp", addr, 3*time.Second)
+	if err != nil {
+		fatal(err)
+	}
+	defer conn.Close()
+	fmt.Printf("probe: 已连接 %s（svrlist 明文行协议）\n", addr)
+
+	if _, err := conn.Write([]byte("svrlist\n")); err != nil {
+		fatal(err)
+	}
+	var sb strings.Builder
+	buf := make([]byte, 256)
+	conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	for {
+		n, err := conn.Read(buf)
+		sb.Write(buf[:n])
+		if err != nil {
+			break // 应答后服务端断连，EOF 即完整
+		}
+	}
+	resp := sb.String()
+	fmt.Printf("应答: %q\n", resp)
+
+	// 方言断言：$svrlist #<\u名> $<host> <port> <flag> CRLF
+	if !strings.HasPrefix(resp, "$svrlist #") || !strings.HasSuffix(resp, "\r\n") {
+		fmt.Println("probe: FAIL — 应答不符合 svrlist 方言（头/尾）")
+		return 1
+	}
+	fields := strings.Fields(strings.TrimSuffix(resp, "\r\n"))
+	if len(fields) != 5 || !strings.HasPrefix(fields[2], "$") {
+		fmt.Printf("probe: FAIL — 字段数/形态错误: %v\n", fields)
+		return 1
+	}
+	fmt.Printf("probe: PASS — 名=%s 通告=%s:%s 尾标=%s\n",
+		unescapeUnicode(fields[1][1:]), fields[2][1:], fields[3], fields[4])
+	return 0
+}
+
+// unescapeUnicode 还原 \uXXXX 转义（仅打印用；非法序列原样保留）。
+func unescapeUnicode(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		if len(s)-i >= 6 && s[i] == '\\' && s[i+1] == 'u' {
+			var v rune
+			if _, err := fmt.Sscanf(s[i+2:i+6], "%04X", &v); err == nil {
+				b.WriteRune(v)
+				i += 5
+				continue
+			}
+		}
+		b.WriteByte(s[i])
+	}
+	return b.String()
 }
 
 func lineDesc(plain bool) string {
