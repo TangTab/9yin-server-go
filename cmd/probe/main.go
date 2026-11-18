@@ -11,6 +11,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -18,6 +20,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/net"
 )
@@ -32,6 +35,8 @@ func main() {
 	var (
 		addr     = flag.String("addr", "127.0.0.1:9600", "目标服务地址（心跳模式）")
 		svrlist  = flag.String("svrlist", "", "svrlist 模式：区服列表服务地址（空=心跳模式）")
+		doLogin  = flag.Bool("login", false, "登录模式：重放 golden 首飞并断言 0x04 应答（与 -addr 组合）")
+		flight   = flag.String("flight", "testdata/captures/login-connect-001.bin", "登录模式：golden 首飞线路帧路径")
 		count    = flag.Int("count", 3, "心跳轮数")
 		interval = flag.Duration("interval", time.Second, "轮间隔")
 		plain    = flag.Bool("plain", false, "明文线路（CJ 对拍基线，不用 XOR）")
@@ -43,6 +48,14 @@ func main() {
 	}
 
 	opt := net.Options{}
+	if *plain {
+		opt.ReadCipher = net.IdentityCipher{}
+		opt.WriteCipher = net.IdentityCipher{}
+	}
+
+	if *doLogin {
+		os.Exit(probeLogin(*addr, *flight, opt, *plain))
+	}
 	if *plain {
 		opt.ReadCipher = net.IdentityCipher{}
 		opt.WriteCipher = net.IdentityCipher{}
@@ -88,6 +101,88 @@ func main() {
 	if fail > 0 {
 		os.Exit(1)
 	}
+}
+
+// probeLogin 登录模式：解码 golden 首飞线路帧得 121B 明文 op02，经
+// 同装配线路重放，断言 41B 无角色 0x04 应答（含日期字段合理性）与
+// op03 → 0x05 五书 worldInfo。
+func probeLogin(addr, flightPath string, opt net.Options, plain bool) int {
+	raw, err := os.ReadFile(flightPath)
+	if err != nil {
+		fatal(err)
+	}
+	framer, err := net.NewEscapeFramer(bytes.NewBuffer(raw), 4096)
+	if err != nil {
+		fatal(err)
+	}
+	wire, err := framer.ReadFrame()
+	if err != nil {
+		fatal(fmt.Errorf("首飞解帧: %w", err))
+	}
+	// golden 线路帧为 XOR 编码态；明文基线下（plain）golden 不适用，
+	// 该组合直接报错以免误判。
+	if plain {
+		fatal(fmt.Errorf("登录模式 golden 为 XOR 编码态，不支持 -plain"))
+	}
+	flight := net.NewXorCipher(net.InitialKey).Decode(wire)
+	fmt.Printf("probe: 首飞解码 %d 字节（op=%02X）\n", len(flight), flight[0])
+
+	conn, err := net.Dial(addr, opt)
+	if err != nil {
+		fatal(err)
+	}
+	defer conn.Close()
+	fmt.Printf("probe: 已连接 %s（%s）\n", addr, lineDesc(plain))
+
+	if err := conn.WriteMsg(flight); err != nil {
+		fatal(err)
+	}
+	reply, err := conn.ReadMsg()
+	if err != nil {
+		fatal(err)
+	}
+	fail := 0
+	if len(reply) != 0x29 || reply[0] != 0x04 {
+		fmt.Printf("probe: FAIL — 0x04 应答形态不符（op=%02X len=%d）\n", reply[0], len(reply))
+		fail++
+	} else {
+		u32 := func(off int) uint32 { return binary.LittleEndian.Uint32(reply[off:]) }
+		now := time.Now()
+		fmt.Printf("probe: PASS — 0x04 无角色应答 status=%d 时刻=%04d-%02d-%02d %02d:%02d:%02d\n",
+			u32(0x01), u32(0x09), u32(0x0D), u32(0x11), u32(0x15), u32(0x19), u32(0x1D))
+		if y := u32(0x09); y != uint32(now.Year()) {
+			fmt.Printf("probe: FAIL — 应答年份 %d 非 %d\n", y, now.Year())
+			fail++
+		}
+	}
+
+	if err := conn.WriteMsg([]byte{0x03}); err != nil {
+		fatal(err)
+	}
+	info, err := conn.ReadMsg()
+	if err != nil {
+		fatal(err)
+	}
+	if len(info) < 3 || info[0] != 0x05 {
+		fmt.Printf("probe: FAIL — worldInfo 应答形态不符（op=%02X len=%d）\n", info[0], len(info))
+		fail++
+	} else {
+		units := make([]uint16, 0, (len(info)-3)/2)
+		for i := 3; i+1 < len(info); i += 2 {
+			u := binary.LittleEndian.Uint16(info[i:])
+			if u == 0 {
+				break
+			}
+			units = append(units, u)
+		}
+		fmt.Printf("probe: PASS — worldInfo type=%d text=%q\n",
+			binary.LittleEndian.Uint16(info[1:]), string(utf16.Decode(units)))
+	}
+
+	if fail > 0 {
+		return 1
+	}
+	return 0
 }
 
 // probeSvrlist svrlist 模式：发 golden 请求、读应答至断连、按方言断言。

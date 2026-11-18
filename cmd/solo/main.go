@@ -19,7 +19,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/login"
 )
 
-const version = "0.3.0-solo-svrlist"
+const version = "0.4.0-solo-login-first-flight"
 
 // milestones 是第一里程碑的串联清单，随实现逐步勾掉：
 //   - [x] ecs 内核（World/Entity/Storage/Query/Scheduler，测试+基准通过）
@@ -29,7 +29,9 @@ const version = "0.3.0-solo-svrlist"
 //   - [x] net/proto 最小集：EE+XOR 线路 + 引擎级消息/自定义消息目录 + 心跳网关
 //     （cmd/probe 对拍：golden ping→pong 真 TCP 往返）
 //   - [x] svrlist 区服列表分发（login 链第一环；cmd/lister 独立载体）
-//   - [ ] login 主干：进场景 + AOI + 属性全量集下发
+//   - [x] 登录首段：op02 四槽解析+身份摘要 → 无角色 0x04；op03 → 五书
+//     worldInfo（golden=login-connect-001.bin 首飞线路帧）
+//   - [ ] login 主干续：建角/选角 → 进场景 + AOI + 属性全量集下发
 //   - [ ] persist：DDL 建库 + 角色存取
 func main() {
 	var (
@@ -76,12 +78,16 @@ func main() {
 		})
 	})
 
-	// ---- 网关：客户端线路（EE+XOR），当前只应答心跳 ----
+	// ---- 网关：客户端线路（EE+XOR），心跳 + 登录首段分派 ----
 	var gateway *login.Gateway
 	if *listen != "" {
-		gateway = &login.Gateway{
-			Addr: *listen,
+		flow := &login.Flow{
 			Logf: func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
+		}
+		gateway = &login.Gateway{
+			Addr:    *listen,
+			OnFrame: flow.Handle,
+			Logf:    func(format string, args ...any) { fmt.Printf(format+"\n", args...) },
 		}
 		app.OnStart(func(*engine.App) {
 			addr, err := gateway.Listen()
