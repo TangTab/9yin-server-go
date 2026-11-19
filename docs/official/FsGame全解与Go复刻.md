@@ -168,34 +168,46 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
   aimodule, warmodule, interactivemodule, scenebasemodule, questmodule, lifemodule, guildmodule,
   energywellmodule, logicclassmodule}` + `bg_source\tools\findpath` + `server\{public,utils}`。
 
-## 7. Go 复刻方案（框架层）
+## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-落位 `internal/fsgame`（本轮只立架构与索引，玩法按 §8 表后补）：
+已实现（2648 行，9 测试全绿，官方 door_data.xml 真档校验通过）：
 
 ```
-internal/fsgame/
-  doc.go            // 定位说明（本文件摘录）
-  kernel.go         // Kernel 接口 = IKernel 507 槽的 Go 面（按 §2 分组裁剪方法集）
-  kernel_slots.go   // 槽序常量（对齐 ckernel_slots.txt，供协议对照）
-  module.go         // Module 接口 = ILogicModule 5 槽：Init/BeforeLaunch/LoadResource/Shut
-  registry.go       // Creator 注册链（等价 IModuleCreator 链；Init 序 = §8 表 Init 序）
-  eventbus.go       // 六类注册面：类回调/事件/整型命令/心跳/临界/记录钩子
-  gameobj.go        // 对象模型：属性表+Record+子树+存档（对齐 IGameObj 120 方法分组）
-  varlist.go        // IVarList/TVarList<8> 参数列
-  staticdata.go     // PreloadConfig/xml 静态表（对接 Res/ini）
-  luabridge.go      // nx_* 473 函数注册面（VM 沿 FxCore 里程碑二决策，先占位）
+internal/fsgame/            // 已落码（2648 行 / go test 9 用例全绿）
+  varlist.go     PersistID + Var 联合 + VarList（TVarList<8> 参数列）
+  schema.go      logic_class.xml（类树）+ struct/<class>.xml（属性/记录 schema，
+                 createclass_from_xml 等价）+ 引擎内部属性种子（name/fixed）
+  gameobj.go     GameObject：类型化属性 + Record（行级 RowOp 日志）+ Archive 存档面
+  eventbus.go    六类注册面总线：类回调/事件/整型命令/心跳/临界/记录钩子
+                 （类继承链上溯多播——role 事件 player 类收）
+  kernel.go      Kernel：类表（含 MergedClass 祖先链 schema 合并）/对象表/
+                 场景表/存档出口 SaveOut/资源根/Lua 桥占位
+  module.go      Module 五槽 + Creator + Registry.Assemble（Init 序=§8 表）
+  resource.go    Property 属性表方言（gb2312→GB18030）+ door_data.xml 解析
+  playerbase.go  PlayerBaseModule（七事件 + 0xC/0x33E/0x35C/0x3F7 + 四临界）
+  worldmods.go   SceneBaseModule / LocationModule（door_data 真档）/ MotionModule
+  itemmods.go    ContainerBaseModule（0x1E..0x29 族）/ ItemBaseModule（18 子类）/
+                 CapitalModule（capital_rec 族 + HB_Ansy）
+  rolemods.go    CreateRoleModule（0x375 + OnCreateRole 链 + SaveRoleInfo）/
+                 LevelModule（PlayerExp/PlayerUpgradeExp 升级临界链）/
+                 RequestModule（98..104/0x6D 族）
+  fsgame_test.go 9 用例：七事件闭环/命令路由全表/建角链/升级临界联动/
+                 场景生命周期/door_data 真档/item 生命周期/存档面/装配序
 ```
 
-接驳点：kernel.SendPublicMessage→internal/fssolopublic；存档→internal/fssolostore 管理族；
-碰撞→internal/fscollide；宿主生命周期→internal/fssolomember（其 [Logic] 装配位 LogicModules 已预留）。
+接驳点：SaveOut→internal/fssolostore 管理族；碰撞→internal/fscollide（OnEntry 落点
+校正的 GetHeight 面）；宿主→internal/fssolomember（[Logic] LogicModules 装配位）。
 
-**复刻顺序建议**（框架先行，玩法按表推进）：
+**行为对齐依据**（反汇编定案，见各模块 Init 注释）：PlayerBase
+OnEntry=位置校正落地（GetHeight→MoveTo→SetLandPoint）、OnReady=AsynServerTime/
+Custom/RequestMacAddress/Lua、OnStore→CreateRole::SaveRoleInfo、0xC=Lua 桥；
+CreateRole OnCreateRole=IsCanCreate→SetInt 链→ClearRecord(skill/shortcut_rec/
+normal_attack)；Container 命令族先查 AsynCtrl::IsWaiting；Capital OnReady=
+QueryInt→RequestPoints、OnEntryGame=ResetConsumeRec。
 
-1. registry/module/kernel 骨架 + eventbus 六类回调 + player 七事件空转；
-2. gameobj 属性/Record + SaveChunk → store 链闭环（登录→OnEntry→OnStore→save_data 可回放）；
-3. staticdata（Res/ini xml 子集：server_version/item/skill）+ 整型命令路由（先通 PlayerBase 4 命令）；
-4. 心跳泵（对齐 FxCore 定步）+ Lua nx_* 占位；
-5. 之后按 §8 表逐模块复刻（每模块套路：Init 注册面 → 命令/事件 → Record/心跳）。
+**后续批次**（每模块套路：Init 注册面→命令/事件→Record/心跳）：
+第二批建议社交底座（Chat/Friend/Team/Post + Gmcc/Log）；战斗域整族
+（Skill/Fight/Buffer/CoolDown/DamageCalculate）独立成批。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 
