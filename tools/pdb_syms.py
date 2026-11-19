@@ -44,6 +44,8 @@ class Pdb:
         pos = 4 + 4 * nstream
         self.streams = []
         for sz in sizes:
+            if sz > self.num_blocks * self.block_size:
+                sz = 0  # 哨兵 size（自由块图流），视为空流
             nblk = (sz + self.block_size - 1) // self.block_size
             blks = struct.unpack_from("<%dI" % nblk, raw, pos) if sz else []
             pos += 4 * nblk
