@@ -5,6 +5,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/sockopt"
 )
 
 // 客户端面方言常量（CMassSock 面直连 + client_t 内嵌行缓冲实证）。
@@ -234,7 +236,10 @@ func (r *RegistrationServer) Listen() (gonet.Addr, error) {
 		}
 		bindIP = ip
 	}
-	pc, err := gonet.ListenUDP("udp4", &gonet.UDPAddr{IP: bindIP, Port: port})
+	// 官方 CreateBroadcast 语义：SO_REUSEADDR 共绑（集群多进程/合一多实体
+	// 同口互收广播）。裸 ListenUDP 无 REUSEADDR，先绑者会拒掉后来者的
+	// 127.0.0.1 定向绑定（sidecar 先启即炸 solounite），必须走 reusable 口。
+	pc, err := sockopt.ListenUDPReusable("udp4", (&gonet.UDPAddr{IP: bindIP, Port: port}).String())
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +252,7 @@ func (r *RegistrationServer) Listen() (gonet.Addr, error) {
 	if needLoop {
 		// 官方本地口（bind 127.0.0.1:port，目标 127.255.255.255）：
 		// 同机定向回环即可达（Linux lo 无 BROADCAST 的既定对策）。
-		loop, lerr := gonet.ListenUDP("udp4", &gonet.UDPAddr{IP: gonet.IPv4(127, 0, 0, 1), Port: port})
+		loop, lerr := sockopt.ListenUDPReusable("udp4", (&gonet.UDPAddr{IP: gonet.IPv4(127, 0, 0, 1), Port: port}).String())
 		if lerr == nil {
 			r.pcMu.Lock()
 			r.loopPC = loop

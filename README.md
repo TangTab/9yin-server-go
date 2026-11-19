@@ -15,6 +15,22 @@ go test ./...                  # 全量测试（含 golden 对拍）
 ```
 
 本地无 make 时直接使用上述 go 命令；Makefile 仅作等价包装。
+Windows 下 `build.bat`（先测后编；`build.bat fast` 跳过测试）等价，并自动
+清理 build\ 里改名后残留的旧 exe。
+
+### 启动
+
+```bat
+server-cmd\start-single.bat    :: 单进程合一（game_solounite，一进程承载官方七实体）
+server-cmd\start-cluster.bat   :: 集群（官方启停序九进程；set MEMBERS=12 拉满多场景服）
+server-cmd\stop-cluster.bat    :: 集群停机（官方 kill.bat 逆序）
+```
+
+脚本自动在 `bin\`（deploy 布局）、当前目录、仓库 `build\` 三处定位二进制；
+ini 缺失时进程释放内置官方快照。集群启动序对齐官方依赖序
+logger→world→store→public→lister→entry→member×N→auction→monitor（合一
+main.lua 序与 BGserverCJ\start.bat 序的合并定案，见
+docs/official/game_unite与game_world全解与Go复刻.md）。
 
 ### 直读原版数据（可选）
 
