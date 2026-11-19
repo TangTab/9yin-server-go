@@ -277,3 +277,57 @@ func TestStopSemantics(t *testing.T) {
 		t.Fatal("Stop 后 Send 应拒绝")
 	}
 }
+
+// TestBroadcastCoBind 多实体共绑同一广播口（SO_REUSEADDR 官方语义）：
+// 官方集群多进程/合一进程内多实体同口互收广播——每个套接字都收到
+// 双方报文（含发送者自收；Win11 实测 127.255.255.255 定向广播全投递）。
+func TestBroadcastCoBind(t *testing.T) {
+	probe, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	port := probe.LocalAddr().(*net.UDPAddr).Port
+	probe.Close()
+
+	r1, r2 := New(), New()
+	r1.Start()
+	r2.Start()
+	t.Cleanup(r1.Stop)
+	t.Cleanup(r2.Stop)
+
+	got1, got2 := make(chan string, 4), make(chan string, 4)
+	b1, err := r1.CreateBroadcast("127.255.255.255", port, func(data []byte, from string, p int) {
+		got1 <- string(data)
+	})
+	if err != nil {
+		t.Fatalf("第二前绑口: %v", err)
+	}
+	b2, err := r2.CreateBroadcast("127.255.255.255", port, func(data []byte, from string, p int) {
+		got2 <- string(data)
+	})
+	if err != nil {
+		t.Fatalf("共绑同口失败（REUSEADDR 未生效？）: %v", err)
+	}
+
+	r1.SendBroadcast(b1, []byte("m1"))
+	r2.SendBroadcast(b2, []byte("m2"))
+
+	collect := func(ch chan string) map[string]bool {
+		got := map[string]bool{}
+		for len(got) < 2 {
+			select {
+			case m := <-ch:
+				got[m] = true
+			case <-time.After(testWait):
+				return got
+			}
+		}
+		return got
+	}
+	for name, ch := range map[string]chan string{"r1": got1, "r2": got2} {
+		got := collect(ch)
+		if !got["m1"] || !got["m2"] {
+			t.Fatalf("%s 未双收 m1/m2（得 %v）——共绑广播互收失效", name, got)
+		}
+	}
+}

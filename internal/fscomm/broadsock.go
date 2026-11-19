@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"sync"
+
+	"github.com/lizhanyin/9yin-server-go/internal/sockopt"
 )
 
 // BroadSockOptions 对齐官方 BroadSock 实体属性：
@@ -41,14 +43,15 @@ func NewBroadSock(opts BroadSockOptions, h BroadSockHandler) *BroadSock {
 }
 
 // Start 绑定并进入收包循环（官方 BroadSock::Start；bind 失败文案
-// 对齐 "(BroadSock::Start)bind failed"）。Go 的 UDP 套接字对
-// DGRAM 默认开启广播，等价官方 setsockopt(SO_BROADCAST)。
+// 对齐 "(BroadSock::Start)bind failed"）。SO_REUSEADDR + SO_BROADCAST
+// 兑现官方 setsockopt 对：集群多进程/合一进程内多实体共绑同口互收
+// 广播（见 internal/sockopt）。
 func (b *BroadSock) Start() error {
 	bindAddr := net.UDPAddr{Port: b.opts.BindPort}
 	if b.opts.BindAddress != "" {
 		bindAddr.IP = net.ParseIP(b.opts.BindAddress)
 	}
-	pc, err := net.ListenUDP("udp4", &bindAddr)
+	pc, err := sockopt.ListenUDPReusable("udp4", bindAddr.String())
 	if err != nil {
 		return fmt.Errorf("fscomm: (BroadSock::Start)bind failed: %w", err)
 	}

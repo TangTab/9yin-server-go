@@ -79,8 +79,9 @@ type Server struct {
 	// sceneOf 客户端场景表（set_client_online 第 4 域 → SceneSend 过滤）
 	sceneOf map[uint32]uint32
 
-	stop    chan struct{}
-	stopped chan struct{}
+	stop     chan struct{}
+	stopped  chan struct{}
+	stopOnce sync.Once
 }
 
 // New 装配服务。down/inner 由宿主创建后注入（down 可为 nil，仅测状态机）。
@@ -123,13 +124,13 @@ func (s *Server) Start() {
 	go s.run()
 }
 
-// Stop 收尾。
+// Stop 收尾（幂等：合一进程内 Quit 钩与宿主停机序可能并发重入）。
 func (s *Server) Stop() {
 	s.state.Store(int32(entry.StateClosed))
 	if s.opt.ManualTick {
 		return // 手动拍模式无后台循环
 	}
-	close(s.stop)
+	s.stopOnce.Do(func() { close(s.stop) })
 	<-s.stopped
 }
 

@@ -31,6 +31,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/sockopt"
 )
 
 // ConnHandler 连接三回调（官方 CreateListener/CreateConnector 的
@@ -238,6 +240,21 @@ func (r *Reactor) CreateListener(addr string, port int, maxAccepts int, h ConnHa
 	return id, nil
 }
 
+// ListenerPort 返回 listener 实际侦听口（官方 CReactor::GetListenerPort；
+// 0 口侦听时回填临时口）。id 无效返回 false。
+func (r *Reactor) ListenerPort(id int) (int, bool) {
+	r.mu.Lock()
+	ln, ok := r.listeners[id]
+	r.mu.Unlock()
+	if !ok {
+		return 0, false
+	}
+	if ta, ok := ln.Addr().(*net.TCPAddr); ok {
+		return ta.Port, true
+	}
+	return 0, false
+}
+
 func (r *Reactor) acceptLoop(ln net.Listener, h ConnHandler) {
 	defer r.objWG.Done()
 	for {
@@ -400,11 +417,13 @@ func (r *Reactor) GetConnected(connID int) bool {
 // CreateBroadcast 开 UDP 广播口（官方 CreateBroadcast 语义）：绑通配
 // 地址收发一体，既收定向包也收广播包（Go 对 DGRAM 默认置
 // SO_BROADCAST；官方双口=环回+网段广播，Go 单口即可双收）。
+// SO_REUSEADDR 共绑：官方集群多进程/合一进程内多实体同绑一口互收
+// 广播（Win11 实测 127.255.255.255 定向广播全量投递、发送者亦自收）。
 func (r *Reactor) CreateBroadcast(broadAddr string, broadPort int, onRecv BroadHandler) (int, error) {
 	if !r.start.Load() {
 		return 0, fmt.Errorf("reactor 未 Start")
 	}
-	pc, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: broadPort})
+	pc, err := sockopt.ListenUDPReusable("udp4", (&net.UDPAddr{IP: net.IPv4zero, Port: broadPort}).String())
 	if err != nil {
 		r.logf("CreateBroadcast bind failed: %v", err)
 		return 0, err

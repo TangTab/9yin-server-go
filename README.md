@@ -38,8 +38,18 @@ cmd/                    进程入口（对应原版 game_*.exe）
   entry/ lister/        登录网关 / 区服列表（第二里程碑）
   member/ world/ public/ 角色服务 / 场景服 / 公共数据（第二里程碑）
   auction/              拍卖行数据服务器（game_auction.exe + FsSoloAuction.dll 复刻）
+  soloentry/            单机形态接入网关（game_entry.exe + FsSoloEntry.dll 复刻）
   sololister/           区服列表进程（game_lister.exe + FsSoloLister.dll 全量复刻：UDP 双口中继注册/版本门/黑白名单）
+  solomember/           单机形态场景服（game_member.exe + FsSoloMember.dll 框架层复刻：广播发现/内网五面路由/五态引导机）
+  soloworld/ solopublic/ 单机形态世界服/公共数据服（game_world.exe/game_public.exe + FsSoloWorld/FsSoloPublic.dll 复刻；soloworld 含 scenes.ini 装载）
+  solounite/            合一服（game_unite.exe + lua\solounite 编排复刻：单进程七实体/共享广播口互发现/官方启停序/echo perf）
+  genlic/               生成/校验工具（双方言：solo 内部/外部形态 + 网关 FsEntry 方言；生成后回环自检）
   global/               全局名字服务器（game_global.exe + FsSoloGlobal.dll 复刻：add_name/remove_name 行协议 + 域表 + SQL）
+  logserver/            日志汇聚服务器（game_log.exe + FsSoloLog.dll 复刻：共享内存 64 槽消费落盘 + AutoExit 看门狗 + echo 维护口）
+  store/                存储枢纽（game_store.exe + FsSoloStore.dll 复刻：67 型命令路由/serial 还源/五通道 SQL/29 日志表分周）
+  monitor/              反作弊监控服务器（game_monitor.exe + FsSoloMonitor.dll 复刻：:4008 行协议 10 命令/7 监控表/16 型告警/nx_monitor 落库）
+  robot/                压测机器人客户端（game_robot.exe + FsSoloRobot.dll 复刻：EE 帧网关协议五发七收/QuickLZ 0x28 包裹/±5m 移动）
+  gpksvr/               反外挂动态码自检工具（GPKitSvr.dll 复刻：DynCodeBin 装载 + RandomPick→GetData→Call1/Call2 闭环 + CheckAuthReply）
   probe/                协议探测与对拍客户端（oracle 基础设施）
 internal/
   ecs/                  sparse-set ECS 内核（零依赖，对象模型基础）

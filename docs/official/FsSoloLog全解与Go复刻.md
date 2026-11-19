@@ -69,8 +69,8 @@ FsSoloGlobal 的启动逻辑(docs/official/FsSoloGlobal全解与Go复刻.md §86
 ```
 +0x00  IEntity vptr
 +0x28  void*  m_pWinSocket      ; Init 时 QueryPlugin("WinSocket"),Shut 释放
-+0x2C  bool   m_bUseThread      ; 属性 UseThread
-+0x2D  bool   m_bAutoExit       ; 属性 AutoExit
++0x2C  bool   m_bUseThread      ; 属性 UseThread(ctor 缺省 0)
++0x2D  bool   m_bAutoExit       ; 属性 AutoExit(ctor 缺省 1 ★看门狗缺省开)
 +0x30  int    m_nExitCount      ; AutoExit 空闲秒计数(初值 -1,见 §5.3)
 +0x34  int    m_nState          ; 0=Closed 1=Opened 2=Paused 3=Unknown
 +0x38  TFastStr<0x100> m_EchoAddr
@@ -85,6 +85,11 @@ FsSoloGlobal 的启动逻辑(docs/official/FsSoloGlobal全解与Go复刻.md §86
 +0xB4  char   m_FileNames[64][0x100]  ; 每 appid 槽的当前日志文件名
                                   ;    (空串=未开档;首字节即开档标志)
 ```
+
+**ctor 缺省值定案**（??0SoloLog@@QAE@XZ @0x100552e0 反汇编）：
+`+0x2C←0`、`+0x2D←1`、`+0x30←0xFFFFFFFF`、`+0x34←0`——
+**AutoExit 看门狗缺省开**（main.lua 不设该属性也不影响：solo 形态
+日志服随 world 生灭的设计即由此承载）。
 
 ### 3.1 生命周期
 
@@ -297,10 +302,11 @@ else                                  → on_input(line 原文)
 
 ## 七、Go 复刻设计
 
-### 7.1 落点
+### 7.1 落点（2026-11-19 已实现全绿）
 
-- `internal/fssololog/`:本模块(logsharemem.go + sololog.go + echo.go)
-- `cmd/logserver`(或并入 cmd/solo 作子命令):进程载体
+- `internal/fssololog/`:本模块(logsharemem.go + sololog.go + echo.go
+  + parse.go + commands.go + config.go + winsharemem_windows.go)
+- `cmd/logserver`:进程载体(内置官方 game_log.ini 方言,缺省释放)
 - 复用:`internal/reactor`(CReactor 既有复刻)
 
 ### 7.2 组件映射
@@ -330,10 +336,20 @@ Go 复刻若维持多进程形态(与 cmd/auction 等并立),消费侧有两个�
    UDP/命名管道汇聚),槽语义(64 appid/prefix/换档/环)保留为内部
    结构;`cmd/solo` 单进程整合服里即内存 channel 直通。
 
-建议:包内以 `SlotSink` 接口抽象"取行"动作,保真与纯 Go 两个实现
-分别编译标签或运行期开关选择;文件落盘/翻卷/AutoExit/echo 全部共用。
+**落地决策（已实现）**：LogShareMem 直接承载官方槽协议（[]byte 布局
+逐字对齐），Windows 缺省开真命名映射 `memory_fs_solo_log_0`
+（**保真方案为缺省**，可与官方 game_*.exe 生产进程互操作）；非
+Windows 回退进程内缓冲（协议同构，仅无跨进程能力，`-share off`
+可强制）。Go 侧业务进程作生产者时同用本包（SetAppId/SetLogPrefix/
+TraceLog），不再需要 SlotSink 抽象。
 
 ### 7.4 与官方的已知差异
+
+- **Win11 24H2+ 映射掩码坑（实测定案）**：MapViewOfFile 取经典
+  FILE_MAP_ALL_ACCESS(0xF0010) 时视图**写入即 AV**（CreateFileMappingW/
+  MapViewOfFile 双双"成功"但首页不可写；掩码矩阵 0xF0010✗/0x4✗/
+  0x2✓/0x6✓）；复刻取 FILE_MAP_READ|FILE_MAP_WRITE(0x6)，
+  winsharemem_windows_test.go 为哨兵回归。
 
 - UseThread 双 EventLoop(主循环+线程各一)在 Go 里由 reactor 自身
   事件循环承担,不再暴露线程开关属性。
@@ -356,3 +372,25 @@ Go 复刻若维持多进程形态(与 cmd/auction 等并立),消费侧有两个�
 - [x] Lua 属性/方法注册表 + main.lua 命令全集
 - [x] 生产者 appid 实证(World=1/Public=2/Auction=3/Monitor=0x32/Global=0x38)
 - [ ] FsSoloEntry/Lister/Member/Store 的 appid(运行期计算,待运行态取证)
+
+## 九、Go 复刻验收记录（2026-11-19）
+
+- `go test ./internal/fssololog/`：14 用例全绿——槽协议注册/注销、
+  TraceLog 环满丢行（128 环 127 待取）、文件名 `目录 appid_前缀_
+  时间戳.log` 与行格式 `[YYYY-MM-DD HH:MM:SS] 行`（落盘时刻）、
+  每 tick 每槽 100 行上限（127→100+27 同档 append）、EveryDayAlone
+  跨天换档、create_new 换档+消费侧清位、AutoExit（从未在线不自退/
+  在线跨越一轮后消失 5 轮退出/printf 序列 1..5）、互斥体二实例
+  `(SoloLog::Start)mutex_fs_solo_log exclusive failed` 文案、echo
+  单连接顶替+getp/setp/只读拒绝/未定义命令/end 断连、quit 停服、
+  parse_string 引号保留与 int/float 试型、ini 方言（官方快照缺
+  [Echo] → main.lua 缺省 127.0.0.1:15011）、真命名映射双视图互通
+  （winsharemem_windows_test.go 哨兵）。
+- 端到端（cmd/logserver，Windows）：裸跑释放 game_log.ini → 真命名
+  映射打开 → echo 探针 welcome/`>Opened\r\r\n`（双换行官方行为）/
+  setp ok/help/quit → WriteLine+优雅退出；**跨进程对拍**：ctypes
+  伪造生产进程 attach 同名映射、注册槽 2"PythonProd"、写 3 行推进
+  write_cursor → 0.1s 拍落盘 `log\2_PythonProd_*.log`（官方命名与
+  行格式 ✓）。
+- 新增定案：ctor @0x100552e0（AutoExit 缺省 **1**）；Win11 24H2+
+  FILE_MAP_ALL_ACCESS 掩码坑（§7.4）。

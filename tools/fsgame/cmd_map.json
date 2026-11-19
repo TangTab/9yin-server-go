@@ -1,0 +1,1400 @@
+{
+ "1": [
+  "AchievementModule.obj",
+  "AuctionHouseModule.obj",
+  "BattleWarModule.obj",
+  "BufferModule.obj",
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "ConditionExecutor.obj",
+  "ConvoyNpcModule.obj",
+  "CoolDownModule.obj",
+  "EnergyModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "EverydayGuideModule.obj",
+  "FriendModule.obj",
+  "HateModule.obj",
+  "IncomeReduceModule.obj",
+  "LuaExtModule.obj",
+  "MonsterOwnershipModule.obj",
+  "OpenPromptModule.obj",
+  "PVPActivityModule.obj",
+  "PVPTaskModule.obj",
+  "PostModule.obj",
+  "QuestCriteriaModule.obj",
+  "QuestModule.obj",
+  "TaskExecutor.obj",
+  "TeamModule.obj"
+ ],
+ "2": [
+  "AchievementModule.obj",
+  "AuctionHouseModule.obj",
+  "BattleWarModule.obj",
+  "BufferModule.obj",
+  "CapitalModule.obj",
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "ConditionExecutor.obj",
+  "CoolDownModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "EverydayGuideModule.obj",
+  "FieldCloneModule.obj",
+  "FriendModule.obj",
+  "GMModule.obj",
+  "HateModule.obj",
+  "LuaExtModule.obj",
+  "MonsterOwnershipModule.obj",
+  "OpenPromptModule.obj",
+  "PVPTaskModule.obj",
+  "PostModule.obj",
+  "QuestCriteriaModule.obj",
+  "QuestModule.obj",
+  "SpecialTeamModule.obj",
+  "TaskExecutor.obj",
+  "TeamModule.obj"
+ ],
+ "3": [
+  "AchievementModule.obj",
+  "AuctionHouseModule.obj",
+  "BattleWarSceneModule.obj",
+  "BufferModule.obj",
+  "CapitalModule.obj",
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "ConvoyNpcModule.obj",
+  "CoolDownModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "FriendModule.obj",
+  "HateModule.obj",
+  "MotionModule.obj",
+  "OpenPromptModule.obj",
+  "PVPTaskModule.obj",
+  "PostModule.obj",
+  "QuestCriteriaModule.obj",
+  "QuestModule.obj",
+  "SpecialTeamModule.obj",
+  "TaskExecutor.obj",
+  "TeamModule.obj"
+ ],
+ "616": [
+  "AchievementModule.obj",
+  "BattleCarrierModule.obj",
+  "BattleWarGamePlayModule.obj",
+  "BattleWarModule.obj",
+  "BufferModule.obj",
+  "CloneSceneModule.obj",
+  "ConditionExecutor.obj",
+  "DeadModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "FightModule.obj",
+  "FightRelationModule.obj",
+  "FlowModule.obj",
+  "FreshmanModule.obj",
+  "FriendModule.obj",
+  "GunManModule.obj",
+  "HonorValueModule.obj",
+  "MonsterAwardsModule.obj",
+  "MonsterOwnershipModule.obj",
+  "MysticModule.obj",
+  "PKModule.obj",
+  "PVPTaskModule.obj",
+  "PetLogicModule.obj",
+  "QteModule.obj",
+  "QuestCriteriaModule.obj",
+  "ReliveModule.obj",
+  "ShopModule.obj",
+  "StageModule.obj",
+  "TechnologyNpcModule.obj",
+  "UnderWaterModule.obj"
+ ],
+ "43": [
+  "AchievementModule.obj"
+ ],
+ "716": [
+  "AchievementModule.obj",
+  "FriendModule.obj"
+ ],
+ "340": [
+  "AchievementModule.obj"
+ ],
+ "1000": [
+  "ActivityModule.obj",
+  "CloneSceneModule.obj",
+  "DeadModule.obj",
+  "FriendModule.obj",
+  "MonsterAwardsModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "820": [
+  "ActivityModule.obj",
+  "MovieModule.obj"
+ ],
+ "821": [
+  "ActivityModule.obj",
+  "MovieModule.obj"
+ ],
+ "378": [
+  "ActivityModule.obj"
+ ],
+ "923": [
+  "ActivityModule.obj"
+ ],
+ "553": [
+  "AirportModule.obj"
+ ],
+ "22": [
+  "AirportModule.obj",
+  "BattleCarrierModule.obj",
+  "BattleWarModule.obj",
+  "CommonNpcModule.obj",
+  "DepotModule.obj",
+  "EnergyFillModule.obj",
+  "EquipmentModule.obj",
+  "ExileModule.obj",
+  "FriendModule.obj",
+  "GuildModule.obj",
+  "ItemLaveModule.obj",
+  "OptionTalkModule.obj",
+  "PVPTaskModule.obj",
+  "PostModule.obj",
+  "QuestCriteriaModule.obj",
+  "QuestModule.obj",
+  "ReliveModule.obj",
+  "ShopModule.obj",
+  "TransformJobModule.obj",
+  "TriggerTalkModule.obj"
+ ],
+ "961": [
+  "ArenaRankModule.obj"
+ ],
+ "809": [
+  "ArenaSceneModule.obj",
+  "BattleWarSceneModule.obj"
+ ],
+ "915": [
+  "ArenaSceneModule.obj",
+  "DepotModule.obj",
+  "EverydayGuideModule.obj"
+ ],
+ "4": [
+  "AuctionHouseModule.obj",
+  "BufferModule.obj",
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "ConditionExecutor.obj",
+  "ConvoyNpcModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "FriendModule.obj",
+  "LookModule.obj",
+  "PVPTaskModule.obj",
+  "PostModule.obj",
+  "QuestModule.obj",
+  "SpecialTeamModule.obj",
+  "TaskExecutor.obj",
+  "TeamModule.obj"
+ ],
+ "5": [
+  "AuctionHouseModule.obj",
+  "BufferModule.obj",
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "EverydayGuideModule.obj",
+  "FriendModule.obj",
+  "MsgBoxModule.obj",
+  "PVPTaskModule.obj",
+  "SpecialTeamModule.obj",
+  "TaskExecutor.obj"
+ ],
+ "6": [
+  "AuctionHouseModule.obj",
+  "CloneSceneModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "FriendModule.obj",
+  "MsgBoxModule.obj",
+  "PVPTaskModule.obj",
+  "SpecialTeamModule.obj",
+  "TaskExecutor.obj"
+ ],
+ "197": [
+  "AuctionHouseModule.obj"
+ ],
+ "99": [
+  "BackStageModule.obj",
+  "RequestModule.obj"
+ ],
+ "859": [
+  "BackStageModule.obj"
+ ],
+ "603": [
+  "BannerNpcModule.obj",
+  "GivingNpcModule.obj",
+  "MultiSkillNpcModule.obj",
+  "OrganNpcModule.obj",
+  "ToolItemModule.obj"
+ ],
+ "609": [
+  "BattleCarrierModule.obj",
+  "BufferModule.obj",
+  "FightModule.obj",
+  "FightRelationModule.obj",
+  "PKModule.obj",
+  "PVPTaskModule.obj",
+  "PetLogicModule.obj"
+ ],
+ "550": [
+  "BattleCarrierModule.obj"
+ ],
+ "781": [
+  "BattleCarrierModule.obj"
+ ],
+ "750": [
+  "BattleCarrierModule.obj"
+ ],
+ "752": [
+  "BattleCarrierModule.obj",
+  "ConditionExecutor.obj"
+ ],
+ "753": [
+  "BattleCarrierModule.obj",
+  "TriggerProcesserModule.obj"
+ ],
+ "756": [
+  "BattleCarrierModule.obj",
+  "EventSpringModule.obj"
+ ],
+ "757": [
+  "BattleCarrierModule.obj",
+  "EventSpringModule.obj"
+ ],
+ "758": [
+  "BattleCarrierModule.obj",
+  "SwitchExecutor.obj"
+ ],
+ "760": [
+  "BattleCarrierModule.obj"
+ ],
+ "23": [
+  "BattleCarrierModule.obj"
+ ],
+ "950": [
+  "BattleCarrierModule.obj"
+ ],
+ "640": [
+  "BattleWarModule.obj"
+ ],
+ "896": [
+  "BattleWarModule.obj",
+  "EverydayGuideModule.obj"
+ ],
+ "964": [
+  "BattleWarModule.obj"
+ ],
+ "613": [
+  "BattleWarModule.obj",
+  "BufferModule.obj",
+  "DoSelectModule.obj",
+  "EnergyFillModule.obj",
+  "EnergyWellResFightModule.obj",
+  "FightModule.obj",
+  "JobFormulaModule.obj",
+  "MonsterOwnershipModule.obj",
+  "PVPTaskModule.obj",
+  "PetLogicModule.obj",
+  "SkillBreakManageModule.obj",
+  "ToolItemModule.obj"
+ ],
+ "100": [
+  "BattleWarModule.obj",
+  "RequestModule.obj",
+  "RevertPlayerModule.obj"
+ ],
+ "114": [
+  "BattleWarModule.obj",
+  "CloneSceneModule.obj",
+  "TeamModule.obj"
+ ],
+ "1017": [
+  "BattleWarModule.obj"
+ ],
+ "27": [
+  "BattleWarModule.obj"
+ ],
+ "992": [
+  "BladeRunnerModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "993": [
+  "BladeRunnerModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "994": [
+  "BladeRunnerModule.obj",
+  "EverydayGuideModule.obj"
+ ],
+ "995": [
+  "BladeRunnerModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "641": [
+  "BufferModule.obj"
+ ],
+ "600": [
+  "BufferModule.obj",
+  "FightRelationModule.obj",
+  "GivingNpcModule.obj"
+ ],
+ "605": [
+  "BufferModule.obj",
+  "PKModule.obj"
+ ],
+ "610": [
+  "BufferModule.obj"
+ ],
+ "611": [
+  "BufferModule.obj"
+ ],
+ "612": [
+  "BufferModule.obj"
+ ],
+ "615": [
+  "BufferModule.obj",
+  "EnergyWellResFightModule.obj",
+  "OpenPromptModule.obj",
+  "PKModule.obj"
+ ],
+ "630": [
+  "BufferModule.obj"
+ ],
+ "631": [
+  "BufferModule.obj"
+ ],
+ "632": [
+  "BufferModule.obj"
+ ],
+ "1019": [
+  "BufferModule.obj"
+ ],
+ "1021": [
+  "BufferModule.obj",
+  "MysticModule.obj"
+ ],
+ "323": [
+  "CapitalModule.obj",
+  "ExchangeModule.obj"
+ ],
+ "7": [
+  "CapitalModule.obj",
+  "CloneSceneModule.obj",
+  "EnergyWellModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "FriendModule.obj",
+  "PVPActivityModule.obj",
+  "PostModule.obj",
+  "SpecialTeamModule.obj",
+  "TaskExecutor.obj",
+  "TriggerTalkModule.obj"
+ ],
+ "45": [
+  "CapitalModule.obj",
+  "ExileModule.obj"
+ ],
+ "892": [
+  "CapitalModule.obj"
+ ],
+ "614": [
+  "ChallengeModule.obj",
+  "VisibleNpcModule.obj"
+ ],
+ "196": [
+  "ChargeModule.obj"
+ ],
+ "8": [
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "EnergyWellResFightModule.obj",
+  "EventSpringModule.obj",
+  "LuaExtModule.obj",
+  "OptionTalkModule.obj",
+  "PVPTaskModule.obj",
+  "PostModule.obj",
+  "SpecialTeamModule.obj"
+ ],
+ "9": [
+  "ChatModule.obj",
+  "CloneSceneModule.obj",
+  "EnergyWellResFightModule.obj",
+  "PostModule.obj",
+  "SpecialTeamModule.obj"
+ ],
+ "938": [
+  "ChatModule.obj"
+ ],
+ "914": [
+  "ChatModule.obj",
+  "ToolBoxModule.obj"
+ ],
+ "684": [
+  "ChatRoomModule.obj"
+ ],
+ "685": [
+  "ChatRoomModule.obj"
+ ],
+ "686": [
+  "ChatRoomModule.obj"
+ ],
+ "687": [
+  "ChatRoomModule.obj"
+ ],
+ "688": [
+  "ChatRoomModule.obj"
+ ],
+ "689": [
+  "ChatRoomModule.obj"
+ ],
+ "690": [
+  "ChatRoomModule.obj"
+ ],
+ "691": [
+  "ChatRoomModule.obj"
+ ],
+ "692": [
+  "ChatRoomModule.obj"
+ ],
+ "790": [
+  "ChatRoomModule.obj"
+ ],
+ "791": [
+  "ChatRoomModule.obj"
+ ],
+ "792": [
+  "ChatRoomModule.obj"
+ ],
+ "793": [
+  "ChatRoomModule.obj"
+ ],
+ "794": [
+  "ChatRoomModule.obj"
+ ],
+ "795": [
+  "ChatRoomModule.obj"
+ ],
+ "796": [
+  "ChatRoomModule.obj"
+ ],
+ "797": [
+  "ChatRoomModule.obj"
+ ],
+ "10": [
+  "CloneSceneModule.obj",
+  "EnergyWellResFightModule.obj",
+  "SpecialTeamModule.obj",
+  "TeamModule.obj",
+  "ToolItemModule.obj"
+ ],
+ "139": [
+  "CloneSceneModule.obj"
+ ],
+ "11": [
+  "CloneSceneModule.obj",
+  "SpecialTeamModule.obj"
+ ],
+ "12": [
+  "CloneSceneModule.obj",
+  "PlayerBaseModule.obj",
+  "PostModule.obj"
+ ],
+ "13": [
+  "CloneSceneModule.obj",
+  "FriendModule.obj",
+  "PostModule.obj"
+ ],
+ "799": [
+  "CloneSceneModule.obj"
+ ],
+ "800": [
+  "CloneSceneModule.obj",
+  "WorldRankModule.obj"
+ ],
+ "805": [
+  "CloneSceneModule.obj"
+ ],
+ "80": [
+  "CloneSceneModule.obj"
+ ],
+ "110": [
+  "CloneSceneModule.obj",
+  "FriendModule.obj",
+  "MonsterOwnershipModule.obj",
+  "OpenPromptModule.obj",
+  "TeamModule.obj"
+ ],
+ "112": [
+  "CloneSceneModule.obj",
+  "MonsterOwnershipModule.obj",
+  "TeamModule.obj"
+ ],
+ "30": [
+  "CommonNpcModule.obj",
+  "ContainerBaseModule.obj"
+ ],
+ "930": [
+  "ConditionExecutor.obj",
+  "PetLogicModule.obj"
+ ],
+ "932": [
+  "ConditionExecutor.obj",
+  "EverydayGuideModule.obj",
+  "PetLogicModule.obj"
+ ],
+ "32": [
+  "ContainerBaseModule.obj"
+ ],
+ "33": [
+  "ContainerBaseModule.obj"
+ ],
+ "34": [
+  "ContainerBaseModule.obj"
+ ],
+ "35": [
+  "ContainerBaseModule.obj"
+ ],
+ "36": [
+  "ContainerBaseModule.obj"
+ ],
+ "37": [
+  "ContainerBaseModule.obj",
+  "EnergyFillModule.obj"
+ ],
+ "38": [
+  "ContainerBaseModule.obj"
+ ],
+ "39": [
+  "ContainerBaseModule.obj"
+ ],
+ "40": [
+  "ContainerBaseModule.obj"
+ ],
+ "41": [
+  "ContainerBaseModule.obj"
+ ],
+ "701": [
+  "ConvoyNpcModule.obj",
+  "EnergyWellModule.obj",
+  "FlyNpcModule.obj"
+ ],
+ "935": [
+  "CreateMonsterModule.obj"
+ ],
+ "885": [
+  "CreateRoleModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "860": [
+  "DepotModule.obj",
+  "PlayerBaseModule.obj",
+  "QteModule.obj"
+ ],
+ "910": [
+  "DepotModule.obj",
+  "TechnologyNpcModule.obj"
+ ],
+ "20": [
+  "DepotModule.obj",
+  "FriendModule.obj",
+  "GuildModule.obj"
+ ],
+ "220": [
+  "DepotModule.obj"
+ ],
+ "223": [
+  "DepotModule.obj"
+ ],
+ "440": [
+  "DoSelectModule.obj"
+ ],
+ "851": [
+  "DropCapitalItemModule.obj"
+ ],
+ "68": [
+  "DropModule.obj"
+ ],
+ "195": [
+  "DumpRoleModule.obj"
+ ],
+ "999": [
+  "EnergyFillModule.obj",
+  "EnergyWellResFightModule.obj"
+ ],
+ "882": [
+  "EnergyWellModule.obj",
+  "FlyNpcModule.obj"
+ ],
+ "920": [
+  "EnergyWellModule.obj",
+  "PKModule.obj"
+ ],
+ "921": [
+  "EnergyWellModule.obj",
+  "PKModule.obj"
+ ],
+ "1020": [
+  "EnergyWellModule.obj"
+ ],
+ "996": [
+  "EnergyWellResFightModule.obj"
+ ],
+ "997": [
+  "EnergyWellResFightModule.obj"
+ ],
+ "1001": [
+  "EnergyWellResFightModule.obj"
+ ],
+ "1002": [
+  "EnergyWellResFightModule.obj"
+ ],
+ "1003": [
+  "EnergyWellResFightModule.obj"
+ ],
+ "493": [
+  "EnergyWellResFightModule.obj"
+ ],
+ "233": [
+  "EquipmentModule.obj"
+ ],
+ "42": [
+  "EquipmentModule.obj"
+ ],
+ "59": [
+  "EquipmentModule.obj"
+ ],
+ "61": [
+  "EquipmentModule.obj"
+ ],
+ "751": [
+  "EventSpringModule.obj"
+ ],
+ "661": [
+  "EventSpringModule.obj"
+ ],
+ "759": [
+  "EventSpringModule.obj",
+  "MultiRideModule.obj"
+ ],
+ "761": [
+  "EventSpringModule.obj"
+ ],
+ "762": [
+  "EventSpringModule.obj"
+ ],
+ "763": [
+  "EventSpringModule.obj"
+ ],
+ "52006": [
+  "EverydayGuideModule.obj"
+ ],
+ "492": [
+  "EverydayGuideModule.obj"
+ ],
+ "16": [
+  "EverydayGuideModule.obj",
+  "FriendModule.obj",
+  "ItemLaveModule.obj",
+  "TeamModule.obj"
+ ],
+ "1010": [
+  "EverydayGuideModule.obj"
+ ],
+ "10003": [
+  "EverydayGuideModule.obj"
+ ],
+ "990": [
+  "EverydayGuideModule.obj",
+  "VisibleNpcModule.obj"
+ ],
+ "991": [
+  "EverydayGuideModule.obj",
+  "QteModule.obj"
+ ],
+ "320": [
+  "ExchangeModule.obj",
+  "ToolBoxModule.obj"
+ ],
+ "321": [
+  "ExchangeModule.obj",
+  "VipModule.obj"
+ ],
+ "322": [
+  "ExchangeModule.obj",
+  "ExileModule.obj"
+ ],
+ "324": [
+  "ExchangeModule.obj"
+ ],
+ "325": [
+  "ExchangeModule.obj"
+ ],
+ "210": [
+  "ExchangeModule.obj"
+ ],
+ "211": [
+  "ExchangeModule.obj",
+  "SkillModule.obj"
+ ],
+ "260": [
+  "ExileModule.obj"
+ ],
+ "69": [
+  "FashionModule.obj"
+ ],
+ "608": [
+  "FightRelationModule.obj"
+ ],
+ "292": [
+  "FightRelationModule.obj"
+ ],
+ "741": [
+  "FightRelationModule.obj"
+ ],
+ "740": [
+  "FightRelationModule.obj"
+ ],
+ "618": [
+  "FightRelationModule.obj",
+  "HateModule.obj"
+ ],
+ "619": [
+  "FightRelationModule.obj",
+  "HateModule.obj"
+ ],
+ "625": [
+  "FightRelationModule.obj",
+  "ShopModule.obj"
+ ],
+ "731": [
+  "FightRelationModule.obj"
+ ],
+ "980": [
+  "FlyNpcModule.obj"
+ ],
+ "981": [
+  "FlyNpcModule.obj"
+ ],
+ "982": [
+  "FlyNpcModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "145": [
+  "FreshmanModule.obj"
+ ],
+ "14": [
+  "FriendModule.obj",
+  "LookModule.obj",
+  "TeamModule.obj"
+ ],
+ "15": [
+  "FriendModule.obj",
+  "LookModule.obj",
+  "MotionModule.obj",
+  "TeamModule.obj"
+ ],
+ "17": [
+  "FriendModule.obj"
+ ],
+ "400": [
+  "FriendModule.obj"
+ ],
+ "24": [
+  "FriendModule.obj",
+  "GuildModule.obj"
+ ],
+ "312": [
+  "FriendModule.obj",
+  "TeamModule.obj"
+ ],
+ "706": [
+  "FriendModule.obj"
+ ],
+ "864": [
+  "FriendModule.obj"
+ ],
+ "868": [
+  "FriendModule.obj"
+ ],
+ "869": [
+  "FriendModule.obj"
+ ],
+ "190": [
+  "GiftModule.obj"
+ ],
+ "602": [
+  "GivingNpcModule.obj",
+  "OrganNpcModule.obj",
+  "ToolItemModule.obj"
+ ],
+ "852": [
+  "GivingNpcModule.obj"
+ ],
+ "296": [
+  "GmccModule.obj"
+ ],
+ "171": [
+  "GmccModule.obj"
+ ],
+ "806": [
+  "GroupSceneModule.obj",
+  "MovieModule.obj"
+ ],
+ "725": [
+  "GuideModule.obj"
+ ],
+ "1014": [
+  "GuildModule.obj"
+ ],
+ "780": [
+  "GunManModule.obj"
+ ],
+ "120": [
+  "InscriptionModule.obj",
+  "TeamModule.obj"
+ ],
+ "121": [
+  "InscriptionModule.obj",
+  "TeamModule.obj"
+ ],
+ "122": [
+  "InscriptionModule.obj",
+  "TeamModule.obj"
+ ],
+ "962": [
+  "ItemAppendModule.obj"
+ ],
+ "738": [
+  "ItemLaveModule.obj"
+ ],
+ "736": [
+  "JobFormulaModule.obj"
+ ],
+ "739": [
+  "JobFormulaModule.obj"
+ ],
+ "734": [
+  "JobFormulaModule.obj"
+ ],
+ "840": [
+  "LetterModule.obj"
+ ],
+ "105": [
+  "LookModule.obj"
+ ],
+ "106": [
+  "LookModule.obj"
+ ],
+ "107": [
+  "LookModule.obj"
+ ],
+ "1004": [
+  "LookModule.obj"
+ ],
+ "1005": [
+  "LookModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "108": [
+  "LookModule.obj"
+ ],
+ "733": [
+  "MapMagModule.obj"
+ ],
+ "591": [
+  "MapMagModule.obj"
+ ],
+ "316": [
+  "MapMagModule.obj",
+  "TeamModule.obj"
+ ],
+ "732": [
+  "MapMagModule.obj"
+ ],
+ "317": [
+  "MapMagModule.obj",
+  "TeamModule.obj"
+ ],
+ "735": [
+  "MapModule.obj"
+ ],
+ "552": [
+  "MenuModule.obj"
+ ],
+ "50": [
+  "MenuModule.obj"
+ ],
+ "607": [
+  "MonsterOwnershipModule.obj"
+ ],
+ "891": [
+  "MotionModule.obj"
+ ],
+ "890": [
+  "MotionModule.obj"
+ ],
+ "808": [
+  "MovieModule.obj"
+ ],
+ "1009": [
+  "MovieModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "754": [
+  "MultiRideModule.obj",
+  "TriggerProcesserModule.obj"
+ ],
+ "755": [
+  "MultiRideModule.obj"
+ ],
+ "900": [
+  "MysticModule.obj"
+ ],
+ "901": [
+  "MysticModule.obj"
+ ],
+ "939": [
+  "NotifyModule.obj"
+ ],
+ "940": [
+  "NotifyModule.obj"
+ ],
+ "151": [
+  "NotifyModule.obj"
+ ],
+ "700": [
+  "NpcSwitchLocateModule.obj"
+ ],
+ "884": [
+  "OffLineCompensateModule.obj",
+  "WorldRankModule.obj"
+ ],
+ "966": [
+  "OpenPromptModule.obj"
+ ],
+ "109": [
+  "OpenPromptModule.obj",
+  "RequestModule.obj",
+  "TeamModule.obj"
+ ],
+ "478": [
+  "OpenPromptModule.obj",
+  "UnderWaterModule.obj"
+ ],
+ "889": [
+  "OrganNpcModule.obj",
+  "StageModule.obj"
+ ],
+ "291": [
+  "PKModule.obj"
+ ],
+ "974": [
+  "PVPActivityModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "975": [
+  "PVPActivityModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "977": [
+  "PVPActivityModule.obj",
+  "PVPTaskModule.obj"
+ ],
+ "20017": [
+  "PVPTaskModule.obj"
+ ],
+ "973": [
+  "PVPTaskModule.obj"
+ ],
+ "976": [
+  "PVPTaskModule.obj"
+ ],
+ "983": [
+  "PVPTaskModule.obj",
+  "QteModule.obj"
+ ],
+ "601": [
+  "PVPTaskModule.obj",
+  "PunisherModule.obj",
+  "RideModule.obj"
+ ],
+ "985": [
+  "PVPTaskModule.obj"
+ ],
+ "986": [
+  "PVPTaskModule.obj"
+ ],
+ "987": [
+  "PVPTaskModule.obj"
+ ],
+ "988": [
+  "PVPTaskModule.obj"
+ ],
+ "606": [
+  "PVPTaskModule.obj"
+ ],
+ "989": [
+  "PVPTaskModule.obj"
+ ],
+ "1006": [
+  "PVPTaskModule.obj"
+ ],
+ "1008": [
+  "PVPTaskModule.obj"
+ ],
+ "1011": [
+  "PVPTaskModule.obj"
+ ],
+ "929": [
+  "PetLogicModule.obj"
+ ],
+ "931": [
+  "PetLogicModule.obj"
+ ],
+ "937": [
+  "PetLogicModule.obj"
+ ],
+ "387": [
+  "PickUpModule.obj"
+ ],
+ "388": [
+  "PickUpModule.obj"
+ ],
+ "380": [
+  "PickUpModule.obj"
+ ],
+ "382": [
+  "PickUpModule.obj"
+ ],
+ "383": [
+  "PickUpModule.obj"
+ ],
+ "830": [
+  "PlayerBaseModule.obj"
+ ],
+ "1015": [
+  "PlayerBaseModule.obj"
+ ],
+ "101": [
+  "PostModule.obj",
+  "RequestModule.obj"
+ ],
+ "104": [
+  "PostModule.obj",
+  "RequestModule.obj"
+ ],
+ "310": [
+  "PostModule.obj",
+  "TeamModule.obj"
+ ],
+ "31": [
+  "PostModule.obj",
+  "ToolBoxModule.obj"
+ ],
+ "350": [
+  "PostModule.obj"
+ ],
+ "255": [
+  "PostModule.obj"
+ ],
+ "928": [
+  "QuestCriteriaModule.obj"
+ ],
+ "934": [
+  "QuestCriteriaModule.obj"
+ ],
+ "926": [
+  "QuestCriteriaModule.obj"
+ ],
+ "880": [
+  "QuestModule.obj"
+ ],
+ "290": [
+  "ReliveModule.obj"
+ ],
+ "21": [
+  "ReliveModule.obj"
+ ],
+ "315": [
+  "ReliveModule.obj",
+  "TeamModule.obj"
+ ],
+ "98": [
+  "RequestModule.obj"
+ ],
+ "102": [
+  "RequestModule.obj"
+ ],
+ "103": [
+  "RequestModule.obj"
+ ],
+ "712": [
+  "RevertPlayerModule.obj"
+ ],
+ "713": [
+  "RevertPlayerModule.obj"
+ ],
+ "243": [
+  "RideModule.obj"
+ ],
+ "244": [
+  "RideModule.obj"
+ ],
+ "261": [
+  "SafeModeModule.obj"
+ ],
+ "70": [
+  "ShopModule.obj"
+ ],
+ "163": [
+  "ShortCutModule.obj"
+ ],
+ "199": [
+  "ShortCutModule.obj"
+ ],
+ "200": [
+  "ShortCutModule.obj"
+ ],
+ "201": [
+  "ShortCutModule.obj"
+ ],
+ "208": [
+  "ShortCutModule.obj"
+ ],
+ "209": [
+  "ShortCutModule.obj"
+ ],
+ "245": [
+  "SidestepModule.obj"
+ ],
+ "617": [
+  "SkillBreakManageModule.obj"
+ ],
+ "870": [
+  "SkillModule.obj"
+ ],
+ "232": [
+  "SkillModule.obj"
+ ],
+ "856": [
+  "SkillModule.obj"
+ ],
+ "215": [
+  "SkillModule.obj"
+ ],
+ "216": [
+  "SkillModule.obj"
+ ],
+ "170": [
+  "SkillUpgradeModule.obj"
+ ],
+ "460": [
+  "SpecialTeamModule.obj"
+ ],
+ "461": [
+  "SpecialTeamModule.obj"
+ ],
+ "462": [
+  "SpecialTeamModule.obj"
+ ],
+ "2000": [
+  "StageModule.obj"
+ ],
+ "303": [
+  "SwitchDoorModule.obj"
+ ],
+ "936": [
+  "TaskExecutor.obj"
+ ],
+ "927": [
+  "TaskExecutor.obj"
+ ],
+ "128": [
+  "TeamModule.obj"
+ ],
+ "129": [
+  "TeamModule.obj"
+ ],
+ "131": [
+  "TeamModule.obj"
+ ],
+ "132": [
+  "TeamModule.obj"
+ ],
+ "300": [
+  "TeamModule.obj"
+ ],
+ "301": [
+  "TeamModule.obj"
+ ],
+ "302": [
+  "TeamModule.obj"
+ ],
+ "304": [
+  "TeamModule.obj"
+ ],
+ "307": [
+  "TeamModule.obj"
+ ],
+ "308": [
+  "TeamModule.obj"
+ ],
+ "309": [
+  "TeamModule.obj"
+ ],
+ "311": [
+  "TeamModule.obj"
+ ],
+ "313": [
+  "TeamModule.obj"
+ ],
+ "314": [
+  "TeamModule.obj"
+ ],
+ "318": [
+  "TeamModule.obj"
+ ],
+ "319": [
+  "TeamModule.obj",
+  "ToolBoxModule.obj"
+ ],
+ "441": [
+  "TeamModule.obj"
+ ],
+ "442": [
+  "TeamModule.obj"
+ ],
+ "443": [
+  "TeamModule.obj"
+ ],
+ "444": [
+  "TeamModule.obj"
+ ],
+ "445": [
+  "TeamModule.obj"
+ ],
+ "446": [
+  "TeamModule.obj"
+ ],
+ "326": [
+  "TeamModule.obj"
+ ],
+ "327": [
+  "TeamModule.obj"
+ ],
+ "328": [
+  "TeamModule.obj"
+ ],
+ "329": [
+  "TeamModule.obj"
+ ],
+ "447": [
+  "TeamModule.obj"
+ ],
+ "450": [
+  "TeamModule.obj"
+ ],
+ "448": [
+  "TeamModule.obj"
+ ],
+ "449": [
+  "TeamModule.obj"
+ ],
+ "111": [
+  "TeamModule.obj"
+ ],
+ "113": [
+  "TeamModule.obj"
+ ],
+ "118": [
+  "TeamModule.obj"
+ ],
+ "119": [
+  "TeamModule.obj"
+ ],
+ "123": [
+  "TeamModule.obj"
+ ],
+ "124": [
+  "TeamModule.obj"
+ ],
+ "125": [
+  "TeamModule.obj"
+ ],
+ "126": [
+  "TeamModule.obj"
+ ],
+ "127": [
+  "TeamModule.obj"
+ ],
+ "911": [
+  "TechnologyNpcModule.obj"
+ ],
+ "912": [
+  "TechnologyNpcModule.obj"
+ ],
+ "913": [
+  "TechnologyNpcModule.obj"
+ ],
+ "66": [
+  "TestRobotModule.obj"
+ ],
+ "295": [
+  "TitleModule.obj"
+ ],
+ "917": [
+  "ToolBoxModule.obj"
+ ],
+ "29": [
+  "ToolBoxModule.obj"
+ ],
+ "1012": [
+  "ToolItemModule.obj"
+ ],
+ "19": [
+  "TransformJobModule.obj"
+ ],
+ "1023": [
+  "TransformJobModule.obj"
+ ],
+ "270": [
+  "TriggerDataModule.obj"
+ ],
+ "479": [
+  "UnderWaterModule.obj"
+ ],
+ "306": [
+  "UnenthrallModule.obj"
+ ],
+ "277": [
+  "UnenthrallModule.obj"
+ ],
+ "64": [
+  "VipModule.obj"
+ ],
+ "65": [
+  "VipModule.obj"
+ ],
+ "963": [
+  "WorldRankModule.obj"
+ ]
+}

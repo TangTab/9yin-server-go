@@ -161,3 +161,12 @@ void encode_func_N(BYTE* in, BYTE* out) {
   （对应 B 线记忆「official 分支升级路」）。
 - `g_client_code` 变长 blob 的 16B 之后内容从未上线，语义未查（客户端
   侧若消费全 blob 需另行逆向 fxgamelogic）。
+
+## 补充（2026-11-19，FsVerCli 对拍定案）
+
+客户端令牌语义为**双重 md5**：FsVerCli `SendMessageFunc` 调
+`m_EncodeFunc(md5.Digest())`，即 `token = encode_func_id(md5(preimage))`
+（encode_func 内部还有一次 md5）。FsSoloEntry VerifyMessage 比对时对同一
+preimage 先取摘要再 `EncodeFunc(id, digest)`。FsVerCli 在 `GetClientCond(id)`
+下发的 cond16 种子下与 `EncodeFunc(id, in)` 逐字节等价
+（unicorn 2048×3 零失配），详见 `FsVerCli与FsVerEnc全解与Go复刻.md`。

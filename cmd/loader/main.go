@@ -94,6 +94,14 @@ func main() {
 			if AssembleMemberRole(c, c.Config) != nil {
 				fmt.Println("member 角色装配完成（同名多角色路径）")
 			}
+			// fssoloworld.dll（小写系 game_world.ini）→ world 角色装配
+			if AssembleWorldRole(c, c.Config) != nil {
+				fmt.Println("world 角色装配完成（同名多角色路径）")
+			}
+			// fssolostore.dll（小写系 game_store.ini）→ store 角色装配
+			if AssembleStoreRole(c, c.Config) != nil {
+				fmt.Println("store 角色装配完成（同名多角色路径）")
+			}
 			return nil
 		},
 		OnProcess: func(c *fxcore.Core) {
