@@ -227,18 +227,13 @@ bit0 存在 → |h-lastY|≤step → bit1 可行走 → 命中；存在且高度
 - .region 文件与 .area 同为 ARE0；部署内只有 .area（LoadZone 对
   .region 缺失静默容错）。
 - **现代线数据源**（2016，格式未变实测兼容）：
-  `九阴资源/map_ter_battle_unpacked/res/map/ter`＝战场地图 12 张
+  `map/ter`＝战场地图 12 张
   （battle02/banghui/gmp/kof/myz/myz2/new/ngm/pingheng/wd/ym/zb），
   四件套齐全，TestModernBattleMaps 全量装载零错；
-  `九阴资源/resources/map/ter`＝422 张图但只有 terrain.ini+.area
+  `resources/map/ter`＝422 张图但只有 terrain.ini+.area
   （客户端/编辑器树，无 .ground/.walk——区域查询可用，行走/高度需
   服务端导出）。`resources\modern`＝纯客户端树，零碰撞文件。
-- **整包解压与服务端整理集**（2026-11-19）：`九阴资源/map` 下 10 个
-  .package（PCK0 v15）已用 jiuyin-unpack 全解至 `map/map_ter_unpacked/`
-  （约 7.0GB）；其中 `map_ter_city.package`
-  索引加密 key_id **0xCE95** 不在原 31 键表，已用 2023 明文同名包
-  （`20230423/9yin/res/map_ter_city.package`，cnt 5185）做已知明文攻击
-  破出 149 字节周期键并入两张 jiuyin-keys.txt。服务端碰撞集已整理到
-  `九阴资源/map/server_ter/`：**422 张地图 / 47994 文件 / 4.26GB**
+- **整包解压与服务端整理集**（2026-11-19）：`map` 下 10 个
+  `map/server_ter/`：**422 张地图 / 47994 文件 / 4.26GB**
   （terrain.ini + zone_*.ground/.area/.region + walk/zone_*.walk），
   TestServerTerAllMaps 全量装载验证。
