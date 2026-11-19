@@ -19,7 +19,45 @@ type Inner struct {
 	connOf   map[uint32]int // ident → connIdx
 	worldIdx int            // world 连接（-1 未连）
 	ownIdent uint32         // entry 自身 ident（发送侧 src）
+
+	// ---- solo 变体旋钮（FsSoloEntry.dll innerhook.cpp；nil/零值=FsEntry
+	// 官方语义，不改变网关版行为）----
+
+	// SourceCheck 覆盖默认源校验（solo 注入 {0,1,2}∪[0x18,0x2F]）。
+	SourceCheck func(src uint32) bool
+	// OnQuitFrame 入站 QuitFrame（0xFFFE）回调（官方 Core 退出）。
+	OnQuitFrame func()
+	// KickDuplicate ident 已被其它连接持有时：向新连接回 QuitFrame 并
+	// 拒绝其注册（官方 "comm_id duplicate"，保旧踢新）。
+	KickDuplicate bool
+	// MemberSpace 覆盖 member ident 空间（缺省 0x18 起 16 个；solo 为
+	// 0x18..0x2F 共 24 个）。零值用官方缺省。
+	MemberBase  uint32
+	MemberCount int
 }
+
+func (in *Inner) memberBase() uint32 {
+	if in.MemberBase != 0 {
+		return in.MemberBase
+	}
+	return MemberIdentBase
+}
+
+func (in *Inner) memberCount() int {
+	if in.MemberCount != 0 {
+		return in.MemberCount
+	}
+	return MaxMemberNum
+}
+
+func (in *Inner) sourceOK(src uint32) bool {
+	if in.SourceCheck != nil {
+		return in.SourceCheck(src)
+	}
+	return validSource(src)
+}
+
+func (in *Inner) memberIdentOf(idx int) uint32 { return in.memberBase() + uint32(idx) }
 
 // InnerHandler 内网事件回调（ProcessMsg 分发后的宿主逻辑）。
 type InnerHandler struct {
@@ -78,7 +116,13 @@ func (in *Inner) receive(idx int, body []byte, h InnerHandler) {
 		in.register(idx, hdr.Src, h)
 		return
 	}
-	if !validSource(hdr.Src) {
+	if hdr.Type == QuitFrame {
+		if in.OnQuitFrame != nil {
+			in.OnQuitFrame()
+		}
+		return // 官方：GetCore()->Quit(1)
+	}
+	if !in.sourceOK(hdr.Src) {
 		return // "message source error"
 	}
 	if h.OnMessage != nil {
@@ -88,6 +132,14 @@ func (in *Inner) receive(idx int, body []byte, h InnerHandler) {
 
 func (in *Inner) register(idx int, ident uint32, h InnerHandler) {
 	in.mu.Lock()
+	if in.KickDuplicate {
+		if old, ok := in.connOf[ident]; ok && old != idx {
+			// 官方 "comm_id duplicate"：向新连接回 QuitFrame 拒绝注册，保旧绑定
+			in.mu.Unlock()
+			_ = in.adapter.Send(idx, encodeInner(in.ownIdent, WorldIdent, QuitFrame, nil))
+			return
+		}
+	}
 	if old, ok := in.identOf[idx]; ok {
 		delete(in.connOf, old)
 	}
@@ -137,10 +189,10 @@ func (in *Inner) SendToWorld(typ uint32, payload []byte) error {
 
 // SendToMember 发往 member idx（ident 0x18+idx）。
 func (in *Inner) SendToMember(idx int, typ uint32, payload []byte) error {
-	if idx < 0 || idx >= MaxMemberNum {
+	if idx < 0 || idx >= in.memberCount() {
 		return fmt.Errorf("member index out of range: %d", idx)
 	}
-	return in.send(memberIdent(idx), typ, payload)
+	return in.send(in.memberIdentOf(idx), typ, payload)
 }
 
 // SendRaw 直发已注册 ident。

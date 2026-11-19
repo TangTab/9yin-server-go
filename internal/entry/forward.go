@@ -74,6 +74,10 @@ const innerHeaderSize = 12
 // IdentRegister 内网 ident 注册帧的 type 值（官方 0xFFFF 特例）。
 const IdentRegister = 0xFFFF
 
+// QuitFrame 内网退出帧 type（CInnerHook::ReceiveMsg 入站 → Core 退出；
+// ident 重复时向新连接回发同型帧拒绝注册——FsSoloEntry innerhook.cpp）。
+const QuitFrame = 0xFFFE
+
 // WorldIdent world 连接的固定 ident（源校验白名单 0）。
 const WorldIdent = 0
 
