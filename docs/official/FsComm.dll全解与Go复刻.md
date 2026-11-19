@@ -1,6 +1,6 @@
 # FsComm.dll 全解与 Go 复刻
 
-> 标的：`F:\Game\Online\9yin\BGserverCJ\Debug\FsComm.dll`（798 720 B，
+> 标的：`BGserverCJ\Debug\FsComm.dll`（798 720 B，
 > 2013-07-05 编译，随快照带 FsComm.map 4 536 符号 + FsComm.pdb）
 > 方法：tools/dis_entry.py（--dll/--map 参数化，capstone + map 符号直读）
 > 产物：`internal/fscomm`（Go 复刻，11 测试全绿）

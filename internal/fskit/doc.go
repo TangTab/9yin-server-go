@@ -1,6 +1,6 @@
 // Package fskit 复刻官方 FsKit.dll（Fs 框架工具箱模块）。
 //
-// 权威依据：F:\Game\Online\9yin\BGserverCJ\Debug\FsKit.dll（带 .map/.pdb 的
+// 权威依据：BGserverCJ\Debug\FsKit.dll（带 .map/.pdb 的
 // Debug 符号快照）逆向结论，全解见 docs/official/FsKit.dll全解与Go复刻.md。
 // 官方模块构成：
 //   - CIniFile   INI 引擎（utils/inifile.cpp，非实体）

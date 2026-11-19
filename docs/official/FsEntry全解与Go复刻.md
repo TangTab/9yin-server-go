@@ -1,6 +1,6 @@
 # FsEntry.dll 全解与 Go 复刻
 
-> 权威文档。证据源：`F:\Game\Online\9yin\BGserverCJ\Debug` 快照的
+> 权威文档。证据源：`BGserverCJ\Debug` 快照的
 > FsEntry.dll + FsEntry.pdb（PDB2.00，全快照唯一）+ Lua/GameEntry 脚本 +
 > GameEntry.ini + 127.0.0.1.lic 实物；孪生 FsSoloEntry.dll/.map 提供全量
 > 符号反推。复刻落地：`internal/entry` + `cmd/entry`。

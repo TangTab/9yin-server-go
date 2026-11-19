@@ -1,6 +1,6 @@
 # FsCharge.dll 充值计费中心全解与 Go 复刻
 
-> 对象：`F:\Game\Online\9yin\BGserverCJ\Debug\FsCharge.dll`（PE32，2014-03-22
+> 对象：`BGserverCJ\Debug\FsCharge.dll`（PE32，2014-03-22
 > 官方 Debug 全符号快照，同目录 FsCharge.pdb 全量 PUB32 符号）。
 > Go 复刻：`internal/charge`（服务核心）+ `cmd/charge`（进程入口）。
 > 逆向工作底稿（逐函数反汇编记录）：`tmp_research/fscharge/`。

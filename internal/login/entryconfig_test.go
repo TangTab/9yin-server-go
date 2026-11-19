@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// officialGameEntryINI 是官方 F:\Game\Online\9yin\BGserverCJ\Debug\
+// officialGameEntryINI 是官方 BGserverCJ\Debug\
 // game_entry.ini 原文（小写系）节选：含注释键（//Addr=127.0.0.1）、
 // [Module] 裸行、[Script] 键——方言兼容性的对拍底本。
 const officialGameEntryINI = `[System]

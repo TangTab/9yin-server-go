@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	root := flag.String("map", `F:\Game\Online\9yin\BGserverCJ\Res\map\csm001`, "单图模式：地图目录")
+	root := flag.String("map", `..\..\testdata\map\battle\battle_gmp`, "单图模式：地图目录")
 	sample := flag.String("sample", "", "抽样模式：类别/<地图> 两层根目录")
 	flag.Parse()
 

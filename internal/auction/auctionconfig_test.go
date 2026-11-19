@@ -65,7 +65,7 @@ func TestLoadGameAuctionINICreateAndReuse(t *testing.T) {
 }
 
 func TestParseOfficialGBKINI(t *testing.T) {
-	const official = `F:\Game\Online\9yin\BGserverCJ\Debug\game_auction.ini`
+	const official = `..\..\testdata\config-bootstrap\game_auction.ini`
 	raw, err := os.ReadFile(official)
 	if err != nil {
 		t.Skipf("官方快照不可读：%v", err)

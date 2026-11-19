@@ -1,6 +1,6 @@
 # nx_base save_data 容器格式（FsSoloStore 逆向定案）
 
-> 逆向对象：`F:\Game\Online\9yin\BGserverCJ\Debug\FsSoloStore.dll`（.map/.pdb 全带）
+> 逆向对象：`BGserverCJ\Debug\FsSoloStore.dll`（.map/.pdb 全带）
 > 2026-11-19 定案。配套工具：`tmp_research/zip0_probe.py`、`tmp_research/disas_tool.py`、`tmp_research/disas_world.py`
 
 ## 一、结论：外层容器（已实证，反汇编级）

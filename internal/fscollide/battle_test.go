@@ -8,7 +8,7 @@ import (
 
 // TestModernBattleMaps 现代线战场地图（map_ter_battle_unpacked）全量装载。
 func TestModernBattleMaps(t *testing.T) {
-	const root = `F:\Game\Online\9yin\九阴资源\map_ter_battle_unpacked\res\map\ter`
+	const root = `..\..\testdata\map\battle`
 	st, err := os.Stat(root)
 	if err != nil || !st.IsDir() {
 		t.Skip("战场地图目录不存在")

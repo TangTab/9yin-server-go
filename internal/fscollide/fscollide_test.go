@@ -1,5 +1,5 @@
 // golden 测试：对 BGserverCJ 官方部署的真实碰撞数据全量装载 + 查询自检。
-// 数据根：F:\Game\Online\9yin\BGserverCJ\Res\map（存在时才执行，可移植）。
+// 数据根：BGserverCJ\Res\map（存在时才执行，可移植）。
 package fscollide
 
 import (
@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-const mapRoot = `F:\Game\Online\9yin\BGserverCJ\Res\map`
+const mapRoot = `..\..\testdata\map`
 
 func mapRootExists() bool {
 	st, err := os.Stat(mapRoot)
@@ -59,13 +59,13 @@ func TestGoldenLoadAllMaps(t *testing.T) {
 	t.Logf("装载 %d 张地图", loaded)
 }
 
-// TestGoldenQueries 对 csm001（成都主城，多层）做抽样查询一致性：
+// TestGoldenQueries 对 battle\battle_gmp（多层）做抽样查询一致性：
 // 各查询不应 panic，且常见不变量成立。
 func TestGoldenQueries(t *testing.T) {
 	if !mapRootExists() {
 		t.Skip("官方数据目录不存在")
 	}
-	s, err := LoadScene3D(filepath.Join(mapRoot, "csm001"))
+	s, err := LoadScene3D(filepath.Join(mapRoot, `battle\battle_gmp`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +99,7 @@ func TestGoldenQueries(t *testing.T) {
 			s.GetMapArea(x, z)
 		}
 	}
-	t.Logf("csm001 采样 %d：可行走 %d 阻挡 %d", total, walkable, blocked)
+	t.Logf("battle_gmp 采样 %d：可行走 %d 阻挡 %d", total, walkable, blocked)
 	if total > 0 && walkable == 0 {
 		t.Fatal("整图不可行走，解码可能有误")
 	}
@@ -111,24 +111,24 @@ func TestGoldenWalkFileStructure(t *testing.T) {
 	if !mapRootExists() {
 		t.Skip("官方数据目录不存在")
 	}
-	path := filepath.Join(mapRoot, `csm001\walk\zone_43_55.walk`)
+	path := filepath.Join(mapRoot, `battle\battle_gmp\walk\zone_55_57.walk`)
 	tw, err := LoadTerrainWalkable(path, 512)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tw.GetFloorCount() != 1 {
-		t.Fatalf("floorCount=%d 期望 1", tw.GetFloorCount())
+	if tw.GetFloorCount() != 5 {
+		t.Fatalf("floorCount=%d 期望 5", tw.GetFloorCount())
 	}
 	if tw.WalkMarker == nil || tw.Water == nil {
 		t.Fatal("walk marker / water 缺失")
 	}
 	// 多层文件：floorCount>1 逐层齐备
-	path2 := filepath.Join(mapRoot, `csm001\walk\zone_44_56.walk`)
+	path2 := filepath.Join(mapRoot, `battle\battle_gmp\walk\zone_56_57.walk`)
 	tw2, err := LoadTerrainWalkable(path2, 512)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("zone_44_56 floors=%d", tw2.GetFloorCount())
+	t.Logf("zone_56_57 floors=%d", tw2.GetFloorCount())
 	if tw2.GetFloorCount() < 2 {
 		t.Fatalf("多层文件解析异常 floors=%d", tw2.GetFloorCount())
 	}
@@ -139,7 +139,7 @@ func TestGoldenTerrainHeight(t *testing.T) {
 	if !mapRootExists() {
 		t.Skip("官方数据目录不存在")
 	}
-	path := filepath.Join(mapRoot, `csm001\zone_43_55.ground`)
+	path := filepath.Join(mapRoot, `battle\battle_gmp\zone_55_57.ground`)
 	th, err := LoadTerrainHeight(path, 257, 0, 0, 1, 10)
 	if err != nil {
 		t.Fatal(err)
@@ -166,7 +166,7 @@ func TestQuadtreeRoundtripFlag(t *testing.T) {
 	if !mapRootExists() {
 		t.Skip("官方数据目录不存在")
 	}
-	path := filepath.Join(mapRoot, `csm001\zone_45_55.area`)
+	path := filepath.Join(mapRoot, `battle\battle_gmp\zone_55_57.area`)
 	tr, err := LoadTerrainRegion(path, 256, true)
 	if err != nil {
 		t.Fatal(err)
@@ -174,7 +174,7 @@ func TestQuadtreeRoundtripFlag(t *testing.T) {
 	if len(tr.Area) == 0 {
 		t.Fatal("区域列表为空")
 	}
-	t.Logf("zone_45_55 区域 %v", tr.Area)
+	t.Logf("zone_55_57 区域 %v", tr.Area)
 	// 栅格类型图覆盖统计（应非全零，主城中心必有命名区域）
 	nz := 0
 	for _, v := range tr.Type {
@@ -197,11 +197,11 @@ func TestManagerRoute(t *testing.T) {
 	if !m.Init() {
 		t.Fatal("Init")
 	}
-	a, err := m.CreateSceneCollide(filepath.Join(mapRoot, "csm001"))
+	a, err := m.CreateSceneCollide(filepath.Join(mapRoot, `battle\battle_gmp`))
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, err := m.CreateSceneCollide(filepath.Join(mapRoot, "csm001"))
+	b, err := m.CreateSceneCollide(filepath.Join(mapRoot, `battle\battle_gmp`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +218,7 @@ func TestTraceLineWalkSmoke(t *testing.T) {
 	if !mapRootExists() {
 		t.Skip("官方数据目录不存在")
 	}
-	s, err := LoadScene3D(filepath.Join(mapRoot, "csm001"))
+	s, err := LoadScene3D(filepath.Join(mapRoot, `battle\battle_gmp`))
 	if err != nil {
 		t.Fatal(err)
 	}

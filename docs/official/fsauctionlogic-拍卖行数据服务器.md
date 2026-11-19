@@ -1,6 +1,6 @@
 # FsAuctionLogic.dll 全解与 Go 复刻（拍卖行数据服务器）
 
-> 对象：`F:\Game\Online\9yin\BGserverCJ\Debug\FsAuctionLogic.dll`（1015808 B，2014-03-22，
+> 对象：`BGserverCJ\Debug\FsAuctionLogic.dll`（1015808 B，2014-03-22，
 > Debug 全符号 .map/.pdb，源码路径 `d:\bg_source\server\fsauctionlogic\`）
 > 日期：2026-11-19　分支：`official`　复刻落点：`internal/auction`
 > 伴生文档：`tmp_research/auction/soloauction_framework.md`（FsSoloAuction 框架宿主逆向，

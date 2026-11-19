@@ -1,6 +1,6 @@
 # FsCollide.dll 全解与 Go 复刻（internal/fscollide）
 
-> 权威文档。官方快照：`F:\Game\Online\9yin\BGserverCJ\Debug\FsCollide.dll`
+> 权威文档。官方快照：`BGserverCJ\Debug\FsCollide.dll`
 > （2014-03-22 构建，VS2003/08 Debug，配 PDB+全符号 map）。
 > Go 复刻：`internal/fscollide`（测试 `go test ./internal/fscollide`，
 > 探针 `go run ./cmd/fscollide-probe -map <地图目录>`）。

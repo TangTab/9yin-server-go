@@ -13,7 +13,7 @@ import (
 )
 
 // 快照官方 lic（BGserverCJ/Debug/127.0.0.1.lic）作为 golden。
-const snapshotLicPath = `F:\Game\Online\9yin\BGserverCJ\Debug\127.0.0.1.lic`
+const snapshotLicPath = `..\..\testdata\config-bootstrap\127.0.0.1.lic`
 
 func TestLicenseSnapshotGolden(t *testing.T) {
 	data, err := os.ReadFile(snapshotLicPath)
@@ -190,9 +190,9 @@ func TestSceneGridSight(t *testing.T) {
 	bob := c.Alloc(0, "b")
 	far := c.Alloc(0, "f")
 	for _, setup := range []struct {
-		idx   int
-		x, y  int32
-	}{ {alice, 100, 100}, {bob, 105, 100}, {far, 200, 200} } {
+		idx  int
+		x, y int32
+	}{{alice, 100, 100}, {bob, 105, 100}, {far, 200, 200}} {
 		st := c.Client(setup.idx)
 		if err := c.SetPosi(st.Ident, st.Serial, 5, 0, 0, 512, 512, setup.x, setup.y); err != nil {
 			t.Fatal(err)
@@ -283,12 +283,12 @@ func TestUpstreamBuilders(t *testing.T) {
 
 // fakeGateway 捕获下行发送。
 type fakeGateway struct {
-	sends   map[uint32][][]byte // ident → payloads
-	kicked  []uint32
-	shaken  []uint32
+	sends               map[uint32][][]byte // ident → payloads
+	kicked              []uint32
+	shaken              []uint32
 	allSend, onlineSend int
-	channelSends map[uint32][][]byte
-	sightSend    int
+	channelSends        map[uint32][][]byte
+	sightSend           int
 }
 
 func newFakeGateway() *fakeGateway {
@@ -299,15 +299,15 @@ func (f *fakeGateway) ClientSend(ident, serial uint32, p []byte) error {
 	f.sends[ident] = append(f.sends[ident], p)
 	return nil
 }
-func (f *fakeGateway) ClientClose(ident, serial uint32)     { f.kicked = append(f.kicked, ident) }
-func (f *fakeGateway) Shake(ident, serial uint32)           { f.shaken = append(f.shaken, ident) }
-func (f *fakeGateway) SendAll(p []byte)                     { f.allSend++ }
-func (f *fakeGateway) SendOnline(p []byte)                  { f.onlineSend++ }
+func (f *fakeGateway) ClientClose(ident, serial uint32) { f.kicked = append(f.kicked, ident) }
+func (f *fakeGateway) Shake(ident, serial uint32)       { f.shaken = append(f.shaken, ident) }
+func (f *fakeGateway) SendAll(p []byte)                 { f.allSend++ }
+func (f *fakeGateway) SendOnline(p []byte)              { f.onlineSend++ }
 func (f *fakeGateway) SendChannel(ch uint32, p []byte) {
 	f.channelSends[ch] = append(f.channelSends[ch], p)
 }
 func (f *fakeGateway) SendSight(ident uint32, scene uint32, x, y, r int32, p []byte) { f.sightSend++ }
-func (f *fakeGateway) SetClosed(closed bool) {}
+func (f *fakeGateway) SetClosed(closed bool)                                         {}
 
 func TestProcessForwardAllTypes(t *testing.T) {
 	clients := NewClients()

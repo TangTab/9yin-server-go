@@ -1,6 +1,6 @@
 # FsDumper.dll + FsDumpLogic.dll 全解与 Go 复刻
 
-> 权威文档。分析对象：`F:\Game\Online\9yin\BGserverCJ\Debug`（官方 Fs 服 Debug
+> 权威文档。分析对象：`BGserverCJ\Debug`（官方 Fs 服 Debug
 > 全符号快照，2014-03-22，FsDumper.pdb 3.1MB / FsDumpLogic.pdb 8.2MB +
 > .map 双全）。Go 复刻：`internal/fsdumper`（载体 `cmd/gamedumper`）。
 > 同源前作：FsComm/FsSoloLister（壳与网络件）、save_data OBJ3（档案格式）。
@@ -341,7 +341,8 @@ Dumper 用 OBJ3 读取器按 prop 名抽值。
 
 ### 踩坑录（复刻必读）
 
-1. **:4006 行必须以 ``/`
+1. **:4006 行必须以 `
+`/`
 ` 结尾才派发**——官方 ReceiveClientMsg
    逐字节扫行终止符；无终止符则缓冲等待。对拍客户端漏发 `
 `

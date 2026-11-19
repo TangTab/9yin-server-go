@@ -1,6 +1,6 @@
 # FsKit.dll 官方全解与 Go 复刻
 
-> 权威快照：`F:\Game\Online\9yin\BGserverCJ\Debug\FsKit.dll`（663,552 B，2014-03-22，
+> 权威快照：`BGserverCJ\Debug\FsKit.dll`（663,552 B，2014-03-22，
 > PDB 时间戳 51d6353d = 2013-07-05，源码树 `c:\wuyf\svn\serveriii\branches\publish20130508\server\`）。
 > 带 `.map`（1669 符号）+ `.pdb`。Debug 无优化增量链接版（.textbss + ILK thunk 表）。
 > 本文所有结论均出自 .map 符号 + .rdata 字符串 + capstone 注释反汇编

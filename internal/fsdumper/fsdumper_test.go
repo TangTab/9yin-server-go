@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const officialRoot = `F:\Game\Online\9yin\BGserverCJ`
+const officialRoot = `..\..\testdata`
 
 func TestTextVarListRoundTrip(t *testing.T) {
 	v := newTextVarList().

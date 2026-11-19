@@ -1,7 +1,7 @@
 // Package fsdumper 复刻官方数据转储服务器 FsDumper.dll（服务壳）+
 // FsDumpLogic.dll（业务逻辑）。
 //
-// 逆向事实源：F:\Game\Online\9yin\BGserverCJ\Debug 全符号快照
+// 逆向事实源：BGserverCJ\Debug 全符号快照
 // （FsDumper.map/.pdb + FsDumpLogic.map/.pdb，2014-03-22），启动脚本
 // GameDumper.bat/GameDumper.ini，Lua 主控 Lua/GameDumper/{main,echo}.lua，
 // 转储配置 Res/dumpconfig/。权威文档：
