@@ -4,11 +4,20 @@
 MODULE     := github.com/lizhanyin/9yin-server-go
 BUILD_DIR  := build
 
+# Windows 产物需显式 .exe 后缀，Linux/macOS 无后缀
+ifeq ($(OS),Windows_NT)
+  BIN_EXT := .exe
+endif
+
+CMD_PKGS := $(notdir $(wildcard cmd/*))
+
 .PHONY: build test gen vet lint clean
 
-# 编译全部进程入口到 build/
+# 编译全部进程入口到 build/，产物统一 game_<包名> 前缀（与 build.bat 一致）
 build:
-	go build -o $(BUILD_DIR)/ ./cmd/...
+	for d in $(CMD_PKGS); do \
+	  go build -o $(BUILD_DIR)/game_$$d$(BIN_EXT) ./cmd/$$d || exit 1; \
+	done
 
 # 全量测试（含 golden 对拍用例）
 test:

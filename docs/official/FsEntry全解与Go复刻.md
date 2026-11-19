@@ -184,7 +184,7 @@ lic' = 3DES-EDE-ECB(key16 为 K1||K2, 即 K1K2K1) 解密 256B   ← 逐 8B 块
 | GameEntry.ini | entry.ParseGameEntryINI | TestParseGameEntryINI |
 | game_entry.exe 进程 | cmd/entry | 冒烟：注册→开放→接入→下行 |
 
-冒烟实录（build/entry.exe）：假 world 注册 ident 0 → init_connect(1) →
+冒烟实录（build/game_entry.exe）：假 world 注册 ident 0 → init_connect(1) →
 state=unknown→opened → 客户端接入 → world 收 type 0 通知
 `{ident=0x0, serial=1, addr=127.0.0.1, port=51075}` → set_online +
 send_to_client → 客户端收到 EE+XOR 帧 `c7 cd ee ee`（=0x0B 0xF6）。
@@ -200,7 +200,7 @@ send_to_client → 客户端收到 EE+XOR 帧 `c7 cd ee ee`（=0x0B 0xF6）。
 
 ```
 go test ./internal/entry/ -timeout 60s     # 14 用例全绿
-go build ./cmd/entry/                      # build/entry.exe
-./entry.exe -gen-license <外网IP>          # 自签 lic
-./entry.exe                                # 起服（GameEntry.ini 可选）
+go build -o build/game_entry.exe ./cmd/entry/
+./build/game_entry.exe -gen-license <外网IP>   # 自签 lic
+./build/game_entry.exe                        # 起服（GameEntry.ini 可选）
 ```

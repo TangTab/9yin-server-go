@@ -224,7 +224,7 @@ func main() {
 			if err != nil {
 				fatal(err)
 			}
-			fmt.Printf("网关就绪：%s（EE+XOR，心跳应答；probe 对拍：./build/probe.exe -addr %s）\n",
+			fmt.Printf("网关就绪：%s（EE+XOR，心跳应答；probe 对拍：./build/game_probe.exe -addr %s）\n",
 				addr, addr)
 			go gateway.Serve()
 		})
@@ -247,7 +247,7 @@ func main() {
 			if err != nil {
 				fatal(err)
 			}
-			fmt.Printf("svrlist 就绪：%s → 通告 %s:%d（probe 对拍：./build/probe.exe -svrlist %s）\n",
+			fmt.Printf("svrlist 就绪：%s → 通告 %s:%d（probe 对拍：./build/game_probe.exe -svrlist %s）\n",
 				addr, svl.Entry.Host, svl.Entry.Port, addr)
 			go svl.Serve()
 		})

@@ -18,11 +18,13 @@ func TestEncodeServerListGolden(t *testing.T) {
 		t.Fatalf("编码 %q want %q", got, want)
 	}
 
-	// 与抓包 golden 交叉验证（本体一致，结尾换行差异为入库规范化伪影）
+	// 与抓包 golden 交叉验证（本体一致，结尾换行差异为入库规范化伪影：
+	// 库内 LF，但 autocrlf 工作区可能回填 CRLF——比较前统一 LF）
 	raw, err := os.ReadFile("../../testdata/captures/svrlist-response.bin")
 	if err != nil {
 		t.Fatal(err)
 	}
+	raw = bytes.ReplaceAll(raw, []byte("\r\n"), []byte("\n"))
 	body := got
 	body = body[:len(body)-2] // 去掉 CRLF
 	body = append(body, '\n') // 对齐 golden 的 LF 结尾

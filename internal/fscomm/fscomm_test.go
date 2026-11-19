@@ -301,11 +301,20 @@ func TestUserSockSyncSend(t *testing.T) {
 			return
 		}
 		defer c.Close()
+		// 持续读到 EOF：一次性 Read 后立即 Close 会与后续 Send 赛跑
+		//（对端 RST → teardown → "not connected" 间歇性失败）
 		b := make([]byte, 64)
-		n, _ := c.Read(b)
-		mu.Lock()
-		got = append([]byte(nil), b[:n]...)
-		mu.Unlock()
+		for {
+			n, err := c.Read(b)
+			if n > 0 {
+				mu.Lock()
+				got = append([]byte(nil), b[:n]...)
+				mu.Unlock()
+			}
+			if err != nil {
+				return
+			}
+		}
 	}()
 
 	_, portStr, _ := net.SplitHostPort(ln.Addr().String())

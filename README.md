@@ -8,7 +8,8 @@
 编译产物写入 `build`，不会自动覆盖根目录中正在测试的服务端 EXE。
 
 ```sh
-go build -o build/ ./cmd/...   # 全部进程入口
+# 全部进程入口，产物统一 game_<包名>.exe 前缀（与 build.bat 一致）
+for d in cmd/*/; do go build -o "build/game_$(basename "$d").exe" "./$d"; done
 go generate ./...              # structgen / protogen 代码生成
 go test ./...                  # 全量测试（含 golden 对拍）
 ```
