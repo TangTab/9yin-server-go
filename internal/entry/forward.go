@@ -43,17 +43,25 @@ const (
 	ForwSendOnline  = 15
 )
 
-// entry→world 上行类型（COuterHook::ReceiveMessage / OnAccept）：
+// entry→world 上行类型（ProcessEntryMsg 跳表六型——FsServer.pdb 断言
+// 逐型钉死，docs/official/FsServer全解与Go复刻.md §5.1）：
 //
-//	0 accept 通知（28B {ident,serial,addr[16],port}）
-//	2 client lost（shake 未命中回报 {ident,serial}）
-//	3 client 数据（{ident,serial,原始帧}）
+//	0 register（12B {DistrictID,ServerID,EntryIdx}；ident 校验）
+//	1 accept 通知（28B {ident,serial,addr[16],port}）
+//	2 client lost（shake 未命中回报 {ident,serial} 8B）
+//	3 client 数据（{ident,serial,原始帧} ≥8B）
 //	4 非法消息回报
+//	5 close entry 确认
+//
+// 修订记录：旧载 "0=accept" 为 FsSoloEntry 侧误读——world 侧断言实证
+// accept=1、0=register；Lost/Data/Illegal 编号不变。
 const (
-	UpstreamAccept = 0
-	UpstreamLost   = 2
-	UpstreamData   = 3
-	UpstreamIllegal = 4
+	UpstreamRegister = 0
+	UpstreamAccept   = 1
+	UpstreamLost     = 2
+	UpstreamData     = 3
+	UpstreamIllegal  = 4
+	UpstreamCloseEntry = 5
 )
 
 // innerHeader 内网帧 12 字节头 {src,dst,type}（CAdapterHook::ReceiveMsg）。

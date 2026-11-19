@@ -92,6 +92,7 @@ func (l *Loader) Run(ctx context.Context, args []string) (code int) {
 		return 1
 	}
 	cfg.ExtraArgs = extra
+	cfg.IniName = iniName
 	l.Logf("FsLoader: ini=%s Sleep=%d DebugLog=%t MainEntity=%s MainScript=%s 模块=%d 附加=%d",
 		iniName, cfg.Sleep, cfg.DebugLog, cfg.MainEntity, cfg.MainScript,
 		len(cfg.Modules), len(extra))

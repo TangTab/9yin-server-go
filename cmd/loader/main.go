@@ -62,7 +62,9 @@ func main() {
 		}
 	}
 
-	// 模块注册表（官方 CDllManager 面）：fskit 为 FsLoader.ini 默认模块。
+	// 模块注册表（官方 CDllManager 面）：fskit 为 FsLoader.ini 默认模块；
+	// 集群家族（fscomm/fscollide/fsmember/fssolomember）按 ini [Module]
+	// 表激活——同名 exe 改 ini 即换角色（官方 game_*.exe 机制）。
 	registry := fsloader.NewModuleRegistry()
 	if err := registry.Register(&fsloader.DeclModule{
 		ModuleName:  "fskit.dll",
@@ -70,6 +72,9 @@ func main() {
 		ModuleEnts:  fskit.EntityTypes,
 		ModuleFuncs: fskit.ExtFuncs,
 	}); err != nil {
+		fatal(err)
+	}
+	if err := RegisterClusterModules(registry); err != nil {
 		fatal(err)
 	}
 
@@ -84,6 +89,11 @@ func main() {
 		},
 		OnMainEntity: func(c *fxcore.Core, e *fxcore.Entity) error {
 			fmt.Printf("主实体就绪：%s（类型 %s）\n", e.Name, e.Info.TypeName)
+			// 官方 main.lua 时机：模块集含 member 家族 → 装配角色面
+			//（c.Config 随 Startup 绑定，主实体创建在其后）
+			if AssembleMemberRole(c, c.Config) != nil {
+				fmt.Println("member 角色装配完成（同名多角色路径）")
+			}
 			return nil
 		},
 		OnProcess: func(c *fxcore.Core) {
@@ -97,6 +107,7 @@ func main() {
 			}
 		},
 		OnShutdown: func(c *fxcore.Core) {
+			StopMemberRole() // 官方 close() 停机序（member 角色面）
 			fmt.Printf("CoreShutdown：total=%.3fs 实体=%d stats[%s]\n",
 				c.TotalTime(), c.Entities.Count(), c.StatsView())
 		},

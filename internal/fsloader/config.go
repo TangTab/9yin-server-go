@@ -38,6 +38,12 @@ type CoreConfig struct {
 	MainLogic string
 	// ExtraArgs argv[2..] 附加参数（官方追加进配置尾段随 Startup 传入）。
 	ExtraArgs []string
+	// IniName 实际装载的 ini 文件名（Run 发现序产物；角色装配重读用
+	// ——官方 main.lua 亦以 IniDocument 二次打开同一文件）。
+	IniName string
+	// Raw 原始 ini 视图（官方 CCoreConfig 仅取白名单键，脚本/角色装配
+	// 需要访问其余节——[Main]/[Inner]/[Echo]/[Broadcast]/[Logic]）。
+	Raw *fskit.IniFile
 }
 
 // LoadCoreConfig 复刻官方 app_load_core_ini(ini_name, CCoreConfig&)：
@@ -73,6 +79,9 @@ func LoadCoreConfig(ini *fskit.IniFile) (*CoreConfig, error) {
 	cfg.MainEntity = ini.ReadString("System", "MainEntity", "")
 	cfg.MainScript = ini.ReadString("System", "MainScript", "")
 	cfg.MainLogic = ini.ReadString("System", "MainLogic", "")
+
+	// 原始视图随行（角色装配读其余节；官方由脚本自行二开 ini）。
+	cfg.Raw = ini
 	return cfg, nil
 }
 
