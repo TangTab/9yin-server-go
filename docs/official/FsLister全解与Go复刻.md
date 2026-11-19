@@ -5,8 +5,8 @@
 > 方法：tmp_research/fslister/fl_dis.py（capstone + PDB 符号**节重定位**直读）
 > 产物：`internal/fslister`（Go 复刻）+ cmd/lister 集群形态接线
 > 更新：2026-11-19
-> 姊妹篇：FsSoloLister.dll（小写系，§12/分布式形态清单.md）——本文是其
-> 预留的「集群形态规格落码」触发件之一，且把清单里三处悬案全部销项。
+> 姊妹篇：FsSoloLister.dll（小写系）已全解剖落码——见
+> FsSoloLister全解与Go复刻.md（internal/fssololister + cmd/sololister）。
 
 ---
 
@@ -210,15 +210,24 @@ CTickTimer 每 1000ms 一拍 → 每 5 拍全表 CheckServer + CheckClient。
 
 ## 六、与小写系 FsSoloLister 的差异清单
 
-| 维度 | FsSoloLister（§12 已复刻） | FsLister（本文） |
+> 2026-11-19 勘误补记：本表初版把 Go 静态形态（login.Lister + -extra）
+> 误当 FsSoloLister 本体方言（"无注册通道/单线直出/ListerId 过滤/
+> 0x3FF 行缓冲/请求即断"皆非 DLL 实情）。FsSoloLister.dll 全解剖后
+> 差异表已全面重写，见 **FsSoloLister全解与Go复刻.md §八**；要点：
+> solo 系有 UDP 双口中继注册面（魔数 0x3001/world 包 0x84 含
+> recommend）、客户端机 30s/5s、行方言 \r\n 皆终结且控制符不丢、
+> 线过滤同为 IDC、黑白名单 accept 即拦。本表保留作历史对照。
+
+| 维度 | FsSoloLister（全解剖后实证） | FsLister（本文） |
 |---|---|---|
-| 形态 | 单进程内嵌 svrlist | 独立集群聚合服 |
-| 注册通道 | 无（-extra 静态配置） | UDP 双心跳（world/entry 分包） |
-| 选线 | 单线直出 | 16 线取最小 cur/max |
-| busy | 单值公式 | 服级 cur*5/max 聚合 |
-| 线过滤 | ListerId | **IDC**（+0x24 实证） |
-| 客户端机 | 请求即断 | 60s 请求超时 + 5s 温和关闭 + 单请求 |
-| 行缓冲 | 0x3FF(EchoSock 同款) | **0x1000**（自带 hook） |
+| 形态 | game_lister.exe 直启三件套（内嵌 CReactor） | FsLoader 装载（挂 MassSock/BroadSock 实体） |
+| 注册通道 | UDP 双心跳 + 本地环回中继口 | UDP 双心跳（world/entry 分包） |
+| 魔数/包长 | 0x3001 / world 0x84（含 recommend） | 0x300 / world 0x78 |
+| 选线 | 16 线最小 cur/max（bestrate 10.0，等值取先者） | 16 线最小 cur/max（bestrate 1.0，等值取后者） |
+| busy | recommend>10 直通，否则 cur*5/max | 服级 cur*5/max 聚合 |
+| 线过滤 | IDC（+0x34 实证） | **IDC**（+0x24 实证） |
+| 客户端机 | 30s 请求超时 + 5s 滞留 + 1s 回收 + 单请求 + 版本门 | 60s 请求超时 + 5s 温和关闭 + 单请求 |
+| 行缓冲/终结 | 0xFF，\r 与 \n 皆终结，控制符不丢 | 0x1000，仅 \n，<0x20 丢弃 |
 
 **分布式形态清单.md 悬案销项**：① 注册报文头（kind/magic 0x300/
 district 门）与两种包长（120/72）——此前只知 payload 偏移；② 选线过滤

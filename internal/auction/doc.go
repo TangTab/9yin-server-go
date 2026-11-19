@@ -11,7 +11,9 @@
 //	→ auction_callee（IAuctionCallee 八槽接口）。
 //
 // 本包 = FsAuctionLogic 的业务等价翻译（记录层+消息层），不含框架宿主
-// （socket/持久化由 solo 载体与 fscomm/persist 承担）。
+// （宿主已复刻于 internal/fssoloauction + cmd/auction：inner 16003 /
+// echo 16001 / broadcast 15000 / 状态机 / store PUB4 协议，见
+// docs/official/FsSoloAuction全解与Go复刻.md）。
 //
 // # 数据模型
 //

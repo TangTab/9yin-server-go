@@ -150,6 +150,7 @@ func (c *Core) Startup(cfg *fsloader.CoreConfig) error {
 	}
 	c.Main = e
 	c.Entities.SetSingle(e)
+	e.core = c // 主实体反引用（官方 IEntity::GetCore→g_pCore；FsSoloLoader 帧契约位）
 	if c.hooks.OnMainEntity != nil {
 		if err := c.hooks.OnMainEntity(c, e); err != nil {
 			return fmt.Errorf("(CCore::Startup)create main entity failed: %w", err)
@@ -252,6 +253,22 @@ func (c *Core) Process() bool {
 	if !c.started || c.quit {
 		return false
 	}
+	c.stepFrame()
+	return true
+}
+
+// WantQuit 官方 ICore vtbl+0x40（FsSoloLoader 泵循环逐拍查询；
+// true=装载器退出泵——与 FsLoader 的 +0x4c 泵"true=继续"相反）。
+func (c *Core) WantQuit() bool { return c.quit }
+
+// MainEntity 官方 ICore vtbl+0x78（返回 core+0x314 主实体；
+// FsSoloLoader 以非空为装载门，null → "main entity error"）。
+func (c *Core) MainEntity() *Entity { return c.Main }
+
+// stepFrame 一拍实体（Process 的主体；实体帧契约（vtbl+0xc）由此承接：
+// dt=0 语义 = 内核以 GameTimer 实测时差步进——官方 GameTimer.Update→
+// Execute(0) 同源）。
+func (c *Core) stepFrame() {
 	t0 := time.Now()
 
 	// 真实 dt（官方 GameTimer.Update→Execute(0)；钳制防大跳）。
@@ -315,7 +332,6 @@ func (c *Core) Process() bool {
 	if c.hooks.OnProcess != nil {
 		c.hooks.OnProcess(c)
 	}
-	return true
 }
 
 // Shutdown 复刻 FxModule_CoreShutdown：停机标志 + 清场。

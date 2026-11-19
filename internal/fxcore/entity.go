@@ -77,10 +77,23 @@ type Entity struct {
 	deleted     bool
 	canDelByScr bool
 	props       map[string]any
+
+	core *Core // 所属内核（主实体注入；官方 IEntity::GetCore→g_pCore 镜像）
 }
 
 // Deleted 官方 GetDeleted。
 func (e *Entity) Deleted() bool { return e.deleted }
+
+// Frame 官方 IEntity 帧方法（vtbl+0xc，float dt 参）——FsSoloLoader 泵
+// 循环逐拍以 dt=0 调主实体（fldz 定案）：dt=0 语义=内核实测时差步进
+//（GameTimer.Update→Execute(0) 同源）。当前等价实现：驱动所属内核一拍
+//（官方主实体帧回调住在模块/Lua 逻辑层，Go 里程碑由 fxcore tick 承接）。
+func (e *Entity) Frame(dt float32) {
+	if e.core == nil || !e.core.started || e.core.quit {
+		return
+	}
+	e.core.stepFrame()
+}
 
 // CanDelByScript 官方标记（nx_destroy 只能删除此标记实体）。
 func (e *Entity) CanDelByScript() bool { return e.canDelByScr }

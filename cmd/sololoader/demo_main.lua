@@ -1,0 +1,3 @@
+-- demo_main.lua：sololoader 缺省释放的演示主脚本（官方由部署目录
+-- ..\lua\solo*\<MainScript>.lua 提供；Lua 行为层为后续里程碑，此处
+-- 仅满足 fxcore Startup 的脚本存在性门）。

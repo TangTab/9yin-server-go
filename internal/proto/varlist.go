@@ -86,48 +86,66 @@ func (v *VarList) Encode() []byte {
 	out := make([]byte, 2, 16+len(v.Values)*12)
 	binary.LittleEndian.PutUint16(out, uint16(len(v.Values)))
 	for _, val := range v.Values {
-		out = append(out, val.Type)
-		switch val.Type {
-		case VarInt32:
-			var b [4]byte
-			binary.LittleEndian.PutUint32(b[:], uint32(int32(val.I64)))
-			out = append(out, b[:]...)
-		case VarInt64:
-			var b [8]byte
-			binary.LittleEndian.PutUint64(b[:], uint64(val.I64))
-			out = append(out, b[:]...)
-		case VarFloat:
-			var b [4]byte
-			binary.LittleEndian.PutUint32(b[:], math.Float32bits(float32(val.F64)))
-			out = append(out, b[:]...)
-		case VarDouble:
-			var b [8]byte
-			binary.LittleEndian.PutUint64(b[:], math.Float64bits(val.F64))
-			out = append(out, b[:]...)
-		case VarString:
-			n := uint32(len(val.Text) + 1)
-			var b [4]byte
-			binary.LittleEndian.PutUint32(b[:], n)
-			out = append(out, b[:]...)
-			out = append(out, val.Text...)
-			out = append(out, 0)
-		case VarWide:
-			units := utf16.Encode([]rune(val.Text))
-			n := uint32((len(units) + 1) * 2)
-			var b [4]byte
-			binary.LittleEndian.PutUint32(b[:], n)
-			out = append(out, b[:]...)
-			var w [2]byte
-			for _, u := range units {
-				binary.LittleEndian.PutUint16(w[:], u)
-				out = append(out, w[:]...)
-			}
-			out = append(out, 0, 0)
-		case VarObject:
-			out = append(out, val.Raw[:]...)
-		default:
-			panic(fmt.Sprintf("proto: 未知类型标签 %d", val.Type))
+		out = appendValue(out, val)
+	}
+	return out
+}
+
+// EncodeElements 编码为无数量前缀的元素流（官方 Fs 框架内网
+// put_vary_message 形态：元素个数不带在流内，由外层给出——
+// FsSoloAuction 的 auction_forw_message_t{param2; count; vary[]}）。
+// 元素编码与 Encode 完全一致（u8 tag + 值）。
+func (v *VarList) EncodeElements() []byte {
+	out := make([]byte, 0, 16+len(v.Values)*12)
+	for _, val := range v.Values {
+		out = appendValue(out, val)
+	}
+	return out
+}
+
+// appendValue 追加单个元素的线上形态（u8 tag + 值）。
+func appendValue(out []byte, val Value) []byte {
+	out = append(out, val.Type)
+	switch val.Type {
+	case VarInt32:
+		var b [4]byte
+		binary.LittleEndian.PutUint32(b[:], uint32(int32(val.I64)))
+		out = append(out, b[:]...)
+	case VarInt64:
+		var b [8]byte
+		binary.LittleEndian.PutUint64(b[:], uint64(val.I64))
+		out = append(out, b[:]...)
+	case VarFloat:
+		var b [4]byte
+		binary.LittleEndian.PutUint32(b[:], math.Float32bits(float32(val.F64)))
+		out = append(out, b[:]...)
+	case VarDouble:
+		var b [8]byte
+		binary.LittleEndian.PutUint64(b[:], math.Float64bits(val.F64))
+		out = append(out, b[:]...)
+	case VarString:
+		n := uint32(len(val.Text) + 1)
+		var b [4]byte
+		binary.LittleEndian.PutUint32(b[:], n)
+		out = append(out, b[:]...)
+		out = append(out, val.Text...)
+		out = append(out, 0)
+	case VarWide:
+		units := utf16.Encode([]rune(val.Text))
+		n := uint32((len(units) + 1) * 2)
+		var b [4]byte
+		binary.LittleEndian.PutUint32(b[:], n)
+		out = append(out, b[:]...)
+		var w [2]byte
+		for _, u := range units {
+			binary.LittleEndian.PutUint16(w[:], u)
+			out = append(out, w[:]...)
 		}
+		out = append(out, 0, 0)
+	case VarObject:
+		out = append(out, val.Raw[:]...)
+	default:
+		panic(fmt.Sprintf("proto: 未知类型标签 %d", val.Type))
 	}
 	return out
 }
@@ -141,11 +159,28 @@ func DecodeVarList(b []byte) (*VarList, error) {
 	if n > 1024 {
 		return nil, fmt.Errorf("proto: varlist 数量超限 %d", n)
 	}
-	rest := b[2:]
+	v, rest, err := decodeElements(b[2:], n)
+	if err != nil {
+		return nil, err
+	}
+	if len(rest) != 0 {
+		return nil, fmt.Errorf("proto: varlist 尾部多 %d 字节", len(rest))
+	}
+	return v, nil
+}
+
+// DecodeElements 从无数量前缀的元素流解码恰好 count 个元素
+//（官方 get_vary_message 形态：数量由外层给出）。返回剩余字节。
+func DecodeElements(b []byte, count int) (*VarList, []byte, error) {
+	return decodeElements(b, count)
+}
+
+func decodeElements(b []byte, n int) (*VarList, []byte, error) {
+	rest := b
 	v := &VarList{Values: make([]Value, 0, n)}
 	for i := 0; i < n; i++ {
 		if len(rest) == 0 {
-			return nil, fmt.Errorf("proto: 第 %d 个值缺类型标签", i)
+			return nil, nil, fmt.Errorf("proto: 第 %d 个值缺类型标签", i)
 		}
 		val := Value{Type: rest[0]}
 		rest = rest[1:]
@@ -176,14 +211,11 @@ func DecodeVarList(b []byte) (*VarList, error) {
 			err = fmt.Errorf("第 %d 个值不支持类型 %d", i, val.Type)
 		}
 		if err != nil {
-			return nil, fmt.Errorf("proto: 第 %d 个值: %w", i, err)
+			return nil, nil, fmt.Errorf("proto: 第 %d 个值: %w", i, err)
 		}
 		v.Values = append(v.Values, val)
 	}
-	if len(rest) != 0 {
-		return nil, fmt.Errorf("proto: varlist 尾部多 %d 字节", len(rest))
-	}
-	return v, nil
+	return v, rest, nil
 }
 
 func takeI64(b []byte, size int) (int64, []byte, error) {

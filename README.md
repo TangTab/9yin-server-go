@@ -33,9 +33,13 @@ go generate ./...   # protogen → $NINEYIN_DATA/Res/lua/share；structgen → $
 
 ```
 cmd/                    进程入口（对应原版 game_*.exe）
-  solo/                 单进程整合服（第一里程碑，FsSoloLoader 等价）
+  solo/                 单进程整合服（第一里程碑载体）
+  sololoader/           solo 集群进程壳（FsSoloLoader.exe/game_*.exe 复刻：主实体帧泵 + Ctrl+C 吞掉语义）
   entry/ lister/        登录网关 / 区服列表（第二里程碑）
   member/ world/ public/ 角色服务 / 场景服 / 公共数据（第二里程碑）
+  auction/              拍卖行数据服务器（game_auction.exe + FsSoloAuction.dll 复刻）
+  sololister/           区服列表进程（game_lister.exe + FsSoloLister.dll 全量复刻：UDP 双口中继注册/版本门/黑白名单）
+  global/               全局名字服务器（game_global.exe + FsSoloGlobal.dll 复刻：add_name/remove_name 行协议 + 域表 + SQL）
   probe/                协议探测与对拍客户端（oracle 基础设施）
 internal/
   ecs/                  sparse-set ECS 内核（零依赖，对象模型基础）

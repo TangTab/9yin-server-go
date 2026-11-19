@@ -110,3 +110,35 @@ func TestGeneratedCatalog(t *testing.T) {
 		t.Fatalf("sysinfo 缺失: %+v", def)
 	}
 }
+
+func TestVarListElementsNoCountPrefix(t *testing.T) {
+	// 官方 put_vary_message/get_vary_message：元素流无 u16 数量头，
+	// 数量由外层（auction_forw_message_t.count）给出。
+	vl := (&VarList{}).AddInt32(1).AddString("uid-abc").AddInt64(123456).
+		AddFloat32(0.15).AddWide("玩家")
+	body := vl.EncodeElements()
+
+	// 无前缀 = Encode 去掉头 2 字节
+	enc := vl.Encode()
+	if string(body) != string(enc[2:]) {
+		t.Fatalf("元素流应与 Encode 去头一致:\n%x\n%x", body, enc[2:])
+	}
+
+	got, rest, err := DecodeElements(body, 5)
+	if err != nil || len(rest) != 0 {
+		t.Fatalf("解码失败: %v %d", err, len(rest))
+	}
+	if len(got.Values) != 5 || got.Values[1].Text != "uid-abc" ||
+		got.Values[2].I64 != 123456 || got.Values[4].Text != "玩家" {
+		t.Fatalf("回程不一致: %+v", got.Values)
+	}
+
+	// 数量不符：流截断应报错
+	if _, _, err := DecodeElements(body, 6); err == nil {
+		t.Fatal("count 超流应报错")
+	}
+	// count 少于流长：返回剩余字节（外层续读语义）
+	if _, rest, err := DecodeElements(body, 2); err != nil || len(rest) == 0 {
+		t.Fatalf("部分解码应返回剩余: %v", err)
+	}
+}
