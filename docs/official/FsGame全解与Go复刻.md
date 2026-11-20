@@ -170,9 +170,9 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一至十期累计 16058 行、52 测试全绿，官方 door_data.xml 与社交/技能/
-任务/物品/经济/场景/NPC/事件/AI 域配置真档校验通过；§7.1-§7.9 分期明细＋
-§7.3 收尾面）。
+已实现（一至十一期累计 17656 行、60 测试全绿，官方 door_data.xml 与社交/
+技能/任务/物品/经济/场景/NPC/事件/AI/玩家基础域配置真档校验通过；
+§7.1-§7.10 分期明细＋§7.3 收尾面）。
 
 > **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
 > `encoding="utf-8"` 声明（31 个 GBK 内容转码、36 处 gb2312 声明改写、
@@ -227,7 +227,10 @@ CloneScene）已于七期落地（见 §7.6）；第八批 NPC 载体域底座�
 SummonNpc/CommonNpc/VisibleNpc/NpcResource）已于八期落地（见 §7.7）；第九批事件系统核心（TriggerProcesser/Task/
 Switch/Reward/EventSpring）已于九期落地（见 §7.8）；第十批 AI·世界模拟
 底座（AICharacter/AISkillControl/AIOnCommandMotion/Warn/Hate/AIChatWithOther/
-AIMotion/AI/TempStopAI）已于十期落地（见 §7.9）。
+AIMotion/AI/TempStopAI）已于十期落地（见 §7.9）；第十一批玩家基础余量
+（Energy/RevertPlayer/SafeMode/RoleExterior/PlayerChange/Restore/Relive/
+Dead/Freshman/ObjPropRefresh/OffLineCompensate/SetPath/PathFinding/DoSelect）
+已于十一期落地（见 §7.10）。
 
 ### 7.1 二期：社交底座六模块（2026-11-20 落地，16 测试全绿）
 
@@ -659,6 +662,63 @@ sk1/sk2→被击仇恨 11→拉远超界脱战 return+清仇+回巢步进 4 拍�
 被动怪 WarnType=0 不主动入战/被击才入战；警戒几何四型（扇柱正面命中/
 背面±135°拒/圆柱限高/球+扇柱并集/球半径界外）；仇恨转移 0.5 五五分流；
 TempStop 停机期泵跳过+到期恢复续转；说话循环 7→8→7 单槽+跟随/停留命令）。
+
+### 7.10 十一期：玩家基础余量十四模块（2026-11-20 落地，60 测试全绿）
+
+`RegisterEleventhBatch`（Init 序对齐 §8：Energy(52) → RevertPlayer(122) →
+SafeMode(129) → RoleExterior(132) → PlayerChange(135) → Restore(137) →
+Relive(141) → Dead(143) → Freshman(144) → ObjPropRefresh(192) →
+OffLineCompensate(195) → SetPath(206) → PathFinding(212) → DoSelect(215)）。
+**死亡→复活→恢复闭环补完战斗环**（AI 怪杀人后走此链）。真档 schema 经
+player.xml includes 链自带（autorestore/state/maxpara/safemode/doselect/
+visequip/ModifyBase/DeadAvenge）；relive/playerchange/offline_compensate 三档
+显式并入。
+
+```
+internal/fsgame/playermods.go  // 十一期新增（十四模块）
+  RestoreModule         六恢复泵（HP/MP/EY/AV/RC/DP 各命名心跳——速度面
+                        HPUpSpeed+Add；死亡停/满值钳；四临界重启对齐注册）
+  DeadModule            cmd 616 死亡结算：State=dead + DeadAvenge 击杀者
+                        档案（KillerName 属性面）+ ReliveModule 联动
+  ReliveModule          复活闭环：死亡倒计时登记（ReliveDelay）→ cust 290
+                        请求（门：CD 未到拒/ReliveNoNearPos 禁原地强转回城）
+                        → 模式 0 原地半恢复 / 1 回城（RelivePositon
+                        [name,x,y,z,o] 落位）→ Dead/State/CD/CurrentTime
+                        复位；cmd 22 复活 NPC 菜单 + 315 选点（PosSelectOpen
+                        门）+ 三心跳（倒计时到位通知/CD 递减）
+  SafeModeModule        安全模式：OnReady 重启 CurSafeTime 保护倒计时 →
+                        HB 递减（无密码面归零自动解锁）→ cust 261 密码校验
+                        → SafeModeActive 交易/邮寄敏感门
+  PlayerChangeModule    变身：ChangeRole（模型串+时限上限 1h）→ HB 计时
+                        消耗（ChangeCostTime/LeftTime）→ 归零复原；
+                        nx_changemodel_role + RoleType/BRole/ChangedIndex 三临界
+  RoleExteriorModule    外观：visequip 族（HideHat/HideMantle 双临界 +
+                        Hair/Face/Eyes 快照面）
+  EnergyModule          黑金能量（item/BlackGold Energy 列）：查询/消耗
+                        API（零内核注册——官方同）
+  RevertPlayerModule    玩家还原：nx_start_revert 快照（save=true 属性面）
+                        → cust 712 回写 / 713 取消
+  FreshmanModule        新手引导：CopyToolBox OnCreateClass + cust 145 +
+                        616/LogicState 面 + InLead 门（IsInNewUserLead）
+  ObjPropRefreshModule  属性修正聚合：PropModifyRec（属性名,double 值——
+                        ModifyBase 方言）→ Recalc 累加；三临界 + 双 RecHook
+                        （ModifyPackRec/PropComputeRec）联动重算
+  OffLineCompensateModule 离线补偿：OnStore 落 LogoutTime → OnRecover 按
+                        时长结算 OffLineExp（速率/时，上限 24h）→ cmd 884
+                        领取入 PlayerExp（升级临界链）
+  SetPathModule         路径装载：PathID 属性 + AIFindPathRec 逐点入表
+  PathFindingModule     寻路：scene OnCreate → SceneMapProcess 登记 +
+                        FindPath 直线分段（A* 网格随碰撞服里程碑后置）
+  DoSelectModule        选中目标：LastObject 写 + OnDoSelect 外发 +
+                        cmd 613 取消 / cust 440 查询
+```
+
+测试：playermods_test.go 八用例（十一期装配序+心跳注册+includes/补档
+schema 抽查；死亡复活闭环：HP 归零 Fight 临界置 Dead→616 结算 KillerName
++State→CD 内拒→禁最近点强转回城 RelivePositon 落位+半恢复+复位；恢复泵：
+HP/MP 速度回复/死亡停/满值钳/能量族无速度不回复；安全模式：倒计时重启→
+错拒对解→无密码自动解锁；变身：模型+时限→计时→归零复原；离线补偿：2h
+结算 2000→884 领取入经验；路径/寻路/选中/修正聚合；还原快照回写）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 

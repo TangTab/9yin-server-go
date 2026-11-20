@@ -300,3 +300,33 @@ func RegisterTenthBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterEleventhBatch 登记第十一批（玩家基础余量）十四模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：Energy(52) → RevertPlayer(122) →
+// SafeMode(129) → RoleExterior(132) → PlayerChange(135) → Restore(137) →
+// Relive(141) → Dead(143) → Freshman(144) → ObjPropRefresh(192) →
+// OffLineCompensate(195) → SetPath(206) → PathFinding(212) → DoSelect(215)。
+func RegisterEleventhBatch(r *Registry) error {
+	seq := []Creator{
+		{"EnergyModule", func() Module { return &EnergyModule{} }},
+		{"RevertPlayerModule", func() Module { return &RevertPlayerModule{} }},
+		{"SafeModeModule", func() Module { return &SafeModeModule{} }},
+		{"RoleExteriorModule", func() Module { return &RoleExteriorModule{} }},
+		{"PlayerChangeModule", func() Module { return &PlayerChangeModule{} }},
+		{"RestoreModule", func() Module { return &RestoreModule{} }},
+		{"ReliveModule", func() Module { return &ReliveModule{} }},
+		{"DeadModule", func() Module { return &DeadModule{} }},
+		{"FreshmanModule", func() Module { return &FreshmanModule{} }},
+		{"ObjPropRefreshModule", func() Module { return &ObjPropRefreshModule{} }},
+		{"OffLineCompensateModule", func() Module { return &OffLineCompensateModule{} }},
+		{"SetPathModule", func() Module { return &SetPathModule{} }},
+		{"PathFindingModule", func() Module { return &PathFindingModule{} }},
+		{"DoSelectModule", func() Module { return &DoSelectModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
