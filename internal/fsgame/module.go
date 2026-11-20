@@ -330,3 +330,27 @@ func RegisterEleventhBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterTwelfthBatch 登记第十二批（物品底座余量）九模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：Charge(70) → ItemNotify(86) →
+// ItemProCompute(95) → ItemLimited(96) → ItemBind(97) → ItemValidTime(100)
+// → ItemControl(197) → ModifyPack(230) → AddContainer(237)。
+func RegisterTwelfthBatch(r *Registry) error {
+	seq := []Creator{
+		{"ChargeModule", func() Module { return &ChargeModule{} }},
+		{"ItemNotify", func() Module { return &ItemNotify{} }},
+		{"ItemProCompute", func() Module { return &ItemProCompute{} }},
+		{"ItemLimited", func() Module { return &ItemLimited{} }},
+		{"ItemBindModule", func() Module { return &ItemBindModule{} }},
+		{"ItemValidTimeModule", func() Module { return &ItemValidTimeModule{} }},
+		{"ItemControlModule", func() Module { return &ItemControlModule{} }},
+		{"ModifyPackModule", func() Module { return &ModifyPackModule{} }},
+		{"AddContainerModule", func() Module { return &AddContainerModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
