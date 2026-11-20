@@ -276,3 +276,27 @@ func RegisterNinthBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterTenthBatch 登记第十批（AI·世界模拟底座）九模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：AICharacter(39) → AISkillControl(40)
+// → AIOnCommandMotion(41) → WarnModule(42) → HateModule(43) →
+// AIChatWithOther(44) → AIMotionModule(45) → AIModule(46) → TempStopAI(48)。
+func RegisterTenthBatch(r *Registry) error {
+	seq := []Creator{
+		{"AICharacterModule", func() Module { return &AICharacterModule{} }},
+		{"AISkillControlModule", func() Module { return &AISkillControlModule{} }},
+		{"AIOnCommandMotion", func() Module { return &AIOnCommandMotion{} }},
+		{"WarnModule", func() Module { return &WarnModule{} }},
+		{"HateModule", func() Module { return &HateModule{} }},
+		{"AIChatWithOther", func() Module { return &AIChatWithOther{} }},
+		{"AIMotionModule", func() Module { return &AIMotionModule{} }},
+		{"AIModule", func() Module { return &AIModule{} }},
+		{"TempStopAI", func() Module { return &TempStopAI{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}

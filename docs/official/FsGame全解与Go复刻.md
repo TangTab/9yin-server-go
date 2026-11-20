@@ -170,8 +170,8 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一至九期累计 14620 行、45 测试全绿，官方 door_data.xml 与社交/技能/
-任务/物品/经济/场景/NPC/事件域配置真档校验通过；§7.1-§7.8 分期明细＋
+已实现（一至十期累计 16058 行、52 测试全绿，官方 door_data.xml 与社交/技能/
+任务/物品/经济/场景/NPC/事件/AI 域配置真档校验通过；§7.1-§7.9 分期明细＋
 §7.3 收尾面）。
 
 > **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
@@ -225,7 +225,9 @@ QueryInt→RequestPoints、OnEntryGame=ResetConsumeRec。
 AuctionHouse）已于六期落地（见 §7.5）；第七批场景域核心（WarFog/Map/AreaObj/MapMag/
 CloneScene）已于七期落地（见 §7.6）；第八批 NPC 载体域底座（GivingNpc/FunctionNpc/
 SummonNpc/CommonNpc/VisibleNpc/NpcResource）已于八期落地（见 §7.7）；第九批事件系统核心（TriggerProcesser/Task/
-Switch/Reward/EventSpring）已于九期落地（见 §7.8）。
+Switch/Reward/EventSpring）已于九期落地（见 §7.8）；第十批 AI·世界模拟
+底座（AICharacter/AISkillControl/AIOnCommandMotion/Warn/Hate/AIChatWithOther/
+AIMotion/AI/TempStopAI）已于十期落地（见 §7.9）。
 
 ### 7.1 二期：社交底座六模块（2026-11-20 落地，16 测试全绿）
 
@@ -609,6 +611,54 @@ internal/fsgame/eventmods.go   // 九期新增（事件引擎/处理器/三执�
 测试：eventmods_test.go 两用例（九期装配序+七表真档抽查含事件 1 完整
 定义；全闭环：启动三公告→重复拒→开关等级门（30 过/0 拒）→参与记录→
 任务推进 QuestModule 进度→奖励发放→900 拍到期结束→nx_end_es 幂等）。
+
+### 7.9 十期：AI·世界模拟底座九模块（2026-11-20 落地，52 测试全绿）
+
+`RegisterTenthBatch`（Init 序对齐 §8：AICharacter(39) → AISkillControl(40) →
+AIOnCommandMotion(41) → Warn(42) → Hate(43) → AIChatWithOther(44) →
+AIMotion(45) → AIModule(46) → TempStopAI(48)），官方源码树 aimodule\ 定案。
+**配套框架面**：GameObject 引擎原生坐标（Pos/SetPos/Face——官方
+GetPosiX/SetLocation 为非 schema 面，struct_template internals 段无此属性）；
+GetFloat/GetInt64 读值面。配置/记录：struct/npc_property/ai_npc_data.xml +
+ai_motion.xml（WarnType 0-4 警戒几何五型/ChaseRange/PatrolMode/CurState/
+Born*/StopAI/HateList(4)/SpringList(1)/AIFindPathRec 等），测试经 LoadStruct
+多档合并进 CommonNpc 类（AttackNpc 祖先链 MergedClass 带 event_talk_rec）。
+
+```
+internal/fsgame/aimods.go   // 十期新增（九模块）
+  AIModule             状态机中枢：Transition（CurState/SubState/PreState
+                       三联动；dead 终态不迁；词汇 0 stand/1 patrol/2 chase/
+                       3 fight/4 return/5 dead——官方枚举未逐值反汇编，Go
+                       收编并注明）；RecHook(play_point_sound)+AIEffect 临界
+  AICharacterModule    五类 NPC OnEntry 装配：Born* 锚定（空值回落当前
+                       坐标）/状态复位/配置包登记（regs_calls：五类同处理器）
+  WarnModule           警戒域：HB_AIWarn 双泵几何扫描（球/圆柱限高/扇柱
+                       朝向±HalfAngle/球+扇柱并集）→ SpringList 登记 →
+                       WarnTime 满 → 入战（fight+AIFirstAttacker+仇恨种子）；
+                       OnSpring/OnEndSpring 外部空间层联动面；nx_getlinkpos
+  HateModule           仇恨引擎：cmd 618 被击累加（+入战联动）/619 玩家
+                       来向；AddHate upsert（HateTransferScale 分流 MasterID）；
+                       Target=MaxHate 双写 LastObject/AIFirstAttacker；
+                       ChaseRange 超界脱战（return+清仇+回巢 MoveTo）
+  AIMotionModule       移动执行：MoveTo（FindPathX/Z+AIMotioning）+HB
+                       步进（Speed×SpeedRatio 直线步长/到点 OnMotion 外发/
+                       chase→fight、return→stand 迁移）
+  AISkillControlModule 战斗态技能轮选：SkillPackID 逗号包轮转游标 +
+                       HandleState/SkillPack 变更重置（三临界定案）
+  AIOnCommandMotion    受控移动 API 面（主人命令词汇 0 跟随/1 停留/
+                       2 攻击/3 回归；跟随超 FollowProtectRadius 收拢）
+  AIChatWithOther      说话引擎：event_talk_rec 行序循环 → AI_Chat_rec
+                       单槽（maxrows=1 当前话覆盖）
+  TempStopAI           临时停 AI：StopAI 置位+恢复时刻（引擎侧记）；各
+                       AI 泵每拍先过 EnsureResumed 门
+```
+
+测试：aimods_test.go 七用例（十期装配序+心跳注册面+schema 合并；主动怪
+全链：OnEntry Born 锚定→球警戒 SpringList→即时入战+仇恨种子+技能轮选
+sk1/sk2→被击仇恨 11→拉远超界脱战 return+清仇+回巢步进 4 拍到点 stand；
+被动怪 WarnType=0 不主动入战/被击才入战；警戒几何四型（扇柱正面命中/
+背面±135°拒/圆柱限高/球+扇柱并集/球半径界外）；仇恨转移 0.5 五五分流；
+TempStop 停机期泵跳过+到期恢复续转；说话循环 7→8→7 单槽+跟随/停留命令）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 

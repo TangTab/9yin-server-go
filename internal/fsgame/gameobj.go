@@ -117,8 +117,24 @@ type GameObject struct {
 	parent   PersistID
 	children []PersistID
 
+	// 空间坐标（官方 GetPosiX/Y/Z/GetOrient/SetLocation/MoveTo——引擎
+	// 原生面，struct_template internals 段无此属性、不进 schema）。
+	x, y, z, face float32
+
 	created time.Time
 }
+
+// Pos 空间坐标（官方 GetPosiX/Y/Z 三合一）。
+func (o *GameObject) Pos() (x, y, z float32) { return o.x, o.y, o.z }
+
+// SetPos 落坐标（官方 SetLocation 的坐标面）。
+func (o *GameObject) SetPos(x, y, z float32) { o.x, o.y, o.z = x, y, z }
+
+// Face 朝向（官方 GetOrient；弧度）。
+func (o *GameObject) Face() float32 { return o.face }
+
+// SetFace 置朝向。
+func (o *GameObject) SetFace(f float32) { o.face = f }
 
 // ID 对象句柄。
 func (o *GameObject) ID() PersistID { return o.id }
@@ -167,6 +183,25 @@ func (o *GameObject) GetString(name string) string {
 		return v
 	}
 	return ""
+}
+
+// GetFloat 读 float 型属性。
+func (o *GameObject) GetFloat(name string) float32 {
+	if v, ok := o.Get(name).(float32); ok {
+		return v
+	}
+	if v, ok := o.Get(name).(float64); ok {
+		return float32(v)
+	}
+	return 0
+}
+
+// GetInt64 读 int64 型属性。
+func (o *GameObject) GetInt64(name string) int64 {
+	if v, ok := o.Get(name).(int64); ok {
+		return v
+	}
+	return 0
 }
 
 // Record 按名取记录（未定义返回 nil）。
