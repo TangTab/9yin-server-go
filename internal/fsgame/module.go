@@ -354,3 +354,40 @@ func RegisterTwelfthBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterThirteenthBatch 登记第十三批（装备与物品玩法余量）十九模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：CInscription(51) → UpgradeRule(54) →
+// Fashion(83) → ItemLave(84) → ToolItemFunc(87) → ItemTreasure(88) →
+// ItemAppend(89) → InheritEnhance(90) → SlotItem(92) → EnchaseCompound(93)
+// → CompoundItem(94) → DropCapitalItem(98) → ToolItem(99) → ArmorChange(126)
+// → TransformJob(136) → Depot(145) → ShortCut(146) → FightBag(196) →
+// Enchase(198)。
+func RegisterThirteenthBatch(r *Registry) error {
+	seq := []Creator{
+		{"CInscriptionModule", func() Module { return &CInscriptionModule{} }},
+		{"UpgradeRuleModule", func() Module { return &UpgradeRuleModule{} }},
+		{"FashionModule", func() Module { return &FashionModule{} }},
+		{"ItemLaveModule", func() Module { return &ItemLaveModule{} }},
+		{"ToolItemFunc", func() Module { return &ToolItemFunc{} }},
+		{"ItemTreasure", func() Module { return &ItemTreasure{} }},
+		{"ItemAppendModule", func() Module { return &ItemAppendModule{} }},
+		{"InheritEnhance", func() Module { return &InheritEnhance{} }},
+		{"SlotItem", func() Module { return &SlotItem{} }},
+		{"EnchaseCompound", func() Module { return &EnchaseCompound{} }},
+		{"CompoundItem", func() Module { return &CompoundItem{} }},
+		{"DropCapitalItemModule", func() Module { return &DropCapitalItemModule{} }},
+		{"ToolItemModule", func() Module { return &ToolItemModule{} }},
+		{"ArmorChangeModule", func() Module { return &ArmorChangeModule{} }},
+		{"TransformJobModule", func() Module { return &TransformJobModule{} }},
+		{"DepotModule", func() Module { return &DepotModule{} }},
+		{"ShortCutModule", func() Module { return &ShortCutModule{} }},
+		{"FightBag", func() Module { return &FightBag{} }},
+		{"Enchase", func() Module { return &Enchase{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}

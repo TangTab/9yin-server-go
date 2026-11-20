@@ -170,9 +170,9 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一至十一期累计 17656 行、60 测试全绿，官方 door_data.xml 与社交/
-技能/任务/物品/经济/场景/NPC/事件/AI/玩家基础域配置真档校验通过；
-§7.1-§7.10 分期明细＋§7.3 收尾面）。
+已实现（一至十三期累计 19870 行、71 测试全绿，官方 door_data.xml 与社交/
+技能/任务/物品/经济/场景/NPC/事件/AI/玩家基础/物品底座/装备玩法域配置
+真档校验通过；§7.1-§7.12 分期明细＋§7.3 收尾面）。
 
 > **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
 > `encoding="utf-8"` 声明（31 个 GBK 内容转码、36 处 gb2312 声明改写、
@@ -230,7 +230,12 @@ Switch/Reward/EventSpring）已于九期落地（见 §7.8）；第十批 AI·�
 AIMotion/AI/TempStopAI）已于十期落地（见 §7.9）；第十一批玩家基础余量
 （Energy/RevertPlayer/SafeMode/RoleExterior/PlayerChange/Restore/Relive/
 Dead/Freshman/ObjPropRefresh/OffLineCompensate/SetPath/PathFinding/DoSelect）
-已于十一期落地（见 §7.10）。
+已于十一期落地（见 §7.10）；第十二批物品底座余量（Charge/ItemNotify/
+ItemProCompute/ItemLimited/ItemBind/ItemValidTime/ItemControl/ModifyPack/
+AddContainer）与第十三批装备与物品玩法余量（CInscription/UpgradeRule/
+Fashion/ItemLave/ToolItemFunc/ItemTreasure/ItemAppend/InheritEnhance/SlotItem/
+EnchaseCompound/CompoundItem/DropCapitalItem/ToolItem/ArmorChange/TransformJob/
+Depot/ShortCut/FightBag/Enchase）已于十二/十三期落地（见 §7.11-§7.12）。
 
 ### 7.1 二期：社交底座六模块（2026-11-20 落地，16 测试全绿）
 
@@ -719,6 +724,80 @@ schema 抽查；死亡复活闭环：HP 归零 Fight 临界置 Dead→616 结算
 HP/MP 速度回复/死亡停/满值钳/能量族无速度不回复；安全模式：倒计时重启→
 错拒对解→无密码自动解锁；变身：模型+时限→计时→归零复原；离线补偿：2h
 结算 2000→884 领取入经验；路径/寻路/选中/修正聚合；还原快照回写）。
+
+### 7.11 十二期：物品底座余量九模块（2026-11-20 落地，71 测试全绿）
+
+`RegisterTwelfthBatch`（Init 序对齐 §8：Charge(70) → ItemNotify(86) →
+ItemProCompute(95) → ItemLimited(96) → ItemBind(97) → ItemValidTime(100) →
+ItemControl(197) → ModifyPack(230) → AddContainer(237)）。真档 item.xml
+（BindType/BindStatus/ValidTimeType 0 永久・1 绝对点 ExpiredTime
+「年.月.日.时.分」・2 相对秒/LeftTime/MaxCount/CantDepot 族）+ equipment.xml。
+
+```
+internal/fsgame/itemmods2.go  // 十二期新增（九模块）
+  ItemBindModule       入包即绑（ToolBox/EquipBox/MountBox OnAfterAdd ×
+                      BindType；BindStatus 临界）
+  ItemValidTimeModule  物品时效（H_ValidTime 递减 LeftTime → 到期出口；
+                      绝对点解析/相对秒折算；nx_set_leftime）
+  ItemLimited          限制门 API（MaxCount/CantDepot/CantSell/CantDelete/
+                      Task/BindStatus 四门）
+  ItemProCompute       属性包计算（PropPack/PropBuilt/PropRanBuilt
+                      「属性名,值;」方言 → 聚合映射）
+  ItemNotify           入/出包通知（NotifyOut——sync 层转物品面板方言）
+  ItemControlModule    物品管控（scene OnPublicMessage → ban/unban/recall）
+  ModifyPackModule     修正包管理（EquipBox/BufferContainer/InscriptionBox
+                      穿卸 → ObjPropRefresh::Recalc 联动；Hardiness 归零
+                      broken 面）
+  AddContainerModule   扩容容器（ExpandBag 容量面 + OnNoAdd 满拒流水）
+  ChargeModule         充值商城（scene OnBuyItem2 购买到货 + cust 196 +
+                      五异步心跳注册对齐）
+```
+
+测试：itemmods2_test.go 五用例（装配序+心跳；绑定/时效三拍到期+绝对点
+已过即零；限制四门+通知流水；属性包计算 HP60/MP20+穿卸重算联动+耐久归零；
+商城购买出口+扩容+管控禁用门）。
+
+### 7.12 十三期：装备与物品玩法余量十九模块（2026-11-20 落地，71 测试全绿）
+
+`RegisterThirteenthBatch`（Init 序对齐 §8：CInscription(51) → UpgradeRule(54)
+→ Fashion(83) → ItemLave(84) → ToolItemFunc(87) → ItemTreasure(88) →
+ItemAppend(89) → InheritEnhance(90) → SlotItem(92) → EnchaseCompound(93) →
+CompoundItem(94) → DropCapitalItem(98) → ToolItem(99) → ArmorChange(126) →
+TransformJob(136) → Depot(145) → ShortCut(146) → FightBag(196) → Enchase(198)）。
+真档：shortcut_rec（序号/参数1/参数2/类型——类型>0 锁定）、FashionState、
+ResolvePack、tool_item.xml（FuncPack/WealthPack/FragmentComposePack/
+TriggerTaskID——三包列均为 **int 包编号**，产物经配置面）、enchase.xml
+（JewelLevel/CantCompound）。
+
+```
+internal/fsgame/equipmods.go  // 十三期新增（十九模块）
+  FashionModule        时装（FashionBox 六事件；穿脱 → FashionState 联动）
+  ItemLaveModule       分解（ResolvePack → LaveOut；NPC 对话 + cust 738）
+  ToolItemModule       使用物品主链（FuncPack 分派 + TriggerTaskID →
+                      QuestModule 接取联动 + ToolItem cmd 10/中断/完成族）
+  CompoundItem         碎片合成（包编号验包 + 产出出口）
+  Enchase              镶嵌（宝石属性串并入装备 PropPack——串由配置面
+                      传入，struct 档无 PropPack 列定案）
+  DropCapitalItemModule 掉钱（DropMoneyItem OnCreateClass + cmd 851 拾取
+                      → MoneyOut 接 Capital）
+  ArmorChangeModule    装甲换装（ArmorBox 六事件 + EquipBox 卸下联动）
+  TransformJobModule   转职（nx_trans_job/cust 1023 → Job 变更流水）
+  DepotModule          仓库（存/取/查 cust 860/220/223/910；ItemLimited
+                      CanDepot 门 + 绑定物拒）
+  ShortCutModule       快捷栏（cust 199/200/201/163/209 绑定/解绑/交换/
+                      清栏/查询——shortcut_rec upsert + 类型>0 锁定）
+  ItemAppendModule     装备附加（cmd 962 + HB_ItemTimeLimit）
+  CInscriptionModule/UpgradeRuleModule/ToolItemFunc/ItemTreasure/
+  InheritEnhance/SlotItem/EnchaseCompound/FightBag
+                      无注册 API 族（铭文 PropPack 追加/升级千分比判定/
+                      功能包分派/开箱/强化继承 PropBuilt 迁移/入槽/宝石
+                      3 合 1/战斗包）
+```
+
+测试：equipmods_test.go 六用例（装配序；时装 FashionState 穿脱+装甲流水；
+分解 120/开箱 2 个/碎片 8 拒 10 过；使用物品 FuncPack+cmd 10 流水+掉钱 888
+拾取；转职 0→3 同职拒+仓库存取 CantDepot 拒；快捷栏绑定/锁定栏拒解/交换+
+镶嵌-铭文-继承属性串三连+宝石合成+千分比判定）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 
