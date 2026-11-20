@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" QuestionNpc="WorldNpc00010" SceneID="1" QuestionID="duige01" TrackInfoID="questioninfo_24015"/>
+	<Property ID="4002" QuestionNpc="WorldNpc06101" SceneID="22" QuestionID="yiyuhewei" TrackInfoID="task_TrackInfo_24145"/>
+	<Property ID="4003" QuestionNpc="WorldNpc00031" SceneID="1" QuestionID="zuiaideren" TrackInfoID="task_TrackInfo_24254"/>
+	<Property ID="4004" QuestionNpc="WorldNpc00031" SceneID="1" QuestionID="bidezhuren" TrackInfoID="task_TrackInfo_24270"/>
+	<Property ID="4005" QuestionNpc="WorldNpc00031" SceneID="1" QuestionID="aiyuhen" TrackInfoID="task_TrackInfo_24285"/>
+	<Property ID="4006" QuestionNpc="WorldNpc06436" SceneID="20" QuestionID="24314" TrackInfoID="questioninfo_24314"/>
+	<Property ID="4007" QuestionNpc="WorldNpc02605" SceneID="10" QuestionID="yiruoxundeyiwen" TrackInfoID="task_TrackInfo_24399"/>
+	<Property ID="4008" QuestionNpc="WorldNpc02602" SceneID="10" QuestionID="emeidizideyiwen" TrackInfoID="task_TrackInfo_24431"/>
+	<Property ID="4009" QuestionNpc="WorldNpc06128" SceneID="22" QuestionID="24516" TrackInfoID="task_TrackInfo_24516"/>
+	<Property ID="4010" QuestionNpc="WorldNpc04708" SceneID="11" QuestionID="wudangsiguoya" TrackInfoID="task_TrackInfo_24633"/>
+	<Property ID="4011" QuestionNpc="WorldNpc04809" SceneID="11" QuestionID="jieyuanwudang" TrackInfoID="task_TrackInfo_24665"/>
+	<Property ID="4012" QuestionNpc="WorldNpc04401" SceneID="11" QuestionID="baokoumobian01" TrackInfoID="task_TrackInfo_24678"/>
+	<Property ID="4013" QuestionNpc="WorldNpc04401" SceneID="11" QuestionID="baokoumobian02" TrackInfoID="task_TrackInfo_24680"/>
+	<Property ID="4014" QuestionNpc="WorldNpc04429" SceneID="11" QuestionID="zhenrong01" TrackInfoID="task_TrackInfo_24699"/>
+	<Property ID="4015" QuestionNpc="WorldNpc04429" SceneID="11" QuestionID="zhenrong02" TrackInfoID="task_TrackInfo_24700"/>
+	<Property ID="4016" QuestionNpc="WorldNpc04429" SceneID="11" QuestionID="zhenrong03" TrackInfoID="task_TrackInfo_24701"/>
+	<Property ID="4017" QuestionNpc="WorldNpc04401" SceneID="11" QuestionID="zhenrong04" TrackInfoID="task_TrackInfo_24704"/>
+	<Property ID="3001" QuestionNpc="WorldNpc00635" SceneID="3" QuestionID="shenminvzi" TrackInfoID="questioninfo_3001"/>
+	<Property ID="3002" QuestionNpc="WorldNpc00628" SceneID="3" QuestionID="zaishengshiduan" TrackInfoID="questioninfo_3002"/>
+	<Property ID="3003" QuestionNpc="WorldNpc00501" SceneID="3" QuestionID="kaidaozhujiao" TrackInfoID="questioninfo_22002"/>
+	<Property ID="3004" QuestionNpc="WorldNpc00574" SceneID="3" QuestionID="jiuguniang" TrackInfoID="questioninfo_22033"/>
+	<Property ID="3005" QuestionNpc="WorldNpc00627" SceneID="3" QuestionID="xialuo" TrackInfoID="questioninfo_22047"/>
+	<Property ID="3006" QuestionNpc="WorldNpc01353" SceneID="14" QuestionID="xiangniang" TrackInfoID="questioninfo_22056"/>
+	<Property ID="3007" QuestionNpc="WorldNpc01360" SceneID="14" QuestionID="chaoge" TrackInfoID="questioninfo_22065"/>
+	<Property ID="3008" QuestionNpc="WorldNpc01369" SceneID="14" QuestionID="heibaizi" TrackInfoID="questioninfo_22084"/>
+	<Property ID="3009" QuestionNpc="WorldNpc06038" SceneID="21" QuestionID="abujiaha" TrackInfoID="questioninfo_22138"/>
+	<Property ID="27001" QuestionNpc="FunnpcClone017002" QuestionID="shiqingbaogao" TrackInfoID="task_TrackInfo_2808"/>
+	<Property ID="27002" QuestionNpc="bossclone002009" QuestionID="baogaojiayan" TrackInfoID="task_TrackInfo_2069"/>
+	<Property ID="27003" QuestionNpc="bossclone002017" QuestionID="mazeianhao" TrackInfoID="task_TrackInfo_2444"/>
+	<Property ID="27004" QuestionNpc="WorldNpc02604" QuestionID="chushikaoyan" TrackInfoID="task_TrackInfo_2402"/>
+	<Property ID="27005" QuestionNpc="bossclone002012" QuestionID="mazeiwodi" TrackInfoID="task_TrackInfo_2083"/>
+	<Property ID="27006" QuestionNpc="bossclone002009" QuestionID="dongchangdiaocha" TrackInfoID="task_TrackInfo_2432"/>
+	<Property ID="27007" QuestionNpc="bossclone002017" QuestionID="mazeidiaocha" TrackInfoID="task_TrackInfo_2446"/>
+	<Property ID="27008" QuestionNpc="funnpcclone003108" SceneID="14" QuestionID="yucunchoujia" TrackInfoID="task_TrackInfo_2103"/>
+	<Property ID="12001" QuestionNpc="WorldNpc00212" SceneID="12" QuestionID="38164" TrackInfoID="task_TrackInfo_38164"/>
+	<Property ID="12004" QuestionNpc="WorldNpc10005" SceneID="16" QuestionID="38212" TrackInfoID="task_TrackInfo_38212"/>
+	<Property ID="12005" QuestionNpc="WorldNpc09301" SceneID="2" QuestionID="qiangbiaoburongyi002" TrackInfoID="task_TrackInfo_38284"/>
+	<Property ID="12007" QuestionNpc="WorldNpc09201" SceneID="2" QuestionID="caimishiwen" TrackInfoID="task_TrackInfo_38448"/>
+	<Property ID="12008" QuestionNpc="WorldNpc02546" SceneID="9" QuestionID="qiangbiaoburongyi001" TrackInfoID="task_TrackInfo_38496"/>
+	<Property ID="12009" QuestionNpc="WorldNpc00212" SceneID="12" QuestionID="kaoyanhuigen01" TrackInfoID="task_TrackInfo_38529"/>
+	<Property ID="12010" QuestionNpc="WorldNpc05792" SceneID="21" QuestionID="lunfofa01" TrackInfoID="task_TrackInfo_38537"/>
+	<Property ID="12011" QuestionNpc="WorldNpc05792" SceneID="21" QuestionID="lunfofa02" TrackInfoID="task_TrackInfo_38540"/>
+	<Property ID="11001" QuestionNpc="WorldNpc04413" SceneID="11" QuestionID="baishizhiren" TrackInfoID="questioninfo_36007"/>
+	<Property ID="11002" QuestionNpc="WorldNpc04701" SceneID="11" QuestionID="chengrenmeishi" TrackInfoID="questioninfo_36148"/>
+	<Property ID="11003" QuestionNpc="WorldNpc09623" SceneID="17" QuestionID="xianvxunchou" TrackInfoID="questioninfo_36175"/>
+	<Property ID="11004" QuestionNpc="WorldNpc04403" SceneID="11" QuestionID="36483" TrackInfoID="questioninfo_36483"/>
+	<Property ID="11005" QuestionNpc="WorldNpc04401" SceneID="11" QuestionID="36532" TrackInfoID="questioninfo_36532"/>
+	<Property ID="10001" QuestionNpc="WorldNpc02685" SceneID="10" QuestionID="chifan" TrackInfoID="quest40003"/>
+	<Property ID="10002" QuestionNpc="WorldNpc02610" SceneID="10" QuestionID="keyouzhengju" TrackInfoID="quest40014"/>
+	<Property ID="10003" QuestionNpc="WorldNpc02629" SceneID="10" QuestionID="xixv" TrackInfoID="quest40054"/>
+	<Property ID="10004" QuestionNpc="WorldNpc08942" SceneID="13" QuestionID="wudangyuemei" TrackInfoID="quest40400"/>
+	<Property ID="6001"/>
+	<Property ID="9001" QuestionNpc="WorldNpc02244" SceneID="9" QuestionID="shifouzhenxin" TrackInfoID="questioninfo_50053"/>
+	<Property ID="9002" QuestionNpc="WorldNpc10004" SceneID="16" QuestionID="xiangwangjianghu" TrackInfoID="questioninfo_50299"/>
+	<Property ID="9003" QuestionNpc="WorldNpc02605" SceneID="10" QuestionID="emeiyijing" TrackInfoID="questioninfo_50351"/>
+	<Property ID="9004" QuestionNpc="WorldNpc02203" SceneID="9" QuestionID="huazhongfangying" TrackInfoID="questioninfo_50357"/>
+	<Property ID="9005" QuestionNpc="WorldNpc03420" SceneID="7" QuestionID="shuihuolian" TrackInfoID="questioninfo_50394"/>
+	<Property ID="7000" QuestionNpc="WorldNpc03335" SceneID="7" TrackInfoID="questioninfo_46042"/>
+	<Property ID="7001"/>
+	<Property ID="7002"/>
+	<Property ID="7003"/>
+	<Property ID="7004"/>
+	<Property ID="7005"/>
+	<Property ID="7006"/>
+	<Property ID="7007"/>
+	<Property ID="7008"/>
+	<Property ID="7009"/>
+	<Property ID="7010"/>
+	<Property ID="7011"/>
+	<Property ID="7012"/>
+	<Property ID="7013"/>
+	<Property ID="7014"/>
+	<Property ID="7015"/>
+	<Property ID="7016"/>
+	<Property ID="7017"/>
+	<Property ID="7018"/>
+	<Property ID="7019"/>
+	<Property ID="7020"/>
+	<Property ID="7021"/>
+	<Property ID="7022"/>
+	<Property ID="7023"/>
+	<Property ID="7024"/>
+	<Property ID="7025"/>
+	<Property ID="7026"/>
+	<Property ID="7027"/>
+	<Property ID="7028"/>
+	<Property ID="7029"/>
+	<Property ID="7030"/>
+	<Property ID="7031"/>
+	<Property ID="7032"/>
+	<Property ID="7033"/>
+	<Property ID="7034"/>
+	<Property ID="7035"/>
+	<Property ID="7036"/>
+	<Property ID="8001" QuestionNpc="WorldNpc04027" SceneID="8" QuestionID="48215" TrackInfoID="task_TrackInfo_48215"/>
+</Object>

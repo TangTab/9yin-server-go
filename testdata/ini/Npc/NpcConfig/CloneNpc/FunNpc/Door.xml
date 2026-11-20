@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="DoorNpcclone001" script="Door" Name="孔雀副本结束出口" Desc="孔雀副本结束出口" Resource="npc\export001" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone001a" script="Door" Name="孔雀副本结束出口" Desc="孔雀副本结束出口" Resource="npc\fbmac021010" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone0017" script="Door" Name="狱下之狱副本出口" Desc="狱下之狱副本出口" Resource="npc\itemnpc057k" NpcType="42" SpringRange="10" SelectState="2"/>
+	<Property ID="DoorNpcclone003" script="Door" Name="暮色之村出口" Desc="暮色之村出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone002001" script="Door" Name="龙门客栈出口1" Desc="龙门客栈出口1" Resource="npc\export001" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone002002" script="Door" Name="龙门客栈出口2" Desc="龙门客栈出口2" Resource="npc\funcnpc018" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone007001" script="Door" Name="武当出师副本出口" Desc="武当出师副本出口" Resource="npc\itemnpc057k" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone007002" script="Door" Name="武当出师副本出口（困难、地狱）" Desc="武当出师副本出口（困难、地狱）" Resource="npc\itemnpc057k" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone009001" script="Door" Name="舍身崖结束出口" Desc="舍身崖结束出口" Resource="npc\funcnpc018" NpcType="42" SpringRange="100" SelectState="2"/>
+	<Property ID="DoorNpcclone009002" script="Door" Name="舍身崖初始出口" Desc="舍身崖初始出口" Resource="npc\itemnpc057k" NpcType="42" SpringRange="100" SelectState="2"/>
+	<Property ID="DoorNpcclone009003" script="Door" Name="舍身崖结束出口2" Desc="舍身崖结束出口2" Resource="npc\export001" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone005001" script="Door" Name="木人巷出口" Desc="木人巷出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="10" SelectState="2"/>
+	<Property ID="DoorNpcclone019001" script="Door" Name="极乐谷初始出口" Desc="极乐谷初始出口" Resource="npc\itemnpc057k" NpcType="42" SpringRange="5" SelectState="2"/>
+	<Property ID="DoorNpcclone019002" script="Door" Name="极乐谷结束出口" Desc="极乐谷结束出口" Resource="npc\export001" NpcType="42" SpringRange="5" SelectState="2"/>
+	<Property ID="DoorNpcclone004001" script="Door" Name="雁门关出口" Desc="雁门关出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="5" SelectState="2"/>
+	<Property ID="DoorNpcclone013001" script="Door" Name="万毒宫副本初始出口" Desc="万毒宫副本初始出口" Resource="npc\funcnpc018" NpcType="42" SpringRange="1" SelectState="2"/>
+	<Property ID="DoorNpcclone013002" script="Door" Name="万毒宫副本结束出口" Desc="万毒宫副本结束出口" Resource="npc\itemnpc057k" NpcType="42" SpringRange="1" SelectState="2"/>
+	<Property ID="DoorNpcclone021001" script="Door" Resource="npc\funcnpc018" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone011001" script="Door" Name="杏子林副本初始出口" Desc="杏子林副本初始出口" Resource="npc\funcnpc018" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcclone011002" script="Door" Name="杏子林副本结束出口" Desc="杏子林副本结束出口" Resource="npc\itemnpc057k" NpcType="42" SpringRange="3" SelectState="2"/>
+	<Property ID="DoorNpcadv033" script="Door" Name="水府洞天出口" Desc="水府洞天出口" Resource="npc\itemnpc057qgyd" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcadv032" script="Door" Name="侠客洞出口" Desc="侠客洞出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcadv023" script="Door" Name="残塔出口" Desc="残塔出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="1" SelectState="2"/>
+	<Property ID="DoorNpcadv101" script="Door" Name="雪峰传送门" Desc="雪峰传送门" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcadv100" script="Door" Name="古狱传送门" Desc="古狱传送门" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="PlotDoor00024" script="Door" Name="青羊宫传送成都" Desc="青羊宫传送成都" Resource="npc\itemnpc057k" NpcType="49" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpc00338" script="Door" Name="情侣心魔幻境出口" Desc="情侣心魔幻境出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcadv040001" script="Door" Name="晴瑶宫" Desc="晴瑶宫" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcclonezone001" script="Door" Name="蝙蝠洞出" Desc="蝙蝠洞出" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcclonezone002" script="Door" Name="无争山庄出" Desc="无争山庄出" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcclonetower001" script="Door" Name="通天峰出" Desc="通天峰出" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcclone038001" script="Door" Name="大漠鬼城禁地出口" Desc="大漠鬼城禁地出口" Resource="npc\funcnpc019" NpcType="42" SpringRange="2" SelectState="2"/>
+	<Property ID="DoorNpcclone691001" script="Door" Name="千苍峡禁地出口" Desc="千苍峡禁地出口" Resource="npc\funcnpc018" NpcType="42" SpringRange="2" SelectState="2"/>
+</Object>

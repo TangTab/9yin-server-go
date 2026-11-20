@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="SwSwitch_jyw01" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw02" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw03" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw04" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw05" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw06" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw07" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw08" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw09" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw10" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw11" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw12" script="SpringMachineNpc" Name="开关" Desc="开关" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="SwSwitch_jyw13" script="SpringMachineNpc" Name="地牢入口" Desc="地牢入口" Resource="npc\fbmac002015" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="schoolwar_flog_jyw01" script="SpringMachineNpc" Name="旗子" Desc="旗子" Resource="npc\itemnpc639" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="schoolwar_flog_jyw02" script="SpringMachineNpc" Name="旗子" Desc="旗子" Resource="npc\itemnpc639" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="switem_gb_att" script="SpringMachineNpc" Name="投石机" Desc="投石机" Resource="npc\fbmac004007" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="switem_gb_flag01" script="SpringMachineNpc" Name="守方战旗" Desc="守方战旗" Resource="npc\itemnpc634" NpcType="173" SpringRange="5" SelectState="2" Scale="3.100,3.100,3.100"/>
+	<Property ID="switem_gb_flag02" script="SpringMachineNpc" Name="攻方战旗" Desc="攻方战旗" Resource="npc\1701_bzqizhi01" NpcType="173" SpringRange="5" SelectState="2" Scale="3.100,3.100,3.100"/>
+	<Property ID="SwStone_wd01" script="SpringMachineNpc" Name="大石头" Desc="大石头" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+</Object>

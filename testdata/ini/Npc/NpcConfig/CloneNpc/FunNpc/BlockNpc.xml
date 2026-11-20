@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="BlockNpc00001" script="BlockNpc" Name="门" Desc="门" Resource="npc\worldnpc266" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00002" script="BlockNpc" Name="拒马" Desc="拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00003" script="BlockNpc" Name="水相石门" Desc="水相石门" Resource="npc\fbmac00015" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00004" script="BlockNpc" Name="金相石门" Desc="金相石门" Resource="npc\fbmac00014" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00005" script="BlockNpc" Name="火相石门" Desc="火相石门" Resource="npc\fbmac00016" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00006" script="BlockNpc" Name="风相石门" Desc="风相石门" Resource="npc\fbmac00017" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00007" script="BlockNpc" Name="天宫门" Desc="天宫门" Resource="npc\fbmac00010" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00008" script="BlockNpc" Name="地宫石门" Desc="地宫石门" Resource="npc\fbmac00011" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00009" script="BlockNpc" Name="五行小塔" Desc="五行小塔" Resource="npc\fbmac00013" NpcType="167" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00010" script="BlockNpc" Name="地宫中央的石柱" Desc="地宫中央的石柱" Resource="npc\fbmac00026" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00011" script="BlockNpc" Name="庄门透明墙" Desc="庄门透明墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00021" script="BlockNpc" Name="庄门墙" Desc="庄门墙" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00015" script="BlockNpc" Name="四相外门有光" Desc="四相外门有光" Resource="npc\fbmac00037" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00016" script="BlockNpc" Name="棺材" Desc="棺材" Resource="npc\itemnpc190" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00017" script="BlockNpc" Name="四相外门无光" Desc="四相外门无光" Resource="npc\fbmac00037a" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00018" script="BlockNpc" Name="庄内透明墙" Desc="庄内透明墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00019" script="BlockNpc" Name="四相外门移动光" Desc="四相外门移动光" Resource="npc\fbmac00037b" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00020" script="BlockNpc" Name="防穿透透明墙" Desc="防穿透透明墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00022" script="BlockNpc" Name="后山透明墙" Desc="后山透明墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockNpc00023" script="BlockNpc" Name="后山墙" Desc="后山墙" Resource="npc\fbmac00519a" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone005001" script="BlockNpc" Name="地板机关1触发的门" Desc="地板机关1触发的门" Resource="npc\worldnpc266" NpcType="172" SpringRange="2" SelectState="2"/>
+	<Property ID="BlockClone005002" script="BlockNpc" Name="地板机关2触发的门" Desc="地板机关2触发的门" Resource="npc\worldnpc266" NpcType="172" SpringRange="2" SelectState="2"/>
+	<Property ID="BlockClone005003" script="BlockNpc" Name="塔林阻挡npc" Desc="塔林阻挡npc" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone009001" script="BlockNpc" Name="副本传送门" Desc="副本传送门" Resource="npc\worldnpc266" NpcType="172" SpringRange="2" SelectState="2"/>
+	<Property ID="BlockClone009011" script="BlockNpc" Name="舍利台" Desc="舍利台" Resource="npc\itemnpc488" NpcType="172" SpringRange="2" SelectState="2"/>
+	<Property ID="BlockClone002001" script="BlockNpc" Name="客栈内墙" Desc="客栈内墙" Resource="npc\fbmac002019" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone002002" script="BlockNpc" Name="客栈外墙" Desc="客栈外墙" Resource="npc\fbmac002020" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone002003" script="BlockNpc" Name="客栈屋顶" Desc="客栈屋顶" Resource="npc\fbmac002021" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone003001" script="BlockNpc" Name="村口大门" Desc="村口大门" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone003002" script="BlockNpc" Name="村口障碍" Desc="村口障碍" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone003003" script="BlockNpc" Name="祠堂院门" Desc="祠堂院门" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone003004" script="BlockNpc" Name="赵家院门" Desc="赵家院门" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone003005" script="BlockNpc" Name="墓室墓碑" Desc="墓室墓碑" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone019006" script="BlockNpc" Name="巨剑" Desc="巨剑" Resource="npc\fbmac019016" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019007" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019050" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbmac019011a" NpcType="172" SpringRange="5" SelectState="0" Scale="2.3,2.3,2.3"/>
+	<Property ID="BlockClone019051" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="5" SelectState="0" Scale="2.1,2.1,2.1"/>
+	<Property ID="BlockClone019052" script="BlockNpc" Name="落石1" Desc="落石1" Resource="npc\itemnpc059" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019053" script="BlockNpc" Name="落石2" Desc="落石2" Resource="npc\itemnpc075" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019054" script="BlockNpc" Name="落石3" Desc="落石3" Resource="npc\fbmac005011" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019055" script="BlockNpc" Name="落石4" Desc="落石4" Resource="npc\fbmac005020a" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019056" script="BlockNpc" Name="落石5" Desc="落石5" Resource="npc\fbmac005020b" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019057" script="BlockNpc" Name="落石6" Desc="落石6" Resource="npc\fbmac005020c" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019058" script="BlockNpc" Name="落石7" Desc="落石7" Resource="npc\fbmac005020d" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019059" script="BlockNpc" Name="落石8" Desc="落石8" Resource="npc\fbmac005020e" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone019060" script="BlockNpc" Name="副本门阻挡空气墙" Desc="副本门阻挡空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="5" SelectState="0"/>
+	<Property ID="BlockClone004001" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone004002" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone004003" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone004004" script="BlockNpc" Name="暗影洞落石" Desc="暗影洞落石" Resource="npc\itemnpc669" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone004005" script="BlockNpc" Name="暗影洞铁门" Desc="暗影洞铁门" Resource="npc\fbmac00536" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone004006" script="BlockNpc" Name="暗影洞关闭石门" Desc="暗影洞关闭石门" Resource="npc\fbmac021033" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone004007" script="BlockNpc" Name="暗影洞关闭石门(破碎)" Desc="暗影洞关闭石门(破碎)" Resource="npc\brokennpc\brokenitem061" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone004008" script="BlockNpc" Name="阻挡空气墙" Desc="阻挡空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone021001" script="BlockNpc" Name="圆木门" Desc="圆木门" Resource="npc\fbmac013028" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone021002" script="BlockNpc" Name="管家阻挡" Desc="管家阻挡" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone021003" script="BlockNpc" Name="鸽笼阻挡" Desc="鸽笼阻挡" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone021004" script="BlockNpc" Name="后花园阻挡" Desc="后花园阻挡" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockYd_stone" script="BlockNpc" Name="阻挡石头" Desc="阻挡石头" Resource="npc\fbmac005020e" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="//奇遇用阻挡NPC"/>
+	<Property ID="qy_111030_junzitang_block" script="BlockNpc" Name="阻挡石门" Desc="阻挡石门" Resource="npc\fbmac021034" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="qy_shuifudongtian" script="BlockNpc" Resource="npc\fbmac004013" NpcType="172" SpringRange="6" SelectState="0"/>
+	<Property ID="//任务用阻挡"/>
+	<Property ID="GB_Block_44025" script="BlockNpc" Name="后花园阻挡" Desc="后花园阻挡" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockNpc021001" script="BlockNpc" Name="青云堡天门阵空气墙" Desc="青云堡天门阵空气墙" Resource="npc\blocknpc021001" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone017001" script="BlockNpc" Name="狱下之狱阻挡岩石" Desc="狱下之狱阻挡岩石" Resource="npc\fbmac005020e" NpcType="172" SpringRange="2"/>
+	<Property ID="BlockClone017002" script="BlockNpc" Name="防穿透透明墙" Desc="防穿透透明墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone017003" script="BlockNpc" Name="狱下之狱阻挡岩石" Desc="狱下之狱阻挡岩石" Resource="npc\fbmac005020e" NpcType="172" SpringRange="2"/>
+	<Property ID="BlockClone011001" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011002" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011003" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011004" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011005" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011006" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011007" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011008" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011009" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011010" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011011" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011012" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011013" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011014" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011015" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011016" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011017" script="BlockNpc" Name="//禁地闯关" Desc="//禁地闯关" Resource="npc\fbblock00000" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone011501" script="BlockNpc" Name="破庙围栏" Desc="破庙围栏" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011502" script="BlockNpc" Name="破庙围栏" Desc="破庙围栏" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011503" script="BlockNpc" Name="破庙围栏" Desc="破庙围栏" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011504" script="BlockNpc" Name="破庙围栏" Desc="破庙围栏" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011505" script="BlockNpc" Name="破庙拒马" Desc="破庙拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011601" script="BlockNpc" Name="困难陷阱拒马" Desc="困难陷阱拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011602" script="BlockNpc" Name="困难陷阱拒马" Desc="困难陷阱拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011603" script="BlockNpc" Name="困难陷阱拒马" Desc="困难陷阱拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011604" script="BlockNpc" Name="困难陷阱气墙" Desc="困难陷阱气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011605" script="BlockNpc" Name="困难陷阱气墙" Desc="困难陷阱气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011606" script="BlockNpc" Name="困难陷阱气墙" Desc="困难陷阱气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011607" script="BlockNpc" Name="困难酒阵拒马" Desc="困难酒阵拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011608" script="BlockNpc" Name="困难酒阵气墙" Desc="困难酒阵气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011609" script="BlockNpc" Name="困难大仁拒马" Desc="困难大仁拒马" Resource="npc\fbmac00007" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011610" script="BlockNpc" Name="困难大仁气墙" Desc="困难大仁气墙" Resource="npc\fbblock00000" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone011611" script="BlockNpc" Name="困难堵路巨石" Desc="困难堵路巨石" Resource="npc\fbmac005020c" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="BlockClone009012" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009013" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009015" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009016" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009017" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009018" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009019" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009020" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009021" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009022" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone009050" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="npc_5nei_sl_021" script="BlockNpc" Name="五内-少林五内前戏任务空气墙" Desc="五内-少林五内前戏任务空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0" Scale="1.3,1,10.6"/>
+	<Property ID="//四内"/>
+	<Property ID="Block_4nei_tm01" script="BlockNpc" Name="唐门四内日常BOSS阻挡岩石" Desc="唐门四内日常BOSS阻挡岩石" Resource="npc\fbmac005020e" NpcType="172" SpringRange="2"/>
+	<Property ID="BlockNpc_wgm_001" script="BlockNpc" Name="修罗道试炼" Desc="修罗道试炼" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockNpc_nmp_wgm001" script="BlockNpc" Name="无根门空气墙" Desc="无根门空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="0.1" SelectState="0"/>
+	<Property ID="Npc_world_38" script="BlockNpc" Name="暗器之王空气墙" Desc="暗器之王空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="Npc_world_39" script="BlockNpc" Name="暗器之王空气墙" Desc="暗器之王空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="block_5nei_zy_dxyc_am" script="BlockNpc" Resource="npc\fbmac004013" NpcType="172" SpringRange="1" SelectState="0"/>
+	<Property ID="BlockClone_hsp_smdh01" script="BlockNpc" Name="杏子林空气墙" Desc="杏子林空气墙" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="BlockClone034001" script="BlockNpc" Name="阻挡用门" Desc="阻挡用门" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0" Scale="2,120,2"/>
+	<Property ID="BlockClone034002" script="BlockNpc" Name="阻挡用门" Desc="阻挡用门" Resource="npc\fbmac004013" NpcType="172" SpringRange="2" SelectState="0" Scale="2,120,2"/>
+</Object>

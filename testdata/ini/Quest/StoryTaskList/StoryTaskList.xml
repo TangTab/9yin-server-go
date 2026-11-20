@@ -1,0 +1,1191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" NpcID="WorldNpc00002" contextId="story_24003_1" titleId="storymenu_24003_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24003" SceneID="1"/>
+	<Property ID="4001" NpcID="WorldNpc00002" contextId="story_24003_2" titleId="storymenu_24003_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24003" SceneID="1"/>
+	<Property ID="4002" NpcID="FuncNpc00003" contextId="story_24007_1" titleId="storymenu_24007_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24007" SceneID="1"/>
+	<Property ID="4002" NpcID="FuncNpc00003" contextId="story_24007_2" titleId="storymenu_24007_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24007" SceneID="1"/>
+	<Property ID="4003" NpcID="WorldNpc00004" contextId="story_24009_1" titleId="storymenu_24009_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24009" SceneID="1"/>
+	<Property ID="4003" NpcID="WorldNpc00004" contextId="story_24009_2" titleId="storymenu_24009_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24009" SceneID="1"/>
+	<Property ID="4004" NpcID="WorldNpc00047" contextId="story_24023_1" titleId="storymenu_24023_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24022" SceneID="1"/>
+	<Property ID="4004" NpcID="WorldNpc00047" contextId="story_24023_2" titleId="storymenu_24023_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24022" SceneID="1"/>
+	<Property ID="4005" NpcID="FuncNpc00004" contextId="story_24026_1" titleId="storymenu_24026_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24026" SceneID="1"/>
+	<Property ID="4005" NpcID="FuncNpc00004" contextId="story_24026_2" titleId="storymenu_24026_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24026" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_1" titleId="storymenu_24035_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_2" titleId="storymenu_24035_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_3" titleId="storymenu_24035_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_4" titleId="storymenu_24035_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_5" titleId="storymenu_24035_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_6" titleId="storymenu_24035_6" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4006" NpcID="WorldNpc00017" contextId="story_24035_7" titleId="storymenu_24035_7" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24034" SceneID="1"/>
+	<Property ID="4007" NpcID="FuncNpc00003" contextId="story_24039_1" titleId="storymenu_24039_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24039" SceneID="1"/>
+	<Property ID="4007" NpcID="FuncNpc00003" contextId="story_24039_2" titleId="storymenu_24039_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24039" SceneID="1"/>
+	<Property ID="4008" NpcID="WorldNpc00012" contextId="story_24049_1" titleId="storymenu_24049_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24049" SceneID="1"/>
+	<Property ID="4008" NpcID="WorldNpc00012" contextId="story_24049_2" titleId="storymenu_24049_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24049" SceneID="1"/>
+	<Property ID="4008" NpcID="WorldNpc00012" contextId="story_24049_3" titleId="storymenu_24049_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24049" SceneID="1"/>
+	<Property ID="4008" NpcID="WorldNpc00012" contextId="story_24049_4" titleId="storymenu_24049_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24049" SceneID="1"/>
+	<Property ID="4009" NpcID="FuncNpc00003" contextId="story_24053_1" titleId="storymenu_24053_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24053" SceneID="1"/>
+	<Property ID="4009" NpcID="FuncNpc00003" contextId="story_24053_2" titleId="storymenu_24053_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24053" SceneID="1"/>
+	<Property ID="4009" NpcID="FuncNpc00003" contextId="story_24053_3" titleId="storymenu_24053_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24053" SceneID="1"/>
+	<Property ID="4009" NpcID="FuncNpc00003" contextId="story_24053_4" titleId="storymenu_24053_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24053" SceneID="1"/>
+	<Property ID="4010" NpcID="WorldNpc02605" contextId="story_24083_1" titleId="storymenu_24083_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24082" SceneID="10"/>
+	<Property ID="4010" NpcID="WorldNpc02605" contextId="story_24083_2" titleId="storymenu_24083_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24082" SceneID="10"/>
+	<Property ID="4011" NpcID="WorldNpc02611" contextId="story_24093_1" titleId="storymenu_24093_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24092" SceneID="10"/>
+	<Property ID="4011" NpcID="WorldNpc02611" contextId="story_24093_2" titleId="storymenu_24093_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24092" SceneID="10"/>
+	<Property ID="4011" NpcID="WorldNpc02611" contextId="story_24093_3" titleId="storymenu_24093_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24092" SceneID="10"/>
+	<Property ID="4012" NpcID="WorldNpc06103" contextId="story_24149_1" titleId="storymenu_24149_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24149" SceneID="22"/>
+	<Property ID="4012" NpcID="WorldNpc06103" contextId="story_24149_2" titleId="storymenu_24149_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24149" SceneID="22"/>
+	<Property ID="4012" NpcID="WorldNpc06103" contextId="story_24149_3" titleId="storymenu_24149_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24149" SceneID="22"/>
+	<Property ID="4013" NpcID="WorldNpc06104" contextId="story_24152_1" titleId="storymenu_24152_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24152" SceneID="22"/>
+	<Property ID="4013" NpcID="WorldNpc06104" contextId="story_24152_2" titleId="storymenu_24152_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24152" SceneID="22"/>
+	<Property ID="4013" NpcID="WorldNpc06104" contextId="story_24152_3" titleId="storymenu_24152_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24152" SceneID="22"/>
+	<Property ID="4014" NpcID="WorldNpc06106" contextId="story_24154_1" titleId="storymenu_24154_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24154" SceneID="22"/>
+	<Property ID="4014" NpcID="WorldNpc06106" contextId="story_24154_2" titleId="storymenu_24154_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24154" SceneID="22"/>
+	<Property ID="4014" NpcID="WorldNpc06106" contextId="story_24154_3" titleId="storymenu_24154_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24154" SceneID="22"/>
+	<Property ID="4015" NpcID="WorldNpc06112" contextId="story_24165_1" titleId="storymenu_24165_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24165" SceneID="22"/>
+	<Property ID="4015" NpcID="WorldNpc06112" contextId="story_24165_2" titleId="storymenu_24165_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24165" SceneID="22"/>
+	<Property ID="4015" NpcID="WorldNpc06112" contextId="story_24165_3" titleId="storymenu_24165_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24165" SceneID="22"/>
+	<Property ID="4015" NpcID="WorldNpc06112" contextId="story_24165_4" titleId="storymenu_24165_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24165" SceneID="22"/>
+	<Property ID="4016" NpcID="WorldNpc06116" contextId="story_24172_1" titleId="storymenu_24172_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24172" SceneID="22"/>
+	<Property ID="4016" NpcID="WorldNpc06116" contextId="story_24172_2" titleId="storymenu_24172_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24172" SceneID="22"/>
+	<Property ID="4016" NpcID="WorldNpc06116" contextId="story_24172_3" titleId="storymenu_24172_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24172" SceneID="22"/>
+	<Property ID="4016" NpcID="WorldNpc06116" contextId="story_24172_4" titleId="storymenu_24172_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24172" SceneID="22"/>
+	<Property ID="4017" NpcID="WorldNpc09601" contextId="story_24193_1" titleId="storymenu_24193_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24193" SceneID="17"/>
+	<Property ID="4017" NpcID="WorldNpc09601" contextId="story_24193_2" titleId="storymenu_24193_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24193" SceneID="17"/>
+	<Property ID="4017" NpcID="WorldNpc09601" contextId="story_24193_3" titleId="storymenu_24193_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24193" SceneID="17"/>
+	<Property ID="4017" NpcID="WorldNpc09601" contextId="story_24193_4" titleId="storymenu_24193_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24193" SceneID="17"/>
+	<Property ID="4017" NpcID="WorldNpc09601" contextId="story_24193_5" titleId="storymenu_24193_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24193" SceneID="17"/>
+	<Property ID="4018" NpcID="WorldNpc09602" contextId="story_24196_1" titleId="storymenu_24196_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24196" SceneID="17"/>
+	<Property ID="4018" NpcID="WorldNpc09602" contextId="story_24196_2" titleId="storymenu_24196_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24196" SceneID="17"/>
+	<Property ID="4018" NpcID="WorldNpc09602" contextId="story_24196_3" titleId="storymenu_24196_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24196" SceneID="17"/>
+	<Property ID="4019" NpcID="WorldNpc09612" contextId="story_24204_1" titleId="storymenu_24204_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24204" SceneID="17"/>
+	<Property ID="4019" NpcID="WorldNpc09612" contextId="story_24204_2" titleId="storymenu_24204_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24204" SceneID="17"/>
+	<Property ID="4020" NpcID="WorldNpc09805" contextId="story_24217_1" titleId="storymenu_24217_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24217" SceneID="17"/>
+	<Property ID="4020" NpcID="WorldNpc09805" contextId="story_24217_2" titleId="storymenu_24217_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24217" SceneID="17"/>
+	<Property ID="4020" NpcID="WorldNpc09805" contextId="story_24217_3" titleId="storymenu_24217_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24217" SceneID="17"/>
+	<Property ID="4021" NpcID="WorldNpc09605" contextId="story_24225_1" titleId="storymenu_24225_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24225" SceneID="17"/>
+	<Property ID="4021" NpcID="WorldNpc09605" contextId="story_24225_2" titleId="storymenu_24225_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24225" SceneID="17"/>
+	<Property ID="4022" NpcID="WorldNpc09601" contextId="story_24227_1" titleId="storymenu_24227_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24227" SceneID="17"/>
+	<Property ID="4022" NpcID="WorldNpc09601" contextId="story_24227_2" titleId="storymenu_24227_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24227" SceneID="17"/>
+	<Property ID="4023" NpcID="WorldNpc09601" contextId="story_24234_1" titleId="storymenu_24234_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24234" SceneID="17"/>
+	<Property ID="4023" NpcID="WorldNpc09601" contextId="story_24234_2" titleId="storymenu_24234_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24234" SceneID="17"/>
+	<Property ID="4023" NpcID="WorldNpc09601" contextId="story_24234_3" titleId="storymenu_24234_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24234" SceneID="17"/>
+	<Property ID="4024" NpcID="WorldNpc00029" contextId="story_24249_1" titleId="storymenu_24249_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24249" SceneID="1"/>
+	<Property ID="4024" NpcID="WorldNpc00029" contextId="story_24249_2" titleId="storymenu_24249_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24249" SceneID="1"/>
+	<Property ID="4024" NpcID="WorldNpc00029" contextId="story_24249_3" titleId="storymenu_24249_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24249" SceneID="1"/>
+	<Property ID="4025" NpcID="WorldNpc00031" contextId="story_24263_1" titleId="storymenu_24263_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24263" SceneID="1"/>
+	<Property ID="4025" NpcID="WorldNpc00031" contextId="story_24263_2" titleId="storymenu_24263_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24263" SceneID="1"/>
+	<Property ID="4026" NpcID="WorldNpc05802" contextId="story_24268_1" titleId="storymenu_24268_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24268" SceneID="21"/>
+	<Property ID="4026" NpcID="WorldNpc05802" contextId="story_24268_2" titleId="storymenu_24268_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24268" SceneID="21"/>
+	<Property ID="4027" NpcID="WorldNpc00031" contextId="story_24270_1" titleId="storymenu_24270_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24270" SceneID="1"/>
+	<Property ID="4027" NpcID="WorldNpc00031" contextId="story_24270_2" titleId="storymenu_24270_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24270" SceneID="1"/>
+	<Property ID="4028" NpcID="WorldNpc00031" contextId="story_24283_1" titleId="storymenu_24283_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24283" SceneID="1"/>
+	<Property ID="4028" NpcID="WorldNpc00031" contextId="story_24283_2" titleId="storymenu_24283_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24283" SceneID="1"/>
+	<Property ID="4028" NpcID="WorldNpc00031" contextId="story_24283_3" titleId="storymenu_24283_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24283" SceneID="1"/>
+	<Property ID="4028" NpcID="WorldNpc00031" contextId="story_24283_4" titleId="storymenu_24283_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24283" SceneID="1"/>
+	<Property ID="4028" NpcID="WorldNpc00031" contextId="story_24283_5" titleId="storymenu_24283_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24283" SceneID="1"/>
+	<Property ID="4029" NpcID="WorldNpc08859" contextId="story_24294_1" titleId="storymenu_24294_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24294" SceneID="13"/>
+	<Property ID="4029" NpcID="WorldNpc08859" contextId="story_24294_2" titleId="storymenu_24294_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24294" SceneID="13"/>
+	<Property ID="4029" NpcID="WorldNpc08859" contextId="story_24294_3" titleId="storymenu_24294_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24294" SceneID="13"/>
+	<Property ID="4029" NpcID="WorldNpc08859" contextId="story_24294_4" titleId="storymenu_24294_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24294" SceneID="13"/>
+	<Property ID="4029" NpcID="WorldNpc08859" contextId="story_24294_5" titleId="storymenu_24294_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24294" SceneID="13"/>
+	<Property ID="4030" NpcID="WorldNpc08841" contextId="story_24296_1" titleId="storymenu_24296_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24296" SceneID="13"/>
+	<Property ID="4030" NpcID="WorldNpc08841" contextId="story_24296_2" titleId="storymenu_24296_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24296" SceneID="13"/>
+	<Property ID="4030" NpcID="WorldNpc08841" contextId="story_24296_3" titleId="storymenu_24296_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24296" SceneID="13"/>
+	<Property ID="4031" NpcID="WorldNpc06402" contextId="story_24302_1" titleId="storymenu_24302_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24302" SceneID="20"/>
+	<Property ID="4031" NpcID="WorldNpc06402" contextId="story_24302_2" titleId="storymenu_24302_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24302" SceneID="20"/>
+	<Property ID="4031" NpcID="WorldNpc06402" contextId="story_24302_3" titleId="storymenu_24302_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24302" SceneID="20"/>
+	<Property ID="4032" NpcID="WorldNpc06612" contextId="story_24304_1" titleId="storymenu_24304_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24304" SceneID="20"/>
+	<Property ID="4032" NpcID="WorldNpc06612" contextId="story_24304_2" titleId="storymenu_24304_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24304" SceneID="20"/>
+	<Property ID="4033" NpcID="WorldNpc06484" contextId="story_24316_1" titleId="storymenu_24316_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24316" SceneID="20"/>
+	<Property ID="4033" NpcID="WorldNpc06484" contextId="story_24316_2" titleId="storymenu_24316_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24316" SceneID="20"/>
+	<Property ID="4033" NpcID="WorldNpc06484" contextId="story_24316_3" titleId="storymenu_24316_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24316" SceneID="20"/>
+	<Property ID="4034" NpcID="WorldNpc08835" contextId="story_24341_1" titleId="storymenu_24341_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24341" SceneID="13"/>
+	<Property ID="4034" NpcID="WorldNpc08835" contextId="story_24341_2" titleId="storymenu_24341_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24341" SceneID="13"/>
+	<Property ID="4035" NpcID="WorldNpc08718" contextId="story_24352_1" titleId="storymenu_24352_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24352" SceneID="13"/>
+	<Property ID="4035" NpcID="WorldNpc08718" contextId="story_24352_2" titleId="storymenu_24352_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24352" SceneID="13"/>
+	<Property ID="4036" NpcID="WorldNpc02907" contextId="story_24386_1" titleId="storymenu_24386_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24386" SceneID="10"/>
+	<Property ID="4036" NpcID="WorldNpc02907" contextId="story_24386_2" titleId="storymenu_24386_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24386" SceneID="10"/>
+	<Property ID="4037" NpcID="WorldNpc02641" contextId="story_24389_1" titleId="storymenu_24389_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24389" SceneID="10"/>
+	<Property ID="4037" NpcID="WorldNpc02641" contextId="story_24389_2" titleId="storymenu_24389_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24389" SceneID="10"/>
+	<Property ID="4037" NpcID="WorldNpc02641" contextId="story_24389_3" titleId="storymenu_24389_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24389" SceneID="10"/>
+	<Property ID="4038" NpcID="WorldNpc02642" contextId="story_24397_1" titleId="storymenu_24397_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24397" SceneID="10"/>
+	<Property ID="4038" NpcID="WorldNpc02642" contextId="story_24397_2" titleId="storymenu_24397_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24397" SceneID="10"/>
+	<Property ID="4038" NpcID="WorldNpc02642" contextId="story_24397_3" titleId="storymenu_24397_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24397" SceneID="10"/>
+	<Property ID="4039" NpcID="WorldNpc02908" contextId="story_24399_1" titleId="storymenu_24399_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24399" SceneID="10"/>
+	<Property ID="4039" NpcID="WorldNpc02908" contextId="story_24399_2" titleId="storymenu_24399_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24399" SceneID="10"/>
+	<Property ID="4040" NpcID="WorldNpc02643" contextId="story_24425_1" titleId="storymenu_24425_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24425" SceneID="10"/>
+	<Property ID="4040" NpcID="WorldNpc02643" contextId="story_24425_2" titleId="storymenu_24425_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24425" SceneID="10"/>
+	<Property ID="4041" NpcID="WorldNpc02524" contextId="story_24437_1" titleId="storymenu_24437_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24437" SceneID="9"/>
+	<Property ID="4041" NpcID="WorldNpc02524" contextId="story_24437_2" titleId="storymenu_24437_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24437" SceneID="9"/>
+	<Property ID="4041" NpcID="WorldNpc02524" contextId="story_24437_3" titleId="storymenu_24437_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24437" SceneID="9"/>
+	<Property ID="4042" NpcID="WorldNpc02528" contextId="story_24446_1" titleId="storymenu_24446_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24446" SceneID="9"/>
+	<Property ID="4042" NpcID="WorldNpc02528" contextId="story_24446_2" titleId="storymenu_24446_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24446" SceneID="9"/>
+	<Property ID="4042" NpcID="WorldNpc02528" contextId="story_24446_3" titleId="storymenu_24446_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24446" SceneID="9"/>
+	<Property ID="4043" NpcID="WorldNpc02510" contextId="story_24452_1" titleId="storymenu_24452_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24452" SceneID="9"/>
+	<Property ID="4043" NpcID="WorldNpc02510" contextId="story_24452_2" titleId="storymenu_24452_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24452" SceneID="9"/>
+	<Property ID="4043" NpcID="WorldNpc02510" contextId="story_24452_3" titleId="storymenu_24452_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24452" SceneID="9"/>
+	<Property ID="4044" NpcID="WorldNpc02532" contextId="story_24460_1" titleId="storymenu_24460_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24460" SceneID="9"/>
+	<Property ID="4044" NpcID="WorldNpc02532" contextId="story_24460_2" titleId="storymenu_24460_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24460" SceneID="9"/>
+	<Property ID="4044" NpcID="WorldNpc02532" contextId="story_24460_3" titleId="storymenu_24460_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24460" SceneID="9"/>
+	<Property ID="4045" NpcID="WorldNpc02532" contextId="story_24463_1" titleId="storymenu_24463_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24463" SceneID="9"/>
+	<Property ID="4045" NpcID="WorldNpc02532" contextId="story_24463_2" titleId="storymenu_24463_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24463" SceneID="9"/>
+	<Property ID="4045" NpcID="WorldNpc02532" contextId="story_24463_3" titleId="storymenu_24463_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24463" SceneID="9"/>
+	<Property ID="4046" NpcID="WorldNpc02528" contextId="story_24465_1" titleId="storymenu_24465_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24465" SceneID="9"/>
+	<Property ID="4046" NpcID="WorldNpc02528" contextId="story_24465_2" titleId="storymenu_24465_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24465" SceneID="9"/>
+	<Property ID="4046" NpcID="WorldNpc02528" contextId="story_24465_3" titleId="storymenu_24465_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24465" SceneID="9"/>
+	<Property ID="4047" NpcID="WorldNpc06163" contextId="story_24482_1" titleId="storymenu_24482_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24482" SceneID="22"/>
+	<Property ID="4047" NpcID="WorldNpc06163" contextId="story_24482_2" titleId="storymenu_24482_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24482" SceneID="22"/>
+	<Property ID="4047" NpcID="WorldNpc06163" contextId="story_24482_3" titleId="storymenu_24482_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24482" SceneID="22"/>
+	<Property ID="4048" NpcID="WorldNpc06130" contextId="story_24484_1" titleId="storymenu_24484_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24484" SceneID="22"/>
+	<Property ID="4048" NpcID="WorldNpc06130" contextId="story_24484_2" titleId="storymenu_24484_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24484" SceneID="22"/>
+	<Property ID="4049" NpcID="WorldNpc06130" contextId="story_24484_3" titleId="storymenu_24484_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24484" SceneID="22"/>
+	<Property ID="4049" NpcID="WorldNpc06130" contextId="story_24489_1" titleId="storymenu_24489_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24489" SceneID="22"/>
+	<Property ID="4049" NpcID="WorldNpc06130" contextId="story_24489_2" titleId="storymenu_24489_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24489" SceneID="22"/>
+	<Property ID="4050" NpcID="WorldNpc06130" contextId="story_24497_1" titleId="storymenu_24497_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24497" SceneID="22"/>
+	<Property ID="4050" NpcID="WorldNpc06130" contextId="story_24497_2" titleId="storymenu_24497_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24497" SceneID="22"/>
+	<Property ID="4050" NpcID="WorldNpc06130" contextId="story_24497_3" titleId="storymenu_24497_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24497" SceneID="22"/>
+	<Property ID="4051" NpcID="WorldNpc02528" contextId="story_24500_1" titleId="storymenu_24500_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24500" SceneID="9"/>
+	<Property ID="4051" NpcID="WorldNpc02528" contextId="story_24500_2" titleId="storymenu_24500_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24500" SceneID="9"/>
+	<Property ID="4051" NpcID="WorldNpc02528" contextId="story_24500_3" titleId="storymenu_24500_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24500" SceneID="9"/>
+	<Property ID="4052" NpcID="WorldNpc06131" contextId="story_24510_1" titleId="storymenu_24510_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24510" SceneID="22"/>
+	<Property ID="4052" NpcID="WorldNpc06131" contextId="story_24510_2" titleId="storymenu_24510_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24510" SceneID="22"/>
+	<Property ID="4052" NpcID="WorldNpc06131" contextId="story_24510_3" titleId="storymenu_24510_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24510" SceneID="22"/>
+	<Property ID="4053" NpcID="WorldNpc06130" contextId="story_24521_1" titleId="storymenu_24521_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24521" SceneID="22"/>
+	<Property ID="4053" NpcID="WorldNpc06130" contextId="story_24521_2" titleId="storymenu_24521_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24521" SceneID="22"/>
+	<Property ID="4053" NpcID="WorldNpc06130" contextId="story_24521_3" titleId="storymenu_24521_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24521" SceneID="22"/>
+	<Property ID="4055" NpcID="WorldNpc02428" contextId="story_24533_1" titleId="storymenu_24533_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24533" SceneID="9"/>
+	<Property ID="4055" NpcID="WorldNpc02428" contextId="story_24533_2" titleId="storymenu_24533_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24533" SceneID="9"/>
+	<Property ID="4056" NpcID="WorldNpc02432" contextId="story_24535_1" titleId="storymenu_24535_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24535" SceneID="9"/>
+	<Property ID="4056" NpcID="WorldNpc02432" contextId="story_24535_2" titleId="storymenu_24535_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24535" SceneID="9"/>
+	<Property ID="4056" NpcID="WorldNpc02432" contextId="story_24535_3" titleId="storymenu_24535_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24535" SceneID="9"/>
+	<Property ID="4057" NpcID="WorldNpc02436" contextId="story_24542_1" titleId="storymenu_24542_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24542" SceneID="9"/>
+	<Property ID="4057" NpcID="WorldNpc02436" contextId="story_24542_2" titleId="storymenu_24542_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24542" SceneID="9"/>
+	<Property ID="4058" NpcID="WorldNpc02437" contextId="story_24548_1" titleId="storymenu_24548_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24548" SceneID="9"/>
+	<Property ID="4058" NpcID="WorldNpc02437" contextId="story_24548_2" titleId="storymenu_24548_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24548" SceneID="9"/>
+	<Property ID="4059" NpcID="WorldNpc02437" contextId="story_24553_1" titleId="storymenu_24553_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24553" SceneID="9"/>
+	<Property ID="4059" NpcID="WorldNpc02437" contextId="story_24553_2" titleId="storymenu_24553_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24553" SceneID="9"/>
+	<Property ID="4060" NpcID="WorldNpc02440" contextId="story_24556_1" titleId="storymenu_24556_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24556" SceneID="9"/>
+	<Property ID="4060" NpcID="WorldNpc02440" contextId="story_24556_2" titleId="storymenu_24556_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24556" SceneID="9"/>
+	<Property ID="4061" NpcID="WorldNpc02440" contextId="story_24558_1" titleId="storymenu_24558_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24558" SceneID="9"/>
+	<Property ID="4061" NpcID="WorldNpc02440" contextId="story_24558_2" titleId="storymenu_24558_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24558" SceneID="9"/>
+	<Property ID="4062" NpcID="WorldNpc02440" contextId="story_24565_1" titleId="storymenu_24565_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24565" SceneID="9"/>
+	<Property ID="4062" NpcID="WorldNpc02440" contextId="story_24565_2" titleId="storymenu_24565_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24565" SceneID="9"/>
+	<Property ID="4063" NpcID="WorldNpc02432" contextId="story_24572_1" titleId="storymenu_24572_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24572" SceneID="9"/>
+	<Property ID="4063" NpcID="WorldNpc02432" contextId="story_24572_2" titleId="storymenu_24572_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24572" SceneID="9"/>
+	<Property ID="4064" NpcID="WorldNpc02443" contextId="story_24573_1" titleId="storymenu_24573_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24573" SceneID="9"/>
+	<Property ID="4064" NpcID="WorldNpc02443" contextId="story_24573_2" titleId="storymenu_24573_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24573" SceneID="9"/>
+	<Property ID="4065" NpcID="WorldNpc02446" contextId="story_24579_1" titleId="storymenu_24579_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24579" SceneID="9"/>
+	<Property ID="4065" NpcID="WorldNpc02446" contextId="story_24579_2" titleId="storymenu_24579_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24579" SceneID="9"/>
+	<Property ID="4065" NpcID="WorldNpc02446" contextId="story_24579_3" titleId="storymenu_24579_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24579" SceneID="9"/>
+	<Property ID="4066" NpcID="WorldNpc02447" contextId="story_24582_1" titleId="storymenu_24582_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24582" SceneID="9"/>
+	<Property ID="4066" NpcID="WorldNpc02447" contextId="story_24582_2" titleId="storymenu_24582_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24582" SceneID="9"/>
+	<Property ID="4067" NpcID="WorldNpc02479" contextId="story_24594_1" titleId="storymenu_24594_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24594" SceneID="9"/>
+	<Property ID="4067" NpcID="WorldNpc02479" contextId="story_24594_2" titleId="storymenu_24594_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24594" SceneID="9"/>
+	<Property ID="4067" NpcID="WorldNpc02479" contextId="story_24594_3" titleId="storymenu_24594_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24594" SceneID="9"/>
+	<Property ID="4068" NpcID="WorldNpc02450" contextId="story_24596_1" titleId="storymenu_24596_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24596" SceneID="9"/>
+	<Property ID="4068" NpcID="WorldNpc02450" contextId="story_24596_2" titleId="storymenu_24596_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24596" SceneID="9"/>
+	<Property ID="4069" NpcID="WorldNpc02453" contextId="story_24603_1" titleId="storymenu_24603_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24603" SceneID="9"/>
+	<Property ID="4069" NpcID="WorldNpc02453" contextId="story_24603_2" titleId="storymenu_24603_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24603" SceneID="9"/>
+	<Property ID="4070" NpcID="WorldNpc02454" contextId="story_24611_1" titleId="storymenu_24611_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24611" SceneID="9"/>
+	<Property ID="4070" NpcID="WorldNpc02454" contextId="story_24611_2" titleId="storymenu_24611_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24611" SceneID="9"/>
+	<Property ID="4071" NpcID="WorldNpc02453" contextId="story_24615_1" titleId="storymenu_24615_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24615" SceneID="9"/>
+	<Property ID="4071" NpcID="WorldNpc02453" contextId="story_24615_2" titleId="storymenu_24615_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24615" SceneID="9"/>
+	<Property ID="4072" NpcID="WorldNpc04708" contextId="story_24628_1" titleId="storymenu_24628_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24628" SceneID="11"/>
+	<Property ID="4072" NpcID="WorldNpc04708" contextId="story_24628_2" titleId="storymenu_24628_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24628" SceneID="11"/>
+	<Property ID="4073" NpcID="WorldNpc04807" contextId="story_24655_1" titleId="storymenu_24655_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24655" SceneID="11"/>
+	<Property ID="4073" NpcID="WorldNpc04807" contextId="story_24655_2" titleId="storymenu_24655_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24655" SceneID="11"/>
+	<Property ID="4074" NpcID="WorldNpc04427" contextId="story_24685_1" titleId="storymenu_24685_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24685" SceneID="11"/>
+	<Property ID="4074" NpcID="WorldNpc04427" contextId="story_24685_2" titleId="storymenu_24685_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24685" SceneID="11"/>
+	<Property ID="4074" NpcID="WorldNpc04427" contextId="story_24685_3" titleId="storymenu_24685_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24685" SceneID="11"/>
+	<Property ID="4075" NpcID="WorldNpc04401" contextId="story_24696_1" titleId="storymenu_24696_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24696" SceneID="11"/>
+	<Property ID="4075" NpcID="WorldNpc04401" contextId="story_24696_2" titleId="storymenu_24696_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24696" SceneID="11"/>
+	<Property ID="4076" NpcID="WorldNpc04401" contextId="story_24703_1" titleId="storymenu_24703_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24703" SceneID="11"/>
+	<Property ID="4076" NpcID="WorldNpc04401" contextId="story_24703_2" titleId="storymenu_24703_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24703" SceneID="11"/>
+	<Property ID="4077" NpcID="WorldNpc04709" contextId="story_24708_1" titleId="storymenu_24708_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24708" SceneID="11"/>
+	<Property ID="4077" NpcID="WorldNpc04709" contextId="story_24708_2" titleId="storymenu_24708_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24708" SceneID="11"/>
+	<Property ID="4078" NpcID="WorldNpc04711" contextId="story_24710_1" titleId="storymenu_24710_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24710" SceneID="11"/>
+	<Property ID="4078" NpcID="WorldNpc04711" contextId="story_24710_2" titleId="storymenu_24710_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24710" SceneID="11"/>
+	<Property ID="4079" NpcID="WorldNpc04711" contextId="story_24716_1" titleId="storymenu_24716_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24716" SceneID="11"/>
+	<Property ID="4079" NpcID="WorldNpc04711" contextId="story_24716_2" titleId="storymenu_24716_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24716" SceneID="11"/>
+	<Property ID="4080" NpcID="WorldNpc00021" contextId="story_24061_1" titleId="storymenu_24061_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24061" SceneID="1"/>
+	<Property ID="4080" NpcID="WorldNpc00021" contextId="story_24061_2" titleId="storymenu_24061_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24061" SceneID="1"/>
+	<Property ID="4081" NpcID="WorldNpc05928" contextId="story_24100_1" titleId="storymenu_24100_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24100" SceneID="21"/>
+	<Property ID="4081" NpcID="WorldNpc05928" contextId="story_24100_2" titleId="storymenu_24100_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24100" SceneID="21"/>
+	<Property ID="4081" NpcID="WorldNpc05928" contextId="story_24100_3" titleId="storymenu_24100_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24100" SceneID="21"/>
+	<Property ID="4082" NpcID="WorldNpc06003" contextId="story_24126_1" titleId="storymenu_24126_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24126" SceneID="21"/>
+	<Property ID="4082" NpcID="WorldNpc06003" contextId="story_24126_2" titleId="storymenu_24126_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24126" SceneID="21"/>
+	<Property ID="4083" NpcID="WorldNpc06007" contextId="story_24132_1" titleId="storymenu_24132_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24132" SceneID="21"/>
+	<Property ID="4083" NpcID="WorldNpc06007" contextId="story_24132_2" titleId="storymenu_24132_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24132" SceneID="21"/>
+	<Property ID="4083" NpcID="WorldNpc06007" contextId="story_24132_3" titleId="storymenu_24132_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24132" SceneID="21"/>
+	<Property ID="4084" NpcID="WorldNpc06010" contextId="story_24136_1" titleId="storymenu_24136_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24136" SceneID="21"/>
+	<Property ID="4084" NpcID="WorldNpc06010" contextId="story_24136_2" titleId="storymenu_24136_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24136" SceneID="21"/>
+	<Property ID="4084" NpcID="WorldNpc06010" contextId="story_24136_3" titleId="storymenu_24136_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24136" SceneID="21"/>
+	<Property ID="4085" NpcID="WorldNpc06010" contextId="story_24139_1" titleId="storymenu_24139_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24139" SceneID="21"/>
+	<Property ID="4085" NpcID="WorldNpc06010" contextId="story_24139_2" titleId="storymenu_24139_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24139" SceneID="21"/>
+	<Property ID="4085" NpcID="WorldNpc06010" contextId="story_24139_3" titleId="storymenu_24139_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24139" SceneID="21"/>
+	<Property ID="4086" NpcID="WorldNpc06005" contextId="story_24141_1" titleId="storymenu_24141_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24141" SceneID="21"/>
+	<Property ID="4086" NpcID="WorldNpc06005" contextId="story_24141_2" titleId="storymenu_24141_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24141" SceneID="21"/>
+	<Property ID="4086" NpcID="WorldNpc06005" contextId="story_24141_3" titleId="storymenu_24141_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24141" SceneID="21"/>
+	<Property ID="4087" NpcID="WorldNpc06101" contextId="story_24145_1" titleId="storymenu_24145_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24145" SceneID="22"/>
+	<Property ID="4087" NpcID="WorldNpc06101" contextId="story_24145_2" titleId="storymenu_24145_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24145" SceneID="22"/>
+	<Property ID="4088" NpcID="WorldNpc06108" contextId="story_24159_1" titleId="storymenu_24159_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24159" SceneID="22"/>
+	<Property ID="4088" NpcID="WorldNpc06108" contextId="story_24159_2" titleId="storymenu_24159_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24159" SceneID="22"/>
+	<Property ID="4089" NpcID="WorldNpc06122" contextId="story_24168_1" titleId="storymenu_24168_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24168" SceneID="22"/>
+	<Property ID="4089" NpcID="WorldNpc06122" contextId="story_24168_2" titleId="storymenu_24168_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24168" SceneID="22"/>
+	<Property ID="4090" NpcID="WorldNpc06117" contextId="story_24176_1" titleId="storymenu_24176_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24176" SceneID="22"/>
+	<Property ID="4090" NpcID="WorldNpc06117" contextId="story_24176_2" titleId="storymenu_24176_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24176" SceneID="22"/>
+	<Property ID="4091" NpcID="WorldNpc06113" contextId="story_24185_1" titleId="storymenu_24185_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24185" SceneID="22"/>
+	<Property ID="4091" NpcID="WorldNpc06113" contextId="story_24185_2" titleId="storymenu_24185_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24185" SceneID="22"/>
+	<Property ID="4092" NpcID="WorldNpc06126" contextId="story_24191_1" titleId="storymenu_24191_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24191" SceneID="22"/>
+	<Property ID="4092" NpcID="WorldNpc06126" contextId="story_24191_2" titleId="storymenu_24191_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24191" SceneID="22"/>
+	<Property ID="4093" NpcID="WorldNpc09801" contextId="story_24200_1" titleId="storymenu_24200_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24200" SceneID="17"/>
+	<Property ID="4093" NpcID="WorldNpc09801" contextId="story_24200_2" titleId="storymenu_24200_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24200" SceneID="17"/>
+	<Property ID="4093" NpcID="WorldNpc09801" contextId="story_24200_3" titleId="storymenu_24200_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24200" SceneID="17"/>
+	<Property ID="4094" NpcID="WorldNpc09602" contextId="story_24215_1" titleId="storymenu_24215_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24215" SceneID="17"/>
+	<Property ID="4094" NpcID="WorldNpc09602" contextId="story_24215_2" titleId="storymenu_24215_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24215" SceneID="17"/>
+	<Property ID="4094" NpcID="WorldNpc09602" contextId="story_24215_3" titleId="storymenu_24215_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24215" SceneID="17"/>
+	<Property ID="4095" NpcID="WorldNpc09601" contextId="story_24240_1" titleId="storymenu_24240_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24240" SceneID="17"/>
+	<Property ID="4095" NpcID="WorldNpc09601" contextId="story_24240_2" titleId="storymenu_24240_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24240" SceneID="17"/>
+	<Property ID="4096" NpcID="WorldNpc00030" contextId="story_24249_4" titleId="storymenu_24249_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24249_1" SceneID="1"/>
+	<Property ID="4096" NpcID="WorldNpc00030" contextId="story_24249_5" titleId="storymenu_24249_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24249_1" SceneID="1"/>
+	<Property ID="4096" NpcID="WorldNpc00030" contextId="story_24249_6" titleId="storymenu_24249_6" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24249_1" SceneID="1"/>
+	<Property ID="4097" NpcID="WorldNpc00031" contextId="story_24251_1" titleId="storymenu_24251_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24251" SceneID="1"/>
+	<Property ID="4097" NpcID="WorldNpc00031" contextId="story_24251_2" titleId="storymenu_24251_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24251" SceneID="1"/>
+	<Property ID="4098" NpcID="WorldNpc00031" contextId="story_24253_1" titleId="storymenu_24253_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24253" SceneID="1"/>
+	<Property ID="4098" NpcID="WorldNpc00031" contextId="story_24253_2" titleId="storymenu_24253_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24253" SceneID="1"/>
+	<Property ID="4098" NpcID="WorldNpc00031" contextId="story_24253_3" titleId="storymenu_24253_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24253" SceneID="1"/>
+	<Property ID="4099" NpcID="WorldNpc00032" contextId="story_24260_1" titleId="storymenu_24260_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24260" SceneID="1"/>
+	<Property ID="4099" NpcID="WorldNpc00032" contextId="story_24260_2" titleId="storymenu_24260_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24260" SceneID="1"/>
+	<Property ID="4100" NpcID="WorldNpc00035" contextId="story_24287_1" titleId="storymenu_24287_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24287" SceneID="1"/>
+	<Property ID="4100" NpcID="WorldNpc00035" contextId="story_24287_2" titleId="storymenu_24287_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24287" SceneID="1"/>
+	<Property ID="4100" NpcID="WorldNpc00035" contextId="story_24287_3" titleId="storymenu_24287_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24287" SceneID="1"/>
+	<Property ID="4101" NpcID="WorldNpc08857" contextId="story_24289_1" titleId="storymenu_24289_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24289" SceneID="13"/>
+	<Property ID="4101" NpcID="WorldNpc08857" contextId="story_24289_2" titleId="storymenu_24289_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24289" SceneID="13"/>
+	<Property ID="4102" NpcID="WorldNpc06402" contextId="story_24309_1" titleId="storymenu_24309_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24309" SceneID="20"/>
+	<Property ID="4102" NpcID="WorldNpc06402" contextId="story_24309_2" titleId="storymenu_24309_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24309" SceneID="20"/>
+	<Property ID="4103" NpcID="WorldNpc06612" contextId="story_24311_1" titleId="storymenu_24311_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24311" SceneID="20"/>
+	<Property ID="4103" NpcID="WorldNpc06612" contextId="story_24311_2" titleId="storymenu_24311_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24311" SceneID="20"/>
+	<Property ID="4104" NpcID="WorldNpc08408" contextId="story_24338_1" titleId="storymenu_24338_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24338" SceneID="13"/>
+	<Property ID="4104" NpcID="WorldNpc08408" contextId="story_24338_2" titleId="storymenu_24338_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24338" SceneID="13"/>
+	<Property ID="4105" NpcID="WorldNpc08834" contextId="story_24350_1" titleId="storymenu_24350_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24350" SceneID="13"/>
+	<Property ID="4105" NpcID="WorldNpc08834" contextId="story_24350_2" titleId="storymenu_24350_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24350" SceneID="13"/>
+	<Property ID="4106" NpcID="WorldNpc08519" contextId="story_24354_1" titleId="storymenu_24354_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24354" SceneID="13"/>
+	<Property ID="4106" NpcID="WorldNpc08519" contextId="story_24354_2" titleId="storymenu_24354_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24354" SceneID="13"/>
+	<Property ID="4107" NpcID="WorldNpc08718" contextId="story_24359_1" titleId="storymenu_24359_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24359" SceneID="13"/>
+	<Property ID="4107" NpcID="WorldNpc08718" contextId="story_24359_2" titleId="storymenu_24359_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24359" SceneID="13"/>
+	<Property ID="4108" NpcID="WorldNpc08836" contextId="story_24362_1" titleId="storymenu_24362_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24362" SceneID="13"/>
+	<Property ID="4108" NpcID="WorldNpc08836" contextId="story_24362_2" titleId="storymenu_24362_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24362" SceneID="13"/>
+	<Property ID="4109" NpcID="WorldNpc08840" contextId="story_24367_1" titleId="storymenu_24367_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24367" SceneID="13"/>
+	<Property ID="4109" NpcID="WorldNpc08840" contextId="story_24367_2" titleId="storymenu_24367_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24367" SceneID="13"/>
+	<Property ID="4110" NpcID="WorldNpc08519" contextId="story_24379_1" titleId="storymenu_24379_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24379" SceneID="13"/>
+	<Property ID="4110" NpcID="WorldNpc08519" contextId="story_24379_2" titleId="storymenu_24379_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24379" SceneID="13"/>
+	<Property ID="4111" NpcID="WorldNpc08839" contextId="story_24381_1" titleId="storymenu_24381_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24381" SceneID="13"/>
+	<Property ID="4111" NpcID="WorldNpc08839" contextId="story_24381_2" titleId="storymenu_24381_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24381" SceneID="13"/>
+	<Property ID="4112" NpcID="WorldNpc06540" contextId="story_24334_1" titleId="storymenu_24334_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24334" SceneID="13"/>
+	<Property ID="4112" NpcID="WorldNpc06540" contextId="story_24334_2" titleId="storymenu_24334_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24334" SceneID="13"/>
+	<Property ID="4113" NpcID="WorldNpc02901" contextId="story_24400_1" titleId="storymenu_24400_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24400" SceneID="10"/>
+	<Property ID="4113" NpcID="WorldNpc02901" contextId="story_24400_2" titleId="storymenu_24400_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24400" SceneID="10"/>
+	<Property ID="4114" NpcID="WorldNpc02901" contextId="story_24401_1" titleId="storymenu_24401_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24401" SceneID="10"/>
+	<Property ID="4114" NpcID="WorldNpc02901" contextId="story_24401_2" titleId="storymenu_24401_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24401" SceneID="10"/>
+	<Property ID="4115" NpcID="WorldNpc02911" contextId="story_24413_1" titleId="storymenu_24413_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24413" SceneID="10"/>
+	<Property ID="4115" NpcID="WorldNpc02911" contextId="story_24413_2" titleId="storymenu_24413_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24413" SceneID="10"/>
+	<Property ID="4115" NpcID="WorldNpc02911" contextId="story_24413_3" titleId="storymenu_24413_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24413" SceneID="10"/>
+	<Property ID="4115" NpcID="WorldNpc02911" contextId="story_24413_4" titleId="storymenu_24413_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24413" SceneID="10"/>
+	<Property ID="4116" NpcID="WorldNpc02912" contextId="story_24414_1" titleId="storymenu_24414_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24414" SceneID="10"/>
+	<Property ID="4116" NpcID="WorldNpc02912" contextId="story_24414_2" titleId="storymenu_24414_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24414" SceneID="10"/>
+	<Property ID="4117" NpcID="WorldNpc02642" contextId="story_24425_1" titleId="storymenu_24425_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24425" SceneID="10"/>
+	<Property ID="4117" NpcID="WorldNpc02642" contextId="story_24425_2" titleId="storymenu_24425_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24425" SceneID="10"/>
+	<Property ID="4118" NpcID="WorldNpc02642" contextId="story_24426_1" titleId="storymenu_24426_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24426" SceneID="10"/>
+	<Property ID="4118" NpcID="WorldNpc02642" contextId="story_24426_2" titleId="storymenu_24426_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24426" SceneID="10"/>
+	<Property ID="4119" NpcID="WorldNpc02526" contextId="story_24442_1" titleId="storymenu_24442_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24442" SceneID="9"/>
+	<Property ID="4119" NpcID="WorldNpc02526" contextId="story_24442_2" titleId="storymenu_24442_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24442" SceneID="9"/>
+	<Property ID="4120" NpcID="WorldNpc02510" contextId="story_24450_1" titleId="storymenu_24450_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24450" SceneID="9"/>
+	<Property ID="4120" NpcID="WorldNpc02510" contextId="story_24450_2" titleId="storymenu_24450_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24450" SceneID="9"/>
+	<Property ID="4121" NpcID="WorldNpc02528" contextId="story_24454_1" titleId="storymenu_24454_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24454" SceneID="9"/>
+	<Property ID="4121" NpcID="WorldNpc02528" contextId="story_24454_2" titleId="storymenu_24454_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24454" SceneID="9"/>
+	<Property ID="4122" NpcID="WorldNpc02529" contextId="story_24455_1" titleId="storymenu_24455_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24455" SceneID="9"/>
+	<Property ID="4122" NpcID="WorldNpc02529" contextId="story_24455_2" titleId="storymenu_24455_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24455" SceneID="9"/>
+	<Property ID="4122" NpcID="WorldNpc02529" contextId="story_24455_3" titleId="storymenu_24455_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24455" SceneID="9"/>
+	<Property ID="4122" NpcID="WorldNpc02529" contextId="story_24455_4" titleId="storymenu_24455_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24455" SceneID="9"/>
+	<Property ID="4123" NpcID="WorldNpc02531" contextId="story_24457_1" titleId="storymenu_24457_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24457" SceneID="9"/>
+	<Property ID="4123" NpcID="WorldNpc02531" contextId="story_24457_2" titleId="storymenu_24457_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24457" SceneID="9"/>
+	<Property ID="4124" NpcID="WorldNpc02532" contextId="story_24462_1" titleId="storymenu_24462_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24462" SceneID="9"/>
+	<Property ID="4124" NpcID="WorldNpc02532" contextId="story_24462_2" titleId="storymenu_24462_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24462" SceneID="9"/>
+	<Property ID="4124" NpcID="WorldNpc02532" contextId="story_24462_3" titleId="storymenu_24462_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24462" SceneID="9"/>
+	<Property ID="4124" NpcID="WorldNpc02532" contextId="story_24462_4" titleId="storymenu_24462_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24462" SceneID="9"/>
+	<Property ID="4125" NpcID="WorldNpc02533" contextId="story_24464_1" titleId="storymenu_24464_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24464" SceneID="9"/>
+	<Property ID="4125" NpcID="WorldNpc02533" contextId="story_24464_2" titleId="storymenu_24464_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24464" SceneID="9"/>
+	<Property ID="4125" NpcID="WorldNpc02533" contextId="story_24464_3" titleId="storymenu_24464_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24464" SceneID="9"/>
+	<Property ID="4126" NpcID="WorldNpc02501" contextId="story_24468_1" titleId="storymenu_24468_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24468" SceneID="9"/>
+	<Property ID="4126" NpcID="WorldNpc02501" contextId="story_24468_2" titleId="storymenu_24468_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24468" SceneID="9"/>
+	<Property ID="4126" NpcID="WorldNpc02501" contextId="story_24468_3" titleId="storymenu_24468_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24468" SceneID="9"/>
+	<Property ID="4127" NpcID="WorldNpc02528" contextId="story_24472_1" titleId="storymenu_24472_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24472" SceneID="9"/>
+	<Property ID="4127" NpcID="WorldNpc02528" contextId="story_24472_2" titleId="storymenu_24472_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24472" SceneID="9"/>
+	<Property ID="4128" NpcID="WorldNpc02533" contextId="story_24474_1" titleId="storymenu_24474_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24474" SceneID="9"/>
+	<Property ID="4128" NpcID="WorldNpc02533" contextId="story_24474_2" titleId="storymenu_24474_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24474" SceneID="9"/>
+	<Property ID="4129" NpcID="WorldNpc06113" contextId="story_24483_1" titleId="storymenu_24483_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24483" SceneID="22"/>
+	<Property ID="4129" NpcID="WorldNpc06113" contextId="story_24483_2" titleId="storymenu_24483_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24483" SceneID="22"/>
+	<Property ID="4130" NpcID="WorldNpc02528" contextId="story_24494_1" titleId="storymenu_24494_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24494" SceneID="9"/>
+	<Property ID="4130" NpcID="WorldNpc02528" contextId="story_24494_2" titleId="storymenu_24494_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24494" SceneID="9"/>
+	<Property ID="4131" NpcID="WorldNpc02533" contextId="story_24495_1" titleId="storymenu_24495_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24495" SceneID="9"/>
+	<Property ID="4131" NpcID="WorldNpc02533" contextId="story_24495_2" titleId="storymenu_24495_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24495" SceneID="9"/>
+	<Property ID="4131" NpcID="WorldNpc02533" contextId="story_24495_3" titleId="storymenu_24495_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24495" SceneID="9"/>
+	<Property ID="4132" NpcID="WorldNpc06163" contextId="story_24499_1" titleId="storymenu_24499_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24499" SceneID="22"/>
+	<Property ID="4132" NpcID="WorldNpc06163" contextId="story_24499_2" titleId="storymenu_24499_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24499" SceneID="22"/>
+	<Property ID="4133" NpcID="WorldNpc06131" contextId="story_24501_1" titleId="storymenu_24501_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24501" SceneID="22"/>
+	<Property ID="4133" NpcID="WorldNpc06131" contextId="story_24501_2" titleId="storymenu_24501_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24501" SceneID="22"/>
+	<Property ID="4133" NpcID="WorldNpc06131" contextId="story_24501_3" titleId="storymenu_24501_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24501" SceneID="22"/>
+	<Property ID="4133" NpcID="WorldNpc06131" contextId="story_24501_4" titleId="storymenu_24501_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24501" SceneID="22"/>
+	<Property ID="4133" NpcID="WorldNpc06131" contextId="story_24501_5" titleId="storymenu_24501_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24501" SceneID="22"/>
+	<Property ID="4133" NpcID="WorldNpc06131" contextId="story_24501_6" titleId="storymenu_24501_6" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24501" SceneID="22"/>
+	<Property ID="4134" NpcID="WorldNpc06131" contextId="story_24505_1" titleId="storymenu_24505_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24505" SceneID="22"/>
+	<Property ID="4134" NpcID="WorldNpc06131" contextId="story_24505_2" titleId="storymenu_24505_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24505" SceneID="22"/>
+	<Property ID="4135" NpcID="WorldNpc06128" contextId="story_24511_1" titleId="storymenu_24511_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24511" SceneID="22"/>
+	<Property ID="4135" NpcID="WorldNpc06128" contextId="story_24511_2" titleId="storymenu_24511_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24511" SceneID="22"/>
+	<Property ID="4136" NpcID="WorldNpc06128" contextId="story_24520_1" titleId="storymenu_24520_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24520" SceneID="22"/>
+	<Property ID="4136" NpcID="WorldNpc06128" contextId="story_24520_2" titleId="storymenu_24520_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24520" SceneID="22"/>
+	<Property ID="4137" NpcID="WorldNpc02427" contextId="story_24524_1" titleId="storymenu_24524_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24524" SceneID="9"/>
+	<Property ID="4137" NpcID="WorldNpc02427" contextId="story_24524_2" titleId="storymenu_24524_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24524" SceneID="9"/>
+	<Property ID="4137" NpcID="WorldNpc02427" contextId="story_24524_3" titleId="storymenu_24524_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24524" SceneID="9"/>
+	<Property ID="4138" NpcID="WorldNpc02476" contextId="story_24525_1" titleId="storymenu_24525_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24525" SceneID="9"/>
+	<Property ID="4138" NpcID="WorldNpc02476" contextId="story_24525_2" titleId="storymenu_24525_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24525" SceneID="9"/>
+	<Property ID="4139" NpcID="WorldNpc02427" contextId="story_24530_1" titleId="storymenu_24530_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24530" SceneID="9"/>
+	<Property ID="4139" NpcID="WorldNpc02427" contextId="story_24530_2" titleId="storymenu_24530_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24530" SceneID="9"/>
+	<Property ID="4140" NpcID="WorldNpc02437" contextId="story_24547_1" titleId="storymenu_24547_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24547" SceneID="9"/>
+	<Property ID="4140" NpcID="WorldNpc02437" contextId="story_24547_2" titleId="storymenu_24547_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24547" SceneID="9"/>
+	<Property ID="4141" NpcID="WorldNpc02437" contextId="story_24559_1" titleId="storymenu_24559_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24559" SceneID="9"/>
+	<Property ID="4141" NpcID="WorldNpc02437" contextId="story_24559_2" titleId="storymenu_24559_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24559" SceneID="9"/>
+	<Property ID="4142" NpcID="WorldNpc02434" contextId="story_24561_1" titleId="storymenu_24561_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24561" SceneID="9"/>
+	<Property ID="4142" NpcID="WorldNpc02434" contextId="story_24561_2" titleId="storymenu_24561_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24561" SceneID="9"/>
+	<Property ID="4143" NpcID="WorldNpc02429" contextId="story_24567_1" titleId="storymenu_24567_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24567" SceneID="9"/>
+	<Property ID="4143" NpcID="WorldNpc02429" contextId="story_24567_2" titleId="storymenu_24567_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24567" SceneID="9"/>
+	<Property ID="4143" NpcID="WorldNpc02429" contextId="story_24567_3" titleId="storymenu_24567_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24567" SceneID="9"/>
+	<Property ID="4144" NpcID="WorldNpc02452" contextId="story_24600_1" titleId="storymenu_24600_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24600" SceneID="9"/>
+	<Property ID="4144" NpcID="WorldNpc02452" contextId="story_24600_2" titleId="storymenu_24600_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24600" SceneID="9"/>
+	<Property ID="4145" NpcID="WorldNpc02453" contextId="story_24614_1" titleId="storymenu_24614_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24614" SceneID="9"/>
+	<Property ID="4145" NpcID="WorldNpc02453" contextId="story_24614_2" titleId="storymenu_24614_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24614" SceneID="9"/>
+	<Property ID="4146" NpcID="WorldNpc02453" contextId="story_24618_1" titleId="storymenu_24618_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24618" SceneID="9"/>
+	<Property ID="4146" NpcID="WorldNpc02453" contextId="story_24618_2" titleId="storymenu_24618_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24618" SceneID="9"/>
+	<Property ID="4146" NpcID="WorldNpc02453" contextId="story_24618_3" titleId="storymenu_24618_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24618" SceneID="9"/>
+	<Property ID="4147" NpcID="WorldNpc04811" contextId="story_24667_1" titleId="storymenu_24667_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24667" SceneID="11"/>
+	<Property ID="4147" NpcID="WorldNpc04811" contextId="story_24667_2" titleId="storymenu_24667_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24667" SceneID="11"/>
+	<Property ID="4147" NpcID="WorldNpc04811" contextId="story_24667_3" titleId="storymenu_24667_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24667" SceneID="11"/>
+	<Property ID="4148" NpcID="FuncNpc00601" contextId="story_24721_1" titleId="storymenu_24721_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24721" SceneID="17"/>
+	<Property ID="4148" NpcID="FuncNpc00601" contextId="story_24721_2" titleId="storymenu_24721_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24721" SceneID="17"/>
+	<Property ID="4149" NpcID="WorldNpc09800" contextId="story_24729_1" titleId="storymenu_24729_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24729" SceneID="17"/>
+	<Property ID="4149" NpcID="WorldNpc09800" contextId="story_24729_2" titleId="storymenu_24729_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24729" SceneID="17"/>
+	<Property ID="4149" NpcID="WorldNpc09800" contextId="story_24729_3" titleId="storymenu_24729_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24729" SceneID="17"/>
+	<Property ID="4150" NpcID="WorldNpc02604" contextId="story_24734_1" titleId="storymenu_24734_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24734" SceneID="10"/>
+	<Property ID="4150" NpcID="WorldNpc02604" contextId="story_24734_2" titleId="storymenu_24734_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24734" SceneID="10"/>
+	<Property ID="4151" NpcID="WorldNpc02619" contextId="story_24736_1" titleId="storymenu_24736_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24736" SceneID="10"/>
+	<Property ID="4151" NpcID="WorldNpc02619" contextId="story_24736_2" titleId="storymenu_24736_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24736" SceneID="10"/>
+	<Property ID="4151" NpcID="WorldNpc02619" contextId="story_24736_3" titleId="storymenu_24736_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24736" SceneID="10"/>
+	<Property ID="4153" NpcID="WorldNpc02706" contextId="story_24739_1" titleId="storymenu_24739_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24739" SceneID="10"/>
+	<Property ID="4153" NpcID="WorldNpc02706" contextId="story_24739_2" titleId="storymenu_24739_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24739" SceneID="10"/>
+	<Property ID="4155" NpcID="WorldNpc02711" contextId="story_24750_1" titleId="storymenu_24750_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24750" SceneID="10"/>
+	<Property ID="4155" NpcID="WorldNpc02711" contextId="story_24750_2" titleId="storymenu_24750_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_24750" SceneID="10"/>
+	<Property ID="3001" NpcID="WorldNpc00501" contextId="story_1002_0" titleId="story_1002_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3001" SceneID="3"/>
+	<Property ID="3001" NpcID="WorldNpc00501" contextId="story_1002_1" titleId="story_1002_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3001" SceneID="3"/>
+	<Property ID="3002" NpcID="FuncNpc00058" contextId="story_1004_0" titleId="story_1004_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3002" SceneID="3"/>
+	<Property ID="3002" NpcID="FuncNpc00058" contextId="story_1004_1" titleId="story_1004_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3002" SceneID="3"/>
+	<Property ID="3003" NpcID="WorldNpc00628" contextId="story_1031_0" titleId="story_1031_2" LeaveTextID="answer1031" LeaveResult="0" TrackInfoID="storyinfo_3003" SceneID="3"/>
+	<Property ID="3004" NpcID="funnpcclone001011" contextId="story_2031_0" titleId="story_2031_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3004"/>
+	<Property ID="3004" NpcID="funnpcclone001011" contextId="story_2031_2" titleId="story_2031_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3004"/>
+	<Property ID="3004" NpcID="funnpcclone001011" contextId="story_2031_4" titleId="story_2031_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3004"/>
+	<Property ID="3005" NpcID="funnpcclone001012" contextId="story_2039_0" titleId="story_2039_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3005"/>
+	<Property ID="3005" NpcID="funnpcclone001012" contextId="story_2039_2" titleId="story_2039_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3005"/>
+	<Property ID="3005" NpcID="funnpcclone001012" contextId="story_2039_4" titleId="story_2039_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_3005"/>
+	<Property ID="3006" NpcID="FuncNpc00058" contextId="story_22003_1" titleId="storymenu_22003_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22003" SceneID="3"/>
+	<Property ID="3006" NpcID="FuncNpc00058" contextId="story_22003_2" titleId="storymenu_22003_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22003" SceneID="3"/>
+	<Property ID="3008" NpcID="WorldNpc00690" contextId="story_22030_1" titleId="storymenu_22030_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22030" SceneID="3"/>
+	<Property ID="3008" NpcID="WorldNpc00690" contextId="story_22030_2" titleId="storymenu_22030_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22030" SceneID="3"/>
+	<Property ID="3009" NpcID="WorldNpc00574" contextId="story_22034_1" titleId="storymenu_22034_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22034" SceneID="3"/>
+	<Property ID="3009" NpcID="WorldNpc00574" contextId="story_22034_2" titleId="storymenu_22034_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22034" SceneID="3"/>
+	<Property ID="3010" NpcID="WorldNpc00566" contextId="story_22038_1" titleId="storymenu_22038_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22038" SceneID="3"/>
+	<Property ID="3010" NpcID="WorldNpc00566" contextId="story_22038_2" titleId="storymenu_22038_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22038" SceneID="3"/>
+	<Property ID="3011" NpcID="WorldNpc01194" contextId="story_22050_1" titleId="storymenu_22050_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22050" SceneID="14"/>
+	<Property ID="3011" NpcID="WorldNpc01194" contextId="story_22050_2" titleId="storymenu_22050_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22050" SceneID="14"/>
+	<Property ID="3012" NpcID="WorldNpc01342" contextId="story_22053_1" titleId="storymenu_22053_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22053" SceneID="14"/>
+	<Property ID="3012" NpcID="WorldNpc01342" contextId="story_22053_2" titleId="storymenu_22053_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22053" SceneID="14"/>
+	<Property ID="3013" NpcID="WorldNpc01359" contextId="story_22061_1" titleId="storymenu_22061_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22061" SceneID="14"/>
+	<Property ID="3013" NpcID="WorldNpc01359" contextId="story_22061_2" titleId="storymenu_22061_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22061" SceneID="14"/>
+	<Property ID="3014" NpcID="WorldNpc01369" contextId="story_22080_1" titleId="storymenu_22080_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22080" SceneID="14"/>
+	<Property ID="3014" NpcID="WorldNpc01369" contextId="story_22080_2" titleId="storymenu_22080_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22080" SceneID="14"/>
+	<Property ID="3015" NpcID="WorldNpc01194" contextId="story_22050_1" titleId="storymenu_22095_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22095" SceneID="14"/>
+	<Property ID="3015" NpcID="WorldNpc01194" contextId="story_22050_2" titleId="storymenu_22095_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22095" SceneID="14"/>
+	<Property ID="3016" NpcID="WorldNpc05852" contextId="story_22110_1" titleId="storymenu_22110_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22110" SceneID="21"/>
+	<Property ID="3016" NpcID="WorldNpc05852" contextId="story_22110_2" titleId="storymenu_22110_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22110" SceneID="21"/>
+	<Property ID="3017" NpcID="WorldNpc05859" contextId="story_22114_1" titleId="storymenu_22114_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22114" SceneID="21"/>
+	<Property ID="3017" NpcID="WorldNpc05859" contextId="story_22114_2" titleId="storymenu_22114_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22114" SceneID="21"/>
+	<Property ID="3018" NpcID="WorldNpc05859" contextId="story_22120_1" titleId="storymenu_22120_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22120" SceneID="21"/>
+	<Property ID="3018" NpcID="WorldNpc05859" contextId="story_22120_2" titleId="storymenu_22120_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22120" SceneID="21"/>
+	<Property ID="3019" NpcID="WorldNpc06007" contextId="story_22130_1" titleId="storymenu_22130_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22130" SceneID="21"/>
+	<Property ID="3020" NpcID="WorldNpc06009" contextId="story_22135_1" titleId="storymenu_22135_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22135" SceneID="21"/>
+	<Property ID="3020" NpcID="WorldNpc06009" contextId="story_22135_2" titleId="storymenu_22135_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22135" SceneID="21"/>
+	<Property ID="3021" NpcID="WorldNpc06007" contextId="story_22143_1" titleId="storymenu_22143_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22143" SceneID="21"/>
+	<Property ID="3021" NpcID="WorldNpc06007" contextId="story_22143_2" titleId="storymenu_22143_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22143" SceneID="21"/>
+	<Property ID="3022" NpcID="WorldNpc06127" contextId="story_22145_1" titleId="storymenu_22145_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22145" SceneID="22"/>
+	<Property ID="3022" NpcID="WorldNpc06127" contextId="story_22145_2" titleId="storymenu_22145_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22145" SceneID="22"/>
+	<Property ID="3023" NpcID="WorldNpc06127" contextId="story_22151_1" titleId="storymenu_22151_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22151" SceneID="22"/>
+	<Property ID="3024" NpcID="WorldNpc06167" contextId="story_22154_1" titleId="storymenu_22154_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22154" SceneID="22"/>
+	<Property ID="3024" NpcID="WorldNpc06167" contextId="story_22154_2" titleId="storymenu_22154_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22154" SceneID="22"/>
+	<Property ID="3025" NpcID="WorldNpc06112" contextId="story_22159_1" titleId="storymenu_22159_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22159" SceneID="22"/>
+	<Property ID="3025" NpcID="WorldNpc06112" contextId="story_22159_2" titleId="storymenu_22159_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22159" SceneID="22"/>
+	<Property ID="3025" NpcID="WorldNpc06112" contextId="story_22159_3" titleId="storymenu_22159_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22159" SceneID="22"/>
+	<Property ID="3026" NpcID="WorldNpc06171" contextId="story_22160_1" titleId="storymenu_22160_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22160" SceneID="22"/>
+	<Property ID="3026" NpcID="WorldNpc06171" contextId="story_22160_2" titleId="storymenu_22160_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22160" SceneID="22"/>
+	<Property ID="3027" NpcID="WorldNpc06171" contextId="story_22161_1" titleId="storymenu_22161_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22161" SceneID="22"/>
+	<Property ID="3028" NpcID="WorldNpc06173" contextId="story_22165_1" titleId="storymenu_22165_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22165" SceneID="22"/>
+	<Property ID="3028" NpcID="WorldNpc06173" contextId="story_22165_2" titleId="storymenu_22165_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_22165" SceneID="22"/>
+	<Property ID="27001" NpcID="funnpcclone001002" contextId="story_2029_0" titleId="story_2029_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2029"/>
+	<Property ID="27001" NpcID="funnpcclone001002" contextId="story_2029_2" titleId="story_2029_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2029"/>
+	<Property ID="27002" NpcID="bossclone002027" contextId="story_2063_0" titleId="story_2063_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27002"/>
+	<Property ID="27002" NpcID="bossclone002027" contextId="story_2063_2" titleId="story_2063_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27002"/>
+	<Property ID="27003" NpcID="funnpcclone002009" contextId="story_2067_0" titleId="story_2067_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27003"/>
+	<Property ID="27003" NpcID="funnpcclone002009" contextId="story_2067_2" titleId="story_2067_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27003"/>
+	<Property ID="27004" NpcID="funnpcclone002010" contextId="story_2072_0" titleId="story_2072_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27004"/>
+	<Property ID="27004" NpcID="funnpcclone002010" contextId="story_2072_2" titleId="story_2072_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27004"/>
+	<Property ID="27005" NpcID="bossclone002013" contextId="story_2075_0" titleId="story_2075_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27005"/>
+	<Property ID="27005" NpcID="bossclone002013" contextId="story_2075_2" titleId="story_2075_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27005"/>
+	<Property ID="27006" NpcID="FunnpcClone017002" contextId="story_2819_0" titleId="story_2819_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27006"/>
+	<Property ID="27006" NpcID="FunnpcClone017002" contextId="story_2819_2" titleId="story_2819_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27006"/>
+	<Property ID="27007" NpcID="bossclone002004" contextId="story_2051_0" titleId="story_2051_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27007"/>
+	<Property ID="27007" NpcID="bossclone002004" contextId="story_2051_2" titleId="story_2051_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27007"/>
+	<Property ID="27008" NpcID="bossclone002007" contextId="story_2059_0" titleId="story_2059_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27008"/>
+	<Property ID="27008" NpcID="bossclone002007" contextId="story_2059_2" titleId="story_2059_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27008"/>
+	<Property ID="27009" NpcID="bossclone002012" contextId="story_2053_0" titleId="story_2053_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27009"/>
+	<Property ID="27009" NpcID="bossclone002012" contextId="story_2053_2" titleId="story_2053_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27009"/>
+	<Property ID="27010" NpcID="bossclone002013" contextId="story_2053_4" titleId="story_2053_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27010"/>
+	<Property ID="27010" NpcID="bossclone002013" contextId="story_2053_6" titleId="story_2053_7" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_27010"/>
+	<Property ID="27011" NpcID="WorldNpc02604" contextId="story_2401_0" titleId="story_2401_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2401"/>
+	<Property ID="27011" NpcID="WorldNpc02604" contextId="story_2401_2" titleId="story_2401_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2401"/>
+	<Property ID="27011" NpcID="WorldNpc02604" contextId="story_2401_4" titleId="story_2401_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2401"/>
+	<Property ID="27012" NpcID="funnpcclone003103" contextId="story_2103_0" titleId="story_2103_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_2103" SceneID="14"/>
+	<Property ID="27012" NpcID="funnpcclone003103" contextId="story_2103_2" titleId="story_2103_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_2103" SceneID="14"/>
+	<Property ID="27012" NpcID="funnpcclone003103" contextId="story_2103_4" titleId="story_2103_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_2103" SceneID="14"/>
+	<Property ID="12001" NpcID="WorldNpc00457" contextId="story_38049_1" titleId="storymenu_38049_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38049" SceneID="12"/>
+	<Property ID="12001" NpcID="WorldNpc00457" contextId="story_38049_2" titleId="storymenu_38049_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38049" SceneID="12"/>
+	<Property ID="12001" NpcID="WorldNpc00457" contextId="story_38049_3" titleId="storymenu_38049_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38049" SceneID="12"/>
+	<Property ID="12002" NpcID="WorldNpc00212" contextId="story_38054_1" titleId="storymenu_38054_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38054" SceneID="12"/>
+	<Property ID="12002" NpcID="WorldNpc00212" contextId="story_38054_2" titleId="storymenu_38054_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38054" SceneID="12"/>
+	<Property ID="12002" NpcID="WorldNpc00212" contextId="story_38054_3" titleId="storymenu_38054_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38054" SceneID="12"/>
+	<Property ID="12003" NpcID="WorldNpc00372" contextId="story_38099_1" titleId="storymenu_38099_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38099" SceneID="12"/>
+	<Property ID="12003" NpcID="WorldNpc00372" contextId="story_38099_2" titleId="storymenu_38099_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38099" SceneID="12"/>
+	<Property ID="12004" NpcID="WorldNpc00201" contextId="story_38109_1" titleId="storymenu_38109_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38109" SceneID="12"/>
+	<Property ID="12004" NpcID="WorldNpc00201" contextId="story_38109_2" titleId="storymenu_38109_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38109" SceneID="12"/>
+	<Property ID="12005" NpcID="WorldNpc00272" contextId="story_38114_1" titleId="storymenu_38114_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38114" SceneID="12"/>
+	<Property ID="12005" NpcID="WorldNpc00272" contextId="story_38114_2" titleId="storymenu_38114_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38114" SceneID="12"/>
+	<Property ID="12006" NpcID="WorldNpc00212" contextId="story_38133_1" titleId="storymenu_38133_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38133" SceneID="12"/>
+	<Property ID="12006" NpcID="WorldNpc00212" contextId="story_38133_2" titleId="storymenu_38133_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38133" SceneID="12"/>
+	<Property ID="12007" NpcID="WorldNpc00206" contextId="story_38150_1" titleId="storymenu_38150_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38150" SceneID="12"/>
+	<Property ID="12007" NpcID="WorldNpc00206" contextId="story_38150_2" titleId="storymenu_38150_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38150" SceneID="12"/>
+	<Property ID="12007" NpcID="WorldNpc00206" contextId="story_38150_3" titleId="storymenu_38150_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38150" SceneID="12"/>
+	<Property ID="12008" NpcID="WorldNpc06609" contextId="story_38187_1" titleId="storymenu_38187_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38187" SceneID="20"/>
+	<Property ID="12008" NpcID="WorldNpc06609" contextId="story_38187_2" titleId="storymenu_38187_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38187" SceneID="20"/>
+	<Property ID="12008" NpcID="WorldNpc06609" contextId="story_38187_3" titleId="storymenu_38187_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38187" SceneID="20"/>
+	<Property ID="12009" NpcID="WorldNpc10001" contextId="story_38202_1" titleId="storymenu_38202_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38202" SceneID="16"/>
+	<Property ID="12009" NpcID="WorldNpc10001" contextId="story_38202_2" titleId="storymenu_38202_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38202" SceneID="16"/>
+	<Property ID="12010" NpcID="WorldNpc10003" contextId="story_38208_1" titleId="storymenu_38208_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38208" SceneID="16"/>
+	<Property ID="12010" NpcID="WorldNpc10003" contextId="story_38208_2" titleId="storymenu_38208_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38208" SceneID="16"/>
+	<Property ID="12010" NpcID="WorldNpc10003" contextId="story_38208_3" titleId="storymenu_38208_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38208" SceneID="16"/>
+	<Property ID="12011" NpcID="WorldNpc10005" contextId="story_38214_1" titleId="storymenu_38214_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38214" SceneID="16"/>
+	<Property ID="12011" NpcID="WorldNpc10005" contextId="story_38214_2" titleId="storymenu_38214_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38214" SceneID="16"/>
+	<Property ID="12011" NpcID="WorldNpc10005" contextId="story_38214_3" titleId="storymenu_38214_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38214" SceneID="16"/>
+	<Property ID="12012" NpcID="WorldNpc10006" contextId="story_38217_1" titleId="storymenu_38217_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38217" SceneID="16"/>
+	<Property ID="12012" NpcID="WorldNpc10006" contextId="story_38217_2" titleId="storymenu_38217_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38217" SceneID="16"/>
+	<Property ID="12012" NpcID="WorldNpc10006" contextId="story_38217_3" titleId="storymenu_38217_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38217" SceneID="16"/>
+	<Property ID="12013" NpcID="WorldNpc10010" contextId="story_38227_1" titleId="storymenu_38227_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38227" SceneID="16"/>
+	<Property ID="12013" NpcID="WorldNpc10010" contextId="story_38227_2" titleId="storymenu_38227_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38227" SceneID="16"/>
+	<Property ID="12013" NpcID="WorldNpc10010" contextId="story_38227_3" titleId="storymenu_38227_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38227" SceneID="16"/>
+	<Property ID="12014" NpcID="WorldNpc10019" contextId="story_38237_1" titleId="storymenu_38237_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38237" SceneID="16"/>
+	<Property ID="12014" NpcID="WorldNpc10019" contextId="story_38237_2" titleId="storymenu_38237_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38237" SceneID="16"/>
+	<Property ID="12014" NpcID="WorldNpc10019" contextId="story_38237_3" titleId="storymenu_38237_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38237" SceneID="16"/>
+	<Property ID="12014" NpcID="WorldNpc10019" contextId="story_38237_4" titleId="storymenu_38237_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38237" SceneID="16"/>
+	<Property ID="12015" NpcID="WorldNpc00351" contextId="story_38241_1" titleId="storymenu_38241_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38241" SceneID="12"/>
+	<Property ID="12016" NpcID="WorldNpc00212" contextId="story_38272_1" titleId="storymenu_38272_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38272" SceneID="12"/>
+	<Property ID="12016" NpcID="WorldNpc00212" contextId="story_38272_2" titleId="storymenu_38272_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38272" SceneID="12"/>
+	<Property ID="12016" NpcID="WorldNpc00212" contextId="story_38272_3" titleId="storymenu_38272_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38272" SceneID="12"/>
+	<Property ID="12017" NpcID="WorldNpc09301" contextId="story_38285_1" titleId="storymenu_38285_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38285" SceneID="2"/>
+	<Property ID="12017" NpcID="WorldNpc09301" contextId="story_38285_2" titleId="storymenu_38285_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38285" SceneID="2"/>
+	<Property ID="12018" NpcID="WorldNpc00232" contextId="story_38290_1" titleId="storymenu_38290_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38290" SceneID="12"/>
+	<Property ID="12018" NpcID="WorldNpc00232" contextId="story_38290_2" titleId="storymenu_38290_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38290" SceneID="12"/>
+	<Property ID="12019" NpcID="WorldNpc01390" contextId="story_38314_1" titleId="storymenu_38314_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38314" SceneID="14"/>
+	<Property ID="12019" NpcID="WorldNpc01390" contextId="story_38314_2" titleId="storymenu_38314_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38314" SceneID="14"/>
+	<Property ID="12020" NpcID="WorldNpc01393" contextId="story_38326_1" titleId="storymenu_38326_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38326" SceneID="14"/>
+	<Property ID="12020" NpcID="WorldNpc01393" contextId="story_38326_2" titleId="storymenu_38326_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38326" SceneID="14"/>
+	<Property ID="12021" NpcID="WorldNpc08926" contextId="story_38349_1" titleId="storymenu_38349_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38349" SceneID="13"/>
+	<Property ID="12021" NpcID="WorldNpc08926" contextId="story_38349_2" titleId="storymenu_38349_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38349" SceneID="13"/>
+	<Property ID="12022" NpcID="WorldNpc00472" contextId="story_38385_1" titleId="storymenu_38385_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38385" SceneID="12"/>
+	<Property ID="12022" NpcID="WorldNpc00472" contextId="story_38385_2" titleId="storymenu_38385_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38385" SceneID="12"/>
+	<Property ID="12023" NpcID="WorldNpc00212" contextId="story_38399_1" titleId="storymenu_38399_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38399" SceneID="12"/>
+	<Property ID="12023" NpcID="WorldNpc00212" contextId="story_38399_2" titleId="storymenu_38399_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38399" SceneID="12"/>
+	<Property ID="12024" NpcID="WorldNpc08832" contextId="story_38407_1" titleId="storymenu_38407_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38407" SceneID="13"/>
+	<Property ID="12024" NpcID="WorldNpc08832" contextId="story_38407_2" titleId="storymenu_38407_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38407" SceneID="13"/>
+	<Property ID="12025" NpcID="WorldNpc00212" contextId="story_38421_1" titleId="storymenu_38421_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38421" SceneID="12"/>
+	<Property ID="12025" NpcID="WorldNpc00212" contextId="story_38421_2" titleId="storymenu_38421_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38421" SceneID="12"/>
+	<Property ID="12026" NpcID="WorldNpc09401" contextId="story_38455_1" titleId="storymenu_38455_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38455" SceneID="2"/>
+	<Property ID="12026" NpcID="WorldNpc09401" contextId="story_38455_2" titleId="storymenu_38455_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38455" SceneID="2"/>
+	<Property ID="12027" NpcID="WorldNpc01292" contextId="story_38469_1" titleId="storymenu_38469_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38469" SceneID="14"/>
+	<Property ID="12027" NpcID="WorldNpc01292" contextId="story_38469_2" titleId="storymenu_38469_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38469" SceneID="14"/>
+	<Property ID="12028" NpcID="WorldNpc02502" contextId="story_38493_1" titleId="storymenu_38493_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38493" SceneID="9"/>
+	<Property ID="12029" NpcID="WorldNpc02502" contextId="story_38505_1" titleId="storymenu_38505_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38505" SceneID="9"/>
+	<Property ID="12030" NpcID="WorldNpc02516" contextId="story_38518_1" titleId="storymenu_38518_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38518" SceneID="9"/>
+	<Property ID="12031" NpcID="WorldNpc05797" contextId="story_38548_1" titleId="storymenu_38548_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38548" SceneID="21"/>
+	<Property ID="12031" NpcID="WorldNpc05797" contextId="story_38548_2" titleId="storymenu_38548_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38548" SceneID="21"/>
+	<Property ID="12032" NpcID="WorldNpc05792" contextId="story_38553_1" titleId="storymenu_38553_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38553" SceneID="21"/>
+	<Property ID="12032" NpcID="WorldNpc05792" contextId="story_38553_2" titleId="storymenu_38553_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38553" SceneID="21"/>
+	<Property ID="12033" NpcID="WorldNpc05799" contextId="story_38558_1" titleId="storymenu_38558_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38558" SceneID="21"/>
+	<Property ID="12033" NpcID="WorldNpc05799" contextId="story_38558_2" titleId="storymenu_38558_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38558" SceneID="21"/>
+	<Property ID="12034" NpcID="WorldNpc05791" contextId="story_38575_1" titleId="storymenu_38575_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38575" SceneID="21"/>
+	<Property ID="12034" NpcID="WorldNpc05791" contextId="story_38575_2" titleId="storymenu_38575_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38575" SceneID="21"/>
+	<Property ID="12035" NpcID="WorldNpc00245" contextId="story_38299_1" titleId="storymenu_38299_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38299" SceneID="12"/>
+	<Property ID="12035" NpcID="WorldNpc00245" contextId="story_38299_2" titleId="storymenu_38299_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38299" SceneID="12"/>
+	<Property ID="12036" NpcID="WorldNpc01308" contextId="story_38321_1" titleId="storymenu_38321_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38321" SceneID="14"/>
+	<Property ID="12036" NpcID="WorldNpc01308" contextId="story_38321_2" titleId="storymenu_38321_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38321" SceneID="14"/>
+	<Property ID="12037" NpcID="WorldNpc05092" contextId="story_38457_1" titleId="storymenu_38457_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38457" SceneID="14"/>
+	<Property ID="12037" NpcID="WorldNpc05092" contextId="story_38457_2" titleId="storymenu_38457_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38457" SceneID="14"/>
+	<Property ID="12038" NpcID="WorldNpc05042" contextId="story_38462_1" titleId="storymenu_38462_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38462" SceneID="24"/>
+	<Property ID="12038" NpcID="WorldNpc05042" contextId="story_38462_2" titleId="storymenu_38462_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_38462" SceneID="24"/>
+	<Property ID="11001" NpcID="WorldNpc04413" contextId="story_36006_1" titleId="storymenu_36006_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36006" SceneID="11"/>
+	<Property ID="11001" NpcID="WorldNpc04413" contextId="story_36006_2" titleId="storymenu_36006_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36006" SceneID="11"/>
+	<Property ID="11002" NpcID="WorldNpc04401" contextId="story_36011_1" titleId="storymenu_36011_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36011" SceneID="11"/>
+	<Property ID="11002" NpcID="WorldNpc04401" contextId="story_36011_2" titleId="storymenu_36011_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36011" SceneID="11"/>
+	<Property ID="11002" NpcID="WorldNpc04401" contextId="story_36011_3" titleId="storymenu_36011_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36011" SceneID="11"/>
+	<Property ID="11003" NpcID="WorldNpc04803" contextId="story_36014_1" titleId="storymenu_36014_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36014" SceneID="11"/>
+	<Property ID="11003" NpcID="WorldNpc04803" contextId="story_36014_2" titleId="storymenu_36014_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36014" SceneID="11"/>
+	<Property ID="11004" NpcID="WorldNpc04802" contextId="story_36021_1" titleId="storymenu_36021_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36021" SceneID="11"/>
+	<Property ID="11004" NpcID="WorldNpc04802" contextId="story_36021_2" titleId="storymenu_36021_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36021" SceneID="11"/>
+	<Property ID="11005" NpcID="WorldNpc04430" contextId="story_36031_1" titleId="storymenu_36031_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36031" SceneID="11"/>
+	<Property ID="11005" NpcID="WorldNpc04430" contextId="story_36031_2" titleId="storymenu_36031_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36031" SceneID="11"/>
+	<Property ID="11006" NpcID="WorldNpc04401" contextId="story_36037_1" titleId="storymenu_36037_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36037" SceneID="11"/>
+	<Property ID="11006" NpcID="WorldNpc04401" contextId="story_36037_2" titleId="storymenu_36037_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36037" SceneID="11"/>
+	<Property ID="11006" NpcID="WorldNpc04401" contextId="story_36037_3" titleId="storymenu_36037_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36037" SceneID="11"/>
+	<Property ID="11007" NpcID="WorldNpc04401" contextId="story_36048_1" titleId="storymenu_36048_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36048" SceneID="11"/>
+	<Property ID="11007" NpcID="WorldNpc04401" contextId="story_36048_2" titleId="storymenu_36048_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36048" SceneID="11"/>
+	<Property ID="11007" NpcID="WorldNpc04401" contextId="story_36048_3" titleId="storymenu_36048_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36048" SceneID="11"/>
+	<Property ID="11008" NpcID="WorldNpc04405" contextId="story_36049_1" titleId="storymenu_36049_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36049" SceneID="11"/>
+	<Property ID="11008" NpcID="WorldNpc04405" contextId="story_36049_2" titleId="storymenu_36049_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36049" SceneID="11"/>
+	<Property ID="11009" NpcID="WorldNpc04419" contextId="story_36057_1" titleId="storymenu_36057_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36057" SceneID="11"/>
+	<Property ID="11009" NpcID="WorldNpc04419" contextId="story_36057_2" titleId="storymenu_36057_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36057" SceneID="11"/>
+	<Property ID="11010" NpcID="WorldNpc04404" contextId="story_36065_1" titleId="storymenu_36065_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36065" SceneID="11"/>
+	<Property ID="11010" NpcID="WorldNpc04404" contextId="story_36065_2" titleId="storymenu_36065_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36065" SceneID="11"/>
+	<Property ID="11011" NpcID="WorldNpc04401" contextId="story_36085_1" titleId="storymenu_36085_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36085" SceneID="11"/>
+	<Property ID="11011" NpcID="WorldNpc04401" contextId="story_36085_2" titleId="storymenu_36085_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36085" SceneID="11"/>
+	<Property ID="11012" NpcID="WorldNpc04401" contextId="story_36097_1" titleId="storymenu_36097_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36097" SceneID="11"/>
+	<Property ID="11012" NpcID="WorldNpc04401" contextId="story_36097_2" titleId="storymenu_36097_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36097" SceneID="11"/>
+	<Property ID="11013" NpcID="WorldNpc04562" contextId="story_36108_1" titleId="storymenu_36108_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36108" SceneID="11"/>
+	<Property ID="11013" NpcID="WorldNpc04562" contextId="story_36108_2" titleId="storymenu_36108_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36108" SceneID="11"/>
+	<Property ID="11014" NpcID="WorldNpc04560" contextId="story_36131_1" titleId="storymenu_36131_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36131" SceneID="11"/>
+	<Property ID="11014" NpcID="WorldNpc04560" contextId="story_36131_2" titleId="storymenu_36131_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36131" SceneID="11"/>
+	<Property ID="11015" NpcID="WorldNpc04558" contextId="story_36135_1" titleId="storymenu_36135_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36135" SceneID="11"/>
+	<Property ID="11015" NpcID="WorldNpc04558" contextId="story_36135_2" titleId="storymenu_36135_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36135" SceneID="11"/>
+	<Property ID="11016" NpcID="WorldNpc04561" contextId="story_36137_1" titleId="storymenu_36137_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36137" SceneID="11"/>
+	<Property ID="11016" NpcID="WorldNpc04561" contextId="story_36137_2" titleId="storymenu_36137_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36137" SceneID="11"/>
+	<Property ID="11017" NpcID="WorldNpc04813" contextId="story_36145_1" titleId="storymenu_36145_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36145" SceneID="11"/>
+	<Property ID="11017" NpcID="WorldNpc04813" contextId="story_36145_2" titleId="storymenu_36145_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36145" SceneID="11"/>
+	<Property ID="11018" NpcID="WorldNpc04408" contextId="story_36151_1" titleId="storymenu_36151_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36151" SceneID="11"/>
+	<Property ID="11018" NpcID="WorldNpc04408" contextId="story_36151_2" titleId="storymenu_36151_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36151" SceneID="11"/>
+	<Property ID="11019" NpcID="WorldNpc09626" contextId="story_36163_1" titleId="storymenu_36163_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36163" SceneID="17"/>
+	<Property ID="11019" NpcID="WorldNpc09626" contextId="story_36163_2" titleId="storymenu_36163_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36163" SceneID="17"/>
+	<Property ID="11020" NpcID="WorldNpc09811" contextId="story_36172_1" titleId="storymenu_36172_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36172" SceneID="17"/>
+	<Property ID="11020" NpcID="WorldNpc09811" contextId="story_36172_2" titleId="storymenu_36172_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36172" SceneID="17"/>
+	<Property ID="11021" NpcID="WorldNpc09801" contextId="story_36188_1" titleId="storymenu_36188_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36187" SceneID="17"/>
+	<Property ID="11021" NpcID="WorldNpc09801" contextId="story_36188_2" titleId="storymenu_36188_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36187" SceneID="17"/>
+	<Property ID="11022" NpcID="WorldNpc00393" contextId="story_36199_1" titleId="storymenu_36199_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36199" SceneID="12"/>
+	<Property ID="11022" NpcID="WorldNpc00393" contextId="story_36199_2" titleId="storymenu_36199_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36199" SceneID="12"/>
+	<Property ID="11023" NpcID="WorldNpc00388" contextId="story_36206_1" titleId="storymenu_36206_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36206" SceneID="12"/>
+	<Property ID="11023" NpcID="WorldNpc00388" contextId="story_36206_2" titleId="storymenu_36206_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36206" SceneID="12"/>
+	<Property ID="11024" NpcID="WorldNpc00394" contextId="story_36210_1" titleId="storymenu_36210_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36210" SceneID="12"/>
+	<Property ID="11024" NpcID="WorldNpc00394" contextId="story_36210_2" titleId="storymenu_36210_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36210" SceneID="12"/>
+	<Property ID="11025" NpcID="WorldNpc00386" contextId="story_36222_1" titleId="storymenu_36222_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36222" SceneID="12"/>
+	<Property ID="11025" NpcID="WorldNpc00386" contextId="story_36222_2" titleId="storymenu_36222_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36222" SceneID="12"/>
+	<Property ID="11026" NpcID="WorldNpc00386" contextId="story_36225_1" titleId="storymenu_36225_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36225" SceneID="12"/>
+	<Property ID="11026" NpcID="WorldNpc00386" contextId="story_36225_2" titleId="storymenu_36225_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36225" SceneID="12"/>
+	<Property ID="11027" NpcID="WorldNpc00393" contextId="story_36229_1" titleId="storymenu_36229_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36229" SceneID="12"/>
+	<Property ID="11027" NpcID="WorldNpc00393" contextId="story_36229_2" titleId="storymenu_36229_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36229" SceneID="12"/>
+	<Property ID="11028" NpcID="WorldNpc00388" contextId="story_36234_1" titleId="storymenu_36234_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36234" SceneID="12"/>
+	<Property ID="11028" NpcID="WorldNpc00388" contextId="story_36234_2" titleId="storymenu_36234_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36234" SceneID="12"/>
+	<Property ID="11029" NpcID="WorldNpc04431" contextId="story_36242_1" titleId="storymenu_36242_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36242" SceneID="11"/>
+	<Property ID="11029" NpcID="WorldNpc04431" contextId="story_36242_2" titleId="storymenu_36242_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36242" SceneID="11"/>
+	<Property ID="11030" NpcID="WorldNpc04406" contextId="story_36250_1" titleId="storymenu_36250_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36250" SceneID="11"/>
+	<Property ID="11030" NpcID="WorldNpc04406" contextId="story_36250_2" titleId="storymenu_36250_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36250" SceneID="11"/>
+	<Property ID="11031" NpcID="WorldNpc06619" contextId="story_36260_1" titleId="storymenu_36260_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36260" SceneID="20"/>
+	<Property ID="11031" NpcID="WorldNpc06619" contextId="story_36260_2" titleId="storymenu_36260_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36260" SceneID="20"/>
+	<Property ID="11032" NpcID="WorldNpc06618" contextId="story_36270_1" titleId="storymenu_36270_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36270" SceneID="20"/>
+	<Property ID="11032" NpcID="WorldNpc06618" contextId="story_36270_2" titleId="storymenu_36270_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36270" SceneID="20"/>
+	<Property ID="11033" NpcID="WorldNpc06621" contextId="story_36276_1" titleId="storymenu_36276_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36276" SceneID="20"/>
+	<Property ID="11033" NpcID="WorldNpc06621" contextId="story_36276_2" titleId="storymenu_36276_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36276" SceneID="20"/>
+	<Property ID="11034" NpcID="WorldNpc04424" contextId="story_36289_1" titleId="storymenu_36289_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36289" SceneID="11"/>
+	<Property ID="11034" NpcID="WorldNpc04424" contextId="story_36289_2" titleId="storymenu_36289_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36289" SceneID="11"/>
+	<Property ID="11035" NpcID="WorldNpc09902" contextId="story_36316_1" titleId="storymenu_36316_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36316" SceneID="17"/>
+	<Property ID="11035" NpcID="WorldNpc09902" contextId="story_36316_2" titleId="storymenu_36316_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36316" SceneID="17"/>
+	<Property ID="11036" NpcID="WorldNpc04425" contextId="story_36331_1" titleId="storymenu_36331_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36331" SceneID="11"/>
+	<Property ID="11036" NpcID="WorldNpc04425" contextId="story_36331_2" titleId="storymenu_36331_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36331" SceneID="11"/>
+	<Property ID="11037" NpcID="WorldNpc04401" contextId="story_36337_1" titleId="storymenu_36337_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36337" SceneID="11"/>
+	<Property ID="11037" NpcID="WorldNpc04401" contextId="story_36337_2" titleId="storymenu_36337_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36337" SceneID="11"/>
+	<Property ID="11037" NpcID="WorldNpc04401" contextId="story_36337_3" titleId="storymenu_36337_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36337" SceneID="11"/>
+	<Property ID="11038" NpcID="WorldNpc04572" contextId="story_36341_1" titleId="storymenu_36341_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36341" SceneID="11"/>
+	<Property ID="11039" NpcID="WorldNpc10042" contextId="story_36376_1" titleId="storymenu_36376_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36376" SceneID="16"/>
+	<Property ID="11039" NpcID="WorldNpc10042" contextId="story_36376_2" titleId="storymenu_36376_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36376" SceneID="16"/>
+	<Property ID="11040" NpcID="WorldNpc08832" contextId="story_36399_1" titleId="storymenu_36399_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36399" SceneID="13"/>
+	<Property ID="11041" NpcID="WorldNpc04403" contextId="story_36482_1" titleId="storymenu_36482_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36482" SceneID="11"/>
+	<Property ID="11041" NpcID="WorldNpc04403" contextId="story_36482_2" titleId="storymenu_36482_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36482" SceneID="11"/>
+	<Property ID="11042" NpcID="WorldNpc05202" contextId="story_36497_1" titleId="storymenu_36497_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36497" SceneID="18"/>
+	<Property ID="11042" NpcID="WorldNpc05202" contextId="story_36497_2" titleId="storymenu_36497_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36497" SceneID="18"/>
+	<Property ID="11043" NpcID="WorldNpc05389" contextId="story_36514_1" titleId="storymenu_36514_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36514" SceneID="18"/>
+	<Property ID="11043" NpcID="WorldNpc05389" contextId="story_36514_2" titleId="storymenu_36514_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36514" SceneID="18"/>
+	<Property ID="11044" NpcID="WorldNpc05390" contextId="story_36517_1" titleId="storymenu_36517_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36517" SceneID="18"/>
+	<Property ID="11044" NpcID="WorldNpc05390" contextId="story_36517_2" titleId="storymenu_36517_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36517" SceneID="18"/>
+	<Property ID="11045" NpcID="WorldNpc05391" contextId="story_36524_1" titleId="storymenu_36524_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36524" SceneID="18"/>
+	<Property ID="11045" NpcID="WorldNpc05391" contextId="story_36524_2" titleId="storymenu_36524_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36524" SceneID="18"/>
+	<Property ID="11046" NpcID="WorldNpc05390" contextId="story_36527_1" titleId="storymenu_36527_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36527" SceneID="18"/>
+	<Property ID="11046" NpcID="WorldNpc05390" contextId="story_36527_2" titleId="storymenu_36527_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36527" SceneID="18"/>
+	<Property ID="11047" NpcID="WorldNpc04431" contextId="story_36534_1" titleId="storymenu_36534_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36534" SceneID="11"/>
+	<Property ID="11047" NpcID="WorldNpc04431" contextId="story_36534_2" titleId="storymenu_36534_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36534" SceneID="11"/>
+	<Property ID="11048" NpcID="WorldNpc09309" contextId="story_36550_1" titleId="storymenu_36550_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36550" SceneID="2"/>
+	<Property ID="11048" NpcID="WorldNpc09309" contextId="story_36550_2" titleId="storymenu_36550_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36550" SceneID="2"/>
+	<Property ID="11049" NpcID="WorldNpc09308" contextId="story_36555_1" titleId="storymenu_36555_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36555" SceneID="2"/>
+	<Property ID="11049" NpcID="WorldNpc09308" contextId="story_36555_2" titleId="storymenu_36555_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36555" SceneID="2"/>
+	<Property ID="11050" NpcID="WorldNpc04433" contextId="story_36558_1" titleId="storymenu_36558_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36558" SceneID="11"/>
+	<Property ID="11050" NpcID="WorldNpc04433" contextId="story_36558_2" titleId="storymenu_36558_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36558" SceneID="11"/>
+	<Property ID="11051" NpcID="WorldNpc06903" contextId="story_36567_1" titleId="storymenu_36567_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36567" SceneID="26"/>
+	<Property ID="11051" NpcID="WorldNpc06903" contextId="story_36567_2" titleId="storymenu_36567_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36567" SceneID="26"/>
+	<Property ID="11052" NpcID="WorldNpc06905" contextId="story_36572_1" titleId="storymenu_36572_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36572" SceneID="26"/>
+	<Property ID="11052" NpcID="WorldNpc06905" contextId="story_36572_2" titleId="storymenu_36572_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36572" SceneID="26"/>
+	<Property ID="11053" NpcID="WorldNpc08928" contextId="story_36473_1" titleId="storymenu_36473_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36473" SceneID="13"/>
+	<Property ID="11053" NpcID="WorldNpc08928" contextId="story_36473_2" titleId="storymenu_36473_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36473" SceneID="13"/>
+	<Property ID="11053" NpcID="WorldNpc08928" contextId="story_36473_3" titleId="storymenu_36473_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_36473" SceneID="13"/>
+	<Property ID="10001" NpcID="WorldNpc02685" contextId="story_40003_1" titleId="storymenu_40003_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40003" SceneID="10"/>
+	<Property ID="10001" NpcID="WorldNpc02685" contextId="story_40003_2" titleId="storymenu_40003_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40003" SceneID="10"/>
+	<Property ID="10002" NpcID="WorldNpc02681" contextId="story_40005_1" titleId="storymenu_40005_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40005" SceneID="10"/>
+	<Property ID="10002" NpcID="WorldNpc02681" contextId="story_40005_2" titleId="storymenu_40005_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40005" SceneID="10"/>
+	<Property ID="10003" NpcID="WorldNpc02680" contextId="story_40006_1" titleId="storymenu_40006_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40006" SceneID="10"/>
+	<Property ID="10003" NpcID="WorldNpc02680" contextId="story_40006_2" titleId="storymenu_40006_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40006" SceneID="10"/>
+	<Property ID="10004" NpcID="WorldNpc02610" contextId="story_40013_1" titleId="storymenu_40013_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40013" SceneID="10"/>
+	<Property ID="10004" NpcID="WorldNpc02610" contextId="story_40013_2" titleId="storymenu_40013_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40013" SceneID="10"/>
+	<Property ID="10005" NpcID="WorldNpc02610" contextId="story_40014_1" titleId="storymenu_40014_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40014" SceneID="10"/>
+	<Property ID="10005" NpcID="WorldNpc02610" contextId="story_40014_2" titleId="storymenu_40014_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40014" SceneID="10"/>
+	<Property ID="10006" NpcID="WorldNpc02920" contextId="story_40015_1" titleId="storymenu_40015_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40015" SceneID="10"/>
+	<Property ID="10006" NpcID="WorldNpc02920" contextId="story_40015_2" titleId="storymenu_40015_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40015" SceneID="10"/>
+	<Property ID="10007" NpcID="WorldNpc02682" contextId="story_40018_1" titleId="storymenu_40018_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40018" SceneID="10"/>
+	<Property ID="10007" NpcID="WorldNpc02682" contextId="story_40018_2" titleId="storymenu_40018_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40018" SceneID="10"/>
+	<Property ID="10008" NpcID="WorldNpc02604" contextId="story_40026_1" titleId="storymenu_40026_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40026" SceneID="10"/>
+	<Property ID="10008" NpcID="WorldNpc02604" contextId="story_40026_2" titleId="storymenu_40026_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40026" SceneID="10"/>
+	<Property ID="10009" NpcID="WorldNpc02684" contextId="story_40028_1" titleId="storymenu_40028_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40028_1" SceneID="10"/>
+	<Property ID="10009" NpcID="WorldNpc02684" contextId="story_40028_2" titleId="storymenu_40028_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40028_1" SceneID="10"/>
+	<Property ID="10010" NpcID="WorldNpc02684" contextId="story_40028_3" titleId="storymenu_40028_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40028_2" SceneID="10"/>
+	<Property ID="10010" NpcID="WorldNpc02684" contextId="story_40028_4" titleId="storymenu_40028_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40028_2" SceneID="10"/>
+	<Property ID="10010" NpcID="WorldNpc02684" contextId="story_40028_5" titleId="storymenu_40028_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40028_2" SceneID="10"/>
+	<Property ID="10011" NpcID="WorldNpc02604" contextId="story_40037_1" titleId="storymenu_40037_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40037" SceneID="10"/>
+	<Property ID="10011" NpcID="WorldNpc02604" contextId="story_40037_2" titleId="storymenu_40037_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40037" SceneID="10"/>
+	<Property ID="10012" NpcID="WorldNpc02610" contextId="story_40038_1" titleId="storymenu_40038_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40038" SceneID="10"/>
+	<Property ID="10012" NpcID="WorldNpc02610" contextId="story_40038_2" titleId="storymenu_40038_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40038" SceneID="10"/>
+	<Property ID="10013" NpcID="WorldNpc02684" contextId="story_40039_1" titleId="storymenu_40039_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40039" SceneID="10"/>
+	<Property ID="10013" NpcID="WorldNpc02684" contextId="story_40039_2" titleId="storymenu_40039_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40039" SceneID="10"/>
+	<Property ID="10013" NpcID="WorldNpc02684" contextId="story_40039_3" titleId="storymenu_40039_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40039" SceneID="10"/>
+	<Property ID="10013" NpcID="WorldNpc02684" contextId="story_40039_4" titleId="storymenu_40039_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40039" SceneID="10"/>
+	<Property ID="10014" NpcID="WorldNpc02684" contextId="story_40040_1" titleId="storymenu_40040_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40040" SceneID="10"/>
+	<Property ID="10014" NpcID="WorldNpc02684" contextId="story_40040_2" titleId="storymenu_40040_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40040" SceneID="10"/>
+	<Property ID="10014" NpcID="WorldNpc02684" contextId="story_40040_3" titleId="storymenu_40040_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40040" SceneID="10"/>
+	<Property ID="10015" NpcID="WorldNpc02688" contextId="story_40099_1" titleId="storymenu_40099_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40099" SceneID="10"/>
+	<Property ID="10015" NpcID="WorldNpc02688" contextId="story_40099_2" titleId="storymenu_40099_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40099" SceneID="10"/>
+	<Property ID="10016" NpcID="WorldNpc02687" contextId="story_40109_1" titleId="storymenu_40109_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40109" SceneID="10"/>
+	<Property ID="10016" NpcID="WorldNpc02687" contextId="story_40109_2" titleId="storymenu_40109_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40109" SceneID="10"/>
+	<Property ID="10017" NpcID="WorldNpc02604" contextId="story_40111_1" titleId="storymenu_40111_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40111" SceneID="10"/>
+	<Property ID="10017" NpcID="WorldNpc02604" contextId="story_40111_2" titleId="storymenu_40111_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40111" SceneID="10"/>
+	<Property ID="10017" NpcID="WorldNpc02604" contextId="story_40111_3" titleId="storymenu_40111_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40111" SceneID="10"/>
+	<Property ID="10017" NpcID="WorldNpc02604" contextId="story_40111_4" titleId="storymenu_40111_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40111" SceneID="10"/>
+	<Property ID="10017" NpcID="WorldNpc02604" contextId="story_40111_5" titleId="storymenu_40111_5" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40111" SceneID="10"/>
+	<Property ID="10018" NpcID="WorldNpc09601" contextId="story_40112_1" titleId="storymenu_40112_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40112" SceneID="17"/>
+	<Property ID="10018" NpcID="WorldNpc09601" contextId="story_40112_2" titleId="storymenu_40112_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40112" SceneID="17"/>
+	<Property ID="10019" NpcID="WorldNpc01611" contextId="story_40123_1" titleId="storymenu_40123_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40123" SceneID="14"/>
+	<Property ID="10019" NpcID="WorldNpc01611" contextId="story_40123_2" titleId="storymenu_40123_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40123" SceneID="14"/>
+	<Property ID="10020" NpcID="WorldNpc01611" contextId="story_40133_1" titleId="storymenu_40133_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40133" SceneID="14"/>
+	<Property ID="10020" NpcID="WorldNpc01611" contextId="story_40133_2" titleId="storymenu_40133_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40133" SceneID="14"/>
+	<Property ID="10021" NpcID="WorldNpc02689" contextId="story_40052_1" titleId="storymenu_40052_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40052" SceneID="10"/>
+	<Property ID="10021" NpcID="WorldNpc02689" contextId="story_40052_2" titleId="storymenu_40052_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40052" SceneID="10"/>
+	<Property ID="10022" NpcID="WorldNpc02629" contextId="story_40054_1" titleId="storymenu_40054_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40054" SceneID="10"/>
+	<Property ID="10022" NpcID="WorldNpc02629" contextId="story_40054_2" titleId="storymenu_40054_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40054" SceneID="10"/>
+	<Property ID="10023" NpcID="WorldNpc02689" contextId="story_40077_1" titleId="storymenu_40077_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40077" SceneID="10"/>
+	<Property ID="10023" NpcID="WorldNpc02689" contextId="story_40077_2" titleId="storymenu_40077_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40077" SceneID="10"/>
+	<Property ID="10024" NpcID="WorldNpc02626" contextId="story_40078_1" titleId="storymenu_40078_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40078" SceneID="10"/>
+	<Property ID="10024" NpcID="WorldNpc02626" contextId="story_40078_2" titleId="storymenu_40078_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40078" SceneID="10"/>
+	<Property ID="10190" NpcID="WorldNpc02613" contextId="story_40244_1" titleId="storymenu_40244_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40244" SceneID="10"/>
+	<Property ID="10190" NpcID="WorldNpc02613" contextId="story_40244_2" titleId="storymenu_40244_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40244" SceneID="10"/>
+	<Property ID="10191" NpcID="WorldNpc02613" contextId="story_40245_1" titleId="storymenu_40245_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40245" SceneID="10"/>
+	<Property ID="10191" NpcID="WorldNpc02613" contextId="story_40245_2" titleId="storymenu_40245_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40245" SceneID="10"/>
+	<Property ID="10192" NpcID="WorldNpc05808" contextId="story_40257_1" titleId="storymenu_40257_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40257" SceneID="21"/>
+	<Property ID="10192" NpcID="WorldNpc05808" contextId="story_40257_2" titleId="storymenu_40257_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40257" SceneID="21"/>
+	<Property ID="10193" NpcID="WorldNpc05808" contextId="story_40266_1" titleId="storymenu_40266_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40266" SceneID="21"/>
+	<Property ID="10193" NpcID="WorldNpc05808" contextId="story_40266_2" titleId="storymenu_40266_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40266" SceneID="21"/>
+	<Property ID="10194" NpcID="WorldNpc02605" contextId="story_40281_1" titleId="storymenu_40281_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40281" SceneID="10"/>
+	<Property ID="10194" NpcID="WorldNpc02605" contextId="story_40281_2" titleId="storymenu_40281_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story40281" SceneID="10"/>
+	<Property ID="10200" NpcID="WorldNpc02604" contextId="story_40289_1" titleId="storymenu_40289_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40289" SceneID="10"/>
+	<Property ID="10200" NpcID="WorldNpc02604" contextId="story_40289_2" titleId="storymenu_40289_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40289" SceneID="10"/>
+	<Property ID="10200" NpcID="WorldNpc02604" contextId="story_40289_3" titleId="storymenu_40289_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40289" SceneID="10"/>
+	<Property ID="10200" NpcID="WorldNpc02604" contextId="story_40289_4" titleId="storymenu_40289_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40289" SceneID="10"/>
+	<Property ID="10201" NpcID="WorldNpc09956" contextId="story_40299_1" titleId="storymenu_40299_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40299" SceneID="17"/>
+	<Property ID="10201" NpcID="WorldNpc09956" contextId="story_40299_2" titleId="storymenu_40299_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40299" SceneID="17"/>
+	<Property ID="10201" NpcID="WorldNpc09956" contextId="story_40299_3" titleId="storymenu_40299_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40299" SceneID="17"/>
+	<Property ID="10202" NpcID="WorldNpc09961" contextId="story_40309_1" titleId="storymenu_40309_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40309" SceneID="17"/>
+	<Property ID="10202" NpcID="WorldNpc09961" contextId="story_40309_2" titleId="storymenu_40309_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40309" SceneID="17"/>
+	<Property ID="10202" NpcID="WorldNpc09961" contextId="story_40309_3" titleId="storymenu_40309_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40309" SceneID="17"/>
+	<Property ID="10203" NpcID="WorldNpc09955" contextId="story_40311_1" titleId="storymenu_40311_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40311" SceneID="17"/>
+	<Property ID="10203" NpcID="WorldNpc09955" contextId="story_40311_2" titleId="storymenu_40311_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40311" SceneID="17"/>
+	<Property ID="10203" NpcID="WorldNpc09955" contextId="story_40311_3" titleId="storymenu_40311_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40311" SceneID="17"/>
+	<Property ID="10204" NpcID="WorldNpc09955" contextId="story_40317_1" titleId="storymenu_40317_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40317" SceneID="17"/>
+	<Property ID="10204" NpcID="WorldNpc09955" contextId="story_40317_2" titleId="storymenu_40317_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40317" SceneID="17"/>
+	<Property ID="10204" NpcID="WorldNpc09955" contextId="story_40317_3" titleId="storymenu_40317_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40317" SceneID="17"/>
+	<Property ID="10205" NpcID="WorldNpc02604" contextId="story_40337_1" titleId="storymenu_40337_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40337" SceneID="10"/>
+	<Property ID="10205" NpcID="WorldNpc02604" contextId="story_40337_2" titleId="storymenu_40337_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40337" SceneID="10"/>
+	<Property ID="10205" NpcID="WorldNpc02604" contextId="story_40337_3" titleId="storymenu_40337_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40337" SceneID="10"/>
+	<Property ID="10207" NpcID="WorldNpc11004" contextId="story_40347_1" titleId="storymenu_40347_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40347" SceneID="13"/>
+	<Property ID="10207" NpcID="WorldNpc11004" contextId="story_40347_2" titleId="storymenu_40347_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40347" SceneID="13"/>
+	<Property ID="10208" NpcID="WorldNpc10046" contextId="story_40358_1" titleId="storymenu_40358_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40358" SceneID="13"/>
+	<Property ID="10208" NpcID="WorldNpc10046" contextId="story_40358_2" titleId="storymenu_40358_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40358" SceneID="13"/>
+	<Property ID="10250" NpcID="WorldNpc02629" contextId="story_40388_1" titleId="storymenu_40388_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40388" SceneID="10"/>
+	<Property ID="10250" NpcID="WorldNpc02629" contextId="story_40388_2" titleId="storymenu_40388_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40388" SceneID="10"/>
+	<Property ID="10251" NpcID="WorldNpc02605" contextId="story_40389_1" titleId="storymenu_40389_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40389" SceneID="10"/>
+	<Property ID="10251" NpcID="WorldNpc02605" contextId="story_40389_2" titleId="storymenu_40389_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40389" SceneID="10"/>
+	<Property ID="10252" NpcID="WorldNpc08942" contextId="story_40401_1" titleId="storymenu_40401_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40401" SceneID="13"/>
+	<Property ID="10252" NpcID="WorldNpc08942" contextId="story_40401_2" titleId="storymenu_40401_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40401" SceneID="13"/>
+	<Property ID="10253" NpcID="WorldNpc08946" contextId="story_40411_1" titleId="storymenu_40411_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40411" SceneID="13"/>
+	<Property ID="10253" NpcID="WorldNpc08946" contextId="story_40411_2" titleId="storymenu_40411_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40411" SceneID="13"/>
+	<Property ID="10254" NpcID="WorldNpc08948" contextId="story_40423_1" titleId="storymenu_40423_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40423" SceneID="13"/>
+	<Property ID="10254" NpcID="WorldNpc08948" contextId="story_40423_2" titleId="storymenu_40423_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40423" SceneID="13"/>
+	<Property ID="10255" NpcID="WorldNpc08950" contextId="story_40425_1" titleId="storymenu_40425_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40425" SceneID="13"/>
+	<Property ID="10255" NpcID="WorldNpc08950" contextId="story_40425_2" titleId="storymenu_40425_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40425" SceneID="13"/>
+	<Property ID="10300" NpcID="WorldNpc02605" contextId="story_40436_1" titleId="storymenu_40436_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40436" SceneID="10"/>
+	<Property ID="10300" NpcID="WorldNpc02605" contextId="story_40436_2" titleId="storymenu_40436_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40436" SceneID="10"/>
+	<Property ID="10301" NpcID="WorldNpc02629" contextId="story_40445_1" titleId="storymenu_40445_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40445" SceneID="10"/>
+	<Property ID="10301" NpcID="WorldNpc02629" contextId="story_40445_2" titleId="storymenu_40445_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40445" SceneID="10"/>
+	<Property ID="10302" NpcID="WorldNpc01244" contextId="story_40450_1" titleId="storymenu_40450_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40450" SceneID="14"/>
+	<Property ID="10302" NpcID="WorldNpc01244" contextId="story_40450_2" titleId="storymenu_40450_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40450" SceneID="14"/>
+	<Property ID="10303" NpcID="WorldNpc01443" contextId="story_40454_1" titleId="storymenu_40454_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40454" SceneID="14"/>
+	<Property ID="10303" NpcID="WorldNpc01443" contextId="story_40454_2" titleId="storymenu_40454_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40454" SceneID="14"/>
+	<Property ID="10304" NpcID="WorldNpc01244" contextId="story_40458_1" titleId="storymenu_40458_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40458" SceneID="14"/>
+	<Property ID="10304" NpcID="WorldNpc01244" contextId="story_40458_2" titleId="storymenu_40458_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40458" SceneID="14"/>
+	<Property ID="10305" NpcID="WorldNpc01444" contextId="story_40466_1" titleId="storymenu_40466_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40466" SceneID="14"/>
+	<Property ID="10305" NpcID="WorldNpc01444" contextId="story_40466_2" titleId="storymenu_40466_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40466" SceneID="14"/>
+	<Property ID="10306" NpcID="WorldNpc02717" contextId="story_40473_1" titleId="storymenu_40473_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40473" SceneID="10"/>
+	<Property ID="10306" NpcID="WorldNpc02717" contextId="story_40473_2" titleId="storymenu_40473_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40473" SceneID="10"/>
+	<Property ID="10307" NpcID="WorldNpc02716" contextId="story_40475_1" titleId="storymenu_40475_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40475" SceneID="10"/>
+	<Property ID="10307" NpcID="WorldNpc02716" contextId="story_40475_2" titleId="storymenu_40475_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo40475" SceneID="10"/>
+	<Property ID="6001"/>
+	<Property ID="6200" NpcID="WorldNpc10051" contextId="story_44291_1" titleId="storymenu_44291_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44291" SceneID="16"/>
+	<Property ID="6200" NpcID="WorldNpc10051" contextId="story_44291_2" titleId="storymenu_44291_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44291" SceneID="16"/>
+	<Property ID="6201" NpcID="WorldNpc10027" contextId="story_44294_1" titleId="storymenu_44294_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44294" SceneID="16"/>
+	<Property ID="6201" NpcID="WorldNpc10027" contextId="story_44294_2" titleId="storymenu_44294_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44294" SceneID="16"/>
+	<Property ID="6201" NpcID="WorldNpc10027" contextId="story_44294_3" titleId="storymenu_44294_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44294" SceneID="16"/>
+	<Property ID="6202" NpcID="WorldNpc10051" contextId="story_44295_1" titleId="storymenu_44295_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44295" SceneID="16"/>
+	<Property ID="6202" NpcID="WorldNpc10051" contextId="story_44295_2" titleId="storymenu_44295_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44295" SceneID="16"/>
+	<Property ID="6202" NpcID="WorldNpc10051" contextId="story_44295_3" titleId="storymenu_44295_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44295" SceneID="16"/>
+	<Property ID="6203" NpcID="WorldNpc10055" contextId="story_44296_1" titleId="storymenu_44296_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44296" SceneID="16"/>
+	<Property ID="6203" NpcID="WorldNpc10055" contextId="story_44296_2" titleId="storymenu_44296_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44296" SceneID="16"/>
+	<Property ID="6204" NpcID="WorldNpc10056" contextId="story_44299_1" titleId="storymenu_44299_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44299" SceneID="16"/>
+	<Property ID="6204" NpcID="WorldNpc10056" contextId="story_44299_2" titleId="storymenu_44299_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo44299" SceneID="16"/>
+	<Property ID="9001" NpcID="WorldNpc02201" contextId="story_50010_1" titleId="storymenu_50010_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50010" SceneID="9"/>
+	<Property ID="9001" NpcID="WorldNpc02201" contextId="story_50010_2" titleId="storymenu_50010_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50010" SceneID="9"/>
+	<Property ID="9002" NpcID="WorldNpc02247" contextId="story_50015_1" titleId="storymenu_50015_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50015" SceneID="9"/>
+	<Property ID="9002" NpcID="WorldNpc02247" contextId="story_50015_2" titleId="storymenu_50015_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50015" SceneID="9"/>
+	<Property ID="9003" NpcID="WorldNpc02247" contextId="story_50030_1" titleId="storymenu_50030_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50030" SceneID="9"/>
+	<Property ID="9003" NpcID="WorldNpc02247" contextId="story_50030_2" titleId="storymenu_50030_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50030" SceneID="9"/>
+	<Property ID="9003" NpcID="WorldNpc02247" contextId="story_50030_3" titleId="storymenu_50030_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50030" SceneID="9"/>
+	<Property ID="9004" NpcID="WorldNpc02251" contextId="story_50035_1" titleId="storymenu_50035_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50035" SceneID="9"/>
+	<Property ID="9004" NpcID="WorldNpc02251" contextId="story_50035_2" titleId="storymenu_50035_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50035" SceneID="9"/>
+	<Property ID="9004" NpcID="WorldNpc02251" contextId="story_50035_3" titleId="storymenu_50035_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50035" SceneID="9"/>
+	<Property ID="9005" NpcID="WorldNpc02244" contextId="story_50057_1" titleId="storymenu_50057_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50057" SceneID="9"/>
+	<Property ID="9005" NpcID="WorldNpc02244" contextId="story_50057_2" titleId="storymenu_50057_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50057" SceneID="9"/>
+	<Property ID="9005" NpcID="WorldNpc02244" contextId="story_50057_3" titleId="storymenu_50057_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50057" SceneID="9"/>
+	<Property ID="9006" NpcID="WorldNpc02240" contextId="story_50069_1" titleId="storymenu_50069_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50069" SceneID="9"/>
+	<Property ID="9006" NpcID="WorldNpc02240" contextId="story_50069_2" titleId="storymenu_50069_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50069" SceneID="9"/>
+	<Property ID="9007" NpcID="WorldNpc02208" contextId="story_50075_1" titleId="storymenu_50075_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50075" SceneID="9"/>
+	<Property ID="9007" NpcID="WorldNpc02208" contextId="story_50075_2" titleId="storymenu_50075_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50075" SceneID="9"/>
+	<Property ID="9007" NpcID="WorldNpc02208" contextId="story_50075_3" titleId="storymenu_50075_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50075" SceneID="9"/>
+	<Property ID="9008" NpcID="WorldNpc02240" contextId="story_50082_1" titleId="storymenu_50082_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50082" SceneID="9"/>
+	<Property ID="9008" NpcID="WorldNpc02240" contextId="story_50082_2" titleId="storymenu_50082_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50082" SceneID="9"/>
+	<Property ID="9008" NpcID="WorldNpc02240" contextId="story_50082_3" titleId="storymenu_50082_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50082" SceneID="9"/>
+	<Property ID="9009" NpcID="WorldNpc02240" contextId="story_50086_1" titleId="storymenu_50086_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50086" SceneID="9"/>
+	<Property ID="9009" NpcID="WorldNpc02240" contextId="story_50086_2" titleId="storymenu_50086_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50086" SceneID="9"/>
+	<Property ID="9009" NpcID="WorldNpc02240" contextId="story_50086_3" titleId="storymenu_50086_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50086" SceneID="9"/>
+	<Property ID="9010" NpcID="WorldNpc02201" contextId="story_50091_1" titleId="storymenu_50091_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50091" SceneID="9"/>
+	<Property ID="9010" NpcID="WorldNpc02201" contextId="story_50091_2" titleId="storymenu_50091_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50091" SceneID="9"/>
+	<Property ID="9010" NpcID="WorldNpc02201" contextId="story_50091_3" titleId="storymenu_50091_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50091" SceneID="9"/>
+	<Property ID="9011" NpcID="WorldNpc02231" contextId="story_50103_1" titleId="storymenu_50103_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50103" SceneID="9"/>
+	<Property ID="9011" NpcID="WorldNpc02231" contextId="story_50103_2" titleId="storymenu_50103_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50103" SceneID="9"/>
+	<Property ID="9012" NpcID="WorldNpc02230" contextId="story_50112_1" titleId="storymenu_50112_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50112" SceneID="9"/>
+	<Property ID="9012" NpcID="WorldNpc02230" contextId="story_50112_2" titleId="storymenu_50112_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50112" SceneID="9"/>
+	<Property ID="9013" NpcID="WorldNpc02230" contextId="story_50135_1" titleId="storymenu_50135_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50135" SceneID="9"/>
+	<Property ID="9013" NpcID="WorldNpc02230" contextId="story_50135_2" titleId="storymenu_50135_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50135" SceneID="9"/>
+	<Property ID="9014" NpcID="WorldNpc02210" contextId="story_50149_1" titleId="storymenu_50149_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50149" SceneID="9"/>
+	<Property ID="9014" NpcID="WorldNpc02210" contextId="story_50149_2" titleId="storymenu_50149_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50149" SceneID="9"/>
+	<Property ID="9015" NpcID="WorldNpc09620" contextId="story_50177_1" titleId="storymenu_50177_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50177" SceneID="17"/>
+	<Property ID="9015" NpcID="WorldNpc09620" contextId="story_50177_2" titleId="storymenu_50177_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50177" SceneID="17"/>
+	<Property ID="9015" NpcID="WorldNpc09620" contextId="story_50177_3" titleId="storymenu_50177_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50177" SceneID="17"/>
+	<Property ID="9016" NpcID="WorldNpc09809" contextId="story_50181_1" titleId="storymenu_50181_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50181" SceneID="17"/>
+	<Property ID="9016" NpcID="WorldNpc09809" contextId="story_50181_2" titleId="storymenu_50181_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50181" SceneID="17"/>
+	<Property ID="9017" NpcID="WorldNpc02209" contextId="story_50194_1" titleId="storymenu_50194_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50194" SceneID="9"/>
+	<Property ID="9017" NpcID="WorldNpc02209" contextId="story_50194_2" titleId="storymenu_50194_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50194" SceneID="9"/>
+	<Property ID="9018" NpcID="WorldNpc02209" contextId="story_50237_1" titleId="storymenu_50237_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50237" SceneID="9"/>
+	<Property ID="9018" NpcID="WorldNpc02209" contextId="story_50237_2" titleId="storymenu_50237_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50237" SceneID="9"/>
+	<Property ID="9020" NpcID="WorldNpc05805" contextId="story_50278_1" titleId="storymenu_50278_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50278" SceneID="21"/>
+	<Property ID="9020" NpcID="WorldNpc05805" contextId="story_50278_2" titleId="storymenu_50278_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50278" SceneID="21"/>
+	<Property ID="9020" NpcID="WorldNpc05805" contextId="story_50278_3" titleId="storymenu_50278_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50278" SceneID="21"/>
+	<Property ID="9021" NpcID="WorldNpc02207" contextId="story_50293_1" titleId="storymenu_50293_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50293" SceneID="9"/>
+	<Property ID="9021" NpcID="WorldNpc02207" contextId="story_50293_2" titleId="storymenu_50293_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50293" SceneID="9"/>
+	<Property ID="9021" NpcID="WorldNpc02207" contextId="story_50293_3" titleId="storymenu_50293_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50293" SceneID="9"/>
+	<Property ID="9021" NpcID="WorldNpc02207" contextId="story_50293_4" titleId="storymenu_50293_4" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50293" SceneID="9"/>
+	<Property ID="9022" NpcID="WorldNpc10023" contextId="story_50301_1" titleId="storymenu_50301_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50301" SceneID="16"/>
+	<Property ID="9022" NpcID="WorldNpc10023" contextId="story_50301_2" titleId="storymenu_50301_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50301" SceneID="16"/>
+	<Property ID="9022" NpcID="WorldNpc10023" contextId="story_50301_3" titleId="storymenu_50301_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50301" SceneID="16"/>
+	<Property ID="9023" NpcID="WorldNpc10029" contextId="story_50313_1" titleId="storymenu_50313_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50313" SceneID="16"/>
+	<Property ID="9023" NpcID="WorldNpc10029" contextId="story_50313_2" titleId="storymenu_50313_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50313" SceneID="16"/>
+	<Property ID="9023" NpcID="WorldNpc10029" contextId="story_50313_3" titleId="storymenu_50313_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50313" SceneID="16"/>
+	<Property ID="9024" NpcID="WorldNpc10031" contextId="story_50319_1" titleId="storymenu_50319_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50319" SceneID="16"/>
+	<Property ID="9024" NpcID="WorldNpc10031" contextId="story_50319_2" titleId="storymenu_50319_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50319" SceneID="16"/>
+	<Property ID="9024" NpcID="WorldNpc10031" contextId="story_50319_3" titleId="storymenu_50319_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50319" SceneID="16"/>
+	<Property ID="9025" NpcID="WorldNpc10004" contextId="story_50321_1" titleId="storymenu_50321_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50321" SceneID="16"/>
+	<Property ID="9025" NpcID="WorldNpc10004" contextId="story_50321_2" titleId="storymenu_50321_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50321" SceneID="16"/>
+	<Property ID="9025" NpcID="WorldNpc10004" contextId="story_50321_3" titleId="storymenu_50321_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50321" SceneID="16"/>
+	<Property ID="9026" NpcID="WorldNpc03418" contextId="story_50386_1" titleId="storymenu_50386_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50386" SceneID="7"/>
+	<Property ID="9026" NpcID="WorldNpc03418" contextId="story_50386_2" titleId="storymenu_50386_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50386" SceneID="7"/>
+	<Property ID="9026" NpcID="WorldNpc03418" contextId="story_50386_3" titleId="storymenu_50386_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50386" SceneID="7"/>
+	<Property ID="9027" NpcID="WorldNpc02208" contextId="story_50481_1" titleId="storymenu_50481_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50481" SceneID="9"/>
+	<Property ID="9027" NpcID="WorldNpc02208" contextId="story_50481_2" titleId="storymenu_50481_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50481" SceneID="9"/>
+	<Property ID="9028" NpcID="WorldNpc06617" contextId="story_50499_1" titleId="storymenu_50499_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50499" SceneID="20"/>
+	<Property ID="9028" NpcID="WorldNpc06617" contextId="story_50499_2" titleId="storymenu_50499_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50499" SceneID="20"/>
+	<Property ID="9029" NpcID="WorldNpc02431" contextId="story_50524_1" titleId="storymenu_50524_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50524" SceneID="9"/>
+	<Property ID="9029" NpcID="WorldNpc02431" contextId="story_50524_2" titleId="storymenu_50524_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50524" SceneID="9"/>
+	<Property ID="9030" NpcID="WorldNpc02224" contextId="story_50555_1" titleId="storymenu_50555_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50555" SceneID="9"/>
+	<Property ID="9030" NpcID="WorldNpc02224" contextId="story_50555_2" titleId="storymenu_50555_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50555" SceneID="9"/>
+	<Property ID="9031" NpcID="WorldNpc02205" contextId="story_50559_1" titleId="storymenu_50559_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50559" SceneID="9"/>
+	<Property ID="9031" NpcID="WorldNpc02205" contextId="story_50559_2" titleId="storymenu_50559_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50559" SceneID="9"/>
+	<Property ID="9032" NpcID="WorldNpc02906" contextId="story_50344_1" titleId="storymenu_50344_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50344" SceneID="10"/>
+	<Property ID="9032" NpcID="WorldNpc02906" contextId="story_50344_2" titleId="storymenu_50344_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50344" SceneID="10"/>
+	<Property ID="9033" NpcID="WorldNpc02644" contextId="story_50349_1" titleId="storymenu_50349_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50349" SceneID="10"/>
+	<Property ID="9033" NpcID="WorldNpc02644" contextId="story_50349_2" titleId="storymenu_50349_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="story50349" SceneID="10"/>
+	<Property ID="9034" NpcID="funnpcclone001015" contextId="story_2042_0" titleId="story_2042_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2042"/>
+	<Property ID="9034" NpcID="funnpcclone001015" contextId="story_2042_2" titleId="story_2042_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2042"/>
+	<Property ID="9034" NpcID="funnpcclone001015" contextId="story_2042_0" titleId="story_2042_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2042"/>
+	<Property ID="9034" NpcID="funnpcclone001015" contextId="story_2042_2" titleId="story_2042_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2042"/>
+	<Property ID="9035" NpcID="WorldNpc02203" contextId="story_2044_0" titleId="story_2044_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2044" SceneID="9"/>
+	<Property ID="9035" NpcID="WorldNpc02203" contextId="story_2044_2" titleId="story_2044_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2044" SceneID="9"/>
+	<Property ID="9035" NpcID="WorldNpc02203" contextId="story_2044_0" titleId="story_2044_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2044"/>
+	<Property ID="9035" NpcID="WorldNpc02203" contextId="story_2044_2" titleId="story_2044_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="task_TrackInfo_2044"/>
+	<Property ID="7000" NpcID="WorldNpc03312" contextId="story_46003_1" titleId="storymenu_46003_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46003" SceneID="7"/>
+	<Property ID="7000" NpcID="WorldNpc03312" contextId="story_46003_2" titleId="storymenu_46003_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46003" SceneID="7"/>
+	<Property ID="7001" NpcID="WorldNpc03312" contextId="story_46009_1" titleId="storymenu_46009_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46009" SceneID="7"/>
+	<Property ID="7001" NpcID="WorldNpc03312" contextId="story_46009_2" titleId="storymenu_46009_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46009" SceneID="7"/>
+	<Property ID="7002" NpcID="WorldNpc03372" contextId="story_46014_1" titleId="storymenu_46014_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46014" SceneID="7"/>
+	<Property ID="7002" NpcID="WorldNpc03372" contextId="story_46014_2" titleId="storymenu_46014_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46014" SceneID="7"/>
+	<Property ID="7003" NpcID="WorldNpc03305" contextId="story_46017_1" titleId="storymenu_46017_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46017" SceneID="7"/>
+	<Property ID="7003" NpcID="WorldNpc03305" contextId="story_46017_2" titleId="storymenu_46017_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46017" SceneID="7"/>
+	<Property ID="7004" NpcID="WorldNpc03372" contextId="story_46025_1" titleId="storymenu_46025_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46025" SceneID="7"/>
+	<Property ID="7004" NpcID="WorldNpc03372" contextId="story_46025_2" titleId="storymenu_46025_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46025" SceneID="7"/>
+	<Property ID="7005" NpcID="WorldNpc03373" contextId="story_46029_1" titleId="storymenu_46029_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46029" SceneID="7"/>
+	<Property ID="7005" NpcID="WorldNpc03373" contextId="story_46029_2" titleId="storymenu_46029_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46029" SceneID="7"/>
+	<Property ID="7006" NpcID="WorldNpc03335" contextId="story_46032_1" titleId="storymenu_46032_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46032" SceneID="7"/>
+	<Property ID="7006" NpcID="WorldNpc03335" contextId="story_46032_2" titleId="storymenu_46032_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46032" SceneID="7"/>
+	<Property ID="7007" NpcID="WorldNpc03421" contextId="story_46041_1" titleId="storymenu_46041_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46041" SceneID="7"/>
+	<Property ID="7007" NpcID="WorldNpc03421" contextId="story_46041_2" titleId="storymenu_46041_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46041" SceneID="7"/>
+	<Property ID="7008" NpcID="WorldNpc03313" contextId="story_46048_1" titleId="storymenu_46048_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46048" SceneID="7"/>
+	<Property ID="7008" NpcID="WorldNpc03313" contextId="story_46048_2" titleId="storymenu_46048_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46048" SceneID="7"/>
+	<Property ID="7009" NpcID="WorldNpc03305" contextId="story_46049_1" titleId="storymenu_46049_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46049" SceneID="7"/>
+	<Property ID="7009" NpcID="WorldNpc03305" contextId="story_46049_2" titleId="storymenu_46049_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46049" SceneID="7"/>
+	<Property ID="7010" NpcID="WorldNpc03305" contextId="story_46052_1" titleId="storymenu_46052_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46052" SceneID="7"/>
+	<Property ID="7010" NpcID="WorldNpc03305" contextId="story_46052_2" titleId="storymenu_46052_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46052" SceneID="7"/>
+	<Property ID="7011" NpcID="WorldNpc03444" contextId="story_46056_1" titleId="storymenu_46056_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46056" SceneID="7"/>
+	<Property ID="7011" NpcID="WorldNpc03444" contextId="story_46056_2" titleId="storymenu_46056_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46056" SceneID="7"/>
+	<Property ID="7012" NpcID="WorldNpc03421" contextId="story_46062_1" titleId="storymenu_46062_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46062" SceneID="7"/>
+	<Property ID="7012" NpcID="WorldNpc03421" contextId="story_46062_2" titleId="storymenu_46062_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46062" SceneID="7"/>
+	<Property ID="7013" NpcID="WorldNpc03445" contextId="story_46064_1" titleId="storymenu_46064_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46064" SceneID="7"/>
+	<Property ID="7013" NpcID="WorldNpc03445" contextId="story_46064_2" titleId="storymenu_46064_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46064" SceneID="7"/>
+	<Property ID="7014" NpcID="WorldNpc03421" contextId="story_46070_1" titleId="storymenu_46070_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46070" SceneID="7"/>
+	<Property ID="7014" NpcID="WorldNpc03421" contextId="story_46070_2" titleId="storymenu_46070_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46070" SceneID="7"/>
+	<Property ID="7015" NpcID="WorldNpc03447" contextId="story_46073_1" titleId="storymenu_46073_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46073" SceneID="7"/>
+	<Property ID="7015" NpcID="WorldNpc03447" contextId="story_46073_2" titleId="storymenu_46073_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46073" SceneID="7"/>
+	<Property ID="7016" NpcID="WorldNpc03445" contextId="story_46075_1" titleId="storymenu_46075_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46075" SceneID="7"/>
+	<Property ID="7016" NpcID="WorldNpc03445" contextId="story_46075_1" titleId="storymenu_46075_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46075" SceneID="7"/>
+	<Property ID="7017" NpcID="WorldNpc03305" contextId="story_46082_1" titleId="storymenu_46082_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46082" SceneID="7"/>
+	<Property ID="7017" NpcID="WorldNpc03305" contextId="story_46082_2" titleId="storymenu_46082_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46082" SceneID="7"/>
+	<Property ID="7018" NpcID="WorldNpc03444" contextId="story_46086_1" titleId="storymenu_46086_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46086" SceneID="7"/>
+	<Property ID="7018" NpcID="WorldNpc03444" contextId="story_46086_2" titleId="storymenu_46086_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46086" SceneID="7"/>
+	<Property ID="7019" NpcID="WorldNpc03316" contextId="story_46098_1" titleId="storymenu_46098_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46098" SceneID="7"/>
+	<Property ID="7019" NpcID="WorldNpc03316" contextId="story_46098_2" titleId="storymenu_46098_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46098" SceneID="7"/>
+	<Property ID="7020" NpcID="WorldNpc05094" contextId="story_46114_1" titleId="storymenu_46114_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46114" SceneID="24"/>
+	<Property ID="7020" NpcID="WorldNpc05094" contextId="story_46114_2" titleId="storymenu_46114_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46114" SceneID="24"/>
+	<Property ID="7021" NpcID="WorldNpc05095" contextId="story_46117_1" titleId="storymenu_46117_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46117" SceneID="24"/>
+	<Property ID="7021" NpcID="WorldNpc05095" contextId="story_46117_2" titleId="storymenu_46117_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46117" SceneID="24"/>
+	<Property ID="7022" NpcID="WorldNpc05095" contextId="story_46125_1" titleId="storymenu_46125_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46125" SceneID="24"/>
+	<Property ID="7022" NpcID="WorldNpc05095" contextId="story_46125_2" titleId="storymenu_46125_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46125" SceneID="24"/>
+	<Property ID="7023" NpcID="WorldNpc05101" contextId="story_46135_1" titleId="storymenu_46135_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46135" SceneID="24"/>
+	<Property ID="7023" NpcID="WorldNpc05101" contextId="story_46135_2" titleId="storymenu_46135_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46135" SceneID="24"/>
+	<Property ID="7024" NpcID="WorldNpc03305" contextId="story_46138_1" titleId="storymenu_46138_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46138" SceneID="7"/>
+	<Property ID="7024" NpcID="WorldNpc03305" contextId="story_46138_2" titleId="storymenu_46138_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46138" SceneID="7"/>
+	<Property ID="7025" NpcID="WorldNpc04577" contextId="story_46144_1" titleId="storymenu_46144_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46144" SceneID="11"/>
+	<Property ID="7025" NpcID="WorldNpc04577" contextId="story_46144_2" titleId="storymenu_46144_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46144" SceneID="11"/>
+	<Property ID="7026" NpcID="WorldNpc04577" contextId="story_46148_1" titleId="storymenu_46148_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46148" SceneID="11"/>
+	<Property ID="7026" NpcID="WorldNpc04577" contextId="story_46148_2" titleId="storymenu_46148_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46148" SceneID="11"/>
+	<Property ID="7027" NpcID="WorldNpc04431" contextId="story_46151_1" titleId="storymenu_46151_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46151" SceneID="11"/>
+	<Property ID="7027" NpcID="WorldNpc04431" contextId="story_46151_2" titleId="storymenu_46151_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46151" SceneID="11"/>
+	<Property ID="7028" NpcID="WorldNpc04405" contextId="story_46156_1" titleId="storymenu_46156_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46156" SceneID="11"/>
+	<Property ID="7028" NpcID="WorldNpc04405" contextId="story_46156_2" titleId="storymenu_46156_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46156" SceneID="11"/>
+	<Property ID="7029" NpcID="WorldNpc04401" contextId="story_46158_1" titleId="storymenu_46158_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46158" SceneID="11"/>
+	<Property ID="7029" NpcID="WorldNpc04401" contextId="story_46158_2" titleId="storymenu_46158_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46158" SceneID="11"/>
+	<Property ID="7030" NpcID="WorldNpc04714" contextId="story_46172_1" titleId="storymenu_46172_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46172" SceneID="11"/>
+	<Property ID="7030" NpcID="WorldNpc04714" contextId="story_46172_2" titleId="storymenu_46172_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46172" SceneID="11"/>
+	<Property ID="7031" NpcID="WorldNpc04431" contextId="story_46176_1" titleId="storymenu_46176_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46176" SceneID="11"/>
+	<Property ID="7031" NpcID="WorldNpc04431" contextId="story_46176_2" titleId="storymenu_46176_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46176" SceneID="11"/>
+	<Property ID="7032" NpcID="WorldNpc03451" contextId="story_46189_1" titleId="storymenu_46189_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46189" SceneID="7"/>
+	<Property ID="7032" NpcID="WorldNpc03451" contextId="story_46189_2" titleId="storymenu_46189_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46189" SceneID="7"/>
+	<Property ID="7033" NpcID="WorldNpc03305" contextId="story_46191_1" titleId="storymenu_46191_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46191" SceneID="7"/>
+	<Property ID="7033" NpcID="WorldNpc03305" contextId="story_46191_2" titleId="storymenu_46191_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46191" SceneID="7"/>
+	<Property ID="7034" NpcID="WorldNpc02035" contextId="story_46195_1" titleId="storymenu_46195_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46195" SceneID="19"/>
+	<Property ID="7034" NpcID="WorldNpc02035" contextId="story_46195_2" titleId="storymenu_46195_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46195" SceneID="19"/>
+	<Property ID="7035" NpcID="WorldNpc02037" contextId="story_46197_1" titleId="storymenu_46197_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46197" SceneID="19"/>
+	<Property ID="7035" NpcID="WorldNpc02037" contextId="story_46197_2" titleId="storymenu_46197_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46197" SceneID="19"/>
+	<Property ID="7036" NpcID="WorldNpc02038" contextId="story_46200_1" titleId="storymenu_46200_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46200" SceneID="19"/>
+	<Property ID="7036" NpcID="WorldNpc02038" contextId="story_46200_2" titleId="storymenu_46200_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46200" SceneID="19"/>
+	<Property ID="7037" NpcID="WorldNpc02039" contextId="story_46208_1" titleId="storymenu_46208_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46208" SceneID="19"/>
+	<Property ID="7037" NpcID="WorldNpc02039" contextId="story_46208_2" titleId="storymenu_46208_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46208" SceneID="19"/>
+	<Property ID="7038" NpcID="WorldNpc02042" contextId="story_46210_1" titleId="storymenu_46210_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46210" SceneID="19"/>
+	<Property ID="7038" NpcID="WorldNpc02042" contextId="story_46210_2" titleId="storymenu_46210_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46210" SceneID="19"/>
+	<Property ID="7039" NpcID="WorldNpc02041" contextId="story_46213_1" titleId="storymenu_46213_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46213" SceneID="19"/>
+	<Property ID="7039" NpcID="WorldNpc02041" contextId="story_46213_2" titleId="storymenu_46213_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46213" SceneID="19"/>
+	<Property ID="7040" NpcID="WorldNpc02035" contextId="story_46215_1" titleId="storymenu_46215_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46215" SceneID="19"/>
+	<Property ID="7040" NpcID="WorldNpc02035" contextId="story_46215_2" titleId="storymenu_46215_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46215" SceneID="19"/>
+	<Property ID="7041" NpcID="WorldNpc02037" contextId="story_46221_1" titleId="storymenu_46221_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46221" SceneID="19"/>
+	<Property ID="7041" NpcID="WorldNpc02037" contextId="story_46221_2" titleId="storymenu_46221_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46221" SceneID="19"/>
+	<Property ID="7042" NpcID="WorldNpc02039" contextId="story_46223_1" titleId="storymenu_46223_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46223" SceneID="19"/>
+	<Property ID="7042" NpcID="WorldNpc02039" contextId="story_46223_2" titleId="storymenu_46223_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46223" SceneID="19"/>
+	<Property ID="7043" NpcID="WorldNpc02041" contextId="story_46226_1" titleId="storymenu_46226_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46226" SceneID="19"/>
+	<Property ID="7043" NpcID="WorldNpc02041" contextId="story_46226_2" titleId="storymenu_46226_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46226" SceneID="19"/>
+	<Property ID="7043" NpcID="WorldNpc02041" contextId="story_46226_3" titleId="storymenu_46226_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_46226" SceneID="19"/>
+	<Property ID="7089"/>
+	<Property ID="7090"/>
+	<Property ID="7091"/>
+	<Property ID="7092"/>
+	<Property ID="7093"/>
+	<Property ID="7094"/>
+	<Property ID="7095"/>
+	<Property ID="7096"/>
+	<Property ID="7097"/>
+	<Property ID="7098"/>
+	<Property ID="7099"/>
+	<Property ID="7100"/>
+	<Property ID="7101"/>
+	<Property ID="7102"/>
+	<Property ID="7103"/>
+	<Property ID="7104"/>
+	<Property ID="7105"/>
+	<Property ID="7106"/>
+	<Property ID="7107"/>
+	<Property ID="7108"/>
+	<Property ID="7109"/>
+	<Property ID="7110"/>
+	<Property ID="7111"/>
+	<Property ID="7112"/>
+	<Property ID="7113"/>
+	<Property ID="7114"/>
+	<Property ID="7115"/>
+	<Property ID="7116"/>
+	<Property ID="7117"/>
+	<Property ID="7118"/>
+	<Property ID="7119"/>
+	<Property ID="7120"/>
+	<Property ID="7121"/>
+	<Property ID="7122"/>
+	<Property ID="7123"/>
+	<Property ID="7124"/>
+	<Property ID="7125"/>
+	<Property ID="7126"/>
+	<Property ID="7127"/>
+	<Property ID="7128"/>
+	<Property ID="7129"/>
+	<Property ID="7130"/>
+	<Property ID="7131"/>
+	<Property ID="7132"/>
+	<Property ID="7133"/>
+	<Property ID="7134"/>
+	<Property ID="7135"/>
+	<Property ID="7136"/>
+	<Property ID="7137"/>
+	<Property ID="7138"/>
+	<Property ID="7139"/>
+	<Property ID="7140"/>
+	<Property ID="7141"/>
+	<Property ID="7142"/>
+	<Property ID="7143"/>
+	<Property ID="7144"/>
+	<Property ID="7145"/>
+	<Property ID="7146"/>
+	<Property ID="7147"/>
+	<Property ID="7148"/>
+	<Property ID="7149"/>
+	<Property ID="7150"/>
+	<Property ID="7151"/>
+	<Property ID="7152"/>
+	<Property ID="7153"/>
+	<Property ID="7154"/>
+	<Property ID="7155"/>
+	<Property ID="7156"/>
+	<Property ID="7157"/>
+	<Property ID="7158"/>
+	<Property ID="7159"/>
+	<Property ID="7160"/>
+	<Property ID="7161"/>
+	<Property ID="7162"/>
+	<Property ID="7163"/>
+	<Property ID="7164"/>
+	<Property ID="7165"/>
+	<Property ID="7166"/>
+	<Property ID="7167"/>
+	<Property ID="7168"/>
+	<Property ID="7169"/>
+	<Property ID="7170"/>
+	<Property ID="7171"/>
+	<Property ID="7172"/>
+	<Property ID="7173"/>
+	<Property ID="7174"/>
+	<Property ID="7175"/>
+	<Property ID="7176"/>
+	<Property ID="7177"/>
+	<Property ID="7178"/>
+	<Property ID="7179"/>
+	<Property ID="7180"/>
+	<Property ID="7181"/>
+	<Property ID="7182"/>
+	<Property ID="7183"/>
+	<Property ID="7184"/>
+	<Property ID="7185"/>
+	<Property ID="7186"/>
+	<Property ID="7187"/>
+	<Property ID="7188"/>
+	<Property ID="7189"/>
+	<Property ID="7190"/>
+	<Property ID="7191"/>
+	<Property ID="7192"/>
+	<Property ID="7193"/>
+	<Property ID="7194"/>
+	<Property ID="7195"/>
+	<Property ID="7196"/>
+	<Property ID="7197"/>
+	<Property ID="7198"/>
+	<Property ID="7199"/>
+	<Property ID="7200" NpcID="WorldNpc08519" contextId="story46291_1" titleId="storymenu46291_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46291" SceneID="13"/>
+	<Property ID="7201" NpcID="WorldNpc02692" contextId="story46338_1" titleId="storymenu46338_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46338" SceneID="10"/>
+	<Property ID="7201" NpcID="WorldNpc02692" contextId="story46338_2" titleId="storymenu46338_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46338" SceneID="10"/>
+	<Property ID="7203" NpcID="WorldNpc02693" contextId="story46340_2" titleId="storymenu46340_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46340_2" SceneID="10"/>
+	<Property ID="7204" NpcID="WorldNpc02698" contextId="story46344_1" titleId="storymenu46344_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46344" SceneID="10"/>
+	<Property ID="7204" NpcID="WorldNpc02698" contextId="story46344_2" titleId="storymenu46344_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46344" SceneID="10"/>
+	<Property ID="7205" NpcID="WorldNpc02642" contextId="story46361_1" titleId="storymenu46361_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46361" SceneID="10"/>
+	<Property ID="7206" NpcID="WorldNpc02696" contextId="story46363_1" titleId="storymenu46363_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46363" SceneID="10"/>
+	<Property ID="7208" NpcID="WorldNpc02696" contextId="story46378_1" titleId="storymenu46378_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46378" SceneID="10"/>
+	<Property ID="7208" NpcID="WorldNpc02696" contextId="story46378_2" titleId="storymenu46378_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46378" SceneID="10"/>
+	<Property ID="7209" NpcID="WorldNpc03305" contextId="story46386_1" titleId="storymenu46386_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46386" SceneID="9"/>
+	<Property ID="7210" NpcID="WorldNpc02573" contextId="story46391_1" titleId="storymenu46391_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46391" SceneID="9"/>
+	<Property ID="7211" NpcID="WorldNpc02576" contextId="story46410_1" titleId="storymenu46410_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46410" SceneID="9"/>
+	<Property ID="7212" NpcID="WorldNpc02576" contextId="story46422_1" titleId="storymenu46422_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46422" SceneID="9"/>
+	<Property ID="7213" NpcID="WorldNpc02574" contextId="story46428_1" titleId="storymenu46428_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46428" SceneID="9"/>
+	<Property ID="7214" NpcID="WorldNpc03305" contextId="story46434_1" titleId="storymenu46434_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46434" SceneID="7"/>
+	<Property ID="7215" NpcID="WorldNpc06231" contextId="story46436_1" titleId="storymenu46436_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46436" SceneID="22"/>
+	<Property ID="7216" NpcID="WorldNpc06232" contextId="story46447_1" titleId="storymenu46447_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46447" SceneID="22"/>
+	<Property ID="7217" NpcID="WorldNpc06237" contextId="story46452_1" titleId="storymenu46452_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46452" SceneID="22"/>
+	<Property ID="7218" NpcID="WorldNpc06230" contextId="story46455_1" titleId="storymenu46455_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46455" SceneID="22"/>
+	<Property ID="7219" NpcID="WorldNpc06240" contextId="story46461_1" titleId="storymenu46461_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46461" SceneID="22"/>
+	<Property ID="7220" NpcID="WorldNpc06241" contextId="story46464_1" titleId="storymenu46464_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46464" SceneID="22"/>
+	<Property ID="7221" NpcID="WorldNpc06242" contextId="story46469_1" titleId="storymenu46469_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46469" SceneID="22"/>
+	<Property ID="7222" NpcID="WorldNpc06236 " contextId="story46471_1" titleId="storymenu46471_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46471_1" SceneID="22"/>
+	<Property ID="7223" NpcID="WorldNpc06236 " contextId="story46471_2" titleId="storymenu46471_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo46471_2" SceneID="22"/>
+	<Property ID="7224"/>
+	<Property ID="7225"/>
+	<Property ID="7226"/>
+	<Property ID="7227"/>
+	<Property ID="7228"/>
+	<Property ID="7229"/>
+	<Property ID="7230"/>
+	<Property ID="7231"/>
+	<Property ID="7232"/>
+	<Property ID="7233"/>
+	<Property ID="7234"/>
+	<Property ID="7235"/>
+	<Property ID="7236"/>
+	<Property ID="7237"/>
+	<Property ID="7238"/>
+	<Property ID="7239"/>
+	<Property ID="7240"/>
+	<Property ID="7241"/>
+	<Property ID="7242"/>
+	<Property ID="7243"/>
+	<Property ID="7244"/>
+	<Property ID="7245"/>
+	<Property ID="7246"/>
+	<Property ID="7247"/>
+	<Property ID="7248"/>
+	<Property ID="7249"/>
+	<Property ID="7250"/>
+	<Property ID="7251"/>
+	<Property ID="7252"/>
+	<Property ID="7253"/>
+	<Property ID="7254"/>
+	<Property ID="7255"/>
+	<Property ID="7256"/>
+	<Property ID="7257"/>
+	<Property ID="7258"/>
+	<Property ID="7259"/>
+	<Property ID="7260"/>
+	<Property ID="7261"/>
+	<Property ID="7262"/>
+	<Property ID="5001" NpcID="FunnpcClone017002" contextId="story_42021_1" titleId="storymenu_42021_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_42021" SceneID="5"/>
+	<Property ID="5001" NpcID="FunnpcClone017002" contextId="story_42021_2" titleId="storymenu_42021_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_42021" SceneID="5"/>
+	<Property ID="8001" NpcID="WorldNpc03826" contextId="story_48001_1" titleId="storymenu_48001_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48001" SceneID="8"/>
+	<Property ID="8001" NpcID="WorldNpc03826" contextId="story_48001_2" titleId="storymenu_48001_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48001" SceneID="8"/>
+	<Property ID="8001" NpcID="WorldNpc03826" contextId="story_48001_3" titleId="storymenu_48001_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48001" SceneID="8"/>
+	<Property ID="8002" NpcID="WorldNpc03810" contextId="story_48002_1" titleId="storymenu48002_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48002" SceneID="8"/>
+	<Property ID="8002" NpcID="WorldNpc03810" contextId="story_48002_2" titleId="storymenu48002_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48002" SceneID="8"/>
+	<Property ID="8002" NpcID="WorldNpc03810" contextId="story_48002_3" titleId="storymenu48002_3" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48002" SceneID="8"/>
+	<Property ID="8003" NpcID="WorldNpc03810" contextId="story_48008_1" titleId="storymenu_48008_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48008" SceneID="8"/>
+	<Property ID="8003" NpcID="WorldNpc03810" contextId="story_48008_2" titleId="storymenu_48008_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48008" SceneID="8"/>
+	<Property ID="8004" NpcID="WorldNpc03856" contextId="story_48018_1" titleId="storymenu48018_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48018" SceneID="8"/>
+	<Property ID="8004" NpcID="WorldNpc03856" contextId="story_48018_2" titleId="storymenu48018_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48018" SceneID="8"/>
+	<Property ID="8005" NpcID="WorldNpc03810" contextId="story_48024_1" titleId="storymenu48024_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48024" SceneID="8"/>
+	<Property ID="8005" NpcID="WorldNpc03810" contextId="story_48024_2" titleId="storymenu48024_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48024" SceneID="8"/>
+	<Property ID="8006" NpcID="WorldNpc03858" contextId="story_48030_1" titleId="storymenu48030_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48030" SceneID="8"/>
+	<Property ID="8007" NpcID="WorldNpc03858" contextId="story_48030_2" titleId="storymenu48030_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48030" SceneID="8"/>
+	<Property ID="8008" NpcID="WorldNpc03928" contextId="story_48061_1" titleId="storymenu48061_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48061" SceneID="8"/>
+	<Property ID="8008" NpcID="WorldNpc03928" contextId="story_48061_2" titleId="storymenu48061_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48061" SceneID="8"/>
+	<Property ID="8009" NpcID="WorldNpc03928" contextId="story_48066_1" titleId="storymenu48066_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48066" SceneID="8"/>
+	<Property ID="8009" NpcID="WorldNpc03928" contextId="story_48066_2" titleId="storymenu48066_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48066" SceneID="8"/>
+	<Property ID="8010" NpcID="WorldNpc03809" contextId="story_48071_1" titleId="storymenu48071_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48071" SceneID="8"/>
+	<Property ID="8010" NpcID="WorldNpc03809" contextId="story_48071_2" titleId="storymenu48071_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48071" SceneID="8"/>
+	<Property ID="8011" NpcID="WorldNpc03809" contextId="story_48076_1" titleId="storymenu48076_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48076" SceneID="8"/>
+	<Property ID="8011" NpcID="WorldNpc03809" contextId="story_48076_2" titleId="storymenu48076_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48076" SceneID="8"/>
+	<Property ID="8012" NpcID="WorldNpc03811" contextId="story_48134_1" titleId="storymenu48134_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48134" SceneID="8"/>
+	<Property ID="8012" NpcID="WorldNpc03811" contextId="story_48134_2" titleId="storymenu48134_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48134" SceneID="8"/>
+	<Property ID="8013" NpcID="WorldNpc03822" contextId="story_48143_1" titleId="storymenu48143_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48143" SceneID="8"/>
+	<Property ID="8013" NpcID="WorldNpc03822" contextId="story_48143_2" titleId="storymenu48143_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48143" SceneID="8"/>
+	<Property ID="8014" NpcID="WorldNpc09602" contextId="story_48150_1" titleId="storymenu48150_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48150" SceneID="17"/>
+	<Property ID="8014" NpcID="WorldNpc09602" contextId="story_48150_2" titleId="storymenu48150_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48150" SceneID="17"/>
+	<Property ID="8015" NpcID="WorldNpc09815" contextId="story_48167_1" titleId="storymenu48167_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48167" SceneID="17"/>
+	<Property ID="8015" NpcID="WorldNpc09815" contextId="story_48167_2" titleId="storymenu48167_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48167" SceneID="17"/>
+	<Property ID="8016" NpcID="WorldNpc03825" contextId="story_48174_1" titleId="storymenu48174_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48174" SceneID="8"/>
+	<Property ID="8016" NpcID="WorldNpc03825" contextId="story_48174_2" titleId="storymenu48174_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48174" SceneID="8"/>
+	<Property ID="8017" NpcID="WorldNpc03930" contextId="story_48084_1" titleId="storymenu481084_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48084" SceneID="8"/>
+	<Property ID="8017" NpcID="WorldNpc03930" contextId="story_48084_2" titleId="storymenu481084_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48084" SceneID="8"/>
+	<Property ID="8018" NpcID="WorldNpc05105" contextId="story_48100_1" titleId="storymenu48100_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48100" SceneID="24"/>
+	<Property ID="8018" NpcID="WorldNpc05105" contextId="story_48100_2" titleId="storymenu48100_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48100" SceneID="24"/>
+	<Property ID="8019" NpcID="WorldNpc05105" contextId="story_48109_1" titleId="storymenu48109_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48109" SceneID="24"/>
+	<Property ID="8019" NpcID="WorldNpc05105" contextId="story_48109_2" titleId="storymenu48109_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48109" SceneID="24"/>
+	<Property ID="8020" NpcID="WorldNpc05103" contextId="story_48115_1" titleId="storymenu48115_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48115" SceneID="24"/>
+	<Property ID="8020" NpcID="WorldNpc05103" contextId="story_48115_2" titleId="storymenu48115_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48115" SceneID="24"/>
+	<Property ID="8021" NpcID="WorldNpc05108" contextId="story_48128_1" titleId="storymenu48128_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48128" SceneID="24"/>
+	<Property ID="8021" NpcID="WorldNpc05108" contextId="story_48128_2" titleId="storymenu48128_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48128" SceneID="24"/>
+	<Property ID="8022" NpcID="WorldNpc04013" contextId="story_48192_1" titleId="storymenu48192_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48192" SceneID="8"/>
+	<Property ID="8022" NpcID="WorldNpc04013" contextId="story_48192_2" titleId="storymenu48192_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48192" SceneID="8"/>
+	<Property ID="8023" NpcID="WorldNpc04008" contextId="story_48212_1" titleId="storymenu48212_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48212" SceneID="8"/>
+	<Property ID="8023" NpcID="WorldNpc04008" contextId="story_48212_2" titleId="storymenu48212_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48212" SceneID="8"/>
+	<Property ID="8024" NpcID="WorldNpc04086" contextId="story_48219_1" titleId="storymenu48219_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48219" SceneID="8"/>
+	<Property ID="8024" NpcID="WorldNpc04086" contextId="story_48219_2" titleId="storymenu48219_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48219" SceneID="8"/>
+	<Property ID="8025" NpcID="WorldNpc03808" contextId="story_48230_1" titleId="storymenu48230_1" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48230" SceneID="8"/>
+	<Property ID="8025" NpcID="WorldNpc03808" contextId="story_48230_2" titleId="storymenu48230_2" LeaveTextID="9607" LeaveResult="0" TrackInfoID="storyinfo_48230" SceneID="8"/>
+</Object>

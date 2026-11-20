@@ -38,7 +38,9 @@ func (m *NpcResourceModule) Init(k *Kernel) error {
 }
 
 // LoadResource 官方 @0x8A3FD0：ini/Npc 树扫描（NpcConfigAuto 按
-// member<N>_ 分档优先；Go 面计数装载）。
+// member<N>_ 分档优先）。官方 NpcConfig 本就按组子目录分档
+// （WorldNpc/BattleNpc/CloneNpc/LifeNpc，见客户端 npcconfig/npc_type.ini
+// 的服务端路径映射），Go 面递归装载并按行登记 npcID → script 类。
 func (m *NpcResourceModule) LoadResource(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return fmt.Errorf("fsgame: NpcResourceModule.LoadResource: ResourcePath 未设置")
@@ -46,20 +48,55 @@ func (m *NpcResourceModule) LoadResource(k *Kernel) error {
 	base := filepath.Join(k.ResourcePath, "ini", "Npc")
 	for _, sub := range []string{"NpcConfigAuto", "NpcConfig"} {
 		dir := filepath.Join(base, sub)
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			continue
-		}
-		for _, e := range entries {
-			if e.IsDir() || !strings.HasSuffix(e.Name(), ".xml") {
-				continue
+		err := filepath.WalkDir(dir, func(path string, d os.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				if os.IsNotExist(walkErr) {
+					return nil // 目录缺失与旧容错一致
+				}
+				return walkErr
+			}
+			if d.IsDir() || !strings.HasSuffix(d.Name(), ".xml") {
+				return nil
+			}
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				k.Tracef("NpcResourceModule: 读 %s: %v", path, readErr)
+				return nil
+			}
+			rows, parseErr := ParsePropTable(data)
+			if parseErr != nil {
+				k.Tracef("NpcResourceModule: 解析 %s: %v", path, parseErr)
+				return nil
+			}
+			for _, row := range rows {
+				id := row["ID"]
+				if id == "" {
+					continue
+				}
+				m.npcs[id] = m.resolveClass(k, row["script"])
 			}
 			m.loaded++
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("fsgame: NpcResourceModule.LoadResource: %w", err)
 		}
 	}
-	k.Tracef("NpcResourceModule: LoadResource ini/Npc 树 %d 档", m.loaded)
+	k.Tracef("NpcResourceModule: LoadResource ini/Npc 树 %d 档 %d NPC", m.loaded, len(m.npcs))
 	return nil
 }
+
+// resolveClass script 属性 → 物化类名：客户端表 script 值即对象类型；
+// 空值或 logic_class 未登记的类名回落 CommonNpc。
+func (m *NpcResourceModule) resolveClass(k *Kernel, script string) string {
+	if script != "" && k.Class(script) != nil {
+		return script
+	}
+	return "CommonNpc"
+}
+
+// ClassOf 查询 NPC 配置登记类（测试面；未登记返回空）。
+func (m *NpcResourceModule) ClassOf(npcID string) string { return m.npcs[npcID] }
 
 // RegisterNpc 登记 NPC 资源（npcID → 类）。
 func (m *NpcResourceModule) RegisterNpc(npcID, class string) { m.npcs[npcID] = class }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property File="attacknpc.xml" No="BF409E960FBA4C5ABF729CA32C9AB98B" x="214.699" y="9.262" z="464.701" ay="-1.990" id="NpcAdv032001" BornAction="ty_interact237" RandomAction="ty_interact237" RefreshTime="-1.0" PatrolMode="1" WakeupRange="5.0" ChaseRange="27.0" NotPositive="0" desc="侠客"/>
+	<Property File="attacknpc.xml" No="C8CF46AE343A4389A191193DB066E32D" x="210.606" y="10.537" z="441.397" id="NpcPrestige011" RefreshTime="30000.0" PatrolMode="1" WakeupRange="5.0" ChaseRange="27.0" NotPositive="0" desc="极乐追风刀"/>
+	<Property File="attacknpc.xml" No="13E3D94E67C84581A6503AB35F47A25C" x="208.422" y="10.418" z="440.750" id="NpcPrestige011" RefreshTime="30000.0" PatrolMode="1" WakeupRange="5.0" ChaseRange="27.0" NotPositive="0" desc="极乐追风刀"/>
+	<Property File="attacknpc.xml" No="BA4E5C75126744AA9876CC7DB42AAD34" x="211.365" y="11.018" z="436.841" id="NpcPrestige006" RefreshTime="30000.0" PatrolMode="1" WakeupRange="5.0" ChaseRange="27.0" NotPositive="0" desc="唐门迷魂镖"/>
+	<Property File="attacknpc.xml" No="ABA9B238076A43DC847BE2BC554C9B18" x="208.463" y="11.003" z="436.650" id="NpcPrestige006" RefreshTime="30000.0" PatrolMode="1" WakeupRange="5.0" ChaseRange="27.0" NotPositive="0" desc="唐门迷魂镖"/>
+	<Property File="attacknpc.xml" No="750192B8399D4AB9A4682717C63E5CBB" x="208.489" y="10.630" z="438.283" id="NpcPrestige005" RefreshTime="30000.0" PatrolMode="1" WakeupRange="5.0" ChaseRange="27.0" NotPositive="0" desc="锦衣掌法"/>
+	<Property File="attacknpc.xml" No="1B4EBE66063D4FD995DBB70CB94AB727" x="210.910" y="11.013" z="439.261" id="NpcPrestige005" RefreshTime="30000.0" PatrolMode="1" WakeupRange="16.0" ChaseRange="27.0" NotPositive="0" desc="锦衣掌法"/>
+	<Property File="commonnpc.xml" No="F2103C652B9540B894AE45D56C8EF4F9" x="209.047" y="11.050" z="433.590" id="bosskarma004" BornAction="ty_interact237" RandomAction="ty_interact237" RefreshTime="-1.0" PatrolMode="1" WakeupRange="5" ChaseRange="27.0" NotPositive="0" desc="鬼愁"/>
+	<Property File="funcnpc.xml" No="13BA151772454821BBCE67EDDA49AE0F" x="209.008" y="11.028" z="433.497" id="Macadv032_cloneNpc001" RefreshTime="30000.0" PatrolMode="1" WakeupRange="12.0" ChaseRange="23.0" NotPositive="0" desc="毒"/>
+	<Property File="funcnpc.xml" No="53B57F249B394DFE8A94289237748880" x="175.063" y="9.785" z="475.119" id="DoorNpcadv032" RefreshTime="30000.0" PatrolMode="1" WakeupRange="3" ChaseRange="23.0" NotPositive="0" desc="侠客洞出口"/>
+	<Property File="funcnpc.xml" No="556F041C6B974B1BA953C78DA27B186A" x="196.109" y="7.749" z="466.848" id="EventAdv100clone001" RefreshTime="30000.0" PatrolMode="1" WakeupRange="5" ChaseRange="23.0" NotPositive="0" desc="删除看守"/>
+</Object>

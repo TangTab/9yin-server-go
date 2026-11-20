@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="RoadSign00001" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="179" Resource="npc\lupai_01"/>
+	<Property ID="RoadSign01" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="44" Resource="npc\jt_lupai01_01"/>
+	<Property ID="RoadSign02" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="44" Resource="npc\jt_lupai02_01"/>
+	<Property ID="RoadSign03" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="44" Resource="npc\jt_lupai03_01"/>
+	<Property ID="RoadSign04" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="44" Resource="npc\jt_lupai04_01"/>
+	<Property ID="RoadSign05" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="44" Resource="npc\jt_lupai05_01"/>
+	<Property ID="RoadSign06" script="RoadSignNpc" Name="路牌" Desc="路牌" NpcType="44" Resource="npc\jt_lupai06_01"/>
+</Object>

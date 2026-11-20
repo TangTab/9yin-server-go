@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="save_xjz_01" script="BeCuredNpc" Name="老人1" Desc="老人1" WeaponMode="hand1_1" Resource="npc\worldnpc110" NpcType="420" SpringRange="20" SelectState="2"/>
+	<Property ID="save_xjz_02" script="BeCuredNpc" Name="老人2" Desc="老人2" WeaponMode="hand1_1" Resource="npc\worldnpc119" NpcType="420" SpringRange="20" SelectState="2"/>
+	<Property ID="save_xjz_03" script="BeCuredNpc" Name="老人3" Desc="老人3" WeaponMode="hand1_1" Resource="npc\worldnpc125" NpcType="420" SpringRange="20" SelectState="2"/>
+	<Property ID="save_xjz_04" script="BeCuredNpc" Name="老人4" Desc="老人4" WeaponMode="hand1_1" Resource="npc\worldnpc126" NpcType="420" SpringRange="20" SelectState="2"/>
+	<Property ID="save_xjz_05" script="BeCuredNpc" Name="老人5" Desc="老人5" WeaponMode="hand1_1" Resource="npc\worldnpc132" NpcType="420" SpringRange="20" SelectState="2"/>
+</Object>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="RideDriveNpc_wjd_01" script="RideDriveNpc" Name="无极岛移动炮" Desc="无极岛移动炮" NpcType="166" SelectState="2" NeedRotate="0" Resource="npc\npcitem877a_dapao" WalkSpeed="1" RunSpeed="1" AITemplate="3" PatrolMode="1" PatrolRange="0" SpringRange="10" Camp="1" FightID="31" Level="60" RefreshTime="-1"/>
+</Object>

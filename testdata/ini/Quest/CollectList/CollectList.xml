@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" ItemId="useitem_38b" NpcId="monv041200" Count="1" Droprate="0.8" TrackInfo="collect24018" SceneId="1"/>
+	<Property ID="4002" ItemId="taskitem_3f" NpcId="monv041400" Count="2" Droprate="0.5" TrackInfo="collect24029_1" SceneId="1"/>
+	<Property ID="4003" ItemId="taskitem_4f" NpcId="monv041500" Count="2" Droprate="0.5" TrackInfo="collect24029_2" SceneId="1"/>
+	<Property ID="4004" ItemId="taskitem_26f" Count="1" Droprate="1" TrackInfo="collect24029_3" SceneId="1"/>
+	<Property ID="4005" ItemId="taskitem_11f" Count="1" Droprate="1" TrackInfo="collect24053" SceneId="1"/>
+	<Property ID="4006" ItemId="taskitem_5f" NpcId="Gather00005f" Count="6" Droprate="1" TrackInfo="collect24058_1" SceneId="1"/>
+	<Property ID="4007" ItemId="taskitem_6f" NpcId="monv040400" Count="6" Droprate="1" TrackInfo="collect24058_2" SceneId="1"/>
+	<Property ID="4008" ItemId="taskitem_7f" NpcId="Gather00007f" Count="3" Droprate="1" TrackInfo="collect24072" SceneId="1"/>
+	<Property ID="4009" ItemId="taskitem_29b" NpcId="Gather00012b" Count="1" Droprate="1" TrackInfo="collect24635" SceneId="11"/>
+	<Property ID="4010" ItemId="taskitem_10f" NpcId="Gather00011f" Count="1" Droprate="1" TrackInfo="collect24089" SceneId="10"/>
+	<Property ID="4011" ItemId="taskitem_13f" NpcId="Gather00006f" Count="3" Droprate="1" TrackInfo="collect24097" SceneId="21"/>
+	<Property ID="4012" ItemId="taskitem_14f" NpcId="Gather00017f" Count="1" Droprate="1" TrackInfo="collect24105" SceneId="21"/>
+	<Property ID="4013" ItemId="taskitem_18f" Count="1" Droprate="1" TrackInfo="collect24107" SceneId="21"/>
+	<Property ID="4014" ItemId="taskitem_36f" NpcId="Gather00023f" Count="1" Droprate="1" TrackInfo="collect24126_1" SceneId="21"/>
+	<Property ID="4015" ItemId="taskitem_37f" NpcId="Gather00024f" Count="1" Droprate="1" TrackInfo="collect24126_2" SceneId="21"/>
+	<Property ID="4016" ItemId="taskitem_21f" NpcId="Gather00012f" Count="6" Droprate="1" TrackInfo="collect24129" SceneId="21"/>
+	<Property ID="4017" ItemId="taskitem_20f" NpcId="Gather00013f" Count="3" Droprate="1" TrackInfo="collect24134" SceneId="21"/>
+	<Property ID="4018" ItemId="taskitem_23f" NpcId="Gather00018f" Count="3" Droprate="1" TrackInfo="collect24147" SceneId="22"/>
+	<Property ID="4019" ItemId="taskitem_27f" NpcId="monrf051100" RefreshMonster="1010" Count="1" Droprate="1" TrackInfo="collect24175" SceneId="22"/>
+	<Property ID="4022" ItemId="taskitem_30f" NpcId="Gather00021f" Count="1" Droprate="1" TrackInfo="collect24181" SceneId="22"/>
+	<Property ID="4023" ItemId="taskitem_31f" NpcId="Gather00025f" Count="1" Droprate="1" TrackInfo="collect24188" SceneId="22"/>
+	<Property ID="4024" ItemId="taskitem_6h" NpcId="monrc050600" Count="1" Droprate="1" TrackInfo="collect24221" SceneId="17"/>
+	<Property ID="4025" ItemId="useitem_5h" NpcId="monrm071500" Count="1" Droprate="1" TrackInfo="collect24232" SceneId="17"/>
+	<Property ID="4026" ItemId="useitem_41b" NpcId="Gather00001b" Count="1" Droprate="1" TrackInfo="collect24247" SceneId="1"/>
+	<Property ID="4027" ItemId="taskitem_2b" NpcId="Gather00002b" Count="1" Droprate="1" TrackInfo="collect24256" SceneId="1"/>
+	<Property ID="4028" ItemId="taskitem_5b" NpcId="WorldNpc00033" Count="1" Droprate="1" TrackInfo="collect24262" SceneId="1"/>
+	<Property ID="4029" ItemId="taskitem_6b" Count="1" Droprate="1" TrackInfo="collect24263" SceneId="1"/>
+	<Property ID="4030" ItemId="taskitem_11b" NpcId="WorldNpc05804" Count="1" Droprate="1" TrackInfo="collect24268" SceneId="21"/>
+	<Property ID="4031" ItemId="taskitem_1a" NpcId="monc020500" Count="5" Droprate="0.8" TrackInfo="collect24292" SceneId="13"/>
+	<Property ID="4032" ItemId="taskitem_4a" NpcId="Gather00005a" Count="1" Droprate="1" TrackInfo="collect24305" SceneId="20"/>
+	<Property ID="4033" ItemId="taskitem_5a" NpcId="Gather00006a" Count="1" Droprate="1" TrackInfo="collect24309" SceneId="20"/>
+	<Property ID="4034" ItemId="taskitem_7a" NpcId="Gather00007a" Count="4" Droprate="1" TrackInfo="collect24317" SceneId="20"/>
+	<Property ID="4035" ItemId="taskitem_8a" NpcId="Gather00008a" Count="1" Droprate="1" TrackInfo="collect24320" SceneId="20"/>
+	<Property ID="4036" ItemId="taskitem_9a" NpcId="monf034500" Count="5" Droprate="0.8" TrackInfo="collect24321" SceneId="20"/>
+	<Property ID="4037" ItemId="taskitem_410" NpcId="Gather00007b" Count="7" Droprate="1" TrackInfo="collect24369" SceneId="13"/>
+	<Property ID="4038" ItemId="taskitem_415" NpcId="Gather00008b" Count="5" Droprate="1" TrackInfo="collect24381" SceneId="13"/>
+	<Property ID="4039" ItemId="taskitem_25b" NpcId="Gather00011b" Count="6" Droprate="1" TrackInfo="collect24390" SceneId="10"/>
+	<Property ID="4040" ItemId="taskitem_24b" NpcId="Gather00009b" Count="1" Droprate="1" TrackInfo="collect24416" SceneId="10"/>
+	<Property ID="4041" ItemId="taskitem_11a" NpcId="Gather00011a" Count="1" Droprate="1" TrackInfo="collect24434" SceneId="9"/>
+	<Property ID="4042" ItemId="taskitem_14a" NpcId="WorldNpc02545" Count="1" Droprate="1" TrackInfo="collect24442" SceneId="9"/>
+	<Property ID="4043" ItemId="useitem_44b" NpcId="monrm051500" RefreshMonster="1246" Count="1" Droprate="1" TrackInfo="collect24449" SceneId="9"/>
+	<Property ID="4044" ItemId="taskitem_21a" NpcId="Gather00013a" Count="1" Droprate="1" TrackInfo="collect24451" SceneId="9"/>
+	<Property ID="4045" ItemId="taskitem_16a" NpcId="Gather00014a" Count="1" Droprate="1" TrackInfo="collect24465" SceneId="9"/>
+	<Property ID="4046" ItemId="taskitem_17a" NpcId="monm051300" Count="10" Droprate="0.75" TrackInfo="collect24473" SceneId="9"/>
+	<Property ID="4047" ItemId="taskitem_19a" NpcId="monm051400" Count="3" Droprate="0.1" TrackInfo="collect24476" SceneId="9"/>
+	<Property ID="4048" ItemId="taskitem_20a" NpcId="useitem_8a" Count="1" Droprate="1" TrackInfo="collect24478" SceneId="9"/>
+	<Property ID="4049" ItemId="taskitem_23a" NpcId="Gather00015a" Count="1" Droprate="1" TrackInfo="collect24494" SceneId="22"/>
+	<Property ID="4050" ItemId="useitem_12a" NpcId="Gather00017a" Count="1" Droprate="1" TrackInfo="collect24511" SceneId="22"/>
+	<Property ID="4051" ItemId="taskitem_24a" NpcId="Gather00018a" Count="1" Droprate="1" TrackInfo="collect24518" SceneId="22"/>
+	<Property ID="4052" ItemId="taskitem_25a" NpcId="monm052100" Count="3" Droprate="1" TrackInfo="collect24524_1" SceneId="9"/>
+	<Property ID="4053" ItemId="taskitem_26a" NpcId="monm052100" Count="3" Droprate="1" TrackInfo="collect24524_2" SceneId="9"/>
+	<Property ID="4054" ItemId="useitem_15a" NpcId="monrm058100" Count="1" Droprate="1" TrackInfo="collect24549" SceneId="9"/>
+	<Property ID="4055" ItemId="useitem_16a" NpcId="monrm058200" Count="1" Droprate="1" TrackInfo="collect24551" SceneId="9"/>
+	<Property ID="4056" ItemId="useitem_17a" Count="1" Droprate="1" TrackInfo="collect24561_1" SceneId="9"/>
+	<Property ID="4057" ItemId="taskitem_31a" Count="3" Droprate="1" TrackInfo="collect24561_2" SceneId="9"/>
+	<Property ID="4058" ItemId="taskitem_34a" NpcId="monrm059100" Count="1" Droprate="1" TrackInfo="collect24586" SceneId="9"/>
+	<Property ID="4059" ItemId="taskitem_37a" NpcId="Gather00025a" Count="3" Droprate="1" TrackInfo="collect24589" SceneId="9"/>
+	<Property ID="4060" ItemId="taskitem_61b" NpcId="Gather00034b" Count="1" Droprate="1" TrackInfo="collect24604" SceneId="9"/>
+	<Property ID="4061" ItemId="taskitem_43a" NpcId="Gather00027a" Count="1" Droprate="1" TrackInfo="collect24605" SceneId="9"/>
+	<Property ID="4062" ItemId="taskitem_46a" NpcId="Gather00028a" Count="1" Droprate="1" TrackInfo="collect24613" SceneId="9"/>
+	<Property ID="4063" ItemId="taskitem_45a" NpcId="monrm059900" Count="1" Droprate="1" TrackInfo="collect24617" SceneId="9"/>
+	<Property ID="4064" ItemId="taskitem_29b" NpcId="monrm070300" Count="1" Droprate="1" TrackInfo="collect24634" SceneId="11"/>
+	<Property ID="4065" ItemId="taskitem_30b" NpcId="Gather00012b" Count="1" Droprate="1" TrackInfo="collect24639" SceneId="11"/>
+	<Property ID="4066" ItemId="taskitem_29b" Count="1" Droprate="1" TrackInfo="collect24640" SceneId="11"/>
+	<Property ID="4067" ItemId="taskitem_31b" NpcId="Gather00013b" Count="5" Droprate="1" TrackInfo="collect24641" SceneId="11"/>
+	<Property ID="4068" ItemId="taskitem_32b" NpcId="Gather00015b" Count="5" Droprate="1" TrackInfo="collect24652" SceneId="11"/>
+	<Property ID="4069" ItemId="taskitem_33b" Count="1" Droprate="1" TrackInfo="collect24653" SceneId="11"/>
+	<Property ID="4070" ItemId="taskitem_35b" NpcId="Gather00016b" Count="1" Droprate="1" TrackInfo="collect24674" SceneId="11"/>
+	<Property ID="4071" ItemId="taskitem_37b" NpcId="Gather00017b" Count="5" Droprate="1" TrackInfo="collect24682" SceneId="11"/>
+	<Property ID="4072" ItemId="taskitem_38b" Count="1" Droprate="1" TrackInfo="collect24693" SceneId="11"/>
+	<Property ID="4073" ItemId="taskitem_374" NpcId="Gather00002f" Count="2" Droprate="1" TrackInfo="collect24005" SceneId="11"/>
+	<Property ID="4074" ItemId="taskitem_53b" NpcId="Gather00025b" Count="1" Droprate="1" TrackInfo="collect24454" SceneId="9"/>
+	<Property ID="4075" ItemId="taskitem_55b" NpcId="Gather00029b" Count="1" Droprate="1" TrackInfo="collect24502" SceneId="22"/>
+	<Property ID="4076" ItemId="taskitem_58b" NpcId="Gather00030b" Count="6" Droprate="1" TrackInfo="collect24509" SceneId="22"/>
+	<Property ID="4077" ItemId="taskitem_66b" NpcId="Gather00036b" Count="1" Droprate="1" TrackInfo="collect24750" SceneId="10"/>
+	<Property ID="4078" ItemId="taskitem_67b" NpcId="Gather00037b" Count="1" Droprate="1" TrackInfo="collect24757" SceneId="10"/>
+	<Property ID="4079" ItemId="useitem_49b" NpcId="monrm058400" IsNeedCreator="1" Count="4" Droprate="1" TrackInfo="collect24549" SceneId="9"/>
+	<Property ID="3012" ItemId="taskitem_16g" NpcId="Gather00006g" Count="6" Droprate="1" TrackInfo="collect22009" SceneId="3"/>
+	<Property ID="3013" ItemId="taskitem_30g" NpcId="Gather00007g" Count="6" Droprate="1" TrackInfo="collect22023" SceneId="3"/>
+	<Property ID="3014" ItemId="taskitem_18g" NpcId="Gather00014g" Count="6" Droprate="1" TrackInfo="collect22027" SceneId="3"/>
+	<Property ID="3015" ItemId="taskitem_21g" NpcId="Gather00008g" Count="1" Droprate="1" TrackInfo="collect22054" SceneId="14"/>
+	<Property ID="3016" ItemId="taskitem_23g" NpcId="monc011200" Count="6" Droprate="1" TrackInfo="collect22063" SceneId="14"/>
+	<Property ID="3017" ItemId="taskitem_24g" NpcId="Gather00010g" Count="6" Droprate="1" TrackInfo="collect22065" SceneId="14"/>
+	<Property ID="3018" ItemId="taskitem_25g" NpcId="monc011400" Count="6" Droprate="1" TrackInfo="collect22068" SceneId="14"/>
+	<Property ID="3019" ItemId="taskitem_26g" NpcId="Gather00011g" Count="6" Droprate="1" TrackInfo="collect22081" SceneId="14"/>
+	<Property ID="3020" ItemId="taskitem_27g" NpcId="Gather00012g" Count="6" Droprate="1" TrackInfo="collect22088" SceneId="14"/>
+	<Property ID="3021" ItemId="taskitem_28g" NpcId="Gather00013g" Count="6" Droprate="1" TrackInfo="collect22089" SceneId="14"/>
+	<Property ID="3022" ItemId="taskitem_13f" NpcId="Gather00006f" Count="2" Droprate="1" TrackInfo="collect22097" SceneId="21"/>
+	<Property ID="3023" ItemId="taskitem_31g" NpcId="Gather00019g" Count="1" Droprate="1" TrackInfo="collect22100" SceneId="21"/>
+	<Property ID="3024" ItemId="taskitem_14f" NpcId="Gather00017f" Count="1" Droprate="1" TrackInfo="collect22104" SceneId="21"/>
+	<Property ID="3025" ItemId="taskitem_32g" NpcId="monf041200" Count="6" Droprate="1" TrackInfo="collect22113" SceneId="21"/>
+	<Property ID="3026" ItemId="taskitem_33g" NpcId="monf041400" Count="1" Droprate="0.3" TrackInfo="collect22115" SceneId="21"/>
+	<Property ID="3027" ItemId="taskitem_21f" NpcId="Gather00012f" Count="6" Droprate="1" TrackInfo="collect22133" SceneId="21"/>
+	<Property ID="3028" ItemId="taskitem_29g" Count="1" Droprate="1" TrackInfo="collect22092" SceneId="14"/>
+	<Property ID="3029" ItemId="taskitem_37g" NpcId="Gather00022g" Count="3" Droprate="1" TrackInfo="collect22146_1" SceneId="22"/>
+	<Property ID="3030" ItemId="taskitem_38g" NpcId="Gather00023g" Count="3" Droprate="1" TrackInfo="collect22146_2" SceneId="22"/>
+	<Property ID="3031" ItemId="taskitem_39g" Count="1" Droprate="1" TrackInfo="collect22153" SceneId="22"/>
+	<Property ID="3032" ItemId="taskitem_40g" NpcId="monrf050600" Count="1" Droprate="1" TrackInfo="collect22156" SceneId="22"/>
+	<Property ID="3033" ItemId="taskitem_42g" NpcId="monrf051800" Count="1" Droprate="1" TrackInfo="collect22167" SceneId="22"/>
+	<Property ID="3034" ItemId="taskitem_43g" NpcId="WorldNpc06174" Count="1" Droprate="1" TrackInfo="collect22168" SceneId="22"/>
+	<Property ID="27001" ItemId="TaskItemClone_001025" NpcId="GatherClone001007" Count="1" Droprate="1" TrackInfo="collect2003" SceneId="27"/>
+	<Property ID="27002" ItemId="TaskItemClone_001016" NpcId="GatherNpc01000" Count="1" Droprate="1" TrackInfo="collect2018_1" SceneId="27"/>
+	<Property ID="27003" ItemId="TaskItemClone_001017" NpcId="GatherNpc01001" Count="1" Droprate="1" TrackInfo="collect2018_2" SceneId="27"/>
+	<Property ID="27004" ItemId="TaskItemClone_001018" NpcId="GatherNpc01002" Count="1" Droprate="1" TrackInfo="collect2018_3" SceneId="27"/>
+	<Property ID="27005" ItemId="TaskItemClone_001019" NpcId="GatherNpc01003" Count="1" Droprate="1" TrackInfo="collect2018_4" SceneId="27"/>
+	<Property ID="27011" ItemId="TaskItemClone_001027" NpcId="bossclone001002" Count="1" Droprate="1" TrackInfo="collect2045" SceneId="27"/>
+	<Property ID="27012" ItemId="TaskItemClone_0171137" NpcId="BossClone017008" Count="1" Droprate="1" TrackInfo="collect2815" SceneId="43"/>
+	<Property ID="27013" ItemId="TaskItemClone_0171134" NpcId="BossClone017013" Count="1" Droprate="1" TrackInfo="collect2816" SceneId="43"/>
+	<Property ID="27014" ItemId="TaskItemClone_002019" NpcId="GatherClone002005" Count="40" Droprate="1" TrackInfo="collect2839_1" SceneId="28"/>
+	<Property ID="27015" ItemId="TaskItemClone_002022" NpcId="GatherClone002006" Count="40" Droprate="1" TrackInfo="collect2839_2" SceneId="28"/>
+	<Property ID="27016" ItemId="TaskItemClone_002024" NpcId="GatherClone002008" Count="40" Droprate="1" TrackInfo="collect2839_3" SceneId="28"/>
+	<Property ID="27018" ItemId="TaskItemClone_002026" NpcId="bossclone002022" Count="1" Droprate="1" TrackInfo="collect2056_1" SceneId="28"/>
+	<Property ID="27019" ItemId="TaskItemClone_002006" NpcId="bossclone002022" Count="1" Droprate="1" TrackInfo="collect2056_2" SceneId="28"/>
+	<Property ID="27023" ItemId="TaskItemClone_002008" NpcId="GatherClone002002" Count="1" Droprate="1" TrackInfo="collect2836_1" SceneId="28"/>
+	<Property ID="27024" ItemId="TaskItemClone_002009" NpcId="GatherClone002003" Count="1" Droprate="1" TrackInfo="collect2836_2" SceneId="28"/>
+	<Property ID="27027" ItemId="TaskItemClone_002009" NpcId="bossclone002028" Count="1" Droprate="1" TrackInfo="collect2842" SceneId="28"/>
+	<Property ID="27028" ItemId="TaskItemClone_001009" NpcId="npcclone001052" Count="1" Droprate="1" TrackInfo="collect2038" SceneId="3"/>
+	<Property ID="27029" ItemId="TaskItemClone_001003" NpcId="GatherClone001001" Count="1" Droprate="1" TrackInfo="collect2035_1" SceneId="3"/>
+	<Property ID="27030" ItemId="TaskItemClone_001004" NpcId="GatherClone001002" Count="1" Droprate="1" TrackInfo="collect2035_2" SceneId="3"/>
+	<Property ID="27031" ItemId="TaskItemClone_001005" NpcId="GatherClone001003" Count="1" Droprate="1" TrackInfo="collect2035_3" SceneId="3"/>
+	<Property ID="27032" ItemId="TaskItemClone_001006" NpcId="GatherClone001004" Count="1" Droprate="1" TrackInfo="collect2035_4" SceneId="3"/>
+	<Property ID="27033" ItemId="TaskItemClone_001007" NpcId="GatherClone001005" Count="1" Droprate="1" TrackInfo="collect2034_1" SceneId="3"/>
+	<Property ID="27034" ItemId="TaskItemClone_001008" NpcId="GatherClone001006" Count="1" Droprate="1" TrackInfo="collect2034_2" SceneId="3"/>
+	<Property ID="27035" Count="1" Droprate="1" TrackInfo="collect2025" SceneId="27"/>
+	<Property ID="27036" ItemId="TaskItemClone009002" NpcId="Gahter009006e" Count="15" Droprate="1" TrackInfo="collect2403" SceneId="35"/>
+	<Property ID="27037" ItemId="TaskItemClone009003" NpcId="Gahter009007e" Count="15" Droprate="1" TrackInfo="collect2404" SceneId="35"/>
+	<Property ID="27038" ItemId="TaskItemClone009004" NpcId="Gahter009008e" Count="10" Droprate="1" TrackInfo="collect2405" SceneId="35"/>
+	<Property ID="27039" ItemId="TaskItemClone009007" NpcId="Gahter009009e" Count="1" Droprate="1" TrackInfo="collect2411" SceneId="35"/>
+	<Property ID="27040" ItemId="TaskItemClone_002025" NpcId="funnpcclone002065" Count="1" Droprate="1" TrackInfo="collect2073" SceneId="28"/>
+	<Property ID="27041" ItemId="TaskItemClone_002010" NpcId="bossclone002014" Count="1" Droprate="1" TrackInfo="collect2438" SceneId="28"/>
+	<Property ID="27042" ItemId="TaskItemClone_002028" NpcId="GatherClone002010" Count="10" Droprate="1" TrackInfo="collect2053" SceneId="28"/>
+	<Property ID="27043" ItemId="TaskItemClone_002021" NpcId="GatherClone002007" Count="40" Droprate="1" TrackInfo="collect2434" SceneId="28"/>
+	<Property ID="27044" ItemId="TaskItemClone_002027" NpcId="GatherClone002009" Count="18" Droprate="1" TrackInfo="collect2070" SceneId="28"/>
+	<Property ID="12001" ItemId="taskitem_361" NpcId="GatherNpc00203" Count="1" Droprate="1" TrackInfo="collect38004" SceneId="12"/>
+	<Property ID="12002" ItemId="taskitem_366" NpcId="monm080200" Count="3" Droprate="0.5" TrackInfo="collect38009" SceneId="12"/>
+	<Property ID="12003" ItemId="taskitem_367" NpcId="monm081400" Count="5" Droprate="1" TrackInfo="collect38018" SceneId="12"/>
+	<Property ID="12004" ItemId="taskitem_157" NpcId="monm081500" Count="4" Droprate="0.5" TrackInfo="collect38027" SceneId="12"/>
+	<Property ID="12005" ItemId="taskitem_368" NpcId="GatherNpc00205" Count="1" Droprate="1" TrackInfo="collect38034" SceneId="12"/>
+	<Property ID="12006" ItemId="taskitem_370" NpcId="monm080200" Count="6" Droprate="1" TrackInfo="collect38037" SceneId="12"/>
+	<Property ID="12007" ItemId="taskitem_5d" NpcId="monm080100" Count="5" Droprate="1" TrackInfo="collect38059" SceneId="12"/>
+	<Property ID="12008" ItemId="taskitem_9k" Count="1" Droprate="1" TrackInfo="collect38060" SceneId="12"/>
+	<Property ID="12009" ItemId="taskitem_4j" NpcId="Gather00001j" Count="3" Droprate="1" TrackInfo="collect38074" SceneId="12"/>
+	<Property ID="12010" ItemId="taskitem_329" NpcId="GatherNpc00190" Count="5" Droprate="1" TrackInfo="collect38081" SceneId="12"/>
+	<Property ID="12011" ItemId="taskitem_1j" NpcId="EventNpc38083" Count="1" Droprate="1" TrackInfo="collect38083" SceneId="12"/>
+	<Property ID="12012" ItemId="taskitem_8j" NpcId="monm081200" Count="1" Droprate="0.2" TrackInfo="collect38085" SceneId="12"/>
+	<Property ID="12013" ItemId="taskitem_9j" NpcId="monm081300" Count="5" Droprate="0.5" TrackInfo="collect38090" SceneId="12"/>
+	<Property ID="12014" ItemId="taskitem_12b" NpcId="monm082200" Count="11" Droprate="1" TrackInfo="collect38098" SceneId="12"/>
+	<Property ID="12015" ItemId="taskitem_17" NpcId="GatherNpc00157" Count="1" Droprate="1" TrackInfo="collect38106" SceneId="12"/>
+	<Property ID="12016" ItemId="taskitem_5d" NpcId="monm080100" Count="5" Droprate="1" TrackInfo="collect38110" SceneId="12"/>
+	<Property ID="12017" ItemId="taskitem_17b" NpcId="Gather00004b" Count="1" Droprate="1" TrackInfo="collect38112" SceneId="12"/>
+	<Property ID="12019" ItemId="useitem_36b" NpcId="Gather00018j" Count="1" Droprate="1" TrackInfo="collect38140" SceneId="11"/>
+	<Property ID="12020" ItemId="taskitem_380" NpcId="monm081200" Count="5" Droprate="1" TrackInfo="collect38148" SceneId="12"/>
+	<Property ID="12021" ItemId="taskitem_417" NpcId="monm081100" Count="8" Droprate="1" TrackInfo="collect38151" SceneId="12"/>
+	<Property ID="12022" ItemId="taskitem_382" NpcId="monm080100" Count="5" Droprate="0.5" TrackInfo="collect38159" SceneId="12"/>
+	<Property ID="12023" ItemId="taskitem_384" NpcId="monm081200" Count="5" Droprate="0.5" TrackInfo="collect38162" SceneId="12"/>
+	<Property ID="12024" ItemId="taskitem_10" NpcId="monf030200" Count="5" Droprate="0.5" TrackInfo="collect38176" SceneId="20"/>
+	<Property ID="12025" ItemId="taskitem_387" NpcId="monf030100" Count="6" Droprate="0.5" TrackInfo="collect38182" SceneId="20"/>
+	<Property ID="12026" ItemId="taskitem_283" NpcId="Gather00002a" Count="1" Droprate="1" TrackInfo="collect38184" SceneId="20"/>
+	<Property ID="12027" ItemId="taskitem_389" NpcId="monm080500" Count="8" Droprate="1" TrackInfo="collect38195" SceneId="12"/>
+	<Property ID="12028" ItemId="taskitem_390" NpcId="monm081500" Count="5" Droprate="0.5" TrackInfo="collect38198" SceneId="12"/>
+	<Property ID="12029" ItemId="taskitem_391" NpcId="Gather00004a" Count="1" Droprate="1" TrackInfo="collect38199" SceneId="12"/>
+	<Property ID="12030" ItemId="taskitem_392" NpcId="monrc043700" Count="3" Droprate="1" TrackInfo="collect38204" SceneId="16"/>
+	<Property ID="12031" ItemId="taskitem_393" NpcId="monc040500" Count="3" Droprate="0.5" TrackInfo="collect38210" SceneId="16"/>
+	<Property ID="12033" ItemId="taskitem_394" NpcId="monrc043800" Count="3" Droprate="1" TrackInfo="collect38221" SceneId="16"/>
+	<Property ID="12034" ItemId="taskitem_395" NpcId="monrc043900" Count="1" Droprate="1" TrackInfo="collect38225" SceneId="16"/>
+	<Property ID="12035" ItemId="taskitem_321" NpcId="monm081100" Count="6" Droprate="1" TrackInfo="collect38259" SceneId="12"/>
+	<Property ID="12036" ItemId="taskitem_12g" NpcId="Gather00003g" Count="2" Droprate="1" TrackInfo="collect38269" SceneId="2"/>
+	<Property ID="12038" ItemId="taskitem_35g" NpcId="Gather00020g" Count="1" Droprate="1" TrackInfo="collect38298" SceneId="12"/>
+	<Property ID="12039" ItemId="taskitem_289" NpcId="Gather00021g" Count="5" Droprate="1" TrackInfo="collect38297" SceneId="12"/>
+	<Property ID="12040" ItemId="taskitem_15g" NpcId="Gather00004g" Count="8" Droprate="1" TrackInfo="collect38305" SceneId="14"/>
+	<Property ID="12041" ItemId="taskitem_8g" NpcId="monc015200" Count="6" Droprate="1" TrackInfo="collect38316" SceneId="14"/>
+	<Property ID="12042" ItemId="taskitem_9g" NpcId="Gather00002g" Count="5" Droprate="1" TrackInfo="collect38317" SceneId="14"/>
+	<Property ID="12043" ItemId="useitem_6g" NpcId="monrc010500" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect38333" SceneId="14"/>
+	<Property ID="12044" ItemId="taskitem_418" NpcId="GatherNpc00208" Count="1" Droprate="1" TrackInfo="collect38375" SceneId="13"/>
+	<Property ID="12045" ItemId="taskitem_406" NpcId="monm081600" Count="5" Droprate="0.5" TrackInfo="collect38396" SceneId="12"/>
+	<Property ID="12047" ItemId="taskitem_404" NpcId="bossc020100" Count="1" Droprate="1" TrackInfo="collect38429" SceneId="13"/>
+	<Property ID="12048" ItemId="taskitem_4e" NpcId="Gather00001e" Count="3" Droprate="1" TrackInfo="collect38440" SceneId="22"/>
+	<Property ID="12049" ItemId="taskitem_152" NpcId="monrv020200" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect38449" SceneId="2"/>
+	<Property ID="12050" ItemId="taskitem_1e" NpcId="bossv020100" Count="1" Droprate="1" TrackInfo="collect38452" SceneId="2"/>
+	<Property ID="12051" ItemId="taskitem_7e" NpcId="bossf070100" Count="1" Droprate="1" TrackInfo="collect38465" SceneId="24"/>
+	<Property ID="12052" ItemId="taskitem_61" NpcId="monf072600" Count="3" Droprate="0.5" TrackInfo="collect38466" SceneId="24"/>
+	<Property ID="12053" ItemId="taskitem_41" NpcId="Gather00002e" Count="1" Droprate="1" TrackInfo="collect38467" SceneId="24"/>
+	<Property ID="12055" ItemId="taskitem_5d" NpcId="monm051700" Count="3" Droprate="1" TrackInfo="collect38501" SceneId="9"/>
+	<Property ID="12057" ItemId="taskitem_10d" NpcId="bossm050100" Count="1" Droprate="1" TrackInfo="collect38512" SceneId="9"/>
+	<Property ID="12058" ItemId="taskitem_2d" NpcId="Gather00001d" Count="6" Droprate="1" TrackInfo="collect38489" SceneId="9"/>
+	<Property ID="12059" ItemId="taskitem_6d" NpcId="Gather00002d" Count="1" Droprate="1" TrackInfo="collect38503" SceneId="9"/>
+	<Property ID="12060" ItemId="taskitem_9d" NpcId="Gather00003d" Count="1" Droprate="1" TrackInfo="collect38509" SceneId="9"/>
+	<Property ID="12061" ItemId="taskitem_14d" NpcId="Gather00004d" Count="1" Droprate="1" TrackInfo="collect38527" SceneId="9"/>
+	<Property ID="12062" ItemId="taskitem_313" NpcId="Gather00001h" Count="4" Droprate="1" TrackInfo="collect38535" SceneId="21"/>
+	<Property ID="12063" ItemId="taskitem_19" NpcId="monf045100" Count="4" Droprate="0.5" TrackInfo="collect38538" SceneId="21"/>
+	<Property ID="12064" ItemId="useitem_3h" NpcId="monf045400" Count="1" Droprate="0.5" TrackInfo="collect38545" SceneId="21"/>
+	<Property ID="12065" ItemId="taskitem_38" NpcId="Gather00002h" Count="1" Droprate="1" TrackInfo="collect38544" SceneId="21"/>
+	<Property ID="12066" ItemId="taskitem_93" Count="1" Droprate="1" TrackInfo="collect38532" SceneId="21"/>
+	<Property ID="11001" ItemId="taskitem_29h" NpcId="Gather00004h" Count="1" Droprate="1" TrackInfo="collect36047" SceneId="11"/>
+	<Property ID="11002" ItemId="taskitem_30h" NpcId="monm070600" Count="3" Droprate="0.5" TrackInfo="collect36056" SceneId="11"/>
+	<Property ID="11003" ItemId="taskitem_39b" NpcId="monm070500" Count="3" Droprate="0.5" TrackInfo="collect36101" SceneId="11"/>
+	<Property ID="11004" ItemId="taskitem_40b" NpcId="Gather00018b" Count="4" Droprate="1" TrackInfo="collect36126" SceneId="11"/>
+	<Property ID="11005" ItemId="taskitem_41b" NpcId="monm072700" Count="4" Droprate="0.5" TrackInfo="collect36127" SceneId="11"/>
+	<Property ID="11006" ItemId="taskitem_42b" NpcId="Gather00021b" Count="3" Droprate="1" TrackInfo="collect36134" SceneId="11"/>
+	<Property ID="11007" ItemId="taskitem_43b" NpcId="Gather00019b" Count="1" Droprate="1" TrackInfo="collect36156" SceneId="11"/>
+	<Property ID="11008" ItemId="taskitem_45b" Count="1" Droprate="1" TrackInfo="collect36171_1" SceneId="17"/>
+	<Property ID="11009" ItemId="taskitem_36b" Count="1" Droprate="1" TrackInfo="collect36171_2" SceneId="17"/>
+	<Property ID="11010" ItemId="taskitem_47b" Count="1" Droprate="1" TrackInfo="collect36192" SceneId="17"/>
+	<Property ID="11011" ItemId="taskitem_22l" NpcId="monm083700" Count="5" Droprate="0.5" TrackInfo="collect36201" SceneId="12"/>
+	<Property ID="11012" ItemId="taskitem_23l" NpcId="Gather00008l" Count="1" Droprate="1" TrackInfo="collect36215" SceneId="12"/>
+	<Property ID="11013" ItemId="taskitem_24l" NpcId="WorldNpc00394" Count="1" Droprate="1" TrackInfo="collect36221" SceneId="12"/>
+	<Property ID="11014" ItemId="taskitem_25l" NpcId="Gather00009l" Count="1" Droprate="1" TrackInfo="collect36227" SceneId="12"/>
+	<Property ID="11015" ItemId="taskitem_27l" NpcId="Gather000010l" Count="1" Droprate="1" TrackInfo="collect36236" SceneId="12"/>
+	<Property ID="11016" ItemId="taskitem_28l" NpcId="Gather000011l" Count="1" Droprate="1" TrackInfo="collect36245" SceneId="11"/>
+	<Property ID="11017" ItemId="taskitem_36l" NpcId="Gather000012l" Count="1" Droprate="1" TrackInfo="collect36248" SceneId="11"/>
+	<Property ID="11018" ItemId="taskitem_29l" NpcId="Gather000016l" Count="1" Droprate="1" TrackInfo="collect36261" SceneId="20"/>
+	<Property ID="11019" ItemId="taskitem_30l" NpcId="Gather000013l" Count="1" Droprate="1" TrackInfo="collect36266" SceneId="20"/>
+	<Property ID="11020" ItemId="taskitem_32l" NpcId="Gather000015l" Count="1" Droprate="1" TrackInfo="collect36273" SceneId="20"/>
+	<Property ID="11021" ItemId="taskitem_35l" NpcId="Gather000014l" Count="1" Droprate="1" TrackInfo="collect36288" SceneId="20"/>
+	<Property ID="11022" ItemId="taskitem_32j" NpcId="Gather00014j" Count="1" Droprate="1" TrackInfo="collect36296" SceneId="11"/>
+	<Property ID="11023" ItemId="taskitem_33j" NpcId="Gather00015j" Count="1" Droprate="1" TrackInfo="collect36298" SceneId="11"/>
+	<Property ID="11024" ItemId="taskitem_34j" NpcId="Gather00016j" Count="1" Droprate="1" TrackInfo="collect36308" SceneId="11"/>
+	<Property ID="11025" ItemId="taskitem_35j" NpcId="monm076500" Count="5" Droprate="0.5" TrackInfo="collect36311" SceneId="11"/>
+	<Property ID="11026" ItemId="taskitem_9k" Count="1" Droprate="1" TrackInfo="collect36315" SceneId="17"/>
+	<Property ID="11027" ItemId="taskitem_31j" NpcId="bossc050100" Count="1" Droprate="1" TrackInfo="collect36321" SceneId="17"/>
+	<Property ID="11028" ItemId="taskitem_37j" NpcId="monm075400" Count="5" Droprate="0.5" TrackInfo="collect36349" SceneId="11"/>
+	<Property ID="11029" ItemId="taskitem_22j" NpcId="Gather00017j" Count="5" Droprate="1" TrackInfo="collect36351" SceneId="16"/>
+	<Property ID="11030" ItemId="taskitem_8j" NpcId="monrc042400" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect36352" SceneId="16"/>
+	<Property ID="11031" ItemId="taskitem_9k" Count="1" Droprate="1" TrackInfo="collect36364" SceneId="16"/>
+	<Property ID="11033" ItemId="taskitem_39j" NpcId="monrc043000" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect36381" SceneId="16"/>
+	<Property ID="11034" ItemId="taskitem_41e" NpcId="monc022100" Count="10" Droprate="1" TrackInfo="collect36414" SceneId="13"/>
+	<Property ID="11035" ItemId="taskitem_59a" NpcId="Gather00047a" Count="1" Droprate="1" TrackInfo="collect36429" SceneId="13"/>
+	<Property ID="11041" ItemId="taskitem_48e" NpcId="GatherNpc00217" Count="3" Droprate="1" TrackInfo="collect36438" SceneId="11"/>
+	<Property ID="11045" ItemId="taskitem_61a" NpcId="Gather00049a" Count="1" Droprate="1" TrackInfo="collect36470" SceneId="13"/>
+	<Property ID="11046" ItemId="taskitem_62a" NpcId="GatherNpc00216" Count="1" Droprate="1" TrackInfo="collect36472" SceneId="13"/>
+	<Property ID="11047" ItemId="taskitem_48a" NpcId="Gather00031a" Count="5" Droprate="1" TrackInfo="collect36491_1" SceneId="18"/>
+	<Property ID="11048" ItemId="taskitem_49a" NpcId="Gather00032a" Count="5" Droprate="1" TrackInfo="collect36491_2" SceneId="18"/>
+	<Property ID="11049" ItemId="taskitem_50a" NpcId="Gather00033a" Count="1" Droprate="1" TrackInfo="collect36494" SceneId="18"/>
+	<Property ID="11050" ItemId="taskitem_51a" NpcId="Gather00034a" Count="1" Droprate="1" TrackInfo="collect36498" SceneId="18"/>
+	<Property ID="11051" ItemId="taskitem_52a" NpcId="Gather00035a" Count="1" Droprate="1" TrackInfo="collect36499" SceneId="18"/>
+	<Property ID="11052" ItemId="taskitem_47a" Count="1" Droprate="1" TrackInfo="collect36533" SceneId="11"/>
+	<Property ID="11053" ItemId="taskitem_54a" NpcId="Gather00036a" Count="1" Droprate="1" TrackInfo="collect36538" SceneId="2"/>
+	<Property ID="11054" ItemId="taskitem_55a" NpcId="monrv021100" Count="1" Droprate="1" TrackInfo="collect36539" SceneId="2"/>
+	<Property ID="11056" ItemId="taskitem_47a" NpcId="Gather00038a" Count="1" Droprate="1" TrackInfo="collect36554" SceneId="2"/>
+	<Property ID="11057" ItemId="taskitem_56a" NpcId="Gather00040a" Count="1" Droprate="1" TrackInfo="collect36574" SceneId="26"/>
+	<Property ID="10001" ItemId="taskitem_35h" NpcId="Gather00017h" Count="2" Droprate="1" TrackInfo="collect40002_1" SceneId="10"/>
+	<Property ID="10002" ItemId="taskitem_36h" NpcId="Gather00020h" Count="2" Droprate="1" TrackInfo="collect40002_2" SceneId="10"/>
+	<Property ID="10003" ItemId="useitem_31h" NpcId="Gather00019h" Count="1" Droprate="1" TrackInfo="collect40025" SceneId="10"/>
+	<Property ID="10004" ItemId="taskitem_39h" NpcId="Gather00025h" Count="2" Droprate="0.8" TrackInfo="collect40098" SceneId="10"/>
+	<Property ID="10006" ItemId="taskitem_42h" NpcId="monrm063300" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect40136" SceneId="10"/>
+	<Property ID="10007" ItemId="taskitem_43hXXhuowu" NpcId="monrm063400" IsNeedCreator="1" Count="3" Droprate="0.8" TrackInfo="collect40051" SceneId="10"/>
+	<Property ID="10008" ItemId="taskitem_57d" NpcId="Gather00029d" Count="10" Droprate="1" TrackInfo="collect40050" SceneId="10"/>
+	<Property ID="10009" ItemId="taskitem_58d" NpcId="Gather00030d" Count="1" Droprate="1" TrackInfo="collect40052_1" SceneId="10"/>
+	<Property ID="10010" ItemId="taskitem_59d" NpcId="Gather00031d" Count="1" Droprate="1" TrackInfo="collect40052_2" SceneId="10"/>
+	<Property ID="10011" ItemId="taskitem_62d" NpcId="Gather00032d" Count="10" Droprate="1" TrackInfo="collect40063" SceneId="10"/>
+	<Property ID="10012" ItemId="taskitem_65d" NpcId="Gather00034d" Count="5" Droprate="1" TrackInfo="collect40160" SceneId="17"/>
+	<Property ID="10013" ItemId="taskitem_66d" NpcId="Gather00035d" Count="1" Droprate="1" TrackInfo="collect40075" SceneId="10"/>
+	<Property ID="10014" ItemId="taskitem_67d" NpcId="Gather00036d" Count="1" Droprate="1" TrackInfo="collect40146" SceneId="10"/>
+	<Property ID="10190" ItemId="taskitem_7m" NpcId="Gather00005m" Count="1" Droprate="1" TrackInfo="collect40243" SceneId="10"/>
+	<Property ID="10191" ItemId="taskitem_8m" NpcId="monf043500" Count="3" Droprate="0.5" TrackInfo="collect40257" SceneId="21"/>
+	<Property ID="10192" ItemId="taskitem_13m" NpcId="Gather00007m" Count="5" Droprate="1" TrackInfo="collect40265_1" SceneId="21"/>
+	<Property ID="10193" ItemId="taskitem_12m" NpcId="Gather00006m" Count="1" Droprate="1" TrackInfo="collect40279" SceneId="10"/>
+	<Property ID="10194" ItemId="taskitem_11m" NpcId="Gather00004m" Count="1" Droprate="1" TrackInfo="collect40281" SceneId="10"/>
+	<Property ID="10195" ItemId="taskitem_9m" NpcId="Gather00003m" Count="1" Droprate="1" TrackInfo="collect40265_2" SceneId="21"/>
+	<Property ID="10200" ItemId="taskitem_68a" NpcId="Gather00052a" Count="1" Droprate="1" TrackInfo="collect40297" SceneId="17"/>
+	<Property ID="10201" ItemId="taskitem_69a" NpcId="Gather00053a" Count="3" Droprate="1" TrackInfo="collect40315" SceneId="17"/>
+	<Property ID="10202" ItemId="taskitem_70a" NpcId="Gather00054a" Count="1" Droprate="1" TrackInfo="collect40316_1" SceneId="17"/>
+	<Property ID="10203" ItemId="taskitem_71a" NpcId="Gather00055a" Count="1" Droprate="1" TrackInfo="collect40316_2" SceneId="17"/>
+	<Property ID="10204" ItemId="taskitem_74a" NpcId="monf032400" Count="8" Droprate="0.9" TrackInfo="collect40339" SceneId="20"/>
+	<Property ID="10205" ItemId="taskitem_75a" NpcId="monf032300" Count="5" Droprate="0.8" TrackInfo="collect40343" SceneId="20"/>
+	<Property ID="10206"/>
+	<Property ID="10250" ItemId="taskitem_14m" NpcId="Gather00008m" Count="1" Droprate="1" TrackInfo="collect40398" SceneId="13"/>
+	<Property ID="10251" ItemId="taskitem_16m" NpcId="monc022500" Count="1" Droprate="0.2" TrackInfo="collect40421" SceneId="13"/>
+	<Property ID="10252" ItemId="taskitem_17m" NpcId="Gather00009m" Count="3" Droprate="1" TrackInfo="collect40426" SceneId="13"/>
+	<Property ID="10300" ItemId="taskitem_73b" NpcId="Gather00043b" Count="1" Droprate="1" TrackInfo="collect40435" SceneId="10"/>
+	<Property ID="10301" ItemId="taskitem_74b" NpcId="Gather00044b" Count="3" Droprate="1" TrackInfo="collect40439_1" SceneId="10"/>
+	<Property ID="10303" ItemId="taskitem_76b" NpcId="Gather00046b" Count="6" Droprate="1" TrackInfo="collect40449" SceneId="14"/>
+	<Property ID="10304" ItemId="yaopin10002" Count="6" Droprate="1" TrackInfo="collect40451" SceneId="14"/>
+	<Property ID="10305" ItemId="taskitem_78b" NpcId="Gather00048b" Count="1" Droprate="1" TrackInfo="collect40461" SceneId="14"/>
+	<Property ID="6001"/>
+	<Property ID="6200" ItemId="taskitem_77a" NpcId="Gather00056a" Count="5" Droprate="1" TrackInfo="collect44292" SceneId="16"/>
+	<Property ID="6201" ItemId="taskitem_78a" NpcId="monrc044000" IsNeedCreator="1" Count="1" Droprate="0.2" TrackInfo="collect44316" SceneId="16"/>
+	<Property ID="6202" ItemId="taskitem_79a" NpcId="Gather00057a" Count="1" Droprate="1" TrackInfo="collect44303" SceneId="13"/>
+	<Property ID="9003" ItemId="taskitem_10h" NpcId="Gather00007h" Count="5" Droprate="1" TrackInfo="collect50011" SceneId="9"/>
+	<Property ID="9004" ItemId="taskitem_11h" NpcId="Gather00009h" Count="5" Droprate="1" TrackInfo="collect50019" SceneId="9"/>
+	<Property ID="9005" ItemId="taskitem_12h" NpcId="monm050600" Count="1" Droprate="0.2" TrackInfo="collect50022" SceneId="9"/>
+	<Property ID="9006" ItemId="useitem_10h" NpcId="Gather00010h" Count="1" Droprate="1" TrackInfo="collect50033" SceneId="9"/>
+	<Property ID="9007" ItemId="taskitem_15h" NpcId="Gather00008h" Count="4" Droprate="1" TrackInfo="collect50039" SceneId="9"/>
+	<Property ID="9008" ItemId="useitem_11h" NpcId="Gather00011h" Count="1" Droprate="1" TrackInfo="collect50045" SceneId="9"/>
+	<Property ID="9009" ItemId="taskitem_17h" NpcId="Gather00012h" Count="3" Droprate="1" TrackInfo="collect50050" SceneId="9"/>
+	<Property ID="9011" ItemId="taskitem_19h" NpcId="monm050300" Count="1" Droprate="0.2" TrackInfo="collect50059" SceneId="9"/>
+	<Property ID="9016" ItemId="taskitem_24h" NpcId="Gather00014h" Count="1" Droprate="1" TrackInfo="collect50089" SceneId="9"/>
+	<Property ID="9017" ItemId="taskitem_15d" NpcId="Gather00005d" Count="2" Droprate="1" TrackInfo="collect50101" SceneId="9"/>
+	<Property ID="9025" ItemId="taskitem_28d" NpcId="monrm050900" IsNeedCreator="1" Count="3" Droprate="1" TrackInfo="collect50147" SceneId="9"/>
+	<Property ID="9026" ItemId="useitem_8d" NpcId="Gather00009d" Count="1" Droprate="1" TrackInfo="collect50152" SceneId="9"/>
+	<Property ID="9027" ItemId="taskitem_29d" NpcId="monc051300" Count="4" Droprate="1" TrackInfo="collect50158" SceneId="17"/>
+	<Property ID="9028" ItemId="taskitem_38d" NpcId="Gather00008d" Count="5" Droprate="1" TrackInfo="collect50167" SceneId="17"/>
+	<Property ID="9030" ItemId="taskitem_37d" NpcId="Gather00007d" Count="3" Droprate="1" TrackInfo="collect50190" SceneId="17"/>
+	<Property ID="9031" ItemId="taskitem_9e" NpcId="GatherNpc00209" Count="5" Droprate="1" TrackInfo="collect50202" SceneId="1"/>
+	<Property ID="9033" ItemId="taskitem_13e" NpcId="GatherNpc00210" Count="3" Droprate="1" TrackInfo="collect50221" SceneId="17"/>
+	<Property ID="9034" ItemId="taskitem_14e" NpcId="monv043200" Count="5" Droprate="1" TrackInfo="collect50225" SceneId="1"/>
+	<Property ID="9035" ItemId="taskitem_15e" NpcId="monv043500" Count="1" Droprate="0.33" TrackInfo="collect50229" SceneId="1"/>
+	<Property ID="9036" ItemId="useitem_2e" NpcId="monv043300" Count="1" Droprate="0.33" TrackInfo="collect50232" SceneId="1"/>
+	<Property ID="9038" ItemId="taskitem_19e" NpcId="GatherNpc00212" Count="2" Droprate="1" TrackInfo="collect50239" SceneId="9"/>
+	<Property ID="9039" ItemId="taskitem_21e" NpcId="bossf040500" Count="1" Droprate="1" TrackInfo="collect50244" SceneId="21"/>
+	<Property ID="9040" ItemId="taskitem_22e" NpcId="GatherNpc00211" Count="5" Droprate="1" TrackInfo="collect50247_1" SceneId="21"/>
+	<Property ID="9041" ItemId="taskitem_23e" NpcId="monf043700" Count="6" Droprate="1" TrackInfo="collect50247_2" SceneId="21"/>
+	<Property ID="9042" ItemId="taskitem_24e" NpcId="monf043200" Count="5" Droprate="1" TrackInfo="collect50248" SceneId="21"/>
+	<Property ID="9043" ItemId="taskitem_28e" NpcId="GatherNpc00213" Count="1" Droprate="1" TrackInfo="collect50253" SceneId="9"/>
+	<Property ID="9044" ItemId="taskitem_30e" NpcId="bossm050300" Count="1" Droprate="1" TrackInfo="collect50263" SceneId="9"/>
+	<Property ID="9045" ItemId="taskitem_32e" NpcId="GatherNpc00214" Count="1" Droprate="1" TrackInfo="collect50267" SceneId="9"/>
+	<Property ID="9046" ItemId="taskitem_35e" NpcId="monrm055500" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50278" SceneId="21"/>
+	<Property ID="9048" ItemId="taskitem_1l" NpcId="monrm050001" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50289" SceneId="9"/>
+	<Property ID="9050" ItemId="taskitem_5l" NpcId="monrc042200" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50318" SceneId="16"/>
+	<Property ID="9051" ItemId="taskitem_7l" NpcId="Gather00002l" Count="1" Droprate="1" TrackInfo="collect50325" SceneId="16"/>
+	<Property ID="9053" ItemId="taskitem_10k" NpcId="Gather00006k" Count="1" Droprate="1" TrackInfo="collect50338" SceneId="9"/>
+	<Property ID="9054" ItemId="taskitem_1k" NpcId="monm060600" Count="1" Droprate="0.33" TrackInfo="collect50342_1" SceneId="10"/>
+	<Property ID="9055" ItemId="taskitem_2k" NpcId="monrm060800" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50349" SceneId="10"/>
+	<Property ID="9056" ItemId="taskitem_3k" NpcId="Gather00001k" Count="1" Droprate="1" TrackInfo="collect50354" SceneId="10"/>
+	<Property ID="9057" ItemId="taskitem_4k" NpcId="Gather00002k" Count="5" Droprate="1" TrackInfo="collect50357" SceneId="9"/>
+	<Property ID="9058" ItemId="taskitem_5k" NpcId="Gather00003k" Count="5" Droprate="1" TrackInfo="collect50359" SceneId="9"/>
+	<Property ID="9059" ItemId="taskitem_6k" NpcId="Gather00004k" Count="5" Droprate="1" TrackInfo="collect50363" SceneId="10"/>
+	<Property ID="9060" ItemId="taskitem_14k" NpcId="Gather00009k" Count="1" Droprate="1" TrackInfo="collect50370" SceneId="9"/>
+	<Property ID="9061" ItemId="taskitem_7k" NpcId="Gather00008k" Count="1" Droprate="1" TrackInfo="collect50375" SceneId="9"/>
+	<Property ID="9062" ItemId="taskitem_9k" Count="1" TrackInfo="collect50380" SceneId="9"/>
+	<Property ID="9063" ItemId="taskitem_11k" NpcId="Gather00007k" Count="5" Droprate="1" TrackInfo="collect50381" SceneId="9"/>
+	<Property ID="9064" ItemId="taskitem_6j" NpcId="Gather00002j" Count="1" Droprate="1" TrackInfo="collect50389" SceneId="7"/>
+	<Property ID="9065" ItemId="taskitem_13j" NpcId="monm031400" Count="1" Droprate="0.33" TrackInfo="collect50390_1" SceneId="7"/>
+	<Property ID="9066" ItemId="taskitem_14j" NpcId="bossm030100" Count="1" Droprate="1" TrackInfo="collect50390_2" SceneId="7"/>
+	<Property ID="9067" ItemId="taskitem_15j" NpcId="Gather00006j" Count="1" Droprate="1" TrackInfo="collect50397" SceneId="7"/>
+	<Property ID="9068" ItemId="taskitem_16j" NpcId="Gather00003j" Count="1" Droprate="1" TrackInfo="collect50399_1" SceneId="7"/>
+	<Property ID="9072" ItemId="taskitem_16k" NpcId="Gather00011k" Count="5" Droprate="1" TrackInfo="collect50435" SceneId="9"/>
+	<Property ID="9073" ItemId="taskitem_17k" NpcId="monm050300" Count="1" Droprate="0.2" TrackInfo="collect50437" SceneId="9"/>
+	<Property ID="9074" ItemId="taskitem_18k" NpcId="Gather00012k" Count="5" Droprate="1" TrackInfo="collect50450" SceneId="2"/>
+	<Property ID="9075" ItemId="taskitem_4k" NpcId="Gather00002k" Count="3" Droprate="1" TrackInfo="collect50459" SceneId="9"/>
+	<Property ID="9076" ItemId="taskitem_30j" NpcId="Gather00013j" Count="3" Droprate="1" TrackInfo="collect50464" SceneId="9"/>
+	<Property ID="9077" ItemId="taskitem_22k" NpcId="Gather00013k" Count="1" Droprate="1" TrackInfo="collect50472" SceneId="9"/>
+	<Property ID="9078" ItemId="taskitem_23k" NpcId="bossv020100" Count="1" Droprate="1" TrackInfo="collect50478" SceneId="2"/>
+	<Property ID="9079" ItemId="taskitem_10l" NpcId="Gather00006l" Count="1" Droprate="1" TrackInfo="collect50483_1" SceneId="9"/>
+	<Property ID="9080" ItemId="taskitem_11l" NpcId="monrm056900" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50483_2" SceneId="9"/>
+	<Property ID="9081" ItemId="taskitem_12l" NpcId="monf031200" Count="1" Droprate="0.2" TrackInfo="collect50493" SceneId="20"/>
+	<Property ID="9082" ItemId="taskitem_13l" NpcId="monrf031000" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50502" SceneId="20"/>
+	<Property ID="9083" ItemId="taskitem_14l" NpcId="monrf031200" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50505" SceneId="20"/>
+	<Property ID="9084" ItemId="taskitem_15l" NpcId="Gather00005l" Count="1" Droprate="1" TrackInfo="collect50506" SceneId="9"/>
+	<Property ID="9086" ItemId="taskitem_19l" NpcId="Gather00007l" Count="1" Droprate="1" TrackInfo="collect50519" SceneId="9"/>
+	<Property ID="9087" ItemId="taskitem_20l" NpcId="monm053100" Count="1" Droprate="0.2" TrackInfo="collect50521" SceneId="9"/>
+	<Property ID="9088" ItemId="taskitem_21l" NpcId="monrm057300" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect50527" SceneId="9"/>
+	<Property ID="9089" ItemId="taskitem_20j" NpcId="Gather00007j" Count="5" Droprate="1" TrackInfo="collect50530_1" SceneId="9"/>
+	<Property ID="9090" ItemId="taskitem_21j" NpcId="monm050500" Count="3" Droprate="0.5" TrackInfo="collect50530_2" SceneId="9"/>
+	<Property ID="9091" ItemId="taskitem_22j" NpcId="Gather00008j" Count="5" Droprate="1" TrackInfo="collect50533" SceneId="9"/>
+	<Property ID="9092" ItemId="taskitem_23j" NpcId="Gather00009j" Count="5" Droprate="1" TrackInfo="collect50543" SceneId="26"/>
+	<Property ID="9093" ItemId="taskitem_25j" NpcId="Gather00010j" Count="1" Droprate="1" TrackInfo="collect50550" SceneId="26"/>
+	<Property ID="9094" ItemId="taskitem_26j" NpcId="Gather00011j" Count="5" Droprate="1" TrackInfo="collect50554" SceneId="9"/>
+	<Property ID="9095" ItemId="taskitem_27j" NpcId="Gather00012j" Count="5" Droprate="1" TrackInfo="collect50566" SceneId="9"/>
+	<Property ID="9097" ItemId="taskitem_30j" NpcId="Gather00013j" Count="5" Droprate="1" TrackInfo="collect50572" SceneId="9"/>
+	<Property ID="9098" ItemId="taskitem_1m" NpcId="monm060600" Count="1" Droprate="0.33" TrackInfo="collect50342_2" SceneId="10"/>
+	<Property ID="9099" ItemId="taskitem_3m" NpcId="bossv040200" Count="1" Droprate="1" TrackInfo="collect50230" SceneId="1"/>
+	<Property ID="9100" ItemId="taskitem_6m" NpcId="Gather00002m" Count="1" Droprate="1" TrackInfo="collect50399_2" SceneId="7"/>
+	<Property ID="7000" ItemId="taskitem_w002" NpcId="Gather00001W" Count="1" Droprate="1" TrackInfo="collect46004" SceneId="7"/>
+	<Property ID="7001" ItemId="taskitem_19j" NpcId="Gather00002W" Count="1" Droprate="1" TrackInfo="collect46038" SceneId="7"/>
+	<Property ID="7002" ItemId="taskitem_w009" NpcId="Gather00003W" Count="1" Droprate="1" TrackInfo="collect46053" SceneId="7"/>
+	<Property ID="7003" ItemId="taskitem_w113" NpcId="Gather00004W" Count="1" Droprate="1" TrackInfo="collect46065" SceneId="7"/>
+	<Property ID="7004" ItemId="taskitem_w112" NpcId="Gather00007W" Count="1" Droprate="1" TrackInfo="collect46072" SceneId="7"/>
+	<Property ID="7005" ItemId="taskitem_w111" NpcId="Gather00005W" Count="1" Droprate="1" TrackInfo="collect46076_1" SceneId="7"/>
+	<Property ID="7006" ItemId="taskitem_w110" NpcId="Gather00006W" Count="1" Droprate="1" TrackInfo="collect46076_2" SceneId="7"/>
+	<Property ID="7007" ItemId="taskitem_w116" NpcId="monf070200" Count="5" Droprate="0.7" TrackInfo="collect46101" SceneId="24"/>
+	<Property ID="7008" ItemId="taskitem_w117" NpcId="monf070400" Count="6" Droprate="0.7" TrackInfo="collect46107" SceneId="24"/>
+	<Property ID="7009" ItemId="taskitem_w119" NpcId="bossf070200" Count="1" Droprate="1" TrackInfo="collect46136" SceneId="24"/>
+	<Property ID="7010" ItemId="taskitem_w122" NpcId="Gather00008W" Count="1" Droprate="1" TrackInfo="collect46180" SceneId="11"/>
+	<Property ID="7011" ItemId="taskitem_w124" NpcId="monf020700" Count="5" Droprate="0.7" TrackInfo="collect46204" SceneId="19"/>
+	<Property ID="7012" ItemId="taskitem_w125" NpcId="Gather00009W" Count="3" Droprate="1" TrackInfo="collect46206" SceneId="19"/>
+	<Property ID="7013" ItemId="taskitem_w126" NpcId="monf020600" Count="5" Droprate="0.7" TrackInfo="collect46211" SceneId="19"/>
+	<Property ID="7014" ItemId="taskitem_w127" NpcId="Gather00010W" Count="3" Droprate="1" TrackInfo="collect46212" SceneId="19"/>
+	<Property ID="7015"/>
+	<Property ID="7016"/>
+	<Property ID="7017"/>
+	<Property ID="7018"/>
+	<Property ID="7019"/>
+	<Property ID="7020"/>
+	<Property ID="7021"/>
+	<Property ID="7022"/>
+	<Property ID="7023"/>
+	<Property ID="7024"/>
+	<Property ID="7025"/>
+	<Property ID="7026"/>
+	<Property ID="7027"/>
+	<Property ID="7028"/>
+	<Property ID="7029"/>
+	<Property ID="7030"/>
+	<Property ID="7031"/>
+	<Property ID="7032"/>
+	<Property ID="7033"/>
+	<Property ID="7034"/>
+	<Property ID="7035"/>
+	<Property ID="7036"/>
+	<Property ID="7037"/>
+	<Property ID="7038"/>
+	<Property ID="7039"/>
+	<Property ID="7040"/>
+	<Property ID="7041"/>
+	<Property ID="7042"/>
+	<Property ID="7043"/>
+	<Property ID="7044"/>
+	<Property ID="7045"/>
+	<Property ID="7046"/>
+	<Property ID="7047"/>
+	<Property ID="7048"/>
+	<Property ID="7049"/>
+	<Property ID="7050"/>
+	<Property ID="7051"/>
+	<Property ID="7052"/>
+	<Property ID="7053"/>
+	<Property ID="7054"/>
+	<Property ID="7055"/>
+	<Property ID="7056"/>
+	<Property ID="7057"/>
+	<Property ID="7058"/>
+	<Property ID="7059"/>
+	<Property ID="7060"/>
+	<Property ID="7061"/>
+	<Property ID="7062"/>
+	<Property ID="7063"/>
+	<Property ID="7064"/>
+	<Property ID="7065"/>
+	<Property ID="7066"/>
+	<Property ID="7067"/>
+	<Property ID="7068"/>
+	<Property ID="7069"/>
+	<Property ID="7070"/>
+	<Property ID="7071"/>
+	<Property ID="7072"/>
+	<Property ID="7073"/>
+	<Property ID="7074"/>
+	<Property ID="7075"/>
+	<Property ID="7076"/>
+	<Property ID="7077"/>
+	<Property ID="7078"/>
+	<Property ID="7079"/>
+	<Property ID="7080"/>
+	<Property ID="7081"/>
+	<Property ID="7082"/>
+	<Property ID="7083"/>
+	<Property ID="7084"/>
+	<Property ID="7085"/>
+	<Property ID="7086"/>
+	<Property ID="7087"/>
+	<Property ID="7088"/>
+	<Property ID="7089"/>
+	<Property ID="7090"/>
+	<Property ID="7091"/>
+	<Property ID="7092"/>
+	<Property ID="7093"/>
+	<Property ID="7094"/>
+	<Property ID="7095"/>
+	<Property ID="7096"/>
+	<Property ID="7097"/>
+	<Property ID="7098"/>
+	<Property ID="7099"/>
+	<Property ID="7100"/>
+	<Property ID="7101"/>
+	<Property ID="7102"/>
+	<Property ID="7103"/>
+	<Property ID="7104"/>
+	<Property ID="7105"/>
+	<Property ID="7106"/>
+	<Property ID="7107"/>
+	<Property ID="7108"/>
+	<Property ID="7109"/>
+	<Property ID="7110"/>
+	<Property ID="7111"/>
+	<Property ID="7112"/>
+	<Property ID="7113"/>
+	<Property ID="7114"/>
+	<Property ID="7115"/>
+	<Property ID="7116"/>
+	<Property ID="7117"/>
+	<Property ID="7118"/>
+	<Property ID="7119"/>
+	<Property ID="7120"/>
+	<Property ID="7121"/>
+	<Property ID="7122"/>
+	<Property ID="7123"/>
+	<Property ID="7124"/>
+	<Property ID="7125"/>
+	<Property ID="7126"/>
+	<Property ID="7127"/>
+	<Property ID="7128"/>
+	<Property ID="7129"/>
+	<Property ID="7130"/>
+	<Property ID="7131"/>
+	<Property ID="7132"/>
+	<Property ID="7133"/>
+	<Property ID="7134"/>
+	<Property ID="7135"/>
+	<Property ID="7136"/>
+	<Property ID="7137"/>
+	<Property ID="7138"/>
+	<Property ID="7139"/>
+	<Property ID="7140"/>
+	<Property ID="7141"/>
+	<Property ID="7142"/>
+	<Property ID="7143"/>
+	<Property ID="7144"/>
+	<Property ID="7145"/>
+	<Property ID="7146"/>
+	<Property ID="7147"/>
+	<Property ID="7148"/>
+	<Property ID="7149"/>
+	<Property ID="7150"/>
+	<Property ID="7151"/>
+	<Property ID="7152"/>
+	<Property ID="7153"/>
+	<Property ID="7154"/>
+	<Property ID="7155"/>
+	<Property ID="7156"/>
+	<Property ID="7157"/>
+	<Property ID="7158"/>
+	<Property ID="7159"/>
+	<Property ID="7160"/>
+	<Property ID="7161"/>
+	<Property ID="7162"/>
+	<Property ID="7163"/>
+	<Property ID="7164"/>
+	<Property ID="7165"/>
+	<Property ID="7166"/>
+	<Property ID="7167"/>
+	<Property ID="7168"/>
+	<Property ID="7169"/>
+	<Property ID="7170"/>
+	<Property ID="7171"/>
+	<Property ID="7172"/>
+	<Property ID="7173"/>
+	<Property ID="7174"/>
+	<Property ID="7175"/>
+	<Property ID="7176"/>
+	<Property ID="7177"/>
+	<Property ID="7178"/>
+	<Property ID="7179"/>
+	<Property ID="7180"/>
+	<Property ID="7181"/>
+	<Property ID="7182"/>
+	<Property ID="7183"/>
+	<Property ID="7184"/>
+	<Property ID="7185"/>
+	<Property ID="7186"/>
+	<Property ID="7187"/>
+	<Property ID="7188"/>
+	<Property ID="7189"/>
+	<Property ID="7190"/>
+	<Property ID="7191"/>
+	<Property ID="7192"/>
+	<Property ID="7193"/>
+	<Property ID="7194"/>
+	<Property ID="7195"/>
+	<Property ID="7196"/>
+	<Property ID="7197"/>
+	<Property ID="7198"/>
+	<Property ID="7199"/>
+	<Property ID="7200" ItemId="taskitem_yc001" NpcId="Gather00001yc" Count="1" Droprate="1" TrackInfo="collect_46294" SceneId="13"/>
+	<Property ID="7201" ItemId="taskitem_yc002" NpcId="Gather00002yc" Count="1" Droprate="1" TrackInfo="collect_46304" SceneId="13"/>
+	<Property ID="7202" ItemId="taskitem_yc003" NpcId="Gather00003yc" Count="1" Droprate="1" TrackInfo="collect_46315" SceneId="13"/>
+	<Property ID="7203" ItemId="taskitem_yc004" NpcId="Gather00004yc" Count="1" Droprate="1" TrackInfo="collect_46327" SceneId="13"/>
+	<Property ID="7204" ItemId="taskitem_yc007" NpcId="Gather00007yc" Count="1" Droprate="1" TrackInfo="collect_46350" SceneId="10"/>
+	<Property ID="7205" ItemId="taskitem_yc008" NpcId="Gather00008yc" Count="1" Droprate="0.5" TrackInfo="collect_46355" SceneId="10"/>
+	<Property ID="7206" ItemId="taskitem_yc009" NpcId="Gather00009yc" Count="1" Droprate="0.2" TrackInfo="collect_46376" SceneId="10"/>
+	<Property ID="7207" ItemId="taskitem_yc011" NpcId="Gather00011yc" Count="1" Droprate="1" TrackInfo="collect_46394" SceneId="21"/>
+	<Property ID="7208" ItemId="taskitem_yc012" NpcId="Gather00012yc" Count="1" Droprate="1" TrackInfo="collect_46406" SceneId="9"/>
+	<Property ID="7209" ItemId="taskitem_yc013" NpcId="Gather00013yc" Count="1" Droprate="1" TrackInfo="collect_46422" SceneId="9"/>
+	<Property ID="7210"/>
+	<Property ID="7211"/>
+	<Property ID="7212"/>
+	<Property ID="7213"/>
+	<Property ID="7214"/>
+	<Property ID="7215"/>
+	<Property ID="7216"/>
+	<Property ID="7217"/>
+	<Property ID="7218"/>
+	<Property ID="7219"/>
+	<Property ID="7220"/>
+	<Property ID="7221"/>
+	<Property ID="7222"/>
+	<Property ID="7223"/>
+	<Property ID="7224"/>
+	<Property ID="7225"/>
+	<Property ID="7226"/>
+	<Property ID="7227"/>
+	<Property ID="7228"/>
+	<Property ID="7229"/>
+	<Property ID="7230"/>
+	<Property ID="7231"/>
+	<Property ID="7232"/>
+	<Property ID="7233"/>
+	<Property ID="7234"/>
+	<Property ID="7235"/>
+	<Property ID="7236"/>
+	<Property ID="7237"/>
+	<Property ID="7238"/>
+	<Property ID="7239"/>
+	<Property ID="7240"/>
+	<Property ID="7241"/>
+	<Property ID="7242"/>
+	<Property ID="7243"/>
+	<Property ID="7244"/>
+	<Property ID="7245"/>
+	<Property ID="7246"/>
+	<Property ID="7247"/>
+	<Property ID="7248"/>
+	<Property ID="7249"/>
+	<Property ID="7250"/>
+	<Property ID="7251"/>
+	<Property ID="7252"/>
+	<Property ID="7253"/>
+	<Property ID="7254"/>
+	<Property ID="7255"/>
+	<Property ID="7256"/>
+	<Property ID="7257"/>
+	<Property ID="7258"/>
+	<Property ID="7259"/>
+	<Property ID="7260"/>
+	<Property ID="7261"/>
+	<Property ID="7262"/>
+	<Property ID="7263"/>
+	<Property ID="7264"/>
+	<Property ID="7265"/>
+	<Property ID="7266"/>
+	<Property ID="7267"/>
+	<Property ID="7268"/>
+	<Property ID="7269"/>
+	<Property ID="7270"/>
+	<Property ID="7271"/>
+	<Property ID="7272"/>
+	<Property ID="7273"/>
+	<Property ID="7274"/>
+	<Property ID="7275"/>
+	<Property ID="7276"/>
+	<Property ID="7277"/>
+	<Property ID="7278"/>
+	<Property ID="7279"/>
+	<Property ID="7280"/>
+	<Property ID="7281"/>
+	<Property ID="7282"/>
+	<Property ID="7283"/>
+	<Property ID="7284"/>
+	<Property ID="7285"/>
+	<Property ID="7286"/>
+	<Property ID="7287"/>
+	<Property ID="7288"/>
+	<Property ID="7289"/>
+	<Property ID="7290"/>
+	<Property ID="7291"/>
+	<Property ID="7292"/>
+	<Property ID="7293"/>
+	<Property ID="7294"/>
+	<Property ID="7295"/>
+	<Property ID="7296"/>
+	<Property ID="7297"/>
+	<Property ID="7298"/>
+	<Property ID="7299"/>
+	<Property ID="7300"/>
+	<Property ID="7301"/>
+	<Property ID="7302"/>
+	<Property ID="7303"/>
+	<Property ID="7304"/>
+	<Property ID="7305"/>
+	<Property ID="7306"/>
+	<Property ID="7307"/>
+	<Property ID="7308"/>
+	<Property ID="7309"/>
+	<Property ID="7310"/>
+	<Property ID="7311"/>
+	<Property ID="7312"/>
+	<Property ID="7313"/>
+	<Property ID="7314"/>
+	<Property ID="7315"/>
+	<Property ID="7316"/>
+	<Property ID="7317"/>
+	<Property ID="7318"/>
+	<Property ID="7319"/>
+	<Property ID="7320"/>
+	<Property ID="7321"/>
+	<Property ID="7322"/>
+	<Property ID="7323"/>
+	<Property ID="7324"/>
+	<Property ID="7325"/>
+	<Property ID="7326"/>
+	<Property ID="7327"/>
+	<Property ID="7328"/>
+	<Property ID="7329"/>
+	<Property ID="7330"/>
+	<Property ID="7331"/>
+	<Property ID="7332"/>
+	<Property ID="7333"/>
+	<Property ID="7334"/>
+	<Property ID="7335"/>
+	<Property ID="7336"/>
+	<Property ID="7337"/>
+	<Property ID="7338"/>
+	<Property ID="7339"/>
+	<Property ID="7340"/>
+	<Property ID="7341"/>
+	<Property ID="7342"/>
+	<Property ID="7343"/>
+	<Property ID="7344"/>
+	<Property ID="7345"/>
+	<Property ID="7346"/>
+	<Property ID="7347"/>
+	<Property ID="7348"/>
+	<Property ID="7349"/>
+	<Property ID="7350"/>
+	<Property ID="7351"/>
+	<Property ID="7352"/>
+	<Property ID="7353"/>
+	<Property ID="7354"/>
+	<Property ID="7355"/>
+	<Property ID="7356"/>
+	<Property ID="7357"/>
+	<Property ID="7358"/>
+	<Property ID="7359"/>
+	<Property ID="7360"/>
+	<Property ID="7361"/>
+	<Property ID="7362"/>
+	<Property ID="7363"/>
+	<Property ID="7364"/>
+	<Property ID="7365"/>
+	<Property ID="7366"/>
+	<Property ID="7367"/>
+	<Property ID="7368"/>
+	<Property ID="7369"/>
+	<Property ID="7370"/>
+	<Property ID="7371"/>
+	<Property ID="7372"/>
+	<Property ID="7373"/>
+	<Property ID="5001" ItemId="taskitem_x012" NpcId="monm010300" Count="3" Droprate="1" TrackInfo="collect42005" SceneId="5"/>
+	<Property ID="5002" ItemId="taskitem_x003" NpcId="Gather00001x" Count="3" Droprate="1" TrackInfo="collect42028" SceneId="5"/>
+	<Property ID="5003" ItemId="taskitem_x004" NpcId="monm010200" Count="3" Droprate="1" TrackInfo="collect42029" SceneId="5"/>
+	<Property ID="5004" ItemId="taskitem_x006" NpcId="Gather00002x" Count="3" Droprate="1" TrackInfo="collect42037" SceneId="5"/>
+	<Property ID="5005" ItemId="taskitem_x007" NpcId="Gather00003x" Count="3" Droprate="1" TrackInfo="collect42038" SceneId="5"/>
+	<Property ID="5006" ItemId="taskitem_x008" NpcId="monm010100" Count="3" Droprate="1" TrackInfo="collect42039" SceneId="5"/>
+	<Property ID="5007" ItemId="taskitem_x009" NpcId="monm010300" Count="2" Droprate="1" TrackInfo="collect42042" SceneId="5"/>
+	<Property ID="5008" ItemId="taskitem_x013" NpcId="Gather00005x" Count="3" Droprate="1" TrackInfo="collect42055" SceneId="5"/>
+	<Property ID="5009" ItemId="taskitem_x016" NpcId="Gather00007x" Count="1" Droprate="1" TrackInfo="collect42079" SceneId="5"/>
+	<Property ID="5010" ItemId="taskitem_x017" NpcId="Gather00004x" Count="1" Droprate="1" TrackInfo="collect42081" SceneId="5"/>
+	<Property ID="5011" ItemId="taskitem_x018" NpcId="Gather00006x" Count="1" Droprate="1" TrackInfo="collect42085" SceneId="5"/>
+	<Property ID="8001" ItemId="taskitem_1y" NpcId="Gather70001y" Count="9" Droprate="1" TrackInfo="collect48006" SceneId="8"/>
+	<Property ID="8002" ItemId="taskitem_4y" NpcId="Gather70002y" Count="1" Droprate="1" TrackInfo="collect48009" SceneId="8"/>
+	<Property ID="8003" ItemId="taskitem_6y" NpcId="Gather70003y" Count="5" Droprate="1" TrackInfo="collect48012" SceneId="8"/>
+	<Property ID="8004" ItemId="taskitem_7y" NpcId="monrm040004" RefreshMonster="7014" Count="1" Droprate="1" TrackInfo="collect48020" SceneId="8"/>
+	<Property ID="8005" ItemId="taskitem_8y" NpcId="Gather70004y" Count="5" Droprate="1" TrackInfo="collect48025" SceneId="8"/>
+	<Property ID="8006" ItemId="taskitem_9y" NpcId="Gather70005y" Count="5" Droprate="1" TrackInfo="collect48030" SceneId="8"/>
+	<Property ID="8007" ItemId="taskitem_10y" NpcId="Gather70006y" Count="3" Droprate="1" TrackInfo="collect48040" SceneId="8"/>
+	<Property ID="8008" ItemId="taskitem_12y" NpcId="Gather70007y" Count="5" Droprate="1" TrackInfo="collect48049" SceneId="8"/>
+	<Property ID="8009" ItemId="taskitem_13y" NpcId="monrm040010" RefreshMonster="7025,7026,7027" Count="3" Droprate="1" TrackInfo="collect48056" SceneId="8"/>
+	<Property ID="8010" ItemId="taskitem_17y" NpcId="Gather70009y" Count="3" Droprate="1" TrackInfo="collect48067" SceneId="8"/>
+	<Property ID="8011" ItemId="taskitem_19y" NpcId="monrm040012" RefreshMonster="7035" Count="1" Droprate="1" TrackInfo="collect48074" SceneId="8"/>
+	<Property ID="8012" ItemId="taskitem_20y" NpcId="Gather70010y" Count="1" Droprate="1" TrackInfo="collect48141" SceneId="8"/>
+	<Property ID="8013" ItemId="taskitem_21y" NpcId="Gather70011y" Count="5" Droprate="1" TrackInfo="collect48147" SceneId="8"/>
+	<Property ID="8014" ItemId="taskitem_22y" NpcId="Gather70012y" Count="1" Droprate="1" TrackInfo="collect48156" SceneId="17"/>
+	<Property ID="8015" ItemId="taskitem_23y" NpcId="Gather70013y" Count="5" Droprate="1" TrackInfo="collect48164" SceneId="17"/>
+	<Property ID="8016" ItemId="taskitem_24y" NpcId="monm040100" Count="2" Droprate="1" TrackInfo="collect48179_1" SceneId="8"/>
+	<Property ID="8017" ItemId="taskitem_25y" NpcId="monm040200" Count="2" Droprate="1" TrackInfo="collect48179_2" SceneId="8"/>
+	<Property ID="8018" ItemId="taskitem_26y" NpcId="Gather70014y" Count="1" Droprate="1" TrackInfo="collect48088" SceneId="8"/>
+	<Property ID="8019" ItemId="taskitem_29y" NpcId="monf070400" Count="3" Droprate="0.5" TrackInfo="collect48092" SceneId="24"/>
+	<Property ID="8020" ItemId="taskitem_27y" NpcId="Gather70015y" Count="5" Droprate="1" TrackInfo="collect48097" SceneId="24"/>
+	<Property ID="8021" ItemId="taskitem_31y" NpcId="monrf070700" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect48105" SceneId="24"/>
+	<Property ID="8022" ItemId="taskitem_28y" NpcId="Gather70016y" Count="5" Droprate="1" TrackInfo="collect48111" SceneId="24"/>
+	<Property ID="8023" ItemId="taskitem_30y" NpcId="monrf070800" IsNeedCreator="1" Count="1" Droprate="1" TrackInfo="collect48116" SceneId="24"/>
+	<Property ID="8024" ItemId="taskitem_35y" NpcId="monm041400" Count="1" Droprate="0.5" TrackInfo="collect48188" SceneId="8"/>
+	<Property ID="8025" ItemId="taskitem_37y" NpcId="monm041500" Count="2" Droprate="0.5" TrackInfo="collect48195" SceneId="8"/>
+	<Property ID="8026" ItemId="taskitem_38y" NpcId="monm040300" Count="2" Droprate="0.5" TrackInfo="collect48198" SceneId="8"/>
+	<Property ID="8027" ItemId="taskitem_34y" NpcId="Gather70017y" Count="5" Droprate="1" TrackInfo="collect48205" SceneId="8"/>
+	<Property ID="8028" ItemId="taskitem_42y" NpcId="Gather70018y" Count="1" Droprate="1" TrackInfo="collect48229" SceneId="8"/>
+</Object>

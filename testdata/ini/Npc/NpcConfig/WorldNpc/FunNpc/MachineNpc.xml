@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="HiddenNpc00001" script="MachineNpc" Name="陷阱单体" Desc="陷阱单体" Resource="npc\cj_106020c" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="HiddenNpc00002" script="MachineNpc" Name="陷阱范围" Desc="陷阱范围" Resource="npc\cj_106020c" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_01001" script="MachineNpc" Name="定身1" Desc="定身1" Resource="npc\hw_xj001" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_01002" script="MachineNpc" Name="定身2" Desc="定身2" Resource="npc\hw_xj001" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_01003" script="MachineNpc" Name="定身3" Desc="定身3" Resource="npc\hw_xj001" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_01004" script="MachineNpc" Name="定身4" Desc="定身4" Resource="npc\hw_xj001" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_01005" script="MachineNpc" Name="定身5" Desc="定身5" Resource="npc\hw_xj001" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_02001" script="MachineNpc" Name="直接伤害1" Desc="直接伤害1" Resource="npc\hw_xj002" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_02002" script="MachineNpc" Name="直接伤害2" Desc="直接伤害2" Resource="npc\hw_xj002" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_02003" script="MachineNpc" Name="直接伤害3" Desc="直接伤害3" Resource="npc\hw_xj002" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_02004" script="MachineNpc" Name="直接伤害4" Desc="直接伤害4" Resource="npc\hw_xj002" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_02005" script="MachineNpc" Name="直接伤害5" Desc="直接伤害5" Resource="npc\hw_xj002" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_03001" script="MachineNpc" Name="持续伤害1" Desc="持续伤害1" Resource="npc\hw_xj003" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_03002" script="MachineNpc" Name="持续伤害2" Desc="持续伤害2" Resource="npc\hw_xj003" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_03003" script="MachineNpc" Name="持续伤害3" Desc="持续伤害3" Resource="npc\hw_xj003" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_03004" script="MachineNpc" Name="持续伤害4" Desc="持续伤害4" Resource="npc\hw_xj003" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_03005" script="MachineNpc" Name="持续伤害5" Desc="持续伤害5" Resource="npc\hw_xj003" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_04001" script="MachineNpc" Name="减速1" Desc="减速1" Resource="npc\hw_xj004" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_04002" script="MachineNpc" Name="减速2" Desc="减速2" Resource="npc\hw_xj004" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_04003" script="MachineNpc" Name="减速3" Desc="减速3" Resource="npc\hw_xj004" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_04004" script="MachineNpc" Name="减速4" Desc="减速4" Resource="npc\hw_xj004" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_04005" script="MachineNpc" Name="减速5" Desc="减速5" Resource="npc\hw_xj004" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_05001" script="MachineNpc" Name="昏迷1" Desc="昏迷1" Resource="npc\hw_xj005" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_05002" script="MachineNpc" Name="昏迷2" Desc="昏迷2" Resource="npc\hw_xj005" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_05003" script="MachineNpc" Name="昏迷3" Desc="昏迷3" Resource="npc\hw_xj005" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_05004" script="MachineNpc" Name="昏迷4" Desc="昏迷4" Resource="npc\hw_xj005" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="XJNpc_05005" script="MachineNpc" Name="昏迷5" Desc="昏迷5" Resource="npc\hw_xj005" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="DPNpc_01001" script="MachineNpc" Name="持续伤害1" Desc="持续伤害1" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_01002" script="MachineNpc" Name="持续伤害2" Desc="持续伤害2" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_01003" script="MachineNpc" Name="持续伤害3" Desc="持续伤害3" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_01004" script="MachineNpc" Name="持续伤害4" Desc="持续伤害4" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_01005" script="MachineNpc" Name="持续伤害5" Desc="持续伤害5" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_02001" script="MachineNpc" Name="减速1" Desc="减速1" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_02002" script="MachineNpc" Name="减速2" Desc="减速2" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_02003" script="MachineNpc" Name="减速3" Desc="减速3" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_02004" script="MachineNpc" Name="减速4" Desc="减速4" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_02005" script="MachineNpc" Name="减速5" Desc="减速5" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_03001" script="MachineNpc" Name="攻击减弱1" Desc="攻击减弱1" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_03002" script="MachineNpc" Name="攻击减弱2" Desc="攻击减弱2" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_03003" script="MachineNpc" Name="攻击减弱3" Desc="攻击减弱3" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_03004" script="MachineNpc" Name="攻击减弱4" Desc="攻击减弱4" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_03005" script="MachineNpc" Name="攻击减弱5" Desc="攻击减弱5" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_04001" script="MachineNpc" Name="走火入魔1" Desc="走火入魔1" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_04002" script="MachineNpc" Name="走火入魔2" Desc="走火入魔2" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_04003" script="MachineNpc" Name="走火入魔3" Desc="走火入魔3" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_04004" script="MachineNpc" Name="走火入魔4" Desc="走火入魔4" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_04005" script="MachineNpc" Name="走火入魔5" Desc="走火入魔5" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_05001" script="MachineNpc" Name="化解内力" Desc="化解内力" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_05002" script="MachineNpc" Name="化解内力2" Desc="化解内力2" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_05003" script="MachineNpc" Name="化解内力3" Desc="化解内力3" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_05004" script="MachineNpc" Name="化解内力4" Desc="化解内力4" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="DPNpc_05005" script="MachineNpc" Name="化解内力5" Desc="化解内力5" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="HYNpc_04001" script="MachineNpc" Name="击飞" Desc="击飞" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" SelectState="0"/>
+	<Property ID="snatchbook_ng" script="MachineNpc" Name="秘籍（内功）" Desc="秘籍（内功）" Resource="npc\npcitem532" NpcType="251" SpringRange="10" SelectState="2"/>
+	<Property ID="snatchbook_zs" script="MachineNpc" Name="秘籍（招式）" Desc="秘籍（招式）" Resource="npc\npcitem532" NpcType="251" SpringRange="2" SelectState="2"/>
+	<Property ID="cstnpc_ng" script="MachineNpc" Name="藏书台（内功）" Desc="藏书台（内功）" Resource="npc\itemnpc523" NpcType="251" SpringRange="10" SelectState="2"/>
+	<Property ID="cstnpc_zs" script="MachineNpc" Name="藏书台（招式）" Desc="藏书台（招式）" Resource="npc\itemnpc524" NpcType="251" SpringRange="2" SelectState="2"/>
+	<Property ID="HiddenTG17063" script="MachineNpc" Name="阎小龙禁足陷阱" Desc="阎小龙禁足陷阱" Resource="npc\cj_040040" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="HiddenTG32031" script="MachineNpc" Name="雷天明聚散流沙" Desc="雷天明聚散流沙" Resource="npc\itemnpc057a" NpcType="202" SpringRange="2" SelectState="0" Scale="0.5,0.5,0.5"/>
+	<Property ID="Fire_01" script="MachineNpc" Name="火焰" Desc="火焰" Resource="npc\guildeffect001" NpcType="202" SpringRange="25" SelectState="0"/>
+	<Property ID="Fire_02" script="MachineNpc" Name="火焰" Desc="火焰" Resource="npc\guildeffect001" NpcType="202" SpringRange="25" SelectState="0"/>
+	<Property ID="dw_01" script="MachineNpc" Name="锦衣卫毒雾" Desc="锦衣卫毒雾" Resource="npc\itemnpc057" NpcType="202" SpringRange="30" SelectState="0"/>
+	<Property ID="qy_swgj_jiguan01" script="MachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac013045" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="task_digong_0012" script="MachineNpc" Name="地宫擦伤" Desc="地宫擦伤" Resource="npc\itemnpc057" NpcType="202" SpringRange="1" SelectState="0"/>
+	<Property ID="task_digong_0013" script="MachineNpc" Name="地宫毒液" Desc="地宫毒液" Resource="npc\itemnpc057" NpcType="202" SpringRange="1" SelectState="0"/>
+	<Property ID="task_digong_0004" script="MachineNpc" Name="地宫毒雾" Desc="地宫毒雾" Resource="npc\itemnpc057" NpcType="202" SpringRange="1" SelectState="0"/>
+	<Property ID="task_digong_0005" script="MachineNpc" Name="地宫水潭" Desc="地宫水潭" Resource="npc\itemnpc057" NpcType="202" SpringRange="1" SelectState="0"/>
+	<Property ID="task_digong_0011" script="MachineNpc" Name="限制轻功" Desc="限制轻功" Resource="npc\itemnpc057" NpcType="202" SpringRange="20" SelectState="0"/>
+	<Property ID="macxjz_006" script="MachineNpc" Name="飞镖" Desc="飞镖" NpcType="202" SpringRange="3" LifeTime="4000"/>
+	<Property ID="macxjz_007" script="MachineNpc" Name="地刺" Desc="地刺" NpcType="202" SpringRange="3" LifeTime="4000"/>
+	<Property ID="macxjz_008" script="MachineNpc" Name="毒液" Desc="毒液" NpcType="202" SpringRange="3" LifeTime="4000"/>
+	<Property ID="macxjz_009" script="MachineNpc" Name="毒针" Desc="毒针" NpcType="202" SpringRange="3" LifeTime="4000"/>
+	<Property ID="macxjz_010" script="MachineNpc" Name="火焰" Desc="火焰" Resource="npc\guildeffect001" NpcType="202" SpringRange="3" LifeTime="4000"/>
+	<Property ID="macxjz_011" script="MachineNpc" Name="提示圈" Desc="提示圈" Resource="npc\itemnpc057_tg1" NpcType="202" SpringRange="16" LifeTime="4000" Scale="20,0.1,20"/>
+	<Property ID="macxjz_012" script="MachineNpc" Name="治疗" Desc="治疗" Resource="npc\itemnpc057_lx05" NpcType="202" SpringRange="3" LifeTime="5000"/>
+	<Property ID="macxjz_013" script="MachineNpc" Name="火海" Desc="火海" Resource="npc\itemnpc057_huoyan" NpcType="202" SpringRange="16" LifeTime="10000"/>
+	<Property ID="macxjz_014" script="MachineNpc" Name="治疗2" Desc="治疗2" Resource="npc\itemnpc057_lx05" NpcType="202" SpringRange="3" LifeTime="12000"/>
+	<Property ID="macxjz_001" script="MachineNpc" Name="火焰NPC" Desc="火焰NPC" Resource="npc\guildeffect001" NpcType="202" SpringRange="2" LifeTime="2500000" Scale="0.5,0.5,0.5" FightID="98" Level="100"/>
+	<Property ID="macxjz_002" script="MachineNpc" Name="烟雾NPC" Desc="烟雾NPC" Resource="npc\hw_xj005" NpcType="161" SpringRange="3" LifeTime="2500000" FightID="98" Level="100"/>
+	<Property ID="macxjz_003" script="MachineNpc" Name="定身NPC" Desc="定身NPC" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="2" LifeTime="2500000" FightID="98" Level="100"/>
+	<Property ID="macxjz_004" script="MachineNpc" Name="爆炸NPC" Desc="爆炸NPC" Resource="npc\hw_zd005" NpcType="1" SpringRange="2" LifeTime="2500000" Scale="1.5,1.5,1.5" FightID="98" Level="100"/>
+	<Property ID="macxjz_005" script="MachineNpc" Name="毒雾减速NPC" Desc="毒雾减速NPC" Resource="npc\hw_xj005" NpcType="161" SpringRange="4" LifeTime="2500000" FightID="98" Level="100"/>
+	<Property ID="macyhg_006" script="MachineNpc" Name="网" Desc="网" Resource="npc\itemnpc057" NpcType="202" SpringRange="3"/>
+	<Property ID="macyhg_007" script="MachineNpc" Name="玉蜂" Desc="玉蜂" Resource="npc\fb_monster007" NpcType="202" SpringRange="2"/>
+	<Property ID="macyhg_008" script="MachineNpc" Name="玉蜂群" Desc="玉蜂群" Resource="npc\itemnpc400" NpcType="202" SpringRange="3"/>
+	<Property ID="macyhg_009" script="MachineNpc" Name="巡风剑" Desc="巡风剑" Resource="npc\npcitem411" NpcType="202" SpringRange="2" SelectState="2" BornActionRec="stand"/>
+	<Property ID="macthd_001" script="MachineNpc" Resource="npc\itemnpc057_thd_001" NpcType="202" SpringRange="8.5" LifeTime="5000"/>
+	<Property ID="macyhg_014" script="MachineNpc" Name="凝月闪" Desc="凝月闪" Resource="npc\itemnpc057_yhg003" NpcType="202" SpringRange="3"/>
+	<Property ID="macyhg_015" script="MachineNpc" Name="击飞" Desc="击飞" Resource="npc\itemnpc057_yhg04" NpcType="202" SpringRange="3"/>
+	<Property ID="mac_gmp_hd_02_001" script="MachineNpc" Name="伤害陷阱" Desc="伤害陷阱" Resource="npc\itemnpc057_yhg07" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="mac_gmp_hd_02_002" script="MachineNpc" Name="击飞陷阱" Desc="击飞陷阱" Resource="npc\itemnpc057_gmphd_01" NpcType="202" SpringRange="5"/>
+	<Property ID="mac_gmp_hd_02_003" script="MachineNpc" Name="减速陷阱" Desc="减速陷阱" Resource="npc\itemnpc057_yhg07" NpcType="202" SpringRange="2" SelectState="0"/>
+	<Property ID="mac_cfbj_dbdh_001" script="MachineNpc" Name="减速陷阱" Desc="减速陷阱" Resource="npc\itemnpc057_xyxs" NpcType="202" SpringRange="3" SelectState="0" LifeTime="3000"/>
+	<Property ID="ssg_dw_01" script="MachineNpc" Name="湿气" Desc="湿气" Resource="npc\itemnpc057t" NpcType="202" SpringRange="5" SelectState="0"/>
+	<Property ID="ssg_dw_02" script="MachineNpc" Name="瘴气" Desc="瘴气" Resource="npc\itemnpc057_jlg06" NpcType="202" SpringRange="5" SelectState="0"/>
+	<Property ID="ssg_dw_03" script="MachineNpc" Name="死气" Desc="死气" Resource="npc\itemnpc057_shyb003" NpcType="202" SpringRange="5" SelectState="0"/>
+	<Property ID="ssg_dw_04" script="MachineNpc" Name="毒气" Desc="毒气" Resource="npc\itemnpc057_jlg01" NpcType="202" SpringRange="5" SelectState="0"/>
+	<Property ID="mac_ymsj_lzyzz001" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz002" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz003" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz004" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz005" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz006" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz007" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz008" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+	<Property ID="mac_ymsj_lzyzz009" script="MachineNpc" Name="站阵机关" Desc="站阵机关" Resource="npc\fbmac00012" NpcType="202" SpringRange="1" SelectState="2" Scale="0.15,0.3,0.15"/>
+</Object>

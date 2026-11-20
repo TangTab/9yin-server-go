@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="EventBGBoss_cd_1" script="WorldAdvanceBossTrigger" Name="雕骨触发NPC" Desc="雕骨触发NPC" Resource="npc\fbmac019005" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_qd_1" script="WorldAdvanceBossTrigger" Name="冶魂触发NPC" Desc="冶魂触发NPC" Resource="npc\itemnpc146" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_yyz_1" script="WorldAdvanceBossTrigger" Name="画皮触发NPC" Desc="画皮触发NPC" Resource="npc\npcitem566_qy" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_jmy_1" script="WorldAdvanceBossTrigger" Name="人厨触发NPC" Desc="人厨触发NPC" Resource="npc\itemnpc162" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_sz_1" script="WorldAdvanceBossTrigger" Name="毒活触发NPC" Desc="毒活触发NPC" Resource="npc\itemnpc226" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_cd2_1" script="WorldAdvanceBossTrigger" Name="死医触发NPC" Desc="死医触发NPC" Resource="npc\npcitem014" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_cd_2" script="WorldAdvanceBossTrigger" Name="雕骨触发NPC" Desc="雕骨触发NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_qd_2" script="WorldAdvanceBossTrigger" Name="冶魂触发NPC" Desc="冶魂触发NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_yyz_2" script="WorldAdvanceBossTrigger" Name="画皮触发NPC" Desc="画皮触发NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_jmy_2" script="WorldAdvanceBossTrigger" Name="人厨触发NPC" Desc="人厨触发NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_sz_2" script="WorldAdvanceBossTrigger" Name="毒活触发NPC" Desc="毒活触发NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventBGBoss_cd2_2" script="WorldAdvanceBossTrigger" Name="死医触发NPC" Desc="死医触发NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+</Object>

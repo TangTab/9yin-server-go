@@ -1,0 +1,1039 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="BoxNpc10001" script="BoxNpc" Name="木质宝箱" Desc="木质宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc10002" script="BoxNpc" Name="木质宝箱" Desc="木质宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc10003" script="BoxNpc" Name="铜质宝箱" Desc="铜质宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc10004" script="BoxNpc" Name="铜质宝箱" Desc="铜质宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc10005" script="BoxNpc" Name="镀银宝箱" Desc="镀银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc10006" script="BoxNpc" Name="镀银宝箱" Desc="镀银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc10007" script="BoxNpc" Name="镀金宝箱" Desc="镀金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_04" DestroyTime1="3"/>
+	<Property ID="BoxNpc10008" script="BoxNpc" Name="镀金宝箱" Desc="镀金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_04" DestroyTime1="3"/>
+	<Property ID="BoxNpc10009" script="BoxNpc" Name="镶玉宝箱" Desc="镶玉宝箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_05" DestroyTime1="3"/>
+	<Property ID="BoxNpc10010" script="BoxNpc" Name="镶玉宝箱" Desc="镶玉宝箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_05" DestroyTime1="3"/>
+	<Property ID="BoxNpc10011" script="BoxNpc" Name="黑铁宝箱" Desc="黑铁宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_06" DestroyTime1="3"/>
+	<Property ID="BoxNpc10012" script="BoxNpc" Name="黑铁宝箱" Desc="黑铁宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_taskitem_xiakexing_06" DestroyTime1="3"/>
+	<Property ID="BoxNpc10013" script="BoxNpc" Name="镶铜储物柜" Desc="镶铜储物柜" Resource="npc\itemboxnpc002" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06000" DestroyTime1="3"/>
+	<Property ID="BoxNpc10014" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01001" DestroyTime1="1"/>
+	<Property ID="BoxNpc10015" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10016" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10017" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10018" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10019" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10020" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10021" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10022" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10023" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10024" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10025" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10026" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06001" DestroyTime1="3"/>
+	<Property ID="BoxNpc10027" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10028" script="BoxNpc" Name="精致的箱子" Desc="精致的箱子" Resource="npc\itemboxnpc002" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10029" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10030" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10031" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10032" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10033" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10034" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10035" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10036" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10037" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10038" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10039" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10040" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10041" script="BoxNpc" Name="精致的箱子" Desc="精致的箱子" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10042" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10043" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10044" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10045" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10046" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10047" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10048" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10049" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10050" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10051" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10052" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10053" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10054" script="BoxNpc" Name="精致的礼盒" Desc="精致的礼盒" Resource="npc\itemnpc201" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10055" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10056" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10057" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10058" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10059" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10060" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc048" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10061" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10062" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10063" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10064" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10065" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc049" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06002" DestroyTime1="3"/>
+	<Property ID="BoxNpc10066" script="BoxNpc" Name="陈旧的木箱" Desc="陈旧的木箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03003" DestroyTime1="3"/>
+	<Property ID="BoxNpc10067" script="BoxNpc" Name="精致的箱子" Desc="精致的箱子" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10068" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10069" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10070" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10071" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10072" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10073" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10074" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10075" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10076" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10077" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10078" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10079" script="BoxNpc" Name="陈旧的木箱" Desc="陈旧的木箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03003" DestroyTime1="3"/>
+	<Property ID="BoxNpc10080" script="BoxNpc" Name="精致的箱子" Desc="精致的箱子" Resource="npc\itemboxnpc002" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10081" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10082" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10083" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10084" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10085" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10086" script="BoxNpc" Name="木制储物箱" Desc="木制储物箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06005" DestroyTime1="3"/>
+	<Property ID="BoxNpc10087" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox02004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10088" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox03004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10089" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox04004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10090" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox05004" DestroyTime1="3"/>
+	<Property ID="BoxNpc10091" script="BoxNpc" Name="精致的盒子" Desc="精致的盒子" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox06004" DestroyTime1="3"/>
+	<Property ID="BoxNpc_CJshow_10092" script="BoxNpc" Name="陈旧铁箱" Desc="陈旧铁箱" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="Enchou_Hexin_1805"/>
+	<Property ID="BoxNpc_CJshow_10093" script="BoxNpc" Name="陈旧铁箱" Desc="陈旧铁箱" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="Enchou_Hexin_2006"/>
+	<Property ID="BoxNpc10092" script="BoxNpc" Name="酒坛" Desc="酒坛" Resource="npc\itemnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01006" DestroyTime1="1"/>
+	<Property ID="BoxNpc10093" script="BoxNpc" Name="药" Desc="药" Resource="npc\itemnpc041" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01007" DestroyTime1="1"/>
+	<Property ID="BoxNpc10094" script="BoxNpc" Name="毒药瓶" Desc="毒药瓶" Resource="npc\itemnpc666" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01008" DestroyTime1="1"/>
+	<Property ID="BoxNpc10095" script="BoxNpc" Name="首饰盒" Desc="首饰盒" Resource="npc\fbmac003020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01005" DestroyTime1="1"/>
+	<Property ID="BoxNpc10096" script="BoxNpc" Name="钱袋" Desc="钱袋" Resource="npc\itemnpc439" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01009" DestroyTime1="1"/>
+	<Property ID="BoxNpc10097" script="BoxNpc" Name="衣柜" Desc="衣柜" Resource="npc\fbmac003024" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01000" DestroyTime1="1"/>
+	<Property ID="BoxNpc10098" script="BoxNpc" Name="土堆" Desc="土堆" Resource="npc\cj_106028c" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01009" DestroyTime1="1"/>
+	<Property ID="BoxNpc20000" script="BoxNpc" Name="神秘盒子1" Desc="神秘盒子1" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10001"/>
+	<Property ID="BoxNpc20001" script="BoxNpc" Name="神秘盒子2" Desc="神秘盒子2" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10002"/>
+	<Property ID="BoxNpc20002" script="BoxNpc" Name="神秘盒子3" Desc="神秘盒子3" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10003"/>
+	<Property ID="BoxNpc20003" script="BoxNpc" Name="神秘盒子4" Desc="神秘盒子4" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10004"/>
+	<Property ID="BoxNpc20004" script="BoxNpc" Name="神秘盒子5" Desc="神秘盒子5" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10005"/>
+	<Property ID="BoxNpc20005" script="BoxNpc" Name="神秘盒子6" Desc="神秘盒子6" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10006"/>
+	<Property ID="BoxNpc20006" script="BoxNpc" Name="神秘盒子7" Desc="神秘盒子7" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10007"/>
+	<Property ID="BoxNpc20007" script="BoxNpc" Name="神秘盒子8" Desc="神秘盒子8" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10008"/>
+	<Property ID="BoxNpc20008" script="BoxNpc" Name="神秘盒子9" Desc="神秘盒子9" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10009"/>
+	<Property ID="BoxNpc20009" script="BoxNpc" Name="神秘盒子10" Desc="神秘盒子10" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10010"/>
+	<Property ID="BoxNpc20010" script="BoxNpc" Name="神秘盒子11" Desc="神秘盒子11" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10011"/>
+	<Property ID="BoxNpc20011" script="BoxNpc" Name="神秘盒子12" Desc="神秘盒子12" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10012"/>
+	<Property ID="BoxNpc20012" script="BoxNpc" Name="神秘盒子13" Desc="神秘盒子13" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10013"/>
+	<Property ID="BoxNpc20013" script="BoxNpc" Name="神秘盒子14" Desc="神秘盒子14" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10014"/>
+	<Property ID="BoxNpc20014" script="BoxNpc" Name="神秘盒子15" Desc="神秘盒子15" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10015"/>
+	<Property ID="BoxNpc20015" script="BoxNpc" Name="神秘盒子16" Desc="神秘盒子16" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10016"/>
+	<Property ID="BoxNpc20016" script="BoxNpc" Name="神秘盒子17" Desc="神秘盒子17" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10017"/>
+	<Property ID="BoxNpc20017" script="BoxNpc" Name="神秘盒子18" Desc="神秘盒子18" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10018"/>
+	<Property ID="BoxNpc20018" script="BoxNpc" Name="神秘盒子19" Desc="神秘盒子19" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10019"/>
+	<Property ID="BoxNpc20019" script="BoxNpc" Name="神秘盒子20" Desc="神秘盒子20" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="wizardbox10020"/>
+	<Property ID="BoxNpc21000" script="BoxNpc" Name="特殊捕兽夹" Desc="特殊捕兽夹" Resource="npc\npcitem339" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="dmonrv04066"/>
+	<Property ID="BoxNpc22001" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22002" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22003" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22004" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22005" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22006" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22007" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22008" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22009" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22010" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22011" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22012" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22013" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22014" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22015" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22016" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22017" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22018" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22019" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22020" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22021" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22022" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22023" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22024" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22025" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22026" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22027" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22028" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22029" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22030" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22031" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22032" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22033" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22034" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22035" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22036" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22037" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22038" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22039" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22040" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22041" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22042" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22043" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22044" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22045" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22046" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22047" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22048" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22049" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22050" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22051" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22052" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22053" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22054" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22055" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22056" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22057" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22058" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22059" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22060" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22061" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22062" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22063" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22064" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22065" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22066" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox001"/>
+	<Property ID="BoxNpc22300" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22301" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22302" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22303" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22304" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22305" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22306" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22307" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22308" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22309" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22310" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22311" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22312" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22313" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22314" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22315" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22316" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22317" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22318" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22319" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22320" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22321" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22322" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22323" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22324" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22325" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22326" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22327" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22328" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22329" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22330" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22331" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22332" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox002"/>
+	<Property ID="BoxNpc22100" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="YunBiaoBox003"/>
+	<Property ID="BoxNpc22101" script="BoxNpc" Name="货箱" Desc="货箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="ShengZhuBox001"/>
+	<Property ID="BoxNpc23001" script="BoxNpc" Name="麻袋" Desc="麻袋" Resource="npc\itemnpc165a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="dmonrv04073"/>
+	<Property ID="BoxNpc_qy_suzhou_31001" script="BoxNpc" Name="鸟巢" Desc="鸟巢" Resource="npc\itemnpc227" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_key_suzhou_31001"/>
+	<Property ID="BoxNpc_qy_suzhou_31002" script="BoxNpc" Name="精致小盒" Desc="精致小盒" Resource="npc\itemnpc201" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_key_suzhou_31002"/>
+	<Property ID="BoxNpc_qy_suzhou_31003" script="BoxNpc" Name="神秘锦盒" Desc="神秘锦盒" Resource="npc\itemnpc201" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_key_suzhou_31003"/>
+	<Property ID="BoxNpc_qy_suzhou_31004" script="BoxNpc" Name="鸟巢" Desc="鸟巢" Resource="npc\itemnpc227" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_key_suzhou_31004"/>
+	<Property ID="BoxNpc_qy_suzhou_31005" script="BoxNpc" Name="鸟巢" Desc="鸟巢" Resource="npc\itemnpc227" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_key_suzhou_31005"/>
+	<Property ID="BoxNpc_qy_suzhou_31006" script="BoxNpc" Name="宝箱" Desc="宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="tf_jn_aqsf_sen"/>
+	<Property ID="BoxNpc_qy_suzhou_31007" script="BoxNpc" Name="宝箱" Desc="宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="tf_jn_sh_ks"/>
+	<Property ID="BoxNpc_qy_suzhou_31008" script="BoxNpc" Name="小盒子" Desc="小盒子" Resource="npc\itemnpc201" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="tf_jn_zs_pgd"/>
+	<Property ID="BoxNpc_qy_suzhou_31009" script="BoxNpc" Name="宝箱" Desc="宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="tf_jn_zf_jh"/>
+	<Property ID="BoxNpc_qy_junzitang0014" script="BoxNpc" Name="木质宝箱" Desc="木质宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9"/>
+	<Property ID="BoxNpc_mp_jl_48006" script="BoxNpc" Name="曼珠沙华" Desc="曼珠沙华" Resource="npc\itemnpc453" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00008"/>
+	<Property ID="BoxNpc_zx_cd_34024" script="BoxNpc" Name="马钱子" Desc="马钱子" Resource="npc\itemnpc166" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="task_renwu_00001"/>
+	<Property ID="BoxNpc_zx_cd_34025" script="BoxNpc" Name="洋金花" Desc="洋金花" Resource="npc\itemnpc228" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="task_renwu_00002"/>
+	<Property ID="BoxNpc_zx_cd_34026" script="BoxNpc" Name="黄芪" Desc="黄芪" Resource="npc\itemnpc054" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="task_renwu_00003"/>
+	<Property ID="BoxNpc_mp_jy_42018" script="BoxNpc" Name="木柴" Desc="木柴" Resource="npc\itemnpc038" NpcType="161" SpringRange="30" SelectState="2" WorldDropID="task_renwu_00005"/>
+	<Property ID="BoxNpc_mp_jy_42019" script="BoxNpc" Name="火石" Desc="火石" Resource="npc\itemnpc649" NpcType="161" SpringRange="30" SelectState="2" WorldDropID="task_renwu_00006"/>
+	<Property ID="BoxNpc_mp_jy_42020" script="BoxNpc" Name="麻油" Desc="麻油" Resource="npc\fbmac003022" NpcType="161" SpringRange="30" SelectState="2" WorldDropID="task_renwu_00007"/>
+	<Property ID="BoxNpc_mp_jy_42021" script="BoxNpc" Name="火把" Desc="火把" Resource="npc\npcitem167" NpcType="161" SpringRange="30" SelectState="2" WorldDropID="task_renwu_00010"/>
+	<Property ID="BoxNpc_zx_ts_01" script="BoxNpc" Name="武器架" Desc="武器架" Resource="npc\fbmac00040" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="NormalBox04001" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_02" script="BoxNpc" Name="书堆" Desc="书堆" Resource="npc\itemnpc686" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00020" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_03" script="BoxNpc" Name="低级宝箱1" Desc="低级宝箱1" Resource="npc\itemnpc691" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00027" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_04" script="BoxNpc" Name="中级宝箱1" Desc="中级宝箱1" Resource="npc\itemnpc695" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00028" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_05" script="BoxNpc" Name="高级宝箱" Desc="高级宝箱" Resource="npc\itemnpc692" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00029" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_06" script="BoxNpc" Name="丹药罐" Desc="丹药罐" Resource="npc\itemnpc687" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00022" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_07" script="BoxNpc" Name="蒲团" Desc="蒲团" Resource="npc\itemnpc063" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00011" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_08" script="BoxNpc" Name="酒坛子" Desc="酒坛子" Resource="npc\itemnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00025" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_09" script="BoxNpc" Name="台灯" Desc="台灯" Resource="npc\fbmac009007" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00024" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_10" script="BoxNpc" Name="柜子" Desc="柜子" Resource="npc\itemnpc694" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00023" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_11" script="BoxNpc" Name="盒子" Desc="盒子" Resource="npc\itemnpc688" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00021" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_12" script="BoxNpc" Name="低级宝箱2" Desc="低级宝箱2" Resource="npc\itemnpc690" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00030" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_13" script="BoxNpc" Name="中级宝箱2" Desc="中级宝箱2" Resource="npc\itemnpc693" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00031" DestroyTime1="10"/>
+	<Property ID="BoxNpc_zx_ts_14" script="BoxNpc" Name="火堆" Desc="火堆" Resource="npc\itemnpc179" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="task_renwu_00015" DestroyTime1="10"/>
+	<Property ID="GatherWeatherWar01" script="BoxNpc" Name="踢馆1级箱" Desc="踢馆1级箱" Resource="npc\itemnpc891" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_citywar_01" DestroyTime1="1"/>
+	<Property ID="BoxTG01" script="BoxNpc" Name="踢馆1级箱" Desc="踢馆1级箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_001" DestroyTime1="6000"/>
+	<Property ID="BoxTG02" script="BoxNpc" Name="踢馆2级箱" Desc="踢馆2级箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_001" DestroyTime1="6000"/>
+	<Property ID="BoxTG03" script="BoxNpc" Name="踢馆3级箱" Desc="踢馆3级箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_002" DestroyTime1="6000"/>
+	<Property ID="BoxTG04" script="BoxNpc" Name="踢馆4级箱" Desc="踢馆4级箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_002" DestroyTime1="6000"/>
+	<Property ID="BoxTG05" script="BoxNpc" Name="踢馆5级箱" Desc="踢馆5级箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_003" DestroyTime1="6000"/>
+	<Property ID="BoxTG06" script="BoxNpc" Name="踢馆6级箱" Desc="踢馆6级箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_003" DestroyTime1="6000"/>
+	<Property ID="BoxTG07" script="BoxNpc" Name="踢馆7级箱" Desc="踢馆7级箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_004" DestroyTime1="6000"/>
+	<Property ID="BoxTG08" script="BoxNpc" Name="踢馆8级箱" Desc="踢馆8级箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_004" DestroyTime1="6000"/>
+	<Property ID="BoxTG09" script="BoxNpc" Name="踢馆9级箱" Desc="踢馆9级箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_005" DestroyTime1="6000"/>
+	<Property ID="BoxTG10" script="BoxNpc" Name="踢馆10级箱" Desc="踢馆10级箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_005" DestroyTime1="6000"/>
+	<Property ID="BoxTG11" script="BoxNpc" Name="踢馆11级箱" Desc="踢馆11级箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_006" DestroyTime1="6000"/>
+	<Property ID="BoxTG12" script="BoxNpc" Name="踢馆12级箱" Desc="踢馆12级箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_006" DestroyTime1="6000"/>
+	<Property ID="BoxTG13" script="BoxNpc" Name="踢馆13级箱" Desc="踢馆13级箱" Resource="npc\itemboxnpc002" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_006" DestroyTime1="6000"/>
+	<Property ID="BoxTG14" script="BoxNpc" Name="踢馆14级箱" Desc="踢馆14级箱" Resource="npc\itemboxnpc003" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_tgbox_box_006" DestroyTime1="6000"/>
+	<Property ID="BoxTG0101" script="BoxNpc" Name="江尊堂" Desc="江尊堂" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_1" DestroyTime1="6000"/>
+	<Property ID="BoxTG0102" script="BoxNpc" Name="江娉婷" Desc="江娉婷" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_1" DestroyTime1="6000"/>
+	<Property ID="BoxTG0103" script="BoxNpc" Name="古啸天" Desc="古啸天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_1" DestroyTime1="6000"/>
+	<Property ID="BoxTG0104" script="BoxNpc" Name="梁影峰" Desc="梁影峰" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_1" DestroyTime1="6000"/>
+	<Property ID="BoxTG0105" script="BoxNpc" Name="君淮明" Desc="君淮明" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_1" DestroyTime1="6000"/>
+	<Property ID="BoxTG0106" script="BoxNpc" Name="西门飞燕" Desc="西门飞燕" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_1" DestroyTime1="6000"/>
+	<Property ID="BoxTG011" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia1" DestroyTime1="6000"/>
+	<Property ID="BoxTG012" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi1" DestroyTime1="6000"/>
+	<Property ID="BoxTG013" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing1" DestroyTime1="6000"/>
+	<Property ID="BoxTG0201" script="BoxNpc" Name="东方玉环" Desc="东方玉环" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_2" DestroyTime1="6000"/>
+	<Property ID="BoxTG0202" script="BoxNpc" Name="叶南之" Desc="叶南之" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_2" DestroyTime1="6000"/>
+	<Property ID="BoxTG0203" script="BoxNpc" Name="秦秀秀" Desc="秦秀秀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_2" DestroyTime1="6000"/>
+	<Property ID="BoxTG0204" script="BoxNpc" Name="司徒敬" Desc="司徒敬" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_2" DestroyTime1="6000"/>
+	<Property ID="BoxTG0205" script="BoxNpc" Name="司蔻" Desc="司蔻" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_2" DestroyTime1="6000"/>
+	<Property ID="BoxTG021" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia2" DestroyTime1="6000"/>
+	<Property ID="BoxTG022" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi2" DestroyTime1="6000"/>
+	<Property ID="BoxTG023" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing2" DestroyTime1="6000"/>
+	<Property ID="BoxTG0301" script="BoxNpc" Name="沈沧海" Desc="沈沧海" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_3" DestroyTime1="6000"/>
+	<Property ID="BoxTG0304" script="BoxNpc" Name="沈裴珏" Desc="沈裴珏" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_3" DestroyTime1="6000"/>
+	<Property ID="BoxTG0305" script="BoxNpc" Name="沈希珏" Desc="沈希珏" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_3" DestroyTime1="6000"/>
+	<Property ID="BoxTG0308" script="BoxNpc" Name="徐心宁" Desc="徐心宁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_3" DestroyTime1="6000"/>
+	<Property ID="BoxTG0309" script="BoxNpc" Name="王天怀" Desc="王天怀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_3" DestroyTime1="6000"/>
+	<Property ID="BoxTG031" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia3" DestroyTime1="6000"/>
+	<Property ID="BoxTG032" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi3" DestroyTime1="6000"/>
+	<Property ID="BoxTG033" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing3" DestroyTime1="6000"/>
+	<Property ID="BoxTG0401" script="BoxNpc" Name="徐云铮" Desc="徐云铮" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_4" DestroyTime1="6000"/>
+	<Property ID="BoxTG0402" script="BoxNpc" Name="徐子卿" Desc="徐子卿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_4" DestroyTime1="6000"/>
+	<Property ID="BoxTG0403" script="BoxNpc" Name="徐子凌" Desc="徐子凌" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_4" DestroyTime1="6000"/>
+	<Property ID="BoxTG0404" script="BoxNpc" Name="徐子朔" Desc="徐子朔" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_4" DestroyTime1="6000"/>
+	<Property ID="BoxTG0405" script="BoxNpc" Name="徐子汐" Desc="徐子汐" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_4" DestroyTime1="6000"/>
+	<Property ID="BoxTG041" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia4" DestroyTime1="6000"/>
+	<Property ID="BoxTG042" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi4" DestroyTime1="6000"/>
+	<Property ID="BoxTG043" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing4" DestroyTime1="6000"/>
+	<Property ID="BoxTG0501" script="BoxNpc" Name="南宫傲天" Desc="南宫傲天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0502" script="BoxNpc" Name="东方情情" Desc="东方情情" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0503" script="BoxNpc" Name="南宫俊" Desc="南宫俊" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0504" script="BoxNpc" Name="南宫平" Desc="南宫平" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0505" script="BoxNpc" Name="南宫烈" Desc="南宫烈" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0506" script="BoxNpc" Name="南宫丑" Desc="南宫丑" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0507" script="BoxNpc" Name="叶翠兰" Desc="叶翠兰" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0508" script="BoxNpc" Name="南宫玉真" Desc="南宫玉真" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0509" script="BoxNpc" Name="燕熙儿" Desc="燕熙儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0510" script="BoxNpc" Name="南宫珏" Desc="南宫珏" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0511" script="BoxNpc" Name="南宫青云" Desc="南宫青云" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0512" script="BoxNpc" Name="南宫秋月" Desc="南宫秋月" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0513" script="BoxNpc" Name="南宫筝儿" Desc="南宫筝儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0514" script="BoxNpc" Name="姚黄" Desc="姚黄" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_5" DestroyTime1="6000"/>
+	<Property ID="BoxTG051" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia5" DestroyTime1="6000"/>
+	<Property ID="BoxTG052" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi5" DestroyTime1="6000"/>
+	<Property ID="BoxTG053" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing5" DestroyTime1="6000"/>
+	<Property ID="BoxTG0601" script="BoxNpc" Name="苏百灵" Desc="苏百灵" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0602" script="BoxNpc" Name="摘星子" Desc="摘星子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0603" script="BoxNpc" Name="天晓子" Desc="天晓子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0604" script="BoxNpc" Name="玉阳子" Desc="玉阳子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0605" script="BoxNpc" Name="薛菁" Desc="薛菁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0606" script="BoxNpc" Name="兰姬" Desc="兰姬" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0607" script="BoxNpc" Name="槿儿" Desc="槿儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0608" script="BoxNpc" Name="出尘子" Desc="出尘子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0609" script="BoxNpc" Name="费无仁" Desc="费无仁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_6" DestroyTime1="6000"/>
+	<Property ID="BoxTG061" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia6" DestroyTime1="6000"/>
+	<Property ID="BoxTG062" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi6" DestroyTime1="6000"/>
+	<Property ID="BoxTG063" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing6" DestroyTime1="6000"/>
+	<Property ID="BoxTG0701" script="BoxNpc" Name="刘泰" Desc="刘泰" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_7" DestroyTime1="6000"/>
+	<Property ID="BoxTG0702" script="BoxNpc" Name="胡不愁" Desc="胡不愁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_7" DestroyTime1="6000"/>
+	<Property ID="BoxTG0703" script="BoxNpc" Name="洪昭阳" Desc="洪昭阳" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_7" DestroyTime1="6000"/>
+	<Property ID="BoxTG0704" script="BoxNpc" Name="陈环秀" Desc="陈环秀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_7" DestroyTime1="6000"/>
+	<Property ID="BoxTG071" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia7" DestroyTime1="6000"/>
+	<Property ID="BoxTG072" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi7" DestroyTime1="6000"/>
+	<Property ID="BoxTG073" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing7" DestroyTime1="6000"/>
+	<Property ID="BoxTG0801" script="BoxNpc" Name="仲孙圣" Desc="仲孙圣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0802" script="BoxNpc" Name="梁令公" Desc="梁令公" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0803" script="BoxNpc" Name="南逸翁" Desc="南逸翁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0804" script="BoxNpc" Name="曲中求" Desc="曲中求" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0805" script="BoxNpc" Name="沈冲" Desc="沈冲" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0806" script="BoxNpc" Name="薛少华" Desc="薛少华" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0807" script="BoxNpc" Name="冷秋菱" Desc="冷秋菱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_8" DestroyTime1="6000"/>
+	<Property ID="BoxTG081" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia8" DestroyTime1="6000"/>
+	<Property ID="BoxTG082" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi8" DestroyTime1="6000"/>
+	<Property ID="BoxTG083" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing8" DestroyTime1="6000"/>
+	<Property ID="BoxTG0901" script="BoxNpc" Name="令狐雪" Desc="令狐雪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0902" script="BoxNpc" Name="卞灵筠" Desc="卞灵筠" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0903" script="BoxNpc" Name="纳兰青儿" Desc="纳兰青儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0904" script="BoxNpc" Name="拓拔缎儿" Desc="拓拔缎儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0905" script="BoxNpc" Name="黎嫱" Desc="黎嫱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0906" script="BoxNpc" Name="红影" Desc="红影" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0907" script="BoxNpc" Name="绿纹" Desc="绿纹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0908" script="BoxNpc" Name="蓝霄" Desc="蓝霄" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0909" script="BoxNpc" Name="紫烟" Desc="紫烟" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0910" script="BoxNpc" Name="胡玉飞" Desc="胡玉飞" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG0911" script="BoxNpc" Name="宫绮薇" Desc="宫绮薇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_9" DestroyTime1="6000"/>
+	<Property ID="BoxTG091" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia9" DestroyTime1="6000"/>
+	<Property ID="BoxTG092" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi9" DestroyTime1="6000"/>
+	<Property ID="BoxTG093" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing9" DestroyTime1="6000"/>
+	<Property ID="BoxTG1001" script="BoxNpc" Name="雷远堂" Desc="雷远堂" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1002" script="BoxNpc" Name="雷如烈" Desc="雷如烈" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1003" script="BoxNpc" Name="唐涓涓" Desc="唐涓涓" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1004" script="BoxNpc" Name="雷蒙" Desc="雷蒙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1005" script="BoxNpc" Name="雷阔天" Desc="雷阔天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1006" script="BoxNpc" Name="尹倩儿" Desc="尹倩儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1007" script="BoxNpc" Name="雷鹏" Desc="雷鹏" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1008" script="BoxNpc" Name="周琛" Desc="周琛" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1009" script="BoxNpc" Name="游一漂" Desc="游一漂" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1010" script="BoxNpc" Name="小雷神" Desc="小雷神" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1011" script="BoxNpc" Name="雷可秀" Desc="雷可秀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_10" DestroyTime1="6000"/>
+	<Property ID="BoxTG101" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia10" DestroyTime1="6000"/>
+	<Property ID="BoxTG102" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi10" DestroyTime1="6000"/>
+	<Property ID="BoxTG103" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing10" DestroyTime1="6000"/>
+	<Property ID="BoxTG1101" script="BoxNpc" Name="史舒鹰" Desc="史舒鹰" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_11" DestroyTime1="6000"/>
+	<Property ID="BoxTG1102" script="BoxNpc" Name="史孟雄" Desc="史孟雄" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_11" DestroyTime1="6000"/>
+	<Property ID="BoxTG1103" script="BoxNpc" Name="史云豹" Desc="史云豹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_11" DestroyTime1="6000"/>
+	<Property ID="BoxTG1104" script="BoxNpc" Name="史羽施" Desc="史羽施" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_11" DestroyTime1="6000"/>
+	<Property ID="BoxTG1105" script="BoxNpc" Name="史耀虎" Desc="史耀虎" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_11" DestroyTime1="6000"/>
+	<Property ID="BoxTG111" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia11" DestroyTime1="6000"/>
+	<Property ID="BoxTG112" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi11" DestroyTime1="6000"/>
+	<Property ID="BoxTG113" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing11" DestroyTime1="6000"/>
+	<Property ID="BoxTG1201" script="BoxNpc" Name="左月凛" Desc="左月凛" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_12" DestroyTime1="6000"/>
+	<Property ID="BoxTG1202" script="BoxNpc" Name="莫伊人" Desc="莫伊人" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_12" DestroyTime1="6000"/>
+	<Property ID="BoxTG1203" script="BoxNpc" Name="沈澈" Desc="沈澈" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_12" DestroyTime1="6000"/>
+	<Property ID="BoxTG1204" script="BoxNpc" Name="柳慕尘" Desc="柳慕尘" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_12" DestroyTime1="6000"/>
+	<Property ID="BoxTG1205" script="BoxNpc" Name="永贻" Desc="永贻" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_12" DestroyTime1="6000"/>
+	<Property ID="BoxTG1206" script="BoxNpc" Name="赵言武" Desc="赵言武" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_12" DestroyTime1="6000"/>
+	<Property ID="BoxTG121" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia12" DestroyTime1="6000"/>
+	<Property ID="BoxTG122" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi12" DestroyTime1="6000"/>
+	<Property ID="BoxTG123" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing12" DestroyTime1="6000"/>
+	<Property ID="BoxTG1301" script="BoxNpc" Name="曲天" Desc="曲天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1302" script="BoxNpc" Name="彭扈" Desc="彭扈" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1303" script="BoxNpc" Name="曲灵风" Desc="曲灵风" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1304" script="BoxNpc" Name="苏洛儿" Desc="苏洛儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1305" script="BoxNpc" Name="费清" Desc="费清" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1306" script="BoxNpc" Name="黄有通" Desc="黄有通" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1307" script="BoxNpc" Name="星邪" Desc="星邪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1308" script="BoxNpc" Name="铁盛" Desc="铁盛" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1309" script="BoxNpc" Name="娄铁夫" Desc="娄铁夫" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1310" script="BoxNpc" Name="马元庆" Desc="马元庆" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1311" script="BoxNpc" Name="白四姑" Desc="白四姑" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1312" script="BoxNpc" Name="魏行歌" Desc="魏行歌" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1313" script="BoxNpc" Name="刘文奇" Desc="刘文奇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1314" script="BoxNpc" Name="徐谦" Desc="徐谦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1315" script="BoxNpc" Name="赵无忌" Desc="赵无忌" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1316" script="BoxNpc" Name="王仁佑" Desc="王仁佑" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1317" script="BoxNpc" Name="乌万迪" Desc="乌万迪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_13" DestroyTime1="6000"/>
+	<Property ID="BoxTG131" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia13" DestroyTime1="6000"/>
+	<Property ID="BoxTG132" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi13" DestroyTime1="6000"/>
+	<Property ID="BoxTG133" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing13" DestroyTime1="6000"/>
+	<Property ID="BoxTG1401" script="BoxNpc" Name="大宫主 白莹莹" Desc="大宫主 白莹莹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_14" DestroyTime1="6000"/>
+	<Property ID="BoxTG1402" script="BoxNpc" Name="二宫主 白飞飞" Desc="二宫主 白飞飞" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_14" DestroyTime1="6000"/>
+	<Property ID="BoxTG1403" script="BoxNpc" Name="银刀护卫 龙牙" Desc="银刀护卫 龙牙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_14" DestroyTime1="6000"/>
+	<Property ID="BoxTG1404" script="BoxNpc" Name="金剑侍女 阿绣" Desc="金剑侍女 阿绣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_14" DestroyTime1="6000"/>
+	<Property ID="BoxTG141" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia14" DestroyTime1="6000"/>
+	<Property ID="BoxTG142" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi14" DestroyTime1="6000"/>
+	<Property ID="BoxTG143" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing14" DestroyTime1="6000"/>
+	<Property ID="BoxTG1501" script="BoxNpc" Name="杨邪" Desc="杨邪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_15" DestroyTime1="6000"/>
+	<Property ID="BoxTG1502" script="BoxNpc" Name="杨池蕊" Desc="杨池蕊" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_15" DestroyTime1="6000"/>
+	<Property ID="BoxTG1503" script="BoxNpc" Name="韩芷心" Desc="韩芷心" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_15" DestroyTime1="6000"/>
+	<Property ID="BoxTG1504" script="BoxNpc" Name="班婆婆" Desc="班婆婆" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_15" DestroyTime1="6000"/>
+	<Property ID="BoxTG151" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia15" DestroyTime1="6000"/>
+	<Property ID="BoxTG152" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi15" DestroyTime1="6000"/>
+	<Property ID="BoxTG153" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing15" DestroyTime1="6000"/>
+	<Property ID="BoxTG1601" script="BoxNpc" Name="庄聿贤" Desc="庄聿贤" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1602" script="BoxNpc" Name="云素问" Desc="云素问" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1603" script="BoxNpc" Name="庄小仙" Desc="庄小仙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1604" script="BoxNpc" Name="卫无风" Desc="卫无风" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1605" script="BoxNpc" Name="庄青青" Desc="庄青青" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1606" script="BoxNpc" Name="徐云晟" Desc="徐云晟" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1607" script="BoxNpc" Name="庄明珠" Desc="庄明珠" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_16" DestroyTime1="6000"/>
+	<Property ID="BoxTG161" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia16" DestroyTime1="6000"/>
+	<Property ID="BoxTG162" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi16" DestroyTime1="6000"/>
+	<Property ID="BoxTG163" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing16" DestroyTime1="6000"/>
+	<Property ID="BoxTG1701" script="BoxNpc" Name="仇百岁" Desc="仇百岁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1702" script="BoxNpc" Name="仇赛儿" Desc="仇赛儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1703" script="BoxNpc" Name="百晓生" Desc="百晓生" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1704" script="BoxNpc" Name="王青" Desc="王青" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1705" script="BoxNpc" Name="熊齐山" Desc="熊齐山" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1706" script="BoxNpc" Name="薛恶虎" Desc="薛恶虎" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1707" script="BoxNpc" Name="袁鸠" Desc="袁鸠" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1708" script="BoxNpc" Name="阎小龙" Desc="阎小龙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1709" script="BoxNpc" Name="梁不凡" Desc="梁不凡" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1710" script="BoxNpc" Name="顾苏娇" Desc="顾苏娇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1711" script="BoxNpc" Name="金轮王" Desc="金轮王" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1712" script="BoxNpc" Name="尸户户" Desc="尸户户" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1713" script="BoxNpc" Name="棺木老人" Desc="棺木老人" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1714" script="BoxNpc" Name="刁鹏" Desc="刁鹏" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1715" script="BoxNpc" Name="麦秀" Desc="麦秀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1716" script="BoxNpc" Name="姜子奇" Desc="姜子奇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1717" script="BoxNpc" Name="冯正横" Desc="冯正横" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_17" DestroyTime1="6000"/>
+	<Property ID="BoxTG171" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia17" DestroyTime1="6000"/>
+	<Property ID="BoxTG172" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi17" DestroyTime1="6000"/>
+	<Property ID="BoxTG173" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing17" DestroyTime1="6000"/>
+	<Property ID="BoxTG1801" script="BoxNpc" Name="东方城" Desc="东方城" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1802" script="BoxNpc" Name="龙紫嫣" Desc="龙紫嫣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1803" script="BoxNpc" Name="东方羽" Desc="东方羽" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1804" script="BoxNpc" Name="东方仁" Desc="东方仁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1805" script="BoxNpc" Name="齐昭" Desc="齐昭" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1806" script="BoxNpc" Name="东方傲雪" Desc="东方傲雪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1807" script="BoxNpc" Name="东方芷" Desc="东方芷" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1808" script="BoxNpc" Name="阮红竹" Desc="阮红竹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1809" script="BoxNpc" Name="东方亚菱" Desc="东方亚菱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1810" script="BoxNpc" Name="东方遥" Desc="东方遥" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1811" script="BoxNpc" Name="南宫怜" Desc="南宫怜" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1812" script="BoxNpc" Name="东方雁" Desc="东方雁" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1813" script="BoxNpc" Name="东方士廷" Desc="东方士廷" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1814" script="BoxNpc" Name="东方言少" Desc="东方言少" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_18" DestroyTime1="6000"/>
+	<Property ID="BoxTG181" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia18" DestroyTime1="6000"/>
+	<Property ID="BoxTG182" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi18" DestroyTime1="6000"/>
+	<Property ID="BoxTG183" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing18" DestroyTime1="6000"/>
+	<Property ID="BoxTG1901" script="BoxNpc" Name="慕容千秋" Desc="慕容千秋" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1902" script="BoxNpc" Name="慕容万代" Desc="慕容万代" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1903" script="BoxNpc" Name="慕容司辰" Desc="慕容司辰" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1904" script="BoxNpc" Name="慕容卿" Desc="慕容卿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1905" script="BoxNpc" Name="慕容乾" Desc="慕容乾" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1906" script="BoxNpc" Name="丁不扬" Desc="丁不扬" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1907" script="BoxNpc" Name="吴不恭" Desc="吴不恭" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1908" script="BoxNpc" Name="如醉" Desc="如醉" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1909" script="BoxNpc" Name="如梦" Desc="如梦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1910" script="BoxNpc" Name="李令悦" Desc="李令悦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1911" script="BoxNpc" Name="慕容嫣" Desc="慕容嫣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1912" script="BoxNpc" Name="慕容双" Desc="慕容双" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1913" script="BoxNpc" Name="慕容仙" Desc="慕容仙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1914" script="BoxNpc" Name="如痴" Desc="如痴" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG1915" script="BoxNpc" Name="如云" Desc="如云" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_19" DestroyTime1="6000"/>
+	<Property ID="BoxTG191" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia19" DestroyTime1="6000"/>
+	<Property ID="BoxTG192" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi19" DestroyTime1="6000"/>
+	<Property ID="BoxTG193" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing19" DestroyTime1="6000"/>
+	<Property ID="BoxTG2001" script="BoxNpc" Name="燕百苦" Desc="燕百苦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2002" script="BoxNpc" Name="燕南天" Desc="燕南天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2003" script="BoxNpc" Name="燕晴雪" Desc="燕晴雪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2004" script="BoxNpc" Name="燕孤鸿" Desc="燕孤鸿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2005" script="BoxNpc" Name="梅洛尘" Desc="梅洛尘" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2006" script="BoxNpc" Name="燕华枫" Desc="燕华枫" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2007" script="BoxNpc" Name="燕白楼" Desc="燕白楼" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2008" script="BoxNpc" Name="南宫吟" Desc="南宫吟" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2009" script="BoxNpc" Name="燕七" Desc="燕七" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2010" script="BoxNpc" Name="华青云" Desc="华青云" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2011" script="BoxNpc" Name="邱剑鸣" Desc="邱剑鸣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2012" script="BoxNpc" Name="金燕子" Desc="金燕子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2013" script="BoxNpc" Name="银燕子" Desc="银燕子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2014" script="BoxNpc" Name="玉燕子" Desc="玉燕子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_20" DestroyTime1="6000"/>
+	<Property ID="BoxTG201" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia20" DestroyTime1="6000"/>
+	<Property ID="BoxTG202" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi20" DestroyTime1="6000"/>
+	<Property ID="BoxTG203" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing20" DestroyTime1="6000"/>
+	<Property ID="BoxTG2101" script="BoxNpc" Name="云曼" Desc="云曼" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2102" script="BoxNpc" Name="苏云梦" Desc="苏云梦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2103" script="BoxNpc" Name="段云曦" Desc="段云曦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2104" script="BoxNpc" Name="楚云谣" Desc="楚云谣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2105" script="BoxNpc" Name="柳云烟" Desc="柳云烟" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2106" script="BoxNpc" Name="杜云芊" Desc="杜云芊" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2107" script="BoxNpc" Name="史云飞" Desc="史云飞" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_21" DestroyTime1="6000"/>
+	<Property ID="BoxTG211" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia21" DestroyTime1="6000"/>
+	<Property ID="BoxTG212" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi21" DestroyTime1="6000"/>
+	<Property ID="BoxTG213" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing21" DestroyTime1="6000"/>
+	<Property ID="BoxTG2201" script="BoxNpc" Name="望月老人" Desc="望月老人" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2202" script="BoxNpc" Name="玄鉴神僧" Desc="玄鉴神僧" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2203" script="BoxNpc" Name="万人杰" Desc="万人杰" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2204" script="BoxNpc" Name="薛虎山" Desc="薛虎山" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2205" script="BoxNpc" Name="向晚晴" Desc="向晚晴" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2206" script="BoxNpc" Name="聂风" Desc="聂风" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2207" script="BoxNpc" Name="玉钗寒" Desc="玉钗寒" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2208" script="BoxNpc" Name="薛绫女" Desc="薛绫女" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2209" script="BoxNpc" Name="云望" Desc="云望" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2210" script="BoxNpc" Name="阎彭" Desc="阎彭" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_22" DestroyTime1="6000"/>
+	<Property ID="BoxTG221" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia22" DestroyTime1="6000"/>
+	<Property ID="BoxTG222" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi22" DestroyTime1="6000"/>
+	<Property ID="BoxTG223" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing22" DestroyTime1="6000"/>
+	<Property ID="BoxTG2301" script="BoxNpc" Name="姬葬花" Desc="姬葬花" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2302" script="BoxNpc" Name="姬苦情" Desc="姬苦情" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2303" script="BoxNpc" Name="姬悲情" Desc="姬悲情" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2304" script="BoxNpc" Name="姬夫人" Desc="姬夫人" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2305" script="BoxNpc" Name="姬凌凤" Desc="姬凌凤" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2306" script="BoxNpc" Name="姬凌燕" Desc="姬凌燕" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2307" script="BoxNpc" Name="东郭高" Desc="东郭高" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_23" DestroyTime1="6000"/>
+	<Property ID="BoxTG231" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia23" DestroyTime1="6000"/>
+	<Property ID="BoxTG232" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi23" DestroyTime1="6000"/>
+	<Property ID="BoxTG233" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing23" DestroyTime1="6000"/>
+	<Property ID="BoxTG2401" script="BoxNpc" Name="雷行空" Desc="雷行空" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2402" script="BoxNpc" Name="朱允炆" Desc="朱允炆" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2403" script="BoxNpc" Name="黑莫尔" Desc="黑莫尔" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2404" script="BoxNpc" Name="黑珍珠" Desc="黑珍珠" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2405" script="BoxNpc" Name="端木祺" Desc="端木祺" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2406" script="BoxNpc" Name="詹逵" Desc="詹逵" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2407" script="BoxNpc" Name="欧阳画扇" Desc="欧阳画扇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2408" script="BoxNpc" Name="林曼儿" Desc="林曼儿" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2409" script="BoxNpc" Name="樊一坤" Desc="樊一坤" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2410" script="BoxNpc" Name="千拙大师" Desc="千拙大师" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2411" script="BoxNpc" Name="铁尺道长" Desc="铁尺道长" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2412" script="BoxNpc" Name="仁波切" Desc="仁波切" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2413" script="BoxNpc" Name="诸十三" Desc="诸十三" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_24" DestroyTime1="6000"/>
+	<Property ID="BoxTG241" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia24" DestroyTime1="6000"/>
+	<Property ID="BoxTG242" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi24" DestroyTime1="6000"/>
+	<Property ID="BoxTG243" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing24" DestroyTime1="6000"/>
+	<Property ID="BoxTG2501" script="BoxNpc" Name="血影子" Desc="血影子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_25" DestroyTime1="6000"/>
+	<Property ID="BoxTG2502" script="BoxNpc" Name="赵赵姑娘" Desc="赵赵姑娘" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_25" DestroyTime1="6000"/>
+	<Property ID="BoxTG2503" script="BoxNpc" Name="黑手" Desc="黑手" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_25" DestroyTime1="6000"/>
+	<Property ID="BoxTG2504" script="BoxNpc" Name="历清狂" Desc="历清狂" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_25" DestroyTime1="6000"/>
+	<Property ID="BoxTG2505" script="BoxNpc" Name="赫连璧" Desc="赫连璧" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_25" DestroyTime1="6000"/>
+	<Property ID="BoxTG2506" script="BoxNpc" Name="霍缡凤" Desc="霍缡凤" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_25" DestroyTime1="6000"/>
+	<Property ID="BoxTG251" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia25" DestroyTime1="6000"/>
+	<Property ID="BoxTG252" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi25" DestroyTime1="6000"/>
+	<Property ID="BoxTG253" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing25" DestroyTime1="6000"/>
+	<Property ID="BoxTG2601" script="BoxNpc" Name="朱靖" Desc="朱靖" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2602" script="BoxNpc" Name="老太君" Desc="老太君" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2603" script="BoxNpc" Name="永成公主" Desc="永成公主" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2604" script="BoxNpc" Name="丝衣" Desc="丝衣" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2605" script="BoxNpc" Name="张丹灵" Desc="张丹灵" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2606" script="BoxNpc" Name="丁烈" Desc="丁烈" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2607" script="BoxNpc" Name="铁臂苍狼" Desc="铁臂苍狼" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_26" DestroyTime1="6000"/>
+	<Property ID="BoxTG261" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia26" DestroyTime1="6000"/>
+	<Property ID="BoxTG262" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi26" DestroyTime1="6000"/>
+	<Property ID="BoxTG263" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing26" DestroyTime1="6000"/>
+	<Property ID="BoxTG2701" script="BoxNpc" Name="熊霸天" Desc="熊霸天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2702" script="BoxNpc" Name="万骄芷" Desc="万骄芷" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2703" script="BoxNpc" Name="秦天豹" Desc="秦天豹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2704" script="BoxNpc" Name="黄奎" Desc="黄奎" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2705" script="BoxNpc" Name="向无极" Desc="向无极" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2706" script="BoxNpc" Name="瓦努玉崆" Desc="瓦努玉崆" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2707" script="BoxNpc" Name="龙杏霄" Desc="龙杏霄" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2708" script="BoxNpc" Name="范强" Desc="范强" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2709" script="BoxNpc" Name="范翼" Desc="范翼" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2710" script="BoxNpc" Name="居谦" Desc="居谦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2711" script="BoxNpc" Name="李龙翼" Desc="李龙翼" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2712" script="BoxNpc" Name="乔百乾" Desc="乔百乾" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2713" script="BoxNpc" Name="张宇奇" Desc="张宇奇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2714" script="BoxNpc" Name="黄钟" Desc="黄钟" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2715" script="BoxNpc" Name="薛雪" Desc="薛雪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_27" DestroyTime1="6000"/>
+	<Property ID="BoxTG271" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia27" DestroyTime1="6000"/>
+	<Property ID="BoxTG272" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi27" DestroyTime1="6000"/>
+	<Property ID="BoxTG273" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing27" DestroyTime1="6000"/>
+	<Property ID="BoxTG2801" script="BoxNpc" Name="公孙奇" Desc="公孙奇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_28" DestroyTime1="6000"/>
+	<Property ID="BoxTG2802" script="BoxNpc" Name="公孙昊天" Desc="公孙昊天" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_28" DestroyTime1="6000"/>
+	<Property ID="BoxTG2803" script="BoxNpc" Name="公孙赞" Desc="公孙赞" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_28" DestroyTime1="6000"/>
+	<Property ID="BoxTG2804" script="BoxNpc" Name="公孙降" Desc="公孙降" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_28" DestroyTime1="6000"/>
+	<Property ID="BoxTG2805" script="BoxNpc" Name="公孙德清" Desc="公孙德清" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_28" DestroyTime1="6000"/>
+	<Property ID="BoxTG281" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia28" DestroyTime1="6000"/>
+	<Property ID="BoxTG282" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi28" DestroyTime1="6000"/>
+	<Property ID="BoxTG283" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing28" DestroyTime1="6000"/>
+	<Property ID="BoxTG2901" script="BoxNpc" Name="刘铁胆" Desc="刘铁胆" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_29" DestroyTime1="6000"/>
+	<Property ID="BoxTG2902" script="BoxNpc" Name="唐语曦" Desc="唐语曦" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_29" DestroyTime1="6000"/>
+	<Property ID="BoxTG2903" script="BoxNpc" Name="韩笑" Desc="韩笑" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_29" DestroyTime1="6000"/>
+	<Property ID="BoxTG2904" script="BoxNpc" Name="张飞雨" Desc="张飞雨" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_29" DestroyTime1="6000"/>
+	<Property ID="BoxTG2905" script="BoxNpc" Name="谢阕吟" Desc="谢阕吟" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_29" DestroyTime1="6000"/>
+	<Property ID="BoxTG2906" script="BoxNpc" Name="仇毅" Desc="仇毅" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_29" DestroyTime1="6000"/>
+	<Property ID="BoxTG291" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia29" DestroyTime1="6000"/>
+	<Property ID="BoxTG292" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi29" DestroyTime1="6000"/>
+	<Property ID="BoxTG293" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing29" DestroyTime1="6000"/>
+	<Property ID="BoxTG3001" script="BoxNpc" Name="关逢雷" Desc="关逢雷" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_30" DestroyTime1="6000"/>
+	<Property ID="BoxTG3002" script="BoxNpc" Name="洪喜" Desc="洪喜" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_30" DestroyTime1="6000"/>
+	<Property ID="BoxTG3003" script="BoxNpc" Name="刘百手" Desc="刘百手" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_30" DestroyTime1="6000"/>
+	<Property ID="BoxTG3005" script="BoxNpc" Name="鲁旺哀" Desc="鲁旺哀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_30" DestroyTime1="6000"/>
+	<Property ID="BoxTG3006" script="BoxNpc" Name="关玉兵" Desc="关玉兵" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_30" DestroyTime1="6000"/>
+	<Property ID="BoxTG301" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia30" DestroyTime1="6000"/>
+	<Property ID="BoxTG302" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi30" DestroyTime1="6000"/>
+	<Property ID="BoxTG303" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing30" DestroyTime1="6000"/>
+	<Property ID="BoxTG3101" script="BoxNpc" Name="老刀把子" Desc="老刀把子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3102" script="BoxNpc" Name="勾魂使者" Desc="勾魂使者" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3103" script="BoxNpc" Name="夺魄使者" Desc="夺魄使者" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3104" script="BoxNpc" Name="降龙" Desc="降龙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3105" script="BoxNpc" Name="伏虎" Desc="伏虎" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3106" script="BoxNpc" Name="公孙启" Desc="公孙启" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3107" script="BoxNpc" Name="石不归" Desc="石不归" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3108" script="BoxNpc" Name="丁芒" Desc="丁芒" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3109" script="BoxNpc" Name="韩若谷" Desc="韩若谷" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3110" script="BoxNpc" Name="韩雪" Desc="韩雪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3111" script="BoxNpc" Name="韩菱" Desc="韩菱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_31" DestroyTime1="6000"/>
+	<Property ID="BoxTG311" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia31" DestroyTime1="6000"/>
+	<Property ID="BoxTG312" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi31" DestroyTime1="6000"/>
+	<Property ID="BoxTG313" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing31" DestroyTime1="6000"/>
+	<Property ID="BoxTG3201" script="BoxNpc" Name="司空天行" Desc="司空天行" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3202" script="BoxNpc" Name="司空姚氏" Desc="司空姚氏" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3203" script="BoxNpc" Name="雷天明" Desc="雷天明" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3204" script="BoxNpc" Name="江羽轩" Desc="江羽轩" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3205" script="BoxNpc" Name="公孙飞龙" Desc="公孙飞龙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3206" script="BoxNpc" Name="西门浩南" Desc="西门浩南" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3207" script="BoxNpc" Name="向百清" Desc="向百清" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3208" script="BoxNpc" Name="司空豹" Desc="司空豹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3209" script="BoxNpc" Name="熊天豹" Desc="熊天豹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3210" script="BoxNpc" Name="严泉" Desc="严泉" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3211" script="BoxNpc" Name="柳启龙" Desc="柳启龙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3212" script="BoxNpc" Name="肖天虎" Desc="肖天虎" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3213" script="BoxNpc" Name="肖天豹" Desc="肖天豹" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3214" script="BoxNpc" Name="秦博琪" Desc="秦博琪" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_32" DestroyTime1="6000"/>
+	<Property ID="BoxTG321" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia32" DestroyTime1="6000"/>
+	<Property ID="BoxTG322" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi32" DestroyTime1="6000"/>
+	<Property ID="BoxTG323" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing32" DestroyTime1="6000"/>
+	<Property ID="BoxTG3301" script="BoxNpc" Name="邓黄龙" Desc="邓黄龙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_33" DestroyTime1="6000"/>
+	<Property ID="BoxTG3302" script="BoxNpc" Name="邓青龙" Desc="邓青龙" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_33" DestroyTime1="6000"/>
+	<Property ID="BoxTG3303" script="BoxNpc" Name="霍影" Desc="霍影" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_33" DestroyTime1="6000"/>
+	<Property ID="BoxTG331" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia33" DestroyTime1="6000"/>
+	<Property ID="BoxTG332" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi33" DestroyTime1="6000"/>
+	<Property ID="BoxTG333" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing33" DestroyTime1="6000"/>
+	<Property ID="BoxTG3401" script="BoxNpc" Name="萧桀" Desc="萧桀" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_34" DestroyTime1="6000"/>
+	<Property ID="BoxTG3402" script="BoxNpc" Name="莫尔风" Desc="莫尔风" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_34" DestroyTime1="6000"/>
+	<Property ID="BoxTG3403" script="BoxNpc" Name="谢飞" Desc="谢飞" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_34" DestroyTime1="6000"/>
+	<Property ID="BoxTG341" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia34" DestroyTime1="6000"/>
+	<Property ID="BoxTG342" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi34" DestroyTime1="6000"/>
+	<Property ID="BoxTG343" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing34" DestroyTime1="6000"/>
+	<Property ID="BoxTG0000" script="BoxNpc" Name="临时" Desc="临时" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="hhjp_boss_001" DestroyTime1="6000"/>
+	<Property ID="BoxJHHJ" script="BoxNpc" Name="江湖豪杰宝箱" Desc="江湖豪杰宝箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="NormalBox01004" DestroyTime1="6000"/>
+	<Property ID="BoxNpc_qy_qyb_001" script="BoxNpc" Name="青云堡奇遇宝箱" Desc="青云堡奇遇宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_kn_01"/>
+	<Property ID="BoxNpc_qy_qyb_002" script="BoxNpc" Name="青云堡奇遇boss宝箱" Desc="青云堡奇遇boss宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_kn_02"/>
+	<Property ID="BoxNpc_qy_qyb_003" script="BoxNpc" Name="红水晶" Desc="红水晶" Resource="npc\cj_102019" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_kn_03"/>
+	<Property ID="BoxNpc_qy_qyb_004" script="BoxNpc" Name="蓝水晶" Desc="蓝水晶" Resource="npc\cj_102020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_kn_04"/>
+	<Property ID="BoxNpc_qy_qyb_005" script="BoxNpc" Name="绿水晶" Desc="绿水晶" Resource="npc\cj_102021" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_kn_05"/>
+	<Property ID="BoxNpc_qy_qyb_006" script="BoxNpc" Name="青云堡奇遇宝箱" Desc="青云堡奇遇宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_001"/>
+	<Property ID="BoxNpc_qy_qyb_007" script="BoxNpc" Name="青云堡奇遇宝箱" Desc="青云堡奇遇宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="qy_qyb_001"/>
+	<Property ID="BoxNpc_kq_01" script="BoxNpc" Name="千灵果" Desc="千灵果" Resource="npc\itemnpc228" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="qy_kq_01"/>
+	<Property ID="BoxNpc_kq_02" script="BoxNpc" Name="宝箱" Desc="宝箱" Resource="npc\itemboxnpc002" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="qy_kq_02" DestroyTime1="10"/>
+	<Property ID="BoxNpc_kq_03" script="BoxNpc" Name="宝箱" Desc="宝箱" Resource="npc\itemnpc586" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="qy_kq_05" DestroyTime1="10"/>
+	<Property ID="BoxNpc_qy_120401_shaolin_02" script="BoxNpc" Name=" " Desc=" " Resource="npc\hw_dp004" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="qy_120401_shaolin_dl_03" DestroyTime1="10"/>
+	<Property ID="BoxNpc_ct_ng_sl_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_sl_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_sl_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_sl_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_sl_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_sl_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_sl_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_sl_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_wd_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_wd_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_wd_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_wd_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_wd_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_wd_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_wd_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_wd_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_em_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_em_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_em_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_em_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_em_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_em_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_em_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_em_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_gb_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_gb_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_gb_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_gb_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_gb_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_gb_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_gb_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_gb_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jz_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jz_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jz_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jz_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jz_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jz_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jz_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jz_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jy_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jy_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jy_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jy_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jy_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jy_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jy_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jy_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jl_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jl_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jl_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jl_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jl_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jl_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jl_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jl_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_tm_001" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_tm_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_tm_002" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_tm_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_tm_003" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_tm_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_tm_004" script="BoxNpc" Name="秘籍宝箱" Desc="秘籍宝箱" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_tm_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_001" script="BoxNpc" Name="秘籍宝箱（坐忘）" Desc="秘籍宝箱（坐忘）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_005" script="BoxNpc" Name="秘籍宝箱（寒冰）" Desc="秘籍宝箱（寒冰）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_201" script="BoxNpc" Name="秘籍宝箱（无妄）" Desc="秘籍宝箱（无妄）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_202" script="BoxNpc" Name="秘籍宝箱（残阳）" Desc="秘籍宝箱（残阳）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_203" script="BoxNpc" Name="秘籍宝箱（五行）" Desc="秘籍宝箱（五行）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_204" script="BoxNpc" Name="秘籍宝箱（紫霞）" Desc="秘籍宝箱（紫霞）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_108" script="BoxNpc" Name="秘籍宝箱（混元）" Desc="秘籍宝箱（混元）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_209" script="BoxNpc" Name="秘籍宝箱（冰心）" Desc="秘籍宝箱（冰心）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_205" script="BoxNpc" Name="秘籍宝箱（蛤蟆）" Desc="秘籍宝箱（蛤蟆）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_307" script="BoxNpc" Name="秘籍宝箱（血刀）" Desc="秘籍宝箱（血刀）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_507" script="BoxNpc" Name="秘籍宝箱（葵花）" Desc="秘籍宝箱（葵花）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_jh_306" script="BoxNpc" Name="秘籍宝箱（吸星）" Desc="秘籍宝箱（吸星）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_wg_001" script="BoxNpc" Name="秘籍宝箱（混天）" Desc="秘籍宝箱（混天）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_yh_001" script="BoxNpc" Name="秘籍宝箱（明玉）" Desc="秘籍宝箱（明玉）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_th_001" script="BoxNpc" Name="秘籍宝箱（碧波）" Desc="秘籍宝箱（碧波）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_sj_001" script="BoxNpc" Name="秘籍宝箱（金关）" Desc="秘籍宝箱（金关）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_xj_001" script="BoxNpc" Name="秘籍宝箱（三清）" Desc="秘籍宝箱（三清）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_ct_ng_ws_001" script="BoxNpc" Name="秘籍宝箱（伏养）" Desc="秘籍宝箱（伏养）" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="ct_citan_jh001_01" DestroyTime1="3"/>
+	<Property ID="GatherNpc_ytj" script="BoxNpc" Name="倚天剑" Desc="倚天剑" Resource="npc\itemytj" NpcType="161" SpringRange="20" SelectState="2" WorldDropID="huashan_drop_08" DestroyTime1="3"/>
+	<Property ID="JhzbNPC_khbd_002" script="BoxNpc" Name="木质宝箱" Desc="木质宝箱" Resource="npc\jhzb_xhz" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="JhzbNPC_xxdf_002" script="BoxNpc" Name="木质宝箱" Desc="木质宝箱" Resource="npc\jhzb_sp" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xl_01" script="BoxNpc" Name="新郎宝箱" Desc="新郎宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xl01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xl_02" script="BoxNpc" Name="新郎宝箱" Desc="新郎宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xl01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xl_03" script="BoxNpc" Name="新郎宝箱" Desc="新郎宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xl01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xl_04" script="BoxNpc" Name="新郎宝箱" Desc="新郎宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xl01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xn_01" script="BoxNpc" Name="新娘宝箱" Desc="新娘宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xn01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xn_02" script="BoxNpc" Name="新娘宝箱" Desc="新娘宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xn01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xn_03" script="BoxNpc" Name="新娘宝箱" Desc="新娘宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xn01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xn_04" script="BoxNpc" Name="新娘宝箱" Desc="新娘宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_xn01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xh_01" script="BoxNpc" Name="新婚祝福花篮" Desc="新婚祝福花篮" Resource="npc\itemnpc080a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xh_01" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xh_02" script="BoxNpc" Name="新婚祝福宝箱" Desc="新婚祝福宝箱" Resource="npc\itemnpc201a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xh_02" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xh_03" script="BoxNpc" Name="新婚祝福宝箱" Desc="新婚祝福宝箱" Resource="npc\itemnpc428a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xh_03" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xh_04" script="BoxNpc" Name="新婚祝福宝箱" Desc="新婚祝福宝箱" Resource="npc\fbmac003020a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xh_04" DestroyTime1="3"/>
+	<Property ID="BoxNpc_xh_05" script="BoxNpc" Name="新婚祝福喜袋" Desc="新婚祝福喜袋" Resource="npc\itemnpc439a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xh_05" DestroyTime1="3"/>
+	<Property ID="yhg_task_001" script="BoxNpc" Name="破碎的书籍" Desc="破碎的书籍" Resource="npc\itemnpc016" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="dorp_yhg_task_001" DestroyTime1="3"/>
+	<Property ID="yhg_task_002" script="BoxNpc" Name="破碎的书籍" Desc="破碎的书籍" Resource="npc\itemnpc026" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="dorp_yhg_task_002" DestroyTime1="3"/>
+	<Property ID="yhg_task_003" script="BoxNpc" Name="破碎的书籍" Desc="破碎的书籍" Resource="npc\itemnpc047" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="dorp_yhg_task_003" DestroyTime1="3"/>
+	<Property ID="Box_xjz_002" script="BoxNpc" Name="鱼群" Desc="鱼群" Resource="npc\cj_101008" NpcType="161" SpringRange="40" SelectState="9" WorldDropID="drop_xjz_002" DestroyTime1="5"/>
+	<Property ID="Box_xjz_003" script="BoxNpc" Name="工具箱" Desc="工具箱" Resource="npc\itemboxnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xjz_003" DestroyTime1="3"/>
+	<Property ID="Box_yhgsl_dc" script="BoxNpc" Name="毒草" Desc="毒草" Resource="npc\itemnpc066_01" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="drop_yhg_sl_001" DestroyTime1="1"/>
+	<Property ID="Box_yhgsl_cy" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\itemnpc168_1" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="drop_yhg_sl_003" DestroyTime1="1"/>
+	<Property ID="Box_yhgsl_jdc" script="BoxNpc" Name="解毒药" Desc="解毒药" Resource="npc\itemnpc066_01" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="drop_yhg_sl_002" DestroyTime1="1"/>
+	<Property ID="BoxNpc_yh_001" script="BoxNpc" Name="飞鹰地宫宝盒" Desc="飞鹰地宫宝盒" Resource="npc\npcitem104" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="item_yh_001" DestroyTime1="3" LifeTime="480000"/>
+	<Property ID="BoxNpc_yh_002" script="BoxNpc" Name="地灵草" Desc="地灵草" Resource="npc\itemnpc168_1" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="item_yh_002" DestroyTime1="3"/>
+	<Property ID="BoxNpc_yh_003" script="BoxNpc" Name="损坏的画卷" Desc="损坏的画卷" Resource="npc\itemnpc828" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="item_yh_003" DestroyTime1="3"/>
+	<Property ID="Box_jzsj_001" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj01" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_002" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150050" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj02" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_003" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150100" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj03" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_004" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150150" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj04" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_005" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150250" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj05" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_006" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150300" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj06" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_007" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_160001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj07" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_008" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_160150" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj08" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_009" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_160300" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj09" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_010" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_160200" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj10" DestroyTime1="1" LifeTime="86400000"/>
+	<Property ID="Box_jzsj_011" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj30" DestroyTime1="1" LifeTime="7200000"/>
+	<Property ID="Box_jzsj_012" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150050" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj31" DestroyTime1="1" LifeTime="7200000"/>
+	<Property ID="Box_jzsj_013" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150100" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj32" DestroyTime1="1" LifeTime="7200000"/>
+	<Property ID="Box_jzsj_014" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150150" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj33" DestroyTime1="1" LifeTime="7200000"/>
+	<Property ID="Box_jzsj_015" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150250" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="baoxiangjzsj34" DestroyTime1="1" LifeTime="7200000"/>
+	<Property ID="Box_tuzi_huangjin" script="BoxNpc" Name="黄金兔毛" Desc="黄金兔毛" Resource="npc\itemnpc057_tumao" NpcType="161" SpringRange="4" SelectState="9" WorldDropID="drop_tuzi_huangjin" DestroyTime1="60" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_01" script="BoxNpc" Name="普通地宝_地灵紫芝" Desc="普通地宝_地灵紫芝" Resource="npc\cj_106022c" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc001" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_02" script="BoxNpc" Name="普通地宝_玉露枇杷" Desc="普通地宝_玉露枇杷" Resource="npc\itemnpc166" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc002" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_03" script="BoxNpc" Name="普通地宝_九品红(玄冰虫草)" Desc="普通地宝_九品红(玄冰虫草)" Resource="npc\npcitem669" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc003" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_04" script="BoxNpc" Name="普通地宝_破血散(玄天冰魄)" Desc="普通地宝_破血散(玄天冰魄)" Resource="npc\npcitem670" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc004" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_05" script="BoxNpc" Name="大型地宝_天蜈珠(天蜈珠)" Desc="大型地宝_天蜈珠(天蜈珠)" Resource="npc\petm_c_0502" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc005" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_06" script="BoxNpc" Name="大型地宝_地龙血衣(千年铁木)" Desc="大型地宝_地龙血衣(千年铁木)" Resource="npc\itemnpc447" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc006" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_db_07" script="BoxNpc" Name="稀有地宝_地心石钟乳" Desc="稀有地宝_地心石钟乳" Resource="npc\itemnpc057m" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc007" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_01" script="BoxNpc" Name="普通水宝_碧水青茗" Desc="普通水宝_碧水青茗" Resource="npc\npcitem672_b" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc008" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_02" script="BoxNpc" Name="普通水宝_回天再造丹(水元珠)" Desc="普通水宝_回天再造丹(水元珠)" Resource="npc\npcitem675" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc009" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_03" script="BoxNpc" Name="普通水宝_十二天香膏(十二天香果)" Desc="普通水宝_十二天香膏(十二天香果)" Resource="npc\cj_150100a1" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc010" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_04" script="BoxNpc" Name="普通水宝_佛面蛇心丹(清心冰晶)" Desc="普通水宝_佛面蛇心丹(清心冰晶)" Resource="npc\npcitem677" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc011" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_05" script="BoxNpc" Name="大型水宝_冰果琼浆露(通窍雪藕)" Desc="大型水宝_冰果琼浆露(通窍雪藕)" Resource="npc\cj_041060b" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc012" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_06" script="BoxNpc" Name="大型水宝_水月之花" Desc="大型水宝_水月之花" Resource="npc\cj_160200a1" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc013" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_sb_07" script="BoxNpc" Name="稀有水宝_清心镜(水魔莲)" Desc="稀有水宝_清心镜(水魔莲)" Resource="npc\cj_150300" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc014" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_yb_01a" script="BoxNpc" Name="异宝" Desc="异宝" Resource="npc\itemnpc776" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc017" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_lxc_mucai" script="BoxNpc" Name="木材" Desc="木材" Resource="npc\itemnpc038" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxcwuzi_001" DestroyTime1="10"/>
+	<Property ID="BoxNpc_lxc_kuangshi" script="BoxNpc" Name="矿石" Desc="矿石" Resource="npc\cj020001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxcwuzi_002" DestroyTime1="10"/>
+	<Property ID="BoxNpc_lxc_caoyao" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\itemnpc214" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxcwuzi_003" DestroyTime1="10"/>
+	<Property ID="BoxNpc_lxc_liangshi" script="BoxNpc" Name="粮食" Desc="粮食" Resource="npc\itemnpc165" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxcwuzi_004" DestroyTime1="10"/>
+	<Property ID="BoxNpc_lxc_wuqi" script="BoxNpc" Name="武器" Desc="武器" Resource="npc\fbmac00040" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxcwuzi_005" DestroyTime1="10"/>
+	<Property ID="BoxNpc_lxc_bz" script="BoxNpc" Name="冰砖" Desc="冰砖" Resource="npc\itemnpc788" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc016" DestroyTime1="10"/>
+	<Property ID="BoxNpc_lxc_zg" script="BoxNpc" Name="竹管" Desc="竹管" Resource="npc\itemnpc539" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_worldwar_lxc015" DestroyTime1="10"/>
+	<Property ID="Box_shitu_001" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_shitu_002" DestroyTime1="60"/>
+	<Property ID="boxnpc_khd_bx001" script="BoxNpc" Name="快活岛铜质宝箱1" Desc="快活岛铜质宝箱1" Resource="npc\itemnpc005" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_001" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx002" script="BoxNpc" Name="快活岛铜质宝箱2" Desc="快活岛铜质宝箱2" Resource="npc\itemnpc012" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_001" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx003" script="BoxNpc" Name="快活岛铜质宝箱3" Desc="快活岛铜质宝箱3" Resource="npc\itemnpc207" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_001" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx004" script="BoxNpc" Name="快活岛镀银宝箱1" Desc="快活岛镀银宝箱1" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx005" script="BoxNpc" Name="快活岛镀银宝箱2" Desc="快活岛镀银宝箱2" Resource="npc\itemnpc014" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx006" script="BoxNpc" Name="快活岛镀银宝箱3" Desc="快活岛镀银宝箱3" Resource="npc\itemnpc075" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx007" script="BoxNpc" Name="快活岛镀银宝箱4" Desc="快活岛镀银宝箱4" Resource="npc\itemnpc087" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx008" script="BoxNpc" Name="快活岛镀银宝箱5" Desc="快活岛镀银宝箱5" Resource="npc\itemnpc206" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx009" script="BoxNpc" Name="快活岛镀银宝箱6" Desc="快活岛镀银宝箱6" Resource="npc\itemnpc207" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx010" script="BoxNpc" Name="快活岛镀银宝箱7" Desc="快活岛镀银宝箱7" Resource="npc\itemnpc473" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx011" script="BoxNpc" Name="快活岛镀银宝箱8" Desc="快活岛镀银宝箱8" Resource="npc\itemnpc685" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_khd_bx012" script="BoxNpc" Name="快活岛镀银宝箱9" Desc="快活岛镀银宝箱9" Resource="npc\itemnpc890" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_khd_chengchuan_002" DestroyTime1="3"/>
+	<Property ID="Box_yhgslboss_001" script="BoxNpc" Name="清雪剑" Desc="清雪剑" Resource="npc\itemnpc646" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_yhgslboss_002" DestroyTime1="3" LifeTime="3600000"/>
+	<Property ID="Box_jlqz_001" script="BoxNpc" Name="解毒药1" Desc="解毒药1" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_jlqz_jiedu_001"/>
+	<Property ID="Box_jlqz_002" script="BoxNpc" Name="解毒药1" Desc="解毒药1" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_jlqz_jiedu_002"/>
+	<Property ID="Box_jlqz_003" script="BoxNpc" Name="解毒药1" Desc="解毒药1" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_jlqz_jiedu_003"/>
+	<Property ID="Box_jlqz_004" script="BoxNpc" Name="解毒药1" Desc="解毒药1" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_jlqz_jiedu_004"/>
+	<Property ID="Box_jlqz_005" script="BoxNpc" Name="解毒药1" Desc="解毒药1" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_jlqz_jiedu_005"/>
+	<Property ID="BoxNpc_newdrop001" script="BoxNpc" Name="击杀掉落" Desc="击杀掉落" Resource="npc\itemnpc1378" NpcType="399" SpringRange="3" SelectState="9" DestroyTime1="3" LifeTime="3600000"/>
+	<Property ID="BoxNpc_newdrop002" script="BoxNpc" Name="击杀掉落" Desc="击杀掉落" Resource="npc\itemnpc1377" NpcType="399" SpringRange="3" SelectState="9" DestroyTime1="3" LifeTime="3600000"/>
+	<Property ID="BoxNpc_newdrop003" script="BoxNpc" Name="击杀掉落" Desc="击杀掉落" Resource="npc\itemnpc1379" NpcType="399" SpringRange="3" SelectState="9" DestroyTime1="3" LifeTime="3600000"/>
+	<Property ID="BoxNpc_xiyu_yd_001" script="BoxNpc" Name="太玄经" Desc="太玄经" Resource="npc\itemnpc053yd" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xiyu_yd_001" DestroyTime1="1"/>
+	<Property ID="box_beiyuan_wmd_001" script="BoxNpc" Name="钥匙宝箱" Desc="钥匙宝箱" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_beiyuan_wmd_002" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="box_beiyuan_wmd_002" script="BoxNpc" Name="铃铛宝箱" Desc="铃铛宝箱" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_beiyuan_wmd_005" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="BoxNpc_beiyuan_yd_001" script="BoxNpc" Name="光效" Desc="光效" Resource="npc\itemnpc053yd" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="1"/>
+	<Property ID="BoxNpc_beiyuan_yd_002" script="BoxNpc" Name="香囊" Desc="香囊" Resource="npc\itemnpc439" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_beiyuan_yd_001" DestroyTime1="1"/>
+	<Property ID="beiyuan_hz_shiti" script="BoxNpc" Name="尸体" Desc="尸体" Resource="npc\itemnpc230" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_beiyuan_hmt01" DestroyTime1="1"/>
+	<Property ID="beiyuan_hz_shiti_hmt1" script="BoxNpc" Name="黑魔尸体" Desc="黑魔尸体" Resource="npc\itemnpc230" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_beiyuan_hmt02" DestroyTime1="1"/>
+	<Property ID="beiyuan_hz_caoyao" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\itemnpc054" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_beiyuan_hmt03" DestroyTime1="1"/>
+	<Property ID="Box_gmzd_bomb" script="BoxNpc" Name="炸药" Desc="炸药" Resource="npc\itemnpc434" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_gmzd_bomb" DestroyTime1="3"/>
+	<Property ID="Box_mijing_ssg_001" script="BoxNpc" Name="真宝箱" Desc="真宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_ssg_001" DestroyTime1="3"/>
+	<Property ID="Box_tongyongmijing_llmk" script="BoxNpc" Name="楼兰密窟通关奖励" Desc="楼兰密窟通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_llmk" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="Box_tongyongmijing_jwd" script="BoxNpc" Name="金蜈洞通关奖励" Desc="金蜈洞通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_jwd" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="Box_tongyongmijing_sldxc" script="BoxNpc" Name="石林洞府通关奖励" Desc="石林洞府通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_sldxc" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="Box_tongyongmijing_wmd" script="BoxNpc" Name="无名洞通关奖励" Desc="无名洞通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_wmd" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="Box_tongyongmijing_gmmg" script="BoxNpc" Name="古墓迷宫通关奖励" Desc="古墓迷宫通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_gmmg" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="Box_tongyongmijing_ssg" script="BoxNpc" Name="神水宫通关奖励" Desc="神水宫通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_ssg" DestroyTime1="3" LifeTime="72000000"/>
+	<Property ID="box_wmd_prize" script="BoxNpc" Name="无名洞通关奖励" Desc="无名洞通关奖励" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_prize_wmdbox" DestroyTime1="3"/>
+	<Property ID="bag_bossnewworld002_01" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg01" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld002_extra" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld002_02" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg02" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld002_extra" DestroyTime1="1" Scale="0.5,0.5,0.5"/>
+	<Property ID="bag_bossnewworld002_03" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg03" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld002_extra" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld001_01" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg01" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld001_extra" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld001_02" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg02" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld001_extra" DestroyTime1="1" Scale="0.5,0.5,0.5"/>
+	<Property ID="bag_bossnewworld001_03" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg03" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld001_extra" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld001a_01" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg01" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld001a_extra1" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld001a_02" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg02" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld001a_extra2" DestroyTime1="1" Scale="0.5,0.5,0.5"/>
+	<Property ID="bag_bossnewworld001a_03" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg03" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld001a_extra3" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld002a_01" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg01" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld002a_extra1" DestroyTime1="1"/>
+	<Property ID="bag_bossnewworld002a_02" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg02" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld002a_extra2" DestroyTime1="1" Scale="0.5,0.5,0.5"/>
+	<Property ID="bag_bossnewworld002a_03" script="BoxNpc" Name="奖励包" Desc="奖励包" Resource="npc\bag_wnhg03" NpcType="52" SpringRange="1" SelectState="1" WorldDropID="drop_bossnewworld002a_extra3" DestroyTime1="1"/>
+	<Property ID="box_nmp_gmpwb_004" script="BoxNpc" Name="奖励宝箱（一级）" Desc="奖励宝箱（一级）" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_nmp_gmpwb_002" DestroyTime1="3" LifeTime="7200000"/>
+	<Property ID="box_nmp_gmpwb_003" script="BoxNpc" Name="奖励宝箱（二级）" Desc="奖励宝箱（二级）" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_nmp_gmpwb_003" DestroyTime1="3" LifeTime="7200000"/>
+	<Property ID="box_nmp_gmpwb_002" script="BoxNpc" Name="奖励宝箱（三级）" Desc="奖励宝箱（三级）" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_nmp_gmpwb_004" DestroyTime1="3" LifeTime="7200000"/>
+	<Property ID="box_nmp_gmpwb_001" script="BoxNpc" Name="奖励宝箱（四级）" Desc="奖励宝箱（四级）" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_nmp_gmpwb_005" DestroyTime1="3" LifeTime="7200000"/>
+	<Property ID="boxnpc_nlb_hh_lh_001" script="BoxNpc" Name="花会跳跳乐" Desc="花会跳跳乐" Resource="npc\itemnpc033" NpcType="161" SpringRange="1" SelectState="9" WorldDropID="drop_boxnpc_nlb_hh_lh_001" DestroyTime1="3"/>
+	<Property ID="box_nmp_cfbj_hd_03_001" script="BoxNpc" Name="宝箱（大）" Desc="宝箱（大）" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_cfbj_dbdh_prize_009" DestroyTime1="3" LifeTime="300000"/>
+	<Property ID="box_nmp_cfbj_hd_03_002" script="BoxNpc" Name="宝箱（中）" Desc="宝箱（中）" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_cfbj_dbdh_prize_010" DestroyTime1="3" LifeTime="300000"/>
+	<Property ID="box_nmp_cfbj_hd_03_003" script="BoxNpc" Name="宝箱（小）" Desc="宝箱（小）" Resource="npc\itemnpc689" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_cfbj_dbdh_prize_011" DestroyTime1="3" LifeTime="300000"/>
+	<Property ID="Gather_cfbj_shxb_001" script="BoxNpc" Name="大砍刀" Desc="大砍刀" Resource="npc\npcitem873" NpcType="161" SpringRange="1" SelectState="9" WorldDropID="drop_cfbj_shxb_001" DestroyTime1="3" LifeTime="7200000"/>
+	<Property ID="Gather_cfbj_shxb_003" script="BoxNpc" Name="货物" Desc="货物" Resource="npc\npcitem794" NpcType="161" SpringRange="1" SelectState="9" WorldDropID="drop_cfbj_shxb_003" DestroyTime1="3" LifeTime="7200000"/>
+	<Property ID="boxnpc_nlb_ww001" script="BoxNpc" Name="念萝坝花会-一堆杂物" Desc="念萝坝花会-一堆杂物" Resource="npc\itemnpc012" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww002" script="BoxNpc" Name="念萝坝花会-一堆枯叶" Desc="念萝坝花会-一堆枯叶" Resource="npc\itemnpc087" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww003" script="BoxNpc" Name="念萝坝花会-一堆乱石" Desc="念萝坝花会-一堆乱石" Resource="npc\itemnpc207" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww004" script="BoxNpc" Name="念萝坝花会-一颗小草" Desc="念萝坝花会-一颗小草" Resource="npc\itemnpc168" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww005" script="BoxNpc" Name="念萝坝花会-茂密的草丛" Desc="念萝坝花会-茂密的草丛" Resource="npc\itemnpc172" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww006" script="BoxNpc" Name="念萝坝花会-一株野花" Desc="念萝坝花会-一株野花" Resource="npc\itemnpc204" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww007" script="BoxNpc" Name="念萝坝花会-一根枯枝" Desc="念萝坝花会-一根枯枝" Resource="npc\npcitem744" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_nlb_ww008" script="BoxNpc" Name="念萝坝花会-新鲜的蘑菇" Desc="念萝坝花会-新鲜的蘑菇" Resource="npc\itemnpc440" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_nlb_fiesta_01" DestroyTime1="3"/>
+	<Property ID="boxnpc_ssg_rm_001" script="BoxNpc" Name="雪莲" Desc="雪莲" Resource="npc\itemnpc224" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_Box_ssg_rm_001" DestroyTime1="3"/>
+	<Property ID="boxnpc_ssg_hd_mphz001" script="BoxNpc" Name="宝箱（大）" Desc="宝箱（大）" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_item_prize_ssg_016_a" DestroyTime1="3" LifeTime="300000"/>
+	<Property ID="BoxNpc_pld001" script="BoxNpc" Name="银质宝箱" Desc="银质宝箱" Resource="npc\itemnpc588" NpcType="713" SpringRange="3" SelectState="9" WorldDropID="comd_pld_wb_yin" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_pld002" script="BoxNpc" Name="金质宝箱" Desc="金质宝箱" Resource="npc\itemnpc589" NpcType="713" SpringRange="3" SelectState="9" WorldDropID="comd_pld_wb_jin" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_pld003" script="BoxNpc" Name="玉质宝箱" Desc="玉质宝箱" Resource="npc\itemnpc591a" NpcType="713" SpringRange="3" SelectState="9" WorldDropID="comd_pld_wb_yu" DestroyTime1="10" LifeTime="300000"/>
+	<Property ID="BoxNpc_pld004" script="BoxNpc" Name="丹药宝箱" Desc="丹药宝箱" Resource="npc\npcitem639a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_box_pld_004" DestroyTime1="1" LifeTime="60000"/>
+	<Property ID="boxnpc_hsp_wxjz_lh_001" script="BoxNpc" Name="御剑道具" Desc="御剑道具" Resource="npc\itemnpc590" NpcType="161" SpringRange="1" SelectState="9" WorldDropID="drop_hsp_wxjz_luh_03" DestroyTime1="3"/>
+	<Property ID="boxnpc_worldboss001_01" script="BoxNpc" Name="打造台" Desc="打造台" Resource="npc\npcitem964" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss001_box01" DestroyTime1="1" Scale="0.5,0.5,0.5"/>
+	<Property ID="boxnpc_worldboss001_02" script="BoxNpc" Name="古谱残卷" Desc="古谱残卷" Resource="npc\npcitem961" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss001_box02" DestroyTime1="1"/>
+	<Property ID="boxnpc_worldboss001_03" script="BoxNpc" Name="内功残卷" Desc="内功残卷" Resource="npc\npcitem963" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss001_box03" DestroyTime1="1"/>
+	<Property ID="boxnpc_worldboss001_03_2" script="BoxNpc" Name="内功残卷" Desc="内功残卷" Resource="npc\npcitem963" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss001_box03_2" DestroyTime1="1"/>
+	<Property ID="boxnpc_worldboss001_04" script="BoxNpc" Name="拓本碎片" Desc="拓本碎片" Resource="npc\npcitem966" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss001_box04" DestroyTime1="1" Scale="0.3,1,0.3"/>
+	<Property ID="boxnpc_worldboss007_01" script="BoxNpc" Name="打造台" Desc="打造台" Resource="npc\npcitem964" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss007_box01" DestroyTime1="1" Scale="0.75,0.75,0.75"/>
+	<Property ID="boxnpc_worldboss007_02" script="BoxNpc" Name="古谱残卷" Desc="古谱残卷" Resource="npc\npcitem961" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss007_box02" DestroyTime1="1" Scale="1.5,1.5,1.5"/>
+	<Property ID="boxnpc_worldboss007_03" script="BoxNpc" Name="内功残卷" Desc="内功残卷" Resource="npc\npcitem963" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss007_box03" DestroyTime1="1" Scale="1.5,1.5,1.5"/>
+	<Property ID="boxnpc_worldboss007_03_2" script="BoxNpc" Name="内功残卷" Desc="内功残卷" Resource="npc\npcitem963" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss007_box03_2" DestroyTime1="1" Scale="1.5,1.5,1.5"/>
+	<Property ID="boxnpc_worldboss007_04" script="BoxNpc" Name="拓本碎片" Desc="拓本碎片" Resource="npc\npcitem966" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss007_box04" DestroyTime1="1" Scale="0.45,1.5,0.45"/>
+	<Property ID="boxnpc_worldboss001_02_1" script="BoxNpc" Name="古谱残卷" Desc="古谱残卷" Resource="npc\npcitem961" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss001_box02_1" DestroyTime1="1"/>
+	<Property ID="boxnpc_worldboss007_02_1" script="BoxNpc" Name="古谱残卷" Desc="古谱残卷" Resource="npc\npcitem961" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_worldboss007_box02_1" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_01" script="BoxNpc" Name="酒坛" Desc="酒坛" Resource="npc\itemnpc001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_01" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_04" script="BoxNpc" Name="闭目鱼" Desc="闭目鱼" Resource="npc\cj_101007" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_07" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_05" script="BoxNpc" Name="鱼群" Desc="鱼群" Resource="npc\cj_101008" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_08" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_06" script="BoxNpc" Name="象棋子" Desc="象棋子" Resource="npc\fbmac015002" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_11" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_07" script="BoxNpc" Name="水果" Desc="水果" Resource="npc\cj_040020" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_12" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_08" script="BoxNpc" Name="梧桐木" Desc="梧桐木" Resource="npc\itemnpc1403" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_13" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_09" script="BoxNpc" Name="蚕架" Desc="蚕架" Resource="npc\cj_040203" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_14" DestroyTime1="1"/>
+	<Property ID="boxnpc_xkd_10" script="BoxNpc" Name="灵芝" Desc="灵芝" Resource="npc\cj_106022" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_xkd_envet_15" DestroyTime1="1"/>
+	<Property ID="boxnpc_zyb_pld001" script="BoxNpc" Name="蓬莱岛野鸡" Desc="蓬莱岛野鸡" Resource="npc\monster119" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_item_pl_008" DestroyTime1="1"/>
+	<Property ID="boxnpc_pld_tuzi" script="BoxNpc" Name="蓬莱岛兔子" Desc="蓬莱岛兔子" Resource="npc\monster118" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_pld_lzy_001" DestroyTime1="0.01"/>
+	<Property ID="pldcj_zyb_001" script="BoxNpc" Name="蓬莱岛秘籍" Desc="蓬莱岛秘籍" Resource="npc\itemnpc005" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_item_pl_014" DestroyTime1="1"/>
+	<Property ID="boxnpc_jiebai_qgd" script="BoxNpc" Name="宝箱" Desc="宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_jiebai_qgd" DestroyTime1="3" LifeTime="300000"/>
+	<Property ID="box_boss_dhpvp_004" script="BoxNpc" Name="东海PVPBOSS普通宝箱" Desc="东海PVPBOSS普通宝箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_boss_dhpvp_004" DestroyTime1="3" LifeTime="300000"/>
+	<Property ID="BoxNpcgujpld_001" script="BoxNpc" Name="鹿掉落" Desc="鹿掉落" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_item_pld_gujqybzs_02" DestroyTime1="3"/>
+	<Property ID="BoxNpcgujpld_002" script="BoxNpc" Name="草药" Desc="草药" Resource="npc\cj_150001" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_huodong_pldguj_04" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_04" script="BoxNpc" Name="粘土堆" Desc="粘土堆" Resource="npc\itemnpc075" NpcType="161" SpringRange="2" SelectState="1" WorldDropID="drop_itemnpc_wjd_04" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_05" script="BoxNpc" Name="白杨树" Desc="白杨树" Resource="npc\box001" NpcType="52" SpringRange="3" SelectState="1" WorldDropID="drop_itemnpc_wjd_05" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_06" script="BoxNpc" Name="铁矿石" Desc="铁矿石" Resource="npc\cj_102005" NpcType="161" SpringRange="2" SelectState="1" WorldDropID="drop_itemnpc_wjd_06" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_13_01" script="BoxNpc" Name="止血草" Desc="止血草" Resource="npc\cj_150100a1" NpcType="161" SpringRange="3" SelectState="1" WorldDropID="drop_itemnpc_wjd_13_01" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_13_02" script="BoxNpc" Name="独龙草" Desc="独龙草" Resource="npc\cj_160001" NpcType="161" SpringRange="3" SelectState="1" WorldDropID="drop_itemnpc_wjd_13_02" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_13_03" script="BoxNpc" Name="鱼腥草" Desc="鱼腥草" Resource="npc\cj_106013a1" NpcType="161" SpringRange="3" SelectState="1" WorldDropID="drop_itemnpc_wjd_13_03" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_05_02" script="BoxNpc" Name="村民衣服" Desc="村民衣服" Resource="npc\itemnpc136" NpcType="52" SpringRange="3" SelectState="1" WorldDropID="drop_itemnpc_wjd_05_02" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_49_01" script="BoxNpc" Name="大明宝物" Desc="大明宝物" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="1" SelectState="9" WorldDropID="drop_itemnpc_wjd_49_01" DestroyTime1="3"/>
+	<Property ID="itemnpc_wjd_44_01" script="BoxNpc" Name="布防图" Desc="布防图" Resource="npc\npcitem962" NpcType="161" SpringRange="2" SelectState="1" WorldDropID="drop_itemnpc_wjd_44_01" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_44_02" script="BoxNpc" Name="舰船设计图" Desc="舰船设计图" Resource="npc\npcitem962" NpcType="161" SpringRange="2" SelectState="1" WorldDropID="drop_itemnpc_wjd_44_02" DestroyTime1="1"/>
+	<Property ID="itemnpc_wjd_44_03" script="BoxNpc" Name="计划书" Desc="计划书" Resource="npc\npcitem962" NpcType="161" SpringRange="2" SelectState="1" WorldDropID="drop_itemnpc_wjd_44_03" DestroyTime1="1"/>
+	<Property ID="boxnpc_wuxianjiao_gujzlcy_001" script="BoxNpc" Name="蜈蚣" Desc="蜈蚣" Resource="npc\fbnpc019019" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wxjguj_rczlcy_003" DestroyTime1="0.01"/>
+	<Property ID="boxnpc_wuxianjiao_gujzlcy_002" script="BoxNpc" Name="蝎子" Desc="蝎子" Resource="npc\monster013" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wxjguj_rczlcy_004" DestroyTime1="0.01"/>
+	<Property ID="boxnpc_wuxianjiao_gujzlcy_003" script="BoxNpc" Name="蟾蜍" Desc="蟾蜍" Resource="npc\petm_c_0300" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wxjguj_rczlcy_005" DestroyTime1="0.01"/>
+	<Property ID="boxnpc_wxj_dg_001" script="BoxNpc" Name="斗蛊大会宝箱" Desc="斗蛊大会宝箱" Resource="npc\itemnpc005a" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wxj_dg_001" DestroyTime1="1"/>
+	<Property ID="box_sneakon_qb_01" script="BoxNpc" Name="情报箱" Desc="情报箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="1" SelectState="9" WorldDropID="drop_sneakon_01" DestroyTime1="1"/>
+	<Property ID="Boxnpc_murong_001" script="BoxNpc" Name="慕容世家藏书" Desc="慕容世家藏书" Resource="npc\itemnpc049citan" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_murong_001" DestroyTime1="1"/>
+	<Property ID="boxnpc_ymsj_gujfenwei_001" script="BoxNpc" Name="药草" Desc="药草" Resource="npc\cj_150250" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_ymsj_guj_001" DestroyTime1="0.01"/>
+	<Property ID="boxnpc_ymsj_gujfenwei_002" script="BoxNpc" Name="情报箱" Desc="情报箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_ymsj_guj_002" DestroyTime1="0.01"/>
+	<Property ID="Boxnpc_cbtdrwf_guj002" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wcbz_001" DestroyTime1="1"/>
+	<Property ID="Boxnpc_wcbz_001" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wcbz_001" DestroyTime1="300000"/>
+	<Property ID="Boxnpc_lzy_cbtdrwf_yczk001" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_lzy_cbtdrwf_yczk001" DestroyTime1="1"/>
+	<Property ID="Boxnpc_lzy_cbtdrwf_yczk002" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_lzy_cbtdrwf_yczk002" DestroyTime1="1"/>
+	<Property ID="Boxnpc_lzy_cbtdrwf_yczk003" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_lzy_cbtdrwf_yczk003" DestroyTime1="1"/>
+	<Property ID="Boxnpc_lzy_cbtdrwf_yczk004" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_lzy_cbtdrwf_yczk004" DestroyTime1="1"/>
+	<Property ID="Boxnpc_lzy_cbtdrwf_yczk005" script="BoxNpc" Name="藏宝图单人玩法1--宝箱" Desc="藏宝图单人玩法1--宝箱" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_lzy_cbtdrwf_yczk005" DestroyTime1="1"/>
+	<Property ID="Boxnpc_wcbz_002" script="BoxNpc" Name="藏宝图直接宝箱" Desc="藏宝图直接宝箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_wcbz_002" DestroyTime1="300000"/>
+	<Property ID="Boxnpc_wcbz_003" script="BoxNpc" Name="藏宝图多人玩法宝箱" Desc="藏宝图多人玩法宝箱" Resource="npc\itemboxnpc003_yunbiao" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_wcbz_003" DestroyTime1="300000"/>
+	<Property ID="Boxnpc_wcbz_004" script="BoxNpc" Name="藏宝图多人玩法宝箱2" Desc="藏宝图多人玩法宝箱2" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comd_drop_wcbz_004" DestroyTime1="300000"/>
+	<Property ID="box_th_001" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_th_002" script="BoxNpc" Name="铁箱子" Desc="铁箱子" Resource="npc\itemnpc1593_1a" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_th_003" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc1593_2a" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_th_004" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_th_005" script="BoxNpc" Name="木盒子（小）" Desc="木盒子（小）" Resource="npc\itemnpc1593_3a" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_th_006" script="BoxNpc" Name="黑盒子大" Desc="黑盒子大" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_th_007" script="BoxNpc" Name="包袱" Desc="包袱" Resource="npc\itemnpc1593_3a" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="boxnpc_jiuyang_001" script="BoxNpc" Name="宝箱1" Desc="宝箱1" Resource="npc\itemnpc589" NpcType="161" SpringRange="5" SelectState="2" WorldDropID="drop_jysg_001" DestroyTime1="3" LifeTime="14400000"/>
+	<Property ID="boxnpc_jiuyang_002" script="BoxNpc" Name="宝箱1" Desc="宝箱1" Resource="npc\itemnpc589" NpcType="161" SpringRange="5" SelectState="2" WorldDropID="drop_jysg_002" DestroyTime1="3" LifeTime="14400000"/>
+	<Property ID="boxnpc_cyjhd_zy_001" script="BoxNpc" Name="菊花" Desc="菊花" Resource="npc\itemnpc1596" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="drop_boxnpc_cyjhd_zy_001" DestroyTime1="1"/>
+	<Property ID="npc_cy2017_zyc" script="BoxNpc" Name="茱萸树" Desc="茱萸树" Resource="npc\npcitem1056a" NpcType="161" SpringRange="5" SelectState="9" WorldDropID="drop_box_cy2017_zyz" DestroyTime1="1"/>
+	<Property ID="boxnpc_mzyy_001" script="BoxNpc" Name="法华经" Desc="法华经" Resource="npc\itemnpc053" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_boxnpc_mzyy_001" DestroyTime1="3"/>
+	<Property ID="boxnpc_mzyy_002" script="BoxNpc" Name="地藏经" Desc="地藏经" Resource="npc\itemnpc021" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_boxnpc_mzyy_002" DestroyTime1="3"/>
+	<Property ID="boxnpc_mzyy_003" script="BoxNpc" Name="阿弥陀经" Desc="阿弥陀经" Resource="npc\itemnpc026" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_boxnpc_mzyy_003" DestroyTime1="3"/>
+	<Property ID="boxnpc_mzyy_004" script="BoxNpc" Name="经书" Desc="经书" Resource="npc\itemnpc016" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_boxnpc_mzyy_004" DestroyTime1="3"/>
+	<Property ID="BoxTG3501" script="BoxNpc" Name="洛天璇" Desc="洛天璇" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss1_35" DestroyTime1="6000"/>
+	<Property ID="BoxTG3502" script="BoxNpc" Name="忘尘" Desc="忘尘" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_35" DestroyTime1="6000"/>
+	<Property ID="BoxTG3503" script="BoxNpc" Name="羡影" Desc="羡影" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_35" DestroyTime1="6000"/>
+	<Property ID="BoxTG3504" script="BoxNpc" Name="拏云" Desc="拏云" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_boss2_35" DestroyTime1="6000"/>
+	<Property ID="BoxTG351" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_jia35" DestroyTime1="6000"/>
+	<Property ID="BoxTG352" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_yi35" DestroyTime1="6000"/>
+	<Property ID="BoxTG353" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc587" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_tg_bing35" DestroyTime1="6000"/>
+	<Property ID="BoxNpc_ylqj_lzy_qizi001" script="BoxNpc" Name="棋子" Desc="棋子" Resource="npc\itemnpc485" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_ylqj_lzy_qizi001" DestroyTime1="3" Scale="5,5,5"/>
+	<Property ID="box_newts_001" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_002" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_003" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_004" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_005" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_006" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_007" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_008" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_009" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_010" script="BoxNpc" Name="木箱子" Desc="木箱子" Resource="npc\itemnpc586" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_011" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_012" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_013" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_014" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_015" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_016" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_017" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_018" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_019" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_020" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_021" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_022" script="BoxNpc" Name="银箱子" Desc="银箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_023" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_024" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_025" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_026" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_027" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_028" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_029" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_030" script="BoxNpc" Name="金箱子" Desc="金箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_031" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_032" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_033" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_034" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_035" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_036" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_037" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_038" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_039" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_040" script="BoxNpc" Name="隐藏箱子1" Desc="隐藏箱子1" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_041" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_042" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_043" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_044" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_045" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_046" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_047" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_048" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_049" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_050" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_051" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_052" script="BoxNpc" Name="隐藏箱子2" Desc="隐藏箱子2" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_053" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_054" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_055" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_056" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_057" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_058" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_059" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="box_newts_060" script="BoxNpc" Name="隐藏箱子3" Desc="隐藏箱子3" Resource="npc\itemnpc057_dzw_ts01" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="Box_shp_lsz_001" script="BoxNpc" Name="至宝箱子" Desc="至宝箱子" Resource="npc\itemnpc588" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_shp_lsz_001" DestroyTime1="3"/>
+	<Property ID="Box_shp_lsz_002" script="BoxNpc" Name="至宝箱子" Desc="至宝箱子" Resource="npc\itemnpc589" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_shp_lsz_002" DestroyTime1="3"/>
+	<Property ID="Box_shp_lsz_003" script="BoxNpc" Name="至宝箱子" Desc="至宝箱子" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_shp_lsz_003" DestroyTime1="3"/>
+	<Property ID="Box_shp_lsz_004" script="BoxNpc" Name="至宝箱子" Desc="至宝箱子" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_shp_lsz_004" DestroyTime1="3"/>
+	<Property ID="Box_shp_lsz_005" script="BoxNpc" Name="至宝箱子" Desc="至宝箱子" Resource="npc\itemnpc591" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_shp_lsz_005" DestroyTime1="3"/>
+	<Property ID="Boxjjgg_001" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemboxnpc010" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_drop_lzy_jjgc_lp_jin" DestroyTime1="60"/>
+	<Property ID="Boxjjgg_002" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemboxnpc011" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_drop_lzy_jjgc_lp_yin" DestroyTime1="60" LifeTime="600000"/>
+	<Property ID="Boxjjgg_003" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemboxnpc012" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="comb_drop_lzy_jjgc_lp_tong" DestroyTime1="60" LifeTime="600000"/>
+	<Property ID="Boxnewts_guj001" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemboxnpc010" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_guj01_005" DestroyTime1="3"/>
+	<Property ID="Boxnewts_guj002" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemboxnpc011" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_guj01_004" DestroyTime1="3"/>
+	<Property ID="Boxnewts_guj003" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemboxnpc013" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_guj01_003" DestroyTime1="3"/>
+	<Property ID="Boxnewts_guj004" script="BoxNpc" Name="铁宝箱" Desc="铁宝箱" Resource="npc\itemboxnpc012" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_guj01_002" DestroyTime1="3"/>
+	<Property ID="Boxnewts_guj005" script="BoxNpc" Name="玉宝箱" Desc="玉宝箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="Boxnewts_guj006" script="BoxNpc" Name="木宝箱" Desc="木宝箱" Resource="npc\itemboxnpc013" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_guj01_001" DestroyTime1="3"/>
+	<Property ID="Boxnewts_guj007" script="BoxNpc" Name="惊喜宝箱" Desc="惊喜宝箱" Resource="npc\itemnpc053yd" NpcType="161" SpringRange="2" SelectState="9" WorldDropID="drop_newts_newbaoxiang_guj_006" DestroyTime1="3"/>
+	<Property ID="boxnpc_worldboss_wuxu_skillbox" script="BoxNpc" Name="新剑古朴1-6" Desc="新剑古朴1-6" Resource="npc\npcitem961" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="comb_drop_boxnpc_worldboss_wuxu_skillbox" DestroyTime1="1"/>
+	<Property ID="BoxNpc_gujsjhrc_002_01" script="BoxNpc" Name="情报" Desc="情报" Resource="npc\itemnpc053yd" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_item_gujsjhrc_002_01" DestroyTime1="1"/>
+	<Property ID="boxnpc_worldboss_huodong202608_bosssmall" script="BoxNpc" Name="新剑古朴1-6" Desc="新剑古朴1-6" Resource="npc\itemnpc053yd" NpcType="161" SpringRange="1" SelectState="1" WorldDropID="drop_box_gift_jh_skill_huodong_bosssmall" DestroyTime1="1" Scale="0.5,0.5,0.5"/>
+	<Property ID="Boxnewts_sea001" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemnpc1378" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_sea_005" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea002" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemnpc1378" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_sea_004" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea003" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemnpc1378" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_sea_003" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea004" script="BoxNpc" Name="铁宝箱" Desc="铁宝箱" Resource="npc\itemnpc1378" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_sea_002" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea005" script="BoxNpc" Name="玉宝箱" Desc="玉宝箱" Resource="npc\itemnpc590" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea006" script="BoxNpc" Name="木宝箱" Desc="木宝箱" Resource="npc\itemnpc1378" NpcType="202" SpringRange="3" SelectState="9" WorldDropID="drop_newts_newbaoxiang_sea_001" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea007" script="BoxNpc" Name="惊喜宝箱" Desc="惊喜宝箱" Resource="npc\itemnpc053yd" NpcType="161" SpringRange="2" SelectState="9" WorldDropID="drop_newts_newbaoxiang_sea_006" DestroyTime1="3"/>
+	<Property ID="Boxnewts_sea_skill" script="BoxNpc" Name="玉宝箱" Desc="玉宝箱" Resource="npc\itemnpc439a" NpcType="161" SpringRange="3" SelectState="9" DestroyTime1="3" Scale="2,2,2"/>
+	<Property ID="Box_zlcl_lzy_hhxb_001" script="BoxNpc" Name="金宝箱" Desc="金宝箱" Resource="npc\itemboxnpc010" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_zlcl_lzy_hhxb_001" DestroyTime1="10" LifeTime="60000"/>
+	<Property ID="Box_zlcl_lzy_hhxb_002" script="BoxNpc" Name="银宝箱" Desc="银宝箱" Resource="npc\itemboxnpc011" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_zlcl_lzy_hhxb_002" DestroyTime1="10" LifeTime="60000"/>
+	<Property ID="Box_zlcl_lzy_hhxb_003" script="BoxNpc" Name="铜宝箱" Desc="铜宝箱" Resource="npc\itemboxnpc012" NpcType="161" SpringRange="3" SelectState="9" WorldDropID="drop_zlcl_lzy_hhxb_003" DestroyTime1="10" LifeTime="60000"/>
+</Object>

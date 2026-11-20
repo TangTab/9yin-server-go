@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="TriggerNpcClone005001" script="TriggerNpc" Name="少林出师副本机关用1" Desc="少林出师副本机关用1" Resource="npc\itemnpc057" NpcType="165" SpringRange="3" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005002" script="TriggerNpc" Name="机关寒潭" Desc="机关寒潭" Resource="npc\itemnpc057" NpcType="165" SpringRange="8" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005003" script="TriggerNpc" Name="机关炭火" Desc="机关炭火" Resource="npc\itemnpc057" NpcType="165" SpringRange="8" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005004" script="TriggerNpc" Name="机关木刺" Desc="机关木刺" Resource="npc\itemnpc057" NpcType="165" SpringRange="8" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005005" script="TriggerNpc" Name="地板机关" Desc="地板机关" Resource="npc\itemnpc057" NpcType="165" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005006" script="TriggerNpc" Name="钉墙" Desc="钉墙" Resource="npc\itemnpc057" NpcType="165" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005007" script="TriggerNpc" Name="地刺" Desc="地刺" Resource="npc\itemnpc057" NpcType="165" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone005008" script="TriggerNpc" Name="火圈" Desc="火圈" Resource="npc\fbmac00515" NpcType="165" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001001" script="TriggerNpc" Name="白虎钉墙左" Desc="白虎钉墙左" Resource="npc\fbmac00027" AITemplate="3" PatrolMode="1" WalkSpeed="0.2" RunSpeed="0.2" PathId="AI_clone001_019" NpcType="163" SpringRange="20" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001002" script="TriggerNpc" Name="白虎钉墙右" Desc="白虎钉墙右" Resource="npc\fbmac00027" AITemplate="3" PatrolMode="1" WalkSpeed="0.2" RunSpeed="0.2" PathId="AI_clone001_020" NpcType="163" SpringRange="20" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001003" script="TriggerNpc" Name="地钉" Desc="地钉" Resource="npc\worldnpc266" NpcType="165" SpringRange="5.4" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001004" script="TriggerNpc" Name="地钉" Desc="地钉" Resource="npc\worldnpc266" NpcType="165" SpringRange="5.4" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001005" script="TriggerNpc" Name="地钉" Desc="地钉" Resource="npc\worldnpc266" NpcType="165" SpringRange="5.4" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001006" script="TriggerNpc" Name="地钉" Desc="地钉" Resource="npc\worldnpc266" NpcType="165" SpringRange="5.4" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001007" script="TriggerNpc" Name="地面火焰" Desc="地面火焰" Resource="npc\itemnpc057a" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001008" script="TriggerNpc" Name="旋风" Desc="旋风" Resource="npc\itemnpc057" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001009" script="TriggerNpc" Resource="npc\itemnpc057c" NpcType="165" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone001010" script="TriggerNpc" Resource="npc\itemnpc057" NpcType="165" SpringRange="5" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone007001" script="TriggerNpc" Name="冰窖" Desc="冰窖" Resource="npc\fbmac00515" NpcType="202" SpringRange="45" Invisible="0"/>
+	<Property ID="TriggerNpcClone007002" script="TriggerNpc" Name="三毒散" Desc="三毒散" Resource="npc\worldnpc266" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone007003" script="TriggerNpc" Name="凹槽" Desc="凹槽" Resource="npc\worldnpc266" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone007004" script="TriggerNpc" Name="七星阵1" Desc="七星阵1" Resource="npc\fbmac00515" NpcType="202" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone007005" script="TriggerNpc" Name="七星阵2" Desc="七星阵2" Resource="npc\fbmac00515" NpcType="202" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone007006" script="TriggerNpc" Name="七星阵3" Desc="七星阵3" Resource="npc\itemnpc057d" NpcType="165" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone007007" script="TriggerNpc" Name="七星阵4" Desc="七星阵4" Resource="npc\itemnpc057d" NpcType="165" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone007008" script="TriggerNpc" Name="七星阵5" Desc="七星阵5" Resource="npc\itemnpc057d" NpcType="165" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone007009" script="TriggerNpc" Name="七星阵6" Desc="七星阵6" Resource="npc\itemnpc057d" NpcType="165" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone007010" script="TriggerNpc" Name="寒谭深水" Desc="寒谭深水" Resource="npc\worldnpc251" NpcType="202" SpringRange="35" Invisible="1"/>
+	<Property ID="TriggerNpcClone007011" script="TriggerNpc" Name="短凹槽" Desc="短凹槽" Resource="npc\worldnpc266" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone007012" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone007013" script="TriggerNpc" Name="落石触发npc" Desc="落石触发npc" Resource="npc\fbmac00515" NpcType="202" SpringRange="17.5" Invisible="0"/>
+	<Property ID="TriggerNpcClone007014" script="TriggerNpc" Name="寒谭深水" Desc="寒谭深水" Resource="npc\fbmac00515" NpcType="202" SpringRange="71" Invisible="0"/>
+	<Property ID="TriggerNpcClone007015" script="TriggerNpc" Name="游龙阵特效npc" Desc="游龙阵特效npc" Resource="npc\fbmac007006" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone007016" script="TriggerNpc" Name="伤门致死" Desc="伤门致死" Resource="npc\fbmac013018f" NpcType="202" SpringRange="30" Invisible="0"/>
+	<Property ID="TriggerNpcClone007017" script="TriggerNpc" Name="伤门致死" Desc="伤门致死" Resource="npc\fbmac013018f" NpcType="202" SpringRange="7" Invisible="0"/>
+	<Property ID="macclone013018a" script="TriggerNpc" Name="太一宫机关-红-火" Desc="太一宫机关-红-火" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="macclone013018b" script="TriggerNpc" Name="太一宫机关-绿-木" Desc="太一宫机关-绿-木" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="macclone013018c" script="TriggerNpc" Name="太一宫机关-黄-土" Desc="太一宫机关-黄-土" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="macclone013018d" script="TriggerNpc" Name="太一宫机关-白-金" Desc="太一宫机关-白-金" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="macclone013018e" script="TriggerNpc" Name="太一宫机关-黑-水" Desc="太一宫机关-黑-水" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="macclone013018g" script="TriggerNpc" Name="太一宫机关-开门" Desc="太一宫机关-开门" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="TriggerNpcClone013001" script="TriggerNpc" Name="炼毒房火坑npc" Desc="炼毒房火坑npc" Resource="npc\fbmac013018f" NpcType="202" SpringRange="14.2" Invisible="0"/>
+	<Property ID="TriggerNpcClone013002" script="TriggerNpc" Name="毒雾" Desc="毒雾" Resource="npc\fbmac007006" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone013003" script="TriggerNpc" Name="离宫地刺" Desc="离宫地刺" Resource="npc\fbmac013018f" NpcType="202" SpringRange="34.3" Invisible="0"/>
+	<Property ID="TriggerNpcClone013006" script="TriggerNpc" Name="离宫触发npc" Desc="离宫触发npc" Resource="npc\fbmac013018f" NpcType="202" SpringRange="4.6" Invisible="0"/>
+	<Property ID="TriggerNpcClone013005" script="TriggerNpc" Name="九折-毒雾触发NPC" Desc="九折-毒雾触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcClone013004" script="TriggerNpc" Name="九折-地刺触发NPC" Desc="九折-地刺触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcClone013022" script="TriggerNpc" Name="九折-毒针触发NPC" Desc="九折-毒针触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcClone013023" script="TriggerNpc" Name="九折-暗器触发NPC" Desc="九折-暗器触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcClone013024" script="TriggerNpc" Name="九折-毒液触发NPC" Desc="九折-毒液触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="EventNpcClone013014" script="TriggerNpc" Name="乱石道毒雾触发npc" Desc="乱石道毒雾触发npc" Resource="npc\fbmac013019f" NpcType="202" SpringRange="8" Invisible="0"/>
+	<Property ID="EventNpcClone013015" script="TriggerNpc" Name="乱石道毒蝎触发npc" Desc="乱石道毒蝎触发npc" Resource="npc\fbmac013019f" NpcType="202" SpringRange="8" Invisible="0"/>
+	<Property ID="EventNpcClone013016" script="TriggerNpc" Name="乱石道毒蜂触发npc" Desc="乱石道毒蜂触发npc" Resource="npc\fbmac013019f" NpcType="202" SpringRange="8" Invisible="0"/>
+	<Property ID="EventNpcClone013017" script="TriggerNpc" Name="离宫假出口" Desc="离宫假出口" Resource="npc\itemnpc057k" NpcType="202" SpringRange="2" Invisible="0"/>
+	<Property ID="TriggerNpcClone019001" script="TriggerNpc" Name="鬼使大门" Desc="鬼使大门" Resource="npc\itemnpc057" NpcType="202" SpringRange="20" Invisible="0"/>
+	<Property ID="TriggerNpcClone019002" script="TriggerNpc" Name="毒使大门" Desc="毒使大门" Resource="npc\itemnpc057" NpcType="202" SpringRange="20" Invisible="0"/>
+	<Property ID="TriggerNpcClone019003" script="TriggerNpc" Name="佛使bufNPC" Desc="佛使bufNPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="80" Invisible="0"/>
+	<Property ID="TriggerNpcClone019004" script="TriggerNpc" Name="销魂石人数检测" Desc="销魂石人数检测" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone019005" script="TriggerNpc" Name="销魂石人数检测" Desc="销魂石人数检测" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017001" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017002" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017003" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017004" script="TriggerNpc" Resource="npc\kqshiti01" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017005" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" Invisible="1"/>
+	<Property ID="TriggerNpcClone017006" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="150" Invisible="1"/>
+	<Property ID="TriggerNpcClone017007" script="TriggerNpc" Resource="npc\kqshiti02" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017008" script="TriggerNpc" Resource="npc\kqshiti03" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017009" script="TriggerNpc" Resource="npc\kqshiti04" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017010" script="TriggerNpc" Resource="npc\kqshiti05" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017011" script="TriggerNpc" Resource="npc\kqshiti06" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017013" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="42" Invisible="0"/>
+	<Property ID="TriggerNpcClone017014" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="38" Invisible="0"/>
+	<Property ID="TriggerNpcClone017020" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="70" Invisible="1"/>
+	<Property ID="TriggerNpcClone017021" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017022" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriggerNpcClone017023" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="165" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017032" script="TriggerNpc" Name="机关通道踩踏地板砖1" Desc="机关通道踩踏地板砖1" Resource="npc\fbmac00522" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017033" script="TriggerNpc" Name="机关通道踩踏地板砖2" Desc="机关通道踩踏地板砖2" Resource="npc\fbmac00523" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017034" script="TriggerNpc" Name="机关通道踩踏地板砖3" Desc="机关通道踩踏地板砖3" Resource="npc\fbmac00524" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017035" script="TriggerNpc" Name="机关通道踩踏地板砖4" Desc="机关通道踩踏地板砖4" Resource="npc\fbmac00532" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017036" script="TriggerNpc" Name="机关通道踩踏地板砖5" Desc="机关通道踩踏地板砖5" Resource="npc\fbmac00533" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017037" script="TriggerNpc" Name="机关通道踩踏地板砖6" Desc="机关通道踩踏地板砖6" Resource="npc\fbmac00534" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017038" script="TriggerNpc" Name="机关通道踩踏地板砖7" Desc="机关通道踩踏地板砖7" Resource="npc\fbmac00538" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017039" script="TriggerNpc" Name="机关通道踩踏地板砖8" Desc="机关通道踩踏地板砖8" Resource="npc\fbmac00539" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017040" script="TriggerNpc" Name="机关通道踩踏地板砖9" Desc="机关通道踩踏地板砖9" Resource="npc\fbmac00540" NpcType="202" SpringRange="180" Invisible="0"/>
+	<Property ID="TriMacClone017065" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017070" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017071" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017072" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017073" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017074" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017075" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017076" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017077" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017078" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017079" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017080" script="TriggerNpc" Resource="npc\fbmac00527" NpcType="202" SpringRange="5" Invisible="0"/>
+	<Property ID="TriMacClone017081" script="TriggerNpc" Resource="npc\fbmac00515" NpcType="202" SpringRange="8" Invisible="0"/>
+	<Property ID="TriggerNpc003001" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="70" Invisible="1"/>
+	<Property ID="TriggerNpc003002" script="TriggerNpc" Name="房子燃烧" Desc="房子燃烧" Resource="npc\itemnpc057a" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003003" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="5" Invisible="1"/>
+	<Property ID="TriggerNpc003004" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="5" Invisible="1"/>
+	<Property ID="TriggerNpc003005" script="TriggerNpc" Name="地面火焰" Desc="地面火焰" Resource="npc\itemnpc057" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003006" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="8" Invisible="1"/>
+	<Property ID="TriggerNpc003007" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="5" Invisible="1"/>
+	<Property ID="TriggerNpc003008" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003009" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003010" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003011" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="7" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003012" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="5" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003013" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="5" Invisible="1"/>
+	<Property ID="TriggerNpc003014" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="10" Invisible="1"/>
+	<Property ID="TriggerNpc003015" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="3" Invisible="1"/>
+	<Property ID="TriggerNpc009001" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="2" Invisible="1"/>
+	<Property ID="TriMacClone004001" script="TriggerNpc" Resource="npc\fbmac004013" NpcType="165" SpringRange="20" Invisible="0"/>
+	<Property ID="TriMacClone004002" script="TriggerNpc" Resource="npc\fbmac004013" NpcType="165" SpringRange="20" Invisible="0"/>
+	<Property ID="TriMacClone004003" script="TriggerNpc" Resource="npc\fbmac004013" NpcType="165" SpringRange="20" Invisible="0"/>
+	<Property ID="TriMacClone004004" script="TriggerNpc" Resource="npc\fbmac004013" NpcType="165" SpringRange="20" Invisible="0"/>
+	<Property ID="TriMacClone004005" script="TriggerNpc" Resource="npc\fbmac004012" NpcType="165" SpringRange="20" Invisible="0"/>
+	<Property ID="TriMacClone004006" script="TriggerNpc" Resource="npc\itemnpc057_em02" NpcType="165" SpringRange="20" Invisible="0"/>
+	<Property ID="TriMacClone015001" script="TriggerNpc" Resource="npc\fbmac004013" WalkSpeed="1" NpcType="165" SpringRange="30" Invisible="0"/>
+	<Property ID="TriggerNpcClone009001" script="TriggerNpc" Resource="npc\worldnpc140" NpcType="165" SpringRange="60" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone009002" script="TriggerNpc" Resource="npc\worldnpc140" NpcType="165" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone009003" script="TriggerNpc" Resource="npc\worldnpc140" NpcType="165" SpringRange="5" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone009004" script="TriggerNpc" Resource="npc\itemnpc057d" NpcType="165" SpringRange="20" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021001" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="16.8" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021002" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021003" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021004" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="40" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021005" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021006" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="2" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021007" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="80" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021008" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021009" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021010" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021011" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021012" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021013" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021014" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021015" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021016" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021017" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021018" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021019" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021020" script="TriggerNpc" Resource="npc\itemnpc057e" NpcType="165" SpringRange="15" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone021021" script="TriggerNpc" Name="机关寒潭" Desc="机关寒潭" Resource="npc\itemnpc057e" NpcType="165" SpringRange="49" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc_yd_001" script="TriggerNpc" Name="新手引导传送门" Desc="新手引导传送门" Resource="npc\funcnpc019c" NpcType="202" SpringRange="4" Invisible="0"/>
+	<Property ID="TriggerNpc_yd_001" script="TriggerNpc" Name="新手引导传送门" Desc="新手引导传送门" Resource="npc\itemnpc057" NpcType="202" SpringRange="4" Invisible="0"/>
+	<Property ID="TriggerBox_qysz_001" script="TriggerNpc" Name="苏州奇遇" Desc="苏州奇遇" Resource="npc\itemnpc057k" NpcType="202" SpringRange="1" Invisible="1" CantBeAttack="1"/>
+	<Property ID="smokebomb" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_01" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_02" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_03" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_06" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_08" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_jgjf" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone004001" script="TriggerNpc" Name="火焰墙" Desc="火焰墙" Resource="npc\itemnpc057_huoyan" AITemplate="3" WalkSpeed="5" RunSpeed="5" PathId="Clone004_huoyanqiang_01" NpcType="165" SpringRange="22" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone004002" script="TriggerNpc" Name="火焰墙" Desc="火焰墙" Resource="npc\itemnpc057_huoyan" AITemplate="3" WalkSpeed="5" RunSpeed="5" PathId="Clone004_huoyanqiang_02" NpcType="165" SpringRange="22" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone004003" script="TriggerNpc" Name="火焰墙" Desc="火焰墙" Resource="npc\itemnpc057_huoyan" AITemplate="3" WalkSpeed="5" RunSpeed="5" PathId="Clone004_huoyanqiang_03" NpcType="165" SpringRange="22" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcClone004004" script="TriggerNpc" Name="火焰墙" Desc="火焰墙" Resource="npc\itemnpc057_huoyan" AITemplate="3" WalkSpeed="5" RunSpeed="5" PathId="Clone004_huoyanqiang_04" NpcType="165" SpringRange="22" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_flxmz" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_fireworks1" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Npc_tlw07" script="TriggerNpc" Name="天罗舞" Desc="天罗舞" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_mjh04" script="TriggerNpc" Name="透骨刀炎" Desc="透骨刀炎" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_mjh05" script="BulletNpc" Name="弯刀火影" Desc="弯刀火影" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_xfsyt" script="BulletNpc" Name="旋风扫叶腿" Desc="旋风扫叶腿" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Npc_shl01" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Npc_shl02" script="BulletNpc" Name="圣火令" Desc="圣火令" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_gwc03" script="BulletNpc" Name="鬼王刺" Desc="鬼王刺" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_xlsbzc06" script="TriggerNpc" Name="飞龙压顶" Desc="飞龙压顶" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TS_icewall" script="TriggerNpc" Name="天山冰墙" Desc="天山冰墙" Resource="npc\itemnpc057_bing" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_football" script="TriggerNpc" Name="足球本体" Desc="足球本体" Resource="npc\football001" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcjl001" script="TriggerNpc" Name="暗器触发NPC" Desc="暗器触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcjl002" script="TriggerNpc" Name="地刺触发NPC" Desc="地刺触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcjl003" script="TriggerNpc" Name="毒针触发NPC" Desc="毒针触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcjl004" script="TriggerNpc" Name="毒液触发NPC" Desc="毒液触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcjl005" script="TriggerNpc" Name="箭雨触发NPC" Desc="箭雨触发NPC" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcClone001108" script="TriggerNpc" Name="旋风" Desc="旋风" Resource="npc\itemnpc057" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpctsxjl01" script="TriggerNpc" Name="太湖地宫地刺" Desc="太湖地宫地刺" Resource="npc\fbmac013018f" NpcType="202" SpringRange="1.5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpctsxjl02" script="TriggerNpc" Name="太湖地宫喷毒" Desc="太湖地宫喷毒" Resource="npc\fbmac013018f" NpcType="202" SpringRange="1.7" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpc_qy_tangmen001" script="TriggerNpc" Name="地钉" Desc="地钉" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpc_qy_tangmen002" script="TriggerNpc" Name="毒气" Desc="毒气" Resource="npc\fbmac013018f" NpcType="202" SpringRange="10" Invisible="0"/>
+	<Property ID="TriggerNpcBattle001" script="TriggerNpc" Name="攻击增强" Desc="攻击增强" Resource="npc\fbmac004012e" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcBattle002" script="TriggerNpc" Name="回复" Desc="回复" Resource="npc\fbmac004012f" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcBattle003" script="TriggerNpc" Name="防御" Desc="防御" Resource="npc\fbmac004012g" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcBattle004" script="TriggerNpc" Name="红色剑币" Desc="红色剑币" Resource="npc\fbmac004012x" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpcBattle005" script="TriggerNpc" Name="蓝色剑币" Desc="蓝色剑币" Resource="npc\fbmac004012y" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="nightwar_item_attack" script="TriggerNpc" Name="攻击增强" Desc="攻击增强" Resource="npc\fbmac004012e" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1" LifeTime="59000"/>
+	<Property ID="nightwar_item_hp" script="TriggerNpc" Name="回复" Desc="回复" Resource="npc\fbmac004012f" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1" LifeTime="59000"/>
+	<Property ID="nightwar_item_protect" script="TriggerNpc" Name="防御" Desc="防御" Resource="npc\fbmac004012g" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1" LifeTime="59000"/>
+	<Property ID="nightwar_item_boom" script="TriggerNpc" Name="自爆" Desc="自爆" Resource="npc\fbmac004012x" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1" LifeTime="59000"/>
+	<Property ID="EventNpcClone011220" script="TriggerNpc" Name="添加毒buff" Desc="添加毒buff" Resource="npc\itemnpc057e" NpcType="202" SpringRange="30" Invisible="1" CantBeAttack="1"/>
+	<Property ID="EventNpcClone011215" script="TriggerNpc" Name="杏子林山壁陷阱" Desc="杏子林山壁陷阱" Resource="npc\itemnpc057e" NpcType="202" SpringRange="8" Invisible="1" CantBeAttack="1"/>
+	<Property ID="Triggerborn003006" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="8" Invisible="1"/>
+	<Property ID="Triggerborn003010" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="Triggerborn003011" script="TriggerNpc" Resource="npc\worldnpc266" NpcType="165" SpringRange="7" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_1" script="TriggerNpc" Name="百姓逃跑终点" Desc="百姓逃跑终点" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_2" script="TriggerNpc" Name="整体事件触发NPC" Desc="整体事件触发NPC" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_3" script="TriggerNpc" Name="对掌不可靠近范围" Desc="对掌不可靠近范围" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_4" script="TriggerNpc" Name="况府余孽消失触发器" Desc="况府余孽消失触发器" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_5" script="TriggerNpc" Name="况府" Desc="况府" Resource="npc\fbmac004012f" NpcType="202" SpringRange="30" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_6" script="TriggerNpc" Name="苏州事件" Desc="苏州事件" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_7" script="TriggerNpc" Name="苏州事件" Desc="苏州事件" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="trig_szwe01_8" script="TriggerNpc" Name="苏州事件" Desc="苏州事件" Resource="npc\fbmac004012f" NpcType="202" SpringRange="3" Invisible="1" CantBeAttack="1"/>
+	<Property ID="TriggerNpc_wgm001" script="TriggerNpc" Name="无根门" Desc="无根门" Resource="npc\itemnpc057_jlg01" NpcType="202" SpringRange="10" Invisible="1" CantBeAttack="1"/>
+	<Property ID="sweetemploy_mkk01" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="pet_guide_npc" script="TriggerNpc" Name="剧情npc路标" Desc="剧情npc路标" Resource="npc\itemnpc057" NpcType="286" SpringRange="1" Invisible="1" CantBeAttack="1"/>
+	<Property ID="pet_guide_gather" script="TriggerNpc" Name="植物采集物标识" Desc="植物采集物标识" Resource="npc\itemnpc057" NpcType="287" SpringRange="1" Invisible="1" CantBeAttack="1"/>
+	<Property ID="pet_guide_animal" script="TriggerNpc" Name="动物采集物标识" Desc="动物采集物标识" Resource="npc\itemnpc057" NpcType="288" SpringRange="1" Invisible="1" CantBeAttack="1"/>
+	<Property ID="pet_guide_zhangpeng" script="TriggerNpc" Name="隐藏帐篷" Desc="隐藏帐篷" Resource="npc\itemnpc057" NpcType="202" SpringRange="1" Invisible="0" CantBeAttack="1"/>
+	<Property ID="pet_guide_hole" script="TriggerNpc" Name="山洞路标" Desc="山洞路标" Resource="npc\itemnpc057" NpcType="524" SpringRange="1" Invisible="1" CantBeAttack="1"/>
+	<Property ID="Trigger_nlb_hh_th" script="TriggerNpc" Name="投壶标记" Desc="投壶标记" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="bullet_tg01" script="BulletNpc" Name="矩形子弹" Desc="矩形子弹" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="bullet_tg02" script="BulletNpc" Name="圆柱子弹" Desc="圆柱子弹" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="2"/>
+	<Property ID="bullet_tg03" script="BulletNpc" Name="矩形子弹（不可见）" Desc="矩形子弹（不可见）" Resource="npc\itemnpc057" NpcType="202" Invisible="1" CantBeAttack="1"/>
+	<Property ID="NPC_jxc07" script="TriggerNpc" Name="冰凌刺" Desc="冰凌刺" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_bhjtz02" script="BulletNpc" Name="碧海惊涛掌" Desc="碧海惊涛掌" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_single_js" script="TriggerNpc" Name="剑弑剑阵" Desc="剑弑剑阵" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_CS_single_wxd" script="TriggerNpc" Name="万仙鼎" Desc="万仙鼎" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Newguild_TriggerNpcBattle000" script="TriggerNpc" Name="攻击增强" Desc="攻击增强" Resource="npc\fbmac004012e" NpcType="202" SpringRange="2" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Newguild_TriggerNpcBattle001" script="TriggerNpc" Name="攻击增强" Desc="攻击增强" Resource="npc\fbmac004012e" NpcType="202" SpringRange="1" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Newguild_TriggerNpcBattle002" script="TriggerNpc" Name="回复" Desc="回复" Resource="npc\fbmac004012f" NpcType="202" SpringRange="1" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Newguild_TriggerNpcBattle003" script="TriggerNpc" Name="防御" Desc="防御" Resource="npc\fbmac004012g" NpcType="202" SpringRange="1" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Newguild_TriggerNpcBattle004" script="TriggerNpc" Name="攻击增强" Desc="攻击增强" Resource="npc\fbmac004012e_1" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="qyby_zd" script="TriggerNpc" Name="轰天雷" Desc="轰天雷" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_ykr08" script="BulletNpc" Name="隐空刃回旋镖" Desc="隐空刃回旋镖" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_lzxss04" script="BulletNpc" Name="血爪" Desc="血爪" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_lzxss06" script="BulletNpc" Name="血骷" Desc="血骷" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_fbg05" script="BulletNpc" Name="风波棍" Desc="风波棍" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_ykr04" script="TriggerNpc" Name="鬼哭神嚎" Desc="鬼哭神嚎" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_ykr06_hide" script="TriggerNpc" Name="风声鹤唳" Desc="风声鹤唳" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_hq_01" script="BulletNpc" Name="香蕉皮" Desc="香蕉皮" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="2"/>
+	<Property ID="NPC_wshj" script="TriggerNpc" Name="当前区域" Desc="当前区域" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_mwcq07" script="TriggerNpc" Name="群鸿戏海" Desc="群鸿戏海" Resource="npc\itemnpc057" NpcType="202" SpringRange="6" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_mwcq08" script="TriggerNpc" Name="飞龙舞凤" Desc="飞龙舞凤" Resource="npc\itemnpc057" NpcType="202" SpringRange="6" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_tmby01" script="BulletNpc" Name="余音音波" Desc="余音音波" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_gymmc_06" script="TriggerNpc" Name="留影" Desc="留影" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_donghai_event_skill_01" script="BulletNpc" Name="碧海惊涛掌" Desc="碧海惊涛掌" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" LifeTime="2000"/>
+	<Property ID="npc_sjclone01_007" script="TriggerNpc" Name="蝙蝠洞透明公用NPC" Desc="蝙蝠洞透明公用NPC" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_sjclone01_015" script="BulletNpc" Name="风随手里剑" Desc="风随手里剑" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_sjclone02_016" script="BulletNpc" Name="箭" Desc="箭" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_wjd" script="BulletNpc" Name="无极岛炮弹" Desc="无极岛炮弹" Resource="npc\fbnpc00005" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="clone034_mon_01" script="TriggerNpc" Name="夺魂内圈" Desc="夺魂内圈" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="clone034_mon_02" script="TriggerNpc" Name="夺魂中圈" Desc="夺魂中圈" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="clone034_mon_03" script="TriggerNpc" Name="夺魂外圈" Desc="夺魂外圈" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_01" script="TriggerNpc" Name="陷阱" Desc="陷阱" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_02" script="TriggerNpc" Name="机关关闭点" Desc="机关关闭点" Resource="npc\itemnpc1380" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_03" script="TriggerNpc" Name="火焰" Desc="火焰" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_tp" script="TriggerNpc" Name="玄门铁炮" Desc="玄门铁炮" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_10" script="BulletNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_jm" script="TriggerNpc" Name="剑阵·灭" Desc="剑阵·灭" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone034_qfytx" script="TriggerNpc" Name="清风崖两仪阵" Desc="清风崖两仪阵" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Trigger_clone034_jwz" script="TriggerNpc" Name="剑网阵" Desc="剑网阵" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Trigger_clone034_jwzzj" script="TriggerNpc" Name="剑网阵重剑" Desc="剑网阵重剑" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Trigger_clone034_tiaoyue" script="TriggerNpc" Name="挑岳标记" Desc="挑岳标记" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Trigger_clone034_bengshan" script="TriggerNpc" Name="崩山标记" Desc="崩山标记" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Trigger_clone034_yxz" script="TriggerNpc" Name="月相阵" Desc="月相阵" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_gsd_01" script="BulletNpc" Name="官商道扇风" Desc="官商道扇风" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_gsd_01xyz" script="BulletNpc" Name="最后一行防BUG配置" Desc="最后一行防BUG配置" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003005_a" script="TriggerNpc" Name="地面标记" Desc="地面标记" Resource="npc\itemnpc057" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="TriggerNpc003016" script="TriggerNpc" Name="宝藏点" Desc="宝藏点" Resource="npc\itemnpc057" NpcType="202" SpringRange="12" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_clone039_01" script="BulletNpc" Name="矩形暗器" Desc="矩形暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_clone039_02" script="BulletNpc" Name="球形暗器" Desc="球形暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="2"/>
+	<Property ID="event_clone039_01" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone039_MY" script="TriggerNpc" Name="冰柱后方区域" Desc="冰柱后方区域" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone039_hx" script="TriggerNpc" Name="滑雪" Desc="滑雪" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_clone039_hx02" script="TriggerNpc" Name="滑雪终点" Desc="滑雪终点" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" Invisible="0" CantBeAttack="1"/>
+	<Property ID="guildchaoswar_TriggerNpcBattle002" script="TriggerNpc" Name="回复" Desc="回复" Resource="npc\fbmac004012f" NpcType="202" SpringRange="1" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_sjcyj" script="TriggerNpc" Name="荒天落日箭" Desc="荒天落日箭" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" CantBeAttack="1"/>
+	<Property ID="NPC_tyjf01" script="TriggerNpc" Name="落雪剑" Desc="落雪剑" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" CantBeAttack="1"/>
+	<Property ID="event_clone040_01" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_fbg05" script="BulletNpc" Name="风波棍" Desc="风波棍" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="smokebomb_xtxjf" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" CantBeAttack="1"/>
+	<Property ID="npc_jtg_event_01" script="BulletNpc" Name="水墙" Desc="水墙" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_jtg_event_02" script="BulletNpc" Name="圆环形" Desc="圆环形" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="1"/>
+	<Property ID="event_tyhg_zf1" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_tyhg_zf2" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_tyhg_zf3" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_worldqjc_ky" script="TriggerNpc" Name="陨石刻印" Desc="陨石刻印" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="event_worldqjc_01" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_worldqjc_01" script="BulletNpc" Name="月轮" Desc="月轮" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="7"/>
+	<Property ID="npc_worldqjc_02" script="BulletNpc" Name="苦无" Desc="苦无" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="2"/>
+	<Property ID="NPC_CS_single_qyg4" script="TriggerNpc" Name="天机珠" Desc="天机珠" Resource="npc\itemnpc057" NpcType="1212" SpringRange="25" CantBeAttack="1"/>
+	<Property ID="NPC_gujjf01" script="TriggerNpc" Name="巨斧" Desc="巨斧" Resource="npc\itemnpc057" NpcType="202" SpringRange="25" CantBeAttack="1"/>
+	<Property ID="npc_xtbzyb_004" script="TriggerNpc" Name="木狼旗" Desc="木狼旗" Resource="npc\npc_xtbzyb_004" NpcType="202" SpringRange="20" CantBeAttack="1"/>
+	<Property ID="npc_xtbzyb_005" script="TriggerNpc" Name="白虎旗" Desc="白虎旗" Resource="npc\npc_xtbzyb_005" NpcType="202" SpringRange="20" CantBeAttack="1"/>
+	<Property ID="npc_xtbzyb_006" script="TriggerNpc" Name="刑天旗" Desc="刑天旗" Resource="npc\npc_xtbzyb_006" NpcType="202" SpringRange="20" CantBeAttack="1"/>
+	<Property ID="event_wyjt_aq01" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\fbnpc00005" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Npc_Wbj_fire" script="TriggerNpc" Name="烈火弹" Desc="烈火弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" CantBeAttack="1"/>
+	<Property ID="war_xueyu001" script="TriggerNpc" Name="地火" Desc="地火" Resource="npc\itemnpc057" NpcType="202" SpringRange="20" CantBeAttack="1" LifeTime="30000"/>
+	<Property ID="war_xueyu002" script="TriggerNpc" Name="地火" Desc="地火" Resource="npc\itemnpc057" NpcType="202" SpringRange="20" CantBeAttack="1" LifeTime="30000"/>
+	<Property ID="event_worldlqq_01" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057c" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_cloneqy_xr_002" script="BulletNpc" Name="暗器飞镖" Desc="暗器飞镖" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_cloneqy_xr_003" script="BulletNpc" Name="回旋镖" Desc="回旋镖" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_cloneqy_lgj_001" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_cloneqy_lgj_002" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_cloneqy_bmj_001" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="npc_cloneqy_xr_001" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="home_jyt_cw_001" script="TriggerNpc" Name="暗器" Desc="暗器" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="home_jyt_cw_002" script="TriggerNpc" Name="月辉" Desc="月辉" Resource="npc\itemnpc1730" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="Npc_zf02" script="TriggerNpc" Name="醉赋" Desc="醉赋" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" CantBeAttack="1"/>
+	<Property ID="Npc_zf03" script="TriggerNpc" Name="醉赋" Desc="醉赋" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" CantBeAttack="1"/>
+	<Property ID="Npc_zf07" script="TriggerNpc" Name="醉赋" Desc="醉赋" Resource="npc\itemnpc057" NpcType="202" SpringRange="5" CantBeAttack="1"/>
+	<Property ID="Npc_wqb_gmfs_xf" script="BulletNpc" Name="傀儡" Desc="傀儡" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1"/>
+	<Property ID="NPC_ftbz01" script="BulletNpc" Name="碧海惊涛掌" Desc="碧海惊涛掌" Resource="npc\itemnpc057" NpcType="202" CantBeAttack="1"/>
+	<Property ID="TS_icewall_fwz" script="TriggerNpc" Name="天山冰墙" Desc="天山冰墙" Resource="npc\itemnpc057_bing_fwz" NpcType="202" SpringRange="10" CantBeAttack="1"/>
+	<Property ID="npc_sjclone069_001" script="BulletNpc" Name="半径2米旋风" Desc="半径2米旋风" Resource="npc\itemnpc057" NpcType="202" Invisible="0" CantBeAttack="1" CollideRadius="2"/>
+	<Property ID="smokebomb_xjmj02" script="TriggerNpc" Name="烟雾弹" Desc="烟雾弹" Resource="npc\itemnpc057" NpcType="202" SpringRange="10" Invisible="0" CantBeAttack="1"/>
+</Object>

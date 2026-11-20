@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property File="commonnpc.xml" No="0F4F9211F6F1488EBCF9078183E12291" x="-18.402" y="15.536" z="1.988" ay="1.615" id="Npc_yd_wg_jx_mj01" RefreshTime="30000.0" PatrolMode="1" WakeupRange="12.0" ChaseRange="13.0" NotPositive="0" desc="武馆首席弟子"/>
+	<Property File="commonnpc.xml" No="F80164BBD78640A3A00CBDFEFD5B0846" x="-8.917" y="15.536" z="-5.276" id="Npc_yd_wg_jx_mj02" RefreshTime="30000.0" PatrolMode="1" WakeupRange="12.0" ChaseRange="13.0" NotPositive="1" desc="武馆教学（键位）"/>
+	<Property File="commonnpc.xml" No="482EEC5433434D31BDE61F0D22F0D7C9" x="-13.128" y="15.536" z="-5.303" id="Npc_yd_wg_jx_mj03" RefreshTime="30000.0" PatrolMode="1" WakeupRange="12.0" ChaseRange="13.0" NotPositive="0" SubSceneNo="9046" desc="武馆学徒（防御）"/>
+	<Property File="commonnpc.xml" No="8F43A33BFBEF4E779A2FE4E75D122398" x="-18.564" y="15.536" z="-5.413" id="Npc_yd_wg_jx_mj04" RefreshTime="30000.0" PatrolMode="1" WakeupRange="12.0" ChaseRange="13.0" NotPositive="0" SubSceneNo="9046" desc="武馆学徒（破防）"/>
+	<Property File="commonnpc.xml" No="25BD2CD3346C43AC8C1567329905271C" x="-23.704" y="15.536" z="-5.486" id="Npc_yd_wg_jx_mj05" RefreshTime="30000.0" PatrolMode="1" WakeupRange="12.0" ChaseRange="13.0" NotPositive="0" SubSceneNo="9046" desc="武馆学徒（怒气）"/>
+	<Property File="funcnpc.xml" No="B83758C841974128B18A23F2EF79CA16" x="-16.814" y="15.496" z="15.786" ay="1.465" id="Npc_yd_wg_cs_mj02" RefreshTime="30000.0" PatrolMode="1" WakeupRange="1.0" ChaseRange="1.0" NotPositive="0" SubSceneNo="9046" desc="明教演武堂出口"/>
+</Object>

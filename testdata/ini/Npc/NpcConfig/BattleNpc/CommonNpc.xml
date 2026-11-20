@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="SWJG_jyw_01" script="CommonNpc" Name="木栅栏" Desc="木栅栏" NpcType="172" Resource="npc\fbmac00007" SpringRange="100"/>
+	<Property ID="SWJG_jyw_02" script="CommonNpc" Name="门" Desc="门" NpcType="76" SelectState="2" Resource="npc\fbmac005004" SpringRange="100" FightID="116" Level="20" Fixed="1" DestroyTime1="1" Force="1111"/>
+	<Property ID="SWJG_jyw_03" script="CommonNpc" Name="门" Desc="门" NpcType="76" SelectState="2" Resource="npc\fbmac005004" SpringRange="100" FightID="116" Level="20" Fixed="1" DestroyTime1="1" Force="1111"/>
+	<Property ID="switem_gb_buff_01" script="CommonNpc" Name="水缸" Desc="水缸" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc060" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_01" script="CommonNpc" Name="捕兽夹" Desc="捕兽夹" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc619" PatrolMode="0" PatrolRange="0" SpringRange="1" Invisible="1"/>
+	<Property ID="swnpc_infonpc" script="CommonNpc" Name="宁鹰飞" Desc="宁鹰飞" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\worldnpc207" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="swnpc_gbksnpc" script="CommonNpc" Name="投石机看守弟子" Desc="投石机看守弟子" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\worldnpc561" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_itembox" script="CommonNpc" Name="道具宝箱" Desc="道具宝箱" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemboxnpc002" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_door" script="CommonNpc" Name="防守石门" Desc="防守石门" NpcType="76" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\fbmac002011" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="97" Level="18" Fixed="1" DestroyTime1="1" Force="1111"/>
+	<Property ID="switem_gb_relive01" script="CommonNpc" Name="佛塔洞公共复活点特效1" Desc="佛塔洞公共复活点特效1" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057u" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_relive02" script="CommonNpc" Name="蚂蚁岭公共复活点特效2" Desc="蚂蚁岭公共复活点特效2" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057u" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_relive03" script="CommonNpc" Name="驿站公共复活点特效3" Desc="驿站公共复活点特效3" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057u" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_relive04" script="CommonNpc" Name="宗义祠公共复活点特效4" Desc="宗义祠公共复活点特效4" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057u" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_guildnpc_gb01" script="CommonNpc" Name="断云崖（丐帮东北区域）" Desc="断云崖（丐帮东北区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_gb02" script="CommonNpc" Name="回雁峰（丐帮西南区域）" Desc="回雁峰（丐帮西南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_gb03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_gb04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="switem_gb_flagnpc01" script="CommonNpc" Name="守方战旗发放NPC" Desc="守方战旗发放NPC" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" WeaponMode="hand1_1" Resource="npc\worldnpc292" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_gb_flagnpc02" script="CommonNpc" Name="攻方战旗发放NPC" Desc="攻方战旗发放NPC" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" WeaponMode="hand1_1" Resource="npc\worldnpc214" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_lhz01" script="CommonNpc" Name="莲花落阵特效" Desc="莲花落阵特效" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb01" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_lhz02" script="CommonNpc" Name="莲花落阵特效" Desc="莲花落阵特效" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb01" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_lhz03" script="CommonNpc" Name="莲花落阵特效" Desc="莲花落阵特效" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb01" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_lhz04" script="CommonNpc" Name="莲花落阵特效" Desc="莲花落阵特效" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb01" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_lhz05" script="CommonNpc" Name="莲花落阵特效" Desc="莲花落阵特效" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb01" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_zf01" script="CommonNpc" Name="阵法大圈1" Desc="阵法大圈1" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb02" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="sweff_zf02" script="CommonNpc" Name="阵法大圈2" Desc="阵法大圈2" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_gb03" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_item_jz06" script="CommonNpc" Name="大字“定”" Desc="大字“定”" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc623" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz07" script="CommonNpc" Name="大字“惑”" Desc="大字“惑”" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc622" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz08" script="CommonNpc" Name="悬挂的画" Desc="悬挂的画" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc039" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz09" script="CommonNpc" Name="焚烟的香炉" Desc="焚烟的香炉" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\fbmac005017" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz10" script="CommonNpc" Name="大字“群”" Desc="大字“群”" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc624" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz11" script="CommonNpc" Name="大字“气”" Desc="大字“气”" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc625" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz12" script="CommonNpc" Name="大字“控”" Desc="大字“控”" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc626" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz13" script="CommonNpc" Name="棋子触发NPC" Desc="棋子触发NPC" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc620" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_item_jz14" script="CommonNpc" Name="墨池眯眼特效一" Desc="墨池眯眼特效一" NpcType="172" Resource="npc\itemnpc057_em01"/>
+	<Property ID="schoolwar_item_jz15" script="CommonNpc" Name="墨池眯眼特效二" Desc="墨池眯眼特效二" NpcType="172" Resource="npc\itemnpc057_em02"/>
+	<Property ID="schoolwar_jlg_01" script="CommonNpc" Name="毒使毒气" Desc="毒使毒气" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_jlg01" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_jlg_02" script="CommonNpc" Name="尸使毒气" Desc="尸使毒气" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_jlg02" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_jlg_03" script="CommonNpc" Name="狮子火焰" Desc="狮子火焰" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_jlg03" PatrolMode="0" PatrolRange="0" SpringRange="5"/>
+	<Property ID="schoolwar_jlg_04" script="CommonNpc" Name="蛇口火焰" Desc="蛇口火焰" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_jlg04" PatrolMode="0" PatrolRange="0" SpringRange="5"/>
+	<Property ID="schoolwar_jlg_05" script="CommonNpc" Name="极乐地刺" Desc="极乐地刺" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\fbmac00537" PatrolMode="0" PatrolRange="0" SpringRange="6"/>
+	<Property ID="schoolwar_jlg_06" script="CommonNpc" Name="迷云" Desc="迷云" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_jlg06" PatrolMode="0" PatrolRange="0" SpringRange="15"/>
+	<Property ID="schoolwar_jlg_11" script="CommonNpc" Name="滚石区域" Desc="滚石区域" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc011" PatrolMode="0" PatrolRange="0" SpringRange="5"/>
+	<Property ID="schoolwar_jlg_12" script="CommonNpc" Name="滚石" Desc="滚石" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc627" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_jlg_13" script="CommonNpc" Name="水中区域" Desc="水中区域" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc011" PatrolMode="0" PatrolRange="0" SpringRange="5"/>
+	<Property ID="schoolwar_jlg_15" script="CommonNpc" Name="毒液NPC" Desc="毒液NPC" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc162" PatrolMode="0" PatrolRange="0" SpringRange="5"/>
+	<Property ID="schoolwar_jlg_16" script="CommonNpc" Name="黑色烟雾" Desc="黑色烟雾" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_jlg16" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="schoolwar_jlg_17" script="CommonNpc" Name="机关石" Desc="机关石" NpcType="172" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc070" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="116" Level="5" Fixed="1" DestroyTime2="1" Force="1111"/>
+	<Property ID="schoolwar_jlg_18" script="CommonNpc" Name="狮子口盆" Desc="狮子口盆" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\guildeffect003" PatrolMode="0" PatrolRange="0" SpringRange="3"/>
+	<Property ID="schoolwar_jlg_19" script="CommonNpc" Name="蛇口地面" Desc="蛇口地面" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc011" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_jlg_01" script="CommonNpc" Name="控制杆" Desc="控制杆" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac00036" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="2" Fixed="1" DestroyTime2="1"/>
+	<Property ID="SWKG_jlg_02" script="CommonNpc" Name="控制杆" Desc="控制杆" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac00036" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="2" Fixed="1" DestroyTime2="1"/>
+	<Property ID="schoolwar_jlg_20" script="CommonNpc" Name="火焰空模型" Desc="火焰空模型" NpcType="172" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057" PatrolMode="0" PatrolRange="0" SpringRange="25" Force="1111"/>
+	<Property ID="SWJG_tm_01" script="CommonNpc" Name="机关（复活点）" Desc="机关（复活点）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc570" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_02" script="CommonNpc" Name="机关（复活点）" Desc="机关（复活点）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc570" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_03" script="CommonNpc" Name="机关（复活点）" Desc="机关（复活点）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc570" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_04" script="CommonNpc" Name="机关（石碑）" Desc="机关（石碑）" NpcType="172" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc070" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="116" Level="7" Fixed="1" DestroyTime2="1" Force="1111"/>
+	<Property ID="SWJG_tm_05" script="CommonNpc" Name="机关（石碑）" Desc="机关（石碑）" NpcType="172" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc070" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="116" Level="7" Fixed="1" DestroyTime2="1" Force="1111"/>
+	<Property ID="SWJG_tm_06_1" script="CommonNpc" Name="九毒鼎" Desc="九毒鼎" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc605" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_06_2" script="CommonNpc" Name="九毒鼎" Desc="九毒鼎" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc605" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_06_3" script="CommonNpc" Name="九毒鼎" Desc="九毒鼎" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc605" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_06_4" script="CommonNpc" Name="九毒鼎" Desc="九毒鼎" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc605" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_07" script="CommonNpc" Name="机关(蜘蛛刺1）" Desc="机关(蜘蛛刺1）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc604" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_tm_07" script="CommonNpc" Name="开关(蜘蛛刺1）" Desc="开关(蜘蛛刺1）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac00036" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_08" script="CommonNpc" Name="机关(蜘蛛刺2）" Desc="机关(蜘蛛刺2）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc604" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_tm_08" script="CommonNpc" Name="开关(蜘蛛刺2）" Desc="开关(蜘蛛刺2）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac00036" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_09" script="CommonNpc" Name="机关(蜘蛛刺3）" Desc="机关(蜘蛛刺3）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc604" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_tm_09" script="CommonNpc" Name="开关(蜘蛛刺3）" Desc="开关(蜘蛛刺3）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac00036" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWJG_tm_10" script="CommonNpc" Name="机关(蜘蛛刺4）" Desc="机关(蜘蛛刺4）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc604" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_tm_10" script="CommonNpc" Name="开关(蜘蛛刺4）" Desc="开关(蜘蛛刺4）" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac00036" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_tm_02" script="CommonNpc" Name="突刺" Desc="突刺" NpcType="81" WalkSpeed="0" RunSpeed="0" Resource="npc\fbmac00537" SpringRange="30"/>
+	<Property ID="SWKG_em_01" script="CommonNpc" Name="开关壹" Desc="开关壹" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac009007" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_em_02" script="CommonNpc" Name="开关贰" Desc="开关贰" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac009007" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_em_03" script="CommonNpc" Name="开关叁" Desc="开关叁" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac009007" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_em_04" script="CommonNpc" Name="开关肆" Desc="开关肆" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\Fbmac009007" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_em_05" script="CommonNpc" Name="佛光普照开关" Desc="佛光普照开关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc050" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="SWKG_em_06" script="CommonNpc" Name="佛光普照 开关" Desc="佛光普照 开关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc050" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_item_em01" script="CommonNpc" Name="桃花雾障机关" Desc="桃花雾障机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_item_em02" script="CommonNpc" Name="佛光普照机关" Desc="佛光普照机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_special_em01" script="CommonNpc" Name="风陵大阵" Desc="风陵大阵" NpcType="81" Resource="npc\itemnpc088"/>
+	<Property ID="schoolwar_special_em02" script="CommonNpc" Name="梅花大阵" Desc="梅花大阵" NpcType="81" Resource="npc\itemnpc088"/>
+	<Property ID="itemnpc_em01" script="CommonNpc" Name="桃花雾障特效NPC一" Desc="桃花雾障特效NPC一" NpcType="202" Resource="npc\itemnpc057_em01"/>
+	<Property ID="itemnpc_em02" script="CommonNpc" Name="桃花雾障特效NPC二" Desc="桃花雾障特效NPC二" NpcType="202" Resource="npc\itemnpc057_em01"/>
+	<Property ID="itemnpc_em03" script="CommonNpc" Name="桃花雾障特效NPC三" Desc="桃花雾障特效NPC三" NpcType="202" Resource="npc\itemnpc057_em01"/>
+	<Property ID="itemnpc_em04" script="CommonNpc" Name="桃花雾障特效NPC四" Desc="桃花雾障特效NPC四" NpcType="202" Resource="npc\itemnpc057_em01"/>
+	<Property ID="itemnpc_em05" script="CommonNpc" Name="桃花雾障特效NPC五" Desc="桃花雾障特效NPC五" NpcType="202" Resource="npc\itemnpc057_em02"/>
+	<Property ID="itemnpc_em06" script="CommonNpc" Name="桃花雾障特效NPC六" Desc="桃花雾障特效NPC六" NpcType="202" Resource="npc\itemnpc057_em02"/>
+	<Property ID="itemnpc_em07" script="CommonNpc" Name="桃花雾障特效NPC七" Desc="桃花雾障特效NPC七" NpcType="202" Resource="npc\itemnpc057_em02"/>
+	<Property ID="itemnpc_em08" script="CommonNpc" Name="桃花雾障特效NPC八" Desc="桃花雾障特效NPC八" NpcType="202" Resource="npc\itemnpc057_em02"/>
+	<Property ID="itemnpc_em09" script="CommonNpc" Name="佛光普照机关特效" Desc="佛光普照机关特效" NpcType="172" Resource="npc\itemnpc057_em03" PatrolMode="0" PatrolRange="0" SpringRange="80"/>
+	<Property ID="SWKG_wd_01" script="CommonNpc" Name="开关" Desc="开关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc488" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="2" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_01" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_02" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_03" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_04" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_05" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_06" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_07" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_08" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_09" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="SWJG_wd_10" script="CommonNpc" Name="机关" Desc="机关" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc225" PatrolMode="0" PatrolRange="0" SpringRange="10" FightID="1" Level="1" Fixed="1" CantBeKilled="1" Force="1111"/>
+	<Property ID="switem_wd_relive01" script="CommonNpc" Name="虎啸山庄复活点特效1" Desc="虎啸山庄复活点特效1" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057u" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_wd_relive02" script="CommonNpc" Name="辎重营复活点特效2" Desc="辎重营复活点特效2" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057u" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="switem_wd_flagnpc02" script="CommonNpc" Name="攻方战旗发放NPC" Desc="攻方战旗发放NPC" NpcType="81" SelectState="2" WalkSpeed="0" RunSpeed="0" WeaponMode="hand1_1" Resource="npc\worldnpc214" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="itemnpcscenewd01" script="CommonNpc" NpcType="172" Resource="npc\fbmac005014"/>
+	<Property ID="SchoolWarNPC_01" script="CommonNpc" Name="攻方" Desc="攻方" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\funcnpc001" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1"/>
+	<Property ID="SchoolWarNPC_02" script="CommonNpc" Name="守方" Desc="守方" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\funcnpc001" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1"/>
+	<Property ID="ShangFangBaoJian" script="FuncItem" Name="尚方宝剑" Desc="尚方宝剑" NpcType="172" SelectState="2" Resource="npc\itemnpc568"/>
+	<Property ID="DaGouGun" script="FuncItem" Name="打狗棍" Desc="打狗棍" NpcType="172" SelectState="2" Resource="npc\itemnpc566"/>
+	<Property ID="LanTingXu" script="FuncItem" Name="兰亭序" Desc="兰亭序" NpcType="172" SelectState="2" Resource="npc\itemnpc567"/>
+	<Property ID="ShenMuWangDing" script="FuncItem" Name="神木王鼎" Desc="神木王鼎" NpcType="172" SelectState="2" Resource="npc\itemnpc569"/>
+	<Property ID="KongQueLing" script="FuncItem" Name="孔雀翎" Desc="孔雀翎" NpcType="172" SelectState="2" Resource="npc\itemnpc581"/>
+	<Property ID="YiTianJian" script="FuncItem" Name="倚天剑" Desc="倚天剑" NpcType="172" SelectState="2" Resource="npc\itemnpc580"/>
+	<Property ID="TaiJiTu" script="FuncItem" Name="太极图" Desc="太极图" NpcType="172" SelectState="2" Resource="npc\itemnpc565"/>
+	<Property ID="DaMoSheLi" script="FuncItem" Name="达摩舍利" Desc="达摩舍利" NpcType="172" SelectState="2" Resource="npc\itemnpc564"/>
+	<Property ID="schoolwar_table" script="FuncItem" Name="供桌" Desc="供桌" NpcType="172" Resource="npc\itemnpc582"/>
+	<Property ID="PoLuYin" script="FuncItem" Name="破虏印" Desc="破虏印" NpcType="172" SelectState="2" Resource="npc\itemnpc1584"/>
+	<Property ID="YouXianZhen" script="FuncItem" Name="游梦仙枕" Desc="游梦仙枕" NpcType="172" SelectState="2" Resource="npc\itemnpc1652"/>
+	<Property ID="schoolwarbox_buff_wd01" script="CommonNpc" Name="获取BUFF" Desc="获取BUFF" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_wd01" script="CommonNpc" Name="获取道具" Desc="获取道具" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_buff_sl01" script="CommonNpc" Name="获取BUFF" Desc="获取BUFF" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_sl01" script="CommonNpc" Name="获取道具" Desc="获取道具" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_buff_tm01" script="CommonNpc" Name="获取BUFF" Desc="获取BUFF" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_tm01" script="CommonNpc" Name="获取道具（药房）" Desc="获取道具（药房）" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_tm02" script="CommonNpc" Name="获取道具（练毒室）" Desc="获取道具（练毒室）" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_buff_em01" script="CommonNpc" Name="获取BUFF" Desc="获取BUFF" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_em01" script="CommonNpc" Name="获取道具" Desc="获取道具" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_jyw01" script="CommonNpc" Name="获取道具" Desc="获取道具" NpcType="81" SelectState="2" Resource="npc\itemnpc005a" SpringRange="20" Camp="1"/>
+	<Property ID="schoolpose_flagnpc01" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc600"/>
+	<Property ID="schoolpose_blookEffect_jyw01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_jyw02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_guildnpc_jyw01" script="CommonNpc" Name="三指峰（锦衣卫正西区域）" Desc="三指峰（锦衣卫正西区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jyw02" script="CommonNpc" Name="落英谷（锦衣卫正南区域）" Desc="落英谷（锦衣卫正南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jyw03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jyw04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jyw05" script="CommonNpc" Name="无辜的民工" Desc="无辜的民工" NpcType="81" SelectState="2" Resource="npc\worldnpc110" CollideRadius="0.959009" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_special_jyw01" script="CommonNpc" Name="灯柱上的火焰1" Desc="灯柱上的火焰1" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw02" script="CommonNpc" Name="灯柱上的火焰2" Desc="灯柱上的火焰2" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw03" script="CommonNpc" Name="灯柱上的火焰3" Desc="灯柱上的火焰3" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw04" script="CommonNpc" Name="灯柱上的火焰4" Desc="灯柱上的火焰4" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw05" script="CommonNpc" Name="灯柱上的火焰5" Desc="灯柱上的火焰5" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw06" script="CommonNpc" Name="灯柱上的火焰6" Desc="灯柱上的火焰6" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw07" script="CommonNpc" Name="灯柱上的火焰7" Desc="灯柱上的火焰7" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw08" script="CommonNpc" Name="灯柱上的火焰8" Desc="灯柱上的火焰8" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw09" script="CommonNpc" Name="灯柱上的火焰9" Desc="灯柱上的火焰9" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw10" script="CommonNpc" Name="灯柱上的火焰10" Desc="灯柱上的火焰10" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw11" script="CommonNpc" Name="灯柱上的火焰11" Desc="灯柱上的火焰11" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_special_jyw12" script="CommonNpc" Name="灯柱上的火焰12" Desc="灯柱上的火焰12" NpcType="172" Resource="npc\itemnpc057_jyw01" SpringRange="100"/>
+	<Property ID="schoolwar_zhenfa_jyw01" script="CommonNpc" Name="天机神弩" Desc="天机神弩" NpcType="81" SelectState="2" Resource="npc\itemnpc618" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_zhenfa_jyw02" script="CommonNpc" Name="天机神弩" Desc="天机神弩" NpcType="81" SelectState="2" Resource="npc\itemnpc618" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_box_jyw01" script="CommonNpc" Name="药品箱子" Desc="药品箱子" NpcType="81" SelectState="2" Resource="npc\itemboxnpc002" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_npc_jyw01" script="CommonNpc" Name="关押的弟子" Desc="关押的弟子" NpcType="81" SelectState="2" Resource="npc\monster252"/>
+	<Property ID="schoolwar_hole_jyw01" script="CommonNpc" Name="黑洞 " Desc="黑洞 " NpcType="172" Resource="npc\itemnpc132"/>
+	<Property ID="schoolwar_gongjian_jyw01" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_boss_jyw05" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_weiguan_jyw001" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster179"/>
+	<Property ID="schoolwar_weiguan_jyw002" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster121"/>
+	<Property ID="schoolwar_weiguan_jyw003" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster502"/>
+	<Property ID="schoolwar_weiguan_jyw004" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster383"/>
+	<Property ID="schoolwar_weiguan_jyw005" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster382"/>
+	<Property ID="schoolwar_weiguan_jyw006" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster179"/>
+	<Property ID="schoolwar_weiguan_jyw007" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster121"/>
+	<Property ID="schoolwar_weiguan_jyw008" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster502"/>
+	<Property ID="schoolwar_weiguan_jyw009" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster383"/>
+	<Property ID="schoolwar_weiguan_jyw010" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster382"/>
+	<Property ID="schoolwar_point_jyw01" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw02" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw03" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw04" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw05" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw06" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw07" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw08" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw09" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolwar_point_jyw010" script="CommonNpc" Name="检测npc" Desc="检测npc" NpcType="172" Resource="npc\itemnpc057"/>
+	<Property ID="schoolpose_flagnpc02" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc595"/>
+	<Property ID="schoolpose_blookEffect_gb01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_gb02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_weiguan_gb001" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc259"/>
+	<Property ID="schoolwar_weiguan_gb002" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc061"/>
+	<Property ID="schoolwar_weiguan_gb003" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc081"/>
+	<Property ID="schoolwar_weiguan_gb004" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc060"/>
+	<Property ID="schoolwar_weiguan_gb005" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc492_1"/>
+	<Property ID="schoolwar_weiguan_gb006" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc493"/>
+	<Property ID="schoolwar_weiguan_gb007" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc159"/>
+	<Property ID="schoolwar_weiguan_gb008" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc563"/>
+	<Property ID="schoolwar_weiguan_gb009" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster115"/>
+	<Property ID="schoolwar_weiguan_gb010" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc061"/>
+	<Property ID="schoolpose_flagnpc05" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc598"/>
+	<Property ID="schoolpose_blookEffect_jzt01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_jzt02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwarbox_item_jz01" script="CommonNpc" Name="宝箱" Desc="宝箱" NpcType="172" Resource="npc\itemboxnpc002" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_jz02" script="CommonNpc" Name="宝箱" Desc="宝箱" NpcType="172" Resource="npc\itemboxnpc002" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_jz03" script="CommonNpc" Name="宝箱" Desc="宝箱" NpcType="172" Resource="npc\itemboxnpc002" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwarbox_item_jz04" script="CommonNpc" Name="宝箱" Desc="宝箱" NpcType="172" Resource="npc\itemboxnpc002" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jz01" script="CommonNpc" Name="九里崖(君子堂西北区域)" Desc="九里崖(君子堂西北区域)" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jz02" script="CommonNpc" Name="飞鹤山(君子堂东南区域)" Desc="飞鹤山(君子堂东南区域)" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jz03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jz04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_jztwg01" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster160" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg02" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc191" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg03" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc204" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg04" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc358" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg05" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc253" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg06" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc101" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg07" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc358" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg08" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc191" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg09" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc204" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolwar_jztwg10" script="CommonNpc" Name="君子堂弟子" Desc="君子堂弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc358" SpringRange="5" FightID="1" Level="50" Fixed="1"/>
+	<Property ID="schoolpose_flagnpc04" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc599"/>
+	<Property ID="schoolpose_blookEffect_jlg01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_jlg02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_guildnpc_jlg01" script="CommonNpc" Name="段天崖(极乐谷西北区域)" Desc="段天崖(极乐谷西北区域)" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jlg02" script="CommonNpc" Name="舍身崖(极乐谷东南区域)" Desc="舍身崖(极乐谷东南区域)" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jlg03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_jlg04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_jlgwg01" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc544" PathId="school_jlg01" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg02" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc200" PathId="school_jlg02" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg03" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster243" PathId="school_jlg03" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg04" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc545" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg05" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" Resource="npc\monster156" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg06" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster243" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg07" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" Resource="npc\monster134" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg08" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc393" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg09" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc200" SpringRange="5"/>
+	<Property ID="schoolwar_jlgwg10" script="CommonNpc" Name="极乐谷弟子" Desc="极乐谷弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\worldnpc200" SpringRange="5"/>
+	<Property ID="schoolpose_flagnpc_tm01" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc597"/>
+	<Property ID="schoolpose_blookEffect_tm01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_tm02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_zfnpc_tm01" script="CommonNpc" Name="练毒炉" Desc="练毒炉" NpcType="81" SelectState="2" Resource="npc\itemnpc046" CollideRadius="0.91" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_zfnpc_tm02" script="CommonNpc" Name="练毒炉" Desc="练毒炉" NpcType="81" SelectState="2" Resource="npc\itemnpc046" CollideRadius="0.91" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_zfnpc_tm03" script="CommonNpc" Name="练毒炉" Desc="练毒炉" NpcType="81" SelectState="2" Resource="npc\itemnpc046" CollideRadius="0.91" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_guildnpc_tm01" script="CommonNpc" Name="勾漏山（唐门东北区域）" Desc="勾漏山（唐门东北区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_tm02" script="CommonNpc" Name="摘月峰（唐门正南区域）" Desc="摘月峰（唐门正南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_tm03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_tm04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="itemnpc057_tm01" script="CommonNpc" Name="毒雾迷障" Desc="毒雾迷障" NpcType="172" Resource="npc\itemnpc057_tm01" SpringRange="30"/>
+	<Property ID="schoolwar_tmwg01" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster378"/>
+	<Property ID="schoolwar_tmwg02" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" Resource="npc\worldnpc388"/>
+	<Property ID="schoolwar_tmwg03" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster379"/>
+	<Property ID="schoolwar_tmwg04" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster377"/>
+	<Property ID="schoolwar_tmwg05" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster378"/>
+	<Property ID="schoolwar_tmwg06" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster168"/>
+	<Property ID="schoolwar_tmwg07" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster379"/>
+	<Property ID="schoolwar_tmwg08" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" Resource="npc\worldnpc386"/>
+	<Property ID="schoolwar_tmwg09" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" Resource="npc\worldnpc386"/>
+	<Property ID="schoolwar_tmwg10" script="CommonNpc" Name="唐门弟子" Desc="唐门弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" Resource="npc\monster377"/>
+	<Property ID="schoolpose_flagnpc03" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc596"/>
+	<Property ID="schoolpose_blookEffect_em01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_em02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_guildnpc_em01" script="CommonNpc" Name="鸣鹤观（峨眉西南区域）" Desc="鸣鹤观（峨眉西南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc382" CollideRadius="0.91" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_en02" script="CommonNpc" Name="梅林（峨眉东南区域）" Desc="梅林（峨眉东南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc382" CollideRadius="0.91" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_em03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc381" CollideRadius="0.89" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_en04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc381" CollideRadius="0.89" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_weiguan_em001" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc527"/>
+	<Property ID="schoolwar_weiguan_em002" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc528"/>
+	<Property ID="schoolwar_weiguan_em003" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc529"/>
+	<Property ID="schoolwar_weiguan_em004" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc527"/>
+	<Property ID="schoolwar_weiguan_em005" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc528"/>
+	<Property ID="schoolwar_weiguan_em006" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc529"/>
+	<Property ID="schoolwar_weiguan_em007" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc527"/>
+	<Property ID="schoolwar_weiguan_em008" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc528"/>
+	<Property ID="schoolwar_weiguan_em009" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc529"/>
+	<Property ID="schoolwar_weiguan_em010" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc529"/>
+	<Property ID="schoolwar_special_wd01" script="CommonNpc" Name="天罡北斗阵" Desc="天罡北斗阵" NpcType="172" Resource="npc\itemnpc577"/>
+	<Property ID="schoolwar_special_wd02" script="CommonNpc" Name="太极八卦阵" Desc="太极八卦阵" NpcType="172" Resource="npc\itemnpc578"/>
+	<Property ID="schoolwar_locknpc" script="CoopNpc" Name="绑人玩法" Desc="绑人玩法" NpcType="172" SelectState="2" Resource="npc\itemnpc572" SpringRange="10" Camp="1" FightID="1" Level="1" Fixed="1"/>
+	<Property ID="schoolwar_block_wd01" script="CommonNpc" Name="北斗阵" Desc="北斗阵" NpcType="172" Resource="npc\itemnpc577" SpringRange="2"/>
+	<Property ID="schoolwar_block_wd02" script="CommonNpc" Name="八卦阵" Desc="八卦阵" NpcType="172" Resource="npc\itemnpc578" SpringRange="2"/>
+	<Property ID="schoolwar_hole_wd01" script="CommonNpc" Name="刷兵据点" Desc="刷兵据点" NpcType="172" Resource="npc\itemnpc132"/>
+	<Property ID="schoolwar_guildnpc_wd01" script="CommonNpc" Name="神风岭（武当东北区域）" Desc="神风岭（武当东北区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_wd02" script="CommonNpc" Name="通天峰（武当西北区域）" Desc="通天峰（武当西北区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_wd03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_wd04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_relivenpc" script="CommonNpc" Name="通用" Desc="通用" NpcType="66" SelectState="2" WalkSpeed="0" RunSpeed="-1" WeaponMode="hand_0" Resource="npc\funcnpc004" CollideRadius="0.947249" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_relivenpc_1" script="CommonNpc" Name="通用" Desc="通用" NpcType="66" SelectState="2" WalkSpeed="0" RunSpeed="-1" WeaponMode="hand_0" Resource="npc\funcnpc004" CollideRadius="0.947249" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_medical_1" script="CommonNpc" Name="装饰" Desc="装饰" NpcType="172" Resource="npc\itemboxnpc001"/>
+	<Property ID="schoolwar_medical_2" script="CommonNpc" Name="装饰" Desc="装饰" NpcType="172" Resource="npc\itemnpc005"/>
+	<Property ID="schoolwar_salve" script="CommonNpc" Name="装饰" Desc="装饰" NpcType="172" Resource="npc\itemnpc041"/>
+	<Property ID="schoolpose_flagnpc" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc593"/>
+	<Property ID="schoolpose_blookEffect_wd01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_wd02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_funcnpc01" script="CommonNpc" Name="门派战内功能NPC" Desc="门派战内功能NPC" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="8"/>
+	<Property ID="schoolwar_funcnpc02" script="CommonNpc" Name="门派战复活点NPC（隐藏）" Desc="门派战复活点NPC（隐藏）" NpcType="172" Resource="npc\itemnpc041" SpringRange="10"/>
+	<Property ID="schoolwar_flag_jyw01" script="CommonNpc" Name="旗子" Desc="旗子" NpcType="172" SelectState="2" Resource="npc\itemnpc422a"/>
+	<Property ID="schoolwar_nu_jyw01" script="CommonNpc" Name="弩" Desc="弩" NpcType="172" SelectState="2" Resource="npc\fbmac004007"/>
+	<Property ID="schoolwar_wdwg01" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster160" PathId="school_wd01"/>
+	<Property ID="schoolwar_wdwg02" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster568" PathId="school_wd02"/>
+	<Property ID="schoolwar_wdwg03" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" CollideRadius="npc\monster159" PathId="school_wd03"/>
+	<Property ID="schoolwar_wdwg04" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_2" CollideRadius="npc\monster161" PathId="school_wd04"/>
+	<Property ID="schoolwar_wdwg05" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster564" PathId="school_wd05"/>
+	<Property ID="schoolwar_wdwg06" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster563" PathId="school_wd06"/>
+	<Property ID="schoolwar_wdwg07" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster160" PathId="school_wd07"/>
+	<Property ID="schoolwar_wdwg08" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster565" PathId="school_wd08"/>
+	<Property ID="schoolwar_wdwg09" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster565"/>
+	<Property ID="schoolwar_wdwg10" script="CommonNpc" Name="武当弟子" Desc="武当弟子" NpcType="81" SelectState="2" WalkSpeed="1.25" RunSpeed="4" WeaponMode="hand1_1" CollideRadius="npc\monster565"/>
+	<Property ID="schoolpose_flagnpc_sl01" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc594"/>
+	<Property ID="schoolpose_blookEffect_sl01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_sl02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_guildnpc_sl01" script="CommonNpc" Name="嵩阳书院（少林正南区域）" Desc="嵩阳书院（少林正南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_sl02" script="CommonNpc" Name="嵩阳书院（少林东南区域）" Desc="嵩阳书院（少林东南区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_sl03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_guildnpc_sl04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_door_sl01" script="CommonNpc" Name="刷兵据点" Desc="刷兵据点" NpcType="172" SelectState="2" Resource="npc\itemnpc601"/>
+	<Property ID="schoolwar_door_sl02" script="CommonNpc" Name="刷兵据点" Desc="刷兵据点" NpcType="172" SelectState="2" Resource="npc\itemnpc602"/>
+	<Property ID="schoolwar_item_sl01" script="CommonNpc" Name="破关道具" Desc="破关道具" NpcType="172" SelectState="2" Resource="npc\itemnpc537"/>
+	<Property ID="schoolwar_item_sl02" script="CommonNpc" Name="炉火" Desc="炉火" NpcType="172" SelectState="2" Resource="npc\guildeffect009"/>
+	<Property ID="schoolwar_special_sl01" script="CommonNpc" Name="梵音驱魔阵" Desc="梵音驱魔阵" NpcType="212" Resource="npc\itemnpc057_em03" PatrolMode="0" PatrolRange="0" SpringRange="80"/>
+	<Property ID="schoolwar_weiguan_sl001" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster126"/>
+	<Property ID="schoolwar_weiguan_sl002" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster140"/>
+	<Property ID="schoolwar_weiguan_sl003" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster145"/>
+	<Property ID="schoolwar_weiguan_sl004" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster155"/>
+	<Property ID="schoolwar_weiguan_sl005" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\worldnpc049"/>
+	<Property ID="schoolwar_weiguan_sl006" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster512"/>
+	<Property ID="schoolwar_weiguan_sl007" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster514"/>
+	<Property ID="schoolwar_weiguan_sl008" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster516"/>
+	<Property ID="schoolwar_weiguan_sl009" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster516"/>
+	<Property ID="schoolwar_weiguan_sl010" script="CommonNpc" Name="围观弟子" Desc="围观弟子" NpcType="81" Resource="npc\monster527"/>
+	<Property ID="SchoolFightFuncNpc01" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc02" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc03" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc04" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc05" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc06" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc07" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightFuncNpc08" script="CommonNpc" Name="师门战报名官" Desc="师门战报名官" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightItemNpc01" script="CommonNpc" Name="装饰武器架" Desc="装饰武器架" NpcType="172" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="#N/A" Resource="npc\fbmac00040" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightNpc_wd001" script="CommonNpc" Name="围观NPC" Desc="围观NPC" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc053" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightNpc_wd002" script="CommonNpc" Name="围观NPC" Desc="围观NPC" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_2" Resource="npc\worldnpc054" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightNpc_wd003" script="CommonNpc" Name="围观NPC" Desc="围观NPC" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_2" Resource="npc\worldnpc230" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightNpc_wd004" script="CommonNpc" Name="围观NPC" Desc="围观NPC" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\monster563" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolTreasureNPC" script="CommonNpc" Name="门派至宝讲解员" Desc="门派至宝讲解员" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc125" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="25"/>
+	<Property ID="SchoolFightCloseNPC" script="CommonNpc" Name="门派封山npc" Desc="门派封山npc" NpcType="223" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc207" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20"/>
+	<Property ID="SchoolFightDefendNpc01" script="CommonNpc" Name="门派战保护范围NPC" Desc="门派战保护范围NPC" NpcType="172" Resource="npc\itemnpc041" SpringRange="15"/>
+	<Property ID="SchoolFightDefendNpc02" script="CommonNpc" Name="门派战保护范围NPC" Desc="门派战保护范围NPC" NpcType="172" Resource="npc\itemnpc041" SpringRange="15"/>
+	<Property ID="SchoolFightDefendNpc03" script="CommonNpc" Name="门派战保护范围NPC" Desc="门派战保护范围NPC" NpcType="172" Resource="npc\itemnpc041" SpringRange="15"/>
+	<Property ID="SchoolFightDefendNpc04" script="CommonNpc" Name="门派战保护范围NPC" Desc="门派战保护范围NPC" NpcType="172" Resource="npc\itemnpc041" SpringRange="15"/>
+	<Property ID="SchoolWarItemNpc01" script="CommonNpc" Name="院子" Desc="院子" NpcType="172" Resource="npc\jcunluo04"/>
+	<Property ID="SchoolWarItemNpc02" script="CommonNpc" Name="战旗（损）" Desc="战旗（损）" NpcType="172" Resource="npc\Guildwar002_03"/>
+	<Property ID="SchoolWarItemNpc03" script="CommonNpc" Name="篝火" Desc="篝火" NpcType="172" Resource="npc\guildeffect009"/>
+	<Property ID="SchoolWarItemNpc04" script="CommonNpc" Name="石板" Desc="石板" NpcType="172" Resource="npc\fbmac021022"/>
+	<Property ID="SchoolWarItemNpc05" script="CommonNpc" Name="栅栏" Desc="栅栏" NpcType="172" Resource="npc\fbmac00246"/>
+	<Property ID="SchoolWarItemNpc06" script="CommonNpc" Name="箱子" Desc="箱子" NpcType="172" Resource="npc\itemnpc692"/>
+	<Property ID="SchoolWarItemNpc07" script="CommonNpc" Name="车药杂物" Desc="车药杂物" NpcType="172" Resource="npc\itemnpc657"/>
+	<Property ID="SchoolWarItemNpc08" script="CommonNpc" Name="草席" Desc="草席" NpcType="172" Resource="npc\itemnpc617"/>
+	<Property ID="SchoolWarItemNpc09" script="CommonNpc" Name="水缸" Desc="水缸" NpcType="172" Resource="npc\itemnpc553"/>
+	<Property ID="SchoolWarItemNpc10" script="CommonNpc" Name="酒缸" Desc="酒缸" NpcType="172" Resource="npc\itemnpc470"/>
+	<Property ID="SchoolWarItemNpc11" script="CommonNpc" Name="草堆" Desc="草堆" NpcType="172" Resource="npc\itemnpc032"/>
+	<Property ID="SchoolWarItemNpc12" script="CommonNpc" Name="木桌" Desc="木桌" NpcType="172" Resource="npc\itemnpc009"/>
+	<Property ID="SchoolWarItemNpc13" script="CommonNpc" Name="长凳" Desc="长凳" NpcType="172" Resource="npc\itemnpc007"/>
+	<Property ID="SchoolWarItemNpc14" script="CommonNpc" Name="大鼓" Desc="大鼓" NpcType="172" Resource="npc\itemnpc537"/>
+	<Property ID="SchoolWarItemNpc15" script="CommonNpc" Name="木桩" Desc="木桩" NpcType="172" Resource="npc\itemnpc004"/>
+	<Property ID="schoolwar_attack_01" script="SchoolFightStrongPoint" Name="攻方大营功能" Desc="攻方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_attack_02" script="SchoolFightStrongPoint" Name="攻方大营功能" Desc="攻方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_attack_03" script="SchoolFightStrongPoint" Name="攻方大营功能" Desc="攻方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_attack_04" script="SchoolFightStrongPoint" Name="攻方大营功能" Desc="攻方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_attack_05" script="SchoolFightStrongPoint" Name="攻方大营功能" Desc="攻方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_attack_06" script="SchoolFightStrongPoint" Name="攻方大营功能" Desc="攻方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_defend_01" script="SchoolFightStrongPoint" Name="守方大营功能" Desc="守方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_defend_02" script="SchoolFightStrongPoint" Name="守方大营功能" Desc="守方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_defend_03" script="SchoolFightStrongPoint" Name="守方大营功能" Desc="守方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_defend_04" script="SchoolFightStrongPoint" Name="守方大营功能" Desc="守方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_defend_05" script="SchoolFightStrongPoint" Name="守方大营功能" Desc="守方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_defend_06" script="SchoolFightStrongPoint" Name="守方大营功能" Desc="守方大营功能" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_01" script="SchoolFightStrongPoint" Name="争夺点功能(金)" Desc="争夺点功能(金)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_02" script="SchoolFightStrongPoint" Name="争夺点功能(金)" Desc="争夺点功能(金)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_03" script="SchoolFightStrongPoint" Name="争夺点功能(木)" Desc="争夺点功能(木)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_04" script="SchoolFightStrongPoint" Name="争夺点功能(木)" Desc="争夺点功能(木)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_05" script="SchoolFightStrongPoint" Name="争夺点功能(水)" Desc="争夺点功能(水)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_06" script="SchoolFightStrongPoint" Name="争夺点功能(水)" Desc="争夺点功能(水)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_07" script="SchoolFightStrongPoint" Name="争夺点功能(火)" Desc="争夺点功能(火)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_08" script="SchoolFightStrongPoint" Name="争夺点功能(火)" Desc="争夺点功能(火)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_09" script="SchoolFightStrongPoint" Name="争夺点功能(土)" Desc="争夺点功能(土)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_neutral_10" script="SchoolFightStrongPoint" Name="争夺点功能(土)" Desc="争夺点功能(土)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_flag_jyw" script="CommonNpc" Name="锦衣卫大旗" Desc="锦衣卫大旗" NpcType="172" Resource="npc\itemnpc639"/>
+	<Property ID="schoolwar_flag_gb" script="CommonNpc" Name="丐帮大旗" Desc="丐帮大旗" NpcType="172" Resource="npc\itemnpc634"/>
+	<Property ID="schoolwar_flag_jzt" script="CommonNpc" Name="君子堂大旗" Desc="君子堂大旗" NpcType="172" Resource="npc\itemnpc637"/>
+	<Property ID="schoolwar_flag_jlg" script="CommonNpc" Name="极乐谷大旗" Desc="极乐谷大旗" NpcType="172" Resource="npc\itemnpc638"/>
+	<Property ID="schoolwar_flag_tm" script="CommonNpc" Name="唐门大旗" Desc="唐门大旗" NpcType="172" Resource="npc\itemnpc636"/>
+	<Property ID="schoolwar_flag_em" script="CommonNpc" Name="峨眉大旗" Desc="峨眉大旗" NpcType="172" Resource="npc\itemnpc635"/>
+	<Property ID="schoolwar_flag_wd" script="CommonNpc" Name="武当大旗" Desc="武当大旗" NpcType="172" Resource="npc\itemnpc632"/>
+	<Property ID="schoolwar_flag_sl" script="CommonNpc" Name="少林大旗" Desc="少林大旗" NpcType="172" Resource="npc\itemnpc633"/>
+	<Property ID="schoolwar_flag_wuzhanling" script="CommonNpc" Name="无占领" Desc="无占领" NpcType="172" Resource="npc\itemnpc_schoolwar_017"/>
+	<Property ID="schoolwar_eff_jd01" script="CommonNpc" Name="据点特效（木）" Desc="据点特效（木）" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_swjd01" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_eff_jd02" script="CommonNpc" Name="据点特效（火）" Desc="据点特效（火）" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_swjd02" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_eff_jd03" script="CommonNpc" Name="据点特效（水）" Desc="据点特效（水）" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_swjd03" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_eff_jd04" script="CommonNpc" Name="据点特效（土）" Desc="据点特效（土）" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_swjd04" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_eff_jd05" script="CommonNpc" Name="据点特效（金）" Desc="据点特效（金）" NpcType="202" WalkSpeed="0" RunSpeed="0" Resource="npc\itemnpc057_swjd05" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_jyw" script="CommonNpc" Name="锦衣卫指挥使" Desc="锦衣卫指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_008" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_gb" script="CommonNpc" Name="丐帮指挥使" Desc="丐帮指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_002" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_jzt" script="CommonNpc" Name="君子堂指挥使" Desc="君子堂指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_003" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_jlg" script="CommonNpc" Name="极乐谷指挥使" Desc="极乐谷指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_007" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_tm" script="CommonNpc" Name="唐门指挥使" Desc="唐门指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_005" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_em" script="CommonNpc" Name="峨眉指挥使" Desc="峨眉指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_006" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_wd" script="CommonNpc" Name="武当指挥使" Desc="武当指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_004" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_command_sl" script="CommonNpc" Name="少林指挥使" Desc="少林指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_001" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="schoolwar_item_gold" script="CommonNpc" Name="金" Desc="金" NpcType="172" Resource="npc\itemnpc_schoolwar_001"/>
+	<Property ID="schoolwar_item_wood" script="CommonNpc" Name="木" Desc="木" NpcType="172" Resource="npc\itemnpc_schoolwar_002"/>
+	<Property ID="schoolwar_item_water" script="CommonNpc" Name="水" Desc="水" NpcType="172" Resource="npc\itemnpc_schoolwar_003"/>
+	<Property ID="schoolwar_item_fire" script="CommonNpc" Name="火" Desc="火" NpcType="172" Resource="npc\itemnpc_schoolwar_004"/>
+	<Property ID="schoolwar_item_soil" script="CommonNpc" Name="土" Desc="土" NpcType="172" Resource="npc\itemnpc_schoolwar_005"/>
+	<Property ID="schoolwar_item_wall" script="CommonNpc" Name="围墙" Desc="围墙" NpcType="172" Resource="npc\itemnpc_schoolwar_006"/>
+	<Property ID="schoolwar_item_platform" script="CommonNpc" Name="插旗台" Desc="插旗台" NpcType="172" Resource="npc\itemnpc_schoolwar_018"/>
+	<Property ID="schoolwar_flag_gold01" script="CommonNpc" Name="金（大旗）" Desc="金（大旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_007"/>
+	<Property ID="schoolwar_flag_gold02" script="CommonNpc" Name="金（小旗）" Desc="金（小旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_012"/>
+	<Property ID="schoolwar_flag_wood01" script="CommonNpc" Name="木（大旗）" Desc="木（大旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_008"/>
+	<Property ID="schoolwar_flag_wood02" script="CommonNpc" Name="木（小旗）" Desc="木（小旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_013"/>
+	<Property ID="schoolwar_flag_water01" script="CommonNpc" Name="水（大旗）" Desc="水（大旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_009"/>
+	<Property ID="schoolwar_flag_water02" script="CommonNpc" Name="水（小旗）" Desc="水（小旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_014"/>
+	<Property ID="schoolwar_flag_fire01" script="CommonNpc" Name="火（大旗）" Desc="火（大旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_010"/>
+	<Property ID="schoolwar_flag_fire02" script="CommonNpc" Name="火（小旗）" Desc="火（小旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_015"/>
+	<Property ID="schoolwar_flag_soil01" script="CommonNpc" Name="土（大旗）" Desc="土（大旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_011"/>
+	<Property ID="schoolwar_flag_soil02" script="CommonNpc" Name="土（小旗）" Desc="土（小旗）" NpcType="172" Resource="npc\itemnpc_schoolwar_016"/>
+	<Property ID="yyzcjd_npc001" script="SchoolFightStrongPoint" Name="据点" Desc="据点" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="yyzcjd_npc002" script="SchoolFightStrongPoint" Name="据点" Desc="据点" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="yyzcjd_npc003" script="SchoolFightStrongPoint" Name="据点" Desc="据点" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="yyzcjd_npc004" script="SchoolFightStrongPoint" Name="据点" Desc="据点" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="yyzcjd_npc005" script="SchoolFightStrongPoint" Name="据点" Desc="据点" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="yyzcjd_npc006" script="SchoolFightStrongPoint" Name="据点" Desc="据点" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="yyzcjf_npc001" script="CommonNpc" Name="力量第1裆积分" Desc="力量第1裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq01" SpringRange="1" Scale="0.6,0.6,0.6"/>
+	<Property ID="yyzcjf_npc002" script="CommonNpc" Name="力量第2裆积分" Desc="力量第2裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq01" SpringRange="1.2" Scale="0.7,0.7,0.7"/>
+	<Property ID="yyzcjf_npc003" script="CommonNpc" Name="力量第3裆积分" Desc="力量第3裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq01" SpringRange="1.5" Scale="0.8,0.8,0.8"/>
+	<Property ID="yyzcjf_npc004" script="CommonNpc" Name="力量第4裆积分" Desc="力量第4裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq01" SpringRange="2" Scale="0.9,0.9,0.9"/>
+	<Property ID="yyzcjf_npc005" script="CommonNpc" Name="力量第5裆积分" Desc="力量第5裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq01" SpringRange="2.2"/>
+	<Property ID="yyzcjf_npc006" script="CommonNpc" Name="身法第1裆积分" Desc="身法第1裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq02" SpringRange="1" Scale="0.6,0.6,0.6"/>
+	<Property ID="yyzcjf_npc007" script="CommonNpc" Name="身法第2裆积分" Desc="身法第2裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq02" SpringRange="1.2" Scale="0.7,0.7,0.7"/>
+	<Property ID="yyzcjf_npc008" script="CommonNpc" Name="身法第3裆积分" Desc="身法第3裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq02" SpringRange="1.5" Scale="0.8,0.8,0.8"/>
+	<Property ID="yyzcjf_npc009" script="CommonNpc" Name="身法第4裆积分" Desc="身法第4裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq02" SpringRange="2" Scale="0.9,0.9,0.9"/>
+	<Property ID="yyzcjf_npc010" script="CommonNpc" Name="身法第5裆积分" Desc="身法第5裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq02" SpringRange="2.2"/>
+	<Property ID="yyzcjf_npc011" script="CommonNpc" Name="内息第1裆积分" Desc="内息第1裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq03" SpringRange="1" Scale="0.6,0.6,0.6"/>
+	<Property ID="yyzcjf_npc012" script="CommonNpc" Name="内息第2裆积分" Desc="内息第2裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq03" SpringRange="1.2" Scale="0.7,0.7,0.7"/>
+	<Property ID="yyzcjf_npc013" script="CommonNpc" Name="内息第3裆积分" Desc="内息第3裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq03" SpringRange="1.5" Scale="0.8,0.8,0.8"/>
+	<Property ID="yyzcjf_npc014" script="CommonNpc" Name="内息第4裆积分" Desc="内息第4裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq03" SpringRange="2" Scale="0.9,0.9,0.9"/>
+	<Property ID="yyzcjf_npc015" script="CommonNpc" Name="内息第5裆积分" Desc="内息第5裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq03" SpringRange="2.2"/>
+	<Property ID="yyzcjf_npc016" script="CommonNpc" Name="体魄第1裆积分" Desc="体魄第1裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq05" SpringRange="1" Scale="0.6,0.6,0.6"/>
+	<Property ID="yyzcjf_npc017" script="CommonNpc" Name="体魄第2裆积分" Desc="体魄第2裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq05" SpringRange="1.2" Scale="0.7,0.7,0.7"/>
+	<Property ID="yyzcjf_npc018" script="CommonNpc" Name="体魄第3裆积分" Desc="体魄第3裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq05" SpringRange="1.5" Scale="0.8,0.8,0.8"/>
+	<Property ID="yyzcjf_npc019" script="CommonNpc" Name="体魄第4裆积分" Desc="体魄第4裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq05" SpringRange="2" Scale="0.9,0.9,0.9"/>
+	<Property ID="yyzcjf_npc020" script="CommonNpc" Name="体魄第5裆积分" Desc="体魄第5裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq05" SpringRange="2.2"/>
+	<Property ID="yyzcjf_npc021" script="CommonNpc" Name="罡气第1裆积分" Desc="罡气第1裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq04" SpringRange="1" Scale="0.6,0.6,0.6"/>
+	<Property ID="yyzcjf_npc022" script="CommonNpc" Name="罡气第2裆积分" Desc="罡气第2裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq04" SpringRange="1.2" Scale="0.7,0.7,0.7"/>
+	<Property ID="yyzcjf_npc023" script="CommonNpc" Name="罡气第3裆积分" Desc="罡气第3裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq04" SpringRange="1.5" Scale="0.8,0.8,0.8"/>
+	<Property ID="yyzcjf_npc024" script="CommonNpc" Name="罡气第4裆积分" Desc="罡气第4裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq04" SpringRange="2" Scale="0.9,0.9,0.9"/>
+	<Property ID="yyzcjf_npc025" script="CommonNpc" Name="罡气第5裆积分" Desc="罡气第5裆积分" NpcType="202" Resource="npc\itemnpc057_yyzq04" SpringRange="2.2"/>
+	<Property ID="yyzc_qz_npc001" script="CommonNpc" Name="空白旗帜" Desc="空白旗帜" NpcType="172" Resource="npc\itemnpc423a" SpringRange="25"/>
+	<Property ID="yyzc_qz_npc002" script="CommonNpc" Name="明军旗帜" Desc="明军旗帜" NpcType="172" Resource="npc\itemnpc719" SpringRange="25" Scale="0.5"/>
+	<Property ID="yyzc_qz_npc003" script="CommonNpc" Name="蒙军旗帜" Desc="蒙军旗帜" NpcType="172" Resource="npc\itemnpc720" SpringRange="25" Scale="0.5"/>
+	<Property ID="yyzc_mjyl_01" script="CommonNpc" Name="明军运粮官1" Desc="明军运粮官1" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc217" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1300"/>
+	<Property ID="yyzc_mgyl_01" script="CommonNpc" Name="蒙古运粮官1" Desc="蒙古运粮官1" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\monster443" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1301"/>
+	<Property ID="yyzc_mjyl_02" script="CommonNpc" Name="明军运粮官2" Desc="明军运粮官2" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc217" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1300"/>
+	<Property ID="yyzc_mgyl_02" script="CommonNpc" Name="蒙古运粮官2" Desc="蒙古运粮官2" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\monster443" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1301"/>
+	<Property ID="yyzc_mjyl_03" script="CommonNpc" Name="明军运粮官3" Desc="明军运粮官3" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc217" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1300"/>
+	<Property ID="yyzc_mgyl_03" script="CommonNpc" Name="蒙古运粮官3" Desc="蒙古运粮官3" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\monster443" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1301"/>
+	<Property ID="yyzc_mjyl_04" script="CommonNpc" Name="明军运粮官4" Desc="明军运粮官4" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc217" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1300"/>
+	<Property ID="yyzc_mgyl_04" script="CommonNpc" Name="蒙古运粮官4" Desc="蒙古运粮官4" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\monster443" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1301"/>
+	<Property ID="yyzc_mjyl_05" script="CommonNpc" Name="明军运粮官5" Desc="明军运粮官5" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc217" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1300"/>
+	<Property ID="yyzc_mgyl_05" script="CommonNpc" Name="蒙古运粮官5" Desc="蒙古运粮官5" NpcType="81" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\monster443" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" FightID="6" Level="40" DestroyTime1="120" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0" Force="1301"/>
+	<Property ID="school_yznpc_001" script="CommonNpc" Name="约战场景特效" Desc="约战场景特效" NpcType="202" Resource="npc\huashanleitai"/>
+	<Property ID="lxc_xbnpc_001" script="CommonNpc" Name="普通地宝_地灵紫芝" Desc="普通地宝_地灵紫芝" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\npcitem678_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_002" script="CommonNpc" Name="普通地宝_玉露枇杷" Desc="普通地宝_玉露枇杷" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\itemnpc166_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_003" script="CommonNpc" Name="普通地宝_玄冰虫草" Desc="普通地宝_玄冰虫草" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\npcitem669_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_004" script="CommonNpc" Name="普通地宝_玄天冰魄" Desc="普通地宝_玄天冰魄" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\cj020140_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_005" script="CommonNpc" Name="大型地宝_千年铁木" Desc="大型地宝_千年铁木" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\itemnpc447_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_006" script="CommonNpc" Name="大型地宝_天蜈珠" Desc="大型地宝_天蜈珠" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\itemnpc057_yhrw" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_007" script="CommonNpc" Name="稀有地宝_地心石钟乳" Desc="稀有地宝_地心石钟乳" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\npcitem671_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_008" script="CommonNpc" Name="普通水宝_碧水青茗" Desc="普通水宝_碧水青茗" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\npcitem672_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_009" script="CommonNpc" Name="普通水宝_水元珠" Desc="普通水宝_水元珠" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\npcitem676_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_010" script="CommonNpc" Name="普通水宝_十二天香果" Desc="普通水宝_十二天香果" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\cj_150100" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_011" script="CommonNpc" Name="普通水宝_清心冰晶" Desc="普通水宝_清心冰晶" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\npcitem674_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_012" script="CommonNpc" Name="大型水宝_通窍雪藕" Desc="大型水宝_通窍雪藕" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\cj_041060b_1" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_013" script="CommonNpc" Name="大型水宝_水月之花" Desc="大型水宝_水月之花" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\cj_160200" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_xbnpc_014" script="CommonNpc" Name="稀有水宝_水魔莲" Desc="稀有水宝_水魔莲" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\itemnpc200" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="BoxNpc_lxc_yb_01" script="CommonNpc" Name="异宝_人参果" Desc="异宝_人参果" NpcType="202" SelectState="2" NeedRotate="1" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\itemnpc776_a" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="2" FightID="6" Level="40" DestroyTime1="1" DestroyTime2="1" CantAttack="0" CantBeAttack="0" CantBeKilled="0" ChaseRange="0"/>
+	<Property ID="lxc_huodui" script="CommonNpc" Name="火堆" Desc="火堆" NpcType="202" SelectState="2" Resource="npc\itemnpc552_1" SpringRange="2"/>
+	<Property ID="yhg_xiuqiu001" script="CommonNpc" Name="第一阶段绣球" Desc="第一阶段绣球" NpcType="202" Resource="npc\itemnpc057_wqxq01" SpringRange="1" Scale="0.6,0.6,0.6"/>
+	<Property ID="funcnpc_schoolwar001a" script="CommonNpc" Name="锦衣卫" Desc="锦衣卫" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster179" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar002a" script="CommonNpc" Name="丐帮" Desc="丐帮" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc061" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar003a" script="CommonNpc" Name="君子堂" Desc="君子堂" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc204" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar004a" script="CommonNpc" Name="极乐谷" Desc="极乐谷" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster156" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar005a" script="CommonNpc" Name="唐门" Desc="唐门" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc388" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar006a" script="CommonNpc" Name="峨眉" Desc="峨眉" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster208" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar007a" script="CommonNpc" Name="武当" Desc="武当" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster159" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar008a" script="CommonNpc" Name="少林" Desc="少林" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster155" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar001b" script="CommonNpc" Name="锦衣卫" Desc="锦衣卫" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster179" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar002b" script="CommonNpc" Name="丐帮" Desc="丐帮" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc061" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar003b" script="CommonNpc" Name="君子堂" Desc="君子堂" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc204" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar004b" script="CommonNpc" Name="极乐谷" Desc="极乐谷" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster156" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar005b" script="CommonNpc" Name="唐门" Desc="唐门" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc388" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar006b" script="CommonNpc" Name="峨眉" Desc="峨眉" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster208" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar007b" script="CommonNpc" Name="武当" Desc="武当" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster159" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar008b" script="CommonNpc" Name="少林" Desc="少林" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\monster155" SpringRange="5" Camp="1"/>
+	<Property ID="schoolwar_flag_tsp" script="CommonNpc" Name="天山大旗" Desc="天山大旗" NpcType="172" Resource="npc\itemnpc1651"/>
+	<Property ID="schoolwar_command_tsp" script="CommonNpc" Name="天山指挥使" Desc="天山指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc1692" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="funcnpc_schoolwar010a" script="CommonNpc" Name="天山" Desc="天山" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc1692" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar010b" script="CommonNpc" Name="天山" Desc="天山" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc1692" SpringRange="5" Camp="1"/>
+	<Property ID="schoolpose_flagnpcmj01" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc1581"/>
+	<Property ID="schoolpose_blookEffect_mj01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_mj02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_flag_mj" script="CommonNpc" Name="明教大旗" Desc="明教大旗" NpcType="172" Resource="npc\itemnpc1581"/>
+	<Property ID="schoolwar_command_mj" script="CommonNpc" Name="明教指挥使" Desc="明教指挥使" NpcType="81" SelectState="2" WalkSpeed="1" RunSpeed="5" WeaponMode="hand1_1" Resource="npc\worldnpc_schoolwar_006" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="funcnpc_schoolwar009a" script="CommonNpc" Name="明教" Desc="明教" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc1614" SpringRange="5" Camp="1"/>
+	<Property ID="funcnpc_schoolwar009b" script="CommonNpc" Name="明教" Desc="明教" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc1614" SpringRange="5" Camp="1"/>
+	<Property ID="schoolpose_flagnpctsp01" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc1651" Scale="2,2,2"/>
+	<Property ID="schoolpose_blookEffect_tsp01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_tsp02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolwar_gujmpz_01" script="NewSchoolFightStrongPoint" Name="争夺点功能(金)" Desc="争夺点功能(金)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_gujmpz_02" script="NewSchoolFightStrongPoint" Name="争夺点功能(金2)" Desc="争夺点功能(金2)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_gujmpz_03" script="NewSchoolFightStrongPoint" Name="争夺点功能(水)" Desc="争夺点功能(水)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_gujmpz_04" script="NewSchoolFightStrongPoint" Name="争夺点功能(水2)" Desc="争夺点功能(水2)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_gujmpz_05" script="NewSchoolFightStrongPoint" Name="争夺点功能(木)" Desc="争夺点功能(木)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolwar_gujmpz_06" script="NewSchoolFightStrongPoint" Name="争夺点功能(木2)" Desc="争夺点功能(木2)" NpcType="225" Resource="npc\itemnpc057" SpringRange="20"/>
+	<Property ID="schoolpose_flagnpckl01" script="CommonNpc" Name="师门阶位战装饰大旗" Desc="师门阶位战装饰大旗" NpcType="172" Resource="npc\itemnpc1664" Scale="2,2,2"/>
+	<Property ID="schoolpose_blookEffect_kl01" script="CommonNpc" Name="师门阶位战围栏（大）" Desc="师门阶位战围栏（大）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="schoolpose_blookEffect_kl02" script="CommonNpc" Name="师门阶位战围栏（小）" Desc="师门阶位战围栏（小）" NpcType="172" Resource="npc\itemnpc057n"/>
+	<Property ID="nhzfzjwar_gujmpz_01" script="NewSchoolFightStrongPoint" Name="争夺点功能(大)" Desc="争夺点功能(大)" NpcType="225" Resource="npc\itemnpc1676_4a" SpringRange="12"/>
+	<Property ID="nhzfzjwar_gujmpz_02" script="NewSchoolFightStrongPoint" Name="争夺点功能(中1)" Desc="争夺点功能(中1)" NpcType="225" Resource="npc\itemnpc1676_1a" SpringRange="12"/>
+	<Property ID="nhzfzjwar_gujmpz_03" script="NewSchoolFightStrongPoint" Name="争夺点功能(中2)" Desc="争夺点功能(中2)" NpcType="225" Resource="npc\itemnpc1676_1a" SpringRange="12"/>
+	<Property ID="nhzfzjwar_gujmpz_04" script="NewSchoolFightStrongPoint" Name="争夺点功能(中3)" Desc="争夺点功能(中3)" NpcType="225" Resource="npc\itemnpc1676_1a" SpringRange="12"/>
+	<Property ID="nhzfzjwar_gujmpz_05" script="NewSchoolFightStrongPoint" Name="争夺点功能(小1)" Desc="争夺点功能(小1)" NpcType="225" Resource="npc\itemnpc1676_3a" SpringRange="12"/>
+	<Property ID="nhzfzjwar_gujmpz_06" script="NewSchoolFightStrongPoint" Name="争夺点功能(小2)" Desc="争夺点功能(小2)" NpcType="225" Resource="npc\itemnpc1676_3a" SpringRange="12"/>
+	<Property ID="nhzfzjwar_gujmpz_07" script="NewSchoolFightStrongPoint" Name="争夺点功能(小3)" Desc="争夺点功能(小3)" NpcType="225" Resource="npc\itemnpc1676_3a" SpringRange="12"/>
+	<Property ID="zlcl_plunder_born_01" script="CommonNpc" Name="红队复活点" Desc="红队复活点" NpcType="1311" Resource="npc\itemnpc570" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+	<Property ID="zlcl_plunder_born_02" script="CommonNpc" Name="蓝队复活点" Desc="蓝队复活点" NpcType="1312" Resource="npc\itemnpc570" PatrolMode="0" PatrolRange="0" SpringRange="10"/>
+</Object>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="BombNpc22343" script="BombNpc" Name="炸弹" Desc="炸弹" FightID="14" Level="1" Resource="npc\fbnpc00005" NpcType="162" SpringRange="20" SelectState="2" AITemplate="3" Camp="1" PatrolMode="1" PatrolRange="0" WalkSpeed="0" RunSpeed="0" RefreshTime="-1" ChaseRange="0" CantAttack="0" CantBeAttack="1" SkillPackID="jn_fbnpc00005_02,1,0"/>
+</Object>

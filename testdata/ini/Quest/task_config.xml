@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="ID" Model="main" Tips="任务ID"/>
+	<Property ID="Step" Model="main" Desc="任务步骤" Tips="界面显示:标准格式【1/3】"/>
+	<Property ID="AcceptNpc" Name="1" Model="main" Desc="接任务npc" Tips="空"/>
+	<Property ID="SubmitNpc" Name="1" Model="main" Desc="交任务npc" Tips="空"/>
+	<Property ID="AcceptSceneID" Model="main" Desc="接任务npc场景" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="SubmitSceneID" Model="main" Desc="交任务npc场景" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="PreTaskLimit" Model="main" Desc="前置任务ID" Tips="空"/>
+	<Property ID="NextTaskLimit" Model="main" Desc="后续任务ID" Tips="空"/>
+	<Property ID="NULL" Model="main"/>
+	<Property ID="Line" Model="main" Desc="任务分类" Tips="1主线,2环式,3日常,4门派,5支线,6副本"/>
+	<Property ID="CanGiveup" Model="main" Desc="放弃类型" Tips="1不能放弃,0能放弃"/>
+	<Property ID="ShareType" Model="main" Desc="共享类型" Tips="0不可共享,1可共享,2自动共享,3副本专用"/>
+	<Property ID="RepeatType" Model="main" Desc="重复类型" Tips="0不可重复,1接任务开始,n天一轮,2接任务开始,n小时一轮"/>
+	<Property ID="RepeatPeriod" Model="main" Desc="重复周期" Tips="对应RepeatType的n"/>
+	<Property ID="CountDayLimit" Model="main" Desc="重复次数" Tips="空"/>
+	<Property ID="RefreshMonster" Name="1" Model="further" Desc="刷怪ID" Tips="空"/>
+	<Property ID="TaskItemList" Name="1" Model="further" Desc="发放道具ID" Tips="空"/>
+	<Property ID="TaskScript" Model="further" Desc="脚本路径" Tips="task\taskXXX.lua"/>
+	<Property ID="NULL" Model="further"/>
+	<Property ID="AcceptLimit" Model="further" Desc="接任务限制条件" Tips="条件表ID"/>
+	<Property ID="SubmitLimit" Model="further" Desc="交任务限制条件" Tips="条件表ID"/>
+	<Property ID="NULL" Model="further"/>
+	<Property ID="TimeLimitLength" Model="further" Desc="时间限制" Tips="单位：分钟"/>
+	<Property ID="NULL" Model="further"/>
+	<Property ID="AutoAcceptID" Model="further" Desc="自动承接任务ID"/>
+	<Property ID="AutoSubmit" Model="further" Desc="是否自动提交" Tips="0不提交,1提交"/>
+	<Property ID="NULL" Model="further"/>
+	<Property ID="AcceptMovie" Model="further" Desc="接任务动画" Tips="动画表id"/>
+	<Property ID="SubmitMovie" Model="further" Desc="交任务动画" Tips="动画表id"/>
+	<Property ID="DramaAccept" Model="further" Desc="接任务小说" Tips="小说表id"/>
+	<Property ID="DramaSubmit" Model="further" Desc="完成任务小说" Tips="小说表id"/>
+	<Property ID="ID" Model="monster" Desc="刷怪表ID" Tips="空"/>
+	<Property ID="MonsterID" Name="1" Model="monster" Desc="刷新怪物编号" Tips="空"/>
+	<Property ID="RSceneID" Model="monster" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="RPosX" Model="monster" Desc="刷怪坐标X" Tips="空"/>
+	<Property ID="RPosY" Model="monster" Desc="刷怪坐标Y" Tips="高度"/>
+	<Property ID="RPosZ" Model="monster" Desc="刷怪坐标Z" Tips="空"/>
+	<Property ID="RLifeTime" Model="monster" Desc="生存时间" Tips="单位：秒,标配1800"/>
+	<Property ID="ID" Model="tool" Desc="发放道具表ID" Tips="空"/>
+	<Property ID="ItemId" Name="1" Model="tool" Desc="道具ID" Tips="空"/>
+	<Property ID="Count" Model="tool" Desc="数量" Tips="空"/>
+	<Property ID="IsGive" Model="tool" Desc="是否发放" Tips="0不发放,1发放"/>
+	<Property ID="back" Model="tool" Desc="是否归还" Tips="0不归还,1归还"/>
+	<Property ID="ID" Model="hunter" Desc="猎杀表ID" Tips="空"/>
+	<Property ID="NpcId" Name="1" Model="hunter" Desc="猎杀怪物ID" Tips="空"/>
+	<Property ID="Count" Model="hunter" Desc="数量" Tips="空"/>
+	<Property ID="NULL" Model="hunter"/>
+	<Property ID="IsNeedCreator" Model="hunter" Desc="怪物生成器" Tips="空"/>
+	<Property ID="NULL" Model="hunter"/>
+	<Property ID="IsQieCuo" Model="hunter" Desc="切磋模式" Tips="0不切磋,1切磋"/>
+	<Property ID="NULL" Model="hunter"/>
+	<Property ID="SceneID" Model="hunter" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="NULL" Model="hunter"/>
+	<Property ID="HideNpcID" Name="1" Model="hunter" Desc="隐藏NPCID串" Tips="半角逗号分割,"/>
+	<Property ID="RefreshMonster" Name="1" Model="hunter" Desc="刷怪ID" Tips="刷怪表"/>
+	<Property ID="ID" Model="collect" Desc="收集表ID" Tips="空"/>
+	<Property ID="ItemId" Name="1" Model="collect" Desc="道具ID" Tips="空"/>
+	<Property ID="Count" Model="collect" Desc="数量" Tips="空"/>
+	<Property ID="Droprate" Model="collect" Desc="概率" Tips="空"/>
+	<Property ID="NpcId" Name="1" Model="collect" Desc="掉落NPC" Tips="空"/>
+	<Property ID="SceneId" Model="collect" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="NULL" Model="collect"/>
+	<Property ID="IsNeedCreator" Model="collect" Desc="怪物生成器" Tips="空"/>
+	<Property ID="RefreshMonster" Name="1" Model="collect" Desc="刷怪ID" Tips="空"/>
+	<Property ID="ID" Model="interact" Desc="交互表ID" Tips="空"/>
+	<Property ID="NpcID" Name="1" Model="interact" Desc="交互NpcID" Tips="空"/>
+	<Property ID="SceneID" Name="1" Model="interact" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="NULL" Model="interact"/>
+	<Property ID="GetItems" Model="interact" Desc="获得道具" Tips="空"/>
+	<Property ID="LostItems" Model="interact" Desc="上缴道具" Tips="空"/>
+	<Property ID="ID" Model="story" Desc="ID" Tips="空"/>
+	<Property ID="NpcID" Name="1" Model="story" Desc="讲故事NpcID" Tips="空"/>
+	<Property ID="SceneID" Model="story" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="LeaveResult" Model="story" Desc="结束完成任务" Tips="空"/>
+	<Property ID="ID" Model="question" Desc="ID" Tips="空"/>
+	<Property ID="QuestionNpc" Name="1" Model="question" Desc="答题NPC" Tips="空"/>
+	<Property ID="SceneID" Model="question" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="QuestionID" Model="question" Desc="题库ID" Tips="空"/>
+	<Property ID="ID" Model="useitem" Desc="使用道具表ID" Tips="空"/>
+	<Property ID="ItemID" Name="1" Model="useitem" Desc="道具ID" Tips="空"/>
+	<Property ID="AddItems" Model="useitem" Desc="使用生成道具" Tips="空"/>
+	<Property ID="DeleteItems" Model="useitem" Desc="使用删除道具" Tips="空"/>
+	<Property ID="DeleteSelf" Model="useitem" Desc="使用删除自己" Tips="空"/>
+	<Property ID="SceneID" Model="useitem" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="NULL" Model="useitem"/>
+	<Property ID="LockTarget" Model="useitem" Desc="强制锁定目标" Tips="空"/>
+	<Property ID="TargetConfig" Model="useitem" Desc="使用指定目标" Tips="ID"/>
+	<Property ID="Radius" Model="useitem" Desc="使用半径" Tips="空"/>
+	<Property ID="NULL" Model="useitem"/>
+	<Property ID="ProCount" Model="useitem" Desc="进度总数量" Tips="空"/>
+	<Property ID="AddPro" Model="useitem" Desc="是否增加进度" Tips="空"/>
+	<Property ID="NULL" Model="useitem"/>
+	<Property ID="Water" Model="useitem" Desc="是否在水里" Tips="空"/>
+	<Property ID="ID" Model="convoy" Desc="护送表ID" Tips="空"/>
+	<Property ID="NpcId" Name="1" Model="convoy" Desc="护送NPC的ID" Tips="空"/>
+	<Property ID="SceneID" Model="convoy" Desc="所在场景ID" Tips="1千灯镇,2恶人谷,3烟雨庄,4漠河镇,5锦衣卫,6丐帮,7君子堂,8极乐谷,9唐门,10峨眉,11武当,12少林,13燕京,14苏州,15金陵,16洛阳,17成都,18幽云十六州,19蓬莱仙境,20泛黄平原,21向阳坡,22念萝坝,23凌霄城,24梅花岭,25塞外大漠,26塞北草原"/>
+	<Property ID="PathID" Model="convoy" Desc="路径ID" Tips="空"/>
+	<Property ID="HideNpcID" Model="convoy" Desc="隐藏npc的ID串" Tips="空"/>
+	<Property ID="HideType" Model="convoy" Desc="隐藏类型" Tips="空"/>
+</Object>

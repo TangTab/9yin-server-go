@@ -1,0 +1,1341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" NpcId="EventNpc24001" SceneID="1" TrackInfo="interact24002_1"/>
+	<Property ID="4002"/>
+	<Property ID="4003" NpcId="WorldNpc00007" SceneID="1" DialogID="dialog_24011" TrackInfo="interact24011" OkMenu="okmenu24011"/>
+	<Property ID="4005" NpcId="Gather00003f" SceneID="1" DialogID="0" TrackInfo="interact24013"/>
+	<Property ID="4006" NpcId="Gather00003f" SceneID="1" DialogID="0" TrackInfo="interact24013"/>
+	<Property ID="4007" NpcId="Gather00004f" SceneID="1" DialogID="0" TrackInfo="interact24021"/>
+	<Property ID="4008" NpcId="Gather00004f" SceneID="1" DialogID="0" TrackInfo="interact24021"/>
+	<Property ID="4009" NpcId="Gather00004f" SceneID="1" DialogID="0" TrackInfo="interact24021"/>
+	<Property ID="4010" NpcId="Gather00004f" SceneID="1" DialogID="0" TrackInfo="interact24021"/>
+	<Property ID="4011" NpcId="Gather00004f" SceneID="1" DialogID="0" TrackInfo="interact24021"/>
+	<Property ID="4012" NpcId="FuncNpc00002" SceneID="1" DialogID="dialog_24034_1" GetItems="useitem_39b-1" TrackInfo="interact24034_1" OkMenu="okmenu24034"/>
+	<Property ID="4013" NpcId="FuncNpc00004" DialogID="dialog_24037_1" TrackInfo="interact24037_1" OkMenu="okmenu24037"/>
+	<Property ID="4014" NpcId="FuncNpc00003" SceneID="1" DialogID="dialog_24059_2" LostItems="taskitem_5f-6|taskitem_6f-5" TrackInfo="interact24059_2" OkMenu="okmenu24059_2"/>
+	<Property ID="4015" NpcId="WorldNpc02623" SceneID="10" DialogID="dialog_24080_1" TrackInfo="interact24080_1" OkMenu="okmenu24080_1"/>
+	<Property ID="4016" NpcId="WorldNpc02634" SceneID="10" DialogID="dialog_24080_2" TrackInfo="interact24080_2" OkMenu="okmenu24080_2"/>
+	<Property ID="4017" NpcId="WorldNpc02629" SceneID="10" DialogID="dialog_24080_3" TrackInfo="interact24080_3" OkMenu="okmenu24080_3"/>
+	<Property ID="4018" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_24080_4" TrackInfo="interact24080_4" OkMenu="okmenu24080_4"/>
+	<Property ID="4019" NpcId="WorldNpc06008" SceneID="10" DialogID="dialog_24141_1" TrackInfo="interact24141" OkMenu="okmenu24141_1"/>
+	<Property ID="4020" NpcId="Gather00019f" SceneID="22" DialogID="dialog_24163_1" TrackInfo="interact24163_1"/>
+	<Property ID="4021" NpcId="WorldNpc09801" SceneID="17" DialogID="dialog_24194_1" TrackInfo="interact24194_1"/>
+	<Property ID="4022" NpcId="WorldNpc09606" SceneID="17" DialogID="dialog_24234_1" TrackInfo="interact24234_1" OkMenu="okmenu24234_1"/>
+	<Property ID="4023" NpcId="WorldNpc09602" SceneID="17" DialogID="dialog_24236_1" TrackInfo="interact24236_1" OkMenu="okmenu24236_1"/>
+	<Property ID="4024" NpcId="WorldNpc00032" SceneID="4" DialogID="dialog_24257_1" TrackInfo="interact24257"/>
+	<Property ID="4025" NpcId="WorldNpc00031" SceneID="4" DialogID="dialog_24282_1" LostItems="taskitem_9b-1" TrackInfo="interact24282_1"/>
+	<Property ID="4026" NpcId="Gather00009a" SceneID="20" TrackInfo="interact24298"/>
+	<Property ID="4027" NpcId="WorldNpc06459" SceneID="20" DialogID="dialog_24309_1" TrackInfo="interact24309"/>
+	<Property ID="4029" NpcId="WorldNpc06459" SceneID="20" DialogID="dialog_24318_1" TrackInfo="interact24318"/>
+	<Property ID="4030" NpcId="Gather00010a" SceneID="20" DialogID="dialog_24323_1" TrackInfo="interact24323"/>
+	<Property ID="4031" NpcId="WorldNpc08399" SceneID="13" DialogID="dialog_24342_1" GetItems="taskitem_412-2" TrackInfo="interact24342_1" OkMenu="okmenu24342_1"/>
+	<Property ID="4032" NpcId="WorldNpc08835" SceneID="13" DialogID="dialog_24342_2" LostItems="taskitem_412-2" TrackInfo="interact24342_2" OkMenu="okmenu24342_2"/>
+	<Property ID="4033" NpcId="Gather00010b" SceneID="13" TrackInfo="interact24342_3"/>
+	<Property ID="4034" NpcId="WorldNpc02640" SceneID="10" DialogID="dialog_24388_1" TrackInfo="interact24388_1" OkMenu="okmenu24388_1"/>
+	<Property ID="4035" NpcId="EventNpc24385" SceneID="10" TrackInfo="interact24385_1"/>
+	<Property ID="4036" NpcId="WorldNpc02907" SceneID="10" DialogID="dialog_24387_1" TrackInfo="interact24387_1" OkMenu="okmenu24387_1"/>
+	<Property ID="4037" NpcId="WorldNpc02910" SceneID="10" DialogID="dialog_24402_1" TrackInfo="interact24402_1" OkMenu="okmenu24402_1"/>
+	<Property ID="4038" NpcId="WorldNpc02522" SceneID="9" DialogID="dialog_24435_1" GetItems="taskitem_12a-1" TrackInfo="interact24435_1"/>
+	<Property ID="4039" NpcId="WorldNpc02523" SceneID="9" DialogID="dialog_24435_2" LostItems="taskitem_12a-1" TrackInfo="interact24435_2"/>
+	<Property ID="4040" NpcId="WorldNpc02526" SceneID="9" DialogID="dialog_24441_1" LostItems="taskitem_13a-1" TrackInfo="interact24441_1"/>
+	<Property ID="4041" NpcId="WorldNpc02526" SceneID="9" DialogID="dialog_24441_2" LostItems="taskitem_22a-1" TrackInfo="interact24441_2"/>
+	<Property ID="4042" NpcId="EventNpc24445" SceneID="9" TrackInfo="interact24445_1"/>
+	<Property ID="4043" NpcId="EventNpc24447" SceneID="9" TrackInfo="interact24447_1"/>
+	<Property ID="4044" NpcId="WorldNpc02533" SceneID="9" DialogID="dialog_24464_1" LostItems="taskitem_414-1" TrackInfo="interact24464_1"/>
+	<Property ID="4045" NpcId="WorldNpc02534" SceneID="9" DialogID="dialog_24477_1" GetItems="useitem_8a-1" TrackInfo="interact24477_1"/>
+	<Property ID="4046" NpcId="Gather00016a" SceneID="22" TrackInfo="interact24496_1"/>
+	<Property ID="4047" NpcId="WorldNpc02533" SceneID="9" DialogID="dialog_24499_1" TrackInfo="interact24499_1"/>
+	<Property ID="4048" NpcId="WorldNpc06128" SceneID="22" DialogID="dialog_24508_1" TrackInfo="interact24508_1"/>
+	<Property ID="4049" NpcId="WorldNpc06132" SceneID="22" DialogID="dialog_24515_1" LostItems="taskitem_27a-1" TrackInfo="interact24515_1"/>
+	<Property ID="4050" NpcId="Gather00019a" SceneID="22" TrackInfo="interact24519_1"/>
+	<Property ID="4051" NpcId="Gather00020a" SceneID="22" TrackInfo="interact24519_2"/>
+	<Property ID="4052" NpcId="Gather00021a" SceneID="22" TrackInfo="interact24519_3"/>
+	<Property ID="4053" NpcId="WorldNpc06128" SceneID="22" DialogID="dialog_24528_1" LostItems="taskitem_30a-1" TrackInfo="interact24528_1"/>
+	<Property ID="4054" NpcId="EventNpc24538_1" SceneID="9" TrackInfo="interact24538_1"/>
+	<Property ID="4055" NpcId="EventNpc24538_2" SceneID="9" TrackInfo="interact24538_2"/>
+	<Property ID="4056" NpcId="EventNpc24538_3" SceneID="9" TrackInfo="interact24538_3"/>
+	<Property ID="4057" NpcId="Gather00023a" SceneID="9" GetItems="useitem_17a-1" TrackInfo="interact24559"/>
+	<Property ID="4058" NpcId="Gather00024a" SceneID="9" GetItems="useitem_19a-1" TrackInfo="interact24566_1"/>
+	<Property ID="4059" NpcId="WorldNpc02450" SceneID="9" DialogID="dialog_24589_1" LostItems="taskitem_35a-1" TrackInfo="interact24589_1"/>
+	<Property ID="4060" NpcId="WorldNpc02451" SceneID="9" DialogID="dialog_24589_2" LostItems="taskitem_36a-1" TrackInfo="interact24589_2"/>
+	<Property ID="4061" NpcId="WorldNpc02450" SceneID="9" DialogID="dialog_24591_1" GetItems="taskitem_38a-1" TrackInfo="interact24591_1"/>
+	<Property ID="4062" NpcId="WorldNpc02479" SceneID="9" DialogID="dialog_24591_2" LostItems="taskitem_38a-1|taskitem_39a-1" TrackInfo="interact24591_2"/>
+	<Property ID="4063" NpcId="WorldNpc02451" SceneID="9" DialogID="dialog_24593_1" LostItems="taskitem_35a-1" TrackInfo="interact24593_1"/>
+	<Property ID="4064" NpcId="WorldNpc02450" SceneID="9" DialogID="dialog_24593_2" LostItems="taskitem_36a-1" TrackInfo="interact24593_2"/>
+	<Property ID="4065" NpcId="WorldNpc04706" SceneID="11" DialogID="dialog_24635_1" TrackInfo="interact24635_1"/>
+	<Property ID="4066" NpcId="Gather00014b" SceneID="11" TrackInfo="interact24647_1"/>
+	<Property ID="4067" NpcId="WorldNpc04810" SceneID="11" DialogID="dialog_24670_1" LostItems="useitem_26b-1" TrackInfo="interact24670_1"/>
+	<Property ID="4068" NpcId="EventNpc24671_1" SceneID="11" TrackInfo="interact24671_1"/>
+	<Property ID="4069" NpcId="EventNpc24671_2" SceneID="11" TrackInfo="interact24671_2"/>
+	<Property ID="4070" NpcId="EventNpc24671_3" SceneID="11" TrackInfo="interact24671_3"/>
+	<Property ID="4071" NpcId="WorldNpc04429" SceneID="11" DialogID="dialog_24673_1" LostItems="taskitem_29b-1" TrackInfo="interact24673_1"/>
+	<Property ID="4072" NpcId="WorldNpc04707" SceneID="11" TrackInfo="interact24679_1"/>
+	<Property ID="4073" NpcId="WorldNpc04555" SceneID="11" DialogID="dialog_24691_1" GetItems="taskitem_88-1" TrackInfo="interact24691_1"/>
+	<Property ID="4074" NpcId="WorldNpc04710" SceneID="11" DialogID="dialog_24691_2" LostItems="taskitem_88-1" TrackInfo="interact24691_2"/>
+	<Property ID="4075" NpcId="WorldNpc04556" SceneID="11" DialogID="dialog_24692_1" GetItems="taskitem_24b-1" TrackInfo="interact24692_1"/>
+	<Property ID="4076" NpcId="WorldNpc04710" SceneID="11" DialogID="dialog_24692_2" LostItems="taskitem_24b-1" TrackInfo="interact24692_2"/>
+	<Property ID="4077" NpcId="WorldNpc04557" SceneID="11" DialogID="dialog_24694_1" TrackInfo="interact24694_1"/>
+	<Property ID="4078" NpcId="Gather00014f" SceneID="21" DialogID="0" GetItems="taskitem_15f-1" TrackInfo="interact24107_1"/>
+	<Property ID="4079" NpcId="Gather00015f" SceneID="21" DialogID="0" GetItems="taskitem_16f-1" TrackInfo="interact24107_2"/>
+	<Property ID="4080" NpcId="WorldNpc05923" SceneID="21" DialogID="dialog_24104_1" TrackInfo="interact24104_1" OkMenu="okmenu24104_1"/>
+	<Property ID="4081" NpcId="WorldNpc09813" SceneID="17" DialogID="dialog_24232_1" GetItems="useitem_5h-1" TrackInfo="interact24232_1"/>
+	<Property ID="4082" NpcId="WorldNpc00016" SceneID="1" DialogID="dialog_24026_1" TrackInfo="interact24026_1" OkMenu="okmenu24026_1"/>
+	<Property ID="4083" NpcId="WorldNpc00016" SceneID="1" DialogID="dialog_24026_2" TrackInfo="interact24026_2" OkMenu="okmenu24026_2"/>
+	<Property ID="4084" NpcId="Gather00003f" SceneID="1" DialogID="0" TrackInfo="interact24013"/>
+	<Property ID="4087" NpcId="WorldNpc00001" SceneID="1" DialogID="dialog_24005_2" TrackInfo="interact24005_2" OkMenu="okmenu24005_1"/>
+	<Property ID="4088" NpcId="WorldNpc00001" SceneID="1" DialogID="dialog_24005_1" TrackInfo="interact24005_1" OkMenu="okmenu24005_2"/>
+	<Property ID="4089" NpcId="WorldNpc00003" SceneID="1" DialogID="dialog_24010_1" TrackInfo="interact24010_1" OkMenu="okmenu24010_1"/>
+	<Property ID="4090" NpcId="WorldNpc00005" SceneID="1" DialogID="dialog_24010_2" TrackInfo="interact24010_2" OkMenu="okmenu24010_2"/>
+	<Property ID="4091" NpcId="WorldNpc00006" SceneID="1" DialogID="dialog_24010_3" TrackInfo="interact24010_3" OkMenu="okmenu24010_3"/>
+	<Property ID="4092" NpcId="EventNpc24015" SceneID="1" TrackInfo="interact24015_1"/>
+	<Property ID="4093" NpcId="WorldNpc00010" SceneID="1" DialogID="dialog_24015_1" TrackInfo="interact24015_2" OkMenu="okmenu24015"/>
+	<Property ID="4094" NpcId="EventNpc24016" SceneID="1" TrackInfo="interact24016_1"/>
+	<Property ID="4095" NpcId="EventNpc24019" SceneID="1" TrackInfo="interact24019_1"/>
+	<Property ID="4096" NpcId="WorldNpc00014" SceneID="1" DialogID="dialog_24024_1" LostItems="taskitem_2f-1" TrackInfo="interact24024_1" OkMenu="okmenu24024"/>
+	<Property ID="4097" NpcId="WorldNpc00017" SceneID="1" DialogID="dialog_24031_1" TrackInfo="interact24031_1" OkMenu="okmenu24031_1"/>
+	<Property ID="4098" NpcId="Gather00003b" SceneID="1" DialogID="dialog_24031_2" GetItems="useitem_3f-1" TrackInfo="interact24031_2" OkMenu="okmenu24031_2"/>
+	<Property ID="4099" NpcId="FuncNpc00004" SceneID="1" DialogID="dialog_24041_1" TrackInfo="interact24041_1" OkMenu="okmenu24041_1"/>
+	<Property ID="4100" NpcId="EventNpc24042" SceneID="1" TrackInfo="interact24041_2"/>
+	<Property ID="4101" NpcId="WorldNpc00018" SceneID="1" DialogID="dialog_24041_2" TrackInfo="interact24041_3" OkMenu="okmenu24041_2"/>
+	<Property ID="4102" NpcId="WorldNpc00020" SceneID="1" DialogID="dialog_24046_1" GetItems="useitem_5f-1" TrackInfo="interact24046_1" OkMenu="okmenu24046"/>
+	<Property ID="4103" NpcId="WorldNpc00011" SceneID="1" DialogID="dialog_24018_1" TrackInfo="interact24018_1" OkMenu="okmenu24018"/>
+	<Property ID="4104" NpcId="EventNpc24049" SceneID="1" TrackInfo="interact24049_1"/>
+	<Property ID="4105" NpcId="WorldNpc00012" SceneID="1" DialogID="dialog_24049_1" TrackInfo="interact24049_2" OkMenu="okmenu24049"/>
+	<Property ID="4106" NpcId="FuncNpc00002" SceneID="1" DialogID="dialog_24053_1" LostItems="taskitem_11f-1" TrackInfo="interact24053_1" OkMenu="okmenu24053_1"/>
+	<Property ID="4107" NpcId="FuncNpc00002" SceneID="1" DialogID="dialog_24053_2" TrackInfo="interact24053_2" OkMenu="okmenu24053_2"/>
+	<Property ID="4108" NpcId="WorldNpc00020" SceneID="1" DialogID="dialog_24059_1" GetItems="taskitem_5f-8|taskitem_6f-5" LostItems="useitem_6f-1" TrackInfo="interact24059_1" OkMenu="okmenu24059_1"/>
+	<Property ID="4109" NpcId="EventNpc24061" SceneID="1" TrackInfo="interact24061_1"/>
+	<Property ID="4110" NpcId="WorldNpc00045" SceneID="1" DialogID="dialog_24063_1" TrackInfo="interact24063_1" OkMenu="okmenu24063_1"/>
+	<Property ID="4111" NpcId="WorldNpc00022" SceneID="1" DialogID="dialog_24065_1" GetItems="useitem_7f-1" TrackInfo="interact24065_1" OkMenu="okmenu24065"/>
+	<Property ID="4112" NpcId="WorldNpc00024" SceneID="1" DialogID="dialog_24068_1" TrackInfo="interact24068_1" OkMenu="okmenu24068_1"/>
+	<Property ID="4113" NpcId="WorldNpc00025" SceneID="1" DialogID="dialog_24068_2" TrackInfo="interact24068_2" OkMenu="okmenu24068_2"/>
+	<Property ID="4114" NpcId="WorldNpc00026" SceneID="1" DialogID="dialog_24070_1" TrackInfo="interact24070_1" OkMenu="okmenu24070"/>
+	<Property ID="4115" NpcId="WorldNpc00048" SceneID="1" DialogID="dialog_24072_1" TrackInfo="interact24072_1" OkMenu="okmenu24072"/>
+	<Property ID="4116" NpcId="Gather00009f" SceneID="1" GetItems="taskitem_9f-1" TrackInfo="interact24074_1"/>
+	<Property ID="4117" NpcId="EventNpc24074" SceneID="10" TrackInfo="interact24074_2"/>
+	<Property ID="4118" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_24077_1" TrackInfo="interact24077_1" OkMenu="okmenu24077"/>
+	<Property ID="4119" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_24082_1" LostItems="taskitem_9f-1" TrackInfo="interact24082_1" OkMenu="okmenu24082"/>
+	<Property ID="4120" NpcId="WorldNpc02607" SceneID="10" DialogID="dialog_24085_1" TrackInfo="interact24085_1" OkMenu="okmenu24085"/>
+	<Property ID="4121" NpcId="WorldNpc02608" SceneID="10" DialogID="dialog_24089_1" LostItems="useitem_10f-1" TrackInfo="interact24089_1" OkMenu="okmenu24089"/>
+	<Property ID="4122" NpcId="WorldNpc00045" SceneID="1" DialogID="dialog_24063_2" TrackInfo="interact24063_2" OkMenu="okmenu24063_2"/>
+	<Property ID="4123" NpcId="EventNpc25180" SceneID="21" TrackInfo="interact24097_1"/>
+	<Property ID="4124" NpcId="WorldNpc05927" SceneID="21" DialogID="dialog_24099_1" TrackInfo="interact24099_1" OkMenu="okmenu24099_1"/>
+	<Property ID="4125" NpcId="WorldNpc05927" SceneID="22" DialogID="dialog_24099_2" TrackInfo="interact24099_2" OkMenu="okmenu24099_2"/>
+	<Property ID="4126" NpcId="WorldNpc05928" SceneID="21" DialogID="dialog_24103_1" TrackInfo="interact24103_1" OkMenu="okmenu24103_1"/>
+	<Property ID="4127" NpcId="WorldNpc05924" SceneID="21" DialogID="dialog_24106_1" TrackInfo="interact24106_1" OkMenu="okmenu24106_1"/>
+	<Property ID="4128" NpcId="WorldNpc05925" SceneID="21" DialogID="dialog_24108_1" TrackInfo="interact24108_1" OkMenu="okmenu24108_1"/>
+	<Property ID="4129" NpcId="ItemNpc04001" SceneID="21" DialogID="dialog_24110_1" TrackInfo="interact24110_1" OkMenu="okmenu24110_1"/>
+	<Property ID="4130" NpcId="ItemNpc04003" SceneID="21" DialogID="dialog_24110_2" TrackInfo="interact24110_2" OkMenu="okmenu24110_2"/>
+	<Property ID="4131" NpcId="EventNpc24111" SceneID="21" TrackInfo="interact24111_1"/>
+	<Property ID="4132" NpcId="WorldNpc05930" SceneID="21" DialogID="dialog_24113_1" LostItems="taskitem_22f-1" TrackInfo="interact24113_1" OkMenu="okmenu24113_1"/>
+	<Property ID="4133" NpcId="EventNpc24113" SceneID="21" TrackInfo="interact24113_2"/>
+	<Property ID="4134" NpcId="WorldNpc05853" SceneID="21" DialogID="dialog_24116_1" TrackInfo="interact24116_1" OkMenu="okmenu24116_1"/>
+	<Property ID="4135" NpcId="WorldNpc05853" SceneID="21" DialogID="dialog_24116_2" TrackInfo="interact24116_2" OkMenu="okmenu24116_2"/>
+	<Property ID="4136" NpcId="EventNpc24120" SceneID="21" TrackInfo="interact24120_1"/>
+	<Property ID="4137" NpcId="WorldNpc06001" SceneID="21" DialogID="dialog_24122_1" TrackInfo="interact24122_1" OkMenu="okmenu24122_1"/>
+	<Property ID="4139" NpcId="EventNpc24123_1" SceneID="21" TrackInfo="interact24123_1"/>
+	<Property ID="4140" NpcId="EventNpc24123_2" SceneID="21" TrackInfo="interact24123_2"/>
+	<Property ID="4141" NpcId="WorldNpc06003" SceneID="21" DialogID="dialog_24126_1" TrackInfo="interact24126_1" OkMenu="okmenu24126_1"/>
+	<Property ID="4142" NpcId="WorldNpc06009" SceneID="21" DialogID="dialog_24129_1" TrackInfo="interact24129_1" OkMenu="okmenu24129_1"/>
+	<Property ID="4143" NpcId="EventNpc24132" SceneID="21" TrackInfo="interact24132_1"/>
+	<Property ID="4144" NpcId="WorldNpc06006" SceneID="21" DialogID="dialog_24135_1" TrackInfo="interact24135_1" OkMenu="okmenu24135_1"/>
+	<Property ID="4145" NpcId="EventNpc24144" SceneID="22" TrackInfo="interact24144_1"/>
+	<Property ID="4146" NpcId="WorldNpc06103" SceneID="22" DialogID="dialog_24149_1" TrackInfo="interact24149_1" OkMenu="okmenu24149_1"/>
+	<Property ID="4147" NpcId="WorldNpc06107" SceneID="22" DialogID="dialog_24157_1" GetItems="useitem_40b-1" TrackInfo="interact24157_1" OkMenu="okmenu24157_1"/>
+	<Property ID="4148" NpcId="WorldNpc06112" SceneID="22" DialogID="dialog_24162_1" TrackInfo="interact24162_1" OkMenu="okmenu24162_1"/>
+	<Property ID="4149" NpcId="EventNpc24162" SceneID="22" TrackInfo="interact24162_2"/>
+	<Property ID="4150" NpcId="WorldNpc06110" SceneID="22" DialogID="dialog_24163_2" GetItems="useitem_18f-1" LostItems="useitem_42b-1" TrackInfo="interact24163_2" OkMenu="okmenu24163_2"/>
+	<Property ID="4151" NpcId="EventNpc24165" SceneID="22" TrackInfo="interact24165_1"/>
+	<Property ID="4152" NpcId="WorldNpc06115" SceneID="22" DialogID="dialog_24170_1" TrackInfo="interact24170_1" OkMenu="okmenu24170_1"/>
+	<Property ID="4153" NpcId="Gather00022f" SceneID="22" GetItems="taskitem_28f-1" TrackInfo="interact24176_1"/>
+	<Property ID="4154" NpcId="WorldNpc06122" SceneID="22" DialogID="dialog_24178_1" GetItems="useitem_19f-1" LostItems="taskitem_28f-1" TrackInfo="interact24178_1" OkMenu="okmenu24178_1"/>
+	<Property ID="4155" NpcId="WorldNpc06118" SceneID="22" DialogID="dialog_24181_1" TrackInfo="interact24181_1" OkMenu="okmenu24181_1"/>
+	<Property ID="4156" NpcId="WorldNpc06119" SceneID="22" DialogID="dialog_24183_1" TrackInfo="interact24183_1" OkMenu="okmenu24183_1"/>
+	<Property ID="4157" NpcId="WorldNpc06122" SceneID="22" DialogID="dialog_24188_1" TrackInfo="interact24188_1" OkMenu="okmenu24188_1"/>
+	<Property ID="4158" NpcId="WorldNpc06125" SceneID="22" DialogID="dialog_24190_1" TrackInfo="interact24190_1" OkMenu="okmenu24190_1"/>
+	<Property ID="4159" NpcId="ItemNpc12001" SceneID="17" DialogID="dialog_24198_1" TrackInfo="interact24198_1" OkMenu="okmenu24198_1"/>
+	<Property ID="4160" NpcId="WorldNpc09607" SceneID="17" DialogID="dialog_24198_2" TrackInfo="interact24198_2" OkMenu="okmenu24198_2"/>
+	<Property ID="4161" NpcId="EventNpc24199" SceneID="17" TrackInfo="interact24199_1"/>
+	<Property ID="4162" NpcId="EventNpc24201" SceneID="17" TrackInfo="interact24201_1"/>
+	<Property ID="4163" NpcId="WorldNpc09609" SceneID="17" DialogID="dialog_24205_1" TrackInfo="interact24205_1" OkMenu="okmenu24205_1"/>
+	<Property ID="4164" NpcId="ItemNpc12002" SceneID="17" DialogID="dialog_24207_1" GetItems="taskitem_5h-1" TrackInfo="interact24207_1" OkMenu="okmenu24207_1"/>
+	<Property ID="4165" NpcId="WorldNpc09803" SceneID="17" DialogID="dialog_24209_1" LostItems="taskitem_5h-1" TrackInfo="interact24209_1" OkMenu="okmenu24209_1"/>
+	<Property ID="4166" NpcId="WorldNpc09803" SceneID="17" DialogID="dialog_24210_1" TrackInfo="interact24210_1" OkMenu="okmenu24210_1"/>
+	<Property ID="4167" NpcId="ItemNpc12002" SceneID="17" DialogID="dialog_24213_1" TrackInfo="interact24213_1" OkMenu="okmenu24213_1"/>
+	<Property ID="4168" NpcId="EventNpc24213" SceneID="17" TrackInfo="interact24213_2"/>
+	<Property ID="4169" NpcId="WorldNpc09806" SceneID="17" DialogID="dialog_24220_1" TrackInfo="interact24220_1" OkMenu="okmenu24220_1"/>
+	<Property ID="4170" NpcId="WorldNpc09806" SceneID="17" DialogID="dialog_24220_2" GetItems="taskitem_6h-1" TrackInfo="interact24220_2" OkMenu="okmenu24220_2"/>
+	<Property ID="4171" NpcId="WorldNpc09602" SceneID="17" DialogID="dialog_24221_1" TrackInfo="interact24221_1" OkMenu="okmenu24221_1"/>
+	<Property ID="4172" NpcId="WorldNpc09601" SceneID="17" DialogID="dialog_24221_2" TrackInfo="interact24221_2" OkMenu="okmenu24221_2"/>
+	<Property ID="4173" NpcId="WorldNpc09605" SceneID="17" DialogID="dialog_24224_1" LostItems="taskitem_6h-1" TrackInfo="interact24224_1" OkMenu="okmenu24224_1"/>
+	<Property ID="4174" NpcId="WorldNpc09602" SceneID="17" DialogID="dialog_24227_1" TrackInfo="interact24227_1" OkMenu="okmenu24227_1"/>
+	<Property ID="4175" NpcId="WorldNpc09801" SceneID="17" DialogID="dialog_24227_2" TrackInfo="interact24227_2" OkMenu="okmenu24227_2"/>
+	<Property ID="4176" NpcId="WorldNpc09813" SceneID="17" DialogID="dialog_24231_1" TrackInfo="interact24231_1" OkMenu="okmenu24231_1"/>
+	<Property ID="4177" NpcId="WorldNpc09601" SceneID="17" DialogID="dialog_24232_1" TrackInfo="interact24232_1" OkMenu="okmenu24232_1"/>
+	<Property ID="4178" NpcId="WorldNpc09601" SceneID="17" DialogID="dialog_24236_2" TrackInfo="interact24236_2" OkMenu="okmenu24236_2"/>
+	<Property ID="4179" NpcId="WorldNpc09611" SceneID="17" DialogID="dialog_24238_1" TrackInfo="interact24238_1" OkMenu="okmenu24238_1"/>
+	<Property ID="4180" NpcId="FuncNpc00005" SceneID="1" DialogID="dialog_24242_1" GetItems="taskitem_3b-1" TrackInfo="interact24242_1" OkMenu="okmenu24242_1"/>
+	<Property ID="4181" NpcId="WorldNpc00028" SceneID="1" DialogID="dialog_24245_1" TrackInfo="interact24245_1" OkMenu="okmenu24245_1"/>
+	<Property ID="4182" NpcId="WorldNpc00052" SceneID="1" DialogID="dialog_24247_1" TrackInfo="interact24247_1" OkMenu="okmenu24247_1"/>
+	<Property ID="4183" NpcId="EventNpc24251" SceneID="1" TrackInfo="interact24251_1"/>
+	<Property ID="4184" NpcId="WorldNpc00032" SceneID="1" DialogID="dialog_24256_1" TrackInfo="interact24256_1" OkMenu="okmenu24256_1"/>
+	<Property ID="4185" NpcId="WorldNpc00031" SceneID="1" DialogID="dialog_24256_2" TrackInfo="interact24256_2" OkMenu="okmenu24256_2"/>
+	<Property ID="4186" NpcId="WorldNpc00032" SceneID="1" DialogID="dialog_24260_1" TrackInfo="interact24260_1" OkMenu="okmenu24260_1"/>
+	<Property ID="4187" NpcId="WorldNpc05803" SceneID="21" DialogID="dialog_24266_1" TrackInfo="interact24266_1" OkMenu="okmenu24266_1"/>
+	<Property ID="4188" NpcId="WorldNpc05803" SceneID="21" DialogID="dialog_24266_2" TrackInfo="interact24266_2" OkMenu="okmenu24266_2"/>
+	<Property ID="4189" NpcId="WorldNpc05804" SceneID="21" DialogID="dialog_24268_1" TrackInfo="interact24268_1" OkMenu="okmenu24268_1"/>
+	<Property ID="4190" NpcId="WorldNpc00034" SceneID="1" DialogID="dialog_24272_1" TrackInfo="interact24272_1" OkMenu="okmenu24272_1"/>
+	<Property ID="4191" NpcId="WorldNpc00034" SceneID="1" DialogID="dialog_24272_2" TrackInfo="interact24272_2" OkMenu="okmenu24272_2"/>
+	<Property ID="4192" NpcId="FuncNpc00006" SceneID="1" DialogID="dialog_24275_1" GetItems="taskitem_8b-1" TrackInfo="interact24275_1" OkMenu="okmenu24275_1"/>
+	<Property ID="4193" NpcId="WorldNpc09603" SceneID="17" DialogID="dialog_24277_1" TrackInfo="interact24277_1" OkMenu="okmenu24277_1"/>
+	<Property ID="4194" NpcId="WorldNpc09603" SceneID="17" DialogID="dialog_24280_1" TrackInfo="interact24280_1" OkMenu="okmenu24280_1"/>
+	<Property ID="4195" NpcId="WorldNpc06003" SceneID="21" DialogID="dialog_24126_2" LostItems="taskitem_36f-1|taskitem_37f-1" TrackInfo="interact24126_2" OkMenu="okmenu24126_2"/>
+	<Property ID="4196" NpcId="WorldNpc08858" SceneID="13" DialogID="dialog_24292_1" LostItems="taskitem_1a-5" TrackInfo="interact24292_1" OkMenu="okmenu24292_1"/>
+	<Property ID="4197" NpcId="EventNpc24296" SceneID="13" TrackInfo="interact24296_1"/>
+	<Property ID="4198" NpcId="WorldNpc08841" SceneID="13" DialogID="dialog_24299_1" TrackInfo="interact24299_1" OkMenu="okmenu24299_1"/>
+	<Property ID="4199" NpcId="WorldNpc06643" SceneID="20" DialogID="dialog_24305_1" TrackInfo="interact24305_1" OkMenu="okmenu24305_1"/>
+	<Property ID="4200" NpcId="WorldNpc06643" SceneID="20" DialogID="dialog_24308_1" TrackInfo="interact24308_1" OkMenu="okmenu24308_1"/>
+	<Property ID="4201" NpcId="Gather00023f" SceneID="21" GetItems="taskitem_36f-1" TrackInfo="interact24126_3"/>
+	<Property ID="4202" NpcId="Gather00024f" SceneID="21" GetItems="taskitem_37f-1" TrackInfo="interact24126_4"/>
+	<Property ID="4203" NpcId="Gather00001b" SceneID="1" GetItems="useitem_41b-1" TrackInfo="interact24247_2"/>
+	<Property ID="4204" NpcId="WorldNpc06643" SceneID="20" DialogID="dialog_24311_1" TrackInfo="interact24311_1" OkMenu="okmenu24311_1"/>
+	<Property ID="4205" NpcId="EventNpc24317" SceneID="20" TrackInfo="interact24317_1"/>
+	<Property ID="4206" NpcId="WorldNpc06444" SceneID="20" DialogID="dialog_24318_1" TrackInfo="interact24318_1" OkMenu="okmenu24318_1"/>
+	<Property ID="4207" NpcId="EventNpc24326" SceneID="20" TrackInfo="interact24326_1"/>
+	<Property ID="4208" NpcId="EventNpc24332" SceneID="20" TrackInfo="interact24332_1"/>
+	<Property ID="4209" NpcId="WorldNpc08399" SceneID="13" DialogID="dialog_24340_1" TrackInfo="interact24340_1" OkMenu="okmenu24340_1"/>
+	<Property ID="4210" NpcId="WorldNpc08408" SceneID="13" DialogID="dialog_24344_1" TrackInfo="interact24344_1" OkMenu="okmenu24344_1"/>
+	<Property ID="4211" NpcId="WorldNpc08399" SceneID="13" DialogID="dialog_24346_1" TrackInfo="interact24346_1" OkMenu="okmenu24346_1"/>
+	<Property ID="4212" NpcId="WorldNpc08836" SceneID="13" DialogID="dialog_24356_1" GetItems="taskitem_414-1" TrackInfo="interact24356_1" OkMenu="okmenu24356_1"/>
+	<Property ID="4213" NpcId="WorldNpc08838" SceneID="13" DialogID="dialog_24375_1" TrackInfo="interact24375_1" OkMenu="okmenu24375_1"/>
+	<Property ID="4214" NpcId="WorldNpc02909" SceneID="10" DialogID="dialog_24403_1" TrackInfo="interact24403_1" OkMenu="okmenu24403_1"/>
+	<Property ID="4215" NpcId="WorldNpc02912" SceneID="10" DialogID="dialog_24409_1" TrackInfo="interact24409_1" OkMenu="okmenu24409_1"/>
+	<Property ID="4216" NpcId="Gather00022b" SceneID="10" GetItems="taskitem_27b-1" TrackInfo="interact24410_1"/>
+	<Property ID="4217" NpcId="WorldNpc02911" SceneID="10" DialogID="dialog_24410_1" TrackInfo="interact24410_2" OkMenu="okmenu24410_1"/>
+	<Property ID="4218" NpcId="Gather00023b" SceneID="10" GetItems="useitem_43b-1" TrackInfo="interact24412_1"/>
+	<Property ID="4219" NpcId="WorldNpc02911" SceneID="10" DialogID="dialog_24412_1" TrackInfo="interact24412_2" OkMenu="okmenu24412_1"/>
+	<Property ID="4220" NpcId="WorldNpc02912" SceneID="10" DialogID="dialog_24414_1" LostItems="taskitem_50b-1" TrackInfo="interact24414_1" OkMenu="okmenu24414_1"/>
+	<Property ID="4221" NpcId="WorldNpc02901" SceneID="10" DialogID="dialog_24415_1" TrackInfo="interact24415_1" OkMenu="okmenu24415_1"/>
+	<Property ID="4222" NpcId="EventNpc24418" SceneID="10" TrackInfo="interact24418_1"/>
+	<Property ID="4223" NpcId="WorldNpc02642" SceneID="10" DialogID="dialog_24428_1" LostItems="taskitem_51b-1" TrackInfo="interact24428_1" OkMenu="okmenu24428_1"/>
+	<Property ID="4224" NpcId="EventNpc24439" SceneID="9" TrackInfo="interact24439_1"/>
+	<Property ID="4225" NpcId="WorldNpc02545" SceneID="9" DialogID="dialog_24442_1" TrackInfo="interact24442_1" OkMenu="okmenu24442_1"/>
+	<Property ID="4226" NpcId="Gather00024b" SceneID="9" GetItems="useitem_45b-1" TrackInfo="interact24454_1"/>
+	<Property ID="4227" NpcId="EventNpc24463" SceneID="9" TrackInfo="interact24463_1"/>
+	<Property ID="4228" NpcId="WorldNpc02501" SceneID="9" DialogID="dialog_24469_1" TrackInfo="interact24469_1" OkMenu="okmenu24469_1"/>
+	<Property ID="4229" NpcId="WorldNpc06128" SceneID="22" DialogID="dialog_24481_1" TrackInfo="interact24481_1" OkMenu="okmenu24481_1"/>
+	<Property ID="4230" NpcId="EventNpc24489" SceneID="22" TrackInfo="interact24489_1"/>
+	<Property ID="4231" NpcId="WorldNpc06183" SceneID="22" DialogID="dialog_24491_1" TrackInfo="interact24491_1" OkMenu="okmenu24491_1"/>
+	<Property ID="4232" NpcId="WorldNpc02533" SceneID="9" DialogID="dialog_24493_1" TrackInfo="interact24493_1" OkMenu="okmenu24493_1"/>
+	<Property ID="4233" NpcId="WorldNpc02501" SceneID="9" DialogID="dialog_24496_1" TrackInfo="interact24496_1" OkMenu="okmenu24496_1"/>
+	<Property ID="4234" NpcId="EventNpc24502" SceneID="22" TrackInfo="interact24502_1"/>
+	<Property ID="4235" NpcId="WorldNpc06128" SceneID="22" DialogID="dialog_24507_1" TrackInfo="interact24507_1" OkMenu="okmenu24507_1"/>
+	<Property ID="4236" NpcId="WorldNpc06128" SceneID="22" DialogID="dialog_24517_1" TrackInfo="interact24517_1" OkMenu="okmenu24517_1"/>
+	<Property ID="4237" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_24523_1" TrackInfo="interact24523_1" OkMenu="okmenu24523_1"/>
+	<Property ID="4238" NpcId="EventNpc24525" SceneID="9" TrackInfo="interact24525_1"/>
+	<Property ID="4239" NpcId="WorldNpc06128" SceneID="22" DialogID="dialog_24521_1" TrackInfo="interact24521_1" OkMenu="okmenu24521_1"/>
+	<Property ID="4240" NpcId="EventNpc24539" SceneID="9" TrackInfo="interact24539_1"/>
+	<Property ID="4241" NpcId="EventNpc24543" SceneID="9" TrackInfo="interact24543_1"/>
+	<Property ID="4242" NpcId="Gather00031b" SceneID="9" GetItems="useitem_17a-1" TrackInfo="interact24549_1"/>
+	<Property ID="4243" NpcId="EventNpc24550" SceneID="9" TrackInfo="interact24550_1"/>
+	<Property ID="4244" NpcId="Gather00024a" SceneID="9" GetItems="useitem_19a-1" TrackInfo="interact24550_2"/>
+	<Property ID="4245" NpcId="Gather00032b" SceneID="9" GetItems="useitem_15a-1" TrackInfo="interact24555_1"/>
+	<Property ID="4246" NpcId="WorldNpc02545" SceneID="9" DialogID="dialog_24442_2" GetItems="taskitem_14a-1" TrackInfo="interact24442_2" OkMenu="okmenu24442_2"/>
+	<Property ID="4247" NpcId="WorldNpc02434" SceneID="9" DialogID="dialog_24565_1" GetItems="useitem_20a-1" TrackInfo="interact24565_1" OkMenu="okmenu24565_1"/>
+	<Property ID="4248" NpcId="EventNpc24567" SceneID="9" TrackInfo="interact24567_1"/>
+	<Property ID="4249" NpcId="WorldNpc02444" SceneID="9" DialogID="dialog_24568_1" TrackInfo="interact24568_1" OkMenu="okmenu24568_1"/>
+	<Property ID="4250" NpcId="WorldNpc02443" SceneID="9" DialogID="dialog_24568_2" TrackInfo="interact24568_2" OkMenu="okmenu24568_2"/>
+	<Property ID="4251" NpcId="WorldNpc02446" SceneID="9" DialogID="dialog_24579_1" TrackInfo="interact24579_1" OkMenu="okmenu24579_1"/>
+	<Property ID="4252" NpcId="WorldNpc02449" SceneID="9" DialogID="dialog_24585_1" TrackInfo="interact24585_1" OkMenu="okmenu24585_1"/>
+	<Property ID="4253" NpcId="WorldNpc02479" SceneID="9" DialogID="dialog_24587_1" LostItems="taskitem_34a-1" TrackInfo="interact24587_1" OkMenu="okmenu24587_1"/>
+	<Property ID="4254" NpcId="WorldNpc05921" SceneID="21" DialogID="dialog_24097_1" TrackInfo="interact24097_2" OkMenu="okmenu24097_1"/>
+	<Property ID="4255" NpcId="WorldNpc02451" SceneID="9" DialogID="dialog_24590_1" LostItems="taskitem_36a-1|useitem_50b-1" TrackInfo="interact24590_1" OkMenu="okmenu24590_1"/>
+	<Property ID="4256" NpcId="WorldNpc02450" SceneID="9" DialogID="dialog_24590_2" LostItems="taskitem_35a-1|useitem_50b-1" TrackInfo="interact24590_2" OkMenu="okmenu24590_2"/>
+	<Property ID="4257" NpcId="EventNpc24601" SceneID="9" TrackInfo="interact24601_1"/>
+	<Property ID="4258" NpcId="EventNpc24610" SceneID="9" TrackInfo="interact24610_1"/>
+	<Property ID="4259" NpcId="Gather00035b" SceneID="9" GetItems="taskitem_45a-1" TrackInfo="interact24616_1"/>
+	<Property ID="4260" NpcId="WorldNpc02429" SceneID="9" DialogID="dialog_24621_1" TrackInfo="interact24621_1" OkMenu="okmenu24621_1"/>
+	<Property ID="4261" NpcId="EventNpc24621" SceneID="11" TrackInfo="interact24621_2"/>
+	<Property ID="4262" NpcId="WorldNpc04706" SceneID="11" DialogID="dialog_24626_1" TrackInfo="interact24626_1" OkMenu="okmenu24626_1"/>
+	<Property ID="4263" NpcId="WorldNpc04707" SceneID="11" DialogID="dialog_24626_2" TrackInfo="interact24626_2" OkMenu="okmenu24626_2"/>
+	<Property ID="4264" NpcId="WorldNpc04708" SceneID="11" DialogID="dialog_24631_1" TrackInfo="interact24631_1" OkMenu="okmenu24631_1"/>
+	<Property ID="4265" NpcId="EventNpc24634" SceneID="11" TrackInfo="interact24634_1"/>
+	<Property ID="4266" NpcId="WorldNpc04805" SceneID="11" DialogID="dialog_24647_1" TrackInfo="interact24647_2" OkMenu="okmenu24647_1"/>
+	<Property ID="4267" NpcId="EventNpc24649" SceneID="11" TrackInfo="interact24649_1"/>
+	<Property ID="4268" NpcId="ItemNpc03201" SceneID="11" DialogID="dialog_24649_1" TrackInfo="interact24649_2" OkMenu="okmenu24649_1"/>
+	<Property ID="4269" NpcId="WorldNpc04425" SceneID="11" DialogID="dialog_24654_1" GetItems="useitem_20b-1" TrackInfo="interact24654_1" OkMenu="okmenu24654_1"/>
+	<Property ID="4270" NpcId="EventNpc24660" SceneID="11" TrackInfo="interact24660_1"/>
+	<Property ID="4271" NpcId="WorldNpc04810" SceneID="11" DialogID="dialog_24662_1" TrackInfo="interact24662_1" OkMenu="okmenu24662_1"/>
+	<Property ID="4272" NpcId="WorldNpc04809" SceneID="11" DialogID="dialog_24664_1" TrackInfo="interact24664_1" OkMenu="okmenu24664_1"/>
+	<Property ID="4273" NpcId="EventNpc24666" SceneID="11" TrackInfo="interact24666_1"/>
+	<Property ID="4274" NpcId="WorldNpc04807" SceneID="11" DialogID="dialog_24655_1" GetItems="useitem_20b-1" TrackInfo="interact24655_1" OkMenu="okmenu24655_1"/>
+	<Property ID="4275" NpcId="WorldNpc04426" SceneID="11" DialogID="dialog_24674_1" LostItems="taskitem_29b-1" TrackInfo="interact24674_1" OkMenu="okmenu24674_1"/>
+	<Property ID="4276" NpcId="WorldNpc04401" SceneID="11" DialogID="dialog_24677_1" TrackInfo="interact24677_1" OkMenu="okmenu24677_1"/>
+	<Property ID="4277" NpcId="WorldNpc04710" SceneID="11" DialogID="dialog_24690_1" GetItems="taskitem_64b-1" LostItems="taskitem_63b-1" TrackInfo="interact24690_1" OkMenu="okmenu24690_1"/>
+	<Property ID="4278" NpcId="WorldNpc04557" SceneID="11" DialogID="dialog_24690_2" LostItems="taskitem_64b-1" TrackInfo="interact24690_2" OkMenu="okmenu24690_2"/>
+	<Property ID="4279" NpcId="WorldNpc04709" SceneID="11" DialogID="dialog_24695_1" GetItems="taskitem_65b-1" TrackInfo="interact24695_1" OkMenu="okmenu24695_1"/>
+	<Property ID="4280" NpcId="WorldNpc04805" SceneID="11" DialogID="dialog_24705_1" TrackInfo="interact24705_1" OkMenu="okmenu24705_1"/>
+	<Property ID="4281" NpcId="WorldNpc04805" SceneID="11" DialogID="dialog_24713_1" TrackInfo="interact24713_1" OkMenu="okmenu24713_1"/>
+	<Property ID="4282" NpcId="WorldNpc04805" SceneID="11" DialogID="dialog_24715_1" GetItems="useitem_23b-3|useitem_24b-3" TrackInfo="interact24715_1" OkMenu="okmenu24715_1"/>
+	<Property ID="4283" NpcId="EventNpc24719" SceneID="11" TrackInfo="interact24719_1"/>
+	<Property ID="4284" NpcId="EventNpc24722" SceneID="17" TrackInfo="interact24722_1"/>
+	<Property ID="4285" NpcId="EventNpc24727" SceneID="17" TrackInfo="interact24727_1"/>
+	<Property ID="4286" NpcId="EventNpc24729" SceneID="10" TrackInfo="interact24729_1"/>
+	<Property ID="4287" NpcId="WorldNpc02911" SceneID="10" DialogID="dialog_24735_1" TrackInfo="interact24735_1" OkMenu="okmenu24735_1"/>
+	<Property ID="4288" NpcId="WorldNpc02636" SceneID="10" DialogID="dialog_24735_2" TrackInfo="interact24735_2" OkMenu="okmenu24735_2"/>
+	<Property ID="4289" NpcId="WorldNpc02706" SceneID="10" DialogID="dialog_24737_1" TrackInfo="interact24737_1" OkMenu="okmenu24737_1"/>
+	<Property ID="4290" NpcId="EventNpc24739_1" SceneID="10" TrackInfo="interact24739_1"/>
+	<Property ID="4291" NpcId="EventNpc24739_2" SceneID="10" TrackInfo="interact24739_2"/>
+	<Property ID="4292" NpcId="WorldNpc02709" SceneID="10" DialogID="dialog_24740_1" GetItems="useitem_52b-1|taskitem_71b-1" TrackInfo="interact24740_1" OkMenu="okmenu24740_1"/>
+	<Property ID="4293" NpcId="Gather00039b" SceneID="10" TrackInfo="interact24745_1"/>
+	<Property ID="4294" NpcId="EventNpc24746" SceneID="10" TrackInfo="interact24746_1"/>
+	<Property ID="4295" NpcId="WorldNpc02710" SceneID="10" DialogID="dialog_24747_1" TrackInfo="interact24747_1" OkMenu="okmenu24747_1"/>
+	<Property ID="4296" NpcId="EventNpc24761" SceneID="10" TrackInfo="interact24761_1"/>
+	<Property ID="4297" NpcId="EventNpc24763" SceneID="23" TrackInfo="interact24763_1"/>
+	<Property ID="4298" NpcId="Gather00038b" SceneID="17" GetItems="taskitem_70b-1" TrackInfo="interact24727_2"/>
+	<Property ID="4299" NpcId="WorldNpc02604" SceneID="10" DialogID="dialog_24763_1" LostItems="taskitem_66b-1" TrackInfo="interact24763_2" OkMenu="okmenu24763_1"/>
+	<Property ID="4300" NpcId="WorldNpc02604" SceneID="10" DialogID="dialog_24745_1" TrackInfo="interact24745_2" OkMenu="okmenu24745_1"/>
+	<Property ID="4301" NpcId="Gather00026b" SceneID="22" TrackInfo="interact24487_1"/>
+	<Property ID="4302" NpcId="Gather00026b" SceneID="22" TrackInfo="interact24487_1"/>
+	<Property ID="4303" NpcId="Gather00026b" SceneID="22" TrackInfo="interact24487_1"/>
+	<Property ID="4304" NpcId="Gather00026b" SceneID="22" TrackInfo="interact24487_1"/>
+	<Property ID="4305" NpcId="Gather00027b" SceneID="22" TrackInfo="interact24487_2"/>
+	<Property ID="4306" NpcId="Gather00027b" SceneID="22" TrackInfo="interact24487_2"/>
+	<Property ID="4307" NpcId="Gather00027b" SceneID="22" TrackInfo="interact24487_2"/>
+	<Property ID="4308" NpcId="Gather00027b" SceneID="22" TrackInfo="interact24487_2"/>
+	<Property ID="4309" NpcId="Gather00028b" SceneID="22" TrackInfo="interact24497_1"/>
+	<Property ID="3006" NpcId="FuncNpc00058" SceneID="3" DialogID="dialog_22003_1" TrackInfo="interact22003_1" OkMenu="OkMenu_22003_1"/>
+	<Property ID="3007" NpcId="WorldNpc00688" SceneID="3" DialogID="dialog_22007_1" TrackInfo="interact22007_1" OkMenu="OkMenu_22007_1"/>
+	<Property ID="3008" NpcId="FuncNpc00052" SceneID="3" DialogID="dialog_22007_2" TrackInfo="interact22007_2" OkMenu="OkMenu_22007_2"/>
+	<Property ID="3009" NpcId="WorldNpc00634" SceneID="3" DialogID="dialog_22008_1" TrackInfo="interact22008_1" OkMenu="OkMenu_22008_1"/>
+	<Property ID="3010" NpcId="WorldNpc00595" SceneID="3" DialogID="dialog_22013_1" TrackInfo="interact22013_1" OkMenu="OkMenu_22013_1"/>
+	<Property ID="3011" NpcId="WorldNpc00689" SceneID="3" DialogID="dialog_22015_1" GetItems="useitem_13g-1" TrackInfo="interact22015_1" OkMenu="OkMenu_22015_1"/>
+	<Property ID="3012" NpcId="WorldNpc00689" SceneID="3" DialogID="dialog_22019_1" TrackInfo="interact22019_1" OkMenu="OkMenu_22019_2"/>
+	<Property ID="3013" NpcId="WorldNpc00694" SceneID="3" DialogID="dialog_22021_1" TrackInfo="interact22021_1" OkMenu="OkMenu_22021_1"/>
+	<Property ID="3014" NpcId="GatherNpc00008" SceneID="3" DialogID="0" TrackInfo="interact22024_1"/>
+	<Property ID="3015" NpcId="GatherNpc00009" SceneID="3" DialogID="0" TrackInfo="interact22024_2"/>
+	<Property ID="3016" NpcId="GatherNpc00010" SceneID="3" DialogID="0" TrackInfo="interact22024_3"/>
+	<Property ID="3017" NpcId="WorldNpc00691" SceneID="3" DialogID="dialog_22039_1" TrackInfo="interact22039_1" OkMenu="OkMenu_22039_1"/>
+	<Property ID="3018" NpcId="WorldNpc00693" SceneID="3" DialogID="dialog_22041_1" TrackInfo="interact22041_1" OkMenu="OkMenu_22041_1"/>
+	<Property ID="3019" NpcId="WorldNpc01342" SceneID="14" DialogID="dialog_22051_1" TrackInfo="interact22051_1" OkMenu="OkMenu_22051_1"/>
+	<Property ID="3020" NpcId="WorldNpc01353" SceneID="14" DialogID="dialog_22054_1" TrackInfo="interact22054_1" OkMenu="OkMenu_22054_1"/>
+	<Property ID="3021" NpcId="AIFuncNpc01357" SceneID="14" DialogID="dialog_22058_1" LostItems="taskitem_22g-1" TrackInfo="interact22058_1" OkMenu="OkMenu_22058_1"/>
+	<Property ID="3022" NpcId="WorldNpc01359" SceneID="14" DialogID="dialog_22061_1" TrackInfo="interact22061_1" OkMenu="OkMenu_22061_1"/>
+	<Property ID="3023" NpcId="Gather00009g" SceneID="14" DialogID="0" TrackInfo="interact22063_1"/>
+	<Property ID="3024" NpcId="WorldNpc01360" SceneID="14" DialogID="dialog_22065_1" TrackInfo="interact22065_1" OkMenu="OkMenu_22065_1"/>
+	<Property ID="3025" NpcId="WorldNpc01361" SceneID="14" DialogID="dialog_22068_1" TrackInfo="interact22068_1" OkMenu="OkMenu_22068_1"/>
+	<Property ID="3026" NpcId="WorldNpc01452" SceneID="14" DialogID="dialog_22070_1" TrackInfo="interact22070_1" OkMenu="OkMenu_22070_1"/>
+	<Property ID="3027" NpcId="WorldNpc01362" SceneID="14" DialogID="dialog_22072_1" TrackInfo="interact22072_1" OkMenu="OkMenu_22072_1"/>
+	<Property ID="3028" NpcId="WorldNpc01363" SceneID="14" DialogID="dialog_22075_1" GetItems="useitem_10g-1" TrackInfo="interact22075_1" OkMenu="OkMenu_22075_1"/>
+	<Property ID="3029" NpcId="WorldNpc01371" SceneID="14" DialogID="dialog_22081_1" TrackInfo="interact22081_1" OkMenu="OkMenu_22081_1"/>
+	<Property ID="3030" NpcId="WorldNpc01364" SceneID="14" DialogID="dialog_22085_1" TrackInfo="interact22085_1" OkMenu="OkMenu_22085_1"/>
+	<Property ID="3031" NpcId="WorldNpc01370" SceneID="14" DialogID="dialog_22086_1" TrackInfo="interact22086_1" OkMenu="OkMenu_22086_1"/>
+	<Property ID="3032" NpcId="WorldNpc01362" SceneID="14" DialogID="dialog_22091_1" TrackInfo="interact22091_1" OkMenu="OkMenu_22091_1"/>
+	<Property ID="3033" NpcId="WorldNpc00628" SceneID="3" DialogID="dialog_22046_1" TrackInfo="interact22046_1" OkMenu="OkMenu_22046_1"/>
+	<Property ID="3034" NpcId="WorldNpc05921" SceneID="21" DialogID="dialog_22097_1" TrackInfo="interact22097_1" OkMenu="OkMenu_22097_1"/>
+	<Property ID="3035" NpcId="WorldNpc05928" SceneID="21" DialogID="dialog_22100_1" TrackInfo="interact22100_1" OkMenu="OkMenu_22100_1"/>
+	<Property ID="3036" NpcId="WorldNpc05924" SceneID="21" DialogID="dialog_22107_1" TrackInfo="interact22107_1" OkMenu="OkMenu_22107_1"/>
+	<Property ID="3037" NpcId="WorldNpc05926" SceneID="21" DialogID="dialog_22107_2" GetItems="useitem_15g-1" TrackInfo="interact22107_2" OkMenu="OkMenu_22107_2"/>
+	<Property ID="3038" NpcId="WorldNpc05852" SceneID="21" DialogID="dialog_22111_1" TrackInfo="interact22111_1" OkMenu="OkMenu_22111_1"/>
+	<Property ID="3039" NpcId="WorldNpc05852" SceneID="21" DialogID="dialog_22115_1" TrackInfo="interact22115_1" OkMenu="OkMenu_22115_1"/>
+	<Property ID="3040" NpcId="WorldNpc05854" SceneID="21" DialogID="dialog_22122_1" TrackInfo="interact22122_1" OkMenu="OkMenu_22122_1"/>
+	<Property ID="3041" NpcId="WorldNpc06001" SceneID="21" DialogID="dialog_22123_1" TrackInfo="interact22123_1" OkMenu="OkMenu_22123_1"/>
+	<Property ID="3042" NpcId="WorldNpc06037" SceneID="21" DialogID="dialog_22126_1" TrackInfo="interact22126_1" OkMenu="OkMenu_22126_1"/>
+	<Property ID="3043" NpcId="WorldNpc06007" SceneID="21" DialogID="dialog_22128_1" TrackInfo="interact22128_1" OkMenu="OkMenu_22128_1"/>
+	<Property ID="3044" NpcId="WorldNpc06037" SceneID="21" DialogID="dialog_22132_1" TrackInfo="interact22132_1" OkMenu="OkMenu_22132_1"/>
+	<Property ID="3045" NpcId="WorldNpc06038" SceneID="21" DialogID="dialog_22136_1" TrackInfo="interact22136_1" OkMenu="OkMenu_22136_1"/>
+	<Property ID="3046" NpcId="WorldNpc06038" SceneID="21" DialogID="dialog_22138_1" TrackInfo="interact22138_1" OkMenu="OkMenu_22138_1"/>
+	<Property ID="3047" NpcId="WorldNpc06009" SceneID="21" DialogID="dialog_22141_1" TrackInfo="interact22141_1" OkMenu="OkMenu_22141_1"/>
+	<Property ID="3048" NpcId="WorldNpc06037" SceneID="21" DialogID="dialog_22142_1" TrackInfo="interact22142_1" OkMenu="OkMenu_22142_1"/>
+	<Property ID="3049" NpcId="WorldNpc06127" SceneID="22" DialogID="dialog_22145_1" TrackInfo="interact22145_1"/>
+	<Property ID="3050" NpcId="WorldNpc06164" SceneID="22" DialogID="dialog_22146_1" TrackInfo="interact22146_1"/>
+	<Property ID="3051" NpcId="WorldNpc06165" SceneID="22" DialogID="dialog_22147_1" TrackInfo="interact22147_1"/>
+	<Property ID="3052" NpcId="WorldNpc06176" SceneID="22" DialogID="dialog_22148_1" TrackInfo="interact22148_1"/>
+	<Property ID="3053" NpcId="WorldNpc06126" SceneID="22" DialogID="dialog_22148_2" TrackInfo="interact22148_2"/>
+	<Property ID="3054" NpcId="WorldNpc06179" SceneID="22" DialogID="dialog_22149_1" TrackInfo="interact22149_1"/>
+	<Property ID="3055" NpcId="WorldNpc06127" SceneID="22" DialogID="dialog_22151_1" TrackInfo="interact22151_1"/>
+	<Property ID="3056" NpcId="WorldNpc06167" SceneID="22" DialogID="dialog_22153_1" TrackInfo="interact22153_1"/>
+	<Property ID="3057" NpcId="WorldNpc06168" SceneID="22" DialogID="dialog_22155_1" TrackInfo="interact22155_1"/>
+	<Property ID="3058" NpcId="WorldNpc06180" SceneID="22" DialogID="dialog_22156_1" TrackInfo="interact22156_1"/>
+	<Property ID="3059" NpcId="WorldNpc06167" SceneID="22" DialogID="dialog_22157_1" TrackInfo="interact22157_1"/>
+	<Property ID="3060" NpcId="WorldNpc06108" SceneID="22" DialogID="dialog_22158_1" TrackInfo="interact22158_1"/>
+	<Property ID="3061" NpcId="WorldNpc06112" SceneID="22" DialogID="dialog_22159_1" TrackInfo="interact22159_1"/>
+	<Property ID="3062" NpcId="WorldNpc06171" SceneID="22" DialogID="dialog_22160_1" TrackInfo="interact22160_1"/>
+	<Property ID="3063" NpcId="WorldNpc06171" SceneID="22" DialogID="dialog_22164_1" GetItems="useitem_21g-1" LostItems="taskitem_41g-1" TrackInfo="interact22164_1"/>
+	<Property ID="3064" NpcId="WorldNpc06173" SceneID="22" DialogID="dialog_22165_1" TrackInfo="interact22165_1"/>
+	<Property ID="3065" NpcId="WorldNpc06126" SceneID="22" DialogID="dialog_22170_1" TrackInfo="interact22170_1"/>
+	<Property ID="3066" NpcId="WorldNpc06127" SceneID="22" DialogID="dialog_22170_2" TrackInfo="interact22170_2"/>
+	<Property ID="27001" NpcId="FunnpcClone017004" SceneID="43" DialogID="dialog_2809" TrackInfo="interact2809"/>
+	<Property ID="27002" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_2817" LostItems="TaskItemClone_0171137-1|TaskItemClone_0171134-1" TrackInfo="interact2817" OkMenu="okmenu2817"/>
+	<Property ID="27003" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_2818" LostItems="TaskItemClone_0171135-1" TrackInfo="interact2818" OkMenu="okmenu2818"/>
+	<Property ID="27004" NpcId="bossclone002012" SceneID="28" DialogID="dialog_2053" LostItems="TaskItemClone_002001-1" TrackInfo="interact2053" OkMenu="okmenu2053"/>
+	<Property ID="27005" NpcId="bossclone002017" SceneID="28" DialogID="dialog_2061_3" TrackInfo="interact2061_3"/>
+	<Property ID="27006" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2060" TrackInfo="interact2060"/>
+	<Property ID="27007" NpcId="bossclone002017" SceneID="28" DialogID="dialog_2061_1" GetItems="useitemclone002001-1" TrackInfo="interact2061_1"/>
+	<Property ID="27008" NpcId="bossclone002014" SceneID="28" DialogID="dialog_2061_2" TrackInfo="interact2061_2"/>
+	<Property ID="27009" NpcId="funnpcclone002010" SceneID="28" DialogID="dialog_2079" TrackInfo="interact2079" OkMenu="okmenu2079"/>
+	<Property ID="27010" NpcId="bossclone002007" SceneID="28" DialogID="dialog_2080" TrackInfo="interact2080" OkMenu="okmenu2080"/>
+	<Property ID="27011" NpcId="bossclone002007" SceneID="28" DialogID="dialog_2089" TrackInfo="interact2089"/>
+	<Property ID="27012" NpcId="bossclone002007" SceneID="28" DialogID="dialog_2095" TrackInfo="interact2095" OkMenu="okmenu2095"/>
+	<Property ID="27013" NpcId="bossclone002002" SceneID="28" DialogID="dialog_2238" LostItems="TaskItemClone_002002-1" TrackInfo="interact2238" OkMenu="okmenu2238"/>
+	<Property ID="27014" NpcId="bossclone002007" SceneID="28" DialogID="dialog_2239" TrackInfo="interact2239" OkMenu="okmenu2239"/>
+	<Property ID="27015" NpcId="bossclone002005" SceneID="28" DialogID="dialog_2433" LostItems="TaskItemClone_002003-1" TrackInfo="interact2433"/>
+	<Property ID="27016" NpcId="bossclone002013" SceneID="28" DialogID="dialog_2434" TrackInfo="interact2434"/>
+	<Property ID="27017" NpcId="bossclone002001" SceneID="28" DialogID="dialog_2440" LostItems="TaskItemClone_002004-1" TrackInfo="interact2440"/>
+	<Property ID="27018" NpcId="bossclone002002" SceneID="28" DialogID="dialog_2442" LostItems="TaskItemClone_002005-1" TrackInfo="interact2442"/>
+	<Property ID="27019" NpcId="bossclone002009" SceneID="28" DialogID="dialog_2446_1" TrackInfo="interact2446_1"/>
+	<Property ID="27020" NpcId="bossclone002004" SceneID="28" DialogID="dialog_2446_2" TrackInfo="interact2446_2"/>
+	<Property ID="27021" NpcId="bossclone002018" SceneID="28" DialogID="dialog_2839" TrackInfo="interact2839" OkMenu="okmenu2839"/>
+	<Property ID="27022" NpcId="bossclone002014" SceneID="28" DialogID="dialog_2234_1" TrackInfo="interact2234_1" OkMenu="okmenu2234_1"/>
+	<Property ID="27023" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2083_1" TrackInfo="interact2083_1" OkMenu="okmenu2083_1"/>
+	<Property ID="27025" NpcId="bossclone002009" SceneID="28" DialogID="dialog_2083_3" TrackInfo="interact2083_3" OkMenu="okmenu2083_3"/>
+	<Property ID="27026" NpcId="bossclone002017" SceneID="28" DialogID="dialog_2083_4" TrackInfo="interact2083_4" OkMenu="okmenu2083_4"/>
+	<Property ID="27027" NpcId="bossclone002012" SceneID="28" DialogID="dialog_2432_1" TrackInfo="interact2432_1"/>
+	<Property ID="27028" NpcId="bossclone002006" SceneID="28" DialogID="dialog_2432_2" TrackInfo="interact2432_2"/>
+	<Property ID="27029" NpcId="bossclone002004" SceneID="28" DialogID="dialog_2432_3" TrackInfo="interact2432_3"/>
+	<Property ID="27030" NpcId="funnpcclone002066" SceneID="28" DialogID="dialog_2234_2" TrackInfo="interact2234_2" OkMenu="okmenu2234_2"/>
+	<Property ID="27031" NpcId="bossclone002019" SceneID="28" DialogID="dialog_2841_1" TrackInfo="interact2841_1"/>
+	<Property ID="27032" NpcId="bossclone002020" SceneID="28" DialogID="dialog_2841_2" TrackInfo="interact2841_2"/>
+	<Property ID="27033" NpcId="bossclone002021" SceneID="28" DialogID="dialog_2841_3" TrackInfo="interact2841_3"/>
+	<Property ID="27034" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2081_1" TrackInfo="interact2081_1" OkMenu="okmenu2081_1"/>
+	<Property ID="27035" NpcId="bossclone002006" SceneID="28" DialogID="dialog_2081_2" TrackInfo="interact2081_2" OkMenu="okmenu2081_2"/>
+	<Property ID="27036" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2096" TrackInfo="interact2096" OkMenu="okmenu2096"/>
+	<Property ID="27037" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2431_1" TrackInfo="interact2431_1" OkMenu="okmenu2431_1"/>
+	<Property ID="27038" NpcId="bossclone002009" SceneID="28" DialogID="dialog_2431_2" TrackInfo="interact2431_2" OkMenu="okmenu2431_2"/>
+	<Property ID="27039" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2445_1" TrackInfo="interact2445_1" OkMenu="okmenu2445_1"/>
+	<Property ID="27040" NpcId="bossclone002017" SceneID="28" DialogID="dialog_2445_2" TrackInfo="interact2445_2" OkMenu="okmenu2445_2"/>
+	<Property ID="27041" NpcId="bossclone002028" SceneID="28" DialogID="dialog_2840_1" TrackInfo="interact2840_1" OkMenu="okmenu2840_1"/>
+	<Property ID="27042" NpcId="bossclone002007" SceneID="28" DialogID="dialog_2840_2" TrackInfo="interact2840_2" OkMenu="okmenu2840_2"/>
+	<Property ID="27043" NpcId="bossclone002017" SceneID="28" DialogID="dialog_2097" TrackInfo="interact2097"/>
+	<Property ID="27044" NpcId="bossclone002006" SceneID="28" DialogID="dialog_2052" LostItems="TaskItemClone_002016-1" TrackInfo="interact2052"/>
+	<Property ID="27045" NpcId="bossclone002013" SceneID="28" DialogID="dialog_2073" TrackInfo="interact2073"/>
+	<Property ID="27046" NpcId="bossclone002005" SceneID="28" DialogID="dialog_2838_1" LostItems="TaskItemClone_002017-1" TrackInfo="interact2838_1" OkMenu="okmenu2838_1"/>
+	<Property ID="27047" NpcId="funnpcclone002066" SceneID="28" DialogID="dialog_2069_1" TrackInfo="interact2069_1" OkMenu="okmenu2069_1"/>
+	<Property ID="27048" NpcId="funnpcclone002041" SceneID="28" DialogID="dialog_2076_1" TrackInfo="interact2076_1" OkMenu="okmenu2076_1"/>
+	<Property ID="27049" NpcId="FunnpcClone017004" SceneID="5" DialogID="dialog_2801" LostItems="TaskItemClone_0171127-1" TrackInfo="interact2801" OkMenu="okmenu2801"/>
+	<Property ID="27050" NpcId="FunnpcClone017011" SceneID="5" TrackInfo="interact2803"/>
+	<Property ID="27051" NpcId="FunnpcClone017007" SceneID="5" DialogID="dialog_2805_1" GetItems="TaskItemClone_0171129-1" TrackInfo="interact2805_1" OkMenu="okmenu2805_1"/>
+	<Property ID="27052" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_2805_2" LostItems="TaskItemClone_0171129-1" TrackInfo="interact2805_2" OkMenu="okmenu2805_2"/>
+	<Property ID="27053" NpcId="FuncNpc00106" SceneID="14" DialogID="dialog_2002_1" GetItems="TaskItemClone_001013-1" TrackInfo="interact2002_1"/>
+	<Property ID="27054" NpcId="WorldNpc01081" SceneID="14" DialogID="dialog_2017_1" GetItems="TaskItemClone_001001-1" TrackInfo="interact2017_1"/>
+	<Property ID="27056" NpcId="funnpcclone002042" SceneID="28" DialogID="dialog_2076_2" TrackInfo="interact2076_2" OkMenu="okmenu2076_2"/>
+	<Property ID="27057" NpcId="funnpcclone002043" SceneID="28" DialogID="dialog_2076_3" TrackInfo="interact2076_3" OkMenu="okmenu2076_3"/>
+	<Property ID="27058" NpcId="FunnpcClone009001" SceneID="35" DialogID="dialog_2420_1" LostItems="TaskItemClone009001-1" TrackInfo="interact2420"/>
+	<Property ID="27059" NpcId="BossClone009002" SceneID="35" DialogID="dialog_2413_1" LostItems="TaskItemClone_009006-1|TaskItemClone_009007-1" TrackInfo="interact2413"/>
+	<Property ID="27060" NpcId="funnpcclone002066" SceneID="28" DialogID="dialog_2069" TrackInfo="interact2069" OkMenu="okmenu2069"/>
+	<Property ID="27062" NpcId="funnpcclone002071" SceneID="28" DialogID="dialog_2070" TrackInfo="interact2070"/>
+	<Property ID="27063" NpcId="funnpcclone003102" SceneID="14" DialogID="dialog_2101" TrackInfo="interact2101" OkMenu="okmenu2101"/>
+	<Property ID="27064" NpcId="funnpcclone003102" SceneID="14" DialogID="dialog_2102_1" GetItems="TaskItemClone_003002-1" TrackInfo="interact2102_1" OkMenu="okmenu2102_1"/>
+	<Property ID="27065" NpcId="funnpcclone003101" SceneID="14" DialogID="dialog_2102_2" TrackInfo="interact2102_2" OkMenu="okmenu2102_2"/>
+	<Property ID="27066" NpcId="funnpcclone003102" SceneID="14" DialogID="dialog_2102_3" LostItems="TaskItemClone_003002-1" TrackInfo="interact2102_3" OkMenu="okmenu2102_3"/>
+	<Property ID="27067" NpcId="funnpcclone003106" SceneID="29" DialogID="dialog_2104" TrackInfo="interact2104" OkMenu="okmenu2104"/>
+	<Property ID="27068" NpcId="funnpcclone003002" SceneID="29" DialogID="dialog_2106_1" TrackInfo="interact2106_1" OkMenu="okmenu2106_1"/>
+	<Property ID="27069" NpcId="funnpcclone003003" SceneID="29" DialogID="dialog_2106_2" TrackInfo="interact2106_2" OkMenu="okmenu2106_2"/>
+	<Property ID="27070" NpcId="funnpcclone003108" SceneID="14" DialogID="dialog_2103" TrackInfo="interact2103" OkMenu="okmenu2103"/>
+	<Property ID="12001" NpcId="WorldNpc00364" SceneID="12" DialogID="dialog_38003_1" TrackInfo="interact38003" OkMenu="OkMenu 38003"/>
+	<Property ID="12002" NpcId="WorldNpc00262" SceneID="12" DialogID="dialog_38006_1" LostItems="taskitem_296-1" TrackInfo="interact38006_1" OkMenu="OkMenu 38006_1"/>
+	<Property ID="12003" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38012_1" TrackInfo="interact38012_1" OkMenu="OkMenu 38012_1"/>
+	<Property ID="12004" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38012_2" TrackInfo="interact38012_2" OkMenu="OkMenu 38012_2"/>
+	<Property ID="12005" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38047_1" TrackInfo="interact38047_1" OkMenu="OkMenu 38047_1"/>
+	<Property ID="12006" NpcId="WorldNpc00274" SceneID="12" DialogID="dialog_38047_2" TrackInfo="interact38047_2" OkMenu="OkMenu 38047_2"/>
+	<Property ID="12007" NpcId="WorldNpc00211" SceneID="12" DialogID="dialog_38047_3" TrackInfo="interact38047_3" OkMenu="OkMenu 38047_3"/>
+	<Property ID="12008" NpcId="WorldNpc00355" SceneID="12" DialogID="dialog_38047_4" TrackInfo="interact38047_4" OkMenu="OkMenu 38047_4"/>
+	<Property ID="12009" NpcId="WorldNpc00203" SceneID="12" DialogID="dialog_38048_2" TrackInfo="interact38048_2" OkMenu="OkMenu 38048_1"/>
+	<Property ID="12010" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38048_3" TrackInfo="interact38048_3" OkMenu="OkMenu 38048_2"/>
+	<Property ID="12011" NpcId="WorldNpc00473" SceneID="12" DialogID="dialog_38048_4" TrackInfo="interact38048_4" OkMenu="OkMenu 38048_3"/>
+	<Property ID="12012" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38084_1" GetItems="taskitem_7j-1" TrackInfo="interact38084_1" OkMenu="OkMenu 38084_1"/>
+	<Property ID="12013" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38084_2" LostItems="taskitem_7j-1" TrackInfo="interact38084_2" OkMenu="OkMenu 38084_2"/>
+	<Property ID="12014" NpcId="WorldNpc00372" SceneID="12" DialogID="dialog_38105_1" TrackInfo="interact38105" OkMenu="OkMenu 38105"/>
+	<Property ID="12015" NpcId="WorldNpc00201" SceneID="12" DialogID="dialog_38111_1" GetItems="taskitem_16b-1" LostItems="taskitem_23b-1" TrackInfo="interact38111_1" OkMenu="OkMenu 38111_1"/>
+	<Property ID="12016" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38111_2" LostItems="taskitem_16b-1" TrackInfo="interact38111_2" OkMenu="OkMenu 38111_2"/>
+	<Property ID="12017" NpcId="WorldNpc00201" SceneID="12" DialogID="dialog_38123_1" LostItems="taskitem_20b-1" TrackInfo="interact38123" OkMenu="OkMenu 38123"/>
+	<Property ID="12018" NpcId="WorldNpc00447" SceneID="12" DialogID="dialog_38132_1" TrackInfo="interact38132" OkMenu="OkMenu 38132"/>
+	<Property ID="12019" NpcId="WorldNpc00331" SceneID="12" DialogID="dialog_38152_1" LostItems="taskitem_381-1" TrackInfo="interact38152" OkMenu="OkMenu 38152"/>
+	<Property ID="12020" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38154_2" TrackInfo="interact38154_2" OkMenu="OkMenu 38154_2"/>
+	<Property ID="12021" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38154_3" TrackInfo="interact38154_3" OkMenu="OkMenu 38154_3"/>
+	<Property ID="12022" NpcId="WorldNpc00206" SceneID="12" DialogID="dialog_38160_1" LostItems="taskitem_383-1" TrackInfo="interact38160" OkMenu="OkMenu 38160"/>
+	<Property ID="12023" NpcId="WorldNpc00206" SceneID="12" DialogID="dialog_38163_1" LostItems="taskitem_385-1" TrackInfo="interact38163" OkMenu="OkMenu 38163"/>
+	<Property ID="12024" NpcId="WorldNpc00342" SceneID="12" DialogID="dialog_38171_1" GetItems="taskitem_386-1" TrackInfo="interact38171" OkMenu="OkMenu 38171"/>
+	<Property ID="12025" NpcId="ItemNpc20501" SceneID="20" DialogID="dialog_38173_1" LostItems="taskitem_386-1" TrackInfo="interact38173" OkMenu="OkMenu 38173"/>
+	<Property ID="12026" NpcId="ItemNpc20502" SceneID="20" DialogID="dialog_38185_1" LostItems="taskitem_388-1" TrackInfo="interact38185" OkMenu="OkMenu 38185"/>
+	<Property ID="12027" NpcId="WorldNpc00246" SceneID="12" DialogID="dialog_38193_1" TrackInfo="interact38193" OkMenu="OkMenu 38193"/>
+	<Property ID="12028" NpcId="WorldNpc00204" SceneID="12" DialogID="dialog_38249" TrackInfo="interact38249" OkMenu="OkMenu 38249"/>
+	<Property ID="12029" NpcId="WorldNpc00203" SceneID="12" DialogID="dialog_38273" GetItems="useitem_1g-1" TrackInfo="interact38273" OkMenu="OkMenu 38273"/>
+	<Property ID="12030" NpcId="WorldNpc00228" SceneID="12" DialogID="dialog_38278_1" GetItems="taskitem_13g-1" TrackInfo="interact38278_1" OkMenu="OkMenu 38278_1"/>
+	<Property ID="12031" NpcId="WorldNpc00204" SceneID="12" DialogID="dialog_38278_2" LostItems="taskitem_13g-1" TrackInfo="interact38278_2" OkMenu="OkMenu 38278_2"/>
+	<Property ID="12032" NpcId="WorldNpc01616" SceneID="14" DialogID="dialog_38328_1" LostItems="taskitem_11g-1" TrackInfo="interact38328_1" OkMenu="OkMenu 38328_1"/>
+	<Property ID="12033" NpcId="WorldNpc01619" SceneID="14" DialogID="dialog_38334_1" TrackInfo="interact38334" OkMenu="OkMenu 38334_1"/>
+	<Property ID="12034" NpcId="WorldNpc08913" SceneID="13" DialogID="dialog_38338_1" LostItems="taskitem_397-1" TrackInfo="interact38338_1" OkMenu="OkMenu 38338_1"/>
+	<Property ID="12035" NpcId="WorldNpc08913" SceneID="13" DialogID="dialog_38338_2" TrackInfo="interact38338_2" OkMenu="OkMenu 38338_2"/>
+	<Property ID="12036" NpcId="WorldNpc08926" SceneID="13" DialogID="dialog_38349_1" TrackInfo="interact38349_1" OkMenu="OkMenu 38349_1"/>
+	<Property ID="12037" NpcId="WorldNpc08926" SceneID="13" DialogID="dialog_38349_2" TrackInfo="interact38349_2" OkMenu="OkMenu 38349_2"/>
+	<Property ID="12038" NpcId="WorldNpc08932" SceneID="13" DialogID="dialog_38361_1" LostItems="taskitem_419-1" TrackInfo="interact38361" OkMenu="OkMenu 38361"/>
+	<Property ID="12039" NpcId="WorldNpc08933" SceneID="13" DialogID="dialog_38366_1" GetItems="useitem_1b-1" TrackInfo="interact38366_1" OkMenu="OkMenu 38366_1"/>
+	<Property ID="12040" NpcId="WorldNpc08920" SceneID="13" DialogID="dialog_38366_2" LostItems="useitem_1b-1" TrackInfo="interact38366_2" OkMenu="OkMenu 38366_2"/>
+	<Property ID="12041" NpcId="WorldNpc08921" SceneID="13" DialogID="dialog_38371_1" LostItems="taskitem_41j-1" TrackInfo="interact38371" OkMenu="OkMenu 38371"/>
+	<Property ID="12042" NpcId="WorldNpc08916" SceneID="13" DialogID="dialog_38384_2" LostItems="taskitem_408-1" TrackInfo="interact38384" OkMenu="OkMenu 38384"/>
+	<Property ID="12043" NpcId="WorldNpc00224" SceneID="12" DialogID="dialog_38390_1" GetItems="taskitem_407-1" TrackInfo="interact38390_1" OkMenu="OkMenu 38390_1"/>
+	<Property ID="12044" NpcId="WorldNpc00262" SceneID="12" DialogID="dialog_38390_2" LostItems="taskitem_407-1" TrackInfo="interact38390_2" OkMenu="OkMenu 38390_2"/>
+	<Property ID="12045" NpcId="WorldNpc08828" SceneID="13" DialogID="dialog_38405_1" GetItems="taskitem_321-3" TrackInfo="interact38405_1" OkMenu="OkMenu 38405_1"/>
+	<Property ID="12046" NpcId="WorldNpc08831" SceneID="13" DialogID="dialog_38405_2" LostItems="taskitem_321-3" TrackInfo="interact38405_2" OkMenu="OkMenu 38405_2"/>
+	<Property ID="12047" NpcId="WorldNpc10008" SceneID="16" DialogID="dialog_38416_1" GetItems="taskitem_177-2" TrackInfo="interact38416_1" OkMenu="OkMenu 38416_1"/>
+	<Property ID="12048" NpcId="WorldNpc10017" SceneID="16" DialogID="dialog_38416_2" LostItems="taskitem_177-2" TrackInfo="interact38416_2" OkMenu="OkMenu 38416_2"/>
+	<Property ID="12049" NpcId="WorldNpc10008" SceneID="16" DialogID="dialog_38417_1" GetItems="taskitem_40j-1" TrackInfo="interact38417_1" OkMenu="OkMenu 38417_1"/>
+	<Property ID="12050" NpcId="WorldNpc10018" SceneID="16" DialogID="dialog_38417_2" LostItems="taskitem_40j-1" TrackInfo="interact38417_2" OkMenu="OkMenu 38417_2"/>
+	<Property ID="12051" NpcId="Gather00006b" SceneID="16" DialogID="0" TrackInfo="interact38418" OkMenu="OkMenu 38418"/>
+	<Property ID="12052" NpcId="WorldNpc06136" SceneID="22" DialogID="dialog_38434_1" TrackInfo="interact38434_1" OkMenu="OkMenu 38434_1"/>
+	<Property ID="12053" NpcId="WorldNpc06134" SceneID="22" DialogID="dialog_38434_2" TrackInfo="interact38434_2" OkMenu="OkMenu 38434_2"/>
+	<Property ID="12054" NpcId="WorldNpc06135" SceneID="22" DialogID="dialog_38434_3" TrackInfo="interact38434_3" OkMenu="OkMenu 38434_3"/>
+	<Property ID="12057" NpcId="WorldNpc01123" SceneID="14" DialogID="dialog_38470_1" GetItems="taskitem_43j-3" TrackInfo="interact38470_1" OkMenu="OkMenu 38470"/>
+	<Property ID="12060" NpcId="WorldNpc01455" SceneID="14" DialogID="dialog_38480_1" LostItems="taskitem_44j-1" TrackInfo="interact38480" OkMenu="OkMenu 38480"/>
+	<Property ID="12061" NpcId="WorldNpc00229" SceneID="12" DialogID="dialog_38481_1" GetItems="taskitem_1d-1" TrackInfo="interact38481_1" OkMenu="OkMenu 38481_1"/>
+	<Property ID="12062" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38481_2" LostItems="taskitem_1d-1" TrackInfo="interact38481_2" OkMenu="OkMenu 38481_2"/>
+	<Property ID="12063" NpcId="WorldNpc02520" SceneID="9" DialogID="dialog_38494" TrackInfo="interact38494" OkMenu="OkMenu 38494"/>
+	<Property ID="12064" NpcId="WorldNpc02502" SceneID="9" DialogID="dialog_38502" TrackInfo="interact38502" OkMenu="OkMenu 38502"/>
+	<Property ID="12065" NpcId="WorldNpc02502" SceneID="9" DialogID="dialog_38513_1" LostItems="taskitem_13d-1" TrackInfo="interact38513_1" OkMenu="OkMenu 38513_1"/>
+	<Property ID="12066" NpcId="WorldNpc02512" SceneID="9" DialogID="dialog_38513_2" LostItems="taskitem_13d-1" TrackInfo="interact38513_2" OkMenu="OkMenu 38513_2"/>
+	<Property ID="12067" NpcId="WorldNpc02511" SceneID="9" DialogID="dialog_38513_3" LostItems="taskitem_13d-1" TrackInfo="interact38513_3" OkMenu="OkMenu 38513_3"/>
+	<Property ID="12068" NpcId="WorldNpc02521" SceneID="9" DialogID="dialog_38521" TrackInfo="interact38521" OkMenu="OkMenu 38521"/>
+	<Property ID="12070" NpcId="WorldNpc05793" SceneID="21" DialogID="dialog_38531_1" TrackInfo="interact38531" OkMenu="OkMenu 38531"/>
+	<Property ID="12071" NpcId="WorldNpc05793" SceneID="21" DialogID="dialog_38536_1" LostItems="taskitem_313-1" TrackInfo="interact38536_1" OkMenu="OkMenu 38536_1"/>
+	<Property ID="12072" NpcId="WorldNpc05794" SceneID="21" DialogID="dialog_38536_2" LostItems="taskitem_313-1" TrackInfo="interact38536_2" OkMenu="OkMenu 38536_2"/>
+	<Property ID="12073" NpcId="WorldNpc05795" SceneID="21" DialogID="dialog_38536_3" LostItems="taskitem_313-1" TrackInfo="interact38536_3" OkMenu="OkMenu 38536_3"/>
+	<Property ID="12074" NpcId="WorldNpc05796" SceneID="21" DialogID="dialog_38536_4" LostItems="taskitem_313-1" TrackInfo="interact38536_4" OkMenu="OkMenu 38536_4"/>
+	<Property ID="12075" NpcId="WorldNpc05793" SceneID="21" DialogID="dialog_38539_1" LostItems="taskitem_19-1" TrackInfo="interact38539_1" OkMenu="OkMenu 38539_1"/>
+	<Property ID="12076" NpcId="WorldNpc05794" SceneID="21" DialogID="dialog_38539_2" LostItems="taskitem_19-1" TrackInfo="interact38539_2" OkMenu="OkMenu 38539_2"/>
+	<Property ID="12077" NpcId="WorldNpc05795" SceneID="21" DialogID="dialog_38539_3" LostItems="taskitem_19-1" TrackInfo="interact38539_3" OkMenu="OkMenu 38539_3"/>
+	<Property ID="12078" NpcId="WorldNpc05796" SceneID="21" DialogID="dialog_38539_4" LostItems="taskitem_19-1" TrackInfo="interact38539_4" OkMenu="OkMenu 38539_4"/>
+	<Property ID="12079" NpcId="WorldNpc05791" SceneID="21" DialogID="dialog_38559_1" TrackInfo="interact38559_1" OkMenu="OkMenu 38559_1"/>
+	<Property ID="12080" NpcId="WorldNpc05799" SceneID="21" DialogID="dialog_38559_2" TrackInfo="interact38559_2" OkMenu="OkMenu 38559_2"/>
+	<Property ID="12081" NpcId="WorldNpc05793" SceneID="21" DialogID="dialog_38560_1" TrackInfo="interact38560_1" OkMenu="OkMenu 38560_1"/>
+	<Property ID="12082" NpcId="WorldNpc05794" SceneID="21" DialogID="dialog_38560_2" TrackInfo="interact38560_2" OkMenu="OkMenu 38560_2"/>
+	<Property ID="12083" NpcId="WorldNpc05795" SceneID="21" DialogID="dialog_38560_3" TrackInfo="interact38560_3" OkMenu="OkMenu 38560_3"/>
+	<Property ID="12084" NpcId="WorldNpc05796" SceneID="21" DialogID="dialog_38560_4" TrackInfo="interact38560_4" OkMenu="OkMenu 38560_4"/>
+	<Property ID="12085" NpcId="WorldNpc05793" SceneID="21" DialogID="dialog_38565_1" TrackInfo="interact38565_1" OkMenu="OkMenu 38565_1"/>
+	<Property ID="12086" NpcId="WorldNpc05794" SceneID="21" DialogID="dialog_38565_2" TrackInfo="interact38565_2" OkMenu="OkMenu 38565_2"/>
+	<Property ID="12087" NpcId="WorldNpc05795" SceneID="21" DialogID="dialog_38565_3" TrackInfo="interact38565_3" OkMenu="OkMenu 38565_3"/>
+	<Property ID="12088" NpcId="WorldNpc05796" SceneID="21" DialogID="dialog_38565_4" TrackInfo="interact38565_4" OkMenu="OkMenu 38565_4"/>
+	<Property ID="12089" NpcId="WorldNpc05801" SceneID="21" DialogID="dialog_38568_1" GetItems="taskitem_198-1" TrackInfo="interact38568_1" OkMenu="OkMenu 38568_1"/>
+	<Property ID="12090" NpcId="WorldNpc05800" SceneID="21" DialogID="dialog_38568_2" LostItems="taskitem_198-1" TrackInfo="interact38568_2" OkMenu="OkMenu 38568_2"/>
+	<Property ID="12091" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_38571_1" TrackInfo="interact38571" OkMenu="OkMenu 38571"/>
+	<Property ID="12092" NpcId="WorldNpc02603" SceneID="10" DialogID="dialog_38572_1" TrackInfo="interact38572" OkMenu="OkMenu 38572"/>
+	<Property ID="12093" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38001_1" TrackInfo="interact38001_2" OkMenu="OkMenu 38001_1"/>
+	<Property ID="12094" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38001_2" TrackInfo="interact38001_3" OkMenu="OkMenu 38001_2"/>
+	<Property ID="12095" NpcId="WorldNpc00203" SceneID="12" DialogID="dialog_38004_1" TrackInfo="interact38004_1" OkMenu="OkMenu 38004"/>
+	<Property ID="12096" NpcId="WorldNpc00209" SceneID="12" DialogID="dialog_38006_2" TrackInfo="interact38006_2" OkMenu="OkMenu 38006_2"/>
+	<Property ID="12097" NpcId="WorldNpc00209" SceneID="12" DialogID="dialog_38006_3" GetItems="taskitem_359-1" TrackInfo="interact38006_3" OkMenu="OkMenu 38006_3"/>
+	<Property ID="12098" NpcId="WorldNpc00473" SceneID="12" DialogID="dialog_38008_1" TrackInfo="interact38008_1" OkMenu="OkMenu 38008"/>
+	<Property ID="12099" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38015_2" TrackInfo="interact38015_2" OkMenu="OkMenu 38015_2"/>
+	<Property ID="12100" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38019_1" TrackInfo="interact38019_1" OkMenu="OkMenu 38019_1"/>
+	<Property ID="12101" NpcId="WorldNpc00379" SceneID="12" DialogID="dialog_38065_1" TrackInfo="interact38065_1" OkMenu="OkMenu 38065"/>
+	<Property ID="12102" NpcId="WorldNpc00359" SceneID="12" DialogID="dialog_38022_1" TrackInfo="interact38022_1" OkMenu="OkMenu 38022_1"/>
+	<Property ID="12103" NpcId="WorldNpc00365" SceneID="12" DialogID="dialog_38025_1" TrackInfo="interact38025_1" OkMenu="OkMenu 38025"/>
+	<Property ID="12104" NpcId="WorldNpc00339" SceneID="12" DialogID="dialog_38027_1" TrackInfo="interact38027_1" OkMenu="OkMenu 38027"/>
+	<Property ID="12105" NpcId="WorldNpc00360" SceneID="12" DialogID="dialog_38029_1" TrackInfo="interact38029_1" OkMenu="OkMenu 38029_1"/>
+	<Property ID="12106" NpcId="WorldNpc00361" SceneID="12" DialogID="dialog_38032_1" TrackInfo="interact38032_1" OkMenu="OkMenu 38032"/>
+	<Property ID="12107" NpcId="WorldNpc00361" SceneID="12" DialogID="dialog_38034_1" TrackInfo="interact38034_1" OkMenu="OkMenu 38034"/>
+	<Property ID="12108" NpcId="WorldNpc00364" SceneID="12" DialogID="dialog_38036_1" LostItems="taskitem_372-1|taskitem_368-1" TrackInfo="interact38036_1" OkMenu="OkMenu 38036"/>
+	<Property ID="12109" NpcId="WorldNpc00365" SceneID="12" DialogID="dialog_38037_1" TrackInfo="interact38037_1" OkMenu="OkMenu 38037"/>
+	<Property ID="12110" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38015_1" TrackInfo="interact38015_1" OkMenu="OkMenu 38015_1"/>
+	<Property ID="12111" NpcId="WorldNpc00360" SceneID="12" DialogID="dialog_38029_2" GetItems="taskitem_372-1" TrackInfo="interact38029_2" OkMenu="OkMenu 38029_2"/>
+	<Property ID="12112" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38039_1" TrackInfo="interact38039_1" OkMenu="OkMenu 38039"/>
+	<Property ID="12113" NpcId="WorldNpc00211" SceneID="12" DialogID="dialog_38041_1" TrackInfo="interact38041_1" OkMenu="OkMenu 38041"/>
+	<Property ID="12114" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38042_1" TrackInfo="interact38042_1" OkMenu="OkMenu 38042"/>
+	<Property ID="12115" NpcId="WorldNpc00355" SceneID="12" DialogID="dialog_38043_1" GetItems="useitem_12b-1" TrackInfo="interact38043_1" OkMenu="OkMenu 38043_1"/>
+	<Property ID="12116" NpcId="WorldNpc00462" SceneID="12" DialogID="dialog_38043_2" TrackInfo="interact38043_2" OkMenu="OkMenu 38043_2"/>
+	<Property ID="12117" NpcId="WorldNpc00355" SceneID="12" DialogID="dialog_38045_1" TrackInfo="interact38045_1" OkMenu="OkMenu 38045_1"/>
+	<Property ID="12118" NpcId="EventNpc38001" SceneID="12" TrackInfo="interact38001_1"/>
+	<Property ID="12119" NpcId="WorldNpc00359" SceneID="12" DialogID="dialog_38022_2" TrackInfo="interact38022_2" OkMenu="OkMenu 38022_2"/>
+	<Property ID="12120" NpcId="WorldNpc00385" SceneID="12" DialogID="dialog_38045_2" TrackInfo="interact38045_2" OkMenu="OkMenu 38045_2"/>
+	<Property ID="12121" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38154_1" TrackInfo="interact38154_1" OkMenu="OkMenu 38154_1"/>
+	<Property ID="12122" NpcId="WorldNpc00457" SceneID="12" DialogID="dialog_38049_1" TrackInfo="interact38049_1" OkMenu="OkMenu 38049"/>
+	<Property ID="12123" NpcId="WorldNpc00383" SceneID="12" DialogID="dialog_38050_1" TrackInfo="interact38050_1" OkMenu="OkMenu 38050_1"/>
+	<Property ID="12124" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38050_2" TrackInfo="interact38050_2" OkMenu="OkMenu 38050_2"/>
+	<Property ID="12125" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38054_1" TrackInfo="interact38054_1" OkMenu="OkMenu 38054"/>
+	<Property ID="12126" NpcId="WorldNpc00333" SceneID="12" DialogID="dialog_38056_1" TrackInfo="interact38056_1" OkMenu="OkMenu 38056"/>
+	<Property ID="12127" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38061" TrackInfo="interact38061" OkMenu="OkMenu 38061"/>
+	<Property ID="12128" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38061_1" TrackInfo="interact38061_1" OkMenu="OkMenu 38061_1"/>
+	<Property ID="12129" NpcId="WorldNpc00331" SceneID="12" DialogID="dialog_38061_2" TrackInfo="interact38061_2" OkMenu="OkMenu 38061_2"/>
+	<Property ID="12130" NpcId="WorldNpc00331" SceneID="12" DialogID="dialog_38061_3" TrackInfo="interact38061_3" OkMenu="OkMenu 38061_3"/>
+	<Property ID="12131" NpcId="WorldNpc01616" SceneID="14" DialogID="dialog_38306_1" TrackInfo="interact38306" OkMenu="OkMenu 38306"/>
+	<Property ID="12132" NpcId="WorldNpc00391" SceneID="12" DialogID="dialog_38066_2" TrackInfo="interact38066_2" OkMenu="OkMenu 38066_2"/>
+	<Property ID="12133" NpcId="WorldNpc00485" SceneID="12" DialogID="dialog_38068_1" TrackInfo="interact38068_1" OkMenu="OkMenu 38068"/>
+	<Property ID="12134" NpcId="WorldNpc00392" SceneID="12" DialogID="dialog_38070_1" TrackInfo="interact38070_1" OkMenu="OkMenu 38070_1"/>
+	<Property ID="12135" NpcId="WorldNpc00392" SceneID="12" DialogID="dialog_38070_2" TrackInfo="interact38070_2" OkMenu="OkMenu 38070_2"/>
+	<Property ID="12136" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38074_1" TrackInfo="interact38074_1" OkMenu="OkMenu 38074"/>
+	<Property ID="12137" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38076_1" TrackInfo="interact38076_1" OkMenu="OkMenu 38076_1"/>
+	<Property ID="12138" NpcId="WorldNpc00457" SceneID="12" DialogID="dialog_38076_2" TrackInfo="interact38076_2" OkMenu="OkMenu 38076_2"/>
+	<Property ID="12139" NpcId="WorldNpc00457" SceneID="12" DialogID="dialog_38076_3" TrackInfo="interact38076_3" OkMenu="OkMenu 38076_3"/>
+	<Property ID="12140" NpcId="WorldNpc00457" SceneID="12" DialogID="dialog_38079_1" TrackInfo="interact38079_1" OkMenu="OkMenu 38079"/>
+	<Property ID="12141" NpcId="WorldNpc00389" SceneID="12" DialogID="dialog_38085_1" TrackInfo="interact38085_1" OkMenu="OkMenu 38085"/>
+	<Property ID="12142" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38087_1" TrackInfo="interact38087_1" OkMenu="OkMenu 38087_1"/>
+	<Property ID="12143" NpcId="WorldNpc00485" SceneID="12" DialogID="dialog_38087_2" TrackInfo="interact38087_2" OkMenu="OkMenu 38087_2"/>
+	<Property ID="12144" NpcId="WorldNpc00486" SceneID="12" DialogID="dialog_38090_1" TrackInfo="interact38090_1" OkMenu="OkMenu 38090"/>
+	<Property ID="12145" NpcId="WorldNpc00361" SceneID="12" DialogID="dialog_38092_1" TrackInfo="interact38092_1" OkMenu="OkMenu 38092_1"/>
+	<Property ID="12146" NpcId="WorldNpc00361" SceneID="12" DialogID="dialog_38092_2" TrackInfo="interact38092_2" OkMenu="OkMenu 38092_2"/>
+	<Property ID="12147" NpcId="WorldNpc00360" SceneID="12" DialogID="dialog_38095_1" TrackInfo="interact38095_1" OkMenu="OkMenu 38095"/>
+	<Property ID="12148" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38087_3" TrackInfo="interact38087_3" OkMenu="OkMenu 38087_3"/>
+	<Property ID="12149" NpcId="WorldNpc00203" SceneID="12" DialogID="dialog_38097_1" TrackInfo="interact38097_1" OkMenu="OkMenu 38097"/>
+	<Property ID="12150" NpcId="WorldNpc00372" SceneID="12" DialogID="dialog_38099_1" TrackInfo="interact38099_1" OkMenu="OkMenu 38099"/>
+	<Property ID="12151" NpcId="WorldNpc00373" SceneID="12" DialogID="dialog_38101_1" TrackInfo="interact38101_1" OkMenu="OkMenu 38101"/>
+	<Property ID="12153" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38108_1" TrackInfo="interact38108_1" OkMenu="OkMenu 38108"/>
+	<Property ID="12154" NpcId="WorldNpc00201" SceneID="12" DialogID="dialog_38109_1" TrackInfo="interact38109_1" OkMenu="OkMenu 38109"/>
+	<Property ID="12155" NpcId="WorldNpc00331" SceneID="12" DialogID="dialog_38112_1" TrackInfo="interact38112_1" OkMenu="OkMenu 38112"/>
+	<Property ID="12156" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38114_1" TrackInfo="interact38114_1" OkMenu="OkMenu 38114_1"/>
+	<Property ID="12157" NpcId="WorldNpc00272" SceneID="12" DialogID="dialog_38114_2" TrackInfo="interact38114_2" OkMenu="OkMenu 38114_2"/>
+	<Property ID="12158" NpcId="WorldNpc00201" SceneID="12" DialogID="dialog_38116_1" TrackInfo="interact38116_1" OkMenu="OkMenu 38116_1"/>
+	<Property ID="12159" NpcId="WorldNpc00201" SceneID="12" DialogID="dialog_38116_2" TrackInfo="interact38116_2" OkMenu="OkMenu 38116_2"/>
+	<Property ID="12160" NpcId="WorldNpc00245" SceneID="12" DialogID="dialog_38118_1" TrackInfo="interact38118_1" OkMenu="OkMenu 38118"/>
+	<Property ID="12161" NpcId="WorldNpc00372" SceneID="12" DialogID="dialog_38125_1" TrackInfo="interact38125_1" OkMenu="OkMenu 38125_1"/>
+	<Property ID="12162" NpcId="WorldNpc00375" SceneID="12" DialogID="dialog_38125_2" TrackInfo="interact38125_2" OkMenu="OkMenu 38125_2"/>
+	<Property ID="12163" NpcId="WorldNpc00374" SceneID="12" DialogID="dialog_38129_1" TrackInfo="interact38129_1" OkMenu="OkMenu 38129"/>
+	<Property ID="12164" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38133_1" TrackInfo="interact38133_1" OkMenu="OkMenu 38133_1"/>
+	<Property ID="12165" NpcId="WorldNpc00447" SceneID="12" DialogID="dialog_38133_2" TrackInfo="interact38133_2" OkMenu="OkMenu 38133_2"/>
+	<Property ID="12166" NpcId="WorldNpc00232" SceneID="12" DialogID="dialog_38136_1" TrackInfo="interact38136_1" OkMenu="OkMenu 38136"/>
+	<Property ID="12167" NpcId="WorldNpc00208" SceneID="12" DialogID="dialog_38151_1" TrackInfo="interact38151_1" OkMenu="OkMenu 38151"/>
+	<Property ID="12168" NpcId="WorldNpc00206" SceneID="12" DialogID="dialog_38153_1" TrackInfo="interact38153_1" OkMenu="OkMenu 38153"/>
+	<Property ID="12169" NpcId="WorldNpc00208" SceneID="12" DialogID="dialog_38165_1" TrackInfo="interact38165_1" OkMenu="OkMenu 38165"/>
+	<Property ID="12170" NpcId="WorldNpc00210" SceneID="12" DialogID="dialog_38166_1" TrackInfo="interact38166_1" OkMenu="OkMenu 38166_1"/>
+	<Property ID="12171" NpcId="WorldNpc00208" SceneID="12" DialogID="dialog_38166_2" TrackInfo="interact38166_2" OkMenu="OkMenu 38166_2"/>
+	<Property ID="12172" NpcId="WorldNpc06607" SceneID="20" DialogID="dialog_38174_1" TrackInfo="interact38174_1" OkMenu="OkMenu 38174"/>
+	<Property ID="12173" NpcId="WorldNpc06608" SceneID="20" DialogID="dialog_38176_1" TrackInfo="interact38176_1" OkMenu="OkMenu 38176"/>
+	<Property ID="12174" NpcId="WorldNpc06609" SceneID="20" DialogID="dialog_38187_1" TrackInfo="interact38187_1" OkMenu="OkMenu 38187"/>
+	<Property ID="12175" NpcId="WorldNpc04570" SceneID="11" DialogID="dialog_38142_1" TrackInfo="interact38142_1" OkMenu="OkMenu 38142_1"/>
+	<Property ID="12176" NpcId="WorldNpc04569" SceneID="11" DialogID="dialog_38142_2" TrackInfo="interact38142_2" OkMenu="OkMenu 38142_2"/>
+	<Property ID="12177" NpcId="WorldNpc10001" SceneID="16" DialogID="dialog_38202_1" TrackInfo="interact38202_1" OkMenu="OkMenu 38202"/>
+	<Property ID="12178" NpcId="WorldNpc10006" SceneID="16" DialogID="dialog_38216_1" TrackInfo="interact38216_1" OkMenu="OkMenu 38216"/>
+	<Property ID="12179" NpcId="WorldNpc10006" SceneID="16" DialogID="dialog_38217_1" TrackInfo="interact38217_1" OkMenu="OkMenu 38217"/>
+	<Property ID="12180" NpcId="WorldNpc00351" SceneID="12" DialogID="dialog_38241_1" TrackInfo="interact38241_1" OkMenu="OkMenu 38241_1"/>
+	<Property ID="12181" NpcId="WorldNpc00351" SceneID="12" DialogID="dialog_38241_2" TrackInfo="interact38241_2" OkMenu="OkMenu 38241_2"/>
+	<Property ID="12182" NpcId="WorldNpc00480" SceneID="12" DialogID="dialog_38244_1" TrackInfo="interact38244_1" OkMenu="OkMenu 38244_1"/>
+	<Property ID="12183" NpcId="WorldNpc00480" SceneID="12" DialogID="dialog_38250_1" TrackInfo="interact38250_1" OkMenu="OkMenu 38250_1"/>
+	<Property ID="12184" NpcId="WorldNpc00480" SceneID="12" DialogID="dialog_38250_2" TrackInfo="interact38250_2" OkMenu="OkMenu 38250_2"/>
+	<Property ID="12185" NpcId="WorldNpc00481" SceneID="12" DialogID="dialog_38255_1" TrackInfo="interact38255_1" OkMenu="OkMenu 38255_1"/>
+	<Property ID="12186" NpcId="WorldNpc00341" SceneID="12" DialogID="dialog_38259_1" TrackInfo="interact38259_1" OkMenu="OkMenu 38259_1"/>
+	<Property ID="12187" NpcId="WorldNpc00480" SceneID="12" DialogID="dialog_38261_1" LostItems="taskitem_1g-2" TrackInfo="interact38261_1" OkMenu="OkMenu 38261_1"/>
+	<Property ID="12188" NpcId="WorldNpc00357" SceneID="12" DialogID="dialog_38261_2" TrackInfo="interact38261_2" OkMenu="OkMenu 38261_2"/>
+	<Property ID="12189" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38261_3" TrackInfo="interact38261_3" OkMenu="OkMenu 38261_3"/>
+	<Property ID="12190" NpcId="WorldNpc00482" SceneID="12" DialogID="dialog_38274_1" LostItems="taskitem_2g-1|taskitem_3g-1" TrackInfo="interact38274_1" OkMenu="OkMenu 38274_1"/>
+	<Property ID="12191" NpcId="WorldNpc10007" SceneID="16" DialogID="dialog_38220_1" TrackInfo="interact38220_1" OkMenu="OkMenu 38220"/>
+	<Property ID="12192" NpcId="WorldNpc00379" SceneID="12" DialogID="dialog_38066_3" TrackInfo="interact38066_3" OkMenu="OkMenu 38066_3"/>
+	<Property ID="12193" NpcId="WorldNpc00377" SceneID="12" DialogID="dialog_38293_1" TrackInfo="interact38293_1" OkMenu="OkMenu 38293_1"/>
+	<Property ID="12194" NpcId="WorldNpc00377" SceneID="12" DialogID="dialog_38293_2" GetItems="taskitem_36g-1" TrackInfo="interact38293_2" OkMenu="OkMenu 38293_2"/>
+	<Property ID="12195" NpcId="WorldNpc00212" SceneID="12" DialogID="dialog_38300_1" TrackInfo="interact38300_1" OkMenu="OkMenu 38300_1"/>
+	<Property ID="12196" NpcId="WorldNpc00333" SceneID="12" DialogID="dialog_38300_2" TrackInfo="interact38300_2" OkMenu="OkMenu 38300_2"/>
+	<Property ID="12197" NpcId="WorldNpc00245" SceneID="12" DialogID="dialog_38300_3" GetItems="taskitem_6g-1" TrackInfo="interact38300_3" OkMenu="OkMenu 38300_3"/>
+	<Property ID="12198" NpcId="WorldNpc01302" SceneID="14" DialogID="dialog_38308_1" TrackInfo="interact38308_1" OkMenu="OkMenu 38308_1"/>
+	<Property ID="12199" NpcId="WorldNpc01391" SceneID="14" DialogID="dialog_38312_1" TrackInfo="interact38312_1" OkMenu="OkMenu 38312_1"/>
+	<Property ID="12200" NpcId="WorldNpc01391" SceneID="14" DialogID="dialog_38318_1" GetItems="taskitem_4g-1" TrackInfo="interact38318" OkMenu="OkMenu 38318_1"/>
+	<Property ID="12201" NpcId="WorldNpc01392" SceneID="14" DialogID="dialog_38321_1" TrackInfo="interact38321_1" OkMenu="OkMenu 38321_1"/>
+	<Property ID="12202" NpcId="WorldNpc01392" SceneID="14" DialogID="dialog_38321_2" GetItems="useitem_5g-1" TrackInfo="interact38321_2" OkMenu="OkMenu 38321_2"/>
+	<Property ID="12203" NpcId="WorldNpc08918" SceneID="13" DialogID="dialog_38354_1" TrackInfo="interact38354_1" OkMenu="OkMenu 38354_1"/>
+	<Property ID="12204" NpcId="WorldNpc08924" SceneID="13" DialogID="dialog_38354_2" TrackInfo="interact38354_2" OkMenu="OkMenu 38354_2"/>
+	<Property ID="12205" NpcId="WorldNpc08918" SceneID="13" DialogID="dialog_38357_1" TrackInfo="interact38357_1" OkMenu="OkMenu 38357_1"/>
+	<Property ID="12206" NpcId="WorldNpc08924" SceneID="13" DialogID="dialog_38357_2" TrackInfo="interact38357_2" OkMenu="OkMenu 38357_2"/>
+	<Property ID="12207" NpcId="WorldNpc08918" SceneID="13" DialogID="dialog_38383_1" TrackInfo="interact38383_1" OkMenu="OkMenu 38383_1"/>
+	<Property ID="12208" NpcId="WorldNpc08915" SceneID="13" DialogID="dialog_38383_2" TrackInfo="interact38383_2" OkMenu="OkMenu 38383_2"/>
+	<Property ID="12209" NpcId="WorldNpc00472" SceneID="12" DialogID="dialog_38385_1" TrackInfo="interact38385_1" OkMenu="OkMenu 38385_1"/>
+	<Property ID="12210" NpcId="WorldNpc00380" SceneID="12" DialogID="dialog_38392_1" TrackInfo="interact38392_1" OkMenu="OkMenu 38392_1"/>
+	<Property ID="12211" NpcId="WorldNpc00380" SceneID="12" DialogID="dialog_38392_2" TrackInfo="interact38392_2" OkMenu="OkMenu 38392_2"/>
+	<Property ID="12212" NpcId="WorldNpc00245" SceneID="12" DialogID="dialog_38396_1" TrackInfo="interact38396_1" OkMenu="OkMenu 38396_1"/>
+	<Property ID="12213" NpcId="WorldNpc00472" SceneID="12" DialogID="dialog_38397_1" TrackInfo="interact38397_1" OkMenu="OkMenu 38397_1"/>
+	<Property ID="12214" NpcId="WorldNpc08829" SceneID="13" DialogID="dialog_38400_1" TrackInfo="interact38400_1" OkMenu="OkMenu 38400"/>
+	<Property ID="12215" NpcId="WorldNpc08830" SceneID="13" DialogID="dialog_38403_1" TrackInfo="interact38403_1" OkMenu="OkMenu 38403"/>
+	<Property ID="12216" NpcId="WorldNpc10016" SceneID="16" DialogID="dialog_38412_1" TrackInfo="interact38412_1" OkMenu="OkMenu 38412"/>
+	<Property ID="12217" NpcId="WorldNpc08833" SceneID="13" DialogID="dialog_38427_1" TrackInfo="interact38427_1" OkMenu="OkMenu 38427"/>
+	<Property ID="12218" NpcId="WorldNpc08833" SceneID="13" DialogID="dialog_38430_1" GetItems="taskitem_405-1" TrackInfo="interact38430_1" OkMenu="OkMenu 38430"/>
+	<Property ID="12219" NpcId="WorldNpc02519" SceneID="9" DialogID="dialog_38507_1" GetItems="taskitem_8d-1" TrackInfo="interact38507" OkMenu="OkMenu 38507"/>
+	<Property ID="12220" NpcId="WorldNpc02513" SceneID="9" DialogID="dialog_38498" GetItems="taskitem_4d-1" TrackInfo="interact38498" OkMenu="OkMenu 38498"/>
+	<Property ID="12221" NpcId="WorldNpc10017" SceneID="16" DialogID="dialog_38418" TrackInfo="interact38418_1" OkMenu="OkMenu 38418"/>
+	<Property ID="12222" NpcId="WorldNpc06133" SceneID="22" DialogID="dialog_38442" TrackInfo="interact38442" OkMenu="OkMenu 38442"/>
+	<Property ID="12223" NpcId="WorldNpc05041" SceneID="24" DialogID="dialog_38463" GetItems="taskitem_42j-1" TrackInfo="interact38463" OkMenu="OkMenu 38463"/>
+	<Property ID="12224" NpcId="WorldNpc01292" SceneID="14" DialogID="dialog_38474" TrackInfo="interact38474" OkMenu="OkMenu 38474"/>
+	<Property ID="12225" NpcId="WorldNpc00377" SceneID="12" DialogID="dialog_38118_2" GetItems="taskitem_19b-1" TrackInfo="interact38118_2" OkMenu="OkMenu 38118_2"/>
+	<Property ID="11001" NpcId="EventNpc36032" SceneID="11" DialogID="0" TrackInfo="interact36032"/>
+	<Property ID="11002" NpcId="WorldNpc04404" SceneID="11" DialogID="dialog_36054_1" TrackInfo="interact36054_1"/>
+	<Property ID="11003" NpcId="WorldNpc04405" SceneID="11" DialogID="dialog_36054_2" TrackInfo="interact36054_2"/>
+	<Property ID="11004" NpcId="WorldNpc04404" SceneID="11" DialogID="dialog_36071_1" LostItems="useitem_16h-1|useitem_17h-1" TrackInfo="interact36071_1"/>
+	<Property ID="11005" NpcId="WorldNpc04405" SceneID="11" DialogID="dialog_36071_2" LostItems="useitem_16h-1|useitem_17h-1" TrackInfo="interact36071_2"/>
+	<Property ID="11009" NpcId="WorldNpc04559" SceneID="11" DialogID="dialog_36121_1" GetItems="taskitem_88-1" TrackInfo="interact36121_1"/>
+	<Property ID="11010" NpcId="WorldNpc04560" SceneID="11" DialogID="dialog_36121_2" LostItems="taskitem_88-1" TrackInfo="interact36121_2"/>
+	<Property ID="11011" NpcId="WorldNpc04701" SceneID="11" DialogID="dialog_36146_1" TrackInfo="interact36146"/>
+	<Property ID="11013" NpcId="WorldNpc00388" SceneID="12" DialogID="dialog_36198_1" TrackInfo="interact36198"/>
+	<Property ID="11014" NpcId="WorldNpc00393" SceneID="12" DialogID="dialog_36208_1" TrackInfo="interact36208"/>
+	<Property ID="11015" NpcId="WorldNpc04405" SceneID="11" DialogID="dialog_36244_1" TrackInfo="interact36244"/>
+	<Property ID="11016" NpcId="WorldNpc06620" SceneID="20" DialogID="dialog_36253_1" TrackInfo="interact36253"/>
+	<Property ID="11017" NpcId="WorldNpc06619" SceneID="20" DialogID="dialog_36255_1" TrackInfo="interact36255"/>
+	<Property ID="11018" NpcId="WorldNpc06529" SceneID="20" DialogID="dialog_36264_1" TrackInfo="interact36264"/>
+	<Property ID="11019" NpcId="WorldNpc06620" SceneID="20" DialogID="dialog_36283_1" TrackInfo="interact36283"/>
+	<Property ID="11020" NpcId="WorldNpc04566" SceneID="11" DialogID="dialog_36294_1" TrackInfo="interact36294"/>
+	<Property ID="11021" NpcId="WorldNpc04567" SceneID="11" DialogID="dialog_36329_1" TrackInfo="interact36329" OkMenu="okmenu36329_1"/>
+	<Property ID="11022" NpcId="WorldNpc04425" SceneID="11" DialogID="dialog_36334_1" TrackInfo="interact36334"/>
+	<Property ID="11023" NpcId="WorldNpc04401" SceneID="11" DialogID="dialog_36336_1" TrackInfo="interact36336"/>
+	<Property ID="11024" NpcId="WorldNpc04435" SceneID="11" DialogID="dialog_36405_1" GetItems="taskitem_41e-3" TrackInfo="interact36405_1"/>
+	<Property ID="11025" NpcId="WorldNpc03003" SceneID="6" DialogID="dialog_36432_1" TrackInfo="interact36432_1"/>
+	<Property ID="11027" NpcId="WorldNpc06633" SceneID="20" DialogID="dialog_36460_1" TrackInfo="interact36460_1"/>
+	<Property ID="11028" NpcId="WorldNpc06636" SceneID="20" DialogID="dialog_36461_1" TrackInfo="interact36461_1"/>
+	<Property ID="11029" NpcId="WorldNpc06635" SceneID="20" DialogID="dialog_36464_1" TrackInfo="interact36464_1"/>
+	<Property ID="11030" NpcId="WorldNpc06641" SceneID="20" DialogID="dialog_36473_1" TrackInfo="interact36473_1"/>
+	<Property ID="11034" NpcId="WorldNpc08929" SceneID="20" DialogID="dialog_36479_1" TrackInfo="interact36479_1"/>
+	<Property ID="11035" NpcId="WorldNpc08930" SceneID="20" DialogID="dialog_36479_2" TrackInfo="interact36479_2"/>
+	<Property ID="11036" NpcId="WorldNpc05384" SceneID="18" DialogID="dialog_36515_1" GetItems="taskitem_53a" TrackInfo="interact36515_1"/>
+	<Property ID="11038" NpcId="Gather00030a" SceneID="11" GetItems="taskitem_47a-1" TrackInfo="interact36530_1"/>
+	<Property ID="11039" NpcId="WorldNpc04401" SceneID="11" DialogID="dialog_36531_2" LostItems="taskitem_47a-1" TrackInfo="interact36530_2" OkMenu="okmenu36530_2"/>
+	<Property ID="11040" NpcId="WorldNpc04402" SceneID="11" DialogID="dialog_36560_1" TrackInfo="interact36560_1" OkMenu="okmenu36560_1"/>
+	<Property ID="11041" NpcId="WorldNpc04403" SceneID="11" DialogID="dialog_36560_2" TrackInfo="interact36560_2" OkMenu="okmenu36560_2"/>
+	<Property ID="11042" NpcId="WorldNpc04404" SceneID="11" DialogID="dialog_36560_3" TrackInfo="interact36560_3" OkMenu="okmenu36560_3"/>
+	<Property ID="11043" NpcId="WorldNpc04405" SceneID="11" DialogID="dialog_36560_4" TrackInfo="interact36560_4" OkMenu="okmenu36560_4"/>
+	<Property ID="11045" NpcId="WorldNpc06905" SceneID="26" DialogID="dialog_36568_2" TrackInfo="interact36568_2"/>
+	<Property ID="11046" NpcId="WorldNpc04413" SceneID="11" DialogID="dialog_36002_2" TrackInfo="interact36002_2" OkMenu="okmenu36002"/>
+	<Property ID="11047" NpcId="WorldNpc04412" SceneID="11" DialogID="dialog_36004_2" TrackInfo="interact36004_2" OkMenu="okmenu36004_2"/>
+	<Property ID="11048" NpcId="EventNpc36001" SceneID="11" TrackInfo="interact36001"/>
+	<Property ID="11049" NpcId="WorldNpc04413" SceneID="11" DialogID="dialog_36022" TrackInfo="interact36022"/>
+	<Property ID="11050" NpcId="EventNpc36023" SceneID="11" TrackInfo="interact36023"/>
+	<Property ID="11051" NpcId="WorldNpc04413" SceneID="11" DialogID="dialog_36040" TrackInfo="interact36040"/>
+	<Property ID="11052" NpcId="EventNpc36086" SceneID="11" TrackInfo="interact36086"/>
+	<Property ID="11053" NpcId="Gather00015h" SceneID="11" TrackInfo="interact36086_1"/>
+	<Property ID="11054" NpcId="Gather00016h" SceneID="11" TrackInfo="interact36086_2"/>
+	<Property ID="11055" NpcId="WorldNpc04417" SceneID="11" DialogID="dialog_36043" TrackInfo="interact36043" OkMenu="okmenu36043"/>
+	<Property ID="11056" NpcId="WorldNpc04418" SceneID="11" DialogID="dialog_36072" TrackInfo="interact36072" OkMenu="okmenu36072"/>
+	<Property ID="11057" NpcId="ItemNpc03204" SceneID="11" DialogID="dialog_36110_1" TrackInfo="interact36110_1" OkMenu="okmenu36110_1"/>
+	<Property ID="11058" NpcId="ItemNpc03205" SceneID="11" DialogID="dialog_36110_2" TrackInfo="interact36110_2" OkMenu="okmenu36110_2"/>
+	<Property ID="11059" NpcId="ItemNpc03206" SceneID="11" DialogID="dialog_36118_1" TrackInfo="interact36118_1" OkMenu="okmenu36118_1"/>
+	<Property ID="11060" NpcId="ItemNpc03207" SceneID="11" DialogID="dialog_36118_2" TrackInfo="interact36118_2" OkMenu="okmenu36118_2"/>
+	<Property ID="11061" NpcId="WorldNpc04401" SceneID="11" DialogID="dialog_36145" TrackInfo="interact36145" OkMenu="okmenu36145"/>
+	<Property ID="11062" NpcId="WorldNpc04408" SceneID="11" DialogID="dialog_36154" TrackInfo="interact36154" OkMenu="okmenu36154"/>
+	<Property ID="11063" NpcId="WorldNpc04701" SceneID="11" DialogID="dialog_36148" TrackInfo="interact36148" OkMenu="okmenu36148"/>
+	<Property ID="11064" NpcId="WorldNpc09812" SceneID="17" DialogID="dialog_36164" TrackInfo="interact36164" OkMenu="okmenu36164"/>
+	<Property ID="11065" NpcId="WorldNpc04813" SceneID="11" DialogID="dialog_36192_1" LostItems="taskitem_46b-1" TrackInfo="interact36192_1" OkMenu="okmenu36192_1"/>
+	<Property ID="11066" NpcId="WorldNpc04408" SceneID="11" DialogID="dialog_36192_2" TrackInfo="interact36192_2" OkMenu="okmenu36192_2"/>
+	<Property ID="11067" NpcId="WorldNpc06619" SceneID="11" DialogID="dialog_36288_2" TrackInfo="interact36288_2" OkMenu="okmenu36288_2"/>
+	<Property ID="11068" NpcId="WorldNpc04804" SceneID="11" DialogID="dialog_36247_3" TrackInfo="interact36247_3" OkMenu="okmenu36247_3"/>
+	<Property ID="11069" NpcId="WorldNpc04435" SceneID="11" DialogID="dialog36405" TrackInfo="interact36405" OkMenu="okmenu36405"/>
+	<Property ID="11070" NpcId="WorldNpc08848" SceneID="13" DialogID="dialog36413" LostItems="taskitem_39e-1" TrackInfo="interact36413" OkMenu="okmenu36413"/>
+	<Property ID="11071" NpcId="WorldNpc03003" SceneID="6" DialogID="dialog36415" LostItems="taskitem_41e-10" TrackInfo="interact36415" OkMenu="okmenu36415"/>
+	<Property ID="11072" NpcId="WorldNpc08844" SceneID="13" DialogID="dialog36418_1" TrackInfo="interact36418" OkMenu="okmenu36418"/>
+	<Property ID="11073" NpcId="WorldNpc08863" SceneID="13" DialogID="dialog36421_1" GetItems="taskitem_58a-1" TrackInfo="interact36421_1" OkMenu="okmenu36421_1"/>
+	<Property ID="11074" NpcId="WorldNpc08862" SceneID="13" DialogID="dialog36421_2" LostItems="taskitem_58a-1" TrackInfo="interact36421_2" OkMenu="okmenu36421_2"/>
+	<Property ID="11075" NpcId="WorldNpc08219" SceneID="13" DialogID="dialog36426_1" GetItems="taskitem_60a-1" TrackInfo="interact36426_1" OkMenu="okmenu36426_1"/>
+	<Property ID="11076" NpcId="WorldNpc08862" SceneID="13" DialogID="dialog36426_2" LostItems="taskitem_60a-1" TrackInfo="interact36426_2" OkMenu="okmenu36426_2"/>
+	<Property ID="11077" NpcId="Gather00048a" SceneID="13" TrackInfo="interact36428_1"/>
+	<Property ID="11078" NpcId="WorldNpc06636" SceneID="20" DialogID="dialog36461_1" GetItems="taskitem_64a-1" TrackInfo="interact36461_1" OkMenu="okmenu36461_1"/>
+	<Property ID="11079" NpcId="WorldNpc06641" SceneID="20" DialogID="dialog36461_2" LostItems="taskitem_64a-1" TrackInfo="interact36461_2" OkMenu="okmenu36461_2"/>
+	<Property ID="11080" NpcId="EventNpc36449" SceneID="20" TrackInfo="interact36449"/>
+	<Property ID="11081" NpcId="WorldNpc06641" SceneID="20" DialogID="dialog36468" TrackInfo="interact36468" OkMenu="okmenu36468"/>
+	<Property ID="11082" NpcId="Gather00050a" SceneID="13" GetItems="taskitem_63a-1" TrackInfo="interact36479_1"/>
+	<Property ID="11083" NpcId="WorldNpc08928" SceneID="13" DialogID="dialog36479" LostItems="taskitem_63a-1" TrackInfo="interact36479_2" OkMenu="okmenu36479"/>
+	<Property ID="11084" NpcId="WorldNpc06905" SceneID="1" DialogID="dialog36575" LostItems="taskitem_56a-1" TrackInfo="interact36575" OkMenu="okmenu36575"/>
+	<Property ID="11085" NpcId="Gather00051a" SceneID="2" GetItems="useitem_29a-1" TrackInfo="interact36551"/>
+	<Property ID="10001" NpcId="WorldNpc02634" SceneID="10" DialogID="dialog_40001_1" TrackInfo="interact40001_1" OkMenu="okmenu40001_1"/>
+	<Property ID="10002" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_40001_2" TrackInfo="interact40001_2" OkMenu="okmenu40001_2"/>
+	<Property ID="10003" NpcId="WorldNpc02629" SceneID="10" DialogID="dialog_40001_3" TrackInfo="interact40001_3" OkMenu="okmenu40001_3"/>
+	<Property ID="10004" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_40001_4" TrackInfo="interact40001_4" OkMenu="okmenu40001_4"/>
+	<Property ID="10005" NpcId="EventNpc40004" SceneID="10" TrackInfo="interact40004"/>
+	<Property ID="10006" NpcId="WorldNpc02681" SceneID="10" DialogID="dialog_40005_1" TrackInfo="interact40005" OkMenu="okmenu40005_1"/>
+	<Property ID="10007" NpcId="Gather00018h" SceneID="10" GetItems="useitem_25h-1" TrackInfo="interact40016"/>
+	<Property ID="10008" NpcId="EventNpc40017_1" SceneID="10" TrackInfo="interact40017_1"/>
+	<Property ID="10009" NpcId="EventNpc40017_2" SceneID="10" TrackInfo="interact40017_2"/>
+	<Property ID="10010" NpcId="WorldNpc02610" SceneID="10" DialogID="dialog_40026_1" TrackInfo="interact40026_1" OkMenu="okmenu40026_1"/>
+	<Property ID="10011" NpcId="WorldNpc02610" SceneID="10" DialogID="dialog_40026_2" TrackInfo="interact40026_2" OkMenu="okmenu40026_2"/>
+	<Property ID="10012" NpcId="WorldNpc02610" SceneID="10" DialogID="dialog_40027_1" GetItems="useitem_26h-1" TrackInfo="interact40027_1" OkMenu="okmenu40027_1"/>
+	<Property ID="10013" NpcId="WorldNpc02684" SceneID="10" DialogID="dialog_40027_2" TrackInfo="interact40027_2" OkMenu="okmenu40027_2"/>
+	<Property ID="10014" NpcId="WorldNpc02684" SceneID="10" DialogID="dialog_40027_3" LostItems="useitem_31h-1" TrackInfo="interact40027_3" OkMenu="okmenu40027_3"/>
+	<Property ID="10015" NpcId="Gather00021h" SceneID="10" GetItems="useitem_27h-1" TrackInfo="interact40029_1"/>
+	<Property ID="10016" NpcId="WorldNpc02684" SceneID="10" DialogID="dialog_40029_1" TrackInfo="interact40029_2" OkMenu="okmenu40029_1"/>
+	<Property ID="10017" NpcId="Gather00023h" SceneID="10" GetItems="taskitem_37h-1" TrackInfo="interact40038"/>
+	<Property ID="10018" NpcId="Gather00023h" SceneID="10" GetItems="taskitem_37h-1" TrackInfo="interact40038"/>
+	<Property ID="10019" NpcId="Gather00023h" SceneID="10" GetItems="taskitem_37h-1" TrackInfo="interact40038"/>
+	<Property ID="10020" NpcId="WorldNpc02684" SceneID="10" DialogID="dialog_40039_1" LostItems="useitem_28h-1" TrackInfo="interact40039_1" OkMenu="okmenu40039_1"/>
+	<Property ID="10021" NpcId="Gather00022h" SceneID="10" GetItems="useitem_28h" TrackInfo="interact40039_2"/>
+	<Property ID="10022" NpcId="WorldNpc02684" SceneID="10" DialogID="dialog_40041_1" TrackInfo="interact40041_1" OkMenu="okmenu40041_1"/>
+	<Property ID="10023" NpcId="WorldNpc02613" SceneID="10" DialogID="dialog_40097_1" TrackInfo="interact40097_1" OkMenu="okmenu40097_1"/>
+	<Property ID="10024" NpcId="Gather00024h" SceneID="10" GetItems="taskitem_38h-1" TrackInfo="interact40097_2"/>
+	<Property ID="10025" NpcId="WorldNpc02686" SceneID="10" DialogID="dialog_40097_2" LostItems="taskitem_38h-1" TrackInfo="interact40097_3" OkMenu="okmenu40097_2"/>
+	<Property ID="10026" NpcId="EventNpc40098_1" SceneID="10" TrackInfo="interact40098_1"/>
+	<Property ID="10027" NpcId="EventNpc40098_2" SceneID="10" TrackInfo="interact40098_2"/>
+	<Property ID="10028" NpcId="EventNpc40100" SceneID="10" TrackInfo="interact40100_1"/>
+	<Property ID="10029" NpcId="WorldNpc02680" SceneID="10" DialogID="dialog_40109_1" TrackInfo="interact40109_1" OkMenu="okmenu40109_1"/>
+	<Property ID="10030" NpcId="EventNpc40111" SceneID="17" TrackInfo="interact40111_1"/>
+	<Property ID="10031" NpcId="WorldNpc09601" SceneID="17" DialogID="dialog_40112_1" TrackInfo="interact40112_1" OkMenu="okmenu40112_1"/>
+	<Property ID="10032" NpcId="Gather00026h" SceneID="17" GetItems="taskitem_41h-1" TrackInfo="interact40113_1"/>
+	<Property ID="10033" NpcId="WorldNpc09606" SceneID="17" DialogID="dialog_40113_2" LostItems="taskitem_41h-1" TrackInfo="interact40113_2" OkMenu="okmenu40113_2"/>
+	<Property ID="10034" NpcId="Gather00027h" SceneID="14" GetItems="useitem_32h-1" TrackInfo="interact40121_1"/>
+	<Property ID="10035" NpcId="WorldNpc01612" SceneID="14" DialogID="dialog_40121_2" TrackInfo="interact40121_2" OkMenu="okmenu40121_2"/>
+	<Property ID="10036" NpcId="EventNpc40122" SceneID="14" TrackInfo="interact40122_1"/>
+	<Property ID="10037" NpcId="WorldNpc01611" SceneID="14" DialogID="dialog_40122_2" TrackInfo="interact40122_2" OkMenu="okmenu40122_2"/>
+	<Property ID="10038" NpcId="WorldNpc01614" SceneID="14" DialogID="dialog_40133_1" TrackInfo="interact40133_1" OkMenu="okmenu40133_1"/>
+	<Property ID="10039" NpcId="WorldNpc01610" SceneID="14" DialogID="dialog_40134_1" TrackInfo="interact40134_1" OkMenu="okmenu40134_1"/>
+	<Property ID="10040" NpcId="EventNpc40135" SceneID="10" TrackInfo="interact40135_1"/>
+	<Property ID="10041" NpcId="WorldNpc02687" SceneID="10" DialogID="dialog_40135_2" TrackInfo="interact40135_2" OkMenu="okmenu40135_2"/>
+	<Property ID="10042" NpcId="EventNpc40136" SceneID="10" TrackInfo="interact40136_1"/>
+	<Property ID="10043" NpcId="WorldNpc02688" SceneID="10" DialogID="dialog_40109_2" GetItems="taskitem_40h-1" TrackInfo="interact40109_2" OkMenu="okmenu40109_2"/>
+	<Property ID="10044" NpcId="WorldNpc01615" SceneID="14" DialogID="dialog_40124_1" TrackInfo="interact40124_1" OkMenu="okmenu40124"/>
+	<Property ID="10067" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_40052" LostItems="taskitem_59d-1" TrackInfo="interact40052" OkMenu="okmenu40052"/>
+	<Property ID="10068" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_40053" LostItems="taskitem_58d-1" TrackInfo="interact40053" OkMenu="okmenu40053"/>
+	<Property ID="10069" NpcId="WorldNpc02606" SceneID="10" DialogID="dialog_40061_1" GetItems="taskitem_61d-1" LostItems="taskitem_60d-1" TrackInfo="interact40061_1" OkMenu="okmenu40061_1"/>
+	<Property ID="10070" NpcId="WorldNpc02631" SceneID="10" DialogID="dialog_40061_2" LostItems="taskitem_60d-1" TrackInfo="interact40061_2" OkMenu="okmenu40061_2"/>
+	<Property ID="10071" NpcId="WorldNpc02623" SceneID="10" DialogID="dialog_40061_3" LostItems="taskitem_60d-1" TrackInfo="interact40061_3" OkMenu="okmenu40061_3"/>
+	<Property ID="10072" NpcId="WorldNpc02604" SceneID="10" DialogID="dialog_40061_4" LostItems="taskitem_60d-3" TrackInfo="interact40061_4" OkMenu="okmenu40061_4"/>
+	<Property ID="10073" NpcId="WorldNpc02650" SceneID="10" DialogID="dialog_40065_1" TrackInfo="interact40065_1" OkMenu="okmenu40065_1"/>
+	<Property ID="10074" NpcId="WorldNpc02606" SceneID="10" DialogID="dialog_40078_1" TrackInfo="interact40078_1" OkMenu="okmenu40078_1"/>
+	<Property ID="10075" NpcId="WorldNpc02631" SceneID="10" DialogID="dialog_40078_2" TrackInfo="interact40078_2" OkMenu="okmenu40078_2"/>
+	<Property ID="10076" NpcId="WorldNpc02623" SceneID="10" DialogID="dialog_40078_3" TrackInfo="interact40078_3" OkMenu="okmenu40078_3"/>
+	<Property ID="10077" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_40087_1" LostItems="taskitem_64d-1" TrackInfo="interact40087_1" OkMenu="okmenu40087_1"/>
+	<Property ID="10078" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_40087_2" LostItems="taskitem_63d-1" TrackInfo="interact40087_2" OkMenu="okmenu40087_2"/>
+	<Property ID="10079" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_40090" TrackInfo="interact40090" OkMenu="okmenu40090"/>
+	<Property ID="10080" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_40145" TrackInfo="interact40145" OkMenu="okmenu40145"/>
+	<Property ID="10081" NpcId="WorldNpc02631" SceneID="10" DialogID="dialog_40146" TrackInfo="interact40146" OkMenu="okmenu40146"/>
+	<Property ID="10082" NpcId="WorldNpc02604" SceneID="10" DialogID="dialog_40148" TrackInfo="interact40148" OkMenu="okmenu40148"/>
+	<Property ID="10083" NpcId="WorldNpc02626" SceneID="10" DialogID="dialog_40149_1" TrackInfo="interact40149_1" OkMenu="okmenu40149_1"/>
+	<Property ID="10084" NpcId="WorldNpc02604" SceneID="10" DialogID="dialog_40149_2" TrackInfo="interact40149_2" OkMenu="okmenu40149_2"/>
+	<Property ID="10085" NpcId="Gather00033d" SceneID="17" DialogID="dialog_40159" TrackInfo="interact40159" OkMenu="okmenu40159"/>
+	<Property ID="10086" NpcId="FuncNpc00607" SceneID="17" DialogID="dialog_40162_1" GetItems="yaopin10192-10" TrackInfo="interact40162_1" OkMenu="okmenu40162_1"/>
+	<Property ID="10087" NpcId="WorldNpc02623" SceneID="10" DialogID="dialog_40182_1" TrackInfo="interact40182_1" OkMenu="okmenu40182_1"/>
+	<Property ID="10088" NpcId="WorldNpc02624" SceneID="10" DialogID="dialog_40182_2" TrackInfo="interact40182_2" OkMenu="okmenu40182_2"/>
+	<Property ID="10089" NpcId="WorldNpc02625" SceneID="10" DialogID="dialog_40182_3" TrackInfo="interact40182_3" OkMenu="okmenu40182_3"/>
+	<Property ID="10090" NpcId="WorldNpc09801" SceneID="17" DialogID="dialog_40162_2" LostItems="yaopin10192-1" TrackInfo="interact40162_2" OkMenu="okmenu40162_2"/>
+	<Property ID="10200" NpcId="WorldNpc09958" SceneID="17" DialogID="dialog_40300" TrackInfo="interact40300" OkMenu="okmenu40300"/>
+	<Property ID="10201" NpcId="WorldNpc09956" SceneID="17" DialogID="dialog_40303" TrackInfo="interact40303" OkMenu="okmenu40303"/>
+	<Property ID="10202" NpcId="WorldNpc09955" SceneID="17" DialogID="dialog_40306" LostItems="taskitem_68a-1" TrackInfo="interact40306" OkMenu="okmenu40306"/>
+	<Property ID="10203" NpcId="WorldNpc09961" SceneID="17" DialogID="dialog_40307" TrackInfo="interact40307" OkMenu="okmenu40307"/>
+	<Property ID="10204" NpcId="WorldNpc09627" SceneID="17" DialogID="dialog_40313" GetItems="useitem_37a-1" TrackInfo="interact40313" OkMenu="okmenu40313"/>
+	<Property ID="10205" NpcId="WorldNpc09794" SceneID="17" DialogID="dialog_40315" TrackInfo="interact40315" OkMenu="okmenu40315"/>
+	<Property ID="10206" NpcId="WorldNpc09955" SceneID="17" DialogID="dialog_40316" LostItems="taskitem_72-1" TrackInfo="interact40316" OkMenu="okmenu40316"/>
+	<Property ID="10207" NpcId="WorldNpc09794" SceneID="17" DialogID="dialog_40320_1" TrackInfo="interact40320_1" OkMenu="okmenu40320_1"/>
+	<Property ID="10208" NpcId="WorldNpc09794" SceneID="17" DialogID="dialog_40320_2" TrackInfo="interact40320_2" OkMenu="okmenu40320_2"/>
+	<Property ID="10209" NpcId="WorldNpc06639" SceneID="20" DialogID="dialog_40338_1" LostItems="taskitem_73a-5" TrackInfo="interact40338_1" OkMenu="okmenu40338_1"/>
+	<Property ID="10210" NpcId="WorldNpc06640" SceneID="20" DialogID="dialog_40338_2" LostItems="taskitem_73a-5" TrackInfo="interact40338_2" OkMenu="okmenu40338_2"/>
+	<Property ID="10211" NpcId="WorldNpc11001" SceneID="13" DialogID="dialog_40345_1" TrackInfo="interact40345_1" OkMenu="okmenu40345_1"/>
+	<Property ID="10212" NpcId="WorldNpc11002" SceneID="13" DialogID="dialog_40345_2" TrackInfo="interact40345_2" OkMenu="okmenu40345_2"/>
+	<Property ID="10213" NpcId="WorldNpc11004" SceneID="13" DialogID="dialog_40346_1" TrackInfo="interact40346_1" OkMenu="okmenu40346_1"/>
+	<Property ID="10214" NpcId="WorldNpc11003" SceneID="13" DialogID="dialog_40348" TrackInfo="interact40348" OkMenu="okmenu40348"/>
+	<Property ID="10215" NpcId="WorldNpc11009" SceneID="13" DialogID="dialog_40354" TrackInfo="interact40354" OkMenu="okmenu40354"/>
+	<Property ID="10216" NpcId="WorldNpc10048" SceneID="16" DialogID="dialog_40356" GetItems="taskitem_76a-1" TrackInfo="interact40356" OkMenu="okmenu40356"/>
+	<Property ID="10220" NpcId="WorldNpc02921" SceneID="10" DialogID="dialog_40242_1" TrackInfo="interact40242_1" OkMenu="okmenu40242_1"/>
+	<Property ID="10221" NpcId="WorldNpc02704" SceneID="10" DialogID="dialog_40246_1" TrackInfo="interact40246_1" OkMenu="okmenu40246_1"/>
+	<Property ID="10222" NpcId="WorldNpc02704" SceneID="10" DialogID="dialog_40253_1" TrackInfo="interact40253_1" OkMenu="okmenu40253_1"/>
+	<Property ID="10223" NpcId="WorldNpc05807" SceneID="21" DialogID="dialog_40255_1" TrackInfo="interact40255_1" OkMenu="okmenu40255_1"/>
+	<Property ID="10224" NpcId="WorldNpc05808" SceneID="21" DialogID="dialog_40258_1" TrackInfo="interact40258_1" OkMenu="okmenu40258_1"/>
+	<Property ID="10225" NpcId="WorldNpc05807" SceneID="21" DialogID="dialog_40265_1" TrackInfo="interact40265_1" OkMenu="okmenu40265_1"/>
+	<Property ID="10226" NpcId="WorldNpc05807" SceneID="21" DialogID="dialog_40266_1" TrackInfo="interact40266_1" OkMenu="okmenu40266_1"/>
+	<Property ID="10227" NpcId="WorldNpc02613" SceneID="10" DialogID="dialog_40269_1" LostItems="taskitem_10m-1" TrackInfo="interact40269_1" OkMenu="okmenu40269_1"/>
+	<Property ID="10228" NpcId="WorldNpc02704" SceneID="10" DialogID="dialog_40269_2" TrackInfo="interact40269_2" OkMenu="okmenu40269_2"/>
+	<Property ID="10229" NpcId="EventNpc40277_1" SceneID="10" DialogID="dialog_40277_1" TrackInfo="interact40277_1" OkMenu="okmenu40277_1"/>
+	<Property ID="10230" NpcId="EventNpc40277_2" SceneID="10" DialogID="dialog_40277_2" TrackInfo="interact40277_2" OkMenu="okmenu40277_2"/>
+	<Property ID="10231" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_40278_1" TrackInfo="interact40278_1" OkMenu="okmenu40278_1"/>
+	<Property ID="10233" NpcId="WorldNpc02705" SceneID="10" DialogID="dialog_40280_1" TrackInfo="interact40280_1" OkMenu="okmenu40280_1"/>
+	<Property ID="10234" NpcId="WorldNpc05807" SceneID="21" DialogID="dialog_40258_2" TrackInfo="interact40258_2" OkMenu="okmenu40258_2"/>
+	<Property ID="10250" NpcId="WorldNpc02656" SceneID="10" DialogID="dialog_40386_1" TrackInfo="interact40386_1" OkMenu="okmenu40386_1"/>
+	<Property ID="10251" NpcId="WorldNpc02656" SceneID="10" DialogID="dialog_40386_2" GetItems="taskitem_18m-1" TrackInfo="interact40386_2" OkMenu="okmenu40386_2"/>
+	<Property ID="10252" NpcId="WorldNpc02629" SceneID="10" DialogID="dialog_40387_1" LostItems="taskitem_18m-1" TrackInfo="interact40387_1" OkMenu="okmenu40387_1"/>
+	<Property ID="10253" NpcId="WorldNpc02629" SceneID="10" DialogID="dialog_40387_2" LostItems="taskitem_19m-1" TrackInfo="interact40387_2" OkMenu="okmenu40387_2"/>
+	<Property ID="10254" NpcId="WorldNpc08944" SceneID="13" DialogID="dialog_40402_1" TrackInfo="interact40402_1" OkMenu="okmenu40402_1"/>
+	<Property ID="10255" NpcId="WorldNpc08831" SceneID="13" DialogID="dialog_40403_1" TrackInfo="interact40403_1" OkMenu="okmenu40403_1"/>
+	<Property ID="10256" NpcId="WorldNpc08832" SceneID="13" DialogID="dialog_40409_1" GetItems="taskitem_15m-1" TrackInfo="interact40409_1" OkMenu="okmenu40409_1"/>
+	<Property ID="10257" NpcId="WorldNpc08945" SceneID="13" DialogID="dialog_40409_2" LostItems="taskitem_15m-1" TrackInfo="interact40409_2" OkMenu="okmenu40409_2"/>
+	<Property ID="10258" NpcId="WorldNpc08945" SceneID="13" DialogID="dialog_40411_1" TrackInfo="interact40411_1" OkMenu="okmenu40411_1"/>
+	<Property ID="10259" NpcId="WorldNpc08946" SceneID="13" DialogID="dialog_40412_1" TrackInfo="interact40412_1" OkMenu="okmenu40412_1"/>
+	<Property ID="10260" NpcId="WorldNpc08947" SceneID="13" DialogID="dialog_40413_1" TrackInfo="interact40413_1" OkMenu="okmenu40413_1"/>
+	<Property ID="10261" NpcId="WorldNpc08832" SceneID="13" DialogID="dialog_40413_2" TrackInfo="interact40413_2" OkMenu="okmenu40413_2"/>
+	<Property ID="10262" NpcId="WorldNpc08950" SceneID="13" DialogID="dialog_40427_1" TrackInfo="interact40427_1" OkMenu="okmenu40427_1"/>
+	<Property ID="10263" NpcId="WorldNpc08942" SceneID="13" DialogID="dialog_40427_2" TrackInfo="interact40427_2" OkMenu="okmenu40427_2"/>
+	<Property ID="10264" NpcId="WorldNpc08832" SceneID="13" DialogID="dialog_40427_3" TrackInfo="interact40427_3" OkMenu="okmenu40427_3"/>
+	<Property ID="10300" NpcId="EventNpc40433" SceneID="10" TrackInfo="interact40433_1"/>
+	<Property ID="10301" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_40441_1" TrackInfo="interact40441_1" OkMenu="okmenu40441_1"/>
+	<Property ID="10302" NpcId="WorldNpc01230" SceneID="14" DialogID="dialog_40447_1" TrackInfo="interact40447_1" OkMenu="okmenu40441_1"/>
+	<Property ID="10303" NpcId="EventNpc40448" SceneID="14" TrackInfo="interact40448_1"/>
+	<Property ID="10304" NpcId="WorldNpc01244" SceneID="14" DialogID="dialog_40452_1" GetItems="taskitem_81b-1" TrackInfo="interact40452_1" OkMenu="okmenu40452_1"/>
+	<Property ID="10305" NpcId="EventNpc40460" SceneID="14" TrackInfo="interact40460_1"/>
+	<Property ID="10306" NpcId="WorldNpc01439" SceneID="14" DialogID="dialog_40461_1" LostItems="taskitem_80b-1" TrackInfo="interact40461_1" OkMenu="okmenu40461_1"/>
+	<Property ID="10307" NpcId="WorldNpc01440" SceneID="14" DialogID="dialog_40461_2" LostItems="taskitem_79b-1" TrackInfo="interact40461_2" OkMenu="okmenu40461_2"/>
+	<Property ID="10308" NpcId="WorldNpc01444" SceneID="14" DialogID="dialog_40462_1" TrackInfo="interact40462_1" OkMenu="okmenu40462_1"/>
+	<Property ID="10309" NpcId="EventNpc40463" SceneID="14" TrackInfo="interact40463_1"/>
+	<Property ID="10310" NpcId="WorldNpc02715" SceneID="10" DialogID="dialog_40469_1" TrackInfo="interact40469_1" OkMenu="okmenu40469_1"/>
+	<Property ID="10311" NpcId="WorldNpc02610" SceneID="10" DialogID="dialog_40471_1" TrackInfo="interact40471_1" OkMenu="okmenu40471_1"/>
+	<Property ID="10312" NpcId="Gather00049b" SceneID="10" DialogID="dialog_40471_2" GetItems="useitem_55b-1" TrackInfo="interact40471_2" OkMenu="okmenu40471_2"/>
+	<Property ID="10313" NpcId="WorldNpc02610" SceneID="10" DialogID="dialog_40472_1" TrackInfo="interact40472_1" OkMenu="okmenu40472_1"/>
+	<Property ID="10314" NpcId="WorldNpc02610" SceneID="10" TrackInfo="interact40473_1" OkMenu="okmenu40473_1"/>
+	<Property ID="10315" NpcId="EventNpc40474" SceneID="10" TrackInfo="interact40474_1"/>
+	<Property ID="10316" NpcId="WorldNpc02716" SceneID="10" DialogID="dialog_40476_1" TrackInfo="interact40476_1" OkMenu="okmenu40476_1"/>
+	<Property ID="6001"/>
+	<Property ID="6200" NpcId="WorldNpc10052" SceneID="16" DialogID="dialog_44292" TrackInfo="interact44292" OkMenu="okmenu44292"/>
+	<Property ID="6201" NpcId="WorldNpc10027" SceneID="16" DialogID="dialog_44294" TrackInfo="interact44294" OkMenu="okmenu44294"/>
+	<Property ID="6202" NpcId="EventNpc44295_1" SceneID="16" TrackInfo="interact44295_1"/>
+	<Property ID="6203" NpcId="EventNpc44295_2" SceneID="16" TrackInfo="interact44295_2"/>
+	<Property ID="6204" NpcId="EventNpc44295_3" SceneID="16" TrackInfo="interact44295_3"/>
+	<Property ID="6205" NpcId="WorldNpc08523" SceneID="13" DialogID="dialog_44300_1" GetItems="taskitem_80a-1" TrackInfo="interact44300_1" OkMenu="okmenu44300_1"/>
+	<Property ID="6206" NpcId="WorldNpc08528" SceneID="13" DialogID="dialog_44300_2" LostItems="taskitem_80a-1" TrackInfo="interact44300_2" OkMenu="okmenu44300_2"/>
+	<Property ID="6207" NpcId="WorldNpc08527" SceneID="13" DialogID="dialog_44303" TrackInfo="interact44303" OkMenu="okmenu44303"/>
+	<Property ID="6208" NpcId="WorldNpc08526" SceneID="13" DialogID="dialog_44304" TrackInfo="interact44304" OkMenu="okmenu44304"/>
+	<Property ID="6209" NpcId="WorldNpc10054" SceneID="16" DialogID="dialog_44315" TrackInfo="interact44315" OkMenu="okmenu44315"/>
+	<Property ID="6210" NpcId="WorldNpc03116" SceneID="6" DialogID="dialog_44322" TrackInfo="interact44322" OkMenu="okmenu44322"/>
+	<Property ID="6211" NpcId="WorldNpc10027" SceneID="16" DialogID="dialog_44317" TrackInfo="interact44317" OkMenu="okmenu44317"/>
+	<Property ID="6212" NpcId="WorldNpc08525" SceneID="13" DialogID="dialog_44308" TrackInfo="interact44308" OkMenu="okmenu44308"/>
+	<Property ID="9001" NpcId="ItemNpc02002" SceneID="9" DialogID="dialog_50002_1" TrackInfo="interact50002_1" OkMenu="okmenu50002_1"/>
+	<Property ID="9002" NpcId="ItemNpc02003" SceneID="9" DialogID="dialog_50002_2" TrackInfo="interact50002_2" OkMenu="okmenu50002_2"/>
+	<Property ID="9003" NpcId="ItemNpc02004" SceneID="9" DialogID="dialog_50002_3" TrackInfo="interact50002_3" OkMenu="okmenu50002_3"/>
+	<Property ID="9004" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50009_1" TrackInfo="interact50009_1" OkMenu="okmenu50009_1"/>
+	<Property ID="9005" NpcId="ItemNpc02005" SceneID="9" DialogID="dialog_50012_1" TrackInfo="interact50012_1" OkMenu="okmenu50012_1"/>
+	<Property ID="9006" NpcId="WorldNpc02245" SceneID="9" DialogID="dialog_50017_1" TrackInfo="interact50017_1" OkMenu="okmenu50017_1"/>
+	<Property ID="9007" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50039_1" GetItems="taskitem_14h-1" TrackInfo="interact50039_1" OkMenu="okmenu50039_1"/>
+	<Property ID="9008" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50039_2" LostItems="taskitem_14h-1" TrackInfo="interact50039_2" OkMenu="okmenu50039_2"/>
+	<Property ID="9009" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50049_1" TrackInfo="interact50049_1" OkMenu="okmenu50049_1"/>
+	<Property ID="9010" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50053_1" LostItems="taskitem_25h-1" TrackInfo="interact50053_1" OkMenu="okmenu50053_1"/>
+	<Property ID="9011" NpcId="WorldNpc02244" SceneID="9" DialogID="dialog_50061_1" TrackInfo="interact50061_1" OkMenu="okmenu50061_1"/>
+	<Property ID="9012" NpcId="WorldNpc02241" SceneID="9" DialogID="dialog_50066_1" TrackInfo="interact50066_1" OkMenu="okmenu50066_1"/>
+	<Property ID="9013" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50072_1" TrackInfo="interact50072_1" OkMenu="okmenu50072_1"/>
+	<Property ID="9014" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50077_1" TrackInfo="interact50077_1" OkMenu="okmenu50077_1"/>
+	<Property ID="9015" NpcId="WorldNpc02240" SceneID="9" DialogID="dialog_50081_1" TrackInfo="interact50081_1"/>
+	<Property ID="9016" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50081_2" TrackInfo="interact50081_2"/>
+	<Property ID="9017" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50117" TrackInfo="interact50117_1" OkMenu="okmenu50117_1"/>
+	<Property ID="9018" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50125_1" TrackInfo="interact50125_1" OkMenu="okmenu50125_1"/>
+	<Property ID="9020" NpcId="WorldNpc02206" SceneID="9" DialogID="dialog_50125_2" TrackInfo="interact50125_2" OkMenu="okmenu50125_2"/>
+	<Property ID="9022" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50125_3" TrackInfo="interact50125_3" OkMenu="okmenu50125_3"/>
+	<Property ID="9025" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50133_1" TrackInfo="interact50133_1" OkMenu="okmenu50133_1"/>
+	<Property ID="9026" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50139_1" TrackInfo="interact50139_1" OkMenu="okmenu50139_1"/>
+	<Property ID="9028" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50139_2" TrackInfo="interact50139_2" OkMenu="okmenu50139_2"/>
+	<Property ID="9031" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50152_1" TrackInfo="interact50152_1" OkMenu="okmenu50152_1"/>
+	<Property ID="9032" NpcId="WorldNpc02238" SceneID="9" DialogID="dialog_50152_2" TrackInfo="interact50152_2" OkMenu="okmenu50152_2"/>
+	<Property ID="9033" NpcId="WorldNpc02238" SceneID="9" DialogID="dialog_50154" TrackInfo="interact50154_1" OkMenu="okmenu50154_1"/>
+	<Property ID="9034" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50174_1" TrackInfo="interact50174_1" OkMenu="okmenu50174_1"/>
+	<Property ID="9035" NpcId="WorldNpc02209" SceneID="9" DialogID="dialog_50174_2" LostItems="taskitem_33d-1" TrackInfo="interact50174_2" OkMenu="okmenu50174_2"/>
+	<Property ID="9036" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50174_3" TrackInfo="interact50174_3" OkMenu="okmenu50174_3"/>
+	<Property ID="9037" NpcId="WorldNpc02238" SceneID="9" DialogID="dialog_50175" TrackInfo="interact50175_1" OkMenu="okmenu50175_1"/>
+	<Property ID="9038" NpcId="WorldNpc09809" SceneID="17" DialogID="dialog_50184" TrackInfo="interact50184_1" OkMenu="okmenu50184_1"/>
+	<Property ID="9039" NpcId="WorldNpc02209" SceneID="9" DialogID="dialog_50191" TrackInfo="interact50191_1" OkMenu="okmenu50191_1"/>
+	<Property ID="9040" NpcId="WorldNpc00036" SceneID="1" DialogID="dialog_50215_1" GetItems="taskitem_11e-1" TrackInfo="interact50215_1" OkMenu="okmenu50215_1"/>
+	<Property ID="9041" NpcId="WorldNpc00044" SceneID="1" DialogID="dialog_50215_2" LostItems="taskitem_11e-1" TrackInfo="interact50215_2" OkMenu="okmenu50215_2"/>
+	<Property ID="9042" NpcId="WorldNpc00037" SceneID="1" DialogID="dialog_50227" TrackInfo="interact50227_1" OkMenu="okmenu50227_1"/>
+	<Property ID="9043" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50236" LostItems="taskitem_17e-1" TrackInfo="interact50236_1" OkMenu="okmenu50236_1"/>
+	<Property ID="9044" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50237" GetItems="taskitem_17e-1" TrackInfo="interact50237_1" OkMenu="okmenu50237_1"/>
+	<Property ID="9045" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50243" TrackInfo="interact50243_1" OkMenu="okmenu50243_1"/>
+	<Property ID="9046" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50256" TrackInfo="interact50256_1" OkMenu="okmenu50256_1"/>
+	<Property ID="9049" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50265" TrackInfo="interact50265_1" OkMenu="okmenu50265_1"/>
+	<Property ID="9050" NpcId="WorldNpc02211" SceneID="9" DialogID="dialog_50269" TrackInfo="interact50269_1" OkMenu="okmenu50269_1"/>
+	<Property ID="9051" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50275" GetItems="useitem_5e-1" TrackInfo="interact50275_1" OkMenu="okmenu50275_1"/>
+	<Property ID="9052" NpcId="WorldNpc02256" SceneID="9" DialogID="dialog_50275_2" TrackInfo="interact50275_2" OkMenu="okmenu50275_2"/>
+	<Property ID="9053" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50281" TrackInfo="interact50281_1" OkMenu="okmenu50281_1"/>
+	<Property ID="9054" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50290_1" TrackInfo="interact50290_1" OkMenu="okmenu50290_1"/>
+	<Property ID="9055" NpcId="WorldNpc10032" SceneID="16" DialogID="dialog_50311_1" LostItems="taskitem_4l-1" TrackInfo="interact50311_1" OkMenu="okmenu50311_1"/>
+	<Property ID="9056" NpcId="WorldNpc10033" SceneID="16" DialogID="dialog_50311_2" LostItems="taskitem_4l-1" TrackInfo="interact50311_2" OkMenu="okmenu50311_2"/>
+	<Property ID="9057" NpcId="WorldNpc10034" SceneID="16" DialogID="dialog_50311_3" LostItems="taskitem_4l-1" TrackInfo="interact50311_3" OkMenu="okmenu50311_3"/>
+	<Property ID="9058" NpcId="WorldNpc02257" SceneID="9" DialogID="dialog_50340_1" GetItems="taskitem_12k-1" TrackInfo="interact50340_1" OkMenu="okmenu50340_1"/>
+	<Property ID="9059" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50340_2" LostItems="taskitem_12k-1" TrackInfo="interact50340_2" OkMenu="okmenu50340_2"/>
+	<Property ID="9060" NpcId="EventNpc50342" SceneID="10" TrackInfo="interact50342_1"/>
+	<Property ID="9061" NpcId="WorldNpc02204" SceneID="9" DialogID="dialog_50368_1" TrackInfo="interact50368_1" OkMenu="okmenu50368_1"/>
+	<Property ID="9062" NpcId="WorldNpc02215" SceneID="9" DialogID="dialog_50368_2" TrackInfo="interact50368_2" OkMenu="okmenu50368_2"/>
+	<Property ID="9063" NpcId="WorldNpc02224" SceneID="9" DialogID="dialog_50373" TrackInfo="interact50373_1" OkMenu="okmenu50373_1"/>
+	<Property ID="9064" NpcId="WorldNpc02204" SceneID="9" DialogID="dialog_50377" TrackInfo="interact50377_1" OkMenu="okmenu50377_1"/>
+	<Property ID="9065" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50383_1" GetItems="taskitem_8k-1" TrackInfo="interact50383_1" OkMenu="okmenu50383_1"/>
+	<Property ID="9066" NpcId="WorldNpc02204" SceneID="9" DialogID="dialog_50383_2" LostItems="taskitem_8k-1" TrackInfo="interact50383_2" OkMenu="okmenu50383_2"/>
+	<Property ID="9067" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50384" TrackInfo="interact50384_1" OkMenu="okmenu50384_1"/>
+	<Property ID="9068" NpcId="WorldNpc03417" SceneID="7" DialogID="dialog_50385_1" LostItems="taskitem_5j-1" TrackInfo="interact50385_1" OkMenu="okmenu50385_1"/>
+	<Property ID="9072" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50433" TrackInfo="interact50433_1" OkMenu="okmenu50433_1"/>
+	<Property ID="9073" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50434_1" TrackInfo="interact50434_1" OkMenu="okmenu50434_1"/>
+	<Property ID="9074" NpcId="WorldNpc02259" SceneID="9" DialogID="dialog_50434_2" TrackInfo="interact50434_2" OkMenu="okmenu50434_2"/>
+	<Property ID="9076" NpcId="WorldNpc02261" SceneID="9" DialogID="dialog_50439_1" LostItems="taskitem_24k-1" TrackInfo="interact50439_1" OkMenu="okmenu50439_1"/>
+	<Property ID="9077" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50439_2" LostItems="taskitem_24k-1" TrackInfo="interact50439_2" OkMenu="okmenu50439_2"/>
+	<Property ID="9078" NpcId="WorldNpc02202" SceneID="9" DialogID="dialog_50443_1" TrackInfo="interact50443_1" OkMenu="okmenu50443_1"/>
+	<Property ID="9079" NpcId="WorldNpc02259" SceneID="9" DialogID="dialog_50443_2" TrackInfo="interact50443_2" OkMenu="okmenu50443_2"/>
+	<Property ID="9081" NpcId="WorldNpc09302" SceneID="2" DialogID="dialog_50445_1" TrackInfo="interact50445_1" OkMenu="okmenu50445_1"/>
+	<Property ID="9083" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50457_1" TrackInfo="interact50457_1" OkMenu="okmenu50457_1"/>
+	<Property ID="9084" NpcId="WorldNpc02202" SceneID="9" DialogID="dialog_50457_2" TrackInfo="interact50457_2" OkMenu="okmenu50457_2"/>
+	<Property ID="9085" NpcId="WorldNpc02260" SceneID="9" DialogID="dialog_50459_1" GetItems="taskitem_19k-1" TrackInfo="interact50459_1" OkMenu="okmenu50459_1"/>
+	<Property ID="9086" NpcId="WorldNpc02259" SceneID="9" DialogID="dialog_50459_2" LostItems="taskitem_19k-1" TrackInfo="interact50459_2" OkMenu="okmenu50459_2"/>
+	<Property ID="9089" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50465_3" LostItems="taskitem_21k-1" TrackInfo="interact50465_3" OkMenu="okmenu50465_3"/>
+	<Property ID="9090" NpcId="WorldNpc02260" SceneID="9" DialogID="dialog_50468" TrackInfo="interact50468" OkMenu="okmenu50468"/>
+	<Property ID="9098" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50510_1" TrackInfo="interact50510_1" OkMenu="okmenu50510_1"/>
+	<Property ID="9099" NpcId="WorldNpc02206" SceneID="9" DialogID="dialog_50510_2" TrackInfo="interact50510_2" OkMenu="okmenu50510_2"/>
+	<Property ID="9100" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50510_3" TrackInfo="interact50510_3" OkMenu="okmenu50510_3"/>
+	<Property ID="9102" NpcId="WorldNpc02204" SceneID="9" DialogID="dialog_50541_1" TrackInfo="interact50541_1" OkMenu="okmenu50541_1"/>
+	<Property ID="9103" NpcId="WorldNpc06901" SceneID="26" DialogID="dialog_50546_1" LostItems="taskitem_24j-1" TrackInfo="interact50546_1" OkMenu="okmenu50546_1"/>
+	<Property ID="9104" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50553_1" TrackInfo="interact50553_1" OkMenu="okmenu50553_1"/>
+	<Property ID="9105" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50569_1" LostItems="taskitem_29j-1" TrackInfo="interact50569_1" OkMenu="okmenu50569_1"/>
+	<Property ID="9109" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50003_1" LostItems="taskitem_9h-1|taskitem_26h-1|useitem_8h-1|useitem_15h-1" TrackInfo="interact50003_1" OkMenu="okmenu50003_1"/>
+	<Property ID="9110" NpcId="WorldNpc02228" SceneID="9" DialogID="dialog_50005_1" GetItems="useitem_9h-1" TrackInfo="interact50005_1" OkMenu="okmenu50005_1"/>
+	<Property ID="9111" NpcId="WorldNpc02228" SceneID="9" DialogID="dialog_50011_1" TrackInfo="interact50011_1" OkMenu="okmenu50011_1"/>
+	<Property ID="9112" NpcId="WorldNpc02239" SceneID="9" DialogID="dialog_50005_2" TrackInfo="interact50005_2" OkMenu="okmenu50005_2"/>
+	<Property ID="9113" NpcId="WorldNpc02246" SceneID="9" DialogID="dialog_50013_1" TrackInfo="interact50013_1" OkMenu="okmenu50013_1"/>
+	<Property ID="9114" NpcId="WorldNpc02247" SceneID="9" DialogID="dialog_50015_1" TrackInfo="interact50015_1" OkMenu="okmenu50015_1"/>
+	<Property ID="9115" NpcId="WorldNpc02248" SceneID="9" DialogID="dialog_50017_2" TrackInfo="interact50017_2" OkMenu="okmenu50017_2"/>
+	<Property ID="9116" NpcId="WorldNpc02246" SceneID="9" DialogID="dialog_50020_1" TrackInfo="interact50020_1" OkMenu="okmenu50020_1"/>
+	<Property ID="9117" NpcId="WorldNpc02245" SceneID="9" DialogID="dialog_50022_1" TrackInfo="interact50022_1" OkMenu="okmenu50022_1"/>
+	<Property ID="9118" NpcId="WorldNpc02247" SceneID="9" DialogID="dialog_50025_1" TrackInfo="interact50025_1" OkMenu="okmenu50025_1"/>
+	<Property ID="9119" NpcId="WorldNpc02249" SceneID="9" DialogID="dialog_50027_1" TrackInfo="interact50027_1" OkMenu="okmenu50027_1"/>
+	<Property ID="9120" NpcId="WorldNpc02249" SceneID="9" DialogID="dialog_50027_2" TrackInfo="interact50027_2" OkMenu="okmenu50027_2"/>
+	<Property ID="9121" NpcId="WorldNpc02250" SceneID="9" DialogID="dialog_50030_1" TrackInfo="interact50030_1" OkMenu="okmenu50030_1"/>
+	<Property ID="9122" NpcId="WorldNpc02250" SceneID="9" DialogID="dialog_50033_1" TrackInfo="interact50033_1" OkMenu="okmenu50033_1"/>
+	<Property ID="9123" NpcId="WorldNpc02247" SceneID="9" DialogID="dialog_50042_1" TrackInfo="interact50042_1" OkMenu="okmenu50042_1"/>
+	<Property ID="9124" NpcId="WorldNpc02247" SceneID="9" DialogID="dialog_50042_2" TrackInfo="interact50042_2" OkMenu="okmenu50042_2"/>
+	<Property ID="9125" NpcId="WorldNpc02252" SceneID="9" DialogID="dialog_50045_1" TrackInfo="interact50045_1" OkMenu="okmenu50045_1"/>
+	<Property ID="9126" NpcId="EventNpc50001_2" SceneID="9" TrackInfo="interact50001_1"/>
+	<Property ID="9127" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50004_1" TrackInfo="interact50004_1" OkMenu="okmenu50004_1"/>
+	<Property ID="9128" NpcId="WorldNpc02239" SceneID="9" DialogID="dialog_50038_1" TrackInfo="interact50038_1" OkMenu="okmenu50038_1"/>
+	<Property ID="9129" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50049_2" TrackInfo="interact50049_2" OkMenu="okmenu50049_2"/>
+	<Property ID="9130" NpcId="WorldNpc02244" SceneID="9" DialogID="dialog_50051_1" TrackInfo="interact50051_1" OkMenu="okmenu50051_1"/>
+	<Property ID="9131" NpcId="WorldNpc02244" SceneID="9" DialogID="dialog_50053_2" TrackInfo="interact50053_2" OkMenu="okmenu50053_2"/>
+	<Property ID="9132" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50055_1" TrackInfo="interact50055_1" OkMenu="okmenu50055_1"/>
+	<Property ID="9133" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50059_1" TrackInfo="interact50059_1" OkMenu="okmenu50059_1"/>
+	<Property ID="9134" NpcId="WorldNpc02241" SceneID="9" DialogID="dialog_50061_2" LostItems="taskitem_19h-1" TrackInfo="interact50061_2" OkMenu="okmenu50061_2"/>
+	<Property ID="9135" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50063_1" GetItems="useitem_13h-1" TrackInfo="interact50063_1" OkMenu="okmenu50063_1"/>
+	<Property ID="9136" NpcId="WorldNpc02241" SceneID="9" DialogID="dialog_50063_2" LostItems="taskitem_21h-1" TrackInfo="interact50063_2" OkMenu="okmenu50063_2"/>
+	<Property ID="9137" NpcId="WorldNpc02240" SceneID="9" DialogID="dialog_50066_2" LostItems="taskitem_19h-1" TrackInfo="interact50066_2" OkMenu="okmenu50066_2"/>
+	<Property ID="9138" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50069_1" TrackInfo="interact50069_1" OkMenu="okmenu50069_1"/>
+	<Property ID="9139" NpcId="WorldNpc02240" SceneID="9" DialogID="dialog_50069_2" TrackInfo="interact50069_2" OkMenu="okmenu50069_2"/>
+	<Property ID="9140" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50073_1" GetItems="taskitem_22h-1" TrackInfo="interact50073_1" OkMenu="okmenu50073_1"/>
+	<Property ID="9141" NpcId="WorldNpc02242" SceneID="9" DialogID="dialog_50077_2" TrackInfo="interact50077_2" OkMenu="okmenu50077_2"/>
+	<Property ID="9142" NpcId="WorldNpc02240" SceneID="9" DialogID="dialog_50082_1" TrackInfo="interact50082_1" OkMenu="okmenu50082_1"/>
+	<Property ID="9143" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50089_1" TrackInfo="interact50089_1" OkMenu="okmenu50089_1"/>
+	<Property ID="9144" NpcId="WorldNpc02240" SceneID="9" DialogID="dialog_50091_1" TrackInfo="interact50091_1" OkMenu="okmenu50091_1"/>
+	<Property ID="9145" NpcId="WorldNpc02243" SceneID="9" DialogID="dialog_50094_1" TrackInfo="interact50094_1" OkMenu="okmenu50094_1"/>
+	<Property ID="9146" NpcId="Gather00013h" SceneID="9" GetItems="taskitem_20h-1" TrackInfo="interact50063_3"/>
+	<Property ID="9147" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50097_1" TrackInfo="interact50097_1" OkMenu="okmenu50097_1"/>
+	<Property ID="9148" NpcId="WorldNpc02228" SceneID="9" DialogID="dialog_50097_2" TrackInfo="interact50097_2" OkMenu="okmenu50097_2"/>
+	<Property ID="9149" NpcId="WorldNpc02229" SceneID="9" DialogID="dialog_50101_1" TrackInfo="interact50101_1" OkMenu="okmenu50101_1"/>
+	<Property ID="9150" NpcId="WorldNpc02231" SceneID="9" DialogID="dialog_50103_1" TrackInfo="interact50103_1" OkMenu="okmenu50103_1"/>
+	<Property ID="9151" NpcId="WorldNpc02231" SceneID="9" DialogID="dialog_50103_2" TrackInfo="interact50103_2" OkMenu="okmenu50103_2"/>
+	<Property ID="9152" NpcId="WorldNpc02232" SceneID="9" DialogID="dialog_50106_1" LostItems="taskitem_16d-1" TrackInfo="interact50106_1" OkMenu="okmenu50106_1"/>
+	<Property ID="9153" NpcId="WorldNpc02228" SceneID="9" DialogID="dialog_50112_1" TrackInfo="interact50112_1" OkMenu="okmenu50112_1"/>
+	<Property ID="9154" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50112_2" TrackInfo="interact50112_2" OkMenu="okmenu50112_2"/>
+	<Property ID="9155" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50115_1" LostItems="taskitem_20d-1" TrackInfo="interact50115_1" OkMenu="okmenu50115_1"/>
+	<Property ID="9156" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50118_1" TrackInfo="interact50118_1" OkMenu="okmenu50118_1"/>
+	<Property ID="9157" NpcId="WorldNpc02211" SceneID="9" DialogID="dialog_50121_1" LostItems="taskitem_22d-1" TrackInfo="interact50121_1" OkMenu="okmenu50121_1"/>
+	<Property ID="9158" NpcId="WorldNpc02206" SceneID="9" DialogID="dialog_50127_1" LostItems="taskitem_22d-1" TrackInfo="interact50127_1" OkMenu="okmenu50127_1"/>
+	<Property ID="9159" NpcId="Gather00010d" SceneID="9" GetItems="useitem_4d-1" TrackInfo="interact50127_2"/>
+	<Property ID="9160" NpcId="WorldNpc02206" SceneID="9" DialogID="dialog_50127_3" TrackInfo="interact50127_3" OkMenu="okmenu50127_3"/>
+	<Property ID="9161" NpcId="Gather00006d" SceneID="9" GetItems="taskitem_24d-1" TrackInfo="interact50130_1"/>
+	<Property ID="9162" NpcId="WorldNpc02206" SceneID="9" DialogID="dialog_50130_2" GetItems="useitem_5d-1" LostItems="taskitem_24d-1" TrackInfo="interact50130_2" OkMenu="okmenu50130_2"/>
+	<Property ID="9163" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50133_2" TrackInfo="interact50133_2" OkMenu="okmenu50133_2"/>
+	<Property ID="9164" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50135_1" TrackInfo="interact50135_1" OkMenu="okmenu50135_1"/>
+	<Property ID="9165" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50137_1" TrackInfo="interact50137_1" OkMenu="okmenu50137_1"/>
+	<Property ID="9166" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50140_1" GetItems="useitem_6d-1" LostItems="taskitem_26d-1" TrackInfo="interact50140_1" OkMenu="okmenu50140_1"/>
+	<Property ID="9167" NpcId="WorldNpc02206" SceneID="9" DialogID="dialog_50142_1" GetItems="useitem_7d-1" TrackInfo="interact50142_1" OkMenu="okmenu50142_1"/>
+	<Property ID="9168" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50142_2" TrackInfo="interact50142_2" OkMenu="okmenu50142_2"/>
+	<Property ID="9169" NpcId="WorldNpc02209" SceneID="9" DialogID="dialog_50145_1" TrackInfo="interact50145_1" OkMenu="okmenu50145_1"/>
+	<Property ID="9170" NpcId="WorldNpc02209" SceneID="9" DialogID="dialog_50147_1" LostItems="taskitem_27d-1" TrackInfo="interact50147_1" OkMenu="okmenu50147_1"/>
+	<Property ID="9171" NpcId="WorldNpc02238" SceneID="9" DialogID="dialog_50150_1" TrackInfo="interact50150_1" OkMenu="okmenu50150_1"/>
+	<Property ID="9172" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50152_3" TrackInfo="interact50152_3" OkMenu="okmenu50152_3"/>
+	<Property ID="9173" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50154_2" TrackInfo="interact50154_2" OkMenu="okmenu50154_2"/>
+	<Property ID="9174" NpcId="WorldNpc09802" SceneID="17" DialogID="dialog_50158_1" TrackInfo="interact50158_1" OkMenu="okmenu50158_1"/>
+	<Property ID="9175" NpcId="WorldNpc09617" SceneID="17" DialogID="dialog_50160_1" GetItems="taskitem_31d-1" LostItems="taskitem_30d-1" TrackInfo="interact50160_1" OkMenu="okmenu50160_1"/>
+	<Property ID="9176" NpcId="WorldNpc09804" SceneID="17" DialogID="dialog_50162_1" TrackInfo="interact50162_1" OkMenu="okmenu50162_1"/>
+	<Property ID="9177" NpcId="WorldNpc09809" SceneID="17" DialogID="dialog_50164_1" TrackInfo="interact50164_1" OkMenu="okmenu50164_1"/>
+	<Property ID="9178" NpcId="WorldNpc09809" SceneID="17" DialogID="dialog_50164_2" TrackInfo="interact50164_2" OkMenu="okmenu50164_2"/>
+	<Property ID="9179" NpcId="WorldNpc09804" SceneID="17" DialogID="dialog_50167_1" TrackInfo="interact50167_1" OkMenu="okmenu50167_1"/>
+	<Property ID="9180" NpcId="WorldNpc09619" SceneID="17" DialogID="dialog_50171_1" TrackInfo="interact50171_1" OkMenu="okmenu50171_1"/>
+	<Property ID="9181" NpcId="WorldNpc09619" SceneID="17" DialogID="dialog_50171_2" GetItems="taskitem_32d-1" TrackInfo="interact50171_2" OkMenu="okmenu50171_2"/>
+	<Property ID="9182" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50175_2" GetItems="useitem_9d-1" TrackInfo="interact50175_2" OkMenu="okmenu50175_2"/>
+	<Property ID="9183" NpcId="WorldNpc09802" SceneID="17" DialogID="dialog_50179_1" TrackInfo="interact50179_1" OkMenu="okmenu50179_1"/>
+	<Property ID="9184" NpcId="WorldNpc09809" SceneID="17" DialogID="dialog_50181_1" GetItems="taskitem_35d-1" TrackInfo="interact50181_1" OkMenu="okmenu50181_1"/>
+	<Property ID="9185" NpcId="WorldNpc09618" SceneID="17" DialogID="dialog_50184_2" TrackInfo="interact50184_2" OkMenu="okmenu50184_2"/>
+	<Property ID="9186" NpcId="WorldNpc09809" SceneID="17" DialogID="dialog_50186_1" GetItems="taskitem_36d-1" TrackInfo="interact50186_1" OkMenu="okmenu50186_1"/>
+	<Property ID="9187" NpcId="WorldNpc09604" SceneID="17" DialogID="dialog_50188_1" TrackInfo="interact50188_1" OkMenu="okmenu50188_1"/>
+	<Property ID="9188" NpcId="WorldNpc09620" SceneID="17" DialogID="dialog_50191_2" TrackInfo="interact50191_2" OkMenu="okmenu50191_2"/>
+	<Property ID="9189" NpcId="WorldNpc02237" SceneID="9" DialogID="dialog_50175_3" LostItems="taskitem_34d-1" TrackInfo="interact50175_3" OkMenu="okmenu50175_3"/>
+	<Property ID="9190" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50193_1" TrackInfo="interact50193_1" OkMenu="okmenu50193_1"/>
+	<Property ID="9191" NpcId="WorldNpc00037" SceneID="1" DialogID="dialog_50197_1" TrackInfo="interact50197_1" OkMenu="okmenu50197_1"/>
+	<Property ID="9192" NpcId="WorldNpc00039" SceneID="1" DialogID="dialog_50200_1" TrackInfo="interact50200_1" OkMenu="okmenu50200_1"/>
+	<Property ID="9193" NpcId="WorldNpc00039" SceneID="1" DialogID="dialog_50202_1" TrackInfo="interact50202_1" OkMenu="okmenu50202_1"/>
+	<Property ID="9194" NpcId="WorldNpc00037" SceneID="1" DialogID="dialog_50207_1" TrackInfo="interact50207_1" OkMenu="okmenu50207_1"/>
+	<Property ID="9195" NpcId="WorldNpc00036" SceneID="1" DialogID="dialog_50209_1" GetItems="useitem_1e-1" TrackInfo="interact50209_1" OkMenu="okmenu50209_1"/>
+	<Property ID="9196" NpcId="ItemNpc00008" SceneID="1" DialogID="dialog_50211_1" TrackInfo="interact50211_1" OkMenu="okmenu50211_1"/>
+	<Property ID="9197" NpcId="WorldNpc00044" SceneID="1" DialogID="dialog_50213_1" TrackInfo="interact50213_1" OkMenu="okmenu50213_1"/>
+	<Property ID="9198" NpcId="WorldNpc00037" SceneID="1" DialogID="dialog_50215_3" TrackInfo="interact50215_3" OkMenu="okmenu50215_3"/>
+	<Property ID="9199" NpcId="FuncNpc00004" SceneID="1" DialogID="dialog_50217_1" TrackInfo="interact50217_1" OkMenu="okmenu50217_1"/>
+	<Property ID="9200" NpcId="WorldNpc00041" SceneID="1" DialogID="dialog_50217_2" GetItems="taskitem_12e-1" TrackInfo="interact50217_2" OkMenu="okmenu50217_2"/>
+	<Property ID="9201" NpcId="WorldNpc09622" SceneID="17" DialogID="dialog_50222_1" TrackInfo="interact50222_1" OkMenu="okmenu50222_1"/>
+	<Property ID="9202" NpcId="WorldNpc00042" SceneID="1" DialogID="dialog_50227_2" TrackInfo="interact50227_2" OkMenu="okmenu50227_2"/>
+	<Property ID="9203" NpcId="WorldNpc00036" SceneID="1" DialogID="dialog_50234_1" GetItems="useitem_7e-1" TrackInfo="interact50234_1" OkMenu="okmenu50234_1"/>
+	<Property ID="9204" NpcId="WorldNpc02209" SceneID="9" DialogID="dialog_50237_2" TrackInfo="interact50237_2" OkMenu="okmenu50237_2"/>
+	<Property ID="9205" NpcId="WorldNpc00037" SceneID="1" DialogID="dialog_50232_1" LostItems="taskitem_17e-1" TrackInfo="interact50232_1" OkMenu="okmenu50232_1"/>
+	<Property ID="9206" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50241_1" LostItems="taskitem_4m-1" TrackInfo="interact50241_1" OkMenu="okmenu50241_1"/>
+	<Property ID="9207" NpcId="WorldNpc02253" SceneID="9" DialogID="dialog_50241_2" GetItems="useitem_9e-1" TrackInfo="interact50241_2" OkMenu="okmenu50241_2"/>
+	<Property ID="9208" NpcId="WorldNpc05805" SceneID="21" DialogID="dialog_50244_1" TrackInfo="interact50244_1" OkMenu="okmenu50244_1"/>
+	<Property ID="9209" NpcId="WorldNpc05806" SceneID="21" DialogID="dialog_50248_1" TrackInfo="interact50248_1" OkMenu="okmenu50248_1"/>
+	<Property ID="9210" NpcId="WorldNpc05806" SceneID="21" DialogID="dialog_50248_2" TrackInfo="interact50248_2" OkMenu="okmenu50248_2"/>
+	<Property ID="9211" NpcId="WorldNpc02254" SceneID="9" DialogID="dialog_50253_1" LostItems="taskitem_31e-1" TrackInfo="interact50253_1" OkMenu="okmenu50253_1"/>
+	<Property ID="9212" NpcId="WorldNpc02254" SceneID="9" DialogID="dialog_50253_2" TrackInfo="interact50253_2" OkMenu="okmenu50253_2"/>
+	<Property ID="9213" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50257_1" TrackInfo="interact50257_1" OkMenu="okmenu50257_1"/>
+	<Property ID="9214" NpcId="WorldNpc02255" SceneID="9" DialogID="dialog_50260_1" TrackInfo="interact50260_1" OkMenu="okmenu50260_1"/>
+	<Property ID="9215" NpcId="WorldNpc02254" SceneID="9" DialogID="dialog_50263_2" TrackInfo="interact50263_2" OkMenu="okmenu50263_2"/>
+	<Property ID="9216" NpcId="WorldNpc02255" SceneID="9" DialogID="dialog_50265_2" TrackInfo="interact50265_2" OkMenu="okmenu50265_2"/>
+	<Property ID="9217" NpcId="WorldNpc02210" SceneID="9" DialogID="dialog_50267_1" TrackInfo="interact50267_1" OkMenu="okmenu50267_1"/>
+	<Property ID="9218" NpcId="WorldNpc02223" SceneID="9" DialogID="dialog_50269_2" TrackInfo="interact50269_2" OkMenu="okmenu50269_2"/>
+	<Property ID="9219" NpcId="WorldNpc02256" SceneID="9" DialogID="dialog_50272_1" TrackInfo="interact50272_1" OkMenu="okmenu50272_1"/>
+	<Property ID="9220" NpcId="WorldNpc02256" SceneID="9" DialogID="dialog_50272_2" TrackInfo="interact50272_2" OkMenu="okmenu50272_2"/>
+	<Property ID="9221" NpcId="WorldNpc05805" SceneID="21" DialogID="dialog_50283_1" TrackInfo="interact50283_1" OkMenu="okmenu50283_1"/>
+	<Property ID="9222" NpcId="WorldNpc05805" SceneID="21" DialogID="dialog_50285_1" GetItems="useitem_6e-1" LostItems="taskitem_7f-1" TrackInfo="interact50285_1" OkMenu="okmenu50285_1"/>
+	<Property ID="9223" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50287_1" TrackInfo="interact50287_1" OkMenu="okmenu50287_1"/>
+	<Property ID="9225" NpcId="Gather00001m" SceneID="21" GetItems="taskitem_7f-1" TrackInfo="interact50285_2"/>
+	<Property ID="9226" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50289_1" TrackInfo="interact50289_1" OkMenu="okmenu50289_1"/>
+	<Property ID="9227" NpcId="WorldNpc02258" SceneID="9" DialogID="dialog_50291_1" GetItems="useitem_1l-1" LostItems="taskitem_1l-1|taskitem_2l-1" TrackInfo="interact50291_1" OkMenu="okmenu50291_1"/>
+	<Property ID="9228" NpcId="WorldNpc02207" SceneID="9" DialogID="dialog_50293_1" TrackInfo="interact50293_1" OkMenu="okmenu50293_1"/>
+	<Property ID="9229" NpcId="WorldNpc10022" SceneID="16" DialogID="dialog_50297_1" TrackInfo="interact50297_1" OkMenu="okmenu50297_1"/>
+	<Property ID="9230" NpcId="WorldNpc10004" SceneID="16" DialogID="dialog_50299_1" TrackInfo="interact50299_1" OkMenu="okmenu50299_1"/>
+	<Property ID="9231" NpcId="WorldNpc10023" SceneID="16" DialogID="dialog_50301_1" TrackInfo="interact50301_1" OkMenu="okmenu50301_1"/>
+	<Property ID="9232" NpcId="WorldNpc10024" SceneID="16" DialogID="dialog_50304_1" GetItems="useitem_3l-1" LostItems="taskitem_3l-1" TrackInfo="interact50304_1" OkMenu="okmenu50304_1"/>
+	<Property ID="9233" NpcId="WorldNpc10026" SceneID="16" DialogID="dialog_50306_1" TrackInfo="interact50306_1" OkMenu="okmenu50306_1"/>
+	<Property ID="9234" NpcId="WorldNpc10026" SceneID="16" DialogID="dialog_50306_2" TrackInfo="interact50306_2" OkMenu="okmenu50306_2"/>
+	<Property ID="9235" NpcId="WorldNpc10029" SceneID="16" DialogID="dialog_50313_1" TrackInfo="interact50313_1" OkMenu="okmenu50313_1"/>
+	<Property ID="9236" NpcId="WorldNpc10029" SceneID="16" DialogID="dialog_50313_2" TrackInfo="interact50313_2" OkMenu="okmenu50313_2"/>
+	<Property ID="9237" NpcId="WorldNpc10031" SceneID="16" DialogID="dialog_50319_1" TrackInfo="interact50319_1" OkMenu="okmenu50319_1"/>
+	<Property ID="9238" NpcId="WorldNpc10004" SceneID="16" DialogID="dialog_50321_1" TrackInfo="interact50321_1" OkMenu="okmenu50321_1"/>
+	<Property ID="9239" NpcId="WorldNpc10031" SceneID="16" DialogID="dialog_50323_1" LostItems="taskitem_6l-1" TrackInfo="interact50323_1" OkMenu="okmenu50323_1"/>
+	<Property ID="9240" NpcId="WorldNpc10004" SceneID="16" DialogID="dialog_50332_1" TrackInfo="interact50332_1" OkMenu="okmenu50332_1"/>
+	<Property ID="9241" NpcId="WorldNpc10035" SceneID="16" DialogID="dialog_50334_1" TrackInfo="interact50334_1" OkMenu="okmenu50334_1"/>
+	<Property ID="9242" NpcId="Gather00003l" SceneID="16" GetItems="taskitem_9l-1" TrackInfo="interact50332_2"/>
+	<Property ID="9243" NpcId="Gather00001l" SceneID="16" GetItems="taskitem_3l-1" TrackInfo="interact50304_2"/>
+	<Property ID="9244" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50337_1" TrackInfo="interact50337_1" OkMenu="okmenu50337_1"/>
+	<Property ID="9245" NpcId="WorldNpc02904" SceneID="10" DialogID="dialog_50342_2" TrackInfo="interact50342_2" OkMenu="okmenu50342_2"/>
+	<Property ID="9246" NpcId="WorldNpc02906" SceneID="10" DialogID="dialog_50344_1" GetItems="useitem_1k-1" TrackInfo="interact50344_1" OkMenu="okmenu50344_1"/>
+	<Property ID="9247" NpcId="ItemNpc02202" SceneID="10" DialogID="dialog_50347_1" TrackInfo="interact50347_1" OkMenu="okmenu50347_1"/>
+	<Property ID="9248" NpcId="WorldNpc02644" SceneID="10" DialogID="dialog_50349_1" TrackInfo="interact50349_1" OkMenu="okmenu50349_1"/>
+	<Property ID="9249" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_50351_1" TrackInfo="interact50351_1" OkMenu="okmenu50351_1"/>
+	<Property ID="9250" NpcId="WorldNpc02631" SceneID="10" DialogID="dialog_50351_2" TrackInfo="interact50351_2" OkMenu="okmenu50351_2"/>
+	<Property ID="9251" NpcId="WorldNpc02904" SceneID="10" DialogID="dialog_50354_1" TrackInfo="interact50354_1" OkMenu="okmenu50354_1"/>
+	<Property ID="9252" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50357_1" TrackInfo="interact50357_1" OkMenu="okmenu50357_1"/>
+	<Property ID="9253" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_50361_1" TrackInfo="interact50361_1" OkMenu="okmenu50361_1"/>
+	<Property ID="9254" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_50363_1" TrackInfo="interact50363_1" OkMenu="okmenu50363_1"/>
+	<Property ID="9255" NpcId="WorldNpc02215" SceneID="9" DialogID="dialog_50368_3" TrackInfo="interact50368_3" OkMenu="okmenu50368_3"/>
+	<Property ID="9256" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50373_2" TrackInfo="interact50373_2" OkMenu="okmenu50373_2"/>
+	<Property ID="9257" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50377_2" TrackInfo="interact50377_2" OkMenu="okmenu50377_2"/>
+	<Property ID="9258" NpcId="WorldNpc02203" SceneID="9" DialogID="dialog_50381_1" TrackInfo="interact50381_1" OkMenu="okmenu50381_1"/>
+	<Property ID="9259" NpcId="WorldNpc03419" SceneID="7" DialogID="dialog_50387_1" TrackInfo="interact50387_1" OkMenu="okmenu50387_1"/>
+	<Property ID="9260" NpcId="WorldNpc03419" SceneID="7" DialogID="dialog_50390_1" TrackInfo="interact50390_1" OkMenu="okmenu50390_1"/>
+	<Property ID="9261" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_50392_2" TrackInfo="interact50392_2" OkMenu="okmenu50392_2"/>
+	<Property ID="9262" NpcId="WorldNpc03420" SceneID="7" DialogID="dialog_50394_1" TrackInfo="interact50394_1" OkMenu="okmenu50394_1"/>
+	<Property ID="9263" NpcId="WorldNpc03420" SceneID="7" DialogID="dialog_50394_2" TrackInfo="interact50394_2" OkMenu="okmenu50394_2"/>
+	<Property ID="9264" NpcId="WorldNpc03420" SceneID="7" DialogID="dialog_50397_1" TrackInfo="interact50397_1" OkMenu="okmenu50397_1"/>
+	<Property ID="9265" NpcId="WorldNpc03418" SceneID="7" DialogID="dialog_50399_1" TrackInfo="interact50399_1" OkMenu="okmenu50399_1"/>
+	<Property ID="9266" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_50399_2" TrackInfo="interact50399_2" OkMenu="okmenu50399_2"/>
+	<Property ID="9267" NpcId="WorldNpc03420" SceneID="7" DialogID="dialog_50402_1" TrackInfo="interact50402_1" OkMenu="okmenu50402_1"/>
+	<Property ID="9268" NpcId="WorldNpc03421" SceneID="7" DialogID="dialog_50405_1" GetItems="useitem_6j-1" TrackInfo="interact50405_1" OkMenu="okmenu50405_1"/>
+	<Property ID="9269" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_50409_1" TrackInfo="interact50409_1" OkMenu="okmenu50409_1"/>
+	<Property ID="9270" NpcId="WorldNpc03423" SceneID="7" DialogID="dialog_50413_1" TrackInfo="interact50413_1" OkMenu="okmenu50413_1"/>
+	<Property ID="9271" NpcId="WorldNpc03418" SceneID="7" DialogID="dialog_50417_1" GetItems="useitem_8j-1" TrackInfo="interact50417_1" OkMenu="okmenu50417_1"/>
+	<Property ID="9272" NpcId="WorldNpc03422" SceneID="7" DialogID="dialog_50417_2" TrackInfo="interact50417_2" OkMenu="okmenu50417_2"/>
+	<Property ID="9273" NpcId="WorldNpc03422" SceneID="7" DialogID="dialog_50421_1" TrackInfo="interact50421_1" OkMenu="okmenu50421_1"/>
+	<Property ID="9274" NpcId="WorldNpc03422" SceneID="7" DialogID="dialog_50421_2" GetItems="taskitem_18j-1" TrackInfo="interact50421_2" OkMenu="okmenu50421_2"/>
+	<Property ID="9275" NpcId="WorldNpc03422" SceneID="7" DialogID="dialog_50424_1" TrackInfo="interact50424_1" OkMenu="okmenu50424_1"/>
+	<Property ID="9276" NpcId="WorldNpc03424" SceneID="7" DialogID="dialog_50426_1" TrackInfo="interact50426_1" OkMenu="okmenu50426_1"/>
+	<Property ID="9277" NpcId="WorldNpc03424" SceneID="7" DialogID="dialog_50426_2" TrackInfo="interact50426_2" OkMenu="okmenu50426_2"/>
+	<Property ID="9278" NpcId="WorldNpc03421" SceneID="7" DialogID="dialog_50429_1" GetItems="useitem_1m-1" TrackInfo="interact50429_1" OkMenu="okmenu50429_1"/>
+	<Property ID="9279" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_50432_1" TrackInfo="interact50432_1" OkMenu="okmenu50432_1"/>
+	<Property ID="9280" NpcId="Gather00005j" SceneID="7" GetItems="taskitem_19j-1" TrackInfo="interact50429_2"/>
+	<Property ID="9281" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50481_1" TrackInfo="interact50481_1" OkMenu="okmenu50481_1"/>
+	<Property ID="9282" NpcId="WorldNpc02268" SceneID="9" DialogID="dialog_50483_1" TrackInfo="interact50483_1" OkMenu="okmenu50483_1"/>
+	<Property ID="9283" NpcId="WorldNpc02268" SceneID="9" DialogID="dialog_50486_1" TrackInfo="interact50486_1" OkMenu="okmenu50486_1"/>
+	<Property ID="9284" NpcId="WorldNpc06616" SceneID="20" DialogID="dialog_50491_1" TrackInfo="interact50491_1" OkMenu="okmenu50491_1"/>
+	<Property ID="9285" NpcId="WorldNpc06618" SceneID="20" DialogID="dialog_50493_1" TrackInfo="interact50493_1" OkMenu="okmenu50493_1"/>
+	<Property ID="9287" NpcId="WorldNpc06617" SceneID="20" DialogID="dialog_50499_1" TrackInfo="interact50499_1" OkMenu="okmenu50499_1"/>
+	<Property ID="9289" NpcId="WorldNpc06616" SceneID="20" DialogID="dialog_50503_1" TrackInfo="interact50503_1" OkMenu="okmenu50503_1"/>
+	<Property ID="9290" NpcId="WorldNpc02264" SceneID="9" DialogID="dialog_50506_1" TrackInfo="interact50506_1" OkMenu="okmenu50506_1"/>
+	<Property ID="9291" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50511_1" GetItems="useitem_10l-1" LostItems="taskitem_17l-1" TrackInfo="interact50511_1" OkMenu="okmenu50511_1"/>
+	<Property ID="9292" NpcId="WorldNpc02264" SceneID="9" DialogID="dialog_50513_1" TrackInfo="interact50513_1" OkMenu="okmenu50513_1"/>
+	<Property ID="9293" NpcId="WorldNpc02266" SceneID="9" DialogID="dialog_50517_1" TrackInfo="interact50517_1" OkMenu="okmenu50517_1"/>
+	<Property ID="9294" NpcId="WorldNpc02267" SceneID="9" DialogID="dialog_50519_1" LostItems="taskitem_18l-1" TrackInfo="interact50519_1" OkMenu="okmenu50519_1"/>
+	<Property ID="9295" NpcId="WorldNpc02431" SceneID="9" DialogID="dialog_50522_1" TrackInfo="interact50522_1" OkMenu="okmenu50522_1"/>
+	<Property ID="9296" NpcId="WorldNpc02430" SceneID="9" DialogID="dialog_50525_1" TrackInfo="interact50525_1" OkMenu="okmenu50525_1"/>
+	<Property ID="9297" NpcId="Gather00004l" SceneID="9" DialogID="dialog_50511_2" TrackInfo="interact50511_2" OkMenu="okmenu50511_2"/>
+	<Property ID="9298" NpcId="WorldNpc06608" SceneID="20" DialogID="dialog_50488_1" TrackInfo="interact50488_1" OkMenu="okmenu50488_1"/>
+	<Property ID="9299" NpcId="WorldNpc02259" SceneID="9" DialogID="dialog_50433_2" TrackInfo="interact50433_2" OkMenu="okmenu50433_2"/>
+	<Property ID="9300" NpcId="WorldNpc02204" SceneID="9" DialogID="dialog_50435_1" TrackInfo="interact50435_1" OkMenu="okmenu50435_1"/>
+	<Property ID="9301" NpcId="WorldNpc02202" SceneID="9" DialogID="dialog_50440_1" TrackInfo="interact50440_1" OkMenu="okmenu50440_1"/>
+	<Property ID="9302" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50442_1" TrackInfo="interact50442_1" OkMenu="okmenu50442_1"/>
+	<Property ID="9303" NpcId="WorldNpc02204" SceneID="9" DialogID="dialog_50442_2" TrackInfo="interact50442_2" OkMenu="okmenu50442_2"/>
+	<Property ID="9304" NpcId="WorldNpc02259" SceneID="9" DialogID="dialog_50445_3" TrackInfo="interact50445_3" OkMenu="okmenu50445_3"/>
+	<Property ID="9305" NpcId="WorldNpc09307" SceneID="2" DialogID="dialog_50448_1" TrackInfo="interact50448_1" OkMenu="okmenu50448_1"/>
+	<Property ID="9306" NpcId="WorldNpc09307" SceneID="2" DialogID="dialog_50450_1" GetItems="useitem_8k-1" TrackInfo="interact50450_1" OkMenu="okmenu50450_1"/>
+	<Property ID="9309" NpcId="WorldNpc02259" SceneID="9" DialogID="dialog_50461_1" TrackInfo="interact50461_1" OkMenu="okmenu50461_1"/>
+	<Property ID="9310" NpcId="WorldNpc02202" SceneID="9" DialogID="dialog_50466_1" TrackInfo="interact50466_1" OkMenu="okmenu50466_1"/>
+	<Property ID="9311" NpcId="WorldNpc02208" SceneID="9" DialogID="dialog_50472_1" GetItems="useitem_10k-1" TrackInfo="interact50472_1" OkMenu="okmenu50472_1"/>
+	<Property ID="9312" NpcId="WorldNpc02359" SceneID="9" DialogID="dialog_50475_1" TrackInfo="interact50475_1" OkMenu="okmenu50475_1"/>
+	<Property ID="9313" NpcId="WorldNpc02262" SceneID="9" DialogID="dialog_50567_1" TrackInfo="interact50567_1" OkMenu="okmenu50567_1"/>
+	<Property ID="9314" NpcId="WorldNpc02262" SceneID="9" DialogID="dialog_50567_2" GetItems="taskitem_28j-1" TrackInfo="interact50567_2" OkMenu="okmenu50567_2"/>
+	<Property ID="9315" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50529_1" TrackInfo="interact50529_1" OkMenu="okmenu50529_1"/>
+	<Property ID="9316" NpcId="WorldNpc02254" SceneID="9" DialogID="dialog_50530_1" TrackInfo="interact50530_1" OkMenu="okmenu50530_1"/>
+	<Property ID="9317" NpcId="WorldNpc02209" SceneID="9" DialogID="dialog_50533_1" TrackInfo="interact50533_1" OkMenu="okmenu50533_1"/>
+	<Property ID="9318" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50536_1" TrackInfo="interact50536_1" OkMenu="okmenu50536_1"/>
+	<Property ID="9319" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50538_1" TrackInfo="interact50538_1" OkMenu="okmenu50538_1"/>
+	<Property ID="9320" NpcId="WorldNpc06902" SceneID="26" DialogID="dialog_50543_1" TrackInfo="interact50543_1" OkMenu="okmenu50543_1"/>
+	<Property ID="9321" NpcId="WorldNpc06903" SceneID="26" DialogID="dialog_50548_1" TrackInfo="interact50548_1" OkMenu="okmenu50548_1"/>
+	<Property ID="9322" NpcId="WorldNpc06903" SceneID="26" DialogID="dialog_50550_1" TrackInfo="interact50550_1" OkMenu="okmenu50550_1"/>
+	<Property ID="9323" NpcId="WorldNpc02224" SceneID="9" DialogID="dialog_50555_1" TrackInfo="interact50555_1" OkMenu="okmenu50555_1"/>
+	<Property ID="9324" NpcId="WorldNpc02263" SceneID="9" DialogID="dialog_50557_1" TrackInfo="interact50557_1" OkMenu="okmenu50557_1"/>
+	<Property ID="9325" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50559_1" TrackInfo="interact50559_1" OkMenu="okmenu50559_1"/>
+	<Property ID="9326" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50561_1" TrackInfo="interact50561_1" OkMenu="okmenu50561_1"/>
+	<Property ID="9327" NpcId="WorldNpc02201" SceneID="9" DialogID="dialog_50570_1" TrackInfo="interact50570_1" OkMenu="okmenu50570_1"/>
+	<Property ID="9328" NpcId="WorldNpc02205" SceneID="9" DialogID="dialog_50574_1" TrackInfo="interact50574_1" OkMenu="okmenu50574_1"/>
+	<Property ID="9329" NpcId="WorldNpc02211" SceneID="9" DialogID="dialog_50057_1" GetItems="taskitem_18h-1" TrackInfo="interact50057_1" OkMenu="okmenu50057_1"/>
+	<Property ID="9330" NpcId="WorldNpc02235" SceneID="9" DialogID="dialog_50111_1" GetItems="taskitem_17d-1|taskitem_18d-1|taskitem_19d-1" TrackInfo="interact50111_1" OkMenu="okmenu50111_1"/>
+	<Property ID="9331" NpcId="WorldNpc02230" SceneID="9" DialogID="dialog_50111_2" LostItems="taskitem_17d-1|taskitem_18d-1|taskitem_19d-1" TrackInfo="interact50111_2" OkMenu="okmenu50111_2"/>
+	<Property ID="9332" NpcId="WorldNpc02236" SceneID="9" DialogID="dialog_50118_2" GetItems="taskitem_21d-1" TrackInfo="interact50118_2" OkMenu="okmenu50118_2"/>
+	<Property ID="7000" NpcId="WorldNpc03313" SceneID="7" DialogID="dialog_46001_1" LostItems="taskitem_w001-1" TrackInfo="interact46001_1" OkMenu="okmenu46001_1"/>
+	<Property ID="7001" NpcId="WorldNpc03313" SceneID="7" DialogID="dialog_46001_2" TrackInfo="interact46001_2" OkMenu="okmenu46001_2"/>
+	<Property ID="7002" NpcId="WorldNpc03335" SceneID="7" DialogID="dialog_46006_1" GetItems="taskitem_w003-1" TrackInfo="interact46006_1" OkMenu="okmenu46006_1"/>
+	<Property ID="7003" NpcId="WorldNpc03313" SceneID="7" DialogID="dialog_46006_2" LostItems="taskitem_w003-1" TrackInfo="interact46006_2" OkMenu="okmenu46006_2"/>
+	<Property ID="7004" NpcId="WorldNpc03313" SceneID="7" DialogID="dialog_46008_1" GetItems="taskitem_w004-1" TrackInfo="interact46008_1" OkMenu="okmenu46008_1"/>
+	<Property ID="7005" NpcId="WorldNpc03312" SceneID="7" DialogID="dialog_46008_2" LostItems="taskitem_w004-1" TrackInfo="interact46008_2" OkMenu="okmenu46008_2"/>
+	<Property ID="7006" NpcId="WorldNpc03312" SceneID="7" DialogID="dialog_46019_1" GetItems="taskitem_w005-1" TrackInfo="interact46019_1" OkMenu="okmenu46019_1"/>
+	<Property ID="7007" NpcId="WorldNpc03440" SceneID="7" DialogID="dialog_46020_1" LostItems="taskitem_w005-1" TrackInfo="interact46020_1" OkMenu="okmenu46020_1"/>
+	<Property ID="7008" NpcId="WorldNpc03440" SceneID="7" DialogID="dialog_46020_2" TrackInfo="interact46020_2" OkMenu="okmenu46020_2"/>
+	<Property ID="7009" NpcId="WorldNpc03421" SceneID="7" DialogID="dialog_46040_1" LostItems="taskitem_w007-1" TrackInfo="interact46040_1" OkMenu="okmenu46040_1"/>
+	<Property ID="7010" NpcId="WorldNpc03335" SceneID="7" DialogID="dialog_46042_1" TrackInfo="interact46042_1" OkMenu="okmenu46042_1"/>
+	<Property ID="7011" NpcId="WorldNpc03335" SceneID="7" DialogID="dialog_46042_2" LostItems="taskitem_w006-1" TrackInfo="interact46042_2" OkMenu="okmenu46042_2"/>
+	<Property ID="7012" NpcId="WorldNpc03421" SceneID="7" DialogID="dialog_46045_1" GetItems="taskitem_w007-1" TrackInfo="interact46045_1" OkMenu="okmenu46045_1"/>
+	<Property ID="7013" NpcId="WorldNpc03313" SceneID="7" DialogID="dialog_46045_2" LostItems="taskitem_w007-1" TrackInfo="interact46045_2" OkMenu="okmenu46045_2"/>
+	<Property ID="7014" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_46051_1" LostItems="taskitem_w008-1" TrackInfo="interact46051_1" OkMenu="okmenu46051_1"/>
+	<Property ID="7015" NpcId="WorldNpc03306" SceneID="7" DialogID="dialog_46054_1" TrackInfo="interact46054_1" OkMenu="okmenu46054_1"/>
+	<Property ID="7016" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_46078_1" LostItems="taskitem_w110-1" TrackInfo="interact46078_1" OkMenu="okmenu46078_1"/>
+	<Property ID="7017" NpcId="WorldNpc03314" SceneID="7" DialogID="dialog_46097_1" GetItems="taskitem_w114-1" TrackInfo="interact46097_1" OkMenu="okmenu46097_1"/>
+	<Property ID="7018" NpcId="WorldNpc03316" SceneID="7" DialogID="dialog_46097_2" LostItems="taskitem_w114-1" TrackInfo="interact46097_2" OkMenu="okmenu46097_2"/>
+	<Property ID="7019" NpcId="EventNpc46099" SceneID="24" TrackInfo="interact46099_1"/>
+	<Property ID="7020" NpcId="EventNpc46109" SceneID="24" TrackInfo="interact46109_1"/>
+	<Property ID="7021" NpcId="EventNpc46115" SceneID="24" TrackInfo="interact46115_1"/>
+	<Property ID="7022" NpcId="EventNpc46128" SceneID="24" TrackInfo="interact46128_1"/>
+	<Property ID="7023" NpcId="WorldNpc05098" SceneID="24" DialogID="dialog_46129_1" GetItems="taskitem_w118-1" TrackInfo="interact46129_1" OkMenu="okmenu46129_1"/>
+	<Property ID="7024" NpcId="WorldNpc05099" SceneID="24" DialogID="dialog_46129_2" LostItems="taskitem_w118-1" TrackInfo="interact46129_2" OkMenu="okmenu46129_2"/>
+	<Property ID="7025" NpcId="WorldNpc05100" SceneID="24" DialogID="dialog_46131_1" LostItems="taskitem_w118-1" TrackInfo="interact46131_1" OkMenu="okmenu46131_1"/>
+	<Property ID="7026" NpcId="WorldNpc04405" SceneID="11" DialogID="dialog_46159_1" TrackInfo="interact46159_1" OkMenu="okmenu46159_1"/>
+	<Property ID="7027" NpcId="WorldNpc04404" SceneID="11" DialogID="dialog_46159_2" TrackInfo="interact46159_2" OkMenu="okmenu46159_2"/>
+	<Property ID="7028" NpcId="WorldNpc04401" SceneID="11" DialogID="dialog_46169_1" LostItems="taskitem_w120-1" TrackInfo="interact46169_1" OkMenu="okmenu46169_1"/>
+	<Property ID="7029" NpcId="EventNpc46170" SceneID="11" TrackInfo="interact46170_1"/>
+	<Property ID="7030" NpcId="EventNpc46173" SceneID="11" TrackInfo="interact46173_1"/>
+	<Property ID="7031" NpcId="WorldNpc04701" SceneID="11" DialogID="dialog_46177_1" LostItems="taskitem_w121-1" TrackInfo="interact46177_1" OkMenu="okmenu46177_1"/>
+	<Property ID="7032" NpcId="WorldNpc03305" SceneID="7" DialogID="dialog_46187_1" LostItems="taskitem_w123-1" TrackInfo="interact46187_1" OkMenu="okmenu46187_1"/>
+	<Property ID="7033" NpcId="WorldNpc02036" SceneID="19" DialogID="dialog_46194_1" TrackInfo="interact46194_1" OkMenu="okmenu46194_1"/>
+	<Property ID="7034" NpcId="EventNpc46203" SceneID="19" TrackInfo="interact46203_1"/>
+	<Property ID="7035" NpcId="EventNpc46209" SceneID="19" TrackInfo="interact46209_1"/>
+	<Property ID="7036" NpcId="WorldNpc02038" SceneID="19" DialogID="dialog_46224_1" TrackInfo="interact46224_2" OkMenu="okmenu46224_1"/>
+	<Property ID="7200" NpcId="WorldNpc08934" SceneID="13" DialogID="dialog_46294_1" TrackInfo="interact46294_1" OkMenu="okmenu46294_1"/>
+	<Property ID="7201" NpcId="WorldNpc08504" SceneID="13" DialogID="dialog_46296_1" GetItems="useitem_1yc-1" TrackInfo="interact46296_1" OkMenu="okmenu46296_1"/>
+	<Property ID="7202" NpcId="WorldNpc08934" SceneID="13" DialogID="dialog_46304_1" TrackInfo="interact46304_1" OkMenu="okmenu46304_1"/>
+	<Property ID="7203" NpcId="WorldNpc08935" SceneID="13" DialogID="dialog_46304_2" TrackInfo="interact46304_2" OkMenu="okmenu46304_1"/>
+	<Property ID="7204" NpcId="WorldNpc08935" SceneID="13" DialogID="dialog_46306_1" TrackInfo="interact46306_1" OkMenu="okmenu46306_1"/>
+	<Property ID="7205" NpcId="WorldNpc08519" SceneID="13" DialogID="dialog_46311_1" TrackInfo="interact46311_1" OkMenu="okmenu46311_1"/>
+	<Property ID="7206" NpcId="WorldNpc08936" SceneID="13" DialogID="dialog_46314_1" TrackInfo="interact46314_1" OkMenu="okmenu46314_1"/>
+	<Property ID="7207" NpcId="WorldNpc08936" SceneID="13" DialogID="dialog_46319_2" TrackInfo="interact46319_2" OkMenu="okmenu46319_2"/>
+	<Property ID="7208" NpcId="WorldNpc08938" SceneID="13" DialogID="dialog_46320_2" GetItems="taskitem_yc005-1" TrackInfo="interact46320_2" OkMenu="okmenu46320_2"/>
+	<Property ID="7209" NpcId="WorldNpc08519" SceneID="13" DialogID="dialog_46334_1" TrackInfo="interact46334_1" OkMenu="okmenu46334_1"/>
+	<Property ID="7210" NpcId="WorldNpc02692" SceneID="10" DialogID="dialog_46338_1" TrackInfo="interact46338_1" OkMenu="okmenu46338_1"/>
+	<Property ID="7211" NpcId="WorldNpc08939" SceneID="13" DialogID="dialog_46328_1" TrackInfo="interact46328_1" OkMenu="okmenu46328_1"/>
+	<Property ID="7212" NpcId="WorldNpc02698" SceneID="10" DialogID="dialog_46344_1" TrackInfo="interact46344_1" OkMenu="okmenu46344_1"/>
+	<Property ID="7213" NpcId="WorldNpc02698" SceneID="10" DialogID="dialog_46344_2" TrackInfo="interact46344_2" OkMenu="okmenu46334_2"/>
+	<Property ID="7214" NpcId="WorldNpc02605" SceneID="10" DialogID="dialog_46350_1" TrackInfo="interact46350_1" OkMenu="okmenu46350_1"/>
+	<Property ID="7215" NpcId="WorldNpc02695" SceneID="10" DialogID="dialog_46355_1" TrackInfo="interact46355_1" OkMenu="okmenu46355_1"/>
+	<Property ID="7216" NpcId="WorldNpc02692" SceneID="10" DialogID="dialog_46355_2" TrackInfo="interact46355_2" OkMenu="okmenu46355_2"/>
+	<Property ID="7217" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_46350_2" TrackInfo="interact46350_2" OkMenu="okmenu46350_2"/>
+	<Property ID="7218" NpcId="WorldNpc02642" SceneID="10" DialogID="dialog_46361_1" TrackInfo="interact46361_1" OkMenu="okmenu46361_1"/>
+	<Property ID="7219" NpcId="WorldNpc02696" SceneID="10" DialogID="dialog_46363_1" TrackInfo="interact46363_1" OkMenu="okmenu46363_1"/>
+	<Property ID="7220" NpcId="WorldNpc02696" SceneID="10" DialogID="dialog_46363_2" TrackInfo="interact46363_2" OkMenu="okmenu46363_2"/>
+	<Property ID="7221" NpcId="WorldNpc02693" SceneID="10" DialogID="dialog_46367_1" TrackInfo="interact46367_1" OkMenu="okmenu46367_1"/>
+	<Property ID="7222" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_46367_2" GetItems="useitem_5yc-1" TrackInfo="interact46367_2" OkMenu="okmenu46367_2"/>
+	<Property ID="7224" NpcId="WorldNpc02699" SceneID="10" DialogID="dialog_46373_1" TrackInfo="interact46373_1" OkMenu="okmenu46373_1"/>
+	<Property ID="7225" NpcId="WorldNpc02699" SceneID="10" DialogID="dialog_46373_2" TrackInfo="interact46373_2" OkMenu="okmenu46373_2"/>
+	<Property ID="7226" NpcId="WorldNpc02602" SceneID="10" DialogID="dialog_46373_3" TrackInfo="interact46373_3" OkMenu="okmenu46373_3"/>
+	<Property ID="7227" NpcId="WorldNpc02696" SceneID="10" DialogID="dialog_46378_1" LostItems="taskitem_yc009-1" TrackInfo="interact46378_1" OkMenu="okmenu46378_1"/>
+	<Property ID="7228" NpcId="WorldNpc02697" SceneID="10" DialogID="dialog_46381_1" TrackInfo="interact46381_1" OkMenu="okmenu46381_1"/>
+	<Property ID="7229" NpcId="WorldNpc02693" SceneID="10" DialogID="dialog_46340_1" GetItems="useitem_4yc-1" TrackInfo="interact46340_1" OkMenu="okmenu46340_1"/>
+	<Property ID="7230" NpcId="WorldNpc02572" SceneID="9" DialogID="dialog_46393_1" LostItems="taskitem_yc014-1" TrackInfo="interact46393_1" OkMenu="okmenu46393_1"/>
+	<Property ID="7232" NpcId="WorldNpc02510" SceneID="9" DialogID="dialog_46394_1" TrackInfo="interact46394_1" OkMenu="okmenu46394_1"/>
+	<Property ID="7233" NpcId="WorldNpc02575" SceneID="9" DialogID="dialog_46398_1" TrackInfo="interact46398_1" OkMenu="okmenu46398_1"/>
+	<Property ID="7234" NpcId="WorldNpc02577" SceneID="9" DialogID="dialog_46406_1" TrackInfo="interact46406_1" OkMenu="okmenu46406_1"/>
+	<Property ID="7235" NpcId="WorldNpc02577" SceneID="9" DialogID="dialog_46410_1" GetItems="useitem_6yc-1" TrackInfo="interact46410_1" OkMenu="okmenu46410_1"/>
+	<Property ID="7236" NpcId="WorldNpc02510" SceneID="9" DialogID="dialog_46428_1" TrackInfo="interact46428_1" OkMenu="okmenu46428_1"/>
+	<Property ID="7237" NpcId="WorldNpc06231" SceneID="22" DialogID="dialog_46436_1" TrackInfo="interact46436_1" OkMenu="okmenu46436_1"/>
+	<Property ID="7238" NpcId="WorldNpc06240" SceneID="22" DialogID="dialog_46461_1" TrackInfo="interact46461_1" OkMenu="okmenu46461_1"/>
+	<Property ID="7239" NpcId="WorldNpc06236" SceneID="22" DialogID="dialog_46471_1" GetItems="taskitem_yc016-1" TrackInfo="interact46471_1" OkMenu="okmenu46471_1"/>
+	<Property ID="7240" NpcId="WorldNpc06238" SceneID="22" DialogID="dialog_46478_1" GetItems="useitem_8yc-1" TrackInfo="interact46478_1" OkMenu="okmenu46478_1"/>
+	<Property ID="7241" SceneID="9"/>
+	<Property ID="7242" SceneID="9"/>
+	<Property ID="7243" SceneID="9"/>
+	<Property ID="7244" SceneID="9"/>
+	<Property ID="7245" SceneID="9"/>
+	<Property ID="7246" SceneID="9"/>
+	<Property ID="7247" SceneID="9"/>
+	<Property ID="5001" NpcId="WorldNpc04106" SceneID="5" DialogID="dialog_42001_1" TrackInfo="interact42001_1" OkMenu="okmenu42001_1"/>
+	<Property ID="5002" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_42001_2" TrackInfo="interact42001_2" OkMenu="okmenu42001_2"/>
+	<Property ID="5003" NpcId="WorldNpc04109" SceneID="5" DialogID="dialog_42001_3" TrackInfo="interact42001_3" OkMenu="okmenu42001_3"/>
+	<Property ID="5004" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_42007" TrackInfo="interact42007" OkMenu="okmenu42007"/>
+	<Property ID="5006" NpcId="WorldNpc04109" SceneID="5" DialogID="dialog_42011" GetItems="taskitem_x001-1" TrackInfo="interact42011" OkMenu="okmenu42011"/>
+	<Property ID="5007" NpcId="WorldNpc04110" SceneID="5" DialogID="dialog_42013_1" TrackInfo="interact42013_1" OkMenu="okmenu42013_1"/>
+	<Property ID="5008" NpcId="WorldNpc04108" SceneID="5" DialogID="dialog_42013_2" TrackInfo="interact42013_2" OkMenu="okmenu42013_2"/>
+	<Property ID="5009" NpcId="itemnpc03001" SceneID="5" DialogID="dialog_42013_3" TrackInfo="interact42013_3" OkMenu="okmenu42013_3"/>
+	<Property ID="5010" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_42017" TrackInfo="interact42017" OkMenu="okmenu42017"/>
+	<Property ID="5011" NpcId="WorldNpc04109" SceneID="5" DialogID="dialog_42020" TrackInfo="interact42020" OkMenu="okmenu42020"/>
+	<Property ID="5012" NpcId="itemnpc03002" SceneID="5" DialogID="dialog_42022_1" LostItems="taskitem_x002-1" TrackInfo="interact42022_1" OkMenu="okmenu42022_1"/>
+	<Property ID="5013" NpcId="WorldNpc04112" SceneID="5" DialogID="dialog_42022_2" TrackInfo="interact42022_2" OkMenu="okmenu42022_2"/>
+	<Property ID="5014" NpcId="WorldNpc04106" SceneID="5" DialogID="dialog_42025_1" TrackInfo="interact42025_1" OkMenu="okmenu42025_1"/>
+	<Property ID="5015" NpcId="WorldNpc04102" SceneID="5" DialogID="dialog_42025_2" TrackInfo="interact42025_2" OkMenu="okmenu42025_2"/>
+	<Property ID="5016" NpcId="WorldNpc04103" SceneID="5" DialogID="dialog_42025_3" TrackInfo="interact42025_3" OkMenu="okmenu42025_3"/>
+	<Property ID="5017" NpcId="WorldNpc04104" SceneID="5" DialogID="dialog_42025_4" TrackInfo="interact42025_4" OkMenu="okmenu42025_4"/>
+	<Property ID="5018" NpcId="WorldNpc04112" SceneID="5" DialogID="dialog_42030" TrackInfo="interact42030" OkMenu="okmenu42030"/>
+	<Property ID="5019" NpcId="WorldNpc04103" SceneID="5" DialogID="dialog_42031_1" TrackInfo="interact42031_1" OkMenu="okmenu42031_1"/>
+	<Property ID="5020" NpcId="WorldNpc04104" SceneID="5" DialogID="dialog_42031_2" TrackInfo="interact42031_2" OkMenu="okmenu42031_2"/>
+	<Property ID="5022" NpcId="WorldNpc04102" SceneID="5" DialogID="dialog_42032" TrackInfo="interact42032" OkMenu="okmenu42032"/>
+	<Property ID="5023" NpcId="WorldNpc04114" SceneID="5" DialogID="dialog_42034_1" TrackInfo="interact42034_1" OkMenu="okmenu42034_1"/>
+	<Property ID="5024" NpcId="WorldNpc04102" SceneID="5" DialogID="dialog_42034_2" TrackInfo="interact42034_2" OkMenu="okmenu42034_2"/>
+	<Property ID="5025" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_42040_1" TrackInfo="interact42040_1" OkMenu="okmenu42040_1"/>
+	<Property ID="5026" NpcId="WorldNpc04107" SceneID="5" DialogID="dialog_42043_1" TrackInfo="interact42043_1" OkMenu="okmenu42043_1"/>
+	<Property ID="5027" NpcId="WorldNpc04103" SceneID="5" DialogID="dialog_42043_2" TrackInfo="interact42043_2" OkMenu="okmenu42043_2"/>
+	<Property ID="5028" NpcId="WorldNpc04105" SceneID="5" DialogID="dialog_42045_1" TrackInfo="interact42045_1" OkMenu="okmenu42045_1"/>
+	<Property ID="5029" NpcId="itemnpc03003" SceneID="5" DialogID="dialog_42045_2" LostItems="taskitem_x010-1" TrackInfo="interact42045_2" OkMenu="okmenu42045_2"/>
+	<Property ID="5030" NpcId="WorldNpc04105" SceneID="5" DialogID="dialog_42045_3" TrackInfo="interact42045_3" OkMenu="okmenu42045_3"/>
+	<Property ID="5031" NpcId="WorldNpc04117" SceneID="5" DialogID="dialog_42006_1" LostItems="taskitem_x012-1" TrackInfo="interact42006_1" OkMenu="okmenu42006_1"/>
+	<Property ID="5032" NpcId="WorldNpc04118" SceneID="5" DialogID="dialog_42006_2" LostItems="taskitem_x012-1" TrackInfo="interact42006_2" OkMenu="okmenu42006_2"/>
+	<Property ID="5033" NpcId="WorldNpc04119" SceneID="5" DialogID="dialog_42006_3" LostItems="taskitem_x012-1" TrackInfo="interact42006_3" OkMenu="okmenu42006_3"/>
+	<Property ID="5034" NpcId="WorldNpc04108" SceneID="5" DialogID="dialog_42001_4" TrackInfo="interact42001_4" OkMenu="okmenu42001_4"/>
+	<Property ID="5035" NpcId="WorldNpc04111" SceneID="5" DialogID="dialog_42040_2" TrackInfo="interact42040_2" OkMenu="okmenu42040_2"/>
+	<Property ID="5036" NpcId="FunnpcClone017002" SceneID="5" DialogID="dialog_42049" TrackInfo="interact42049" OkMenu="okmenu42049"/>
+	<Property ID="5037" NpcId="WorldNpc04128" SceneID="5" DialogID="dialog_42090" GetItems="taskitem_x019-1" TrackInfo="interact42090" OkMenu="okmenu42090"/>
+	<Property ID="8001" NpcId="WorldNpc03826" SceneID="8" DialogID="dialog_48001_1" TrackInfo="interact48001_1" OkMenu="okmenu48001_1"/>
+	<Property ID="8002" NpcId="WorldNpc03810" SceneID="8" DialogID="dialog_48002_2" TrackInfo="interact48002_1" OkMenu="okmenu48002_1"/>
+	<Property ID="8003" NpcId="WorldNpc03810" SceneID="8" DialogID="dialog_48008_2" TrackInfo="interact48008_2" OkMenu="okmenu48008_2"/>
+	<Property ID="8004" NpcId="WorldNpc03855" SceneID="8" DialogID="dialog_48009_1" TrackInfo="interact48009_1" OkMenu="okmenu48009_1"/>
+	<Property ID="8005" NpcId="WorldNpc03826" SceneID="8" DialogID="dialog_48012_1" TrackInfo="interact48012_1" OkMenu="okmenu48012_1"/>
+	<Property ID="8006" NpcId="WorldNpc03856" SceneID="8" DialogID="dialog_48018_1" TrackInfo="interact48018_1" OkMenu="okmenu48018_1"/>
+	<Property ID="8007" NpcId="WorldNpc03810" SceneID="8" DialogID="dialog_48019_1" TrackInfo="interact48019_1" OkMenu="okmenu48019_1"/>
+	<Property ID="8008" NpcId="WorldNpc03857" SceneID="8" DialogID="dialog_48021_1" TrackInfo="interact48021_1" OkMenu="okmenu48021_1"/>
+	<Property ID="8009" NpcId="WorldNpc03826" SceneID="8" DialogID="dialog_48030_2" TrackInfo="interact48030_2" OkMenu="okmenu48030_2"/>
+	<Property ID="8010" NpcId="WorldNpc03820" SceneID="8" DialogID="dialog_48002_1" TrackInfo="interact48002_2" OkMenu="okmenu48002_2"/>
+	<Property ID="8011" NpcId="WorldNpc03820" SceneID="8" DialogID="dialog_48008_1" LostItems="taskitem_3y-1" TrackInfo="interact48008_1" OkMenu="okmenu48008_1"/>
+	<Property ID="8012" NpcId="WorldNpc03816" SceneID="8" DialogID="dialog_48043_1" LostItems="taskitem_11y-1" TrackInfo="interact48043_1" OkMenu="okmenu48043_1"/>
+	<Property ID="8013" NpcId="WorldNpc03809" SceneID="8" DialogID="dialog_48043_2" TrackInfo="interact48043_2" OkMenu="okmenu48043_2"/>
+	<Property ID="8014" NpcId="WorldNpc03816" SceneID="8" DialogID="dialog_48047_1" TrackInfo="interact48047_1" OkMenu="okmenu48047_1"/>
+	<Property ID="8015" NpcId="WorldNpc03812" SceneID="8" DialogID="dialog_48047_2" TrackInfo="interact48047_2" OkMenu="okmenu48047_2"/>
+	<Property ID="8016" NpcId="WorldNpc03809" SceneID="8" DialogID="dialog_48047_3" TrackInfo="interact48047_3" OkMenu="okmenu48047_3"/>
+	<Property ID="8017" NpcId="WorldNpc03836" SceneID="8" DialogID="dialog_48059_1" TrackInfo="interact48059_1" OkMenu="okmenu48059_1"/>
+	<Property ID="8018" NpcId="WorldNpc03928" SceneID="8" DialogID="dialog_48059_2" TrackInfo="interact48059_2" OkMenu="okmenu48059_2"/>
+	<Property ID="8020" NpcId="WorldNpc03928" SceneID="8" DialogID="dialog_48072_1" TrackInfo="interact48072_1" OkMenu="okmenu48072_1"/>
+	<Property ID="8021" NpcId="WorldNpc03822" SceneID="8" DialogID="dialog_48076_1" TrackInfo="interact48076_1" OkMenu="okmenu48076_1"/>
+	<Property ID="8022" NpcId="WorldNpc03816" SceneID="8" DialogID="dialog_48080_1" LostItems="taskitem_15y-1,taskitem_19y-1" TrackInfo="interact48080_1" OkMenu="okmenu48080_1"/>
+	<Property ID="8023" NpcId="WorldNpc03812" SceneID="8" DialogID="dialog_48080_2" TrackInfo="interact48080_2" OkMenu="okmenu48080_2"/>
+	<Property ID="8024" NpcId="WorldNpc03809" SceneID="8" DialogID="dialog_48081_1" TrackInfo="interact48081_1" OkMenu="okmenu48081_1"/>
+	<Property ID="8025" NpcId="WorldNpc03816" SceneID="8" DialogID="dialog_48081_2" TrackInfo="interact48081_2" OkMenu="okmenu48081_2"/>
+	<Property ID="8026" NpcId="WorldNpc03840" SceneID="8" DialogID="dialog_48134_1" TrackInfo="interact48134_1" OkMenu="okmenu48134_1"/>
+	<Property ID="8027" NpcId="WorldNpc03930" SceneID="8" DialogID="dialog_48089_1" TrackInfo="interact48089_1" OkMenu="okmenu48089_1"/>
+	<Property ID="8028" NpcId="WorldNpc03820" SceneID="8" DialogID="dialog_48089_2" TrackInfo="interact48089_2" OkMenu="okmenu48089_2"/>
+	<Property ID="8029" NpcId="WorldNpc03930" SceneID="8" DialogID="dialog_48091_1" TrackInfo="interact48091_1" OkMenu="okmenu48091_1"/>
+	<Property ID="8030" NpcId="WorldNpc05102" SceneID="24" DialogID="dialog_48091_2" TrackInfo="interact48091_2" OkMenu="okmenu48091_2"/>
+	<Property ID="8031" NpcId="WorldNpc05104" SceneID="24" DialogID="dialog_48097_1" TrackInfo="interact48097_1" OkMenu="okmenu48097_1"/>
+	<Property ID="8032" NpcId="WorldNpc05102" SceneID="24" DialogID="dialog_48099_1" TrackInfo="interact48099_1" OkMenu="okmenu48099_1"/>
+	<Property ID="8033" NpcId="WorldNpc05105" SceneID="24" DialogID="dialog_48099_2" TrackInfo="interact48099_2" OkMenu="okmenu48099_2"/>
+	<Property ID="8034" NpcId="WorldNpc05103" SceneID="24" DialogID="dialog_48108_1" TrackInfo="interact48108_1" OkMenu="okmenu48108_1"/>
+	<Property ID="8035" NpcId="WorldNpc05105" SceneID="24" DialogID="dialog_48108_2" TrackInfo="interact48108_2" OkMenu="okmenu48108_2"/>
+	<Property ID="8036" NpcId="WorldNpc05103" SceneID="24" DialogID="dialog_48113_1" TrackInfo="interact48113_1" OkMenu="okmenu48113_1"/>
+	<Property ID="8037" NpcId="WorldNpc05106" SceneID="24" DialogID="dialog_48117_1" TrackInfo="interact48117_1" OkMenu="okmenu48117_1"/>
+	<Property ID="8038" NpcId="WorldNpc05103" SceneID="24" DialogID="dialog_48117_2" TrackInfo="interact48117_2" OkMenu="okmenu48117_2"/>
+	<Property ID="8039" NpcId="WorldNpc05107" SceneID="24" DialogID="dialog_48120_1" TrackInfo="interact48120_1" OkMenu="okmenu48120_1"/>
+	<Property ID="8040" NpcId="WorldNpc04004" SceneID="8" DialogID="dialog_48183_1" TrackInfo="interact48183_1" OkMenu="okmenu48183_1"/>
+	<Property ID="8041" NpcId="WorldNpc04002" SceneID="8" DialogID="dialog_48185_1" TrackInfo="interact48185_1" OkMenu="okmenu48185_1"/>
+	<Property ID="8042" NpcId="WorldNpc04024" SceneID="8" DialogID="dialog_48189_1" TrackInfo="interact48189_1" OkMenu="okmenu48189_1"/>
+	<Property ID="8043" NpcId="WorldNpc04013" SceneID="8" DialogID="dialog_48192_1" TrackInfo="interact48192_1" OkMenu="okmenu48192_1"/>
+	<Property ID="8044" NpcId="WorldNpc04057" SceneID="8" DialogID="dialog_48192_2" TrackInfo="interact48192_2" OkMenu="okmenu48192_2"/>
+	<Property ID="8045" NpcId="WorldNpc03808" SceneID="8" DialogID="dialog_48198_1" TrackInfo="interact48198_1" OkMenu="okmenu48198_1"/>
+	<Property ID="8046" NpcId="WorldNpc04059" SceneID="8" DialogID="dialog_48201_1" TrackInfo="interact48201_1" OkMenu="okmenu48201_1"/>
+	<Property ID="8047" NpcId="WorldNpc04004" SceneID="8" DialogID="dialog_48201_2" TrackInfo="interact48201_2" OkMenu="okmenu48201_2"/>
+	<Property ID="8048" NpcId="WorldNpc04086" SceneID="8" DialogID="dialog_48207_1" TrackInfo="interact48207_1" OkMenu="okmenu48207_1"/>
+	<Property ID="8049" NpcId="WorldNpc04008" SceneID="8" DialogID="dialog_48210_1" TrackInfo="interact48210_1" OkMenu="okmenu48210_1"/>
+	<Property ID="8050" NpcId="WorldNpc04009" SceneID="8" DialogID="dialog_48212_1" TrackInfo="interact48212_1" OkMenu="okmenu48212_1"/>
+	<Property ID="8051" NpcId="WorldNpc03808" SceneID="8" DialogID="dialog_48219_1" TrackInfo="interact48219_1" OkMenu="okmenu48219_1"/>
+</Object>

@@ -1,0 +1,1062 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" NpcId="monv040100" Count="3" TrackInfo="hunter24013" SceneID="1"/>
+	<Property ID="4002" NpcId="monv041100" Count="5" TrackInfo="hunter24016" SceneID="1"/>
+	<Property ID="4003" NpcId="monv041300" Count="6" TrackInfo="hunter24019" SceneID="1"/>
+	<Property ID="4004" NpcId="monv040200" Count="2" TrackInfo="hunter24026" SceneID="1"/>
+	<Property ID="4005" NpcId="monv040200" Count="3" TrackInfo="hunter24036" SceneID="1"/>
+	<Property ID="4006" NpcId="Qiecuo005" Count="1" TrackInfo="hunter24040" SceneID="1"/>
+	<Property ID="4007" NpcId="monv041600" Count="6" TrackInfo="hunter24041" SceneID="1"/>
+	<Property ID="4008" NpcId="bossv040100" Count="1" TrackInfo="hunter24044" SceneID="1"/>
+	<Property ID="4009" NpcId="monv040300" Count="6" TrackInfo="hunter24049" SceneID="1"/>
+	<Property ID="4010" NpcId="monv040500" Count="6" TrackInfo="hunter24063" SceneID="1"/>
+	<Property ID="4011" NpcId="WorldNpc00022" Count="1" TrackInfo="hunter24065" SceneID="1" IsQieCuo="1"/>
+	<Property ID="4012" NpcId="monv042100" Count="3" TrackInfo="hunter24068_1" SceneID="1"/>
+	<Property ID="4013" NpcId="monv042200" Count="3" TrackInfo="hunter24068_2" SceneID="1"/>
+	<Property ID="4014" NpcId="monv042300" Count="6" TrackInfo="hunter24072" SceneID="1"/>
+	<Property ID="4015" NpcId="monrm060100" Count="3" RefreshMonster="1233,1234,1235" TrackInfo="hunter24075" SceneID="10"/>
+	<Property ID="4016" NpcId="monm060200" Count="6" TrackInfo="hunter24076" SceneID="10"/>
+	<Property ID="4017" NpcId="monm060300" Count="6" TrackInfo="hunter24079" SceneID="10"/>
+	<Property ID="4018" NpcId="monm060400" Count="6" TrackInfo="hunter24085" SceneID="10"/>
+	<Property ID="4019" NpcId="bossm060100" Count="1" TrackInfo="hunter24088" SceneID="10"/>
+	<Property ID="4020" NpcId="monm060500" Count="6" TrackInfo="hunter24094" SceneID="10"/>
+	<Property ID="4021" NpcId="monf040100" Count="6" TrackInfo="hunter24099" SceneID="21"/>
+	<Property ID="4022" NpcId="monf040200" Count="6" TrackInfo="hunter24102" SceneID="21"/>
+	<Property ID="4023" NpcId="monf040400" Count="6" TrackInfo="hunter24105_1" SceneID="21"/>
+	<Property ID="4024" NpcId="bossf040100" Count="1" TrackInfo="hunter24105_2" SceneID="21"/>
+	<Property ID="4025" NpcId="monf040500" Count="6" TrackInfo="hunter24112" SceneID="21"/>
+	<Property ID="4026" NpcId="monf041100" Count="6" TrackInfo="hunter24115" SceneID="21"/>
+	<Property ID="4027" NpcId="monf041200" Count="6" TrackInfo="hunter24116" SceneID="21"/>
+	<Property ID="4028" NpcId="monf041400" Count="4" TrackInfo="hunter24119_1" SceneID="21"/>
+	<Property ID="4029" NpcId="bossf040200" Count="1" TrackInfo="hunter24119_2" SceneID="21"/>
+	<Property ID="4030" NpcId="monrf040700" Count="4" RefreshMonster="1004,1005,1006,1007" TrackInfo="hunter24121" SceneID="21"/>
+	<Property ID="4031" NpcId="monf042100" Count="6" TrackInfo="hunter24122" SceneID="21"/>
+	<Property ID="4032" NpcId="monf042300" Count="5" TrackInfo="hunter24132_1" SceneID="21"/>
+	<Property ID="4033" NpcId="monf042400" Count="5" TrackInfo="hunter24132_2" SceneID="21"/>
+	<Property ID="4034" NpcId="monf042500" Count="6" TrackInfo="hunter24136_1" SceneID="21"/>
+	<Property ID="4035" NpcId="WorldNpc06010" Count="1" TrackInfo="hunter24136_2" SceneID="21" IsQieCuo="1"/>
+	<Property ID="4036" NpcId="monf042600" Count="6" TrackInfo="hunter24141_1" SceneID="21"/>
+	<Property ID="4037" NpcId="bossf040400" Count="1" TrackInfo="hunter24141_2" SceneID="21"/>
+	<Property ID="4038" NpcId="monf050100" Count="6" TrackInfo="hunter24147" SceneID="22"/>
+	<Property ID="4039" NpcId="monf050200" Count="6" TrackInfo="hunter24149" SceneID="22"/>
+	<Property ID="4040" NpcId="monf050300" Count="6" TrackInfo="hunter24154" SceneID="22"/>
+	<Property ID="4041" NpcId="monf051600" Count="6" TrackInfo="hunter24159" SceneID="22"/>
+	<Property ID="4042" NpcId="monf051100" Count="6" TrackInfo="hunter24162_1" SceneID="22"/>
+	<Property ID="4043" NpcId="monf051200" Count="5" TrackInfo="hunter24170" SceneID="22"/>
+	<Property ID="4044" NpcId="monrf051000" Count="1" RefreshMonster="1011" TrackInfo="hunter24176" SceneID="22"/>
+	<Property ID="4045" NpcId="bossf050100" Count="1" TrackInfo="hunter24178" SceneID="22"/>
+	<Property ID="4046" NpcId="monrf051400" Count="2" RefreshMonster="1238,1239" TrackInfo="hunter24183" SceneID="22"/>
+	<Property ID="4047" NpcId="monf051700" Count="6" TrackInfo="hunter24187" SceneID="22"/>
+	<Property ID="4048" NpcId="monf051400" Count="8" TrackInfo="hunter24190" SceneID="22"/>
+	<Property ID="4049" NpcId="WorldNpc09804" Count="1" TrackInfo="hunter24200" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4050" NpcId="monrc050300" Count="1" TrackInfo="hunter24201" SceneID="17"/>
+	<Property ID="4051" NpcId="monrc050400" Count="1" TrackInfo="hunter24202" SceneID="17"/>
+	<Property ID="4052" NpcId="WorldNpc09803" Count="1" TrackInfo="hunter24209" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4053" NpcId="monc051100" Count="7" TrackInfo="hunter24210" SceneID="17"/>
+	<Property ID="4055" NpcId="monrc050900" Count="1" RefreshMonster="1018" TrackInfo="hunter24214_1" SceneID="17"/>
+	<Property ID="4056" NpcId="monrc051000" Count="1" RefreshMonster="1019" TrackInfo="hunter24214_2" SceneID="17"/>
+	<Property ID="4057" NpcId="monrc051100" Count="1" RefreshMonster="1020" TrackInfo="hunter24214_3" SceneID="17"/>
+	<Property ID="4058" NpcId="WorldNpc09806" Count="1" TrackInfo="hunter24220_1" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4059" NpcId="monrc050900" Count="1" RefreshMonster="1023,1024,1025,1026" TrackInfo="hunter24223_1" SceneID="17"/>
+	<Property ID="4060" NpcId="monrc051000" Count="1" TrackInfo="hunter24223_2" SceneID="17"/>
+	<Property ID="4061" NpcId="monrc051100" Count="1" TrackInfo="hunter24223_3" SceneID="17"/>
+	<Property ID="4062" NpcId="monrc051200" Count="1" TrackInfo="hunter24223_4" SceneID="17"/>
+	<Property ID="4063" NpcId="WorldNpc09601" Count="1" TrackInfo="hunter24226" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4064" NpcId="WorldNpc09813" Count="1" TrackInfo="hunter24231" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4065" NpcId="WorldNpc09611" Count="1" TrackInfo="hunter24238" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4066" NpcId="WorldNpc00028" Count="1" TrackInfo="hunter24245" SceneID="1" IsQieCuo="1"/>
+	<Property ID="4067" NpcId="WorldNpc00030" Count="1" TrackInfo="hunter24249" SceneID="1" IsQieCuo="1"/>
+	<Property ID="4068" NpcId="WorldNpc00032" Count="1" TrackInfo="hunter24256" SceneID="1" IsQieCuo="1"/>
+	<Property ID="4069" NpcId="WorldNpc05803" Count="1" TrackInfo="hunter24266" SceneID="21" IsQieCuo="1"/>
+	<Property ID="4070" NpcId="monrv041800" Count="3" RefreshMonster="1038,1039,1040" TrackInfo="hunter24272" SceneID="1"/>
+	<Property ID="4071" NpcId="WorldNpc09616" Count="1" TrackInfo="hunter24279" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4072" NpcId="bossc050100" Count="1" TrackInfo="hunter24281" SceneID="17"/>
+	<Property ID="4073" NpcId="monrv041000" Count="1" RefreshMonster="1044" TrackInfo="hunter24283" SceneID="1"/>
+	<Property ID="4074" NpcId="monc020600" Count="6" TrackInfo="hunter24290_1" SceneID="15"/>
+	<Property ID="4075" NpcId="monc033500" Count="6" TrackInfo="hunter24290_2" SceneID="15"/>
+	<Property ID="4076" NpcId="WorldNpc08841" Count="1" TrackInfo="hunter24299" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4077" NpcId="monrf030300" Count="1" RefreshMonster="1046" TrackInfo="hunter24301_1" SceneID="20"/>
+	<Property ID="4078" NpcId="monrf030400" Count="1" RefreshMonster="1053" TrackInfo="hunter24301_2" SceneID="20"/>
+	<Property ID="4079" NpcId="monrc021400" Count="3" RefreshMonster="1051,1052,1054" TrackInfo="hunter24304" SceneID="20"/>
+	<Property ID="4080" NpcId="monf031300" Count="6" TrackInfo="hunter24309" SceneID="20"/>
+	<Property ID="4081" NpcId="monrf032900" Count="4" TrackInfo="hunter24318" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="4082" NpcId="monrf033200" Count="6" TrackInfo="hunter24321" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="4083" NpcId="monrf033100" Count="3" RefreshMonster="1008,1009,1013" TrackInfo="hunter24326" SceneID="20"/>
+	<Property ID="4084" NpcId="monrf033100" Count="4" RefreshMonster="1017,1025,1041,1042" TrackInfo="hunter24328" SceneID="20"/>
+	<Property ID="4085" NpcId="monf031300" Count="6" TrackInfo="hunter24329" SceneID="20"/>
+	<Property ID="4086" NpcId="bossf030200" Count="1" TrackInfo="hunter24333" SceneID="20"/>
+	<Property ID="4087" NpcId="bossf030100" Count="1" TrackInfo="hunter24334" SceneID="20"/>
+	<Property ID="4088" NpcId="WorldNpc08408" Count="1" TrackInfo="hunter24338" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4089" NpcId="monrc020500" Count="3" RefreshMonster="1057,1058,1059" TrackInfo="hunter24344" SceneID="13"/>
+	<Property ID="4090" NpcId="WorldNpc08834" Count="1" TrackInfo="hunter24350" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4091" NpcId="WorldNpc08519" Count="1" TrackInfo="hunter24354" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4092" NpcId="WorldNpc08840" Count="1" TrackInfo="hunter24358" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4093" NpcId="monc021100" Count="6" TrackInfo="hunter24362" SceneID="13"/>
+	<Property ID="4094" NpcId="monrc020900" Count="1" RefreshMonster="1063" TrackInfo="hunter24366" SceneID="13"/>
+	<Property ID="4095" NpcId="WorldNpc08860" Count="1" TrackInfo="hunter24371" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4096" NpcId="monrc020800" Count="1" RefreshMonster="1065" TrackInfo="hunter24374" SceneID="13"/>
+	<Property ID="4097" NpcId="WorldNpc08838" Count="1" TrackInfo="hunter24375" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4098" NpcId="monrc021100" Count="3" RefreshMonster="1067,1068,1069" TrackInfo="hunter24378" SceneID="13"/>
+	<Property ID="4099" NpcId="monrm063600" Count="2" RefreshMonster="1021,1022" TrackInfo="hunter24386" SceneID="10"/>
+	<Property ID="4100" NpcId="monm062300" Count="8" TrackInfo="hunter24387" SceneID="10"/>
+	<Property ID="4101" NpcId="WorldNpc02640" Count="1" TrackInfo="hunter24388" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4102" NpcId="monrm063600" Count="3" RefreshMonster="1023,1024,1026" TrackInfo="hunter24400" SceneID="10"/>
+	<Property ID="4103" NpcId="monrm061600" Count="4" TrackInfo="hunter24402" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="4104" NpcId="monrm061600" Count="3" RefreshMonster="1003,1049,1050" TrackInfo="hunter24409" SceneID="10"/>
+	<Property ID="4105" NpcId="WorldNpc02912" Count="1" TrackInfo="hunter24411" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4106" NpcId="WorldNpc02915" Count="1" TrackInfo="hunter24416" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4107" NpcId="WorldNpc02691" Count="1" TrackInfo="hunter24422_1" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4108" NpcId="monrm062300" Count="3" RefreshMonster="1228,1229,1240" TrackInfo="hunter24422_2" SceneID="10"/>
+	<Property ID="4109" NpcId="monm061600" Count="6" TrackInfo="hunter24426" SceneID="10"/>
+	<Property ID="4110" NpcId="WorldNpc02649" Count="1" TrackInfo="hunter24427" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4111" NpcId="monrm051300" Count="3" RefreshMonster="1241,1242,1243" TrackInfo="hunter24437" SceneID="9"/>
+	<Property ID="4112" NpcId="monrm051200" Count="2" RefreshMonster="1244,1245" TrackInfo="hunter24449_1" SceneID="9"/>
+	<Property ID="4113" NpcId="monrm051500" Count="1" RefreshMonster="1246" TrackInfo="hunter24449_2" SceneID="9"/>
+	<Property ID="4114" NpcId="WorldNpc02531" Count="1" TrackInfo="hunter24457" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4115" NpcId="WorldNpc02532" Count="1" TrackInfo="hunter24458" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4116" NpcId="WorldNpc02525" Count="1" TrackInfo="hunter24438" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4117" NpcId="monrm051200" Count="3" RefreshMonster="1105,1106,1107" TrackInfo="hunter24439" SceneID="9"/>
+	<Property ID="4118" NpcId="monrm051200" Count="3" RefreshMonster="1109,1110,1111" TrackInfo="hunter24447" SceneID="9"/>
+	<Property ID="4119" NpcId="monrm051400" Count="1" RefreshMonster="1113" TrackInfo="hunter24456" SceneID="9"/>
+	<Property ID="4120" NpcId="monrm051500" Count="1" RefreshMonster="1114" TrackInfo="hunter24457" SceneID="9"/>
+	<Property ID="4121" NpcId="monrm051700" Count="1" RefreshMonster="1115" TrackInfo="hunter24461" SceneID="9"/>
+	<Property ID="4122" NpcId="monrm051800" Count="3" RefreshMonster="1116,1117,1118" TrackInfo="hunter24468_1" SceneID="9"/>
+	<Property ID="4123" NpcId="WorldNpc02501" Count="1" TrackInfo="hunter24468_2" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4124" NpcId="monf052100" Count="6" TrackInfo="hunter24484" SceneID="22"/>
+	<Property ID="4125" NpcId="monf052200" Count="10" TrackInfo="hunter24487" SceneID="22"/>
+	<Property ID="4126" NpcId="monrf050900" Count="1" RefreshMonster="1122" TrackInfo="hunter24488" SceneID="22"/>
+	<Property ID="4127" NpcId="monf052300" Count="10" TrackInfo="hunter24495" SceneID="22"/>
+	<Property ID="4128" NpcId="monrf051700" Count="4" TrackInfo="hunter24502" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="4129" NpcId="monrf050600" Count="3" RefreshMonster="1124,1125,1126" TrackInfo="hunter24509" SceneID="22"/>
+	<Property ID="4130" NpcId="monrf050700" Count="1" RefreshMonster="1127" TrackInfo="hunter24514" SceneID="22"/>
+	<Property ID="4131" NpcId="monrf050800" Count="1" RefreshMonster="1128" TrackInfo="hunter24517" SceneID="22"/>
+	<Property ID="4132" NpcId="monrm055300" Count="2" RefreshMonster="1129,1130" TrackInfo="hunter24523" SceneID="22"/>
+	<Property ID="4133" NpcId="WorldNpc02427" Count="1" TrackInfo="hunter24529" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4134" NpcId="monrm057800" Count="4" RefreshMonster="1132,1133,1134,1135" TrackInfo="hunter24531" SceneID="9"/>
+	<Property ID="4135" NpcId="monm052300" Count="6" TrackInfo="hunter24543" SceneID="9"/>
+	<Property ID="4136" NpcId="monrm058000" Count="1" RefreshMonster="1138" TrackInfo="hunter24546" SceneID="9"/>
+	<Property ID="4137" NpcId="monrm058200" Count="1" RefreshMonster="1140" TrackInfo="hunter24551" SceneID="9"/>
+	<Property ID="4138" NpcId="monrm058300" Count="5" RefreshMonster="1141,1142,1143,1144,1145" TrackInfo="hunter24554" SceneID="9"/>
+	<Property ID="4139" NpcId="monrm058300" Count="3" RefreshMonster="1146,1147,1148" TrackInfo="hunter24560_1" SceneID="9"/>
+	<Property ID="4140" NpcId="monrm058800" Count="4" RefreshMonster="1155,1156,1157,1158,1159" TrackInfo="hunter24563_1" SceneID="9"/>
+	<Property ID="4141" NpcId="monrm058700" Count="1" TrackInfo="hunter24563_2" SceneID="9"/>
+	<Property ID="4142" NpcId="monrm058300" Count="5" RefreshMonster="1163,1164,1165,1166,1167" TrackInfo="hunter24571" SceneID="9"/>
+	<Property ID="4143" NpcId="monrm058900" Count="1" RefreshMonster="1168" TrackInfo="hunter24574" SceneID="9"/>
+	<Property ID="4144" NpcId="WorldNpc02445" Count="1" TrackInfo="hunter24577" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4145" NpcId="monrm059000" Count="1" TrackInfo="hunter24579" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="4146" NpcId="monrm059200" Count="4" RefreshMonster="1176,1177,1178,1179" TrackInfo="hunter24592" SceneID="9"/>
+	<Property ID="4147" NpcId="WorldNpc02451" Count="1" TrackInfo="hunter24597" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4148" NpcId="WorldNpc02450" Count="1" TrackInfo="hunter24599" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4149" NpcId="monrm059500" Count="1" RefreshMonster="1182,1183" TrackInfo="hunter24601_1" SceneID="9"/>
+	<Property ID="4150" NpcId="monrm059600" Count="1" TrackInfo="hunter24601_2" SceneID="9"/>
+	<Property ID="4151" NpcId="monrm059700" Count="4" TrackInfo="hunter24608" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="4152" NpcId="monm053700" Count="15" TrackInfo="hunter24609" SceneID="9"/>
+	<Property ID="4153" NpcId="monrm059700" Count="5" TrackInfo="hunter24610_1" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="4154" NpcId="monrm059800" Count="5" TrackInfo="hunter24610_2" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="4155" NpcId="WorldNpc02455" Count="1" TrackInfo="hunter24615" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4156" NpcId="monrm060000" Count="5" TrackInfo="hunter24617_2" SceneID="9"/>
+	<Property ID="4157" NpcId="monrm071500" Count="1" RefreshMonster="1029" TrackInfo="hunter24232" SceneID="17"/>
+	<Property ID="4159" NpcId="monrv040200" Count="3" RefreshMonster="1230,1231,1232" TrackInfo="hunter24021" SceneID="1"/>
+	<Property ID="4160" NpcId="monrf051300" Count="2" TrackInfo="hunter24162_2" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="4161" NpcId="WorldNpc00052" Count="1" TrackInfo="hunter24247" SceneID="1" IsQieCuo="1"/>
+	<Property ID="4162" NpcId="monc022400" Count="6" TrackInfo="hunter24296" SceneID="13"/>
+	<Property ID="4163" NpcId="monf030200" Count="5" TrackInfo="hunter24317" SceneID="20"/>
+	<Property ID="4164" NpcId="monf031700" Count="6" TrackInfo="hunter24332" SceneID="20"/>
+	<Property ID="4165" NpcId="WorldNpc08513" Count="1" TrackInfo="hunter24378_1" SceneID="13" IsQieCuo="1"/>
+	<Property ID="4166" NpcId="WorldNpc06444" Count="1" TrackInfo="hunter24318_1" SceneID="20" IsQieCuo="1"/>
+	<Property ID="4167" NpcId="monrm051200" Count="3" RefreshMonster="1247,1248,1249" TrackInfo="hunter24463" SceneID="9"/>
+	<Property ID="4168" NpcId="monm051300" Count="6" TrackInfo="hunter24476" SceneID="9"/>
+	<Property ID="4169" NpcId="WorldNpc06128" Count="1" TrackInfo="hunter24481" SceneID="22" IsQieCuo="1"/>
+	<Property ID="4170" NpcId="monrf051500" Count="2" RefreshMonster="1250,1251" TrackInfo="hunter24489_1" SceneID="22"/>
+	<Property ID="4171" NpcId="monrf050800" Count="1" TrackInfo="hunter24489_2" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="4172" NpcId="monrf051600" Count="4" TrackInfo="hunter24498" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="4173" NpcId="WorldNpc06128" Count="1" TrackInfo="hunter24507" SceneID="22" IsQieCuo="1"/>
+	<Property ID="4174" NpcId="WorldNpc06184" Count="1" TrackInfo="hunter24518" SceneID="22" IsQieCuo="1"/>
+	<Property ID="4175" NpcId="WorldNpc02269" Count="1" TrackInfo="hunter24522" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4176" NpcId="monrm057800" Count="3" RefreshMonster="1257,1258,1259" TrackInfo="hunter24542" SceneID="9"/>
+	<Property ID="4177" NpcId="monrm058200" Count="4" RefreshMonster="1264,1265,1266,1267" TrackInfo="hunter24548" SceneID="9"/>
+	<Property ID="4178" NpcId="monm052400" Count="3" TrackInfo="hunter24550" SceneID="9"/>
+	<Property ID="4179" NpcId="monrm057700" Count="1" TrackInfo="hunter24556" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="4180" NpcId="monrm058300" Count="4" RefreshMonster="1260,1261,1262,1263" TrackInfo="hunter24558" SceneID="9"/>
+	<Property ID="4181" NpcId="WorldNpc02545" Count="1" TrackInfo="hunter24442" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4182" NpcId="WorldNpc02477" Count="1" TrackInfo="hunter24560_2" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4183" NpcId="WorldNpc02444" Count="1" TrackInfo="hunter24569" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4184" NpcId="WorldNpc02449" Count="1" TrackInfo="hunter24585" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4185" NpcId="WorldNpc02478" Count="1" TrackInfo="hunter24602" SceneID="9" IsQieCuo="1"/>
+	<Property ID="4186" NpcId="monm053700" Count="6" TrackInfo="hunter24613" SceneID="9"/>
+	<Property ID="4187" NpcId="monrm059600" Count="5" TrackInfo="hunter24619" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="4188" NpcId="monm074100" Count="6" TrackInfo="hunter24626" SceneID="11"/>
+	<Property ID="4189" NpcId="WorldNpc04708" Count="1" TrackInfo="hunter24629" SceneID="11" IsQieCuo="1"/>
+	<Property ID="4190" NpcId="monm074300" Count="6" TrackInfo="hunter24631" SceneID="11"/>
+	<Property ID="4191" NpcId="monrm070300" Count="1" TrackInfo="hunter24634" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="4192" NpcId="WorldNpc04805" Count="1" TrackInfo="hunter24646" SceneID="11" IsQieCuo="1"/>
+	<Property ID="4193" NpcId="WorldNpc04810" Count="1" TrackInfo="hunter24662" SceneID="11" IsQieCuo="1"/>
+	<Property ID="4194" NpcId="WorldNpc04809" Count="1" TrackInfo="hunter24664" SceneID="11" IsQieCuo="1"/>
+	<Property ID="4195" NpcId="monrm070800" Count="4" TrackInfo="hunter24666" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="4196" NpcId="monrm071000" Count="3" TrackInfo="hunter24677" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="4197" NpcId="WorldNpc04428" Count="1" TrackInfo="hunter24687" SceneID="11" IsQieCuo="1"/>
+	<Property ID="4198" NpcId="WorldNpc04429" Count="1" TrackInfo="hunter24698" SceneID="11" IsQieCuo="1"/>
+	<Property ID="4199" NpcId="monrm070900" Count="3" TrackInfo="hunter24699" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="4200" NpcId="monrm074800" Count="3" TrackInfo="hunter24715" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="4201" NpcId="monrm070900" Count="3" TrackInfo="hunter24719" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="4202" NpcId="monrc053700" Count="3" TrackInfo="hunter24722" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="4203" NpcId="WorldNpc09603" Count="1" TrackInfo="hunter24724_1" SceneID="17" IsQieCuo="1"/>
+	<Property ID="4204" NpcId="monrc053800" Count="3" TrackInfo="hunter24724_2" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="4205" NpcId="monrc053700" Count="3" TrackInfo="hunter24726" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="4206" NpcId="monrc053900" Count="2" TrackInfo="hunter24729" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="4207" NpcId="monrm061100" Count="2" TrackInfo="hunter24736" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="4208" NpcId="WorldNpc02709" Count="1" TrackInfo="hunter24740" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4209" NpcId="WorldNpc02710" Count="1" TrackInfo="hunter24747" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4210" NpcId="WorldNpc02711" Count="1" TrackInfo="hunter24749" SceneID="10" IsQieCuo="1"/>
+	<Property ID="4211" NpcId="monrm061200" Count="4" TrackInfo="hunter24760" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="4212" NpcId="WorldNpc02713" Count="1" TrackInfo="hunter24762" SceneID="10" IsQieCuo="1"/>
+	<Property ID="3001" NpcId="jiaoxue001" Count="3" TrackInfo="hunter1005" SceneID="3"/>
+	<Property ID="3002" NpcId="bossv030100" Count="1" TrackInfo="hunter1013" SceneID="3"/>
+	<Property ID="3003" NpcId="monv031300" Count="6" TrackInfo="hunter1020" SceneID="3"/>
+	<Property ID="3004" NpcId="monv031400" Count="6" TrackInfo="hunter1022" SceneID="3"/>
+	<Property ID="3005" NpcId="npcclone001052" Count="1" TrackInfo="hunter2038" SceneID="3"/>
+	<Property ID="3006"/>
+	<Property ID="3007" NpcId="WorldNpc00693" Count="1" TrackInfo="hunter22041" SceneID="3" IsQieCuo="1"/>
+	<Property ID="3008" NpcId="monv030200" Count="6" TrackInfo="hunter22009" SceneID="3"/>
+	<Property ID="3009" NpcId="monv031100" Count="6" TrackInfo="hunter22017_1" SceneID="3"/>
+	<Property ID="3010" NpcId="bossv030100" Count="1" TrackInfo="hunter22017_2" SceneID="3"/>
+	<Property ID="3011" NpcId="monv031200" Count="6" TrackInfo="hunter22021" SceneID="3"/>
+	<Property ID="3012" NpcId="bossv030300" Count="1" TrackInfo="hunter22028" SceneID="3"/>
+	<Property ID="3013" NpcId="monv031400" Count="6" TrackInfo="hunter22032" SceneID="3"/>
+	<Property ID="3014" NpcId="monrv030200" Count="2" RefreshMonster="13,14" TrackInfo="hunter22035" SceneID="3"/>
+	<Property ID="3015" NpcId="monv031400" Count="6" TrackInfo="hunter22039" SceneID="3"/>
+	<Property ID="3016" NpcId="Qiecuo003" Count="1" SceneID="3" IsQieCuo="1"/>
+	<Property ID="3017" NpcId="monc010400" Count="6" TrackInfo="hunter22051" SceneID="14"/>
+	<Property ID="3018" NpcId="monrv030100" Count="1" RefreshMonster="12" TrackInfo="hunter22056" SceneID="14"/>
+	<Property ID="3019" NpcId="AIFuncNpc01357" Count="1" TrackInfo="hunter22058" SceneID="14" IsQieCuo="1"/>
+	<Property ID="3020" NpcId="monc011100" Count="6" TrackInfo="hunter22060" SceneID="14"/>
+	<Property ID="3021" NpcId="WorldNpc01371" Count="1" TrackInfo="hunter22073" SceneID="14" IsQieCuo="1"/>
+	<Property ID="3022" NpcId="WorldNpc01370" Count="1" TrackInfo="hunter22073" SceneID="14" IsQieCuo="1"/>
+	<Property ID="3023" NpcId="WorldNpc01369" Count="1" TrackInfo="hunter22079" SceneID="14" IsQieCuo="1"/>
+	<Property ID="3024" NpcId="WorldNpc01365" Count="1" TrackInfo="hunter22089" SceneID="14" IsQieCuo="1"/>
+	<Property ID="3025" NpcId="monf040200" Count="6" TrackInfo="hunter22100" SceneID="21"/>
+	<Property ID="3026" NpcId="monf040400" Count="6" TrackInfo="hunter22104" SceneID="21"/>
+	<Property ID="3027" NpcId="bossf040100" Count="1" TrackInfo="hunter22104" SceneID="21"/>
+	<Property ID="3028" NpcId="monf041100" Count="6" TrackInfo="hunter22111" SceneID="21"/>
+	<Property ID="3029" NpcId="bossf040200" Count="1" TrackInfo="hunter22121" SceneID="21"/>
+	<Property ID="3030" NpcId="monf042100" Count="6" TrackInfo="hunter22123" SceneID="21"/>
+	<Property ID="3031" NpcId="WorldNpc06001" Count="1" TrackInfo="hunter22123" SceneID="21" IsQieCuo="1"/>
+	<Property ID="3032" NpcId="monf042300" Count="6" TrackInfo="hunter22126" SceneID="21"/>
+	<Property ID="3033" NpcId="monf042400" Count="6" TrackInfo="hunter22126" SceneID="21"/>
+	<Property ID="3034" NpcId="WorldNpc06007" Count="1" TrackInfo="hunter22128" SceneID="21" IsQieCuo="1"/>
+	<Property ID="3035" NpcId="WorldNpc06038" Count="1" TrackInfo="hunter22136" SceneID="21" IsQieCuo="1"/>
+	<Property ID="3036" NpcId="WorldNpc06038" Count="1" TrackInfo="hunter22138" SceneID="21" IsQieCuo="1"/>
+	<Property ID="3037" NpcId="monf042600" Count="6" TrackInfo="hunter22142" SceneID="21"/>
+	<Property ID="3038" NpcId="WorldNpc06165" Count="1" TrackInfo="hunter22147" SceneID="22" IsQieCuo="1"/>
+	<Property ID="3039" NpcId="monf051400" Count="3" TrackInfo="hunter22149" SceneID="22"/>
+	<Property ID="3040" NpcId="WorldNpc06168" Count="1" TrackInfo="hunter22155" SceneID="22" IsQieCuo="1"/>
+	<Property ID="3041" NpcId="monf050300" Count="3" TrackInfo="hunter22158" SceneID="22"/>
+	<Property ID="3042" NpcId="monf050300" Count="3" TrackInfo="hunter22161" SceneID="22"/>
+	<Property ID="3043" NpcId="monf050400" Count="3" TrackInfo="hunter22162" SceneID="22"/>
+	<Property ID="3044" NpcId="WorldNpc06172" Count="1" TrackInfo="hunter22163" SceneID="22" IsQieCuo="1"/>
+	<Property ID="3045" NpcId="WorldNpc06173" Count="1" TrackInfo="hunter22165" SceneID="22" IsQieCuo="1"/>
+	<Property ID="3046" NpcId="WorldNpc06175" Count="1" TrackInfo="hunter22170" SceneID="22" IsQieCuo="1"/>
+	<Property ID="27001" NpcId="bossclone001013" Count="1" TrackInfo="hunter2010" SceneID="27"/>
+	<Property ID="27002" NpcId="bossclone001003" Count="1" TrackInfo="hunter2016" SceneID="27"/>
+	<Property ID="27003" NpcId="bossclone002003" Count="1" TrackInfo="hunter2236" SceneID="28"/>
+	<Property ID="27004" NpcId="BossClone017005" Count="1" TrackInfo="hunter2810" SceneID="43"/>
+	<Property ID="27005" NpcId="BossClone017006" Count="1" TrackInfo="hunter2811_1" SceneID="43"/>
+	<Property ID="27006" NpcId="BossClone017014" Count="1" TrackInfo="hunter2811_2" SceneID="43"/>
+	<Property ID="27007" NpcId="BossClone017015" Count="1" TrackInfo="hunter2811_3" SceneID="43"/>
+	<Property ID="27008" NpcId="BossClone017007" Count="1" TrackInfo="hunter2812" SceneID="43"/>
+	<Property ID="27009" NpcId="BossClone017004" Count="1" TrackInfo="hunter2813" SceneID="43"/>
+	<Property ID="27010" NpcId="BossClone017004" Count="1" TrackInfo="hunter2814" SceneID="43"/>
+	<Property ID="27011" NpcId="BossClone017002" Count="1" TrackInfo="hunter2820" SceneID="43"/>
+	<Property ID="27013" NpcId="bossclone002017" Count="1" TrackInfo="hunter2084" SceneID="28"/>
+	<Property ID="27014" NpcId="bossclone002009" Count="1" TrackInfo="hunter2087_1" SceneID="28"/>
+	<Property ID="27015" NpcId="bossclone002010" Count="1" TrackInfo="hunter2087_2" SceneID="28"/>
+	<Property ID="27016" NpcId="FightNpcClone017001" Count="10" TrackInfo="hunter2804_1" SceneID="5"/>
+	<Property ID="27017" NpcId="FightNpcClone017002" Count="10" TrackInfo="hunter2804_2" SceneID="5"/>
+	<Property ID="27018" NpcId="BossClone017001" Count="1" TrackInfo="hunter2806" SceneID="5"/>
+	<Property ID="27019" NpcId="bossclone002004" Count="1" TrackInfo="hunter2832_1" SceneID="28"/>
+	<Property ID="27020" NpcId="bossclone002006" Count="1" TrackInfo="hunter2832_2" SceneID="28"/>
+	<Property ID="27021" NpcId="bossclone002028" Count="1" TrackInfo="hunter2833_2" SceneID="28"/>
+	<Property ID="27031" NpcId="funnpcclone002070" Count="1" TrackInfo="hunter2052" SceneID="28"/>
+	<Property ID="27032" NpcId="funnpcclone002055" Count="50" TrackInfo="hunter2837" SceneID="28"/>
+	<Property ID="27034" NpcId="funnpcclone002055" Count="50" TrackInfo="hunter2332" SceneID="28"/>
+	<Property ID="27036" NpcId="bossclone002007" Count="1" TrackInfo="hunter2231" SceneID="28"/>
+	<Property ID="27038" NpcId="bossclone002014" Count="1" TrackInfo="hunter2090" SceneID="28"/>
+	<Property ID="27040" NpcId="bossclone002017" Count="1" TrackInfo="hunter2098" SceneID="28"/>
+	<Property ID="27041" NpcId="bossclone002013" Count="1" TrackInfo="hunter2099" SceneID="28"/>
+	<Property ID="27042" NpcId="bossclone002014" Count="1" TrackInfo="hunter2833_1" SceneID="28"/>
+	<Property ID="27044" NpcId="bossclone002013" Count="1" TrackInfo="hunter2843" SceneID="28"/>
+	<Property ID="27045" NpcId="bossclone002009" Count="1" TrackInfo="hunter2846_1" SceneID="28"/>
+	<Property ID="27046" NpcId="bossclone002010" Count="1" TrackInfo="hunter2846_2" SceneID="28"/>
+	<Property ID="27047" NpcId="npcclone001057" Count="20" TrackInfo="hunter2041" SceneID="9"/>
+	<Property ID="27048" NpcId="funnpcclone002045" Count="1" TrackInfo="hunter2818" SceneID="43"/>
+	<Property ID="27049" NpcId="NpcClone009002" Count="12" TrackInfo="hunter2412" SceneID="35"/>
+	<Property ID="27050" NpcId="NpcClone009003" Count="2" TrackInfo="hunter2408" SceneID="35"/>
+	<Property ID="27051" NpcId="BossClone009005" Count="1" TrackInfo="hunter2410" SceneID="35"/>
+	<Property ID="27052" NpcId="BossClone009008" Count="1" TrackInfo="hunter2414" SceneID="35"/>
+	<Property ID="27053" NpcId="BossClone009007" Count="1" TrackInfo="hunter2417" SceneID="35"/>
+	<Property ID="27054" NpcId="BossClone009006" Count="1" TrackInfo="hunter2418" SceneID="35"/>
+	<Property ID="27055" NpcId="NpcClone009001" Count="30" TrackInfo="hunter2407" SceneID="35"/>
+	<Property ID="27056" NpcId="bossclone002007" Count="1" TrackInfo="hunter2438" SceneID="28"/>
+	<Property ID="27057" NpcId="bossclone002002" Count="1" TrackInfo="hunter2093" SceneID="28"/>
+	<Property ID="27058" NpcId="funnpcclone002068" Count="1" TrackInfo="hunter2069" SceneID="28"/>
+	<Property ID="27060" NpcId="NpcClone003018" Count="3" TrackInfo="hunter2102" SceneID="14"/>
+	<Property ID="27061" NpcId="BossClone003004" Count="1" TrackInfo="hunter2106" SceneID="29"/>
+	<Property ID="27062" NpcId="BossClone003001" Count="1" TrackInfo="hunter2105" SceneID="29"/>
+	<Property ID="12001" NpcId="WorldNpc00462" Count="1" TrackInfo="hunter38001" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12002" NpcId="WorldNpc00359" Count="1" TrackInfo="hunter38022" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12003" NpcId="WorldNpc00360" Count="1" TrackInfo="hunter38029" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12004" NpcId="WorldNpc00361" Count="1" TrackInfo="hunter38032" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12005" NpcId="WorldNpc00331" Count="1" TrackInfo="hunter38061" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12006" NpcId="monrm081500" Count="3" RefreshMonster="3006,3007,3008" TrackInfo="hunter38066" SceneID="12"/>
+	<Property ID="12007" NpcId="monrm081000" Count="1" TrackInfo="hunter38070" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="12008" NpcId="monrm081200" Count="1" TrackInfo="hunter38076" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="12009" NpcId="monrm081100" Count="1" TrackInfo="hunter38079" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="12010" NpcId="WorldNpc00361" Count="1" TrackInfo="hunter38092_1" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12011" NpcId="monrm081400" Count="2" TrackInfo="hunter38092_2" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="12012" NpcId="bossm080200" Count="1" TrackInfo="hunter38101" SceneID="12"/>
+	<Property ID="12013" NpcId="WorldNpc00201" Count="1" TrackInfo="hunter38116" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12014" NpcId="WorldNpc00272" Count="1" TrackInfo="hunter38124" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12015" NpcId="WorldNpc00375" Count="1" TrackInfo="hunter38125" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12016" NpcId="WorldNpc00374" Count="1" TrackInfo="hunter38129" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12017" NpcId="monm081300" Count="8" TrackInfo="hunter38136" SceneID="12"/>
+	<Property ID="12018" NpcId="WorldNpc00206" Count="1" TrackInfo="hunter38149" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12019" NpcId="WorldNpc00208" Count="1" TrackInfo="hunter38166" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12020" NpcId="WorldNpc00206" Count="1" TrackInfo="hunter38170" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12021" NpcId="monf030100" Count="8" TrackInfo="hunter38174" SceneID="20"/>
+	<Property ID="12022" NpcId="WorldNpc06609" Count="1" TrackInfo="hunter38179" SceneID="20" IsQieCuo="1"/>
+	<Property ID="12023" NpcId="monf031100" Count="8" TrackInfo="hunter38183" SceneID="20"/>
+	<Property ID="12024" NpcId="WorldNpc06609" Count="1" TrackInfo="hunter38187" SceneID="20" IsQieCuo="1"/>
+	<Property ID="12025" NpcId="WorldNpc10001" Count="1" TrackInfo="hunter38202" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12026" NpcId="WorldNpc10003" Count="1" TrackInfo="hunter38207" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12027" NpcId="WorldNpc10005" Count="1" TrackInfo="hunter38213" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12028" NpcId="WorldNpc10007" Count="1" TrackInfo="hunter38217" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12029" NpcId="WorldNpc10009" Count="1" TrackInfo="hunter38224" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12030" NpcId="monc042100" Count="8" TrackInfo="hunter38232" SceneID="16"/>
+	<Property ID="12031" NpcId="WorldNpc10019" Count="1" TrackInfo="hunter38238" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12032" NpcId="monm081600" Count="8" TrackInfo="hunter38241" SceneID="12"/>
+	<Property ID="12033" NpcId="WorldNpc00480" Count="1" TrackInfo="hunter38244" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12034" NpcId="WorldNpc00480" Count="1" TrackInfo="hunter38250" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12035" NpcId="monm081400" Count="6" TrackInfo="hunter38258" SceneID="12"/>
+	<Property ID="12036" NpcId="monrm081600" Count="3" TrackInfo="hunter38261" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="12037" NpcId="monrv021900" Count="3" TrackInfo="hunter38267" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="12038" NpcId="monv022500" Count="8" TrackInfo="hunter38268" SceneID="2"/>
+	<Property ID="12039" NpcId="bossv020200" Count="1" TrackInfo="hunter38270" SceneID="2"/>
+	<Property ID="12040" NpcId="WorldNpc09303" Count="1" TrackInfo="hunter38286" SceneID="2" IsQieCuo="1"/>
+	<Property ID="12041" NpcId="WorldNpc00377" Count="1" TrackInfo="hunter38293" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12042" NpcId="monm050400" Count="8" TrackInfo="hunter38315" SceneID="9"/>
+	<Property ID="12043" NpcId="WorldNpc01392" Count="1" TrackInfo="hunter38321" SceneID="14" IsQieCuo="1"/>
+	<Property ID="12044" NpcId="WorldNpc01308" Count="1" TrackInfo="hunter38310" SceneID="14" IsQieCuo="1"/>
+	<Property ID="12045" NpcId="monc012100" Count="5" TrackInfo="hunter38329" SceneID="14"/>
+	<Property ID="12046" NpcId="WorldNpc08913" Count="1" TrackInfo="hunter38338" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12047" NpcId="WorldNpc08914" Count="1" TrackInfo="hunter38344" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12048" NpcId="WorldNpc08925" Count="1" TrackInfo="hunter38348" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12049" NpcId="WorldNpc08926" Count="1" TrackInfo="hunter38349" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12050" NpcId="WorldNpc08924" Count="1" TrackInfo="hunter38356" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12051" NpcId="WorldNpc08920" Count="1" TrackInfo="hunter38364" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12052" NpcId="monc020600" Count="8" TrackInfo="hunter38368" SceneID="13"/>
+	<Property ID="12053" NpcId="WorldNpc08927" Count="1" TrackInfo="hunter38370" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12054" NpcId="monrc024000" Count="1" TrackInfo="hunter38374_1" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="12055" NpcId="WorldNpc08923" Count="1" TrackInfo="hunter38378" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12056" NpcId="WorldNpc00380" Count="1" TrackInfo="hunter38392_1" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12057" NpcId="monm082200" Count="8" TrackInfo="hunter38392_2" SceneID="12"/>
+	<Property ID="12059" NpcId="monc022100" Count="8" TrackInfo="hunter38400" SceneID="13"/>
+	<Property ID="12060" NpcId="WorldNpc08830" Count="1" TrackInfo="hunter38403" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12061" NpcId="WorldNpc10016" Count="1" TrackInfo="hunter38412_1" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12062" NpcId="monc041200" Count="8" TrackInfo="hunter38412_2" SceneID="16"/>
+	<Property ID="12063" NpcId="WorldNpc10018" Count="1" TrackInfo="hunter38419" SceneID="16" IsQieCuo="1"/>
+	<Property ID="12064" NpcId="WorldNpc00381" Count="1" TrackInfo="hunter38423" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12065" NpcId="WorldNpc08833" Count="1" TrackInfo="hunter38426" SceneID="13" IsQieCuo="1"/>
+	<Property ID="12066" NpcId="WorldNpc02519" Count="1" TrackInfo="hunter38507" SceneID="9" IsQieCuo="1"/>
+	<Property ID="12067" NpcId="monrf050100" Count="1" TrackInfo="hunter38437" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="12068" NpcId="monrf050200" Count="4" TrackInfo="hunter38438" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="12069" NpcId="monrf052000" Count="1" TrackInfo="hunter38443" SceneID="22" IsNeedCreator="1"/>
+	<Property ID="12070" NpcId="WorldNpc09201" Count="1" TrackInfo="hunter38450" SceneID="2" IsQieCuo="1"/>
+	<Property ID="12071" NpcId="WorldNpc09401" Count="1" TrackInfo="hunter38454" SceneID="2" IsQieCuo="1"/>
+	<Property ID="12072" NpcId="WorldNpc05043" Count="1" TrackInfo="hunter38460" SceneID="24" IsQieCuo="1"/>
+	<Property ID="12075" NpcId="monrc010100" Count="6" TrackInfo="hunter38473" SceneID="14" IsNeedCreator="1"/>
+	<Property ID="12076" NpcId="WorldNpc01457" Count="1" TrackInfo="hunter38478" SceneID="14" IsQieCuo="1"/>
+	<Property ID="12077" NpcId="monf045100" Count="6" TrackInfo="hunter38533" SceneID="21"/>
+	<Property ID="12078" NpcId="WorldNpc05797" Count="1" TrackInfo="hunter38549" SceneID="21" IsQieCuo="1"/>
+	<Property ID="12079" NpcId="WorldNpc05798" Count="1" TrackInfo="hunter38551" SceneID="21" IsQieCuo="1"/>
+	<Property ID="12080" NpcId="WorldNpc05794" Count="1" TrackInfo="hunter38556" SceneID="21" IsQieCuo="1"/>
+	<Property ID="12081" NpcId="monf045300" Count="3" TrackInfo="hunter38562" SceneID="21"/>
+	<Property ID="12083" NpcId="monf045300" Count="6" TrackInfo="hunter38573" SceneID="21"/>
+	<Property ID="12084" NpcId="WorldNpc05799" Count="1" TrackInfo="hunter38574" SceneID="21" IsQieCuo="1"/>
+	<Property ID="12085" NpcId="monm051500" Count="8" TrackInfo="hunter38488" SceneID="9"/>
+	<Property ID="12086" NpcId="WorldNpc02510" Count="1" TrackInfo="hunter38490" SceneID="9" IsQieCuo="1"/>
+	<Property ID="12087" NpcId="monrm050700" Count="1" TrackInfo="hunter38498" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="12088" NpcId="monm051200" Count="8" TrackInfo="hunter38521" SceneID="9"/>
+	<Property ID="12089" NpcId="monrm050300" Count="1" TrackInfo="hunter38524" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="12090" NpcId="monrm050400" Count="1" TrackInfo="hunter38526" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="12091" NpcId="monrv021700" Count="4" TrackInfo="hunter38283" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="12092" NpcId="WorldNpc01617" Count="1" TrackInfo="hunter38330" SceneID="14" IsQieCuo="1"/>
+	<Property ID="12093" NpcId="monrc024001" Count="1" TrackInfo="hunter38374_2" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="12094" NpcId="monrc025000" Count="1" TrackInfo="hunter38374_3" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="12095" NpcId="monrc025001" Count="1" TrackInfo="hunter38374_4" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="12096" NpcId="monrc043100" Count="1" TrackInfo="hunter38215_1" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="12097" NpcId="monrc043200" Count="2" TrackInfo="hunter38215_2" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="12098" NpcId="monrc043300" Count="2" TrackInfo="hunter38215_3" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="12099" NpcId="monrf070200" Count="2" TrackInfo="hunter38458_1" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="12100" NpcId="monrf070300" Count="3" TrackInfo="hunter38458_2" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="12101" NpcId="WorldNpc00377" Count="1" TrackInfo="hunter38118" SceneID="12" IsQieCuo="1"/>
+	<Property ID="12102" NpcId="monrc010600" Count="3" TrackInfo="hunter38471" SceneID="14" IsNeedCreator="1"/>
+	<Property ID="12103" NpcId="monrf041200" Count="1" TrackInfo="hunter38566_1" SceneID="21" IsNeedCreator="1"/>
+	<Property ID="12104" NpcId="monrf041300" Count="3" TrackInfo="hunter38566_2" SceneID="21" IsNeedCreator="1"/>
+	<Property ID="11001" NpcId="WorldNpc04413" Count="1" TrackInfo="hunter36002" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11002" NpcId="monm072400" Count="3" TrackInfo="hunter36013" SceneID="11"/>
+	<Property ID="11003" NpcId="monm072400" Count="6" TrackInfo="hunter36016" SceneID="11"/>
+	<Property ID="11004" NpcId="monm072200" Count="8" TrackInfo="hunter36019" SceneID="11"/>
+	<Property ID="11005" NpcId="WorldNpc04802" Count="1" TrackInfo="hunter36020" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11006" NpcId="monrm071900" Count="3" TrackInfo="hunter36028" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11007" NpcId="monrm074900" Count="3" TrackInfo="hunter36029_1" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11008" NpcId="monrm071800" Count="1" TrackInfo="hunter36029_2" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11009" NpcId="monrm071900" Count="3" TrackInfo="hunter36042" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11010" NpcId="WorldNpc04417" Count="1" TrackInfo="hunter36043" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11011" NpcId="WorldNpc04804" Count="1" TrackInfo="hunter36047" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11012" NpcId="WorldNpc04418" Count="1" TrackInfo="hunter36052" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11013" NpcId="monm070600" Count="6" TrackInfo="hunter36053" SceneID="11"/>
+	<Property ID="11014" NpcId="monm071600" Count="10" TrackInfo="hunter36063" SceneID="11"/>
+	<Property ID="11015" NpcId="WorldNpc04436" Count="1" TrackInfo="hunter36067" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11016" NpcId="WorldNpc04418" Count="1" TrackInfo="hunter36075" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11017" NpcId="WorldNpc04705" Count="1" TrackInfo="hunter36079" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11018" NpcId="monm073300" Count="6" TrackInfo="hunter36083" SceneID="11"/>
+	<Property ID="11020" NpcId="monm072600" Count="10" TrackInfo="hunter36090" SceneID="11"/>
+	<Property ID="11021" NpcId="WorldNpc04812" Count="1" TrackInfo="hunter36093" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11022" NpcId="WorldNpc04812" Count="1" TrackInfo="hunter36099" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11023" NpcId="monrm074000" Count="3" TrackInfo="hunter36107" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11024" NpcId="monm071500" Count="10" TrackInfo="hunter36114" SceneID="11"/>
+	<Property ID="11025" NpcId="monrm072700" Count="1" TrackInfo="hunter36117" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11026" NpcId="WorldNpc04560" Count="1" TrackInfo="hunter36122" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11027" NpcId="monm072300" Count="5" TrackInfo="hunter36125" SceneID="11"/>
+	<Property ID="11028" NpcId="WorldNpc04563" Count="1" TrackInfo="hunter36139" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11029" NpcId="WorldNpc04564" Count="1" TrackInfo="hunter36141" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11030" NpcId="WorldNpc04565" Count="1" TrackInfo="hunter36142" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11032" NpcId="WorldNpc09624" Count="1" TrackInfo="hunter36158" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11033" NpcId="WorldNpc09625" Count="1" TrackInfo="hunter36160" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11034" NpcId="monrc053000" Count="6" TrackInfo="hunter36164" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="11035" NpcId="monc051500" Count="5" TrackInfo="hunter36167" SceneID="17"/>
+	<Property ID="11036" NpcId="monrm073100" Count="1" TrackInfo="hunter36174" SceneID="17"/>
+	<Property ID="11037" NpcId="WorldNpc09812" Count="1" TrackInfo="hunter36178" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11042" NpcId="monm083200" Count="10" TrackInfo="hunter36194" SceneID="12"/>
+	<Property ID="11043" NpcId="WorldNpc00386" Count="1" TrackInfo="hunter36197" SceneID="12" IsQieCuo="1"/>
+	<Property ID="11044" NpcId="monrm081700" Count="2" TrackInfo="hunter36203" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="11045" NpcId="WorldNpc00394" Count="1" TrackInfo="hunter36209" SceneID="12" IsQieCuo="1"/>
+	<Property ID="11046" NpcId="WorldNpc00395" Count="1" TrackInfo="hunter36213" SceneID="12" IsQieCuo="1"/>
+	<Property ID="11047" NpcId="monm083600" Count="10" TrackInfo="hunter36214" SceneID="12"/>
+	<Property ID="11048" NpcId="monm083300" Count="10" TrackInfo="hunter36217" SceneID="12"/>
+	<Property ID="11049" NpcId="monm083400" Count="10" TrackInfo="hunter36219" SceneID="12"/>
+	<Property ID="11050" NpcId="WorldNpc00487" Count="1" TrackInfo="hunter36224" SceneID="12" IsQieCuo="1"/>
+	<Property ID="11051" NpcId="monrm081800" Count="3" TrackInfo="hunter36233" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="11052" NpcId="monrm081900" Count="3" TrackInfo="hunter36237" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="11053" NpcId="monrm082200" Count="1" TrackInfo="hunter36238" SceneID="12" IsNeedCreator="1"/>
+	<Property ID="11054" NpcId="WorldNpc04431" Count="1" TrackInfo="hunter36243" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11055" NpcId="monrm073600" Count="3" TrackInfo="hunter36247" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11057" NpcId="monf031100" Count="10" TrackInfo="hunter36254" SceneID="20"/>
+	<Property ID="11058" NpcId="monf031300" Count="10" TrackInfo="hunter36257" SceneID="20"/>
+	<Property ID="11059" NpcId="monf031200" Count="10" TrackInfo="hunter36259" SceneID="20"/>
+	<Property ID="11060" NpcId="monf030100" Count="10" TrackInfo="hunter36265" SceneID="20"/>
+	<Property ID="11061" NpcId="WorldNpc06618" Count="1" TrackInfo="hunter36269" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11062" NpcId="monf030600" Count="10" TrackInfo="hunter36272" SceneID="20"/>
+	<Property ID="11063" NpcId="WorldNpc06621" Count="1" TrackInfo="hunter36275" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11065" NpcId="WorldNpc06625" Count="1" TrackInfo="hunter36281" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11066" NpcId="monf030300" Count="10" TrackInfo="hunter36284" SceneID="20"/>
+	<Property ID="11067" NpcId="WorldNpc04566" Count="1" TrackInfo="hunter36292" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11068" NpcId="WorldNpc04432" Count="1" TrackInfo="hunter36295" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11069" NpcId="WorldNpc09901" Count="1" TrackInfo="hunter36302" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11070" NpcId="WorldNpc09902" Count="1" TrackInfo="hunter36304" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11071" NpcId="WorldNpc09903" Count="1" TrackInfo="hunter36306" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11072" NpcId="monc052200" Count="10" TrackInfo="hunter36313" SceneID="17"/>
+	<Property ID="11074" NpcId="monm075200" Count="10" TrackInfo="hunter36325" SceneID="11"/>
+	<Property ID="11075" NpcId="WorldNpc04432" Count="1" TrackInfo="hunter36332" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11076" NpcId="monrm073900" Count="1" TrackInfo="hunter36335" SceneID="11"/>
+	<Property ID="11077" NpcId="WorldNpc04572" Count="1" TrackInfo="hunter36340" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11078" NpcId="monrm074300" Count="2" TrackInfo="hunter36344" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11079" NpcId="WorldNpc04573" Count="1" TrackInfo="hunter36346" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11080" NpcId="monrc042600" Count="3" TrackInfo="hunter36355" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="11081" NpcId="WorldNpc10036" Count="1" TrackInfo="hunter36356" SceneID="16" IsQieCuo="1"/>
+	<Property ID="11082" NpcId="monrc042800" Count="3" TrackInfo="hunter36372" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="11083" NpcId="WorldNpc10040" Count="1" TrackInfo="hunter36373" SceneID="16" IsQieCuo="1"/>
+	<Property ID="11084" NpcId="monrc021900" Count="3" TrackInfo="hunter36387" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="11085" NpcId="WorldNpc08611" Count="1" TrackInfo="hunter36388" SceneID="13" IsQieCuo="1"/>
+	<Property ID="11086" NpcId="monc022300" Count="5" TrackInfo="hunter36395" SceneID="13"/>
+	<Property ID="11088" NpcId="monc022200" Count="5" TrackInfo="hunter36400" SceneID="13"/>
+	<Property ID="11089" NpcId="monc022500" Count="5" TrackInfo="hunter36402" SceneID="13"/>
+	<Property ID="11090" NpcId="monc022500" Count="5" TrackInfo="hunter36406" SceneID="13"/>
+	<Property ID="11091" NpcId="monc022600" Count="10" TrackInfo="hunter36416" SceneID="13"/>
+	<Property ID="11092" NpcId="bossc020100" Count="1" TrackInfo="hunter36417" SceneID="13"/>
+	<Property ID="11093" NpcId="monrc021700" Count="3" TrackInfo="hunter36418" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="11094" NpcId="monc022300" Count="10" TrackInfo="hunter36422" SceneID="13"/>
+	<Property ID="11095" NpcId="monc022600" Count="10" TrackInfo="hunter36424" SceneID="13"/>
+	<Property ID="11096" NpcId="monc022600" Count="10" TrackInfo="hunter36425" SceneID="13"/>
+	<Property ID="11097" NpcId="WorldNpc04434" Count="1" TrackInfo="hunter36434_1" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11099" NpcId="monrm074400" Count="1" TrackInfo="hunter36436" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11100" NpcId="monrf031900" Count="4" TrackInfo="hunter36441" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="11101" NpcId="WorldNpc06630" Count="1" TrackInfo="hunter36443" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11102" NpcId="WorldNpc06632" Count="1" TrackInfo="hunter36446" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11103" NpcId="monf033600" Count="10" TrackInfo="hunter36449_2" SceneID="20"/>
+	<Property ID="11104" NpcId="monf033700" Count="10" TrackInfo="hunter36449_3" SceneID="20"/>
+	<Property ID="11106" NpcId="WorldNpc06632" Count="1" TrackInfo="hunter36455" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11108" NpcId="monf033300" Count="10" TrackInfo="hunter36459" SceneID="20"/>
+	<Property ID="11110" NpcId="WorldNpc06635" Count="1" TrackInfo="hunter36464" SceneID="20" IsQieCuo="1"/>
+	<Property ID="11111" NpcId="monrc022000" Count="3" TrackInfo="hunter36475" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="11112" NpcId="monrc023000" Count="5" TrackInfo="hunter36477" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="11114" NpcId="monf010100" Count="10" TrackInfo="hunter36486" SceneID="18"/>
+	<Property ID="11115" NpcId="WorldNpc05385" Count="1" TrackInfo="hunter36489" SceneID="18" IsQieCuo="1"/>
+	<Property ID="11116" NpcId="monrf010200" Count="1" TrackInfo="hunter36498" SceneID="18" IsNeedCreator="1"/>
+	<Property ID="11117" NpcId="monf010200" Count="10" TrackInfo="hunter36504" SceneID="18"/>
+	<Property ID="11118" NpcId="WorldNpc05385" Count="1" TrackInfo="hunter36506" SceneID="18" IsQieCuo="1"/>
+	<Property ID="11120" NpcId="monrf010400" Count="10" TrackInfo="hunter36513" SceneID="18" IsNeedCreator="1"/>
+	<Property ID="11121" NpcId="monf010300" Count="10" TrackInfo="hunter36519" SceneID="18" IsNeedCreator="1"/>
+	<Property ID="11122" NpcId="monrf011200" Count="1" TrackInfo="hunter36522" SceneID="18" IsNeedCreator="1"/>
+	<Property ID="11123" NpcId="monrv021500" Count="4" TrackInfo="hunter36536" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="11124" NpcId="WorldNpc09204" Count="1" TrackInfo="hunter36537" SceneID="2" IsQieCuo="1"/>
+	<Property ID="11125" NpcId="WorldNpc09204" Count="1" TrackInfo="hunter36539_1" SceneID="2" IsQieCuo="1"/>
+	<Property ID="11126" NpcId="monrv021100" Count="1" TrackInfo="hunter36539_2" SceneID="2"/>
+	<Property ID="11127" NpcId="monrv021800" Count="10" TrackInfo="hunter36544" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="11128" NpcId="WorldNpc09310" Count="1" TrackInfo="hunter36551" SceneID="2" IsQieCuo="1"/>
+	<Property ID="11129" NpcId="WorldNpc09309" Count="1" TrackInfo="hunter36553" SceneID="2" IsQieCuo="1"/>
+	<Property ID="11130" NpcId="WorldNpc09302" Count="1" TrackInfo="hunter36556" SceneID="2" IsQieCuo="1"/>
+	<Property ID="11131" NpcId="WorldNpc06903" Count="1" TrackInfo="hunter36566" SceneID="26" IsQieCuo="1"/>
+	<Property ID="11132" NpcId="monf093700" Count="10" TrackInfo="hunter36569" SceneID="26"/>
+	<Property ID="11133" NpcId="WorldNpc06905" Count="1" TrackInfo="hunter36571" SceneID="26" IsQieCuo="1"/>
+	<Property ID="11134" NpcId="WorldNpc04576" Count="1" TrackInfo="hunter36075" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11135" NpcId="monrm074600" Count="2" TrackInfo="hunter36077" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11136" NpcId="monm072500" Count="10" TrackInfo="hunter36081" SceneID="11"/>
+	<Property ID="11137" NpcId="monrm074700" Count="2" TrackInfo="hunter36086" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="11138" NpcId="WorldNpc04705" Count="1" TrackInfo="hunter36089" SceneID="11" IsQieCuo="1"/>
+	<Property ID="11139" NpcId="monm072600" Count="5" TrackInfo="hunter36082" SceneID="11"/>
+	<Property ID="11140" NpcId="monrc053300" Count="4" TrackInfo="hunter36180" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="11141" NpcId="WorldNpc09802" Count="1" TrackInfo="hunter36183" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11142" NpcId="WorldNpc09801" Count="1" TrackInfo="hunter36184" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11143" NpcId="WorldNpc09811" Count="1" TrackInfo="hunter36189" SceneID="17" IsQieCuo="1"/>
+	<Property ID="11144" NpcId="monrf033300" Count="3" TrackInfo="hunter36189" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="11145" NpcId="WorldNpc10039" Count="1" TrackInfo="hunter36367" SceneID="16" IsQieCuo="1"/>
+	<Property ID="11146" NpcId="WorldNpc10040" Count="1" TrackInfo="hunter36381" SceneID="16" IsQieCuo="1"/>
+	<Property ID="10001" NpcId="WorldNpc02610" Count="1" TrackInfo="hunter40013" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10002" NpcId="monrm064800" Count="3" TrackInfo="hunter40015" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10003" NpcId="WorldNpc02684" Count="1" TrackInfo="hunter40028" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10004" NpcId="monrm062900" Count="3" TrackInfo="hunter40098" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10005" NpcId="WorldNpc02688" Count="1" TrackInfo="hunter40099" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10006" NpcId="monrm063000" Count="3" TrackInfo="hunter40111" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="10007" NpcId="monrm063100" Count="6" TrackInfo="hunter40122_1" SceneID="14" IsNeedCreator="1"/>
+	<Property ID="10008" NpcId="WorldNpc01613" Count="1" TrackInfo="hunter40122_2" SceneID="14" IsQieCuo="1"/>
+	<Property ID="10009" NpcId="monrm063200" Count="1" TrackInfo="hunter40124" SceneID="14" IsNeedCreator="1"/>
+	<Property ID="10010" NpcId="WorldNpc01614" Count="1" TrackInfo="hunter40133" SceneID="14" IsQieCuo="1"/>
+	<Property ID="10011" NpcId="monrm063200" Count="3" TrackInfo="hunter40135" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10012" NpcId="WorldNpc02629" Count="1" TrackInfo="hunter40054" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10013" NpcId="bossm060100" Count="1" TrackInfo="hunter40064" SceneID="10"/>
+	<Property ID="10014" NpcId="WorldNpc02691" Count="1" TrackInfo="hunter40074_1" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10015" NpcId="monrm063500" Count="3" TrackInfo="hunter40074_2" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10016" NpcId="WorldNpc02689" Count="1" TrackInfo="hunter40077" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10017" NpcId="WorldNpc02688" Count="1" TrackInfo="hunter40109" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10018" NpcId="monrm064200" Count="2" TrackInfo="hunter40055" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10019" NpcId="monm060300" Count="15" TrackInfo="hunter40063" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10020" NpcId="monrm063500" Count="1" TrackInfo="hunter40074" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10021" NpcId="monrm064400" Count="4" TrackInfo="hunter40075" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10022" NpcId="monrm064300" Count="3" TrackInfo="hunter40077" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10023" NpcId="monrm064500" Count="3" TrackInfo="hunter40085" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10024" NpcId="WorldNpc02626" Count="1" TrackInfo="hunter40089" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10025" NpcId="WorldNpc02629" Count="1" TrackInfo="hunter40145" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10026" NpcId="WorldNpc09801" Count="1" TrackInfo="hunter40158" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10027" NpcId="monrm064900" Count="3" TrackInfo="hunter40164" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10028" NpcId="WorldNpc02629" Count="1" TrackInfo="hunter40173" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10029" NpcId="WorldNpc02628" Count="1" TrackInfo="hunter40184" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10030" NpcId="monrm065000" Count="3" TrackInfo="hunter40185" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10185" NpcId="monrm064100" Count="3" TrackInfo="hunter40242" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10186" NpcId="WorldNpc02704" Count="1" TrackInfo="hunter40246" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10187" NpcId="WorldNpc05807" Count="1" TrackInfo="hunter40255" SceneID="21" IsQieCuo="1"/>
+	<Property ID="10188" NpcId="WorldNpc05807" Count="1" TrackInfo="hunter40258" SceneID="21" IsQieCuo="1"/>
+	<Property ID="10189" NpcId="monf043400" Count="6" TrackInfo="hunter40266" SceneID="21"/>
+	<Property ID="10190" NpcId="monrf041100" Count="1" TrackInfo="hunter40267" SceneID="21" IsNeedCreator="1"/>
+	<Property ID="10191" NpcId="monrm063900" Count="3" TrackInfo="hunter40278" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10192" NpcId="monrm064000" Count="3" TrackInfo="hunter40279" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10200" NpcId="WorldNpc09795" Count="1" TrackInfo="hunter40291" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10201" NpcId="WorldNpc09798" Count="1" TrackInfo="hunter40294" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10202" NpcId="WorldNpc09956" Count="1" TrackInfo="hunter40300_1" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10203" NpcId="monrc053500" Count="5" TrackInfo="hunter40300_2" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="10204" NpcId="monc052300" Count="10" TrackInfo="hunter40303" SceneID="17"/>
+	<Property ID="10205" NpcId="WorldNpc09957" Count="1" TrackInfo="hunter40304" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10206" NpcId="WorldNpc09958" Count="1" TrackInfo="hunter40307_1" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10208" NpcId="WorldNpc09961" Count="1" TrackInfo="hunter40308" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10209" NpcId="WorldNpc09959" Count="1" TrackInfo="hunter40310" SceneID="17" IsQieCuo="1"/>
+	<Property ID="10210" NpcId="monrc053600" Count="1" TrackInfo="hunter40319" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="10211" NpcId="monrf033400" Count="10" TrackInfo="hunter40340" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="10212" NpcId="monf032600" Count="10" TrackInfo="hunter40341_1" SceneID="20"/>
+	<Property ID="10213" NpcId="WorldNpc06644" Count="1" TrackInfo="hunter40341_2" SceneID="20" IsQieCuo="1"/>
+	<Property ID="10214" NpcId="WorldNpc11002" Count="1" TrackInfo="hunter40345" SceneID="13" IsQieCuo="1"/>
+	<Property ID="10215" NpcId="monrc030200" Count="1" TrackInfo="hunter40346" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10216" NpcId="WorldNpc11004" Count="1" TrackInfo="hunter40347" SceneID="13" IsQieCuo="1"/>
+	<Property ID="10217" NpcId="monrc030300" Count="4" TrackInfo="hunter40348" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10218" NpcId="monrc030400" Count="5" TrackInfo="hunter40349" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10219" NpcId="monrc030500" Count="5" TrackInfo="hunter40350" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10220" NpcId="monrc030600" Count="10" TrackInfo="hunter40352" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10221" NpcId="WorldNpc11008" Count="1" TrackInfo="hunter40353" SceneID="13" IsQieCuo="1"/>
+	<Property ID="10222" NpcId="WorldNpc10048" Count="1" TrackInfo="hunter40354" SceneID="16" IsQieCuo="1"/>
+	<Property ID="10223" NpcId="monrc043400" Count="2" TrackInfo="hunter40359" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="10224" NpcId="Summon00151" Count="3" TrackInfo="hunter40360" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="10250" NpcId="WorldNpc02656" Count="1" TrackInfo="hunter40386" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10251" NpcId="monc022100" Count="5" TrackInfo="hunter40398" SceneID="13"/>
+	<Property ID="10252" NpcId="monrc025002" Count="3" TrackInfo="hunter40399" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10253" NpcId="WorldNpc08945" Count="1" TrackInfo="hunter40410" SceneID="13" IsQieCuo="1"/>
+	<Property ID="10255" NpcId="monrc025003" Count="3" TrackInfo="hunter40422" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10256" NpcId="monrc025004" Count="4" TrackInfo="hunter40425" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="10300" NpcId="WorldNpc02715" Count="1" TrackInfo="hunter40434" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10301" NpcId="WorldNpc02626" Count="1" TrackInfo="hunter40438" SceneID="10" IsQieCuo="1"/>
+	<Property ID="10302" NpcId="monrm065100" Count="3" TrackInfo="hunter40440" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10303" NpcId="monrc010700" Count="4" TrackInfo="hunter40448" SceneID="14" IsNeedCreator="1"/>
+	<Property ID="10304" NpcId="WorldNpc01443" Count="1" TrackInfo="hunter40454" SceneID="14" IsQieCuo="1"/>
+	<Property ID="10305" NpcId="WorldNpc01438" Count="1" TrackInfo="hunter40461" SceneID="14" IsQieCuo="1"/>
+	<Property ID="10306" NpcId="monc014500" Count="10" TrackInfo="hunter40463_1" SceneID="14"/>
+	<Property ID="10307" NpcId="monrc010800" Count="1" TrackInfo="hunter40463_2" SceneID="14" IsNeedCreator="1"/>
+	<Property ID="10308" NpcId="monrm065100" Count="4" TrackInfo="hunter40470" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="10309" NpcId="monrm065200" Count="5" TrackInfo="hunter40474" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="6200" NpcId="WorldNpc10052" Count="1" TrackInfo="hunter44290" SceneID="16" IsQieCuo="1" QiecuoTitle="qiecuotitle_6200" QiecuoMenu="qiecuomenu_6200"/>
+	<Property ID="6201" NpcId="monc043400" Count="10" TrackInfo="hunter44292" SceneID="16"/>
+	<Property ID="6202" NpcId="monrc044100" Count="5" TrackInfo="hunter44298_1" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="6203" NpcId="WorldNpc10056" Count="1" TrackInfo="hunter44298_2" SceneID="16" IsQieCuo="1" QiecuoTitle="qiecuotitle_6203" QiecuoMenu="qiecuomenu_6203"/>
+	<Property ID="6204" NpcId="WorldNpc08527" Count="1" TrackInfo="hunter44302" SceneID="13" IsQieCuo="1" QiecuoTitle="qiecuotitle_6204" QiecuoMenu="qiecuomenu_6204"/>
+	<Property ID="6205" NpcId="monrc022100" Count="4" TrackInfo="hunter44303" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="6206" NpcId="monc021500" Count="5" TrackInfo="hunter44305_1" SceneID="13"/>
+	<Property ID="6207" NpcId="monrc022200" Count="5" TrackInfo="hunter44305_2" SceneID="13" IsNeedCreator="1"/>
+	<Property ID="6208" NpcId="WorldNpc08524" Count="1" TrackInfo="hunter44306" SceneID="13" IsQieCuo="1" QiecuoTitle="qiecuotitle_6208" QiecuoMenu="qiecuomenu_6208"/>
+	<Property ID="6209" NpcId="WorldNpc03116" Count="1" TrackInfo="hunter44322" SceneID="6" IsQieCuo="1" QiecuoTitle="qiecuotitle_6209" QiecuoMenu="qiecuomenu_6209"/>
+	<Property ID="6210" NpcId="WorldNpc03114" Count="1" TrackInfo="hunter44310_1" SceneID="6" IsQieCuo="1" QiecuoTitle="qiecuotitle_6210" QiecuoMenu="qiecuomenu_6210"/>
+	<Property ID="6211" NpcId="WorldNpc03115" Count="1" TrackInfo="hunter44310_2" SceneID="6" IsQieCuo="1" QiecuoTitle="qiecuotitle_6211" QiecuoMenu="qiecuomenu_6211"/>
+	<Property ID="9001" NpcId="monm050600" Count="5" TrackInfo="hunter50004" SceneID="9"/>
+	<Property ID="9002" NpcId="WorldNpc02239" Count="1" TrackInfo="hunter50005" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9003" NpcId="WorldNpc02246" Count="1" TrackInfo="hunter50013" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9004" NpcId="WorldNpc02248" Count="1" TrackInfo="hunter50017_1" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9006" NpcId="WorldNpc02246" Count="1" TrackInfo="hunter50020_1" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9008" NpcId="WorldNpc02247" Count="1" TrackInfo="hunter50025" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9009" NpcId="WorldNpc02249" Count="1" TrackInfo="hunter50027_1" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9011" NpcId="WorldNpc02250" Count="1" TrackInfo="hunter50030" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9012" NpcId="WorldNpc02247" Count="1" TrackInfo="hunter50042_1" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9013" NpcId="WorldNpc02244" Count="1" TrackInfo="hunter50051" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9014" NpcId="monrm052800" Count="1" TrackInfo="hunter50061" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9015" NpcId="WorldNpc02240" Count="1" TrackInfo="hunter50066" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9016" NpcId="WorldNpc02205" Count="1" TrackInfo="hunter50073" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9017" NpcId="WorldNpc02242" Count="1" TrackInfo="hunter50077" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9018" NpcId="WorldNpc02240" Count="1" TrackInfo="hunter50082" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9019" NpcId="WorldNpc02236" Count="1" TrackInfo="hunter50091" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9020" NpcId="monm050500" Count="5" TrackInfo="hunter50094" SceneID="9"/>
+	<Property ID="9021" NpcId="WorldNpc02229" Count="1" TrackInfo="hunter50101" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9022" NpcId="WorldNpc02231" Count="1" TrackInfo="hunter50103" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9023" NpcId="WorldNpc02232" Count="1" TrackInfo="hunter50106" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9024" NpcId="WorldNpc02233" Count="1" TrackInfo="hunter50109" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9025" NpcId="WorldNpc02234" Count="1" TrackInfo="hunter50110" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9026" NpcId="monrm053100" Count="3" TrackInfo="hunter50115" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9027" NpcId="monrm054300" Count="3" TrackInfo="hunter50121" SceneID="9" HideAccept="1" IsNeedCreator="1"/>
+	<Property ID="9028" NpcId="monrm054200" Count="1" TrackInfo="hunter50124" SceneID="9" HideAccept="1" IsNeedCreator="1"/>
+	<Property ID="9029" NpcId="monrm053900" Count="1" TrackInfo="hunter50126" SceneID="9" HideAccept="1" IsNeedCreator="1"/>
+	<Property ID="9030" NpcId="monrm056800" Count="1" TrackInfo="hunter50135" SceneID="9" HideAccept="1" IsNeedCreator="1"/>
+	<Property ID="9031" NpcId="WorldNpc02207" Count="1" TrackInfo="hunter50137" SceneID="9" HideAccept="1" IsQieCuo="1"/>
+	<Property ID="9032" NpcId="monrm054700" Count="3" TrackInfo="hunter50146" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9033" NpcId="monrm054100" Count="1" TrackInfo="hunter50150" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9034" NpcId="WorldNpc09802" Count="1" TrackInfo="hunter50158" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9035" NpcId="monrc051500" Count="5" TrackInfo="hunter50162" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="9036" NpcId="WorldNpc09809" Count="1" TrackInfo="hunter50164" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9037" NpcId="WorldNpc09618" Count="1" TrackInfo="hunter50170" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9038" NpcId="WorldNpc09619" Count="1" TrackInfo="hunter50171" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9039" NpcId="monrc051900" Count="2" TrackInfo="hunter50178" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="9040" NpcId="monrc052000" Count="3" TrackInfo="hunter50184" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="9041" NpcId="WorldNpc09604" Count="1" TrackInfo="hunter50188" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9042" NpcId="WorldNpc09618" Count="1" TrackInfo="hunter50191" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9043" NpcId="monrv041100" Count="3" TrackInfo="hunter50196" SceneID="1" IsNeedCreator="1"/>
+	<Property ID="9044" NpcId="monrv041200" Count="3" TrackInfo="hunter50199" SceneID="1" IsNeedCreator="1"/>
+	<Property ID="9045" NpcId="WorldNpc00039" Count="1" TrackInfo="hunter50200" SceneID="1" IsQieCuo="1"/>
+	<Property ID="9046" NpcId="WorldNpc00039" Count="1" TrackInfo="hunter50202_1" SceneID="1" IsQieCuo="1"/>
+	<Property ID="9048" NpcId="monv042400" Count="7" TrackInfo="hunter50205" SceneID="1"/>
+	<Property ID="9049" NpcId="bossv040300" Count="1" TrackInfo="hunter50207" SceneID="1"/>
+	<Property ID="9050" NpcId="monrv041500" Count="3" TrackInfo="hunter50211" SceneID="1" IsNeedCreator="1"/>
+	<Property ID="9051" NpcId="monv041700" Count="6" TrackInfo="hunter50213" SceneID="1"/>
+	<Property ID="9052" NpcId="WorldNpc09622" Count="1" TrackInfo="hunter50222" SceneID="17" IsQieCuo="1"/>
+	<Property ID="9053" NpcId="monv043400" Count="6" TrackInfo="hunter50226" SceneID="1"/>
+	<Property ID="9055" NpcId="monf042500" Count="6" TrackInfo="hunter50244" SceneID="21"/>
+	<Property ID="9056" NpcId="monrm055400" Count="4" TrackInfo="hunter50257" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9057" NpcId="WorldNpc02255" Count="1" TrackInfo="hunter50260" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9058" NpcId="WorldNpc02223" Count="1" TrackInfo="hunter50269" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9059" NpcId="WorldNpc02256" Count="1" TrackInfo="hunter50272" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9060" NpcId="WorldNpc05805" Count="1" TrackInfo="hunter50277" SceneID="21" IsQieCuo="1"/>
+	<Property ID="9061" NpcId="monf043100" Count="6" TrackInfo="hunter50283" SceneID="21"/>
+	<Property ID="9062" NpcId="WorldNpc10020" Count="1" TrackInfo="hunter50295" SceneID="16" IsQieCuo="1"/>
+	<Property ID="9063" NpcId="WorldNpc10022" Count="1" TrackInfo="hunter50297" SceneID="16" IsQieCuo="1"/>
+	<Property ID="9064" NpcId="WorldNpc10026" Count="1" TrackInfo="hunter50306" SceneID="16" IsQieCuo="1"/>
+	<Property ID="9065" NpcId="monrc041200" Count="1" TrackInfo="hunter50310" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9066" NpcId="WorldNpc10029" Count="1" TrackInfo="hunter50313" SceneID="16" IsQieCuo="1"/>
+	<Property ID="9067" NpcId="WorldNpc10030" Count="1" TrackInfo="hunter50317_1" SceneID="16" IsQieCuo="1"/>
+	<Property ID="9069" NpcId="WorldNpc10031" Count="1" TrackInfo="hunter50323_1" SceneID="16" IsQieCuo="1"/>
+	<Property ID="9071" NpcId="monrc041900" Count="1" TrackInfo="hunter50328_1" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9072" NpcId="monrc042300" Count="2" TrackInfo="hunter50328_2" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9073" NpcId="monrc042000" Count="1" TrackInfo="hunter50329_1" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9074" NpcId="monrc042300" Count="2" TrackInfo="hunter50329_2" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9075" NpcId="monrc042100" Count="1" TrackInfo="hunter50330_1" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9076" NpcId="monrc042300" Count="2" TrackInfo="hunter50330_2" SceneID="16" IsNeedCreator="1"/>
+	<Property ID="9077" NpcId="monm050400" Count="5" TrackInfo="hunter50338" SceneID="9"/>
+	<Property ID="9078" NpcId="monrm062700" Count="1" TrackInfo="hunter50346" SceneID="10" IsNeedCreator="1"/>
+	<Property ID="9080" NpcId="WorldNpc02631" Count="1" TrackInfo="hunter50351" SceneID="10" IsQieCuo="1"/>
+	<Property ID="9081" NpcId="monm060400" Count="5" TrackInfo="hunter50363" SceneID="10"/>
+	<Property ID="9082" NpcId="WorldNpc02215" Count="1" TrackInfo="hunter50368" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9083" NpcId="monrm051000" Count="1" TrackInfo="hunter50373" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9084" NpcId="WorldNpc03419" Count="1" TrackInfo="hunter50387" SceneID="7" IsQieCuo="1"/>
+	<Property ID="9085" NpcId="WorldNpc03422" Count="1" TrackInfo="hunter50408" SceneID="7" IsQieCuo="1"/>
+	<Property ID="9086" NpcId="monm030200" Count="5" TrackInfo="hunter50411" SceneID="7"/>
+	<Property ID="9087" NpcId="WorldNpc03423" Count="1" TrackInfo="hunter50413" SceneID="7" IsQieCuo="1"/>
+	<Property ID="9088" NpcId="monrm030600" Count="3" TrackInfo="hunter50424" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="9089" NpcId="WorldNpc03424" Count="1" TrackInfo="hunter50426" SceneID="7" IsQieCuo="1"/>
+	<Property ID="9090" NpcId="WorldNpc02236" Count="1" TrackInfo="hunter50438_1" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9091" NpcId="WorldNpc02261" Count="1" TrackInfo="hunter50438_2" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9092" NpcId="WorldNpc02239" Count="1" TrackInfo="hunter50444" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9093" NpcId="WorldNpc09306" Count="1" TrackInfo="hunter50447" SceneID="2" IsQieCuo="1"/>
+	<Property ID="9094" NpcId="monrv020700" Count="1" TrackInfo="hunter50448" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="9095" NpcId="monrv020800" Count="1" TrackInfo="hunter50454" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="9096" NpcId="WorldNpc02259" Count="1" TrackInfo="hunter50461" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9097" NpcId="WorldNpc02202" Count="1" TrackInfo="hunter50466" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9098" NpcId="monrm056200" Count="1" TrackInfo="hunter50474_1" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9099" NpcId="monrm057900" Count="1" TrackInfo="hunter50474_2" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9100" NpcId="monrm056400" Count="1" TrackInfo="hunter50474_3" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9101" NpcId="monrv020900" Count="1" TrackInfo="hunter50479" SceneID="2" IsNeedCreator="1"/>
+	<Property ID="9102" NpcId="monf032200" Count="5" TrackInfo="hunter50488_1" SceneID="20"/>
+	<Property ID="9103" NpcId="monrf030800" Count="1" TrackInfo="hunter50488_2" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="9104" NpcId="monrf030900" Count="2" TrackInfo="hunter50488_3" SceneID="20" IsNeedCreator="1"/>
+	<Property ID="9105" NpcId="monf032600" Count="6" TrackInfo="hunter50497" SceneID="20"/>
+	<Property ID="9106" NpcId="WorldNpc06617" Count="1" TrackInfo="hunter50499" SceneID="20" IsQieCuo="1"/>
+	<Property ID="9107" NpcId="WorldNpc02264" Count="1" TrackInfo="hunter50513" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9108" NpcId="WorldNpc02266" Count="1" TrackInfo="hunter50517" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9109" NpcId="WorldNpc02431" Count="1" TrackInfo="hunter50522" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9110" NpcId="monm053700" Count="6" TrackInfo="hunter50525" SceneID="9"/>
+	<Property ID="9111" NpcId="monrm056300" Count="1" TrackInfo="hunter50536" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9112" NpcId="monf090300" Count="5" TrackInfo="hunter50542" SceneID="26"/>
+	<Property ID="9113" NpcId="monrf090100" Count="1" TrackInfo="hunter50545" SceneID="26" IsNeedCreator="1"/>
+	<Property ID="9114" NpcId="WorldNpc06903" Count="1" TrackInfo="hunter50548" SceneID="26" IsQieCuo="1"/>
+	<Property ID="9115" NpcId="monf090500" Count="5" TrackInfo="hunter50550" SceneID="26"/>
+	<Property ID="9116" NpcId="monrm057600" Count="3" TrackInfo="hunter50555" SceneID="9" IsNeedCreator="1"/>
+	<Property ID="9117" NpcId="WorldNpc02263" Count="1" TrackInfo="hunter50557" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9118" NpcId="WorldNpc02262" Count="1" TrackInfo="hunter50567" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9119" NpcId="WorldNpc02211" Count="1" TrackInfo="hunter50057" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9120" NpcId="WorldNpc02235" Count="1" TrackInfo="hunter50111" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9121" NpcId="WorldNpc02236" Count="1" TrackInfo="hunter50118" SceneID="9" IsQieCuo="1"/>
+	<Property ID="9122" NpcId="WorldNpc00041" Count="1" TrackInfo="hunter50217" SceneID="1" IsQieCuo="1"/>
+	<Property ID="9123" NpcId="WorldNpc03421" Count="1" TrackInfo="hunter50405" SceneID="7" IsQieCuo="1"/>
+	<Property ID="9124" NpcId="WorldNpc03422" Count="1" TrackInfo="hunter50421" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7000" NpcId="monrm030800" Count="6" TrackInfo="hunter46007" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="7001" NpcId="monrm030700" Count="1" TrackInfo="hunter46012" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="7002" NpcId="WorldNpc03372" Count="1" TrackInfo="hunter46013" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7003" NpcId="WorldNpc03440" Count="1" TrackInfo="hunter46015" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7004" NpcId="monrm030900" Count="3" TrackInfo="hunter46021" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="7005" NpcId="WorldNpc03373" Count="1" TrackInfo="hunter46028" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7006" NpcId="monrm031100" Count="3" TrackInfo="hunter46034" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="7007" NpcId="WorldNpc03441" Count="1" TrackInfo="hunter46035" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7008" NpcId="WorldNpc03335" Count="1" TrackInfo="hunter46043" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7009" NpcId="WorldNpc03444" Count="1" TrackInfo="hunter46055" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7010" NpcId="WorldNpc03444" Count="1" TrackInfo="hunter46057" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7011" NpcId="WorldNpc03445" Count="1" TrackInfo="hunter46063" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7012" NpcId="WorldNpc03444" Count="1" TrackInfo="hunter46068" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7013" NpcId="monm030200" Count="6" TrackInfo="hunter46071" SceneID="7"/>
+	<Property ID="7014" NpcId="WorldNpc03312" Count="1" TrackInfo="hunter46080" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7015" NpcId="monm030300" Count="6" TrackInfo="hunter46081" SceneID="7"/>
+	<Property ID="7016" NpcId="WorldNpc03444" Count="1" TrackInfo="hunter46085" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7017" NpcId="WorldNpc03449" Count="1" TrackInfo="hunter46090" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7018" NpcId="WorldNpc03444" Count="1" TrackInfo="hunter46093" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7019" NpcId="WorldNpc05050" Count="1" TrackInfo="hunter46100" SceneID="24" IsQieCuo="1"/>
+	<Property ID="7020" NpcId="WorldNpc05093" Count="1" TrackInfo="hunter46105" SceneID="24" IsQieCuo="1"/>
+	<Property ID="7021" NpcId="WorldNpc05094" Count="1" TrackInfo="hunter46113" SceneID="24" IsQieCuo="1"/>
+	<Property ID="7022" NpcId="WorldNpc05095" Count="1" TrackInfo="hunter46116" SceneID="24" IsQieCuo="1"/>
+	<Property ID="7023" NpcId="monf070100" Count="5" TrackInfo="hunter46120" SceneID="24"/>
+	<Property ID="7024" NpcId="monrf070400" Count="3" TrackInfo="hunter46121" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="7025" NpcId="WorldNpc05096" Count="1" TrackInfo="hunter46122" SceneID="24" IsQieCuo="1"/>
+	<Property ID="7026" NpcId="monf070700" Count="5" TrackInfo="hunter46127" SceneID="24"/>
+	<Property ID="7027" NpcId="monf070300" Count="5" TrackInfo="hunter46133" SceneID="24"/>
+	<Property ID="7028" NpcId="WorldNpc04431" Count="1" TrackInfo="hunter46141" SceneID="11" IsQieCuo="1"/>
+	<Property ID="7029" NpcId="WorldNpc04438" Count="1" TrackInfo="hunter46152" SceneID="11" IsQieCuo="1"/>
+	<Property ID="7030" NpcId="monrm075100" Count="3" TrackInfo="hunter46153" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="7031" NpcId="monrm075200" Count="3" TrackInfo="hunter46155" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="7032" NpcId="monrm075300" Count="5" TrackInfo="hunter46160" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="7033" NpcId="monrm075400" Count="5" TrackInfo="hunter46162" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="7034" NpcId="WorldNpc04714" Count="1" TrackInfo="hunter46163" SceneID="11" IsQieCuo="1"/>
+	<Property ID="7035" NpcId="WorldNpc04714" Count="1" TrackInfo="hunter46165" SceneID="11" IsQieCuo="1"/>
+	<Property ID="7036" NpcId="WorldNpc04579" Count="1" TrackInfo="hunter46174" SceneID="11" IsQieCuo="1"/>
+	<Property ID="7037" NpcId="monrm075500" Count="5" TrackInfo="hunter46178" SceneID="11" IsNeedCreator="1"/>
+	<Property ID="7038" NpcId="monrm031200" Count="3" TrackInfo="hunter46186" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="7039" NpcId="WorldNpc03451" Count="1" TrackInfo="hunter46188" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7040" NpcId="WorldNpc03451" Count="1" TrackInfo="hunter46190" SceneID="7" IsQieCuo="1"/>
+	<Property ID="7041" NpcId="monrm031300" Count="3" TrackInfo="hunter46193" SceneID="7" IsNeedCreator="1"/>
+	<Property ID="7042" NpcId="WorldNpc02037" Count="1" TrackInfo="hunter46198" SceneID="19" IsQieCuo="1"/>
+	<Property ID="7043" NpcId="WorldNpc02038" Count="1" TrackInfo="hunter46201" SceneID="19" IsQieCuo="1"/>
+	<Property ID="7044" NpcId="monf020500" Count="6" TrackInfo="hunter46202" SceneID="19"/>
+	<Property ID="7045" NpcId="WorldNpc02041" Count="1" TrackInfo="hunter46217" SceneID="19" IsQieCuo="1"/>
+	<Property ID="7046" NpcId="WorldNpc02037" Count="1" TrackInfo="hunter46220" SceneID="19" IsQieCuo="1"/>
+	<Property ID="7047"/>
+	<Property ID="7048"/>
+	<Property ID="7049"/>
+	<Property ID="7050"/>
+	<Property ID="7051"/>
+	<Property ID="7052"/>
+	<Property ID="7053"/>
+	<Property ID="7054"/>
+	<Property ID="7055"/>
+	<Property ID="7056"/>
+	<Property ID="7057"/>
+	<Property ID="7058"/>
+	<Property ID="7059"/>
+	<Property ID="7060"/>
+	<Property ID="7061"/>
+	<Property ID="7062"/>
+	<Property ID="7063"/>
+	<Property ID="7064"/>
+	<Property ID="7065"/>
+	<Property ID="7066"/>
+	<Property ID="7067"/>
+	<Property ID="7068"/>
+	<Property ID="7069"/>
+	<Property ID="7070"/>
+	<Property ID="7071"/>
+	<Property ID="7072"/>
+	<Property ID="7073"/>
+	<Property ID="7074"/>
+	<Property ID="7075"/>
+	<Property ID="7076"/>
+	<Property ID="7077"/>
+	<Property ID="7078"/>
+	<Property ID="7079"/>
+	<Property ID="7080"/>
+	<Property ID="7081"/>
+	<Property ID="7082"/>
+	<Property ID="7083"/>
+	<Property ID="7084"/>
+	<Property ID="7085"/>
+	<Property ID="7086"/>
+	<Property ID="7087"/>
+	<Property ID="7088"/>
+	<Property ID="7089"/>
+	<Property ID="7090"/>
+	<Property ID="7091"/>
+	<Property ID="7092"/>
+	<Property ID="7093"/>
+	<Property ID="7094"/>
+	<Property ID="7095"/>
+	<Property ID="7096"/>
+	<Property ID="7097"/>
+	<Property ID="7098"/>
+	<Property ID="7099"/>
+	<Property ID="7100"/>
+	<Property ID="7101"/>
+	<Property ID="7102"/>
+	<Property ID="7103"/>
+	<Property ID="7104"/>
+	<Property ID="7105"/>
+	<Property ID="7106"/>
+	<Property ID="7107"/>
+	<Property ID="7108"/>
+	<Property ID="7109"/>
+	<Property ID="7110"/>
+	<Property ID="7111"/>
+	<Property ID="7112"/>
+	<Property ID="7113"/>
+	<Property ID="7114"/>
+	<Property ID="7115"/>
+	<Property ID="7116"/>
+	<Property ID="7117"/>
+	<Property ID="7118"/>
+	<Property ID="7119"/>
+	<Property ID="7120"/>
+	<Property ID="7121"/>
+	<Property ID="7122"/>
+	<Property ID="7123"/>
+	<Property ID="7124"/>
+	<Property ID="7125"/>
+	<Property ID="7126"/>
+	<Property ID="7127"/>
+	<Property ID="7128"/>
+	<Property ID="7129"/>
+	<Property ID="7130"/>
+	<Property ID="7131"/>
+	<Property ID="7132"/>
+	<Property ID="7133"/>
+	<Property ID="7134"/>
+	<Property ID="7135"/>
+	<Property ID="7136"/>
+	<Property ID="7137"/>
+	<Property ID="7138"/>
+	<Property ID="7139"/>
+	<Property ID="7140"/>
+	<Property ID="7141"/>
+	<Property ID="7142"/>
+	<Property ID="7143"/>
+	<Property ID="7144"/>
+	<Property ID="7145"/>
+	<Property ID="7146"/>
+	<Property ID="7147"/>
+	<Property ID="7148"/>
+	<Property ID="7149"/>
+	<Property ID="7150"/>
+	<Property ID="7151"/>
+	<Property ID="7152"/>
+	<Property ID="7153"/>
+	<Property ID="7154"/>
+	<Property ID="7155"/>
+	<Property ID="7156"/>
+	<Property ID="7157"/>
+	<Property ID="7158"/>
+	<Property ID="7159"/>
+	<Property ID="7160"/>
+	<Property ID="7161"/>
+	<Property ID="7162"/>
+	<Property ID="7163"/>
+	<Property ID="7164"/>
+	<Property ID="7165"/>
+	<Property ID="7166"/>
+	<Property ID="7167"/>
+	<Property ID="7168"/>
+	<Property ID="7169"/>
+	<Property ID="7170"/>
+	<Property ID="7171"/>
+	<Property ID="7172"/>
+	<Property ID="7173"/>
+	<Property ID="7174"/>
+	<Property ID="7175"/>
+	<Property ID="7176"/>
+	<Property ID="7177"/>
+	<Property ID="7178"/>
+	<Property ID="7179"/>
+	<Property ID="7180"/>
+	<Property ID="7181"/>
+	<Property ID="7182"/>
+	<Property ID="7183"/>
+	<Property ID="7184"/>
+	<Property ID="7185"/>
+	<Property ID="7186"/>
+	<Property ID="7187"/>
+	<Property ID="7188"/>
+	<Property ID="7189"/>
+	<Property ID="7190"/>
+	<Property ID="7191"/>
+	<Property ID="7192"/>
+	<Property ID="7193"/>
+	<Property ID="7194"/>
+	<Property ID="7195"/>
+	<Property ID="7196"/>
+	<Property ID="7197"/>
+	<Property ID="7198"/>
+	<Property ID="7199"/>
+	<Property ID="7200" NpcId="monrc021400" Count="5" RefreshMonster="9200,9201,9202,9203,9204" TrackInfo="hunter_46292" SceneID="13"/>
+	<Property ID="7201" NpcId="monrc023001" Count="6" RefreshMonster="9205,9206,9207,9208,9209,9210" TrackInfo="hunter_46298" SceneID="13"/>
+	<Property ID="7202" NpcId="WorldNpc08937" Count="1" TrackInfo="hunter_46300" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7203" NpcId="WorldNpc08938" Count="1" TrackInfo="hunter_46307" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7204" NpcId="monrc023002" Count="5" RefreshMonster="9211,9212,9213,9214,9215" TrackInfo="hunter_46309" SceneID="13"/>
+	<Property ID="7205" NpcId="WorldNpc08936" Count="1" TrackInfo="hunter_46316" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7206" NpcId="WorldNpc08936" Count="1" TrackInfo="hunter_46319" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7207" NpcId="WorldNpc08938" Count="1" TrackInfo="hunter_46320" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7208" NpcId="WorldNpc08939" Count="1" TrackInfo="hunter_46324" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7209" NpcId="WorldNpc08939" Count="1" TrackInfo="hunter_46328" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7210" NpcId="WorldNpc08938" Count="1" TrackInfo="hunter_46334" SceneID="13" IsQieCuo="1"/>
+	<Property ID="7211" NpcId="monrm063700" Count="3" RefreshMonster="9216,9297,9218" TrackInfo="hunter_46340" SceneID="10"/>
+	<Property ID="7212" NpcId="WorldNpc02698" Count="1" TrackInfo="hunter_46344" SceneID="10" IsQieCuo="1"/>
+	<Property ID="7213" NpcId="monrm063800" Count="5" RefreshMonster="9219,9220,9221,9222,9223" TrackInfo="hunter_46350" SceneID="10"/>
+	<Property ID="7214" NpcId="WorldNpc02695" Count="1" TrackInfo="hunter_46355" SceneID="10" IsQieCuo="1"/>
+	<Property ID="7215" NpcId="WorldNpc02696" Count="1" TrackInfo="hunter_46363" SceneID="10" IsQieCuo="1"/>
+	<Property ID="7216" NpcId="monm063400" Count="1" TrackInfo="hunter_46367" SceneID="10" IsQieCuo="1"/>
+	<Property ID="7217" NpcId="WorldNpc02699" Count="1" TrackInfo="hunter_46373" SceneID="10" IsQieCuo="1"/>
+	<Property ID="7218" NpcId="WorldNpc02697" Count="1" TrackInfo="hunter_46381" SceneID="10" IsQieCuo="1"/>
+	<Property ID="7219" NpcId="WorldNpc03450" Count="1" TrackInfo="hunter_46388" SceneID="9" IsQieCuo="1"/>
+	<Property ID="7220" NpcId="monrm050002" Count="3" RefreshMonster="9230,9231,9232" TrackInfo="hunter_46391" SceneID="9"/>
+	<Property ID="7221" NpcId="WorldNpc02575" Count="1" TrackInfo="hunter_46398" SceneID="9" IsQieCuo="1"/>
+	<Property ID="7222" NpcId="WorldNpc02574" Count="1" TrackInfo="hunter_46403" SceneID="9" IsQieCuo="1"/>
+	<Property ID="7223" NpcId="monrm050003" Count="3" RefreshMonster="9224,9225,9226" TrackInfo="hunter_46408" SceneID="9"/>
+	<Property ID="7224" NpcId="monm051100" Count="6" TrackInfo="hunter_46414" SceneID="9"/>
+	<Property ID="7225" NpcId="WorldNpc02578" Count="1" TrackInfo="hunter_46417" SceneID="9" IsQieCuo="1"/>
+	<Property ID="7226" NpcId="WorldNpc02578" Count="1" TrackInfo="hunter_46420" SceneID="9" IsQieCuo="1"/>
+	<Property ID="7227" NpcId="monrm050003" Count="3" RefreshMonster="9227,9228,9229" TrackInfo="hunter_46425" SceneID="9"/>
+	<Property ID="7228" NpcId="WorldNpc02510" Count="1" TrackInfo="hunter_46428" SceneID="9" IsQieCuo="1"/>
+	<Property ID="7229" NpcId="WorldNpc06233" Count="1" TrackInfo="hunter_46439_1" SceneID="22" IsQieCuo="1"/>
+	<Property ID="7230" NpcId="WorldNpc06234" Count="1" TrackInfo="hunter_46439_2" SceneID="22" IsQieCuo="1"/>
+	<Property ID="7231" NpcId="WorldNpc06235" Count="1" TrackInfo="hunter_46439_3" SceneID="22" IsQieCuo="1"/>
+	<Property ID="7232" NpcId="WorldNpc06236" Count="1" TrackInfo="hunter_46445" SceneID="22" IsQieCuo="1"/>
+	<Property ID="7233" NpcId="monrf052001" Count="5" RefreshMonster="9233,9234,9235,9236,9237" TrackInfo="hunter_46451" SceneID="22"/>
+	<Property ID="7234" NpcId="monrf052001" Count="3" RefreshMonster="9238,9239,9240" TrackInfo="hunter_46453" SceneID="22"/>
+	<Property ID="7235" NpcId="monrf051600" Count="5" TrackInfo="hunter_46461" SceneID="22"/>
+	<Property ID="7236" NpcId="WorldNpc06241" Count="1" TrackInfo="hunter_46464_1" SceneID="22" IsQieCuo="1"/>
+	<Property ID="7237" NpcId="monrf052002" Count="3" RefreshMonster="9241,9242,9243" TrackInfo="hunter_46464_2" SceneID="22"/>
+	<Property ID="7238" NpcId="WorldNpc06236" Count="1" TrackInfo="hunter_46471" SceneID="22" IsQieCuo="1"/>
+	<Property ID="7239" NpcId="monf050300" Count="6" TrackInfo="hunter_46477" SceneID="22"/>
+	<Property ID="7240"/>
+	<Property ID="7241"/>
+	<Property ID="7242"/>
+	<Property ID="7243"/>
+	<Property ID="7244"/>
+	<Property ID="7245"/>
+	<Property ID="5001" NpcId="monrm010200" Count="3" RefreshMonster="8001,8002,8003" TrackInfo="hunter42013" SceneID="5"/>
+	<Property ID="5002" NpcId="monrm010300" Count="1" RefreshMonster="8004" TrackInfo="hunter42022" SceneID="5"/>
+	<Property ID="5003" NpcId="WorldNpc04108" Count="1" TrackInfo="hunter42032_1" SceneID="5" IsQieCuo="1"/>
+	<Property ID="5004" NpcId="WorldNpc04109" Count="1" TrackInfo="hunter42032_2" SceneID="5" IsQieCuo="1"/>
+	<Property ID="5005" NpcId="monrm010400" Count="1" RefreshMonster="8005" TrackInfo="hunter42045" SceneID="5"/>
+	<Property ID="5006" NpcId="monrm010500" Count="3" RefreshMonster="8006,8007,8008" TrackInfo="hunter42034" SceneID="5"/>
+	<Property ID="5007" NpcId="WorldNpc04104" Count="1" TrackInfo="hunter42052" SceneID="5" IsQieCuo="1"/>
+	<Property ID="5008" NpcId="monrm010700" Count="1" RefreshMonster="8009" TrackInfo="hunter42061" SceneID="5"/>
+	<Property ID="5010" NpcId="monrm010800" Count="3" RefreshMonster="8010,8011,8012" TrackInfo="hunter42076" SceneID="5"/>
+	<Property ID="5011" NpcId="WorldNpc04126" Count="1" TrackInfo="hunter42080" SceneID="5" IsQieCuo="1"/>
+	<Property ID="5012" NpcId="WorldNpc04125" Count="1" TrackInfo="hunter42087" SceneID="5" IsQieCuo="1"/>
+	<Property ID="5013" NpcId="WorldNpc04104" Count="1" TrackInfo="hunter42091" SceneID="5" IsQieCuo="1"/>
+	<Property ID="5014" NpcId="WorldNpc04126" Count="1" TrackInfo="hunter42094" SceneID="5" IsQieCuo="1"/>
+	<Property ID="8001" NpcId="WorldNpc03826" Count="1" TrackInfo="hunter48001" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8002" NpcId="WorldNpc03820" Count="1" TrackInfo="hunter48002" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8003" NpcId="monm040100" Count="6" TrackInfo="hunter48004" SceneID="8"/>
+	<Property ID="8004" NpcId="monm040200" Count="6" TrackInfo="hunter48008" SceneID="8"/>
+	<Property ID="8005" NpcId="monm040300" Count="6" TrackInfo="hunter48012" SceneID="8"/>
+	<Property ID="8006" NpcId="monm040500" Count="6" TrackInfo="hunter48014" SceneID="8"/>
+	<Property ID="8007" NpcId="WorldNpc03847" Count="1" TrackInfo="hunter48016" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8008" NpcId="monrm040001" Count="3" RefreshMonster="7001,7002,7003" TrackInfo="hunter48017" SceneID="8"/>
+	<Property ID="8009" NpcId="monrm040005" Count="1" RefreshMonster="7015" TrackInfo="hunter48022_1" SceneID="8"/>
+	<Property ID="8010" NpcId="monrm040006" Count="3" RefreshMonster="7016,7017,7018" TrackInfo="hunter48022_2" SceneID="8"/>
+	<Property ID="8011" NpcId="monrm040007" Count="6" RefreshMonster="7008,7009,7010,7011,7012,7013" TrackInfo="hunter48027" SceneID="8"/>
+	<Property ID="8012" NpcId="WorldNpc03810" Count="1" TrackInfo="hunter48029" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8013" NpcId="WorldNpc03856" Count="1" TrackInfo="hunter48032" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8014" NpcId="monrm040008" Count="3" RefreshMonster="7019,7020,7021" TrackInfo="hunter48036" SceneID="8"/>
+	<Property ID="8015" NpcId="monm040500" Count="6" TrackInfo="hunter48040" SceneID="8"/>
+	<Property ID="8016" NpcId="monm040400" Count="6" TrackInfo="hunter48044" SceneID="8"/>
+	<Property ID="8017" NpcId="monrm040009" Count="3" RefreshMonster="7022,7023,7024" TrackInfo="hunter48049" SceneID="8"/>
+	<Property ID="8018" NpcId="monm040200" Count="6" TrackInfo="hunter48052" SceneID="8"/>
+	<Property ID="8019" NpcId="monm040300" Count="6" TrackInfo="hunter48054" SceneID="8"/>
+	<Property ID="8020" NpcId="WorldNpc03928" Count="1" TrackInfo="hunter48069" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8021" NpcId="monrm040009" Count="4" RefreshMonster="7028,7029,7030,7031" TrackInfo="hunter48064" SceneID="8"/>
+	<Property ID="8022" NpcId="monrm040011" Count="3" RefreshMonster="7032,7033,7034" TrackInfo="hunter48067" SceneID="8"/>
+	<Property ID="8023" NpcId="monm040400" Count="6" TrackInfo="hunter48072" SceneID="8"/>
+	<Property ID="8024" NpcId="monrm040013" Count="3" RefreshMonster="7036,7037,7038" TrackInfo="hunter48075" SceneID="8"/>
+	<Property ID="8025" NpcId="monrm040014" Count="3" RefreshMonster="7039,7040,7041" TrackInfo="hunter48079" SceneID="8"/>
+	<Property ID="8026" NpcId="WorldNpc03811" Count="1" TrackInfo="hunter48134" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8027" NpcId="monm040600" Count="6" TrackInfo="hunter48139" SceneID="8"/>
+	<Property ID="8028" NpcId="WorldNpc03822" Count="1" TrackInfo="hunter48143" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8029" NpcId="monm040400" Count="6" TrackInfo="hunter48145" SceneID="8"/>
+	<Property ID="8030" NpcId="monrm040026" Count="3" TrackInfo="hunter48150" SceneID="17" IsNeedCreator="1"/>
+	<Property ID="8031" NpcId="monrm040021" Count="3" RefreshMonster="7042,7043,7044" TrackInfo="hunter48153" SceneID="17"/>
+	<Property ID="8032" NpcId="WorldNpc09799" Count="1" TrackInfo="hunter48155_1" SceneID="17" IsQieCuo="1"/>
+	<Property ID="8034" NpcId="monrm040023" Count="5" RefreshMonster="7047,7048,7049,7050,7051" TrackInfo="hunter48158" SceneID="17"/>
+	<Property ID="8035" NpcId="monc051200" Count="3" TrackInfo="hunter48160" SceneID="17"/>
+	<Property ID="8036" NpcId="monc051600" Count="5" TrackInfo="hunter48162" SceneID="17"/>
+	<Property ID="8037" NpcId="monrm040024" Count="3" RefreshMonster="7052,7053,7054" TrackInfo="hunter48164" SceneID="17"/>
+	<Property ID="8038" NpcId="WorldNpc09816" Count="1" TrackInfo="hunter48169" SceneID="17" IsQieCuo="1"/>
+	<Property ID="8039" NpcId="WorldNpc03825" Count="1" TrackInfo="hunter48174" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8040" NpcId="monrm040025" Count="3" RefreshMonster="7055,7056,7057" TrackInfo="hunter48177" SceneID="8"/>
+	<Property ID="8041" NpcId="WorldNpc03820" Count="1" TrackInfo="hunter48090" SceneID="8" IsQieCuo="1"/>
+	<Property ID="8042" NpcId="monf070400" Count="6" TrackInfo="hunter48092_1" SceneID="24"/>
+	<Property ID="8043" NpcId="monrf070500" Count="1" TrackInfo="hunter48092_2" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="8044" NpcId="monrf071100" Count="5" TrackInfo="hunter48092_3" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="8045" NpcId="monf070600" Count="6" TrackInfo="hunter48101" SceneID="24"/>
+	<Property ID="8046" NpcId="monrf070600" Count="5" TrackInfo="hunter48103" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="8047" NpcId="monf070500" Count="6" TrackInfo="hunter48105" SceneID="24"/>
+	<Property ID="8048" NpcId="WorldNpc05105" Count="1" TrackInfo="hunter48109" SceneID="24" IsQieCuo="1"/>
+	<Property ID="8049" NpcId="monrf070900" Count="6" TrackInfo="hunter48113" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="8050" NpcId="WorldNpc05107" Count="1" TrackInfo="hunter48120" SceneID="24" IsQieCuo="1"/>
+	<Property ID="8052" NpcId="monrf071000" Count="6" TrackInfo="hunter48124" SceneID="24" IsNeedCreator="1"/>
+	<Property ID="8053" NpcId="WorldNpc05108" Count="1" TrackInfo="hunter48127" SceneID="24" IsQieCuo="1"/>
+	<Property ID="8054" NpcId="WorldNpc05102" Count="1" TrackInfo="hunter48130" SceneID="24" IsQieCuo="1"/>
+	<Property ID="8055" NpcId="monm041500" Count="6" TrackInfo="hunter48183" SceneID="8"/>
+	<Property ID="8056" NpcId="monm041200" Count="6" TrackInfo="hunter48185" SceneID="8"/>
+	<Property ID="8057" NpcId="monm041300" Count="6" TrackInfo="hunter48189" SceneID="8"/>
+	<Property ID="8058" NpcId="monrm040027" Count="6" TrackInfo="hunter48197" SceneID="8" IsNeedCreator="1"/>
+	<Property ID="8059" NpcId="monrm040028" Count="6" TrackInfo="hunter48201" SceneID="8" IsNeedCreator="1"/>
+	<Property ID="8060" NpcId="monrm040029" Count="6" TrackInfo="hunter48207" SceneID="8" IsNeedCreator="1"/>
+	<Property ID="8061" NpcId="monrm040030" Count="6" TrackInfo="hunter48216" SceneID="8" IsNeedCreator="1"/>
+	<Property ID="8062" NpcId="monrm040031" Count="6" TrackInfo="hunter48222" SceneID="8" IsNeedCreator="1"/>
+	<Property ID="8063" NpcId="monrm040032" Count="6" TrackInfo="hunter48223" SceneID="8" IsNeedCreator="1"/>
+	<Property ID="8064" NpcId="WorldNpc04008" Count="1" TrackInfo="hunter48227" SceneID="8" IsQieCuo="1"/>
+</Object>

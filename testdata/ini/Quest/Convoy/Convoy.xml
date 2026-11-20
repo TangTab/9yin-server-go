@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" NpcId="Convoy24019" HideType="1" SceneID="1" TrackInfo="task_TrackInfo_24019"/>
+	<Property ID="4002" NpcId="Convoy24044" PathID="1-24044" HideType="1" SceneID="1" TrackInfo="task_TrackInfo_24044"/>
+	<Property ID="4003" NpcId="Convoy24070" PathID="1-24070" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_24070" HideNpcID="WorldNpc00026,WorldNpc00048"/>
+	<Property ID="4004" NpcId="Convoy24081" PathID="10-24081" SceneID="10" TrackInfo="task_TrackInfo_24081"/>
+	<Property ID="4005" NpcId="Convoy24087" PathID="10-24087" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_24087" HideNpcID="WorldNpc02607"/>
+	<Property ID="4006" NpcId="Convoy24098" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_24098" HideNpcID="WorldNpc05921,WorldNpc05931"/>
+	<Property ID="4007" NpcId="Convoy24106" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_24106" HideNpcID="WorldNpc05851"/>
+	<Property ID="4008" NpcId="Convoy24125" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_24125" HideNpcID="WorldNpc06004"/>
+	<Property ID="4009" NpcId="Convoy24135" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_24135" HideNpcID="WorldNpc06006,WorldNpc06010"/>
+	<Property ID="4010" NpcId="Convoy24148" HideType="3" SceneID="22" TrackInfo="task_TrackInfo_24148" HideNpcID="WorldNpc06102"/>
+	<Property ID="4011" NpcId="Convoy24161" PathID="22-24159" HideType="3" SceneID="22" TrackInfo="task_TrackInfo_24159" HideNpcID="WorldNpc06108"/>
+	<Property ID="4012" NpcId="Convoy24167" PathID="22-24165" HideType="3" SceneID="22" TrackInfo="task_TrackInfo_24165" HideNpcID="WorldNpc06112,WorldNpc06122"/>
+	<Property ID="4013" NpcId="Convoy24170" PathID="22-24170" HideType="3" SceneID="22" TrackInfo="task_TrackInfo_24170" HideNpcID="WorldNpc06114"/>
+	<Property ID="4014" NpcId="Convoy24174" PathID="22-24172" HideType="3" SceneID="22" TrackInfo="task_TrackInfo_24172" HideNpcID="WorldNpc06116,WorldNpc06124"/>
+	<Property ID="4015" NpcId="Convoy24197" PathID="17-24196" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_24196" HideNpcID="WorldNpc09602,WorldNpc09612"/>
+	<Property ID="4016" NpcId="Convoy24206" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_24205" HideNpcID="WorldNpc09609"/>
+	<Property ID="4017" NpcId="Convoy24219" PathID="17-24217" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_24217" HideNpcID="WorldNpc09805,WorldNpc09808"/>
+	<Property ID="4018" NpcId="Convoy24239" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_24238" HideNpcID="WorldNpc09611"/>
+	<Property ID="4019" NpcId="Convoy24259" PathID="1-24259" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_24259" HideNpcID="WorldNpc00031"/>
+	<Property ID="4020" NpcId="Convoy24287" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_24287" HideNpcID="WorldNpc00031,WorldNpc00035"/>
+	<Property ID="4021" NpcId="Convoy24293" PathID="13-24292" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_24292" HideNpcID="WorldNpc08858"/>
+	<Property ID="4022" NpcId="Convoy24297" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_24297"/>
+	<Property ID="4023" NpcId="Convoy24315" PathID="20-24315" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_24315" HideNpcID="WorldNpc06436"/>
+	<Property ID="4024" NpcId="Convoy24325" PathID="20-24325" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_24325" HideNpcID="WorldNpc06612,WorldNpc06627"/>
+	<Property ID="4025" NpcId="Convoy24335" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_24335" HideNpcID="WorldNpc06426"/>
+	<Property ID="4026" NpcId="Convoy24377" PathID="13-24377" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_24377" HideNpcID="WorldNpc08838"/>
+	<Property ID="4027" NpcId="Convoy24388" PathID="10-24388" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_24388" HideNpcID="WorldNpc02640,WorldNpc02641"/>
+	<Property ID="4028" NpcId="Convoy24402" PathID="10-24402" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_24402" HideNpcID="WorldNpc02909"/>
+	<Property ID="4029" NpcId="Convoy24491" HideType="3" SceneID="22" TrackInfo="task_TrackInfo_24491" HideNpcID="WorldNpc06183"/>
+	<Property ID="4030" NpcId="Convoy24565" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24565"/>
+	<Property ID="4031" NpcId="Convoy24436" PathID="9-24436" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24436" HideNpcID="WorldNpc02523"/>
+	<Property ID="4032" NpcId="Convoy24443" PathID="9-24443" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24443"/>
+	<Property ID="4033" NpcId="Convoy24450" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24450" HideNpcID="WorldNpc02510"/>
+	<Property ID="4034" NpcId="Convoy24454" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24454"/>
+	<Property ID="4035" NpcId="Convoy24458" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24458"/>
+	<Property ID="4036" NpcId="Convoy24470" PathID="9-24470" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24470"/>
+	<Property ID="4037" NpcId="Convoy24479" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24479"/>
+	<Property ID="4038" NpcId="Convoy24532" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_24532"/>
+	<Property ID="4039" NpcId="Convoy24627" PathID="11-24626" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_24626" HideNpcID="WorldNpc04706"/>
+	<Property ID="4040" NpcId="Convoy24659" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_24659"/>
+	<Property ID="4041" NpcId="Convoy24688" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_24688" HideNpcID="WorldNpc04427,WorldNpc04710"/>
+	<Property ID="4042" NpcId="Convoy24654" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_24654"/>
+	<Property ID="4043" NpcId="Convoy24727" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_24727"/>
+	<Property ID="4044" NpcId="Convoy24736" PathID="10-24736" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_24736" HideNpcID="WorldNpc02714"/>
+	<Property ID="3001" NpcId="Convoy22014" HideType="3" SceneID="3" TrackInfo="task_TrackInfo_22014" HideNpcID="WorldNpc00629"/>
+	<Property ID="3002" NpcId="Convoy22019" HideType="3" SceneID="3" TrackInfo="task_TrackInfo_22019" HideNpcID="WorldNpc00629"/>
+	<Property ID="3003" NpcId="Convoy22031" PathID="3-22031" HideType="3" SceneID="3" TrackInfo="task_TrackInfo_22031" HideNpcID="WorldNpc00690"/>
+	<Property ID="3004" NpcId="Convoy22041" PathID="3-22041" HideType="3" SceneID="3" TrackInfo="task_TrackInfo_22041" HideNpcID="WorldNpc00693"/>
+	<Property ID="3005" NpcId="Convoy22044" HideType="3" SceneID="3" TrackInfo="task_TrackInfo_22044" HideNpcID="WorldNpc00692"/>
+	<Property ID="3006" NpcId="Convoy22045" HideType="3" SceneID="3" TrackInfo="task_TrackInfo_22045" HideNpcID="WorldNpc00692"/>
+	<Property ID="3007" NpcId="Convoy22075" HideType="3" SceneID="14" TrackInfo="task_TrackInfo_22075" HideNpcID="WorldNpc01363"/>
+	<Property ID="3008" NpcId="Convoy22086" HideType="3" SceneID="14" TrackInfo="task_TrackInfo_22086" HideNpcID="WorldNpc01369"/>
+	<Property ID="3009" NpcId="Convoy22093" HideType="3" SceneID="14" TrackInfo="task_TrackInfo_22093" HideNpcID="WorldNpc01342"/>
+	<Property ID="3010" NpcId="Convoy24098" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_22099" HideNpcID="WorldNpc05921"/>
+	<Property ID="3011" NpcId="con22001" HideType="3" SceneID="22" TrackInfo="convoy_22150" HideNpcID="WorldNpc06179"/>
+	<Property ID="3012" NpcId="con22002" HideType="3" SceneID="22" TrackInfo="convoy_22167" HideNpcID="WorldNpc06179"/>
+	<Property ID="3013" NpcId="con22003" HideType="3" SceneID="22" TrackInfo="convoy_22171" HideNpcID="WorldNpc06171"/>
+	<Property ID="12001" NpcId="Convoy38008" PathID="12-38008" HideType="1" SceneID="12" TrackInfo="task_TrackInfo_38008" HideNpcID="WorldNpc00473"/>
+	<Property ID="12002" NpcId="Convoy38012" PathID="12-38012" HideType="0" SceneID="12" TrackInfo="task_TrackInfo_38012"/>
+	<Property ID="12003" NpcId="Convoy38015" HideType="1" SceneID="12" TrackInfo="task_TrackInfo_38015" HideNpcID="WorldNpc00365"/>
+	<Property ID="12004" NpcId="Convoy38019" PathID="12-38019" HideType="1" SceneID="12" TrackInfo="task_TrackInfo_38019" HideNpcID="WorldNpc00462"/>
+	<Property ID="12005" NpcId="Convoy38022" HideType="1" SceneID="12" TrackInfo="task_TrackInfo_38022" HideNpcID="WorldNpc00359"/>
+	<Property ID="12006" NpcId="Convoy38025" HideType="1" SceneID="12" TrackInfo="task_TrackInfo_38025" HideNpcID="WorldNpc00365"/>
+	<Property ID="12007" NpcId="Convoy38045" PathID="12-38045" HideType="1" SceneID="12" TrackInfo="task_TrackInfo_38045" HideNpcID="WorldNpc00385"/>
+	<Property ID="12008" NpcId="Convoy38053" PathID="12-38053" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_38053" HideNpcID="WorldNpc00383"/>
+	<Property ID="12009" NpcId="Convoy38066" PathID="12-38066" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_38066" HideNpcID="WorldNpc00391"/>
+	<Property ID="12010" NpcId="Convoy38131" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_38131" HideNpcID="WorldNpc00272"/>
+	<Property ID="12012" NpcId="Convoy38166" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_38166" HideNpcID="WorldNpc00208"/>
+	<Property ID="12014" NpcId="Convoy38228" PathID="16-38228" HideType="3" SceneID="16" TrackInfo="task_TrackInfo_38228" HideNpcID="WorldNpc10010"/>
+	<Property ID="12015" NpcId="Convoy38234" HideType="3" SceneID="16" TrackInfo="task_TrackInfo_38234" HideNpcID="WorldNpc10015"/>
+	<Property ID="12017" NpcId="Convoy38248" PathID="12-38248" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_38248" HideNpcID="WorldNpc00204"/>
+	<Property ID="12018" NpcId="Convoy38254" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_38254" HideNpcID="WorldNpc00204"/>
+	<Property ID="12019" NpcId="Convoy38283" PathID="2-38283" HideType="3" SceneID="2" TrackInfo="task_TrackInfo_38283" HideNpcID="WorldNpc09303"/>
+	<Property ID="12020" NpcId="Convoy38287" HideType="3" SceneID="2" TrackInfo="task_TrackInfo_38287" HideNpcID="WorldNpc09301"/>
+	<Property ID="12021" NpcId="Convoy38302" PathID="14-38302" HideType="3" SceneID="14" TrackInfo="task_TrackInfo_38302" HideNpcID="WorldNpc01230"/>
+	<Property ID="12022" NpcId="Convoy38311" HideType="3" SceneID="14" TrackInfo="task_TrackInfo_38311" HideNpcID="WorldNpc01308"/>
+	<Property ID="12025" NpcId="Convoy38338" PathID="13-38338" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_38338" HideNpcID="WorldNpc08913"/>
+	<Property ID="12028" NpcId="Convoy38353" PathID="13-38353" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_38353" HideNpcID="WorldNpc08914"/>
+	<Property ID="12031" NpcId="Convoy38376" PathID="13-38376" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_38376" HideNpcID="WorldNpc08922"/>
+	<Property ID="12037" NpcId="Convoy38406" PathID="13-38406" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_38406" HideNpcID="WorldNpc08831"/>
+	<Property ID="12040" NpcId="Convoy38451" HideType="3" SceneID="2" TrackInfo="task_TrackInfo_38451" HideNpcID="WorldNpc09201"/>
+	<Property ID="12043" NpcId="Convoy38471" PathID="14-38471" HideType="0" SceneID="14" TrackInfo="task_TrackInfo_38471"/>
+	<Property ID="12044" NpcId="Convoy38479" HideType="3" SceneID="14" TrackInfo="task_TrackInfo_38479" HideNpcID="WorldNpc01457"/>
+	<Property ID="12045" NpcId="Convoy38484" PathID="9-38484" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_38484" HideNpcID="WorldNpc02509"/>
+	<Property ID="12046" NpcId="Convoy38491" PathID="9-38491" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_38491" HideNpcID="WorldNpc02510"/>
+	<Property ID="12048" NpcId="Convoy38515" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_38515" HideNpcID="WorldNpc02511"/>
+	<Property ID="12049" NpcId="Convoy38519" PathID="9-38519" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_38519" HideNpcID="WorldNpc02517"/>
+	<Property ID="12050" NpcId="Convoy38523" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_38523" HideNpcID="WorldNpc02515"/>
+	<Property ID="12052" NpcId="Convoy38550" PathID="21-38550" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_38550" HideNpcID="WorldNpc05797"/>
+	<Property ID="12053" NpcId="Convoy38564" HideType="3" SceneID="21" TrackInfo="task_TrackInfo_38564" HideNpcID="WorldNpc05798"/>
+	<Property ID="12054" NpcId="Convoy38570" PathID="10-38570" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_38570" HideNpcID="WorldNpc02602"/>
+	<Property ID="12055" NpcId="Convoy2009" PathID="12-2009" HideType="1"/>
+	<Property ID="11001" NpcId="Convoy36013" PathID="11-36013" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36013" HideNpcID="WorldNpc04413"/>
+	<Property ID="11002" NpcId="Convoy36023" PathID="11-36023" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36023" HideNpcID="WorldNpc04413"/>
+	<Property ID="11003" NpcId="Convoy36034" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36034" HideNpcID="WorldNpc04413,WorldNpc04552"/>
+	<Property ID="11005" NpcId="Convoy36078" PathID="11-36078" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36078"/>
+	<Property ID="11007" NpcId="Convoy36110" PathID="11-36110" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36110" HideNpcID="WorldNpc04558"/>
+	<Property ID="11008" NpcId="Convoy36128" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36128"/>
+	<Property ID="11009" NpcId="Convoy36132" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36132" HideNpcID="WorldNpc04560"/>
+	<Property ID="11013" NpcId="Convoy36195" PathID="12-36195" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_36195" HideNpcID="WorldNpc00386"/>
+	<Property ID="11015" NpcId="Convoy36207" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_36207"/>
+	<Property ID="11016" NpcId="Convoy36211" PathID="12-36211" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_36211" HideNpcID="WorldNpc00394"/>
+	<Property ID="11017" NpcId="Convoy36220" HideType="3" SceneID="12" TrackInfo="task_TrackInfo_36220" HideNpcID="WorldNpc00395"/>
+	<Property ID="11019" NpcId="Convoy36258" PathID="20-36258" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_36258" HideNpcID="WorldNpc06618"/>
+	<Property ID="11020" NpcId="Convoy36262" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_36262" HideNpcID="WorldNpc06619"/>
+	<Property ID="11021" NpcId="Convoy36279" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_36279"/>
+	<Property ID="11022" NpcId="Convoy36286" HideType="3" SceneID="20" TrackInfo="task_TrackInfo_36286"/>
+	<Property ID="11023" NpcId="Convoy36305" PathID="17-36305" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_36305" HideNpcID="WorldNpc09902"/>
+	<Property ID="11024" NpcId="Convoy36328" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36328" HideNpcID="WorldNpc04432"/>
+	<Property ID="11025" NpcId="Convoy36333" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36333"/>
+	<Property ID="11026" NpcId="Convoy36342" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36342" HideNpcID="WorldNpc04572"/>
+	<Property ID="11027" NpcId="Convoy36362" HideType="3" SceneID="16" TrackInfo="task_TrackInfo_36362"/>
+	<Property ID="11043" NpcId="Convoy36492" HideType="3" SceneID="18" TrackInfo="task_TrackInfo_36492" HideNpcID="WorldNpc05384"/>
+	<Property ID="11044" NpcId="Convoy36501" HideType="3" SceneID="18" TrackInfo="task_TrackInfo_36501"/>
+	<Property ID="11045" NpcId="Convoy36511" HideType="3" SceneID="18" TrackInfo="task_TrackInfo_36511"/>
+	<Property ID="11046" NpcId="Convoy36525" HideType="3" SceneID="18" TrackInfo="task_TrackInfo_36525" HideNpcID="WorldNpc05391"/>
+	<Property ID="11047" NpcId="Convoy36543" PathID="2-36543" HideType="3" SceneID="2" TrackInfo="task_TrackInfo_36543" HideNpcID="WorldNpc09302"/>
+	<Property ID="11049" NpcId="Convoy36573" HideType="3" SceneID="26" TrackInfo="task_TrackInfo_36573" HideNpcID="WorldNpc06904"/>
+	<Property ID="11050" NpcId="Convoy36076" PathID="11-36076" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36076" HideNpcID="WorldNpc04418,WorldNpc04554"/>
+	<Property ID="11051" NpcId="Convoy36150" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36150" HideNpcID="WorldNpc04408"/>
+	<Property ID="11052" NpcId="Convoy36183" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_36186"/>
+	<Property ID="11053" NpcId="Convoy36252" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36252" HideNpcID="WorldNpc06619"/>
+	<Property ID="11055" NpcId="Convoy36319" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_36319" HideNpcID="WorldNpc09903"/>
+	<Property ID="11056" NpcId="Convoy36562" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36562" HideNpcID="WorldNpc04431"/>
+	<Property ID="11057" NpcId="Convoy36562_2" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_36562_2" HideNpcID="WorldNpc04433"/>
+	<Property ID="10001" NpcId="Convoy40004" PathID="10-40004" HideType="0" SceneID="10" TrackInfo="convoyinfo40004"/>
+	<Property ID="10002" NpcId="Convoy40005" HideType="3" SceneID="10" TrackInfo="convoyinfo40005" HideNpcID="WorldNpc02681"/>
+	<Property ID="10003" NpcId="Convoy40006" HideType="3" SceneID="10" TrackInfo="convoyinfo40006" HideNpcID="WorldNpc02681"/>
+	<Property ID="10004" NpcId="Convoy40018" HideType="3" SceneID="10" TrackInfo="convoyinfo40018" HideNpcID="WorldNpc02682"/>
+	<Property ID="10005" NpcId="Convoy40042_1" HideType="3" SceneID="10" TrackInfo="convoyinfo40042" HideNpcID="WorldNpc02684"/>
+	<Property ID="10006" NpcId="Convoy40042_2" PathID="10-40042" HideType="2" SceneID="10" TrackInfo="convoyinfo40042"/>
+	<Property ID="10007" NpcId="Convoy40100_1" HideType="3" SceneID="10" TrackInfo="convoyinfo40100_1" HideNpcID="WorldNpc02687"/>
+	<Property ID="10008" NpcId="Convoy40100_2" PathID="10-40100" HideType="3" SceneID="10" TrackInfo="convoyinfo40100_2" HideNpcID="WorldNpc02687"/>
+	<Property ID="10009" NpcId="Convoy40112" HideType="3" SceneID="17" TrackInfo="convoyinfo40112" HideNpcID="WorldNpc09601"/>
+	<Property ID="10010" NpcId="Convoy40121" PathID="14-40121" HideType="3" SceneID="14" TrackInfo="convoyinfo40121" HideNpcID="WorldNpc01612"/>
+	<Property ID="10011" NpcId="Convoy40124" HideType="3" SceneID="14" TrackInfo="convoyinfo40124" HideNpcID="WorldNpc01615"/>
+	<Property ID="10012" NpcId="Convoy40125" HideType="3" SceneID="14" TrackInfo="convoyinfo40125" HideNpcID="WorldNpc01615"/>
+	<Property ID="10013" NpcId="Convoy40134" HideType="3" SceneID="14" TrackInfo="convoyinfo40134" HideNpcID="WorldNpc01610"/>
+	<Property ID="10014" NpcId="Convoy40135" HideType="3" SceneID="10" TrackInfo="convoyinfo40135" HideNpcID="WorldNpc02687"/>
+	<Property ID="10015" NpcId="Convoy40050" HideType="3" SceneID="10" TrackInfo="convoyinfo40150" HideNpcID="WorldNpc02689"/>
+	<Property ID="10016" NpcId="Convoy40064" HideType="3" SceneID="10" TrackInfo="convoyinfo40064" HideNpcID="WorldNpc02607"/>
+	<Property ID="10017"/>
+	<Property ID="10018"/>
+	<Property ID="10019"/>
+	<Property ID="10020"/>
+	<Property ID="10190" NpcId="Convoy40244" PathID="10-40244" HideType="3" SceneID="10" TrackInfo="task_trackinfo_40244" HideNpcID="WorldNpc02613"/>
+	<Property ID="10191" NpcId="Convoy40253" HideType="3" SceneID="10" TrackInfo="task_trackinfo_40253" HideNpcID="WorldNpc02704"/>
+	<Property ID="10192" NpcId="Convoy40256" PathID="21-40256" HideType="3" SceneID="21" TrackInfo="task_trackinfo_40256" HideNpcID="WorldNpc05807"/>
+	<Property ID="10200" NpcId="Convoy40290" SceneID="17" TrackInfo="task_trackinfo_40290"/>
+	<Property ID="10201" NpcId="Convoy40296" SceneID="17" TrackInfo="task_trackinfo_40296"/>
+	<Property ID="10202" NpcId="Convoy40300" HideType="3" SceneID="17" TrackInfo="task_trackinfo_40300" HideNpcID="WorldNpc09958"/>
+	<Property ID="10203" NpcId="Convoy40315" SceneID="17" TrackInfo="task_trackinfo_40315"/>
+	<Property ID="10204" NpcId="Convoy40318" SceneID="17" TrackInfo="task_trackinfo_40318"/>
+	<Property ID="10205" NpcId="Convoy40348" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40348" HideNpcID="WorldNpc11003"/>
+	<Property ID="10206" NpcId="Convoy40349" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40349" HideNpcID="WorldNpc11003"/>
+	<Property ID="10207" NpcId="Convoy40360" HideType="3" SceneID="16" TrackInfo="task_trackinfo_40360" HideNpcID="WorldNpc10050,WorldNpc10046"/>
+	<Property ID="10250" NpcId="Convoy40390" HideType="3" SceneID="10" TrackInfo="task_trackinfo_40390" HideNpcID="WorldNpc02629"/>
+	<Property ID="10251" NpcId="Convoy40401" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40401" HideNpcID="WorldNpc08942"/>
+	<Property ID="10252" NpcId="Convoy40402" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40402" HideNpcID="WorldNpc08944"/>
+	<Property ID="10253" NpcId="Convoy40412" PathID="13-40412" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40412" HideNpcID="WorldNpc08946"/>
+	<Property ID="10254" NpcId="Convoy40414" PathID="13-40414" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40414" HideNpcID="WorldNpc08947"/>
+	<Property ID="10255" NpcId="Convoy40424" PathID="13-40424" HideType="3" SceneID="13" TrackInfo="task_trackinfo_40424" HideNpcID="WorldNpc08948,WorldNpc08949,WorldNpc08950"/>
+	<Property ID="6001"/>
+	<Property ID="6200" NpcId="Convoy44293" PathID="16-44293" HideType="3" SceneID="16" TrackInfo="task_trackinfo_44293" HideNpcID="WorldNpc10052"/>
+	<Property ID="6201" NpcId="Convoy44294" HideType="3" SceneID="16" TrackInfo="task_trackinfo_44294"/>
+	<Property ID="6202" NpcId="Convoy44308" HideType="3" SceneID="13" TrackInfo="task_trackinfo_44308"/>
+	<Property ID="6204" NpcId="Convoy44319" PathID="6-44319" HideType="3" SceneID="6" TrackInfo="task_trackinfo_44319_1"/>
+	<Property ID="6205" NpcId="Convoy44319" HideType="3" SceneID="6" TrackInfo="task_trackinfo_44319_2"/>
+	<Property ID="9001" NpcId="Convoy50008" HideType="1" SceneID="9" TrackInfo="task_TrackInfo_50008" HideNpcID="WorldNpc02239"/>
+	<Property ID="9002" NpcId="Convoy50015" PathID="9-50015" HideType="1" SceneID="9" TrackInfo="task_TrackInfo_50015" HideNpcID="WorldNpc02246"/>
+	<Property ID="9003" NpcId="Convoy50030" PathID="9-50030" HideType="1" SceneID="9" TrackInfo="task_TrackInfo_50030" HideNpcID="WorldNpc02247"/>
+	<Property ID="9004" NpcId="Convoy50047" HideType="1" SceneID="9" TrackInfo="task_TrackInfo_50047" HideNpcID="WorldNpc02252"/>
+	<Property ID="9005" NpcId="Convoy50069" PathID="9-50069" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50069" HideNpcID="WorldNpc02236"/>
+	<Property ID="9006" NpcId="Convoy50079" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50079" HideNpcID="WorldNpc02242"/>
+	<Property ID="9007" NpcId="Convoy50088" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50088" HideNpcID="WorldNpc02240"/>
+	<Property ID="9008" NpcId="Convoy50099" PathID="9-50099" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50099" HideNpcID="WorldNpc02230"/>
+	<Property ID="9009" NpcId="Convoy50164" PathID="17-50164" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_50164" HideNpcID="WorldNpc09804"/>
+	<Property ID="9010" NpcId="Convoy50197" PathID="1-50197" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_50197" HideNpcID="WorldNpc00036"/>
+	<Property ID="9011" NpcId="Convoy50206" PathID="1-50206" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_50206" HideNpcID="WorldNpc00040"/>
+	<Property ID="9012" NpcId="Convoy50209" PathID="1-50209" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_50209" HideNpcID="WorldNpc00036"/>
+	<Property ID="9013" NpcId="Convoy50217" PathID="1-50217" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_50217" HideNpcID="FuncNpc00004"/>
+	<Property ID="9014" NpcId="Convoy50227" PathID="1-50227" HideType="3" SceneID="1" TrackInfo="task_TrackInfo_50227" HideNpcID="WorldNpc00043"/>
+	<Property ID="9015" NpcId="Convoy50253" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50253" HideNpcID="WorldNpc02254"/>
+	<Property ID="9016" NpcId="Convoy50265" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50265" HideNpcID="WorldNpc02255"/>
+	<Property ID="9017" NpcId="Convoy50272" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50272" HideNpcID="WorldNpc02256"/>
+	<Property ID="9018" NpcId="Convoy50283" HideType="0" SceneID="21" TrackInfo="task_TrackInfo_50283" HideNpcID="WorldNpc05805"/>
+	<Property ID="9019" NpcId="Convoy50297" PathID="16-50297" HideType="3" SceneID="16" TrackInfo="task_TrackInfo_50297" HideNpcID="WorldNpc10021"/>
+	<Property ID="9020" NpcId="Convoy50306" PathID="16-50306" HideType="0" SceneID="16" TrackInfo="task_TrackInfo_50306" HideNpcID="WorldNpc10026"/>
+	<Property ID="9021" NpcId="Convoy50326" PathID="16-50326" HideType="0" SceneID="16" TrackInfo="task_TrackInfo_50326" HideNpcID="WorldNpc10029,WorldNpc10035"/>
+	<Property ID="9022" NpcId="Convoy50327" HideType="0" SceneID="16" TrackInfo="task_TrackInfo_50327" HideNpcID="WorldNpc10035"/>
+	<Property ID="9023" NpcId="Convoy50334" PathID="16-50334" HideType="0" SceneID="16" TrackInfo="task_TrackInfo_50334" HideNpcID="WorldNpc10035"/>
+	<Property ID="9024" NpcId="Convoy50339" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50339" HideNpcID="WorldNpc02222"/>
+	<Property ID="9025" NpcId="Convoy50354" PathID="10-50354" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_50354" HideNpcID="WorldNpc02904"/>
+	<Property ID="9026" NpcId="Convoy50365" PathID="10-50365" HideType="3" SceneID="10" TrackInfo="task_TrackInfo_50365" HideNpcID="WorldNpc02602"/>
+	<Property ID="9027" NpcId="Convoy50367" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50367" HideNpcID="WorldNpc02203"/>
+	<Property ID="9028" NpcId="Convoy50377" PathID="9-50377" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50377" HideNpcID="WorldNpc02203"/>
+	<Property ID="9029" NpcId="Convoy50379" PathID="9-50379" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50379" HideNpcID="WorldNpc02204"/>
+	<Property ID="9030" NpcId="Convoy50415" HideType="3" SceneID="7" TrackInfo="task_TrackInfo_50415" HideNpcID="WorldNpc03423"/>
+	<Property ID="9031" NpcId="Convoy50426" HideType="3" SceneID="7" TrackInfo="task_TrackInfo_50426" HideNpcID="WorldNpc03424"/>
+	<Property ID="9032" NpcId="Convoy50440" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50440" HideNpcID="WorldNpc02202"/>
+	<Property ID="9033" NpcId="Convoy50452" HideType="3" SceneID="2" TrackInfo="task_TrackInfo_50452" HideNpcID="WorldNpc09307"/>
+	<Property ID="9035" NpcId="Convoy50463" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50463" HideNpcID="WorldNpc02259"/>
+	<Property ID="9036" NpcId="Convoy50466" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50466" HideNpcID="WorldNpc02202"/>
+	<Property ID="9037" NpcId="Convoy50471" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50471" HideNpcID="WorldNpc02203"/>
+	<Property ID="9039" NpcId="Convoy50491" PathID="20-50491" HideType="0" SceneID="20" TrackInfo="task_TrackInfo_50491" HideNpcID="WorldNpc06608"/>
+	<Property ID="9043" NpcId="Convoy50515" HideType="0" SceneID="9" TrackInfo="task_TrackInfo_50515" HideNpcID="WorldNpc02264"/>
+	<Property ID="9044" NpcId="Convoy50538" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50538" HideNpcID="WorldNpc02204"/>
+	<Property ID="9045" NpcId="Convoy50547" HideType="3" SceneID="26" TrackInfo="task_TrackInfo_50547" HideNpcID="WorldNpc06902"/>
+	<Property ID="9046" NpcId="Convoy50561" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50561" HideNpcID="WorldNpc02205"/>
+	<Property ID="9047" NpcId="Convoy50574" HideType="3" SceneID="9" TrackInfo="task_TrackInfo_50574" HideNpcID="WorldNpc02205"/>
+	<Property ID="7000" NpcId="Convoy46005" HideType="3" SceneID="7" TrackInfo="task_TrackInfo_46005" HideNpcID="WorldNpc03335"/>
+	<Property ID="7001" NpcId="Convoy46024" HideType="3" SceneID="7" TrackInfo="task_TrackInfo_46024" HideNpcID="WorldNpc03372"/>
+	<Property ID="7002" NpcId="Convoy46031" HideType="3" SceneID="7" TrackInfo="task_TrackInfo_46031" HideNpcID="WorldNpc03335"/>
+	<Property ID="7003" NpcId="Convoy46044" HideType="3" SceneID="7" HideNpcID="WorldNpc03335"/>
+	<Property ID="7004" NpcId="Convoy46074" PathID="7-46074" HideType="3" SceneID="7" TrackInfo="task_TrackInfo_46074" HideNpcID="WorldNpc03447"/>
+	<Property ID="7005" NpcId="Convoy46091" HideType="3" SceneID="7" HideNpcID="WorldNpc03449"/>
+	<Property ID="7006" NpcId="Convoy46096" HideType="3" SceneID="7" HideNpcID="WorldNpc03316"/>
+	<Property ID="7007" NpcId="Convoy46106" PathID="24-46106" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_46106" HideNpcID="WorldNpc05093"/>
+	<Property ID="7008" NpcId="Convoy46108" HideType="3" SceneID="24" HideNpcID="WorldNpc05050"/>
+	<Property ID="7009" NpcId="Convoy46112" PathID="24-46112" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_46112" HideNpcID="WorldNpc05051"/>
+	<Property ID="7010" NpcId="Convoy46118" HideType="3" SceneID="24" HideNpcID="WorldNpc05095"/>
+	<Property ID="7011" NpcId="Convoy46143" HideType="3" SceneID="11" HideNpcID="WorldNpc04577"/>
+	<Property ID="7012" NpcId="Convoy46146" HideType="3" SceneID="11" HideNpcID="WorldNpc04578"/>
+	<Property ID="7013" NpcId="Convoy46149" PathID="11-46149" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_46149" HideNpcID="WorldNpc04577"/>
+	<Property ID="7014" NpcId="Convoy46154" PathID="11-46154" HideType="3" SceneID="11" TrackInfo="task_TrackInfo_46154" HideNpcID="WorldNpc04438"/>
+	<Property ID="7015" NpcId="Convoy46157" HideType="3" SceneID="11" HideNpcID="WorldNpc04405"/>
+	<Property ID="7016" NpcId="Convoy46164" HideType="3" SceneID="11" HideNpcID="WorldNpc04713"/>
+	<Property ID="7017" NpcId="Convoy46167" HideType="3" SceneID="11" HideNpcID="WorldNpc04713"/>
+	<Property ID="7018" NpcId="Convoy46171" HideType="3" SceneID="11" HideNpcID="WorldNpc04714"/>
+	<Property ID="7019" NpcId="Convoy46183" HideType="3" SceneID="11" HideNpcID="WorldNpc04577"/>
+	<Property ID="7020" NpcId="Convoy46196" HideType="3" SceneID="19" HideNpcID="WorldNpc02035"/>
+	<Property ID="7021" NpcId="Convoy46199" PathID="19-46199" HideType="3" SceneID="19" TrackInfo="task_TrackInfo_46199"/>
+	<Property ID="7022" NpcId="Convoy46207" PathID="19-46207" HideType="3" SceneID="19" TrackInfo="task_TrackInfo_46207" HideNpcID="WorldNpc02040"/>
+	<Property ID="7023" NpcId="Convoy46209" HideType="3" SceneID="19" HideNpcID="WorldNpc02042"/>
+	<Property ID="7024" NpcId="Convoy46218" PathID="19-46218" HideType="3" SceneID="19" TrackInfo="task_TrackInfo_46218" HideNpcID="WorldNpc02041"/>
+	<Property ID="7025" NpcId="Convoy46219" HideType="3" SceneID="19" HideNpcID="WorldNpc02035"/>
+	<Property ID="7026" NpcId="Convoy46224" HideType="3" SceneID="19" HideNpcID="WorldNpc02038"/>
+	<Property ID="7027"/>
+	<Property ID="7028"/>
+	<Property ID="7029"/>
+	<Property ID="7030"/>
+	<Property ID="7031"/>
+	<Property ID="7032"/>
+	<Property ID="7033"/>
+	<Property ID="7034"/>
+	<Property ID="7035"/>
+	<Property ID="7036"/>
+	<Property ID="7037"/>
+	<Property ID="7038"/>
+	<Property ID="7039"/>
+	<Property ID="7040"/>
+	<Property ID="7041"/>
+	<Property ID="7042"/>
+	<Property ID="7043"/>
+	<Property ID="7044"/>
+	<Property ID="7045"/>
+	<Property ID="7046"/>
+	<Property ID="7047"/>
+	<Property ID="7048"/>
+	<Property ID="7049"/>
+	<Property ID="7050"/>
+	<Property ID="7051"/>
+	<Property ID="7052"/>
+	<Property ID="7053"/>
+	<Property ID="7054"/>
+	<Property ID="7055"/>
+	<Property ID="7056"/>
+	<Property ID="7057"/>
+	<Property ID="7058"/>
+	<Property ID="7059"/>
+	<Property ID="7060"/>
+	<Property ID="7061"/>
+	<Property ID="7062"/>
+	<Property ID="7063"/>
+	<Property ID="7064"/>
+	<Property ID="7065"/>
+	<Property ID="7066"/>
+	<Property ID="7067"/>
+	<Property ID="7068"/>
+	<Property ID="7069"/>
+	<Property ID="7070"/>
+	<Property ID="7071"/>
+	<Property ID="7072"/>
+	<Property ID="7073"/>
+	<Property ID="7074"/>
+	<Property ID="7075"/>
+	<Property ID="7076"/>
+	<Property ID="7077"/>
+	<Property ID="7078"/>
+	<Property ID="7079"/>
+	<Property ID="7080"/>
+	<Property ID="7081"/>
+	<Property ID="7082"/>
+	<Property ID="7083"/>
+	<Property ID="7084"/>
+	<Property ID="7085"/>
+	<Property ID="7086"/>
+	<Property ID="7087"/>
+	<Property ID="7088"/>
+	<Property ID="7089"/>
+	<Property ID="7090"/>
+	<Property ID="7091"/>
+	<Property ID="7092"/>
+	<Property ID="7093"/>
+	<Property ID="7094"/>
+	<Property ID="7095"/>
+	<Property ID="7096"/>
+	<Property ID="7097"/>
+	<Property ID="7098"/>
+	<Property ID="7099"/>
+	<Property ID="7100"/>
+	<Property ID="7101"/>
+	<Property ID="7102"/>
+	<Property ID="7103"/>
+	<Property ID="7104"/>
+	<Property ID="7105"/>
+	<Property ID="7106"/>
+	<Property ID="7107"/>
+	<Property ID="7108"/>
+	<Property ID="7109"/>
+	<Property ID="7110"/>
+	<Property ID="7111"/>
+	<Property ID="7112"/>
+	<Property ID="7113"/>
+	<Property ID="7114"/>
+	<Property ID="7115"/>
+	<Property ID="7116"/>
+	<Property ID="7117"/>
+	<Property ID="7118"/>
+	<Property ID="7119"/>
+	<Property ID="7120"/>
+	<Property ID="7121"/>
+	<Property ID="7122"/>
+	<Property ID="7123"/>
+	<Property ID="7124"/>
+	<Property ID="7125"/>
+	<Property ID="7126"/>
+	<Property ID="7127"/>
+	<Property ID="7128"/>
+	<Property ID="7129"/>
+	<Property ID="7130"/>
+	<Property ID="7131"/>
+	<Property ID="7132"/>
+	<Property ID="7133"/>
+	<Property ID="7134"/>
+	<Property ID="7135"/>
+	<Property ID="7136"/>
+	<Property ID="7137"/>
+	<Property ID="7138"/>
+	<Property ID="7139"/>
+	<Property ID="7140"/>
+	<Property ID="7141"/>
+	<Property ID="7142"/>
+	<Property ID="7143"/>
+	<Property ID="7144"/>
+	<Property ID="7145"/>
+	<Property ID="7146"/>
+	<Property ID="7147"/>
+	<Property ID="7148"/>
+	<Property ID="7149"/>
+	<Property ID="7150"/>
+	<Property ID="7151"/>
+	<Property ID="7152"/>
+	<Property ID="7153"/>
+	<Property ID="7154"/>
+	<Property ID="7155"/>
+	<Property ID="7156"/>
+	<Property ID="7157"/>
+	<Property ID="7158"/>
+	<Property ID="7159"/>
+	<Property ID="7160"/>
+	<Property ID="7161"/>
+	<Property ID="7162"/>
+	<Property ID="7163"/>
+	<Property ID="7164"/>
+	<Property ID="7165"/>
+	<Property ID="7166"/>
+	<Property ID="7167"/>
+	<Property ID="7168"/>
+	<Property ID="7169"/>
+	<Property ID="7170"/>
+	<Property ID="7171"/>
+	<Property ID="7172"/>
+	<Property ID="7173"/>
+	<Property ID="7174"/>
+	<Property ID="7175"/>
+	<Property ID="7176"/>
+	<Property ID="7177"/>
+	<Property ID="7178"/>
+	<Property ID="7179"/>
+	<Property ID="7180"/>
+	<Property ID="7181"/>
+	<Property ID="7182"/>
+	<Property ID="7183"/>
+	<Property ID="7184"/>
+	<Property ID="7185"/>
+	<Property ID="7186"/>
+	<Property ID="7187"/>
+	<Property ID="7188"/>
+	<Property ID="7189"/>
+	<Property ID="7190"/>
+	<Property ID="7191"/>
+	<Property ID="7192"/>
+	<Property ID="7193"/>
+	<Property ID="7194"/>
+	<Property ID="7195"/>
+	<Property ID="7196"/>
+	<Property ID="7197"/>
+	<Property ID="7198"/>
+	<Property ID="7199"/>
+	<Property ID="7200" NpcId="Convoy46306" HideType="3" SceneID="13" TrackInfo="task_TrackInfo_46306" HideNpcID="WorldNpc08935"/>
+	<Property ID="7201"/>
+	<Property ID="7202"/>
+	<Property ID="7203"/>
+	<Property ID="7204"/>
+	<Property ID="7205"/>
+	<Property ID="7206"/>
+	<Property ID="7207"/>
+	<Property ID="7208"/>
+	<Property ID="7209"/>
+	<Property ID="7210"/>
+	<Property ID="7211"/>
+	<Property ID="7212"/>
+	<Property ID="7213"/>
+	<Property ID="7214"/>
+	<Property ID="7215"/>
+	<Property ID="7216"/>
+	<Property ID="7217"/>
+	<Property ID="7218"/>
+	<Property ID="7219"/>
+	<Property ID="7220"/>
+	<Property ID="7221"/>
+	<Property ID="7222"/>
+	<Property ID="7223"/>
+	<Property ID="7224"/>
+	<Property ID="7225"/>
+	<Property ID="7226"/>
+	<Property ID="7227"/>
+	<Property ID="7228"/>
+	<Property ID="7229"/>
+	<Property ID="7230"/>
+	<Property ID="7231"/>
+	<Property ID="7232"/>
+	<Property ID="7233"/>
+	<Property ID="7234"/>
+	<Property ID="7235"/>
+	<Property ID="5001" NpcId="Convoy42004" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42004" HideNpcID="WorldNpc04115"/>
+	<Property ID="5002" NpcId="Convoy42007" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42007" HideNpcID="WorldNpc04115"/>
+	<Property ID="5003" NpcId="Convoy42009" PathID="5-42009" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42009" HideNpcID="WorldNpc04109"/>
+	<Property ID="5004" NpcId="Convoy42018" PathID="5-42018" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42018" HideNpcID="WorldNpc04111"/>
+	<Property ID="5005" NpcId="Convoy42019" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42019" HideNpcID="WorldNpc04108"/>
+	<Property ID="5006" NpcId="Convoy42034" PathID="5-42034" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42034" HideNpcID="WorldNpc04114"/>
+	<Property ID="5007" NpcId="Convoy42040" PathID="5-42040" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42040" HideNpcID="WorldNpc04111"/>
+	<Property ID="5008" NpcId="Convoy42057" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42057" HideNpcID="WorldNpc04102"/>
+	<Property ID="5009" NpcId="Convoy42058" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42058" HideNpcID="WorldNpc04122"/>
+	<Property ID="5010" NpcId="Convoy42063" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42063" HideNpcID="WorldNpc04123"/>
+	<Property ID="5011" NpcId="Convoy42066" PathID="5-42066" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42066" HideNpcID="WorldNpc04104"/>
+	<Property ID="5012" NpcId="Convoy42069" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42069" HideNpcID="WorldNpc04102"/>
+	<Property ID="5013" NpcId="Convoy42072" PathID="5-42072" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42072" HideNpcID="WorldNpc04126"/>
+	<Property ID="5014" NpcId="Convoy42081" PathID="5-42081" HideType="3" SceneID="5" TrackInfo="task_TrackInfo_42081" HideNpcID="WorldNpc04127"/>
+	<Property ID="8001" NpcId="Convoy48001" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48001" HideNpcID="WorldNpc03826"/>
+	<Property ID="8002" NpcId="Convoy48018" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48018" HideNpcID="WorldNpc03856"/>
+	<Property ID="8003" NpcId="Convoy48038" PathID="8-48038" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48038" HideNpcID="WorldNpc03822"/>
+	<Property ID="8004" NpcId="Convoy48046" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48046" HideNpcID="WorldNpc03925"/>
+	<Property ID="8005" NpcId="Convoy48053" PathID="8-48053" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48053" HideNpcID="WorldNpc03836"/>
+	<Property ID="8006" NpcId="Convoy48076" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48076" HideNpcID="WorldNpc03822"/>
+	<Property ID="8007" NpcId="Convoy48081" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48081" HideNpcID="WorldNpc03812"/>
+	<Property ID="8008" NpcId="Convoy48137" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48137" HideNpcID="WorldNpc03840"/>
+	<Property ID="8009" NpcId="Convoy48159" PathID="17-48159" HideType="3" SceneID="17" TrackInfo="task_TrackInfo_48159" HideNpcID="WorldNpc09802"/>
+	<Property ID="8010" NpcId="Convoy48173" PathID="8-48173" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48173" HideNpcID="WorldNpc03825"/>
+	<Property ID="8011" NpcId="Convoy48086" PathID="8-48086" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48086" HideNpcID="WorldNpc03837"/>
+	<Property ID="8012" NpcId="Convoy48104" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_48104" HideNpcID="WorldNpc05103"/>
+	<Property ID="8013" NpcId="Convoy48118" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_48118" HideNpcID="WorldNpc05103"/>
+	<Property ID="8014" NpcId="Convoy48123" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_48123" HideNpcID="WorldNpc05103"/>
+	<Property ID="8015" NpcId="Convoy48126" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_48126" HideNpcID="WorldNpc05102"/>
+	<Property ID="8016" NpcId="Convoy48131" HideType="3" SceneID="24" TrackInfo="task_TrackInfo_48131" HideNpcID="WorldNpc05103"/>
+	<Property ID="8017" NpcId="Convoy48196" PathID="8-48196" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48132" HideNpcID="WorldNpc04057"/>
+	<Property ID="8018" NpcId="Convoy48200" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48200" HideNpcID="WorldNpc03808"/>
+	<Property ID="8019" NpcId="Convoy48228" PathID="8-48228" HideType="3" SceneID="8" TrackInfo="task_TrackInfo_48228" HideNpcID="WorldNpc04008"/>
+</Object>

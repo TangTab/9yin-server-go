@@ -77,6 +77,13 @@ func TestEighthBatchAssemble(t *testing.T) {
 	if nrm.Loaded() == 0 {
 		t.Fatal("ini/Npc 树预载计数为零")
 	}
+	// 九阴真档抽查（tools/npcgen 生成）：成都马六，script=CommonNpc。
+	if class := nrm.ClassOf("FuncNpc00601"); class != "CommonNpc" {
+		t.Fatalf("FuncNpc00601 登记类 %q，期望 CommonNpc", class)
+	}
+	if id := nrm.Spawn(k, "FuncNpc00601"); !id.Valid() {
+		t.Fatal("九阴真档 NPC 物化失败")
+	}
 }
 
 // TestNpcLifecycle NPC 闭环：资源登记 → 召唤物化（EventSummon 真档）→

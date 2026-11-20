@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="matchchair_npc01" script="CommonNpc" Name="椅子" Desc="椅子" NpcType="167" Resource="npc\npcitem629" SpringRange="20"/>
+	<Property ID="matchchair_npc02" script="ChairNpc" Name="椅子" Desc="椅子" NpcType="167" SelectState="2" Resource="npc\itemnpc063" SpringRange="20"/>
+</Object>

@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4001" ItemID="useitem_2f" ProCount="1" AddPro="1" TrackInfoID="useitem24031_1" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="1" Water="0" TargetConfig="WorldNpc00017"/>
+	<Property ID="4002" ItemID="useitem_3f" ProCount="1" AddPro="1" TrackInfoID="useitem24031_2" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="1" Water="0" TargetConfig="WorldNpc00017"/>
+	<Property ID="4003" ItemID="useitem_5f" ProCount="1" AddPro="1" TrackInfoID="useitem24046" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="1" Water="0"/>
+	<Property ID="4004" ItemID="useitem_9f" ProCount="1" AddPro="1" TrackInfoID="useitem24053" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="1" Water="1" AddItems="taskitem_11f"/>
+	<Property ID="4005" ItemID="useitem_6f" ProCount="1" AddPro="1" TrackInfoID="useitem24059" DeleteSelf="0" LockTarget="0" Radius="0" SceneID="1" Water="0" DeleteItems="taskitem_6f"/>
+	<Property ID="4006" ItemID="useitem_7f" ProCount="1" AddPro="1" TrackInfoID="useitem24065" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="1" Water="0"/>
+	<Property ID="4007" ItemID="useitem_10f" ProCount="1" AddPro="1" TrackInfoID="useitem24089" DeleteSelf="0" LockTarget="1" Radius="0" SceneID="10" Water="0" TargetConfig="Gather00010f"/>
+	<Property ID="4008" ItemID="useitem_12f" ProCount="1" AddPro="1" TrackInfoID="useitem24104_1" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="21" Water="0" TargetConfig="ItemNpc04001"/>
+	<Property ID="4009" ItemID="useitem_12f" ProCount="1" AddPro="1" TrackInfoID="useitem24104_2" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="21" Water="0" TargetConfig="ItemNpc04002"/>
+	<Property ID="4010" ItemID="useitem_12f" ProCount="1" AddPro="1" TrackInfoID="useitem24104_3" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="21" Water="0" TargetConfig="ItemNpc04003"/>
+	<Property ID="4011" ItemID="useitem_13f" ProCount="1" AddPro="1" TrackInfoID="useitem24107" DeleteSelf="0" LockTarget="0" Radius="0" SceneID="21" Water="0" AddItems="taskitem_18f" DeleteItems="taskitem_15f;taskitem_16f"/>
+	<Property ID="4012" ItemID="useitem_14f" ProCount="1" AddPro="1" TrackInfoID="useitem24109_1" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="21" Water="0" TargetConfig="ItemNpc04001"/>
+	<Property ID="4013" ItemID="useitem_14f" ProCount="1" AddPro="1" TrackInfoID="useitem24109_2" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="21" Water="0" TargetConfig="ItemNpc04002"/>
+	<Property ID="4014" ItemID="useitem_14f" ProCount="1" AddPro="1" TrackInfoID="useitem24109_3" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="21" Water="0" TargetConfig="ItemNpc04003"/>
+	<Property ID="4015" ItemID="useitem_15f" ProCount="1" AddPro="1" TrackInfoID="useitem24130_1" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="21" Water="1" AddItems="useitem_16f" TargetConfig="EventNpc24130"/>
+	<Property ID="4016" ItemID="useitem_16f" ProCount="1" AddPro="1" TrackInfoID="useitem24130_2" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="21" Water="0" TargetConfig="WorldNpc06011"/>
+	<Property ID="4017" ItemID="useitem_6h" ProCount="1" AddPro="1" TrackInfoID="useitem24207" DeleteSelf="0" LockTarget="0" Radius="5" SceneID="17" Water="0" TargetConfig="ItemNpc12002"/>
+	<Property ID="4018" ItemID="useitem_5h" ProCount="1" AddPro="1" TrackInfoID="useitem24232" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="17" Water="0" TargetConfig="WorldNpc09601"/>
+	<Property ID="4019" ItemID="useitem_9b" ProCount="1" AddPro="1" TrackInfoID="useitem24244" DeleteSelf="0" LockTarget="0" Radius="3" SceneID="1" Water="0" TargetConfig="EventNpc24249"/>
+	<Property ID="4020" ItemID="useitem_8b" ProCount="1" AddPro="1" TrackInfoID="useitem24260" DeleteSelf="1" LockTarget="1" Radius="2" SceneID="1" Water="0" TargetConfig="WorldNpc00032"/>
+	<Property ID="4021" ItemID="useitem_7b" ProCount="1" AddPro="1" TrackInfoID="useitem24263" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="1" Water="0" AddItems="taskitem_6b"/>
+	<Property ID="4022" ItemID="useitem_1a" ProCount="1" AddPro="1" TrackInfoID="useitem24291" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="13" Water="0"/>
+	<Property ID="4023" ItemID="useitem_2a" ProCount="1" AddPro="1" TrackInfoID="useitem24307" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="20" Water="0" TargetConfig="WorldNpc06613"/>
+	<Property ID="4024" ItemID="useitem_3a" ProCount="3" AddPro="1" TrackInfoID="useitem24330" DeleteSelf="1" LockTarget="0" Radius="50" SceneID="20" Water="0" TargetConfig="EventNpc24330"/>
+	<Property ID="4025" ItemID="useitem_15b" ProCount="1" AddPro="1" TrackInfoID="useitem24380" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="13" Water="0"/>
+	<Property ID="4026" ItemID="useitem_14b" ProCount="1" AddPro="1" TrackInfoID="useitem24383" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="13" Water="0"/>
+	<Property ID="4027" ItemID="useitem_13b" ProCount="1" AddPro="1" TrackInfoID="useitem24394" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="10" Water="0" TargetConfig="WorldNpc02614"/>
+	<Property ID="4028" ItemID="useitem_16b" ProCount="1" AddPro="1" TrackInfoID="useitem24423" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="10" Water="0" TargetConfig="WorldNpc02647"/>
+	<Property ID="4029" ItemID="useitem_10a" ProCount="1" AddPro="1" TrackInfoID="useitem24444" DeleteSelf="1" LockTarget="1" Radius="15" SceneID="9" Water="0" TargetConfig="WorldNpc02527"/>
+	<Property ID="4030" ItemID="useitem_8a" ProCount="0" AddPro="0" TrackInfoID="useitem24478" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0" AddItems="taskitem_20a"/>
+	<Property ID="4031" ItemID="useitem_4a" ProCount="4" AddPro="1" TrackInfoID="useitem24487_1" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="22" Water="0" TargetConfig="Gather00026b"/>
+	<Property ID="4032" ItemID="useitem_6a" ProCount="1" AddPro="1" TrackInfoID="useitem24501" DeleteSelf="0" LockTarget="0" SceneID="9" Water="0"/>
+	<Property ID="4033" ItemID="useitem_9a" ProCount="1" AddPro="1" TrackInfoID="useitem24503" DeleteSelf="1" LockTarget="0" SceneID="9"/>
+	<Property ID="4034" ItemID="useitem_11a" ProCount="1" AddPro="1" TrackInfoID="useitem24506" DeleteSelf="1" LockTarget="0" SceneID="22"/>
+	<Property ID="4035" ItemID="useitem_12a" ProCount="1" AddPro="1" TrackInfoID="useitem24513" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="22" Water="0" TargetConfig="WorldNpc06128"/>
+	<Property ID="4036" ItemID="useitem_13a" ProCount="1" AddPro="1" TrackInfoID="useitem24536" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02433"/>
+	<Property ID="4037" ItemID="useitem_26a" ProCount="1" AddPro="1" TrackInfoID="useitem24537" DeleteSelf="1" LockTarget="0" SceneID="9" Water="0"/>
+	<Property ID="4038" ItemID="useitem_14a" ProCount="1" AddPro="1" TrackInfoID="useitem24539" DeleteSelf="1" LockTarget="0" SceneID="9" Water="0"/>
+	<Property ID="4039" ItemID="useitem_15a" ProCount="1" AddPro="1" TrackInfoID="useitem24555" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02440"/>
+	<Property ID="4040" ItemID="useitem_16a" ProCount="1" AddPro="1" TrackInfoID="useitem24552" DeleteSelf="1" LockTarget="0" SceneID="9" Water="0"/>
+	<Property ID="4041" ItemID="useitem_17a" ProCount="4" AddPro="1" TrackInfoID="useitem24549" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="monm052700"/>
+	<Property ID="4042" ItemID="useitem_18a" ProCount="1" AddPro="1" TrackInfoID="useitem24564" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="monrm058500"/>
+	<Property ID="4043" ItemID="useitem_19a" ProCount="1" AddPro="1" TrackInfoID="useitem24567" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="ItemNpc02012"/>
+	<Property ID="4044" ItemID="useitem_20a" ProCount="1" AddPro="1" TrackInfoID="useitem24569" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02443"/>
+	<Property ID="4045" ItemID="useitem_21a" ProCount="1" AddPro="1" TrackInfoID="useitem24597" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02451"/>
+	<Property ID="4046" ItemID="useitem_22a" ProCount="1" AddPro="1" TrackInfoID="useitem24600" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02452"/>
+	<Property ID="4047" ItemID="useitem_23a" ProCount="4" AddPro="1" TrackInfoID="useitem24614" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="ItemNpc02013"/>
+	<Property ID="4048" ItemID="useitem_24a" ProCount="1" AddPro="1" TrackInfoID="useitem24621" DeleteSelf="1" LockTarget="0" SceneID="9" Water="0"/>
+	<Property ID="4049" ItemID="useitem_25a" ProCount="1" AddPro="1" TrackInfoID="useitem24624" DeleteSelf="1" LockTarget="0" SceneID="9" Water="0"/>
+	<Property ID="4050" ItemID="useitem_17b" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="11" Water="0" AddItems="taskitem_29b"/>
+	<Property ID="4051" ItemID="useitem_18b" ProCount="1" AddPro="1" TrackInfoID="useitem24642" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04709"/>
+	<Property ID="4052" ItemID="useitem_19b" ProCount="1" AddPro="1" TrackInfoID="useitem24653" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="11" Water="0" AddItems="taskitem_33b"/>
+	<Property ID="4053" ItemID="useitem_20b" ProCount="1" AddPro="1" TrackInfoID="useitem24658" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04808"/>
+	<Property ID="4054" ItemID="useitem_26b" ProCount="1" AddPro="1" TrackInfoID="useitem24669_1" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04809"/>
+	<Property ID="4055" ItemID="useitem_26b" ProCount="1" AddPro="1" TrackInfoID="useitem24669_2" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04810"/>
+	<Property ID="4056" ItemID="useitem_21b" ProCount="1" AddPro="1" TrackInfoID="useitem24690" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04710"/>
+	<Property ID="4057" ItemID="useitem_22b" DeleteSelf="0" LockTarget="0" Radius="0" SceneID="11" Water="0" AddItems="taskitem_38b" DeleteItems="taskitem_417"/>
+	<Property ID="4058" ItemID="useitem_23b" ProCount="3" AddPro="1" TrackInfoID="useitem24713_1" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04805"/>
+	<Property ID="4059" ItemID="useitem_24b" ProCount="3" AddPro="1" TrackInfoID="useitem24713_2" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04805"/>
+	<Property ID="4060" ItemID="useitem_25b" ProCount="1" AddPro="1" TrackInfoID="useitem24718" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04805"/>
+	<Property ID="4061" ItemID="useitem_8f" ProCount="1" AddPro="1" TrackInfoID="useitem24067_1" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="1" Water="0" TargetConfig="WorldNpc00023"/>
+	<Property ID="4062" ItemID="useitem_8f" ProCount="1" AddPro="1" TrackInfoID="useitem24067_2" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="1" Water="0" TargetConfig="WorldNpc00024"/>
+	<Property ID="4063" ItemID="useitem_8f" ProCount="1" AddPro="1" TrackInfoID="useitem24067_3" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="1" Water="0" TargetConfig="WorldNpc00025"/>
+	<Property ID="4064" ItemID="useitem_18f" ProCount="1" AddPro="1" TrackInfoID="useitem24163" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="22" Water="0" TargetConfig="EventNpc24164"/>
+	<Property ID="4065" ItemID="useitem_19f" ProCount="1" AddPro="1" TrackInfoID="useitem24178" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="22" Water="0" TargetConfig="WorldNpc06113"/>
+	<Property ID="4066" ItemID="useitem_40b" ProCount="1" AddPro="1" TrackInfoID="useitem24157" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="22" Water="0"/>
+	<Property ID="4067" ItemID="useitem_38b" ProCount="1" AddPro="1" TrackInfoID="useitem24018" DeleteSelf="0" Radius="0" SceneID="1" Water="0"/>
+	<Property ID="4068" ItemID="useitem_39b" ProCount="1" AddPro="1" TrackInfoID="useitem24034" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="1" Water="0" TargetConfig="WorldNpc00017"/>
+	<Property ID="4069" ItemID="useitem_41b" ProCount="1" AddPro="1" TrackInfoID="useitem24247" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="1" Water="0"/>
+	<Property ID="4070" ItemID="useitem_42b" ProCount="1" AddPro="1" TrackInfoID="useitem24163_1" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="22" Water="0" TargetConfig="WorldNpc06110"/>
+	<Property ID="4071" ItemID="useitem_43b" ProCount="1" AddPro="1" TrackInfoID="useitem24412" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="10" Water="0" AddItems="taskitem_49b;taskitem_50b"/>
+	<Property ID="4072" ItemID="useitem_44b" ProCount="1" AddPro="1" TrackInfoID="useitem24449" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="9" Water="0" TargetConfig="WorldNpc02510"/>
+	<Property ID="4073" ItemID="useitem_45b" ProCount="1" AddPro="1" TrackInfoID="useitem24454" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="9" Water="0" TargetConfig="Gather00025b"/>
+	<Property ID="4074" ItemID="useitem_46b" ProCount="1" AddPro="1" TrackInfoID="useitem24470" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="9" Water="0" TargetConfig="WorldNpc02533"/>
+	<Property ID="4075" ItemID="useitem_4a" ProCount="4" AddPro="1" TrackInfoID="useitem24487_2" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="22" Water="0" TargetConfig="Gather00027b"/>
+	<Property ID="4076" ItemID="useitem_47b" ProCount="1" AddPro="1" TrackInfoID="useitem24496" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0"/>
+	<Property ID="4077" ItemID="useitem_48b" ProCount="1" AddPro="1" TrackInfoID="useitem24497" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="22" Water="0" TargetConfig="Gather00028b"/>
+	<Property ID="4078" ItemID="useitem_49b" ProCount="4" AddPro="1" TrackInfoID="useitem24557" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0"/>
+	<Property ID="4079" ItemID="useitem_50b" ProCount="1" AddPro="1" TrackInfoID="useitem24596" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="9" Water="0" TargetConfig="Gather00033b"/>
+	<Property ID="4080" ItemID="useitem_51b" ProCount="1" AddPro="1" TrackInfoID="useitem24738" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="10" Water="0" TargetConfig="WorldNpc02706"/>
+	<Property ID="4081" ItemID="useitem_52b" ProCount="1" AddPro="1" TrackInfoID="useitem24741" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="10" Water="0" TargetConfig="WorldNpc02706"/>
+	<Property ID="4082" ItemID="useitem_53b" ProCount="1" AddPro="1" TrackInfoID="useitem24759" DeleteSelf="0" LockTarget="0" Radius="0" SceneID="10" Water="0" AddItems="taskitem_68b;taskitem_69b" DeleteItems="taskitem_67b"/>
+	<Property ID="3001" ItemID="useitem_8g" ProCount="1" AddPro="1" TrackInfoID="useitem22011" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="3" Water="0" TargetConfig="WorldNpc00634"/>
+	<Property ID="3002" ItemID="useitem_13g" ProCount="1" AddPro="1" TrackInfoID="useitem22015" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="3" Water="0" TargetConfig="WorldNpc00629"/>
+	<Property ID="3003" ItemID="useitem_9g" ProCount="1" AddPro="1" TrackInfoID="useitem22028" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="3" Water="0" TargetConfig="WorldNpc00690"/>
+	<Property ID="3004" ItemID="useitem_14g" ProCount="1" AddPro="1" TrackInfoID="useitem22070" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="14" Water="0" TargetConfig="Gather00018g"/>
+	<Property ID="3005" ItemID="useitem_10g" ProCount="1" AddPro="1" TrackInfoID="useitem22075" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="14" Water="0" TargetConfig="WorldNpc01363"/>
+	<Property ID="3006" ItemID="useitem_11g" ProCount="1" AddPro="1" TrackInfoID="useitem22083" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="14" Water="0" TargetConfig="WorldNpc01369"/>
+	<Property ID="3007" ItemID="useitem_12g" ProCount="1" AddPro="1" TrackInfoID="useitem22092" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="14" Water="1" AddItems="taskitem_29g"/>
+	<Property ID="3008" ItemID="useitem_15g" ProCount="1" AddPro="1" TrackInfoID="useitem22107" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="21" Water="0" TargetConfig="WorldNpc05924"/>
+	<Property ID="3009" ItemID="useitem_16g" ProCount="1" AddPro="1" TrackInfoID="useitem22117_1" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="21" Water="0" AddItems="useitem_17g"/>
+	<Property ID="3010" ItemID="useitem_17g" ProCount="1" AddPro="1" TrackInfoID="useitem22117_2" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="21" Water="0"/>
+	<Property ID="3011" ItemID="useitem_18g" ProCount="1" AddPro="1" TrackInfoID="useitem22119" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="21" Water="0"/>
+	<Property ID="3012" ItemID="useitem_19g" ProCount="1" AddPro="1" TrackInfoID="useitem22130" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="21" Water="0" TargetConfig="WorldNpc06007"/>
+	<Property ID="3013" ItemID="useitem_20g" ProCount="1" AddPro="1" TrackInfoID="useitem22134" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="21" Water="0" TargetConfig="WorldNpc06011"/>
+	<Property ID="3014" ItemID="useitem_21g" ProCount="1" AddPro="1" TrackInfoID="useitem22164" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="22" Water="1"/>
+	<Property ID="3015" ItemID="useitem_22g" ProCount="1" AddPro="1" TrackInfoID="useitem22169" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="22" Water="1"/>
+	<Property ID="27001" ItemID="useitemclone002001" ProCount="1" AddPro="1" TrackInfoID="useitem2061" DeleteSelf="1" LockTarget="1" Radius="5" Water="0" TargetConfig="funnpcclone002059"/>
+	<Property ID="27002" ItemID="useitemclone002002" ProCount="1" AddPro="1" TrackInfoID="useitem2837" SceneID="28" Water="0"/>
+	<Property ID="27003" ItemID="useitemclone002004" ProCount="1" AddPro="1" TrackInfoID="useitem2070" DeleteSelf="1" LockTarget="1" Radius="5" TargetConfig="funnpcclone002056"/>
+	<Property ID="27004" ItemID="ItemClone017jd3" ProCount="1" AddPro="1" TrackInfoID="useitem2821" DeleteSelf="1" Water="0"/>
+	<Property ID="27005" ItemID="useitemclone002005" ProCount="1" AddPro="1" TrackInfoID="useitem2332" SceneID="28" Water="0"/>
+	<Property ID="27006" ItemID="useitemclone002007" ProCount="1" AddPro="1" TrackInfoID="useitem2447" SceneID="28" Water="0"/>
+	<Property ID="27007" ItemID="useitemclone002006" ProCount="1" AddPro="1" TrackInfoID="useitem2053" DeleteSelf="0" LockTarget="1" Radius="5" Water="0" TargetConfig="bossclone002013"/>
+	<Property ID="12001" ItemID="useitem_4b" ProCount="1" AddPro="1" TrackInfoID="useitem38011" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00473"/>
+	<Property ID="12002" ItemID="useitem_11b" ProCount="1" AddPro="1" TrackInfoID="useitem38039" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00462"/>
+	<Property ID="12003" ItemID="useitem_5b" ProCount="1" AddPro="1" TrackInfoID="useitem38042" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00462"/>
+	<Property ID="12004" ItemID="useitem_12b" ProCount="1" AddPro="1" TrackInfoID="useitem38043" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00462"/>
+	<Property ID="12005" ItemID="useitem_1j" ProCount="1" AddPro="1" TrackInfoID="useitem38054" DeleteSelf="0" LockTarget="0" Radius="20" SceneID="12" Water="0" TargetConfig="EventNpc38054"/>
+	<Property ID="12006" ItemID="useitem_2j" ProCount="1" AddPro="1" TrackInfoID="useitem38058" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00485"/>
+	<Property ID="12007" ItemID="useitem_3j" TrackInfoID="useitem38060" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="12" Water="1" AddItems="taskitem_9k" TargetConfig="EventNpc38060"/>
+	<Property ID="12008" ItemID="useitem_4j" TrackInfoID="useitem38083" DeleteSelf="0" LockTarget="0" Radius="20" SceneID="12" Water="1" AddItems="taskitem_1j" DeleteItems="taskitem_2j" TargetConfig="EventNpc38083"/>
+	<Property ID="12009" ItemID="useitem_5j" ProCount="1" AddPro="1" TrackInfoID="useitem38089" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00485"/>
+	<Property ID="12010" ItemID="useitem_36b" ProCount="1" AddPro="1" TrackInfoID="useitem38141" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04569"/>
+	<Property ID="12011" ItemID="useitem_10b" ProCount="1" AddPro="1" TrackInfoID="useitem38120" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00201"/>
+	<Property ID="12012" ItemID="useitem_6b" ProCount="1" AddPro="1" TrackInfoID="useitem38359" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08924"/>
+	<Property ID="12013" ItemID="useitem_2b" ProCount="1" AddPro="1" TrackInfoID="useitem38362" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="13" Water="0"/>
+	<Property ID="12014" ItemID="useitem_1b" ProCount="1" AddPro="1" TrackInfoID="useitem38367" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08920"/>
+	<Property ID="12015" ItemID="useitem_3b" ProCount="1" AddPro="1" TrackInfoID="useitem38425" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="12" Water="0"/>
+	<Property ID="12016" ItemID="useitem_1d" ProCount="1" AddPro="1" TrackInfoID="useitem38497" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0"/>
+	<Property ID="12017" ItemID="useitem_2d" ProCount="1" AddPro="1" TrackInfoID="useitem38506" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02519"/>
+	<Property ID="12018" ItemID="useitem_1h" TrackInfoID="useitem38532" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="21" Water="1" AddItems="taskitem_93" TargetConfig="EventNpc38532"/>
+	<Property ID="12019" ItemID="useitem_2h" ProCount="1" AddPro="1" TrackInfoID="useitem38534" DeleteSelf="0" LockTarget="1" Radius="0" SceneID="21" Water="0" TargetConfig="Gather00003h"/>
+	<Property ID="12020" ItemID="useitem_3h" ProCount="1" AddPro="1" TrackInfoID="useitem38546" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="21" Water="0"/>
+	<Property ID="12021" ItemID="useitem_4h" ProCount="1" AddPro="1" TrackInfoID="useitem38543" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="21" Water="0" TargetConfig="EventNpc38546"/>
+	<Property ID="12022" ItemID="useitem_7h" ProCount="1" AddPro="1" TrackInfoID="useitem38561" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="21" Water="0" TargetConfig="EventNpc38561"/>
+	<Property ID="12023" ItemID="useitem_1g" ProCount="1" AddPro="1" TrackInfoID="useitem38282" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="2" Water="1" TargetConfig="EventNpc38282"/>
+	<Property ID="12024" ItemID="useitem_2g" ProCount="1" AddPro="1" TrackInfoID="useitem38281" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="2" Water="0" TargetConfig="EventNpc38281"/>
+	<Property ID="12025" ItemID="useitem_3g" ProCount="1" AddPro="1" TrackInfoID="useitem38296" DeleteSelf="0" LockTarget="0" Radius="20" SceneID="12" Water="0" TargetConfig="EventNpc38296"/>
+	<Property ID="12026" ItemID="useitem_4g" ProCount="1" AddPro="1" TrackInfoID="useitem38304" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="14" Water="0"/>
+	<Property ID="12027" ItemID="useitem_5g" ProCount="1" AddPro="1" TrackInfoID="useitem38332" DeleteSelf="0" LockTarget="0" Radius="5" SceneID="14" Water="0" TargetConfig="EventNpc38332"/>
+	<Property ID="12028" ItemID="useitem_6g" ProCount="1" AddPro="1" TrackInfoID="useitem38334" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="14" Water="0" TargetConfig="WorldNpc01619"/>
+	<Property ID="12029" ItemID="useitem_7g" ProCount="1" AddPro="1" TrackInfoID="useitem38307" DeleteSelf="0" LockTarget="0" Radius="5" SceneID="14" Water="0" DeleteItems="taskitem_15g" TargetConfig="EventNpc38307"/>
+	<Property ID="11001" ItemID="useitem_16h" ProCount="1" AddPro="1" TrackInfoID="useitem36004" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04412"/>
+	<Property ID="11002" ItemID="useitem_22h" ProCount="1" AddPro="1" TrackInfoID="useitem36026" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="11" Water="0"/>
+	<Property ID="11003" ItemID="useitem_17h" ProCount="1" AddPro="1" TrackInfoID="useitem36027" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04552"/>
+	<Property ID="11004" ItemID="useitem_18h" ProCount="1" AddPro="1" TrackInfoID="useitem36035_1" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04414"/>
+	<Property ID="11005" ItemID="useitem_18h" ProCount="1" AddPro="1" TrackInfoID="useitem36035_2" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04415"/>
+	<Property ID="11006" ItemID="useitem_18h" ProCount="1" AddPro="1" TrackInfoID="useitem36035_3" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04416"/>
+	<Property ID="11007" ItemID="useitem_19h" ProCount="1" AddPro="1" TrackInfoID="useitem36040" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04413"/>
+	<Property ID="11008" ItemID="useitem_21h" ProCount="1" AddPro="1" TrackInfoID="useitem36060" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04419"/>
+	<Property ID="11009" ItemID="useitem_20h" ProCount="1" AddPro="1" TrackInfoID="useitem36081" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="11" Water="0"/>
+	<Property ID="11010" ItemID="useitem_35b" ProCount="1" AddPro="1" TrackInfoID="useitem36102" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04812"/>
+	<Property ID="11011" ItemID="useitem_27b" ProCount="1" AddPro="1" TrackInfoID="useitem36113" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="ItemNpc03209"/>
+	<Property ID="11012" ItemID="useitem_28b" ProCount="1" AddPro="1" TrackInfoID="useitem36116" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="ItemNpc03208"/>
+	<Property ID="11013" ItemID="useitem_29b" ProCount="1" AddPro="1" TrackInfoID="useitem36124" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="ItemNpc03210"/>
+	<Property ID="11014" ItemID="useitem_30b" ProCount="1" AddPro="1" TrackInfoID="useitem36130" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="11" Water="0" TargetConfig="WorldNpc04560"/>
+	<Property ID="11015" ItemID="useitem_31b" ProCount="1" AddPro="1" TrackInfoID="useitem36171" DeleteSelf="0" LockTarget="1" Radius="3" SceneID="17" Water="0" AddItems="taskitem_45b;taskitem_36b" TargetConfig="ItemNpc12004"/>
+	<Property ID="11016" ItemID="useitem_32b" ProCount="1" AddPro="1" TrackInfoID="useitem36179" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="17" Water="0" TargetConfig="ItemNpc12005"/>
+	<Property ID="11017" ItemID="useitem_33b" ProCount="1" AddPro="1" TrackInfoID="useitem36184" DeleteSelf="1" LockTarget="1" Radius="3" SceneID="17" Water="0" TargetConfig="WorldNpc09812"/>
+	<Property ID="11018" ItemID="useitem_34b" ProCount="1" AddPro="1" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="17" Water="0" AddItems="taskitem_47b" TargetConfig="ItemNpc12004"/>
+	<Property ID="11019" ItemID="useitem_14l" ProCount="1" AddPro="1" TrackInfoID="useitem36216" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00386"/>
+	<Property ID="11020" ItemID="useitem_15l" ProCount="1" AddPro="1" TrackInfoID="useitem36223" DeleteSelf="1" LockTarget="0" SceneID="12" Water="0"/>
+	<Property ID="11021" ItemID="useitem_16l" ProCount="1" AddPro="1" TrackInfoID="useitem36228" DeleteSelf="1" LockTarget="0" SceneID="12" Water="0" AddItems="taskitem_26l" DeleteItems="taskitem_25l"/>
+	<Property ID="11022" ItemID="useitem_17l" ProCount="1" AddPro="1" TrackInfoID="useitem36231" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="12" Water="0" TargetConfig="WorldNpc00386"/>
+	<Property ID="11023" ItemID="useitem_18l" ProCount="1" AddPro="1" TrackInfoID="useitem36274" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="20" Water="0" TargetConfig="WorldNpc06621"/>
+	<Property ID="11024" ItemID="useitem_19l" ProCount="1" AddPro="1" TrackInfoID="useitem36287" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="20" Water="0" TargetConfig="WorldNpc06621"/>
+	<Property ID="11025" ItemID="useitem_14j" TrackInfoID="useitem36315" DeleteSelf="1" LockTarget="0" SceneID="17" Water="1" AddItems="taskitem_9k"/>
+	<Property ID="11026" ItemID="useitem_12j" ProCount="1" AddPro="1" TrackInfoID="useitem36322" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="17" Water="0" TargetConfig="WorldNpc09903"/>
+	<Property ID="11027" ItemID="useitem_13j" ProCount="1" AddPro="1" TrackInfoID="useitem36327" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="11" Water="0" TargetConfig="WorldNpc04432"/>
+	<Property ID="11028" ItemID="useitem_15j" ProCount="1" AddPro="1" TrackInfoID="useitem36359" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="16" Water="0" TargetConfig="WorldNpc10042"/>
+	<Property ID="11029" ItemID="useitem_16j" TrackInfoID="useitem36364" DeleteSelf="1" LockTarget="0" SceneID="16" Water="1" AddItems="taskitem_9k"/>
+	<Property ID="11030" ItemID="useitem_17j" ProCount="1" AddPro="1" TrackInfoID="useitem36369" DeleteSelf="1" LockTarget="0" SceneID="16" Water="1"/>
+	<Property ID="11031" ItemID="useitem_18j" ProCount="1" AddPro="1" TrackInfoID="useitem36378" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="16" Water="0" TargetConfig="WorldNpc10043"/>
+	<Property ID="11032" ItemID="useitem_32a" ProCount="1" AddPro="1" TrackInfoID="useitem36392" DeleteSelf="1" Water="0"/>
+	<Property ID="11033" ItemID="useitem_33a" ProCount="1" AddPro="1" TrackInfoID="useitem36420" DeleteSelf="1" Water="0"/>
+	<Property ID="11034" ItemID="useitem_12e" ProCount="1" AddPro="1" TrackInfoID="useitem36460" DeleteSelf="1" Water="0"/>
+	<Property ID="11035" ItemID="useitem_34a" ProCount="1" AddPro="1" TrackInfoID="useitem36465" DeleteSelf="1" Water="0"/>
+	<Property ID="11037" ItemID="useitem_14e" ProCount="1" AddPro="1" TrackInfoID="useitem36466" DeleteSelf="1" Water="0" TargetConfig="GatherNpc00219"/>
+	<Property ID="11038" ItemID="useitem_31a" ProCount="1" AddPro="1" TrackInfoID="useitem36503_1" DeleteSelf="1" LockTarget="0" SceneID="18" Water="0" AddItems="useitem_30a" DeleteItems="taskitem_57a"/>
+	<Property ID="11039" ItemID="useitem_30a" ProCount="1" AddPro="1" TrackInfoID="useitem36503_2" DeleteSelf="1" LockTarget="0" SceneID="18" Water="0"/>
+	<Property ID="11040" ItemID="useitem_27a" ProCount="1" AddPro="1" TrackInfoID="useitem36530" DeleteSelf="1" LockTarget="1" Radius="2" SceneID="11" Water="0" TargetConfig="Gather00029a"/>
+	<Property ID="11041" ItemID="useitem_28a" ProCount="1" AddPro="1" TrackInfoID="useitem36547" DeleteSelf="1" LockTarget="1" Radius="2" SceneID="2" Water="0" TargetConfig="Gather00037a"/>
+	<Property ID="11042" ItemID="useitem_29a" ProCount="1" AddPro="1" TrackInfoID="useitem36552" DeleteSelf="1" LockTarget="1" Radius="2" SceneID="2" Water="0" TargetConfig="WorldNpc09309"/>
+	<Property ID="11043" ItemID="useitem_39a" ProCount="1" AddPro="1" TrackInfoID="useitem36568" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="26" Water="0"/>
+	<Property ID="10001" ItemID="useitem_24h" ProCount="1" AddPro="1" TrackInfoID="useitem40003" DeleteSelf="0" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02685"/>
+	<Property ID="10002" ItemID="useitem_25h" ProCount="1" AddPro="1" TrackInfoID="useitem40016_1" DeleteSelf="1" LockTarget="0" SceneID="10" Water="0" AddItems="useitem_30h"/>
+	<Property ID="10003" ItemID="useitem_30h" ProCount="1" AddPro="1" TrackInfoID="useitem40016_2" DeleteSelf="1" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02610"/>
+	<Property ID="10004" ItemID="useitem_31h" ProCount="1" AddPro="1" TrackInfoID="useitem40026" DeleteSelf="0" LockTarget="0" SceneID="10" Water="0"/>
+	<Property ID="10005" ItemID="useitem_26h" ProCount="1" AddPro="1" TrackInfoID="useitem40028" DeleteSelf="1" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02684"/>
+	<Property ID="10006" ItemID="useitem_27h" ProCount="1" AddPro="1" TrackInfoID="useitem40029" DeleteSelf="1" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02684"/>
+	<Property ID="10007" ItemID="useitem_28h" ProCount="1" AddPro="1" TrackInfoID="useitem40039" DeleteSelf="1" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02684"/>
+	<Property ID="10008" ItemID="useitem_29h" ProCount="1" AddPro="1" TrackInfoID="useitem40041" DeleteSelf="1" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02684"/>
+	<Property ID="10009" ItemID="useitem_32h" ProCount="1" AddPro="1" TrackInfoID="useitem40121" DeleteSelf="1" LockTarget="0" SceneID="14" Water="0"/>
+	<Property ID="10010" ItemID="XXX" ProCount="1" AddPro="1" TrackInfoID="useitem40065" DeleteSelf="1" LockTarget="1" SceneID="10" Water="0" TargetConfig="WorldNpc02685"/>
+	<Property ID="10011"/>
+	<Property ID="10012"/>
+	<Property ID="10013"/>
+	<Property ID="10014"/>
+	<Property ID="10015"/>
+	<Property ID="10016"/>
+	<Property ID="10200" ItemID="useitem_36a" ProCount="1" AddPro="1" TrackInfoID="useitem40301" DeleteSelf="1" LockTarget="0" SceneID="17" Water="0"/>
+	<Property ID="10201" ItemID="useitem_37a" ProCount="1" AddPro="1" TrackInfoID="useitem40313" DeleteSelf="1" LockTarget="0" SceneID="17" Water="0"/>
+	<Property ID="10202" ItemID="useitem_38a" ProCount="1" AddPro="1" TrackInfoID="useitem40349" DeleteSelf="1" LockTarget="0" SceneID="13" Water="0"/>
+	<Property ID="10203" ItemID="useitem_40a" ProCount="1" AddPro="1" TrackInfoID="useitem40354" DeleteSelf="1" LockTarget="0" SceneID="13" Water="0" TargetConfig="WorldNpc11009"/>
+	<Property ID="10250" ItemID="useitem_2m" ProCount="1" AddPro="1" TrackInfoID="useitem40402" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08944"/>
+	<Property ID="10251" ItemID="useitem_3m" ProCount="1" AddPro="1" TrackInfoID="useitem40412" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08946"/>
+	<Property ID="10252" ItemID="useitem_4m" ProCount="1" AddPro="1" TrackInfoID="useitem40425_1" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="13" Water="0"/>
+	<Property ID="10253" ItemID="useitem_5m" ProCount="1" AddPro="1" TrackInfoID="useitem40425_2" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08950"/>
+	<Property ID="10300" ItemID="useitem_56b" ProCount="1" AddPro="1" TrackInfoID="useitem40451" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="14" Water="0" TargetConfig="Gather00047b"/>
+	<Property ID="10301" ItemID="useitem_54b" ProCount="1" AddPro="1" TrackInfoID="useitem40459" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="14" Water="0" TargetConfig="WorldNpc01444"/>
+	<Property ID="10302" ItemID="useitem_55b" ProCount="1" AddPro="1" TrackInfoID="useitem40471" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="10" Water="0" TargetConfig="WorldNpc02717"/>
+	<Property ID="6001"/>
+	<Property ID="6200" ItemID="useitem_41a" ProCount="1" AddPro="1" TrackInfoID="useitem44300" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08523"/>
+	<Property ID="6201" ItemID="useitem_41a" ProCount="1" AddPro="1" TrackInfoID="useitem44313" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="16" Water="0" TargetConfig="WorldNpc10027"/>
+	<Property ID="9001" ItemID="useitem_8h" ProCount="1" AddPro="1" TrackInfoID="useitem50003_1" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="9" Water="0" AddItems="taskitem_9h" DeleteItems="taskitem_8h" TargetConfig="ItemNpc02003"/>
+	<Property ID="9002" ItemID="useitem_15h" ProCount="1" AddPro="1" TrackInfoID="useitem50003_2" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="9" Water="0" AddItems="taskitem_26h" DeleteItems="taskitem_34h" TargetConfig="ItemNpc02004"/>
+	<Property ID="9003" ItemID="useitem_9h" ProCount="1" AddPro="1" TrackInfoID="useitem50005" DeleteSelf="1" LockTarget="1" Radius="2" SceneID="9" Water="0" TargetConfig="WorldNpc02239"/>
+	<Property ID="9004" ItemID="useitem_23h" ProCount="1" AddPro="1" TrackInfoID="useitem50038" DeleteSelf="0" LockTarget="1" Radius="2" SceneID="9" Water="0" TargetConfig="WorldNpc02239"/>
+	<Property ID="9005" ItemID="useitem_10h" ProCount="1" AddPro="1" TrackInfoID="useitem50033" DeleteSelf="0" LockTarget="1" Radius="2" SceneID="9" Water="0" TargetConfig="WorldNpc02251"/>
+	<Property ID="9006" ItemID="useitem_11h" ProCount="1" AddPro="1" TrackInfoID="useitem50045" DeleteSelf="0" LockTarget="1" Radius="2" SceneID="9" Water="0" TargetConfig="WorldNpc02252"/>
+	<Property ID="9007" ItemID="useitem_13h" ProCount="1" AddPro="1" TrackInfoID="useitem50063" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0" AddItems="taskitem_21h" DeleteItems="taskitem_20h"/>
+	<Property ID="9008" ItemID="useitem_14h" ProCount="1" AddPro="1" TrackInfoID="useitem50080" DeleteSelf="1" LockTarget="0" Radius="2" SceneID="9" Water="0" TargetConfig="WorldNpc02243"/>
+	<Property ID="9009" ItemID="useitem_12h" ProCount="1" AddPro="1" TrackInfoID="useitem50093" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02240"/>
+	<Property ID="9010" ItemID="useitem_3d" ProCount="1" AddPro="1" TrackInfoID="useitem50121" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0" AddItems="taskitem_22d" DeleteItems="taskitem_17d;taskitem_18d"/>
+	<Property ID="9011" ItemID="useitem_4d" ProCount="1" AddPro="1" TrackInfoID="useitem50127" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="Gather00006d"/>
+	<Property ID="9012" ItemID="useitem_5d" ProCount="1" AddPro="1" TrackInfoID="useitem50130" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="9" Water="0" TargetConfig="EventNpc50131"/>
+	<Property ID="9013" ItemID="useitem_6d" ProCount="1" AddPro="1" TrackInfoID="useitem50140" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02230"/>
+	<Property ID="9014" ItemID="useitem_7d" ProCount="1" AddPro="1" TrackInfoID="useitem50142" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02230"/>
+	<Property ID="9015" ItemID="useitem_8d" ProCount="1" AddPro="1" TrackInfoID="useitem50154" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="ItemNpc02007"/>
+	<Property ID="9016" ItemID="useitem_9d" ProCount="1" AddPro="1" TrackInfoID="useitem50175" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0" AddItems="taskitem_34d"/>
+	<Property ID="9017" ItemID="useitem_1e" ProCount="1" AddPro="1" TrackInfoID="useitem50211" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="1" Water="0" TargetConfig="ItemNpc00008"/>
+	<Property ID="9018" ItemID="useitem_2e" ProCount="1" AddPro="1" TrackInfoID="useitem50232" DeleteSelf="0" LockTarget="0" Radius="0" SceneID="1" Water="0" AddItems="taskitem_17e" DeleteItems="taskitem_3m"/>
+	<Property ID="9019" ItemID="useitem_7e" ProCount="1" AddPro="1" TrackInfoID="useitem50234" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="1" Water="0" TargetConfig="ItemNpc00008"/>
+	<Property ID="9020" ItemID="useitem_9e" ProCount="1" AddPro="1" TrackInfoID="useitem50241" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="ItemNpc02008"/>
+	<Property ID="9021" ItemID="useitem_3e" ProCount="1" AddPro="1" TrackInfoID="useitem50251" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="21" Water="0" AddItems="taskitem_5m" DeleteItems="taskitem_24e"/>
+	<Property ID="9022" ItemID="useitem_4e" ProCount="1" AddPro="1" TrackInfoID="useitem50259" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="GatherNpc00213"/>
+	<Property ID="9023" ItemID="useitem_5e" ProCount="1" AddPro="1" TrackInfoID="useitem50275" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="9" Water="0" TargetConfig="WorldNpc02256"/>
+	<Property ID="9024" ItemID="useitem_8e" ProCount="1" AddPro="1" TrackInfoID="useitem50280" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="21" Water="0"/>
+	<Property ID="9025" ItemID="useitem_6e" ProCount="1" AddPro="1" TrackInfoID="useitem50285" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="21" Water="0" TargetConfig="WorldNpc05805"/>
+	<Property ID="9026" ItemID="useitem_1l" ProCount="1" AddPro="1" TrackInfoID="useitem50291" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="9" Water="0" TargetConfig="ItemNpc02006"/>
+	<Property ID="9027" ItemID="useitem_2l" ProCount="1" AddPro="1" TrackInfoID="useitem50296" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="16" Water="0" TargetConfig="WorldNpc10021"/>
+	<Property ID="9028" ItemID="useitem_3l" ProCount="1" AddPro="1" TrackInfoID="useitem50304" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="16" Water="0" TargetConfig="WorldNpc10025"/>
+	<Property ID="9029" ItemID="useitem_4l" ProCount="1" AddPro="1" TrackInfoID="useitem50312" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="16" Water="0" TargetConfig="WorldNpc10027"/>
+	<Property ID="9030" ItemID="useitem_5l" ProCount="1" AddPro="1" TrackInfoID="useitem50316" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="16" Water="0" TargetConfig="WorldNpc10030"/>
+	<Property ID="9031" ItemID="useitem_6l" ProCount="1" AddPro="1" TrackInfoID="useitem50319" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="16" Water="0"/>
+	<Property ID="9032" ItemID="useitem_7l" ProCount="1" AddPro="1" TrackInfoID="useitem50334" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="16" Water="0" TargetConfig="WorldNpc10035"/>
+	<Property ID="9033" ItemID="useitem_1k" ProCount="1" AddPro="1" TrackInfoID="useitem50344" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="10" Water="0"/>
+	<Property ID="9034" ItemID="useitem_2k" ProCount="1" AddPro="1" TrackInfoID="useitem50371_1" DeleteSelf="0" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="Gather00005k"/>
+	<Property ID="9035" ItemID="useitem_3k" ProCount="1" AddPro="1" TrackInfoID="useitem50371_2" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="Gather00005k"/>
+	<Property ID="9036" ItemID="useitem_4k" ProCount="1" AddPro="1" TrackInfoID="useitem50376" DeleteSelf="1" LockTarget="0" Radius="5" SceneID="9" Water="0" TargetConfig="EventNpc50376"/>
+	<Property ID="9037" ItemID="useitem_5k" ProCount="1" AddPro="1" TrackInfoID="useitem50380" DeleteSelf="1" LockTarget="0" Radius="20" SceneID="9" Water="1" AddItems="taskitem_9k" TargetConfig="EventNpc50380"/>
+	<Property ID="9038" ItemID="useitem_6j" ProCount="1" AddPro="1" TrackInfoID="useitem50405" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="7" Water="0" TargetConfig="WorldNpc03420"/>
+	<Property ID="9039" ItemID="useitem_7j" ProCount="1" AddPro="1" TrackInfoID="useitem50416" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="7" Water="0" TargetConfig="Gather00004j"/>
+	<Property ID="9040" ItemID="useitem_8j" ProCount="1" AddPro="1" TrackInfoID="useitem50417" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="7" Water="0" TargetConfig="WorldNpc03422"/>
+	<Property ID="9041" ItemID="useitem_9j" ProCount="1" AddPro="1" TrackInfoID="useitem50429_2" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="7" Water="0" TargetConfig="WorldNpc03422"/>
+	<Property ID="9042" ItemID="useitem_6k" ProCount="1" AddPro="1" TrackInfoID="useitem50438" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0"/>
+	<Property ID="9043" ItemID="useitem_7k" ProCount="1" AddPro="1" TrackInfoID="useitem50442_1" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="WorldNpc02205"/>
+	<Property ID="9044" ItemID="useitem_7k" ProCount="1" AddPro="1" TrackInfoID="useitem50442_2" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="WorldNpc02204"/>
+	<Property ID="9045" ItemID="useitem_8k" ProCount="1" AddPro="1" TrackInfoID="useitem50450" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="2" Water="0" TargetConfig="WorldNpc09307"/>
+	<Property ID="9046" ItemID="useitem_9k" ProCount="1" AddPro="1" TrackInfoID="useitem50461" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="Gather00014k"/>
+	<Property ID="9047" ItemID="useitem_10k" ProCount="1" AddPro="1" TrackInfoID="useitem50472" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="WorldNpc02203"/>
+	<Property ID="9048" ItemID="useitem_8l" ProCount="1" AddPro="1" TrackInfoID="useitem50485" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="ItemNpc02011"/>
+	<Property ID="9049" ItemID="useitem_9l" ProCount="1" AddPro="1" TrackInfoID="useitem50496" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="20" Water="0" TargetConfig="WorldNpc06616"/>
+	<Property ID="9050" ItemID="useitem_10l" ProCount="1" AddPro="1" TrackInfoID="useitem50511" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="Gather00004l"/>
+	<Property ID="9051" ItemID="useitem_11l" ProCount="1" AddPro="1" TrackInfoID="useitem50516" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0"/>
+	<Property ID="9052" ItemID="useitem_12l" ProCount="1" AddPro="1" TrackInfoID="useitem50522" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="9" Water="0"/>
+	<Property ID="9053" ItemID="useitem_13l" ProCount="1" AddPro="1" TrackInfoID="useitem50528" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="Gather00006d"/>
+	<Property ID="9054" ItemID="useitem_10j" ProCount="1" AddPro="1" TrackInfoID="useitem50561" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="WorldNpc02205"/>
+	<Property ID="9055" ItemID="useitem_11j" ProCount="1" AddPro="1" TrackInfoID="useitem50573" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="9" Water="0" TargetConfig="WorldNpc02209"/>
+	<Property ID="9056" ItemID="useitem_1m" ProCount="1" AddPro="1" TrackInfoID="useitem50429_1" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="7" Water="0" AddItems="useitem_9j" DeleteItems="taskitem_19j"/>
+	<Property ID="7000" ItemID="useitem_1w" ProCount="1" AddPro="1" TrackInfoID="useitem_46027" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="7" Water="0"/>
+	<Property ID="7001" ItemID="useitem_2w" ProCount="1" AddPro="1" TrackInfoID="useitem_46039_1" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="7" Water="0" AddItems="useitem_3w"/>
+	<Property ID="7002" ItemID="useitem_3w" ProCount="1" AddPro="1" TrackInfoID="useitem_46039_2" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="7" Water="0" TargetConfig="WorldNpc03335"/>
+	<Property ID="7003" ItemID="useitem_4w" ProCount="1" AddPro="1" TrackInfoID="useitem_46046" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="7" Water="0" TargetConfig="WorldNpc03335"/>
+	<Property ID="7004" ItemID="useitem_5w" ProCount="1" AddPro="1" TrackInfoID="useitem_46060" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="7" Water="0" TargetConfig="WorldNpc03443"/>
+	<Property ID="7005" ItemID="useitem_6w" ProCount="1" AddPro="1" TrackInfoID="useitem_46102" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="24" Water="1" AddItems="taskitem_w115"/>
+	<Property ID="7006" ItemID="useitem_7w" ProCount="1" AddPro="1" TrackInfoID="useitem_46110" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="24" Water="0" TargetConfig="WorldNpc05050"/>
+	<Property ID="7007" ItemID="useitem_8w" ProCount="1" AddPro="1" TrackInfoID="useitem_46181" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="11" Water="0" TargetConfig="WorldNpc04579"/>
+	<Property ID="7008"/>
+	<Property ID="7009"/>
+	<Property ID="7010"/>
+	<Property ID="7011"/>
+	<Property ID="7012"/>
+	<Property ID="7013"/>
+	<Property ID="7014"/>
+	<Property ID="7015"/>
+	<Property ID="7016"/>
+	<Property ID="7017"/>
+	<Property ID="7018"/>
+	<Property ID="7019"/>
+	<Property ID="7020"/>
+	<Property ID="7021"/>
+	<Property ID="7022"/>
+	<Property ID="7023"/>
+	<Property ID="7024"/>
+	<Property ID="7025"/>
+	<Property ID="7026"/>
+	<Property ID="7027"/>
+	<Property ID="7028"/>
+	<Property ID="7029"/>
+	<Property ID="7030"/>
+	<Property ID="7031"/>
+	<Property ID="7032"/>
+	<Property ID="7033"/>
+	<Property ID="7034"/>
+	<Property ID="7035"/>
+	<Property ID="7036"/>
+	<Property ID="7037"/>
+	<Property ID="7038"/>
+	<Property ID="7039"/>
+	<Property ID="7040"/>
+	<Property ID="7041"/>
+	<Property ID="7042"/>
+	<Property ID="7043"/>
+	<Property ID="7044"/>
+	<Property ID="7045"/>
+	<Property ID="7046"/>
+	<Property ID="7047"/>
+	<Property ID="7048"/>
+	<Property ID="7049"/>
+	<Property ID="7050"/>
+	<Property ID="7051"/>
+	<Property ID="7052"/>
+	<Property ID="7053"/>
+	<Property ID="7054"/>
+	<Property ID="7055"/>
+	<Property ID="7056"/>
+	<Property ID="7057"/>
+	<Property ID="7058"/>
+	<Property ID="7059"/>
+	<Property ID="7060"/>
+	<Property ID="7061"/>
+	<Property ID="7062"/>
+	<Property ID="7063"/>
+	<Property ID="7064"/>
+	<Property ID="7065"/>
+	<Property ID="7066"/>
+	<Property ID="7067"/>
+	<Property ID="7068"/>
+	<Property ID="7069"/>
+	<Property ID="7070"/>
+	<Property ID="7071"/>
+	<Property ID="7072"/>
+	<Property ID="7073"/>
+	<Property ID="7074"/>
+	<Property ID="7075"/>
+	<Property ID="7076"/>
+	<Property ID="7077"/>
+	<Property ID="7078"/>
+	<Property ID="7079"/>
+	<Property ID="7080"/>
+	<Property ID="7081"/>
+	<Property ID="7082"/>
+	<Property ID="7083"/>
+	<Property ID="7084"/>
+	<Property ID="7085"/>
+	<Property ID="7086"/>
+	<Property ID="7087"/>
+	<Property ID="7088"/>
+	<Property ID="7089"/>
+	<Property ID="7090"/>
+	<Property ID="7091"/>
+	<Property ID="7092"/>
+	<Property ID="7093"/>
+	<Property ID="7094"/>
+	<Property ID="7095"/>
+	<Property ID="7096"/>
+	<Property ID="7097"/>
+	<Property ID="7098"/>
+	<Property ID="7099"/>
+	<Property ID="7100"/>
+	<Property ID="7101"/>
+	<Property ID="7102"/>
+	<Property ID="7103"/>
+	<Property ID="7104"/>
+	<Property ID="7105"/>
+	<Property ID="7106"/>
+	<Property ID="7107"/>
+	<Property ID="7108"/>
+	<Property ID="7109"/>
+	<Property ID="7110"/>
+	<Property ID="7111"/>
+	<Property ID="7112"/>
+	<Property ID="7113"/>
+	<Property ID="7114"/>
+	<Property ID="7115"/>
+	<Property ID="7116"/>
+	<Property ID="7117"/>
+	<Property ID="7118"/>
+	<Property ID="7119"/>
+	<Property ID="7120"/>
+	<Property ID="7121"/>
+	<Property ID="7122"/>
+	<Property ID="7123"/>
+	<Property ID="7124"/>
+	<Property ID="7125"/>
+	<Property ID="7126"/>
+	<Property ID="7127"/>
+	<Property ID="7128"/>
+	<Property ID="7129"/>
+	<Property ID="7130"/>
+	<Property ID="7131"/>
+	<Property ID="7132"/>
+	<Property ID="7133"/>
+	<Property ID="7134"/>
+	<Property ID="7135"/>
+	<Property ID="7136"/>
+	<Property ID="7137"/>
+	<Property ID="7138"/>
+	<Property ID="7139"/>
+	<Property ID="7140"/>
+	<Property ID="7141"/>
+	<Property ID="7142"/>
+	<Property ID="7143"/>
+	<Property ID="7144"/>
+	<Property ID="7145"/>
+	<Property ID="7146"/>
+	<Property ID="7147"/>
+	<Property ID="7148"/>
+	<Property ID="7149"/>
+	<Property ID="7150"/>
+	<Property ID="7151"/>
+	<Property ID="7152"/>
+	<Property ID="7153"/>
+	<Property ID="7154"/>
+	<Property ID="7155"/>
+	<Property ID="7156"/>
+	<Property ID="7157"/>
+	<Property ID="7158"/>
+	<Property ID="7159"/>
+	<Property ID="7160"/>
+	<Property ID="7161"/>
+	<Property ID="7162"/>
+	<Property ID="7163"/>
+	<Property ID="7164"/>
+	<Property ID="7165"/>
+	<Property ID="7166"/>
+	<Property ID="7167"/>
+	<Property ID="7168"/>
+	<Property ID="7169"/>
+	<Property ID="7170"/>
+	<Property ID="7171"/>
+	<Property ID="7172"/>
+	<Property ID="7173"/>
+	<Property ID="7174"/>
+	<Property ID="7175"/>
+	<Property ID="7176"/>
+	<Property ID="7177"/>
+	<Property ID="7178"/>
+	<Property ID="7179"/>
+	<Property ID="7180"/>
+	<Property ID="7181"/>
+	<Property ID="7182"/>
+	<Property ID="7183"/>
+	<Property ID="7184"/>
+	<Property ID="7185"/>
+	<Property ID="7186"/>
+	<Property ID="7187"/>
+	<Property ID="7188"/>
+	<Property ID="7189"/>
+	<Property ID="7190"/>
+	<Property ID="7191"/>
+	<Property ID="7192"/>
+	<Property ID="7193"/>
+	<Property ID="7194"/>
+	<Property ID="7195"/>
+	<Property ID="7196"/>
+	<Property ID="7197"/>
+	<Property ID="7198"/>
+	<Property ID="7199"/>
+	<Property ID="7200" ItemID="useitem_1yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46296" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="13" Water="0" TargetConfig="WorldNpc08516"/>
+	<Property ID="7201" ItemID="useitem_2yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46328" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="13" Water="0"/>
+	<Property ID="7202" ItemID="useitem_3yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46328" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="13" Water="0"/>
+	<Property ID="7203" ItemID="useitem_4yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46340" DeleteSelf="0" LockTarget="1" Radius="15" SceneID="10" Water="0" TargetConfig="WorldNpc02700"/>
+	<Property ID="7204" ItemID="useitem_5yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46367" DeleteSelf="1" LockTarget="1" Radius="10" SceneID="10" Water="0" TargetConfig="WorldNpc02693"/>
+	<Property ID="7205" ItemID="useitem_6yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46410" DeleteSelf="1" LockTarget="1" Radius="15" SceneID="9" Water="0" TargetConfig="WorldNpc02576"/>
+	<Property ID="7206" ItemID="useitem_9yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46443" DeleteSelf="1" LockTarget="1" Radius="0" SceneID="22" Water="0"/>
+	<Property ID="7207" ItemID="useitem_7yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46457" DeleteSelf="1" LockTarget="1" Radius="15" SceneID="22" Water="0" TargetConfig="WorldNpc06239"/>
+	<Property ID="7208" ItemID="useitem_8yc" ProCount="1" AddPro="1" TrackInfoID="useitem_46478" DeleteSelf="1" LockTarget="1" Radius="15" SceneID="22" Water="0" TargetConfig="WorldNpc06230"/>
+	<Property ID="7209"/>
+	<Property ID="7210"/>
+	<Property ID="5001" ItemID="useitem_001x" ProCount="1" AddPro="1" TrackInfoID="useitem42071" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="5" Water="0" TargetConfig="WorldNpc04126"/>
+	<Property ID="5002" ItemID="useitem_002x" ProCount="1" AddPro="1" TrackInfoID="useitem42074" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="5" Water="0" TargetConfig="WorldNpc04124"/>
+	<Property ID="8001" ItemID="useitem_1y" ProCount="1" AddPro="1" TrackInfoID="useitem48011" DeleteSelf="1" LockTarget="0" Radius="0" SceneID="8" Water="0"/>
+	<Property ID="8002" ItemID="useitem_2y" ProCount="1" AddPro="1" TrackInfoID="useitem48018" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03856"/>
+	<Property ID="8003" ItemID="useitem_3y" ProCount="1" AddPro="1" TrackInfoID="useitem48033" DeleteSelf="1" LockTarget="1" Radius="50" SceneID="8" Water="0" TargetConfig="WorldNpc03810"/>
+	<Property ID="8004" ItemID="useitem_4y" ProCount="1" AddPro="1" TrackInfoID="useitem48045" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03925"/>
+	<Property ID="8005" ItemID="useitem_5y" ProCount="1" AddPro="1" TrackInfoID="useitem48047" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03925"/>
+	<Property ID="8006" ItemID="useitem_6y" ProCount="1" AddPro="1" TrackInfoID="useitem48058" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" AddItems="taskitem_14y" TargetConfig="EventNpc48058"/>
+	<Property ID="8007" ItemID="useitem_7y" ProCount="1" AddPro="1" TrackInfoID="useitem48063" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="8" Water="0" AddItems="taskitem_15y" TargetConfig="ItemNpc02803"/>
+	<Property ID="8008" ItemID="useitem_8y" ProCount="1" AddPro="1" TrackInfoID="useitem48067" DeleteSelf="0" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03928"/>
+	<Property ID="8009" ItemID="useitem_9y" ProCount="1" AddPro="1" TrackInfoID="useitem48138" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03833"/>
+	<Property ID="8010" ItemID="useitem_10y" ProCount="1" AddPro="1" TrackInfoID="useitem48148" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="ItemNpc02805"/>
+	<Property ID="8011" ItemID="useitem_11y" ProCount="1" AddPro="1" TrackInfoID="useitem48164" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="17" Water="0" TargetConfig="WorldNpc09815"/>
+	<Property ID="8012" ItemID="useitem_12y" ProCount="1" AddPro="1" TrackInfoID="useitem48172" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03811"/>
+	<Property ID="8013" ItemID="useitem_13y" ProCount="1" AddPro="1" TrackInfoID="useitem48180" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc03811"/>
+	<Property ID="8014" ItemID="useitem_14y" ProCount="1" AddPro="1" TrackInfoID="useitem48096" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="24" Water="0" TargetConfig="WorldNpc05105"/>
+	<Property ID="8015" ItemID="useitem_15y" ProCount="1" AddPro="1" TrackInfoID="useitem48112" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="24" Water="0" TargetConfig="WorldNpc05105"/>
+	<Property ID="8016" ItemID="useitem_16y" ProCount="1" AddPro="1" TrackInfoID="useitem48206" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc04008"/>
+	<Property ID="8017" ItemID="useitem_17y" ProCount="1" AddPro="1" TrackInfoID="useitem48210" DeleteSelf="1" LockTarget="1" Radius="5" SceneID="8" Water="0" TargetConfig="WorldNpc04008"/>
+</Object>

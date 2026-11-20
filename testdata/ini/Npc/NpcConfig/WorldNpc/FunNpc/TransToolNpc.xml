@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="Mache00001" script="TransToolNpc" Name="马车" Desc="马车" CollideRadius="1" NpcType="45" Resource="npc\mache001" WalkSpeed="4" RunSpeed="10"/>
+	<Property ID="fb_Mache00001" script="TransToolNpc" Name="马车" Desc="马车" CollideRadius="1" NpcType="45" Resource="npc\mache001" WalkSpeed="4" RunSpeed="10"/>
+	<Property ID="duchuan00001" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\boat02" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="duchuan00002" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\jt_chuan02" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="duchuan00003" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\jt_chuan03" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="duchuan00004" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\jt_zhufa01" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="fb_duchuan00001" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\boat02" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="duchuan00005" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\boat01" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="fb_duchuan00006" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\itemnpc819" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="no_fb_thd_shayu" script="TransToolNpc" Name="鲨鱼" Desc="鲨鱼" CollideRadius="1" NpcType="45" Resource="npc\searide_thd_1" WalkSpeed="15" RunSpeed="15"/>
+	<Property ID="fb_duchuan00002" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\jt_chuan02" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="no_fb_lxc_xueqiao" script="TransToolNpc" Name="雪橇" Desc="雪橇" CollideRadius="1" NpcType="45" Resource="npc\ride_wedjifen_0301" WalkSpeed="4" RunSpeed="10"/>
+	<Property ID="no_fb_changfeng_biaoche" script="TransToolNpc" Name="镖车" Desc="镖车" CollideRadius="1" NpcType="45" Resource="npc\ride_biaoche01" WalkSpeed="4" RunSpeed="8"/>
+	<Property ID="no_fb_changfeng_biaoche_1" script="TransToolNpc" Name="镖车" Desc="镖车" CollideRadius="1" NpcType="45" Resource="npc\ride_biaoche01" WalkSpeed="4" RunSpeed="6"/>
+	<Property ID="no_zhufa19" script="TransToolNpc" Name="浮萍" Desc="浮萍" CollideRadius="1" NpcType="45" Resource="npc\zhufa_npcitem950" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="dh_duchuan00001" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\dh_duchuan001" WalkSpeed="3" RunSpeed="4.5"/>
+	<Property ID="duchuan00006" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\jt_chuan03" WalkSpeed="3" RunSpeed="10"/>
+	<Property ID="no_zhufaschool18" script="TransToolNpc" Name="渡船" Desc="渡船" CollideRadius="1" NpcType="45" Resource="npc\jt_zhufa02" WalkSpeed="3" RunSpeed="4.5"/>
+</Object>

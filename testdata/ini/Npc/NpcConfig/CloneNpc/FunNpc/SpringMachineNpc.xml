@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="test_machine_001" script="SpringMachineNpc" Name="孔雀1号门" Desc="孔雀1号门" Resource="npc\fbmac00035" NpcType="173" SpringRange="5" SpringItemList="TaskItemClone005002,2,1,101010" SelectState="0"/>
+	<Property ID="machineclone001001" script="SpringMachineNpc" Resource="npc\fbmac00033" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="machineclone001002" script="SpringMachineNpc" Resource="npc\fbmac00033" NpcType="173" SpringRange="2" SpringItemList="TaskItemClone_001029,1,1,15007" SelectState="2"/>
+	<Property ID="machineclone001003" script="SpringMachineNpc" Resource="npc\fbmac00034" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="machineclone001004" script="SpringMachineNpc" Resource="npc\fbmac00034" NpcType="173" SpringRange="2" SpringItemList="TaskItemClone_001029,1,1,15007" SelectState="2"/>
+	<Property ID="machineclone001005" script="SpringMachineNpc" Resource="npc\fbmac00035" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="machineclone001006" script="SpringMachineNpc" Resource="npc\fbmac00035" NpcType="173" SpringRange="2" SpringItemList="TaskItemClone_001029,1,1,15007" SelectState="2"/>
+	<Property ID="MachineNpc00220" script="SpringMachineNpc" Name="青龙外机关" Desc="青龙外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00221" script="SpringMachineNpc" Name="白虎外机关" Desc="白虎外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00222" script="SpringMachineNpc" Name="朱雀外机关" Desc="朱雀外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00223" script="SpringMachineNpc" Name="玄武外机关" Desc="玄武外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00020" script="SpringMachineNpc" Name="青龙外机关" Desc="青龙外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00021" script="SpringMachineNpc" Name="白虎外机关" Desc="白虎外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00022" script="SpringMachineNpc" Name="朱雀外机关" Desc="朱雀外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00023" script="SpringMachineNpc" Name="玄武外机关" Desc="玄武外机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MachineNpc00024" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone002006" script="SpringMachineNpc" Resource="npc\fbmac002013" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002007" script="SpringMachineNpc" Resource="npc\fbmac002012" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002008" script="SpringMachineNpc" Resource="npc\fbmac002003" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002009" script="SpringMachineNpc" Resource="npc\fbmac002004" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="macclone002010" script="SpringMachineNpc" Resource="npc\fbmac002005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002011" script="SpringMachineNpc" Resource="npc\fbmac002006" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="macclone002012" script="SpringMachineNpc" Resource="npc\fbmac002007" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002013" script="SpringMachineNpc" Resource="npc\fbmac002008" NpcType="173" SpringRange="2" SpringItemList="TaskItemClone_002025,1,0,15007" SelectState="2"/>
+	<Property ID="macclone002014" script="SpringMachineNpc" Resource="npc\fbmac002009" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002015" script="SpringMachineNpc" Resource="npc\fbmac002010" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002016" script="SpringMachineNpc" Resource="npc\fbmac002011" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002017" script="SpringMachineNpc" Resource="npc\itemnpc423a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002018" script="SpringMachineNpc" Resource="npc\itemnpc423a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002019" script="SpringMachineNpc" Resource="npc\itemnpc423a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002020" script="SpringMachineNpc" Resource="npc\itemnpc423a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002021" script="SpringMachineNpc" Resource="npc\itemnpc423a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002022" script="SpringMachineNpc" Resource="npc\itemnpc423a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002023" script="SpringMachineNpc" Resource="npc\itemnpc422a" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="macclone002024" script="SpringMachineNpc" Resource="npc\itemnpc422a" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="macclone002025" script="SpringMachineNpc" Resource="npc\itemnpc422a" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="macclone002026" script="SpringMachineNpc" Resource="npc\itemnpc422a" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="macclone002027" script="SpringMachineNpc" Resource="npc\itemnpc422a" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="macclone002028" script="SpringMachineNpc" Resource="npc\itemnpc422a" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="macclone002029" script="SpringMachineNpc" Resource="npc\fbmac002014" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002030" script="SpringMachineNpc" Resource="npc\fbmac002016" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002031" script="SpringMachineNpc" Resource="npc\fbmac002015" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002032" script="SpringMachineNpc" Resource="npc\fbmac002017" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002033" script="SpringMachineNpc" Resource="npc\fbmac002018" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone002001" script="SpringMachineNpc" Resource="npc\fbmac002002" NpcType="173" SpringRange="3" SpringItemList="TaskItemClone_002018,1,1,15007" SelectState="2"/>
+	<Property ID="MacClone002002" script="SpringMachineNpc" Resource="npc\fbmac002002" NpcType="173" SpringRange="3" SpringItemList="TaskItemClone_002018,1,1,15007" SelectState="2"/>
+	<Property ID="MacClone002003" script="SpringMachineNpc" Resource="npc\fbmac002002" NpcType="173" SpringRange="3" SpringItemList="TaskItemClone_002018,1,1,15007" SelectState="2"/>
+	<Property ID="MacClone002004" script="SpringMachineNpc" Resource="npc\fbmac002002" NpcType="173" SpringRange="3" SpringItemList="TaskItemClone_002018,1,1,15007" SelectState="2"/>
+	<Property ID="MacClone017066" script="SpringMachineNpc" Resource="npc\fbmac00535" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017011" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017012" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017014" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017015" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SpringItemList="TaskItemClone_0171140,1,1,15007" SelectState="2"/>
+	<Property ID="MacClone017016" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017028" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017029" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017010" script="SpringMachineNpc" Resource="npc\fbmac019011" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017001" script="SpringMachineNpc" Resource="npc\fbmac019011" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017091" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017092" script="SpringMachineNpc" Resource="npc\fbmac00529" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017093" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017095" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017043" script="SpringMachineNpc" Resource="npc\fbmac019011" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017009" script="SpringMachineNpc" Resource="npc\fbmac00517" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017013" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017030" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017031" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017017" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017018" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017019" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017020" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017021" script="SpringMachineNpc" Resource="npc\fbmac00531" NpcType="171" SpringRange="1" SelectState="0"/>
+	<Property ID="MacClone017022" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="171" SpringRange="1" SelectState="0"/>
+	<Property ID="MacClone017023" script="SpringMachineNpc" Resource="npc\fbmac00515" NpcType="164" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone017044" script="SpringMachineNpc" Resource="npc\fbmac00525" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017049" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017050" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017081" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017082" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017083" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017084" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017085" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017086" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017087" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017088" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017094" script="SpringMachineNpc" Resource="npc\fbmac00525" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017081" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017201" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017202" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017203" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017204" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017205" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017206" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017207" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017208" script="SpringMachineNpc" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017209" script="SpringMachineNpc" Resource="npc\fbmac00517" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017210" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017211" script="SpringMachineNpc" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017212" script="SpringMachineNpc" Resource="npc\fbmac00520" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017213" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017214" script="SpringMachineNpc" Resource="npc\fbmac00535" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017215" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017216" script="SpringMachineNpc" Resource="npc\fbmac00529" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone017217" script="SpringMachineNpc" Resource="npc\fbmac00531" NpcType="171" SpringRange="1" SelectState="0"/>
+	<Property ID="MacClone017218" script="SpringMachineNpc" Resource="npc\fbmac00525" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone003001" script="SpringMachineNpc" Resource="npc\fbmac003001" NpcType="173" SpringRange="2" SpringItemList="TaskItemClone_002025,1,0,4029" SelectState="2"/>
+	<Property ID="MacClone003002" script="SpringMachineNpc" Resource="npc\fbmac003002" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003003" script="SpringMachineNpc" Resource="npc\fbmac003003" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003004" script="SpringMachineNpc" Resource="npc\fbmac003027" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003005" script="SpringMachineNpc" Resource="npc\fbmac003004" NpcType="164" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003006" script="SpringMachineNpc" Resource="npc\brokennpc\brokenitem027" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone003007" script="SpringMachineNpc" Resource="npc\fbmac003006" NpcType="164" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003008" script="SpringMachineNpc" Resource="npc\brokennpc\brokenitem028" NpcType="172" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone003009" script="SpringMachineNpc" Resource="npc\fbmac003008" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone003010" script="SpringMachineNpc" Resource="npc\fbmac003009" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone003011" script="SpringMachineNpc" Resource="npc\fbmac003011" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003012" script="SpringMachineNpc" Resource="npc\fbmac003012" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone003013" script="SpringMachineNpc" Resource="npc\fbmac00035" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone005002" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="MacClone005003" script="SpringMachineNpc" Resource="npc\fbmac005005" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005005" script="SpringMachineNpc" Resource="npc\fbmac005004" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005006" script="SpringMachineNpc" Resource="npc\fbmac005004" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005007" script="SpringMachineNpc" Resource="npc\fbmac005007" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005008" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005009" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005010" script="SpringMachineNpc" Resource="npc\fbmac00003" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005011" script="SpringMachineNpc" Resource="npc\fbmac00003" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005012" script="SpringMachineNpc" Resource="npc\fbmac00003" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005016" script="SpringMachineNpc" Resource="npc\fbmac005016" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005017" script="SpringMachineNpc" Resource="npc\itemnpc070" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005018" script="SpringMachineNpc" Resource="npc\fbmac005017" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005019" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005020" script="SpringMachineNpc" Resource="npc\fbmac005001" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005021" script="SpringMachineNpc" Resource="npc\fbmac005002" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005004" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005022" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005023" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005024" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005025" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005026" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005027" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005028" script="SpringMachineNpc" Resource="npc\fbmac005006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005029" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005030" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005031" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005032" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005033" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005034" script="SpringMachineNpc" Resource="npc\fbmac00011" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005035" script="SpringMachineNpc" Resource="npc\fbmac00011" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005036" script="SpringMachineNpc" Resource="npc\fbmac00035" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005037" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005038" script="SpringMachineNpc" Resource="npc\fbmac00040" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005051" script="SpringMachineNpc" Resource="npc\fbmac005003" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005052" script="SpringMachineNpc" Resource="npc\fbmac005012" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005053" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005054" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005055" script="SpringMachineNpc" Resource="npc\fbmac005007" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005056" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005057" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005058" script="SpringMachineNpc" Resource="npc\fbmac005007" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005059" script="SpringMachineNpc" Resource="npc\fbmac005007" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005060" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005061" script="SpringMachineNpc" Resource="npc\fbmac005008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005062" script="SpringMachineNpc" Resource="npc\fbmac005005" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005063" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005064" script="SpringMachineNpc" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005101w" script="CommonNpc" Name="解馋迷宫机关" Desc="解馋迷宫机关" Resource="npc\fbmac00036" NpcType="164" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005102w" script="CommonNpc" Name="解馋迷宫机关" Desc="解馋迷宫机关" Resource="npc\fbmac00036" NpcType="164" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005103w" script="CommonNpc" Name="解馋迷宫机关" Desc="解馋迷宫机关" Resource="npc\fbmac00036" NpcType="164" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone005104w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005105w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005106w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005107w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005108w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005109w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005110w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone005111w" script="SpringMachineNpc" Name="解馋迷宫门" Desc="解馋迷宫门" Resource="npc\fbmac005009" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone007004" script="SpringMachineNpc" Resource="npc\fbmac00201" NpcType="174" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone007005" script="SpringMachineNpc" Resource="npc\fbmac00202" NpcType="174" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone007006" script="SpringMachineNpc" Resource="npc\fbmac00203" NpcType="174" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone007007" script="SpringMachineNpc" Resource="npc\fbmac00204" NpcType="174" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone007008" script="SpringMachineNpc" Resource="npc\fbmac00205" NpcType="174" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone007009" script="FlyNpc" Resource="npc\fbmac00531" NpcType="48" SpringRange="1" SelectState="0"/>
+	<Property ID="MacClone007010" script="FlyNpc" Resource="npc\fbmac00521" NpcType="48" SpringRange="1" SelectState="0"/>
+	<Property ID="MacClone007011" script="FlyNpc" Resource="npc\fbmac00521" NpcType="48" SpringRange="1" SelectState="0"/>
+	<Property ID="MacClone007012" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone007013" script="SpringMachineNpc" Resource="npc\fbmac00206_a" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007014" script="SpringMachineNpc" Resource="npc\fbmac00206_b" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007015" script="SpringMachineNpc" Resource="npc\fbmac00206_c" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007016" script="SpringMachineNpc" Resource="npc\fbmac00206_d" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007017" script="SpringMachineNpc" Resource="npc\fbmac00206_e" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007018" script="SpringMachineNpc" Resource="npc\fbmac00206_f" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007019" script="SpringMachineNpc" Resource="npc\fbmac00206_g" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007020" script="SpringMachineNpc" Resource="npc\fbmac00206_h" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007021" script="SpringMachineNpc" Resource="npc\fbmac00206_i" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007022" script="SpringMachineNpc" Resource="npc\fbmac00206_j" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007023" script="SpringMachineNpc" Resource="npc\fbmac00206_k" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007024" script="SpringMachineNpc" Resource="npc\fbmac00206_l" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007025" script="SpringMachineNpc" Resource="npc\fbmac00206_m" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007026" script="SpringMachineNpc" Resource="npc\fbmac00206_n" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007027" script="SpringMachineNpc" Resource="npc\fbmac00206_o" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007028" script="SpringMachineNpc" Resource="npc\fbmac00206_p" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007029" script="SpringMachineNpc" Resource="npc\fbmac00206_q" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007030" script="SpringMachineNpc" Resource="npc\fbmac00206_r" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007031" script="SpringMachineNpc" Resource="npc\fbmac00206_s" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007032" script="SpringMachineNpc" Resource="npc\fbmac00206_t" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone007033" script="SpringMachineNpc" Resource="npc\fbmac00184" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone007034" script="SpringMachineNpc" Resource="npc\fbmac00184" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="MacClone007036" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone007037" script="SpringMachineNpc" Resource="npc\fbmac007003" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone007038" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone007039" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone007040" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone007041" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone007042" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007001" script="SpringMachineNpc" Resource="npc\fbmac00185" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007002" script="SpringMachineNpc" Resource="npc\fbmac00186" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007003" script="SpringMachineNpc" Resource="npc\fbmac00187" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007004" script="SpringMachineNpc" Resource="npc\fbmac00188" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007005" script="SpringMachineNpc" Resource="npc\fbmac00189" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007006" script="SpringMachineNpc" Resource="npc\fbmac00190" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007007" script="SpringMachineNpc" Resource="npc\fbmac00191" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007008" script="SpringMachineNpc" Resource="npc\fbmac00192" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007009" script="SpringMachineNpc" Resource="npc\fbmac00193" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007010" script="SpringMachineNpc" Resource="npc\fbmac00194" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007011" script="SpringMachineNpc" Resource="npc\fbmac00195" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007012" script="SpringMachineNpc" Resource="npc\fbmac00196" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007013" script="SpringMachineNpc" Resource="npc\fbmac00197" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007014" script="SpringMachineNpc" Name="璇玑门-地狱" Desc="璇玑门-地狱" Resource="npc\fbmac00197" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007015" script="SpringMachineNpc" Name="玄真门地狱" Desc="玄真门地狱" Resource="npc\fbmac00196" NpcType="173" SpringRange="3" SpringItemList="TaskItemClone_007021,1,0,clone007068" SelectState="2"/>
+	<Property ID="BlockClone007016" script="SpringMachineNpc" Name="璇玑门-普通、困难" Desc="璇玑门-普通、困难" Resource="npc\fbmac00197" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone007017" script="SpringMachineNpc" Name="剑门-普通" Desc="剑门-普通" Resource="npc\fbmac00197" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004001" script="SpringMachineNpc" Resource="npc\fbmac004004" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004002" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004003" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004004" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004005" script="SpringMachineNpc" Resource="npc\fbmac004004" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004006" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004007" script="SpringMachineNpc" Resource="npc\fbmac00518" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004008" script="SpringMachineNpc" Resource="npc\fbmac004007" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone004009" script="SpringMachineNpc" Resource="npc\fbmac004008" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone004011" script="SpringMachineNpc" Resource="npc\fbmac004003" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone004012" script="SpringMachineNpc" Resource="npc\fbmac004001" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone004013" script="SpringMachineNpc" Resource="npc\fbmac004001" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone004014" script="SpringMachineNpc" Resource="npc\fbmac004002" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone004015" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone004016" script="SpringMachineNpc" Name="暗影洞1" Desc="暗影洞1" Resource="npc\fbmac021033" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="MacClone004017" script="SpringMachineNpc" Name="暗影洞2" Desc="暗影洞2" Resource="npc\fbmac021033" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="MacClone004018" script="SpringMachineNpc" Name="暗影洞3" Desc="暗影洞3" Resource="npc\fbmac021033" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="MacClone004019" script="SpringMachineNpc" Name="暗影洞4" Desc="暗影洞4" Resource="npc\fbmac021033" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="MacClone004020" script="SpringMachineNpc" Name="暗影洞5" Desc="暗影洞5" Resource="npc\fbmac021033" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="MacClone004100" script="SpringMachineNpc" Name="城门" Desc="城门" Resource="npc\fbmac004002" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009002" script="SpringMachineNpc" Resource="npc\fbmac00243" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="BlockClone009003" script="SpringMachineNpc" Resource="npc\fbmac00245" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009004" script="SpringMachineNpc" Resource="npc\fbmac00246" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009005" script="SpringMachineNpc" Resource="npc\fbmac00248" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009008" script="SpringMachineNpc" Resource="npc\fbmac00249" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009009" script="SpringMachineNpc" Resource="npc\fbmac00254" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009010" script="SpringMachineNpc" Resource="npc\fbmac00255" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="macclone009001" script="SpringMachineNpc" Resource="npc\fbmac003011" NpcType="173" SpringRange="3"/>
+	<Property ID="macclone009003" script="SpringMachineNpc" Resource="npc\itemnpc514" NpcType="163" SpringRange="1" SelectState="2"/>
+	<Property ID="BlockClone019002" script="SpringMachineNpc" Resource="npc\fbmac019011" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019003" script="SpringMachineNpc" Resource="npc\fbmac019013" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019004" script="SpringMachineNpc" Resource="npc\fbmac019011" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019005" script="SpringMachineNpc" Resource="npc\fbmac019012" NpcType="173" SpringRange="5.5" SpringItemList="taskitemclone019011,1,1,16153" SelectState="2"/>
+	<Property ID="BlockClone019011" script="SpringMachineNpc" Resource="npc\fbmac019011a" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019008" script="SpringMachineNpc" Resource="npc\fbmac019011a" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019009" script="SpringMachineNpc" Resource="npc\fbmac019011a" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019010" script="SpringMachineNpc" Resource="npc\fbmac019011" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="MacClone019003" script="SpringMachineNpc" Name="火把" Desc="火把" Resource="npc\fbmac019004" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="MacClone019013" script="SpringMachineNpc" Resource="npc\fbmac019006" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="BlockClone019012" script="SpringMachineNpc" Resource="npc\fbmac019014" NpcType="173" SpringRange="5.5" SelectState="2"/>
+	<Property ID="BlockClone019013" script="SpringMachineNpc" Resource="npc\fbmac019022" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="BlockClone019014" script="SpringMachineNpc" Resource="npc\fbmac019022" NpcType="173" SpringRange="5"/>
+	<Property ID="BlockClone019015" script="SpringMachineNpc" Resource="npc\fbmac019006" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone019016" script="SpringMachineNpc" Resource="npc\fbmac019006" NpcType="173" SpringRange="4" SelectState="2"/>
+	<Property ID="BlockClone019017" script="SpringMachineNpc" Resource="npc\fbmac019005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="BlockClone019018" script="SpringMachineNpc" Resource="npc\fbmac019005" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone019022" script="SpringMachineNpc" Resource="npc\fbmac019006" NpcType="173" SpringRange="4" SelectState="2"/>
+	<Property ID="MacClone019023" script="SpringMachineNpc" Resource="npc\fbmac019006" NpcType="173" SpringRange="4" SelectState="2"/>
+	<Property ID="MacClone019024" script="SpringMachineNpc" Resource="npc\fbmac019006" NpcType="173" SpringRange="4" SelectState="2"/>
+	<Property ID="MacClone019025" script="SpringMachineNpc" Name="火把" Desc="火把" Resource="npc\fbmac019004" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="MacClone019026" script="SpringMachineNpc" Name="火把" Desc="火把" Resource="npc\fbmac019004" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="MacClone019027" script="SpringMachineNpc" Name="火把" Desc="火把" Resource="npc\fbmac019004" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="MacClone019028" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac005019" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="MacClone019029" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac005019" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="MacClone019030" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac005019" NpcType="173" SpringRange="1.5" SelectState="2"/>
+	<Property ID="BlockClone019019" script="SpringMachineNpc" Name="布袋" Desc="布袋" Resource="npc\itemnpc560" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="BlockClone019080" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac019034" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="BlockClone019081" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac019034" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="BlockClone019082" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac019034" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="BlockClone019083" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\fbmac019034" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="BlockClone019084" script="SpringMachineNpc" Name="牢笼" Desc="牢笼" Resource="npc\itemnpc606" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013001" script="SpringMachineNpc" Resource="npc\fbmac013001" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013002" script="SpringMachineNpc" Resource="npc\fbmac013002" NpcType="202" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone013003" script="SpringMachineNpc" Resource="npc\fbmac013003" NpcType="202" SpringRange="20" SelectState="0"/>
+	<Property ID="macclone013004" script="SpringMachineNpc" Resource="npc\fbmac013004" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013004a" script="SpringMachineNpc" Resource="npc\fbmac013004" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013005" script="SpringMachineNpc" Resource="npc\fbmac013005" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013006a" script="SpringMachineNpc" Resource="npc\fbmac013006a" NpcType="172" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013006b" script="SpringMachineNpc" Resource="npc\fbmac013006b" NpcType="172" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013006c" script="SpringMachineNpc" Resource="npc\fbmac013006c" NpcType="172" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013007" script="SpringMachineNpc" Resource="npc\fbmac013007" NpcType="172" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone013008" script="SpringMachineNpc" Resource="npc\fbmac013008" NpcType="172" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone013009" script="SpringMachineNpc" Resource="npc\fbmac013009" NpcType="172" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone013013" script="SpringMachineNpc" Resource="npc\fbmac013013" NpcType="163" SpringRange="100" SelectState="2"/>
+	<Property ID="macclone013014" script="SpringMachineNpc" Resource="npc\fbmac013040" NpcType="202" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013016" script="SpringMachineNpc" Resource="npc\fbmac013016" NpcType="172" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone013019a" script="SpringMachineNpc" Resource="npc\fbmac013019f" NpcType="170" SpringRange="50" SelectState="0"/>
+	<Property ID="macclone013019b" script="SpringMachineNpc" Resource="npc\fbmac013019f" NpcType="170" SpringRange="50" SelectState="0"/>
+	<Property ID="macclone013019c" script="SpringMachineNpc" Resource="npc\fbmac013019f" NpcType="170" SpringRange="50" SelectState="0"/>
+	<Property ID="macclone013019d" script="SpringMachineNpc" Resource="npc\fbmac013019f" NpcType="170" SpringRange="50" SelectState="0"/>
+	<Property ID="macclone013019e" script="SpringMachineNpc" Resource="npc\fbmac013019f" NpcType="170" SpringRange="50" SelectState="0"/>
+	<Property ID="macclone013020" script="SpringMachineNpc" Resource="npc\fbmac013020" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013021" script="SpringMachineNpc" Resource="npc\fbmac013021" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013022" script="SpringMachineNpc" Resource="npc\fbmac013022" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013023" script="SpringMachineNpc" Resource="npc\fbmac013023" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013024" script="SpringMachineNpc" Resource="npc\fbmac013024" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013024a" script="SpringMachineNpc" Resource="npc\fbmac013024" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013024b" script="SpringMachineNpc" Resource="npc\fbmac013024a" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013024c" script="SpringMachineNpc" Resource="npc\fbmac013024a" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013024d" script="SpringMachineNpc" Resource="npc\fbmac013024" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013026" script="SpringMachineNpc" Resource="npc\fbmac013026" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013026c" script="SpringMachineNpc" Resource="npc\fbmac013026b" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013026a" script="SpringMachineNpc" Resource="npc\fbmac013026a" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013026b" script="SpringMachineNpc" Resource="npc\fbmac013026a" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013027" script="SpringMachineNpc" Resource="npc\fbmac013027" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013027a" script="SpringMachineNpc" Resource="npc\fbmac013027a" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013027b" script="SpringMachineNpc" Resource="npc\fbmac013027b" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013028" script="SpringMachineNpc" Resource="npc\fbmac013028" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013028a" script="SpringMachineNpc" Resource="npc\fbmac013028" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013029" script="SpringMachineNpc" Resource="npc\fbmac013029" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030a" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030b" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030c" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030d" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030e" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013030f" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013031" script="SpringMachineNpc" Resource="npc\fbmac013031" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032a" script="SpringMachineNpc" Resource="npc\fbmac013032a" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032b" script="SpringMachineNpc" Resource="npc\fbmac013032b" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032c" script="SpringMachineNpc" Resource="npc\fbmac013032c" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032d" script="SpringMachineNpc" Resource="npc\fbmac013032d" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032e" script="SpringMachineNpc" Resource="npc\fbmac013032e" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032f" script="SpringMachineNpc" Resource="npc\fbmac013032f" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032g" script="SpringMachineNpc" Resource="npc\fbmac013032g" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032h" script="SpringMachineNpc" Resource="npc\fbmac013032h" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032i" script="SpringMachineNpc" Resource="npc\fbmac013032i" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013032j" script="SpringMachineNpc" Resource="npc\fbmac013032j" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013033" script="SpringMachineNpc" Resource="npc\fbmac013033" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013033a" script="SpringMachineNpc" Resource="npc\fbmac013033" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013034" script="SpringMachineNpc" Resource="npc\fbmac013034" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013035" script="SpringMachineNpc" Resource="npc\fbmac013035" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013035a" script="SpringMachineNpc" Resource="npc\fbmac013035" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013036" script="SpringMachineNpc" Resource="npc\fbmac013036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013037" script="SpringMachineNpc" Resource="npc\fbmac013037" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013037a" script="SpringMachineNpc" Resource="npc\fbmac013037" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="macclone013051" script="SpringMachineNpc" Resource="npc\fbmac013039a" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013052" script="SpringMachineNpc" Resource="npc\fbmac013039b" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013053" script="SpringMachineNpc" Resource="npc\fbmac013039c" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013054" script="SpringMachineNpc" Resource="npc\fbmac013039d" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013055" script="SpringMachineNpc" Resource="npc\fbmac013039e" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013056" script="SpringMachineNpc" Resource="npc\fbmac013039f" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013057" script="SpringMachineNpc" Resource="npc\fbmac013039g" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013058" script="SpringMachineNpc" Resource="npc\fbmac013039h" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013059" script="SpringMachineNpc" Resource="npc\fbmac013039i" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone013060" script="SpringMachineNpc" Resource="npc\fbmac013039j" NpcType="601" SpringRange="5" SelectState="2"/>
+	<Property ID="funnpcclone013012" script="SpringMachineNpc" Resource="npc\fbfunnpc00241a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="npcclone013005ca" script="SpringMachineNpc" Resource="npc\monster134a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="npcclone013006ca" script="SpringMachineNpc" Resource="npc\monster258a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="npcclone013007a" script="SpringMachineNpc" Resource="npc\monster072a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="npcclone013008a" script="SpringMachineNpc" Resource="npc\monster246a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="npcclone013009a" script="SpringMachineNpc" Resource="npc\monster058a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="npcclone013010a" script="SpringMachineNpc" Resource="npc\worldnpc246a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone015001" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015002" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015003" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015004" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015005" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015006" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015007" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015008" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015009" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015010" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015011" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015012" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015013" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015014" script="SpringMachineNpc" Resource="npc\fbmac00511" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015015" script="SpringMachineNpc" Resource="npc\fbmac015017" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone015016" script="SpringMachineNpc" Resource="npc\fbmac015018" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015017" script="SpringMachineNpc" Resource="npc\fbmac015019" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015018" script="SpringMachineNpc" Resource="npc\fbmac00195" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015019" script="SpringMachineNpc" Resource="npc\fbmac015020" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015020" script="SpringMachineNpc" Resource="npc\fbmac015018" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015021" script="SpringMachineNpc" Resource="npc\fbmac015019" NpcType="173" SpringRange="5"/>
+	<Property ID="MacClone015281" script="SpringMachineNpc" Resource="npc\fbmac00528" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021001" script="SpringMachineNpc" Resource="npc\fbmac021020" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021002" script="SpringMachineNpc" Resource="npc\fbmac021021" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021003" script="SpringMachineNpc" Resource="npc\fbmac021022" NpcType="173" SpringRange="4" SelectState="2"/>
+	<Property ID="MacClone021102" script="SpringMachineNpc" Resource="npc\fbmac021023" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021004" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021005" script="SpringMachineNpc" Resource="npc\fbmac021034" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacClone021007" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021008" script="SpringMachineNpc" Resource="npc\fbmac00012" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021009" script="SpringMachineNpc" Resource="npc\fbmac003026" NpcType="173" SpringRange="5"/>
+	<Property ID="Macclone021021" script="FlyNpc" Resource="npc\fbmac021025" NpcType="48" SpringRange="5"/>
+	<Property ID="Macclone021022" script="FlyNpc" Resource="npc\fbmac021025" NpcType="48" SpringRange="5"/>
+	<Property ID="Macclone021023" script="FlyNpc" Resource="npc\fbmac021025" NpcType="48" SpringRange="5"/>
+	<Property ID="Macclone021024" script="FlyNpc" Resource="npc\fbmac021025" NpcType="48" SpringRange="5"/>
+	<Property ID="Macclone021211" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021212" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021213" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021214" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021215" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021216" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021217" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021218" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021219" script="SpringMachineNpc" Resource="npc\fbmac021011" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021047" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021048" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021049" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021050" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021051" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021052" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021053" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021054" script="SpringMachineNpc" Resource="npc\fbmac021001" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="MacClone021131" script="SpringMachineNpc" Name="灯柱1" Desc="灯柱1" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021132" script="SpringMachineNpc" Name="灯柱2" Desc="灯柱2" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021133" script="SpringMachineNpc" Name="灯柱3" Desc="灯柱3" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021134" script="SpringMachineNpc" Name="灯柱4" Desc="灯柱4" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021135" script="SpringMachineNpc" Name="灯柱5" Desc="灯柱5" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021136" script="SpringMachineNpc" Name="灯柱6" Desc="灯柱6" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021137" script="SpringMachineNpc" Name="灯柱7" Desc="灯柱7" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021138" script="SpringMachineNpc" Name="灯柱8" Desc="灯柱8" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone021139" script="SpringMachineNpc" Name="灯柱9" Desc="灯柱9" Resource="npc\fbmac021001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="Macclone021101" script="SpringMachineNpc" Resource="npc\fbmac021055" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="Macclone021103" script="SpringMachineNpc" Resource="npc\fbmac021076" NpcType="173" SpringRange="5" SpringItemList="useitemclone013003,1,1,16425" SelectState="2"/>
+	<Property ID="Macclone021104" script="SpringMachineNpc" Resource="npc\fbmac021036" NpcType="173" SpringRange="5" SpringItemList="useitemclone013003,1,1,16423" SelectState="2"/>
+	<Property ID="Macclone021105" script="SpringMachineNpc" Resource="npc\fbmac021036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021106" script="SpringMachineNpc" Resource="npc\fbmac021034" NpcType="173" SpringRange="6" SelectState="2"/>
+	<Property ID="Macclone021107" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021108" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021109" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021110" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021111" script="SpringMachineNpc" Resource="npc\itemnpc517" NpcType="173" SpringRange="5" SpringItemList="useitemclone021019,1,1,16391" SelectState="2"/>
+	<Property ID="Macclone021112" script="SpringMachineNpc" Resource="npc\fbmac021055" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021071" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021072" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021073" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021074" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021075" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021076" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021077" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021078" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021079" script="SpringMachineNpc" Resource="npc\fbmac00521" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021080" script="SpringMachineNpc" Resource="npc\itemnpc517" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021081" script="SpringMachineNpc" Resource="npc\fbmac021041" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021125" script="SpringMachineNpc" Resource="npc\fbmac021047" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021082" script="SpringMachineNpc" Resource="npc\fbmac021042" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021083" script="SpringMachineNpc" Resource="npc\fbmac021043" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021084" script="SpringMachineNpc" Resource="npc\fbmac021045" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021085" script="SpringMachineNpc" Resource="npc\fbmac021046" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021086" script="SpringMachineNpc" Resource="npc\fbmac021047" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021087" script="SpringMachineNpc" Resource="npc\fbmac021050" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021088" script="SpringMachineNpc" Resource="npc\fbmac021051" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021089" script="SpringMachineNpc" Resource="npc\fbmac021052" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021090" script="SpringMachineNpc" Resource="npc\fbmac021053" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021091" script="SpringMachineNpc" Resource="npc\fbmac021054" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021092" script="SpringMachineNpc" Resource="npc\fbmac021055" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021093" script="SpringMachineNpc" Resource="npc\fbmac021056" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021094" script="SpringMachineNpc" Resource="npc\fbmac021056a" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021095" script="SpringMachineNpc" Resource="npc\fbmac013030" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021096" script="SpringMachineNpc" Resource="npc\fbmac021061" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021097" script="SpringMachineNpc" Resource="npc\fbmac021063" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021098" script="SpringMachineNpc" Resource="npc\fbmac021064" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021099" script="SpringMachineNpc" Resource="npc\fbmac021065" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021113" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021114" script="SpringMachineNpc" Resource="npc\fbmac021034" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021115" script="SpringMachineNpc" Resource="npc\fbmac021035" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021116" script="SpringMachineNpc" Resource="npc\fbmac021036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021117" script="SpringMachineNpc" Resource="npc\fbmac021037" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021118" script="SpringMachineNpc" Resource="npc\fbmac021038" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone021119" script="SpringMachineNpc" Resource="npc\fbmac021034" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="Macclone021120" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="Macclone021121" script="SpringMachineNpc" Resource="npc\fbmac021034" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="Macclone021123" script="SpringMachineNpc" Resource="npc\fbmac021036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Macclone021511" script="SpringMachineNpc" Resource="npc\itemnpc517" NpcType="173" SpringRange="5" SpringItemList="useitemclone021019_a,1,1,16391" SelectState="2"/>
+	<Property ID="Macclone011010" script="SpringMachineNpc" Resource="npc\fbmac013023" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone011011" script="SpringMachineNpc" Resource="npc\npcitem167" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone011012" script="SpringMachineNpc" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone011013" script="SpringMachineNpc" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone011014" script="SpringMachineNpc" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone011015" script="SpringMachineNpc" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="Macclone011016" script="SpringMachineNpc" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="0"/>
+	<Property ID="qy_yd_shiti" script="SpringMachineNpc" Resource="npc\monster500a" NpcType="202" SpringRange="5" SelectState="2"/>
+	<Property ID="qy_111030_junzitang_jiguanmen" script="SpringMachineNpc" Resource="npc\fbmac021033" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="jieyujiguan002" script="SpringMachineNpc" Name="机关门2" Desc="机关门2" Resource="npc\fbmac002011" NpcType="173" SpringRange="30" SelectState="0"/>
+	<Property ID="jieyujiguan003" script="SpringMachineNpc" Name="劫狱门1" Desc="劫狱门1" Resource="npc\fbmac002011" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="jieyujiguan004" script="SpringMachineNpc" Name="劫狱门2" Desc="劫狱门2" Resource="npc\fbmac002011" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="jieyujiguan005" script="SpringMachineNpc" Name="劫狱门3" Desc="劫狱门3" Resource="npc\fbmac002011" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="jieyujiguan006" script="SpringMachineNpc" Name="劫狱门4" Desc="劫狱门4" Resource="npc\fbmac002011" NpcType="173" SpringRange="30" SelectState="0"/>
+	<Property ID="jieyudiban001" script="SpringMachineNpc" Name="劫狱地板1" Desc="劫狱地板1" Resource="npc\itemnpc642" NpcType="173" SpringRange="1" PathId="0" SelectState="0"/>
+	<Property ID="jieyudiban002" script="SpringMachineNpc" Name="劫狱地板2" Desc="劫狱地板2" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban003" script="SpringMachineNpc" Name="劫狱地板3" Desc="劫狱地板3" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban004" script="SpringMachineNpc" Name="劫狱地板4" Desc="劫狱地板4" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban005" script="SpringMachineNpc" Name="劫狱地板5" Desc="劫狱地板5" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban006" script="SpringMachineNpc" Name="劫狱地板6" Desc="劫狱地板6" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban007" script="SpringMachineNpc" Name="劫狱地板7" Desc="劫狱地板7" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban008" script="SpringMachineNpc" Name="劫狱地板8" Desc="劫狱地板8" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="jieyudiban009" script="SpringMachineNpc" Name="劫狱地板9" Desc="劫狱地板9" Resource="npc\itemnpc642" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="qy_yanjing_jian1" script="SpringMachineNpc" Resource="npc\itemnpc644" NpcType="173" SpringRange="2" SpringItemList="key_yanjing_jgty,1,0,15007" SelectState="2"/>
+	<Property ID="qy_yanjing_jian2" script="SpringMachineNpc" Resource="npc\itemnpc645" NpcType="173" SpringRange="2" SpringItemList="key_yanjing_jgty,1,0,15007" SelectState="2"/>
+	<Property ID="qy_yanjing_jian3" script="SpringMachineNpc" Resource="npc\itemnpc646" NpcType="173" SpringRange="2" SpringItemList="key_yanjing_jgty,1,0,15007" SelectState="2"/>
+	<Property ID="qy_yanjing_jian4" script="SpringMachineNpc" Resource="npc\itemnpc647" NpcType="173" SpringRange="2" SpringItemList="key_yanjing_jgty,1,0,15007" SelectState="2"/>
+	<Property ID="qy_yanjing_szj" script="SpringMachineNpc" Resource="npc\itemnpc648" NpcType="173" SpringRange="2" SpringItemList="key_yanjing_jgty,1,0,15007" SelectState="2"/>
+	<Property ID="mac_qy_qdz_001" script="SpringMachineNpc" Name="麻袋" Desc="麻袋" Resource="npc\itemnpc560" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_qy_swgj_jiguan" script="SpringMachineNpc" Name="木门" Desc="木门" Resource="npc\fbmac013045" NpcType="173" SpringRange="50" SelectState="2"/>
+	<Property ID="Doorprison01" script="SpringMachineNpc" Resource="npc\itemnpc057k" NpcType="173" SpringRange="0.5" SelectState="0"/>
+	<Property ID="mac_qy_swgj_deng" script="SpringMachineNpc" Resource="npc\fbmac021035" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="jieyujiguan001" script="SpringMachineNpc" Name="劫狱门1" Desc="劫狱门1" Resource="npc\fbmac002011" NpcType="173" SpringRange="100" SelectState="0"/>
+	<Property ID="BlockClone009014" script="SpringMachineNpc" Resource="npc\fbmac00036" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="mac_qy_lmkz_010" script="SpringMachineNpc" Name="罗盘" Desc="罗盘" Resource="npc\fbmac013040" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_qy_tm_door" script="SpringMachineNpc" Name="木门" Desc="木门" Resource="npc\fbmac013045" NpcType="173" SpringRange="50" SelectState="0"/>
+	<Property ID="mac_qy_tm_lamp" script="SpringMachineNpc" Name="灯" Desc="灯" Resource="npc\fbmac021035" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="macclone009201" script="SpringMachineNpc" Name="吊环" Desc="吊环" Resource="npc\fbmac013002" NpcType="202" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone009202" script="SpringMachineNpc" Name="吊环" Desc="吊环" Resource="npc\fbmac013002" NpcType="202" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone009203" script="SpringMachineNpc" Name="吊环" Desc="吊环" Resource="npc\fbmac013002" NpcType="202" SpringRange="20" SelectState="2"/>
+	<Property ID="macclone009204" script="SpringMachineNpc" Name="吊环" Desc="吊环" Resource="npc\fbmac013002" NpcType="202" SpringRange="20" SelectState="2"/>
+	<Property ID="tsxjl_guizi" script="SpringMachineNpc" Name="木柜" Desc="木柜" Resource="npc\fbmac002012" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="tsxjl_cankumen" script="SpringMachineNpc" Name="石门" Desc="石门" Resource="npc\itemnpc678" NpcType="173" SpringRange="2" SpringItemList="key_tsxjl_01,1,0,15007" SelectState="2"/>
+	<Property ID="tsxjl_baokumen" script="SpringMachineNpc" Name="石门" Desc="石门" Resource="npc\itemnpc678" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="tsxjl_jianyumen" script="SpringMachineNpc" Name="石门" Desc="石门" Resource="npc\itemnpc678" NpcType="173" SpringRange="2" SpringItemList="key_tsxjl_03,1,0,15007" SelectState="2"/>
+	<Property ID="tsxjl_kongzhi01" script="SpringMachineNpc" Name="控制器1" Desc="控制器1" Resource="npc\fbmac002018" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="tsxjl_kongzhi02" script="SpringMachineNpc" Name="控制器2" Desc="控制器2" Resource="npc\fbmac00036" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="task_digong_sz" script="SpringMachineNpc" Name="石门" Desc="石门" Resource="npc\itemnpc678" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="tsxjl_foxiang" script="SpringMachineNpc" Name="佛像" Desc="佛像" Resource="npc\itemnpc072" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="tsxjl_jiguanmen01" script="SpringMachineNpc" Name="L型门" Desc="L型门" Resource="npc\itemnpc676" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="tsxjl_jiguanmen02" script="SpringMachineNpc" Name="左右门" Desc="左右门" Resource="npc\itemnpc677" NpcType="173" SpringRange="0" SelectState="2"/>
+	<Property ID="BlockClone009023" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009024" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009025" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009026" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009027" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009028" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009029" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009030" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009031" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009032" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009033" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009034" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009035" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009037" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009038" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009039" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009040" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009041" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009042" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009043" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009036" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009044" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009045" script="SpringMachineNpc" Resource="npc\itemnpc703" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009046" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009047" script="SpringMachineNpc" Resource="npc\itemnpc704" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="BlockClone009048" script="SpringMachineNpc" Resource="npc\itemnpc704a" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacBorn003005" script="SpringMachineNpc" Resource="npc\itemnpc057" NpcType="164" SpringRange="2" SelectState="0"/>
+	<Property ID="Mac_cwqy_monkeyrescue" script="SpringMachineNpc" Resource="npc\itemnpc606" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="jieyujiguan001_1" script="SpringMachineNpc" Name="劫狱门1" Desc="劫狱门1" Resource="npc\fbmac002011" NpcType="173" SpringRange="100" SelectState="0"/>
+	<Property ID="jieyujiguan002_1" script="SpringMachineNpc" Name="机关门2" Desc="机关门2" Resource="npc\fbmac002011" NpcType="173" SpringRange="30" SelectState="0"/>
+	<Property ID="jieyujiguan003_1" script="SpringMachineNpc" Name="劫狱门1" Desc="劫狱门1" Resource="npc\fbmac002011" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="jieyujiguan004_1" script="SpringMachineNpc" Name="劫狱门2" Desc="劫狱门2" Resource="npc\fbmac002011" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="jieyujiguan005_1" script="SpringMachineNpc" Name="劫狱门3" Desc="劫狱门3" Resource="npc\fbmac002011" NpcType="173" SpringRange="0" SelectState="0"/>
+	<Property ID="jieyujiguan006_1" script="SpringMachineNpc" Name="劫狱门4" Desc="劫狱门4" Resource="npc\fbmac002011" NpcType="173" SpringRange="30" SelectState="0"/>
+	<Property ID="yhgtaofa_jiguan1" script="SpringMachineNpc" Name="移花宫门派讨伐-机关1" Desc="移花宫门派讨伐-机关1" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="yhgtaofa_jiguan2" script="SpringMachineNpc" Name="移花宫门派讨伐-机关2" Desc="移花宫门派讨伐-机关2" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="yhgtaofa_jiguan3" script="SpringMachineNpc" Name="移花宫门派讨伐-机关3" Desc="移花宫门派讨伐-机关3" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="yhgtaofa_jiguan4" script="SpringMachineNpc" Name="移花宫门派讨伐-机关假" Desc="移花宫门派讨伐-机关假" Resource="npc\fbmac00036" NpcType="173" SpringRange="1" SelectState="2"/>
+	<Property ID="Door_szwe0101" script="SpringMachineNpc" Resource="npc\fbmac021036" NpcType="173" SpringRange="5" SpringItemList="useitemclone013999,1,1,19814" SelectState="2"/>
+	<Property ID="MacDoor_khd_001" script="SpringMachineNpc" Resource="npc\fbmac00251" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacDoor_clone031_001" script="SpringMachineNpc" Name="屏风" Desc="屏风" Resource="npc\fbmac031003" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacDoor_clone031_002" script="SpringMachineNpc" Name="大门密室大门·平" Desc="大门密室大门·平" Resource="npc\fbmac031001" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacDoor_clone031_003" script="SpringMachineNpc" Name="密室大门·圆" Desc="密室大门·圆" Resource="npc\fbmac031002" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="5nei_zy_dxyc_door" script="SpringMachineNpc" Name="普通牢房门" Desc="普通牢房门" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SpringItemList="item_5nei_zy_dxyc_tyc,1,0,15007" SelectState="2"/>
+	<Property ID="5nei_zy_dxyc_door1" script="SpringMachineNpc" Name="特殊牢房门" Desc="特殊牢房门" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SpringItemList="item_5nei_zy_dxyc_htyc,1,0,15007" SelectState="2"/>
+	<Property ID="5nei_zy_dxyc_door2" script="SpringMachineNpc" Name="特殊牢房门" Desc="特殊牢房门" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="5nei_zy_dxyc_am" script="SpringMachineNpc" Name="地牢暗门" Desc="地牢暗门" Resource="npc\fbmac002013" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="Npc_5neijz_57035n_03" script="SpringMachineNpc" Resource="npc\fbmac019011a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_001" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_002" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_003" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_004" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_005" script="SpringMachineNpc" Name="2区域机关门" Desc="2区域机关门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_006" script="SpringMachineNpc" Name="6区域机关门" Desc="6区域机关门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="item_llmk_001,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_007" script="SpringMachineNpc" Name="4区域机石门" Desc="4区域机石门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_008" script="SpringMachineNpc" Name="区域4机关" Desc="区域4机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_009" script="SpringMachineNpc" Name="区域6机关" Desc="区域6机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_010" script="SpringMachineNpc" Name="8区域机关门" Desc="8区域机关门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_011" script="SpringMachineNpc" Name="7区域机关门-1" Desc="7区域机关门-1" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_012" script="SpringMachineNpc" Name="7区域机关门-2" Desc="7区域机关门-2" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_001_a" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_002_a" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_003_a" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_004_a" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_005_a" script="SpringMachineNpc" Name="2区域机关门" Desc="2区域机关门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_006_a" script="SpringMachineNpc" Name="6区域机关门" Desc="6区域机关门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="item_llmk_001,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_007_a" script="SpringMachineNpc" Name="4区域机石门" Desc="4区域机石门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_008_a" script="SpringMachineNpc" Name="区域4机关" Desc="区域4机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_009_a" script="SpringMachineNpc" Name="区域6机关" Desc="区域6机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_loulan_010_a" script="SpringMachineNpc" Name="8区域机关门" Desc="8区域机关门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_011_a" script="SpringMachineNpc" Name="7区域机关门-1" Desc="7区域机关门-1" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_loulan_012_a" script="SpringMachineNpc" Name="7区域机关门-2" Desc="7区域机关门-2" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_001" script="SpringMachineNpc" Name="区域2-3石门" Desc="区域2-3石门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_002_a" script="SpringMachineNpc" Name="机关壁画" Desc="机关壁画" Resource="npc\itemnpc1022" NpcType="173" SpringRange="6" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_002_b" script="SpringMachineNpc" Name="机关壁画" Desc="机关壁画" Resource="npc\itemnpc1023" NpcType="173" SpringRange="6" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_002_c" script="SpringMachineNpc" Name="机关壁画" Desc="机关壁画" Resource="npc\itemnpc1024" NpcType="173" SpringRange="6" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_002_d" script="SpringMachineNpc" Name="机关壁画" Desc="机关壁画" Resource="npc\itemnpc1025" NpcType="173" SpringRange="6" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_003" script="SpringMachineNpc" Name="区域3-4石门" Desc="区域3-4石门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="item_wmd_006,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_004" script="SpringMachineNpc" Name="床" Desc="床" Resource="npc\itemnpc929" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_beiyuan_wmd_005" script="SpringMachineNpc" Name="升降梯" Desc="升降梯" Resource="npc\npcitem788" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_gmzd_001" script="SpringMachineNpc" Name="棺材" Desc="棺材" Resource="npc\itemnpc_mj002" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_gmzd_001_a" script="SpringMachineNpc" Name="棺材" Desc="棺材" Resource="npc\itemnpc_mj002" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_gmxd_001" script="SpringMachineNpc" Name="棺材" Desc="棺材" Resource="npc\itemnpc_mj002" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_gmxd_001_a" script="SpringMachineNpc" Name="棺材" Desc="棺材" Resource="npc\itemnpc_mj002" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_ssg_001" script="SpringMachineNpc" Name="假箱子" Desc="假箱子" Resource="npc\itemnpc591" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_ssg_002" script="SpringMachineNpc" Name="石门" Desc="石门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SpringItemList="wuxbsb,1,1,llmkdoor" SelectState="2"/>
+	<Property ID="mac_nmp_gmpwb_016" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem842" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_017" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem843" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_018" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem844" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_019" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem845" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_020" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem846" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_021" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem847" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_022" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem848" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_023" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem849" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_024" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem850" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_025" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem851" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_016" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem842" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_017" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem843" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_018" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem844" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_019" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem845" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_020" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem846" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_021" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem847" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_022" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem848" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_023" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem849" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_024" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem850" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_a_025" script="SpringMachineNpc" Name="碎裂地表" Desc="碎裂地表" Resource="npc\npcitem851" NpcType="173" SpringRange="3" SpringItemList="wuxb"/>
+	<Property ID="mac_nmp_gmpwb_026" script="SpringMachineNpc" Name="刷挂吓人箱" Desc="刷挂吓人箱" Resource="npc\itemnpc591" NpcType="173" SpringRange="2" SpringItemList="item_nmp_gmpwb_012,1,1,llmkdoor"/>
+	<Property ID="mac_gmp_hd_02_01" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_gmp_hd_02_02" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_gmp_hd_02_03" script="SpringMachineNpc" Name="地刺机关" Desc="地刺机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_gmp_zyb_01" script="SpringMachineNpc" Name="坟墓NPC" Desc="坟墓NPC" Resource="npc\fbmac00036" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_npc_shenshui_01" script="SpringMachineNpc" Name="神水宫水门1" Desc="神水宫水门1" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SpringItemList="item_shenshui_km01,1,1,info_shenshui_km01" SelectState="2"/>
+	<Property ID="mac_npc_shenshui_02" script="SpringMachineNpc" Name="神水宫水门2" Desc="神水宫水门2" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SpringItemList="item_shenshui_km02,1,1,info_shenshui_km01" SelectState="2"/>
+	<Property ID="mac_npc_shenshui_03" script="SpringMachineNpc" Name="神水宫水门3" Desc="神水宫水门3" Resource="npc\fbmac00516" NpcType="173" SpringRange="3" SpringItemList="item_shenshui_km03,1,1,info_shenshui_km01" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_001" script="SpringMachineNpc" Name="得分旗帜" Desc="得分旗帜" Resource="npc\itemnpc1502" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_002" script="SpringMachineNpc" Name="灯柱1" Desc="灯柱1" Resource="npc\itemnpc1370" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_003" script="SpringMachineNpc" Name="灯柱1" Desc="灯柱1" Resource="npc\itemnpc615" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_004" script="SpringMachineNpc" Name="灯柱1" Desc="灯柱1" Resource="npc\itemnpc780" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_005" script="SpringMachineNpc" Name="灯柱1" Desc="灯柱1" Resource="npc\itemnpc782" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_006" script="SpringMachineNpc" Name="小旗帜" Desc="小旗帜" Resource="npc\itemnpc615a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_007" script="SpringMachineNpc" Name="小旗帜" Desc="小旗帜" Resource="npc\itemnpc615a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_008" script="SpringMachineNpc" Name="小旗帜" Desc="小旗帜" Resource="npc\itemnpc615b" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_009" script="SpringMachineNpc" Name="小旗帜" Desc="小旗帜" Resource="npc\itemnpc615c" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="GuildWar_kuafu_mflag_010" script="SpringMachineNpc" Name="小旗帜" Desc="小旗帜" Resource="npc\itemnpc615d" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_newworldnpc_xkd_01" script="SpringMachineNpc" Name="石壁1" Desc="石壁1" Resource="npc\itemnpc667" NpcType="173" SpringRange="1.2" SelectState="2"/>
+	<Property ID="mac_newworldnpc_xkd_02" script="SpringMachineNpc" Name="石壁2" Desc="石壁2" Resource="npc\itemnpc667" NpcType="173" SpringRange="1.2" SelectState="2"/>
+	<Property ID="mac_newworldnpc_xkd_03" script="SpringMachineNpc" Name="石壁3" Desc="石壁3" Resource="npc\itemnpc667" NpcType="173" SpringRange="1.2" SelectState="2"/>
+	<Property ID="mac_newworldnpc_xkd_04" script="SpringMachineNpc" Name="蒲团" Desc="蒲团" Resource="npc\putuan04" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="newworld_xkdnpc_065" script="SpringMachineNpc" Name="宝箱木" Desc="宝箱木" Resource="npc\itemnpc586" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="newworld_xkdnpc_066" script="SpringMachineNpc" Name="宝箱金" Desc="宝箱金" Resource="npc\itemboxnpc003_yunbiao" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="newworld_xkdnpc_067" script="SpringMachineNpc" Name="宝箱玄铁" Desc="宝箱玄铁" Resource="npc\itemnpc591a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacClone034_xuanji_001" script="SpringMachineNpc" Name="天隐谷玄机堡机关门" Desc="天隐谷玄机堡机关门" Resource="npc\fbmac00519" NpcType="173" SpringRange="3" SelectState="0" Scale="1.2,0.84,1"/>
+	<Property ID="wyrq_MachineNpc_001" script="SpringMachineNpc" Name="草药" Desc="草药" Resource="npc\cj_106012a2" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_001_1" script="SpringMachineNpc" Name="尸体" Desc="尸体" Resource="npc\fbmac019028a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_001_2" script="SpringMachineNpc" Name="佩剑" Desc="佩剑" Resource="npc\itemnpc205" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_002" script="SpringMachineNpc" Name="痕迹" Desc="痕迹" Resource="npc\itemnpc162" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_002_1" script="SpringMachineNpc" Name="报信地点" Desc="报信地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_002_2" script="SpringMachineNpc" Name="放箭地点" Desc="放箭地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_003" script="SpringMachineNpc" Name="尸体" Desc="尸体" Resource="npc\fbmac019028a" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_003_1" script="SpringMachineNpc" Name="画桌" Desc="画桌" Resource="npc\itemnpc1204" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_003_2" script="SpringMachineNpc" Name="中原堂主" Desc="中原堂主" Resource="npc\monster043" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_004" script="SpringMachineNpc" Name="丹药桌" Desc="丹药桌" Resource="npc\bag_wnhg02" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_004_1" script="SpringMachineNpc" Name="心法口诀" Desc="心法口诀" Resource="npc\bag_wnhg01" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_004_2" script="SpringMachineNpc" Name="外域小弟" Desc="外域小弟" Resource="npc\monster290" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_005" script="SpringMachineNpc" Name="哨戒" Desc="哨戒" Resource="npc\itemnpc725" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_005_1" script="SpringMachineNpc" Name="井" Desc="井" Resource="npc\itemnpc182" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_005_2" script="SpringMachineNpc" Name="宝箱" Desc="宝箱" Resource="npc\bag_wnhg02" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_006" script="SpringMachineNpc" Name="村民" Desc="村民" Resource="npc\worldnpc110" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_006_1" script="SpringMachineNpc" Name="外域堂主" Desc="外域堂主" Resource="npc\monster266" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_006_2" script="SpringMachineNpc" Name="外域小弟" Desc="外域小弟" Resource="npc\monster290" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_007" script="SpringMachineNpc" Name="放哨地点" Desc="放哨地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_007_1" script="SpringMachineNpc" Name="兽皮宝箱" Desc="兽皮宝箱" Resource="npc\bag_wnhg02" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_007_2" script="SpringMachineNpc" Name="下毒地点" Desc="下毒地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_008" script="SpringMachineNpc" Name="空白地点" Desc="空白地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_008_1" script="SpringMachineNpc" Name="空白地点" Desc="空白地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="wyrq_MachineNpc_008_2" script="SpringMachineNpc" Name="空白地点" Desc="空白地点" Resource="npc\itemnpc057_shyb005" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="MacTower_star001" script="SpringMachineNpc" Name="星位机关1" Desc="星位机关1" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star002" script="SpringMachineNpc" Name="星位机关2" Desc="星位机关2" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star003" script="SpringMachineNpc" Name="星位机关3" Desc="星位机关3" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star004" script="SpringMachineNpc" Name="星位机关4" Desc="星位机关4" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star005" script="SpringMachineNpc" Name="星位机关5" Desc="星位机关5" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star006" script="SpringMachineNpc" Name="星位机关6" Desc="星位机关6" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star007" script="SpringMachineNpc" Name="星位机关7" Desc="星位机关7" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star008" script="SpringMachineNpc" Name="星位机关8" Desc="星位机关8" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star009" script="SpringMachineNpc" Name="星位机关9" Desc="星位机关9" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star010" script="SpringMachineNpc" Name="星位机关10" Desc="星位机关10" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star011" script="SpringMachineNpc" Name="星位机关11" Desc="星位机关11" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_star000" script="SpringMachineNpc" Name="星位机关空" Desc="星位机关空" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="2"/>
+	<Property ID="MacTower_ri" script="SpringMachineNpc" Name="太阳" Desc="太阳" Resource="npc\fbmac031012_03" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_yue" script="SpringMachineNpc" Name="月亮" Desc="月亮" Resource="npc\fbmac031012_04" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_diqiu" script="SpringMachineNpc" Name="地球" Desc="地球" Resource="npc\fbmac031012_05" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_qiao1" script="SpringMachineNpc" Name="桥1" Desc="桥1" Resource="npc\fbmac031012_13" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_qiao2" script="SpringMachineNpc" Name="桥2" Desc="桥2" Resource="npc\fbmac031012_13" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_niulang" script="SpringMachineNpc" Name="牛郎" Desc="牛郎" Resource="npc\fbmac031012_11" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_zhinv" script="SpringMachineNpc" Name="织女" Desc="织女" Resource="npc\fbmac031012_12" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_wenqu" script="SpringMachineNpc" Name="文曲" Desc="文曲" Resource="npc\fbmac031012_21" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_si" script="SpringMachineNpc" Name="死" Desc="死" Resource="npc\fbmac031012_02" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_yaoguang" script="SpringMachineNpc" Name="摇光" Desc="摇光" Resource="npc\fbmac031012_14" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_kaiyang" script="SpringMachineNpc" Name="开阳" Desc="开阳" Resource="npc\fbmac031012_15" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_yuheng" script="SpringMachineNpc" Name="玉衡" Desc="玉衡" Resource="npc\fbmac031012_16" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_tianquan" script="SpringMachineNpc" Name="天权" Desc="天权" Resource="npc\fbmac031012_17" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_tianji" script="SpringMachineNpc" Name="天玑" Desc="天玑" Resource="npc\fbmac031012_18" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_tianxuan" script="SpringMachineNpc" Name="天璇" Desc="天璇" Resource="npc\fbmac031012_19" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_tianshu" script="SpringMachineNpc" Name="天枢" Desc="天枢" Resource="npc\fbmac031012_20" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacTower_kong1" script="SpringMachineNpc" Name="空石板" Desc="空石板" Resource="npc\fbmac031012_01" NpcType="173" SpringRange="3" SelectState="0"/>
+	<Property ID="MacClone038_lastdoor" script="SpringMachineNpc" Name="鬼城最终机关门" Desc="鬼城最终机关门" Resource="npc\fbmac_gc01" NpcType="173" SpringRange="3" SelectState="0" Scale="1.2,1.2,1.2"/>
+	<Property ID="mac_npc_lzy_cbtdrwf_zpjg001" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_npc_lzy_cbtdrwf_zpjg002" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_npc_lzy_cbtdrwf_zpjg003" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="mac_npc_lzy_cbtdrwf_zpjg004" script="SpringMachineNpc" Name="机关" Desc="机关" Resource="npc\itemnpc1357" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="macclone002033_x" script="SpringMachineNpc" Name="金怀玉厨房机关" Desc="金怀玉厨房机关" Resource="npc\fbmac002018" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="sljg_201988_01" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_02" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_03" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_04" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_05" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_06" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_07" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_08" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_09" script="SpringMachineNpc" Name="控制器" Desc="控制器" Resource="npc\fbmac00036" NpcType="163" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_10" script="SpringMachineNpc" Name="石门" Desc="石门" Resource="npc\itemnpc1359" NpcType="173" SpringRange="2" SelectState="2"/>
+	<Property ID="sljg_201988_11" script="SpringMachineNpc" Name="机关门2" Desc="机关门2" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="sljg_201988_12" script="SpringMachineNpc" Name="机关门2" Desc="机关门2" Resource="npc\fbmac002011" NpcType="173" SpringRange="5" SelectState="2"/>
+	<Property ID="Mac_20250220hd_lzy001" script="SpringMachineNpc" Name="笼子1" Desc="笼子1" Resource="npc\itemnpc606" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="Mac_20250220hd_lzy002" script="SpringMachineNpc" Name="笼子2" Desc="笼子2" Resource="npc\itemnpc606" NpcType="173" SpringRange="2" SelectState="0"/>
+	<Property ID="Mac_20250220hd_lzy003" script="SpringMachineNpc" Name="笼子3" Desc="笼子3" Resource="npc\itemnpc606" NpcType="173" SpringRange="2" SelectState="0"/>
+</Object>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="OffPetNpc01" script="OffPetNpc" Name="离线雇佣NPC" Desc="离线雇佣NPC" Resource="npc\b_offpetnpc" NpcType="78" SelectState="2" SpringRange="10" NeedRotate="0" WalkSpeed="1" RunSpeed="5"/>
+	<Property ID="OffPetNpc02" script="OffPetNpc" Name="离线雇佣NPC" Desc="离线雇佣NPC" Resource="npc\g_offpetnpc" NpcType="78" SelectState="2" SpringRange="10" NeedRotate="0" WalkSpeed="1" RunSpeed="5"/>
+	<Property ID="OffAbductNpc" script="OffAbductNpc" Name="装人的麻袋" Desc="装人的麻袋" Resource="npc\itemnpc560" NpcType="79" SelectState="2" SpringRange="10" NeedRotate="0" WalkSpeed="0" RunSpeed="0" LifeTime="60000" RefreshTime="-1"/>
+	<Property ID="MaDai" script="CommonNpc" Name="麻袋" Desc="麻袋" Resource="npc\itemnpc560" NpcType="79" NeedRotate="0" LifeTime="20000" RefreshTime="-1"/>
+	<Property ID="OffAbductNpc_0" script="OffAbductNpc" Name="绑匪的麻袋" Desc="绑匪的麻袋" Resource="npc\itemnpc560" NpcType="79" SelectState="2" SpringRange="10" NeedRotate="0" WalkSpeed="0" RunSpeed="0" LifeTime="60000" RefreshTime="-1"/>
+	<Property ID="abductednpc_b" script="OffPetNpc" Name="肉票npc" Desc="肉票npc" Resource="npc\b_pc" NpcType="79" NeedRotate="0" WalkSpeed="0" RunSpeed="0" LifeTime="4000" RefreshTime="-1"/>
+	<Property ID="abductednpc_g" script="OffPetNpc" Name="肉票npc" Desc="肉票npc" Resource="npc\g_pc" NpcType="79" NeedRotate="0" WalkSpeed="0" RunSpeed="0" LifeTime="4000" RefreshTime="-1"/>
+	<Property ID="abductednpc_b_huaren" script="OffPetNpc" Name="肉票npc" Desc="肉票npc" Resource="npc\b_xinmo" NpcType="79" NeedRotate="0" WalkSpeed="0" RunSpeed="0" LifeTime="4000" RefreshTime="-1"/>
+	<Property ID="abductednpc_g_huaren" script="OffPetNpc" Name="肉票npc" Desc="肉票npc" Resource="npc\g_xinmo" NpcType="79" NeedRotate="0" WalkSpeed="0" RunSpeed="0" LifeTime="4000" RefreshTime="-1"/>
+</Object>

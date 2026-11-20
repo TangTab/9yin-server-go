@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="SchoolWarDoor_wd01" script="GotoDoor" Name="武当巨石通路传送门" Desc="武当巨石通路传送门" Resource="npc\itemnpc057u" NpcType="43" SpringRange="2" SelectState="33"/>
+	<Property ID="SchoolWarDoor_wd02" script="GotoDoor" Name="武当巨石通路传送门" Desc="武当巨石通路传送门" Resource="npc\itemnpc057u" NpcType="43" SpringRange="2" SelectState="33"/>
+	<Property ID="SchoolWarDoor_wd03" script="GotoDoor" Name="武当铁链通路传送门" Desc="武当铁链通路传送门" Resource="npc\itemnpc057u" NpcType="43" SpringRange="2" SelectState="33"/>
+	<Property ID="SchoolWarDoor_wd04" script="GotoDoor" Name="武当铁链通路传送门" Desc="武当铁链通路传送门" Resource="npc\itemnpc057u" NpcType="43" SpringRange="2" SelectState="33"/>
+	<Property ID="SchoolWarDoor_em01" script="GotoDoor" Name="峨眉铁链通路传送门" Desc="峨眉铁链通路传送门" Resource="npc\itemnpc057u" NpcType="43" SpringRange="2" SelectState="33"/>
+	<Property ID="SchoolWarDoor_em02" script="GotoDoor" Name="峨眉铁链通路传送门" Desc="峨眉铁链通路传送门" Resource="npc\itemnpc057u" NpcType="43" SpringRange="2" SelectState="33"/>
+</Object>

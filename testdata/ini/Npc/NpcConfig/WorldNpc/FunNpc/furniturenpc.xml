@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="home_wuqi_001" script="WeaponRackNpc" Name="武器架-1" Desc="武器架-1" Resource="npc\itemnpc897" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuqi_002" script="WeaponRackNpc" Name="武器架-2" Desc="武器架-2" Resource="npc\itemnpc898" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuqi_003" script="WeaponRackNpc" Name="武器架-3" Desc="武器架-3" Resource="npc\itemnpc899" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuqi_004" script="WeaponRackNpc" Name="武器架-4" Desc="武器架-4" Resource="npc\itemnpc900" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuqi_005" script="WeaponRackNpc" Name="武器架-5" Desc="武器架-5" Resource="npc\itemnpc901" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuqi_006" script="WeaponRackNpc" Name="武器架-6" Desc="武器架-6" Resource="npc\itemnpc902" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_fuzhuang_001" script="ClothesHangerNpc" Name="服装架-男" Desc="服装架-男" Resource="npc\b_homefzj" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_fuzhuang_002" script="ClothesHangerNpc" Name="服装架-女" Desc="服装架-女" Resource="npc\g_homefzj" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_yijia_001" script="ClothesRackNpc" Name="衣架" Desc="衣架" Resource="npc\itemnpc1407" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiulian_muren_001" script="FurnitureNpc" Name="木人桩-1" Desc="木人桩-1" Resource="npc\itemnpc915" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiulian_muren_002" script="FurnitureNpc" Name="木人桩-2" Desc="木人桩-2" Resource="npc\itemnpc916" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiulian_muren_003" script="FurnitureNpc" Name="木人桩-3" Desc="木人桩-3" Resource="npc\itemnpc917" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiulian_muren_004" script="FurnitureNpc" Name="木人桩-4" Desc="木人桩-4" Resource="npc\itemnpc918" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiulian_muren_005" script="FurnitureNpc" Name="木人桩-5" Desc="木人桩-5" Resource="npc\itemnpc919" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiulian_muren_006" script="FurnitureNpc" Name="木人桩-6" Desc="木人桩-6" Resource="npc\itemnpc920" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_mu_001" script="FurnitureNpc" Name="梳妆台木-1" Desc="梳妆台木-1" Resource="npc\itemnpc946" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_mu_002" script="FurnitureNpc" Name="梳妆台木-2" Desc="梳妆台木-2" Resource="npc\itemnpc947" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_mu_003" script="FurnitureNpc" Name="梳妆台木-3" Desc="梳妆台木-3" Resource="npc\itemnpc948" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_mu_004" script="FurnitureNpc" Name="梳妆台木-4" Desc="梳妆台木-4" Resource="npc\itemnpc949" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_mu_005" script="FurnitureNpc" Name="梳妆台木-5" Desc="梳妆台木-5" Resource="npc\itemnpc950" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_mu_006" script="FurnitureNpc" Name="梳妆台木-6" Desc="梳妆台木-6" Resource="npc\itemnpc951" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_zhu_001" script="FurnitureNpc" Name="梳妆台竹-1" Desc="梳妆台竹-1" Resource="npc\itemnpc955" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_zhu_002" script="FurnitureNpc" Name="梳妆台竹-2" Desc="梳妆台竹-2" Resource="npc\itemnpc956" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_zhu_003" script="FurnitureNpc" Name="梳妆台竹-3" Desc="梳妆台竹-3" Resource="npc\itemnpc957" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_shi_001" script="FurnitureNpc" Name="梳妆台石-1" Desc="梳妆台石-1" Resource="npc\itemnpc952" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_shi_002" script="FurnitureNpc" Name="梳妆台石-2" Desc="梳妆台石-2" Resource="npc\itemnpc953" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_shi_003" script="FurnitureNpc" Name="梳妆台石-3" Desc="梳妆台石-3" Resource="npc\itemnpc954" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_mu_001" script="FurnitureNpc" Name="屏风木-1" Desc="屏风木-1" Resource="npc\itemnpc984" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_mu_002" script="FurnitureNpc" Name="屏风木-2" Desc="屏风木-2" Resource="npc\itemnpc985" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_mu_003" script="FurnitureNpc" Name="屏风木-3" Desc="屏风木-3" Resource="npc\itemnpc986" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_mu_004" script="FurnitureNpc" Name="屏风木-4" Desc="屏风木-4" Resource="npc\itemnpc987" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_mu_005" script="FurnitureNpc" Name="屏风木-5" Desc="屏风木-5" Resource="npc\itemnpc988" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_mu_006" script="FurnitureNpc" Name="屏风木-6" Desc="屏风木-6" Resource="npc\itemnpc989" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_zhu_001" script="FurnitureNpc" Name="屏风竹-1" Desc="屏风竹-1" Resource="npc\itemnpc998" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_zhu_002" script="FurnitureNpc" Name="屏风竹-2" Desc="屏风竹-2" Resource="npc\itemnpc999" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_zhu_003" script="FurnitureNpc" Name="屏风竹-3" Desc="屏风竹-3" Resource="npc\itemnpc1000" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_zhu_004" script="FurnitureNpc" Name="屏风竹-4" Desc="屏风竹-4" Resource="npc\itemnpc1001" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_zhu_005" script="FurnitureNpc" Name="屏风竹-5" Desc="屏风竹-5" Resource="npc\itemnpc1002" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_zhu_006" script="FurnitureNpc" Name="屏风竹-6" Desc="屏风竹-6" Resource="npc\itemnpc1003" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_shi_001" script="FurnitureNpc" Name="屏风石-1" Desc="屏风石-1" Resource="npc\itemnpc992" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_shi_002" script="FurnitureNpc" Name="屏风石-2" Desc="屏风石-2" Resource="npc\itemnpc993" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_shi_003" script="FurnitureNpc" Name="屏风石-3" Desc="屏风石-3" Resource="npc\itemnpc994" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_shi_004" script="FurnitureNpc" Name="屏风石-4" Desc="屏风石-4" Resource="npc\itemnpc995" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_shi_005" script="FurnitureNpc" Name="屏风石-5" Desc="屏风石-5" Resource="npc\itemnpc996" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_pingfeng_shi_006" script="FurnitureNpc" Name="屏风石-6" Desc="屏风石-6" Resource="npc\itemnpc997" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_001" script="FurnitureNpc" Name="地毯-1-1" Desc="地毯-1-1" Resource="npc\itemnpc1005" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_002" script="FurnitureNpc" Name="地毯-1-1" Desc="地毯-1-1" Resource="npc\itemnpc1006" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_003" script="FurnitureNpc" Name="地毯-2-1" Desc="地毯-2-1" Resource="npc\itemnpc1016" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_004" script="FurnitureNpc" Name="地毯-2-1" Desc="地毯-2-1" Resource="npc\itemnpc1004" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_005" script="FurnitureNpc" Name="地毯-3-1" Desc="地毯-3-1" Resource="npc\itemnpc1008" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_006" script="FurnitureNpc" Name="地毯-3-1" Desc="地毯-3-1" Resource="npc\itemnpc1009" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_007" script="FurnitureNpc" Name="地毯-4-1" Desc="地毯-4-1" Resource="npc\itemnpc1010" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_008" script="FurnitureNpc" Name="地毯-4-1" Desc="地毯-4-1" Resource="npc\itemnpc1014" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_009" script="FurnitureNpc" Name="地毯-5-1" Desc="地毯-5-1" Resource="npc\itemnpc1015" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_ditan_010" script="FurnitureNpc" Name="地毯-6-1" Desc="地毯-6-1" Resource="npc\itemnpc1011" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_001" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1017" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_002" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1018" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_003" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1019" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_004" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1020" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_005" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1021" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_006" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1022" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_007" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1023" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_008" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1024" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_009" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1025" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_010" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1026" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_011" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1027" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_012" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1028" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_013" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1029" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_014" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1030" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_015" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1031" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_016" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1032" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_017" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1033" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_018" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1034" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_019" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1035" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_020" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1036" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_021" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1037" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zihua_022" script="FurnitureNpc" Name="字画" Desc="字画" Resource="npc\itemnpc1038" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chuanlian_001" script="FurnitureNpc" Name="窗帘-1" Desc="窗帘-1" Resource="npc\itemnpc1063" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chuanlian_002" script="FurnitureNpc" Name="窗帘-2" Desc="窗帘-2" Resource="npc\itemnpc1064" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chuanlian_003" script="FurnitureNpc" Name="窗帘-3" Desc="窗帘-3" Resource="npc\itemnpc1065" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chuanlian_004" script="FurnitureNpc" Name="窗帘-4" Desc="窗帘-4" Resource="npc\itemnpc1066" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chuanlian_005" script="FurnitureNpc" Name="窗帘-5" Desc="窗帘-5" Resource="npc\itemnpc1067" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chuanlian_006" script="FurnitureNpc" Name="窗帘-6" Desc="窗帘-6" Resource="npc\itemnpc1068" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_001" script="FurnitureNpc" Name="盆栽-1" Desc="盆栽-1" Resource="npc\itemnpc1069" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_002" script="FurnitureNpc" Name="盆栽-1" Desc="盆栽-1" Resource="npc\itemnpc1070" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_003" script="FurnitureNpc" Name="盆栽-2" Desc="盆栽-2" Resource="npc\itemnpc1071" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_004" script="FurnitureNpc" Name="盆栽-2" Desc="盆栽-2" Resource="npc\itemnpc1072" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_005" script="FurnitureNpc" Name="盆栽-3" Desc="盆栽-3" Resource="npc\itemnpc1073" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_006" script="FurnitureNpc" Name="盆栽-3" Desc="盆栽-3" Resource="npc\itemnpc1074" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_007" script="FurnitureNpc" Name="盆栽-4" Desc="盆栽-4" Resource="npc\itemnpc1075" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_008" script="FurnitureNpc" Name="盆栽-4" Desc="盆栽-4" Resource="npc\itemnpc1076" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_009" script="FurnitureNpc" Name="盆栽-5" Desc="盆栽-5" Resource="npc\itemnpc1077" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_010" script="FurnitureNpc" Name="盆栽-6" Desc="盆栽-6" Resource="npc\itemnpc1078" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chugui_mu_001" script="FurnitureNpc" Name="橱柜木-1" Desc="橱柜木-1" Resource="npc\itemnpc1175" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chugui_mu_002" script="FurnitureNpc" Name="橱柜木-2" Desc="橱柜木-2" Resource="npc\itemnpc1176" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chugui_mu_003" script="FurnitureNpc" Name="橱柜木-3" Desc="橱柜木-3" Resource="npc\itemnpc1177" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chugui_zhu_001" script="FurnitureNpc" Name="橱柜竹-1" Desc="橱柜竹-1" Resource="npc\itemnpc1179" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chugui_zhu_002" script="FurnitureNpc" Name="橱柜竹-2" Desc="橱柜竹-2" Resource="npc\itemnpc1180" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chugui_zhu_003" script="FurnitureNpc" Name="橱柜竹-3" Desc="橱柜竹-3" Resource="npc\itemnpc1181" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiangzi_001" script="FurnitureNpc" Name="箱子木" Desc="箱子木" Resource="npc\itemnpc1174" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiangzi_002" script="FurnitureNpc" Name="箱子竹" Desc="箱子竹" Resource="npc\itemnpc1178" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiangzi_003" script="FurnitureNpc" Name="箱子-1" Desc="箱子-1" Resource="npc\itemnpc1182" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiangzi_004" script="FurnitureNpc" Name="箱子-2" Desc="箱子-2" Resource="npc\itemnpc1183" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuo_mu_001" script="SaveFurnNpc" Name="木桌-1" Desc="木桌-1" Resource="npc\itemnpc1199" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_mu_002" script="SaveFurnNpc" Name="木桌-2" Desc="木桌-2" Resource="npc\itemnpc1200" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_mu_003" script="SaveFurnNpc" Name="木桌-3" Desc="木桌-3" Resource="npc\itemnpc1201" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_mu_004" script="SaveFurnNpc" Name="木桌-4" Desc="木桌-4" Resource="npc\itemnpc1202" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_mu_005" script="SaveFurnNpc" Name="木桌-5" Desc="木桌-5" Resource="npc\itemnpc1203" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_mt_001" script="FurnitureNpc" Name="木条桌-1" Desc="木条桌-1" Resource="npc\itemnpc1204" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuo_mt_002" script="FurnitureNpc" Name="木条桌-2" Desc="木条桌-2" Resource="npc\itemnpc1207" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuo_mt_003" script="FurnitureNpc" Name="木条桌-3" Desc="木条桌-3" Resource="npc\itemnpc1206" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuo_mt_004" script="FurnitureNpc" Name="木条桌-4" Desc="木条桌-4" Resource="npc\itemnpc1205" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuo_zhu_001" script="SaveFurnNpc" Name="竹桌-1" Desc="竹桌-1" Resource="npc\itemnpc1208" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_zhu_002" script="SaveFurnNpc" Name="竹桌-2" Desc="竹桌-2" Resource="npc\itemnpc1209" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_zhu_003" script="SaveFurnNpc" Name="竹桌-3" Desc="竹桌-3" Resource="npc\itemnpc1210" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_shi_001" script="SaveFurnNpc" Name="石桌-1" Desc="石桌-1" Resource="npc\itemnpc1213" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_shi_002" script="SaveFurnNpc" Name="石桌-2" Desc="石桌-2" Resource="npc\itemnpc1214" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_zhuo_shi_003" script="SaveFurnNpc" Name="石桌-3" Desc="石桌-3" Resource="npc\itemnpc1215" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_huajia_mu_001" script="SaveFurnNpc" Name="花架木-1" Desc="花架木-1" Resource="npc\itemnpc1079" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_mu_002" script="SaveFurnNpc" Name="花架木-3" Desc="花架木-3" Resource="npc\itemnpc1080" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_mu_003" script="SaveFurnNpc" Name="花架木-6" Desc="花架木-6" Resource="npc\itemnpc1081" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_zhu_001" script="SaveFurnNpc" Name="花架竹-1" Desc="花架竹-1" Resource="npc\itemnpc1085" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_zhu_002" script="SaveFurnNpc" Name="花架竹-3" Desc="花架竹-3" Resource="npc\itemnpc1086" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_zhu_003" script="SaveFurnNpc" Name="花架竹-6" Desc="花架竹-6" Resource="npc\itemnpc1087" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_shi_001" script="SaveFurnNpc" Name="花架石-1" Desc="花架石-1" Resource="npc\itemnpc1082" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_shi_002" script="SaveFurnNpc" Name="花架石-3" Desc="花架石-3" Resource="npc\itemnpc1083" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_huajia_shi_003" script="SaveFurnNpc" Name="花架石-6" Desc="花架石-6" Resource="npc\itemnpc1084" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="6,Home_Point_1,,;"/>
+	<Property ID="home_guizi_mu_001" script="SaveFurnNpc" Name="柜子木-1" Desc="柜子木-1" Resource="npc\itemnpc1045" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;1,Home_Point_7,,;1,Home_Point_8,,;"/>
+	<Property ID="home_guizi_mu_002" script="SaveFurnNpc" Name="柜子木-2" Desc="柜子木-2" Resource="npc\itemnpc1046" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;2,Home_Point_2,,;2,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;1,Home_Point_7,,;2,Home_Point_8,,;2,Home_Point_9,,;2,Home_Point_10,,;"/>
+	<Property ID="home_guizi_mu_003" script="SaveFurnNpc" Name="柜子木-3" Desc="柜子木-3" Resource="npc\itemnpc1047" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="3,Home_Point_1,,;2,Home_Point_2,,;2,Home_Point_3,,;2,Home_Point_4,,;2,Home_Point_5,,;2,Home_Point_6,,;2,Home_Point_7,,;1,Home_Point_8,,;1,Home_Point_9,,;"/>
+	<Property ID="home_guizi_mu_004" script="SaveFurnNpc" Name="柜子木-4" Desc="柜子木-4" Resource="npc\itemnpc1048" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;3,Home_Point_2,,;2,Home_Point_3,,;2,Home_Point_4,,;2,Home_Point_5,,;3,Home_Point_6,,;2,Home_Point_7,,;4,Home_Point_8,,;1,Home_Point_9,,;1,Home_Point_10,,;"/>
+	<Property ID="home_guizi_mu_005" script="SaveFurnNpc" Name="柜子木-5" Desc="柜子木-5" Resource="npc\itemnpc1049" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;3,Home_Point_3,,;1,Home_Point_4,,;5,Home_Point_5,,;4,Home_Point_6,,;"/>
+	<Property ID="home_guizi_mu_006" script="SaveFurnNpc" Name="柜子木-6" Desc="柜子木-6" Resource="npc\itemnpc1050" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;2,Home_Point_2,,;2,Home_Point_3,,;2,Home_Point_4,,;3,Home_Point_5,,;2,Home_Point_6,,;2,Home_Point_7,,;6,Home_Point_8,,;"/>
+	<Property ID="home_guizi_shi_001" script="SaveFurnNpc" Name="柜子石-1" Desc="柜子石-1" Resource="npc\itemnpc1051" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;1,Home_Point_7,,;1,Home_Point_8,,;1,Home_Point_9,,;1,Home_Point_10,,;"/>
+	<Property ID="home_guizi_shi_002" script="SaveFurnNpc" Name="柜子石-2" Desc="柜子石-2" Resource="npc\itemnpc1052" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;2,Home_Point_7,,;2,Home_Point_8,,;"/>
+	<Property ID="home_guizi_shi_003" script="SaveFurnNpc" Name="柜子石-3" Desc="柜子石-3" Resource="npc\itemnpc1053" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;3,Home_Point_2,,;2,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;"/>
+	<Property ID="home_guizi_shi_004" script="SaveFurnNpc" Name="柜子石-4" Desc="柜子石-4" Resource="npc\itemnpc1054" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;4,Home_Point_2,,;2,Home_Point_3,,;2,Home_Point_4,,;2,Home_Point_5,,;2,Home_Point_6,,;2,Home_Point_7,,;"/>
+	<Property ID="home_guizi_shi_005" script="SaveFurnNpc" Name="柜子石-5" Desc="柜子石-5" Resource="npc\itemnpc1055" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;3,Home_Point_2,,;1,Home_Point_3,,;5,Home_Point_4,,;2,Home_Point_5,,;2,Home_Point_6,,;5,Home_Point_7,,;"/>
+	<Property ID="home_guizi_shi_006" script="SaveFurnNpc" Name="柜子石-6" Desc="柜子石-6" Resource="npc\itemnpc1056" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="3,Home_Point_1,,;4,Home_Point_2,,;3,Home_Point_3,,;2,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;6,Home_Point_7,,;"/>
+	<Property ID="home_guizi_zhu_001" script="SaveFurnNpc" Name="柜子竹-1" Desc="柜子竹-1" Resource="npc\itemnpc1057" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;1,Home_Point_7,,;1,Home_Point_8,,;1,Home_Point_9,,;1,Home_Point_10,,;"/>
+	<Property ID="home_guizi_zhu_002" script="SaveFurnNpc" Name="柜子竹-2" Desc="柜子竹-2" Resource="npc\itemnpc1058" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;2,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;2,Home_Point_6,,;2,Home_Point_7,,;1,Home_Point_8,,;1,Home_Point_9,,;1,Home_Point_10,,;"/>
+	<Property ID="home_guizi_zhu_003" script="SaveFurnNpc" Name="柜子竹-3" Desc="柜子竹-3" Resource="npc\itemnpc1059" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;3,Home_Point_2,,;1,Home_Point_3,,;3,Home_Point_4,,;2,Home_Point_5,,;3,Home_Point_6,,;2,Home_Point_7,,;"/>
+	<Property ID="home_guizi_zhu_004" script="SaveFurnNpc" Name="柜子竹-4" Desc="柜子竹-4" Resource="npc\itemnpc1060" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;2,Home_Point_3,,;2,Home_Point_4,,;2,Home_Point_5,,;1,Home_Point_6,,;3,Home_Point_7,,;4,Home_Point_8,,;"/>
+	<Property ID="home_guizi_zhu_005" script="SaveFurnNpc" Name="柜子竹-5" Desc="柜子竹-5" Resource="npc\itemnpc1061" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;4,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;1,Home_Point_6,,;5,Home_Point_7,,;1,Home_Point_8,,;"/>
+	<Property ID="home_guizi_zhu_006" script="SaveFurnNpc" Name="柜子竹-6" Desc="柜子竹-6" Resource="npc\itemnpc1062" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="1,Home_Point_1,,;1,Home_Point_2,,;2,Home_Point_3,,;2,Home_Point_4,,;5,Home_Point_5,,;3,Home_Point_6,,;"/>
+	<Property ID="home_chongwu_gou1_npc" script="HomePetNpc" Name="中华田园犬" Desc="中华田园犬" Resource="npc\petm_110301" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_gou2_npc" script="HomePetNpc" Name="黑背" Desc="黑背" Resource="npc\petm_110302" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_gou3_npc" script="HomePetNpc" Name="藏獒" Desc="藏獒" Resource="npc\petm_110303" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_ying1_npc" script="HomePetNpc" Name="白雕" Desc="白雕" Resource="npc\petm_100301" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_ying2_npc" script="HomePetNpc" Name="猫头鹰" Desc="猫头鹰" Resource="npc\petm_100302" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_ying3_npc" script="HomePetNpc" Name="金雕" Desc="金雕" Resource="npc\petm_100303" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_hou1_npc" script="HomePetNpc" Name="猕猴" Desc="猕猴" Resource="npc\petm_090301" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_hou2_npc" script="HomePetNpc" Name="猿猴" Desc="猿猴" Resource="npc\petm_090302" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_hou3_npc" script="HomePetNpc" Name="金丝猴" Desc="金丝猴" Resource="npc\petm_090303" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_diao1_npc" script="HomePetNpc" Name="钟灵貂" Desc="钟灵貂" Resource="npc\petm_120301" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_diao2_npc" script="HomePetNpc" Name="闪电貂" Desc="闪电貂" Resource="npc\petm_120302" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_diao3_npc" script="HomePetNpc" Name="熊猫貂" Desc="熊猫貂" Resource="npc\petm_120303" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_chongwu_huli_npc" script="HomePetNpc" Name="阿狸" Desc="阿狸" Resource="npc\petm_130302" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xn" script="HomeToolBoxNpc" Name="行囊架" Desc="行囊架" Resource="npc\itemnpc1352" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuxuexl_001_npc" script="HomeWuXueNpc" Name="武学书架" Desc="武学书架" Resource="npc\npcitem776" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_wuxuexl_002_npc" script="HomeWuXueNpc" Name="武学书架" Desc="武学书架" Resource="npc\npcitem776" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_aizhuo_mu_001" script="FurnitureNpc" Name="矮桌-1" Desc="矮桌-1" Resource="npc\itemnpc1461" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_aizhuo_mu_002" script="FurnitureNpc" Name="矮桌-2" Desc="矮桌-2" Resource="npc\itemnpc1462" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_aizhuo_mu_003" script="FurnitureNpc" Name="矮桌-3" Desc="矮桌-3" Resource="npc\itemnpc1463" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xilianjia_mu_001" script="FurnitureNpc" Name="洗脸架-1" Desc="洗脸架-1" Resource="npc\itemnpc1467" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xilianjia_mu_002" script="FurnitureNpc" Name="洗脸架-2" Desc="洗脸架-2" Resource="npc\itemnpc1468" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xilianjia_mu_003" script="FurnitureNpc" Name="洗脸架-3" Desc="洗脸架-3" Resource="npc\itemnpc1469" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_yichu_001" script="ClothespressNpc" Name="衣橱-1" Desc="衣橱-1" Resource="npc\itemnpc1177" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_yichu_002" script="ClothespressNpc" Name="衣橱-2" Desc="衣橱-2" Resource="npc\itemnpc1176" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_yichu_003" script="ClothespressNpc" Name="衣橱-3" Desc="衣橱-3" Resource="npc\itemnpc1177" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//圣诞家具"/>
+	<Property ID="home_ditan_sd_001" script="FurnitureNpc" Name="暖冬地毯" Desc="暖冬地毯" Resource="npc\npcitem910" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuangshi_sd_001" script="FurnitureNpc" Name="雪人侠士" Desc="雪人侠士" Resource="npc\npcitem912" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuangshi_sd_002" script="FurnitureNpc" Name="火树银花" Desc="火树银花" Resource="npc\npcitem913" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuo_sd_001" script="SaveFurnNpc" Name="游龙戏珠圆桌" Desc="游龙戏珠圆桌" Resource="npc\npcitem916" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="2,Home_Point_1,,;1,Home_Point_2,,;1,Home_Point_3,,;1,Home_Point_4,,;1,Home_Point_5,,;"/>
+	<Property ID="home_pingfeng_sd_001" script="FurnitureNpc" Name="屏风" Desc="屏风" Resource="npc\npcitem914" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_zhuang_sd_001" script="FurnitureNpc" Name="梳妆台" Desc="梳妆台" Resource="npc\npcitem918" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xiangzi_sd_001" script="FurnitureNpc" Name="宝箱" Desc="宝箱" Resource="npc\npcitem917" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//15年圣诞"/>
+	<Property ID="home_wuqi_007" script="WeaponRackNpc" Name="楠木帝尊武器架" Desc="楠木帝尊武器架" Resource="npc\home_wuqi_07" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_yichu_sd_001" script="ClothespressNpc" Name="金丝琳琅衣橱" Desc="金丝琳琅衣橱" Resource="npc\home_yichu_02" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//庭院家具"/>
+	<Property ID="//雕像"/>
+	<Property ID="home_diaoxiang_001" script="FurnitureNpc" Name="石狮左" Desc="石狮左" Resource="npc\npcitem1045" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_diaoxiang_002" script="FurnitureNpc" Name="石狮右" Desc="石狮右" Resource="npc\npcitem1045a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_diaoxiang_003" script="FurnitureNpc" Name="貔貅" Desc="貔貅" Resource="npc\npcitem1046" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//盆栽"/>
+	<Property ID="home_penzai_new_001" script="FurnitureNpc" Name="盆栽-1" Desc="盆栽-1" Resource="npc\npcitem1047" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_new_002" script="FurnitureNpc" Name="盆栽-1" Desc="盆栽-1" Resource="npc\npcitem1048" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_new_003" script="FurnitureNpc" Name="盆栽-2" Desc="盆栽-2" Resource="npc\npcitem1049" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_penzai_new_004" script="FurnitureNpc" Name="盆栽-2" Desc="盆栽-2" Resource="npc\npcitem1050" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//树木"/>
+	<Property ID="home_tree_001" script="FurnitureNpc" Name="樱树" Desc="樱树" Resource="npc\npcitem1055" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_tree_002" script="FurnitureNpc" Name="红叶" Desc="红叶" Resource="npc\npcitem1056" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_tree_003" script="FurnitureNpc" Name="柳树" Desc="柳树" Resource="npc\npcitem1057" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_tree_004" script="FurnitureNpc" Name="桃树" Desc="桃树" Resource="npc\npcitem1058" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//添水"/>
+	<Property ID="home_tianshui_001" script="FurnitureNpc" Name="添水-1" Desc="添水-1" Resource="npc\npcitem1060" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_tianshui_002" script="FurnitureNpc" Name="添水-2" Desc="添水-2" Resource="npc\npcitem1061" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_tianshui_003" script="FurnitureNpc" Name="添水-3" Desc="添水-3" Resource="npc\npcitem1062" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//藤架"/>
+	<Property ID="home_tengjia_001" script="FurnitureNpc" Name="藤架-1" Desc="藤架-1" Resource="npc\npcitem1063" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_tengjia_002" script="FurnitureNpc" Name="藤架-2" Desc="藤架-2" Resource="npc\npcitem1064" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//水井"/>
+	<Property ID="home_jing_001" script="FurnitureNpc" Name="水井-1" Desc="水井-1" Resource="npc\npcitem1065" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jing_002" script="FurnitureNpc" Name="水井-2" Desc="水井-2" Resource="npc\npcitem1066" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jing_003" script="FurnitureNpc" Name="水井-3" Desc="水井-3" Resource="npc\npcitem1067" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//2016圣诞"/>
+	<Property ID="home_sd_new_006" script="FurnitureNpc" Name="醉花荫" Desc="醉花荫" Resource="npc\npcitem1072" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sd_new_001" script="FurnitureNpc" Name="冰晶火凤" Desc="冰晶火凤" Resource="npc\npcitem1071" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sd_new_002" script="FurnitureNpc" Name="招财雪喵" Desc="招财雪喵" Resource="npc\npcitem1068" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sd_new_007" script="FurnitureNpc" Name="姻缘木" Desc="姻缘木" Resource="npc\npcitem1076" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_qrj_dh_001" script="FurnitureNpc" Name="玫瑰花拱门" Desc="玫瑰花拱门" Resource="npc\npcitem1083" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_qrj_dh_002" script="FurnitureNpc" Name="玫瑰花花丛" Desc="玫瑰花花丛" Resource="npc\npcitem1084" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sbj_dh_001" script="FurnitureNpc" Name="牡丹花瓶" Desc="牡丹花瓶" Resource="npc\npcitem1118" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sbj_dh_002" script="FurnitureNpc" Name="牡丹屏风" Desc="牡丹屏风" Resource="npc\npcitem1119" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//新版摆设"/>
+	<Property ID="home_jy_jt_001" script="FurnitureNpc" Name="女儿红" Desc="女儿红" Resource="npc\npcitem1094" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_jt_002" script="FurnitureNpc" Name="酿酒坛" Desc="酿酒坛" Resource="npc\npcitem1095" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_wg_001" script="FurnitureNpc" Name="瓦罐" Desc="瓦罐" Resource="npc\npcitem1096" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_wg_002" script="FurnitureNpc" Name="瓦罐堆" Desc="瓦罐堆" Resource="npc\npcitem1097" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_sb_001" script="FurnitureNpc" Name="双层晒扁" Desc="双层晒扁" Resource="npc\npcitem1098" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_sb_002" script="FurnitureNpc" Name="三层晒扁" Desc="三层晒扁" Resource="npc\npcitem1099" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_sj_001" script="FurnitureNpc" Name="粗绳晒架" Desc="粗绳晒架" Resource="npc\npcitem1100" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_zt_001" script="FurnitureNpc" Name="灶台" Desc="灶台" Resource="npc\npcitem1101" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_jj_001" script="FurnitureNpc" Name="酒架" Desc="酒架" Resource="npc\npcitem1102" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tdm_001" script="FurnitureNpc" Name="土地庙" Desc="土地庙" Resource="npc\npcitem1103" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_qs_001" script="FurnitureNpc" Name="奇石" Desc="奇石" Resource="npc\npcitem1104" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_qs_002" script="FurnitureNpc" Name="奇石" Desc="奇石" Resource="npc\npcitem1105" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_qs_003" script="FurnitureNpc" Name="奇石" Desc="奇石" Resource="npc\npcitem1106" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_qs_004" script="FurnitureNpc" Name="奇石" Desc="奇石" Resource="npc\npcitem1107" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_sg_001" script="FurnitureNpc" Name="水缸" Desc="水缸" Resource="npc\npcitem1091_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_sg_002" script="FurnitureNpc" Name="水缸" Desc="水缸" Resource="npc\npcitem1091_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_ymwqj_001" script="FurnitureNpc" Name="衙门武器架" Desc="衙门武器架" Resource="npc\npcitem1092_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_ymwqj_002" script="FurnitureNpc" Name="衙门武器架" Desc="衙门武器架" Resource="npc\npcitem1092_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tree_001" script="FurnitureNpc" Name="树" Desc="树" Resource="npc\npcitem1108" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tree_002" script="FurnitureNpc" Name="树" Desc="树" Resource="npc\npcitem1109" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tree_003" script="FurnitureNpc" Name="树" Desc="树" Resource="npc\npcitem1110" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tree_004" script="FurnitureNpc" Name="树" Desc="树" Resource="npc\npcitem1111" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_penzai_001" script="FurnitureNpc" Name="盆栽" Desc="盆栽" Resource="npc\npcitem1112" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tree_005" script="FurnitureNpc" Name="树" Desc="树" Resource="npc\npcitem1113" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_penzai_002" script="FurnitureNpc" Name="盆栽" Desc="盆栽" Resource="npc\npcitem1114" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_penzai_003" script="FurnitureNpc" Name="盆栽" Desc="盆栽" Resource="npc\npcitem1115" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_penzai_004" script="FurnitureNpc" Name="盆栽" Desc="盆栽" Resource="npc\npcitem1116" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_jy_tree_006" script="FurnitureNpc" Name="树" Desc="树" Resource="npc\npcitem1117" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//17圣诞家具"/>
+	<Property ID="home_sd_17new_004" script="FurnitureNpc" Name="舞狮雕像" Desc="舞狮雕像" Resource="npc\npcitem1140" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sd_17new_006" script="FurnitureNpc" Name="冬日屏风" Desc="冬日屏风" Resource="npc\npcitem1143" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sd_17new_007" script="FurnitureNpc" Name="冬日梳妆台" Desc="冬日梳妆台" Resource="npc\npcitem1145" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_sd_17new_008" script="FurnitureNpc" Name="冬日落地花瓶" Desc="冬日落地花瓶" Resource="npc\npcitem1144" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//18年十月家具"/>
+	<Property ID="home_10_new_001" script="FurnitureNpc" Name="萤火点点" Desc="萤火点点" Resource="npc\npcitem1155" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_10_new_002" script="FurnitureNpc" Name="屏风" Desc="屏风" Resource="npc\npcitem1153" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//19年十二月家具"/>
+	<Property ID="home_19_new_015" script="FurnitureNpc" Name="猪雕像" Desc="猪雕像" Resource="npc\npcitem1174" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_19_new_016" script="FurnitureNpc" Name="猪雕像" Desc="猪雕像" Resource="npc\npcitem1175" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//20年春节活动"/>
+	<Property ID="home_20_hd_001" script="FurnitureNpc" Name="关公像" Desc="关公像" Resource="npc\npcitem1166" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//2020双旦"/>
+	<Property ID="home_20_new_001" script="FurnitureNpc" Name="芳林花笑（屏风）" Desc="芳林花笑（屏风）" Resource="npc\npcitem1167" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_20_new_002" script="FurnitureNpc" Name="富仙奇宝架" Desc="富仙奇宝架" Resource="npc\npcitem1168" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//2021蛟珠岛"/>
+	<Property ID="home_21_dao_001" script="FurnitureNpc" Name="蛟珠海阁" Desc="蛟珠海阁" Resource="npc\itemnpc1711" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_002" script="FurnitureNpc" Name="观海亭" Desc="观海亭" Resource="npc\itemnpc1704_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_003" script="SaveFurnNpc" Name="望海台" Desc="望海台" Resource="npc\itemnpc1704_2" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="12,Home_Point_1,,;12,Home_Point_2,,;12,Home_Point_3,,;12,Home_Point_4,,;12,Home_Point_5,,;" FishTankRec="1,0.5,1,0,;1,0.5,1.6,0,;0,0.5,0,0,;-1,0.5,1,0,;-1,0.5,1,0,;"/>
+	<Property ID="home_21_dao_004" script="FurnitureNpc" Name="听海楼" Desc="听海楼" Resource="npc\itemnpc1704_3" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_007" script="FurnitureNpc" Name="珊瑚围栏-直线" Desc="珊瑚围栏-直线" Resource="npc\itemnpc1702_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_008" script="FurnitureNpc" Name="珊瑚围栏-十字" Desc="珊瑚围栏-十字" Resource="npc\itemnpc1702_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_009" script="FurnitureNpc" Name="珊瑚围栏-转角" Desc="珊瑚围栏-转角" Resource="npc\itemnpc1702_3" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_010" script="FurnitureNpc" Name="珊瑚围栏-游廊" Desc="珊瑚围栏-游廊" Resource="npc\itemnpc1702_4" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_011" script="FurnitureNpc" Name="珊瑚围栏-门楼" Desc="珊瑚围栏-门楼" Resource="npc\itemnpc1702_5" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_012" script="FurnitureNpc" Name="珊瑚围栏-景墙" Desc="珊瑚围栏-景墙" Resource="npc\itemnpc1702_6" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_013" script="SaveFurnNpc" Name="小鱼缸-1" Desc="小鱼缸-1" Resource="npc\itemnpc1705_1" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="11,Home_Point_1,,;11,Home_Point_2,,;11,Home_Point_3,,;11,Home_Point_4,,;11,Home_Point_5,,;13,Home_Point_6,,;13,Home_Point_7,,;13,Home_Point_8,,;14,Home_Point_9,,;" FishTankRec="0.8,0.8,0.5,0,;-0.8,0.6,0.5,0,;0,0.8,0,0,;0.75,0.8,-0.5,0,;-0.7,0.8,-0.6,0,;1,0.6,0.5,0,;-0.6,0.6,1,0,;0.4,0.6,1,0,;1,1,1,-1.54,;"/>
+	<Property ID="home_21_dao_014" script="SaveFurnNpc" Name="小鱼缸-2" Desc="小鱼缸-2" Resource="npc\itemnpc1705_2" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="11,Home_Point_1,,;11,Home_Point_2,,;11,Home_Point_3,,;11,Home_Point_4,,;11,Home_Point_5,,;13,Home_Point_6,,;13,Home_Point_7,,;13,Home_Point_8,,;14,Home_Point_9,,;" FishTankRec="0.8,0.8,0.5,0,;-0.8,0.6,0.5,0,;0,0.8,0,0,;0.75,0.8,-0.5,0,;-0.7,0.8,-0.6,0,;1,0.6,0.5,0,;-0.6,0.6,1,0,;0.4,0.6,1,0,;1,1,1,-1.54,;"/>
+	<Property ID="home_21_dao_015" script="SaveFurnNpc" Name="小鱼缸-3" Desc="小鱼缸-3" Resource="npc\itemnpc1705_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_016" script="SaveFurnNpc" Name="鱼缸-1" Desc="鱼缸-1" Resource="npc\itemnpc1706_1" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="10,Home_Point_1,,;10,Home_Point_2,,;10,Home_Point_3,,;13,Home_Point_4,,;13,Home_Point_5,,;13,Home_Point_6,,;" FishTankRec="0.5,1.2,0,0,;-0.4,1,0,0,;0,0.8,0,0,;0.75,0.5,0.2,0,;0,0.5,0,0,;-0.75,0.5,0,0,;"/>
+	<Property ID="home_21_dao_017" script="SaveFurnNpc" Name="鱼缸-2" Desc="鱼缸-2" Resource="npc\itemnpc1706_2" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="10,Home_Point_1,,;10,Home_Point_2,,;10,Home_Point_3,,;13,Home_Point_4,,;13,Home_Point_5,,;13,Home_Point_6,,;" FishTankRec="0.5,1.2,0,0,;-0.4,1,0,0,;0,0.8,0,0,;0.75,0.5,0.2,0,;0,0.55,0,0,;-0.75,0.5,0,0,;"/>
+	<Property ID="home_21_dao_018" script="SaveFurnNpc" Name="鱼缸-3" Desc="鱼缸-3" Resource="npc\itemnpc1705_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_019" script="FurnitureNpc" Name="植物-珊瑚簇1" Desc="植物-珊瑚簇1" Resource="npc\itemnpc1707_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_020" script="FurnitureNpc" Name="植物-珊瑚簇2" Desc="植物-珊瑚簇2" Resource="npc\itemnpc1707_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_021" script="FurnitureNpc" Name="植物-珊瑚簇3" Desc="植物-珊瑚簇3" Resource="npc\itemnpc1707_3" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_022" script="FurnitureNpc" Name="植物-珊瑚簇4" Desc="植物-珊瑚簇4" Resource="npc\itemnpc1707_4" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_023" script="FurnitureNpc" Name="植物-椰树1" Desc="植物-椰树1" Resource="npc\itemnpc1708_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_024" script="FurnitureNpc" Name="植物-椰树2" Desc="植物-椰树2" Resource="npc\itemnpc1708_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_025" script="FurnitureNpc" Name="植物-椰树3" Desc="植物-椰树3" Resource="npc\itemnpc1708_3" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_026" script="FurnitureNpc" Name="植物-椰树4" Desc="植物-椰树4" Resource="npc\itemnpc1708_4" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_027" script="FurnitureNpc" Name="植物-阔叶芭蕉树1" Desc="植物-阔叶芭蕉树1" Resource="npc\itemnpc1709_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_028" script="FurnitureNpc" Name="植物-阔叶芭蕉树2" Desc="植物-阔叶芭蕉树2" Resource="npc\itemnpc1709_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_029" script="FurnitureNpc" Name="植物-阔叶芭蕉树3" Desc="植物-阔叶芭蕉树3" Resource="npc\itemnpc1709_3" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_030" script="FurnitureNpc" Name="植物-阔叶芭蕉树4" Desc="植物-阔叶芭蕉树4" Resource="npc\itemnpc1709_4" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_031" script="FurnitureNpc" Name="植物-矮树丛1" Desc="植物-矮树丛1" Resource="npc\itemnpc1710a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_032" script="FurnitureNpc" Name="植物-矮树丛2" Desc="植物-矮树丛2" Resource="npc\itemnpc1710b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_033" script="FurnitureNpc" Name="植物-矮树丛3" Desc="植物-矮树丛3" Resource="npc\itemnpc1710c" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_034" script="FurnitureNpc" Name="植物-矮树丛4" Desc="植物-矮树丛4" Resource="npc\itemnpc1710d" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_daojian_001" script="FurnitureNpc" Name="蛟珠海阁主屋" Desc="蛟珠海阁主屋" Resource="npc\itemnpc1703" NpcType="333" SpringRange="30" SelectState="2" SubNpcRec="home_daoyu_main_001,-2.091767,-0.100002,12.127483,-0.200000,"/>
+	<Property ID="home_21_daojian_002" script="FurnitureNpc" Name="农场" Desc="农场" Resource="npc\npcitem1183" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_007b" script="FurnitureNpc" Name="围墙-直线（伍）" Desc="围墙-直线（伍）" Resource="npc\itemnpc1702_1b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_dao_007c" script="FurnitureNpc" Name="围墙-直线（玖）" Desc="围墙-直线（玖）" Resource="npc\itemnpc1702_1c" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="/21年新年家具"/>
+	<Property ID="home_21_new_001" script="SaveFurnNpc" Name="鱼缸" Desc="鱼缸" Resource="npc\itemnpc1713" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="11,Home_Point_1,,;11,Home_Point_2,,;11,Home_Point_3,,;11,Home_Point_4,,;11,Home_Point_5,,;13,Home_Point_6,,;13,Home_Point_7,,;13,Home_Point_8,,;14,Home_Point_9,,;" FishTankRec="0.8,0.8,0.5,0,;-0.8,0.6,0.5,0,;0,0.8,0,0,;0.75,0.8,-0.5,0,;-0.7,0.8,-0.6,0,;1,0.6,0.5,0,;-0.6,0.6,1,0,;0.4,0.6,1,0,;1,1,1,-1.54,;"/>
+	<Property ID="home_21_new_007" script="FurnitureNpc" Name="摆件1" Desc="摆件1" Resource="npc\npcitem1170a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_new_008" script="FurnitureNpc" Name="摆件2" Desc="摆件2" Resource="npc\npcitem1170b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_new_009" script="FurnitureNpc" Name="树1" Desc="树1" Resource="npc\npcitem1171a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_new_010" script="FurnitureNpc" Name="摆件3" Desc="摆件3" Resource="npc\npcitem1173" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_21_new_011" script="FurnitureNpc" Name="树2" Desc="树2" Resource="npc\npcitem1171b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="/22年4月版本家具"/>
+	<Property ID="home_2204_new_001" script="FurnitureNpc" Name="游廊1" Desc="游廊1" Resource="npc\itemnpc1716_1" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_002" script="FurnitureNpc" Name="游廊2带楼梯" Desc="游廊2带楼梯" Resource="npc\itemnpc1716_2" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_003" script="FurnitureNpc" Name="游廊3弯道" Desc="游廊3弯道" Resource="npc\itemnpc1716_3" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_004" script="FurnitureNpc" Name="游廊4弯道" Desc="游廊4弯道" Resource="npc\itemnpc1716_4" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_005" script="FurnitureNpc" Name="竹子" Desc="竹子" Resource="npc\itemnpc1717" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_006" script="FurnitureNpc" Name="假石" Desc="假石" Resource="npc\itemnpc1718" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_007" script="FurnitureNpc" Name="亭子" Desc="亭子" Resource="npc\itemnpc1719" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_008" script="SaveFurnNpc" Name="鱼池" Desc="鱼池" Resource="npc\itemnpc1715" NpcType="333" SpringRange="5" SelectState="2" SaveFurnRec="12,Home_Point_1,,;12,Home_Point_2,,;12,Home_Point_3,,;12,Home_Point_4,,;12,Home_Point_5,,;" FishTankRec="1,0.8,1,0,;1,0.8,1.2,0,;0,0.8,0,0,;-1,0.8,1,0,;-1,0.8,0,0,;"/>
+	<Property ID="home_2204_new_009" script="FurnitureNpc" Name="游廊2带楼梯" Desc="游廊2带楼梯" Resource="npc\itemnpc1716_5" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_010" script="FurnitureNpc" Name="游廊1-3" Desc="游廊1-3" Resource="npc\itemnpc1716_6" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2204_new_011" script="FurnitureNpc" Name="游廊1-5" Desc="游廊1-5" Resource="npc\itemnpc1716_7" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="/22年6月版本家具"/>
+	<Property ID="home_2206_new_001" script="HomeMannequinNpc" Name="男模特" Desc="男模特" Resource="npc\kyfjianghu000b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2206_new_002" script="HomeMannequinNpc" Name="女模特" Desc="女模特" Resource="npc\kyfjianghu000g" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_2206_new_003" script="HomeMannequinNpc" Name="男模特小" Desc="男模特小" Resource="npc\kyfjianghu000b_s" NpcType="333" SpringRange="5" SelectState="2" Scale="0.75,0.75,0.75"/>
+	<Property ID="home_2206_new_004" script="HomeMannequinNpc" Name="女模特小" Desc="女模特小" Resource="npc\kyfjianghu000g_s" NpcType="333" SpringRange="5" SelectState="2" Scale="0.75,0.75,0.75"/>
+	<Property ID="/22年过年家具"/>
+	<Property ID="home_22_new_001" script="FurnitureNpc" Name="恋屏" Desc="恋屏" Resource="npc\npcitem1414" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_22_new_002" script="FurnitureNpc" Name="金声玉振" Desc="金声玉振" Resource="npc\npcitem1415" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_22_new_005" script="FurnitureNpc" Name="瑶台月下逢" Desc="瑶台月下逢" Resource="npc\npcitem1412" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//23年12月庄园家具"/>
+	<Property ID="home_23_zy_004" script="FurnitureNpc" Name="锦鲤灯" Desc="锦鲤灯" Resource="npc\homeitem004" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_006" script="FurnitureNpc" Name="挂画" Desc="挂画" Resource="npc\homeitem006" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_006a" script="FurnitureNpc" Name="挂画" Desc="挂画" Resource="npc\homeitem006a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_006b" script="FurnitureNpc" Name="挂画" Desc="挂画" Resource="npc\homeitem006b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_006c" script="FurnitureNpc" Name="挂画" Desc="挂画" Resource="npc\homeitem006c" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_007" script="FurnitureNpc" Name="雪人摆件" Desc="雪人摆件" Resource="npc\homeitem007" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_008a" script="FurnitureNpc" Name="萤火虫（黄）" Desc="萤火虫（黄）" Resource="npc\homeitem008a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_008b" script="FurnitureNpc" Name="萤火虫（绿）" Desc="萤火虫（绿）" Resource="npc\homeitem008b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_009" script="FurnitureNpc" Name="竹影盆景" Desc="竹影盆景" Resource="npc\homeitem009" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_010" script="FurnitureNpc" Name="纱幔竹帘" Desc="纱幔竹帘" Resource="npc\homeitem010" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_23_zy_011" script="FurnitureNpc" Name="念荷灯" Desc="念荷灯" Resource="npc\homeitem011" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//24年新春家具"/>
+	<Property ID="home_24_new_001" script="FurnitureNpc" Name="龙玩偶" Desc="龙玩偶" Resource="npc\homeitem012" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_24_new_003" script="FurnitureNpc" Name="温泉" Desc="温泉" Resource="npc\homeitem014" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_24_new_007" script="FurnitureNpc" Name="福" Desc="福" Resource="npc\homeitem017b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_24_new_008" script="FurnitureNpc" Name="中国结" Desc="中国结" Resource="npc\homeitem017c" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_24_new_009" script="FurnitureNpc" Name="花盆" Desc="花盆" Resource="npc\homeitem018" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_24_new_010" script="FurnitureNpc" Name="花盆" Desc="花盆" Resource="npc\homeitem019" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_24_new_011" script="FurnitureNpc" Name="鼓车" Desc="鼓车" Resource="npc\homeitem020" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//25年新春家具"/>
+	<Property ID="home_25_new_001" script="FurnitureNpc" Name="蛇玩偶1" Desc="蛇玩偶1" Resource="npc\homeitem021" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_new_002" script="FurnitureNpc" Name="蛇玩偶2" Desc="蛇玩偶2" Resource="npc\homeitem022" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_new_003" script="FurnitureNpc" Name="屏风" Desc="屏风" Resource="npc\homeitem026" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_school29_001" script="FurnitureNpc" Name="星象仪" Desc="星象仪" Resource="npc\huntianyi" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//25年青山隐2.0"/>
+	<Property ID="home_25_zy_001" script="FurnitureNpc" Resource="npc\homeitem040" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_002" script="FurnitureNpc" Resource="npc\homeitem041" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_003" script="FurnitureNpc" Resource="npc\homeitem042" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_005" script="FurnitureNpc" Resource="npc\homeitem044" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_008" script="FurnitureNpc" Resource="npc\homeitem047" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_009" script="FurnitureNpc" Resource="npc\homeitem048" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_010" script="FurnitureNpc" Resource="npc\homeitem049" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_011" script="FurnitureNpc" Resource="npc\homeitem050" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_012" script="FurnitureNpc" Resource="npc\homeitem051" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_013" script="FurnitureNpc" Resource="npc\homeitem056" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_014" script="FurnitureNpc" Resource="npc\homeitem053" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_25_zy_015" script="FurnitureNpc" Resource="npc\homeitem054" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="//26年新春家具"/>
+	<Property ID="home_26_new_001" script="FurnitureNpc" Name="绯烟祈岁" Desc="绯烟祈岁" Resource="npc\homeitem057" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_002" script="FurnitureNpc" Name="寒苑香雪" Desc="寒苑香雪" Resource="npc\homeitem061" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_003" script="FurnitureNpc" Name="天驷巡霄" Desc="天驷巡霄" Resource="npc\homeitem062" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_004" script="FurnitureNpc" Name="红骝骝" Desc="红骝骝" Resource="npc\homeitem064a" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_005" script="FurnitureNpc" Name="黄骠骠" Desc="黄骠骠" Resource="npc\homeitem064b" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_006" script="FurnitureNpc" Name="竹骑欢岁" Desc="竹骑欢岁" Resource="npc\homeitem065" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_007" script="FurnitureNpc" Name="甲辰迎骏" Desc="甲辰迎骏" Resource="npc\homeitem058" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_008" script="FurnitureNpc" Name="屏山入境" Desc="屏山入境" Resource="npc\homeitem059" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_26_new_009" script="FurnitureNpc" Name="云骑骋影" Desc="云骑骋影" Resource="npc\homeitem060" NpcType="333" SpringRange="5" SelectState="2"/>
+</Object>
