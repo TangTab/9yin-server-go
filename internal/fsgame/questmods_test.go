@@ -202,6 +202,56 @@ func containsInt(list []int32, want int32) bool {
 	return false
 }
 
+// TestQuestMenuFlow 对话菜单闭环（cmd 22）：OnSelect 建上下文 → 菜单接取
+// （NPC 门）→ 步骤推满 → 菜单提交（NPC 门）→ 默认奖励出口流水。
+// 用例 24241 勇闯挑灯崖（接 FuncNpc00003 / 交 WorldNpc00027，奖励
+// taskitem_7h×1）。
+func TestQuestMenuFlow(t *testing.T) {
+	k, _ := assemble4(t)
+	qm := module2[*QuestModule](t, k, "QuestModule")
+	p, _ := k.CreateObject("player")
+	qm.setRewarded(k, p, 24240) // 前置完成位
+
+	menu := func(action, questID int32) {
+		k.DispatchIntCommand("player", 22, p, NullPersistID, VarList{action, questID})
+	}
+
+	// 错误 NPC 接取被拒（先对交任务 NPC 对话再试接）。
+	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc00027"})
+	menu(1, 24241)
+	if qm.IsQuestHaving(k, p, 24241) {
+		t.Fatal("非接取 NPC 的菜单接取未被拒")
+	}
+	// 正确 NPC：接取 → 步骤推满 → 提交（菜单，NPC 门过）→ 奖励流水。
+	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"FuncNpc00003"})
+	menu(1, 24241)
+	if !qm.IsQuestHaving(k, p, 24241) {
+		t.Fatal("菜单接取失败")
+	}
+	for _, cid := range strings.Split(qm.Quests["24241"]["CriteriaList"], ",") {
+		c := qm.Criteria[cid]
+		max := atoi32(c["MaxCount"])
+		if max <= 0 {
+			max = 1
+		}
+		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
+	}
+	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc00027"})
+	menu(2, 24241)
+	if qm.IsQuestHaving(k, p, 24241) {
+		t.Fatal("菜单提交失败")
+	}
+	awardSeen := false
+	for _, op := range qm.Ops() {
+		if strings.HasPrefix(op, "award:") && strings.Contains(op, "item=1") {
+			awardSeen = true
+		}
+	}
+	if !awardSeen {
+		t.Fatalf("默认奖励出口流水缺失: %v", qm.Ops())
+	}
+}
+
 // TestConvoyRuntime 护送闭环（黑金官方链路蓝图）：接 24019 茶林遇险
 // （前置 24018 先置完成位；三步骤=护送+杀怪+交互）→ 物化 ConvoyNpc
 // （LeaderNPC）+ 保护对象登记 → 到达回调推进护送子模板（其余步骤推满）

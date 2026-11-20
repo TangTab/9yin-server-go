@@ -120,6 +120,10 @@ type QuestModule struct {
 	// stringtask_normal/special 提取）。
 	Texts map[string]string
 
+	// lastNpc 对话菜单上下文（玩家 → 最近 OnSelect 的 NPC 配置号；
+	// cmd 22 菜单分发据此校验接/交 NPC 门）。
+	lastNpc map[PersistID]string
+
 	// sysMsgs 系统信息观测（sys_quest_* 模板号）。
 	sysMsgs []string
 	// ops 命令流水（测试面）。
@@ -153,6 +157,23 @@ func (m *QuestModule) Init(k *Kernel) error {
 	b.HeartBeat("QuestModule::HB_CheckTime", m.hbCheckTime)
 	b.HeartBeat("QuestModule::HB_RepeatQuest", m.hbRepeatQuest)
 	b.HeartBeat("QuestModule::HB_RefreshQuestEffect", m.hbRefreshQuestEffect)
+	// 奖励出口默认面：容器（ToolBox）/货币（Capital）域实装前的流水
+	// 审计——经验/货币记 trace（玩家 struct 无 Exp 属性面，九阴任务
+	// Exp/Money 恒 0），物品按 "item,count;…" 解析计数。正式落账由
+	// sync 层注入 AwardOut 覆盖。
+	if m.AwardOut == nil {
+		m.AwardOut = func(player PersistID, exp, money int32, items string) {
+			count := int32(0)
+			for _, seg := range strings.Split(items, ";") {
+				if pair := strings.Split(seg, ","); len(pair) == 2 {
+					if n := atoi32(pair[1]); n > 0 {
+						count += n
+					}
+				}
+			}
+			m.ops = append(m.ops, fmt.Sprintf("award:%d item=%d exp=%d money=%d", player.ID(), count, exp, money))
+		}
+	}
 	return nil
 }
 
@@ -196,6 +217,9 @@ func (m *QuestModule) loadTexts(k *Kernel) error {
 
 // TaskText 任务文案查询（串键 → 文本；缺省空）。
 func (m *QuestModule) TaskText(key string) string { return m.Texts[key] }
+
+// LastNpcFor 玩家最近的对话 NPC（菜单上下文；测试面）。
+func (m *QuestModule) LastNpcFor(player PersistID) string { return m.lastNpc[player] }
 
 // onCustomQuestMsg 官方 @0x99E2C0（cust 880=0x370）：任务客户端消息多路
 //（args: 子命令, 任务编号[, …]）。
@@ -291,6 +315,15 @@ func (m *QuestModule) AcceptQuest(k *Kernel, self PersistID, questID int32) bool
 		if tt := atoi32(cfg["TimeType"]); tt != 0 {
 			if tr := o.Record("QuestTimeLimitRecord"); tr != nil {
 				tr.AppendRow(VarList{questID, unixNow(), unixNow() + 86400})
+			}
+		}
+		// 无步骤任务（CriteriaList 空，如 24241 勇闯挑灯崖——对话即完
+		// 型）：接取即可提交；AutoSubmit=1 的自动提交面由菜单/同步层处理。
+		if strings.TrimSpace(cfg["CriteriaList"]) == "" {
+			if i := m.questRow(k, self, questID); i >= 0 {
+				row := qr.Row(i)
+				row[qrState] = QSCanSubmit
+				qr.ModifyRow(i, row)
 			}
 		}
 		// 护送任务启动（官方接取面联动 QuestCriteriaModule）。
@@ -531,6 +564,10 @@ func (m *QuestModule) setRewarded(k *Kernel, self PersistID, questID int32) {
 // （cmd 22）分发。
 func (m *QuestModule) onNpcSelect(k *Kernel, self, from PersistID, args VarList) {
 	npcID := args.String(0)
+	if m.lastNpc == nil {
+		m.lastNpc = make(map[PersistID]string)
+	}
+	m.lastNpc[from] = npcID
 	acc := m.AcceptableQuests(k, from, npcID)
 	sub := m.SubmittableQuests(k, from, npcID)
 	m.ops = append(m.ops, fmt.Sprintf("npc:%s accept=%v submit=%v", npcID, acc, sub))
@@ -603,8 +640,41 @@ func (m *QuestModule) prereqMet(k *Kernel, player PersistID, cfg map[string]stri
 	return true
 }
 
-// onMenuSelect 官方 @0x9A3B50（命令 22）：菜单（对话选项 → 接/交任务入口）。
-func (m *QuestModule) onMenuSelect(k *Kernel, self, from PersistID, args VarList) {}
+// onMenuSelect 官方 @0x9A3B50（命令 22）：对话菜单选项 → 接/交任务。
+// args: 动作（1 接 / 2 交）、任务号。NPC 门用最近 OnSelect 的上下文
+//（lastNpc）：接取须该 NPC 在任务 AcceptNpc 面、提交须在 SubmitNpc 面。
+func (m *QuestModule) onMenuSelect(k *Kernel, self, from PersistID, args VarList) {
+	action, questID := args.Int(0), args.Int(1)
+	// 命令面 self=玩家（from 为空面）；菜单上下文按玩家取。
+	npcID := m.lastNpc[self]
+	switch action {
+	case 1: // 接取。
+		if !m.npcHas(m.npcAccept, npcID, questID) {
+			m.sys("sys_quest_0007") // 非该 NPC 可接
+			return
+		}
+		m.AcceptQuest(k, self, questID)
+	case 2: // 提交。
+		if !m.npcHas(m.npcSubmit, npcID, questID) {
+			m.sys("sys_quest_0008") // 非该 NPC 可交
+			return
+		}
+		m.SubmitQuest(k, self, questID)
+	default:
+		k.Tracef("QuestModule: menu action %d", action)
+	}
+}
+
+// npcHas NPC → 任务号索引包含判断。
+func (m *QuestModule) npcHas(index map[string][]string, npcID string, questID int32) bool {
+	want := fmt.Sprint(questID)
+	for _, tid := range index[npcID] {
+		if tid == want {
+			return true
+		}
+	}
+	return false
+}
 
 // onReady 官方 @0x99DDD0：任务表同步下发。
 func (m *QuestModule) onReady(k *Kernel, self, from PersistID, args VarList) {

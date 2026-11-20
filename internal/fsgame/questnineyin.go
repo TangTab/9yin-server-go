@@ -325,6 +325,9 @@ func loadNineyinQuests(resourcePath string) (*nineyinQuestData, error) {
 				"ID": id, "Exp": "0", "Money": "0",
 				"DefaultItemList": strings.Join(items, ";"),
 			}
+			// SubmitQuest 按 cfg["AwardID"] 查奖励——九阴无独立奖励号，
+			// 以任务号自指。
+			quests[id]["AwardID"] = id
 			stats.AwardsBuilt++
 		}
 	}
