@@ -202,6 +202,80 @@ func containsInt(list []int32, want int32) bool {
 	return false
 }
 
+// TestConvoyRuntime 护送闭环（黑金官方链路蓝图）：接 24019 茶林遇险
+// （前置 24018 先置完成位；三步骤=护送+杀怪+交互）→ 物化 ConvoyNpc
+// （LeaderNPC）+ 保护对象登记 → 到达回调推进护送子模板（其余步骤推满）
+// → 可提交；超时面走 HB_Convoy 失败清理。装配用八期（NpcResourceModule
+// 在八期批次）。
+func TestConvoyRuntime(t *testing.T) {
+	k, _ := assemble8(t)
+	cnData := mustRead(t, filepath.Join("..", "..", "testdata", "struct", "npc", "ConvoyNpc.xml"))
+	if err := k.LoadStruct("ConvoyNpc", cnData); err != nil {
+		t.Fatalf("LoadStruct ConvoyNpc: %v", err)
+	}
+	qm := module2[*QuestModule](t, k, "QuestModule")
+	qcm := module2[*QuestCriteriaModule](t, k, "QuestCriteriaModule")
+
+	// 接取 → 物化与登记。
+	p, _ := k.CreateObject("player")
+	qm.setRewarded(k, p, 24018)
+	if !qm.AcceptQuest(k, p, 24019) {
+		t.Fatal("护送任务 24019 接取失败")
+	}
+	r := k.GetGameObj(p).Record("Convoy_ProtectObj_Rec")
+	if r == nil || r.Rows() != 1 {
+		t.Fatalf("保护对象登记异常: rows=%v", r)
+	}
+	npc, _ := r.Row(0)[4].(PersistID)
+	if !npc.Valid() || k.GetGameObj(npc) == nil {
+		t.Fatalf("护送 NPC 未物化: %v", npc)
+	}
+	if got := k.GetGameObj(npc).ClassName(); got != "ConvoyNpc" {
+		t.Fatalf("物化类=%q，期望 ConvoyNpc", got)
+	}
+	if got := k.GetGameObj(npc).GetString("ConfigID"); got != "Convoy24019" {
+		t.Fatalf("物化 ConfigID=%q", got)
+	}
+	criteriaID := k.GetGameObj(npc).GetInt("ConvoyCriteriaID")
+	if criteriaID == 0 || k.GetGameObj(p).GetInt("ConvoyCriteriaID") != criteriaID {
+		t.Fatalf("ConvoyCriteriaID 未写全: npc=%d player=%d",
+			criteriaID, k.GetGameObj(p).GetInt("ConvoyCriteriaID"))
+	}
+
+	// 到达（未来移动运行时回调面）→ 护送子模板推进；杀怪/交互步骤推满
+	// → 可提交 → 保护对象清。
+	qcm.NpcArriveDest(k, p, npc)
+	for _, cid := range strings.Split(qm.Quests["24019"]["CriteriaList"], ",") {
+		if c := qm.Criteria[cid]; c != nil && c["StepType"] != "convoy" {
+			max := atoi32(c["MaxCount"])
+			if max <= 0 {
+				max = 1
+			}
+			qm.UpdateCriteria(k, p, atoi32(cid), max, true)
+		}
+	}
+	if !qm.SubmitQuest(k, p, 24019) {
+		t.Fatal("护送到达后未达可提交")
+	}
+	if r.Rows() != 0 {
+		t.Fatalf("到达后保护对象未清: %d", r.Rows())
+	}
+
+	// 超时失败面（HB_Convoy）。
+	p2, _ := k.CreateObject("player")
+	qm.setRewarded(k, p2, 24018)
+	if !qm.AcceptQuest(k, p2, 24019) {
+		t.Fatal("超时用例接取失败")
+	}
+	if err := k.GetGameObj(p2).Set("ConvoyEndTime", int64(1)); err != nil {
+		t.Fatalf("置过期超时: %v", err)
+	}
+	k.Bus().TickHeartBeats(k, 1)
+	if qm.IsQuestHaving(k, p2, 24019) {
+		t.Fatal("超时后任务未失败清理")
+	}
+}
+
 // TestQuestLifecycle 任务闭环：接任务（等级/前置门）→ 引擎推进（杀怪/对话）→
 // 全子模板完成转可提交 → 提交（奖励出口+完成位集）→ 后继任务可接。
 func TestQuestLifecycle(t *testing.T) {

@@ -287,12 +287,21 @@ func (m *QuestModule) AcceptQuest(k *Kernel, self PersistID, questID int32) bool
 			cr.AppendRow(VarList{atoi32(cid), CSDoing, int32(0), max, questID, int32(0)})
 		}
 	}
-	// 时限任务登记（TimeType≠0 → QuestTimeLimitRecord）。
-	if tt := atoi32(cfg["TimeType"]); tt != 0 {
-		if tr := o.Record("QuestTimeLimitRecord"); tr != nil {
-			tr.AppendRow(VarList{questID, unixNow(), unixNow() + 86400})
+		// 时限任务登记（TimeType≠0 → QuestTimeLimitRecord）。
+		if tt := atoi32(cfg["TimeType"]); tt != 0 {
+			if tr := o.Record("QuestTimeLimitRecord"); tr != nil {
+				tr.AppendRow(VarList{questID, unixNow(), unixNow() + 86400})
+			}
 		}
-	}
+		// 护送任务启动（官方接取面联动 QuestCriteriaModule）。
+		if qcm, _ := k.GetLogicModule("QuestCriteriaModule").(*QuestCriteriaModule); qcm != nil {
+			for _, cid := range strings.Split(cfg["CriteriaList"], ",") {
+				crit := m.Criteria[strings.TrimSpace(cid)]
+				if crit != nil && crit["StepType"] == "convoy" {
+					qcm.StartConvoy(k, self, questID, crit)
+				}
+			}
+		}
 	m.ops = append(m.ops, fmt.Sprintf("accept:%d", questID))
 	k.Tracef("QuestModule: accept %d (%s) player=%v", questID, cfg["Name"], self.ID())
 	return true
@@ -694,6 +703,10 @@ func (m *QuestModule) Ops() []string { return m.ops }
 type QuestCriteriaModule struct {
 	BaseModule
 
+	// Convoys 护送域配置（ini/Quest/Convoy/Convoy.xml，TypeID → 行：
+	// NpcId/PathID/HideType/SceneID/HideNpcID）。
+	Convoys map[string]map[string]string
+
 	// engine 目标模块缓存（QuestModule 协作）。
 	ops []string
 }
@@ -726,6 +739,96 @@ func (m *QuestCriteriaModule) Init(k *Kernel) error {
 func (m *QuestCriteriaModule) questModule(k *Kernel) *QuestModule {
 	qm, _ := k.GetLogicModule("QuestModule").(*QuestModule)
 	return qm
+}
+
+// LoadResource 护送域配置装载（官方经 StaticDataQuery；Go 面直读）。
+func (m *QuestCriteriaModule) LoadResource(k *Kernel) error {
+	if k.ResourcePath == "" {
+		return fmt.Errorf("fsgame: QuestCriteriaModule.LoadResource: ResourcePath 未设置")
+	}
+	rows, err := loadPropRows(k.ResourcePath, "ini/Quest/Convoy/Convoy.xml")
+	if err != nil {
+		return fmt.Errorf("fsgame: QuestCriteriaModule::LoadResource: %w", err)
+	}
+	m.Convoys = make(map[string]map[string]string, len(rows))
+	for _, row := range rows {
+		if row["ID"] != "" {
+			m.Convoys[row["ID"]] = row
+		}
+	}
+	k.Tracef("QuestCriteriaModule: LoadResource 护送 %d", len(m.Convoys))
+	return nil
+}
+
+// StartConvoy 护送启动（接取面联动，黑金官方链路：类型 8 子模板 → 物化
+// LeaderNPC）：NpcResourceModule 按 NpcId 物化 ConvoyNpc → 写
+// ConvoyCriteriaID/ConvoyPathID → 登记 Convoy_ProtectObj_Rec →
+// TimeLimitLength>0 时设 ConvoyEndTime。
+func (m *QuestCriteriaModule) StartConvoy(k *Kernel, player PersistID, taskID int32, crit map[string]string) bool {
+	cfg := m.Convoys[crit["StepID"]]
+	if cfg == nil {
+		return false
+	}
+	nrm, _ := k.GetLogicModule("NpcResourceModule").(*NpcResourceModule)
+	if nrm == nil {
+		return false
+	}
+	npc := nrm.Spawn(k, cfg["NpcId"])
+	if !npc.Valid() {
+		return false
+	}
+	o := k.GetGameObj(npc)
+	if o == nil {
+		return false
+	}
+	if _, ok := o.Class().Prop("ConvoyCriteriaID"); ok {
+		_ = k.SetInt(npc, "ConvoyCriteriaID", atoi32(crit["ID"]))
+	}
+	if p, ok := o.Class().Prop("ConvoyPathID"); ok && cfg["PathID"] != "" && p.Type == "string" {
+		_ = k.SetString(npc, "ConvoyPathID", cfg["PathID"])
+	}
+	po := k.GetGameObj(player)
+	if po == nil {
+		return false
+	}
+	// 玩家侧（quest struct 属性面）：护送子模板号 + 超时（HB_Convoy 消费）。
+	if _, ok := po.Class().Prop("ConvoyCriteriaID"); ok {
+		_ = po.Set("ConvoyCriteriaID", atoi32(crit["ID"]))
+	}
+	if r := po.Record("Convoy_ProtectObj_Rec"); r != nil && r.Rows() < r.Def().MaxRows {
+		r.AppendRow(VarList{cfg["NpcId"], int32(0), int32(0), int32(0), npc})
+	}
+	if qm := m.questModule(k); qm != nil {
+		if limit := atoi32(qm.Quests[fmt.Sprint(taskID)]["TimeLimitLength"]); limit > 0 {
+			_ = po.Set("ConvoyEndTime", unixNow()+int64(limit))
+		}
+	}
+	m.ops = append(m.ops, fmt.Sprintf("convoy:start:%d", taskID))
+	k.Tracef("QuestCriteriaModule: start convoy %s (task %d) player=%v", cfg["NpcId"], taskID, player.ID())
+	return true
+}
+
+// NpcArriveDest 护送对象到达终点（未来移动/路径运行时的回调面）：
+// ToDestFlag 置位 → 推进护送子模板 → 清保护对象行与超时。
+func (m *QuestCriteriaModule) NpcArriveDest(k *Kernel, player, npc PersistID) {
+	qm := m.questModule(k)
+	o, po := k.GetGameObj(npc), k.GetGameObj(player)
+	if qm == nil || o == nil || po == nil {
+		return
+	}
+	criteriaID := o.GetInt("ConvoyCriteriaID")
+	_ = k.SetInt(npc, "ToDestFlag", 1)
+	qm.UpdateCriteria(k, player, criteriaID, 1, true)
+	if r := po.Record("Convoy_ProtectObj_Rec"); r != nil {
+		for i := r.Rows() - 1; i >= 0; i-- {
+			if v, ok := r.Row(i)[4].(PersistID); ok && v == npc {
+				r.DeleteRow(i)
+			}
+		}
+	}
+	_ = po.Set("ConvoyEndTime", int64(0))
+	m.ops = append(m.ops, fmt.Sprintf("convoy:arrive:%d", criteriaID))
+	k.Tracef("QuestCriteriaModule: convoy arrive criteria=%d player=%v", criteriaID, player.ID())
 }
 
 // advanceByType 按子模板类型推进在办任务下同型子模板。
@@ -852,8 +955,30 @@ func (m *QuestCriteriaModule) onMapChanged(k *Kernel, self, from PersistID, args
 	m.advanceByType(k, from, CriteriaReachArea, 1, args.String(0))
 }
 
-// HB_Convoy 官方 @0x98FAA0：护送泵（Convoy_ProtectObj_Rec / ConvoyEndTime）。
-func (m *QuestCriteriaModule) hbConvoy(k *Kernel, self PersistID, beats int32) {}
+// HB_Convoy 官方 @0x98FAA0：护送泵——超时失败（ConvoyEndTime 到期 →
+// 任务失败清理 + 保护对象表/超时清空）。心跳 self 遍历全部对象，只处理
+// 玩家面。
+func (m *QuestCriteriaModule) hbConvoy(k *Kernel, self PersistID, beats int32) {
+	qm := m.questModule(k)
+	o := k.GetGameObj(self)
+	if qm == nil || o == nil || o.ClassName() != "player" {
+		return
+	}
+	end, _ := o.Get("ConvoyEndTime").(int64)
+	if end == 0 || unixNow() < end {
+		return
+	}
+	cid := o.GetInt("ConvoyCriteriaID")
+	if cfg := qm.Criteria[fmt.Sprint(cid)]; cfg != nil {
+		qm.FailCriteria(k, self, atoi32(cfg["TaskID"]))
+	}
+	if r := o.Record("Convoy_ProtectObj_Rec"); r != nil {
+		r.Clear()
+	}
+	_ = o.Set("ConvoyEndTime", int64(0))
+	m.ops = append(m.ops, fmt.Sprintf("convoy:timeout:%d", cid))
+	k.Tracef("QuestCriteriaModule: convoy timeout criteria=%d player=%v", cid, self.ID())
+}
 
 // Ops 引擎流水（测试面）。
 func (m *QuestCriteriaModule) Ops() []string { return m.ops }
