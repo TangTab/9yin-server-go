@@ -40,6 +40,7 @@ type Options struct {
 	InnerAddr string // 广播包 inner_addr 域
 	InnerPort int    // 广播包 inner_port 域
 	OuterAddr string // 广播包 outer_addr 域
+	OuterPort int    // 广播包 outer_port 域（网关监听口，客户端接入）
 
 	AppName string // 缺省 entry_<sid>_<eid>
 
@@ -286,7 +287,9 @@ func (s *Server) StatusLine() string {
 
 // BroadcastInfo 复刻 BroadcastEntryInfo：0x48 字节 UDP 0x3001 信息包
 // {ver=1, msg=0x3001, inner_addr[16], inner_port, district, server,
-// entry, idc, outer_addr[16], max_connects, connect_count}。
+// entry, idc, outer_addr[16], outer_port, max_connects, connect_count}。
+// 尾三域与 fssololister.ParseEntryInfo 偏移互证（0x3C=Port/0x40=Max/
+// 0x44=Cur——缺 outer_port 会让列表服把 max_connects 当端口下发）。
 func (s *Server) BroadcastInfo() []byte {
 	buf := make([]byte, 0x48)
 	binary.LittleEndian.PutUint32(buf[0:], 1)
@@ -298,9 +301,10 @@ func (s *Server) BroadcastInfo() []byte {
 	binary.LittleEndian.PutUint32(buf[0x24:], uint32(s.opt.EntryID))
 	binary.LittleEndian.PutUint32(buf[0x28:], s.opt.IDC)
 	putStr16(buf[0x2c:], s.opt.OuterAddr)
-	binary.LittleEndian.PutUint32(buf[0x3c:], uint32(s.opt.MaxConnects))
+	binary.LittleEndian.PutUint32(buf[0x3c:], uint32(s.opt.OuterPort))
+	binary.LittleEndian.PutUint32(buf[0x40:], uint32(s.opt.MaxConnects))
 	cc, _, _ := s.clients.Stats()
-	binary.LittleEndian.PutUint32(buf[0x40:], uint32(cc))
+	binary.LittleEndian.PutUint32(buf[0x44:], uint32(cc))
 	return buf
 }
 

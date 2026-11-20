@@ -50,6 +50,7 @@ const (
 	// 官方日志方言（CORE_TRACE）。
 	logAddServer    = "add server %s(%s)"    // RecvWorldServerInfo 新建服
 	logRemoveServer = "remove server %s(%s)" // CheckServer 心跳丢失
+	logAddLine      = "add line %d on server %s -> %s:%d (max %d)" // RecvEntryServerInfo 新建线（首跳打，心跳不刷屏）
 	logClientCon    = "address %s:%d connected, total %d"
 	logClientDis    = "address %s:%d disconnected, total %d"
 	logRemoveClient = "remove client %d, total %d"
@@ -304,12 +305,13 @@ func (sl *SoloLister) RecvEntryInfo(e EntryInfo) bool {
 		return false
 	}
 	sl.mu.Lock()
-	defer sl.mu.Unlock()
 	s := sl.findServerLocked(e.ServerID)
 	if s == nil {
+		sl.mu.Unlock()
 		return false
 	}
 	l := &s.Lines[e.LineIndex]
+	first := !l.Valid
 	l.Valid = true
 	l.Latch = true
 	l.LineID = e.LineID
@@ -317,6 +319,11 @@ func (sl *SoloLister) RecvEntryInfo(e EntryInfo) bool {
 	l.Cur = e.Cur
 	l.Port = e.Port
 	l.IP = e.IP
+	name := s.Name
+	sl.mu.Unlock()
+	if first {
+		sl.logf(logAddLine, e.LineIndex, name, e.IP, e.Port, e.Max)
+	}
 	return true
 }
 

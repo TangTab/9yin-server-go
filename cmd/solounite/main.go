@@ -136,6 +136,11 @@ func main() {
 	var scenes []fssoloworld.SceneSpec
 	if *scenesINI != "" {
 		if specs, err := fssoloworld.LoadScenesINI(*scenesINI); err == nil && len(specs) > 0 {
+			// scenes.ini 是集群快照（场景分给 member 1..N）——合一形态
+			// 只承载 member 0，全部重映射，否则场景永远送不到、world 不 Open。
+			for i := range specs {
+				specs[i].Member = 0
+			}
 			scenes = specs
 			fmt.Println(fssoloworld.FormatScenesCount(len(specs)))
 		}

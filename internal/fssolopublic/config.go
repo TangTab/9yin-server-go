@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // defaultGamePublicINI 是内置默认配置（官方 game_public.ini 方言）：
@@ -37,35 +39,21 @@ type Config struct {
 	EchoPort       int      // [Echo] Port（缺省 15003）
 }
 
-// ParseGamePublicINI 解析官方 game_public.ini 文本（GBK 文件亦可：
-// 关心的键均为 ASCII）。
+// ParseGamePublicINI 解析官方 game_public.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言；[Module] 裸行模块列表
+// 按官方 key-only 条目语义收集；GBK 文件亦可——关心的键均为 ASCII）。
 func ParseGamePublicINI(data []byte) (Config, error) {
 	var cfg Config
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	if err := fskit.ParseItems(data, func(sec, key, value string) error {
+		// [Module] 节是官方方言的裸行模块列表（key-only 条目；
+		// '#' 行官方 Build 不吃，漏成 key-only 条目，这里挡掉）。
+		if strings.EqualFold(sec, "Module") && value == "" && !strings.HasPrefix(key, "#") {
+			cfg.Modules = append(cfg.Modules, key)
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			if strings.EqualFold(section, "Module") {
-				if name := strings.TrimSpace(line); name != "" {
-					cfg.Modules = append(cfg.Modules, name)
-				}
-				continue
-			}
-			return cfg, fmt.Errorf("game_public ini 第 %d 行无 '='：%q", i+1, line)
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("game_public ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+		return cfg.set(sec, key, value)
+	}); err != nil {
+		return cfg, fmt.Errorf("game_public ini %w", err)
 	}
 	cfg.applyDefaults()
 	return cfg, nil

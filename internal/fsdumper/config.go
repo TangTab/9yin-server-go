@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 对应官方 GameDumper.ini（FsLoader 装载，main.lua 消费）。
@@ -33,29 +35,16 @@ func DefaultConfig() *Config {
 	}
 }
 
-// LoadConfig 解析 GameDumper.ini（GBK/UTF-8 兼读；官方 ini 为 GBK）。
+// LoadConfig 解析 GameDumper.ini（GBK/UTF-8 兼读；官方 ini 为 GBK；
+// 分词统一走 fskit.ParseItems＝官方 CIniFile Build 方言）。
 func LoadConfig(path string) (*Config, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("fsdumper: 读配置 %s: %w", path, err)
 	}
 	cfg := DefaultConfig()
-	sec := ""
-	for _, line := range strings.Split(decodeGBK(raw), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(line), "\r"))
-		if line == "" || strings.HasPrefix(line, "//") || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			sec = strings.ToLower(line[1 : len(line)-1])
-			continue
-		}
-		k, v, ok := strings.Cut(line, "=")
-		if !ok {
-			continue
-		}
-		k, v = strings.TrimSpace(k), strings.TrimSpace(v)
-		switch sec + "." + strings.ToLower(k) {
+	err = fskit.ParseItems([]byte(decodeGBK(raw)), func(sec, k, v string) error {
+		switch strings.ToLower(sec) + "." + strings.ToLower(k) {
 		case "main.dumplogicdll":
 			cfg.LogicDLL = v
 		case "main.usemysql":
@@ -79,6 +68,10 @@ func LoadConfig(path string) (*Config, error) {
 		case "output.connectstring":
 			cfg.OutputDSN = v
 		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fsdumper: 解析配置 %s: %w", path, err)
 	}
 	return cfg, nil
 }

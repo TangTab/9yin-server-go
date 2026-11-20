@@ -5,11 +5,14 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // LoadScenesINI 官方 main.lua load_scene_config（soloworld/solounite 同源）：
 // scenes.ini（节=场景号，键 Member/Script/Config/Clonable）→ SceneSpec
-// 装配面。文件缺失/读败返回 err（调用方决定跳过与否）。
+// 装配面（分词统一走 fskit.ParseItems＝官方 CIniFile Build 方言，按文件
+// 序成组）。文件缺失/读败返回 err（调用方决定跳过与否）。
 func LoadScenesINI(path string) ([]SceneSpec, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -41,22 +44,17 @@ func LoadScenesINI(path string) ([]SceneSpec, error) {
 		}
 		specs = append(specs, spec)
 	}
-	for _, raw := range strings.Split(string(data), "\n") {
-		line := strings.TrimSpace(strings.TrimSuffix(raw, "\r"))
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, "#") {
-			continue
+	_ = fskit.ParseItems(data, func(s, k, v string) error {
+		if s == "" { // 节前裸键不入表（同旧解析器口径）
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+		if s != sec {
 			flush()
-			sec = strings.TrimSpace(line[1 : len(line)-1])
-			kv = map[string]string{}
-			continue
+			sec, kv = s, map[string]string{}
 		}
-		if i := strings.IndexByte(line, '='); i > 0 && sec != "" {
-			kv[strings.ToLower(strings.TrimSpace(line[:i]))] = strings.TrimSpace(line[i+1:])
-		}
-	}
+		kv[strings.ToLower(k)] = v
+		return nil
+	})
 	flush()
 	return specs, nil
 }

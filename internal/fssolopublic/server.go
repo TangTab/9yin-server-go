@@ -227,8 +227,10 @@ func (s *Server) onBroadcast(data []byte, fromAddr string, fromPort int) {
 	}
 	switch a.Type {
 	case announceStore:
-		if a.Index >= CommStoreMin && a.Index < CommStoreMax {
-			s.inner.CheckConnect(a.Index, a.Addr, int(a.Port))
+		// @0x24 是裸 store 序号（fssolostore 写 StoreID、fssoloworld
+		// CheckStoreConnect 同释）——此处补 comm 基址，勿当完整 comm 判。
+		if a.Index < CommStoreMax-CommStoreMin {
+			s.inner.CheckConnect(CommStoreMin+a.Index, a.Addr, int(a.Port))
 		}
 	case announceEntry:
 		if a.Index < worldIndexMax {

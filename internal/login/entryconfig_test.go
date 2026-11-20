@@ -80,8 +80,10 @@ func TestParseGameEntryINIErrors(t *testing.T) {
 	if _, err := ParseGameEntryINI([]byte("[Main]\nIDC=x\n[Outer]\nAddr=1.2.3.4\nPort=2001\n")); err == nil {
 		t.Fatal("非整数应报错")
 	}
-	if _, err := ParseGameEntryINI([]byte("[Main]\n裸行\n[Outer]\nAddr=1.2.3.4\nPort=2001\n")); err == nil {
-		t.Fatal("非 [Module] 节裸行应报错")
+	// 官方 CIniFile Build 语义：裸行是 key-only 条目（不报错），
+	// 未知键由 set 忽略——与 fskit.TestBuildNoEqualLine 同口径。
+	if _, err := ParseGameEntryINI([]byte("[Main]\n裸行\n[Outer]\nAddr=1.2.3.4\nPort=2001\n")); err != nil {
+		t.Fatalf("裸行应按 key-only 忽略: %v", err)
 	}
 	// Go 扩展键：ClientVersion / MessageEncodeKey
 	cfg, err := ParseGameEntryINI([]byte(

@@ -1,9 +1,10 @@
 package fsmember
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是 GameMember.ini 方言（集群场景服版）。键名大小写不敏感，
@@ -44,29 +45,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// ParseGameMemberINI 解析 GameMember.ini 文本（大写系集群方言）。
+// ParseGameMemberINI 解析 GameMember.ini 文本（大写系集群方言；分词统一
+// 走 fskit.ParseItems＝官方 CIniFile Build 方言，节键归一小写交 set）。
 func ParseGameMemberINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	section := ""
-	for line := range eachLine(string(data)) {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") ||
-			strings.HasPrefix(line, "//") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.ToLower(strings.TrimSpace(line[1 : len(line)-1]))
-			continue
-		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 {
-			continue
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		if err := cfg.set(section, key, val); err != nil {
-			return cfg, err
-		}
+	if err := fskit.ParseItems(data, func(sec, key, val string) error {
+		return cfg.set(strings.ToLower(sec), strings.ToLower(key), val)
+	}); err != nil {
+		return cfg, err
 	}
 	if cfg.InnerPort == 16300 {
 		cfg.InnerPort += int(cfg.MemberID)
@@ -204,5 +190,3 @@ func ParseScenesMemberText(data []byte) map[uint32][]uint32 {
 func MemberScenesFor(data []byte, memberID uint32) []uint32 {
 	return ParseScenesMemberText(data)[memberID]
 }
-
-var _ = fmt.Sprintf // 保留 fmt 引用位（与 entry/config.go 同风格）

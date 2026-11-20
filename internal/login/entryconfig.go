@@ -3,7 +3,8 @@ package login
 import (
 	"fmt"
 	"strconv"
-	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // GameEntryConfig 是官方 game_entry.ini（小写系，game_entry.exe →
@@ -44,33 +45,14 @@ type GameEntryConfig struct {
 	EchoPort         int
 }
 
-// ParseGameEntryINI 解析官方 game_entry.ini 文本。必填 [Outer] Addr/Port，
-// 端口合法范围 1..65535；其余键缺省零值。
+// ParseGameEntryINI 解析官方 game_entry.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言：`[节]`/`键=值`、`//`/`;`
+// 注释、`#` 与裸行按 key-only 条目忽略、节键保留原文大小写交给 set）。
+// 必填 [Outer] Addr/Port，端口合法范围 1..65535；其余键缺省零值。
 func ParseGameEntryINI(data []byte) (GameEntryConfig, error) {
 	var cfg GameEntryConfig
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			// [Module] 节是官方方言的裸行模块列表，跳过。
-			if strings.EqualFold(section, "Module") {
-				continue
-			}
-			return cfg, fmt.Errorf("game_entry ini 第 %d 行无 '='：%q", i+1, line)
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("game_entry ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+	if err := fskit.ParseItems(data, cfg.set); err != nil {
+		return cfg, fmt.Errorf("game_entry ini %w", err)
 	}
 	if cfg.OuterAddr == "" {
 		return cfg, fmt.Errorf("game_entry ini 缺 [Outer] Addr")

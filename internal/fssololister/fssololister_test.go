@@ -126,7 +126,8 @@ func TestRegistrationLifecycle(t *testing.T) {
 	if !s.Lines[2].Valid || !s.Lines[2].Latch || s.Lines[2].Max != 100 {
 		t.Fatalf("line 注册后状态错：%+v", s.Lines[2])
 	}
-	if len(logs) != 1 || logs[0] != "add server 五区(10.0.0.5)" {
+	if len(logs) != 2 || logs[0] != "add server 五区(10.0.0.5)" ||
+		logs[1] != "add line 2 on server 五区 -> 10.0.0.5:9600 (max 100)" {
 		t.Fatalf("add 日志方言错：%v", logs)
 	}
 
@@ -136,7 +137,7 @@ func TestRegistrationLifecycle(t *testing.T) {
 	if sl.FindServer(5) != nil {
 		t.Fatal("world 心跳丢失未除名")
 	}
-	if len(logs) != 2 || logs[1] != "remove server 五区(10.0.0.5)" {
+	if len(logs) != 3 || logs[2] != "remove server 五区(10.0.0.5)" {
 		t.Fatalf("remove 日志方言错：%v", logs)
 	}
 	// 同 id 重注册 → 复用空槽（freeSlots 语义）

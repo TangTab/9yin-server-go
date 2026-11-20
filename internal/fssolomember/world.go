@@ -55,6 +55,7 @@ func (s *Server) processWorldMsg(id1, id2 uint32, payload []byte) {
 
 // worldCreateScene CommandCreateScene：{scene u32, type u32, name/配置…}
 // （集群 GameMember 布局；创建器来自逻辑模块——Go 侧静态注册表）。
+// 建成即回 SceneState(0x05){scene, 2=Running}——world 端 AllRunning 门。
 func (s *Server) worldCreateScene(p []byte) {
 	if len(p) < 8 {
 		return
@@ -64,7 +65,12 @@ func (s *Server) worldCreateScene(p []byte) {
 	name := cstringAt(p, 8)
 	if _, err := s.Scenes.CreateScene(id, fsmemberSceneType(typ), name, 0); err != nil {
 		s.opt.Logf("(SoloMember::CommandCreateScene)%v", err)
+		return
 	}
+	reply := make([]byte, 8)
+	binary.LittleEndian.PutUint32(reply[0:], id)
+	binary.LittleEndian.PutUint32(reply[4:], 2) // Running
+	s.inner.SendToWorld(0, 5, reply)
 }
 
 func (s *Server) worldCreateClone(p []byte) {

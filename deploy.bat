@@ -161,7 +161,13 @@ exit /b 0
 
 rem Copy one build artifact into the target bin\, overwriting.
 :deploy_build_file
+rem .ini configs are NOT deployed - bin side is the single source
+rem of truth (embedded snapshots release only when missing).
 if not exist "%~1" exit /b 0
+if /i "%~x1"==".ini" (
+    echo   [build] %~2 - config, not synced
+    exit /b 0
+)
 if exist "%NINEYIN_SERVER_ROOT%\bin\%~2" (set "TAG=overwrite") else set "TAG=new"
 copy /y "%~1" "%NINEYIN_SERVER_ROOT%\bin\" >nul
 if errorlevel 1 (

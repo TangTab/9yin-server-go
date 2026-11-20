@@ -260,6 +260,7 @@ line: %d"）。DETACH 时 DumpMemory（CRT 泄漏转储）+ Shutdown。Go 复刻
 | 官方 | Go | 对齐点 |
 |---|---|---|
 | CIniFile 全 API | `inifile.go IniFile` | 同 offset-free 实现（[]byte buffer + section/item 索引），Build/Save 逐字节方言（含哨兵 \n、隐式节、trim 置零语义、CRLF、节后空行） |
+| （Go 扩展）分词统一入口 | `inifile.go ParseItems` | 按文件序回调 (节,键,值)；全仓 18 处配置解析器（login/solo 家族/fsmember 家族/taskdata 等）已收编，不再各写行循环。'#' 注释官方 Build 不吃（漏成 key-only 条目）由各消费方过滤；taskdata/text.go 的 idres 文本表有意不收编（值不 trim） |
 | GetHashValue/Case | `HashValue/HashValueCase` | h*131 + tolower 表（0x80+ 恒等）/ 原字节 |
 | 查找 | `GetSection/GetItem` | hash 预筛 + EqualFold(ASCII) 等价 stricmp |
 | IniDocument 实体 | `inidocument.go` | Init(args[0]) 不自动 Load；21 方法 |

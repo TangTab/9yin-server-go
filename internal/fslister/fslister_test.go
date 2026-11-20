@@ -381,12 +381,20 @@ func TestUDPRegistration(t *testing.T) {
 	send(BuildWorldPacket(9, WorldInfo{ServerID: 43, Visible: true}))
 
 	deadline := time.Now().Add(time.Second)
-	for len(gl.Snapshot()) == 0 && time.Now().Before(deadline) {
+	want := "$svrlist #UDP\\u670D $5.5.5.6 7300 1\r\n"
+	got, snap := "", 0
+	for time.Now().Before(deadline) {
+		// got/snap 同拍取样：只盯快照非空再断言会有 TOCTOU——满载时
+		// 包恰在 EncodeResponse 与 Fatalf 取快照之间落地，报出
+		// 「应答异常（快照 1 服）」的假阳性。
+		snap = len(gl.Snapshot())
+		got = string(gl.EncodeResponse())
+		if got == want {
+			return
+		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	if got := string(gl.EncodeResponse()); got != "$svrlist #UDP\\u670D $5.5.5.6 7300 1\r\n" {
-		t.Fatalf("UDP 注册后应答 %q 异常（快照 %d 服）", got, len(gl.Snapshot()))
-	}
+	t.Fatalf("UDP 注册后应答 %q 异常（快照 %d 服）", got, snap)
 }
 
 // 主循环驱动：ServeGameLister 按官方 1s 节拍推进（5s 扫描编排已由

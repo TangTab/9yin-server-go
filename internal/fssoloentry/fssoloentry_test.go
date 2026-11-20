@@ -446,6 +446,7 @@ func TestBroadcastInfoGolden(t *testing.T) {
 	s := New(Options{
 		IDC: 1, DistrictID: 2, ServerID: 11, EntryID: 3, MaxConnects: 1024,
 		InnerAddr: "127.0.0.1", InnerPort: 16507, OuterAddr: "192.168.33.70",
+		OuterPort: 2001,
 		License: lic, ManualTick: true,
 	}, clients, nil, nil)
 	pkt := s.BroadcastInfo()
@@ -468,10 +469,13 @@ func TestBroadcastInfoGolden(t *testing.T) {
 	if string(pkt[0x2c:0x2c+13]) != "192.168.33.70" {
 		t.Fatalf("outer_addr 域 %q", pkt[0x2c:0x3c])
 	}
-	if binary.LittleEndian.Uint32(pkt[0x3c:]) != 1024 {
+	if binary.LittleEndian.Uint32(pkt[0x3c:]) != 2001 {
+		t.Fatal("outer_port 域（fssololister.ParseEntryInfo Port@0x3C 互证）")
+	}
+	if binary.LittleEndian.Uint32(pkt[0x40:]) != 1024 {
 		t.Fatal("max_connects 域")
 	}
-	if binary.LittleEndian.Uint32(pkt[0x40:]) != 0 {
+	if binary.LittleEndian.Uint32(pkt[0x44:]) != 0 {
 		t.Fatal("connect_count 域")
 	}
 }

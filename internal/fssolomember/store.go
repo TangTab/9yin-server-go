@@ -99,7 +99,16 @@ func (s *Server) processStoreMsg(id1, id2 uint32, payload []byte) {
 			s.mu.Unlock()
 		}
 	case 0x1E: // PublishManageInfo：管理配置全量 → +0x444 闩（Loading 门）
-		if decodeManageInfo(payload) == nil {
+		if len(payload) == 0 {
+			// 空表帧（fssolostore 空库回执 nil 载荷）：空表同闩，
+			// 否则 member 永卡 Loading、world 永不 Opened。
+			s.mu.Lock()
+			s.manageData = &ManageInfo{}
+			s.mu.Unlock()
+			return
+		}
+		mi := decodeManageInfo(payload)
+		if mi == nil {
 			s.opt.Logf("(SoloMember::PublishManageInfo)failed")
 			s.mu.Lock()
 			s.manageData = nil
@@ -107,7 +116,7 @@ func (s *Server) processStoreMsg(id1, id2 uint32, payload []byte) {
 			return
 		}
 		s.mu.Lock()
-		s.manageData = decodeManageInfo(payload)
+		s.manageData = mi
 		s.mu.Unlock()
 	case 0x1F, 0x20, 0x21: // PublishManageBase/Update/Remove
 		s.opt.Logf("publish manage 0x%X (%d bytes)", id2, len(payload))

@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // defaultGameLogINI 是内置默认配置（官方 game_log.ini 方言；[Echo]
@@ -30,36 +32,21 @@ type LogConfig struct {
 	EchoPort   int      // 0=官方缺省 15011
 }
 
-// ParseGameLogINI 解析官方 game_log.ini 文本。GBK 官方文件亦可解析
-// （关心的键均为 ASCII）。
+// ParseGameLogINI 解析官方 game_log.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言；[Module] 裸行模块列表
+// 按官方 key-only 条目语义收集）。GBK 官方文件亦可解析（关心的键均
+// 为 ASCII）。
 func ParseGameLogINI(data []byte) (LogConfig, error) {
 	var cfg LogConfig
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	if err := fskit.ParseItems(data, func(sec, key, value string) error {
+		// [Module] 节是官方方言的裸行模块列表（key-only 条目）。
+		if strings.EqualFold(sec, "Module") && value == "" {
+			cfg.Modules = append(cfg.Modules, key)
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			if strings.EqualFold(section, "Module") {
-				// [Module] 节是官方方言的裸行模块列表。
-				if name := strings.TrimSpace(line); name != "" {
-					cfg.Modules = append(cfg.Modules, name)
-				}
-				continue
-			}
-			continue // [Main] 空节等容忍（官方快照即如此）
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("game_log ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+		return cfg.set(sec, key, value)
+	}); err != nil {
+		return cfg, fmt.Errorf("game_log ini %w", err)
 	}
 	if cfg.EchoPort == 0 {
 		cfg.EchoPort = 15011 // 官方 main.lua ReadInteger 缺省

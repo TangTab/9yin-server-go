@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // defaultGameAuctionINI 是内置默认配置（官方 game_auction.ini 方言）：
@@ -55,35 +56,16 @@ func (c *AuctionConfig) ItemTypeXML() string {
 		"Trade" + string(os.PathSeparator) + "AuctionHouse" + string(os.PathSeparator) + "ItemType.xml"
 }
 
-// ParseGameAuctionINI 解析官方 game_auction.ini 文本。
+// ParseGameAuctionINI 解析官方 game_auction.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言，`#` 与裸行按 key-only
+// 条目忽略——[Module] 模块名清单由此呈现）。
 // 必填 [Main] DistrictID/ServerID；[Inner] Port 官方文件不写
 // （端口来自 main.lua 本地缺省 16003），缺省回落同值，
 // 显式给值时须 1..65535；GBK 官方文件亦可解析（关心的键均为 ASCII）。
 func ParseGameAuctionINI(data []byte) (AuctionConfig, error) {
 	var cfg AuctionConfig
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			// [Module] 节是官方方言的裸行模块列表，跳过。
-			if strings.EqualFold(section, "Module") {
-				continue
-			}
-			return cfg, fmt.Errorf("game_auction ini 第 %d 行无 '='：%q", i+1, line)
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("game_auction ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+	if err := fskit.ParseItems(data, cfg.set); err != nil {
+		return cfg, fmt.Errorf("game_auction ini %w", err)
 	}
 	if cfg.DistrictID == 0 {
 		return cfg, fmt.Errorf("game_auction ini 缺 [Main] DistrictID")

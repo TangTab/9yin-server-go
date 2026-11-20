@@ -101,7 +101,7 @@ func (s *Server) Start() error {
 		return fmt.Errorf("(SoloMember::Start)start reactor failed: %w", err)
 	}
 	s.inner.Attach(s.r)
-	broadID, err := s.r.CreateBroadcast(s.cfg.InnerAddr, s.cfg.BroadPort, s.onBroadcast)
+	broadID, err := s.r.CreateBroadcast(s.cfg.BroadAddr, s.cfg.BroadPort, s.onBroadcast)
 	if err != nil {
 		return fmt.Errorf("(SoloMember::Start)create broadcast failed: %w", err)
 	}

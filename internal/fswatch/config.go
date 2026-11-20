@@ -1,12 +1,13 @@
 package fswatch
 
 import (
-	"bufio"
 	_ "embed"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // DefaultGameWatchINI 内置默认配置（官方 GameWatch.ini 方言，
@@ -66,39 +67,29 @@ func DefaultConfig() *Config {
 	}
 }
 
-// iniSections 把官方 ini（'//' 行注释、[节] 键=值）解析成有序节表。
-// 官方 IniDocument 允许无键节的列表项（[Module] 下裸 DLL 名），此处一并
-// 保留为空键项。
+// iniSections 把官方 ini（分词统一走 fskit.ParseItems＝官方 CIniFile
+// Build 方言：'//' 行注释、[节] 键=值）解析成有序节表。官方 IniDocument
+// 允许无键节的列表项（[Module] 下裸 DLL 名），此处一并保留为空值键项
+// （消费方一律跳过空键）。'#' 行官方 Build 不吃、漏成 key-only 条目，
+// 这里挡掉。
 func iniSections(path string) (map[string][][2]string, []string, error) {
-	f, err := os.Open(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, nil, err
 	}
-	defer f.Close()
 	secs := map[string][][2]string{}
 	var order []string
-	cur := ""
-	sc := bufio.NewScanner(f)
-	sc.Buffer(make([]byte, 1024*1024), 1024*1024)
-	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
-		if line == "" || strings.HasPrefix(line, "//") || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	_ = fskit.ParseItems(data, func(sec, k, v string) error {
+		if strings.HasPrefix(k, "#") {
+			return nil // 注释行不入表（官方方言）
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			cur = strings.TrimSpace(line[1 : len(line)-1])
-			if _, ok := secs[cur]; !ok {
-				order = append(order, cur)
-			}
-			continue
+		if _, ok := secs[sec]; !ok {
+			order = append(order, sec)
 		}
-		if i := strings.IndexByte(line, '='); i >= 0 {
-			secs[cur] = append(secs[cur], [2]string{strings.TrimSpace(line[:i]), strings.TrimSpace(line[i+1:])})
-		} else {
-			secs[cur] = append(secs[cur], [2]string{"", line})
-		}
-	}
-	return secs, order, sc.Err()
+		secs[sec] = append(secs[sec], [2]string{k, v})
+		return nil
+	})
+	return secs, order, nil
 }
 
 func (c *Config) apply(secs map[string][][2]string) error {

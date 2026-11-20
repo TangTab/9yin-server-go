@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是 GameEntry.ini 方言（网关版）。与 solo 版 game_entry.ini
@@ -45,29 +47,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// ParseGameEntryINI 解析 GameEntry.ini 文本。
+// ParseGameEntryINI 解析 GameEntry.ini 文本（分词统一走 fskit.ParseItems
+// ＝官方 CIniFile Build 方言；`#` 与裸行按 key-only 条目忽略）。
 func ParseGameEntryINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	section := ""
-	for line := range eachLine(string(data)) {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") ||
-			strings.HasPrefix(line, "//") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.ToLower(strings.TrimSpace(line[1 : len(line)-1]))
-			continue
-		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 {
-			continue
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		if err := cfg.set(section, key, val); err != nil {
-			return cfg, err
-		}
+	if err := fskit.ParseItems(data, func(sec, key, val string) error {
+		return cfg.set(strings.ToLower(sec), strings.ToLower(key), val)
+	}); err != nil {
+		return cfg, err
 	}
 	if cfg.InnerPort == 16200 {
 		cfg.InnerPort += int(cfg.EntryID)
@@ -156,23 +143,6 @@ func (c *Config) set(section, key, val string) error {
 		}
 	}
 	return nil // 未知键忽略（前向兼容）
-}
-
-func eachLine(s string) func(func(string) bool) {
-	return func(yield func(string) bool) {
-		for len(s) > 0 {
-			i := strings.IndexByte(s, '\n')
-			var line string
-			if i < 0 {
-				line, s = s, ""
-			} else {
-				line, s = s[:i], s[i+1:]
-			}
-			if !yield(line) {
-				return
-			}
-		}
-	}
 }
 
 func parseUint(val string) (uint64, error) { return strconv.ParseUint(val, 10, 64) }

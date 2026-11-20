@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entry"
 	"github.com/lizhanyin/9yin-server-go/internal/fscomm"
@@ -61,6 +62,8 @@ type Unite struct {
 
 	stopOnce sync.Once // 停机序幂等（Quit 钩/信号/宿主可并发重入）
 	quitOnce sync.Once
+
+	publicStop chan struct{} // public 1s 拍停口（cmd/solopublic 心跳等价）
 }
 
 // Assemble 建七实体骨架（不绑定网络；main.lua 14-407 的建实体 +
@@ -98,6 +101,7 @@ func Assemble(cfg Config, opt Options) *Unite {
 	u.world = fssoloworld.New(fssoloworld.Options{
 		Config:   cfg.WorldConfig(),
 		AppName:  cfg.AppName(),
+		Logf:     u.logf, // 官方控制台同源；缺省静默会把外连/装载链全藏掉
 		Scenes:   append([]fssoloworld.SceneSpec(nil), opt.Scenes...),
 		OnClosed: func() { go u.quit() }, // 官方 nx_quit（异步防重入 tick 协程）
 	})
@@ -192,6 +196,7 @@ func (u *Unite) Start() error {
 		InnerAddr:   u.cfg.InnerAddr,
 		InnerPort:   innerPort, // 官方 GetListenerPort 回填
 		OuterAddr:   u.cfg.OuterAddr,
+		OuterPort:   u.cfg.OuterPort,
 		AppName:     fmt.Sprintf("entry_%d_0", u.cfg.ServerID),
 		License:     u.opt.License,
 		StatusSink:  func(line string) { u.logf("%s", line) },
@@ -240,6 +245,21 @@ func (u *Unite) Start() error {
 	if err := u.public.Start(); err != nil {
 		return fmt.Errorf("unite: public start: %w", err)
 	}
+	// public 无内建定时器（官方 CReactor CreateTimer 由宿主给）：
+	// 1s 心跳驱动装载链推进 + 0x24B 自宣，停机序先停拍再 Stop。
+	u.publicStop = make(chan struct{})
+	go func() {
+		t := time.NewTicker(time.Second)
+		defer t.Stop()
+		for {
+			select {
+			case <-t.C:
+				u.public.Tick()
+			case <-u.publicStop:
+				return
+			}
+		}
+	}()
 	if err := u.auction.Start(); err != nil {
 		return fmt.Errorf("unite: auction start: %w", err)
 	}
@@ -283,6 +303,9 @@ func (u *Unite) stopSequence() {
 	u.logf("auction server shutdown...")
 	u.auction.Stop()
 	u.logf("public server shutdown...")
+	if u.publicStop != nil {
+		close(u.publicStop)
+	}
 	u.public.Stop()
 	u.logf("entry server shutdown...")
 	if u.gateway != nil {

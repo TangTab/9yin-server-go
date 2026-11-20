@@ -1,6 +1,7 @@
 package fskit
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -268,6 +269,51 @@ func TestSectionListOrder(t *testing.T) {
 }
 
 // ---- split 三兄弟 ----
+
+func TestParseItemsOrderAndDialect(t *testing.T) {
+	var got [][3]string
+	err := ParseItems([]byte("; cmt\r\n[Sys]\r\n// cmt2\r\nk = v\r\nFsKit.dll\r\n[Main]\r\nIDC=1\r\n"),
+		func(sec, key, value string) error {
+			got = append(got, [3]string{sec, key, value})
+			return nil
+		})
+	if err != nil {
+		t.Fatalf("err=%v", err)
+	}
+	want := [][3]string{
+		{"Sys", "k", "v"},
+		{"Sys", "FsKit.dll", ""}, // 裸行 key-only（[Module] 模块名方言）
+		{"Main", "IDC", "1"},
+	}
+	if len(got) != len(want) {
+		t.Fatalf("条目数 %d: %+v", len(got), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("第 %d 条 got %+v want %+v", i, got[i], want[i])
+		}
+	}
+}
+
+func TestParseItemsImplicitSectionAndErrorWrap(t *testing.T) {
+	var n int
+	err := ParseItems([]byte("bare=1\r\n[S]\r\nk=v\r\n"), func(sec, key, value string) error {
+		if n == 0 && (sec != "" || key != "bare" || value != "1") {
+			t.Fatalf("隐式空名节应最先: %q/%q=%q", sec, key, value)
+		}
+		n++
+		if n == 2 {
+			return errors.New("坏值")
+		}
+		return nil
+	})
+	if err == nil || !strings.Contains(err.Error(), "S/k: 坏值") {
+		t.Fatalf("错误应带节/键前缀: %v", err)
+	}
+	if n != 2 {
+		t.Fatalf("回调应中止: %d", n)
+	}
+}
 
 func TestSplitStringDefaultComma(t *testing.T) {
 	got := SplitString("a,b,c", "")

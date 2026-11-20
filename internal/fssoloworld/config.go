@@ -3,6 +3,8 @@ package fssoloworld
 import (
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 对齐 game_world.ini + SoloWorld 属性缺省（§二 ctor 定案）。
@@ -80,12 +82,11 @@ func DefaultConfig() Config {
 // AppName 官方 `"world_" .. server_id`。
 func (c Config) AppName() string { return "world_" + strconv.Itoa(c.ServerID) }
 
-// ParseGameWorldINI 解析 game_world.ini（fsloader ini 方言：节/键=值）。
-// 与家族 ParseGame*INI 同模式。
+// ParseGameWorldINI 解析 game_world.ini（分词统一走 fskit.ParseItems＝
+// 官方 CIniFile Build 方言：节/键=值）。与家族 ParseGame*INI 同模式。
 func ParseGameWorldINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	sec := ""
-	assign := func(k, v string) {
+	assign := func(sec, k, v string) {
 		k = strings.ToLower(strings.TrimSpace(k))
 		v = strings.TrimSpace(v)
 		b := func() bool { return v == "1" || strings.EqualFold(v, "true") }
@@ -183,18 +184,9 @@ func ParseGameWorldINI(data []byte) (Config, error) {
 			}
 		}
 	}
-	for _, raw := range strings.Split(string(data), "\n") {
-		line := strings.TrimSpace(raw)
-		if line == "" || strings.HasPrefix(line, "//") || strings.HasPrefix(line, ";") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			sec = strings.ToLower(strings.Trim(line, "[]"))
-			continue
-		}
-		if i := strings.IndexByte(line, '='); i > 0 {
-			assign(line[:i], line[i+1:])
-		}
-	}
+	_ = fskit.ParseItems(data, func(sec, k, v string) error {
+		assign(strings.ToLower(sec), k, v)
+		return nil
+	})
 	return cfg, nil
 }

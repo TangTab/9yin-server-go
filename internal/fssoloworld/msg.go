@@ -237,8 +237,68 @@ func (s *Server) storeRoleInfo(id1 uint32, p []byte) bool {
 	}
 	if s.state == WsLoadRoles {
 		s.setState(WsLoadScenes)
+		s.syncRoleInfoToMembers() // 名册就绪 → 全量推 member（+0x43C 闩源）
+		s.pushRoleInfoToPublic()  // 同步推 public（+0x176 nameuids 门源）
 	}
 	return true
+}
+
+// buildRoleInfoForPublic public 版 RoleInfo（type10/0x0A，0x34B 定长帧）：
+// {int@0, int@4=1, count@8, 项 0x28B{wstr name[0x20], char uid[8]}×count}
+// ——fssolopublic.worldRoleInfo 按定长 0x34 验帧（空名册也须 0x34B），
+// 项区最多 1 项，不足补零。
+func (s *Server) buildRoleInfoForPublic() []byte {
+	snap := s.names.Snapshot()
+	b := make([]byte, 0x34) // 定长帧：0xC 头 + 1×0x28 项槽
+	binary.LittleEndian.PutUint32(b[0:], 0)
+	binary.LittleEndian.PutUint32(b[4:], 1)
+	binary.LittleEndian.PutUint32(b[8:], uint32(len(snap)))
+	if len(snap) > 1 {
+		snap = snap[:1]
+	}
+	for i, nd := range snap {
+		ent := b[0xC+i*0x28 : 0xC+(i+1)*0x28]
+		u := encodeUTF16([]rune(nd.Name))
+		for j, c := range u {
+			if j >= 0x1F {
+				break
+			}
+			binary.LittleEndian.PutUint16(ent[j*2:], uint16(c))
+		}
+		copy(ent[0x20:], nd.Uid)
+	}
+	return b
+}
+
+// pushRoleInfoToPublic RoleInfo(type10) 全量推 public。
+func (s *Server) pushRoleInfoToPublic() {
+	s.inner.SendToPublic(0, 0x0A, s.buildRoleInfoForPublic())
+}
+
+// buildRoleInfoPayload CommandRoleInfo(0x0B) 载荷：{count,{wstr name,
+// str uid,u8 deleted}}——与 store RoleInfo 回执同构（member 端
+// worldRoleInfo 装载序）。
+func (s *Server) buildRoleInfoPayload() []byte {
+	snap := s.names.Snapshot()
+	b := make([]byte, 4)
+	binary.LittleEndian.PutUint32(b, uint32(len(snap)))
+	for _, nd := range snap {
+		u := encodeUTF16([]rune(nd.Name))
+		u = append(u, 0)
+		b = binary.LittleEndian.AppendUint32(b, uint32(len(u)))
+		for _, c := range u {
+			b = binary.LittleEndian.AppendUint16(b, uint16(c))
+		}
+		ub := append([]byte(nd.Uid), 0)
+		b = binary.LittleEndian.AppendUint32(b, uint32(len(ub)))
+		b = append(b, ub...)
+		if nd.Deleted {
+			b = append(b, 1)
+		} else {
+			b = append(b, 0)
+		}
+	}
+	return b
 }
 
 // storeLoad：{client_id, serial, account, count, {uid,name,level,...}...}。

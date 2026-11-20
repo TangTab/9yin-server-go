@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // GameListerConfig 是官方 Fs 框架 lister 家族 INI 配置的投影，兼容两个
@@ -34,35 +35,15 @@ type GameListerConfig struct {
 }
 
 // ParseGameListerINI 解析官方 GameLister.ini / game_lister.ini 文本。
-// 方言：`[节]` 头、`键=值`、`//`（及 `;`/`#`）整行注释、注释掉的键
-// （如 `//Addr=127.0.0.1`）视为缺省；未知节/键忽略（前向兼容）。
+// 方言（分词统一走 fskit.ParseItems＝官方 CIniFile Build 方言）：
+// `[节]` 头、`键=值`、`//`/`;` 整行注释、`#` 与裸行按 key-only 条目
+// 忽略（[Module] 模块名清单由此呈现）、注释掉的键（如
+// `//Addr=127.0.0.1`）视为缺省；未知节/键忽略（前向兼容）。
 // 必填 [Outer] Addr/Port，端口合法范围 1..65535。
 func ParseGameListerINI(data []byte) (GameListerConfig, error) {
 	var cfg GameListerConfig
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			// [Module] 节是官方方言的裸行模块列表（FsKit.dll 等），跳过；
-			// 其余节出现无 '=' 行按格式错误处理。
-			if strings.EqualFold(section, "Module") {
-				continue
-			}
-			return cfg, fmt.Errorf("game_lister ini 第 %d 行无 '='：%q", i+1, line)
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("game_lister ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+	if err := fskit.ParseItems(data, cfg.set); err != nil {
+		return cfg, fmt.Errorf("game_lister ini %w", err)
 	}
 	if cfg.OuterAddr == "" {
 		return cfg, fmt.Errorf("game_lister ini 缺 [Outer] Addr")

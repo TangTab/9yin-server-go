@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // defaultGameMonitorINI 是内置默认配置（官方 game_monitor.ini 方言，
@@ -52,35 +54,21 @@ func (c Config) IsOLEDB() bool {
 	return strings.HasPrefix(strings.TrimSpace(c.ConnectString), "Provider=")
 }
 
-// ParseGameMonitorINI 解析官方 game_monitor.ini 文本（关心的键均
-// ASCII，GBK 原文件亦可解析）。
+// ParseGameMonitorINI 解析官方 game_monitor.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言；[Module] 裸行模块列表
+// 按官方 key-only 条目语义收集；关心的键均 ASCII，GBK 原文件亦可解析）。
 func ParseGameMonitorINI(data []byte) (Config, error) {
 	var cfg Config
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	if err := fskit.ParseItems(data, func(sec, key, value string) error {
+		// [Module] 节是官方方言的裸行模块列表（key-only 条目；
+		// '#' 行官方 Build 不吃，漏成 key-only 条目，这里挡掉）。
+		if strings.EqualFold(sec, "Module") && value == "" && !strings.HasPrefix(key, "#") {
+			cfg.Modules = append(cfg.Modules, key)
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			if strings.EqualFold(section, "Module") {
-				if name := strings.TrimSpace(line); name != "" {
-					cfg.Modules = append(cfg.Modules, name)
-				}
-				continue
-			}
-			return cfg, fmt.Errorf("game_monitor ini 第 %d 行无 '='：%q", i+1, line)
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("game_monitor ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+		return cfg.set(sec, key, value)
+	}); err != nil {
+		return cfg, fmt.Errorf("game_monitor ini %w", err)
 	}
 	if cfg.OuterPort == 0 {
 		cfg.OuterPort = 4008 // 官方 game_monitor.ini 实配
@@ -259,32 +247,22 @@ func LoadMonitorLimitINI(path string) (cfg LimitConfig, data []byte, created boo
 	return cfg, defaultMonitorLimitINI, true, err
 }
 
-// parseCaseSensitiveINI 通用 INI 解析（节/键大小写敏感，官方 CReadIni
-// 行为）：`//`、`;`、`#` 整行注释；`[节]` 头；`键=值`（两端修剪）；
-// 裸行（无 '='）忽略。
+// parseCaseSensitiveINI 通用 INI 解析（分词统一走 fskit.ParseItems＝
+// 官方 CIniFile Build 方言，节/键保留原文大小写——官方 CReadIni 行为，
+// [System] 与 [system] 是两个节）。'#' 行官方 Build 不吃、漏成 key-only
+// 条目，这里挡掉；裸行同样入表为 key→""（无消费者，等价旧忽略口径）。
 func parseCaseSensitiveINI(b []byte) map[string]map[string]string {
 	out := map[string]map[string]string{}
-	section := ""
-	for _, line := range strings.Split(string(b), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	_ = fskit.ParseItems(b, func(sec, k, v string) error {
+		if strings.HasPrefix(k, "#") {
+			return nil // 注释行不入表（官方方言）
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			if out[section] == nil {
-				out[section] = map[string]string{}
-			}
-			continue
+		if out[sec] == nil {
+			out[sec] = map[string]string{}
 		}
-		if k, v, ok := strings.Cut(line, "="); ok {
-			if out[section] == nil {
-				out[section] = map[string]string{}
-			}
-			out[section][strings.TrimSpace(k)] = strings.TrimSpace(v)
-		}
-	}
+		out[sec][k] = v
+		return nil
+	})
 	return out
 }
 

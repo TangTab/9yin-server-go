@@ -85,7 +85,7 @@ Addr=127.0.0.1
 Port=4008
 
 [Account]
-ConnectString=Provider=SQLOLEDB;Password=pw;User ID=sa;Initial Catalog=nx_district1;Data Source=192.168.10.148:3306
+ConnectString=Provider=SQLOLEDB;Password=pw;User ID=sa;Initial Catalog=nx_district1;Data Source=127.0.0.1:3306
 ConnectPool=3
 
 [Role]

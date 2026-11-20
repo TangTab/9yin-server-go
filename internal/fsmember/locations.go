@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Location 全局落地点（location.ini [名] 节）：
@@ -25,7 +27,8 @@ type Locations struct {
 // NewLocations 建表。
 func NewLocations() *Locations { return &Locations{byID: make(map[string]Location)} }
 
-// Load 复刻 LoadLocations(path)：[Name] Location=x,z,y,orient / Scene=path。
+// Load 复刻 LoadLocations(path)：[Name] Location=x,z,y,orient / Scene=path
+// （分词统一走 fskit.ParseItems＝官方 CIniFile Build 方言，按文件序成组）。
 func (l *Locations) Load(data []byte) error {
 	section := ""
 	loc := Location{}
@@ -34,24 +37,16 @@ func (l *Locations) Load(data []byte) error {
 			l.byID[section] = loc
 		}
 	}
-	for line := range eachLine(string(data)) {
-		line = trimSpace(line)
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	err := fskit.ParseItems(data, func(sec, key, val string) error {
+		if sec == "" { // 节前裸键不入表（同旧解析器口径）
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+		if sec != section {
 			flush()
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			loc = Location{Name: section}
-			continue
+			section = sec
+			loc = Location{Name: sec}
 		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 || section == "" {
-			continue
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		switch key {
+		switch strings.ToLower(key) {
 		case "location":
 			parts := strings.Split(val, ",")
 			nums := make([]float64, 4)
@@ -65,9 +60,10 @@ func (l *Locations) Load(data []byte) error {
 		case "scene":
 			loc.Scene = val
 		}
-	}
+		return nil
+	})
 	flush()
-	return nil
+	return err
 }
 
 // Find 按名查点。

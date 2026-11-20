@@ -292,6 +292,15 @@ func (m *memberClient) send(comm, id1, id2 uint32, payload []byte) {
 }
 
 func (m *memberClient) recv() (comm, id1, id2 uint32, payload []byte) {
+	for {
+		comm, id1, id2, payload = m.recvRaw()
+		if id2 != innerIdentifyID2 {
+			return // 受面双向 identify：跳过 store 的自报帧
+		}
+	}
+}
+
+func (m *memberClient) recvRaw() (comm, id1, id2 uint32, payload []byte) {
 	m.conn.SetReadDeadline(time.Now().Add(3 * time.Second))
 	head := make([]byte, 4)
 	if _, err := ioReadFull(m.conn, head); err != nil {

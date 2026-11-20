@@ -11,6 +11,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/fssolopublic"
 	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是 game_unite.ini 方言的投影（solounite/main.lua main() 全量
@@ -125,37 +126,23 @@ func DefaultConfig() Config {
 	}
 }
 
-// ParseGameUniteINI 解析 game_unite.ini 文本（fsloader ini 方言：
-// `[节]` + `键=值`；`//` 与 `;` 注释；[Module] 裸行收集）。
+// ParseGameUniteINI 解析 game_unite.ini 文本（分词统一走 fskit.ParseItems
+// ＝官方 CIniFile Build 方言：`[节]` + `键=值`；`//` 与 `;` 注释；
+// [Module] 裸行按 key-only 条目收集）。
 func ParseGameUniteINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	sec := ""
 	b := func(v string) bool { return v == "1" || strings.EqualFold(v, "true") }
 	n := func(v string) int { i, _ := strconv.Atoi(v); return i }
-	for i, raw := range strings.Split(string(data), "\n") {
-		line := strings.TrimSpace(strings.TrimSuffix(raw, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") || strings.HasPrefix(line, ";") ||
-			strings.HasPrefix(line, "#") {
-			continue
+	if err := fskit.ParseItems(data, func(sec, key, val string) error {
+		sec = strings.ToLower(sec)
+		// [Module] 裸行模块列表（key-only 条目；'#' 行滤掉）。
+		if val == "" && sec == "module" && !strings.HasPrefix(key, "#") {
+			cfg.Modules = append(cfg.Modules, key)
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			sec = strings.ToLower(strings.TrimSpace(line[1 : len(line)-1]))
-			continue
-		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 {
-			if sec == "module" {
-				if name := strings.TrimSpace(line); name != "" {
-					cfg.Modules = append(cfg.Modules, name)
-				}
-			}
-			continue // 其余裸行容忍（官方方言 [Module] 外不出现）
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		if err := cfg.set(sec, key, val, b, n); err != nil {
-			return cfg, fmt.Errorf("game_unite ini 第 %d 行 %s/%s: %w", i+1, sec, key, err)
-		}
+		return cfg.set(sec, strings.ToLower(key), val, b, n)
+	}); err != nil {
+		return cfg, fmt.Errorf("game_unite ini %w", err)
 	}
 	return cfg, nil
 }

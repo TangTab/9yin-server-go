@@ -338,9 +338,10 @@ func (l *InnerLink) ConnCommOf(connID int) (uint32, bool) {
 	return c, ok && c != commUnknown
 }
 
-// encodeLoadRoles StoreMsg 请求体（WorldStateUnknown → SendToStore）。
-func encodeLoadRoles() []byte {
+// encodeLoadRoles StoreMsg 请求体（WorldStateUnknown → SendToStore；
+// 首域 ServerId——store 端 ResetOnline 的复位范围）。
+func encodeLoadRoles(sid int) []byte {
 	b := make([]byte, 4)
-	binary.LittleEndian.PutUint32(b[0:], 0)
+	binary.LittleEndian.PutUint32(b[0:], uint32(sid))
 	return b
 }

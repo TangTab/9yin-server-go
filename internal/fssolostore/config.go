@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是官方 game_store.ini 的字段投影（main.lua main() 全量读取序）。
@@ -129,29 +131,16 @@ func appRecordFrame(state string, database string, dbErr int, tick uint32) strin
 		"\" db_err=\"" + itoa(dbErr) + "\" tick=\"" + utoa(uint64(tick)) + "\" />"
 }
 
-// ParseGameStoreINI 解析 game_store.ini 文本（solo 方言；注释行 `//`
-// 与分号均容忍——快照 ini 以 `//` 注释）。
+// ParseGameStoreINI 解析 game_store.ini 文本（solo 方言；分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言，注释行 `//` 与分号均容忍
+// ——快照 ini 以 `//` 注释；节键归一小写交 set；[Module] 裸行由装载器
+// 承担，此处不收）。
 func ParseGameStoreINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	section := ""
-	for _, raw := range strings.Split(string(data), "\n") {
-		line := strings.TrimSpace(strings.TrimSuffix(raw, "\r"))
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") ||
-			strings.HasPrefix(line, "//") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.ToLower(strings.TrimSpace(line[1 : len(line)-1]))
-			continue
-		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 {
-			continue // [Module] 裸行由装载器承担，此处不收
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		cfg.set(section, key, val)
-	}
+	_ = fskit.ParseItems(data, func(sec, key, val string) error {
+		cfg.set(strings.ToLower(sec), strings.ToLower(key), val)
+		return nil
+	})
 	if cfg.EchoPort == 15100 {
 		cfg.EchoPort += cfg.StoreID
 	}

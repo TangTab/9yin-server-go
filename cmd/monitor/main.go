@@ -28,7 +28,7 @@ const version = "0.1.0-monitor"
 func main() {
 	var (
 		configPath = flag.String("config", "", "game_monitor.ini 配置路径（默认：当前目录 game_monitor.ini，没有则释放内置默认并采用；官方方言）")
-		limitPath  = flag.String("limit-ini", "Res/MonitorLimit.ini", "MonitorLimit.ini 限额配置路径（官方固定 ..\\Res\\MonitorLimit.ini；不存在则释放内置官方快照）")
+		limitPath  = flag.String("limit-ini", "../Res/MonitorLimit.ini", "MonitorLimit.ini 限额配置路径（官方固定 ..\\Res\\MonitorLimit.ini，即 bin 工作目录上一级 Res\\；不存在则释放内置官方快照）")
 		outer      = flag.String("outer", "", "外网受面 addr:port（官方 [Outer]；缺省 127.0.0.1:4008；off=关闭）")
 		echoAddr   = flag.String("echo", "127.0.0.1:15012", "echo 维护口 addr:port（官方 [Echo] 缺省 15012；off=关闭）")
 		mysqlDSN   = flag.String("mysql-dsn", "", "MySQL DSN（官方 [Main] ConnectString 为 SQLOLEDB 方言，Go 复刻经此接真库；空=内存兜底，告警仅日志/echo）")

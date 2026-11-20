@@ -228,7 +228,7 @@ func main() {
 		ServerID: cfg.ServerID, EntryID: cfg.EntryID,
 		MaxConnects: cfg.MaxConnects,
 		InnerAddr:   cfg.InnerAddr, InnerPort: cfg.InnerPort,
-		OuterAddr:  cfg.OuterAddr,
+		OuterAddr:  cfg.OuterAddr, OuterPort: cfg.OuterPort,
 		AppName:    fmt.Sprintf("entry_%d_%d", cfg.ServerID, cfg.EntryID),
 		License:    lic,
 		StatusSink: func(line string) { fmt.Println(line) },

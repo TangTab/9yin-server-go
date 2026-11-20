@@ -28,7 +28,7 @@ func TestParseGameMonitorINI(t *testing.T) {
 	}
 	// 官方原 ini（含 fssql.dll/OLEDB 串）亦可解析。
 	official := "[System]\nSleep=-1\nMainEntity=SoloMonitor\nMainScript=main\n[Module]\nfskit.dll\nfssql.dll\nfscomm.dll\nFsSoloMonitor.dll\n" +
-		"[Script]\nPath=..\\lua\\solomonitor\n[Main]\nConnectString=Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.10.148:3306\n" +
+		"[Script]\nPath=..\\lua\\solomonitor\n[Main]\nConnectString=Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_base1;Data Source=127.0.0.1:3306\n" +
 		"[Outer]\nAddr=127.0.0.1\nPort=4008\n"
 	cfg, err = ParseGameMonitorINI([]byte(official))
 	if err != nil {

@@ -80,6 +80,11 @@ func (l *InnerLink) onOpen(connID int, host string, port int) {
 	l.connComm[connID] = commUnknown
 	l.acc[connID] = &frameAcc{}
 	l.mu.Unlock()
+	// 官方双向 identify：受面接受连接即回自身 identify——
+	// public 端 OnStoreIdentified（装载链事件1）依赖此帧。
+	if frame, err := encodeInner(l.self, 0, innerIdentifyID2, nil); err == nil {
+		l.r.Send(connID, frame)
+	}
 }
 
 func (l *InnerLink) onClose(connID int, host string, port int) {

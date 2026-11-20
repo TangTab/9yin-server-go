@@ -449,12 +449,57 @@ var msgChannel = [0x43]string{
 	0x3F: "Public", 0x40: "Public", 0x41: "Public", 0x42: "Public",
 }
 
+// boolByteU8 布尔 → 单字节 0/1（archive 尾域）。
+func boolByteU8(v bool) byte {
+	if v {
+		return 1
+	}
+	return 0
+}
+
+// emptyStoreBackHeader 0x22/0x23/0x28 应答公共头（result=1, count=0）——
+// 空库合法形态，fssolopublic parseStoreBackHeader 互证（len≥0x10 且
+// result≠0 即过门）。
+func emptyStoreBackHeader() []byte {
+	b := make([]byte, 0x10)
+	putLe32(b, 0, 1)
+	return b
+}
+
+// cstrFixed 定长域取 NUL 前 C 串。
+func cstrFixed(b []byte) string {
+	for i, c := range b {
+		if c == 0 {
+			return string(b[:i])
+		}
+	}
+	return string(b)
+}
+
 // dispatch 官方 CAccess::ProcessMsg 67 型分发（Go 单 Backend 并发执行）。
 // 已建模命令做完整互操作编解码；其余走 Backend.Generic（回执 {u32 result}）。
 func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 	b := s.opt.Backend
 	back := msgBackIDs[msg]
 	switch msg {
+	case 0x00: // role_info：开机在线复位 + 名册全量（world 引导 WsUnknown→LoadRoles；
+		// 回执 archive {count,{wstr name,str uid,u8 deleted}}，world 端 storeRoleInfo 装载序）
+		sid := int(sceneOf(payload))
+		if sid == 0 {
+			sid = s.cfg.ServerID
+		}
+		briefs, err := b.ResetOnline(sid)
+		if err != nil {
+			s.logf("(CAccess::MessageRoleInfo)connection error")
+			return
+		}
+		body := appendArchInt(nil, int32(len(briefs)))
+		for _, br := range briefs {
+			body = appendArchWide(body, br.Name)
+			body = appendArchStr(body, br.UID)
+			body = append(body, boolByteU8(br.Deleted))
+		}
+		s.emit(serial, back, body)
 	case 0x29: // manage_info：全量管理配置（member 引导 0x29 {ServerId}）
 		entries, err := b.ManageInfos()
 		if err != nil {
@@ -553,15 +598,35 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			}
 		}
 		s.emit(serial, back, []byte{0, 0, 0, 0})
-	case 0x24: // pub_info
-		tables, err := b.PubInfo()
+	case 0x24: // pub_info：{space[0x24],table[0x24]} → store_back_pub_info_t
+		// {space@0,table@0x24,result@0x48,count@0x4C,archive{wstr}×}
+		// （fssolopublic.storePubInfo 版式互证）。
+		if len(payload) < 0x48 {
+			s.logf("(CAccess::MessagePubInfo)len < 0x48")
+			return
+		}
+		space := cstrFixed(payload[0:0x24])
+		table := cstrFixed(payload[0x24:0x48])
+		names, err := b.PubLoad(table)
 		if err != nil {
 			s.logf("(CAccess::MessagePubInfo)failed")
 			return
 		}
-		body := make([]byte, 4+len(tables)*4) // 简化：{n, hash…} 测试断言字节数即可
-		putLe32(body, 0, uint32(len(tables)))
+		body := make([]byte, 0x50, 0x50+len(names)*4)
+		copy(body[0:0x24], space)
+		copy(body[0x24:0x48], table)
+		putLe32(body, 0x48, 1) // result≠0
+		putLe32(body, 0x4C, uint32(len(names)))
+		for name := range names {
+			body = appendArchWide(body, name)
+		}
 		s.emit(serial, back, body)
+	case 0x2D: // relation_info：{ServerId} → 0x22 空表头（result≠0）
+		s.emit(serial, back, emptyStoreBackHeader())
+	case 0x30: // feed 存活期配置 → 0x23 空表头
+		s.emit(serial, back, emptyStoreBackHeader())
+	case 0x3A: // trade_info：{ServerId} → 0x28 空表头
+		s.emit(serial, back, emptyStoreBackHeader())
 	default:
 		if back != 0xFF {
 			// 未细建模的带回执命令：Backend.Generic + {u32 result}

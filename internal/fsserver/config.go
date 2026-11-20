@@ -1,9 +1,10 @@
 package fsserver
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config GameWorld.ini 官方方言（main.lua 读取面 + [Main]/[Inner]/
@@ -51,32 +52,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// ParseGameWorldINI 官方 INI 方言（fskit.IniFile 同方言；此处轻量解析
-// 保持包内零依赖——`//` 注释、[节]、键=值）。
+// ParseGameWorldINI 官方 INI 方言（分词统一走 fskit.ParseItems＝
+// fskit.IniFile/官方 CIniFile Build 同方言；节键归一小写分发）。
 func ParseGameWorldINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	sec := ""
-	saw := map[string]bool{}
-	for _, raw := range strings.Split(string(data), "\n") {
-		line := strings.TrimSpace(strings.TrimSuffix(raw, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") || strings.HasPrefix(line, ";") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			sec = strings.ToLower(line[1 : len(line)-1])
-			continue
-		}
-		eq := strings.Index(line, "=")
-		if eq < 0 {
-			continue
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		full := sec + "." + key
-		switch full {
+	_ = fskit.ParseItems(data, func(sec, key, val string) error {
+		switch strings.ToLower(sec) + "." + strings.ToLower(key) {
 		case "main.districtid":
 			cfg.DistrictID = parseU32(val, cfg.DistrictID)
-			saw["district"] = true
 		case "main.serverid":
 			cfg.ServerID = parseU32(val, cfg.ServerID)
 		case "main.servername":
@@ -120,10 +103,8 @@ func ParseGameWorldINI(data []byte) (Config, error) {
 		case "manageserver.port":
 			cfg.ManagePort = int(parseI(val, 0))
 		}
-	}
-	if !saw["district"] {
-		// 注释键=缺省语义：保持 DefaultConfig
-	}
+		return nil
+	})
 	return cfg, nil
 }
 
@@ -148,5 +129,3 @@ func parseBool(s string) bool {
 	s = strings.ToLower(strings.TrimSpace(s))
 	return s != "" && s != "false" && s != "0"
 }
-
-var _ = fmt.Sprintf

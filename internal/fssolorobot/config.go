@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // defaultGameRobotINI 是内置默认配置（官方 game_robot.ini 方言，
@@ -44,8 +46,10 @@ type Config struct {
 	EchoPort           int      // [Echo] Port
 }
 
-// ParseGameRobotINI 解析官方 game_robot.ini 文本。GBK 官方文件亦可
-// 解析（关心的键均为 ASCII）。
+// ParseGameRobotINI 解析官方 game_robot.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言；[Module] 裸行模块列表
+// 按官方 key-only 条目语义收集，'#' 行滤掉）。GBK 官方文件亦可解析
+// （关心的键均为 ASCII）。
 func ParseGameRobotINI(data []byte) (Config, error) {
 	cfg := Config{
 		MainEntity:        "SoloRobot",
@@ -61,23 +65,9 @@ func ParseGameRobotINI(data []byte) (Config, error) {
 		EchoAddr:          "127.0.0.1",
 		EchoPort:          15009,
 	}
-	section := ""
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		switch section {
+	_ = fskit.ParseItems(data, func(sec, key, val string) error {
+		switch sec {
 		case "System":
-			key, val, ok := splitKV(line)
-			if !ok {
-				continue
-			}
 			switch strings.ToLower(key) {
 			case "mainentity":
 				cfg.MainEntity = val
@@ -85,20 +75,14 @@ func ParseGameRobotINI(data []byte) (Config, error) {
 				cfg.MainScript = val
 			}
 		case "Module":
-			cfg.Modules = append(cfg.Modules, strings.ToLower(line))
-		case "Script":
-			key, val, ok := splitKV(line)
-			if !ok {
-				continue
+			if val == "" && !strings.HasPrefix(key, "#") { // key-only 裸行模块名
+				cfg.Modules = append(cfg.Modules, strings.ToLower(key))
 			}
+		case "Script":
 			if strings.EqualFold(key, "path") {
 				cfg.ScriptPath = val
 			}
 		case "Main":
-			key, val, ok := splitKV(line)
-			if !ok {
-				continue
-			}
 			switch strings.ToLower(key) {
 			case "maxplayer":
 				cfg.MaxConnects = atoiDefault(val, cfg.MaxConnects)
@@ -116,10 +100,6 @@ func ParseGameRobotINI(data []byte) (Config, error) {
 				cfg.MessageEncodeKey = val
 			}
 		case "Outer":
-			key, val, ok := splitKV(line)
-			if !ok {
-				continue
-			}
 			switch strings.ToLower(key) {
 			case "addr":
 				cfg.OuterAddr = val
@@ -127,10 +107,6 @@ func ParseGameRobotINI(data []byte) (Config, error) {
 				cfg.OuterPort = atoiDefault(val, cfg.OuterPort)
 			}
 		case "Echo":
-			key, val, ok := splitKV(line)
-			if !ok {
-				continue
-			}
 			switch strings.ToLower(key) {
 			case "addr":
 				cfg.EchoAddr = val
@@ -138,16 +114,9 @@ func ParseGameRobotINI(data []byte) (Config, error) {
 				cfg.EchoPort = atoiDefault(val, cfg.EchoPort)
 			}
 		}
-	}
+		return nil
+	})
 	return cfg, nil
-}
-
-func splitKV(line string) (string, string, bool) {
-	i := strings.IndexByte(line, '=')
-	if i < 0 {
-		return "", "", false
-	}
-	return strings.TrimSpace(line[:i]), strings.TrimSpace(line[i+1:]), true
 }
 
 func atoiDefault(s string, def int) int {

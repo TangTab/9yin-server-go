@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是 game_entry.ini 的 solo 方言（lua\soloentry\main.lua 读键面）。
@@ -45,30 +47,15 @@ func DefaultConfig() Config {
 	}
 }
 
-// ParseSoloINI 解析 game_entry.ini 文本（键名大小写不敏感；[System]/
-// [Module]/[Script] 节静默跳过——壳层与装载器事务，见 internal/fsloader）。
+// ParseSoloINI 解析 game_entry.ini 文本（分词统一走 fskit.ParseItems＝
+// 官方 CIniFile Build 方言，节键归一小写交 set；[System]/[Module]/
+// [Script] 节静默跳过——壳层与装载器事务，见 internal/fsloader）。
 func ParseSoloINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	section := ""
-	for _, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") ||
-			strings.HasPrefix(line, "//") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.ToLower(strings.TrimSpace(line[1 : len(line)-1]))
-			continue
-		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 {
-			continue
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		if err := cfg.set(section, key, val); err != nil {
-			return cfg, err
-		}
+	if err := fskit.ParseItems(data, func(sec, key, val string) error {
+		return cfg.set(strings.ToLower(sec), strings.ToLower(key), val)
+	}); err != nil {
+		return cfg, err
 	}
 	if cfg.EchoPort == 15200 {
 		cfg.EchoPort += int(cfg.EntryID)

@@ -86,9 +86,18 @@ func (s *Server) stateLoadingHandler(event uint32) bool {
 		s.state = stateClosing
 		return true
 	}
-	if s.pubReady && s.roleReady && s.manageData != nil {
+	s.mu.Lock()
+	pub, role, manage := s.pubReady, s.roleReady, s.manageData
+	s.mu.Unlock()
+	if pub && role && manage != nil {
 		s.state = stateOpened
 		return true
+	}
+	// 自愈重发：官方注册是 on_public_connect 一次性，但合一进程内
+	// member 连 public 早于 public 走完装载链（StateOpened 门静默丢
+	// 弃注册），闩即永久不落——Loading 期未得 pub 闩每拍重发注册。
+	if !pub {
+		s.inner.SendToPublic(0, 0, encodeRegisterPayload(s.cfg.DistrictID, s.cfg.ServerID))
 	}
 	return false
 }

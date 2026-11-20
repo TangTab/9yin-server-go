@@ -10,6 +10,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // LoadOrCreateGameChargeINI 读取 path 配置；不存在时写入内置默认 def
@@ -26,34 +28,14 @@ func LoadOrCreateGameChargeINI(path string, def []byte) (data []byte, created bo
 	return def, true, nil
 }
 
-// ParseGameChargeINI 解析官方 GameCharge.ini 文本（方言同
-// ParseGameListerINI：`[节]`/`键=值`/`//`、`;`、`#` 注释；未知节键忽略）。
+// ParseGameChargeINI 解析官方 GameCharge.ini 文本（分词统一走
+// fskit.ParseItems＝官方 CIniFile Build 方言：`[节]`/`键=值`/`//`、`;`
+// 注释，`#` 与裸行按 key-only 条目忽略；未知节键忽略）。
 // 键名大小写不敏感（官方 ini 读写组件同特性）。
 func ParseGameChargeINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	section := ""
-	for i, line := range strings.Split(string(data), "\n") {
-		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") ||
-			strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.TrimSpace(line[1 : len(line)-1])
-			continue
-		}
-		key, value, ok := strings.Cut(line, "=")
-		if !ok {
-			if strings.EqualFold(section, "Module") || strings.EqualFold(section, "System") ||
-				strings.EqualFold(section, "Script") || strings.EqualFold(section, "Resource") {
-				continue
-			}
-			return cfg, fmt.Errorf("gamecharge ini 第 %d 行无 '='：%q", i+1, line)
-		}
-		key, value = strings.TrimSpace(key), strings.TrimSpace(value)
-		if err := cfg.set(section, key, value); err != nil {
-			return cfg, fmt.Errorf("gamecharge ini 第 %d 行 %s/%s: %w", i+1, section, key, err)
-		}
+	if err := fskit.ParseItems(data, cfg.set); err != nil {
+		return cfg, fmt.Errorf("gamecharge ini %w", err)
 	}
 	if cfg.Addr == "" {
 		return cfg, fmt.Errorf("gamecharge ini 缺 [Outer] Addr")

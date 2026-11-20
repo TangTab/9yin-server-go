@@ -2,6 +2,7 @@ package fskit
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -493,6 +494,31 @@ func (f *IniFile) GetItemValueList(section string) []string {
 		out = append(out, f.cstr(f.items[sec.firstItem+i].valueOff))
 	}
 	return out
+}
+
+// ParseItems 官方方言解析 data（等价 NewIniFile+LoadFromBytes），并按
+// 文件序把每个条目（节名, 键, 值）回调 cb——Go 扩展遍历面（官方等价
+// 组合为 GetSectionList/GetItemList/GetItemValueList，但不便按节成组走）。
+// 注释/空行不入流；无 '=' 的裸行按官方 Build 语义以 key-only 条目呈现
+// （value=""，如 [Module] 模块名清单）；节名/键保留原文大小写；节前
+// 裸键落在隐式空名节。cb 返回错误立即中止并包装 "节/键: " 前缀透传。
+// 各配置解析器统一走此入口，取代手写行循环。
+func ParseItems(data []byte, cb func(section, key, value string) error) error {
+	f := NewIniFile("")
+	if !f.LoadFromBytes(data) {
+		return nil // Build 恒成功（防御分支，不可达）
+	}
+	for _, sec := range f.sections {
+		name := f.cstr(sec.nameOff)
+		for i := uint32(0); i < sec.itemCount; i++ {
+			it := f.items[sec.firstItem+i]
+			key, value := f.cstr(it.keyOff), f.cstr(it.valueOff)
+			if err := cb(name, key, value); err != nil {
+				return fmt.Errorf("%s/%s: %w", name, key, err)
+			}
+		}
+	}
+	return nil
 }
 
 func itoa(v int) string {

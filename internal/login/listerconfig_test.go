@@ -138,7 +138,9 @@ func TestParseGameListerINIErrors(t *testing.T) {
 		{"缺 Outer.Port", "[Outer]\nAddr=1.2.3.4\n", "[Outer] Port 非法"},
 		{"端口越界", "[Outer]\nAddr=1.2.3.4\nPort=70000\n", "[Outer] Port 非法"},
 		{"整数键非整数", "[Main]\nIDC=abc\n[Outer]\nAddr=1.2.3.4\nPort=4000\n", "须为整数"},
-		{"无等号行", "[Outer]\n乱行\n", "无 '='"},
+		// 官方 CIniFile Build 语义：裸行是 key-only 条目（不报错），
+		// 未知键忽略——与 fskit.TestBuildNoEqualLine 同口径。
+		{"无等号行按 key-only 忽略", "[Outer]\n乱行\n", "缺 [Outer] Addr"},
 	}
 	for _, c := range cases {
 		_, err := ParseGameListerINI([]byte(c.ini))

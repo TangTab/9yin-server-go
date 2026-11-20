@@ -3,6 +3,8 @@ package fspublic
 import (
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是 GamePublic.ini 方言（集群公共数据服版）。键名大小写不敏感，
@@ -44,28 +46,14 @@ func DefaultConfig() Config {
 	}
 }
 
-// ParseGamePublicINI 解析 GamePublic.ini 文本（大写系集群方言）。
+// ParseGamePublicINI 解析 GamePublic.ini 文本（大写系集群方言；分词统一
+// 走 fskit.ParseItems＝官方 CIniFile Build 方言，节键归一小写交 set）。
 func ParseGamePublicINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
-	section := ""
-	for line := range eachLine(string(data)) {
-		line = strings.TrimSpace(line)
-		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") ||
-			strings.HasPrefix(line, "//") {
-			continue
-		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			section = strings.ToLower(strings.TrimSpace(line[1 : len(line)-1]))
-			continue
-		}
-		eq := strings.IndexByte(line, '=')
-		if eq < 0 {
-			continue
-		}
-		key := strings.ToLower(strings.TrimSpace(line[:eq]))
-		val := strings.TrimSpace(line[eq+1:])
-		cfg.set(section, key, val)
-	}
+	_ = fskit.ParseItems(data, func(sec, key, val string) error {
+		cfg.set(strings.ToLower(sec), strings.ToLower(key), val)
+		return nil
+	})
 	return cfg, nil
 }
 
@@ -103,23 +91,6 @@ func (c *Config) set(section, key, val string) {
 		}
 	}
 	// 未知键忽略（前向兼容）
-}
-
-func eachLine(s string) func(func(string) bool) {
-	return func(yield func(string) bool) {
-		for len(s) > 0 {
-			i := strings.IndexByte(s, '\n')
-			var line string
-			if i < 0 {
-				line, s = s, ""
-			} else {
-				line, s = s[:i], s[i+1:]
-			}
-			if !yield(line) {
-				return
-			}
-		}
-	}
 }
 
 func parseU32(val string, def uint32) uint32 {

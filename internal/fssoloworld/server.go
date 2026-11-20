@@ -1,6 +1,7 @@
 package fssoloworld
 
 import (
+	"encoding/binary"
 	"sync"
 	"time"
 
@@ -318,6 +319,10 @@ func (s *Server) onInnerConnected(comm uint32) {
 	switch {
 	case comm == commPublic:
 		s.trace("public connected")
+		// 名册已装载而 public 后连：补推 RoleInfo(type10)（+0x176 门源）
+		if s.rolesLoaded() {
+			s.pushRoleInfoToPublic()
+		}
 	case comm == commAuction:
 		s.trace("auction connected")
 	case comm >= commStoreMin && comm < commStoreMax:
@@ -325,8 +330,35 @@ func (s *Server) onInnerConnected(comm uint32) {
 	case comm >= commEntryMin && comm < commEntryMax:
 		s.trace("entry %d connected", comm-commEntryMin)
 	case comm >= commMemberMin && comm < commMemberMax:
-		s.trace("member %d connected", comm-commMemberMin)
+		idx := int(comm - commMemberMin)
+		s.trace("member %d connected", idx)
+		// 名册已装载而 member 后连：补推 CommandRoleInfo（+0x43C 闩源）
+		if s.rolesLoaded() {
+			s.inner.SendToMember(idx, 0, 0x0B, s.buildRoleInfoPayload())
+		}
 	}
+}
+
+// sendSceneCreate CommandCreateScene(0x00) 下发：{scene u32, type u32,
+// name cstr}（member 端 worldCreateScene 装载序；name=Script 逻辑类名）。
+func (s *Server) sendSceneCreate(index, member, typ int, name string) bool {
+	b := make([]byte, 8+len(name)+1)
+	binary.LittleEndian.PutUint32(b[0:], uint32(index))
+	binary.LittleEndian.PutUint32(b[4:], uint32(typ))
+	copy(b[8:], name)
+	return s.inner.SendToMember(member, 0, 0x00, b)
+}
+
+// rolesLoaded 角色名册装载完毕（WsLoadScenes..WsOpened 运行区间）。
+func (s *Server) rolesLoaded() bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.state >= WsLoadScenes && s.state <= WsOpened
+}
+
+// syncRoleInfoToMembers CommandRoleInfo(0x0B) 全量推所有已连 member。
+func (s *Server) syncRoleInfoToMembers() {
+	s.inner.SendToAllMember(0, 0x0B, s.buildRoleInfoPayload())
 }
 
 func (s *Server) onInnerDisconnect(comm uint32) {
@@ -359,13 +391,24 @@ func (s *Server) worldStateMachine() {
 	switch st {
 	case WsUnknown:
 		// SendToStore(load roles 请求) → LoadRoles
-		if s.inner != nil && s.inner.SendToAllStore(0, 0, encodeLoadRoles()) {
+		if s.inner != nil && s.inner.SendToAllStore(0, 0, encodeLoadRoles(s.cfg.ServerID)) {
 			s.setState(WsLoadRoles)
 		}
 	case WsLoadRoles:
 		// 等 StoreMsgRoleInfo 同步（storeRoleInfo 推进）
 	case WsLoadScenes:
-		// SendSceneAdd（AddScene 装配后逐场景下发 member）→ 等 SceneState
+		// SendSceneAdd（AddScene 装配后逐场景下发 member）→ 等 SceneState。
+		// member 未连时 SendToMember 失败、ScUnknown 保持，下一拍重试。
+		for _, sc := range s.scenes.Snapshot() {
+			if sc.State != ScUnknown || sc.Member < 0 {
+				continue
+			}
+			if s.sendSceneCreate(sc.Index, sc.Member, sc.Type, sc.Script) {
+				s.scenes.SetState(sc.Index, ScStarting)
+			} else {
+				s.trace("send scene %d to member %d failed", sc.Index, sc.Member)
+			}
+		}
 		if s.scenes.CountNormal() == 0 && s.scenes.CountClone() == 0 {
 			s.setState(WsCanOpen)
 		}

@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // LoadStoryTaskListFromBytes 解析一份 storytasklist_*.txt（TAB 分隔，
@@ -66,30 +68,22 @@ func storyColumn(fields []string, columns map[string]int, name string) string {
 	return strings.TrimSpace(fields[index])
 }
 
-// parseIniSections 是任务表专用的极简 INI 扫描：[节名] 下的 key=value
-// 收进 map。注释行（//、;、#）、节外行与无法切分的行跳过；值的解释
-// 留给调用方。编码同上——只消费 ASCII。
+// parseIniSections 是任务表专用的 INI 扫描（分词统一走 fskit.ParseItems
+// ＝官方 CIniFile Build 方言）：[节名] 下的 key=value 收进 map。
+// 注释行（//、;、'#'——官方 Build 不吃 '#' 漏成 key-only 条目，这里
+// 挡掉）、节外行跳过；值的解释留给调用方。编码同上——只消费 ASCII。
 func parseIniSections(raw []byte) map[string]map[string]string {
 	sections := make(map[string]map[string]string)
-	current := ""
-	for _, line := range strings.Split(string(raw), "\n") {
-		line = strings.TrimSpace(strings.TrimRight(line, "\r"))
-		if line == "" || strings.HasPrefix(line, "//") || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-			continue
+	_ = fskit.ParseItems(raw, func(sec, key, value string) error {
+		if sec == "" || strings.HasPrefix(key, "#") {
+			return nil
 		}
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			current = strings.TrimSpace(line[1 : len(line)-1])
-			if current != "" && sections[current] == nil {
-				sections[current] = make(map[string]string)
-			}
-			continue
+		if sections[sec] == nil {
+			sections[sec] = make(map[string]string)
 		}
-		key, value, found := strings.Cut(line, "=")
-		if !found || current == "" {
-			continue
-		}
-		sections[current][strings.TrimSpace(key)] = strings.TrimSpace(value)
-	}
+		sections[sec][key] = value
+		return nil
+	})
 	return sections
 }
 
