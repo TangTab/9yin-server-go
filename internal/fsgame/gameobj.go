@@ -14,11 +14,20 @@ type RowOp struct {
 	Values VarList
 }
 
+// 记录行变更通知的操作码（DeclareRecHook 回调面；对应官方
+// SendRec{Append,Modify,Delete} 客户端下发族）。
+const (
+	RecOpAdded   int32 = 1 // AppendRow
+	RecOpChanged int32 = 2 // ModifyRow
+	RecOpRemoved int32 = 3 // DeleteRow / Clear 逐行
+)
+
 // Record 复刻 CGameObject 的 Record：对象上的二维表，行级操作。
 type Record struct {
 	def  RecordDef
 	rows []VarList
 	ops  []RowOp
+	fire func(op, row int32, vals VarList) // 行变更通知（内核物化时接线；nil=无总线）
 }
 
 // Def 记录定义。
@@ -47,6 +56,9 @@ func (r *Record) AppendRow(vals VarList) int {
 	r.rows = append(r.rows, vals)
 	i := len(r.rows) - 1
 	r.log("append", i, vals)
+	if r.fire != nil {
+		r.fire(RecOpAdded, int32(i), vals)
+	}
 	return i
 }
 
@@ -57,6 +69,9 @@ func (r *Record) ModifyRow(i int, vals VarList) bool {
 	}
 	r.rows[i] = vals
 	r.log("modify", i, vals)
+	if r.fire != nil {
+		r.fire(RecOpChanged, int32(i), vals)
+	}
 	return true
 }
 
@@ -67,11 +82,20 @@ func (r *Record) DeleteRow(i int) bool {
 	}
 	r.rows = append(r.rows[:i], r.rows[i+1:]...)
 	r.log("delete", i, nil)
+	if r.fire != nil {
+		r.fire(RecOpRemoved, int32(i), nil)
+	}
 	return true
 }
 
-// Clear 清表（官方 ClearRecord）。
+// Clear 清表（官方 ClearRecord）——按官方 RemoveRecordRow 族逐行倒序
+// 通知（客户端按行号递减移除）。
 func (r *Record) Clear() {
+	for i := len(r.rows) - 1; i >= 0; i-- {
+		if r.fire != nil {
+			r.fire(RecOpRemoved, int32(i), nil)
+		}
+	}
 	r.rows = nil
 	r.log("clear", -1, nil)
 }
@@ -209,6 +233,14 @@ func newGameObject(id PersistID, class *ClassDef) *GameObject {
 		o.records[rd.Name] = &Record{def: rd}
 	}
 	return o
+}
+
+// setRecNotifier 接线记录行变更通知（内核物化后注入；DeclareRecHook
+// 注册面经 Bus.FireRecHook 消费——模块侧记录联动此前只注册不触发）。
+func (o *GameObject) setRecNotifier(fn func(record string, op, row int32, vals VarList)) {
+	for name, r := range o.records {
+		r.fire = func(op, row int32, vals VarList) { fn(name, op, row, vals) }
+	}
 }
 
 // coerceVar 把 Go 值收进 schema 类型（宽松转换，等价 IVar 类型系统的赋值面）。

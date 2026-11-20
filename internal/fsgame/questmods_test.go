@@ -555,3 +555,180 @@ func TestAchievementLifecycle(t *testing.T) {
 		t.Fatal("重置未清面")
 	}
 }
+
+// TestQuestMsgSync quest_msg 客户端同步（RecHook 双记录联动）：接取 →
+// 承接表 append + 进度表逐行 append；推满 → 承接表 modify（可提交）；
+// 提交 → 进度表逐行 remove + 承接表 remove；时限行随提交清除 + 九阴
+// TimeLimitLength 分钟单位（24272 书生的请求=5 分钟）。
+func TestQuestMsgSync(t *testing.T) {
+	k, _ := assemble4(t)
+	qm := module2[*QuestModule](t, k, "QuestModule")
+	type qmsg struct {
+		sub  int32
+		args VarList
+	}
+	var msgs []qmsg
+	qm.MsgOut = func(player PersistID, sub int32, args VarList) {
+		msgs = append(msgs, qmsg{sub, args})
+	}
+	p, _ := k.CreateObject("player")
+	qm.setRewarded(k, p, 24270)
+	before := unixNow()
+	if !qm.AcceptQuest(k, p, 24272) {
+		t.Fatal("时限任务 24272 接取失败")
+	}
+	// 首条=承接表 append（op + row + 4 列行值）。
+	if msgs[0].sub != 1 || msgs[0].args.Int(0) != RecOpAdded || msgs[0].args.Int(1) != 0 || len(msgs[0].args) != 6 {
+		t.Fatalf("承接表 append 消息形状异常: %+v", msgs[0])
+	}
+	// 进度表 append 数 = 子模板数（24272=interact/hunter/interact 三步）。
+	appends := 0
+	for _, m := range msgs {
+		if m.sub == 2 && m.args.Int(0) == RecOpAdded {
+			appends++
+		}
+	}
+	if appends != 3 {
+		t.Fatalf("进度表 append 应 3 条: %d", appends)
+	}
+	// 时限登记：deadline = 接取时刻 + 5 分钟。
+	tr := k.GetGameObj(p).Record("QuestTimeLimitRecord")
+	if tr.Rows() != 1 {
+		t.Fatalf("时限行应 1 行: %d", tr.Rows())
+	}
+	deadline := tr.Row(0).Int64(2)
+	if deadline < before+295 || deadline > unixNow()+305 {
+		t.Fatalf("时限 deadline=%d 不在 5 分钟窗内", deadline)
+	}
+	// 推满三步 → 末条=承接表 modify（转可提交）。
+	for _, cid := range strings.Split(qm.Quests["24272"]["CriteriaList"], ",") {
+		max := atoi32(qm.Criteria[cid]["MaxCount"])
+		if max <= 0 {
+			max = 1
+		}
+		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
+	}
+	if last := msgs[len(msgs)-1]; last.sub != 1 || last.args.Int(0) != RecOpChanged {
+		t.Fatalf("推满后末条应为承接表 modify: %+v", last)
+	}
+	if !qm.SubmitQuest(k, p, 24272) {
+		t.Fatal("24272 提交失败")
+	}
+	// 提交序：承接表 remove → 进度表倒序逐行 remove（clearCriteria）；
+	// 末条 sub=1 消息应为承接表 remove（无行值）。
+	var lastQuest qmsg
+	for _, m := range msgs {
+		if m.sub == 1 {
+			lastQuest = m
+		}
+	}
+	if lastQuest.args.Int(0) != RecOpRemoved || len(lastQuest.args) != 2 {
+		t.Fatalf("提交后末条承接表消息应为 remove（无行值）: %+v", lastQuest)
+	}
+	if tr.Rows() != 0 {
+		t.Fatalf("时限行未随提交清除: %d", tr.Rows())
+	}
+}
+
+// TestQuestRepeatFlow 可重复任务闭环：提交记次数（不进完成位集）→
+// 次数满拒接 → 刷新时间过 HB_RepeatQuest 清行 → 可再接。当前九阴快照
+// RepeatType 全 0，用合成配置驱动（引擎词汇=黑金方言）。
+func TestQuestRepeatFlow(t *testing.T) {
+	k, _ := assemble4(t)
+	qm := module2[*QuestModule](t, k, "QuestModule")
+	qm.Quests["99001"] = map[string]string{
+		"ID": "99001", "Name": "重复试炼", "RepeatType": "1",
+		"CountDayLimit": "2", "RepeatPeriod": "1",
+		"AcceptNpc": "WorldNpc00009", "CriteriaList": "", "GiveUp": "1",
+	}
+	p, _ := k.CreateObject("player")
+	rr := k.GetGameObj(p).Record("QuestRepeatRecord")
+	// 两次接交 → 次数 2/2；完成位集不置（否则永久不可再接）。
+	for i := 0; i < 2; i++ {
+		if !qm.AcceptQuest(k, p, 99001) {
+			t.Fatalf("第 %d 次接取失败", i+1)
+		}
+		if !qm.SubmitQuest(k, p, 99001) {
+			t.Fatalf("第 %d 次提交失败", i+1)
+		}
+	}
+	if rr.Rows() != 1 || rr.Row(0).Int(1) != 2 || rr.Row(0).Int(2) != 2 {
+		t.Fatalf("重复登记异常: rows=%d row=%v", rr.Rows(), rr.Row(0))
+	}
+	if qm.isRewarded(k, p, 99001) {
+		t.Fatal("可重复任务不应置完成位集")
+	}
+	// 第三次：次数满且未到刷新时间 → 拒。
+	if qm.AcceptQuest(k, p, 99001) {
+		t.Fatal("次数满应拒接")
+	}
+	seen := false
+	for _, s := range qm.SysMsgs() {
+		if s == "sys_quest_0010" {
+			seen = true
+		}
+	}
+	if !seen {
+		t.Fatalf("次数满系统信息缺失: %v", qm.SysMsgs())
+	}
+	// 刷新时间已过 → HB_RepeatQuest 清行 → 可再接。
+	row := rr.Row(0)
+	row[3] = int64(1)
+	rr.ModifyRow(0, row)
+	k.Bus().TickHeartBeats(k, 1)
+	if rr.Rows() != 0 {
+		t.Fatalf("刷新窗过后重复行未清: %d", rr.Rows())
+	}
+	if !qm.AcceptQuest(k, p, 99001) {
+		t.Fatal("刷新后应可再接")
+	}
+}
+
+// TestQuestCheckTimeSweep HB_CheckTime 孤儿时限行清扫（承接表已无该
+// 任务的时限行兜底清除）。
+func TestQuestCheckTimeSweep(t *testing.T) {
+	k, _ := assemble4(t)
+	qm := module2[*QuestModule](t, k, "QuestModule")
+	p, _ := k.CreateObject("player")
+	tr := k.GetGameObj(p).Record("QuestTimeLimitRecord")
+	tr.AppendRow(VarList{int32(88888), unixNow(), unixNow() + 60})
+	k.Bus().TickHeartBeats(k, 1)
+	if tr.Rows() != 0 {
+		t.Fatalf("孤儿时限行未清扫: %d", tr.Rows())
+	}
+	if qm.IsQuestHaving(k, p, 88888) {
+		t.Fatal("幽灵任务")
+	}
+}
+
+// TestQuestLevelNotify 升级新可接通知（C_OnLevelChanged → quest_msg
+// sub=3）：等级门新越过的任务号下发。九阴任务链由 PreTaskLimit 驱动、
+// 无 MinLevel 列——引擎词汇面以合成配置驱动机制。
+func TestQuestLevelNotify(t *testing.T) {
+	k, _ := assemble4(t)
+	qm := module2[*QuestModule](t, k, "QuestModule")
+	qm.Quests["99002"] = map[string]string{
+		"ID": "99002", "Name": "等级试炼", "MinLevel": "5",
+		"AcceptNpc": "WorldNpc00009", "CriteriaList": "",
+	}
+	var notify VarList
+	qm.MsgOut = func(player PersistID, sub int32, args VarList) {
+		if sub == 3 {
+			notify = args
+		}
+	}
+	p, _ := k.CreateObject("player")
+	if err := k.SetInt(p, "Level", 5); err != nil {
+		t.Fatalf("升级失败: %v", err)
+	}
+	if len(notify) != 1 || notify.Int(0) != 99002 {
+		t.Fatalf("升级通知应含 99002: %v", notify)
+	}
+	// 未越过门（升到 4）不通知。
+	notify = nil
+	p2, _ := k.CreateObject("player")
+	_ = k.SetInt(p2, "Level", 4)
+	if len(notify) != 0 {
+		t.Fatalf("未过门不应通知: %v", notify)
+	}
+}

@@ -2,6 +2,7 @@ package fsgame
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -124,6 +125,12 @@ type QuestModule struct {
 	// cmd 22 菜单分发据此校验接/交 NPC 门）。
 	lastNpc map[PersistID]string
 
+	// MsgOut 任务客户端消息出口（官方 quest_msg 下发面：RecHook 双记录
+	// 联动 + 升级可接面刷新；接 sync 层转 0x0A 记录方言下发）。sub：
+	// 1=承接表变更（args 首列 op、次列 row，继以行值）/ 2=进度表变更
+	//（同构）/ 3=升级后新可接任务（args=任务号列）。
+	MsgOut func(player PersistID, sub int32, args VarList)
+
 	// sysMsgs 系统信息观测（sys_quest_* 模板号）。
 	sysMsgs []string
 	// ops 命令流水（测试面）。
@@ -172,6 +179,12 @@ func (m *QuestModule) Init(k *Kernel) error {
 				}
 			}
 			m.ops = append(m.ops, fmt.Sprintf("award:%d item=%d exp=%d money=%d", player.ID(), count, exp, money))
+		}
+	}
+	// quest_msg 出口默认面：流水审计（正式下发由 sync 层注入 MsgOut 覆盖）。
+	if m.MsgOut == nil {
+		m.MsgOut = func(player PersistID, sub int32, args VarList) {
+			m.ops = append(m.ops, fmt.Sprintf("quest_msg:%d player=%d n=%d", sub, player.ID(), len(args)))
 		}
 	}
 	return nil
@@ -289,6 +302,22 @@ func (m *QuestModule) AcceptQuest(k *Kernel, self PersistID, questID int32) bool
 		m.sys("sys_quest_0005") // 已承接
 		return false
 	}
+	// 可重复任务次数门（QuestRepeatRecord）：RepeatType≠0 且承接次数达
+	// 上限且未到刷新时间 → 拒（刷新由 HB_RepeatQuest 周期清扫）。
+	if atoi32(cfg["RepeatType"]) != 0 {
+		if rr := o.Record("QuestRepeatRecord"); rr != nil {
+			for i := 0; i < rr.Rows(); i++ {
+				if rr.Row(i).Int(0) != questID {
+					continue
+				}
+				if rr.Row(i).Int(1) >= rr.Row(i).Int(2) && unixNow() < rr.Row(i).Int64(3) {
+					m.sys("sys_quest_0010") // 重复次数已满
+					return false
+				}
+				break
+			}
+		}
+	}
 	if qr.Rows() >= qr.Def().MaxRows {
 		m.sys("sys_quest_0006") // 任务栏满
 		return false
@@ -311,10 +340,16 @@ func (m *QuestModule) AcceptQuest(k *Kernel, self PersistID, questID int32) bool
 			cr.AppendRow(VarList{atoi32(cid), CSDoing, int32(0), max, questID, int32(0)})
 		}
 	}
-		// 时限任务登记（TimeType≠0 → QuestTimeLimitRecord）。
+		// 时限任务登记（TimeType≠0 → QuestTimeLimitRecord）。九阴
+		// TimeLimitLength 单位=分钟（副本时限 3/5/10/15 定案）；缺省回
+		// 落黑金 86400 语义（当日）。
 		if tt := atoi32(cfg["TimeType"]); tt != 0 {
 			if tr := o.Record("QuestTimeLimitRecord"); tr != nil {
-				tr.AppendRow(VarList{questID, unixNow(), unixNow() + 86400})
+				deadline := unixNow() + 86400
+				if mins := atoi32(cfg["TimeLimitLength"]); mins > 0 {
+					deadline = unixNow() + int64(mins)*60
+				}
+				tr.AppendRow(VarList{questID, unixNow(), deadline})
 			}
 		}
 		// 无步骤任务（CriteriaList 空，如 24241 勇闯挑灯崖——对话即完
@@ -371,9 +406,59 @@ func (m *QuestModule) SubmitQuest(k *Kernel, self PersistID, questID int32) bool
 	}
 	qr.DeleteRow(i)
 	m.clearCriteria(k, self, questID)
-	m.setRewarded(k, self, questID)
+	// 完成面分叉：可重复任务（RepeatType≠0）不进 QuestRewarded 位集
+	//（否则后继永久不可再接），改记 QuestRepeatRecord 承接次数+刷新窗。
+	if cfg != nil && atoi32(cfg["RepeatType"]) != 0 {
+		m.trackRepeat(k, self, questID, cfg)
+	} else {
+		m.setRewarded(k, self, questID)
+	}
+	// 时限行随提交清除（HB_TimeLimit 不再扫到；与 GiveUpQuest 对称）。
+	if tr := o.Record("QuestTimeLimitRecord"); tr != nil {
+		for j := 0; j < tr.Rows(); j++ {
+			if tr.Row(j).Int(0) == questID {
+				tr.DeleteRow(j)
+				break
+			}
+		}
+	}
 	m.ops = append(m.ops, fmt.Sprintf("submit:%d", questID))
 	return true
+}
+
+// trackRepeat 可重复任务完成登记（QuestRepeatRecord upsert）：承接次数+1、
+// 上限=CountDayLimit（缺省 1）、刷新时间=RepeatPeriod 分钟（缺省次日零点——
+// CountDayLimit 为「日上限」语义）。当前九阴快照 RepeatType 全 0，本路径
+// 由测试合成配置驱动。
+func (m *QuestModule) trackRepeat(k *Kernel, self PersistID, questID int32, cfg map[string]string) {
+	o := k.GetGameObj(self)
+	rr := o.Record("QuestRepeatRecord")
+	if rr == nil {
+		return
+	}
+	limit := atoi32(cfg["CountDayLimit"])
+	if limit <= 0 {
+		limit = 1
+	}
+	var refresh int64
+	if mins := atoi32(cfg["RepeatPeriod"]); mins > 0 {
+		refresh = unixNow() + int64(mins)*60
+	} else {
+		refresh = nextMidnight()
+	}
+	for i := 0; i < rr.Rows(); i++ {
+		if rr.Row(i).Int(0) == questID {
+			row := rr.Row(i)
+			row[1] = row.Int(1) + 1
+			row[2] = limit
+			row[3] = refresh
+			rr.ModifyRow(i, row)
+			return
+		}
+	}
+	if rr.Rows() < rr.Def().MaxRows {
+		rr.AppendRow(VarList{questID, int32(1), limit, refresh})
+	}
 }
 
 // GiveUpQuest 官方 OnGiveUpQuest：放弃（清行；时限任务同步清）。
@@ -704,15 +789,74 @@ func (m *QuestModule) onContinue(k *Kernel, self, from PersistID, args VarList) 
 // onStore 官方 @0x99E110。
 func (m *QuestModule) onStore(k *Kernel, self, from PersistID, args VarList) {}
 
-// OnCriteriaRecChanged 官方 @0x9AC3E0（RecHook）：进度表变更联动
-//（quest_msg 下发 + LastObject 面记）。
-func (m *QuestModule) onCriteriaRecChanged(k *Kernel, self PersistID, record string, op, row int32) {}
+// OnCriteriaRecChanged 官方 @0x9AC3E0（RecHook）：进度表变更联动——
+// quest_msg 下发（sub=2：op/row + 行值，客户端任务追踪器增量刷新）。
+func (m *QuestModule) onCriteriaRecChanged(k *Kernel, self PersistID, record string, op, row int32) {
+	m.syncRecMsg(k, self, 2, record, op, row)
+}
 
-// OnQuestRecChanged 官方 @0x9AC940（RecHook）：承接表变更联动。
-func (m *QuestModule) onQuestRecChanged(k *Kernel, self PersistID, record string, op, row int32) {}
+// OnQuestRecChanged 官方 @0x9AC940（RecHook）：承接表变更联动——
+// quest_msg 下发（sub=1：接取/提交/放弃/追踪的全量行同步）。
+func (m *QuestModule) onQuestRecChanged(k *Kernel, self PersistID, record string, op, row int32) {
+	m.syncRecMsg(k, self, 1, record, op, row)
+}
 
-// C_OnLevelChanged 官方 @0x9ACE20：升级 → 新任务可接面刷新。
-func (m *QuestModule) onLevelChanged(k *Kernel, self PersistID, prop string, old Var) {}
+// syncRecMsg 记录变更 → quest_msg 出口（非玩家面静默；删行不带值——
+// 客户端按行号移除）。
+func (m *QuestModule) syncRecMsg(k *Kernel, self PersistID, sub int32, record string, op, row int32) {
+	o := k.GetGameObj(self)
+	if o == nil || o.ClassName() != "player" {
+		return
+	}
+	args := VarList{op, row}
+	if op != RecOpRemoved {
+		if r := o.Record(record); r != nil {
+			if vals := r.Row(int(row)); vals != nil {
+				args = append(args, vals...)
+			}
+		}
+	}
+	if m.MsgOut != nil {
+		m.MsgOut(self, sub, args)
+	}
+}
+
+// C_OnLevelChanged 官方 @0x9ACE20：升级 → 新任务可接面刷新（quest_msg
+// sub=3：等级门新越过的可接任务号，客户端据此点亮任务 NPC 标记）。
+func (m *QuestModule) onLevelChanged(k *Kernel, self PersistID, prop string, old Var) {
+	o := k.GetGameObj(self)
+	if o == nil {
+		return
+	}
+	from := int32(0)
+	if v, ok := old.(int32); ok {
+		from = v
+	}
+	lv := o.GetInt("Level")
+	if lv <= from {
+		return // 只处理升级面
+	}
+	var ids []int32
+	for tid, cfg := range m.Quests {
+		minLv := atoi32(cfg["MinLevel"])
+		if minLv <= from || minLv > lv || minLv <= 0 {
+			continue
+		}
+		if cfg["AcceptNpc"] == "" || m.isRewarded(k, self, atoi32(tid)) ||
+			m.questRow(k, self, atoi32(tid)) >= 0 || !m.prereqMet(k, self, cfg) {
+			continue
+		}
+		ids = append(ids, atoi32(tid))
+	}
+	if len(ids) > 0 && m.MsgOut != nil {
+		sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+		args := make(VarList, len(ids))
+		for i, id := range ids {
+			args[i] = id
+		}
+		m.MsgOut(self, 3, args)
+	}
+}
 
 // C_OnForceChanged 官方 @0x9AD000：势力变更 → 阵营任务可用性刷新。
 func (m *QuestModule) onForceChanged(k *Kernel, self PersistID, prop string, old Var) {}
@@ -734,11 +878,42 @@ func (m *QuestModule) hbTimeLimit(k *Kernel, self PersistID, beats int32) {
 	}
 }
 
-// HB_CheckTime 官方 @0x99A5C0。
-func (m *QuestModule) hbCheckTime(k *Kernel, self PersistID, beats int32) {}
+// HB_CheckTime 官方 @0x99A5C0。Go 收编语义：时限表一致性巡检——承接表
+// 已无该任务的孤儿时限行清除（提交/放弃主路径即清，此处兜底中途态，
+// 防 HB_TimeLimit 对已交任务反复 GiveUpQuest 空转）。
+func (m *QuestModule) hbCheckTime(k *Kernel, self PersistID, beats int32) {
+	o := k.GetGameObj(self)
+	if o == nil || o.ClassName() != "player" {
+		return
+	}
+	tr := o.Record("QuestTimeLimitRecord")
+	if tr == nil {
+		return
+	}
+	for i := tr.Rows() - 1; i >= 0; i-- {
+		if m.questRow(k, self, tr.Row(i).Int(0)) < 0 {
+			tr.DeleteRow(i)
+		}
+	}
+}
 
-// HB_RepeatQuest 官方 @0x99A270：可重复任务刷新（QuestRepeatRecord 刷新时间）。
-func (m *QuestModule) hbRepeatQuest(k *Kernel, self PersistID, beats int32) {}
+// HB_RepeatQuest 官方 @0x99A270：可重复任务刷新（QuestRepeatRecord）——
+// 刷新时间已过的行清除（次数窗口重开，可再次承接）。
+func (m *QuestModule) hbRepeatQuest(k *Kernel, self PersistID, beats int32) {
+	o := k.GetGameObj(self)
+	if o == nil || o.ClassName() != "player" {
+		return
+	}
+	rr := o.Record("QuestRepeatRecord")
+	if rr == nil {
+		return
+	}
+	for i := rr.Rows() - 1; i >= 0; i-- {
+		if unixNow() >= rr.Row(i).Int64(3) {
+			rr.DeleteRow(i)
+		}
+	}
+}
 
 // HB_RefreshQuestEffect 官方 @0x99A730：任务效果刷新（effect 面）。
 func (m *QuestModule) hbRefreshQuestEffect(k *Kernel, self PersistID, beats int32) {}

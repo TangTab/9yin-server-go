@@ -170,8 +170,9 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一至九期累计 13260 行、39 测试全绿，官方 door_data.xml 与社交/技能/
-任务/物品/经济/场景/NPC/事件域配置真档校验通过；§7.1-§7.8 分期明细）。
+已实现（一至九期累计 14620 行、45 测试全绿，官方 door_data.xml 与社交/技能/
+任务/物品/经济/场景/NPC/事件域配置真档校验通过；§7.1-§7.8 分期明细＋
+§7.3 收尾面）。
 
 > **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
 > `encoding="utf-8"` 声明（31 个 GBK 内容转码、36 处 gb2312 声明改写、
@@ -185,9 +186,11 @@ internal/fsgame/            // 已落码（2648 行 / go test 9 用例全绿）
   varlist.go     PersistID + Var 联合 + VarList（TVarList<8> 参数列）
   schema.go      logic_class.xml（类树）+ struct/<class>.xml（属性/记录 schema，
                  createclass_from_xml 等价）+ 引擎内部属性种子（name/fixed）
-  gameobj.go     GameObject：类型化属性 + Record（行级 RowOp 日志）+ Archive 存档面
+  gameobj.go     GameObject：类型化属性 + Record（行级 RowOp 日志 + RecHook
+                 触发接线：append=1/modify=2/delete=3/clear 倒序逐行）+ Archive 存档面
   eventbus.go    六类注册面总线：类回调/事件/整型命令/心跳/临界/记录钩子
-                 （类继承链上溯多播——role 事件 player 类收）
+                 （FireRecHook 由内核物化时逐对象接线；类继承链上溯多播——
+                 role 事件 player 类收）
   kernel.go      Kernel：类表（含 MergedClass 祖先链 schema 合并）/对象表/
                  场景表/存档出口 SaveOut/资源根/Lua 桥占位
   module.go      Module 五槽 + Creator + Registry.Assemble（Init 序=§8 表）
@@ -373,17 +376,38 @@ internal/fsgame/questmods.go  // 四期新增（任务/条件引擎/成就三模
                       complete——参数校验串 object/int 定案）
 ```
 
-配置真档（官方经 StaticDataQuery 装载；Go 面 LoadResource 直读）：
-ini/Quest/Quest.xml（任务表 997KB：MinLevel/preQuestList/postQuestList/
-CriteriaList/GiveUp/Share/AwardID…）+ QuestCriteria.xml（子模板 2685 行：
-CriteriaType 值域 1/3-9/11/13/16/18-20）+ Award.xml（奖励 1904 行：Exp/Money/
-DefaultItemList）；ini/Achievement/Achievement.xml（61 成就：CriteriaList/
-Points）+ AchievementCriteria.xml（106 子模板）。记录 schema（struct/quest/
-quest.xml + struct/player/Achievement.xml）经 player includes 自动装载。
-测试：questmods_test.go 四用例（四期装配序+五配置真档；任务闭环：接取
-等级/前置/去重门→934 推进→对话+杀怪双模板→全完成转可提交→提交奖励出口+
-位集+后继解锁→放弃；条件引擎：NPC 对话 InterNpc 键匹配/不匹配拒进/616 杀怪
-面；成就闭环：登记→推进→解锁点数→重复解锁拒→追踪/领奖→Lua 四面）。
+配置真档——**2026-11-20 切九阴真档**（黑金三表 Quest/QuestCriteria/Award.xml
+已移 heijin_backup 留作对照）：Task 树 + task002.xml 互补合并（4413 任务，
+task002 补独有 598）经
+questnineyin.go 合成引擎词汇——SubFunction 接线（Type=步骤域、TypeID=步骤行、
+Order=序）把 HuntList/CollectList/UseItemList/InteractiveList/Question 五步骤域
+合成 CriteriaList（子模板按任务号升序确定性重编号 1..N，qcID 是 word 且九阴
+步骤行跨域撞号）；story 域逐段成对话子模板按 Order 门控顺序播放；convoy 域
+占位子模板（CriteriaType 留空不被事件面误推，物化 ConvoyNpc 走护送运行时）；
+奖励由 Task.TaskItemList→TaskItem（IsGive=0）合成（AwardID=任务号自指，Exp/
+Money=0——九阴修为来自杀怪 FacultyExp 面）；文案 ini/Text/TaskText.xml（npcgen
+从客户端 stringtask_normal/special 提取，title_/context_/CanAcceptMenu_/
+complete_/story_ 串键 24 万条）。成就两表仍为黑金方言（Achievement.xml +
+AchievementCriteria.xml）。记录 schema（struct/quest/quest.xml + struct/player/
+Achievement.xml）经 player includes 自动装载。
+
+**收尾面（2026-11-20 补齐）**：DeclareRecHook 触发机制落地（此前六模块注册
+不触发——Record 行级操作现经内核接线 FireRecHook：append=1/modify=2/delete=3/
+clear 倒序逐行 3，Friend/Team/Post/Fight 的记录联动一并激活）；quest_msg
+客户端同步出口 MsgOut（sub=1 承接表/2 进度表变更带 op,row+行值、sub=3 升级
+新可接任务号；默认流水审计，正式下发由 sync 层注入转 0x0A 记录方言）；
+HB_RepeatQuest 可重复任务刷新（QuestRepeatRecord 次数满拒接→刷新窗过清行；
+九阴快照 RepeatType 全 0，提交面分叉——可重复不进 QuestRewarded 位集改记
+次数）；HB_CheckTime 孤儿时限行兜底清扫（提交/放弃主路径外防中途态）；
+时限长度修正——九阴 TimeLimitLength 单位分钟（副本时限 3/5/10/15 定案），
+缺省回落黑金 86400；提交面同步清 QuestTimeLimitRecord 行（与放弃对称）。
+测试：questmods_test.go 十用例（四期装配序+真档抽查 22072/24013/24241/
+22145/24019；任务闭环：接取等级/前置/去重门→934 推进→对话+杀怪双模板→
+全完成转可提交→提交奖励出口+位集+后继解锁→放弃；条件引擎：NPC 对话
+InterNpc 键匹配/不匹配拒进/616 杀怪面；成就闭环：登记→推进→解锁点数→
+重复解锁拒→追踪/领奖→Lua 四面；菜单流 cmd 22 NPC 门接/交；护送运行时
+物化/到达/超时；quest_msg 同步序列+5 分钟时限窗；重复任务两满一拒一刷新；
+孤儿清扫；升级通知双态）。
 
 ### 7.4 五期：物品玩法域五模块（2026-11-20 落地，27 测试全绿）
 

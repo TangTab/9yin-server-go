@@ -254,6 +254,9 @@ func (k *Kernel) CreateObject(class string) (PersistID, error) {
 	id := MakePersistID(k.nextID, 1)
 	k.nextID++
 	obj := newGameObject(id, cd)
+	obj.setRecNotifier(func(record string, op, row int32, vals VarList) {
+		k.bus.FireRecHook(k, id, record, op, row)
+	})
 	k.objects[id] = obj
 	k.mu.Unlock()
 	k.bus.FireEvent(k, class, "OnCreate", id, NullPersistID, nil)
@@ -427,3 +430,9 @@ func (k *Kernel) RemoveObject(id PersistID) {
 
 // unixNow 秒级时钟（util_get_now 等价）。
 func unixNow() int64 { return time.Now().Unix() }
+
+// nextMidnight 次日零点（本地时区；日上限类刷新窗锚点）。
+func nextMidnight() int64 {
+	t := time.Now()
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()).AddDate(0, 0, 1).Unix()
+}
