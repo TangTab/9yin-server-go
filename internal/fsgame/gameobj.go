@@ -204,6 +204,14 @@ func (o *GameObject) GetInt64(name string) int64 {
 	return 0
 }
 
+// GetDouble 读 double 型属性。
+func (o *GameObject) GetDouble(name string) float64 {
+	if v, ok := o.Get(name).(float64); ok {
+		return v
+	}
+	return 0
+}
+
 // Record 按名取记录（未定义返回 nil）。
 func (o *GameObject) Record(name string) *Record {
 	return o.records[name]

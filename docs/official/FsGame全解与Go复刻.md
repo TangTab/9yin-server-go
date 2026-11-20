@@ -170,9 +170,9 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一至十三期累计 19870 行、71 测试全绿，官方 door_data.xml 与社交/
-技能/任务/物品/经济/场景/NPC/事件/AI/玩家基础/物品底座/装备玩法域配置
-真档校验通过；§7.1-§7.12 分期明细＋§7.3 收尾面）。
+已实现（一至十四期累计 21218 行、76 测试全绿，官方 door_data.xml 与社交/
+技能/任务/物品/经济/场景/NPC/事件/AI/玩家基础/物品底座/装备玩法/世界
+规则域配置真档校验通过；§7.1-§7.13 分期明细＋§7.3 收尾面）。
 
 > **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
 > `encoding="utf-8"` 声明（31 个 GBK 内容转码、36 处 gb2312 声明改写、
@@ -235,7 +235,10 @@ ItemProCompute/ItemLimited/ItemBind/ItemValidTime/ItemControl/ModifyPack/
 AddContainer）与第十三批装备与物品玩法余量（CInscription/UpgradeRule/
 Fashion/ItemLave/ToolItemFunc/ItemTreasure/ItemAppend/InheritEnhance/SlotItem/
 EnchaseCompound/CompoundItem/DropCapitalItem/ToolItem/ArmorChange/TransformJob/
-Depot/ShortCut/FightBag/Enchase）已于十二/十三期落地（见 §7.11-§7.12）。
+Depot/ShortCut/FightBag/Enchase）已于十二/十三期落地（见 §7.11-§7.12）；
+第十四批世界规则与状态（HonorValue/Airport/Punisher/UnderWater/Camp/
+Repute/Title/WorldRank/Exile/News/ForceState/Force/Movie/Unenthrall）已于
+十四期落地（见 §7.13）。
 
 ### 7.1 二期：社交底座六模块（2026-11-20 落地，16 测试全绿）
 
@@ -798,6 +801,54 @@ internal/fsgame/equipmods.go  // 十三期新增（十九模块）
 分解 120/开箱 2 个/碎片 8 拒 10 过；使用物品 FuncPack+cmd 10 流水+掉钱 888
 拾取；转职 0→3 同职拒+仓库存取 CantDepot 拒；快捷栏绑定/锁定栏拒解/交换+
 镶嵌-铭文-继承属性串三连+宝石合成+千分比判定）。
+
+### 7.13 十四期：世界规则与状态十四模块（2026-11-20 落地，76 测试全绿）
+
+`RegisterFourteenthBatch`（Init 序对齐 §8：HonorValue(119) → Airport(120) →
+Punisher(127) → UnderWater(138) → Camp(139) → Repute(140) → Title(142) →
+WorldRank(174) → Exile(193) → News(199) → ForceState(201) → Force(202) →
+Movie(207) → Unenthrall(213)）。真档经 player.xml includes 链：honor
+（PlayerHonor/RankLevel/UpgradeHonor/CanAddHonorPoint）、title（TitleID +
+title_rec 5 列）、punisher（RFC 怒火）、exile（ExileStatus/ExileLockDate/
+ExileLockTime 天）、in_water（CurUnderWaterValue 呼吸值三列）、force_repute
+（Force/ForceVersion）、force_state、unenthrall（UnenthrallTime）。
+
+```
+internal/fsgame/worldmods2.go  // 十四期新增（十四模块）
+  HonorValueModule    荣誉军阶：AddHonor（每日上限钳）→ 升阶链
+                      （RankLevel+UpgradeHonor 线性阈值）+ 616 击杀收益 +
+                      H_UpDateMaxHonor 跨日刷新（UTC+8 零点锚）
+  AirportModule       机场航线：nx_active_airport 乘机态 → cust 553 直达
+                      传送（SetPos 落位）+ nx_fly_unlink/reload_trans_path
+  PunisherModule      怒火：cmd 601 增减（上限 100）+ H_BeginDEC_RFC 衰减
+                      （死亡清零）
+  UnderWaterModule    水下呼吸：cust 478/479 出入水 + 三心跳（呼吸消耗
+                      Speed×(1+ModifySpeed)/出水回复/耗尽溺伤 HP-5——两泵
+                      同拍序：耗尽当拍即伤）
+  ReputeModule        声望：nx_add_repute（ForceVersion 递增）+
+                      nx_add_force（势力归属）
+  TitleModule         称号：nx_add/remove/set_playertitle 三面 + title_rec
+                      RecHook 联动（记录通知链触发）+ HB 限时到期移除
+  WorldRankModule     排行：PlayerHonor/ArenaPoints 双临界镜像（域 0/1）+
+                      Top N + nx_clear_rank
+  ExileModule         流放：ArrestValue 临界 → ExileStatus 两档（>0 通缉/
+                      ≥100 重犯）+ nx_set_status 监禁（LockDate+LockTime 天）
+                      + HB 刑满释放（ArrestValue 同清）
+  NewsModule          公告：nx_publish_news 单面
+  CampModule/ForceStateModule/ForceModule
+                      零注册 API 族（阵营=Force 派生/ForceState 战和态/
+                      JoinForce→Repute+阵营状态复位）
+  MovieModule         影片：nx_beigin_movie 播放态 + CantBeAttack 免打面 +
+                      三心跳（延迟播放/免打维持/取消排队）
+  UnenthrallModule    防沉迷：HB 累计在线秒 → 3h/5h 疲劳档流水 +
+                      OnChargeMessage 充值面
+```
+
+测试：worldmods2_test.go 五用例（装配序；荣誉 900+200→升阶 rank1→上限
+钳→排行镜像→怒火 30→衰减→死亡清；称号解锁/RecHook 联动 rec:1/佩戴/未持有
+拒/限时 2 拍到期移除+佩戴同卸；水下 9 拍消耗→第 10 拍归零当拍溺伤→持续→
+出水回复/流放 120→重犯档→监禁→刑满释放清通缉/势力链 JoinForce→版本递增→
+声望入账；航线传送 30,40/影片免打置解/公告/防沉迷 3h 档）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 

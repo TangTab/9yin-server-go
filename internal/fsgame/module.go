@@ -391,3 +391,33 @@ func RegisterThirteenthBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterFourteenthBatch 登记第十四批（世界规则与状态）十四模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：HonorValue(119) → Airport(120) →
+// Punisher(127) → UnderWater(138) → Camp(139) → Repute(140) → Title(142) →
+// WorldRank(174) → Exile(193) → News(199) → ForceState(201) → Force(202) →
+// Movie(207) → Unenthrall(213)。
+func RegisterFourteenthBatch(r *Registry) error {
+	seq := []Creator{
+		{"HonorValueModule", func() Module { return &HonorValueModule{} }},
+		{"AirportModule", func() Module { return &AirportModule{} }},
+		{"PunisherModule", func() Module { return &PunisherModule{} }},
+		{"UnderWaterModule", func() Module { return &UnderWaterModule{} }},
+		{"CampModule", func() Module { return &CampModule{} }},
+		{"ReputeModule", func() Module { return &ReputeModule{} }},
+		{"TitleModule", func() Module { return &TitleModule{} }},
+		{"WorldRankModule", func() Module { return &WorldRankModule{} }},
+		{"ExileModule", func() Module { return &ExileModule{} }},
+		{"NewsModule", func() Module { return &NewsModule{} }},
+		{"ForceStateModule", func() Module { return &ForceStateModule{} }},
+		{"ForceModule", func() Module { return &ForceModule{} }},
+		{"MovieModule", func() Module { return &MovieModule{} }},
+		{"UnenthrallModule", func() Module { return &UnenthrallModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
