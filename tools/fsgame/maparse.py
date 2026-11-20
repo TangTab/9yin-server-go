@@ -2,8 +2,9 @@
 """FsGame.map 解析器： publics -> (rva, name, obj) 表 + 类/命名空间统计。"""
 import re, sys, struct, collections
 
-MAP = r"F:\Game\Online\9yin\BGserverCJ\Debug\FsGame.map"
-DLL = r"F:\Game\Online\9yin\BGserverCJ\Debug\FsGame.dll"
+import os
+MAP = os.environ.get("FSGAME_MAP", r"E:\Workspace\project\game\九阴真经ol\BGserverCJ\Debug\FsGame.map")
+DLL = os.environ.get("FSGAME_DLL", r"E:\Workspace\project\game\九阴真经ol\BGserverCJ\Debug\FsGame.dll")
 
 def section_rvas():
     d = open(DLL, "rb").read()

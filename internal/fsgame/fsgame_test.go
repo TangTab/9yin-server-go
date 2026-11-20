@@ -21,6 +21,7 @@ func assemble(t *testing.T) (*Kernel, []Module) {
 	}
 
 	k := NewKernel()
+	k.ResourcePath = td // includes 递归装载根（官方 GetResourcePath → ..\Res）
 	if err := k.LoadLogicClassXML(lc); err != nil {
 		t.Fatalf("LoadLogicClassXML: %v", err)
 	}
@@ -219,7 +220,7 @@ func TestSceneLifecycle(t *testing.T) {
 // TestLocationDoorData LocationModule 装载官方 door_data.xml（真档）。
 func TestLocationDoorData(t *testing.T) {
 	k, mods := assemble(t)
-	res := `F:\Game\Online\9yin\BGserverCJ\Res`
+	res := `E:\Workspace\project\game\九阴真经ol\BGserverCJ\Res`
 	if _, err := os.Stat(res); err != nil {
 		t.Skip("官方 Res 不在本机，跳过真档校验")
 	}

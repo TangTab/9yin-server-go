@@ -114,3 +114,24 @@ func RegisterFirstBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterSecondBatch 登记第二批（社交底座）：Gmcc/Post/Team/Friend/Chat/Log
+// 六模块（docs/official/FsGame全解与Go复刻.md §7 后续批次定案）。
+// 顺序对齐官方 Init 序（玩法表 §8）：Gmcc(13) → Post(178) → Team(182) →
+// Friend(183) → Chat(184) → Log(240)。
+func RegisterSecondBatch(r *Registry) error {
+	seq := []Creator{
+		{"GmccModule", func() Module { return &GmccModule{} }},
+		{"PostModule", func() Module { return &PostModule{} }},
+		{"TeamModule", func() Module { return &TeamModule{} }},
+		{"FriendModule", func() Module { return &FriendModule{} }},
+		{"ChatModule", func() Module { return &ChatModule{} }},
+		{"LogModule", func() Module { return &LogModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}

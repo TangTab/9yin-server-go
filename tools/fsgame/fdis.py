@@ -3,7 +3,8 @@
 import struct, re, sys
 import capstone
 
-DLL = r"F:\Game\Online\9yin\BGserverCJ\Debug\FsGame.dll"
+import os
+DLL = os.environ.get("FSGAME_DLL", r"E:\Workspace\project\game\九阴真经ol\BGserverCJ\Debug\FsGame.dll")
 d = open(DLL, "rb").read()
 pe = struct.unpack_from("<I", d, 0x3C)[0]
 nsec = struct.unpack_from("<H", d, pe+6)[0]

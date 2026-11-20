@@ -29,12 +29,18 @@ type CriticalFn func(k *Kernel, self PersistID, prop string, old Var)
 type RecHookFn func(k *Kernel, self PersistID, record string, op, row int32)
 
 // Bus 六类回调总线（官方 CEventCmdMnger + CKernel 注册面的等价物）。
-// 命名心跳为全局单例；类事件按 (类,事件) 多播；命令按 (类,命令号) 单播。
+// 命名心跳为全局单例；类事件按 (类,事件) 多播；命令按 (类,命令号) 单播——
+// 官方分两条注册/分发通道：AddIntCustomHook（客户端 custom 通道）与
+// AddIntCommandHook（命令通道），两表独立（同号不冲突，如 0x138 既登记
+// TeamModule::OnCustomLeave（custom）又登记 FriendModule::OnTransDecTicketRes
+// （command））；字符串命令（AddCommandHook，如 "chat"）按 (类,命令名) 单播。
 type Bus struct {
 	classEvents map[string][]ClassCallbackFn // (class|event) → 类级回调
 	events      map[string][]EventFn         // (class|event) → 事件回调
 	commands    map[int32]CmdFn              // 命令号 → 处理器（player 类主载）
-	customCmds  map[string]map[int32]CmdFn   // 类 → 命令号 → 处理器
+	customCmds  map[string]map[int32]CmdFn   // 类 → 命令号 → AddIntCustomHook 处理器
+	intCmds     map[string]map[int32]CmdFn   // 类 → 命令号 → AddIntCommandHook 处理器
+	strCmds     map[string]CmdFn             // (class|name) → 处理器（字符串命令）
 	heartbeats  []namedBeat
 	criticals   map[string][]CriticalFn // (class|prop) → 回调
 	recHooks    map[string][]RecHookFn  // 记录名（或 Class::Name）→ 回调
@@ -54,6 +60,8 @@ func NewBus() *Bus {
 		events:      make(map[string][]EventFn),
 		commands:    make(map[int32]CmdFn),
 		customCmds:  make(map[string]map[int32]CmdFn),
+		intCmds:     make(map[string]map[int32]CmdFn),
+		strCmds:     make(map[string]CmdFn),
 		criticals:   make(map[string][]CriticalFn),
 		recHooks:    make(map[string][]RecHookFn),
 	}
@@ -76,6 +84,37 @@ func (b *Bus) OnCommand(class string, cmd int32, fn CmdFn) {
 		b.customCmds[class] = make(map[int32]CmdFn)
 	}
 	b.customCmds[class][cmd] = fn
+}
+
+// OnIntCommand 命令通道注册（AddIntCommandHook(class, cmd, fn)；与
+// OnCommand 分表，同号不冲突）。
+func (b *Bus) OnIntCommand(class string, cmd int32, fn CmdFn) {
+	if _, ok := b.intCmds[class]; !ok {
+		b.intCmds[class] = make(map[int32]CmdFn)
+	}
+	b.intCmds[class][cmd] = fn
+}
+
+// OnStringCommand 字符串命令注册（AddCommandHook/AddCustomHook(class, name, fn)；
+// 客户端字符串命令通道，如聊天发送 "chat"）。
+func (b *Bus) OnStringCommand(class, name string, fn CmdFn) {
+	b.strCmds[busKey(class, name)] = fn
+}
+
+// DispatchStringCommand 字符串命令路由（类继承链上溯；返回是否命中）。
+func (b *Bus) DispatchStringCommand(k *Kernel, class, name string, self, from PersistID, args VarList) bool {
+	for c := class; c != ""; {
+		if fn, ok := b.strCmds[busKey(c, name)]; ok {
+			fn(k, self, from, args)
+			return true
+		}
+		cd := k.Class(c)
+		if cd == nil {
+			break
+		}
+		c = cd.Parent
+	}
+	return false
 }
 
 // HeartBeat 心跳注册（DeclareHeartBeat(name, fn)）。
@@ -125,10 +164,27 @@ func (b *Bus) FireEvent(k *Kernel, class, event string, self, from PersistID, ar
 	return n
 }
 
-// DispatchCommand 整型命令路由（类继承链上溯；返回是否命中）。
+// DispatchCommand 整型命令路由（类继承链上溯；custom 通道优先，未命中回落
+// 命令通道——Go 面兼容桥；返回是否命中）。
 func (b *Bus) DispatchCommand(k *Kernel, class string, cmd int32, self, from PersistID, args VarList) bool {
+	if b.dispatchIn(k, b.customCmds, class, cmd, self, from, args) {
+		return true
+	}
+	return b.dispatchIn(k, b.intCmds, class, cmd, self, from, args)
+}
+
+// DispatchIntCommand 命令通道路由（命令通道优先，未命中回落 custom 通道）。
+func (b *Bus) DispatchIntCommand(k *Kernel, class string, cmd int32, self, from PersistID, args VarList) bool {
+	if b.dispatchIn(k, b.intCmds, class, cmd, self, from, args) {
+		return true
+	}
+	return b.dispatchIn(k, b.customCmds, class, cmd, self, from, args)
+}
+
+// dispatchIn 单表路由（类继承链上溯）。
+func (b *Bus) dispatchIn(k *Kernel, table map[string]map[int32]CmdFn, class string, cmd int32, self, from PersistID, args VarList) bool {
 	for c := class; c != ""; {
-		if m := b.customCmds[c]; m != nil {
+		if m := table[c]; m != nil {
 			if fn, ok := m[cmd]; ok {
 				fn(k, self, from, args)
 				return true
@@ -185,6 +241,13 @@ func (b *Bus) HeartBeatNames() []string {
 
 // String 总线注册面概览。
 func (b *Bus) String() string {
+	n := 0
+	for _, m := range b.customCmds {
+		n += len(m)
+	}
+	for _, m := range b.intCmds {
+		n += len(m)
+	}
 	return fmt.Sprintf("Bus{events=%d cmds=%d heartbeats=%d criticals=%d rechoks=%d}",
-		len(b.events), len(b.commands)+len(b.customCmds), len(b.heartbeats), len(b.criticals), len(b.recHooks))
+		len(b.events), len(b.commands)+n, len(b.heartbeats), len(b.criticals), len(b.recHooks))
 }

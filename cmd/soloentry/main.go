@@ -143,7 +143,7 @@ func main() {
 		ip := fssoloentry.LocalIPString(cfg.OuterAddr)
 		l, err := fssoloentry.LoadLicenseFile(cfg.License, ip, time.Now())
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "soloentry: %v（继续以未授权形态运行：不广播 + 每拍告警）\n", err)
+			fmt.Fprintf(os.Stderr, "soloentry: %v未授权（不广播 + 每拍告警）\n", err)
 		} else {
 			lic = &l
 			if l.Licensed() {
@@ -228,9 +228,9 @@ func main() {
 		ServerID: cfg.ServerID, EntryID: cfg.EntryID,
 		MaxConnects: cfg.MaxConnects,
 		InnerAddr:   cfg.InnerAddr, InnerPort: cfg.InnerPort,
-		OuterAddr: cfg.OuterAddr,
-		AppName:   fmt.Sprintf("entry_%d_%d", cfg.ServerID, cfg.EntryID),
-		License:   lic,
+		OuterAddr:  cfg.OuterAddr,
+		AppName:    fmt.Sprintf("entry_%d_%d", cfg.ServerID, cfg.EntryID),
+		License:    lic,
 		StatusSink: func(line string) { fmt.Println(line) },
 		BroadcastSink: func(pkt []byte) {
 			if cfg.BroadPort != 0 {

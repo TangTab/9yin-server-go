@@ -45,7 +45,7 @@ const version = "0.1.0-sololister"
 
 func main() {
 	var (
-		addr   = flag.String("addr", "", "客户端监听地址（缺省取配置 [Outer]，官方客户端编死 4000）")
+		addr   = flag.String("addr", "", "客户端监听地址（缺省取配置 [Outer]，客户端编死 4000）")
 		name   = flag.String("name", "", "静态区服显示名（显式给出即合成本进程注册心跳）")
 		host   = flag.String("host", "", "静态条目通告地址（空=监听 host，通配回退 127.0.0.1）")
 		port   = flag.Int("port", 9600, "静态条目通告端口")
@@ -53,10 +53,10 @@ func main() {
 		config = flag.String("config", "", "配置文件路径（默认：当前目录 game_lister.ini，没有则释放内置默认并采用）")
 	)
 	var extras extraFlags
-	flag.Var(&extras, "extra", "追加静态区服条目 name=host:port[=busy]，可重复（官方多服连排方言）")
+	flag.Var(&extras, "extra", "追加静态区服条目 name=host:port[=busy]，可重复")
 	flag.Parse()
 
-	fmt.Printf("9yin-server-go sololister %s（FsSoloLister.dll 复刻）\n", version)
+	fmt.Printf("9yin-server-go sololister %s\n", version)
 
 	var cfgData []byte
 	released := false

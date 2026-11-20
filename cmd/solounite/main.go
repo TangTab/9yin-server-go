@@ -47,7 +47,7 @@ func main() {
 	)
 	flag.Parse()
 
-	fmt.Printf("9yin-server-go solounite %s（game_unite.exe 合一服复刻）\n", version)
+	fmt.Printf("9yin-server-go solounite %s\n", version)
 
 	// 配置发现序：-config > ./game_unite.ini > 释放内置官方快照（不覆盖）
 	data := defaultINI
@@ -105,7 +105,7 @@ func main() {
 		ip := fssoloentry.LocalIPString(cfg.OuterAddr)
 		l, err := fssoloentry.LoadLicenseFile(cfg.LicensePath(), ip, time.Now())
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "solounite: %v（继续以未授权形态运行：不广播 + 每拍告警）\n", err)
+			fmt.Fprintf(os.Stderr, "solounite: %v未授权（不广播 + 每拍告警）\n", err)
 		} else {
 			lic = &l
 			if l.Licensed() {

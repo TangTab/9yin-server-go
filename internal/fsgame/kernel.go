@@ -3,7 +3,10 @@ package fsgame
 import (
 	"encoding/xml"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -119,13 +122,28 @@ func (k *Kernel) LoadLogicClassXML(data []byte) error {
 
 // LoadStruct 装载类 schema（createclass_from_xml 等价：logic_class 树节点
 // + struct/<class>.xml 属性/记录定义），装载完成触发类级 OnCreateClass。
+// 官方 XML 的 <includes> 段（相对 Res 根、反斜杠路径）按 ResourcePath 递归装载。
 func (k *Kernel) LoadStruct(class string, xmlData []byte) error {
 	cd := k.classes[class]
 	if cd == nil {
 		return fmt.Errorf("fsgame: 类 %s 未登记（先装载 logic_class.xml）", class)
 	}
-	if err := ParseStructXML(bytesReader(xmlData), cd); err != nil {
+	includes, err := ParseStructXML(bytesReader(xmlData), cd)
+	if err != nil {
 		return err
+	}
+	for _, inc := range includes {
+		if k.ResourcePath == "" {
+			return fmt.Errorf("fsgame: %s 引用 include %s 但 ResourcePath 未设置", class, inc)
+		}
+		rel := filepath.FromSlash(strings.ReplaceAll(inc, "\\", "/"))
+		data, err := os.ReadFile(filepath.Join(k.ResourcePath, rel))
+		if err != nil {
+			return fmt.Errorf("fsgame: %s include %s: %w", class, inc, err)
+		}
+		if err := k.loadStructNoEvent(class, data, inc, map[string]bool{inc: true}); err != nil {
+			return err
+		}
 	}
 	for name := range k.merged { // schema 变更后重建合并缓存
 		if name == class || k.isDescendant(name, class) {
@@ -133,6 +151,34 @@ func (k *Kernel) LoadStruct(class string, xmlData []byte) error {
 		}
 	}
 	k.bus.FireClassEvent(k, class, "OnCreateClass")
+	return nil
+}
+
+// loadStructNoEvent includes 递归装载体（不触发 OnCreateClass——官方整树装载
+// 完成后才回调一次；visited 防环）。
+func (k *Kernel) loadStructNoEvent(class string, xmlData []byte, src string, visited map[string]bool) error {
+	cd := k.classes[class]
+	if cd == nil {
+		return fmt.Errorf("fsgame: 类 %s 未登记", class)
+	}
+	includes, err := ParseStructXML(bytesReader(xmlData), cd)
+	if err != nil {
+		return fmt.Errorf("%s: %w", src, err)
+	}
+	for _, inc := range includes {
+		if visited[inc] {
+			continue
+		}
+		visited[inc] = true
+		rel := filepath.FromSlash(strings.ReplaceAll(inc, "\\", "/"))
+		data, err := os.ReadFile(filepath.Join(k.ResourcePath, rel))
+		if err != nil {
+			return fmt.Errorf("fsgame: %s include %s: %w", class, inc, err)
+		}
+		if err := k.loadStructNoEvent(class, data, inc, visited); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -223,6 +269,30 @@ func (k *Kernel) GetGameObj(id PersistID) *GameObject {
 // 如 LocationModule 缓存 AsynCtrlModule/NpcSwitchLocateModule）。
 func (k *Kernel) GetLogicModule(name string) Module { return k.modules[name] }
 
+// SeekRoleName 按角色名查在线玩家（官方 IKernel::SeekRoleName；好友/组队/
+// 私聊等社交面的目标定位。name 属性为引擎内部属性）。
+func (k *Kernel) SeekRoleName(name string) PersistID {
+	for id, o := range k.objects {
+		if o.ClassName() == "player" || k.isDescendant(o.ClassName(), "player") {
+			if v, ok := o.Get("name").(string); ok && v == name {
+				return id
+			}
+		}
+	}
+	return NullPersistID
+}
+
+// PlayersSnapshot 在线玩家句柄集（社交面遍历：好友在线检查/组队广播）。
+func (k *Kernel) PlayersSnapshot() []PersistID {
+	var out []PersistID
+	for id, o := range k.objects {
+		if o.ClassName() == "player" || k.isDescendant(o.ClassName(), "player") {
+			out = append(out, id)
+		}
+	}
+	return out
+}
+
 // SetInt 写 int 属性并触发临界（官方 SetInt + DeclareCritical 通知链）。
 func (k *Kernel) SetInt(id PersistID, prop string, v int32) error {
 	o := k.objects[id]
@@ -279,6 +349,17 @@ func (k *Kernel) RunEvent(class, event string, self, from PersistID, args VarLis
 // DispatchCommand 客户端整型命令入口（AddIntCustomHook 注册面）。
 func (k *Kernel) DispatchCommand(class string, cmd int32, self, from PersistID, args VarList) bool {
 	return k.bus.DispatchCommand(k, class, cmd, self, from, args)
+}
+
+// DispatchStringCommand 客户端字符串命令入口（AddCommandHook 注册面）。
+func (k *Kernel) DispatchStringCommand(class, name string, self, from PersistID, args VarList) bool {
+	return k.bus.DispatchStringCommand(k, class, name, self, from, args)
+}
+
+// DispatchIntCommand 命令通道入口（AddIntCommandHook 注册面；与 custom
+// 通道分表，见 Bus）。
+func (k *Kernel) DispatchIntCommand(class string, cmd int32, self, from PersistID, args VarList) bool {
+	return k.bus.DispatchIntCommand(k, class, cmd, self, from, args)
 }
 
 // AddScene 登记场景（fssolomember LoadScenesINI 的内核侧落点）。

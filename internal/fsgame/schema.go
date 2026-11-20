@@ -149,6 +149,12 @@ type xmlStructObject struct {
 	Internals  []xmlPropNode   `xml:"internals>property"`
 	Properties []xmlPropNode   `xml:"properties>property"`
 	Records    []xmlRecordNode `xml:"records>record"`
+	Includes   []xmlIncludeNode `xml:"includes>path"`
+}
+
+type xmlIncludeNode struct {
+	Name string `xml:"name,attr"` // 官方为反斜杠相对 Res 根路径
+	Desc string `xml:"desc,attr"`
 }
 
 type xmlPropNode struct {
@@ -182,12 +188,14 @@ func xmlBool(s string) bool { return s == "true" || s == "1" }
 // ParseStructXML 解析 struct/<class>.xml（object/properties/records 模板，
 // 见 testdata/struct/struct_template.xml 注释），把 schema 并入类定义。
 // internals 段在前（引擎属性），properties 段随后；重复属性以首次定义为准。
-func ParseStructXML(r io.Reader, into *ClassDef) error {
+// 返回值为本文件 <includes> 段声明的子 schema 路径（相对 Res 根，反斜杠方言），
+// 由 Kernel.LoadStruct 递归装载（官方 createclass_from_xml 的 includes 递归面）。
+func ParseStructXML(r io.Reader, into *ClassDef) ([]string, error) {
 	var root xmlStructObject
 	dec := xml.NewDecoder(r)
 	dec.CharsetReader = gbCharsetReader
 	if err := dec.Decode(&root); err != nil {
-		return fmt.Errorf("fsgame: struct xml %s: %w", into.Name, err)
+		return nil, fmt.Errorf("fsgame: struct xml %s: %w", into.Name, err)
 	}
 	if into.propIndex == nil {
 		into.seal()
@@ -232,7 +240,13 @@ func ParseStructXML(r io.Reader, into *ClassDef) error {
 		into.Records = append(into.Records, rd)
 		into.recordIndex[rd.Name] = len(into.Records) - 1
 	}
-	return nil
+	includes := make([]string, 0, len(root.Includes))
+	for _, inc := range root.Includes {
+		if inc.Name != "" {
+			includes = append(includes, inc.Name)
+		}
+	}
+	return includes, nil
 }
 
 // EngineInternals 引擎内部属性（struct_template.xml internals 段定案：

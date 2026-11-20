@@ -170,7 +170,8 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（2648 行，9 测试全绿，官方 door_data.xml 真档校验通过）：
+已实现（一期 2648 行 + 二期 3358 行 = 6006 行，16 测试全绿，官方 door_data.xml
+与社交域配置真档校验通过；二期详见 §7.1）：
 
 ```
 internal/fsgame/            // 已落码（2648 行 / go test 9 用例全绿）
@@ -206,8 +207,65 @@ normal_attack)；Container 命令族先查 AsynCtrl::IsWaiting；Capital OnReady
 QueryInt→RequestPoints、OnEntryGame=ResetConsumeRec。
 
 **后续批次**（每模块套路：Init 注册面→命令/事件→Record/心跳）：
-第二批建议社交底座（Chat/Friend/Team/Post + Gmcc/Log）；战斗域整族
-（Skill/Fight/Buffer/CoolDown/DamageCalculate）独立成批。
+第二批社交底座（Chat/Friend/Team/Post + Gmcc/Log）已于二期落地（见 §7.1）；
+战斗域整族（Skill/Fight/Buffer/CoolDown/DamageCalculate）独立成批。
+
+### 7.1 二期：社交底座六模块（2026-11-20 落地，16 测试全绿）
+
+`RegisterSecondBatch`（Init 序对齐 §8：Gmcc(13)→Post(178)→Team(182)→Friend(183)→
+Chat(184)→Log(240)），配套内核扩展三项：**LoadStruct includes 递归装载**（官方
+createclass_from_xml 的 `<includes>` 面整树生效——friend/team/letter/chatpage 等
+60+ struct XML 经 player.xml includes 自动并入）、**SeekRoleName**（社交面按名定位
+在线玩家）、**命令双通道**（AddIntCustomHook 与 AddIntCommandHook 分表——官方
+同号并存实证：0x138 既是 TeamModule::OnCustomLeave(custom) 又是
+FriendModule::OnTransDecTicketRes(command)）。
+
+```
+internal/fsgame/           // 二期新增（+3358 行 / 7 新测试）
+  chatmods.go    ChatModule：chatpage_rec 五默认页（ui_zonghe/ui_zhandou/
+                 ui_siliao/ui_guild/ui_fujin）+ 子命令多路（100 新页/101 位置/
+                 102 删除/99 改名/98 组合/95 尺寸/96 透明度/97 锁定/106 频道/
+                 121 CanChat/22 CleanWords）+ "chat" 字符串命令（频道广播）+
+                 914/938 跨场景私聊（黑名单拒发）+ H_Silence 禁言倒计时
+                 （SilenceTick → BG_131001 解禁公告）
+  friendmods.go  FriendModule：cust110 十三子命令（跳表 0x1086B810：加/删好友/
+                 陌生人/黑名单/仇人/查看/GM 加）+ friend_rec(19)/
+                 friendvalueevent_rec(21)/unfamiliar_rec(8)/blacklist_rec(7)/
+                 enemy_rec(8) 五表 + 好友度引擎（friendship.xml MaxValue=1000 +
+                 friendvalueevent.xml 行为值 + FriendshipLevel 六档）+ 四临界
+                 （Level/Job/ArrestValue/CurArea → 好友行联动）+ 0x268 被杀入仇
+                 + team_rec 钩子（队伍人数列）+ nx_set_friend_value
+  teammods.go    TeamModule：53 命令全登记（custom 0x12C-0x149/0x1B9-0x1C2 操作族
+                 + command 0x6D-0x84/0x313 结果族）+ 建队/邀请/入队/离队/踢出/
+                 移交队长/解散状态机（TeamID/TeamUniqueID/TeamCaptain/CurMembers
+                 属性链 + team_rec(21) 全员镜像）+ 13 属性临界同步（Photo/HPRatio
+                 族/EGRatio/Level/Job/LogicState/Camp/CurArea）+ 六心跳
+                 （CheckOffLineMember/ReadyAffirmWait/CheckSummonTime/
+                 UpdateMemberPos/UpdateHPRatio/UpdateEGRatio）+ buffer_rec 钩子
+                 + 六 Lua 面（nx_is_in_team 族）+ summon_cost.xml
+  postmods.go    PostModule：四邮箱类（SendPostBox/RecvPostBox/SendDealPostBox/
+                 SendBankPostBox，struct/container/postbox.xml）+ cust350 十七
+                 子命令（跳表 0x10814350：开箱/发信/读信/取钱/取附件/删信/汇款/
+                 退信/交易/银行/加急族）+ 信件生命周期（发信 → RecvLetterMidRec
+                 中间表倒计时（Money/ItemDelayTime）→ H_Update_Letter 到期转
+                 RecvLetterRec(15) → H_OverTime_Check 超时退信（TradeToReturn）→
+                 H_PostNpc_Check 加急召邮差）+ post.xml 邮资/时限规则
+  opsmods.go     GmccModule（cmd 0xAB/0x128：禁言/解禁经 ChatModule + SendToGmcc
+                 上行；scene OnGmccCustom 下行）+ LogModule（八生命周期事件 →
+                 entry_scene/leave_scene/logout 日志（Name/Account/Address/
+                 MacAddress/EntrySceneTime/LeaveSceneTime）+ nx_save_playerlog/
+                 nx_append_itemlog 两 Lua 面）
+```
+
+行为对齐依据（反汇编定案，见各文件头注释）：Chat OnRecover=chatpage 初始化+
+SilenceTick；Friend OnRecover 对象级挂载四临界（prop 名由 HB 巡检函数串定案）；
+Team OnStore=TeamID 族落档+TeamBeRequest 清理、CreateTeam=sys_team_0026 权限族；
+Post OnCreateClass=postbox.xml 四类、H_Update_Letter=sys_mail_0009 通知；
+Gmcc OnCustom/OnPlayerCmd=ChatModule 协作（sys_item_0083 禁言模板）；Log
+OnLeaveScene=leave_scene 日志字段族。测试：socialmods_test.go 七用例
+（装配序+配置装载/聊天页+禁言/好友全流程/组队全流程/信件全流程/GMCC 禁言/
+日志生命周期），testdata 新增 ini/Rule/{friendship,friendvalueevent,
+enemyexpend,post}.xml + ini/Team/summon_cost.xml（官方真档）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 
@@ -553,6 +611,8 @@ QueryInt→RequestPoints、OnEntryGame=ResetConsumeRec。
 |---|---|
 | `maparse.py` | FsGame.map 解析（publics → RVA/符号/obj） |
 | `fdis.py` | capstone 反汇编助手（RVA→指令，符号交叉解析） |
+| `dis2.py` | 二期分析助手（RVA→反汇编 + 字符串/符号解析；FSGAME_DLL 环境变量可覆写 DLL 路径） |
+| `p2scan.py` | 二期定向扫描（esp 栈槽仿真，按 [esp+N] 还原 thiscall 实参 → 注册面精确元组） |
 | `regscan2.py` | 全模块 kernel 槽调用扫描 → regs_calls.json（2917 条注册） |
 | `mkindex.py` | 241 模块索引合成（Name/Init/obj/统计） |
 | `gendoc.py` | 玩法表生成（分类域 → 本文 §8） |

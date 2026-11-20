@@ -158,7 +158,7 @@ func (s *Server) Start() error {
 		s.quick = s.opt.Share
 	} else if mem, err := OpenLogShareMem(s.opt.ShareName); err == nil {
 		s.quick = mem
-		s.logf("共享内存：Windows 命名映射 %s（可与官方进程互通）", s.opt.ShareName)
+		s.logf("共享内存：Windows 命名映射 %s", s.opt.ShareName)
 	} else {
 		s.quick = NewLogShareMemInMemory()
 		s.logf("共享内存：进程内缓冲（%v）", err)
