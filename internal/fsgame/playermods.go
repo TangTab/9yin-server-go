@@ -15,7 +15,13 @@ package fsgame
 
 import (
 	"fmt"
+	"math"
+	"os"
+	"path/filepath"
+	"sort"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // ---- RestoreModule（Init 序 137）----
@@ -262,7 +268,7 @@ func (m *ReliveModule) OnPlayerDead(k *Kernel, player PersistID) {
 func (m *ReliveModule) onNpcKilled(k *Kernel, self, from PersistID, args VarList) {}
 
 // onRequestRelive 官方 @0x1750D0（cust 290=0x122）：请求复活
-//（args: 模式 0 原地 / 1 回城）。门：倒计时未到拒；ReliveNoNearPos=1
+// （args: 模式 0 原地 / 1 回城）。门：倒计时未到拒；ReliveNoNearPos=1
 // 禁原地（模式 0）。
 func (m *ReliveModule) onRequestRelive(k *Kernel, self, from PersistID, args VarList) {
 	o := k.GetGameObj(self)
@@ -281,7 +287,7 @@ func (m *ReliveModule) onRequestRelive(k *Kernel, self, from PersistID, args Var
 }
 
 // onMenuSelect 官方 @0x17B810（cmd 22 菜单）：复活 NPC 对话菜单接面
-//（args: 动作 1=原地 / 2=回城——菜单上下文经 OnSelect 建立）。
+// （args: 动作 1=原地 / 2=回城——菜单上下文经 OnSelect 建立）。
 func (m *ReliveModule) onMenuSelect(k *Kernel, self, from PersistID, args VarList) {
 	o := k.GetGameObj(self)
 	if o == nil || o.GetInt("Dead") == 0 {
@@ -296,7 +302,7 @@ func (m *ReliveModule) onMenuSelect(k *Kernel, self, from PersistID, args VarLis
 }
 
 // onSelectRelivePos 官方 @0x17C270（cmd 315=0x13B）：选择复活点
-//（RelivePosSelectOpen 门）。
+// （RelivePosSelectOpen 门）。
 func (m *ReliveModule) onSelectRelivePos(k *Kernel, self, from PersistID, args VarList) {
 	if o := k.GetGameObj(self); o != nil && o.GetInt("RelivePosSelectOpen") != 0 {
 		m.events = append(m.events, fmt.Sprintf("pos-sel:%d", self.ID()))
@@ -508,7 +514,7 @@ func (m *PlayerChangeModule) Init(k *Kernel) error {
 }
 
 // ChangeRole 变身（nx_changemodel_role 的 Go 等价）：模型串 + 时限秒
-//（ChangeLeftTime 上限 1h——schema desc 定案）→ bRoleChange=1。
+// （ChangeLeftTime 上限 1h——schema desc 定案）→ bRoleChange=1。
 func (m *PlayerChangeModule) ChangeRole(k *Kernel, player PersistID, model string, seconds int32) bool {
 	o := k.GetGameObj(player)
 	if o == nil {
@@ -797,8 +803,8 @@ func (m *FreshmanModule) onLogicStateChanged(k *Kernel, self PersistID, prop str
 	m.ops = append(m.ops, "logic-state")
 }
 
-func (m *FreshmanModule) hbDelayClone(k *Kernel, self PersistID, beats int32) {}
-func (m *FreshmanModule) hbExitClone(k *Kernel, self PersistID, beats int32)  {}
+func (m *FreshmanModule) hbDelayClone(k *Kernel, self PersistID, beats int32)   {}
+func (m *FreshmanModule) hbExitClone(k *Kernel, self PersistID, beats int32)    {}
 func (m *FreshmanModule) onStore(k *Kernel, self, from PersistID, args VarList) {}
 func (m *FreshmanModule) onEntry(k *Kernel, self, from PersistID, args VarList) {
 	if m.InLead(k, self) {
@@ -826,8 +832,18 @@ func (m *FreshmanModule) Ops() []string { return m.ops }
 type ObjPropRefreshModule struct {
 	BaseModule
 
+	// PropPacks 修正包真档（share/modifypack/proppack.ini——十五期接入：
+	// 节=包号，r=「属性名,值,方式」多行方言，如 [2] r=,StrAdd,2,0）。
+	PropPacks map[string][]PropPackEntry
 	// refreshes 刷新计数（测试面）。
 	refreshes int
+}
+
+// PropPackEntry 修正包条目（属性名, 值, 计算方式）。
+type PropPackEntry struct {
+	Prop  string
+	Value int32
+	Mode  int32
 }
 
 // Name 模块名。
@@ -850,6 +866,44 @@ func (m *ObjPropRefreshModule) Init(k *Kernel) error {
 	b.RecHook("PropComputeRec", m.onPropComputeRecChanged)
 	return nil
 }
+
+// LoadResource 修正包真档装载（share/modifypack/proppack.ini——fskit
+// ParseItems 官方方言；重复 r= 键按序成条目）。
+func (m *ObjPropRefreshModule) LoadResource(k *Kernel) error {
+	if k.ResourcePath == "" {
+		return nil
+	}
+	data, err := os.ReadFile(filepath.Join(k.ResourcePath, "share", "modifypack", "proppack.ini"))
+	if err != nil {
+		return nil // 缺档静默（官方 loadres 非致命面）
+	}
+	packs := make(map[string][]PropPackEntry)
+	err = fskit.ParseItems(data, func(sec, key, value string) error {
+		if sec == "" || key != "r" {
+			return nil
+		}
+		f := strings.Split(strings.TrimPrefix(value, ","), ",")
+		if len(f) < 2 {
+			return nil
+		}
+		e := PropPackEntry{Prop: strings.TrimSpace(f[0]), Value: atoi32(f[1])}
+		if len(f) > 2 {
+			e.Mode = atoi32(f[2])
+		}
+		if e.Prop != "" {
+			packs[sec] = append(packs[sec], e)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	m.PropPacks = packs
+	return nil
+}
+
+// PropPack 包查询（缺省 nil）。
+func (m *ObjPropRefreshModule) PropPack(id string) []PropPackEntry { return m.PropPacks[id] }
 
 // Recalc 属性修正聚合重算：PropModifyRec 行（属性名, 加成…——ModifyBase
 // 方言 col0=属性名）累加 → 目标属性 += 聚合值（重算面：先减旧聚合再加新）。
@@ -880,10 +934,14 @@ func (m *ObjPropRefreshModule) Recalc(k *Kernel, id PersistID) {
 	m.refreshes++
 }
 
-func (m *ObjPropRefreshModule) onRecover(k *Kernel, self, from PersistID, args VarList) { m.Recalc(k, self) }
-func (m *ObjPropRefreshModule) onReady(k *Kernel, self, from PersistID, args VarList)  {}
-func (m *ObjPropRefreshModule) onStore(k *Kernel, self, from PersistID, args VarList)  {}
-func (m *ObjPropRefreshModule) onLoad(k *Kernel, self, from PersistID, args VarList)   { m.Recalc(k, self) }
+func (m *ObjPropRefreshModule) onRecover(k *Kernel, self, from PersistID, args VarList) {
+	m.Recalc(k, self)
+}
+func (m *ObjPropRefreshModule) onReady(k *Kernel, self, from PersistID, args VarList) {}
+func (m *ObjPropRefreshModule) onStore(k *Kernel, self, from PersistID, args VarList) {}
+func (m *ObjPropRefreshModule) onLoad(k *Kernel, self, from PersistID, args VarList) {
+	m.Recalc(k, self)
+}
 
 // 三临界官方面（绑定属性变更 → 重算）。
 func (m *ObjPropRefreshModule) onBindSavePropChanged(k *Kernel, self PersistID, prop string, old Var) {
@@ -950,7 +1008,7 @@ func (m *OffLineCompensateModule) onStore(k *Kernel, self, from PersistID, args 
 }
 
 // onRecover 官方 @0x7C7A90：回载——按离线时长结算 OffLineExp
-//（速率 ExpPerHour/时；上限 24h——官方按表，Go 收编缺省）。
+// （速率 ExpPerHour/时；上限 24h——官方按表，Go 收编缺省）。
 func (m *OffLineCompensateModule) onRecover(k *Kernel, self, from PersistID, args VarList) {
 	o := k.GetGameObj(self)
 	if o == nil {
@@ -996,7 +1054,7 @@ func (m *OffLineCompensateModule) Events() []string { return m.events }
 
 // SetPathModule 复刻官方 SetPathModule（Init @0x6CAC00；符号 280；注册面
 // 为 StageModule 噪声行——路径设置 API 模块）：NPC 巡逻路径装载
-//（PathID → AIFindPathRec 路径点表）。
+// （PathID → AIFindPathRec 路径点表）。
 type SetPathModule struct {
 	BaseModule
 
@@ -1059,6 +1117,10 @@ type PathFindingModule struct {
 
 	// maps 场景地图登记（scene 对象 → true）。
 	maps map[PersistID]bool
+	// graphs 导航图真档（map/path/*.path 文件名 → 节点图——2026-11-20
+	// 十五期逆向定案：u32 节点数 + {f32 xyz + 边×{u32 邻居,f32 代价}}，
+	// 代价=欧氏距离全中/无向回边全对称）。
+	graphs map[string][]PathNode
 	// ops 流水（测试面）。
 	ops []string
 }
@@ -1080,6 +1142,56 @@ func (m *PathFindingModule) Init(k *Kernel) error {
 func (m *PathFindingModule) onSceneCreate(k *Kernel, self, from PersistID, args VarList) {
 	m.maps[self] = true
 	m.ops = append(m.ops, fmt.Sprintf("map:%d", self.ID()))
+}
+
+// LoadResource 导航图真档装载（map/path/*.path；缺目录静默）。
+func (m *PathFindingModule) LoadResource(k *Kernel) error {
+	if k.ResourcePath == "" {
+		return nil
+	}
+	graphs, err := LoadPathDir(filepath.Join(k.ResourcePath, "map", "path"))
+	if err != nil {
+		return fmt.Errorf("fsgame: PathFindingModule::LoadResource: %w", err)
+	}
+	m.graphs = graphs
+	return nil
+}
+
+// GraphNames 已装载导航图名（测试面）。
+func (m *PathFindingModule) GraphNames() []string {
+	out := make([]string, 0, len(m.graphs))
+	for name := range m.graphs {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// FindPathOnGraph 图上寻路：起点就近锚定其巡逻段（连通分量——.path 文件
+// =多段巡逻路径集合，段内 Dijkstra；跨段返 nil）。
+func (m *PathFindingModule) FindPathOnGraph(name string, x1, z1, x2, z2 float32) []PathPoint {
+	nodes := m.graphs[name]
+	if len(nodes) == 0 {
+		return nil
+	}
+	from := int32(NearestNode(nodes, x1, z1))
+	comp := ComponentOf(nodes, from)
+	to, bestD := int32(-1), float32(math.MaxFloat32)
+	for id := range comp {
+		if d := dist2D(nodes[id].X, nodes[id].Z, x2, z2); d < bestD {
+			to, bestD = id, d
+		}
+	}
+	idx := ShortestPath(nodes, from, to)
+	if idx == nil {
+		return nil
+	}
+	out := make([]PathPoint, len(idx))
+	for i, v := range idx {
+		out[i] = PathPoint{X: nodes[v].X, Z: nodes[v].Z}
+	}
+	m.ops = append(m.ops, fmt.Sprintf("findg:%s:%d", name, len(out)))
+	return out
 }
 
 // FindPath 寻路（Go 收编：直线分段简化——A* 网格寻路随碰撞服里程碑后置，

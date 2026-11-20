@@ -421,3 +421,44 @@ func RegisterFourteenthBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterFifteenthBatch 登记第十五批（事件系统底座余量 stagemodule 管线）
+// 十六模块。顺序对齐官方 Init 序（玩法表 §8）：TriggerData(11) →
+// TriggerPlayerEvent(22) → TriggerSceneEvent(23) → TriggerNpcEvent(24) →
+// TriggerAreaEvent(25) → TriggerBufferEvent(26) → TriggerItemEvent(27) →
+// TriggerBaseModule(29) → ProcessorCloneSceneBehavior(14) →
+// ProcessorCommonBehavior(15) → ProcessorAIBehavior(16) →
+// ProcessorObjectBehavior(19) → ProcessorConditionBehavior(20) →
+// ProcessorComparisionBehavior(21) → NoticeExecutor(103) →
+// BehaviorExecutor(107) → ConditionExecutor(108) → ConditionModule(205)——
+// 十八项（十六模块族：Trigger 基座与六触发器计一族）。
+func RegisterFifteenthBatch(r *Registry) error {
+	seq := []Creator{
+		{"TriggerDataModule", func() Module { return &TriggerDataModule{} }},
+		{"TriggerPlayerEvent", func() Module { return &TriggerPlayerEvent{} }},
+		{"TriggerSceneEvent", func() Module { return &TriggerSceneEvent{} }},
+		{"TriggerNpcEvent", func() Module { return &TriggerNpcEvent{} }},
+		{"TriggerAreaEvent", func() Module { return &TriggerAreaEvent{} }},
+		{"TriggerBufferEvent", func() Module { return &TriggerBufferEvent{} }},
+		{"TriggerItemEvent", func() Module { return &TriggerItemEvent{} }},
+		{"TriggerBaseModule", func() Module { return &TriggerBaseModule{} }},
+		{"ProcessorCloneSceneBehavior", func() Module { return &ProcessorCloneSceneBehavior{} }},
+		{"ProcessorCommonBehavior", func() Module { return &ProcessorCommonBehavior{} }},
+		{"ProcessorAIBehavior", func() Module { return &ProcessorAIBehavior{} }},
+		{"ProcessorObjectBehavior", func() Module { return &ProcessorObjectBehavior{} }},
+		{"ProcessorRecordBehavior", func() Module { return &ProcessorRecordBehavior{} }},
+		{"ProcessorPropertyBehavior", func() Module { return &ProcessorPropertyBehavior{} }},
+		{"ProcessorConditionBehavior", func() Module { return &ProcessorConditionBehavior{} }},
+		{"ProcessorComparisionBehavior", func() Module { return &ProcessorComparisionBehavior{} }},
+		{"NoticeExecutor", func() Module { return &NoticeExecutor{} }},
+		{"BehaviorExecutor", func() Module { return &BehaviorExecutor{} }},
+		{"ConditionExecutor", func() Module { return &ConditionExecutor{} }},
+		{"ConditionModule", func() Module { return &ConditionModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}

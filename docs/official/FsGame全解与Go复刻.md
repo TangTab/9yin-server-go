@@ -170,9 +170,9 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一至十四期累计 21218 行、76 测试全绿，官方 door_data.xml 与社交/
+已实现（一至十五期累计 22750 行、82 测试全绿，官方 door_data.xml 与社交/
 技能/任务/物品/经济/场景/NPC/事件/AI/玩家基础/物品底座/装备玩法/世界
-规则域配置真档校验通过；§7.1-§7.13 分期明细＋§7.3 收尾面）。
+规则/事件底座域配置真档校验通过；§7.1-§7.14 分期明细＋§7.3 收尾面）。
 
 > **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
 > `encoding="utf-8"` 声明（31 个 GBK 内容转码、36 处 gb2312 声明改写、
@@ -849,6 +849,54 @@ internal/fsgame/worldmods2.go  // 十四期新增（十四模块）
 拒/限时 2 拍到期移除+佩戴同卸；水下 9 拍消耗→第 10 拍归零当拍溺伤→持续→
 出水回复/流放 120→重犯档→监禁→刑满释放清通缉/势力链 JoinForce→版本递增→
 声望入账；航线传送 30,40/影片免打置解/公告/防沉迷 3h 档）。
+
+### 7.14 十五期：事件底座余量 stagemodule 管线 + 四样真档接入（2026-11-20 落地，82 测试全绿）
+
+`RegisterFifteenthBatch`（Init 序对齐 §8：TriggerData(11) → 六触发器(22-27)
+→ TriggerBase(29) → 八 Processor(14-21) → NoticeExecutor(103) →
+BehaviorExecutor(107) → ConditionExecutor(108) → ConditionModule(205)）。
+**架构定案**：该族官方 loadres 全空——不读静态表，触发/行为定义经 Lua
+（lua64/trigger/tr_*.lua、stage*.lua）与副本 zone 运行时注入；Go 同构：
+TriggerDataModule 登记面 + 六源触发器 → 条件门 → 八 Processor → 三 Executor。
+
+**真档接入（十五期 A）**：
+- **map/path/*.path 二进制逆向定案**：`u32 节点数 + 节点{f32 x,y,z +
+  u32 边数 + 边×{u32 邻居, f32 代价}}`——adv031 513 节点/2244 边，代价=
+  欧氏距离 300 抽验全中、无向回边全对称；**分量语义勘误**：文件=多段
+  巡逻路径集合（adv031 自 0 号仅达 3 节点），FindPathOnGraph=段内
+  Dijkstra（ComponentOf 分量锚定）——AIMotion 巡逻/护送 PathID 数据源
+- **share/modifypack/proppack.ini**（3.7MB 真档）：节=包号、r=「属性名,
+  值,方式」多行方言（[2] r=,StrAdd,2,0=臂力+2）→ ObjPropRefresh 装载面
+- **share/area/areainfo.ini**：区域禁则 12 键（forbid_PVP/chat/mail…）
+  → TriggerAreaEvent.Forbid 门
+- **share/clone/cloneinfo.ini**：副本难度表（Desc/三档 PowerLevel）→
+  CloneSceneModule.LoadCloneInfo + ProcessorCloneSceneBehavior 门槛
+- 三 ini 由 GBK 转 UTF-8 入库（testdata 编码规范化先例）
+
+```
+internal/fsgame/stagemods.go  // 十五期新增（触发器管线 18 注册项）
+  TriggerDataModule    触发器登记（cust 270；Register API——Lua 注入面）
+  TriggerBaseModule    容器基座：条件门（ConditionModule 求值）+ 单发闸 +
+                      行为链派发（stageExecute 八 Processor 路由）
+  六触发器            player（四事件闭包）/scene（OnCreate·Destroy）/
+                      npc（616 杀）/area（OnMapChanged+禁则真档）/buffer
+                      （BufferContainer）/item（ToolBox）——Source 方言
+                      「<族>」或「<族>:<事件>」精确匹配
+  八 Processor        common（set/add/notice）/property（ratio）/
+                      record（add/clear）/object（summon/destroy）/
+                      ai（state/hate→十期模块联动）/clone（建副本+
+                      难度门槛）/condition（运行时门）/comparision（六则）
+  BehaviorExecutor    scene OnCreate + HB_CheckBehavior 行为泵（排队顺序落）
+  ConditionExecutor   cmd 752/930 检查 + 616×3 + 932 推进
+  NoticeExecutor      公告执行（NewsModule 转发）
+  ConditionModule     条件求值 API（prop 六则）
+```
+
+测试：stagemods_test.go 六用例（.path 解码 513/2244+欧氏对拍+截断拒；
+段内寻路首尾锚定+代价≥直线；proppack 包 2=StrAdd,2 应用；cloneinfo
+孔雀山庄 50/58/64 + areainfo 禁则；管线全链——条件门低级拒/过门触发
+HP+50+记录行+公告+处理器流水+单发闸+比较六则+行为泵 drain；四源分派
+NPC 616/区域/物品/buff）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 

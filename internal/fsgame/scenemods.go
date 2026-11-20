@@ -1,6 +1,10 @@
 package fsgame
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
+)
 
 // 七期：场景域核心五模块（docs/official/FsGame全解与Go复刻.md §8 场景基础）。
 // 官方源码树：fsgame\scenebasemodule\（clonescenemodule/mapmagmodule/
@@ -52,6 +56,9 @@ type CloneSceneModule struct {
 
 	// Grades 评分表（scene_difficulty → 行）。
 	Grades map[string]map[string]string
+	// Clones 副本难度真档（share/clone/cloneinfo.ini：场景路径 →
+	// Desc/EasyPowerLevel/DifficultPowerLevel/HellPowerLevel 三难度战力门槛）。
+	Clones map[string]map[string]string
 
 	// clones 运行副本：CloneUniqueID → 场景对象句柄。
 	clones map[string]PersistID
@@ -128,6 +135,36 @@ func (m *CloneSceneModule) LoadResource(k *Kernel) error {
 		m.Grades[id] = row
 	}
 	k.Tracef("CloneSceneModule: LoadResource 评分表 %d 行", len(m.Grades))
+	return nil
+}
+
+// LoadCloneInfo 副本难度真档装载（share/clone/cloneinfo.ini——十五期接入：
+// 节=场景资源路径，Desc/三难度 PowerLevel）。缺档静默。
+func (m *CloneSceneModule) LoadCloneInfo(k *Kernel) error {
+	if k.ResourcePath == "" {
+		return nil
+	}
+	if m.Clones == nil {
+		m.Clones = make(map[string]map[string]string)
+	}
+	data, err := readResource(k.ResourcePath, "share/clone/cloneinfo.ini")
+	if err != nil {
+		return nil // 缺档静默（官方 loadres 非致命面）
+	}
+	err = fskit.ParseItems(data, func(sec, key, value string) error {
+		if sec == "" || key == "" || key == "Comment" {
+			return nil
+		}
+		if m.Clones[sec] == nil {
+			m.Clones[sec] = make(map[string]string)
+		}
+		m.Clones[sec][key] = value
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	k.Tracef("CloneSceneModule: LoadCloneInfo 难度表 %d 副本", len(m.Clones))
 	return nil
 }
 
@@ -234,14 +271,14 @@ func (m *CloneSceneModule) NxGetProtoSceneId(uid string) int32 { return 0 }
 func (m *CloneSceneModule) onComandCloneSceneScene(k *Kernel, self, from PersistID, args VarList) {}
 
 // onComandCloneScenePlayer 官方 @0x283240（命令 800=0x320）：玩家侧
-//（CloneScoreTopRefreshTime/CloneWeekLimitCount 面下发）。
+// （CloneScoreTopRefreshTime/CloneWeekLimitCount 面下发）。
 func (m *CloneSceneModule) onComandCloneScenePlayer(k *Kernel, self, from PersistID, args VarList) {}
 
 // onCommandCreateTeam 官方 @0x283A10（命令 110 多播协同——队伍变更联动
 // CloneOwnerID）。
 func (m *CloneSceneModule) onCommandCreateTeam(k *Kernel, self, from PersistID, args VarList) {}
 
-func (m *CloneSceneModule) onCommandClearTeam(k *Kernel, self, from PersistID, args VarList)    {}
+func (m *CloneSceneModule) onCommandClearTeam(k *Kernel, self, from PersistID, args VarList)     {}
 func (m *CloneSceneModule) onCommandAddTeamMember(k *Kernel, self, from PersistID, args VarList) {}
 
 // onCommandDecCapital 官方 @0x284EF0（命令 805=0x325）：副本货币消耗回执。
@@ -257,7 +294,7 @@ func (m *CloneSceneModule) onCommandDeadInClone(k *Kernel, self, from PersistID,
 }
 
 // onCommandCloneBossDead 官方 @0x2852D0（616）：Boss 击杀
-//（BossBeKilledCount+1 + BossTimeCount 记时）。
+// （BossBeKilledCount+1 + BossTimeCount 记时）。
 func (m *CloneSceneModule) onCommandCloneBossDead(k *Kernel, self, from PersistID, args VarList) {
 	for _, id := range m.clones {
 		if o := k.GetGameObj(id); o != nil {
@@ -281,7 +318,7 @@ func (m *CloneSceneModule) onScenePublicMessage(k *Kernel, self, from PersistID,
 func (m *CloneSceneModule) onCloneScene(k *Kernel, self, from PersistID, args VarList) {}
 
 // onCloneReset/onCloneDestroy 官方 @0x281CD0/@0x281D90。
-func (m *CloneSceneModule) onCloneReset(k *Kernel, self, from PersistID, args VarList)   {}
+func (m *CloneSceneModule) onCloneReset(k *Kernel, self, from PersistID, args VarList) {}
 func (m *CloneSceneModule) onCloneDestroy(k *Kernel, self, from PersistID, args VarList) {
 	for uid, id := range m.clones {
 		if id == self {
@@ -303,12 +340,12 @@ func (m *CloneSceneModule) onPlayerEvent(k *Kernel, self, from PersistID, args V
 func (m *CloneSceneModule) onVisibleNpcEntry(k *Kernel, self, from PersistID, args VarList) {}
 
 // 六心跳官方面（关闭倒计时/同刷计数/离队退出/时限/副本门/他人离队）。
-func (m *CloneSceneModule) hbCloseClone(k *Kernel, self PersistID, beats int32)        {}
-func (m *CloneSceneModule) hbCloneCount(k *Kernel, self PersistID, beats int32)        {}
-func (m *CloneSceneModule) hbLeaveTeamExit(k *Kernel, self PersistID, beats int32)     {}
-func (m *CloneSceneModule) hbCloneLimiteTime(k *Kernel, self PersistID, beats int32)   {}
-func (m *CloneSceneModule) hbCloneDoor(k *Kernel, self PersistID, beats int32)         {}
-func (m *CloneSceneModule) hbAnotherLeaveTeam(k *Kernel, self PersistID, beats int32)  {}
+func (m *CloneSceneModule) hbCloseClone(k *Kernel, self PersistID, beats int32)       {}
+func (m *CloneSceneModule) hbCloneCount(k *Kernel, self PersistID, beats int32)       {}
+func (m *CloneSceneModule) hbLeaveTeamExit(k *Kernel, self PersistID, beats int32)    {}
+func (m *CloneSceneModule) hbCloneLimiteTime(k *Kernel, self PersistID, beats int32)  {}
+func (m *CloneSceneModule) hbCloneDoor(k *Kernel, self PersistID, beats int32)        {}
+func (m *CloneSceneModule) hbAnotherLeaveTeam(k *Kernel, self PersistID, beats int32) {}
 
 // 七临界官方面。
 func (m *CloneSceneModule) onProgressChanged(k *Kernel, self PersistID, prop string, old Var) {}
@@ -321,8 +358,8 @@ func (m *CloneSceneModule) onGmPassChanged(k *Kernel, self PersistID, prop strin
 func (m *CloneSceneModule) onNextMonster(k *Kernel, self PersistID, prop string, old Var)     {}
 
 // Ops/Scores 流水（测试面）。
-func (m *CloneSceneModule) Ops() []string     { return m.ops }
-func (m *CloneSceneModule) Scores() []string  { return m.scores }
+func (m *CloneSceneModule) Ops() []string    { return m.ops }
+func (m *CloneSceneModule) Scores() []string { return m.scores }
 
 // ---- MapMagModule ----
 
@@ -348,7 +385,7 @@ func (m *CloneSceneModule) Scores() []string  { return m.scores }
 //	DeclareCritical ("…LogicState")→C_OnLogicStateChanged@0x2E8410
 //
 // 传送点表（官方经 Location/静态面；Go 面直读）：ini/Map/transport.xml
-//（56 点：ID/NpcID/Name/NeedCamp/Scene）。
+// （56 点：ID/NpcID/Name/NeedCamp/Scene）。
 type MapMagModule struct {
 	BaseModule
 
@@ -640,7 +677,7 @@ func (m *WarFog) LoadResource(k *Kernel) error {
 }
 
 // onEntry 官方 @0x5F7970：玩家入场——战雾区域可见性计算
-//（未探索区域不可见；协作 MapModule explored 面）。
+// （未探索区域不可见；协作 MapModule explored 面）。
 func (m *WarFog) onEntry(k *Kernel, self, from PersistID, args VarList) {
 	if !m.EnableWarFog {
 		return
