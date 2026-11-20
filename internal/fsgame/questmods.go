@@ -110,6 +110,16 @@ type QuestModule struct {
 	// Capital/Container 落账，Go 面 sync 层挂接）。
 	AwardOut func(player PersistID, exp, money int32, items string)
 
+	// npcAccept/npcSubmit NPC → 任务号索引（九阴任务侧 AcceptNpc/
+	// SubmitNpc 反查；OnNpcSelect 分发面）。
+	npcAccept map[string][]string
+	npcSubmit map[string][]string
+
+	// Texts 任务文案（ini/Text/TaskText.xml：title_<id>/context_<id>/
+	// CanAcceptMenu_<id>/story_<id>_<n> 等串键，npcgen 从客户端
+	// stringtask_normal/special 提取）。
+	Texts map[string]string
+
 	// sysMsgs 系统信息观测（sys_quest_* 模板号）。
 	sysMsgs []string
 	// ops 命令流水（测试面）。
@@ -146,32 +156,46 @@ func (m *QuestModule) Init(k *Kernel) error {
 	return nil
 }
 
-// LoadResource 任务域配置装载（官方经 StaticDataQuery；Go 面直读）。
+// LoadResource 任务域配置装载——九阴任务域（BGserverCJ 侧，npcgen 生成的
+// ini/Quest/Task 树 + SubFunction 接线 + 步骤域 + TaskItem），经
+// questnineyin.go 合成引擎词汇三表与 NPC 面；黑金三表（Quest/
+// QuestCriteria/Award.xml）已移 heijin_backup 留作对照。
 func (m *QuestModule) LoadResource(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return fmt.Errorf("fsgame: QuestModule.LoadResource: ResourcePath 未设置")
 	}
-	for path, into := range map[string]map[string]map[string]string{
-		"ini/Quest/Quest.xml":         m.Quests,
-		"ini/Quest/QuestCriteria.xml": m.Criteria,
-		"ini/Quest/Award.xml":         m.Awards,
-	} {
-		data, err := readResource(k.ResourcePath, path)
-		if err != nil {
-			return fmt.Errorf("fsgame: QuestModule::LoadResource %s: %w", path, err)
-		}
-		rows, err := ParsePropTable(data)
-		if err != nil {
-			return err
-		}
-		for id, row := range ruleByID(rows) {
-			into[id] = row
-		}
+	data, err := loadNineyinQuests(k.ResourcePath)
+	if err != nil {
+		return fmt.Errorf("fsgame: QuestModule::LoadResource: %w", err)
 	}
-	k.Tracef("QuestModule: LoadResource 任务 %d / 子模板 %d / 奖励 %d",
-		len(m.Quests), len(m.Criteria), len(m.Awards))
+	m.Quests, m.Criteria, m.Awards = data.Quests, data.Criteria, data.Awards
+	m.npcAccept, m.npcSubmit = data.NpcAccept, data.NpcSubmit
+	if err := m.loadTexts(k); err != nil {
+		return err
+	}
+	s := data.Stats
+	k.Tracef("QuestModule: LoadResource 九阴任务 %d（task002 补 %d）/ 合成子模板 %d / 可推进任务 %d / 奖励行 %d / 文案 %d / 未映射类型 %d / 缺步骤 %d",
+		s.Tasks, s.Task002Only, s.Synthesized, s.WithSteps, s.AwardsBuilt, len(m.Texts), s.SkippedType, s.MissingStep)
 	return nil
 }
+
+// loadTexts 任务文案装载（ini/Text/TaskText.xml）。
+func (m *QuestModule) loadTexts(k *Kernel) error {
+	rows, err := loadPropRows(k.ResourcePath, "ini/Text/TaskText.xml")
+	if err != nil {
+		return fmt.Errorf("fsgame: QuestModule::LoadResource: %w", err)
+	}
+	m.Texts = make(map[string]string, len(rows))
+	for _, row := range rows {
+		if row["ID"] != "" {
+			m.Texts[row["ID"]] = row["Text"]
+		}
+	}
+	return nil
+}
+
+// TaskText 任务文案查询（串键 → 文本；缺省空）。
+func (m *QuestModule) TaskText(key string) string { return m.Texts[key] }
 
 // onCustomQuestMsg 官方 @0x99E2C0（cust 880=0x370）：任务客户端消息多路
 //（args: 子命令, 任务编号[, …]）。
@@ -493,11 +517,81 @@ func (m *QuestModule) setRewarded(k *Kernel, self PersistID, questID int32) {
 }
 
 // onNpcSelect 官方 @0x9A34B0：NPC 对话——对话类子模板（CriteriaType=4，
-// InterNpc 匹配）推进；SubmitNpc 匹配可交任务面。
+// InterNpc 匹配）推进；SubmitNpc 匹配可交任务面。Go 面计算该 NPC 的
+// 可接/可交清单（九阴任务侧 AcceptNpc/SubmitNpc 索引），供对话菜单
+// （cmd 22）分发。
 func (m *QuestModule) onNpcSelect(k *Kernel, self, from PersistID, args VarList) {
-	npcName := args.String(0)
-	_ = npcName
-	k.Tracef("QuestModule: OnNpcSelect %s", npcName)
+	npcID := args.String(0)
+	acc := m.AcceptableQuests(k, from, npcID)
+	sub := m.SubmittableQuests(k, from, npcID)
+	m.ops = append(m.ops, fmt.Sprintf("npc:%s accept=%v submit=%v", npcID, acc, sub))
+	k.Tracef("QuestModule: OnNpcSelect %s 可接 %d / 可交 %d", npcID, len(acc), len(sub))
+}
+
+// AcceptableQuests NPC 对话面上可接任务清单：AcceptNpc 匹配 + 等级门 +
+// 前置完成位集 + 在办去重。
+func (m *QuestModule) AcceptableQuests(k *Kernel, player PersistID, npcID string) []int32 {
+	o := k.GetGameObj(player)
+	if o == nil {
+		return nil
+	}
+	var out []int32
+	for _, tid := range m.npcAccept[npcID] {
+		cfg := m.Quests[tid]
+		if cfg == nil {
+			continue
+		}
+		if minLv := atoi32(cfg["MinLevel"]); minLv > 0 && o.GetInt("Level") < minLv {
+			continue
+		}
+		if !m.prereqMet(k, player, cfg) || m.questRow(k, player, atoi32(tid)) >= 0 {
+			continue
+		}
+		out = append(out, atoi32(tid))
+	}
+	return out
+}
+
+// SubmittableQuests NPC 对话面上可交任务清单：在办 + 状态=可提交 +
+// SubmitNpc 匹配。
+func (m *QuestModule) SubmittableQuests(k *Kernel, player PersistID, npcID string) []int32 {
+	o := k.GetGameObj(player)
+	if o == nil {
+		return nil
+	}
+	qr := o.Record("QuestRecord")
+	if qr == nil {
+		return nil
+	}
+	submitSet := make(map[string]struct{}, len(m.npcSubmit[npcID]))
+	for _, tid := range m.npcSubmit[npcID] {
+		submitSet[tid] = struct{}{}
+	}
+	var out []int32
+	for i := 0; i < qr.Rows(); i++ {
+		tid := qr.Row(i).Int(qrID)
+		if _, ok := submitSet[fmt.Sprint(tid)]; !ok {
+			continue
+		}
+		if qr.Row(i).Int(qrState) == QSCanSubmit {
+			out = append(out, tid)
+		}
+	}
+	return out
+}
+
+// prereqMet 前置任务完成位集校验（AcceptQuest 同款门的只读版）。
+func (m *QuestModule) prereqMet(k *Kernel, player PersistID, cfg map[string]string) bool {
+	for _, p := range strings.Split(cfg["preQuestList"], ",") {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		if !m.isRewarded(k, player, atoi32(p)) {
+			return false
+		}
+	}
+	return true
 }
 
 // onMenuSelect 官方 @0x9A3B50（命令 22）：菜单（对话选项 → 接/交任务入口）。
@@ -635,6 +729,8 @@ func (m *QuestCriteriaModule) questModule(k *Kernel) *QuestModule {
 }
 
 // advanceByType 按子模板类型推进在办任务下同型子模板。
+// 剧情段（StepType=story）按 Order 顺序播放：同任务一次只推最前未完成段
+//（其余段 InterNpc 相同，不门控会一次对话播完全部剧情）。
 func (m *QuestCriteriaModule) advanceByType(k *Kernel, self PersistID, criteriaType string, count int32, key string) {
 	qm := m.questModule(k)
 	o := k.GetGameObj(self)
@@ -645,6 +741,14 @@ func (m *QuestCriteriaModule) advanceByType(k *Kernel, self PersistID, criteriaT
 	if cr == nil {
 		return
 	}
+	// 收集匹配行 + 求同任务剧情段的最小未完成 Order。
+	type candidate struct {
+		row   int
+		order int32
+		story bool
+	}
+	var matched []candidate
+	minStoryOrder := map[int32]int32{} // qcParent → 最小 Order
 	for i := 0; i < cr.Rows(); i++ {
 		row := cr.Row(i)
 		if row.Int(qcState) == CSDone {
@@ -664,8 +768,23 @@ func (m *QuestCriteriaModule) advanceByType(k *Kernel, self PersistID, criteriaT
 				continue
 			}
 		}
-		qm.UpdateCriteria(k, self, row.Int(qcID), count, false)
-		m.ops = append(m.ops, fmt.Sprintf("advance:%d(type %s)", row.Int(qcID), criteriaType))
+		story := ccfg["StepType"] == "story"
+		order := atoi32(ccfg["Order"])
+		matched = append(matched, candidate{row: i, order: order, story: story})
+		if story {
+			parent := row.Int(qcParent)
+			if mo, ok := minStoryOrder[parent]; !ok || order < mo {
+				minStoryOrder[parent] = order
+			}
+		}
+	}
+	for _, c := range matched {
+		if c.story && c.order != minStoryOrder[cr.Row(c.row).Int(qcParent)] {
+			continue
+		}
+		cid := cr.Row(c.row).Int(qcID)
+		qm.UpdateCriteria(k, self, cid, count, false)
+		m.ops = append(m.ops, fmt.Sprintf("advance:%d(type %s)", cid, criteriaType))
 	}
 }
 

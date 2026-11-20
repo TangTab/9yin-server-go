@@ -13,12 +13,16 @@
 //     同域分档合并去重）
 //   - task002.txt / task_config.txt / CharEffect.txt / npctemplate.tab
 //
+// 输入三（文案，modern/text/chineses；目录不存在则跳过）：
+//   - stringtask_normal/ + stringtask_special/  任务串档（key=value）
+//
 // 输出（服务端方言 <Object><Property .../>，UTF-8，格式以服务端为准）：
 //   - <out>/NpcConfig/<组>/<表>.xml       NPC 模板（属性名按审定映射表
 //     转服务端词汇，映射不到的列不进输出、只在报告记录）
 //   - <scenes-out>/<场景>/npc_creator.xml 每场景摆放（属性名保持 creator 源名）
 //   - <quest-out>/<域>/<域>.xml           任务域表（服务端词汇透传，不映射）
 //   - <out>/NpcTemplate.xml               战斗 NPC 模板（BGserverCJ 侧）
+//   - <text-out>/TaskText.xml             任务文案（ID=串键，Text=文本）
 //   - <report>                            JSON 审计报告（四类列映射、
 //     ID 冲突、孤儿摆放、任务域统计）
 //
@@ -47,10 +51,11 @@ func main() {
 	scenesOut := flag.String("scenes-out", filepath.Join(repoTestData(), "ini", "scene"), "场景摆放 XML 输出根")
 	tasksIn := flag.String("tasks", defaultTasksRoot(), "BGserverCJ 任务数据根（含 Task\\ 与 npctemplate.tab；目录不存在则跳过任务转换）")
 	questOut := flag.String("quest-out", filepath.Join(repoTestData(), "ini", "Quest"), "任务域 XML 输出根")
+	textOut := flag.String("text-out", filepath.Join(repoTestData(), "ini", "Text"), "任务文案 XML 输出根")
 	reportPath := flag.String("report", filepath.Join(repoRoot(), "artifacts", "local", "npcgen-report.json"), "审计报告 JSON 输出")
 	verify := flag.Bool("verify", false, "生成后用 config.LoadObjectFile 回读校验行数与 ID 集")
 	flag.Parse()
-	if err := run(*in, *out, *scenesOut, *tasksIn, *questOut, *reportPath, *verify); err != nil {
+	if err := run(*in, *out, *scenesOut, *tasksIn, *questOut, *textOut, *reportPath, *verify); err != nil {
 		fmt.Fprintln(os.Stderr, "npcgen:", err)
 		os.Exit(1)
 	}
@@ -133,11 +138,13 @@ type genReport struct {
 		Source         string         `json:"source,omitempty"`
 		Domains        []domainReport `json:"domains,omitempty"`
 		NpcTemplateRow int            `json:"npc_template_rows"`
+		TextRows       int            `json:"text_rows"`
+		TextConflicts  int            `json:"text_conflicts"`
 	} `json:"quest"`
 	Warnings []string `json:"warnings,omitempty"`
 }
 
-func run(modern, outDir, scenesOut, tasksIn, questOut, reportPath string, verify bool) error {
+func run(modern, outDir, scenesOut, tasksIn, questOut, textOut, reportPath string, verify bool) error {
 	npcconfigDir := filepath.Join(modern, "share", "npc", "npcconfig")
 	creatorDir := filepath.Join(modern, "share", "creator", "npc_creator")
 	for _, dir := range []string{npcconfigDir, creatorDir} {
@@ -277,6 +284,23 @@ func run(modern, outDir, scenesOut, tasksIn, questOut, reportPath string, verify
 		fmt.Printf("npcgen: 任务数据根不存在，跳过任务转换（-tasks=%s）\n", tasksIn)
 	}
 
+	// 任务文案（modern/text/chineses 的 stringtask_* 目录）。
+	textRoot := filepath.Join(modern, "text", "chineses")
+	if info, err := os.Stat(textRoot); err == nil && info.IsDir() {
+		rows, conflicts, warnings, err := convertTaskText(textRoot, textOut)
+		if err != nil {
+			return err
+		}
+		report.Quest.TextRows = rows
+		report.Quest.TextConflicts = conflicts
+		report.Warnings = append(report.Warnings, warnings...)
+		taskTextPath := filepath.Join(textOut, "TaskText.xml")
+		written[taskTextPath] = rows
+		writtenOrder = append(writtenOrder, taskTextPath)
+	} else {
+		fmt.Printf("npcgen: 文案目录不存在，跳过文案提取（%s）\n", textRoot)
+	}
+
 	// 报告落盘。
 	if err := os.MkdirAll(filepath.Dir(reportPath), 0o755); err != nil {
 		return err
@@ -293,8 +317,8 @@ func run(modern, outDir, scenesOut, tasksIn, questOut, reportPath string, verify
 	fmt.Printf("npcgen: %d 表 %d 行（唯一 ID %d）→ %s\n", len(report.Tables), report.TotalRows, report.UniqueIDs, outDir)
 	fmt.Printf("npcgen: %d 场景 %d 摆放实例 → %s（孤儿 %d）\n", report.Creators.Scenes, report.Creators.Instances, scenesOut, report.Creators.OrphanCount)
 	if report.Quest.Source != "" {
-		fmt.Printf("npcgen: 任务域 %d 档（HuntList/CollectList/...）+ 战斗 NPC 模板 %d 行 → %s\n",
-			len(report.Quest.Domains), report.Quest.NpcTemplateRow, questOut)
+		fmt.Printf("npcgen: 任务域 %d 档（HuntList/CollectList/...）+ 战斗 NPC 模板 %d 行 → %s；文案 %d 键 → %s\n",
+			len(report.Quest.Domains), report.Quest.NpcTemplateRow, questOut, report.Quest.TextRows, textOut)
 	}
 	fmt.Printf("npcgen: %s；报告 %s\n", report.Backup, reportPath)
 	for _, w := range report.Warnings {

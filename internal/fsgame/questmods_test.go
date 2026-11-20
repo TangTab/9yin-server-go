@@ -2,6 +2,7 @@ package fsgame
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -67,14 +68,58 @@ func TestFourthBatchAssemble(t *testing.T) {
 		}
 	}
 	qm := module2[*QuestModule](t, k, "QuestModule")
-	if cfg := qm.Quests["501"]; cfg == nil || cfg["Name"] != "英雄之城" || cfg["AcceptNpc"] == "" {
-		t.Fatalf("Quest.xml 未装载: %v", qm.Quests["501"])
+	// 九阴真档（npcgen 生成）：22072 谷中考验。
+	if cfg := qm.Quests["22072"]; cfg == nil || cfg["Name"] != "谷中考验" ||
+		cfg["AcceptNpc"] != "WorldNpc01452" || cfg["preQuestList"] != "22070" {
+		t.Fatalf("九阴任务 22072 未装载: %v", qm.Quests["22072"])
 	}
-	if c := qm.Criteria["501"]; c == nil || c["CriteriaType"] != "4" {
-		t.Fatalf("QuestCriteria.xml 未装载: %v", qm.Criteria["501"])
+	// SubFunction 接线合成：24013 → hunter 4001 → monv040100×3。
+	cfg13 := qm.Quests["24013"]
+	if cfg13 == nil || cfg13["CriteriaList"] == "" {
+		t.Fatalf("24013 未合成步骤: %v", cfg13)
 	}
-	if a := qm.Awards["301"]; a == nil || atoi32(a["Exp"]) != 3686 {
-		t.Fatalf("Award.xml 未装载: %v", qm.Awards["301"])
+	hunted := false
+	for _, cid := range strings.Split(cfg13["CriteriaList"], ",") {
+		if c := qm.Criteria[cid]; c != nil && c["CriteriaType"] == CriteriaKillNpc &&
+			c["InterNpc"] == "monv040100" && atoi32(c["MaxCount"]) == 3 {
+			hunted = true
+		}
+	}
+	if !hunted {
+		t.Fatalf("24013 杀怪子模板未合成: %v", cfg13["CriteriaList"])
+	}
+	// 奖励合成：24241 勇闯挑灯崖 → TaskItem 1117（taskitem_7h×1，IsGive=0）。
+	if a := qm.Awards["24241"]; a == nil || a["DefaultItemList"] != "taskitem_7h,1" {
+		t.Fatalf("TaskItem 奖励未合成: %v", qm.Awards["24241"])
+	}
+	// 剧情/文案：22145 → story 3022 两段对话 @ WorldNpc06127；
+	// title_22072 文案（idres 版本）。
+	cfg145 := qm.Quests["22145"]
+	story := 0
+	for _, cid := range strings.Split(cfg145["CriteriaList"], ",") {
+		if c := qm.Criteria[cid]; c != nil && c["StepType"] == "story" && c["InterNpc"] == "WorldNpc06127" {
+			story++
+		}
+	}
+	if story != 2 {
+		t.Fatalf("22145 剧情子模板应 2 段: %d (%v)", story, cfg145["CriteriaList"])
+	}
+	if qm.TaskText("title_22072") != "另有隐情" {
+		t.Fatalf("任务文案未装载: %q", qm.TaskText("title_22072"))
+	}
+	if txt := qm.TaskText("CanAcceptMenu_22001"); !strings.Contains(txt, "新的开始") {
+		t.Fatalf("菜单文案未装载: %q", txt)
+	}
+	// 护送占位：24019 → convoy 4001 → Convoy24019（NpcConfig 命中）。
+	c19 := qm.Quests["24019"]
+	convoy := 0
+	for _, cid := range strings.Split(c19["CriteriaList"], ",") {
+		if c := qm.Criteria[cid]; c != nil && c["StepType"] == "convoy" && c["NpcId"] == "Convoy24019" && c["CriteriaType"] == "" {
+			convoy++
+		}
+	}
+	if convoy != 1 {
+		t.Fatalf("24019 护送占位子模板缺失: %v", c19["CriteriaList"])
 	}
 	am := module2[*AchievementModule](t, k, "AchievementModule")
 	if cfg := am.Achievements["1"]; cfg == nil || atoi32(cfg["Points"]) != 10 {
@@ -88,6 +133,73 @@ func TestFourthBatchAssemble(t *testing.T) {
 	if k.GetGameObj(p).Record("QuestRecord") == nil || k.GetGameObj(p).Record("AchievementCompleted") == nil {
 		t.Fatal("任务/成就记录未随 includes 装载")
 	}
+	// 真档全闭环：接 2412 峨嵋剑阵（无前置）→ 各步骤推满 → 可提交。
+	cfg12 := qm.Quests["2412"]
+	if cfg12 == nil || cfg12["CriteriaList"] == "" {
+		t.Fatalf("2412 未合成步骤: %v", cfg12)
+	}
+	if !qm.AcceptQuest(k, p, 2412) {
+		t.Fatal("真档任务 2412 接取失败")
+	}
+	for _, cid := range strings.Split(cfg12["CriteriaList"], ",") {
+		c := qm.Criteria[cid]
+		max := atoi32(c["MaxCount"])
+		if max <= 0 {
+			max = 1
+		}
+		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
+	}
+	if !qm.SubmitQuest(k, p, 2412) {
+		t.Fatal("真档任务 2412 未达可提交")
+	}
+	// NPC 面（任务侧索引）：22145 第一回——接 WorldNpc06008 / 交 WorldNpc06127。
+	if got := qm.AcceptableQuests(k, p, "WorldNpc06008"); !containsInt(got, 22145) {
+		t.Fatalf("WorldNpc06008 可接清单缺 22145: %v", got)
+	}
+	if !qm.AcceptQuest(k, p, 22145) {
+		t.Fatal("真档任务 22145 接取失败")
+	}
+	if got := qm.AcceptableQuests(k, p, "WorldNpc06008"); containsInt(got, 22145) {
+		t.Fatalf("接取后可接清单应去重: %v", got)
+	}
+	for _, cid := range strings.Split(qm.Quests["22145"]["CriteriaList"], ",") {
+		max := atoi32(qm.Criteria[cid]["MaxCount"])
+		if max <= 0 {
+			max = 1
+		}
+		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
+	}
+	if got := qm.SubmittableQuests(k, p, "WorldNpc06127"); !containsInt(got, 22145) {
+		t.Fatalf("WorldNpc06127 可交清单缺 22145: %v", got)
+	}
+	// 剧情顺序播放：22145 的 interact 与 story 两段同 NPC（WorldNpc06127）
+	// ——首次对话推 interact+story①（2 条），第二次只推 story②（1 条），
+	// 之后 0 条（Order 门控，不一次播完）。
+	p2, _ := k.CreateObject("player")
+	if !qm.AcceptQuest(k, p2, 22145) {
+		t.Fatal("剧情顺序用例接取失败")
+	}
+	qcm := module2[*QuestCriteriaModule](t, k, "QuestCriteriaModule")
+	talk := func() int {
+		before := len(qcm.Ops())
+		k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p2, VarList{"WorldNpc06127"})
+		return len(qcm.Ops()) - before
+	}
+	for i, want := range []int{2, 1, 0} {
+		if got := talk(); got != want {
+			t.Fatalf("第 %d 次对话推进数 %d，期望 %d", i+1, got, want)
+		}
+	}
+}
+
+// containsInt 切片包含（测试面）。
+func containsInt(list []int32, want int32) bool {
+	for _, v := range list {
+		if v == want {
+			return true
+		}
+	}
+	return false
 }
 
 // TestQuestLifecycle 任务闭环：接任务（等级/前置门）→ 引擎推进（杀怪/对话）→
