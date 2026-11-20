@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Object>
-<!-- MaxValueºÃÓÑ¶ÈÉÏÏÞ		MaxValueÔÚÏßÐÐÎª×î´óÖµ		FVOlineMaxÔÚÏßÐÐÎª×î´óÖµ		FVChatMaxÁÄÌìÐÐÎª×î´óÖµ		FVFunMaxÓéÀÖÐÐÎª×î´óÖµ  FVPresentMaxËÍÀñÐÐÎª×î´óÖµ		OnlineTimeÔÚÏßÀÛ¼ÆÊ±¼ä£¨·ÖÖÓ£© ExploreTimeÌ½Ë÷ÐÐÎªÀÛ¼ÆÊ±¼ä	RidingTime×øÆïÀÛ¼ÆÊ±¼ä	KillCount×é¶ÓÉ±¹Ö¸öÊý-->
+<!-- MaxValueå¥½å‹åº¦ä¸Šé™		MaxValueåœ¨çº¿è¡Œä¸ºæœ€å¤§å€¼		FVOlineMaxåœ¨çº¿è¡Œä¸ºæœ€å¤§å€¼		FVChatMaxèŠå¤©è¡Œä¸ºæœ€å¤§å€¼		FVFunMaxå¨±ä¹è¡Œä¸ºæœ€å¤§å€¼  FVPresentMaxé€ç¤¼è¡Œä¸ºæœ€å¤§å€¼		OnlineTimeåœ¨çº¿ç´¯è®¡æ—¶é—´ï¼ˆåˆ†é’Ÿï¼‰ ExploreTimeæŽ¢ç´¢è¡Œä¸ºç´¯è®¡æ—¶é—´	RidingTimeåéª‘ç´¯è®¡æ—¶é—´	KillCountç»„é˜Ÿæ€æ€ªä¸ªæ•°-->
 <Property ID = "FriendValue" MaxValue = "1000" FVOlineMax = "5" FVChatMax = "5" FVTeamMax = "50" FVFunMax = "20" FVPresentMax = "40" OnlineTime = "60" ExploreTime = "10" RidingTime = "10" KillCount = "10" FVPVPMax = "20" FriendshipLevel = "0,30,150,350,650,999" />
 </Object>

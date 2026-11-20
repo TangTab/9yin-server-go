@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='gb2312' ?>
+<?xml version='1.0' encoding='utf-8' ?>
 <object>
 	<properties>
 	<property name="PrayFunc"  type="int" public="false" private="true" save="false" desc="祈福功能" />

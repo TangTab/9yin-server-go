@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Object>
-<!-- 		FVOnlineÐÐÎªÃû		ÐÐÎªµÄÊ±¼ä¼ä¸ô 		ÐÐÎªµÄ´ÎÊý	 ÐÐÎªµÄµãÊý-->
+<!-- 		FVOnlineè¡Œä¸ºå		è¡Œä¸ºçš„æ—¶é—´é—´éš” 		è¡Œä¸ºçš„æ¬¡æ•°	 è¡Œä¸ºçš„ç‚¹æ•°-->
 <Property ID = "FVOnline"	IncreaseTime = "1"	IncreaseCount = "1"	IncreaseValue = "1"		/>
 <Property ID = "FVChat"		IncreaseTime = "1"	IncreaseCount = "1"	IncreaseValue = "1"		/>
 <Property ID = "FVTeamKill"	IncreaseTime = "1"	IncreaseCount = "1"	IncreaseValue = "1"	/>

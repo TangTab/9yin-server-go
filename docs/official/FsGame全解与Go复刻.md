@@ -170,8 +170,15 @@ OnStore 事件（PlayerBaseModule）= 存档钩子；IKernel::SavePlayerData = �
 
 ## 7. Go 复刻（框架层已落码，internal/fsgame，2026-11-20 全绿）
 
-已实现（一期 2648 行 + 二期 3358 行 = 6006 行，16 测试全绿，官方 door_data.xml
-与社交域配置真档校验通过；二期详见 §7.1）：
+已实现（一至九期累计 13260 行、39 测试全绿，官方 door_data.xml 与社交/技能/
+任务/物品/经济/场景/NPC/事件域配置真档校验通过；§7.1-§7.8 分期明细）。
+
+> **testdata 编码规范化**（2026-11-20）：全树 268 个 XML 统一为 UTF-8 字节 +
+> `encoding="utf-8"` 声明（31 个 GBK 内容转码、36 处 gb2312 声明改写、
+> 1 个 BOM 剥离、4 个无声明文件补头；ini/Level/Level.xml 的官方源损坏声明
+> `versionUpgradeExp`/`encodingUpgradeExp` 顺手修正）。解析器
+> （resource.go gbCharsetReader）保持 GB18030 兼容——官方真档 Res 仍为
+> gb2312，两侧通用。
 
 ```
 internal/fsgame/            // 已落码（2648 行 / go test 9 用例全绿）
@@ -208,7 +215,14 @@ QueryInt→RequestPoints、OnEntryGame=ResetConsumeRec。
 
 **后续批次**（每模块套路：Init 注册面→命令/事件→Record/心跳）：
 第二批社交底座（Chat/Friend/Team/Post + Gmcc/Log）已于二期落地（见 §7.1）；
-战斗域整族（Skill/Fight/Buffer/CoolDown/DamageCalculate）独立成批。
+第三批战斗域整族（Skill/Fight/Buffer/CoolDown/DamageCalculate）已于三期落地
+（见 §7.2）；第四批任务域（Quest/QuestCriteria/Achievement）已于四期落地
+（见 §7.3）；第五批物品玩法域核心（Drop/PickUp/ToolBox/Equipment/Strengthen）
+已于五期落地（见 §7.4）；第六批经济域（Shop/Gift/Vip/IncomeReduce/
+AuctionHouse）已于六期落地（见 §7.5）；第七批场景域核心（WarFog/Map/AreaObj/MapMag/
+CloneScene）已于七期落地（见 §7.6）；第八批 NPC 载体域底座（GivingNpc/FunctionNpc/
+SummonNpc/CommonNpc/VisibleNpc/NpcResource）已于八期落地（见 §7.7）；第九批事件系统核心（TriggerProcesser/Task/
+Switch/Reward/EventSpring）已于九期落地（见 §7.8）。
 
 ### 7.1 二期：社交底座六模块（2026-11-20 落地，16 测试全绿）
 
@@ -266,6 +280,311 @@ OnLeaveScene=leave_scene 日志字段族。测试：socialmods_test.go 七用例
 （装配序+配置装载/聊天页+禁言/好友全流程/组队全流程/信件全流程/GMCC 禁言/
 日志生命周期），testdata 新增 ini/Rule/{friendship,friendvalueevent,
 enemyexpend,post}.xml + ini/Team/summon_cost.xml（官方真档）。
+
+### 7.2 三期：战斗域五模块（2026-11-20 落地，20 测试全绿）
+
+`RegisterThirdBatch`（Init 序对齐 §8：DamageCalculate(57) → Fight(63) →
+CoolDown(64) → Buffer(65) → Skill(68)），官方源码树 skillmodule\ 定案。
+
+```
+internal/fsgame/fightmods.go   // 三期新增（技能/战斗/状态/冷却/伤害五模块）
+  CoolDownModule      纯 Lua 面四函数（nx_is_cooldown/nx_begin_cooldown/
+                      nx_clear_all_skill_cooldown/nx_clear_all_cooldown）；
+                      冷却落 cooldown_rec（commonfighter.xml，4 列：
+                      分类ID/开始/结束/大分类——大分类组传递冷却）
+  DamageCalculateModule  SkillDamageCalculate/CalculateFormula 双 API
+                      （官方符号定案；公式本体在 StaticDataQuery 静态数据域，
+                      Go 缝合为线性公式 + RandDmgType 浮动面）+
+                      nx_reload_damage_calculate_data
+  FightModule         四临界（C_OnHPChanged=HPRatio 重算+归零判死 /
+                      C_OnMPChanged / C_OnCantMoveChange / C_OnExpChanged）；
+                      nx_damage 伤害结算（防御面 DefenseLevel/SAllResistProb
+                      ——playerfightpara 防御族定案）+ 十二 Lua 面
+                      （nx_canattacktarget/nx_get_defend/nx_send_fight_*
+                      飘字六出口）；命令 609/613 硬度族 + 616 BeKill
+  BufferModule        Buffer 类生命周期（buffer_new.xml schema：LifeTime/
+                      ConfigID/UniqueID/MaxOverlayNumber/CantClear/
+                      OffLineClear/DeadClear）+ BufferContainer 三事件 +
+                      H_BufferUpdate 泵（Timer 按 beatMS 推进、LifeType 计时
+                      到期移除、0=持久）+ 叠加刷新 + cust 1019/1021 +
+                      十二命令族（600-641 三类同挂）+ 六 Lua 面
+  SkillModule         出招闭环：校验链（invalid msg→CantUseSkill→Dead→冷却
+                      →MP 消耗）→ CurSkill/CurSkillID/CurSkillTarget 写入
+                      （C_OnCurSkillChanged 临界）→ DamageCalculate→
+                      FightModule::NxDamage 结算 → CoolDownModule 开冷却
+                      （CoolDownTime ms）→ 延迟技队列（DelaySkill 属性族 →
+                      H_DelayUse 泵）；学技 856/忘技 870 + cust 211/215/216/
+                      232；五临界 + 十七心跳（H_EFFECT1-8 八通道/QuequeSkill/
+                      CantMove/LockAction/HitOutStateClear/CantRotate/
+                      CantJump/DelayRemoveBuff/DelayFinish/DelayUse）；
+                      LoadResource=sprintf("ini/skill/skill_new_%d.xml",
+                      GetMemberId)（slot +0x60 定案；缺档回退主表
+                      skill_new.xml.xml）+ Skill_Normal_Attack 普攻映射
+                      （job_sex 键）
+```
+
+行为对齐依据（反汇编定案，见文件头注释）：Skill OnCustomUseSkill @0x3861B0
+校验串（"use skill error: recved invalid msg!"/SelfCast/DelaySkill 族）；Fight
+C_OnHPChanged @0x330ED0 属性串（MaxHP/MaxHPAdd/HPRatio/Dead/IMMUNE_EEFFECT）；
+Buffer H_BufferUpdate @0x34F410 列面（Timer/EffectType/EffectTimer/LifeTimeType/
+LifeTime/Counter/AddTime）；CoolDown nx_begin_cooldown 五参校验串
+（object/int/int64/int/int64 ↔ cooldown_rec 四列+组）；DamageCalculate
+SkillDamageCalculate（TargetSkill/RandDmgType 面，m_pStaticDataQueryModule 协作）。
+测试：fightmods_test.go 四用例（战斗闭环：学技→出招扣MP/配置伤害/开冷却→
+冷却拒→清冷却再出→打死判死→死者免伤→忘技；Buffer 生命周期：挂载→叠加刷新→
+泵到期→CantClear→OffLineClear；伤害面：防御减伤+飘字出口+公式缝合+禁攻；
+三期装配序+技能表/普攻映射真档+17 心跳登记），testdata 新增
+ini/Skill/{skill_new.xml.xml, Skill_Normal_Attack.xml, Buff_Config.xml,
+Buff_Modify.xml}（官方真档）。
+
+### 7.3 四期：任务域三模块（2026-11-20 落地，24 测试全绿）
+
+`RegisterFourthBatch`（Init 序对齐 §8：Quest(79) → QuestCriteria(80) →
+Achievement(81)），官方源码树 questmodule\ 定案。**配套总线修正**：官方
+`AddIntCommandHook` 为多播——0x268 击杀通知被 Friend/Fight/Buffer/
+QuestCriteria/Achievement 五模块同 (类,命令号) 注册（cmd_map.json 交叉证据），
+命令通道改为按注册序全量调用（custom 通道仍单播后注册覆盖）。
+
+```
+internal/fsgame/questmods.go  // 四期新增（任务/条件引擎/成就三模块）
+  QuestModule         任务状态机：接任务闭环（MinLevel 门/preQuestList 前置
+                      位集门/承接表容量 25/去重）→ QuestRecord(4) 承接行 +
+                      QuestCriteriaRecord(6) 按 CriteriaList 初始化（总进度=
+                      MaxCount）→ 提交（状态=可提交门 → AwardID 奖励出口 →
+                      QuestRewarded dword 位集置位 → postQuestList 后继解锁）→
+                      放弃（GiveUp=1 配置门）/追踪/共享（cust 880 十子命令：
+                      1 接/2 交/3 共享/4 弃/5 追踪/8 自动交/9-10 共享回应）；
+                      RecHook 双记录联动 + C_OnLevelChanged/C_OnForceChanged +
+                      四心跳（TimeLimit 到期失败/CheckTime/RepeatQuest/
+                      RefreshQuestEffect）；OnRecover→Quest_Fail_OnLoad_Rec
+                      下线失败任务清理
+  QuestCriteriaModule 条件引擎：游戏事件 → 子模板类型路由（杀怪 1=NPC 616 面/
+                      对话 4=CommonNpc OnSelect+InterNpc 键/收集 5=ToolBox
+                      AfterAdd·Remove 增减/到达 18=OnMapChanged+LinkArea 键）→
+                      QuestModule::UpdateCriteria；cmd 926 失败/928 查询/934
+                      通用推进；HB_Convoy 护送泵
+  AchievementModule   成就闭环：RegisterAchievement（CriteriaList 展开 →
+                      AchievementCriteriaProgress(6)）→ cmd 716 推进 → 全
+                      子模板 flag=1 → 解锁（AchievementCompleted(3) 追加 +
+                      AchievePoint += Points + 完成时间戳）→ 追踪（cust 340）/
+                      领奖（领取标识置位）；七临界（Prop/Level/LifeJobLevel/
+                      LifeJobExp/EveRecActive/FightPower/GuildPosition →
+                      对应类型子模板）；四 Lua 面（reload/reset/clear_sole/
+                      complete——参数校验串 object/int 定案）
+```
+
+配置真档（官方经 StaticDataQuery 装载；Go 面 LoadResource 直读）：
+ini/Quest/Quest.xml（任务表 997KB：MinLevel/preQuestList/postQuestList/
+CriteriaList/GiveUp/Share/AwardID…）+ QuestCriteria.xml（子模板 2685 行：
+CriteriaType 值域 1/3-9/11/13/16/18-20）+ Award.xml（奖励 1904 行：Exp/Money/
+DefaultItemList）；ini/Achievement/Achievement.xml（61 成就：CriteriaList/
+Points）+ AchievementCriteria.xml（106 子模板）。记录 schema（struct/quest/
+quest.xml + struct/player/Achievement.xml）经 player includes 自动装载。
+测试：questmods_test.go 四用例（四期装配序+五配置真档；任务闭环：接取
+等级/前置/去重门→934 推进→对话+杀怪双模板→全完成转可提交→提交奖励出口+
+位集+后继解锁→放弃；条件引擎：NPC 对话 InterNpc 键匹配/不匹配拒进/616 杀怪
+面；成就闭环：登记→推进→解锁点数→重复解锁拒→追踪/领奖→Lua 四面）。
+
+### 7.4 五期：物品玩法域五模块（2026-11-20 落地，27 测试全绿）
+
+`RegisterFifthBatch`（Init 序对齐 §8：Equipment(85) → Strengthen(91) →
+ToolBox(147) → PickUp(208) → Drop(214)），官方源码树 commonmodule\ +
+playerbasemodule\ + itembasemodule\ 定案。
+
+```
+internal/fsgame/lootmods.go   // 五期新增（掉落/拾取/背包/穿戴/强化五模块）
+  DropModule         掉落引擎：六表链（ini/Drop/）——Drop_Item（物品组键
+                     ItemTeamID→"ItemID,数量"）→ Drop_Team（一级组键
+                     FstTeamID→"ItemTeamID,数量,权重,?;…" 权重掷取）→
+                     World/Spec_Simple（PackageID→行集，同包多行独立概率门）/
+                     Complex（PackageID→FstTeam 引用）；RollDrop 主入口 +
+                     cust 0x44 掉落表查询 + 七 Lua 面（nx_get_world/
+                     special_DropIDdropn 族）
+  PickUpModule       拾取与分配：NPC OnDestroy → NpcDropBox 物化（QuestDropRecord
+                     掉落包记录）→ CanPick 归属门（AttackNpc 侧 open_player_rec，
+                     空表通配开放）→ cust 0x17C 拾取（首条出箱→PickOut 入包→
+                     箱空 OnRemove+销毁）/ 0x17E 队长分配 / 0x183 掷骰 /
+                     H_Dice_Wait·H_Turn_Protect 双心跳（骰等/轮流保护）
+  ToolBoxModule      背包镜像：OnRecover 建包 → AddItem 堆叠/RemoveItem 消耗 →
+                     cust 0x1F 用道具 / 0x1D 对物使用 / 0x392 扩展槽 /
+                     0x395 链接授权 + intCmd 319/320 扣券回执
+  EquipmentModule    穿戴：EquipType 栏位表（同栏换装先卸）+ Weapon 临界联动
+                     （真档 dump schema 无 Weapon object 属性——写失败容忍，
+                     官方运行期有）+ Energy 属性链（OnAfterAdd 串定案：Energy/
+                     EnergyValue/EnergyExpLv/EnergyLevel/LockActionSet/
+                     FashionState）+ 四临界（Hardiness/Weapon/WeaponState/
+                     EquipEnergyCount）+ H_BeginDepletion_Energy 能量衰减泵 +
+                     cust 0x3B 显形 / 0xE9 技能快捷 / 0x3D 能量升级
+  Strengthen         强化台：CommonNpc OnSelect 登台 → cust 0x53 选装备
+                     （LockStatus 锁拒 sys_depot_0016 / enhance_limit
+                     StartLevel=15 等级门 sys_item_0070）→ 0x54 执行
+                     （CurrentTicket/CurrentBlackgold 消耗记账 → StarLevel+1 →
+                     C_OnStarLevelChanged 属性重算）→ 0x55 放材料 / 0x52 关台 +
+                     DoContinueEnhance 连续强化泵 + nx_strengthen Lua
+```
+
+真档配置：ini/Drop 六表（Drop_Item 4060 组 / Drop_Team 1464 /
+World_Drop_Simple 586 行 / World_Drop_Complex 1443 / Spec_Drop_Simple 2219 /
+Spec_Drop_Complex 1）——表主键为组/包键（ItemTeamID/FstTeamID/PackageID 列），
+非行自增 ID；ini/ItemEnhance/enhance_limit.xml（StartLevel=15）。
+记录：NpcDropBox.QuestDropRecord（掉落包）/ AttackNpc.open_player_rec·
+pickup_member_rec（归属面）。测试：lootmods_test.go 三用例（五期装配序+
+六表/强化限制真档抽查；掉落→拾取→入包→用道具闭环：直落概率门（固定 0.05
+源）/组落三级链（W_LZ_001→T_LZ_001→LZ_001）/归属通配面/箱空销毁；穿戴→
+强化闭环：栏位表/换装/卸下/Weapon 联动/等级门/锁定拒/nx_strengthen/关台清面）。
+
+### 7.5 六期：经济域五模块（2026-11-20 落地，31 测试全绿）
+
+`RegisterSixthBatch`（Init 序对齐 §8：AuctionHouse(71) → Shop(73) →
+IncomeReduce(118) → Vip(123) → Gift(130)），官方源码树 trademodule\ 定案。
+
+```
+internal/fsgame/economymods.go  // 六期新增（商店/VIP/礼包/拍卖/收益递减）
+  ShopModule         商店：Shop.xml（76 店：SellID 逗号商品表/RefreshItemTime
+                     "12,30" 时刻表）+ ShopItem.xml（2755 品：BuyPrice -1
+                     非卖/Maxamount 限购/CurrencyType 币种）；Buy 闭环
+                     （在售门→非卖拒→限购截断→CostOut 货币扣减→BuyOut 到货）
+                     + cust 0x46 购物多路 + ShopBox/ReclaimBox 双容器 +
+                     BaseShop 三心跳（ArriveRefreshTime/RefreshItem/
+                     ShopItemCoolDown）+ H_ClearReclaim 回购栏
+  VipModule          VIP：IsVip/VipGiftTime 属性（player schema）——cust 0x41
+                     领礼包（IsVip 门 + 每日一次 VipGiftTime 天序号）/
+                     0x40 面板 / intCmd 0x141 购券回执 + HB_VipValidTime
+  GiftModule         充值/活动礼包：scene OnQueryGift/OnGetGift（日志五元组
+                     "ongetgift:result,giftid,gift,count,sendmail" 定案）——
+                     sendmail=1 → GiftWaitPostGetRec 邮件待收表 /
+                     0 → 直发出口 + HB_QueryGift 轮询
+  AuctionHouseModule 拍卖会员桥（撮合本体在 FsAuctionLogic 服）：cust 0xC5
+                     多路（consign 寄卖→rec_consign_args(4×300)/bid 竞价→
+                     rec_my_bid(2×200)）+ AuctionOut 上行（SendAuctionMessage）
+                     + ItemType.xml 80 分类树（Father 键）+ 两 Lua 面；
+                     auction.xml 记录族经 LoadResource 并入 player 类
+                     （官方 OnCreateClass 动态挂载面——不在 player includes）
+  IncomeReduceModule 收益递减：ReduceCountRec(3×1 事件/战场/竞技场计数)
+                     ——CountIncome 计数 + ApplyIncome 比例（3/6/9 档
+                     100%/50%/25%/0，Go 缝合系数）+ HB_ReduceReset 周期重置
+                     （sys_eventment_0002/0003 通知）
+```
+
+真档配置：ini/trade/Shop/{Shop.xml(76), ShopItem.xml(2755)} +
+ini/trade/AuctionHouse/ItemType.xml(80 分类)。测试：economymods_test.go
+四用例（六期装配序+真档抽查含 BuyPrice=-1 非卖；商店闭环：在售/限购/非卖/
+店外/货币不足五门 + cust 0x46 路由；VIP+礼包：每日一次/邮件待收分叉；
+拍卖桥：寄卖/竞价记录+上行+清面 + 收益递减 3/6/9 档与 HB 重置）。
+
+### 7.6 七期：场景域五模块（2026-11-20 落地，34 测试全绿）
+
+`RegisterSeventhBatch`（Init 序对齐 §8：WarFog(12) → Map(111) → AreaObj(112)
+→ MapMag(113) → CloneScene(115)），官方源码树 scenebasemodule\ +
+stagemodule\ 定案。
+
+```
+internal/fsgame/scenemods.go   // 七期新增（副本/地图管理/探索/区域/战雾）
+  CloneSceneModule   副本：CloneScene 类 schema（struct/scene/clone_scene.xml：
+                     CloneDifficulty/CloneProgress/CloneUniqueID/CloneOwnerType/
+                     CloneOwnerID/BossBeKilledCount/PassStageTime/
+                     PlayerDeadCount/PScore1 评分族）；CreateClone 属性链 →
+                     SetProgress（C_OnProgressChanged）→ 616 Boss 击杀/死亡
+                     计数（多播）→ PassClone 通关评分（CloneSceneGrade.xml
+                     真档：Target/NormalPassTime + DeadCount×DeadDecrease →
+                     S/A/B/C）→ CloseClone；六心跳（CloseClone 倒计时/
+                     CloneCount/LeaveTeamExit/CloneLimiteTime/CloneDoor/
+                     AnotherLeaveTeam）+ 七临界 + 十一 Lua 面 + 队伍命令多播
+                     协同（110/114/112）
+  MapMagModule       地图管理与传送：Trans 校验链（Dead 拒 sys_map_0007 →
+                     LogicState 拒 sys_map_0009 → transport.xml 真档查找 →
+                     场景登记 + OnMapChanged）+ cust 0x2DC/0x2DD/0x24F +
+                     intCmd 0x13C/0x13D 扣券回执 + HB_RefreshResource
+  MapModule          探索标记：OnEntry/OnMapChanged 自动探索 + nx_set/
+                     clear_explored 两 Lua 面
+  AreaObjModule      区域联动：player/VisibleNpc 双类 × OnMapChanged/OnEntry/
+                     OnLeave 六事件挂载（区域触发器协作面）
+  WarFog             战雾：EnableWarFog 开关（LoadResource 配置面）+
+                     player/VisibleNpc OnEntry 揭示
+```
+
+真档配置：ini/Scene/CloneSceneGrade.xml（44 评分行："<scene>_<difficulty>"
+键）+ ini/Map/transport.xml（56 传送点：NpcID/NeedCamp/Scene）。玩家当前
+场景为模块侧记账（dump schema 无 SceneID 属性——官方为引擎侧场景成员关系）。
+测试：scenemods_test.go 三用例（七期装配序+评分/传送真档抽查；副本闭环：
+建副属性链→进度→Boss/死亡 616 计数→真档评分 S/B 分档→关闭销毁；传送+
+探索+区域+战雾：死亡拒/OnMapChanged 自动探索/AreaObj 联动/战雾开关/两
+Lua 面/cust 路由）。
+
+### 7.7 八期：NPC 载体域底座六模块（2026-11-20 落地，37 测试全绿）
+
+`RegisterEighthBatch`（Init 序对齐 §8：GivingNpc(163) → FunctionNpc(166) →
+SummonNpc(167) → CommonNpc(169) → VisibleNpc(171) → NpcResource(225)），
+官方源码树 npcbasemodule\ 定案。
+
+```
+internal/fsgame/npcmods.go     // 八期新增（NPC 资源/视野/交互/献祭/召唤/功能）
+  NpcResourceModule  资源预载与物化：ini/Npc 树（NpcConfig 39 档 + NpcConfigAuto
+                     396 member 分档，71MB——测试面取 CommonNpc 子集）；
+                     Spawn = CreateFromConfig 面（ConfigID 写入）
+  VisibleNpcModule   视野面：VisibleNpc OnLoad/OnEntry/OnLeave + player
+                     OnEntry/OnLeave（AOI 挂载）+ 命令 614 可击杀查询 +
+                     cust 990 巡逻移动 + Action/CollideType 双临界 +
+                     nx_query_preload_npc
+  CommonNpcModule    交互枢纽：CommonNpc OnSelect 多播分发（Quest/Shop/
+                     Post/Team/Strengthen 各域监听同事件——本仓库多批模块
+                     的协作锚点）+ intCmd 22 对话菜单
+  GivingNpcModule    献祭/采集目标物：OnSpring（SpringRange/SpringType/
+                     BombEntryPos 校验族）→ 采集三段（600 开始/602 中断/
+                     603 完成——HP 归零触发 C_OnHPRatioChanged）→ 852 拾取
+                     （未完成态拒）→ HB_ReBorn 重生泵（Invisible/
+                     RefreshTime 面）
+  SummonNpcModule    事件召唤：EventSummon.xml 真档（21 事件：r="npc,
+                     count,x,z" 多段——引号方言正则容忍解析）→ NpcResource
+                     物化 ×count
+  FunctionNpcModule  功能 NPC：OnLoad/OnEntry/OnSelect/OnEndSpring 四事件
+                     （商店/传送/修理功能绑定面）
+```
+
+真档：ini/Quest/Convoy/EventSummon.xml + ini/Npc 树子集（CommonNpc 6 档 +
+member0_clonedoor_npc）。类 schema：struct/npc/{CommonNpc,VisibleNpc}.xml
+（ConfigID 属性经类继承链 VisibleNpc→CommonNpc 合并）。测试：
+npcmods_test.go 三用例（八期装配序+召唤/资源真档；NPC 闭环：登记→真档
+召唤物化→CommonNpc 交互多播→视野挂载；献祭闭环：弹出→采集三段→完成
+HP 归零→拾取拒/收→HB 重生→中断）。
+
+### 7.8 九期：事件系统核心五模块（2026-11-20 落地，39 测试全绿）
+
+`RegisterNinthBatch`（Init 序对齐 §8：TriggerProcesser(102) → Task(104) →
+Switch(105) → Reward(106) → EventSpring(109)），官方源码树
+eventspringmodule\ 定案。
+
+**事件弹簧（EventSpring）= 世界事件引擎**，七配置表链全解码：
+event_spring.xml（216 事件：ConditionId/BehaviorId 多值/NoticeId 多值/
+TaskId/Duration/坐标）→ condition_info（241 条件：ClassId+Param_N 参数包）/
+behavior_info（1505 行为：Param_2_4 召怪/Param_2_5 坐标）/reward_info
+（221：GoalAwards/CriteriaAwards）/switch_info（212 开关：SwitchType/
+SteamPos/MinLevel-MaxLevel 门）/task_info（222：SteamCriteriaId/
+SteamGoalCriteriaId）/notice_info（389 公告：NoticeChannel/TextId）。
+玩家记录（struct/player/event_spring.xml，经 includes 装载）：
+PlayerESRec(4×1024)/PlayerESCriteriaRec(6×1024)/PlayerESRewardRec(8×1024)。
+
+```
+internal/fsgame/eventmods.go   // 九期新增（事件引擎/处理器/三执行器）
+  EventSpringModule      引擎：StartES（定义门→running 登记→公告下发
+                         NoticeId 多值）→ JoinES（PlayerESRec）→
+                         HB_EndES（Duration 倒计→结束）→ 616 NPC 被杀→
+                         task_info 协作 QuestModule::UpdateCriteria；
+                         scene 命令 751/756/757/759/761/762 + player 763/
+                         616 + cust 661 + 三心跳 + 十五 Lua 面
+  TriggerProcesserModule 触发处理器（EventSpringProcesser 配置族 +
+                         命令 753/754 + HB_WaitProcess）
+  TaskExecutor           事件任务执行器：命令 927/936 → task_info
+                         SteamCriteriaId → QuestModule 进度（跨模块协作）
+  SwitchExecutor         弹簧开关：cust 758 → switch_info 等级门 →
+                         EventSpring::JoinES
+  RewardExecutor         奖励执行器：reward_info 行 → Awards 逗号段展开
+                         → RewardOut
+```
+
+测试：eventmods_test.go 两用例（九期装配序+七表真档抽查含事件 1 完整
+定义；全闭环：启动三公告→重复拒→开关等级门（30 过/0 拒）→参与记录→
+任务推进 QuestModule 进度→奖励发放→900 拍到期结束→nx_end_es 幂等）。
 
 ## 8. 玩法模块索引表（241 个，位置齐全）
 

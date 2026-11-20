@@ -38,8 +38,8 @@ type Bus struct {
 	classEvents map[string][]ClassCallbackFn // (class|event) → 类级回调
 	events      map[string][]EventFn         // (class|event) → 事件回调
 	commands    map[int32]CmdFn              // 命令号 → 处理器（player 类主载）
-	customCmds  map[string]map[int32]CmdFn   // 类 → 命令号 → AddIntCustomHook 处理器
-	intCmds     map[string]map[int32]CmdFn   // 类 → 命令号 → AddIntCommandHook 处理器
+	customCmds  map[string]map[int32]CmdFn   // 类 → 命令号 → AddIntCustomHook 处理器（单播）
+	intCmds     map[string]map[int32][]CmdFn // 类 → 命令号 → AddIntCommandHook 处理器（多播：0x268 击杀广播被 Friend/Fight/Buffer/QuestCriteria/Achievement 五模块同注册定案）
 	strCmds     map[string]CmdFn             // (class|name) → 处理器（字符串命令）
 	heartbeats  []namedBeat
 	criticals   map[string][]CriticalFn // (class|prop) → 回调
@@ -60,7 +60,7 @@ func NewBus() *Bus {
 		events:      make(map[string][]EventFn),
 		commands:    make(map[int32]CmdFn),
 		customCmds:  make(map[string]map[int32]CmdFn),
-		intCmds:     make(map[string]map[int32]CmdFn),
+		intCmds:     make(map[string]map[int32][]CmdFn),
 		strCmds:     make(map[string]CmdFn),
 		criticals:   make(map[string][]CriticalFn),
 		recHooks:    make(map[string][]RecHookFn),
@@ -87,12 +87,13 @@ func (b *Bus) OnCommand(class string, cmd int32, fn CmdFn) {
 }
 
 // OnIntCommand 命令通道注册（AddIntCommandHook(class, cmd, fn)；与
-// OnCommand 分表，同号不冲突）。
+// OnCommand 分表且多播——官方 0x268 击杀通知由五个模块同注册，
+// 分发按注册序全量调用）。
 func (b *Bus) OnIntCommand(class string, cmd int32, fn CmdFn) {
 	if _, ok := b.intCmds[class]; !ok {
-		b.intCmds[class] = make(map[int32]CmdFn)
+		b.intCmds[class] = make(map[int32][]CmdFn)
 	}
-	b.intCmds[class][cmd] = fn
+	b.intCmds[class][cmd] = append(b.intCmds[class][cmd], fn)
 }
 
 // OnStringCommand 字符串命令注册（AddCommandHook/AddCustomHook(class, name, fn)；
@@ -164,27 +165,40 @@ func (b *Bus) FireEvent(k *Kernel, class, event string, self, from PersistID, ar
 	return n
 }
 
-// DispatchCommand 整型命令路由（类继承链上溯；custom 通道优先，未命中回落
-// 命令通道——Go 面兼容桥；返回是否命中）。
+// DispatchCommand 整型命令路由（custom 通道优先——单播，未命中回落
+// 命令通道——多播；类继承链上溯；返回是否命中）。
 func (b *Bus) DispatchCommand(k *Kernel, class string, cmd int32, self, from PersistID, args VarList) bool {
-	if b.dispatchIn(k, b.customCmds, class, cmd, self, from, args) {
+	if b.walkCustom(k, class, cmd, self, from, args) {
 		return true
 	}
-	return b.dispatchIn(k, b.intCmds, class, cmd, self, from, args)
+	return b.DispatchIntCommand(k, class, cmd, self, from, args)
 }
 
-// DispatchIntCommand 命令通道路由（命令通道优先，未命中回落 custom 通道）。
+// DispatchIntCommand 命令通道路由（多播全量，注册序调用——官方 0x268
+// 击杀广播五模块同收语义；未命中回落 custom 通道）。
 func (b *Bus) DispatchIntCommand(k *Kernel, class string, cmd int32, self, from PersistID, args VarList) bool {
-	if b.dispatchIn(k, b.intCmds, class, cmd, self, from, args) {
-		return true
+	for c := class; c != ""; {
+		if m := b.intCmds[c]; m != nil {
+			if fns, ok := m[cmd]; ok {
+				for _, fn := range fns {
+					fn(k, self, from, args)
+				}
+				return true
+			}
+		}
+		cd := k.Class(c)
+		if cd == nil {
+			break
+		}
+		c = cd.Parent
 	}
-	return b.dispatchIn(k, b.customCmds, class, cmd, self, from, args)
+	return b.walkCustom(k, class, cmd, self, from, args)
 }
 
-// dispatchIn 单表路由（类继承链上溯）。
-func (b *Bus) dispatchIn(k *Kernel, table map[string]map[int32]CmdFn, class string, cmd int32, self, from PersistID, args VarList) bool {
+// walkCustom custom 通道遍历（单播，后注册覆盖）。
+func (b *Bus) walkCustom(k *Kernel, class string, cmd int32, self, from PersistID, args VarList) bool {
 	for c := class; c != ""; {
-		if m := table[c]; m != nil {
+		if m := b.customCmds[c]; m != nil {
 			if fn, ok := m[cmd]; ok {
 				fn(k, self, from, args)
 				return true
@@ -248,6 +262,7 @@ func (b *Bus) String() string {
 	for _, m := range b.intCmds {
 		n += len(m)
 	}
+	_ = n
 	return fmt.Sprintf("Bus{events=%d cmds=%d heartbeats=%d criticals=%d rechoks=%d}",
 		len(b.events), len(b.commands)+n, len(b.heartbeats), len(b.criticals), len(b.recHooks))
 }

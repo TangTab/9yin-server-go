@@ -135,3 +135,144 @@ func RegisterSecondBatch(r *Registry) error {
 	}
 	return nil
 }
+
+// RegisterThirdBatch 登记第三批（战斗域整族）：DamageCalculate/Fight/
+// CoolDown/Buffer/Skill 五模块（§10 建议批次）。
+// 顺序对齐官方 Init 序（玩法表 §8）：DamageCalculate(57) → Fight(63) →
+// CoolDown(64) → Buffer(65) → Skill(68)。
+func RegisterThirdBatch(r *Registry) error {
+	seq := []Creator{
+		{"DamageCalculateModule", func() Module { return &DamageCalculateModule{} }},
+		{"FightModule", func() Module { return &FightModule{} }},
+		{"CoolDownModule", func() Module { return &CoolDownModule{} }},
+		{"BufferModule", func() Module { return &BufferModule{} }},
+		{"SkillModule", func() Module { return &SkillModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RegisterFourthBatch 登记第四批（任务域）：QuestCriteria/Quest/Achievement
+// 三模块（引擎先行——QuestCriteria 依赖 QuestModule 协作，官方同域相邻装载）。
+// 顺序对齐官方 Init 序（玩法表 §8）：Quest(79) → QuestCriteria(80) →
+// Achievement(81)。
+func RegisterFourthBatch(r *Registry) error {
+	seq := []Creator{
+		{"QuestModule", func() Module { return &QuestModule{} }},
+		{"QuestCriteriaModule", func() Module { return &QuestCriteriaModule{} }},
+		{"AchievementModule", func() Module { return &AchievementModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RegisterFifthBatch 登记第五批（物品玩法域核心）：Equipment/Strengthen/
+// ToolBox/PickUp/Drop 五模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：Equipment(85) → Strengthen(91) →
+// ToolBox(147) → PickUp(208) → Drop(214)。
+func RegisterFifthBatch(r *Registry) error {
+	seq := []Creator{
+		{"EquipmentModule", func() Module { return &EquipmentModule{} }},
+		{"Strengthen", func() Module { return &Strengthen{} }},
+		{"ToolBoxModule", func() Module { return &ToolBoxModule{} }},
+		{"PickUpModule", func() Module { return &PickUpModule{} }},
+		{"DropModule", func() Module { return &DropModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RegisterSixthBatch 登记第六批（经济域）：Shop/Gift/Vip/IncomeReduce/
+// AuctionHouse 五模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：AuctionHouse(71) → Shop(73) →
+// IncomeReduce(118) → Vip(123) → Gift(130)。
+func RegisterSixthBatch(r *Registry) error {
+	seq := []Creator{
+		{"AuctionHouseModule", func() Module { return &AuctionHouseModule{} }},
+		{"ShopModule", func() Module { return &ShopModule{} }},
+		{"IncomeReduceModule", func() Module { return &IncomeReduceModule{} }},
+		{"VipModule", func() Module { return &VipModule{} }},
+		{"GiftModule", func() Module { return &GiftModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RegisterSeventhBatch 登记第七批（场景域核心）：WarFog/MapMag/AreaObj/
+// Map/CloneScene 五模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：WarFog(12) → Map(111) → AreaObj(112)
+// → MapMag(113) → CloneScene(115)。
+func RegisterSeventhBatch(r *Registry) error {
+	seq := []Creator{
+		{"WarFog", func() Module { return &WarFog{} }},
+		{"MapModule", func() Module { return &MapModule{} }},
+		{"AreaObjModule", func() Module { return &AreaObjModule{} }},
+		{"MapMagModule", func() Module { return &MapMagModule{} }},
+		{"CloneSceneModule", func() Module { return &CloneSceneModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RegisterEighthBatch 登记第八批（NPC 载体域底座）：GivingNpc/FunctionNpc/
+// SummonNpc/CommonNpc/VisibleNpc/NpcResource 六模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：GivingNpc(163) → FunctionNpc(166) →
+// SummonNpc(167) → CommonNpc(169) → VisibleNpc(171) → NpcResource(225)。
+func RegisterEighthBatch(r *Registry) error {
+	seq := []Creator{
+		{"GivingNpcModule", func() Module { return &GivingNpcModule{} }},
+		{"FunctionNpcModule", func() Module { return &FunctionNpcModule{} }},
+		{"SummonNpcModule", func() Module { return &SummonNpcModule{} }},
+		{"CommonNpcModule", func() Module { return &CommonNpcModule{} }},
+		{"VisibleNpcModule", func() Module { return &VisibleNpcModule{} }},
+		{"NpcResourceModule", func() Module { return &NpcResourceModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// RegisterNinthBatch 登记第九批（事件系统核心）：EventSpring/
+// TriggerProcesser/Reward/Switch/Task 五模块。
+// 顺序对齐官方 Init 序（玩法表 §8）：EventSpring(109) → TaskExecutor(104)
+// → SwitchExecutor(105) → RewardExecutor(106) → TriggerProcesser(102)
+// ——按号序：TriggerProcesser(102) → TaskExecutor(104) → SwitchExecutor(105)
+// → RewardExecutor(106) → EventSpring(109)。
+func RegisterNinthBatch(r *Registry) error {
+	seq := []Creator{
+		{"TriggerProcesserModule", func() Module { return &TriggerProcesserModule{} }},
+		{"TaskExecutor", func() Module { return &TaskExecutor{} }},
+		{"SwitchExecutor", func() Module { return &SwitchExecutor{} }},
+		{"RewardExecutor", func() Module { return &RewardExecutor{} }},
+		{"EventSpringModule", func() Module { return &EventSpringModule{} }},
+	}
+	for _, c := range seq {
+		if err := r.Register(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}

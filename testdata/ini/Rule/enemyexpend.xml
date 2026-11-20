@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="gb2312"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Object>
-<!-- USEcash = ÌîÊý×ÖÊ±Îª¿Û³ý·ÑÓÃ¡°ÓÎÏ·±Ò¡±£¬²»ÌîÎª²»ÏûºÄ USEblood = ÌîÊý×ÖÊ±Îª¿Û³ý·ÑÓÃ¡°ºÚ½ð¡±£¬²»ÌîÎª²»ÏûºÄ USEtroops = ÎïÆ·ID,N; ÎïÆ·ID,N-->
+<!-- USEcash = å¡«æ•°å­—æ—¶ä¸ºæ‰£é™¤è´¹ç”¨â€œæ¸¸æˆå¸â€ï¼Œä¸å¡«ä¸ºä¸æ¶ˆè€— USEblood = å¡«æ•°å­—æ—¶ä¸ºæ‰£é™¤è´¹ç”¨â€œé»‘é‡‘â€ï¼Œä¸å¡«ä¸ºä¸æ¶ˆè€— USEtroops = ç‰©å“ID,N; ç‰©å“ID,N-->
 <Property ID = "EnemyFind" USEcash = "0" USEblood = "25" USEtroops = "" />
 </Object>
