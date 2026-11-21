@@ -485,7 +485,7 @@ func TestEntryMessageFlow(t *testing.T) {
 	acc := make([]byte, 8)
 	binary.LittleEndian.PutUint32(acc[0:], 7)
 	binary.LittleEndian.PutUint32(acc[4:], 1)
-	if !s.ProcessEntryMsg(0, 0, acc) {
+	if !s.ProcessEntryMsg(0, 1, acc) {
 		t.Fatal("accept")
 	}
 	if s.Players().Count() != 1 {
@@ -564,8 +564,8 @@ func TestEntryMessageFlow(t *testing.T) {
 	if p.State != PlLogged {
 		t.Fatalf("logged %s", p.State)
 	}
-	// Closed：ClientClosed 清场
-	if !s.ProcessEntryMsg(0, 1, acc) {
+	// Closed（type 2 连接关闭回报）：ClientClosed 清场
+	if !s.ProcessEntryMsg(0, 2, acc) {
 		t.Fatal("closed")
 	}
 	if s.Players().Count() != 0 {
@@ -778,7 +778,7 @@ func TestCreateRoleEndToEnd(t *testing.T) {
 	h := make([]byte, 8)
 	binary.LittleEndian.PutUint32(h[0:], 7)
 	binary.LittleEndian.PutUint32(h[4:], 1)
-	if !s.ProcessEntryMsg(0, 0, h) {
+	if !s.ProcessEntryMsg(0, 1, h) {
 		t.Fatal("accept")
 	}
 	op := buildTestOp02("acct", "pw")

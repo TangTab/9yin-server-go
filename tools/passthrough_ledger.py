@@ -13,66 +13,71 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'docs', 'official', '透传数据清单.md')
 
 # ---- 帧处置分类 ----
-# 值: (处置, 说明)。处置 ∈ {原生移植, 新写, 保留透传, 待查明, 已原生}
+# 值: (状态, 说明)。状态 ∈ {已接线, 生成器就绪, 未移植, 已原生, 保留透传, 待查明, 暂缓}
+#   已接线   = entergen 编排内实际下发（注明函数/位置）
+#   生成器就绪 = entergen 有编码器但未编排进序列
+#   未移植   = b-line 有生成器，尚未搬到 entergen
+#   已原生   = entergen 之外已原生实现（如 msg.go 心跳）
 OP_DISPOSITION = {
-    0x0B: ('原生移植', 'sendEntryScene（b-line scene_transition.go）——idx178/1468/1447/1448 按存档场景动态，seq 每次进场自增（登陆-all 实证非常量）'),
-    0x0D: ('原生移植', 'sendPlayerSpawn/addObject 0x0D 大属性档（b-line player_actor.go）'),
-    0x10: ('原生移植', '属性帧 sceneObjectProperties + 物理流 sendPlayerPhysicsLoginStream（36 帧常量表）'),
-    0x11: ('原生移植', 'serverRecordAddCells 行编码权威（b-line qinggong_records.go:373，recId≤446）'),
-    0x12: ('原生移植', 'serverRecordDelRow'),
-    0x13: ('原生移植', 'serverRecordGridCell 逐格写'),
-    0x14: ('新写', '记录挂载帧 12B：[14][sub][obj u32@2][own u32@6][rec u16@10]——b-line 无此生成器'),
-    0x15: ('原生移植', 'serverCreateView（messages.go:391）'),
-    0x16: ('原生移植', 'serverDeleteView'),
-    0x17: ('原生移植', '视图属性帧（CJ 引擎 GetViewPropertyMsg 同源；b-line ResendViewports 形态）'),
-    0x18: ('原生移植', 'serverViewAdd + View40/43/44/45/46 视图族生成器（skill_view/player_progress/jingmai/qinggong/inventory）'),
-    0x1F: ('原生移植', '位置帧 [1F][obj][own][XYZ/Orient f32×4]'),
+    0x0B: ('已接线', 'entergen.EntrySceneFrame → PreReadyFrames 首帧（idx178/1468/1447/1448，seq 每次进场自增）'),
+    0x0D: ('未移植', '玩家/NPC 建对象大档（b-line sendPlayerSpawn/addObject）——当前由 0x28 化身 + 0x10 物理流承担；NPC 物化期再移植'),
+    0x10: ('已接线', 'entergen.PhysicsLoginStreamFrames(×36) + basePropertyFrames + combatAttributeFrames（PreReady/Ready 内）'),
+    0x11: ('已接线', 'entergen.RecordAddCellsFrame——挂载计划行推交织（mount.go rowGenerators）+ QingGongRec 逐行'),
+    0x12: ('未移植', 'serverRecordDelRow（b-line shortcut_records.go:57）——顺序敏感表整表重写配套'),
+    0x13: ('未移植', 'serverRecordGridCell 逐格写（b-line official_frames.go:133）——CD/fight_relation 方言'),
+    0x14: ('已接线', 'MountPlan×48（mountplan.go，golden 提取）+ MountSequenceFrames（mount.go）——sub=2 全局 4 + 玩家域 44，行推交织'),
+    0x15: ('已接线', 'entergen.CreateViewFrame——空容器族 26 + View40/43/46 建视图（ReadyFrames）'),
+    0x16: ('未移植', 'serverDeleteView——删视图（登出/关窗期）'),
+    0x17: ('生成器就绪', 'entergen.ViewPropertyFrame 已有编码器未编排（golden ×21；视图属性帧，CJ 引擎 GetViewPropertyMsg 同源）'),
+    0x18: ('已接线', 'entergen.ViewAddFrame——View40(27 行)/43(6 行)/46(52 行) 行集（views.go）'),
+    0x1F: ('已接线', 'entergen.LocationFrame——ReadyFrames 尾帧（25B，建号出生点）'),
     0x1E: '按消息号细分（MSG_DISPOSITION）',
-    0x21: ('原生移植', '对象同步帧（b-line server_moving/移动同步族）'),
-    0x27: ('原生移植', 'LZ 分节 sync（0x47 字面量包装生成）'),
-    0x28: ('原生移植', 'playerProfile0x28Frame（0x46 明文，fork 客户端实证接受；0x47 字面量备用）'),
-    0x29: ('原生移植', '批量预载：0x46/0x47 字面量包装生成（wrapProfile0x28As47Literal 同构适配 0x29 头）——真机验证，透传回退'),
-    0x2D: ('原生移植', '压缩值消息族（多属性批帧，b-line switch_sync_official.go）'),
-    0x32: ('保留透传', '会话票据 1026B×2（StoreMsgSave 转储，结构已逆向 docs §十二——会话身份类，按需镜像）'),
-    0x38: ('已原生', '心跳回显 30B（fssoloworld/msg.go:110 已实现，非透传）'),
+    0x21: ('未移植', '对象同步帧（b-line server_moving 移动同步族）——AOI/移动期通道'),
+    0x27: ('未接线', '0x47 字面量包装已由 0x29 批量通道复用（WrapAs47Literal）；独立 0x27 分节 sync 未编排'),
+    0x28: ('已接线', 'entergen.AvatarFrame（0x46 明文，41 基础+27×17 技能行+CurNeiGong；literal47 备用）'),
+    0x29: ('已接线', 'entergen.recordBatch0x29（Task_Accepted/CollectSkillRec，0x47 全字面量零池依赖）——真机接受度待验，透传回退'),
+    0x2D: ('未移植', '压缩值消息族（b-line switch_sync_official.go 多属性批帧）'),
+    0x32: ('保留透传', '会话票据 1026B×2（inner_push_golden，结构已逆向 docs §十二——会话身份类，按需镜像）'),
+    0x38: ('已原生', '心跳回显 30B（fssoloworld/msg.go:110，外服形态尾巴）'),
     0x06: ('待查明', 'ready 包首帧 op06 len=1——疑似 entry 内网帧误入 golden 包，核实后剔除'),
-    0xCC: ('待查明', 'ready 包次帧 opCC len=28——同上，非正常 S2C opcode 域'),
+    0xCC: ('待查明', 'ready 包次帧 opCC len=28——非正常 S2C opcode 域，同上'),
     0x31: ('待查明', 'ready 包尾帧 op31 len=11——内网寻址族 opcode，需核实是否应下发客户端'),
 }
 
-# 0x1E custom 消息号处置（b-line 生成器参照）
+# 0x1E custom 消息号处置（状态 = entergen/fssoloworld 当前真实接线）
 MSG_DISPOSITION = {
-    52: ('原生移植', '服务器时间 [1,unix]（official_login_align）'),
-    101: ('原生移植', '面板推送（b-line gm_stats 域）'),
-    136: ('原生移植', '状态帧（135/136 成对，b-line switch_sync）'),
-    137: ('原生移植', '状态帧'),
-    169: ('原生移植', 'buff 登记 [buff名, obj]（writeOfficialLoginBuffFrames）'),
-    228: ('原生移植', '数值推送'),
-    229: ('原生移植', 'NPC 列表推送 c130（场景相关——entergen 按场景 NPC 目录生成）'),
-    294: ('原生移植', '对钟应答 [client_ms, reqid, unix, uptime]（officialTimeSyncReplyFrame）'),
-    312: ('原生移植', '任务标记问答'),
-    366: ('原生移植', '客户端 IP 回显（writeOfficialLoginInfoFrames）'),
-    386: ('原生移植', 'UI 开关推送 [slot,id]（funcopen_cluster）'),
-    390: ('原生移植', '数值推送'),
-    395: ('原生移植', '未定位数值推送——透传保留至语义定案'),
-    414: ('原生移植', 'gamestep sync'),
-    416: ('原生移植', '九阴志域声明 ["DomainJiuYinZhi", step]'),
-    419: ('原生移植', '未定位推送'),
-    430: ('原生移植', '数值推送'),
-    496: ('原生移植', '数值推送'),
-    505: ('原生移植', '数值推送'),
-    596: ('原生移植', '数值推送'),
-    607: ('原生移植', '账号+角色名声明（writeOfficialReadyInfoFrames）'),
-    616: ('原生移植', '数值推送'),
-    623: ('原生移植', '[0,0,3] 服务器信息（writeOfficialLoginInfoFrames）'),
-    647: ('原生移植', '数值推送'),
-    655: ('原生移植', '服务器标识四元组（writeOfficialLoginInfoFrames）'),
-    681: ('原生移植', '挑战令牌推送（tiaozhan_probe 方言）'),
-    705: ('原生移植', '个性配置串（custom_config——b-line 刻意停发，移植时保持停发语义）'),
-    98: ('原生移植', '数值推送 [274]（b-line replay P1 同位帧）'),
-    64: ('原生移植', '数值推送'),
-    1: ('原生移植', '系统开关播报'),
-    2: ('原生移植', '数值推送'),
+    52: ('已接线', '服务器时间 [1,unix]——entergen.ReadyInfoFrames（logininfo.go）'),
+    169: ('已接线', 'buff 登记 [buff名, obj]——entergen.LoginBuffFrames（组标志+装备内功）'),
+    294: ('生成器就绪', 'entergen.TimeSyncReplyFrame 已有——m924→m294 应答接线未做（fssoloworld msg.go 未挂 m924）'),
+    366: ('已接线', '客户端 IP 回显——entergen.LoginInfoFrames'),
+    416: ('已接线', '九阴志域声明——entergen.JyzDomainFrame(6)'),
+    607: ('已接线', '账号+角色名声明——entergen.ReadyInfoFrames'),
+    623: ('已接线', '[0,0,3] 服务器信息——entergen.LoginInfoFrames'),
+    655: ('已接线', '服务器标识四元组——entergen.LoginInfoFrames（Session 注入）'),
+    586: ('已接线', '状态推送簇首 [5]——entergen.ReadyInfoFrames'),
+    229: ('未移植', 'NPC 列表推送 c130（场景相关——需场景 NPC 目录数据源；ready 段 ×63 大族）'),
+    386: ('未移植', 'UI 开关推送 [slot,id]（b-line funcopen_cluster）——ready 段 ×15'),
+    681: ('未移植', '挑战令牌推送（b-line tiaozhan_probe 方言）——enter 段 ×6'),
+    101: ('未移植', '面板推送（b-line gm_stats 域）'),
+    136: ('未移植', '状态帧（135/136 成对，b-line switch_sync）'),
+    137: ('未移植', '状态帧'),
+    228: ('未移植', '数值推送'),
+    312: ('未移植', '任务标记问答'),
+    390: ('未移植', '数值推送'),
+    395: ('暂缓', '未定位数值推送——透传保留至语义定案'),
+    414: ('未移植', 'gamestep sync'),
+    419: ('未移植', '未定位推送'),
+    430: ('未移植', '数值推送'),
+    496: ('未移植', '数值推送'),
+    505: ('未移植', '数值推送'),
+    596: ('未移植', '数值推送'),
+    616: ('未移植', '数值推送'),
+    647: ('未移植', '数值推送'),
+    705: ('未移植', '个性配置串——b-line 刻意停发（回推会把客户端控制模式打回传统 3D），移植时保持停发'),
+    98: ('未移植', '数值推送 [274]（b-line replay P1 同位帧）'),
+    64: ('未移植', '数值推送'),
+    1: ('未移植', '系统开关播报'),
+    2: ('未移植', '数值推送'),
 }
 
 
@@ -195,16 +200,59 @@ def main():
     lines.append('| self_home_rec_frame.bin | 0x0A = 446 schema 镜像 | 已接（HomeRecordsMirrorFrame 官方帧透传） |')
 
     # 汇总
-    lines.append('\n## 处置汇总\n')
-    lines.append('| 帧族 | 帧数 | 处置 |')
+    lines.append('\n## 接线状态总览\n')
+    lines.append('| 状态 | 帧数 | 含义 |')
     lines.append('|---|---|---|')
+    status_meaning = {
+        '已接线': 'entergen 编排内实际下发（native 模式生效）',
+        '生成器就绪': '编码器已有，未编排进序列',
+        '未移植': 'b-line 有生成器，尚未搬运',
+        '未接线': '通道被等价路径复用，独立编排未做',
+        '已原生': 'entergen 之外已原生实现',
+        '保留透传': '会话身份类，按需镜像',
+        '待查明': '语义未定，不得盲目下发',
+        '暂缓': '语义未定位，透传保留',
+    }
     bydisp = {}
     for (op, head, disp), n in sorted(total.items()):
         bydisp.setdefault(disp, 0)
         bydisp[disp] += n
     for disp, n in sorted(bydisp.items(), key=lambda kv: -kv[1]):
-        lines.append('| — | %d | %s |' % (n, disp))
+        lines.append('| %s | %d | %s |' % (disp, n, status_meaning.get(disp, '')))
+    wired = bydisp.get('已接线', 0) + bydisp.get('已原生', 0)
+    lines.append('')
+    lines.append('native 覆盖率：**%d/%d 帧（%.0f%%）**；其余帧走 replay 模式或后续接入。'
+                 % (wired, sum(bydisp.values()), 100.0 * wired / max(1, sum(bydisp.values()))))
 
+    lines.append('\n## 生成器接线索引（entergen）\n')
+    lines.append('| 帧族 | 函数 | 文件 |')
+    lines.append('|---|---|---|')
+    for op, func, file in (
+        ('0x0B 进场', 'EntrySceneFrame', 'frames.go'),
+        ('0x10 属性/物理流', 'ObjectPropertyFrame / PhysicsLoginStreamFrames', 'frames.go / physics.go'),
+        ('0x11 记录行', 'RecordAddCellsFrame', 'frames.go'),
+        ('0x14 挂载', 'MountSequenceFrames + MountPlan×48 + rowGenerators', 'mount.go / mountplan.go'),
+        ('0x15/0x17/0x18 视图族', 'CreateViewFrame / ViewPropertyFrame / ViewAddFrame', 'frames.go'),
+        ('0x18 视图行集', 'SkillViewFrames / NeiGongViewFrames / QingGongViewFrames / EmptyViewFrames', 'views.go'),
+        ('0x1F 位置', 'LocationFrame', 'frames.go'),
+        ('0x28 化身', 'AvatarFrame（0x46 明文，0x47 备用）', 'avatar.go'),
+        ('0x29 批量', 'recordBatch0x29 + WrapAs47Literal', 'sequence.go / lz47.go'),
+        ('0x1E m366/m623/m655', 'LoginInfoFrames', 'logininfo.go'),
+        ('0x1E m607/m52/m586', 'ReadyInfoFrames', 'logininfo.go'),
+        ('0x1E m169', 'LoginBuffFrames', 'logininfo.go'),
+        ('0x1E m416', 'JyzDomainFrame', 'logininfo.go'),
+        ('0x1E m294（未接线）', 'TimeSyncReplyFrame', 'logininfo.go'),
+        ('编排入口', 'PreReadyFrames / ReadyFrames', 'sequence.go'),
+    ):
+        lines.append('| %s | `%s` | %s |' % (op, func, file))
+
+    lines.append('\n## 后续接入清单（按优先级）\n')
+    lines.append('1. m294 对钟应答接线（fssoloworld msg.go 挂 m924 → TimeSyncReplyFrame）')
+    lines.append('2. 0x17 视图属性帧编排（golden ×21）')
+    lines.append('3. m229 场景 NPC 列表（需场景 NPC 目录数据源，ready 段 ×63）')
+    lines.append('4. m386 UI 开关推送（funcopen_cluster 移植）')
+    lines.append('5. 41 条 mount-only 记录的行生成器接入（mount.go rowGenerators 注册）')
+    lines.append('6. 待查明三帧（op06/0xCC/0x31）语义核实——疑似内网帧误入，确认后从 golden 包剔除')
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines) + '\n')

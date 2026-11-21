@@ -6,15 +6,18 @@ import (
 	"time"
 )
 
-// ProcessEntryMsg 官方 id2 0..5 分发表（§十；跳表 @0x100c2688）。
+// ProcessEntryMsg 官方 id2 0..5 分发表（§5.1 跳表 @0x10084D78；编号与
+// fsserver/wire.go EntryMsgType* 同源钉死：0=register/1=accept/2=closed/
+// 3=message/4=illegal/5=close。旧载 "0=accept/1=closed" 为误读——accept
+// 误接 closed 曾让断线清理永不触发，重登同名角色被 byName 陈旧项卡死）。
 func (s *Server) ProcessEntryMsg(id1, id2 uint32, payload []byte) bool {
 	switch id2 {
 	case 0:
-		return s.entryClientAccept(id1, payload)
+		return s.entryClientRegister(id1, payload)
 	case 1:
-		return s.entryClientClosed(id1, payload)
+		return s.entryClientAccept(id1, payload)
 	case 2:
-		return s.entryClientLost(id1, payload)
+		return s.entryClientClosed(id1, payload)
 	case 3:
 		return s.entryClientMessage(id1, payload)
 	case 4:
@@ -26,7 +29,16 @@ func (s *Server) ProcessEntryMsg(id1, id2 uint32, payload []byte) bool {
 	}
 }
 
-// entryClientAccept：{client_id, entry_idx?} 8B → AddPlayer(Unknown)。
+// entryClientRegister entry 注册帧（官方 12B {DistrictID,ServerID,EntryIdx}
+// 校验 + 回 init_connect 旗标）。Go 端注册在 InnerLink identify 层消化、
+// 开闸由 OpenServer 批量 init_connect 承担，业务帧到达此处仅簿记。
+func (s *Server) entryClientRegister(id1 uint32, p []byte) bool {
+	s.trace("entry register id=%d len=%d", id1, len(p))
+	return true
+}
+
+// entryClientAccept：官方 28B {client_id, serial, addr[16], port}（首 8B
+// 即连接键）→ AddPlayer(Unknown)。
 func (s *Server) entryClientAccept(id1 uint32, p []byte) bool {
 	if len(p) < 8 {
 		s.trace("(SoloWorld::EntryMsgClientAccept)len != sizeof(entry_back_client_t)")
@@ -42,7 +54,9 @@ func (s *Server) entryClientAccept(id1 uint32, p []byte) bool {
 	return true
 }
 
-// entryClientClosed：玩家断开（Online→下线链或直删）。
+// entryClientClosed：连接关闭/失联回报（网关读循环退出与 shake 未命中
+// 两源同型）→ 0x37 logoff + playerLeave 清场——byName 陈旧项即在此释放，
+// 重登同名角色不再被 "player already in game" 静默拒绝。
 func (s *Server) entryClientClosed(id1 uint32, p []byte) bool {
 	if len(p) < 8 {
 		return false
@@ -63,11 +77,6 @@ func (s *Server) entryClientClosed(id1 uint32, p []byte) bool {
 	}
 	s.playerLeave(pl)
 	return true
-}
-
-// entryClientLost：entry 丢失客户端（更强的清理，断 charge 侧会话）。
-func (s *Server) entryClientLost(id1 uint32, p []byte) bool {
-	return s.entryClientClosed(id1, p)
 }
 
 // entryClientMessage：8B 头 + msgtype 子分发（§十 msgtype 0..0xC）。

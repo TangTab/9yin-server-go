@@ -48,7 +48,7 @@ const (
 //
 //	0 register（12B {DistrictID,ServerID,EntryIdx}；ident 校验）
 //	1 accept 通知（28B {ident,serial,addr[16],port}）
-//	2 client lost（shake 未命中回报 {ident,serial} 8B）
+//	2 client closed（连接关闭上报 + shake 未命中回报 {ident,serial} 8B）
 //	3 client 数据（{ident,serial,原始帧} ≥8B）
 //	4 非法消息回报
 //	5 close entry 确认
@@ -137,7 +137,8 @@ func BuildUpstreamData(ident, serial uint32, frame []byte) []byte {
 	return buf
 }
 
-// BuildUpstreamLost 复刻 shake 未命中回报 {ident,serial}。
+// BuildUpstreamLost 复刻连接关闭回报 {ident,serial}（OnClose 直报 +
+// shake 未命中兜底两源同型）。
 func BuildUpstreamLost(ident, serial uint32) []byte {
 	buf := make([]byte, 8)
 	binary.LittleEndian.PutUint32(buf[0:], ident)

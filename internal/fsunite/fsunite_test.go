@@ -558,10 +558,10 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	}
 	readFrame(0x09) // 属性表（大帧过真传输面）
 	readFrame(0x0A) // 记录表镜像
-	// 进场段（默认 native：2433 方言 4 属性 0x0B——entgegenert from
+	// 进场段（默认 native：2433 方言 5 属性 0x0B——entgegenert from
 	// role_state_json；帧数随建号数据可变，读完直到 ClientReady 窗口）。
-	// golden 回退（NINEYIN_ENTER_MODE=replay）时为 5 属性 + 272 帧。
-	if f := readFrame(0x0B); binary.LittleEndian.Uint16(f[13:]) != 4 {
+	// golden 回退（NINEYIN_ENTER_MODE=replay）同为 5 属性 + 272 帧。
+	if f := readFrame(0x0B); binary.LittleEndian.Uint16(f[13:]) != 5 {
 		t.Fatalf("native entry attrs=%d", binary.LittleEndian.Uint16(f[13:]))
 	}
 	for i := 0; i < 130; i++ { // 原生进场段其余帧（记录/化身/物理流/属性批）

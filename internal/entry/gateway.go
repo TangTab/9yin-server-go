@@ -150,6 +150,13 @@ func (g *Gateway) onAccept(c gonet.Conn) {
 	}
 
 	defer func() {
+		// 官方 OnClose：向 world 回报 type 2 连接关闭（entry_back_client_
+		// closed_t 8B）——world 侧 entryClientClosed 走 0x37 logoff +
+		// playerLeave 清场。先报后释：lost 事件须先于槽位复用入网，
+		// 杜绝新连接（serial 单调不复用，槽位会复用）误吃旧键清场。
+		if g.Inner != nil {
+			_ = g.Inner.SendToWorld(UpstreamLost, BuildUpstreamLost(st.Ident, st.Serial))
+		}
 		g.mu.Lock()
 		delete(g.conns, idx)
 		delete(g.writers, idx)

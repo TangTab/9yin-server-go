@@ -83,18 +83,20 @@ func NamedProperty(name string, value PropertyValue) IndexedProperty {
 	return IndexedProperty{Index: entry.Index, Name: name, Value: value}
 }
 
-// EntrySceneFrame 0x0B 进场帧（4 属性官方形）。
+// EntrySceneFrame 0x0B 进场帧（5 属性官方形——golden 实证：Name/MaxVisuals/
+// ConfigID/Resource/TiGuanGroupCount）。
 func EntrySceneFrame(id Identity, config, resource string) ([]byte, error) {
 	nameEntry := clientdata.MustSceneProperty("Name")
 	maxVisuals := clientdata.MustSceneProperty("MaxVisuals")
 	configEntry := clientdata.MustSceneProperty("ConfigID")
 	resourceEntry := clientdata.MustSceneProperty("Resource")
-	entry := make([]byte, 15, 96)
+	tiguanEntry := clientdata.MustSceneProperty("TiGuanGroupCount")
+	entry := make([]byte, 15, 104)
 	entry[0] = 0x0B
 	binary.LittleEndian.PutUint32(entry[1:], id.Sequence)
 	binary.LittleEndian.PutUint32(entry[5:], id.ObjectID)
 	binary.LittleEndian.PutUint32(entry[9:], id.OwnerID)
-	binary.LittleEndian.PutUint16(entry[13:], 4)
+	binary.LittleEndian.PutUint16(entry[13:], 5)
 	// idx178 Name：8B 遮蔽常量（六包恒定，按表宽串编码）。
 	entry = binary.LittleEndian.AppendUint16(entry, nameEntry.Index)
 	entry = binary.LittleEndian.AppendUint32(entry, 8)
@@ -103,6 +105,9 @@ func EntrySceneFrame(id Identity, config, resource string) ([]byte, error) {
 	entry = binary.LittleEndian.AppendUint16(entry, 230)
 	entry = appendProperty(entry, IndexedProperty{Index: configEntry.Index, Name: "ConfigID", Value: StringValue(config)})
 	entry = appendProperty(entry, IndexedProperty{Index: resourceEntry.Index, Name: "Resource", Value: StringValue(resource)})
+	// idx1451 TiGuanGroupCount：u16=1（golden 第 5 属性真机形）。
+	entry = binary.LittleEndian.AppendUint16(entry, tiguanEntry.Index)
+	entry = binary.LittleEndian.AppendUint16(entry, 1)
 	return entry, nil
 }
 
@@ -240,12 +245,22 @@ func RecordAddCellsFrame(objectID, ownerID uint32, recordIndex uint16, cells []R
 	return msg, nil
 }
 
-// RecordMountFrame 0x14 记录挂载帧（12B；初始账号方言定版：
-// [0]=0x14 [1]=sub(0=玩家域, 2=全局) [2:6]=obj [6:10]=own [10:12]=rec u16）。
-func RecordMountFrame(objectID, ownerID uint32, recordIndex uint16) []byte {
+// MountSpec 一条挂载计划项（MountPlan 数据源见 mountplan.go）。
+type MountSpec struct {
+	Name string
+	Sub  byte // 0=玩家域（obj/own=玩家身份），2=全局域（obj/own=0）
+}
+
+// RecordMountFrame 0x14 记录挂载帧（12B；golden 48 帧全样本定版：
+// [0]=0x14 [1]=sub(0=玩家域, 2=全局) [2:6]=obj [6:10]=own [10:12]=rec u16；
+// sub≠0 时 obj/own=0）。
+func RecordMountFrame(sub byte, objectID, ownerID uint32, recordIndex uint16) []byte {
 	msg := make([]byte, 12)
 	msg[0] = 0x14
-	msg[1] = 0
+	msg[1] = sub
+	if sub != 0 {
+		objectID, ownerID = 0, 0
+	}
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)

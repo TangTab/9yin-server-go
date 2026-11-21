@@ -19,7 +19,7 @@ func TestBuildRoleStateBorn03(t *testing.T) {
 	if state.HP != 70 || state.MP != 40 || state.SP != 80 || state.Parry != 100 {
 		t.Fatalf("资源初值 HP70/MP40/SP80/Parry100： %+v", state)
 	}
-	if state.Scene != `ini\scene\born03_YanYuZhuang` || state.Resource != "YanYuZhuang" {
+	if state.Scene != `ini\scene\born03_YanYuZhuang` || state.Resource != "born03" {
 		t.Fatalf("出生场景 = %q resource = %q", state.Scene, state.Resource)
 	}
 	if state.Position != [4]float64{482.5, 13.7, 1008, 1.56} {

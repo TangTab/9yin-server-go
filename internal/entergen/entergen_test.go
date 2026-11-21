@@ -24,11 +24,12 @@ func testContext(t *testing.T) Context {
 	}
 }
 
-// TestEntrySceneFrameShape 0x0B 官方 4 属性形：idx178/1468=230/1447/1448，
-// seq 注入（官方非常量实证）。
+// TestEntrySceneFrameShape 0x0B 官方 5 属性形：idx178/1468=230/1447/1448/
+// 1451=1，seq 注入（官方非常量实证）；Resource=born03（资源键真机实证，
+// 尾段 YanYuZhuang 客户端开图报找不到地图文件）。
 func TestEntrySceneFrameShape(t *testing.T) {
 	frame, err := EntrySceneFrame(Identity{Sequence: 0x2F05, ObjectID: 1, OwnerID: 1},
-		`ini\scene\born03_YanYuZhuang`, "YanYuZhuang")
+		`ini\scene\born03_YanYuZhuang`, "born03")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,21 +39,31 @@ func TestEntrySceneFrameShape(t *testing.T) {
 	if binary.LittleEndian.Uint32(frame[5:]) != 1 || binary.LittleEndian.Uint32(frame[9:]) != 1 {
 		t.Fatalf("obj/own: %x", frame[5:13])
 	}
-	if binary.LittleEndian.Uint16(frame[13:]) != 4 {
+	if binary.LittleEndian.Uint16(frame[13:]) != 5 {
 		t.Fatalf("attrs = %d", binary.LittleEndian.Uint16(frame[13:]))
 	}
-	if !bytes.Contains(frame, []byte("ini\\scene\\born03_YanYuZhuang\x00")) ||
-		!bytes.Contains(frame, []byte("YanYuZhuang\x00")) {
-		t.Fatalf("scene strings missing: %x", frame)
+	if !bytes.Contains(frame, []byte("ini\\scene\\born03_YanYuZhuang\x00")) {
+		t.Fatalf("config string missing: %x", frame)
+	}
+	// Resource 属性编码整段断言：idx1448(u16 LE a8 05) + len 7 + "born03\0"
+	// ——资源键取 born03（尾段 YanYuZhuang 客户端开图报找不到地图文件）。
+	if !bytes.Contains(frame, []byte{0xa8, 0x05, 0x07, 0x00, 0x00, 0x00, 'b', 'o', 'r', 'n', '0', '3', 0x00}) {
+		t.Fatalf("resource prop must be born03: %x", frame)
 	}
 }
 
 // TestRecordFrames 记录族：0x14 挂载 12B + 0x11 行（QingGongRec 单列串）。
 func TestRecordFrames(t *testing.T) {
 	rec := clientdata.MustRecordIndexByName("QingGongRec")
-	mount := RecordMountFrame(1, 1, rec)
-	if len(mount) != 12 || mount[0] != 0x14 || binary.LittleEndian.Uint16(mount[10:]) != rec {
+	mount := RecordMountFrame(0, 1, 1, rec)
+	if len(mount) != 12 || mount[0] != 0x14 || mount[1] != 0 ||
+		binary.LittleEndian.Uint16(mount[10:]) != rec {
 		t.Fatalf("mount frame: %x", mount)
+	}
+	global := RecordMountFrame(2, 1, 1, clientdata.MustRecordIndexByName("WeatherRec"))
+	if global[1] != 2 || binary.LittleEndian.Uint32(global[2:]) != 0 ||
+		binary.LittleEndian.Uint32(global[6:]) != 0 {
+		t.Fatalf("global mount frame: %x", global)
 	}
 	row, err := RecordAddCellsFrame(1, 1, rec, []RecordCell{RecordString("qinggong_1")})
 	if err != nil {

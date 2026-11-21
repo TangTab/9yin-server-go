@@ -374,11 +374,11 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 	if state.Scene == "" {
 		state.Scene = `ini\scene\born03_YanYuZhuang`
 	}
-	if i := strings.LastIndex(state.Scene, `_`); i >= 0 {
-		state.Resource = state.Scene[i+1:]
-	} else {
-		state.Resource = scene
-	}
+	// Resource = 地形资源键 = 参数 scene 本身（born03/school01/born_single_01
+	// ——对应 map\map_ter_born\<born03> 等目录）。真机 0x0B 帧 Resource 实证
+	// 值 "born03"；旧按 Scene 尾段切片得 "YanYuZhuang"，客户端开图即报
+	// 「找不到地图相关的文件」。
+	state.Resource = scene
 
 	for _, sk := range starter.Skills.Skill {
 		state.Skills = append(state.Skills, StarterSkill{

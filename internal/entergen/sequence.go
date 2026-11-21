@@ -18,15 +18,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
-	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
-
-// recordMountPairs 就绪前要挂载+推行的纯数字列记录（rec 名 → 行集）。
-// 位图记录（Task_Completed）走 taskCompletedBit 行展开。
-type recordMountPair struct {
-	recordName string
-	rows       func(state rolestate.RoleState) ([][]RecordCell, error)
-}
 
 // PreReadyFrames 进场段全量帧（表下发之后、ClientReady 之前）。
 // 0x29 批量用 0x47 全字面量包装（零池依赖）；literal29=false 时字符串
@@ -48,39 +40,24 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, info...)
 
-	// 记录挂载 + 行推（0x14 + 0x11）：Task_Completed 位图行。
-	if err := appendRecordMounts(&frames, ctx); err != nil {
-		return nil, err
-	}
-
-	// Task_Accepted 行（官方 28 列字符串记录——0x29 批量通道；
-	// 字面量 0x47 包装）。
-	accepted29, err := taskAcceptedBatch(ctx)
+	// 记录挂载计划（MountPlan 48 项，官方顺序）：0x14 + 行推交织
+	//（Task_Completed 位图 0x11 / Task_Accepted 0x29 批量 / QingGongRec
+	// 逐行 0x11；其余记录 mount-only，数据源接入后在 mount.go
+	// rowGenerators 注册）。
+	mounts, err := MountSequenceFrames(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if accepted29 != nil {
-		frames = append(frames, accepted29)
-	}
+	frames = append(frames, mounts...)
 
-	// 采集技能行（CollectSkillRec 两列窄串——0x29 通道）。
+	// 采集技能行（CollectSkillRec 两列窄串——0x29 通道；不在挂载计划
+	// 内，b-line grantCollectSkills 补发口径）。
 	collect29, err := collectSkillBatch(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if collect29 != nil {
 		frames = append(frames, collect29)
-	}
-
-	// 轻功类别记录 QingGongRec（单列窄串——逐行 0x11 官方形态）。
-	for _, cat := range ctx.State.QingGongCategories {
-		cell := cat
-		row, err := RecordAddCellsFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID,
-			clientdata.MustRecordIndexByName("QingGongRec"), []RecordCell{RecordString(cell)})
-		if err != nil {
-			return nil, err
-		}
-		frames = append(frames, row)
 	}
 
 	// 0x28 化身档案（mode=0x46 明文）。
@@ -164,60 +141,6 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		float32(pos[0]), float32(pos[1]), float32(pos[2]), float32(pos[3])))
 
 	return frames, nil
-}
-
-// appendRecordMounts 0x14 挂载 + 0x11 位图行（Task_Completed 串行位映射
-// 与官方 row = (id-1)/32 / mask = 1<<((id-1)%32) 同构，b-line
-// taskCompletedRows 口径——含 final-row 前的全部零值行）。
-func appendRecordMounts(frames *[][]byte, ctx Context) error {
-	rec := clientdata.MustRecordIndexByName("Task_Completed")
-	*frames = append(*frames, RecordMountFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, rec))
-	if len(ctx.State.TaskCompleted) == 0 {
-		return nil
-	}
-	maxRow := 0
-	rows := map[int]uint32{}
-	for _, id := range ctx.State.TaskCompleted {
-		if id == 0 {
-			continue
-		}
-		row := int((id - 1) / 32)
-		bit := (id - 1) % 32
-		rows[row] |= 1 << bit
-		if row > maxRow {
-			maxRow = row
-		}
-	}
-	for row := 0; row <= maxRow; row++ {
-		v := rows[row]
-		cell := v
-		frame, err := RecordAddCellsFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, rec,
-			[]RecordCell{RecordInt(cell)})
-		if err != nil {
-			return err
-		}
-		*frames = append(*frames, frame)
-	}
-	return nil
-}
-
-// taskAcceptedBatch Task_Accepted 28 列字符串记录的 0x29 批量帧
-// （0x47 全字面量包装）。内层明文（初始账号方言定版）：
-// [0]=0 [12]=变体 [14]=0 [15:19]=obj [19:23]=own [23:27]=rec u32
-// [27:29]=行数 u16 [29:]=行体（每行按 schema 列型，首 7 列官方方言）。
-func taskAcceptedBatch(ctx Context) ([]byte, error) {
-	if len(ctx.State.TaskAccepted) == 0 {
-		return nil, nil
-	}
-	rec := clientdata.MustRecordIndexByName("Task_Accepted")
-	rows := make([][]RecordCell, 0, len(ctx.State.TaskAccepted))
-	for _, taskID := range ctx.State.TaskAccepted {
-		rows = append(rows, []RecordCell{
-			RecordInt(taskID), RecordInt(0), RecordString(""),
-			RecordInt(0), RecordString(""), RecordString(""), RecordInt(0),
-		})
-	}
-	return recordBatch0x29(ctx, rec, rows)
 }
 
 // collectSkillBatch CollectSkillRec（ConfigID+等级）0x29 批量。
