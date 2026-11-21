@@ -151,6 +151,14 @@ func (l *InnerLink) Connected(comm uint32) bool {
 	return ok
 }
 
+// AnyConnected 是否已有任一对端 identify 连入（store 纯被连，发现
+// 就绪判定用）。
+func (l *InnerLink) AnyConnected() bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return len(l.commConn) > 0
+}
+
 // SendMsg 按对端 comm 发帧（id2=业务回执号；payload 官方回执体）。
 func (l *InnerLink) SendMsg(dst, id1, id2 uint32, payload []byte) bool {
 	l.mu.Lock()

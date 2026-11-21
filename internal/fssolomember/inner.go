@@ -167,6 +167,18 @@ func (l *InnerLink) onOpen(connID int, addr string, port int) {
 	l.connComm[connID] = commUnknown
 	l.acc[connID] = &frameAcc{}
 	comm, outbound := l.pendComm[connID]
+	if !outbound {
+		// 回环极速拨号竞态：onOpen 可能先于 CheckConnect 的 pendComm
+		// 登记到达——按拨号目标反查 dialing 判定出向（竞态免疫）。
+		target := fmt.Sprintf("%s:%d", addr, port)
+		for c, t := range l.dialing {
+			if t == target {
+				comm, outbound = c, true
+				l.pendComm[connID] = comm
+				break
+			}
+		}
+	}
 	if outbound {
 		l.commConn[comm] = connID
 		delete(l.dialing, comm)
@@ -186,7 +198,13 @@ func (l *InnerLink) onClose(connID int, addr string, port int) {
 	comm, hadComm := l.connComm[connID]
 	delete(l.connComm, connID)
 	delete(l.acc, connID)
-	delete(l.pendComm, connID)
+	if pcomm, ok := l.pendComm[connID]; ok {
+		delete(l.pendComm, connID)
+		delete(l.dialing, pcomm) // 拨号失败/断线后允许广播发现重拨
+		if l.commConn[pcomm] == connID {
+			delete(l.commConn, pcomm) // 未及 identify 即断：乐观登记一并回收
+		}
+	}
 	if hadComm && comm != commUnknown {
 		if cur, ok := l.commConn[comm]; ok && cur == connID {
 			delete(l.commConn, comm)
@@ -308,6 +326,29 @@ func (l *InnerLink) GetStoreConnected(index int) bool {
 	defer l.mu.Unlock()
 	_, ok := l.commConn[uint32(commStoreMin+index)]
 	return ok
+}
+
+// GetConnected comm 是否登记（GetStoreConnected 泛化；发现就绪
+// 判定用）。
+func (l *InnerLink) GetConnected(comm uint32) bool {
+	if comm >= commIDMax {
+		return false
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	_, ok := l.commConn[comm]
+	return ok
+}
+
+// GetPublicConnected public(comm 1) 是否登记（发现就绪判定用）。
+func (l *InnerLink) GetPublicConnected() bool { return l.GetConnected(commPublic) }
+
+// GetEntryConnected entry index 是否登记（发现就绪判定用）。
+func (l *InnerLink) GetEntryConnected(index int) bool {
+	if index < 0 || index >= entryIndexMax {
+		return false
+	}
+	return l.GetConnected(uint32(commEntryMin + index))
 }
 
 // ConnCommOf 测试/呈现用：connID → 对端 comm。

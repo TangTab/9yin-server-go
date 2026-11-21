@@ -21,6 +21,9 @@ rem  二进制定位顺序：本目录 bin\ → 本目录 → 仓库 build\（开发机直跑）。
 rem ============================================================
 
 cd /d "%~dp0"
+
+rem env.server (NINEYIN_MYSQL_DSN etc) - missing file is not fatal
+if exist "%~dp0env.server" for /f "usebackq delims=" %%L in (`findstr /b /l /c:"set " "%~dp0env.server"`) do call %%L
 set "BIN="
 if exist "bin\game_soloworld.exe" set "BIN=%~dp0bin"
 if not defined BIN if exist "game_soloworld.exe" set "BIN=%~dp0"
@@ -40,6 +43,13 @@ echo.
 
 rem ---- 每进程独立窗口（官方 start.bat 形态），/d 指定工作目录使
 rem      ini 释放/日志落在二进制同侧 ----
+rem Optional client-line wire capture: any non-empty NINEYIN_CAPTURE_DIR
+rem dumps both directions of every client session to
+rem <dir>\{ip-dashes}-{port}_c2s.bin / _s2c.bin (raw wire bytes, same
+rem layout as the reference captures\local). CAPTURE=1 picks that dir here.
+if /i "%CAPTURE%"=="1" if not defined NINEYIN_CAPTURE_DIR set "NINEYIN_CAPTURE_DIR=%~dp0..\captures\local"
+if defined NINEYIN_CAPTURE_DIR echo Capture: %NINEYIN_CAPTURE_DIR%
+
 cd /d "%BIN%"
 start "game_log"      /d "%BIN%" "game_logserver.exe"
 timeout /t 1 /nobreak >nul

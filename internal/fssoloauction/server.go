@@ -180,6 +180,7 @@ func (s *Server) Start() error {
 	if !s.opt.ManualTick {
 		go s.tickLoop()
 	}
+	s.startDiscoveryWatch()
 	return nil
 }
 
@@ -301,10 +302,14 @@ func (s *Server) onBroadcast(data []byte, from string, fromPort int) {
 		}
 		s.inner.CheckConnect(commWorld, a.Addr, int(a.Port))
 	case announceStore:
-		if a.District != s.opt.DistrictID || a.Index < commStoreMin || a.Index >= commStoreMax {
+		// 官方门要求 +0x24 为完整 comm 4..7，而 store 自宣（本仓
+		// fssolostore 与官方抓包同构）写裸 StoreID 0..3——member/
+		// public/world 收侧均自行 +4，官方此分支实为永不命中的失配
+		// （勘误：按裸 StoreID 收，+4 基址与其余三包统一）。
+		if a.District != s.opt.DistrictID || a.Index >= commStoreMax-commStoreMin {
 			return
 		}
-		s.inner.CheckConnect(a.Index, a.Addr, int(a.Port))
+		s.inner.CheckConnect(commStoreMin+a.Index, a.Addr, int(a.Port))
 	}
 }
 

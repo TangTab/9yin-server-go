@@ -1,7 +1,9 @@
 package fssoloworld
 
 import (
+	"bytes"
 	"encoding/binary"
+	"time"
 )
 
 // ProcessEntryMsg 官方 id2 0..5 分发表（§十；跳表 @0x100c2688）。
@@ -51,6 +53,14 @@ func (s *Server) entryClientClosed(id1 uint32, p []byte) bool {
 	if pl == nil {
 		return true
 	}
+	// 官方 0x37 AccountLogoff：logged 会话清零（store 侧 dc_accounts）
+	if pl.Account != "" {
+		s.mu.Lock()
+		session := s.session
+		s.mu.Unlock()
+		s.inner.SendToAllStore(0, 0x37,
+			accountLogoffFrame(clientID, serial, session, pl.Account))
+	}
 	s.playerLeave(pl)
 	return true
 }
@@ -63,9 +73,12 @@ func (s *Server) entryClientLost(id1 uint32, p []byte) bool {
 // entryClientMessage：8B 头 + msgtype 子分发（§十 msgtype 0..0xC）。
 func (s *Server) entryClientMessage(id1 uint32, p []byte) bool {
 	clientID, serial, mt, body, ok := decodeClientMsg(p)
+	s.trace("entry client message %d/%d mt=0x%X len=%d ok=%v", clientID, serial, mt, len(body), ok)
 	if !ok {
-		s.trace("(SoloWorld::EntryMsgClientMessage)len <= sizeof(entry_back_client_t)")
 		return false
+	}
+	if mt >= 1 {
+		mt-- // 客户端 opcode → 官方内网 msgtype（op01→0 verify/op02→1 login/…）
 	}
 	pl := s.players.FindByConnect(clientID, serial)
 	if pl == nil {
@@ -76,7 +89,9 @@ func (s *Server) entryClientMessage(id1 uint32, p []byte) bool {
 		// UseVerifyImage=false 时直接跳过（MatrixCode 不复刻）
 		return true
 	case clientMsgLogin:
-		return s.clientLogin(pl, body)
+		// auth 解析要完整 op02 帧（message[0]==0x02 头校验）——重组
+		// opcode 号（mt 已折算内网号，还原 +1）
+		return s.clientLogin(pl, append([]byte{byte(mt + 1)}, body...))
 	case clientMsgWorldInfo:
 		return s.clientWorldInfo(pl)
 	case clientMsgChooseRole:
@@ -87,6 +102,22 @@ func (s *Server) entryClientMessage(id1 uint32, p []byte) bool {
 		return s.clientDeleteRole(pl, body)
 	case clientMsgReviveRole:
 		return s.clientReviveRole(pl, body)
+	case clientMsgReady:
+		// op09 ClientReady（单字节）→ 新手视图簇（View43 内功书/
+		// View40 技能行；View43 缺发 = 「普通开始」按钮禁用）
+		s.clientReady(pl)
+		return true
+	case clientMsgPing:
+		// op0x18 心跳 → 0x38 外服形态（30B）：12B 回显 + 18B 尾
+		// （u16 4 + uptime_ms×2 + 计数——外服 s2c#224 逆向；12B 纯回显
+		// 形态客户端稳定态崩，2026-11-21 capture 对拍）
+		echo := append([]byte{0x38}, body...)
+		ms := uint32(time.Since(processStart).Milliseconds())
+		tail := []byte{0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00}
+		binary.LittleEndian.PutUint32(tail[3:], ms)
+		binary.LittleEndian.PutUint32(tail[13:], ms)
+		s.sendToClient(pl, append(echo, tail...))
+		return true
 	default:
 		return true
 	}
@@ -111,57 +142,80 @@ func (s *Server) entryCloseEntry(id1 uint32, p []byte) bool {
 	return true
 }
 
+// processStart 心跳尾 uptime_ms 基准（进程启动）。
+var processStart = time.Now()
+
 // clientLogin 载荷：length-prefixed account/password（CLoadArchive 双 ReadString）。
 func (s *Server) clientLogin(pl *Player, body []byte) bool {
-	account, _, rest := readArchiveString(body)
-	if account == "" {
-		s.trace("(SoloWorld::PlayerStateUnknown)get account password error")
-		return false
-	}
-	password, _, _ := readArchiveString(rest) // 校验域（charge 侧对账；此处保留解析）
-	_ = password
-	if pl.Account == "" {
-		s.players.mu.Lock()
-		if pl.Account == "" {
-			pl.Account = account
-			s.players.byAcc[account] = pl
-		}
-		s.players.mu.Unlock()
-	}
-	// PlayerQueue 且满员 → Queuing，否则进 Logging（charge login 由
-	// ChargeHook 代理；未接 charge 直进 Getting 下发角色列表）
+	// 官方通路：op02 双槽经 internal/auth（b-line 双域 DES 阶梯）解出
+	// 明文 → store 0x36 AccountLogon（首登自动建号/密码等值/logged 门）
+	// → 0x25 回执驱动（accountLogonReply）。PlayerQueue 满员照旧排队。
 	if s.cfg.PlayerQueue && s.players.CountActive() >= s.cfg.MaxPlayers {
 		s.players.SetPlayerState(pl, PlQueuing)
 		return true
 	}
 	s.players.SetPlayerState(pl, PlLogging)
-	if s.charge == nil || !s.charge.Connected() {
-		// WaitChargeSeconds 超时回退路径：直进 Getting
-		s.players.SetPlayerState(pl, PlGetting)
+	if !s.sendAccountLogon(pl, body) {
+		s.trace("(SoloWorld::PlayerStateUnknown)account logon send failed")
+		s.inner.SendToAllEntry(0, entryBreakClient, entryClientKey(pl))
 	}
 	return true
+}
+
+// entryClientKey 下行/断开帧的 {client_id, serial} 头。
+func entryClientKey(pl *Player) []byte {
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint32(b[0:], pl.Conn1)
+	binary.LittleEndian.PutUint32(b[4:], pl.Conn2)
+	return b
 }
 
 // clientWorldInfo 下发世界信息（ServerName/DistrictId/...）。
 func (s *Server) clientWorldInfo(pl *Player) bool {
+	// op03 世界信息 → 下行 0x05（infoType 0 + 五书开放串，真机回放值）
 	s.players.SetPlayerState(pl, PlGetting)
+	s.sendToClient(pl, worldInfoFrame(0, openBooks))
 	return true
 }
 
-// clientChooseRole 载荷：{role uid[33]} → Loading→member。
+// clientChooseRole 载荷：UCS2 角色名（真机定长 0x54 帧 [1:0x43] 名字
+// 区→body[0:0x42]，FsSoloRobot/fsverify/id-system 三源互证）→
+// PlChoosing + store 0x02 存档载入（回执 case 2 推进进场帧簇）。
 func (s *Server) clientChooseRole(pl *Player, body []byte) bool {
-	uid, _, _ := readArchiveString(body)
-	if uid == "" {
+	end := 0x42
+	if len(body) < end {
+		end = len(body)
+	}
+	name := wideNulNameOf(body[:end])
+	if name == "" {
 		return false
 	}
-	s.players.SetPlayerState(pl, PlLogged)
+	if !s.names.FindName(name) || s.names.GetDeleted(name) {
+		s.trace("(SoloWorld::PlayerStateLogged)choose role unknown %q", name)
+		return false
+	}
+	if q := s.players.FindByName(name); q != nil && q != pl {
+		s.trace("(SoloWorld::PlayerStateLogged)player already in game")
+		return false
+	}
+	s.players.SetupPlayerName(pl.Conn1, pl.Conn2, name)
+	s.players.SetPlayerState(pl, PlChoosing)
+	frame := buildLoadRoleStore(pl.Conn1, pl.Conn2, uint32(s.cfg.ServerID), pl.Account, name)
+	ok := s.inner.SendToAllStore(0, 0x02, frame)
+	s.trace("load role sent(%v) name=%q client=%d", ok, name, pl.Conn1)
 	return true
 }
 
-// clientCreateRole 载荷：{name wchar, config...} → Creating（store create）。
+// clientCreateRole 载荷：{name, config...}（parseCreateRoleBody 双读法）
+// → PlCreating + store 0x0A 建角请求（store_forw_create_t ≥0xD4，solo
+// 断言 212）。0x06 回执经 storeCreate 推进（下行有角 0x04）。
 func (s *Server) clientCreateRole(pl *Player, body []byte) bool {
-	name, _, _ := readArchiveWidestr(body)
+	name, appearance := parseCreateRoleBody(body)
 	if name == "" {
+		return false
+	}
+	if pl.Account == "" { // 未走 op02 绑定：建角会落空账号（重连竞态）
+		s.trace("(SoloWorld::PlayerStateLogged)create role without account client=%d", pl.Conn1)
 		return false
 	}
 	if len([]rune(name)) > s.cfg.RoleNameLimit {
@@ -171,14 +225,62 @@ func (s *Server) clientCreateRole(pl *Player, body []byte) bool {
 		return false // 名字占用
 	}
 	s.players.SetPlayerState(pl, PlCreating)
-	s.pendingCreate[pl.Conn1] = name
+	s.pendingCreate[pl.Conn1] = createReq{name: name, appearance: appearance}
+	frame := buildCreateRoleStore(pl.Conn1, pl.Conn2, uint32(s.cfg.ServerID),
+		pl.Account, name, joinAppearance(appearance))
+	ok := s.inner.SendToAllStore(0, 0x0A, frame)
+	s.trace("create role sent(%v) name=%q client=%d", ok, name, pl.Conn1)
 	return true
 }
 
+// clientDeleteRole 载荷（真机方言未实证，双读防御）：{uid arch-str} /
+// 裸窄串扫 NUL / 宽串角色名——先按 uid 反查名册、再按名字查。→
+// PlDeleting + store 0x0B 删角请求（store_forw_delete_t ==0xAC，与
+// create 同头 + uid@0x71）。0x07 回执经 storeDelete 推进。
 func (s *Server) clientDeleteRole(pl *Player, body []byte) bool {
-	uid, _, _ := readArchiveString(body)
+	if len(body) < 4 {
+		return false
+	}
+	var uid, name string
+	if v, n, _ := readArchiveString(body); n > 4 { // 读法一：archive 串
+		uid = v
+	}
+	if uid == "" { // 读法二：裸窄串扫 NUL
+		end := 0
+		for end < len(body) && body[end] != 0 {
+			end++
+		}
+		uid = string(body[:end])
+	}
+	if v, n, _ := readArchiveWidestr(body); n > 4 { // 读法三：宽串角色名
+		name = v
+	}
+	if uid != "" { // uid 反查优先
+		if v, ok := s.names.GetName(uid); ok {
+			name = v
+		}
+	}
+	if name == "" && uid == "" {
+		return false
+	}
+	if name == "" {
+		name = uid // 名字串形态：uid 槽即角色名
+		uid = ""
+	}
+	if v, ok := s.names.GetUid(name); ok {
+		uid = v
+	} else if uid == "" || s.names.GetDeleted(name) {
+		s.trace("(SoloWorld::PlayerStateLogged)role unknown %q", name)
+		return false
+	}
+	if s.names.GetDeleted(name) {
+		return false
+	}
 	s.players.SetPlayerState(pl, PlDeleting)
-	_ = uid
+	frame := buildDeleteRoleStore(pl.Conn1, pl.Conn2, uint32(s.cfg.ServerID),
+		pl.Account, name, uid)
+	sent := s.inner.SendToAllStore(0, 0x0B, frame)
+	s.trace("delete role sent(%v) name=%q uid=%q client=%d", sent, name, uid, pl.Conn1)
 	return true
 }
 
@@ -192,11 +294,21 @@ func (s *Server) clientReviveRole(pl *Player, body []byte) bool {
 // ProcessStoreMsg 官方 id2 0..0xE 分发表（§十；跳表 @0x100de300）。
 func (s *Server) ProcessStoreMsg(id1, id2 uint32, payload []byte) bool {
 	switch id2 {
+	case 0x24: // AccountReset 回执（开机复位；簿记面）
+		return true
+	case 0x25: // AccountLogon 回执 → 下行 0x04/0x02
+		return s.accountLogonReply(payload)
+	case 0x26: // AccountLogoff 回执
+		return s.accountLogoffReply(payload)
 	case 0: // RoleInfo：NameUid 全量同步（SyncRoleInfo 源）
 		return s.storeRoleInfo(id1, payload)
-	case 1: // Load：账号角色列表
-		return s.storeLoad(id1, payload)
-	case 6: // Create：建角应答
+	case 1: // RoleOffline 回执（§四 0x01；簿记面）
+		return true
+	case 2: // Load 回执：存档载入完成 → 进场帧簇（0x09/0x0A/0x0B/0x0D）
+		return s.storeLoadEnter(id1, payload)
+	case 0x0D: // QueryAccount 回执：账号角色清单 → 下行有角 0x04
+		return s.storeRolesList(id1, payload)
+	case 6: // Create/Roles 共用回执：建角应答
 		return s.storeCreate(id1, payload)
 	case 7: // Delete
 		return s.storeDelete(id1, payload)
@@ -235,7 +347,9 @@ func (s *Server) storeRoleInfo(id1 uint32, p []byte) bool {
 		s.names.Add(name, uid, deleted)
 		rest = r2[1:]
 	}
-	if s.state == WsLoadRoles {
+	// 回环极速竞态：0x00 回执可早于本实体 Unknown→LoadRoles 的 setState
+	// 落地（同进程内微秒级往返）——两态皆认，早到即直迁。
+	if s.state == WsLoadRoles || s.state == WsUnknown {
 		s.setState(WsLoadScenes)
 		s.syncRoleInfoToMembers() // 名册就绪 → 全量推 member（+0x43C 闩源）
 		s.pushRoleInfoToPublic()  // 同步推 public（+0x176 nameuids 门源）
@@ -301,17 +415,37 @@ func (s *Server) buildRoleInfoPayload() []byte {
 	return b
 }
 
-// storeLoad：{client_id, serial, account, count, {uid,name,level,...}...}。
-func (s *Server) storeLoad(id1 uint32, p []byte) bool {
-	if len(p) < 8 {
+// storeRolesList：QueryAccount 回执 0x0D {client_id, serial, count@8,
+// {uid, name wchar, para wchar}...} → PlGetting + 下行有角 0x04（重登
+// 角色列表；无角色时登录链已发无角 0x04，不再重发）。
+func (s *Server) storeRolesList(id1 uint32, p []byte) bool {
+	if len(p) < 12 {
 		return false
 	}
 	clientID := binary.LittleEndian.Uint32(p[0:])
 	serial := binary.LittleEndian.Uint32(p[4:])
+	n := int(binary.LittleEndian.Uint32(p[8:]))
+	rest := p[12:]
 	pl := s.players.FindByConnect(clientID, serial)
-	if pl != nil {
-		s.players.SetPlayerState(pl, PlGetting)
+	if pl == nil {
+		return true
 	}
+	s.players.SetPlayerState(pl, PlGetting)
+	var roles []roleEntry
+	for i := 0; i < n; i++ {
+		_, ur, r1 := readArchiveString(rest)
+		name, nr, r2 := readArchiveWidestr(r1)
+		if ur == 0 || nr == 0 || name == "" {
+			break
+		}
+		para, _, r3 := readArchiveWidestr(r2)
+		roles = append(roles, roleEntry{name: name, appearance: splitAppearance(para)})
+		rest = r3
+	}
+	// 无条件下行：有角→角色列表；空→无角 0x04 基座（count=0）——
+	// 删角后 0x10 刷新依赖空清单也回帧（客户端界面回建角页）
+	s.trace("roles list client=%d count=%d", clientID, len(roles))
+	s.sendToClient(pl, rolesFrame(time.Now(), roles))
 	return true
 }
 
@@ -325,8 +459,15 @@ func (s *Server) storeCreate(id1 uint32, p []byte) bool {
 	rest := p[8:]
 	uid, _, r := readArchiveString(rest)
 	name, _, _ := readArchiveWidestr(r)
+	pl := s.players.FindByConnect(clientID, serial)
 	if uid == "" || name == "" {
-		return false
+		// 建角被拒（重名/超数竞态）：回无角 0x04 让客户端回建角界面
+		s.trace("(SoloWorld::StoreMsgCreate)create role denied client=%d", clientID)
+		delete(s.pendingCreate, clientID)
+		if pl != nil {
+			s.sendToClient(pl, rolesFrame(time.Now(), nil))
+		}
+		return true
 	}
 	if !s.names.Add(name, uid, false) {
 		s.trace("(SoloWorld::StoreMsgCreate)add name uid failed")
@@ -334,23 +475,54 @@ func (s *Server) storeCreate(id1 uint32, p []byte) bool {
 	}
 	// 官方：角色新增广播 member/public/auction 三端 + 统计上报
 	s.broadcastRoleChange(name, uid, true)
-	pl := s.players.FindByConnect(clientID, serial)
 	if pl != nil {
 		s.players.SetupPlayerName(clientID, serial, name)
 		s.players.SetPlayerState(pl, PlLogged)
+		req := s.pendingCreate[clientID]
+		delete(s.pendingCreate, clientID)
+		s.sendToClient(pl, rolesFrame(time.Now(),
+			[]roleEntry{{name: name, appearance: req.appearance}}))
 	}
 	return true
 }
 
+// storeDelete：store_back_delete_t {client, serial, arch-str uid,
+// arch-wstr name}（与 0x06 同构）。成功 → 名册 Remove + 三端角色删除
+// 广播 + PlLogged + 重发 0x10 清单（0x0D 驱动界面回有角/无角 0x04）；
+// 拒（uid 空）→ 仅回 PlLogged。
 func (s *Server) storeDelete(id1 uint32, p []byte) bool {
 	if len(p) < 8 {
 		return false
 	}
 	clientID := binary.LittleEndian.Uint32(p[0:])
 	serial := binary.LittleEndian.Uint32(p[4:])
-	if pl := s.players.FindByConnect(clientID, serial); pl != nil {
+	pl := s.players.FindByConnect(clientID, serial)
+	uid, _, r := readArchiveString(p[8:])
+	name, _, _ := readArchiveWidestr(r)
+	if uid == "" || name == "" {
+		s.trace("(SoloWorld::StoreMsgDelete)delete role denied client=%d", clientID)
+		if pl != nil {
+			s.players.SetPlayerState(pl, PlLogged)
+		}
+		return true
+	}
+	s.names.Remove(name, uid)
+	// 官方：角色删除广播 member/public/auction 三端 + 统计上报
+	s.broadcastRoleChange(name, uid, false)
+	if pl != nil {
+		if pl.Name == name {
+			s.players.SetupPlayerName(clientID, serial, "") // 清绑定（同名可再建）
+		}
 		s.players.SetPlayerState(pl, PlLogged)
 	}
+	// 清单刷新（0x10 → 0x0D → 有角/无角 0x04）
+	req := make([]byte, 72)
+	binary.LittleEndian.PutUint32(req[0:], clientID)
+	binary.LittleEndian.PutUint32(req[4:], serial)
+	if pl != nil {
+		copy(req[8:], pl.Account)
+	}
+	s.inner.SendToAllStore(0, 0x10, req)
 	return true
 }
 
@@ -457,7 +629,9 @@ func encodeRoleChange(name, uid string, add bool) []byte {
 	return b
 }
 
-// readArchiveString CLoadArchive::ReadString：u32 长度 + 字节（NUL 结尾可选）。
+// readArchiveString CLoadArchive::ReadString：u32 长度 + 字节。尾 NUL
+// 统一滤除（store 侧 appendArchStr 方言长度含 NUL——uid char[33] 等
+// 名册键不得带 NUL，否则 FindName/Remove 永远失配）。
 func readArchiveString(p []byte) (val string, n int, rest []byte) {
 	if len(p) < 4 {
 		return "", 0, p
@@ -466,7 +640,7 @@ func readArchiveString(p []byte) (val string, n int, rest []byte) {
 	if l < 0 || 4+l > len(p) {
 		return "", 0, p
 	}
-	return string(p[4 : 4+l]), 4 + l, p[4+l:]
+	return string(bytes.TrimRight(p[4:4+l], "\x00")), 4 + l, p[4+l:]
 }
 
 // readArchiveWidestr UCS2→string（Port_UCS2ToWideStr 语义）。
@@ -482,6 +656,10 @@ func readArchiveWidestr(p []byte) (val string, n int, rest []byte) {
 	u16 := make([]uint16, l)
 	for i := 0; i < l; i++ {
 		u16[i] = binary.LittleEndian.Uint16(b[i*2:])
+	}
+	// 尾 NUL 统一滤除（appendArchWide 码元数含 NUL 同源）
+	for len(u16) > 0 && u16[len(u16)-1] == 0 {
+		u16 = u16[:len(u16)-1]
 	}
 	return string(decodeUTF16(u16)), 4 + l*2, p[4+l*2:]
 }

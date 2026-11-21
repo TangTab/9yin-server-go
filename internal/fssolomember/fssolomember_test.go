@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"net"
+	"strings"
 	"testing"
 	"time"
 )
@@ -382,4 +383,29 @@ func TestLoadingThreeLatches(t *testing.T) {
 func (s *Server) PubHas(space string) bool {
 	_, ok := s.Pub.FindSpace(space)
 	return ok
+}
+
+// ---- 发现监督器谓词 ----
+
+// markConn 白盒标记 comm 已连（识别入登记等价；谓词只看登记面）。
+func markConn(s *Server, comm uint32) {
+	s.inner.mu.Lock()
+	s.inner.commConn[comm] = 1
+	s.inner.mu.Unlock()
+}
+
+func TestDiscoveryPendingMember(t *testing.T) {
+	s := New(Options{Config: DefaultConfig(), ManualTick: true})
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "store0,public,entry0" {
+		t.Fatalf("初始缺口 = %v", p)
+	}
+	markConn(s, commStoreMin)
+	markConn(s, commPublic)
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "entry0" {
+		t.Fatalf("部分连入后缺口 = %v", p)
+	}
+	markConn(s, commEntryMin)
+	if p := s.DiscoveryPending(); len(p) != 0 {
+		t.Fatalf("全连后应就绪 = %v", p)
+	}
 }

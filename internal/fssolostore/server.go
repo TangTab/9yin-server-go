@@ -1,8 +1,13 @@
 package fssolostore
 
 import (
+	"crypto/rand"
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
 	"sync"
 	"time"
+	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/reactor"
 )
@@ -145,6 +150,7 @@ func (s *Server) Start() error {
 	if !s.opt.ManualTick {
 		go s.tickLoop()
 	}
+	s.startDiscoveryWatch()
 	s.logf("app name %s", s.cfg.AppName)
 	s.logf("echo socket %s:%d", s.cfg.EchoAddr, s.cfg.EchoPort)
 	s.logf("inner socket %s:%d", s.cfg.InnerAddr, port)
@@ -476,6 +482,39 @@ func cstrFixed(b []byte) string {
 	return string(b)
 }
 
+// wideNulStr UTF-16LE 定长槽扫 NUL 解码（建角帧 name/para 槽）。
+func wideNulStr(p []byte) string {
+	end := 0
+	for end+1 < len(p) {
+		if p[end] == 0 && p[end+1] == 0 {
+			break
+		}
+		end += 2
+	}
+	u := make([]uint16, end/2)
+	for i := range u {
+		u[i] = binary.LittleEndian.Uint16(p[i*2:])
+	}
+	return string(utf16.Decode(u))
+}
+
+// newRoleUID 官方 CAccess::CreateGuid（char[33] 槽）：16B 随机 hex。
+func newRoleUID() string {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return fmt.Sprintf("%032x", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(b[:])
+}
+
+// 建角出生场景缺省（官方口径：默认烟雨庄；testdata/location.ini
+// BornCJ000003 + rolePara f24 scene_name_017 互证，world 端
+// fssoloworld/roles.go 同源）。
+const (
+	birthSceneID       = 17
+	birthSceneLocation = `ini\scene\born03_YanYuZhuang`
+)
+
 // dispatch 官方 CAccess::ProcessMsg 67 型分发（Go 单 Backend 并发执行）。
 // 已建模命令做完整互操作编解码；其余走 Backend.Generic（回执 {u32 result}）。
 func (s *Server) dispatch(serial, msg uint32, payload []byte) {
@@ -584,7 +623,9 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			s.emit(serial, backID, body)
 		}
 		if msg == 0x40 {
-			s.emit(serial, 0x2B, []byte{0, 0, 0, 0}) // LoadRecordOk 终帧
+			// LoadRecordOk 终帧：result≠0 = 装载成功（fssoloauction
+			// LoadOK 按 result 开闸 Opened——发 0 会被当失败告警）
+			s.emit(serial, 0x2B, []byte{1, 0, 0, 0})
 		}
 	case 0x41, 0x42: // auction save：{name/uid… 定长头 + 块}
 		kind := AuctionAttr
@@ -627,6 +668,178 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 		s.emit(serial, back, emptyStoreBackHeader())
 	case 0x3A: // trade_info：{ServerId} → 0x28 空表头
 		s.emit(serial, back, emptyStoreBackHeader())
+	case 0x02: // load（solo ==0xBC）：与 create 同头 → MessageLoad
+		// （SELECT 存档）→ 回执 0x02 {client,serial,u32 ok,
+		// arch-wstr para}（空档=ok 1 无 blob；save_data 全量 0xD0B
+		// 形态留存档里程碑——新角初建本就 NULL）。
+		if len(payload) < 0x2D+2 {
+			s.logf("(CAccess::MessageLoad)len == sizeof(store_forw_load_t)=0xBC，得 %#x", len(payload))
+			return
+		}
+		_, meta, ok, err := b.LoadRole(cstrFixed(payload[0xC:0x2D]),
+			wideNulStr(payload[0x2D:0x2D+0x44]), int(sceneOf(payload[8:12])))
+		if err != nil {
+			s.logf("(CAccess::MessageLoad)connection error")
+			return
+		}
+		body := make([]byte, 12)
+		putLe32(body, 0x00, sceneOf(payload[0:4]))
+		putLe32(body, 0x04, sceneOf(payload[4:8]))
+		putLe32(body, 0x08, uint32(boolByteU8(ok)))
+		if ok {
+			body = appendArchWide(body, meta.SavePara1)
+		}
+		s.emit(serial, back, body)
+	case 0x0A: // create（solo ≥0xD4）：{client_id@0, serial@4,
+		// server_id@8, account char[33]@0xC, name wchar 34槽@0x2D,
+		// para wchar@0x71} → MessageCreate（INSERT；重名 false）→
+		// 回执 0x06 {client,serial,arch-str uid,arch-wstr name}；拒绝回
+		// {client,serial,u32 1}（uid 空，world 端 storeCreate 拒绝分支）。
+		if len(payload) < 0x2D+2 {
+			s.logf("(CAccess::MessageCreate)len == sizeof(store_forw_create_t)≥0xD4，得 %#x", len(payload))
+			return
+		}
+		serverID := int(sceneOf(payload[8:12]))
+		account := cstrFixed(payload[0xC:0x2D])
+		name := wideNulStr(payload[0x2D : 0x2D+0x44])
+		para := ""
+		if len(payload) > 0x71 {
+			para = wideNulStr(payload[0x71:])
+		}
+		existing, _ := b.QueryAccount(account, serverID)
+		meta := RoleMeta{
+			SceneID:   birthSceneID,
+			Location:  birthSceneLocation,
+			Index:     int32(len(existing)),
+			SavePara1: para,
+		}
+		uid := newRoleUID()
+		ok, err := b.CreateRole(account, name, uid, serverID, meta, nil)
+		if err != nil {
+			s.logf("(CAccess::MessageCreate)connection error")
+			return
+		}
+		if !ok {
+			s.logf("create role %s failed (duplicate)", name)
+			body := make([]byte, 0xC)
+			putLe32(body, 0x00, sceneOf(payload[0:4]))
+			putLe32(body, 0x04, sceneOf(payload[4:8]))
+			putLe32(body, 0x08, 1)
+			s.emit(serial, back, body)
+			return
+		}
+		s.logf("create role %s uid %s", name, uid)
+		body := make([]byte, 8)
+		putLe32(body, 0x00, sceneOf(payload[0:4]))
+		putLe32(body, 0x04, sceneOf(payload[4:8]))
+		body = appendArchStr(body, uid)
+		body = appendArchWide(body, name)
+		s.emit(serial, back, body)
+	case 0x10: // query_account（≥72B）：{client_id@0, serial@4,
+		// account 裸串@8} → MessageQueryAccount（角色清单）→ 回执
+		// 0x0D {client,serial,count@8,{arch-str uid,arch-wstr name,
+		// arch-wstr para}×n}（world 端 storeRolesList 装载序）。
+		account := ""
+		if len(payload) > 8 {
+			account = cstrFixed(payload[8:])
+		}
+		briefs, err := b.QueryAccount(account, s.cfg.ServerID)
+		if err != nil {
+			s.logf("(CAccess::MessageQueryAccount)connection error")
+			return
+		}
+		body := make([]byte, 8)
+		if len(payload) >= 8 {
+			putLe32(body, 0x00, sceneOf(payload[0:4]))
+			putLe32(body, 0x04, sceneOf(payload[4:8]))
+		}
+		body = appendU32(body, uint32(len(briefs)))
+		for _, br := range briefs {
+			body = appendArchStr(body, br.UID)
+			body = appendArchWide(body, br.Name)
+			body = appendArchWide(body, br.Para)
+		}
+		s.emit(serial, back, body)
+	case 0x0B: // delete（solo ==0xAC）：与 create 同头 + uid@0x71 →
+		// MessageDelete（软删 UPDATE deleted=1, delete_time=NOW()
+		// WHERE name AND account）→ 回执 0x07 {client,serial,arch-str
+		// uid,arch-wstr name}（与 0x06 同构）；拒回 {client,serial,u32 1}。
+		if len(payload) < 0x71+2 {
+			s.logf("(CAccess::MessageDelete)len == sizeof(store_forw_delete_t)=0xAC，得 %#x", len(payload))
+			return
+		}
+		dServerID := int(sceneOf(payload[8:12]))
+		dAccount := cstrFixed(payload[0xC:0x2D])
+		dName := wideNulStr(payload[0x2D : 0x2D+0x44])
+		dUID := cstrFixed(payload[0x71:])
+		ok, err := b.DeleteRole(dAccount, dName, dServerID)
+		if err != nil {
+			s.logf("(CAccess::MessageDelete)connection error")
+			return
+		}
+		if !ok {
+			s.logf("delete role %s failed (absent)", dName)
+			body := make([]byte, 0xC)
+			putLe32(body, 0x00, sceneOf(payload[0:4]))
+			putLe32(body, 0x04, sceneOf(payload[4:8]))
+			putLe32(body, 0x08, 1)
+			s.emit(serial, back, body)
+			return
+		}
+		s.logf("delete role %s uid %s", dName, dUID)
+		body := make([]byte, 8)
+		putLe32(body, 0x00, sceneOf(payload[0:4]))
+		putLe32(body, 0x04, sceneOf(payload[4:8]))
+		body = appendArchStr(body, dUID)
+		body = appendArchWide(body, dName)
+		s.emit(serial, back, body)
+	case 0x36: // account_logon（==0x98 官方断言）：find-or-create +
+		// 密码等值 + logged 门 → 回执 0x25 {client,serial,result,
+		// user_type,points,used_points}
+		if len(payload) != 0x98 {
+			s.logf("(CAccess::MessageAccountLogon)len == sizeof(account_logon_t)=0x98，得 %#x", len(payload))
+			return
+		}
+		name := cstrFixed(payload[0xC : 0xC+0x24])
+		password := cstrFixed(payload[0x30 : 0x30+0x24])
+		addr := cstrFixed(payload[0x54 : 0x54+0x20])
+		info, ok, err := b.AccountLogon(name, password, addr, sceneOf(payload[8:12]))
+		if err != nil {
+			s.logf("(CAccess::MessageAccountLogon)connection error: %v", err)
+			return
+		}
+		if !ok && len(name) > 0 {
+			s.logf("logon %s failed (password/logged gate)", name)
+		}
+		body := make([]byte, 0x18)
+		putLe32(body, 0x00, sceneOf(payload[0:4]))  // client_id
+		putLe32(body, 0x04, sceneOf(payload[4:8]))  // serial
+		putLe32(body, 0x08, uint32(boolByteU8(ok))) // result
+		putLe32(body, 0x0C, uint32(info.UserType))  // user_type
+		putLe32(body, 0x10, uint32(info.Points))    // points
+		putLe32(body, 0x14, uint32(info.UsedPoints)) // used_points
+		s.emit(serial, back, body)
+	case 0x37: // account_logoff（==0x7C 官方断言）→ 回执 0x26
+		if len(payload) != 0x7C {
+			s.logf("(CAccess::MessageAccountLogoff)len == sizeof(account_logoff_t)=0x7C，得 %#x", len(payload))
+			return
+		}
+		err := b.AccountLogoff(cstrFixed(payload[0xC:0xC+0x24]), sceneOf(payload[8:12]))
+		if err != nil {
+			s.logf("(CAccess::MessageAccountLogoff)connection error")
+			return
+		}
+		body := make([]byte, 0xC)
+		putLe32(body, 0x00, sceneOf(payload[0:4]))
+		putLe32(body, 0x04, sceneOf(payload[4:8]))
+		putLe32(body, 0x08, 1)
+		s.emit(serial, back, body)
+	case 0x38: // account_reset → 回执 0x24
+		if err := b.AccountReset(sceneOf(payload)); err != nil {
+			s.logf("(CAccess::MessageAccountReset)connection error")
+			return
+		}
+		s.emit(serial, back, []byte{1, 0, 0, 0})
 	default:
 		if back != 0xFF {
 			// 未细建模的带回执命令：Backend.Generic + {u32 result}

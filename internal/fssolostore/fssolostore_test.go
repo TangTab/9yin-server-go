@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 	"time"
 	"unicode/utf16"
@@ -197,15 +198,23 @@ func TestMemoryStoreSemantics(t *testing.T) {
 	if rs, _ := m.QueryAccount("acct", 11); len(rs) != 1 || rs[0].Name != "role1" {
 		t.Fatalf("query account %v", rs)
 	}
-	m.AddAccount("user1")
-	if ok, _ := m.AccountLogon("user1", 5); !ok {
+	m.AddAccount("user1", "pw1")
+	if info, ok, _ := m.AccountLogon("user1", "pw1", "", 5); !ok {
 		t.Fatal("logon")
+	} else if info != (AccountInfo{}) {
+		t.Fatalf("logon info %+v", info)
 	}
-	if ok, _ := m.AccountLogon("user1", 6); ok {
+	if _, ok, _ := m.AccountLogon("user1", "pw1", "", 6); ok {
 		t.Fatal("double logon other id accepted")
 	}
-	if ok, _ := m.AccountLogoff("user1", 5); !ok {
-		t.Fatal("logoff")
+	if _, ok, _ := m.AccountLogon("user1", "bad", "", 5); ok {
+		t.Fatal("wrong password accepted")
+	}
+	if _, ok, _ := m.AccountLogon("stranger", "pw", "", 7); !ok {
+		t.Fatal("first logon should auto-register")
+	}
+	if err := m.AccountLogoff("user1", 5); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -330,6 +339,68 @@ func ioReadFull(c net.Conn, b []byte) (int, error) {
 	return total, nil
 }
 
+func TestFullLinkPublicRelationReply(t *testing.T) {
+	s, _ := startTestServer(t)
+	pc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
+	pc.send(commPublic, 55, innerIdentifyID2, nil)
+	pc.send(commPublic, 66, 0x2D, []byte{11, 0, 0, 0})
+	comm, req, id2, p := pc.recv()
+	if comm != commSelf(0) || req != 66 || id2 != 0x22 {
+		t.Fatalf("reply comm=%d req=%d id2=%#x", comm, req, id2)
+	}
+	if len(p) != 0x10 || binary.LittleEndian.Uint32(p[0:]) != 1 {
+		t.Fatalf("empty header expected: % X", p)
+	}
+}
+
+func TestFullLinkAccountLogon(t *testing.T) {
+	s, _ := startTestServer(t)
+	wc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
+	wc.send(commWorld, 21, innerIdentifyID2, nil)
+	// 0x36 logon（0x98 定长）：首登自动建号 → 0x25 result=1
+	logon := make([]byte, 0x98)
+	put32 := func(off int, v uint32) { binary.LittleEndian.PutUint32(logon[off:], v) }
+	put32(0, 7)
+	put32(4, 21)
+	put32(8, 5001)
+	copy(logon[0xC:], "hero")
+	copy(logon[0x30:], "sword")
+	wc.send(commWorld, 21, 0x36, logon)
+	comm, req, id2, p := wc.recv()
+	if comm != commSelf(0) || req != 21 || id2 != 0x25 {
+		t.Fatalf("logon reply comm=%d req=%d id2=%#x", comm, req, id2)
+	}
+	if len(p) != 0x18 || binary.LittleEndian.Uint32(p[0:]) != 7 ||
+		binary.LittleEndian.Uint32(p[4:]) != 21 || binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("logon reply body %#x", p)
+	}
+	// 错密码 → result=0
+	copy(logon[0x30:], "wrong")
+	wc.send(commWorld, 22, 0x36, logon)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x25 || binary.LittleEndian.Uint32(p[8:]) != 0 {
+		t.Fatalf("wrong password should deny: %#x", p)
+	}
+	// 0x37 logoff → 0x26 result=1
+	off := make([]byte, 0x7C)
+	binary.LittleEndian.PutUint32(off[0:], 7)
+	binary.LittleEndian.PutUint32(off[4:], 22)
+	binary.LittleEndian.PutUint32(off[8:], 5001)
+	copy(off[0xC:], "hero")
+	wc.send(commWorld, 23, 0x37, off)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x26 || binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("logoff reply %#x", p)
+	}
+	// 复登（同会话号；logged 已清）→ 再过门
+	copy(logon[0x30:], "sword")
+	wc.send(commWorld, 24, 0x36, logon)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x25 || binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("re-logon should pass: %#x", p)
+	}
+}
+
 func TestFullLinkManageInfoBootstrap(t *testing.T) {
 	s, _ := startTestServer(t)
 	mc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
@@ -407,7 +478,7 @@ func TestFullLinkAuctionInterop(t *testing.T) {
 	if id2 == 0x2A { // 空库时只有终帧；有块则先块后终帧
 		_, _, id2, p = mc.recv()
 	}
-	if id2 != 0x2B || le32(p, 0) != 0 {
+	if id2 != 0x2B || le32(p, 0) != 1 { // result!=0 = 装载成功（auction LoadOK 开闸位）
 		t.Fatalf("load ok = %#x %v", id2, p)
 	}
 }
@@ -458,5 +529,259 @@ func TestBroadcastSelfAnnounce(t *testing.T) {
 		1, 11, 0)
 	if le32(f, 0x24) != 0 {
 		t.Fatalf("+0x24 = %d, want StoreId 0", le32(f, 0x24))
+	}
+}
+
+// TestFullLinkCreateRoleAndQuery 建角/清单 dispatch 全链（0x0A → 0x06；
+// 0x10 → 0x0D）：帧布局与 fssoloworld/roles.go 定版互为对偶。
+func TestFullLinkCreateRoleAndQuery(t *testing.T) {
+	s, store := startTestServer(t)
+	wc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
+	wc.send(commWorld, 41, innerIdentifyID2, nil)
+
+	// 0x0A create：{client=7, serial=41, server_id=11, account@0xC,
+	// name wchar@0x2D, para wchar@0x71}
+	frame := make([]byte, 0xD4)
+	binary.LittleEndian.PutUint32(frame[0:], 7)
+	binary.LittleEndian.PutUint32(frame[4:], 41)
+	binary.LittleEndian.PutUint32(frame[8:], 11)
+	copy(frame[0xC:], "hero")
+	units := utf16.Encode([]rune("王五"))
+	for i, u := range units {
+		binary.LittleEndian.PutUint16(frame[0x2D+i*2:], u)
+	}
+	units = utf16.Encode([]rune("book1,hair1"))
+	for i, u := range units {
+		binary.LittleEndian.PutUint16(frame[0x71+i*2:], u)
+	}
+	wc.send(commWorld, 41, 0x0A, frame)
+
+	comm, req, id2, p := wc.recv()
+	if comm != commSelf(0) || req != 41 || id2 != 0x06 {
+		t.Fatalf("create reply comm=%d req=%d id2=%#x", comm, req, id2)
+	}
+	if binary.LittleEndian.Uint32(p[0:]) != 7 || binary.LittleEndian.Uint32(p[4:]) != 41 {
+		t.Fatalf("create reply route %#x %#x", p[0:4], p[4:8])
+	}
+	if uidLen := binary.LittleEndian.Uint32(p[8:]); uidLen != 33 { // 32 hex + NUL
+		t.Fatalf("uid len %d", uidLen)
+	}
+	uid := string(p[12 : 12+32])
+	rest := p[12+33:]
+	n := binary.LittleEndian.Uint32(rest)
+	if n != 3 { // 王五 2 码元 + NUL
+		t.Fatalf("name len %d", n)
+	}
+	if got := wideNameOf(rest[4 : 4+(n-1)*2]); got != "王五" {
+		t.Fatalf("create reply name %q", got)
+	}
+	// 落库断言（重名门/外观 para/出生场景缺省）
+	briefs, err := store.QueryAccount("hero", 11)
+	if err != nil || len(briefs) != 1 || briefs[0].Name != "王五" ||
+		briefs[0].UID != uid || briefs[0].Para != "book1,hair1" {
+		t.Fatalf("query account %+v err %v", briefs, err)
+	}
+	if data, meta, ok, _ := store.LoadRole("hero", "王五", 11); !ok ||
+		meta.SceneID != birthSceneID || meta.Location != birthSceneLocation || data != nil {
+		t.Fatalf("stored role meta %+v ok=%v", meta, ok)
+	}
+
+	// 重名拒绝 → {client,serial,u32 1}
+	wc.send(commWorld, 42, 0x0A, frame)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x06 || len(p) != 12 || binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("duplicate create should deny: id2=%#x len=%d", id2, len(p))
+	}
+
+	// 0x10 query_account → 0x0D {client,serial,count,{uid,name,para}}
+	q := make([]byte, 72)
+	binary.LittleEndian.PutUint32(q[0:], 7)
+	binary.LittleEndian.PutUint32(q[4:], 41)
+	copy(q[8:], "hero")
+	wc.send(commWorld, 43, 0x10, q)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x0D {
+		t.Fatalf("query reply id2=%#x", id2)
+	}
+	if binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("query count %#x", p[8:])
+	}
+	item := p[12:]
+	uidN := binary.LittleEndian.Uint32(item)
+	if uidN != 33 { // uid arch-str：32 hex + NUL
+		t.Fatalf("item uid len %d", uidN)
+	}
+	item = item[4+uidN:]
+	if got := wideNameOfNext(&item); got != "王五" {
+		t.Fatalf("query name %q", got)
+	}
+	if got := wideNameOfNext(&item); got != "book1,hair1" {
+		t.Fatalf("query para %q", got)
+	}
+}
+
+// wideNameOf UTF-16LE 字节解码（测试断言用）。
+func wideNameOf(b []byte) string {
+	u := make([]uint16, len(b)/2)
+	for i := range u {
+		u[i] = binary.LittleEndian.Uint16(b[i*2:])
+	}
+	return string(utf16.Decode(u))
+}
+
+// wideNameOfNext 从 item 流读一个 archive 宽串并前移。
+func wideNameOfNext(item *[]byte) string {
+	b := *item
+	n := binary.LittleEndian.Uint32(b)
+	out := wideNameOf(b[4 : 4+(n-1)*2])
+	*item = b[4+n*2:]
+	return out
+}
+
+// TestFullLinkDeleteRole 删角 dispatch 全链（0x0B → 0x07 软删；再删拒；
+// 清单为空）：帧与 fssoloworld/roles.go buildDeleteRoleStore 对偶。
+func TestFullLinkDeleteRole(t *testing.T) {
+	s, store := startTestServer(t)
+	wc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
+	wc.send(commWorld, 51, innerIdentifyID2, nil)
+
+	// 先建角：0x0A（同 TestFullLinkCreateRoleAndQuery 布局）
+	frame := make([]byte, 0xD4)
+	binary.LittleEndian.PutUint32(frame[0:], 7)
+	binary.LittleEndian.PutUint32(frame[4:], 51)
+	binary.LittleEndian.PutUint32(frame[8:], 11)
+	copy(frame[0xC:], "hero")
+	units := utf16.Encode([]rune("王五"))
+	for i, u := range units {
+		binary.LittleEndian.PutUint16(frame[0x2D+i*2:], u)
+	}
+	wc.send(commWorld, 51, 0x0A, frame)
+	_, _, id2, p := wc.recv()
+	if id2 != 0x06 {
+		t.Fatalf("create reply id2=%#x", id2)
+	}
+	uidLen := binary.LittleEndian.Uint32(p[8:])
+	uid := string(p[12 : 12+uidLen-1])
+
+	// 0x0B delete：与 create 同头 + uid@0x71 → 软删 → 0x07 同构回执
+	copy(frame[0x71:], uid)
+	frame = frame[:0xAC]
+	wc.send(commWorld, 52, 0x0B, frame)
+	_, req, id2, p := wc.recv()
+	if req != 52 || id2 != 0x07 {
+		t.Fatalf("delete reply req=%d id2=%#x", req, id2)
+	}
+	if binary.LittleEndian.Uint32(p[0:]) != 7 || binary.LittleEndian.Uint32(p[4:]) != 51 {
+		t.Fatalf("delete reply route %#x", p[:8])
+	}
+	if n := binary.LittleEndian.Uint32(p[8:]); n != uidLen || string(p[12:12+n-1]) != uid {
+		t.Fatalf("delete reply uid %q", p[8:12+uidLen])
+	}
+	rest := p[12+uidLen:]
+	n := binary.LittleEndian.Uint32(rest)
+	if got := wideNameOf(rest[4 : 4+(n-1)*2]); got != "王五" {
+		t.Fatalf("delete reply name %q", got)
+	}
+	// 软删后清单为空；重复删拒
+	if briefs, _ := store.QueryAccount("hero", 11); len(briefs) != 0 {
+		t.Fatalf("query after delete %+v", briefs)
+	}
+	wc.send(commWorld, 53, 0x0B, frame)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x07 || len(p) != 12 || binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("repeat delete should deny: id2=%#x len=%d", id2, len(p))
+	}
+	// 名册回执（0x00 role_info）含 deleted 标志
+	if briefs, _ := store.ResetOnline(11); len(briefs) != 1 || !briefs[0].Deleted {
+		t.Fatalf("role info after delete %+v", briefs)
+	}
+}
+
+// TestFullLinkLoadRole 存档载入 dispatch（0x02 → 0x02 回执）：与
+// fssoloworld buildLoadRoleStore 对偶；空档（新角 save_data NULL）
+// = ok 1 + para 往返。
+func TestFullLinkLoadRole(t *testing.T) {
+	s, store := startTestServer(t)
+	wc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
+	wc.send(commWorld, 61, innerIdentifyID2, nil)
+
+	// 种子角（API 直建）
+	if _, err := store.CreateRole("hero", "王五", "GUID-LOAD-0001", 11,
+		RoleMeta{SavePara1: "book1,hair1"}, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	frame := make([]byte, 0xBC)
+	binary.LittleEndian.PutUint32(frame[0:], 7)
+	binary.LittleEndian.PutUint32(frame[4:], 61)
+	binary.LittleEndian.PutUint32(frame[8:], 11)
+	copy(frame[0xC:], "hero")
+	units := utf16.Encode([]rune("王五"))
+	for i, u := range units {
+		binary.LittleEndian.PutUint16(frame[0x2D+i*2:], u)
+	}
+	wc.send(commWorld, 61, 0x02, frame)
+	_, req, id2, p := wc.recv()
+	if req != 61 || id2 != 0x02 {
+		t.Fatalf("load reply req=%d id2=%#x", req, id2)
+	}
+	if binary.LittleEndian.Uint32(p[0:]) != 7 || binary.LittleEndian.Uint32(p[4:]) != 61 ||
+		binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("load reply head %#x", p[:12])
+	}
+	rest := p[12:]
+	if got := wideNameOfNext(&rest); got != "book1,hair1" {
+		t.Fatalf("load reply para %q", got)
+	}
+
+	// 不存在的角色 → ok 0
+	for i, u := range utf16.Encode([]rune("无")) {
+		binary.LittleEndian.PutUint16(frame[0x2D+i*2:], u)
+	}
+	wc.send(commWorld, 62, 0x02, frame)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x02 || binary.LittleEndian.Uint32(p[8:]) != 0 || len(p) != 12 {
+		t.Fatalf("absent load should deny: len=%d ok=%d", len(p), binary.LittleEndian.Uint32(p[8:]))
+	}
+}
+
+// ---- 发现监督器谓词 ----
+
+func TestDiscoveryPendingStore(t *testing.T) {
+	s, _ := startTestServer(t)
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "any-peer" {
+		t.Fatalf("无入连时缺口 = %v", p)
+	}
+	s.inner.mu.Lock()
+	s.inner.commConn[commWorld] = 1
+	s.inner.mu.Unlock()
+	if p := s.DiscoveryPending(); len(p) != 0 {
+		t.Fatalf("任一 identify 入连即就绪 = %v", p)
+	}
+}
+
+// TestParseConnectStringDSN 官方 SQLOLEDB ConnectString → Go MySQL DSN
+// 公共解析（ini 回落链路核心）。
+func TestParseConnectStringDSN(t *testing.T) {
+	cases := []struct {
+		cs   string
+		want string
+	}{
+		{
+			"Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_base1;Data Source=127.0.0.1:3306",
+			"sa:abc&4621@tcp(127.0.0.1:3306)/nx_base1",
+		},
+		{
+			"Provider=SQLOLEDB;Password=nineyin123;User ID=nineyin;Initial Catalog=nineyin;Data Source=127.0.0.1:3306",
+			"nineyin:nineyin123@tcp(127.0.0.1:3306)/nineyin",
+		},
+		{"Provider=SQLOLEDB;Password=x", ""},         // 缺 User ID/库/源
+		{"", ""},                                      // 空串
+		{"Data Source=127.0.0.1:3306;User ID=sa;Initial Catalog=db;Password=", "sa:@tcp(127.0.0.1:3306)/db"}, // 空密码
+	}
+	for _, c := range cases {
+		if got := ParseConnectStringDSN(c.cs); got != c.want {
+			t.Fatalf("ParseConnectStringDSN(%q) = %q, want %q", c.cs, got, c.want)
+		}
 	}
 }

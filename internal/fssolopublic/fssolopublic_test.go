@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -215,6 +216,9 @@ func newTestServer(t *testing.T) *Server {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// echo 动态口（0=系统分配）：测试与在跑服务（合一服 echo 15003）
+	// 常驻冲突，端口写死会互相挤兑。
+	cfg.EchoPort = 0
 	return New(cfg, Options{})
 }
 
@@ -578,7 +582,7 @@ func TestEchoWelcomeAndCommands(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer s.Stop()
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", s.cfg.EchoPort), 2*time.Second)
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", s.EchoPort()), 2*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -618,5 +622,29 @@ func TestBroadcastServerInfoPacket(t *testing.T) {
 	}
 	if u32at(pkt, 0x1C) != 1 || u32at(pkt, 0x20) != 11 {
 		t.Fatalf("district/server 域错位")
+	}
+}
+
+// ---- 发现监督器谓词 ----
+
+// markConn 白盒标记 comm 已连（识别入登记等价；谓词只看登记面）。
+func markConn(s *Server, comm uint32) {
+	s.inner.mu.Lock()
+	s.inner.commConn[comm] = 1
+	s.inner.mu.Unlock()
+}
+
+func TestDiscoveryPendingPublic(t *testing.T) {
+	s := newTestServer(t) // 谓词直驱（不 Start：监督器不起）
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "store,entry0" {
+		t.Fatalf("初始缺口 = %v", p)
+	}
+	markConn(s, CommStoreMin)
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "entry0" {
+		t.Fatalf("store 连入后缺口 = %v", p)
+	}
+	markConn(s, CommEntryMin)
+	if p := s.DiscoveryPending(); len(p) != 0 {
+		t.Fatalf("全连后应就绪 = %v", p)
 	}
 }

@@ -3,6 +3,7 @@ package fssoloauction
 import (
 	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -597,4 +598,117 @@ func freePort(t *testing.T) int {
 	}
 	defer ln.Close()
 	return ln.Addr().(*net.TCPAddr).Port
+}
+
+// ---- 发现监督器：store 广播门 +4 勘误 + 就绪谓词 ----
+
+func TestOnBroadcastStoreGateRawID(t *testing.T) {
+	// 假 store 受面：收 auction identify 后回 identify comm 4
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	storePort := ln.Addr().(*net.TCPAddr).Port
+	accepted := make(chan net.Conn, 1)
+	go func() {
+		c, err := ln.Accept()
+		if err == nil {
+			accepted <- c
+		}
+	}()
+
+	s := New(Options{
+		DistrictID: 1, ServerID: 11,
+		InnerAddr: "127.0.0.1", InnerPort: freePort(t),
+		EchoAddr: "", EchoPort: -1,
+		BroadPort:  0, // 关广播口（直喂 onBroadcast）
+		ManualTick: true,
+		Logf:       t.Logf,
+	})
+	if err := s.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
+
+	// store 自宣 +0x24 = 裸 StoreID 0（fssolostore 同构；官方 auction
+	// 门要求完整 comm 4..7 属永不命中的失配——勘误后 +4 基址）
+	pkt := make([]byte, 0x28)
+	binary.LittleEndian.PutUint32(pkt[0:], announceStore)
+	binary.LittleEndian.PutUint32(pkt[4:], announceMagic)
+	copy(pkt[8:], "127.0.0.1")
+	binary.LittleEndian.PutUint32(pkt[0x18:], uint32(storePort))
+	binary.LittleEndian.PutUint32(pkt[0x1C:], 1)
+	binary.LittleEndian.PutUint32(pkt[0x20:], 11)
+	binary.LittleEndian.PutUint32(pkt[0x24:], 0)
+	s.onBroadcast(pkt, "127.0.0.1", 0)
+
+	var c net.Conn
+	select {
+	case c = <-accepted:
+		defer c.Close()
+	case <-time.After(2 * time.Second):
+		t.Fatal("裸 StoreID 0 自宣未触发外连（门勘误失效）")
+	}
+	c.SetReadDeadline(time.Now().Add(2 * time.Second))
+	hdr := make([]byte, 16)
+	if _, err := io.ReadFull(c, hdr); err != nil {
+		t.Fatal(err)
+	}
+	if comm := binary.LittleEndian.Uint32(hdr[4:]); comm != commSelf {
+		t.Fatalf("auction identify comm=%d（应 %d）", comm, commSelf)
+	}
+	if id2 := binary.LittleEndian.Uint32(hdr[12:]); id2 != innerIdentifyID2 {
+		t.Fatalf("首帧应 identify，id2=%#x", id2)
+	}
+	frame, _ := encodeInner(commStoreMin, 0, innerIdentifyID2, nil)
+	c.SetWriteDeadline(time.Now().Add(2 * time.Second))
+	if _, err := c.Write(frame); err != nil {
+		t.Fatal(err)
+	}
+
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if len(s.DiscoveryPending()) == 0 && s.inner.Connected(commStoreMin) {
+			return // identify 应答即就绪
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatalf("store identify 后未就绪：pending=%v connected=%v",
+		s.DiscoveryPending(), s.inner.Connected(commStoreMin))
+}
+
+func TestDiscoveryPendingLocalStore(t *testing.T) {
+	// LocalStore 垫片在场即视作 store 已连（Start 内 evStoreConnected 同语义）
+	s := New(Options{
+		DistrictID: 1, ServerID: 11,
+		InnerAddr: "127.0.0.1", InnerPort: freePort(t),
+		EchoAddr: "", EchoPort: -1,
+		BroadPort: 0, ManualTick: true,
+		Logf:      func(string, ...any) {},
+	})
+	if err := s.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
+	if p := s.DiscoveryPending(); len(p) != 1 || p[0] != "store0" {
+		t.Fatalf("无 store 时缺口应为 [store0]：%v", p)
+	}
+
+	ls := &LocalStore{}
+	s2 := New(Options{
+		DistrictID: 1, ServerID: 11,
+		InnerAddr: "127.0.0.1", InnerPort: freePort(t),
+		EchoAddr: "", EchoPort: -1,
+		BroadPort: 0, ManualTick: true,
+		LocalStore: ls,
+		Logf:      func(string, ...any) {},
+	})
+	if err := s2.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s2.Stop()
+	if p := s2.DiscoveryPending(); len(p) != 0 {
+		t.Fatalf("LocalStore 垫片应即就绪：%v", p)
+	}
 }

@@ -2,16 +2,17 @@ package fsunite
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
+	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloauction"
 	"github.com/lizhanyin/9yin-server-go/internal/fssololog"
 	"github.com/lizhanyin/9yin-server-go/internal/fssolomember"
 	"github.com/lizhanyin/9yin-server-go/internal/fssolopublic"
 	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
-	"github.com/lizhanyin/9yin-server-go/internal/fskit"
 )
 
 // Config 是 game_unite.ini 方言的投影（solounite/main.lua main() 全量
@@ -94,10 +95,12 @@ type Config struct {
 
 	// testXxxEcho 测试口位覆盖（ini 无此键；同包测试注入——实体 ctor
 	// 缺省口 15003/15100/15200/16001 与并行包测试进程冲突时改写）。
-	testPublicEcho  int
-	testStoreEcho   int
-	testEntryEcho   int
-	testAuctionEcho int
+	testPublicEcho   int
+	testStoreEcho    int
+	testEntryEcho    int
+	testAuctionEcho  int
+	testAuctionInner int    // 测试 auction 内口覆写（官方缺省 16003）
+	testLogMutex     string // 测试互斥名覆写（与在跑服务互斥体解耦）
 }
 
 // DefaultConfig 官方 game_unite.ini + main.lua 缺省定案。
@@ -129,6 +132,17 @@ func DefaultConfig() Config {
 // ParseGameUniteINI 解析 game_unite.ini 文本（分词统一走 fskit.ParseItems
 // ＝官方 CIniFile Build 方言：`[节]` + `键=值`；`//` 与 `;` 注释；
 // [Module] 裸行按 key-only 条目收集）。
+// MySQLDSN 存储后端 DSN 解析（公共方法）：环境变量 NINEYIN_MYSQL_DSN
+// 优先（env.server），缺省回落 game_unite.ini [Role] ConnectString
+// （官方 SQLOLEDB 方言，经 fssolostore.ParseConnectStringDSN 转换）；
+// 两者皆空返回 ""（内存库，重启即丢）。
+func (c Config) MySQLDSN() string {
+	if dsn := strings.TrimSpace(os.Getenv("NINEYIN_MYSQL_DSN")); dsn != "" {
+		return dsn
+	}
+	return fssolostore.ParseConnectStringDSN(c.RoleBase) // RoleBase=[Role] ConnectString
+}
+
 func ParseGameUniteINI(data []byte) (Config, error) {
 	cfg := DefaultConfig()
 	b := func(v string) bool { return v == "1" || strings.EqualFold(v, "true") }
@@ -382,7 +396,7 @@ func (c Config) AuctionOptions() fssoloauction.Options {
 		DistrictID:    uint32(c.DistrictID),
 		ServerID:      uint32(c.ServerID),
 		InnerAddr:     c.InnerAddr,
-		InnerPort:     0,
+		InnerPort:     c.testAuctionInner, // 0=官方缺省 16003
 		EchoAddr:      "127.0.0.1",
 		EchoPort:      echoPort,
 		BroadAddr:     c.BroadAddr,
@@ -399,8 +413,9 @@ func (c Config) LoggerOptions() fssololog.Options {
 	return fssololog.Options{
 		AppName:       "SoloLog",
 		LogFileDir:    `log\`,
-		EveryDayAlone: false, // main.lua 显式 false（每日一档关闭）
-		AutoExit:      false, // 偏差：无 LogShareMem 生产者，看门狗必杀 → 关
+		EveryDayAlone: false,          // main.lua 显式 false（每日一档关闭）
+		AutoExit:      false,          // 偏差：无 LogShareMem 生产者，看门狗必杀 → 关
+		MutexName:     c.testLogMutex, // 空=官方单实例互斥名
 	}
 }
 

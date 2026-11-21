@@ -61,6 +61,9 @@ type Server struct {
 	stopOnce sync.Once
 	ticker   *time.Ticker
 	tickDone chan struct{}
+
+	watchStop chan struct{} // 发现监督器停口（startDiscoveryWatch 建）
+	watchOnce sync.Once
 }
 
 // New 创建 Server（ctor 缺省全对齐 DefaultConfig）。
@@ -127,6 +130,7 @@ func (s *Server) Start() error {
 			}
 		}()
 	}
+	s.startDiscoveryWatch()
 	s.opt.Logf("game server %d member %d started", s.cfg.ServerID, s.cfg.MemberID)
 	return nil
 }
@@ -134,6 +138,11 @@ func (s *Server) Start() error {
 // Stop 官方 SoloMember::Stop 停机序（§三）。
 func (s *Server) Stop() {
 	s.stopOnce.Do(func() {
+		s.watchOnce.Do(func() {
+			if s.watchStop != nil {
+				close(s.watchStop)
+			}
+		})
 		if s.ticker != nil {
 			s.ticker.Stop()
 			// ticker.Stop 不关 channel（for range 永不返回），超时兜底

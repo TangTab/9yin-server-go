@@ -167,6 +167,7 @@ func TestRoleDataCapitalWindow(t *testing.T) {
 	}
 	// 下线核对偏差 → type 8（expected=50+30+80+80=240 vs val=40）。
 	s.roleData.CheckCapital("张三", 1, 40)
+	waitAlerts(t, sink, 2) // 告警经异步写线程落库：先等再断言（全量并行负载下直断必竞态）
 	if len(sink.alerts) != 2 || sink.alerts[1].Type != 8 {
 		t.Fatalf("check capital alerts=%+v", sink.alerts)
 	}

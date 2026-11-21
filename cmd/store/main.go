@@ -49,11 +49,11 @@ UseMysql=true
 //Port=4001
 
 [Account]
-ConnectString=Provider=SQLOLEDB;Password=abc;User ID=sa;Initial Catalog=nx_district;Data Source=192.168.33.70
+ConnectString=Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_district;Data Source=192.168.33.70
 ConnectPool=1
 
 [Role]
-ConnectString=Provider=SQLOLEDB;Password=abc;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.33.70
+ConnectString=Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.33.70
 ConnectPool=1
 
 [Log]
@@ -65,7 +65,7 @@ ConnectString=
 ConnectPool=
 
 [Manage]
-ConnectString=Provider=SQLOLEDB;Password=abc;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.33.70
+ConnectString=Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.33.70
 ConnectPool=1
 `
 

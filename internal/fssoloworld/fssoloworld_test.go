@@ -1,12 +1,18 @@
 package fssoloworld
 
 import (
+	"github.com/lizhanyin/9yin-server-go/internal/auth"
+	"github.com/lizhanyin/9yin-server-go/internal/proto"
+
 	"bufio"
 	"encoding/binary"
+	"fmt"
+	"io"
 	"net"
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf16"
 )
 
 func TestParseGameWorldINI(t *testing.T) {
@@ -440,6 +446,27 @@ func TestEchoCloseCommand(t *testing.T) {
 }
 
 // entry 消息面：Accept/Login/CreateRole 全链。
+// buildTestOp02 构造真机方言 op02（auth.EncryptFields 同源；golden 333 版本）。
+func buildTestOp02(account, password string) []byte {
+	acctCt, pwCt := auth.EncryptFields(account, auth.ComputeLoginPassword(password))
+	fld := func(slot []byte) []byte {
+		b := make([]byte, 4)
+		binary.LittleEndian.PutUint32(b, uint32(len(slot)))
+		return append(b, slot...)
+	}
+	buf := make([]byte, 25, 25+len(acctCt)+len(pwCt)+64)
+	buf[0] = 0x02
+	binary.LittleEndian.PutUint32(buf[1:], 333)
+	// 账号长度嵌在头内 [0x15:0x19]，槽体紧随 0x19（无自身长度前缀）
+	binary.LittleEndian.PutUint32(buf[0x15:], uint32(len(acctCt)))
+	buf = append(buf, acctCt...)
+	buf = append(buf, fld(pwCt)...) // 密码长度为独立 u32
+	buf = append(buf, 0, 0, 0, 0)   // clientType（不占槽）
+	buf = append(buf, fld(make([]byte, 16))...)
+	buf = append(buf, 0, 0, 0, 0) // loginType，收帧尾
+	return buf
+}
+
 func TestEntryMessageFlow(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.InnerAddr = "127.0.0.1"
@@ -462,19 +489,17 @@ func TestEntryMessageFlow(t *testing.T) {
 	if s.Players().Count() != 1 {
 		t.Fatal("player count")
 	}
-	// Login {u32 len account "acct" | u32 len password "pw"}
-	lg := make([]byte, 0, 16)
-	lg = append(lg, byte(4), 0, 0, 0)
-	lg = append(lg, []byte("acct")...)
-	lg = append(lg, byte(2), 0, 0, 0)
-	lg = append(lg, []byte("pw")...)
-	msg := make([]byte, 0, 32)
+	// Login：真机方言 op02（25B 头 + DES 双槽；auth 包同源加密）。
+	// 无 inner 的单测形态下 0x36 发送失败静默，玩家停在 PlLogging、
+	// 账号由解密明文绑定。
+	op := buildTestOp02("acct", "pw")
+	msg := make([]byte, 0, 8+len(op))
 	var h [8]byte
 	binary.LittleEndian.PutUint32(h[0:], 7)
 	binary.LittleEndian.PutUint32(h[4:], 1)
 	msg = append(msg, h[:]...)
-	msg = append(msg, clientMsgLogin)
-	msg = append(msg, lg...)
+	msg = append(msg, byte(clientMsgLogin+1)) // 客户端 opcode（内网号+1）
+	msg = append(msg, op[1:]...)
 	if !s.ProcessEntryMsg(0, 3, msg) {
 		t.Fatal("login")
 	}
@@ -482,8 +507,19 @@ func TestEntryMessageFlow(t *testing.T) {
 	if p == nil || p.Account != "acct" {
 		t.Fatalf("player %+v", p)
 	}
-	if p.State != PlGetting && p.State != PlLogging {
+	if p.State != PlLogging {
 		t.Fatalf("state %s", p.State)
+	}
+	// store 0x25 回执（result=1）→ PlGetting + 下行 0x04（nil inner 静默）
+	rep := make([]byte, 0x18)
+	binary.LittleEndian.PutUint32(rep[0:], 7)
+	binary.LittleEndian.PutUint32(rep[4:], 1)
+	binary.LittleEndian.PutUint32(rep[8:], 1)
+	if !s.accountLogonReply(rep) {
+		t.Fatal("logon reply")
+	}
+	if p.State != PlGetting {
+		t.Fatalf("after reply state %s", p.State)
 	}
 	// CreateRole（名 "王五"）
 	cr := make([]byte, 0, 16)
@@ -495,7 +531,7 @@ func TestEntryMessageFlow(t *testing.T) {
 	}
 	msg2 := make([]byte, 0, 32)
 	msg2 = append(msg2, h[:]...)
-	msg2 = append(msg2, clientMsgCreateRole)
+	msg2 = append(msg2, clientMsgCreateRole+1)
 	msg2 = append(msg2, cr...)
 	if !s.ProcessEntryMsg(0, 3, msg2) {
 		t.Fatal("createrole")
@@ -614,4 +650,513 @@ func TestSceneStateToOpened(t *testing.T) {
 	if !s.OpenServer() || s.State() != "Opened" {
 		t.Fatal("open")
 	}
+}
+
+// innerTestConn 测试伪实体连接（identify 登记 + 内网帧收发）。
+type innerTestConn struct {
+	conn net.Conn
+	rd   *bufio.Reader
+	t    *testing.T
+}
+
+// dialInnerTest 伪实体拨号 world inner 口并 identify。
+func dialInnerTest(t *testing.T, port int, comm uint32) *innerTestConn {
+	t.Helper()
+	var c net.Conn
+	var err error
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	for i := 0; i < 50; i++ {
+		c, err = net.Dial("tcp", addr)
+		if err == nil {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	if err != nil {
+		t.Fatalf("dial %s: %v", addr, err)
+	}
+	ic := &innerTestConn{conn: c, rd: bufio.NewReader(c), t: t}
+	t.Cleanup(func() { c.Close() })
+	ic.send(comm, 0, innerIdentifyID2, nil)
+	return ic
+}
+
+func (m *innerTestConn) send(comm, id1, id2 uint32, payload []byte) {
+	f, err := encodeInner(comm, id1, id2, payload)
+	if err != nil {
+		m.t.Fatal(err)
+	}
+	if _, err := m.conn.Write(f); err != nil {
+		m.t.Fatal(err)
+	}
+}
+
+func (m *innerTestConn) recv() (comm, id1, id2 uint32, payload []byte) {
+	m.conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+	head := make([]byte, 4)
+	if _, err := io.ReadFull(m.rd, head); err != nil {
+		m.t.Fatalf("read head: %v", err)
+	}
+	body := make([]byte, binary.LittleEndian.Uint32(head))
+	if _, err := io.ReadFull(m.rd, body); err != nil {
+		m.t.Fatalf("read body: %v", err)
+	}
+	comm = binary.LittleEndian.Uint32(body[0:4])
+	id1 = binary.LittleEndian.Uint32(body[4:8])
+	id2 = binary.LittleEndian.Uint32(body[8:12])
+	return comm, id1, id2, body[12:]
+}
+
+// recvClientFrame 伪 entry 收 entrySendClient 下行并剥 {client,serial} 头。
+func (m *innerTestConn) recvClientFrame(t *testing.T) []byte {
+	t.Helper()
+	comm, _, id2, p := m.recv()
+	if comm != commWorld || id2 != entrySendClient {
+		t.Fatalf("entry downlink comm=%d id2=%#x", comm, id2)
+	}
+	if len(p) < 8 {
+		t.Fatalf("entry downlink len %d", len(p))
+	}
+	return p[8:]
+}
+
+// buildRealMachineOp05 真机方言 op05 帧（fork 实证布局）：[4B 保留]
+// + 裸 UTF-16LE 名字 NUL + pad 0x48 + tag6 外观串。
+func buildRealMachineOp05(name string, appearance []string) []byte {
+	body := make([]byte, 0x48)
+	units := utf16.Encode([]rune(name))
+	for i, u := range units {
+		binary.LittleEndian.PutUint16(body[4+i*2:], u)
+	}
+	for _, s := range appearance {
+		body = append(body, 6)
+		body = binary.LittleEndian.AppendUint32(body, uint32(len(s)+1))
+		body = append(body, s...)
+		body = append(body, 0)
+	}
+	frame := make([]byte, 0, 9+len(body))
+	frame = append(frame, 5) // 客户端 opcode（op05；内网号折算 4）
+	return append(frame, body...)
+}
+
+// TestCreateRoleEndToEnd 建角闭环（官方通路全链）：op02 登录 → 0x36/0x25
+// → 无角 0x04 + 0x10 空清单 → op05（真机方言）→ store 0x0A → 0x06 回执
+// → 下行有角 0x04（rolePara 36 字段 golden 断言）→ 0x0D 重登列表。
+func TestCreateRoleEndToEnd(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.InnerAddr = "127.0.0.1"
+	cfg.InnerPort = 0
+	cfg.BroadPort = 0
+	cfg.EchoAddr = ""
+	s := New(Options{Config: cfg, ManualTick: true, Logf: func(format string, args ...any) {
+		t.Logf(format, args...)
+	}})
+	if err := s.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
+
+	st := dialInnerTest(t, s.InnerPort(), commStoreMin) // 伪 store
+	en := dialInnerTest(t, s.InnerPort(), commEntryMin) // 伪 entry
+	// identify 登记是 reactor 异步面：等 commConn 就绪再驱动登录链
+	waitComm := func(comm uint32) {
+		t.Helper()
+		for i := 0; i < 200; i++ {
+			if s.inner.GetConnected(comm) {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		t.Fatalf("comm %d not registered", comm)
+	}
+	waitComm(commStoreMin)
+	waitComm(commEntryMin)
+
+	// ClientAccept {7,1} + op02（真机 DES 方言）
+	h := make([]byte, 8)
+	binary.LittleEndian.PutUint32(h[0:], 7)
+	binary.LittleEndian.PutUint32(h[4:], 1)
+	if !s.ProcessEntryMsg(0, 0, h) {
+		t.Fatal("accept")
+	}
+	op := buildTestOp02("acct", "pw")
+	msg := append([]byte{}, h...)
+	msg = append(msg, byte(clientMsgLogin+1))
+	msg = append(msg, op[1:]...)
+	if !s.ProcessEntryMsg(0, 3, msg) {
+		t.Fatal("login")
+	}
+
+	// 伪 store 收 0x36（account@0xC）→ 回 0x25 result=1
+	if _, _, id2, p := st.recv(); id2 != 0x36 || string(p[0xC:0xC+4]) != "acct" {
+		t.Fatalf("logon to store id2=%#x acct=%q", id2, p[0xC:0xC+4])
+	}
+	rep := make([]byte, 0x18)
+	binary.LittleEndian.PutUint32(rep[0:], 7)
+	binary.LittleEndian.PutUint32(rep[4:], 1)
+	binary.LittleEndian.PutUint32(rep[8:], 1)
+	st.send(commStoreMin, 0, 0x25, rep)
+
+	// 0x10 清单请求 → 0x0D 空回执 → 无角 0x04（统一 0x04 下行路径）
+	if _, _, id2, p := st.recv(); id2 != 0x10 || string(p[8:8+4]) != "acct" {
+		t.Fatalf("query account id2=%#x", id2)
+	}
+	st.send(commStoreMin, 0, 0x0D, emptyRolesReply(h))
+	if f := en.recvClientFrame(t); len(f) != 0x29 || f[0] != 0x04 ||
+		binary.LittleEndian.Uint32(f[0x25:]) != 0 {
+		t.Fatalf("no-role 0x04 len=%d", len(f))
+	}
+
+	// op0x18 心跳 → 0x38 整帧回显（选角页面期 RTT 配对依赖）
+	ping := append([]byte{}, h...)
+	ping = append(ping, 0x18, 1, 2, 3, 4, 5, 6, 7, 8)
+	if !s.ProcessEntryMsg(0, 3, ping) {
+		t.Fatal("ping")
+	}
+	if echo := en.recvClientFrame(t); echo[0] != 0x38 || len(echo) < 20+18-10 { // 回显+18B 尾（真机 12B 心跳=30B；测试短 ping）
+		t.Fatalf("heartbeat echo op=%#x len=%d", echo[0], len(echo))
+	}
+
+	// op05 真机方言（girl 外观 → rolePara f0=1）
+	appearance := []string{"book1", `icon\players\girl01_create.png`, `obj\char\g_hair\g_hair1`}
+	op5 := append([]byte{}, h...)
+	op5 = append(op5, buildRealMachineOp05("王五", appearance)...)
+	if !s.ProcessEntryMsg(0, 3, op5) {
+		t.Fatal("createrole")
+	}
+	if p := s.Players().FindByConnect(7, 1); p == nil || p.State != PlCreating {
+		t.Fatalf("creating state %+v", p)
+	}
+
+	// 伪 store 收 0x0A：{account@0xC, name@0x2D, para@0x71}
+	_, _, id2, cp := st.recv()
+	if id2 != 0x0A {
+		t.Fatalf("expect 0x0A, got %#x", id2)
+	}
+	if string(cp[0xC:0xC+4]) != "acct" {
+		t.Fatalf("create account %q", cp[0xC:0xC+4])
+	}
+	if got := wideNulName(cp[0x2D : 0x2D+0x44]); got != "王五" {
+		t.Fatalf("create name %q", got)
+	}
+	if got := wideNulName(cp[0x71:]); got != joinAppearance(appearance) {
+		t.Fatalf("create para %q", got)
+	}
+
+	// 0x06 回执（{client,serial,arch-str uid,arch-wstr name} 金样形态）
+	sr := make([]byte, 0, 32)
+	sr = append(sr, h...)
+	var l [4]byte
+	binary.LittleEndian.PutUint32(l[0:], 5)
+	sr = append(sr, l[:]...)
+	sr = append(sr, []byte("GUID9")...)
+	binary.LittleEndian.PutUint32(l[0:], 2)
+	sr = append(sr, l[:]...)
+	for _, u := range utf16.Encode([]rune("王五")) {
+		sr = append(sr, byte(u), byte(u>>8))
+	}
+	st.send(commStoreMin, 0, 6, sr)
+
+	// 下行有角 0x04：[0x25]=1 + 6 值 TVarList（名字/rolePara golden）
+	f := en.recvClientFrame(t)
+	if f[0] != 0x04 || binary.LittleEndian.Uint32(f[0x25:]) != 1 {
+		t.Fatalf("one-role 0x04 head %#x", f[0])
+	}
+	vl, err := proto.DecodeVarList(f[0x29:])
+	if err != nil {
+		t.Fatalf("varlist: %v", err)
+	}
+	if len(vl.Values) != 6 || vl.Values[2].Text != "王五" {
+		t.Fatalf("role name slot %+v", vl.Values)
+	}
+	fields := strings.Split(vl.Values[3].Text, ",")
+	if len(fields) != 36 || fields[0] != "1" || fields[1] != "" ||
+		fields[32] != "book1" || fields[24] != "scene_name_017" ||
+		fields[25] != "introduction_qdz01_title" {
+		t.Fatalf("rolePara %q", vl.Values[3].Text)
+	}
+	if p := s.Players().FindByConnect(7, 1); p == nil || p.State != PlLogged ||
+		s.Players().FindByName("王五") != p || !s.Names().FindName("王五") {
+		t.Fatalf("logged state %+v", p)
+	}
+
+	// 重登清单：0x0D 带 1 角色（para 往返）→ 有角 0x04
+	lr := make([]byte, 0, 64)
+	lr = append(lr, h...)
+	lr = binary.LittleEndian.AppendUint32(lr, 1)
+	lr = binary.LittleEndian.AppendUint32(lr, uint32(len("GUID9")+1))
+	lr = append(lr, "GUID9"...)
+	lr = append(lr, 0)
+	lr = appendArchWideTest(lr, "王五")
+	lr = appendArchWideTest(lr, joinAppearance(appearance))
+	st.send(commStoreMin, 0, 0x0D, lr)
+	f = en.recvClientFrame(t)
+	if f[0] != 0x04 || binary.LittleEndian.Uint32(f[0x25:]) != 1 {
+		t.Fatalf("reload one-role 0x04")
+	}
+	vl, err = proto.DecodeVarList(f[0x29:])
+	if err != nil || len(vl.Values) != 6 || vl.Values[2].Text != "王五" {
+		t.Fatalf("reload varlist err=%v vals=%d", err, len(vl.Values))
+	}
+
+	// 删角：op06（uid arch-str）→ PlDeleting + 0x0B → 0x07 → 名册移除
+	// + 0x10 刷新 → 0x0D 空 → 无角 0x04（界面回建角页）
+	del := append([]byte{}, h...)
+	del = append(del, 6) // 客户端 opcode（op06）
+	del = binary.LittleEndian.AppendUint32(del, uint32(len("GUID9")))
+	del = append(del, "GUID9"...)
+	if !s.ProcessEntryMsg(0, 3, del) {
+		t.Fatal("deleterole")
+	}
+	if p := s.Players().FindByConnect(7, 1); p == nil || p.State != PlDeleting {
+		t.Fatalf("deleting state %+v", p)
+	}
+	_, _, id2, dp := st.recv()
+	if id2 != 0x0B {
+		t.Fatalf("expect 0x0B, got %#x", id2)
+	}
+	if got := wideNulName(dp[0x2D : 0x2D+0x44]); got != "王五" {
+		t.Fatalf("delete name %q", got)
+	}
+	if string(dp[0x71:0x71+5]) != "GUID9" {
+		t.Fatalf("delete uid %q", dp[0x71:0x71+5])
+	}
+	// 0x07 回执（{client,serial,arch-str uid,arch-wstr name}，0x06 同构）
+	dr := make([]byte, 0, 32)
+	dr = append(dr, h...)
+	binary.LittleEndian.PutUint32(l[0:], 5)
+	dr = append(dr, l[:]...)
+	dr = append(dr, []byte("GUID9")...)
+	binary.LittleEndian.PutUint32(l[0:], 2)
+	dr = append(dr, l[:]...)
+	for _, u := range utf16.Encode([]rune("王五")) {
+		dr = append(dr, byte(u), byte(u>>8))
+	}
+	st.send(commStoreMin, 0, 7, dr)
+	// 0x10 刷新（names.Remove 先于本请求发出，收到即名册已清）
+	if _, _, id2, _ = st.recv(); id2 != 0x10 {
+		t.Fatalf("refresh query id2=%#x", id2)
+	}
+	if s.Names().FindName("王五") {
+		t.Fatal("nameuid should drop name")
+	}
+	st.send(commStoreMin, 0, 0x0D, emptyRolesReply(h))
+	if f = en.recvClientFrame(t); len(f) != 0x29 || f[0] != 0x04 ||
+		binary.LittleEndian.Uint32(f[0x25:]) != 0 {
+		t.Fatalf("after delete no-role 0x04 len=%d", len(f))
+	}
+	// 末态 Getting：0x0D 刷新置列表态（客户端可再 op05 建角）
+	if p := s.Players().FindByConnect(7, 1); p == nil || p.State != PlGetting {
+		t.Fatalf("after delete state %+v", p)
+	}
+
+	// 再建角后走进场：op04（UCS2 名字，0x54 定长真机方言）→ 0x02 load
+	// → 回执 → 进场帧簇（0x09/0x0A/0x0B/0x0D）→ op09 ClientReady →
+	// View43/40 新手视图
+	op5b := append([]byte{}, h...)
+	op5b = append(op5b, buildRealMachineOp05("王五", appearance)...)
+	if !s.ProcessEntryMsg(0, 3, op5b) {
+		t.Fatal("re-createrole")
+	}
+	_, _, id2, _ = st.recv() // 0x0A
+	sr2 := make([]byte, 0, 32)
+	sr2 = append(sr2, h...)
+	binary.LittleEndian.PutUint32(l[0:], 5)
+	sr2 = append(sr2, l[:]...)
+	sr2 = append(sr2, []byte("GUID9")...)
+	binary.LittleEndian.PutUint32(l[0:], 2)
+	sr2 = append(sr2, l[:]...)
+	for _, u := range utf16.Encode([]rune("王五")) {
+		sr2 = append(sr2, byte(u), byte(u>>8))
+	}
+	st.send(commStoreMin, 0, 6, sr2)
+	en.recvClientFrame(t) // 有角 0x04（0x06 回执驱动）
+
+	ch := make([]byte, 0x4B)
+	for i, u := range utf16.Encode([]rune("王五")) {
+		binary.LittleEndian.PutUint16(ch[i*2:], u)
+	}
+	op4 := append([]byte{}, h...)
+	op4 = append(op4, 4) // op04
+	op4 = append(op4, ch...)
+	if !s.ProcessEntryMsg(0, 3, op4) {
+		t.Fatal("chooserole")
+	}
+	if p := s.Players().FindByConnect(7, 1); p == nil || p.State != PlChoosing {
+		t.Fatalf("choosing state %+v", p)
+	}
+	if _, _, id2, lp := st.recv(); id2 != 0x02 || string(lp[0xC:0xC+4]) != "acct" ||
+		wideNulName(lp[0x2D:0x2D+0x44]) != "王五" {
+		t.Fatalf("load to store id2=%#x", id2)
+	}
+	// 0x02 回执 {client,serial,ok=1,arch-wstr para}
+	lr2 := make([]byte, 0, 64)
+	lr2 = append(lr2, h...)
+	lr2 = binary.LittleEndian.AppendUint32(lr2, 1)
+	lr2 = appendArchWideTest(lr2, joinAppearance(appearance))
+	st.send(commStoreMin, 0, 2, lr2)
+	// 进场（真机镜像回放方言）：0x32×2 → 0x09 表 → 0x0A 表 → 外服进场段
+	for i := 0; i < 2; i++ {
+		if f = en.recvClientFrame(t); f[0] != 0x32 {
+			t.Fatalf("inner push frame %#x", f[0])
+		}
+	}
+	if f = en.recvClientFrame(t); f[0] != 0x09 || len(f) != 29664 {
+		t.Fatalf("property table frame len=%d", len(f)) // 真机镜像 2086 项
+	}
+	if f = en.recvClientFrame(t); f[0] != 0x0A || len(f) != 7921 {
+		t.Fatalf("records mirror frame len=%d", len(f)) // 真机镜像 344 schema
+	}
+	// 外服进场段回放：首帧 0x0B（五属性），尾至 272 帧不等长（镜像包）
+	if f = en.recvClientFrame(t); f[0] != 0x0B || binary.LittleEndian.Uint16(f[13:]) != 5 {
+		t.Fatalf("golden entry head op=%#x attrs=%d", f[0], binary.LittleEndian.Uint16(f[13:]))
+	}
+	for i := 1; i < 272; i++ { // 其余 271 帧只验可读（0x14/0x11/0x29/0x28/0x18 混序）
+		en.recvClientFrame(t)
+	}
+	// op09 ClientReady（单字节）→ 就绪段回放（85 帧）
+	rdy := append([]byte{}, h...)
+	rdy = append(rdy, 9)
+	if !s.ProcessEntryMsg(0, 3, rdy) {
+		t.Fatal("ready")
+	}
+	for i := 0; i < 85; i++ {
+		en.recvClientFrame(t)
+	}
+	if !s.Names().FindName("王五") {
+		t.Fatal("nameuid missing after full flow")
+	}
+}
+
+// emptyRolesReply 0x0D 空清单回执 {client,serial,count=0}。
+func emptyRolesReply(h []byte) []byte {
+	b := make([]byte, 12)
+	copy(b[0:8], h)
+	return b
+}
+
+// wideNulName UTF-16LE 扫 NUL 解码（0x0A 帧槽断言用）。
+func wideNulName(p []byte) string {
+	end := 0
+	for end+1 < len(p) {
+		if p[end] == 0 && p[end+1] == 0 {
+			break
+		}
+		end += 2
+	}
+	u := make([]uint16, end/2)
+	for i := range u {
+		u[i] = binary.LittleEndian.Uint16(p[i*2:])
+	}
+	return string(utf16.Decode(u))
+}
+
+// appendArchWideTest archive 宽串（含 NUL；world readArchiveWidestr 对偶）。
+func appendArchWideTest(b []byte, s string) []byte {
+	u := utf16.Encode([]rune(s))
+	u = append(u, 0)
+	b = binary.LittleEndian.AppendUint32(b, uint32(len(u)))
+	for _, c := range u {
+		b = binary.LittleEndian.AppendUint16(b, c)
+	}
+	return b
+}
+
+// TestParseCreateRoleBody op05 载荷双读法（archive 宽串 / 真机裸 UTF-16）
+// + tag6 外观扫描。
+func TestParseCreateRoleBody(t *testing.T) {
+	// 读法一：archive 宽串 {u32 2, UTF-16("王五")} + 0x48 起 tag6
+	ab := make([]byte, 0x48)
+	binary.LittleEndian.PutUint32(ab[0:], 2)
+	for i, u := range utf16.Encode([]rune("王五")) {
+		binary.LittleEndian.PutUint16(ab[4+i*2:], u)
+	}
+	ab = append(ab, 6)
+	ab = binary.LittleEndian.AppendUint32(ab, uint32(len("book1")+1))
+	ab = append(ab, "book1"...)
+	ab = append(ab, 0)
+	name, appear := parseCreateRoleBody(ab)
+	if name != "王五" || len(appear) != 1 || appear[0] != "book1" {
+		t.Fatalf("archive dialect name=%q appear=%v", name, appear)
+	}
+	// 读法二：真机方言（4B 保留 + 裸 UTF-16 扫 NUL）
+	rb := buildRealMachineOp05("李四", []string{"book2", `icon\players\boy01_create.png`})
+	name, appear = parseCreateRoleBody(rb[1:]) // 剥 opcode
+	if name != "李四" || len(appear) != 2 || appear[1] != `icon\players\boy01_create.png` {
+		t.Fatalf("real-machine dialect name=%q appear=%v", name, appear)
+	}
+	// 性别推断：girl photo → f0=1；boy photo → f0=0
+	if sex := inferSex(appear); sex != 0 {
+		t.Fatalf("boy photo sex=%d", sex)
+	}
+}
+
+// TestRolesFrameGolden 有角 0x04 golden：41B 基座 + [0x25]=count +
+// 6 值 TVarList（rolePara 36 字段官方口径：f1 门派恒 0）。
+func TestRolesFrameGolden(t *testing.T) {
+	now := time.Date(2026, 11, 21, 10, 0, 0, 0, time.Local)
+	f := rolesFrame(now, []roleEntry{{name: "赵六"}})
+	if f[0] != 0x04 || binary.LittleEndian.Uint32(f[0x25:]) != 1 || len(f) <= 0x29 {
+		t.Fatalf("head len=%d", len(f))
+	}
+	if binary.LittleEndian.Uint32(f[0x09:]) != 2026 || binary.LittleEndian.Uint32(f[0x11:]) != 21 {
+		t.Fatalf("base date %#x", f[0x09:0x15])
+	}
+	vl, err := proto.DecodeVarList(f[0x29:])
+	if err != nil || len(vl.Values) != 6 {
+		t.Fatalf("varlist err=%v n=%d", err, len(vl.Values))
+	}
+	fields := strings.Split(vl.Values[3].Text, ",")
+	if len(fields) != 36 || fields[0] != "0" || fields[1] != "" ||
+		fields[9] != "cloth0002" || fields[10] != "hc_2400177" || fields[11] != "cf_composite4" ||
+		fields[23] != "title001" || fields[24] != "scene_name_017" || fields[32] != "book1" ||
+		fields[25] != "introduction_qdz01_title" {
+		t.Fatalf("rolePara %q", vl.Values[3].Text)
+	}
+}
+
+// ---- 发现监督器谓词 ----
+
+// markConn 白盒标记 comm 已连（识别入登记等价；谓词只看登记面）。
+func markConn(s *Server, comm uint32) {
+	s.inner.mu.Lock()
+	s.inner.commConn[comm] = 1
+	s.inner.mu.Unlock()
+}
+
+func TestDiscoveryPendingWorld(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.InnerAddr = "127.0.0.1"
+	cfg.InnerPort = 0
+	cfg.BroadAddr = "127.255.255.255"
+	cfg.BroadPort = 0
+	cfg.EchoAddr = "127.0.0.1"
+	cfg.EchoPort = 0
+	s := New(Options{Config: cfg, ManualTick: true, Scenes: []SceneSpec{
+		{Index: 1, Member: 0, Script: "scene", Config: "c1"},
+		{Index: 2, Member: 3, Script: "scene", Config: "c2"},
+	}})
+	if err := s.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
+
+	if ms := s.Scenes().Members(); len(ms) != 2 || ms[0] != 0 || ms[1] != 3 {
+		t.Fatalf("Members() = %v（scenes 映射 member 去重升序）", ms)
+	}
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "store,member0,member3,entry0,public" {
+		t.Fatalf("初始缺口 = %v", p)
+	}
+	markConn(s, commStoreMin)
+	markConn(s, commMemberMin+3)
+	if p := s.DiscoveryPending(); strings.Join(p, ",") != "member0,entry0,public" {
+		t.Fatalf("部分连入后缺口 = %v", p)
+	}
+	markConn(s, commMemberMin)
+	markConn(s, commEntryMin)
+	markConn(s, commPublic)
+	if p := s.DiscoveryPending(); len(p) != 0 {
+		t.Fatalf("全连后应就绪 = %v", p)
+	}
+	// auction 可选对端：缺席不影响就绪判定（上面即无 auction）
 }

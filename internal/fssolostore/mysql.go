@@ -3,9 +3,14 @@ package fssolostore
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
+
+	// sql.Open("mysql") 的驱动注册（DSN 解析/重试均由驱动侧承担）；
+	// 具名引入供 MySQLError 重复键判定（INSERT 1062 降级）。
+	"github.com/go-sql-driver/mysql"
 )
 
 // MySQLStore 是 Backend 的 MySQL 实现（-mysql-dsn 注入；官方 SQLOLEDB
@@ -53,6 +58,19 @@ func (s *MySQLStore) ensureTables(ctx context.Context) error {
 		"CREATE TABLE IF NOT EXISTS nx_auction ( name VARCHAR(255) NOT NULL PRIMARY KEY, uid VARCHAR(64)," +
 			" create_time DATETIME, type CHAR(1), record VARCHAR(16), version INT, amount INT," +
 			" `range` INT, save_time DATETIME, save_data LONGBLOB ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+		// nx_roles 官方 22 列（docs §五 INSERT 原文；uid char[33]/account
+		// char[33] 槽宽，name 唯一 = 重名 SELECT 语义）
+		"CREATE TABLE IF NOT EXISTS nx_roles ( name VARCHAR(64) NOT NULL PRIMARY KEY," +
+			" uid VARCHAR(33) NOT NULL, account VARCHAR(33) NOT NULL," +
+			" create_time DATETIME, delete_time DATETIME, open_time DATETIME," +
+			" server_id INT NOT NULL DEFAULT 0, total_sec INT NOT NULL DEFAULT 0," +
+			" deleted INT NOT NULL DEFAULT 0, letter_max INT NOT NULL DEFAULT 0," +
+			" sys_flags INT NOT NULL DEFAULT 0, illegals INT NOT NULL DEFAULT 0," +
+			" online INT NOT NULL DEFAULT 0, role_index INT NOT NULL DEFAULT 0," +
+			" scene_id INT NOT NULL DEFAULT 0, location VARCHAR(255)," +
+			" resume_time DATETIME, resume_info VARCHAR(255), charge_info VARCHAR(255)," +
+			" save_para1 TEXT, save_time DATETIME, save_data LONGBLOB," +
+			" KEY idx_account (account, server_id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 	}
 	for _, q := range ddls {
 		if _, err := s.db.ExecContext(ctx, q); err != nil {
@@ -135,28 +153,29 @@ func (s *MySQLStore) ManageInfos() ([]ManageEntry, error) {
 }
 
 // UpsertManage 官方 MessageManageBase 的 INSERT/UPDATE 对（nx_config）。
+// 官方 SQL 原文是 sprintf 方言——database/sql 侧统一转 `?` 占位（值位）。
 func (s *MySQLStore) UpsertManage(e ManageEntry) error {
 	ctx := context.Background()
 	var n int
 	if err := s.db.QueryRowContext(ctx,
-		"SELECT COUNT(*) as count FROM nx_config WHERE id = '%s'", e.ID).Scan(&n); err != nil {
+		"SELECT COUNT(*) as count FROM nx_config WHERE id = ?", e.ID).Scan(&n); err != nil {
 		return err
 	}
 	if n == 0 {
 		_, err := s.db.ExecContext(ctx, "INSERT INTO nx_config ( id, name, type, property, status,"+
-			" op_name, op_type, op_property, op_status, op_version ) VALUES ( '%s', ?, %d, ?, %d, '', 0, '', 0, 0 )",
-			e.ID, e.Type, e.Status)
+			" op_name, op_type, op_property, op_status, op_version ) VALUES ( ?, ?, ?, ?, ?, '', 0, '', 0, 0 )",
+			e.ID, e.Name, e.Type, e.Comment, e.Status)
 		return err
 	}
-	_, err := s.db.ExecContext(ctx, "UPDATE nx_config SET name = ?, type = %d, property = ?, status = %d WHERE id = '%s'",
-		e.Type, e.Status, e.ID)
+	_, err := s.db.ExecContext(ctx, "UPDATE nx_config SET name = ?, type = ?, property = ?, status = ? WHERE id = ?",
+		e.Name, e.Type, e.Comment, e.Status, e.ID)
 	return err
 }
 
 // ---- Chunks（nx_chunks；官方四句原文）----
 
 func (s *MySQLStore) ChunkIDs(sceneID uint32) ([]uint32, error) {
-	rows, err := s.db.Query("SELECT name FROM nx_chunks WHERE server_id = %d AND scene_id = %d",
+	rows, err := s.db.Query("SELECT name FROM nx_chunks WHERE server_id = ? AND scene_id = ?",
 		serverIDForScene(sceneID), sceneID)
 	if err != nil {
 		return nil, err
@@ -179,7 +198,7 @@ func (s *MySQLStore) LoadChunk(sceneID uint32, ids []uint32) (map[uint32][]byte,
 	out := map[uint32][]byte{}
 	for _, id := range ids {
 		var data []byte
-		err := s.db.QueryRow("SELECT save_data FROM nx_chunks WHERE serial_no = '%s' AND server_id = %d ",
+		err := s.db.QueryRow("SELECT save_data FROM nx_chunks WHERE serial_no = ? AND server_id = ?",
 			chunkSerial(id), serverIDForScene(sceneID)).Scan(&data)
 		if err == sql.ErrNoRows {
 			continue
@@ -196,26 +215,26 @@ func (s *MySQLStore) SaveChunk(sceneID uint32, id uint32, data []byte) error {
 	ctx := context.Background()
 	var name string
 	err := s.db.QueryRowContext(ctx,
-		"SELECT name FROM nx_chunks WHERE serial_no = '%s' AND server_id = %d ",
+		"SELECT name FROM nx_chunks WHERE serial_no = ? AND server_id = ?",
 		chunkSerial(id), serverIDForScene(sceneID)).Scan(&name)
 	switch {
 	case err == sql.ErrNoRows:
 		_, err = s.db.ExecContext(ctx, "INSERT INTO nx_chunks ( serial_no, name, server_id, scene_id,"+
-			" create_time, deleted, save_time, save_data ) VALUES ( '%s', '%s', %d, %d, NOW(), 0, NOW(), ? )",
+			" create_time, deleted, save_time, save_data ) VALUES ( ?, ?, ?, ?, NOW(), 0, NOW(), ? )",
 			chunkSerial(id), chunkSerial(id), serverIDForScene(sceneID), sceneID, data)
 		return err
 	case err != nil:
 		return err
 	default:
-		_, err = s.db.ExecContext(ctx, "UPDATE nx_chunks SET name = '%s', scene_id = %d, save_time = NOW(),"+
-			" save_data = ? WHERE serial_no = '%s' AND server_id = %d ", chunkSerial(id), sceneID,
-			chunkSerial(id), serverIDForScene(sceneID), data)
+		_, err = s.db.ExecContext(ctx, "UPDATE nx_chunks SET name = ?, scene_id = ?, save_time = NOW(),"+
+			" save_data = ? WHERE serial_no = ? AND server_id = ?",
+			chunkSerial(id), sceneID, data, chunkSerial(id), serverIDForScene(sceneID))
 		return err
 	}
 }
 
 func (s *MySQLStore) DeleteChunk(sceneID uint32, id uint32) error {
-	_, err := s.db.Exec("DELETE FROM nx_chunks WHERE serial_no = '%s' AND server_id = %d ",
+	_, err := s.db.Exec("DELETE FROM nx_chunks WHERE serial_no = ? AND server_id = ?",
 		chunkSerial(id), serverIDForScene(sceneID))
 	return err
 }
@@ -263,7 +282,8 @@ func (s *MySQLStore) PubAdd(table, name, uid string, saveData []byte) (bool, err
 }
 
 func (s *MySQLStore) PubRemove(table, name string) (bool, error) {
-	res, err := s.db.Exec("DELETE FROM %s WHERE name = '%s'", table, name)
+	// 表名是标识符不可参数化（table 来自内部配置白名单，Sprintf 安全）
+	res, err := s.db.Exec(fmt.Sprintf("DELETE FROM %s WHERE name = ?", table), name)
 	if err != nil {
 		return false, err
 	}
@@ -306,7 +326,7 @@ func (s *MySQLStore) AuctionSave(kind AuctionKind, name string, saveData []byte)
 		tp = "2"
 	}
 	var n int
-	s.db.QueryRow("SELECT COUNT(*) FROM nx_auction WHERE name = '%s'", name).Scan(&n)
+	s.db.QueryRow("SELECT COUNT(*) FROM nx_auction WHERE name = ?", name).Scan(&n)
 	if n == 0 {
 		_, err := s.db.Exec("INSERT INTO nx_auction ( name, uid, create_time, type, record, version,"+
 			" amount, `range`, save_time, save_data ) VALUES ( ?, '', NOW(), ?, 'attr', 0, 0, 0, NOW(), ? )", name, tp, saveData)
@@ -316,19 +336,128 @@ func (s *MySQLStore) AuctionSave(kind AuctionKind, name string, saveData []byte)
 	return err
 }
 
-func (s *MySQLStore) AccountLogon(name string, logged int) (bool, error) {
-	return false, ErrUnsupported
+// dcAccountsTable 官方 Account 库全限定名（nx_district.dc_accounts）。
+const dcAccountsTable = "`nx_district`.`dc_accounts`"
+
+// ensureDcAccounts 缺表才建（官方 create_account.sql 同款；已存在零动作）。
+// ParseConnectStringDSN 官方 ini ConnectString（SQLOLEDB 方言）→ Go
+// MySQL DSN 公共解析：Provider=SQLOLEDB;Password=x;User ID=sa;
+// Initial Catalog=nx_base1;Data Source=127.0.0.1:3306 →
+// sa:x@tcp(127.0.0.1:3306)/nx_base1。缺必需键（User ID/Initial
+// Catalog/Data Source）返回 ""。密码按原样进 DSN（方言值不含
+// url 保留字符；特殊字符需自行转义）。
+func ParseConnectStringDSN(cs string) string {
+	get := func(key string) string {
+		for _, part := range strings.Split(cs, ";") {
+			part = strings.TrimSpace(part)
+			if k, v, ok := strings.Cut(part, "="); ok && strings.TrimSpace(k) == key {
+				return strings.TrimSpace(v)
+			}
+		}
+		return ""
+	}
+	user, db, source := get("User ID"), get("Initial Catalog"), get("Data Source")
+	if user == "" || db == "" || source == "" {
+		return ""
+	}
+	return user + ":" + get("Password") + "@tcp(" + source + ")/" + db
 }
 
-func (s *MySQLStore) AccountLogoff(name string, logged int) (bool, error) {
-	return false, ErrUnsupported
+func (s *MySQLStore) ensureDcAccounts() error {
+	var exists int
+	if err := s.db.QueryRow("SELECT COUNT(*) FROM information_schema.tables " +
+		"WHERE table_schema='nx_district' AND table_name='dc_accounts'").Scan(&exists); err != nil {
+		return err
+	}
+	if exists > 0 {
+		// 存量表迁移：官方方言 password varchar(32) 装不下 fork 派生登录密码
+		// （AES→base64→旋转，恒 36 字符，首登 INSERT 即 1406）→ 扩到 64。
+		var plen int
+		if err := s.db.QueryRow("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns "+
+			"WHERE table_schema='nx_district' AND table_name='dc_accounts' AND column_name='password'").
+			Scan(&plen); err == nil && plen < 64 {
+			if _, err := s.db.Exec("ALTER TABLE " + dcAccountsTable +
+				" MODIFY `password` varchar(64) DEFAULT NULL"); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	// 跨库表：nx_district 库缺失时先建库（DSN 用户需 CREATE 权限）
+	if _, err := s.db.Exec("CREATE DATABASE IF NOT EXISTS nx_district"); err != nil {
+		return err
+	}
+	_, err := s.db.Exec("CREATE TABLE IF NOT EXISTS " + dcAccountsTable + " (" +
+		"`name` varchar(128) NOT NULL,`password` varchar(64) DEFAULT NULL," +
+		"`create_time` datetime DEFAULT NULL,`lastlog_time` datetime DEFAULT NULL," +
+		"`lastlog_addr` varchar(32) DEFAULT NULL,`valid_time` datetime DEFAULT NULL," +
+		"`user_type` int(11) DEFAULT NULL,`status` int(11) DEFAULT NULL," +
+		"`logged` int(11) DEFAULT NULL,`charge_mode` int(11) DEFAULT NULL," +
+		"`points` int(11) DEFAULT NULL,`used_points` int(11) DEFAULT NULL," +
+		"`comment` varchar(256) DEFAULT NULL,PRIMARY KEY (`name`)" +
+		") ENGINE=InnoDB DEFAULT CHARSET=utf8")
+	return err
+}
+
+func (s *MySQLStore) AccountLogon(name, password, addr string, session uint32) (AccountInfo, bool, error) {
+	if err := s.ensureDcAccounts(); err != nil {
+		return AccountInfo{}, false, err
+	}
+	var info AccountInfo
+	var stored string
+	var logged int32
+	err := s.db.QueryRow("SELECT user_type, points, used_points, password, logged FROM "+
+		dcAccountsTable+" WHERE name = ? AND status = 1 AND (logged = 0 OR logged = ?)",
+		name, session).
+		Scan(&info.UserType, &info.Points, &info.UsedPoints, &stored, &logged)
+	switch {
+	case err == nil:
+		if stored != password {
+			return AccountInfo{}, false, nil // 密码槽等值门
+		}
+		_, err = s.db.Exec("UPDATE "+dcAccountsTable+
+			" SET logged = ?, lastlog_time = NOW(), lastlog_addr = ? WHERE name = ?",
+			session, addr, name)
+		return info, err == nil, err
+	default: // sql.ErrNoRows → 官方 add 直名变体：首登自动建号
+		_, err = s.db.Exec("INSERT INTO "+dcAccountsTable+
+			" (name, password, create_time, lastlog_time, lastlog_addr, valid_time,"+
+			" user_type, status, logged, charge_mode, points, used_points, comment)"+
+			" VALUES (?, ?, NOW(), NOW(), ?, NOW(), 0, 1, ?, 0, 0, 0, '')",
+			name, password, addr, session)
+		if err != nil {
+			// 重复键 = 行存在但 SELECT 门未命中（旧 session 的 logged 残留
+			// 等竞态）→ 降级为拒签回包（result=0），不得让客户端无应答。
+			var myErr *mysql.MySQLError
+			if errors.As(err, &myErr) && myErr.Number == 1062 {
+				return AccountInfo{}, false, nil
+			}
+			return AccountInfo{}, false, err
+		}
+		return AccountInfo{}, true, nil
+	}
+}
+
+func (s *MySQLStore) AccountLogoff(name string, session uint32) error {
+	_, err := s.db.Exec("UPDATE "+dcAccountsTable+
+		" SET logged = 0 WHERE name = ? AND logged = ?", name, session)
+	return err
+}
+
+func (s *MySQLStore) AccountReset(session uint32) error {
+	// 官方原文按 session 等值清（多服共享账号库语义）；合一/单机部署
+	// 一服一库，硬杀残留的旧 session 行永不命中 → 账号永久 logged 锁死。
+	// 开机全清（logged<>0 → 0），session 形参仅保留接口签名。
+	_, err := s.db.Exec("UPDATE "+dcAccountsTable+
+		" SET logged = 0 WHERE status = 1 AND logged <> 0")
+	return err
 }
 
 func (s *MySQLStore) ResetOnline(serverID int) ([]RoleBrief, error) {
-	if _, err := s.db.Exec("UPDATE nx_roles SET online = 0 WHERE online = 1 AND server_id = %d", serverID); err != nil {
+	if _, err := s.db.Exec("UPDATE nx_roles SET online = 0 WHERE online = 1 AND server_id = ?", serverID); err != nil {
 		return nil, err
 	}
-	rows, err := s.db.Query("SELECT name, uid, deleted FROM nx_roles WHERE server_id = %d", serverID)
+	rows, err := s.db.Query("SELECT name, uid, deleted FROM nx_roles WHERE server_id = ?", serverID)
 	if err != nil {
 		return nil, err
 	}
@@ -350,11 +479,52 @@ func (s *MySQLStore) SaveRole(name string, meta RoleMeta, saveData []byte) error
 }
 
 func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleMeta, bool, error) {
-	return nil, RoleMeta{}, false, ErrUnsupported
+	// 官方 SELECT * FROM nx_roles WHERE account='%s' AND name='%s' AND
+	// server_id=%d AND deleted=0（参数化——sprintf 方言 1064 坑）。
+	// 空档（新角 save_data NULL）= ok true + nil blob。
+	var meta RoleMeta
+	var saveData []byte
+	var totalSec, letterMax, sceneID, sysFlags, roleIndex int
+	var location, savePara1 sql.NullString
+	err := s.db.QueryRow("SELECT uid, total_sec, letter_max, scene_id, location, "+
+		"sys_flags, role_index, save_para1, save_data FROM nx_roles "+
+		"WHERE account = ? AND name = ? AND deleted = 0", account, name).
+		Scan(&meta.UID, &totalSec, &letterMax, &sceneID, &location,
+			&sysFlags, &roleIndex, &savePara1, &saveData)
+	if err == sql.ErrNoRows {
+		return nil, RoleMeta{}, false, nil
+	}
+	if err != nil {
+		return nil, RoleMeta{}, false, err
+	}
+	meta.Account, meta.ServerID = account, serverID
+	meta.TotalSec, meta.LetterMax = int32(totalSec), int32(letterMax)
+	meta.SceneID, meta.SysFlags, meta.Index = int32(sceneID), int32(sysFlags), int32(roleIndex)
+	meta.Location, meta.SavePara1 = location.String, savePara1.String
+	return saveData, meta, true, nil
 }
 
 func (s *MySQLStore) CreateRole(account, name, uid string, serverID int, meta RoleMeta, saveData []byte) (bool, error) {
-	return false, ErrUnsupported
+	// 重名门（官方 SELECT name FROM nx_roles WHERE name='%s'）
+	var dup string
+	if err := s.db.QueryRow("SELECT name FROM nx_roles WHERE name = ?", name).Scan(&dup); err == nil {
+		return false, nil
+	}
+	// 官方 22 列 INSERT 原文（初建 save_data 参数）
+	meta.Account = account
+	meta.ServerID = serverID
+	meta.UID = uid
+	_, err := s.db.Exec("INSERT INTO nx_roles ( name, uid, account, create_time, delete_time, open_time,"+
+		" server_id, total_sec, deleted, letter_max, sys_flags, illegals, online,"+
+		" role_index, scene_id, location, resume_time, resume_info, charge_info,"+
+		" save_para1, save_time, save_data ) VALUES (?, ?, ?, NOW(), NULL, NOW(),"+
+		" ?, ?, 0, ?, ?, 0, 0, ?, ?, ?, NULL, NULL, NULL, ?, NOW(), ?)",
+		name, uid, account, serverID, meta.TotalSec, meta.LetterMax, meta.SysFlags,
+		meta.Index, meta.SceneID, meta.Location, meta.SavePara1, saveData)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (s *MySQLStore) SetOnline(name string, on bool) error {
@@ -362,12 +532,40 @@ func (s *MySQLStore) SetOnline(name string, on bool) error {
 	if !on {
 		v = 0
 	}
-	_, err := s.db.Exec("UPDATE nx_roles SET online = %d WHERE name = '%s' AND online <> %d", v, name, v)
+	_, err := s.db.Exec("UPDATE nx_roles SET online = ? WHERE name = ? AND online <> ?", v, name, v)
 	return err
 }
 
+func (s *MySQLStore) DeleteRole(account, name string, serverID int) (bool, error) {
+	// 官方软删原文（超期物理 DELETE FROM nx_roles 留回收任务）
+	res, err := s.db.Exec("UPDATE nx_roles SET deleted = 1, delete_time = NOW()"+
+		" WHERE name = ? AND account = ? AND deleted = 0", name, account)
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n > 0, nil
+}
+
 func (s *MySQLStore) QueryAccount(account string, serverID int) ([]RoleBrief, error) {
-	return nil, ErrUnsupported
+	// 官方列角 SELECT（docs §五；+uid 供 0x0D 回执路由）
+	rows, err := s.db.Query("SELECT name, uid, role_index, sys_flags, save_para1"+
+		" FROM nx_roles WHERE account = ? AND server_id = ? AND deleted = 0 ORDER BY role_index",
+		account, serverID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []RoleBrief
+	for rows.Next() {
+		var b RoleBrief
+		var sysFlags int
+		if err := rows.Scan(&b.Name, &b.UID, &b.Index, &sysFlags, &b.Para); err != nil {
+			return nil, err
+		}
+		out = append(out, b)
+	}
+	return out, rows.Err()
 }
 
 // InsertLog 官方动态 INSERT INTO %s (%s) VALUES (%s)（CustomLog）：

@@ -66,6 +66,13 @@ func (e *EchoConsole) Start(addr string, port int) error {
 	return nil
 }
 
+// ListenerID echo 受面 reactor listener 句柄（-1=未开）。
+func (e *EchoConsole) ListenerID() int {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return e.listener
+}
+
 // Stop 关 echo 受面（监听随 Reactor::Stop 统一关闭，此处清引用）。
 func (e *EchoConsole) Stop() {
 	e.mu.Lock()

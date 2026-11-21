@@ -123,6 +123,7 @@ func (s *Server) Start() {
 		return
 	}
 	go s.run()
+	s.startDiscoveryWatch()
 }
 
 // Stop 收尾（幂等：合一进程内 Quit 钩与宿主停机序可能并发重入）。

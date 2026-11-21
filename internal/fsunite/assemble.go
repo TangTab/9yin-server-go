@@ -114,6 +114,7 @@ func Assemble(cfg Config, opt Options) *Unite {
 	u.store = fssolostore.New(fssolostore.Options{
 		Config:  cfg.StoreConfig(),
 		Backend: backend,
+		Logf:    u.logf, // 缺省静默会把 inner 收发/回执错误全部吞掉
 	})
 
 	// entry 传输面（main.lua 340-366 + cmd/soloentry 同构）
@@ -265,6 +266,20 @@ func (u *Unite) Start() error {
 	}
 	if err := u.member.Start(); err != nil {
 		return fmt.Errorf("unite: member start: %w", err)
+	}
+
+	// ---- 确定性收尾（消竞态）----
+	// 实体 Start 虽是串行的，但实体间的连接靠广播发现舞蹈驱动：谁先
+	// 广播、谁的监听先起、UDP 共绑组投递偶丢，都会让 world↔member 这条
+	// 最脆的边错过建连窗口（表现：member 零入连、world 永卡 LoadScenes）。
+	// 此处宿主以已知端口做幂等直连门——不依赖广播时运，连上才算启动完。
+	memberPort := u.member.InnerPort()
+	deadline := time.Now().Add(10 * time.Second)
+	for !u.world.ConnectMember(u.cfg.InnerAddr, memberPort) && time.Now().Before(deadline) {
+		time.Sleep(200 * time.Millisecond)
+	}
+	if !u.world.MemberConnected() {
+		u.logf("unite: world→member 直连门超时（member :%d）——依赖广播发现自愈", memberPort)
 	}
 	return nil
 }

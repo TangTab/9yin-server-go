@@ -34,10 +34,10 @@ func (o Options) AppNameOf() string {
 
 // SceneSpec AddScene/AddPrototypeScene 装配参数（main.lua load_scene_config）。
 type SceneSpec struct {
-	Index   int
-	Member  int
-	Script  string
-	Config  string
+	Index    int
+	Member   int
+	Script   string
+	Config   string
 	Clonable bool
 }
 
@@ -49,15 +49,16 @@ type chargeAgent interface {
 
 // Server 复刻 SoloWorld 实体（§二/§三/§七）。
 type Server struct {
-	opt     Options
-	cfg     Config
-	r       *reactor.Reactor
-	inner   *InnerLink
-	echo    *EchoConsole
-	charge  chargeAgent
+	opt    Options
+	cfg    Config
+	r      *reactor.Reactor
+	inner  *InnerLink
+	echo   *EchoConsole
+	charge chargeAgent
 
 	mu        sync.Mutex
 	state     WorldState
+	session   uint32 // 本实例会话号（dc_accounts.logged 域；开机复位门）
 	broadID   int
 	timerID   int
 	innerPort int
@@ -67,13 +68,16 @@ type Server struct {
 	players       *WorldPlayers
 	scenes        *WorldScenes
 	names         *NameUid
-	pendingCreate map[uint32]string
+	pendingCreate map[uint32]createReq
 	roleLocks     map[string]time.Time // +0x244 角色锁表（200s 自动解锁）
 	accountLocks  map[string]time.Time // +0x254 账号锁表
 
 	stopOnce sync.Once
 	ticker   *time.Ticker
 	tickDone chan struct{}
+
+	watchStop chan struct{} // 发现监督器停口（startDiscoveryWatch 建）
+	watchOnce sync.Once
 }
 
 // New 创建 Server（ctor 缺省对齐 DefaultConfig）。
@@ -90,10 +94,11 @@ func New(opt Options) *Server {
 		players:       NewWorldPlayers(opt.Config.MaxPlayers),
 		scenes:        NewWorldScenes(),
 		names:         NewNameUid(),
-		pendingCreate: map[uint32]string{},
+		pendingCreate: map[uint32]createReq{},
 		roleLocks:     map[string]time.Time{},
 		accountLocks:  map[string]time.Time{},
 		tickDone:      make(chan struct{}),
+		session:       uint32(time.Now().Unix()), // 本实例会话号（dc_accounts.logged 域）
 	}
 	for _, sc := range opt.Scenes {
 		typ := 0
@@ -121,6 +126,12 @@ func (s *Server) State() string {
 func (s *Server) setState(st WorldState) {
 	s.mu.Lock()
 	old := s.state
+	if st <= old {
+		// 只前进不倒退（13 态单调序：装载链与关闭链均为递增编号）：
+		// 早到回执已直迁后，迟到的低态 setState 不得把状态打回。
+		s.mu.Unlock()
+		return
+	}
 	s.state = st
 	s.mu.Unlock()
 	if old != st {
@@ -136,8 +147,8 @@ func (s *Server) Inner() *InnerLink { return s.inner }
 
 // Players / Scenes / Names 公开数据面。
 func (s *Server) Players() *WorldPlayers { return s.players }
-func (s *Server) Scenes() *WorldScenes  { return s.scenes }
-func (s *Server) Names() *NameUid       { return s.names }
+func (s *Server) Scenes() *WorldScenes   { return s.scenes }
+func (s *Server) Names() *NameUid        { return s.names }
 
 // SetChargeAgent 注入 charge 代理观测面。
 func (s *Server) SetChargeAgent(c chargeAgent) { s.charge = c }
@@ -148,9 +159,9 @@ func (s *Server) Start() error {
 	s.r.Start()
 
 	s.inner = NewInnerLink(s.r, InnerEvents{
-		OnMessage:     s.onInnerMessage,
-		OnConnected:   s.onInnerConnected,
-		OnDisconnect:  s.onInnerDisconnect,
+		OnMessage:    s.onInnerMessage,
+		OnConnected:  s.onInnerConnected,
+		OnDisconnect: s.onInnerDisconnect,
 	}, s.opt.AppNameOf(), s.opt.Logf)
 
 	// 广播受发面
@@ -176,6 +187,7 @@ func (s *Server) Start() error {
 		s.ticker = time.NewTicker(time.Second)
 		go s.tickLoop()
 	}
+	s.startDiscoveryWatch()
 	s.trace("game server %d starting...", s.cfg.ServerID)
 	s.setState(WsUnknown)
 	return nil
@@ -184,6 +196,11 @@ func (s *Server) Start() error {
 // Stop 官方 SoloWorld::Stop + Shut。
 func (s *Server) Stop() {
 	s.stopOnce.Do(func() {
+		s.watchOnce.Do(func() {
+			if s.watchStop != nil {
+				close(s.watchStop)
+			}
+		})
 		if s.ticker != nil {
 			s.ticker.Stop()
 			select {
@@ -349,6 +366,27 @@ func (s *Server) sendSceneCreate(index, member, typ int, name string) bool {
 	return s.inner.SendToMember(member, 0, 0x00, b)
 }
 
+// ConnectMember 宿主直连口（合一形态确定性启动）：绕过广播发现，
+// 以已知地址幂等拨 member（已连则 no-op）。返回是否已在线。
+func (s *Server) ConnectMember(addr string, port int) bool {
+	if s.inner == nil {
+		return false
+	}
+	s.inner.CheckMemberConnect(0, addr, port) // 幂等：已连/dialing 中即跳过
+	return s.MemberConnected()
+}
+
+// MemberConnected world↔member 0 号边是否在线（宿主启动门用）。
+func (s *Server) MemberConnected() bool {
+	if s.inner == nil {
+		return false
+	}
+	s.inner.mu.Lock()
+	_, ok := s.inner.commConn[uint32(commMemberMin)]
+	s.inner.mu.Unlock()
+	return ok
+}
+
 // rolesLoaded 角色名册装载完毕（WsLoadScenes..WsOpened 运行区间）。
 func (s *Server) rolesLoaded() bool {
 	s.mu.Lock()
@@ -392,6 +430,11 @@ func (s *Server) worldStateMachine() {
 	case WsUnknown:
 		// SendToStore(load roles 请求) → LoadRoles
 		if s.inner != nil && s.inner.SendToAllStore(0, 0, encodeLoadRoles(s.cfg.ServerID)) {
+			// 0x38 AccountReset 开机复位（logged=session 清零）
+			s.mu.Lock()
+			session := s.session
+			s.mu.Unlock()
+			s.inner.SendToAllStore(0, 0x38, sessionFrame(session))
 			s.setState(WsLoadRoles)
 		}
 	case WsLoadRoles:
@@ -488,7 +531,12 @@ func (s *Server) OpenServer() bool {
 	if !ready {
 		return false
 	}
-	s.inner.SendToAllEntry(0, entryInitConnect, nil)
+	// entry_forw_init_connect_t ==8 {flag,window}：flag≠0 → entry 开闸
+	// （Unknown→Opened、SetClosed(false)——客户端面自此收连）。
+	ic := make([]byte, 8)
+	binary.LittleEndian.PutUint32(ic[0:], 1)
+	binary.LittleEndian.PutUint32(ic[4:], uint32(time.Now().Unix()))
+	s.inner.SendToAllEntry(0, entryInitConnect, ic)
 	s.setState(WsOpened)
 	s.trace("game server opened")
 	return true

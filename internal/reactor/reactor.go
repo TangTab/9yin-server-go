@@ -293,6 +293,12 @@ func (r *Reactor) CreateConnector(addr string, port int, h ConnHandler) (int, er
 			r.mu.Lock()
 			delete(r.conns, c.id)
 			r.mu.Unlock()
+			// 官方异步 ConnectEx 失败回调语义：OnClose 恰好一次（此处
+			// 连接从未建立，从拨号线程直接派发；调用方据此清 dialing
+			// 重拨——否则首拨被拒（对端监听未起）会永久卡死发现链）。
+			if c.h.OnClose != nil {
+				c.h.OnClose(c.id, addr, port)
+			}
 			return
 		}
 		r.wireConn(c, nc)

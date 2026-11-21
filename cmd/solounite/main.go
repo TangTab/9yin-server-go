@@ -11,6 +11,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -22,6 +23,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloentry"
+	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
 	"github.com/lizhanyin/9yin-server-go/internal/fsunite"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
@@ -43,6 +45,8 @@ func main() {
 		echoPort   = flag.Int("echo-port", 0, "覆盖 [Echo] Port")
 		noLicense  = flag.Bool("no-license", false, "跳过 license 门（仅联调用）")
 		genLic     = flag.String("gen-license", "", "为本机 IP 生成 solo lic 后退出（值=IP；内部形态 256B）")
+		mysqlDSN   = flag.String("mysql-dsn", "", "MySQL DSN（空=查 NINEYIN_MYSQL_DSN，仍空=内存库；启用后账号落 nx_district.dc_accounts、角色落 nx_roles）")
+		captureDir = flag.String("capture-dir", "", "客户端线路双向抓取落盘目录（{ip}_{port}_c2s/s2c.bin，EE+XOR wire 原样；空=查 NINEYIN_CAPTURE_DIR）")
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C；冒烟用）")
 	)
 	flag.Parse()
@@ -133,6 +137,37 @@ func main() {
 	}
 
 	logf := func(format string, args ...any) { fmt.Printf(format+"\n", args...) }
+
+	// 客户端线路抓取（fsnet captureStream：gateway 每连接双向 wire 落盘，
+	// 与外服对拍基准同构，可直接喂解帧/对拍工具链）
+	if dir := *captureDir; dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			fatal(err)
+		}
+		_ = os.Setenv("NINEYIN_CAPTURE_DIR", dir)
+		fmt.Printf("线路抓取：客户端双向字节落盘 %s（*_c2s.bin/*_s2c.bin）\n", dir)
+	}
+
+
+	// 存储后端：-mysql-dsn > env NINEYIN_MYSQL_DSN（env.server）>
+	// game_unite.ini [Role] ConnectString（官方 SQLOLEDB 方言公共解析）
+	// > 内存库（重启即丢）——公共解析方法 cfg.MySQLDSN()
+	dsn := *mysqlDSN
+	if dsn == "" {
+		dsn = cfg.MySQLDSN()
+	}
+	var backend fssolostore.Backend
+	if dsn != "" {
+		mb, err := fssolostore.OpenMySQLStore(context.Background(), dsn, logf)
+		if err != nil {
+			fatal(fmt.Errorf("mysql 后端不可用: %w", err))
+		}
+		backend = mb
+		fmt.Printf("存储后端：MySQL（%s）——账号 nx_district.dc_accounts / 角色 nx_roles\n", dsn)
+	} else {
+		fmt.Println("存储后端：内存库（重启即丢；-mysql-dsn 或 NINEYIN_MYSQL_DSN 启用持久化）")
+	}
+
 	var scenes []fssoloworld.SceneSpec
 	if *scenesINI != "" {
 		if specs, err := fssoloworld.LoadScenesINI(*scenesINI); err == nil && len(specs) > 0 {
@@ -146,11 +181,12 @@ func main() {
 		}
 	}
 	u := fsunite.Assemble(cfg, fsunite.Options{
-		License:    lic,
-		NetOptions: netOptions,
-		Scenes:     scenes,
-		Logf:       logf,
-		Quit:       func() { fmt.Println("unite server shutdown..."); os.Exit(0) },
+		License:      lic,
+		NetOptions:   netOptions,
+		Scenes:       scenes,
+		StoreBackend: backend,
+		Logf:         logf,
+		Quit:         func() { fmt.Println("unite server shutdown..."); os.Exit(0) },
 	})
 	if err := u.Start(); err != nil {
 		fatal(err)

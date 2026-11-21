@@ -104,6 +104,23 @@ func (w *WorldScenes) Snapshot() []*Scene {
 	return out
 }
 
+// Members 场景映射到的全部 member 编号（升序去重；发现就绪判定与
+// 宿主观测用）。
+func (w *WorldScenes) Members() []int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	set := map[int]struct{}{}
+	for _, s := range w.byIdx {
+		set[s.Member] = struct{}{}
+	}
+	out := make([]int, 0, len(set))
+	for m := range set {
+		out = append(out, m)
+	}
+	sort.Ints(out)
+	return out
+}
+
 // CountNormal / CountClone / CountAll 计数族。
 func (w *WorldScenes) CountNormal() int {
 	w.mu.Lock()

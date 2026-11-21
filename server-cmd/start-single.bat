@@ -12,6 +12,9 @@ rem  工作目录 = 二进制所在目录（ini 缺失时由进程释放内置官方快照）。
 rem ============================================================
 
 cd /d "%~dp0"
+
+rem env.server (NINEYIN_MYSQL_DSN etc) - missing file is not fatal
+if exist "%~dp0env.server" for /f "usebackq delims=" %%L in (`findstr /b /l /c:"set " "%~dp0env.server"`) do call %%L
 set "BIN="
 if exist "bin\game_solounite.exe" set "BIN=%~dp0bin"
 if not defined BIN if exist "game_solounite.exe" set "BIN=%~dp0"
@@ -29,6 +32,7 @@ echo Workdir: %BIN%
 rem 可选伴随区服列表服：官方合一形态七实体不含 lister（客户端直连
 rem entry 2001）；但官方客户端编死 4000 取列表——需要时
 rem `set WITHLISTER=1` 后再跑本脚本，附带拉起 game_sololister(4000)。
+set WITHLISTER=1
 if /i "%WITHLISTER%"=="1" (
   if exist "%BIN%\game_sololister.exe" (
     echo Sidecar: game_sololister.exe ^(Outer 4000^)
@@ -44,6 +48,14 @@ if /i "%WITHLISTER%"=="1" (
 
 echo.
 rem 场景配置缺省 ..\res\scenes.ini（官方方言）；无则空场景，用 -scenes 覆盖。
+rem Optional client-line wire capture: any non-empty NINEYIN_CAPTURE_DIR
+rem dumps both directions of every client session to
+rem <dir>\{ip-dashes}-{port}_c2s.bin / _s2c.bin (raw wire bytes, same
+rem layout as the reference captures\local). CAPTURE=1 picks that dir here.
+if /i "%CAPTURE%"=="1" if not defined NINEYIN_CAPTURE_DIR set "NINEYIN_CAPTURE_DIR=%~dp0..\captures\local"
+if defined NINEYIN_CAPTURE_DIR echo Capture: %NINEYIN_CAPTURE_DIR%
+
+rem  -capture-dir "%~dp0logs\capture"
 cd /d "%BIN%"
 "game_solounite.exe" %*
 echo.

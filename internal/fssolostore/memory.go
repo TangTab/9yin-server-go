@@ -27,7 +27,7 @@ type MemoryStore struct {
 	pubTables map[string]map[string][]byte // table → name → save_data
 	pubOrder  map[string][]string
 
-	acctLogged map[string]int // dc_accounts.name → logged
+	accounts map[string]*memAccount // dc_accounts.name → 行镜像
 
 	auctionAttr map[string][]byte
 	auctionRec  map[string][]byte
@@ -54,7 +54,7 @@ func NewMemoryStore(snapshotPath string) *MemoryStore {
 		byAcct:      map[string][]string{},
 		pubTables:   map[string]map[string][]byte{},
 		pubOrder:    map[string][]string{},
-		acctLogged:  map[string]int{},
+		accounts:    map[string]*memAccount{},
 		auctionAttr: map[string][]byte{},
 		auctionRec:  map[string][]byte{},
 		logs:        map[string][][]LogValue{},
@@ -182,13 +182,27 @@ func (m *MemoryStore) CreateRole(account, name, uid string, serverID int, meta R
 	meta.ServerID = serverID
 	meta.UID = uid
 	r := &memRole{
-		brief:    RoleBrief{Name: name, UID: uid, Index: meta.Index},
+		brief:    RoleBrief{Name: name, UID: uid, Index: meta.Index, Para: meta.SavePara1},
 		meta:     meta,
 		saveData: append([]byte(nil), saveData...),
 	}
 	m.roles[name] = r
 	k := acctKey(account, serverID)
 	m.byAcct[k] = append(m.byAcct[k], name)
+	return true, nil
+}
+
+func (m *MemoryStore) DeleteRole(account, name string, serverID int) (bool, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	r := m.roles[name]
+	if r == nil || r.brief.Deleted {
+		return false, nil
+	}
+	if r.meta.Account != account || (serverID != 0 && r.meta.ServerID != serverID) {
+		return false, nil
+	}
+	r.brief.Deleted = true // 软删（QueryAccount/名册回执按 deleted 过滤）
 	return true, nil
 }
 
@@ -316,36 +330,81 @@ func (m *MemoryStore) AuctionSave(kind AuctionKind, name string, saveData []byte
 
 // ---- Account（dc_accounts）----
 
-func (m *MemoryStore) AccountLogon(name string, logged int) (bool, error) {
+func (m *MemoryStore) AccountLogon(name, password, addr string, session uint32) (AccountInfo, bool, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	cur, ok := m.acctLogged[name]
-	if !ok {
-		return false, nil // 帐号不存在（SELECT * WHERE name AND status=1）
+	if a, ok := m.accounts[name]; ok {
+		if a.password != password {
+			return AccountInfo{}, false, nil // 密码槽等值门
+		}
+		if a.logged != 0 && a.logged != session {
+			return AccountInfo{}, false, nil // (logged=0 OR logged=%d)
+		}
+		a.logged = session
+		return AccountInfo{UserType: a.userType, Points: a.points, UsedPoints: a.usedPoints}, true, nil
 	}
-	if cur != 0 && cur != logged {
-		return false, nil // (logged = 0 OR logged = %d)
-	}
-	m.acctLogged[name] = logged
-	return true, nil
+	// 官方 add 直名变体：首登自动建号（status=1, logged=session）
+	m.accounts[name] = &memAccount{password: password, logged: session}
+	return AccountInfo{}, true, nil
 }
 
-func (m *MemoryStore) AccountLogoff(name string, logged int) (bool, error) {
+func (m *MemoryStore) AccountLogoff(name string, session uint32) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	cur, ok := m.acctLogged[name]
-	if !ok || cur != logged {
-		return false, nil // WHERE name='%s' AND logged=%d
+	if a, ok := m.accounts[name]; ok && a.logged == session {
+		a.logged = 0 // UPDATE logged=0 WHERE name AND logged=%d
 	}
-	m.acctLogged[name] = 0
-	return true, nil
+	return nil
 }
 
-// AddAccount 测试/装配注入（官方 INSERT dc_accounts 面）。
-func (m *MemoryStore) AddAccount(name string) {
+func (m *MemoryStore) AccountReset(session uint32) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.acctLogged[name] = 0
+	for _, a := range m.accounts {
+		if a.logged == session {
+			a.logged = 0 // UPDATE logged=0 WHERE status=1 AND logged=%d
+		}
+	}
+	return nil
+}
+
+// memAccount dc_accounts 行镜像（内存库形态）。
+type memAccount struct {
+	password                          string
+	logged                            uint32
+	userType, points, usedPoints      int32
+}
+
+// AddAccount 测试/装配注入（官方 INSERT dc_accounts 面；password 为
+// 密码槽原文——与 AccountLogon 等值比对域一致）。
+func (m *MemoryStore) AddAccount(name string, password string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, ok := m.accounts[name]; !ok {
+		m.accounts[name] = &memAccount{password: password}
+	}
+}
+
+// memAccountSnap 快照里的账号行（json 可序列化形态）。
+type memAccountSnap struct {
+	Password string `json:"password"`
+	Logged   uint32 `json:"logged"`
+}
+
+func snapAccounts(in map[string]*memAccount) map[string]*memAccountSnap {
+	out := make(map[string]*memAccountSnap, len(in))
+	for k, a := range in {
+		out[k] = &memAccountSnap{Password: a.password, Logged: a.logged}
+	}
+	return out
+}
+
+func loadAccounts(in map[string]*memAccountSnap) map[string]*memAccount {
+	out := make(map[string]*memAccount, len(in))
+	for k, a := range in {
+		out[k] = &memAccount{password: a.Password, logged: a.Logged}
+	}
+	return out
 }
 
 // ---- Log ----
@@ -386,7 +445,7 @@ type memSnapshot struct {
 	Chunks  map[string]map[string][]byte `json:"chunks"`
 	Roles   map[string]*memRoleSnap      `json:"roles"`
 	Pub     map[string]map[string][]byte `json:"pub"`
-	Acct    map[string]int               `json:"accounts"`
+	Acct    map[string]*memAccountSnap   `json:"accounts"`
 	Attr    map[string][]byte            `json:"auction_attr"`
 	Rec     map[string][]byte            `json:"auction_rec"`
 	Logs    map[string][][]LogValue      `json:"logs"`
@@ -410,7 +469,7 @@ func (m *MemoryStore) saveSnapshot() error {
 		Chunks:  map[string]map[string][]byte{},
 		Roles:   map[string]*memRoleSnap{},
 		Pub:     m.pubTables,
-		Acct:    m.acctLogged,
+		Acct:    snapAccounts(m.accounts),
 		Attr:    m.auctionAttr,
 		Rec:     m.auctionRec,
 		Logs:    m.logs,
@@ -474,7 +533,7 @@ func (m *MemoryStore) loadSnapshot() {
 		m.pubTables = snap.Pub
 	}
 	if snap.Acct != nil {
-		m.acctLogged = snap.Acct
+		m.accounts = loadAccounts(snap.Acct)
 	}
 	if snap.Attr != nil {
 		m.auctionAttr = snap.Attr

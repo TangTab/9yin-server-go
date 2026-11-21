@@ -10,10 +10,10 @@ import (
 // 可插拔编码层的落地：EE+XOR（现代客户端）、明文+EE（对拍基线）、
 // Prefix+Identity（进程间总线）都是同一 Connection 的不同装配。
 type Options struct {
-	MaxFrameSize int            // 默认 DefaultMaxFrameSize
-	Framer       FramerFactory  // 默认 EscapeFramerFactory
-	ReadCipher   Cipher         // 默认 XOR(InitialKey)
-	WriteCipher  Cipher         // 默认 XOR(InitialKey)
+	MaxFrameSize int           // 默认 DefaultMaxFrameSize
+	Framer       FramerFactory // 默认 EscapeFramerFactory
+	ReadCipher   Cipher        // 默认 XOR(InitialKey)
+	WriteCipher  Cipher        // 默认 XOR(InitialKey)
 }
 
 // Connection 组合 Framer + 方向性 Cipher 的有状态连接。
@@ -26,7 +26,7 @@ type Connection struct {
 	readMu     sync.Mutex
 	readCipher Cipher
 
-	writeMu    sync.Mutex
+	writeMu     sync.Mutex
 	writeCipher Cipher
 }
 
@@ -35,6 +35,9 @@ func NewConnection(stream io.ReadWriteCloser, opt Options) (*Connection, error) 
 	if stream == nil {
 		return nil, fmt.Errorf("nil connection stream")
 	}
+	// 线路抓取（NINEYIN_CAPTURE_DIR 非空时启用，见 capture.go）：
+	// 先包住原始流，两方向 wire 字节落盘后才进入成帧/编码。
+	stream = captureStream(stream)
 	if opt.MaxFrameSize <= 0 {
 		opt.MaxFrameSize = DefaultMaxFrameSize
 	}

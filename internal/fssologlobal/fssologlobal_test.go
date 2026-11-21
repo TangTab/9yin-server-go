@@ -39,7 +39,7 @@ Reload=1
 
 [Main]
 // 数据库配置
-ConnectString=Provider=SQLOLEDB;Password=abc;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.33.70
+ConnectString=Provider=SQLOLEDB;Password=abc&4621;User ID=sa;Initial Catalog=nx_base1;Data Source=192.168.33.70
 
 // 外网IP地址
 [Outer]

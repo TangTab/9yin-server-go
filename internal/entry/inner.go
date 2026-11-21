@@ -102,6 +102,14 @@ func (in *Inner) Start() error { return in.adapter.Start() }
 // Stop 停止。
 func (in *Inner) Stop() { in.adapter.Stop() }
 
+// Registered 已注册 ident 数（world/member/public/store 连入计数；
+// 发现就绪判定用）。
+func (in *Inner) Registered() int {
+	in.mu.Lock()
+	defer in.mu.Unlock()
+	return len(in.connOf)
+}
+
 // Addr 实际监听地址。
 func (in *Inner) Addr() net.Addr { return in.adapter.Addr() }
 

@@ -32,6 +32,10 @@ type Backend interface {
 	LoadRole(account, name string, serverID int) (saveData []byte, meta RoleMeta, ok bool, err error)
 	// CreateRole 官方 MessageCreate（INSERT；重名/超数 false；回执 0x06）。
 	CreateRole(account, name, uid string, serverID int, meta RoleMeta, saveData []byte) (bool, error)
+	// DeleteRole 官方 MessageDelete（0x0B；软删 UPDATE deleted=1,
+	// delete_time=NOW() WHERE name AND account；不存在/已删 false；
+	// 超期物理删留回收任务）。
+	DeleteRole(account, name string, serverID int) (bool, error)
 	// SetOnline/SetOffline 官方 0x05/0x06（UPDATE online；无回执）。
 	SetOnline(name string, on bool) error
 	// QueryAccount 官方 MessageQueryAccount（角色清单；回执 0x0D）。
@@ -56,11 +60,18 @@ type Backend interface {
 
 	// ---- Account 通道（nx_district.dc_accounts）----
 
-	// AccountLogon 官方 MessageAccountLogon（0x36，UPDATE logged=%d …
-	// WHERE (logged=0 OR logged=%d)；回执 0x25）。
-	AccountLogon(name string, logged int) (ok bool, err error)
-	// AccountLogoff 官方 MessageAccountLogoff（0x37；回执 0x26）。
-	AccountLogoff(name string, logged int) (ok bool, err error)
+	// AccountLogon 官方 MessageAccountLogon（0x36，回执 0x25）：SELECT *
+	// WHERE name AND status=1 AND (logged=0 OR logged=session)——未命中走
+	// 官方 add 直名变体 INSERT（首登自动建号，trace "create account %s
+	// password %s"）；命中则密码槽等值 + UPDATE logged/lastlog_time/addr，
+	// 回执携带 user_type/points/used_points。
+	AccountLogon(name, password, addr string, session uint32) (AccountInfo, bool, error)
+	// AccountLogoff 官方 MessageAccountLogoff（0x37，回执 0x26）：UPDATE
+	// logged=0 WHERE name AND logged=session。
+	AccountLogoff(name string, session uint32) error
+	// AccountReset 官方 MessageAccountReset（0x38，回执 0x24）：开机复位
+	// UPDATE logged=0 WHERE status=1 AND logged=session。
+	AccountReset(session uint32) error
 
 	// ---- Log 通道（29 张自定义表 + 分周后缀）----
 
@@ -81,6 +92,13 @@ type Backend interface {
 	Ping() error
 	// Close 官方 StopAccess。
 	Close() error
+}
+
+// AccountInfo dc_accounts 行计费域（AccountLogon 回执携带）。
+type AccountInfo struct {
+	UserType    int32
+	Points      int32
+	UsedPoints  int32
 }
 
 // AuctionKind 拍卖块通道（nx_auction type 列）。
@@ -110,6 +128,7 @@ type RoleBrief struct {
 	UID     string
 	Deleted bool
 	Index   int32
+	Para    string // save_para1 投影（外观逗号串；QueryAccount/建角链用）
 }
 
 // RoleMeta 官方 save 元数据列（UPDATE nx_roles SET total_sec=…）。

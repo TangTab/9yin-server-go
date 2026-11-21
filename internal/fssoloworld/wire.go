@@ -215,6 +215,8 @@ const (
 	clientMsgCreateRole = 4
 	clientMsgDeleteRole = 5
 	clientMsgReviveRole = 6
+	clientMsgReady      = 8    // op09 ClientReady（进场就绪单字节）
+	clientMsgPing       = 0x17 // op0x18 心跳（mt 折算后内网号）
 )
 
 // decodeClientMsg 拆 8B 头 + msgtype。

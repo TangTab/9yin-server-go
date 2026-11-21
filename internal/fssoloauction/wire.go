@@ -149,7 +149,7 @@ type Announce struct {
 	Port     uint32 // [0x18]
 	District uint32 // [0x1C]
 	Server   uint32 // [0x20]
-	Index    uint32 // [0x24]（World=序号<0x10；Store=comm_id 4..7）
+	Index    uint32 // [0x24]（World=序号<0x10；Store=裸 StoreID 0..3——收侧 +4 基址勘误）
 }
 
 // encodeAnnounce 构造本服 0x24 字节自宣包。

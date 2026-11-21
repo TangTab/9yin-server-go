@@ -48,6 +48,9 @@ type Server struct {
 
 	logf    func(format string, args ...any)
 	stopped atomic.Bool
+
+	watchStop chan struct{} // 发现监督器停口（startDiscoveryWatch 建）
+	watchOnce sync.Once
 }
 
 // Options 装配可选项。
@@ -136,6 +139,7 @@ func (s *Server) Start() error {
 	s.logf("inner socket %s:%d", s.cfg.InnerAddr, port)
 	s.logf("broadcast socket %s:%d", s.cfg.BroadAddr, s.cfg.BroadPort)
 	s.logf("game public server %d started", s.cfg.ServerID)
+	s.startDiscoveryWatch()
 	return nil
 }
 
@@ -144,9 +148,25 @@ func (s *Server) Stop() {
 	if !s.stopped.CompareAndSwap(false, true) {
 		return
 	}
+	s.watchOnce.Do(func() {
+		if s.watchStop != nil {
+			close(s.watchStop)
+		}
+	})
 	s.echo.Stop()
 	s.r.Stop()
 	s.logf("public server shutdown...")
+}
+
+// EchoPort echo 受面实际侦听口（0=系统分配后回填；未开=0）。
+func (s *Server) EchoPort() int {
+	if s.echo == nil {
+		return 0
+	}
+	if port, ok := s.r.ListenerPort(s.echo.ListenerID()); ok {
+		return port
+	}
+	return s.cfg.EchoPort
 }
 
 // InnerPort 实际侦听端口（官方 main.lua Start 后读回）。
