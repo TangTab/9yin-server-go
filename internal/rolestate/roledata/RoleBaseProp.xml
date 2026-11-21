@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 九阴真经 建角基础属性表（官服口径，属性名对齐引擎 schema）
+     ID 编码: ID = 出生地×10 + 性别
+       出生地: 1=烟雨庄(born03)  2=千灯镇(born04)  3=苏州(city02)
+       性别:   1=男  2=女
+     五维: Str=臂力 Dex=身法 Ing=内息 Spi=罡气 Sta=体魄
+     建号五维 = 3（初始号证实口径；另一抓包基准 30×5 为白板对照口径）
+     资源初值（所有建角组合相同）：
+       HP = 2×Str + 7×Sta = 27        （五维派生 Add 分量；基础位与运行
+                                        内功 pack 运行期另计，官服基础位待抓包）
+       MP = 4×Ing + 1×Spi = 15        （同上；旧攻略"内息×3"为旧版口径）
+       SP(怒气) = 80 基础 + 运行内功档位（登录即满；轻功值初值待考）
+       Parry(招架上限) = 100 白板
+       轻功 = 150
+       体力 = 120
+       饱食度 = 150
+       高阶轻功 = 150
+       戕屠 = 0       （杀戮值）
+       闪避 = 0
+       外功招架 = 50
+       外功防御 = 0
+       内功化解 = 50
+       招架耐力 = 200
+
+     建角初始无门派(School="")，带装备 侠士布衣(cloth0002) 侠士下衣(hc_2400177) 靴子(cf_composite4)
+     出生地 烟雨庄(born03)  千灯镇(born04)  鸡鸣驿(born05)  成都(city01) 
+     
+     完整规则与字段映射见 docs/official/九阴建角初始数据归纳.md -->
+<Object>
+	<Property ID="11" Scene="born03" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="22001" BaishiTask="49"/>
+	<Property ID="12" Scene="born03" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="22001" BaishiTask="49"/>
+	<Property ID="21" Scene="born04" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="24001" BaishiTask="40"/>
+	<Property ID="22" Scene="born04" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="24001" BaishiTask="40"/>
+	<Property ID="31" Scene="city02" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="1" BaishiTask="50"/>
+	<Property ID="32" Scene="city02" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="1" BaishiTask="50"/>
+</Object>

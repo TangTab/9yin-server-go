@@ -143,7 +143,8 @@ func wideNulNameOf(p []byte) string {
 
 // buildLoadRoleStore 构造 0x02 store_forw_load_t（solo ==0xBC）：与
 // create 同头（无 uid/para 尾段）。
-func buildLoadRoleStore(clientID, serial, serverID uint32, account, name string) []byte {	b := make([]byte, 0xBC)
+func buildLoadRoleStore(clientID, serial, serverID uint32, account, name string) []byte {
+	b := make([]byte, 0xBC)
 	binary.LittleEndian.PutUint32(b[0:], clientID)
 	binary.LittleEndian.PutUint32(b[4:], serial)
 	binary.LittleEndian.PutUint32(b[8:], serverID)
@@ -194,13 +195,13 @@ func roleVisualOf(appearance []string) roleVisual {
 	// 侠士下衣 hc_2400177 / 靴子 cf_composite4）
 	clothDefault, pantsDefault, shoesDefault := "cloth0002", "hc_2400177", "cf_composite4"
 	return roleVisual{
-		sex:    sex,
-		photo:  get(1, photoDefault),
-		face:   get(2, "333333333333333333333333333333333333333333X38\x01"),
-		hair:   get(4, hairDefault),
-		cloth:  get(5, clothDefault),
-		pants:  get(6, pantsDefault),
-		shoes:  get(7, shoesDefault),
+		sex:   sex,
+		photo: get(1, photoDefault),
+		face:  get(2, "333333333333333333333333333333333333333333X38\x01"),
+		hair:  get(4, hairDefault),
+		cloth: get(5, clothDefault),
+		pants: get(6, pantsDefault),
+		shoes: get(7, shoesDefault),
 	}
 }
 
@@ -288,7 +289,7 @@ func roleParaFields(appearance []string) []string {
 	}
 	fields := make([]string, 36)
 	fields[0] = strconv.Itoa(int(visual.sex))
-	fields[1] = ""              // School 空串：建角无门派（拜师由 origin 系统驱动）
+	fields[1] = "" // School 空串：建角无门派（拜师由 origin 系统驱动）
 	fields[2], fields[3], fields[4] = "0", "0", "1"
 	fields[5] = get(2, "")
 	fields[6] = "1" // 显示类型存档（无档 golden "1"）

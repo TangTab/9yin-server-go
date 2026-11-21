@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 	"sync"
 	"time"
 	"unicode/utf16"
@@ -513,6 +514,10 @@ func newRoleUID() string {
 const (
 	birthSceneID       = 17
 	birthSceneLocation = `ini\scene\born03_YanYuZhuang`
+
+	// defaultFacultySeed 建号修为种子（b-line facultySeed 口径：外服私服
+	// 修为由历练转化供给，新角色种子可配）。
+	defaultFacultySeed = 0
 )
 
 // dispatch 官方 CAccess::ProcessMsg 67 型分发（Go 单 Backend 并发执行）。
@@ -688,6 +693,13 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 		putLe32(body, 0x08, uint32(boolByteU8(ok)))
 		if ok {
 			body = appendArchWide(body, meta.SavePara1)
+			// Go 内网扩展尾段（官方 store 不带）：建号/运行状态 JSON。
+			// magic 'RST1' 识别——world 端缺席该段时回退 replay 模式。
+			if meta.RoleStateJSON != "" {
+				body = binary.LittleEndian.AppendUint32(body, 0x31545352) // 'RST1'
+				body = binary.LittleEndian.AppendUint32(body, uint32(len(meta.RoleStateJSON)))
+				body = append(body, meta.RoleStateJSON...)
+			}
 		}
 		s.emit(serial, back, body)
 	case 0x0A: // create（solo ≥0xD4）：{client_id@0, serial@4,
@@ -707,11 +719,24 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			para = wideNulStr(payload[0x71:])
 		}
 		existing, _ := b.QueryAccount(account, serverID)
+		// 建号初始状态（rolestate.go：RoleBaseProp.xml 五维/资源初值 +
+		// StarterSet.xml 授予集 + location.ini 出生点）→ role_state_json。
+		state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, rolestate.InferSexFromPara(para), para, defaultFacultySeed)
+		if err != nil {
+			s.logf("(CAccess::MessageCreate)build role state: %v", err)
+			return
+		}
+		stateJSON, err := rolestate.MarshalRoleState(state)
+		if err != nil {
+			s.logf("(CAccess::MessageCreate)marshal role state: %v", err)
+			return
+		}
 		meta := RoleMeta{
-			SceneID:   birthSceneID,
-			Location:  birthSceneLocation,
-			Index:     int32(len(existing)),
-			SavePara1: para,
+			SceneID:       birthSceneID,
+			Location:      birthSceneLocation,
+			Index:         int32(len(existing)),
+			SavePara1:     para,
+			RoleStateJSON: stateJSON,
 		}
 		uid := newRoleUID()
 		ok, err := b.CreateRole(account, name, uid, serverID, meta, nil)
@@ -812,11 +837,11 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			s.logf("logon %s failed (password/logged gate)", name)
 		}
 		body := make([]byte, 0x18)
-		putLe32(body, 0x00, sceneOf(payload[0:4]))  // client_id
-		putLe32(body, 0x04, sceneOf(payload[4:8]))  // serial
-		putLe32(body, 0x08, uint32(boolByteU8(ok))) // result
-		putLe32(body, 0x0C, uint32(info.UserType))  // user_type
-		putLe32(body, 0x10, uint32(info.Points))    // points
+		putLe32(body, 0x00, sceneOf(payload[0:4]))   // client_id
+		putLe32(body, 0x04, sceneOf(payload[4:8]))   // serial
+		putLe32(body, 0x08, uint32(boolByteU8(ok)))  // result
+		putLe32(body, 0x0C, uint32(info.UserType))   // user_type
+		putLe32(body, 0x10, uint32(info.Points))     // points
 		putLe32(body, 0x14, uint32(info.UsedPoints)) // used_points
 		s.emit(serial, back, body)
 	case 0x37: // account_logoff（==0x7C 官方断言）→ 回执 0x26

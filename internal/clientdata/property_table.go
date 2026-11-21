@@ -2,12 +2,14 @@ package clientdata
 
 import (
 	_ "embed"
+	"encoding/binary"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-
+//go:embed official_property_table_2433.txt
+var officialPropertyTable2433Text string
 
 // 属性表唯一方言：外服私服 7074 线 2433 项官方真表 + 61 行尾追段
 // （2026-11-14 定案，分支 official-2433-only）。官方 2433 行与外服
@@ -72,14 +74,32 @@ func (t propertyTable) byNameScene(name string, minIndex int) (PropertyEntry, bo
 	return PropertyEntry{}, false
 }
 
-var officialTable propertyTable
+// 默认装载 2433 官方方言（var 初始化先于一切 init()，golden_table.go
+// 的 init 可在其上按 env 覆盖为真机镜像方言）。
+var officialTable = parsePropertyTable(officialPropertyTable2433Text, "official2433")
 
-// 默认空表：真机镜像方言由 golden_table.go 的 init 装载（2433 txt
-// 方言源已退役为 b-line 备用，不再内嵌）。
-func init() {}
+// ActivePropertyTableMode 返回当前生效的属性表方言（日志/诊断用）：
+// official2433（默认，2433+61 尾追 = 2494 项）或 golden（真机镜像 2086 项）。
+func ActivePropertyTableMode() string {
+	if goldenTableActive {
+		return "golden"
+	}
+	return "official2433"
+}
 
-// ActivePropertyTableMode 返回当前生效的属性表方言（日志/诊断用）。
-func ActivePropertyTableMode() string { return "official2433" }
+// OfficialPropertyTableFrame 把官方表条目编码为 0x09 协商帧：
+// [0x09][u16 N]{name\0 + u8 typeCode}×N（b-line 真机实证形态，含尾追段）。
+func OfficialPropertyTableFrame() []byte {
+	entries := officialTable.entries
+	msg := make([]byte, 3, 3+len(entries)*16)
+	msg[0] = 0x09
+	binary.LittleEndian.PutUint16(msg[1:], uint16(len(entries)))
+	for _, entry := range entries {
+		msg = append(msg, entry.Name...)
+		msg = append(msg, 0, byte(entry.TypeCode))
+	}
+	return msg
+}
 
 func parsePropertyTable(text, mode string) propertyTable {
 	table := propertyTable{

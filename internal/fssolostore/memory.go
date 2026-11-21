@@ -370,9 +370,9 @@ func (m *MemoryStore) AccountReset(session uint32) error {
 
 // memAccount dc_accounts 行镜像（内存库形态）。
 type memAccount struct {
-	password                          string
-	logged                            uint32
-	userType, points, usedPoints      int32
+	password                     string
+	logged                       uint32
+	userType, points, usedPoints int32
 }
 
 // AddAccount 测试/装配注入（官方 INSERT dc_accounts 面；password 为

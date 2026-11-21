@@ -5,10 +5,10 @@ import "sync"
 // NameUid 复刻 CNameUid（NameUid.obj，§九）：角色名(wchar)↔uid(char[33])
 // 双向映射 + deleted 标志。用于建角名预占与 NameUid 同步。
 type NameUid struct {
-	mu      sync.Mutex
-	byName  map[string]*nameUidNode
-	byUid   map[string]*nameUidNode
-	count   int
+	mu     sync.Mutex
+	byName map[string]*nameUidNode
+	byUid  map[string]*nameUidNode
+	count  int
 }
 
 type nameUidNode struct {
@@ -133,12 +133,21 @@ func (n *NameUid) GetCount() int {
 }
 
 // Snapshot 供 SyncRoleInfo 全量同步（StoreMsg RoleInfo 载荷构建用）。
-func (n *NameUid) Snapshot() []struct{ Name, Uid string; Deleted bool } {
+func (n *NameUid) Snapshot() []struct {
+	Name, Uid string
+	Deleted   bool
+} {
 	n.mu.Lock()
 	defer n.mu.Unlock()
-	out := make([]struct{ Name, Uid string; Deleted bool }, 0, n.count)
+	out := make([]struct {
+		Name, Uid string
+		Deleted   bool
+	}, 0, n.count)
 	for _, nd := range n.byName {
-		out = append(out, struct{ Name, Uid string; Deleted bool }{nd.name, nd.uid, nd.deleted})
+		out = append(out, struct {
+			Name, Uid string
+			Deleted   bool
+		}{nd.name, nd.uid, nd.deleted})
 	}
 	return out
 }

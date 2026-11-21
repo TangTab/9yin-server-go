@@ -1,37 +1,66 @@
 package fssoloworld
 
-// 进场链（真机镜像回放方言）：0x02 存档载入回执后下发 0x09/0x0A 镜像
-// 表 + 外服 golden 进场段（enter_golden.bin，#5..#284：0x0B 五属性 →
-// 0x14/0x11 记录对 → 0x29/0x28 LZ 档案 → 0x18 视图行…），ClientReady 后
-// 回放就绪段（ready_golden.bin）。帧序/字节与用户外服抓包逐帧一致
-// （心跳 seq7/#284 为就绪边界锚）；fork 方言自构帧（0x0D/0x1F/物理流/
-// View/m366 族）已全部退役——外服官方方言不发这些，自构形态在官方
-// 客户端上解引用崩溃（2026-11-21 capture 对拍定案）。
+// 进场链双模式（NINEYIN_ENTER_MODE=native|replay，默认 native）：
+//
+//	native（2433 方言原生生成，2026-11-21 决策）：0x02 回执 ok 后下发
+//	  0x09/0x0A 官方表（official2433 方言）→ entergen.PreReadyFrames
+//	  （0x0B/记录对/0x29/0x28 化身/物理流/基础属性批，数据源=store 回执
+//	  RST1 尾段的 role_state_json——建号 rolestate.BuildRoleState 同源）；
+//	  ClientReady 后 entergen.ReadyFrames（视图簇/登录信息帧/位置）。
+//	replay（回退）：真机镜像 golden bins 整段透传（初始账号教程态快照，
+//	  见 docs/official/透传数据清单.md 处置台账）。RST1 缺席（官方
+//	  store/旧档）自动回落 replay。
+//
+// 表前 0x32 推送（inner_push_golden ×2）两模式共用（会话票据透传保留）。
 
 import (
 	_ "embed"
 	"encoding/binary"
+	"os"
+	"sync/atomic"
+	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
+	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 //go:embed enter_golden.bin
 var enterGoldenFrames []byte
 
 //go:embed inner_push_golden.bin
-var innerPushGoldenFrames []byte // 外服表前 0x32 LZ 域配置块×2（INNER 推送）
+var innerPushGoldenFrames []byte // 表前 0x32 LZ 域配置块×2（INNER 推送）
 
 //go:embed ready_golden.bin
 var readyGoldenFrames []byte
 
-// propertyTableFrame 0x09 属性表（真机镜像逐字节透传，2086 项）。
-func propertyTableFrame() []byte {
-	return clientdata.GoldenPropertyTableFrame()
+// enterSeq 0x0B 进场流水号（官方每次进场自增——0x1521/0x2F05 实证
+// 非常量；从 1 起）。
+var enterSeq atomic.Uint32
+
+// nativeEnterEnabled 进场模式开关（运行时读 env——测试可 t.Setenv 切换）。
+func nativeEnterEnabled() bool {
+	return os.Getenv("NINEYIN_ENTER_MODE") != "replay"
 }
 
-// homeRecordsFrame 0x0A 记录表（真机镜像透传，344 schema）。
+// propertyTableFrame 0x09 属性表：默认 official2433 方言（2433+61 尾追
+// = 2494 项，fork/7074 线客户端，b-line 真机跑通）；NINEYIN_TABLE_DIALECT
+// =golden 时逐字节透传真机镜像帧（2086 项，回退开关）。
+func propertyTableFrame() []byte {
+	if clientdata.GoldenTableActive() {
+		return clientdata.GoldenPropertyTableFrame()
+	}
+	return clientdata.OfficialPropertyTableFrame()
+}
+
+// homeRecordsFrame 0x0A 记录表：默认官方 446 schema 镜像帧（外服登录链
+// 实证形态，帧头 16B 兼作 C2S 0x0A 信封头回显；编码侧 447 schema 的
+// recId≤446 与其完全兼容）；golden 方言透传 344 帧。
 func homeRecordsFrame() []byte {
-	return clientdata.GoldenRecordTableFrame()
+	if clientdata.GoldenTableActive() {
+		return clientdata.GoldenRecordTableFrame()
+	}
+	return clientdata.HomeRecordsMirrorFrame()
 }
 
 // replayGoldenFrames 长度前缀包（[u32 len][plain]×N）逐帧下行。
@@ -49,9 +78,28 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 	}
 	return sent
 }
-// storeLoadEnter 0x02 Load 回执 {client,serial,u32 ok,arch-wstr para}：
-// ok → 0x09/0x0A 镜像表 → 外服进场段整段回放（enter_golden）→ PlOnline
-// （等 op09 ClientReady 回放就绪段）。
+
+// enterContext 组装原生生成上下文（身份/会话/角色状态）。
+func (s *Server) enterContext(pl *Player) entergen.Context {
+	return entergen.Context{
+		Identity: entergen.Identity{
+			ObjectID: 1, // fork 客户端恒 1-1（stage_main 开图/记录绑定锚）
+			OwnerID:  1,
+			Sequence: enterSeq.Add(1),
+		},
+		Session: entergen.Session{
+			ServerID:   int32(s.cfg.ServerID),
+			ServerName: s.cfg.ServerName,
+			Account:    pl.Account,
+		},
+		RoleName: pl.Name,
+		State:    pl.roleState,
+	}
+}
+
+// storeLoadEnter 0x02 Load 回执 {client,serial,u32 ok,arch-wstr para
+// [,RST1 扩展尾段]}：ok → 0x32×2 → 0x09/0x0A 表 → 进场段（native 或
+// golden 回放）→ PlOnline（等 op09 ClientReady）。
 func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 	if len(p) < 12 {
 		return false
@@ -67,17 +115,73 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 		s.trace("(SoloWorld::StoreMsgLoad)load denied client=%d", clientID)
 		return true
 	}
+	// RST1 尾段（Go store 扩展）：role_state_json → 原生生成数据源。
+	if rest := parseRST1(p[12:]); rest != nil {
+		if state, err := rolestate.UnmarshalRoleState(*rest); err != nil {
+			s.trace("role state unmarshal failed client=%d: %v", clientID, err)
+		} else {
+			pl.roleState, pl.haveRoleState = state, true
+		}
+	}
 	s.replayGoldenFrames(pl, innerPushGoldenFrames) // 0x32 域配置块（外服序位于表前）
 	s.sendToClient(pl, propertyTableFrame())
 	s.sendToClient(pl, homeRecordsFrame())
+	if nativeEnterEnabled() && pl.haveRoleState {
+		frames, err := entergen.PreReadyFrames(s.enterContext(pl), time.Now())
+		if err != nil {
+			s.trace("native enter generate failed client=%d: %v（回退 golden）", clientID, err)
+			n := s.replayGoldenFrames(pl, enterGoldenFrames)
+			s.players.SetPlayerState(pl, PlOnline)
+			s.trace("enter golden replay %d frames client=%d name=%q", n, clientID, pl.Name)
+			return true
+		}
+		for _, frame := range frames {
+			s.sendToClient(pl, frame)
+		}
+		s.players.SetPlayerState(pl, PlOnline)
+		s.trace("enter native %d frames client=%d name=%q scene=%s", len(frames), clientID, pl.Name, pl.roleState.Scene)
+		return true
+	}
 	n := s.replayGoldenFrames(pl, enterGoldenFrames)
 	s.players.SetPlayerState(pl, PlOnline)
 	s.trace("enter golden replay %d frames client=%d name=%q", n, clientID, pl.Name)
 	return true
 }
 
-// clientReady op09 ClientReady → 外服就绪段回放（ready_golden）。
+// clientReady op09 ClientReady → 就绪段（native：视图簇+登录信息帧；
+// 回放：ready_golden）。
 func (s *Server) clientReady(pl *Player) {
+	if nativeEnterEnabled() && pl.haveRoleState {
+		frames, err := entergen.ReadyFrames(s.enterContext(pl), time.Now())
+		if err != nil {
+			s.trace("native ready generate failed client=%d: %v（回退 golden）", pl.Conn1, err)
+			n := s.replayGoldenFrames(pl, readyGoldenFrames)
+			s.trace("ready golden replay %d frames client=%d", n, pl.Conn1)
+			return
+		}
+		for _, frame := range frames {
+			s.sendToClient(pl, frame)
+		}
+		s.trace("ready native %d frames client=%d", len(frames), pl.Conn1)
+		return
+	}
 	n := s.replayGoldenFrames(pl, readyGoldenFrames)
 	s.trace("ready golden replay %d frames client=%d", n, pl.Conn1)
+}
+
+// parseRST1 从 0x02 回执 para 之后的尾段解出 role_state_json。
+// 布局：para 宽串（u32 码元数+NUL）后 [magic 'RST1' u32][len u32][json]。
+func parseRST1(rest []byte) *string {
+	for off := 0; off+8 <= len(rest); off++ {
+		if binary.LittleEndian.Uint32(rest[off:]) != 0x31545352 { // 'RST1'
+			continue
+		}
+		ln := int(binary.LittleEndian.Uint32(rest[off+4:]))
+		if ln <= 0 || off+8+ln > len(rest) {
+			return nil
+		}
+		v := string(rest[off+8 : off+8+ln])
+		return &v
+	}
+	return nil
 }

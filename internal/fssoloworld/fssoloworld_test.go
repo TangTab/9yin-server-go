@@ -2,9 +2,11 @@ package fssoloworld
 
 import (
 	"github.com/lizhanyin/9yin-server-go/internal/auth"
+	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/proto"
 
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -1001,11 +1003,17 @@ func TestCreateRoleEndToEnd(t *testing.T) {
 			t.Fatalf("inner push frame %#x", f[0])
 		}
 	}
-	if f = en.recvClientFrame(t); f[0] != 0x09 || len(f) != 29664 {
-		t.Fatalf("property table frame len=%d", len(f)) // 真机镜像 2086 项
+	// 表方言默认 official2433（fork/7074 线客户端）：0x09 = 2433+61 尾追
+	// 编码帧（与 clientdata.OfficialPropertyTableFrame 逐字节一致），
+	// 0x0A = 官方 446 schema 镜像帧。golden 方言（29664/7921）由
+	// NINEYIN_TABLE_DIALECT=golden 回退（init 期门控，进程内不可切）。
+	wantTable := clientdata.OfficialPropertyTableFrame()
+	if f = en.recvClientFrame(t); f[0] != 0x09 || !bytes.Equal(f, wantTable) {
+		t.Fatalf("property table frame op=%#x len=%d want=%d", f[0], len(f), len(wantTable))
 	}
-	if f = en.recvClientFrame(t); f[0] != 0x0A || len(f) != 7921 {
-		t.Fatalf("records mirror frame len=%d", len(f)) // 真机镜像 344 schema
+	wantRecords := clientdata.HomeRecordsMirrorFrame()
+	if f = en.recvClientFrame(t); f[0] != 0x0A || !bytes.Equal(f, wantRecords) {
+		t.Fatalf("records mirror frame op=%#x len=%d want=%d", f[0], len(f), len(wantRecords))
 	}
 	// 外服进场段回放：首帧 0x0B（五属性），尾至 272 帧不等长（镜像包）
 	if f = en.recvClientFrame(t); f[0] != 0x0B || binary.LittleEndian.Uint16(f[13:]) != 5 {

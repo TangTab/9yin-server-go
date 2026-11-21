@@ -1,6 +1,8 @@
 package fssoloworld
 
 import (
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
+
 	"sync"
 	"time"
 )
@@ -46,6 +48,10 @@ type Player struct {
 	sceneID      int
 	queued       bool
 	vip          bool
+	// roleState（store 0x02 回执 RST1 尾段）：进场原生生成的数据源。
+	// 缺席（官方 store/旧档）时 entergen 回退 replay 模式。
+	roleState     rolestate.RoleState
+	haveRoleState bool
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。

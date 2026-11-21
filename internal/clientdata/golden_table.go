@@ -4,17 +4,19 @@ import (
 	_ "embed"
 	"encoding/binary"
 	"fmt"
+	"os"
+	"strings"
 )
 
 // 真机镜像表源（2026-11-21 用户外服抓包「初始账号登陆.pcapng」提取，
-// 与用户客户端版本逐字节匹配——2433 项 txt 表与本客户端 idx 绑定错位
-// 会直接崩溃）。帧即下发字节：透传 + 解析共用同一数据。
+// 与 Blue Dragon 线客户端版本逐字节匹配——2433 项 txt 表与该客户端
+// idx 绑定错位会直接崩溃）。帧即下发字节：透传 + 解析共用同一数据。
 //
 //	property_table_golden.bin  0x09 属性表帧（2086 项，29664B）
 //	record_table_golden.bin    0x0A 记录表帧（344 schema，7921B）
 //
-//（b-line 的 official_property_table_2433.txt/official_record_table.bin
-// 保留为 7074 线客户端方言备用。）
+// 方言选择（2026-11-21 决策）：默认 official2433（fork/7074 线客户端，
+// b-line 真机跑通）；NINEYIN_TABLE_DIALECT=golden 切回镜像方言（回退开关）。
 
 //go:embed property_table_golden.bin
 var goldenPropertyTableFrame []byte
@@ -67,7 +69,7 @@ func parseGoldenPropertyTable() []PropertyEntry {
 }
 
 // switchToGoldenTable 以真机镜像表替换默认 2433 方言表（Name→Index 解析
-// 与透传帧同源）。由 fssoloworld 进场链装配时调用（可弃用回 2433 方言）。
+// 与透传帧同源，属性表 + 记录表一并切换）。
 func switchToGoldenTable() {
 	entries := parseGoldenPropertyTable()
 	table := propertyTable{
@@ -86,6 +88,7 @@ func switchToGoldenTable() {
 		table.player[entry.Name] = entry
 	}
 	officialTable = table
+	officialRecords = parseRecordTableFrame(goldenRecordTableFrame)
 	goldenTableActive = true
 }
 
@@ -95,6 +98,10 @@ var goldenTableActive bool
 // GoldenTableActive 镜像方言生效态。
 func GoldenTableActive() bool { return goldenTableActive }
 
-// init 即切镜像方言：真机客户端版本为准（2433 方言与本客户端 idx
-// 绑定错位会崩溃；b-line txt 表保留为 7074 线备用源）。
-func init() { switchToGoldenTable() }
+// init 按 env 门控方言：默认 official2433（fork/7074 线客户端），
+// NINEYIN_TABLE_DIALECT=golden 切回真机镜像（Blue Dragon 线客户端回退）。
+func init() {
+	if strings.TrimSpace(os.Getenv("NINEYIN_TABLE_DIALECT")) == "golden" {
+		switchToGoldenTable()
+	}
+}

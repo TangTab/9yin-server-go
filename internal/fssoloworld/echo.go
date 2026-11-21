@@ -12,12 +12,12 @@ import (
 // + 调试命令族框架（getp/setp/getc/setc/method/listp/listc/listm/listg/
 // function/debugger —— 官方走 nx_property 反射，此处框架保留）。
 type EchoConsole struct {
-	srv      *Server
-	mu       sync.Mutex
-	ln       net.Listener
-	clients  map[net.Conn]chan struct{}
-	closed   bool
-	logf     func(format string, args ...any)
+	srv     *Server
+	mu      sync.Mutex
+	ln      net.Listener
+	clients map[net.Conn]chan struct{}
+	closed  bool
+	logf    func(format string, args ...any)
 }
 
 // StartEcho 开维护受面。

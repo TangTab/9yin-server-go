@@ -775,8 +775,8 @@ func TestParseConnectStringDSN(t *testing.T) {
 			"Provider=SQLOLEDB;Password=nineyin123;User ID=nineyin;Initial Catalog=nineyin;Data Source=127.0.0.1:3306",
 			"nineyin:nineyin123@tcp(127.0.0.1:3306)/nineyin",
 		},
-		{"Provider=SQLOLEDB;Password=x", ""},         // 缺 User ID/库/源
-		{"", ""},                                      // 空串
+		{"Provider=SQLOLEDB;Password=x", ""}, // 缺 User ID/库/源
+		{"", ""},                             // 空串
 		{"Data Source=127.0.0.1:3306;User ID=sa;Initial Catalog=db;Password=", "sa:@tcp(127.0.0.1:3306)/db"}, // 空密码
 	}
 	for _, c := range cases {

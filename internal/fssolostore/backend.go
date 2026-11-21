@@ -96,9 +96,9 @@ type Backend interface {
 
 // AccountInfo dc_accounts 行计费域（AccountLogon 回执携带）。
 type AccountInfo struct {
-	UserType    int32
-	Points      int32
-	UsedPoints  int32
+	UserType   int32
+	Points     int32
+	UsedPoints int32
 }
 
 // AuctionKind 拍卖块通道（nx_auction type 列）。
@@ -143,6 +143,10 @@ type RoleMeta struct {
 	SavePara1 string
 	Index     int32
 	SysFlags  int32
+	// RoleStateJSON 建号初始/运行状态（nx_roles.role_state_json，JSON：
+	// 五维/内功/技能/轻功/任务门——rolestate.go 定义）。建号写入，
+	// 周期存档覆盖；空串 = 无状态列（旧档兼容）。
+	RoleStateJSON string
 }
 
 // LogValue 日志动态值（get_vary_message 的 TVarList 投影）。

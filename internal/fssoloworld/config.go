@@ -27,21 +27,21 @@ type Config struct {
 	EchoPort int
 
 	// [Charge]/[Gmcc]/[ManageServer]/[Monitor]/[DumpServer]
-	ChargeInuse   bool
-	ChargeAddr    string
-	ChargePort    int
-	GmccInuse     bool
-	GmccAddr      string
-	GmccPort      int
-	ManageInuse   bool
-	ManageAddr    string
-	ManagePort    int
-	MonitorInuse  bool
-	MonitorAddr   string
-	MonitorPort   int
-	DumpInuse     bool
-	DumpAddr      string
-	DumpPort      int
+	ChargeInuse  bool
+	ChargeAddr   string
+	ChargePort   int
+	GmccInuse    bool
+	GmccAddr     string
+	GmccPort     int
+	ManageInuse  bool
+	ManageAddr   string
+	ManagePort   int
+	MonitorInuse bool
+	MonitorAddr  string
+	MonitorPort  int
+	DumpInuse    bool
+	DumpAddr     string
+	DumpPort     int
 
 	// 属性缺省（ctor）
 	MaxPlayers    int
@@ -70,7 +70,7 @@ func DefaultConfig() Config {
 		MaxPlayers:    8192, // +0x68 = 0x2000
 		SaveMinutes:   10,   // +0x70 = 0xA
 		FlushMinutes:  0,
-		AccountRoles:  5,    // main.lua 显式 5（ctor 缺省 1）
+		AccountRoles:  5, // main.lua 显式 5（ctor 缺省 1）
 		RoleNameLimit: 16,
 		AutoOpen:      true,
 		PlayerQueue:   true,

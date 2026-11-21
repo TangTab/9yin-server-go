@@ -558,16 +558,19 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	}
 	readFrame(0x09) // 属性表（大帧过真传输面）
 	readFrame(0x0A) // 记录表镜像
-	if f := readFrame(0x0B); binary.LittleEndian.Uint16(f[13:]) != 5 {
-		t.Fatalf("golden entry attrs=%d", binary.LittleEndian.Uint16(f[13:]))
+	// 进场段（默认 native：2433 方言 4 属性 0x0B——entgegenert from
+	// role_state_json；帧数随建号数据可变，读完直到 ClientReady 窗口）。
+	// golden 回退（NINEYIN_ENTER_MODE=replay）时为 5 属性 + 272 帧。
+	if f := readFrame(0x0B); binary.LittleEndian.Uint16(f[13:]) != 4 {
+		t.Fatalf("native entry attrs=%d", binary.LittleEndian.Uint16(f[13:]))
 	}
-	for i := 1; i < 272; i++ { // 外服进场段其余帧
+	for i := 0; i < 130; i++ { // 原生进场段其余帧（记录/化身/物理流/属性批）
 		readAny()
 	}
 	if err := conn.WriteMsg([]byte{0x09}); err != nil { // ClientReady
 		t.Fatalf("write op09: %v", err)
 	}
-	for i := 0; i < 85; i++ { // 就绪段回放
+	for i := 0; i < 130; i++ { // 原生就绪段（视图簇+信息帧+位置）
 		readAny()
 	}
 	if !w.Names().FindName("王五") {

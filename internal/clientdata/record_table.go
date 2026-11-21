@@ -6,8 +6,11 @@ import (
 	"fmt"
 )
 
-//go:embed record_table_golden.bin
+//go:embed official_record_table.bin
 var officialRecordTableFrame []byte
+
+//go:embed self_home_rec_frame.bin
+var homeRecordsMirrorFrame []byte
 
 // RecordSchema 是官方 0x0A 记录表（447 schema）的一项。ColumnTypes 保留
 // 官方线型码：1=byte、2=u16、3=int32、4=int64、6=f64、7=窄字符串、
@@ -23,10 +26,11 @@ type recordTable struct {
 	byName  map[string]RecordSchema
 }
 
-var officialRecords = loadOfficialRecordTable()
+var officialRecords = parseRecordTableFrame(officialRecordTableFrame)
 
-func loadOfficialRecordTable() recordTable {
-	frame := officialRecordTableFrame
+// parseRecordTableFrame 从 0x0A 帧 [0x0A][u16 N]{name\0 + u16 ncols +
+// ncols×colType} 解析 schema 表（官方 447 bin 与 golden 344 帧共用）。
+func parseRecordTableFrame(frame []byte) recordTable {
 	if len(frame) < 3 || frame[0] != 0x0A {
 		panic("clientdata: official record table frame has unexpected header")
 	}
@@ -59,6 +63,13 @@ func loadOfficialRecordTable() recordTable {
 		panic("clientdata: official record table schema count mismatch")
 	}
 	return table
+}
+
+// HomeRecordsMirrorFrame 逐字节透传外服登录链 0x0A 镜像帧（446 schema，
+// 10429B，c.pcapng 实证形态）。客户端取其帧头 16B 作 C2S 0x0A 活动信封
+// 头回显；登录链 recId ≤446 与官方 447 表完全兼容（第 447 项为 fork 追加）。
+func HomeRecordsMirrorFrame() []byte {
+	return append([]byte(nil), homeRecordsMirrorFrame...)
 }
 
 // OfficialRecordTableFrame 逐字节透传官方 0x0A 记录表协商帧

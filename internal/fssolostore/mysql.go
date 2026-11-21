@@ -77,6 +77,13 @@ func (s *MySQLStore) ensureTables(ctx context.Context) error {
 			return fmt.Errorf("fssolostore: ensure table: %w", err)
 		}
 	}
+	// 建号状态列（2026-11-21 建号数据落库决策）：JSON 存五维/内功/技能/
+	// 轻功/任务门（rolestate.go）。幂等——已存在列报 1060 忽略。
+	if _, err := s.db.ExecContext(ctx,
+		"ALTER TABLE nx_roles ADD COLUMN role_state_json LONGTEXT NULL"); err != nil &&
+		!strings.Contains(err.Error(), "1060") && !strings.Contains(err.Error(), "Duplicate column") {
+		return fmt.Errorf("fssolostore: ensure role_state_json: %w", err)
+	}
 	return nil
 }
 
@@ -373,7 +380,7 @@ func (s *MySQLStore) ensureDcAccounts() error {
 		// 存量表迁移：官方方言 password varchar(32) 装不下 fork 派生登录密码
 		// （AES→base64→旋转，恒 36 字符，首登 INSERT 即 1406）→ 扩到 64。
 		var plen int
-		if err := s.db.QueryRow("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns "+
+		if err := s.db.QueryRow("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns " +
 			"WHERE table_schema='nx_district' AND table_name='dc_accounts' AND column_name='password'").
 			Scan(&plen); err == nil && plen < 64 {
 			if _, err := s.db.Exec("ALTER TABLE " + dcAccountsTable +
@@ -448,7 +455,7 @@ func (s *MySQLStore) AccountReset(session uint32) error {
 	// 官方原文按 session 等值清（多服共享账号库语义）；合一/单机部署
 	// 一服一库，硬杀残留的旧 session 行永不命中 → 账号永久 logged 锁死。
 	// 开机全清（logged<>0 → 0），session 形参仅保留接口签名。
-	_, err := s.db.Exec("UPDATE "+dcAccountsTable+
+	_, err := s.db.Exec("UPDATE " + dcAccountsTable +
 		" SET logged = 0 WHERE status = 1 AND logged <> 0")
 	return err
 }
@@ -475,7 +482,25 @@ func (s *MySQLStore) ResetOnline(serverID int) ([]RoleBrief, error) {
 }
 
 func (s *MySQLStore) SaveRole(name string, meta RoleMeta, saveData []byte) error {
-	return ErrUnsupported
+	// 官方 MessageSave（0x04，UPDATE nx_roles SET total_sec=… WHERE name）；
+	// role_state_json 随周期存档覆盖（Phase 4 entergen 运行态回写入口）。
+	if _, err := s.db.Exec("UPDATE nx_roles SET total_sec = ?, letter_max = ?,"+
+		" sys_flags = ?, role_index = ?, scene_id = ?, location = ?, save_para1 = ?,"+
+		" save_time = NOW(), save_data = ?, role_state_json = ? WHERE name = ?",
+		meta.TotalSec, meta.LetterMax, meta.SysFlags, meta.Index, meta.SceneID,
+		meta.Location, meta.SavePara1, saveData,
+		nullIfEmpty(meta.RoleStateJSON), name); err != nil {
+		return err
+	}
+	return nil
+}
+
+// nullIfEmpty 空串列写 NULL（role_state_json 未构建的旧档保持空）。
+func nullIfEmpty(v string) any {
+	if v == "" {
+		return nil
+	}
+	return v
 }
 
 func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleMeta, bool, error) {
@@ -485,12 +510,12 @@ func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleM
 	var meta RoleMeta
 	var saveData []byte
 	var totalSec, letterMax, sceneID, sysFlags, roleIndex int
-	var location, savePara1 sql.NullString
+	var location, savePara1, roleState sql.NullString
 	err := s.db.QueryRow("SELECT uid, total_sec, letter_max, scene_id, location, "+
-		"sys_flags, role_index, save_para1, save_data FROM nx_roles "+
+		"sys_flags, role_index, save_para1, save_data, role_state_json FROM nx_roles "+
 		"WHERE account = ? AND name = ? AND deleted = 0", account, name).
 		Scan(&meta.UID, &totalSec, &letterMax, &sceneID, &location,
-			&sysFlags, &roleIndex, &savePara1, &saveData)
+			&sysFlags, &roleIndex, &savePara1, &saveData, &roleState)
 	if err == sql.ErrNoRows {
 		return nil, RoleMeta{}, false, nil
 	}
@@ -501,6 +526,7 @@ func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleM
 	meta.TotalSec, meta.LetterMax = int32(totalSec), int32(letterMax)
 	meta.SceneID, meta.SysFlags, meta.Index = int32(sceneID), int32(sysFlags), int32(roleIndex)
 	meta.Location, meta.SavePara1 = location.String, savePara1.String
+	meta.RoleStateJSON = roleState.String
 	return saveData, meta, true, nil
 }
 
@@ -517,10 +543,11 @@ func (s *MySQLStore) CreateRole(account, name, uid string, serverID int, meta Ro
 	_, err := s.db.Exec("INSERT INTO nx_roles ( name, uid, account, create_time, delete_time, open_time,"+
 		" server_id, total_sec, deleted, letter_max, sys_flags, illegals, online,"+
 		" role_index, scene_id, location, resume_time, resume_info, charge_info,"+
-		" save_para1, save_time, save_data ) VALUES (?, ?, ?, NOW(), NULL, NOW(),"+
-		" ?, ?, 0, ?, ?, 0, 0, ?, ?, ?, NULL, NULL, NULL, ?, NOW(), ?)",
+		" save_para1, save_time, save_data, role_state_json ) VALUES (?, ?, ?, NOW(), NULL, NOW(),"+
+		" ?, ?, 0, ?, ?, 0, 0, ?, ?, ?, NULL, NULL, NULL, ?, NOW(), ?, ?)",
 		name, uid, account, serverID, meta.TotalSec, meta.LetterMax, meta.SysFlags,
-		meta.Index, meta.SceneID, meta.Location, meta.SavePara1, saveData)
+		meta.Index, meta.SceneID, meta.Location, meta.SavePara1, saveData,
+		nullIfEmpty(meta.RoleStateJSON))
 	if err != nil {
 		return false, err
 	}
