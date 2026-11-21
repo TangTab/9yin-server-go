@@ -162,6 +162,15 @@ func AvatarFrame(ctx Context, literal47 bool) ([]byte, int) {
 	}
 
 	count := 0
+	// 建角自定义外观优先（存档 appearance 槽：[1]photo [2]face(捏脸二进制)
+	// [4]hair——发型/照片/捏脸属玩家自定义数据非固定默认，2026-11-21 定案；
+	// 档内缺席回退 spec 默认）。
+	apSlot := func(i int) string {
+		if i < len(state.Appearance) {
+			return state.Appearance[i]
+		}
+		return ""
+	}
 	for _, spec := range profilePropSpecs {
 		entry, ok := profilePropEntry(spec.name)
 		if !ok {
@@ -170,6 +179,20 @@ func AvatarFrame(ctx Context, literal47 bool) ([]byte, int) {
 		raw := spec.raw
 		if spec.name == "Photo" && state.Sex == 2 {
 			raw = []byte("icon\\players\\girl01.png\x00")
+		}
+		switch spec.name {
+		case "Photo":
+			if v := apSlot(1); v != "" {
+				raw = append([]byte(v), 0)
+			}
+		case "Face":
+			if v := apSlot(2); v != "" {
+				raw = append([]byte(v), 0)
+			}
+		case "Hair":
+			if v := apSlot(4); v != "" {
+				raw = append([]byte(v), 0)
+			}
 		}
 		body = binary.LittleEndian.AppendUint16(body, entry.Index)
 		if raw != nil {

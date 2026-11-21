@@ -98,6 +98,25 @@ func (e *EchoConsole) command(nc net.Conn, line string) bool {
 	resp := func(info string) {
 		fmt.Fprintf(nc, ">%s\r", info)
 	}
+	// kick 是带参命令（switch 是字符串 case，前缀匹配走 if）。
+	if strings.HasPrefix(line, "kick ") {
+		// 面板 GM 踢人：名字/账号皆可命中（FindByName 先，FindByAccount
+		// 兜底——封号联动按账号踢）。官方语义：只向 entry 下发断开帧，
+		// 清理由 entryClientClosed 回报链（store 0x37 logoff + RemovePlayer），
+		// 不在此手动移除（对齐 login.go 拒登路径）。
+		name := strings.TrimSpace(strings.TrimPrefix(line, "kick "))
+		pl := s.players.FindByName(name)
+		if pl == nil {
+			pl = s.players.FindByAccount(name)
+		}
+		if pl == nil {
+			resp("kick " + name + " not found")
+			return false
+		}
+		s.inner.SendToAllEntry(0, entryBreakClient, entryClientKey(pl))
+		resp("kick " + name + " sent")
+		return false
+	}
 	switch line {
 	case "quit":
 		resp("server will shutdown...")
@@ -120,6 +139,16 @@ func (e *EchoConsole) command(nc net.Conn, line string) bool {
 		resp(fmt.Sprintf("player: %d, online: %d, offline: %d, active: %d, queuing: %d",
 			s.players.Count(), s.players.CountOnline(), s.players.CountOffline(),
 			s.players.CountActive(), s.players.CountQueue()))
+	case "plist":
+		// 面板（gmpanel）在线名单方言：计数头 + 每玩家一行 + >end 收尾。
+		// 字段 account|name|state|scene|loginAt|activeAt（时间为 unix 秒）。
+		list := s.players.Snapshot()
+		fmt.Fprintf(nc, ">player %d\r", len(list))
+		for _, p := range list {
+			fmt.Fprintf(nc, "%s|%s|%s|%d|%d|%d\r",
+				p.Account, p.Name, p.State, p.sceneID, p.loginAt.Unix(), p.activeAt.Unix())
+		}
+		fmt.Fprintf(nc, ">end\r")
 	case "open":
 		if s.State() == "Opened" {
 			resp("game server already opened")

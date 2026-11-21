@@ -32,6 +32,7 @@ type RoleState struct {
 	Sex                int            `json:"sex"`
 	Scene              string         `json:"scene"`    // 场景 config（ini\scene\born03_YanYuZhuang）
 	Resource           string         `json:"resource"` // 场景 resource（born03）
+	Appearance         []string       `json:"appearance,omitempty"` // 建角自定义外观串（save_para1 逗号拆；[1]photo [2]face(捏脸二进制) [4]hair——渲染自定义数据）
 	Position           [4]float64     `json:"position"` // x,y,z,orient（location.ini 方言）
 	Str                int            `json:"str"`
 	Dex                int            `json:"dex"`
@@ -314,6 +315,12 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 		sex = InferSexFromPara(para)
 	}
 	base, starter, birth := roleStateAssets.base, roleStateAssets.starter, roleStateAssets.birth
+	// 建角自定义外观（save_para1 逗号拆原样保留——发型/照片/捏脸属玩家
+	// 自定义数据，进场渲染按槽位取，档内缺席回退默认）
+	var appearance []string
+	if para != "" {
+		appearance = append(appearance, strings.Split(para, ",")...)
+	}
 
 	var row *roleBasePropRow
 	for i := range base {
@@ -329,6 +336,7 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 
 	state := RoleState{
 		Sex:                sex,
+		Appearance:         appearance,
 		Str:                atoi(row.Str),
 		Dex:                atoi(row.Dex),
 		Ing:                atoi(row.Ing),

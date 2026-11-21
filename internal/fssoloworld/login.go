@@ -97,6 +97,7 @@ func (s *Server) accountLogonReply(p []byte) bool {
 		return true
 	}
 	s.players.SetPlayerState(pl, PlGetting)
+	s.sendLoginReplyGolden(pl) // golden 方言：外服 op02 应答镜像（会话/场景锚）
 	// 账号角色清单请求（0x10 QueryAccount ≥72B；回执 0x0D 经
 	// storeRolesList 统一下行 0x04——有角角色列表/无角 41B 基座）。
 	// store 未连接（启动竞态/断连）时兜底直发无角 0x04——客户端

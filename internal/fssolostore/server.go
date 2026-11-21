@@ -691,6 +691,19 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 		putLe32(body, 0x00, sceneOf(payload[0:4]))
 		putLe32(body, 0x04, sceneOf(payload[4:8]))
 		putLe32(body, 0x08, uint32(boolByteU8(ok)))
+		if ok && meta.RoleStateJSON == "" {
+			// 旧档补建（RST1 机制上线的存量行 role_state_json=NULL）：
+			// 按存档外观推性别即时重建并回写——否则 world 回落 golden
+			// replay（2086 方言帧在 2433 客户端上 ConfigID 语义错位 →
+			// 场景加载 ter0 失败）。
+			if st, berr := rolestate.BuildRoleState(rolestate.DefaultBirthScene,
+				rolestate.InferSexFromPara(meta.SavePara1), meta.SavePara1, defaultFacultySeed); berr == nil {
+				if js, jerr := rolestate.MarshalRoleState(st); jerr == nil {
+					meta.RoleStateJSON = js
+					_ = b.SaveRole(cstrFixed(payload[0xC:0x2D]), meta, nil)
+				}
+			}
+		}
 		if ok {
 			body = appendArchWide(body, meta.SavePara1)
 			// Go 内网扩展尾段（官方 store 不带）：建号/运行状态 JSON。

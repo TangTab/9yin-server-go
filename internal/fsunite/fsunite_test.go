@@ -570,11 +570,91 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	if err := conn.WriteMsg([]byte{0x09}); err != nil { // ClientReady
 		t.Fatalf("write op09: %v", err)
 	}
-	for i := 0; i < 130; i++ { // 原生就绪段（视图簇+信息帧+位置）
-		readAny()
+	// 原生就绪段含 m229 c130 NPC 物化族 ×N（真档在仓根 testdata，cwd
+	// 探测命中）。进场段帧数随建号数据可变（位图/采集行可达千帧），m229
+	// 族在就绪段头连续出现——读到第一帧后计数至连续段结束。
+	isNpcM229 := func(f []byte) bool {
+		return len(f) > 12 && f[0] == 0x1E && f[3] == 2 &&
+			binary.LittleEndian.Uint32(f[4:]) == 229 &&
+			f[8] == 2 && binary.LittleEndian.Uint32(f[9:]) == 130
+	}
+	npcCount := 0
+	for i := 0; i < 3000; i++ {
+		f := readAny()
+		if isNpcM229(f) {
+			npcCount++
+			continue
+		}
+		if npcCount > 0 {
+			break // NPC 连续段结束
+		}
+	}
+	if npcCount == 0 {
+		t.Fatalf("m229 NPC 物化族缺席（场景目录装载失败？）logs: %s", logs)
+	}
+	if npcCount != 200 {
+		t.Errorf("m229 帧数 = %d, want 200（born03 半径 500 上限 200）", npcCount)
 	}
 	if !w.Names().FindName("王五") {
 		t.Fatal("nameuid missing after full flow")
+	}
+
+	// ---- 删角闭环（op06 → 0x0B → 0x07 → 名册清 → 0x10 → 0x0D → 0x04 无角）----
+	delName := make([]byte, 0x53)
+	for i, u := range utf16.Encode([]rune("王五")) {
+		binary.LittleEndian.PutUint16(delName[i*2:], u)
+	}
+	if err := conn.WriteMsg(append([]byte{0x06}, delName...)); err != nil {
+		t.Fatalf("write op06: %v", err)
+	}
+	// 删角处理链是异步的（0x0B→0x07→0x10→0x0D→0x04 下行）——等名册清空
+	for i := 0; i < 200; i++ {
+		if !w.Names().FindName("王五") {
+			break
+		}
+		if i == 199 {
+			t.Fatal("nameuid should drop name after delete")
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	// 重连验证 0x04 无角
+	conn.Close()
+	conn2, err := fsnet.Dial(fmt.Sprintf("127.0.0.1:%d", cfg.OuterPort), fsnet.Options{})
+	if err != nil {
+		t.Fatalf("re-dial: %v", err)
+	}
+	defer conn2.Close()
+	op2b := make([]byte, 25, 25+len(acctCt)+len(pwCt)+64)
+	op2b[0] = 0x02
+	binary.LittleEndian.PutUint32(op2b[1:], 333)
+	binary.LittleEndian.PutUint32(op2b[0x15:], uint32(len(acctCt)))
+	op2b = append(op2b, acctCt...)
+	op2b = append(op2b, fld(pwCt)...)
+	op2b = append(op2b, 0, 0, 0, 0)
+	op2b = append(op2b, fld(make([]byte, 16))...)
+	op2b = append(op2b, 0, 0, 0, 0)
+	if err := conn2.WriteMsg(op2b); err != nil {
+		t.Fatalf("write op02 (re-login): %v", err)
+	}
+	type res2 struct {
+		b   []byte
+		err error
+	}
+	ch2 := make(chan res2, 1)
+	go func() {
+		b, err := conn2.ReadMsg()
+		ch2 <- res2{b, err}
+	}()
+	select {
+	case r := <-ch2:
+		if r.err != nil {
+			t.Fatalf("re-login read: %v", r.err)
+		}
+		if r.b[0] != 0x04 || len(r.b) != 0x29 || binary.LittleEndian.Uint32(r.b[0x25:]) != 0 {
+			t.Fatalf("after delete: 0x04 op=%#x len=%d count=%d", r.b[0], len(r.b), binary.LittleEndian.Uint32(r.b[0x25:]))
+		}
+	case <-time.After(8 * time.Second):
+		t.Fatal("re-login timeout")
 	}
 }
 

@@ -1,0 +1,259 @@
+/* app.css —— 运维面板布局层（ax.css 管组件，这里只管骨架/表格/卡片）。 */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+}
+
+body { display: flex; flex-direction: column; overflow: hidden; }
+
+/* ---- 顶栏 ---- */
+
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-bottom: 1px solid var(--ax-border-color, #333);
+  background: var(--ax-bg-color, #1b1b1b);
+}
+
+#topbar h1 { font-size: 16px; margin: 0; }
+
+.topbar-spacer { flex: 1; }
+
+.chip {
+  padding: 2px 10px;
+  border: 1px solid var(--ax-border-color, #333);
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--ax-font-color, #ccc);
+}
+
+.chip b { margin-right: 4px; }
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--ax-font-color, #ccc);
+  padding: 4px 8px;
+}
+
+/* ---- 主体 ---- */
+
+.layout { display: flex; flex: 1; min-height: 0; }
+
+#side-nav {
+  width: 170px;
+  flex: 0 0 170px;
+  border-right: 1px solid var(--ax-border-color, #333);
+  padding: 10px 0;
+  overflow-y: auto;
+}
+
+#side-nav a {
+  display: block;
+  padding: 9px 18px;
+  color: var(--ax-font-color, #ccc);
+  text-decoration: none;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+#side-nav a:hover { background: rgba(128, 128, 128, 0.12); }
+
+#side-nav a.active {
+  border-left-color: var(--ax-color-primary, #2d8cf0);
+  background: rgba(45, 140, 240, 0.12);
+}
+
+.view { flex: 1; min-width: 0; overflow-y: auto; padding: 16px 20px 40px; }
+
+.panel { margin-bottom: 22px; }
+
+.panel > h2 { font-size: 15px; margin: 0 0 10px; }
+
+.panel-desc { font-size: 12px; opacity: 0.65; margin: -6px 0 10px; }
+
+/* ---- 卡片网格 / 统计 ---- */
+
+.stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+
+.stat-card {
+  min-width: 130px;
+  padding: 12px 16px;
+  border: 1px solid var(--ax-border-color, #333);
+  border-radius: 8px;
+  background: var(--ax-bg-color, #202020);
+}
+
+.stat-card .k { font-size: 12px; opacity: 0.65; }
+.stat-card .v { font-size: 22px; margin-top: 4px; }
+.stat-card .v small { font-size: 12px; opacity: 0.7; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+
+.svc-card {
+  border: 1px solid var(--ax-border-color, #333);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--ax-bg-color, #202020);
+  /* 操作区贴底: 同行卡说明行数不同时, 按钮基线不锯齿 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 卡内操作行/输入行固定在卡片底部 (margin-top:auto 吃掉剩余高度) */
+.svc-card .ops, .svc-card .toolbar { margin-top: auto; padding-top: 10px; margin-bottom: 0; }
+
+.svc-card .ops { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* 卡内输入框吃满卡片宽 (按钮在右侧占固有宽), 各卡等宽 → 输入框等长;
+   按钮统一最小宽, 三字/两字标签的卡输入框才严格同长 */
+.svc-card .toolbar input[type="text"] { flex: 1; min-width: 0; width: auto; }
+.svc-card .toolbar ax-btn { min-width: 88px; }
+
+.svc-card .hd { display: flex; align-items: center; gap: 8px; }
+.svc-card .nm { font-weight: 600; }
+.svc-card .sub { font-size: 12px; opacity: 0.6; margin: 6px 0; }
+.svc-card .ops { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ---- 状态点 / 状态标 ---- */
+
+.dot {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #888;
+  margin-right: 2px;
+}
+
+.dot.on { background: #19be6b; box-shadow: 0 0 5px #19be6b; }
+.dot.ext { background: #2d8cf0; }
+.dot.off { background: #666; }
+
+.state-tag {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.state-tag.running { color: #19be6b; border-color: #19be6b; }
+.state-tag.external { color: #2d8cf0; border-color: #2d8cf0; }
+.state-tag.stopped { color: #888; border-color: #666; }
+.state-tag.online { color: #19be6b; border-color: #19be6b; }
+
+/* ---- 表格 ---- */
+
+table.tbl { width: 100%; border-collapse: collapse; }
+
+table.tbl th, table.tbl td {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--ax-border-color, #2c2c2c);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+table.tbl th { font-size: 12px; opacity: 0.6; }
+
+table.tbl td.wrap { white-space: normal; word-break: break-all; }
+
+.tbl-empty { opacity: 0.5; padding: 18px; text-align: center; }
+
+/* ---- 工具行 ---- */
+
+/* ax 组件尺寸压平：axui 内部按宿主 font-size 的 em 链定高（:host 1.2em，
+   14px 根 → 16.8px 字号 / 45px 高的 sm 按钮），比 13px 工具栏输入框大一圈。
+   宿主压回 13px（!important 压过 :host 规则），按钮随 em 链缩到 ~35px 与输入框对齐。 */
+ax-btn { font-size: 13px !important; }
+
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+
+.toolbar input[type="text"], .toolbar select {
+  background: var(--ax-bg-color, #202020);
+  border: 1px solid var(--ax-border-color, #333);
+  color: var(--ax-font-color, #ccc);
+  border-radius: 4px;
+  padding: 5px 9px;
+  font-size: 13px;
+}
+
+.toolbar .grow { flex: 1; }
+
+/* ---- 日志 ---- */
+
+.log-box {
+  background: #0d0d0d;
+  border: 1px solid var(--ax-border-color, #2c2c2c);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  height: calc(100vh - 230px);
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.log-box .meta { opacity: 0.5; }
+
+/* ---- 底栏 / toast ---- */
+
+#statusbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  height: 28px;
+  flex: 0 0 28px;
+  padding: 0 14px;
+  font-size: 12px;
+  border-top: 1px solid var(--ax-border-color, #333);
+  color: var(--ax-font-color, #999);
+}
+
+#toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 99;
+}
+
+.toast {
+  padding: 9px 14px;
+  border-radius: 6px;
+  background: #2c2c2c;
+  border-left: 4px solid #2d8cf0;
+  color: #eee;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.25s;
+  max-width: 460px;
+  word-break: break-all;
+}
+
+.toast.show { opacity: 1; transform: none; }
+.toast.ok { border-left-color: #19be6b; }
+.toast.err { border-left-color: #ed4014; }
+
+/* ---- 窄屏收纳导航 ---- */
+
+@media (max-width: 760px) {
+  #side-nav { position: absolute; z-index: 9; height: 100%; display: none; background: var(--ax-bg-color, #1b1b1b); }
+  body.nav-open #side-nav { display: block; }
+}

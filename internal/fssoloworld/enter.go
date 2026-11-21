@@ -34,6 +34,9 @@ var innerPushGoldenFrames []byte // 表前 0x32 LZ 域配置块×2（INNER 推�
 //go:embed ready_golden.bin
 var readyGoldenFrames []byte
 
+//go:embed login_reply_golden.bin
+var loginReplyGolden []byte // 外服 op02 登录应答镜像（369B：会话锚 0xB8B8 + 反外挂校验码段——客户端场景对象表/校验初始化源；2026-11-21 ter0 报错定位的缺失帧）
+
 // enterSeq 0x0B 进场流水号（官方每次进场自增——0x1521/0x2F05 实证
 // 非常量；从 1 起）。
 var enterSeq atomic.Uint32
@@ -63,6 +66,15 @@ func homeRecordsFrame() []byte {
 	return clientdata.HomeRecordsMirrorFrame()
 }
 
+// sendLoginReplyGolden op02 登录应答镜像回放（golden 方言模式；
+// accountLogonReply 过门后紧跟，外服时序=登录应答位）。
+func (s *Server) sendLoginReplyGolden(pl *Player) {
+	if !clientdata.GoldenTableActive() {
+		return // 2433/native 模式不需要（fork 0x04 方言已完整）
+	}
+	s.sendToClient(pl, loginReplyGolden)
+}
+
 // replayGoldenFrames 长度前缀包（[u32 len][plain]×N）逐帧下行。
 func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 	sent := 0
@@ -79,7 +91,7 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 	return sent
 }
 
-// enterContext 组装原生生成上下文（身份/会话/角色状态）。
+// enterContext 组装原生生成上下文（身份/会话/角色状态/场景 NPC 目录）。
 func (s *Server) enterContext(pl *Player) entergen.Context {
 	return entergen.Context{
 		Identity: entergen.Identity{
@@ -94,6 +106,7 @@ func (s *Server) enterContext(pl *Player) entergen.Context {
 		},
 		RoleName: pl.Name,
 		State:    pl.roleState,
+		NPCs:     s.sceneNPCCatalog(pl.roleState.Resource, pl.roleState.Position), // Resource=场景键（born03；Scene 是完整 config 路径）
 	}
 }
 

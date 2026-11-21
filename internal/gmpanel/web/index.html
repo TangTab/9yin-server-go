@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>九阴运维面板</title>
+  <link rel="stylesheet" href="/static/ax.css" />
+  <link rel="stylesheet" href="/static/app/app.css" />
+</head>
+
+<body scheme="dark">
+  <header id="topbar">
+    <button id="nav-toggle" class="icon-btn" title="导航">☰</button>
+    <h1>九阴运维</h1>
+    <span class="chip" id="mode-badge" title="面板形态">-</span>
+    <span class="chip" id="world-badge" title="world echo 状态">world -</span>
+    <span class="chip" id="online-badge" title="在线玩家">在线 -</span>
+    <span class="topbar-spacer"></span>
+    <span class="chip" id="db-badge" title="MySQL">DB -</span>
+    <span class="chip" id="clock">--:--:--</span>
+  </header>
+  <div class="layout">
+    <nav id="side-nav" aria-label="功能导航"></nav>
+    <main id="view" class="view">
+      <section class="panel">
+        <ax-skeleton type="card"></ax-skeleton>
+      </section>
+    </main>
+  </div>
+  <footer id="statusbar">
+    <span id="conn-status"><span class="dot"></span>连接中……</span>
+    <span id="last-refresh"></span>
+    <span id="op-status"></span>
+  </footer>
+  <div id="toast-stack" aria-live="polite"></div>
+  <script type="module" src="/static/app/main.js"></script>
+</body>
+
+</html>

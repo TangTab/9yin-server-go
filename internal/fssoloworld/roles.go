@@ -169,8 +169,10 @@ func splitAppearance(s string) []string {
 	return strings.Split(s, ",")
 }
 
-// roleVisual 建角外观的展示形态（移植 internal/login/role.go；衣裤鞋
-// 不走装备表解析，取请求值或按性别默认裸配置）。
+// roleVisual 建角外观的展示形态（移植 internal/login/role.go）。衣裤鞋
+// 为**初始布衣三件模型路径**（2433 方言定版 docs/official/
+// 初始号无装备身体模型定版.md——无装备≠空槽，fork 线装备码 cloth0002 族
+// 是旧分支方言，captures/local 分支客户端不认，模型缺失）。
 type roleVisual struct {
 	sex                 byte
 	photo, face, hair   string
@@ -185,23 +187,26 @@ func roleVisualOf(appearance []string) roleVisual {
 		return fallback
 	}
 	sex := inferSex(appearance)
-	photoDefault := `icon\players\boy01_create.png`
-	hairDefault := `obj\char\b_hair\b_hair1`
+	photoDefault := `icon\players\boy03_create.png`
+	hairDefault := `obj\char\b_hair\b_hair4`
+	clothDefault, pantsDefault, shoesDefault := `obj\char\b_jianghu001\b_cloth001`,
+		`obj\char\b_jianghu003\b_pants003`, `obj\char\b_jianghu003\b_shoes003`
 	if sex == 1 {
 		photoDefault = `icon\players\girl01_create.png`
-		hairDefault = `obj\char\g_hair\g_hair1`
+		hairDefault = `obj\char\g_hair\g_hair4`
+		clothDefault, pantsDefault, shoesDefault = `obj\char\g_jianghu001\g_cloth001`,
+			`obj\char\g_jianghu003\g_pants003`, `obj\char\g_jianghu003\g_shoes003`
 	}
-	// 建角初始装备男女同款三件（官服建角口径：侠士布衣 cloth0002 /
-	// 侠士下衣 hc_2400177 / 靴子 cf_composite4）
-	clothDefault, pantsDefault, shoesDefault := "cloth0002", "hc_2400177", "cf_composite4"
 	return roleVisual{
 		sex:   sex,
 		photo: get(1, photoDefault),
-		face:  get(2, "333333333333333333333333333333333333333333X38\x01"),
+		face:  get(2, "e/330$33,'51\x1a4>=3333333333?5=<==\x19=33!F!1'6F3\t\x01"),
 		hair:  get(4, hairDefault),
-		cloth: get(5, clothDefault),
-		pants: get(6, pantsDefault),
-		shoes: get(7, shoesDefault),
+		// 布衣三件固定（定版：固定数据，不走档内槽）——52626 会话
+		// rolePara f9/f10/f11 实证值。
+		cloth: clothDefault,
+		pants: pantsDefault,
+		shoes: shoesDefault,
 	}
 }
 
@@ -270,10 +275,35 @@ var bookIntroKeys = map[string]string{
 	"book8": "introduction_wmp01_title",
 }
 
-// roleParaFields 组装 36 字段逗号串（选人界面展示；fork golden）。
-// 官方口径：f1 门派空串（School=""，归纳文档 §2——不走 fork 线移花宫
-// 出家号 faction 口径）；f25 剧本标题映射客户端本地化键（b-line 同源，
-// 未知 book 回退原值）。
+// birthSceneDisplayName 出生场景 → 选人界面「所在场景」显示名（中文
+// 直接量——52626 会话 rolePara f24 实证：该档玩家在移花宫场景时 f24=
+// "移花宫"，非 stringname 键；客户端原样显示）。建号态角色恒在出生
+// 场景；归纳文档 §2/§5 出生地表。
+var birthSceneDisplayName = map[string]string{
+	"born03": "烟雨庄",
+	"born04": "千灯镇",
+	"city02": "苏州",
+}
+
+// sceneDisplayName 按场景配置路径取显示名（未知场景回退资源名）。
+func sceneDisplayName(scenePath string) string {
+	seg := scenePath
+	if i := strings.LastIndexAny(seg, `\/`); i >= 0 {
+		seg = seg[i+1:]
+	}
+	for key, name := range birthSceneDisplayName {
+		if strings.HasPrefix(strings.ToLower(seg), key+"_") || strings.EqualFold(seg, key) {
+			return name
+		}
+	}
+	return seg
+}
+
+// roleParaFields 组装 36 字段逗号串（选人界面展示；52626 会话真机
+// rolePara 36 字段对拍：f6=0、f9/f10/f11=布衣三件模型路径、f24=场景
+// 中文显示名）。官方口径：f1 门派空串（School=""，归纳文档 §2——不走
+// fork 线移花宫出家号 faction 口径）；f25 剧本标题映射客户端本地化键
+// （b-line 同源，未知 book 回退原值）。
 func roleParaFields(appearance []string) []string {
 	get := func(index int, fallback string) string {
 		if index >= 0 && index < len(appearance) && appearance[index] != "" {
@@ -292,12 +322,12 @@ func roleParaFields(appearance []string) []string {
 	fields[1] = "" // School 空串：建角无门派（拜师由 origin 系统驱动）
 	fields[2], fields[3], fields[4] = "0", "0", "1"
 	fields[5] = get(2, "")
-	fields[6] = "1" // 显示类型存档（无档 golden "1"）
+	fields[6] = "0" // 显示类型存档（52626 真机 f6="0"；旧 fork 无档 golden "1" 为异分支方言）
 	fields[7] = visual.hair
 	fields[9], fields[10], fields[11] = visual.cloth, visual.pants, visual.shoes
 	fields[21], fields[22] = "stand", "127.0.0.1"
-	fields[23] = "title001"       // 新手实力档（faculty 接入后按实力阶梯；b-line title027 为 151 实力私服口径）
-	fields[24] = "scene_name_017" // 出生场景显示名（stringname 表接入后按场景查名）
+	fields[23] = "title001"                           // 新手实力档（faculty 接入后按实力阶梯；b-line title027 为 151 实力私服口径）
+	fields[24] = sceneDisplayName(birthScenePath) // 所在场景中文显示名（建号态=出生场景）
 	fields[25] = intro
 	fields[31] = "0"
 	fields[32] = book

@@ -79,6 +79,12 @@ start "game_auction"  /d "%BIN%" "game_auction.exe"
 timeout /t 1 /nobreak >nul
 start "game_monitor"  /d "%BIN%" "game_monitor.exe"
 
+rem ---- 可选运维面板（PANEL=1）：拉起后 http://127.0.0.1:19064 托管/观察双模式 ----
+if /i "%PANEL%"=="1" if exist "%BIN%\game_panel.exe" (
+  start "gm panel" /min /d "%BIN%" "game_panel.exe"
+  echo GM panel : http://127.0.0.1:19064
+)
+
 echo.
 echo Cluster launched: logger world store public lister entry member×%MEMBERS% auction monitor
 echo Stop with: stop-cluster.bat

@@ -66,7 +66,9 @@ func appendProperty(msg []byte, prop IndexedProperty) []byte {
 		msg = append(msg, prop.Value.Text...)
 		return append(msg, 0)
 	case 8:
-		msg = binary.LittleEndian.AppendUint32(msg, uint32(len(prop.Value.WideText)*2+2))
+		// 宽串线长 = UTF-16 码元字节数（按 rune 计，非 UTF-8 字节数）+
+		// NUL 终止——52626 #25 idx178 Name wide[10]=4 汉字实证。
+		msg = binary.LittleEndian.AppendUint32(msg, uint32(len([]rune(prop.Value.WideText))*2+2))
 		for _, r := range prop.Value.WideText {
 			msg = binary.LittleEndian.AppendUint16(msg, uint16(r))
 		}

@@ -1,0 +1,176 @@
+:root {
+  --bg: #14161a; --bg2: #1b1e24; --bg3: #23262e;
+  --fg: #d6d9e0; --fg-dim: #8a8f9a; --accent: #4f9cf9; --accent2: #f0b429;
+  --border: #2e323c; --warn: #e0564f; --ok: #5fbf7a;
+  font-size: 13px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+#app { display: flex; height: 100vh; height: 100dvh; }
+
+/* ---------- 左侧栏: 模型部件 ---------- */
+#sidebar {
+  width: 340px; min-width: 340px; display: flex; flex-direction: column;
+  background: var(--bg2); border-right: 1px solid var(--border);
+}
+#logo { padding: 10px 12px; font-weight: 600; font-size: 14px; border-bottom: 1px solid var(--border); }
+#logo .cnt, #lib-info { color: var(--fg-dim); font-weight: 400; font-size: 12px; margin-left: 4px; }
+
+/* 性别总标签 */
+#gender-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.gtab {
+  flex: 1; padding: 9px; background: none; border: none; color: var(--fg-dim);
+  font-size: 14px; cursor: pointer; border-bottom: 2px solid transparent;
+}
+.gtab:hover { color: var(--fg); }
+.gtab.active { color: var(--fg); border-bottom-color: var(--accent); background: var(--bg3); }
+
+/* 武器栏 (左栏底部固定区, 不受性别标签影响) */
+#weapons-panel {
+  height: 30%; min-height: 140px; display: flex; flex-direction: column;
+  border-top: 2px solid var(--border); background: var(--bg2);
+}
+#weapons-head {
+  padding: 7px 12px; font-weight: 600; font-size: 13px; cursor: pointer;
+  user-select: none; display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+#weapons-head:hover { color: var(--accent); }
+#weapons-head .cnt { color: var(--fg-dim); font-weight: 400; font-size: 12px; }
+#weapons-panel.closed { height: 34px; min-height: 34px; }
+#weapons-panel.closed .filters, #weapons-panel.closed #weapon-groups-wrap { display: none; }
+#weapon-groups-wrap { flex: 1; overflow-y: auto; min-height: 0; }
+#weapon-groups { padding: 0 0 10px; }
+.agroup-header {
+  position: absolute; left: 0; right: 0; height: 26px; padding: 3px 10px 3px 8px;
+  display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+  color: var(--fg-dim); font-size: 12px; background: var(--bg2);
+  border-top: 1px solid var(--border); z-index: 1;
+}
+.agroup-header:hover { color: var(--fg); }
+.agroup-header .tw { width: 12px; display: inline-block; }
+.agroup-header .cnt { margin-left: auto; }
+.mitem .lbl { color: var(--accent2); }
+.mitem .lbl .orig { color: var(--fg-dim); font-size: 10px; margin-left: 4px; }
+
+/* 模型分组 (折叠 + 搜索) */
+#model-groups-wrap { overflow-y: auto; flex: 1; min-height: 0; }
+#model-groups { padding: 0 0 20px; }
+.mgroup-header {
+  padding: 6px 12px; color: var(--fg-dim); font-size: 12px; cursor: pointer;
+  user-select: none; position: sticky; top: 0; background: var(--bg2);
+  border-top: 1px solid var(--border); z-index: 1; display: flex; gap: 6px; align-items: center;
+}
+.mgroup-header:hover { color: var(--fg); }
+.mgroup-header.open { color: var(--fg); }
+.mgroup-header .tw { width: 12px; display: inline-block; }
+.mgroup-header .cnt { margin-left: auto; }
+.mgroup-more { padding: 6px 12px 6px 24px; color: var(--fg-dim); font-size: 11px; }
+#model-list-status { padding: 6px 10px; color: var(--fg-dim); font-size: 11px; border-top: 1px solid var(--border); }
+.mitem .on { color: var(--ok); font-weight: 700; }
+#btn-clear-parts {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--fg-dim);
+  border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 12px;
+}
+#btn-clear-parts:hover { color: var(--warn); border-color: var(--warn); }
+.mitem, .aitem {
+  padding: 5px 12px 5px 20px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  border-left: 2px solid transparent;
+}
+.mitem:hover, .aitem:hover { background: var(--bg3); }
+.mitem.active, .aitem.active { border-left-color: var(--accent); background: var(--bg3); }
+.mitem .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mitem .meta, .aitem .meta { color: var(--fg-dim); font-size: 11px; white-space: nowrap; }
+.badge {
+  font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg3);
+  color: var(--fg-dim); border: 1px solid var(--border);
+}
+.badge.unsup { color: var(--warn); border-color: var(--warn); }
+
+/* 筛选栏 (模型/动画共用) */
+.filters { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--border); }
+.filters input, .filters select {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--fg);
+  padding: 5px 7px; border-radius: 4px; font-size: 12px; outline: none;
+}
+.filters input { flex: 1; min-width: 0; }
+
+/* ---------- 右侧栏: 骨骼动画 + 播放控制 ---------- */
+#animbar {
+  width: 300px; min-width: 300px; display: flex; flex-direction: column;
+  background: var(--bg2); border-left: 1px solid var(--border);
+}
+#animbar-head { padding: 10px 12px; font-weight: 600; font-size: 13px; border-bottom: 1px solid var(--border); }
+#animbar-head .cnt { color: var(--fg-dim); font-weight: 400; font-size: 12px; margin-left: 4px; }
+#anim-list-wrap { flex: 1; overflow-y: auto; position: relative; min-height: 0; }
+#anim-list-spacer { position: absolute; top: 0; left: 0; right: 0; height: 0; }
+.aitem {
+  position: absolute; left: 0; right: 0; height: 26px; padding: 3px 10px 3px 16px;
+}
+#anim-list-status { padding: 6px 10px; color: var(--fg-dim); font-size: 11px; border-top: 1px solid var(--border); }
+
+/* 播放条 (右栏底部, 永远可见) */
+#playbar {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  background: var(--bg3); border-top: 1px solid var(--border);
+}
+#btn-play {
+  width: 34px; height: 28px; background: var(--accent); color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; font-size: 12px; flex: none;
+}
+#btn-play:hover { filter: brightness(1.15); }
+#speed {
+  background: var(--bg2); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; padding: 4px; flex: none;
+}
+#frame-slider { flex: 1; min-width: 60px; accent-color: var(--accent); }
+#playbar-labels {
+  display: flex; justify-content: space-between; padding: 6px 14px 8px;
+  background: var(--bg3); border-top: 1px solid var(--border);
+}
+#frame-label, #time-label { color: var(--fg-dim); font-size: 12px; font-variant-numeric: tabular-nums; }
+.loop { color: var(--fg-dim); font-size: 12px; display: flex; gap: 4px; align-items: center; white-space: nowrap; }
+
+/* ---------- 主区 (视口) ---------- */
+#main { flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
+#viewport { flex: 1; position: relative; min-height: 0; }
+#viewport canvas { display: block; }
+
+#hud { position: absolute; top: 10px; left: 12px; pointer-events: none; display: flex; flex-direction: column; gap: 6px; max-width: 46%; }
+.hud-box {
+  background: rgba(20, 22, 26, 0.82); border: 1px solid var(--border); border-radius: 6px;
+  padding: 7px 10px; font-size: 12px; line-height: 1.55; color: var(--fg);
+}
+.hud-box .t { color: var(--accent2); font-weight: 600; margin-right: 6px; }
+.hud-box.warn { border-color: var(--warn); color: #f2b8b5; }
+
+#toolbar {
+  position: absolute; top: 10px; right: 12px; display: flex; gap: 10px;
+  background: rgba(20, 22, 26, 0.82); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 10px; font-size: 12px;
+}
+#toolbar label { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+
+/* 装配部件 chips (视口底部中央) */
+#assembly-bar {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 80%;
+}
+#assembly-bar:empty { display: none; }
+.part-chip {
+  display: flex; align-items: center; gap: 6px; font-size: 12px;
+  background: rgba(20, 22, 26, 0.88); border: 1px solid var(--accent); border-radius: 12px;
+  padding: 3px 6px 3px 10px; color: var(--fg); cursor: default;
+}
+.part-chip .x {
+  cursor: pointer; color: var(--fg-dim); width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 11px;
+}
+.part-chip .x:hover { background: var(--warn); color: #fff; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }

@@ -28,6 +28,7 @@
 | [外服0x29批量预载通道解析](official/外服0x29批量预载通道解析.md) | 0x29 登录簇玩家记录批量预载通道语法 + LZ 池种子定案 | 现行参考 |
 | [外服压缩值消息族0x27-0x2a全景](official/外服压缩值消息族0x27-0x2a全景.md) | 压缩值族 op→handler 命名全景（-0x18 规则） | 现行参考 |
 | [外服玩家档案0x28全量帧](official/外服玩家档案0x28全量帧.md) | 玩家档案 0x28 大帧（292~393 字段）方言 + 技能行 17 列模板 | 现行参考 |
+| [外服NPCm229物化方言定版](official/外服NPCm229物化方言定版.md) | NPC 物化帧 c130 16 槽方言 + npcdata 数据源/native 移植 + reactor 队满丢帧事故修复 | 现行权威 |
 | [初始账号外服教程态方言](official/初始账号外服教程态方言.md) | 新号教程态登录全解：记录双通道、Task_Completed 位图、第三 0x09 方言（2086 行） | 现行参考 |
 | [op28-fxnet2-lz-decoder](official/op28-fxnet2-lz-decoder.md) | 0x28 四连崩根因：fxnet2 LZ77 字典解码器全逆向 + v3 生成器 | 现行参考 |
 

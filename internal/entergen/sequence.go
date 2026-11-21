@@ -3,11 +3,12 @@ package entergen
 // 进场/就绪两段编排（7074 线实证相位——c.pcapng/登陆-all 窗口对拍）：
 //
 //	PreReady（表后 → ClientReady 前）：
-//	  0x0B 进场 → 0x14/0x11 记录对（挂载→纯数字列行）→ 0x29 批量
-//	  （字符串列记录，0x47 字面量包装）→ 0x28 化身 → 0x10 物理流 ×36
-//	  → 0x10 基础属性批（五维/资源）
+//	  0x0B 进场 → 0x0D 玩家物化（外观/身体模型集）→ 0x14/0x11 记录对
+//	  （挂载→纯数字列行）→ 0x29 批量（字符串列记录，0x47 字面量包装）
+//	  → 0x28 化身 → 0x10 物理流 ×36 → 0x10 基础属性批（五维/资源）
 //	Ready（ClientReady 后）：
-//	  m607/m52/m586 → m169 buff → 视图簇（空容器 + View40/43/46 + 44/45）
+//	  m229 c130 NPC 物化族 ×N（场景 NPC 目录；golden 相位段首）
+//	  → m607/m52/m586 → m169 buff → 视图簇（空容器 + View40/43/46 + 44/45）
 //	  → 战斗属性单帧族 → m416 九阴志域 → 0x1F 位置
 //
 // 会话身份（seq/obj/own/IP/时间戳）由 Identity/Session 注入，数据值取
@@ -32,6 +33,14 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		return nil, err
 	}
 	frames = append(frames, entry)
+
+	// 0x0D 玩家物化帧（52626 实证序 0x0B→0x0D→0x1F；身体渲染模型集：
+	// 布衣三件 + Hat=Hair + 档内外观自定义，定版文档全表序）。
+	appearance, err := AppearanceFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, appearance)
 
 	// 登录信息帧簇 m366/m623/m655（外服 0.1s 位：0x0A 表后）。
 	info, err := LoginInfoFrames(ctx)
@@ -84,6 +93,16 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 // ReadyFrames 就绪段全量帧（ClientReady 之后）。
 func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	frames := [][]byte{}
+
+	// m229 c130 NPC 物化族（golden 相位：ready 段最前 #2-63 连发——
+	// ClientReady 应答先推场景 NPC，再登录信息/视图簇）。
+	if len(ctx.NPCs) > 0 {
+		npc, err := NpcListFrames(ctx.NPCs)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, npc...)
+	}
 
 	// m607/m52/m586。
 	info, err := ReadyInfoFrames(ctx, now)

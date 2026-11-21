@@ -86,6 +86,7 @@ type rconn struct {
 	outClosed bool
 	out       chan []byte
 	outLen    atomic.Int64
+	drain     chan struct{} // writeLoop 退出即 close：解除阻塞背压的 Send
 
 	closeOnce sync.Once
 }
@@ -274,7 +275,7 @@ func (r *Reactor) CreateConnector(addr string, port int, h ConnHandler) (int, er
 	if !r.start.Load() {
 		return 0, fmt.Errorf("reactor 未 Start")
 	}
-	c := &rconn{id: r.newID(), out: make(chan []byte, 256), h: h}
+	c := &rconn{id: r.newID(), out: make(chan []byte, 256), drain: make(chan struct{}), h: h}
 	r.mu.Lock()
 	if r.closed {
 		r.mu.Unlock()
@@ -308,7 +309,7 @@ func (r *Reactor) CreateConnector(addr string, port int, h ConnHandler) (int, er
 
 // registerConn 接入侧连接直接落表（accept 已成，直接进入 connected）。
 func (r *Reactor) registerConn(nc net.Conn, h ConnHandler) {
-	c := &rconn{id: r.newID(), out: make(chan []byte, 256), h: h}
+	c := &rconn{id: r.newID(), out: make(chan []byte, 256), drain: make(chan struct{}), h: h}
 	r.mu.Lock()
 	if r.closed {
 		r.mu.Unlock()
@@ -359,6 +360,7 @@ func (c *rconn) readLoop(r *Reactor, host string, port int) {
 
 func (c *rconn) writeLoop(r *Reactor) {
 	defer r.objWG.Done()
+	defer close(c.drain) // 解除队满阻塞背压的 Send（writer 已亡，入队无意义）
 	for b := range c.out {
 		if _, err := c.c.Write(b); err != nil {
 			r.logf("ProcessWrite error: %v", err)
@@ -392,7 +394,19 @@ func (r *Reactor) Send(connID int, data []byte) bool {
 		c.outLen.Add(int64(len(data)))
 		return true
 	default:
-		r.logf("Send queue full: %d", connID)
+	}
+	// 队满：阻塞背压而非拒发——下行帧静默丢弃会把进场大簇（native
+	// 千帧级）随机打缺（2026-11-22 fsunite e2e 实证：256 槽突发打满、
+	// 客户端仅收 ~23%）。TCP 流控天然限速；MaxOutBufferBytes 字节硬限
+	// 仍护内存。writer 退出/reactor 停止时解除阻塞返回 false。
+	select {
+	case c.out <- append([]byte(nil), data...):
+		c.outLen.Add(int64(len(data)))
+		return true
+	case <-c.drain:
+		r.logf("Send queue drained: %d", connID)
+		return false
+	case <-r.done:
 		return false
 	}
 }

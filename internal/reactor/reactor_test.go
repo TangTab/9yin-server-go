@@ -2,6 +2,7 @@ package reactor
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"runtime"
 	"sync"
@@ -330,4 +331,61 @@ func TestBroadcastCoBind(t *testing.T) {
 			t.Fatalf("%s 未双收 m1/m2（得 %v）——共绑广播互收失效", name, got)
 		}
 	}
+}
+
+// TestSendBurstNoDrop 突发大帧量不丢帧（回归：2026-11-22 fsunite e2e
+// 实证 256 槽 out 队列在 native 进场千帧簇突发下随机满拒、客户端仅收
+// ~23%——修复为队满阻塞背压；TCP 流控限速，MaxOutBufferBytes 仍护内存）。
+func TestSendBurstNoDrop(t *testing.T) {
+	r := New()
+	if err := r.Start(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(r.Stop)
+
+	// 裸 TCP 对端：accept 后读满全部突发字节（对端不主动消费，制造
+	// 生产远快于消费的队满压力）。
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	port := ln.Addr().(*net.TCPAddr).Port
+	srv := make(chan net.Conn, 1)
+	go func() {
+		c, err := ln.Accept()
+		if err == nil {
+			srv <- c
+		}
+	}()
+
+	opened := make(chan struct{}, 1)
+	connID, err := r.CreateConnector("127.0.0.1", port, ConnHandler{
+		OnOpen: func(int, string, int) { close(opened) },
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-opened:
+	case <-time.After(testWait):
+		t.Fatal("等 OnOpen 超时")
+	}
+
+	const total = 2000 // 远超 out 队列 256 槽的突发量
+	frame := []byte{0xAB, 0xCD}
+	for i := 0; i < total; i++ {
+		if !r.Send(connID, frame) {
+			t.Fatalf("Send 第 %d 帧被拒（队满阻塞背压不应拒发）", i)
+		}
+	}
+
+	// 对端逐字节读满（慢消费）：总字节数不少即不丢。
+	c := <-srv
+	buf := make([]byte, total*len(frame))
+	c.SetReadDeadline(time.Now().Add(10 * time.Second))
+	if _, err := io.ReadFull(c, buf); err != nil {
+		t.Fatalf("对端读满失败: %v", err)
+	}
+	r.ShutdownConnector(connID)
 }

@@ -254,15 +254,28 @@ func (s *Server) clientDeleteRole(pl *Player, body []byte) bool {
 	if v, n, _ := readArchiveString(body); n > 4 { // 读法一：archive 串
 		uid = v
 	}
-	if uid == "" { // 读法二：裸窄串扫 NUL
+	// 读法二：op04 同构定长 UCS2 名字帧（0x54 方言——[0:0x42] 裸 UTF-16LE
+	// 扫 NUL）——优先于裸窄串（后者会把 UCS2 字节当垃圾 uid 截断后续解析）
+	{
+		end := 0x42
+		if len(body) < end {
+			end = len(body)
+		}
+		if v := wideNulNameOf(body[:end]); v != "" {
+			name = v
+		}
+	}
+	if uid == "" && name == "" { // 读法三：裸窄串扫 NUL（纯 uid 形态）
 		end := 0
 		for end < len(body) && body[end] != 0 {
 			end++
 		}
 		uid = string(body[:end])
 	}
-	if v, n, _ := readArchiveWidestr(body); n > 4 { // 读法三：宽串角色名
-		name = v
+	if name == "" { // 读法四：archive 宽串
+		if v, n, _ := readArchiveWidestr(body); n > 4 {
+			name = v
+		}
 	}
 	if uid != "" { // uid 反查优先
 		if v, ok := s.names.GetName(uid); ok {

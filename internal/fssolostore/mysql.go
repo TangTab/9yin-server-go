@@ -595,7 +595,80 @@ func (s *MySQLStore) QueryAccount(account string, serverID int) ([]RoleBrief, er
 	return out, rows.Err()
 }
 
-// InsertLog 官方动态 INSERT INTO %s (%s) VALUES (%s)（CustomLog）：
+// ---- gmpanel 面板支撑（SearchRoles/RecentAlerts/SetAccountStatus；
+// 面板进程直连 MySQL 的查询/管理口，不进 Backend 官方消息面） ----
+
+// RoleRow 面板角色查询行（nx_roles 全维度浅投影，含软删/跨区服）。
+type RoleRow struct {
+	Account  string `json:"account"`
+	Name     string `json:"name"`
+	UID      string `json:"uid"`
+	ServerID int    `json:"serverId"`
+	Online   bool   `json:"online"`
+	Deleted  bool   `json:"deleted"`
+}
+
+// SearchRoles 按账号列角色（不限 server_id、含已删——面板口径，
+// 官方 QueryAccount 是登录链视角只看单区服未删）。
+func (s *MySQLStore) SearchRoles(account string) ([]RoleRow, error) {
+	rows, err := s.db.Query("SELECT account, name, uid, server_id, online, deleted"+
+		" FROM nx_roles WHERE account = ? ORDER BY server_id, role_index", account)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []RoleRow
+	for rows.Next() {
+		var r RoleRow
+		var online, deleted int
+		if err := rows.Scan(&r.Account, &r.Name, &r.UID, &r.ServerID, &online, &deleted); err != nil {
+			return nil, err
+		}
+		r.Online, r.Deleted = online != 0, deleted != 0
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// AlertRow nx_monitor 告警流水行（fssolomonitor.AlertSink 落库侧）。
+type AlertRow struct {
+	Name   string `json:"name"`
+	Type   int    `json:"type"`
+	Reason string `json:"reason"`
+	Time   string `json:"time"` // DATETIME 驱动字符串形态（DSN 未开 parseTime）
+}
+
+// RecentAlerts 告警流水倒序（面板告警页）。
+func (s *MySQLStore) RecentAlerts(limit int) ([]AlertRow, error) {
+	rows, err := s.db.Query("SELECT name, type, reason, time FROM nx_monitor"+
+		" ORDER BY time DESC LIMIT ?", limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []AlertRow
+	for rows.Next() {
+		var r AlertRow
+		if err := rows.Scan(&r.Name, &r.Type, &r.Reason, &r.Time); err != nil {
+			return nil, err
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// SetAccountStatus 封号/解封（面板 GM 动作）：status=1 正常（AccountLogon
+// 登录门 `status = 1`），0 = 封禁。附带 logged=0 清会话，防封禁账号
+// 残留 logged 门锁死后续登录。
+func (s *MySQLStore) SetAccountStatus(name string, status int) (bool, error) {
+	res, err := s.db.Exec("UPDATE "+dcAccountsTable+" SET status = ?, logged = 0 WHERE name = ?",
+		status, name)
+	if err != nil {
+		return false, err
+	}
+	n, _ := res.RowsAffected()
+	return n > 0, nil
+}
 // datetime 列自动 NOW()，数值/串按 LogValue。
 func (s *MySQLStore) InsertLog(table string, vals []LogValue) error {
 	t := (&LogTableSet{}).Table(table)

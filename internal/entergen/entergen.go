@@ -44,7 +44,8 @@ type Context struct {
 	Session  Session
 	RoleName string // 角色名（m607 宽串）
 	State    rolestate.RoleState
-	Keybind  string // 存档键位串（0x28 档案 ShortcutKey；空=省略）
+	Keybind  string    // 存档键位串（0x28 档案 ShortcutKey；空=省略）
+	NPCs     []NpcEntry // 场景 NPC 物化族（m229 c130；空=不下发）
 }
 
 // DefaultIdentity fork 客户端方言的玩家恒等身份（1-1）：

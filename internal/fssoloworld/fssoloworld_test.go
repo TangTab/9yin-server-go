@@ -447,6 +447,64 @@ func TestEchoCloseCommand(t *testing.T) {
 	}
 }
 
+// echo plist/kick：面板（gmpanel）在线名单方言 + GM 踢人应答面。
+func TestEchoPlistKick(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.InnerAddr = "127.0.0.1"
+	cfg.InnerPort = 0
+	cfg.BroadPort = 0
+	cfg.EchoAddr = "127.0.0.1"
+	cfg.EchoPort = 0
+	s := New(Options{Config: cfg, ManualTick: true})
+	if err := s.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
+
+	pl := s.players.AddPlayer(7, 1, "test001")
+	s.players.SetupPlayerName(7, 1, "角色甲")
+	s.players.SetPlayerState(pl, PlOnline)
+
+	conn, err := net.DialTimeout("tcp", s.echo.ln.Addr().String(), time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	rd := bufio.NewReader(conn)
+	rd.ReadString('\r') // welcome
+
+	// plist：>player 1 头 + 数据行（account|name|state|scene|loginAt|activeAt）+ >end
+	conn.Write([]byte("plist\r"))
+	head, _ := rd.ReadString('\r')
+	if !strings.Contains(head, ">player 1") {
+		t.Fatalf("plist head %q", head)
+	}
+	row, _ := rd.ReadString('\r')
+	f := strings.Split(strings.TrimSuffix(row, "\r"), "|")
+	if len(f) != 6 || f[0] != "test001" || f[1] != "角色甲" || f[2] != "Online" {
+		t.Fatalf("plist row %q", row)
+	}
+	if f[3] != "0" || f[4] == "0" || f[4] == "" { // scene=0（无场景写入点）、loginAt 非零
+		t.Fatalf("plist row fields %q", row)
+	}
+	end, _ := rd.ReadString('\r')
+	if strings.TrimSpace(end) != ">end" {
+		t.Fatalf("plist end %q", end)
+	}
+
+	// kick 命中（角色名与账号同权）→ sent；未命中 → not found
+	conn.Write([]byte("kick 角色甲\r"))
+	line, _ := rd.ReadString('\r')
+	if !strings.Contains(line, "sent") {
+		t.Fatalf("kick resp %q", line)
+	}
+	conn.Write([]byte("kick nobody\r"))
+	line, _ = rd.ReadString('\r')
+	if !strings.Contains(line, "not found") {
+		t.Fatalf("kick miss %q", line)
+	}
+}
+
 // entry 消息面：Accept/Login/CreateRole 全链。
 // buildTestOp02 构造真机方言 op02（auth.EncryptFields 同源；golden 333 版本）。
 func buildTestOp02(account, password string) []byte {
@@ -873,7 +931,7 @@ func TestCreateRoleEndToEnd(t *testing.T) {
 	}
 	fields := strings.Split(vl.Values[3].Text, ",")
 	if len(fields) != 36 || fields[0] != "1" || fields[1] != "" ||
-		fields[32] != "book1" || fields[24] != "scene_name_017" ||
+		fields[32] != "book1" || fields[24] != "烟雨庄" ||
 		fields[25] != "introduction_qdz01_title" {
 		t.Fatalf("rolePara %q", vl.Values[3].Text)
 	}
@@ -1116,9 +1174,9 @@ func TestRolesFrameGolden(t *testing.T) {
 	}
 	fields := strings.Split(vl.Values[3].Text, ",")
 	if len(fields) != 36 || fields[0] != "0" || fields[1] != "" ||
-		fields[9] != "cloth0002" || fields[10] != "hc_2400177" || fields[11] != "cf_composite4" ||
-		fields[23] != "title001" || fields[24] != "scene_name_017" || fields[32] != "book1" ||
-		fields[25] != "introduction_qdz01_title" {
+		fields[9] != `obj\char\b_jianghu001\b_cloth001` || fields[10] != `obj\char\b_jianghu003\b_pants003` || fields[11] != `obj\char\b_jianghu003\b_shoes003` ||
+		fields[23] != "title001" || fields[24] != "烟雨庄" || fields[32] != "book1" ||
+		fields[25] != "introduction_qdz01_title" || fields[6] != "0" {
 		t.Fatalf("rolePara %q", vl.Values[3].Text)
 	}
 }

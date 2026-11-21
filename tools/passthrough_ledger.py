@@ -55,7 +55,7 @@ MSG_DISPOSITION = {
     623: ('已接线', '[0,0,3] 服务器信息——entergen.LoginInfoFrames'),
     655: ('已接线', '服务器标识四元组——entergen.LoginInfoFrames（Session 注入）'),
     586: ('已接线', '状态推送簇首 [5]——entergen.ReadyInfoFrames'),
-    229: ('未移植', 'NPC 列表推送 c130（场景相关——需场景 NPC 目录数据源；ready 段 ×63 大族）'),
+    229: ('已接线', 'NPC 物化帧 c130（16 槽方言定版；npcdata 摆放+模板联查→entergen.NpcListFrames，ReadyFrames 段首；见 外服NPCm229物化方言定版.md）'),
     386: ('未移植', 'UI 开关推送 [slot,id]（b-line funcopen_cluster）——ready 段 ×15'),
     681: ('未移植', '挑战令牌推送（b-line tiaozhan_probe 方言）——enter 段 ×6'),
     101: ('未移植', '面板推送（b-line gm_stats 域）'),
@@ -151,6 +151,9 @@ def disposition(op, desc):
     d = OP_DISPOSITION.get(op)
     if d == '按消息号细分（MSG_DISPOSITION）':
         mid = int(desc.split(' ')[0][1:]) if desc.startswith('m') else -1
+        # m229 族按子命令细分：c130 大族已接线；144/145/154 变体语义未定案不发。
+        if mid == 229 and not desc.startswith('m229 [130]'):
+            return ('未移植', 'm229 变体轻帧（[144]/[145]/[154]——语义未定案，本期不发；见 外服NPCm229物化方言定版.md §二）')
         return MSG_DISPOSITION.get(mid, ('暂缓', '未定位消息——透传保留至语义定案'))
     if d is None:
         return ('暂缓', '未登记 opcode')
