@@ -118,10 +118,17 @@ func (s *Server) accountLogoffReply(p []byte) bool {
 	return true
 }
 
+// clientSendObserver 下行帧测试观察缝（nil=无；邮件/切图帧序断言用——
+// nil inner 下 SendToAllEntry 静默，帧不可从出口侧观测）。
+var clientSendObserver func(pl *Player, frame []byte)
+
 // sendToClient 单客户端下行：entry id2=6（SoloForwSendClient），
 // 载荷 {ident, serial, 原始客户端帧}（BuildUpstreamData 布局）。
 func (s *Server) sendToClient(pl *Player, frame []byte) {
 	s.trace("send to client %d opcode=0x%02X len=%d", pl.Conn1, frame[0], len(frame))
+	if clientSendObserver != nil {
+		clientSendObserver(pl, frame)
+	}
 	buf := make([]byte, 8+len(frame))
 	binary.LittleEndian.PutUint32(buf[0:], pl.Conn1)
 	binary.LittleEndian.PutUint32(buf[4:], pl.Conn2)

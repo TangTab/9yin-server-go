@@ -148,6 +148,10 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 	ok := binary.LittleEndian.Uint32(p[8:])
 	pl := s.players.FindByConnect(clientID, serial)
 	if pl == nil {
+		// GM 离线邮件合成 clientID 段回执（name-only 查档 → 补信 → 0x04）。
+		if clientID >= offlineSynthClientBase && len(p) > 12 {
+			s.offlineMailReply(clientID, p[12:])
+		}
 		return true
 	}
 	if ok == 0 {
@@ -195,8 +199,12 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 }
 
 // clientReady op09 ClientReady → 就绪段（native：视图簇+登录信息帧；
-// 回放：ready_golden）。
+// 回放：ready_golden）。切图重入（sceneSwitch 在途）走 reentryReady 分支。
 func (s *Server) clientReady(pl *Player) {
+	if pending := s.pendingSceneSwitch(pl); pending != nil {
+		s.reentryReady(pl, pending)
+		return
+	}
 	if nativeEnterEnabled() && pl.haveRoleState {
 		frames, err := entergen.ReadyFrames(s.enterContext(pl, false), time.Now())
 		if err != nil {
@@ -208,7 +216,9 @@ func (s *Server) clientReady(pl *Player) {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
 		}
-		s.trace("ready native %d frames client=%d", len(frames), pl.Conn1)
+		// 邮箱整表重放（2433 线 ClientReady 后、View43/40 前窗口；空表零帧）。
+		letters := s.pushLetterRows(pl)
+		s.trace("ready native %d frames client=%d letters=%d", len(frames), pl.Conn1, letters)
 		return
 	}
 	n := s.replayGoldenFrames(pl, readyGoldenFrames)

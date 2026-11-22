@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 客户端 share/rule/door_data.ini 提取（tools/gen_door_routes）；请勿手改 -->
+<DoorRoutes scenes="44" routes="113">
+  <Scene name="born01">
+    <Route id="1" triggerX="1032.995" triggerY="13.736" triggerZ="522.759" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="837.625" targetY="-35.939" targetZ="-750.86" targetOrient="0.68"/>
+    <Route id="2039" triggerX="737.062" triggerY="47.752" triggerZ="-52.156" radius="8" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="2156" targetY="135.8" targetZ="-663" targetOrient="2.23"/>
+    <Route id="2045" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\born01_MoHeZhen" targetX="750.172" targetY="52.116" targetZ="-6.033" targetOrient="3.137"/>
+    <Route id="2052" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\born01_MoHeZhen" targetX="788.803" targetY="7.688" targetZ="79.37" targetOrient="3.037"/>
+  </Scene>
+  <Scene name="born02">
+    <Route id="2" triggerX="171.325" triggerY="29.149" triggerZ="893.699" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="1513.696" targetY="41.29" targetZ="580.381" targetOrient="-1.313"/>
+    <Route id="3" triggerX="100.959" triggerY="23.586" triggerZ="-529.289" radius="8" targetConfig="ini\\scene\\scene08_SaiWaiDaMo" targetX="-322.234" targetY="3.979" targetZ="858.237" targetOrient="0.67"/>
+    <Route id="2133" triggerX="-324.806" triggerY="-6" triggerZ="296.994" radius="8" targetConfig="ini\\scene\\school20_mingjiao" targetX="522.407" targetY="20.019" targetZ="55.258" targetOrient="-2.083"/>
+  </Scene>
+  <Scene name="born03">
+    <Route id="4" triggerX="892.366" triggerY="55.34" triggerZ="718.45" radius="8" targetConfig="ini\\scene\\city02_SuZhou" targetX="1181.279" targetY="27.745" targetZ="143.367" targetOrient="-0.343"/>
+    <Route id="2075" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\scene16" targetX="121.9" targetY="285.32" targetZ="-1149.508" targetOrient="-0.365"/>
+  </Scene>
+  <Scene name="born04">
+    <Route id="6" triggerX="1113.037" triggerY="-12.968" triggerZ="716.252" radius="8" targetConfig="ini\\scene\\scene25" targetX="671.5" targetY="50.7" targetZ="675.2" targetOrient="2.8"/>
+    <Route id="5" triggerX="182.096" triggerY="-14.087" triggerZ="676.272" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="720.5" targetY="38.526" targetZ="238.4" targetOrient="0.475"/>
+    <Route id="2086" triggerX="746.302" triggerY="91.58" triggerZ="-139.504" radius="8" targetConfig="ini\\scene\\school12_wuxianjiao" targetX="1160.202" targetY="35.646" targetZ="1185.957" targetOrient="1.57"/>
+  </Scene>
+  <Scene name="city01">
+    <Route id="24" triggerX="809.949" triggerY="-35.939" triggerZ="-778.119" radius="8" targetConfig="ini\\scene\\born01_MoHeZhen" targetX="998.817" targetY="8.364" targetZ="530.187" targetOrient="-1.498"/>
+    <Route id="27" triggerX="-465.78" triggerY="-90.823" triggerZ="9.129" radius="8" targetConfig="ini\\scene\\scene01_YouYunShiLiuZhou" targetX="1070.2" targetY="51.8" targetZ="1323.6" targetOrient="1.788"/>
+    <Route id="28" triggerX="-22.296" triggerY="-53.745" triggerZ="1163.051" radius="8" targetConfig="ini\\scene\\scene02_PengLaiXianJing" targetX="199.465" targetY="24.579" targetZ="885.394" targetOrient="1.605"/>
+    <Route id="29" triggerX="1711.625" triggerY="-78.959" triggerZ="913.77" radius="8" targetConfig="ini\\scene\\scene03_FanHuangPingYuan" targetX="383.885" targetY="-20.018" targetZ="1407.695" targetOrient="0.98"/>
+    <Route id="25" triggerX="-577.417" triggerY="-101.874" triggerZ="268.125" radius="8" targetConfig="ini\\scene\\school01_JinYiWei" targetX="-121.847" targetY="-1.008" targetZ="408.606" targetOrient="2.06"/>
+    <Route id="26" triggerX="8.001" triggerY="-100.395" triggerZ="1529.031" radius="8" targetConfig="ini\\scene\\school02_GaiBang" targetX="116.635" targetY="0.729" targetZ="441.931" targetOrient="1.49"/>
+    <Route id="30" triggerX="991.445" triggerY="-69.736" triggerZ="1780.018" radius="8" targetConfig="ini\\scene\\city03_JinLing" targetX="1675.078" targetY="10.726" targetZ="-101.141" targetOrient="0.335"/>
+    <Route id="62" triggerX="-247" triggerY="389.1" triggerZ="831" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="1234.215" targetY="-13.947" targetZ="1759.603" targetOrient="-3.063"/>
+    <Route id="2142" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school21_shenjiying" targetX="-2.217" targetY="8.326" targetZ="451.367" targetOrient="-2.85"/>
+  </Scene>
+  <Scene name="city02">
+    <Route id="33" triggerX="457.855" triggerY="-0.551" triggerZ="1207.817" radius="8" targetConfig="ini\\scene\\school04_JiLeGu" targetX="861.146" targetY="-4.072" targetZ="981.865" targetOrient="-2.78"/>
+    <Route id="34" triggerX="-99.286" triggerY="15.11" triggerZ="1432.056" radius="8" targetConfig="ini\\scene\\scene07_MeiHuaLing" targetX="218.148" targetY="42.118" targetZ="115.44" targetOrient="-0.725"/>
+    <Route id="31" triggerX="1198.302" triggerY="28.72" triggerZ="105.816" radius="8" targetConfig="ini\\scene\\born03_YanYuZhuang" targetX="870.655" targetY="58.287" targetZ="717.367" targetOrient="-1.513"/>
+    <Route id="32" triggerX="159.739" triggerY="6.391" triggerZ="885.922" radius="8" targetConfig="ini\\scene\\school03_JunZiTang" targetX="1141.275" targetY="0.805" targetZ="1432.794" targetOrient="-2.138"/>
+    <Route id="35" triggerX="1848.176" triggerY="11.521" triggerZ="901.177" radius="8" targetConfig="ini\\scene\\city03_JinLing" targetX="400.563" targetY="6.297" targetZ="1913.285" targetOrient="3.135"/>
+    <Route id="1137" triggerX="1637.825" triggerY="-0.709" triggerZ="1105.585" radius="8" targetConfig="ini\\scene\\school10_taohuadao" targetX="-98.498" targetY="39.594" targetZ="354.87" targetOrient="-1.595"/>
+  </Scene>
+  <Scene name="city03">
+    <Route id="47" triggerX="1678.995" triggerY="7.738" triggerZ="-92.117" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="991.393" targetY="-68.882" targetZ="1779.58" targetOrient="1.57"/>
+    <Route id="48" triggerX="395.029" triggerY="8.249" triggerZ="1936.54" radius="8" targetConfig="ini\\scene\\city02_SuZhou" targetX="1823.472" targetY="10.504" targetZ="885.486" targetOrient="-2.283"/>
+    <Route id="49" triggerX="2166.198" triggerY="30.795" triggerZ="1203.509" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="-96.382" targetY="-22.345" targetZ="670.59" targetOrient="0.94"/>
+    <Route id="50" triggerX="2292.659" triggerY="0.971" triggerZ="1840.187" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="63.343" targetY="51.256" targetZ="576.203" targetOrient="-0.09"/>
+    <Route id="2047" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city03_JinLing" targetX="1808.666" targetY="6.446" targetZ="1971.205" targetOrient="-0.897"/>
+  </Scene>
+  <Scene name="city04">
+    <Route id="38" triggerX="784.012" triggerY="21.131" triggerZ="1423.289" radius="8" targetConfig="ini\\scene\\school07_WuDang" targetX="724.957" targetY="26.409" targetZ="1316.87" targetOrient="1.74"/>
+    <Route id="39" triggerX="-313.728" triggerY="22.283" triggerZ="418.314" radius="8" targetConfig="ini\\scene\\school08_ShaoLin" targetX="919.869" targetY="-31.766" targetZ="1149.036" targetOrient="-2.708"/>
+    <Route id="36" triggerX="1539.409" triggerY="41.359" triggerZ="569.401" radius="8" targetConfig="ini\\scene\\born02_ERenGU" targetX="180.546" targetY="28.068" targetZ="857.79" targetOrient="2.935"/>
+    <Route id="37" triggerX="1485.151" triggerY="42.614" triggerZ="533.408" radius="8" targetConfig="ini\\scene\\scene09_SaiBeiCaoYuan" targetX="759.986" targetY="4.861" targetZ="1702.265" targetOrient="1.545"/>
+    <Route id="40" triggerX="-139.309" triggerY="-22.345" triggerZ="663.943" radius="8" targetConfig="ini\\scene\\city03_JinLing" targetX="2136.909" targetY="27.45" targetZ="1213.879" targetOrient="-1.568"/>
+    <Route id="54" triggerX="350.371" triggerY="-28.087" triggerZ="301.587" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="-334.691" targetY="29.856" targetZ="-60.024" targetOrient="4.601"/>
+    <Route id="55" triggerX="-311.673" triggerY="30.801" triggerZ="-61.798" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="366.473" targetY="-29.005" targetZ="303.975" targetOrient="1.41"/>
+    <Route id="56" triggerX="118.528" triggerY="14.081" triggerZ="174.762" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="-564.894" targetY="16.21" targetZ="-64.548" targetOrient="1.98"/>
+    <Route id="57" triggerX="-573.909" triggerY="17.134" triggerZ="-63.137" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="100.03" targetY="11.101" targetZ="175.741" targetOrient="4.553"/>
+    <Route id="66" triggerX="1764.652" triggerY="1.907" triggerZ="1468.325" radius="8" targetConfig="ini\\scene\\school17_HuaShanPai" targetX="1653.096" targetY="58.934" targetZ="1090.728" targetOrient="2.696"/>
+  </Scene>
+  <Scene name="city05">
+    <Route id="42" triggerX="235.149" triggerY="9999.854" triggerZ="1273.384" radius="8" targetConfig="ini\\scene\\school05_TangMen" targetX="530.219" targetY="-7.55" targetZ="-168.011" targetOrient="2.358"/>
+    <Route id="43" triggerX="902.616" triggerY="43.234" triggerZ="1346.257" radius="8" targetConfig="ini\\scene\\school06_Emei" targetX="429.7" targetY="-21.6" targetZ="1040.4" targetOrient="2.875"/>
+    <Route id="44" triggerX="1446.6" triggerY="18.3" triggerZ="994.9" radius="8" targetConfig="ini\\scene\\scene04_2_XiangYangPoBei" targetX="128.369" targetY="77.6" targetZ="291.588" targetOrient="0.42"/>
+    <Route id="45" triggerX="1451.2" triggerY="17.8" triggerZ="876.8" radius="8" targetConfig="ini\\scene\\scene05_NianLuoBa" targetX="1344" targetY="31.567" targetZ="2032.2" targetOrient="1.48"/>
+    <Route id="41" triggerX="713.9" triggerY="41.4" triggerZ="219.8" radius="8" targetConfig="ini\\scene\\born04_QianDengZhen" targetX="202.92" targetY="-13.262" targetZ="673.365" targetOrient="1.565"/>
+    <Route id="46" triggerX="59.543" triggerY="52.979" triggerZ="542.103" radius="8" targetConfig="ini\\scene\\city03_JinLing" targetX="2262.7" targetY="0.46" targetZ="1833.3" targetOrient="-1.723"/>
+    <Route id="1126" triggerX="1080.929" triggerY="13.677" triggerZ="1230.129" radius="8" targetConfig="ini\\scene\\school09_YiHuaGong" targetX="555.009" targetY="-10.823" targetZ="1317.755" targetOrient="1.998"/>
+    <Route id="65" triggerX="1445.028" triggerY="17.905" triggerZ="883.729" radius="8" targetConfig="ini\\scene\\school15_NianLuoBa" targetX="1370.898" targetY="24.246" targetZ="1973.283" targetOrient="2.602"/>
+    <Route id="2048" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city05_ChengDu" targetX="393.876" targetY="22.876" targetZ="606.613" targetOrient="1.643"/>
+  </Scene>
+  <Scene name="scene01">
+    <Route id="15" triggerX="1074" triggerY="52.3" triggerZ="1346" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="-430.189" targetY="-90.823" targetZ="-4.45" targetOrient="1.73"/>
+  </Scene>
+  <Scene name="scene02">
+    <Route id="16" triggerX="198.74" triggerY="24.579" triggerZ="931.365" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="3.794" targetY="-53.727" targetZ="1145.878" targetOrient="2.173"/>
+  </Scene>
+  <Scene name="scene03">
+    <Route id="17" triggerX="364.9" triggerY="-20" triggerZ="1429.6" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="1677.274" targetY="-78.98" targetZ="905.082" targetOrient="-1.738"/>
+  </Scene>
+  <Scene name="scene04">
+    <Route id="18" triggerX="18.022" triggerY="24.408" triggerZ="659.632" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="1430.4" targetY="18.4" targetZ="977.3" targetOrient="-2.373"/>
+  </Scene>
+  <Scene name="scene04_2_XiangYangPoBei">
+    <Route id="2072" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city05_ChengDu" targetX="1420.1" targetY="18.2" targetZ="963.2" targetOrient="-2.3"/>
+  </Scene>
+  <Scene name="scene05">
+    <Route id="19" triggerX="1340.8" triggerY="37.7" triggerZ="2058.5" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="1427.8" targetY="18.388" targetZ="901.9" targetOrient="-0.848"/>
+  </Scene>
+  <Scene name="scene06">
+    <Route id="20" triggerX="978.995" triggerY="34.796" triggerZ="1064.97" radius="8" targetConfig="ini\\scene\\born04_QianDengZhen" targetX="1092.108" targetY="-15.325" targetZ="724.792" targetOrient="-1.558"/>
+    <Route id="51" triggerX="530.4" triggerY="116.5" triggerZ="197.9" radius="8" targetConfig="ini\\scene\\scene06_LingXiaoCheng" targetX="560.6" targetY="151.6" targetZ="166.1" targetOrient="130"/>
+    <Route id="52" triggerX="544.7" triggerY="146.9" triggerZ="186.9" radius="8" targetConfig="ini\\scene\\scene06_LingXiaoCheng" targetX="532.5" targetY="116.5" targetZ="221.2" targetOrient="1"/>
+  </Scene>
+  <Scene name="scene07">
+    <Route id="21" triggerX="201.058" triggerY="47.449" triggerZ="94.295" radius="8" targetConfig="ini\\scene\\city02_SuZhou" targetX="-53.21" targetY="15.127" targetZ="1432.779" targetOrient="1.853"/>
+  </Scene>
+  <Scene name="scene08">
+    <Route id="22" triggerX="-367.367" triggerY="4.152" triggerZ="819.823" radius="8" targetConfig="ini\\scene\\born02_ERenGU" targetX="118.719" targetY="19.376" targetZ="-496.678" targetOrient="0.255"/>
+    <Route id="59" triggerX="-109.562" triggerY="10" triggerZ="454.45" radius="8" targetConfig="ini\\scene\\scene08_SaiWaiDaMo" targetX="1146.659" targetY="10" targetZ="-442.476" targetOrient="5.503"/>
+    <Route id="2095" triggerX="404.249" triggerY="8.095" triggerZ="1168.6" radius="8" targetConfig="ini\\scene\\school18_DaMo" targetX="-560.281" targetY="267.658" targetZ="493.444" targetOrient="-2.048"/>
+    <Route id="2159" triggerX="38.731" triggerY="4.046" triggerZ="223.695" radius="8" targetConfig="ini\\scene\\school22_tianshan" targetX="626.726" targetY="12.523" targetZ="1669.992" targetOrient="1.965"/>
+  </Scene>
+  <Scene name="scene09">
+    <Route id="23" triggerX="755.914" triggerY="0.797" triggerZ="1732.884" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="1493.06" targetY="41.332" targetZ="564.078" targetOrient="0.475"/>
+  </Scene>
+  <Scene name="scene16">
+    <Route id="2076" triggerX="128.944" triggerY="285.21" triggerZ="-1162.937" radius="8" targetConfig="ini\\scene\\born03_yanyuzhuang" targetX="792.75" targetY="2.468" targetZ="1824.25" targetOrient="-2.3"/>
+    <Route id="2077" triggerX="-317.84" triggerY="285.21" triggerZ="-838.372" radius="8" targetConfig="ini\\scene\\scene17" targetX="772.519" targetY="50.238" targetZ="-1840.528" targetOrient="-0.575"/>
+    <Route id="2078" triggerX="-633.702" triggerY="285.21" triggerZ="-493.441" radius="8" targetConfig="ini\\scene\\scene19" targetX="125.658" targetY="106.86" targetZ="-525.582" targetOrient="-0.22"/>
+  </Scene>
+  <Scene name="scene17">
+    <Route id="2079" triggerX="784.644" triggerY="49.999" triggerZ="-1857.794" radius="8" targetConfig="ini\\scene\\scene16" targetX="-306.039" targetY="285.32" targetZ="-823.946" targetOrient="0.495"/>
+    <Route id="2080" triggerX="6.56" triggerY="49.999" triggerZ="-2091.723" radius="8" targetConfig="ini\\scene\\scene19" targetX="-41.058" targetY="106.962" targetZ="-530.709" targetOrient="0.895"/>
+  </Scene>
+  <Scene name="scene19">
+    <Route id="2081" triggerX="133.835" triggerY="106.86" triggerZ="-542.919" radius="8" targetConfig="ini\\scene\\scene16" targetX="-616.243" targetY="285.32" targetZ="-506.334" targetOrient="2.148"/>
+    <Route id="2082" triggerX="-54.645" triggerY="106.962" triggerZ="-540.534" radius="8" targetConfig="ini\\scene\\scene17" targetX="21.049" targetY="50.238" targetZ="-2078.175" targetOrient="0.73"/>
+  </Scene>
+  <Scene name="school01">
+    <Route id="7" triggerX="-158" triggerY="0.9" triggerZ="424.7" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="-571.494" targetY="-102.192" targetZ="226.638" targetOrient="2.905"/>
+  </Scene>
+  <Scene name="school02">
+    <Route id="8" triggerX="82.998" triggerY="0.34" triggerZ="441.886" radius="8" targetConfig="ini\\scene\\city01_YanJing" targetX="6.4" targetY="-100.395" targetZ="1483.073" targetOrient="-3.123"/>
+  </Scene>
+  <Scene name="school03">
+    <Route id="9" triggerX="1181.016" triggerY="0.736" triggerZ="1456.45" radius="8" targetConfig="ini\\scene\\city02_SuZhou" targetX="182.441" targetY="6.336" targetZ="902.653" targetOrient="0.939"/>
+  </Scene>
+  <Scene name="school04">
+    <Route id="10" triggerX="869.912" triggerY="-8.392" triggerZ="1012.637" radius="8" targetConfig="ini\\scene\\city02_SuZhou" targetX="438.14" targetY="0.8" targetZ="1188.282" targetOrient="-2.325"/>
+    <Route id="2289" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city02_SuZhou" targetX="326.466" targetY="3.711" targetZ="763.677" targetOrient="1.49"/>
+    <Route id="2290" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city02_SuZhou" targetX="326" targetY="3.7" targetZ="755.9" targetOrient="1.6"/>
+  </Scene>
+  <Scene name="school05">
+    <Route id="1012" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\clone013" targetX="1048.505" targetY="83.262" targetZ="-434.849" targetOrient="0"/>
+    <Route id="11" triggerX="481.379" triggerY="-7.55" triggerZ="-144.954" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="269.166" targetY="48.212" targetZ="1258.114" targetOrient="2.098"/>
+  </Scene>
+  <Scene name="school06">
+    <Route id="12" triggerX="427.58" triggerY="-23.122" triggerZ="1063.857" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="866.89" targetY="43.234" targetZ="1307.013" targetOrient="-2.561"/>
+  </Scene>
+  <Scene name="school07">
+    <Route id="13" triggerX="727.905" triggerY="30.897" triggerZ="1355.668" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="796.758" targetY="20.924" targetZ="1394.587" targetOrient="2.605"/>
+    <Route id="1101" triggerX="750.535" triggerY="-5.115" triggerZ="783.322" radius="8" targetConfig="ini\\scene\\school07_WuDang" targetX="608.864" targetY="106.263" targetZ="350.834" targetOrient="-1.835"/>
+    <Route id="1102" triggerX="590.583" triggerY="40.519" triggerZ="883.124" radius="8" targetConfig="ini\\scene\\school07_WuDang" targetX="302.274" targetY="118.945" targetZ="412.533" targetOrient="0.675"/>
+  </Scene>
+  <Scene name="school08">
+    <Route id="14" triggerX="932.7" triggerY="-31.7" triggerZ="1182.3" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="-279.883" targetY="18.237" targetZ="420.075" targetOrient="1.62"/>
+  </Scene>
+  <Scene name="school09">
+    <Route id="1127" triggerX="532.31" triggerY="-10.548" triggerZ="1335.396" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="1057.176" targetY="13.571" targetZ="1198.151" targetOrient="-2.73"/>
+  </Scene>
+  <Scene name="school10">
+    <Route id="1138" triggerX="-58.076" triggerY="39.594" triggerZ="352.278" radius="8" targetConfig="ini\\scene\\city02_SuZhou" targetX="1644.111" targetY="-0.932" targetZ="1076.532" targetOrient="3.128"/>
+  </Scene>
+  <Scene name="school12">
+    <Route id="2085" triggerX="1162.809" triggerY="35.661" triggerZ="1204.667" radius="8" targetConfig="ini\\scene\\born04_QianDengZhen" targetX="728.858" targetY="89.326" targetZ="-140.54" targetOrient="-1.558"/>
+  </Scene>
+  <Scene name="school14">
+    <Route id="63" triggerX="1224" triggerY="-10.9" triggerZ="1792" radius="8" targetConfig="ini\\scene\\school14_GuMuPai" targetX="-256" targetY="386.9" targetZ="800" targetOrient="-2.538"/>
+  </Scene>
+  <Scene name="school15">
+    <Route id="64" triggerX="1357.801" triggerY="31.677" triggerZ="1989.924" radius="8" targetConfig="ini\\scene\\city05_ChengDu" targetX="1433.002" targetY="18.327" targetZ="896.485" targetOrient="5.668"/>
+  </Scene>
+  <Scene name="school17">
+    <Route id="67" triggerX="1647.936" triggerY="59.576" triggerZ="1102.102" radius="8" targetConfig="ini\\scene\\city04_LuoYang" targetX="1747.5" targetY="0.1" targetZ="1457.1" targetOrient="-2.11"/>
+  </Scene>
+  <Scene name="school18">
+    <Route id="2096" triggerX="-540.938" triggerY="267.686" triggerZ="498.993" radius="8" targetConfig="ini\\scene\\scene08_SaiWaiDaMo" targetX="419.188" targetY="7.848" targetZ="1178.885" targetOrient="0.995"/>
+  </Scene>
+  <Scene name="school19">
+    <Route id="2041" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="6407.104" targetY="70.878" targetZ="92.346" targetOrient="3.14"/>
+    <Route id="2040" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="6163.8" targetY="146.1" targetZ="605.4" targetOrient="3.1"/>
+    <Route id="2055" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="2407.9" targetY="158" targetZ="-1431" targetOrient="-3.1"/>
+    <Route id="2060" triggerX="2136.549" triggerY="135.604" triggerZ="-665.578" radius="8" targetConfig="ini\\scene\\born01_MoHeZhen" targetX="749.432" targetY="52.115" targetZ="-8.749" targetOrient="0"/>
+    <Route id="2061" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="2214.1" targetY="136.8" targetZ="-653.2" targetOrient="-2.2"/>
+    <Route id="2062" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="2407.9" targetY="134.1" targetZ="-1019.8" targetOrient="-3"/>
+    <Route id="2063" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school19_ShenShuiGong" targetX="2745.3" targetY="242.7" targetZ="-1260.1" targetOrient="3"/>
+  </Scene>
+  <Scene name="school20">
+    <Route id="2134" triggerX="550.693" triggerY="19.999" triggerZ="74.727" radius="8" targetConfig="ini\\scene\\born02_ERenGU" targetX="-296.972" targetY="-5.853" targetZ="294.291" targetOrient="1.685"/>
+  </Scene>
+  <Scene name="school21">
+    <Route id="2143" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city01_YanJing" targetX="991.392" targetY="-4.015" targetZ="-505.798" targetOrient="-1.75"/>
+    <Route id="2145" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school20_mingjiao" targetX="-140.4" targetY="93.1" targetZ="166.9" targetOrient="-3.1"/>
+    <Route id="2141" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school21_shenjiying" targetX="-32.5" targetY="18" targetZ="55.5" targetOrient="-2.2"/>
+  </Scene>
+  <Scene name="school22">
+    <Route id="2160" triggerX="600.715" triggerY="13.561" triggerZ="1680.688" radius="8" targetConfig="ini\\scene\\scene08_SaiWaiDaMo" targetX="64.826" targetY="4.015" targetZ="237.501" targetOrient="1.435"/>
+    <Route id="2169" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school22_tianshan" targetX="1599.6" targetY="163.3" targetZ="1197.3" targetOrient="-3.1"/>
+  </Scene>
+  <Scene name="school23">
+    <Route id="2168" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school23_xingmiaoge" targetX="260.7" targetY="246.5" targetZ="74.8" targetOrient="-2.9"/>
+  </Scene>
+  <Scene name="school7">
+    <Route id="2044" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school17_HuaShanPai" targetX="1728" targetY="95.081" targetZ="997" targetOrient="-2.627"/>
+    <Route id="2046" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school17_HuaShanPai" targetX="1481.295" targetY="171.602" targetZ="704.895" targetOrient="-1.883"/>
+    <Route id="2049" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school17_HuaShanPai" targetX="1552.751" targetY="140.568" targetZ="886.09" targetOrient="0.148"/>
+    <Route id="2050" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school17_HuaShanPai" targetX="1401.147" targetY="159.83" targetZ="833.764" targetOrient="0.148"/>
+    <Route id="2051" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\school17_HuaShanPai" targetX="1597.858" targetY="83.117" targetZ="965.911" targetOrient="0.148"/>
+  </Scene>
+  <Scene name="\xbd\xf0\xc1\xea">
+    <Route id="2069" triggerX="0" triggerY="0" triggerZ="0" radius="0" targetConfig="ini\\scene\\city03_JinLing" targetX="1694.438" targetY="1.526" targetZ="1656.557" targetOrient="1.285"/>
+  </Scene>
+</DoorRoutes>

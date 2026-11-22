@@ -116,6 +116,15 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		s.handleMovementUpload(pl, message)
 	case clientCustomTaskMsg:
 		s.handleTaskMsg(pl, message)
+	case clientCustomPostRead:
+		s.handleReadLetter(pl, message)
+	case clientCustomPostGetAppendix:
+		s.handleGetAppendix(pl, message)
+	case clientCustomPostOpenBox, clientCustomPostSelect, clientCustomPostCloseReadBox,
+		clientCustomPostSelectSend, clientCustomPostCancel, clientCustomPostSend:
+		// 邮件族零动作面：开箱/勾选/关窗/写信族（列表=data_binder 绑
+		// 记录行；玩家发信 352 未实现）——trace 簿记。
+		s.handlePostTrace(pl, id)
 	case clientCustomSelectTarget:
 		// msg431 选中目标（点击 NPC/对象）：LastObject/AutoSelectObject
 		// 双帧 + m25 选靶授权（2433 selection.go 定版）。

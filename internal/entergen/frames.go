@@ -118,6 +118,10 @@ func EntrySceneFrame(id Identity, config, resource string) ([]byte, error) {
 	return entry, nil
 }
 
+// ExitSceneFrame 0x0C 退出场景（单字节；b-line encodeExitScene 定版）。
+// 客户端原生拆除当前场景对象/记录——服务端不逐个发 0x0E，重入簇整段重推。
+func ExitSceneFrame() []byte { return []byte{0x0C} }
+
 // ObjectPropertyFrame 0x10 属性帧（单对象一批）。
 func ObjectPropertyFrame(objectID, ownerID uint32, isViewObject byte, props []IndexedProperty) ([]byte, error) {
 	if len(props) > 0xffff {

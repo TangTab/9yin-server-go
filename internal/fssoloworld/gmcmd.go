@@ -1,6 +1,7 @@
 package fssoloworld
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -72,7 +73,7 @@ func moneyFrame(pl *Player) ([]byte, error) {
 func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 	s := e.srv
 	if len(fields) < 2 {
-		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|save> <who> [args]\r>end\r")
+		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|mail|scene|save> <who> [args]\r>end\r")
 		return
 	}
 	sub, who := fields[0], fields[1]
@@ -81,6 +82,21 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		pl = s.players.FindByAccount(who)
 	}
 	if pl == nil {
+		// gm mail 离线投递：目标不在线 → who=角色名走 store name-only
+		// 查档往返（LoadRole→补信→SaveRole，重启不丢）。
+		if sub == "mail" && len(fields) >= 4 {
+			letter, problem := parseGMMailLetter(fields)
+			if problem != "" {
+				fmt.Fprintf(nc, ">%s\r>end\r", problem)
+				return
+			}
+			if s.dispatchOfflineMail(who, letter) {
+				fmt.Fprintf(nc, ">gm mail %s: player offline, letter %q dispatched to store\r>end\r", who, letter.Serial)
+			} else {
+				fmt.Fprint(nc, ">gm mail: store not connected, offline delivery failed\r>end\r")
+			}
+			return
+		}
 		fmt.Fprintf(nc, ">gm %s: player %q not found\r>end\r", sub, who)
 		return
 	}
@@ -243,22 +259,13 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 				viewID = v
 			}
 		}
-		slot := pl.roleState.FreeBagSlot(viewID)
-		if slot == 0 {
-			fmt.Fprintf(nc, ">gm item: bag page %d full\r", viewID)
-			return
-		}
-		item := rolestate.BagItem{
-			Slot:     slot,
-			ConfigID: configID,
-			Amount:   amount,
-			ViewID:   viewID,
-			Seq:      pl.roleState.NextItemSeq(),
-		}
-		pl.roleState.BagItems = append(pl.roleState.BagItems, item)
-		push, err := entergen.BagItemPushFrames(item)
+		item, push, err := s.grantBagItem(pl, configID, amount, viewID)
 		if err != nil {
-			fmt.Fprintf(nc, ">gm item frame error: %v\r", err)
+			if errors.Is(err, errBagPageFull) {
+				fmt.Fprintf(nc, ">gm item: bag page %d full\r", viewID)
+			} else {
+				fmt.Fprintf(nc, ">gm item frame error: %v\r", err)
+			}
 			return
 		}
 		for _, f := range push {
@@ -266,7 +273,26 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		}
 		s.sendRoleSave(pl)
 		fmt.Fprintf(nc, ">gm item %s: %s x%d → view %d slot %d (0x19+0x18, saved)\r",
-			who, configID, amount, viewID, slot)
+			who, configID, amount, viewID, item.Slot)
+	case "mail":
+		// gm mail <who> <title> <content> [itemConfig[:amount]]——下划线转
+		// 空格；在线直推+落档（离线分支在玩家查找失败处）。
+		if len(fields) < 4 {
+			fmt.Fprint(nc, ">usage: gm mail <who> <title> <content> [itemConfig[:amount]] (title/content 下划线转空格)\r")
+			return
+		}
+		letter, problem := parseGMMailLetter(fields)
+		if problem != "" {
+			fmt.Fprintf(nc, ">%s\r", problem)
+			return
+		}
+		if err := s.deliverLetterOnline(pl, letter); err != nil {
+			fmt.Fprintf(nc, ">gm mail: %v\r", err)
+			return
+		}
+		fmt.Fprintf(nc, ">gm mail %s: letter %q delivered (0x11, saved)\r", who, letter.Serial)
+	case "scene":
+		s.gmSceneCommand(nc, pl, who, fields)
 	case "save":
 		if !s.sendRoleSave(pl) {
 			fmt.Fprint(nc, ">gm save: store not connected, save not sent\r")
@@ -276,4 +302,27 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 	default:
 		fmt.Fprintf(nc, ">gm: unknown subcommand %q\r", sub)
 	}
+}
+
+// parseGMMailLetter gm mail 参数解析（在线/离线两分支共用）：
+// fields[2]=title/fields[3]=content（下划线转空格）/fields[4]=itemConfig
+// [:amount]（"-"=纯文本）。problem 非空=用法错误行（echo 方言）。
+func parseGMMailLetter(fields []string) (letter rolestate.Letter, problem string) {
+	title := strings.ReplaceAll(fields[2], "_", " ")
+	content := strings.ReplaceAll(fields[3], "_", " ")
+	if len([]rune(title)) > mailTitleLimit || len([]rune(content)) > mailContentLimit {
+		return letter, fmt.Sprintf("gm mail: title/content over limit (%d/%d)", mailTitleLimit, mailContentLimit)
+	}
+	appendix := ""
+	if len(fields) >= 5 && fields[4] != "-" {
+		configID, amount := fields[4], 1
+		if i := strings.IndexByte(configID, ':'); i > 0 {
+			if v, err := strconv.Atoi(configID[i+1:]); err == nil && v > 0 && v <= 9999 {
+				amount = v
+				configID = configID[:i]
+			}
+		}
+		appendix = entergen.AppendixXML(configID, amount)
+	}
+	return NewGMLetter(title, content, appendix), ""
 }

@@ -714,6 +714,13 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 				body = binary.LittleEndian.AppendUint32(body, uint32(len(meta.RoleStateJSON)))
 				body = append(body, meta.RoleStateJSON...)
 			}
+			// 'ACC1' 账户尾段（GM 离线邮件 name-only 查档时 world 回写
+			// 0x04 需要真实账户定位；常规链路 world 自知账户，多余无害）。
+			if meta.Account != "" {
+				body = binary.LittleEndian.AppendUint32(body, 0x31434341) // 'ACC1'
+				body = binary.LittleEndian.AppendUint32(body, uint32(len(meta.Account)))
+				body = append(body, meta.Account...)
+			}
 		}
 		s.emit(serial, back, body)
 	case 0x04: // save（gmpanel GM 链路：world 0x04 存档，官方锚点头

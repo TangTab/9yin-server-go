@@ -10,10 +10,20 @@ import * as api from "../api.js";
 const SUBS = [
   { id: "role", title: "角色状态", desc: "gm state 快照 + 五维/资源热更（0x10）" },
   { id: "item", title: "货币与物品", desc: "碎银 CapitalType1（2433 线同名对拍）" },
+  { id: "mail", title: "邮件", desc: "GM 系统邮件（文本+物品附件，RecvLetterRec 319 行）" },
   { id: "skill", title: "武学与修炼", desc: "重发武学 View40 / 内功 View43 / 轻功 View46" },
-  { id: "scene", title: "传送与场景", desc: "场景内瞬移（0x1F 位置帧）" },
+  { id: "scene", title: "传送与场景", desc: "场景内瞬移（0x1F）+ 跨场景切换（0x0C→0x0B→0x0D→0x09）" },
   { id: "debug", title: "调试工具", desc: "mXXX 自定义帧探针 + ReadyFrames 重放" },
   { id: "archive", title: "存档管理", desc: "0x04 存档（role_state_json 落 nx_roles，重登 RST1 回灌）" },
+];
+
+// 场景切换预设（location.ini BornCJ 出生点；gm scene key 直传）。
+const SCENE_PRESETS = [
+  ["born01", "鸡鸣驿（漠河镇）"], ["born02", "恶人谷"], ["born03", "烟雨庄"], ["born04", "千灯镇"],
+  ["city01", "燕京"], ["city02", "苏州"], ["city03", "金陵"], ["city04", "洛阳"], ["city05", "成都"],
+  ["school01", "锦衣卫"], ["school02", "丐帮"], ["school03", "君子堂"], ["school04", "极乐谷"],
+  ["school05", "唐门"], ["school06", "峨眉"], ["school07", "武当"], ["school08", "少林"], ["school09", "移花宫"],
+  ["scene01", "幽云十六州"], ["scene05", "捻罗坝"], ["scene06", "凌霄城"], ["scene08", "塞外大漠"],
 ];
 
 const PROPS = [
@@ -118,6 +128,30 @@ export function mount(view, sub) {
     box.appendChild(h("section", { class: "panel" }, [h("h2", {}, ["状态快照"]), stateBox]));
   }
 
+  function subMail(box) {
+    // 离线投递：目标须为角色名（store name-only 查档往返）；在线目标可
+    // 用下拉名。标题/正文下划线转空格。
+    const target = field("目标角色名（离线可投）", 170);
+    target.value = who() || "";
+    const title = field("标题（_转空格 ≤64）", 150);
+    const content = field("正文（_转空格 ≤1024）", 240);
+    const item = field("物品 config（可空）", 150);
+    const amount = field("数量", 60);
+    box.appendChild(h("div", { class: "toolbar" }, [
+      target, title, content, item, amount,
+      opBtn("gm mail（发信）", "info", async () => {
+        if (!target.value || !title.value) return;
+        const parts = ["gm mail", target.value, title.value, content.value || "-"];
+        if (item.value) parts.push(item.value + ":" + (amount.value || "1"));
+        await send(parts.join(" "));
+      }),
+    ]));
+    box.appendChild(h("div", { class: "panel-desc" }, [
+      "在线：单行 0x11 直推+存档；离线：store 往返（LoadRole name-only → 补信 → SaveRole，重启不丢）。",
+      "玩家侧读信=353/领附件=359（附件入包 0x19+0x18；邮箱容量 50）。纯文本信物品留空即可。",
+    ]));
+  }
+
   function subSkill(box) {
     box.appendChild(h("div", { class: "toolbar" }, [
       opBtn("重发武学 View40", "info", () => who() && send("gm view " + who() + " 40")),
@@ -139,8 +173,23 @@ export function mount(view, sub) {
         refreshState();
       }),
     ]));
+    // 跨场景切换：预设出生点（可坐标覆盖），完整重入序列。
+    const presetSel = h("select", {}, SCENE_PRESETS.map(([v, label]) => h("option", { value: v }, [label])));
+    const sx = field("覆盖x"), sy = field("覆盖y"), sz = field("覆盖z");
+    box.appendChild(h("div", { class: "toolbar", style: "margin-top:8px" }, [
+      presetSel, sx, sy, sz,
+      opBtn("gm scene（跨场景切换）", "error", async () => {
+        if (!who() || !presetSel.value) return;
+        const parts = ["gm scene", who(), presetSel.value];
+        if (sx.value && sy.value && sz.value) parts.push(sx.value, sy.value, sz.value);
+        await send(parts.join(" "));
+        refreshState();
+      }),
+    ]));
     box.appendChild(h("div", { class: "panel-desc" }, [
-      "跨场景切换（switch_scene/副本）2433 有、主树留场景域扩展。",
+      "gm scene：0x0C 退出 → 750ms → 0x0B/0x0D 进新场景 → 客户端 0x09 → 0x1F+vitals+开图+NPC 首拍+",
+      "Ready 重推+邮箱重放（2433 scene_transition 真机时序）；落点默认该场景出生点（location.ini BornCJ）。",
+      "走近传送门（door_data 提取 113 条路线）自动触发，2s 冷却。",
     ]));
   }
 
@@ -186,7 +235,7 @@ export function mount(view, sub) {
   view.appendChild(body);
   view.appendChild(h("section", { class: "panel" }, [h("h2", {}, ["应答输出"]), out]));
 
-  ({ role: subRole, item: subItem, skill: subSkill, scene: subScene, debug: subDebug, archive: subArchive }[sub])(body);
+  ({ role: subRole, item: subItem, mail: subMail, skill: subSkill, scene: subScene, debug: subDebug, archive: subArchive }[sub])(body);
   if (sub === "role" || sub === "item" || sub === "archive") refreshState();
   renderOut();
 

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -92,6 +93,29 @@ type RoleState struct {
 
 	BagItems []BagItem   `json:"bagItems,omitempty"` // 背包行（分类页 slot 1..90）
 	Equips   []EquipItem `json:"equips,omitempty"`   // 装备行（纸娃娃 View1 槽位 1..52）
+
+	// ---- 邮件域（2433 线 letterEntry/Java Letter 精简口径；行帧=记录表
+	// RecvLetterRec 0x11 行，entergen/mailrecords.go 编码）----
+
+	Letters []Letter `json:"letters,omitempty"` // 收件箱（GM 发信/读信/领附件维护）
+}
+
+// Letter 一封邮件（2433 线 letterEntry 同源）：Serial 是读信(353)/领附件
+// (359)回执键；Type 101=系统邮件（LETTER_SYSTEM_POST_USER，101..199 客户端
+// 归系统页签，发件人空串显示「系统邮件」）；Gold/Silver 官方方言是数字
+// 窄串；Appendix 为附件 XML（AppendixXML 格式，领取后清空置已读）。
+type Letter struct {
+	Serial     string `json:"serial"`
+	Type       int32  `json:"type"`
+	Sender     string `json:"sender,omitempty"`
+	SenderUID  string `json:"senderUID,omitempty"`
+	Title      string `json:"title"`
+	Content    string `json:"content"`
+	Gold       string `json:"gold,omitempty"`
+	Silver     string `json:"silver,omitempty"`
+	Appendix   string `json:"appendix,omitempty"`
+	DateUnix   int64  `json:"dateUnix"`
+	Read       bool   `json:"read,omitempty"`
 }
 
 // BagItem 背包行（2433 线 bagRow 精简口径）：ViewID 分类页 1 道具/2 装备/
@@ -433,6 +457,70 @@ func InferSexFromPara(para string) int {
 
 // DefaultBirthScene 默认出生场景（官方默认烟雨庄 born03）。
 const DefaultBirthScene = "born03"
+
+// SceneOption location.ini BornCJ 节导出的一个可选场景目的地
+//（GM 场景切换/传送门共用）：Key=场景 resource 短名（born03/city01…），
+// Config=场景配置路径（ini\scene\…），Position=该节出生点坐标。
+type SceneOption struct {
+	Key      string
+	Config   string
+	Position [4]float64
+}
+
+// BirthSceneOptions 全部 BornCJ 出生态场景选项（按节序稳定输出；同
+// resource 只保留首见节）。Key 推导与 BuildRoleState 的 Resource 同口径：
+// Scene 路径末段截到首个 '_'（born03_YanYuZhuang → born03，无 '_' 保持
+// 全名 clone001）。
+func BirthSceneOptions() []SceneOption {
+	birth := roleStateAssets.birth
+	keys := make([]string, 0, len(birth))
+	for key := range birth {
+		if strings.HasSuffix(key, ".Scene") {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys) // BornCJ 节名定宽数字序——首见节稳定
+	seen := map[string]bool{}
+	out := make([]SceneOption, 0, len(keys))
+	for _, key := range keys {
+		scenePath := birth[key]
+		seg := scenePath
+		if i := strings.LastIndexAny(scenePath, `\/`); i >= 0 {
+			seg = scenePath[i+1:]
+		}
+		resourceKey := seg
+		if i := strings.Index(seg, "_"); i > 0 {
+			resourceKey = seg[:i]
+		}
+		if seen[resourceKey] {
+			continue
+		}
+		seen[resourceKey] = true
+		opt := SceneOption{Key: resourceKey, Config: scenePath}
+		name := strings.TrimSuffix(key, ".Scene")
+		if loc, ok := birth[name+".Location"]; ok {
+			parts := strings.Split(loc, ",")
+			if len(parts) == 4 {
+				for i := 0; i < 4; i++ {
+					opt.Position[i], _ = strconv.ParseFloat(strings.TrimSpace(parts[i]), 64)
+				}
+			}
+		}
+		out = append(out, opt)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Key < out[j].Key })
+	return out
+}
+
+// FindSceneOption 按 resource 短名查场景选项（大小写不敏感；缺席 false）。
+func FindSceneOption(key string) (SceneOption, bool) {
+	for _, opt := range BirthSceneOptions() {
+		if strings.EqualFold(opt.Key, key) {
+			return opt, true
+		}
+	}
+	return SceneOption{}, false
+}
 
 // BuildRoleState 按（出生场景 resource, 性别, 外观串）构建建号初始状态。
 // scene 传空回落 DefaultBirthScene；facultySeed 为修为种子（b-line

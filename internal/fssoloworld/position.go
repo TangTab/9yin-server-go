@@ -40,9 +40,13 @@ func validPlayerPosition(pos [4]float64) bool {
 
 // absorbPlayerPosition 移动上报收编：roleState.Position 内存权威更新 +
 // NPC 视口对账 + 2s 节流存档。无 roleState 会话（未进场/replay 回退）
-// 只做 NPC 对账不落库。
+// 只做 NPC 对账不落库。切图在途（sceneSwitch）全丢弃——0x0C 后首个
+// 0x0A 是旧场景过期活动（2433 定版坑）；传送门圆判定挂尾部。
 func (s *Server) absorbPlayerPosition(pl *Player, pos [4]float64) {
 	if !validPlayerPosition(pos) {
+		return
+	}
+	if s.sceneSwitchInFlight(pl) {
 		return
 	}
 	s.npcReconcile(pl, pos)
@@ -54,6 +58,7 @@ func (s *Server) absorbPlayerPosition(pl *Player, pos [4]float64) {
 		pl.posSaveAt = now
 		s.sendRoleSave(pl)
 	}
+	s.checkPortal(pl, pos)
 }
 
 // handleMovementUpload C2S 15 TVarList 移动上传：idx3..5 恒为 x/y/z（走/

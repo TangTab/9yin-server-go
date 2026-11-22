@@ -70,6 +70,12 @@ type Player struct {
 	npcScene      string
 	patrolReadyAt time.Time
 	npcMoveState  map[uint32]bool
+	// sceneSwitch 切图在途态（sceneswitch.go；nil=不在切换）：0x0C 已发
+	// 到目标场景 0x09 就绪屏障之间，位移上报全丢弃（旧场景过期 0x0A）。
+	sceneSwitchMu sync.Mutex
+	sceneSwitch   *sceneSwitchState
+	// portalCoolAt 传送门触发冷却水位（portals.go；场景级 2s）。
+	portalCoolAt time.Time
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。

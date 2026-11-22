@@ -507,14 +507,17 @@ func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleM
 	// 官方 SELECT * FROM nx_roles WHERE account='%s' AND name='%s' AND
 	// server_id=%d AND deleted=0（参数化——sprintf 方言 1064 坑）。
 	// 空档（新角 save_data NULL）= ok true + nil blob。
+	// account 空串 = name-only 匹配（GM 离线邮件 world 合成 clientID 查档，
+	// 只知角色名；非空时行为与官方语义不变）。
 	var meta RoleMeta
 	var saveData []byte
 	var totalSec, letterMax, sceneID, sysFlags, roleIndex int
 	var location, savePara1, roleState sql.NullString
-	err := s.db.QueryRow("SELECT uid, total_sec, letter_max, scene_id, location, "+
-		"sys_flags, role_index, save_para1, save_data, role_state_json FROM nx_roles "+
-		"WHERE account = ? AND name = ? AND deleted = 0", account, name).
-		Scan(&meta.UID, &totalSec, &letterMax, &sceneID, &location,
+	query := "SELECT uid, account, total_sec, letter_max, scene_id, location, " +
+		"sys_flags, role_index, save_para1, save_data, role_state_json FROM nx_roles " +
+		"WHERE (? = '' OR account = ?) AND name = ? AND deleted = 0"
+	err := s.db.QueryRow(query, account, account, name).
+		Scan(&meta.UID, &meta.Account, &totalSec, &letterMax, &sceneID, &location,
 			&sysFlags, &roleIndex, &savePara1, &saveData, &roleState)
 	if err == sql.ErrNoRows {
 		return nil, RoleMeta{}, false, nil
@@ -522,7 +525,7 @@ func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleM
 	if err != nil {
 		return nil, RoleMeta{}, false, err
 	}
-	meta.Account, meta.ServerID = account, serverID
+	meta.ServerID = serverID
 	meta.TotalSec, meta.LetterMax = int32(totalSec), int32(letterMax)
 	meta.SceneID, meta.SysFlags, meta.Index = int32(sceneID), int32(sysFlags), int32(roleIndex)
 	meta.Location, meta.SavePara1 = location.String, savePara1.String
