@@ -14,7 +14,7 @@ import (
 //	[0x0D:0F]  u16 属性数 = 4
 //	随后属性段（[idx u16][值]）：
 //	  idx178  Name：[u32 8][8B 遮蔽常量]（六包恒定）
-//	  idx1468 MaxVisuals：u16 230（场景可视表容量=AddObject 注册闸，
+//	  idx1468 MaxVisuals：u16 20000（场景可视表容量=AddObject 注册闸；
 //	                        历史恒缺发→客户端对象表未开张）
 //	  idx7    ConfigID：窄串 [u32 len 含 NUL][字节][NUL]
 //	  idx8    Resource：同上
@@ -33,7 +33,7 @@ const (
 	entrySceneSeq   uint32 = 0x1521   // 进场流水（官方样本值）
 	playerCableObj  uint32 = 0x1105C0E3 // 玩家线缆 objectID（fork 形）
 	playerCableOwn  uint32 = 0x03DEFBAE // 玩家线缆 ownerID（fork 形）
-	maxVisualsValue uint16 = 230
+	maxVisualsValue uint16 = 20000
 )
 
 // SceneRef 场景标识（0x0B 与角色档共用的最小形态）。

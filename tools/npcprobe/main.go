@@ -1,117 +1,113 @@
-// npcprobe NPC 目录装载探针：离线验证数据根（正式 $root\Res / 测试
-// testdata）的摆放装载、模板联查与出生点筛选——起服前排查数据问题的
-// 只读工具（不占互斥体）。
+// npcprobe：场景 NPC 目录诊断（npcfeed 链）：摆放/联查/战斗命中率、
+// 未解析与被闸样本、ident 分布、帧形态抽查（0x28/0x0D）。
 //
-// 用法：go run ./tools/npcprobe -root <dir> [-scene born03] [-radius 500] [-limit 200]
-//   <dir> 即数据根（其下有 ini/Npc/NpcConfig 与 ini/Scene/<场景>）。
+//	npcprobe -root <数据根（含 ini/Npc/NpcConfig）> -scene born03
+//	npcprobe -scene city05 -form 0d   # 帧形态抽查切裸 0x0D
 package main
 
 import (
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"os"
 	"sort"
 
-	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
+	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 )
 
 func main() {
-	root := flag.String("root", "", "数据根（下含 ini/Npc、ini/Scene；空=报用法）")
-	scene := flag.String("scene", "born03", "场景键（找 <scene>_* 摆放目录）")
-	radius := flag.Float64("radius", 500, "出生点半径（与 fssoloworld npcDefaultRadius 同缺省）")
-	limit := flag.Int("limit", 200, "总量上限")
+	root := flag.String("root", "", "数据根（含 ini/Npc/NpcConfig；空=npcfeed.ResolveRoot 探测）")
+	scene := flag.String("scene", "born03", "场景键（born03/city05/...）")
+	form := flag.String("form", "28", "帧形态抽查：28=0x28 mode=0x46（默认）/ 0d=裸 0x0D")
+	dump := flag.Int("dump", 1, "帧 hexdump 条数")
 	flag.Parse()
-	if *root == "" {
-		fmt.Fprintln(os.Stderr, "用法: go run ./tools/npcprobe -root <数据根>（如 F:/Game/Online/9yin/9yin-server-go2/Res）")
-		os.Exit(2)
-	}
 
-	npcs, err := npcdata.LoadSceneNPCs(*root, sceneDirOf(*root, *scene))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "装载失败: %v\n", err)
+	dataRoot := *root
+	if dataRoot == "" {
+		dataRoot = npcfeed.ResolveRoot()
+	}
+	if dataRoot == "" {
+		fmt.Fprintln(os.Stderr, "npcprobe: 数据根缺席（-root 或 NINEYIN_DATA_ROOT/Res/testdata 探测链）")
 		os.Exit(1)
 	}
+	spawns, stats, err := npcfeed.BuildCatalog(dataRoot, *scene)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "npcprobe:", err)
+		os.Exit(1)
+	}
+
+	// 类别分布。
 	byFile := map[string]int{}
-	for _, n := range npcs {
-		byFile[n.File]++
+	byScript := map[string]int{}
+	for _, s := range spawns {
+		byFile[s.File]++
+		byScript[s.Script]++
 	}
-	fmt.Printf("场景 %s 静态白名单项 %d（类别分布：\n", *scene, len(npcs))
-	files := make([]string, 0, len(byFile))
-	for f := range byFile {
-		files = append(files, f)
+	fmt.Printf("root=%s scene=%s\n", dataRoot, *scene)
+	fmt.Printf("摆放 %d | 联查 %d | 战斗命中 %d | 闸拦 %d | 物化 %d\n",
+		stats.Placements, stats.Resolved, stats.CombatHit, stats.Skipped, len(spawns))
+	fmt.Printf("战斗联查率 %.1f%%\n", pct(stats.CombatHit, stats.Resolved))
+	dumpDist("类别", byFile)
+	dumpDist("类名", byScript)
+	for _, sample := range stats.Samples {
+		fmt.Println("  样本:", sample)
 	}
-	sort.Strings(files)
-	for _, f := range files {
-		fmt.Printf("  %-22s %d\n", f, byFile[f])
-	}
-	fmt.Println(")")
 
-	tpls, err := npcdata.LoadTemplates(*root)
+	// 帧形态抽查。
+	as0x28 := *form != "0d"
+	frames, err := npcfeed.Frames(spawns, as0x28)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "模板装载失败: %v\n", err)
+		fmt.Fprintln(os.Stderr, "npcprobe: 帧生成:", err)
 		os.Exit(1)
 	}
-	fmt.Printf("NpcConfig 模板 %d 个\n", len(tpls))
-	hit := npcdata.Join(npcs, tpls)
-	fmt.Printf("联查命中 %d/%d（%.0f%%；未命中项跳过不下发）\n", hit, len(npcs), 100*float64(hit)/float64(len(npcs)))
-
-	kept := npcdata.Filter(npcs, 482.5, 1008, *radius, *limit) // born03 出生点 BornCJ000003
-	shown := 0
-	for _, n := range kept {
-		if !n.Hit {
-			continue
-		}
-		if shown < 5 {
-			fmt.Printf("  [%d] %s  res=%s  (%.1f, %.1f, %.1f) ay=%.3f  name=%q scale=%q\n",
-				shown+1, n.ID, n.Tpl.Resource, n.X, n.Y, n.Z, n.AY, n.Tpl.Name, n.Tpl.Scale)
-			shown++
-		}
+	var totalBytes int
+	for _, f := range frames {
+		totalBytes += len(f)
 	}
-	fmt.Printf("筛选（半径 %.0f 上限 %d，出生点 482.5/1008）→ 可下发 %d 条\n", *radius, *limit, countHit(kept))
+	fmt.Printf("帧 %d 条（%s 形态）共 %d 字节，均值 %.0f B/条\n",
+		len(frames), formName(as0x28), totalBytes, avg(float64(totalBytes), float64(len(frames))))
+	for i := 0; i < *dump && i < len(frames) && i < 3; i++ {
+		head := frames[i]
+		if len(head) > 96 {
+			head = head[:96]
+		}
+		fmt.Printf("帧 %d 前 %d 字节:\n%s\n", i, len(head), hex.Dump(head))
+	}
 }
 
-func countHit(npcs []npcdata.SceneNPC) int {
-	n := 0
-	for _, x := range npcs {
-		if x.Hit {
-			n++
-		}
+func pct(a, b int) float64 {
+	if b == 0 {
+		return 0
 	}
-	return n
+	return float64(a) / float64(b) * 100
 }
 
-// sceneDirOf 找 <scene>_* 摆放目录（fssoloworld findSceneDir 同口径的
-// 只读版）。
-func sceneDirOf(root, scene string) string {
-	entries, err := os.ReadDir(root + "/ini/Scene")
-	if err != nil {
-		return scene // 缺目录时装载层报错
+func avg(sum, n float64) float64 {
+	if n == 0 {
+		return 0
 	}
-	prefix := scene + "_"
-	for _, e := range entries {
-		name := e.Name()
-		if e.IsDir() && (name == scene || (len(name) > len(prefix) && equalFold(name[:len(prefix)], prefix))) {
-			return name
-		}
-	}
-	return scene
+	return sum / n
 }
 
-func equalFold(a, b string) bool {
-	if len(a) != len(b) {
-		return false
+func formName(as0x28 bool) string {
+	if as0x28 {
+		return "0x28 mode=0x46"
 	}
-	for i := 0; i < len(a); i++ {
-		ca, cb := a[i], b[i]
-		if 'A' <= ca && ca <= 'Z' {
-			ca += 32
-		}
-		if 'A' <= cb && cb <= 'Z' {
-			cb += 32
-		}
-		if ca != cb {
-			return false
-		}
+	return "0x0D"
+}
+
+func dumpDist(label string, m map[string]int) {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
 	}
-	return true
+	sort.Slice(keys, func(i, j int) bool { return m[keys[i]] > m[keys[j]] })
+	fmt.Printf("%s分布（%d 键）:\n", label, len(keys))
+	for i, k := range keys {
+		if i >= 10 {
+			fmt.Printf("  … 余 %d 键\n", len(keys)-i)
+			break
+		}
+		fmt.Printf("  %-24s %d\n", k, m[k])
+	}
 }

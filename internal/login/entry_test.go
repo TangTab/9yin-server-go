@@ -27,7 +27,7 @@ func TestEntrySceneFrameLayout(t *testing.T) {
 		t.Fatalf("属性数 %d", got)
 	}
 
-	// 属性段走位：178(常量) → 1468(u16 230) → 7(串) → 8(串)
+	// 属性段走位：178(常量) → 1468(u16 20000) → 7(串) → 8(串)
 	off := 15
 	if idx := u16(off); idx != 178 {
 		t.Fatalf("首属性 idx %d want 178", idx)
@@ -42,8 +42,8 @@ func TestEntrySceneFrameLayout(t *testing.T) {
 		t.Fatalf("次属性 idx %d want 1468", idx)
 	}
 	off += 2
-	if v := u16(off); v != 230 {
-		t.Fatalf("MaxVisuals %d want 230", v)
+	if v := u16(off); v != 20000 {
+		t.Fatalf("MaxVisuals %d want 20000", v)
 	}
 	off += 2
 

@@ -1,19 +1,25 @@
 // npcgen：九阴客户端 NPC 数据 → 服务端 ini 配置转换器。
 //
 // 输入一（-in，默认 NINEYIN_MODERN 环境变量 > 仓库兄弟目录
-// ..\9yin_server-go\resources\modern）：
+// ..\9yin_server-go\resources\modern > 本机部署缺省
+// F:\Game\Online\9yin\9yin-server-go\resources\modern）：
 //   - share/npc/npcconfig/*.txt        76 张 GBK+TAB 模板表（3 行头）
 //   - share/npc/npcconfig/npc_type.ini 表 → 服务端原路径清单（[file]/flie<N>）
 //   - share/creator/npc_creator/<场景>/*.xml  场景摆放（静态+随机 creator）
 //
-// 输入二（-tasks，默认 NINEYIN_TASKS 环境变量 > 仓库兄弟目录
-// ..\九阴真经ol\task；目录不存在则跳过）：
+// 输入二（-npctemplate，默认 -tasks 目录 > 本机部署缺省
+// F:\Game\Online\9yin\9yin-server-go2\Res\bak\ini\Task）：战斗 NPC 模板
+//   - npctemplate*.tab（GBK TSV，1 行头；npctemplate.tab 主档优先，
+//     npctemplate2.tab 等补充档按 glob 合并，同 ID 首档胜出）
+//
+// 输入三（-tasks，默认 NINEYIN_TASKS 环境变量 > 仓库兄弟目录
+// ..\九阴真经ol\task；Task/ 子目录缺席则跳过任务域）：
 //   - Task/<域>/<前缀>_*.txt   BGserverCJ 任务域表（HuntList 杀怪/
 //     CollectList 采集/Convoy 押镖/Prize 奖励/StoryTaskList 剧情等，
 //     同域分档合并去重）
 //   - task002.txt / task_config.txt / CharEffect.txt / npctemplate.tab
 //
-// 输入三（文案，modern/text/chineses；目录不存在则跳过）：
+// 输入四（文案，modern/text/chineses；目录不存在则跳过）：
 //   - stringtask_normal/ + stringtask_special/  任务串档（key=value）
 //
 // 输出（服务端方言 <Object><Property .../>，UTF-8，格式以服务端为准）：
@@ -28,6 +34,7 @@
 //
 // 原 NpcConfig/NpcConfigAuto 黑金档首跑前整体移入 <out>/heijin_backup/。
 // 本项目是九阴服务端复刻而非黑金复刻，黑金档仅作属性词汇对照留存。
+// 构建链与黑金样板分析见 docs/official/NPC服务端XML构建链与黑金样板.md。
 package main
 
 import (
@@ -49,13 +56,14 @@ func main() {
 	in := flag.String("in", defaultModernRoot(), "现代客户端提取资源根（含 share/npc/npcconfig）")
 	out := flag.String("out", filepath.Join(repoTestData(), "ini", "Npc"), "服务端 ini/Npc 输出根")
 	scenesOut := flag.String("scenes-out", filepath.Join(repoTestData(), "ini", "scene"), "场景摆放 XML 输出根")
-	tasksIn := flag.String("tasks", defaultTasksRoot(), "BGserverCJ 任务数据根（含 Task\\ 与 npctemplate.tab；目录不存在则跳过任务转换）")
+	npctemplate := flag.String("npctemplate", defaultNpcTemplateSource(), "战斗 NPC 模板源（npctemplate.tab 文件、其所在目录或 glob 模式；缺省探测 -tasks 目录 > 本机部署 Res\\bak\\ini\\Task）")
+	tasksIn := flag.String("tasks", defaultTasksRoot(), "BGserverCJ 任务数据根（含 Task\\ 与 npctemplate.tab；Task/ 子目录缺席则跳过任务域）")
 	questOut := flag.String("quest-out", filepath.Join(repoTestData(), "ini", "Quest"), "任务域 XML 输出根")
 	textOut := flag.String("text-out", filepath.Join(repoTestData(), "ini", "Text"), "任务文案 XML 输出根")
 	reportPath := flag.String("report", filepath.Join(repoRoot(), "artifacts", "local", "npcgen-report.json"), "审计报告 JSON 输出")
 	verify := flag.Bool("verify", false, "生成后用 config.LoadObjectFile 回读校验行数与 ID 集")
 	flag.Parse()
-	if err := run(*in, *out, *scenesOut, *tasksIn, *questOut, *textOut, *reportPath, *verify); err != nil {
+	if err := run(*in, *out, *scenesOut, *tasksIn, *npctemplate, *questOut, *textOut, *reportPath, *verify); err != nil {
 		fmt.Fprintln(os.Stderr, "npcgen:", err)
 		os.Exit(1)
 	}
@@ -71,12 +79,36 @@ func defaultTasksRoot() string {
 }
 
 // defaultModernRoot 输入根解析：flag > NINEYIN_MODERN > 仓库兄弟目录
-// 9yin_server-go/resources/modern（九阴客户端提取资源所在工程）。
+// 9yin_server-go/resources/modern > 本机部署缺省
+// （F:\Game\Online\9yin\9yin-server-go\resources\modern）。
 func defaultModernRoot() string {
 	if configured := strings.TrimSpace(os.Getenv(modernRootEnvironment)); configured != "" {
 		return filepath.Clean(configured)
 	}
-	return filepath.Join(filepath.Dir(repoRoot()), "9yin_server-go", "resources", "modern")
+	candidates := []string{
+		filepath.Join(filepath.Dir(repoRoot()), "9yin_server-go", "resources", "modern"),
+		`F:\Game\Online\9yin\9yin-server-go\resources\modern`,
+	}
+	for _, dir := range candidates {
+		if info, err := os.Stat(filepath.Join(dir, "share", "npc", "npcconfig")); err == nil && info.IsDir() {
+			return dir
+		}
+	}
+	return candidates[0]
+}
+
+// defaultNpcTemplateSource 战斗模板源缺省：-tasks 目录下有 npctemplate.tab
+// 则随任务根；否则本机部署缺省（go2 Res\bak\ini\Task）。
+func defaultNpcTemplateSource() string {
+	primary := filepath.Join(defaultTasksRoot(), "npctemplate.tab")
+	if _, err := os.Stat(primary); err == nil {
+		return filepath.Dir(primary)
+	}
+	fallback := `F:\Game\Online\9yin\9yin-server-go2\Res\bak\ini\Task`
+	if _, err := os.Stat(filepath.Join(fallback, "npctemplate.tab")); err == nil {
+		return fallback
+	}
+	return primary
 }
 
 // repoRoot 向上定位仓库根（go.mod 所在层）。
@@ -129,22 +161,23 @@ type genReport struct {
 	UniqueIDs   int           `json:"unique_ids"`
 	IDConflicts []string      `json:"id_conflicts,omitempty"`
 	Creators    struct {
-		Scenes      int      `json:"scenes"`
-		Instances   int      `json:"instances"`
-		OrphanCount int      `json:"orphan_count"`
+		Scenes       int      `json:"scenes"`
+		Instances    int      `json:"instances"`
+		OrphanCount  int      `json:"orphan_count"`
 		OrphanSample []string `json:"orphan_sample,omitempty"`
 	} `json:"creators"`
 	Quest struct {
-		Source         string         `json:"source,omitempty"`
-		Domains        []domainReport `json:"domains,omitempty"`
-		NpcTemplateRow int            `json:"npc_template_rows"`
-		TextRows       int            `json:"text_rows"`
-		TextConflicts  int            `json:"text_conflicts"`
+		Source            string         `json:"source,omitempty"`
+		NpcTemplateSource string         `json:"npc_template_source,omitempty"`
+		Domains           []domainReport `json:"domains,omitempty"`
+		NpcTemplateRow    int            `json:"npc_template_rows"`
+		TextRows          int            `json:"text_rows"`
+		TextConflicts     int            `json:"text_conflicts"`
 	} `json:"quest"`
 	Warnings []string `json:"warnings,omitempty"`
 }
 
-func run(modern, outDir, scenesOut, tasksIn, questOut, textOut, reportPath string, verify bool) error {
+func run(modern, outDir, scenesOut, tasksIn, npctemplateIn, questOut, textOut, reportPath string, verify bool) error {
 	npcconfigDir := filepath.Join(modern, "share", "npc", "npcconfig")
 	creatorDir := filepath.Join(modern, "share", "creator", "npc_creator")
 	for _, dir := range []string{npcconfigDir, creatorDir} {
@@ -168,7 +201,7 @@ func run(modern, outDir, scenesOut, tasksIn, questOut, textOut, reportPath strin
 
 	// 模板表转换。
 	allIDs := map[string]string{} // ID → 首个来源表（冲突审计）
-	written := map[string]int{}    // 输出路径 → 期望行数（verify 用）
+	written := map[string]int{}   // 输出路径 → 期望行数（verify 用）
 	var writtenOrder []string
 	for _, entry := range entries {
 		tr := tableReport{Client: entry.ClientPath, Server: filepath.ToSlash(entry.ServerRel)}
@@ -260,8 +293,9 @@ func run(modern, outDir, scenesOut, tasksIn, questOut, textOut, reportPath strin
 	}
 	sort.Strings(report.Creators.OrphanSample)
 
-	// BGserverCJ 任务域 + 战斗 NPC 模板（源缺失则跳过，不致命）。
-	if info, err := os.Stat(tasksIn); err == nil && info.IsDir() {
+	// BGserverCJ 任务域（-tasks 下 Task/ 子目录；目录只有 npctemplate*.tab
+	// 时自然跳过任务域，不致命）。
+	if info, err := os.Stat(filepath.Join(tasksIn, "Task")); err == nil && info.IsDir() {
 		report.Quest.Source = tasksIn
 		domains, questWritten, warnings, err := convertQuest(tasksIn, questOut)
 		if err != nil {
@@ -273,15 +307,22 @@ func run(modern, outDir, scenesOut, tasksIn, questOut, textOut, reportPath strin
 			written[path] = rows
 			writtenOrder = append(writtenOrder, path)
 		}
-		if rows, outPath, err := convertNpcTemplate(tasksIn, outDir); err == nil {
-			report.Quest.NpcTemplateRow = rows
-			written[outPath] = rows
-			writtenOrder = append(writtenOrder, outPath)
-		} else if !os.IsNotExist(err) {
-			report.Warnings = append(report.Warnings, fmt.Sprintf("npctemplate.tab: %v", err))
-		}
 	} else {
-		fmt.Printf("npcgen: 任务数据根不存在，跳过任务转换（-tasks=%s）\n", tasksIn)
+		fmt.Printf("npcgen: 任务域目录缺席，跳过任务域转换（-tasks=%s）\n", tasksIn)
+	}
+
+	// 战斗 NPC 模板（-npctemplate 独立源：文件或所在目录；npctemplate*.tab
+	// glob 合并——npctemplate2.tab 空壳/坏档 warning 跳过）。
+	report.Quest.NpcTemplateSource = npctemplateIn
+	if rows, outPath, warnings, err := convertNpcTemplate(npctemplateIn, outDir); err == nil {
+		report.Quest.NpcTemplateRow = rows
+		report.Warnings = append(report.Warnings, warnings...)
+		written[outPath] = rows
+		writtenOrder = append(writtenOrder, outPath)
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("npcgen: npctemplate 源 %s: %w", npctemplateIn, err)
+	} else {
+		fmt.Printf("npcgen: 战斗模板源不存在，跳过（-npctemplate=%s）\n", npctemplateIn)
 	}
 
 	// 任务文案（modern/text/chineses 的 stringtask_* 目录）。
@@ -317,8 +358,14 @@ func run(modern, outDir, scenesOut, tasksIn, questOut, textOut, reportPath strin
 	fmt.Printf("npcgen: %d 表 %d 行（唯一 ID %d）→ %s\n", len(report.Tables), report.TotalRows, report.UniqueIDs, outDir)
 	fmt.Printf("npcgen: %d 场景 %d 摆放实例 → %s（孤儿 %d）\n", report.Creators.Scenes, report.Creators.Instances, scenesOut, report.Creators.OrphanCount)
 	if report.Quest.Source != "" {
-		fmt.Printf("npcgen: 任务域 %d 档（HuntList/CollectList/...）+ 战斗 NPC 模板 %d 行 → %s；文案 %d 键 → %s\n",
-			len(report.Quest.Domains), report.Quest.NpcTemplateRow, questOut, report.Quest.TextRows, textOut)
+		fmt.Printf("npcgen: 任务域 %d 档（HuntList/CollectList/...）→ %s\n", len(report.Quest.Domains), questOut)
+	}
+	if report.Quest.NpcTemplateRow > 0 {
+		fmt.Printf("npcgen: 战斗 NPC 模板 %d 行（源 %s）→ %s\n",
+			report.Quest.NpcTemplateRow, report.Quest.NpcTemplateSource, filepath.Join(outDir, "NpcTemplate.xml"))
+	}
+	if report.Quest.TextRows > 0 {
+		fmt.Printf("npcgen: 文案 %d 键 → %s\n", report.Quest.TextRows, textOut)
 	}
 	fmt.Printf("npcgen: %s；报告 %s\n", report.Backup, reportPath)
 	for _, w := range report.Warnings {

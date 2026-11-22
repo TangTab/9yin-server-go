@@ -85,6 +85,11 @@ func NamedProperty(name string, value PropertyValue) IndexedProperty {
 	return IndexedProperty{Index: entry.Index, Name: name, Value: value}
 }
 
+// maxVisualsValue 场景可视表容量（AddObject 注册闸——客户端按此值建
+// 角色渲染数据池；2026-11-22 真机定案：230 全量物化 1674 条时
+// CreateRoleUserData 池满拒建 1236 条，改 20000）。
+const maxVisualsValue uint16 = 20000
+
 // EntrySceneFrame 0x0B 进场帧（5 属性官方形——golden 实证：Name/MaxVisuals/
 // ConfigID/Resource/TiGuanGroupCount）。
 func EntrySceneFrame(id Identity, config, resource string) ([]byte, error) {
@@ -104,7 +109,7 @@ func EntrySceneFrame(id Identity, config, resource string) ([]byte, error) {
 	entry = binary.LittleEndian.AppendUint32(entry, 8)
 	entry = append(entry, 0x1b, 0x54, 0x50, 0x5b, 0x02, 0x58, 0x00, 0x00)
 	entry = binary.LittleEndian.AppendUint16(entry, maxVisuals.Index)
-	entry = binary.LittleEndian.AppendUint16(entry, 230)
+	entry = binary.LittleEndian.AppendUint16(entry, maxVisualsValue)
 	entry = appendProperty(entry, IndexedProperty{Index: configEntry.Index, Name: "ConfigID", Value: StringValue(config)})
 	entry = appendProperty(entry, IndexedProperty{Index: resourceEntry.Index, Name: "Resource", Value: StringValue(resource)})
 	// idx1451 TiGuanGroupCount：u16=1（golden 第 5 属性真机形）。

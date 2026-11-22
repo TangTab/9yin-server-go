@@ -581,16 +581,16 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	if err := conn.WriteMsg([]byte{0x09}); err != nil { // ClientReady
 		t.Fatalf("write op09: %v", err)
 	}
-	// NPC 双通道（真档在仓根 testdata，cwd 探测命中）：进场段尾部 NPC
-	// 0x0D 物化族 ×1759（fork 段 obj 0x11——渲染通道，默认开）；m229
-	// 设施族默认关。进场段帧数随建号数据可变（位图/采集行+NPC 千帧级）。
+	// NPC 物化族（npcfeed 链，真档在仓根 testdata，cwd 探测命中）：进场段
+	// 尾部 NPC 0x28 mode=0x46 物化 ×1674（fork 段 obj 0x11；摆放 1907 联查
+	// 1674——闸门拦 85 条 EventNpc/TaskSubId/SubSceneNo）。m229 已退役。
 	isNpcM229 := func(f []byte) bool {
 		return len(f) > 12 && f[0] == 0x1E && f[3] == 2 &&
 			binary.LittleEndian.Uint32(f[4:]) == 229 &&
 			f[8] == 2 && binary.LittleEndian.Uint32(f[9:]) == 130
 	}
 	npc0D, mark229 := 0, 0
-	for i := 0; i < 9000; i++ { // 进场余帧（千级）+ NPC 0x0D 全量 1759 + 就绪段尾部
+	for i := 0; i < 9000; i++ { // 进场余帧（千级）+ NPC 0x28 全量 1674 + 就绪段尾部
 		f := readAny()
 		checkMapFrame(f) // 开图双记录（记录簇尾、NPC 物化前）
 		if isNpcM229(f) {
@@ -599,14 +599,14 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 		}
 		if f[0] == 0x28 && f[1] == 0x46 && len(f) > 60 && f[13] == 0x11 {
 			npc0D++ // NPC 0x28 物化（全量一次物化——PreReady 尾）
-			if npc0D >= 1759 {
+			if npc0D >= 1674 {
 				break
 			}
 			continue
 		}
 	}
-	if npc0D != 1759 {
-		t.Errorf("NPC 0x28 帧数 = %d, want 1759（born03 全量物化）logs: %s", npc0D, logs)
+	if npc0D != 1674 {
+		t.Errorf("NPC 0x28 帧数 = %d, want 1674（born03 闸后全量物化）logs: %s", npc0D, logs)
 	}
 	if !openMapSeen {
 		t.Errorf("进场段未见 OpenMapRec 位图帧（大地图城市标签/点击寻路数据源）logs: %s", logs)

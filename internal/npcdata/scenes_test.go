@@ -4,7 +4,21 @@ package npcdata
 // 前缀截断/首现绑定）+ 仓内真档锚点（[3]=born03、[14]=city02、[366]=scene22
 // ——与外服 OpenMapRec 行 11 bit14 互证）。
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+// testRoot 仓内 testdata 根（含 ini/scenes.ini；npcdata 包 cwd 探测）。
+var testRoot = func() string {
+	for _, dir := range []string{"../../testdata", "../../../testdata", "testdata"} {
+		if _, err := os.Stat(filepath.Join(dir, "ini", "scenes.ini")); err == nil {
+			return dir
+		}
+	}
+	return ""
+}()
 
 func TestParseSceneIndexTable(t *testing.T) {
 	text := "// 注释\r\n[1]\r\nMember=1\r\nConfig=ini\\scene\\born04_QianDengZhen\r\n" +

@@ -288,20 +288,103 @@ func convertQuest(tasksDir, questOut string) ([]domainReport, map[string]int, []
 }
 
 // convertNpcTemplate 战斗 NPC 模板（1 行头 .tab）→ ini/Npc/NpcTemplate.xml。
-func convertNpcTemplate(tasksDir, npcOut string) (int, string, error) {
-	path := filepath.Join(tasksDir, "npctemplate.tab")
-	if _, err := os.Stat(path); err != nil {
-		return 0, "", err
-	}
-	t, err := loadTabTable(path, 1)
+//
+// src 三态：npctemplate.tab 文件本身 / 其所在目录 / glob 模式
+// （npctemplate*.tab）。多档合并：npctemplate.tab 主档序前，其余按文件名
+// 字典序补充——同 ID 首档胜出（npctemplate2.tab 等空壳/坏档列头解析失败
+// 整档 warning 跳过，不废主档）。
+func convertNpcTemplate(src, npcOut string) (int, string, []string, error) {
+	files, err := resolveNpcTemplateFiles(src)
 	if err != nil {
-		return 0, "", fmt.Errorf("npcgen: 解析 npctemplate.tab: %w", err)
+		return 0, "", nil, err
+	}
+	merged := &npcTable{}
+	var warnings []string
+	seen := map[string]struct{}{}
+	for _, path := range files {
+		t, loadErr := loadTabTable(path, 1)
+		if loadErr != nil {
+			warnings = append(warnings, fmt.Sprintf("战斗模板档跳过 %s: %v", filepath.Base(path), loadErr))
+			continue
+		}
+		if len(merged.Columns) == 0 {
+			merged.Columns, merged.Types, merged.Source = t.Columns, t.Types, t.Source
+		}
+		first := t.firstIndex()
+		idIdx, hasID := first["ID"]
+		for _, row := range t.Rows {
+			id := ""
+			if hasID && idIdx < len(row) {
+				id = row[idIdx]
+			}
+			if id != "" {
+				if _, dup := seen[id]; dup {
+					continue
+				}
+				seen[id] = struct{}{}
+			}
+			merged.Rows = append(merged.Rows, row)
+		}
+	}
+	if len(merged.Rows) == 0 {
+		return 0, "", warnings, os.ErrNotExist
 	}
 	outPath := filepath.Join(npcOut, "NpcTemplate.xml")
-	if err := writeGenerated(outPath, genPassThroughTable(t)); err != nil {
-		return 0, "", err
+	if err := writeGenerated(outPath, genPassThroughTable(merged)); err != nil {
+		return 0, "", warnings, err
 	}
-	return countIDRows(t), outPath, nil
+	return countIDRows(merged), outPath, warnings, nil
+}
+
+// resolveNpcTemplateFiles 战斗模板源三态解析：文件直用；目录取
+// npctemplate*.tab（npctemplate.tab 精确名优先，其余字典序）；含路径
+// 通配符按 glob 展开。
+func resolveNpcTemplateFiles(src string) ([]string, error) {
+	src = strings.TrimSpace(src)
+	if src == "" {
+		return nil, os.ErrNotExist
+	}
+	if strings.ContainsAny(filepath.Base(src), "*?[") {
+		matches, err := filepath.Glob(src)
+		if err != nil {
+			return nil, fmt.Errorf("npcgen: glob %s: %w", src, err)
+		}
+		if len(matches) == 0 {
+			return nil, os.ErrNotExist
+		}
+		sortNpcTemplateFiles(matches)
+		return matches, nil
+	}
+	if info, err := os.Stat(src); err == nil && !info.IsDir() {
+		return []string{src}, nil
+	}
+	dir := src
+	if info, err := os.Stat(dir); err != nil {
+		return nil, os.ErrNotExist
+	} else if !info.IsDir() {
+		return nil, fmt.Errorf("npcgen: 战斗模板源 %s 非目录/文件", src)
+	}
+	matches, err := filepath.Glob(filepath.Join(dir, "npctemplate*.tab"))
+	if err != nil {
+		return nil, err
+	}
+	if len(matches) == 0 {
+		return nil, os.ErrNotExist
+	}
+	sortNpcTemplateFiles(matches)
+	return matches, nil
+}
+
+// sortNpcTemplateFiles npctemplate.tab 精确名主档序前，其余按字典序
+// （npctemplate2.tab 等补充档在后——同 ID 首档胜出的合并序）。
+func sortNpcTemplateFiles(paths []string) {
+	score := func(p string) int {
+		if strings.EqualFold(filepath.Base(p), "npctemplate.tab") {
+			return 0
+		}
+		return 1
+	}
+	sort.SliceStable(paths, func(i, j int) bool { return score(paths[i]) < score(paths[j]) })
 }
 
 // countIDRows 有 ID 的行数（与 genPassThroughTable 输出一致）。

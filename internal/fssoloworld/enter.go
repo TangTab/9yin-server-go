@@ -23,6 +23,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
+	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
@@ -107,9 +108,7 @@ func (s *Server) enterContext(pl *Player) entergen.Context {
 		},
 		RoleName: pl.Name,
 		State:    pl.roleState,
-		NPCs:       s.sceneNPCMarks(pl.roleState.Resource, pl.roleState.Position), // m229 设施族（已退役恒空）
-		NPCObjects: s.sceneNPCObjects(pl.roleState.Resource, pl.roleState.Position), // 全量物化集（0x28 官方言）
-		NPCAs0x28:  os.Getenv("NINEYIN_NPC_0X28") != "off", // 0x28 官方言默认；=off 判别切裸 0x0D
+		NPCFrames:  s.sceneNPCFrames(pl.roleState.Resource, pl.roleState.Position), // NPC 物化帧族（0x28 官方言默认）
 		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
 	}
 }
@@ -120,7 +119,7 @@ func (s *Server) sceneGlobalIndexOf(resource string) int {
 	if resource == "" {
 		return -1
 	}
-	root := resolveDataRoot()
+	root := npcfeed.ResolveRoot()
 	if root == "" {
 		return -1
 	}

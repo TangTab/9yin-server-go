@@ -7,7 +7,7 @@
 // docs/official/透传数据清单.md。
 //
 // 方言锚点（全部经 clientdata 按 2433 表名解析）：
-//   - 0x0B 进场：idx178 Name / idx1468 MaxVisuals=230 / idx1447 ConfigID /
+//   - 0x0B 进场：idx178 Name / idx1468 MaxVisuals=20000 / idx1447 ConfigID /
 //     idx1448 Resource（b-line scene_transition.go 定版）
 //   - 0x10 属性：[10][mode@1][obj@2][own@6][u16 n@10]
 //   - 0x11 记录加行：行编码按官方 schema 列型（b-line serverRecordAddCells）
@@ -44,11 +44,9 @@ type Context struct {
 	Session   Session
 	RoleName  string // 角色名（m607 宽串）
 	State     rolestate.RoleState
-	Keybind   string // 存档键位串（0x28 档案 ShortcutKey；空=省略）
-	NPCs      []NpcEntry    // 场景 NPC 物化族 m229 c130（外服方言设施通道；默认不发）
-	NPCObjects []NpcObject0D // 场景 NPC 物化族（全量）
-	NPCAs0x28  bool          // 物化帧形态：true=0x28 mode=0x46（官方家族客户端）；false=裸 0x0D 大档（判别）
-	SceneIndex int           // 客户端 scenes.ini 全局段号（开图位图/迷雾行；-1=表缺席降级）
+	Keybind   string   // 存档键位串（0x28 档案 ShortcutKey；空=省略）
+	NPCFrames [][]byte // 场景 NPC 物化帧族（npcfeed 预生成；0x28 官方言默认）
+	SceneIndex int     // 客户端 scenes.ini 全局段号（开图位图/迷雾行；-1=表缺席降级）
 }
 
 // DefaultIdentity fork 客户端方言的玩家恒等身份（1-1）：

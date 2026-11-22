@@ -1,8 +1,8 @@
 package fssoloworld
 
-// npc.go 场景 NPC 物化目录：场景摆放（npc_creator.xml）+ NpcConfig 模板
-// 联查 → 全量物化集（0x28 mode=0x46 官方言，真机验证成功形态），进程
-// 级缓存。数据链与方言定版见 docs/official/外服NPCm229物化方言定版.md。
+// npc.go 场景 NPC 下发薄壳（2026-11-22 重写）：npcfeed 目录缓存 +
+// 半径/上限过滤 + 帧生成。数据链与帧配方见 internal/npcfeed 包注释及
+// docs/official/NPC服务端XML构建链与黑金样板.md。
 
 import (
 	"os"
@@ -10,24 +10,21 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lizhanyin/9yin-server-go/internal/entergen"
-	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
+	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 )
 
 // npcPushEnabled NINEYIN_NPC_PUSH=off 一键关停（方言演进期保护，
 // 渲染异常时归因用）。
 func npcPushEnabled() bool { return os.Getenv("NINEYIN_NPC_PUSH") != "off" }
 
-// npcMark229Enabled m229 设施族开关（默认关——fork 系客户端上是
-// EscortRec 记录帧不渲染；外服家族客户端接入时 NINEYIN_NPC_MARK_229=1
-// 对照）。
-func npcMark229Enabled() bool { return os.Getenv("NINEYIN_NPC_MARK_229") == "1" }
+// npcAs0x28Enabled 物化帧形态：true=0x28 mode=0x46 官方言（默认，
+// npc.pcapng 罗塞塔真机验证形态）；false=裸 0x0D 大档（判别）。
+func npcAs0x28Enabled() bool { return os.Getenv("NINEYIN_NPC_0X28") != "off" }
 
-func npc0DEnabled() bool { return os.Getenv("NINEYIN_NPC_0D") != "off" }
-
-// npcCatalog 场景物化条目集（objects0D 为全量联查命中集）。
+// npcCatalog 场景物化目录（联查命中集，进程级缓存）。
 type npcCatalog struct {
-	objects0D []entergen.NpcObject0D
+	spawns []npcfeed.Spawn
+	stats  npcfeed.Stats
 }
 
 var (
@@ -35,133 +32,87 @@ var (
 	npcCatalogCache = map[string]*npcCatalog{}
 )
 
-// sceneNPCObjects 全量物化集（装载+联查+ident，缓存）。
-func (s *Server) sceneNPCObjects(scene string, origin [4]float64) []entergen.NpcObject0D {
-	if !npcPushEnabled() || !npc0DEnabled() {
+// sceneNPCFrames 场景 NPC 物化帧族（装载+联查+ident+过滤+编码，缓存）。
+// 装载失败返回空——NPC 是增强下发，不阻塞进场。
+func (s *Server) sceneNPCFrames(scene string, origin [4]float64) [][]byte {
+	if !npcPushEnabled() {
 		return nil
 	}
-	return s.sceneNPCScene(scene, origin).objects0D
-}
-
-// sceneNPCMarks m229 设施族：已退役恒空（2026-11-22 终局：fork 系
-// 客户端把 m229 当 EscortRec 记录帧不渲染）。
-func (s *Server) sceneNPCMarks(scene string, origin [4]float64) []entergen.NpcEntry {
-	return nil
-}
-
-// sceneNPCScene 场景目录（缓存）。装载失败返回空目录——NPC 是增强
-// 下发，不阻塞进场。
-func (s *Server) sceneNPCScene(scene string, origin [4]float64) *npcCatalog {
-	if !npcPushEnabled() {
-		return &npcCatalog{}
+	catalog := s.sceneNPCCatalog(scene)
+	spawns := catalog.spawns
+	if radius := npcRadius(); radius > 0 {
+		spawns = npcfeed.FilterByRadius(spawns, origin[0], origin[2], radius, npcLimit())
+	} else if limit := npcLimit(); limit > 0 && len(spawns) > limit {
+		spawns = spawns[:limit]
 	}
+	spawns = applyResourceOverride(spawns)
+	frames, err := npcfeed.Frames(spawns, npcAs0x28Enabled())
+	if err != nil {
+		s.trace("npc frames: %v", err)
+		return nil
+	}
+	return frames
+}
+
+// applyResourceOverride NINEYIN_NPC_RESOURCE_OVERRIDE 判别实验开关：
+// 强制全 NPC 用同一模型串（模板层克隆改写，不污染目录缓存）。判别
+// 「客户端模型库缺失（缺模型的 NPC 不渲染/缺动画呆立）」vs「下发建档
+// 问题」——全同模型后若全城显示且会动，坐实前者（2433 线实验设计）。
+func applyResourceOverride(spawns []npcfeed.Spawn) []npcfeed.Spawn {
+	override := strings.TrimSpace(os.Getenv("NINEYIN_NPC_RESOURCE_OVERRIDE"))
+	if override == "" {
+		return spawns
+	}
+	patched := make([]npcfeed.Spawn, len(spawns))
+	copy(patched, spawns)
+	for i := range patched {
+		tpl := make(map[string]string, len(patched[i].Template)+1)
+		for k, v := range patched[i].Template {
+			tpl[k] = v
+		}
+		tpl["Resource"] = override
+		tpl["Material"] = "" // 防 Material 分支干扰
+		patched[i].Template = tpl
+	}
+	return patched
+}
+
+// sceneNPCCatalog 场景目录（缓存）。
+func (s *Server) sceneNPCCatalog(scene string) *npcCatalog {
 	npcCatalogMu.Lock()
 	defer npcCatalogMu.Unlock()
 	if cached, ok := npcCatalogCache[scene]; ok {
 		return cached
 	}
-	catalog := s.loadNPCCatalog(scene, origin)
+	catalog := &npcCatalog{}
+	root := npcfeed.ResolveRoot()
+	if root == "" {
+		s.trace("npc catalog: 数据根缺席（NINEYIN_DATA_ROOT / Res / testdata），场景 %s NPC 不下发", scene)
+		npcCatalogCache[scene] = catalog
+		return catalog
+	}
+	spawns, stats, err := npcfeed.BuildCatalog(root, scene)
+	if err != nil {
+		s.trace("npc catalog: %v", err)
+		npcCatalogCache[scene] = catalog
+		return catalog
+	}
+	catalog.spawns, catalog.stats = spawns, stats
+	s.trace("npc catalog: 场景 %s 摆放 %d 联查 %d 战斗命中 %d 闸拦 %d → 物化 %d 条",
+		scene, stats.Placements, stats.Resolved, stats.CombatHit, stats.Skipped, len(spawns))
+	for _, sample := range stats.Samples {
+		s.trace("npc catalog: 样本 %s", sample)
+	}
 	npcCatalogCache[scene] = catalog
 	return catalog
 }
 
-// loadNPCCatalog 装载链（无锁；sceneNPCScene 持锁调用）。
-func (s *Server) loadNPCCatalog(scene string, origin [4]float64) *npcCatalog {
-	empty := &npcCatalog{}
-	root := resolveDataRoot()
-	if root == "" {
-		s.trace("npc catalog: data root 缺席（NINEYIN_DATA_ROOT / Res / testdata），场景 %s NPC 不下发", scene)
-		return empty
-	}
-	sceneDir := findSceneDir(root, scene)
-	if sceneDir == "" {
-		s.trace("npc catalog: 场景 %s 无摆放目录", scene)
-		return empty
-	}
-	npcs, err := npcdata.LoadSceneNPCs(root, sceneDir)
-	if err != nil {
-		s.trace("npc catalog: %v", err)
-		return empty
-	}
-	templates, err := npcdata.LoadTemplates(root)
-	if err != nil {
-		s.trace("npc catalog: %v", err)
-		return empty
-	}
-	hit := npcdata.Join(npcs, templates)
-	catalog := &npcCatalog{
-		objects0D: make([]entergen.NpcObject0D, 0, hit),
-	}
-	ident := 0
-	for _, npc := range npcs {
-		if !npc.Hit {
-			continue
-		}
-		ident++
-		tpl := npc.Tpl.Raw
-		if override := os.Getenv("NINEYIN_NPC_RESOURCE_OVERRIDE"); override != "" {
-			tpl = make(map[string]string, len(tpl)+1)
-			for k, v := range npc.Tpl.Raw {
-				tpl[k] = v
-			}
-			tpl["Resource"] = override
-		}
-		catalog.objects0D = append(catalog.objects0D, entergen.NpcObject0D{
-			ObjectID: entergen.NpcForkObjectID(ident),
-			OwnerID:  entergen.NpcForkOwnerID(entergen.NpcForkObjectID(ident)),
-			X:        float32(npc.X),
-			Y:        float32(npc.Y),
-			Z:        float32(npc.Z),
-			Orient:   float32(npc.AY),
-			ConfigID: npc.ID,
-			Template: tpl,
-		})
-	}
-	s.trace("npc catalog: 场景 %s 摆放 %d 联查 %d → 全量物化集 %d 条",
-		scene, len(npcs), hit, len(catalog.objects0D))
-	return catalog
-}
+// npcRadius NINEYIN_NPC_RADIUS 半径过滤（<=0 全量；默认全量——当前
+// 真机验证口径）。
+func npcRadius() float64 { return envFloat("NINEYIN_NPC_RADIUS", 0) }
 
-// resolveDataRoot 数据根定位：env NINEYIN_DATA_ROOT > 相对 cwd 探测
-// <dir>/ini/Npc/NpcConfig——两级语义：
-//   - 正式：$root Res（官方服务端 ini 布局，与 testdata/ini 同构）；
-//   - 测试/开发：仓内 testdata。
-func resolveDataRoot() string {
-	if v := os.Getenv("NINEYIN_DATA_ROOT"); v != "" {
-		return v
-	}
-	for _, dir := range []string{
-		"Res", "../Res", "../../Res", // 正式：$root Res
-		".", "..", "../..", // 裸 ini 布局兼容
-		"testdata", "../testdata", "../../testdata", // 测试：仓内真档
-	} {
-		if st, err := os.Stat(dir + "/ini/Npc/NpcConfig"); err == nil && st.IsDir() {
-			return dir
-		}
-	}
-	return ""
-}
-
-// findSceneDir 场景键（born03）→ 摆放目录名（born03_yanyuzhuang）：
-// ini/Scene 下前缀 "<scene>_" 或同名目录（大小写不敏感）。
-func findSceneDir(root, scene string) string {
-	entries, err := os.ReadDir(root + "/ini/Scene")
-	if err != nil {
-		return ""
-	}
-	prefix := scene + "_"
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		name := e.Name()
-		if strings.EqualFold(name, scene) ||
-			(len(name) > len(prefix) && strings.EqualFold(name[:len(prefix)], prefix)) {
-			return name
-		}
-	}
-	return ""
-}
+// npcLimit NINEYIN_NPC_LIMIT 截断上限（<=0 不截断）。
+func npcLimit() int { return int(envFloat("NINEYIN_NPC_LIMIT", 0)) }
 
 // envFloat env 数值（缺席/非法回落缺省）。
 func envFloat(key string, def float64) float64 {

@@ -111,15 +111,10 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, maps...)
 
-	// NPC 物化族 ×N 全量（官方登录序：玩家 0x0D→记录行→NPC 物化×N；
-	// 默认 0x28 mode=0x46 官方言——npc.pcapng 19 字段罗塞塔）。
-	if len(ctx.NPCObjects) > 0 {
-		npc, err := NpcMaterializeFrames(ctx.NPCObjects, ctx.NPCAs0x28)
-		if err != nil {
-			return nil, err
-		}
-		frames = append(frames, npc...)
-	}
+	// NPC 物化帧族 ×N 全量（官方登录序：玩家 0x0D→记录行→NPC 物化×N；
+	// 帧由 npcfeed 预生成——默认 0x28 mode=0x46 官方言，npc.pcapng 19
+	// 字段罗塞塔）。
+	frames = append(frames, ctx.NPCFrames...)
 
 	return frames, nil
 }

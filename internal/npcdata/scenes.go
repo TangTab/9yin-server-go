@@ -1,3 +1,6 @@
+// Package npcdata 客户端 scenes.ini 场景索引（开图位图/迷雾行数据源）。
+// 原场景 NPC 装载/联查已迁出：NPC 下发链 2026-11-22 重写为
+// internal/npcfeed（服务端 XML 三件 + 2433 帧配方）。
 package npcdata
 
 // scenes.go 客户端 ini\scenes.ini 全局场景索引表：场景 resource（born03/
