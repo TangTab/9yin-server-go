@@ -192,7 +192,7 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 	//（真机实证「窗口展示方式不对——应为整页全屏」）——两窗体二选一，
 	// 官方走 m4-8 全屏。funcid 用 g_menu_id 域（funcid/1000000 顶层短号
 	// 查图标，805000000→805 商店图标实证兼容）。
-	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, services); err == nil {
+	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services); err == nil {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
 		}
@@ -221,8 +221,13 @@ func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 		}
 		return true
 	}
-	// 关菜单统一走 SERVER_CLEAR_MENU（0x1D）。
-	s.sendToClient(pl, []byte{0x1D})
+	// 关菜单走官方 m8 对话结束 ×2（女号抓包 102.4s / npc.pcapng 32.0s
+	// 双源：结束簇恒两条；全程无 0x1C/0x1D）。
+	for i := 0; i < 2; i++ {
+		if end, err := entergen.CustomMessageFrame(8); err == nil {
+			s.sendToClient(pl, end)
+		}
+	}
 	s.clearNPCMenu(pl)
 	if req.FuncID == 0 {
 		s.trace("npc interact: 菜单关闭 id=%d client=%d", req.ObjectID, pl.Conn1)
@@ -255,21 +260,27 @@ func (s *Server) findNPCSpawn(scene string, objectID uint32) (npcfeed.Spawn, boo
 	return npcfeed.Spawn{}, false
 }
 
-// npcCinematicTalkMenu talk 数据帧族（npc.pcapng #2377-2382 官方字节级
-// 模板）：msg4 [4] begin / msg6 [6, funcid, ui文本ID]×N（funcid 用
-// form_talk_data g_menu_id 域，官方离开项 600000000+"ui_exit" 实证同系）
-// / msg7 [7, obj] end。C++ 聚合调 form_talk.show_window；NPC 名由客户
-// 端按 ConfigID 本地查（get_npcname_by_id），标题键（官方发
-// "task_WorldNpc01230" 形的文本表键）普通对话场景无合适键——不发 msg5
-// （曾发 NPC 名 UTF-8→乱码、发 "ui_form_talk"→原文上屏，均实证 m5 串
-// 走 C++ 文本转换而非直显）。
-func npcCinematicTalkMenu(objectID, ownerID uint32, services []npcService) ([][]byte, error) {
-	out := make([][]byte, 0, 2+len(services))
+// npcCinematicTalkMenu talk 数据帧族（npc.pcapng #2377-2382 + 女号官服
+// 抓包 88.2s 段双源定版）：msg4 [4] begin / **msg5 [5, "task_<链键>"]**
+// / msg6 [6, funcid, ui文本ID]×N（funcid 用 form_talk_data g_menu_id 域，
+// 官方离开项 600000000+"ui_exit" 实证同系）/ msg7 [7, obj] end。
+// msg5 为开窗必备（两份官服抓包每一窗必带：引导 NPC
+// "task_funnpcborn003031"、世界 NPC "task_WorldNpc01230"、功能 NPC
+// "task_FuncNpc00107"——键形恒 "task_"+ConfigID，客户端按本地任务链
+// 表解析后聚合 form_talk 开窗；此前缺 m5 = 点击 NPC 无窗）。曾发 NPC
+// 名 UTF-8 / "ui_form_talk" 乱码是键形错误，非 m5 本身不可发。
+func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []npcService) ([][]byte, error) {
+	out := make([][]byte, 0, 3+len(services))
 	begin, err := entergen.CustomMessageFrame(4)
 	if err != nil {
 		return nil, err
 	}
 	out = append(out, begin)
+	menu, err := entergen.CustomMessageFrame(5, entergen.CustomString("task_"+configID))
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, menu)
 	for _, service := range services {
 		pkt, err := entergen.CustomMessageFrame(6, entergen.CustomInt(npcTalkFuncID(service.mark)), entergen.CustomString(npcTalkTextID(service.mark)))
 		if err != nil {

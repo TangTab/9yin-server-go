@@ -4,6 +4,7 @@ package fssoloworld
 // 编码/选中与菜单路由（帧出口经 inner 广播，断言面=菜单簿记与编码器）。
 
 import (
+	"bytes"
 	"encoding/binary"
 	"testing"
 	"unicode/utf16"
@@ -191,4 +192,28 @@ func TestNPCSelectTarget(t *testing.T) {
 	s.handleNPCSelectTarget(pl, message)
 	message.Values[1].Raw[0] = 0 // 清零目标分支
 	s.handleNPCSelectTarget(pl, message)
+}
+
+func TestNPCTalkMenuM5(t *testing.T) {
+	// 官方双源定版：每窗必带 m5 [5, "task_<ConfigID>"]（女号抓包 88.2s
+	// "task_funnpcborn003031" / npc.pcapng "task_WorldNpc01230"）——缺它
+	// 客户端不开窗。帧序 m4 → m5 → m6×N（尾 ui_exit）→ m7。
+	frames, err := npcCinematicTalkMenu(0x43, 0x3500003E, "funnpcborn003031", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) != 4 {
+		t.Fatalf("无服务菜单帧数 = %d, want 4（m4/m5/m6 离开/m7）", len(frames))
+	}
+	for i, want := range []byte{4, 5, 6, 7} {
+		if id := binary.LittleEndian.Uint32(frames[i][4:]); id != uint32(want) {
+			t.Fatalf("帧 %d 消息号 = %d, want %d", i, id, want)
+		}
+	}
+	if !bytes.Contains(frames[1], []byte("task_funnpcborn003031")) {
+		t.Fatalf("m5 缺任务链键: % x", frames[1])
+	}
+	if !bytes.Contains(frames[2], []byte("ui_exit")) {
+		t.Fatalf("尾行缺 ui_exit: % x", frames[2])
+	}
 }

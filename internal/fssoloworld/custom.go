@@ -132,6 +132,10 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		// msg431 选中目标（点击 NPC/对象）：LastObject/AutoSelectObject
 		// 双帧 + m25 选靶授权（2433 selection.go 定版）。
 		s.handleNPCSelectTarget(pl, message)
+	case clientCustomParryState:
+		// msg54 手动格挡（含非战斗态）：m169 BuffInParry 加/除回声
+		//（女号官服抓包 2026-11-23 定版，parry.go）。
+		s.handleParryState(pl, message)
 	default:
 		s.trace("custom message unhandled client=%d id=%d values=%d", pl.Conn1, id, len(message.Values))
 	}

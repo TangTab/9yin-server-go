@@ -76,6 +76,12 @@ type Player struct {
 	sceneSwitch   *sceneSwitchState
 	// portalCoolAt 传送门触发冷却水位（portals.go；场景级 2s）。
 	portalCoolAt time.Time
+	// 手动格挡会话态（parry.go；连接生命周期，不落库）：parryLastValue
+	// = 最近一条 m54 值（同值=客户端等回声的重发，静默）；parryOn=当前
+	// 格挡态（值变化即翻转一次——官方按下/抬起值不可靠分类，只认翻转）。
+	parryMu        sync.Mutex
+	parryLastValue int64
+	parryOn        bool
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。
