@@ -73,9 +73,14 @@ func (s *Server) clientCustom(pl *Player, frame []byte) bool {
 	return true
 }
 
-// clientActivity op0x0A 活动信封入口：21B 头 + TVarList 形态才消费，
+// clientActivity op0x0A 活动信封入口：67B 位移包先走位置收编（NPC AOI
+// 视口对账 + roleState.Position 写回）；21B 头 + TVarList 形态才消费，
 // 其余活动流量原样放行（返回 false 交默认分支簿记）。
 func (s *Server) clientActivity(pl *Player, frame []byte) bool {
+	if x, y, z, orient, ok := parseMotionPosition(frame); ok {
+		s.absorbPlayerPosition(pl, [4]float64{float64(x), float64(y), float64(z), float64(orient)})
+		return true
+	}
 	message, ok, err := entergen.ParseActivityCustomMessage(frame)
 	if err != nil || !ok {
 		return true
@@ -107,6 +112,14 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		s.handleMoveType(pl, message)
 	case clientCustomSitCross:
 		s.handleSitcross(pl, message)
+	case clientCustomMovementUpload:
+		s.handleMovementUpload(pl, message)
+	case clientCustomTaskMsg:
+		s.handleTaskMsg(pl, message)
+	case clientCustomSelectTarget:
+		// msg431 选中目标（点击 NPC/对象）：LastObject/AutoSelectObject
+		// 双帧 + m25 选靶授权（2433 selection.go 定版）。
+		s.handleNPCSelectTarget(pl, message)
 	default:
 		s.trace("custom message unhandled client=%d id=%d values=%d", pl.Conn1, id, len(message.Values))
 	}

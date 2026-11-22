@@ -2,7 +2,7 @@
 // 未解析与被闸样本、ident 分布、帧形态抽查（0x28/0x0D）。
 //
 //	npcprobe -root <数据根（含 ini/Npc/NpcConfig）> -scene born03
-//	npcprobe -scene city05 -form 0d   # 帧形态抽查切裸 0x0D
+//	npcprobe -scene city05 -form 0d   # 帧形态抽查（dual/28/0d）
 package main
 
 import (
@@ -18,7 +18,7 @@ import (
 func main() {
 	root := flag.String("root", "", "数据根（含 ini/Npc/NpcConfig；空=npcfeed.ResolveRoot 探测）")
 	scene := flag.String("scene", "born03", "场景键（born03/city05/...）")
-	form := flag.String("form", "28", "帧形态抽查：28=0x28 mode=0x46（默认）/ 0d=裸 0x0D")
+	form := flag.String("form", "dual", "帧形态抽查：dual=双发 0x0D+0x28（默认，与服务端一致）/ 28=仅 0x28 / 0d=仅裸 0x0D")
 	dump := flag.Int("dump", 1, "帧 hexdump 条数")
 	flag.Parse()
 
@@ -53,9 +53,17 @@ func main() {
 		fmt.Println("  样本:", sample)
 	}
 
-	// 帧形态抽查。
-	as0x28 := *form != "0d"
-	frames, err := npcfeed.Frames(spawns, as0x28)
+	// 帧形态抽查（dual=双发 0x0D+0x28，与服务端缺省一致）。
+	var frameForm npcfeed.Form
+	switch *form {
+	case "0d", "0D":
+		frameForm = npcfeed.Form0DOnly
+	case "28", "0x28":
+		frameForm = npcfeed.Form0x28Only
+	default:
+		frameForm = npcfeed.FormDual
+	}
+	frames, err := npcfeed.Frames(spawns, frameForm)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "npcprobe: 帧生成:", err)
 		os.Exit(1)
@@ -65,7 +73,7 @@ func main() {
 		totalBytes += len(f)
 	}
 	fmt.Printf("帧 %d 条（%s 形态）共 %d 字节，均值 %.0f B/条\n",
-		len(frames), formName(as0x28), totalBytes, avg(float64(totalBytes), float64(len(frames))))
+		len(frames), formName(frameForm), totalBytes, avg(float64(totalBytes), float64(len(frames))))
 	for i := 0; i < *dump && i < len(frames) && i < 3; i++ {
 		head := frames[i]
 		if len(head) > 96 {
@@ -89,11 +97,15 @@ func avg(sum, n float64) float64 {
 	return sum / n
 }
 
-func formName(as0x28 bool) string {
-	if as0x28 {
+func formName(form npcfeed.Form) string {
+	switch form {
+	case npcfeed.FormDual:
+		return "双发 0x0D+0x28"
+	case npcfeed.Form0x28Only:
 		return "0x28 mode=0x46"
+	default:
+		return "0x0D"
 	}
-	return "0x0D"
 }
 
 func dumpDist(label string, m map[string]int) {

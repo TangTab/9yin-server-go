@@ -126,3 +126,61 @@ func TestMoneyRoundTrip(t *testing.T) {
 		t.Fatalf("legacy money %d", legacy.Money)
 	}
 }
+
+// TestProgressAndItemDomainRoundTrip 进度域（OpenMaps）与物品域
+// （BagItems/Equips，2433 线 bagRow/equipRow 口径）JSON 往返 + 槽位/行号
+// 分配助手。
+func TestProgressAndItemDomainRoundTrip(t *testing.T) {
+	state, err := BuildRoleState(DefaultBirthScene, 1, "", 0)
+	if err != nil {
+		t.Fatalf("build: %v", err)
+	}
+	state.OpenMaps = make([]uint32, 24)
+	state.OpenMaps[11] = 1 << 14
+	state.BagItems = []BagItem{
+		{Slot: 1, ConfigID: "yaopin_00100", ItemType: 8, Amount: 5, ViewID: 1, Seq: 1, UID: "aabbccdd"},
+		{Slot: 2, ConfigID: "wuqi_001", ItemType: 16, ViewID: 2, Seq: 2},
+	}
+	state.Equips = []EquipItem{
+		{Slot: 22, ConfigID: "wuqi_001", ItemType: 16, EquipType: "Weapon", Seq: 2, UID: "aabbccdd"},
+	}
+	raw, err := MarshalRoleState(state)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	back, err := UnmarshalRoleState(raw)
+	if err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(back.OpenMaps) != 24 || back.OpenMaps[11] != 1<<14 {
+		t.Fatalf("OpenMaps 回读不一致: %v", back.OpenMaps)
+	}
+	if len(back.BagItems) != 2 || back.BagItems[0].UID != "aabbccdd" ||
+		len(back.Equips) != 1 || back.Equips[0].EquipType != "Weapon" {
+		t.Fatalf("物品域回读不一致: %+v %+v", back.BagItems, back.Equips)
+	}
+
+	// 槽位/行号助手：分类页首空格、跨表 max+1。
+	if got := back.FreeBagSlot(1); got != 2 {
+		t.Fatalf("FreeBagSlot(1)=%d, want 2", got)
+	}
+	if got := back.FreeBagSlot(3); got != 1 {
+		t.Fatalf("FreeBagSlot(3)=%d, want 1（空分类页）", got)
+	}
+	if got := back.NextItemSeq(); got != 3 {
+		t.Fatalf("NextItemSeq()=%d, want 3", got)
+	}
+
+	// omitempty：空进度域不落 JSON（旧档兼容）。
+	fresh, err := BuildRoleState(DefaultBirthScene, 1, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rawFresh, err := MarshalRoleState(fresh)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(rawFresh, "openMaps") || strings.Contains(rawFresh, "bagItems") {
+		t.Fatalf("空进度域应省略: %s", rawFresh)
+	}
+}

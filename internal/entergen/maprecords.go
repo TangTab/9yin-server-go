@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 const (
@@ -42,11 +43,25 @@ var officialOpenMapBits = [openMapRecRows]uint32{
 	0x00000154, 0x00050000, 0x07e00000, 0x00000001,
 }
 
+// EffectiveOpenMapBits 生效开图位图：存档位（roleState.OpenMaps，玩家级
+// 累积）优先，无档回落外服基线；再叠加当前场景位（所在地必开）。进场
+// 下发与 fssoloworld 回写共用本口径（nil OpenMaps 首登=基线+出生场景）。
+func EffectiveOpenMapBits(state rolestate.RoleState, sceneIndex int) [openMapRecRows]uint32 {
+	bits := officialOpenMapBits
+	if len(state.OpenMaps) == openMapRecRows {
+		copy(bits[:], state.OpenMaps)
+	}
+	if sceneIndex >= 0 {
+		overlaySceneBit(&bits, uint32(sceneIndex))
+	}
+	return bits
+}
+
 // MapRecordsFrames 开图双记录帧（PreReady 段；sceneIndex<0 = scenes.ini
-// 缺席，只发基线位图、跳过迷雾行）。序：迷雾行先、位图后（外服同序）。
+// 缺席，只发位图、跳过迷雾行）。序：迷雾行先、位图后（外服同序）。
 func MapRecordsFrames(ctx Context, sceneIndex int) ([][]byte, error) {
 	frames := make([][]byte, 0, 2)
-	bits := officialOpenMapBits
+	bits := EffectiveOpenMapBits(ctx.State, sceneIndex)
 	if sceneIndex >= 0 {
 		overlaySceneBit(&bits, uint32(sceneIndex))
 		mask, err := RecordAddCellsFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID,

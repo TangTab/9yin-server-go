@@ -87,8 +87,8 @@ func NamedProperty(name string, value PropertyValue) IndexedProperty {
 
 // maxVisualsValue 场景可视表容量（AddObject 注册闸——客户端按此值建
 // 角色渲染数据池；2026-11-22 真机定案：230 全量物化 1674 条时
-// CreateRoleUserData 池满拒建 1236 条，改 20000）。
-const maxVisualsValue uint16 = 20000
+// CreateRoleUserData 池满拒建 1236 条，改 10000）。
+const maxVisualsValue uint16 = 10000
 
 // EntrySceneFrame 0x0B 进场帧（5 属性官方形——golden 实证：Name/MaxVisuals/
 // ConfigID/Resource/TiGuanGroupCount）。

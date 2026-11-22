@@ -94,7 +94,14 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 }
 
 // enterContext 组装原生生成上下文（身份/会话/角色状态/场景 NPC 目录）。
-func (s *Server) enterContext(pl *Player) entergen.Context {
+// materializeNPC=true（PreReady 调用点——NPC 物化真实落地处）才生成
+// 物化帧族并初始化视口/巡逻簿记；ClientReady 二入传 false（ReadyFrames
+// 不消费 NPCFrames，免重编码且不重置巡逻首拍窗口）。
+func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context {
+	var npcFrames [][]byte
+	if materializeNPC {
+		npcFrames = s.sceneNPCEnter(pl, pl.roleState.Resource, pl.roleState.Position)
+	}
 	return entergen.Context{
 		Identity: entergen.Identity{
 			ObjectID: 1, // fork 客户端恒 1-1（stage_main 开图/记录绑定锚）
@@ -106,9 +113,9 @@ func (s *Server) enterContext(pl *Player) entergen.Context {
 			ServerName: s.cfg.ServerName,
 			Account:    pl.Account,
 		},
-		RoleName: pl.Name,
-		State:    pl.roleState,
-		NPCFrames:  s.sceneNPCFrames(pl.roleState.Resource, pl.roleState.Position), // NPC 物化帧族（0x28 官方言默认）
+		RoleName:   pl.Name,
+		State:      pl.roleState,
+		NPCFrames:  npcFrames,                                   // NPC 物化帧族（0x28 官方言默认；顺带视口/巡逻簿记初始化）
 		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
 	}
 }
@@ -159,9 +166,11 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 	s.sendToClient(pl, propertyTableFrame())
 	s.sendToClient(pl, homeRecordsFrame())
 	if nativeEnterEnabled() && pl.haveRoleState {
-		frames, err := entergen.PreReadyFrames(s.enterContext(pl), time.Now())
+		ctx := s.enterContext(pl, true)
+		frames, err := entergen.PreReadyFrames(ctx, time.Now())
 		if err != nil {
 			s.trace("native enter generate failed client=%d: %v（回退 golden）", clientID, err)
+			s.npcEnterAborted(pl) // 物化未落地：撤销视口簿记（golden 回放无 NPC，防幽灵 0x21）
 			n := s.replayGoldenFrames(pl, enterGoldenFrames)
 			s.players.SetPlayerState(pl, PlOnline)
 			s.trace("enter golden replay %d frames client=%d name=%q", n, clientID, pl.Name)
@@ -170,6 +179,11 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
 		}
+		// 开图位图回写（玩家级累积）：生效位（存档/基线 + 当前场景位）落
+		// roleState.OpenMaps，随位置节流/下线存档持久化——重登/切图后
+		// 走过的场景保持点亮（2433 线无此持久化，每次重派生基线）。
+		bits := entergen.EffectiveOpenMapBits(pl.roleState, ctx.SceneIndex)
+		pl.roleState.OpenMaps = bits[:]
 		s.players.SetPlayerState(pl, PlOnline)
 		s.trace("enter native %d frames client=%d name=%q scene=%s", len(frames), clientID, pl.Name, pl.roleState.Scene)
 		return true
@@ -184,7 +198,7 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 // 回放：ready_golden）。
 func (s *Server) clientReady(pl *Player) {
 	if nativeEnterEnabled() && pl.haveRoleState {
-		frames, err := entergen.ReadyFrames(s.enterContext(pl), time.Now())
+		frames, err := entergen.ReadyFrames(s.enterContext(pl, false), time.Now())
 		if err != nil {
 			s.trace("native ready generate failed client=%d: %v（回退 golden）", pl.Conn1, err)
 			n := s.replayGoldenFrames(pl, readyGoldenFrames)

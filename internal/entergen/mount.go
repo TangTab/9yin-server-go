@@ -82,18 +82,33 @@ func taskAcceptedRows(ctx Context, recordIndex uint16) ([][]byte, error) {
 	if len(ctx.State.TaskAccepted) == 0 {
 		return nil, nil
 	}
-	rows := make([][]RecordCell, 0, len(ctx.State.TaskAccepted))
-	for _, taskID := range ctx.State.TaskAccepted {
+	frame, err := recordBatch0x29(ctx, recordIndex, acceptedTaskRows(ctx.State.TaskAccepted))
+	if err != nil {
+		return nil, err
+	}
+	return [][]byte{frame}, nil
+}
+
+// TaskAcceptedBatchFrame Task_Accepted 0x29 批量帧（挂载行推同源编码；
+// 空表 nil）。m327 sub6 已接任务列表同步的幂等重放通道（fssoloworld）。
+func TaskAcceptedBatchFrame(ctx Context) ([]byte, error) {
+	if len(ctx.State.TaskAccepted) == 0 {
+		return nil, nil
+	}
+	return recordBatch0x29(ctx, clientdata.MustRecordIndexByName("Task_Accepted"), acceptedTaskRows(ctx.State.TaskAccepted))
+}
+
+// acceptedTaskRows 已接任务行集（首 7 列官方方言，尾列由行编码器按
+// schema 补零）。
+func acceptedTaskRows(ids []uint32) [][]RecordCell {
+	rows := make([][]RecordCell, 0, len(ids))
+	for _, taskID := range ids {
 		rows = append(rows, []RecordCell{
 			RecordInt(taskID), RecordInt(0), RecordString(""),
 			RecordInt(0), RecordString(""), RecordString(""), RecordInt(0),
 		})
 	}
-	frame, err := recordBatch0x29(ctx, recordIndex, rows)
-	if err != nil {
-		return nil, err
-	}
-	return [][]byte{frame}, nil
+	return rows
 }
 
 // qingGongRows QingGongRec 轻功类别行（单列窄串，逐行 0x11 官方形态）。

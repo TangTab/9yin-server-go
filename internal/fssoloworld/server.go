@@ -259,6 +259,9 @@ func (s *Server) timerCheck() {
 
 	// 世界状态机驱动
 	s.worldStateMachine()
+
+	// NPC 巡逻广播（0x21 批量 + State 翻转）
+	s.npcPatrolTick(time.Now())
 }
 
 // checkQueue CheckQueue/CheckVipQueue：排队者放行进 Logging。

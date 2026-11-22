@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // gmPropWhiteList gm set 白名单：字段名 → roleState 落点 + 热发属性
-//（与 entergen.basePropertyFrames 同名同型；money 对拍 2433 线
+// （与 entergen.basePropertyFrames 同名同型；money 对拍 2433 线
 // CapitalType1）。HP/MP/SP 同时刷新 Max 语义（0x10 两属性一帧）。
 type gmPropSpec struct {
 	apply func(pl *Player, v int64)
@@ -19,13 +20,13 @@ type gmPropSpec struct {
 }
 
 var gmPropWhiteList = map[string]gmPropSpec{
-	"str":    {apply: func(pl *Player, v int64) { pl.roleState.Str = int(v) }, frame: propFrameInt32("Str", func(pl *Player) int32 { return int32(pl.roleState.Str) })},
-	"dex":    {apply: func(pl *Player, v int64) { pl.roleState.Dex = int(v) }, frame: propFrameInt32("Dex", func(pl *Player) int32 { return int32(pl.roleState.Dex) })},
-	"ing":    {apply: func(pl *Player, v int64) { pl.roleState.Ing = int(v) }, frame: propFrameInt32("Ing", func(pl *Player) int32 { return int32(pl.roleState.Ing) })},
-	"spi":    {apply: func(pl *Player, v int64) { pl.roleState.Spi = int(v) }, frame: propFrameInt32("Spi", func(pl *Player) int32 { return int32(pl.roleState.Spi) })},
-	"sta":    {apply: func(pl *Player, v int64) { pl.roleState.Sta = int(v) }, frame: propFrameInt32("Sta", func(pl *Player) int32 { return int32(pl.roleState.Sta) })},
-	"parry":  {apply: func(pl *Player, v int64) { pl.roleState.Parry = int(v) }, frame: propFrameInt32("MaxParry", func(pl *Player) int32 { return int32(pl.roleState.Parry) })},
-	"money":  {apply: func(pl *Player, v int64) { pl.roleState.Money = v }, frame: moneyFrame},
+	"str":   {apply: func(pl *Player, v int64) { pl.roleState.Str = int(v) }, frame: propFrameInt32("Str", func(pl *Player) int32 { return int32(pl.roleState.Str) })},
+	"dex":   {apply: func(pl *Player, v int64) { pl.roleState.Dex = int(v) }, frame: propFrameInt32("Dex", func(pl *Player) int32 { return int32(pl.roleState.Dex) })},
+	"ing":   {apply: func(pl *Player, v int64) { pl.roleState.Ing = int(v) }, frame: propFrameInt32("Ing", func(pl *Player) int32 { return int32(pl.roleState.Ing) })},
+	"spi":   {apply: func(pl *Player, v int64) { pl.roleState.Spi = int(v) }, frame: propFrameInt32("Spi", func(pl *Player) int32 { return int32(pl.roleState.Spi) })},
+	"sta":   {apply: func(pl *Player, v int64) { pl.roleState.Sta = int(v) }, frame: propFrameInt32("Sta", func(pl *Player) int32 { return int32(pl.roleState.Sta) })},
+	"parry": {apply: func(pl *Player, v int64) { pl.roleState.Parry = int(v) }, frame: propFrameInt32("MaxParry", func(pl *Player) int32 { return int32(pl.roleState.Parry) })},
+	"money": {apply: func(pl *Player, v int64) { pl.roleState.Money = v }, frame: moneyFrame},
 }
 
 // hp/mp/sp：值与 Max 同步（0x10 一帧两属性）。
@@ -214,7 +215,7 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 	case "flush":
 		// 重放 ReadyFrames（登录信息簇+位置，0x0B 进场帧不含——对拍/
 		// 客户端卡死恢复用）。Sequence 自增防与原进场序撞号。
-		frames, err := entergen.ReadyFrames(s.enterContext(pl), time.Now())
+		frames, err := entergen.ReadyFrames(s.enterContext(pl, false), time.Now())
 		if err != nil {
 			fmt.Fprintf(nc, ">flush error: %v\r", err)
 			return
@@ -223,6 +224,49 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 			s.sendToClient(pl, f)
 		}
 		fmt.Fprintf(nc, ">gm flush %s: ready frames replayed (%d)\r", who, len(frames))
+	case "item":
+		// 发放入包：gm item <who> <configID> [amount] [viewID]——槽位/行号
+		// 自动分配（FreeBagSlot/NextItemSeq），0x19+0x18 成对推送后落档。
+		if len(fields) < 3 {
+			fmt.Fprint(nc, ">usage: gm item <who> <configID> [amount] [viewID 1-4]\r")
+			return
+		}
+		configID := fields[2]
+		amount, viewID := 1, 1
+		if len(fields) >= 4 {
+			if v, err := strconv.Atoi(fields[3]); err == nil && v > 0 && v <= 9999 {
+				amount = v
+			}
+		}
+		if len(fields) >= 5 {
+			if v, err := strconv.Atoi(fields[4]); err == nil && v >= 1 && v <= 4 {
+				viewID = v
+			}
+		}
+		slot := pl.roleState.FreeBagSlot(viewID)
+		if slot == 0 {
+			fmt.Fprintf(nc, ">gm item: bag page %d full\r", viewID)
+			return
+		}
+		item := rolestate.BagItem{
+			Slot:     slot,
+			ConfigID: configID,
+			Amount:   amount,
+			ViewID:   viewID,
+			Seq:      pl.roleState.NextItemSeq(),
+		}
+		pl.roleState.BagItems = append(pl.roleState.BagItems, item)
+		push, err := entergen.BagItemPushFrames(item)
+		if err != nil {
+			fmt.Fprintf(nc, ">gm item frame error: %v\r", err)
+			return
+		}
+		for _, f := range push {
+			s.sendToClient(pl, f)
+		}
+		s.sendRoleSave(pl)
+		fmt.Fprintf(nc, ">gm item %s: %s x%d → view %d slot %d (0x19+0x18, saved)\r",
+			who, configID, amount, viewID, slot)
 	case "save":
 		if !s.sendRoleSave(pl) {
 			fmt.Fprint(nc, ">gm save: store not connected, save not sent\r")

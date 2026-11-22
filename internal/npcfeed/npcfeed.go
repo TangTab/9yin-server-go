@@ -41,9 +41,10 @@ func ResolveRoot() string {
 	return ""
 }
 
-// sceneDirOf 场景键（born03）→ 摆放目录名（born03_yanyuzhuang）：
+// SceneDirOf 场景键（born03）→ 摆放目录名（born03_yanyuzhuang）：
 // ini/Scene 下前缀 "<scene>_" 或同名目录（大小写不敏感）。
-func sceneDirOf(root, scene string) string {
+// 巡逻路线装载（mappath 短名前缀）共用同目录名。
+func SceneDirOf(root, scene string) string {
 	entries, err := os.ReadDir(filepath.Join(root, "ini", "Scene"))
 	if err != nil {
 		return ""

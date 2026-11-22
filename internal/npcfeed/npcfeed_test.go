@@ -262,12 +262,12 @@ func TestFramesBothForms(t *testing.T) {
 		ObjectID: ObjectIDAt(3), OwnerID: OwnerIDOf(ObjectIDAt(3)),
 		ConfigID: "f", Template: map[string]string{"ID": "f", "Resource": `npc\x`},
 	}}
-	as28, err := Frames(spawns, true)
-	if err != nil || as28[0][0] != 0x28 {
+	as28, err := Frames(spawns, Form0x28Only)
+	if err != nil || len(as28) != 1 || as28[0][0] != 0x28 {
 		t.Fatalf("0x28 形态异常: %v", err)
 	}
-	as0d, err := Frames(spawns, false)
-	if err != nil || as0d[0][0] != 0x0D {
+	as0d, err := Frames(spawns, Form0DOnly)
+	if err != nil || len(as0d) != 1 || as0d[0][0] != 0x0D {
 		t.Fatalf("0x0D 形态异常: %v", err)
 	}
 }

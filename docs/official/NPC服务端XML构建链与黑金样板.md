@@ -79,7 +79,7 @@ load.go     三件装载（模板树/战斗表/场景摆放；<Property> 行方�
 join.go     摆放→模板(FightID)→战斗 联查 + 闸门 + ident
 resolve.go  分层属性合成（默认值→模板→战斗→摆放，按 0x09 官方表场景域表序）
 frame.go    2433 帧配方：0x0D（63B 头 + OrderedProperties + 官方 16-prop 块）
-            / 0x28 mode=0x46（19 字段官方形态）
+            / 0x28 mode=0x46（v3 分形态：#0 普通 26 字段 / #1 带武器 23 字段）
 ```
 
 - ident：`obj=0x11000000|(idx+2)`、`own=0x00660000|低16位`（2433 定案）。
@@ -90,6 +90,32 @@ frame.go    2433 帧配方：0x0D（63B 头 + OrderedProperties + 官方 16-prop
 - 战斗层映射：MaxLife→MaxHP/HP、MaxMana→MaxMP、Level（战斗行权威）。
 - 宝箱族（NpcType=161/BoxNpc*）与采集族（153/GatherClone*）不发
   CollideRadius，尾行交互半径 OpenRange=2.0 / GatherRange=3.0。
+- 0x28 物化帧 = 2433 npc_detail_v3 分形态方言（npc.pcapng #0/#1 官方样本
+  逐字节定版）：#0 普通 NPC ~26 字段（含 CursorShape/MPRatio/HasKarma/
+  Character/KarmaLevel/OriginPara1-3 建档常量族）；#1 带武器 NPC ~23 字段
+  （Fixed/WeaponName/FixedBeHitAct/SelfForceID，无 Photo/CursorShape/
+  MPRatio/karma 族）；RotatePara 缺省 "0.0,1.000,0.0"；整数值按 0x09 表
+  条目线型定宽；判别开关 `NINEYIN_NPC_RESOURCE_OVERRIDE`（全同模型实验）。
+
+### 真机定案：MaxVisuals=AddObject 注册闸（2026-11-22）
+
+0x0B 进场帧 idx1468 MaxVisuals 是**客户端角色渲染数据池容量**
+（GameVisual::CreateRoleUserData 注册闸）。历史上恒发 230：
+
+- 全量物化 born03 1674 条 0x28 → 帧全部到达，但池满拒建 **1236 条**
+  （trace.log `CreateRoleUserData can't create any more` ×1236，仅 ~438
+  建成）→ 症状「NPC 变少 / 只有角色周围显示且只一个」。
+- 2433 线全城渲染成功的隐含前提：视口物化单次 ~134 条 < 230。
+- 判别实验佐证：`NINEYIN_NPC_RESOURCE_OVERRIDE=obj\char\b_baixing01`
+  全同模型后**全灭**——NPC 物化通道只认 `npc\` 族资源路径（obj\char 是
+  玩家化身族）；客户端模型包 obj_npc（索引加密）/obj_newnpc（明文 1823
+  模型）对 born03 Resource 表观命中率 71.4%（缺的多为宝箱/物件族，
+  疑在加密包内实际存在）。
+
+修复：`maxVisualsValue` 230 → **10000**（entergen/frames.go 0x0B 帧 +
+internal/login/entry.go 两处同步）——born03 全量 1674、city05 全量 2509
+均落池内。残留观察项：个别 NPC 呆立无动画（模型动画资源面，后续按
+newnpc 库做 Resource 映射）。
 
 fssoloworld 接线：`sceneNPCFrames(scene, origin)`（npc.go 薄壳）→
 `entergen.Context.NPCFrames`（进场序：玩家 0x0D→记录行→NPC 物化×N）。
@@ -103,6 +129,7 @@ fssoloworld 接线：`sceneNPCFrames(scene, origin)`（npc.go 薄壳）→
 | `NINEYIN_NPC_0X28` | on | `=off` 判别切裸 0x0D 大档 |
 | `NINEYIN_NPC_RADIUS` | 0（全量） | 出生点平面半径过滤 |
 | `NINEYIN_NPC_LIMIT` | 0（不截断） | 距离升序截断上限 |
+| `NINEYIN_NPC_RESOURCE_OVERRIDE` | 空（真值） | 全 NPC 同模型判别实验（只认 `npc\` 族路径） |
 
 诊断工具：`go run ./tools/npcprobe -root <数据根> -scene born03`
 （摆放/联查/战斗命中率、类别分布、帧抽查 hexdump）。

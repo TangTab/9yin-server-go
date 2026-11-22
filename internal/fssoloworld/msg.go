@@ -115,6 +115,11 @@ func (s *Server) entryClientMessage(id1 uint32, p []byte) bool {
 	case clientMsgDeleteRole:
 		return s.clientDeleteRole(pl, body)
 	case clientMsgReviveRole:
+		// op0x07 双用法分流：33B 定长 object request（点击场景对象——
+		// NPC 交互链，2433 定版形态）优先；其余形态维持复活占位。
+		if req, ok := parseNPCObjectRequest(append([]byte{0x07}, body...)); ok {
+			return s.handleNPCObjectRequest(pl, req)
+		}
 		return s.clientReviveRole(pl, body)
 	case clientMsgReady:
 		// op09 ClientReady（单字节）→ 新手视图簇（View43 内功书/

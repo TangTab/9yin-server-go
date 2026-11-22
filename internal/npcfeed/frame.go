@@ -28,22 +28,35 @@ import (
 // 玩家形 1.28/Boss 5.0——客户端模型底缩放的服务端回显，保持 NPC 基线）。
 const npc0x28BaseScale = float32(1.25)
 
-// Frames 批量帧出口：as0x28=true 走 0x28 mode=0x46 官方言（默认形态），
-// false 走裸 0x0D 大档（判别/对照）。
-func Frames(spawns []Spawn, as0x28 bool) ([][]byte, error) {
-	frames := make([][]byte, 0, len(spawns))
+// Form 物化帧形态。
+type Form int
+
+const (
+	// FormDual 双发（默认，2433 真机成功会话 56232 形态）：每条 NPC 先发
+	// 0x0D 大档（头行块——Name/NpcNickName/Photo/BornAction/ActionSet 等
+	// 头顶 UI 与动作驱动字段）再发 0x28 v3（官方建档通道）。
+	FormDual Form = iota
+	// Form0x28Only 仅 0x28 v3（旧默认）。
+	Form0x28Only
+	// Form0DOnly 仅裸 0x0D 大档（判别/对照）。
+	Form0DOnly
+)
+
+// Frames 批量帧出口。每条 NPC 的双发保持 0x0D 在前、0x28 在后
+// （同 2433 物化序：AddObject 建档→属性头行跟进）。
+func Frames(spawns []Spawn, form Form) ([][]byte, error) {
+	frames := make([][]byte, 0, len(spawns)*2)
 	for i, s := range spawns {
-		var frame []byte
-		var err error
-		if as0x28 {
-			frame = s.Frame0x28()
-		} else {
-			frame, err = s.Frame0D()
+		if form == FormDual || form == Form0DOnly {
+			frame, err := s.Frame0D()
 			if err != nil {
 				return nil, fmt.Errorf("npcfeed: 条 %d (%s): %w", i, s.ConfigID, err)
 			}
+			frames = append(frames, frame)
 		}
-		frames = append(frames, frame)
+		if form == FormDual || form == Form0x28Only {
+			frames = append(frames, s.Frame0x28())
+		}
 	}
 	return frames, nil
 }
@@ -220,7 +233,11 @@ func (s Spawn) Frame0x28() []byte {
 	}
 	putInt("BossLevel", bossLevel)
 	putStr("IDCard", "null,null,null,null,null")
-	putStr("BornAction", "stand")
+	bornAction := tpl["BornAction"]
+	if bornAction == "" {
+		bornAction = "stand"
+	}
+	putStr("BornAction", bornAction)
 	if armed {
 		// #1：WeaponName 在 WeaponMode 前（武器模型窄串）。
 		if _, ok := clientdata.PlayerProperty("WeaponName"); ok {

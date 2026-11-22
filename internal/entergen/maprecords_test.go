@@ -155,3 +155,35 @@ func TestPreReadyReadyContainMapRecords(t *testing.T) {
 		t.Fatalf("Ready AutoTrace 帧=%d, want 1", autoTrace)
 	}
 }
+
+// TestEffectiveOpenMapBitsStateBacked 存档位图优先于官方基线（玩家级
+// 开图累积）；nil OpenMaps 才回落基线——首登口径不变。
+func TestEffectiveOpenMapBitsStateBacked(t *testing.T) {
+	ctx := testContext(t)
+	ctx.SceneIndex = 366 // scene22（行 11 bit14，抓包↔ini 互证锚）
+
+	// 存档全零位 + 当前场景叠加：不再混入官方基线。
+	saved := make([]uint32, openMapRecRows)
+	ctx.State.OpenMaps = saved
+	frames, err := MapRecordsFrames(ctx, ctx.SceneIndex)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bitmap := frames[len(frames)-1]
+	for row, want := range func() [24]uint32 {
+		bits := [openMapRecRows]uint32{}
+		bits[11] = 1 << 14
+		return bits
+	}() {
+		if got := binary.LittleEndian.Uint32(bitmap[16+4*row:]); got != want {
+			t.Fatalf("存档位图行 %d=%#x, want %#x（不得混入基线）", row, got, want)
+		}
+	}
+
+	// nil=无档：基线 + 当前场景位（首登口径，与既有 overlay 测试同源）。
+	ctx.State.OpenMaps = nil
+	bits := EffectiveOpenMapBits(ctx.State, ctx.SceneIndex)
+	if bits[11] != officialOpenMapBits[11]|1<<14 {
+		t.Fatalf("无档行 11=%#x, want 基线|bit14", bits[11])
+	}
+}

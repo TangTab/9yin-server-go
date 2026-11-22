@@ -22,8 +22,10 @@ type Spawn struct {
 	ConfigID string            // 摆放 id（=模板联查键）
 	File     string            // 摆放类别
 	Script   string            // 模板物化类名
+	PathID   string            // 摆放 PathId（巡逻路线键；缺席回落模板 PathID）
 	Template map[string]string // NpcConfig 模板行（非 nil）
 	Combat   *CombatRow        // 战斗行（FightID 未命中为 nil）
+	Schedule *Schedule         // 巡逻时间表（BindPatrol 绑定；nil=站立）
 }
 
 // Stats 目录装载统计（诊断/测试面）。
@@ -68,7 +70,7 @@ func BuildCatalog(root, scene string) ([]Spawn, Stats, error) {
 	if root == "" {
 		return nil, stats, fmt.Errorf("npcfeed: 数据根缺席")
 	}
-	sceneDir := sceneDirOf(root, scene)
+	sceneDir := SceneDirOf(root, scene)
 	if sceneDir == "" {
 		return nil, stats, fmt.Errorf("npcfeed: 场景 %s 无摆放目录", scene)
 	}
@@ -99,6 +101,7 @@ func BuildCatalog(root, scene string) ([]Spawn, Stats, error) {
 			Orient:   float32(p.AY),
 			ConfigID: p.ID, File: p.File,
 			Script:   tpl.Script,
+			PathID:   strings.TrimSpace(p.Attrs["PathId"]),
 			Template: tpl.Attrs,
 		}
 		if fightID := strings.TrimSpace(tpl.Attrs["FightID"]); fightID != "" {

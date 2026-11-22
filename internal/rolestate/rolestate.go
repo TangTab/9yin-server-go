@@ -30,10 +30,10 @@ var roledataFS embed.FS
 // Phase 4 进场原生生成（entergen）从本状态取值。
 type RoleState struct {
 	Sex                int            `json:"sex"`
-	Scene              string         `json:"scene"`    // 场景 config（ini\scene\born03_YanYuZhuang）
-	Resource           string         `json:"resource"` // 场景 resource（born03）
+	Scene              string         `json:"scene"`                // 场景 config（ini\scene\born03_YanYuZhuang）
+	Resource           string         `json:"resource"`             // 场景 resource（born03）
 	Appearance         []string       `json:"appearance,omitempty"` // 建角自定义外观串（save_para1 逗号拆；[1]photo [2]face(捏脸二进制) [4]hair——渲染自定义数据）
-	Position           [4]float64     `json:"position"` // x,y,z,orient（location.ini 方言）
+	Position           [4]float64     `json:"position"`             // x,y,z,orient（location.ini 方言）
 	Str                int            `json:"str"`
 	Dex                int            `json:"dex"`
 	Ing                int            `json:"ing"`
@@ -79,6 +79,79 @@ type RoleState struct {
 	// Set=true 即玩家已编辑（空表也是基线）：starter 打坐条目不复活。
 	Shortcuts    []ShortcutRow `json:"shortcuts,omitempty"`
 	ShortcutsSet bool          `json:"shortcutsSet,omitempty"`
+
+	// ---- 进度域（进场下发、随 0x04 存档链持久化的玩家级累积）----
+
+	// OpenMaps 开图位图（24×u32=768 场景位；scenes.ini 全局段号 i*32+j）。
+	// nil=无档（首登回落外服基线位图）；进场叠加当前场景位后回写——
+	// 2433 线无玩家级开图持久化（基线+当前场景每次重派生），本仓自建。
+	OpenMaps []uint32 `json:"openMaps,omitempty"`
+
+	// ---- 物品域（2433 线 bagRow/equipRow 口径建模；下发帧/C2S 操作链
+	// （30 移动穿戴/31 使用/34 丢弃/36 整理）后续接入）----
+
+	BagItems []BagItem   `json:"bagItems,omitempty"` // 背包行（分类页 slot 1..90）
+	Equips   []EquipItem `json:"equips,omitempty"`   // 装备行（纸娃娃 View1 槽位 1..52）
+}
+
+// BagItem 背包行（2433 线 bagRow 精简口径）：ViewID 分类页 1 道具/2 装备/
+// 3 材料/4 任务；Amount 堆叠数（客户端按 ConfigID 聚合显示）；Seq 行身份
+// （跨表移动携带）、UID 实例稳定身份（随机属性/强化词缀键控位）。
+type BagItem struct {
+	Slot     int    `json:"slot"`
+	ConfigID string `json:"configID"`
+	ItemType int    `json:"itemType,omitempty"`
+	Amount   int    `json:"amount,omitempty"`
+	ViewID   int    `json:"viewID,omitempty"`
+	Seq      int64  `json:"seq,omitempty"`
+	UID      string `json:"uid,omitempty"`
+}
+
+// EquipItem 装备行（2433 线 equipRow 精简口径）：Slot=身体槽位（hat=1/
+// cloth=3/pants=4/wrist=6/leg=7/shoes=8/weapon=22/treasure=25..29——
+// equipbox.ini [EquipType] 槽位表）；词缀/随机属性后续按 UID 扩展。
+type EquipItem struct {
+	Slot      int    `json:"slot"`
+	ConfigID  string `json:"configID"`
+	ItemType  int    `json:"itemType,omitempty"`
+	EquipType string `json:"equipType,omitempty"`
+	Seq       int64  `json:"seq,omitempty"`
+	UID       string `json:"uid,omitempty"`
+}
+
+// bagSlotMax 背包分类页容量（90 格，2433 线 freeBagSlot 口径）。
+const bagSlotMax = 90
+
+// NextItemSeq 物品行身份分配（max+1，0 起步；入包/穿戴跨表移动携带）。
+func (s *RoleState) NextItemSeq() int64 {
+	var max int64
+	for _, item := range s.BagItems {
+		if item.Seq > max {
+			max = item.Seq
+		}
+	}
+	for _, item := range s.Equips {
+		if item.Seq > max {
+			max = item.Seq
+		}
+	}
+	return max + 1
+}
+
+// FreeBagSlot 分类页首个空格（1..90；全满 0）。
+func (s *RoleState) FreeBagSlot(viewID int) int {
+	taken := map[int]bool{}
+	for _, item := range s.BagItems {
+		if item.ViewID == viewID {
+			taken[item.Slot] = true
+		}
+	}
+	for slot := 1; slot <= bagSlotMax; slot++ {
+		if !taken[slot] {
+			return slot
+		}
+	}
+	return 0
 }
 
 // ShortcutRow shortcut_rec 一行：可见栏位索引、类型（"skill"/"item"…）

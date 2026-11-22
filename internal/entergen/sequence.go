@@ -151,6 +151,13 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		return nil, err
 	}
 	frames = append(frames, empty...)
+	// 背包物品行（空容器族建视图之后逐行推送；空背包零帧——2433 线
+	// inventoryFrames 进场整推口径）。
+	bagItems, err := BagItemViewFrames(ctx.State)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, bagItems...)
 	skills, err := SkillViewFrames(ctx.State)
 	if err != nil {
 		return nil, err

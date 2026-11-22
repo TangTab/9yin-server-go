@@ -57,6 +57,19 @@ type Player struct {
 	// 时跳过落库防默认覆盖玩家配置（custom.go 首传闸）。
 	customizingSeen bool
 	keybindSeen     bool
+	// posSaveAt 位置节流存档水位（position.go absorbPlayerPosition；
+	// 2s 窗口内只更新内存权威位，窗口到点/下线才发 store 0x04）。
+	posSaveAt time.Time
+	// NPC 视口/巡逻簿记（连接生命周期）：npcVisible=已物化 ident 集，
+	// npcPos=当前平面位置（op0x0A 67B 位移包更新）——npcReconcile 按
+	// 此 diff 增删；patrolReadyAt=巡逻首拍时刻（进场物化 +5s）；
+	// npcMoveState=巡逻 NPC 行走/驻停水位（State 翻转帧用）。
+	npcMu         sync.Mutex
+	npcVisible    map[uint32]bool
+	npcPos        [4]float64
+	npcScene      string
+	patrolReadyAt time.Time
+	npcMoveState  map[uint32]bool
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。
@@ -83,7 +96,6 @@ func NewWorldPlayers(max int) *WorldPlayers {
 }
 
 func persistKey(conn1, conn2 uint32) uint64 { return uint64(conn1)<<32 | uint64(conn2) }
-
 
 // AddPlayer 官方 AddPlayer(conn1, conn2, account, flag)。
 func (w *WorldPlayers) AddPlayer(conn1, conn2 uint32, account string) *Player {
