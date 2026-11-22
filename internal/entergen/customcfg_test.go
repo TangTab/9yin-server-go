@@ -179,19 +179,21 @@ func TestParseCustomRoundTrip(t *testing.T) {
 
 // TestReadyFramesIncludesCustomCluster 就绪段集成：fresh 状态必含
 // starter 打坐 0x11 行（缺发即「快捷栏空」表象）。
+// 2026-11-22 深夜定案改口径：推送簇暂不发（705 echo 应答致卡——单推
+// 通道待单独验证）——断言零 705 与零快捷栏行（0x1E 壳的 m607/m52/
+// m586 非本域不在断言内）。
 func TestReadyFramesIncludesCustomCluster(t *testing.T) {
 	frames, err := ReadyFrames(testContext(t), time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
-	found := false
 	for _, frame := range frames {
-		if frame[0] == 0x11 && binary.LittleEndian.Uint16(frame[10:]) == 93 &&
-			bytes.Contains(frame, []byte("zs_default_01\x00")) {
-			found = true
+		if frame[0] == 0x1E && len(frame) >= 8 && frame[3] == 2 &&
+			binary.LittleEndian.Uint32(frame[4:8]) == 705 {
+			t.Fatalf("705 must not be pushed, got len=%d", len(frame))
 		}
-	}
-	if !found {
-		t.Fatal("ready cluster missing starter shortcut row")
+		if frame[0] == 0x11 && binary.LittleEndian.Uint16(frame[10:]) == 93 {
+			t.Fatalf("shortcut rows must not be pushed, got len=%d", len(frame))
+		}
 	}
 }

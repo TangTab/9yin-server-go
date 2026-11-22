@@ -181,15 +181,10 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, combat...)
 
-	// 自定义配置域推送簇：705 个性配置 → 键位域 0x10（198/199/200/
-	// 223/201）→ 快捷栏 shortcut_rec 0x11 行（视图簇之后；无档零帧，
-	// starter 打坐条目由 EffectiveShortcuts 推导）。fork 客户端本地
-	// 不落盘，缺发即「快捷键/自定义配置重登全丢」。
-	custom, err := CustomConfigFrames(ctx)
-	if err != nil {
-		return nil, err
-	}
-	frames = append(frames, custom...)
+	// 自定义配置域推送簇暂不发（2026-11-22 深夜定案：705 echo 应答致
+	// 卡已七轮二分实证——on_parser_customizing 每收 705 强制重置控制
+	// 对象；ClientReady 单推通道待单独真机验证后按需启用，勿整簇放开）。
+	_ = CustomConfigFrames
 
 	// m416 九阴志域声明。
 	jyz, err := JyzDomainFrame(6)

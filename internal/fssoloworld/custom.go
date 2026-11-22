@@ -216,22 +216,19 @@ func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbo
 	}
 	first := !pl.customizingSeen
 	pl.customizingSeen = true
+	// 705 echo 应答永禁（2026-11-22 深夜七轮二分定案，debug 分支同款
+	// 修复移植）：客户端 on_parser_customizing 每收一帧 705 强制重置
+	// 引擎控制对象（game_control_mode/camera_value，2433 参考端
+	// custom_config.go:226 注释同证）——登录期应答式回推反复触发重置链，
+	// 重登后持续掉帧/操作延时。只落内存+存档，不回推。
 	if first && pl.roleState.Customizing != "" {
-		if err := s.pushCustomizing(pl, pl.roleState.Customizing); err != nil {
-			s.trace("re-assert customizing failed client=%d: %v", pl.Conn1, err)
-			return
-		}
-		s.trace("skipped default customizing dump (%d bytes), re-asserted saved %d bytes client=%d",
-			len(config), len(pl.roleState.Customizing), pl.Conn1)
+		s.trace("skipped default customizing dump (%d bytes) client=%d",
+			len(config), pl.Conn1)
 		return
 	}
 	pl.roleState.Customizing = config
-	if err := s.pushCustomizing(pl, config); err != nil {
-		s.trace("echo customizing failed client=%d: %v", pl.Conn1, err)
-		return
-	}
 	s.sendRoleSave(pl)
-	s.trace("saved customizing config %d bytes client=%d", len(config), pl.Conn1)
+	s.trace("saved customizing config %d bytes client=%d (echo muted)", len(config), pl.Conn1)
 }
 
 // printableKeybindValue 键位串限可打印 ASCII（0x20-0x7E）——真机引擎会
