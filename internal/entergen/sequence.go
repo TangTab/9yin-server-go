@@ -96,7 +96,7 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	frames = append(frames, physics...)
 
 	// 0x10 基础属性批（建号五维/资源/等级——rolestate 值）。
-	base, err := basePropertyFrames(ctx)
+	base, err := BasePropertyFrames(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	frames = append(frames, qg...)
 
 	// 战斗属性单帧族（建号可计算子集：五维/等级/资源上限）。
-	combat, err := combatAttributeFrames(ctx)
+	combat, err := CombatAttributeFrames(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -254,8 +254,8 @@ func recordRowBody(recordIndex uint16, cells []RecordCell) ([]byte, error) {
 	return full[16:], nil
 }
 
-// basePropertyFrames 建号基础属性批（0x10 单帧大批：五维/资源/等级）。
-func basePropertyFrames(ctx Context) ([][]byte, error) {
+// BasePropertyFrames 建号基础属性批（0x10 单帧大批：五维/资源/等级）。
+func BasePropertyFrames(ctx Context) ([][]byte, error) {
 	state := ctx.State
 	props := []IndexedProperty{
 		NamedProperty("Level", ByteValue(1)),
@@ -282,9 +282,9 @@ func basePropertyFrames(ctx Context) ([][]byte, error) {
 	return [][]byte{frame}, nil
 }
 
-// combatAttributeFrames 战斗面板单帧族（外服形态：单属性 0x10 逐帧；
+// CombatAttributeFrames 战斗面板单帧族（外服形态：单属性 0x10 逐帧；
 // 建号可计算子集——等级内功加成后面板值）。
-func combatAttributeFrames(ctx Context) ([][]byte, error) {
+func CombatAttributeFrames(ctx Context) ([][]byte, error) {
 	state := ctx.State
 	str := int32(state.Str)
 	sta := int32(state.Sta)

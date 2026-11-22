@@ -15,9 +15,9 @@ package entergen
 //	    config ID）；无编辑基线补 starter 打坐条目（EffectiveShortcuts）。
 //
 // 无档零帧（客户端保持本地默认并自行上传基线）。键位域挂玩家对象
-// 属性视图、快捷栏行挂玩家对象记录——本服暂未实现 0x0C 切图，重入
-// 重推（参考端 stable re-entry 分支）待切图链落地时同口径补。
-// 705 连接级不随切图重置，届时也无需重发。
+// 属性视图、快捷栏行挂玩家对象记录——0x0C 切图清玩家对象后由
+// PlayerObjectConfigFrames 重推（reentryReady，参考端 stable re-entry
+// restore shortcuts/keybind 两步同口径）；705 连接级不随切图重置，无需重发。
 
 import (
 	"fmt"
@@ -30,7 +30,8 @@ import (
 // 个性配置下行通道（C2S 107 上传的回推对应物）。
 const serverCustomPushCustomizing int32 = 705
 
-// CustomConfigFrames 自定义配置域推送簇（Ready 段，视图簇之后）。
+// CustomConfigFrames 自定义配置域推送簇（Ready 段，视图簇之后）=
+// 705 连接级个性配置 + PlayerObjectConfigFrames 玩家对象域。
 func CustomConfigFrames(ctx Context) ([][]byte, error) {
 	frames := [][]byte{}
 	state := ctx.State
@@ -43,6 +44,19 @@ func CustomConfigFrames(ctx Context) ([][]byte, error) {
 		}
 		frames = append(frames, frame)
 	}
+
+	playerObject, err := PlayerObjectConfigFrames(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return append(frames, playerObject...), nil
+}
+
+// PlayerObjectConfigFrames 键位域 + 快捷栏行（挂玩家对象——0x0C 切图
+// 清对象后重入重推用；705 连接级不在内）。
+func PlayerObjectConfigFrames(ctx Context) ([][]byte, error) {
+	frames := [][]byte{}
+	state := ctx.State
 
 	// 键位域：198 当前启用 / 199 方案一 / 200 方案二（保存面板
 	// check_saved 读后两者判定「已保存」）。线上串 = 存档值 + " "。
@@ -87,7 +101,7 @@ func CustomConfigFrames(ctx Context) ([][]byte, error) {
 		frames = append(frames, frame)
 	}
 
-	// 快捷栏行（0x11 逐行重放；mount 已在 PreReady 段挂载 schema）。
+	// 快捷栏行（0x11 逐行重放；schema 走 0x0A 全表自足，无需挂载帧）。
 	shortcutFrames, err := ShortcutRowFrames(ctx.Identity.ObjectID, ctx.Identity.OwnerID, state.EffectiveShortcuts())
 	if err != nil {
 		return nil, err

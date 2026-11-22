@@ -41,7 +41,7 @@ func TestSceneNPCFramesBorn03(t *testing.T) {
 		if f[0] != 0x28 || f[1] != 0x46 {
 			t.Fatalf("帧 %d 形态异常 op=%#x（缺省应 0x28 mode=0x46）", i, f[0])
 		}
-		if seg := binary.LittleEndian.Uint32(f[10:14]); seg>>24 != 0x11 {
+		if seg := binary.LittleEndian.Uint32(f[10:14]); seg>>24 != 0x0E {
 			t.Fatalf("帧 %d objectID 段异常 %x", i, seg)
 		}
 	}

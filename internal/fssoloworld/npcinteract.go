@@ -180,13 +180,18 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 		s.trace("npc interact: %s (%s) 战斗类仅选中", spawn.ConfigID, spawn.Script)
 		return true
 	}
+	// 先回选中双帧（npc.pcapng 点击时序定版：op07 首段应答=0x10
+	// LastObject+AutoSelectObject 双帧先行——C++ 对话流程依赖选中态，
+	// 缺它 m4 聚合链不跑=窗不开）。
+	s.sendSelectTargetFrames(pl, spawn.ObjectID, spawn.OwnerID)
 	services := npcServicesOf(spawn.Template)
-	// talk 数据帧族 msg4 begin/msg6×N(funcid,ui文本ID)/msg7 [obj]——
-	// npc.pcapng #2377-2382 官方字节级模板；C++ 聚合调 form_talk.
-	// show_window 开窗+渲染菜单（单链路自足）。funcid 用 form_talk_data
-	// g_menu_id 官方域。⚠️ 不再叠发 0x1C——0x1C 触发 open_npc_talk 与
-	// msg4 触发的 show_window 双开窗竞态（真机实证 form_talk.lua:71
-	// add_menu 处 nx_destroy need entity）。
+	// talk 帧族 m4/m6×N/m7（npc.pcapng 官方模板）——C++ 聚合调
+	// **form_talk_movie**.show_window（全屏对话界面：HeadGame 语音/
+	// update_menu_control 菜单/play_talk_action NPC 说话动作）。
+	// ⚠️ 绝不发 0x1C：它触发的是 form_talk（小方窗）另一套简版窗体
+	//（真机实证「窗口展示方式不对——应为整页全屏」）——两窗体二选一，
+	// 官方走 m4-8 全屏。funcid 用 g_menu_id 域（funcid/1000000 顶层短号
+	// 查图标，805000000→805 商店图标实证兼容）。
 	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, services); err == nil {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
@@ -372,14 +377,9 @@ const clientCustomSelectTarget int32 = 431
 // handleNPCSelectTarget msg431 [431, obj(packed)]：回 LastObject+
 // AutoSelectObject 双 0x10 属性帧 + m25[30000] 选靶授权；5s 后 m26 解锁
 // 看门狗（官服 m25 恒 0.4~4.6s 内配对 m26，裸 m25 锁输入 30s）。
-func (s *Server) handleNPCSelectTarget(pl *Player, message entergen.CustomInbound) {
-	if len(message.Values) < 2 {
-		return
-	}
-	packed := message.Values[1].Raw
-	targetID := binary.LittleEndian.Uint32(packed[:])
-	targetOwner := binary.LittleEndian.Uint32(packed[4:])
-	// 双帧各自成帧（LastObject 与 AutoSelectObject 是两个 0x10 属性帧）。
+// sendSelectTargetFrames 选中双帧（LastObject+AutoSelectObject 两个 0x10
+// 属性帧，npc.pcapng 点击应答时序的首步）。
+func (s *Server) sendSelectTargetFrames(pl *Player, targetID, targetOwner uint32) {
 	for _, name := range []string{"LastObject", "AutoSelectObject"} {
 		frame, err := entergen.ObjectPropertyFrame(1, 1, 0, []entergen.IndexedProperty{
 			entergen.NamedProperty(name, entergen.ObjectValue(targetID, targetOwner)),
@@ -390,6 +390,16 @@ func (s *Server) handleNPCSelectTarget(pl *Player, message entergen.CustomInboun
 		}
 		s.sendToClient(pl, frame)
 	}
+}
+
+func (s *Server) handleNPCSelectTarget(pl *Player, message entergen.CustomInbound) {
+	if len(message.Values) < 2 {
+		return
+	}
+	packed := message.Values[1].Raw
+	targetID := binary.LittleEndian.Uint32(packed[:])
+	targetOwner := binary.LittleEndian.Uint32(packed[4:])
+	s.sendSelectTargetFrames(pl, targetID, targetOwner)
 	if targetID == 0 {
 		s.trace("npc select: 清除目标 client=%d", pl.Conn1)
 		return

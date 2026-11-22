@@ -20,7 +20,7 @@ package entergen
 //   - ModifySkillLockTime 官方口径 200（Java PlayerActor #2014 反汇编）。
 //
 // 建号数据源：rolestate 白板五维/资源 + StarterSet 首本书 ng_wd_001
-// varprop 加成（与 AppearanceFrame/combatAttributeFrames 同一推法）。
+// varprop 加成（与 AppearanceFrame/CombatAttributeFrames 同一推法）。
 
 import (
 	"fmt"

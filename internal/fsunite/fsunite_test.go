@@ -588,7 +588,7 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	writeActivity()
 	// NPC 物化族（npcfeed 链，真档在仓根 testdata，cwd 探测命中）：进场段
-	// 尾部 NPC 0x28 mode=0x46 物化 ×1674（fork 段 obj 0x11；摆放 1907 联查
+	// 尾部 NPC 0x28 mode=0x46 物化 ×1674（官方 0x0E 段 obj；摆放 1907 联查
 	// 1674——闸门拦 85 条 EventNpc/TaskSubId/SubSceneNo）。m229 已退役。
 	isNpcM229 := func(f []byte) bool {
 		return len(f) > 12 && f[0] == 0x1E && f[3] == 2 &&
@@ -603,7 +603,7 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 			mark229++
 			continue
 		}
-		if f[0] == 0x28 && f[1] == 0x46 && len(f) > 60 && f[13] == 0x11 {
+		if f[0] == 0x28 && f[1] == 0x46 && len(f) > 60 && f[13] == 0x0E {
 			npc0D++ // NPC 0x28 物化（全量一次物化——PreReady 尾）
 			if npc0D >= 1674 {
 				break

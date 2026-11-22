@@ -32,11 +32,11 @@ func TestBuildCatalogBorn03(t *testing.T) {
 	}
 	seen := map[uint32]bool{}
 	for i, s := range spawns {
-		if s.ObjectID>>24 != 0x11 {
-			t.Fatalf("条 %d objectID %x 不在 0x11 段", i, s.ObjectID)
+		if s.ObjectID>>24 != 0x0E {
+			t.Fatalf("条 %d objectID %x 不在官方 0x0E 段", i, s.ObjectID)
 		}
-		if s.OwnerID>>16 != 0x0066 {
-			t.Fatalf("条 %d ownerID %x 不在 0x66xxxx 段", i, s.OwnerID)
+		if s.OwnerID>>16 != 0x00 {
+			t.Fatalf("条 %d ownerID %x 不在小值段", i, s.OwnerID)
 		}
 		if seen[s.ObjectID] {
 			t.Fatalf("objectID %x 重复", s.ObjectID)
@@ -205,7 +205,7 @@ func TestFrame0x28Shape(t *testing.T) {
 	if got := binary.LittleEndian.Uint32(frame[6:]); int(got) != len(frame)-10 {
 		t.Errorf("体长 = %d, want %d", got, len(frame)-10)
 	}
-	if seg := binary.LittleEndian.Uint32(frame[10:]); seg>>24 != 0x11 {
+	if seg := binary.LittleEndian.Uint32(frame[10:]); seg>>24 != 0x0E {
 		t.Errorf("obj 段异常 %x", seg)
 	}
 }

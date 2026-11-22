@@ -4,9 +4,11 @@ package fssoloworld
 // 切换期位移守卫/同场景传送。sceneSwitchGap 测试内调短。
 
 import (
+	"encoding/binary"
 	"testing"
 	"time"
 
+	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
@@ -29,6 +31,19 @@ func TestResolveSceneDestination(t *testing.T) {
 	dest, ok = resolveSceneDestination(`ini\scene\clone001|clone001`)
 	if !ok || dest.Resource != "clone001" || dest.Position != [4]float64{} {
 		t.Fatalf("direct resolve = %+v ok=%v", dest, ok)
+	}
+	// 补充键：born_single_01 新手引导场景（赵子亟·沙滩起点旁）。
+	dest, ok = resolveSceneDestination("born_single_01")
+	if !ok || dest.Resource != "born_single_01" || dest.Config != `ini\scene\born_single_01` {
+		t.Fatalf("born_single_01 resolve = %+v ok=%v", dest, ok)
+	}
+	if dest.Position == [4]float64{} {
+		t.Fatal("born_single_01 position empty")
+	}
+	// 中文别名：新手引导 → born_single_01。
+	dest, ok = resolveSceneDestination("新手引导")
+	if !ok || dest.Resource != "born_single_01" {
+		t.Fatalf("guide alias resolve = %+v ok=%v", dest, ok)
 	}
 	if _, ok := resolveSceneDestination("不存在场景"); ok {
 		t.Fatal("unknown key should not resolve")
@@ -115,6 +130,50 @@ func TestSceneSwitchFlow(t *testing.T) {
 		t.Fatalf("reentry cluster did not replay letters: % x", reentryOps)
 	}
 
+	// 0x0C 清场重建簇（0x09 后整推）：AutoTrace 寻路闸门 + View40/43/46
+	// 视图族 + 战斗属性单帧 + 快捷栏行；705 连接级不重发。
+	autoTraceIdx := clientdata.MustPlayerProperty("AutoTrace").Index
+	strIdx := clientdata.MustPlayerProperty("Str").Index
+	shortcutRec := clientdata.MustRecordIndexByName("shortcut_rec")
+	hasAutoTrace, hasCombat, hasShortcut, has705 := false, false, false, false
+	hasView := map[uint16]bool{}
+	for _, f := range (*frames)[mark:] {
+		if idx, ok := singlePropIndexOf(f); ok {
+			switch idx {
+			case autoTraceIdx:
+				hasAutoTrace = true
+			case strIdx:
+				hasCombat = true
+			}
+		}
+		if vid, ok := viewIDOf(f); ok {
+			hasView[vid] = true
+		}
+		if f[0] == 0x11 && recordIndexOf(f) == shortcutRec {
+			hasShortcut = true
+		}
+		if len(f) >= 8 && f[0] == 0x1E && f[3] == 2 && binary.LittleEndian.Uint32(f[4:]) == 705 {
+			has705 = true
+		}
+	}
+	if !hasAutoTrace {
+		t.Fatal("reentry cluster missing AutoTrace=1 (map-click pathfinding gate)")
+	}
+	if !hasCombat {
+		t.Fatal("reentry cluster missing combat attribute frame (role panel)")
+	}
+	if !hasShortcut {
+		t.Fatal("reentry cluster missing shortcut_rec rows")
+	}
+	for _, vid := range []uint16{entergen.ViewportSkill, entergen.ViewportNeiGong, entergen.ViewportQingGong} {
+		if !hasView[vid] {
+			t.Fatalf("reentry cluster missing View%d rebuild", vid)
+		}
+	}
+	if has705 {
+		t.Fatal("reentry cluster must not re-push connection-level 705 customizing")
+	}
+
 	// 开图位已点亮新场景位（scenes.ini 真表解析，born01 应有全局段号）。
 	idx := s.sceneGlobalIndexOf("born01")
 	if idx >= 0 {
@@ -164,3 +223,22 @@ func TestSceneSwitchInProgressGuard(t *testing.T) {
 
 // recvLetterIndex entergen.RecordRecvLetter 的本包便捷引用。
 func recvLetterIndex() uint16 { return entergen.RecordRecvLetter }
+
+// singlePropIndexOf 0x10 单属性帧（count==1）的属性下标；其余形态 false。
+func singlePropIndexOf(frame []byte) (uint16, bool) {
+	if len(frame) < 14 || frame[0] != 0x10 || frame[1] != 0 {
+		return 0, false
+	}
+	if binary.LittleEndian.Uint16(frame[10:]) != 1 {
+		return 0, false
+	}
+	return binary.LittleEndian.Uint16(frame[12:]), true
+}
+
+// viewIDOf 0x15 视图建帧的视图号；其余形态 false。
+func viewIDOf(frame []byte) (uint16, bool) {
+	if len(frame) < 7 || frame[0] != 0x15 {
+		return 0, false
+	}
+	return binary.LittleEndian.Uint16(frame[1:]), true
+}

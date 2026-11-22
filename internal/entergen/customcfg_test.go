@@ -86,6 +86,35 @@ func TestCustomConfigFramesSaved(t *testing.T) {
 	}
 }
 
+// TestPlayerObjectConfigFramesSplit 0x0C 切图重入重推拆分：
+// PlayerObjectConfigFrames = 键位域+快捷栏行，不含连接级 705。
+func TestPlayerObjectConfigFramesSplit(t *testing.T) {
+	ctx := testContext(t)
+	ctx.State.Customizing = "ABC"
+	ctx.State.Keybind = "1,65;"
+	full, err := CustomConfigFrames(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	playerObject, err := PlayerObjectConfigFrames(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(full) != len(playerObject)+1 {
+		t.Fatalf("full=%d playerObject=%d (want exactly the 705 difference)", len(full), len(playerObject))
+	}
+	for _, frame := range playerObject {
+		if frame[0] == 0x1E {
+			t.Fatalf("player-object half must not carry connection-level custom message: %x", frame[:8])
+		}
+	}
+	for i, frame := range playerObject {
+		if !bytes.Equal(frame, full[i+1]) {
+			t.Fatalf("player-object frame #%d differs from full cluster tail", i)
+		}
+	}
+}
+
 // TestShortcutRebuildFrames 整表重建方言：oldRows=3 倒序 DEL（行 2/1/0，
 // 14B）+ 新表 2 行 ADD。
 func TestShortcutRebuildFrames(t *testing.T) {

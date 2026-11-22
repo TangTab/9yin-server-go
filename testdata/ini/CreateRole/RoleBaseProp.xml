@@ -23,7 +23,8 @@
        招架耐力 = 200
 
      建角初始无门派(School="")，带装备 侠士布衣(cloth0002) 侠士下衣(hc_2400177) 靴子(cf_composite4)
-     出生地 烟雨庄(born03)  千灯镇(born04)  鸡鸣驿(born05)  成都(city01) 
+     出生地 烟雨庄(born03)            千灯镇(born04)            鸡鸣驿(born05)        成都(city01) 
+            烟雨庄(ChushengCJ000002)  千灯镇(ChushengCJ000001)  鸡鸣驿(BornCJ000001)  成都(BornCJ000017) 
      
      完整规则与字段映射见 docs/official/九阴建角初始数据归纳.md -->
 <Object>

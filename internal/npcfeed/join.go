@@ -38,12 +38,14 @@ type Stats struct {
 }
 
 // ObjectIDAt 场景内 NPC wire objectID（目录下标 idx 0 起）：
-// 0x11000000|(idx+2)——2433 fork NPC 段，0/1 保留给玩家。
-func ObjectIDAt(index int) uint32 { return 0x11000000 | uint32(index+2) }
+// 官方 PERSISTID 风格 0x0E00xxxx（npc.pcapng 实证：官方 NPC obj=
+// 0x0E001CB7/0x0E00147A，与玩家同 0x0E 段——fork 0x11 段在外服版
+// 客户端只建视觉层，交互管线按 0x0E 段路由）。0x0E000000/1 保留。
+func ObjectIDAt(index int) uint32 { return 0x0E000100 + uint32(index+2) }
 
-// OwnerIDOf NPC owner 私服化段 0x00660000|低16位——owner=1 在部分客户端
-// 被解析为「1 号玩家化身」触发 PvP 分支（2433 线定案）。
-func OwnerIDOf(objectID uint32) uint32 { return 0x00660000 | (objectID & 0xFFFF) }
+// OwnerIDOf NPC owner：官方风格小值（npc.pcapng 实证 own=0x1CF9 等
+// 递增小值，非 0x66xxxx 段）。
+func OwnerIDOf(objectID uint32) uint32 { return 0x00001000 + (objectID & 0xFFFF) }
 
 // eligible 注册闸门（2433 npcSpawnEligible 同款，判据取摆放行原始属性
 // 与模板类名）。

@@ -15,6 +15,7 @@ import (
 var sceneAliases = map[string]string{
 	"燕京": "city01", "苏州": "city02", "金陵": "city03", "洛阳": "city04", "成都": "city05",
 	"鸡鸣驿": "born01", "烟雨庄": "born03", "千灯镇": "born04", "恶人谷": "born02",
+	"新手引导": "born_single_01",
 	"锦衣卫": "school01", "丐帮": "school02", "君子堂": "school03", "极乐谷": "school04",
 	"唐门": "school05", "峨眉": "school06", "武当": "school07", "少林": "school08",
 	"移花宫":   "school09",
@@ -30,9 +31,23 @@ type sceneDestination struct {
 	Position [4]float64
 }
 
+// extraSceneDestinations 非 BornCJ 键域的补充目的地（单场景克隆态，无
+// location.ini 出生点节；且 BornCJ Key 推导按首个 '_' 截断，born_single_01
+// 会被错截成 "born"，只能走本表）。落点取引导起点 NPC 旁：born_single_01
+// 引导链（TaskText 1339-1346）从沙滩的赵子亟（funnpcborn003031，
+// 194.514,5.598,-114.595）开始，偏移 2m 避免模型重叠。
+var extraSceneDestinations = map[string]sceneDestination{
+	"born_single_01": {
+		Config:   `ini\scene\born_single_01`,
+		Resource: "born_single_01",
+		Position: [4]float64{192.5, 5.598, -113.0, -1.491},
+	},
+}
+
 // resolveSceneDestination key 三形态：中文别名 / resource 短名（born03、
-// city01…，落点=BornCJ 出生点）/ "config|resource" 直填（须显式坐标，
-// 落点 [4]float64 零值由调用方覆盖）。未解析 false。
+// city01…，落点=BornCJ 出生点；born_single_01 等补充键走 extra 表）/
+// "config|resource" 直填（须显式坐标，落点 [4]float64 零值由调用方覆盖）。
+// 未解析 false。
 func resolveSceneDestination(key string) (sceneDestination, bool) {
 	if key == "" {
 		return sceneDestination{}, false
@@ -44,6 +59,9 @@ func resolveSceneDestination(key string) (sceneDestination, bool) {
 	if alias, ok := sceneAliases[key]; ok {
 		resourceKey = alias
 	}
+	if extra, ok := extraSceneDestinations[resourceKey]; ok {
+		return extra, true
+	}
 	if opt, ok := rolestate.FindSceneOption(resourceKey); ok {
 		return sceneDestination{Config: opt.Config, Resource: opt.Key, Position: opt.Position}, true
 	}
@@ -51,13 +69,16 @@ func resolveSceneDestination(key string) (sceneDestination, bool) {
 }
 
 // scenePresetKeys 可用 key 清单（echo `gm scene` 裸调用打印； BornCJ 键域
-// 按序 + 别名提示）。
+// 按序 + 补充键 + 别名提示）。
 func scenePresetKeys() string {
 	opts := rolestate.BirthSceneOptions()
-	keys := make([]string, 0, len(opts))
+	keys := make([]string, 0, len(opts)+len(extraSceneDestinations))
 	for _, opt := range opts {
 		keys = append(keys, opt.Key)
 	}
-	return fmt.Sprintf("keys: %s\naliases: 燕京 苏州 金陵 洛阳 成都 鸡鸣驿 烟雨庄 千灯镇 恶人谷 锦衣卫 丐帮 君子堂 极乐谷 唐门 峨眉 武当 少林 移花宫 …（或 config|resource 直填）",
+	for key := range extraSceneDestinations {
+		keys = append(keys, key)
+	}
+	return fmt.Sprintf("keys: %s\naliases: 燕京 苏州 金陵 洛阳 成都 鸡鸣驿 烟雨庄 千灯镇 恶人谷 新手引导 锦衣卫 丐帮 君子堂 极乐谷 唐门 峨眉 武当 少林 移花宫 …（或 config|resource 直填）",
 		strings.Join(keys, " "))
 }

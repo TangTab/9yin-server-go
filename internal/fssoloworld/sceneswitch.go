@@ -10,8 +10,9 @@ package fssoloworld
 //	→ 0x0D 玩家重物化（目标 stage_main 需要本地 1-1 对象才能开图；
 //	  0x1F 必须推迟，否则坐标被投影到旧地形）
 //	→ 等客户端目标场景自己的 0x09（期间旧场景过期 0x0A 全丢弃）
-//	→ 0x1F+vitals 大批 → 开图双记录 → NPC AOI 首拍 → Ready 整段重推
-//	  → 邮箱重放 → 存档。
+//	→ 0x1F+vitals 大批 → 开图双记录 → 0x0C 清场重建簇（AutoTrace 寻路
+//	  闸门/基础属性/Task·轻功记录行/就绪信息/buff/View 40/43/46/战斗
+//	  属性/键位·快捷栏）→ NPC AOI 首拍 → 邮箱重放 → 存档。
 //
 // 同场景传送（gm tp/传送门 gotodoor 族）只发 0x1F，不走本序列。
 
@@ -24,6 +25,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // sceneSwitchGap 0x0C→0x0B 间隙（包级变量：测试可调短；2433 实测 750ms）。
@@ -145,7 +147,8 @@ func (s *Server) transferPlayer(pl *Player, dest sceneDestination, source string
 }
 
 // reentryReady 目标场景 0x09 → 重入簇（clientReady 分支接管）：0x1F+vitals
-// → 开图双记录 → NPC AOI 首拍 → Ready 整段重推 → 邮箱重放 → 存档。
+// → 开图双记录 → 0x0C 清场重建簇（AutoTrace/基础属性/记录行/就绪信息/
+// buff/视图族/战斗属性/键位快捷栏）→ NPC AOI 首拍 → 邮箱重放 → 存档。
 func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 	pl.sceneSwitchMu.Lock()
 	pl.sceneSwitch = nil
@@ -173,16 +176,92 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 	} else {
 		s.trace("reentry map records failed client=%d: %v", pl.Conn1, err)
 	}
+	// ★0x0C 清场重建簇（参考端 stable re-entry 整表定案：ServerExitScene
+	// 连玩家对象一起拆除，挂对象的一切——属性视图/记录行/View 40/43/46——
+	// 全部随清，重入后须按登录就绪簇同序整推重建）。各域缺席的真机症状：
+	// AutoTrace 缺=点地图不发起寻路（msg266 不发）；View43 缺=faculty
+	// 普通开始按钮禁用；战斗属性簇缺=角色栏信息空白；键位/快捷栏缺=自定义
+	// 配置全丢。705 连接级不随切图重置（2433 定论），不重发。
+	if autoTrace, err := entergen.AutoTraceFrame(ctx); err == nil {
+		s.sendToClient(pl, autoTrace)
+		sent++
+	}
+	if base, err := entergen.BasePropertyFrames(ctx); err == nil {
+		for _, frame := range base {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	} else {
+		s.trace("reentry base props failed client=%d: %v", pl.Conn1, err)
+	}
+	// 记录行族（Task_Completed 位图=功能解锁域 / Task_Accepted / QingGongRec
+	// 18 行——参考端 grantFunctionUnlock+grantStarterQingGong 对应物）。
+	if rows, err := entergen.MountSequenceFrames(ctx); err == nil {
+		for _, frame := range rows {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	} else {
+		s.trace("reentry record rows failed client=%d: %v", pl.Conn1, err)
+	}
+	// 就绪信息簇 m607/m52/m586 + 登录 buff m169（官方切图=第二爆发整段
+	// 重演，wholesale 两相位定案——随 0x0C 清对象丢失，整推重建）。
+	if info, err := entergen.ReadyInfoFrames(ctx, time.Now()); err == nil {
+		for _, frame := range info {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	} else {
+		s.trace("reentry ready info failed client=%d: %v", pl.Conn1, err)
+	}
+	if buffs, err := entergen.LoginBuffFrames(ctx); err == nil {
+		for _, frame := range buffs {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	} else {
+		s.trace("reentry login buffs failed client=%d: %v", pl.Conn1, err)
+	}
+	// 视图族重建（每帧自带容器声明）：View40 武学 / View43 内功 / View46 轻功。
+	for _, build := range []func(rolestate.RoleState) ([][]byte, error){
+		entergen.SkillViewFrames, entergen.NeiGongViewFrames, entergen.QingGongViewFrames,
+	} {
+		frames, err := build(pl.roleState)
+		if err != nil {
+			s.trace("reentry view frames failed client=%d: %v", pl.Conn1, err)
+			continue
+		}
+		for _, frame := range frames {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	}
+	// 战斗属性单帧族（真机「切图后角色栏信息没有下发」定案：随 0x0C 丢失）。
+	if combat, err := entergen.CombatAttributeFrames(ctx); err == nil {
+		for _, frame := range combat {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	} else {
+		s.trace("reentry combat attrs failed client=%d: %v", pl.Conn1, err)
+	}
+	// 键位域 + 快捷栏行（挂玩家对象——PlayerObjectConfigFrames 不含 705）。
+	if cfg, err := entergen.PlayerObjectConfigFrames(ctx); err == nil {
+		for _, frame := range cfg {
+			s.sendToClient(pl, frame)
+			sent++
+		}
+	} else {
+		s.trace("reentry player config failed client=%d: %v", pl.Conn1, err)
+	}
 	// NPC AOI 首拍：视口/巡逻簿记重置（patrolReadyAt+5s 首拍缓冲）。
 	for _, frame := range s.sceneNPCEnter(pl, pl.roleState.Resource, pos) {
 		s.sendToClient(pl, frame)
 		sent++
 	}
-	// 不重推 ReadyFrames 全家（2026-11-22 晚对齐 2433 切图重入实证
-	// 61036#8499：0x0C→0x0B→0x0D→0x1F→0x11 行海→视口流——无表重发、
-	// 无视图簇/战斗属性/自定义配置整段。0x0C 清空后需恢复的域由上方
-	// 0x1F/vitals/开图/邮箱各段精确覆盖；705 连接级不随切图重置（2433
-	// 定论）。
+	// 表帧（0x09 属性/记录全表）与 0x28 化身/物理流不重发（连接级存活，
+	// 61036#8499 实证无表重发）；705 亦连接级不重发。挂玩家对象的域已由
+	// 上方清场重建簇整推。
 	// 邮箱重放（0x0C 清玩家对象上挂的记录，邮件行随重入簇恢复）。
 	sent += s.pushLetterRows(pl)
 	s.sendRoleSave(pl)

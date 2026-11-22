@@ -17,9 +17,10 @@ const SUBS = [
   { id: "archive", title: "存档管理", desc: "0x04 存档（role_state_json 落 nx_roles，重登 RST1 回灌）" },
 ];
 
-// 场景切换预设（location.ini BornCJ 出生点；gm scene key 直传）。
+// 场景切换预设（location.ini BornCJ 出生点 + born_single_01 补充键；gm scene key 直传）。
 const SCENE_PRESETS = [
   ["born01", "鸡鸣驿（漠河镇）"], ["born02", "恶人谷"], ["born03", "烟雨庄"], ["born04", "千灯镇"],
+  ["born_single_01", "新手引导（born_single_01 教学渔村）"],
   ["city01", "燕京"], ["city02", "苏州"], ["city03", "金陵"], ["city04", "洛阳"], ["city05", "成都"],
   ["school01", "锦衣卫"], ["school02", "丐帮"], ["school03", "君子堂"], ["school04", "极乐谷"],
   ["school05", "唐门"], ["school06", "峨眉"], ["school07", "武当"], ["school08", "少林"], ["school09", "移花宫"],
