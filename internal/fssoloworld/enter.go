@@ -22,6 +22,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
@@ -106,8 +107,27 @@ func (s *Server) enterContext(pl *Player) entergen.Context {
 		},
 		RoleName: pl.Name,
 		State:    pl.roleState,
-		NPCs:     s.sceneNPCCatalog(pl.roleState.Resource, pl.roleState.Position), // Resource=场景键（born03；Scene 是完整 config 路径）
+		NPCs:       s.sceneNPCMarks(pl.roleState.Resource, pl.roleState.Position), // m229 设施族（已退役恒空）
+		NPCObjects: s.sceneNPCObjects(pl.roleState.Resource, pl.roleState.Position), // 全量物化集（0x28 官方言）
+		NPCAs0x28:  os.Getenv("NINEYIN_NPC_0X28") != "off", // 0x28 官方言默认；=off 判别切裸 0x0D
+		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
 	}
+}
+
+// sceneGlobalIndexOf 场景 resource → 客户端 scenes.ini 全局段号（npcdata
+// 装载缓存）。缺席 -1：开图降级只发基线位图，不阻塞进场。
+func (s *Server) sceneGlobalIndexOf(resource string) int {
+	if resource == "" {
+		return -1
+	}
+	root := resolveDataRoot()
+	if root == "" {
+		return -1
+	}
+	if index, ok := npcdata.SceneGlobalIndex(root, resource); ok {
+		return int(index)
+	}
+	return -1
 }
 
 // storeLoadEnter 0x02 Load 回执 {client,serial,u32 ok,arch-wstr para

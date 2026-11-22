@@ -10,6 +10,7 @@ package fssoloworld
 // scene_name_017 与 rolePara f24 回退值互证。
 
 import (
+	"math"
 	"encoding/binary"
 	"strconv"
 	"strings"
@@ -156,6 +157,48 @@ func buildLoadRoleStore(clientID, serial, serverID uint32, account, name string)
 		}
 		binary.LittleEndian.PutUint16(b[0x2D+i*2:], u)
 	}
+	return b
+}
+
+// buildSaveStore 构造 0x04 存档包（官方锚点：name 宽串@0x08 0x48 区、
+// charge_info@0x50 0x30 区、location 4×double@0x80、定长头 0xA0=官方
+// 最小 160）。0xA0 后为 TLV 段序列（Go 两端自洽方言）：
+//
+//	tag 1 account（LoadRole/merge 定位需要）
+//	tag 2 server_id（u32 裸值）
+//	tag 3 RST1 json（role_state_json——GM 热改后的权威快照）
+//	tag 4 save_data blob（主树无官方 0xD0B blob 生成器，恒空）
+//
+// 官方 meta 列（total_sec/letter_max/scene_id/…）world 不可知，不编码——
+// store 端 merge 时以库内基底保留，避免 0 值冲掉真值。
+func buildSaveStore(clientID, serial uint32, account, name string, pos [4]float64, rst1 []byte) []byte {
+	b := make([]byte, 0xA0, 0x100)
+	binary.LittleEndian.PutUint32(b[0:], clientID)
+	binary.LittleEndian.PutUint32(b[4:], serial)
+	units := encodeUTF16([]rune(name))
+	for i, u := range units {
+		if i >= 0x24 { // 0x48 区 = 36 码元
+			break
+		}
+		binary.LittleEndian.PutUint16(b[0x08+i*2:], u)
+	}
+	// charge_info char[0x30] @0x50 保持零
+	for i := 0; i < 4; i++ {
+		bits := math.Float64bits(pos[i])
+		binary.LittleEndian.PutUint64(b[0x80+i*8:], bits)
+	}
+	appTLV := func(tag uint32, data []byte) {
+		var hdr [8]byte
+		binary.LittleEndian.PutUint32(hdr[0:], tag)
+		binary.LittleEndian.PutUint32(hdr[4:], uint32(len(data)))
+		b = append(b, hdr[:]...)
+		b = append(b, data...)
+	}
+	appTLV(1, []byte(account))
+	var sid [4]byte // server_id 由 store 端按连接会话补（此处 0）
+	appTLV(2, sid[:])
+	appTLV(3, rst1)
+	appTLV(4, nil) // save_data：主树恒空（空档=官方已有语义）
 	return b
 }
 

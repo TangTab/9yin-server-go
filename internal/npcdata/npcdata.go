@@ -25,14 +25,15 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
-// NpcTemplate NpcConfig 模板行（物化所需的字段子集）。
+// NpcTemplate NpcConfig 模板行（物化所需的字段子集 + 原始行）。
 type NpcTemplate struct {
-	ID      string
-	Script  string // 物化类名（CommonNpc/AttackNpc/...）
-	Name    string // 显示名（中文）
+	ID       string
+	Script   string // 物化类名（CommonNpc/AttackNpc/...）
+	Name     string // 显示名（中文）
 	Resource string // 模型资源路径（npc\Guildqizhi01 形）
-	Scale   string // 缩放串（"3.100,3.100,3.100" 形；空=不缩放）
-	NpcType int
+	Scale    string // 缩放串（"3.100,3.100,3.100" 形；空=不缩放）
+	NpcType  int
+	Raw      map[string]string // 原始行全字段（NPC 0x0D 模板层按名取）
 }
 
 // SceneNPC 一条场景摆放（已联查模板；Hit=false 表示模板缺席）。
@@ -146,6 +147,10 @@ func LoadTemplates(root string) (map[string]NpcTemplate, error) {
 				continue
 			}
 			npctype, _ := strconv.Atoi(strings.TrimSpace(row["NpcType"]))
+			raw := make(map[string]string, len(row))
+			for k, v := range row {
+				raw[k] = v
+			}
 			templates[id] = NpcTemplate{
 				ID:       id,
 				Script:   row["script"],
@@ -153,6 +158,7 @@ func LoadTemplates(root string) (map[string]NpcTemplate, error) {
 				Resource: row["Resource"],
 				Scale:    row["Scale"],
 				NpcType:  npctype,
+				Raw:      raw,
 			}
 		}
 		return nil
@@ -222,6 +228,7 @@ func dist2D(ax, az, bx, bz float64) float64 {
 func gb18030Reader(input io.Reader) io.Reader {
 	return simplifiedchinese.GB18030.NewDecoder().Reader(input)
 }
+
 
 // parsePropRows 解析 <Object><Property k="v" .../></Object> 为属性行列表
 // （fsgame.ParsePropTable 同式；xml 声明 utf-8 直读，gb2312/gbk 按 GB18030

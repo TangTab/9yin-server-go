@@ -95,3 +95,34 @@ func TestInferSexFromPara(t *testing.T) {
 		}
 	}
 }
+
+// TestMoneyRoundTrip 碎银字段（CapitalType1 位）marshal 往返与建号初值。
+func TestMoneyRoundTrip(t *testing.T) {
+	st, err := BuildRoleState("", 0, "", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st.Money != starterMoney {
+		t.Fatalf("starter money %d", st.Money)
+	}
+	st.Money = 123456789
+	js, err := MarshalRoleState(st)
+	if err != nil {
+		t.Fatal(err)
+	}
+	back, err := UnmarshalRoleState(js)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if back.Money != 123456789 {
+		t.Fatalf("money round trip %d", back.Money)
+	}
+	// 旧档（无 money 键）反序列化 → 0（omitempty 兼容）
+	legacy, err := UnmarshalRoleState(`{"sex":1,"scene":"s","resource":"r","position":[0,0,0,1]}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if legacy.Money != 0 {
+		t.Fatalf("legacy money %d", legacy.Money)
+	}
+}

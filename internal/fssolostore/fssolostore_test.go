@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"fmt"
+	"math"
 	"net"
 	"strings"
 	"testing"
@@ -783,5 +784,77 @@ func TestParseConnectStringDSN(t *testing.T) {
 		if got := ParseConnectStringDSN(c.cs); got != c.want {
 			t.Fatalf("ParseConnectStringDSN(%q) = %q, want %q", c.cs, got, c.want)
 		}
+	}
+}
+
+// TestFullLinkSaveRole 存档 dispatch（0x04 → 0x03 回执）：与
+// fssoloworld buildSaveStore 对偶（官方锚点头 + Go TLV 段）。merge 语义：
+// location/RST1/save_data 覆盖，world 不可知列（save_para1/role_index 等）
+// 保留库内基底——热改→存档→重登回灌链的 store 半边。
+func TestFullLinkSaveRole(t *testing.T) {
+	s, store := startTestServer(t)
+	wc := dialMember(t, fmt.Sprintf("127.0.0.1:%d", s.InnerPort()))
+	wc.send(commWorld, 61, innerIdentifyID2, nil)
+
+	// 种子角：save_para1/role_index 是 world 不可知列（merge 保留面）
+	if _, err := store.CreateRole("hero", "王五", "GUID-SAVE-0001", 11,
+		RoleMeta{SavePara1: "book1,hair1", Index: 2}, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	// 0x04 包：官方锚点（name 宽串@8/charge@0x50/location doubles@0x80）
+	// + TLV（1=account 2=server_id 3=RST1 4=save_data 空）
+	frame := make([]byte, 0xA0, 0x100)
+	binary.LittleEndian.PutUint32(frame[0:], 7)
+	binary.LittleEndian.PutUint32(frame[4:], 61)
+	units := utf16.Encode([]rune("王五"))
+	for i, u := range units {
+		binary.LittleEndian.PutUint16(frame[0x08+i*2:], u)
+	}
+	for i, v := range [4]float64{1.5, -2.25, 3.0, 1.0} {
+		binary.LittleEndian.PutUint64(frame[0x80+i*8:], math.Float64bits(v))
+	}
+	appTLV := func(tag uint32, data []byte) {
+		frame = binary.LittleEndian.AppendUint32(frame, tag)
+		frame = binary.LittleEndian.AppendUint32(frame, uint32(len(data)))
+		frame = append(frame, data...)
+	}
+	appTLV(1, []byte("hero"))
+	appTLV(2, binary.LittleEndian.AppendUint32(nil, 11))
+	appTLV(3, []byte(`{"str":99,"money":12345}`))
+	appTLV(4, nil)
+
+	wc.send(commWorld, 61, 0x04, frame)
+	_, req, id2, p := wc.recv()
+	if req != 61 || id2 != 0x03 {
+		t.Fatalf("save reply req=%d id2=%#x", req, id2)
+	}
+	if binary.LittleEndian.Uint32(p[0:]) != 7 || binary.LittleEndian.Uint32(p[8:]) != 1 {
+		t.Fatalf("save reply %#x", p[:12])
+	}
+
+	// merge 复核：location/RST1 新值落库；save_para1/role_index 基底保留
+	_, meta, ok, err := store.LoadRole("hero", "王五", 11)
+	if err != nil || !ok {
+		t.Fatalf("load after save: %v %v", ok, err)
+	}
+	if meta.Location != "1.500,-2.250,3.000,1.000" {
+		t.Fatalf("location merged %q", meta.Location)
+	}
+	if meta.RoleStateJSON != `{"str":99,"money":12345}` {
+		t.Fatalf("rst1 merged %q", meta.RoleStateJSON)
+	}
+	if meta.SavePara1 != "book1,hair1" || meta.Index != 2 {
+		t.Fatalf("base columns clobbered: para=%q index=%d", meta.SavePara1, meta.Index)
+	}
+
+	// 不存在角色 → result 0（官方方言 0=失败）
+	for i, u := range utf16.Encode([]rune("无")) {
+		binary.LittleEndian.PutUint16(frame[0x08+i*2:], u)
+	}
+	wc.send(commWorld, 62, 0x04, frame)
+	_, _, id2, p = wc.recv()
+	if id2 != 0x03 || binary.LittleEndian.Uint32(p[8:]) != 0 {
+		t.Fatalf("absent save should deny: %#x", p[:12])
 	}
 }

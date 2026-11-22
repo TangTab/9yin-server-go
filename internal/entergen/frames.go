@@ -247,6 +247,21 @@ func RecordAddCellsFrame(objectID, ownerID uint32, recordIndex uint16, cells []R
 	return msg, nil
 }
 
+// RecordDelRowFrame 0x12 记录行删除（14B；末 u16 = 记录内 0 基行号）。
+// 快捷栏整表重建方言的清空半边：从尾行到 0 倒序删，行号重编号永不
+// 参与——客户端引擎侧无论怎样维护行号都不会错位（9yin_server1 真机
+// 抓包镜像方言）。
+func RecordDelRowFrame(objectID, ownerID uint32, recordIndex, row uint16) []byte {
+	msg := make([]byte, 14)
+	msg[0] = 0x12
+	msg[1] = 0
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
+	binary.LittleEndian.PutUint16(msg[12:], row)
+	return msg
+}
+
 // MountSpec 一条挂载计划项（MountPlan 数据源见 mountplan.go）。
 type MountSpec struct {
 	Name string

@@ -211,3 +211,9 @@ func PropertyByIndex(index int) (PropertyEntry, bool) {
 func officialSceneFields() []PropertyEntry {
 	return officialTable.sceneFields
 }
+
+// OfficialSceneFields officialSceneFields 的导出面（NPC 0x0D 属性按
+// 表序合成——2433 线 OrderedProperties 同构）。
+func OfficialSceneFields() []PropertyEntry {
+	return officialSceneFields()
+}

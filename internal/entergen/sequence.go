@@ -6,10 +6,13 @@ package entergen
 //	  0x0B 进场 → 0x0D 玩家物化（外观/身体模型集）→ 0x14/0x11 记录对
 //	  （挂载→纯数字列行）→ 0x29 批量（字符串列记录，0x47 字面量包装）
 //	  → 0x28 化身 → 0x10 物理流 ×36 → 0x10 基础属性批（五维/资源）
+//	  → 开图双记录（MapMaskRec 迷雾行 + OpenMapRec 位图）→ NPC 物化 ×N
 //	Ready（ClientReady 后）：
 //	  m229 c130 NPC 物化族 ×N（场景 NPC 目录；golden 相位段首）
-//	  → m607/m52/m586 → m169 buff → 视图簇（空容器 + View40/43/46 + 44/45）
-//	  → 战斗属性单帧族 → m416 九阴志域 → 0x1F 位置
+//	  → 0x10 AutoTrace=1（地图点击寻路闸门）→ m607/m52/m586 → m169 buff
+//	  → 视图簇（空容器 + View40/43/46 + 44/45）
+//	  → 战斗属性单帧族 → 自定义配置簇（705/键位域 0x10/快捷栏 0x11 行）
+//	  → m416 九阴志域 → 0x1F 位置
 //
 // 会话身份（seq/obj/own/IP/时间戳）由 Identity/Session 注入，数据值取
 // rolestate（role_state_json 同源）——官方 Fs 引擎 PlayerEntry 按存档
@@ -41,6 +44,18 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		return nil, err
 	}
 	frames = append(frames, appearance)
+
+	// 0x1F 位置 + 0x10 人物数据大批（52626 #26/#27 实证序：0x0D→0x1F→
+	// 登录全量面板批→物理流单帧族；b-line sendPlayerLocationAndVitals
+	// 同构——0x1F 重定位后紧跟 vitals 大批）。
+	pos0 := ctx.State.Position
+	frames = append(frames, LocationFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID,
+		float32(pos0[0]), float32(pos0[1]), float32(pos0[2]), float32(pos0[3])))
+	vital, err := PlayerVitalBatchFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, vital)
 
 	// 登录信息帧簇 m366/m623/m655（外服 0.1s 位：0x0A 表后）。
 	info, err := LoginInfoFrames(ctx)
@@ -87,6 +102,25 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, base...)
 
+	// 开图双记录帧（b-line grantMapRecords：0x0D 后、ClientReady 前——
+	// MapMaskRec 迷雾行 + OpenMapRec 24 行位图；大地图城市标签/迷雾的
+	// 数据源，全缺则图层空、点击无反应）。
+	maps, err := MapRecordsFrames(ctx, ctx.SceneIndex)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, maps...)
+
+	// NPC 物化族 ×N 全量（官方登录序：玩家 0x0D→记录行→NPC 物化×N；
+	// 默认 0x28 mode=0x46 官方言——npc.pcapng 19 字段罗塞塔）。
+	if len(ctx.NPCObjects) > 0 {
+		npc, err := NpcMaterializeFrames(ctx.NPCObjects, ctx.NPCAs0x28)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, npc...)
+	}
+
 	return frames, nil
 }
 
@@ -94,15 +128,13 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	frames := [][]byte{}
 
-	// m229 c130 NPC 物化族（golden 相位：ready 段最前 #2-63 连发——
-	// ClientReady 应答先推场景 NPC，再登录信息/视图簇）。
-	if len(ctx.NPCs) > 0 {
-		npc, err := NpcListFrames(ctx.NPCs)
-		if err != nil {
-			return nil, err
-		}
-		frames = append(frames, npc...)
+	// 0x10 AutoTrace=1（开图三件套之三，b-line pushAutoTrace：ClientReady
+	// 簇 m52 前——引擎侧地图点击寻路闸门，缺则点击地图不发起自动寻路）。
+	autoTrace, err := AutoTraceFrame(ctx)
+	if err != nil {
+		return nil, err
 	}
+	frames = append(frames, autoTrace)
 
 	// m607/m52/m586。
 	info, err := ReadyInfoFrames(ctx, now)
@@ -146,6 +178,16 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		return nil, err
 	}
 	frames = append(frames, combat...)
+
+	// 自定义配置域推送簇：705 个性配置 → 键位域 0x10（198/199/200/
+	// 223/201）→ 快捷栏 shortcut_rec 0x11 行（视图簇之后；无档零帧，
+	// starter 打坐条目由 EffectiveShortcuts 推导）。fork 客户端本地
+	// 不落盘，缺发即「快捷键/自定义配置重登全丢」。
+	custom, err := CustomConfigFrames(ctx)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, custom...)
 
 	// m416 九阴志域声明。
 	jyz, err := JyzDomainFrame(6)
@@ -224,6 +266,8 @@ func basePropertyFrames(ctx Context) ([][]byte, error) {
 		NamedProperty("MP", Int32Value(int32(state.MP))),
 		NamedProperty("SP", Int32Value(int32(state.SP))),
 		NamedProperty("MaxParry", Int32Value(int32(state.Parry))),
+		// 碎银（CapitalType1，2433 线 silverUpdate 同名同型 Int64）。
+		NamedProperty("CapitalType1", Int64Value(state.Money)),
 	}
 	frame, err := ObjectPropertyFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, 0, props)
 	if err != nil {

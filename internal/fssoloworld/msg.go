@@ -75,6 +75,11 @@ func (s *Server) entryClientClosed(id1 uint32, p []byte) bool {
 		s.inner.SendToAllStore(0, 0x37,
 			accountLogoffFrame(clientID, serial, session, pl.Account))
 	}
+	// 0x04 下线存档（GM 热改后的 roleState 权威快照落库；无 roleState
+	// 的未进场会话跳过）。存档发出后不等待回执（0x03 trace 簿记）。
+	if pl.haveRoleState {
+		s.sendRoleSave(pl)
+	}
 	s.playerLeave(pl)
 	return true
 }
@@ -116,6 +121,14 @@ func (s *Server) entryClientMessage(id1 uint32, p []byte) bool {
 		// View40 技能行；View43 缺发 = 「普通开始」按钮禁用）
 		s.clientReady(pl)
 		return true
+	case clientMsgActivity:
+		// op0x0A 活动信封：仅 21B 头 + TVarList 形态按自定义消息消费
+		//（107/195/99/199/200/201 等可经此路），其余活动流量放行。
+		return s.clientActivity(pl, append([]byte{0x0A}, body...))
+	case clientMsgCustom:
+		// op0x1E 自定义消息（GameVisual:CustomSend TVarList）→
+		// 自定义配置域接收链（键位/快捷栏/个性配置上传）。
+		return s.clientCustom(pl, append([]byte{0x1E}, body...))
 	case clientMsgPing:
 		// op0x18 心跳 → 0x38 外服形态（30B）：12B 回显 + 18B 尾
 		// （u16 4 + uptime_ms×2 + 计数——外服 s2c#224 逆向；12B 纯回显
@@ -328,6 +341,8 @@ func (s *Server) ProcessStoreMsg(id1, id2 uint32, payload []byte) bool {
 		return true
 	case 2: // Load 回执：存档载入完成 → 进场帧簇（0x09/0x0A/0x0B/0x0D）
 		return s.storeLoadEnter(id1, payload)
+	case 3: // Save 回执（0x04 存档应答；簿记面）
+		return s.storeSaveReply(id1, payload)
 	case 0x0D: // QueryAccount 回执：账号角色清单 → 下行有角 0x04
 		return s.storeRolesList(id1, payload)
 	case 6: // Create/Roles 共用回执：建角应答

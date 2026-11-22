@@ -564,36 +564,58 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	if f := readFrame(0x0B); binary.LittleEndian.Uint16(f[13:]) != 5 {
 		t.Fatalf("native entry attrs=%d", binary.LittleEndian.Uint16(f[13:]))
 	}
+	openMapSeen, mapMaskSeen := false, false
+	checkMapFrame := func(f []byte) {
+		if f[0] == 0x11 && len(f) >= 16 {
+			switch binary.LittleEndian.Uint16(f[10:]) {
+			case 51: // OpenMapRec 24 行开图位图（外服 112B 形）
+				openMapSeen = len(f) == 112 && binary.LittleEndian.Uint16(f[14:]) == 24
+			case 56: // MapMaskRec 迷雾行 [段号, born03, 1]
+				mapMaskSeen = binary.LittleEndian.Uint32(f[16:]) == 3
+			}
+		}
+	}
 	for i := 0; i < 130; i++ { // 原生进场段其余帧（记录/化身/物理流/属性批）
-		readAny()
+		checkMapFrame(readAny())
 	}
 	if err := conn.WriteMsg([]byte{0x09}); err != nil { // ClientReady
 		t.Fatalf("write op09: %v", err)
 	}
-	// 原生就绪段含 m229 c130 NPC 物化族 ×N（真档在仓根 testdata，cwd
-	// 探测命中）。进场段帧数随建号数据可变（位图/采集行可达千帧），m229
-	// 族在就绪段头连续出现——读到第一帧后计数至连续段结束。
+	// NPC 双通道（真档在仓根 testdata，cwd 探测命中）：进场段尾部 NPC
+	// 0x0D 物化族 ×1759（fork 段 obj 0x11——渲染通道，默认开）；m229
+	// 设施族默认关。进场段帧数随建号数据可变（位图/采集行+NPC 千帧级）。
 	isNpcM229 := func(f []byte) bool {
 		return len(f) > 12 && f[0] == 0x1E && f[3] == 2 &&
 			binary.LittleEndian.Uint32(f[4:]) == 229 &&
 			f[8] == 2 && binary.LittleEndian.Uint32(f[9:]) == 130
 	}
-	npcCount := 0
-	for i := 0; i < 3000; i++ {
+	npc0D, mark229 := 0, 0
+	for i := 0; i < 9000; i++ { // 进场余帧（千级）+ NPC 0x0D 全量 1759 + 就绪段尾部
 		f := readAny()
+		checkMapFrame(f) // 开图双记录（记录簇尾、NPC 物化前）
 		if isNpcM229(f) {
-			npcCount++
+			mark229++
 			continue
 		}
-		if npcCount > 0 {
-			break // NPC 连续段结束
+		if f[0] == 0x28 && f[1] == 0x46 && len(f) > 60 && f[13] == 0x11 {
+			npc0D++ // NPC 0x28 物化（全量一次物化——PreReady 尾）
+			if npc0D >= 1759 {
+				break
+			}
+			continue
 		}
 	}
-	if npcCount == 0 {
-		t.Fatalf("m229 NPC 物化族缺席（场景目录装载失败？）logs: %s", logs)
+	if npc0D != 1759 {
+		t.Errorf("NPC 0x28 帧数 = %d, want 1759（born03 全量物化）logs: %s", npc0D, logs)
 	}
-	if npcCount != 200 {
-		t.Errorf("m229 帧数 = %d, want 200（born03 半径 500 上限 200）", npcCount)
+	if !openMapSeen {
+		t.Errorf("进场段未见 OpenMapRec 位图帧（大地图城市标签/点击寻路数据源）logs: %s", logs)
+	}
+	if !mapMaskSeen {
+		t.Errorf("进场段未见 MapMaskRec 迷雾行（born03=3）logs: %s", logs)
+	}
+	if mark229 != 0 {
+		t.Errorf("m229 默认关仍下发 %d 帧", mark229)
 	}
 	if !w.Names().FindName("王五") {
 		t.Fatal("nameuid missing after full flow")

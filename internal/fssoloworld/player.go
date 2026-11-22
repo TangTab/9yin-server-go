@@ -52,6 +52,11 @@ type Player struct {
 	// 缺席（官方 store/旧档）时 entergen 回退 replay 模式。
 	roleState     rolestate.RoleState
 	haveRoleState bool
+	// 自定义配置域会话闸（连接生命周期，不落库）：客户端登录期会先
+	// 上传默认键位/个性配置转储（恢复帧未必已应用）——首传且库存有档
+	// 时跳过落库防默认覆盖玩家配置（custom.go 首传闸）。
+	customizingSeen bool
+	keybindSeen     bool
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。
@@ -78,6 +83,7 @@ func NewWorldPlayers(max int) *WorldPlayers {
 }
 
 func persistKey(conn1, conn2 uint32) uint64 { return uint64(conn1)<<32 | uint64(conn2) }
+
 
 // AddPlayer 官方 AddPlayer(conn1, conn2, account, flag)。
 func (w *WorldPlayers) AddPlayer(conn1, conn2 uint32, account string) *Player {

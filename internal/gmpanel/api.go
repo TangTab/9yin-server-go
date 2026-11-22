@@ -322,6 +322,20 @@ func (s *Server) apiGM(w http.ResponseWriter, r *http.Request) {
 	action := strings.TrimPrefix(r.URL.Path, "/api/gm/")
 	body := postBody(r)
 	switch action {
+	case "raw":
+		// GM 测试台透传：仅放行 world echo 的 `gm ` 前缀命令族
+		//（gmcmd.go：state/set/money/tp/msg/view/flush/save）。
+		line := strings.TrimSpace(body["line"])
+		if line == "" || !strings.HasPrefix(line, "gm ") {
+			writeErr(w, http.StatusBadRequest, fmt.Errorf("仅允许 gm 前缀命令（gm state/set/money/tp/msg/view/flush/save …）"))
+			return
+		}
+		lines, err := s.worldCli().Command(line)
+		if err != nil {
+			writeErr(w, http.StatusServiceUnavailable, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"lines": lines})
 	case "kick":
 		name := strings.TrimSpace(body["name"])
 		if name == "" {

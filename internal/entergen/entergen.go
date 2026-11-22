@@ -40,12 +40,15 @@ type Session struct {
 
 // Context 一次进场生成的全部输入。
 type Context struct {
-	Identity Identity
-	Session  Session
-	RoleName string // 角色名（m607 宽串）
-	State    rolestate.RoleState
-	Keybind  string    // 存档键位串（0x28 档案 ShortcutKey；空=省略）
-	NPCs     []NpcEntry // 场景 NPC 物化族（m229 c130；空=不下发）
+	Identity  Identity
+	Session   Session
+	RoleName  string // 角色名（m607 宽串）
+	State     rolestate.RoleState
+	Keybind   string // 存档键位串（0x28 档案 ShortcutKey；空=省略）
+	NPCs      []NpcEntry    // 场景 NPC 物化族 m229 c130（外服方言设施通道；默认不发）
+	NPCObjects []NpcObject0D // 场景 NPC 物化族（全量）
+	NPCAs0x28  bool          // 物化帧形态：true=0x28 mode=0x46（官方家族客户端）；false=裸 0x0D 大档（判别）
+	SceneIndex int           // 客户端 scenes.ini 全局段号（开图位图/迷雾行；-1=表缺席降级）
 }
 
 // DefaultIdentity fork 客户端方言的玩家恒等身份（1-1）：

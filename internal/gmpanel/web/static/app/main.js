@@ -22,7 +22,8 @@ function registerComponents() {
   return count;
 }
 
-/* ---- 面板注册表（懒加载） ---- */
+/* ---- 面板注册表（懒加载；children = 二级目录，分组语义对齐 2433
+   gm-panel 的 panels/registry.js GROUPS） ---- */
 
 const SECTIONS = [
   { id: "overview", title: "总览", load: () => import("./panels/overview.js") },
@@ -31,6 +32,17 @@ const SECTIONS = [
   { id: "players", title: "在线玩家", load: () => import("./panels/players.js") },
   { id: "db", title: "角色 / 告警", load: () => import("./panels/db.js") },
   { id: "gm", title: "GM 命令", load: () => import("./panels/gm.js") },
+  {
+    id: "test", title: "GM 测试台", load: () => import("./panels/test.js"),
+    children: [
+      { id: "role", title: "角色状态" },
+      { id: "item", title: "货币与物品" },
+      { id: "skill", title: "武学与修炼" },
+      { id: "scene", title: "传送与场景" },
+      { id: "debug", title: "调试工具" },
+      { id: "archive", title: "存档管理" },
+    ],
+  },
 ];
 
 let activePanel = null; // {refresh(): void} —— 全局 tick 调当前页刷新
@@ -43,21 +55,43 @@ function buildNav() {
   for (const sec of SECTIONS) {
     const link = h("a", { "data-target": sec.id }, [sec.title]);
     link.addEventListener("click", () => {
-      location.hash = "#/" + sec.id;
+      location.hash = "#/" + sec.id + (sec.children ? "/" + sec.children[0].id : "");
     });
     nav.appendChild(link);
+    for (const child of sec.children || []) {
+      const sub = h("a", { class: "sub", "data-target": sec.id + "/" + child.id }, [child.title]);
+      sub.addEventListener("click", () => {
+        location.hash = "#/" + sec.id + "/" + child.id;
+      });
+      nav.appendChild(sub);
+    }
   }
 }
 
-function markActive(id) {
+function markActive(target) {
+  // 子项精确命中；无子项命中时父级保持高亮（组内其他视图）
   document.querySelectorAll("#side-nav a").forEach((link) => {
-    link.classList.toggle("active", link.dataset.target === id);
+    link.classList.toggle("active", link.dataset.target === target);
   });
+  if (!document.querySelector("#side-nav a.active")) {
+    const head = target.split("/")[0];
+    document.querySelectorAll('#side-nav a:not(.sub)').forEach((link) => {
+      link.classList.toggle("active", link.dataset.target === head);
+    });
+  }
 }
 
-async function showSection(id) {
+// parseHash 拆 #/<section>[/<sub>]（二级目录路由）。
+function parseHash() {
+  const path = location.hash.replace(/^#\//, "") || "overview";
+  const seg = path.split("/").filter(Boolean);
+  return { id: seg[0] || "overview", sub: seg[1] || "" };
+}
+
+async function showSection() {
+  const { id, sub } = parseHash();
   const sec = SECTIONS.find((s) => s.id === id) || SECTIONS[0];
-  markActive(sec.id);
+  markActive(sec.id + (sub ? "/" + sub : ""));
   const view = document.querySelector("#view");
   view.innerHTML = "";
   view.appendChild(h("section", { class: "panel" }, [h("ax-skeleton", { type: "card" })]));
@@ -65,7 +99,7 @@ async function showSection(id) {
   try {
     const mod = await sec.load();
     view.innerHTML = "";
-    activePanel = mod.mount(view);
+    activePanel = mod.mount(view, sub);
   } catch (err) {
     console.error("panel load failed", err);
     view.innerHTML = "";
@@ -122,7 +156,7 @@ registerComponents();
 buildNav();
 setRefreshHook(tick);
 document.querySelector("#nav-toggle").addEventListener("click", () => document.body.classList.toggle("nav-open"));
-window.addEventListener("hashchange", () => showSection(location.hash.replace(/^#\//, "") || "overview"));
-showSection(location.hash.replace(/^#\//, "") || "overview");
+window.addEventListener("hashchange", () => showSection());
+showSection();
 tick();
 setInterval(tick, 2500);

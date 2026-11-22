@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 	"sync"
 	"time"
@@ -715,6 +716,55 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			}
 		}
 		s.emit(serial, back, body)
+	case 0x04: // save（gmpanel GM 链路：world 0x04 存档，官方锚点头
+		// +Go TLV 段——见 fssoloworld/roles.go buildSaveStore）→
+		// merge 库内 meta（world 不可知列不冲掉）→ SaveRole →
+		// 回执 0x03 {client,serial,u32 result}（官方 MessageSave→0x03）。
+		name, pos, tlv, ok := decodeSaveStore(payload)
+		if !ok {
+			s.logf("(CAccess::MessageSave)len == sizeof(store_forw_save_t)≥0xA0，得 %#x", len(payload))
+			return
+		}
+		account := string(tlv[1])
+		serverID := 0
+		if len(tlv[2]) >= 4 {
+			serverID = int(binary.LittleEndian.Uint32(tlv[2]))
+		}
+		result := uint32(1) // 官方方言：0 = 失败，1 = 成功
+		_, base, found, err := b.LoadRole(account, name, serverID)
+		switch {
+		case err != nil:
+			s.logf("(CAccess::MessageSave)connection error")
+			return
+		case !found:
+			s.logf("(CAccess::MessageSave)role %q not found (account %q)", name, account)
+			result = 0
+		default:
+			// merge：location（world 提供新位置）/role_state_json/
+			// save_data 覆盖基底；其余 meta 列（total_sec/letter_max/
+			// scene_id/role_index/sys_flags/save_para1/uid）world 不可
+			// 知，一律保留库内值。
+			if pos != nil {
+				base.Location = fmt.Sprintf("%.3f,%.3f,%.3f,%.3f", pos[0], pos[1], pos[2], pos[3])
+			}
+			if rst1 := string(tlv[3]); rst1 != "" {
+				base.RoleStateJSON = rst1
+			}
+			if len(tlv[4]) > 0 {
+				if err := b.SaveRole(name, base, tlv[4]); err != nil {
+					s.logf("(CAccess::MessageSave)save error: %v", err)
+					result = 0
+				}
+			} else if err := b.SaveRole(name, base, nil); err != nil {
+				s.logf("(CAccess::MessageSave)save error: %v", err)
+				result = 0
+			}
+		}
+		body := make([]byte, 12)
+		putLe32(body, 0x00, sceneOf(payload[0:4]))
+		putLe32(body, 0x04, sceneOf(payload[4:8]))
+		putLe32(body, 0x08, result)
+		s.emit(serial, back, body)
 	case 0x0A: // create（solo ≥0xD4）：{client_id@0, serial@4,
 		// server_id@8, account char[33]@0xC, name wchar 34槽@0x2D,
 		// para wchar@0x71} → MessageCreate（INSERT；重名 false）→
@@ -900,6 +950,40 @@ func sceneOf(p []byte) uint32 {
 		return le32(p, 0)
 	}
 	return 0
+}
+
+// decodeSaveStore 解 0x04 存档包（fssoloworld/roles.go buildSaveStore
+// 对偶）：官方锚点头（name 宽串@0x08 0x48 区、charge@0x50、location
+// 4×double@0x80）+ 0xA0 后 TLV 段（1=account 2=server_id 3=RST1 json
+// 4=save_data）。pos 全零返回 nil（无新位置，merge 保留基底）。
+func decodeSaveStore(p []byte) (name string, pos *[4]float64, tlv map[uint32][]byte, ok bool) {
+	if len(p) < 0xA0 {
+		return "", nil, nil, false
+	}
+	tlv = map[uint32][]byte{}
+	for off := 0xA0; off+8 <= len(p); {
+		tag := le32(p, off)
+		n := int(le32(p, off+4))
+		off += 8
+		if off+n > len(p) {
+			return "", nil, nil, false // 截断段：整包拒绝
+		}
+		tlv[tag] = p[off : off+n]
+		off += n
+	}
+	var loc [4]float64
+	any := false
+	for i := 0; i < 4; i++ {
+		bits := binary.LittleEndian.Uint64(p[0x80+i*8:])
+		loc[i] = math.Float64frombits(bits)
+		if loc[i] != 0 {
+			any = true
+		}
+	}
+	if any {
+		pos = &loc
+	}
+	return wideNulStr(p[0x08 : 0x08+0x48]), pos, tlv, true
 }
 
 // auctionName auction save 头内的名（attr: +8 uid[0x24]/name；粗取 NUL 串）。

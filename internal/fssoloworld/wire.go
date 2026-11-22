@@ -216,6 +216,8 @@ const (
 	clientMsgDeleteRole = 5
 	clientMsgReviveRole = 6
 	clientMsgReady      = 8    // op09 ClientReady（进场就绪单字节）
+	clientMsgActivity   = 0x09 // op0x0A 活动信封（21B 头 + TVarList 形态才消费）
+	clientMsgCustom     = 0x1D // op0x1E 自定义消息（TVarList 数值路由）
 	clientMsgPing       = 0x17 // op0x18 心跳（mt 折算后内网号）
 )
 

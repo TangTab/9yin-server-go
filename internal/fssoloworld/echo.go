@@ -117,6 +117,11 @@ func (e *EchoConsole) command(nc net.Conn, line string) bool {
 		resp("kick " + name + " sent")
 		return false
 	}
+	// gm 测试命令族（带参，switch 字符串 case 之外的同款 if 前缀模式）
+	if strings.HasPrefix(line, "gm ") || line == "gm" {
+		e.gmCommand(nc, strings.Fields(line)[1:])
+		return false
+	}
 	switch line {
 	case "quit":
 		resp("server will shutdown...")

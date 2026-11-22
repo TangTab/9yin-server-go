@@ -4,6 +4,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/auth"
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/proto"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 
 	"bufio"
 	"bytes"
@@ -1225,4 +1226,166 @@ func TestDiscoveryPendingWorld(t *testing.T) {
 		t.Fatalf("全连后应就绪 = %v", p)
 	}
 	// auction 可选对端：缺席不影响就绪判定（上面即无 auction）
+}
+
+// readEchoLine 逐行读 echo 应答（\r 终止方言）。
+func readEchoLine(rd *bufio.Reader) string {
+	line, _ := rd.ReadString('\r')
+	return strings.TrimSuffix(line, "\r")
+}
+
+// TestEchoGmCommands GM 测试命令族全链：gm state/set/money/tp/msg/view
+// 热发帧（伪 entry 收 0x10/0x1F）+ gm save 0x04 存档包（伪 store 收包
+// 断言锚点/TLV 后回 0x03）。方言见 gmcmd.go / roles.go buildSaveStore。
+func TestEchoGmCommands(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.InnerAddr = "127.0.0.1"
+	cfg.InnerPort = 0
+	cfg.BroadPort = 0
+	cfg.EchoAddr = "127.0.0.1"
+	cfg.EchoPort = 0
+	s := New(Options{Config: cfg, ManualTick: true, Logf: func(format string, args ...any) {
+		t.Logf(format, args...)
+	}})
+	if err := s.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Stop()
+	st := dialInnerTest(t, s.InnerPort(), commStoreMin)
+	en := dialInnerTest(t, s.InnerPort(), commEntryMin)
+	waitComm := func(comm uint32) {
+		t.Helper()
+		for i := 0; i < 200; i++ {
+			if s.inner.GetConnected(comm) {
+				return
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+		t.Fatalf("comm %d not registered", comm)
+	}
+	waitComm(commStoreMin)
+	waitComm(commEntryMin)
+
+	pl := s.players.AddPlayer(7, 1, "acct")
+	s.players.SetupPlayerName(7, 1, "测试侠")
+	s.players.SetPlayerState(pl, PlOnline)
+	rs, err := rolestate.BuildRoleState("", 0, "", 42)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pl.roleState, pl.haveRoleState = rs, true
+
+	conn, err := net.DialTimeout("tcp", s.echo.ln.Addr().String(), time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	rd := bufio.NewReader(conn)
+	rd.ReadString('\r') // welcome
+	gm := func(line string) []string {
+		t.Helper()
+		conn.Write([]byte(line + "\r"))
+		var out []string
+		for {
+			l := readEchoLine(rd)
+			if l == ">end" {
+				return out
+			}
+			if l != "" {
+				out = append(out, l)
+			}
+		}
+	}
+	join := func(lines []string) string { return strings.Join(lines, "\n") }
+
+	// state：建号初值（五维/碎银 99999/starter 技能数）
+	lines := gm("gm state acct")
+	body := join(lines)
+	if !strings.Contains(body, "str=") || !strings.Contains(body, "money=99999") {
+		t.Fatalf("gm state: %q", body)
+	}
+
+	// set str 99：0x10 热发 + 内存生效（state 复核）
+	lines = gm("gm set 测试侠 str 99")
+	if !strings.Contains(join(lines), "sent (0x10)") {
+		t.Fatalf("gm set: %q", join(lines))
+	}
+	if f := en.recvClientFrame(t); f[0] != 0x10 {
+		t.Fatalf("set hot frame %#x", f[0])
+	}
+	if lines = gm("gm state acct"); !strings.Contains(join(lines), "str=99") {
+		t.Fatalf("set not applied: %q", join(lines))
+	}
+
+	// money 12345：CapitalType1 帧
+	gm("gm money acct 12345")
+	if f := en.recvClientFrame(t); f[0] != 0x10 {
+		t.Fatalf("money hot frame %#x", f[0])
+	}
+
+	// tp：0x1F 帧
+	lines = gm("gm tp acct 11.5 -22 33.25")
+	if !strings.Contains(join(lines), "sent (0x1F)") {
+		t.Fatalf("gm tp: %q", join(lines))
+	}
+	if f := en.recvClientFrame(t); f[0] != 0x1F {
+		t.Fatalf("tp frame %#x", f[0])
+	}
+
+	// view 40：至少一帧（0x15/0x18 视图族）
+	lines = gm("gm view acct 40")
+	if !strings.Contains(join(lines), "view 40 rebuilt") {
+		t.Fatalf("gm view: %q", join(lines))
+	}
+	if f := en.recvClientFrame(t); f[0] != 0x15 && f[0] != 0x18 {
+		t.Fatalf("view frame %#x", f[0])
+	}
+
+	// msg：m366 自定义帧探针
+	lines = gm("gm msg acct 366 7")
+	if !strings.Contains(join(lines), "msg 366") {
+		t.Fatalf("gm msg: %q", join(lines))
+	}
+	en.recvClientFrame(t)
+
+	// save：伪 store 收 0x04 → 锚点断言 → 回 0x03
+	lines = gm("gm save acct")
+	if !strings.Contains(join(lines), "0x04 sent to store") {
+		t.Fatalf("gm save: %q", join(lines))
+	}
+	comm, _, id2, p := st.recv()
+	if comm != commWorld || id2 != 0x04 {
+		t.Fatalf("save to store comm=%d id2=%#x", comm, id2)
+	}
+	if got := wideNulNameOf(p[0x08 : 0x08+0x48]); got != "测试侠" {
+		t.Fatalf("save name %q", got)
+	}
+	// TLV：tag1 account / tag3 RST1 json（含 gm set 后的 str=99）
+	tlv := map[uint32][]byte{}
+	for off := 0xA0; off+8 <= len(p); {
+		tag := binary.LittleEndian.Uint32(p[off:])
+		n := int(binary.LittleEndian.Uint32(p[off+4:]))
+		off += 8
+		tlv[tag] = p[off : off+n]
+		off += n
+	}
+	if string(tlv[1]) != "acct" {
+		t.Fatalf("save account %q", string(tlv[1]))
+	}
+	if !strings.Contains(string(tlv[3]), `"str":99`) {
+		t.Fatalf("save RST1 missing hot-edited str: %q", string(tlv[3]))
+	}
+	rep := make([]byte, 12)
+	binary.LittleEndian.PutUint32(rep[0:], 7)
+	binary.LittleEndian.PutUint32(rep[4:], 1)
+	binary.LittleEndian.PutUint32(rep[8:], 1)
+	st.send(commStoreMin, 0, 3, rep) // 0x03 回执（trace 簿记，不断言）
+
+	// 未命中/白名单外
+	if lines = gm("gm set acct fly 1"); !strings.Contains(join(lines), "unknown prop") {
+		t.Fatalf("whitelist: %q", join(lines))
+	}
+	if lines = gm("gm state nobody"); !strings.Contains(join(lines), "not found") {
+		t.Fatalf("not found: %q", join(lines))
+	}
 }

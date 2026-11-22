@@ -55,13 +55,20 @@
   guildbuildingnpc 1/other 1；attacknpc 族与 *_creator 随机组不发）。
 - 模板联查：`ini/Npc/NpcConfig` 树（27MB/76 档）id→Resource/Name/Scale/NpcType，
   born03 命中 1759/1907（92%；未命中≈lightnpc 火盆族 NpcConfig 无模板，跳过）。
-- 筛选：距出生点平面半径（缺省 500，`NINEYIN_NPC_RADIUS`）+ 总量上限（缺省 200
-  ≤ MaxVisuals 230，`NINEYIN_NPC_LIMIT`），距离升序截断。
+- 筛选：**全量渲染（2026-11-22 拍板「先全部渲染，不分距离」）**——缺省半径/
+  上限均不限，仅跳过模板联查未命中项（born03 全量 = 联查命中 1759 条）。
+  需收窄时 `NINEYIN_NPC_RADIUS`（如 500）/ `NINEYIN_NPC_LIMIT`（如 200 ≤
+  MaxVisuals 230）设回；全量对客户端视觉上限（idx1468 MaxVisuals=230）的
+  实际行为待真机观察。
 - 槽值策略：Layer=302（众数，不双发）、Group/Aux=0、物件名空/人物填模板 Name
   （**行为待真机验证**）、Icon 空。
-- 数据根：`NINEYIN_DATA_ROOT` > cwd 探测（`.`/`..`/`../..`/`testdata`/
-  `../testdata`/`../../testdata` 下的 ini/Npc/NpcConfig）。真档 27MB 不随二进制
-  部署（deploy.bat 不发 ini）——**真机验证需在目标根放 testdata\ini 或设 env**。
+- 数据根（两级语义，2026-11-22 拍板）：`NINEYIN_DATA_ROOT` > cwd 探测
+  `<dir>/ini/Npc/NpcConfig`——**正式 `$root\Res`**（`Res`/`../Res`/`../../Res`，
+  官方服务端 ini 布局，与 testdata/ini 同构；bin\ 或部署根起服均可命中）优先；
+  **测试兜底仓内 testdata**（`testdata`/`../testdata`/`../../testdata`，Go 测试
+  internal/<pkg>、build\ 直跑、源码树 cmd）。真档 27MB 不随二进制部署
+  （deploy.bat 不发 ini）——正式环境在部署根放 `Res\ini`（npcgen 产出或官方
+  ini），缺席时 NPC 静默不下发。
 - 总开关：`NINEYIN_NPC_PUSH=off` 一键关停（方言演进期保护）。
 
 ## 四、事故记录：reactor 队满静默丢帧（2026-11-22 修复）
@@ -80,6 +87,8 @@ NPC 200 帧接入后 fsunite e2e 首次暴露**既有传输层缺陷**：
 
 ## 五、待真机验证项
 
+（2026-11-22 上午已验——见 §六，m229 在本客户端不渲染，以下仅存档）
+
 1. 物件+人物 200 条混合下发：渲染效果（旗帜/火盆/建筑/村民站立）、Layer=302
    单发是否够（golden 双发 301+302 之谜）、Group/Aux=0 是否影响交互态。
 2. 人物 Name 宽串（golden 无先例）：模板名 vs 空串。
@@ -87,3 +96,34 @@ NPC 200 帧接入后 fsunite e2e 首次暴露**既有传输层缺陷**：
    的地图基准差异未解——渲染位置偏差时先查这里）。
 4. 点击 NPC（C2S 0x07 obj@21 回传 0x03 段 ident）→ 本期未接路由，客户端
    应无响应/静默，不应崩溃。
+
+## 六、真机判决与 0x0D 渲染通道（2026-11-22 上午）
+
+m229 全量 1759 条真机**零渲染**。客户端 `bin64\trace.log`（排障第一站）：
+进场全绿、玩家渲染正常、**m229 零报错零痕迹**——与 2433 工作树
+《外服模式NPC渲染收束.md》终局结论吻合：**fork 系客户端把 m229 当
+EscortRec 记录帧静默吃掉，不是物化通道**（子码=记录表 id：144/145=
+job_skill_share_rec、130=EscortRec）；m229 十六值设施族是外服家族
+客户端语义。trace 另见就绪段海量 `ServerViewAdd Out range`（视图行
+方言问题，独立课题）。
+
+**NPC 渲染正解 = NPC 0x0D**（2433 线真机验证过的配方，本仓表已备
+2433+61 尾追=2494 头行通道）：63B 头（obj/own/x/y/z/orient）+ 头行块
+（默认层 39 项值集 + 模板层同名绑定 + 摆放 PosiX/Y/Z/Orient 四行，
+按 0x09 表序）+ 官方 16-prop 块（CollideRadius 寻路避障/State=stand/
+**Type=4**/Resource+ConfigID+Photo 三件套/ActionSpeed=1.0/Level/
+BossLevel=1/IDCard 五空槽/BornAction/WeaponMode=hand1_1/三比例=100/
+宝箱 OpenRange=2.0 采集 GatherRange=3.0）。ident：obj=0x11000000|idx、
+own=0x00660000|低16位（2433 真机形态）。落码 internal/entergen/npc0d.go
+（默认层直抄 VisibleNPCSpawnDefaultsCompatV1；模板层脏值如
+WalkSpeed="#N/A" 单字段跳过默认层兜底）。
+
+双通道开关：0x0D 默认开（`NINEYIN_NPC_0D=off` 关）；m229 默认关
+（`NINEYIN_NPC_MARK_229=1` 开——外服家族客户端接入时对照）。
+编排：0x0D×N 在 PreReady 尾（官方登录序：玩家 0x0D→记录行→NPC 0x0D×N）。
+
+**模型资源待验**：客户端 res\obj 无 npc 散目录（资源在 PackFileSys 包/
+patch .rp，玩家 b_jianghu 现代名渲染成功证明 char 库吃现代命名——
+worldnpc 系大概率在包内）。0x0D 下发后若 trace 出现 FxModelAdv 装载
+失败即资源缺失实锤，届时按 2433 线判别实验 `NINEYIN_NPC_RESOURCE_OVERRIDE`
+换名验证。

@@ -55,6 +55,59 @@ type RoleState struct {
 	NeiGong            []NeiGongBook  `json:"neigong"`
 	CurNeiGong         string         `json:"curNeiGong"`
 	FacultySeed        int64          `json:"facultySeed"`
+	// Money 碎银（GM/经济测试位；对拍 2433 线 CapitalType1，0x10 属性
+	// 帧按名寻址下发）。官银/黄金（CapitalType0/2）留多币种扩展。
+	Money int64 `json:"money,omitempty"`
+
+	// ---- 自定义配置域（fork 客户端本地不落盘，登录全靠服务端回推；
+	// 参考端 cmd/protocol-probe custom_config.go/shortcut_records.go 同源
+	// 规则，随 0x04 存档链持久化到 role_state_json）----
+
+	Customizing string `json:"customizing,omitempty"` // C2S 107 引擎个性配置整串（S2C 705 回推）
+	// Keybind/1/2 键位主串与方案一/二（C2S 195 scheme 0/1/2 → 属性
+	// 198/199/200 type7；0x10 单属性帧带尾空格、705 不涉）。
+	Keybind  string `json:"keybind,omitempty"`
+	Keybind1 string `json:"keybind1,omitempty"`
+	Keybind2 string `json:"keybind2,omitempty"`
+	// OperateMode 操作模式（C2S 99 → 属性 223；0=3D WASD/1=2.5D 点击）。
+	// Set 区分「从未设置」（不下发，客户端保持本地默认）与显式 0。
+	OperateMode    int32 `json:"operateMode,omitempty"`
+	OperateModeSet bool  `json:"operateModeSet,omitempty"`
+	// NeiGongBind 内功栏绑定串（C2S 199 → 属性 201；25 格 "v;"+尾分号）。
+	NeiGongBind string `json:"neiGongBind,omitempty"`
+	// Shortcuts 快捷栏基线（C2S 200/201 编辑 → shortcut_rec 0x11 行重放）。
+	// Set=true 即玩家已编辑（空表也是基线）：starter 打坐条目不复活。
+	Shortcuts    []ShortcutRow `json:"shortcuts,omitempty"`
+	ShortcutsSet bool          `json:"shortcutsSet,omitempty"`
+}
+
+// ShortcutRow shortcut_rec 一行：可见栏位索引、类型（"skill"/"item"…）
+// 与 config ID（栏位索引非记录行号——客户端 C2S 201 传的也是栏位索引）。
+type ShortcutRow struct {
+	Index int32  `json:"index"`
+	Kind  string `json:"kind"`
+	ID    string `json:"id"`
+}
+
+// StarterSitcrossShortcut starter 打坐条目（Ctrl+0 槽位=索引 9，避开
+// 初始战斗两槽）：客户端把 zs_default_01 识别为原生坐下/起立切换，
+// 走 CustomSend 240 而非 211 战斗路线——不是 FuncManager 记录。
+var StarterSitcrossShortcut = ShortcutRow{Index: 9, Kind: "skill", ID: "zs_default_01"}
+
+// EffectiveShortcuts 快捷栏生效表：无玩家编辑基线（ShortcutsSet=false）
+// 且索引 9 空缺时补 starter 打坐条目；有基线以编辑结果为准（删除即
+// 删除，不复活）。帧生成与编辑应答（整表重建方言）共用本口径。
+func (s RoleState) EffectiveShortcuts() []ShortcutRow {
+	rows := append([]ShortcutRow(nil), s.Shortcuts...)
+	if s.ShortcutsSet {
+		return rows
+	}
+	for _, row := range rows {
+		if row.Index == StarterSitcrossShortcut.Index {
+			return rows
+		}
+	}
+	return append(rows, StarterSitcrossShortcut)
 }
 
 // StarterSkill 初始武学行（View40 技能行 + 0x28 档案技能区共用）。
@@ -91,6 +144,10 @@ type NeiGongBook struct {
 	MaxParryAdd    int    `json:"maxParryAdd,omitempty"`
 	MinMagicDefAdd int    `json:"minMagicDefAdd,omitempty"`
 }
+
+// starterMoney 建号碎银初值（2433 线 flag starter-silver 默认 99999 的
+// 测试口径；官方建号货币基线未逆向，先对齐 fork 线便于对拍）。
+const starterMoney = 99999
 
 // ---- RoleBaseProp.xml ----
 
@@ -353,6 +410,8 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 		QingGongSkills:     splitIDs(starter.QingGong.Instance.IDs),
 		CollectSkills:      splitIDs(starter.CollectSkills.IDs),
 		FacultySeed:        facultySeed,
+		// 碎银初值对拍 2433 线 starter-silver 测试口径（CapitalType1）。
+		Money: starterMoney,
 	}
 	// 场景全名/坐标：location.ini BornCJ 节的 Scene 路径末段以 scene 为
 	// 前缀（born03 → ini\scene\born03_YanYuZhuang）即命中。

@@ -46,6 +46,8 @@ func fakeWorldEcho(t *testing.T) int {
 						fmt.Fprint(nc, ">player: 2, online: 1, offline: 0, active: 1, queuing: 0\r")
 					case line == "plist":
 						fmt.Fprint(nc, ">player 2\rtest001|角色甲|Online|3|1700000000|1700000500\rtest002||Logging|0|1700000100|1700000100\r>end\r")
+					case strings.HasPrefix(line, "gm "):
+						fmt.Fprint(nc, ">gm ok: " + line + ">end")
 					case strings.HasPrefix(line, "kick "):
 						fmt.Fprint(nc, ">kick " + strings.TrimPrefix(line, "kick ") + " sent\r")
 					default:
@@ -303,5 +305,38 @@ func TestParsePlayerCounts(t *testing.T) {
 	n := parsePlayerCounts("player: 2, online: 1, offline: 0, active: 1, queuing: 0", world)
 	if n != 1 || world["counts"] == nil {
 		t.Fatalf("n=%d %v", n, world)
+	}
+}
+
+func TestAPIGmRaw(t *testing.T) {
+	world := fakeWorldEcho(t)
+	s := newTestPanel(t, world, nil)
+	base := "http://" + s.Addr().String()
+	post := func(body string) (*http.Response, map[string]any) {
+		t.Helper()
+		resp, err := http.Post(base+"/api/gm/raw", "application/json", strings.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		var out map[string]any
+		_ = json.NewDecoder(resp.Body).Decode(&out)
+		return resp, out
+	}
+	// gm 前缀透传：应答行剥离 >end
+	resp, body := post(`{"line":"gm state test001"}`)
+	if resp.StatusCode != 200 {
+		t.Fatalf("raw %d", resp.StatusCode)
+	}
+	lines, _ := body["lines"].([]any)
+	if len(lines) != 1 || !strings.HasPrefix(lines[0].(string), "gm ok: gm state") {
+		t.Fatalf("raw lines %v", lines)
+	}
+	// 非 gm 前缀拒绝
+	if resp, _ = post(`{"line":"quit"}`); resp.StatusCode != 400 {
+		t.Fatalf("non-gm should reject: %d", resp.StatusCode)
+	}
+	if resp, _ = post(`{"line":""}`); resp.StatusCode != 400 {
+		t.Fatalf("empty should reject: %d", resp.StatusCode)
 	}
 }

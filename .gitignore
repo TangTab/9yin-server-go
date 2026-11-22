@@ -20,6 +20,7 @@ gmtest-sandbox/
 *.dmp
 *.7z
 
+/Res
 /res*.*
 env.server
 __pycache__
