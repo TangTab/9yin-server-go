@@ -644,6 +644,8 @@ func (s *Server) memberLeaveGame(id1 uint32, p []byte) bool {
 	clientID := binary.LittleEndian.Uint32(p[0:])
 	serial := binary.LittleEndian.Uint32(p[4:])
 	if pl := s.players.FindByConnect(clientID, serial); pl != nil {
+		// 不发 0x0C（2026-11-22 晚对齐 2433：离场零额外帧——客户端退到
+		// 选角直接断 TCP，帧送不到；重登序官方口径也无清场帧）。
 		s.playerLeave(pl)
 	}
 	return true

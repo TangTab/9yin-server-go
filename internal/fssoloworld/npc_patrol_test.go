@@ -109,7 +109,7 @@ func TestPatrolFramesOrderAndBatch(t *testing.T) {
 	}
 	moveState := map[uint32]bool{}
 	nowMs := time.Now().UnixMilli()
-	frames := patrolFrames(catalog, visible, moveState, nowMs)
+	frames := patrolFrames(catalog, visible, moveState, nowMs, nil)
 	if len(frames) == 0 {
 		t.Fatal("巡逻帧族为空")
 	}
@@ -136,7 +136,7 @@ func TestPatrolFramesOrderAndBatch(t *testing.T) {
 			}
 		}
 	}
-	again := patrolFrames(catalog, visible, moveState, nowMs)
+	again := patrolFrames(catalog, visible, moveState, nowMs, nil)
 	for _, f := range again {
 		if f[0] == 0x10 {
 			t.Fatal("同拍无翻转却重复下发 State 帧（水位失效）")

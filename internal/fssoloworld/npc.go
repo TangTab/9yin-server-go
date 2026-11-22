@@ -364,17 +364,53 @@ func (s *Server) npcPatrolTick(now time.Time) {
 			pl.npcMoveState = moveState
 		}
 		pl.npcMu.Unlock()
-		for _, frame := range patrolFrames(s.sceneNPCCatalog(scene), visible, moveState, nowMs) {
+		for _, frame := range patrolFrames(s.sceneNPCCatalog(scene), visible, moveState, nowMs, talkPausedSnapshot()) {
 			s.sendToClient(pl, frame)
 		}
 	}
 }
 
+// ---- 对话暂停（点击行人 NPC 弹菜单时停走） ----
+
+var (
+	talkPauseMu sync.Mutex
+	talkPaused  = map[uint32]int64{} // objectID → 暂停时刻 ms（60s 自动过期兜底）
+)
+
+// pauseNpcTalk 对话暂停：巡逻 NPC 停在暂停时刻采样位（60s 兜底过期，
+// 菜单异常未关不放永久停走）。
+func pauseNpcTalk(objectID uint32) {
+	talkPauseMu.Lock()
+	talkPaused[objectID] = time.Now().UnixMilli()
+	talkPauseMu.Unlock()
+}
+
+// resumeNpcTalk 菜单关闭恢复巡逻。
+func resumeNpcTalk(objectID uint32) {
+	talkPauseMu.Lock()
+	delete(talkPaused, objectID)
+	talkPauseMu.Unlock()
+}
+
+func talkPausedSnapshot() map[uint32]int64 {
+	talkPauseMu.Lock()
+	defer talkPauseMu.Unlock()
+	if len(talkPaused) == 0 {
+		return nil
+	}
+	snapshot := make(map[uint32]int64, len(talkPaused))
+	for id, at := range talkPaused {
+		snapshot[id] = at
+	}
+	return snapshot
+}
+
 // patrolFrames 单玩家巡逻帧族（纯函数；就地更新 moveState 水位）：
 // 视口内巡逻 NPC 采样 Motion——翻转实体先发 0x10 State（walk/stand），
 // 全体组 0x21 批量帧（≤8 条/帧；行进 spd/flags=1 且 rotate 恒 +2π，
-// 停留 spd=0/flags=0）。
-func patrolFrames(catalog *npcCatalog, visible map[uint32]bool, moveState map[uint32]bool, nowMs int64) [][]byte {
+// 停留 spd=0/flags=0）。paused（对话暂停）的 NPC 冻结在暂停时刻采样位、
+// 置 stand、每拍发 spd=0 停留条目（防旧目的地残留）。
+func patrolFrames(catalog *npcCatalog, visible map[uint32]bool, moveState map[uint32]bool, nowMs int64, paused map[uint32]int64) [][]byte {
 	batch := make([]entergen.AllDestEntry, 0, 8)
 	var stateFrames [][]byte
 	for i := range catalog.spawns {
@@ -382,7 +418,17 @@ func patrolFrames(catalog *npcCatalog, visible map[uint32]bool, moveState map[ui
 		if spawn.Schedule == nil || !visible[spawn.ObjectID] {
 			continue
 		}
-		motion := spawn.Schedule.MotionAt(nowMs)
+		pauseAt, isPaused := paused[spawn.ObjectID]
+		if isPaused && nowMs-pauseAt > 60*1000 { // 兜底过期
+			isPaused = false
+		}
+		var motion npcfeed.Motion
+		if isPaused {
+			p := spawn.Schedule.PositionAt(pauseAt)
+			motion = npcfeed.Motion{DestX: p.X, DestY: p.Y, DestZ: p.Z, DestOrient: p.Orient, Moving: false}
+		} else {
+			motion = spawn.Schedule.MotionAt(nowMs)
+		}
 		if last, seen := moveState[spawn.ObjectID]; !seen || last != motion.Moving {
 			moveState[spawn.ObjectID] = motion.Moving
 			if frame, err := entergen.NpcStateFrame(spawn.ObjectID, spawn.OwnerID, motion.Moving); err == nil {
@@ -450,9 +496,11 @@ func npcRadius() float64 { return envFloat("NINEYIN_NPC_RADIUS", 0) }
 // npcLimit NINEYIN_NPC_LIMIT 截断上限（<=0 不截断）。
 func npcLimit() int { return int(envFloat("NINEYIN_NPC_LIMIT", 0)) }
 
-// envFloat env 数值（缺席/非法回落缺省）。
+// envFloat env 数值（缺席/非法回落缺省）。TrimSpace 容忍 CRLF 尾巴——
+// env.server 经 bat findstr+call 注入时 LF 行尾的行会带 \r 残留进值
+// （2026-11-22 NINEYIN_NPC_RADIUS 静默失效教训）。
 func envFloat(key string, def float64) float64 {
-	if v := os.Getenv(key); v != "" {
+	if v := strings.TrimSpace(os.Getenv(key)); v != "" {
 		if f, err := strconv.ParseFloat(v, 64); err == nil && f >= 0 {
 			return f
 		}

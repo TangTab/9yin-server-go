@@ -398,6 +398,7 @@ func testEchoCommands(t *testing.T, addr string, port int) {
 // op04 选角 → 进场帧簇（0x09 表/0x0A/m366 族/0x0B/0x0D/0x1F/物理流）→
 // op09 ClientReady → View43/40 + 就绪簇。world↔store 同进程真 inner 互连。
 func TestUniteClientLoginRoleFlow(t *testing.T) {
+	t.Setenv("NINEYIN_NPC_DEFER_MS", "100") // NPC 物化延迟（clientReady 后下发）加速
 	cfg, err := ParseGameUniteINI([]byte(testINI))
 	if err != nil {
 		t.Fatal(err)
@@ -553,10 +554,7 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 		}
 		return nil
 	}
-	for i := 0; i < 2; i++ { // 0x32 域配置块（表前）
-		readFrame(0x32)
-	}
-	readFrame(0x09) // 属性表（大帧过真传输面）
+	readFrame(0x09) // 属性表（大帧过真传输面；2433 口径：进场直发表，无 0x0C/0x32/0x0E 前导）
 	readFrame(0x0A) // 记录表镜像
 	// 进场段（默认 native：2433 方言 5 属性 0x0B——entgegenert from
 	// role_state_json；帧数随建号数据可变，读完直到 ClientReady 窗口）。
@@ -578,9 +576,17 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	for i := 0; i < 130; i++ { // 原生进场段其余帧（记录/化身/物理流/属性批）
 		checkMapFrame(readAny())
 	}
+	writeActivity := func() { // 首条活动消息：NPC 物化就绪屏障（双保险）
+		if err := conn.WriteMsg([]byte{0x0A}); err != nil {
+			t.Fatalf("write op0A: %v", err)
+		}
+	}
+	writeActivity()
 	if err := conn.WriteMsg([]byte{0x09}); err != nil { // ClientReady
 		t.Fatalf("write op09: %v", err)
 	}
+	time.Sleep(200 * time.Millisecond)
+	writeActivity()
 	// NPC 物化族（npcfeed 链，真档在仓根 testdata，cwd 探测命中）：进场段
 	// 尾部 NPC 0x28 mode=0x46 物化 ×1674（fork 段 obj 0x11；摆放 1907 联查
 	// 1674——闸门拦 85 条 EventNpc/TaskSubId/SubSceneNo）。m229 已退役。

@@ -43,9 +43,9 @@ func TestMountPlanShape(t *testing.T) {
 	}
 }
 
-// TestMountSequenceFrames 挂载序列：48 个 0x14、身份/sub 正确、
-// Task_Completed 挂载后跟位图行、Task_Accepted 挂载后跟 0x29 批量、
-// QingGongRec 挂载后跟 18 行 0x11、无行生成器记录挂载即止。
+// TestMountSequenceFrames 行推序列（2026-11-22 晚定案：0x14 挂载帧不发
+// ——aow/golden 方言遗物，2433 fork 官服对拍零 0x14）：Task_Completed
+// 位图行、Task_Accepted 0x29 批量、QingGongRec 18 行、无 0x14 帧。
 func TestMountSequenceFrames(t *testing.T) {
 	ctx := testContext(t)
 	frames, err := MountSequenceFrames(ctx)
@@ -54,49 +54,26 @@ func TestMountSequenceFrames(t *testing.T) {
 	}
 	var mounts, bitmapRows, qgRows int
 	var accepted29 bool
-	for i, f := range frames {
+	for _, f := range frames {
 		switch f[0] {
 		case 0x14:
 			mounts++
-			name := mountName(f)
-			sub := f[1]
-			if sub == 0 {
-				obj := binary.LittleEndian.Uint32(f[2:])
-				own := binary.LittleEndian.Uint32(f[6:])
-				if obj != 1 || own != 1 {
-					t.Fatalf("#%d 玩家域挂载身份 %x/%x", i, obj, own)
-				}
-			} else if binary.LittleEndian.Uint32(f[2:]) != 0 {
-				t.Fatalf("#%d 全局挂载 obj 非零", i)
-			}
-			switch name {
-			case "Task_Completed":
-				// 下帧应为位图 0x11。
-				if frames[i+1][0] != 0x11 {
-					t.Fatalf("Task_Completed 挂载后应为位图行，得 op%#x", frames[i+1][0])
-				}
-			case "Task_Accepted":
-				if frames[i+1][0] != 0x29 {
-					t.Fatalf("Task_Accepted 挂载后应为 0x29 批量，得 op%#x", frames[i+1][0])
-				}
-				accepted29 = true
-			case "QingGongRec":
-				qgRows = countFollowingRows(frames, i+1)
-			case "TiGuanRec":
-				// 无行生成器：挂载即止（下一帧仍是 0x14）。
-				if frames[i+1][0] != 0x14 {
-					t.Fatalf("TiGuanRec 挂载即止，得 op%#x", frames[i+1][0])
-				}
-			}
 		case 0x11:
-			if rec := binary.LittleEndian.Uint16(f[10:]); f[1] == 0 &&
-				clientdata.MustRecordIndexByName("Task_Completed") == rec {
-				bitmapRows++
+			if f[1] != 0 {
+				break
 			}
+			switch rec := binary.LittleEndian.Uint16(f[10:]); rec {
+			case clientdata.MustRecordIndexByName("Task_Completed"):
+				bitmapRows++
+			case clientdata.MustRecordIndexByName("QingGongRec"):
+				qgRows++
+			}
+		case 0x29:
+			accepted29 = true
 		}
 	}
-	if mounts != 48 {
-		t.Fatalf("0x14 挂载 48 帧，得 %d", mounts)
+	if mounts != 0 {
+		t.Fatalf("0x14 挂载帧应为 0（fork 方言不发），得 %d", mounts)
 	}
 	if !accepted29 {
 		t.Fatal("Task_Accepted 0x29 批量缺席")

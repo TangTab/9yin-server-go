@@ -152,6 +152,38 @@ func (s Spawn) Frame0x28() []byte {
 			putInt(name, val)
 		}
 	}
+	// putSceneInt/putSceneWStr 按场景域首现解析——头行字段
+	//（Name@178/NPCCanSelect@2445/CantShowHeadInfo@2444 等尾追段名）与
+	// 玩家域末现位不同，必须走 SceneProperty。
+	putSceneInt := func(name string, val int32) {
+		entry := clientdata.MustSceneProperty(name)
+		body = binary.LittleEndian.AppendUint16(body, entry.Index)
+		switch entry.Type {
+		case clientdata.WireByte:
+			body = append(body, byte(val))
+		case clientdata.WireWord:
+			body = binary.LittleEndian.AppendUint16(body, uint16(val))
+		default:
+			body = binary.LittleEndian.AppendUint32(body, uint32(val))
+		}
+		count++
+	}
+	trySceneInt := func(name string, val int32) {
+		if _, ok := clientdata.SceneProperty(name); ok {
+			putSceneInt(name, val)
+		}
+	}
+	putSceneWStr := func(name, val string) {
+		entry := clientdata.MustSceneProperty(name)
+		body = binary.LittleEndian.AppendUint16(body, entry.Index)
+		units := utf16.Encode([]rune(val))
+		body = binary.LittleEndian.AppendUint32(body, uint32((len(units)+1)*2))
+		for _, unit := range units {
+			body = binary.LittleEndian.AppendUint16(body, unit)
+		}
+		body = binary.LittleEndian.AppendUint16(body, 0)
+		count++
+	}
 	tplInt := func(name string) int {
 		v, err := strconv.Atoi(strings.TrimSpace(tpl[name]))
 		if err != nil {
@@ -202,11 +234,11 @@ func (s Spawn) Frame0x28() []byte {
 	putInt("Type", 4)
 	if resource != "" {
 		putStr("Resource", resource)
-		rotate := tpl["RotatePara"]
-		if rotate == "" {
-			rotate = "0.0,1.000,0.0" // 2433 v3 缺省（非零中轴）
-		}
-		putStr("RotatePara", rotate)
+		// RotatePara 固定缺省 "0.0,1.000,0.0"（2433 v3 样本形）。曾按
+		// npc.pcapng 改动态 "0.0,%.3f,"（第二轴=yaw）——真机 NPC 全不
+		// 显示，已回滚（2026-11-22 晚；动态格式与客户端姿态解析的相容
+		// 性待重验，勿直接复用）。
+		putStr("RotatePara", "0.0,1.000,0.0")
 		putStr("ConfigID", configID)
 		if !armed {
 			// Photo 仅 #0 形（官方 #1 带武器样本无 Photo 行）。
@@ -285,6 +317,26 @@ func (s Spawn) Frame0x28() []byte {
 			}
 			tryInt(row.name, val)
 		}
+	}
+	// ---- 头行字段追加块（本仓扩展；场景域首现位）----
+	// 三形态实验定案：用户客户端（外服版 fxnet2）NPC 建档/渲染只认 0x28
+	//（0x0D 对 NPC 不建视觉对象），选中/头顶名字等管线字段补进 0x28 值对
+	//（NPCCanSelect@2445 word=可选中、SelectState@1568 byte、
+	// CantShowHeadInfo@2444、Name@178 宽串=头顶名、NpcNickName@2460 宽串）。
+	// 官方基线（captures/local #2189）26 字段不含此块——曾按官方逐字段
+	// 对齐删除过一轮，用户拍板撤回恢复（2026-11-22）。
+	if name := tpl["Name"]; name != "" {
+		putSceneWStr("Name", name)
+	}
+	trySceneInt("NPCCanSelect", 1) // 可选中（LastObject/选靶前提）
+	selectState := int32(2)        // 模板列真值优先（2=可交互态）
+	if v := tplInt("SelectState"); v > 0 {
+		selectState = int32(v)
+	}
+	trySceneInt("SelectState", selectState)
+	trySceneInt("CantShowHeadInfo", 0)
+	if _, ok := clientdata.SceneProperty("NpcNickName"); ok {
+		putSceneWStr("NpcNickName", "") // 头顶昵称行（空=只显名字）
 	}
 	binary.LittleEndian.PutUint16(body[countAt:], uint16(count))
 

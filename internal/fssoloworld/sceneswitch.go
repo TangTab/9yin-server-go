@@ -178,15 +178,11 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 		s.sendToClient(pl, frame)
 		sent++
 	}
-	// Ready 整段重推（0x0C 清空后重臂：AutoTrace/视图簇/自定义配置/0x1F 尾）。
-	if frames, err := entergen.ReadyFrames(ctx, time.Now()); err == nil {
-		for _, frame := range frames {
-			s.sendToClient(pl, frame)
-			sent++
-		}
-	} else {
-		s.trace("reentry ready frames failed client=%d: %v", pl.Conn1, err)
-	}
+	// 不重推 ReadyFrames 全家（2026-11-22 晚对齐 2433 切图重入实证
+	// 61036#8499：0x0C→0x0B→0x0D→0x1F→0x11 行海→视口流——无表重发、
+	// 无视图簇/战斗属性/自定义配置整段。0x0C 清空后需恢复的域由上方
+	// 0x1F/vitals/开图/邮箱各段精确覆盖；705 连接级不随切图重置（2433
+	// 定论）。
 	// 邮箱重放（0x0C 清玩家对象上挂的记录，邮件行随重入簇恢复）。
 	sent += s.pushLetterRows(pl)
 	s.sendRoleSave(pl)

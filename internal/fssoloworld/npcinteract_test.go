@@ -6,6 +6,7 @@ package fssoloworld
 import (
 	"encoding/binary"
 	"testing"
+	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 )
@@ -36,42 +37,63 @@ func TestParseNPCObjectRequest(t *testing.T) {
 	}
 }
 
-func TestNPCServicesAndMenuItems(t *testing.T) {
+func TestNPCServerMenu(t *testing.T) {
 	services := npcServicesOf(map[string]string{
 		"ShopID": "Shop_yaopin_00101", "DepotID": "0", "Job": "3",
 	})
 	if len(services) != 2 {
 		t.Fatalf("服务列 = %d, want 2（DepotID=0 不算）", len(services))
 	}
-	items := npcTalkMenuItems(services)
-	if len(items) != 3 { // 商店+生活职业+离开
-		t.Fatalf("菜单项 = %d, want 3", len(items))
-	}
-	if items[len(items)-1].funcID != 600000000 || items[len(items)-1].textID != "ui_form_talk_leave" {
-		t.Error("尾项应为离开")
-	}
-	if items[0].funcID != 805000000 || items[0].textID != "ui_shop" {
-		t.Errorf("商店项映射异常: %+v", items[0])
-	}
-	// 无服务兜底「交谈」。
-	bare := npcTalkMenuItems(nil)
-	if len(bare) != 2 || bare[0].funcID != 860000001 || bare[0].textID != "ui_talk" {
-		t.Errorf("无服务兜底异常: %+v", bare)
-	}
-}
-
-func TestNPCCinematicTalkMenu(t *testing.T) {
-	frames, err := npcCinematicTalkMenu(0x11000005, 0x00660005, npcTalkMenuItems(nil))
+	frame, err := npcServerMenu(0x11000005, 0x00660005, services)
 	if err != nil {
 		t.Fatalf("编码: %v", err)
 	}
-	if len(frames) != 4 { // begin + 2 项 + end
-		t.Fatalf("帧数 = %d, want 4", len(frames))
+	if frame[0] != 0x1C {
+		t.Fatalf("op = %#x, want 0x1C", frame[0])
 	}
-	for i, frame := range frames {
-		if frame[0] != 0x1E {
-			t.Errorf("帧 %d 非 0x1E: %#x", i, frame[0])
+	if obj := binary.LittleEndian.Uint32(frame[1:]); obj != 0x11000005 {
+		t.Errorf("obj = %x", obj)
+	}
+	n := int(binary.LittleEndian.Uint16(frame[9:]))
+	if n != 3 { // 商店+生活职业+离开
+		t.Fatalf("项数 = %d, want 3", n)
+	}
+	// 走查项：type u8=0 / mark u16 / UTF16LE 串（含 NUL）。
+	off := 11
+	marks := make([]uint16, 0, n)
+	labels := make([]string, 0, n)
+	for i := 0; i < n; i++ {
+		if frame[off] != 0 {
+			t.Errorf("项 %d type 非 0", i)
 		}
+		off++
+		mark := binary.LittleEndian.Uint16(frame[off:])
+		off += 2
+		byteLen := int(binary.LittleEndian.Uint32(frame[off:]))
+		off += 4
+		units := make([]uint16, 0, byteLen/2)
+		for j := 0; j+1 < byteLen; j += 2 {
+			if u := binary.LittleEndian.Uint16(frame[off+j:]); u != 0 { // 尾 NUL 不入
+				units = append(units, u)
+			}
+		}
+		off += byteLen
+		marks = append(marks, mark)
+		labels = append(labels, string(utf16.Decode(units)))
+	}
+	if off != len(frame) {
+		t.Fatalf("走查终点 %d ≠ 帧长 %d", off, len(frame))
+	}
+	if marks[0] != npcMarkShop || labels[0] != "商店" {
+		t.Errorf("商店项异常: mark=%x label=%q", marks[0], labels[0])
+	}
+	if marks[n-1] != 0 || labels[n-1] != "离开" {
+		t.Errorf("尾项应为离开: mark=%x label=%q", marks[n-1], labels[n-1])
+	}
+	// 无服务兜底「交谈」+离开。
+	bare, _ := npcServerMenu(1, 1, nil)
+	if got := binary.LittleEndian.Uint16(bare[9:]); got != 2 {
+		t.Errorf("无服务兜底项数 = %d, want 2", got)
 	}
 }
 
@@ -127,6 +149,35 @@ func parseReq(t *testing.T, objectID, ownerID uint32, funcID int32) npcObjectReq
 		t.Fatal("构造请求失败")
 	}
 	return req
+}
+
+func TestEntryRouteObjectRequest(t *testing.T) {
+	s := newNpcTestServer(t)
+	pl := s.players.AddPlayer(5, 1, "tester")
+	s.players.SetPlayerState(pl, PlOnline)
+	pl.npcMu.Lock()
+	pl.npcScene = "born03"
+	pl.npcMu.Unlock()
+	catalog := s.sceneNPCCatalog("born03")
+	if len(catalog.spawns) == 0 {
+		t.Skip("born03 真档缺席")
+	}
+	target := catalog.spawns[len(catalog.spawns)/2]
+	// entry 内网包：8B 头{clientID,serial} + 33B op0x07 完整帧。
+	frame := buildObjectRequest(target.ObjectID, target.OwnerID, 0)
+	payload := make([]byte, 8, 8+len(frame))
+	binary.LittleEndian.PutUint32(payload[0:], 5)
+	binary.LittleEndian.PutUint32(payload[4:], 1)
+	payload = append(payload, frame...)
+	if !s.ProcessEntryMsg(0x100, 3, payload) {
+		t.Fatal("entry 消息未被消费")
+	}
+	npcMenuMu.Lock()
+	menu := npcMenuState[pl.Conn1]
+	npcMenuMu.Unlock()
+	if menu == nil || menu.objectID != target.ObjectID {
+		t.Fatalf("entry 全路径未弹菜单: %+v", menu)
+	}
 }
 
 func TestNPCSelectTarget(t *testing.T) {

@@ -24,14 +24,16 @@ var rowGenerators = map[string]mountRowGenerator{
 	"QingGongRec":    qingGongRows,
 }
 
-// MountSequenceFrames 按官方顺序生成挂载计划：每项 0x14（+ 可用行推）。
-// 记录名经 MustRecordIndexByName 在当前方言表解析——MountPlan 是官方
-// 抓包提取，缺名即方言表错位，panic 编码期暴露。
+// MountSequenceFrames 按官方顺序生成挂载计划的行推族。
+// 0x14 挂载帧不发（2026-11-22 晚定案：aow/golden 方言遗物——2433 fork
+// 官服重登/切图对拍零 0x14，fork 客户端记录 schema 走 0x0A 全表自足；
+// 挂载帧在真机触发 ServerRecordAddRow Out range 越界族（BppEquipRec/
+// consign_history/vip_info_rec）＋重登/切图后状态累积卡顿）。行推保留
+//（2433 重登照发 0x11 记录行海）。
 func MountSequenceFrames(ctx Context) ([][]byte, error) {
 	frames := make([][]byte, 0, len(MountPlan)*2)
 	for _, spec := range MountPlan {
 		recordIndex := clientdata.MustRecordIndexByName(spec.Name)
-		frames = append(frames, RecordMountFrame(spec.Sub, ctx.Identity.ObjectID, ctx.Identity.OwnerID, recordIndex))
 		if gen, ok := rowGenerators[spec.Name]; ok {
 			rows, err := gen(ctx, recordIndex)
 			if err != nil {

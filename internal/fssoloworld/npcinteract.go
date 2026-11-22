@@ -20,10 +20,10 @@ package fssoloworld
 
 import (
 	"encoding/binary"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
@@ -107,69 +107,55 @@ func npcServicesOf(tpl map[string]string) []npcService {
 	return items
 }
 
-// talkMenuItem cinematic 菜单项（funcID/textID 对）。
-type talkMenuItem struct {
-	funcID int32
-	textID string
+// ---- 物化时机簿记（2433 clientActivity 定案）----
+// NPC 物化必须等客户端 stage_main lua scene_obj:RegisterCallBack 注册
+// 完——就绪屏障=ClientReady 后**首条上行活动消息**（op0x0A/0x1E 到达
+// 即 stage_main 已在跑）；固定延时不可靠（场景资源加载时长不定）。
+// 30s 兜底防客户端哑巴永不物化。
+
+var (
+	npcPendingMu  sync.Mutex
+	npcPendingSet = map[uint32]*Player{} // connID → 待物化玩家
+)
+
+// npcMaterializeArm clientReady 挂账（30s 兜底强制物化）。
+func (s *Server) npcMaterializeArm(pl *Player) {
+	npcPendingMu.Lock()
+	npcPendingSet[pl.Conn1] = pl
+	npcPendingMu.Unlock()
+	time.AfterFunc(30*time.Second, func() {
+		npcPendingMu.Lock()
+		_, pending := npcPendingSet[pl.Conn1]
+		delete(npcPendingSet, pl.Conn1)
+		npcPendingMu.Unlock()
+		if !pending || pl.State != PlOnline {
+			return
+		}
+		s.npcMaterializeSend(pl, "fallback-30s")
+	})
 }
 
-// npcTalkMenuItems 服务列 → cinematic 菜单项；无服务兜底「交谈」；尾项
-// 恒「离开」（600000000/ui_form_talk_leave——2433 定版）。
-func npcTalkMenuItems(services []npcService) []talkMenuItem {
-	items := make([]talkMenuItem, 0, len(services)+1)
-	for _, service := range services {
-		items = append(items, talkMenuItem{funcID: npcTalkFuncID(service.mark), textID: npcTalkTextID(service.mark)})
+// npcMaterializeOnActivity 首条上行活动消息触发（幂等；已物化直通）。
+func (s *Server) npcMaterializeOnActivity(pl *Player) {
+	npcPendingMu.Lock()
+	_, pending := npcPendingSet[pl.Conn1]
+	delete(npcPendingSet, pl.Conn1)
+	npcPendingMu.Unlock()
+	if !pending {
+		return
 	}
-	if len(items) == 0 {
-		items = append(items, talkMenuItem{funcID: 860000001, textID: "ui_talk"})
-	}
-	return append(items, talkMenuItem{funcID: 600000000, textID: "ui_form_talk_leave"})
+	s.npcMaterializeSend(pl, "activity")
 }
 
-func npcTalkFuncID(mark uint16) int32 {
-	switch mark {
-	case npcMarkShop:
-		return 805000000 // 商店
-	case npcMarkDepot:
-		return 807000000 // 仓库
-	case npcMarkTransport:
-		return 860000022 // 传送
-	case npcMarkJob:
-		return 806000036 // 生活职业
-	case npcMarkGem:
-		return 806000013 // 宝石服务
-	case npcMarkGuild:
-		return 809000000 // 帮会
-	case npcMarkHome:
-		return 881000001 // 回城点
-	case npcMarkTask:
-		return 100000001 // 任务入口占位
-	default:
-		return 860000000 + int32(mark)
+func (s *Server) npcMaterializeSend(pl *Player, trigger string) {
+	if pl.State != PlOnline || !pl.haveRoleState {
+		return
 	}
-}
-
-func npcTalkTextID(mark uint16) string {
-	switch mark {
-	case npcMarkShop:
-		return "ui_shop"
-	case npcMarkDepot:
-		return "ui_depot"
-	case npcMarkTransport:
-		return "ui_transport"
-	case npcMarkJob:
-		return "ui_life_job"
-	case npcMarkGem:
-		return "ui_equip_gem"
-	case npcMarkGuild:
-		return "ui_guild"
-	case npcMarkHome:
-		return "ui_home_point"
-	case npcMarkTask:
-		return "ui_form_talk_receive_task"
-	default:
-		return "ui_talk"
+	npcFrames := s.sceneNPCEnter(pl, pl.roleState.Resource, pl.roleState.Position)
+	for _, frame := range npcFrames {
+		s.sendToClient(pl, frame)
 	}
+	s.trace("npc materialize (%s): %d frames client=%d", trigger, len(npcFrames), pl.Conn1)
 }
 
 // ---- 主入口 ----
@@ -195,57 +181,59 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 		return true
 	}
 	services := npcServicesOf(spawn.Template)
-	frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, npcTalkMenuItems(services))
-	if err != nil {
-		s.trace("npc interact: 菜单编码失败 %s: %v", spawn.ConfigID, err)
-		return true
-	}
-	for _, frame := range frames {
-		s.sendToClient(pl, frame)
+	// talk 数据帧族 msg4 begin/msg6×N(funcid,ui文本ID)/msg7 [obj]——
+	// npc.pcapng #2377-2382 官方字节级模板；C++ 聚合调 form_talk.
+	// show_window 开窗+渲染菜单（单链路自足）。funcid 用 form_talk_data
+	// g_menu_id 官方域。⚠️ 不再叠发 0x1C——0x1C 触发 open_npc_talk 与
+	// msg4 触发的 show_window 双开窗竞态（真机实证 form_talk.lua:71
+	// add_menu 处 nx_destroy need entity）。
+	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, services); err == nil {
+		for _, frame := range frames {
+			s.sendToClient(pl, frame)
+		}
+	} else {
+		s.trace("npc interact: talk 数据编码失败 %s: %v", spawn.ConfigID, err)
 	}
 	npcMenuMu.Lock()
 	npcMenuState[pl.Conn1] = &npcActiveMenu{objectID: spawn.ObjectID, ownerID: spawn.OwnerID, at: time.Now()}
 	npcMenuMu.Unlock()
+	pauseNpcTalk(spawn.ObjectID) // 行人对话停走（菜单关闭恢复）
 	s.trace("npc interact: %s (%s) 菜单 %d 项 client=%d", spawn.ConfigID, spawn.Script, len(services)+1, pl.Conn1)
 	return true
 }
 
-// handleNPCMenuSelect 菜单第二段：mark 路由。
+// handleNPCMenuSelect 菜单第二段：0x1C SERVER_MENU 选择的 mark 路由
+// （mark=0 离开 → 0x1D 清菜单；mark 0x1001..0x1008 业务 → 本阶段清菜单
+// + trace 留痕，业务 View 待接）。
 func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 	npcMenuMu.Lock()
 	menu := npcMenuState[pl.Conn1]
 	npcMenuMu.Unlock()
-	switch req.FuncID {
-	case 600000000: // ui_form_talk_leave
-		s.sendNPCMenuClose(pl)
-		s.clearNPCMenu(pl)
-		return true
-	case 0:
-		s.sendToClient(pl, []byte{0x1D}) // SERVER_CLEAR_MENU
-		s.clearNPCMenu(pl)
-		return true
-	}
 	if menu == nil || menu.objectID != req.ObjectID || menu.ownerID != req.OwnerID {
-		s.trace("npc interact: 菜单选择无活动菜单 funcID=%d id=%d", req.FuncID, req.ObjectID)
+		// 无活动菜单的 mark（如兜底「交谈」mark=1）：仅留痕。
+		if req.FuncID != 0 {
+			s.trace("npc interact: 菜单选择无活动菜单 mark=%d id=%d", req.FuncID, req.ObjectID)
+		}
 		return true
 	}
-	// 业务 mark：第一阶段无商店/仓库 View 实现——关菜单并留痕。
-	s.sendNPCMenuClose(pl)
+	// 关菜单统一走 SERVER_CLEAR_MENU（0x1D）。
+	s.sendToClient(pl, []byte{0x1D})
 	s.clearNPCMenu(pl)
-	s.trace("npc interact: 菜单选择 funcID=%d id=%d（业务 View 待接）", req.FuncID, req.ObjectID)
+	if req.FuncID == 0 {
+		s.trace("npc interact: 菜单关闭 id=%d client=%d", req.ObjectID, pl.Conn1)
+		return true
+	}
+	s.trace("npc interact: 菜单选择 mark=%d id=%d（业务 View 待接）", req.FuncID, req.ObjectID)
 	return true
 }
 
 func (s *Server) clearNPCMenu(pl *Player) {
 	npcMenuMu.Lock()
+	menu := npcMenuState[pl.Conn1]
 	delete(npcMenuState, pl.Conn1)
 	npcMenuMu.Unlock()
-}
-
-// sendNPCMenuClose cinematic 关闭（msg8）。
-func (s *Server) sendNPCMenuClose(pl *Player) {
-	if frame, err := entergen.CustomMessageFrame(8); err == nil {
-		s.sendToClient(pl, frame)
+	if menu != nil {
+		resumeNpcTalk(menu.objectID) // 菜单关闭恢复巡逻
 	}
 }
 
@@ -262,31 +250,119 @@ func (s *Server) findNPCSpawn(scene string, objectID uint32) (npcfeed.Spawn, boo
 	return npcfeed.Spawn{}, false
 }
 
-// npcCinematicTalkMenu cinematic 菜单帧族（2433 encodeCinematicTalkMenu
-// 定版）：msg4 begin / msg6 [funcID, textID]×N / msg7 [obj] end——该客户端
-// 不接受字符串别名，首值必须数字。
-func npcCinematicTalkMenu(objectID, ownerID uint32, items []talkMenuItem) ([][]byte, error) {
-	if len(items) == 0 {
-		return nil, fmt.Errorf("talk menu has no items")
-	}
-	out := make([][]byte, 0, 2+len(items))
+// npcCinematicTalkMenu talk 数据帧族（npc.pcapng #2377-2382 官方字节级
+// 模板）：msg4 [4] begin / msg6 [6, funcid, ui文本ID]×N（funcid 用
+// form_talk_data g_menu_id 域，官方离开项 600000000+"ui_exit" 实证同系）
+// / msg7 [7, obj] end。C++ 聚合调 form_talk.show_window；NPC 名由客户
+// 端按 ConfigID 本地查（get_npcname_by_id），标题键（官方发
+// "task_WorldNpc01230" 形的文本表键）普通对话场景无合适键——不发 msg5
+// （曾发 NPC 名 UTF-8→乱码、发 "ui_form_talk"→原文上屏，均实证 m5 串
+// 走 C++ 文本转换而非直显）。
+func npcCinematicTalkMenu(objectID, ownerID uint32, services []npcService) ([][]byte, error) {
+	out := make([][]byte, 0, 2+len(services))
 	begin, err := entergen.CustomMessageFrame(4)
 	if err != nil {
 		return nil, err
 	}
 	out = append(out, begin)
-	for _, item := range items {
-		pkt, err := entergen.CustomMessageFrame(6, entergen.CustomInt(item.funcID), entergen.CustomString(item.textID))
+	for _, service := range services {
+		pkt, err := entergen.CustomMessageFrame(6, entergen.CustomInt(npcTalkFuncID(service.mark)), entergen.CustomString(npcTalkTextID(service.mark)))
 		if err != nil {
 			return nil, err
 		}
 		out = append(out, pkt)
 	}
+	// 尾项「离开」（官方实证 600000000+"ui_exit"）。
+	leave, err := entergen.CustomMessageFrame(6, entergen.CustomInt(600000000), entergen.CustomString("ui_exit"))
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, leave)
 	end, err := entergen.CustomMessageFrame(7, entergen.CustomObject(objectID, ownerID))
 	if err != nil {
 		return nil, err
 	}
 	return append(out, end), nil
+}
+
+// npcTalkFuncID/npcTalkTextID g_menu_id 官方域映射（form_talk_data.lua
+// 定版：func_menu_shop=805000000/func_menu_depot=807000000/…）。
+func npcTalkFuncID(mark uint16) int32 {
+	switch mark {
+	case npcMarkShop:
+		return 805000000
+	case npcMarkDepot:
+		return 807000000
+	case npcMarkTransport:
+		return 860000022
+	case npcMarkJob:
+		return 806000036
+	case npcMarkGem:
+		return 806000013
+	case npcMarkGuild:
+		return 809000000
+	case npcMarkHome:
+		return 881000001
+	default:
+		return 860000000 + int32(mark)
+	}
+}
+
+func npcTalkTextID(mark uint16) string {
+	switch mark {
+	case npcMarkShop:
+		return "ui_shop"
+	case npcMarkDepot:
+		return "ui_depot"
+	case npcMarkTransport:
+		return "ui_transport"
+	case npcMarkJob:
+		return "ui_life_job"
+	case npcMarkGem:
+		return "ui_equip_gem"
+	case npcMarkGuild:
+		return "ui_guild"
+	case npcMarkHome:
+		return "ui_home_point"
+	default:
+		return "ui_talk"
+	}
+}
+
+// npcServerMenu 原生 0x1C SERVER_MENU（2433 messages.go serverMenu 定版）：
+// [0x1C][obj u32][own u32][u16 n]{item: [u8 type=0][u16 mark][u32 含NUL
+// UTF16LE 字节数][UTF16LE+NUL]}。服务列 → {mark, 中文标签}；空服务兜底
+// 「交谈」mark=1；尾项恒「离开」mark=0。
+func npcServerMenu(objectID, ownerID uint32, services []npcService) ([]byte, error) {
+	type item struct {
+		mark    uint16
+		content string
+	}
+	items := make([]item, 0, len(services)+1)
+	for _, service := range services {
+		items = append(items, item{mark: service.mark, content: service.label})
+	}
+	if len(items) == 0 {
+		items = append(items, item{mark: 1, content: "交谈"})
+	}
+	items = append(items, item{mark: 0, content: "离开"})
+
+	msg := make([]byte, 11, 11+len(items)*24)
+	msg[0] = 0x1C
+	binary.LittleEndian.PutUint32(msg[1:], objectID)
+	binary.LittleEndian.PutUint32(msg[5:], ownerID)
+	binary.LittleEndian.PutUint16(msg[9:], uint16(len(items)))
+	for _, it := range items {
+		units := utf16.Encode([]rune(it.content))
+		msg = append(msg, 0) // type
+		msg = binary.LittleEndian.AppendUint16(msg, it.mark)
+		msg = binary.LittleEndian.AppendUint32(msg, uint32((len(units)+1)*2))
+		for _, unit := range units {
+			msg = binary.LittleEndian.AppendUint16(msg, unit)
+		}
+		msg = binary.LittleEndian.AppendUint16(msg, 0)
+	}
+	return msg, nil
 }
 
 // ---- msg431 选中目标 ----

@@ -77,6 +77,9 @@ func (s *Server) clientCustom(pl *Player, frame []byte) bool {
 // 视口对账 + roleState.Position 写回）；21B 头 + TVarList 形态才消费，
 // 其余活动流量原样放行（返回 false 交默认分支簿记）。
 func (s *Server) clientActivity(pl *Player, frame []byte) bool {
+	// NPC 物化就绪屏障：ClientReady 后首条上行活动消息（含 67B 位移包）
+	// =stage_main lua 已在跑，触发挂账的物化（幂等）。
+	s.npcMaterializeOnActivity(pl)
 	if x, y, z, orient, ok := parseMotionPosition(frame); ok {
 		s.absorbPlayerPosition(pl, [4]float64{float64(x), float64(y), float64(z), float64(orient)})
 		return true

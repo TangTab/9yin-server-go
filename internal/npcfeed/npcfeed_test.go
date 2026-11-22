@@ -320,6 +320,7 @@ func TestFrame0x28V3Dialect(t *testing.T) {
 		Template: map[string]string{
 			"ID": "FuncNpc00051", "Resource": `npc\funcnpc001`, "NpcType": "62",
 			"Level": "2", "CollideRadius": "0.905", "CursorShape": "2",
+			"Name": "胡大勇", "SelectState": "2",
 		},
 		Combat: &CombatRow{ID: "1", Attrs: map[string]string{"ID": "1", "Level": "1", "MaxLife": "51"}},
 	}
@@ -330,16 +331,18 @@ func TestFrame0x28V3Dialect(t *testing.T) {
 		"IDCard", "BornAction", "WeaponMode", "HPRatio", "MPRatio",
 		"ParryRatio", "HitHPRatio", "HasKarma", "Character", "KarmaLevel",
 		"OriginPara1", "OriginPara2", "OriginPara3",
+		// 头行追加块（本仓扩展：选中/头顶名）。
+		"Name", "NPCCanSelect", "SelectState", "CantShowHeadInfo", "NpcNickName",
 	} {
 		if _, ok := fields[name]; !ok {
-			t.Errorf("#0 普通形缺字段 %s（2433 v3 官方 #0 样本定版行）", name)
+			t.Errorf("#0 普通形缺字段 %s（v3 样本定版行/头行追加块）", name)
 		}
 	}
 	if _, ok := fields["NotPositive"]; ok {
 		t.Error("#0 形不应有 NotPositive（op28_addobject 实验形残留）")
 	}
 	if got := strings.TrimRight(string(fields["RotatePara"]), "\x00"); got != "0.0,1.000,0.0" {
-		t.Errorf("RotatePara = %q, want 0.0,1.000,0.0（2433 v3 缺省）", got)
+		t.Errorf("RotatePara = %q, want 0.0,1.000,0.0（固定缺省）", got)
 	}
 
 	// #1 带武器形：WeaponName/FixedBeHitAct/SelfForceID 在场，

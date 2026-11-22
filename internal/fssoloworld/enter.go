@@ -94,14 +94,13 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 }
 
 // enterContext 组装原生生成上下文（身份/会话/角色状态/场景 NPC 目录）。
-// materializeNPC=true（PreReady 调用点——NPC 物化真实落地处）才生成
-// 物化帧族并初始化视口/巡逻簿记；ClientReady 二入传 false（ReadyFrames
-// 不消费 NPCFrames，免重编码且不重置巡逻首拍窗口）。
+// NPC 物化不再走 PreReady（2026-11-22 晚定案：客户端 stage_main lua
+// scene_obj:RegisterCallBack 注册前收到的对象只建视觉层（game_visual）、
+// 不进逻辑层（game_client）——form_talk.open_npc_talk 的 GetSceneObj 与
+// 点击判定全在逻辑层，PreReady 物化=看得见点不中）；改由 clientReady
+// 后延迟下发（npcEnterDefer，见 clientReady）。
 func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context {
-	var npcFrames [][]byte
-	if materializeNPC {
-		npcFrames = s.sceneNPCEnter(pl, pl.roleState.Resource, pl.roleState.Position)
-	}
+	_ = materializeNPC // 兼容参数：物化时机已挪 clientReady 后
 	return entergen.Context{
 		Identity: entergen.Identity{
 			ObjectID: 1, // fork 客户端恒 1-1（stage_main 开图/记录绑定锚）
@@ -115,7 +114,6 @@ func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context 
 		},
 		RoleName:   pl.Name,
 		State:      pl.roleState,
-		NPCFrames:  npcFrames,                                   // NPC 物化帧族（0x28 官方言默认；顺带视口/巡逻簿记初始化）
 		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
 	}
 }
@@ -166,10 +164,15 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 			pl.roleState, pl.haveRoleState = state, true
 		}
 	}
-	s.replayGoldenFrames(pl, innerPushGoldenFrames) // 0x32 域配置块（外服序位于表前）
-	s.sendToClient(pl, propertyTableFrame())
-	s.sendToClient(pl, homeRecordsFrame())
 	if nativeEnterEnabled() && pl.haveRoleState {
+		// 重登序对齐 2433 fork 官服（2026-11-22 晚五轮终案，capture 对拍
+		// 61036）：`09→0a→0b→0d→0x11 海`——**不发 0x0C/0x0E 拆除批**
+		//（重登后客户端场景本空，2491 个无效 0x0E 反成进场风暴，
+		// all_msg[276] 积压之源）、**不发 0x32×2/0x14×48**（aow 遗物，
+		// fork 客户端错误消费致 Out range 越界族）。fork 客户端重登自清，
+		// 无需服务端清场。
+		s.sendToClient(pl, propertyTableFrame())
+		s.sendToClient(pl, homeRecordsFrame())
 		ctx := s.enterContext(pl, true)
 		frames, err := entergen.PreReadyFrames(ctx, time.Now())
 		if err != nil {
@@ -192,6 +195,9 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 		s.trace("enter native %d frames client=%d name=%q scene=%s", len(frames), clientID, pl.Name, pl.roleState.Scene)
 		return true
 	}
+	s.replayGoldenFrames(pl, innerPushGoldenFrames) // 0x32 域配置块（外服序位于表前）
+	s.sendToClient(pl, propertyTableFrame())
+	s.sendToClient(pl, homeRecordsFrame())
 	n := s.replayGoldenFrames(pl, enterGoldenFrames)
 	s.players.SetPlayerState(pl, PlOnline)
 	s.trace("enter golden replay %d frames client=%d name=%q", n, clientID, pl.Name)
@@ -219,6 +225,10 @@ func (s *Server) clientReady(pl *Player) {
 		// 邮箱整表重放（2433 线 ClientReady 后、View43/40 前窗口；空表零帧）。
 		letters := s.pushLetterRows(pl)
 		s.trace("ready native %d frames client=%d letters=%d", len(frames), pl.Conn1, letters)
+		// NPC 物化挂账：等客户端首条上行活动消息（stage_main lua
+		// scene_obj:RegisterCallBack 注册完成的就绪屏障——逻辑层
+		// game_client 才收对象）触发；30s 兜底强制。
+		s.npcMaterializeArm(pl)
 		return
 	}
 	n := s.replayGoldenFrames(pl, readyGoldenFrames)

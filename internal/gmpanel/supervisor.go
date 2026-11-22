@@ -208,6 +208,9 @@ func (s *Supervisor) Start(name string) (string, error) {
 	fmt.Fprintf(lf, "---- %s started %s ----\r\n", name, time.Now().Format("2006-01-02 15:04:05"))
 	cmd := exec.Command(exePath, sp.Args...)
 	cmd.Dir = s.cfg.BinDir // 对齐 bat /d：ini 释放/数据落二进制同侧
+	if extra := envServerVars(s.cfg.BinDir); len(extra) > 0 {
+		cmd.Env = append(os.Environ(), extra...)
+	}
 	cmd.Stdout, cmd.Stderr = lf, lf
 	if err := cmd.Start(); err != nil {
 		lf.Close()
@@ -230,6 +233,42 @@ func (s *Supervisor) Start(name string) (string, error) {
 	s.procs[name] = &managedProc{cmd: cmd, log: lf, done: done}
 	s.mu.Unlock()
 	return fmt.Sprintf("%s 已启动（PID %d，日志 %s）", name, cmd.Process.Pid, logPath), nil
+}
+
+// envServerVars 托管子进程的环境注入：对齐 start-*.bat 的
+// `findstr /b /l /c:"set " env.server` + call 语义——部署根（BinDir 上级
+// 优先、BinDir 兜底）的 env.server 中行首 `set "K=V"` / `set K=V` 行。
+// bat 启动走脚本、面板托管走这里，两条启动路同一份配置（否则
+// NINEYIN_NPC_RADIUS 等调优项只在 bat 路生效，面板起的服务静默落缺省）。
+func envServerVars(binDir string) []string {
+	var candidates []string
+	if parent := filepath.Dir(binDir); parent != binDir {
+		candidates = append(candidates, filepath.Join(parent, "env.server"))
+	}
+	candidates = append(candidates, filepath.Join(binDir, "env.server"))
+	var vars []string
+	for _, path := range candidates {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		for _, line := range strings.Split(string(data), "\n") {
+			line = strings.TrimRight(line, "\r")
+			rest, ok := strings.CutPrefix(line, "set ")
+			if !ok {
+				continue
+			}
+			rest = strings.TrimSpace(rest)
+			rest = strings.Trim(rest, "\"")
+			if k, v, ok := strings.Cut(rest, "="); ok && k != "" {
+				vars = append(vars, k+"="+v)
+			}
+		}
+		if len(vars) > 0 {
+			return vars
+		}
+	}
+	return nil
 }
 
 // Stop 停单服。梯度：托管 → echo quit 等 3s → Kill；外部 → echo quit 等
