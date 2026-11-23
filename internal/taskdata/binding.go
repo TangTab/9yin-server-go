@@ -51,6 +51,10 @@ func LoadStoryTaskListFromBytes(raw []byte, source string) ([]Binding, error) {
 			TaskID:      taskID,
 			NPCConfigID: npcID,
 			SceneID:     storyColumn(fields, columns, "SceneID"),
+			StoryID:     storyColumn(fields, columns, "ID"),
+			ContextID:   storyColumn(fields, columns, "contextId"),
+			TitleID:     storyColumn(fields, columns, "titleId"),
+			LeaveTextID: storyColumn(fields, columns, "LeaveTextID"),
 			Source:      "storytasklist",
 		})
 	}

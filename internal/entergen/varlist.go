@@ -32,6 +32,54 @@ func CustomObject(obj, own uint32) CustomValue {
 	return CustomValue{kind: 8, obj: uint64(obj) | uint64(own)<<32}
 }
 
+// KeyedMessageFrame 0x1E 字符串路由自定义消息：首值=消息键
+// （internal/proto/custom_gen.go 的 SERVER_CUSTOMMSG_* 键族，如
+// "task_msg"/"sysinfo"——客户端 custom_handler 按键名分发）。
+func KeyedMessageFrame(key string, values ...CustomValue) ([]byte, error) {
+	if key == "" {
+		return nil, fmt.Errorf("custom message key is empty")
+	}
+	args := append([]CustomValue{CustomString(key)}, values...)
+	msg := make([]byte, 3, 64)
+	msg[0] = 0x1E
+	binary.LittleEndian.PutUint16(msg[1:], uint16(len(args)))
+	for _, v := range args {
+		switch v.kind {
+		case 2:
+			msg = append(msg, 2)
+			msg = binary.LittleEndian.AppendUint32(msg, uint32(v.i32))
+		case 3:
+			msg = append(msg, 3)
+			msg = binary.LittleEndian.AppendUint64(msg, uint64(v.i64))
+		case 4:
+			msg = append(msg, 4)
+			msg = binary.LittleEndian.AppendUint32(msg, math.Float32bits(v.f32))
+		case 5:
+			msg = append(msg, 5)
+			msg = binary.LittleEndian.AppendUint64(msg, math.Float64bits(v.f64))
+		case 6:
+			msg = append(msg, 6)
+			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(v.text)+1))
+			msg = append(msg, v.text...)
+			msg = append(msg, 0)
+		case 7:
+			msg = append(msg, 7)
+			units := []rune(v.text)
+			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(units)*2+2))
+			for _, r := range units {
+				msg = binary.LittleEndian.AppendUint16(msg, uint16(r))
+			}
+			msg = binary.LittleEndian.AppendUint16(msg, 0)
+		case 8:
+			msg = append(msg, 8)
+			msg = binary.LittleEndian.AppendUint64(msg, v.obj)
+		default:
+			return nil, fmt.Errorf("custom message %q has empty argument", key)
+		}
+	}
+	return msg, nil
+}
+
 // CustomMessageFrame 0x1E 数值路由自定义消息：首值=消息号。
 func CustomMessageFrame(messageID int32, values ...CustomValue) ([]byte, error) {
 	if messageID < 1 {

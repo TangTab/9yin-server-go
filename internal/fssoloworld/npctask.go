@@ -45,12 +45,26 @@ const (
 	npcTaskFlagSubmit       int32 = 200
 	npcTaskFlagSubmitChoice int32 = 201
 	npcTaskFlagDoing        int32 = 500
+	// 剧情 N 段窗：段 N 窗内续行 50N（点击发段 N+1）、离行 60N
+	//（引导抓包 story_482_1..5 五段实证，N=1..5）。
+	npcTaskFlagStoryBase         int32 = 500 // 50N = 500+N
+	npcTaskFlagStoryFirst        int32 = 501
+	npcTaskFlagStoryLast         int32 = 505
+	npcTaskFlagStoryLeaveBase    int32 = 600 // 60N = 600+N
+	npcTaskFlagStoryLeaveFirst   int32 = 601
+	npcTaskFlagStoryLeaveLast    int32 = 605
+	// npcStoryLeaveTextDefault 剧情离行缺省文本键（源表 LeaveTextID
+	// 列几乎恒 9607）。
+	npcStoryLeaveTextDefault = "9607"
 )
 
-// npcTaskLine 一条菜单任务行（提交行或接取行）。
+// npcTaskLine 一条菜单任务行：未接=100 接取行；已接剧情未走完=500
+// 进行中行（双键 story_menu_<sid>+title_<TID>，点击进剧情对话）；已接
+// 剧情走完或无剧情段=200 可提交行。
 type npcTaskLine struct {
-	TaskID int
-	Submit bool // true=已接发提交行；false=未接发接取行
+	TaskID  int
+	Submit  bool   // 200 可提交行
+	StoryID string // 500 行剧情键 story_menu_<sid>
 }
 
 // ---- 快照装载（进程级缓存） ----
@@ -108,19 +122,33 @@ func npcTaskSnapshotCandidates(root string) []string {
 // 客户端菜单每页 4 行翻页，过多任务行淹没服务行；<0 一键关停任务行）。
 func npcTaskMenuLimit() int { return int(envFloat("NINEYIN_NPC_TASK_LIMIT", 8)) }
 
-// npcTaskLines NPC 的菜单任务行集：绑定且已加载文案的任务按 TID 升序，
-// 已接（TaskAccepted）发提交行、未接发接取行，截断至上限。
-func npcTaskLines(catalog *taskdata.Catalog, configID string, accepted map[uint32]bool, limit int) []npcTaskLine {
+// npcTaskLines NPC 的菜单任务行集：绑定且已加载文案的任务按 TID 升序——
+// 未接发 100 接取行；已接且剧情未走完（有剧情段）发 500 进行中行；
+// 已接且剧情走完/无剧情段发 200 可提交行。截断至上限。
+func (s *Server) npcTaskLines(catalog *taskdata.Catalog, pl *Player, configID string, limit int) []npcTaskLine {
 	if catalog == nil || limit < 0 || strings.TrimSpace(configID) == "" {
 		return nil
 	}
+	accepted := npcAcceptedSet(pl)
 	tasks := catalog.TasksForNPC(configID)
 	lines := make([]npcTaskLine, 0, len(tasks))
 	for _, task := range tasks {
 		if limit > 0 && len(lines) >= limit {
 			break
 		}
-		lines = append(lines, npcTaskLine{TaskID: task.ID, Submit: accepted[uint32(task.ID)]})
+		tid := uint32(task.ID)
+		switch {
+		case !accepted[tid]:
+			lines = append(lines, npcTaskLine{TaskID: task.ID})
+		case pl.taskStoryDone[tid] || catalog.StoryBindingsFor(configID, task.ID) == nil:
+			lines = append(lines, npcTaskLine{TaskID: task.ID, Submit: true})
+		default:
+			if binding, ok := catalog.StoryBindingFor(configID, task.ID); ok {
+				lines = append(lines, npcTaskLine{TaskID: task.ID, StoryID: binding.StoryID})
+			} else {
+				lines = append(lines, npcTaskLine{TaskID: task.ID, Submit: true})
+			}
+		}
 	}
 	return lines
 }
@@ -137,14 +165,17 @@ func npcAcceptedSet(pl *Player) map[uint32]bool {
 // npcTaskMenuFrames 任务行 m6 帧族（服务行之前——客户端 talk_data_add_save_menu
 // 按域分区聚合，任务行归 menu_task_main 置顶）。行文本双键（引导抓包
 // 定版）：首键=菜单行文案（接取 CanAcceptMenu_<TID> / 提交
-// CompleteMenu_<TID>，TaskText.xml 全覆盖），次键 title_<TID> 作
+// CompleteMenu_<TID> / 进行中 story_menu_<sid>），次键 title_<TID> 作
 // TextManager 格式化参数。
 func npcTaskMenuFrames(lines []npcTaskLine) ([][]byte, error) {
 	frames := make([][]byte, 0, len(lines))
 	for _, line := range lines {
 		flag, textKey := npcTaskFlagAccept, "CanAcceptMenu_"+strconv.Itoa(line.TaskID)
-		if line.Submit {
+		switch {
+		case line.Submit:
 			flag, textKey = npcTaskFlagSubmit, "CompleteMenu_"+strconv.Itoa(line.TaskID)
+		case line.StoryID != "":
+			flag, textKey = npcTaskFlagDoing, "story_menu_"+line.StoryID
 		}
 		frame, err := entergen.CustomMessageFrame(6,
 			entergen.CustomInt(flag*npcTaskFuncBase+int32(line.TaskID)),
@@ -171,29 +202,43 @@ func npcTaskMarkSplit(mark int32) (flag int32, taskID int, ok bool) {
 	return flag, taskID, true
 }
 
-// handleNPCTaskMark op0x07 任务域 mark 受理（引导抓包实证口径）：
-//   - 接取（flag 100）：写 TaskAccepted → 0x29 重放 → 重发菜单
-//     （接取行翻提交行）；
+// handleNPCTaskMark op0x07 任务域 mark 受理（引导抓包实证 + lua 推断）：
+//   - 接取（flag 100）：首次=推接取窗（task_msg sub1 参数族，客户端
+//     form_talk_movie.show_accept_form 本地渲染——窗内「接受任务」行同
+//     funcid 二次到达）；二次（==菜单簿记 pendingTask）=真接取 → 写
+//     TaskAccepted → 0x29 重放 → 重发菜单（接取行翻 500 行）；
 //   - 提交（flag 200/201——201 为奖励单选二次确认，随 200 后到达）：
-//     移除 → 0x29 重放 → m8×2 关窗（官方提交后关菜单，不刷新——
-//     玩家再点 NPC 出下一环任务窗）；
-//   - 其余任务域 flag（300 放弃/400 共享/500 进行中/50N·60N 剧情/
-//     700 未完成）本阶段留痕，走通用关菜单链。
+//     移除+清剧情态 → 0x29 重放 → m8×2 关窗（官方提交后关菜单）；
+//   - 进行中（flag 500）：发剧情对话窗第 1 段（story 窗帧族）；
+//   - 剧情续（flag 501..505）：发下一段；最后一段链尾=剧情完成 →
+//     m8×2 关窗（任务行翻 200 需再点 NPC）；
+//   - 剧情离（flag 601..605）：m8×2 关窗（官方未实证，按离开语义）；
+//   - 其余域（300 放弃/400 共享/700 未完成）留痕。
 func (s *Server) handleNPCTaskMark(pl *Player, menu *npcActiveMenu, mark int32) bool {
 	flag, taskID, ok := npcTaskMarkSplit(mark)
 	if !ok {
 		return false
 	}
-	switch flag {
-	case npcTaskFlagAccept:
-		if !pl.taskAcceptedContains(uint32(taskID)) {
+	switch {
+	case flag == npcTaskFlagAccept:
+		if pl.taskAcceptedContains(uint32(taskID)) {
+			return true // 已接：幂等吞掉
+		}
+		if menu != nil && menu.pendingTask == taskID {
+			menu.pendingTask = 0 // 二次确认：真接取
 			pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, uint32(taskID))
 			s.trace("npc task: 接取 %d client=%d（已接 %d）", taskID, pl.Conn1, len(pl.roleState.TaskAccepted))
+			s.replayTaskAccepted(pl)
+			s.refreshNPCTalkMenu(pl, menu)
+			return true
 		}
-		s.replayTaskAccepted(pl)
-		s.refreshNPCTalkMenu(pl, menu)
-	case npcTaskFlagSubmit, npcTaskFlagSubmitChoice:
+		if menu != nil {
+			menu.pendingTask = taskID
+		}
+		s.sendTaskAcceptForm(pl, menu, taskID)
+	case flag == npcTaskFlagSubmit || flag == npcTaskFlagSubmitChoice:
 		pl.roleState.TaskAccepted = pl.removeAcceptedTask(uint32(taskID))
+		pl.clearTaskStoryDone(uint32(taskID))
 		s.trace("npc task: 提交 %d（flag=%d）client=%d（余 %d）", taskID, flag, pl.Conn1, len(pl.roleState.TaskAccepted))
 		s.replayTaskAccepted(pl)
 		// 官方提交应答：m8×2 关窗（无菜单刷新——客户端提交窗为本地
@@ -204,10 +249,136 @@ func (s *Server) handleNPCTaskMark(pl *Player, menu *npcActiveMenu, mark int32) 
 			}
 		}
 		s.clearNPCMenu(pl)
+	case flag == npcTaskFlagDoing:
+		s.sendStorySegment(pl, menu, taskID, 1)
+	case flag >= npcTaskFlagStoryFirst && flag <= npcTaskFlagStoryLast:
+		s.sendStorySegment(pl, menu, taskID, int(flag-npcTaskFlagStoryBase))
+	case flag >= npcTaskFlagStoryLeaveFirst && flag <= npcTaskFlagStoryLeaveLast:
+		s.trace("npc task: 剧情中断 tid=%d flag=%d client=%d", taskID, flag, pl.Conn1)
+		for i := 0; i < 2; i++ {
+			if end, err := entergen.CustomMessageFrame(8); err == nil {
+				s.sendToClient(pl, end)
+			}
+		}
+		s.clearNPCMenu(pl)
 	default:
 		s.trace("npc task: mark flag=%d tid=%d client=%d（未受理域）", flag, taskID, pl.Conn1)
 	}
 	return true
+}
+
+// sendTaskAcceptForm 接取窗推送（task_msg sub1——show_accept_form 15 参
+// 族，客户端从参数渲染标题/正文/菜单行「接受任务」/离开；奖励三槽
+// 无数据发空串，decMoney/冒险/挑战等门参数零值）。
+func (s *Server) sendTaskAcceptForm(pl *Player, menu *npcActiveMenu, taskID int) {
+	catalog := s.npcTaskCatalogOf()
+	task, ok := catalog.TaskByID(taskID)
+	if !ok {
+		s.trace("npc task: 接取窗无任务文案 %d，直接接取", taskID)
+		pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, uint32(taskID))
+		s.replayTaskAccepted(pl)
+		s.refreshNPCTalkMenu(pl, menu)
+		return
+	}
+	objectID, ownerID := uint32(0), uint32(0)
+	if menu != nil {
+		objectID, ownerID = menu.objectID, menu.ownerID
+	}
+	frame, err := entergen.KeyedMessageFrame("task_msg",
+		entergen.CustomInt(1), // submsg=1 on_show_accept_form
+		entergen.CustomObject(objectID, ownerID),
+		entergen.CustomInt(npcTaskFlagAccept*npcTaskFuncBase+int32(taskID)), // funcid
+		entergen.CustomInt(int32(taskID)),                                   // task_id
+		entergen.CustomString("context_"+strconv.Itoa(taskID)),              // titleid → get_title_task_context
+		entergen.CustomString("task_menu_accept_"+strconv.Itoa(taskID)),     // menuid
+		entergen.CustomString(""), // prize_base
+		entergen.CustomString(""), // prize_ex
+		entergen.CustomString(""), // prize_over
+		entergen.CustomInt(0),     // decMoney
+		entergen.CustomInt(0),     // adventure_plot
+		entergen.CustomInt(0),     // lock_value
+		entergen.CustomString(""), // strLimit
+		entergen.CustomString(task.Title), // title（富文本原文）
+		entergen.CustomInt(0),     // line
+		entergen.CustomInt(0),     // tiaozhan
+	)
+	if err != nil {
+		s.trace("npc task: 接取窗编码失败 %d: %v", taskID, err)
+		return
+	}
+	s.sendToClient(pl, frame)
+	s.trace("npc task: 接取窗 %d（%s）client=%d", taskID, taskdata.StripRichText(task.Title), pl.Conn1)
+}
+
+// sendStorySegment 剧情对话窗第 segment 段（引导抓包帧族定版）：
+// m4 / m5 "story_<sid>_N" / m6 [50N×10⁶+TID, "storymenu_<sid>_N"] /
+// m6 [60N×10⁶+TID, "9607"] / m7。段序超出段数=链尾：剧情完成（任务行
+// 翻 200）+ m8×2 关窗。
+func (s *Server) sendStorySegment(pl *Player, menu *npcActiveMenu, taskID, segment int) {
+	catalog := s.npcTaskCatalogOf()
+	if catalog == nil || menu == nil {
+		return
+	}
+	pl.npcMu.Lock()
+	scene := pl.npcScene
+	pl.npcMu.Unlock()
+	spawn, ok := s.findNPCSpawn(scene, menu.objectID)
+	if !ok || spawn.OwnerID != menu.ownerID {
+		return
+	}
+	segments := catalog.StoryBindingsFor(spawn.ConfigID, taskID)
+	if segment < 1 || segment > len(segments) {
+		// 链尾（最后一段窗的 50N 点击）：剧情完成。
+		if pl.taskStoryDone == nil {
+			pl.taskStoryDone = make(map[uint32]bool)
+		}
+		pl.taskStoryDone[uint32(taskID)] = true
+		s.trace("npc task: 剧情完成 tid=%d（%d 段走完）client=%d", taskID, len(segments), pl.Conn1)
+		for i := 0; i < 2; i++ {
+			if end, err := entergen.CustomMessageFrame(8); err == nil {
+				s.sendToClient(pl, end)
+			}
+		}
+		s.clearNPCMenu(pl)
+		return
+	}
+	seg := segments[segment-1]
+	out := make([][]byte, 0, 5)
+	begin, err := entergen.CustomMessageFrame(4)
+	if err != nil {
+		return
+	}
+	out = append(out, begin)
+	title, err := entergen.CustomMessageFrame(5, entergen.CustomString(seg.ContextID))
+	if err != nil {
+		return
+	}
+	out = append(out, title)
+	cont := (npcTaskFlagStoryBase + int32(segment)) * npcTaskFuncBase
+	contLine, err := entergen.CustomMessageFrame(6, entergen.CustomInt(cont+int32(taskID)), entergen.CustomString(seg.TitleID))
+	if err != nil {
+		return
+	}
+	out = append(out, contLine)
+	leave := (npcTaskFlagStoryLeaveBase + int32(segment)) * npcTaskFuncBase
+	leaveText := seg.LeaveTextID
+	if leaveText == "" {
+		leaveText = npcStoryLeaveTextDefault
+	}
+	leaveLine, err := entergen.CustomMessageFrame(6, entergen.CustomInt(leave+int32(taskID)), entergen.CustomString(leaveText))
+	if err != nil {
+		return
+	}
+	out = append(out, leaveLine)
+	end, err := entergen.CustomMessageFrame(7, entergen.CustomObject(spawn.ObjectID, spawn.OwnerID))
+	if err != nil {
+		return
+	}
+	out = append(out, end)
+	for _, frame := range out {
+		s.sendToClient(pl, frame)
+	}
+	s.trace("npc task: 剧情段 tid=%d seg=%d/%d（%s）client=%d", taskID, segment, len(segments), seg.ContextID, pl.Conn1)
 }
 
 // replayTaskAccepted 重放 Task_Accepted 0x29 批量帧（m327 sub6 同源编码，
@@ -253,6 +424,11 @@ func (p *Player) taskAcceptedContains(id uint32) bool {
 		}
 	}
 	return false
+}
+
+// clearTaskStoryDone 清剧情完成态（提交/放弃后任务重置）。
+func (p *Player) clearTaskStoryDone(id uint32) {
+	delete(p.taskStoryDone, id)
 }
 
 // removeAcceptedTask 移除已接任务（保持余序；值语义拷贝安全——roleState

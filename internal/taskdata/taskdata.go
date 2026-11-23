@@ -33,12 +33,20 @@ type Task struct {
 }
 
 // Binding 记录一条 NPC↔任务关联。Source 标记数据来源：
-// "storytasklist" 或 "qianjiu"。
+// "storytasklist" 或 "qianjiu"。storytasklist 的**每行即剧情的一段**
+// （同 StoryID 多行按行序为段序——引导抓包 story_482_1..5 与源表
+// 5 行互证）：StoryID=剧情行 ID；ContextID/TitleID=该段窗的 m5 标题键
+// （story_<sid>_N）与续行文本键（storymenu_<sid>_N）；LeaveTextID=离行
+// 文本键（9607）。键本身，非文本。
 type Binding struct {
-	TaskID     int    `json:"task_id"`
-	NPCConfigID string `json:"npc_config_id"`
-	SceneID    string `json:"scene_id,omitempty"`
-	Source     string `json:"source,omitempty"`
+	TaskID       int    `json:"task_id"`
+	NPCConfigID  string `json:"npc_config_id"`
+	SceneID      string `json:"scene_id,omitempty"`
+	StoryID      string `json:"story_id,omitempty"`
+	ContextID    string `json:"context_id,omitempty"`
+	TitleID      string `json:"title_id,omitempty"`
+	LeaveTextID  string `json:"leave_text_id,omitempty"`
+	Source       string `json:"source,omitempty"`
 }
 
 // DramaCite 是 task_drama_cite.ini 的任务链条目。
@@ -59,9 +67,10 @@ type Catalog struct {
 	dramaCites map[int]DramaCite
 }
 
-// NewCatalog 组装目录：绑定按（规范化后的 NPC 配置 ID, 任务 ID）去重，
-// 同一 NPC 的绑定按任务 ID 升序。非法条目（非正任务 ID、空 NPC ID）
-// 被丢弃。
+// NewCatalog 组装目录：绑定按（规范化后的 NPC 配置 ID, 任务 ID,
+// 剧情行 ID, 段上下文键）去重——同一剧情的多段行（storytasklist 合法
+// 形态，story_<sid>_N）全部保留、行序即段序，同一 NPC 的绑定按任务
+// ID 升序（稳定排序保段序）。非法条目（非正任务 ID、空 NPC ID）丢弃。
 func NewCatalog(tasks map[int]Task, bindings []Binding, cites map[int]DramaCite) *Catalog {
 	c := &Catalog{
 		tasks:      make(map[int]Task, len(tasks)),
@@ -80,10 +89,13 @@ func NewCatalog(tasks map[int]Task, bindings []Binding, cites map[int]DramaCite)
 	seen := make(map[Binding]bool, len(bindings))
 	for _, binding := range bindings {
 		binding.NPCConfigID = strings.TrimSpace(binding.NPCConfigID)
+		binding.StoryID = strings.TrimSpace(binding.StoryID)
+		binding.ContextID = strings.TrimSpace(binding.ContextID)
 		if binding.TaskID <= 0 || binding.NPCConfigID == "" {
 			continue
 		}
-		key := Binding{TaskID: binding.TaskID, NPCConfigID: normalize(binding.NPCConfigID)}
+		key := Binding{TaskID: binding.TaskID, NPCConfigID: normalize(binding.NPCConfigID),
+			StoryID: binding.StoryID, ContextID: binding.ContextID}
 		if seen[key] {
 			continue
 		}
@@ -122,19 +134,54 @@ func (c *Catalog) BindingsForNPC(configID string) []Binding {
 }
 
 // TasksForNPC 返回该 NPC 绑定且已加载到文本的任务，按任务 ID 升序。
-// 只有绑定、没有文本的任务不计入（见 BindingsForNPC）。
+// 只有绑定、没有文本的任务不计入（见 BindingsForNPC）；同一任务多条
+// 剧情行只返回一次。
 func (c *Catalog) TasksForNPC(configID string) []Task {
 	if c == nil {
 		return nil
 	}
 	bindings := c.byNPC[normalize(configID)]
 	tasks := make([]Task, 0, len(bindings))
+	seen := make(map[int]bool, len(bindings))
 	for _, binding := range bindings {
+		if seen[binding.TaskID] {
+			continue
+		}
 		if task, ok := c.tasks[binding.TaskID]; ok {
 			tasks = append(tasks, task)
+			seen[binding.TaskID] = true
 		}
 	}
 	return tasks
+}
+
+// StoryBindingFor 返回该 NPC 该任务的剧情绑定（storytasklist 来源、
+// 首个带 StoryID 的行；无剧情行返回 ok=false）。
+func (c *Catalog) StoryBindingFor(configID string, taskID int) (Binding, bool) {
+	if c == nil {
+		return Binding{}, false
+	}
+	for _, binding := range c.byNPC[normalize(configID)] {
+		if binding.TaskID == taskID && binding.StoryID != "" {
+			return binding, true
+		}
+	}
+	return Binding{}, false
+}
+
+// StoryBindingsFor 返回该 NPC 该任务的全部剧情段（行序即段序；
+// 无剧情行返回空）。
+func (c *Catalog) StoryBindingsFor(configID string, taskID int) []Binding {
+	if c == nil {
+		return nil
+	}
+	var segments []Binding
+	for _, binding := range c.byNPC[normalize(configID)] {
+		if binding.TaskID == taskID && binding.StoryID != "" {
+			segments = append(segments, binding)
+		}
+	}
+	return segments
 }
 
 // NPCsForTask 返回绑定到该任务的 NPC 配置 ID（保留原文大小写）。

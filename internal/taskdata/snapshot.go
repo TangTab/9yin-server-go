@@ -7,8 +7,9 @@ import (
 )
 
 // SnapshotVersion 每当派生逻辑或字段含义变化时递增；版本不匹配的
-// 快照视为过期，调用方应重新派生。
-const SnapshotVersion = 1
+// 快照视为过期，调用方应重新派生。v2：Binding 增剧情段字段
+// （StoryID/ContextID/TitleID/LeaveTextID）并保留多段行。
+const SnapshotVersion = 2
 
 // Snapshot 是任务目录的版本化持久化形态（data/tasks.json）。
 // 任务与剧情链的键在 JSON 中序列化为十进制字符串。

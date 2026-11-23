@@ -70,6 +70,10 @@ type Player struct {
 	npcScene      string
 	patrolReadyAt time.Time
 	npcMoveState  map[uint32]bool
+	// taskStoryDone 剧情对话已走完任务集（npctask.go；连接生命周期，
+	// 不落库——最小进度态：剧情段链尾点击后置位，任务行 500→200 翻转；
+	// 重登重走剧情可接受）。
+	taskStoryDone map[uint32]bool
 	// sceneSwitch 切图在途态（sceneswitch.go；nil=不在切换）：0x0C 已发
 	// 到目标场景 0x09 就绪屏障之间，位移上报全丢弃（旧场景过期 0x0A）。
 	sceneSwitchMu sync.Mutex

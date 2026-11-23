@@ -62,6 +62,9 @@ type npcActiveMenu struct {
 	objectID uint32
 	ownerID  uint32
 	at       time.Time
+	// pendingTask 接取窗在途任务（npctask.go：100 首次开窗记录、窗内
+	// 「接受任务」同 funcid 二次到达=真接取；换行/关窗清除）。
+	pendingTask int
 }
 
 var (
@@ -197,7 +200,7 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 // 任务行，服务端不发即无任务入口）。
 func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn) {
 	services := npcServicesOf(spawn.Template)
-	tasks := npcTaskLines(s.npcTaskCatalogOf(), spawn.ConfigID, npcAcceptedSet(pl), npcTaskMenuLimit())
+	tasks := s.npcTaskLines(s.npcTaskCatalogOf(), pl, spawn.ConfigID, npcTaskMenuLimit())
 	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services, tasks); err == nil {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
@@ -224,10 +227,11 @@ func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 		}
 		return true
 	}
-	// 任务域 mark：接取（100）/提交（200/201）受理（引导抓包实证口径，
-	// npctask.go——接取后刷新菜单，提交后 m8×2 关窗）。
+	// 任务域 mark：接取（100）/提交（200/201）/剧情（500/50N/60N）受理
+	//（引导抓包实证 + lua 推断，npctask.go——接取后刷新菜单，提交/剧情
+	// 中断后 m8×2 关窗，剧情段链尾翻任务行）。
 	if req.FuncID != 0 {
-		if flag, _, ok := npcTaskMarkSplit(req.FuncID); ok && (flag == npcTaskFlagAccept || flag == npcTaskFlagSubmit || flag == npcTaskFlagSubmitChoice) {
+		if _, _, ok := npcTaskMarkSplit(req.FuncID); ok {
 			s.handleNPCTaskMark(pl, menu, req.FuncID)
 			return true
 		}

@@ -36,20 +36,31 @@ tasks.json（storytasklist 派生），不是 Task.xml。
 
 数据装载：env `NINEYIN_TASK_SNAPSHOT` > `<数据根>/taskdata/tasks.json`（正式 Res）
 > `<数据根>/../artifacts/local/tasks.json`（仓内 testdata 布局）；进程级缓存，
-缺档降级不发任务行（不阻塞对话）。
+缺档降级不发任务行（不阻塞对话）。**taskdata 快照 v2**（2026-11-23）：
+Binding 增剧情段字段（StoryID/ContextID/TitleID/LeaveTextID）且多段行全保留
+（bindings 3226→6350）——storytasklist 每行即剧情一段（同 StoryID 多行按
+行序为段序，引导抓包 story_482_1..5 与源表 5 行互证）。
 
-- `npcTaskLines`：`Catalog.TasksForNPC(ConfigID)`（绑定且已加载文案的任务，TID 升序）
-  → 已接发提交行/未接发接取行；上限 `NINEYIN_NPC_TASK_LIMIT`（缺省 8——客户端菜单
-  每页 4 行翻页；<0 一键关停）。
+- `npcTaskLines`：`Catalog.TasksForNPC(ConfigID)`（绑定且已加载文案的任务，
+  TID 升序，同任务多剧情行只计一次）→ 三态行：
+  - 未接 → 100 接取行；
+  - 已接 + 有剧情段 + 未走完 → 500 进行中行；
+  - 已接 + 剧情走完/无剧情段 → 200 可提交行；
+  上限 `NINEYIN_NPC_TASK_LIMIT`（缺省 8——客户端菜单每页 4 行翻页；<0 关停）。
 - `npcTaskMenuFrames`：m6 任务行，**双文本键**（首键=行文案，次键 title 作
   TextManager 格式化参数）：
   - 接取 `[100×10⁶+TID, "CanAcceptMenu_<TID>", "title_<TID>"]`
   - 提交 `[200×10⁶+TID, "CompleteMenu_<TID>", "title_<TID>"]`
+  - 进行中 `[500×10⁶+TID, "story_menu_<sid>", "title_<TID>"]`
 - mark 受理（handleNPCMenuSelect → handleNPCTaskMark）：
-  - flag 100 接取：写 `roleState.TaskAccepted` → 0x29 重放 → 重发菜单（行翻转）；
-  - flag 200/201 提交（201=奖励单选二次确认，官方恒随 200 后到达）：移除 →
-    0x29 重放 → **m8×2 关窗**（官方口径，不刷新菜单）；
-  - 500/50N/60N 剧情域、300/400/700 本阶段识别留痕。
+  - flag 100 接取：首次=推接取窗（见 §五.1）；同 TID 二次（pendingTask
+    状态机）=真接取 → 写 TaskAccepted → 0x29 重放 → 重发菜单（行翻 500）；
+  - flag 200/201 提交（201=奖励单选二次确认，官方恒随 200 后到达）：
+    移除+清剧情态 → 0x29 重放 → **m8×2 关窗**（官方口径，不刷新菜单）；
+  - flag 500 进行中：发剧情对话窗第 1 段；
+  - flag 50N 剧情续：发段 N+1；链尾=剧情完成（`Player.taskStoryDone`）+m8×2；
+  - flag 60N 剧情离：m8×2 关窗；
+  - 300/400/700 留痕。
 - 0x29 重放走 `entergen.TaskAcceptedBatchFrame`（m327 sub6 同通道，全量幂等）。
 
 ## 三、引导抓包任务协议（女号完整引导流，8032 world 连接）
@@ -159,15 +170,31 @@ prize 串（"钱,0,repute_jianghu,声望,…,物品,数量,…,5,5000,0,0"） | 
 （注：早期启发式字节扫描曾把 #2425 误读为 1342，LZ 精确解码实为 1341——
 启发式结论须以 lz_exact 解码为准。）
 
-## 五、遗留与后续
+## 五、遗留处置（2026-11-23 第二轮，全部落定）
 
-1. **接取行（100 域）官方形态未实证**——引导流自动接取、npc.pcapng 无任务在身；
-   需一份主城有可接任务的抓包（当前实现按 CanAcceptMenu_+title_ 双键推测）。
-2. **500 进行中行未实现**——需要任务进度系统（官方 500 行带 story_menu_<sid>
-   剧情入口，本服已接任务暂发 200 可提交行作可玩闭环）。
-3. **接取窗 task_msg 参数族**（show_accept_form 15 参）未实现——当前以
-   0x29 + 菜单行翻转/关窗闭环替代。
-4. **剧情对话窗**（story_<sid>_N 分段、DialogID_<sid>/okmenu_<sid> 双窗）未实现，
-   storytasklist 行 ID→分段键数据已在 TaskText.xml 齐备。
-5. recordBatch0x29 如需对齐现行官服 15B 头方言，参照 §4.2 布局（非必须——
-   29B 头方言客户端已实证可解）。
+1. **接取行（100 域）官方形态**：三份抓包（引导女/跳过引导男/npc.pcapng）
+   均无手动接取样本——按客户端 lua 链路推断实现并标注待真机验证：
+   首次 100=服务端推接取窗（`KeyedMessageFrame("task_msg", 1, npc, funcid,
+   task_id, "context_<TID>", "task_menu_accept_<TID>", prize×3 空串, 0,0,0,
+   "", title 富文本, 0, 0)`——show_accept_form 15 参族）；窗内「接受任务」
+   行同 funcid 二次到达（菜单簿记 pendingTask 状态机）=真接取。entergen 新增
+   `KeyedMessageFrame`（0x1E 字符串路由）。
+2. **500 进行中行 + 最小进度系统**：已实现——storytasklist **每行即剧情一段**
+   （同 StoryID 多行、行序即段序；taskdata v2 快照 bindings 3226→6350 多段
+   全保留）。已接+有剧情段+未走完=500 行（双键 story_menu_<sid>+title_<TID>）；
+   剧情走完/无剧情段=200 可提交行；`Player.taskStoryDone` 布尔进度态（连接
+   生命周期，不落库）。
+3. **剧情对话窗**：已实现（抓包帧族逐字节复刻）——500 mark 发段 1 窗
+   （m4/m5 "story_<sid>_N"/m6 [50N×10⁶+TID, "storymenu_<sid>_N"]/m6
+   [60N×10⁶+TID, LeaveTextID‖"9607"]/m7）；50N 发段 N+1；链尾（段数+1）=
+   剧情完成+m8×2 关窗；60N 中断=m8×2 关窗（未实证，按离开语义）。
+4. **接取窗参数族**：已实现（见 1）；奖励三槽无数据发空串（prize 数据源
+   在官方 0x29 帧体/BGserverCJ Award.xml，未接）。
+5. **15B 头对齐：不做**——recordBatch0x29 现行 29B 头方言客户端实证可解
+   （四连崩根因是池回引非头布局），对齐需动 Task_Accepted 全通道（登录
+   挂载行推/m327 sub6/批量重放）+ golden 测试，收益（字节级对拍）小于风险。
+
+**新遗留**：接取窗/剧情窗真机验证（需 fork 客户端联调）；接取窗奖励预览
+（prize 数据接入）；官方链推进（NextTaskLimit——提交后自动接取下一环，
+数据在 Task.xml/drama_cite，未接）；DialogID_<sid>/okmenu_<sid> 双窗模式
+（第二窗紧随问候窗，npctask 现单窗）。

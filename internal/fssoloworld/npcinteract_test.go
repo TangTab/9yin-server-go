@@ -227,8 +227,9 @@ func TestNPCTalkMenuM5(t *testing.T) {
 }
 
 func TestNPCTaskMenuLines(t *testing.T) {
-	// 任务行域定版（form_talk_data.lua g_menu_id）：接取 100*base+TID、
-	// 提交 200*base+TID；行文本键 title_<TID>。已接任务翻提交行。
+	// 任务行域定版（form_talk_data.lua g_menu_id + 引导抓包）：
+	// 接取 100*base+TID / 提交 200*base+TID / 进行中 500*base+TID（有
+	// 剧情段且未走完）；行文本双键。已接+剧情走完/无剧情段翻提交行。
 	catalog := taskdata.NewCatalog(
 		map[int]taskdata.Task{101: {ID: 101, Title: "寻亲少年"}, 102: {ID: 102, Title: "初入江湖"}},
 		[]taskdata.Binding{
@@ -237,15 +238,35 @@ func TestNPCTaskMenuLines(t *testing.T) {
 			{TaskID: 103, NPCConfigID: "WorldNpc00009"},
 			{TaskID: 104, NPCConfigID: "WorldNpc00009"}, // 无文本不计
 		}, nil)
-	lines := npcTaskLines(catalog, "WorldNpc00009", map[uint32]bool{101: true}, 8)
+	s := newNpcTestServer(t)
+	pl := &Player{Conn1: 3, State: PlOnline}
+	pl.roleState.TaskAccepted = []uint32{101}
+	lines := s.npcTaskLines(catalog, pl, "WorldNpc00009", 8)
 	if len(lines) != 2 {
 		t.Fatalf("任务行 = %d, want 2（103/104 无文本不计）: %+v", len(lines), lines)
 	}
 	if lines[0].TaskID != 101 || !lines[0].Submit {
-		t.Fatalf("行 0 = %+v, want {101 Submit}", lines[0])
+		t.Fatalf("行 0 = %+v, want {101 Submit 无剧情段直发提交行}", lines[0])
 	}
-	if lines[1].TaskID != 102 || lines[1].Submit {
+	if lines[1].TaskID != 102 || lines[1].Submit || lines[1].StoryID != "" {
 		t.Fatalf("行 1 = %+v, want {102 接取}", lines[1])
+	}
+	// 有剧情段：已接未走完=500 行；走完=200 行。
+	storyTasks := map[int]taskdata.Task{205: {ID: 205, Title: "剧情任务"}}
+	story2 := taskdata.NewCatalog(storyTasks, []taskdata.Binding{
+		{TaskID: 205, NPCConfigID: "F", StoryID: "482", ContextID: "story_482_1", TitleID: "storymenu_482_1"},
+		{TaskID: 205, NPCConfigID: "F", StoryID: "482", ContextID: "story_482_2", TitleID: "storymenu_482_2"},
+	}, nil)
+	pl2 := &Player{Conn1: 4, State: PlOnline}
+	pl2.roleState.TaskAccepted = []uint32{205}
+	got := s.npcTaskLines(story2, pl2, "F", 8)
+	if len(got) != 1 || got[0].StoryID != "482" || got[0].Submit {
+		t.Fatalf("剧情未走完 = %+v, want {205 StoryID=482}", got)
+	}
+	pl2.taskStoryDone = map[uint32]bool{205: true}
+	got = s.npcTaskLines(story2, pl2, "F", 8)
+	if len(got) != 1 || !got[0].Submit {
+		t.Fatalf("剧情走完 = %+v, want {205 Submit}", got)
 	}
 	frames, err := npcTaskMenuFrames(lines)
 	if err != nil {
@@ -263,6 +284,17 @@ func TestNPCTaskMenuLines(t *testing.T) {
 	if !bytes.Contains(frames[0], []byte("CompleteMenu_101")) || !bytes.Contains(frames[0], []byte("title_101")) {
 		t.Fatalf("提交行缺双键: % x", frames[0])
 	}
+	// 500 进行中行双键：story_menu_<sid> + title_<TID>。
+	doing, err := npcTaskMenuFrames([]npcTaskLine{{TaskID: 205, StoryID: "482"}})
+	if err != nil || len(doing) != 1 {
+		t.Fatalf("500 行编码: %v %+v", err, doing)
+	}
+	if !bytes.Contains(doing[0], []byte("story_menu_482")) || !bytes.Contains(doing[0], []byte("title_205")) {
+		t.Fatalf("500 行缺双键: % x", doing[0])
+	}
+	if funcid := binary.LittleEndian.Uint32(doing[0][9:]); funcid != 500000205 {
+		t.Fatalf("500 行 funcid = %d, want 500000205", funcid)
+	}
 	if !bytes.Contains(frames[1], []byte("CanAcceptMenu_102")) || !bytes.Contains(frames[1], []byte("title_102")) {
 		t.Fatalf("接取行缺双键: % x", frames[1])
 	}
@@ -270,10 +302,11 @@ func TestNPCTaskMenuLines(t *testing.T) {
 		t.Fatalf("接取行 funcid = %d, want 100000102", funcid)
 	}
 	// 上限截断与关停。
-	if got := len(npcTaskLines(catalog, "WorldNpc00009", nil, 1)); got != 1 {
+	fresh := &Player{Conn1: 5, State: PlOnline}
+	if got := len(s.npcTaskLines(catalog, fresh, "WorldNpc00009", 1)); got != 1 {
 		t.Fatalf("截断后 = %d, want 1", got)
 	}
-	if got := npcTaskLines(catalog, "WorldNpc00009", nil, -1); got != nil {
+	if got := s.npcTaskLines(catalog, fresh, "WorldNpc00009", -1); got != nil {
 		t.Fatalf("负上限应关停: %+v", got)
 	}
 }
@@ -305,9 +338,14 @@ func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
 	s := newNpcTestServer(t)
 	pl := &Player{Conn1: 9, State: PlOnline}
 	menu := &npcActiveMenu{objectID: 5, ownerID: 6}
+	// 接取状态机：首次 100=推接取窗（不写已接），同 TID 二次=真接取。
+	s.handleNPCTaskMark(pl, menu, 100000301)
+	if pl.taskAcceptedContains(301) {
+		t.Fatalf("首次 100 不应直接接取: %+v", pl.roleState.TaskAccepted)
+	}
 	s.handleNPCTaskMark(pl, menu, 100000301)
 	if !pl.taskAcceptedContains(301) || len(pl.roleState.TaskAccepted) != 1 {
-		t.Fatalf("接取后已接 = %+v", pl.roleState.TaskAccepted)
+		t.Fatalf("二次确认后已接 = %+v", pl.roleState.TaskAccepted)
 	}
 	// 幂等：重复接取不重复追加。
 	s.handleNPCTaskMark(pl, menu, 100000301)
