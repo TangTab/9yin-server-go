@@ -62,8 +62,10 @@ type Player struct {
 	posSaveAt time.Time
 	// NPC 视口/巡逻簿记（连接生命周期）：npcVisible=已物化 ident 集，
 	// npcPos=当前平面位置（op0x0A 67B 位移包更新）——npcReconcile 按
-	// 此 diff 增删；patrolReadyAt=巡逻首拍时刻（进场物化 +5s）；
-	// npcMoveState=巡逻 NPC 行走/驻停水位（State 翻转帧用）。
+	// 此 diff 增删；npcScene=当前场景**摆放目录名**（resolveSceneDir 解析
+	// 的权威目录，目录/巡逻装载与交互查找共用；非 resource 短名）；
+	// patrolReadyAt=巡逻首拍时刻（进场物化 +5s）；npcMoveState=巡逻 NPC
+	// 行走/驻停水位（State 翻转帧用）。
 	npcMu         sync.Mutex
 	npcVisible    map[uint32]bool
 	npcPos        [4]float64

@@ -188,8 +188,8 @@ func TestSceneNPCEnterBookkeeping(t *testing.T) {
 	pl.npcMu.Lock()
 	visible, scene, ready := pl.npcVisible, pl.npcScene, pl.patrolReadyAt
 	pl.npcMu.Unlock()
-	if len(visible) == 0 || scene != "born03" {
-		t.Fatalf("视口簿记未初始化 visible=%d scene=%q", len(visible), scene)
+	if len(visible) == 0 || scene != "born03_yanyuzhuang" {
+		t.Fatalf("视口簿记未初始化 visible=%d scene=%q（应存解析目录名）", len(visible), scene)
 	}
 	if remaining := time.Until(ready); remaining <= 0 || remaining > patrolFirstBroadcastDelay+time.Second {
 		t.Fatalf("首拍延迟异常 %v（应约 %v）", remaining, patrolFirstBroadcastDelay)

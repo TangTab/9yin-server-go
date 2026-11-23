@@ -18,6 +18,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 const (
@@ -65,8 +66,9 @@ func npcForm() npcfeed.Form {
 func npcPatrolEnabled() bool { return os.Getenv("NINEYIN_NPC_PATROL") != "off" }
 
 // npcCatalog 场景物化目录（联查命中集，进程级缓存；巡逻绑定后 spawns
-// 携带时间表与吸附坐标）。
+// 携带时间表与吸附坐标）。dir=解析后的摆放目录名（帧/巡逻装载共用）。
 type npcCatalog struct {
+	dir    string
 	spawns []npcfeed.Spawn
 	stats  npcfeed.Stats
 	bind   npcfeed.PatrolBindStats
@@ -78,12 +80,14 @@ var (
 )
 
 // sceneNPCEnter 进场物化帧族（过滤+采样+编码）并初始化玩家视口簿记
-// （可见集/场景/巡逻首拍时刻）。
+// （可见集/场景/巡逻首拍时刻）。场景键经 resolveSceneDir 解析为权威摆放
+// 目录（变体目录字典序陷阱见其注释），npcScene 存目录名。
 func (s *Server) sceneNPCEnter(pl *Player, scene string, origin [4]float64) [][]byte {
-	frames, visible := s.sceneNPCViewFrames(scene, origin)
+	dir := s.resolveSceneDir(pl.roleState.Scene, scene)
+	frames, visible := s.sceneNPCViewFrames(dir, origin)
 	pl.npcMu.Lock()
 	pl.npcPos = origin
-	pl.npcScene = scene
+	pl.npcScene = dir
 	pl.npcVisible = visible
 	pl.patrolReadyAt = time.Now().Add(patrolFirstBroadcastDelay)
 	pl.npcMoveState = nil
@@ -101,20 +105,20 @@ func (s *Server) npcEnterAborted(pl *Player) {
 }
 
 // sceneNPCFrames 场景 NPC 物化帧族（装载+联查+ident+过滤+采样+编码；
-// 无玩家簿记——测试/无会话面）。
-func (s *Server) sceneNPCFrames(scene string, origin [4]float64) [][]byte {
-	frames, _ := s.sceneNPCViewFrames(scene, origin)
+// 无玩家簿记——测试/无会话面）。key=目录名或场景键（born03 前缀兜底）。
+func (s *Server) sceneNPCFrames(key string, origin [4]float64) [][]byte {
+	frames, _ := s.sceneNPCViewFrames(s.sceneNPCCatalog(key).dir, origin)
 	return frames
 }
 
 // sceneNPCViewFrames 视口子集帧族 + 可见 ident 集：过滤（半径/上限）→
 // 资源 override → 巡逻坐标采样 → 编码。装载失败返回空——NPC 是增强
-// 下发，不阻塞进场。
-func (s *Server) sceneNPCViewFrames(scene string, origin [4]float64) ([][]byte, map[uint32]bool) {
+// 下发，不阻塞进场。dir=已解析摆放目录名。
+func (s *Server) sceneNPCViewFrames(dir string, origin [4]float64) ([][]byte, map[uint32]bool) {
 	if !npcPushEnabled() {
 		return nil, nil
 	}
-	spawns := s.sceneNPCSpawns(scene, origin)
+	spawns := s.sceneNPCSpawns(dir, origin)
 	frames, err := npcfeed.Frames(spawns, npcForm())
 	if err != nil {
 		s.trace("npc frames: %v", err)
@@ -129,9 +133,9 @@ func (s *Server) sceneNPCViewFrames(scene string, origin [4]float64) ([][]byte, 
 
 // sceneNPCSpawns 视口子集（坐标已采样到当前时刻）：全量模式（半径 0）
 // 一次物化；半径模式按玩家平面位置过滤 + 距离升序截断。返回目录副本
-// （不改动缓存）。
-func (s *Server) sceneNPCSpawns(scene string, origin [4]float64) []npcfeed.Spawn {
-	catalog := s.sceneNPCCatalog(scene)
+// （不改动缓存）。dir=已解析摆放目录名。
+func (s *Server) sceneNPCSpawns(dir string, origin [4]float64) []npcfeed.Spawn {
+	catalog := s.sceneNPCCatalog(dir)
 	spawns := catalog.spawns
 	if radius := npcRadius(); radius > 0 {
 		nowMs := time.Now().UnixMilli()
@@ -213,50 +217,86 @@ func applyResourceOverride(spawns []npcfeed.Spawn) []npcfeed.Spawn {
 }
 
 // sceneNPCCatalog 场景目录（缓存；装载时顺带巡逻绑定——epoch=装载时刻，
-// 同场景所有连接共享同一时间表，NPC 位置跨连接一致）。
-func (s *Server) sceneNPCCatalog(scene string) *npcCatalog {
+// 同场景所有连接共享同一时间表，NPC 位置跨连接一致）。key=摆放目录名或
+// 场景键：精确目录名命中（大小写不敏感）优先，否则场景键前缀匹配兜底
+// （born03 → born03_yanyuzhuang）。多变体前缀（school01_fangong 抢在
+// school01_JinYiWei 前）须由 resolveSceneDir 先解析出权威目录再进来。
+func (s *Server) sceneNPCCatalog(key string) *npcCatalog {
 	npcCatalogMu.Lock()
 	defer npcCatalogMu.Unlock()
-	if cached, ok := npcCatalogCache[scene]; ok {
+	if cached, ok := npcCatalogCache[strings.ToLower(key)]; ok {
 		return cached
 	}
-	catalog := &npcCatalog{}
+	catalog := &npcCatalog{dir: key}
 	root := npcfeed.ResolveRoot()
 	if root == "" {
-		s.trace("npc catalog: 数据根缺席（NINEYIN_DATA_ROOT / Res / testdata），场景 %s NPC 不下发", scene)
-		npcCatalogCache[scene] = catalog
+		s.trace("npc catalog: 数据根缺席（NINEYIN_DATA_ROOT / Res / testdata），场景 %s NPC 不下发", key)
+		npcCatalogCache[strings.ToLower(key)] = catalog
 		return catalog
 	}
-	spawns, stats, err := npcfeed.BuildCatalog(root, scene)
+	dir := key
+	if canonical := npcfeed.CanonicalSceneDir(root, dir); canonical != "" {
+		dir = canonical
+	} else if prefix := npcfeed.SceneDirOf(root, dir); prefix != "" {
+		dir = prefix
+	}
+	catalog.dir = dir
+	spawns, stats, err := npcfeed.BuildCatalogDir(root, dir)
 	if err != nil {
 		s.trace("npc catalog: %v", err)
-		npcCatalogCache[scene] = catalog
+		npcCatalogCache[strings.ToLower(key)] = catalog
 		return catalog
 	}
 	// 巡逻绑定：mappath 路线表（<root>/mappath，场景短名前缀 ini）→
 	// 出生点吸附 + 时间表（目录缓存内一次完成）。
 	if npcPatrolEnabled() {
-		routes := npcfeed.LoadPatrolRoutes(resolveMappathDir(root), sceneDirName(root, scene))
+		routes := npcfeed.LoadPatrolRoutes(resolveMappathDir(root), dir)
 		catalog.bind = npcfeed.BindPatrol(spawns, routes, time.Now().UnixMilli())
 	}
 	catalog.spawns, catalog.stats = spawns, stats
 	s.trace("npc catalog: 场景 %s 摆放 %d 联查 %d 战斗命中 %d 闸拦 %d → 物化 %d 条（巡逻 walkers=%d stand=%d missingPath=%d far=%d）",
-		scene, stats.Placements, stats.Resolved, stats.CombatHit, stats.Skipped, len(spawns),
+		dir, stats.Placements, stats.Resolved, stats.CombatHit, stats.Skipped, len(spawns),
 		catalog.bind.Walkers, catalog.bind.Stand, catalog.bind.MissingPath, catalog.bind.FarOrShort)
 	for _, sample := range stats.Samples {
 		s.trace("npc catalog: 样本 %s", sample)
 	}
-	npcCatalogCache[scene] = catalog
+	npcCatalogCache[strings.ToLower(key)] = catalog
 	return catalog
 }
 
-// sceneDirName 场景键 → 摆放目录名（born03 → born03_yanyuzhuang）：
-// npcfeed 私有 sceneDirOf 的薄暴露（巡逻路线装载要同名目录）。
-func sceneDirName(root, scene string) string {
-	if dir := npcfeed.SceneDirOf(root, scene); dir != "" {
+// resolveSceneDir 权威摆放目录解析（2026-11-23 修复：SceneDirOf 字典序
+// 首匹配在同前缀多变体目录上选错——八大门派全命中 school0X_fangong
+// 反攻副本（摆放 300~400 行 vs 正图 3400~6900 行）、襄阳坡/塞外大漠命中
+// _2_ 变体（scene08 仅剩 3 行≈空图），切换这些地图 NPC 缺失/寥寥）。
+// 解析序：① roleState.Scene 末段（建号/切图落的精确 config 路径
+// ini\scene\<dir>，目录存在才算）② BornCJ FindSceneOption(resource)
+// .Config 末段（旧档 Scene 缺席兜底）③ SceneDirOf 字典序前缀（末路——
+// 无权威信息的场景才走，变体目录会选错）④ resource 原样（装载报错空目录）。
+func (s *Server) resolveSceneDir(scenePath, resource string) string {
+	root := npcfeed.ResolveRoot()
+	if root == "" {
+		return resource
+	}
+	if dir := npcfeed.CanonicalSceneDir(root, lastPathSegment(scenePath)); dir != "" {
 		return dir
 	}
-	return scene
+	if opt, ok := rolestate.FindSceneOption(resource); ok {
+		if dir := npcfeed.CanonicalSceneDir(root, lastPathSegment(opt.Config)); dir != "" {
+			return dir
+		}
+	}
+	if dir := npcfeed.SceneDirOf(root, resource); dir != "" {
+		return dir
+	}
+	return resource
+}
+
+// lastPathSegment 路径末段（\ 与 / 皆容）。
+func lastPathSegment(path string) string {
+	if i := strings.LastIndexAny(path, `\/`); i >= 0 {
+		return path[i+1:]
+	}
+	return path
 }
 
 // resolveMappathDir mappath 巡逻路线目录：env NINEYIN_MAPPATH_DIR >

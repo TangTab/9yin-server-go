@@ -65,18 +65,33 @@ func eligible(p Placement, scriptClass string) bool {
 	return true
 }
 
-// BuildCatalog 场景目录：摆放装载 + 模板/战斗联查 + 闸门 + ident。
-// sceneDir 传空则按场景键前缀匹配（born03 → born03_yanyuzhuang）。
+// BuildCatalog 场景目录（场景键形态）：按 SceneDirOf 字典序前缀匹配摆放
+// 目录。⚠️ 同前缀多变体目录（school01_fangong 抢在 school01_JinYiWei 前）
+// 会选错——调用方持有权威场景配置路径时必须走 BuildCatalogDir。
 func BuildCatalog(root, scene string) ([]Spawn, Stats, error) {
+	if root == "" {
+		return nil, Stats{}, fmt.Errorf("npcfeed: 数据根缺席")
+	}
+	sceneDir := SceneDirOf(root, scene)
+	if sceneDir == "" {
+		return nil, Stats{}, fmt.Errorf("npcfeed: 场景 %s 无摆放目录", scene)
+	}
+	return BuildCatalogDir(root, sceneDir)
+}
+
+// BuildCatalogDir 场景目录（精确目录形态）：dir=ini/Scene 下确切目录名
+//（roleState.Scene 末段等权威来源；大小写不敏感匹配实际目录名）。
+func BuildCatalogDir(root, dir string) ([]Spawn, Stats, error) {
 	stats := Stats{}
 	if root == "" {
 		return nil, stats, fmt.Errorf("npcfeed: 数据根缺席")
 	}
-	sceneDir := SceneDirOf(root, scene)
-	if sceneDir == "" {
-		return nil, stats, fmt.Errorf("npcfeed: 场景 %s 无摆放目录", scene)
+	if canonical := CanonicalSceneDir(root, dir); canonical != "" {
+		dir = canonical
+	} else {
+		return nil, stats, fmt.Errorf("npcfeed: 摆放目录 %s 不存在", dir)
 	}
-	placements, err := LoadPlacements(root, sceneDir)
+	placements, err := LoadPlacements(root, dir)
 	if err != nil {
 		return nil, stats, err
 	}

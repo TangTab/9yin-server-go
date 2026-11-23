@@ -44,6 +44,8 @@ func ResolveRoot() string {
 // SceneDirOf 场景键（born03）→ 摆放目录名（born03_yanyuzhuang）：
 // ini/Scene 下前缀 "<scene>_" 或同名目录（大小写不敏感）。
 // 巡逻路线装载（mappath 短名前缀）共用同目录名。
+// ⚠️ 字典序首匹配——同前缀多变体目录（school01_fangong vs
+// school01_JinYiWei）会选中字典序靠前者，权威路径走 canonicalSceneDir。
 func SceneDirOf(root, scene string) string {
 	entries, err := os.ReadDir(filepath.Join(root, "ini", "Scene"))
 	if err != nil {
@@ -58,6 +60,25 @@ func SceneDirOf(root, scene string) string {
 		if strings.EqualFold(name, scene) ||
 			(len(name) > len(prefix) && strings.EqualFold(name[:len(prefix)], prefix)) {
 			return name
+		}
+	}
+	return ""
+}
+
+// CanonicalSceneDir 目录名 → ini/Scene 下实际目录名（大小写不敏感精确
+// 匹配；非前缀——变体目录不会被吞）。缺席返回空。权威场景目录存在性
+// 探针（resolveSceneDir 逐级回落用）。
+func CanonicalSceneDir(root, dir string) string {
+	if dir == "" {
+		return ""
+	}
+	entries, err := os.ReadDir(filepath.Join(root, "ini", "Scene"))
+	if err != nil {
+		return ""
+	}
+	for _, e := range entries {
+		if e.IsDir() && strings.EqualFold(e.Name(), dir) {
+			return e.Name()
 		}
 	}
 	return ""
