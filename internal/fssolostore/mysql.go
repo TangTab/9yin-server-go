@@ -7,44 +7,65 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
-	// sql.Open("mysql") 的驱动注册（DSN 解析/重试均由驱动侧承担）；
-	// 具名引入供 MySQLError 重复键判定（INSERT 1062 降级）。
+	// MySQLError 并发抢注落败判定（nx_roles 主键 1062）。
 	"github.com/go-sql-driver/mysql"
+
+	"github.com/lizhanyin/9yin-server-go/internal/dbconn"
 )
+
+// splitTableTimeout 分周表预建的单次调用上限。它跑在 store 的定时 tick
+// 里（Opened 首拍），不能跟着语句重试一起挂在库重启窗口上——库没好就
+// 到点放弃，下一拍再来。
+const splitTableTimeout = 3 * time.Second
 
 // MySQLStore 是 Backend 的 MySQL 实现（-mysql-dsn 注入；官方 SQLOLEDB
 // 方言 → Go 统一 MySQL，SQL 文本零改动——docs §五 逐字）。
 //
+// 连接经 internal/dbconn：库重启/闪断窗口内语句挂起退避重发（官方
+// CheckConnect 重连 + FailCanRetry 重试的等价），只有重试耗尽才以 error
+// 返回。可重发性：官方 SQL 全是 upsert/幂等 UPDATE；INSERT 族里
+// AccountLogon 首登建号有 SELECT 门兜住，CreateRole 建角自带前置门
+// （createRoleOnce），InsertLog 流水容忍重复行。
+//
 // 已建模命令走官方 SQL 原文；依赖 store_forw_* C 结构体布局的角色/
 // 信件族（Payload 解码未逆向）返回 ErrUnsupported（Server 仅 trace）。
 type MySQLStore struct {
-	db      *sql.DB
-	suffix  string
-	logf    func(format string, args ...any)
-	retries int
+	db     *dbconn.DB
+	suffix string
+	logf   func(format string, args ...any)
 }
 
 // OpenMySQLStore 连库并确保基础表存在（官方 DDL 不在快照内，按 SQL
 // 所需列最小集补建，IF NOT EXISTS）。
-func OpenMySQLStore(ctx context.Context, dsn string, logf func(string, ...any)) (*MySQLStore, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, fmt.Errorf("fssolostore: open mysql: %w", err)
-	}
-	if err := db.PingContext(ctx); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("fssolostore: ping mysql: %w", err)
-	}
+//
+// 库正在重启/暂不可达时等它起来（连接级失败退避重连，缺省不限时；
+// 密码错、库不存在这类等不来的错误立即返回）。要限时就传带 deadline
+// 的 ctx，或设 NINEYIN_DB_CONNECT_TIMEOUT。
+func OpenMySQLStore(ctx context.Context, dsn string, logf func(format string, args ...any)) (*MySQLStore, error) {
 	if logf == nil {
-		logf = func(string, ...any) {}
+		logf = func(format string, args ...any) {}
 	}
-	s := &MySQLStore{db: db, logf: logf, retries: 2}
+	db, err := dbconn.Open(ctx, dsn, dbconn.NewOptions("fssolostore", logf))
+	if err != nil {
+		return nil, err
+	}
+	s := newMySQLStore(db, logf)
 	if err := s.ensureTables(ctx); err != nil {
 		db.Close()
 		return nil, err
 	}
 	return s, nil
+}
+
+// newMySQLStore 以现成连接装配（OpenMySQLStore 的内核；测试经
+// dbconntest 假库注入重启窗口）。
+func newMySQLStore(db *dbconn.DB, logf func(format string, args ...any)) *MySQLStore {
+	if logf == nil {
+		logf = func(format string, args ...any) {}
+	}
+	return &MySQLStore{db: db, logf: logf}
 }
 
 func (s *MySQLStore) ensureTables(ctx context.Context) error {
@@ -54,10 +75,10 @@ func (s *MySQLStore) ensureTables(ctx context.Context) error {
 			" op_type INT, op_property MEDIUMBLOB, op_status INT, op_version INT ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 		"CREATE TABLE IF NOT EXISTS nx_chunks ( serial_no VARCHAR(64) NOT NULL, name VARCHAR(255)," +
 			" server_id INT, scene_id INT, create_time DATETIME, deleted INT, save_time DATETIME," +
-			" save_data LONGBLOB, PRIMARY KEY (serial_no, server_id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+			" save_data LONGBLOB, PRIMARY KEY (serial_no, server_id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
 		"CREATE TABLE IF NOT EXISTS nx_auction ( name VARCHAR(255) NOT NULL PRIMARY KEY, uid VARCHAR(64)," +
 			" create_time DATETIME, type CHAR(1), record VARCHAR(16), version INT, amount INT," +
-			" `range` INT, save_time DATETIME, save_data LONGBLOB ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+			" `range` INT, save_time DATETIME, save_data LONGBLOB ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
 		// nx_roles 官方 22 列（docs §五 INSERT 原文；uid char[33]/account
 		// char[33] 槽宽，name 唯一 = 重名 SELECT 语义）
 		"CREATE TABLE IF NOT EXISTS nx_roles ( name VARCHAR(64) NOT NULL PRIMARY KEY," +
@@ -70,7 +91,7 @@ func (s *MySQLStore) ensureTables(ctx context.Context) error {
 			" scene_id INT NOT NULL DEFAULT 0, location VARCHAR(255)," +
 			" resume_time DATETIME, resume_info VARCHAR(255), charge_info VARCHAR(255)," +
 			" save_para1 TEXT, save_time DATETIME, save_data LONGBLOB," +
-			" KEY idx_account (account, server_id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+			" KEY idx_account (account, server_id) ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
 	}
 	for _, q := range ddls {
 		if _, err := s.db.ExecContext(ctx, q); err != nil {
@@ -87,6 +108,8 @@ func (s *MySQLStore) ensureTables(ctx context.Context) error {
 	return nil
 }
 
+// Ping 官方 CheckConnect 面：只探活不等待（dbconn 封顶 PingTimeout），
+// TimerCheck 的 AppRecord database=Break|OK 判据。
 func (s *MySQLStore) Ping() error  { return s.db.Ping() }
 func (s *MySQLStore) Close() error { return s.db.Close() }
 
@@ -97,18 +120,22 @@ func (s *MySQLStore) PrepareSplitTables(suffix string) (string, error) {
 	if suffix == "" {
 		return "", nil
 	}
-	ctx := context.Background()
-	rows, err := s.db.QueryContext(ctx, "SHOW TABLES")
-	if err != nil {
-		return "", err
-	}
-	defer rows.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), splitTableTimeout)
+	defer cancel()
 	existing := map[string]bool{}
-	for rows.Next() {
-		var n string
-		if rows.Scan(&n) == nil {
+	err := s.db.QueryContext(ctx, func(rows *sql.Rows) error {
+		existing = map[string]bool{} // 重发时整表重建
+		for rows.Next() {
+			var n string
+			if err := rows.Scan(&n); err != nil {
+				return err
+			}
 			existing[n] = true
 		}
+		return rows.Err()
+	}, "SHOW TABLES")
+	if err != nil {
+		return "", err
 	}
 	for _, t := range CustomLogTables() {
 		full := t.Name + "_" + suffix
@@ -139,24 +166,26 @@ func (s *MySQLStore) PrepareSplitTables(suffix string) (string, error) {
 // ---- Manage（nx_config；官方 SELECT … WHERE op_name <> ''）----
 
 func (s *MySQLStore) ManageInfos() ([]ManageEntry, error) {
-	rows, err := s.db.Query("SELECT id, op_name, op_type, op_property, op_status, op_version FROM nx_config WHERE op_name <> ''")
+	var out []ManageEntry
+	err := s.db.Query(func(rows *sql.Rows) error {
+		out = out[:0] // 重发时整表重建
+		for rows.Next() {
+			var e ManageEntry
+			var opName, opProp sql.RawBytes
+			if err := rows.Scan(&e.ID, &opName, &e.Type, &opProp, &e.Status, &e.Order); err != nil {
+				return err
+			}
+			e.Name = string(opName)
+			e.Comment = string(opProp)
+			e.State = e.Status
+			out = append(out, e)
+		}
+		return rows.Err()
+	}, "SELECT id, op_name, op_type, op_property, op_status, op_version FROM nx_config WHERE op_name <> ''")
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []ManageEntry
-	for rows.Next() {
-		var e ManageEntry
-		var opName, opProp sql.RawBytes
-		if err := rows.Scan(&e.ID, &opName, &e.Type, &opProp, &e.Status, &e.Order); err != nil {
-			return nil, err
-		}
-		e.Name = string(opName)
-		e.Comment = string(opProp)
-		e.State = e.Status
-		out = append(out, e)
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 // UpsertManage 官方 MessageManageBase 的 INSERT/UPDATE 对（nx_config）。
@@ -164,7 +193,7 @@ func (s *MySQLStore) ManageInfos() ([]ManageEntry, error) {
 func (s *MySQLStore) UpsertManage(e ManageEntry) error {
 	ctx := context.Background()
 	var n int
-	if err := s.db.QueryRowContext(ctx,
+	if err := s.db.RowContext(ctx,
 		"SELECT COUNT(*) as count FROM nx_config WHERE id = ?", e.ID).Scan(&n); err != nil {
 		return err
 	}
@@ -182,30 +211,33 @@ func (s *MySQLStore) UpsertManage(e ManageEntry) error {
 // ---- Chunks（nx_chunks；官方四句原文）----
 
 func (s *MySQLStore) ChunkIDs(sceneID uint32) ([]uint32, error) {
-	rows, err := s.db.Query("SELECT name FROM nx_chunks WHERE server_id = ? AND scene_id = ?",
-		serverIDForScene(sceneID), sceneID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 	var ids []uint32
-	for rows.Next() {
-		var name string
-		if rows.Scan(&name) == nil {
+	err := s.db.Query(func(rows *sql.Rows) error {
+		ids = ids[:0] // 重发时整表重建
+		for rows.Next() {
+			var name string
+			if err := rows.Scan(&name); err != nil {
+				return err
+			}
 			var id uint32
 			fmt.Sscan(name, &id)
 			ids = append(ids, id)
 		}
+		return rows.Err()
+	}, "SELECT name FROM nx_chunks WHERE server_id = ? AND scene_id = ?",
+		serverIDForScene(sceneID), sceneID)
+	if err != nil {
+		return nil, err
 	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
-	return ids, rows.Err()
+	return ids, nil
 }
 
 func (s *MySQLStore) LoadChunk(sceneID uint32, ids []uint32) (map[uint32][]byte, error) {
 	out := map[uint32][]byte{}
 	for _, id := range ids {
 		var data []byte
-		err := s.db.QueryRow("SELECT save_data FROM nx_chunks WHERE serial_no = ? AND server_id = ?",
+		err := s.db.Row("SELECT save_data FROM nx_chunks WHERE serial_no = ? AND server_id = ?",
 			chunkSerial(id), serverIDForScene(sceneID)).Scan(&data)
 		if err == sql.ErrNoRows {
 			continue
@@ -221,7 +253,7 @@ func (s *MySQLStore) LoadChunk(sceneID uint32, ids []uint32) (map[uint32][]byte,
 func (s *MySQLStore) SaveChunk(sceneID uint32, id uint32, data []byte) error {
 	ctx := context.Background()
 	var name string
-	err := s.db.QueryRowContext(ctx,
+	err := s.db.RowContext(ctx,
 		"SELECT name FROM nx_chunks WHERE serial_no = ? AND server_id = ?",
 		chunkSerial(id), serverIDForScene(sceneID)).Scan(&name)
 	switch {
@@ -263,20 +295,23 @@ func (s *MySQLStore) PubInfo() ([]string, error) {
 }
 
 func (s *MySQLStore) PubLoad(table string) (map[string][]byte, error) {
-	rows, err := s.db.Query("SELECT name, save_data FROM " + table)
+	out := map[string][]byte{}
+	err := s.db.Query(func(rows *sql.Rows) error {
+		out = map[string][]byte{} // 重发时整表重建
+		for rows.Next() {
+			var name string
+			var data []byte
+			if err := rows.Scan(&name, &data); err != nil {
+				return err
+			}
+			out[name] = data
+		}
+		return rows.Err()
+	}, "SELECT name, save_data FROM "+table)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	out := map[string][]byte{}
-	for rows.Next() {
-		var name string
-		var data []byte
-		if rows.Scan(&name, &data) == nil {
-			out[name] = data
-		}
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 func (s *MySQLStore) PubSave(table, name string, saveData []byte) error {
@@ -303,28 +338,30 @@ func (s *MySQLStore) AuctionLoad(kind AuctionKind) (map[string][]byte, error) {
 	if kind == AuctionRec {
 		q = "SELECT * FROM nx_auction WHERE type = '2'"
 	}
-	rows, err := s.db.Query(q)
+	var out map[string][]byte
+	err := s.db.Query(func(rows *sql.Rows) error {
+		cols, _ := rows.Columns()
+		out = map[string][]byte{} // 重发时整表重建
+		for rows.Next() {
+			vals := make([]any, len(cols))
+			ptrs := make([]any, len(cols))
+			for i := range vals {
+				ptrs[i] = &vals[i]
+			}
+			if rows.Scan(ptrs...) != nil {
+				continue
+			}
+			name, _ := vals[0].(string)
+			if d, ok := vals[len(vals)-1].([]byte); ok && name != "" {
+				out[name] = d
+			}
+		}
+		return rows.Err()
+	}, q)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	cols, _ := rows.Columns()
-	out := map[string][]byte{}
-	for rows.Next() {
-		vals := make([]any, len(cols))
-		ptrs := make([]any, len(cols))
-		for i := range vals {
-			ptrs[i] = &vals[i]
-		}
-		if rows.Scan(ptrs...) != nil {
-			continue
-		}
-		name, _ := vals[0].(string)
-		if d, ok := vals[len(vals)-1].([]byte); ok && name != "" {
-			out[name] = d
-		}
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 func (s *MySQLStore) AuctionSave(kind AuctionKind, name string, saveData []byte) error {
@@ -333,7 +370,7 @@ func (s *MySQLStore) AuctionSave(kind AuctionKind, name string, saveData []byte)
 		tp = "2"
 	}
 	var n int
-	s.db.QueryRow("SELECT COUNT(*) FROM nx_auction WHERE name = ?", name).Scan(&n)
+	_ = s.db.Row("SELECT COUNT(*) FROM nx_auction WHERE name = ?", name).Scan(&n)
 	if n == 0 {
 		_, err := s.db.Exec("INSERT INTO nx_auction ( name, uid, create_time, type, record, version,"+
 			" amount, `range`, save_time, save_data ) VALUES ( ?, '', NOW(), ?, 'attr', 0, 0, 0, NOW(), ? )", name, tp, saveData)
@@ -372,7 +409,7 @@ func ParseConnectStringDSN(cs string) string {
 
 func (s *MySQLStore) ensureDcAccounts() error {
 	var exists int
-	if err := s.db.QueryRow("SELECT COUNT(*) FROM information_schema.tables " +
+	if err := s.db.Row("SELECT COUNT(*) FROM information_schema.tables " +
 		"WHERE table_schema='nx_district' AND table_name='dc_accounts'").Scan(&exists); err != nil {
 		return err
 	}
@@ -380,7 +417,7 @@ func (s *MySQLStore) ensureDcAccounts() error {
 		// 存量表迁移：官方方言 password varchar(32) 装不下 fork 派生登录密码
 		// （AES→base64→旋转，恒 36 字符，首登 INSERT 即 1406）→ 扩到 64。
 		var plen int
-		if err := s.db.QueryRow("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns " +
+		if err := s.db.Row("SELECT CHARACTER_MAXIMUM_LENGTH FROM information_schema.columns " +
 			"WHERE table_schema='nx_district' AND table_name='dc_accounts' AND column_name='password'").
 			Scan(&plen); err == nil && plen < 64 {
 			if _, err := s.db.Exec("ALTER TABLE " + dcAccountsTable +
@@ -413,7 +450,7 @@ func (s *MySQLStore) AccountLogon(name, password, addr string, session uint32) (
 	var info AccountInfo
 	var stored string
 	var logged int32
-	err := s.db.QueryRow("SELECT user_type, points, used_points, password, logged FROM "+
+	err := s.db.Row("SELECT user_type, points, used_points, password, logged FROM "+
 		dcAccountsTable+" WHERE name = ? AND status = 1 AND (logged = 0 OR logged = ?)",
 		name, session).
 		Scan(&info.UserType, &info.Points, &info.UsedPoints, &stored, &logged)
@@ -426,23 +463,59 @@ func (s *MySQLStore) AccountLogon(name, password, addr string, session uint32) (
 			" SET logged = ?, lastlog_time = NOW(), lastlog_addr = ? WHERE name = ?",
 			session, addr, name)
 		return info, err == nil, err
-	default: // sql.ErrNoRows → 官方 add 直名变体：首登自动建号
+	case errors.Is(err, sql.ErrNoRows): // 官方 add 直名变体：首登自动建号
 		_, err = s.db.Exec("INSERT INTO "+dcAccountsTable+
 			" (name, password, create_time, lastlog_time, lastlog_addr, valid_time,"+
 			" user_type, status, logged, charge_mode, points, used_points, comment)"+
 			" VALUES (?, ?, NOW(), NOW(), ?, NOW(), 0, 1, ?, 0, 0, 0, '')",
 			name, password, addr, session)
-		if err != nil {
-			// 重复键 = 行存在但 SELECT 门未命中（旧 session 的 logged 残留
-			// 等竞态）→ 降级为拒签回包（result=0），不得让客户端无应答。
-			var myErr *mysql.MySQLError
-			if errors.As(err, &myErr) && myErr.Number == 1062 {
-				return AccountInfo{}, false, nil
-			}
+		if err == nil {
+			return AccountInfo{}, true, nil
+		}
+		if !isDupKey(err) {
 			return AccountInfo{}, false, err
 		}
-		return AccountInfo{}, true, nil
+		// 重复键 = 行存在但 SELECT 门未命中。可能是本会话自己刚插的行——
+		// INSERT 已落库、回包丢在断连里，重发撞主键：再过一遍 SELECT 门
+		//（命中即密码/会话都对）照常放行。其余（旧 session 的 logged 残留
+		// 等竞态）降级为拒签回包（result=0），不得让客户端无应答。
+		info, ok, err := s.accountLogonExisting(name, password, addr, session)
+		if errors.Is(err, sql.ErrNoRows) {
+			return AccountInfo{}, false, nil
+		}
+		return info, ok, err
+	default:
+		return AccountInfo{}, false, err
 	}
+}
+
+// accountLogonExisting 存量账号登录门：SELECT（status=1 且 logged 未被
+// 他会话占用）→ 密码槽等值 → UPDATE logged/lastlog。未命中返回
+// sql.ErrNoRows。
+func (s *MySQLStore) accountLogonExisting(name, password, addr string, session uint32) (AccountInfo, bool, error) {
+	var info AccountInfo
+	var stored string
+	var logged int32
+	err := s.db.Row("SELECT user_type, points, used_points, password, logged FROM "+
+		dcAccountsTable+" WHERE name = ? AND status = 1 AND (logged = 0 OR logged = ?)",
+		name, session).
+		Scan(&info.UserType, &info.Points, &info.UsedPoints, &stored, &logged)
+	if err != nil {
+		return AccountInfo{}, false, err
+	}
+	if stored != password {
+		return AccountInfo{}, false, nil // 密码槽等值门
+	}
+	_, err = s.db.Exec("UPDATE "+dcAccountsTable+
+		" SET logged = ?, lastlog_time = NOW(), lastlog_addr = ? WHERE name = ?",
+		session, addr, name)
+	return info, err == nil, err
+}
+
+// isDupKey MySQL 重复键（1062）。
+func isDupKey(err error) bool {
+	var myErr *mysql.MySQLError
+	return errors.As(err, &myErr) && myErr.Number == 1062
 }
 
 func (s *MySQLStore) AccountLogoff(name string, session uint32) error {
@@ -464,35 +537,36 @@ func (s *MySQLStore) ResetOnline(serverID int) ([]RoleBrief, error) {
 	if _, err := s.db.Exec("UPDATE nx_roles SET online = 0 WHERE online = 1 AND server_id = ?", serverID); err != nil {
 		return nil, err
 	}
-	rows, err := s.db.Query("SELECT name, uid, deleted FROM nx_roles WHERE server_id = ?", serverID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
 	var out []RoleBrief
-	for rows.Next() {
-		var b RoleBrief
-		var del int
-		if rows.Scan(&b.Name, &b.UID, &del) == nil {
+	err := s.db.Query(func(rows *sql.Rows) error {
+		out = out[:0] // 重发时整表重建
+		for rows.Next() {
+			var b RoleBrief
+			var del int
+			if err := rows.Scan(&b.Name, &b.UID, &del); err != nil {
+				return err
+			}
 			b.Deleted = del != 0
 			out = append(out, b)
 		}
+		return rows.Err()
+	}, "SELECT name, uid, deleted FROM nx_roles WHERE server_id = ?", serverID)
+	if err != nil {
+		return nil, err
 	}
-	return out, rows.Err()
+	return out, nil
 }
 
 func (s *MySQLStore) SaveRole(name string, meta RoleMeta, saveData []byte) error {
 	// 官方 MessageSave（0x04，UPDATE nx_roles SET total_sec=… WHERE name）；
 	// role_state_json 随周期存档覆盖（Phase 4 entergen 运行态回写入口）。
-	if _, err := s.db.Exec("UPDATE nx_roles SET total_sec = ?, letter_max = ?,"+
+	_, err := s.db.Exec("UPDATE nx_roles SET total_sec = ?, letter_max = ?,"+
 		" sys_flags = ?, role_index = ?, scene_id = ?, location = ?, save_para1 = ?,"+
 		" save_time = NOW(), save_data = ?, role_state_json = ? WHERE name = ?",
 		meta.TotalSec, meta.LetterMax, meta.SysFlags, meta.Index, meta.SceneID,
 		meta.Location, meta.SavePara1, saveData,
-		nullIfEmpty(meta.RoleStateJSON), name); err != nil {
-		return err
-	}
-	return nil
+		nullIfEmpty(meta.RoleStateJSON), name)
+	return err
 }
 
 // nullIfEmpty 空串列写 NULL（role_state_json 未构建的旧档保持空）。
@@ -516,7 +590,7 @@ func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleM
 	query := "SELECT uid, account, total_sec, letter_max, scene_id, location, " +
 		"sys_flags, role_index, save_para1, save_data, role_state_json FROM nx_roles " +
 		"WHERE (? = '' OR account = ?) AND name = ? AND deleted = 0"
-	err := s.db.QueryRow(query, account, account, name).
+	err := s.db.Row(query, account, account, name).
 		Scan(&meta.UID, &meta.Account, &totalSec, &letterMax, &sceneID, &location,
 			&sysFlags, &roleIndex, &savePara1, &saveData, &roleState)
 	if err == sql.ErrNoRows {
@@ -533,25 +607,48 @@ func (s *MySQLStore) LoadRole(account, name string, serverID int) ([]byte, RoleM
 	return saveData, meta, true, nil
 }
 
+// CreateRole 官方 MessageCreate：重名门（SELECT name FROM nx_roles WHERE
+// name='%s'）+ 22 列 INSERT 原文（初建 save_data 参数）；重名/超数 false。
+//
+// INSERT 不可重复执行，所以不逐语句重发，而是整段走 Retry、重发前先过
+// 重名门：上一轮 INSERT 已落库只是回包丢在断连里（行上的 uid 就是本
+// 请求生成的那个）→ 认领为成功，不发第二遍；uid 不同才是真重名。
 func (s *MySQLStore) CreateRole(account, name, uid string, serverID int, meta RoleMeta, saveData []byte) (bool, error) {
-	// 重名门（官方 SELECT name FROM nx_roles WHERE name='%s'）
-	var dup string
-	if err := s.db.QueryRow("SELECT name FROM nx_roles WHERE name = ?", name).Scan(&dup); err == nil {
-		return false, nil
+	meta.Account, meta.ServerID, meta.UID = account, serverID, uid
+	var (
+		created bool
+		sent    bool // 本调用的 INSERT 已发出过
+	)
+	err := s.db.Retry(context.Background(), func() (err error) {
+		created, err = s.createRoleOnce(name, uid, serverID, meta, saveData, &sent)
+		return err
+	})
+	return created, err
+}
+
+func (s *MySQLStore) createRoleOnce(name, uid string, serverID int, meta RoleMeta, saveData []byte, sent *bool) (bool, error) {
+	var have string
+	switch err := s.db.Row("SELECT uid FROM nx_roles WHERE name = ?", name).Scan(&have); {
+	case err == nil:
+		return *sent && have == uid, nil // 重名；同 uid = 自己上一轮已落库
+	case !errors.Is(err, sql.ErrNoRows):
+		return false, err
 	}
-	// 官方 22 列 INSERT 原文（初建 save_data 参数）
-	meta.Account = account
-	meta.ServerID = serverID
-	meta.UID = uid
-	_, err := s.db.Exec("INSERT INTO nx_roles ( name, uid, account, create_time, delete_time, open_time,"+
+	*sent = true
+	// 经 Raw 发：本包的连接级重发会无脑再发一遍 INSERT，而它可能已经生效。
+	_, err := s.db.Raw().Exec("INSERT INTO nx_roles ( name, uid, account, create_time, delete_time, open_time,"+
 		" server_id, total_sec, deleted, letter_max, sys_flags, illegals, online,"+
 		" role_index, scene_id, location, resume_time, resume_info, charge_info,"+
 		" save_para1, save_time, save_data, role_state_json ) VALUES (?, ?, ?, NOW(), NULL, NOW(),"+
 		" ?, ?, 0, ?, ?, 0, 0, ?, ?, ?, NULL, NULL, NULL, ?, NOW(), ?, ?)",
-		name, uid, account, serverID, meta.TotalSec, meta.LetterMax, meta.SysFlags,
+		name, uid, meta.Account, serverID, meta.TotalSec, meta.LetterMax, meta.SysFlags,
 		meta.Index, meta.SceneID, meta.Location, meta.SavePara1, saveData,
 		nullIfEmpty(meta.RoleStateJSON))
 	if err != nil {
+		var myErr *mysql.MySQLError
+		if errors.As(err, &myErr) && myErr.Number == 1062 {
+			return false, nil // 库侧唯一键兜底：并发抢注落败
+		}
 		return false, err
 	}
 	return true, nil
@@ -579,23 +676,25 @@ func (s *MySQLStore) DeleteRole(account, name string, serverID int) (bool, error
 
 func (s *MySQLStore) QueryAccount(account string, serverID int) ([]RoleBrief, error) {
 	// 官方列角 SELECT（docs §五；+uid 供 0x0D 回执路由）
-	rows, err := s.db.Query("SELECT name, uid, role_index, sys_flags, save_para1"+
+	var out []RoleBrief
+	err := s.db.Query(func(rows *sql.Rows) error {
+		out = out[:0] // 重发时整表重建
+		for rows.Next() {
+			var b RoleBrief
+			var sysFlags int
+			if err := rows.Scan(&b.Name, &b.UID, &b.Index, &sysFlags, &b.Para); err != nil {
+				return err
+			}
+			out = append(out, b)
+		}
+		return rows.Err()
+	}, "SELECT name, uid, role_index, sys_flags, save_para1"+
 		" FROM nx_roles WHERE account = ? AND server_id = ? AND deleted = 0 ORDER BY role_index",
 		account, serverID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []RoleBrief
-	for rows.Next() {
-		var b RoleBrief
-		var sysFlags int
-		if err := rows.Scan(&b.Name, &b.UID, &b.Index, &sysFlags, &b.Para); err != nil {
-			return nil, err
-		}
-		out = append(out, b)
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 // ---- gmpanel 面板支撑（SearchRoles/RecentAlerts/SetAccountStatus；
@@ -614,23 +713,25 @@ type RoleRow struct {
 // SearchRoles 按账号列角色（不限 server_id、含已删——面板口径，
 // 官方 QueryAccount 是登录链视角只看单区服未删）。
 func (s *MySQLStore) SearchRoles(account string) ([]RoleRow, error) {
-	rows, err := s.db.Query("SELECT account, name, uid, server_id, online, deleted"+
+	var out []RoleRow
+	err := s.db.Query(func(rows *sql.Rows) error {
+		out = out[:0] // 重发时整表重建
+		for rows.Next() {
+			var r RoleRow
+			var online, deleted int
+			if err := rows.Scan(&r.Account, &r.Name, &r.UID, &r.ServerID, &online, &deleted); err != nil {
+				return err
+			}
+			r.Online, r.Deleted = online != 0, deleted != 0
+			out = append(out, r)
+		}
+		return rows.Err()
+	}, "SELECT account, name, uid, server_id, online, deleted"+
 		" FROM nx_roles WHERE account = ? ORDER BY server_id, role_index", account)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []RoleRow
-	for rows.Next() {
-		var r RoleRow
-		var online, deleted int
-		if err := rows.Scan(&r.Account, &r.Name, &r.UID, &r.ServerID, &online, &deleted); err != nil {
-			return nil, err
-		}
-		r.Online, r.Deleted = online != 0, deleted != 0
-		out = append(out, r)
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 // AlertRow nx_monitor 告警流水行（fssolomonitor.AlertSink 落库侧）。
@@ -643,21 +744,23 @@ type AlertRow struct {
 
 // RecentAlerts 告警流水倒序（面板告警页）。
 func (s *MySQLStore) RecentAlerts(limit int) ([]AlertRow, error) {
-	rows, err := s.db.Query("SELECT name, type, reason, time FROM nx_monitor"+
+	var out []AlertRow
+	err := s.db.Query(func(rows *sql.Rows) error {
+		out = out[:0] // 重发时整表重建
+		for rows.Next() {
+			var r AlertRow
+			if err := rows.Scan(&r.Name, &r.Type, &r.Reason, &r.Time); err != nil {
+				return err
+			}
+			out = append(out, r)
+		}
+		return rows.Err()
+	}, "SELECT name, type, reason, time FROM nx_monitor"+
 		" ORDER BY time DESC LIMIT ?", limit)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	var out []AlertRow
-	for rows.Next() {
-		var r AlertRow
-		if err := rows.Scan(&r.Name, &r.Type, &r.Reason, &r.Time); err != nil {
-			return nil, err
-		}
-		out = append(out, r)
-	}
-	return out, rows.Err()
+	return out, nil
 }
 
 // SetAccountStatus 封号/解封（面板 GM 动作）：status=1 正常（AccountLogon
@@ -672,7 +775,9 @@ func (s *MySQLStore) SetAccountStatus(name string, status int) (bool, error) {
 	n, _ := res.RowsAffected()
 	return n > 0, nil
 }
-// datetime 列自动 NOW()，数值/串按 LogValue。
+
+// InsertLog 官方 MessageLogData/ItemLog/ChatLog/CustomLog 合一：datetime
+// 列自动 NOW()，数值/串按 LogValue。
 func (s *MySQLStore) InsertLog(table string, vals []LogValue) error {
 	t := (&LogTableSet{}).Table(table)
 	if t == nil {

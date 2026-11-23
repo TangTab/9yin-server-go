@@ -422,6 +422,48 @@ cmd/gamestore/main.go    GameStore.ini 装配（对应 MainConsole+main.lua）
 - `docs/official/nx_base-save_data容器格式.md` + `save-data-OBJ3-player-schema.txt` 直接支撑 archive.go 与 save_data 读写。
 - FsSoloStore 未建 Go 包；**先落 fsdb（FsSql 对应物）再落 fsstore**，solo 网络面差异（CInnerHook/wake 回路）后续按姊妹篇单独补。
 
+### 3.4 连接级重试（internal/dbconn，2026-11-24 落地）
+
+MySQL 重启/闪断后连接池里的连接必死；`database/sql` 只对
+`driver.ErrBadConn` 做至多 3 次即时换连，go-sql-driver 读写失败时上抛的
+`invalid connection`/EOF/拒连/超时一律直抛调用方。`internal/dbconn` 给
+所有连库方（fssolostore 存储 / fssologlobal 名字服 / fssolomonitor
+告警库 / persist 登录账号库 / charge / gmpanel 面板）统一补上：
+
+- **启动**（`Open`）：Ping 到通为止——连接级失败退避重连，永久性错误
+  （DSN 非法 / 1045 密码错 / 1049 库不存在）立即返回。即官方
+  CheckConnect 重连 + FailCanRetry(<2) 的等价，区别在带退避、覆盖整个
+  重启窗口。等待上限 `NINEYIN_DB_CONNECT_TIMEOUT`（缺省不限）。
+- **运行期**：`Exec` / `Row().Scan` / `Query(consume)` 门面逐语句重发，
+  只有连接级错误才重发（SQL 语义错 / `ErrNoRows` 不重发），总时限 30s
+  （`NINEYIN_DB_RETRY_TIMEOUT`，`0` / `off` = 不限）；消费函数须可重入
+  （累加器先清空再写）。
+- **不可重复的 INSERT**（建角 `CreateRole`、名字登记 `AddName`）走
+  `Retry` + `Raw()` 整段重发，重发前先过前置门：上一轮 INSERT 已落库
+  只是回包丢失 → 按 uid / owner 认领成功，不发第二遍。首登建号
+  （`AccountLogon` / `persist.Verify`）撞 1062 后回读命中即放行。
+- **Ping 只探活不等待**（`PingTimeout` 2s 封顶，不拖定时 tick）。库重启后
+  个别死连接能骗过驱动活性检查、到 COM_PING 才暴露 `ErrBadConn`，而
+  `PingContext` 对这一步不换连——遇 `ErrBadConn` 换连再探（真库杀库
+  实测到的洞）。
+- DSN 未写明的拨号 / 读写超时兜底 5s / 60s（库主机失联时连接不挂死，
+  重试才触发得了）。
+- 断连日志全局一份：`连接中断，等待重试` → 每 5s 一条 `仍不可用` →
+  `连接恢复（中断 N s）`，不逐操作刷屏。
+
+Go 扩展（非官方行为）：global / monitor 状态行的 `database="Break"` 在库
+恢复后由定时 tick 探活自动摘除（官方只有 echo 的 ClearDatabaseError
+能清）；dbErr 累计保留供事后查。
+
+验证两层：假驱动单测（`internal/dbconn/dbconntest`，注入拨号拒连 / 池内
+连接猝死 / 语句级脚本，无需真库）；隔离实例真库杀库重启端到端（临时
+数据目录 + 独立端口，不碰本机库，Windows 下按进程树杀——mysqld.exe 还会
+再拉一个子 mysqld 当真服务进程）：
+
+```
+NINEYIN_MYSQL_TEST_MYSQLD=<部署根>\mysql\bin\mysqld.exe go test ./internal/fssolostore -run TestMySQLStoreRealRestart -v
+```
+
 ---
 
 ## 四、遗留未决（低风险待证）

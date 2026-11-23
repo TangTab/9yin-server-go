@@ -358,6 +358,7 @@ func (s *Server) TimerCheck() {
 		}
 	}
 	s.mu.Unlock()
+	s.healDatabaseBreak()
 	s.sm.Dispatch(eventTick, 0, 0)
 }
 
@@ -393,6 +394,25 @@ func (s *Server) ClearDatabaseError() {
 	s.dbBreak = false
 	s.dbErr = 0
 	s.mu.Unlock()
+}
+
+// healDatabaseBreak Go 扩展：DatabaseBreak 期间逐拍探活，探通即摘掉
+// Break（官方只有 echo 的 ClearDatabaseError 能清——库重启后状态行会
+// 一直挂在 Break 上）。dbErr 是断连期间的累计，保留供事后查。
+func (s *Server) healDatabaseBreak() {
+	s.mu.Lock()
+	broken := s.dbBreak
+	s.mu.Unlock()
+	if !broken {
+		return
+	}
+	if err := s.store.Ping(); err != nil {
+		return
+	}
+	s.mu.Lock()
+	s.dbBreak = false
+	s.mu.Unlock()
+	s.logf("(SoloGlobal)database recovered")
 }
 
 // State 当前状态机态（官方 GetState）。

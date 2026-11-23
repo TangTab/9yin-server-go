@@ -47,10 +47,14 @@ type Server struct {
 	ln net.Listener
 }
 
+// dbOpenTimeout 面板连库的等待上限。面板是旁路（库不可用只降级角色/
+// 告警页），不跟着 store 那样等完整个库重启窗口。
+const dbOpenTimeout = 5 * time.Second
+
 // New 装配面板（不启动）。Port=0 保留（动态口，测试注入）；Addr/Port
 // 的产品默认值在 cmd/panel 的 flag 层（固定口填在这里会让测试面板叠
-// 19064 假阴性——本仓「测试与服务解耦」约定）。DSN 非空时立即尝试连库，
-// 失败不致命（角色/告警页降级，后续请求惰性重连）。
+// 19064 假阴性——本仓「测试与服务解耦」约定）。DSN 非空时立即尝试连库
+// （限时），失败不致命（角色/告警页降级，后续请求惰性重连）。
 func New(cfg Config) (*Server, error) {
 	if cfg.Mode == "" {
 		cfg.Mode = "cluster"
@@ -61,7 +65,7 @@ func New(cfg Config) (*Server, error) {
 	s := &Server{cfg: cfg, logf: cfg.logger(), sys: fswatch.NewSampler()}
 	s.sup = NewSupervisor(cfg)
 	if cfg.DSN != "" {
-		if db, err := fssolostore.OpenMySQLStore(context.Background(), cfg.DSN, s.logf); err != nil {
+		if db, err := s.openDB(); err != nil {
 			s.logf("gmpanel: mysql 不可用（角色/告警页降级）: %v", err)
 		} else {
 			s.db, s.dbReady = db, true
@@ -70,7 +74,17 @@ func New(cfg Config) (*Server, error) {
 	return s, nil
 }
 
-// store 惰性取库：nil 且 DSN 非空时限频重开（MySQL 后启/重启场景）。
+// openDB 限时连库。
+func (s *Server) openDB() (*fssolostore.MySQLStore, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dbOpenTimeout)
+	defer cancel()
+	return fssolostore.OpenMySQLStore(ctx, s.cfg.DSN, s.logf)
+}
+
+// store 惰性取库。句柄一旦建立就常驻：库重启/闪断由 MySQLStore 自己的
+// 连接级重试兜住（经 internal/dbconn），面板只探活——Ping 落败即报不可用
+// 并立刻返回（Ping 有上限，不挂住请求），不重开句柄、不限流，库一恢复
+// 下一次请求就通。只有启动时没连上的情况才走限频重连。
 func (s *Server) store() (*fssolostore.MySQLStore, error) {
 	if s.cfg.DSN == "" {
 		return nil, fmt.Errorf("面板未配置 MySQL DSN（-mysql-dsn / NINEYIN_MYSQL_DSN）")
@@ -78,16 +92,15 @@ func (s *Server) store() (*fssolostore.MySQLStore, error) {
 	s.dbMu.Lock()
 	defer s.dbMu.Unlock()
 	if s.db != nil {
-		if err := s.db.Ping(); err == nil {
-			return s.db, nil
+		if err := s.db.Ping(); err != nil {
+			return nil, fmt.Errorf("mysql 不可用: %w", err)
 		}
-		s.db.Close()
-		s.db = nil
+		return s.db, nil
 	}
 	if time.Now().Before(s.dbNext) {
 		return nil, fmt.Errorf("mysql 不可用（重试限频中）")
 	}
-	db, err := fssolostore.OpenMySQLStore(context.Background(), s.cfg.DSN, s.logf)
+	db, err := s.openDB()
 	if err != nil {
 		s.dbNext = time.Now().Add(30 * time.Second)
 		return nil, fmt.Errorf("mysql 不可用: %w", err)
@@ -97,7 +110,7 @@ func (s *Server) store() (*fssolostore.MySQLStore, error) {
 		s.dbReady = true
 	}
 	s.db = db
-	return s.db, nil
+	return db, nil
 }
 
 // worldCli world echo 维护口客户端（cluster=soloworld、single=solounite，

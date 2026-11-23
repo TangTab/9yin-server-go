@@ -12,13 +12,16 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/dbconn"
 )
 
 // MySQLBackend 读路径接 nx_district.dc_accounts 的后端。
 // 写路径（logout/renew 落账、gift/card/item）保持官方"成功空转"语义，
-// 待商城/点卡表落地时扩展。
+// 待商城/点卡表落地时扩展。连接经 internal/dbconn：库重启/闪断窗口内
+// 读路径挂起退避重发（受本处 3s ctx 封顶），超时才降级 innerLogin。
 type MySQLBackend struct {
-	DB         *sql.DB
+	DB         *dbconn.DB
 	Inner      Backend // 兜底后端（空目录/默认值；nil=FreeBackend）
 	FreePoints bool    // true=login 校验密码但不以点数拦截（开发默认）
 }
@@ -41,11 +44,11 @@ type accountRow struct {
 func (m *MySQLBackend) lookup(ctx context.Context, account string) (*accountRow, error) {
 	// dc_accounts 主键 name（无 id 列，persist.DDL 口径）；accID 由
 	// 调用方按账号稳定哈希生成。
-	row := m.DB.QueryRowContext(ctx,
-		"SELECT `password`, `points`, `used_points`, `charge_mode`, `valid_time` "+
-			"FROM `nx_district`.`dc_accounts` WHERE `name`=?", account)
 	var r accountRow
-	err := row.Scan(&r.password, &r.points, &r.usedPoints, &r.chargeMode, &r.validTime)
+	err := m.DB.RowContext(ctx,
+		"SELECT `password`, `points`, `used_points`, `charge_mode`, `valid_time` "+
+			"FROM `nx_district`.`dc_accounts` WHERE `name`=?", account).
+		Scan(&r.password, &r.points, &r.usedPoints, &r.chargeMode, &r.validTime)
 	if err != nil {
 		return nil, err
 	}

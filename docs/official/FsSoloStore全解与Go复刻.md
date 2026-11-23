@@ -101,6 +101,8 @@ CAccess 线程: AccessInitProc → AccessLoopProc{ DoWait } ◄─────�
 - 池>1 时 `SendToAccessRole` 以 `serial % (pools-1) + 1` 分片负载。
 - 连接失败：ConnectFailed/FailCanRetry(<2 次)重试；断链计数经
   CLockVal(+0x368/+0x36C) 呈现到 AppRecord `database="Break"`。
+  Go 复刻的等价物是 `internal/dbconn`（库重启窗口内退避重发，
+  启动连库等到通为止）——见 FsSql 篇 §3.4。
 - save_data BLOB 走 SQL 参数 `?`；超长块 CompressData/UncompressData
   （GetCompressBufferSize/GetUncompressBufferSize，zlib 族）。
 - 连接串混淆：`encode_string/decode_string(key="SnailGameCharge")`

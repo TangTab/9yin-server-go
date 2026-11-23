@@ -10,7 +10,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -19,8 +18,8 @@ import (
 	"os/signal"
 	"strconv"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/lizhanyin/9yin-server-go/internal/charge"
+	"github.com/lizhanyin/9yin-server-go/internal/dbconn"
 )
 
 //go:embed GameCharge.ini
@@ -77,14 +76,13 @@ func main() {
 		return n
 	}()
 
+	logf := func(format string, args ...any) { fmt.Printf(format+"\n", args...) }
 	var backend charge.Backend
 	backendName := "free(开发免费模式)"
 	if *dsn != "" {
-		db, err := sql.Open("mysql", *dsn)
+		// 库在重启就等它起来（语义见 dbconn.Open）
+		db, err := dbconn.Open(context.Background(), *dsn, dbconn.NewOptions("charge", logf))
 		if err != nil {
-			fatal(fmt.Errorf("打开 MySQL: %w", err))
-		}
-		if err := db.Ping(); err != nil {
 			fatal(fmt.Errorf("连接 MySQL: %w", err))
 		}
 		backend = &charge.MySQLBackend{DB: db}
@@ -92,7 +90,7 @@ func main() {
 	}
 
 	srv := charge.NewServer(cfg, backend)
-	srv.Logf = func(format string, args ...any) { fmt.Printf(format+"\n", args...) }
+	srv.Logf = logf
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()

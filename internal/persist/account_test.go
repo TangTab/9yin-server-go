@@ -92,7 +92,7 @@ func TestAccountStoreRegisterAndVerify(t *testing.T) {
 	var password string
 	var userType, status int
 	var touchedInOrder bool
-	err = store.db.QueryRow(
+	err = store.db.Row(
 		"SELECT `password`,`user_type`,`status`,`lastlog_time`>=`create_time` "+
 			"FROM `nx_district`.`dc_accounts` WHERE `name`=?", identity.String()).
 		Scan(&password, &userType, &status, &touchedInOrder)

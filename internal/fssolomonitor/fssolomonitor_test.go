@@ -90,10 +90,13 @@ func TestGetCapitalType(t *testing.T) {
 
 // ---- 监控表行为 ----
 
-// mockSink 收集告警（测试串行调用）。
-type mockSink struct{ alerts []Alert }
+// mockSink 收集告警（测试串行调用）；pingErr 非空 = 模拟库不通。
+type mockSink struct {
+	alerts  []Alert
+	pingErr error
+}
 
-func (m *mockSink) Ping() error { return nil }
+func (m *mockSink) Ping() error { return m.pingErr }
 func (m *mockSink) InsertAlert(_ context.Context, a Alert) error {
 	m.alerts = append(m.alerts, a)
 	return nil

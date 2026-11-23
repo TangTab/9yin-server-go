@@ -2,9 +2,10 @@ package fssolomonitor
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"sync"
+
+	"github.com/lizhanyin/9yin-server-go/internal/dbconn"
 )
 
 // Alert 官方 store_forw_insert_table_t 的语义投影：
@@ -72,49 +73,38 @@ const nxMonitorDDL = "CREATE TABLE IF NOT EXISTS nx_monitor ( name VARCHAR(128)"
 	" CHARACTER SET utf8 COLLATE utf8_bin, type INT, reason TEXT, time DATETIME" +
 	" ) ENGINE=InnoDB DEFAULT CHARSET=utf8"
 
-// MySQLAlertSink 官方 CAccess→IDBSystem 的 database/sql 投影。
+// MySQLAlertSink 官方 CAccess→IDBSystem 的 database/sql 投影。连接经
+// internal/dbconn：库重启/闪断窗口内 INSERT 挂起退避重发（官方 retry<2
+// 的等价）；流水行容忍重复，逐语句重发即可。
 type MySQLAlertSink struct {
-	db      *sql.DB
-	logf    func(format string, args ...any)
-	retries int // 官方 retry<2
+	db *dbconn.DB
 }
 
-// OpenMySQLAlertSink 连库并确保 nx_monitor 存在（官方 InitConnect：
-// 连接失败置 DatabaseBreak 但不致命；建表失败不致命——此处把连库
-// 失败上抛由 Server 记 Break，建表失败仅日志）。
+// OpenMySQLAlertSink 连库并确保 nx_monitor 存在（库在重启就等它起来，
+// 语义见 dbconn.Open；建表失败不致命，仅日志）。
 func OpenMySQLAlertSink(ctx context.Context, dsn string, logf func(string, ...any)) (*MySQLAlertSink, error) {
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		return nil, fmt.Errorf("fssolomonitor: open mysql: %w", err)
-	}
-	if err := db.PingContext(ctx); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("fssolomonitor: ping mysql: %w", err)
-	}
 	if logf == nil {
 		logf = func(string, ...any) {}
+	}
+	db, err := dbconn.Open(ctx, dsn, dbconn.NewOptions("fssolomonitor", logf))
+	if err != nil {
+		return nil, err
 	}
 	if _, err := db.ExecContext(ctx, nxMonitorDDL); err != nil {
 		logf("(CAccess::InitConnect)create nx_monitor failed: %v", err)
 	}
-	return &MySQLAlertSink{db: db, logf: logf, retries: 2}, nil
+	return &MySQLAlertSink{db: db}, nil
 }
 
-// Ping 连接检查。
+// Ping 连接检查（探活不等待）。
 func (s *MySQLAlertSink) Ping() error { return s.db.Ping() }
 
-// InsertAlert 官方 INSERT 原文（NOW() 原生；reason 不转义）。
-// 断连时官方 retry<2 重试后仅 trace。
+// InsertAlert 官方 INSERT 原文（NOW() 原生；reason 不转义）。受 ctx
+// 约束：Access 写线程停机即取消，不卡在重试里。
 func (s *MySQLAlertSink) InsertAlert(ctx context.Context, a Alert) error {
 	stmt := fmt.Sprintf("INSERT INTO nx_monitor VALUES('%s',%d,'%s',NOW())",
 		a.Name, a.Type, a.Reason)
-	var err error
-	for attempt := 0; attempt <= s.retries; attempt++ {
-		if _, err = s.db.ExecContext(ctx, stmt); err == nil {
-			return nil
-		}
-		s.logf("(CAccess::MessageInsertTable)connection error: %v", err)
-	}
+	_, err := s.db.ExecContext(ctx, stmt)
 	return err
 }
 
@@ -169,6 +159,9 @@ func (a *Access) Start() error {
 	}
 	return nil
 }
+
+// Ping 探活透传（Server 的 Break 自愈用；受 dbconn PingTimeout 封顶）。
+func (a *Access) Ping() error { return a.sink.Ping() }
 
 // PutMessage 官方 PutMessage(0,0,buf,len) 的非阻塞形态：队满丢弃+trace。
 func (a *Access) PutMessage(alert Alert) {
