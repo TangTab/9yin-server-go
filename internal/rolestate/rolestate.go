@@ -111,30 +111,33 @@ type RoleState struct {
 // 归系统页签，发件人空串显示「系统邮件」）；Gold/Silver 官方方言是数字
 // 窄串；Appendix 为附件 XML（AppendixXML 格式，领取后清空置已读）。
 type Letter struct {
-	Serial     string `json:"serial"`
-	Type       int32  `json:"type"`
-	Sender     string `json:"sender,omitempty"`
-	SenderUID  string `json:"senderUID,omitempty"`
-	Title      string `json:"title"`
-	Content    string `json:"content"`
-	Gold       string `json:"gold,omitempty"`
-	Silver     string `json:"silver,omitempty"`
-	Appendix   string `json:"appendix,omitempty"`
-	DateUnix   int64  `json:"dateUnix"`
-	Read       bool   `json:"read,omitempty"`
+	Serial    string `json:"serial"`
+	Type      int32  `json:"type"`
+	Sender    string `json:"sender,omitempty"`
+	SenderUID string `json:"senderUID,omitempty"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	Gold      string `json:"gold,omitempty"`
+	Silver    string `json:"silver,omitempty"`
+	Appendix  string `json:"appendix,omitempty"`
+	DateUnix  int64  `json:"dateUnix"`
+	Read      bool   `json:"read,omitempty"`
 }
 
 // BagItem 背包行（2433 线 bagRow 精简口径）：ViewID 分类页 1 道具/2 装备/
 // 3 材料/4 任务；Amount 堆叠数（客户端按 ConfigID 聚合显示）；Seq 行身份
 // （跨表移动携带）、UID 实例稳定身份（随机属性/强化词缀键控位）。
 type BagItem struct {
-	Slot     int    `json:"slot"`
-	ConfigID string `json:"configID"`
-	ItemType int    `json:"itemType,omitempty"`
-	Amount   int    `json:"amount,omitempty"`
-	ViewID   int    `json:"viewID,omitempty"`
-	Seq      int64  `json:"seq,omitempty"`
-	UID      string `json:"uid,omitempty"`
+	Slot       int    `json:"slot"`
+	ConfigID   string `json:"configID"`
+	ItemType   int    `json:"itemType,omitempty"`
+	Amount     int    `json:"amount,omitempty"`
+	ViewID     int    `json:"viewID,omitempty"`
+	Seq        int64  `json:"seq,omitempty"`
+	UID        string `json:"uid,omitempty"`
+	EquipType  string `json:"equipType,omitempty"`  // 装备行必发真值（渲染闸）
+	ColorLevel int    `json:"colorLevel,omitempty"` // 缺省 1
+	Photo      string `json:"photo,omitempty"`      // 图标（可缺省）
 }
 
 // EquipItem 装备行（2433 线 equipRow 精简口径）：Slot=身体槽位（hat=1/
@@ -465,7 +468,7 @@ func InferSexFromPara(para string) int {
 const DefaultBirthScene = "born03"
 
 // SceneOption location.ini BornCJ 节导出的一个可选场景目的地
-//（GM 场景切换/传送门共用）：Key=场景 resource 短名（born03/city01…），
+// （GM 场景切换/传送门共用）：Key=场景 resource 短名（born03/city01…），
 // Config=场景配置路径（ini\scene\…），Position=该节出生点坐标。
 type SceneOption struct {
 	Key      string

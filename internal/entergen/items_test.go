@@ -79,17 +79,42 @@ func TestBagItemViewRowProps(t *testing.T) {
 		t.Fatalf("UniqueID=%v", got)
 	}
 
-	// 无 UID 行省 UniqueID（五项）。
+	// 无 UID 行合成 UniqueID（六项；2433 itemUID 同形 16 hex——空缺则
+	// 客户端不渲染行，2026-11-23 真机「买了不显示」根因）。
 	bare := bagItemViewRow(rolestate.BagItem{Slot: 2, ConfigID: "x", ViewID: 1})
-	if len(bare) != 5 {
-		t.Fatalf("无 UID 行属性数=%d, want 5", len(bare))
+	if len(bare) != 6 {
+		t.Fatalf("无 UID 行属性数=%d, want 6", len(bare))
+	}
+	bareByName := map[string]PropertyValue{}
+	for _, p := range bare {
+		entry, _ := clientdata.PlayerProperty(propNameOf(t, p.Index))
+		bareByName[entry.Name] = p.Value
+	}
+	synth := bareByName["UniqueID"].Text
+	if len(synth) != 16 {
+		t.Fatalf("合成 UID 形态=%q, want 16 hex", synth)
+	}
+	// 装备页行补装备域（EquipType 必发——真值缺失客户端不渲染）。
+	equipProps := bagItemViewRow(rolestate.BagItem{Slot: 3, ConfigID: "blade", ViewID: 2, EquipType: "Blade"})
+	equipByName := map[string]PropertyValue{}
+	for _, p := range equipProps {
+		entry, _ := clientdata.PlayerProperty(propNameOf(t, p.Index))
+		equipByName[entry.Name] = p.Value
+	}
+	if equipByName["EquipType"].Text != "Blade" {
+		t.Fatalf("EquipType=%v", equipByName["EquipType"])
+	}
+	if equipByName["Hardiness"].Int32 != 100 || equipByName["ColorLevel"].Int32 != 1 {
+		t.Fatalf("装备缺省域异常: %+v", equipByName)
 	}
 }
 
 // propNameOf idx → 表名（测试辅助；反向查 2433 表）。
 func propNameOf(t *testing.T, index uint16) string {
 	t.Helper()
-	for _, name := range []string{"ConfigID", "ItemType", "Amount", "MaxAmount", "BindStatus", "UniqueID"} {
+	for _, name := range []string{"ConfigID", "ItemType", "Amount", "MaxAmount", "BindStatus", "UniqueID",
+		"EquipType", "MaxBuildCount", "CurBuildCount", "RecoverFlag", "ColorLevel",
+		"Hardiness", "MaxHardiness", "Level", "Photo"} {
 		if entry, ok := clientdata.PlayerProperty(name); ok && entry.Index == index {
 			return name
 		}

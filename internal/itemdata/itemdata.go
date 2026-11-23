@@ -22,10 +22,13 @@ import (
 
 // Entry 一条物品定义。
 type Entry struct {
-	ConfigID  string
-	ItemType  int
-	MaxAmount int // 堆叠上限（0=未知）
-	ViewID    int // 背包分类页 1..4
+	ConfigID   string
+	ItemType   int
+	MaxAmount  int    // 堆叠上限（0=未知）
+	ViewID     int    // 背包分类页 1..4
+	EquipType  string // 装备类（武器/防具/时装…）——背包装备行必发真值
+	ColorLevel int    // 品阶（0=未知，行缺省 1）
+	Photo      string // 图标路径（装备行可携）
 }
 
 // Catalog 目录（configID → Entry）。
@@ -139,7 +142,14 @@ func LoadFile(path string) (map[string]Entry, error) {
 		case "EquipType":
 			if value != "" {
 				entry.ViewID = 2
+				entry.EquipType = value
 			}
+		case "ColorLevel":
+			if v, perr := strconv.Atoi(value); perr == nil {
+				entry.ColorLevel = v
+			}
+		case "Photo":
+			entry.Photo = value
 		}
 	}
 	flush()

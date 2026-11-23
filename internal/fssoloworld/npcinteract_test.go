@@ -380,60 +380,39 @@ func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
 	}
 }
 
-func TestNPCServicesByNpcType(t *testing.T) {
-	// NpcType 结构域回落（npc_type_define.lua：62 铁匠铺→商店、61 武馆→
-	// 技能训练、122 铁匠(生活职业)→生活职业、45 马车船只→传送；84 烟雨庄
-	// 世界域/1 怪物无服务）。
-	cases := []struct {
-		typeVal string
-		want    int
-		mark    uint16
-		label   string
-	}{
-		{"62", 1, npcMarkShop, "商店"},
-		{"66", 1, npcMarkShop, "商店"},
-		{"61", 1, npcMarkTrainer, "技能训练"},
-		{"122", 1, npcMarkJob, "生活职业"},
-		{"45", 1, npcMarkTransport, "传送"},
-		{"84", 0, 0, ""},
-		{"1", 0, 0, ""},
-		{"abc", 0, 0, ""},
-		{"", 0, 0, ""},
-	}
-	for _, c := range cases {
-		services := npcServicesOf(map[string]string{"NpcType": c.typeVal})
-		if len(services) != c.want {
-			t.Fatalf("NpcType=%s 服务数 = %d, want %d", c.typeVal, len(services), c.want)
-		}
-		if c.want == 0 {
-			continue
-		}
-		if services[0].mark != c.mark || services[0].label != c.label {
-			t.Fatalf("NpcType=%s 派生 mark=%x label=%q, want mark=%x %q",
-				c.typeVal, services[0].mark, services[0].label, c.mark, c.label)
-		}
-		if services[0].value != c.typeVal {
-			t.Fatalf("NpcType 派生 value = %q, want 类型号 %q", services[0].value, c.typeVal)
+func TestNPCServicesNoDataNoLine(t *testing.T) {
+	// 无数据即无功能行（2026-11-23 真机定案：NpcType 结构域回落已删——
+	// 车夫等无业务列 NPC 不弹虚构入口；npc_type_define.lua 的 62 铁匠铺/
+	// 61 武馆/122 生活职业/45 马车船只类型号本身不再派生服务行）。
+	for _, typeVal := range []string{"62", "66", "61", "122", "45", "84", "1", "abc", ""} {
+		if services := npcServicesOf(map[string]string{"NpcType": typeVal}); len(services) != 0 {
+			t.Fatalf("NpcType=%s 无业务列不应出服务行: %+v", typeVal, services)
 		}
 	}
-	// 业务列权威：显式列存在时 NpcType 回落整体抑制（防金四爷
-	// DepotID=1+NpcType=67 叠出虚构商店行）。
+	// 业务列权威（"0" 值不算配置）。
 	services := npcServicesOf(map[string]string{"ShopID": "Shop_x", "NpcType": "62"})
 	if len(services) != 1 || services[0].value != "Shop_x" || services[0].mark != npcMarkShop {
-		t.Fatalf("列权威异常: %+v", services)
+		t.Fatalf("商店列异常: %+v", services)
 	}
 	services = npcServicesOf(map[string]string{"DepotID": "1", "NpcType": "67"})
 	if len(services) != 1 || services[0].mark != npcMarkDepot {
-		t.Fatalf("仓库列+NpcType 抑制异常: %+v", services)
+		t.Fatalf("仓库列异常: %+v", services)
+	}
+	if services := npcServicesOf(map[string]string{"ShopID": "0"}); len(services) != 0 {
+		t.Fatalf("ShopID=0 不算配置: %+v", services)
 	}
 }
 
 func TestNPCTalkMenuServiceLines(t *testing.T) {
-	// 武馆 NPC（NpcType=61）：服务行（技能训练 860000047/ui_skill_trainer）
-	// 置于赠送/侠恶通用行之前、ui_exit 之前。帧序 m4/m5/m6×4/m7。
-	services := npcServicesOf(map[string]string{"NpcType": "61"})
-	if len(services) != 1 || npcTalkFuncID(services[0].mark) != 860000047 || npcTalkTextID(services[0].mark) != "ui_skill_trainer" {
-		t.Fatalf("武馆映射异常: %+v", services)
+	// 武馆 NPC（业务列 ShopID）：服务行置于赠送/侠恶通用行之前、
+	// ui_exit 之前。帧序 m4/m5/m6×4/m7（Trainer 映射保留——
+	// 860000047/ui_skill_trainer 的 mark 域供后续训练师数据接入）。
+	services := npcServicesOf(map[string]string{"ShopID": "Shop_jn_jh_00100"})
+	if len(services) != 1 || services[0].mark != npcMarkShop {
+		t.Fatalf("商店列服务异常: %+v", services)
+	}
+	if npcTalkFuncID(npcMarkTrainer) != 860000047 || npcTalkTextID(npcMarkTrainer) != "ui_skill_trainer" {
+		t.Fatal("Trainer mark 映射漂移")
 	}
 	frames, err := npcCinematicTalkMenu(0x0E000104, 0x1010, "FuncNpc00058", services, nil)
 	if err != nil {
@@ -447,8 +426,8 @@ func TestNPCTalkMenuServiceLines(t *testing.T) {
 			t.Fatalf("帧 %d 消息号 = %d, want %d", i, id, want)
 		}
 	}
-	if !bytes.Contains(frames[2], []byte("ui_skill_trainer")) {
-		t.Fatalf("m6 服务行缺 ui_skill_trainer: % x", frames[2])
+	if !bytes.Contains(frames[2], []byte("ui_shop")) {
+		t.Fatalf("m6 服务行缺 ui_shop: % x", frames[2])
 	}
 	if !bytes.Contains(frames[1], []byte("task_FuncNpc00058")) {
 		t.Fatalf("m5 链键异常: % x", frames[1])

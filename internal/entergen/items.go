@@ -6,6 +6,10 @@ package entergen
 // 行推送「0x19 预清 + 0x18 行」成对方言（客户端对重复 slot 行残留敏感）。
 
 import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
@@ -41,17 +45,49 @@ func ViewRemoveFrame(viewID, objectIndex uint16) []byte {
 // bagItemViewRow 背包行属性集（itemCommonProps 六项；Amount 下发实际
 // 堆叠数、UniqueID 实例身份——强化/随机属性键控位，空串可省）。
 func bagItemViewRow(item rolestate.BagItem) []ViewProperty {
+	uid := item.UID
+	if uid == "" {
+		uid = itemUIDOf(item.Seq, item.Slot)
+	}
 	props := []ViewProperty{
 		{playerIdx("ConfigID"), StringValue(item.ConfigID)},
 		{playerIdx("ItemType"), Int32Value(int32(item.ItemType))},
 		{playerIdx("Amount"), Int32Value(int32(item.Amount))},
 		{playerIdx("MaxAmount"), Int32Value(int32(maxAmountOf(item)))},
 		{playerIdx("BindStatus"), Int32Value(0)},
+		{playerIdx("UniqueID"), StringValue(uid)},
 	}
-	if item.UID != "" {
-		props = append(props, ViewProperty{playerIdx("UniqueID"), StringValue(item.UID)})
+	// 装备页行补装备域（2433 bagRowViewAdd 同款：EquipType 必须真值
+	// 否则不渲染；其余缺省 MaxBuild/CurBuild=2、Hardiness 族=100、
+	// ColorLevel=1、Level=0）。
+	if item.ViewID == 2 {
+		colorLevel := item.ColorLevel
+		if colorLevel <= 0 {
+			colorLevel = 1
+		}
+		props = append(props,
+			ViewProperty{playerIdx("EquipType"), StringValue(item.EquipType)},
+			ViewProperty{playerIdx("MaxBuildCount"), Int32Value(2)},
+			ViewProperty{playerIdx("CurBuildCount"), Int32Value(2)},
+			ViewProperty{playerIdx("RecoverFlag"), ByteValue(0)},
+			ViewProperty{playerIdx("ColorLevel"), Int32Value(int32(colorLevel))},
+			ViewProperty{playerIdx("Hardiness"), Int32Value(100)},
+			ViewProperty{playerIdx("MaxHardiness"), Int32Value(100)},
+			ViewProperty{playerIdx("Level"), ByteValue(0)},
+		)
+		if item.Photo != "" {
+			props = append(props, ViewProperty{playerIdx("Photo"), StringValue(item.Photo)})
+		}
 	}
 	return props
+}
+
+// itemUIDOf 实例身份合成（2433 itemUID 同形：md5 前 8 字节 hex=16 字符；
+// Seq 全档唯一且随存档持久——重登稳定）。
+func itemUIDOf(seq int64, slot int) string {
+	seed := fmt.Sprintf("bag:%d:%d", seq, slot)
+	digest := md5.Sum([]byte(seed))
+	return hex.EncodeToString(digest[:8])
 }
 
 // maxAmountOf 堆叠上限（无目录口径：非堆叠物 1，其余与 Amount 等值——

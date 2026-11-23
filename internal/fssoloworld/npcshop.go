@@ -301,12 +301,15 @@ func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bo
 		return false
 	}
 	item := rolestate.BagItem{
-		Slot:     slot,
-		ConfigID: configID,
-		ItemType: entry.ItemType,
-		Amount:   int(total),
-		ViewID:   entry.ViewID,
-		Seq:      st.NextItemSeq(),
+		Slot:       slot,
+		ConfigID:   configID,
+		ItemType:   entry.ItemType,
+		Amount:     int(total),
+		ViewID:     entry.ViewID,
+		Seq:        st.NextItemSeq(),
+		EquipType:  entry.EquipType,
+		ColorLevel: entry.ColorLevel,
+		Photo:      entry.Photo,
 	}
 	push, err := entergen.BagItemPushFrames(item)
 	if err != nil {

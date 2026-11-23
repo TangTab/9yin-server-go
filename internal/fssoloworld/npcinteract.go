@@ -14,17 +14,14 @@ package fssoloworld
 //	           （S2C 0x1D）、服务 mark（805000000 商店/807000000 仓库/
 //	           860000022 传送…）→ 业务 View 待接（本阶段 trace 留痕）。
 //
-// 服务列两级绑定：①模板行业务列（ShopID/DepotID/TransFuncID/GemGameNpcID/
-// GuildFunc/HomePoint/Job——2433 modernNPCServices 同源语义；本档位全树无
-// 此类列，为 2433 modern 数据预留）②NpcType 结构域回落（客户端
-// lua/share/npc_type_define.lua 类型表定版：61 武馆=技能训练、62~68 商铺
-// 族、45 马车船只、109/121~137 生活职业族——2026-11-23 实测档位唯一逐
-// NPC 功能源）。菜单文案键与 funcID 映射照抄 2433 modernTalkFuncID/
-// TextID 定版（Trainer 行取 legacyTalkFuncID(47) 对）。
+// 服务列绑定=模板行业务列（ShopID/DepotID/TransFuncID/GemGameNpcID/
+// GuildFunc/HomePoint/Job——2433 modernNPCServices 同源方言；npcgen
+// 2026-11-23 从 share/npc/npcconfig txt 折叠入 XML）。菜单文案键与
+// funcID 映射照抄 2433 modernTalkFuncID/TextID 定版（Trainer 行取
+// legacyTalkFuncID(47) 对）。无业务列即无功能行（结构域回落已删）。
 
 import (
 	"encoding/binary"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -100,34 +97,11 @@ const (
 	npcMarkTrainer   uint16 = 0x1009
 )
 
-// npcTypeServiceMarks NpcType → 服务 mark（lua/share/npc_type_define.lua：
-// 45 马车船只 / 61 武馆 / 62 铁匠铺 63 绸缎庄 64 首饰行 65 杂货店
-// 66 药堂 67 钱庄 68 特产商 / 109 生活职业NPC / 121~137 矿工..乞丐十六
-// 生活职业）。表外类型（怪物/传送门/机关/采集/世界域 NPC）无对话服务
-// 语义，不派生。
-var npcTypeServiceMarks = map[uint16]uint16{
-	45:  npcMarkTransport,
-	61:  npcMarkTrainer,
-	62:  npcMarkShop,
-	63:  npcMarkShop,
-	64:  npcMarkShop,
-	65:  npcMarkShop,
-	66:  npcMarkShop,
-	67:  npcMarkShop,
-	68:  npcMarkShop,
-	109: npcMarkJob,
-	121: npcMarkJob, 122: npcMarkJob, 123: npcMarkJob, 124: npcMarkJob,
-	125: npcMarkJob, 126: npcMarkJob, 127: npcMarkJob, 128: npcMarkJob,
-	129: npcMarkJob, 130: npcMarkJob, 131: npcMarkJob, 132: npcMarkJob,
-	133: npcMarkJob, 134: npcMarkJob, 135: npcMarkJob, 136: npcMarkJob,
-	137: npcMarkJob,
-}
-
-// npcServicesOf 模板行两级服务提取：业务列（非空且非 "0" 才算配置，
-// 2433 modern 数据方言；npcgen 2026-11-23 已折叠商店ID/仓库ID 等七列）
-// → NpcType 结构域回落（仅当零业务列——显式数据权威，防钱庄
-// DepotID+NpcType67 启发式叠出虚构商店行）。value：业务列取列值；
-// NpcType 派生取类型号（审计留痕）。
+// npcServicesOf 模板行业务列服务提取（非空且非 "0" 才算配置，2433
+// modernNPCServices 同源方言；npcgen 2026-11-23 已折叠商店ID/仓库ID 等
+// 七列）。**无数据即无功能行**（2026-11-23 真机定案：NpcType 结构域
+// 启发式回落已删——车夫等无业务列 NPC 弹出无数据功能行=虚构入口；
+// 显式列是唯一权威）。
 func npcServicesOf(tpl map[string]string) []npcService {
 	add := func(items []npcService, mark uint16, key string) []npcService {
 		if v := strings.TrimSpace(tpl[key]); v != "" && v != "0" {
@@ -143,31 +117,7 @@ func npcServicesOf(tpl map[string]string) []npcService {
 	items = add(items, npcMarkGuild, "GuildFunc")
 	items = add(items, npcMarkHome, "HomePoint")
 	items = add(items, npcMarkJob, "Job")
-	if len(items) > 0 {
-		return items // 显式业务列权威，NpcType 回落不启用
-	}
-	typeRaw := strings.TrimSpace(tpl["NpcType"])
-	if mark, ok := npcTypeMarkOf(typeRaw); ok {
-		items = append(items, npcService{
-			mark:  mark,
-			label: npcServiceLabel(mark),
-			value: typeRaw,
-		})
-	}
 	return items
-}
-
-// npcTypeMarkOf NpcType 字符串 → mark（脏值/表外类型零值回落）。
-func npcTypeMarkOf(typeRaw string) (uint16, bool) {
-	if typeRaw == "" {
-		return 0, false
-	}
-	v, err := strconv.Atoi(typeRaw)
-	if err != nil {
-		return 0, false
-	}
-	mark, ok := npcTypeServiceMarks[uint16(v)]
-	return mark, ok
 }
 
 // npcServiceLabel mark → 0x1C 菜单中文标签（npcServerMenu 域）。
