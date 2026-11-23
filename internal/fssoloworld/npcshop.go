@@ -21,8 +21,10 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/itemdata"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 	"github.com/lizhanyin/9yin-server-go/internal/npcshop"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 const (
@@ -149,4 +151,247 @@ func npcShopViewFrames(shopID string, section *npcshop.Section) ([][]byte, error
 		frames = append(frames, row)
 	}
 	return frames, nil
+}
+
+// ---- 购销受理（msg70/71，2433 shop_buy.go fork 同名 handler 复刻） ----
+
+const (
+	clientCustomShopBuy  int32 = 70
+	clientCustomShopSell int32 = 71
+	// shopBuyMaxCount 购买数量上限（fork CMPL count,0x62=98；View61 行
+	// MaxAmount=99 的服务端闸）。
+	shopBuyMaxCount int32 = 98
+	// shopSellUnitSilver fork 固定出售单价（碎银/件，无逐物品价格表）。
+	shopSellUnitSilver int64 = 10
+)
+
+// ---- 物品目录（root 锚定缓存，shopCatalogOf 同款） ----
+
+var (
+	npcItemMu        sync.Mutex
+	npcItemRootTried string
+	npcItemCatalog   *itemdata.Catalog
+)
+
+// itemCatalogOf 物品目录：env NINEYIN_ITEM_DIR > 数据根 share/item
+// （物品定义节携 ItemType/分类——发放行的 ItemType 真值来源）。缺档
+// 负面缓存（进程级）。
+func (s *Server) itemCatalogOf() *itemdata.Catalog {
+	npcItemMu.Lock()
+	defer npcItemMu.Unlock()
+	root := npcfeed.ResolveRoot()
+	if root == npcItemRootTried {
+		return npcItemCatalog
+	}
+	npcItemRootTried = root
+	npcItemCatalog = nil
+	if root == "" {
+		return nil
+	}
+	if v := strings.TrimSpace(os.Getenv("NINEYIN_ITEM_DIR")); v != "" {
+		if catalog, err := itemdata.LoadDir(filepath.Clean(v)); err == nil {
+			npcItemCatalog = catalog
+			return catalog
+		}
+	}
+	if catalog, err := itemdata.LoadDir(filepath.Join(root, "share", "item")); err == nil {
+		npcItemCatalog = catalog
+	}
+	return npcItemCatalog
+}
+
+// handleShopBuy msg70 [70, shopId str, page, pos, count]：货位匹配
+// （item.page==page+1 && item.position==pos-1，与开窗 objectIndex 同坐标
+// 系）→ 按 capitalType 扣款（本线仅碎银 CapitalType1=roleState.Money；
+// 0/2 未建模货币、3 兑换链待接——静默拒 + trace，fork 同口径）→
+// 入包（同类同页行内叠堆优先，否则新行）→ 三币回帧（碎银 0x10）→
+// 落档。
+func (s *Server) handleShopBuy(pl *Player, message entergen.CustomInbound) {
+	if len(message.Values) < 5 {
+		s.trace("npc shop buy: 畸形 values=%d client=%d", len(message.Values), pl.Conn1)
+		return
+	}
+	shopID, ok := customStringAt(message, 1)
+	if !ok {
+		s.trace("npc shop buy: shopId 非串 client=%d", pl.Conn1)
+		return
+	}
+	page, pageOK := message.Values[2].ExactInt32()
+	pos, posOK := message.Values[3].ExactInt32()
+	count, countOK := message.Values[4].ExactInt32()
+	if !pageOK || !posOK || !countOK || page < 0 || pos < 1 || count < 1 || count > shopBuyMaxCount {
+		s.trace("npc shop buy: %s 越界 page=%d pos=%d count=%d client=%d", shopID, page, pos, count, pl.Conn1)
+		return
+	}
+	catalog := s.shopCatalogOf()
+	section, ok := catalog.Section(shopID)
+	if !ok {
+		s.trace("npc shop buy: %s 无目录节 client=%d", shopID, pl.Conn1)
+		return
+	}
+	var listing *npcshop.Item
+	for i := range section.Items {
+		if section.Items[i].Page == page+1 && section.Items[i].Position == pos-1 {
+			listing = &section.Items[i]
+			break
+		}
+	}
+	if listing == nil {
+		s.trace("npc shop buy: %s 无货位 page=%d pos=%d client=%d", shopID, page, pos, pl.Conn1)
+		return
+	}
+	units := listing.Amount
+	if units < 1 {
+		units = 1
+	}
+	switch listing.CapitalType {
+	case 1:
+		cost := int64(listing.Price) * int64(count)
+		if pl.roleState.Money < cost {
+			s.trace("npc shop buy: %s %s x%d 需碎银 %d 现有 %d client=%d",
+				shopID, listing.ConfigID, count, cost, pl.roleState.Money, pl.Conn1)
+			return
+		}
+		if !s.grantShopItemUnits(pl, listing.ConfigID, units*count) {
+			return // 满包/物品未知（已 trace）；不扣款
+		}
+		pl.roleState.Money -= cost
+	case 0, 2:
+		s.trace("npc shop buy: %s %s capitalType=%d 未建模货币拒收 client=%d",
+			shopID, listing.ConfigID, listing.CapitalType, pl.Conn1)
+		return
+	default: // 3 兑换链（exchangeitem.ini）待接
+		s.trace("npc shop buy: %s %s 兑换类（exchange）待接 client=%d", shopID, listing.ConfigID, pl.Conn1)
+		return
+	}
+	s.pushMoneyFrame(pl)
+	s.sendRoleSave(pl)
+	s.trace("npc shop buy: %s %s x%d（单价 %d）→ 碎银余 %d client=%d",
+		shopID, listing.ConfigID, count, listing.Price, pl.roleState.Money, pl.Conn1)
+}
+
+// grantShopItemUnits 发放 total 件：同 configID 同分类页行内叠堆优先
+// （Amount 上限不设——fork addToBagItemCount 同款，显示层 MaxAmount 由
+// 行值承担），否则查物品目录建新行（ItemType 真值入档）。返回是否成功。
+func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bool {
+	st := &pl.roleState
+	for i := range st.BagItems {
+		if st.BagItems[i].ConfigID == configID && st.BagItems[i].ViewID != 0 {
+			st.BagItems[i].Amount += int(total)
+			push, err := entergen.BagItemPushFrames(st.BagItems[i])
+			if err != nil {
+				s.trace("npc shop buy: 叠堆帧编码失败 %s: %v", configID, err)
+				return false
+			}
+			for _, f := range push {
+				s.sendToClient(pl, f)
+			}
+			return true
+		}
+	}
+	items := s.itemCatalogOf()
+	entry, ok := items.Lookup(configID)
+	if !ok {
+		s.trace("npc shop buy: 物品 %s 无目录条目（share/item）拒发", configID)
+		return false
+	}
+	slot := st.FreeBagSlot(entry.ViewID)
+	if slot == 0 {
+		s.trace("npc shop buy: %s 分类页 %d 满", configID, entry.ViewID)
+		return false
+	}
+	item := rolestate.BagItem{
+		Slot:     slot,
+		ConfigID: configID,
+		ItemType: entry.ItemType,
+		Amount:   int(total),
+		ViewID:   entry.ViewID,
+		Seq:      st.NextItemSeq(),
+	}
+	push, err := entergen.BagItemPushFrames(item)
+	if err != nil {
+		s.trace("npc shop buy: 新行帧编码失败 %s: %v", configID, err)
+		return false
+	}
+	st.BagItems = append(st.BagItems, item)
+	for _, f := range push {
+		s.sendToClient(pl, f)
+	}
+	return true
+}
+
+// handleShopSell msg71 [71, 类别页, 槽位(1 起), 数量, configID str]：
+// 槽位打中行 → 校验 configID/数量 → 扣件（清行 0x19 / 减堆 0x19+0x18）→
+// +10 碎银/件 → 三币回帧 → 落档。
+func (s *Server) handleShopSell(pl *Player, message entergen.CustomInbound) {
+	if len(message.Values) < 5 {
+		s.trace("npc shop sell: 畸形 values=%d client=%d", len(message.Values), pl.Conn1)
+		return
+	}
+	category, catOK := message.Values[1].ExactInt32()
+	idx, idxOK := message.Values[2].ExactInt32()
+	count, countOK := message.Values[3].ExactInt32()
+	if !catOK || !idxOK || !countOK || idx < 1 || count < 1 {
+		s.trace("npc shop sell: 越界 category=%d idx=%d count=%d client=%d", category, idx, count, pl.Conn1)
+		return
+	}
+	if category < 1 || category > 4 {
+		category = 1 // fork 缺省分支：落道具页
+	}
+	configID, _ := customStringAt(message, 4) // 校验用，缺席放行
+	st := &pl.roleState
+	rowIdx := -1
+	for i := range st.BagItems {
+		if st.BagItems[i].ViewID == int(category) && st.BagItems[i].Slot == int(idx) {
+			rowIdx = i
+			break
+		}
+	}
+	if rowIdx < 0 {
+		s.trace("npc shop sell: 无行 view=%d idx=%d client=%d", category, idx, pl.Conn1)
+		return
+	}
+	row := &st.BagItems[rowIdx]
+	if configID != "" && configID != row.ConfigID {
+		s.trace("npc shop sell: 过期格 configID=%s 应为 %s view=%d idx=%d", configID, row.ConfigID, category, idx)
+		return
+	}
+	if row.Amount < int(count) {
+		s.trace("npc shop sell: %s x%d 超堆 %d", row.ConfigID, count, row.Amount)
+		return
+	}
+	row.Amount -= int(count)
+	wire := entergen.BagViewOf(int(category))
+	if row.Amount == 0 {
+		st.BagItems = append(st.BagItems[:rowIdx], st.BagItems[rowIdx+1:]...)
+		s.sendToClient(pl, entergen.ViewRemoveFrame(wire, uint16(idx)))
+	} else {
+		push, err := entergen.BagItemPushFrames(*row)
+		if err != nil {
+			s.trace("npc shop sell: 减堆帧编码失败 %s: %v", row.ConfigID, err)
+			return
+		}
+		for _, f := range push {
+			s.sendToClient(pl, f)
+		}
+	}
+	proceeds := shopSellUnitSilver * int64(count)
+	pl.roleState.Money += proceeds
+	s.pushMoneyFrame(pl)
+	s.sendRoleSave(pl)
+	s.trace("npc shop sell: %s x%d → 碎银 +%d（余 %d）client=%d",
+		row.ConfigID, count, proceeds, pl.roleState.Money, pl.Conn1)
+}
+
+// pushMoneyFrame 碎银三币回帧（CapitalType1 0x10 单属性——gmcmd
+// moneyFrame 同帧型，购销共用）。
+func (s *Server) pushMoneyFrame(pl *Player) {
+	frame, err := entergen.ObjectPropertyFrame(1, 1, 0, []entergen.IndexedProperty{
+		entergen.NamedProperty("CapitalType1", entergen.Int64Value(pl.roleState.Money)),
+	})
+	if err != nil {
+		s.trace("npc shop: 碎银帧编码失败: %v", err)
+		return
+	}
+	s.sendToClient(pl, frame)
 }

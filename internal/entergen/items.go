@@ -24,6 +24,10 @@ func bagViewOf(viewID int) uint16 {
 	}
 }
 
+// BagViewOf 背包分类页 → wire 视图（bagViewOf 导出面：购销/移除等
+// 服务端业务共用）。
+func BagViewOf(viewID int) uint16 { return bagViewOf(viewID) }
+
 // ViewRemoveFrame 0x19 视图删行：[19][u16 vid][u16 idx]（5B；行推送
 // 预清/删除共用）。
 func ViewRemoveFrame(viewID, objectIndex uint16) []byte {

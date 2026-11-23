@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/npcshop"
 )
 
@@ -141,4 +142,95 @@ func TestNPCShopMarkRouting(t *testing.T) {
 	if still {
 		t.Fatal("商店开窗后菜单应清除")
 	}
+}
+
+func TestNPCShopBuySell(t *testing.T) {
+	// 购：碎银扣款+叠堆/新行+存档；卖：扣件+碎银入账。
+	s := newNpcTestServer(t)
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "shop.ini"),
+		[]byte("[Shop_yaopin_00101]\nNameID=药堂\nType=0\n0=yaopin_00100,1,1,8,0,1,0,0,0\n0=yaopin_00300,1,1,40,0,1,1,0,0\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	itemDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(itemDir, "tool_item.ini"),
+		[]byte("[yaopin_00100]\nItemType=1\nMaxAmount=30\n\n[yaopin_00300]\nItemType=2\nMaxAmount=30\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("NINEYIN_SHOP_INI", filepath.Join(dir, "shop.ini"))
+	t.Setenv("NINEYIN_ITEM_DIR", itemDir)
+	npcShopMu.Lock()
+	npcShopRootTried = ""
+	npcShopMu.Unlock()
+	npcItemMu.Lock()
+	npcItemRootTried = ""
+	npcItemMu.Unlock()
+
+	pl := &Player{Conn1: 11, State: PlOnline}
+	pl.roleState.Money = 1000
+	pl.haveRoleState = true
+
+	// 买 2 件 yaopin_00100（单价 8）：新行 view1 slot1 type1。
+	s.handleShopBuy(pl, shopMsg("Shop_yaopin_00101", 0, 1, 2))
+	if len(pl.roleState.BagItems) != 1 {
+		t.Fatalf("购后行数 = %d, want 1", len(pl.roleState.BagItems))
+	}
+	item := pl.roleState.BagItems[0]
+	if item.ConfigID != "yaopin_00100" || item.Amount != 2 || item.ViewID != 1 || item.ItemType != 1 {
+		t.Fatalf("新行异常: %+v", item)
+	}
+	if pl.roleState.Money != 1000-16 {
+		t.Fatalf("碎银 = %d, want 984", pl.roleState.Money)
+	}
+	// 再买 3 件：同 configID 叠堆。
+	s.handleShopBuy(pl, shopMsg("Shop_yaopin_00101", 0, 1, 3))
+	if len(pl.roleState.BagItems) != 1 || pl.roleState.BagItems[0].Amount != 5 {
+		t.Fatalf("叠堆异常: %+v", pl.roleState.BagItems)
+	}
+	if pl.roleState.Money != 1000-16-24 {
+		t.Fatalf("叠堆购后碎银 = %d, want 960", pl.roleState.Money)
+	}
+	// 余额不足拒：单价 40 x 98。
+	s.handleShopBuy(pl, shopMsg("Shop_yaopin_00101", 0, 2, 98))
+	if pl.roleState.Money != 960 || pl.roleState.BagItems[0].Amount != 5 {
+		t.Fatalf("余额不足不应动账: money=%d items=%+v", pl.roleState.Money, pl.roleState.BagItems)
+	}
+	// 卖 4 件：减堆 + 40 碎银。
+	s.handleShopSell(pl, sellMsg(1, 1, 4, "yaopin_00100"))
+	if len(pl.roleState.BagItems) != 1 || pl.roleState.BagItems[0].Amount != 1 {
+		t.Fatalf("出售后行异常: %+v", pl.roleState.BagItems)
+	}
+	if pl.roleState.Money != 960+40 {
+		t.Fatalf("出售后碎银 = %d, want 1000", pl.roleState.Money)
+	}
+	// 卖清余量：行移除。
+	s.handleShopSell(pl, sellMsg(1, 1, 1, ""))
+	if len(pl.roleState.BagItems) != 0 {
+		t.Fatalf("清售后行数 = %d, want 0", len(pl.roleState.BagItems))
+	}
+	if pl.roleState.Money != 1000+10 {
+		t.Fatalf("清售后碎银 = %d, want 1010", pl.roleState.Money)
+	}
+}
+
+// shopMsg msg70 线形（[70, shopId, page, pos, count]）。
+func shopMsg(shopID string, page, pos, count int32) entergen.CustomInbound {
+	return entergen.CustomInbound{Values: []entergen.CustomInboundValue{
+		{Type: 2, Int32: 70},
+		{Type: 6, Text: shopID},
+		{Type: 2, Int32: page},
+		{Type: 2, Int32: pos},
+		{Type: 2, Int32: count},
+	}}
+}
+
+// sellMsg msg71 线形（[71, category, idx, count, configID]）。
+func sellMsg(category, idx, count int32, configID string) entergen.CustomInbound {
+	return entergen.CustomInbound{Values: []entergen.CustomInboundValue{
+		{Type: 2, Int32: 71},
+		{Type: 2, Int32: category},
+		{Type: 2, Int32: idx},
+		{Type: 2, Int32: count},
+		{Type: 6, Text: configID},
+	}}
 }

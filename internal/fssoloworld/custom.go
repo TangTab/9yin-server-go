@@ -137,6 +137,17 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		// 邮件族零动作面：开箱/勾选/关窗/写信族（列表=data_binder 绑
 		// 记录行；玩家发信 352 未实现）——trace 簿记。
 		s.handlePostTrace(pl, id)
+	case clientCustomShopBuy:
+		// msg70 商店购买：货位匹配 → 碎银扣款 → 叠堆/新行入包 → 回帧
+		//（npcshop.go，fork shop_buy.go 复刻）。
+		if s.requireRoleState(pl, id) {
+			s.handleShopBuy(pl, message)
+		}
+	case clientCustomShopSell:
+		// msg71 商店出售：背包扣件 → +10 碎银/件 → 回帧（npcshop.go）。
+		if s.requireRoleState(pl, id) {
+			s.handleShopSell(pl, message)
+		}
 	case clientCustomSelectTarget:
 		// msg431 选中目标（点击 NPC/对象）：LastObject/AutoSelectObject
 		// 双帧 + m25 选靶授权（2433 selection.go 定版）。
