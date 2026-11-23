@@ -171,8 +171,24 @@ func RecordDouble(v float64) RecordCell { return RecordCell{Double: &v} }
 func RecordString(v string) RecordCell  { return RecordCell{Text: &v} }
 
 // RecordAddCellsFrame 0x11 整行加（按官方 schema 列型写满；缺尾列补零/
-// 空串，超宽报错——b-line serverRecordAddCells 语义）。
+// 空串，超宽报错——b-line serverRecordAddCells 语义）。行号恒 0；要在
+// 指定行号插入用 RecordInsertRowFrame。
 func RecordAddCellsFrame(objectID, ownerID uint32, recordIndex uint16, cells []RecordCell) ([]byte, error) {
+	return recordAddRowFrame(objectID, ownerID, recordIndex, 0, cells)
+}
+
+// RecordInsertRowFrame 0x11 在 row 处插入一行（各列按官方 schema 线型写
+// 零值）。官服冷却表方言（女号抓包 cooldown_rec 逐帧定版）：先插入空行，
+// 再用 RecordGridFrame 逐格写值——
+//
+//	11 00 [obj][own] 6d 00 | 行号 u16 | 01 00 | 各列零值
+func RecordInsertRowFrame(objectID, ownerID uint32, recordIndex, row uint16) ([]byte, error) {
+	return recordAddRowFrame(objectID, ownerID, recordIndex, row, nil)
+}
+
+// recordAddRowFrame 0x11 行加帧：[11][00][obj u32][own u32][rec u16]
+// [起始行 u16][行数 u16=1][行内各列]。
+func recordAddRowFrame(objectID, ownerID uint32, recordIndex, row uint16, cells []RecordCell) ([]byte, error) {
 	schema, ok := clientdata.RecordSchemaByIndex(int(recordIndex))
 	if !ok {
 		return nil, fmt.Errorf("record index %d outside official table", recordIndex)
@@ -187,71 +203,125 @@ func RecordAddCellsFrame(objectID, ownerID uint32, recordIndex uint16, cells []R
 	binary.LittleEndian.PutUint32(msg[2:], objectID)
 	binary.LittleEndian.PutUint32(msg[6:], ownerID)
 	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
-	binary.LittleEndian.PutUint16(msg[12:], 0) // 第一个源行
+	binary.LittleEndian.PutUint16(msg[12:], row)
 	binary.LittleEndian.PutUint16(msg[14:], 1) // 一整行
 	for column := range colTypes {
-		var cell *RecordCell
 		if column < len(cells) {
-			cell = &cells[column]
+			msg = appendRecordCell(msg, colTypes[column], &cells[column])
+		} else {
+			msg = appendRecordCell(msg, colTypes[column], nil)
 		}
-		switch colTypes[column] {
-		case 3: // int32
-			if cell == nil || cell.Int == nil {
-				msg = binary.LittleEndian.AppendUint32(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint32(msg, *cell.Int)
-		case 2: // word
-			if cell == nil || cell.Int == nil {
-				msg = binary.LittleEndian.AppendUint16(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint16(msg, uint16(*cell.Int&0xFFFF))
-		case 1: // byte
-			if cell == nil || cell.Byte == nil {
-				msg = append(msg, 0)
-				continue
-			}
-			msg = append(msg, byte(*cell.Byte))
-		case 4: // int64
-			if cell == nil || cell.Int64 == nil {
-				msg = binary.LittleEndian.AppendUint64(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint64(msg, uint64(*cell.Int64))
-		case 6: // f64
-			if cell == nil || cell.Double == nil {
-				msg = binary.LittleEndian.AppendUint64(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint64(msg, math.Float64bits(*cell.Double))
-		case 7: // 窄串
-			if cell == nil || cell.Text == nil {
-				msg = binary.LittleEndian.AppendUint32(msg, 1)
-				msg = append(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint32(msg, uint32(len(*cell.Text)+1))
-			msg = append(msg, (*cell.Text)...)
-			msg = append(msg, 0)
-		case 8: // 宽串
-			if cell == nil || cell.Text == nil {
-				msg = binary.LittleEndian.AppendUint32(msg, 2)
-				msg = binary.LittleEndian.AppendUint16(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint32(msg, uint32(len([]rune(*cell.Text))*2+2))
-			for _, r := range *cell.Text {
-				msg = binary.LittleEndian.AppendUint16(msg, uint16(r))
-			}
-			msg = binary.LittleEndian.AppendUint16(msg, 0)
-		case 9: // object
-			if cell == nil || cell.Int64 == nil {
-				msg = binary.LittleEndian.AppendUint64(msg, 0)
-				continue
-			}
-			msg = binary.LittleEndian.AppendUint64(msg, uint64(*cell.Int64))
+	}
+	return msg, nil
+}
+
+// appendRecordCell 按 schema 列型追加一格（cell 为 nil 或对应字段为 nil 写零值）。
+func appendRecordCell(msg []byte, colType byte, cell *RecordCell) []byte {
+	switch colType {
+	case 3: // int32
+		if cell == nil || cell.Int == nil {
+			return binary.LittleEndian.AppendUint32(msg, 0)
 		}
+		return binary.LittleEndian.AppendUint32(msg, *cell.Int)
+	case 2: // word
+		if cell == nil || cell.Int == nil {
+			return binary.LittleEndian.AppendUint16(msg, 0)
+		}
+		return binary.LittleEndian.AppendUint16(msg, uint16(*cell.Int&0xFFFF))
+	case 1: // byte
+		if cell == nil || cell.Byte == nil {
+			return append(msg, 0)
+		}
+		return append(msg, byte(*cell.Byte))
+	case 4: // int64
+		if cell == nil || cell.Int64 == nil {
+			return binary.LittleEndian.AppendUint64(msg, 0)
+		}
+		return binary.LittleEndian.AppendUint64(msg, uint64(*cell.Int64))
+	case 6: // f64
+		if cell == nil || cell.Double == nil {
+			return binary.LittleEndian.AppendUint64(msg, 0)
+		}
+		return binary.LittleEndian.AppendUint64(msg, math.Float64bits(*cell.Double))
+	case 7: // 窄串
+		if cell == nil || cell.Text == nil {
+			msg = binary.LittleEndian.AppendUint32(msg, 1)
+			return append(msg, 0)
+		}
+		msg = binary.LittleEndian.AppendUint32(msg, uint32(len(*cell.Text)+1))
+		msg = append(msg, (*cell.Text)...)
+		return append(msg, 0)
+	case 8: // 宽串
+		if cell == nil || cell.Text == nil {
+			msg = binary.LittleEndian.AppendUint32(msg, 2)
+			return binary.LittleEndian.AppendUint16(msg, 0)
+		}
+		msg = binary.LittleEndian.AppendUint32(msg, uint32(len([]rune(*cell.Text))*2+2))
+		for _, r := range *cell.Text {
+			msg = binary.LittleEndian.AppendUint16(msg, uint16(r))
+		}
+		return binary.LittleEndian.AppendUint16(msg, 0)
+	case 9: // object
+		if cell == nil || cell.Int64 == nil {
+			return binary.LittleEndian.AppendUint64(msg, 0)
+		}
+		return binary.LittleEndian.AppendUint64(msg, uint64(*cell.Int64))
+	}
+	return msg
+}
+
+// RecordGridCell 0x13 的一格：列号 + 值（值字段按 schema 列型取用：
+// int32/word/byte 列读 Int，int64/object 列读 Int64，f64 列读 Double）。
+type RecordGridCell struct {
+	Column int
+	Value  RecordCell
+}
+
+// GridInt / GridInt64 / GridWord 逐格写值的三种常用构造。
+func GridInt(column int, value uint32) RecordGridCell {
+	return RecordGridCell{Column: column, Value: RecordInt(value)}
+}
+
+func GridInt64(column int, value int64) RecordGridCell {
+	return RecordGridCell{Column: column, Value: RecordInt64(value)}
+}
+
+func GridWord(column int, value uint16) RecordGridCell {
+	return RecordGridCell{Column: column, Value: RecordInt(uint32(value))}
+}
+
+// RecordGridFrame 0x13 ServerRecordGrid 逐格写（官服冷却表方言，女号抓包
+// 逐帧定版——官服每帧只写任意一列的一格）：
+//
+//	13 00 [obj u32][own u32] [rec u16] [格数 u16] [行 u16] { [列 u8] [按 schema 列型的值] }
+//
+// 例：cooldown_rec 行 0 写类别 2012 → 13 00 … 6d 00 01 00 00 00 00 dc 07 00 00
+// （16B 头 + 列号 00 + int32）。值宽由官方 schema 列型决定；列越界报错。
+func RecordGridFrame(objectID, ownerID uint32, recordIndex, row uint16, cells ...RecordGridCell) ([]byte, error) {
+	schema, ok := clientdata.RecordSchemaByIndex(int(recordIndex))
+	if !ok {
+		return nil, fmt.Errorf("record index %d outside official table", recordIndex)
+	}
+	if len(cells) == 0 {
+		return nil, fmt.Errorf("record %q grid frame needs at least one cell", schema.Name)
+	}
+	for _, cell := range cells {
+		if cell.Column < 0 || cell.Column >= len(schema.ColumnTypes) {
+			return nil, fmt.Errorf("record %q grid column %d outside %d columns",
+				schema.Name, cell.Column, len(schema.ColumnTypes))
+		}
+	}
+	msg := make([]byte, 16, 16+len(cells)*9)
+	msg[0] = 0x13
+	msg[1] = 0
+	binary.LittleEndian.PutUint32(msg[2:], objectID)
+	binary.LittleEndian.PutUint32(msg[6:], ownerID)
+	binary.LittleEndian.PutUint16(msg[10:], recordIndex)
+	binary.LittleEndian.PutUint16(msg[12:], uint16(len(cells)))
+	binary.LittleEndian.PutUint16(msg[14:], row)
+	for _, cell := range cells {
+		msg = append(msg, byte(cell.Column))
+		msg = appendRecordCell(msg, schema.ColumnTypes[cell.Column], &cell.Value)
 	}
 	return msg, nil
 }

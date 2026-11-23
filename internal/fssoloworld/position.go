@@ -50,6 +50,8 @@ func (s *Server) absorbPlayerPosition(pl *Player, pos [4]float64) {
 		return
 	}
 	s.npcReconcile(pl, pos)
+	// 冲锋暂存中：位置上报驱动进带判定（无暂存即时返回）。
+	s.rushOnReport(pl, pos[0], pos[2])
 	if !pl.haveRoleState {
 		return
 	}

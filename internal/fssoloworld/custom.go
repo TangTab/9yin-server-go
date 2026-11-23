@@ -117,6 +117,15 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		s.handleSitcross(pl, message)
 	case clientCustomMovementUpload:
 		s.handleMovementUpload(pl, message)
+	case clientCustomUseSkill:
+		// msg211 技能施放：受理/超距/冷却/MP 闸门与帧簇（skill.go）。
+		s.handleSkillCast(pl, message)
+	case clientCustomRushApproach:
+		// msg220 冲锋接近上报：位置收编 + 进带授予 c61（skillrush.go）。
+		s.handleRushApproach(pl, message)
+	case clientCustomDashLanding:
+		// msg212 冲锋到位申报：落地释放簇（skillrush.go）。
+		s.handleDashLanding(pl, message)
 	case clientCustomTaskMsg:
 		s.handleTaskMsg(pl, message)
 	case clientCustomPostRead:

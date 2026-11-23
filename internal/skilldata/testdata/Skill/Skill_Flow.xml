@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="1" HitAction="zs_normal_00_01,zs_normal_00_02,zs_normal_00_03,zs_normal_00_04,zs_normal_00_05,zs_normal_00_06,zs_normal_00_07,zs_normal_00_08,zs_normal_00_09,zs_normal_00_10" HitTime="0" PrepareTime="0" LeadTime="0" LeadSepTime="0"/>
+	<Property ID="1181" HitAction="zs_aq070_01_fd"/>
+	<Property ID="5328" HitAction="CS_jh_cqgf04" LockBuffTime="1000"/>
+	<Property ID="5508" HitAction="CS_jh_cqgf06" LockBuffTime="1100"/>
+</Object>

@@ -262,6 +262,9 @@ func (s *Server) timerCheck() {
 
 	// NPC 巡逻广播（0x21 批量 + State 翻转）
 	s.npcPatrolTick(time.Now())
+
+	// 战斗会话每秒驱动（MP 回复；skill.go）
+	s.combatTick()
 }
 
 // checkQueue CheckQueue/CheckVipQueue：排队者放行进 Logging。

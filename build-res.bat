@@ -34,6 +34,7 @@ if not exist "%RES_ROOT%/ini/Npc/NpcConfig" (
 
 echo npc probe  root=%RES_ROOT%  extra: %2 %3 %4 %5
 go run ./tools/npcprobe -root "%RES_ROOT%" %2 %3 %4 %5
+go run ./tools/skillgen -in "%RES_ROOT%/share/skill" -rule "%RES_ROOT%/share/rule" -out "%RES_ROOT%/ini/Skill" -verify
 if errorlevel 1 (
   echo ERROR: npcprobe failed for %RES_ROOT%.
   goto wait_exit

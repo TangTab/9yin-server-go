@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="13" TaoLu="tl_normal" CoolDownCategory="2012" CoolDownTeam="50001" CoolEffectType="2" DamageType="0" EffectType="1" IsDamage="1" LauchType="0" MaxVarPropNo="241" MinVarPropNo="241" ShowName="0" SkillType="1" TargetSelect="1" TargetType="4" Loop="0" NormalAttack="0" CanRush="0" CanAirUse="1" NoLimit="0" Photo=""/>
+	<Property ID="4401" TaoLu="CS_jh_cqgf" TargetSelect="1" LockType="1431" MinVarPropNo="88001" MaxVarPropNo="88016" LauchType="0" SkillType="1" EffectType="1" CoolDownCategory="5828" ShowName="0" IsDamage="1" DamageType="0" TargetType="4" CoolEffectType="1" CoolDownTeam="50124" CanRush="1"/>
+	<Property ID="4404" TaoLu="CS_jh_cqgf" CoolDownCategory="5830" EffectType="1" IsDamage="1" TargetType="8" CoolEffectType="1" CoolDownTeam="50124" MinVarPropNo="88061" MaxVarPropNo="88076" CanRush="0"/>
+	<Property ID="627" TaoLu="hw_normal" CoolDownCategory="2605" EffectType="1" MinVarPropNo="12521" MaxVarPropNo="12521" TargetType="4" NoLimit="1" CanRush="0" CanAirUse="0"/>
+	<Property ID="9001" TaoLu="tl_test" CoolDownCategory="9100" MinVarPropNo="91001" MaxVarPropNo="91002" TargetType="8"/>
+	<Property ID="9002" TaoLu="a &quot;quoted&quot; &amp; &lt;tag&gt;" CoolDownCategory="9101" MinVarPropNo="241" MaxVarPropNo="241" TargetType="4" LuaScript="skill\wuxue\wx_test.lua"/>
+</Object>

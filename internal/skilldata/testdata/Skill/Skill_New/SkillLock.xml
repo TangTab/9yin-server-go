@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="CS_jh_cqgf01" script="SkillLock" StaticData="4401" ItemType="1001" QTypeID="2" PauseTime="30000" AddCoolDownTime="7000"/>
+</Object>

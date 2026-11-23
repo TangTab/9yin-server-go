@@ -447,6 +447,10 @@ func (s *Server) handleNPCSelectTarget(pl *Player, message entergen.CustomInboun
 	targetID := binary.LittleEndian.Uint32(packed[:])
 	targetOwner := binary.LittleEndian.Uint32(packed[4:])
 	s.sendSelectTargetFrames(pl, targetID, targetOwner)
+	// 记最近选靶：m211 不带目标时回落（客户端先选靶后施放）。
+	pl.combat.mu.Lock()
+	pl.combat.selected = uint64(targetID) | uint64(targetOwner)<<32
+	pl.combat.mu.Unlock()
 	if targetID == 0 {
 		s.trace("npc select: 清除目标 client=%d", pl.Conn1)
 		return
@@ -455,8 +459,15 @@ func (s *Server) handleNPCSelectTarget(pl *Player, message entergen.CustomInboun
 	if err == nil {
 		s.sendToClient(pl, pause)
 		// m26 看门狗：5s 后解锁（官服 m25 恒 0.4~4.6s 配对；经 entry 转发，
-		// 玩家离线由 entry 丢弃，安全）。
+		// 玩家离线由 entry 丢弃，安全）。冲锋暂存中不发——暂停归暂存链
+		// 所有，由落地/取消/超时解除；此处抢发会让客户端提前脱离暂存。
 		time.AfterFunc(5*time.Second, func() {
+			pl.combat.mu.Lock()
+			staged := pl.combat.staged != nil
+			pl.combat.mu.Unlock()
+			if staged {
+				return
+			}
 			if clear, cerr := entergen.CustomMessageFrame(26); cerr == nil {
 				s.sendToClient(pl, clear)
 			}

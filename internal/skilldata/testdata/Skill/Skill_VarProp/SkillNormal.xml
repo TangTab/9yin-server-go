@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="241" Level="1" CoolDownTime="1200" DamageCalculate="52" TargetShapePkg="78" HitShapePkg="1" Flow="1" HeightDiff="2"/>
+	<Property ID="88061" Level="1" CoolDownTime="3000" Consume="1440" DamageCalculate="3004" TargetShapePkg="6" HitShapePkg="102" Flow="5328" EventProcess="3666" HitCount="10" HeightDiff="5"/>
+	<Property ID="12521" Level="1" CoolDownTime="1500" Consume="459" DamageCalculate="767" TargetShapePkg="18" HitShapePkg="1" Flow="1181" HeightDiff="25"/>
+	<Property ID="91001" Level="1" CoolDownTime="1000" TargetShapePkg="6" HitShapePkg="1"/>
+	<Property ID="91002" Level="2" CoolDownTime="2000" TargetShapePkg="6" HitShapePkg="1"/>
+</Object>

@@ -3,8 +3,10 @@ package fsgame
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -21,11 +23,25 @@ import (
 //      （struct/*.xml，见 schema.go）
 
 // readResource 资源读取（root + 相对路径；官方 GetResourcePath + 相对 ini 路径）。
+//
+// ini/Skill 下的黑金原档已让位给九阴构建产物（tools/skillgen 首跑整体移入
+// ini/Skill/heijin_backup/）：规范位不存在时回退备份目录取同名文件。本包是
+// FsGameLogic 的复刻模型，技能/buff 资源夹具仍是黑金真档（九阴产物是
+// internal/skilldata 的数据源，列结构与黑金不同，不可混读）。
 func readResource(root, rel string) ([]byte, error) {
 	if root == "" {
 		return nil, fmt.Errorf("fsgame: 资源根路径为空")
 	}
-	return os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+	data, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(rel)))
+	if err == nil || !errors.Is(err, fs.ErrNotExist) {
+		return data, err
+	}
+	if strings.HasPrefix(strings.ToLower(filepath.ToSlash(rel)), "ini/skill/") {
+		if backup, backupErr := os.ReadFile(filepath.Join(root, "ini", "Skill", "heijin_backup", filepath.Base(rel))); backupErr == nil {
+			return backup, nil
+		}
+	}
+	return nil, err
 }
 
 // ParsePropTable 解析 <Object><Property k="v" .../></Object> 为属性行列表。

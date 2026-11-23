@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="4" TargetShape="1" TargetShapePara1="0" TargetShapePara2="3" Comment="以自己为圆心半径3米范围"/>
+	<Property ID="6" TargetShape="1" TargetShapePara1="0" TargetShapePara2="5" Comment="以自己为圆心半径5米范围"/>
+	<Property ID="18" TargetShape="1" TargetShapePara1="0" TargetShapePara2="25" Comment="以自己为圆心半径25米范围"/>
+	<Property ID="78" TargetShape="3" TargetShapePara1="120" TargetShapePara2="2" Comment="自己正面扇形区域120度半径2米"/>
+</Object>

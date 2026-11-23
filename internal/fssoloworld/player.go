@@ -88,6 +88,9 @@ type Player struct {
 	parryMu       sync.Mutex
 	parryBaseline int64
 	parrying      bool
+	// combat 技能/冷却会话态（skill.go；连接生命周期，不落库）：冷却表
+	// 行镜像、进行中技能、MP、冲锋暂存。
+	combat combatState
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。

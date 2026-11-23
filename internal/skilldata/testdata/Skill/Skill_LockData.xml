@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="1431" LockRatio="100" LockSrcTime="1500" LockTargetTime="1500" LockSrcDist="0.87" LockTargetDist="0.9" DodgeAction="CS_jh_cqgf01_dodge" HitAction="CS_jh_cqgf01" ParryAction="CS_jh_cqgf01_parry" SrcDodgeDist="0.87" SrcDodgeTime="900" TargetDodgeDist="0.8" TargetDodgeTime="900" LockGRushAction="qg_fastrun_0h_01" LockARushAction="qg_fastruning_s_0h_01" LockWRushAction="swim_rush_0h_01" LockFailedAction="jb_0h_07"/>
+</Object>

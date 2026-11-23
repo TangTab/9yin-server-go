@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="zs_normal_00" script="SkillNormal" StaticData="13" ItemType="1000" QTypeID="2" AddCoolDownTime="2000"/>
+	<Property ID="CS_jh_cqgf04" script="SkillNormal" StaticData="4404" ItemType="1000" QTypeID="2" AddCoolDownTime="7000"/>
+	<Property ID="hw_normal_fb" script="SkillNormal" StaticData="627" ItemType="1000" QTypeID="2" Skill_Use_Limit="25"/>
+	<Property ID="test_levels" script="SkillNormal" StaticData="9001" ItemType="1000" QTypeID="2"/>
+	<Property ID="test_escape" script="SkillNormal" StaticData="9002" ItemType="1000" QTypeID="2"/>
+	<Property ID="test_nostatic" script="SkillNormal" StaticData="777" ItemType="1000" QTypeID="2"/>
+	<Property ID="test_dup" script="SkillNormal" StaticData="13" ItemType="1000" QTypeID="2"/>
+	<Property ID="test_dup" script="SkillNormal" StaticData="4404" ItemType="1000" QTypeID="2"/>
+	<Property ID="裂天拳" script="SkillNormal" StaticData="13" ItemType="1000" QTypeID="2"/>
+</Object>

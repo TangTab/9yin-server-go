@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="1" HitShape="0" HitShapePara1="0" HitShapePara2="0" Comment="非范围技能仅影响作用目标"/>
+	<Property ID="102" HitShape="3" HitShapePara1="120" HitShapePara2="5" Comment="自己正面扇形区域120度半径5米"/>
+</Object>

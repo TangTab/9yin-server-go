@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Object>
+	<Property ID="88001" Level="1" CoolDownTime="6000" Consume="1434" DamageCalculate="2998" TargetShapePkg="4" HitShapePkg="1" EventProcess="3662" HitCount="1" HeightDiff="3"/>
+	<Property ID="88002" Level="2" CoolDownTime="6000" Consume="1434" DamageCalculate="2999" TargetShapePkg="4" HitShapePkg="1" HitCount="1" HeightDiff="3"/>
+</Object>

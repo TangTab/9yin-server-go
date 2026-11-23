@@ -34,6 +34,19 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
 - `player/` — 玩家对象属性（含 Record 表定义）
 - `skill/skillbase.xml` — 技能对象属性
 
+## ini/Skill/ — 技能配置（九阴构建产物 + 黑金原档备份）
+
+- `Skill_New/<逻辑类>.xml`、`skill_static.xml`、`Skill_VarProp/`、
+  `Skill_Consume/TargetShape/HitShape/Flow/LockData/UseLimit/RushRange.xml`
+  — **九阴构建产物**：`tools/skillgen` 把官服设计态表
+  `share/skill/*.ini` + `share/rule/flow_config.ini` 离线构建为服务端 XML
+  （黑金模型：技能对象行 + 引用包分档，运行时联查），服务端只读产物、
+  不读设计态表（装载器 `internal/skilldata`）。再生命令：
+  `go run ./tools/skillgen -in <Res>/share/skill -rule <Res>/share/rule -verify`
+- `heijin_backup/` — 黑金原档 7 个样本（`skillgen` 首跑整体移入）：仅作
+  `internal/fsgame` 测试夹具与属性词汇对照，`fsgame` 的 `readResource`
+  在规范位缺席时回退到此目录。
+
 ## ini/ — 数值表抽样（config 包的格式样例）
 
 从原版 `Res/ini/` 抽样的代表性文件，用于驱动 `internal/config` 的解析器
@@ -41,14 +54,15 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
 
 - `scenes.xml` — 场景注册表（含 Clonable/ReliveLocation 语义）
 - `Skill/Skill_Config.xml` + `skill_static.xml` + `buff_static.xml` —
-  技能四件套的注册与 lua 引用关系
+  技能四件套的注册与 lua 引用关系（黑金原档，已移入
+  `Skill/heijin_backup/`；`Skill/` 根下现为九阴构建产物，见下）
 - `CreateRole/RoleBaseProp.xml` — 阵营/种族/职业基础属性
 - `Level/Level.xml` — 等级经验曲线
 
 ## lua/ — 行为逻辑脚本全量副本（script 层的移植目标与 API 语料）
 
 原版服务端 `Res/lua/` 全量副本（361 个脚本，已转 UTF-8）。按引用状态分三类
-（引用计数来自 ini/Skill/skill_static.xml + buff_static.xml 的 211 处引用）：
+（引用计数来自 ini/Skill/heijin_backup/skill_static.xml + buff_static.xml 的 211 处引用）：
 
 - **活脚本**（黑金运行时实际加载，也是本项目 `internal/script` 的移植目标
   与回归用例）：`skill/jn_normal/`（复活/中毒/AOE 等 47 处引用）、
