@@ -22,6 +22,7 @@ package fssoloworld
 
 import (
 	"encoding/binary"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -232,13 +233,20 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 	return true
 }
 
-// sendNPCTalkMenu talk 帧族下发（m4/m5/m6×N/m7）：服务行 + 任务行 +
-// 通用行。任务行来自 taskdata 快照绑定（npctask.go——客户端不自行生成
-// 任务行，服务端不发即无任务入口）。services 由调用方计算（菜单簿记
-// 共用一份，npcshop.go mark 路由取绑定值）。
+// sendNPCTalkMenu talk 帧族下发（m4/m5/m6×N/m7）：服务行 + 任务行 +（业报
+// NPC 的）通用行。任务行来自任务目录绑定（npctask.go——客户端不自行生成
+// 任务行，服务端不发即无任务入口）；链首自动任务在算行之前先由服务端
+// 接取并重放 0x29（官服引导链首次点击即进行中行）。services 由调用方
+// 计算（菜单簿记共用一份，npcshop.go mark 路由取绑定值）。
 func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn, services []npcService) {
-	tasks := s.npcTaskLines(s.npcTaskCatalogOf(), pl, spawn.ConfigID, npcTaskMenuLimit())
-	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services, tasks); err == nil {
+	catalog := s.npcTaskCatalogOf()
+	if added := s.autoAcceptChainStarts(catalog, pl, spawn.ConfigID); len(added) > 0 {
+		s.trace("npc task: 链首自动接取 %v@%s client=%d", added, spawn.ConfigID, pl.Conn1)
+		s.replayTaskAccepted(pl)
+	}
+	tasks := s.npcTaskLines(catalog, pl, spawn.ConfigID, npcTaskMenuLimit())
+	karma := npcKarmaDialog(spawn.Template)
+	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services, tasks, karma); err == nil {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
 		}
@@ -246,7 +254,31 @@ func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn, services []npc
 		s.trace("npc interact: talk 数据编码失败 %s: %v", spawn.ConfigID, err)
 	}
 	s.trace("npc interact: %s (%s) 菜单 %d 项（任务行 %d）client=%d",
-		spawn.ConfigID, spawn.Script, len(services)+3, len(tasks), pl.Conn1)
+		spawn.ConfigID, spawn.Script, len(services)+btoi(karma)*2+1, len(tasks), pl.Conn1)
+}
+
+// npcKarmaDialog 模板业报列决定是否发「赠送物品/侠恶查询」两行（官服三份
+// 抓包 100+ 对话窗定版，2026-11-24）：仅 Character（善恶参数）有值且
+// KarmaLevel（地位评分）≥1 的 NPC 带这两行（世界 NPC/钱庄/部分商铺）；
+// 引导 NPC、车夫驿站、生活职业、多数商店没有。捕快类 235/236 虽有业报值
+// 但走各自的专属行，不发通用行。
+func npcKarmaDialog(tpl map[string]string) bool {
+	if tpl == nil || strings.TrimSpace(tpl["Character"]) == "" {
+		return false
+	}
+	switch strings.TrimSpace(tpl["NpcType"]) {
+	case "235", "236":
+		return false
+	}
+	level, err := strconv.Atoi(strings.TrimSpace(tpl["KarmaLevel"]))
+	return err == nil && level >= 1
+}
+
+func btoi(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 // handleNPCMenuSelect 菜单第二段：0x1C SERVER_MENU 选择的 mark 路由
@@ -384,7 +416,12 @@ func (s *Server) findNPCSpawn(scene string, objectID uint32) (npcfeed.Spawn, boo
 // 名 UTF-8 / "ui_form_talk" 乱码是键形错误，非 m5 本身不可发。
 // tasks 任务行（npctask.go 绑定派生）置于服务行之前——客户端
 // talk_data_add_save_menu 按 flag 域分区聚合，任务行归任务区置顶。
-func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []npcService, tasks []npcTaskLine) ([][]byte, error) {
+// karma=模板带业报（npcKarmaDialog）时发「赠送物品/侠恶查询」通用行——
+// npc.pcapng 30.275s 官方字节模板：898000024/898000023 为客户端 ui_*
+// 通用键，侠恶行带第三参 int 1000；并非每窗必带（引导 NPC/车夫/商店
+// 官服不发）。karma 与服务行全无时只剩 ui_exit——真机 64344 会话实证
+// 无内容行时对话数据虽被受理（客户端回 m298 查询）但窗体不渲染。
+func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []npcService, tasks []npcTaskLine, karma bool) ([][]byte, error) {
 	out := make([][]byte, 0, 3+len(services)+len(tasks))
 	begin, err := entergen.CustomMessageFrame(4)
 	if err != nil {
@@ -408,20 +445,18 @@ func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []
 		}
 		out = append(out, pkt)
 	}
-	// 世界 NPC 通用行（npc.pcapng 30.275s 官方字节模板：赠送 + 侠恶查询
-	// ——898000024/898000023 为客户端 ui_* 通用键，每窗必带；侠恶行带
-	// 第三参 int 1000。真机 64344 会话实证：无内容行（仅 ui_exit）时
-	// 对话数据虽被受理（客户端回 m298 查询）但窗体不渲染）。
-	present, err := entergen.CustomMessageFrame(6, entergen.CustomInt(898000024), entergen.CustomString("ui_present_to_npc_item"))
-	if err != nil {
-		return nil, err
+	if karma {
+		present, err := entergen.CustomMessageFrame(6, entergen.CustomInt(898000024), entergen.CustomString("ui_present_to_npc_item"))
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, present)
+		query, err := entergen.CustomMessageFrame(6, entergen.CustomInt(898000023), entergen.CustomString("ui_karma_query"), entergen.CustomInt(1000))
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, query)
 	}
-	out = append(out, present)
-	karma, err := entergen.CustomMessageFrame(6, entergen.CustomInt(898000023), entergen.CustomString("ui_karma_query"), entergen.CustomInt(1000))
-	if err != nil {
-		return nil, err
-	}
-	out = append(out, karma)
 	// 尾项「离开」（官方实证 600000000+"ui_exit"）。
 	leave, err := entergen.CustomMessageFrame(6, entergen.CustomInt(600000000), entergen.CustomString("ui_exit"))
 	if err != nil {

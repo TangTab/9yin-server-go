@@ -2,22 +2,36 @@ package fssoloworld
 
 // npctask.go NPC 任务绑定（对话框任务行 + 接取/提交受理）：
 //
-// 数据：服务端任务域 XML（<数据根>/ini/Quest，npcgen 产物——Task/
-// task002 主表 + SubFunction×StoryTaskList 剧情段）为正典源；env
-// NINEYIN_TASK_SNAPSHOT 显式快照最优先，旧版 tasks.json 快照
-//（storytasklist/qianjiu_tasknpc.ini 派生）作回退。
+// 数据：服务端任务域 XML（<数据根>/ini/Quest，npcgen 由客户端 share/task
+// 生成——任务 ID 与客户端文案键同一体系；Task 主表 + SubFunction×
+// StoryTaskList 剧情段）为正典源；env NINEYIN_TASK_SNAPSHOT 显式快照最
+// 优先，旧版 tasks.json 快照（storytasklist/qianjiu_tasknpc.ini 派生）作
+// 回退。
 //
 // 协议（form_talk_data.lua g_menu_id 域 + 引导抓包定版）：菜单任务行
 // m6 funcid=flag*1000000+TID，行文本双键（首键=行文案、次键 title_
 // <TID>=格式化参数）。on_endmenu 只聚合 on_addmenu 收到的行——客户端
 // 不自行生成任务行，服务端不发即无任务入口。
 //
+// 行规则（2026-11-24 官服三份抓包定版，见 npcTaskLines）：
+//   - 已接：剧情未走完发 500 进行中行，否则发 200 提交行；
+//   - 未接：仅当任务有接取文案键（主表 CanAcceptMenu）才发 100 接取行
+//     ——客户端没有该键时发了只会显示原始键名（引导链任务全都没有，
+//     官服从不发它们的接取行）；
+//   - 链根任务（无前置、无接取文案、非任何任务的 AutoAcceptID 目标）
+//     首次对话即由服务端接取（autoAcceptChainStarts），主窗直接是
+//     进行中行；
+//   - 已交任务不出行。
+//
 // 受理：玩家点任务行回 op0x07 FuncID=任务域 mark。官方流（引导抓包）
 // 中任务状态同步走 0x29 记录帧（接取/完成/链推进即时推），接取窗与
 // 提交窗均由客户端从 REC_TASK_ACCEPT 本地渲染（全程无 m327、无
-// task_msg 字符串路由）；提交后服务端回 m8×2 关窗。
+// task_msg 字符串路由）；提交后服务端回 m8×2 关窗。提交受理
+// （completeNPCTask）记已交并按 AutoAcceptID 链式接取下一环；AutoSubmit
+// 任务剧情走完即自动提交。
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -38,8 +52,7 @@ const npcTaskFuncBase = 1000000
 // 引导-女」抓包实证）：100 接取 / 200 提交 / 201 提交+奖励单选（lua
 // menu_select 的 funcid+singleselect*base 二次确认，c2s 恒随 200 后
 // 出现）/ 500 进行中（官方已接任务行，双键 story_menu_<sid>+title_
-// <TID>）/ 50N·60N 剧情段落续/离 / 600 离开。本服务端无进度系统：
-// 已接任务发 200 可提交行（可玩闭环），500/剧情域仅识别留痕。
+// <TID>）/ 50N·60N 剧情段落续/离 / 600 离开。
 const (
 	npcTaskFlagAccept       int32 = 100
 	npcTaskFlagSubmit       int32 = 200
@@ -58,13 +71,14 @@ const (
 	npcStoryLeaveTextDefault = "9607"
 )
 
-// npcTaskLine 一条菜单任务行：未接=100 接取行；已接剧情未走完=500
-// 进行中行（双键 story_menu_<sid>+title_<TID>，点击进剧情对话）；已接
+// npcTaskLine 一条菜单任务行：未接且有接取文案=100 接取行；已接剧情未走完
+// =500 进行中行（双键 story_menu_<sid>+title_<TID>，点击进剧情对话）；已接
 // 剧情走完或无剧情段=200 可提交行。
 type npcTaskLine struct {
-	TaskID  int
-	Submit  bool   // 200 可提交行
-	StoryID string // 500 行剧情键 story_menu_<sid>
+	TaskID    int
+	Submit    bool   // 200 可提交行
+	StoryID   string // 500 行剧情键 story_menu_<sid>
+	AcceptKey string // 100 行文案键（任务主表 CanAcceptMenu）
 }
 
 // ---- 快照装载（进程级缓存） ----
@@ -137,13 +151,16 @@ func npcTaskSnapshotCandidates(root string) []string {
 func npcTaskMenuLimit() int { return int(envFloat("NINEYIN_NPC_TASK_LIMIT", 8)) }
 
 // npcTaskLines NPC 的菜单任务行集：绑定且已加载文案的任务按 TID 升序——
-// 未接发 100 接取行；已接且剧情未走完（有剧情段）发 500 进行中行；
-// 已接且剧情走完/无剧情段发 200 可提交行。截断至上限。
+// 已接且剧情未走完（有剧情段）发 500 进行中行；已接且剧情走完/无剧情段发
+// 200 可提交行；未接且有接取文案发 100 接取行。已交任务与无接取文案的
+// 未接任务不出行（后者只能服务端自动接取，见 autoAcceptChainStarts）。
+// 截断至上限。
 func (s *Server) npcTaskLines(catalog *taskdata.Catalog, pl *Player, configID string, limit int) []npcTaskLine {
 	if catalog == nil || limit < 0 || strings.TrimSpace(configID) == "" {
 		return nil
 	}
 	accepted := npcAcceptedSet(pl)
+	completed := npcCompletedSet(pl)
 	tasks := catalog.TasksForNPC(configID)
 	lines := make([]npcTaskLine, 0, len(tasks))
 	for _, task := range tasks {
@@ -151,26 +168,62 @@ func (s *Server) npcTaskLines(catalog *taskdata.Catalog, pl *Player, configID st
 			break
 		}
 		tid := uint32(task.ID)
+		if completed[tid] {
+			continue
+		}
 		switch {
-		case !accepted[tid]:
-			lines = append(lines, npcTaskLine{TaskID: task.ID})
-		case pl.taskStoryDone[tid] || catalog.StoryBindingsFor(configID, task.ID) == nil:
-			lines = append(lines, npcTaskLine{TaskID: task.ID, Submit: true})
-		default:
-			if binding, ok := catalog.StoryBindingFor(configID, task.ID); ok {
+		case accepted[tid]:
+			if pl.taskStoryDone[tid] || catalog.StoryBindingsFor(configID, task.ID) == nil {
+				lines = append(lines, npcTaskLine{TaskID: task.ID, Submit: true})
+			} else if binding, ok := catalog.StoryBindingFor(configID, task.ID); ok {
 				lines = append(lines, npcTaskLine{TaskID: task.ID, StoryID: binding.StoryID})
 			} else {
 				lines = append(lines, npcTaskLine{TaskID: task.ID, Submit: true})
 			}
+		case task.AcceptMenuKey != "":
+			lines = append(lines, npcTaskLine{TaskID: task.ID, AcceptKey: task.AcceptMenuKey})
 		}
 	}
 	return lines
+}
+
+// autoAcceptChainStarts 链根任务的「首谈即接」：绑定到该 NPC、无前置
+// 任务、无接取文案、非链式接取目标、未接未交的任务由服务端直接接取
+// （官服引导链实证：1340@funnpcborn003031、1648@Transcity05D 首次点击
+// 即发进行中行，全程无接取行）。返回本次新接的任务号（调用方据此重放
+// 0x29）。
+func (s *Server) autoAcceptChainStarts(catalog *taskdata.Catalog, pl *Player, configID string) []int {
+	if catalog == nil || strings.TrimSpace(configID) == "" {
+		return nil
+	}
+	accepted := npcAcceptedSet(pl)
+	completed := npcCompletedSet(pl)
+	var added []int
+	for _, task := range catalog.TasksForNPC(configID) {
+		tid := uint32(task.ID)
+		if !task.ChainRoot || task.AcceptMenuKey != "" || accepted[tid] || completed[tid] {
+			continue
+		}
+		pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, tid)
+		added = append(added, task.ID)
+	}
+	return added
 }
 
 // npcAcceptedSet 玩家已接任务集合。
 func npcAcceptedSet(pl *Player) map[uint32]bool {
 	set := make(map[uint32]bool, len(pl.roleState.TaskAccepted))
 	for _, id := range pl.roleState.TaskAccepted {
+		set[id] = true
+	}
+	return set
+}
+
+// npcCompletedSet 玩家已交任务集合（roleState.TaskCompleted——建号种子与
+// 提交受理共同维护）。
+func npcCompletedSet(pl *Player) map[uint32]bool {
+	set := make(map[uint32]bool, len(pl.roleState.TaskCompleted))
+	for _, id := range pl.roleState.TaskCompleted {
 		set[id] = true
 	}
 	return set
@@ -190,6 +243,10 @@ func npcTaskMenuFrames(lines []npcTaskLine) ([][]byte, error) {
 			flag, textKey = npcTaskFlagSubmit, "CompleteMenu_"+strconv.Itoa(line.TaskID)
 		case line.StoryID != "":
 			flag, textKey = npcTaskFlagDoing, "story_menu_"+line.StoryID
+		default:
+			if line.AcceptKey != "" {
+				textKey = line.AcceptKey
+			}
 		}
 		frame, err := entergen.CustomMessageFrame(6,
 			entergen.CustomInt(flag*npcTaskFuncBase+int32(line.TaskID)),
@@ -251,10 +308,7 @@ func (s *Server) handleNPCTaskMark(pl *Player, menu *npcActiveMenu, mark int32) 
 		}
 		s.sendTaskAcceptForm(pl, menu, taskID)
 	case flag == npcTaskFlagSubmit || flag == npcTaskFlagSubmitChoice:
-		pl.roleState.TaskAccepted = pl.removeAcceptedTask(uint32(taskID))
-		pl.clearTaskStoryDone(uint32(taskID))
-		s.trace("npc task: 提交 %d（flag=%d）client=%d（余 %d）", taskID, flag, pl.Conn1, len(pl.roleState.TaskAccepted))
-		s.replayTaskAccepted(pl)
+		s.completeNPCTask(pl, taskID, fmt.Sprintf("提交（flag=%d）", flag))
 		// 官方提交应答：m8×2 关窗（无菜单刷新——客户端提交窗为本地
 		// 渲染，任务日志由 0x29 记录帧同步）。
 		for i := 0; i < 2; i++ {
@@ -342,18 +396,30 @@ func (s *Server) sendStorySegment(pl *Player, menu *npcActiveMenu, taskID, segme
 	}
 	segments := catalog.StoryBindingsFor(spawn.ConfigID, taskID)
 	if segment < 1 || segment > len(segments) {
-		// 链尾（最后一段窗的 50N 点击）：剧情完成。
-		if pl.taskStoryDone == nil {
-			pl.taskStoryDone = make(map[uint32]bool)
+		// 链尾（最后一段窗的 50N 点击）：剧情完成。AutoSubmit 任务目标即
+		// 剧情（引导 1340：官服 505 点击后直接奖励+关窗，无 200 提交步）
+		// ——走完即自动提交并链推进；其余置剧情完成态，任务行翻 200
+		// 待提交（需再点 NPC）。
+		auto := false
+		if task, ok := catalog.TaskByID(taskID); ok {
+			auto = task.AutoSubmit
 		}
-		pl.taskStoryDone[uint32(taskID)] = true
-		s.trace("npc task: 剧情完成 tid=%d（%d 段走完）client=%d", taskID, len(segments), pl.Conn1)
+		if !auto {
+			if pl.taskStoryDone == nil {
+				pl.taskStoryDone = make(map[uint32]bool)
+			}
+			pl.taskStoryDone[uint32(taskID)] = true
+		}
+		s.trace("npc task: 剧情完成 tid=%d（%d 段走完，自动提交=%v）client=%d", taskID, len(segments), auto, pl.Conn1)
 		for i := 0; i < 2; i++ {
 			if end, err := entergen.CustomMessageFrame(8); err == nil {
 				s.sendToClient(pl, end)
 			}
 		}
 		s.clearNPCMenu(pl)
+		if auto {
+			s.completeNPCTask(pl, taskID, "剧情走完自动提交")
+		}
 		return
 	}
 	seg := segments[segment-1]
@@ -393,6 +459,41 @@ func (s *Server) sendStorySegment(pl *Player, menu *npcActiveMenu, taskID, segme
 		s.sendToClient(pl, frame)
 	}
 	s.trace("npc task: 剧情段 tid=%d seg=%d/%d（%s）client=%d", taskID, segment, len(segments), seg.ContextID, pl.Conn1)
+}
+
+// completeNPCTask 任务提交受理：移出已接、清剧情态、记入已交，并按
+// AutoAcceptID 链式接取下一环（官服链推进：引导抓包 1340 五段剧情走完即
+// 奖励+关窗，随后客户端上报 m327 "0,1347"）。之后全量重放 0x29。
+func (s *Server) completeNPCTask(pl *Player, taskID int, how string) {
+	id := uint32(taskID)
+	pl.roleState.TaskAccepted = pl.removeAcceptedTask(id)
+	pl.clearTaskStoryDone(id)
+	if !npcCompletedSet(pl)[id] {
+		pl.roleState.TaskCompleted = append(pl.roleState.TaskCompleted, id)
+	}
+	s.trace("npc task: %s %d client=%d（余 %d）", how, taskID, pl.Conn1, len(pl.roleState.TaskAccepted))
+	if next := s.acceptChainNext(s.npcTaskCatalogOf(), pl, taskID); next != 0 {
+		s.trace("npc task: 链推进 自动接取 %d（%d 之后）client=%d", next, taskID, pl.Conn1)
+	}
+	s.replayTaskAccepted(pl)
+}
+
+// acceptChainNext 按任务的 AutoAcceptID 接取下一环（未接未交才接）；返回
+// 新接的任务号，无则 0。
+func (s *Server) acceptChainNext(catalog *taskdata.Catalog, pl *Player, taskID int) int {
+	if catalog == nil {
+		return 0
+	}
+	task, ok := catalog.TaskByID(taskID)
+	if !ok || task.AutoAcceptID <= 0 {
+		return 0
+	}
+	next := uint32(task.AutoAcceptID)
+	if pl.taskAcceptedContains(next) || npcCompletedSet(pl)[next] {
+		return 0
+	}
+	pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, next)
+	return task.AutoAcceptID
 }
 
 // replayTaskAccepted 重放 Task_Accepted 0x29 批量帧（m327 sub6 同源编码，
