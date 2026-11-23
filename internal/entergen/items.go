@@ -15,6 +15,8 @@ import (
 
 // 背包容器视图编号（2433 线 bagViewOf：ViewID 分类页 → wire 视图；
 // 1 道具/2 装备/3 材料/4 任务，道具页=视图 2）。
+const equipDollView uint16 = 1 // View1 纸娃娃（行号=身体槽位）
+
 func bagViewOf(viewID int) uint16 {
 	switch viewID {
 	case 2:
@@ -120,6 +122,52 @@ func BagItemViewFrames(state rolestate.RoleState) ([][]byte, error) {
 			return nil, err
 		}
 		frames = append(frames, push...)
+	}
+	return frames, nil
+}
+
+// equipItemViewRow View1 纸娃娃行属性集（2433 线 equipmentViewAdd 同款：
+// 通用 6 项 + EquipType 真值 + 精炼/耐久/品阶族；行号=身体槽位）。
+func equipItemViewRow(item rolestate.EquipItem) []ViewProperty {
+	uid := item.UID
+	if uid == "" {
+		uid = itemUIDOf(item.Seq, item.Slot)
+	}
+	colorLevel := 1
+	props := []ViewProperty{
+		{playerIdx("ConfigID"), StringValue(item.ConfigID)},
+		{playerIdx("ItemType"), Int32Value(int32(item.ItemType))},
+		{playerIdx("Amount"), Int32Value(1)},
+		{playerIdx("MaxAmount"), Int32Value(1)},
+		{playerIdx("BindStatus"), Int32Value(0)},
+		{playerIdx("UniqueID"), StringValue(uid)},
+		{playerIdx("EquipType"), StringValue(item.EquipType)},
+		{playerIdx("MaxBuildCount"), Int32Value(2)},
+		{playerIdx("CurBuildCount"), Int32Value(2)},
+		{playerIdx("RecoverFlag"), ByteValue(0)},
+		{playerIdx("ColorLevel"), Int32Value(int32(colorLevel))},
+		{playerIdx("Hardiness"), Int32Value(100)},
+		{playerIdx("MaxHardiness"), Int32Value(100)},
+		{playerIdx("Level"), ByteValue(0)},
+	}
+	return props
+}
+
+// EquipRowFrame 单件纸娃娃行（穿戴帧组用：0x19 槽位清 + 本行成对）。
+func EquipRowFrame(item rolestate.EquipItem) ([]byte, error) {
+	return ViewAddFrame(equipDollView, uint16(item.Slot), equipItemViewRow(item))
+}
+
+// EquipViewFrames 全纸娃娃行推送（登录整推——2433 线 inventoryFrames
+// 序：纸娃娃行先于背包行；空装备零帧）。
+func EquipViewFrames(state rolestate.RoleState) ([][]byte, error) {
+	frames := make([][]byte, 0, len(state.Equips))
+	for _, item := range state.Equips {
+		row, err := EquipRowFrame(item)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, row)
 	}
 	return frames, nil
 }

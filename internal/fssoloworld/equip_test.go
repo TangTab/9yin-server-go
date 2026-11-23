@@ -60,6 +60,20 @@ func TestMoveItemEquipUnequip(t *testing.T) {
 	if frameContains(sent, []byte("obj\\char\\b_jianghu000")) {
 		t.Fatalf("穿鞋不应推裸身模型")
 	}
+	// 穿戴帧组（2433 参考端）：0x18 view1 纸娃娃行 + appearance（ActionSet
+	// 回 1h 基线）。
+	doll := false
+	for _, f := range sent {
+		if f[0] == 0x18 && f[1] == 1 && f[2] == 0 && f[3] == 8 {
+			doll = true
+		}
+	}
+	if !doll {
+		t.Fatalf("穿鞋未发 view1 槽 8 纸娃娃行")
+	}
+	if !frameContains(sent, []byte("1h")) {
+		t.Fatalf("穿鞋未发 appearance（ActionSet 基线缺失）")
+	}
 	// PhyDef 同步到 6。
 	if !phyDefFrameValue(sent, 6) {
 		t.Fatalf("穿鞋后 PhyDef 帧缺失或值非 6")

@@ -699,6 +699,21 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			// 场景加载 ter0 失败）。
 			if st, berr := rolestate.BuildRoleState(rolestate.DefaultBirthScene,
 				rolestate.InferSexFromPara(meta.SavePara1), meta.SavePara1, defaultFacultySeed); berr == nil {
+				st.Equips = rolestate.StarterEquips(st.Sex, meta.UID, time.Now().Unix())
+				st.EquipsSeeded = true
+				if js, jerr := rolestate.MarshalRoleState(st); jerr == nil {
+					meta.RoleStateJSON = js
+					_ = b.SaveRole(cstrFixed(payload[0xC:0x2D]), meta, nil)
+				}
+			}
+		}
+		if ok && meta.RoleStateJSON != "" {
+			// 初始布衣补穿（equipsSeeded 闸上线前的存量档：RST1 在但
+			// 建号早于 StarterEquips——按官方初始号口径穿着进场补一次；
+			// 玩家主动全脱的档已有闸位不再复穿）。
+			if st, uerr := rolestate.UnmarshalRoleState(meta.RoleStateJSON); uerr == nil && !st.EquipsSeeded {
+				st.Equips = rolestate.StarterEquips(st.Sex, meta.UID, time.Now().Unix())
+				st.EquipsSeeded = true
 				if js, jerr := rolestate.MarshalRoleState(st); jerr == nil {
 					meta.RoleStateJSON = js
 					_ = b.SaveRole(cstrFixed(payload[0xC:0x2D]), meta, nil)
@@ -790,12 +805,16 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 		}
 		existing, _ := b.QueryAccount(account, serverID)
 		// 建号初始状态（rolestate.go：RoleBaseProp.xml 五维/资源初值 +
-		// StarterSet.xml 授予集 + location.ini 出生点）→ role_state_json。
+		// StarterSet.xml 授予集 + location.ini 出生点；初始布衣三件穿着
+		// 进场——官服初始号 view1 口径）→ role_state_json。
+		uid := newRoleUID()
 		state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, rolestate.InferSexFromPara(para), para, defaultFacultySeed)
 		if err != nil {
 			s.logf("(CAccess::MessageCreate)build role state: %v", err)
 			return
 		}
+		state.Equips = rolestate.StarterEquips(state.Sex, uid, time.Now().Unix())
+		state.EquipsSeeded = true
 		stateJSON, err := rolestate.MarshalRoleState(state)
 		if err != nil {
 			s.logf("(CAccess::MessageCreate)marshal role state: %v", err)
@@ -808,7 +827,6 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			SavePara1:     para,
 			RoleStateJSON: stateJSON,
 		}
-		uid := newRoleUID()
 		ok, err := b.CreateRole(account, name, uid, serverID, meta, nil)
 		if err != nil {
 			s.logf("(CAccess::MessageCreate)connection error")

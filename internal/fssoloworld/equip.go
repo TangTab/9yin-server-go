@@ -1,27 +1,39 @@
 package fssoloworld
 
-// C2S msg30 移动物品/穿脱（2026-11-23 官服真机方言，初始账号登陆-3 +
-// 更改快捷键三会话定版，docs/official/初始号无装备身体模型定版.md）：
+// C2S msg30 移动物品/穿脱。方言双源对齐：
 //
-//	[30, src_view, src_slot, dst_view, dst_slot]
+// 官服真机（2026-11-23 初始账号登陆-3 + 更改快捷键三会话，docs/official/
+// 初始号无装备身体模型定版.md）：脱=0x19(view1,槽)+入包行+op10 裸身模型
+// 单值帧+PhyDef；穿=0x19(源页,槽)+op10 件模型。
 //
-//	view 1=装备（纸娃娃，槽位 3=衣 4=裤 8=鞋…equipbox 口径）；2/121/123/125
-//	=背包分类页（道具/装备/材料/任务）；dst_slot 0=自动入位（首个空格）。
-//	应答方言（官服逐帧对齐）：
-//	  - 0x19 源行删（脱=0x19(view1,槽)；穿=0x19(背包页,槽)）；
-//	  - 脱下入包走 0x19 预清 + 0x18 行（BagItemPushFrames 同购销方言）；
-//	  - 穿上**不发 view1 行**（纸娃娃客户端本地拖放自知），改推 op10 模型
-//	    单值帧：空槽=jianghu000 裸身族、布衣=jianghu 系号族（equipmodel.go）；
-//	  - op10 PhyDef 同步（0 基线 + 布衣每件 +6）。
-// 占槽换装：原槽件退回源背包格（行帧 + 模型帧一并下发）。
+// 2433 参考端（cmd/protocol-probe/item_wear.go，fork 客户端实证）：
+// 穿戴帧组=0x19(doll 槽)+0x18 纸娃娃行+appearance 0x10（ShowEquipType+
+// 已穿槽位模型+武器三属性，空槽跳过、空手 ActionSet 回 1h）；脱下后同推
+// appearance 整刷。两源合流：穿发 doll 行+appearance（参考端），脱额外推
+// 裸身模型单值帧（官服——保证视觉回退）。PhyDef 单推（0 基线+布衣 +6/件）。
+// 占槽换装：原槽件退回源背包格。
 
 import (
+	"strings"
+
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // equipViewWire 装备（纸娃娃）wire 视图号。
 const equipViewWire int32 = 1
+
+// equipSlotsByType EquipType → 穿戴槽（2433 参考端 equipSlotsByType 同表：
+// 双槽类型优先空槽）。
+var equipSlotsByType = map[string][]int{
+	"hat": {1}, "cloth": {3}, "pants": {4}, "wrist": {6}, "leg": {7}, "shoes": {8},
+	"earring": {11, 12}, "necklace": {13}, "fingerring": {14, 15},
+	"suit": {16}, "newsuit": {16},
+	"fashioncoat": {17}, "newfashioncoat": {17}, "fashionhat": {18}, "fashionshoes": {19},
+	"weapon": {22}, "shotweapon": {22}, "innerweapon": {22},
+	"treasure":    {25, 26, 27, 28, 29},
+	"newtreasure": {30, 31, 32, 33, 34},
+}
 
 // bagViewIDOfWire wire 视图号 → 背包分类页（bagViewOf 逆映射；未知 0）。
 func bagViewIDOfWire(wire int32) int {
@@ -38,41 +50,51 @@ func bagViewIDOfWire(wire int32) int {
 	return 0
 }
 
-// equipSlotForConfig ConfigID 前缀 → 身体槽位（{part}_{b|g}NNNN 形；
-// equipbox 口径；其余件 0=按客户端所报槽位收）。
-func equipSlotForConfig(configID string) int {
-	switch {
-	case hasEquipPrefix(configID, "cloth_"):
-		return entergen.EquipSlotCloth
-	case hasEquipPrefix(configID, "pants_"):
-		return entergen.EquipSlotPants
-	case hasEquipPrefix(configID, "shoes_"):
-		return entergen.EquipSlotShoes
-	case hasEquipPrefix(configID, "hat_"):
-		return entergen.EquipSlotHat
+// equipTypeOfItem 行 EquipType（行值 > 目录 > ConfigID 前缀兜底）。
+func (s *Server) equipTypeOfItem(itemType, slotFallback int, equipType, configID string) string {
+	if equipType != "" {
+		return equipType
 	}
-	return 0
+	if entry, ok := s.itemCatalogOf().Lookup(configID); ok && entry.EquipType != "" {
+		return entry.EquipType
+	}
+	if under := strings.IndexByte(configID, '_'); under > 0 {
+		return strings.ToLower(configID[:under])
+	}
+	return ""
 }
 
-// hasEquipPrefix ConfigID 是否 {prefix}{b|g}NNNN 形（性别位 + 数字尾）。
-func hasEquipPrefix(configID, prefix string) bool {
-	if len(configID) <= len(prefix)+1 || configID[:len(prefix)] != prefix {
-		return false
+// equipSlotForEquipType EquipType → 目标槽：显式槽须在类型槽表内；
+// toSlot<=0 自动（双槽类型首个空槽，全占用替换第一槽）。未收录类型 0。
+func equipSlotForEquipType(equipType string, toSlot int, equips []rolestate.EquipItem) int {
+	slots, ok := equipSlotsByType[strings.ToLower(strings.TrimSpace(equipType))]
+	if !ok {
+		return 0
 	}
-	switch configID[len(prefix)] {
-	case 'b', 'g':
-	default:
-		return false
+	if toSlot > 0 {
+		for _, allowed := range slots {
+			if allowed == toSlot {
+				return toSlot
+			}
+		}
+		return 0 // 类型与所报槽不符：拒收
 	}
-	for i := len(prefix) + 1; i < len(configID); i++ {
-		if configID[i] < '0' || configID[i] > '9' {
-			return false
+	for _, slot := range slots {
+		taken := false
+		for _, worn := range equips {
+			if worn.Slot == slot {
+				taken = true
+				break
+			}
+		}
+		if !taken {
+			return slot
 		}
 	}
-	return true
+	return slots[0]
 }
 
-// handleMoveItem C2S 30 移动物品/穿脱。
+// handleMoveItem C2S 30 [30, src_view, src_slot, dst_view, dst_slot]。
 func (s *Server) handleMoveItem(pl *Player, message entergen.CustomInbound) {
 	if !s.requireRoleState(pl, clientCustomMoveItem) {
 		return
@@ -140,8 +162,8 @@ func (s *Server) stackOrAddBagItem(pl *Player, item rolestate.BagItem) ([][]byte
 	return entergen.BagItemPushFrames(item)
 }
 
-// pushEquipSlotModel op10 模型单值帧（槽位视觉：穿=件模型、空=裸身 000 族；
-// 帽槽=无帽回填发型语义）。
+// pushEquipSlotModel op10 模型单值帧（官服方言：空槽显式回推裸身 000 族
+// ——保证视觉回退；穿=件模型）。
 func (s *Server) pushEquipSlotModel(pl *Player, slot int) {
 	name := entergen.EquipSlotPropName(slot)
 	if name == "" {
@@ -152,6 +174,18 @@ func (s *Server) pushEquipSlotModel(pl *Player, slot int) {
 		[]entergen.IndexedProperty{entergen.NamedProperty(name, entergen.StringValue(value))})
 	if err != nil {
 		s.trace("equip move: 模型帧编码失败 slot=%d: %v", slot, err)
+		return
+	}
+	s.sendToClient(pl, frame)
+}
+
+// pushEquipAppearance op10 外观整刷（2433 参考端 appearanceFrame 方言：
+// ShowEquipType+已穿槽位模型+武器三属性恒写）。
+func (s *Server) pushEquipAppearance(pl *Player) {
+	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
+		entergen.EquipAppearanceProps(&pl.roleState))
+	if err != nil {
+		s.trace("equip move: appearance 帧编码失败: %v", err)
 		return
 	}
 	s.sendToClient(pl, frame)
@@ -168,7 +202,7 @@ func (s *Server) pushEquipPhyDef(pl *Player) {
 	s.sendToClient(pl, frame)
 }
 
-// itemTypeWithCatalog 行 ItemType（装备行缺席时查目录兜底）。
+// itemTypeWithCatalog 行 ItemType（缺席时查目录兜底）。
 func (s *Server) itemTypeWithCatalog(have int, configID string) int {
 	if have != 0 {
 		return have
@@ -179,7 +213,8 @@ func (s *Server) itemTypeWithCatalog(have int, configID string) int {
 	return 0
 }
 
-// moveUnequip 脱装（equip → 背包）：0x19(view1,槽) + 入包行 + 模型/PhyDef 推送。
+// moveUnequip 脱装（equip → 背包）：0x19(view1,槽) + 入包行 + appearance
+// 整刷 + 裸身模型单推（官服方言）+ PhyDef。
 func (s *Server) moveUnequip(pl *Player, srcSlot, dstView, dstSlot int32) {
 	st := &pl.roleState
 	viewID := bagViewIDOfWire(dstView)
@@ -205,13 +240,14 @@ func (s *Server) moveUnequip(pl *Player, srcSlot, dstView, dstSlot int32) {
 	}
 	st.Equips = append(st.Equips[:index], st.Equips[index+1:]...)
 	push, err := s.stackOrAddBagItem(pl, rolestate.BagItem{
-		Slot:     slot,
-		ConfigID: equip.ConfigID,
-		ItemType: s.itemTypeWithCatalog(equip.ItemType, equip.ConfigID),
-		Amount:   1,
-		ViewID:   viewID,
-		Seq:      equip.Seq,
-		UID:      equip.UID,
+		Slot:      slot,
+		ConfigID:  equip.ConfigID,
+		ItemType:  s.itemTypeWithCatalog(equip.ItemType, equip.ConfigID),
+		Amount:    1,
+		ViewID:    viewID,
+		Seq:       equip.Seq,
+		UID:       equip.UID,
+		EquipType: equip.EquipType, // 装备行渲染闸：脱下入包仍须真值
 	})
 	if err != nil {
 		s.trace("equip move: 脱装入包帧编码失败 %s: %v", equip.ConfigID, err)
@@ -221,15 +257,17 @@ func (s *Server) moveUnequip(pl *Player, srcSlot, dstView, dstSlot int32) {
 	for _, frame := range push {
 		s.sendToClient(pl, frame)
 	}
-	s.pushEquipSlotModel(pl, int(srcSlot))
+	s.pushEquipAppearance(pl)
+	s.pushEquipSlotModel(pl, int(srcSlot)) // 官服方言：空槽显式回推裸身
 	s.pushEquipPhyDef(pl)
 	s.sendRoleSave(pl)
 	s.trace("equip move: 脱 %s 槽 %d → 背包 %d.%d client=%d",
 		equip.ConfigID, srcSlot, viewID, slot, pl.Conn1)
 }
 
-// moveEquip 穿装（背包 → equip）：0x19(源页,槽) + 模型/PhyDef 推送（不发
-// view1 行——官服实证）。占槽换装：原件退回源格。
+// moveEquip 穿装（背包 → equip）：0x19(源页,槽)+[换装退件行]+穿戴帧组
+//（0x19(doll 槽)+0x18 纸娃娃行+appearance 整刷）+ PhyDef。槽位按 EquipType
+// 槽表校验（显式槽不符/类型未收录拒收；0=自动槽）。
 func (s *Server) moveEquip(pl *Player, srcView, srcSlot, dstSlot int32) {
 	st := &pl.roleState
 	viewID := bagViewIDOfWire(srcView)
@@ -249,14 +287,11 @@ func (s *Server) moveEquip(pl *Player, srcView, srcSlot, dstSlot int32) {
 		return
 	}
 	item := st.BagItems[index]
-	slot := int(dstSlot)
-	if expected := equipSlotForConfig(item.ConfigID); expected != 0 {
-		if slot != expected {
-			s.trace("equip move: %s 应入槽 %d 实报 %d 拒收 client=%d", item.ConfigID, expected, slot, pl.Conn1)
-			return
-		}
-	} else if slot < 1 || slot > 52 {
-		s.trace("equip move: 装备槽越界 %d client=%d", slot, pl.Conn1)
+	equipType := s.equipTypeOfItem(item.ItemType, 0, item.EquipType, item.ConfigID)
+	slot := equipSlotForEquipType(equipType, int(dstSlot), st.Equips)
+	if slot == 0 {
+		s.trace("equip move: %s equipType=%q 不可穿/槽不符（报槽 %d）拒收 client=%d",
+			item.ConfigID, equipType, dstSlot, pl.Conn1)
 		return
 	}
 	// 占槽换装：原槽件先摘下（稍后退回源格）。
@@ -286,13 +321,14 @@ func (s *Server) moveEquip(pl *Player, srcView, srcSlot, dstSlot int32) {
 	}
 	if swapped != nil {
 		push, err := s.stackOrAddBagItem(pl, rolestate.BagItem{
-			Slot:     int(srcSlot),
-			ConfigID: swapped.ConfigID,
-			ItemType: s.itemTypeWithCatalog(swapped.ItemType, swapped.ConfigID),
-			Amount:   1,
-			ViewID:   viewID,
-			Seq:      swapped.Seq,
-			UID:      swapped.UID,
+			Slot:      int(srcSlot),
+			ConfigID:  swapped.ConfigID,
+			ItemType:  s.itemTypeWithCatalog(swapped.ItemType, swapped.ConfigID),
+			Amount:    1,
+			ViewID:    viewID,
+			Seq:       swapped.Seq,
+			UID:       swapped.UID,
+			EquipType: swapped.EquipType,
 		})
 		if err != nil {
 			s.trace("equip move: 退件帧编码失败 %s: %v", swapped.ConfigID, err)
@@ -302,27 +338,28 @@ func (s *Server) moveEquip(pl *Player, srcView, srcSlot, dstSlot int32) {
 			}
 		}
 	}
-	st.Equips = append(st.Equips, rolestate.EquipItem{
+	worn := rolestate.EquipItem{
 		Slot:      slot,
 		ConfigID:  item.ConfigID,
 		ItemType:  item.ItemType,
-		EquipType: equipTypeOf(s, item.ConfigID),
+		EquipType: equipType,
 		Seq:       item.Seq,
 		UID:       item.UID,
-	})
-	s.pushEquipSlotModel(pl, slot)
+	}
+	st.Equips = append(st.Equips, worn)
+	// 穿戴帧组（2433 参考端 pushWearFrames 序）：槽位清 → 纸娃娃行 →
+	// appearance 整刷。
+	s.sendToClient(pl, entergen.ViewRemoveFrame(uint16(equipViewWire), uint16(slot)))
+	if row, err := entergen.EquipRowFrame(worn); err == nil {
+		s.sendToClient(pl, row)
+	} else {
+		s.trace("equip move: 纸娃娃行编码失败 %s: %v", worn.ConfigID, err)
+	}
+	s.pushEquipAppearance(pl)
 	s.pushEquipPhyDef(pl)
 	s.sendRoleSave(pl)
-	s.trace("equip move: 穿 %s → 槽 %d（换装退件 %t）client=%d",
-		item.ConfigID, slot, swapped != nil, pl.Conn1)
-}
-
-// equipTypeOf 目录 EquipType（无目录空串）。
-func equipTypeOf(s *Server, configID string) string {
-	if entry, ok := s.itemCatalogOf().Lookup(configID); ok {
-		return entry.EquipType
-	}
-	return ""
+	s.trace("equip move: 穿 %s（%s）→ 槽 %d（换装退件 %t）client=%d",
+		item.ConfigID, equipType, slot, swapped != nil, pl.Conn1)
 }
 
 // moveInsideBag 背包内挪格/叠堆：0x19 源 + 0x19+0x18 目标。

@@ -99,6 +99,10 @@ type RoleState struct {
 
 	BagItems []BagItem   `json:"bagItems,omitempty"` // 背包行（分类页 slot 1..90）
 	Equips   []EquipItem `json:"equips,omitempty"`   // 装备行（纸娃娃 View1 槽位 1..52）
+	// EquipsSeeded 初始布衣种子闸（omitempty 下「功能上线前旧档」与
+	//「玩家主动全脱」的 Equips 都缺席——建号/补建置位一次，此后全脱
+	// 不再复穿）。
+	EquipsSeeded bool `json:"equipsSeeded,omitempty"`
 
 	// ---- 邮件域（2433 线 letterEntry/Java Letter 精简口径；行帧=记录表
 	// RecvLetterRec 0x11 行，entergen/mailrecords.go 编码）----
@@ -154,6 +158,38 @@ type EquipItem struct {
 
 // bagSlotMax 背包分类页容量（90 格，2433 线 freeBagSlot 口径）。
 const bagSlotMax = 90
+
+// StarterEquips 初始布衣三件（官服初始号 view1 真机口径：穿着进场，
+// cloth/pants/shoes (b|g)0001，ItemType 141/142/143、PhyDef 每件 +6）。
+// UniqueID 官方形状 {roleUID}-001-{unix}-{序}，跨穿脱/存档稳定。
+func StarterEquips(sex int, roleUID string, nowUnix int64) []EquipItem {
+	suffix := "b"
+	if sex == 2 {
+		suffix = "g"
+	}
+	rows := []struct {
+		slot      int
+		part      string
+		itemType  int
+		equipType string
+	}{
+		{3, "cloth", 141, "Cloth"},
+		{4, "pants", 142, "Pants"},
+		{8, "shoes", 143, "Shoes"},
+	}
+	equips := make([]EquipItem, 0, len(rows))
+	for i, row := range rows {
+		equips = append(equips, EquipItem{
+			Slot:      row.slot,
+			ConfigID:  row.part + "_" + suffix + "0001",
+			ItemType:  row.itemType,
+			EquipType: row.equipType,
+			Seq:       int64(i + 1),
+			UID:       fmt.Sprintf("%s-001-%d-%04d", roleUID, nowUnix, i+1),
+		})
+	}
+	return equips
+}
 
 // NextItemSeq 物品行身份分配（max+1，0 起步；入包/穿戴跨表移动携带）。
 func (s *RoleState) NextItemSeq() int64 {

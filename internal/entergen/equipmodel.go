@@ -140,3 +140,41 @@ func EquipSlotPropName(slot int) string {
 		return ""
 	}
 }
+
+// wornSlotModel 槽上已穿件的模型（空槽/无映射 → 空串——外观 0x10 的
+// 可选通道：空值跳过保持客户端当前值，2433 线 appearanceFrame 同款）。
+// 帽件模型映射未定版（穿帽暂仍显发型，见 EquipSlotModel 注释）。
+func wornSlotModel(state *rolestate.RoleState, slot int) string {
+	part := bodyPartOfSlot(slot)
+	if part == "" {
+		return ""
+	}
+	sexChar := bodySexChar(state.Sex)
+	for _, equip := range state.Equips {
+		if equip.Slot == slot && strings.HasPrefix(equip.ConfigID, part+"_") {
+			return clothSeriesModel(sexChar, part, bodySeriesOfConfig(equip.ConfigID))
+		}
+	}
+	return ""
+}
+
+// EquipAppearanceProps 穿/脱后的外观 0x10 属性组（2433 线 appearanceFrame
+// 方言）：ShowEquipType 恒写 + 已穿槽位模型（空槽跳过）+ 武器三属性恒写
+//（空串=显式收武器；空手 ActionSet 回 1h 基线——F 抓包方言）。
+func EquipAppearanceProps(state *rolestate.RoleState) []IndexedProperty {
+	props := []IndexedProperty{
+		{Index: playerIdx("ShowEquipType"), Name: "ShowEquipType", Value: ByteValue(0)},
+	}
+	for _, slot := range []int{EquipSlotCloth, EquipSlotPants, EquipSlotShoes} {
+		if model := wornSlotModel(state, slot); model != "" {
+			name := EquipSlotPropName(slot)
+			props = append(props, IndexedProperty{Index: playerIdx(name), Name: name, Value: StringValue(model)})
+		}
+	}
+	props = append(props,
+		IndexedProperty{Index: playerIdx("Weapon"), Name: "Weapon", Value: StringValue("")},
+		IndexedProperty{Index: playerIdx("ShotWeapon"), Name: "ShotWeapon", Value: StringValue("")},
+		IndexedProperty{Index: playerIdx("ActionSet"), Name: "ActionSet", Value: StringValue("1h")},
+	)
+	return props
+}

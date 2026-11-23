@@ -151,8 +151,13 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		return nil, err
 	}
 	frames = append(frames, empty...)
-	// 背包物品行（空容器族建视图之后逐行推送；空背包零帧——2433 线
-	// inventoryFrames 进场整推口径）。
+	// 纸娃娃行 + 背包物品行（空容器族建视图之后逐行推送；2433 线
+	// inventoryFrames 进场整推序：纸娃娃行先于背包行；空装备/空背包零帧）。
+	dollRows, err := EquipViewFrames(ctx.State)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, dollRows...)
 	bagItems, err := BagItemViewFrames(ctx.State)
 	if err != nil {
 		return nil, err

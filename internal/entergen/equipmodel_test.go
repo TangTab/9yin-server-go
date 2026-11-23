@@ -75,3 +75,65 @@ func TestEquipPhyDef(t *testing.T) {
 		t.Fatalf("三件布衣 PhyDef = %d want 18", got)
 	}
 }
+
+// TestStarterEquipsSeeded 建号种子：0x0D 全 001 族 + PhyDef 18（官服
+// 初始号穿着进场口径）+ 登录纸娃娃行（view1 行号=槽位）。
+func TestStarterEquipsSeeded(t *testing.T) {
+	state := rolestate.RoleState{Sex: 2}
+	state.Equips = rolestate.StarterEquips(2, "test-uid", 1795442540)
+	if len(state.Equips) != 3 {
+		t.Fatalf("种子行数 = %d", len(state.Equips))
+	}
+	for slot, want := range map[int]string{
+		EquipSlotCloth: `obj\char\g_jianghu001\g_cloth001`,
+		EquipSlotPants: `obj\char\g_jianghu001\g_pants001`,
+		EquipSlotShoes: `obj\char\g_jianghu001\g_shoes001`,
+	} {
+		if got := EquipSlotModel(&state, slot); got != want {
+			t.Fatalf("slot %d = %q want %q", slot, got, want)
+		}
+	}
+	if got := EquipPhyDef(&state); got != 18 {
+		t.Fatalf("种子 PhyDef = %d want 18", got)
+	}
+	rows, err := EquipViewFrames(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 3 {
+		t.Fatalf("纸娃娃行数 = %d", len(rows))
+	}
+	for _, row := range rows {
+		if row[0] != 0x18 {
+			t.Fatalf("行 op = %#x", row[0])
+		}
+		view := int(row[1]) | int(row[2])<<8
+		if view != 1 {
+			t.Fatalf("行视图 = %d want 1", view)
+		}
+	}
+}
+
+// TestEquipAppearanceProps 外观 0x10 属性组：已穿槽位带模型、空槽跳过、
+// 武器三属性恒写 + ActionSet 回 1h 基线。
+func TestEquipAppearanceProps(t *testing.T) {
+	state := &rolestate.RoleState{Sex: 1, Equips: []rolestate.EquipItem{
+		{Slot: EquipSlotShoes, ConfigID: "shoes_b0001", EquipType: "Shoes"},
+	}}
+	props := EquipAppearanceProps(state)
+	found := map[string]string{}
+	for _, prop := range props {
+		if prop.Value.Text != "" {
+			found[prop.Name] = prop.Value.Text
+		}
+	}
+	if found["Shoes"] != `obj\char\b_jianghu001\b_shoes001` {
+		t.Fatalf("Shoes = %q", found["Shoes"])
+	}
+	if _, has := found["Cloth"]; has {
+		t.Fatalf("空槽 Cloth 不应下发")
+	}
+	if found["ActionSet"] != "1h" {
+		t.Fatalf("ActionSet = %q", found["ActionSet"])
+	}
+}
