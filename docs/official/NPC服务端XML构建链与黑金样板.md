@@ -32,7 +32,8 @@ heijin_backup 留存）。五点结论：
 | 输入 | 来源 |
 | --- | --- |
 | 模板+摆放 | `F:\Game\Online\9yin\9yin-server-go\resources\modern\share\`（客户端解压资源：npc/npcconfig TSV + creator/npc_creator XML） |
-| 战斗模板 | `F:\Game\Online\9yin\9yin-server-go2\Res\bak\ini\Task\npctemplate.tab`（GBK TSV，1 行头，6272 行） |
+| 任务域 | 同根 `share/task/task/<域>/*.txt`（客户端任务域树 15 域 + `share/task` 根级散表；2 行头，GBK/UTF-8 混排）——2026-11-23 晚起取代 BGserverCJ 2014 服务端 Task 树（见下「任务域」） |
+| 战斗模板 | 同根 `share/task/npctemplate*.tab`（GBK TSV，1 行头，6272 行；与 go2 `Res\bak\ini\Task` 同字节） |
 
 产物（服务端 XML，`testdata/ini` 与 `go2 Res/ini` 两处同源已投）：
 
@@ -40,27 +41,57 @@ heijin_backup 留存）。五点结论：
 ini/Npc/NpcConfig/<组>/<表>.xml    NPC 模板（行带 FightID=PowerNo）
 ini/Npc/NpcTemplate.xml            战斗模板（npctemplate.tab 逐行转换，6272 行）
 ini/Scene/<场景>/npc_creator.xml   每场景摆放（406 场景）
+ini/Quest/<域>/<域>.xml            任务域表（Task/StoryTaskList/SubFunction/
+                                   HuntList/CollectList/UseItemList/
+                                   InteractiveList/Question/RefreshMonster/
+                                   Convoy/Convoypoint/Special/Choose/
+                                   TaskItem/Prize）+ 根级 task_config/
+                                   CharEffect/xxx_type_ID.xml
 ```
 
 再生成命令（2026-11-22 起两个输入源均可传参，缺省探测链自动命中本机
-部署路径——零参数直接 `go run ./tools/npcgen` 亦可）：
+部署路径——零参数直接 `go run ./tools/npcgen` 亦可；`-scenes-out`/`-text-out`
+指临时目录可免无关产物的行尾 churn）：
 
 ```
 go run ./tools/npcgen -in F:\Game\Online\9yin\9yin-server-go\resources\modern ^
-  -npctemplate F:\Game\Online\9yin\9yin-server-go2\Res\bak\ini\Task ^
-  -out testdata\ini\Npc -scenes-out testdata\ini\Scene
+  -out testdata\ini\Npc -scenes-out testdata\ini\Scene -verify
 ```
 
 输入参数：
 
 | flag | 语义 | 缺省探测链 |
 | --- | --- | --- |
-| `-in` | 客户端解压资源根（模板+摆放） | `NINEYIN_MODERN` > 仓库兄弟目录 > `F:\...\9yin-server-go\resources\modern` |
-| `-npctemplate` | 战斗模板源：**npctemplate.tab 文件 / 所在目录 / `npctemplate*.tab` glob 三态**；多档合并（主档优先、同 ID 首档胜出、npctemplate2.tab 空壳 warning 跳过） | `-tasks` 目录 > `F:\...\9yin-server-go2\Res\bak\ini\Task` |
-| `-tasks` | 任务域数据根（Task/ 子目录；缺席自动跳过任务域转换） | `NINEYIN_TASKS` > 仓库兄弟目录 |
+| `-in` | 客户端解压资源根（模板+摆放+任务域） | `NINEYIN_MODERN` > 仓库兄弟目录 > `F:\...\9yin-server-go\resources\modern` |
+| `-npctemplate` | 战斗模板源：**npctemplate.tab 文件 / 所在目录 / `npctemplate*.tab` glob 三态**；多档合并（主档优先、同 ID 首档胜出、npctemplate2.tab 空壳 warning 跳过） | `<modern>/share/task` > `F:\...\9yin-server-go2\Res\bak\ini\Task` |
 
 最近一次构建基线：76 表 77394 行（唯一 ID 77093）/ 405 场景 268507 摆放
-（孤儿 705）/ 战斗模板 6272 行 / verify 483 文件回读一致。
+（孤儿 705）/ 战斗模板 6272 行 / 任务域 15 域 + 3 散表（主表 15435 行、
+77 列并集）/ verify 502 文件回读一致。
+
+### 任务域（客户端 share/task → ini/Quest，2026-11-23 晚）
+
+客户端 `share/task/task/task_*.txt` 是任务主表正典：任务 ID 与客户端文案键、
+官服 0x29 记录帧同一体系（引导链 1340→…→1648 逐项对拍吻合）。转换要点
+（`tools/npcgen/tasks.go`）：
+
+- **域归属按列键签名**：列头须齐含 ID + 该域公共键才算本域——目录里混有
+  错置档（`storytasklist/task_zx_lyg_01.txt` 是主表档、
+  `interactivelist/prize_23n_kyf_001.txt` 是奖励档），按签名挡在域外并记入
+  报告 `skipped`。目录内 `task_index_file.ini` 清单已过期（53 档未登记却带
+  4730 个独有任务），不作文件集依据，全部 `.txt` 入表。
+- **列并集合并**：同域各档列头不统一（主表 83 种列头变体，43~59 列），输出
+  列取并集（首见序）、行按列键对齐；列键裁首尾空白，拼写变体
+  （`TimeLimitLenghtEx`/`TimeLimitLengthEx`、`ReputationLimite`）原样保留
+  不合并。同 ID 多行全部保留（StoryTaskList 多段剧情、SubFunction 多步骤）。
+- **主表 Title 回填显示文本**：源表 `Title` 列是过期设计期备注（与客户端
+  文案七成不一致），输出 `Title` 改存 `TitleId` 键在 stringtask 文案表的
+  解析值（与 TaskText.xml 同一份键值表；多步任务共用标题键、TitleId 留空
+  回落 `title_<ID>`）；无文案留空——装载链据此不入目录（509 个）。
+- **源表瑕疵只记不改**：重复列取首见、无名列丢弃、超列宽行截断，逐域记入
+  报告 `notes`（如 SubFunction 有 1 行两步粘在一行，后一步丢失）。
+- 旧 `-tasks` flag / `NINEYIN_TASKS` 环境变量 / BGserverCJ 转换路径已移除；
+  BG 专属的 `task002.xml`（主表旧快照）随之删除，装载链不再合并它。
 
 ## 三、联查键实证（FightID == npctemplate ID）
 
@@ -96,6 +127,13 @@ frame.go    2433 帧配方：0x0D（63B 头 + OrderedProperties + 官方 16-prop
   （Fixed/WeaponName/FixedBeHitAct/SelfForceID，无 Photo/CursorShape/
   MPRatio/karma 族）；RotatePara 缺省 "0.0,1.000,0.0"；整数值按 0x09 表
   条目线型定宽；判别开关 `NINEYIN_NPC_RESOURCE_OVERRIDE`（全同模型实验）。
+
+- 2026-11-24 增两列直通：`Character`（善恶参数）/ `KarmaLevel`（地位评分）进
+  NpcConfig——NPC 对话「赠送物品/侠恶查询」通用行的门控依据
+  （fssoloworld npcKarmaDialog：仅两列满足 Character 有值且 KarmaLevel≥1
+  的 NPC 发，见《NPC任务绑定与引导流任务协议定版.md》§3.5）。npcfeed 0x28
+  尾部常量族按同名读取，入表后这两个字段按模板真值下发（原恒 1/3；客户端
+  关系界面读本地 npcconfig，不依赖服务端下发的值）。
 
 ### 真机定案：MaxVisuals=AddObject 注册闸（2026-11-22）
 

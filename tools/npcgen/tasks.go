@@ -1,19 +1,26 @@
-// tasks.go BGserverCJ 任务域与战斗 NPC 模板转换。
+// tasks.go 客户端任务域与战斗 NPC 模板转换。
 //
-// 源（-tasks 指向 task 根，缺省仓库兄弟目录 九阴真经ol\task）：
-//   - Task/<域>/<前缀>_*.txt   任务各域表（GBK，2 行头：类型+列键；按
-//     main/copy/sch 分档，同域合并去重）——HuntList 杀怪、CollectList 采集、
-//     Convoy 押镖、Prize 奖励、StoryTaskList 剧情等 12 域
-//   - Task/xxx_type_ID.txt     根级散表
-//   - task002.txt              主表旧快照（UTF-8 BOM，37 列；与 Task 树
-//     ID 互补，单独立档不合并）
-//   - task_config.txt          字段字典（含中文枚举说明）
-//   - CharEffect.txt           人物特效表（列键为中文，XML 合法保留）
-//   - npctemplate.tab          战斗 NPC 模板（6273 行，1 行头）
+// 源（-in 资源根下的 share/task——客户端自己在用的任务域树）：任务 ID 与
+// 客户端文案键（title_<ID>/context_<ID>…）、官服 0x29 记录帧同一体系（引导链
+// 1340→1347→…→1648 的 NPC/后继任务逐项对拍吻合）。2026-11-23 起取代
+// BGserverCJ 2014 服务端 Task 树——同一 ID 体系的旧快照：其 4156 任务只
+// 覆盖本表的 2886 个同号 ID（引导链等 12549 个任务缺席，1270 个 ID 本表
+// 已无），同号任务的 NPC/链与步骤行也大面积漂移。
+//   - task/<域>/<前缀>_*.txt   15 个任务域表（GBK/UTF-8 自适应，2 行头：
+//     类型+列键）。同域各档列头不统一（主表 83 种列头变体）——按列键并集
+//     合并、行按列键对齐；列头须齐含域列键签名才归属本域（挡错置档）。
+//     目录内 task_index_file.ini 清单已过期（53 档未登记却带 4730 个独有
+//     任务），不作文件集依据。
+//   - task_config.txt            字段字典（含中文枚举说明）
+//   - chareffect.txt             人物特效表（列键为中文，XML 合法保留）
+//   - task/xxx_type_id.txt       根级散表
+//   - npctemplate*.tab           战斗 NPC 模板（-npctemplate，缺省同目录）
 //
-// 这些表本身就是服务端词汇（BGserverCJ 引擎侧），与黑金档无对应关系，
-// 不做跨词汇映射：列名原样透传，空 cell 省略，ID 置首。任务表的 NpcId
-// 引用（如 monv040100）解析到本工具生成的 NpcConfig 树。
+// 这些表本身就是服务端词汇（FsGame 引擎侧 ini/Quest 同构），不做跨词汇
+// 映射：列名原样透传（2 行头表的列键裁首尾空白），空 cell 省略，ID 置首。
+// 主表 Title 列是设计期备注（与客户端文案七成不一致），输出改存 TitleId
+// 键解析出的显示文本，解析不到留空——装载链据此把客户端无文案的任务挡在
+// 任务行外。任务表的 NpcId/AcceptNpc 引用解析到本工具生成的 NpcConfig 树。
 package main
 
 import (
@@ -29,7 +36,8 @@ import (
 )
 
 // loadTabTable 读 2 行头（类型+列键）或 1 行头（仅列键）的 TAB 表。
-// 编码自适应（GBK / UTF-8 BOM）；尾部空列键裁剪；短行补齐；全空行跳过。
+// 编码自适应（GBK / UTF-8 BOM）；2 行头表的列键裁首尾空白；尾部空列键裁剪；
+// 短行补齐、长行截断（计入 Truncated）；全空行跳过。
 func loadTabTable(path string, headerRows int) (*npcTable, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -69,6 +77,9 @@ func loadTabTable(path string, headerRows int) (*npcTable, error) {
 		if err != nil {
 			return nil, fmt.Errorf("读列键行: %w", err)
 		}
+		for i := range columns {
+			columns[i] = strings.TrimSpace(columns[i])
+		}
 		t.Columns = columns
 	}
 	// 尾部空列键裁剪（HuntList 等表头尾带空 TAB 段）。
@@ -104,6 +115,13 @@ func loadTabTable(path string, headerRows int) (*npcTable, error) {
 		if len(record) < width {
 			record = append(record, make([]string, width-len(record))...)
 		} else if len(record) > width {
+			// 行尾空占位列是排版常态；只有多余字段带值才算截断丢数据。
+			for _, extra := range record[width:] {
+				if strings.TrimSpace(extra) != "" {
+					t.Truncated++
+					break
+				}
+			}
 			record = record[:width]
 		}
 		t.Rows = append(t.Rows, record)
@@ -134,155 +152,319 @@ func genPassThroughTable(t *npcTable) []byte {
 	return w.Bytes()
 }
 
+// questDomain 一个任务域：客户端目录名 → 输出目录名（沿用既有产物命名）。
+type questDomain struct {
+	Client string   // share/task/task 下的客户端目录名
+	Server string   // 输出目录与文件名 Quest/<Server>/<Server>.xml
+	Keys   []string // 列键签名：列头齐含才归属本域
+}
+
+// questDomains 任务域清单（输出序）。Keys 取该域全部列头变体的公共键——
+// 错置档（storytasklist/ 内的主表档、interactivelist/ 内的奖励档）列头
+// 不含签名，按此挡在域外。
+var questDomains = []questDomain{
+	{"task", "Task", []string{"TitleId", "ContextId", "AcceptNpc", "SubmitNpc"}},
+	{"storytasklist", "StoryTaskList", []string{"NpcID", "contextId", "titleId", "TaskID"}},
+	{"subfunction", "SubFunction", []string{"Type", "TypeID"}},
+	{"huntlist", "HuntList", []string{"NpcId", "Count", "TaskID"}},
+	{"collectlist", "CollectList", []string{"ItemId", "NpcId"}},
+	{"useitemlist", "UseItemList", []string{"ItemID", "ProCount"}},
+	{"interactivelist", "InteractiveList", []string{"NpcId", "DialogID"}},
+	{"question", "Question", []string{"QuestionNpc", "QuestionID"}},
+	{"refreshmonster", "RefreshMonster", []string{"MonsterID"}},
+	{"convoy", "Convoy", []string{"NpcId", "PathID"}},
+	{"convoypoint", "Convoypoint", []string{"Xpoint", "Zpoint"}},
+	{"special", "Special", []string{"SpecialType"}},
+	{"choose", "Choose", []string{"ChooseNpc"}},
+	{"taskitem", "TaskItem", []string{"ItemId", "IsGive"}},
+	{"prize", "Prize", []string{"Faculty", "CapitalType1"}},
+}
+
+// questRootTables 任务域根级散表 → 输出文件名（沿用既有产物命名）。
+var questRootTables = []struct{ Source, Output string }{
+	{"task_config.txt", "task_config.xml"}, // 字段字典
+	{"chareffect.txt", "CharEffect.xml"},   // 人物特效表
+	{"task/xxx_type_id.txt", "xxx_type_ID.xml"},
+}
+
 // domainReport 一个任务域的转换统计。
 type domainReport struct {
-	Name      string   `json:"name"`
-	Files     int      `json:"files"`
+	Name      string   `json:"name"`   // 输出域名
+	Client    string   `json:"client"` // 客户端目录名
+	Files     int      `json:"files"`  // 入表档数
 	Rows      int      `json:"rows"`
-	RepeatIDs int      `json:"repeat_ids"` // 同 ID 多行数（剧情步骤/分档变体，全部保留不去重）
+	Columns   int      `json:"columns"`              // 并集列数
+	RepeatIDs int      `json:"repeat_ids"`           // 同 ID 多行数（剧情步骤/分档变体，全部保留不去重）
+	TitleText int      `json:"title_text,omitempty"` // 主表 Title 解析到客户端文案的行数（仅 task 域）
+	Skipped   []string `json:"skipped,omitempty"`    // 未入表档与原因
 	Notes     []string `json:"notes,omitempty"`
 }
 
-// sortDomainFiles 域内档序：_main_ 主档优先（主档是权威版本），其余按
-// 文件名字典序。
-func sortDomainFiles(paths []string) {
-	score := func(p string) int {
-		if strings.Contains(filepath.Base(p), "_main_") {
-			return 0
-		}
-		return 1
-	}
-	sort.SliceStable(paths, func(i, j int) bool { return score(paths[i]) < score(paths[j]) })
+// mergeAudit 一次同域合并的审计面。
+type mergeAudit struct {
+	Files   int      // 入表档数
+	Repeats int      // 同 ID 多行数
+	Skipped []string // 未入表档与原因
+	Notes   []string // 源表瑕疵（重复列/无名列/截断行）
 }
 
-// mergeDomainFiles 同域分档合并：主档序在前，全部行保留——同 ID 多行是
-// 合法形态（StoryTaskList 一条任务多段剧情、SubFunction 多段子功能），
-// 按 ID 去重会吞步骤。返回合并表与同 ID 多行计数（仅统计）。
-func mergeDomainFiles(paths []string) (*npcTable, []string, int, error) {
-	merged := &npcTable{}
-	seen := map[string]int{}
-	var warnings []string
-	repeats := 0
+// mergeDomainFiles 同域各档合并为一张表：列取各档列键并集（首见序），行按
+// 列键对齐（缺列留空）。同 ID 多行全部保留不去重——是合法形态（StoryTaskList
+// 一条任务多段剧情、SubFunction 多段子功能）。返回合并表（nil＝域内无
+// 有效表）。
+func mergeDomainFiles(domain questDomain, paths []string) (*npcTable, *mergeAudit) {
+	audit := &mergeAudit{}
+	var sources []*npcTable
+	nameless, duplicateColumnsCount, truncated := 0, 0, 0
+	var namelessExample, duplicateExample string
 	for _, p := range paths {
-		t, err := loadTabTable(p, 2)
-		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("跳过 %s: %v", filepath.Base(p), err))
+		if info, err := os.Stat(p); err == nil && info.Size() == 0 {
+			audit.Skipped = append(audit.Skipped, filepath.Base(p)+"（空档）")
 			continue
 		}
-		if len(merged.Columns) == 0 {
-			merged.Columns = t.Columns
-			merged.Types = t.Types
-			merged.Source = t.Source
+		t, err := loadTabTable(p, 2)
+		if err != nil {
+			audit.Skipped = append(audit.Skipped, fmt.Sprintf("%s（%v）", filepath.Base(p), err))
+			continue
 		}
 		first := t.firstIndex()
-		idIdx, hasID := first["ID"]
+		if _, hasID := first["ID"]; !hasID || !hasColumnKeys(first, domain.Keys) {
+			audit.Skipped = append(audit.Skipped, fmt.Sprintf("%s（错置档：列头无 ID/%s 域签名）", filepath.Base(p), domain.Client))
+			continue
+		}
+		sources = append(sources, t)
+		audit.Files++
+		if blanks := countBlanks(t.Columns); blanks > 0 {
+			nameless += blanks
+			namelessExample = filepath.Base(p)
+		}
+		if dups := len(t.Columns) - len(first); dups > 0 {
+			duplicateColumnsCount += dups
+			duplicateExample = fmt.Sprintf("%s：%s", filepath.Base(p), strings.Join(duplicateColumnNames(t), "、"))
+		}
+		truncated += t.Truncated
+	}
+	if len(sources) == 0 {
+		return nil, audit
+	}
+	if nameless > 0 {
+		audit.Notes = append(audit.Notes, fmt.Sprintf("无名列 %d 个（值丢弃，如 %s）", nameless, namelessExample))
+	}
+	if duplicateColumnsCount > 0 {
+		audit.Notes = append(audit.Notes, fmt.Sprintf("重复列 %d 处（取首见，如 %s）", duplicateColumnsCount, duplicateExample))
+	}
+	if truncated > 0 {
+		audit.Notes = append(audit.Notes, fmt.Sprintf("超列宽截断行 %d（多余字段丢弃）", truncated))
+	}
+
+	// 列并集（首见序）；声明类型取首见该列的档。
+	merged := &npcTable{}
+	index := make(map[string]int, 256)
+	for _, t := range sources {
+		for i, name := range t.Columns {
+			if name == "" {
+				continue
+			}
+			if _, seen := index[name]; seen {
+				continue
+			}
+			index[name] = len(merged.Columns)
+			merged.Columns = append(merged.Columns, name)
+			declared := ""
+			if i < len(t.Types) {
+				declared = t.Types[i]
+			}
+			merged.Types = append(merged.Types, declared)
+		}
+	}
+	// 行按列键对齐；同名列取首见（与输出取舍一致）。
+	idIdx := index["ID"]
+	seen := map[string]int{}
+	for _, t := range sources {
+		first := t.firstIndex()
 		for _, row := range t.Rows {
-			merged.Rows = append(merged.Rows, row)
-			if hasID && idIdx < len(row) && row[idIdx] != "" {
-				seen[row[idIdx]]++
-				if seen[row[idIdx]] > 1 {
-					repeats++
+			cells := make([]string, len(merged.Columns))
+			for i, name := range t.Columns {
+				if name == "" || first[name] != i || i >= len(row) {
+					continue
+				}
+				cells[index[name]] = row[i]
+			}
+			merged.Rows = append(merged.Rows, cells)
+			if id := cells[idIdx]; id != "" {
+				seen[id]++
+				if seen[id] > 1 {
+					audit.Repeats++
 				}
 			}
 		}
 	}
-	if len(merged.Columns) == 0 {
-		return nil, warnings, repeats, errors.New("域内无可解析表")
-	}
-	return merged, warnings, repeats, nil
+	return merged, audit
 }
 
-// convertQuest 任务域转换主入口：Task/ 子目录各并一档，根级散表单档。
+// hasColumnKeys 列头是否齐含签名键。
+func hasColumnKeys(first map[string]int, keys []string) bool {
+	for _, key := range keys {
+		if _, ok := first[key]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// countBlanks 列键中段的无名列数（尾部空列键已裁剪）。
+func countBlanks(columns []string) int {
+	n := 0
+	for _, name := range columns {
+		if name == "" {
+			n++
+		}
+	}
+	return n
+}
+
+// duplicateColumnNames 同名列清单（列键×出现次数，字典序）。
+func duplicateColumnNames(t *npcTable) []string {
+	counts := map[string]int{}
+	for _, name := range t.Columns {
+		if name != "" {
+			counts[name]++
+		}
+	}
+	var out []string
+	for name, n := range counts {
+		if n > 1 {
+			out = append(out, fmt.Sprintf("%s×%d", name, n))
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// resolveTaskTitle 主表 Title 改存显示文本：源表 Title 列是设计期备注（与
+// 客户端文案七成不一致），显示名以 TitleId 键在 stringtask 文案表的解析为
+// 准（多步任务共用一个标题键；TitleId 留空回落 title_<ID>）；解析不到留
+// 空。返回解析到文案的行数。
+func resolveTaskTitle(t *npcTable, texts map[string]string) int {
+	first := t.firstIndex()
+	titleIdx, hasTitle := first["Title"]
+	if !hasTitle {
+		return 0
+	}
+	titleIDIdx, hasTitleID := first["TitleId"]
+	resolved := 0
+	for _, row := range t.Rows {
+		key := ""
+		if hasTitleID && titleIDIdx < len(row) {
+			key = strings.TrimSpace(row[titleIDIdx])
+		}
+		if key == "" {
+			key = "title_" + strings.TrimSpace(row[first["ID"]])
+		}
+		text := ""
+		if texts != nil {
+			text = strings.TrimSpace(texts[key])
+		}
+		if text != "" {
+			resolved++
+		}
+		row[titleIdx] = text
+	}
+	return resolved
+}
+
+// convertQuest 任务域转换主入口（<modern>/share/task）：task/ 下各域目录并
+// 一档，根级散表单档。texts 为 stringtask 文案表（主表 Title 解析用）。
 // 返回域统计与全部输出（路径→期望行数，供 verify）。
-func convertQuest(tasksDir, questOut string) ([]domainReport, map[string]int, []string, error) {
+func convertQuest(taskRoot string, texts map[string]string, questOut string) ([]domainReport, map[string]int, []string, error) {
 	domains := []domainReport{}
 	written := map[string]int{}
 	var warnings []string
 
-	taskRoot := filepath.Join(tasksDir, "Task")
-	entries, err := os.ReadDir(taskRoot)
+	taskDir := filepath.Join(taskRoot, "task")
+	entries, err := os.ReadDir(taskDir)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("npcgen: 读 %s: %w", taskRoot, err)
+		return nil, nil, nil, fmt.Errorf("npcgen: 读 %s: %w", taskDir, err)
 	}
-	var dirs, loose []string
+	byLower := make(map[string]*questDomain, len(questDomains))
+	for i := range questDomains {
+		byLower[strings.ToLower(questDomains[i].Client)] = &questDomains[i]
+	}
+	// 目录名大小写以磁盘为准，域序按 questDomains。
+	diskName := map[string]string{} // 小写目录名 → 磁盘目录名
 	for _, e := range entries {
-		if e.IsDir() {
-			dirs = append(dirs, e.Name())
-		} else if strings.EqualFold(filepath.Ext(e.Name()), ".txt") {
-			loose = append(loose, e.Name())
-		} else {
-			warnings = append(warnings, fmt.Sprintf("Task 根跳过非 txt: %s", e.Name()))
-		}
-	}
-	sort.Strings(dirs)
-	sort.Strings(loose)
-
-	for _, dir := range dirs {
-		var files []string
-		sub := filepath.Join(taskRoot, dir)
-		list, err := os.ReadDir(sub)
-		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("域 %s: %v", dir, err))
+		if !e.IsDir() {
 			continue
 		}
+		diskName[strings.ToLower(e.Name())] = e.Name()
+		if _, known := byLower[strings.ToLower(e.Name())]; !known {
+			warnings = append(warnings, fmt.Sprintf("任务域未识别，跳过: task/%s", e.Name()))
+		}
+	}
+	for i := range questDomains {
+		domain := &questDomains[i]
+		name, ok := diskName[strings.ToLower(domain.Client)]
+		if !ok {
+			warnings = append(warnings, fmt.Sprintf("任务域目录缺席: task/%s", domain.Client))
+			continue
+		}
+		sub := filepath.Join(taskDir, name)
+		list, err := os.ReadDir(sub)
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("npcgen: 读 %s: %w", sub, err)
+		}
+		var files []string
 		for _, e := range list {
 			if !e.IsDir() && strings.EqualFold(filepath.Ext(e.Name()), ".txt") {
 				files = append(files, filepath.Join(sub, e.Name()))
 			}
 		}
 		sort.Strings(files)
-		if len(files) == 0 {
+		merged, audit := mergeDomainFiles(*domain, files)
+		if merged == nil {
+			warnings = append(warnings, fmt.Sprintf("任务域 %s 无可解析表", name))
 			continue
 		}
-		sortDomainFiles(files)
-		merged, dwarns, repeats, err := mergeDomainFiles(files)
-		warnings = append(warnings, dwarns...)
-		if err != nil {
-			domains = append(domains, domainReport{Name: dir, Notes: []string{err.Error()}})
-			continue
+		report := domainReport{
+			Name: domain.Server, Client: name, Files: audit.Files,
+			Rows: len(merged.Rows), Columns: len(merged.Columns),
+			RepeatIDs: audit.Repeats, Skipped: audit.Skipped, Notes: audit.Notes,
 		}
-		outPath := filepath.Join(questOut, dir, dir+".xml")
+		if domain.Client == "task" {
+			report.TitleText = resolveTaskTitle(merged, texts)
+		}
+		outPath := filepath.Join(questOut, domain.Server, domain.Server+".xml")
 		if err := writeGenerated(outPath, genPassThroughTable(merged)); err != nil {
 			return nil, nil, nil, err
 		}
 		written[outPath] = countIDRows(merged)
-		domains = append(domains, domainReport{Name: dir, Files: len(files), Rows: written[outPath], RepeatIDs: repeats})
+		domains = append(domains, report)
+	}
+	if _, ok := written[filepath.Join(questOut, "Task", "Task.xml")]; !ok {
+		return nil, nil, nil, fmt.Errorf("npcgen: 任务主表无可解析行（%s/task/task）", taskRoot)
 	}
 
-	// Task/ 根级散表（xxx_type_ID.txt 等）。
-	for _, name := range loose {
-		t, err := loadTabTable(filepath.Join(taskRoot, name), 2)
-		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("跳过 %s: %v", name, err))
-			continue
-		}
-		outPath := filepath.Join(questOut, strings.TrimSuffix(name, filepath.Ext(name))+".xml")
-		if err := writeGenerated(outPath, genPassThroughTable(t)); err != nil {
-			return nil, nil, nil, err
-		}
-		written[outPath] = countIDRows(t)
-		domains = append(domains, domainReport{Name: strings.TrimSuffix(name, filepath.Ext(name)), Files: 1, Rows: written[outPath]})
-	}
-
-	// task 根级：task002.txt（主表旧快照，与 Task 树互补不合并）、
-	// task_config.txt（字段字典）、CharEffect.txt（特效表）。
-	for name, headerRows := range map[string]int{"task002.txt": 2, "task_config.txt": 2, "CharEffect.txt": 2} {
-		path := filepath.Join(tasksDir, name)
+	// 根级散表（字段字典/特效表/xxx_type_ID）。
+	for _, table := range questRootTables {
+		path := filepath.Join(taskRoot, filepath.FromSlash(table.Source))
 		if _, err := os.Stat(path); err != nil {
-			warnings = append(warnings, fmt.Sprintf("根级表缺失: %s", name))
+			warnings = append(warnings, fmt.Sprintf("根级表缺失: %s", table.Source))
 			continue
 		}
-		t, err := loadTabTable(path, headerRows)
+		t, err := loadTabTable(path, 2)
 		if err != nil {
-			warnings = append(warnings, fmt.Sprintf("跳过 %s: %v", name, err))
+			warnings = append(warnings, fmt.Sprintf("跳过 %s: %v", table.Source, err))
 			continue
 		}
-		outPath := filepath.Join(questOut, strings.TrimSuffix(name, filepath.Ext(name))+".xml")
+		outPath := filepath.Join(questOut, table.Output)
 		if err := writeGenerated(outPath, genPassThroughTable(t)); err != nil {
 			return nil, nil, nil, err
 		}
 		written[outPath] = countIDRows(t)
-		domains = append(domains, domainReport{Name: strings.TrimSuffix(name, filepath.Ext(name)), Files: 1, Rows: written[outPath]})
+		domains = append(domains, domainReport{
+			Name: strings.TrimSuffix(table.Output, filepath.Ext(table.Output)), Client: table.Source,
+			Files: 1, Rows: written[outPath], Columns: len(t.Columns),
+		})
 	}
 	return domains, written, warnings, nil
 }

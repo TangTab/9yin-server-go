@@ -3,7 +3,8 @@
 // testdata/ini/Text/TaskText.xml（服务端方言，ID=串键）。
 // 任务表引用的 title_<id>/context_<id>/CanAcceptMenu_<id>/target_<id>/
 // story_<id>_<n> 等串键都在这两个目录里（textfiles.ini 只登记单文件
-// 域，任务串按档拆目录不在其中）。
+// 域，任务串按档拆目录不在其中）。同一份键值表也供任务主表 Title 解析
+// （tasks.go resolveTaskTitle）——两处取值必须同源。
 //
 // npcTalkFiles NPC 对话框文案散档（text/chineses 根级单文件，key=value
 // 同方言）→ NpcTalk.xml：m5 对话标题键 task_<ConfigID>（form_talk_data
@@ -20,9 +21,9 @@ import (
 	"strings"
 )
 
-// convertTaskText 扫描两个任务串目录，合并为单档 XML。
-// 返回（行数, 键冲突数, 告警）。
-func convertTaskText(textRoot, textOut string) (int, int, []string, error) {
+// collectTaskText 扫描两个任务串目录，合并为键 → 值（首见胜）。
+// 返回（键值表, 读入档数, 键冲突数, 告警）。
+func collectTaskText(textRoot string) (map[string]string, int, int, []string, error) {
 	dirs := []string{"stringtask_normal", "stringtask_special"}
 	entries := map[string]string{} // 键 → 值（首见胜）
 	conflicts := 0
@@ -50,23 +51,9 @@ func convertTaskText(textRoot, textOut string) (int, int, []string, error) {
 		}
 	}
 	if len(entries) == 0 {
-		return 0, conflicts, warnings, fmt.Errorf("npcgen: 任务串目录无内容 %s", textRoot)
+		return nil, files, conflicts, warnings, fmt.Errorf("npcgen: 任务串目录无内容 %s", textRoot)
 	}
-	w := newObjectWriter()
-	keys := make([]string, 0, len(entries))
-	for k := range entries {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		w.AddProperty([][2]string{{"ID", k}, {"Text", entries[k]}})
-	}
-	outPath := filepath.Join(textOut, "TaskText.xml")
-	if err := writeGenerated(outPath, w.Bytes()); err != nil {
-		return 0, conflicts, warnings, err
-	}
-	_ = files
-	return len(entries), conflicts, warnings, nil
+	return entries, files, conflicts, warnings, nil
 }
 
 // npcTalkFiles NPC 对话框文案散档清单（text/chineses 根级，按重要度序；
@@ -80,14 +67,12 @@ func convertNpcTalk(textRoot, textOut string) (int, int, []string, error) {
 	entries := map[string]string{} // 键 → 值（首见胜）
 	conflicts := 0
 	var warnings []string
-	read := 0
 	for _, name := range npcTalkFiles {
 		path := filepath.Join(textRoot, name)
 		if _, err := os.Stat(path); err != nil {
 			warnings = append(warnings, fmt.Sprintf("对话散档缺失 %s: %v", name, err))
 			continue
 		}
-		read++
 		if err := readIDres(path, entries, &conflicts); err != nil {
 			warnings = append(warnings, fmt.Sprintf("跳过 %s: %v", name, err))
 		}
@@ -95,21 +80,24 @@ func convertNpcTalk(textRoot, textOut string) (int, int, []string, error) {
 	if len(entries) == 0 {
 		return 0, conflicts, warnings, fmt.Errorf("npcgen: NPC 对话散档无内容 %s", textRoot)
 	}
-	w := newObjectWriter()
+	if err := writeTextTable(filepath.Join(textOut, "NpcTalk.xml"), entries); err != nil {
+		return 0, conflicts, warnings, err
+	}
+	return len(entries), conflicts, warnings, nil
+}
+
+// writeTextTable 键值表 → XML（ID=串键，Text=文本，键字典序）。
+func writeTextTable(path string, entries map[string]string) error {
 	keys := make([]string, 0, len(entries))
 	for k := range entries {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
+	w := newObjectWriter()
 	for _, k := range keys {
 		w.AddProperty([][2]string{{"ID", k}, {"Text", entries[k]}})
 	}
-	outPath := filepath.Join(textOut, "NpcTalk.xml")
-	if err := writeGenerated(outPath, w.Bytes()); err != nil {
-		return 0, conflicts, warnings, err
-	}
-	_ = read
-	return len(entries), conflicts, warnings, nil
+	return writeGenerated(path, w.Bytes())
 }
 
 // readIDres 解析单个 .idres（key=value 行；UTF-8 BOM / GBK 自适应；行内

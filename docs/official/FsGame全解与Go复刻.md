@@ -389,13 +389,15 @@ internal/fsgame/questmods.go  // 四期新增（任务/条件引擎/成就三模
                       complete——参数校验串 object/int 定案）
 ```
 
-配置真档——**2026-11-20 切九阴真档**（黑金三表 Quest/QuestCriteria/Award.xml
-已移 heijin_backup 留作对照）：Task 树 + task002.xml 互补合并（4413 任务，
-task002 补独有 598）经
+配置真档——**2026-11-20 切九阴真档，2026-11-23 晚改由客户端 share/task 树
+生成**（黑金三表 Quest/QuestCriteria/Award.xml 已移 heijin_backup 留作
+对照）：Task.xml 主表（15435 任务，Title 为 TitleId 解析的客户端显示文本；
+BGserverCJ 2014 旧快照与 task002.xml 已退役）经
 questnineyin.go 合成引擎词汇——SubFunction 接线（Type=步骤域、TypeID=步骤行、
 Order=序）把 HuntList/CollectList/UseItemList/InteractiveList/Question 五步骤域
 合成 CriteriaList（子模板按任务号升序确定性重编号 1..N，qcID 是 word 且九阴
-步骤行跨域撞号）；story 域逐段成对话子模板按 Order 门控顺序播放；convoy 域
+步骤行跨域撞号）；story 域逐段成对话子模板按 Order 门控顺序播放（源表续段行
+NpcID 留空，沿用组内上一行 NPC）；convoy 域
 占位子模板（CriteriaType 留空不被事件面误推，物化 ConvoyNpc 走护送运行时）；
 奖励由 Task.TaskItemList→TaskItem（IsGive=0）合成（AwardID=任务号自指，Exp/
 Money=0——九阴修为来自杀怪 FacultyExp 面）；文案 ini/Text/TaskText.xml（npcgen

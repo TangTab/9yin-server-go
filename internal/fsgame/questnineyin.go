@@ -1,10 +1,11 @@
-// questnineyin.go 九阴任务域配置装载（BGserverCJ 侧数据，npcgen 生成的
-// testdata/ini/Quest/**.xml）→ 黑金复刻引擎词汇（Quests/Criteria 两表）。
+// questnineyin.go 九阴任务域配置装载（npcgen 由客户端 share/task 生成的
+// testdata/ini/Quest/**.xml——任务 ID 与客户端文案键同一体系）→ 黑金复刻
+// 引擎词汇（Quests/Criteria 两表）。
 //
 // 数据模型对齐（与黑金三表 Quest/QuestCriteria/Award 的差异）：
 //
-//	Task.xml + task002.xml  任务主表互补快照（Task 树优先，task002 补
-//	                       独有 ID 合并）；九阴无独立子模板表——
+//	Task.xml                任务主表（Title 已按 TitleId 解析为客户端显示
+//	                       文本）；九阴无独立子模板表——
 //	SubFunction             接线表：ID=任务ID、Type=步骤域、TypeID=步骤行
 //	                       ID、Order=步骤序，一条任务多行
 //	HuntList/CollectList/   步骤域行（ID 域内唯一、跨域撞号，经 SubFunction
@@ -30,16 +31,16 @@
 //	useitem  → 7 用物（ItemID=ItemID，MaxCount=ProCount）
 //	interact → 4 对话（InterNpc=NpcId）
 //	question → 4 对话（InterNpc=QuestionNpc）
-//	story    → 4 对话（每行一段剧情：InterNpc=StoryTaskList.NpcID；
-//	           同 TypeID 多行=多段对话，各成一条子模板，按 Order 顺序
-//	           推进——advanceByType 的 talk 面对同任务剧情段门控，一次
-//	           对话只推最前未完成段）
+//	story    → 4 对话（每行一段剧情：InterNpc=StoryTaskList 该组行的 NPC
+//	           （源表只在首段行写 NpcID，续段行沿用组内上一行）；同 TypeID
+//	           多行=多段对话，各成一条子模板，按 Order 顺序推进——
+//	           advanceByType 的 talk 面对同任务剧情段门控，一次对话只推
+//	           最前未完成段）
 //	convoy   → 占位子模板（CriteriaType 留空：不被事件面误推，完成走
 //	           cmd 934 通用推进面/未来护送运行时——物化 ConvoyNpc 沿
 //	           PathID 走到终点后推进；NpcId/PathID/SceneID 溯源随行，
 //	           护送 NPC 在 NpcConfig/NpcTask_ConvoyNpc 的命中校验入统计）
-//	special/#REF! → 不合成（special 全为 TypeID=-1 占位；#REF! 坏值），
-//	           仅统计。
+//	special/choose → 不合成（引擎侧无对应子模板类型，仅统计；#REF! 坏值同）。
 package fsgame
 
 import (
@@ -60,8 +61,7 @@ var stepDomain = map[string]string{
 
 // nineyinQuestStats 装载统计（Tracef/排障面）。
 type nineyinQuestStats struct {
-	Tasks        int // 主表合并后任务数
-	Task002Only  int // task002 补入的独有任务
+	Tasks        int // 主表任务数
 	SubFunctions int // SubFunction 总行
 	WithSteps    int // 有可推进步骤（CriteriaList 非空）的任务
 	Synthesized  int // 合成子模板数
@@ -92,38 +92,23 @@ func loadNineyinQuests(resourcePath string) (*nineyinQuestData, error) {
 	}
 	quests, criteria, stats := out.Quests, out.Criteria, &out.Stats
 
-	// 1. 主表合并：Task 树优先，task002 补独有。
-	taskSources := []struct {
-		path    string
-		onlyNew bool
-	}{
-		{path: "ini/Quest/Task/Task.xml"},
-		{path: "ini/Quest/task002.xml", onlyNew: true},
+	// 1. 主表。
+	taskRows, err := loadPropRows(resourcePath, "ini/Quest/Task/Task.xml")
+	if err != nil {
+		return nil, err
 	}
-	for _, src := range taskSources {
-		rows, err := loadPropRows(resourcePath, src.path)
-		if err != nil {
-			return nil, err
+	for _, row := range taskRows {
+		id := row["ID"]
+		if id == "" {
+			continue
 		}
-		for _, row := range rows {
-			id := row["ID"]
-			if id == "" {
-				continue
-			}
-			if _, exists := quests[id]; exists && src.onlyNew {
-				continue
-			}
-			if src.onlyNew {
-				stats.Task002Only++
-			}
-			quests[id] = nineyinTaskRow(row)
-			// NPC → 任务号索引（任务侧声明）。
-			if npc := row["AcceptNpc"]; npc != "" {
-				out.NpcAccept[npc] = append(out.NpcAccept[npc], id)
-			}
-			if npc := row["SubmitNpc"]; npc != "" {
-				out.NpcSubmit[npc] = append(out.NpcSubmit[npc], id)
-			}
+		quests[id] = nineyinTaskRow(row)
+		// NPC → 任务号索引（任务侧声明）。
+		if npc := row["AcceptNpc"]; npc != "" {
+			out.NpcAccept[npc] = append(out.NpcAccept[npc], id)
+		}
+		if npc := row["SubmitNpc"]; npc != "" {
+			out.NpcSubmit[npc] = append(out.NpcSubmit[npc], id)
 		}
 	}
 	stats.Tasks = len(quests)
@@ -163,9 +148,32 @@ func loadNineyinQuests(resourcePath string) (*nineyinQuestData, error) {
 	}
 	storyByID := map[string][]map[string]string{}
 	for _, row := range storyRows {
-		if row["ID"] != "" {
-			storyByID[row["ID"]] = append(storyByID[row["ID"]], row)
+		id := row["ID"]
+		if id == "" {
+			continue
 		}
+		// 源表只在首段行写 NpcID：续段行沿用组内上一行的 NPC。空行（无
+		// contextId）不成段；与组内已有行完全相同的行是跨档复制重复，不
+		// 重复成段（否则同一段要对两次话）。
+		if row["NpcID"] == "" {
+			if prev := storyByID[id]; len(prev) > 0 {
+				row["NpcID"] = prev[len(prev)-1]["NpcID"]
+			}
+		}
+		if row["contextId"] == "" {
+			continue
+		}
+		repeated := false
+		for _, prev := range storyByID[id] {
+			if prev["NpcID"] == row["NpcID"] && prev["contextId"] == row["contextId"] {
+				repeated = true
+				break
+			}
+		}
+		if repeated {
+			continue
+		}
+		storyByID[id] = append(storyByID[id], row)
 	}
 	// 护送域与护送 NPC 配置命中集（NpcConfig 侧 best-effort：缺档只影响
 	// 统计，不阻断任务装载）。
@@ -288,8 +296,8 @@ func loadNineyinQuests(resourcePath string) (*nineyinQuestData, error) {
 	}
 
 	// 5. 奖励合成：Task.TaskItemList → TaskItem 行（独立 ID 空间）。
-	// 九阴 Prize 域为空壳，经验/货币不在任务表（修为来自杀怪 FacultyExp
-	// 面），Exp/Money 置 0；给予物取 IsGive=0（无需上交的奖励行，
+	// 经验/货币/物品奖励在 Prize 域（Prize.xml 已随 npcgen 出档，接线
+	// 待做），此处 Exp/Money 置 0；给予物取 IsGive=0（无需上交的奖励行，
 	// IsGive=1 是接取时给、交时按 back 回收的任务道具——由接取面发放，
 	// 不进交任务奖励）。
 	taskItems, err := loadPropRows(resourcePath, "ini/Quest/TaskItem/TaskItem.xml")

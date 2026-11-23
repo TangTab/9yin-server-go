@@ -1,12 +1,13 @@
 package taskdata
 
-// questxml.go 服务端任务域 XML 装载（BGserverCJ 侧 ini/Quest，tools/npcgen
-// 产物——与 fsgame 九阴任务域同源数据）：
+// questxml.go 服务端任务域 XML 装载（<root>/ini/Quest，tools/npcgen 由
+// 客户端 share/task 任务域树生成——任务 ID 与客户端文案键/官服 0x29 记录
+// 帧同一体系）：
 //
-//	Task/Task.xml + task002.xml   任务主表互补快照（Task 树优先，task002
-//	                              补独有 ID 合并）：Title 直存文本；
-//	                              AcceptNpc/SubmitNpc + 两侧 SceneID 给
-//	                              NPC↔任务绑定
+//	Task/Task.xml            任务主表（15 域）：Title 为 npcgen 按 TitleId
+//	                         解析出的客户端显示文本（无文案留空）；
+//	                         AcceptNpc/SubmitNpc + 两侧 SceneID 给
+//	                         NPC↔任务绑定
 //	SubFunction/SubFunction.xml   接线表：ID=任务 ID、Type=步骤域、
 //	                              TypeID=步骤行 ID（story 域 → StoryTaskList
 //	                              组 ID）
@@ -17,7 +18,8 @@ package taskdata
 //
 // 与快照链（share/task txt + idres 文本派生 tasks.json）互为数据源：
 // 目录装载优先走本链（XML 为正典），快照作旧部署回退。无 Title 的主表行
-// 不计入目录——与快照链「绑定且已加载文本的任务」同语义。
+// 不计入目录——客户端没有该任务的文案，任务行发了也无处渲染——与快照链
+// 「绑定且已加载文本的任务」同语义。
 
 import (
 	"bytes"
@@ -37,49 +39,52 @@ import (
 // （SubFunction × StoryTaskList）缺档降级为无剧情绑定——剧情行是增强
 // 下发，缺数据不阻塞任务行。
 func LoadQuestXMLDir(dir string) (*Catalog, error) {
+	rows, err := loadQuestPropRows(filepath.Join(dir, "Task", "Task.xml"))
+	if err != nil {
+		return nil, err
+	}
 	tasks := make(map[int]Task)
 	var bindings []Binding
-	for _, src := range []struct {
-		rel     string
-		onlyNew bool
-	}{
-		{rel: filepath.Join("Task", "Task.xml")},
-		{rel: "task002.xml", onlyNew: true},
-	} {
-		rows, err := loadQuestPropRows(filepath.Join(dir, src.rel))
-		if err != nil {
-			return nil, err
+	// 链式接取目标集：被某任务 AutoAcceptID 指向的任务只随前序任务完成
+	// 接取（如 27509 随 1648），不算链根。
+	chainDriven := make(map[int]bool)
+	for _, row := range rows {
+		if next := iniInt(row["AutoAcceptID"]); next > 0 {
+			chainDriven[next] = true
 		}
-		for _, row := range rows {
-			id, err := strconv.Atoi(strings.TrimSpace(row["ID"]))
-			if err != nil || id <= 0 {
-				continue
-			}
-			if _, exists := tasks[id]; exists && src.onlyNew {
-				continue
-			}
-			title := strings.TrimSpace(row["Title"])
-			if title == "" {
-				continue // 无文本任务不入目录（task002 同 ID 行可后补）
-			}
-			tasks[id] = Task{ID: id, Title: title}
-			for _, side := range []struct{ npc, scene, source string }{
-				{row["AcceptNpc"], row["AcceptSceneID"], "quest-accept"},
-				{row["SubmitNpc"], row["SubmitSceneID"], "quest-submit"},
-			} {
-				if npc := strings.TrimSpace(side.npc); npc != "" {
-					bindings = append(bindings, Binding{
-						TaskID:      id,
-						NPCConfigID: npc,
-						SceneID:     strings.TrimSpace(side.scene),
-						Source:      side.source,
-					})
-				}
+	}
+	for _, row := range rows {
+		id, err := strconv.Atoi(strings.TrimSpace(row["ID"]))
+		if err != nil || id <= 0 {
+			continue
+		}
+		title := strings.TrimSpace(row["Title"])
+		if title == "" {
+			continue
+		}
+		tasks[id] = Task{
+			ID: id, Title: title,
+			AcceptMenuKey: strings.TrimSpace(row["CanAcceptMenu"]),
+			ChainRoot:     strings.TrimSpace(row["PreTaskLimit"]) == "" && !chainDriven[id],
+			AutoAcceptID:  iniInt(row["AutoAcceptID"]),
+			AutoSubmit:    strings.TrimSpace(row["AutoSubmit"]) == "1",
+		}
+		for _, side := range []struct{ npc, scene, source string }{
+			{row["AcceptNpc"], row["AcceptSceneID"], "quest-accept"},
+			{row["SubmitNpc"], row["SubmitSceneID"], "quest-submit"},
+		} {
+			if npc := strings.TrimSpace(side.npc); npc != "" {
+				bindings = append(bindings, Binding{
+					TaskID:      id,
+					NPCConfigID: npc,
+					SceneID:     strings.TrimSpace(side.scene),
+					Source:      side.source,
+				})
 			}
 		}
 	}
 	if len(tasks) == 0 {
-		return nil, fmt.Errorf("taskdata: %s 无任务主表行（Task/Task.xml）", dir)
+		return nil, fmt.Errorf("taskdata: %s 无带文案的任务主表行（Task/Task.xml）", dir)
 	}
 	if story, err := loadQuestStoryBindings(dir); err == nil {
 		bindings = append(bindings, story...)
@@ -90,6 +95,10 @@ func LoadQuestXMLDir(dir string) (*Catalog, error) {
 // loadQuestStoryBindings SubFunction（Type=story）× StoryTaskList 合成剧情
 // 段绑定：同组多行逐行成段（StoryID=组 ID，ContextID/TitleID/LeaveTextID
 // 同 txt 链词汇），行序即段序。
+//
+// 源表只在一组剧情的首段行写 NpcID，续段行留空——沿用组内上一行的 NPC；
+// 没有任何 NPC 的行（空行/残行）不成段。完全重复的行（跨档复制）由
+// Catalog 去重。
 func loadQuestStoryBindings(dir string) ([]Binding, error) {
 	storyRows, err := loadQuestPropRows(filepath.Join(dir, "StoryTaskList", "StoryTaskList.xml"))
 	if err != nil {
@@ -114,9 +123,12 @@ func loadQuestStoryBindings(dir string) ([]Binding, error) {
 		if err != nil || taskID <= 0 {
 			continue
 		}
+		npc := "" // 组内上一个带 NPC 的行
 		for _, row := range storyByID[strings.TrimSpace(sf["TypeID"])] {
-			npc := strings.TrimSpace(row["NpcID"])
-			if npc == "" {
+			if v := strings.TrimSpace(row["NpcID"]); v != "" {
+				npc = v
+			}
+			if npc == "" || strings.TrimSpace(row["contextId"]) == "" {
 				continue
 			}
 			bindings = append(bindings, Binding{

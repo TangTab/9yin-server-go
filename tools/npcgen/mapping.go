@@ -75,6 +75,13 @@ var columnBindings = map[string]binding{
 	"GuildFunc":    {Server: "GuildFunc"},
 	"GemGameNpcID": {Server: "GemGameNpcID"},
 
+	// ---- direct：NPC 业报列（源表中文列注释：善恶参数/地位评分——
+	// 2026-11-24 对话通用行门控定案：官服只对 Character 有值且 KarmaLevel≥1
+	// 的 NPC 发「赠送物品/侠恶查询」两行）。npcfeed 0x28 尾部常量族按同名
+	// 读取，入表后这两个字段按模板真值下发（原恒 1/3）。----
+	"Character":  {Server: "Character"},
+	"KarmaLevel": {Server: "KarmaLevel"},
+
 	// ---- rename：改名映射 ----
 	"PathID": {Server: "PathId", Kind: "rename", Note: "大小写对齐黑金档 PathId（巡逻路径 ID）"},
 	"FacultyExp": {Server: "Exp", Kind: "rename",

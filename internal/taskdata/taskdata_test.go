@@ -36,6 +36,31 @@ func TestParseTaskTextCollectsWhitelistedPrefixes(t *testing.T) {
 	}
 }
 
+func TestCatalogDerivesAcceptMenuKeyFromText(t *testing.T) {
+	// 旧 JSON 快照链只有文案：有接取文案的任务折算出接取键（可手动接取），
+	// 没有的留空（不可手动接取）；快照往返后稳定。
+	catalog := NewCatalog(map[int]Task{
+		75701: {CanAcceptMenu: "<font>拜入昆仑（可承接）</font>"},
+		75702: {Title: "无接取文案"},
+	}, nil, nil)
+	first, _ := catalog.TaskByID(75701)
+	second, _ := catalog.TaskByID(75702)
+	if first.AcceptMenuKey != "CanAcceptMenu_75701" || second.AcceptMenuKey != "" {
+		t.Fatalf("接取键折算 = %q / %q", first.AcceptMenuKey, second.AcceptMenuKey)
+	}
+	data, err := MarshalSnapshot(catalog.SnapshotAt(time.Unix(1700000000, 0).UTC()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := ParseSnapshot(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again, _ := parsed.TaskByID(75701); again.AcceptMenuKey != "CanAcceptMenu_75701" {
+		t.Fatalf("快照往返后接取键 = %q", again.AcceptMenuKey)
+	}
+}
+
 func TestParseTaskTextLaterEntryWins(t *testing.T) {
 	tasks := make(map[int]*Task)
 	CollectTaskText([]byte("title_100=甲\ntitle_100=乙\n"), tasks)
@@ -217,28 +242,69 @@ func TestLoadQuestXMLDir(t *testing.T) {
 	if catalog.Count() == 0 || catalog.BindingCount() == 0 {
 		t.Fatalf("目录为空: tasks=%d bindings=%d", catalog.Count(), catalog.BindingCount())
 	}
-	// 主表行直存文本；task002 补独有 ID（同 ID 不覆盖 Task 树）。
-	task, ok := catalog.TaskByID(24001)
-	if !ok || task.Title != "寻亲少年" {
-		t.Fatalf("task 24001 = %+v ok=%v（Title 应直存主表文本）", task, ok)
+	// 主表 Title 是 npcgen 按 TitleId 解析的客户端显示文本；客户端无文案的
+	// 任务（Title 留空）不入目录。
+	task, ok := catalog.TaskByID(1340)
+	if !ok || task.Title != "武林高手" {
+		t.Fatalf("task 1340 = %+v ok=%v（Title 应为 TitleId 解析的显示文本）", task, ok)
 	}
-	// AcceptNpc/SubmitNpc 双侧绑定（24001 仅 Submit、24002 仅 Accept）。
-	if tasks := catalog.TasksForNPC("WorldNpc00009"); len(tasks) < 2 || tasks[0].ID != 24001 || tasks[1].ID != 24002 {
-		t.Fatalf("WorldNpc00009 任务 = %+v, want 首两名 24001/24002", tasks)
+	if _, ok := catalog.TaskByID(103); ok {
+		t.Fatal("无文案任务 103 不应入目录")
 	}
-	// SubFunction(story)×StoryTaskList 剧情段：24003 → 组 4001 两段，
-	// 行序即段序，词汇同 txt 链。
-	segments := catalog.StoryBindingsFor("worldnpc00002", 24003)
-	if len(segments) != 2 {
-		t.Fatalf("24003 剧情段 = %+v, want 2 段", segments)
+	// 接取/链进字段（主表行带出）：1340 无接取文案（官服从不发它的接取
+	// 行）、链根（首谈即接）、剧情走完自动提交、提交后链式接取 1347；
+	// 1648 同为链根；27509 虽无前置但是 1648 的链式目标，不算链根。
+	for _, tc := range []struct {
+		id         int
+		acceptKey  string
+		chainRoot  bool
+		autoSubmit bool
+		autoNext   int
+	}{
+		{1340, "", true, true, 1347},
+		{1648, "", true, false, 27509},
+		{27509, "", false, false, 27510},
+		{81264, "CanAcceptMenu_81264", true, false, 0},
+	} {
+		got, ok := catalog.TaskByID(tc.id)
+		if !ok || got.AcceptMenuKey != tc.acceptKey || got.ChainRoot != tc.chainRoot ||
+			got.AutoSubmit != tc.autoSubmit || got.AutoAcceptID != tc.autoNext {
+			t.Fatalf("task %d 链字段 = %+v ok=%v, want key=%q root=%v autoSubmit=%v next=%d",
+				tc.id, got, ok, tc.acceptKey, tc.chainRoot, tc.autoSubmit, tc.autoNext)
+		}
 	}
-	for i, want := range []string{"story_24003_1", "story_24003_2"} {
-		seg := segments[i]
-		if seg.StoryID != "4001" || seg.ContextID != want || seg.TitleID != "storymenu_24003_"+strconv.Itoa(i+1) || seg.LeaveTextID != "9607" {
-			t.Fatalf("段 %d = %+v（want %s）", i, seg, want)
+	// 引导链 1340→1347→1341（官服 0x29 记录帧对拍）：主表 AcceptNpc/
+	// SubmitNpc 绑定到 NPC（接/交同 NPC 时两侧绑定按（NPC, 任务）去重为一）。
+	quests := questBindingsFor(catalog, "FunNpcBorn003031", 1340)
+	if len(quests) != 1 || quests[0].Source != "quest-accept" || quests[0].SceneID != "300" {
+		t.Fatalf("funnpcborn003031 的 1340 主表绑定 = %+v, want 一条带 AcceptSceneID", quests)
+	}
+	// SubFunction(story)×StoryTaskList 剧情段：1340 → 组 482 五段（引导抓包
+	// story_482_1..5），行序即段序，词汇同 txt 链。源表只在首段行写 NpcID，
+	// 续段行沿用——五段都应绑到 funnpcborn003031。
+	segments := catalog.StoryBindingsFor("funnpcborn003031", 1340)
+	if len(segments) != 5 {
+		t.Fatalf("1340 剧情段 = %+v, want 5 段", segments)
+	}
+	for i, seg := range segments {
+		n := strconv.Itoa(i + 1)
+		if seg.StoryID != "482" || seg.ContextID != "story_482_"+n || seg.TitleID != "storymenu_482_"+n || seg.LeaveTextID != "9607" {
+			t.Fatalf("段 %d = %+v", i, seg)
 		}
 	}
 	if _, err := LoadQuestXMLDir(filepath.Join(dir, "..", "NoQuest")); err == nil {
 		t.Fatal("缺 Task.xml 应报错")
 	}
+}
+
+// questBindingsFor 某 NPC 某任务的主表绑定（quest-accept/quest-submit），
+// 按目录行序。
+func questBindingsFor(catalog *Catalog, configID string, taskID int) []Binding {
+	var out []Binding
+	for _, binding := range catalog.BindingsForNPC(configID) {
+		if binding.TaskID == taskID && binding.Source != "storytasklist" {
+			out = append(out, binding)
+		}
+	}
+	return out
 }

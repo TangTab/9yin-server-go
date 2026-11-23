@@ -190,8 +190,8 @@ func (m *QuestModule) Init(k *Kernel) error {
 	return nil
 }
 
-// LoadResource 任务域配置装载——九阴任务域（BGserverCJ 侧，npcgen 生成的
-// ini/Quest/Task 树 + SubFunction 接线 + 步骤域 + TaskItem），经
+// LoadResource 任务域配置装载——九阴任务域（客户端 share/task 经 npcgen
+// 生成的 ini/Quest/Task 树 + SubFunction 接线 + 步骤域 + TaskItem），经
 // questnineyin.go 合成引擎词汇三表与 NPC 面；黑金三表（Quest/
 // QuestCriteria/Award.xml）已移 heijin_backup 留作对照。
 func (m *QuestModule) LoadResource(k *Kernel) error {
@@ -208,8 +208,8 @@ func (m *QuestModule) LoadResource(k *Kernel) error {
 		return err
 	}
 	s := data.Stats
-	k.Tracef("QuestModule: LoadResource 九阴任务 %d（task002 补 %d）/ 合成子模板 %d / 可推进任务 %d / 奖励行 %d / 文案 %d / 未映射类型 %d / 缺步骤 %d",
-		s.Tasks, s.Task002Only, s.Synthesized, s.WithSteps, s.AwardsBuilt, len(m.Texts), s.SkippedType, s.MissingStep)
+	k.Tracef("QuestModule: LoadResource 九阴任务 %d / 合成子模板 %d / 可推进任务 %d / 奖励行 %d / 文案 %d / 未映射类型 %d / 缺步骤 %d",
+		s.Tasks, s.Synthesized, s.WithSteps, s.AwardsBuilt, len(m.Texts), s.SkippedType, s.MissingStep)
 	return nil
 }
 

@@ -14,6 +14,7 @@ package taskdata
 import (
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -30,6 +31,23 @@ type Task struct {
 	UncompleteMenu string `json:"uncomplete_menu,omitempty"`
 	Complete       string `json:"complete,omitempty"`
 	Next           string `json:"next,omitempty"`
+
+	// 接取/链进字段（ini/Quest 任务主表行带出；旧 JSON 快照链只有文案，
+	// 接取键按 CanAcceptMenu 文案有无折算，其余为零值）。
+	//
+	// AcceptMenuKey 接取行文案键——空＝客户端没有接取文案，官服不发 100
+	// 接取行（多样本抓包实证 `100081264 CanAcceptMenu_81264 title_81264`
+	// 只出现在有该键的任务上），只能服务端自动接取：链首任务首谈即接、
+	// 前序任务提交后按 AutoAcceptID 链式接取。
+	AcceptMenuKey string `json:"accept_menu_key,omitempty"`
+	// ChainRoot 链根任务：无前置任务、无接取文案，且不是任何任务的
+	// AutoAcceptID 目标——服务端在首次对话时直接接取（官服引导链首环
+	// 1340、车夫的 1648 均属此类）。
+	ChainRoot bool `json:"chain_root,omitempty"`
+	// AutoAcceptID 本任务提交后服务端自动接取的任务。
+	AutoAcceptID int `json:"auto_accept_id,omitempty"`
+	// AutoSubmit 目标达成即自动提交（剧情任务＝剧情走完）。
+	AutoSubmit bool `json:"auto_submit,omitempty"`
 }
 
 // Binding 记录一条 NPC↔任务关联。Source 标记数据来源：
@@ -84,6 +102,9 @@ func NewCatalog(tasks map[int]Task, bindings []Binding, cites map[int]DramaCite)
 			continue
 		}
 		task.ID = id
+		if task.AcceptMenuKey == "" && task.CanAcceptMenu != "" {
+			task.AcceptMenuKey = "CanAcceptMenu_" + strconv.Itoa(id)
+		}
 		c.tasks[id] = task
 	}
 	seen := make(map[Binding]bool, len(bindings))

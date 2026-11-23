@@ -68,44 +68,45 @@ func TestFourthBatchAssemble(t *testing.T) {
 		}
 	}
 	qm := module2[*QuestModule](t, k, "QuestModule")
-	// 九阴真档（npcgen 生成）：22072 谷中考验。
-	if cfg := qm.Quests["22072"]; cfg == nil || cfg["Name"] != "谷中考验" ||
-		cfg["AcceptNpc"] != "WorldNpc01452" || cfg["preQuestList"] != "22070" {
-		t.Fatalf("九阴任务 22072 未装载: %v", qm.Quests["22072"])
+	// 客户端真档（npcgen 生成）：引导链 1347 武学之道（接/交
+	// funnpcborn003035，前置 1340）。
+	if cfg := qm.Quests["1347"]; cfg == nil || cfg["Name"] != "武学之道" ||
+		cfg["AcceptNpc"] != "funnpcborn003035" || cfg["preQuestList"] != "1340" {
+		t.Fatalf("九阴任务 1347 未装载: %v", qm.Quests["1347"])
 	}
-	// SubFunction 接线合成：24013 → hunter 4001 → monv040100×3。
-	cfg13 := qm.Quests["24013"]
-	if cfg13 == nil || cfg13["CriteriaList"] == "" {
-		t.Fatalf("24013 未合成步骤: %v", cfg13)
+	// SubFunction 接线合成：1341 营救村民 → hunter 522 → NpcBorn003011×1。
+	cfg41 := qm.Quests["1341"]
+	if cfg41 == nil || cfg41["CriteriaList"] == "" {
+		t.Fatalf("1341 未合成步骤: %v", cfg41)
 	}
 	hunted := false
-	for _, cid := range strings.Split(cfg13["CriteriaList"], ",") {
+	for _, cid := range strings.Split(cfg41["CriteriaList"], ",") {
 		if c := qm.Criteria[cid]; c != nil && c["CriteriaType"] == CriteriaKillNpc &&
-			c["InterNpc"] == "monv040100" && atoi32(c["MaxCount"]) == 3 {
+			c["InterNpc"] == "NpcBorn003011" && atoi32(c["MaxCount"]) == 1 {
 			hunted = true
 		}
 	}
 	if !hunted {
-		t.Fatalf("24013 杀怪子模板未合成: %v", cfg13["CriteriaList"])
+		t.Fatalf("1341 杀怪子模板未合成: %v", cfg41["CriteriaList"])
 	}
-	// 奖励合成：24241 勇闯挑灯崖 → TaskItem 1117（taskitem_7h×1，IsGive=0）。
-	if a := qm.Awards["24241"]; a == nil || a["DefaultItemList"] != "taskitem_7h,1" {
-		t.Fatalf("TaskItem 奖励未合成: %v", qm.Awards["24241"])
+	// 奖励合成：40452 宝物遗失 → TaskItem 10326（taskitem_81b×1，IsGive=0）。
+	if a := qm.Awards["40452"]; a == nil || a["DefaultItemList"] != "taskitem_81b,1" {
+		t.Fatalf("TaskItem 奖励未合成: %v", qm.Awards["40452"])
 	}
-	// 剧情/文案：22145 → story 3022 两段对话 @ WorldNpc06127；
-	// title_22072 文案（idres 版本）。
-	cfg145 := qm.Quests["22145"]
+	// 剧情/文案：84122 → interact + story 48882 两段对话 @ WorldNpc07050；
+	// title_1340 文案。
+	cfgS := qm.Quests["84122"]
 	story := 0
-	for _, cid := range strings.Split(cfg145["CriteriaList"], ",") {
-		if c := qm.Criteria[cid]; c != nil && c["StepType"] == "story" && c["InterNpc"] == "WorldNpc06127" {
+	for _, cid := range strings.Split(cfgS["CriteriaList"], ",") {
+		if c := qm.Criteria[cid]; c != nil && c["StepType"] == "story" && c["InterNpc"] == "WorldNpc07050" {
 			story++
 		}
 	}
 	if story != 2 {
-		t.Fatalf("22145 剧情子模板应 2 段: %d (%v)", story, cfg145["CriteriaList"])
+		t.Fatalf("84122 剧情子模板应 2 段: %d (%v)", story, cfgS["CriteriaList"])
 	}
-	if qm.TaskText("title_22072") != "另有隐情" {
-		t.Fatalf("任务文案未装载: %q", qm.TaskText("title_22072"))
+	if qm.TaskText("title_1340") != "武林高手" {
+		t.Fatalf("任务文案未装载: %q", qm.TaskText("title_1340"))
 	}
 	if txt := qm.TaskText("CanAcceptMenu_22001"); !strings.Contains(txt, "新的开始") {
 		t.Fatalf("菜单文案未装载: %q", txt)
@@ -133,13 +134,14 @@ func TestFourthBatchAssemble(t *testing.T) {
 	if k.GetGameObj(p).Record("QuestRecord") == nil || k.GetGameObj(p).Record("AchievementCompleted") == nil {
 		t.Fatal("任务/成就记录未随 includes 装载")
 	}
-	// 真档全闭环：接 2412 峨嵋剑阵（无前置）→ 各步骤推满 → 可提交。
-	cfg12 := qm.Quests["2412"]
+	// 真档全闭环：接 1340 武林高手（引导首环，无前置）→ 各步骤推满 →
+	// 可提交。
+	cfg12 := qm.Quests["1340"]
 	if cfg12 == nil || cfg12["CriteriaList"] == "" {
-		t.Fatalf("2412 未合成步骤: %v", cfg12)
+		t.Fatalf("1340 未合成步骤: %v", cfg12)
 	}
-	if !qm.AcceptQuest(k, p, 2412) {
-		t.Fatal("真档任务 2412 接取失败")
+	if !qm.AcceptQuest(k, p, 1340) {
+		t.Fatal("真档任务 1340 接取失败")
 	}
 	for _, cid := range strings.Split(cfg12["CriteriaList"], ",") {
 		c := qm.Criteria[cid]
@@ -149,40 +151,41 @@ func TestFourthBatchAssemble(t *testing.T) {
 		}
 		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
 	}
-	if !qm.SubmitQuest(k, p, 2412) {
-		t.Fatal("真档任务 2412 未达可提交")
+	if !qm.SubmitQuest(k, p, 1340) {
+		t.Fatal("真档任务 1340 未达可提交")
 	}
-	// NPC 面（任务侧索引）：22145 第一回——接 WorldNpc06008 / 交 WorldNpc06127。
-	if got := qm.AcceptableQuests(k, p, "WorldNpc06008"); !containsInt(got, 22145) {
-		t.Fatalf("WorldNpc06008 可接清单缺 22145: %v", got)
+	// NPC 面（任务侧索引）：84122 雷电身世——接 WorldNpc07049 / 交
+	// WorldNpc07050。
+	if got := qm.AcceptableQuests(k, p, "WorldNpc07049"); !containsInt(got, 84122) {
+		t.Fatalf("WorldNpc07049 可接清单缺 84122: %v", got)
 	}
-	if !qm.AcceptQuest(k, p, 22145) {
-		t.Fatal("真档任务 22145 接取失败")
+	if !qm.AcceptQuest(k, p, 84122) {
+		t.Fatal("真档任务 84122 接取失败")
 	}
-	if got := qm.AcceptableQuests(k, p, "WorldNpc06008"); containsInt(got, 22145) {
+	if got := qm.AcceptableQuests(k, p, "WorldNpc07049"); containsInt(got, 84122) {
 		t.Fatalf("接取后可接清单应去重: %v", got)
 	}
-	for _, cid := range strings.Split(qm.Quests["22145"]["CriteriaList"], ",") {
+	for _, cid := range strings.Split(qm.Quests["84122"]["CriteriaList"], ",") {
 		max := atoi32(qm.Criteria[cid]["MaxCount"])
 		if max <= 0 {
 			max = 1
 		}
 		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
 	}
-	if got := qm.SubmittableQuests(k, p, "WorldNpc06127"); !containsInt(got, 22145) {
-		t.Fatalf("WorldNpc06127 可交清单缺 22145: %v", got)
+	if got := qm.SubmittableQuests(k, p, "WorldNpc07050"); !containsInt(got, 84122) {
+		t.Fatalf("WorldNpc07050 可交清单缺 84122: %v", got)
 	}
-	// 剧情顺序播放：22145 的 interact 与 story 两段同 NPC（WorldNpc06127）
+	// 剧情顺序播放：84122 的 interact 与 story 两段同 NPC（WorldNpc07050）
 	// ——首次对话推 interact+story①（2 条），第二次只推 story②（1 条），
 	// 之后 0 条（Order 门控，不一次播完）。
 	p2, _ := k.CreateObject("player")
-	if !qm.AcceptQuest(k, p2, 22145) {
+	if !qm.AcceptQuest(k, p2, 84122) {
 		t.Fatal("剧情顺序用例接取失败")
 	}
 	qcm := module2[*QuestCriteriaModule](t, k, "QuestCriteriaModule")
 	talk := func() int {
 		before := len(qcm.Ops())
-		k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p2, VarList{"WorldNpc06127"})
+		k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p2, VarList{"WorldNpc07050"})
 		return len(qcm.Ops()) - before
 	}
 	for i, want := range []int{2, 1, 0} {
@@ -204,31 +207,31 @@ func containsInt(list []int32, want int32) bool {
 
 // TestQuestMenuFlow 对话菜单闭环（cmd 22）：OnSelect 建上下文 → 菜单接取
 // （NPC 门）→ 步骤推满 → 菜单提交（NPC 门）→ 默认奖励出口流水。
-// 用例 24241 勇闯挑灯崖（接 FuncNpc00003 / 交 WorldNpc00027，奖励
-// taskitem_7h×1）。
+// 用例 40452 宝物遗失（接 WorldNpc01437 / 交 WorldNpc01455，前置 40451，
+// 奖励 taskitem_81b×1）。
 func TestQuestMenuFlow(t *testing.T) {
 	k, _ := assemble4(t)
 	qm := module2[*QuestModule](t, k, "QuestModule")
 	p, _ := k.CreateObject("player")
-	qm.setRewarded(k, p, 24240) // 前置完成位
+	qm.setRewarded(k, p, 40451) // 前置完成位
 
 	menu := func(action, questID int32) {
 		k.DispatchIntCommand("player", 22, p, NullPersistID, VarList{action, questID})
 	}
 
 	// 错误 NPC 接取被拒（先对交任务 NPC 对话再试接）。
-	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc00027"})
-	menu(1, 24241)
-	if qm.IsQuestHaving(k, p, 24241) {
+	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc01455"})
+	menu(1, 40452)
+	if qm.IsQuestHaving(k, p, 40452) {
 		t.Fatal("非接取 NPC 的菜单接取未被拒")
 	}
 	// 正确 NPC：接取 → 步骤推满 → 提交（菜单，NPC 门过）→ 奖励流水。
-	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"FuncNpc00003"})
-	menu(1, 24241)
-	if !qm.IsQuestHaving(k, p, 24241) {
+	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc01437"})
+	menu(1, 40452)
+	if !qm.IsQuestHaving(k, p, 40452) {
 		t.Fatal("菜单接取失败")
 	}
-	for _, cid := range strings.Split(qm.Quests["24241"]["CriteriaList"], ",") {
+	for _, cid := range strings.Split(qm.Quests["40452"]["CriteriaList"], ",") {
 		c := qm.Criteria[cid]
 		max := atoi32(c["MaxCount"])
 		if max <= 0 {
@@ -236,9 +239,9 @@ func TestQuestMenuFlow(t *testing.T) {
 		}
 		qm.UpdateCriteria(k, p, atoi32(cid), max, true)
 	}
-	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc00027"})
-	menu(2, 24241)
-	if qm.IsQuestHaving(k, p, 24241) {
+	k.RunEvent("CommonNpc", "OnSelect", NullPersistID, p, VarList{"WorldNpc01455"})
+	menu(2, 40452)
+	if qm.IsQuestHaving(k, p, 40452) {
 		t.Fatal("菜单提交失败")
 	}
 	awardSeen := false
@@ -559,7 +562,7 @@ func TestAchievementLifecycle(t *testing.T) {
 // TestQuestMsgSync quest_msg 客户端同步（RecHook 双记录联动）：接取 →
 // 承接表 append + 进度表逐行 append；推满 → 承接表 modify（可提交）；
 // 提交 → 进度表逐行 remove + 承接表 remove；时限行随提交清除 + 九阴
-// TimeLimitLength 分钟单位（24272 书生的请求=5 分钟）。
+// TimeLimitLength 分钟单位（41514 乔装探秘=5 分钟，无前置）。
 func TestQuestMsgSync(t *testing.T) {
 	k, _ := assemble4(t)
 	qm := module2[*QuestModule](t, k, "QuestModule")
@@ -572,16 +575,15 @@ func TestQuestMsgSync(t *testing.T) {
 		msgs = append(msgs, qmsg{sub, args})
 	}
 	p, _ := k.CreateObject("player")
-	qm.setRewarded(k, p, 24270)
 	before := unixNow()
-	if !qm.AcceptQuest(k, p, 24272) {
-		t.Fatal("时限任务 24272 接取失败")
+	if !qm.AcceptQuest(k, p, 41514) {
+		t.Fatal("时限任务 41514 接取失败")
 	}
 	// 首条=承接表 append（op + row + 4 列行值）。
 	if msgs[0].sub != 1 || msgs[0].args.Int(0) != RecOpAdded || msgs[0].args.Int(1) != 0 || len(msgs[0].args) != 6 {
 		t.Fatalf("承接表 append 消息形状异常: %+v", msgs[0])
 	}
-	// 进度表 append 数 = 子模板数（24272=interact/hunter/interact 三步）。
+	// 进度表 append 数 = 子模板数（41514=useitem/interact/collect 三步）。
 	appends := 0
 	for _, m := range msgs {
 		if m.sub == 2 && m.args.Int(0) == RecOpAdded {
@@ -601,7 +603,7 @@ func TestQuestMsgSync(t *testing.T) {
 		t.Fatalf("时限 deadline=%d 不在 5 分钟窗内", deadline)
 	}
 	// 推满三步 → 末条=承接表 modify（转可提交）。
-	for _, cid := range strings.Split(qm.Quests["24272"]["CriteriaList"], ",") {
+	for _, cid := range strings.Split(qm.Quests["41514"]["CriteriaList"], ",") {
 		max := atoi32(qm.Criteria[cid]["MaxCount"])
 		if max <= 0 {
 			max = 1
@@ -611,8 +613,8 @@ func TestQuestMsgSync(t *testing.T) {
 	if last := msgs[len(msgs)-1]; last.sub != 1 || last.args.Int(0) != RecOpChanged {
 		t.Fatalf("推满后末条应为承接表 modify: %+v", last)
 	}
-	if !qm.SubmitQuest(k, p, 24272) {
-		t.Fatal("24272 提交失败")
+	if !qm.SubmitQuest(k, p, 41514) {
+		t.Fatal("41514 提交失败")
 	}
 	// 提交序：承接表 remove → 进度表倒序逐行 remove（clearCriteria）；
 	// 末条 sub=1 消息应为承接表 remove（无行值）。

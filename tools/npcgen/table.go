@@ -21,6 +21,10 @@ type npcTable struct {
 	Types    []string // 第 2 行：声明类型
 	Columns  []string // 第 3 行：英文列键
 	Rows     [][]string
+
+	// Truncated 超列宽被截断的行数（任务域 2 行头表审计用；NPC 模板表
+	// 头宽不一致即报错，恒 0）。
+	Truncated int
 }
 
 // firstIndex 列键 → 首次出现的列下标。同名列（WeaponName/FreeTalk/

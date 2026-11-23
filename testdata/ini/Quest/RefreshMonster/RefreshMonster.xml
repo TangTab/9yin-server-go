@@ -1,8 +1,596 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Object>
-	<Property ID="1001" MonsterID="monrv040300" RSceneID="1" RPosX="717" RPosY="-37" RPosZ="697" RLifeTime="300"/>
-	<Property ID="1002" MonsterID="monrv040300" RSceneID="1" RPosX="717" RPosY="-37" RPosZ="700" RLifeTime="300"/>
-	<Property ID="1003" MonsterID="monrm061600" RSceneID="10" RPosX="1098.4" RPosY="92.469" RPosZ="95" RLifeTime="300"/>
+	<Property ID="78805" MonsterID="npc_wokou" RSceneID="1" RPosX="574" RPosY="-37" RPosZ="624" RLifeTime="500"/>
+	<Property ID="16302"/>
+	<Property ID="18300" MonsterID="NpcClone003029" RSceneID="14" RPosX="580" RPosY="0" RPosZ="524" RLifeTime="600"/>
+	<Property ID="18301" MonsterID="NpcClone003029" RSceneID="14" RPosX="582" RPosY="0" RPosZ="528" RLifeTime="600"/>
+	<Property ID="18302" MonsterID="NpcClone003029" RSceneID="14" RPosX="577" RPosY="0" RPosZ="524" RLifeTime="600"/>
+	<Property ID="18303" MonsterID="NpcClone003031" RSceneID="14" RPosX="372" RPosY="0" RPosZ="785" RLifeTime="600"/>
+	<Property ID="18304" MonsterID="NpcClone003031" RSceneID="14" RPosX="370" RPosY="0" RPosZ="783" RLifeTime="600"/>
+	<Property ID="18305" MonsterID="NpcClone003031" RSceneID="14" RPosX="371" RPosY="0" RPosZ="780" RLifeTime="600"/>
+	<Property ID="18306" MonsterID="NpcClone003031" RSceneID="14" RPosX="375" RPosY="0" RPosZ="782" RLifeTime="600"/>
+	<Property ID="18307" MonsterID="NpcClone003031" RSceneID="14" RPosX="374" RPosY="0" RPosZ="781" RLifeTime="600"/>
+	<Property ID="18308" MonsterID="NpcClone003038" RSceneID="14" RPosX="757" RPosY="0" RPosZ="856" RLifeTime="600"/>
+	<Property ID="18309" MonsterID="NpcClone003039" RSceneID="14" RPosX="887" RPosY="61" RPosZ="671" RLifeTime="600"/>
+	<Property ID="18310" MonsterID="NpcClone003039" RSceneID="14" RPosX="879" RPosY="61" RPosZ="669" RLifeTime="600"/>
+	<Property ID="18311" MonsterID="NpcClone003040" RSceneID="14" RPosX="952" RPosY="46" RPosZ="67" RLifeTime="600"/>
+	<Property ID="18312" MonsterID="NpcClone003040" RSceneID="14" RPosX="951" RPosY="46" RPosZ="77" RLifeTime="600"/>
+	<Property ID="18313" MonsterID="NpcClone003041" RSceneID="14" RPosX="918" RPosY="28" RPosZ="122" RLifeTime="600"/>
+	<Property ID="18314" MonsterID="NpcClone003041" RSceneID="14" RPosX="920" RPosY="30" RPosZ="95" RLifeTime="600"/>
+	<Property ID="18315" MonsterID="NpcClone003041" RSceneID="14" RPosX="930" RPosY="28" RPosZ="100" RLifeTime="600"/>
+	<Property ID="18316" MonsterID="NpcClone003041" RSceneID="14" RPosX="932" RPosY="25" RPosZ="144" RLifeTime="600"/>
+	<Property ID="18317" MonsterID="NpcClone003046" RSceneID="14" RPosX="919" RPosY="0" RPosZ="108" RLifeTime="600"/>
+	<Property ID="24300" MonsterID="NpcClone009055" RSceneID="10" RPosX="485" RPosY="22" RPosZ="707" RLifeTime="600"/>
+	<Property ID="24301" MonsterID="NpcClone009055" RSceneID="10" RPosX="482" RPosY="22" RPosZ="712" RLifeTime="600"/>
+	<Property ID="24303" MonsterID="NpcClone009055" RSceneID="10" RPosX="480" RPosY="22" RPosZ="705" RLifeTime="600"/>
+	<Property ID="24305" MonsterID="NpcClone009056" RSceneID="10" RPosX="575" RPosY="-7" RPosZ="1126" RLifeTime="600"/>
+	<Property ID="24306" MonsterID="NpcClone009056" RSceneID="10" RPosX="580" RPosY="-7" RPosZ="1133" RLifeTime="600"/>
+	<Property ID="24307" MonsterID="NpcClone009056" RSceneID="10" RPosX="577" RPosY="-7" RPosZ="1130" RLifeTime="600"/>
+	<Property ID="28300"/>
+	<Property ID="40001" MonsterID="npcclone001052" RSceneID="ini\scene\born03_YanYuZhuang" RPosX="138" RPosY="48.3" RPosZ="754.5" RLifeTime="1800"/>
+	<Property ID="40410" MonsterID="NpcClone021041" RSceneID="48" RPosX="-762" RPosY="-23.09" RPosZ="1191" RLifeTime="60"/>
+	<Property ID="40411" MonsterID="NpcClone021041" RSceneID="48" RPosX="-762" RPosY="-23.09" RPosZ="1191" RLifeTime="60"/>
+	<Property ID="40204" MonsterID="NpcClone011060" RSceneID="6" RPosX="521" RPosY="17" RPosZ="251.3" RLifeTime="300"/>
+	<Property ID="40205" MonsterID="NpcClone011018" RSceneID="6" RPosX="521" RPosY="17" RPosZ="255" RLifeTime="300"/>
+	<Property ID="40206" MonsterID="NpcClone011060" RSceneID="6" RPosX="523" RPosY="17" RPosZ="245" RLifeTime="300"/>
+	<Property ID="40242" TaskID="2612"/>
+	<Property ID="40241" TaskID="2611"/>
+	<Property ID="40243" TaskID="2616"/>
+	<Property ID="10001"/>
+	<Property ID="10002"/>
+	<Property ID="10003"/>
+	<Property ID="10004"/>
+	<Property ID="10005"/>
+	<Property ID="10006"/>
+	<Property ID="10007"/>
+	<Property ID="10008"/>
+	<Property ID="10009"/>
+	<Property ID="10010"/>
+	<Property ID="10011"/>
+	<Property ID="10012"/>
+	<Property ID="10013"/>
+	<Property ID="10014"/>
+	<Property ID="10015"/>
+	<Property ID="10016"/>
+	<Property ID="10017"/>
+	<Property ID="10018"/>
+	<Property ID="10019"/>
+	<Property ID="10020"/>
+	<Property ID="10021"/>
+	<Property ID="10022"/>
+	<Property ID="10023"/>
+	<Property ID="10024"/>
+	<Property ID="10025"/>
+	<Property ID="10026"/>
+	<Property ID="10027"/>
+	<Property ID="10028"/>
+	<Property ID="10029"/>
+	<Property ID="10030"/>
+	<Property ID="10031"/>
+	<Property ID="10032"/>
+	<Property ID="10033"/>
+	<Property ID="10034"/>
+	<Property ID="10035"/>
+	<Property ID="10036"/>
+	<Property ID="10037"/>
+	<Property ID="10038"/>
+	<Property ID="10039"/>
+	<Property ID="10040"/>
+	<Property ID="10041"/>
+	<Property ID="10042"/>
+	<Property ID="10043"/>
+	<Property ID="10044"/>
+	<Property ID="10045"/>
+	<Property ID="10046"/>
+	<Property ID="10047"/>
+	<Property ID="10048"/>
+	<Property ID="10049"/>
+	<Property ID="10050"/>
+	<Property ID="10051"/>
+	<Property ID="10052"/>
+	<Property ID="10053"/>
+	<Property ID="10054"/>
+	<Property ID="10055"/>
+	<Property ID="10056"/>
+	<Property ID="10057"/>
+	<Property ID="10058"/>
+	<Property ID="10059"/>
+	<Property ID="10060"/>
+	<Property ID="10061"/>
+	<Property ID="10062"/>
+	<Property ID="10063"/>
+	<Property ID="10064"/>
+	<Property ID="10065"/>
+	<Property ID="10066"/>
+	<Property ID="10067"/>
+	<Property ID="10068"/>
+	<Property ID="10069"/>
+	<Property ID="10070"/>
+	<Property ID="10071"/>
+	<Property ID="10072"/>
+	<Property ID="10073"/>
+	<Property ID="10074"/>
+	<Property ID="10075"/>
+	<Property ID="10076"/>
+	<Property ID="10077"/>
+	<Property ID="10078"/>
+	<Property ID="10079"/>
+	<Property ID="10080"/>
+	<Property ID="10081"/>
+	<Property ID="10082"/>
+	<Property ID="10083"/>
+	<Property ID="10084"/>
+	<Property ID="10085"/>
+	<Property ID="10086"/>
+	<Property ID="10087"/>
+	<Property ID="10088"/>
+	<Property ID="10089"/>
+	<Property ID="10090"/>
+	<Property ID="10091"/>
+	<Property ID="10092"/>
+	<Property ID="10093"/>
+	<Property ID="10094"/>
+	<Property ID="10095"/>
+	<Property ID="10096"/>
+	<Property ID="10097"/>
+	<Property ID="10098"/>
+	<Property ID="10099"/>
+	<Property ID="10100"/>
+	<Property ID="10101"/>
+	<Property ID="10102"/>
+	<Property ID="10103"/>
+	<Property ID="10104"/>
+	<Property ID="10105"/>
+	<Property ID="10106"/>
+	<Property ID="10107"/>
+	<Property ID="10108"/>
+	<Property ID="10109"/>
+	<Property ID="10110"/>
+	<Property ID="10111"/>
+	<Property ID="10112"/>
+	<Property ID="10113"/>
+	<Property ID="10114"/>
+	<Property ID="10115"/>
+	<Property ID="7014" TaskID="48020"/>
+	<Property ID="7015" TaskID="48022"/>
+	<Property ID="7016" TaskID="48022"/>
+	<Property ID="7017" TaskID="48022"/>
+	<Property ID="7010" TaskID="48022"/>
+	<Property ID="8001" MonsterID="monrm010200" RSceneID="5" RPosX="5.6" RPosY="4.6" RPosZ="434" RLifeTime="300"/>
+	<Property ID="8002" MonsterID="monrm010200" RSceneID="5" RPosX="12" RPosY="3.9" RPosZ="430" RLifeTime="300"/>
+	<Property ID="8003" MonsterID="monrm010200" RSceneID="5" RPosX="16.4" RPosY="4.9" RPosZ="433.7" RLifeTime="300"/>
+	<Property ID="8004" MonsterID="monrm010300" RSceneID="5" RPosX="232.82" RPosY="66.91" RPosZ="-69.02" RLifeTime="300"/>
+	<Property ID="8005" MonsterID="monrm010400" RSceneID="5" RPosX="148.25" RPosY="2.73" RPosZ="142.62" RLifeTime="300"/>
+	<Property ID="8006" MonsterID="monrm010500" RSceneID="5" RPosX="28" RPosY="-2" RPosZ="116" RLifeTime="300"/>
+	<Property ID="8007" MonsterID="monrm010500" RSceneID="5" RPosX="43" RPosY="-2" RPosZ="118" RLifeTime="300"/>
+	<Property ID="8008" MonsterID="monrm010500" RSceneID="5" RPosX="32" RPosY="-2" RPosZ="122" RLifeTime="300"/>
+	<Property ID="8009" MonsterID="monrm010700" RSceneID="5" RPosX="357" RPosY="64.3" RPosZ="83.3" RLifeTime="300"/>
+	<Property ID="8010" MonsterID="monrm010800" RSceneID="5" RPosX="356" RPosY="64.3" RPosZ="85.7" RLifeTime="300"/>
+	<Property ID="8011" MonsterID="monrm010800" RSceneID="5" RPosX="345.8" RPosY="64.3" RPosZ="84.3" RLifeTime="300"/>
+	<Property ID="8012" MonsterID="monrm010800" RSceneID="5" RPosX="346" RPosY="28.5" RPosZ="263" RLifeTime="300"/>
+	<Property ID="9000"/>
+	<Property ID="9001"/>
+	<Property ID="9002"/>
+	<Property ID="9003"/>
+	<Property ID="9004"/>
+	<Property ID="9005"/>
+	<Property ID="9006"/>
+	<Property ID="9007"/>
+	<Property ID="9008"/>
+	<Property ID="9009"/>
+	<Property ID="9010"/>
+	<Property ID="9011"/>
+	<Property ID="9012"/>
+	<Property ID="9013"/>
+	<Property ID="9014"/>
+	<Property ID="9015"/>
+	<Property ID="9016"/>
+	<Property ID="9017"/>
+	<Property ID="9018"/>
+	<Property ID="9019"/>
+	<Property ID="9020"/>
+	<Property ID="9021"/>
+	<Property ID="9022"/>
+	<Property ID="9023"/>
+	<Property ID="9024"/>
+	<Property ID="9025"/>
+	<Property ID="9026"/>
+	<Property ID="9027"/>
+	<Property ID="9028"/>
+	<Property ID="9029"/>
+	<Property ID="9030"/>
+	<Property ID="9031"/>
+	<Property ID="9206" MonsterID="monrc023001" RSceneID="13" RPosX="352.84" RPosY="-152.11" RPosZ="1230.46" RLifeTime="300"/>
+	<Property ID="9207" MonsterID="monrc023001" RSceneID="13" RPosX="353.46" RPosY="-157.11" RPosZ="1240.55" RLifeTime="300"/>
+	<Property ID="9208" MonsterID="monrc023001" RSceneID="13" RPosX="358.66" RPosY="151.18" RPosZ="1222.22" RLifeTime="300"/>
+	<Property ID="9209" MonsterID="monrc023001" RSceneID="13" RPosX="356.53" RPosY="150.18" RPosZ="1210.15" RLifeTime="300"/>
+	<Property ID="9210" MonsterID="monrc023001" RSceneID="13" RPosX="354.08" RPosY="151.74" RPosZ="1218.15" RLifeTime="300"/>
+	<Property ID="9211" MonsterID="monrc023002" RSceneID="13" RPosX="352.21" RPosY="151.18" RPosZ="1222" RLifeTime="300"/>
+	<Property ID="9212" MonsterID="monrc023002" RSceneID="13" RPosX="358.66" RPosY="151.18" RPosZ="1222.22" RLifeTime="300"/>
+	<Property ID="9213" MonsterID="monrc023002" RSceneID="13" RPosX="356.53" RPosY="150.18" RPosZ="1210.15" RLifeTime="300"/>
+	<Property ID="9214" MonsterID="monrc023002" RSceneID="13" RPosX="354.08" RPosY="151.74" RPosZ="1218.15" RLifeTime="300"/>
+	<Property ID="9215" MonsterID="monrc023002" RSceneID="13" RPosX="352.21" RPosY="151.18" RPosZ="1222" RLifeTime="300"/>
+	<Property ID="9216" MonsterID="monrm063700" RSceneID="10" RPosX="398.11" RPosY="6" RPosZ="856.87" RLifeTime="300"/>
+	<Property ID="9217" MonsterID="monrm063700" RSceneID="10" RPosX="399" RPosY="8.4" RPosZ="850.27" RLifeTime="300"/>
+	<Property ID="9218" MonsterID="monrm063700" RSceneID="10" RPosX="398" RPosY="8.4" RPosZ="850.07" RLifeTime="300"/>
+	<Property ID="9219" MonsterID="monrm063800" RSceneID="10" RPosX="471.16" RPosY="96.75" RPosZ="416.26" RLifeTime="300"/>
+	<Property ID="9220" MonsterID="monrm063800" RSceneID="10" RPosX="474.82" RPosY="97.5" RPosZ="415.38" RLifeTime="300"/>
+	<Property ID="9221" MonsterID="monrm063800" RSceneID="10" RPosX="476.2" RPosY="97.5" RPosZ="415.58" RLifeTime="300"/>
+	<Property ID="9222" MonsterID="monrm063800" RSceneID="10" RPosX="475.15" RPosY="97.3" RPosZ="416.5" RLifeTime="300"/>
+	<Property ID="9223" MonsterID="monrm063800" RSceneID="10" RPosX="471" RPosY="97" RPosZ="411.4" RLifeTime="300"/>
+	<Property ID="9224" MonsterID="monrm050003" RSceneID="9" RPosX="800" RPosY="33.71" RPosZ="897.78" RLifeTime="300"/>
+	<Property ID="9225" MonsterID="monrm050003" RSceneID="9" RPosX="800.82" RPosY="33" RPosZ="896.1" RLifeTime="300"/>
+	<Property ID="9226" MonsterID="monrm050003" RSceneID="9" RPosX="800.54" RPosY="33" RPosZ="896.1" RLifeTime="300"/>
+	<Property ID="9227" MonsterID="monrm050003" RSceneID="9" RPosX="847.48" RPosY="35.97" RPosZ="863.63" RLifeTime="300"/>
+	<Property ID="9228" MonsterID="monrm050003" RSceneID="9" RPosX="846" RPosY="35.1" RPosZ="862.53" RLifeTime="300"/>
+	<Property ID="9229" MonsterID="monrm050003" RSceneID="9" RPosX="846.55" RPosY="35.97" RPosZ="862.53" RLifeTime="300"/>
+	<Property ID="9230" MonsterID="monrm050002" RSceneID="9" RPosX="630.14" RPosY="29.66" RPosZ="712.55" RLifeTime="300"/>
+	<Property ID="9231" MonsterID="monrm050002" RSceneID="9" RPosX="630.93" RPosY="29.55" RPosZ="710.88" RLifeTime="300"/>
+	<Property ID="9232" MonsterID="monrm050002" RSceneID="9" RPosX="630.33" RPosY="29.25" RPosZ="710.38" RLifeTime="300"/>
+	<Property ID="9233" MonsterID="monrf052001" RSceneID="22" RPosX="1369.23" RPosY="81.29" RPosZ="1056.24" RLifeTime="300"/>
+	<Property ID="9234" MonsterID="monrf052001" RSceneID="22" RPosX="1374.61" RPosY="81.65" RPosZ="1052.38" RLifeTime="300"/>
+	<Property ID="9235" MonsterID="monrf052001" RSceneID="22" RPosX="1367.69" RPosY="80.87" RPosZ="1051.49" RLifeTime="300"/>
+	<Property ID="9236" MonsterID="monrf052001" RSceneID="22" RPosX="1366.08" RPosY="80.89" RPosZ="1058.63" RLifeTime="300"/>
+	<Property ID="9237" MonsterID="monrf052001" RSceneID="22" RPosX="1368.55" RPosY="80.9" RPosZ="1054.66" RLifeTime="300"/>
+	<Property ID="9238" MonsterID="monrf052001" RSceneID="22" RPosX="1349.21" RPosY="79.85" RPosZ="1200.83" RLifeTime="300"/>
+	<Property ID="9239" MonsterID="monrf052001" RSceneID="22" RPosX="1353.29" RPosY="79.42" RPosZ="1202.66" RLifeTime="300"/>
+	<Property ID="9240" MonsterID="monrf052001" RSceneID="22" RPosX="1353.79" RPosY="79.88" RPosZ="1203.15" RLifeTime="300"/>
+	<Property ID="9241" MonsterID="monrf052002" RSceneID="22" RPosX="1205.61" RPosY="79.34" RPosZ="1158.8" RLifeTime="300"/>
+	<Property ID="9242" MonsterID="monrf052002" RSceneID="22" RPosX="1205.52" RPosY="79.32" RPosZ="1159.21" RLifeTime="300"/>
+	<Property ID="9243" MonsterID="monrf052002" RSceneID="22" RPosX="1205.33" RPosY="79.38" RPosZ="1158.7" RLifeTime="300"/>
+	<Property ID="9244" RSceneID="22"/>
+	<Property ID="9245" RSceneID="22"/>
+	<Property ID="9246" RSceneID="22"/>
+	<Property ID="9247" RSceneID="22"/>
+	<Property ID="9248" RSceneID="22"/>
+	<Property ID="9249" RSceneID="22"/>
+	<Property ID="9297"/>
+	<Property ID="3001" MonsterID="monrm082900" RSceneID="12" RPosX="812.037" RPosY="73.314" RPosZ="436.459" RLifeTime="300"/>
+	<Property ID="3002" MonsterID="monrm083000" RSceneID="12" RPosX="902.783" RPosY="136.314" RPosZ="298.093" RLifeTime="300"/>
+	<Property ID="3003" MonsterID="monrm083100" RSceneID="12" RPosX="331.84" RPosY="-50.662" RPosZ="610.62" RLifeTime="300"/>
+	<Property ID="3004" MonsterID="monrm083200" RSceneID="12" RPosX="268.515" RPosY="-46.341" RPosZ="617.429" RLifeTime="300"/>
+	<Property ID="3005" MonsterID="monrm083300" RSceneID="12" RPosX="752.062" RPosY="73.168" RPosZ="363.792" RLifeTime="600"/>
+	<Property ID="3009" MonsterID="monrm081500" RSceneID="12" RPosX="-188.139" RPosY="37.192" RPosZ="529.812" RLifeTime="600"/>
+	<Property ID="3010" MonsterID="monrm081000" RSceneID="12" RPosX="761.088" RPosY="73.028" RPosZ="319.457" RLifeTime="600"/>
+	<Property ID="3011" MonsterID="monrm081200" RSceneID="12" RPosX="749.184" RPosY="62.144" RPosZ="514.561" RLifeTime="600"/>
+	<Property ID="3012" MonsterID="monrm081100" RSceneID="12" RPosX="825.165" RPosY="65.549" RPosZ="499.779" RLifeTime="600"/>
+	<Property ID="3013" MonsterID="monrm081300" RSceneID="12" RPosX="268.515" RPosY="-46.341" RPosZ="617.429" RLifeTime="600"/>
+	<Property ID="3014" MonsterID="monrm081400" RSceneID="12" RPosX="277.446" RPosY="-46.341" RPosZ="611.137" RLifeTime="600"/>
+	<Property ID="3015" MonsterID="monrm081400" RSceneID="12" RPosX="266.527" RPosY="-46.341" RPosZ="609.545" RLifeTime="600"/>
+	<Property ID="3016" MonsterID="monrm080500" RSceneID="12" RPosX="743" RPosY="62.144" RPosZ="531" RLifeTime="600"/>
+	<Property ID="3017" MonsterID="monrm080600" RSceneID="12" RPosX="628.5" RPosY="55.9" RPosZ="265.8" RLifeTime="600"/>
+	<Property ID="3018" MonsterID="monrm080800" RSceneID="12" RPosX="808.381" RPosY="19.29" RPosZ="729.672" RLifeTime="600"/>
+	<Property ID="3019" MonsterID="monrm080900" RSceneID="12" RPosX="757.667" RPosY="-32.493" RPosZ="917.953" RLifeTime="600"/>
+	<Property ID="3020" MonsterID="monrm080400" RSceneID="12" RPosX="749" RPosY="73" RPosZ="407" RLifeTime="600"/>
+	<Property ID="3021" MonsterID="monrm080200" RSceneID="12" RPosX="879" RPosY="73" RPosZ="408" RLifeTime="600"/>
+	<Property ID="3022" MonsterID="monrm080400" RSceneID="12" RPosX="749" RPosY="73" RPosZ="407" RLifeTime="600"/>
+	<Property ID="3023" MonsterID="monrf030100" RSceneID="20" RPosX="772" RPosY="-10" RPosZ="548" RLifeTime="600"/>
+	<Property ID="3024" MonsterID="monrf030100" RSceneID="20" RPosX="772" RPosY="-10" RPosZ="548" RLifeTime="600"/>
+	<Property ID="3025" MonsterID="monrc040100" RSceneID="16" RPosX="936" RPosY="-16" RPosZ="654" RLifeTime="600"/>
+	<Property ID="3026" MonsterID="monrc040200" RSceneID="16" RPosX="958" RPosY="-25" RPosZ="805" RLifeTime="600"/>
+	<Property ID="3027" MonsterID="monrc040300" RSceneID="16" RPosX="879" RPosY="-21" RPosZ="750" RLifeTime="600"/>
+	<Property ID="3028" MonsterID="monrc040400" RSceneID="16" RPosX="929" RPosY="-24" RPosZ="654" RLifeTime="600"/>
+	<Property ID="3029" MonsterID="monrc040500" RSceneID="16" RPosX="1045" RPosY="1.6" RPosZ="476" RLifeTime="600"/>
+	<Property ID="3030" MonsterID="monrc040800" RSceneID="16" RPosX="1031" RPosY="4" RPosZ="271" RLifeTime="600"/>
+	<Property ID="3031" MonsterID="monrm080100" RSceneID="12" RPosX="403" RPosY="-43" RPosZ="632" RLifeTime="600"/>
+	<Property ID="3032" MonsterID="monrm080100" RSceneID="12" RPosX="403" RPosY="-43" RPosZ="632" RLifeTime="600"/>
+	<Property ID="3033" MonsterID="monrv020100" RSceneID="2" RPosX="102" RPosY="-5" RPosZ="120" RLifeTime="600"/>
+	<Property ID="3034" MonsterID="monrm081600" RSceneID="12" RPosX="759.028" RPosY="62.298" RPosZ="509.039" RLifeTime="600"/>
+	<Property ID="3035" MonsterID="monrm081600" RSceneID="12" RPosX="750.318" RPosY="64.413" RPosZ="448.612" RLifeTime="600"/>
+	<Property ID="3036" MonsterID="monrm081600" RSceneID="12" RPosX="826.717" RPosY="63.753" RPosZ="479.422" RLifeTime="600"/>
+	<Property ID="3039" MonsterID="monrm020100" RSceneID="14" RPosX="113" RPosY="53" RPosZ="198" RLifeTime="600"/>
+	<Property ID="3040" MonsterID="monrc030900" RSceneID="14" RPosX="524.52" RPosY="23.13" RPosZ="614.68" RLifeTime="600"/>
+	<Property ID="3041" MonsterID="monrc010500" RSceneID="14" RPosX="1102.151" RPosY="23.782" RPosZ="197.629" RLifeTime="600"/>
+	<Property ID="3050" MonsterID="monrc020100" RSceneID="13" RPosX="329" RPosY="-5" RPosZ="435" RLifeTime="600"/>
+	<Property ID="3051" MonsterID="monrm080300" RSceneID="12" RPosX="582" RPosY="21" RPosZ="305" RLifeTime="600"/>
+	<Property ID="3052" MonsterID="monrc020200" RSceneID="13" RPosX="359" RPosY="3" RPosZ="635" RLifeTime="600"/>
+	<Property ID="3053" MonsterID="monrc040600" RSceneID="14" RPosX="1038" RPosY="-16" RPosZ="694" RLifeTime="600"/>
+	<Property ID="3054" MonsterID="monrc040700" RSceneID="14" RPosX="963" RPosY="-22" RPosZ="732" RLifeTime="600"/>
+	<Property ID="3055" MonsterID="monrf030200" RSceneID="20" RPosX="416" RPosY="23" RPosZ="609" RLifeTime="600"/>
+	<Property ID="3056" MonsterID="monrc020300" RSceneID="13" RPosX="193" RPosY="2" RPosZ="473" RLifeTime="600"/>
+	<Property ID="3057" MonsterID="monrf050100" RSceneID="22" RPosX="1443.82" RPosY="6.26" RPosZ="1847.48" RLifeTime="600"/>
+	<Property ID="3058" MonsterID="monrf050200" RSceneID="22" RPosX="1179" RPosY="124.84" RPosZ="794" RLifeTime="600"/>
+	<Property ID="3059" MonsterID="monrf050200" RSceneID="22" RPosX="1399" RPosY="88.87" RPosZ="810" RLifeTime="600"/>
+	<Property ID="3060" MonsterID="monrv020200" RSceneID="2" RPosX="237.322" RPosY="25.844" RPosZ="564.613" RLifeTime="600"/>
+	<Property ID="3061" MonsterID="monrv020300" RSceneID="2" RPosX="430" RPosY="7.51" RPosZ="807" RLifeTime="600"/>
+	<Property ID="3062" MonsterID="monrv020500" RSceneID="2" RPosX="233" RPosY="25.04" RPosZ="779" RLifeTime="600"/>
+	<Property ID="3063" MonsterID="monrf070100" RSceneID="24" RPosX="668.1" RPosY="23.54" RPosZ="50.57" RLifeTime="600"/>
+	<Property ID="3065" MonsterID="monrf070100" RSceneID="24" RPosX="670.03" RPosY="23.5" RPosZ="47.31" RLifeTime="600"/>
+	<Property ID="3066" MonsterID="monrf070100" RSceneID="24" RPosX="664" RPosY="23.89" RPosZ="50.26" RLifeTime="600"/>
+	<Property ID="3067" MonsterID="monrf070100" RSceneID="24" RPosX="665.42" RPosY="23.87" RPosZ="48.03" RLifeTime="600"/>
+	<Property ID="3068" MonsterID="monrf070100" RSceneID="24" RPosX="672.17" RPosY="23.07" RPosZ="49.56" RLifeTime="600"/>
+	<Property ID="3069" MonsterID="Monster00710" RSceneID="24" RPosX="389.8" RPosY="10.92" RPosZ="29.844" RLifeTime="600"/>
+	<Property ID="3070" MonsterID="monrc010100" RSceneID="14" RPosX="792.72" RPosY="83.38" RPosZ="122.33" RLifeTime="600"/>
+	<Property ID="3071" MonsterID="monrc010100" RSceneID="14" RPosX="761.8" RPosY="83.38" RPosZ="119.05" RLifeTime="600"/>
+	<Property ID="3072" MonsterID="monrc010100" RSceneID="14" RPosX="764.83" RPosY="83.38" RPosZ="113.8" RLifeTime="600"/>
+	<Property ID="3073" MonsterID="monrc010100" RSceneID="14" RPosX="769.22" RPosY="83.38" RPosZ="112.1" RLifeTime="600"/>
+	<Property ID="3074" MonsterID="monrc010100" RSceneID="14" RPosX="772.02" RPosY="83.38" RPosZ="119.95" RLifeTime="600"/>
+	<Property ID="3075" MonsterID="monrc010100" RSceneID="14" RPosX="768.22" RPosY="83.38" RPosZ="118.43" RLifeTime="600"/>
+	<Property ID="3076" MonsterID="monrf050200" RSceneID="14" RPosX="289.145" RPosY="4.945" RPosZ="648.917" RLifeTime="600"/>
+	<Property ID="3077" MonsterID="monrm050100" RSceneID="9" RPosX="730" RPosY="30" RPosZ="749" RLifeTime="60"/>
+	<Property ID="3078" MonsterID="monrm050100" RSceneID="9" RPosX="731" RPosY="30" RPosZ="750" RLifeTime="60"/>
+	<Property ID="3079" MonsterID="monrm050200" RSceneID="9" RPosX="411" RPosY="63" RPosZ="791" RLifeTime="600"/>
+	<Property ID="3080" MonsterID="monrm050600" RSceneID="9" RPosX="816" RPosY="32" RPosZ="842" RLifeTime="600"/>
+	<Property ID="3081" MonsterID="monrm050700" RSceneID="9" RPosX="680.78" RPosY="10.85" RPosZ="578.02" RLifeTime="600"/>
+	<Property ID="3082" MonsterID="monrm050700" RSceneID="9" RPosX="399" RPosY="53" RPosZ="734" RLifeTime="2400"/>
+	<Property ID="3083" MonsterID="monrm050300" RSceneID="9" RPosX="490" RPosY="48" RPosZ="807" RLifeTime="400"/>
+	<Property ID="3084" MonsterID="monrm050400" RSceneID="9" RPosX="872" RPosY="34" RPosZ="867" RLifeTime="240"/>
+	<Property ID="3085" MonsterID="monrf040300" RSceneID="21" RPosX="584" RPosY="57.65" RPosZ="887" RLifeTime="600"/>
+	<Property ID="3086" MonsterID="monrf040400" RSceneID="21" RPosX="555" RPosY="28.44" RPosZ="925" RLifeTime="600"/>
+	<Property ID="3087" MonsterID="monrf040100" RSceneID="21" RPosX="729" RPosY="59" RPosZ="1017" RLifeTime="600"/>
+	<Property ID="3088" MonsterID="monrf040200" RSceneID="21" RPosX="731" RPosY="59" RPosZ="1022" RLifeTime="600"/>
+	<Property ID="3089" MonsterID="monrv021700" RSceneID="2" RPosX="169" RPosY="0" RPosZ="71" RLifeTime="600"/>
+	<Property ID="3090" MonsterID="monrv021700" RSceneID="2" RPosX="166" RPosY="0" RPosZ="73" RLifeTime="600"/>
+	<Property ID="3091" MonsterID="monrv021700" RSceneID="2" RPosX="164" RPosY="0" RPosZ="69" RLifeTime="600"/>
+	<Property ID="3092" MonsterID="monrv021700" RSceneID="2" RPosX="165" RPosY="0" RPosZ="65" RLifeTime="600"/>
+	<Property ID="3093"/>
+	<Property ID="3094"/>
+	<Property ID="3095"/>
+	<Property ID="3096"/>
+	<Property ID="3097"/>
+	<Property ID="3098"/>
+	<Property ID="3099"/>
+	<Property ID="3100"/>
+	<Property ID="3101"/>
+	<Property ID="3102"/>
+	<Property ID="3103"/>
+	<Property ID="3104"/>
+	<Property ID="3105"/>
+	<Property ID="3106"/>
+	<Property ID="3107"/>
+	<Property ID="3108"/>
+	<Property ID="3109"/>
+	<Property ID="3110"/>
+	<Property ID="3111"/>
+	<Property ID="3112"/>
+	<Property ID="3113"/>
+	<Property ID="3114"/>
+	<Property ID="3115"/>
+	<Property ID="3116"/>
+	<Property ID="3117"/>
+	<Property ID="3118"/>
+	<Property ID="3119"/>
+	<Property ID="3120"/>
+	<Property ID="3121"/>
+	<Property ID="3122"/>
+	<Property ID="3123"/>
+	<Property ID="3124"/>
+	<Property ID="3125"/>
+	<Property ID="3126"/>
+	<Property ID="3127"/>
+	<Property ID="3128"/>
+	<Property ID="3129"/>
+	<Property ID="3130"/>
+	<Property ID="3131"/>
+	<Property ID="3132"/>
+	<Property ID="3133"/>
+	<Property ID="3134"/>
+	<Property ID="3135"/>
+	<Property ID="3136"/>
+	<Property ID="3137"/>
+	<Property ID="3138"/>
+	<Property ID="3139"/>
+	<Property ID="3140"/>
+	<Property ID="3141"/>
+	<Property ID="3142"/>
+	<Property ID="3143"/>
+	<Property ID="3144"/>
+	<Property ID="3145"/>
+	<Property ID="3146"/>
+	<Property ID="3147"/>
+	<Property ID="3148"/>
+	<Property ID="3149"/>
+	<Property ID="3150"/>
+	<Property ID="3151"/>
+	<Property ID="3152"/>
+	<Property ID="3006"/>
+	<Property ID="3007"/>
+	<Property ID="3008"/>
+	<Property ID="5001" MonsterID="monrm052700" RSceneID="9" RPosX="1082.437" RPosY="78.88" RPosZ="23.627" RLifeTime="300"/>
+	<Property ID="5002" MonsterID="monrm052200" RSceneID="9" RPosX="925.103" RPosY="32.091" RPosZ="321.896" RLifeTime="300"/>
+	<Property ID="5003" MonsterID="monrm052300" RSceneID="9" RPosX="1059.779" RPosY="45.62" RPosZ="431.175" RLifeTime="300"/>
+	<Property ID="5004" MonsterID="monrm052400" RSceneID="9" RPosX="1054.7" RPosY="45.61" RPosZ="428.91" RLifeTime="300"/>
+	<Property ID="5005" MonsterID="monrm052400" RSceneID="9" RPosX="1054.82" RPosY="45.61" RPosZ="432.2" RLifeTime="300"/>
+	<Property ID="5006" MonsterID="monrm052400" RSceneID="9" RPosX="1057.82" RPosY="45.61" RPosZ="425.14" RLifeTime="300"/>
+	<Property ID="5007" MonsterID="monrm052200" RSceneID="9" RPosX="925.103" RPosY="32.091" RPosZ="321.896" RLifeTime="300"/>
+	<Property ID="5008" MonsterID="monrm052400" RSceneID="9" RPosX="918.22" RPosY="29.48" RPosZ="323.23" RLifeTime="300"/>
+	<Property ID="5009" MonsterID="monrm052400" RSceneID="9" RPosX="915.03" RPosY="28.48" RPosZ="320.86" RLifeTime="300"/>
+	<Property ID="5010" MonsterID="monrm052400" RSceneID="9" RPosX="916.09" RPosY="28.79" RPosZ="318.26" RLifeTime="300"/>
+	<Property ID="5011" MonsterID="monrm053500" RSceneID="9" RPosX="1099.557" RPosY="46.45" RPosZ="347.756" RLifeTime="300"/>
+	<Property ID="5012" MonsterID="monrm052500" RSceneID="9" RPosX="970.991" RPosY="36.278" RPosZ="329.634" RLifeTime="300"/>
+	<Property ID="5013" MonsterID="monrm052400" RSceneID="9" RPosX="965.54" RPosY="36.19" RPosZ="334.11" RLifeTime="300"/>
+	<Property ID="5014" MonsterID="monrm052400" RSceneID="9" RPosX="975.63" RPosY="36.28" RPosZ="339.04" RLifeTime="300"/>
+	<Property ID="5015" MonsterID="monrm052400" RSceneID="9" RPosX="970.43" RPosY="36.19" RPosZ="334.07" RLifeTime="300"/>
+	<Property ID="5016" MonsterID="monrm052600" RSceneID="9" RPosX="936" RPosY="42.2" RPosZ="292.5" RLifeTime="300"/>
+	<Property ID="5017" MonsterID="monrm053500" RSceneID="9" RPosX="1099.557" RPosY="46.45" RPosZ="347.767" RLifeTime="300"/>
+	<Property ID="5018" MonsterID="monrm052400" RSceneID="9" RPosX="1100.557" RPosY="46.45" RPosZ="348.767" RLifeTime="300"/>
+	<Property ID="5019" MonsterID="monrm052400" RSceneID="9" RPosX="1098.557" RPosY="46.45" RPosZ="346.767" RLifeTime="300"/>
+	<Property ID="5020" MonsterID="monrm052400" RSceneID="9" RPosX="1097.557" RPosY="46.45" RPosZ="345.767" RLifeTime="300"/>
+	<Property ID="5021" MonsterID="monrm052900" RSceneID="9" RPosX="1172.165" RPosY="100.542" RPosZ="-50.389" RLifeTime="300"/>
+	<Property ID="5022" MonsterID="monrm053000" RSceneID="9" RPosX="899.17" RPosY="48.713" RPosZ="-80.384" RLifeTime="300"/>
+	<Property ID="5023" MonsterID="monrm052800" RSceneID="9" RPosX="1026" RPosY="69" RPosZ="-188" RLifeTime="300"/>
+	<Property ID="5024" MonsterID="monrm053100" RSceneID="9" RPosX="1094.393" RPosY="79.026" RPosZ="12.093" RLifeTime="300"/>
+	<Property ID="5025" MonsterID="monrm053200" RSceneID="9" RPosX="941.8" RPosY="68.315" RPosZ="-111.7" RLifeTime="300"/>
+	<Property ID="5026" MonsterID="monrm053300" RSceneID="9" RPosX="961.088" RPosY="61.701" RPosZ="45.916" RLifeTime="300"/>
+	<Property ID="5027" MonsterID="monrm053100" RSceneID="9" RPosX="1094.393" RPosY="79.026" RPosZ="12.093" RLifeTime="300"/>
+	<Property ID="5028" MonsterID="monrm053400" RSceneID="9" RPosX="1040.5" RPosY="79.44" RPosZ="-123.123" RLifeTime="300"/>
+	<Property ID="5029" MonsterID="monrm053600" RSceneID="9" RPosX="1011" RPosY="69" RPosZ="-182" RLifeTime="1800"/>
+	<Property ID="5030" MonsterID="monrm053700" RSceneID="9" RPosX="545" RPosY="-6" RPosZ="254" RLifeTime="1800"/>
+	<Property ID="5031" MonsterID="monrm053800" RSceneID="9" RPosX="853" RPosY="31" RPosZ="428" RLifeTime="1800"/>
+	<Property ID="5032" MonsterID="monrm054900" RSceneID="9" RPosX="815" RPosY="35" RPosZ="508" RLifeTime="1800"/>
+	<Property ID="5033" MonsterID="monrm055000" RSceneID="9" RPosX="817" RPosY="35" RPosZ="514" RLifeTime="1800"/>
+	<Property ID="5034" MonsterID="monrm055100" RSceneID="9" RPosX="810" RPosY="35" RPosZ="506" RLifeTime="1800"/>
+	<Property ID="5035" MonsterID="monrm055200" RSceneID="9" RPosX="1040" RPosY="80" RPosZ="-123" RLifeTime="1800"/>
+	<Property ID="5036" MonsterID="monrm054300" RSceneID="9" RPosX="896" RPosY="49" RPosZ="-80" RLifeTime="1800"/>
+	<Property ID="5037" MonsterID="monrm054300" RSceneID="9" RPosX="892" RPosY="49" RPosZ="-81" RLifeTime="1800"/>
+	<Property ID="5038" MonsterID="monrm054300" RSceneID="9" RPosX="894" RPosY="49" RPosZ="-85" RLifeTime="1800"/>
+	<Property ID="5040" MonsterID="monrm054200" RSceneID="9" RPosX="453" RPosY="-16" RPosZ="479" RLifeTime="1800"/>
+	<Property ID="5041" MonsterID="monrm053900" RSceneID="9" RPosX="879" RPosY="49" RPosZ="-86" RLifeTime="1800"/>
+	<Property ID="5042" MonsterID="monrm056800" RSceneID="9" RPosX="885" RPosY="62.3" RPosZ="-225" RLifeTime="1800"/>
+	<Property ID="5043" MonsterID="monrm054000" RSceneID="9" RPosX="1055" RPosY="103" RPosZ="-349" RLifeTime="1800"/>
+	<Property ID="5044" MonsterID="monrm054700" RSceneID="9" RPosX="1060" RPosY="78" RPosZ="-116" RLifeTime="1800"/>
+	<Property ID="5045" MonsterID="monrm054700" RSceneID="9" RPosX="1061" RPosY="78" RPosZ="-118" RLifeTime="1800"/>
+	<Property ID="5046" MonsterID="monrm054700" RSceneID="9" RPosX="1039" RPosY="78" RPosZ="-179" RLifeTime="1800"/>
+	<Property ID="5047" MonsterID="monrm054700" RSceneID="9" RPosX="1043" RPosY="78" RPosZ="-178" RLifeTime="1800"/>
+	<Property ID="5048" MonsterID="monrm054700" RSceneID="9" RPosX="1039" RPosY="78" RPosZ="-175" RLifeTime="1800"/>
+	<Property ID="5049" MonsterID="monrm054100" RSceneID="9" RPosX="1030" RPosY="73" RPosZ="5" RLifeTime="1800"/>
+	<Property ID="5050" MonsterID="monrc051400" RSceneID="17" RPosX="937" RPosY="24" RPosZ="875" RLifeTime="1800"/>
+	<Property ID="5051" MonsterID="monrc051500" RSceneID="17" RPosX="1283" RPosY="84" RPosZ="611" RLifeTime="1800"/>
+	<Property ID="5052" MonsterID="monrc051500" RSceneID="17" RPosX="1285" RPosY="84" RPosZ="615" RLifeTime="1800"/>
+	<Property ID="5053" MonsterID="monrc051500" RSceneID="17" RPosX="1298" RPosY="84" RPosZ="615" RLifeTime="1800"/>
+	<Property ID="5054" MonsterID="monrc051500" RSceneID="17" RPosX="1301" RPosY="84" RPosZ="611" RLifeTime="1800"/>
+	<Property ID="5055" MonsterID="monrc051500" RSceneID="17" RPosX="1292" RPosY="84" RPosZ="612" RLifeTime="1800"/>
+	<Property ID="5057" MonsterID="monrc051600" RSceneID="17" RPosX="914" RPosY="28" RPosZ="849" RLifeTime="1800"/>
+	<Property ID="5058" MonsterID="monrc051700" RSceneID="17" RPosX="894" RPosY="30" RPosZ="592" RLifeTime="1800"/>
+	<Property ID="5059" MonsterID="monrc051800" RSceneID="17" RPosX="808" RPosY="25" RPosZ="615" RLifeTime="1800"/>
+	<Property ID="5060" MonsterID="monrc051900" RSceneID="17" RPosX="950" RPosY="19" RPosZ="755" RLifeTime="1800"/>
+	<Property ID="5061" MonsterID="monrc051900" RSceneID="17" RPosX="953" RPosY="19" RPosZ="758" RLifeTime="1800"/>
+	<Property ID="5063" MonsterID="monrc052000" RSceneID="17" RPosX="894" RPosY="30.3" RPosZ="594" RLifeTime="1800"/>
+	<Property ID="5064" MonsterID="monrc052000" RSceneID="17" RPosX="891" RPosY="30.3" RPosZ="595" RLifeTime="1800"/>
+	<Property ID="5065" MonsterID="monrc052000" RSceneID="17" RPosX="892" RPosY="30.3" RPosZ="596" RLifeTime="1800"/>
+	<Property ID="5066" MonsterID="monrc052000" RSceneID="17" RPosX="889" RPosY="30.3" RPosZ="596" RLifeTime="1800"/>
+	<Property ID="5067" MonsterID="monrc052000" RSceneID="17" RPosX="892" RPosY="30.3" RPosZ="591" RLifeTime="1800"/>
+	<Property ID="5068" MonsterID="monrc052100" RSceneID="17" RPosX="667" RPosY="24" RPosZ="610" RLifeTime="1800"/>
+	<Property ID="5069" MonsterID="monrc051700" RSceneID="17" RPosX="894" RPosY="30" RPosZ="592" RLifeTime="1800"/>
+	<Property ID="5070" MonsterID="monrv041100" RSceneID="1" RPosX="618.55" RPosY="-39.68" RPosZ="677.94" RLifeTime="1800"/>
+	<Property ID="5071" MonsterID="monrv041100" RSceneID="1" RPosX="615.28" RPosY="-39.68" RPosZ="676.19" RLifeTime="1800"/>
+	<Property ID="5072" MonsterID="monrv041100" RSceneID="1" RPosX="609.73" RPosY="-39.68" RPosZ="674.2" RLifeTime="1800"/>
+	<Property ID="5073" MonsterID="monrv041200" RSceneID="1" RPosX="890" RPosY="-35" RPosZ="489" RLifeTime="1800"/>
+	<Property ID="5074" MonsterID="monrv041200" RSceneID="1" RPosX="886" RPosY="-36" RPosZ="484" RLifeTime="1800"/>
+	<Property ID="5075" MonsterID="monrv041200" RSceneID="1" RPosX="877" RPosY="-39" RPosZ="483" RLifeTime="1800"/>
+	<Property ID="5076" MonsterID="monrv041300" RSceneID="1" RPosX="496.87" RPosY="-40.29" RPosZ="811.56" RLifeTime="1800"/>
+	<Property ID="5077" MonsterID="monrv041300" RSceneID="1" RPosX="497.72" RPosY="-40.59" RPosZ="813.44" RLifeTime="1800"/>
+	<Property ID="5078" MonsterID="monrv041400" RSceneID="1" RPosX="969.7" RPosY="30.8" RPosZ="921.3" RLifeTime="1800"/>
+	<Property ID="5079" MonsterID="monrv041400" RSceneID="1" RPosX="969.8" RPosY="30.2" RPosZ="926.6" RLifeTime="1800"/>
+	<Property ID="5080" MonsterID="monrv041400" RSceneID="1" RPosX="973.9" RPosY="30.6" RPosZ="927.4" RLifeTime="1800"/>
+	<Property ID="5081" MonsterID="monrv041500" RSceneID="1" RPosX="431.32" RPosY="-29.15" RPosZ="627.49" RLifeTime="1800"/>
+	<Property ID="5082" MonsterID="monrv041500" RSceneID="1" RPosX="427.43" RPosY="-28.71" RPosZ="624.82" RLifeTime="1800"/>
+	<Property ID="5083" MonsterID="monrv041500" RSceneID="1" RPosX="423.41" RPosY="-28.89" RPosZ="623.98" RLifeTime="1800"/>
+	<Property ID="5084" MonsterID="monrv041600" RSceneID="1" RPosX="858.24" RPosY="-28.93" RPosZ="678.75" RLifeTime="1800"/>
+	<Property ID="5085" MonsterID="monrc052200" RSceneID="17" RPosX="368.73" RPosY="14.43" RPosZ="519.49" RLifeTime="1800"/>
+	<Property ID="5086" MonsterID="monrm055400" RSceneID="9" RPosX="1061.6" RPosY="79.38" RPosZ="-12.22" RLifeTime="1800"/>
+	<Property ID="5087" MonsterID="monrm055500" RSceneID="9" RPosX="1106.39" RPosY="99.9" RPosZ="-307.91" RLifeTime="1800"/>
+	<Property ID="5088" MonsterID="monrm055600" RSceneID="9" RPosX="959.29" RPosY="68.31" RPosZ="-115.05" RLifeTime="1800"/>
+	<Property ID="5090" MonsterID="monrf040800" RSceneID="21" RPosX="519.12" RPosY="57.43" RPosZ="361.58" RLifeTime="1800"/>
+	<Property ID="5091" MonsterID="monrf040800" RSceneID="21" RPosX="521.36" RPosY="57.43" RPosZ="364.61" RLifeTime="1800"/>
+	<Property ID="5092" MonsterID="monrf040800" RSceneID="21" RPosX="524.01" RPosY="57.67" RPosZ="366.99" RLifeTime="1800"/>
+	<Property ID="5093" MonsterID="monrm050001" RSceneID="9" RPosX="706.513" RPosY="-2.884" RPosZ="311.63" RLifeTime="1800"/>
+	<Property ID="5094" MonsterID="monrc040900" RSceneID="16" RPosX="1007.817" RPosY="-16.038" RPosZ="711.87" RLifeTime="600"/>
+	<Property ID="5095" MonsterID="monrc041000" RSceneID="16" RPosX="1158.018" RPosY="13.998" RPosZ="359.614" RLifeTime="600"/>
+	<Property ID="5096" MonsterID="monrc041100" RSceneID="16" RPosX="339.359" RPosY="32.637" RPosZ="366.326" RLifeTime="600"/>
+	<Property ID="5097" MonsterID="monrc041200" RSceneID="16" RPosX="428.8" RPosY="-41.8" RPosZ="322.3" RLifeTime="1800"/>
+	<Property ID="5098" MonsterID="monrc041300" RSceneID="16" RPosX="749.194" RPosY="-28.596" RPosZ="574.706" RLifeTime="600"/>
+	<Property ID="5099" MonsterID="monrc041400" RSceneID="16" RPosX="1264.35" RPosY="-24.934" RPosZ="786.477" RLifeTime="600"/>
+	<Property ID="5100" MonsterID="monrc041500" RSceneID="16" RPosX="606.4" RPosY="-24" RPosZ="596.8" RLifeTime="600"/>
+	<Property ID="5101" MonsterID="monrc041500" RSceneID="16" RPosX="611.5" RPosY="-23.7" RPosZ="596.3" RLifeTime="600"/>
+	<Property ID="5102" MonsterID="monrc042200" RSceneID="16" RPosX="538.2" RPosY="-27.9" RPosZ="553" RLifeTime="600"/>
+	<Property ID="5103" MonsterID="monrc041600" RSceneID="16" RPosX="1354.015" RPosY="-7.952" RPosZ="1073.472" RLifeTime="600"/>
+	<Property ID="5104" MonsterID="monrc041700" RSceneID="16" RPosX="535" RPosY="-25.4" RPosZ="690.3" RLifeTime="600"/>
+	<Property ID="5105" MonsterID="monrc041700" RSceneID="16" RPosX="539.8" RPosY="-25.5" RPosZ="693.9" RLifeTime="600"/>
+	<Property ID="5106" MonsterID="monrc041900" RSceneID="16" RPosX="504" RPosY="-27" RPosZ="465" RLifeTime="1800"/>
+	<Property ID="5107" MonsterID="monrc042300" RSceneID="16" RPosX="503" RPosY="-27" RPosZ="467" RLifeTime="1800"/>
+	<Property ID="5108" MonsterID="monrc042300" RSceneID="16" RPosX="502" RPosY="-27" RPosZ="464.5" RLifeTime="1800"/>
+	<Property ID="5109" MonsterID="monrc042000" RSceneID="16" RPosX="388" RPosY="-24.5" RPosZ="431" RLifeTime="1800"/>
+	<Property ID="5110" MonsterID="monrc042300" RSceneID="16" RPosX="389" RPosY="-25" RPosZ="429.5" RLifeTime="1800"/>
+	<Property ID="5111" MonsterID="monrc042300" RSceneID="16" RPosX="390" RPosY="-25" RPosZ="432" RLifeTime="1800"/>
+	<Property ID="5112" MonsterID="monrc042100" RSceneID="16" RPosX="518" RPosY="-32.7" RPosZ="389" RLifeTime="1800"/>
+	<Property ID="5113" MonsterID="monrc042300" RSceneID="16" RPosX="518" RPosY="-33.4" RPosZ="386.7" RLifeTime="1800"/>
+	<Property ID="5114" MonsterID="monrc042300" RSceneID="16" RPosX="520" RPosY="-33.8" RPosZ="387.8" RLifeTime="1800"/>
+	<Property ID="5115" MonsterID="monrm062700" RSceneID="10" RPosX="183.6" RPosY="91.5" RPosZ="451.5" RLifeTime="600"/>
+	<Property ID="5117" MonsterID="monrm060800" RSceneID="10" RPosX="308" RPosY="49" RPosZ="567" RLifeTime="600"/>
+	<Property ID="5118" MonsterID="monrm060900" RSceneID="10" RPosX="627" RPosY="128" RPosZ="144" RLifeTime="600"/>
+	<Property ID="5119" MonsterID="monrm050800" RSceneID="9" RPosX="954.564" RPosY="79.713" RPosZ="-298.625" RLifeTime="600"/>
+	<Property ID="5120" MonsterID="monrm051000" RSceneID="9" RPosX="717.8" RPosY="-15.4" RPosZ="138.6" RLifeTime="600"/>
+	<Property ID="5121" MonsterID="monrm030400" RSceneID="7" RPosX="280.879" RPosY="40.804" RPosZ="411.639" RLifeTime="600"/>
+	<Property ID="5122" MonsterID="monrm030500" RSceneID="7" RPosX="-27.116" RPosY="20.501" RPosZ="514.166" RLifeTime="600"/>
+	<Property ID="5123" MonsterID="monrm030100" RSceneID="7" RPosX="242.564" RPosY="36.455" RPosZ="586.981" RLifeTime="600"/>
+	<Property ID="5124" MonsterID="monrm030200" RSceneID="7" RPosX="310.837" RPosY="32.429" RPosZ="434.036" RLifeTime="600"/>
+	<Property ID="5125" MonsterID="monrm030100" RSceneID="7" RPosX="242.564" RPosY="36.455" RPosZ="586.981" RLifeTime="600"/>
+	<Property ID="5126" MonsterID="monrm030600" RSceneID="7" RPosX="742" RPosY="101.6" RPosZ="562" RLifeTime="600"/>
+	<Property ID="5127" MonsterID="monrm030300" RSceneID="7" RPosX="181.237" RPosY="42.336" RPosZ="443.193" RLifeTime="600"/>
+	<Property ID="5128" MonsterID="monrm055700" RSceneID="9" RPosX="1024.329" RPosY="77.985" RPosZ="-152.706" RLifeTime="600"/>
+	<Property ID="5129" MonsterID="monrm055800" RSceneID="9" RPosX="1024" RPosY="77.985" RPosZ="-149" RLifeTime="600"/>
+	<Property ID="5130" MonsterID="monrm055900" RSceneID="9" RPosX="1082.4" RPosY="78.9" RPosZ="23.6" RLifeTime="600"/>
+	<Property ID="5131" MonsterID="monrv020600" RSceneID="2" RPosX="185.622" RPosY="-1.331" RPosZ="4.013" RLifeTime="600"/>
+	<Property ID="5132" MonsterID="monrv020700" RSceneID="2" RPosX="33.932" RPosY="-3.223" RPosZ="72.073" RLifeTime="600"/>
+	<Property ID="5133" MonsterID="monrv020800" RSceneID="2" RPosX="43.869" RPosY="-2.715" RPosZ="250.78" RLifeTime="600"/>
+	<Property ID="5134" MonsterID="monrm056000" RSceneID="9" RPosX="1015.674" RPosY="68.735" RPosZ="-85.211" RLifeTime="600"/>
+	<Property ID="5135" MonsterID="monrm056100" RSceneID="9" RPosX="981.857" RPosY="68.735" RPosZ="-173.706" RLifeTime="600"/>
+	<Property ID="5136" MonsterID="monrm056200" RSceneID="9" RPosX="1111" RPosY="80" RPosZ="-28" RLifeTime="600"/>
+	<Property ID="5137" MonsterID="monrm057900" RSceneID="9" RPosX="1135" RPosY="78" RPosZ="-224" RLifeTime="600"/>
+	<Property ID="5138" MonsterID="monrm056400" RSceneID="9" RPosX="950" RPosY="73" RPosZ="-271" RLifeTime="600"/>
+	<Property ID="5139" MonsterID="monrv020900" RSceneID="2" RPosX="244.423" RPosY="-3.094" RPosZ="18.265" RLifeTime="600"/>
+	<Property ID="5140" MonsterID="monrm056900" RSceneID="9" RPosX="442" RPosY="17.9" RPosZ="-42.6" RLifeTime="1800"/>
+	<Property ID="5141" MonsterID="monrf030800" RSceneID="20" RPosX="746" RPosY="-5" RPosZ="599" RLifeTime="1800"/>
+	<Property ID="5142" MonsterID="monrf030900" RSceneID="20" RPosX="750" RPosY="-4.5" RPosZ="596" RLifeTime="1800"/>
+	<Property ID="5143" MonsterID="monrf030900" RSceneID="20" RPosX="750" RPosY="-5" RPosZ="600" RLifeTime="1800"/>
+	<Property ID="5144" MonsterID="monrf030700" RSceneID="20" RPosX="814.6" RPosY="-11.278" RPosZ="613.162" RLifeTime="1800"/>
+	<Property ID="5145" MonsterID="monrf031000" RSceneID="20" RPosX="1196" RPosY="30" RPosZ="554" RLifeTime="1800"/>
+	<Property ID="5148" MonsterID="monrf031200" RSceneID="20" RPosX="956.5" RPosY="1.65" RPosZ="892" RLifeTime="1800"/>
+	<Property ID="5149" MonsterID="monrm057000" RSceneID="9" RPosX="1109.803" RPosY="78.943" RPosZ="4.804" RLifeTime="1800"/>
+	<Property ID="5150" MonsterID="monrm057100" RSceneID="9" RPosX="693.276" RPosY="-10.287" RPosZ="271.915" RLifeTime="1800"/>
+	<Property ID="5151" MonsterID="monrm057200" RSceneID="9" RPosX="103.821" RPosY="-10.608" RPosZ="752.739" RLifeTime="1800"/>
+	<Property ID="5152" MonsterID="monrm057300" RSceneID="9" RPosX="-8" RPosY="21" RPosZ="749" RLifeTime="1800"/>
+	<Property ID="5155" MonsterID="monrm056300" RSceneID="9" RPosX="1075" RPosY="78" RPosZ="-199" RLifeTime="1800"/>
+	<Property ID="5156" MonsterID="monrf090100" RSceneID="26" RPosX="793.097" RPosY="6.997" RPosZ="1007.738" RLifeTime="1800"/>
+	<Property ID="5157" MonsterID="monrf090200" RSceneID="26" RPosX="930.66" RPosY="0.627" RPosZ="1483.606" RLifeTime="1800"/>
+	<Property ID="5158" MonsterID="monrm057600" RSceneID="9" RPosX="1062" RPosY="69" RPosZ="-107" RLifeTime="600"/>
+	<Property ID="5159" MonsterID="monrm057600" RSceneID="9" RPosX="1059" RPosY="69" RPosZ="-108" RLifeTime="600"/>
+	<Property ID="5160" MonsterID="monrm057600" RSceneID="9" RPosX="1064" RPosY="69" RPosZ="-112" RLifeTime="600"/>
+	<Property ID="5161" MonsterID="monrm056600" RSceneID="9" RPosX="977.176" RPosY="70.343" RPosZ="-179.509" RLifeTime="1800"/>
+	<Property ID="5162" MonsterID="monrm056700" RSceneID="9" RPosX="999.349" RPosY="68.735" RPosZ="-91.971" RLifeTime="1800"/>
+	<Property ID="5163" MonsterID="monrm053100" RSceneID="9" RPosX="792" RPosY="31.5" RPosZ="1" RLifeTime="1800"/>
+	<Property ID="5164" MonsterID="monrm053100" RSceneID="9" RPosX="798" RPosY="32" RPosZ="-3" RLifeTime="1800"/>
+	<Property ID="5165" MonsterID="monrm053100" RSceneID="9" RPosX="796" RPosY="31" RPosZ="4" RLifeTime="1800"/>
+	<Property ID="5166" MonsterID="monrm050900" RSceneID="9" RPosX="1226" RPosY="-16.5" RPosZ="-64" RLifeTime="1800"/>
+	<Property ID="5167" MonsterID="monrm050900" RSceneID="9" RPosX="1226" RPosY="-14.5" RPosZ="-56.32" RLifeTime="1800"/>
+	<Property ID="5168" MonsterID="monrm050900" RSceneID="9" RPosX="1227" RPosY="-14" RPosZ="-53" RLifeTime="1800"/>
+	<Property ID="5169" MonsterID="monrm055400" RSceneID="9" RPosX="668" RPosY="-15.75" RPosZ="224" RLifeTime="1800"/>
+	<Property ID="5170" MonsterID="monrm055400" RSceneID="9" RPosX="680" RPosY="-15.5" RPosZ="219" RLifeTime="1800"/>
+	<Property ID="5171" MonsterID="monrm055400" RSceneID="9" RPosX="669" RPosY="-17" RPosZ="213" RLifeTime="1800"/>
+	<Property ID="5172" MonsterID="monrm055400" RSceneID="9" RPosX="675" RPosY="-14.9" RPosZ="234" RLifeTime="1800"/>
+	<Property ID="5173" MonsterID="monrm055500" RSceneID="21" RPosX="468" RPosY="23" RPosZ="440" RLifeTime="1800"/>
+	<Property ID="5174" MonsterID="monrm062700" RSceneID="10" RPosX="184.7" RPosY="91.5" RPosZ="453.7" RLifeTime="600"/>
+	<Property ID="5175" MonsterID="monrm062700" RSceneID="10" RPosX="183.7" RPosY="91.5" RPosZ="454.7" RLifeTime="600"/>
+	<Property ID="7753"/>
+	<Property ID="7750" MonsterID="wgm_zd_006" RSceneID="3" RPosX="522.663" RPosY="17.833" RPosZ="1386.203" RLifeTime="1800"/>
+	<Property ID="25020" MonsterID="NpcQYEM0011" RSceneID="10" RPosX="762" RPosY="-2.69" RPosZ="272" RLifeTime="1800"/>
+	<Property ID="25021" MonsterID="NpcQYEM0012" RSceneID="10" RPosX="188" RPosY="20" RPosZ="679" RLifeTime="1800"/>
+	<Property ID="25010"/>
+	<Property ID="16000" MonsterID="NPCQYJMY001" RSceneID="4" RPosX="-1.897457" RPosY="131.944839" RPosZ="407.976959" RLifeTime="1800"/>
+	<Property ID="16001" MonsterID="NPCQYJMY003" RSceneID="4" RPosX="-219.584503" RPosY="156.781006" RPosZ="429.385712" RLifeTime="1800"/>
+	<Property ID="16002" MonsterID="NPCQYJMY002" RSceneID="4" RPosX="-1.897457" RPosY="131.944839" RPosZ="407.976959" RLifeTime="1800"/>
+	<Property ID="16003" MonsterID="NPCQYJMY003" RSceneID="4" RPosX="-219.584503" RPosY="156.781006" RPosZ="429.385712" RLifeTime="1800"/>
+	<Property ID="16004" MonsterID="NPCQYJMY005" RSceneID="4" RPosX="-179.213196" RPosY="156.17601" RPosZ="433.725311" RLifeTime="1800"/>
+	<Property ID="16005" MonsterID="NPCQYJMY004" RSceneID="4" RPosX="-219.584503" RPosY="156.781006" RPosZ="429.385712" RLifeTime="1800"/>
+	<Property ID="18013" MonsterID="monrv04009" RSceneID="1" RPosX="888" RPosY="-34.5" RPosZ="665" RLifeTime="1800"/>
+	<Property ID="18014" MonsterID="monrv04010" RSceneID="1" RPosX="875" RPosY="-32.5" RPosZ="735" RLifeTime="1800"/>
+	<Property ID="18015" MonsterID="monrv04011" RSceneID="1" RPosX="931" RPosY="-29.4" RPosZ="508" RLifeTime="1800"/>
+	<Property ID="18016" MonsterID="monrv04012" RSceneID="1" RPosX="865" RPosY="-28.9" RPosZ="678" RLifeTime="1800"/>
+	<Property ID="18022" MonsterID="monrv04004" RSceneID="1" RPosX="800" RPosY="-35.9" RPosZ="740" RLifeTime="1800"/>
+	<Property ID="18023" MonsterID="monrv04005" RSceneID="1" RPosX="898" RPosY="-28.9" RPosZ="685" RLifeTime="1800"/>
+	<Property ID="18024" MonsterID="monrv04007" RSceneID="1" RPosX="837" RPosY="-28.5" RPosZ="632" RLifeTime="1800"/>
+	<Property ID="18025" MonsterID="monrv04051" RSceneID="1" RPosX="478" RPosY="-39" RPosZ="817" RLifeTime="1800"/>
+	<Property ID="18026" MonsterID="monrv04050" RSceneID="1" RPosX="1033" RPosY="1.7" RPosZ="1020" RLifeTime="1800"/>
+	<Property ID="18027" MonsterID="monrv04053" RSceneID="1" RPosX="716" RPosY="-37" RPosZ="694" RLifeTime="1800"/>
+	<Property ID="26001" MonsterID="monrm08001" RSceneID="12" RPosX="-129.166" RPosY="43.993" RPosZ="307.646" RLifeTime="1800"/>
+	<Property ID="26002" MonsterID="monrm08002" RSceneID="12" RPosX="-5.408" RPosY="49.836" RPosZ="193.756" RLifeTime="1800"/>
+	<Property ID="26003" MonsterID="monrm08003" RSceneID="12" RPosX="56.861" RPosY="41.704" RPosZ="859.519" RLifeTime="1800"/>
+	<Property ID="26004" MonsterID="monrm08004" RSceneID="12" RPosX="902.765" RPosY="136.36" RPosZ="298.468" RLifeTime="1800"/>
+	<Property ID="26005" MonsterID="monrm08005" RSceneID="12" RPosX="353.826" RPosY="83.994" RPosZ="236.587" RLifeTime="1800"/>
+	<Property ID="19000" MonsterID="cloneworldnpc014001" RSceneID="14" RPosX="580.8" RPosY="2.3" RPosZ="435.3" RLifeTime="36000"/>
+	<Property ID="35000"/>
+	<Property ID="17001" MonsterID="monrv03401" RSceneID="3" RPosX="30" RPosY="104" RPosZ="649" RLifeTime="6000"/>
+	<Property ID="17002" MonsterID="monrv03402" RSceneID="3" RPosX="161" RPosY="18" RPosZ="1423" RLifeTime="6000"/>
+	<Property ID="17003" MonsterID="monrv03403" RSceneID="3" RPosX="138" RPosY="20" RPosZ="1442" RLifeTime="6000"/>
+	<Property ID="17004" MonsterID="monrv03302" RSceneID="3" RPosX="136" RPosY="20" RPosZ="1438" RLifeTime="6000"/>
+	<Property ID="17005" MonsterID="monrv03302" RSceneID="3" RPosX="136" RPosY="20" RPosZ="1438" RLifeTime="6000"/>
+	<Property ID="29600" MonsterID="monrm012000" RSceneID="5" RPosX="565" RPosY="43" RPosZ="257.7" RLifeTime="500000"/>
+	<Property ID="29601" MonsterID="monrm012100" RSceneID="5" RPosX="459.5" RPosY="78.5" RPosZ="-144.7" RLifeTime="500000"/>
+	<Property ID="33700"/>
+	<Property ID="36841"/>
+	<Property ID="43700"/>
+	<Property ID="1003" MonsterID="monrm061600" RSceneID="10" RPosX="1098.4" RPosY="92.469" RPosZ="95" RLifeTime="300" TaskID="24065"/>
 	<Property ID="1004" MonsterID="monrf040700" RSceneID="21" RPosX="285.856" RPosY="16.119" RPosZ="240.899" RLifeTime="300"/>
 	<Property ID="1005" MonsterID="monrf040700" RSceneID="21" RPosX="285.655" RPosY="16.094" RPosZ="246.17" RLifeTime="300"/>
 	<Property ID="1006" MonsterID="monrf040700" RSceneID="21" RPosX="284.086" RPosY="16.094" RPosZ="253.228" RLifeTime="300"/>
@@ -60,11 +648,7 @@
 	<Property ID="1062" MonsterID="monrc020700" RSceneID="13" RPosX="122.46" RPosY="2.36" RPosZ="423.65" RLifeTime="300"/>
 	<Property ID="1063" MonsterID="monrc020900" RSceneID="13" RPosX="586.9" RPosY="-106.45" RPosZ="869.3" RLifeTime="300"/>
 	<Property ID="1064" MonsterID="monrc021600" RSceneID="13" RPosX="140" RPosY="2.36" RPosZ="422" RLifeTime="300"/>
-	<Property ID="1065" MonsterID="monrc020800" RSceneID="13" RPosX="324.48" RPosY="-143.7" RPosZ="1315.3" RLifeTime="300"/>
 	<Property ID="1066" MonsterID="monrc021000" RSceneID="13" RPosX="79.9" RPosY="28.52" RPosZ="643.24" RLifeTime="300"/>
-	<Property ID="1067" MonsterID="monrc021100" RSceneID="13" RPosX="254.9" RPosY="-143.7" RPosZ="1386.6" RLifeTime="300"/>
-	<Property ID="1068" MonsterID="monrc021100" RSceneID="13" RPosX="254.6" RPosY="-143.7" RPosZ="1399.5" RLifeTime="300"/>
-	<Property ID="1069" MonsterID="monrc021100" RSceneID="13" RPosX="260" RPosY="-143.7" RPosZ="1393" RLifeTime="300"/>
 	<Property ID="1070" MonsterID="monrm061000" RSceneID="10" RPosX="596.165" RPosY="35.3" RPosZ="714.12" RLifeTime="300"/>
 	<Property ID="1071" MonsterID="monrm061100" RSceneID="10" RPosX="574.697" RPosY="27.065" RPosZ="672.69" RLifeTime="300"/>
 	<Property ID="1072" MonsterID="monrm061200" RSceneID="10" RPosX="699.644" RPosY="31.67" RPosZ="750.52" RLifeTime="300"/>
@@ -272,601 +856,11 @@
 	<Property ID="1276"/>
 	<Property ID="1277"/>
 	<Property ID="1278"/>
-	<Property ID="10"/>
-	<Property ID="11"/>
+	<Property ID="1001" TaskID="24026"/>
+	<Property ID="1002" TaskID="24026"/>
+	<Property ID="73305" RSceneID="786"/>
 	<Property ID="12" MonsterID="monrv030100" RSceneID="ini\scene\city02_suzhou" RPosX="611.6" RPosY="6" RPosZ="920.9" RLifeTime="600"/>
 	<Property ID="13" MonsterID="monrv030200" RSceneID="ini\scene\born03_yanyuzhuang" RPosX="239.9" RPosY="52.3" RPosZ="710.9" RLifeTime="600"/>
 	<Property ID="14" MonsterID="monrv030200" RSceneID="ini\scene\born03_yanyuzhuang" RPosX="238.3" RPosY="53.1" RPosZ="708.8" RLifeTime="600"/>
-	<Property ID="2"/>
-	<Property ID="3"/>
-	<Property ID="4"/>
-	<Property ID="40"/>
-	<Property ID="5"/>
-	<Property ID="6"/>
-	<Property ID="7"/>
-	<Property ID="8"/>
-	<Property ID="9"/>
-	<Property ID="40001" MonsterID="npcclone001052" RSceneID="ini\scene\born03_YanYuZhuang" RPosX="138" RPosY="48.3" RPosZ="754.5" RLifeTime="1800"/>
-	<Property ID="3001" MonsterID="monrm082900" RSceneID="12" RPosX="812.037" RPosY="73.314" RPosZ="436.459" RLifeTime="300"/>
-	<Property ID="3002" MonsterID="monrm083000" RSceneID="12" RPosX="902.783" RPosY="136.314" RPosZ="298.093" RLifeTime="300"/>
-	<Property ID="3003" MonsterID="monrm083100" RSceneID="12" RPosX="331.84" RPosY="-50.662" RPosZ="610.62" RLifeTime="300"/>
-	<Property ID="3004" MonsterID="monrm083200" RSceneID="12" RPosX="268.515" RPosY="-46.341" RPosZ="617.429" RLifeTime="300"/>
-	<Property ID="3005" MonsterID="monrm083300" RSceneID="12" RPosX="752.062" RPosY="73.168" RPosZ="363.792" RLifeTime="600"/>
-	<Property ID="3006" MonsterID="monrm081500" RSceneID="12" RPosX="-195.446" RPosY="37.192" RPosZ="519.266" RLifeTime="600"/>
-	<Property ID="3007" MonsterID="monrm081500" RSceneID="12" RPosX="-191.909" RPosY="37.192" RPosZ="521.109" RLifeTime="600"/>
-	<Property ID="3008" MonsterID="monrm081500" RSceneID="12" RPosX="-188.745" RPosY="37.192" RPosZ="524.556" RLifeTime="600"/>
-	<Property ID="3009" MonsterID="monrm081500" RSceneID="12" RPosX="-188.139" RPosY="37.192" RPosZ="529.812" RLifeTime="600"/>
-	<Property ID="3010" MonsterID="monrm081000" RSceneID="12" RPosX="761.088" RPosY="73.028" RPosZ="319.457" RLifeTime="600"/>
-	<Property ID="3011" MonsterID="monrm081200" RSceneID="12" RPosX="749.184" RPosY="62.144" RPosZ="514.561" RLifeTime="600"/>
-	<Property ID="3012" MonsterID="monrm081100" RSceneID="12" RPosX="825.165" RPosY="65.549" RPosZ="499.779" RLifeTime="600"/>
-	<Property ID="3013" MonsterID="monrm081300" RSceneID="12" RPosX="268.515" RPosY="-46.341" RPosZ="617.429" RLifeTime="600"/>
-	<Property ID="3014" MonsterID="monrm081400" RSceneID="12" RPosX="277.446" RPosY="-46.341" RPosZ="611.137" RLifeTime="600"/>
-	<Property ID="3015" MonsterID="monrm081400" RSceneID="12" RPosX="266.527" RPosY="-46.341" RPosZ="609.545" RLifeTime="600"/>
-	<Property ID="3016" MonsterID="monrm080500" RSceneID="12" RPosX="743" RPosY="62.144" RPosZ="531" RLifeTime="600"/>
-	<Property ID="3017" MonsterID="monrm080600" RSceneID="12" RPosX="628.5" RPosY="55.9" RPosZ="265.8" RLifeTime="600"/>
-	<Property ID="3018" MonsterID="monrm080800" RSceneID="12" RPosX="808.381" RPosY="19.29" RPosZ="729.672" RLifeTime="600"/>
-	<Property ID="3019" MonsterID="monrm080900" RSceneID="12" RPosX="757.667" RPosY="-32.493" RPosZ="917.953" RLifeTime="600"/>
-	<Property ID="3020" MonsterID="monrm080400" RSceneID="12" RPosX="749" RPosY="73" RPosZ="407" RLifeTime="600"/>
-	<Property ID="3021" MonsterID="monrm080200" RSceneID="12" RPosX="879" RPosY="73" RPosZ="408" RLifeTime="600"/>
-	<Property ID="3022" MonsterID="monrm080400" RSceneID="12" RPosX="749" RPosY="73" RPosZ="407" RLifeTime="600"/>
-	<Property ID="3023" MonsterID="monrf030100" RSceneID="20" RPosX="772" RPosY="-10" RPosZ="548" RLifeTime="600"/>
-	<Property ID="3024" MonsterID="monrf030100" RSceneID="20" RPosX="772" RPosY="-10" RPosZ="548" RLifeTime="600"/>
-	<Property ID="3025" MonsterID="monrc040100" RSceneID="16" RPosX="936" RPosY="-16" RPosZ="654" RLifeTime="600"/>
-	<Property ID="3026" MonsterID="monrc040200" RSceneID="16" RPosX="958" RPosY="-25" RPosZ="805" RLifeTime="600"/>
-	<Property ID="3027" MonsterID="monrc040300" RSceneID="16" RPosX="879" RPosY="-21" RPosZ="750" RLifeTime="600"/>
-	<Property ID="3028" MonsterID="monrc040400" RSceneID="16" RPosX="929" RPosY="-24" RPosZ="654" RLifeTime="600"/>
-	<Property ID="3029" MonsterID="monrc040500" RSceneID="16" RPosX="1045" RPosY="1.6" RPosZ="476" RLifeTime="600"/>
-	<Property ID="3030" MonsterID="monrc040800" RSceneID="16" RPosX="1031" RPosY="4" RPosZ="271" RLifeTime="600"/>
-	<Property ID="3031" MonsterID="monrm080100" RSceneID="12" RPosX="403" RPosY="-43" RPosZ="632" RLifeTime="600"/>
-	<Property ID="3032" MonsterID="monrm080100" RSceneID="12" RPosX="403" RPosY="-43" RPosZ="632" RLifeTime="600"/>
-	<Property ID="3033" MonsterID="monrv020100" RSceneID="2" RPosX="102" RPosY="-5" RPosZ="120" RLifeTime="600"/>
-	<Property ID="3034" MonsterID="monrm081600" RSceneID="12" RPosX="759.028" RPosY="62.298" RPosZ="509.039" RLifeTime="600"/>
-	<Property ID="3035" MonsterID="monrm081600" RSceneID="12" RPosX="750.318" RPosY="64.413" RPosZ="448.612" RLifeTime="600"/>
-	<Property ID="3036" MonsterID="monrm081600" RSceneID="12" RPosX="826.717" RPosY="63.753" RPosZ="479.422" RLifeTime="600"/>
-	<Property ID="3039" MonsterID="monrm020100" RSceneID="14" RPosX="113" RPosY="53" RPosZ="198" RLifeTime="600"/>
-	<Property ID="3040" MonsterID="monrc030900" RSceneID="14" RPosX="524.52" RPosY="23.13" RPosZ="614.68" RLifeTime="600"/>
-	<Property ID="3041" MonsterID="monrc010500" RSceneID="14" RPosX="1102.151" RPosY="23.782" RPosZ="197.629" RLifeTime="600"/>
-	<Property ID="3050" MonsterID="monrc020100" RSceneID="13" RPosX="329" RPosY="-5" RPosZ="435" RLifeTime="600"/>
-	<Property ID="3051" MonsterID="monrm080300" RSceneID="12" RPosX="582" RPosY="21" RPosZ="305" RLifeTime="600"/>
-	<Property ID="3052" MonsterID="monrc020200" RSceneID="13" RPosX="359" RPosY="3" RPosZ="635" RLifeTime="600"/>
-	<Property ID="3053" MonsterID="monrc040600" RSceneID="14" RPosX="1038" RPosY="-16" RPosZ="694" RLifeTime="600"/>
-	<Property ID="3054" MonsterID="monrc040700" RSceneID="14" RPosX="963" RPosY="-22" RPosZ="732" RLifeTime="600"/>
-	<Property ID="3055" MonsterID="monrf030200" RSceneID="20" RPosX="416" RPosY="23" RPosZ="609" RLifeTime="600"/>
-	<Property ID="3056" MonsterID="monrc020300" RSceneID="13" RPosX="193" RPosY="2" RPosZ="473" RLifeTime="600"/>
-	<Property ID="3057" MonsterID="monrf050100" RSceneID="22" RPosX="1443.82" RPosY="6.26" RPosZ="1847.48" RLifeTime="600"/>
-	<Property ID="3058" MonsterID="monrf050200" RSceneID="22" RPosX="1179" RPosY="124.84" RPosZ="794" RLifeTime="600"/>
-	<Property ID="3059" MonsterID="monrf050200" RSceneID="22" RPosX="1399" RPosY="88.87" RPosZ="810" RLifeTime="600"/>
-	<Property ID="3060" MonsterID="monrv020200" RSceneID="2" RPosX="237.322" RPosY="25.844" RPosZ="564.613" RLifeTime="600"/>
-	<Property ID="3061" MonsterID="monrv020300" RSceneID="2" RPosX="430" RPosY="7.51" RPosZ="807" RLifeTime="600"/>
-	<Property ID="3062" MonsterID="monrv020500" RSceneID="2" RPosX="233" RPosY="25.04" RPosZ="779" RLifeTime="600"/>
-	<Property ID="3063" MonsterID="monrf070100" RSceneID="24" RPosX="668.1" RPosY="23.54" RPosZ="50.57" RLifeTime="600"/>
-	<Property ID="3065" MonsterID="monrf070100" RSceneID="24" RPosX="670.03" RPosY="23.5" RPosZ="47.31" RLifeTime="600"/>
-	<Property ID="3066" MonsterID="monrf070100" RSceneID="24" RPosX="664" RPosY="23.89" RPosZ="50.26" RLifeTime="600"/>
-	<Property ID="3067" MonsterID="monrf070100" RSceneID="24" RPosX="665.42" RPosY="23.87" RPosZ="48.03" RLifeTime="600"/>
-	<Property ID="3068" MonsterID="monrf070100" RSceneID="24" RPosX="672.17" RPosY="23.07" RPosZ="49.56" RLifeTime="600"/>
-	<Property ID="3069" MonsterID="Monster00710" RSceneID="24" RPosX="389.8" RPosY="10.92" RPosZ="29.844" RLifeTime="600"/>
-	<Property ID="3070" MonsterID="monrc010100" RSceneID="14" RPosX="792.72" RPosY="83.38" RPosZ="122.33" RLifeTime="600"/>
-	<Property ID="3071" MonsterID="monrc010100" RSceneID="14" RPosX="761.8" RPosY="83.38" RPosZ="119.05" RLifeTime="600"/>
-	<Property ID="3072" MonsterID="monrc010100" RSceneID="14" RPosX="764.83" RPosY="83.38" RPosZ="113.8" RLifeTime="600"/>
-	<Property ID="3073" MonsterID="monrc010100" RSceneID="14" RPosX="769.22" RPosY="83.38" RPosZ="112.1" RLifeTime="600"/>
-	<Property ID="3074" MonsterID="monrc010100" RSceneID="14" RPosX="772.02" RPosY="83.38" RPosZ="119.95" RLifeTime="600"/>
-	<Property ID="3075" MonsterID="monrc010100" RSceneID="14" RPosX="768.22" RPosY="83.38" RPosZ="118.43" RLifeTime="600"/>
-	<Property ID="3076" MonsterID="monrf050200" RSceneID="14" RPosX="289.145" RPosY="4.945" RPosZ="648.917" RLifeTime="600"/>
-	<Property ID="3077" MonsterID="monrm050100" RSceneID="9" RPosX="730" RPosY="30" RPosZ="749" RLifeTime="60"/>
-	<Property ID="3078" MonsterID="monrm050100" RSceneID="9" RPosX="731" RPosY="30" RPosZ="750" RLifeTime="60"/>
-	<Property ID="3079" MonsterID="monrm050200" RSceneID="9" RPosX="411" RPosY="63" RPosZ="791" RLifeTime="600"/>
-	<Property ID="3080" MonsterID="monrm050600" RSceneID="9" RPosX="816" RPosY="32" RPosZ="842" RLifeTime="600"/>
-	<Property ID="3081" MonsterID="monrm050700" RSceneID="9" RPosX="680.78" RPosY="10.85" RPosZ="578.02" RLifeTime="600"/>
-	<Property ID="3082" MonsterID="monrm050700" RSceneID="9" RPosX="399" RPosY="53" RPosZ="734" RLifeTime="2400"/>
-	<Property ID="3083" MonsterID="monrm050300" RSceneID="9" RPosX="490" RPosY="48" RPosZ="807" RLifeTime="400"/>
-	<Property ID="3084" MonsterID="monrm050400" RSceneID="9" RPosX="872" RPosY="34" RPosZ="867" RLifeTime="240"/>
-	<Property ID="3085" MonsterID="monrf040300" RSceneID="21" RPosX="584" RPosY="57.65" RPosZ="887" RLifeTime="600"/>
-	<Property ID="3086" MonsterID="monrf040400" RSceneID="21" RPosX="555" RPosY="28.44" RPosZ="925" RLifeTime="600"/>
-	<Property ID="3087" MonsterID="monrf040100" RSceneID="21" RPosX="729" RPosY="59" RPosZ="1017" RLifeTime="600"/>
-	<Property ID="3088" MonsterID="monrf040200" RSceneID="21" RPosX="731" RPosY="59" RPosZ="1022" RLifeTime="600"/>
-	<Property ID="3089" MonsterID="monrv021700" RSceneID="2" RPosX="169" RPosY="0" RPosZ="71" RLifeTime="600"/>
-	<Property ID="3090" MonsterID="monrv021700" RSceneID="2" RPosX="166" RPosY="0" RPosZ="73" RLifeTime="600"/>
-	<Property ID="3091" MonsterID="monrv021700" RSceneID="2" RPosX="164" RPosY="0" RPosZ="69" RLifeTime="600"/>
-	<Property ID="3092" MonsterID="monrv021700" RSceneID="2" RPosX="165" RPosY="0" RPosZ="65" RLifeTime="600"/>
-	<Property ID="3093"/>
-	<Property ID="3094"/>
-	<Property ID="3095"/>
-	<Property ID="3096"/>
-	<Property ID="3097"/>
-	<Property ID="3098"/>
-	<Property ID="3099"/>
-	<Property ID="3100"/>
-	<Property ID="3101"/>
-	<Property ID="3102"/>
-	<Property ID="3103"/>
-	<Property ID="3104"/>
-	<Property ID="3105"/>
-	<Property ID="3106"/>
-	<Property ID="3107"/>
-	<Property ID="3108"/>
-	<Property ID="3109"/>
-	<Property ID="3110"/>
-	<Property ID="3111"/>
-	<Property ID="3112"/>
-	<Property ID="3113"/>
-	<Property ID="3114"/>
-	<Property ID="3115"/>
-	<Property ID="3116"/>
-	<Property ID="3117"/>
-	<Property ID="3118"/>
-	<Property ID="3119"/>
-	<Property ID="3120"/>
-	<Property ID="3121"/>
-	<Property ID="3122"/>
-	<Property ID="3123"/>
-	<Property ID="3124"/>
-	<Property ID="3125"/>
-	<Property ID="3126"/>
-	<Property ID="3127"/>
-	<Property ID="3128"/>
-	<Property ID="3129"/>
-	<Property ID="3130"/>
-	<Property ID="3131"/>
-	<Property ID="3132"/>
-	<Property ID="3133"/>
-	<Property ID="3134"/>
-	<Property ID="3135"/>
-	<Property ID="3136"/>
-	<Property ID="3137"/>
-	<Property ID="3138"/>
-	<Property ID="3139"/>
-	<Property ID="3140"/>
-	<Property ID="3141"/>
-	<Property ID="3142"/>
-	<Property ID="3143"/>
-	<Property ID="3144"/>
-	<Property ID="3145"/>
-	<Property ID="3146"/>
-	<Property ID="3147"/>
-	<Property ID="3148"/>
-	<Property ID="3149"/>
-	<Property ID="3150"/>
-	<Property ID="3151"/>
-	<Property ID="3152"/>
-	<Property ID="10001"/>
-	<Property ID="10002"/>
-	<Property ID="10003"/>
-	<Property ID="10004"/>
-	<Property ID="10005"/>
-	<Property ID="10006"/>
-	<Property ID="10007"/>
-	<Property ID="10008"/>
-	<Property ID="10009"/>
-	<Property ID="10010"/>
-	<Property ID="10011"/>
-	<Property ID="10012"/>
-	<Property ID="10013"/>
-	<Property ID="10014"/>
-	<Property ID="10015"/>
-	<Property ID="10016"/>
-	<Property ID="10017"/>
-	<Property ID="10018"/>
-	<Property ID="10019"/>
-	<Property ID="10020"/>
-	<Property ID="10021"/>
-	<Property ID="10022"/>
-	<Property ID="10023"/>
-	<Property ID="10024"/>
-	<Property ID="10025"/>
-	<Property ID="10026"/>
-	<Property ID="10027"/>
-	<Property ID="10028"/>
-	<Property ID="10029"/>
-	<Property ID="10030"/>
-	<Property ID="10031"/>
-	<Property ID="10032"/>
-	<Property ID="10033"/>
-	<Property ID="10034"/>
-	<Property ID="10035"/>
-	<Property ID="10036"/>
-	<Property ID="10037"/>
-	<Property ID="10038"/>
-	<Property ID="10039"/>
-	<Property ID="10040"/>
-	<Property ID="10041"/>
-	<Property ID="10042"/>
-	<Property ID="10043"/>
-	<Property ID="10044"/>
-	<Property ID="10045"/>
-	<Property ID="10046"/>
-	<Property ID="10047"/>
-	<Property ID="10048"/>
-	<Property ID="10049"/>
-	<Property ID="10050"/>
-	<Property ID="10051"/>
-	<Property ID="10052"/>
-	<Property ID="10053"/>
-	<Property ID="10054"/>
-	<Property ID="10055"/>
-	<Property ID="10056"/>
-	<Property ID="10057"/>
-	<Property ID="10058"/>
-	<Property ID="10059"/>
-	<Property ID="10060"/>
-	<Property ID="10061"/>
-	<Property ID="10062"/>
-	<Property ID="10063"/>
-	<Property ID="10064"/>
-	<Property ID="10065"/>
-	<Property ID="10066"/>
-	<Property ID="10067"/>
-	<Property ID="10068"/>
-	<Property ID="10069"/>
-	<Property ID="10070"/>
-	<Property ID="10071"/>
-	<Property ID="10072"/>
-	<Property ID="10073"/>
-	<Property ID="10074"/>
-	<Property ID="10075"/>
-	<Property ID="10076"/>
-	<Property ID="10077"/>
-	<Property ID="10078"/>
-	<Property ID="10079"/>
-	<Property ID="10080"/>
-	<Property ID="10081"/>
-	<Property ID="10082"/>
-	<Property ID="10083"/>
-	<Property ID="10084"/>
-	<Property ID="10085"/>
-	<Property ID="10086"/>
-	<Property ID="10087"/>
-	<Property ID="10088"/>
-	<Property ID="10089"/>
-	<Property ID="10090"/>
-	<Property ID="10091"/>
-	<Property ID="10092"/>
-	<Property ID="10093"/>
-	<Property ID="10094"/>
-	<Property ID="10095"/>
-	<Property ID="10096"/>
-	<Property ID="10097"/>
-	<Property ID="10098"/>
-	<Property ID="10099"/>
-	<Property ID="10100"/>
-	<Property ID="10101"/>
-	<Property ID="10102"/>
-	<Property ID="10103"/>
-	<Property ID="10104"/>
-	<Property ID="10105"/>
-	<Property ID="10106"/>
-	<Property ID="10107"/>
-	<Property ID="10108"/>
-	<Property ID="10109"/>
-	<Property ID="10110"/>
-	<Property ID="10111"/>
-	<Property ID="10112"/>
-	<Property ID="10113"/>
-	<Property ID="10114"/>
-	<Property ID="10115"/>
-	<Property ID="5001" MonsterID="monrm052700" RSceneID="9" RPosX="1082.437" RPosY="78.88" RPosZ="23.627" RLifeTime="300"/>
-	<Property ID="5002" MonsterID="monrm052200" RSceneID="9" RPosX="925.103" RPosY="32.091" RPosZ="321.896" RLifeTime="300"/>
-	<Property ID="5003" MonsterID="monrm052300" RSceneID="9" RPosX="1059.779" RPosY="45.62" RPosZ="431.175" RLifeTime="300"/>
-	<Property ID="5004" MonsterID="monrm052400" RSceneID="9" RPosX="1054.7" RPosY="45.61" RPosZ="428.91" RLifeTime="300"/>
-	<Property ID="5005" MonsterID="monrm052400" RSceneID="9" RPosX="1054.82" RPosY="45.61" RPosZ="432.2" RLifeTime="300"/>
-	<Property ID="5006" MonsterID="monrm052400" RSceneID="9" RPosX="1057.82" RPosY="45.61" RPosZ="425.14" RLifeTime="300"/>
-	<Property ID="5007" MonsterID="monrm052200" RSceneID="9" RPosX="925.103" RPosY="32.091" RPosZ="321.896" RLifeTime="300"/>
-	<Property ID="5008" MonsterID="monrm052400" RSceneID="9" RPosX="918.22" RPosY="29.48" RPosZ="323.23" RLifeTime="300"/>
-	<Property ID="5009" MonsterID="monrm052400" RSceneID="9" RPosX="915.03" RPosY="28.48" RPosZ="320.86" RLifeTime="300"/>
-	<Property ID="5010" MonsterID="monrm052400" RSceneID="9" RPosX="916.09" RPosY="28.79" RPosZ="318.26" RLifeTime="300"/>
-	<Property ID="5011" MonsterID="monrm053500" RSceneID="9" RPosX="1099.557" RPosY="46.45" RPosZ="347.756" RLifeTime="300"/>
-	<Property ID="5012" MonsterID="monrm052500" RSceneID="9" RPosX="970.991" RPosY="36.278" RPosZ="329.634" RLifeTime="300"/>
-	<Property ID="5013" MonsterID="monrm052400" RSceneID="9" RPosX="965.54" RPosY="36.19" RPosZ="334.11" RLifeTime="300"/>
-	<Property ID="5014" MonsterID="monrm052400" RSceneID="9" RPosX="975.63" RPosY="36.28" RPosZ="339.04" RLifeTime="300"/>
-	<Property ID="5015" MonsterID="monrm052400" RSceneID="9" RPosX="970.43" RPosY="36.19" RPosZ="334.07" RLifeTime="300"/>
-	<Property ID="5016" MonsterID="monrm052600" RSceneID="9" RPosX="936" RPosY="42.2" RPosZ="292.5" RLifeTime="300"/>
-	<Property ID="5017" MonsterID="monrm053500" RSceneID="9" RPosX="1099.557" RPosY="46.45" RPosZ="347.767" RLifeTime="300"/>
-	<Property ID="5018" MonsterID="monrm052400" RSceneID="9" RPosX="1100.557" RPosY="46.45" RPosZ="348.767" RLifeTime="300"/>
-	<Property ID="5019" MonsterID="monrm052400" RSceneID="9" RPosX="1098.557" RPosY="46.45" RPosZ="346.767" RLifeTime="300"/>
-	<Property ID="5020" MonsterID="monrm052400" RSceneID="9" RPosX="1097.557" RPosY="46.45" RPosZ="345.767" RLifeTime="300"/>
-	<Property ID="5021" MonsterID="monrm052900" RSceneID="9" RPosX="1172.165" RPosY="100.542" RPosZ="-50.389" RLifeTime="300"/>
-	<Property ID="5022" MonsterID="monrm053000" RSceneID="9" RPosX="899.17" RPosY="48.713" RPosZ="-80.384" RLifeTime="300"/>
-	<Property ID="5023" MonsterID="monrm052800" RSceneID="9" RPosX="1026" RPosY="69" RPosZ="-188" RLifeTime="300"/>
-	<Property ID="5024" MonsterID="monrm053100" RSceneID="9" RPosX="1094.393" RPosY="79.026" RPosZ="12.093" RLifeTime="300"/>
-	<Property ID="5025" MonsterID="monrm053200" RSceneID="9" RPosX="941.8" RPosY="68.315" RPosZ="-111.7" RLifeTime="300"/>
-	<Property ID="5026" MonsterID="monrm053300" RSceneID="9" RPosX="961.088" RPosY="61.701" RPosZ="45.916" RLifeTime="300"/>
-	<Property ID="5027" MonsterID="monrm053100" RSceneID="9" RPosX="1094.393" RPosY="79.026" RPosZ="12.093" RLifeTime="300"/>
-	<Property ID="5028" MonsterID="monrm053400" RSceneID="9" RPosX="1040.5" RPosY="79.44" RPosZ="-123.123" RLifeTime="300"/>
-	<Property ID="5029" MonsterID="monrm053600" RSceneID="9" RPosX="1011" RPosY="69" RPosZ="-182" RLifeTime="1800"/>
-	<Property ID="5030" MonsterID="monrm053700" RSceneID="9" RPosX="545" RPosY="-6" RPosZ="254" RLifeTime="1800"/>
-	<Property ID="5031" MonsterID="monrm053800" RSceneID="9" RPosX="853" RPosY="31" RPosZ="428" RLifeTime="1800"/>
-	<Property ID="5032" MonsterID="monrm054900" RSceneID="9" RPosX="815" RPosY="35" RPosZ="508" RLifeTime="1800"/>
-	<Property ID="5033" MonsterID="monrm055000" RSceneID="9" RPosX="817" RPosY="35" RPosZ="514" RLifeTime="1800"/>
-	<Property ID="5034" MonsterID="monrm055100" RSceneID="9" RPosX="810" RPosY="35" RPosZ="506" RLifeTime="1800"/>
-	<Property ID="5035" MonsterID="monrm055200" RSceneID="9" RPosX="1040" RPosY="80" RPosZ="-123" RLifeTime="1800"/>
-	<Property ID="5036" MonsterID="monrm054300" RSceneID="9" RPosX="896" RPosY="49" RPosZ="-80" RLifeTime="1800"/>
-	<Property ID="5037" MonsterID="monrm054300" RSceneID="9" RPosX="892" RPosY="49" RPosZ="-81" RLifeTime="1800"/>
-	<Property ID="5038" MonsterID="monrm054300" RSceneID="9" RPosX="894" RPosY="49" RPosZ="-85" RLifeTime="1800"/>
-	<Property ID="5040" MonsterID="monrm054200" RSceneID="9" RPosX="453" RPosY="-16" RPosZ="479" RLifeTime="1800"/>
-	<Property ID="5041" MonsterID="monrm053900" RSceneID="9" RPosX="879" RPosY="49" RPosZ="-86" RLifeTime="1800"/>
-	<Property ID="5042" MonsterID="monrm056800" RSceneID="9" RPosX="885" RPosY="62.3" RPosZ="-225" RLifeTime="1800"/>
-	<Property ID="5043" MonsterID="monrm054000" RSceneID="9" RPosX="1055" RPosY="103" RPosZ="-349" RLifeTime="1800"/>
-	<Property ID="5044" MonsterID="monrm054700" RSceneID="9" RPosX="1060" RPosY="78" RPosZ="-116" RLifeTime="1800"/>
-	<Property ID="5045" MonsterID="monrm054700" RSceneID="9" RPosX="1061" RPosY="78" RPosZ="-118" RLifeTime="1800"/>
-	<Property ID="5046" MonsterID="monrm054700" RSceneID="9" RPosX="1039" RPosY="78" RPosZ="-179" RLifeTime="1800"/>
-	<Property ID="5047" MonsterID="monrm054700" RSceneID="9" RPosX="1043" RPosY="78" RPosZ="-178" RLifeTime="1800"/>
-	<Property ID="5048" MonsterID="monrm054700" RSceneID="9" RPosX="1039" RPosY="78" RPosZ="-175" RLifeTime="1800"/>
-	<Property ID="5049" MonsterID="monrm054100" RSceneID="9" RPosX="1030" RPosY="73" RPosZ="5" RLifeTime="1800"/>
-	<Property ID="5050" MonsterID="monrc051400" RSceneID="17" RPosX="937" RPosY="24" RPosZ="875" RLifeTime="1800"/>
-	<Property ID="5051" MonsterID="monrc051500" RSceneID="17" RPosX="1283" RPosY="84" RPosZ="611" RLifeTime="1800"/>
-	<Property ID="5052" MonsterID="monrc051500" RSceneID="17" RPosX="1285" RPosY="84" RPosZ="615" RLifeTime="1800"/>
-	<Property ID="5053" MonsterID="monrc051500" RSceneID="17" RPosX="1298" RPosY="84" RPosZ="615" RLifeTime="1800"/>
-	<Property ID="5054" MonsterID="monrc051500" RSceneID="17" RPosX="1301" RPosY="84" RPosZ="611" RLifeTime="1800"/>
-	<Property ID="5055" MonsterID="monrc051500" RSceneID="17" RPosX="1292" RPosY="84" RPosZ="612" RLifeTime="1800"/>
-	<Property ID="5057" MonsterID="monrc051600" RSceneID="17" RPosX="914" RPosY="28" RPosZ="849" RLifeTime="1800"/>
-	<Property ID="5058" MonsterID="monrc051700" RSceneID="17" RPosX="894" RPosY="30" RPosZ="592" RLifeTime="1800"/>
-	<Property ID="5059" MonsterID="monrc051800" RSceneID="17" RPosX="808" RPosY="25" RPosZ="615" RLifeTime="1800"/>
-	<Property ID="5060" MonsterID="monrc051900" RSceneID="17" RPosX="950" RPosY="19" RPosZ="755" RLifeTime="1800"/>
-	<Property ID="5061" MonsterID="monrc051900" RSceneID="17" RPosX="953" RPosY="19" RPosZ="758" RLifeTime="1800"/>
-	<Property ID="5063" MonsterID="monrc052000" RSceneID="17" RPosX="894" RPosY="30.3" RPosZ="594" RLifeTime="1800"/>
-	<Property ID="5064" MonsterID="monrc052000" RSceneID="17" RPosX="891" RPosY="30.3" RPosZ="595" RLifeTime="1800"/>
-	<Property ID="5065" MonsterID="monrc052000" RSceneID="17" RPosX="892" RPosY="30.3" RPosZ="596" RLifeTime="1800"/>
-	<Property ID="5066" MonsterID="monrc052000" RSceneID="17" RPosX="889" RPosY="30.3" RPosZ="596" RLifeTime="1800"/>
-	<Property ID="5067" MonsterID="monrc052000" RSceneID="17" RPosX="892" RPosY="30.3" RPosZ="591" RLifeTime="1800"/>
-	<Property ID="5068" MonsterID="monrc052100" RSceneID="17" RPosX="667" RPosY="24" RPosZ="610" RLifeTime="1800"/>
-	<Property ID="5069" MonsterID="monrc051700" RSceneID="17" RPosX="894" RPosY="30" RPosZ="592" RLifeTime="1800"/>
-	<Property ID="5070" MonsterID="monrv041100" RSceneID="1" RPosX="618.55" RPosY="-39.68" RPosZ="677.94" RLifeTime="1800"/>
-	<Property ID="5071" MonsterID="monrv041100" RSceneID="1" RPosX="615.28" RPosY="-39.68" RPosZ="676.19" RLifeTime="1800"/>
-	<Property ID="5072" MonsterID="monrv041100" RSceneID="1" RPosX="609.73" RPosY="-39.68" RPosZ="674.2" RLifeTime="1800"/>
-	<Property ID="5073" MonsterID="monrv041200" RSceneID="1" RPosX="890" RPosY="-35" RPosZ="489" RLifeTime="1800"/>
-	<Property ID="5074" MonsterID="monrv041200" RSceneID="1" RPosX="886" RPosY="-36" RPosZ="484" RLifeTime="1800"/>
-	<Property ID="5075" MonsterID="monrv041200" RSceneID="1" RPosX="877" RPosY="-39" RPosZ="483" RLifeTime="1800"/>
-	<Property ID="5076" MonsterID="monrv041300" RSceneID="1" RPosX="496.87" RPosY="-40.29" RPosZ="811.56" RLifeTime="1800"/>
-	<Property ID="5077" MonsterID="monrv041300" RSceneID="1" RPosX="497.72" RPosY="-40.59" RPosZ="813.44" RLifeTime="1800"/>
-	<Property ID="5078" MonsterID="monrv041400" RSceneID="1" RPosX="969.7" RPosY="30.8" RPosZ="921.3" RLifeTime="1800"/>
-	<Property ID="5079" MonsterID="monrv041400" RSceneID="1" RPosX="969.8" RPosY="30.2" RPosZ="926.6" RLifeTime="1800"/>
-	<Property ID="5080" MonsterID="monrv041400" RSceneID="1" RPosX="973.9" RPosY="30.6" RPosZ="927.4" RLifeTime="1800"/>
-	<Property ID="5081" MonsterID="monrv041500" RSceneID="1" RPosX="431.32" RPosY="-29.15" RPosZ="627.49" RLifeTime="1800"/>
-	<Property ID="5082" MonsterID="monrv041500" RSceneID="1" RPosX="427.43" RPosY="-28.71" RPosZ="624.82" RLifeTime="1800"/>
-	<Property ID="5083" MonsterID="monrv041500" RSceneID="1" RPosX="423.41" RPosY="-28.89" RPosZ="623.98" RLifeTime="1800"/>
-	<Property ID="5084" MonsterID="monrv041600" RSceneID="1" RPosX="858.24" RPosY="-28.93" RPosZ="678.75" RLifeTime="1800"/>
-	<Property ID="5085" MonsterID="monrc052200" RSceneID="17" RPosX="368.73" RPosY="14.43" RPosZ="519.49" RLifeTime="1800"/>
-	<Property ID="5086" MonsterID="monrm055400" RSceneID="9" RPosX="1061.6" RPosY="79.38" RPosZ="-12.22" RLifeTime="1800"/>
-	<Property ID="5087" MonsterID="monrm055500" RSceneID="9" RPosX="1106.39" RPosY="99.9" RPosZ="-307.91" RLifeTime="1800"/>
-	<Property ID="5088" MonsterID="monrm055600" RSceneID="9" RPosX="959.29" RPosY="68.31" RPosZ="-115.05" RLifeTime="1800"/>
-	<Property ID="5090" MonsterID="monrf040800" RSceneID="21" RPosX="519.12" RPosY="57.43" RPosZ="361.58" RLifeTime="1800"/>
-	<Property ID="5091" MonsterID="monrf040800" RSceneID="21" RPosX="521.36" RPosY="57.43" RPosZ="364.61" RLifeTime="1800"/>
-	<Property ID="5092" MonsterID="monrf040800" RSceneID="21" RPosX="524.01" RPosY="57.67" RPosZ="366.99" RLifeTime="1800"/>
-	<Property ID="5093" MonsterID="monrm050001" RSceneID="9" RPosX="706.513" RPosY="-2.884" RPosZ="311.63" RLifeTime="1800"/>
-	<Property ID="5094" MonsterID="monrc040900" RSceneID="16" RPosX="1007.817" RPosY="-16.038" RPosZ="711.87" RLifeTime="600"/>
-	<Property ID="5095" MonsterID="monrc041000" RSceneID="16" RPosX="1158.018" RPosY="13.998" RPosZ="359.614" RLifeTime="600"/>
-	<Property ID="5096" MonsterID="monrc041100" RSceneID="16" RPosX="339.359" RPosY="32.637" RPosZ="366.326" RLifeTime="600"/>
-	<Property ID="5097" MonsterID="monrc041200" RSceneID="16" RPosX="428.8" RPosY="-41.8" RPosZ="322.3" RLifeTime="1800"/>
-	<Property ID="5098" MonsterID="monrc041300" RSceneID="16" RPosX="749.194" RPosY="-28.596" RPosZ="574.706" RLifeTime="600"/>
-	<Property ID="5099" MonsterID="monrc041400" RSceneID="16" RPosX="1264.35" RPosY="-24.934" RPosZ="786.477" RLifeTime="600"/>
-	<Property ID="5100" MonsterID="monrc041500" RSceneID="16" RPosX="606.4" RPosY="-24" RPosZ="596.8" RLifeTime="600"/>
-	<Property ID="5101" MonsterID="monrc041500" RSceneID="16" RPosX="611.5" RPosY="-23.7" RPosZ="596.3" RLifeTime="600"/>
-	<Property ID="5102" MonsterID="monrc042200" RSceneID="16" RPosX="538.2" RPosY="-27.9" RPosZ="553" RLifeTime="600"/>
-	<Property ID="5103" MonsterID="monrc041600" RSceneID="16" RPosX="1354.015" RPosY="-7.952" RPosZ="1073.472" RLifeTime="600"/>
-	<Property ID="5104" MonsterID="monrc041700" RSceneID="16" RPosX="535" RPosY="-25.4" RPosZ="690.3" RLifeTime="600"/>
-	<Property ID="5105" MonsterID="monrc041700" RSceneID="16" RPosX="539.8" RPosY="-25.5" RPosZ="693.9" RLifeTime="600"/>
-	<Property ID="5106" MonsterID="monrc041900" RSceneID="16" RPosX="504" RPosY="-27" RPosZ="465" RLifeTime="1800"/>
-	<Property ID="5107" MonsterID="monrc042300" RSceneID="16" RPosX="503" RPosY="-27" RPosZ="467" RLifeTime="1800"/>
-	<Property ID="5108" MonsterID="monrc042300" RSceneID="16" RPosX="502" RPosY="-27" RPosZ="464.5" RLifeTime="1800"/>
-	<Property ID="5109" MonsterID="monrc042000" RSceneID="16" RPosX="388" RPosY="-24.5" RPosZ="431" RLifeTime="1800"/>
-	<Property ID="5110" MonsterID="monrc042300" RSceneID="16" RPosX="389" RPosY="-25" RPosZ="429.5" RLifeTime="1800"/>
-	<Property ID="5111" MonsterID="monrc042300" RSceneID="16" RPosX="390" RPosY="-25" RPosZ="432" RLifeTime="1800"/>
-	<Property ID="5112" MonsterID="monrc042100" RSceneID="16" RPosX="518" RPosY="-32.7" RPosZ="389" RLifeTime="1800"/>
-	<Property ID="5113" MonsterID="monrc042300" RSceneID="16" RPosX="518" RPosY="-33.4" RPosZ="386.7" RLifeTime="1800"/>
-	<Property ID="5114" MonsterID="monrc042300" RSceneID="16" RPosX="520" RPosY="-33.8" RPosZ="387.8" RLifeTime="1800"/>
-	<Property ID="5115" MonsterID="monrm062700" RSceneID="10" RPosX="183.6" RPosY="91.5" RPosZ="451.5" RLifeTime="600"/>
-	<Property ID="5117" MonsterID="monrm060800" RSceneID="10" RPosX="308" RPosY="49" RPosZ="567" RLifeTime="600"/>
-	<Property ID="5118" MonsterID="monrm060900" RSceneID="10" RPosX="627" RPosY="128" RPosZ="144" RLifeTime="600"/>
-	<Property ID="5119" MonsterID="monrm050800" RSceneID="9" RPosX="954.564" RPosY="79.713" RPosZ="-298.625" RLifeTime="600"/>
-	<Property ID="5120" MonsterID="monrm051000" RSceneID="9" RPosX="717.8" RPosY="-15.4" RPosZ="138.6" RLifeTime="600"/>
-	<Property ID="5121" MonsterID="monrm030400" RSceneID="7" RPosX="280.879" RPosY="40.804" RPosZ="411.639" RLifeTime="600"/>
-	<Property ID="5122" MonsterID="monrm030500" RSceneID="7" RPosX="-27.116" RPosY="20.501" RPosZ="514.166" RLifeTime="600"/>
-	<Property ID="5123" MonsterID="monrm030100" RSceneID="7" RPosX="242.564" RPosY="36.455" RPosZ="586.981" RLifeTime="600"/>
-	<Property ID="5124" MonsterID="monrm030200" RSceneID="7" RPosX="310.837" RPosY="32.429" RPosZ="434.036" RLifeTime="600"/>
-	<Property ID="5125" MonsterID="monrm030100" RSceneID="7" RPosX="242.564" RPosY="36.455" RPosZ="586.981" RLifeTime="600"/>
-	<Property ID="5126" MonsterID="monrm030600" RSceneID="7" RPosX="742" RPosY="101.6" RPosZ="562" RLifeTime="600"/>
-	<Property ID="5127" MonsterID="monrm030300" RSceneID="7" RPosX="181.237" RPosY="42.336" RPosZ="443.193" RLifeTime="600"/>
-	<Property ID="5128" MonsterID="monrm055700" RSceneID="9" RPosX="1024.329" RPosY="77.985" RPosZ="-152.706" RLifeTime="600"/>
-	<Property ID="5129" MonsterID="monrm055800" RSceneID="9" RPosX="1024" RPosY="77.985" RPosZ="-149" RLifeTime="600"/>
-	<Property ID="5130" MonsterID="monrm055900" RSceneID="9" RPosX="1082.4" RPosY="78.9" RPosZ="23.6" RLifeTime="600"/>
-	<Property ID="5131" MonsterID="monrv020600" RSceneID="2" RPosX="185.622" RPosY="-1.331" RPosZ="4.013" RLifeTime="600"/>
-	<Property ID="5132" MonsterID="monrv020700" RSceneID="2" RPosX="33.932" RPosY="-3.223" RPosZ="72.073" RLifeTime="600"/>
-	<Property ID="5133" MonsterID="monrv020800" RSceneID="2" RPosX="43.869" RPosY="-2.715" RPosZ="250.78" RLifeTime="600"/>
-	<Property ID="5134" MonsterID="monrm056000" RSceneID="9" RPosX="1015.674" RPosY="68.735" RPosZ="-85.211" RLifeTime="600"/>
-	<Property ID="5135" MonsterID="monrm056100" RSceneID="9" RPosX="981.857" RPosY="68.735" RPosZ="-173.706" RLifeTime="600"/>
-	<Property ID="5136" MonsterID="monrm056200" RSceneID="9" RPosX="1111" RPosY="80" RPosZ="-28" RLifeTime="600"/>
-	<Property ID="5137" MonsterID="monrm057900" RSceneID="9" RPosX="1135" RPosY="78" RPosZ="-224" RLifeTime="600"/>
-	<Property ID="5138" MonsterID="monrm056400" RSceneID="9" RPosX="950" RPosY="73" RPosZ="-271" RLifeTime="600"/>
-	<Property ID="5139" MonsterID="monrv020900" RSceneID="2" RPosX="244.423" RPosY="-3.094" RPosZ="18.265" RLifeTime="600"/>
-	<Property ID="5140" MonsterID="monrm056900" RSceneID="9" RPosX="442" RPosY="17.9" RPosZ="-42.6" RLifeTime="1800"/>
-	<Property ID="5141" MonsterID="monrf030800" RSceneID="20" RPosX="746" RPosY="-5" RPosZ="599" RLifeTime="1800"/>
-	<Property ID="5142" MonsterID="monrf030900" RSceneID="20" RPosX="750" RPosY="-4.5" RPosZ="596" RLifeTime="1800"/>
-	<Property ID="5143" MonsterID="monrf030900" RSceneID="20" RPosX="750" RPosY="-5" RPosZ="600" RLifeTime="1800"/>
-	<Property ID="5144" MonsterID="monrf030700" RSceneID="20" RPosX="814.6" RPosY="-11.278" RPosZ="613.162" RLifeTime="1800"/>
-	<Property ID="5145" MonsterID="monrf031000" RSceneID="20" RPosX="1196" RPosY="30" RPosZ="554" RLifeTime="1800"/>
-	<Property ID="5148" MonsterID="monrf031200" RSceneID="20" RPosX="956.5" RPosY="1.65" RPosZ="892" RLifeTime="1800"/>
-	<Property ID="5149" MonsterID="monrm057000" RSceneID="9" RPosX="1109.803" RPosY="78.943" RPosZ="4.804" RLifeTime="1800"/>
-	<Property ID="5150" MonsterID="monrm057100" RSceneID="9" RPosX="693.276" RPosY="-10.287" RPosZ="271.915" RLifeTime="1800"/>
-	<Property ID="5151" MonsterID="monrm057200" RSceneID="9" RPosX="103.821" RPosY="-10.608" RPosZ="752.739" RLifeTime="1800"/>
-	<Property ID="5152" MonsterID="monrm057300" RSceneID="9" RPosX="-8" RPosY="21" RPosZ="749" RLifeTime="1800"/>
-	<Property ID="5155" MonsterID="monrm056300" RSceneID="9" RPosX="1075" RPosY="78" RPosZ="-199" RLifeTime="1800"/>
-	<Property ID="5156" MonsterID="monrf090100" RSceneID="26" RPosX="793.097" RPosY="6.997" RPosZ="1007.738" RLifeTime="1800"/>
-	<Property ID="5157" MonsterID="monrf090200" RSceneID="26" RPosX="930.66" RPosY="0.627" RPosZ="1483.606" RLifeTime="1800"/>
-	<Property ID="5158" MonsterID="monrm057600" RSceneID="9" RPosX="1062" RPosY="69" RPosZ="-107" RLifeTime="600"/>
-	<Property ID="5159" MonsterID="monrm057600" RSceneID="9" RPosX="1059" RPosY="69" RPosZ="-108" RLifeTime="600"/>
-	<Property ID="5160" MonsterID="monrm057600" RSceneID="9" RPosX="1064" RPosY="69" RPosZ="-112" RLifeTime="600"/>
-	<Property ID="5161" MonsterID="monrm056600" RSceneID="9" RPosX="977.176" RPosY="70.343" RPosZ="-179.509" RLifeTime="1800"/>
-	<Property ID="5162" MonsterID="monrm056700" RSceneID="9" RPosX="999.349" RPosY="68.735" RPosZ="-91.971" RLifeTime="1800"/>
-	<Property ID="5163" MonsterID="monrm053100" RSceneID="9" RPosX="792" RPosY="31.5" RPosZ="1" RLifeTime="1800"/>
-	<Property ID="5164" MonsterID="monrm053100" RSceneID="9" RPosX="798" RPosY="32" RPosZ="-3" RLifeTime="1800"/>
-	<Property ID="5165" MonsterID="monrm053100" RSceneID="9" RPosX="796" RPosY="31" RPosZ="4" RLifeTime="1800"/>
-	<Property ID="5166" MonsterID="monrm050900" RSceneID="9" RPosX="1226" RPosY="-16.5" RPosZ="-64" RLifeTime="1800"/>
-	<Property ID="5167" MonsterID="monrm050900" RSceneID="9" RPosX="1226" RPosY="-14.5" RPosZ="-56.32" RLifeTime="1800"/>
-	<Property ID="5168" MonsterID="monrm050900" RSceneID="9" RPosX="1227" RPosY="-14" RPosZ="-53" RLifeTime="1800"/>
-	<Property ID="5169" MonsterID="monrm055400" RSceneID="9" RPosX="668" RPosY="-15.75" RPosZ="224" RLifeTime="1800"/>
-	<Property ID="5170" MonsterID="monrm055400" RSceneID="9" RPosX="680" RPosY="-15.5" RPosZ="219" RLifeTime="1800"/>
-	<Property ID="5171" MonsterID="monrm055400" RSceneID="9" RPosX="669" RPosY="-17" RPosZ="213" RLifeTime="1800"/>
-	<Property ID="5172" MonsterID="monrm055400" RSceneID="9" RPosX="675" RPosY="-14.9" RPosZ="234" RLifeTime="1800"/>
-	<Property ID="5173" MonsterID="monrm055500" RSceneID="21" RPosX="468" RPosY="23" RPosZ="440" RLifeTime="1800"/>
-	<Property ID="5174" MonsterID="monrm062700" RSceneID="10" RPosX="184.7" RPosY="91.5" RPosZ="453.7" RLifeTime="600"/>
-	<Property ID="5175" MonsterID="monrm062700" RSceneID="10" RPosX="183.7" RPosY="91.5" RPosZ="454.7" RLifeTime="600"/>
-	<Property ID="9000"/>
-	<Property ID="9001"/>
-	<Property ID="9002"/>
-	<Property ID="9003"/>
-	<Property ID="9004"/>
-	<Property ID="9005"/>
-	<Property ID="9006"/>
-	<Property ID="9007"/>
-	<Property ID="9008"/>
-	<Property ID="9009"/>
-	<Property ID="9010"/>
-	<Property ID="9011"/>
-	<Property ID="9012"/>
-	<Property ID="9013"/>
-	<Property ID="9014"/>
-	<Property ID="9015"/>
-	<Property ID="9016"/>
-	<Property ID="9017"/>
-	<Property ID="9018"/>
-	<Property ID="9019"/>
-	<Property ID="9020"/>
-	<Property ID="9021"/>
-	<Property ID="9022"/>
-	<Property ID="9023"/>
-	<Property ID="9024"/>
-	<Property ID="9025"/>
-	<Property ID="9026"/>
-	<Property ID="9027"/>
-	<Property ID="9028"/>
-	<Property ID="9029"/>
-	<Property ID="9030"/>
-	<Property ID="9031"/>
-	<Property ID="9200" MonsterID="monrc021400" RSceneID="13" RPosX="446.63" RPosY="-143.76" RPosZ="1092.59" RLifeTime="300"/>
-	<Property ID="9201" MonsterID="monrc021400" RSceneID="13" RPosX="440.91" RPosY="-143.76" RPosZ="1099.29" RLifeTime="300"/>
-	<Property ID="9202" MonsterID="monrc021400" RSceneID="13" RPosX="450.22" RPosY="-144.21" RPosZ="1097.83" RLifeTime="300"/>
-	<Property ID="9203" MonsterID="monrc021400" RSceneID="13" RPosX="463.32" RPosY="-145.97" RPosZ="1080.94" RLifeTime="300"/>
-	<Property ID="9204" MonsterID="monrc021400" RSceneID="13" RPosX="454.97" RPosY="-142.49" RPosZ="1075.3" RLifeTime="300"/>
-	<Property ID="9205" MonsterID="monrc023001" RSceneID="13" RPosX="355.4" RPosY="-148.67" RPosZ="1232.3" RLifeTime="300"/>
-	<Property ID="9206" MonsterID="monrc023001" RSceneID="13" RPosX="352.84" RPosY="-152.11" RPosZ="1230.46" RLifeTime="300"/>
-	<Property ID="9207" MonsterID="monrc023001" RSceneID="13" RPosX="353.46" RPosY="-157.11" RPosZ="1240.55" RLifeTime="300"/>
-	<Property ID="9208" MonsterID="monrc023001" RSceneID="13" RPosX="358.66" RPosY="151.18" RPosZ="1222.22" RLifeTime="300"/>
-	<Property ID="9209" MonsterID="monrc023001" RSceneID="13" RPosX="356.53" RPosY="150.18" RPosZ="1210.15" RLifeTime="300"/>
-	<Property ID="9210" MonsterID="monrc023001" RSceneID="13" RPosX="354.08" RPosY="151.74" RPosZ="1218.15" RLifeTime="300"/>
-	<Property ID="9211" MonsterID="monrc023002" RSceneID="13" RPosX="352.21" RPosY="151.18" RPosZ="1222" RLifeTime="300"/>
-	<Property ID="9212" MonsterID="monrc023002" RSceneID="13" RPosX="358.66" RPosY="151.18" RPosZ="1222.22" RLifeTime="300"/>
-	<Property ID="9213" MonsterID="monrc023002" RSceneID="13" RPosX="356.53" RPosY="150.18" RPosZ="1210.15" RLifeTime="300"/>
-	<Property ID="9214" MonsterID="monrc023002" RSceneID="13" RPosX="354.08" RPosY="151.74" RPosZ="1218.15" RLifeTime="300"/>
-	<Property ID="9215" MonsterID="monrc023002" RSceneID="13" RPosX="352.21" RPosY="151.18" RPosZ="1222" RLifeTime="300"/>
-	<Property ID="9216" MonsterID="monrm063700" RSceneID="10" RPosX="398.11" RPosY="6" RPosZ="856.87" RLifeTime="300"/>
-	<Property ID="9217" MonsterID="monrm063700" RSceneID="10" RPosX="399" RPosY="8.4" RPosZ="850.27" RLifeTime="300"/>
-	<Property ID="9218" MonsterID="monrm063700" RSceneID="10" RPosX="398" RPosY="8.4" RPosZ="850.07" RLifeTime="300"/>
-	<Property ID="9219" MonsterID="monrm063800" RSceneID="10" RPosX="471.16" RPosY="96.75" RPosZ="416.26" RLifeTime="300"/>
-	<Property ID="9220" MonsterID="monrm063800" RSceneID="10" RPosX="474.82" RPosY="97.5" RPosZ="415.38" RLifeTime="300"/>
-	<Property ID="9221" MonsterID="monrm063800" RSceneID="10" RPosX="476.2" RPosY="97.5" RPosZ="415.58" RLifeTime="300"/>
-	<Property ID="9222" MonsterID="monrm063800" RSceneID="10" RPosX="475.15" RPosY="97.3" RPosZ="416.5" RLifeTime="300"/>
-	<Property ID="9223" MonsterID="monrm063800" RSceneID="10" RPosX="471" RPosY="97" RPosZ="411.4" RLifeTime="300"/>
-	<Property ID="9224" MonsterID="monrm050003" RSceneID="9" RPosX="800" RPosY="33.71" RPosZ="897.78" RLifeTime="300"/>
-	<Property ID="9225" MonsterID="monrm050003" RSceneID="9" RPosX="800.82" RPosY="33" RPosZ="896.1" RLifeTime="300"/>
-	<Property ID="9226" MonsterID="monrm050003" RSceneID="9" RPosX="800.54" RPosY="33" RPosZ="896.1" RLifeTime="300"/>
-	<Property ID="9227" MonsterID="monrm050003" RSceneID="9" RPosX="847.48" RPosY="35.97" RPosZ="863.63" RLifeTime="300"/>
-	<Property ID="9228" MonsterID="monrm050003" RSceneID="9" RPosX="846" RPosY="35.1" RPosZ="862.53" RLifeTime="300"/>
-	<Property ID="9229" MonsterID="monrm050003" RSceneID="9" RPosX="846.55" RPosY="35.97" RPosZ="862.53" RLifeTime="300"/>
-	<Property ID="9230" MonsterID="monrm050002" RSceneID="9" RPosX="630.14" RPosY="29.66" RPosZ="712.55" RLifeTime="300"/>
-	<Property ID="9231" MonsterID="monrm050002" RSceneID="9" RPosX="630.93" RPosY="29.55" RPosZ="710.88" RLifeTime="300"/>
-	<Property ID="9232" MonsterID="monrm050002" RSceneID="9" RPosX="630.33" RPosY="29.25" RPosZ="710.38" RLifeTime="300"/>
-	<Property ID="9233" MonsterID="monrf052001" RSceneID="22" RPosX="1369.23" RPosY="81.29" RPosZ="1056.24" RLifeTime="300"/>
-	<Property ID="9234" MonsterID="monrf052001" RSceneID="22" RPosX="1374.61" RPosY="81.65" RPosZ="1052.38" RLifeTime="300"/>
-	<Property ID="9235" MonsterID="monrf052001" RSceneID="22" RPosX="1367.69" RPosY="80.87" RPosZ="1051.49" RLifeTime="300"/>
-	<Property ID="9236" MonsterID="monrf052001" RSceneID="22" RPosX="1366.08" RPosY="80.89" RPosZ="1058.63" RLifeTime="300"/>
-	<Property ID="9237" MonsterID="monrf052001" RSceneID="22" RPosX="1368.55" RPosY="80.9" RPosZ="1054.66" RLifeTime="300"/>
-	<Property ID="9238" MonsterID="monrf052001" RSceneID="22" RPosX="1349.21" RPosY="79.85" RPosZ="1200.83" RLifeTime="300"/>
-	<Property ID="9239" MonsterID="monrf052001" RSceneID="22" RPosX="1353.29" RPosY="79.42" RPosZ="1202.66" RLifeTime="300"/>
-	<Property ID="9240" MonsterID="monrf052001" RSceneID="22" RPosX="1353.79" RPosY="79.88" RPosZ="1203.15" RLifeTime="300"/>
-	<Property ID="9241" MonsterID="monrf052002" RSceneID="22" RPosX="1205.61" RPosY="79.34" RPosZ="1158.8" RLifeTime="300"/>
-	<Property ID="9242" MonsterID="monrf052002" RSceneID="22" RPosX="1205.52" RPosY="79.32" RPosZ="1159.21" RLifeTime="300"/>
-	<Property ID="9243" MonsterID="monrf052002" RSceneID="22" RPosX="1205.33" RPosY="79.38" RPosZ="1158.7" RLifeTime="300"/>
-	<Property ID="9244" RSceneID="22"/>
-	<Property ID="9245" RSceneID="22"/>
-	<Property ID="9246" RSceneID="22"/>
-	<Property ID="9247" RSceneID="22"/>
-	<Property ID="9248" RSceneID="22"/>
-	<Property ID="9249" RSceneID="22"/>
-	<Property ID="8001" MonsterID="monrm010200" RSceneID="5" RPosX="5.6" RPosY="4.6" RPosZ="434" RLifeTime="300"/>
-	<Property ID="8002" MonsterID="monrm010200" RSceneID="5" RPosX="12" RPosY="3.9" RPosZ="430" RLifeTime="300"/>
-	<Property ID="8003" MonsterID="monrm010200" RSceneID="5" RPosX="16.4" RPosY="4.9" RPosZ="433.7" RLifeTime="300"/>
-	<Property ID="8004" MonsterID="monrm010300" RSceneID="5" RPosX="232.82" RPosY="66.91" RPosZ="-69.02" RLifeTime="300"/>
-	<Property ID="8005" MonsterID="monrm010400" RSceneID="5" RPosX="148.25" RPosY="2.73" RPosZ="142.62" RLifeTime="300"/>
-	<Property ID="8006" MonsterID="monrm010500" RSceneID="5" RPosX="28" RPosY="-2" RPosZ="116" RLifeTime="300"/>
-	<Property ID="8007" MonsterID="monrm010500" RSceneID="5" RPosX="43" RPosY="-2" RPosZ="118" RLifeTime="300"/>
-	<Property ID="8008" MonsterID="monrm010500" RSceneID="5" RPosX="32" RPosY="-2" RPosZ="122" RLifeTime="300"/>
-	<Property ID="8009" MonsterID="monrm010700" RSceneID="5" RPosX="357" RPosY="64.3" RPosZ="83.3" RLifeTime="300"/>
-	<Property ID="8010" MonsterID="monrm010800" RSceneID="5" RPosX="356" RPosY="64.3" RPosZ="85.7" RLifeTime="300"/>
-	<Property ID="8011" MonsterID="monrm010800" RSceneID="5" RPosX="345.8" RPosY="64.3" RPosZ="84.3" RLifeTime="300"/>
-	<Property ID="8012" MonsterID="monrm010800" RSceneID="5" RPosX="346" RPosY="28.5" RPosZ="263" RLifeTime="300"/>
-	<Property ID="8013" MonsterID="monrm010900" RSceneID="5" RPosX="590.62" RPosY="37.78" RPosZ="201.21" RLifeTime="300"/>
-	<Property ID="8014" MonsterID="monrm010900" RSceneID="5" RPosX="593.04" RPosY="36.58" RPosZ="199.83" RLifeTime="300"/>
-	<Property ID="8015" MonsterID="monrm010900" RSceneID="5" RPosX="592.01" RPosY="36.62" RPosZ="197.62" RLifeTime="300"/>
-	<Property ID="8016" MonsterID="monrm011000" RSceneID="5" RPosX="647.68" RPosY="52.44" RPosZ="263.07" RLifeTime="300"/>
-	<Property ID="8017" MonsterID="monrm011000" RSceneID="5" RPosX="648.21" RPosY="52.29" RPosZ="260.5" RLifeTime="300"/>
-	<Property ID="8018" MonsterID="monrm011000" RSceneID="5" RPosX="646.74" RPosY="53.06" RPosZ="256.68" RLifeTime="300"/>
-	<Property ID="8019" MonsterID="monrm011000" RSceneID="5" RPosX="668.22" RPosY="56.69" RPosZ="387.99" RLifeTime="300"/>
-	<Property ID="8020" MonsterID="monrm011000" RSceneID="5" RPosX="667.01" RPosY="55.94" RPosZ="392.19" RLifeTime="300"/>
-	<Property ID="8021" MonsterID="monrm011000" RSceneID="5" RPosX="661.93" RPosY="55.27" RPosZ="393.52" RLifeTime="300"/>
-	<Property ID="8022" MonsterID="monrm011000" RSceneID="5" RPosX="549.47" RPosY="41.22" RPosZ="380.51" RLifeTime="300"/>
-	<Property ID="8023" MonsterID="monrm011000" RSceneID="5" RPosX="547.95" RPosY="40.17" RPosZ="374.81" RLifeTime="300"/>
-	<Property ID="8024" MonsterID="monrm011000" RSceneID="5" RPosX="540.68" RPosY="40.12" RPosZ="373.22" RLifeTime="300"/>
-	<Property ID="8025" MonsterID="monrm011000" RSceneID="5" RPosX="662.36" RPosY="51.45" RPosZ="271.2" RLifeTime="300"/>
-	<Property ID="8026" MonsterID="monrm011000" RSceneID="5" RPosX="665.39" RPosY="51.54" RPosZ="269.36" RLifeTime="300"/>
-	<Property ID="8027" MonsterID="monrm011000" RSceneID="5" RPosX="662.19" RPosY="51.39" RPosZ="274.82" RLifeTime="300"/>
-	<Property ID="7001" MonsterID="monrm040001" RSceneID="8" RPosX="704.653" RPosY="10.477" RPosZ="341.84" RLifeTime="300"/>
-	<Property ID="7002" MonsterID="monrm040001" RSceneID="8" RPosX="706.643" RPosY="10.352" RPosZ="342.55" RLifeTime="300"/>
-	<Property ID="7003" MonsterID="monrm040001" RSceneID="8" RPosX="709.911" RPosY="10.56" RPosZ="342.79" RLifeTime="300"/>
-	<Property ID="7008" MonsterID="monrm040007" RSceneID="8" RPosX="911.075" RPosY="17.982" RPosZ="264.93" RLifeTime="300"/>
-	<Property ID="7009" MonsterID="monrm040007" RSceneID="8" RPosX="905.444" RPosY="18.364" RPosZ="266.53" RLifeTime="300"/>
-	<Property ID="7010" MonsterID="monrm040007" RSceneID="8" RPosX="899.523" RPosY="18.57" RPosZ="270.49" RLifeTime="300"/>
-	<Property ID="7011" MonsterID="monrm040007" RSceneID="8" RPosX="900.446" RPosY="19.184" RPosZ="266.22" RLifeTime="300"/>
-	<Property ID="7012" MonsterID="monrm040007" RSceneID="8" RPosX="899.426" RPosY="19.254" RPosZ="266.7" RLifeTime="300"/>
-	<Property ID="7013" MonsterID="monrm040007" RSceneID="8" RPosX="902.301" RPosY="19.441" RPosZ="263.89" RLifeTime="300"/>
-	<Property ID="7014" MonsterID="monrm040004" RSceneID="8" RPosX="913.29" RPosY="12.402" RPosZ="459.558" RLifeTime="900"/>
-	<Property ID="7015" MonsterID="monrm040005" RSceneID="8" RPosX="707.764" RPosY="24.452" RPosZ="635.515" RLifeTime="900"/>
-	<Property ID="7016" MonsterID="monrm040006" RSceneID="8" RPosX="704.58" RPosY="26.367" RPosZ="639.401" RLifeTime="900"/>
-	<Property ID="7017" MonsterID="monrm040006" RSceneID="8" RPosX="707.992" RPosY="25.473" RPosZ="638.213" RLifeTime="900"/>
-	<Property ID="7018" MonsterID="monrm040006" RSceneID="8" RPosX="709.066" RPosY="27.582" RPosZ="642.691" RLifeTime="900"/>
-	<Property ID="7019" MonsterID="monrm040008" RSceneID="8" RPosX="179.8" RPosY="128.09" RPosZ="-30.618" RLifeTime="300"/>
-	<Property ID="7020" MonsterID="monrm040008" RSceneID="8" RPosX="180.707" RPosY="128.093" RPosZ="-32.771" RLifeTime="300"/>
-	<Property ID="7021" MonsterID="monrm040008" RSceneID="8" RPosX="179.729" RPosY="128.093" RPosZ="-32.491" RLifeTime="300"/>
-	<Property ID="7022" MonsterID="monrm040009" RSceneID="8" RPosX="460.009" RPosY="47.707" RPosZ="52.574" RLifeTime="300"/>
-	<Property ID="7023" MonsterID="monrm040009" RSceneID="8" RPosX="459.599" RPosY="47.882" RPosZ="50.967" RLifeTime="300"/>
-	<Property ID="7024" MonsterID="monrm040009" RSceneID="8" RPosX="459.093" RPosY="47.644" RPosZ="53.091" RLifeTime="300"/>
-	<Property ID="7025" MonsterID="monrm040010" RSceneID="8" RPosX="586.21" RPosY="9.267" RPosZ="233.961" RLifeTime="300"/>
-	<Property ID="7026" MonsterID="monrm040010" RSceneID="8" RPosX="586.15" RPosY="9.283" RPosZ="223.671" RLifeTime="300"/>
-	<Property ID="7027" MonsterID="monrm040010" RSceneID="8" RPosX="589.709" RPosY="9.709" RPosZ="220.435" RLifeTime="300"/>
-	<Property ID="7028" MonsterID="monrm040009" RSceneID="8" RPosX="499.983" RPosY="13.856" RPosZ="373.105" RLifeTime="300"/>
-	<Property ID="7029" MonsterID="monrm040009" RSceneID="8" RPosX="502.237" RPosY="13.883" RPosZ="373.318" RLifeTime="300"/>
-	<Property ID="7030" MonsterID="monrm040009" RSceneID="8" RPosX="500.501" RPosY="13.883" RPosZ="374.662" RLifeTime="300"/>
-	<Property ID="7031" MonsterID="monrm040009" RSceneID="8" RPosX="501.374" RPosY="13.859" RPosZ="370.498" RLifeTime="300"/>
-	<Property ID="7032" MonsterID="monrm040011" RSceneID="8" RPosX="529.439" RPosY="10.775" RPosZ="307.174" RLifeTime="300"/>
-	<Property ID="7033" MonsterID="monrm040011" RSceneID="8" RPosX="528.338" RPosY="10.437" RPosZ="307.552" RLifeTime="300"/>
-	<Property ID="7034" MonsterID="monrm040011" RSceneID="8" RPosX="528.437" RPosY="10.701" RPosZ="308.839" RLifeTime="300"/>
-	<Property ID="7035" MonsterID="monrm040012" RSceneID="8" RPosX="617.463" RPosY="40.563" RPosZ="-112.316" RLifeTime="300"/>
-	<Property ID="7036" MonsterID="monrm040013" RSceneID="8" RPosX="490.161" RPosY="8.594" RPosZ="403.321" RLifeTime="300"/>
-	<Property ID="7037" MonsterID="monrm040013" RSceneID="8" RPosX="490.401" RPosY="8.683" RPosZ="404.509" RLifeTime="300"/>
-	<Property ID="7038" MonsterID="monrm040013" RSceneID="8" RPosX="491.172" RPosY="8.751" RPosZ="404.354" RLifeTime="300"/>
-	<Property ID="7039" MonsterID="monrm040014" RSceneID="8" RPosX="255.925" RPosY="81.209" RPosZ="92.598" RLifeTime="300"/>
-	<Property ID="7040" MonsterID="monrm040014" RSceneID="8" RPosX="256.513" RPosY="81.209" RPosZ="93.165" RLifeTime="300"/>
-	<Property ID="7041" MonsterID="monrm040014" RSceneID="8" RPosX="255.782" RPosY="81.209" RPosZ="94.827" RLifeTime="300"/>
-	<Property ID="7042" MonsterID="monrm040021" RSceneID="17" RPosX="543.888" RPosY="24.221" RPosZ="641.391" RLifeTime="300"/>
-	<Property ID="7043" MonsterID="monrm040021" RSceneID="17" RPosX="542.525" RPosY="24.221" RPosZ="640.731" RLifeTime="300"/>
-	<Property ID="7044" MonsterID="monrm040021" RSceneID="17" RPosX="541.939" RPosY="24.221" RPosZ="643.567" RLifeTime="300"/>
-	<Property ID="7047" MonsterID="monrm040023" RSceneID="17" RPosX="1255.576" RPosY="83.987" RPosZ="680.531" RLifeTime="300"/>
-	<Property ID="7048" MonsterID="monrm040023" RSceneID="17" RPosX="1255.799" RPosY="83.987" RPosZ="678.836" RLifeTime="300"/>
-	<Property ID="7049" MonsterID="monrm040023" RSceneID="17" RPosX="1258.804" RPosY="83.987" RPosZ="680.313" RLifeTime="300"/>
-	<Property ID="7050" MonsterID="monrm040023" RSceneID="17" RPosX="1257.864" RPosY="83.987" RPosZ="682.376" RLifeTime="300"/>
-	<Property ID="7051" MonsterID="monrm040023" RSceneID="17" RPosX="1259.493" RPosY="83.987" RPosZ="681.941" RLifeTime="300"/>
-	<Property ID="7052" MonsterID="monrm040024" RSceneID="17" RPosX="1044.219" RPosY="24.497" RPosZ="902.239" RLifeTime="300"/>
-	<Property ID="7053" MonsterID="monrm040024" RSceneID="17" RPosX="1041.464" RPosY="24.853" RPosZ="900.241" RLifeTime="300"/>
-	<Property ID="7054" MonsterID="monrm040024" RSceneID="17" RPosX="1042.956" RPosY="24.606" RPosZ="900.387" RLifeTime="300"/>
-	<Property ID="7055" MonsterID="monrm040025" RSceneID="8" RPosX="245.745" RPosY="91.661" RPosZ="45.603" RLifeTime="300"/>
-	<Property ID="7056" MonsterID="monrm040025" RSceneID="8" RPosX="246.227" RPosY="91.649" RPosZ="47.883" RLifeTime="300"/>
-	<Property ID="7057" MonsterID="monrm040025" RSceneID="8" RPosX="243.698" RPosY="91.696" RPosZ="46.369" RLifeTime="300"/>
+	<Property ID="153" MonsterID="nil" RSceneID="nil" RPosX="nil" RPosY="nil" RPosZ="nil" RLifeTime="nil"/>
 </Object>
