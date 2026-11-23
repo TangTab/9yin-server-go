@@ -67,6 +67,9 @@ type npcActiveMenu struct {
 	objectID uint32
 	ownerID  uint32
 	at       time.Time
+	// services 开窗时的服务列（npcshop.go mark 路由用：805000000 商店
+	// 取 ShopID 值、807000000 仓库——npcService.value 携带绑定真值）。
+	services []npcService
 	// pendingTask 接取窗在途任务（npctask.go：100 首次开窗记录、窗内
 	// 「接受任务」同 funcid 二次到达=真接取；换行/关窗清除）。
 	pendingTask int
@@ -121,9 +124,10 @@ var npcTypeServiceMarks = map[uint16]uint16{
 }
 
 // npcServicesOf 模板行两级服务提取：业务列（非空且非 "0" 才算配置，
-// 2433 modern 数据方言）→ NpcType 结构域回落（mark 去重，列派生优先）。
-// value：业务列取列值（如 ShopID）；NpcType 派生取类型号（审计留痕，
-// 业务 View 接入时作为绑定线索）。
+// 2433 modern 数据方言；npcgen 2026-11-23 已折叠商店ID/仓库ID 等七列）
+// → NpcType 结构域回落（仅当零业务列——显式数据权威，防钱庄
+// DepotID+NpcType67 启发式叠出虚构商店行）。value：业务列取列值；
+// NpcType 派生取类型号（审计留痕）。
 func npcServicesOf(tpl map[string]string) []npcService {
 	add := func(items []npcService, mark uint16, key string) []npcService {
 		if v := strings.TrimSpace(tpl[key]); v != "" && v != "0" {
@@ -139,13 +143,11 @@ func npcServicesOf(tpl map[string]string) []npcService {
 	items = add(items, npcMarkGuild, "GuildFunc")
 	items = add(items, npcMarkHome, "HomePoint")
 	items = add(items, npcMarkJob, "Job")
-	// NpcType 结构域回落：列已派生的 mark 不重复追加。
-	seen := make(map[uint16]bool, len(items))
-	for _, svc := range items {
-		seen[svc.mark] = true
+	if len(items) > 0 {
+		return items // 显式业务列权威，NpcType 回落不启用
 	}
 	typeRaw := strings.TrimSpace(tpl["NpcType"])
-	if mark, ok := npcTypeMarkOf(typeRaw); ok && !seen[mark] {
+	if mark, ok := npcTypeMarkOf(typeRaw); ok {
 		items = append(items, npcService{
 			mark:  mark,
 			label: npcServiceLabel(mark),
@@ -268,9 +270,13 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 	// LastObject+AutoSelectObject 双帧先行——C++ 对话流程依赖选中态，
 	// 缺它 m4 聚合链不跑=窗不开）。
 	s.sendSelectTargetFrames(pl, spawn.ObjectID, spawn.OwnerID)
-	s.sendNPCTalkMenu(pl, spawn)
+	services := npcServicesOf(spawn.Template)
+	s.sendNPCTalkMenu(pl, spawn, services)
 	npcMenuMu.Lock()
-	npcMenuState[pl.Conn1] = &npcActiveMenu{objectID: spawn.ObjectID, ownerID: spawn.OwnerID, at: time.Now()}
+	npcMenuState[pl.Conn1] = &npcActiveMenu{
+		objectID: spawn.ObjectID, ownerID: spawn.OwnerID, at: time.Now(),
+		services: services,
+	}
 	npcMenuMu.Unlock()
 	pauseNpcTalk(spawn.ObjectID) // 行人对话停走（菜单关闭恢复）
 	return true
@@ -278,9 +284,9 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 
 // sendNPCTalkMenu talk 帧族下发（m4/m5/m6×N/m7）：服务行 + 任务行 +
 // 通用行。任务行来自 taskdata 快照绑定（npctask.go——客户端不自行生成
-// 任务行，服务端不发即无任务入口）。
-func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn) {
-	services := npcServicesOf(spawn.Template)
+// 任务行，服务端不发即无任务入口）。services 由调用方计算（菜单簿记
+// 共用一份，npcshop.go mark 路由取绑定值）。
+func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn, services []npcService) {
 	tasks := s.npcTaskLines(s.npcTaskCatalogOf(), pl, spawn.ConfigID, npcTaskMenuLimit())
 	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services, tasks); err == nil {
 		for _, frame := range frames {
@@ -317,13 +323,29 @@ func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 			return true
 		}
 	}
-	// 关菜单走官方 m8 对话结束 ×2（女号抓包 102.4s / npc.pcapng 32.0s
-	// 双源：结束簇恒两条；全程无 0x1C/0x1D）。
-	for i := 0; i < 2; i++ {
-		if end, err := entergen.CustomMessageFrame(8); err == nil {
-			s.sendToClient(pl, end)
+	// 服务域 mark：关对话 → 业务 View（2433 selectCinematicTalkLocked
+	// 定序：closeCinematicTalk → clearActiveMenu → openSelectedService）。
+	if svc, ok := npcMenuServiceByFuncID(menu.services, req.FuncID); ok {
+		switch req.FuncID {
+		case 805000000: // 商店
+			s.closeNPCTalk(pl)
+			s.clearNPCMenu(pl)
+			if svc.value == "" {
+				s.trace("npc shop: %s 商店服务无 ShopID（npcshop.go 数据源待补）", svc.label)
+				return true
+			}
+			s.openNPCShopView(pl, svc.value)
+			return true
+		case 807000000: // 仓库
+			s.closeNPCTalk(pl)
+			s.clearNPCMenu(pl)
+			s.openNPCDepotView(pl)
+			return true
 		}
 	}
+	// 关菜单走官方 m8 对话结束 ×2（女号抓包 102.4s / npc.pcapng 32.0s
+	// 双源：结束簇恒两条；全程无 0x1C/0x1D）。
+	s.closeNPCTalk(pl)
 	s.clearNPCMenu(pl)
 	if req.FuncID == 0 {
 		s.trace("npc interact: 菜单关闭 id=%d client=%d", req.ObjectID, pl.Conn1)
@@ -332,6 +354,26 @@ func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 	s.trace("npc interact: 菜单选择 %s（mark=%d）id=%d client=%d（业务 View 待接）",
 		npcServiceNameByFuncID(req.FuncID), req.FuncID, req.ObjectID, pl.Conn1)
 	return true
+}
+
+// closeNPCTalk 对话结束 m8×2（女号抓包/npc.pcapng 双源定版：结束簇恒两条）。
+func (s *Server) closeNPCTalk(pl *Player) {
+	for i := 0; i < 2; i++ {
+		if end, err := entergen.CustomMessageFrame(8); err == nil {
+			s.sendToClient(pl, end)
+		}
+	}
+}
+
+// npcMenuServiceByFuncID 活动菜单服务列按回执 funcid 匹配（funcid 域
+// 见 npcTalkFuncID）。
+func npcMenuServiceByFuncID(services []npcService, funcID int32) (npcService, bool) {
+	for _, svc := range services {
+		if npcTalkFuncID(svc.mark) == funcID {
+			return svc, true
+		}
+	}
+	return npcService{}, false
 }
 
 // npcServiceNameByFuncID 菜单回执 funcid → 服务名（trace 观测面；业务

@@ -47,12 +47,12 @@ const (
 	npcTaskFlagDoing        int32 = 500
 	// 剧情 N 段窗：段 N 窗内续行 50N（点击发段 N+1）、离行 60N
 	//（引导抓包 story_482_1..5 五段实证，N=1..5）。
-	npcTaskFlagStoryBase         int32 = 500 // 50N = 500+N
-	npcTaskFlagStoryFirst        int32 = 501
-	npcTaskFlagStoryLast         int32 = 505
-	npcTaskFlagStoryLeaveBase    int32 = 600 // 60N = 600+N
-	npcTaskFlagStoryLeaveFirst   int32 = 601
-	npcTaskFlagStoryLeaveLast    int32 = 605
+	npcTaskFlagStoryBase       int32 = 500 // 50N = 500+N
+	npcTaskFlagStoryFirst      int32 = 501
+	npcTaskFlagStoryLast       int32 = 505
+	npcTaskFlagStoryLeaveBase  int32 = 600 // 60N = 600+N
+	npcTaskFlagStoryLeaveFirst int32 = 601
+	npcTaskFlagStoryLeaveLast  int32 = 605
 	// npcStoryLeaveTextDefault 剧情离行缺省文本键（源表 LeaveTextID
 	// 列几乎恒 9607）。
 	npcStoryLeaveTextDefault = "9607"
@@ -305,16 +305,16 @@ func (s *Server) sendTaskAcceptForm(pl *Player, menu *npcActiveMenu, taskID int)
 		entergen.CustomInt(int32(taskID)),                                   // task_id
 		entergen.CustomString("context_"+strconv.Itoa(taskID)),              // titleid → get_title_task_context
 		entergen.CustomString("task_menu_accept_"+strconv.Itoa(taskID)),     // menuid
-		entergen.CustomString(""), // prize_base
-		entergen.CustomString(""), // prize_ex
-		entergen.CustomString(""), // prize_over
-		entergen.CustomInt(0),     // decMoney
-		entergen.CustomInt(0),     // adventure_plot
-		entergen.CustomInt(0),     // lock_value
-		entergen.CustomString(""), // strLimit
-		entergen.CustomString(task.Title), // title（富文本原文）
-		entergen.CustomInt(0),     // line
-		entergen.CustomInt(0),     // tiaozhan
+		entergen.CustomString(""),                                           // prize_base
+		entergen.CustomString(""),                                           // prize_ex
+		entergen.CustomString(""),                                           // prize_over
+		entergen.CustomInt(0),                                               // decMoney
+		entergen.CustomInt(0),                                               // adventure_plot
+		entergen.CustomInt(0),                                               // lock_value
+		entergen.CustomString(""),                                           // strLimit
+		entergen.CustomString(task.Title),                                   // title（富文本原文）
+		entergen.CustomInt(0),                                               // line
+		entergen.CustomInt(0),                                               // tiaozhan
 	)
 	if err != nil {
 		s.trace("npc task: 接取窗编码失败 %d: %v", taskID, err)
@@ -427,7 +427,7 @@ func (s *Server) refreshNPCTalkMenu(pl *Player, menu *npcActiveMenu) {
 	if !ok || spawn.OwnerID != menu.ownerID {
 		return
 	}
-	s.sendNPCTalkMenu(pl, spawn)
+	s.sendNPCTalkMenu(pl, spawn, npcServicesOf(spawn.Template))
 }
 
 // taskAcceptedContains 已接判定（nil 接收者安全）。

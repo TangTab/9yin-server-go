@@ -64,6 +64,17 @@ var columnBindings = map[string]binding{
 	"CallHelpRange":  {Server: "CallHelpRange"},
 	"CallHelpType":   {Server: "CallHelpType"},
 
+	// ---- direct：NPC 业务功能列（2433 modernNPCServices 同名方言；源
+	// 表中文列注释：商店ID/仓库ID/职业ID/宝石游戏NPC ID/驿站/落脚点/
+	// 是否有公会功能——2026-11-23 商店/仓库 View 接入定案）----
+	"ShopID":       {Server: "ShopID"},
+	"DepotID":      {Server: "DepotID"},
+	"Job":          {Server: "Job"},
+	"TransFuncID":  {Server: "TransFuncID"},
+	"HomePoint":    {Server: "HomePoint"},
+	"GuildFunc":    {Server: "GuildFunc"},
+	"GemGameNpcID": {Server: "GemGameNpcID"},
+
 	// ---- rename：改名映射 ----
 	"PathID": {Server: "PathId", Kind: "rename", Note: "大小写对齐黑金档 PathId（巡逻路径 ID）"},
 	"FacultyExp": {Server: "Exp", Kind: "rename",

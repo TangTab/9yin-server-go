@@ -274,8 +274,8 @@
 	<Property ID="schoolwar_guildnpc_wd02" script="CommonNpc" Name="通天峰（武当西北区域）" Desc="通天峰（武当西北区域）" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc355" CollideRadius="0.919563" SpringRange="20" Camp="1"/>
 	<Property ID="schoolwar_guildnpc_wd03" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
 	<Property ID="schoolwar_guildnpc_wd04" script="CommonNpc" Name="无功能" Desc="无功能" NpcType="81" SelectState="2" WeaponMode="hand1_1" Resource="npc\worldnpc207" CollideRadius="0.89833" SpringRange="20" Camp="1"/>
-	<Property ID="schoolwar_relivenpc" script="CommonNpc" Name="通用" Desc="通用" NpcType="66" SelectState="2" WalkSpeed="0" RunSpeed="-1" WeaponMode="hand_0" Resource="npc\funcnpc004" CollideRadius="0.947249" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1"/>
-	<Property ID="schoolwar_relivenpc_1" script="CommonNpc" Name="通用" Desc="通用" NpcType="66" SelectState="2" WalkSpeed="0" RunSpeed="-1" WeaponMode="hand_0" Resource="npc\funcnpc004" CollideRadius="0.947249" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1"/>
+	<Property ID="schoolwar_relivenpc" script="CommonNpc" Name="通用" Desc="通用" NpcType="66" SelectState="2" WalkSpeed="0" RunSpeed="-1" WeaponMode="hand_0" Resource="npc\funcnpc004" CollideRadius="0.947249" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1" ShopID="Shop_schoolwar_001_1"/>
+	<Property ID="schoolwar_relivenpc_1" script="CommonNpc" Name="通用" Desc="通用" NpcType="66" SelectState="2" WalkSpeed="0" RunSpeed="-1" WeaponMode="hand_0" Resource="npc\funcnpc004" CollideRadius="0.947249" AITemplate="3" PatrolMode="0" PatrolRange="0" SpringRange="20" Camp="1" ShopID="Shop_schoolwar_001"/>
 	<Property ID="schoolwar_medical_1" script="CommonNpc" Name="装饰" Desc="装饰" NpcType="172" Resource="npc\itemboxnpc001"/>
 	<Property ID="schoolwar_medical_2" script="CommonNpc" Name="装饰" Desc="装饰" NpcType="172" Resource="npc\itemnpc005"/>
 	<Property ID="schoolwar_salve" script="CommonNpc" Name="装饰" Desc="装饰" NpcType="172" Resource="npc\itemnpc041"/>

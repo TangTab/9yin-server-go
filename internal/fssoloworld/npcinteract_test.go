@@ -416,15 +416,15 @@ func TestNPCServicesByNpcType(t *testing.T) {
 			t.Fatalf("NpcType 派生 value = %q, want 类型号 %q", services[0].value, c.typeVal)
 		}
 	}
-	// 业务列优先 + mark 去重：ShopID 与 NpcType=62 同为商店只出一行。
+	// 业务列权威：显式列存在时 NpcType 回落整体抑制（防金四爷
+	// DepotID=1+NpcType=67 叠出虚构商店行）。
 	services := npcServicesOf(map[string]string{"ShopID": "Shop_x", "NpcType": "62"})
-	if len(services) != 1 || services[0].value != "Shop_x" {
-		t.Fatalf("列+类型去重异常: %+v", services)
+	if len(services) != 1 || services[0].value != "Shop_x" || services[0].mark != npcMarkShop {
+		t.Fatalf("列权威异常: %+v", services)
 	}
-	// 列与类型不同 mark 时合并：DepotID + NpcType=122 → 仓库+生活职业。
-	services = npcServicesOf(map[string]string{"DepotID": "D1", "NpcType": "122"})
-	if len(services) != 2 || services[0].mark != npcMarkDepot || services[1].mark != npcMarkJob {
-		t.Fatalf("列+类型合并异常: %+v", services)
+	services = npcServicesOf(map[string]string{"DepotID": "1", "NpcType": "67"})
+	if len(services) != 1 || services[0].mark != npcMarkDepot {
+		t.Fatalf("仓库列+NpcType 抑制异常: %+v", services)
 	}
 }
 

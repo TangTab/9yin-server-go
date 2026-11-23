@@ -158,7 +158,7 @@
 	<Property ID="home_chongwu_diao2_npc" script="HomePetNpc" Name="闪电貂" Desc="闪电貂" Resource="npc\petm_120302" NpcType="333" SpringRange="5" SelectState="2"/>
 	<Property ID="home_chongwu_diao3_npc" script="HomePetNpc" Name="熊猫貂" Desc="熊猫貂" Resource="npc\petm_120303" NpcType="333" SpringRange="5" SelectState="2"/>
 	<Property ID="home_chongwu_huli_npc" script="HomePetNpc" Name="阿狸" Desc="阿狸" Resource="npc\petm_130302" NpcType="333" SpringRange="5" SelectState="2"/>
-	<Property ID="home_xn" script="HomeToolBoxNpc" Name="行囊架" Desc="行囊架" Resource="npc\itemnpc1352" NpcType="333" SpringRange="5" SelectState="2"/>
+	<Property ID="home_xn" script="HomeToolBoxNpc" Name="行囊架" Desc="行囊架" Resource="npc\itemnpc1352" NpcType="333" SpringRange="5" SelectState="2" Job="home_toolbox"/>
 	<Property ID="home_wuxuexl_001_npc" script="HomeWuXueNpc" Name="武学书架" Desc="武学书架" Resource="npc\npcitem776" NpcType="333" SpringRange="5" SelectState="2"/>
 	<Property ID="home_wuxuexl_002_npc" script="HomeWuXueNpc" Name="武学书架" Desc="武学书架" Resource="npc\npcitem776" NpcType="333" SpringRange="5" SelectState="2"/>
 	<Property ID="home_aizhuo_mu_001" script="FurnitureNpc" Name="矮桌-1" Desc="矮桌-1" Resource="npc\itemnpc1461" NpcType="333" SpringRange="5" SelectState="2"/>
