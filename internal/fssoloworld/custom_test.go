@@ -2,7 +2,7 @@ package fssoloworld
 
 // 自定义配置域接收链单测：首传闸（登录期默认转储不覆盖存档）、
 // 快捷栏基线物化（starter 打坐条目「所见即所存」、删除不复活）、
-// 0x1E/0x0A 双路由入口。下行帧正确性由 entergen.CustomConfigFrames/
+// 0x1E/0x0A 双路由入口。下行帧正确性由 entergen.PlayerObjectConfigFrames/
 // ShortcutRebuildFrames 字节级测试覆盖（nil inner 下 sendToClient 静默）。
 
 import (

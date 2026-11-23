@@ -1,12 +1,9 @@
 package entergen
 
-// 自定义配置域 ClientReady 推送簇（fork 客户端本地不落盘——键位/快捷
-// 栏/个性配置全靠服务端回推，缺发即「重登全丢」）。规则移植参考端
+// 自定义配置域（fork 客户端本地不落盘——键位/快捷栏重登全靠服务端
+// 回推，缺发即「重登全丢」）。规则移植参考端
 // cmd/protocol-probe custom_config.go/shortcut_records.go：
 //
-//	705 个性配置（0x1E 旧壳，on_parser_customizing 灌回配置对象）——
-//	    连接级，须赶在客户端登录期上传 107 默认转储之前（本簇随
-//	    ClientReady 立即下行即满足）；
 //	键位域 0x10 单属性帧：198 ShortcutKey/199 ShortcutKey1/200
 //	    ShortcutKey2（type7，串 = 存档值 + " " 尾空格——两形态不可与
 //	    0x0D 档内嵌混用）、223 OperateMode（仅显式设置过）、201
@@ -15,9 +12,14 @@ package entergen
 //	    config ID）；无编辑基线补 starter 打坐条目（EffectiveShortcuts）。
 //
 // 无档零帧（客户端保持本地默认并自行上传基线）。键位域挂玩家对象
-// 属性视图、快捷栏行挂玩家对象记录——0x0C 切图清玩家对象后由
-// PlayerObjectConfigFrames 重推（reentryReady，参考端 stable re-entry
-// restore shortcuts/keybind 两步同口径）；705 连接级不随切图重置，无需重发。
+// 属性视图、快捷栏行挂玩家对象记录——Ready 段与 0x0C 切图清对象后
+// 都由 PlayerObjectConfigFrames 重推（reentryReady，参考端 stable
+// re-entry restore shortcuts/keybind 两步同口径）。
+//
+// 705 个性配置不在本簇（连接级，不随切图重置）：唯一下行位 = 首传闸
+// re-assert（fssoloworld/custom.go），内容必须字节保真——2026-11-23
+// 定案：存档串被 encoding/json 清洗成 U+FFFD 后回推，即重登/切图
+// 卡顿根因（docs/official/自定义配置705推送卡顿排查.md §七）。
 
 import (
 	"fmt"
@@ -25,32 +27,6 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
-
-// serverCustomPushCustomizing S2C 705：on_parser_customizing(configStr)
-// 个性配置下行通道（C2S 107 上传的回推对应物）。
-const serverCustomPushCustomizing int32 = 705
-
-// CustomConfigFrames 自定义配置域推送簇（Ready 段，视图簇之后）=
-// 705 连接级个性配置 + PlayerObjectConfigFrames 玩家对象域。
-func CustomConfigFrames(ctx Context) ([][]byte, error) {
-	frames := [][]byte{}
-	state := ctx.State
-
-	// 705 个性配置（空档零帧）。
-	if state.Customizing != "" {
-		frame, err := CustomMessageFrame(serverCustomPushCustomizing, CustomString(string(state.Customizing)))
-		if err != nil {
-			return nil, fmt.Errorf("encode customizing frame: %w", err)
-		}
-		frames = append(frames, frame)
-	}
-
-	playerObject, err := PlayerObjectConfigFrames(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return append(frames, playerObject...), nil
-}
 
 // PlayerObjectConfigFrames 键位域 + 快捷栏行（挂玩家对象——0x0C 切图
 // 清对象后重入重推用；705 连接级不在内）。

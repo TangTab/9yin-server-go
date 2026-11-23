@@ -1,6 +1,6 @@
 package entergen
 
-// 自定义配置域推送簇/整表重建方言/TVarList 解码的单测（规则源：
+// 自定义配置域玩家对象帧/整表重建方言/TVarList 解码的单测（规则源：
 // 参考端 cmd/protocol-probe shortcut_records_test.go/custom_config_test.go）。
 
 import (
@@ -13,30 +13,11 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
-// TestCustomConfigFramesFresh 建号态：仅 starter 打坐条目一行 0x11
-//（record 93，[9,"skill","zs_default_01"]），其余域零帧。
-func TestCustomConfigFramesFresh(t *testing.T) {
-	ctx := testContext(t)
-	frames, err := CustomConfigFrames(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(frames) != 1 {
-		t.Fatalf("fresh cluster = %d frames, want 1 (starter shortcut only)", len(frames))
-	}
-	want := append([]byte{0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 93, 0x00, 0x00, 0x00, 0x01, 0x00},
-		0x09, 0x00, 0x00, 0x00, // int32 栏位索引 9（Ctrl+0）
-		0x06, 0x00, 0x00, 0x00, 's', 'k', 'i', 'l', 'l', 0x00,
-		0x0E, 0x00, 0x00, 0x00, 'z', 's', '_', 'd', 'e', 'f', 'a', 'u', 'l', 't', '_', '0', '1', 0x00)
-	if !bytes.Equal(frames[0], want) {
-		t.Fatalf("starter shortcut frame:\n got %x\nwant %x", frames[0], want)
-	}
-}
-
-// TestCustomConfigFramesSaved 存档态：705 个性配置首帧 → 键位域 0x10
-//（198 尾空格/223/201 尾空格）→ 快捷栏行；ShortcutsSet 基线不复权
-// starter 条目。
-func TestCustomConfigFramesSaved(t *testing.T) {
+// TestPlayerObjectConfigFramesSaved 存档态：键位域 0x10（198 尾空格/
+// 223/201 尾空格）→ 快捷栏行；ShortcutsSet 基线不复权 starter 条目；
+// 玩家对象域不含连接级 705（0x1E，705 唯一下行位=首传闸 re-assert，
+// fssoloworld/custom.go）。
+func TestPlayerObjectConfigFramesSaved(t *testing.T) {
 	ctx := testContext(t)
 	ctx.State.Customizing = "ABC"
 	ctx.State.Keybind = "1,65;2,66;"
@@ -44,74 +25,44 @@ func TestCustomConfigFramesSaved(t *testing.T) {
 	ctx.State.NeiGongBind = "1;0;0;"
 	ctx.State.Shortcuts = []rolestate.ShortcutRow{{Index: 3, Kind: "item", ID: "it_potion"}}
 	ctx.State.ShortcutsSet = true
-	frames, err := CustomConfigFrames(ctx)
+	frames, err := PlayerObjectConfigFrames(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(frames) != 5 {
-		t.Fatalf("saved cluster = %d frames, want 5 (705+198+223+201+1 行)", len(frames))
+	if len(frames) != 4 {
+		t.Fatalf("saved cluster = %d frames, want 4 (198+223+201+1 行)", len(frames))
 	}
-	// 705：[1E][02 00][02][C1 02 00 00][06][04 00 00 00]"ABC\0"
-	want705 := []byte{0x1E, 0x02, 0x00, 0x02, 0xC1, 0x02, 0x00, 0x00,
-		0x06, 0x04, 0x00, 0x00, 0x00, 'A', 'B', 'C', 0x00}
-	if !bytes.Equal(frames[0], want705) {
-		t.Fatalf("705 frame:\n got %x\nwant %x", frames[0], want705)
+	for _, frame := range frames {
+		if frame[0] == 0x1E {
+			t.Fatalf("player-object domain must not carry connection-level 705: %x", frame[:8])
+		}
 	}
 	// 198 ShortcutKey：串 = 存档值 + " " 尾空格（0x0D 档内嵌无尾空格，
 	// 两形态不可混用）。
-	if frames[1][0] != 0x10 || binary.LittleEndian.Uint16(frames[1][10:]) != 1 {
-		t.Fatalf("keybind frame head: %x", frames[1][:12])
+	if frames[0][0] != 0x10 || binary.LittleEndian.Uint16(frames[0][10:]) != 1 {
+		t.Fatalf("keybind frame head: %x", frames[0][:12])
 	}
-	if idx := binary.LittleEndian.Uint16(frames[1][12:]); idx != clientdata.MustPlayerProperty("ShortcutKey").Index {
+	if idx := binary.LittleEndian.Uint16(frames[0][12:]); idx != clientdata.MustPlayerProperty("ShortcutKey").Index {
 		t.Fatalf("keybind property index = %d", idx)
 	}
-	if !bytes.HasSuffix(frames[1], []byte("1,65;2,66; \x00")) {
-		t.Fatalf("keybind value missing trailing space: %x", frames[1])
+	if !bytes.HasSuffix(frames[0], []byte("1,65;2,66; \x00")) {
+		t.Fatalf("keybind value missing trailing space: %x", frames[0])
 	}
 	// 223 OperateMode int32=1。
-	if frames[2][0] != 0x10 || binary.LittleEndian.Uint16(frames[2][12:]) != 223 ||
-		binary.LittleEndian.Uint32(frames[2][14:]) != 1 {
-		t.Fatalf("operate mode frame: %x", frames[2])
+	if frames[1][0] != 0x10 || binary.LittleEndian.Uint16(frames[1][12:]) != 223 ||
+		binary.LittleEndian.Uint32(frames[1][14:]) != 1 {
+		t.Fatalf("operate mode frame: %x", frames[1])
 	}
 	// 201 NeiGongBind 尾空格。
-	if !bytes.HasSuffix(frames[3], []byte("1;0;0; \x00")) {
-		t.Fatalf("neigong bind value missing trailing space: %x", frames[3])
+	if !bytes.HasSuffix(frames[2], []byte("1;0;0; \x00")) {
+		t.Fatalf("neigong bind value missing trailing space: %x", frames[2])
 	}
 	// 快捷栏：基线行原样，无 starter 复活。
-	if len(frames[4:]) != 1 || !bytes.Contains(frames[4], []byte("it_potion\x00")) {
-		t.Fatalf("shortcut rows: %x", frames[4:])
+	if !bytes.Contains(frames[3], []byte("it_potion\x00")) {
+		t.Fatalf("shortcut rows: %x", frames[3])
 	}
-	if bytes.Contains(frames[4], []byte("zs_default_01")) {
+	if bytes.Contains(frames[3], []byte("zs_default_01")) {
 		t.Fatal("starter resurrected over edited baseline")
-	}
-}
-
-// TestPlayerObjectConfigFramesSplit 0x0C 切图重入重推拆分：
-// PlayerObjectConfigFrames = 键位域+快捷栏行，不含连接级 705。
-func TestPlayerObjectConfigFramesSplit(t *testing.T) {
-	ctx := testContext(t)
-	ctx.State.Customizing = "ABC"
-	ctx.State.Keybind = "1,65;"
-	full, err := CustomConfigFrames(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	playerObject, err := PlayerObjectConfigFrames(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(full) != len(playerObject)+1 {
-		t.Fatalf("full=%d playerObject=%d (want exactly the 705 difference)", len(full), len(playerObject))
-	}
-	for _, frame := range playerObject {
-		if frame[0] == 0x1E {
-			t.Fatalf("player-object half must not carry connection-level custom message: %x", frame[:8])
-		}
-	}
-	for i, frame := range playerObject {
-		if !bytes.Equal(frame, full[i+1]) {
-			t.Fatalf("player-object frame #%d differs from full cluster tail", i)
-		}
 	}
 }
 
@@ -208,8 +159,8 @@ func TestParseCustomRoundTrip(t *testing.T) {
 
 // TestReadyFramesIncludesCustomCluster 就绪段集成：fresh 状态必含
 // starter 打坐 0x11 行（缺发即「快捷栏空」表象）。
-// 2026-11-22 深夜恢复推送（2433 抢跑口径）：断言 705 与 starter 快捷
-// 栏行在簇内（有档时）。
+// 705 已自就绪簇撤下（5633d54；真服对照=登录段单发、上传零回应），
+// 簇内只断言 starter 快捷栏行。
 func TestReadyFramesIncludesCustomCluster(t *testing.T) {
 	frames, err := ReadyFrames(testContext(t), time.Now())
 	if err != nil {
