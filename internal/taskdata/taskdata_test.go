@@ -1,6 +1,9 @@
 package taskdata
 
 import (
+	"os"
+	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -199,5 +202,43 @@ func TestStripRichText(t *testing.T) {
 	}
 	if got := StripRichText("  纯文本  "); got != "纯文本" {
 		t.Fatalf("stripped = %q", got)
+	}
+}
+
+func TestLoadQuestXMLDir(t *testing.T) {
+	dir := filepath.Join("..", "..", "testdata", "ini", "Quest")
+	if _, err := os.Stat(filepath.Join(dir, "Task", "Task.xml")); err != nil {
+		t.Skipf("任务域 XML 构建产物缺席（tools/npcgen）: %v", err)
+	}
+	catalog, err := LoadQuestXMLDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if catalog.Count() == 0 || catalog.BindingCount() == 0 {
+		t.Fatalf("目录为空: tasks=%d bindings=%d", catalog.Count(), catalog.BindingCount())
+	}
+	// 主表行直存文本；task002 补独有 ID（同 ID 不覆盖 Task 树）。
+	task, ok := catalog.TaskByID(24001)
+	if !ok || task.Title != "寻亲少年" {
+		t.Fatalf("task 24001 = %+v ok=%v（Title 应直存主表文本）", task, ok)
+	}
+	// AcceptNpc/SubmitNpc 双侧绑定（24001 仅 Submit、24002 仅 Accept）。
+	if tasks := catalog.TasksForNPC("WorldNpc00009"); len(tasks) < 2 || tasks[0].ID != 24001 || tasks[1].ID != 24002 {
+		t.Fatalf("WorldNpc00009 任务 = %+v, want 首两名 24001/24002", tasks)
+	}
+	// SubFunction(story)×StoryTaskList 剧情段：24003 → 组 4001 两段，
+	// 行序即段序，词汇同 txt 链。
+	segments := catalog.StoryBindingsFor("worldnpc00002", 24003)
+	if len(segments) != 2 {
+		t.Fatalf("24003 剧情段 = %+v, want 2 段", segments)
+	}
+	for i, want := range []string{"story_24003_1", "story_24003_2"} {
+		seg := segments[i]
+		if seg.StoryID != "4001" || seg.ContextID != want || seg.TitleID != "storymenu_24003_"+strconv.Itoa(i+1) || seg.LeaveTextID != "9607" {
+			t.Fatalf("段 %d = %+v（want %s）", i, seg, want)
+		}
+	}
+	if _, err := LoadQuestXMLDir(filepath.Join(dir, "..", "NoQuest")); err == nil {
+		t.Fatal("缺 Task.xml 应报错")
 	}
 }

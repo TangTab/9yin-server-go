@@ -14,12 +14,17 @@ package fssoloworld
 //	           （S2C 0x1D）、服务 mark（805000000 商店/807000000 仓库/
 //	           860000022 传送…）→ 业务 View 待接（本阶段 trace 留痕）。
 //
-// 服务列从模板行提取（ShopID/DepotID/TransFuncID/GemGameNpcID/GuildFunc/
-// HomePoint/Job——2433 modernNPCServices 同源语义）；菜单文案键与 funcID
-// 映射照抄 2433 modernTalkFuncID/TextID 定版。
+// 服务列两级绑定：①模板行业务列（ShopID/DepotID/TransFuncID/GemGameNpcID/
+// GuildFunc/HomePoint/Job——2433 modernNPCServices 同源语义；本档位全树无
+// 此类列，为 2433 modern 数据预留）②NpcType 结构域回落（客户端
+// lua/share/npc_type_define.lua 类型表定版：61 武馆=技能训练、62~68 商铺
+// 族、45 马车船只、109/121~137 生活职业族——2026-11-23 实测档位唯一逐
+// NPC 功能源）。菜单文案键与 funcID 映射照抄 2433 modernTalkFuncID/
+// TextID 定版（Trainer 行取 legacyTalkFuncID(47) 对）。
 
 import (
 	"encoding/binary"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -89,25 +94,101 @@ const (
 	npcMarkGuild     uint16 = 0x1006
 	npcMarkHome      uint16 = 0x1007
 	npcMarkTask      uint16 = 0x1008
+	npcMarkTrainer   uint16 = 0x1009
 )
 
-// npcServicesOf 模板行服务列提取（非空且非 "0" 才算配置）。
+// npcTypeServiceMarks NpcType → 服务 mark（lua/share/npc_type_define.lua：
+// 45 马车船只 / 61 武馆 / 62 铁匠铺 63 绸缎庄 64 首饰行 65 杂货店
+// 66 药堂 67 钱庄 68 特产商 / 109 生活职业NPC / 121~137 矿工..乞丐十六
+// 生活职业）。表外类型（怪物/传送门/机关/采集/世界域 NPC）无对话服务
+// 语义，不派生。
+var npcTypeServiceMarks = map[uint16]uint16{
+	45:  npcMarkTransport,
+	61:  npcMarkTrainer,
+	62:  npcMarkShop,
+	63:  npcMarkShop,
+	64:  npcMarkShop,
+	65:  npcMarkShop,
+	66:  npcMarkShop,
+	67:  npcMarkShop,
+	68:  npcMarkShop,
+	109: npcMarkJob,
+	121: npcMarkJob, 122: npcMarkJob, 123: npcMarkJob, 124: npcMarkJob,
+	125: npcMarkJob, 126: npcMarkJob, 127: npcMarkJob, 128: npcMarkJob,
+	129: npcMarkJob, 130: npcMarkJob, 131: npcMarkJob, 132: npcMarkJob,
+	133: npcMarkJob, 134: npcMarkJob, 135: npcMarkJob, 136: npcMarkJob,
+	137: npcMarkJob,
+}
+
+// npcServicesOf 模板行两级服务提取：业务列（非空且非 "0" 才算配置，
+// 2433 modern 数据方言）→ NpcType 结构域回落（mark 去重，列派生优先）。
+// value：业务列取列值（如 ShopID）；NpcType 派生取类型号（审计留痕，
+// 业务 View 接入时作为绑定线索）。
 func npcServicesOf(tpl map[string]string) []npcService {
-	add := func(items []npcService, mark uint16, label, key string) []npcService {
+	add := func(items []npcService, mark uint16, key string) []npcService {
 		if v := strings.TrimSpace(tpl[key]); v != "" && v != "0" {
-			return append(items, npcService{mark: mark, label: label, value: v})
+			return append(items, npcService{mark: mark, label: npcServiceLabel(mark), value: v})
 		}
 		return items
 	}
 	items := make([]npcService, 0, 6)
-	items = add(items, npcMarkShop, "商店", "ShopID")
-	items = add(items, npcMarkDepot, "仓库", "DepotID")
-	items = add(items, npcMarkTransport, "传送", "TransFuncID")
-	items = add(items, npcMarkGem, "宝石服务", "GemGameNpcID")
-	items = add(items, npcMarkGuild, "帮会", "GuildFunc")
-	items = add(items, npcMarkHome, "回城点", "HomePoint")
-	items = add(items, npcMarkJob, "生活职业", "Job")
+	items = add(items, npcMarkShop, "ShopID")
+	items = add(items, npcMarkDepot, "DepotID")
+	items = add(items, npcMarkTransport, "TransFuncID")
+	items = add(items, npcMarkGem, "GemGameNpcID")
+	items = add(items, npcMarkGuild, "GuildFunc")
+	items = add(items, npcMarkHome, "HomePoint")
+	items = add(items, npcMarkJob, "Job")
+	// NpcType 结构域回落：列已派生的 mark 不重复追加。
+	seen := make(map[uint16]bool, len(items))
+	for _, svc := range items {
+		seen[svc.mark] = true
+	}
+	typeRaw := strings.TrimSpace(tpl["NpcType"])
+	if mark, ok := npcTypeMarkOf(typeRaw); ok && !seen[mark] {
+		items = append(items, npcService{
+			mark:  mark,
+			label: npcServiceLabel(mark),
+			value: typeRaw,
+		})
+	}
 	return items
+}
+
+// npcTypeMarkOf NpcType 字符串 → mark（脏值/表外类型零值回落）。
+func npcTypeMarkOf(typeRaw string) (uint16, bool) {
+	if typeRaw == "" {
+		return 0, false
+	}
+	v, err := strconv.Atoi(typeRaw)
+	if err != nil {
+		return 0, false
+	}
+	mark, ok := npcTypeServiceMarks[uint16(v)]
+	return mark, ok
+}
+
+// npcServiceLabel mark → 0x1C 菜单中文标签（npcServerMenu 域）。
+func npcServiceLabel(mark uint16) string {
+	switch mark {
+	case npcMarkShop:
+		return "商店"
+	case npcMarkDepot:
+		return "仓库"
+	case npcMarkTransport:
+		return "传送"
+	case npcMarkJob:
+		return "生活职业"
+	case npcMarkGem:
+		return "宝石服务"
+	case npcMarkGuild:
+		return "帮会"
+	case npcMarkHome:
+		return "回城点"
+	case npcMarkTrainer:
+		return "技能训练"
+	}
+	return "交谈"
 }
 
 // ---- 物化时机簿记（2433 clientActivity 定案）----
@@ -248,8 +329,33 @@ func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 		s.trace("npc interact: 菜单关闭 id=%d client=%d", req.ObjectID, pl.Conn1)
 		return true
 	}
-	s.trace("npc interact: 菜单选择 mark=%d id=%d（业务 View 待接）", req.FuncID, req.ObjectID)
+	s.trace("npc interact: 菜单选择 %s（mark=%d）id=%d client=%d（业务 View 待接）",
+		npcServiceNameByFuncID(req.FuncID), req.FuncID, req.ObjectID, pl.Conn1)
 	return true
+}
+
+// npcServiceNameByFuncID 菜单回执 funcid → 服务名（trace 观测面；业务
+// View 接入后此处替换为各服务受理）。
+func npcServiceNameByFuncID(funcID int32) string {
+	switch funcID {
+	case 805000000:
+		return "商店"
+	case 807000000:
+		return "仓库"
+	case 860000022:
+		return "传送"
+	case 806000036:
+		return "生活职业"
+	case 806000013:
+		return "宝石服务"
+	case 809000000:
+		return "帮会"
+	case 881000001:
+		return "回城点"
+	case 860000047:
+		return "技能训练"
+	}
+	return "未知服务"
 }
 
 func (s *Server) clearNPCMenu(pl *Player) {
@@ -338,7 +444,8 @@ func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []
 }
 
 // npcTalkFuncID/npcTalkTextID g_menu_id 官方域映射（form_talk_data.lua
-// 定版：func_menu_shop=805000000/func_menu_depot=807000000/…）。
+// 定版：func_menu_shop=805000000/func_menu_depot=807000000/…；Trainer
+// 取 2433 legacyTalkFuncID(47)=860000047/ui_skill_trainer 对）。
 func npcTalkFuncID(mark uint16) int32 {
 	switch mark {
 	case npcMarkShop:
@@ -355,6 +462,8 @@ func npcTalkFuncID(mark uint16) int32 {
 		return 809000000
 	case npcMarkHome:
 		return 881000001
+	case npcMarkTrainer:
+		return 860000047
 	default:
 		return 860000000 + int32(mark)
 	}
@@ -376,6 +485,8 @@ func npcTalkTextID(mark uint16) string {
 		return "ui_guild"
 	case npcMarkHome:
 		return "ui_home_point"
+	case npcMarkTrainer:
+		return "ui_skill_trainer"
 	default:
 		return "ui_talk"
 	}

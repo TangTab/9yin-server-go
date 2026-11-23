@@ -2,10 +2,10 @@ package fssoloworld
 
 // npctask.go NPC 任务绑定（对话框任务行 + 接取/提交受理）：
 //
-// 数据：taskdata 快照（storytasklist/qianjiu_tasknpc.ini 派生的
-// tasks.json，NPC→TID 绑定 + 任务文案）。装载路径：env
-// NINEYIN_TASK_SNAPSHOT > <数据根>/taskdata/tasks.json（正式 Res）>
-// <数据根>/../artifacts/local/tasks.json（仓内 testdata 布局）。
+// 数据：服务端任务域 XML（<数据根>/ini/Quest，npcgen 产物——Task/
+// task002 主表 + SubFunction×StoryTaskList 剧情段）为正典源；env
+// NINEYIN_TASK_SNAPSHOT 显式快照最优先，旧版 tasks.json 快照
+//（storytasklist/qianjiu_tasknpc.ini 派生）作回退。
 //
 // 协议（form_talk_data.lua g_menu_id 域 + 引导抓包定版）：菜单任务行
 // m6 funcid=flag*1000000+TID，行文本双键（首键=行文案、次键 title_
@@ -76,7 +76,8 @@ var (
 )
 
 // taskCatalogForRoot 装载任务目录（按数据根缓存；缺档返回 nil——任务行
-// 是增强下发，缺数据不阻塞对话）。
+// 是增强下发，缺数据不阻塞对话）。候选源序：env NINEYIN_TASK_SNAPSHOT
+// 显式快照 > 服务端任务域 XML（ini/Quest，正典）> 旧版 JSON 快照。
 func taskCatalogForRoot(root string) *taskdata.Catalog {
 	npcTaskMu.Lock()
 	defer npcTaskMu.Unlock()
@@ -88,34 +89,47 @@ func taskCatalogForRoot(root string) *taskdata.Catalog {
 	if root == "" {
 		return nil
 	}
-	for _, path := range npcTaskSnapshotCandidates(root) {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			continue
+	if v := strings.TrimSpace(os.Getenv("NINEYIN_TASK_SNAPSHOT")); v != "" {
+		if catalog := npcTaskParseSnapshotFile(filepath.Clean(v)); catalog != nil {
+			npcTaskCatalog = catalog
+			return catalog
 		}
-		catalog, err := taskdata.ParseSnapshot(data)
-		if err != nil {
-			continue
-		}
+	}
+	if catalog, err := taskdata.LoadQuestXMLDir(filepath.Join(root, "ini", "Quest")); err == nil && catalog.Count() > 0 {
 		npcTaskCatalog = catalog
 		return catalog
+	}
+	for _, path := range npcTaskSnapshotCandidates(root) {
+		if catalog := npcTaskParseSnapshotFile(path); catalog != nil {
+			npcTaskCatalog = catalog
+			return catalog
+		}
 	}
 	return nil
 }
 
-// npcTaskSnapshotCandidates 快照候选路径序：env 显式 > 数据根 taskdata
+// npcTaskParseSnapshotFile 读单份 JSON 快照（读失败/版本不符返回 nil，
+// 由调用方继续下一候选）。
+func npcTaskParseSnapshotFile(path string) *taskdata.Catalog {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	catalog, err := taskdata.ParseSnapshot(data)
+	if err != nil {
+		return nil
+	}
+	return catalog
+}
+
+// npcTaskSnapshotCandidates 旧版 JSON 快照候选路径序：数据根 taskdata
 // 子目录（正式 Res/taskdata/tasks.json）> 仓内 artifacts/local（testdata
 // 布局的兄弟目录）。
 func npcTaskSnapshotCandidates(root string) []string {
-	var paths []string
-	if v := strings.TrimSpace(os.Getenv("NINEYIN_TASK_SNAPSHOT")); v != "" {
-		paths = append(paths, filepath.Clean(v))
-	}
-	paths = append(paths,
+	return []string{
 		filepath.Join(root, "taskdata", "tasks.json"),
 		filepath.Join(root, "..", "artifacts", "local", "tasks.json"),
-	)
-	return paths
+	}
 }
 
 // npcTaskMenuLimit NINEYIN_NPC_TASK_LIMIT 单 NPC 任务行上限（缺省 8——
@@ -443,12 +457,13 @@ func (p *Player) removeAcceptedTask(id uint32) []uint32 {
 	return kept
 }
 
-// npcTaskCatalogOf 数据根解析 + 快照装载薄封装（trace 一次缺档）。
+// npcTaskCatalogOf 数据根解析 + 目录装载薄封装（trace 一次缺档）。
 func (s *Server) npcTaskCatalogOf() *taskdata.Catalog {
 	root := npcfeed.ResolveRoot()
 	catalog := taskCatalogForRoot(root)
 	if catalog == nil {
-		s.trace("npc task: 任务快照缺席（NINEYIN_TASK_SNAPSHOT / %s），任务行不下发", filepath.Join(root, "taskdata", "tasks.json"))
+		s.trace("npc task: 任务目录缺席（NINEYIN_TASK_SNAPSHOT / %s / ini/Quest），任务行不下发",
+			filepath.Join(root, "taskdata", "tasks.json"))
 	}
 	return catalog
 }

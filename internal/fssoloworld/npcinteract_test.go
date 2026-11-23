@@ -334,37 +334,130 @@ func TestNPCTaskMarkSplit(t *testing.T) {
 
 func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
 	// 接取→已接列表增长+菜单刷新；提交→移除。0x29 重放走 haveRoleState
-	// 门（无角色态静默跳过，不 panic）。
+	// 门（无角色态静默跳过，不 panic）。任务目录走服务端 XML 配置
+	//（testdata/ini/Quest）：TID 取真实绑定任务且必有文案，首点 100 走
+	// 接取窗路径，不落「无文案直接接取」回退。
 	s := newNpcTestServer(t)
+	catalog := s.npcTaskCatalogOf()
+	if catalog == nil {
+		t.Fatal("任务目录缺席（ini/Quest XML）")
+	}
+	tasks := catalog.TasksForNPC("WorldNpc00009")
+	if len(tasks) == 0 {
+		t.Fatal("WorldNpc00009 无任务绑定（XML 数据异常）")
+	}
+	tid := tasks[0].ID
 	pl := &Player{Conn1: 9, State: PlOnline}
 	menu := &npcActiveMenu{objectID: 5, ownerID: 6}
 	// 接取状态机：首次 100=推接取窗（不写已接），同 TID 二次=真接取。
-	s.handleNPCTaskMark(pl, menu, 100000301)
-	if pl.taskAcceptedContains(301) {
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagAccept*npcTaskFuncBase+int32(tid))
+	if pl.taskAcceptedContains(uint32(tid)) {
 		t.Fatalf("首次 100 不应直接接取: %+v", pl.roleState.TaskAccepted)
 	}
-	s.handleNPCTaskMark(pl, menu, 100000301)
-	if !pl.taskAcceptedContains(301) || len(pl.roleState.TaskAccepted) != 1 {
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagAccept*npcTaskFuncBase+int32(tid))
+	if !pl.taskAcceptedContains(uint32(tid)) || len(pl.roleState.TaskAccepted) != 1 {
 		t.Fatalf("二次确认后已接 = %+v", pl.roleState.TaskAccepted)
 	}
 	// 幂等：重复接取不重复追加。
-	s.handleNPCTaskMark(pl, menu, 100000301)
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagAccept*npcTaskFuncBase+int32(tid))
 	if len(pl.roleState.TaskAccepted) != 1 {
 		t.Fatalf("重复接取后已接 = %d, want 1", len(pl.roleState.TaskAccepted))
 	}
-	s.handleNPCTaskMark(pl, menu, 200000301)
-	if pl.taskAcceptedContains(301) || len(pl.roleState.TaskAccepted) != 0 {
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagSubmit*npcTaskFuncBase+int32(tid))
+	if pl.taskAcceptedContains(uint32(tid)) || len(pl.roleState.TaskAccepted) != 0 {
 		t.Fatalf("提交后已接 = %+v", pl.roleState.TaskAccepted)
 	}
 	// 201 域（奖励单选二次确认）同样按提交受理。
-	pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, 302)
-	s.handleNPCTaskMark(pl, menu, 201000302)
-	if pl.taskAcceptedContains(302) {
+	pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, uint32(tid))
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagSubmitChoice*npcTaskFuncBase+int32(tid))
+	if pl.taskAcceptedContains(uint32(tid)) {
 		t.Fatalf("201 提交后已接 = %+v", pl.roleState.TaskAccepted)
 	}
 	// 未受理任务域（300 放弃）不改状态。
-	s.handleNPCTaskMark(pl, menu, 300000301)
+	s.handleNPCTaskMark(pl, menu, 300*npcTaskFuncBase+int32(tid))
 	if len(pl.roleState.TaskAccepted) != 0 {
 		t.Fatalf("放弃域不应改状态: %+v", pl.roleState.TaskAccepted)
+	}
+}
+
+func TestNPCServicesByNpcType(t *testing.T) {
+	// NpcType 结构域回落（npc_type_define.lua：62 铁匠铺→商店、61 武馆→
+	// 技能训练、122 铁匠(生活职业)→生活职业、45 马车船只→传送；84 烟雨庄
+	// 世界域/1 怪物无服务）。
+	cases := []struct {
+		typeVal string
+		want    int
+		mark    uint16
+		label   string
+	}{
+		{"62", 1, npcMarkShop, "商店"},
+		{"66", 1, npcMarkShop, "商店"},
+		{"61", 1, npcMarkTrainer, "技能训练"},
+		{"122", 1, npcMarkJob, "生活职业"},
+		{"45", 1, npcMarkTransport, "传送"},
+		{"84", 0, 0, ""},
+		{"1", 0, 0, ""},
+		{"abc", 0, 0, ""},
+		{"", 0, 0, ""},
+	}
+	for _, c := range cases {
+		services := npcServicesOf(map[string]string{"NpcType": c.typeVal})
+		if len(services) != c.want {
+			t.Fatalf("NpcType=%s 服务数 = %d, want %d", c.typeVal, len(services), c.want)
+		}
+		if c.want == 0 {
+			continue
+		}
+		if services[0].mark != c.mark || services[0].label != c.label {
+			t.Fatalf("NpcType=%s 派生 mark=%x label=%q, want mark=%x %q",
+				c.typeVal, services[0].mark, services[0].label, c.mark, c.label)
+		}
+		if services[0].value != c.typeVal {
+			t.Fatalf("NpcType 派生 value = %q, want 类型号 %q", services[0].value, c.typeVal)
+		}
+	}
+	// 业务列优先 + mark 去重：ShopID 与 NpcType=62 同为商店只出一行。
+	services := npcServicesOf(map[string]string{"ShopID": "Shop_x", "NpcType": "62"})
+	if len(services) != 1 || services[0].value != "Shop_x" {
+		t.Fatalf("列+类型去重异常: %+v", services)
+	}
+	// 列与类型不同 mark 时合并：DepotID + NpcType=122 → 仓库+生活职业。
+	services = npcServicesOf(map[string]string{"DepotID": "D1", "NpcType": "122"})
+	if len(services) != 2 || services[0].mark != npcMarkDepot || services[1].mark != npcMarkJob {
+		t.Fatalf("列+类型合并异常: %+v", services)
+	}
+}
+
+func TestNPCTalkMenuServiceLines(t *testing.T) {
+	// 武馆 NPC（NpcType=61）：服务行（技能训练 860000047/ui_skill_trainer）
+	// 置于赠送/侠恶通用行之前、ui_exit 之前。帧序 m4/m5/m6×4/m7。
+	services := npcServicesOf(map[string]string{"NpcType": "61"})
+	if len(services) != 1 || npcTalkFuncID(services[0].mark) != 860000047 || npcTalkTextID(services[0].mark) != "ui_skill_trainer" {
+		t.Fatalf("武馆映射异常: %+v", services)
+	}
+	frames, err := npcCinematicTalkMenu(0x0E000104, 0x1010, "FuncNpc00058", services, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) != 7 {
+		t.Fatalf("服务菜单帧数 = %d, want 7", len(frames))
+	}
+	for i, want := range []byte{4, 5, 6, 6, 6, 6, 7} {
+		if id := binary.LittleEndian.Uint32(frames[i][4:]); id != uint32(want) {
+			t.Fatalf("帧 %d 消息号 = %d, want %d", i, id, want)
+		}
+	}
+	if !bytes.Contains(frames[2], []byte("ui_skill_trainer")) {
+		t.Fatalf("m6 服务行缺 ui_skill_trainer: % x", frames[2])
+	}
+	if !bytes.Contains(frames[1], []byte("task_FuncNpc00058")) {
+		t.Fatalf("m5 链键异常: % x", frames[1])
+	}
+	// 回执命名（trace 观测面）。
+	if name := npcServiceNameByFuncID(860000047); name != "技能训练" {
+		t.Fatalf("funcid 860000047 名 = %q", name)
+	}
+	if name := npcServiceNameByFuncID(805000000); name != "商店" {
+		t.Fatalf("funcid 805000000 名 = %q", name)
 	}
 }
