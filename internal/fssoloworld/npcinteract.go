@@ -184,32 +184,35 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 	// LastObject+AutoSelectObject 双帧先行——C++ 对话流程依赖选中态，
 	// 缺它 m4 聚合链不跑=窗不开）。
 	s.sendSelectTargetFrames(pl, spawn.ObjectID, spawn.OwnerID)
+	s.sendNPCTalkMenu(pl, spawn)
+	npcMenuMu.Lock()
+	npcMenuState[pl.Conn1] = &npcActiveMenu{objectID: spawn.ObjectID, ownerID: spawn.OwnerID, at: time.Now()}
+	npcMenuMu.Unlock()
+	pauseNpcTalk(spawn.ObjectID) // 行人对话停走（菜单关闭恢复）
+	return true
+}
+
+// sendNPCTalkMenu talk 帧族下发（m4/m5/m6×N/m7）：服务行 + 任务行 +
+// 通用行。任务行来自 taskdata 快照绑定（npctask.go——客户端不自行生成
+// 任务行，服务端不发即无任务入口）。
+func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn) {
 	services := npcServicesOf(spawn.Template)
-	// talk 帧族 m4/m6×N/m7（npc.pcapng 官方模板）——C++ 聚合调
-	// **form_talk_movie**.show_window（全屏对话界面：HeadGame 语音/
-	// update_menu_control 菜单/play_talk_action NPC 说话动作）。
-	// ⚠️ 绝不发 0x1C：它触发的是 form_talk（小方窗）另一套简版窗体
-	//（真机实证「窗口展示方式不对——应为整页全屏」）——两窗体二选一，
-	// 官方走 m4-8 全屏。funcid 用 g_menu_id 域（funcid/1000000 顶层短号
-	// 查图标，805000000→805 商店图标实证兼容）。
-	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services); err == nil {
+	tasks := npcTaskLines(s.npcTaskCatalogOf(), spawn.ConfigID, npcAcceptedSet(pl), npcTaskMenuLimit())
+	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services, tasks); err == nil {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
 		}
 	} else {
 		s.trace("npc interact: talk 数据编码失败 %s: %v", spawn.ConfigID, err)
 	}
-	npcMenuMu.Lock()
-	npcMenuState[pl.Conn1] = &npcActiveMenu{objectID: spawn.ObjectID, ownerID: spawn.OwnerID, at: time.Now()}
-	npcMenuMu.Unlock()
-	pauseNpcTalk(spawn.ObjectID) // 行人对话停走（菜单关闭恢复）
-	s.trace("npc interact: %s (%s) 菜单 %d 项 client=%d", spawn.ConfigID, spawn.Script, len(services)+1, pl.Conn1)
-	return true
+	s.trace("npc interact: %s (%s) 菜单 %d 项（任务行 %d）client=%d",
+		spawn.ConfigID, spawn.Script, len(services)+3, len(tasks), pl.Conn1)
 }
 
 // handleNPCMenuSelect 菜单第二段：0x1C SERVER_MENU 选择的 mark 路由
-// （mark=0 离开 → 0x1D 清菜单；mark 0x1001..0x1008 业务 → 本阶段清菜单
-// + trace 留痕，业务 View 待接）。
+// （mark=0 离开 → m8×2 清菜单；任务域 mark 100/200 → 接取/提交受理
+// （npctask.go，不关窗刷新菜单）；其余业务 mark → 本阶段清菜单 + trace
+// 留痕，业务 View 待接）。
 func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 	npcMenuMu.Lock()
 	menu := npcMenuState[pl.Conn1]
@@ -220,6 +223,14 @@ func (s *Server) handleNPCMenuSelect(pl *Player, req npcObjectRequest) bool {
 			s.trace("npc interact: 菜单选择无活动菜单 mark=%d id=%d", req.FuncID, req.ObjectID)
 		}
 		return true
+	}
+	// 任务域 mark：接取（100）/提交（200/201）受理（引导抓包实证口径，
+	// npctask.go——接取后刷新菜单，提交后 m8×2 关窗）。
+	if req.FuncID != 0 {
+		if flag, _, ok := npcTaskMarkSplit(req.FuncID); ok && (flag == npcTaskFlagAccept || flag == npcTaskFlagSubmit || flag == npcTaskFlagSubmitChoice) {
+			s.handleNPCTaskMark(pl, menu, req.FuncID)
+			return true
+		}
 	}
 	// 关菜单走官方 m8 对话结束 ×2（女号抓包 102.4s / npc.pcapng 32.0s
 	// 双源：结束簇恒两条；全程无 0x1C/0x1D）。
@@ -269,8 +280,10 @@ func (s *Server) findNPCSpawn(scene string, objectID uint32) (npcfeed.Spawn, boo
 // "task_FuncNpc00107"——键形恒 "task_"+ConfigID，客户端按本地任务链
 // 表解析后聚合 form_talk 开窗；此前缺 m5 = 点击 NPC 无窗）。曾发 NPC
 // 名 UTF-8 / "ui_form_talk" 乱码是键形错误，非 m5 本身不可发。
-func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []npcService) ([][]byte, error) {
-	out := make([][]byte, 0, 3+len(services))
+// tasks 任务行（npctask.go 绑定派生）置于服务行之前——客户端
+// talk_data_add_save_menu 按 flag 域分区聚合，任务行归任务区置顶。
+func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []npcService, tasks []npcTaskLine) ([][]byte, error) {
+	out := make([][]byte, 0, 3+len(services)+len(tasks))
 	begin, err := entergen.CustomMessageFrame(4)
 	if err != nil {
 		return nil, err
@@ -281,6 +294,11 @@ func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []
 		return nil, err
 	}
 	out = append(out, menu)
+	taskFrames, err := npcTaskMenuFrames(tasks)
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, taskFrames...)
 	for _, service := range services {
 		pkt, err := entergen.CustomMessageFrame(6, entergen.CustomInt(npcTalkFuncID(service.mark)), entergen.CustomString(npcTalkTextID(service.mark)))
 		if err != nil {

@@ -173,6 +173,8 @@ type genReport struct {
 		NpcTemplateRow    int            `json:"npc_template_rows"`
 		TextRows          int            `json:"text_rows"`
 		TextConflicts     int            `json:"text_conflicts"`
+		NpcTalkRows       int            `json:"npc_talk_rows"`
+		NpcTalkConflicts  int            `json:"npc_talk_conflicts"`
 	} `json:"quest"`
 	Warnings []string `json:"warnings,omitempty"`
 }
@@ -325,7 +327,8 @@ func run(modern, outDir, scenesOut, tasksIn, npctemplateIn, questOut, textOut, r
 		fmt.Printf("npcgen: 战斗模板源不存在，跳过（-npctemplate=%s）\n", npctemplateIn)
 	}
 
-	// 任务文案（modern/text/chineses 的 stringtask_* 目录）。
+	// 任务文案（modern/text/chineses 的 stringtask_* 目录）与 NPC 对话框
+	// 散档（string_npctalk/string_taskmenu/stringtalk → NpcTalk.xml）。
 	textRoot := filepath.Join(modern, "text", "chineses")
 	if info, err := os.Stat(textRoot); err == nil && info.IsDir() {
 		rows, conflicts, warnings, err := convertTaskText(textRoot, textOut)
@@ -338,6 +341,16 @@ func run(modern, outDir, scenesOut, tasksIn, npctemplateIn, questOut, textOut, r
 		taskTextPath := filepath.Join(textOut, "TaskText.xml")
 		written[taskTextPath] = rows
 		writtenOrder = append(writtenOrder, taskTextPath)
+		talkRows, talkConflicts, talkWarnings, err := convertNpcTalk(textRoot, textOut)
+		if err != nil {
+			return err
+		}
+		report.Quest.NpcTalkRows = talkRows
+		report.Quest.NpcTalkConflicts = talkConflicts
+		report.Warnings = append(report.Warnings, talkWarnings...)
+		npcTalkPath := filepath.Join(textOut, "NpcTalk.xml")
+		written[npcTalkPath] = talkRows
+		writtenOrder = append(writtenOrder, npcTalkPath)
 	} else {
 		fmt.Printf("npcgen: 文案目录不存在，跳过文案提取（%s）\n", textRoot)
 	}
@@ -366,6 +379,9 @@ func run(modern, outDir, scenesOut, tasksIn, npctemplateIn, questOut, textOut, r
 	}
 	if report.Quest.TextRows > 0 {
 		fmt.Printf("npcgen: 文案 %d 键 → %s\n", report.Quest.TextRows, textOut)
+	}
+	if report.Quest.NpcTalkRows > 0 {
+		fmt.Printf("npcgen: NPC 对话框文案 %d 键 → %s\n", report.Quest.NpcTalkRows, filepath.Join(textOut, "NpcTalk.xml"))
 	}
 	fmt.Printf("npcgen: %s；报告 %s\n", report.Backup, reportPath)
 	for _, w := range report.Warnings {

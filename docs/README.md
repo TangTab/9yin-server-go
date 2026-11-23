@@ -31,6 +31,7 @@
 | [外服NPCm229物化方言定版](official/外服NPCm229物化方言定版.md) | NPC 物化帧 c130 16 槽方言 + npcdata 数据源/native 移植 + reactor 队满丢帧事故修复 | 现行权威 |
 | [初始账号外服教程态方言](official/初始账号外服教程态方言.md) | 新号教程态登录全解：记录双通道、Task_Completed 位图、第三 0x09 方言（2086 行） | 现行参考 |
 | [op28-fxnet2-lz-decoder](official/op28-fxnet2-lz-decoder.md) | 0x28 四连崩根因：fxnet2 LZ77 字典解码器全逆向 + v3 生成器 | 现行参考 |
+| [NPC任务绑定与引导流任务协议定版](official/NPC任务绑定与引导流任务协议定版.md) | NPC 对话任务行域表/双键语义/接取提交受理、任务数据链审计（两套任务 ID 体系）、引导抓包任务协议、lz_exact 落地与官方 0x29 任务记录帧布局 | 现行权威 |
 
 ## 二、combat/ —— 战斗与技能
 

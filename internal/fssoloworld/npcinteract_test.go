@@ -10,6 +10,7 @@ import (
 	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/taskdata"
 )
 
 func buildObjectRequest(objectID, ownerID uint32, funcID int32) []byte {
@@ -198,7 +199,7 @@ func TestNPCTalkMenuM5(t *testing.T) {
 	// 官方双源定版：每窗必带 m5 [5, "task_<ConfigID>"]（女号抓包 88.2s
 	// "task_funnpcborn003031" / npc.pcapng "task_WorldNpc01230"）——缺它
 	// 客户端不开窗。帧序 m4 → m5 → m6×N（尾 ui_exit）→ m7。
-	frames, err := npcCinematicTalkMenu(0x43, 0x3500003E, "funnpcborn003031", nil)
+	frames, err := npcCinematicTalkMenu(0x43, 0x3500003E, "funnpcborn003031", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -222,5 +223,110 @@ func TestNPCTalkMenuM5(t *testing.T) {
 	}
 	if !bytes.Contains(frames[4], []byte("ui_exit")) {
 		t.Fatalf("尾行缺 ui_exit: % x", frames[4])
+	}
+}
+
+func TestNPCTaskMenuLines(t *testing.T) {
+	// 任务行域定版（form_talk_data.lua g_menu_id）：接取 100*base+TID、
+	// 提交 200*base+TID；行文本键 title_<TID>。已接任务翻提交行。
+	catalog := taskdata.NewCatalog(
+		map[int]taskdata.Task{101: {ID: 101, Title: "寻亲少年"}, 102: {ID: 102, Title: "初入江湖"}},
+		[]taskdata.Binding{
+			{TaskID: 101, NPCConfigID: "WorldNpc00009"},
+			{TaskID: 102, NPCConfigID: "worldnpc00009"}, // 大小写不敏感去重
+			{TaskID: 103, NPCConfigID: "WorldNpc00009"},
+			{TaskID: 104, NPCConfigID: "WorldNpc00009"}, // 无文本不计
+		}, nil)
+	lines := npcTaskLines(catalog, "WorldNpc00009", map[uint32]bool{101: true}, 8)
+	if len(lines) != 2 {
+		t.Fatalf("任务行 = %d, want 2（103/104 无文本不计）: %+v", len(lines), lines)
+	}
+	if lines[0].TaskID != 101 || !lines[0].Submit {
+		t.Fatalf("行 0 = %+v, want {101 Submit}", lines[0])
+	}
+	if lines[1].TaskID != 102 || lines[1].Submit {
+		t.Fatalf("行 1 = %+v, want {102 接取}", lines[1])
+	}
+	frames, err := npcTaskMenuFrames(lines)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) != 2 {
+		t.Fatalf("帧数 = %d, want 2", len(frames))
+	}
+	if id := binary.LittleEndian.Uint32(frames[0][4:]); id != 6 {
+		t.Fatalf("消息号 = %d, want 6", id)
+	}
+	if funcid := binary.LittleEndian.Uint32(frames[0][9:]); funcid != 200000101 {
+		t.Fatalf("提交行 funcid = %d, want 200000101", funcid)
+	}
+	if !bytes.Contains(frames[0], []byte("CompleteMenu_101")) || !bytes.Contains(frames[0], []byte("title_101")) {
+		t.Fatalf("提交行缺双键: % x", frames[0])
+	}
+	if !bytes.Contains(frames[1], []byte("CanAcceptMenu_102")) || !bytes.Contains(frames[1], []byte("title_102")) {
+		t.Fatalf("接取行缺双键: % x", frames[1])
+	}
+	if funcid := binary.LittleEndian.Uint32(frames[1][9:]); funcid != 100000102 {
+		t.Fatalf("接取行 funcid = %d, want 100000102", funcid)
+	}
+	// 上限截断与关停。
+	if got := len(npcTaskLines(catalog, "WorldNpc00009", nil, 1)); got != 1 {
+		t.Fatalf("截断后 = %d, want 1", got)
+	}
+	if got := npcTaskLines(catalog, "WorldNpc00009", nil, -1); got != nil {
+		t.Fatalf("负上限应关停: %+v", got)
+	}
+}
+
+func TestNPCTaskMarkSplit(t *testing.T) {
+	for _, tc := range []struct {
+		mark   int32
+		flag   int32
+		taskID int
+		ok     bool
+	}{
+		{100000101, 100, 101, true},
+		{200000101, 200, 101, true},
+		{600000000, 600, 0, false},  // 离开项 TID=0 非任务行
+		{898000024, 898, 24, false}, // 通用行域外
+		{805000000, 805, 0, false},  // 商店域外
+		{99999999, 0, 0, false},     // 低位
+	} {
+		flag, taskID, ok := npcTaskMarkSplit(tc.mark)
+		if ok != tc.ok || (ok && (flag != tc.flag || taskID != tc.taskID)) {
+			t.Fatalf("mark %d 拆解 = (%d,%d,%v), want (%d,%d,%v)", tc.mark, flag, taskID, ok, tc.flag, tc.taskID, tc.ok)
+		}
+	}
+}
+
+func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
+	// 接取→已接列表增长+菜单刷新；提交→移除。0x29 重放走 haveRoleState
+	// 门（无角色态静默跳过，不 panic）。
+	s := newNpcTestServer(t)
+	pl := &Player{Conn1: 9, State: PlOnline}
+	menu := &npcActiveMenu{objectID: 5, ownerID: 6}
+	s.handleNPCTaskMark(pl, menu, 100000301)
+	if !pl.taskAcceptedContains(301) || len(pl.roleState.TaskAccepted) != 1 {
+		t.Fatalf("接取后已接 = %+v", pl.roleState.TaskAccepted)
+	}
+	// 幂等：重复接取不重复追加。
+	s.handleNPCTaskMark(pl, menu, 100000301)
+	if len(pl.roleState.TaskAccepted) != 1 {
+		t.Fatalf("重复接取后已接 = %d, want 1", len(pl.roleState.TaskAccepted))
+	}
+	s.handleNPCTaskMark(pl, menu, 200000301)
+	if pl.taskAcceptedContains(301) || len(pl.roleState.TaskAccepted) != 0 {
+		t.Fatalf("提交后已接 = %+v", pl.roleState.TaskAccepted)
+	}
+	// 201 域（奖励单选二次确认）同样按提交受理。
+	pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, 302)
+	s.handleNPCTaskMark(pl, menu, 201000302)
+	if pl.taskAcceptedContains(302) {
+		t.Fatalf("201 提交后已接 = %+v", pl.roleState.TaskAccepted)
+	}
+	// 未受理任务域（300 放弃）不改状态。
+	s.handleNPCTaskMark(pl, menu, 300000301)
+	if len(pl.roleState.TaskAccepted) != 0 {
+		t.Fatalf("放弃域不应改状态: %+v", pl.roleState.TaskAccepted)
 	}
 }

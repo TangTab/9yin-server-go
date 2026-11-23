@@ -79,7 +79,8 @@ type Player struct {
 	// 手动格挡会话态（parry.go；连接生命周期，不落库）：parryBaseline=
 	// 官服族 m54 状态上报的基调值（0=未采集；首条上报即基调=未格挡）；
 	// parrying=当前格挡权威位。双方言：0/1 直判（0=按下）与令牌上报
-	//（值≠基调=格挡中）共用这两个字段。
+	//（按压=基调+parryTokenDelta）共用这两个字段；基调随副本切景轮换，
+	// 由 K 形判别自动采纳。
 	parryMu       sync.Mutex
 	parryBaseline int64
 	parrying      bool

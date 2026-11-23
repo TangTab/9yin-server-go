@@ -55,13 +55,12 @@ func main() {
 			capLen := int(binary.LittleEndian.Uint32(body[12:]))
 			pkt := body[20 : 20+capLen]
 			dir, cport, seq, payload := parsePacket(pkt, linkType)
-			if dir < 0 {
-				continue
+			if dir >= 0 {
+				cp := make([]byte, len(payload))
+				copy(cp, payload)
+				k := streamKey{cport, dir}
+				streams[k] = append(streams[k], seg{seq, cp})
 			}
-			cp := make([]byte, len(payload))
-			copy(cp, payload)
-			k := streamKey{cport, dir}
-			streams[k] = append(streams[k], seg{seq, cp})
 		}
 		off += blkLen
 	}
