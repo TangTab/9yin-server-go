@@ -1,7 +1,8 @@
 package fssoloworld
 
-// msg54 手动格挡回声序列测试（官方女号抓包 192s 段方言）：
-// 值变化=翻转，同值重发静默；ON/OFF 各按官方帧序回 m169 + 0x10 属性。
+// msg54 手动格挡双方言测试（参考端 820f79a 真机定版语义）：
+// 0/1 直判（0=按下）；官服族状态上报（基调=首条、≠基调=格挡中）；
+// 无变迁零帧；应答=三属性权威帧+LogicState 撑持。
 
 import (
 	"bytes"
@@ -11,66 +12,86 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 )
 
-func TestParryToggleEcho(t *testing.T) {
+func newParryTestServer(t *testing.T) (*Server, *Player, *[][]byte) {
+	t.Helper()
 	s := newNpcTestServer(t)
 	pl := &Player{Conn1: 9, State: PlOnline}
-
 	var frames [][]byte
 	prev := clientSendObserver
 	clientSendObserver = func(pl *Player, frame []byte) { frames = append(frames, frame) }
 	t.Cleanup(func() { clientSendObserver = prev })
+	return s, pl, &frames
+}
 
-	send := func(v int64) {
-		s.handleParryState(pl, entergen.CustomInbound{Opcode: 0x1A, Values: []entergen.CustomInboundValue{
-			{Type: 2, Int32: clientCustomParryState},
-			{Type: 3, Int64: v},
-		}})
+func sendM54(s *Server, pl *Player, tag byte, value int64) {
+	v := entergen.CustomInboundValue{Type: tag}
+	if tag == 2 {
+		v.Int32 = int32(value)
+	} else {
+		v.Int64 = value
 	}
+	s.handleParryState(pl, entergen.CustomInbound{Opcode: 0x0A, Values: []entergen.CustomInboundValue{
+		{Type: 2, Int32: clientCustomParryState}, v,
+	}})
+}
 
-	// 按下：ON 簇（5×0x10 + m169 c1=0 + 0x10 InManualParry）。
-	send(5525727475)
-	if len(frames) != 7 {
-		t.Fatalf("ON 簇帧数 = %d, want 7", len(frames))
+// 官服族状态上报（我方 B 线登录的真机形态）：恒 1=基调闲时上报零帧。
+func TestParryStateReportBaseline(t *testing.T) {
+	s, pl, frames := newParryTestServer(t)
+	sendM54(s, pl, 3, 1)
+	sendM54(s, pl, 3, 1)
+	sendM54(s, pl, 3, 1)
+	if len(*frames) != 0 {
+		t.Fatalf("基调上报应零帧（回帧自激成洪流），实发 %d 帧", len(*frames))
 	}
-	if !bytes.Contains(frames[5], []byte("BuffInParry")) || frames[5][0] != 0x1E {
-		t.Fatalf("第 6 帧应为 m169 BuffInParry: % x", frames[5])
+	if pl.parrying {
+		t.Error("基调上报不应进入格挡态")
 	}
-	if mid := binary.LittleEndian.Uint32(frames[5][4:]); mid != 169 {
-		t.Fatalf("m169 消息号 = %d", mid)
+	// 值≠基调 = 按下：三属性帧 + LogicState=1。
+	sendM54(s, pl, 3, 5525727475)
+	if len(*frames) != 2 {
+		t.Fatalf("按下应发 2 帧（三属性+LogicState），实发 %d", len(*frames))
 	}
-	if c1 := frames[5][9]; c1 != 0 { // n=9 @1，msg id 后首值 tag=02、值低字节
-		t.Fatalf("ON 回声 c1 = %d, want 0（添加）", c1)
+	if !bytes.Contains((*frames)[0], []byte("ParryValue")) && !hasPropIdx((*frames)[0]) {
+		t.Fatalf("首帧应三属性 0x10: % x", (*frames)[0])
 	}
-	if !pl.parryOn {
-		t.Error("按下后 parryOn 应为 true")
+	if !pl.parrying {
+		t.Error("按下后应进入格挡态")
 	}
+	// 回基调 = 松开：三属性帧 + LogicState=0。
+	sendM54(s, pl, 3, 1)
+	if len(*frames) != 4 {
+		t.Fatalf("松开应再发 2 帧，实发 %d", len(*frames))
+	}
+	if pl.parrying {
+		t.Error("松开后应退出格挡态")
+	}
+}
 
-	// 同值重发（客户端等回声轮询）：静默。
-	before := len(frames)
-	send(5525727475)
-	if len(frames) != before {
-		t.Fatalf("同值重发不应再发帧：%d → %d", before, len(frames))
+// fork 二值方言兼容：基调=1 时 0=按下（异值分支覆盖）。
+func TestParryBinaryDialect(t *testing.T) {
+	s, pl, frames := newParryTestServer(t)
+	sendM54(s, pl, 2, 1) // 基线采集（闲时）
+	sendM54(s, pl, 2, 0) // 0=按下（异值）
+	if !pl.parrying || len(*frames) != 2 {
+		t.Fatalf("0=按下应受理: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
+	sendM54(s, pl, 2, 1) // 回基调=松开
+	if pl.parrying || len(*frames) != 4 {
+		t.Fatalf("回基调应松开: parrying=%t frames=%d", pl.parrying, len(*frames))
+	}
+	sendM54(s, pl, 2, 1) // 重复基调：零帧
+	if len(*frames) != 4 {
+		t.Fatalf("重复基调应零帧，实发 %d", len(*frames))
+	}
+}
 
-	// 抬起：OFF 簇（m169 c1=1 + 6×0x10）。
-	send(5226499786)
-	if len(frames) != before+7 {
-		t.Fatalf("OFF 簇帧数异常：%d → %d", before, len(frames))
-	}
-	off := frames[before]
-	if off[0] != 0x1E || !bytes.Contains(off, []byte("BuffInParry")) {
-		t.Fatalf("OFF 首帧应为 m169: % x", off)
-	}
-	if c1 := off[9]; c1 != 1 {
-		t.Fatalf("OFF 回声 c1 = %d, want 1（移除）", c1)
-	}
-	if pl.parryOn {
-		t.Error("抬起后 parryOn 应为 false")
-	}
+func hasPropIdx(frame []byte) bool { return len(frame) >= 14 && frame[0] == 0x10 }
 
-	// 再按下（同值复用也不误判——值变化才翻转）。
-	send(5525727475)
-	if !pl.parryOn {
-		t.Error("再次按下应翻回 true")
+func TestParryValueTotalFallback(t *testing.T) {
+	s, pl, _ := newParryTestServer(t)
+	if got := s.parryValueTotal(pl); got != 72 {
+		t.Fatalf("无存档回退招架值 = %d, want 72", got)
 	}
+	_ = binary.LittleEndian
 }

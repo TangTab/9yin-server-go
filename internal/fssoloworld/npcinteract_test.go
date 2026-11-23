@@ -202,10 +202,11 @@ func TestNPCTalkMenuM5(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(frames) != 4 {
-		t.Fatalf("无服务菜单帧数 = %d, want 4（m4/m5/m6 离开/m7）", len(frames))
+	// m4/m5/[服务行×0]/赠送/侠恶/离开/m7。
+	if len(frames) != 6 {
+		t.Fatalf("无服务菜单帧数 = %d, want 6", len(frames))
 	}
-	for i, want := range []byte{4, 5, 6, 7} {
+	for i, want := range []byte{4, 5, 6, 6, 6, 7} {
 		if id := binary.LittleEndian.Uint32(frames[i][4:]); id != uint32(want) {
 			t.Fatalf("帧 %d 消息号 = %d, want %d", i, id, want)
 		}
@@ -213,7 +214,13 @@ func TestNPCTalkMenuM5(t *testing.T) {
 	if !bytes.Contains(frames[1], []byte("task_funnpcborn003031")) {
 		t.Fatalf("m5 缺任务链键: % x", frames[1])
 	}
-	if !bytes.Contains(frames[2], []byte("ui_exit")) {
-		t.Fatalf("尾行缺 ui_exit: % x", frames[2])
+	if !bytes.Contains(frames[2], []byte("ui_present_to_npc_item")) {
+		t.Fatalf("缺赠送通用行: % x", frames[2])
+	}
+	if !bytes.Contains(frames[3], []byte("ui_karma_query")) {
+		t.Fatalf("缺侠恶通用行: % x", frames[3])
+	}
+	if !bytes.Contains(frames[4], []byte("ui_exit")) {
+		t.Fatalf("尾行缺 ui_exit: % x", frames[4])
 	}
 }

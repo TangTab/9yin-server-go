@@ -1,119 +1,137 @@
 package fssoloworld
 
-// C2S 54 手动格挡（2026-11-23 女号官服抓包「初始账号登陆-完整引导-女」
-// 192s 段字节级定版；此前 2433 参考端 protocol-probe 只在战斗态接线，
-// 非战斗态 m54 全部落 unhandled——真机表象：非战斗按格挡无任何反馈）。
+// C2S 54 手动格挡（含非战斗态）。方言按参考端 protocol-probe 820f79a
+// 真机多轮定版移植（非官方外服六件套——那个方言在 fork 客户端原生链上
+// 「按下即塌」，2026-11-12 P2 5971 条死锁实证；2026-11-23 早真机复核：
+// 我方首版照官方抓包回 m169+速度族，客户端 415 条 m54 全程无反应）：
 //
-// 官方方言：
-//   - 客户端按下/抬起各发一个 u64 值（同值 ~35ms 重发直到回声；ON 值 =
-//     OFF 值 + 0x11D5DA29，值本身是客户端计时器，逐对缓变，不可靠分类）；
-//   - 服务端只按「值变化 = 一次翻转」应答（重复值静默；重复 OFF 官方
-//     也常不回，客户端容忍持续重发）；
-//   - ON 应答序（逐帧单属性 0x10）：MoveSpeed=1.17 / RunSpeedAdd=-2.36 /
-//     InParry=1 / ParryUpSpeedAdd=-1 / BufferInfo2="11CE,<own>,<obj>,1,0,0"
-//     → m169 [169,0,"BuffInParry",obj,obj,宽串×2,0,0] → InManualParry=1；
-//   - OFF 应答序：m169 c1=1（移除）→ BufferInfo2="" / MoveSpeed=3.9 /
-//     RunSpeedAdd=0 / InParry=0 / ParryUpSpeedAdd=0 / InManualParry=0。
-//     （c1 极性经 InParry 转换逐帧相关验证：0=添加 1=移除。）
-//   - 宽串两枚官方恒为 UTF-16 "致文"（7e 82 87 65 00 00，计时器余脉），
-//     照抄保形。
+//   - 双形判定：值 0/1 直判（fork 协议模式：0=按下、非 0=松开，Java
+//     handleManualParry engage==0 同义）；其它值=官服族状态上报（B 线
+//     官方方言登录后客户端每帧广播：基调=登录后首条上报值=未格挡、
+//     值≠基调=格挡中——2026-11-15 57719 会话 6984 条同值定案。我方
+//     服务端走 B 线官方登录，真机 64344 会话全程恒 1=基调闲时上报）。
+//   - 无变迁零帧（状态上报回帧会自激成洪流）；游离重复松开回帧重同步。
+//   - 应答=三属性权威帧 InParry/InManualParry/ParryValue（server2
+//     manualParryStateUpdate 同构）——fork 客户端格挡认知锚在 fighter
+//     资源上；active 门槛 = parrying && ParryValue>0。
+//   - 非战斗架势由 LogicState=1 撑住（2026-11-16 真机定版：战斗段 6s
+//     保持 vs 预警段 50ms 即弃；三属性帧全删撑持曾致 6 按塌 5 回退）。
+//     帧形=单属性帧但 idx 必须动态解析（我方表=465；旧 463 硬编错位
+//     =「按下即塌」根因）。松开回写原值 0。
 
 import (
-	"fmt"
-
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 )
 
-// clientCustomParryState C2S msg54 格挡状态 [54, int64]。
+// clientCustomParryState C2S msg54 格挡状态 [54, numeric]。
 const clientCustomParryState int32 = 54
 
-// 格挡官方常量（女号抓包逐帧对齐）。
-const (
-	parryBuffName     = "BuffInParry"
-	parryBufferSerial = "11CE" // BufferInfo2 串首段（buff 槽序号域）
-	parryMoveSpeedOn  = 1.17   // 3.9×0.3 格挡减速
-	parryRunSpeedAdd  = -2.36
-	parryMoveSpeedOff = 3.9
-	parryWideResidue  = "\u827e\u6587" // 官方宽串余脉字节 7e 82 87 65
-)
+// parryIdleValue 无在格挡时的 LogicState 还原位（我们未建 Z 拔刀权威态，
+// 恒按空闲 0 回写；后续接 m292 时改为记 0/2 原值）。
+const parryIdleValue byte = 0
 
-// handleParryState C2S 54：值变化 = 翻转一次；按官方帧序回声。
+// parryValueTotal 招架耐力总量（应答帧口径；无存档会话按新号基线 72）。
+func (s *Server) parryValueTotal(pl *Player) int32 {
+	if pl.haveRoleState {
+		if total := int32(pl.roleState.Parry); total > 0 {
+			return total
+		}
+	}
+	return 72
+}
+
+// handleParryState C2S 54：纯基调状态机 + 三属性权威帧 + LogicState 撑持。
+// 基调语义统一覆盖双方言：B 线登录客户端闲时恒发基调（真机 64344 会话
+// 恒 1、~1/s），按压发异值（官方两抓包=成对 u64 令牌）；0=按下的 fork
+// 二值方言在基调≠0 时同样落入「异值=按下」分支。无变迁恒零帧。
 func (s *Server) handleParryState(pl *Player, message entergen.CustomInbound) {
-	if len(message.Values) < 2 || message.Values[1].Type != 3 {
+	if len(message.Values) < 2 {
 		return
 	}
-	value := message.Values[1].Int64
-	pl.parryMu.Lock()
-	if value == pl.parryLastValue {
-		pl.parryMu.Unlock()
-		return // 同值重发（客户端等回声的 ~35ms 轮询）
+	value, ok := parryNumericValue(message.Values[1])
+	if !ok {
+		return
 	}
-	pl.parryLastValue = value
-	on := !pl.parryOn
-	pl.parryOn = on
+	engage := s.parryStateReport(pl, value)
+
+	pl.parryMu.Lock()
+	already := pl.parrying
+	if already == engage {
+		pl.parryMu.Unlock()
+		return // 无变迁零帧（回帧自激成洪流）
+	}
+	pl.parrying = engage
 	pl.parryMu.Unlock()
 
-	if on {
-		s.sendParryProps(pl,
-			entergen.NamedProperty("MoveSpeed", entergen.Float32Value(parryMoveSpeedOn)),
-			entergen.NamedProperty("RunSpeedAdd", entergen.Float32Value(parryRunSpeedAdd)),
-			entergen.NamedProperty("InParry", entergen.Int32Value(1)),
-			entergen.NamedProperty("ParryUpSpeedAdd", entergen.Int32Value(-1)),
-			entergen.NamedProperty("BufferInfo2", entergen.StringValue(parryBufferInfo())),
-		)
-		s.sendParryEcho(pl, 0)
-		s.sendParryProps(pl,
-			entergen.NamedProperty("InManualParry", entergen.Int32Value(1)),
-		)
-		s.trace("parry on client=%d value=%d", pl.Conn1, value)
-		return
+	s.sendParryStateFrame(pl)
+	// 非战斗架势撑持：按下升 1，松开回 0（单属性帧、idx 动态解析）。
+	if engage {
+		s.sendParryLogicState(pl, 1)
+	} else {
+		s.sendParryLogicState(pl, parryIdleValue)
 	}
-	s.sendParryEcho(pl, 1)
-	s.sendParryProps(pl,
-		entergen.NamedProperty("BufferInfo2", entergen.StringValue("")),
-		entergen.NamedProperty("MoveSpeed", entergen.Float32Value(parryMoveSpeedOff)),
-		entergen.NamedProperty("RunSpeedAdd", entergen.Float32Value(0)),
-		entergen.NamedProperty("InParry", entergen.Int32Value(0)),
-		entergen.NamedProperty("ParryUpSpeedAdd", entergen.Int32Value(0)),
-		entergen.NamedProperty("InManualParry", entergen.Int32Value(0)),
-	)
-	s.trace("parry off client=%d value=%d", pl.Conn1, value)
+	s.trace("manual parry engage=%t value=%d baseline=%d client=%d",
+		engage, value, pl.parryBaseline, pl.Conn1)
 }
 
-// sendParryProps 逐属性单帧 0x10（官方每帧一属性；地址=fork 玩家对象）。
-func (s *Server) sendParryProps(pl *Player, props ...entergen.IndexedProperty) {
-	for _, prop := range props {
-		frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-			[]entergen.IndexedProperty{prop})
-		if err != nil {
-			s.trace("parry prop %s encode failed client=%d: %v", prop.Name, pl.Conn1, err)
-			return
-		}
-		s.sendToClient(pl, frame)
+// parryStateReport 官服族状态上报解码：基调=首条上报值（未格挡），
+// 值≠基调=格挡中，回基调=取消。
+func (s *Server) parryStateReport(pl *Player, value int64) bool {
+	pl.parryMu.Lock()
+	defer pl.parryMu.Unlock()
+	if pl.parryBaseline == 0 {
+		pl.parryBaseline = value
 	}
+	return value != pl.parryBaseline
 }
 
-// sendParryEcho m169 BuffInParry 加/除（addRemove：0=添加 1=移除）。
-func (s *Server) sendParryEcho(pl *Player, addRemove int32) {
-	frame, err := entergen.CustomMessageFrame(169,
-		entergen.CustomInt(addRemove),
-		entergen.CustomString(parryBuffName),
-		entergen.CustomObject(forkPlayerObjectID, forkPlayerOwnerID),
-		entergen.CustomObject(forkPlayerObjectID, forkPlayerOwnerID),
-		entergen.CustomWideString(parryWideResidue),
-		entergen.CustomWideString(parryWideResidue),
-		entergen.CustomInt64(0),
-		entergen.CustomInt(0),
-	)
+// sendParryStateFrame 三属性权威帧（InParry/InManualParry/ParryValue）。
+func (s *Server) sendParryStateFrame(pl *Player) {
+	pl.parryMu.Lock()
+	parrying := pl.parrying
+	pl.parryMu.Unlock()
+	value := s.parryValueTotal(pl)
+	active := int32(0)
+	if parrying && value > 0 {
+		active = 1
+	}
+	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0, []entergen.IndexedProperty{
+		entergen.NamedProperty("InParry", entergen.Int32Value(active)),
+		entergen.NamedProperty("InManualParry", entergen.Int32Value(active)),
+		entergen.NamedProperty("ParryValue", entergen.Int32Value(value)),
+	})
 	if err != nil {
-		s.trace("parry echo encode failed client=%d: %v", pl.Conn1, err)
+		s.trace("parry state frame encode failed client=%d: %v", pl.Conn1, err)
 		return
 	}
 	s.sendToClient(pl, frame)
 }
 
-// parryBufferInfo ON 态 BufferInfo2 串（官方 "11CE,350000F3,102A,1,0,0"
-// = 序号,own,obj,1,0,0；fork 玩家对象 1/1）。
-func parryBufferInfo() string {
-	return fmt.Sprintf("%s,%X,%X,1,0,0", parryBufferSerial, forkPlayerOwnerID, forkPlayerObjectID)
+// sendParryLogicState 架势撑持帧（LogicState 单属性；idx 走表动态解析）。
+func (s *Server) sendParryLogicState(pl *Player, state byte) {
+	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
+		[]entergen.IndexedProperty{entergen.NamedProperty("LogicState", entergen.ByteValue(state))})
+	if err != nil {
+		s.trace("parry logic state frame encode failed client=%d: %v", pl.Conn1, err)
+		return
+	}
+	s.sendToClient(pl, frame)
+}
+
+// parryNumericValue m54 值域统一提取（tag2/3/4/5 积分形态）。
+func parryNumericValue(value entergen.CustomInboundValue) (int64, bool) {
+	switch value.Type {
+	case 2:
+		return int64(value.Int32), true
+	case 3:
+		return value.Int64, true
+	case 4, 5:
+		number, ok := value.ExactInt32()
+		if !ok {
+			return 0, false
+		}
+		return int64(number), true
+	default:
+		return 0, false
+	}
 }

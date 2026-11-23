@@ -288,6 +288,20 @@ func npcCinematicTalkMenu(objectID, ownerID uint32, configID string, services []
 		}
 		out = append(out, pkt)
 	}
+	// 世界 NPC 通用行（npc.pcapng 30.275s 官方字节模板：赠送 + 侠恶查询
+	// ——898000024/898000023 为客户端 ui_* 通用键，每窗必带；侠恶行带
+	// 第三参 int 1000。真机 64344 会话实证：无内容行（仅 ui_exit）时
+	// 对话数据虽被受理（客户端回 m298 查询）但窗体不渲染）。
+	present, err := entergen.CustomMessageFrame(6, entergen.CustomInt(898000024), entergen.CustomString("ui_present_to_npc_item"))
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, present)
+	karma, err := entergen.CustomMessageFrame(6, entergen.CustomInt(898000023), entergen.CustomString("ui_karma_query"), entergen.CustomInt(1000))
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, karma)
 	// 尾项「离开」（官方实证 600000000+"ui_exit"）。
 	leave, err := entergen.CustomMessageFrame(6, entergen.CustomInt(600000000), entergen.CustomString("ui_exit"))
 	if err != nil {
