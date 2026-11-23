@@ -15,7 +15,9 @@ package rolestate
 // 无资源目录时的建号兜底口径（与 b-line newPlayerProgress 同源）。
 
 import (
+	"bytes"
 	"embed"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -64,7 +66,11 @@ type RoleState struct {
 	// 参考端 cmd/protocol-probe custom_config.go/shortcut_records.go 同源
 	// 规则，随 0x04 存档链持久化到 role_state_json）----
 
-	Customizing string `json:"customizing,omitempty"` // C2S 107 引擎个性配置整串（S2C 705 回推）
+	// Customizing C2S 107 引擎个性配置整串（S2C 705 回推）。二进制串
+	// （字节值即配置项取值，含 ≥0x80）——必须走 BinaryString：普通
+	// string 经 encoding/json 会被清洗成合法 UTF-8，高字节全换成 U+FFFD，
+	// 回推客户端即画面配置错位（2026-11-23 重登卡顿根因）。
+	Customizing BinaryString `json:"customizing,omitempty"`
 	// Keybind/1/2 键位主串与方案一/二（C2S 195 scheme 0/1/2 → 属性
 	// 198/199/200 type7；0x10 单属性帧带尾空格、705 不涉）。
 	Keybind  string `json:"keybind,omitempty"`
@@ -676,4 +682,58 @@ func UnmarshalRoleState(raw string) (RoleState, error) {
 		return RoleState{}, err
 	}
 	return state, nil
+}
+
+// BinaryString 按字节保真的串字段：JSON 里编码为 {"b64":"<base64>"}，
+// 不经 encoding/json 对 string 的 UTF-8 清洗（非法字节会被换成 U+FFFD，
+// 且一个字节膨胀成三个——定长字节配置串自此整体错位）。
+type BinaryString string
+
+type binaryStringJSON struct {
+	B64 string `json:"b64"`
+}
+
+// replacementBytes 旧编码器清洗非法 UTF-8 时写入的 U+FFFD（线上的
+// EF BF BD）。必须按字节子串匹配：ContainsRune 会把任何非法 UTF-8
+// 字节解码成 U+FFFD，合法的高字节取值会被误判。
+const replacementBytes = "\uFFFD"
+
+// MarshalJSON base64 包装。
+func (b BinaryString) MarshalJSON() ([]byte, error) {
+	return json.Marshal(binaryStringJSON{B64: base64.StdEncoding.EncodeToString([]byte(b))})
+}
+
+// UnmarshalJSON 兼容两种形态：新档 {"b64":…}；旧档裸串（清洗前写下的
+// 控制字符转义串）——仅当不含 U+FFFD 时采用，含则视为已被清洗的坏串
+// 丢弃（宁可不恢复配置，也不把错位的配置回推客户端）。
+func (b *BinaryString) UnmarshalJSON(data []byte) error {
+	data = bytes.TrimSpace(data)
+	if len(data) > 0 && data[0] == '"' {
+		var legacy string
+		if err := json.Unmarshal(data, &legacy); err != nil {
+			return err
+		}
+		if strings.Contains(legacy, replacementBytes) {
+			legacy = ""
+		}
+		*b = BinaryString(legacy)
+		return nil
+	}
+	var wrapped binaryStringJSON
+	if err := json.Unmarshal(data, &wrapped); err != nil {
+		return err
+	}
+	raw, err := base64.StdEncoding.DecodeString(wrapped.B64)
+	if err != nil {
+		return fmt.Errorf("binary string base64: %w", err)
+	}
+	*b = BinaryString(raw)
+	return nil
+}
+
+// ValidCustomizing 报告客户端 107 上传的配置串可入库：不含 U+FFFD。
+// 客户端本地配置一旦被历史坏串污染，其转储会原样带着 U+FFFD 上传——
+// 收下即把坏值固化进存档。
+func ValidCustomizing(config string) bool {
+	return !strings.Contains(config, replacementBytes)
 }

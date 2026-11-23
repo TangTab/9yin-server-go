@@ -38,7 +38,7 @@ func CustomConfigFrames(ctx Context) ([][]byte, error) {
 
 	// 705 个性配置（空档零帧）。
 	if state.Customizing != "" {
-		frame, err := CustomMessageFrame(serverCustomPushCustomizing, CustomString(state.Customizing))
+		frame, err := CustomMessageFrame(serverCustomPushCustomizing, CustomString(string(state.Customizing)))
 		if err != nil {
 			return nil, fmt.Errorf("encode customizing frame: %w", err)
 		}

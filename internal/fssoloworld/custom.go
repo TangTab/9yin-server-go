@@ -235,8 +235,10 @@ func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbo
 	// （2433 custom_config.go:326 同款）。save-echo 永不回推（echo 把
 	// 客户端转储原样弹回会触发 on_parser_customizing 控制对象重置链
 	// → 震荡卡顿，2433 参考 custom_config.go:226 注释同证）。
+	// 存档值经 rolestate.BinaryString 字节保真；旧档被清洗过的坏串
+	// （含 U+FFFD）在反序列化处已丢弃，不会从这里回推。
 	if first && pl.roleState.Customizing != "" {
-		if err := s.pushCustomizing(pl, pl.roleState.Customizing); err != nil {
+		if err := s.pushCustomizing(pl, string(pl.roleState.Customizing)); err != nil {
 			s.trace("re-assert customizing failed client=%d: %v", pl.Conn1, err)
 			return
 		}
@@ -244,7 +246,13 @@ func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbo
 			len(config), len(pl.roleState.Customizing), pl.Conn1)
 		return
 	}
-	pl.roleState.Customizing = config
+	// 客户端本地配置若被历史坏串污染（画面配置错位后它照常转储），上传
+	// 里原样带着 U+FFFD——拒收，防坏值固化进存档后再回推。
+	if !rolestate.ValidCustomizing(config) {
+		s.trace("rejected poisoned customizing dump (%d bytes) client=%d", len(config), pl.Conn1)
+		return
+	}
+	pl.roleState.Customizing = rolestate.BinaryString(config)
 	s.sendRoleSave(pl)
 	s.trace("saved customizing config %d bytes client=%d (save-echo muted)", len(config), pl.Conn1)
 }

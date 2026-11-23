@@ -184,3 +184,50 @@ func TestProgressAndItemDomainRoundTrip(t *testing.T) {
 		t.Fatalf("空进度域应省略: %s", rawFresh)
 	}
 }
+// TestCustomizingBinaryRoundTrip 个性配置串字节保真：含 ≥0x80 的二进制串
+// JSON 往返不得被 UTF-8 清洗（旧实现经 encoding/json 把高字节换成
+// U+FFFD，一个字节膨胀成三个，回推客户端后画面配置整体错位——
+// 2026-11-23 重登卡顿根因）。
+func TestCustomizingBinaryRoundTrip(t *testing.T) {
+	// 11-22 真机首传的尾部形态：161/129/145/229 等取值。
+	config := "\x01e\x01\x01\x01\x10\x02\x02\x02\xa1\x02\x02\x01\x02\xe5\x02\x81\x01"
+	state, err := BuildRoleState(DefaultBirthScene, 1, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	state.Customizing = BinaryString(config)
+	raw, err := MarshalRoleState(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(raw, replacementBytes) {
+		t.Fatalf("marshal 清洗了二进制串: %q", raw)
+	}
+	back, err := UnmarshalRoleState(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(back.Customizing) != config {
+		t.Fatalf("回读不一致: %q want %q", back.Customizing, config)
+	}
+
+	// 旧档裸串：完好的照收，被清洗过（含 U+FFFD）的丢弃。
+	const base = `{"sex":1,"scene":"s","resource":"r","position":[0,0,0,1],"customizing":`
+	legacy, err := UnmarshalRoleState(base + `"\u0001e\u0001\u0002"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(legacy.Customizing) != "\x01e\x01\x02" {
+		t.Fatalf("旧档完好串: %q", legacy.Customizing)
+	}
+	poisoned, err := UnmarshalRoleState(base + `"\u0001e\u0001\ufffd\u0002\ufffd\ufffd"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if poisoned.Customizing != "" {
+		t.Fatalf("旧档坏串应丢弃: %q", poisoned.Customizing)
+	}
+	if !ValidCustomizing(config) || ValidCustomizing("a\ufffdb") {
+		t.Fatal("ValidCustomizing 口径")
+	}
+}

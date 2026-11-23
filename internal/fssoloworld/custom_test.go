@@ -203,3 +203,32 @@ func TestCustomRejectedWithoutRoleState(t *testing.T) {
 		t.Fatalf("edits accepted without role state: %+v", pl.roleState)
 	}
 }
+// TestCustomizingPoisonedUploadRejected 客户端本地配置被历史坏串污染后，
+// 转储里原样带着 U+FFFD——拒收不落库，后续干净上传照常入库；有干净
+// 存档时首传仍回推存档纠正客户端，坏串不得覆盖。
+func TestCustomizingPoisonedUploadRejected(t *testing.T) {
+	s, pl := newCustomTestServer(t)
+	poisoned := "\x01e\ufffd\x02\ufffd\ufffd"
+	s.handleCustomizingUpload(pl, customMsg(107, customStr(poisoned)))
+	if pl.roleState.Customizing != "" {
+		t.Fatalf("poisoned dump persisted: %q", pl.roleState.Customizing)
+	}
+	clean := "\x01e\x01\x02\xa1\xe5"
+	s.handleCustomizingUpload(pl, customMsg(107, customStr(clean)))
+	if string(pl.roleState.Customizing) != clean {
+		t.Fatalf("clean dump after poison rejected: %q", pl.roleState.Customizing)
+	}
+
+	state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, 1, "", 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	saved := rolestate.BinaryString("\x01SAVED\xa1")
+	state.Customizing = saved
+	pl2 := s.Players().AddPlayer(8, 2, "acct")
+	pl2.roleState, pl2.haveRoleState = state, true
+	s.handleCustomizingUpload(pl2, customMsg(107, customStr(poisoned)))
+	if pl2.roleState.Customizing != saved {
+		t.Fatalf("saved overwritten by poisoned dump: %q", pl2.roleState.Customizing)
+	}
+}
