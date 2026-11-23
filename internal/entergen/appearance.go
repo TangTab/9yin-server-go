@@ -9,15 +9,16 @@ package entergen
 //	[0]=0x0D [1:5]=obj [5:9]=own [9:13]=x [13:17]=y [17:21]=z
 //	[21:25]=orient（f32）[25:61] 保留 36B 零 [61:63]=u16 属性数 + 属性区
 //
-// 定版要点（无装备 ≠ 空槽）：
-//   - Cloth/Pants/Shoes = 初始布衣三件（b_jianghu 族模型路径），槽空会
-//     导致客户端模型缺失（ter/模型加载失败同族问题）；
+// 定版要点（2026-11-23 官服穿/脱真机勘误后）：
+//   - Cloth/Pants/Shoes 装备驱动（equipmodel.go）：槽空=jianghu000 裸身族
+//     （官服实证「无装备≠空模型」），穿 {part}_{b|g}NNNN=jianghu 系号族；
 //   - Hat = Hair 同值（无帽回填发型）；
 //   - Photo/Face/Hair 属建角自定义（存档 appearance 槽 [1]/[2]/[4]，
 //     捏脸二进制原样透传），档内缺席回退 captures/local 分支默认。
 //
-// 数值族：速度/物理常量取 #25 真机值；五维/资源/内功从 rolestate 首本
-// 书推（官服白板口径 RoleBaseProp + StarterSet ng_wd_001 加成）。
+// 数值族：速度/物理常量取 #25 真机值；PhyDef 装备合计（官服 0 基线 +
+// 布衣每件 +6）；五维/资源/内功从 rolestate 首本书推（官服白板口径
+// RoleBaseProp + StarterSet ng_wd_001 加成）。
 
 import (
 	"encoding/binary"
@@ -27,17 +28,10 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
-// 初始布衣三件（#25 真机值：cloth 001 / pants·shoes 003——定版文档表内
-// 001 为手抄简写，以全表机器解析为准）。女号镜像 g_ 族（未真机实证）。
+// 建角自定义回退默认（captures/local 分支；Photo fork 线为 boy01）。
+// 身体三件与 PhyDef 见 equipmodel.go（装备驱动）。
 const (
-	appearanceClothB = `obj\char\b_jianghu001\b_cloth001`
-	appearancePantsB = `obj\char\b_jianghu003\b_pants003`
-	appearanceShoesB = `obj\char\b_jianghu003\b_shoes003`
-	appearanceClothG = `obj\char\g_jianghu001\g_cloth001`
-	appearancePantsG = `obj\char\g_jianghu003\g_pants003`
-	appearanceShoesG = `obj\char\g_jianghu003\g_shoes003`
-
-	appearancePhotoB = `icon\players\boy03_create.png` // captures/local 分支默认（fork 线为 boy01）
+	appearancePhotoB = `icon\players\boy03_create.png`
 	appearancePhotoG = `icon\players\girl01_create.png`
 	appearanceHairB  = `obj\char\b_hair\b_hair4`
 	appearanceHairG  = `obj\char\g_hair\g_hair4`
@@ -71,28 +65,27 @@ func ap(name string, value PropertyValue) IndexedProperty {
 func AppearanceFrame(ctx Context) ([]byte, error) {
 	state := ctx.State
 	female := state.Sex == 2
-	photoDefault, hairDefault := appearancePhotoB, appearanceHairB
-	cloth, pants, shoes := appearanceClothB, appearancePantsB, appearanceShoesB
+	photoDefault := appearancePhotoB
 	if female {
-		photoDefault, hairDefault = appearancePhotoG, appearanceHairG
-		cloth, pants, shoes = appearanceClothG, appearancePantsG, appearanceShoesG
+		photoDefault = appearancePhotoG
 	}
+	cloth := EquipSlotModel(&state, EquipSlotCloth)
+	pants := EquipSlotModel(&state, EquipSlotPants)
+	shoes := EquipSlotModel(&state, EquipSlotShoes)
 	apSlot := func(i int) string {
 		if i < len(state.Appearance) {
 			return state.Appearance[i]
 		}
 		return ""
 	}
-	photo, face, hair := photoDefault, appearanceFace, hairDefault
+	photo, face := photoDefault, appearanceFace
 	if v := apSlot(1); v != "" {
 		photo = v
 	}
 	if v := apSlot(2); v != "" {
 		face = v
 	}
-	if v := apSlot(4); v != "" {
-		hair = v
-	}
+	hair := HairModel(&state)
 	shortcut := ctx.Keybind
 	if shortcut == "" {
 		shortcut = appearanceShortcutKey
@@ -279,7 +272,7 @@ func AppearanceFrame(ctx Context) ([]byte, error) {
 		ap("MagicVa", Int32Value(16)),
 		ap("MagicVaAdd", Int32Value(int32(dex))),
 		ap("MaxParry", Int32Value(int32(state.Parry))),
-		ap("PhyDef", Int32Value(60)),
+		ap("PhyDef", Int32Value(EquipPhyDef(&state))),
 		ap("StiDef", Int32Value(50)),
 		ap("NegDef", Int32Value(50)),
 		ap("MasDef", Int32Value(50)),

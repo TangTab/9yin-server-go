@@ -134,15 +134,19 @@ func TestAppearanceFrameLayout(t *testing.T) {
 
 	props := decodeAppearanceProps(t, frame)
 
-	// 身体渲染模型集（定版：无装备=初始布衣三件，Hat=Hair 回填）。
-	if props["Cloth"] != appearanceClothB {
+	// 身体渲染模型集（2026-11-23 官服勘误：无装备=jianghu000 裸身族，
+	// Hat=Hair 回填；穿装见 TestEquipSlotModel）。
+	if props["Cloth"] != `obj\char\b_jianghu000\b_cloth000` {
 		t.Fatalf("Cloth = %q", props["Cloth"])
 	}
-	if props["Pants"] != appearancePantsB {
+	if props["Pants"] != `obj\char\b_jianghu000\b_pants000` {
 		t.Fatalf("Pants = %q", props["Pants"])
 	}
-	if props["Shoes"] != appearanceShoesB {
+	if props["Shoes"] != `obj\char\b_jianghu000\b_shoes000` {
 		t.Fatalf("Shoes = %q", props["Shoes"])
+	}
+	if props["PhyDef"] != "0" {
+		t.Fatalf("PhyDef = %q want 0（无装备 0 基线）", props["PhyDef"])
 	}
 	if props["Hat"] != props["Hair"] {
 		t.Fatalf("Hat %q != Hair %q", props["Hat"], props["Hair"])
@@ -167,7 +171,7 @@ func TestAppearanceFrameLayout(t *testing.T) {
 	}
 }
 
-// TestAppearanceFrameFemale 女号：镜像 g_ 族 + Sex=1。
+// TestAppearanceFrameFemale 女号：镜像 g_ 裸身族 + Sex=1。
 func TestAppearanceFrameFemale(t *testing.T) {
 	ctx := testContext(t)
 	ctx.State.Sex = 2
@@ -180,7 +184,9 @@ func TestAppearanceFrameFemale(t *testing.T) {
 	if props["Sex"] != "1" {
 		t.Fatalf("Sex = %q", props["Sex"])
 	}
-	if props["Cloth"] != appearanceClothG || props["Pants"] != appearancePantsG || props["Shoes"] != appearanceShoesG {
+	if props["Cloth"] != `obj\char\g_jianghu000\g_cloth000` ||
+		props["Pants"] != `obj\char\g_jianghu000\g_pants000` ||
+		props["Shoes"] != `obj\char\g_jianghu000\g_shoes000` {
 		t.Fatalf("female cloth set: %q %q %q", props["Cloth"], props["Pants"], props["Shoes"])
 	}
 	if props["Hair"] != appearanceHairG || props["Hat"] != appearanceHairG {

@@ -38,6 +38,7 @@ const (
 	clientCustomSetShortcut     int32 = 200
 	clientCustomRemoveShortcut  int32 = 201
 	clientCustomSitCross        int32 = 240
+	clientCustomMoveItem        int32 = 30
 )
 
 // serverCustomPushCustomizing S2C 705（与 entergen.customcfg 同源）。
@@ -115,6 +116,12 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		s.handleMoveType(pl, message)
 	case clientCustomSitCross:
 		s.handleSitcross(pl, message)
+	case clientCustomMoveItem:
+		// msg30 移动物品/穿脱：装备 ↔ 背包互移 + op10 身体模型单推
+		//（equip.go，官服穿/脱真机方言）。
+		if s.requireRoleState(pl, id) {
+			s.handleMoveItem(pl, message)
+		}
 	case clientCustomMovementUpload:
 		s.handleMovementUpload(pl, message)
 	case clientCustomUseSkill:
