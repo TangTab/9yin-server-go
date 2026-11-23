@@ -76,9 +76,13 @@ for %%F in (%OUT_LIST%) do echo   %%F
 
 echo.
 echo Startup:
-echo   server-cmd\start-single.bat   单进程合一（game_solounite）
-echo   server-cmd\start-cluster.bat  集群（官方启停序九进程；set MEMBERS=12 多场景服）
-echo   server-cmd\stop-cluster.bat   集群停机（官方 kill.bat 逆序）
+rem Startup 提示行只用 ASCII：GBK 中文 echo 一经管道或 UTF-8 终端解读即乱码。
+rem   中文原意：单进程合一（game_solounite）/ 集群（官方启停序九进程；
+rem   set MEMBERS=12 多场景服）/ 集群停机（官方 kill.bat 逆序）。
+echo   server-cmd\start-single.bat   all-in-one single process - game_solounite
+echo   server-cmd\start-cluster.bat  cluster - 9 processes in official start order;
+echo                                 set MEMBERS=12 beforehand to max out scene servers
+echo   server-cmd\stop-cluster.bat   cluster shutdown - reverse of official kill.bat
 
 rem Success: short countdown so a double-clicked window keeps the result
 rem readable, then exit 0. Must NOT fall through into :wait_exit (= exit 1).
