@@ -326,19 +326,28 @@ func castLockMS(def skilldata.Definition) time.Duration {
 	return time.Duration(ms) * time.Millisecond
 }
 
-// resolveSkillTarget 目标的服务端位置与名字（NPC 目录；未知对象回落 false）。
-func (s *Server) resolveSkillTarget(pl *Player, cast *skillCast) (pos [3]float64, name string, known bool) {
+// skillTarget 技能目标的服务端口径（位置 + 朝向 + 名字）。
+type skillTarget struct {
+	pos    [3]float64
+	orient float32 // 服务端记录的朝向（弧度，atan2(dx,dz) 约定）
+	name   string
+	known  bool
+}
+
+// resolveSkillTarget 目标的服务端位置/朝向/名字（NPC 目录；未知对象 known=false）。
+func (s *Server) resolveSkillTarget(pl *Player, cast *skillCast) skillTarget {
 	if !cast.hasTarget {
-		return pos, "", false
+		return skillTarget{}
 	}
 	pl.npcMu.Lock()
 	scene := pl.npcScene
 	pl.npcMu.Unlock()
 	spawn, ok := s.findNPCSpawn(scene, cast.targetID)
 	if !ok || spawn.OwnerID != cast.targetOwner {
-		return pos, "", false
+		return skillTarget{}
 	}
-	return [3]float64{float64(spawn.X), float64(spawn.Y), float64(spawn.Z)}, spawn.ConfigID, true
+	return skillTarget{pos: [3]float64{float64(spawn.X), float64(spawn.Y), float64(spawn.Z)},
+		orient: spawn.Orient, name: spawn.ConfigID, known: true}
 }
 
 // ---- 主入口 ----
@@ -408,13 +417,14 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultMPLess))
 		return b.done()
 	}
-	// 目标与射程。
-	target, targetName, targetKnown := s.resolveSkillTarget(pl, &cast)
-	if !targetKnown {
-		target = [3]float64{float64(cast.targetX), float64(cast.targetY), float64(cast.targetZ)}
+	// 目标与射程。目标不在服务端目录时位置回落 m211 自报位（朝向无从得知，
+	// 保持 0）。
+	target := s.resolveSkillTarget(pl, &cast)
+	if !target.known {
+		target.pos = [3]float64{float64(cast.targetX), float64(cast.targetY), float64(cast.targetZ)}
 	}
 	needsTarget := def.NeedsTarget()
-	distance := math.Hypot(target[0]-float64(cast.x), target[2]-float64(cast.z))
+	distance := math.Hypot(target.pos[0]-float64(cast.x), target.pos[2]-float64(cast.z))
 	if needsTarget && !cast.hasTarget {
 		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultNoTarget))
 		return b.done()
@@ -433,7 +443,7 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 			b.custom(707, entergen.CustomInt(useSkillStateStaged))
 			st.castSeq++
 			stage := &stagedRush{def: def, seq: st.castSeq, target: cast.targetKey(),
-				targetPos: target, targetName: targetName}
+				targetPos: target.pos, targetName: target.name}
 			stage.expiry = time.AfterFunc(time.Duration(window)*time.Millisecond,
 				func() { s.expireStaged(pl, stage.seq) })
 			st.staged, st.curSkill, st.curTarget = stage, def.ID, cast.targetKey()
@@ -441,10 +451,13 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 			return b.done()
 		}
 		if distance > def.CastRange {
-			// 超距：回目标位与朝向，客户端据此接近。
+			// 超距：回目标当前的服务端位置与朝向，客户端据此接近。末位浮点是
+			// 目标朝向——女号抓包 7 条拒绝帧均与此前该目标最近一条服务端位置
+			// 记录（0x1F / 0x21 条目 / m337）的朝向逐位相同
+			//（tools/pcapskill/reject80.py）。
 			b.custom(24, targetValue(cast.targetKey()), entergen.CustomInt(80),
-				entergen.CustomFloat32(float32(target[0])), entergen.CustomFloat32(float32(target[1])),
-				entergen.CustomFloat32(float32(target[2])), entergen.CustomFloat32(cast.orient))
+				entergen.CustomFloat32(float32(target.pos[0])), entergen.CustomFloat32(float32(target.pos[1])),
+				entergen.CustomFloat32(float32(target.pos[2])), entergen.CustomFloat32(target.orient))
 			s.trace("skill %s out of range dist=%.2f range=%.2f client=%d", def.ID, distance, def.CastRange, pl.Conn1)
 			return b.done()
 		}
@@ -478,14 +491,14 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 
 	orient := cast.orient
 	if cast.hasTarget {
-		orient = towardOrient(float64(cast.x), float64(cast.z), target[0], target[2])
+		orient = towardOrient(float64(cast.x), float64(cast.z), target.pos[0], target.pos[2])
 	}
 	if def.Script == skilldata.ScriptLock {
 		st.locked = true
 		b.location(cast.x, cast.y, cast.z, normalizeOrient(orient))
 		b.prop("LastWGHit", entergen.Float32Value(100))
 		b.custom(24, targetValue(cast.targetKey()), entergen.CustomInt(40), entergen.CustomInt(1), selfValue())
-		b.custom(19, skillLockMessageValues(def, cast, target, orient)...)
+		b.custom(19, skillLockMessageValues(def, cast, target.pos, orient)...)
 		b.prop("CantMove", entergen.ByteValue(1))
 		b.prop("CantParry", entergen.Int32Value(1))
 	} else {

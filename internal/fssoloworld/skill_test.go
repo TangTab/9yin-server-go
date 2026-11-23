@@ -46,10 +46,31 @@ func newSkillFixture(t *testing.T) *skillFixture {
 	pl.posSaveAt = time.Now().Add(time.Hour)
 	var frames [][]byte
 	prevOut, prevNow := clientSendObserver, combatNow
-	clientSendObserver = func(_ *Player, frame []byte) { frames = append(frames, frame) }
+	// 观察器是包级的：只收本夹具玩家的帧——收招/暂存到期走真实时钟的
+	// 定时器，会在此后的测试运行期间才触发，不能记到别人名下。
+	clientSendObserver = func(got *Player, frame []byte) {
+		if got == pl {
+			frames = append(frames, frame)
+		}
+	}
 	now := time.Unix(1_700_000_000, 0)
 	combatNow = func() time.Time { return now }
-	t.Cleanup(func() { clientSendObserver, combatNow = prevOut, prevNow })
+	t.Cleanup(func() {
+		clientSendObserver, combatNow = prevOut, prevNow
+		// 作废本夹具遗留的真实时钟定时器（序号对不上即空转）。
+		pl.combat.mu.Lock()
+		pl.combat.castSeq++
+		if stage := pl.combat.staged; stage != nil {
+			if stage.expiry != nil {
+				stage.expiry.Stop()
+			}
+			if stage.landing != nil {
+				stage.landing.Stop()
+			}
+			pl.combat.staged = nil
+		}
+		pl.combat.mu.Unlock()
+	})
 	return &skillFixture{s: s, pl: pl, out: &frames, clock: &now, origin: now}
 }
 
@@ -357,15 +378,37 @@ func TestSkillCooldownFollowsTaoluRule(t *testing.T) {
 }
 
 // 超距：回 m24 目标 80 + 目标位 + 朝向（抓包 205.644）。目标不在 NPC 目录
-// 时用 m211 自报位。
+// 时位置用 m211 自报位、朝向无从得知置 0。
 func TestSkillCastOutOfRangeRejects(t *testing.T) {
 	f := newSkillFixture(t)
 	target := testTarget
 	f.s.handleSkillCast(f.pl, castMessage(basicAttack, 100, 5, 200, 1.25, &target, 105, 5.2, 200))
-	f.assertFrames(t, f.take(), "m24("+testTargetText+",i:80,f:105.000,f:5.200,f:200.000,f:1.250)")
+	f.assertFrames(t, f.take(), "m24("+testTargetText+",i:80,f:105.000,f:5.200,f:200.000,f:0.000)")
 	if state := f.combatStateText(); state != `cur="" rows=0 mp=55 qgp=150 staged=false locked=false` {
 		t.Errorf("拒绝不应留下技能态: %s", state)
 	}
+}
+
+// 超距帧的目标位与朝向取服务端记录，不取 m211 自报：女号抓包 7 条拒绝帧
+// 的末位浮点全部等于此前该目标最近一条服务端位置记录的朝向
+// （tools/pcapskill/reject80.py）。m211 故意把目标坐标报错以示区别。
+func TestSkillCastOutOfRangeUsesServerTargetRecord(t *testing.T) {
+	f := newSkillFixture(t)
+	const scene = "born03"
+	spawns := f.s.sceneNPCCatalog(scene).spawns
+	if len(spawns) == 0 {
+		t.Skipf("场景 %s 的 NPC 目录缺席（需要数据根）", scene)
+	}
+	npc := spawns[0]
+	f.pl.npcMu.Lock()
+	f.pl.npcScene = scene
+	f.pl.npcMu.Unlock()
+	target := uint64(npc.ObjectID) | uint64(npc.OwnerID)<<32
+	casterX, casterZ := npc.X+80, npc.Z+80 // 远离目标（普攻射程 2）
+	f.s.handleSkillCast(f.pl, castMessage(basicAttack, casterX, npc.Y, casterZ, 1,
+		&target, npc.X-300, npc.Y, npc.Z-300))
+	f.assertFrames(t, f.take(), fmt.Sprintf("m24(o:%d/%d,i:80,f:%.3f,f:%.3f,f:%.3f,f:%.3f)",
+		npc.ObjectID, npc.OwnerID, npc.X, npc.Y, npc.Z, npc.Orient))
 }
 
 // 进行中再按 → 9033；需目标而无目标 → 9030；MP 不足 → 9021。
@@ -403,7 +446,7 @@ func TestSkillCastFallsBackToSelectedTarget(t *testing.T) {
 	// 目标不在 NPC 目录且 m211 无自报位 → 目标位回落 (0,0,0) → 超距拒绝，
 	// m24 携带回落到的选靶对象。
 	f.s.handleSkillCast(f.pl, castMessage(basicAttack, 100, 5, 200, 1, nil, 0, 0, 0))
-	f.assertFrames(t, f.take(), "m24("+testTargetText+",i:80,f:0.000,f:0.000,f:0.000,f:1.000)")
+	f.assertFrames(t, f.take(), "m24("+testTargetText+",i:80,f:0.000,f:0.000,f:0.000,f:0.000)")
 }
 
 // 冲锋技全链：暂存 → 进带授予 c61 → m212 落地释放 → 收招清位。

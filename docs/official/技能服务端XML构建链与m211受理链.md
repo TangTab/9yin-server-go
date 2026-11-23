@@ -109,12 +109,20 @@ LockData 包。`Script` 非 `SkillNormal/SkillLock`（内功、轻功…）返�
 | 普通技 | `[清扫] → CurSkillID → [CurSkillTarget] → 冷却行 → [MPRatio/MP] → 0x1F → m337 → m20`（197.729 / 209.389） |
 | 锁定技直收带内（≤ castRange+0.5） | `[清扫] → CurSkillID → CurSkillTarget → m284 → 冷却行 → MPRatio/MP → 0x1F → LastWGHit → m24 目标 40 → m19 → CantMove/CantParry=1`（355.780） |
 | 锁定冲锋技超直收带 | 暂存：`CurSkillID → CurSkillTarget → m25[PauseTime,"skill_pause"] → PauseSkill → m707[15]`（206.558） |
-| 超距（非冲锋） | `[清扫] → m24 目标 80 [目标位, 朝向]`（205.644） |
+| 超距（非冲锋） | `[清扫] → m24 目标 80 [目标当前服务端位 xyz, 目标朝向]`（205.644） |
 
 细节：
 
 - `CurSkillTarget` 值变才发（无目标技能在之前有目标时补发 None，198.879）。
 - 朝向 = 指向服务端目标位的 `atan2(dx,dz)`；无目标技能取 m211 自报朝向。
+- **超距帧 `m24[目标, 80, x, y, z, f]` 的四个浮点都是目标的服务端口径**：xyz =
+  目标当前服务端位置（目标在移动时与 m211 自报位不同，380.835），末位 f =
+  **目标当前朝向**（弧度）。取证（`tools/pcapskill/reject80.py`）：抓包 7 条
+  拒绝帧的 f 全部与此前该目标最近一条服务端位置记录（`0x1F` / `0x21` 条目 /
+  m337）的朝向**逐位相同**——三个取值只是三个时刻的目标/场景不同：
+  1.1744336（切图前，`0x21`@195.400）、2.807396（切图后同一对象 ID 在新场景的
+  朝向，`0x1F`/m337@201.914）、2.1190872（另一只怪，`0x21`@380.568）。
+  目标不在服务端 NPC 目录时位置回落 m211 自报位、朝向置 0。
 - m20：普通技 `[自己, 动作, 目标|None, 0, 0.0]`，动作取流程包 `HitAction`
   列表（普攻连招段按技能各自轮转）。
 - **闸门**（顺序即官服语义）：出招进行中再按 → `m707[9033]`；冷却中 →
@@ -190,7 +198,7 @@ LockTargetDist, 0, 0.0, 1, 1, 0.0, 目标位 xyz]`；打击点 = 出招位 / 目
 | 工具 | 用途 |
 |---|---|
 | `tools/skillgen` | 设计态 ini → 服务端 XML（黑金模型），审计报告 + `-verify` |
-| `tools/pcapskill` | 抓包按时间窗/方向/opcode/消息号逐帧 hex；`cddecode.py` 冷却表可读时间线，`cdsim.py` 冷却表逐次状态模拟 |
+| `tools/pcapskill` | 抓包按时间窗/方向/opcode/消息号逐帧 hex；`cddecode.py` 冷却表可读时间线，`cdsim.py` 冷却表逐次状态模拟，`reject80.py` 超距拒绝帧末位浮点取证 |
 | `tools/pcapevents`（原 m54scan） | 抓包全事件时间线（`dumpall`）；`rushband.py` / `staged.py` / `m337check.py` 文本分析 |
 | `tools/luaaudit` | `audit_skills.py` / `audit_buffs.py` Lua 覆盖面审计，`colunion.py` 源表列并集，`heijin_shape.py` 黑金样本形状 |
 
@@ -202,5 +210,6 @@ go run ./tools/skillgen -in "E:/Game/9yin/9yin-server-go2/Res/share/skill" \
 go run ./tools/pcapskill <女号.pcapng> 8032 197.72 197.74 "op11,op13"
 go run ./tools/pcapskill <女号.pcapng> 8032 197.0 398.0 "op11,op12,op13,op10" \
   | python -I tools/pcapskill/cdsim.py
+go run ./tools/pcapskill <女号.pcapng> 8032 0.0 400.0 | python -I tools/pcapskill/reject80.py
 go test ./tools/skillgen ./internal/skilldata ./internal/entergen ./internal/fssoloworld
 ```
