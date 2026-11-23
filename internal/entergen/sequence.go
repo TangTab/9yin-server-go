@@ -11,7 +11,7 @@ package entergen
 //	  m229 c130 NPC 物化族 ×N（场景 NPC 目录；golden 相位段首）
 //	  → 0x10 AutoTrace=1（地图点击寻路闸门）→ m607/m52/m586 → m169 buff
 //	  → 视图簇（空容器 + View40/43/46 + 44/45）
-//	  → 战斗属性单帧族 → 自定义配置簇（705/键位域 0x10/快捷栏 0x11 行）
+//	  → 战斗属性单帧族 → 键位域 0x10/快捷栏 0x11 行（705 不在本段）
 //	  → m416 九阴志域 → 0x1F 位置
 //
 // 会话身份（seq/obj/own/IP/时间戳）由 Identity/Session 注入，数据值取
@@ -181,19 +181,20 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, combat...)
 
-	// 自定义配置域推送簇：705 个性配置 → 键位域 0x10（198/199/200/
-	// 223/201）→ 快捷栏 shortcut_rec 0x11 行（视图簇之后；无档零帧，
-	// starter 打坐条目由 EffectiveShortcuts 推导）。fork 客户端本地
-	// 不落盘，缺发即「快捷键/自定义配置重登全丢」。
-	// ★时序铁律（2433 main.go:3685 定版）：705 必须赶在客户端登录期
-	// 上传 107（默认键位转储）之前——客户端把推来的当权威配置应用，
-	// 之后上传的转储一致，首传闸直接吞掉（本簇位于 ClientReady 应答
-	// 窗口=抢跑位）。save-echo 永不回推（震荡卡顿根源，见 custom.go）。
-	custom, err := CustomConfigFrames(ctx)
+	// 玩家对象域配置：键位域 0x10（198/199/200/223/201）→ 快捷栏
+	// shortcut_rec 0x11 行（视图簇之后；无档零帧，starter 打坐条目由
+	// EffectiveShortcuts 推导）。fork 客户端本地不落盘，缺发即「快捷
+	// 键重登全丢」。
+	// 705 不在本段（2026-11-23）：线路抓包 48 会话实证客户端在 0x09
+	// 之前已上传 107 共 2–4 次、此后不再上传——ClientReady 位的 705
+	// 赶不上登录转储（原注「抢跑位」不成立）；705 只留首传闸 re-assert
+	// 一处（custom.go）。2433 同位 705 排在就绪信息簇之前（main.go
+	// :3685），本段原排在之后，真机二分 548e616 首卡。
+	playerObject, err := PlayerObjectConfigFrames(ctx)
 	if err != nil {
 		return nil, err
 	}
-	frames = append(frames, custom...)
+	frames = append(frames, playerObject...)
 
 	// m416 九阴志域声明。
 	jyz, err := JyzDomainFrame(6)

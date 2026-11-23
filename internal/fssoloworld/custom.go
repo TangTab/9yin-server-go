@@ -220,12 +220,12 @@ func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbo
 	}
 	first := !pl.customizingSeen
 	pl.customizingSeen = true
-	// 2433 口径（2026-11-22 深夜七轮二分定案后的恢复形态）：ClientReady
-	// 抢跑推送（sequence.go CustomConfigFrames）先到，客户端应用权威值后
-	// 上传的转储与之一致——首传闸 re-assert 回推存档值（幂等，防默认
-	// 转储覆盖玩家配置）；save-echo 永不回推（echo 把客户端转储原样弹
-	// 回会触发 on_parser_customizing 控制对象重置链 → 震荡卡顿，2433
-	// 参考 custom_config.go:226 注释同证）。
+	// 首传闸 re-assert 是 705 唯一下行位（2026-11-23：抓包实证客户端在
+	// 0x09 之前已上传 107 共 2–4 次，ClientReady 位 705 赶不上登录转储，
+	// 已自 ReadyFrames 撤下）——回推存档值，防默认转储覆盖玩家配置
+	// （2433 custom_config.go:326 同款）。save-echo 永不回推（echo 把
+	// 客户端转储原样弹回会触发 on_parser_customizing 控制对象重置链
+	// → 震荡卡顿，2433 参考 custom_config.go:226 注释同证）。
 	if first && pl.roleState.Customizing != "" {
 		if err := s.pushCustomizing(pl, pl.roleState.Customizing); err != nil {
 			s.trace("re-assert customizing failed client=%d: %v", pl.Conn1, err)
