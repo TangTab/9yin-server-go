@@ -258,6 +258,8 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 			if v, err := strconv.Atoi(fields[4]); err == nil && v >= 1 && v <= 4 {
 				viewID = v
 			}
+		} else if entry, ok := s.itemCatalogOf().Lookup(configID); ok {
+			viewID = entry.ViewID // 未指定页：落模板行自己的分类页
 		}
 		item, push, err := s.grantBagItem(pl, configID, amount, viewID)
 		if err != nil {

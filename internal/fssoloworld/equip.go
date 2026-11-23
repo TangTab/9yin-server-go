@@ -146,17 +146,43 @@ func (s *Server) resolveBagSlot(pl *Player, st *rolestate.RoleState, viewID, slo
 	return slot
 }
 
-// stackOrAddBagItem 入包：单件且同 configID 同页有行 → 叠堆（购销同方言），
-// 否则新行。返回行帧。
+// bagRowCanAbsorb 背包行能否再并入 add 件（堆叠上限 = 行值 > 物品目录
+// MaxAmount；未标不设限）。并入时把目录上限补记到行。
+func (s *Server) bagRowCanAbsorb(row *rolestate.BagItem, add int) bool {
+	if row.MaxAmount <= 0 {
+		if entry, ok := s.itemCatalogOf().Lookup(row.ConfigID); ok {
+			row.MaxAmount = entry.MaxAmount
+		}
+	}
+	return row.MaxAmount <= 0 || row.Amount+add <= row.MaxAmount
+}
+
+// stackOrAddBagItem 入包单件：同 configID 同页有未满行 → 叠堆（上限 =
+// 行值/物品目录 MaxAmount；未标不设限），否则新行。返回行帧。
 func (s *Server) stackOrAddBagItem(pl *Player, item rolestate.BagItem) ([][]byte, error) {
 	st := &pl.roleState
 	if item.Amount == 1 {
-		for i := range st.BagItems {
-			if st.BagItems[i].ConfigID == item.ConfigID && st.BagItems[i].ViewID == item.ViewID {
-				st.BagItems[i].Amount++
-				return entergen.BagItemPushFrames(st.BagItems[i])
+		limit := item.MaxAmount
+		if limit == 0 {
+			if entry, ok := s.itemCatalogOf().Lookup(item.ConfigID); ok {
+				limit = entry.MaxAmount
 			}
 		}
+		for i := range st.BagItems {
+			if st.BagItems[i].ConfigID != item.ConfigID || st.BagItems[i].ViewID != item.ViewID {
+				continue
+			}
+			capacity := st.BagItems[i].MaxAmount
+			if capacity <= 0 {
+				capacity = limit
+			}
+			if capacity > 0 && st.BagItems[i].Amount >= capacity {
+				continue // 该行已满：不可堆叠物逐件成行
+			}
+			st.BagItems[i].Amount++
+			return entergen.BagItemPushFrames(st.BagItems[i])
+		}
+		item.MaxAmount = limit
 	}
 	st.BagItems = append(st.BagItems, item)
 	return entergen.BagItemPushFrames(item)
@@ -383,14 +409,15 @@ func (s *Server) moveInsideBag(pl *Player, srcView, srcSlot, dstView, dstSlot in
 		return
 	}
 	item := st.BagItems[index]
-	// 同 configID 同页目标格 → 纯叠堆。
+	// 同 configID 同页目标格 → 纯叠堆（并入后不得超堆叠上限——超限按
+	// 普通挪格走）。
 	if dstSlot != 0 {
 		for i := range st.BagItems {
 			if i == index {
 				continue
 			}
 			if st.BagItems[i].ViewID == dstPage && st.BagItems[i].Slot == int(dstSlot) &&
-				st.BagItems[i].ConfigID == item.ConfigID {
+				st.BagItems[i].ConfigID == item.ConfigID && s.bagRowCanAbsorb(&st.BagItems[i], item.Amount) {
 				st.BagItems[i].Amount += item.Amount
 				st.BagItems = append(st.BagItems[:index], st.BagItems[index+1:]...)
 				s.sendToClient(pl, entergen.ViewRemoveFrame(uint16(srcView), uint16(srcSlot)))

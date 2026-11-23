@@ -21,7 +21,6 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
-	"github.com/lizhanyin/9yin-server-go/internal/itemdata"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 	"github.com/lizhanyin/9yin-server-go/internal/npcshop"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
@@ -165,40 +164,7 @@ const (
 	shopSellUnitSilver int64 = 10
 )
 
-// ---- 物品目录（root 锚定缓存，shopCatalogOf 同款） ----
-
-var (
-	npcItemMu        sync.Mutex
-	npcItemRootTried string
-	npcItemCatalog   *itemdata.Catalog
-)
-
-// itemCatalogOf 物品目录：env NINEYIN_ITEM_DIR > 数据根 share/item
-// （物品定义节携 ItemType/分类——发放行的 ItemType 真值来源）。缺档
-// 负面缓存（进程级）。
-func (s *Server) itemCatalogOf() *itemdata.Catalog {
-	npcItemMu.Lock()
-	defer npcItemMu.Unlock()
-	root := npcfeed.ResolveRoot()
-	if root == npcItemRootTried {
-		return npcItemCatalog
-	}
-	npcItemRootTried = root
-	npcItemCatalog = nil
-	if root == "" {
-		return nil
-	}
-	if v := strings.TrimSpace(os.Getenv("NINEYIN_ITEM_DIR")); v != "" {
-		if catalog, err := itemdata.LoadDir(filepath.Clean(v)); err == nil {
-			npcItemCatalog = catalog
-			return catalog
-		}
-	}
-	if catalog, err := itemdata.LoadDir(filepath.Join(root, "share", "item")); err == nil {
-		npcItemCatalog = catalog
-	}
-	return npcItemCatalog
-}
+// 物品目录解析见 itemcatalog.go（ini/Item 构建产物优先，设计态 ini 回退）。
 
 // handleShopBuy msg70 [70, shopId str, page, pos, count]：货位匹配
 // （item.page==page+1 && item.position==pos-1，与开窗 objectIndex 同坐标
@@ -270,57 +236,99 @@ func (s *Server) handleShopBuy(pl *Player, message entergen.CustomInbound) {
 		shopID, listing.ConfigID, count, listing.Price, pl.roleState.Money, pl.Conn1)
 }
 
-// grantShopItemUnits 发放 total 件：同 configID 同分类页行内叠堆优先
-// （Amount 上限不设——fork addToBagItemCount 同款，显示层 MaxAmount 由
-// 行值承担），否则查物品目录建新行（ItemType 真值入档）。返回是否成功。
+// grantShopItemUnits 发放 total 件：同 configID 同分类页的未满行先叠堆
+// （上限 = 模板行 MaxAmount；目录缺席/未标不设限），满了开新行——不可堆叠
+// 物（MaxAmount=1）逐件成行；新行查物品目录取 ItemType 真值、页标与
+// MaxAmount 入档。先做容量预检：放不下整单则一件不发、返回 false（调用方
+// 据此不扣款——避免「部分入包不收费」）。
 func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bool {
 	st := &pl.roleState
+	entry, ok := s.itemCatalogOf().Lookup(configID)
+	if !ok {
+		s.trace("npc shop buy: 物品 %s 无目录条目拒发", configID)
+		return false
+	}
+	// 预检：现有行还能叠多少、余量要开几个新行。
+	remaining := int(total)
 	for i := range st.BagItems {
-		if st.BagItems[i].ConfigID == configID && st.BagItems[i].ViewID != 0 {
-			st.BagItems[i].Amount += int(total)
-			push, err := entergen.BagItemPushFrames(st.BagItems[i])
-			if err != nil {
-				s.trace("npc shop buy: 叠堆帧编码失败 %s: %v", configID, err)
-				return false
-			}
-			for _, f := range push {
-				s.sendToClient(pl, f)
-			}
-			return true
+		row := &st.BagItems[i]
+		if remaining == 0 || row.ConfigID != configID || row.ViewID != entry.ViewID {
+			continue
+		}
+		capacity := row.MaxAmount
+		if capacity <= 0 {
+			capacity = entry.MaxAmount
+		}
+		room := remaining
+		if capacity > 0 {
+			room = max(min(room, capacity-row.Amount), 0)
+		}
+		remaining -= room
+	}
+	newRows := 0
+	if remaining > 0 {
+		newRows = 1
+		if entry.MaxAmount > 0 {
+			newRows = (remaining + entry.MaxAmount - 1) / entry.MaxAmount
 		}
 	}
-	items := s.itemCatalogOf()
-	entry, ok := items.Lookup(configID)
-	if !ok {
-		s.trace("npc shop buy: 物品 %s 无目录条目（share/item）拒发", configID)
+	if free := st.FreeBagSlots(entry.ViewID); free < newRows {
+		s.trace("npc shop buy: %s x%d 分类页 %d 空位不足（需 %d 行，余 %d）",
+			configID, total, entry.ViewID, newRows, free)
 		return false
 	}
-	slot := st.FreeBagSlot(entry.ViewID)
-	if slot == 0 {
-		s.trace("npc shop buy: %s 分类页 %d 满", configID, entry.ViewID)
-		return false
+	// 落包：先补未满行，再开新行。
+	remaining = int(total)
+	for i := range st.BagItems {
+		row := &st.BagItems[i]
+		if remaining == 0 || row.ConfigID != configID || row.ViewID != entry.ViewID {
+			continue
+		}
+		take := remaining
+		if entry.MaxAmount > 0 {
+			take = max(min(take, entry.MaxAmount-row.Amount), 0)
+		}
+		row.Amount += take
+		row.MaxAmount = entry.MaxAmount
+		remaining -= take
+		if take > 0 {
+			s.pushBagRow(pl, *row, configID)
+		}
 	}
-	item := rolestate.BagItem{
-		Slot:       slot,
-		ConfigID:   configID,
-		ItemType:   entry.ItemType,
-		Amount:     int(total),
-		ViewID:     entry.ViewID,
-		Seq:        st.NextItemSeq(),
-		EquipType:  entry.EquipType,
-		ColorLevel: entry.ColorLevel,
-		Photo:      entry.Photo,
+	for remaining > 0 {
+		take := remaining
+		if entry.MaxAmount > 0 {
+			take = min(take, entry.MaxAmount)
+		}
+		item := rolestate.BagItem{
+			Slot:       st.FreeBagSlot(entry.ViewID),
+			ConfigID:   configID,
+			ItemType:   entry.ItemType,
+			Amount:     take,
+			ViewID:     entry.ViewID,
+			Seq:        st.NextItemSeq(),
+			EquipType:  entry.EquipType,
+			ColorLevel: entry.ColorLevel,
+			Photo:      entry.Photo,
+			MaxAmount:  entry.MaxAmount,
+		}
+		st.BagItems = append(st.BagItems, item)
+		remaining -= take
+		s.pushBagRow(pl, item, configID)
 	}
+	return true
+}
+
+// pushBagRow 背包行成对推送（0x19 预清 + 0x18 行；编码失败只记日志）。
+func (s *Server) pushBagRow(pl *Player, item rolestate.BagItem, configID string) {
 	push, err := entergen.BagItemPushFrames(item)
 	if err != nil {
-		s.trace("npc shop buy: 新行帧编码失败 %s: %v", configID, err)
-		return false
+		s.trace("bag row: 帧编码失败 %s: %v", configID, err)
+		return
 	}
-	st.BagItems = append(st.BagItems, item)
 	for _, f := range push {
 		s.sendToClient(pl, f)
 	}
-	return true
 }
 
 // handleShopSell msg71 [71, 类别页, 槽位(1 起), 数量, configID str]：

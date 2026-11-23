@@ -92,9 +92,13 @@ func itemUIDOf(seq int64, slot int) string {
 	return hex.EncodeToString(digest[:8])
 }
 
-// maxAmountOf 堆叠上限（无目录口径：非堆叠物 1，其余与 Amount 等值——
-// 客户端聚合显示不依赖此值，ItemUse 目录接入后改真值）。
+// maxAmountOf 堆叠上限：行值（入包时取自物品模板行 MaxAmount——ini/Item
+// 构建产物，itemdata 目录）> 无行值回落「与 Amount 等值、单件为 1」（物品
+// 目录缺席/旧档行；客户端聚合显示不依赖此值）。
 func maxAmountOf(item rolestate.BagItem) int {
+	if item.MaxAmount > 0 {
+		return item.MaxAmount
+	}
 	if item.Amount > 1 {
 		return item.Amount
 	}

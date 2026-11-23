@@ -142,6 +142,9 @@ type BagItem struct {
 	EquipType  string `json:"equipType,omitempty"`  // 装备行必发真值（渲染闸）
 	ColorLevel int    `json:"colorLevel,omitempty"` // 缺省 1
 	Photo      string `json:"photo,omitempty"`      // 图标（可缺省）
+	// MaxAmount 堆叠上限（入包时取自物品模板行；0=未记——行帧回落旧口径，
+	// 叠堆不设限）。
+	MaxAmount int `json:"maxAmount,omitempty"`
 }
 
 // EquipItem 装备行（2433 线 equipRow 精简口径）：Slot=身体槽位（hat=1/
@@ -221,6 +224,17 @@ func (s *RoleState) FreeBagSlot(viewID int) int {
 		}
 	}
 	return 0
+}
+
+// FreeBagSlots 分类页空格数（入包容量预检用）。
+func (s *RoleState) FreeBagSlots(viewID int) int {
+	taken := 0
+	for _, item := range s.BagItems {
+		if item.ViewID == viewID && item.Slot >= 1 && item.Slot <= bagSlotMax {
+			taken++
+		}
+	}
+	return max(bagSlotMax-taken, 0)
 }
 
 // ShortcutRow shortcut_rec 一行：可见栏位索引、类型（"skill"/"item"…）

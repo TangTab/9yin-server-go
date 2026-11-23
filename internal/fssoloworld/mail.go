@@ -289,6 +289,8 @@ func (s *Server) reorderLetterRow(pl *Player, idx int, letter rolestate.Letter) 
 
 // grantBagItem 入包：FreeBagSlot/NextItemSeq 分配 + BagItems 落档 +
 // 0x19/0x18 成对帧（gm item 与邮件领附件共用；满页 errBagPageFull）。
+// 模板行数据随目录入档（物品目录可用时）：ItemType/MaxAmount 与装备行
+// 渲染属性——使用链（itemuse.go）与行帧都取自这里。
 func (s *Server) grantBagItem(pl *Player, configID string, amount, viewID int) (rolestate.BagItem, [][]byte, error) {
 	slot := pl.roleState.FreeBagSlot(viewID)
 	if slot == 0 {
@@ -300,6 +302,10 @@ func (s *Server) grantBagItem(pl *Player, configID string, amount, viewID int) (
 		Amount:   amount,
 		ViewID:   viewID,
 		Seq:      pl.roleState.NextItemSeq(),
+	}
+	if entry, ok := s.itemCatalogOf().Lookup(configID); ok {
+		item.ItemType, item.MaxAmount, item.EquipType = entry.ItemType, entry.MaxAmount, entry.EquipType
+		item.ColorLevel, item.Photo = entry.ColorLevel, entry.Photo
 	}
 	push, err := entergen.BagItemPushFrames(item)
 	if err != nil {

@@ -18,6 +18,16 @@ const (
 	ViewportQingGong = 46 // 轻功容器
 )
 
+// 三数据视图的建视图容量（官服登录 0x15 帧实测：资料\初始账号登陆-完整
+// 引导-女.pcapng 24.05s，`15 28 00 20 03` / `15 2b 00 00 02` / `15 2e 00
+// 00 02`）。是容器上限而非登录行数——武学书使用（msg31）学会新招式要在
+// 登录行集之后追加行，按行数建容量会越界。
+const (
+	skillViewCapacity    = 800
+	neiGongViewCapacity  = 512
+	qingGongViewCapacity = 512
+)
+
 func playerIdx(name string) uint16 { return clientdata.MustPlayerProperty(name).Index }
 
 // skillViewRow View40 单行属性集（b-line skillRowProperties；VarPropNo/
@@ -50,15 +60,22 @@ func skillViewRow(skill rolestate.StarterSkill) []ViewProperty {
 
 // SkillViewFrames View40：建视图 + 每技能一行。
 func SkillViewFrames(state rolestate.RoleState) ([][]byte, error) {
-	frames := [][]byte{mustCreateView(ViewportSkill, uint16(len(state.Skills)))}
+	frames := [][]byte{mustCreateView(ViewportSkill, skillViewCapacity)}
 	for index, skill := range state.Skills {
-		frame, err := ViewAddFrame(ViewportSkill, uint16(index+1), skillViewRow(skill))
+		frame, err := SkillRowFrame(index, skill)
 		if err != nil {
 			return nil, err
 		}
 		frames = append(frames, frame)
 	}
 	return frames, nil
+}
+
+// SkillRowFrame View40 追加一行（行号 = 在 roleState.Skills 里的 0 基
+// 下标 + 1；武学书使用学会新招式时在登录行集之后追加——官服抓包 m31 #1
+// `0x18 view=40 idx=8` 同形）。
+func SkillRowFrame(index int, skill rolestate.StarterSkill) ([]byte, error) {
+	return ViewAddFrame(ViewportSkill, uint16(index+1), skillViewRow(skill))
 }
 
 // bookViewRow View43 书行（b-line bookFrame：ConfigID/ItemType/Level/
@@ -107,7 +124,7 @@ func bookViewRow(book rolestate.NeiGongBook) []ViewProperty {
 
 // NeiGongViewFrames View43：建视图 + 每书一行。
 func NeiGongViewFrames(state rolestate.RoleState) ([][]byte, error) {
-	frames := [][]byte{mustCreateView(ViewportNeiGong, uint16(len(state.NeiGong)))}
+	frames := [][]byte{mustCreateView(ViewportNeiGong, neiGongViewCapacity)}
 	for index, book := range state.NeiGong {
 		frame, err := ViewAddFrame(ViewportNeiGong, uint16(index+1), bookViewRow(book))
 		if err != nil {
@@ -126,7 +143,7 @@ func QingGongViewFrames(state rolestate.RoleState) ([][]byte, error) {
 		configEntry = clientdata.MustPlayerProperty("ConfigID")
 	}
 	activeEntry := clientdata.MustPlayerProperty("IsActive")
-	frames := [][]byte{mustCreateView(ViewportQingGong, uint16(len(state.QingGongSkills)))}
+	frames := [][]byte{mustCreateView(ViewportQingGong, qingGongViewCapacity)}
 	for index, id := range state.QingGongSkills {
 		frame, err := ViewAddFrame(ViewportQingGong, uint16(index+1), []ViewProperty{
 			{configEntry.Index, StringValue(id)},

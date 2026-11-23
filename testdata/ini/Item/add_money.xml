@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- add_money：掉落金钱显示物：script=DropMoneyItem（黑金同名同义） -->
+<Object>
+	<Property ID="add_money_item00001" script="DropMoneyItem" ItemType="1100" ViewID="1" Name="金钱掉落" ColorLevel="1" Photo="icon\prop\suiyinzi.png" MaxAmount="100000000" Amount="1" LogicPack="1" IsMarketItem="1" SellPrice1="1" TextureType="0"/>
+	<Property ID="add_money_item00002" script="DropMoneyItem" ItemType="1100" ViewID="1" Name="金钱掉落" ColorLevel="1" Photo="icon\prop\suiyinzi.png" MaxAmount="100000000" Amount="1" LogicPack="1" FuncPack="1" IsMarketItem="1" SellPrice1="1" TextureType="0"/>
+	<Property ID="add_money_item00003" script="DropMoneyItem" ItemType="1100" ViewID="1" Name="金钱掉落" ColorLevel="1" Photo="icon\prop\suiyinzi.png" MaxAmount="100000000" Amount="1" LogicPack="1" FuncPack="1" IsMarketItem="1" SellPrice1="1" TextureType="0"/>
+	<Property ID="add_money_item00004" script="DropMoneyItem" ItemType="1100" ViewID="1" Name="金钱掉落" ColorLevel="1" Photo="icon\prop\suiyinzi.png" MaxAmount="1000000" Amount="1" LogicPack="1" FuncPack="1" IsMarketItem="1" SellPrice1="1" TextureType="0"/>
+</Object>

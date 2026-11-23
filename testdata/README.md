@@ -47,6 +47,20 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
   `internal/fsgame` 测试夹具与属性词汇对照，`fsgame` 的 `readResource`
   在规范位缺席时回退到此目录。
 
+## ini/Item/ — 物品配置（九阴构建产物，黑金物品配置格式）
+
+`tools/itemgen` 把九阴设计态表 `share/item/*.ini` 离线构建为服务端 XML
+（黑金 `ini/Item` 同构：`path_config.xml` 登记表 + 11 个模板档
+`Equipment/Weapon/Material/ItemUse/Rune/ItemMountUse/TaskItemUse/
+TaskMaterial/ItemBox/SkillBook/add_money.xml` + 9 个静态包
+`item_func_static/item_logic_pack/ItemArtStatic/item_use_skill_static/
+item_learn_skill_static/item_task_static/item_ingredient_static/
+item_prop_modify_static/item_seed_static.xml` + `ItemTypeList.xml`；22 文件
+12.5 万行）。服务端只读产物（装载器 `internal/itemdata`；产物缺席回退
+设计态 `share/item`，只有目录面）。再生命令：`go run ./tools/itemgen -verify`
+（部署根同步加 `-out <Res>/ini/Item`）。详见
+`docs/official/物品服务端XML构建链与msg31使用链.md`。
+
 ## ini/ — 数值表抽样（config 包的格式样例）
 
 从原版 `Res/ini/` 抽样的代表性文件，用于驱动 `internal/config` 的解析器

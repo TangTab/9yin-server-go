@@ -162,9 +162,7 @@ func TestNPCShopBuySell(t *testing.T) {
 	npcShopMu.Lock()
 	npcShopRootTried = ""
 	npcShopMu.Unlock()
-	npcItemMu.Lock()
-	npcItemRootTried = ""
-	npcItemMu.Unlock()
+	resetItemCatalog()
 
 	pl := &Player{Conn1: 11, State: PlOnline}
 	pl.roleState.Money = 1000

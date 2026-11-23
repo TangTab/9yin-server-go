@@ -93,6 +93,10 @@ type Player struct {
 	// combat 技能/冷却会话态（skill.go；连接生命周期，不落库）：冷却表
 	// 行镜像、进行中技能、MP、冲锋暂存。
 	combat combatState
+	// itemUse 使用读条流（itemuse.go；连接生命周期，不落库）：nil=无进行中
+	// 的 msg31 读条；读条期间再按静默（官服连点零应答）。
+	itemUseMu sync.Mutex
+	itemUse   *itemUseFlow
 }
 
 // WorldPlayers 复刻 CWorldPlayers（0x48）：数组 + 空闲槽 + PERSISTID 索引。
