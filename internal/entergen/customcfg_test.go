@@ -15,8 +15,8 @@ import (
 
 // TestPlayerObjectConfigFramesSaved 存档态：键位域 0x10（198 尾空格/
 // 223/201 尾空格）→ 快捷栏行；ShortcutsSet 基线不复权 starter 条目；
-// 玩家对象域不含连接级 705（0x1E，705 唯一下行位=首传闸 re-assert，
-// fssoloworld/custom.go）。
+// 玩家对象域不含 705（0x1E，下行位=进场段首帧 CustomizingFrame，
+// 每次完整进场单发）。
 func TestPlayerObjectConfigFramesSaved(t *testing.T) {
 	ctx := testContext(t)
 	ctx.State.Customizing = "ABC"
@@ -176,4 +176,72 @@ func TestReadyFramesIncludesCustomCluster(t *testing.T) {
 	if !found {
 		t.Fatal("ready cluster missing starter shortcut row")
 	}
+}
+
+// TestCustomizingLeadsEntry 705 个性配置是进场段首帧（官服登录段位：
+// 属性表后、0x0B 进场前——先于客户端登录期 107 转储，也先于场景加载
+// 的控制初始化，因为客户端每收一帧 705 会强制 camera_value/
+// game_control_mode=0）；载荷逐字节等于存档串；每次进场恰 1 帧，就绪段
+// 不重发；无档零帧。
+func TestCustomizingLeadsEntry(t *testing.T) {
+	ctx := testContext(t)
+	saved := rolestate.BinaryString("\x01e\x01\x02\xa1SAVED")
+	ctx.State.Customizing = saved
+	pre, err := PreReadyFrames(ctx, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pre) < 2 || pre[0][0] != 0x1E || pre[1][0] != 0x0B {
+		t.Fatalf("entry segment must lead with 705 then 0x0B: ops=% x", opsOf(pre[:3]))
+	}
+	msg, err := ParseCustomMessage(pre[0])
+	if err != nil {
+		t.Fatalf("705 parse: %v", err)
+	}
+	if msg.Values[0].Int32 != 705 || msg.Values[1].Type != 6 || msg.Values[1].Text != string(saved) {
+		t.Fatalf("705 payload mismatch: %+v", msg.Values)
+	}
+	if countCustomizingPushes(pre) != 1 {
+		t.Fatalf("entry segment must carry exactly one 705, got %d", countCustomizingPushes(pre))
+	}
+	ready, err := ReadyFrames(ctx, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if countCustomizingPushes(ready) != 0 {
+		t.Fatal("ready segment must not re-push 705")
+	}
+
+	// 无档：零帧，进场段仍以 0x0B 起头。
+	bare := testContext(t)
+	if frame, err := CustomizingFrame(bare.State); err != nil || frame != nil {
+		t.Fatalf("empty archive must yield no frame: %v %v", frame, err)
+	}
+	preBare, err := PreReadyFrames(bare, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if preBare[0][0] != 0x0B || countCustomizingPushes(preBare) != 0 {
+		t.Fatalf("no archive: entry must start with 0x0B and carry no 705: % x", preBare[0][:4])
+	}
+}
+
+// countCustomizingPushes 帧序里 S2C 705（0x1E，首值 int 705）的帧数。
+func countCustomizingPushes(frames [][]byte) int {
+	count := 0
+	for _, frame := range frames {
+		if len(frame) >= 8 && frame[0] == 0x1E && frame[3] == 2 &&
+			binary.LittleEndian.Uint32(frame[4:]) == 705 {
+			count++
+		}
+	}
+	return count
+}
+
+func opsOf(frames [][]byte) []byte {
+	ops := make([]byte, len(frames))
+	for i, frame := range frames {
+		ops[i] = frame[0]
+	}
+	return ops
 }

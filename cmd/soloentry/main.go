@@ -28,6 +28,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/entry"
 	"github.com/lizhanyin/9yin-server-go/internal/fscomm"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloentry"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -86,6 +87,8 @@ func main() {
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C；冒烟用）")
 	)
 	flag.Parse()
+	logline.Install("entry")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go soloentry %s（game_entry.exe + FsSoloEntry.dll 复刻）\n", version)
 
@@ -303,5 +306,5 @@ func shutdown(gateway *entry.Gateway, inner *entry.Inner, echo *fscomm.EchoSock,
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "soloentry:", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

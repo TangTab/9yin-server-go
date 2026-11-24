@@ -16,10 +16,12 @@ package entergen
 // 都由 PlayerObjectConfigFrames 重推（reentryReady，参考端 stable
 // re-entry restore shortcuts/keybind 两步同口径）。
 //
-// 705 个性配置不在本簇（连接级，不随切图重置）：唯一下行位 = 首传闸
-// re-assert（fssoloworld/custom.go），内容必须字节保真——2026-11-23
-// 定案：存档串被 encoding/json 清洗成 U+FFFD 后回推，即重登/切图
-// 卡顿根因（docs/official/自定义配置705推送卡顿排查.md §七）。
+// 705 个性配置走 CustomizingFrame：官服口径（2026-11-24「初始账号登陆-
+// 任务-入门2」抓包）每次完整进场恰 1 帧，落登录段、先于客户端登录期的
+// 107 转储——登录进 PreReadyFrames 段首，切图在 0x0B 之前（fssoloworld
+// sceneswitch.go）。内容必须字节保真——2026-11-23 定案：存档串被
+// encoding/json 清洗成 U+FFFD 后回推，即重登/切图卡顿根因
+//（docs/official/自定义配置705推送卡顿排查.md §七）。
 
 import (
 	"fmt"
@@ -27,6 +29,26 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
+
+// customizingPushMessage S2C 705（lua custom_handler on_parser_customizing
+// → customizing:UpdateToConfigObj 灌回配置对象）。
+const customizingPushMessage int32 = 705
+
+// CustomizingFrame S2C 705 个性配置整串（无档 nil，零帧）。载荷即客户端
+// CustomizingManager 的字段表（fxgame.DMP 逆出 SaveConfigToServer：134
+// 字节、值=配置值+1、C 串遇 0 截断——如 [6] operate_control_mode、[94]
+// fightparry「非战斗状态可招架」，全表见 docs/official/
+// 非战斗格挡开关与705个性配置字段表.md），服务端不解释、原样回推。
+func CustomizingFrame(state rolestate.RoleState) ([]byte, error) {
+	if state.Customizing == "" {
+		return nil, nil
+	}
+	frame, err := CustomMessageFrame(customizingPushMessage, CustomString(string(state.Customizing)))
+	if err != nil {
+		return nil, fmt.Errorf("encode customizing push: %w", err)
+	}
+	return frame, nil
+}
 
 // PlayerObjectConfigFrames 键位域 + 快捷栏行（挂玩家对象——0x0C 切图
 // 清对象后重入重推用；705 连接级不在内）。

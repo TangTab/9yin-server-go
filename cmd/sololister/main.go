@@ -32,6 +32,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssololister"
 	"github.com/lizhanyin/9yin-server-go/internal/login"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 // defaultGameListerINI 是内置默认配置（官方小写系 game_lister.ini 方言，
@@ -55,6 +56,8 @@ func main() {
 	var extras extraFlags
 	flag.Var(&extras, "extra", "追加静态区服条目 name=host:port[=busy]，可重复")
 	flag.Parse()
+	logline.Install("lister")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go sololister %s\n", version)
 
@@ -187,7 +190,7 @@ func main() {
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "sololister:", err)
-	os.Exit(1)
+	logline.Exit(1)
 }
 
 // extraFlags 收集重复的 -extra name=host:port[=busy] 旗标。

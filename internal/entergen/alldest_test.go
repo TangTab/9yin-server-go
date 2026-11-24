@@ -62,9 +62,10 @@ func TestServerAllDestFrameLayout(t *testing.T) {
 	}
 }
 
-// TestNpcStateFrame 0x10 State 翻转帧：单属性 State="walk"/"stand"。
+// TestNpcStateFrame 0x10 State 翻转帧：单属性 State=传入的动作名（walk /
+// stand / 姿态动作名）；空状态拒绝。
 func TestNpcStateFrame(t *testing.T) {
-	walk, err := NpcStateFrame(0x11000005, 0x00660005, true)
+	walk, err := NpcStateFrame(0x11000005, 0x00660005, "walk")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,9 +81,16 @@ func TestNpcStateFrame(t *testing.T) {
 	if !contains(walk, "walk") {
 		t.Fatal("walk 帧缺 walk 串")
 	}
-	stand, _ := NpcStateFrame(0x11000005, 0x00660005, false)
+	stand, _ := NpcStateFrame(0x11000005, 0x00660005, "stand")
 	if !contains(stand, "stand") {
 		t.Fatal("stand 帧缺 stand 串")
+	}
+	pose, err := NpcStateFrame(0x11000005, 0x00660005, "ty_sitchair_drinkloop")
+	if err != nil || !contains(pose, "ty_sitchair_drinkloop") {
+		t.Fatalf("姿态 State 帧应带动作名: err=%v bytes=% x", err, pose)
+	}
+	if _, err := NpcStateFrame(0x11000005, 0x00660005, ""); err == nil {
+		t.Fatal("空状态应拒绝（会把 NPC 置成空动作）")
 	}
 }
 

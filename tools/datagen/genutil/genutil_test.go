@@ -58,6 +58,34 @@ func TestWriteFileFollowsExistingLineEndings(t *testing.T) {
 	}
 }
 
+// WriteFileVerbatim 不跟随现有文件的行尾：透传产物与源逐字节相同；
+// 占用重试与 WriteFile 同样生效。
+func TestWriteFileVerbatimKeepsLineEndings(t *testing.T) {
+	root := t.TempDir()
+	target := filepath.Join(root, "a.ini")
+	if err := os.WriteFile(target, []byte("[old]\r\nr=1\r\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := WriteFileVerbatim(target, []byte("[new]\nr=1\n")); err != nil {
+		t.Fatal(err)
+	}
+	if data, err := os.ReadFile(target); err != nil || string(data) != "[new]\nr=1\n" {
+		t.Fatalf("Verbatim 不应改行尾: %q（err=%v）", data, err)
+	}
+
+	calls := 0
+	useFakeWrite(t, func(path string, data []byte, perm os.FileMode) error {
+		calls++
+		if calls == 1 {
+			return &fs.PathError{Op: "open", Path: path, Err: transientLockError()}
+		}
+		return os.WriteFile(path, data, perm)
+	})
+	if err := WriteFileVerbatim(filepath.Join(root, "sub", "b.ini"), []byte("x\n")); err != nil || calls != 2 {
+		t.Fatalf("占用重试失效: err=%v calls=%d", err, calls)
+	}
+}
+
 // useFakeWrite 把实际写盘换成 fake，并把重试间隔缩到最短；测试结束恢复。
 func useFakeWrite(t *testing.T, fake func(string, []byte, os.FileMode) error) {
 	t.Helper()

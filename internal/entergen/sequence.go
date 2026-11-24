@@ -3,7 +3,8 @@ package entergen
 // 进场/就绪两段编排（7074 线实证相位——c.pcapng/登陆-all 窗口对拍）：
 //
 //	PreReady（表后 → ClientReady 前）：
-//	  0x0B 进场 → 0x0D 玩家物化（外观/身体模型集）→ 0x14/0x11 记录对
+//	  S2C 705 个性配置（有档；官服登录段位——先于客户端登录期 107 转储）
+//	  → 0x0B 进场 → 0x0D 玩家物化（外观/身体模型集）→ 0x14/0x11 记录对
 //	  （挂载→纯数字列行）→ 0x29 批量（字符串列记录，0x47 字面量包装）
 //	  → 0x28 化身 → 0x10 物理流 ×36 → 0x10 基础属性批（五维/资源）
 //	  → 开图双记录（MapMaskRec 迷雾行 + OpenMapRec 位图）→ NPC 物化 ×N
@@ -11,8 +12,7 @@ package entergen
 //	  m229 c130 NPC 物化族 ×N（场景 NPC 目录；golden 相位段首）
 //	  → 0x10 AutoTrace=1（地图点击寻路闸门）→ m607/m52/m586 → m169 buff
 //	  → 视图簇（空容器 + View40/43/46 + 44/45）
-//	  → 战斗属性单帧族 → 键位域 0x10/快捷栏 0x11 行（705 不在本段）
-//	  → m416 九阴志域 → 0x1F 位置
+//	  → 战斗属性单帧族 → 键位域 0x10/快捷栏 0x11 行 → m416 九阴志域 → 0x1F 位置
 //
 // 会话身份（seq/obj/own/IP/时间戳）由 Identity/Session 注入，数据值取
 // rolestate（role_state_json 同源）——官方 Fs 引擎 PlayerEntry 按存档
@@ -29,6 +29,18 @@ import (
 // 列记录降级走 0x11 行（fork 客户端已接受方言）。
 func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	frames := [][]byte{}
+
+	// S2C 705 个性配置（有档）：登录段首帧——官服位（表后、0x0B 进场前，
+	// 先于客户端登录期的 107 转储）。客户端每收一帧 705 会强制
+	// camera_value/game_control_mode=0，须赶在场景加载的控制初始化之前
+	// 到达；无档零帧（客户端保持本地配置，首份转储落库作基线）。
+	customizing, err := CustomizingFrame(ctx.State)
+	if err != nil {
+		return nil, err
+	}
+	if customizing != nil {
+		frames = append(frames, customizing)
+	}
 
 	// 0x0B 进场（idx178/1468/1447/1448 按存档场景）。
 	entry, err := EntrySceneFrame(ctx.Identity, ctx.State.Scene, ctx.State.Resource)
@@ -190,11 +202,10 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	// shortcut_rec 0x11 行（视图簇之后；无档零帧，starter 打坐条目由
 	// EffectiveShortcuts 推导）。fork 客户端本地不落盘，缺发即「快捷
 	// 键重登全丢」。
-	// 705 不在本段（2026-11-23）：线路抓包 48 会话实证客户端在 0x09
-	// 之前已上传 107 共 2–4 次、此后不再上传——ClientReady 位的 705
-	// 赶不上登录转储（原注「抢跑位」不成立）；705 只留首传闸 re-assert
-	// 一处（custom.go）。2433 同位 705 排在就绪信息簇之前（main.go
-	// :3685），本段原排在之后，真机二分 548e616 首卡。
+	// 705 不在本段：2026-11-23 线路抓包 48 会话实证客户端在 0x09 之前
+	// 已上传 107 共 2–4 次，ClientReady 位的 705 赶不上登录转储；现行
+	// 下行位 = 进场段首帧（PreReadyFrames / 切图 0x0B 前），上传零应答
+	//（官服口径，docs/official/自定义配置705推送卡顿排查.md §八）。
 	playerObject, err := PlayerObjectConfigFrames(ctx)
 	if err != nil {
 		return nil, err

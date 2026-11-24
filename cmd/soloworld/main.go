@@ -15,6 +15,7 @@ import (
 	"syscall"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 // defaultINI 快照 game_world.ini 方言（BGserverCJ\Debug\game_world.ini）。
@@ -70,13 +71,15 @@ func main() {
 		echoPort   = flag.Int("echo-port", -1, "覆盖 [Echo] Port")
 	)
 	flag.Parse()
+	logline.Install("world")
+	defer logline.Flush()
 
 	data := []byte(defaultINI)
 	if *configPath != "" {
 		b, err := os.ReadFile(*configPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "read config: %v\n", err)
-			os.Exit(1)
+			logline.Exit(1)
 		}
 		data = b
 	} else if _, err := os.Stat("game_world.ini"); err == nil {
@@ -87,7 +90,7 @@ func main() {
 	cfg, err := fssoloworld.ParseGameWorldINI(data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "parse config: %v\n", err)
-		os.Exit(1)
+		logline.Exit(1)
 	}
 	if *district != 0 {
 		cfg.DistrictID = *district
@@ -110,13 +113,13 @@ func main() {
 		Logf:   func(f string, a ...any) { fmt.Printf(f+"\n", a...) },
 		OnClosed: func() {
 			fmt.Println("world server shutdown...")
-			os.Exit(0)
+			logline.Exit(0)
 		},
 		Scenes: loadScenes(*scenesINI),
 	})
 	if err := srv.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		logline.Exit(1)
 	}
 	fmt.Printf("app name %s\n", cfg.AppName())
 	fmt.Printf("echo socket %s:%d\n", cfg.EchoAddr, cfg.EchoPort)

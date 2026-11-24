@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 )
 
 // 八期：NPC 载体域底座六模块（docs/official/FsGame全解与Go复刻.md §8
@@ -43,9 +44,17 @@ func (m *NpcResourceModule) Init(k *Kernel) error {
 // member<N>_ 分档优先）。官方 NpcConfig 本就按组子目录分档
 // （WorldNpc/BattleNpc/CloneNpc/LifeNpc，见客户端 npcconfig/npc_type.ini
 // 的服务端路径映射），Go 面递归装载并按行登记 npcID → script 类。
+//
+// 数据来源（2026-11-25，见 internal/npcfeed/source.go）：数据根带客户端
+// share/npc/npcconfig 即直读模板表（NINEYIN_DATA_SOURCE=xml 强制读产物）。
+// 两路登记语义相同——后表覆盖；直读的表序与产物树的遍历序一致
+// （sharedata.NPCConfigTables），同 ID 多表时登记到的是同一个类。
 func (m *NpcResourceModule) LoadResource(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return fmt.Errorf("fsgame: NpcResourceModule.LoadResource: ResourcePath 未设置")
+	}
+	if sharedata.EffectiveSource(k.ResourcePath, sharedata.NPCConfigDir) == sharedata.SourceShare {
+		return m.loadFromShare(k)
 	}
 	base := filepath.Join(k.ResourcePath, "ini", "Npc")
 	for _, sub := range []string{"NpcConfigAuto", "NpcConfig"} {
@@ -85,6 +94,39 @@ func (m *NpcResourceModule) LoadResource(k *Kernel) error {
 		}
 	}
 	k.Tracef("NpcResourceModule: LoadResource ini/Npc 树 %d 档 %d NPC", m.loaded, len(m.npcs))
+	return nil
+}
+
+// loadFromShare 直读客户端模板表：逐表登记 npcID → script 类（后表覆盖）。
+// 单表解析失败只记 trace，不废整树。
+func (m *NpcResourceModule) loadFromShare(k *Kernel) error {
+	tables, err := sharedata.NPCConfigTables(k.ResourcePath)
+	if err != nil {
+		return fmt.Errorf("fsgame: NpcResourceModule.LoadResource: %w", err)
+	}
+	for _, entry := range tables {
+		table, parseErr := sharedata.ReadTemplateTable(entry.Path)
+		if parseErr != nil {
+			k.Tracef("NpcResourceModule: 解析 %s: %v", entry.Rel, parseErr)
+			continue
+		}
+		idCol, scriptCol := table.Column("ID"), table.Column("script")
+		if idCol < 0 {
+			continue
+		}
+		for _, row := range table.Rows {
+			if idCol >= len(row) || row[idCol] == "" {
+				continue
+			}
+			script := ""
+			if scriptCol >= 0 && scriptCol < len(row) {
+				script = row[scriptCol]
+			}
+			m.npcs[row[idCol]] = m.resolveClass(k, script)
+		}
+		m.loaded++
+	}
+	k.Tracef("NpcResourceModule: LoadResource share/npc/npcconfig %d 档 %d NPC", m.loaded, len(m.npcs))
 	return nil
 }
 

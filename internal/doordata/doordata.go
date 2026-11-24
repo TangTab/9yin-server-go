@@ -48,7 +48,13 @@ var routesByScene = func() map[string][]Route {
 	}
 	out := make(map[string][]Route, len(doc.Scene))
 	for _, scene := range doc.Scene {
-		out[scene.Name] = append(out[scene.Name], scene.Route...)
+		for _, r := range scene.Route {
+			// door_routes.xml 的 targetConfig 由 gen_door_routes 以 %q 写出、
+			// 反斜杠成对（ini\\scene\\x）。还原成客户端 door_data.ini / gm
+			// scene 的单反斜杠写法——切图 0x0B 的 ConfigID 原样下发。
+			r.TargetConfig = strings.ReplaceAll(r.TargetConfig, `\\`, `\`)
+			out[scene.Name] = append(out[scene.Name], r)
+		}
 	}
 	return out
 }()

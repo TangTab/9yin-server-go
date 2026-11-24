@@ -48,6 +48,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 )
 
 // stepDomain SubFunction.Type → 步骤域文件（相对 ini/Quest）。
@@ -368,7 +370,18 @@ func nineyinTaskRow(row map[string]string) map[string]string {
 }
 
 // loadPropRows 读 Object/Property XML 属性行（资源根 + 相对路径）。
+//
+// 数据根走 share 源时改道直读（2026-11-25，见 internal/npcfeed/source.go）：
+// 任务域、任务文案、护送 NPC 模板表这几类产物路径由
+// sharedata.BuiltRows 直接读客户端表给出同样的行（share/task/task 合并、
+// text/chineses 文案档）；不归直读管的路径照旧读 XML 产物。
 func loadPropRows(resourcePath, rel string) ([]map[string]string, error) {
+	if rows, ok, err := sharedata.BuiltRows(resourcePath, rel); ok {
+		if err != nil {
+			return nil, fmt.Errorf("fsgame: 九阴任务域 %s（直读）: %w", rel, err)
+		}
+		return rows, nil
+	}
 	data, err := readResource(resourcePath, rel)
 	if err != nil {
 		return nil, fmt.Errorf("fsgame: 九阴任务域 %s: %w", rel, err)

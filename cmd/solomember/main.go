@@ -15,6 +15,7 @@ import (
 	"syscall"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssolomember"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 // defaultINI 快照 game_member.ini 方言（BGserverCJ\Debug\game_member.ini）。
@@ -64,13 +65,15 @@ func main() {
 		broadPort  = flag.Int("broad-port", -1, "覆盖 [Broadcast] Port")
 	)
 	flag.Parse()
+	logline.Install("member")
+	defer logline.Flush()
 
 	data := []byte(defaultINI)
 	if *configPath != "" {
 		b, err := os.ReadFile(*configPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "read config: %v\n", err)
-			os.Exit(1)
+			logline.Exit(1)
 		}
 		data = b
 	} else if _, err := os.Stat("game_member.ini"); err == nil {
@@ -81,7 +84,7 @@ func main() {
 	cfg, err := fssolomember.ParseGameMemberINI(data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "parse config: %v\n", err)
-		os.Exit(1)
+		logline.Exit(1)
 	}
 	if *district != 0 {
 		cfg.DistrictID = uint32(*district)
@@ -92,6 +95,7 @@ func main() {
 	if *member != 0 {
 		cfg.MemberID = uint32(*member)
 	}
+	logline.SetServer(fmt.Sprintf("member%d", cfg.MemberID)) // 日志来源：序号随配置定
 	if *innerPort >= 0 {
 		cfg.InnerPort = *innerPort
 	}
@@ -106,7 +110,7 @@ func main() {
 	})
 	if err := srv.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		logline.Exit(1)
 	}
 	fmt.Printf("app name member_%d_%d\n", cfg.ServerID, cfg.MemberID)
 	fmt.Printf("inner socket %s:%d\n", cfg.InnerAddr, srv.InnerPort())

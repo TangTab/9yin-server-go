@@ -2,9 +2,10 @@ package fssoloworld
 
 // npctask.go NPC 任务绑定（对话框任务行 + 接取/提交受理）：
 //
-// 数据：服务端任务域 XML（<数据根>/ini/Quest，datagen npc 由客户端
-// share/task 生成——任务 ID 与客户端文案键同一体系；Task 主表 +
-// SubFunction×StoryTaskList 剧情段）。
+// 数据：任务目录（taskdata.LoadQuest——数据根带客户端 share/task/task 与
+// 文案档时直读，否则读 datagen npc 生成的任务域 XML <数据根>/ini/Quest；
+// 任务 ID 与客户端文案键同一体系；Task 主表 + SubFunction×StoryTaskList
+// 剧情段）。
 //
 // 协议（form_talk_data.lua g_menu_id 域 + 引导抓包定版）：菜单任务行
 // m6 funcid=flag*1000000+TID，行文本双键（首键=行文案、次键 title_
@@ -30,7 +31,6 @@ package fssoloworld
 
 import (
 	"fmt"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -87,8 +87,8 @@ var (
 )
 
 // taskCatalogForRoot 装载任务目录（按数据根缓存；缺档返回 nil——任务行
-// 是增强下发，缺数据不阻塞对话）。数据源是数据根下的任务域 XML
-// （ini/Quest）。
+// 是增强下发，缺数据不阻塞对话）。数据源见 taskdata.LoadQuest：数据根带
+// share/task/task 与文案档即直读，否则读任务域 XML 产物（ini/Quest）。
 func taskCatalogForRoot(root string) *taskdata.Catalog {
 	npcTaskMu.Lock()
 	defer npcTaskMu.Unlock()
@@ -100,7 +100,7 @@ func taskCatalogForRoot(root string) *taskdata.Catalog {
 	if root == "" {
 		return nil
 	}
-	if catalog, err := taskdata.LoadQuestXMLDir(filepath.Join(root, "ini", "Quest")); err == nil && catalog.Count() > 0 {
+	if catalog, err := taskdata.LoadQuest(root); err == nil && catalog.Count() > 0 {
 		npcTaskCatalog = catalog
 	}
 	return npcTaskCatalog
@@ -518,13 +518,20 @@ func (p *Player) removeAcceptedTask(id uint32) []uint32 {
 	return kept
 }
 
-// npcTaskCatalogOf 数据根解析 + 目录装载薄封装（trace 一次缺档）。
+// npcTaskCatalogOf 数据根解析 + 目录装载薄封装（trace 一次缺档 / 来源）。
 func (s *Server) npcTaskCatalogOf() *taskdata.Catalog {
 	root := npcfeed.ResolveRoot()
 	catalog := taskCatalogForRoot(root)
 	if catalog == nil {
-		s.trace("npc task: 任务目录缺席（%s），任务行不下发",
-			filepath.Join(root, "ini", "Quest"))
+		s.trace("npc task: 任务目录缺席（数据根 %s，来源 %s），任务行不下发", root, taskdata.QuestSourceOf(root))
+		return catalog
 	}
+	npcTaskSourceOnce.Do(func() {
+		s.trace("npc task: 任务目录 %d 任务 / %d 绑定，来源 %s（share=直读 share/task/task + 文案档，xml=构建产物）",
+			catalog.Count(), catalog.BindingCount(), taskdata.QuestSourceOf(root))
+	})
 	return catalog
 }
+
+// npcTaskSourceOnce 任务目录来源只 trace 一次。
+var npcTaskSourceOnce sync.Once

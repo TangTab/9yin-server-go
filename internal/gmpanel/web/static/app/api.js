@@ -39,6 +39,7 @@ export const svcStopAll = () => postJSON("/api/svc/stopall");
 
 export const gmKick = (name) => postJSON("/api/gm/kick", { name });
 export const gmRaw = (line) => postJSON("/api/gm/raw", { line });
+export const gmScenes = () => getJSON("/api/gm/scenes");
 export const gmBan = (account) => postJSON("/api/gm/ban", { account });
 export const gmUnban = (account) => postJSON("/api/gm/unban", { account });
 export const worldOpen = () => postJSON("/api/world/open");

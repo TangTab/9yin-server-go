@@ -4,7 +4,13 @@ package npcfeed
 // 配方移植 2433 线 cmd/protocol-probe/patrol.go（真机验证配方，2026-11-22
 // 备份目录 npc-aoi-patrol 再适配 npcfeed.Spawn）：
 //
-//   - 路线表：mappath/<场景短名>*.ini（GBK），节名=creator PathId，每行
+// 数据链：客户端 share/creator/mappath/*.ini（官方路线表）随客户端 share
+// 树原样并入数据根同路径（<数据根>/share/creator/mappath；tools/datagen
+// patrol 亦可单独搬运）——服务端只读数据根，不直读客户端资源。
+// 数据根缺这个目录即全部 NPC 站立（2026-11-24 Res 层化后路线目录未随迁，
+// 巡逻「消失」的真因；fssoloworld 对缺目录有一次 trace）。
+//
+//   - 路线表：share/creator/mappath/<场景短名>_<类别>.ini（GBK），节名=creator PathId，每行
 //     r= 一个路点（三种列格式：前导空列 / 整数导航点 id 列 / 无 id 列
 //     ——旧服误读 id 成 x 即「上天入地」根因；列序 x,y,z,orient,dwellMs，
 //     尾部 col8 walk/run 标记）。
@@ -45,10 +51,13 @@ const (
 	patrolMaxLegDYMeters = float32(6)
 )
 
-// Waypoint 单个路点；Run=true 跑 RunSpeed；DwellMs=到达本点后的停留。
+// Waypoint 单个路点；Run=true 跑 RunSpeed；DwellMs=到达本点后的停留；
+// Arrival=到达后播放的动作（ActionName 列：stand/空=站立，walk/run=过点
+// 不停，其余=到点做的动作，如 interact01 / ty_dance_szw_1）。
 type Waypoint struct {
 	X, Y, Z float32
 	Orient  float32
+	Arrival string
 	Run     bool
 	DwellMs int64
 }
@@ -87,11 +96,13 @@ type Position struct {
 }
 
 // Motion 0x21 广播动作：段目标坐标/朝向、当前速度（行进=该腿速度，
-// 停留=0）、移动标志（官方每秒一拍全量广播，含停留中的实体）。
+// 停留=0）、移动标志（官方每秒一拍全量广播，含停留中的实体）；
+// Arrival=停留中所在路点的到达动作（ActionName 列，行进中为空）。
 type Motion struct {
 	DestX, DestY, DestZ, DestOrient float32
 	Speed                           float32
 	Moving                          bool
+	Arrival                         string
 }
 
 // PositionAt 时刻 nowMs 的当前位置（行程中插值；朝向=目标朝向或行进方向）。
@@ -113,7 +124,7 @@ func (s *Schedule) PositionAt(nowMs int64) Position {
 }
 
 // MotionAt 时刻 nowMs 的 0x21 广播动作：目的地=段末路点，速度=该腿速度
-// （run 腿取 runSpeed），停留中速度 0。
+// （run 腿取 runSpeed），停留中速度 0 且带该路点的到达动作。
 func (s *Schedule) MotionAt(nowMs int64) Motion {
 	k := s.segmentAt(nowMs)
 	a, b := s.points[s.fromIdx[k]], s.points[s.toIdx[k]]
@@ -126,8 +137,12 @@ func (s *Schedule) MotionAt(nowMs int64) Motion {
 			speed = s.runSpeed
 		}
 	}
-	return Motion{DestX: b.X, DestY: b.Y, DestZ: b.Z, DestOrient: patrolFacingOf(a, b),
+	motion := Motion{DestX: b.X, DestY: b.Y, DestZ: b.Z, DestOrient: patrolFacingOf(a, b),
 		Speed: speed, Moving: moving}
+	if !moving {
+		motion.Arrival = b.Arrival
+	}
+	return motion
 }
 
 // patrolFacingOf 朝向：路点有效朝向优先，否则按段行进方向。
@@ -173,7 +188,7 @@ func BuildSchedule(route *Route, walkSpeed, runSpeed float32, epochMs int64) *Sc
 		pathID: route.PathID, epochMs: epochMs, points: kept,
 		starts:    make([]int64, segments),
 		travels:   make([]int64, segments),
-		dwells:   make([]int64, segments),
+		dwells:    make([]int64, segments),
 		fromIdx:   make([]int, segments),
 		toIdx:     make([]int, segments),
 		walkSpeed: walkSpeed,
@@ -247,32 +262,51 @@ func min64(a, b int64) int64 {
 
 var (
 	patrolCacheMu sync.Mutex
-	patrolCache   = map[string]map[string]*Route{} // sceneFolder → pathID → route
+	// patrolCache 路线表缓存：（路线目录, 场景目录）→ pathID → route。键须
+	// 带上目录——同一场景换数据根（env NINEYIN_MAPPATH_DIR / 测试切换）时
+	// 不能命中另一目录的旧表。
+	patrolCache = map[patrolCacheKey]map[string]*Route{}
 )
 
-// LoadPatrolRoutes 场景路线表：mappath 目录下 stem 以场景短名（首个 '_'
-// 前）开头且不含 offline 的 .ini（GBK）。目录缺失/无匹配 → 空表（该场景
-// 无巡逻，不报错）。
+type patrolCacheKey struct {
+	dir         string
+	sceneFolder string
+}
+
+// LoadPatrolRoutes 场景路线表：mappath 目录下 stem 为 <场景短名> 或
+// <场景短名>_<类别>（短名 = 首个 '_' 前）、且不含 offline 的 .ini（GBK）。
+// 目录缺失/无匹配 → 空表（该场景无巡逻，不报错）。
 func LoadPatrolRoutes(mappathDir, sceneFolder string) map[string]*Route {
+	key := patrolCacheKey{dir: filepath.Clean(mappathDir), sceneFolder: sceneFolder}
 	patrolCacheMu.Lock()
 	defer patrolCacheMu.Unlock()
-	if cached, ok := patrolCache[sceneFolder]; ok {
+	if cached, ok := patrolCache[key]; ok {
 		return cached
 	}
 	table := make(map[string]*Route)
-	entries, err := res.ReadDir(mappathDir)
-	if err != nil {
-		patrolCache[sceneFolder] = table
+	prefix := strings.ToLower(patrolSceneShortName(sceneFolder))
+	if prefix == "" {
+		// 空短名不匹配任何档（否则等于全量装载）。
+		patrolCache[key] = table
 		return table
 	}
-	prefix := strings.ToLower(patrolSceneShortName(sceneFolder))
+	entries, err := res.ReadDir(mappathDir)
+	if err != nil {
+		patrolCache[key] = table
+		return table
+	}
 	var files []string
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".ini") {
 			continue
 		}
 		stem := strings.ToLower(strings.TrimSuffix(entry.Name(), filepath.Ext(entry.Name())))
-		if strings.HasPrefix(stem, prefix) && !strings.Contains(stem, "offline") {
+		// 短名须在 '_' 边界处结束：纯前缀匹配会把邻场景的档一并吞进来
+		// （adv040 吞 adv040a_lead.ini）。
+		if stem != prefix && !strings.HasPrefix(stem, prefix+"_") {
+			continue
+		}
+		if !strings.Contains(stem, "offline") {
 			files = append(files, filepath.Join(mappathDir, entry.Name()))
 		}
 	}
@@ -280,14 +314,14 @@ func LoadPatrolRoutes(mappathDir, sceneFolder string) map[string]*Route {
 	for _, file := range files {
 		loadRouteFile(file, table)
 	}
-	patrolCache[sceneFolder] = table
+	patrolCache[key] = table
 	return table
 }
 
 // ResetPatrolCache 清路线缓存（测试面）。
 func ResetPatrolCache() {
 	patrolCacheMu.Lock()
-	patrolCache = map[string]map[string]*Route{}
+	patrolCache = map[patrolCacheKey]map[string]*Route{}
 	patrolCacheMu.Unlock()
 }
 
@@ -300,26 +334,72 @@ func patrolSceneShortName(sceneFolder string) string {
 	return sceneFolder
 }
 
-// loadRouteFile 解析单个 mappath ini：节名=PathId，每行 r= 一个路点。
-// GBK 解码（GB18030 超集；失败回落原字节——路线坐标全 ASCII 时无差）。
+// loadRouteFile 解析单个 mappath ini 并入场景表：节名=PathId，每行 r= 一个
+// 路点。GBK 解码（GB18030 超集；失败回落原字节——路线坐标全 ASCII 时
+// 无差）。同名路线先装载的档生效。
 func loadRouteFile(path string, table map[string]*Route) {
 	data, err := res.ReadFile(path)
 	if err != nil {
 		return
 	}
+	routes, _ := ParseRouteTable(data)
+	for pathID, route := range routes {
+		if _, exists := table[pathID]; !exists {
+			table[pathID] = route
+		}
+	}
+}
+
+// RouteTableStats 单份路线表的解析统计（tools/datagen patrol 构建器的
+// 审计面：服务端实际读到什么）。
+type RouteTableStats struct {
+	Sections  int // 节数（节名非空）
+	Lines     int // r= 行数
+	Rejected  int // 坐标解析失败而丢弃的 r= 行数
+	TooShort  int // 去重后不足 2 点、不成路线的节数
+	Routes    int // 成路线的节数
+	Waypoints int // 成路线的路点总数（去重后）
+}
+
+// ParseRouteTable 解析一份路线表原文（GBK）：节名=PathId，每行 r= 一个
+// 路点。装载器与 tools/datagen patrol 构建器共用同一份规则——构建期统计
+// 的就是服务端运行时读到的。
+func ParseRouteTable(data []byte) (map[string]*Route, RouteTableStats) {
 	if decoded, err := simplifiedchinese.GB18030.NewDecoder().Bytes(data); err == nil {
 		data = decoded
 	}
+	return parseRouteTable(string(data))
+}
+
+func parseRouteTable(text string) (map[string]*Route, RouteTableStats) {
+	var stats RouteTableStats
+	routes := make(map[string]*Route)
 	section := ""
 	var points []Waypoint
-	for _, raw := range strings.Split(string(data), "\n") {
+	flush := func() {
+		route, dropped := buildRoute(section, points)
+		switch {
+		case route != nil:
+			if _, exists := routes[section]; !exists {
+				routes[section] = route
+				stats.Routes++
+				stats.Waypoints += len(route.Waypoints)
+			}
+		case dropped:
+			stats.TooShort++
+		}
+	}
+	for _, raw := range strings.Split(text, "\n") {
 		line := strings.TrimSpace(raw)
 		if line == "" || line[0] == ';' || line[0] == '#' {
 			continue
 		}
 		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
-			flushRouteSection(table, section, points)
+			flush()
 			section = line[1 : len(line)-1]
+			if section != "" {
+				stats.Sections++
+			}
 			points = nil
 			continue
 		}
@@ -327,11 +407,36 @@ func loadRouteFile(path string, table map[string]*Route) {
 		if section == "" || eq <= 0 || (line[0] != 'r' && line[0] != 'R') {
 			continue
 		}
-		if waypoint, ok := parseWaypoint(line[eq+1:]); ok {
-			points = append(points, waypoint)
+		stats.Lines++
+		waypoint, ok := parseWaypoint(line[eq+1:])
+		if !ok {
+			stats.Rejected++
+			continue
 		}
+		points = append(points, waypoint)
 	}
-	flushRouteSection(table, section, points)
+	flush()
+	return routes, stats
+}
+
+// buildRoute 节收尾：相邻点去重（<0.5m）后 ≥2 点才成路线。dropped 报告
+// 该节是否因点数不足被丢弃（节内有路点、但没成路线）。
+func buildRoute(pathID string, points []Waypoint) (route *Route, dropped bool) {
+	if len(points) < 2 {
+		return nil, len(points) > 0
+	}
+	cleaned := make([]Waypoint, 0, len(points))
+	for _, point := range points {
+		if len(cleaned) > 0 && routeDistanceSq(cleaned[len(cleaned)-1], point) <
+			patrolDedupeMeters*patrolDedupeMeters {
+			continue
+		}
+		cleaned = append(cleaned, point)
+	}
+	if len(cleaned) < 2 {
+		return nil, true
+	}
+	return &Route{PathID: pathID, Waypoints: cleaned}, false
 }
 
 // parseWaypoint r= 载荷三格式（对齐尾部 stand,nil,walk 列）：
@@ -377,9 +482,18 @@ func parseWaypoint(payload string) (Waypoint, bool) {
 		}
 	}
 	dwellMs = math.Max(0, math.Min(float64(patrolDwellCapMillis), dwellMs))
-	run := len(parts) > 8 && strings.EqualFold(strings.TrimSpace(parts[8]), "run")
+	// 到达动作 / 路上动作：停留之后的两列（间隔特效列）。列位随坐标起始列
+	// 走——无 id 列的行格式整体前移一列。
+	arrival, road := "", ""
+	if len(parts) > base+5 {
+		arrival = strings.TrimSpace(parts[base+5])
+	}
+	if len(parts) > base+7 {
+		road = strings.TrimSpace(parts[base+7])
+	}
 	return Waypoint{X: float32(x), Y: float32(y), Z: float32(z),
-		Orient: float32(orient), Run: run, DwellMs: int64(dwellMs)}, true
+		Orient: float32(orient), Arrival: arrival,
+		Run: strings.EqualFold(road, "run"), DwellMs: int64(dwellMs)}, true
 }
 
 // coordinateBase 坐标起始列：首列空（格式1）或纯整数导航点 id（格式2）
@@ -402,29 +516,6 @@ func coordinateBase(parts []string) int {
 		return 1
 	}
 	return -1
-}
-
-// flushRouteSection 节收尾：相邻点去重（<0.5m）后 ≥2 点才成路线；同名
-// 节首个生效。
-func flushRouteSection(table map[string]*Route, section string, points []Waypoint) {
-	if section == "" || len(points) < 2 {
-		return
-	}
-	cleaned := make([]Waypoint, 0, len(points))
-	for _, point := range points {
-		if len(cleaned) > 0 && routeDistanceSq(cleaned[len(cleaned)-1], point) <
-			patrolDedupeMeters*patrolDedupeMeters {
-			continue
-		}
-		cleaned = append(cleaned, point)
-	}
-	if len(cleaned) < 2 {
-		return
-	}
-	if _, exists := table[section]; exists {
-		return
-	}
-	table[section] = &Route{PathID: section, Waypoints: cleaned}
 }
 
 func routeDistanceSq(a, b Waypoint) float32 {

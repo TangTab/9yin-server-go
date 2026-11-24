@@ -1,9 +1,10 @@
 package fssoloworld
 
-// 自定义配置域接收链单测：首传闸（登录期默认转储不覆盖存档）、
-// 快捷栏基线物化（starter 打坐条目「所见即所存」、删除不复活）、
-// 0x1E/0x0A 双路由入口。下行帧正确性由 entergen.PlayerObjectConfigFrames/
-// ShortcutRebuildFrames 字节级测试覆盖（nil inner 下 sendToClient 静默）。
+// 自定义配置域接收链单测：107 上传零应答 + ClientReady 前的登录期转储
+// 不落库、快捷栏基线物化（starter 打坐条目「所见即所存」、删除不复活）、
+// 0x1E/0x0A 双路由入口。下行帧正确性由 entergen.PreReadyFrames/
+// PlayerObjectConfigFrames/ShortcutRebuildFrames 字节级测试覆盖（nil
+// inner 下 sendToClient 静默）。
 
 import (
 	"testing"
@@ -43,21 +44,37 @@ func customDouble(v float64) entergen.CustomInboundValue {
 	return entergen.CustomInboundValue{Type: 5, Float64: v}
 }
 
-// TestCustomizingFirstUploadGate 首传闸：库存有档时登录期默认转储被跳过
-// （回推存档），编辑提交照常收。
-func TestCustomizingFirstUploadGate(t *testing.T) {
+// TestCustomizingLoginDumpIgnored 107 上传零应答（官服口径）；ClientReady
+// 之前的登录期转储不落库——有档时全份忽略（旧首传闸只挡首份，第 2/3
+// 份把存档冲回旧值），无档时照收作基线；0x09 之后的编辑提交才落库。
+func TestCustomizingLoginDumpIgnored(t *testing.T) {
 	s, pl := newCustomTestServer(t)
+	frames := captureFrames(t)
 	pl.roleState.Customizing = "SAVED"
-	s.handleCustomizingUpload(pl, customMsg(107, customStr("DEFAULT")))
-	if pl.roleState.Customizing != "SAVED" {
-		t.Fatalf("login dump overwrote saved config: %q", pl.roleState.Customizing)
+	// 登录期三份转储（本地态 / 应用 705 过程中的中间态）：全部忽略。
+	for _, dump := range []string{"LOCAL", "COERCED-1", "COERCED-2"} {
+		s.handleCustomizingUpload(pl, customMsg(107, customStr(dump)))
+		if pl.roleState.Customizing != "SAVED" {
+			t.Fatalf("login-time dump %q overwrote saved config: %q", dump, pl.roleState.Customizing)
+		}
 	}
-	if !pl.customizingSeen {
-		t.Fatal("first-upload gate not consumed")
+	if len(*frames) != 0 {
+		t.Fatalf("107 上传须零应答（回声触发 on_parser_customizing 重置链），实发 %d 帧", len(*frames))
 	}
-	s.handleCustomizingUpload(pl, customMsg(107, customStr("NEW")))
-	if pl.roleState.Customizing != "NEW" {
-		t.Fatalf("edit rejected: %q", pl.roleState.Customizing)
+	// 0x09 之后的编辑提交：落库，同样零应答。
+	pl.entryReady = true
+	s.handleCustomizingUpload(pl, customMsg(107, customStr("EDIT")))
+	if pl.roleState.Customizing != "EDIT" {
+		t.Fatalf("edit after ClientReady rejected: %q", pl.roleState.Customizing)
+	}
+	if len(*frames) != 0 {
+		t.Fatalf("编辑提交同样零应答，实发 %d 帧", len(*frames))
+	}
+	// 无档（新号）：登录期首份转储即基线。
+	s2, pl2 := newCustomTestServer(t)
+	s2.handleCustomizingUpload(pl2, customMsg(107, customStr("BASELINE")))
+	if pl2.roleState.Customizing != "BASELINE" {
+		t.Fatalf("baseline dump on fresh role rejected: %q", pl2.roleState.Customizing)
 	}
 }
 
@@ -205,7 +222,7 @@ func TestCustomRejectedWithoutRoleState(t *testing.T) {
 }
 // TestCustomizingPoisonedUploadRejected 客户端本地配置被历史坏串污染后，
 // 转储里原样带着 U+FFFD——拒收不落库，后续干净上传照常入库；有干净
-// 存档时首传仍回推存档纠正客户端，坏串不得覆盖。
+// 存档时无论登录期还是 ClientReady 之后，坏串都不得覆盖。
 func TestCustomizingPoisonedUploadRejected(t *testing.T) {
 	s, pl := newCustomTestServer(t)
 	poisoned := "\x01e\ufffd\x02\ufffd\ufffd"
@@ -230,5 +247,10 @@ func TestCustomizingPoisonedUploadRejected(t *testing.T) {
 	s.handleCustomizingUpload(pl2, customMsg(107, customStr(poisoned)))
 	if pl2.roleState.Customizing != saved {
 		t.Fatalf("saved overwritten by poisoned dump: %q", pl2.roleState.Customizing)
+	}
+	pl2.entryReady = true // ClientReady 之后的坏串编辑同样拒收
+	s.handleCustomizingUpload(pl2, customMsg(107, customStr(poisoned)))
+	if pl2.roleState.Customizing != saved {
+		t.Fatalf("saved overwritten by poisoned edit: %q", pl2.roleState.Customizing)
 	}
 }

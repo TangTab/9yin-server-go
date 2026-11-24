@@ -26,6 +26,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/auction"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloauction"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 const version = "0.1.0-auction"
@@ -42,6 +43,8 @@ func main() {
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
 	)
 	flag.Parse()
+	logline.Install("auction")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go auction %s（game_auction.exe + FsSoloAuction.dll 复刻）\n", version)
 
@@ -217,5 +220,5 @@ func orDefaultInt(v, def int) int {
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "auction:", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

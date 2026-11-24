@@ -155,6 +155,7 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 			s.trace("role state unmarshal failed client=%d: %v", clientID, err)
 		} else {
 			pl.roleState, pl.haveRoleState = state, true
+			pl.entryReady = false // 新一次进场：0x09 之前的 107 转储不落库
 		}
 	}
 	if nativeEnterEnabled() && pl.haveRoleState {
@@ -204,7 +205,9 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 
 // clientReady op09 ClientReady → 就绪段（native：视图簇+登录信息帧；
 // 回放：ready_golden）。切图重入（sceneSwitch 在途）走 reentryReady 分支。
+// 0x09 之后的 107 上传才是玩家编辑，此前的登录期转储不落库。
 func (s *Server) clientReady(pl *Player) {
+	pl.entryReady = true
 	if pending := s.pendingSceneSwitch(pl); pending != nil {
 		s.reentryReady(pl, pending)
 		return

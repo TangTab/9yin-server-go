@@ -3,7 +3,6 @@ package fsunite
 import (
 	"fmt"
 	"net"
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/fssolopublic"
 	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -30,7 +30,7 @@ type Options struct {
 	StoreBackend fssolostore.Backend
 	// Scenes scenes.ini 装配面（world；可空）。
 	Scenes []fssoloworld.SceneSpec
-	// Quit force_close 完成后的退出钩（官方 nx_quit；缺省 os.Exit(0)）。
+	// Quit force_close 完成后的退出钩（官方 nx_quit；缺省 logline.Exit(0)）。
 	Quit func()
 	// WorkDir logger LogFileDir 相对锚定（官方 nx_work_path()；缺省当前目录）。
 	WorkDir string
@@ -73,7 +73,7 @@ func Assemble(cfg Config, opt Options) *Unite {
 		opt.Logf = func(string, ...any) {}
 	}
 	if opt.Quit == nil {
-		opt.Quit = func() { os.Exit(0) }
+		opt.Quit = func() { logline.Exit(0) }
 	}
 	u := &Unite{cfg: cfg, opt: opt, logf: opt.Logf}
 
@@ -93,15 +93,15 @@ func Assemble(cfg Config, opt Options) *Unite {
 	// logger（main.lua 15/19/35-39）
 	loggerOpt := cfg.LoggerOptions()
 	loggerOpt.WorkDir = opt.WorkDir
-	loggerOpt.Logf = u.logf
-	loggerOpt.Printf = func(format string, args ...any) { fmt.Printf(format+"\n", args...) }
+	loggerOpt.Logf = u.logfFor("logserver")
+	loggerOpt.Printf = u.logfFor("logserver")
 	u.logger = fssololog.New(loggerOpt)
 
 	// world（main.lua 256-281；AppName "unite_<sid>"）
 	u.world = fssoloworld.New(fssoloworld.Options{
 		Config:   cfg.WorldConfig(),
 		AppName:  cfg.AppName(),
-		Logf:     u.logf, // 官方控制台同源；缺省静默会把外连/装载链全藏掉
+		Logf:     u.logfFor("world"), // 官方控制台同源；缺省静默会把外连/装载链全藏掉
 		Scenes:   append([]fssoloworld.SceneSpec(nil), opt.Scenes...),
 		OnClosed: func() { go u.quit() }, // 官方 nx_quit（异步防重入 tick 协程）
 	})
@@ -114,7 +114,7 @@ func Assemble(cfg Config, opt Options) *Unite {
 	u.store = fssolostore.New(fssolostore.Options{
 		Config:  cfg.StoreConfig(),
 		Backend: backend,
-		Logf:    u.logf, // 缺省静默会把 inner 收发/回执错误全部吞掉
+		Logf:    u.logfFor("store"), // 缺省静默会把 inner 收发/回执错误全部吞掉
 	})
 
 	// entry 传输面（main.lua 340-366 + cmd/soloentry 同构）
@@ -123,24 +123,24 @@ func Assemble(cfg Config, opt Options) *Unite {
 		OnMessage: func(src, typ uint32, p []byte) {
 			if u.entrySvc != nil {
 				if err := u.entrySvc.ProcessInnerMsg(src, typ, p); err != nil {
-					u.logf("unite entry: inner %#x: %v", typ, err)
+					u.logfFor("entry")("unite entry: inner %#x: %v", typ, err)
 				}
 			}
 		},
-		OnRegister: func(ident uint32) { u.logf("unite entry: ident %#x 注册", ident) },
-		OnDrop:     func(ident uint32) { u.logf("unite entry: ident %#x 断开", ident) },
+		OnRegister: func(ident uint32) { u.logfFor("entry")("unite entry: ident %#x 注册", ident) },
+		OnDrop:     func(ident uint32) { u.logfFor("entry")("unite entry: ident %#x 断开", ident) },
 	})
 	u.inner.SourceCheck = fssoloentry.SoloSourceCheck
 	u.inner.KickDuplicate = true
 	u.inner.MemberBase = fssoloentry.SoloMemberBase
 	u.inner.MemberCount = fssoloentry.SoloMemberCount
 	u.inner.OnQuitFrame = func() {
-		u.logf("unite entry: 收到内网退出帧（官方 Core->Quit(1)）")
+		u.logfFor("entry")("unite entry: 收到内网退出帧（官方 Core->Quit(1)）")
 		go u.quit()
 	}
 	u.gateway = entry.NewGateway(net.JoinHostPort(cfg.OuterAddr, strconv.Itoa(cfg.OuterPort)),
 		0, u.clients, u.inner, opt.NetOptions)
-	u.gateway.Logf = u.logf
+	u.gateway.Logf = u.logfFor("entry")
 	u.broad = fscomm.NewBroadSock(fscomm.BroadSockOptions{
 		BindAddress:      cfg.InnerAddr,
 		BindPort:         cfg.BroadPort, // 收发同口：共绑共享广播口
@@ -150,18 +150,18 @@ func Assemble(cfg Config, opt Options) *Unite {
 
 	// public（main.lua 283-298；domain/guild 双空间 Start 内置）
 	u.public = fssolopublic.New(cfg.PublicConfig(), fssolopublic.Options{
-		Logf: u.logf,
+		Logf: u.logfFor("public"),
 	})
 
 	// auction（main.lua 329-337）
 	auctionOpt := cfg.AuctionOptions()
-	auctionOpt.Logf = u.logf
+	auctionOpt.Logf = u.logfFor("auction")
 	u.auction = fssoloauction.New(auctionOpt)
 
 	// member（main.lua 368-391）
 	u.member = fssolomember.New(fssolomember.Options{
 		Config: cfg.MemberConfig(),
-		Logf:   u.logf,
+		Logf:   u.logfFor(fmt.Sprintf("member%d", u.cfg.MemberConfig().MemberID)),
 		OnExit: func() { go u.quit() },
 	})
 	return u
@@ -200,7 +200,7 @@ func (u *Unite) Start() error {
 		OuterPort:   u.cfg.OuterPort,
 		AppName:     fmt.Sprintf("entry_%d_0", u.cfg.ServerID),
 		License:     u.opt.License,
-		StatusSink:  func(line string) { u.logf("%s", line) },
+		StatusSink:  func(line string) { u.logfFor("entry")("%s", line) },
 		BroadcastSink: func(pkt []byte) {
 			if u.cfg.BroadPort != 0 {
 				_ = u.broad.SendBroad(pkt)
@@ -227,11 +227,11 @@ func (u *Unite) Start() error {
 		u.gateway.BlockIP(), u.entrySvc.StatusLine, func() { go u.quit() })
 	u.entryEcho = fscomm.NewEchoSock("127.0.0.1", entryEchoPort, fscomm.EchoSockHandler{
 		OnOpen: func(addr string, port int) {
-			u.logf("echo client %s:%d connected", addr, port)
+			u.logfFor("entry")("echo client %s:%d connected", addr, port)
 			_ = u.entryEcho.SendLine(echoWelcome)
 		},
 		OnClose: func(addr string, port int) {
-			u.logf("echo client %s:%d closed", addr, port)
+			u.logfFor("entry")("echo client %s:%d closed", addr, port)
 		},
 		OnInput: func(line string) {
 			for _, resp := range echoOnInput(line) {
@@ -313,16 +313,16 @@ func (u *Unite) Stop() {
 }
 
 func (u *Unite) stopSequence() {
-	u.logf("store server shutdown...")
+	u.logfFor("store")("store server shutdown...")
 	u.store.Stop()
-	u.logf("auction server shutdown...")
+	u.logfFor("auction")("auction server shutdown...")
 	u.auction.Stop()
-	u.logf("public server shutdown...")
+	u.logfFor("public")("public server shutdown...")
 	if u.publicStop != nil {
 		close(u.publicStop)
 	}
 	u.public.Stop()
-	u.logf("entry server shutdown...")
+	u.logfFor("entry")("entry server shutdown...")
 	if u.gateway != nil {
 		u.gateway.Stop()
 	}
@@ -334,9 +334,9 @@ func (u *Unite) stopSequence() {
 	if u.entryEcho != nil {
 		u.entryEcho.Stop()
 	}
-	u.logf("member server shutdown...")
+	u.logfFor(fmt.Sprintf("member%d", u.cfg.MemberConfig().MemberID))("member server shutdown...")
 	u.member.Stop()
-	u.logf("world server shutdown...")
+	u.logfFor("world")("world server shutdown...")
 	u.world.Stop()
 	u.logger.Stop()
 }
@@ -347,6 +347,13 @@ func (u *Unite) quit() {
 		u.Stop()
 		u.opt.Quit()
 	})
+}
+
+// logfFor 实体来源标签版 logf：合一进程七个实体共用一条 stdout，日志行
+// 前缀的服务名据此落到具体实体（world/store/entry…）；编排层自己的输出
+// 仍走 u.logf（进程名）。未接 logline 的宿主/单测里等同 u.logf。
+func (u *Unite) logfFor(entity string) func(format string, args ...any) {
+	return logline.Tagged(entity, u.logf)
 }
 
 // 访问面（测试/横幅）

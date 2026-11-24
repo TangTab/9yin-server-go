@@ -131,7 +131,8 @@ func TestSceneSwitchFlow(t *testing.T) {
 	}
 
 	// 0x0C 清场重建簇（0x09 后整推）：AutoTrace 寻路闸门 + View40/43/46
-	// 视图族 + 战斗属性单帧 + 快捷栏行；705 连接级不重发。
+	// 视图族 + 战斗属性单帧 + 快捷栏行；705 随本次进场已在 0x0B 前下发
+	//（见 TestSceneSwitchPushesCustomizing），重入簇不重发。
 	autoTraceIdx := clientdata.MustPlayerProperty("AutoTrace").Index
 	strIdx := clientdata.MustPlayerProperty("Str").Index
 	shortcutRec := clientdata.MustRecordIndexByName("shortcut_rec")
@@ -171,7 +172,7 @@ func TestSceneSwitchFlow(t *testing.T) {
 		}
 	}
 	if has705 {
-		t.Fatal("reentry cluster must not re-push connection-level 705 customizing")
+		t.Fatal("reentry cluster must not re-push 705 customizing (it leads the entry, before 0x0B)")
 	}
 
 	// 开图位已点亮新场景位（scenes.ini 真表解析，born01 应有全局段号）。
@@ -181,6 +182,87 @@ func TestSceneSwitchFlow(t *testing.T) {
 		if len(pl.roleState.OpenMaps) == 24 && pl.roleState.OpenMaps[row]&(1<<bit) == 0 {
 			t.Fatalf("open map bit not set for born01 idx=%d", idx)
 		}
+	}
+}
+
+// isCustomizingPush S2C 705（0x1E 数值路由，首值 int 705）。
+func isCustomizingPush(f []byte) bool {
+	return len(f) >= 8 && f[0] == 0x1E && f[3] == 2 && binary.LittleEndian.Uint32(f[4:]) == 705
+}
+
+// TestSceneSwitchPushesCustomizing 切图 = 一次完整进场：705 随进场先发
+//（官服口径——登录段单发，0x0B 之前、先于客户端切图后的 107 转储），
+// 载荷逐字节等于存档；0x09 之后的重入簇不重发；0x0C 复位 entryReady，
+// 切图后的登录期转储不冲存档。
+func TestSceneSwitchPushesCustomizing(t *testing.T) {
+	s, pl := newCustomTestServer(t)
+	prevGap := sceneSwitchGap
+	sceneSwitchGap = time.Millisecond
+	t.Cleanup(func() { sceneSwitchGap = prevGap })
+
+	saved := rolestate.BinaryString("\x01e\x01SAVED\xa1")
+	pl.roleState.Customizing = saved
+	pl.entryReady = true // 旧场景已就绪
+	frames := captureFrames(t)
+	dest, _ := resolveSceneDestination("born01")
+	dest.Position = [4]float64{990, 6.66, 532, 4.7}
+	if err := s.transferPlayer(pl, dest, "test"); err != nil {
+		t.Fatalf("transfer: %v", err)
+	}
+	if pl.entryReady {
+		t.Fatal("entryReady must reset at 0x0C (new entry pending)")
+	}
+	// 切图后的登录期转储（0x09 之前）：不冲存档。
+	s.handleCustomizingUpload(pl, customMsg(107, customStr("COERCED")))
+	if pl.roleState.Customizing != saved {
+		t.Fatalf("login-time dump after scene switch overwrote saved config: %q", pl.roleState.Customizing)
+	}
+	deadline := time.Now().Add(2 * time.Second)
+	for s.pendingSceneSwitch(pl) == nil && time.Now().Before(deadline) {
+		time.Sleep(time.Millisecond)
+	}
+	if s.pendingSceneSwitch(pl) == nil {
+		t.Fatal("awaitReady not armed after gap")
+	}
+	pre := (*frames)[:]
+	push, entryAt := -1, -1
+	pushes := 0
+	for i, f := range pre {
+		if isCustomizingPush(f) {
+			pushes++
+			if push < 0 {
+				push = i
+			}
+		}
+		if f[0] == 0x0B && entryAt < 0 {
+			entryAt = i
+		}
+	}
+	if pushes != 1 || push < 0 || push > entryAt || entryAt < 0 {
+		t.Fatalf("want exactly one 705 before 0x0B: pushes=%d push=%d entry=%d ops=% x", pushes, push, entryAt, opOf(pre))
+	}
+	msg, err := entergen.ParseCustomMessage(pre[push])
+	if err != nil {
+		t.Fatalf("705 parse: %v", err)
+	}
+	if msg.Values[0].Int32 != 705 || msg.Values[1].Text != string(saved) {
+		t.Fatalf("705 payload mismatch: %+v", msg.Values)
+	}
+
+	mark := len(*frames)
+	s.clientReady(pl)
+	if !pl.entryReady {
+		t.Fatal("entryReady must arm at ClientReady")
+	}
+	for _, f := range (*frames)[mark:] {
+		if isCustomizingPush(f) {
+			t.Fatal("reentry cluster re-pushed 705 (must be sent once per entry, before 0x0B)")
+		}
+	}
+	// 0x09 之后的编辑提交照常落库。
+	s.handleCustomizingUpload(pl, customMsg(107, customStr("EDIT")))
+	if pl.roleState.Customizing != "EDIT" {
+		t.Fatalf("edit after reentry ClientReady rejected: %q", pl.roleState.Customizing)
 	}
 }
 

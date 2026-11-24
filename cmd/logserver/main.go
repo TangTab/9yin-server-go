@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssololog"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 const version = "0.1.0-logserver"
@@ -42,6 +43,8 @@ func main() {
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
 	)
 	flag.Parse()
+	logline.Install("logserver")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go logserver %s（game_log.exe + FsSoloLog.dll 复刻）\n", version)
 
@@ -129,7 +132,7 @@ func main() {
 	// printf 后 exit(0)（唯一直接退出口）。
 	if err := srv.Start(); err != nil {
 		if errors.Is(err, fssololog.ErrExclusive) {
-			os.Exit(0)
+			logline.Exit(0)
 		}
 		fatal(err)
 	}
@@ -186,5 +189,5 @@ func printf(format string, args ...any) {
 
 func fatal(err error) {
 	fmt.Fprintf(os.Stderr, "[logserver] 致命错误：%v\n", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

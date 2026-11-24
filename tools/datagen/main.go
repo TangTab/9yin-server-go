@@ -4,9 +4,17 @@
 //
 // 用法: go run ./tools/datagen [构建器…] [选项]
 //
-//	npc    NPC 模板 / 场景摆放 / 任务域 / 战斗模板 / 任务文案
-//	item   物品配置 ini/Item
-//	skill  技能配置 ini/Skill
+//	npc     NPC 模板 / 场景摆放 / 任务域 / 战斗模板 / 任务文案
+//	patrol  NPC 巡逻路线 mappath
+//	item    物品配置 ini/Item
+//	skill   技能配置 ini/Skill
+//
+// 2026-11-25 起只有 item / skill 必须构建（模型重建）。NPC、任务域、任务文案、
+// 巡逻路线的装载器可以直接读数据根里的客户端 share 树（开关
+// NINEYIN_DATA_SOURCE，见 docs/official/NPC与任务数据来源直读落地.md）；npc 与
+// patrol 构建器保留，产物是回退路径与 A/B 对拍基线——直读的键名 / 取值口径
+// 以这里的输出为准，两边的差异由对拍测试兜住，改这里的列映射时要同步改
+// internal/npcfeed/load_share.go 的 npcColumnBindings。
 //
 // 不带构建器名即构建全部。任务数据（ini/Quest 的任务域 XML）由 npc 构建
 // 器一并产出。只需要两类输入：
@@ -28,6 +36,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"github.com/lizhanyin/9yin-server-go/tools/datagen/item"
 	"github.com/lizhanyin/9yin-server-go/tools/datagen/npc"
+	"github.com/lizhanyin/9yin-server-go/tools/datagen/patrol"
 	"github.com/lizhanyin/9yin-server-go/tools/datagen/skill"
 )
 
@@ -52,6 +61,7 @@ type builder struct {
 
 var builders = []builder{
 	{"npc", "NPC 模板 / 场景摆放 / 任务域 / 战斗模板 / 任务文案", buildNpc},
+	{"patrol", "NPC 巡逻路线 mappath", buildPatrol},
 	{"item", "物品配置 ini/Item", buildItem},
 	{"skill", "技能配置 ini/Skill", buildSkill},
 }
@@ -169,6 +179,16 @@ func checkInputs(in inputs, selected []builder) error {
 	if info, err := os.Stat(filepath.Join(in.Client, "share")); err != nil || !info.IsDir() {
 		return fmt.Errorf("客户端资源根 %s 下没有 share/ 目录（-client 应指向解压根，而非其子目录）", in.Client)
 	}
+	for _, b := range selected {
+		if b.name != "patrol" {
+			continue
+		}
+		// 巡逻路线源在客户端 share/creator/mappath（与 npc 构建器的
+		// npc_creator 摆放树同级）。
+		if info, err := res.Stat(filepath.Join(in.Client, "share", "creator", "mappath")); err != nil || !info.IsDir() {
+			return fmt.Errorf("客户端资源根 %s 下没有 share/creator/mappath（patrol 构建器的输入）", in.Client)
+		}
+	}
 	needsHeijin := false
 	for _, b := range selected {
 		if b.name == "item" || b.name == "skill" {
@@ -194,6 +214,18 @@ func buildNpc(in inputs) error {
 		QuestOut:   filepath.Join(in.Out, "ini", "Quest"),
 		TextOut:    filepath.Join(in.Out, "ini", "Text"),
 		ReportPath: filepath.Join(in.Repo, "artifacts", "local", "npcgen-report.json"),
+		Verify:     in.Verify,
+	})
+}
+
+// buildPatrol 数据根 share/creator/mappath：NPC 巡逻路线表，客户端
+// share/creator/mappath 原样透传（装载器 internal/npcfeed/patrol.go 按场景
+// 短名前缀读；输出与客户端资源树同路径）。
+func buildPatrol(in inputs) error {
+	return patrol.Run(patrol.Options{
+		In:         filepath.Join(in.Client, "share", "creator", "mappath"),
+		Out:        filepath.Join(in.Out, "share", "creator", "mappath"),
+		ReportPath: filepath.Join(in.Repo, "artifacts", "local", "patrolgen-report.json"),
 		Verify:     in.Verify,
 	})
 }

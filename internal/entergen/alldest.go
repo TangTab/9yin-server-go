@@ -13,6 +13,7 @@ package entergen
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
 )
 
@@ -52,14 +53,14 @@ func ServerAllDestFrame(entries []AllDestEntry) []byte {
 	return payload
 }
 
-// NpcStateFrame 0x10 单属性 State(183)="walk"/"stand"——NPC 行为状态翻转
-// 帧（起走 walk/驻停 stand，与 0x21 路点帧成对，e.pcapng 实证 §13.5；
-// 先于 0x21 下发——先置动画状态再同步运动目的地）。索引按名经
-// clientdata 解析（表漂移免疫）。
-func NpcStateFrame(objectID, ownerID uint32, moving bool) ([]byte, error) {
-	state := "stand"
-	if moving {
-		state = "walk"
+// NpcStateFrame 0x10 单属性 State=state——NPC 行为状态翻转帧（起走
+// walk / 驻停 stand 或静息姿态 / 路点到达动作，与 0x21 路点帧成对，
+// e.pcapng 实证 §13.5；先于 0x21 下发——先置动画状态再同步运动目的
+// 地）。state 是客户端动作名（npcfeed.RestAction / Motion.State 给出）。
+// 索引按名经 clientdata 解析（表漂移免疫）。
+func NpcStateFrame(objectID, ownerID uint32, state string) ([]byte, error) {
+	if state == "" {
+		return nil, fmt.Errorf("npc state is empty")
 	}
 	return ObjectPropertyFrame(objectID, ownerID, 0, []IndexedProperty{
 		NamedProperty("State", StringValue(state)),

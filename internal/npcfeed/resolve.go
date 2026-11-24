@@ -9,6 +9,7 @@ package npcfeed
 //	  → 战斗层（NpcTemplate 行：MaxLife→MaxHP/HP、MaxMana→MaxMP、
 //	     Level 真值；表缺席名跳过）
 //	  → 摆放层（PosiX/Y/Z/Orient——表尾追段场景域有名才注入）
+//	  → 姿态层（State / BornAction 同值=出生姿态，见 pose.go）
 //
 // 输出按 0x09 官方表场景域表序（每名首现），供 0x0D 头行块编码。
 
@@ -141,6 +142,11 @@ func (s Spawn) OrderedProperties() []Prop {
 			props[name] = value
 		}
 	}
+
+	// 姿态层：State / BornAction 同值（官服定版，见 pose.go）——盖过默认层
+	// 的 stand / 空与模板层同名列，与官方追加块同口径。
+	setIfField(props, "State", stringVal(s.materialState()))
+	setIfField(props, "BornAction", stringVal(s.RestAction()))
 
 	// 按表序输出。
 	out := make([]Prop, 0, len(props))

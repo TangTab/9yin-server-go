@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/scenedata"
 )
 
 //go:embed web
@@ -25,6 +27,7 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("/api/role", s.apiRoleDetail)
 	mux.HandleFunc("/api/alerts", s.apiAlerts)
 	mux.HandleFunc("/api/svc/", s.apiSvc)
+	mux.HandleFunc("/api/gm/scenes", s.apiGMScenes)
 	mux.HandleFunc("/api/gm/", s.apiGM)
 	mux.HandleFunc("/api/world/", s.apiWorld)
 	mountWeb(mux)
@@ -412,4 +415,30 @@ func (s *Server) apiWorld(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"message": strings.Join(lines, "；")})
+}
+
+/* ---------------- GM 场景表 ---------------- */
+
+// apiGMScenes GM 测试台「传送与场景」下拉数据：scenedata 场景/驿站表（与
+// world 同一份内嵌生成表——下拉列的每个场景 world 都能解析，不再手维
+// JS 预设表）。按类别分组、显示中文名；驿站供按点传送（gm scene <who>
+// <key> x y z orient 的坐标覆盖）。
+func (s *Server) apiGMScenes(w http.ResponseWriter, r *http.Request) {
+	table := scenedata.Scenes()
+	scenes := make([]map[string]any, 0, len(table))
+	for _, sc := range table {
+		waypoints := make([]map[string]any, 0, len(sc.Waypoints))
+		for _, wp := range sc.Waypoints {
+			waypoints = append(waypoints, map[string]any{
+				"name": wp.Name, "title": wp.Title, "x": wp.X, "y": wp.Y, "z": wp.Z,
+				"orient": wp.Orient, "kind": wp.Kind, "safe": wp.Safe,
+			})
+		}
+		scenes = append(scenes, map[string]any{
+			"key": sc.Resource, "name": sc.Name, "category": sc.Category,
+			"categoryName": scenedata.CategoryName(sc.Category), "config": sc.Config,
+			"landing": sc.Landing.Name, "waypoints": waypoints,
+		})
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"scenes": scenes})
 }

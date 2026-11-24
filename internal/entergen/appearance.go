@@ -60,6 +60,38 @@ func ap(name string, value PropertyValue) IndexedProperty {
 	return IndexedProperty{Index: playerIdx(name), Name: name, Value: value}
 }
 
+// keybindArchiveProps 0x0D 档内紧跟 ShortcutKey 的键位域其余属性：
+// 223 OperateMode（显式设置过才有）/ 201 NeiGongBind（非空才有）；无档
+// 零项。档内串无尾空格（0x10 单帧形态带 " "，勿混用）。
+func keybindArchiveProps(state rolestate.RoleState) []IndexedProperty {
+	props := []IndexedProperty{}
+	if state.OperateModeSet {
+		props = append(props, NamedProperty("OperateMode", Int32Value(state.OperateMode)))
+	}
+	if state.NeiGongBind != "" {
+		props = append(props, NamedProperty("NeiGongBind", StringValue(state.NeiGongBind)))
+	}
+	return props
+}
+
+// withKeybindArchiveProps 把键位域其余属性插到 ShortcutKey 之后（保持
+// #25 真机属性序，键位域连片）；无档或档内无 ShortcutKey 时原样返回。
+func withKeybindArchiveProps(props, keybind []IndexedProperty) []IndexedProperty {
+	if len(keybind) == 0 {
+		return props
+	}
+	for i := range props {
+		if props[i].Name != "ShortcutKey" {
+			continue
+		}
+		out := make([]IndexedProperty, 0, len(props)+len(keybind))
+		out = append(out, props[:i+1]...)
+		out = append(out, keybind...)
+		return append(out, props[i+1:]...)
+	}
+	return props
+}
+
 // AppearanceFrame 0x0D 玩家物化帧（进场首帧 0x0B 之后、位置帧之前——
 // 52626 实证序 0x0B→0x0D→0x1F）。属性序全按 #25 真机序。
 func AppearanceFrame(ctx Context) ([]byte, error) {
@@ -311,6 +343,12 @@ func AppearanceFrame(ctx Context) ([]byte, error) {
 		ap("ParryValue", Int32Value(int32(maxParry))),
 		ap("ParryUpSpeed", Int32Value(4)),
 	}
+	// 键位域其余两属性紧跟 ShortcutKey 内嵌（参考端 player_actor.go 同位）：
+	// 引擎建对象时即读整个键位域，只给方案不给操作模式，客户端的
+	// operate_control_mode 会被方案默认模式顶掉——2026-11-24 我方 61 会话
+	// 抓包实证每次进场转储的操作模式都被翻回 0（「重登丢配置」根因之一）；
+	// 0x10 补推在 ClientReady 之后，晚于建对象。
+	props = withKeybindArchiveProps(props, keybindArchiveProps(state))
 
 	msg := make([]byte, 63, 63+len(props)*10)
 	msg[0] = 0x0D

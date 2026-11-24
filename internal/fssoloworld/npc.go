@@ -17,9 +17,11 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 )
 
 const (
@@ -167,15 +169,20 @@ func (s *Server) sceneNPCSpawns(dir string, origin [4]float64) []npcfeed.Spawn {
 }
 
 // sampleSpawns 巡逻 Spawn 坐标覆写为时间表当前位置（重进视口不闪现
-// 回出生点；静止 Spawn 原样）。返回新切片（不改动目录缓存）。
+// 回出生点；静止 Spawn 原样），State 标为采样时刻的状态——在走即 walk，
+// 与官服一致：行进中进视口的 NPC 物化即 walk；停留即路点到达动作或
+// 静息态。返回新切片（不改动目录缓存）。
 func sampleSpawns(spawns []npcfeed.Spawn, nowMs int64) []npcfeed.Spawn {
 	out := make([]npcfeed.Spawn, len(spawns))
 	copy(out, spawns)
 	for i := range out {
-		if schedule := out[i].Schedule; schedule != nil {
-			p := schedule.PositionAt(nowMs)
-			out[i].X, out[i].Y, out[i].Z, out[i].Orient = p.X, p.Y, p.Z, p.Orient
+		schedule := out[i].Schedule
+		if schedule == nil {
+			continue
 		}
+		p := schedule.PositionAt(nowMs)
+		out[i].X, out[i].Y, out[i].Z, out[i].Orient = p.X, p.Y, p.Z, p.Orient
+		out[i].State = schedule.MotionAt(nowMs).State(out[i].RestAction())
 	}
 	return out
 }
@@ -253,6 +260,7 @@ func (s *Server) sceneNPCCatalog(key string) *npcCatalog {
 		npcCatalogCache[strings.ToLower(key)] = catalog
 		return catalog
 	}
+	s.traceDataSource(root)
 	dir := key
 	if canonical := npcfeed.CanonicalSceneDir(root, dir); canonical != "" {
 		dir = canonical
@@ -283,11 +291,13 @@ func (s *Server) sceneNPCCatalog(key string) *npcCatalog {
 	for _, spawn := range spawns {
 		catalog.owners[spawn.ObjectID] = spawn.OwnerID
 	}
-	// 巡逻绑定：mappath 路线表（<root>/mappath，场景短名前缀 ini）→
-	// 出生点吸附 + 时间表（目录缓存内一次完成）。
+	// 巡逻绑定：mappath 路线表（<root>/share/creator/mappath，场景短名前缀
+	// ini）→ 出生点吸附 + 时间表（目录缓存内一次完成）。
 	if npcPatrolEnabled() {
-		routes := npcfeed.LoadPatrolRoutes(resolveMappathDir(root), dir)
+		mappathDir := resolveMappathDir(root)
+		routes := npcfeed.LoadPatrolRoutes(mappathDir, dir)
 		catalog.bind = npcfeed.BindPatrol(spawns, routes, time.Now().UnixMilli())
+		s.tracePatrolRoutesMissing(mappathDir)
 	}
 	catalog.spawns, catalog.stats = spawns, stats
 	s.trace("npc catalog: 场景 %s 摆放 %d 联查 %d 战斗命中 %d 闸拦 %d → 物化 %d 条（巡逻 walkers=%d stand=%d missingPath=%d far=%d）",
@@ -336,13 +346,48 @@ func lastPathSegment(path string) string {
 }
 
 // resolveMappathDir mappath 巡逻路线目录：env NINEYIN_MAPPATH_DIR >
-// <root>/mappath（随数据根投放；正式根 Res/mappath、仓内
-// testdata/mappath）。
+// <root>/share/creator/mappath——与客户端资源树同布局（客户端 share 整树
+// 并入数据根后路线就在这个位置，无须另行搬运；正式根 Res\share\creator\
+// mappath、仓内 testdata 同路径）。
 func resolveMappathDir(root string) string {
 	if v := strings.TrimSpace(os.Getenv("NINEYIN_MAPPATH_DIR")); v != "" {
 		return v
 	}
-	return filepath.Join(root, "mappath")
+	return filepath.Join(root, "share", "creator", "mappath")
+}
+
+// patrolRoutesMissingOnce 路线目录缺席只 trace 一次：每个场景目录装载都会
+// 经过，缺目录=所有场景都没有巡逻，逐场景刷屏无益。
+var patrolRoutesMissingOnce sync.Once
+
+// npcSourceOnce 数据来源只在首个场景目录装载时 trace 一次。
+var npcSourceOnce sync.Once
+
+// traceDataSource 标明 NPC 三域的数据取自哪里（npcfeed.SourcesOf）：数据根
+// 带客户端 share 树即直读（share），否则读构建产物（xml）——启动后看这一行
+// 就知道 NPC 数据走的是哪条路；某域意外回落 xml 时在这里能看出来。share 树
+// 因比产物旧而被判回落的，另起一行说明原因与办法（sharedata.StaleShareNote）。
+func (s *Server) traceDataSource(root string) {
+	npcSourceOnce.Do(func() {
+		s.trace("npc data: 来源 %s（NINEYIN_DATA_SOURCE=%q；share=直读客户端 share 树，xml=构建产物）",
+			npcfeed.SourcesOf(root), strings.TrimSpace(os.Getenv("NINEYIN_DATA_SOURCE")))
+		if note := sharedata.StaleShareNote(root); note != "" {
+			s.trace("npc data: %s", note)
+		}
+	})
+}
+
+// tracePatrolRoutesMissing 路线目录缺席告警。目录缺失时 LoadPatrolRoutes
+// 静默返回空表、带 PathId 的 NPC 全部站立——2026-11-24 Res 层化后路线
+// 目录没随迁，巡逻「消失」而日志里只有一行 walkers=0，补一条说清原因的
+// trace。
+func (s *Server) tracePatrolRoutesMissing(mappathDir string) {
+	if _, err := res.Stat(mappathDir); err == nil {
+		return
+	}
+	patrolRoutesMissingOnce.Do(func() {
+		s.trace("npc patrol: 巡逻路线目录缺席 %s —— 带 PathId 的 NPC 全部站立（把客户端 share/creator/mappath 投放数据根同路径，或 go run ./tools/datagen patrol；NINEYIN_MAPPATH_DIR 可改路径）", mappathDir)
+	})
 }
 
 // npcReconcile 视口对账（op0x0A 玩家位移驱动）：diff 全量集（按玩家
@@ -436,7 +481,7 @@ func (s *Server) npcPatrolTick(now time.Time) {
 		}
 		visible, moveState, scene := pl.npcVisible, pl.npcMoveState, pl.npcScene
 		if moveState == nil {
-			moveState = make(map[uint32]bool)
+			moveState = make(map[uint32]string)
 			pl.npcMoveState = moveState
 		}
 		pl.npcMu.Unlock()
@@ -481,12 +526,14 @@ func talkPausedSnapshot() map[uint32]int64 {
 	return snapshot
 }
 
-// patrolFrames 单玩家巡逻帧族（纯函数；就地更新 moveState 水位）：
-// 视口内巡逻 NPC 采样 Motion——翻转实体先发 0x10 State（walk/stand），
-// 全体组 0x21 批量帧（≤8 条/帧；行进 spd/flags=1 且 rotate 恒 +2π，
-// 停留 spd=0/flags=0）。paused（对话暂停）的 NPC 冻结在暂停时刻采样位、
-// 置 stand、每拍发 spd=0 停留条目（防旧目的地残留）。
-func patrolFrames(catalog *npcCatalog, visible map[uint32]bool, moveState map[uint32]bool, nowMs int64, paused map[uint32]int64) [][]byte {
+// patrolFrames 单玩家巡逻帧族（纯函数；就地更新 moveState 水位）：视口
+// 内巡逻 NPC 采样 Motion——状态变了才发 0x10 State（在走 walk；停留是
+// 路点到达动作或静息态，见 npcfeed.Motion.State），全体组 0x21 批量帧
+// （≤8 条/帧；行进 spd/flags=1 且 rotate 恒 +2π，停留 spd=0/flags=0）。
+// paused（对话暂停）的 NPC 冻结在暂停时刻采样位、置静息态、每拍发 spd=0
+// 停留条目（防旧目的地残留）。不巡逻的 NPC（姿态 NPC）不经此处——
+// 姿态由物化帧给出后客户端自持，官服同样不再发 State。
+func patrolFrames(catalog *npcCatalog, visible map[uint32]bool, moveState map[uint32]string, nowMs int64, paused map[uint32]int64) [][]byte {
 	batch := make([]entergen.AllDestEntry, 0, 8)
 	var stateFrames [][]byte
 	for i := range catalog.spawns {
@@ -501,13 +548,14 @@ func patrolFrames(catalog *npcCatalog, visible map[uint32]bool, moveState map[ui
 		var motion npcfeed.Motion
 		if isPaused {
 			p := spawn.Schedule.PositionAt(pauseAt)
-			motion = npcfeed.Motion{DestX: p.X, DestY: p.Y, DestZ: p.Z, DestOrient: p.Orient, Moving: false}
+			motion = npcfeed.Motion{DestX: p.X, DestY: p.Y, DestZ: p.Z, DestOrient: p.Orient}
 		} else {
 			motion = spawn.Schedule.MotionAt(nowMs)
 		}
-		if last, seen := moveState[spawn.ObjectID]; !seen || last != motion.Moving {
-			moveState[spawn.ObjectID] = motion.Moving
-			if frame, err := entergen.NpcStateFrame(spawn.ObjectID, spawn.OwnerID, motion.Moving); err == nil {
+		state := motion.State(spawn.RestAction())
+		if last, seen := moveState[spawn.ObjectID]; !seen || last != state {
+			moveState[spawn.ObjectID] = state
+			if frame, err := entergen.NpcStateFrame(spawn.ObjectID, spawn.OwnerID, state); err == nil {
 				stateFrames = append(stateFrames, frame)
 			}
 		}

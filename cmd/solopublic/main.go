@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssolopublic"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 const version = "0.1.0-solopublic"
@@ -37,6 +38,8 @@ func main() {
 		verbose    = flag.Bool("v", false, "打印官方 trace 面日志")
 	)
 	flag.Parse()
+	logline.Install("public")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go solopublic %s（game_public.exe + FsSoloPublic.dll 复刻）\n", version)
 
@@ -150,5 +153,5 @@ func splitHostPort(s string) (string, int, error) {
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "fatal:", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

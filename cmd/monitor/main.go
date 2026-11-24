@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssolomonitor"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 const version = "0.1.0-monitor"
@@ -35,6 +36,8 @@ func main() {
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C）")
 	)
 	flag.Parse()
+	logline.Install("monitor")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go monitor %s（game_monitor.exe + FsSoloMonitor.dll 复刻）\n", version)
 
@@ -172,5 +175,5 @@ func logf(format string, args ...any) {
 
 func fatal(err error) {
 	fmt.Fprintf(os.Stderr, "[monitor] 致命错误：%v\n", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

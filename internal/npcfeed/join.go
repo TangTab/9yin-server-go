@@ -15,17 +15,19 @@ import (
 
 // Spawn 一条联查完毕的待物化 NPC（帧生成输入）。
 type Spawn struct {
-	ObjectID uint32
-	OwnerID  uint32
-	X, Y, Z  float32
-	Orient   float32
-	ConfigID string            // 摆放 id（=模板联查键）
-	File     string            // 摆放类别
-	Script   string            // 模板物化类名
-	PathID   string            // 摆放 PathId（巡逻路线键；缺席回落模板 PathID）
-	Template map[string]string // NpcConfig 模板行（非 nil）
-	Combat   *CombatRow        // 战斗行（FightID 未命中为 nil）
-	Schedule *Schedule         // 巡逻时间表（BindPatrol 绑定；nil=站立）
+	ObjectID   uint32
+	OwnerID    uint32
+	X, Y, Z    float32
+	Orient     float32
+	ConfigID   string            // 摆放 id（=模板联查键）
+	File       string            // 摆放类别
+	Script     string            // 模板物化类名
+	PathID     string            // 摆放 PathId（巡逻路线键；缺席回落模板 PathID）
+	BornAction string            // 出生状态原始值：摆放 BornAction > 模板 BornAction > 模板 BornActionRec（空=stand，见 pose.go）
+	State      string            // 物化时的 State（巡逻采样在走=walk；空=静息态）
+	Template   map[string]string // NpcConfig 模板行（非 nil）
+	Combat     *CombatRow        // 战斗行（FightID 未命中为 nil）
+	Schedule   *Schedule         // 巡逻时间表（BindPatrol 绑定；nil=站立）
 }
 
 // Stats 目录装载统计（诊断/测试面）。
@@ -204,9 +206,10 @@ func BuildCatalogDirAs(root, dir string, scheme IdentScheme, sceneID int) ([]Spa
 			X: float32(p.X), Y: float32(p.Y), Z: float32(p.Z),
 			Orient:   float32(p.AY),
 			ConfigID: p.ID, File: p.File,
-			Script:   tpl.Script,
-			PathID:   strings.TrimSpace(p.Attrs["PathId"]),
-			Template: tpl.Attrs,
+			Script:     tpl.Script,
+			PathID:     strings.TrimSpace(p.Attrs["PathId"]),
+			BornAction: bornActionOf(p.Attrs, tpl.Attrs),
+			Template:   tpl.Attrs,
 		}
 		if fightID := strings.TrimSpace(tpl.Attrs["FightID"]); fightID != "" {
 			if row, hit := combat[fightID]; hit {

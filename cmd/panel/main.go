@@ -20,6 +20,7 @@ import (
 	"syscall"
 
 	"github.com/lizhanyin/9yin-server-go/internal/gmpanel"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 func main() {
@@ -31,6 +32,8 @@ func main() {
 	dsn := flag.String("mysql-dsn", "", "MySQL DSN（空=NINEYIN_MYSQL_DSN env，再空=禁用角色/告警页）")
 	members := flag.Int("members", 0, "member 数（0=MEMBERS env，默认 1）")
 	flag.Parse()
+	logline.Install("panel")
+	defer logline.Flush()
 
 	if *dsn == "" {
 		*dsn = os.Getenv("NINEYIN_MYSQL_DSN")
@@ -46,7 +49,7 @@ func main() {
 		*bin = locateBin()
 		if *bin == "" {
 			fmt.Fprintln(os.Stderr, "panel: 未定位到集群 exe 目录（build 后再启动，或 -bin 指定）")
-			os.Exit(1)
+			logline.Exit(1)
 		}
 	}
 	logf := func(format string, args ...any) {
@@ -98,5 +101,5 @@ func locateBin() string {
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "panel:", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

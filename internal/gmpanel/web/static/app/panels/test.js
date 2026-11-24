@@ -17,7 +17,10 @@ const SUBS = [
   { id: "archive", title: "存档管理", desc: "0x04 存档（role_state_json 落 nx_roles，重登 RST1 回灌）" },
 ];
 
-// 场景切换预设（location.ini BornCJ 出生点 + born_single_01 补充键；gm scene key 直传）。
+// 场景切换预设（gm scene key 直传）。场景下拉的正式数据来自 /api/gm/scenes
+//（scenedata 内嵌表：客户端有地形的全部世界场景，world 侧同一份）；本表是
+// 接口取不到时的回退（旧面板 exe / 请求失败），以及表外的补充键
+//（born_single_01 新手引导）。
 const SCENE_PRESETS = [
   ["born01", "鸡鸣驿（漠河镇）"], ["born02", "恶人谷"], ["born03", "烟雨庄"], ["born04", "千灯镇"],
   ["born_single_01", "新手引导（born_single_01 教学渔村）"],
@@ -26,6 +29,46 @@ const SCENE_PRESETS = [
   ["school05", "唐门"], ["school06", "峨眉"], ["school07", "武当"], ["school08", "少林"], ["school09", "移花宫"],
   ["scene01", "幽云十六州"], ["scene05", "捻罗坝"], ["scene06", "凌霄城"], ["scene08", "塞外大漠"],
 ];
+
+// 场景表模块级缓存（切子页不重取）；null = 取不到，回退静态预设。
+let sceneTable = null;
+let sceneTableLoading = null;
+
+function loadScenes() {
+  if (!sceneTableLoading) {
+    sceneTableLoading = api.gmScenes()
+      .then((res) => (sceneTable = res.scenes || null))
+      .catch(() => null);
+  }
+  return sceneTableLoading;
+}
+
+/** 场景表 → 下拉分组 [{category, label, options:[{value, label}]}]。分组与
+ *  场景序 = 接口序（类序 + 编号）；无中文名回退 key；同组重名追加 key 区分
+ *  （江湖·凌霄城 scene06 / scene25）；extra = 表外的补充预设，归「其它」组。
+ *  纯函数（不依赖 DOM）。 */
+export function groupScenes(scenes, extra = []) {
+  const entries = scenes.map((sc) => ({
+    value: sc.key, label: sc.name || sc.key, category: sc.category, categoryName: sc.categoryName,
+  }));
+  for (const [key, label] of extra) entries.push({ value: key, label, category: "other", categoryName: "其它" });
+  const seen = new Map();
+  for (const e of entries) {
+    const id = e.category + "/" + e.label;
+    seen.set(id, (seen.get(id) || 0) + 1);
+  }
+  const groups = [];
+  const indexOf = new Map();
+  for (const e of entries) {
+    if (!indexOf.has(e.category)) {
+      indexOf.set(e.category, groups.length);
+      groups.push({ category: e.category, label: e.categoryName || e.category, options: [] });
+    }
+    const dup = seen.get(e.category + "/" + e.label) > 1;
+    groups[indexOf.get(e.category)].options.push({ value: e.value, label: dup ? e.label + " " + e.value : e.label });
+  }
+  return groups;
+}
 
 const PROPS = [
   ["str", "臂力 Str"], ["dex", "身法 Dex"], ["ing", "内息 Ing"],
@@ -174,22 +217,60 @@ export function mount(view, sub) {
         refreshState();
       }),
     ]));
-    // 跨场景切换：预设出生点（可坐标覆盖），完整重入序列。
+    // 跨场景切换：场景下拉（接口数据，按类分组）+ 可选驿站（选中即以其坐标
+    // 覆盖落点），完整重入序列。
     const presetSel = h("select", {}, SCENE_PRESETS.map(([v, label]) => h("option", { value: v }, [label])));
-    const sx = field("覆盖x"), sy = field("覆盖y"), sz = field("覆盖z");
+    const wpSel = h("select", { title: "驿站：选中后以其坐标覆盖落点" }, [h("option", { value: "" }, ["默认落点"])]);
+    const sx = field("覆盖x"), sy = field("覆盖y"), sz = field("覆盖z"), so = field("朝向(可空)", 90);
+    const byKey = new Map(); // key → 场景（接口数据到达后填充）
+    const fillWaypoints = (scene) => {
+      wpSel.textContent = "";
+      wpSel.appendChild(h("option", { value: "" }, ["默认落点"]));
+      for (const wp of (scene && scene.waypoints) || []) {
+        wpSel.appendChild(h("option", { value: wp.name }, [wp.title || wp.name]));
+      }
+    };
+    presetSel.addEventListener("change", () => {
+      fillWaypoints(byKey.get(presetSel.value));
+      sx.value = sy.value = sz.value = so.value = "";
+    });
+    wpSel.addEventListener("change", () => {
+      const wp = ((byKey.get(presetSel.value) || {}).waypoints || []).find((w) => w.name === wpSel.value);
+      sx.value = wp ? wp.x : "";
+      sy.value = wp ? wp.y : "";
+      sz.value = wp ? wp.z : "";
+      so.value = wp ? wp.orient : "";
+    });
+    loadScenes().then((scenes) => {
+      if (!scenes) return;
+      const prev = presetSel.value;
+      for (const sc of scenes) byKey.set(sc.key, sc);
+      const extra = SCENE_PRESETS.filter(([key]) => !byKey.has(key));
+      presetSel.textContent = "";
+      for (const group of groupScenes(scenes, extra)) {
+        presetSel.appendChild(h("optgroup", { label: group.label },
+          group.options.map((o) => h("option", { value: o.value }, [o.label]))));
+      }
+      presetSel.value = byKey.has(prev) ? prev : (scenes[0] && scenes[0].key) || "";
+      fillWaypoints(byKey.get(presetSel.value));
+    });
     box.appendChild(h("div", { class: "toolbar", style: "margin-top:8px" }, [
-      presetSel, sx, sy, sz,
+      presetSel, wpSel, sx, sy, sz, so,
       opBtn("gm scene（跨场景切换）", "error", async () => {
         if (!who() || !presetSel.value) return;
         const parts = ["gm scene", who(), presetSel.value];
-        if (sx.value && sy.value && sz.value) parts.push(sx.value, sy.value, sz.value);
+        if (sx.value && sy.value && sz.value) {
+          parts.push(sx.value, sy.value, sz.value);
+          if (so.value !== "") parts.push(so.value);
+        }
         await send(parts.join(" "));
         refreshState();
       }),
     ]));
     box.appendChild(h("div", { class: "panel-desc" }, [
       "gm scene：0x0C 退出 → 750ms → 0x0B/0x0D 进新场景 → 客户端 0x09 → 0x1F+vitals+开图+NPC 首拍+",
-      "Ready 重推+邮箱重放（2433 scene_transition 真机时序）；落点默认该场景出生点（location.ini BornCJ）。",
+      "Ready 重推+邮箱重放（2433 scene_transition 真机时序）；落点默认该场景出生点（BornCJ）或",
+      "默认驿站（场景表：客户端有地形的全部世界场景）；下拉选驿站即按点传送。",
       "走近传送门（door_data 提取 113 条路线）自动触发，2s 冷却。",
     ]));
   }

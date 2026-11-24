@@ -17,6 +17,7 @@ import (
 	"syscall"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 )
 
 // defaultINI 快照 game_store.ini 方言（BGserverCJ\Debug\game_store.ini）。
@@ -82,13 +83,15 @@ func main() {
 		localStore = flag.String("local-store", "game_store_state.json", "内存后端 JSON 快照路径（空=纯内存）")
 	)
 	flag.Parse()
+	logline.Install("store")
+	defer logline.Flush()
 
 	data := []byte(defaultINI)
 	if *configPath != "" {
 		b, err := os.ReadFile(*configPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "read config: %v\n", err)
-			os.Exit(1)
+			logline.Exit(1)
 		}
 		data = b
 	} else if _, err := os.Stat("game_store.ini"); err == nil {
@@ -99,7 +102,7 @@ func main() {
 	cfg, err := fssolostore.ParseGameStoreINI(data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "parse config: %v\n", err)
-		os.Exit(1)
+		logline.Exit(1)
 	}
 	if *district != 0 {
 		cfg.DistrictID = int(*district)
@@ -127,7 +130,7 @@ func main() {
 		ms, err := fssolostore.OpenMySQLStore(context.Background(), *mysqlDSN, logf)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
+			logline.Exit(1)
 		}
 		backend = ms
 	} else {
@@ -145,7 +148,7 @@ func main() {
 	})
 	if err := srv.Start(); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(1)
+		logline.Exit(1)
 	}
 	rt := srv.Config()
 	fmt.Printf("app name %s\n", rt.AppName)

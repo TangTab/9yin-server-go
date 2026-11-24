@@ -56,11 +56,15 @@ type Player struct {
 	// 缺席（官方 store/旧档）时 entergen 回退 replay 模式。
 	roleState     rolestate.RoleState
 	haveRoleState bool
-	// 自定义配置域会话闸（连接生命周期，不落库）：客户端登录期会先
-	// 上传默认键位/个性配置转储（恢复帧未必已应用）——首传且库存有档
-	// 时跳过落库防默认覆盖玩家配置（custom.go 首传闸）。
-	customizingSeen bool
-	keybindSeen     bool
+	// entryReady 本次进场客户端是否已发 ClientReady（0x09）：登录起假、
+	// 0x09 置真、切图 0x0C 复位（custom.go 个性配置上传闸）。客户端每次
+	// 完整进场都会在 0x09 之前转储 2–3 份 107（本地态/应用 705 过程中的
+	// 中间态，不是玩家编辑）——有档时这些登录期转储不落库。
+	entryReady bool
+	// keybindSeen 195 上传首传闸（连接生命周期，不落库）：登录期先上传
+	// 默认键位转储（恢复帧未必已应用）——首传且库存有档时跳过落库防
+	// 默认覆盖玩家配置（custom.go 首传闸）。
+	keybindSeen bool
 	// posSaveAt 位置节流存档水位（position.go absorbPlayerPosition；
 	// 2s 窗口内只更新内存权威位，窗口到点/下线才发 store 0x04）。
 	posSaveAt time.Time
@@ -69,13 +73,13 @@ type Player struct {
 	// 此 diff 增删；npcScene=当前场景**摆放目录名**（resolveSceneDir 解析
 	// 的权威目录，目录/巡逻装载与交互查找共用；非 resource 短名）；
 	// patrolReadyAt=巡逻首拍时刻（进场物化 +5s）；npcMoveState=巡逻 NPC
-	// 行走/驻停水位（State 翻转帧用）。
+	// 最近一次下发的 State 水位（walk/stand/路点到达动作，翻转帧用）。
 	npcMu         sync.Mutex
 	npcVisible    map[uint32]bool
 	npcPos        [4]float64
 	npcScene      string
 	patrolReadyAt time.Time
-	npcMoveState  map[uint32]bool
+	npcMoveState  map[uint32]string
 	// taskStoryDone 剧情对话已走完任务集（npctask.go；连接生命周期，
 	// 不落库——最小进度态：剧情段链尾点击后置位，任务行 500→200 翻转；
 	// 重登重走剧情可接受）。

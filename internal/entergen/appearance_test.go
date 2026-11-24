@@ -14,12 +14,15 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 )
 
-// decodeAppearanceProps 按 2433 表线型走帧属性区（对拍工具同口径），
-// 返回 名→串值 map（重复键后写覆盖——真机帧 State/Parry 族尾段重复）。
-func decodeAppearanceProps(t *testing.T, frame []byte) map[string]string {
+// appearanceProp 0x0D 帧属性区的一行（名 + 串值）。
+type appearanceProp struct{ name, val string }
+
+// walkAppearanceProps 按 2433 表线型走帧属性区（对拍工具同口径），按
+// 线上顺序返回全部属性行。
+func walkAppearanceProps(t *testing.T, frame []byte) []appearanceProp {
 	t.Helper()
-	props := make(map[string]string)
 	n := int(binary.LittleEndian.Uint16(frame[61:]))
+	props := make([]appearanceProp, 0, n)
 	off := 63
 	for i := 0; i < n; i++ {
 		idx := binary.LittleEndian.Uint16(frame[off:])
@@ -68,12 +71,38 @@ func decodeAppearanceProps(t *testing.T, frame []byte) map[string]string {
 		default:
 			t.Fatalf("prop %d unknown type %d", idx, entry.TypeCode)
 		}
-		props[entry.Name] = val
+		props = append(props, appearanceProp{entry.Name, val})
 	}
 	if off != len(frame) {
 		t.Fatalf("consumed %d/%d", off, len(frame))
 	}
 	return props
+}
+
+// decodeAppearanceProps 名→串值 map（重复键后写覆盖——真机帧 State/Parry
+// 族尾段重复）。
+func decodeAppearanceProps(t *testing.T, frame []byte) map[string]string {
+	t.Helper()
+	props := make(map[string]string)
+	for _, prop := range walkAppearanceProps(t, frame) {
+		props[prop.name] = prop.val
+	}
+	return props
+}
+
+// appearancePropAfter 返回 name 之后第 offset 个属性（offset=0 即自身）；
+// 越界返回零值。
+func appearancePropAfter(props []appearanceProp, name string, offset int) appearanceProp {
+	for i, prop := range props {
+		if prop.name != name {
+			continue
+		}
+		if i+offset < len(props) {
+			return props[i+offset]
+		}
+		break
+	}
+	return appearanceProp{}
 }
 
 func utf16Decode(units []uint16) []rune {
@@ -202,5 +231,49 @@ func TestPreReadyFramesContainsAppearance(t *testing.T) {
 	}
 	if len(frames) < 2 || frames[0][0] != 0x0B || frames[1][0] != 0x0D {
 		t.Fatalf("enter prefix = %#x %#x", frames[0][0], frames[1][0])
+	}
+}
+
+// TestAppearanceEmbedsKeybindArchive 键位域在 0x0D 档内连片：ShortcutKey
+// 之后紧跟 OperateMode(223) / NeiGongBind(201)（参考端 player_actor.go
+// 同位——引擎建对象时即读整个键位域，只给方案不给操作模式，客户端的
+// operate_control_mode 会被方案默认模式顶掉）；档内串无尾空格（0x10 单帧
+// 形态带 " "）；无档零属性，属性序不变。
+func TestAppearanceEmbedsKeybindArchive(t *testing.T) {
+	ctx := testContext(t)
+	ctx.Keybind = "1,65;2,66;" // 档内键位串取 Context.Keybind（空则默认方案）
+	ctx.State.OperateMode, ctx.State.OperateModeSet = 1, true
+	ctx.State.NeiGongBind = "1;0;2;"
+	frame, err := AppearanceFrame(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	props := walkAppearanceProps(t, frame)
+	if got := appearancePropAfter(props, "ShortcutKey", 0); got.val != "1,65;2,66;" {
+		t.Fatalf("archive ShortcutKey = %q", got.val)
+	}
+	if got := appearancePropAfter(props, "ShortcutKey", 1); got.name != "OperateMode" || got.val != "1" {
+		t.Fatalf("OperateMode must follow ShortcutKey in the archive: %+v", got)
+	}
+	if got := appearancePropAfter(props, "ShortcutKey", 2); got.name != "NeiGongBind" || got.val != "1;0;2;" {
+		t.Fatalf("NeiGongBind must follow OperateMode without trailing space: %+v", got)
+	}
+	if got := appearancePropAfter(props, "ShortcutKey", 3); got.name != "PosiX" {
+		t.Fatalf("keybind domain must stay contiguous ahead of PosiX: %+v", got)
+	}
+
+	// 无档：零属性，#25 真机属性序原样（ShortcutKey 后即 PosiX）。
+	bareFrame, err := AppearanceFrame(testContext(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bareProps := walkAppearanceProps(t, bareFrame)
+	if got := appearancePropAfter(bareProps, "ShortcutKey", 1); got.name != "PosiX" {
+		t.Fatalf("no archive must keep the stock property order: %+v", got)
+	}
+	for _, prop := range bareProps {
+		if prop.name == "OperateMode" || prop.name == "NeiGongBind" {
+			t.Fatalf("no archive must embed no %s", prop.name)
+		}
 	}
 }

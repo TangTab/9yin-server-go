@@ -6,6 +6,7 @@ package fssoloworld
 import (
 	"encoding/binary"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
@@ -14,14 +15,32 @@ import (
 
 func newNpcTestServer(t *testing.T) *Server {
 	t.Helper()
+	// 用例结束后丢弃迟到的日志：选靶看门狗（5s 后发 m26 解锁）这类定时器
+	// 会比用例活得久，整套用例跑过 5 秒后回调再 t.Logf 即 panic。
+	var mu sync.Mutex
+	done := false
+	t.Cleanup(func() {
+		mu.Lock()
+		done = true
+		mu.Unlock()
+	})
+	return newNpcTestServerLogf(t, func(format string, args ...any) {
+		mu.Lock()
+		defer mu.Unlock()
+		if !done {
+			t.Logf(format, args...)
+		}
+	})
+}
+
+// newNpcTestServerLogf 同 newNpcTestServer，trace 输出自定（断言日志用）。
+func newNpcTestServerLogf(t *testing.T, logf func(format string, args ...any)) *Server {
+	t.Helper()
 	cfg := DefaultConfig()
 	cfg.InnerAddr = "127.0.0.1"
 	cfg.InnerPort = 0
 	cfg.BroadPort = 0
 	cfg.EchoAddr = ""
-	logf := func(format string, args ...any) {
-		t.Logf(format, args...)
-	}
 	s := New(Options{Config: cfg, ManualTick: true, Logf: logf})
 	// 交互链测试要 sendToClient（走 inner 广播）：挂无监听内网链
 	//（零连接 → SendToAllEntry 空转安全）。

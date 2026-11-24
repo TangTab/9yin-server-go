@@ -1,5 +1,10 @@
 # NPC 服务端 XML 构建链与黑金样板
 
+> 2026-11-25 更新：装载器已可直读客户端 `share` 树（NPC 摆放 / 模板 / 战斗、任务域、
+> 任务文案），本文的「离线构建服务端 XML → 服务端只读构建产物」退为回退路径与
+> A/B 基线；来源选择、保险与对拍见
+> [NPC与任务数据来源直读落地](NPC与任务数据来源直读落地.md)。
+>
 > 2026-11-24 更新：构建工具已合并为统一入口 `tools/datagen`（子命令 `npc` / `item` / `skill`，
 > 无参构建全部），输入收窄为两类——客户端资源解压根（`-client`）与黑金参考资源根
 > `testdata/references/h001.rep`。本文中的 `tools/npcgen`、`tools/skillgen`、`tools/itemgen` 命令

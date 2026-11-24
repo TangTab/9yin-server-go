@@ -1,9 +1,16 @@
 package fssoloworld
 
 // C2S 54 手动格挡（含非战斗态）。方言按参考端 protocol-probe 820f79a
-// 真机多轮定版移植（非官方外服六件套——那个方言在 fork 客户端原生链上
-// 「按下即塌」，2026-11-12 P2 5971 条死锁实证；2026-11-23 早真机复核：
-// 我方首版照官方抓包回 m169+速度族，客户端 415 条 m54 全程无反应）：
+// 真机多轮定版移植，并经 2026-11-24 官服抓包（初始账号登陆-任务-入门2）
+// 逐帧复核。
+//
+// ★非战斗格挡的总开关在客户端本地，服务端开不了这道门：设置界面
+// 「调节战斗的自由度」里的「非战斗状态可招架」复选框（systeminfo.ini
+// [Config] fightparry，默认 0；即 107/705 个性配置串第 94 字节，见
+// docs/official/非战斗格挡开关与705个性配置字段表.md）。未勾选时客户端
+// 本地拒绝进入格挡，m54 恒发基调——2026-11-23 早真机 415 条全程无按压
+// 令牌即此。此前「按下即塌／需 LogicState=1 撑持」都是在该开关关闭下
+// 的误判：撑持只是把客户端强推进战斗态才让它肯格挡。
 //
 //   - 双形判定：值 0/1 直判（fork 协议模式：0=按下、非 0=松开，Java
 //     handleManualParry engage==0 同义）；其它值=官服族状态上报（B 线
@@ -20,10 +27,11 @@ package fssoloworld
 //   - 应答=三属性权威帧 InParry/InManualParry/ParryValue（server2
 //     manualParryStateUpdate 同构）——fork 客户端格挡认知锚在 fighter
 //     资源上；active 门槛 = parrying && ParryValue>0。
-//   - 非战斗架势由 LogicState=1 撑住（2026-11-16 真机定版：战斗段 6s
-//     保持 vs 预警段 50ms 即弃；三属性帧全删撑持曾致 6 按塌 5 回退）。
-//     帧形=单属性帧但 idx 必须动态解析（我方表=465；旧 463 硬编错位
-//     =「按下即塌」根因）。松开回写原值 0。
+//   - 不碰 LogicState。官服非战斗按压簇（2026-11-24 抓包 7 次连按）=
+//     InParry=1 → ParryUpSpeedAdd=-3 → m169(0,"BuffInParry") →
+//     InManualParry=1，松开全清，全程无 LogicState 帧。旧「按下升 1／
+//     松开回 0 撑持」会让客户端瞬时进入战斗状态，松开回 0 还会误清真实
+//     战斗架势——开关勾选后架势由客户端自己维持，撑持已撤。
 
 import (
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
@@ -37,10 +45,6 @@ const clientCustomParryState int32 = 54
 // 周期重发同值——服务端据此区分「长按重发」与「切景轮换新基调」）。
 const parryTokenDelta int64 = 299227689
 
-// parryIdleValue 无在格挡时的 LogicState 还原位（我们未建 Z 拔刀权威态，
-// 恒按空闲 0 回写；后续接 m292 时改为记 0/2 原值）。
-const parryIdleValue byte = 0
-
 // parryValueTotal 招架耐力总量（应答帧口径；无存档会话按新号基线 72）。
 func (s *Server) parryValueTotal(pl *Player) int32 {
 	if pl.haveRoleState {
@@ -51,7 +55,7 @@ func (s *Server) parryValueTotal(pl *Player) int32 {
 	return 72
 }
 
-// handleParryState C2S 54：纯基调状态机 + 三属性权威帧 + LogicState 撑持。
+// handleParryState C2S 54：纯基调状态机 + 三属性权威帧（不碰 LogicState）。
 // 基调语义统一覆盖双方言：B 线登录客户端闲时恒发基调（真机 64344 会话
 // 恒 1、~1/s），按压发异值；0=按下的 fork 二值方言由 0/1 直判分支覆盖。
 // 无变迁恒零帧（官服对长按期间的按压令牌重发同样零应答）。
@@ -75,12 +79,6 @@ func (s *Server) handleParryState(pl *Player, message entergen.CustomInbound) {
 	pl.parryMu.Unlock()
 
 	s.sendParryStateFrame(pl)
-	// 非战斗架势撑持：按下升 1，松开回 0（单属性帧、idx 动态解析）。
-	if engage {
-		s.sendParryLogicState(pl, 1)
-	} else {
-		s.sendParryLogicState(pl, parryIdleValue)
-	}
 	s.trace("manual parry engage=%t value=%d baseline=%d client=%d",
 		engage, value, pl.parryBaseline, pl.Conn1)
 }
@@ -135,16 +133,6 @@ func (s *Server) sendParryStateFrame(pl *Player) {
 		entergen.NamedProperty("ParryValue", entergen.Int32Value(value)))
 	if err != nil {
 		s.trace("parry state frame encode failed client=%d: %v", pl.Conn1, err)
-		return
-	}
-	s.sendToClient(pl, frame)
-}
-
-// sendParryLogicState 架势撑持帧（LogicState 单属性；idx 走表动态解析）。
-func (s *Server) sendParryLogicState(pl *Player, state byte) {
-	frame, err := playerPropertyFrame(pl, entergen.NamedProperty("LogicState", entergen.ByteValue(state)))
-	if err != nil {
-		s.trace("parry logic state frame encode failed client=%d: %v", pl.Conn1, err)
 		return
 	}
 	s.sendToClient(pl, frame)

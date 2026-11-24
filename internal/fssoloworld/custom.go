@@ -5,7 +5,8 @@ package fssoloworld
 // 全靠「上传 → 落 roleState → 回推确认」闭环收敛。规则移植参考端
 // cmd/protocol-probe custom_config.go/shortcut_records.go/custom_c2s.go：
 //
-//	107 个性配置整串上传（首传闸：登录期默认转储不覆盖存档）；
+//	107 个性配置整串上传（上传零应答——官服口径；ClientReady 之前的
+//	    登录期转储不落库，下发走进场段 705：entergen.CustomizingFrame）；
 //	195 键位方案上传 [195, scheme, str]（scheme 0=当前/1=方案一/2=方案二，
 //	    同款首传闸）；
 //	99 操作模式 [99, mode]（0=3D WASD/1=2.5D 点击）；
@@ -41,9 +42,6 @@ const (
 	clientCustomMoveItem        int32 = 30
 	clientCustomUseItem         int32 = 31
 )
-
-// serverCustomPushCustomizing S2C 705（与 entergen.customcfg 同源）。
-const serverCustomPushCustomizing int32 = 705
 
 // customizingConfigLimit / keybindValueLimit 引擎侧串宽上限（Java
 // handleKeybindUpload 校验同口径）。
@@ -161,8 +159,8 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		// 双帧 + m25 选靶授权（2433 selection.go 定版）。
 		s.handleNPCSelectTarget(pl, message)
 	case clientCustomParryState:
-		// msg54 手动格挡（含非战斗态）：m169 BuffInParry 加/除回声
-		//（女号官服抓包 2026-11-23 定版，parry.go）。
+		// msg54 手动格挡（含非战斗态）：三属性权威帧，不碰 LogicState
+		//（parry.go；2026-11-24 官服抓包逐帧复核）。
 		s.handleParryState(pl, message)
 	default:
 		s.trace("custom message unhandled client=%d id=%d values=%d", pl.Conn1, id, len(message.Values))
@@ -177,16 +175,6 @@ func (s *Server) requireRoleState(pl *Player, id int32) bool {
 	}
 	s.trace("reject custom %d before role state ready client=%d", id, pl.Conn1)
 	return false
-}
-
-// pushCustomizing 705 回推（空串零帧）。
-func (s *Server) pushCustomizing(pl *Player, config string) error {
-	frame, err := entergen.CustomMessageFrame(serverCustomPushCustomizing, entergen.CustomString(config))
-	if err != nil {
-		return err
-	}
-	s.sendToClient(pl, frame)
-	return nil
 }
 
 // pushKeybindScheme 键位域 0x10 单属性帧（198/199/200，串 = 值 + " "
@@ -225,9 +213,17 @@ func (s *Server) pushOperateMode(pl *Player, mode int32) error {
 	return nil
 }
 
-// handleCustomizingUpload C2S 107 [107, string]。首传闸：客户端登录期
-// 会先上传默认键位转储（恢复帧未必已应用）——首传且库存有档时跳过
-// 落库存档、回发存档再确认恢复态；后续上传（编辑提交）照常收。
+// handleCustomizingUpload C2S 107 [107, string]：上传零应答（官服口径——
+// 2026-11-24 抓包全程 107 零回应，存档只在下次进场的 705 里下发；回声
+// 会触发 on_parser_customizing 控制对象重置链 → 震荡卡顿）。
+//
+// 落库闸按进场划分：客户端每次完整进场都在 0x09 之前转储 2–3 份 107
+//（本地态 / 应用 705 过程中的中间态，含被 0x0D 键位方案顶掉
+// operate_control_mode 之后的值——61 会话抓包实证，见
+// docs/official/非战斗格挡开关与705个性配置字段表.md），不是玩家编辑。
+// 有档时 ClientReady 之前的转储一律不落库（旧实现只挡首份，第 2/3 份
+// 把存档冲回旧值 = 「重登丢配置」根因之一）；无档时照收作基线（官服
+// 新号空档同义）。0x09 之后才是编辑提交，落库即生效于下次进场。
 func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbound) {
 	if !s.requireRoleState(pl, clientCustomSaveCustomizing) {
 		return
@@ -244,22 +240,8 @@ func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbo
 		s.trace("customizing config length %d exceeds %d client=%d", len(config), customizingConfigLimit, pl.Conn1)
 		return
 	}
-	first := !pl.customizingSeen
-	pl.customizingSeen = true
-	// 首传闸 re-assert 是 705 唯一下行位（2026-11-23：抓包实证客户端在
-	// 0x09 之前已上传 107 共 2–4 次，ClientReady 位 705 赶不上登录转储，
-	// 已自 ReadyFrames 撤下）——回推存档值，防默认转储覆盖玩家配置
-	// （2433 custom_config.go:326 同款）。save-echo 永不回推（echo 把
-	// 客户端转储原样弹回会触发 on_parser_customizing 控制对象重置链
-	// → 震荡卡顿，2433 参考 custom_config.go:226 注释同证）。
-	// 存档值经 rolestate.BinaryString 字节保真；旧档被清洗过的坏串
-	// （含 U+FFFD）在反序列化处已丢弃，不会从这里回推。
-	if first && pl.roleState.Customizing != "" {
-		if err := s.pushCustomizing(pl, string(pl.roleState.Customizing)); err != nil {
-			s.trace("re-assert customizing failed client=%d: %v", pl.Conn1, err)
-			return
-		}
-		s.trace("skipped default customizing dump (%d bytes), re-asserted saved %d bytes client=%d",
+	if !pl.entryReady && pl.roleState.Customizing != "" {
+		s.trace("ignored login-time customizing dump (%d bytes; saved %d bytes) client=%d",
 			len(config), len(pl.roleState.Customizing), pl.Conn1)
 		return
 	}
@@ -271,7 +253,7 @@ func (s *Server) handleCustomizingUpload(pl *Player, message entergen.CustomInbo
 	}
 	pl.roleState.Customizing = rolestate.BinaryString(config)
 	s.sendRoleSave(pl)
-	s.trace("saved customizing config %d bytes client=%d (save-echo muted)", len(config), pl.Conn1)
+	s.trace("saved customizing config %d bytes client=%d", len(config), pl.Conn1)
 }
 
 // printableKeybindValue 键位串限可打印 ASCII（0x20-0x7E）——真机引擎会

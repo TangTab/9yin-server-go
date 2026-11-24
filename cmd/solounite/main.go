@@ -26,6 +26,7 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
 	"github.com/lizhanyin/9yin-server-go/internal/fsunite"
+	"github.com/lizhanyin/9yin-server-go/internal/logline"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -50,6 +51,8 @@ func main() {
 		runFor     = flag.Duration("run", 0, "运行时长（0=直到 Ctrl+C；冒烟用）")
 	)
 	flag.Parse()
+	logline.Install("solounite")
+	defer logline.Flush()
 
 	fmt.Printf("9yin-server-go solounite %s\n", version)
 
@@ -158,7 +161,7 @@ func main() {
 	}
 	var backend fssolostore.Backend
 	if dsn != "" {
-		mb, err := fssolostore.OpenMySQLStore(context.Background(), dsn, logf)
+		mb, err := fssolostore.OpenMySQLStore(context.Background(), dsn, logline.Tagged("store", logf))
 		if err != nil {
 			fatal(fmt.Errorf("mysql 后端不可用: %w", err))
 		}
@@ -186,7 +189,7 @@ func main() {
 		Scenes:       scenes,
 		StoreBackend: backend,
 		Logf:         logf,
-		Quit:         func() { fmt.Println("unite server shutdown..."); os.Exit(0) },
+		Quit:         func() { fmt.Println("unite server shutdown..."); logline.Exit(0) },
 	})
 	if err := u.Start(); err != nil {
 		fatal(err)
@@ -212,5 +215,5 @@ func main() {
 
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, "solounite:", err)
-	os.Exit(1)
+	logline.Exit(1)
 }

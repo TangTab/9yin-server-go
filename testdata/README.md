@@ -28,21 +28,30 @@
 `filepath.*` 完全相同。直接用 `os.ReadFile` 之类读本目录的代码，在散文件并入层
 之后就找不到文件了。散文件改完即生效；层文件的内容要重新打开才更新。
 
-**构建数据**：服务端数据由统一构建器 `tools/datagen` 生成——`npc`（NPC 模板 /
-场景摆放 / 任务域 / 战斗模板 / 任务文案）、`item`（物品配置）、`skill`（技能配置）。
-只需要两类输入：客户端资源解压根（`-client`）与黑金参考资源根（上面的
+**构建数据**：只有 `item`（物品配置）、`skill`（技能配置）**必须**经统一构建器
+`tools/datagen` 离线构建——它们是模型重建。NPC（模板 / 摆放 / 战斗）、任务域、
+任务文案的装载器从 2026-11-25 起可以直接读层里的客户端 `share` 树，不必先转
+XML（开关与保险见 `docs/official/NPC与任务数据来源直读落地.md`）；`tools/datagen
+npc` 与 `patrol` 仍可运行，产物（`ini/Npc`、`ini/Scene`、`ini/Quest`、
+`ini/Text`）留在层里作回退路径与 A/B 对拍基线（`NINEYIN_DATA_SOURCE=xml`）。
+构建器只需要两类输入：客户端资源解压根（`-client`）与黑金参考资源根（上面的
 `references/`，缺省就是它）：
 
 ```bash
 go run ./tools/datagen                      # 构建全部
-go run ./tools/datagen item skill           # 只构建指定的（npc / item / skill）
+go run ./tools/datagen item skill           # 只构建指定的（npc / patrol / item / skill）
 go run ./tools/datagen -client <解压根>     # 别的机器：指定客户端资源根
 ```
 
 生成物先以**散文件**落在对应目录（`ini/Npc`、`ini/Scene`、`ini/Quest`、
-`ini/Text`、`ini/Item`、`ini/Skill`），验证无误后再并入资源层。
+`ini/Text`、`ini/Item`、`ini/Skill`、`share/creator/mappath`），验证无误后再并入
+资源层。
 写出时行尾跟随层里的同名现有文件，所以内容没变的文件重建后与层里逐字节相同，
-并入时会被去重。
+并入时会被去重（`patrol` 是字节透传，本就与源逐字节相同）。
+
+本目录层里没有 `text/chineses`（任务文案），所以任务域在这里缺省走 XML 产物；
+要验任务域直读，把文案目录指到客户端树：
+`NINEYIN_TASK_TEXT_DIR=<客户端资源根>/text/chineses go test ./internal/... -run Parity`。
 
 **更新**：改动的文件先以散文件形式放在本目录，跑完验证后并入新的增量层：
 
@@ -121,6 +130,19 @@ item_prop_modify_static/item_seed_static.xml` + `ItemTypeList.xml`；22 文件�
 设计态 `share/item`，只有目录面）。再生命令：`go run ./tools/datagen item`
 （`-out <目录>` 可把产物先生成到别处）。详见
 `docs/official/物品服务端XML构建链与msg31使用链.md`。
+
+## share/creator/mappath/ — NPC 巡逻路线（官方路线表原样镜像）
+
+巡逻路线在数据根的 `share/creator/mappath/`——与客户端资源树同路径，客户端
+`share` 整树并入时随之到位（2026-11-25 起装载器读这里；此前的顶层 `mappath/`
+不再读取，层里残留的那份是死数据，重铺层时可清）。`tools/datagen patrol` 也可
+把客户端 `share/creator/mappath/*.ini` 单独搬进来
+（251 档约 13.6 MiB；GBK 与行尾都不动——装载器 `internal/npcfeed/patrol.go`
+读的就是这份 `r=` 行方言）。节名 = 摆放 `PathId`，文件名 =
+`<场景短名>_<类别>.ini`；含 `offline` 的是离线态路线，服务端装载器按文件名
+排除。**缺这个目录 = 带 PathId 的 NPC 全部站立**（2026-11-24 Res 层化后曾因此
+巡逻全无）。构建器报告按服务端解析器统计路线 / 路点 / 坏行。详见
+`docs/official/NPC巡逻mappath路线链.md`。
 
 ## ini/ — 数值表抽样（config 包的格式样例）
 

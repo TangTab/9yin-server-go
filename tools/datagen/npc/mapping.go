@@ -82,6 +82,14 @@ var columnBindings = map[string]binding{
 	"Character":  {Server: "Character"},
 	"KarmaLevel": {Server: "KarmaLevel"},
 
+	// ---- direct：NPC 出生状态列（源表中文列注释「出生状态」；同义的另两
+	// 种列名 table@BornActionRec / table@BornAction 已按 tableRec 去前缀入
+	// 表，输出名 BornActionRec / BornAction）。2026-11-25 官服物化帧定案：
+	// State 与 BornAction 同值=出生状态（姿态 NPC 是动作名，普通为
+	// stand），npcfeed pose.go 按 摆放 BornAction > 模板 BornAction > 模板
+	// BornActionRec 分层取值。----
+	"BornAction": {Server: "BornAction"},
+
 	// ---- rename：改名映射 ----
 	"PathID": {Server: "PathId", Kind: "rename", Note: "大小写对齐黑金档 PathId（巡逻路径 ID）"},
 	"FacultyExp": {Server: "Exp", Kind: "rename",

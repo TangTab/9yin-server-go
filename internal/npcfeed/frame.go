@@ -6,9 +6,11 @@ package npcfeed
 //   头行块（OrderedProperties）+ 官方 16-prop 追加块（c.pcapng #1777
 //   逐项定版）：CollideRadius（寻路避障关键；宝箱 NpcType=161/采集
 //   NpcType=153 不发碰撞体，尾行改交互半径 OpenRange=2.0/GatherRange=3.0）
-//   /State=stand/Type=4/Resource+ConfigID+Photo 三件套/ActionSpeed=1.0/
-//   Level/BossLevel/IDCard 五空槽/BornAction=stand/WeaponMode=hand1_1/
-//   三比例=100。索引一律按名经 clientdata 解析（表漂移免疫）。
+//   /State/BornAction（两者同值=出生姿态，姿态 NPC 是动作名、普通为
+//   stand、行进中进视口为 walk，见 pose.go）/Type=4/Resource+ConfigID+
+//   Photo 三件套/ActionSpeed=1.0/Level/BossLevel/IDCard 五空槽/
+//   WeaponMode=hand1_1/三比例=100。索引一律按名经 clientdata 解析
+//   （表漂移免疫）。
 //
 // 0x28 mode=0x46：官方 19 字段明文形态（npc.pcapng #1841/#1898 罗塞塔），
 //   ConfigID/Resource/NpcType/Level/CollideRadius 喂解析真值。
@@ -230,7 +232,7 @@ func (s Spawn) Frame0x28() []byte {
 			tryInt("Fixed", int32(fixed))
 		}
 	}
-	putStr("State", "stand")
+	putStr("State", s.materialState())
 	putInt("Type", 4)
 	if resource != "" {
 		putStr("Resource", resource)
@@ -265,11 +267,8 @@ func (s Spawn) Frame0x28() []byte {
 	}
 	putInt("BossLevel", bossLevel)
 	putStr("IDCard", "null,null,null,null,null")
-	bornAction := tpl["BornAction"]
-	if bornAction == "" {
-		bornAction = "stand"
-	}
-	putStr("BornAction", bornAction)
+	// 出生姿态：State 与 BornAction 同值（官服两包实证，见 pose.go）。
+	putStr("BornAction", s.RestAction())
 	if armed {
 		// #1：WeaponName 在 WeaponMode 前（武器模型窄串）。
 		if _, ok := clientdata.PlayerProperty("WeaponName"); ok {
@@ -437,7 +436,7 @@ func officialProps(s Spawn) []Prop {
 		props = append(props, Prop{Index: collide.Index, Name: collide.Name, Value: floatVal(collideVal)})
 	}
 	props = append(props,
-		Prop{Index: state.Index, Name: state.Name, Value: stringVal("stand")},
+		Prop{Index: state.Index, Name: state.Name, Value: stringVal(s.materialState())},
 		intProp(propType, 4), // 外服 #1777 Type=4（NPC 对象类别）
 	)
 	if resourceVal != "" {
@@ -457,7 +456,7 @@ func officialProps(s Spawn) []Prop {
 		intProp(bossLevel, bossLevelVal),
 		// 外服 #1777 IDCard 五槽空身份卡。
 		Prop{Index: idCard.Index, Name: idCard.Name, Value: stringVal("null,null,null,null,null")},
-		Prop{Index: bornAction.Index, Name: bornAction.Name, Value: stringVal("stand")},
+		Prop{Index: bornAction.Index, Name: bornAction.Name, Value: stringVal(s.RestAction())},
 		Prop{Index: weaponMode.Index, Name: weaponMode.Name, Value: stringVal("hand1_1")},
 		intProp(hpRatio, 100),
 		intProp(parryRatio, 100),

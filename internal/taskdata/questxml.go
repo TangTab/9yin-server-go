@@ -1,23 +1,28 @@
 package taskdata
 
-// questxml.go 服务端任务域 XML 装载（<root>/ini/Quest，tools/datagen npc 由
-// 客户端 share/task 任务域树生成——任务 ID 与客户端文案键/官服 0x29 记录
-// 帧同一体系）：
+// questxml.go 任务目录装载。来源二选一（见 internal/npcfeed/source.go；
+// 任务 ID 与客户端文案键/官服 0x29 记录帧同一体系）：
 //
-//	Task/Task.xml            任务主表（15 域）：Title 为 npcgen 按 TitleId
-//	                         解析出的客户端显示文本（无文案留空）；
-//	                         AcceptNpc/SubmitNpc + 两侧 SceneID 给
-//	                         NPC↔任务绑定
-//	SubFunction/SubFunction.xml   接线表：ID=任务 ID、Type=步骤域、
-//	                              TypeID=步骤行 ID（story 域 → StoryTaskList
-//	                              组 ID）
-//	StoryTaskList/StoryTaskList.xml  剧情段行：同 ID 多行=同剧情多段
-//	                              （行序即段序），NpcID/contextId/titleId/
-//	                              LeaveTextID/SceneID 与 txt 链
-//	                              storytasklist 同词汇
+//	A. 直读客户端任务域表（2026-11-25 起；数据根带 share/task/task 与
+//	   text/chineses 即走这条）：share/task/task/{task,storytasklist,
+//	   subfunction}/*.txt + 文案档。同域合并与主表 Title 解析的口径见
+//	   internal/sharedata/quest.go。
+//	B. tools/datagen npc 由客户端 share/task 任务域树生成的 XML 产物
+//	   （<root>/ini/Quest）：
+//	   Task/Task.xml            任务主表（15 域）：Title 为按 TitleId 解析出
+//	                            的客户端显示文本（无文案留空）；
+//	                            AcceptNpc/SubmitNpc + 两侧 SceneID 给
+//	                            NPC↔任务绑定
+//	   SubFunction/SubFunction.xml   接线表：ID=任务 ID、Type=步骤域、
+//	                                 TypeID=步骤行 ID（story 域 → StoryTaskList
+//	                                 组 ID）
+//	   StoryTaskList/StoryTaskList.xml  剧情段行：同 ID 多行=同剧情多段
+//	                                 （行序即段序），NpcID/contextId/titleId/
+//	                                 LeaveTextID/SceneID 与 txt 链
+//	                                 storytasklist 同词汇
 //
-// 任务域 XML 是任务目录的唯一数据源。无 Title 的主表行不计入目录——
-// 客户端没有该任务的文案，任务行发了也无处渲染。
+// 两路给出行方言相同的表，目录构建口径共用（buildCatalog）。无 Title 的
+// 主表行不计入目录——客户端没有该任务的文案，任务行发了也无处渲染。
 
 import (
 	"bytes"
@@ -29,8 +34,21 @@ import (
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
+
+// QuestSourceOf 任务域在某个数据根下实际使用的来源（trace / 诊断面）。
+func QuestSourceOf(root string) sharedata.Source { return sharedata.QuestSource(root) }
+
+// LoadQuest 任务目录（root=数据根；来源见文件头）。两路的错误语义相同：
+// 主表缺席或无有效任务行报错（调用方视为没有任务目录）。
+func LoadQuest(root string) (*Catalog, error) {
+	if sharedata.QuestSource(root) == sharedata.SourceShare {
+		return loadQuestShare(root)
+	}
+	return LoadQuestXMLDir(filepath.Join(root, "ini", "Quest"))
+}
 
 // LoadQuestXMLDir 从服务端任务域 XML 目录（<root>/ini/Quest）构建目录。
 // Task.xml 缺席或无有效任务行报错（调用方视为没有任务目录）；剧情链
@@ -41,6 +59,42 @@ func LoadQuestXMLDir(dir string) (*Catalog, error) {
 	if err != nil {
 		return nil, err
 	}
+	story, storyErr := loadQuestPropRows(filepath.Join(dir, "StoryTaskList", "StoryTaskList.xml"))
+	sub, subErr := loadQuestPropRows(filepath.Join(dir, "SubFunction", "SubFunction.xml"))
+	var storyRows, subRows []map[string]string
+	if storyErr == nil && subErr == nil {
+		storyRows, subRows = story, sub
+	}
+	return buildCatalog(dir, rows, storyRows, subRows)
+}
+
+// loadQuestShare 直读：主表 Title 用文案档解析；剧情链缺档同样降级为无
+// 剧情绑定。
+func loadQuestShare(root string) (*Catalog, error) {
+	domain := func(server string) sharedata.QuestDomain {
+		d, _ := sharedata.QuestDomainOf(server)
+		return d
+	}
+	texts, _, _, err := sharedata.ReadTaskText(root)
+	if err != nil {
+		return nil, err
+	}
+	rows, _, err := sharedata.ReadQuestDomain(root, domain("Task"), texts)
+	if err != nil {
+		return nil, err
+	}
+	story, _, storyErr := sharedata.ReadQuestDomain(root, domain("StoryTaskList"), nil)
+	sub, _, subErr := sharedata.ReadQuestDomain(root, domain("SubFunction"), nil)
+	var storyRows, subRows []map[string]string
+	if storyErr == nil && subErr == nil {
+		storyRows, subRows = story, sub
+	}
+	return buildCatalog(filepath.Join(root, filepath.FromSlash(sharedata.QuestDomainDir)), rows, storyRows, subRows)
+}
+
+// buildCatalog 主表行 + 剧情段行 + 接线行 → 目录。storyRows / subRows 为
+// nil 即没有剧情链（不下发剧情段绑定）。
+func buildCatalog(dir string, rows, storyRows, subRows []map[string]string) (*Catalog, error) {
 	tasks := make(map[int]Task)
 	var bindings []Binding
 	// 链式接取目标集：被某任务 AutoAcceptID 指向的任务只随前序任务完成
@@ -82,10 +136,10 @@ func LoadQuestXMLDir(dir string) (*Catalog, error) {
 		}
 	}
 	if len(tasks) == 0 {
-		return nil, fmt.Errorf("taskdata: %s 无带文案的任务主表行（Task/Task.xml）", dir)
+		return nil, fmt.Errorf("taskdata: %s 无带文案的任务主表行（Task）", dir)
 	}
-	if story, err := loadQuestStoryBindings(dir); err == nil {
-		bindings = append(bindings, story...)
+	if storyRows != nil && subRows != nil {
+		bindings = append(bindings, storyBindings(storyRows, subRows)...)
 	}
 	return NewCatalog(tasks, bindings), nil
 }
@@ -99,27 +153,19 @@ func iniInt(value string) int {
 	return number
 }
 
-// loadQuestStoryBindings SubFunction（Type=story）× StoryTaskList 合成剧情
-// 段绑定：同组多行逐行成段（StoryID=组 ID，ContextID/TitleID/LeaveTextID
-// 同 txt 链词汇），行序即段序。
+// storyBindings SubFunction（Type=story）× StoryTaskList 合成剧情段绑定：
+// 同组多行逐行成段（StoryID=组 ID，ContextID/TitleID/LeaveTextID 同 txt 链
+// 词汇），行序即段序。
 //
 // 源表只在一组剧情的首段行写 NpcID，续段行留空——沿用组内上一行的 NPC；
 // 没有任何 NPC 的行（空行/残行）不成段。完全重复的行（跨档复制）由
 // Catalog 去重。
-func loadQuestStoryBindings(dir string) ([]Binding, error) {
-	storyRows, err := loadQuestPropRows(filepath.Join(dir, "StoryTaskList", "StoryTaskList.xml"))
-	if err != nil {
-		return nil, err
-	}
+func storyBindings(storyRows, subRows []map[string]string) []Binding {
 	storyByID := make(map[string][]map[string]string)
 	for _, row := range storyRows {
 		if id := strings.TrimSpace(row["ID"]); id != "" {
 			storyByID[id] = append(storyByID[id], row)
 		}
-	}
-	subRows, err := loadQuestPropRows(filepath.Join(dir, "SubFunction", "SubFunction.xml"))
-	if err != nil {
-		return nil, err
 	}
 	var bindings []Binding
 	for _, sf := range subRows {
@@ -150,7 +196,7 @@ func loadQuestStoryBindings(dir string) ([]Binding, error) {
 			})
 		}
 	}
-	return bindings, nil
+	return bindings
 }
 
 // loadQuestPropRows 读 <Object><Property k="v"/></Object> 属性表文件。

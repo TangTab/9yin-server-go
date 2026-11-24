@@ -1,0 +1,358 @@
+<!-- 生成物：go run ./tools/gen_scene_waypoints；勿手改（数据换代重跑，-verify 对拍）。 -->
+<SceneWaypoints>
+  <Scene resource="city01" config="ini\scene\city01_YanJing" name="燕京" category="city" landing="HomePointcity01D">
+    <Waypoint name="HomePointcity01A" title="异人庄荒坟冢" x="1370.026" y="-36.974" z="281.584" orient="3.25" kind="home" source="city01_01"></Waypoint>
+    <Waypoint name="HomePointcity01B" title="西山猎场百草堂" x="1166.853" y="-96.274" z="1205.964" orient="0.867" kind="home" source="city01_02"></Waypoint>
+    <Waypoint name="HomePointcity01C" title="东方世家百草堂" x="583.724" y="-157.707" z="1333.496" orient="2.758" kind="home" source="city01_03"></Waypoint>
+    <Waypoint name="HomePointcity01D" title="燕京城义庄" x="146.539" y="-104.698" z="-105.03" orient="2.748" kind="home" safe="true" source="city01_04"></Waypoint>
+    <Waypoint name="HomePointcity01E" title="无瑕山" x="1057.462" y="-36.911" z="-977.189" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointcity01F" title="醉柳谷" x="-465.208" y="-99.411" z="1502.661" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="city02" config="ini\scene\city02_SuZhou" name="苏州" category="city" landing="HomePointcity02E">
+    <Waypoint name="HomePointcity02A" title="枫晚林百草堂" x="1515.186" y="3.27" z="233.062" orient="1.737" kind="home" source="city02_01"></Waypoint>
+    <Waypoint name="HomePointcity02B" title="碧螺岛百草堂" x="1255.844" y="4.234" z="888.608" orient="6.15" kind="home" source="city02_02"></Waypoint>
+    <Waypoint name="HomePointcity02C" title="太湖湾百草堂" x="1146.502" y="19.534" z="1210.808" orient="2.227" kind="home" source="city02_03"></Waypoint>
+    <Waypoint name="HomePointcity02D" title="风铃谷百草堂" x="315.071" y="21.685" z="1123.367" orient="4.5" kind="home" source="city02_04"></Waypoint>
+    <Waypoint name="HomePointcity02E" title="苏州城义庄" x="328.31" y="3.663" z="762.357" orient="5.59" kind="home" safe="true" source="city02_05"></Waypoint>
+    <Waypoint name="HomePointcity02F" title="虎丘百草堂" x="814.12" y="23.068" z="358.19" orient="4.15" kind="home" source="city02_06"></Waypoint>
+    <Waypoint name="HomePointcity02G" title="坠仙崖" x="1249.455" y="20.089" z="-210.293" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointcity02H" title="栖仙峰" x="2065.193" y="20.089" z="801.605" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointcity02I" title="慕容世家百草堂" x="1027.41" y="11.956" z="2384.934" orient="2.508" kind="home" source="city02_07"></Waypoint>
+  </Scene>
+  <Scene resource="city03" config="ini\scene\city03_JinLing" name="金陵" category="city" landing="HomePointcity03A">
+    <Waypoint name="HomePointcity03A" title="金陵城蒲衣巷" x="1778.047" y="17.532" z="1071.119" orient="5.343" kind="home" safe="true" source="city03_01"></Waypoint>
+    <Waypoint name="HomePointcity03B" title="金陵北郊百草堂" x="1587" y="12.5" z="-27" orient="1.57" kind="home" source="city03_02"></Waypoint>
+    <Waypoint name="HomePointcity03C" title="金陵西郊百草堂" x="1791.267" y="0.308" z="1909.546" orient="5.488" kind="home" source="city03_03"></Waypoint>
+    <Waypoint name="HomePointcity03D" title="金陵南郊百草堂" x="1090.146" y="15.496" z="2252.097" orient="5.28" kind="home" source="city03_04"></Waypoint>
+    <Waypoint name="HomePointcity03E" title="金陵东郊百草堂" x="418.585" y="3.848" z="1166.551" orient="4.395" kind="home" source="city03_05"></Waypoint>
+  </Scene>
+  <Scene resource="city04" config="ini\scene\city04_LuoYang" name="洛阳" category="city" landing="HomePointcity04A">
+    <Waypoint name="HomePointcity04A" title="洛阳城义庄" x="1139.839" y="-15.236" z="648.953" orient="3.055" kind="home" safe="true" source="city04_01"></Waypoint>
+    <Waypoint name="HomePointcity04B" title="龙门石窟百草堂" x="1341.612" y="2.298" z="1333.439" orient="5.008" kind="home" source="city04_02"></Waypoint>
+    <Waypoint name="HomePointcity04C" title="燕门世家百草堂" x="491.65" y="-47.253" z="357.134" orient="1.055" kind="home" source="city04_03"></Waypoint>
+    <Waypoint name="HomePointcity04D" title="白马寺百草堂" x="220.219" y="-4.585" z="486.976" orient="4.58" kind="home" source="city04_04"></Waypoint>
+    <Waypoint name="HomePointcity04E" title="秦王府百草堂" x="547.75" y="-3.761" z="1027.284" orient="0.66" kind="home" source="city04_05"></Waypoint>
+    <Waypoint name="HomePointcity04F" title="冰蚀崖" x="-465.238" y="20.089" z="926.598" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointcity04G" title="伏虎山" x="414.398" y="20.089" z="1777.073" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="city05" config="ini\scene\city05_ChengDu" name="成都" category="city" landing="HomePointcity05B">
+    <Waypoint name="HomePointcity05A" title="浣花溪百草堂" x="1042.226" y="30.526" z="846.99" orient="1.732" kind="home" source="city05_01"></Waypoint>
+    <Waypoint name="HomePointcity05B" title="成都城义庄" x="911.073" y="31.192" z="537.35" orient="1.742" kind="home" safe="true" source="city05_02"></Waypoint>
+    <Waypoint name="HomePointcity05C" title="南宫世家百草堂" x="292.913" y="33.958" z="440.641" orient="2.412" kind="home" source="city05_03"></Waypoint>
+    <Waypoint name="HomePointcity05D" title="问心崖" x="1057.546" y="20.089" z="78.719" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointcity05E" title="清风谷" x="-17.28" y="20.089" z="1182.486" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointcity05F" title="成都徐家庄" x="575.13" y="38.63" z="272.576" orient="1.045" kind="home" safe="true" source="city05_04"></Waypoint>
+    <Waypoint name="HomePointcity05G" title="成都金针沈家" x="354.6" y="81" z="800.1" orient="1.045" kind="home" safe="true" source="city05_05"></Waypoint>
+  </Scene>
+  <Scene resource="born01" config="ini\scene\born01_MoHeZhen" name="鸡鸣驿" category="born" landing="HomePointborn01A">
+    <Waypoint name="HomePointborn01A" title="鸡鸣驿" x="693.961" y="24.704" z="404.084" orient="1.941" kind="home" safe="true" source="born01_01"></Waypoint>
+    <Waypoint name="HomePointborn01B" title="碧华谷" x="754.216" y="5.178" z="624.037" orient="4.678" kind="home" source="born01_02"></Waypoint>
+    <Waypoint name="HomePointborn01C" title="常青岭" x="349.282" y="25.842" z="415.291" orient="0.837" kind="home" source="born01_03"></Waypoint>
+    <Waypoint name="HomePointborn01D" title="恶虎岗" x="297.224" y="98.879" z="720.482" orient="1.8" kind="home" source="born01_04"></Waypoint>
+    <Waypoint name="HomePointborn01E" title="昆吾峰" x="65.574" y="20.089" z="-465.206" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn01F" title="蜈蚣岭" x="382.435" y="20.089" z="1297.166" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="born02" config="ini\scene\born02_ERenGU" name="恶人谷" category="born" landing="HomePointborn02A">
+    <Waypoint name="HomePointborn02A" title="恶人谷百草堂" x="905.069" y="10.81" z="196.98" orient="1.61" kind="home" safe="true" source="born02_01"></Waypoint>
+    <Waypoint name="HomePointborn02B" title="侠客洞百草堂" x="645.778" y="5.956" z="618.477" orient="2.748" kind="home" source="born02_02"></Waypoint>
+    <Waypoint name="HomePointborn02C" title="侠客峰百草堂" x="463.388" y="28.131" z="684.138" orient="4.408" kind="home" source="born02_03"></Waypoint>
+    <Waypoint name="HomePointborn02D" title="地灵山百草堂" x="426.355" y="5.674" z="171.975" orient="0.82" kind="home" source="born02_04"></Waypoint>
+    <Waypoint name="HomePointborn02E" title="星宿海百草堂" x="134.465" y="-4.4" z="-195.052" orient="4.058" kind="home" source="born02_05"></Waypoint>
+    <Waypoint name="HomePointborn02F" title="素云宫荒坟冢" x="58.971" y="3.723" z="328.414" orient="3.288" kind="home" source="born02_06"></Waypoint>
+    <Waypoint name="HomePointborn02G" title="孤云峰" x="289.574" y="20.089" z="-721.31" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn02H" title="铸剑谷" x="126.33" y="20.089" z="1137.062" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn02I" title="恶人谷百草堂" x="905.048" y="10.81" z="196.98" orient="0" kind="home" safe="true" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn02J" title="恶人谷百草堂" x="552" y="32.5" z="922" orient="0" kind="home" safe="true" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="born03" config="ini\scene\born03_YanYuZhuang" name="烟雨庄" category="born" landing="HomePointborn03B">
+    <Waypoint name="HomePointborn03A" title="栖凤山百草堂" x="862.511" y="81.196" z="429.953" orient="6.21" kind="home" source="born03_01"></Waypoint>
+    <Waypoint name="HomePointborn03B" title="烟雨庄百草堂" x="460.629" y="12.811" z="659.731" orient="5.58" kind="home" safe="true" source="born03_02"></Waypoint>
+    <Waypoint name="HomePointborn03C" title="翔云山百草堂" x="231.529" y="163.176" z="388.355" orient="0.8" kind="home" source="born03_03"></Waypoint>
+    <Waypoint name="HomePointborn03D" title="盐帮荒坟冢" x="27.519" y="6.789" z="1244.411" orient="2.86" kind="home" source="born03_04"></Waypoint>
+    <Waypoint name="HomePointborn03E" title="天外天荒地" x="-691.59" y="2.558" z="401.833" orient="1.62" kind="home" source="born03_05"></Waypoint>
+    <Waypoint name="HomePointborn03F" title="忘忧崖" x="-914.213" y="20.089" z="1470.628" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn03G" title="断水崖" x="1201.298" y="20.089" z="1313.499" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn03H" title="烟雨庄码头百草堂" x="877.488" y="22.834" z="2135.737" orient="-1.46" kind="home" source="born03_06"></Waypoint>
+  </Scene>
+  <Scene resource="born04" config="ini\scene\born04_QianDengZhen" name="千灯镇" category="born" landing="HomePointborn04A">
+    <Waypoint name="HomePointborn04A" title="千灯镇百草堂" x="874.933" y="-32.392" z="746.688" orient="0.335" kind="home" safe="true" source="born04_01"></Waypoint>
+    <Waypoint name="HomePointborn04B" title="乱云涧荒坟冢" x="931.811" y="30.819" z="922.534" orient="4.885" kind="home" source="born04_02"></Waypoint>
+    <Waypoint name="HomePointborn04C" title="天香茶林百草堂" x="428.81" y="-35.209" z="666.87" orient="2.582" kind="home" source="born04_03"></Waypoint>
+    <Waypoint name="HomePointborn04D" title="挑灯崖百草堂" x="617.284" y="33.093" z="247.513" orient="1.882" kind="home" source="born04_04"></Waypoint>
+    <Waypoint name="HomePointborn04E" title="试剑崖" x="734.493" y="20.089" z="1553.135" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointborn04F" title="苍龙岭" x="-49.02" y="20.089" z="446.851" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school01" config="ini\scene\school01_JinYiWei" name="锦衣卫" category="school" landing="HomePointschool01A">
+    <Waypoint name="HomePointschool01A" title="锦衣卫百草堂" x="437.576" y="66.607" z="3.387" orient="4.78" kind="home" safe="true" source="school01_01"></Waypoint>
+    <Waypoint name="HomePointschool01B" title="乱葬岗百草堂" x="480.123" y="49.645" z="474.573" orient="0.69" kind="home" source="school01_02"></Waypoint>
+    <Waypoint name="HomePointschool01C" title="阴冥山荒坟冢" x="662.476" y="61.244" z="665.955" orient="0" kind="home" source="school01_03"></Waypoint>
+    <Waypoint name="HomePointschool01D" title="落英谷" x="446.476" y="20.089" z="1073.142" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool01E" title="三指峰" x="1009.257" y="20.089" z="225.509" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school02" config="ini\scene\school02_GaiBang" name="丐帮" category="school" landing="HomePointschool02B">
+    <Waypoint name="HomePointschool02A" title="万兽岭荒坟冢" x="518.297" y="9.741" z="691.406" orient="2.97" kind="home" source="school02_01"></Waypoint>
+    <Waypoint name="HomePointschool02B" title="北岭村广场" x="581.209" y="16.702" z="296.34" orient="1.97" kind="home" safe="true" source="school02_02"></Waypoint>
+    <Waypoint name="HomePointschool02C" title="断云崖" x="449.656" y="20.089" z="-338.221" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool02D" title="回雁峰" x="1233.386" y="20.089" z="1057.425" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool02E" title="百兽庄百草堂" x="340.197" y="87.078" z="1014.906" orient="4.813" kind="home" safe="true" source="school02_03"></Waypoint>
+  </Scene>
+  <Scene resource="school03" config="ini\scene\school03_JunZiTang" name="君子堂" category="school" landing="HomePointschool03A">
+    <Waypoint name="HomePointschool03A" title="君子堂百草堂" x="768.998" y="104.474" z="496.142" orient="1.625" kind="home" safe="true" source="school03_01"></Waypoint>
+    <Waypoint name="HomePointschool03B" title="雾竹谷百草堂" x="1169.242" y="9.474" z="515.606" orient="0.772" kind="home" source="school03_02"></Waypoint>
+    <Waypoint name="HomePointschool03C" title="兰谷百草堂" x="960.346" y="3.625" z="1133.417" orient="1.152" kind="home" source="school03_03"></Waypoint>
+    <Waypoint name="HomePointschool03D" title="神木岭百草堂" x="781.852" y="37.865" z="1505.16" orient="4.935" kind="home" source="school03_04"></Waypoint>
+    <Waypoint name="HomePointschool03E" title="飞鹤山" x="-817.217" y="20.089" z="1246.453" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool03F" title="九里崖" x="1921.571" y="20.089" z="590.779" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school04" config="ini\scene\school04_JiLeGu" name="极乐谷" category="school" landing="HomePointschool04A">
+    <Waypoint name="HomePointschool04A" title="极乐谷百草堂" x="278.084" y="136.105" z="-249.344" orient="2.055" kind="home" safe="true" source="school04_01"></Waypoint>
+    <Waypoint name="HomePointschool04B" title="无肠谷百草堂" x="245.043" y="24.4" z="659.682" orient="4.873" kind="home" source="school04_03"></Waypoint>
+    <Waypoint name="HomePointschool04C" title="黑风山百草堂" x="850.501" y="14.584" z="375.374" orient="5.358" kind="home" source="school04_02"></Waypoint>
+    <Waypoint name="HomePointschool04D" title="段天崖" x="1457.356" y="20.089" z="417.562" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool04E" title="舍身崖" x="-497.203" y="20.089" z="926.519" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school05" config="ini\scene\school05_TangMen" name="唐门" category="school" landing="HomePointschool05A">
+    <Waypoint name="HomePointschool05A" title="唐家堡百草堂" x="965.241" y="71.079" z="-88.753" orient="0.352" kind="home" safe="true" source="school05_01"></Waypoint>
+    <Waypoint name="HomePointschool05B" title="沐云庄百草堂" x="717.926" y="6.827" z="494.769" orient="1.912" kind="home" source="school05_02"></Waypoint>
+    <Waypoint name="HomePointschool05C" title="蛇窟荒坟冢" x="298.38" y="-16.392" z="606.103" orient="3.545" kind="home" source="school05_03"></Waypoint>
+    <Waypoint name="HomePointschool05D" title="十二连环坞荒坟冢" x="490.9" y="85.919" z="1030.1" orient="5.335" kind="home" source="school05_04"></Waypoint>
+    <Waypoint name="HomePointschool05E" title="摘月峰" x="862.453" y="20.089" z="1553.246" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool05F" title="勾漏山" x="-465.1" y="20.089" z="158.559" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school06" config="ini\scene\school06_EMei" name="峨眉" category="school" landing="HomePointschool06C">
+    <Waypoint name="HomePointschool06A" title="云顶百草堂" x="744.778" y="156.129" z="4.145" orient="3.1" kind="home" source="school06_01"></Waypoint>
+    <Waypoint name="HomePointschool06B" title="天池百草堂" x="938.306" y="75.432" z="320.017" orient="4.2" kind="home" source="school06_02"></Waypoint>
+    <Waypoint name="HomePointschool06C" title="峨眉山百草堂" x="403.423" y="123.378" z="209.999" orient="0.6" kind="home" safe="true" source="school06_03"></Waypoint>
+    <Waypoint name="HomePointschool06D" title="鸣鹤观百草堂" x="690.833" y="35.872" z="723.448" orient="5.5" kind="home" source="school06_04"></Waypoint>
+    <Waypoint name="HomePointschool06E" title="九幽山" x="-177.294" y="20.089" z="606.405" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool06F" title="黑风谷" x="1105.243" y="20.089" z="1121.469" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school07" config="ini\scene\school07_WuDang" name="武当" category="school" landing="HomePointschool07B">
+    <Waypoint name="HomePointschool07A" title="卧虎岭荒坟冢" x="1163.682" y="2.967" z="990.717" orient="3.795" kind="home" source="school07_01"></Waypoint>
+    <Waypoint name="HomePointschool07B" title="龙南村百草堂" x="323.932" y="-0.372" z="812.682" orient="0.385" kind="home" safe="true" source="school07_02"></Waypoint>
+    <Waypoint name="HomePointschool07C" title="五老峰百草堂" x="983.217" y="-3.709" z="612.659" orient="3.405" kind="home" source="school07_03"></Waypoint>
+    <Waypoint name="HomePointschool07D" title="榆须岭百草堂" x="186.192" y="7.029" z="675.373" orient="3.46" kind="home" source="school07_04"></Waypoint>
+    <Waypoint name="HomePointschool07E" title="武当山百草堂" x="420.623" y="109.971" z="394.578" orient="1.595" kind="home" safe="true" source="school07_05"></Waypoint>
+    <Waypoint name="HomePointschool07F" title="龙牙山百草堂" x="117.415" y="19.068" z="144.899" orient="5.09" kind="home" source="school07_06"></Waypoint>
+    <Waypoint name="HomePointschool07G" title="金顶百草堂" x="711.632" y="15.517" z="101.686" orient="0.145" kind="home" source="school07_07"></Waypoint>
+    <Waypoint name="HomePointschool07H" title="神风岭" x="-465.194" y="20.089" z="-161.5" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool07I" title="通天峰" x="1361.115" y="20.089" z="-94.441" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school08" config="ini\scene\school08_ShaoLin" name="少林" category="school" landing="HomePointschool08D">
+    <Waypoint name="HomePointschool08A" title="塔林百草堂" x="716.797" y="-30.958" z="853.56" orient="2.605" kind="home" source="school08_01"></Waypoint>
+    <Waypoint name="HomePointschool08B" title="太平村百草堂" x="517.123" y="-52.745" z="670.984" orient="1.035" kind="home" source="school08_02"></Waypoint>
+    <Waypoint name="HomePointschool08C" title="嵩阳书院百草堂" x="303.562" y="6.414" z="906.293" orient="5.413" kind="home" source="school08_03"></Waypoint>
+    <Waypoint name="HomePointschool08D" title="少林寺百草堂" x="735.698" y="73.5" z="401.023" orient="1.205" kind="home" safe="true" source="school08_04"></Waypoint>
+    <Waypoint name="HomePointschool08E" title="嵩山铁剑门荒坟冢" x="349.788" y="25.831" z="287.869" orient="4.978" kind="home" source="school08_05"></Waypoint>
+    <Waypoint name="HomePointschool08F" title="不归谷" x="-113.327" y="20.089" z="1278.493" orient="0" kind="home" source="homepoint"></Waypoint>
+    <Waypoint name="HomePointschool08G" title="寒梅谷" x="702.488" y="20.089" z="1650.201" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school09" config="ini\scene\school09_YiHuaGong" name="移花宫" category="school" landing="HomePointschool09A">
+    <Waypoint name="HomePointschool09A" title="移花宫眠楼" x="340.16" y="47.979" z="657.284" orient="2.588" kind="home" safe="true" source="school09_01"></Waypoint>
+    <Waypoint name="HomePointschool09B" title="雾花林渡口" x="827.378" y="-9.839" z="1236.628" orient="3.238" kind="home" source="school09_02"></Waypoint>
+  </Scene>
+  <Scene resource="school10" config="ini\scene\school10_taohuadao" name="四月岛" category="school" landing="HomePointschool10A">
+    <Waypoint name="HomePointschool10A" title="四月岛百草堂" x="-390.249" y="41.262" z="73.963" orient="0.92" kind="home" safe="true" source="school10_01"></Waypoint>
+    <Waypoint name="HomePointschool10B" title="四月岛游鲨屿" x="-523.788" y="48.285" z="-1214.42" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school11" config="ini\scene\school11_wugenmen" name="无根门" category="school" landing="HomePointschool11A">
+    <Waypoint name="HomePointschool11A" title="无根门地宫" x="-89.36" y="3.315" z="338.454" orient="3.138" kind="home" safe="true" source="school11_01"></Waypoint>
+  </Scene>
+  <Scene resource="school12" config="ini\scene\school12_wuxianjiao" name="五仙教" category="school" landing="HomePointschool12A">
+    <Waypoint name="HomePointschool12A" title="五仙教百草堂" x="1451.899" y="49.252" z="799.405" orient="1.335" kind="home" safe="true" source="school12_01"></Waypoint>
+  </Scene>
+  <Scene resource="school13" config="ini\scene\school13_xuedaomen" name="血刀堂" category="school" landing="HomePointschool13A">
+    <Waypoint name="HomePointschool13A" title="血刀堂百草堂" x="552" y="32.5" z="922" orient="0" kind="home" safe="true" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school14" config="ini\scene\school14_GuMuPai" name="西山古墓" category="school" landing="HomePointschool14A">
+    <Waypoint name="HomePointschool14A" title="西山古墓百草堂" x="-277" y="356" z="-325" orient="0" kind="home" safe="true" source="school14_01"></Waypoint>
+  </Scene>
+  <Scene resource="school15" config="ini\scene\school15_NianLuoBa" name="念萝坝" category="school" landing="HomePointschool15A">
+    <Waypoint name="HomePointschool15A" title="念萝坝百草堂" x="2133.586" y="108.031" z="1007.968" orient="2.632" kind="home" safe="true" source="school15_01"></Waypoint>
+  </Scene>
+  <Scene resource="school17" config="ini\scene\school17_HuaShanPai" name="华山派" category="school" landing="HomePointschool17A">
+    <Waypoint name="HomePointschool17A" title="华山派百草堂" x="1567.773" y="134.784" z="694.839" orient="2.78" kind="home" safe="true" source="school17_01"></Waypoint>
+  </Scene>
+  <Scene resource="school18" config="ini\scene\school18_DaMo" name="达摩派" category="school" landing="HomePointschool18A">
+    <Waypoint name="HomePointschool18A" title="达摩派百草堂" x="-373.021" y="276.227" z="-573.989" orient="-0.79" kind="home" safe="true" source="school18_01"></Waypoint>
+  </Scene>
+  <Scene resource="school19" config="ini\scene\school19_ShenShuiGong" name="神水宫" category="school" landing="HomePointschool19A">
+    <Waypoint name="HomePointschool19A" title="神水宫百草堂" x="2271.06" y="163.409" z="-1379.284" orient="1.57" kind="home" safe="true" source="school19_01"></Waypoint>
+    <Waypoint name="HomePointschool19B" title="藏风谷百草堂" x="2193.329" y="137.35" z="-640.111" orient="0" kind="home" source="homepoint"></Waypoint>
+  </Scene>
+  <Scene resource="school20" config="ini\scene\school20_mingjiao" name="明教" category="school" landing="HomePointschool20A">
+    <Waypoint name="HomePointschool20A" title="明教百草堂" x="-140.371" y="93.089" z="162.732" orient="3.18" kind="home" safe="true" source="school20_01"></Waypoint>
+    <Waypoint name="HomePointschool20B" title="乱石原百草堂" x="237.095" y="29.438" z="-289.862" orient="0.13" kind="home" source="school20_02"></Waypoint>
+  </Scene>
+  <Scene resource="school21" config="ini\scene\school21_shenjiying" category="school" landing="HomePointschool21A">
+    <Waypoint name="HomePointschool21A" title="神机营百草堂" x="-45.4" y="18.6" z="-46.9" orient="0.1" kind="home" safe="true" source="school21_01"></Waypoint>
+    <Waypoint name="HomePointschool21B" title="左路军营百草堂" x="150.799" y="15.852" z="222.334" orient="2.51" kind="home" source="school21_02"></Waypoint>
+    <Waypoint name="HomePointschool21C" title="落锤之地百草堂" x="67.42" y="16.571" z="-417.349" orient="0" kind="home" source="school21_03"></Waypoint>
+  </Scene>
+  <Scene resource="school22" config="ini\scene\school22_tianshan" name="天山派" category="school" landing="HomePointschool22A">
+    <Waypoint name="HomePointschool22A" title="天山派百草堂" x="1594.875" y="163.137" z="1201.744" orient="0.09" kind="home" safe="true" source="school22_01"></Waypoint>
+    <Waypoint name="HomePointschool22B" title="隐龙坡百草堂" x="937.121" y="43.34" z="1753.047" orient="-3.059" kind="home" source="school22_02"></Waypoint>
+  </Scene>
+  <Scene resource="school23" config="ini\scene\school23_xingmiaoge" name="星渺阁" category="school" landing="HomePointschool23A">
+    <Waypoint name="HomePointschool23A" title="星渺阁百草堂" x="259.598" y="246.446" z="70.54" orient="-1.32" kind="home" safe="true" source="school23_01"></Waypoint>
+  </Scene>
+  <Scene resource="school24" config="ini\scene\school24_kunlun" name="昆仑派" category="school" landing="HomePointschool24A">
+    <Waypoint name="HomePointschool24A" title="昆仑派百草堂" x="64.552" y="150.969" z="-153.422" orient="-0.92" kind="home" safe="true" source="school24_01"></Waypoint>
+    <Waypoint name="HomePointschool24B" title="天玑小道百草堂" x="82.455" y="32.715" z="154.238" orient="-0.39" kind="home" source="school24_02"></Waypoint>
+  </Scene>
+  <Scene resource="school25" config="ini\scene\school25_tianya" name="天涯海阁" category="school" landing="HomePointschool25A">
+    <Waypoint name="HomePointschool25A" title="天涯海阁百草堂" x="1745.635" y="18.729" z="1066.64" orient="0.3" kind="home" safe="true" source="school25_01"></Waypoint>
+  </Scene>
+  <Scene resource="school26" config="ini\scene\school26_xingtianbao" name="刑天城" category="school" landing="HomePointschool26A">
+    <Waypoint name="HomePointschool26A" title="刑天城百草堂" x="-542.409" y="72.121" z="426.395" orient="5.513" kind="home" safe="true" source="school26_01"></Waypoint>
+    <Waypoint name="HomePointschool26B" title="外城百草堂" x="-282.494" y="28.206" z="871.581" orient="0.82" kind="home" source="school26_02"></Waypoint>
+  </Scene>
+  <Scene resource="school28" config="ini\scene\school28_wanghui" name="望辉洲" category="school" landing="HomePointschool28A">
+    <Waypoint name="HomePointschool28A" title="望辉洲百草堂" x="119.267" y="12.734" z="3.625" orient="1.385" kind="home" safe="true" source="school28_01"></Waypoint>
+  </Scene>
+  <Scene resource="school29" config="ini\scene\school29" name="秘境.山鬼地窟" category="school" landing="npc:Relive_Fhjiangyou01">
+    <Waypoint name="npc:Relive_Fhjiangyou01" title="游方药师" x="179.145" y="80.018" z="-195.072" orient="0" kind="npc" source="commonnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="school30" config="ini\scene\school30_wuxu" name="巫墟" category="school" landing="HomePointschool30A">
+    <Waypoint name="HomePointschool30A" title="巫墟百草堂" x="-3927.438" y="69.36" z="-5407.769" orient="-0.135" kind="home" safe="true" source="school30_01"></Waypoint>
+    <Waypoint name="HomePointschool30C" title="云中阶梯百草堂" x="-4559.972" y="-36.715" z="-5723.88" orient="3.02" kind="home" source="school30_03"></Waypoint>
+  </Scene>
+  <Scene resource="school31" config="ini\scene\school31_shenjihui" name="长乐坊" category="school" landing="HomePointschool31A">
+    <Waypoint name="HomePointschool31A" title="长乐坊百草堂" x="-48.765" y="-153.637" z="-4770.149" orient="0.3" kind="home" safe="true" source="school31_01"></Waypoint>
+  </Scene>
+  <Scene resource="scene01" config="ini\scene\scene01_YouYunShiLiuZhou" name="幽云十六州" category="scene" landing="HomePointscene01A">
+    <Waypoint name="HomePointscene01A" title="镇虏关百草堂" x="970.337" y="55.148" z="168.989" orient="2.557" kind="home" source="scene01_01"></Waypoint>
+    <Waypoint name="HomePointscene01B" title="镇关山义庄" x="884.011" y="55.818" z="853.585" orient="3.763" kind="home" source="scene01_02"></Waypoint>
+    <Waypoint name="HomePointscene01C" title="古战场百草堂" x="636.008" y="28.799" z="671.081" orient="0.452" kind="home" source="scene01_03"></Waypoint>
+    <Waypoint name="HomePointscene01D" title="碣石百草堂" x="244.913" y="-1.155" z="882.533" orient="4.428" kind="home" source="scene01_04"></Waypoint>
+    <Waypoint name="HomePointscene01E" title="石头城百草堂" x="110.59" y="36.991" z="458.492" orient="5.725" kind="home" source="scene01_05"></Waypoint>
+  </Scene>
+  <Scene resource="scene02" config="ini\scene\scene02_PengLaiXianJing" name="蓬莱仙境" category="scene" landing="HomePointscene02A">
+    <Waypoint name="HomePointscene02A" title="蓬莱仙山百草堂" x="499.662" y="81.607" z="566.498" orient="6.028" kind="home" source="scene02_02"></Waypoint>
+    <Waypoint name="HomePointscene02B" title="太乙仙境百草堂" x="498.463" y="81.603" z="564.857" orient="3.54" kind="home" source="scene02_03"></Waypoint>
+    <Waypoint name="HomePointscene02C" title="蓬莱水城百草堂" x="382.54" y="52.455" z="-95.517" orient="4.28" kind="home" source="scene02_01"></Waypoint>
+  </Scene>
+  <Scene resource="scene03" config="ini\scene\scene03_FanHuangPingYuan" name="泛黄平原" category="scene" landing="HomePointscene03A">
+    <Waypoint name="HomePointscene03A" title="马家村百草堂" x="463.638" y="-11.759" z="837.899" orient="4.498" kind="home" source="scene03_01"></Waypoint>
+    <Waypoint name="HomePointscene03B" title="万劫谷荒坟冢" x="352.959" y="12.203" z="678.437" orient="5.643" kind="home" source="scene03_02"></Waypoint>
+    <Waypoint name="HomePointscene03C" title="皇纲道百草堂" x="646.656" y="41.93" z="292.096" orient="0.645" kind="home" source="scene03_03"></Waypoint>
+    <Waypoint name="HomePointscene03D" title="西村墓林荒坟冢" x="786.025" y="-4.19" z="671.696" orient="0.76" kind="home" source="scene03_04"></Waypoint>
+  </Scene>
+  <Scene resource="scene04" config="ini\scene\scene04_XiangYangPo" name="向阳坡" category="scene" landing="HomePointscene04A">
+    <Waypoint name="HomePointscene04A" title="女儿国百草堂" x="398.911" y="-7.89" z="939.204" orient="1.595" kind="home" source="scene04_01"></Waypoint>
+    <Waypoint name="HomePointscene04B" title="骆绒牛场百草堂" x="381.76" y="8.996" z="740.449" orient="3.985" kind="home" source="scene04_02"></Waypoint>
+    <Waypoint name="HomePointscene04C" title="藏寨百草堂" x="241.944" y="5.921" z="525.524" orient="5.423" kind="home" source="scene04_03"></Waypoint>
+    <Waypoint name="HomePointscene04D" title="叹息城百草堂" x="395.744" y="11.58" z="329.406" orient="4.598" kind="home" source="scene04_04"></Waypoint>
+  </Scene>
+  <Scene resource="scene05" config="ini\scene\scene05_NianLuoBa" name="念萝坝" category="scene" landing="HomePointscene05A">
+    <Waypoint name="HomePointscene05A" title="梨花寨百草堂" x="1589.168" y="9.07" z="1605.329" orient="3.9" kind="home" source="scene05_01"></Waypoint>
+    <Waypoint name="HomePointscene05B" title="五仙教百草堂" x="1343.102" y="82.5" z="1246.427" orient="2.7" kind="home" source="scene05_02"></Waypoint>
+    <Waypoint name="HomePointscene05C" title="霓裳宫百草堂" x="1672.05" y="80.48" z="1185.05" orient="3.5" kind="home" source="scene05_03"></Waypoint>
+  </Scene>
+  <Scene resource="scene06" config="ini\scene\scene06_LingXiaoCheng" name="凌霄城" category="scene" landing="HomePointscene06A">
+    <Waypoint name="HomePointscene06A" title="木尔多雪山百草堂" x="1323.08" y="99.744" z="542.912" orient="2.387" kind="home" source="scene06_04"></Waypoint>
+    <Waypoint name="HomePointscene06B" title="纳涟措湖百草堂" x="271.152" y="46.938" z="723.954" orient="3.94" kind="home" source="scene06_02"></Waypoint>
+    <Waypoint name="HomePointscene06C" title="凌霄城百草堂" x="769.274" y="12.246" z="439.915" orient="0.59" kind="home" source="scene06_03"></Waypoint>
+    <Waypoint name="HomePointscene06D" title="腾格谷百草堂" x="543.386" y="-5.012" z="1015.991" orient="3.73" kind="home" source="scene06_01"></Waypoint>
+  </Scene>
+  <Scene resource="scene07" config="ini\scene\scene07_MeiHuaLing" name="梅花岭" category="scene" landing="HomePointscene07A">
+    <Waypoint name="HomePointscene07A" title="梅花岭百草堂" x="213.92" y="17.869" z="334.236" orient="2.1" kind="home" source="scene07_01"></Waypoint>
+    <Waypoint name="HomePointscene07B" title="李渡镇百草堂" x="477.814" y="55.417" z="293.296" orient="6.1" kind="home" source="scene07_02"></Waypoint>
+    <Waypoint name="HomePointscene07C" title="丹霞沼泽百草堂" x="551.449" y="24.067" z="-63.756" orient="0.3" kind="home" source="scene07_03"></Waypoint>
+  </Scene>
+  <Scene resource="scene08" config="ini\scene\scene08_SaiWaiDaMo" name="塞外大漠" category="scene" landing="HomePointscene08A">
+    <Waypoint name="HomePointscene08A" title="铁镜关义庄" x="387.267" y="6.243" z="679.848" orient="0.33" kind="home" source="scene08_01"></Waypoint>
+    <Waypoint name="HomePointscene08B" title="鸣沙谷百草堂" x="828.557" y="5.531" z="796.017" orient="3.153" kind="home" source="scene08_02"></Waypoint>
+    <Waypoint name="HomePointscene08C" title="铁血大旗门百草堂" x="883.259" y="6.516" z="360.792" orient="2.23" kind="home" source="scene08_03"></Waypoint>
+    <Waypoint name="HomePointscene08D" title="安息荒漠百草堂" x="336.038" y="5.13" z="98.744" orient="1.395" kind="home" source="scene08_04"></Waypoint>
+    <Waypoint name="HomePointscene08E" title="楼兰遗址百草堂" x="1211.616" y="2.592" z="-128.538" orient="3.248" kind="home" source="scene08_05"></Waypoint>
+  </Scene>
+  <Scene resource="scene09" config="ini\scene\scene09_SaiBeiCaoYuan" name="塞北草原" category="scene" landing="HomePointscene09A">
+    <Waypoint name="HomePointscene09A" title="西宁镇百草堂" x="1050.974" y="1.918" z="1525.646" orient="1.3" kind="home" source="scene09_01"></Waypoint>
+    <Waypoint name="HomePointscene09B" title="喀塔塔王庭荒坟冢" x="1750.926" y="19.553" z="1402.211" orient="3.33" kind="home" source="scene09_02"></Waypoint>
+    <Waypoint name="HomePointscene09C" title="九曲牧场百草堂" x="1273.295" y="1.71" z="994.184" orient="3.145" kind="home" source="scene09_03"></Waypoint>
+    <Waypoint name="HomePointscene09D" title="西夏王陵荒坟冢" x="512.984" y="16.883" z="474.57" orient="1.635" kind="home" source="scene09_04"></Waypoint>
+  </Scene>
+  <Scene resource="scene10" config="ini\scene\scene10_huashanlunjian" name="华山" category="scene" landing="npc:Block_huashan">
+    <Waypoint name="npc:Block_huashan" title="华山论剑" x="666" y="140.353" z="1746" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene11" config="ini\scene\scene11_kuaihuodao" name="快活岛" category="scene" landing="scene11_01">
+    <Waypoint name="scene11_01" title="快活岛" x="4.169" y="144.077" z="686.932" orient="1.388" kind="home" source="scene11_01"></Waypoint>
+    <Waypoint name="scene11_02" title="快活岛" x="-261.593" y="82.678" z="68.986" orient="-1.401" kind="home" source="scene11_02"></Waypoint>
+    <Waypoint name="scene11_03" title="快活岛" x="-470.401" y="87.912" z="-271.388" orient="0.134" kind="home" source="scene11_03"></Waypoint>
+    <Waypoint name="scene11_04" title="快活岛" x="-444.44" y="82.9" z="-6.578" orient="0.023" kind="home" source="scene11_04"></Waypoint>
+    <Waypoint name="scene11_05" title="快活岛" x="-103.991" y="96.685" z="25.781" orient="-1.558" kind="home" source="scene11_05"></Waypoint>
+    <Waypoint name="scene11_06" title="快活岛" x="-3.592" y="135.655" z="156.758" orient="1.24" kind="home" source="scene11_06"></Waypoint>
+    <Waypoint name="scene11_07" title="快活岛" x="-193.072" y="158.922" z="517.914" orient="1.026" kind="home" source="scene11_07"></Waypoint>
+    <Waypoint name="scene11_08" title="快活岛" x="-353.589" y="135.429" z="711.283" orient="3.104" kind="home" source="scene11_08"></Waypoint>
+    <Waypoint name="scene11_09" title="快活岛" x="23.934" y="140.578" z="445.772" orient="-0.139" kind="home" source="scene11_09"></Waypoint>
+    <Waypoint name="scene11_10" title="快活岛" x="178.273" y="144.139" z="772.983" orient="3.006" kind="home" source="scene11_10"></Waypoint>
+    <Waypoint name="scene11_11" title="快活岛" x="269.798" y="153.142" z="568.82" orient="-1.52" kind="home" source="scene11_11"></Waypoint>
+    <Waypoint name="scene11_12" title="快活岛" x="268.059" y="150.331" z="374.815" orient="-0.575" kind="home" source="scene11_12"></Waypoint>
+    <Waypoint name="scene11_13" title="快活岛" x="32.142" y="83.39" z="-188.525" orient="-1.403" kind="home" source="scene11_13"></Waypoint>
+    <Waypoint name="scene11_14" title="快活岛" x="-359.236" y="82.593" z="253.958" orient="2.109" kind="home" source="scene11_14"></Waypoint>
+  </Scene>
+  <Scene resource="scene12" config="ini\scene\scene12" name="跃马草场" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="463.15" y="10.346" z="2242.198" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene13" config="ini\scene\scene13" name="高昌荒漠" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="519.612" y="100.554" z="-341.49" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene14" config="ini\scene\scene14" name="苍莽荒漠" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="42.863" y="128.255" z="180.982" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene15" config="ini\scene\scene15" name="楼兰鬼域" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="-20.833" y="58.081" z="-144.799" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene16" config="ini\scene\scene16" name="蓬莱岛" category="scene" landing="HomePointscene16A">
+    <Waypoint name="HomePointscene16A" title="魔剑门百草堂" x="557.225" y="371.279" z="-408.049" orient="0.355" kind="home" source="scene16_01"></Waypoint>
+    <Waypoint name="HomePointscene16B" title="神月宫百草堂" x="-74.291" y="323.662" z="-456.978" orient="-1.27" kind="home" source="scene16_02"></Waypoint>
+    <Waypoint name="HomePointscene16C" title="清音壁百草堂" x="-41.876" y="442.088" z="-35.085" orient="-2.74" kind="home" source="scene16_03"></Waypoint>
+    <Waypoint name="HomePointscene16D" title="生死判百草堂" x="-336.487" y="341.836" z="-292.889" orient="1.575" kind="home" source="scene16_04"></Waypoint>
+    <Waypoint name="HomePointscene16E" title="蓬莱村医馆" x="-257.23" y="307.652" z="-531.549" orient="0.865" kind="home" source="scene16_05"></Waypoint>
+  </Scene>
+  <Scene resource="scene17" config="ini\scene\scene17" name="侠客岛" category="scene" landing="HomePointscene17A">
+    <Waypoint name="HomePointscene17A" title="潜龙岛百草堂" x="1513.167" y="54.542" z="-901.78" orient="0" kind="home" source="scene17_01"></Waypoint>
+    <Waypoint name="HomePointscene17B" title="侠客岛百草堂" x="472.513" y="52.71" z="-1029.98" orient="2.985" kind="home" source="scene17_02"></Waypoint>
+    <Waypoint name="HomePointscene17C" title="神龙岛百草堂" x="-1398.384" y="67.078" z="-668.521" orient="-2.805" kind="home" source="scene17_03"></Waypoint>
+    <Waypoint name="HomePointscene17D" title="樱花岛百草堂" x="-1123.24" y="61.963" z="1094.492" orient="1.1" kind="home" source="scene17_04"></Waypoint>
+  </Scene>
+  <Scene resource="scene19" config="ini\scene\scene19" name="无极岛" category="scene" landing="HomePointscene19A">
+    <Waypoint name="HomePointscene19A" title="谷堆码头百草堂" x="-187.085" y="109.788" z="-102.474" orient="2.76" kind="home" source="scene19_01"></Waypoint>
+    <Waypoint name="HomePointscene19B" title="北湾村百草堂" x="159.811" y="112.101" z="-74.469" orient="-1.075" kind="home" source="scene19_02"></Waypoint>
+  </Scene>
+  <Scene resource="scene20" config="ini\scene\scene20" name="腾龙山" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="709" y="623" z="60" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene21" config="ini\scene\scene21" name="烟波雪谷" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="525" y="449" z="172" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene22" config="ini\scene\scene22" name="柞木峰" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="336" y="601" z="-782" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene23" config="ini\scene\scene23" name="净日池" category="scene" landing="npc:Event_xjh_kg_01">
+    <Waypoint name="npc:Event_xjh_kg_01" title="考古点" x="253" y="149" z="258" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene25" config="ini\scene\scene25" name="凌霄城" category="scene" landing="scene25_01">
+    <Waypoint name="scene25_01" title="凌霄城百草堂" x="769.6" y="12.3" z="439.6" orient="0.6" kind="home" source="scene25_01"></Waypoint>
+  </Scene>
+  <Scene resource="scene32" config="ini\scene\scene32" name="永夜城" category="scene" landing="HomePointscene32A">
+    <Waypoint name="HomePointscene32A" title="永夜城百草堂" x="1566.019" y="129.908" z="1402.802" orient="0.755" kind="home" source="scene32_01"></Waypoint>
+    <Waypoint name="HomePointscene32B" title="长明之舟百草堂" x="1344.083" y="56.985" z="1804.342" orient="1.01" kind="home" source="scene32_02"></Waypoint>
+  </Scene>
+  <Scene resource="scene33" config="ini\scene\scene33" name="鬼市" category="scene" landing="HomePointscene33A">
+    <Waypoint name="HomePointscene33A" title="鬼市百草堂" x="1619.491" y="-50.386" z="1139.963" orient="1.22" kind="home" source="scene33_01"></Waypoint>
+  </Scene>
+  <Scene resource="scene35" config="ini\scene\scene35" name="星垂城" category="scene" landing="npc:newworld_xcc_031">
+    <Waypoint name="npc:newworld_xcc_031" title="倭寇1" x="-374.052" y="201.81" z="226.712" orient="0" kind="npc" source="commonnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene36" config="ini\scene\scene36" category="scene" landing="npc:Event_2021byzyb_006">
+    <Waypoint name="npc:Event_2021byzyb_006" title="前往星垂城" x="-624.542" y="108.521" z="252.962" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene38" config="ini\scene\scene38" name="金乌岛" category="scene" landing="npc:Relive_Fhjiangyou">
+    <Waypoint name="npc:Relive_Fhjiangyou" title="游方药师" x="-824.238" y="62.864" z="-2940.229" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+  <Scene resource="scene39" config="ini\scene\scene39" name="图伦碛" category="scene" landing="npc:Relive_Fhjiangyou">
+    <Waypoint name="npc:Relive_Fhjiangyou" title="游方药师" x="-491.218" y="-31.283" z="-525.625" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
+  </Scene>
+</SceneWaypoints>

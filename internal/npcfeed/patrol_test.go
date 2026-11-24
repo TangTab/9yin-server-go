@@ -2,12 +2,14 @@ package npcfeed
 
 // patrol_test.go 巡逻数据域测试：路线三格式解析（含导航 id 列跳过）、
 // offline 排除、去重/高度过滤、时间表采样周期性、BindPatrol 绑定面与
-// 速度钳制；真档集成走仓根 testdata/mappath（born03）。
+// 速度钳制；短名边界匹配、缓存键带目录、解析统计；真档集成走仓根
+// testdata/share/creator/mappath（born03）。
 
 import (
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -109,6 +111,85 @@ r=,10,1,20,0,0,stand,nil,walk,nil,1,
 	}
 }
 
+// TestLoadPatrolRoutesPrefixBoundary 短名在 '_' 边界处匹配：adv040 不得
+// 吞进邻场景的 adv040a_lead.ini；与短名同名的档也收；空短名不匹配任何档。
+func TestLoadPatrolRoutesPrefixBoundary(t *testing.T) {
+	ResetPatrolCache()
+	dir := t.TempDir()
+	body := "[AI_x]\nr=,10,1,20,0,0,stand,nil,walk,nil,1,\nr=,30,1,40,0,0,stand,nil,walk,nil,1,\n"
+	writeRouteFile(t, dir, "adv040_6nei.ini", strings.Replace(body, "AI_x", "AI_in", 1))
+	writeRouteFile(t, dir, "adv040a_lead.ini", strings.Replace(body, "AI_x", "AI_neighbor", 1))
+	writeRouteFile(t, dir, "city09.ini", strings.Replace(body, "AI_x", "AI_exact", 1))
+
+	routes := LoadPatrolRoutes(dir, "adv040")
+	if routes["AI_in"] == nil {
+		t.Fatal("本场景路线缺席")
+	}
+	if _, exists := routes["AI_neighbor"]; exists {
+		t.Fatal("邻场景路线被前缀匹配吞入（adv040 不应收 adv040a_lead.ini）")
+	}
+	if routes = LoadPatrolRoutes(dir, "adv040a"); routes["AI_neighbor"] == nil {
+		t.Fatal("adv040a 自身的路线缺席")
+	}
+	if routes = LoadPatrolRoutes(dir, "city09_harbor"); routes["AI_exact"] == nil {
+		t.Fatal("与短名同名的档未装载")
+	}
+	if routes = LoadPatrolRoutes(dir, "_noname"); len(routes) != 0 {
+		t.Fatalf("空短名不应匹配任何档，得 %d 条", len(routes))
+	}
+}
+
+// TestLoadPatrolRoutesCacheKeyedByDirectory 缓存键带路线目录：同一场景
+// 目录换路线目录（env NINEYIN_MAPPATH_DIR / 测试切换数据根）不得命中
+// 另一目录的旧表。
+func TestLoadPatrolRoutesCacheKeyedByDirectory(t *testing.T) {
+	ResetPatrolCache()
+	a, b := t.TempDir(), t.TempDir()
+	body := "[AI_x]\nr=,10,1,20,0,0,stand,nil,walk,nil,1,\nr=,30,1,40,0,0,stand,nil,walk,nil,1,\n"
+	writeRouteFile(t, a, "city01_npc.ini", strings.Replace(body, "AI_x", "AI_a", 1))
+	writeRouteFile(t, b, "city01_npc.ini", strings.Replace(body, "AI_x", "AI_b", 1))
+
+	if routes := LoadPatrolRoutes(a, "city01_yanjing"); routes["AI_a"] == nil {
+		t.Fatal("目录 a 的路线缺席")
+	}
+	routes := LoadPatrolRoutes(b, "city01_yanjing")
+	if routes["AI_b"] == nil {
+		t.Fatal("目录 b 的路线缺席（命中了目录 a 的缓存）")
+	}
+	if _, exists := routes["AI_a"]; exists {
+		t.Fatal("目录 b 的表混入了目录 a 的路线")
+	}
+}
+
+// TestParseRouteTableStats 解析统计与服务端读数同源（构建器审计用）：
+// 成路线/点数不足/坏行各计其数，路线带 PathId。
+func TestParseRouteTableStats(t *testing.T) {
+	text := "[AI_ok]\r\n" +
+		"r=,10,1,20,0,0,stand,nil,walk,nil,1,\r\n" +
+		"r=,10.2,1,20.1,0,0,stand,nil,walk,nil,1,\r\n" + // 与上点 <0.5m，去重
+		"r=,30,1,40,1.5,500,stand,nil,run,nil,1,\r\n" +
+		"[AI_single]\r\nr=,10,1,20,0,0,stand,nil,walk,nil,1,\r\n" +
+		"[AI_bad]\r\nr=,x,1,20,0,0,stand,nil,walk,nil,1,\r\nr=,30,1,40,0,0,stand,nil,walk,nil,1,\r\n"
+	routes, stats := ParseRouteTable([]byte(text))
+	want := RouteTableStats{Sections: 3, Lines: 6, Rejected: 1, TooShort: 2, Routes: 1, Waypoints: 2}
+	if stats != want {
+		t.Fatalf("stats=%+v，应为 %+v", stats, want)
+	}
+	route := routes["AI_ok"]
+	if route == nil || route.PathID != "AI_ok" {
+		t.Fatalf("AI_ok 未成路线或缺 PathId: %+v", route)
+	}
+	last := route.Waypoints[len(route.Waypoints)-1]
+	if !last.Run || last.DwellMs != 500 || last.X != 30 {
+		t.Fatalf("尾点解析错位: %+v", last)
+	}
+	for _, dropped := range []string{"AI_single", "AI_bad"} {
+		if routes[dropped] != nil {
+			t.Fatalf("%s 不应成路线", dropped)
+		}
+	}
+}
+
 // TestBuildScheduleSampling 时间表：周期性（t 与 t+cycle 同位置）、行程
 // 中位移推进、非法入参返 nil。
 func TestBuildScheduleSampling(t *testing.T) {
@@ -174,9 +255,9 @@ func TestBindPatrolFaces(t *testing.T) {
 	}
 	spawns := []Spawn{
 		{ObjectID: 1, X: 102, Y: 0, Z: 101, PathID: "AI_x", Template: tpl(map[string]string{"WalkSpeed": "2", "RunSpeed": "6"})},
-		{ObjectID: 2, X: 100, Y: 0, Z: 100, Template: tpl(map[string]string{"PathID": "AI_x"})}, // 模板缺省
-		{ObjectID: 3, X: 500, Y: 0, Z: 500, PathID: "AI_x", Template: tpl(nil)},                 // 过远
-		{ObjectID: 4, X: 100, Y: 0, Z: 100, PathID: "nope", Template: tpl(nil)},                 // 路线缺席
+		{ObjectID: 2, X: 100, Y: 0, Z: 100, Template: tpl(map[string]string{"PathID": "AI_x"})},      // 模板缺省
+		{ObjectID: 3, X: 500, Y: 0, Z: 500, PathID: "AI_x", Template: tpl(nil)},                      // 过远
+		{ObjectID: 4, X: 100, Y: 0, Z: 100, PathID: "nope", Template: tpl(nil)},                      // 路线缺席
 		{ObjectID: 5, X: 100, Y: 0, Z: 100, PathID: "AI_x", Script: "AttackNPC", Template: tpl(nil)}, // 敌对
 	}
 	stats := BindPatrol(spawns, routes, 0)
@@ -215,13 +296,14 @@ func TestLoadPatrolRoutesBorn03(t *testing.T) {
 	if root == "" {
 		t.Skip("数据根缺席（真档不随仓）")
 	}
-	if _, err := res.Stat(filepath.Join(root, "mappath")); err != nil {
-		t.Skipf("mappath 缺席: %v", err)
+	mappathDir := filepath.Join(root, "share", "creator", "mappath")
+	if _, err := res.Stat(mappathDir); err != nil {
+		t.Skipf("share/creator/mappath 缺席: %v", err)
 	}
 	ResetPatrolCache()
-	routes := LoadPatrolRoutes(filepath.Join(root, "mappath"), "born03_yanyuzhuang")
+	routes := LoadPatrolRoutes(mappathDir, "born03_yanyuzhuang")
 	if len(routes) == 0 {
-		t.Fatal("born03 路线表为空（testdata/mappath 缺席？）")
+		t.Fatal("born03 路线表为空（testdata/share/creator/mappath 缺席？）")
 	}
 	spawns, _, err := BuildCatalog(root, "born03")
 	if err != nil {

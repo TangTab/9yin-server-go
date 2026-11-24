@@ -105,6 +105,7 @@ func (s *Server) transferPlayer(pl *Player, dest sceneDestination, source string
 
 	s.sendToClient(pl, entergen.ExitSceneFrame()) // 0x0C
 	s.sendRoleSave(pl)                            // 2433 切图即存档口径
+	pl.entryReady = false                         // 新一次进场：0x09 之前的 107 转储不落库
 	s.trace("scene switch start client=%d %s → %s (%s) 0x0C sent", pl.Conn1,
 		pl.roleState.Resource, dest.Resource, source)
 
@@ -132,6 +133,13 @@ func (s *Server) transferPlayer(pl *Player, dest sceneDestination, source string
 			pl.setWireIdent(prevIdent)
 			s.trace("scene switch 0x0D failed client=%d: %v", pl.Conn1, err)
 			return
+		}
+		// S2C 705 个性配置（有档）：官服口径每次完整进场登录段先发——
+		// 0x0B 之前，先于客户端切图后的 107 转储（2026-11-24 官服抓包：
+		// 切景 0x09 表重发 → 属性帧 → m705 → m414 → 0x0B）。旧「连接级
+		// 不重发」致切图后个性配置不恢复。
+		if customizing, cerr := entergen.CustomizingFrame(pl.roleState); cerr == nil && customizing != nil {
+			s.sendToClient(pl, customizing)
 		}
 		s.sendToClient(pl, entry)      // 0x0B
 		s.sendToClient(pl, appearance) // 0x0D（0x1F 推迟到 0x09 后）
@@ -188,7 +196,8 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 	// 全部随清，重入后须按登录就绪簇同序整推重建）。各域缺席的真机症状：
 	// AutoTrace 缺=点地图不发起寻路（msg266 不发）；View43 缺=faculty
 	// 普通开始按钮禁用；战斗属性簇缺=角色栏信息空白；键位/快捷栏缺=自定义
-	// 配置全丢。705 连接级不随切图重置（2433 定论），不重发。
+	// 配置全丢。705 已在 0x0B 之前随本次进场下发（transferPlayer），
+	// 本簇不重发。
 	if autoTrace, err := entergen.AutoTraceFrame(ctx); err == nil {
 		s.sendToClient(pl, autoTrace)
 		sent++
@@ -252,7 +261,7 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 	} else {
 		s.trace("reentry combat attrs failed client=%d: %v", pl.Conn1, err)
 	}
-	// 键位域 + 快捷栏行（挂玩家对象——PlayerObjectConfigFrames 不含 705）。
+	// 键位域 + 快捷栏行（挂玩家对象；705 已在 0x0B 前下发）。
 	if cfg, err := entergen.PlayerObjectConfigFrames(ctx); err == nil {
 		for _, frame := range cfg {
 			s.sendToClient(pl, frame)
@@ -267,8 +276,8 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 		sent++
 	}
 	// 表帧（0x09 属性/记录全表）与 0x28 化身/物理流不重发（连接级存活，
-	// 61036#8499 实证无表重发）；705 亦连接级不重发。挂玩家对象的域已由
-	// 上方清场重建簇整推。
+	// 61036#8499 实证无表重发）；705 每次进场重发（已在 0x0B 前）。挂玩家
+	// 对象的域已由上方清场重建簇整推。
 	// 邮箱重放（0x0C 清玩家对象上挂的记录，邮件行随重入簇恢复）。
 	sent += s.pushLetterRows(pl)
 	s.sendRoleSave(pl)

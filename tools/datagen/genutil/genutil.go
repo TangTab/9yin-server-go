@@ -35,6 +35,17 @@ func WriteFile(path string, data []byte) error {
 	if existingUsesCRLF(path) {
 		data = toCRLF(data)
 	}
+	return writeRetrying(path, data)
+}
+
+// WriteFileVerbatim 原样写出（建目录，不改行尾）：用于字节透传的产物
+// （巡逻路线等原样搬运的 ini）。与源逐字节相同，并入资源层时才能与既有
+// 层去重。占用重试同 WriteFile。
+func WriteFileVerbatim(path string, data []byte) error {
+	return writeRetrying(path, data)
+}
+
+func writeRetrying(path string, data []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}

@@ -2,8 +2,10 @@ package fsgame
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fskit"
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 )
 
 // 七期：场景域核心五模块（docs/official/FsGame全解与Go复刻.md §8 场景基础）。
@@ -140,6 +142,10 @@ func (m *CloneSceneModule) LoadResource(k *Kernel) error {
 
 // LoadCloneInfo 副本难度真档装载（share/clone/cloneinfo.ini——十五期接入：
 // 节=场景资源路径，Desc/三难度 PowerLevel）。缺档静默。
+//
+// 客户端档是 GBK（随 share 树原样进数据根），经 sharedata.ReadTextFile
+// 编码自适应——此前直接喂原始字节，值是 GBK 时（如 Desc）比对 / 下发
+// 全是乱码。
 func (m *CloneSceneModule) LoadCloneInfo(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return nil
@@ -147,7 +153,7 @@ func (m *CloneSceneModule) LoadCloneInfo(k *Kernel) error {
 	if m.Clones == nil {
 		m.Clones = make(map[string]map[string]string)
 	}
-	data, err := readResource(k.ResourcePath, "share/clone/cloneinfo.ini")
+	data, err := sharedata.ReadTextFile(filepath.Join(k.ResourcePath, "share", "clone", "cloneinfo.ini"))
 	if err != nil {
 		return nil // 缺档静默（官方 loadres 非致命面）
 	}

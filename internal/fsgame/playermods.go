@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fskit"
-	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 )
 
 // ---- RestoreModule（Init 序 137）----
@@ -873,7 +873,8 @@ func (m *ObjPropRefreshModule) LoadResource(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return nil
 	}
-	data, err := res.ReadFile(filepath.Join(k.ResourcePath, "share", "modifypack", "proppack.ini"))
+	// 客户端档是 GBK（随 share 树原样进数据根），经编码自适应入口读。
+	data, err := sharedata.ReadTextFile(filepath.Join(k.ResourcePath, "share", "modifypack", "proppack.ini"))
 	if err != nil {
 		return nil // 缺档静默（官方 loadres 非致命面）
 	}

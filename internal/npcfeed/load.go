@@ -1,8 +1,9 @@
 package npcfeed
 
-// load.go 服务端 XML 三件装载：NpcConfig 模板树 / NpcTemplate 战斗表 /
-// 场景 npc_creator 摆放。全部 <Object><Property k="v"/> 行方言
-//（npcgen 构建产物；UTF-8 声明直读，gb 系声明按 GB18030 超集解码）。
+// load.go NPC 三件装载：NpcConfig 模板树 / NpcTemplate 战斗表 / 场景
+// npc_creator 摆放。来源二选一（见 source.go）：直读客户端 share 树，或读
+// npcgen 构建产物——后者全部 <Object><Property k="v"/> 行方言（UTF-8 声明
+// 直读，gb 系声明按 GB18030 超集解码）。两条路给出的行方言相同。
 
 import (
 	"bytes"
@@ -16,6 +17,7 @@ import (
 	"sync"
 
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
+	"github.com/lizhanyin/9yin-server-go/internal/sharedata"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -62,10 +64,11 @@ var (
 )
 
 // LoadStore 装载模板树 + 战斗表（进程级缓存；root 变更时以首载为准）。
+// 来源按数据根现状选（见 source.go）。
 func LoadStore(root string) (map[string]TemplateRow, map[string]CombatRow, error) {
 	storeOnce.Do(func() {
 		storeRoot = root
-		templates, combat, storeErr = loadStoreOnce(root)
+		templates, combat, storeErr = loadStoreSource(root, TemplateSource(root), CombatSource(root))
 	})
 	if root != storeRoot {
 		return nil, nil, fmt.Errorf("npcfeed: 数据根已锚定 %s（进程级缓存），拒绝改载 %s", storeRoot, root)
@@ -79,12 +82,27 @@ func ResetStore() {
 	storeRoot, templates, combat, storeErr = "", nil, nil, nil
 }
 
-func loadStoreOnce(root string) (map[string]TemplateRow, map[string]CombatRow, error) {
-	tpls, err := loadTemplates(filepath.Join(root, "ini", "Npc", "NpcConfig"))
+// loadStoreSource 按指定来源装载模板与战斗表（A/B 对拍直接调；LoadStore
+// 按数据根现状选源后也走这里）。
+func loadStoreSource(root string, templateSource, combatSource sharedata.Source) (map[string]TemplateRow, map[string]CombatRow, error) {
+	var (
+		tpls map[string]TemplateRow
+		cbt  map[string]CombatRow
+		err  error
+	)
+	if templateSource == sharedata.SourceShare {
+		tpls, _, err = loadTemplatesShare(root)
+	} else {
+		tpls, err = loadTemplates(filepath.Join(root, "ini", "Npc", "NpcConfig"))
+	}
 	if err != nil {
 		return nil, nil, err
 	}
-	cbt, err := loadCombat(filepath.Join(root, "ini", "Npc", "NpcTemplate.xml"))
+	if combatSource == sharedata.SourceShare {
+		cbt, err = loadCombatShare(root)
+	} else {
+		cbt, err = loadCombat(filepath.Join(root, "ini", "Npc", "NpcTemplate.xml"))
+	}
 	if err != nil {
 		return nil, nil, err
 	}
@@ -147,13 +165,18 @@ func loadCombat(path string) (map[string]CombatRow, error) {
 	return combat, nil
 }
 
-// LoadPlacements 场景摆放（ini/Scene/<sceneDir>/npc_creator.xml）。
+// LoadPlacements 场景摆放（来源见 source.go：share 模式读
+// share/creator/npc_creator/<sceneDir>/*.xml，xml 模式读
+// ini/Scene/<sceneDir>/npc_creator.xml）。
 // 只收白名单类别且坐标合法的静态项；随机组（无坐标行）跳过。
 func LoadPlacements(root, sceneDir string) ([]Placement, error) {
-	path := filepath.Join(root, "ini", "Scene", filepath.FromSlash(sceneDir), "npc_creator.xml")
-	rows, err := parsePropRowsFile(path)
+	return loadPlacements(root, sceneDir, PlacementSource(root))
+}
+
+func loadPlacements(root, sceneDir string, source sharedata.Source) ([]Placement, error) {
+	rows, err := placementRows(root, sceneDir, source)
 	if err != nil {
-		return nil, fmt.Errorf("npcfeed: 读场景摆放 %s: %w", path, err)
+		return nil, err
 	}
 	out := make([]Placement, 0, len(rows))
 	for _, row := range rows {
@@ -187,6 +210,24 @@ var pushableFiles = map[string]bool{
 	"guildbuildingnpc.xml": true,
 	"gathernpc.xml":        true,
 	"other.xml":            true,
+}
+
+// placementRows 场景摆放属性行（creator 源名方言；来源见 source.go）。
+func placementRows(root, sceneDir string, source sharedata.Source) ([]map[string]string, error) {
+	if source == sharedata.SourceShare {
+		path := filepath.Join(root, filepath.FromSlash(shareCreatorDir), filepath.FromSlash(sceneDir))
+		rows, _, _, err := sharedata.ReadCreatorDir(path)
+		if err != nil {
+			return nil, fmt.Errorf("npcfeed: 读场景摆放 %s: %w", path, err)
+		}
+		return rows, nil
+	}
+	path := filepath.Join(root, "ini", "Scene", filepath.FromSlash(sceneDir), "npc_creator.xml")
+	rows, err := parsePropRowsFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("npcfeed: 读场景摆放 %s: %w", path, err)
+	}
+	return rows, nil
 }
 
 func parseCoord(s string) (float64, error) {

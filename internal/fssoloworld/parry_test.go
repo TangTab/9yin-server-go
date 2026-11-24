@@ -3,13 +3,14 @@ package fssoloworld
 // msg54 手动格挡双方言测试（参考端 820f79a 真机定版语义 + 2026-11-23
 // 官方女号抓包 197 条全量复核）：0/1 直判（0=按下）；官服族令牌上报
 //（基调=首条、按压=基调+K、长按重发零帧、轮换异值采纳）；
-// 无变迁零帧；应答=三属性权威帧+LogicState 撑持。
+// 无变迁零帧；应答=三属性权威帧，全程不碰 LogicState（官服非战斗
+// 按压簇无 LogicState 帧；旧撑持帧致「格挡瞬时进入战斗状态」）。
 
 import (
-	"bytes"
 	"encoding/binary"
 	"testing"
 
+	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 )
 
@@ -49,12 +50,12 @@ func TestParryStateReportBaseline(t *testing.T) {
 	if pl.parrying {
 		t.Error("基调上报不应进入格挡态")
 	}
-	// 按压 = 基调+K：三属性帧 + LogicState=1。
+	// 按压 = 基调+K：仅三属性帧。
 	sendM54(s, pl, 3, 1+parryTokenDelta)
-	if len(*frames) != 2 {
-		t.Fatalf("按下应发 2 帧（三属性+LogicState），实发 %d", len(*frames))
+	if len(*frames) != 1 {
+		t.Fatalf("按下应只发 1 帧三属性，实发 %d", len(*frames))
 	}
-	if !bytes.Contains((*frames)[0], []byte("ParryValue")) && !hasPropIdx((*frames)[0]) {
+	if !hasPropIdx((*frames)[0]) {
 		t.Fatalf("首帧应三属性 0x10: % x", (*frames)[0])
 	}
 	if !pl.parrying {
@@ -62,20 +63,30 @@ func TestParryStateReportBaseline(t *testing.T) {
 	}
 	// 长按重发按压令牌（官服抓包 E3 纪元 11s 长按 9 连发）：零帧。
 	sendM54(s, pl, 3, 1+parryTokenDelta)
-	if len(*frames) != 2 || !pl.parrying {
+	if len(*frames) != 1 || !pl.parrying {
 		t.Fatalf("长按重发应零帧: frames=%d parrying=%t", len(*frames), pl.parrying)
 	}
-	// 回基调 = 松开：三属性帧 + LogicState=0；松开重发零帧。
+	// 回基调 = 松开：再发 1 帧三属性；松开重发零帧。
 	sendM54(s, pl, 3, 1)
-	if len(*frames) != 4 {
-		t.Fatalf("松开应再发 2 帧，实发 %d", len(*frames))
+	if len(*frames) != 2 {
+		t.Fatalf("松开应再发 1 帧，实发 %d", len(*frames))
 	}
 	if pl.parrying {
 		t.Error("松开后应退出格挡态")
 	}
 	sendM54(s, pl, 3, 1)
-	if len(*frames) != 4 {
+	if len(*frames) != 2 {
 		t.Fatalf("松开重发应零帧，实发 %d 帧", len(*frames))
+	}
+	// 官服非战斗按压簇不含 LogicState：撑持帧会让客户端瞬时进入战斗
+	// 状态（2026-11-24 真机），按下/松开全程不得下发该属性。
+	logic := uint16(clientdata.MustPlayerProperty("LogicState").Index)
+	for _, frame := range *frames {
+		for _, idx := range framePropIndexes(frame) {
+			if idx == logic {
+				t.Fatalf("格挡应答不得带 LogicState: % x", frame)
+			}
+		}
 	}
 }
 
@@ -84,29 +95,29 @@ func TestParryBinaryDialect(t *testing.T) {
 	s, pl, frames := newParryTestServer(t)
 	sendM54(s, pl, 2, 1) // 基线采集（闲时）
 	sendM54(s, pl, 2, 0) // 0=按下（异值）
-	if !pl.parrying || len(*frames) != 2 {
+	if !pl.parrying || len(*frames) != 1 {
 		t.Fatalf("0=按下应受理: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
 	sendM54(s, pl, 2, 1) // 回基调=松开
-	if pl.parrying || len(*frames) != 4 {
+	if pl.parrying || len(*frames) != 2 {
 		t.Fatalf("回基调应松开: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
 	sendM54(s, pl, 2, 1) // 重复基调：零帧
-	if len(*frames) != 4 {
+	if len(*frames) != 2 {
 		t.Fatalf("重复基调应零帧，实发 %d 帧", len(*frames))
 	}
 	// 基调先锁 0 的反判防护：首报即 0（按下态上报）按二值方言直判按下。
 	s2, pl2, frames2 := newParryTestServer(t)
-	sendM54(s2, pl2, 2, 0) // 首报 0：锚定空闲 1、直判按下（2 帧）
-	if !pl2.parrying || len(*frames2) != 2 {
+	sendM54(s2, pl2, 2, 0) // 首报 0：锚定空闲 1、直判按下（1 帧）
+	if !pl2.parrying || len(*frames2) != 1 {
 		t.Fatalf("首报 0 应判按下: parrying=%t frames=%d", pl2.parrying, len(*frames2))
 	}
 	sendM54(s2, pl2, 2, 0) // 仍 0：无变迁零帧
-	if !pl2.parrying || len(*frames2) != 2 {
+	if !pl2.parrying || len(*frames2) != 1 {
 		t.Fatalf("持续按下应零帧: parrying=%t frames=%d", pl2.parrying, len(*frames2))
 	}
 	sendM54(s2, pl2, 2, 1) // 1=松开
-	if pl2.parrying || len(*frames2) != 4 {
+	if pl2.parrying || len(*frames2) != 2 {
 		t.Fatalf("1 应松开: parrying=%t frames=%d", pl2.parrying, len(*frames2))
 	}
 }
@@ -130,29 +141,66 @@ func TestParryBaselineRotation(t *testing.T) {
 	}
 	// 新纪元按压（基调+0x11D5DA29）→ 长按重发零帧 → 松开回新基调。
 	sendM54(s, pl, 3, 5525727475)
-	if !pl.parrying || len(*frames) != 2 {
+	if !pl.parrying || len(*frames) != 1 {
 		t.Fatalf("新纪元按压应受理: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
 	sendM54(s, pl, 3, 5525727475) // 长按重发：零帧
-	if len(*frames) != 2 {
-		t.Fatalf("长按重发应零帧，实发 %d 帧", len(*frames))
+	if len(*frames) != 1 {
+		t.Fatalf("长按重发应零帧，实发 %d", len(*frames))
 	}
 	sendM54(s, pl, 3, 5226499786)
-	if pl.parrying || len(*frames) != 4 {
+	if pl.parrying || len(*frames) != 2 {
 		t.Fatalf("回新基调应松开: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
 	// 轮换发生在格挡中：新基调采纳并复位（推松开帧）。
 	sendM54(s, pl, 3, 5525727475) // 再按压（新基调+K）
-	if !pl.parrying || len(*frames) != 6 {
+	if !pl.parrying || len(*frames) != 3 {
 		t.Fatalf("再按压应受理: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
 	sendM54(s, pl, 3, 4667437540) // 持按中切景轮换：采纳 + 复位
-	if pl.parrying || len(*frames) != 8 {
+	if pl.parrying || len(*frames) != 4 {
 		t.Fatalf("持按轮换应采纳并复位: parrying=%t frames=%d", pl.parrying, len(*frames))
 	}
 }
 
 func hasPropIdx(frame []byte) bool { return len(frame) >= 14 && frame[0] == 0x10 }
+
+// framePropIndexes 0x10 属性帧的属性号列表（[idx u16][值]…，值宽按
+// 官方属性表线型走）。
+func framePropIndexes(frame []byte) []uint16 {
+	if !hasPropIdx(frame) {
+		return nil
+	}
+	count := int(binary.LittleEndian.Uint16(frame[10:]))
+	body := frame[12:]
+	var out []uint16
+	for i := 0; i < count; i++ {
+		if len(body) < 2 {
+			break
+		}
+		idx := int(binary.LittleEndian.Uint16(body))
+		entry, ok := clientdata.PropertyByIndex(idx)
+		if !ok {
+			break
+		}
+		out = append(out, uint16(idx))
+		var width int
+		switch entry.Type {
+		case clientdata.WireByte:
+			width = 1
+		case clientdata.WireWord:
+			width = 2
+		case clientdata.WireInt32, clientdata.WireFloat32:
+			width = 4
+		case clientdata.WireInt64, clientdata.WireObject:
+			width = 8
+		default:
+			return out // 串型值宽不固定，格挡应答帧用不到
+		}
+		body = body[2+width:]
+	}
+	return out
+}
 
 func TestParryValueTotalFallback(t *testing.T) {
 	s, pl, _ := newParryTestServer(t)
