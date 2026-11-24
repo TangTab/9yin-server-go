@@ -1162,7 +1162,7 @@ func TestParseCreateRoleBody(t *testing.T) {
 // 6 值 TVarList（rolePara 36 字段官方口径：f1 门派恒 0）。
 func TestRolesFrameGolden(t *testing.T) {
 	now := time.Date(2026, 11, 21, 10, 0, 0, 0, time.Local)
-	f := rolesFrame(now, []roleEntry{{name: "赵六"}})
+	f := rolesFrame(0, now, []roleEntry{{name: "赵六"}})
 	if f[0] != 0x04 || binary.LittleEndian.Uint32(f[0x25:]) != 1 || len(f) <= 0x29 {
 		t.Fatalf("head len=%d", len(f))
 	}

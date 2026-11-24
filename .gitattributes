@@ -1,2 +1,5 @@
 *.bin binary
 *.txt text
+# 资源层与 MPQ 夹具：完整性攸关，显式按二进制处理，不受 autocrlf 影响
+*.rep binary
+*.mpq binary

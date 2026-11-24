@@ -5,7 +5,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // LogicClass 是服务器逻辑对象类型树的节点（logic_class.xml）。
@@ -34,7 +35,7 @@ type xmlClass struct {
 
 // LoadLogicClass 解析 logic_class.xml（UTF-8/GBK 自适应，嵌套任意深度）。
 func LoadLogicClass(path string) (*LogicClassTree, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

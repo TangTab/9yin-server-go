@@ -3,10 +3,10 @@ package login
 import (
 	"bytes"
 	"encoding/binary"
-	"os"
 	"testing"
 	"time"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -18,7 +18,7 @@ const capturedIdentity = "acct:v1:112cd36f1e1d2bac408e0428aabef6e399080c2bc33407
 // unescape → XOR(InitialKey)，得 121B 明文 op02。
 func capturedFirstFlight(t *testing.T) []byte {
 	t.Helper()
-	raw, err := os.ReadFile("../../testdata/captures/login-connect-001.bin")
+	raw, err := res.ReadFile("../../testdata/captures/login-connect-001.bin")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"os"
 	"sort"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 type seg struct {
@@ -25,7 +27,7 @@ func main() {
 		os.Exit(2)
 	}
 	serverPort = uint16(mustAtoi(os.Args[2]))
-	data, err := os.ReadFile(os.Args[1])
+	data, err := res.ReadFile(os.Args[1])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

@@ -15,11 +15,11 @@ package fsgame
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fskit"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // ---- TriggerDataModule（Init 序 11）----
@@ -245,7 +245,7 @@ func (m *TriggerAreaEvent) LoadResource(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return nil
 	}
-	data, err := os.ReadFile(filepath.Join(k.ResourcePath, "share", "area", "areainfo.ini"))
+	data, err := res.ReadFile(filepath.Join(k.ResourcePath, "share", "area", "areainfo.ini"))
 	if err != nil {
 		return nil
 	}

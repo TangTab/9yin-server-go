@@ -7,7 +7,7 @@ package fssoloworld
 //
 //	NINEYIN_ITEM_XML  构建产物目录（含 path_config.xml）显式覆盖
 //	NINEYIN_ITEM_DIR  设计态 ini 目录显式覆盖（旧口径，原样保留）
-//	数据根 ini/Item   构建产物（tools/itemgen；候选根同技能产物
+//	数据根 ini/Item   构建产物（tools/datagen item；候选根同技能产物
 //	                  skillDataRoots：npcfeed.ResolveRoot → 仓库 testdata）
 //	数据根 share/item 设计态 ini 回退（只有目录面，无模板行/静态包）
 //
@@ -80,7 +80,7 @@ func (s *Server) adoptItemCatalog(catalog *itemdata.Catalog, err error, source s
 		s.trace("item catalog loaded: %s（%d 行，黑金格式构建产物；缺席静态包 %v）",
 			catalog.Source(), catalog.Count(), catalog.MissingPacks())
 	default:
-		s.trace("item catalog loaded: %s（%d 行，设计态 ini 回退——go run ./tools/itemgen 构建产物可启用模板行/静态包）",
+		s.trace("item catalog loaded: %s（%d 行，设计态 ini 回退——go run ./tools/datagen item 构建产物可启用模板行/静态包）",
 			catalog.Source(), catalog.Count())
 	}
 	return catalog

@@ -12,9 +12,10 @@ package fscollide
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // SceneCollide 是两类场景碰撞的统一门面（官方为 ISceneCollide 虚接口，
@@ -80,7 +81,7 @@ func (m *Manager) CreateSceneCollide(mapDir string) (SceneCollide, error) {
 
 // loadIni 极简 INI：[节] 与 key=value（保留原字节；官方 readini 同样按行）。
 func loadIni(path string) (map[string]map[string]string, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

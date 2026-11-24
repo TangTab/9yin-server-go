@@ -13,11 +13,11 @@ package npcshop
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -67,7 +67,7 @@ func (c *Catalog) Count() int {
 // Load 读 shop.ini（合法 UTF-8 直通，否则 GBK 转码——与 npcgen toUTF8
 // 同款自适应）。
 func Load(path string) (*Catalog, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("npcshop: read %s: %w", path, err)
 	}

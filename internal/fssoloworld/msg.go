@@ -487,7 +487,7 @@ func (s *Server) storeRolesList(id1 uint32, p []byte) bool {
 	// 无条件下行：有角→角色列表；空→无角 0x04 基座（count=0）——
 	// 删角后 0x10 刷新依赖空清单也回帧（客户端界面回建角页）
 	s.trace("roles list client=%d count=%d", clientID, len(roles))
-	s.sendToClient(pl, rolesFrame(time.Now(), roles))
+	s.sendRolesFrame(pl, roles)
 	return true
 }
 
@@ -507,7 +507,7 @@ func (s *Server) storeCreate(id1 uint32, p []byte) bool {
 		s.trace("(SoloWorld::StoreMsgCreate)create role denied client=%d", clientID)
 		delete(s.pendingCreate, clientID)
 		if pl != nil {
-			s.sendToClient(pl, rolesFrame(time.Now(), nil))
+			s.sendRolesFrame(pl, nil)
 		}
 		return true
 	}
@@ -522,8 +522,7 @@ func (s *Server) storeCreate(id1 uint32, p []byte) bool {
 		s.players.SetPlayerState(pl, PlLogged)
 		req := s.pendingCreate[clientID]
 		delete(s.pendingCreate, clientID)
-		s.sendToClient(pl, rolesFrame(time.Now(),
-			[]roleEntry{{name: name, appearance: req.appearance}}))
+		s.sendRolesFrame(pl, []roleEntry{{name: name, appearance: req.appearance}})
 	}
 	return true
 }

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -91,10 +92,10 @@ func loadStoreOnce(root string) (map[string]TemplateRow, map[string]CombatRow, e
 }
 
 // loadTemplates 递归装载 NpcConfig 树 → ID → 模板行。
-// heijin_backup 是 NpcConfig 的兄弟目录，天然不进本树。
+// 黑金原档在参考资源根（testdata/references），不在本树内。
 func loadTemplates(dir string) (map[string]TemplateRow, error) {
 	templates := map[string]TemplateRow{}
-	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, walkErr error) error {
+	err := res.WalkDir(dir, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			if os.IsNotExist(walkErr) {
 				return nil
@@ -204,7 +205,7 @@ var errNoCoord = fmt.Errorf("npcfeed: 坐标缺席")
 // parsePropRowsFile 解析 <Object><Property k="v" .../></Object> 为属性行
 // 列表（XML 声明 utf-8 直读，gb2312/gbk/gb18030 按 GB18030 超集解码）。
 func parsePropRowsFile(path string) ([]map[string]string, error) {
-	data, err := os.ReadFile(path)
+	data, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

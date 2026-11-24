@@ -385,12 +385,13 @@ type roleEntry struct {
 	appearance []string
 }
 
-// rolesFrame 生成有角色 0x04 ServerPlayerRoles：41B 基座 +
-// [0x25]u32=count + 每角色 6 值 TVarList（int32 0 · int32 0 ·
+// rolesFrame 生成 0x04 ServerPlayerRoles（有角/无角同形）：41B 基座
+// （serial@0x21=登录会话 serial——官服抓包实证与 0x0B 的 [1:5] 同值，
+// 如男号会话两者均为 0x94B）+ [0x25]u32=count + 每角色 6 值 TVarList（int32 0 · int32 0 ·
 // widestr 名字 · widestr rolePara · int32 0 · double 0）。单角色
 // 形态与 internal/login.oneRoleLoginSuccessFrame golden 一致；多角色
 // 按 docs/fork-era/id-system-analysis.md 推导（真机校准点）。
-func rolesFrame(now time.Time, roles []roleEntry) []byte {
+func rolesFrame(serial uint32, now time.Time, roles []roleEntry) []byte {
 	msg := make([]byte, 0x29)
 	msg[0] = 0x04
 	put := func(off int, v uint32) { binary.LittleEndian.PutUint32(msg[off:], v) }
@@ -401,6 +402,7 @@ func rolesFrame(now time.Time, roles []roleEntry) []byte {
 	put(0x15, uint32(now.Hour()))
 	put(0x19, uint32(now.Minute()))
 	put(0x1D, uint32(now.Second()))
+	put(0x21, serial)
 	put(0x25, uint32(len(roles)))
 	for _, r := range roles {
 		body := (&proto.VarList{}).
@@ -413,4 +415,9 @@ func rolesFrame(now time.Time, roles []roleEntry) []byte {
 		msg = append(msg, body.Encode()...)
 	}
 	return msg
+}
+
+// sendRolesFrame 下行 0x04：serial 取会话连接键（Conn2）。
+func (s *Server) sendRolesFrame(pl *Player, roles []roleEntry) {
+	s.sendToClient(pl, rolesFrame(pl.Conn2, time.Now(), roles))
 }

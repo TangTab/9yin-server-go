@@ -5,16 +5,17 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"os"
 	"strings"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // capturedFirstFlight 读取 golden 线路帧并按线路层解码（与
 // internal/login/auth_test.go 同源：EE 转义 → XOR InitialKey）。
 func capturedFirstFlight(t *testing.T) []byte {
 	t.Helper()
-	raw, err := os.ReadFile("../../testdata/captures/login-connect-001.bin")
+	raw, err := res.ReadFile("../../testdata/captures/login-connect-001.bin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,12 +106,11 @@ func TestGoldenCiphertextLock(t *testing.T) {
 // TestEncodeVectors 全量 2048 向量（tools/fsverify_gen.py 以 unicorn oracle
 // 跑官方 DLL 产出的 golden）。
 func TestEncodeVectors(t *testing.T) {
-	f, err := os.Open("../../testdata/fsverify/encode-vectors.txt")
+	raw, err := res.ReadFile("../../testdata/fsverify/encode-vectors.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
-	scanner := bufio.NewScanner(f)
+	scanner := bufio.NewScanner(bytes.NewReader(raw))
 	n := 0
 	for scanner.Scan() {
 		fields := strings.Fields(scanner.Text())

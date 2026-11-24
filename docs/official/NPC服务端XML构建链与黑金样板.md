@@ -1,5 +1,11 @@
 # NPC 服务端 XML 构建链与黑金样板
 
+> 2026-11-24 更新：构建工具已合并为统一入口 `tools/datagen`（子命令 `npc` / `item` / `skill`，
+> 无参构建全部），输入收窄为两类——客户端资源解压根（`-client`）与黑金参考资源根
+> `testdata/references/h001.rep`。本文中的 `tools/npcgen`、`tools/skillgen`、`tools/itemgen` 命令
+> 与数据源路径是定版当时的记录；现状以 `testdata/README.md` 的「构建数据」一节为准。
+
+
 2026-11-22 定案。NPC 数据链改为「离线构建服务端 XML → 服务端只读构建产物」，
 NPC 相关服务端代码（装载/联查/帧/下发）整体重写为 `internal/npcfeed`，
 帧配方参考 2433 线 `cmd/protocol-probe`（npcAddObject / officialNPC0x28Frame）。

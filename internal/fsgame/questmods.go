@@ -190,10 +190,10 @@ func (m *QuestModule) Init(k *Kernel) error {
 	return nil
 }
 
-// LoadResource 任务域配置装载——九阴任务域（客户端 share/task 经 npcgen
+// LoadResource 任务域配置装载——九阴任务域（客户端 share/task 经 datagen npc
 // 生成的 ini/Quest/Task 树 + SubFunction 接线 + 步骤域 + TaskItem），经
 // questnineyin.go 合成引擎词汇三表与 NPC 面；黑金三表（Quest/
-// QuestCriteria/Award.xml）已移 heijin_backup 留作对照。
+// QuestCriteria/Award.xml）在参考资源根 references/ini/Quest 留作对照。
 func (m *QuestModule) LoadResource(k *Kernel) error {
 	if k.ResourcePath == "" {
 		return fmt.Errorf("fsgame: QuestModule.LoadResource: ResourcePath 未设置")

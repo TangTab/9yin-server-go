@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
@@ -106,8 +107,8 @@ func TestUseItemSkillBookOfficialDialect(t *testing.T) {
 		filepath.Join("..", "..", "testdata", "ini", "Item", "path_config.xml"),
 		filepath.Join("..", "..", "testdata", "ini", "Skill", "skill_static.xml"),
 	} {
-		if _, err := os.Stat(path); err != nil {
-			t.Skipf("构建产物缺席（go run ./tools/itemgen / ./tools/skillgen）: %v", err)
+		if _, err := res.Stat(path); err != nil {
+			t.Skipf("构建产物缺席（go run ./tools/datagen item / ./tools/datagen skill）: %v", err)
 		}
 	}
 	f := newItemUseFixture(t)

@@ -16,13 +16,13 @@ package npcfeed
 
 import (
 	"math"
-	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -260,7 +260,7 @@ func LoadPatrolRoutes(mappathDir, sceneFolder string) map[string]*Route {
 		return cached
 	}
 	table := make(map[string]*Route)
-	entries, err := os.ReadDir(mappathDir)
+	entries, err := res.ReadDir(mappathDir)
 	if err != nil {
 		patrolCache[sceneFolder] = table
 		return table
@@ -303,7 +303,7 @@ func patrolSceneShortName(sceneFolder string) string {
 // loadRouteFile 解析单个 mappath ini：节名=PathId，每行 r= 一个路点。
 // GBK 解码（GB18030 超集；失败回落原字节——路线坐标全 ASCII 时无差）。
 func loadRouteFile(path string, table map[string]*Route) {
-	data, err := os.ReadFile(path)
+	data, err := res.ReadFile(path)
 	if err != nil {
 		return
 	}

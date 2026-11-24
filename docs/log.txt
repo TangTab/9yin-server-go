@@ -1,3 +1,24 @@
 物品
 
 内功
+
+内容构建需要改： 基础的资料 + 客户端资料
+
+
+ID 开关
+
+set "NINEYIN_PLAYER_IDENT=scene"   :: 玩家进场分配（缺省 fixed，恒 1-1）
+set "NINEYIN_NPC_IDENT=scene"      :: NPC 走官服形态（缺省固定段 0x0E）
+两个开关互相独立。只开玩家开关时，玩家序号会排在固定段 NPC 之后，不撞号。
+
+验证
+构建与 vet：go build ./... 通过，改动包 vet 干净。
+测试：新增 9 个用例全部通过，覆盖进场链逐帧 ident 一致（fixed/scene 两种）、切图换 ident、同场景传送不换、未知场景不发出半套形态、NPC 场景 tag、会话 serial。
+全量测试有一个失败：internal/fssolopublic 的 TestBootChainOverTCP 超时。该包不依赖我改过的任何包，单独重跑 8 次全过，是负载敏感的偶发问题。
+竞态检测：fssolopublic 之外，改动包里只有 TestSceneSwitchInProgressGuard 报竞争。我把 HEAD 原始代码导出到仓库外实测，同一处同样报，是原有的测试问题，我没动它。
+需要你知道的
+真机 A/B 还没做。建议先只开 NINEYIN_NPC_IDENT=scene，在烟雨庄确认 NPC 是 0x03xxxxxx 段且能交互，再单独开玩家开关。
+数值不会和抓包完全一样。单人新手场景在 scenes.ini 里每个 member 一节，本仓取第一节（0x2C 段），抓包落在 member=16 那节（0x3D 段）；形态一致。
+缺省可见的线上变化只有一处：0x0B[1:5] 从进程级计数变成连接 serial，0x04@0x21 从 0 变成同一个值。
+仓库里有并行改动：internal/mpq/*、cmd/mpq 等已被另一个会话 git add，和我的文件没有重叠。所以我也没碰 docs/任务与进度.md，避免和那边冲突；需要的话你可以把这次结论补进去。
+0x04@0x01 没改：官服是 0，项目写的是 1，与 ID 无关，留给你定。

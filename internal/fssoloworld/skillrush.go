@@ -57,7 +57,7 @@ type stagedRush struct {
 
 // clearStagedLocked 暂存收尾（换技/取消/超时共用，调用方持会话锁）：停表，
 // 已授予则先还原授予对，再三清 CurSkillID="" → m26 → PauseSkill=""。
-func (s *Server) clearStagedLocked(st *combatState) [][]byte {
+func (s *Server) clearStagedLocked(ident wireIdent, st *combatState) [][]byte {
 	stage := st.staged
 	if stage == nil {
 		return nil
@@ -69,7 +69,7 @@ func (s *Server) clearStagedLocked(st *combatState) [][]byte {
 		stage.landing.Stop()
 	}
 	st.staged, st.curSkill, st.locked = nil, "", false
-	b := &frameBuilder{}
+	b := &frameBuilder{ident: ident}
 	if stage.granted {
 		b.prop("CantMove", entergen.ByteValue(0))
 		b.prop("CantParry", entergen.Int32Value(0))
@@ -90,7 +90,7 @@ func (s *Server) expireStaged(pl *Player, seq int) {
 		return
 	}
 	skillID := stage.def.ID
-	frames := s.clearStagedLocked(st)
+	frames := s.clearStagedLocked(pl.wireIdent(), st)
 	st.mu.Unlock()
 	s.sendFrames(pl, frames)
 	s.trace("skill %s staged rush expired seq=%d client=%d", skillID, seq, pl.Conn1)
@@ -125,14 +125,15 @@ func (s *Server) rushOnReport(pl *Player, x, z float64) {
 	st.ensureVitals(pl)
 	def := stage.def
 	if def.Consume.MP > st.mp {
-		b := &frameBuilder{}
-		b.frames = append(b.frames, s.clearStagedLocked(st)...)
+		b := newFrameBuilder(pl)
+		b.frames = append(b.frames, s.clearStagedLocked(b.ident, st)...)
 		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultMPLess))
 		st.mu.Unlock()
 		s.sendFrames(pl, b.frames)
 		return
 	}
-	rowFrames, rows, err := writeCooldownRows(forkPlayerObjectID, forkPlayerOwnerID, st.cooldowns, def, nowMS)
+	ident := pl.wireIdent()
+	rowFrames, rows, err := writeCooldownRows(ident.objectID, ident.ownerID, st.cooldowns, def, nowMS)
 	if err != nil {
 		st.mu.Unlock()
 		s.trace("skill %s rush grant cooldown rows encode failed client=%d: %v", def.ID, pl.Conn1, err)
@@ -154,8 +155,8 @@ func (s *Server) rushOnReport(pl *Player, x, z float64) {
 		action = defaultRushAction
 	}
 	f32 := entergen.CustomFloat32
-	b := &frameBuilder{}
-	b.custom(24, selfValue(), entergen.CustomInt(61),
+	b := newFrameBuilder(pl)
+	b.custom(24, b.selfValue(), entergen.CustomInt(61),
 		f32(float32(stage.targetPos[0]+dx)), f32(float32(stage.targetPos[1]+rushDestLift)),
 		f32(float32(stage.targetPos[2]+dz)), entergen.CustomInt(rushDashFlagGround), entergen.CustomString(action))
 	b.prop("CantMove", entergen.ByteValue(1))
@@ -182,11 +183,11 @@ func (s *Server) rushOnReport(pl *Player, x, z float64) {
 }
 
 // rushLandingFrames 落地释放簇（锚 = 落地位）。调用方持会话锁。
-func rushLandingFrames(def skilldata.Definition, stage *stagedRush, pos [4]float32) *frameBuilder {
+func rushLandingFrames(ident wireIdent, def skilldata.Definition, stage *stagedRush, pos [4]float32) *frameBuilder {
 	orient := towardOrient(float64(pos[0]), float64(pos[2]), stage.targetPos[0], stage.targetPos[2])
 	facing := normalizeOrient(orient)
 	f32 := entergen.CustomFloat32
-	b := &frameBuilder{}
+	b := &frameBuilder{ident: ident.orFixed()}
 	b.prop("CantMove", entergen.ByteValue(0))
 	b.prop("CantParry", entergen.Int32Value(0))
 	b.location(pos[0], pos[1], pos[2], facing)
@@ -194,15 +195,15 @@ func rushLandingFrames(def skilldata.Definition, stage *stagedRush, pos [4]float
 	b.prop("PauseSkill", entergen.StringValue(""))
 	b.custom(26)
 	b.location(pos[0], pos[1], pos[2], facing)
-	b.custom(337, selfValue(), f32(pos[0]), f32(pos[1]), f32(pos[2]), f32(facing), entergen.CustomInt(0))
+	b.custom(337, b.selfValue(), f32(pos[0]), f32(pos[1]), f32(pos[2]), f32(facing), entergen.CustomInt(0))
 	if stage.targetName != "" {
 		b.prop("LastWGAttackNpc", entergen.StringValue(stage.targetName))
 	}
 	b.prop("LastWGHit", entergen.Float32Value(100))
-	b.custom(24, targetValue(stage.target), entergen.CustomInt(40), entergen.CustomInt(1), selfValue())
+	b.custom(24, targetValue(stage.target), entergen.CustomInt(40), entergen.CustomInt(1), b.selfValue())
 	cast := skillCast{skill: def.ID, x: pos[0], y: pos[1], z: pos[2],
 		targetID: uint32(stage.target), targetOwner: uint32(stage.target >> 32), hasTarget: true}
-	b.custom(19, skillLockMessageValues(def, cast, stage.targetPos, orient)...)
+	b.custom(19, skillLockMessageValues(b.ident, def, cast, stage.targetPos, orient)...)
 	b.prop("CantMove", entergen.ByteValue(1))
 	b.prop("CantParry", entergen.Int32Value(1))
 	b.location(pos[0], pos[1], pos[2], facing)
@@ -245,7 +246,7 @@ func (s *Server) handleDashLanding(pl *Player, message entergen.CustomInbound) {
 		st.mu.Unlock()
 		return
 	}
-	b := rushLandingFrames(stage.def, stage, pos)
+	b := rushLandingFrames(pl.wireIdent(), stage.def, stage, pos)
 	if b.err != nil {
 		st.mu.Unlock()
 		s.trace("skill %s rush landing encode failed client=%d: %v", stage.def.ID, pl.Conn1, b.err)
@@ -270,7 +271,7 @@ func (s *Server) rushLandingFallback(pl *Player, seq int) {
 	}
 	reported := pl.roleState.Position
 	pos := [4]float32{float32(reported[0]), float32(reported[1]), float32(reported[2]), float32(reported[3])}
-	b := rushLandingFrames(stage.def, stage, pos)
+	b := rushLandingFrames(pl.wireIdent(), stage.def, stage, pos)
 	if b.err != nil {
 		st.mu.Unlock()
 		return

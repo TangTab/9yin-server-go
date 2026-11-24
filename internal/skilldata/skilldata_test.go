@@ -1,6 +1,6 @@
 package skilldata
 
-// 夹具值取自官服设计态表真值（share/skill/*.ini，经 tools/skillgen 构建），
+// 夹具值取自官服设计态表真值（share/skill/*.ini，经 tools/datagen skill 构建），
 // 与 docs/official/初始账号登陆-完整引导-女.pcapng 抓包里五个技能的线为
 // 逐项对应（冷却类别/分组/射程/消耗）。
 
@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func loadFixture(t *testing.T) *Catalog {
@@ -253,11 +255,11 @@ func TestUnescapeAttr(t *testing.T) {
 	}
 }
 
-// 对接仓库真实产物（tools/skillgen 构建；缺席则跳过）：官服真值抽查 +
+// 对接仓库真实产物（tools/datagen skill 构建；缺席则跳过）：官服真值抽查 +
 // 首次装载耗时观测。
 func TestRealProducts(t *testing.T) {
 	root := filepath.Join("..", "..", "testdata")
-	if _, err := os.Stat(filepath.Join(root, "ini", "Skill", fileStatic)); err != nil {
+	if _, err := res.Stat(filepath.Join(root, "ini", "Skill", fileStatic)); err != nil {
 		t.Skipf("仓库产物缺席: %v", err)
 	}
 	start := time.Now()

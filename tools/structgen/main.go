@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func main() {
@@ -52,7 +54,7 @@ func run(in, out string) error {
 	// 1. 收集并解析全部 XML
 	var objs []*ObjectDef
 	var warn []string
-	err := filepath.WalkDir(in, func(path string, d os.DirEntry, err error) error {
+	err := res.WalkDir(in, func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".xml") {
 			return err
 		}

@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // dumpResConfig 对应 dumpconfig/dump_config.xml。
@@ -65,7 +67,7 @@ func NewDumpRes(resDir string, logf func(string, ...any)) (*DumpRes, error) {
 	if logf == nil {
 		logf = func(string, ...any) {}
 	}
-	raw, err := os.ReadFile(filepath.Join(resDir, "dumpconfig", "dump_config.xml"))
+	raw, err := res.ReadFile(filepath.Join(resDir, "dumpconfig", "dump_config.xml"))
 	if err != nil {
 		return nil, fmt.Errorf("fsdumper: dump_config.xml: %w", err)
 	}
@@ -133,7 +135,7 @@ func (d *DumpRes) runStaticSQLs(k *Kernel) {
 		return
 	}
 	for _, st := range d.cfg.Statics {
-		raw, err := os.ReadFile(filepath.Join(d.resDir, filepath.FromSlash(st.Path)))
+		raw, err := res.ReadFile(filepath.Join(d.resDir, filepath.FromSlash(st.Path)))
 		if err != nil {
 			d.logf("(DumpRes)静态 SQL 读失败 %s: %v", st.Path, err)
 			continue
@@ -219,7 +221,7 @@ func (d *DumpRes) dumpMoveFiles(k *Kernel) {
 	ctx := context.Background()
 	for _, f := range d.cfg.Move {
 		full := filepath.Join(d.resDir, filepath.FromSlash(f.Path))
-		fi, err := os.Stat(full)
+		fi, err := res.Stat(full)
 		if err != nil {
 			continue // 官方 FindFileTime 失败跳过
 		}
@@ -249,7 +251,7 @@ func resRowID(f dumpResFile) string {
 // 整档一行（官方 TextGrid/ini 支路的近似）。另写文件级行（property
 // 空）作 mtime 基线标记，供巡检跳过未变更文件。
 func (d *DumpRes) dumpOneRes(k *Kernel, db DB, f dumpResFile, full string, mtime int64) {
-	raw, err := os.ReadFile(full)
+	raw, err := res.ReadFile(full)
 	if err != nil {
 		d.logf("(DumpRes)读资源失败 %s: %v", f.Path, err)
 		return

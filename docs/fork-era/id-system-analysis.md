@@ -1,6 +1,60 @@
 # 9yin ID 体系全景分析（9yin-game-native-menu.exe 逆向 + 抓包实证）
->
-> 🗄️ **fork 方言存档（2026-11-14 标记）**：§6.5 玩家对 (0x11000001, 0x7A5C0B) 仍是 fork 客户端线的权威落地；
+
+> ⚠️ **部分作废（2026-11-24）**：下方「官服规则」为现行结论；其后 §0–§6 描述的是
+> **fork 服务端方言**的常量 ident 方案（玩家一对常量、NPC `(index+2)|0x11000000`/owner=1、
+> 把 `0x0B [1:5]` 当场景对象 ID/进场流水号），多处与官服抓包相悖，仅作 fork 客户端线的
+> 历史落地记录。现行实现：`internal/fssoloworld/ident.go`（玩家 ident 唯一来源）、
+> `internal/npcfeed/join.go`（`SceneIdent` 分配器）。
+
+## 官服规则（现行；npc / 初始账号-女 / 初始账号-男 / 技能 四抓包实证）
+
+工具：`tools/pcapdump`（pcapng → 按连接成帧/XOR 解密 → 二进制帧记录）。线上对象身份
+是引擎 `PERSISTID{ident, serial}`，wire 写作 `(objectID, ownerID)`：
+
+```text
+objectID = (sceneID << 24 | 场景内序号) & 0xFFFFFFFF   // 高 8 位 = 场景 ID 低字节，低 24 位 = 场景内序号
+ownerID  = 创建时取自场景内单调递增的序列号             // 序号可复用，序列号不复用
+```
+
+| 对象 | 规则 | 抓包证据 |
+|---|---|---|
+| objectID 高字节 | = `scenes.ini` 节号（场景 ID）的低字节；玩家与同场景全部对象共用 | 漠河镇 `[4]`→`0x04`、姑苏 `[14]`→`0x0E`、born03 `[3]`→`0x03`（早先 golden 样本）；born_single_01 节号 317（档案 `LastGenSceneID=317`）→`0x3D`；选角实例 17→`0x11` |
+| ownerID | 场景内序列号；同一 obj 重建后换新值 | `0x35000179` 的 own `0x10BD→0x10EA`；`0x0E0E9472` 的 own `04F4FC0A→04F6018E` |
+| 玩家 | 每进一个场景换一套 ident，由 `0x0B [5:9]/[9:13]` 宣告 | 男号同会话 `3D0000F3/0611`（born_single_01）→`040036B5/21AD1F`（漠河镇），两帧均 Type=2 |
+| 静态 NPC | 序号由场景内容决定；每个可见 NPC 占 5 个序号单位，own = 序号 + 分段常数（初值 5） | born_single_01 两台服务器逐值相同：`0x3E/0x43`、`0x4D/0x52`、`0x75/0x7A`；born01 分段常数 +5→+11→+105→+111→+215→+303 |
+| `0x0B [1:5]` | **登录会话 serial**，等于 `0x04` 的 `serial@0x21`，整个会话不变 | 男号两次进场均 `0x94B`，女号 `0x34EFE` |
+| 角色 ID | 线上没有数字 RoleID：角色 = 账号 + 角色名（m655 / m607），`0x04` 角色条目两个 int32 恒 0 | 三会话一致 |
+| 角色子实体 | 内功/经脉/物品/技能是另一套 ident `(小容器号, 序列号)` | `(0x2B,0)`=ng_jh_001、`(0x2D,k)`=jm_dantian 族、`(0x24,k)`=物品 |
+
+ident 在各帧型的位置（对已证 ident 做全帧命中扫描）：`0x0B@5`、`0x0D/0x0E/0x1F/0x25@1`、
+`0x10/0x11/0x12/0x13/0x14@2`、`0x21` 条目首 8 字节（`[3+44k]`）、`0x28` 体首、`0x29` 体 `@1`、
+`0x2C` 体 `@2`（步长 44）、`0x2D` 体首、`0x31` 体 `@2`（步长 8）；上行 `0x07@21`，自定义消息的
+obj 型值原样 8 字节。
+
+**与下文 fork 结论的对照**
+
+- 推翻：`0x0B [1:5]` 是场景对象 ID / 进场自增流水号。
+- 推翻：NPC 用 `(index+2)|0x11000000` + owner=1、玩家用一对常量 ident——那是 fork 服务端的做法。
+- 仍成立：`[5:9]/[9:13]` 是玩家 ident，且必须与其后所有帧一致；数据库 RoleID 不参与线上身份链。
+- 未验证：「owner=1 被客户端解析为 1 号玩家化身」——官服流量里场景对象的 own 最小只见到 `0x141`。
+
+**本仓实现与开关**
+
+- 缺省行为不变：`NINEYIN_PLAYER_IDENT` / `NINEYIN_NPC_IDENT` 未设时玩家恒 1-1、NPC 固定段
+  `0x0E000100+idx`（fork 客户端真机验证形态）。
+- `NINEYIN_PLAYER_IDENT=scene`：玩家进场分配（登录进场、跨场景切图各一次）——obj = 场景 ID
+  低字节 `<<24` | 静态目录之后的序号，own = 场景序列号；生成失败即撤销、场景不在 scenes.ini
+  时保持原 ident。
+- `NINEYIN_NPC_IDENT=scene`：NPC 目录走官服形态（born03 → `0x03` 段，own = 序号 + 5），并与
+  同场景玩家共用序号/序列号计数器。
+- 会话 serial 对齐缺省生效：`0x04 serial@0x21` 与 `0x0B [1:5]` 均取网关连接 serial（`pl.Conn2`），
+  原进程级自增 `enterSeq` 已移除。
+- **两项官服形态未经真机验证**。多节同名的场景（born_single_01 每 member 一节）本仓取首现节号
+  （`[300]`→`0x2C` 段），官服抓包落在 member=16 那份（`[317]`→`0x3D` 段），形态一致、数值不同。
+
+---
+
+> 🗄️ **fork 方言存档（2026-11-14 标记）**：以下 §0–§6 均为 fork 服务端方言。§6.5 玩家对 (0x11000001, 0x7A5C0B) 仍是 fork 客户端线的权威落地；
 > 但外服 B 线已另借官方 ID 对（NINEYIN_REPLAY_SELF_IDS），进场帧 EntryScene 的 fork 形（恒 0x1F6A3）在 B 线废弃、
 > 改官方 4 属性形（见《[外服方言B线路线收束](../official/外服方言B线路线收束.md)》）。本文属性索引为 fork 表位，
 > official2433 唯一方言下同名位有漂移；现行权威见 [docs/README.md](../README.md) 与 [docs/official/fxnet2-op-dispatch-table.md](../official/fxnet2-op-dispatch-table.md)。

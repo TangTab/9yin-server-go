@@ -3,9 +3,10 @@ package login
 import (
 	"bytes"
 	gonet "net"
-	"os"
 	"testing"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // golden 转录（旧分支 testdata/lister 拷贝；入库时 CR 被 git 文本规范化
@@ -20,7 +21,7 @@ func TestEncodeServerListGolden(t *testing.T) {
 
 	// 与抓包 golden 交叉验证（本体一致，结尾换行差异为入库规范化伪影：
 	// 库内 LF，但 autocrlf 工作区可能回填 CRLF——比较前统一 LF）
-	raw, err := os.ReadFile("../../testdata/captures/svrlist-response.bin")
+	raw, err := res.ReadFile("../../testdata/captures/svrlist-response.bin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +104,7 @@ func TestListerRoundTrip(t *testing.T) {
 	entry := ServerEntry{Name: "本地测试", Host: "127.0.0.1", Port: 19061}
 	_, addr := startTestLister(t, entry)
 
-	req, err := os.ReadFile("../../testdata/captures/svrlist-request.bin")
+	req, err := res.ReadFile("../../testdata/captures/svrlist-request.bin")
 	if err != nil {
 		t.Fatal(err)
 	}

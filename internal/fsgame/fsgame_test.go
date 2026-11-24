@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // 装配官方登录闭环：logic_class.xml + player struct + 10 模块 + 心跳泵。
@@ -11,11 +13,11 @@ func assemble(t *testing.T) (*Kernel, []Module) {
 	t.Helper()
 	// testdata 根（官方 Res 副本；testdata/struct/player/player.xml 为 schema）。
 	td := filepath.Join("..", "..", "testdata")
-	lc, err := os.ReadFile(filepath.Join(td, "logic_class.xml"))
+	lc, err := res.ReadFile(filepath.Join(td, "logic_class.xml"))
 	if err != nil {
 		t.Fatalf("读 logic_class.xml: %v", err)
 	}
-	px, err := os.ReadFile(filepath.Join(td, "struct", "player", "player.xml"))
+	px, err := res.ReadFile(filepath.Join(td, "struct", "player", "player.xml"))
 	if err != nil {
 		t.Fatalf("读 struct/player/player.xml: %v", err)
 	}
@@ -29,7 +31,7 @@ func assemble(t *testing.T) (*Kernel, []Module) {
 		t.Fatalf("LoadStruct player: %v", err)
 	}
 	// exp.xml：LevelModule 经验属性面（官方由该模块 OnCreateClass 声明）。
-	ex, err := os.ReadFile(filepath.Join(td, "struct", "player", "exp.xml"))
+	ex, err := res.ReadFile(filepath.Join(td, "struct", "player", "exp.xml"))
 	if err != nil {
 		t.Fatalf("读 struct/player/exp.xml: %v", err)
 	}
@@ -248,7 +250,7 @@ func TestLocationDoorData(t *testing.T) {
 func TestItemObjectLifecycle(t *testing.T) {
 	k, _ := assemble(t)
 	// 官方 item 类 schema（struct/item/item.xml）+ ItemBase 注册面。
-	ix, err := os.ReadFile(filepath.Join("..", "..", "testdata", "struct", "item", "item.xml"))
+	ix, err := res.ReadFile(filepath.Join("..", "..", "testdata", "struct", "item", "item.xml"))
 	if err != nil {
 		t.Fatalf("读 struct/item/item.xml: %v", err)
 	}

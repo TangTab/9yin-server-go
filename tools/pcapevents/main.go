@@ -18,6 +18,7 @@ import (
 	"strconv"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	net "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -45,7 +46,7 @@ func main() {
 		v, _ := strconv.Atoi(os.Args[2])
 		port = uint16(v)
 	}
-	data, err := os.ReadFile(os.Args[1])
+	data, err := res.ReadFile(os.Args[1])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

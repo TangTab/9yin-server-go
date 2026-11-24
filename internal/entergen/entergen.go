@@ -21,12 +21,21 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
-// Identity 会话身份（每次进场注入；官方每会话不同——0x0B 的 seq 实证
-// 0x1521/0x2F05 非常量，obj/own 为玩家实体 PERSISTID）。
+// Identity 会话身份（每次进场由调用方注入，见 fssoloworld/ident.go）。
+// 官服抓包实证（四抓包，2026-11-24；详见 docs/fork-era/id-system-analysis.md
+// 文首「官服规则」）：
+//
+//	ObjectID / OwnerID  玩家本次进场的 PERSISTID{ident, serial}——每进一个
+//	                   场景换一套，由 0x0B 的 [5:9]/[9:13] 宣告：
+//	                     ident = sceneID<<24 | 场景内序号（高 8 位=场景 ID
+//	                             低字节，玩家与同场景 NPC 共用）
+//	                     serial = 场景内序列号（单调递增）
+//	Sequence            登录会话 serial——0x0B 的 [1:5]，等于 0x04 的
+//	                   serial@0x21，整个会话不变（不是进场流水号）
 type Identity struct {
-	ObjectID uint32 // 玩家 wire objectID（fork 客户端恒 1）
-	OwnerID  uint32 // 玩家 wire ownerID（fork 客户端恒 1）
-	Sequence uint32 // 0x0B 进场流水号（每次进场自增）
+	ObjectID uint32 // 玩家 wire objectID（PERSISTID.ident）
+	OwnerID  uint32 // 玩家 wire ownerID（PERSISTID.serial）
+	Sequence uint32 // 0x0B [1:5] 登录会话 serial（= 0x04 serial@0x21）
 }
 
 // Session 登录会话信息（m366/m623/m655/m607/m52/m586 数据源）。
@@ -48,7 +57,3 @@ type Context struct {
 	NPCFrames [][]byte // 场景 NPC 物化帧族（npcfeed 预生成；0x28 官方言默认）
 	SceneIndex int     // 客户端 scenes.ini 全局段号（开图位图/迷雾行；-1=表缺席降级）
 }
-
-// DefaultIdentity fork 客户端方言的玩家恒等身份（1-1）：
-// stage_main 开图与 0x11 记录绑定都依赖这一身份（b-line 定版）。
-func DefaultIdentity() Identity { return Identity{ObjectID: 1, OwnerID: 1} }

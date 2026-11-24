@@ -21,6 +21,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/lizhanyin/9yin-server-go/internal/fscomm"
 	"github.com/lizhanyin/9yin-server-go/internal/fsdumper"
+	resfs "github.com/lizhanyin/9yin-server-go/internal/mpq/res" // 别名：局部变量 res 是 Res 根路径
 )
 
 const version = "0.1.0-gamedumper"
@@ -99,11 +100,11 @@ func main() {
 	}
 
 	// 业务装配（官方 dump_callee：DumpRole + DumpRes 两单例）。
-	dbinfo, err := os.ReadFile(filepath.Join(res, "dumpconfig", "dump_role_dbinfo.xml"))
+	dbinfo, err := resfs.ReadFile(filepath.Join(res, "dumpconfig", "dump_role_dbinfo.xml"))
 	if err != nil {
 		fatalf("dump_role_dbinfo.xml: %v", err)
 	}
-	dbrec, err := os.ReadFile(filepath.Join(res, "dumpconfig", "dump_role_record.xml"))
+	dbrec, err := resfs.ReadFile(filepath.Join(res, "dumpconfig", "dump_role_record.xml"))
 	if err != nil {
 		fatalf("dump_role_record.xml: %v", err)
 	}

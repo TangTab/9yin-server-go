@@ -1,6 +1,6 @@
 package taskdata
 
-// questxml.go 服务端任务域 XML 装载（<root>/ini/Quest，tools/npcgen 由
+// questxml.go 服务端任务域 XML 装载（<root>/ini/Quest，tools/datagen npc 由
 // 客户端 share/task 任务域树生成——任务 ID 与客户端文案键/官服 0x29 记录
 // 帧同一体系）：
 //
@@ -16,26 +16,24 @@ package taskdata
 //	                              LeaveTextID/SceneID 与 txt 链
 //	                              storytasklist 同词汇
 //
-// 与快照链（share/task txt + idres 文本派生 tasks.json）互为数据源：
-// 目录装载优先走本链（XML 为正典），快照作旧部署回退。无 Title 的主表行
-// 不计入目录——客户端没有该任务的文案，任务行发了也无处渲染——与快照链
-// 「绑定且已加载文本的任务」同语义。
+// 任务域 XML 是任务目录的唯一数据源。无 Title 的主表行不计入目录——
+// 客户端没有该任务的文案，任务行发了也无处渲染。
 
 import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 // LoadQuestXMLDir 从服务端任务域 XML 目录（<root>/ini/Quest）构建目录。
-// Task.xml 缺席或无有效任务行报错（调用方视为候选源失败）；剧情链
+// Task.xml 缺席或无有效任务行报错（调用方视为没有任务目录）；剧情链
 // （SubFunction × StoryTaskList）缺档降级为无剧情绑定——剧情行是增强
 // 下发，缺数据不阻塞任务行。
 func LoadQuestXMLDir(dir string) (*Catalog, error) {
@@ -89,7 +87,16 @@ func LoadQuestXMLDir(dir string) (*Catalog, error) {
 	if story, err := loadQuestStoryBindings(dir); err == nil {
 		bindings = append(bindings, story...)
 	}
-	return NewCatalog(tasks, bindings, nil), nil
+	return NewCatalog(tasks, bindings), nil
+}
+
+// iniInt 主表整数列：非数字或为空取 0。
+func iniInt(value string) int {
+	number, err := strconv.Atoi(strings.TrimSpace(value))
+	if err != nil {
+		return 0
+	}
+	return number
 }
 
 // loadQuestStoryBindings SubFunction（Type=story）× StoryTaskList 合成剧情
@@ -148,7 +155,7 @@ func loadQuestStoryBindings(dir string) ([]Binding, error) {
 
 // loadQuestPropRows 读 <Object><Property k="v"/></Object> 属性表文件。
 func loadQuestPropRows(path string) ([]map[string]string, error) {
-	data, err := os.ReadFile(path)
+	data, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

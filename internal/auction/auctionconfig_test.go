@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func TestParseEmbeddedDefaultINI(t *testing.T) {
@@ -66,7 +68,7 @@ func TestLoadGameAuctionINICreateAndReuse(t *testing.T) {
 
 func TestParseOfficialGBKINI(t *testing.T) {
 	const official = `..\..\testdata\config-bootstrap\game_auction.ini`
-	raw, err := os.ReadFile(official)
+	raw, err := res.ReadFile(official)
 	if err != nil {
 		t.Skipf("官方快照不可读：%v", err)
 	}

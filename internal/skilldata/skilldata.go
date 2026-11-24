@@ -1,6 +1,6 @@
 // Package skilldata 服务端技能配置只读装载。
 //
-// 数据源是 tools/skillgen 的构建产物 ini/Skill/*.xml（黑金模型，见
+// 数据源是 tools/datagen skill 的构建产物 ini/Skill/*.xml（黑金模型，见
 // docs/official/技能服务端XML构建链与m211受理链.md）：
 //
 //	Skill_New/<逻辑类>.xml        技能对象行（ID=技能 ConfigID，script 逻辑类）
@@ -16,11 +16,12 @@ package skilldata
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // Script 技能对象逻辑类（skill_new.script = 服务端对象类）。
@@ -192,11 +193,11 @@ type defEntry struct {
 // LoadDir 装载 ini/Skill 目录（不经进程级缓存）。
 func LoadDir(dir string) (*Catalog, error) {
 	static := filepath.Join(dir, fileStatic)
-	info, err := os.Stat(static)
+	info, err := res.Stat(static)
 	if err != nil || info.IsDir() {
-		return nil, fmt.Errorf("skilldata: 构建产物缺席 %s（go run ./tools/skillgen 构建）: %w", static, err)
+		return nil, fmt.Errorf("skilldata: 构建产物缺席 %s（go run ./tools/datagen skill 构建）: %w", static, err)
 	}
-	entries, err := os.ReadDir(filepath.Join(dir, dirNew))
+	entries, err := res.ReadDir(filepath.Join(dir, dirNew))
 	if err != nil {
 		return nil, fmt.Errorf("skilldata: 技能对象行目录缺席 %s: %w", filepath.Join(dir, dirNew), err)
 	}

@@ -77,7 +77,7 @@ func TestEighthBatchAssemble(t *testing.T) {
 	if nrm.Loaded() == 0 {
 		t.Fatal("ini/Npc 树预载计数为零")
 	}
-	// 九阴真档抽查（tools/npcgen 生成）：成都马六，script=CommonNpc。
+	// 九阴真档抽查（tools/datagen npc 生成）：成都马六，script=CommonNpc。
 	if class := nrm.ClassOf("FuncNpc00601"); class != "CommonNpc" {
 		t.Fatalf("FuncNpc00601 登记类 %q，期望 CommonNpc", class)
 	}

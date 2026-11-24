@@ -196,8 +196,7 @@ func (s *Server) pushEquipSlotModel(pl *Player, slot int) {
 		return
 	}
 	value := entergen.EquipSlotModel(&pl.roleState, slot)
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		[]entergen.IndexedProperty{entergen.NamedProperty(name, entergen.StringValue(value))})
+	frame, err := playerPropertyFrame(pl, entergen.NamedProperty(name, entergen.StringValue(value)))
 	if err != nil {
 		s.trace("equip move: 模型帧编码失败 slot=%d: %v", slot, err)
 		return
@@ -208,8 +207,7 @@ func (s *Server) pushEquipSlotModel(pl *Player, slot int) {
 // pushEquipAppearance op10 外观整刷（2433 参考端 appearanceFrame 方言：
 // ShowEquipType+已穿槽位模型+武器三属性恒写）。
 func (s *Server) pushEquipAppearance(pl *Player) {
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		entergen.EquipAppearanceProps(&pl.roleState))
+	frame, err := playerPropertyFrame(pl, entergen.EquipAppearanceProps(&pl.roleState)...)
 	if err != nil {
 		s.trace("equip move: appearance 帧编码失败: %v", err)
 		return
@@ -219,8 +217,7 @@ func (s *Server) pushEquipAppearance(pl *Player) {
 
 // pushEquipPhyDef op10 PhyDef 同步（装备合计）。
 func (s *Server) pushEquipPhyDef(pl *Player) {
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		[]entergen.IndexedProperty{entergen.NamedProperty("PhyDef", entergen.Int32Value(entergen.EquipPhyDef(&pl.roleState)))})
+	frame, err := playerPropertyFrame(pl, entergen.NamedProperty("PhyDef", entergen.Int32Value(entergen.EquipPhyDef(&pl.roleState))))
 	if err != nil {
 		s.trace("equip move: PhyDef 帧编码失败: %v", err)
 		return

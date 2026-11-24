@@ -6,11 +6,12 @@ import (
 	"io"
 	"os"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
 func main() {
-	data, _ := os.ReadFile(os.Args[1])
+	data, _ := res.ReadFile(os.Args[1])
 	f, _ := fsnet.NewEscapeFramer(&byteReader{b: data}, fsnet.DefaultMaxFrameSize)
 	cipher := fsnet.NewXorCipher(fsnet.NewKey(fsnet.InitialKeyValue))
 	var seg map[byte]int

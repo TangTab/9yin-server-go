@@ -63,6 +63,89 @@ func TestBuildCatalogUnknownScene(t *testing.T) {
 	}
 }
 
+// TestSceneIdentFormula 官服形态公式锚点（四抓包实证，2026-11-24）：obj
+// 高 8 位=场景 ID 低字节、低 24 位=序号（自 2 起步长 5），own=序号+5。
+func TestSceneIdentFormula(t *testing.T) {
+	// born_single_01 节号 317=0x13D → 0x3D 段（≥256 取低字节）；第 12/15/23
+	// 个 NPC 为女号（8032 线）与男号（7114 线）抓包逐值相同的三对。
+	alloc := NewSceneIdent(317)
+	want := map[int][2]uint32{12: {0x3E, 0x43}, 15: {0x4D, 0x52}, 23: {0x75, 0x7A}}
+	for i := 0; i < 48; i++ { // 官服 born_single_01 可见静态 NPC 止于第 47 块
+		objectID, ownerID, ok := alloc.Alloc(sceneIdentNPCUnits)
+		if !ok {
+			t.Fatalf("alloc %d 失败", i)
+		}
+		if w, hit := want[i]; hit && (objectID != 0x3D000000|w[0] || ownerID != w[1]) {
+			t.Fatalf("npc %d ident=%x/%x want %x/%x", i, objectID, ownerID, 0x3D000000|w[0], w[1])
+		}
+	}
+	// 静态目录之后进场玩家占 1 个序号单位：序号 242（官服该场景玩家序号
+	// 0xF3 即静态目录之后的下一块）、序列号 247；第二个玩家各 +1。
+	for i, w := range [][2]uint32{{0x3D0000F2, 247}, {0x3D0000F3, 248}} {
+		objectID, ownerID, ok := alloc.Alloc(1)
+		if !ok || objectID != w[0] || ownerID != w[1] {
+			t.Fatalf("player %d ident=%x/%x,%v want %x/%x", i, objectID, ownerID, ok, w[0], w[1])
+		}
+	}
+	// 漠河镇 [4]、姑苏 [14]：段号即高字节。
+	if got := SceneObjectIDAt(4, 2); got != 0x04000002 {
+		t.Fatalf("scene 4 base=%x", got)
+	}
+	if got := SceneObjectIDAt(14, 0x140C); got != 0x0E00140C {
+		t.Fatalf("scene 14 obj=%x", got)
+	}
+	// 序号越出 24 位拒绝（不溢进场景 ID 字节）。
+	full := &SceneIdent{sceneID: 14, index: sceneIndexLimit, serial: 1}
+	if _, _, ok := full.Alloc(1); ok {
+		t.Fatal("序号耗尽应拒绝")
+	}
+	if _, _, ok := (*SceneIdent)(nil).Alloc(1); ok {
+		t.Fatal("nil 分配器应拒绝")
+	}
+}
+
+// TestBuildCatalogDirAsScene 真档 born03（scenes.ini [3]）官服形态：全部
+// 落 0x03 段（与项目早先 golden 样本 obj 0x03002091… 同段），own=序号+5；
+// 返回的分配器从静态目录之后续分。
+func TestBuildCatalogDirAsScene(t *testing.T) {
+	root := testRoot(t)
+	spawns, _, alloc, err := BuildCatalogDirAs(root, "born03_yanyuzhuang", IdentScene, 3)
+	if err != nil {
+		t.Fatalf("BuildCatalogDirAs: %v", err)
+	}
+	if len(spawns) == 0 || alloc == nil {
+		t.Fatalf("born03 目录为空或无分配器（n=%d）", len(spawns))
+	}
+	seen := map[uint32]bool{}
+	for i, s := range spawns {
+		index := s.ObjectID & 0xFFFFFF
+		if s.ObjectID>>24 != 0x03 || index != uint32(2+5*i) || s.OwnerID != index+5 {
+			t.Fatalf("条 %d ident=%x/%x 不符官服形态（want 0x03:%x/%x）", i, s.ObjectID, s.OwnerID, 2+5*i, 7+5*i)
+		}
+		if seen[s.ObjectID] {
+			t.Fatalf("objectID %x 重复", s.ObjectID)
+		}
+		seen[s.ObjectID] = true
+	}
+	objectID, ownerID, ok := alloc.Alloc(1)
+	if !ok || objectID>>24 != 0x03 || objectID&0xFFFFFF != uint32(2+5*len(spawns)) || ownerID != uint32(7+5*len(spawns)) {
+		t.Fatalf("续分 ident=%x/%x,%v（n=%d）", objectID, ownerID, ok, len(spawns))
+	}
+	// 缺省方言不受影响：同目录仍是固定段，且无分配器。
+	fixed, _, err := BuildCatalogDir(root, "born03_yanyuzhuang")
+	if err != nil {
+		t.Fatalf("BuildCatalogDir: %v", err)
+	}
+	if len(fixed) != len(spawns) || fixed[0].ObjectID != ObjectIDAt(0) {
+		t.Fatalf("固定段目录首条 ident=%x", fixed[0].ObjectID)
+	}
+	// 场景 ID 未知：回落固定段。
+	unknown, _, unknownAlloc, err := BuildCatalogDirAs(root, "born03_yanyuzhuang", IdentScene, -1)
+	if err != nil || unknownAlloc != nil || len(unknown) == 0 || unknown[0].ObjectID != ObjectIDAt(0) {
+		t.Fatalf("未知场景应回落固定段：err=%v alloc=%v first=%x", err, unknownAlloc, unknown[0].ObjectID)
+	}
+}
+
 func TestCombatLayerOverrides(t *testing.T) {
 	ResetStore()
 	defer ResetStore()

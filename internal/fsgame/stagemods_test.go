@@ -2,9 +2,10 @@ package fsgame
 
 import (
 	"math"
-	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // assemble15 装配十五批一百三十三模块（ResourcePath=testdata——真档
@@ -85,7 +86,7 @@ func TestPathGraphDecode(t *testing.T) {
 		t.Fatalf("adv031_main 节点数=%d 期望 32", len(main))
 	}
 	// 损档拒：截断 → 游程未耗尽。
-	data, _ := os.ReadFile(filepath.Join(td, "adv031_main.path"))
+	data, _ := res.ReadFile(filepath.Join(td, "adv031_main.path"))
 	if _, err := DecodePathGraph(data[:len(data)-3]); err == nil {
 		t.Fatal("截断档应拒")
 	}

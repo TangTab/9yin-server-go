@@ -427,22 +427,22 @@ func TestNPCTaskMenuLines(t *testing.T) {
 	catalog := taskdata.NewCatalog(
 		map[int]taskdata.Task{
 			101: {ID: 101, Title: "寻亲少年"},
-			102: {ID: 102, Title: "初入江湖", CanAcceptMenu: "<font>初入江湖（可承接）</font>"}, // 快照链：有接取文案→折算接取键
-			105: {ID: 105, Title: "无接取文案"},                                         // 无接取文案：不可手动接取
+			102: {ID: 102, Title: "初入江湖", AcceptMenuKey: "CanAcceptMenu_102"}, // 有接取键：可手动接取
+			105: {ID: 105, Title: "无接取文案"},                                    // 无接取键：不可手动接取
 		},
 		[]taskdata.Binding{
 			{TaskID: 101, NPCConfigID: "WorldNpc00009"},
 			{TaskID: 102, NPCConfigID: "worldnpc00009"}, // 大小写不敏感去重
 			{TaskID: 103, NPCConfigID: "WorldNpc00009"},
-			{TaskID: 104, NPCConfigID: "WorldNpc00009"}, // 无文本不计
+			{TaskID: 104, NPCConfigID: "WorldNpc00009"}, // 不在目录里，不计
 			{TaskID: 105, NPCConfigID: "WorldNpc00009"},
-		}, nil)
+		})
 	s := newNpcTestServer(t)
 	pl := &Player{Conn1: 3, State: PlOnline}
 	pl.roleState.TaskAccepted = []uint32{101}
 	lines := s.npcTaskLines(catalog, pl, "WorldNpc00009", 8)
 	if len(lines) != 2 {
-		t.Fatalf("任务行 = %d, want 2（103/104 无文本、105 无接取文案不计）: %+v", len(lines), lines)
+		t.Fatalf("任务行 = %d, want 2（103/104 不在目录、105 无接取键不计）: %+v", len(lines), lines)
 	}
 	if lines[0].TaskID != 101 || !lines[0].Submit {
 		t.Fatalf("行 0 = %+v, want {101 Submit 无剧情段直发提交行}", lines[0])
@@ -455,7 +455,7 @@ func TestNPCTaskMenuLines(t *testing.T) {
 	story2 := taskdata.NewCatalog(storyTasks, []taskdata.Binding{
 		{TaskID: 205, NPCConfigID: "F", StoryID: "482", ContextID: "story_482_1", TitleID: "storymenu_482_1"},
 		{TaskID: 205, NPCConfigID: "F", StoryID: "482", ContextID: "story_482_2", TitleID: "storymenu_482_2"},
-	}, nil)
+	})
 	pl2 := &Player{Conn1: 4, State: PlOnline}
 	pl2.roleState.TaskAccepted = []uint32{205}
 	got := s.npcTaskLines(story2, pl2, "F", 8)

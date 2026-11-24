@@ -1,5 +1,10 @@
 # NPC 任务绑定与引导流任务协议定版
 
+> 2026-11-24 更新：任务目录只从服务端任务域 XML（`ini/Quest`）装载。旧版 JSON 快照
+> `taskdata/tasks.json`、它在运行时的回退与 `NINEYIN_TASK_SNAPSHOT` 环境变量、以及生成它的
+> task 构建器均已移除；§一里涉及快照链的描述是定版当时的记录。
+
+
 > 对象：NPC 对话框的任务行下发与接取/提交受理（internal/fssoloworld/npctask.go +
 > npcinteract.go）、任务数据链审计（npcgen/taskgen）、引导抓包任务协议
 > （资料/初始账号登陆-完整引导-女.pcapng）、LZ47 解码链（tools/lz_exact.py）。

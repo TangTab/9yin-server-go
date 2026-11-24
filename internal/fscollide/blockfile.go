@@ -22,7 +22,8 @@ package fscollide
 import (
 	"encoding/binary"
 	"fmt"
-	"os"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // Signature 官方地形碰撞文件签名。
@@ -38,7 +39,7 @@ type Block struct {
 // size/id/crc 任一读失败即报错（与官方 Load 的告警路径一致，但官方在
 // 块 id 未知时跳过继续；这里由调用方按 ID 过滤）。
 func LoadBlockFile(path string) ([]Block, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

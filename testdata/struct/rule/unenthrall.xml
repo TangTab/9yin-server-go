@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<object>
-	<!-- 基本属性 -->
-	<properties>
-		<property name="UnenthrallTime" type="int" public="false" private="true" save="false" desc="累积在线时间"/>
-	</properties>
-</object>

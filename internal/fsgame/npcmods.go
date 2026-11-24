@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // 八期：NPC 载体域底座六模块（docs/official/FsGame全解与Go复刻.md §8
@@ -48,7 +50,7 @@ func (m *NpcResourceModule) LoadResource(k *Kernel) error {
 	base := filepath.Join(k.ResourcePath, "ini", "Npc")
 	for _, sub := range []string{"NpcConfigAuto", "NpcConfig"} {
 		dir := filepath.Join(base, sub)
-		err := filepath.WalkDir(dir, func(path string, d os.DirEntry, walkErr error) error {
+		err := res.WalkDir(dir, func(path string, d os.DirEntry, walkErr error) error {
 			if walkErr != nil {
 				if os.IsNotExist(walkErr) {
 					return nil // 目录缺失与旧容错一致
@@ -58,7 +60,7 @@ func (m *NpcResourceModule) LoadResource(k *Kernel) error {
 			if d.IsDir() || !strings.HasSuffix(d.Name(), ".xml") {
 				return nil
 			}
-			data, readErr := os.ReadFile(path)
+			data, readErr := res.ReadFile(path)
 			if readErr != nil {
 				k.Tracef("NpcResourceModule: 读 %s: %v", path, readErr)
 				return nil

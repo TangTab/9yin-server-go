@@ -22,6 +22,9 @@ rem    %2..%5 透传 npcprobe（如 -scene born01 -radius 800 -limit 50）。
 rem  例: build-res.bat
 rem      build-res.bat F:/Game/Online/9yin/9yin-server-go2/Res -scene born01
 rem      build-res.bat ..\testdata            （仓内测试档）
+rem
+rem  本脚本只做装载探针。构建数据（NPC / 任务 / 物品 / 技能）走统一入口：
+rem      go run ./tools/datagen            （先落散文件到 testdata，再并入资源层）
 rem ============================================================
 
 set "RES_ROOT=%~1"
@@ -34,7 +37,6 @@ if not exist "%RES_ROOT%/ini/Npc/NpcConfig" (
 
 echo npc probe  root=%RES_ROOT%  extra: %2 %3 %4 %5
 go run ./tools/npcprobe -root "%RES_ROOT%" %2 %3 %4 %5
-go run ./tools/skillgen -in "%RES_ROOT%/share/skill" -rule "%RES_ROOT%/share/rule" -out "%RES_ROOT%/ini/Skill" -verify
 if errorlevel 1 (
   echo ERROR: npcprobe failed for %RES_ROOT%.
   goto wait_exit

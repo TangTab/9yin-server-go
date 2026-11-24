@@ -1,6 +1,6 @@
 // Package itemdata 物品目录装载（服务端只读构建产物）。
 //
-// 主来源是 ini/Item 构建产物（tools/itemgen：九阴设计态 share/item 表 →
+// 主来源是 ini/Item 构建产物（tools/datagen item：九阴设计态 share/item 表 →
 // 黑金物品配置格式的服务端 XML，见 docs/official/物品服务端XML构建链与
 // msg31使用链.md）——模板行按 path_config.xml 登记分档，行携逻辑类
 // script/ItemType/ViewID 与静态包引用（FuncPack/LogicPack/ArtPack/
@@ -17,12 +17,12 @@ package itemdata
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -103,7 +103,7 @@ func (c *Catalog) MissingPacks() []string {
 // LoadDir 装载目录下全部 *.ini（设计态回退；单档解析失败跳过——87 档
 // 静态数据，个别脏档不废整目录；同 ID 首档胜出）。
 func LoadDir(dir string) (*Catalog, error) {
-	files, err := filepath.Glob(filepath.Join(dir, "*.ini"))
+	files, err := res.Glob(filepath.Join(dir, "*.ini"))
 	if err != nil {
 		return nil, fmt.Errorf("itemdata: glob %s: %w", dir, err)
 	}
@@ -131,7 +131,7 @@ func LoadDir(dir string) (*Catalog, error) {
 
 // LoadFile 单档装载（合法 UTF-8 直通，否则 GBK 转码；[//注释节] 跳过）。
 func LoadFile(path string) (map[string]Entry, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

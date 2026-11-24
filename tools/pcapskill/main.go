@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	net "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -43,7 +44,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: pcapskill <file.pcapng> <port> <t0> <t1> [filter]")
 		os.Exit(2)
 	}
-	data, err := os.ReadFile(os.Args[1])
+	data, err := res.ReadFile(os.Args[1])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

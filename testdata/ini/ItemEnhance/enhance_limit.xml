@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-StartLevel="开启等级"
--->
-<Object>
-	<Property ID="StartLevel" Value="15"/>
-</Object>

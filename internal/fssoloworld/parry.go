@@ -129,11 +129,10 @@ func (s *Server) sendParryStateFrame(pl *Player) {
 	if parrying && value > 0 {
 		active = 1
 	}
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0, []entergen.IndexedProperty{
+	frame, err := playerPropertyFrame(pl,
 		entergen.NamedProperty("InParry", entergen.Int32Value(active)),
 		entergen.NamedProperty("InManualParry", entergen.Int32Value(active)),
-		entergen.NamedProperty("ParryValue", entergen.Int32Value(value)),
-	})
+		entergen.NamedProperty("ParryValue", entergen.Int32Value(value)))
 	if err != nil {
 		s.trace("parry state frame encode failed client=%d: %v", pl.Conn1, err)
 		return
@@ -143,8 +142,7 @@ func (s *Server) sendParryStateFrame(pl *Player) {
 
 // sendParryLogicState 架势撑持帧（LogicState 单属性；idx 走表动态解析）。
 func (s *Server) sendParryLogicState(pl *Player, state byte) {
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		[]entergen.IndexedProperty{entergen.NamedProperty("LogicState", entergen.ByteValue(state))})
+	frame, err := playerPropertyFrame(pl, entergen.NamedProperty("LogicState", entergen.ByteValue(state)))
 	if err != nil {
 		s.trace("parry logic state frame encode failed client=%d: %v", pl.Conn1, err)
 		return

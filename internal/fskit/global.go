@@ -3,10 +3,11 @@ package fskit
 import (
 	"crypto/rand"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // Global 六个扩展函数（官方 Global.obj，extfunc 注册给脚本层）。
@@ -96,7 +97,7 @@ func SplitFileName(name string) []string {
 // （GetFileTime + FileTimeToSystemTime，无 FileTimeToLocalFileTime），
 // 格式 "%04d-%02d-%02d %02d:%02d:%02d"；失败 → ""。
 func GetFileTime(path string) string {
-	fi, err := os.Stat(path)
+	fi, err := res.Stat(path)
 	if err != nil {
 		return ""
 	}
@@ -139,7 +140,7 @@ type FileTime struct {
 
 // GetFileTimeStruct 是 GetFileTime 的结构化版（官方 Port_GetFileTime 输出）。
 func GetFileTimeStruct(path string) (FileTime, bool) {
-	fi, err := os.Stat(path)
+	fi, err := res.Stat(path)
 	if err != nil {
 		return FileTime{}, false
 	}

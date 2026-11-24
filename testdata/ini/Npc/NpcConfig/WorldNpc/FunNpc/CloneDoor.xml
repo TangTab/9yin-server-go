@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Object>
-	<Property ID="CloneDoorNpc00047" script="CloneDoor" Name="进入47号场景副本" Desc="进入47号场景副本" Resource="npc\itemnpc057" NpcType="42" SpringRange="3" SelectState="33"/>
-</Object>

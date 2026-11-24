@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func writeProduct(t *testing.T, dir, name, body string) {
@@ -166,8 +168,8 @@ func TestINIFallbackHasNoDefinition(t *testing.T) {
 // 菜肴/坐骑）须能按使用链取值面联查到底。
 func TestRepositoryProduct(t *testing.T) {
 	dir := filepath.Join("..", "..", "testdata", "ini", "Item")
-	if info, err := os.Stat(filepath.Join(dir, filePathConfig)); err != nil || info.IsDir() {
-		t.Skipf("仓库产物缺席（go run ./tools/itemgen 构建）: %v", err)
+	if info, err := res.Stat(filepath.Join(dir, filePathConfig)); err != nil || info.IsDir() {
+		t.Skipf("仓库产物缺席（go run ./tools/datagen item 构建）: %v", err)
 	}
 	start := time.Now()
 	catalog, err := LoadXML(dir)

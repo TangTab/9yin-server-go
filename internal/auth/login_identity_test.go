@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"github.com/lizhanyin/9yin-server-go/internal/transport"
 )
 
@@ -15,7 +15,7 @@ const capturedIdentity = "acct:v1:112cd36f1e1d2bac408e0428aabef6e399080c2bc33407
 
 func capturedLogin(t *testing.T) []byte {
 	t.Helper()
-	raw, err := os.ReadFile(filepath.Join("..", "..", "testdata", "protocol", "connect-first-flight.bin"))
+	raw, err := res.ReadFile(filepath.Join("..", "..", "testdata", "protocol", "connect-first-flight.bin"))
 	if err != nil {
 		t.Fatal(err)
 	}

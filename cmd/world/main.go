@@ -15,6 +15,7 @@ import (
 	"os/signal"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fsserver"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 //go:embed GameWorld.ini
@@ -77,12 +78,12 @@ func main() {
 
 	// 资源装载（官方 LoadNameFilter/load_scene_config）
 	if *filterPath != "" {
-		if _, err := os.ReadFile(*filterPath); err == nil {
+		if _, err := res.ReadFile(*filterPath); err == nil {
 			fmt.Println("load name filter: (接入面)")
 		}
 	}
 	if *scenesINI != "" {
-		if data, err := os.ReadFile(*scenesINI); err == nil {
+		if data, err := res.ReadFile(*scenesINI); err == nil {
 			n := loadScenes(w, data)
 			fmt.Printf("load scene config: %d scenes\n", n)
 		}

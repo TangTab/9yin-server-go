@@ -12,21 +12,34 @@ package npcdata
 // SceneGlobalIndex 恒 false——调用方降级（只发样本位图、跳过迷雾行），
 // 不阻塞进场。段号锚点：[3]=born03_YanYuZhuang、[14]=city02_SuZhou、
 // [366]=scene22（与外服 c.pcapng OpenMapRec 行 11 bit14 互证）。
+//
+// 段号即场景 ID：官服 wire ident 的 obj 高 8 位取其低字节（四抓包实证
+// 2026-11-24：漠河镇 [4]→0x04 段、姑苏 [14]→0x0E 段、born_single_01 节号
+// 317=0x13D→0x3D 段）——摆放目录 → 段号查 SceneIndexOfDir。
 
 import (
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
 
+// sceneIndexTables scenes.ini 一次解析的两张索引，均为「同键多段取首现」：
+// byResource 键=Config 基名的 resource（city02/born03，city/school/born/
+// scene 前缀截到首个 '_'）；byDir 键=Config 基名全名小写（=ini\Scene 下
+// 摆放目录名）。
+type sceneIndexTables struct {
+	byResource map[string]uint32
+	byDir      map[string]uint32
+}
+
 var (
 	sceneIndexMu    sync.Mutex
-	sceneIndexRoots = map[string]map[string]uint32{}
+	sceneIndexRoots = map[string]*sceneIndexTables{}
 )
 
 // SceneGlobalIndex 取场景 resource 在客户端 scenes.ini 的全局段号。
@@ -39,22 +52,49 @@ func SceneGlobalIndex(root, resource string) (uint32, bool) {
 	}
 	sceneIndexMu.Lock()
 	defer sceneIndexMu.Unlock()
-	table, ok := sceneIndexRoots[root]
-	if !ok {
-		table = loadSceneIndexTable(filepath.Join(root, "ini", "scenes.ini"))
-		sceneIndexRoots[root] = table
-	}
+	table := sceneIndexTablesOf(root)
 	if table == nil {
 		return 0, false
 	}
-	index, ok := table[key]
+	index, ok := table.byResource[key]
 	return index, ok
 }
 
-// loadSceneIndexTable 解析 scenes.ini（GBK）：段号 → Config 基名首现绑定。
-// 文件缺失/解码失败返回 nil（进程级缓存负面结果，不重试）。
-func loadSceneIndexTable(path string) map[string]uint32 {
-	data, err := os.ReadFile(path)
+// SceneIndexOfDir 取摆放目录名（ini\Scene 下目录，= scenes.ini 节 Config
+// 基名，大小写不敏感）的场景号——官服形态 ident 的 obj 高字节来源
+// （npcfeed.IdentScene）。精确基名优先；scenes.ini 未收录的变体目录
+// （school01_fangong、scene08 _2_ 族）回落 resource 键的首现段号。
+func SceneIndexOfDir(root, dir string) (uint32, bool) {
+	key := strings.ToLower(strings.TrimSpace(dir))
+	if key == "" {
+		return 0, false
+	}
+	sceneIndexMu.Lock()
+	defer sceneIndexMu.Unlock()
+	table := sceneIndexTablesOf(root)
+	if table == nil {
+		return 0, false
+	}
+	if index, ok := table.byDir[key]; ok {
+		return index, true
+	}
+	index, ok := table.byResource[SceneResourceOfBase(key)]
+	return index, ok
+}
+
+// sceneIndexTablesOf 数据根的索引表（持 sceneIndexMu 调用）。文件缺失/
+// 解码失败缓存 nil（进程级负面结果，不重试）。
+func sceneIndexTablesOf(root string) *sceneIndexTables {
+	table, ok := sceneIndexRoots[root]
+	if !ok {
+		table = loadSceneIndexTables(filepath.Join(root, "ini", "scenes.ini"))
+		sceneIndexRoots[root] = table
+	}
+	return table
+}
+
+func loadSceneIndexTables(path string) *sceneIndexTables {
+	data, err := res.ReadFile(path)
 	if err != nil {
 		return nil
 	}
@@ -62,13 +102,20 @@ func loadSceneIndexTable(path string) map[string]uint32 {
 	if err != nil {
 		return nil
 	}
-	return ParseSceneIndexTable(string(decoded))
+	return parseSceneIndexTables(string(decoded))
 }
 
-// ParseSceneIndexTable 纯解析（测试入口）：[段号] Config=ini\scene\<基名>，
-// 同 resource 多段取首现。
+// ParseSceneIndexTable 纯解析（测试入口）：[段号] Config=ini\scene\<基名>
+// 的 resource 键表，同 resource 多段取首现。
 func ParseSceneIndexTable(text string) map[string]uint32 {
-	table := make(map[string]uint32, 300)
+	return parseSceneIndexTables(text).byResource
+}
+
+func parseSceneIndexTables(text string) *sceneIndexTables {
+	tables := &sceneIndexTables{
+		byResource: make(map[string]uint32, 300),
+		byDir:      make(map[string]uint32, 300),
+	}
 	section := -1
 	for _, line := range strings.Split(text, "\n") {
 		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
@@ -91,12 +138,15 @@ func ParseSceneIndexTable(text string) map[string]uint32 {
 		if base == "" {
 			continue
 		}
+		if _, exists := tables.byDir[strings.ToLower(base)]; !exists {
+			tables.byDir[strings.ToLower(base)] = uint32(section)
+		}
 		key := SceneResourceOfBase(base)
-		if _, exists := table[key]; !exists {
-			table[key] = uint32(section)
+		if _, exists := tables.byResource[key]; !exists {
+			tables.byResource[key] = uint32(section)
 		}
 	}
-	return table
+	return tables
 }
 
 // SceneResourceOfBase 配置基名 → 地形 resource 键：city/school/born/scene

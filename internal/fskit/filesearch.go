@@ -1,9 +1,10 @@
 package fskit
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 const FileSearchTypeName = "FileSearch"
@@ -124,7 +125,7 @@ func findEntries(dir, fileName string) ([]string, bool) {
 		}
 	}
 	wild := pattern[len(base):]
-	ents, err := os.ReadDir(base)
+	ents, err := res.ReadDir(base)
 	if err != nil {
 		return nil, false
 	}
@@ -138,7 +139,7 @@ func findEntries(dir, fileName string) ([]string, bool) {
 }
 
 func isDir(p string) bool {
-	fi, err := os.Stat(p)
+	fi, err := res.Stat(p)
 	return err == nil && fi.IsDir()
 }
 

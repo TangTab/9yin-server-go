@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Object>
-	<Property ID="worldwarlxjg01" script="SpringMachineNpc" Name="凌霄城城墙据点" Desc="凌霄城城墙据点" Resource="npc\itemnpc057" NpcType="173" SpringRange="10" SelectState="2"/>
-</Object>

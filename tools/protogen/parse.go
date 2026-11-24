@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -52,7 +52,7 @@ func toUTF8(raw []byte) ([]byte, error) {
 // parseDefineFile 解析一个 *_custom_define.lua。
 // 结构约定：`--注释`（含“格式：”行）紧邻 `NAME = value` 定义行。
 func parseDefineFile(path string) ([]MsgDef, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
@@ -72,6 +73,24 @@ type npcCatalog struct {
 	spawns []npcfeed.Spawn
 	stats  npcfeed.Stats
 	bind   npcfeed.PatrolBindStats
+	// sceneID scenes.ini 场景号（-1=未收录）：官服形态 ident 的 obj 高字节
+	// 来源，玩家进场分配与 NPC 共用。
+	sceneID int
+	// ident 官服形态分配器（静态 NPC 之后的续分起点，玩家进场取号用）：
+	// NPC 走官服形态时必有；固定段下仅玩家走官服形态时存在（空推过静态
+	// 目录），否则 nil。
+	ident *npcfeed.SceneIdent
+	// owners obj → own（0x0E 移除帧取 own：官服形态 own 是独立序列号，
+	// 不可由 obj 反推）。
+	owners map[uint32]uint32
+}
+
+// ownerOf 对象的 own（目录外对象回落固定段公式）。
+func (c *npcCatalog) ownerOf(objectID uint32) uint32 {
+	if own, ok := c.owners[objectID]; ok {
+		return own
+	}
+	return npcfeed.OwnerIDOf(objectID)
 }
 
 var (
@@ -227,7 +246,7 @@ func (s *Server) sceneNPCCatalog(key string) *npcCatalog {
 	if cached, ok := npcCatalogCache[strings.ToLower(key)]; ok {
 		return cached
 	}
-	catalog := &npcCatalog{dir: key}
+	catalog := &npcCatalog{dir: key, sceneID: -1}
 	root := npcfeed.ResolveRoot()
 	if root == "" {
 		s.trace("npc catalog: 数据根缺席（NINEYIN_DATA_ROOT / Res / testdata），场景 %s NPC 不下发", key)
@@ -241,11 +260,28 @@ func (s *Server) sceneNPCCatalog(key string) *npcCatalog {
 		dir = prefix
 	}
 	catalog.dir = dir
-	spawns, stats, err := npcfeed.BuildCatalogDir(root, dir)
+	scheme := npcIdentScheme()
+	if id, ok := npcdata.SceneIndexOfDir(root, dir); ok {
+		catalog.sceneID = int(id)
+	} else if playerIdentScene() || scheme == npcfeed.IdentScene {
+		s.trace("npc catalog: 场景 %s 不在 scenes.ini，ident 回落固定段", dir)
+	}
+	spawns, stats, alloc, err := npcfeed.BuildCatalogDirAs(root, dir, scheme, catalog.sceneID)
+	catalog.ident = alloc
+	if catalog.ident == nil && playerIdentScene() && catalog.sceneID >= 0 {
+		// NPC 走固定段（或本场景无摆放目录）而玩家走官服形态：动态对象
+		// 仍从静态目录之后起算（2+5N 与固定段 [0x102, 0x102+N) 不相交）。
+		catalog.ident = npcfeed.NewSceneIdent(catalog.sceneID)
+		catalog.ident.SkipStatic(len(spawns))
+	}
 	if err != nil {
 		s.trace("npc catalog: %v", err)
 		npcCatalogCache[strings.ToLower(key)] = catalog
 		return catalog
+	}
+	catalog.owners = make(map[uint32]uint32, len(spawns))
+	for _, spawn := range spawns {
+		catalog.owners[spawn.ObjectID] = spawn.OwnerID
 	}
 	// 巡逻绑定：mappath 路线表（<root>/mappath，场景短名前缀 ini）→
 	// 出生点吸附 + 时间表（目录缓存内一次完成）。
@@ -341,7 +377,7 @@ func (s *Server) npcReconcile(pl *Player, pos [4]float64) {
 		}
 	}
 	for _, id := range removes {
-		s.sendToClient(pl, entergen.SceneRemoveObjectFrame(id, npcfeed.OwnerIDOf(id)))
+		s.sendToClient(pl, entergen.SceneRemoveObjectFrame(id, catalog.ownerOf(id)))
 	}
 	if len(adds)+len(removes) > 0 {
 		s.trace("npc viewport reconcile: client=%d +%d -%d visible=%d", pl.Conn1, len(adds), len(removes), len(nowVisible))

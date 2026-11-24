@@ -5,11 +5,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -86,7 +86,7 @@ func toUTF8(raw []byte) ([]byte, error) {
 // LoadObjectFile 加载通用 Object/Property XML（UTF-8 或 GBK 自适应）。
 // 该格式覆盖原版绝大部分数值表与注册表（scenes.xml、ini\**\*.xml）。
 func LoadObjectFile(path string) (*ObjectDoc, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

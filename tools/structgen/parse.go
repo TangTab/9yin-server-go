@@ -5,11 +5,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"os"
 	"regexp"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
@@ -141,7 +141,7 @@ func toUTF8(raw []byte) ([]byte, error) {
 
 // parseObject 解析单个 struct XML：编码自适应 → 剥注释 → 修属性 → 解码。
 func parseObject(path string) (*ObjectDef, error) {
-	raw, err := os.ReadFile(path)
+	raw, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

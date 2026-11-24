@@ -56,12 +56,6 @@ const (
 // 校验，不是 26 段就整串回落全零）。串形 = 25 个 "v;" + 尾分号。
 const neiGongBindSlotCount = 25
 
-// fork 客户端玩家对象恒 1-1（enterContext 同锚；属性帧/记录行挂点）。
-const (
-	forkPlayerObjectID uint32 = 1
-	forkPlayerOwnerID  uint32 = 1
-)
-
 // clientCustom op0x1E 自定义消息入口（frame 含 opcode 字节）。
 // 解析失败静默忽略（畸形流量不断会话）；无 roleState 的会话（未进场/
 // 旧档回退）拒收编辑但保留日志。
@@ -202,8 +196,8 @@ func (s *Server) pushKeybindScheme(pl *Player, scheme int32, value string) error
 	if name == "" {
 		return strconv.ErrRange
 	}
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		[]entergen.IndexedProperty{entergen.NamedProperty(name, entergen.StringValue(value+" "))})
+	frame, err := playerPropertyFrame(pl,
+		entergen.NamedProperty(name, entergen.StringValue(value+" ")))
 	if err != nil {
 		return err
 	}
@@ -213,8 +207,7 @@ func (s *Server) pushKeybindScheme(pl *Player, scheme int32, value string) error
 
 // pushNeiGongBind 0x10 属性 201（同键位域尾空格方言）。
 func (s *Server) pushNeiGongBind(pl *Player, value string) error {
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		[]entergen.IndexedProperty{entergen.NamedProperty("NeiGongBind", entergen.StringValue(value+" "))})
+	frame, err := playerPropertyFrame(pl, entergen.NamedProperty("NeiGongBind", entergen.StringValue(value+" ")))
 	if err != nil {
 		return err
 	}
@@ -224,8 +217,7 @@ func (s *Server) pushNeiGongBind(pl *Player, value string) error {
 
 // pushOperateMode 0x10 属性 223（int32）。
 func (s *Server) pushOperateMode(pl *Player, mode int32) error {
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
-		[]entergen.IndexedProperty{entergen.NamedProperty("OperateMode", entergen.Int32Value(mode))})
+	frame, err := playerPropertyFrame(pl, entergen.NamedProperty("OperateMode", entergen.Int32Value(mode)))
 	if err != nil {
 		return err
 	}
@@ -437,7 +429,8 @@ func materializeShortcutBaseline(pl *Player) {
 // 到 0 倒序清空，再按内存序整表重建（倒序删行使行号重编号永不参与；
 // 帧序构造见 entergen.ShortcutRebuildFrames）。
 func (s *Server) rebuildShortcutRecord(pl *Player, oldRows int) error {
-	frames, err := entergen.ShortcutRebuildFrames(forkPlayerObjectID, forkPlayerOwnerID, oldRows, pl.roleState.Shortcuts)
+	id := pl.wireIdent()
+	frames, err := entergen.ShortcutRebuildFrames(id.objectID, id.ownerID, oldRows, pl.roleState.Shortcuts)
 	if err != nil {
 		return err
 	}

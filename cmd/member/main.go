@@ -17,6 +17,7 @@ import (
 	"os/signal"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fsmember"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 //go:embed GameMember.ini
@@ -78,20 +79,20 @@ func main() {
 
 	// 可选资源装载（官方 LoadNameFilter/LoadLocations/静态场景分配）
 	if *filterPath != "" {
-		if data, err := os.ReadFile(*filterPath); err == nil {
+		if data, err := res.ReadFile(*filterPath); err == nil {
 			words := fsmember.ParseFilterText(data)
 			fmt.Printf("load name filter: %d words\n", len(words))
 		}
 	}
 	if *locPath != "" {
-		if data, err := os.ReadFile(*locPath); err == nil {
+		if data, err := res.ReadFile(*locPath); err == nil {
 			locations := fsmember.NewLocations()
 			_ = locations.Load(data)
 			fmt.Printf("load locations: %d points\n", locations.Count())
 		}
 	}
 	if *scenesMem != "" {
-		if data, err := os.ReadFile(*scenesMem); err == nil {
+		if data, err := res.ReadFile(*scenesMem); err == nil {
 			for _, id := range fsmember.MemberScenesFor(data, cfg.MemberID) {
 				if _, err := m.Scenes.CreateScene(id, fsmember.ScenePrototype,
 					fmt.Sprintf("scene_%d", id), 0); err == nil {

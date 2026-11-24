@@ -1,110 +1,80 @@
-// Package taskdata 从客户端资源加载任务文本与 NPC↔任务绑定：
+// Package taskdata 装载服务端任务域 XML（<数据根>/ini/Quest）并建立
+// NPC↔任务目录：任务主表给出任务与接取/提交 NPC，SubFunction ×
+// StoryTaskList 给出剧情段绑定。
 //
-//   - 任务文本来自 text/chineses/stringtask_normal/*.idres，按
-//     share/task/pre_file.txt 声明的前缀规则以任务 ID（TID）组织；
-//   - NPC 绑定来自 share/task/task/storytasklist/*.txt（剧情任务对话表，
-//     行含 NpcID/SceneID/TaskID）与 share/task/qianjiu_tasknpc.ini 的
-//     [TaskNpc] 段；
-//   - 任务链元数据来自 share/task/task/task_drama_cite.ini。
-//
-// 派生结果经 Snapshot 以版本化 JSON 持久化，服务端启动时可直接读快照，
-// 不必每次重扫 500+ 个资源文件。
+// XML 由 tools/datagen npc 从客户端 share/task 任务域树离线构建，任务 ID
+// 与客户端文案键同一体系。装载入口 LoadQuestXMLDir。
 package taskdata
 
 import (
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 )
 
-// Task 是一个任务的客户端文本快照。字段保留客户端富文本原文
-// （<font>/<br> 标记），日志与脚本展示用 StripRichText 取纯文本。
+// Task 是目录里的一个任务（ini/Quest/Task/Task.xml 主表行）。
 type Task struct {
-	ID             int    `json:"id"`
-	Title          string `json:"title,omitempty"`
-	Target         string `json:"target,omitempty"`
-	Context        string `json:"context,omitempty"`
-	Menu           string `json:"menu,omitempty"`
-	CanAcceptMenu  string `json:"can_accept_menu,omitempty"`
-	CompleteMenu   string `json:"complete_menu,omitempty"`
-	UncompleteMenu string `json:"uncomplete_menu,omitempty"`
-	Complete       string `json:"complete,omitempty"`
-	Next           string `json:"next,omitempty"`
+	ID    int
+	Title string // 客户端显示文本（构建时按 TitleId 解析）；没有文案的行不进目录
 
-	// 接取/链进字段（ini/Quest 任务主表行带出；旧 JSON 快照链只有文案，
-	// 接取键按 CanAcceptMenu 文案有无折算，其余为零值）。
-	//
 	// AcceptMenuKey 接取行文案键——空＝客户端没有接取文案，官服不发 100
 	// 接取行（多样本抓包实证 `100081264 CanAcceptMenu_81264 title_81264`
 	// 只出现在有该键的任务上），只能服务端自动接取：链首任务首谈即接、
 	// 前序任务提交后按 AutoAcceptID 链式接取。
-	AcceptMenuKey string `json:"accept_menu_key,omitempty"`
+	AcceptMenuKey string
 	// ChainRoot 链根任务：无前置任务、无接取文案，且不是任何任务的
 	// AutoAcceptID 目标——服务端在首次对话时直接接取（官服引导链首环
 	// 1340、车夫的 1648 均属此类）。
-	ChainRoot bool `json:"chain_root,omitempty"`
+	ChainRoot bool
 	// AutoAcceptID 本任务提交后服务端自动接取的任务。
-	AutoAcceptID int `json:"auto_accept_id,omitempty"`
+	AutoAcceptID int
 	// AutoSubmit 目标达成即自动提交（剧情任务＝剧情走完）。
-	AutoSubmit bool `json:"auto_submit,omitempty"`
+	AutoSubmit bool
 }
 
-// Binding 记录一条 NPC↔任务关联。Source 标记数据来源：
-// "storytasklist" 或 "qianjiu"。storytasklist 的**每行即剧情的一段**
+// Binding 记录一条 NPC↔任务关联。Source 标记数据来源：主表的接取/提交
+// NPC 为 "quest-accept" / "quest-submit"；剧情段为 "storytasklist"。
+// storytasklist 的**每行即剧情的一段**
 // （同 StoryID 多行按行序为段序——引导抓包 story_482_1..5 与源表
 // 5 行互证）：StoryID=剧情行 ID；ContextID/TitleID=该段窗的 m5 标题键
 // （story_<sid>_N）与续行文本键（storymenu_<sid>_N）；LeaveTextID=离行
 // 文本键（9607）。键本身，非文本。
 type Binding struct {
-	TaskID       int    `json:"task_id"`
-	NPCConfigID  string `json:"npc_config_id"`
-	SceneID      string `json:"scene_id,omitempty"`
-	StoryID      string `json:"story_id,omitempty"`
-	ContextID    string `json:"context_id,omitempty"`
-	TitleID      string `json:"title_id,omitempty"`
-	LeaveTextID  string `json:"leave_text_id,omitempty"`
-	Source       string `json:"source,omitempty"`
-}
-
-// DramaCite 是 task_drama_cite.ini 的任务链条目。
-type DramaCite struct {
-	DramaName     string `json:"drama_name,omitempty"`
-	Chapter       int    `json:"chapter,omitempty"`
-	Round         int    `json:"round,omitempty"`
-	NextTaskLimit int    `json:"next_task_limit,omitempty"`
+	TaskID      int
+	NPCConfigID string
+	SceneID     string
+	StoryID     string
+	ContextID   string
+	TitleID     string
+	LeaveTextID string
+	Source      string
 }
 
 // Catalog 是去重并索引后的任务目录。零值与 nil 接收者安全，
 // 查询返回空结果（与 npcfunc.Registry 的约定一致）。
 type Catalog struct {
-	tasks      map[int]Task
-	bindings   []Binding
-	byNPC      map[string][]Binding
-	byTask     map[int][]Binding
-	dramaCites map[int]DramaCite
+	tasks    map[int]Task
+	bindings []Binding
+	byNPC    map[string][]Binding
+	byTask   map[int][]Binding
 }
 
 // NewCatalog 组装目录：绑定按（规范化后的 NPC 配置 ID, 任务 ID,
 // 剧情行 ID, 段上下文键）去重——同一剧情的多段行（storytasklist 合法
 // 形态，story_<sid>_N）全部保留、行序即段序，同一 NPC 的绑定按任务
 // ID 升序（稳定排序保段序）。非法条目（非正任务 ID、空 NPC ID）丢弃。
-func NewCatalog(tasks map[int]Task, bindings []Binding, cites map[int]DramaCite) *Catalog {
+func NewCatalog(tasks map[int]Task, bindings []Binding) *Catalog {
 	c := &Catalog{
-		tasks:      make(map[int]Task, len(tasks)),
-		bindings:   make([]Binding, 0, len(bindings)),
-		byNPC:      make(map[string][]Binding),
-		byTask:     make(map[int][]Binding),
-		dramaCites: make(map[int]DramaCite, len(cites)),
+		tasks:    make(map[int]Task, len(tasks)),
+		bindings: make([]Binding, 0, len(bindings)),
+		byNPC:    make(map[string][]Binding),
+		byTask:   make(map[int][]Binding),
 	}
 	for id, task := range tasks {
 		if id <= 0 {
 			continue
 		}
 		task.ID = id
-		if task.AcceptMenuKey == "" && task.CanAcceptMenu != "" {
-			task.AcceptMenuKey = "CanAcceptMenu_" + strconv.Itoa(id)
-		}
 		c.tasks[id] = task
 	}
 	seen := make(map[Binding]bool, len(bindings))
@@ -128,11 +98,6 @@ func NewCatalog(tasks map[int]Task, bindings []Binding, cites map[int]DramaCite)
 	for _, list := range c.byNPC {
 		sort.SliceStable(list, func(i, j int) bool { return list[i].TaskID < list[j].TaskID })
 	}
-	for id, cite := range cites {
-		if id > 0 {
-			c.dramaCites[id] = cite
-		}
-	}
 	return c
 }
 
@@ -154,8 +119,8 @@ func (c *Catalog) BindingsForNPC(configID string) []Binding {
 	return append([]Binding(nil), source...)
 }
 
-// TasksForNPC 返回该 NPC 绑定且已加载到文本的任务，按任务 ID 升序。
-// 只有绑定、没有文本的任务不计入（见 BindingsForNPC）；同一任务多条
+// TasksForNPC 返回该 NPC 绑定的任务，按任务 ID 升序。
+// 只有绑定、目录里没有该任务的行不计入（见 BindingsForNPC）；同一任务多条
 // 剧情行只返回一次。
 func (c *Catalog) TasksForNPC(configID string) []Task {
 	if c == nil {
@@ -218,7 +183,7 @@ func (c *Catalog) NPCsForTask(id int) []string {
 	return npcs
 }
 
-// Count 返回已加载文本的任务数。
+// Count 返回目录里的任务数。
 func (c *Catalog) Count() int {
 	if c == nil {
 		return 0
@@ -240,14 +205,6 @@ func (c *Catalog) BoundNPCCount() int {
 		return 0
 	}
 	return len(c.byNPC)
-}
-
-func (c *Catalog) DramaCiteByID(id int) (DramaCite, bool) {
-	if c == nil {
-		return DramaCite{}, false
-	}
-	cite, ok := c.dramaCites[id]
-	return cite, ok
 }
 
 var (

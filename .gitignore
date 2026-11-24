@@ -20,6 +20,8 @@ gmtest-sandbox/
 *.dmp
 *.7z
 
+!share.7z
+
 /Res
 /res*.*
 env.server
@@ -27,6 +29,7 @@ __pycache__
 tmp_*
 mitm_log
 start_view.bat
+.scratch
 
 # IDE / OS
 .idea/

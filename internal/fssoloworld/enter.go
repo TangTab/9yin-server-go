@@ -17,7 +17,6 @@ import (
 	_ "embed"
 	"encoding/binary"
 	"os"
-	"sync/atomic"
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
@@ -38,10 +37,6 @@ var readyGoldenFrames []byte
 
 //go:embed login_reply_golden.bin
 var loginReplyGolden []byte // 外服 op02 登录应答镜像（369B：会话锚 0xB8B8 + 反外挂校验码段——客户端场景对象表/校验初始化源；2026-11-21 ter0 报错定位的缺失帧）
-
-// enterSeq 0x0B 进场流水号（官方每次进场自增——0x1521/0x2F05 实证
-// 非常量；从 1 起）。
-var enterSeq atomic.Uint32
 
 // nativeEnterEnabled 进场模式开关（运行时读 env——测试可 t.Setenv 切换）。
 func nativeEnterEnabled() bool {
@@ -94,6 +89,8 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 }
 
 // enterContext 组装原生生成上下文（身份/会话/角色状态/场景 NPC 目录）。
+// 身份只读自会话（ident.go：obj/own=进场分配的 wire ident，Sequence=登录
+// 会话 serial）——本函数一次进场会被调用多次，不得在此分配。
 // NPC 物化不再走 PreReady（2026-11-22 晚定案：客户端 stage_main lua
 // scene_obj:RegisterCallBack 注册前收到的对象只建视觉层（game_visual）、
 // 不进逻辑层（game_client）——form_talk.open_npc_talk 的 GetSceneObj 与
@@ -102,11 +99,7 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context {
 	_ = materializeNPC // 兼容参数：物化时机已挪 clientReady 后
 	return entergen.Context{
-		Identity: entergen.Identity{
-			ObjectID: 1, // fork 客户端恒 1-1（stage_main 开图/记录绑定锚）
-			OwnerID:  1,
-			Sequence: enterSeq.Add(1),
-		},
+		Identity: pl.entergenIdentity(),
 		Session: entergen.Session{
 			ServerID:   int32(s.cfg.ServerID),
 			ServerName: s.cfg.ServerName,
@@ -173,9 +166,14 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 		// 无需服务端清场。
 		s.sendToClient(pl, propertyTableFrame())
 		s.sendToClient(pl, homeRecordsFrame())
+		// 进场分配先于本次进场的任何帧；生成失败回退 golden 时撤销
+		//（golden 帧内嵌固定身份，其后实时帧须同源）。
+		prevIdent := pl.wireIdent()
+		s.assignPlayerIdent(pl)
 		ctx := s.enterContext(pl, true)
 		frames, err := entergen.PreReadyFrames(ctx, time.Now())
 		if err != nil {
+			pl.setWireIdent(prevIdent)
 			s.trace("native enter generate failed client=%d: %v（回退 golden）", clientID, err)
 			s.npcEnterAborted(pl) // 物化未落地：撤销视口簿记（golden 回放无 NPC，防幽灵 0x21）
 			n := s.replayGoldenFrames(pl, enterGoldenFrames)

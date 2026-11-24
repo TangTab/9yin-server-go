@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func TestCapturedLoginFrameRoundTrip(t *testing.T) {
-	raw, err := os.ReadFile(filepath.Join("..", "..", "testdata", "protocol", "connect-first-flight.bin"))
+	raw, err := res.ReadFile(filepath.Join("..", "..", "testdata", "protocol", "connect-first-flight.bin"))
 	if err != nil {
 		t.Fatal(err)
 	}

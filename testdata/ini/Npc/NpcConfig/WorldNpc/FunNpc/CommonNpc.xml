@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Object>
-	<Property ID="ComposeNpc0001" script="TableNpc" Name="打铁台" Desc="打铁台" Resource="npc\itemnpc057" NpcType="154" SpringRange="0" SelectState="0"/>
-	<Property ID="ComposeNpc0002" script="TableNpc" Name="灶台" Desc="灶台" Resource="npc\itemnpc057" NpcType="155" SpringRange="0" SelectState="0"/>
-	<Property ID="ComposeNpc0003" script="TableNpc" Name="裁缝桌" Desc="裁缝桌" Resource="npc\itemnpc057" NpcType="156" SpringRange="0" SelectState="0"/>
-	<Property ID="ComposeNpc0004" script="TableNpc" Name="打造台" Desc="打造台" Resource="npc\itemnpc057" NpcType="157" SpringRange="0" SelectState="0"/>
-</Object>

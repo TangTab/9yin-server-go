@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Object>
-	<Property ID="SchoolWarPost_em01" script="SchoolFightStone" Name="铁链柱子A" Desc="铁链柱子A" Resource="npc\itemnpc571" NpcType="172" SpringRange="20" SelectState="2"/>
-	<Property ID="SchoolWarPost_em02" script="SchoolFightStone" Name="铁链柱子B" Desc="铁链柱子B" Resource="npc\itemnpc571" NpcType="172" SpringRange="20" SelectState="2"/>
-	<Property ID="SchoolWarStone_wd01" script="SchoolFightStone" Name="巨石A" Desc="巨石A" Resource="npc\fbmac021033" NpcType="172" SpringRange="20" SelectState="2"/>
-	<Property ID="SchoolWarStone_wd02" script="SchoolFightStone" Name="巨石B" Desc="巨石B" Resource="npc\fbmac021033" NpcType="172" SpringRange="20" SelectState="2"/>
-	<Property ID="SchoolWarPost_wd01" script="SchoolFightStone" Name="铁链柱子A" Desc="铁链柱子A" Resource="npc\itemnpc571" NpcType="172" SpringRange="20" SelectState="2"/>
-	<Property ID="SchoolWarPost_wd02" script="SchoolFightStone" Name="铁链柱子B" Desc="铁链柱子B" Resource="npc\itemnpc571" NpcType="172" SpringRange="20" SelectState="2"/>
-</Object>

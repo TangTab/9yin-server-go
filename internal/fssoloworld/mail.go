@@ -91,7 +91,8 @@ func (s *Server) pushLetterRows(pl *Player) int {
 	if !pl.haveRoleState || len(pl.roleState.Letters) == 0 {
 		return 0
 	}
-	frames, err := entergen.LetterRowFrames(forkPlayerObjectID, forkPlayerOwnerID, pl.roleState.Letters)
+	ident := pl.wireIdent()
+	frames, err := entergen.LetterRowFrames(ident.objectID, ident.ownerID, pl.roleState.Letters)
 	if err != nil {
 		s.trace("letter frames failed client=%d: %v", pl.Conn1, err)
 		return 0
@@ -108,7 +109,8 @@ func (s *Server) deliverLetterOnline(pl *Player, letter rolestate.Letter) error 
 		return fmt.Errorf("mailbox full (%d)", mailBoxCap)
 	}
 	pl.roleState.Letters = append(pl.roleState.Letters, letter)
-	frame, err := entergen.LetterRowFrame(forkPlayerObjectID, forkPlayerOwnerID, letter)
+	ident := pl.wireIdent()
+	frame, err := entergen.LetterRowFrame(ident.objectID, ident.ownerID, letter)
 	if err != nil {
 		s.trace("letter row frame failed client=%d: %v", pl.Conn1, err)
 	} else {
@@ -279,8 +281,9 @@ func (s *Server) reorderLetterRow(pl *Player, idx int, letter rolestate.Letter) 
 	st := &pl.roleState
 	st.Letters = append(st.Letters[:idx], st.Letters[idx+1:]...)
 	st.Letters = append(st.Letters, letter)
-	s.sendToClient(pl, entergen.LetterDelRowFrame(forkPlayerObjectID, forkPlayerOwnerID, idx))
-	if frame, err := entergen.LetterRowFrame(forkPlayerObjectID, forkPlayerOwnerID, letter); err == nil {
+	ident := pl.wireIdent()
+	s.sendToClient(pl, entergen.LetterDelRowFrame(ident.objectID, ident.ownerID, idx))
+	if frame, err := entergen.LetterRowFrame(ident.objectID, ident.ownerID, letter); err == nil {
 		s.sendToClient(pl, frame)
 	} else {
 		s.trace("letter row frame failed client=%d: %v", pl.Conn1, err)

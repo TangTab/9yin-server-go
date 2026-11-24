@@ -20,9 +20,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // PathEdge 导航边（邻接）。
@@ -86,7 +87,7 @@ func mathFloat32(b []byte) float32 {
 
 // LoadPathDir 扫描目录装载全部 .path（文件名去后缀 → 图）。
 func LoadPathDir(dir string) (map[string][]PathNode, error) {
-	entries, err := os.ReadDir(dir)
+	entries, err := res.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func LoadPathDir(dir string) (map[string][]PathNode, error) {
 		if e.IsDir() || !strings.EqualFold(filepath.Ext(e.Name()), ".path") {
 			continue
 		}
-		data, err := os.ReadFile(filepath.Join(dir, e.Name()))
+		data, err := res.ReadFile(filepath.Join(dir, e.Name()))
 		if err != nil {
 			return nil, err
 		}

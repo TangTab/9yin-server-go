@@ -111,7 +111,7 @@ func (s *Server) handleTaskMsg(pl *Player, message entergen.CustomInbound) {
 		return
 	}
 	frame, err := entergen.TaskAcceptedBatchFrame(entergen.Context{
-		Identity: entergen.DefaultIdentity(),
+		Identity: pl.entergenIdentity(),
 		State:    pl.roleState,
 	})
 	if err != nil {

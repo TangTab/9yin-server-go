@@ -48,6 +48,10 @@ type Player struct {
 	sceneID      int
 	queued       bool
 	vip          bool
+	// ident 当前场景的玩家 wire ident（PERSISTID：0x0B 宣告后本场景全部
+	// 玩家帧同源，见 ident.go）。零值=fork 固定身份 1-1。
+	identMu sync.Mutex
+	ident   wireIdent
 	// roleState（store 0x02 回执 RST1 尾段）：进场原生生成的数据源。
 	// 缺席（官方 store/旧档）时 entergen 回退 replay 模式。
 	roleState     rolestate.RoleState

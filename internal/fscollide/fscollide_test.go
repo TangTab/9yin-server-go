@@ -3,15 +3,16 @@
 package fscollide
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 const mapRoot = `..\..\testdata\map`
 
 func mapRootExists() bool {
-	st, err := os.Stat(mapRoot)
+	st, err := res.Stat(mapRoot)
 	return err == nil && st.IsDir()
 }
 
@@ -20,7 +21,7 @@ func TestGoldenLoadAllMaps(t *testing.T) {
 	if !mapRootExists() {
 		t.Skip("官方数据目录不存在")
 	}
-	entries, err := os.ReadDir(mapRoot)
+	entries, err := res.ReadDir(mapRoot)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +31,7 @@ func TestGoldenLoadAllMaps(t *testing.T) {
 			continue
 		}
 		dir := filepath.Join(mapRoot, e.Name())
-		if _, err := os.Stat(filepath.Join(dir, "terrain.ini")); err != nil {
+		if _, err := res.Stat(filepath.Join(dir, "terrain.ini")); err != nil {
 			continue
 		}
 		s, err := LoadScene3D(dir)

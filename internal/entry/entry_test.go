@@ -3,12 +3,12 @@ package entry
 import (
 	"encoding/binary"
 	"net"
-	"os"
 	"testing"
 	"time"
 
 	gonet "net"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -16,7 +16,7 @@ import (
 const snapshotLicPath = `..\..\testdata\config-bootstrap\127.0.0.1.lic`
 
 func TestLicenseSnapshotGolden(t *testing.T) {
-	data, err := os.ReadFile(snapshotLicPath)
+	data, err := res.ReadFile(snapshotLicPath)
 	if err != nil {
 		t.Skipf("快照 lic 不可读: %v", err)
 	}

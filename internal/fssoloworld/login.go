@@ -4,12 +4,12 @@ package fssoloworld
 // op02 双槽明文（b-line 双域 DES 阶梯移植）→ store 0x36 AccountLogon
 // （首登自动建号 nx_district.dc_accounts、密码槽等值、logged 会话门）
 // → 回执 0x25 过门后下行 0x04 ServerPlayerRoles（golden 41B 无角形态，
-// 布局同 internal/login.noRoleLoginSuccessFrame 真机钉死版）/ 0x05
+// 布局同 internal/login.noRoleLoginSuccessFrame 真机钉死版；serial@0x21=
+// 登录会话 serial，官服实证与 0x0B 的 [1:5] 同值）/ 0x05
 // ServerWorldInfo（五书开放串，真机回放值）。断开走 0x37 logoff。
 
 import (
 	"encoding/binary"
-	"time"
 	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/auth"
@@ -108,7 +108,7 @@ func (s *Server) accountLogonReply(p []byte) bool {
 	copy(req[8:], pl.Account)
 	if !s.inner.SendToAllStore(0, 0x10, req) {
 		s.trace("(SoloWorld::PlayerStateGetting)store absent, no-role fallback client=%d", clientID)
-		s.sendToClient(pl, rolesFrame(time.Now(), nil))
+		s.sendRolesFrame(pl, nil)
 	}
 	return true
 }

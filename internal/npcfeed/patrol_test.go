@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func writeRouteFile(t *testing.T, dir, name, body string) {
@@ -213,7 +215,7 @@ func TestLoadPatrolRoutesBorn03(t *testing.T) {
 	if root == "" {
 		t.Skip("数据根缺席（真档不随仓）")
 	}
-	if _, err := os.Stat(filepath.Join(root, "mappath")); err != nil {
+	if _, err := res.Stat(filepath.Join(root, "mappath")); err != nil {
 		t.Skipf("mappath 缺席: %v", err)
 	}
 	ResetPatrolCache()

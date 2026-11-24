@@ -1,19 +1,20 @@
 package fscollide
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // TestModernBattleMaps 现代线战场地图（map_ter_battle_unpacked）全量装载。
 func TestModernBattleMaps(t *testing.T) {
 	const root = `..\..\testdata\map\battle`
-	st, err := os.Stat(root)
+	st, err := res.Stat(root)
 	if err != nil || !st.IsDir() {
 		t.Skip("战场地图目录不存在")
 	}
-	entries, _ := os.ReadDir(root)
+	entries, _ := res.ReadDir(root)
 	loaded := 0
 	for _, e := range entries {
 		if !e.IsDir() {

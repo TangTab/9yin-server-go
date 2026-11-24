@@ -1,5 +1,11 @@
 # 物品服务端 XML 构建链与 msg31 使用链定版（2026-11-24）
 
+> 2026-11-24 更新：构建工具已合并为统一入口 `tools/datagen`（子命令 `npc` / `item` / `skill`，
+> 无参构建全部），输入收窄为两类——客户端资源解压根（`-client`）与黑金参考资源根
+> `testdata/references/h001.rep`。本文中的 `tools/npcgen`、`tools/skillgen`、`tools/itemgen` 命令
+> 与数据源路径是定版当时的记录；现状以 `testdata/README.md` 的「构建数据」一节为准。
+
+
 > 数据源：九阴设计态表 `go2 Res/share/item`（87 档）；黑金样板
 > `F:\Game\Online\9yin\BGserverCJ\Res\ini\Item`（原版 37 档）；官服抓包
 > `go2 资料\初始账号登陆-完整引导-女.pcapng`（8032 线，14 次 m31）。

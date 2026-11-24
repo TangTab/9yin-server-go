@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 
 	fscollide "github.com/lizhanyin/9yin-server-go/internal/fscollide"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 func main() {
@@ -76,7 +77,7 @@ func singleProbe(mapDir string) {
 
 // sampleProbe 抽样：每个类别目录挑 walk 文件最多（最复杂）的一张。
 func sampleProbe(root string) {
-	entries, err := os.ReadDir(root)
+	entries, err := res.ReadDir(root)
 	if err != nil {
 		fmt.Println("读目录失败:", err)
 		os.Exit(1)
@@ -87,18 +88,18 @@ func sampleProbe(root string) {
 			continue
 		}
 		cat := filepath.Join(root, e.Name())
-		maps, _ := os.ReadDir(cat)
+		maps, _ := res.ReadDir(cat)
 		best, bestN := "", -1
 		for _, m := range maps {
 			if !m.IsDir() {
 				continue
 			}
 			dir := filepath.Join(cat, m.Name())
-			if _, err := os.Stat(filepath.Join(dir, "terrain.ini")); err != nil {
+			if _, err := res.Stat(filepath.Join(dir, "terrain.ini")); err != nil {
 				continue
 			}
 			n := 0
-			if ws, err := os.ReadDir(filepath.Join(dir, "walk")); err == nil {
+			if ws, err := res.ReadDir(filepath.Join(dir, "walk")); err == nil {
 				n = len(ws)
 			}
 			if n > bestN {

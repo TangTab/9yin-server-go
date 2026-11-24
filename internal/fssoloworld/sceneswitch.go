@@ -75,7 +75,8 @@ func (s *Server) transferPlayer(pl *Player, dest sceneDestination, source string
 	if dest.Resource == pl.roleState.Resource {
 		// 同场景传送：0x1F 落位 + 存档（gm tp 同款；不动 NPC 视口）。
 		pl.roleState.Position = dest.Position
-		s.sendToClient(pl, entergen.LocationFrame(forkPlayerObjectID, forkPlayerOwnerID,
+		ident := pl.wireIdent()
+		s.sendToClient(pl, entergen.LocationFrame(ident.objectID, ident.ownerID,
 			float32(dest.Position[0]), float32(dest.Position[1]),
 			float32(dest.Position[2]), float32(dest.Position[3])))
 		s.sendRoleSave(pl)
@@ -115,14 +116,20 @@ func (s *Server) transferPlayer(pl *Player, dest sceneDestination, source string
 		if current != state {
 			return // 已被超时清理/玩家离线
 		}
-		ctx := s.enterContext(pl, false) // 新场景 config/resource（seq 自增）
+		// 进场分配先于本次进场的任何帧；0x0B/0x0D 生成失败即撤销（客户端
+		// 仍停在旧场景，旧 ident 继续有效）。
+		prevIdent := pl.wireIdent()
+		s.assignPlayerIdent(pl)
+		ctx := s.enterContext(pl, false) // 新场景 config/resource + 本次进场 ident
 		entry, err := entergen.EntrySceneFrame(ctx.Identity, dest.Config, dest.Resource)
 		if err != nil {
+			pl.setWireIdent(prevIdent)
 			s.trace("scene switch 0x0B failed client=%d: %v", pl.Conn1, err)
 			return
 		}
 		appearance, err := entergen.AppearanceFrame(ctx)
 		if err != nil {
+			pl.setWireIdent(prevIdent)
 			s.trace("scene switch 0x0D failed client=%d: %v", pl.Conn1, err)
 			return
 		}

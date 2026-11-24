@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!--移动相关的属性-->
-<object>
-	<!-- 基本属性 -->
-	<properties>
-		<property name="BackStageFlag" type="byte" public="false" private="false" save="true" desc="后台标志"/>
-	</properties>
-</object>

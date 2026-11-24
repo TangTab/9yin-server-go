@@ -1,6 +1,6 @@
 package itemdata
 
-// xml.go ini/Item 构建产物（tools/itemgen，黑金物品配置格式）的按需装载。
+// xml.go ini/Item 构建产物（tools/datagen item，黑金物品配置格式）的按需装载。
 //
 // 产物约 36MB/12.5 万行：装载期逐文件一遍扫描建「ConfigID → (文件, 元素
 // 偏移, 长度)」索引后即丢弃文件字节（常驻约 10MB；整表解成 map 要数百
@@ -15,20 +15,20 @@ package itemdata
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/lizhanyin/9yin-server-go/internal/config"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // 产物文件名（相对 ini/Item）。
 const (
 	filePathConfig = "path_config.xml"
 
-	// 静态包：引用键 → 文件（tools/itemgen/mapping.go packSpecs 同表）。
+	// 静态包：引用键 → 文件（tools/datagen/item/mapping.go packSpecs 同表）。
 	packFunc       = "FuncPack"
 	packLogic      = "LogicPack"
 	packArt        = "ArtPack"
@@ -110,11 +110,11 @@ func (c *defCache) put(id string, def *Definition) {
 }
 
 // LoadXML 装载 ini/Item 构建产物目录（不经进程级缓存）。path_config.xml
-// 缺席即产物缺席（go run ./tools/itemgen 构建）；静态包缺席只记诊断。
+// 缺席即产物缺席（go run ./tools/datagen item 构建）；静态包缺席只记诊断。
 func LoadXML(dir string) (*Catalog, error) {
 	doc, err := config.LoadObjectFile(filepath.Join(dir, filePathConfig))
 	if err != nil {
-		return nil, fmt.Errorf("itemdata: 构建产物缺席 %s（go run ./tools/itemgen 构建）: %w", dir, err)
+		return nil, fmt.Errorf("itemdata: 构建产物缺席 %s（go run ./tools/datagen item 构建）: %w", dir, err)
 	}
 	xc := &xmlCatalog{
 		dir:   dir,
@@ -148,7 +148,7 @@ func LoadXML(dir string) (*Catalog, error) {
 
 // indexFile 一遍扫描建索引（文件字节用完即弃）。
 func (x *xmlCatalog) indexFile(file *xmlFile) error {
-	raw, err := os.ReadFile(file.path)
+	raw, err := res.ReadFile(file.path)
 	if err != nil {
 		return fmt.Errorf("itemdata: 模板档 %s: %w", file.path, err)
 	}
@@ -205,16 +205,12 @@ func (x *xmlCatalog) lookup(id string) (*Definition, bool) {
 	if !ok {
 		return nil, false
 	}
-	buf := make([]byte, pos.n)
-	file, err := os.Open(pos.file.path)
-	if err != nil {
+	// ReadFileShared 返回的可能是资源仓读缓存的内部对象：buf 只被解析、不被改写。
+	raw, err := res.ReadFileShared(pos.file.path)
+	if err != nil || pos.off < 0 || pos.off+int64(pos.n) > int64(len(raw)) {
 		return nil, false
 	}
-	_, readErr := file.ReadAt(buf, pos.off)
-	file.Close()
-	if readErr != nil {
-		return nil, false
-	}
+	buf := raw[pos.off : pos.off+int64(pos.n)]
 	attrs := map[string]string{}
 	if end, _ := scanAttributes(buf, len("<Property"), attrs); end < 0 {
 		return nil, false

@@ -2,7 +2,7 @@ package fssoloworld
 
 // 技能受理链测试：帧序与取值按官服女号抓包定版
 //（docs/official/技能服务端XML构建链与m211受理链.md），技能取值来自
-// tools/skillgen 构建产物（仓内 testdata/ini/Skill，缺席则跳过）。
+// tools/datagen skill 构建产物（仓内 testdata/ini/Skill，缺席则跳过）。
 //
 // 断言面是「可读化的帧序」：describeFrames 把每个下行帧转写为
 // 属性/自定义消息/冷却表格/位置的紧凑文本，与期望串按 token 比对
@@ -13,7 +13,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -21,6 +20,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // skillFixture 一个在线玩家 + 可拨动的会话时钟 + 下行帧捕获。
@@ -34,8 +34,8 @@ type skillFixture struct {
 
 func newSkillFixture(t *testing.T) *skillFixture {
 	t.Helper()
-	if _, err := os.Stat(filepath.Join("..", "..", "testdata", "ini", "Skill", "skill_static.xml")); err != nil {
-		t.Skipf("技能构建产物缺席（go run ./tools/skillgen）: %v", err)
+	if _, err := res.Stat(filepath.Join("..", "..", "testdata", "ini", "Skill", "skill_static.xml")); err != nil {
+		t.Skipf("技能构建产物缺席（go run ./tools/datagen skill）: %v", err)
 	}
 	s := newNpcTestServer(t)
 	// 登记进玩家表（combatTick 按表驱动）；存档水位推到远期，位移收编

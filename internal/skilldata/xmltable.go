@@ -9,10 +9,11 @@ package skilldata
 
 import (
 	"bytes"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // xmlTable 一个 Object/Property XML 文件：原始字节 + ID 索引。
@@ -36,7 +37,7 @@ type row []attr
 // ensure 首次使用时装载并建索引。
 func (t *xmlTable) ensure(path string) {
 	t.once.Do(func() {
-		raw, err := os.ReadFile(path)
+		raw, err := res.ReadFile(path)
 		if err != nil {
 			t.missing = true
 			return

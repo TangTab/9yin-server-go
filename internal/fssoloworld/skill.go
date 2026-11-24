@@ -2,7 +2,7 @@ package fssoloworld
 
 // skill.go C2S msg211 技能施放受理链（官服女号抓包逐帧定版，
 // E:\Game\9yin\9yin-server-go2\资料\初始账号登陆-完整引导-女.pcapng 8032 线
-// 197~398s 共 41 次施放）。技能配置来自 tools/skillgen 构建产物
+// 197~398s 共 41 次施放）。技能配置来自 tools/datagen skill 构建产物
 //（internal/skilldata 联查），本文件只管流程与帧序。
 //
 // 受理形态（按技能静态包与距离分流）：
@@ -154,11 +154,21 @@ func parseSkillCast(values []entergen.CustomInboundValue) (skillCast, bool) {
 
 // ---- 帧构造小件（纯函数，测试可直调） ----
 
-// frameBuilder 帧簇累加器：首个编码错误即止，调用方统一判错。
+// frameBuilder 帧簇累加器：首个编码错误即止，调用方统一判错。ident=玩家
+// wire ident（newFrameBuilder 按会话注入；零值回落 fork 固定身份——测试直构）。
 type frameBuilder struct {
 	frames [][]byte
 	err    error
+	ident  wireIdent
 }
+
+// newFrameBuilder 会话帧簇（ident 取玩家当前值）。
+func newFrameBuilder(pl *Player) *frameBuilder {
+	return &frameBuilder{ident: pl.wireIdent()}
+}
+
+// playerIdent 累加器 ident。
+func (b *frameBuilder) playerIdent() wireIdent { return b.ident.orFixed() }
 
 func (b *frameBuilder) add(frame []byte, err error) {
 	if b.err != nil {
@@ -173,7 +183,8 @@ func (b *frameBuilder) add(frame []byte, err error) {
 
 // prop 单属性 0x10 帧（玩家对象）。
 func (b *frameBuilder) prop(name string, value entergen.PropertyValue) {
-	frame, err := entergen.ObjectPropertyFrame(forkPlayerObjectID, forkPlayerOwnerID, 0,
+	ident := b.playerIdent()
+	frame, err := entergen.ObjectPropertyFrame(ident.objectID, ident.ownerID, 0,
 		[]entergen.IndexedProperty{entergen.NamedProperty(name, value)})
 	b.add(frame, err)
 }
@@ -186,12 +197,14 @@ func (b *frameBuilder) custom(messageID int32, values ...entergen.CustomValue) {
 
 // location 玩家 0x1F 位置帧。
 func (b *frameBuilder) location(x, y, z, orient float32) {
-	b.add(entergen.LocationFrame(forkPlayerObjectID, forkPlayerOwnerID, x, y, z, orient), nil)
+	ident := b.playerIdent()
+	b.add(entergen.LocationFrame(ident.objectID, ident.ownerID, x, y, z, orient), nil)
 }
 
-// selfValue 玩家对象值。
-func selfValue() entergen.CustomValue {
-	return entergen.CustomObject(forkPlayerObjectID, forkPlayerOwnerID)
+// selfValue 玩家对象值（自定义消息里的自身 obj）。
+func (b *frameBuilder) selfValue() entergen.CustomValue {
+	ident := b.playerIdent()
+	return entergen.CustomObject(ident.objectID, ident.ownerID)
 }
 
 // targetValue 对象键 → 对象值（0 = None）。
@@ -270,7 +283,7 @@ func (s *Server) skillCatalog() *skilldata.Catalog {
 			skillCatalogCache.err = err
 		}
 		if skillCatalogCache.catalog == nil {
-			s.trace("skill catalog unavailable: %v（go run ./tools/skillgen 构建）", skillCatalogCache.err)
+			s.trace("skill catalog unavailable: %v（go run ./tools/datagen skill 构建）", skillCatalogCache.err)
 		}
 	}
 	return skillCatalogCache.catalog
@@ -378,13 +391,13 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	st := &pl.combat
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	b := &frameBuilder{}
+	b := newFrameBuilder(pl)
 	nowMS := filetimeMS(combatNow())
 
 	// 暂存中的冲锋技被新按键覆盖：三清（CurSkillID="" → m26 → PauseSkill=""）
 	// 后按新技能重新分流（2433 参考 rearm 同序）。
 	if st.staged != nil {
-		b.frames = append(b.frames, s.clearStagedLocked(st)...)
+		b.frames = append(b.frames, s.clearStagedLocked(b.ident, st)...)
 	}
 	// 出招进行中：其他技能正在使用中。
 	if st.curSkill != "" {
@@ -402,7 +415,7 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		st.selected = cast.targetKey()
 	}
 	// 清扫对每次被处理的按键都发生，受理/拒绝同款。
-	sweep, rows := sweepCooldowns(forkPlayerObjectID, forkPlayerOwnerID, st.cooldowns, def, nowMS)
+	sweep, rows := sweepCooldowns(b.ident.objectID, b.ident.ownerID, st.cooldowns, def, nowMS)
 	st.cooldowns = rows
 	b.frames = append(b.frames, sweep...)
 
@@ -464,7 +477,7 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	}
 
 	// ---- 受理：冷却行在写入成功后才落会话 ----
-	rowFrames, rows, err := writeCooldownRows(forkPlayerObjectID, forkPlayerOwnerID, st.cooldowns, def, nowMS)
+	rowFrames, rows, err := writeCooldownRows(b.ident.objectID, b.ident.ownerID, st.cooldowns, def, nowMS)
 	if err != nil {
 		s.trace("skill %s cooldown rows encode failed client=%d: %v", def.ID, pl.Conn1, err)
 		return nil, nil
@@ -497,13 +510,13 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		st.locked = true
 		b.location(cast.x, cast.y, cast.z, normalizeOrient(orient))
 		b.prop("LastWGHit", entergen.Float32Value(100))
-		b.custom(24, targetValue(cast.targetKey()), entergen.CustomInt(40), entergen.CustomInt(1), selfValue())
-		b.custom(19, skillLockMessageValues(def, cast, target.pos, orient)...)
+		b.custom(24, targetValue(cast.targetKey()), entergen.CustomInt(40), entergen.CustomInt(1), b.selfValue())
+		b.custom(19, skillLockMessageValues(b.ident, def, cast, target.pos, orient)...)
 		b.prop("CantMove", entergen.ByteValue(1))
 		b.prop("CantParry", entergen.Int32Value(1))
 	} else {
 		b.location(cast.x, cast.y, cast.z, orient)
-		b.custom(337, selfValue(), entergen.CustomFloat32(cast.x), entergen.CustomFloat32(cast.y),
+		b.custom(337, b.selfValue(), entergen.CustomFloat32(cast.x), entergen.CustomFloat32(cast.y),
 			entergen.CustomFloat32(cast.z), entergen.CustomFloat32(orient), entergen.CustomInt(0))
 		action := def.ID
 		if count := len(def.Flow.HitActions); count > 0 {
@@ -517,7 +530,7 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		if cast.hasTarget {
 			aim = targetValue(cast.targetKey())
 		}
-		b.custom(20, selfValue(), entergen.CustomString(action), aim, entergen.CustomInt(0), entergen.CustomFloat32(0))
+		b.custom(20, b.selfValue(), entergen.CustomString(action), aim, entergen.CustomInt(0), entergen.CustomFloat32(0))
 	}
 	locked := st.locked
 	s.trace("skill %s accepted dist=%.2f mp=%d client=%d", def.ID, distance, st.mp, pl.Conn1)
@@ -548,7 +561,8 @@ func (b *frameBuilder) done() ([][]byte, func()) {
 // [攻击者, 目标, 技能, 己方锁定ms, 目标锁定ms, 打击点1 xyz, 朝向,
 // 锁定己方位移, 打击点2 xyz, 常量 2.6166286, 锁定对方位移, 0, 0.0, 1, 1,
 // 0.0, 目标位 xyz]。打击点 = 出招位 / 目标位各沿攻击方向前进对应位移。
-func skillLockMessageValues(def skilldata.Definition, cast skillCast, target [3]float64, orient float32) []entergen.CustomValue {
+func skillLockMessageValues(ident wireIdent, def skilldata.Definition, cast skillCast, target [3]float64, orient float32) []entergen.CustomValue {
+	ident = ident.orFixed()
 	lock := def.Lock
 	if lock.SrcTime <= 0 {
 		lock.SrcTime = 1500
@@ -560,7 +574,7 @@ func skillLockMessageValues(def skilldata.Definition, cast skillCast, target [3]
 	dx, dz := math.Sin(float64(orient)), math.Cos(float64(orient))
 	f32 := entergen.CustomFloat32
 	return []entergen.CustomValue{
-		selfValue(), targetValue(cast.targetKey()), entergen.CustomString(def.ID),
+		entergen.CustomObject(ident.objectID, ident.ownerID), targetValue(cast.targetKey()), entergen.CustomString(def.ID),
 		entergen.CustomInt(int32(lock.SrcTime)), entergen.CustomInt(int32(lock.TargetTime)),
 		f32(cast.x + float32(dx*srcDist)), f32(cast.y), f32(cast.z + float32(dz*srcDist)),
 		f32(orient), f32(float32(srcDist)),
@@ -580,7 +594,7 @@ func (s *Server) finishCast(pl *Player, seq int, locked bool) {
 		st.mu.Unlock()
 		return
 	}
-	b := &frameBuilder{}
+	b := newFrameBuilder(pl)
 	if locked {
 		b.prop("CantMove", entergen.ByteValue(0))
 		b.prop("CantParry", entergen.Int32Value(0))
@@ -614,14 +628,14 @@ func (s *Server) combatTick() {
 		st.mpCredit, st.mp = credit, mp
 		st.mu.Unlock()
 		if mp != before {
-			s.sendFrames(pl, mpFrame(mp))
+			s.sendFrames(pl, mpFrame(pl.wireIdent(), mp))
 		}
 	}
 }
 
-// mpFrame MP 单属性帧。
-func mpFrame(mp int) [][]byte {
-	b := &frameBuilder{}
+// mpFrame MP 单属性帧（ident=玩家 wire ident）。
+func mpFrame(ident wireIdent, mp int) [][]byte {
+	b := &frameBuilder{ident: ident}
 	b.prop("MP", entergen.Int32Value(int32(mp)))
 	return b.frames
 }

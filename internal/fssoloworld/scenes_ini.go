@@ -2,11 +2,11 @@ package fssoloworld
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/fskit"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // LoadScenesINI 官方 main.lua load_scene_config（soloworld/solounite 同源）：
@@ -14,7 +14,7 @@ import (
 // 装配面（分词统一走 fskit.ParseItems＝官方 CIniFile Build 方言，按文件
 // 序成组）。文件缺失/读败返回 err（调用方决定跳过与否）。
 func LoadScenesINI(path string) ([]SceneSpec, error) {
-	data, err := os.ReadFile(path)
+	data, err := res.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

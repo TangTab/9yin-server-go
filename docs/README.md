@@ -33,8 +33,8 @@
 | [op28-fxnet2-lz-decoder](official/op28-fxnet2-lz-decoder.md) | 0x28 四连崩根因：fxnet2 LZ77 字典解码器全逆向 + v3 生成器 | 现行参考 |
 | [NPC任务绑定与引导流任务协议定版](official/NPC任务绑定与引导流任务协议定版.md) | NPC 对话任务行域表/双键语义/接取提交受理、任务数据链审计（两套任务 ID 体系）、引导抓包任务协议、lz_exact 落地与官方 0x29 任务记录帧布局 | 现行权威 |
 | [自定义配置705推送卡顿排查](official/自定义配置705推送卡顿排查.md) | 重登/切图卡顿排查：首卡提交 548e616（二分）、线路抓包实证 107 早于 0x09（「抢跑位」不成立）、与 2433 的 ClientReady 位 705 位置差异、候选 A（Ready 簇去 705）测试判读表 | 现行参考（真机待验） |
-| [技能服务端XML构建链与msg211受理链](official/技能服务端XML构建链与m211受理链.md) | 技能配置按黑金模型离线构建（`tools/skillgen`：11 表 18.3 万行 → `testdata/ini/Skill`，源表脏数据处理审计）+ `internal/skilldata` 按需索引装载 + msg211 受理链（普通/锁定直收/冲锋暂存→c61→m212 落地/超距/冷却·MP 闸门，女号抓包 41 次施放逐帧定版）+ 冷却表模型与套路规则（同套路按招式 CD、换套路才共享 7 秒）+ Lua 边界查证（挂 Lua 的 177 个技能全是特殊技能，内功零 Lua） | 现行权威（命中/伤害结算未接） |
-| [物品服务端XML构建链与msg31使用链](official/物品服务端XML构建链与msg31使用链.md) | 物品配置按黑金格式离线构建（`tools/itemgen`：九阴 share/item → `ini/Item` 22 文件 12.5 万行/10.5 万件，path_config 登记表 + 11 模板档 + 9 静态包 + 类型树，属性出处/引用完整性审计）+ `internal/itemdata` 偏移索引装载与静态包联查 + 官服 msg31 取证（`tools/pcapitem`，14 次样本逐帧）+ 使用受理链（读条流/行上锁/扣件帧与官服逐字节一致；效果面已接武学书学习、钱袋，其余按数据拒收不扣件）+ 入包堆叠上限 | 现行权威（效果面与真机验证有余项） |
+| [技能服务端XML构建链与msg211受理链](official/技能服务端XML构建链与m211受理链.md) | 技能配置按黑金模型离线构建（`tools/datagen skill`：11 表 18.3 万行 → `testdata/ini/Skill`，源表脏数据处理审计）+ `internal/skilldata` 按需索引装载 + msg211 受理链（普通/锁定直收/冲锋暂存→c61→m212 落地/超距/冷却·MP 闸门，女号抓包 41 次施放逐帧定版）+ 冷却表模型与套路规则（同套路按招式 CD、换套路才共享 7 秒）+ Lua 边界查证（挂 Lua 的 177 个技能全是特殊技能，内功零 Lua） | 现行权威（命中/伤害结算未接） |
+| [物品服务端XML构建链与msg31使用链](official/物品服务端XML构建链与msg31使用链.md) | 物品配置按黑金格式离线构建（`tools/datagen item`：九阴 share/item → `ini/Item` 22 文件 12.5 万行/10.5 万件，path_config 登记表 + 11 模板档 + 9 静态包 + 类型树，属性出处/引用完整性审计）+ `internal/itemdata` 偏移索引装载与静态包联查 + 官服 msg31 取证（`tools/pcapitem`，14 次样本逐帧）+ 使用受理链（读条流/行上锁/扣件帧与官服逐字节一致；效果面已接武学书学习、钱袋，其余按数据拒收不扣件）+ 入包堆叠上限 | 现行权威（效果面与真机验证有余项） |
 
 ## 二、combat/ —— 战斗与技能
 
@@ -78,7 +78,7 @@
 | [lua64-analysis](client/lua64-analysis.md) | 客户端 lua64 脚本价值评估（协议语义/战斗线索） | 现行参考 |
 | [lua64-protocol-dict](client/lua64-protocol-dict.md) | custom 通道字典：710 C2S ID + 184 引擎直连 + 665 S2C handler（custom 数字 ID 通道与表方言无关，仍有效） | 现行参考 |
 | [map-region-are0-rgn1](client/map-region-are0-rgn1.md) | ARE0/RGN1 区域多边形格式逆向（~80%） | 现行参考 |
-| [mpq-resource-system](client/mpq-resource-system.md) | MPQ 三层资源仓（res-base/res-patch/local） | 现行参考 |
+| [mpq-resource-system](client/mpq-resource-system.md) | MPQ 资源包与多层资源仓：编号层 `bNNN.rep`（testdata）/ `dataNNN.rep`（正式 Res），散文件 > 高层 > 低层，资源名即数据根相对路径；CLI（`store pack/list/read/unpack/delete`）、层构建与去重、路径式读取入口（`res.ReadFile/Stat/ReadDir/WalkDir/Glob` 替代 `os.*`）及接入规则 | 现行权威 |
 | [text-extract/](client/text-extract/README.md) | GM 客户端（盛大 res1）文本抽取知识库 16 文件 | 冻结快照（再生脚本已不在本仓库） |
 
 ## 六、infra/ —— 工具与基建
@@ -104,7 +104,7 @@ A 线连接目标，方言知识保留作兼容参考；**属性索引/帧方言
 | [fork-binary-message-inventory](fork-era/fork-binary-message-inventory.md) | fork exe C2S custom msgId 分发清单 + fork 专属子系统 + 恢复优先级 | 历史存档 |
 | [fork-login-crypto](fork-era/fork-login-crypto.md) | fork DES/AES 登录加密逆向 + /api/register 移植 | 历史存档（加密层仍在用） |
 | [fork-object-id-migration](fork-era/fork-object-id-migration.md) | fork 线上对象 ID 迁移（0x11000000\|idx） | 历史存档（"远程成员同段"方案已被 id-system §6.5.2 撤销） |
-| [id-system-analysis](fork-era/id-system-analysis.md) | ID 体系全景：wire ident 链、fork vs 旧硬编码、§6.5 落地权威 | 部分现行（§6.5 为 fork 方言权威；外服线已另用官方 ID 对） |
+| [id-system-analysis](fork-era/id-system-analysis.md) | ID 体系：文首「官服规则」为现行（PERSISTID=场景 ID 低字节<<24\|序号 + 序列号、`0x0B [1:5]`=登录会话 serial，四抓包实证）；§0-§6 为 fork 方言落地记录 | 部分作废（官服规则现行；fork 结论见文首横幅） |
 
 ## 八、spec/ —— fork 协议冻结快照
 

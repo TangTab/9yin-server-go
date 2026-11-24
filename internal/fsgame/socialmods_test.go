@@ -1,9 +1,10 @@
 package fsgame
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // assemble2 装配第一批 + 第二批（社交底座）十六模块。
@@ -41,7 +42,7 @@ func assemble2(t *testing.T) (*Kernel, []Module) {
 
 func mustRead(t *testing.T, p string) []byte {
 	t.Helper()
-	data, err := os.ReadFile(p)
+	data, err := res.ReadFile(p)
 	if err != nil {
 		t.Fatalf("读 %s: %v", p, err)
 	}

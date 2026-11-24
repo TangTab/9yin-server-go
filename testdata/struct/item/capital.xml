@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!--金钱类-->
-<object>
-	<!-- 基本属性 -->
-	<properties>
-		<property name="CapitalType" type="int" public="false" private="false" save="false" desc="资产类型"/>
-	</properties>
-</object>

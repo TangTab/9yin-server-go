@@ -91,7 +91,8 @@ func NamedProperty(name string, value PropertyValue) IndexedProperty {
 const maxVisualsValue uint16 = 10000
 
 // EntrySceneFrame 0x0B 进场帧（5 属性官方形——golden 实证：Name/MaxVisuals/
-// ConfigID/Resource/TiGuanGroupCount）。
+// ConfigID/Resource/TiGuanGroupCount）。帧头三 u32：[1:5]=登录会话 serial、
+// [5:9]/[9:13]=玩家本次进场的 PERSISTID（官服抓包实证，见 Identity 注释）。
 func EntrySceneFrame(id Identity, config, resource string) ([]byte, error) {
 	nameEntry := clientdata.MustSceneProperty("Name")
 	maxVisuals := clientdata.MustSceneProperty("MaxVisuals")

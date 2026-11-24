@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Object>
-	<Property ID="newworld_xj_1001" script="TrapNpc" Name="火焰莲花" Desc="火焰莲花" NpcType="81" SelectState="2" Resource="npc\itemnpc1373" SpringRange="10"/>
-	<Property ID="newworld_xj_1002" script="TrapNpc" Name="捕兽夹" Desc="捕兽夹" NpcType="81" SelectState="2" Resource="npc\itemnpc1372" SpringRange="10"/>
-	<Property ID="newworld_xj_1003" script="TrapNpc" Name="绊马索" Desc="绊马索" NpcType="81" SelectState="2" Resource="npc\itemnpc1371" SpringRange="10"/>
-	<Property ID="newworld_xj_1004" script="TrapNpc" Name="腐骨泥沼" Desc="腐骨泥沼" NpcType="81" SelectState="2" Resource="npc\itemnpc1374" SpringRange="10"/>
-</Object>

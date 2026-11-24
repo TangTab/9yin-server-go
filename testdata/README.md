@@ -2,6 +2,66 @@
 
 本目录内容**仅限研究用途**（见根 README 许可证声明），来源与用途如下。
 
+## 存储形态（2026-11-24 起）
+
+本目录是一个**多层资源仓**的数据根：绝大部分内容在层文件 `b001.rep` 里，散文件
+盖在层之上。读取顺序固定为
+
+```
+根下散文件  >  b00N.rep  >  …  >  b001.rep
+```
+
+资源名就是本目录下的相对路径，所以下文各节写的路径都不变，只是不再以散文件
+形式出现在工作区。
+
+保持散文件、不进层文件的：
+
+- `mpq/` —— `internal/mpq` 自身的测试夹具（读归档的测试不能依赖归档）。
+- `references/` —— **参考资源根**，自带层文件 `h001.rep`（黑金原档全量，6489 个
+  文件：ini 5708 / lua 368 / struct 209 / dumpconfig 142 / map 49 …）。它是嵌套在
+  本目录里的另一个数据根：`references/…` 下的路径按它自己的层解析，与外层互不
+  相干；`h001.rep` 是层容器，不会被收进 `b` 层。
+- `README.md` —— 本文件。
+
+**读取**：代码一律经 `internal/mpq/res` 的路径式入口读本目录——`res.ReadFile` /
+`res.Stat` / `res.ReadDir` / `res.WalkDir` / `res.Glob`，用法与 `os.*` /
+`filepath.*` 完全相同。直接用 `os.ReadFile` 之类读本目录的代码，在散文件并入层
+之后就找不到文件了。散文件改完即生效；层文件的内容要重新打开才更新。
+
+**构建数据**：服务端数据由统一构建器 `tools/datagen` 生成——`npc`（NPC 模板 /
+场景摆放 / 任务域 / 战斗模板 / 任务文案）、`item`（物品配置）、`skill`（技能配置）。
+只需要两类输入：客户端资源解压根（`-client`）与黑金参考资源根（上面的
+`references/`，缺省就是它）：
+
+```bash
+go run ./tools/datagen                      # 构建全部
+go run ./tools/datagen item skill           # 只构建指定的（npc / item / skill）
+go run ./tools/datagen -client <解压根>     # 别的机器：指定客户端资源根
+```
+
+生成物先以**散文件**落在对应目录（`ini/Npc`、`ini/Scene`、`ini/Quest`、
+`ini/Text`、`ini/Item`、`ini/Skill`），验证无误后再并入资源层。
+写出时行尾跟随层里的同名现有文件，所以内容没变的文件重建后与层里逐字节相同，
+并入时会被去重。
+
+**更新**：改动的文件先以散文件形式放在本目录，跑完验证后并入新的增量层：
+
+```bash
+# 只收与下层内容不同的文件 → b002（及之后的层），并清掉已并入的散文件
+go run ./cmd/mpq store pack testdata -prefix b -prune -exclude mpq -exclude README.md
+```
+
+**查看**：
+
+```bash
+go run ./cmd/mpq store info   testdata               # 各层与合并视图统计
+go run ./cmd/mpq store list   testdata ini/Skill     # 每个文件所在的层
+go run ./cmd/mpq store read   testdata scenes.ini    # 命中层 + 内容预览
+go run ./cmd/mpq store unpack testdata               # 合并视图解到同级的 testdata-unpacked/
+```
+
+模型、CLI 与接入规则详见 `docs/client/mpq-resource-system.md`。
+
 ## 编码说明（已全量转为 UTF-8）
 
 本目录全部 `.xml` / `.lua` 文件已由原版 GBK **转码为 UTF-8**，XML 头声明
@@ -34,31 +94,32 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
 - `player/` — 玩家对象属性（含 Record 表定义）
 - `skill/skillbase.xml` — 技能对象属性
 
-## ini/Skill/ — 技能配置（九阴构建产物 + 黑金原档备份）
+## ini/Skill/ — 技能配置（九阴构建产物）
 
 - `Skill_New/<逻辑类>.xml`、`skill_static.xml`、`Skill_VarProp/`、
   `Skill_Consume/TargetShape/HitShape/Flow/LockData/UseLimit/RushRange.xml`
-  — **九阴构建产物**：`tools/skillgen` 把官服设计态表
+  — **九阴构建产物**：`tools/datagen skill` 把客户端设计态表
   `share/skill/*.ini` + `share/rule/flow_config.ini` 离线构建为服务端 XML
   （黑金模型：技能对象行 + 引用包分档，运行时联查），服务端只读产物、
   不读设计态表（装载器 `internal/skilldata`）。再生命令：
-  `go run ./tools/skillgen -in <Res>/share/skill -rule <Res>/share/rule -verify`
-- `heijin_backup/` — 黑金原档 7 个样本（`skillgen` 首跑整体移入）：仅作
+  `go run ./tools/datagen skill`
+- 黑金原档 7 个样本（`Skill_Config.xml`、`skill_static.xml`、`buff_static.xml`
+  等）在参考资源根 `references/ini/Skill/`（原字节，`gb2312` 声明）：仅作
   `internal/fsgame` 测试夹具与属性词汇对照，`fsgame` 的 `readResource`
-  在规范位缺席时回退到此目录。
+  在规范位缺席时回退到那里取同名黑金样本。
 
 ## ini/Item/ — 物品配置（九阴构建产物，黑金物品配置格式）
 
-`tools/itemgen` 把九阴设计态表 `share/item/*.ini` 离线构建为服务端 XML
+`tools/datagen item` 把客户端设计态表 `share/item/*.ini` 离线构建为服务端 XML
 （黑金 `ini/Item` 同构：`path_config.xml` 登记表 + 11 个模板档
 `Equipment/Weapon/Material/ItemUse/Rune/ItemMountUse/TaskItemUse/
 TaskMaterial/ItemBox/SkillBook/add_money.xml` + 9 个静态包
 `item_func_static/item_logic_pack/ItemArtStatic/item_use_skill_static/
 item_learn_skill_static/item_task_static/item_ingredient_static/
-item_prop_modify_static/item_seed_static.xml` + `ItemTypeList.xml`；22 文件
-12.5 万行）。服务端只读产物（装载器 `internal/itemdata`；产物缺席回退
-设计态 `share/item`，只有目录面）。再生命令：`go run ./tools/itemgen -verify`
-（部署根同步加 `-out <Res>/ini/Item`）。详见
+item_prop_modify_static/item_seed_static.xml` + `ItemTypeList.xml`；22 文件，
+约 12.6 万行）。服务端只读产物（装载器 `internal/itemdata`；产物缺席回退
+设计态 `share/item`，只有目录面）。再生命令：`go run ./tools/datagen item`
+（`-out <目录>` 可把产物先生成到别处）。详见
 `docs/official/物品服务端XML构建链与msg31使用链.md`。
 
 ## ini/ — 数值表抽样（config 包的格式样例）
@@ -68,15 +129,15 @@ item_prop_modify_static/item_seed_static.xml` + `ItemTypeList.xml`；22 文件
 
 - `scenes.xml` — 场景注册表（含 Clonable/ReliveLocation 语义）
 - `Skill/Skill_Config.xml` + `skill_static.xml` + `buff_static.xml` —
-  技能四件套的注册与 lua 引用关系（黑金原档，已移入
-  `Skill/heijin_backup/`；`Skill/` 根下现为九阴构建产物，见下）
+  技能四件套的注册与 lua 引用关系（黑金原档，在参考资源根
+  `references/ini/Skill/`；本目录 `Skill/` 根下是九阴构建产物，见上）
 - `CreateRole/RoleBaseProp.xml` — 阵营/种族/职业基础属性
 - `Level/Level.xml` — 等级经验曲线
 
 ## lua/ — 行为逻辑脚本全量副本（script 层的移植目标与 API 语料）
 
 原版服务端 `Res/lua/` 全量副本（361 个脚本，已转 UTF-8）。按引用状态分三类
-（引用计数来自 ini/Skill/heijin_backup/skill_static.xml + buff_static.xml 的 211 处引用）：
+（引用计数来自黑金原档 `references/ini/Skill/skill_static.xml` + `buff_static.xml` 的 211 处引用）：
 
 - **活脚本**（黑金运行时实际加载，也是本项目 `internal/script` 的移植目标
   与回归用例）：`skill/jn_normal/`（复活/中毒/AOE 等 47 处引用）、

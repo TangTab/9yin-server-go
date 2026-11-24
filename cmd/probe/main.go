@@ -22,6 +22,7 @@ import (
 	"time"
 	"unicode/utf16"
 
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	"github.com/lizhanyin/9yin-server-go/internal/net"
 	"github.com/lizhanyin/9yin-server-go/internal/proto"
 )
@@ -108,7 +109,7 @@ func main() {
 // 同装配线路重放，断言 41B 无角色 0x04 应答（含日期字段合理性）、
 // op03 → 0x05 五书 worldInfo、op05 建角 → 有角色 0x04。
 func probeLogin(addr, flightPath string, opt net.Options, plain bool) int {
-	raw, err := os.ReadFile(flightPath)
+	raw, err := res.ReadFile(flightPath)
 	if err != nil {
 		fatal(err)
 	}

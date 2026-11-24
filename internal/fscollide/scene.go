@@ -15,10 +15,11 @@ package fscollide
 import (
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // TerrainZone 复刻 CTerrainZone（holder）。
@@ -245,7 +246,7 @@ func (s *SceneCollide3D) connectValues(z *TerrainZone) {
 }
 
 func fileExists(p string) bool {
-	st, err := os.Stat(p)
+	st, err := res.Stat(p)
 	return err == nil && !st.IsDir()
 }
 

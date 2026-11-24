@@ -1,7 +1,0 @@
-<?xml version="1.0" ?>
-<visuals>
-    <model name="7DA0A7C37EDC45A3A06773F0934F0DA1" model="scene\city01\YJshitou01.gm2" pos="54.266,-29.622,185.189" angle="-0.248,2.843,-0.154" scale="2.980,2.640,2.980" light_map="true" />
-    <model name="9F013D6371D546989DBBB827C470365B" model="scene\city01\YJshitou01.gm2" pos="13.426,4.384,173.116" angle="-0.248,2.283,0.048" scale="2.980,2.640,2.980" light_map="true" />
-    <model name="BBA6F6C5878C4D048D103B5C97CD56D0" model="scene\city01\xscstone06" pos="13.842,-16.159,173.225" angle="0.152,1.932,0.157" scale="2.810,2.810,2.810" light_map="true" />
-    <model name="DEAFB1EC579B45198232645011413678" model="scene\city01\YJshitou01.gm2" pos="5.589,-28.615,169.085" angle="-0.038,2.508,0.067" scale="3.980,2.670,3.980" light_map="true" />
-</visuals>

@@ -3,12 +3,13 @@ package fsgame
 import (
 	"encoding/xml"
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // Kernel 复刻宿主 CKernel（IKernel 507 虚槽）的登录闭环子面：
@@ -137,7 +138,7 @@ func (k *Kernel) LoadStruct(class string, xmlData []byte) error {
 			return fmt.Errorf("fsgame: %s 引用 include %s 但 ResourcePath 未设置", class, inc)
 		}
 		rel := filepath.FromSlash(strings.ReplaceAll(inc, "\\", "/"))
-		data, err := os.ReadFile(filepath.Join(k.ResourcePath, rel))
+		data, err := res.ReadFile(filepath.Join(k.ResourcePath, rel))
 		if err != nil {
 			return fmt.Errorf("fsgame: %s include %s: %w", class, inc, err)
 		}
@@ -171,7 +172,7 @@ func (k *Kernel) loadStructNoEvent(class string, xmlData []byte, src string, vis
 		}
 		visited[inc] = true
 		rel := filepath.FromSlash(strings.ReplaceAll(inc, "\\", "/"))
-		data, err := os.ReadFile(filepath.Join(k.ResourcePath, rel))
+		data, err := res.ReadFile(filepath.Join(k.ResourcePath, rel))
 		if err != nil {
 			return fmt.Errorf("fsgame: %s include %s: %w", class, inc, err)
 		}

@@ -2,7 +2,7 @@
 // entergen/npc* 旧链）：服务端 XML 三件装载 → 摆放/模板/战斗联查 →
 // 2433 帧配方（0x0D 物化大档 / 0x28 mode=0x46 官方言）。
 //
-// 数据链（服务端只读构建产物，不直读客户端资源——XML 由 tools/npcgen
+// 数据链（服务端只读构建产物，不直读客户端资源——XML 由 tools/datagen npc
 // 离线构建，构建方式以黑金档为样板，见
 // docs/official/NPC服务端XML构建链与黑金样板.md）：
 //
@@ -13,14 +13,17 @@
 //
 // 帧配方移植 2433 线 cmd/protocol-probe npcAddObject：0x0D = 63B 头 +
 // OrderedProperties（默认值层→模板层→战斗层→摆放层，按 0x09 官方表
-// 场景域表序）+ 官方 16-prop 追加块；ident obj=0x11000000|(idx+2)、
-// own=0x00660000|低16位。
+// 场景域表序）+ 官方 16-prop 追加块；ident 分配方言见 join.go
+// IdentScheme（缺省固定段 0x0E000100+idx；NINEYIN_NPC_IDENT=scene 为官服
+// 形态 obj=场景 ID 低字节<<24|场景内序号、own=场景内序列号）。
 package npcfeed
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // ResolveRoot 数据根定位：env NINEYIN_DATA_ROOT > 相对 cwd 探测含
@@ -34,7 +37,7 @@ func ResolveRoot() string {
 		".", "..", "../..", // 裸 ini 布局兼容
 		"testdata", "../testdata", "../../testdata", // 测试：仓内构建产物
 	} {
-		if st, err := os.Stat(filepath.Join(dir, "ini", "Npc", "NpcConfig")); err == nil && st.IsDir() {
+		if st, err := res.Stat(filepath.Join(dir, "ini", "Npc", "NpcConfig")); err == nil && st.IsDir() {
 			return dir
 		}
 	}
@@ -47,7 +50,7 @@ func ResolveRoot() string {
 // ⚠️ 字典序首匹配——同前缀多变体目录（school01_fangong vs
 // school01_JinYiWei）会选中字典序靠前者，权威路径走 canonicalSceneDir。
 func SceneDirOf(root, scene string) string {
-	entries, err := os.ReadDir(filepath.Join(root, "ini", "Scene"))
+	entries, err := res.ReadDir(filepath.Join(root, "ini", "Scene"))
 	if err != nil {
 		return ""
 	}
@@ -72,7 +75,7 @@ func CanonicalSceneDir(root, dir string) string {
 	if dir == "" {
 		return ""
 	}
-	entries, err := os.ReadDir(filepath.Join(root, "ini", "Scene"))
+	entries, err := res.ReadDir(filepath.Join(root, "ini", "Scene"))
 	if err != nil {
 		return ""
 	}

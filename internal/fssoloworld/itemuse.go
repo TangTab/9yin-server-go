@@ -149,7 +149,7 @@ func (s *Server) handleUseItem(pl *Player, message entergen.CustomInbound) {
 	}
 
 	// ---- 受理：效果/冷却/扣件同步落定，尾段帧备好 ----
-	tail := &frameBuilder{}
+	tail := newFrameBuilder(pl)
 	s.applyItemUse(pl, &plan, tail)
 	if category > 0 && coolDownMS > 0 {
 		tail.frames = append(tail.frames, s.startItemCooldown(pl, category, coolDownMS, nowMS)...)
@@ -164,7 +164,7 @@ func (s *Server) handleUseItem(pl *Player, message entergen.CustomInbound) {
 		s.sendFrames(pl, tail.frames)
 		return
 	}
-	b := &frameBuilder{}
+	b := newFrameBuilder(pl)
 	b.custom(25, entergen.CustomInt(int32(funcPack.PrepareTimeMS)),
 		entergen.CustomString(prepareFlowName), entergen.CustomString(useItemFlowName))
 	lock, err := useItemLockFrame(view, slot, 1)
@@ -182,7 +182,7 @@ func (s *Server) handleUseItem(pl *Player, message entergen.CustomInbound) {
 
 	flow := &itemUseFlow{configID: item.ConfigID, view: view, slot: slot}
 	// 读条结束帧序（官服）：m26 → State="" → 行解锁 → 效果 → 冷却 → 扣件。
-	done := &frameBuilder{}
+	done := newFrameBuilder(pl)
 	done.custom(26)
 	done.prop("State", entergen.StringValue(""))
 	unlock, err := useItemLockFrame(view, slot, 0)
@@ -297,8 +297,9 @@ func (s *Server) applyItemUse(pl *Player, plan *itemUsePlan, b *frameBuilder) {
 func (s *Server) startItemCooldown(pl *Player, category, coolDownMS int, nowMS int64) [][]byte {
 	pl.combat.mu.Lock()
 	defer pl.combat.mu.Unlock()
+	ident := pl.wireIdent()
 	w := &cooldownRowWriter{
-		objectID: forkPlayerObjectID, ownerID: forkPlayerOwnerID,
+		objectID: ident.objectID, ownerID: ident.ownerID,
 		record: clientdata.MustRecordIndexByName("cooldown_rec"),
 		rows:   pl.combat.cooldowns,
 	}

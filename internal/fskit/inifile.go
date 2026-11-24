@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
 // section/item 复刻官方 inifile.cpp 的 section_t/item_t：offset 相对 buffer，
@@ -56,7 +58,7 @@ func (f *IniFile) cstr(off uint32) string {
 // LoadFromFile 官方 0x10042880：整读 + 尾部哨兵 "\n\0" + Build。
 // 短读/打不开 → false。
 func (f *IniFile) LoadFromFile() bool {
-	data, err := os.ReadFile(f.fileName)
+	data, err := res.ReadFile(f.fileName)
 	if err != nil {
 		return false
 	}

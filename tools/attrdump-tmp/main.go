@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
 )
 
@@ -22,7 +23,7 @@ func main() {
 		v, _ := strconv.ParseUint(os.Args[2], 16, 64)
 		key = fsnet.NewKey(uint32(v))
 	}
-	data, err := os.ReadFile(os.Args[1])
+	data, err := res.ReadFile(os.Args[1])
 	if err != nil {
 		panic(err)
 	}
