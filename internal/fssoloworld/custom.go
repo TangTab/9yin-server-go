@@ -126,6 +126,9 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 	case clientCustomUseSkill:
 		// msg211 技能施放：受理/超距/冷却/MP 闸门与帧簇（skill.go）。
 		s.handleSkillCast(pl, message)
+	case clientCustomItemSkill:
+		// msg270 技能道具施放（任务技能）：与 m211 同一条受理链（skill.go）。
+		s.handleItemSkillCast(pl, message)
 	case clientCustomRushApproach:
 		// msg220 冲锋接近上报：位置收编 + 进带授予 c61（skillrush.go）。
 		s.handleRushApproach(pl, message)

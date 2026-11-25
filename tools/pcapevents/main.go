@@ -1,6 +1,8 @@
 // pcapevents（原 m54scan）带时间轴的抓包事件分析器：
 // pcapng → 8032 端口 TCP 双向重组（带每字节到达时间戳）→ EE+XOR 帧解码 →
 // C2S 0x0A 自定义消息（m54 格挡为主）/ S2C 0x09 表 + 0x10 属性帧事件流。
+// 属性名表取自包内登录阶段的 S2C 0x09；中途开抓的包没有这一帧时回退仓库
+// 内嵌的官服 2433 属性表（internal/clientdata）。
 //
 // 用法: go run ./tools/pcapevents <file.pcapng> [server-port] [dumpall|dumprec]
 //
@@ -22,6 +24,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/fssolorobot"
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	net "github.com/lizhanyin/9yin-server-go/internal/net"
 )
@@ -187,6 +190,14 @@ func main() {
 			}
 			expect += uint32(len(d))
 		}
+		// 带外标记：干净 EE EE 终止符后插入 7 字节 `00×6 EE`（官服女号抓包
+		// t=522.8 实证一处，详见 docs/official/初始女号抓包m54手动格挡全解.md
+		// §六）。标准帧器读到标记尾部的非法转义对会硬停，其后整段流丢失
+		//（女号抓包 600~624s 的战斗段此前因此未解出）。分析工具侧剥离标记，
+		// 仓库 net 包的 EscapeFramer 保持协议忠实不改。
+		if removed := stripOutOfBandMarkers(stream, tsArr); removed > 0 {
+			fmt.Fprintf(os.Stderr, "dir=%d stripped %d out-of-band marker(s)\n", dir, removed)
+		}
 		rd := &byteReader{b: stream}
 		f, err := net.NewEscapeFramer(rd, net.DefaultMaxFrameSize)
 		if err != nil {
@@ -250,13 +261,37 @@ func main() {
 			}
 		}
 	}
-	fmt.Fprintf(os.Stderr, "prop table: %d entries\n", len(entries))
+	// 中途开抓的包没有登录阶段的 0x09（属性帧只能解到下标）：回退仓库内嵌的
+	// 官服 2433 属性表（clientdata，与服务端下发 0x09 同一张）。
+	source := "capture 0x09"
+	if len(entries) == 0 {
+		official := clientdata.OfficialPropertyEntries()
+		max := 0
+		for _, pe := range official {
+			if int(pe.Index) > max {
+				max = int(pe.Index)
+			}
+		}
+		entries = make([]propEntry, max+1)
+		for i := range entries {
+			entries[i] = propEntry{fmt.Sprintf("idx%d", i), 0}
+		}
+		for _, pe := range official {
+			entries[pe.Index] = propEntry{pe.Name, pe.TypeCode}
+		}
+		source = "embedded official 2433"
+	}
+	fmt.Fprintf(os.Stderr, "prop table: %d entries (%s)\n", len(entries), source)
 
 	// dumpall 模式：全部事件打一行（S2C 0x10 解属性、0x1E 打原始 hex 头 48B）。
 	// dumprec 同款，记录族帧另按 schema 解码（见 decodeRecordFrame）。
 	mode := ""
 	if len(os.Args) > 3 {
 		mode = os.Args[3]
+	}
+	hexMax := 0
+	if v, e := strconv.Atoi(os.Getenv("NINEYIN_PCAP_HEX")); e == nil {
+		hexMax = v
 	}
 	if mode == "dumpall" || mode == "dumprec" {
 		for _, ev := range events {
@@ -266,26 +301,8 @@ func main() {
 			}
 			switch {
 			case ev.op == 0x10 && len(ev.frame) >= 12:
-				obj := binary.LittleEndian.Uint32(ev.frame[2:])
-				n := int(binary.LittleEndian.Uint16(ev.frame[10:]))
-				o := 12
-				ps := ""
-				for j := 0; j < n && o < len(ev.frame); j++ {
-					idx := int(binary.LittleEndian.Uint16(ev.frame[o:]))
-					o += 2
-					name := fmt.Sprintf("idx%d", idx)
-					wt := 0
-					if idx < len(entries) {
-						name, wt = entries[idx].name, entries[idx].code
-					}
-					val, width := decodeValue(ev.frame, o, wt)
-					o += width
-					ps += fmt.Sprintf(" %s=%s", name, val)
-					if width == 0 {
-						break
-					}
-				}
-				fmt.Printf("A t=%9.3f %s #%d 0x10 obj=%08x:%s\n", ev.ts, d, ev.idx, obj, ps)
+				ps, _ := propList(ev.frame, 12, int(binary.LittleEndian.Uint16(ev.frame[10:])), entries)
+				fmt.Printf("A t=%9.3f %s #%d 0x10 obj=%08x:%s\n", ev.ts, d, ev.idx, binary.LittleEndian.Uint32(ev.frame[2:]), ps)
 			case ev.op == 0x1E || ev.op == 0x27 || ev.op == 0x0A:
 				hl := 96
 				if len(ev.frame) < hl {
@@ -306,14 +323,72 @@ func main() {
 				} else {
 					fmt.Printf("A t=%9.3f %s #%d op=0x%02X len=%d hex=% x\n", ev.ts, d, ev.idx, ev.op, len(ev.frame), ev.frame[:hl])
 				}
-			default:
-				if mode == "dumprec" && ev.dir == 1 {
-					if desc, ok := decodeRecordFrame(ev.frame); ok {
-						fmt.Printf("A t=%9.3f %s #%d rec op=0x%02X len=%d %s\n", ev.ts, d, ev.idx, ev.op, len(ev.frame), desc)
-						continue
+			case ev.op == 0x2C:
+				// 压缩批量位置帧（mode-0x47 QuickLZ）：明文体 [u16 条数][条数×44B：
+				// obj/own/x/y/z/朝向/…]。旁观者视角下他人位置（含受控位移）的来源。
+				if body := unwrap47(ev.frame); len(body) >= 2 {
+					cnt := int(binary.LittleEndian.Uint16(body))
+					es := ""
+					for j := 0; j < cnt && 2+(j+1)*44 <= len(body); j++ {
+						b := body[2+j*44:]
+						es += fmt.Sprintf(" {%08x %.2f,%.2f,%.2f o=%.2f}", binary.LittleEndian.Uint32(b),
+							math.Float32frombits(binary.LittleEndian.Uint32(b[8:])), math.Float32frombits(binary.LittleEndian.Uint32(b[12:])),
+							math.Float32frombits(binary.LittleEndian.Uint32(b[16:])), math.Float32frombits(binary.LittleEndian.Uint32(b[20:])))
 					}
+					line := fmt.Sprintf("A t=%9.3f %s #%d op=0x2C len=%d n=%d%s", ev.ts, d, ev.idx, len(ev.frame), cnt, es)
+					if hexMax > 0 { // 明文体头（条目尾部字段取证用）
+						line += fmt.Sprintf(" phex=% x", body[:min(hexMax, len(body))])
+					}
+					fmt.Println(line)
+					continue
 				}
-				fmt.Printf("A t=%9.3f %s #%d op=0x%02X len=%d\n", ev.ts, d, ev.idx, ev.op, len(ev.frame))
+				printOther(ev, d, mode, hexMax)
+			case ev.op == 0x2D && len(ev.frame) >= 3:
+				// 多对象属性帧：u16 对象数 + 每对象 {obj, own, u16 属性数, {下标 u16, 值}…}
+				//（值编码同 0x10）。旁观者视角下他人血量/状态等属性的来源之一。
+				k := int(binary.LittleEndian.Uint16(ev.frame[1:]))
+				o, ps := 3, ""
+				for j := 0; j < k && o+10 <= len(ev.frame); j++ {
+					obj := binary.LittleEndian.Uint32(ev.frame[o:])
+					o += 8
+					n := int(binary.LittleEndian.Uint16(ev.frame[o:]))
+					o += 2
+					one, w := propList(ev.frame, o, n, entries)
+					if w == 0 && n > 0 {
+						break
+					}
+					o += w
+					ps += fmt.Sprintf(" {%08x%s}", obj, one)
+				}
+				fmt.Printf("A t=%9.3f %s #%d 0x2D k=%d%s\n", ev.ts, d, ev.idx, k, ps)
+			case ev.op == 0x21 && len(ev.frame) >= 3:
+				// 批量移动广播（entergen.ServerAllDestFrame 布局：u16 条数 +
+				// 条数×44B：obj/own/目的地 xyz/朝向/速度/回显槽×3/移动标志）。
+				n := int(binary.LittleEndian.Uint16(ev.frame[1:]))
+				es := ""
+				for j := 0; j < n && 3+(j+1)*44 <= len(ev.frame); j++ {
+					b := ev.frame[3+j*44:]
+					f := func(o int) float64 {
+						return float64(math.Float32frombits(binary.LittleEndian.Uint32(b[o:])))
+					}
+					es += fmt.Sprintf(" {%08x dst=%.2f,%.2f,%.2f o=%.2f spd=%.2f rot=%.2f m2=%.2f m3=%.2f f=%d}",
+						binary.LittleEndian.Uint32(b), f(8), f(12), f(16), f(20), f(24), f(28), f(32), f(36),
+						binary.LittleEndian.Uint32(b[40:]))
+				}
+				line := fmt.Sprintf("A t=%9.3f %s #%d op=0x21 len=%d n=%d%s", ev.ts, d, ev.idx, len(ev.frame), n, es)
+				if hexMax > 0 { // 原始字节头（与服务端编码器逐字节对拍用）
+					line += fmt.Sprintf(" hex=% x", ev.frame[:min(hexMax, len(ev.frame))])
+				}
+				fmt.Println(line)
+			case ev.op == 0x1F && len(ev.frame) >= 25:
+				// 位置帧（entergen.LocationFrame 布局；受控位移/腾空取证用，
+				// 旧 token `op=0x1F len=` 保留，字段追加在行尾）。
+				fmt.Printf("A t=%9.3f %s #%d op=0x1F len=%d obj=%08x own=%08x x=%v y=%v z=%v orient=%v\n", ev.ts, d, ev.idx, len(ev.frame),
+					binary.LittleEndian.Uint32(ev.frame[1:]), binary.LittleEndian.Uint32(ev.frame[5:]),
+					math.Float32frombits(binary.LittleEndian.Uint32(ev.frame[9:])), math.Float32frombits(binary.LittleEndian.Uint32(ev.frame[13:])),
+					math.Float32frombits(binary.LittleEndian.Uint32(ev.frame[17:])), math.Float32frombits(binary.LittleEndian.Uint32(ev.frame[21:])))
+			default:
+				printOther(ev, d, mode, hexMax)
 			}
 		}
 		return
@@ -598,6 +673,43 @@ func (r *byteReader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
+// stripOutOfBandMarkers 原地剥离流中的带外标记并保持逐字节时间戳对齐，
+// 返回剥离数。标记形：`EE EE | 00 00 00 00 00 00 EE | <下一帧首字节≠00/EE>`
+// ——只删中间 7 字节（终止符与下一帧首字节保留）。合法帧不会命中：帧内
+// EE 必以 `EE 00`（字面量）或 `EE EE`（终止符）续接，标记尾部是单个 EE
+// 后跟普通字节。
+func stripOutOfBandMarkers(stream []byte, ts []float64) int {
+	const markerLen = 7
+	removed := 0
+	for i := 0; i+markerLen+2 < len(stream); i++ {
+		if stream[i] != 0xEE || stream[i+1] != 0xEE {
+			continue
+		}
+		zeros := true
+		for k := 2; k < markerLen+1; k++ {
+			if stream[i+k] != 0 {
+				zeros = false
+				break
+			}
+		}
+		if !zeros || stream[i+markerLen+1] != 0xEE {
+			continue
+		}
+		next := stream[i+markerLen+2]
+		if next == 0x00 || next == 0xEE {
+			continue
+		}
+		at := i + 2
+		stream = append(stream[:at], stream[at+markerLen:]...)
+		if ts != nil {
+			ts = append(ts[:at], ts[at+markerLen:]...)
+		}
+		removed++
+		i = at // 从下一帧首字节继续扫
+	}
+	return removed
+}
+
 func seqDelta(a, b uint32) int32 {
 	d := int64(a) - int64(b)
 	if d > 1<<31 {
@@ -607,4 +719,68 @@ func seqDelta(a, b uint32) int32 {
 		d += 1 << 32
 	}
 	return int32(d)
+}
+
+// printOther 是未专门解码的帧的一行输出：dumprec 模式下记录族帧先按 schema
+// 解（解得出即替代普通行）；其余打 `op len`，按开关追加原始 hex 头与
+// mode-0x47 包装帧的明文体长度。
+func printOther(ev event, d, mode string, hexMax int) {
+	if mode == "dumprec" && ev.dir == 1 {
+		if desc, ok := decodeRecordFrame(ev.frame); ok {
+			fmt.Printf("A t=%9.3f %s #%d rec op=0x%02X len=%d %s\n", ev.ts, d, ev.idx, ev.op, len(ev.frame), desc)
+			return
+		}
+	}
+	line := fmt.Sprintf("A t=%9.3f %s #%d op=0x%02X len=%d", ev.ts, d, ev.idx, ev.op, len(ev.frame))
+	// NINEYIN_PCAP_HEX=<字节数>：未解码帧追加原始 hex 头（缺省不开，行格式不变）。
+	if hexMax > 0 && len(ev.frame) > 0 {
+		line += fmt.Sprintf(" hex=% x", ev.frame[:min(hexMax, len(ev.frame))])
+	}
+	if body := unwrap47(ev.frame); body != nil {
+		line += fmt.Sprintf(" plain=%d", len(body))
+		if hexMax > 0 && len(body) > 0 {
+			line += fmt.Sprintf(" phex=% x", body[:min(hexMax, len(body))])
+		}
+	}
+	fmt.Println(line)
+}
+
+// unwrap47 解 mode-0x47 QuickLZ 包装帧（0x28/0x29/0x2C/0x2E 族），返回明文体；
+// 非该包装或解压失败返回 nil（解压器是 fssolorobot 里官方 qlz_decompress 的复刻）。
+func unwrap47(frame []byte) []byte {
+	if len(frame) < 10 || frame[1] != 0x47 {
+		return nil
+	}
+	d, err := fssolorobot.QLZSizeDecompressed(frame[1:])
+	if err != nil || d < 0 || d > 1<<20 {
+		return nil
+	}
+	body := make([]byte, d)
+	n, err := fssolorobot.QLZDecompress(frame[1:], body)
+	if err != nil || n != d {
+		return nil
+	}
+	return body
+}
+
+// propList 解属性帧体 {下标 u16, 值}×n（o 为体的起始偏移；0x10 头 12B、
+// 0x2D 每对象头 10B），返回 ` 名=值` 串与消耗的字节数，线型按属性表。
+func propList(frame []byte, o, n int, entries []propEntry) (string, int) {
+	ps, start := "", o
+	for j := 0; j < n && o < len(frame); j++ {
+		idx := int(binary.LittleEndian.Uint16(frame[o:]))
+		o += 2
+		name := fmt.Sprintf("idx%d", idx)
+		wt := 0
+		if idx < len(entries) {
+			name, wt = entries[idx].name, entries[idx].code
+		}
+		val, width := decodeValue(frame, o, wt)
+		o += width
+		ps += fmt.Sprintf(" %s=%s", name, val)
+		if width == 0 {
+			break
+		}
+	}
+	return ps, o - start
 }

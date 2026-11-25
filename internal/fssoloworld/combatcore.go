@@ -340,6 +340,26 @@ func (k *frameSink) npcProp(f *npcFighter, name string, value entergen.PropertyV
 		[]entergen.IndexedProperty{entergen.NamedProperty(name, value)}))
 }
 
+// engageFrames 玩家与 NPC 的交手帧：首次交手 = NPC 进战斗态 → 关系行加行 →
+// 玩家进战斗态 → 发现目标（抓包 215.577）；否则只刷新关系行。行号与各项
+// 标志由调用方在 combatState.mu 内定好。
+func (k *frameSink) engageFrames(f *npcFighter, first, entered, added bool, row int, key uint64, now time.Time) {
+	if first {
+		k.npcProp(f, "LogicState", entergen.ByteValue(logicFighting))
+	}
+	if added {
+		k.relationAdd(uint16(row), key, now)
+	} else {
+		k.relationTouch(uint16(row), now)
+	}
+	if entered {
+		k.priv("LogicState", entergen.ByteValue(logicFighting))
+	}
+	if first {
+		k.pubCustom(24, k.npcValue(f), entergen.CustomInt(37), entergen.CustomString("npc_foundplayer"))
+	}
+}
+
 // pubCustom 公共自定义帧。
 func (k *frameSink) pubCustom(messageID int32, values ...entergen.CustomValue) {
 	k.pub(entergen.CustomMessageFrame(messageID, values...))

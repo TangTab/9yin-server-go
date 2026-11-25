@@ -117,6 +117,11 @@ func (s *Server) npcThink(f *npcFighter) {
 		}
 		return
 	}
+	if now.Before(f.stunUntil) {
+		// 受击硬直 / 击退在途（combatcontrol.go）：不动手，硬直接束时再接上。
+		f.mu.Unlock()
+		return
+	}
 	target := pl.roleState.Position
 	dx, dz := target[0]-f.pos[0], target[2]-f.pos[2]
 	distance := math.Hypot(dx, dz)
@@ -492,6 +497,8 @@ func (s *Server) npcRespawn(f *npcFighter) {
 	}
 	f.dead, f.hp, f.buffs = false, int(f.props["MaxHP"]), nil
 	f.logic, f.target, f.cast, f.fightAt = logicNormal, 0, nil, time.Time{}
+	f.stunUntil, f.knockbacks = time.Time{}, 0
+	f.stunSeq++ // 死前的硬直收尾回调作废
 	f.pos = [4]float64{float64(f.spawn.X), float64(f.spawn.Y), float64(f.spawn.Z), float64(f.spawn.Orient)}
 	spawn := f.spawn
 	f.mu.Unlock()

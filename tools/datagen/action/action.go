@@ -19,7 +19,14 @@
 // 产物 ini/Action/zhaoshi_hits.xml（一行一招式）：
 //
 //	<Property ID="zs_normal_00_01" Actions="ptgj_0h_01;ptgj_0h_05"
-//	          Frames="15;29" Hits="467;1000" Length="1467"/>
+//	          Frames="15;29" Hits="467;1000" Stagger="0;1" Length="1467"/>
+//
+// Stagger 与 Hits 逐拍对位：1 = 该判定帧的受击反应由服务端下发（硬直触发器
+// 不带受击者动画，客户端无从自播——女号官服抓包 cqgf04/06、任务技能
+// musejuben_2/4/5 命中时都有受击帧）；0 = 触发器自带受击者动画（hitbreak 的
+// 动画名 / hitback 的动画位 / hitdown / hitout / hitclasp），客户端按招式表自播，
+// 官服不发任何受击帧（cqgf01 三拍动画 hurt_f_2_s / hurt_f_1_s / hurt_f_1_l，
+// 22 次命中零受击帧；飞镖 hw_normal_fb 同）。
 //
 // 服务端只读产物（装载器 internal/actiondata）；招式表本体不进数据根。
 package action
@@ -63,11 +70,17 @@ type speedChange struct {
 	speed float64
 }
 
+// hitMark 一个判定帧：animated = 触发器自带受击者动画（客户端自播受击反应）。
+type hitMark struct {
+	frame    int
+	animated bool
+}
+
 type segment struct {
 	action string
 	frames int
 	speeds []speedChange
-	hits   []int // 判定帧（段内）
+	hits   []hitMark
 }
 
 // entry 一招：各段动作与触发帧。
@@ -78,24 +91,54 @@ type entry struct {
 }
 
 // trigger 一条触发行。isSpeed 区分变速触发与判定触发——变速复位
-// （speed=1）也是变速，不得当作判定帧。
+// （speed=1）也是变速，不得当作判定帧。animated 见 hitMark。
 type trigger struct {
-	seg     int
-	kind    string
-	frame   int
-	speed   float64
-	isSpeed bool
+	seg      int
+	kind     string
+	frame    int
+	speed    float64
+	isSpeed  bool
+	animated bool
+}
+
+// hitAnimated 判定触发是否自带受击者动画：hitbreak 的参数就是动画名
+// （`trigger_hitbreak;13;hurt_f_2_s,`），hitback 是「距离,动画,…」
+// （`trigger_hitback;18;0.3,hurt_f_1_s,,`）；hitdown / hitout / hitclasp 是
+// 受控判定，恒带。参数位为空（`;N;,` / `;N; ,`）即不带。
+func hitAnimated(kind string, fields []string) bool {
+	switch kind {
+	case "trigger_hitbreak":
+		return triggerParam(fields, 3, 0) != ""
+	case "trigger_hitback":
+		return triggerParam(fields, 3, 1) != ""
+	}
+	return true
+}
+
+// triggerParam 触发行第 i 个分号字段（越界取空）的第 j 个逗号子项，去空白与
+// 行尾逗号。
+func triggerParam(fields []string, i, j int) string {
+	if i >= len(fields) {
+		return ""
+	}
+	parts := strings.Split(fields[i], ",")
+	if j >= len(parts) {
+		return ""
+	}
+	return strings.TrimSpace(strings.Trim(parts[j], ", \t"))
 }
 
 type report struct {
-	Input           string     `json:"input"`
-	Out             string     `json:"out"`
-	Files           int        `json:"files"`
-	Sections        int        `json:"sections"`
-	SectionsWithHit int        `json:"sections_with_hits"`
-	HitTriggers     int        `json:"hit_triggers"`
-	Warnings        []string   `json:"warnings,omitempty"`
-	Verify          *verifyRpt `json:"verify,omitempty"`
+	Input               string     `json:"input"`
+	Out                 string     `json:"out"`
+	Files               int        `json:"files"`
+	Sections            int        `json:"sections"`
+	SectionsWithHit     int        `json:"sections_with_hits"`
+	HitTriggers         int        `json:"hit_triggers"`
+	SectionsWithStagger int        `json:"sections_with_stagger_hits"`
+	StaggerBeats        int        `json:"stagger_beats"`
+	Warnings            []string   `json:"warnings,omitempty"`
+	Verify              *verifyRpt `json:"verify,omitempty"`
 }
 
 type verifyRpt struct {
@@ -119,14 +162,26 @@ func Run(opt Options) error {
 	if err := genutil.WriteFile(out, render(entries)); err != nil {
 		return err
 	}
-	withHits := 0
+	withHits, withStagger, staggerBeats := 0, 0, 0
 	for _, e := range entries {
-		if len(e.hitTimes()) > 0 {
+		_, stagger := e.hitMarks()
+		if len(stagger) > 0 {
 			withHits++
+		}
+		n := 0
+		for _, on := range stagger {
+			if on {
+				n++
+			}
+		}
+		staggerBeats += n
+		if n > 0 {
+			withStagger++
 		}
 	}
 	rep := &report{Input: dir, Out: outDir, Files: len(files), Sections: len(entries),
-		SectionsWithHit: withHits, HitTriggers: hitTriggers, Warnings: warnings}
+		SectionsWithHit: withHits, HitTriggers: hitTriggers, Warnings: warnings,
+		SectionsWithStagger: withStagger, StaggerBeats: staggerBeats}
 	if opt.Verify {
 		v := &verifyRpt{}
 		if catalog, err := actiondata.LoadDir(outDir); err != nil {
@@ -138,11 +193,13 @@ func Run(opt Options) error {
 			}
 			for _, e := range entries {
 				got, ok := catalog.Lookup(e.id)
+				hits, stagger := e.hitMarks()
 				if !ok {
 					v.Failures = append(v.Failures, fmt.Sprintf("招式 %s 回读缺席", e.id))
-				} else if fmt.Sprint(got.HitsMS) != fmt.Sprint(e.hitTimes()) || fmt.Sprint(got.Frames) != fmt.Sprint(e.frameList()) {
-					v.Failures = append(v.Failures, fmt.Sprintf("招式 %s 回读 %v/%v != 期望 %v/%v",
-						e.id, got.HitsMS, got.Frames, e.hitTimes(), e.frameList()))
+				} else if fmt.Sprint(got.HitsMS) != fmt.Sprint(hits) || fmt.Sprint(got.Frames) != fmt.Sprint(e.frameList()) ||
+					fmt.Sprint(got.Stagger) != fmt.Sprint(stagger) {
+					v.Failures = append(v.Failures, fmt.Sprintf("招式 %s 回读 %v/%v/%v != 期望 %v/%v/%v",
+						e.id, got.HitsMS, got.Frames, got.Stagger, hits, e.frameList(), stagger))
 				}
 				if len(v.Failures) > 8 {
 					break
@@ -161,7 +218,8 @@ func Run(opt Options) error {
 	if err := os.WriteFile(opt.ReportPath, append(blob, '\n'), 0o644); err != nil {
 		return err
 	}
-	fmt.Printf("action: %d 档 %d 招式（带判定 %d，判定触发 %d）→ %s\n", len(files), len(entries), withHits, hitTriggers, out)
+	fmt.Printf("action: %d 档 %d 招式（带判定 %d，判定触发 %d；服务端发受击帧的 %d 招 / %d 拍）→ %s\n",
+		len(files), len(entries), withHits, hitTriggers, withStagger, staggerBeats, out)
 	for _, w := range warnings {
 		fmt.Println("  警告:", w)
 	}
@@ -246,6 +304,7 @@ func parse(files []string) (entries []*entry, hitTriggers int) {
 				}
 				t := trigger{seg: atoi(fields[0]), kind: strings.ToLower(strings.TrimSpace(fields[1])), frame: atoi(fields[2]), speed: 1}
 				if hitTriggerKinds[t.kind] {
+					t.animated = hitAnimated(t.kind, fields)
 					hitTriggers++
 					triggers = append(triggers, t)
 				} else if t.kind == "trigger_action_speed" {
@@ -292,7 +351,7 @@ func applyTriggers(e *entry, triggers []trigger) {
 		if seg.frames >= 0 && t.frame > seg.frames {
 			continue
 		}
-		seg.hits = append(seg.hits, t.frame)
+		seg.hits = append(seg.hits, hitMark{frame: t.frame, animated: t.animated})
 	}
 	for i := range e.segs {
 		s := &e.segs[i]
@@ -334,21 +393,31 @@ func (e *entry) frameList() []int {
 	return out
 }
 
-// hitTimes 判定时刻（毫秒，升序去重）；Length 为各段时长和。
-func (e *entry) hitTimes() (hits []int) {
+// hitMarks 判定时刻（毫秒，升序去重）与逐拍 Stagger：该刻的全部判定触发都
+// 不带受击者动画 = 受击反应由服务端下发。
+func (e *entry) hitMarks() (hits []int, stagger []bool) {
 	start := 0
-	seen := map[int]bool{}
+	animated := map[int]bool{}
 	for _, seg := range e.segs {
-		for _, frame := range seg.hits {
-			at := start + seg.elapsed(frame)
-			if !seen[at] {
-				seen[at] = true
-				hits = append(hits, at)
+		for _, mark := range seg.hits {
+			ms := start + seg.elapsed(mark.frame)
+			if _, seen := animated[ms]; !seen {
+				hits = append(hits, ms)
 			}
+			animated[ms] = animated[ms] || mark.animated
 		}
 		start += seg.length()
 	}
 	sort.Ints(hits)
+	for _, ms := range hits {
+		stagger = append(stagger, !animated[ms])
+	}
+	return hits, stagger
+}
+
+// hitTimes 判定时刻（毫秒，升序去重）。
+func (e *entry) hitTimes() []int {
+	hits, _ := e.hitMarks()
 	return hits
 }
 
@@ -369,8 +438,9 @@ func render(entries []*entry) []byte {
 		for i, seg := range e.segs {
 			actions[i] = seg.action
 		}
-		fmt.Fprintf(&sb, "\t<Property ID=%q Actions=%q Frames=%q Hits=%q Length=\"%d\"/>\n",
-			e.id, strings.Join(actions, ";"), joinInts(e.frameList()), joinInts(e.hitTimes()), e.length())
+		hits, stagger := e.hitMarks()
+		fmt.Fprintf(&sb, "\t<Property ID=%q Actions=%q Frames=%q Hits=%q Stagger=%q Length=\"%d\"/>\n",
+			e.id, strings.Join(actions, ";"), joinInts(e.frameList()), joinInts(hits), joinFlags(stagger), e.length())
 	}
 	sb.WriteString("</Object>\n")
 	return []byte(sb.String())
@@ -382,6 +452,18 @@ func joinInts(values []int) string {
 	parts := make([]string, len(values))
 	for i, v := range values {
 		parts[i] = strconv.Itoa(v)
+	}
+	return strings.Join(parts, ";")
+}
+
+func joinFlags(values []bool) string {
+	parts := make([]string, len(values))
+	for i, v := range values {
+		if v {
+			parts[i] = "1"
+		} else {
+			parts[i] = "0"
+		}
 	}
 	return strings.Join(parts, ";")
 }

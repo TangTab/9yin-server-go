@@ -34,18 +34,25 @@ var combatRoll = rand.Float64
 
 // hitPlan 一次施放的命中计划。
 type hitPlan struct {
-	times []time.Duration // 各击时刻（自施放/落地起）
-	hurt  int             // 分母击数（公式 HurtCount）
+	times   []time.Duration // 各击时刻（自施放/落地起）
+	stagger []bool          // 各击的受击反应是否由服务端下发（产物 Stagger）
+	action  string          // 命中动作名（命中硬直 buff buf_<动作> 用）
+	hurt    int             // 分母击数（公式 HurtCount）
 }
 
 func (p hitPlan) valid() bool         { return len(p.times) > 0 }
 func (p hitPlan) last() time.Duration { return p.times[len(p.times)-1] }
 
+// staggers 第 index 击（1 基）的受击反应是否由服务端下发。
+func (p hitPlan) staggers(index int) bool {
+	return index >= 1 && index <= len(p.stagger) && p.stagger[index-1]
+}
+
 // skillHitPlan 命中计划：招式表判定帧 → 流程包 → 无。
 func (s *Server) skillHitPlan(action string, def skilldata.Definition) hitPlan {
 	if lua := s.combatLua(); lua.actions != nil && action != "" {
 		if schedule, ok := lua.actions.Lookup(action); ok && len(schedule.HitsMS) > 0 {
-			plan := hitPlan{hurt: len(schedule.HitsMS)}
+			plan := hitPlan{hurt: len(schedule.HitsMS), stagger: schedule.Stagger, action: action}
 			for _, ms := range schedule.HitsMS {
 				plan.times = append(plan.times, time.Duration(ms)*time.Millisecond)
 			}
@@ -60,7 +67,7 @@ func (s *Server) skillHitPlan(action string, def skilldata.Definition) hitPlan {
 	if count > 1 && step <= 0 {
 		step = time.Duration(def.Flow.HitTimeMS) * time.Millisecond / time.Duration(count)
 	}
-	plan := hitPlan{hurt: count}
+	plan := hitPlan{hurt: count, action: action}
 	for i := 0; i < count; i++ {
 		plan.times = append(plan.times, time.Duration(def.Flow.HitTimeMS)*time.Millisecond+time.Duration(i)*step)
 	}
@@ -68,13 +75,20 @@ func (s *Server) skillHitPlan(action string, def skilldata.Definition) hitPlan {
 }
 
 // skillAction 施放时 m20 下发的动作名（招式表查表键；连招段按技能各自
-// 轮转——与 planSkillCast 取 m20 动作同一计数器）。
+// 轮转——与 planSkillCast 取 m20 动作同一计数器）。流程包没有命中动作的
+// 技能回落锁定包的 HitAction（任务技能 musejuben_6/7/8/9 的逐级行没有
+// Flow 列，动作在 skill_lock_data 里：CS_sl_lhq02 / CS_jz_xytf06 /
+// CS_slzp_lzs07 / CS_sl_djgq06）。
 func skillAction(st *combatState, def skilldata.Definition) string {
-	if count := len(def.Flow.HitActions); count > 0 {
+	actions := def.Flow.HitActions
+	if len(actions) == 0 && def.Lock.HitAction != "" {
+		actions = []string{def.Lock.HitAction}
+	}
+	if count := len(actions); count > 0 {
 		if st.normalSteps == nil {
 			st.normalSteps = map[string]int{}
 		}
-		action := def.Flow.HitActions[st.normalSteps[def.ID]%count]
+		action := actions[st.normalSteps[def.ID]%count]
 		st.normalSteps[def.ID]++
 		return action
 	}
@@ -114,17 +128,20 @@ func (s *Server) scheduleSkillHits(pl *Player, def skilldata.Definition, cast sk
 func (s *Server) castEndFrames(pl *Player, def skilldata.Definition, sink *frameSink, alsoTarget bool) {
 	st := &pl.combat
 	st.mu.Lock()
+	defer st.mu.Unlock()
 	active := st.curSkill == def.ID
-	if active {
-		st.curSkill = ""
-	}
-	st.mu.Unlock()
 	if !active {
 		return
 	}
+	st.curSkill = ""
 	sink.priv("CurSkillID", entergen.StringValue(""))
 	if alsoTarget {
 		sink.priv("CurSkillTarget", entergen.ObjectValue(0, 0))
+	}
+	// 施放期间的自身 buff 随收招摘掉（抓包 738.115：CurSkillID="" → m169 摘
+	// buf_fixed_red → BufferInfo3="" → CantBeSkillLocked=0）。
+	for _, frame := range s.releaseSelfBuffLocked(pl, st) {
+		sink.pri(frame, nil)
 	}
 }
 
@@ -139,17 +156,17 @@ func (s *Server) armCalmLocked(st *combatState, pl *Player, now time.Time) {
 	s.after(playerLeaveFight, func() { s.playerCalm(pl) })
 }
 
-// resolveSkillHit 第 index 击（1 基）。帧序（抓包 208.229 / 216.675 /
-// 挑战包 483.077）：
+// resolveSkillHit 第 index 击（1 基）。帧序（抓包 208.229 / 357.896 /
+// 730.436 / 挑战包 442.392）：
 //
-//	[首击] 技能行 CurTargetCount=目标数 → [攻击者 FP → SP] →
-//	       各目标：[首次交手：NPC.LogicState=1 → 关系行加行 → 玩家
-//	       LogicState=1 → m24 37] → 关系行刷新 → m24 17 → [m24 40] →
-//	       [击杀：关系行删 → m24 29 → m18 → m24 13] →//	[第 2 击起] m24[攻击者,10,累计击数] → MaxHits → m205[攻击者,技能,目标…] →
+//	[首击] 技能行 CurTargetCount=目标数 →
+//	       各目标：攻击者 FP → SP → [首次交手：NPC.LogicState=1 → 关系行
+//	       加行 → 玩家 LogicState=1 → m24 37] → 关系行刷新 → m24 17 →
+//	       [受击动作 m18] → [m24 10 / MaxHits] → [m24 40]（击杀另见 hitNPC）→
 //	[末击] 收招
+//	m205[攻击者,技能,全部目标…]
 //
-// 各目标的帧先入各自的子汇，命中确定后按上次序合并（FP/SP 只在确有
-// 命中时发，且先于全部目标帧）。
+// 单目标的帧序细节在 hitNPC；各目标先入各自的子汇，命中确定后按上次序合并。
 func (s *Server) resolveSkillHit(pl *Player, def skilldata.Definition, cast skillCast, plan hitPlan, index, seq int) {
 	st := &pl.combat
 	st.mu.Lock()
@@ -172,6 +189,7 @@ func (s *Server) resolveSkillHit(pl *Player, def skilldata.Definition, cast skil
 
 	targets := s.skillTargets(pl, def, cast)
 	sink := s.sinkFor(pl)
+	stagger := plan.staggers(index)
 	if index == 1 {
 		view, row := skillView(pl, def)
 		sink.pri(entergen.ObjectPropertyFrame(view, row, 1, []entergen.IndexedProperty{
@@ -184,7 +202,7 @@ func (s *Server) resolveSkillHit(pl *Player, def skilldata.Definition, cast skil
 	var hit []landing
 	for _, f := range targets {
 		sub := s.sinkFor(pl)
-		if s.hitNPC(pl, def, f, plan.hurt, len(targets), skillObj, sub) {
+		if s.hitNPC(pl, def, f, plan.hurt, len(targets), skillObj, stagger, index, plan.action, sub) {
 			hit = append(hit, landing{f: f, sink: sub})
 		} else {
 			sink.absorb(sub) // 闪避等帧原位保留
@@ -197,19 +215,8 @@ func (s *Server) resolveSkillHit(pl *Player, def skilldata.Definition, cast skil
 		sink.flush()
 		return
 	}
-	// 命中一次攻击者得怒/战意：FP/SP 成对 +2（每击一次，与目标数无关——
-	// 挑战包一招双杀同样只发一对）。
-	st.mu.Lock()
-	st.live.hits++
-	total := st.live.hits
-	s.gainSPLocked(st, hitSPGain, sink)
-	st.mu.Unlock()
 	for _, item := range hit {
 		sink.absorb(item.sink)
-	}
-	if total >= 2 {
-		sink.custom(24, sink.playerObject(), entergen.CustomInt(10), entergen.CustomInt(int32(total)))
-		sink.priv("MaxHits", entergen.Int32Value(int32(total)))
 	}
 	values := []entergen.CustomValue{sink.playerObject(), entergen.CustomString(def.ID)}
 	for _, item := range hit {
@@ -330,7 +337,18 @@ func inShape(def skilldata.Definition, origin, target [4]float64) bool {
 }
 
 // hitNPC 对一个 NPC 结算一击；返回是否有效命中（闪避/已死亡为假）。
-func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hurt, count int, skillObj uint64, sink *frameSink) bool {
+// stagger = 本拍判定帧不带受击者动画（受击反应由服务端下发，见 combatreact.go）。
+//
+// 单个目标的帧序（抓包 357.896 非致死 / 358.469 击杀 / 730.436 多目标）：
+//
+//	攻击者 FP → SP（每受击目标一对 +2）→
+//	[首次交手：NPC.LogicState=1 → 关系行加行 → 玩家 LogicState=1 → m24 37] →
+//	关系行刷新 → m24 17 →
+//	非致死  [受击动作 m18 hurt_half] → [m24 10 / MaxHits] → [m24 40 特效]
+//	击杀    摘 buff → 关系行删 → m24 29 → m18 hurt_half → [m24 10 / MaxHits]
+//	        → [m24 40] → [m24 13]
+func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hurt, count int, skillObj uint64, stagger bool,
+	beat int, action string, sink *frameSink) bool {
 	st := &pl.combat
 	key := uint64(f.spawn.ObjectID) | uint64(f.spawn.OwnerID)<<32
 	now := combatNow()
@@ -351,24 +369,12 @@ func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hur
 	s.ensureLiveLocked(st, pl)
 	entered := noteFightLocked(st, now)
 	row := relationIndex(st.live.relations, key)
-	if row < 0 {
+	added := row < 0
+	if added {
 		st.live.relations = append(st.live.relations, fightRelation{target: key, at: now})
+		row = len(st.live.relations) - 1
 	} else {
 		st.live.relations[row].at = now
-	}
-	if first {
-		sink.npcProp(f, "LogicState", entergen.ByteValue(logicFighting))
-	}
-	if row < 0 {
-		sink.relationAdd(uint16(len(st.live.relations)-1), key, now)
-	} else {
-		sink.relationTouch(uint16(row), now)
-	}
-	if entered {
-		sink.priv("LogicState", entergen.ByteValue(logicFighting))
-	}
-	if first {
-		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(37), entergen.CustomString("npc_foundplayer"))
 	}
 	s.armCalmLocked(st, pl, now)
 	st.mu.Unlock()
@@ -379,17 +385,27 @@ func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hur
 	targetName := f.spawn.ConfigID
 	result := s.rollHit(pl, def, f, hurt, count, skillObj)
 	if result.Miss {
+		st.mu.Lock()
+		comboMissLocked(&st.live)
+		st.mu.Unlock()
+		// 未命中不计得怒、不留连击；交手帧照发（被闪避也结仇）。
+		sink.engageFrames(f, first, entered, added, row, key, now)
 		// 闪避：抓包 226.276（锁定技另配 <技能>_dodge 动作、m707[14]）。
 		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(7), entergen.CustomInt(1),
 			sink.playerObject(), entergen.CustomString(def.ID), entergen.CustomString(targetName),
 			entergen.CustomString(pl.Name), entergen.CustomInt(100))
 		if def.Script == skilldata.ScriptLock {
-			sink.pubCustom(20, sink.npcValue(f), entergen.CustomString(def.ID+"_dodge"), sink.playerObject())
+			dodge := def.Lock.DodgeAction
+			if dodge == "" {
+				dodge = def.ID + "_dodge"
+			}
+			sink.pubCustom(20, sink.npcValue(f), entergen.CustomString(dodge), sink.playerObject())
 			sink.custom(707, entergen.CustomInt(useSkillResultDodged))
 		}
 		return false
 	}
 
+	spec := hitSpecOf(def.ID)
 	dealt := int(result.Damage)
 	f.mu.Lock()
 	dealt = min(dealt, f.hp)
@@ -399,28 +415,59 @@ func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hur
 		f.dead, f.deathAt, f.cast = true, now, nil
 	}
 	f.mu.Unlock()
+	var removals [][]byte
+	if killed {
+		removals = s.stripNpcBuffs(f)
+	}
+	st.mu.Lock()
+	st.live.hits++
+	record := comboHitLocked(&st.live, now)
+	// 得怒/战意按受击目标计：一拍打几个目标就几对（女号包 730.436 一拍五
+	// 目标五对；挑战包 77.273 双杀两对）。
+	s.gainSPLocked(st, hitSPGain, sink)
+	delRow := -1
+	if killed {
+		if row := relationIndex(st.live.relations, key); row >= 0 {
+			delRow = row
+			st.live.relations = append(st.live.relations[:row], st.live.relations[row+1:]...)
+		}
+	}
+	st.mu.Unlock()
+	sink.engageFrames(f, first, entered, added, row, key, now)
 	sink.subject(f)
 	sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(17), entergen.CustomInt(int32(dealt)),
 		entergen.CustomInt(0), entergen.CustomInt(0), entergen.CustomString(def.ID),
 		entergen.CustomString(string(def.Script)), entergen.CustomString(targetName),
 		entergen.CustomString(pl.Name), entergen.CustomInt(int32(btoi(result.Crit))))
-	if def.Script != skilldata.ScriptLock && !strings.HasPrefix(def.ID, "zs_normal_") {
-		// 非普攻：受击特效帧（抓包 cqgf04/cqgf06：body_hit_3_self）。
-		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(40),
-			entergen.CustomString("body_hit_3_self"), sink.playerObject())
+	for _, frame := range removals {
+		sink.pub(frame, nil)
+	}
+	if delRow >= 0 {
+		sink.relationDel(uint16(delRow))
 	}
 	if killed {
-		// 击杀簇（挑战包 483.077）：关系行删 → m24 29 → m18 → m24 13。
-		st.mu.Lock()
-		if row := relationIndex(st.live.relations, key); row >= 0 {
-			sink.relationDel(uint16(row))
-			st.live.relations = append(st.live.relations[:row], st.live.relations[row+1:]...)
-		}
-		st.mu.Unlock()
 		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(29), sink.playerObject(),
 			entergen.CustomString(targetName), entergen.CustomString(pl.Name))
 		sink.pubCustom(18, sink.npcValue(f), entergen.CustomString("hurt_half"), entergen.CustomInt(0), sink.playerObject())
-		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(13))
+	} else if stagger && !(spec.firstOnly && !first) {
+		// 受击动作：首次交手必发（把 NPC 从出生姿态里拉出来）；其余按技能
+		// 事件包——每击发，或只靠 m24 40 的受击特效。
+		sink.pubCustom(18, sink.npcValue(f), entergen.CustomString("hurt_half"), entergen.CustomInt(0), sink.playerObject())
+	}
+	st.mu.Lock()
+	sink.comboFrames(&st.live, record)
+	st.mu.Unlock()
+	if !killed && spec.control != nil {
+		s.applyHitControl(sink, pl, def, f, beat, action, *spec.control)
+	}
+	if stagger && spec.effect != "" {
+		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(40),
+			entergen.CustomString(spec.effect), sink.playerObject())
+	}
+	if killed {
+		if spec.deathMark {
+			sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(13))
+		}
 		s.after(corpseKeep, func() { s.npcCorpseRemove(f) })
 		s.after(corpseKeep+npcRespawnDelay, func() { s.npcRespawn(f) })
 	}

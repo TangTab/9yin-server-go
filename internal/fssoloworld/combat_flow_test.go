@@ -38,7 +38,7 @@ func TestCombatBasicAttackHitsOnZhaoshiBeats(t *testing.T) {
 
 	got := f.pump(467 * time.Millisecond)
 	want := "view41.1:CurTargetCount=1 | me:FP=2 | me:SP=2 | " + f.aggro() + " | " + hitNormal +
-		" | m205(me,s:zs_normal_00,npc)"
+		" | me:MaxHits=1 | m205(me,s:zs_normal_00,npc)"
 	if strings.Join(got, " | ") != want {
 		t.Fatalf("首击帧序不符:\n got: %s\nwant: %s", strings.Join(got, " | "), want)
 	}
@@ -74,7 +74,7 @@ func TestCombatFramesIgnoreRealTimeStall(t *testing.T) {
 
 	got := f.pump(467 * time.Millisecond)
 	want := "view41.1:CurTargetCount=1 | me:FP=2 | me:SP=2 | " + f.aggro() + " | " + hitNormal +
-		" | m205(me,s:zs_normal_00,npc)"
+		" | me:MaxHits=1 | m205(me,s:zs_normal_00,npc)"
 	if strings.Join(got, " | ") != want {
 		t.Fatalf("真实时间流逝后的首击帧序不符:\n got: %s\nwant: %s", strings.Join(got, " | "), want)
 	}
@@ -90,7 +90,7 @@ func TestCombatLockSkillHitsAndAttachesBuff(t *testing.T) {
 
 	got := f.pump(433 * time.Millisecond)
 	want := "view41.1:CurTargetCount=1 | me:FP=2 | me:SP=2 | " + f.aggro() + " | " + hit +
-		" | m205(me,s:CS_jh_cqgf01,npc)"
+		" | me:MaxHits=1 | m205(me,s:CS_jh_cqgf01,npc)"
 	if strings.Join(got, " | ") != want {
 		t.Fatalf("首击帧序不符:\n got: %s\nwant: %s", strings.Join(got, " | "), want)
 	}
@@ -130,7 +130,7 @@ func TestCombatKillEmitsDeathCluster(t *testing.T) {
 
 	got := f.pump(533 * time.Millisecond)
 	want := "me:FP=4 | me:SP=4 | me:rec114[0.1]=T | " + hitNormal +
-		" | me:rec114-row0 | m24(npc,i:29,me,s:test_monster,s:) | m18(npc,s:hurt_half,i:0,me) | m24(npc,i:13)" +
+		" | me:rec114-row0 | m24(npc,i:29,me,s:test_monster,s:) | m18(npc,s:hurt_half,i:0,me)" +
 		" | m24(me,i:10,i:2) | me:MaxHits=2 | m205(me,s:zs_normal_00,npc) | me:CurSkillID="
 	if strings.Join(got, " | ") != want {
 		t.Fatalf("击杀帧序不符:\n got: %s\nwant: %s", strings.Join(got, " | "), want)
@@ -291,7 +291,7 @@ end
 	// nx_add_buffer 在钩子里即时下发 m169 挂载帧；命中簇随后按序落地。
 	want := "m169(i:0,s:buf_CS_jh_cqgf01,npc,me,s:test_monster,s:,i:T64,i:73)" +
 		" | view41.1:CurTargetCount=1 | me:FP=2 | me:SP=2 | " + f.aggro() +
-		" | m24(npc,i:17,i:80,i:0,i:0,s:zs_normal_00,s:SkillNormal,s:test_monster,s:,i:0) | m205(me,s:zs_normal_00,npc)" +
+		" | m24(npc,i:17,i:80,i:0,i:0,s:zs_normal_00,s:SkillNormal,s:test_monster,s:,i:0) | me:MaxHits=1 | m205(me,s:zs_normal_00,npc)" +
 		" | me:CurSkillID="
 	if strings.Join(got, " | ") != want {
 		t.Fatalf("钩子结算帧序不符:\n got: %s\nwant: %s", strings.Join(got, " | "), want)
@@ -333,7 +333,7 @@ end
 	// 脚本发起的帧即时下发（同 TestCombatSkillLuaHooks），打断帧先于本击帧簇。
 	got := combatText(f.s, f.pl, f.monster, f.take())
 	want := "me:CurSkillID= | view41.1:CurTargetCount=1 | me:FP=2 | me:SP=2 | " + f.aggro() + " | " + hitNormal +
-		" | m205(me,s:zs_normal_00,npc)"
+		" | me:MaxHits=1 | m205(me,s:zs_normal_00,npc)"
 	if strings.Join(got, " | ") != want {
 		t.Fatalf("打断帧序不符:\n got: %s\nwant: %s", strings.Join(got, " | "), want)
 	}

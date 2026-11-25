@@ -29,6 +29,7 @@ package fssoloworld
 import (
 	"encoding/binary"
 	"math"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -41,16 +42,28 @@ import (
 // C2S 自定义消息号。
 const (
 	clientCustomUseSkill     int32 = 211 // 技能施放
+	clientCustomItemSkill    int32 = 270 // 技能道具施放（任务技能）[技能名]
 	clientCustomDashLanding  int32 = 212 // 冲锋到位申报 [x, y, z, 朝向, 尾 1=冲刺/0=步行]
 	clientCustomRushApproach int32 = 220 // 冲锋接近上报 [x, y, z, 朝向]
 )
 
-// m707 结果码 = useSkillResultBase + USESKILL_RESULT_*（skill_error_define.lua）。
+// 结果码 = useSkillResultBase + USESKILL_RESULT_*（skill_error_define.lua）。
+// m211 链走 m707[码]；m270 技能道具链的多数拒绝是提示消息 m1[2,"码"]
+// （女号包 721~815s 任务技能段 237 次施放的统计）。
 const (
 	useSkillResultBase              = 9000
 	useSkillResultMPLess            = 21 // 能量不足
 	useSkillResultNoTarget          = 30 // 没有选择技能使用目标
 	useSkillResultOtherSkillHitting = 33 // 其他技能正在使用中
+	useSkillResultCooldown          = 9  // 技能在冷却中（m270：m1[2,"9009"]）
+	useSkillResultTargetDead        = 16 // 对象已死亡（m270：m707[9016]）
+	useSkillResultSPLess            = 22 // 战意不足
+	// useSkillResultHitStun 受击硬直中：定义文件无此码，抓包 725.942 被击
+	// （atkhit3）后 80ms 施放任务技能即回 m1[2,"9023"]。
+	useSkillResultHitStun = 23
+	// useSkillStateNoTarget m270 无目标时紧跟 m1[2,"9030"] 的 m707（抓包
+	// 722.992）。
+	useSkillStateNoTarget = 7
 	// useSkillStateStaged 暂存受理确认（m707[15]，抓包 206.558）。
 	useSkillStateStaged = 15
 	// useSkillResultDodged 目标闪避（抓包 226.276：锁定技被闪后的 m707[14]）。
@@ -84,11 +97,13 @@ type combatState struct {
 	staged    *stagedRush
 	// selected 最近一次选靶（msg431）；m211 不带目标时回落。
 	selected uint64
-	// mp 当前 MP（首用时取上限）；mpCredit 回复小数累积；qinggong 轻功点。
+	// mpCredit 回复小数累积；qinggong 轻功点。
 	mp       int
 	mpReady  bool
 	mpCredit float64
 	qinggong int
+	// selfBuff 施放期间挂在玩家身上的自身 buff（技能事件包；收招时摘）。
+	selfBuff *activeSelfBuff
 	// normalSteps 技能 ID → 连招动作轮转下标（流程包 HitAction 列表；按
 	// 技能各自轮转——别的技能施放不推进普攻的连招序号）。
 	normalSteps map[string]int
@@ -100,9 +115,13 @@ type combatState struct {
 	calmAt time.Time
 }
 
-// skillCast m211 解码结果。
+// skillCast m211 / m270 解码结果。
 //
 //	[211, 技能, x, y, z, 朝向, 0, 0, 0, "", [目标, 目标x, 目标y, 目标z]]
+//	[270, 技能]
+//
+// item = m270 技能道具施放（任务技能）：消息不带坐标与目标，坐标取玩家
+// 的服务端位置、目标回落最近选靶，两条入口此后走同一条受理链。
 type skillCast struct {
 	skill       string
 	x, y, z     float32
@@ -113,6 +132,7 @@ type skillCast struct {
 	targetY     float32
 	targetZ     float32
 	hasTarget   bool
+	item        bool
 }
 
 func (c skillCast) targetKey() uint64 {
@@ -394,7 +414,47 @@ func (s *Server) handleSkillCast(pl *Player, message entergen.CustomInbound) {
 	}
 }
 
+// handleItemSkillCast C2S m270 技能道具施放（任务技能）：[270, 技能名]。女号
+// 包 721~815s 的任务战斗 237 次施放全走它、没有一次 m211。消息不带坐标与
+// 目标：坐标取玩家的服务端位置，需目标的技能回落最近选靶，此后与 m211 同
+// 一条受理链（差别见 planSkillCast 的 item 分支）。
+func (s *Server) handleItemSkillCast(pl *Player, message entergen.CustomInbound) {
+	if len(message.Values) < 2 || message.Values[1].Type != 6 {
+		s.trace("item skill cast malformed client=%d", pl.Conn1)
+		return
+	}
+	def, ok := s.skillDefinition(pl, message.Values[1].Text)
+	if !ok {
+		return
+	}
+	pos := pl.roleState.Position
+	cast := skillCast{skill: def.ID, item: true, x: float32(pos[0]), y: float32(pos[1]), z: float32(pos[2]),
+		orient: float32(pos[3])}
+	frames, followUp := s.planSkillCast(pl, def, cast)
+	if len(frames) > 0 {
+		s.sendFrames(pl, frames)
+	}
+	if followUp != nil {
+		followUp()
+	}
+}
+
+// resultText m1[2,"<结果码>"] 的码值（m270 链的提示消息形态）。
+func resultText(code int) entergen.CustomValue {
+	return entergen.CustomString(strconv.Itoa(useSkillResultBase + code))
+}
+
 // planSkillCast 受理规划（返回 nil, nil = 帧编码失败，零发送）。
+//
+// m270（cast.item）与 m211 的差别（女号包任务技能段）：
+//
+//	冷却中       m1[2,"9009"]（m211 零应答）
+//	无目标       m1[2,"9030"] → m707[7]（m211：m707[9030]）
+//	目标已死亡   m707[9016]
+//	受理帧序     普通技：CurSkillID → 冷却行 → MP/SP → [自身 buff] → m20
+//	             （没有 m211 的 0x1F 与 m337——消息不带坐标）
+//	             锁定技：… → 0x1F（服务端位置）→ LastWGAttackNpc=目标名 →
+//	             m24 40 → m19（技能名位是命中动作名）→ CantMove → CantParry
 func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillCast) ([][]byte, func()) {
 	st := &pl.combat
 	st.mu.Lock()
@@ -406,6 +466,16 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	// 后按新技能重新分流（2433 参考 rearm 同序）。
 	if st.staged != nil {
 		b.frames = append(b.frames, s.clearStagedLocked(b.ident, st)...)
+	}
+	// m270 的冷却闸门先于出招闸门：施放途中再按同技能，官服回的是冷却提示
+	// 而不是 9033（抓包 722.139 受理 → 722.286 再按 → 722.324 m1[2,"9009"]，
+	// 其前没有清扫帧）。
+	if cast.item {
+		if reason := cooldownGate(st.cooldowns, st.lastTaoLu, def, nowMS); reason != "" {
+			s.trace("skill %s blocked by %s client=%d", def.ID, reason, pl.Conn1)
+			b.custom(1, entergen.CustomInt(2), resultText(useSkillResultCooldown))
+			return b.done()
+		}
 	}
 	// 出招进行中：其他技能正在使用中。
 	if st.curSkill != "" {
@@ -427,15 +497,24 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	st.cooldowns = rows
 	b.frames = append(b.frames, sweep...)
 
-	// 冷却中：零应答。
+	// 冷却中：m211 零应答（客户端按冷却表自行拦键）；m270 提示冷却中。
 	if reason := cooldownGate(st.cooldowns, st.lastTaoLu, def, nowMS); reason != "" {
 		s.trace("skill %s blocked by %s client=%d", def.ID, reason, pl.Conn1)
+		if cast.item {
+			b.custom(1, entergen.CustomInt(2), resultText(useSkillResultCooldown))
+		}
 		return b.done()
 	}
 	// MP。
 	st.ensureVitals(pl)
 	if def.Consume.MP > st.mp {
 		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultMPLess))
+		return b.done()
+	}
+	// 战意（任务技能 musejuben_4/7/8/9 的消耗是 AConsumeSP）。
+	s.ensureLiveLocked(st, pl)
+	if def.Consume.SP > st.live.sp {
+		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultSPLess))
 		return b.done()
 	}
 	// 目标与射程。目标不在服务端目录时位置回落 m211 自报位（朝向无从得知，
@@ -447,8 +526,22 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	needsTarget := def.NeedsTarget()
 	distance := math.Hypot(target.pos[0]-float64(cast.x), target.pos[2]-float64(cast.z))
 	if needsTarget && !cast.hasTarget {
-		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultNoTarget))
+		if cast.item {
+			b.custom(1, entergen.CustomInt(2), resultText(useSkillResultNoTarget))
+			b.custom(707, entergen.CustomInt(useSkillStateNoTarget))
+		} else {
+			b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultNoTarget))
+		}
 		return b.done()
+	}
+	if cast.item && cast.hasTarget && needsTarget {
+		pl.npcMu.Lock()
+		scene := pl.npcScene
+		pl.npcMu.Unlock()
+		if f := s.fighterBySpawn(scene, cast.targetKey()); f != nil && f.isDead() {
+			b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultTargetDead))
+			return b.done()
+		}
 	}
 	if cast.hasTarget && needsTarget {
 		if def.CanRush && distance > def.CastRange+rushDirectBandExtra {
@@ -506,6 +599,14 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		st.qinggong = max(st.qinggong-def.Consume.QingGong, 0)
 		b.prop("QingGongPoint", entergen.Int32Value(int32(st.qinggong)))
 	}
+	if def.Consume.SP > 0 {
+		st.live.sp = max(st.live.sp-def.Consume.SP, 0)
+		b.prop("SP", entergen.Int32Value(int32(st.live.sp)))
+	}
+	// 施放期间的自身 buff（技能事件包）：属性位 → buff 槽串 → m169 挂载。
+	if spec := hitSpecOf(def.ID).selfBuff; spec != nil {
+		s.grantSelfBuffLocked(b, st, pl, *spec)
+	}
 	st.lastTaoLu, st.curSkill, st.curTarget = def.TaoLu, def.ID, cast.targetKey()
 	st.castSeq++
 	seq := st.castSeq
@@ -519,15 +620,21 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	if def.Script == skilldata.ScriptLock {
 		st.locked = true
 		b.location(cast.x, cast.y, cast.z, normalizeOrient(orient))
-		b.prop("LastWGHit", entergen.Float32Value(100))
+		if cast.item {
+			b.prop("LastWGAttackNpc", entergen.StringValue(target.name))
+		} else {
+			b.prop("LastWGHit", entergen.Float32Value(100))
+		}
 		b.custom(24, targetValue(cast.targetKey()), entergen.CustomInt(40), entergen.CustomInt(1), b.selfValue())
-		b.custom(19, skillLockMessageValues(b.ident, def, cast, target.pos, orient)...)
+		b.custom(19, skillLockMessageValues(b.ident, def, action, cast, target.pos, orient)...)
 		b.prop("CantMove", entergen.ByteValue(1))
 		b.prop("CantParry", entergen.Int32Value(1))
 	} else {
-		b.location(cast.x, cast.y, cast.z, orient)
-		b.custom(337, b.selfValue(), entergen.CustomFloat32(cast.x), entergen.CustomFloat32(cast.y),
-			entergen.CustomFloat32(cast.z), entergen.CustomFloat32(orient), entergen.CustomInt(0))
+		if !cast.item {
+			b.location(cast.x, cast.y, cast.z, orient)
+			b.custom(337, b.selfValue(), entergen.CustomFloat32(cast.x), entergen.CustomFloat32(cast.y),
+				entergen.CustomFloat32(cast.z), entergen.CustomFloat32(orient), entergen.CustomInt(0))
+		}
 		aim := entergen.CustomObject(0, 0)
 		if cast.hasTarget {
 			aim = targetValue(cast.targetKey())
@@ -578,10 +685,12 @@ func (b *frameBuilder) done() ([][]byte, func()) {
 
 // skillLockMessageValues m19 锁定段起始帧的值表（不含消息号；抓包
 // 207.777/355.780 逐值，整帧 144 字节）：
-// [攻击者, 目标, 技能, 己方锁定ms, 目标锁定ms, 打击点1 xyz, 朝向,
+// [攻击者, 目标, 技能名, 己方锁定ms, 目标锁定ms, 打击点1 xyz, 朝向,
 // 锁定己方位移, 打击点2 xyz, 常量 2.6166286, 锁定对方位移, 0, 0.0, 1, 1,
 // 0.0, 目标位 xyz]。打击点 = 出招位 / 目标位各沿攻击方向前进对应位移。
-func skillLockMessageValues(ident wireIdent, def skilldata.Definition, cast skillCast, target [3]float64, orient float32) []entergen.CustomValue {
+// 技能名位填命中动作名（锁定包 HitAction；常规锁定技与技能 ID 同名，任务
+// 技能不同：抓包 728.313 的 m19 技能名位是 CS_sl_lhq02）。
+func skillLockMessageValues(ident wireIdent, def skilldata.Definition, name string, cast skillCast, target [3]float64, orient float32) []entergen.CustomValue {
 	ident = ident.orFixed()
 	lock := def.Lock
 	if lock.SrcTime <= 0 {
@@ -594,7 +703,7 @@ func skillLockMessageValues(ident wireIdent, def skilldata.Definition, cast skil
 	dx, dz := math.Sin(float64(orient)), math.Cos(float64(orient))
 	f32 := entergen.CustomFloat32
 	return []entergen.CustomValue{
-		entergen.CustomObject(ident.objectID, ident.ownerID), targetValue(cast.targetKey()), entergen.CustomString(def.ID),
+		entergen.CustomObject(ident.objectID, ident.ownerID), targetValue(cast.targetKey()), entergen.CustomString(name),
 		entergen.CustomInt(int32(lock.SrcTime)), entergen.CustomInt(int32(lock.TargetTime)),
 		f32(cast.x + float32(dx*srcDist)), f32(cast.y), f32(cast.z + float32(dz*srcDist)),
 		f32(orient), f32(float32(srcDist)),
@@ -624,6 +733,8 @@ func (s *Server) finishCast(pl *Player, seq int, locked bool) {
 	if st.curSkill != "" {
 		b.prop("CurSkillID", entergen.StringValue(""))
 	}
+	// 施放期间的自身 buff 随收招摘掉（CurSkillID 之后；命中链若已摘过则空）。
+	b.frames = append(b.frames, s.releaseSelfBuffLocked(pl, st)...)
 	st.curSkill, st.locked = "", false
 	st.mu.Unlock()
 	s.sendFrames(pl, b.frames)

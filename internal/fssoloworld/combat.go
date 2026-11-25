@@ -127,7 +127,10 @@ type playerLive struct {
 	logic        int
 	fightAt      time.Time // 最近一次战斗活动（零值 = 非战斗）
 	relations    []fightRelation
-	hits         int // 当前技能累计击数
+	hits         int       // 本次施放的累计命中数（脚本属性 Hits：逐击递增的公式用）
+	combo        int       // 连击数（m24 10）：comboWindow 内连续命中累计
+	comboAt      time.Time // 最近一次有效命中（零值 = 无连击）
+	maxHits      int       // MaxHits：连击数的最高纪录（刷新才下发）
 	attacker     uint64
 	attackerName string
 	buffs        []combatBuff
@@ -164,6 +167,11 @@ type npcFighter struct {
 	hurtBy   map[uint64]bool // 近期攻击者（击杀归属）
 	skills   []npcSkillRef   // 技能表（npcSkills 懒建）
 	moving   bool            // 追击/回归中（State=run 已下发）
+	// 受控（combatcontrol.go）：硬直截止与序号；自出生以来被击退的累计次数
+	// （c78 的 N，重生归零）。
+	stunUntil  time.Time
+	stunSeq    int
+	knockbacks int
 }
 
 // combatFrame 带可见性标记的下行帧：private 只发攻击者本人，public 同时

@@ -192,6 +192,15 @@ func combatText(s *Server, pl *Player, monster *npcFighter, frames [][]byte) []s
 			out = append(out, fmt.Sprintf("loc(%s,%.3f,%.3f,%.3f,%.3f)", label(le32(frame[1:]), le32(frame[5:])),
 				math.Float32frombits(le32(frame[9:])), math.Float32frombits(le32(frame[13:])),
 				math.Float32frombits(le32(frame[17:])), math.Float32frombits(le32(frame[21:]))))
+		case 0x21:
+			// AllDest 记录（entergen.ServerAllDestFrame 布局）：位置 / 速度 / 回显槽 / 标志。
+			f32 := func(o int) float64 { return float64(math.Float32frombits(le32(frame[o:]))) }
+			for j := 0; j < le16(frame[1:]) && 3+(j+1)*44 <= len(frame); j++ {
+				at := 3 + j*44
+				out = append(out, fmt.Sprintf("alldest(%s,%.3f,%.3f,%.3f,o=%.3f,spd=%.1f,m2=%.1f,m3=%.1f,f=%#x)",
+					label(le32(frame[at:]), le32(frame[at+4:])), f32(at+8), f32(at+12), f32(at+16), f32(at+20),
+					f32(at+24), f32(at+32), f32(at+36), le32(frame[at+40:])))
+			}
 		default:
 			out = append(out, fmt.Sprintf("op%02X", frame[0]))
 		}

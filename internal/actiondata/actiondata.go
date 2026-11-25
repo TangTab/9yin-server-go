@@ -7,6 +7,8 @@
 //	Actions 各段动作名
 //	Frames  各段帧长（30fps）
 //	Hits    判定时刻（毫秒，自招式起算；hitbreak ∪ hitback 同刻去重）
+//	Stagger 与 Hits 逐拍对位：该拍的受击反应是否由服务端下发（判定触发器
+//	        不带受击者动画）；旧产物无此列时为空，调用方按「不下发」处理
 //	Length  招式总时长（毫秒）
 //
 // 战斗链按技能的 HitAction 取判定时刻调度每击结算（官服命中节拍的数据
@@ -35,7 +37,14 @@ type Action struct {
 	Actions []string
 	Frames  []int
 	HitsMS  []int
+	Stagger []bool
 	Length  int
+}
+
+// Staggers 第 index 击（0 基）的受击反应是否由服务端下发；下标越界或产物
+// 无 Stagger 列均为假。
+func (a Action) Staggers(index int) bool {
+	return index >= 0 && index < len(a.Stagger) && a.Stagger[index]
 }
 
 // Catalog 产物目录（进程级缓存）。
@@ -81,13 +90,14 @@ func LoadDir(dir string) (*Catalog, error) {
 	return parse(raw)
 }
 
-// parse 一行一招的 <Property ID=… Actions=… Frames=… Hits=… Length=…/>。
+// parse 一行一招的 <Property ID=… Actions=… Frames=… Hits=… Stagger=… Length=…/>。
 func parse(raw []byte) (*Catalog, error) {
 	type row struct {
 		ID      string `xml:"ID,attr"`
 		Actions string `xml:"Actions,attr"`
 		Frames  string `xml:"Frames,attr"`
 		Hits    string `xml:"Hits,attr"`
+		Stagger string `xml:"Stagger,attr"`
 		Length  string `xml:"Length,attr"`
 	}
 	decoder := xml.NewDecoder(strings.NewReader(string(raw)))
@@ -113,7 +123,11 @@ func parse(raw []byte) (*Catalog, error) {
 			}
 			length, _ := strconv.Atoi(r.Length)
 			action := Action{ID: r.ID, Actions: splitList(r.Actions), Frames: splitInts(r.Frames),
-				HitsMS: splitInts(r.Hits), Length: length}
+				HitsMS: splitInts(r.Hits), Stagger: splitFlags(r.Stagger), Length: length}
+			// 列数不齐的产物不采信 Stagger（逐拍对位是它的全部意义）。
+			if len(action.Stagger) != len(action.HitsMS) {
+				action.Stagger = nil
+			}
 			if _, dup := cat.actions[r.ID]; !dup {
 				cat.actions[r.ID] = action
 			}
@@ -159,6 +173,16 @@ func splitInts(s string) []int {
 			continue
 		}
 		out = append(out, n)
+	}
+	return out
+}
+
+// splitFlags Stagger 列（1/0 逐拍）；空列返回空。
+func splitFlags(s string) []bool {
+	parts := splitList(s)
+	out := make([]bool, 0, len(parts))
+	for _, part := range parts {
+		out = append(out, strings.TrimSpace(part) == "1")
 	}
 	return out
 }

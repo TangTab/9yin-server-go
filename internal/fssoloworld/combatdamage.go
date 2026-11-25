@@ -5,7 +5,7 @@ package fssoloworld
 //
 // 目标是 NPC：m24[npc,22,伤害,0,0,技能|buff,"Buffer",NPC名,攻击者名]（22 =
 // buff 伤害，到施法者名为止），致死走击杀簇
-// m24[npc,29,攻击者,NPC名,攻击者名] → m18 → m24 13；目标是玩家：HP 帧 →
+// m24[npc,29,攻击者,NPC名,攻击者名] → m18 → [m24 13]；目标是玩家：HP 帧 →
 // m24 17。
 
 import (
@@ -61,10 +61,16 @@ func (s *Server) applyDamage(attacker, defender script.Handle, result script.Hit
 		}
 		sink.pubCustom(24, values...)
 		if killed {
+			// 击杀簇同 hitNPC（摘 buff → m24 29 → m18 → [m24 13]，无连击帧）。
+			for _, frame := range s.stripNpcBuffs(f) {
+				sink.pub(frame, nil)
+			}
 			sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(29), s.objectValue(attacker),
 				entergen.CustomString(f.spawn.ConfigID), entergen.CustomString(attackerName))
 			sink.pubCustom(18, sink.npcValue(f), entergen.CustomString("hurt_half"), entergen.CustomInt(0), s.objectValue(attacker))
-			sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(13))
+			if hitSpecOf(src.skill).deathMark {
+				sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(13))
+			}
 			s.after(corpseKeep, func() { s.npcCorpseRemove(f) })
 			s.after(corpseKeep+npcRespawnDelay, func() { s.npcRespawn(f) })
 		}

@@ -203,7 +203,7 @@ func rushLandingFrames(ident wireIdent, def skilldata.Definition, stage *stagedR
 	b.custom(24, targetValue(stage.target), entergen.CustomInt(40), entergen.CustomInt(1), b.selfValue())
 	cast := skillCast{skill: def.ID, x: pos[0], y: pos[1], z: pos[2],
 		targetID: uint32(stage.target), targetOwner: uint32(stage.target >> 32), hasTarget: true}
-	b.custom(19, skillLockMessageValues(b.ident, def, cast, stage.targetPos, orient)...)
+	b.custom(19, skillLockMessageValues(b.ident, def, def.ID, cast, stage.targetPos, orient)...)
 	b.prop("CantMove", entergen.ByteValue(1))
 	b.prop("CantParry", entergen.Int32Value(1))
 	b.location(pos[0], pos[1], pos[2], facing)
