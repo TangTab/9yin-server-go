@@ -104,6 +104,11 @@ func (s *Server) npcThink(f *npcFighter) {
 	pl := s.playerByKey(f.target)
 	now := combatNow()
 	f.mu.Lock()
+	if passive(f.spawn) {
+		// 不还手（CantAttack=1，训练木桩）：战斗态只用于交手帧，不决策。
+		f.mu.Unlock()
+		return
+	}
 	valid := pl != nil && pl.State == PlOnline
 	if valid {
 		pl.npcMu.Lock()
@@ -397,7 +402,9 @@ func (s *Server) npcCalm(f *npcFighter, reason string) {
 	f.mu.Unlock()
 	s.npcBroadcast(f, npcProperty(f, "LogicState", entergen.ByteValue(logicNormal)))
 	s.trace("combat: npc %s 脱战（%s）", f.spawn.ConfigID, reason)
-	s.npcReturn(f)
+	if !passive(f.spawn) {
+		s.npcReturn(f) // 训练木桩不归位——也就不走出生点回满血
+	}
 }
 
 // npcBroadcast 给同场景看得见该 NPC 的全部玩家下发帧。

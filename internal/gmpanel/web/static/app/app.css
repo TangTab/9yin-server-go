@@ -84,6 +84,29 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 
 .panel-desc { font-size: 12px; opacity: 0.65; margin: -6px 0 10px; }
 
+/* ---- 测试台坐标读数：一行排开（标签 12px 灰 + 数值 13px 等宽数字，
+   轮询刷新时数位不跳） ---- */
+/* 行高收到 20px：框架全局行高 2.4（折算 33.6px 绝对值被继承），12px 小字
+   也要占 34px 行 */
+.pos-line { margin-bottom: 10px; line-height: 20px; }
+.pos-k { font-size: 12px; opacity: 0.65; white-space: nowrap; }
+.pos-scene, .pos-v { font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pos-items { display: inline-flex; gap: 14px; }
+.pos-item { display: inline-flex; align-items: baseline; gap: 5px; }
+/* 说明行（未进场 / 目标不存在 / world 不可达）吃掉余宽，过长省略 */
+.pos-note { flex: 1; min-width: 0; font-size: 12px; opacity: 0.65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 行内小按钮靠行尾：压到 24px 高 / 12px 字（框架 button 基线 34px、其 size=xs
+   档 34px/16.8px 字、ax-btn 35px——都会把行撑高；底色描边沿用框架基线） */
+.pos-line .inline-btn {
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 24px;
+  font-size: 12px;
+  line-height: 1;
+  padding: 0 8px;
+}
+
 /* ---- 卡片网格 / 统计 ---- */
 
 .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
@@ -97,7 +120,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 }
 
 .stat-card .k { font-size: 12px; opacity: 0.65; }
-.stat-card .v { font-size: 22px; margin-top: 4px; }
+/* 值超宽在卡内折行（状态快照的 pos=x,y,z,orient 无空格长串，否则溢出压到邻卡） */
+.stat-card .v { font-size: 22px; margin-top: 4px; overflow-wrap: anywhere; }
 .stat-card .v small { font-size: 12px; opacity: 0.7; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }

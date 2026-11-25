@@ -49,6 +49,9 @@ func (s *Server) absorbPlayerPosition(pl *Player, pos [4]float64) {
 	if s.sceneSwitchInFlight(pl) {
 		return
 	}
+	if s.npcTaskMoviePlaying(pl) {
+		return // 任务影像（剧情副本）在播：副本期间的位移不收编（taskmovie.go）
+	}
 	s.npcReconcile(pl, pos)
 	// 冲锋暂存中：位置上报驱动进带判定（无暂存即时返回）。
 	s.rushOnReport(pl, pos[0], pos[2])
@@ -88,6 +91,15 @@ func (s *Server) handleMovementUpload(pl *Player, message entergen.CustomInbound
 		if orient, ok := customFloat(values[9]); ok {
 			pos[3] = orient
 		}
+	}
+	if state == 7 {
+		// 行走态位移＝玩家已不在剧情副本里（官服副本期间只有原地站立态
+		// 上报）：任务影像在途态立即收尾，位移照常收编。
+		s.npcTaskLocked(pl, func() {
+			if pl.taskMovie != nil {
+				s.npcTaskMovieEnd(pl, "玩家移动")
+			}
+		})
 	}
 	s.absorbPlayerPosition(pl, pos)
 }

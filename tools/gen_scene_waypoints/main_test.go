@@ -9,6 +9,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 )
 
 const homeSample = "\n[HomePointschool09A]\nArea=area_school09_mianlou\nName=ui_HomePointschool09A\nPositonXYZ=344.25,48.0,659.75\nSafe=1\nSceneID=281\nType=2\n\n// 注释行\n[HomePointschool09B]\nName=ui_HomePointschool09B\nPositonXYZ=827.5,-9.8,1237.5\nSafe=0\nSceneID=281\n"
@@ -282,6 +285,66 @@ func TestSingleSlashes(t *testing.T) {
 	}
 	if got := singleSlashes(`ini\scene\x`); got != `ini\scene\x` {
 		t.Fatalf("already single = %q", got)
+	}
+}
+
+func TestLoadNames(t *testing.T) {
+	dir := t.TempDir()
+	// 个别文案表是 GBK（键内大小写混杂）。
+	gbk, _, err := transform.Bytes(simplifiedchinese.GBK.NewEncoder(), []byte("Scene_School24=昆仑派\r\nui_HomePointschool24A=昆仑山门\r\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	files := map[string][]byte{
+		"interface.idres": gbk,
+		// 场景配置目录键在 stringname.idres（UTF-8 BOM）。
+		"stringname.idres": []byte("\ufeffini\\scene\\School21_ShenJiYing=神机营\nini\\scene\\scene36=星垂城\nItem_x=物品\n"),
+		"notes.txt":        []byte("scene_other=非文案表\n"),
+	}
+	for name, body := range files {
+		if err := os.WriteFile(filepath.Join(dir, name), body, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	names, err := loadNames(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{
+		"scene_school24":                        "昆仑派",
+		"ui_homepointschool24a":                 "昆仑山门",
+		configKeyPrefix + "school21_shenjiying": "神机营",
+		configKeyPrefix + "scene36":             "星垂城",
+	}
+	if !reflect.DeepEqual(names, want) {
+		t.Fatalf("names = %v, want %v", names, want)
+	}
+}
+
+func TestSceneName(t *testing.T) {
+	names := map[string]string{
+		"scene_school24":                        "昆仑派",
+		configKeyPrefix + "school21_shenjiying": "神机营",
+		configKeyPrefix + "scene36":             "星垂城",
+	}
+	cases := []struct {
+		resource, config, want string
+	}{
+		{"school24", `ini\scene\school24_kunlun`, "昆仑派"},     // 资源键在：不读目录键
+		{"school21", `ini\scene\school21_shenjiying`, "神机营"}, // 只有目录键
+		{"school21", `ini\scene\School21_ShenJiYing`, "神机营"}, // 目录键不分大小写
+		{"scene36", `ini\scene\scene36`, "星垂城"},
+		{"school99", `ini\scene\nowhere`, ""}, // 两处都无
+	}
+	for _, c := range cases {
+		if got := sceneName(c.resource, c.config, names); got != c.want {
+			t.Errorf("sceneName(%q, %q) = %q, want %q", c.resource, c.config, got, c.want)
+		}
+	}
+	// 资源键首见为空值：落到目录键。
+	names["scene_school21"] = ""
+	if got := sceneName("school21", `ini\scene\school21_shenjiying`, names); got != "神机营" {
+		t.Fatalf("empty resource key must fall through to config key, got %q", got)
 	}
 }
 

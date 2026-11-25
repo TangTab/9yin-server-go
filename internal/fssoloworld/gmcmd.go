@@ -73,7 +73,7 @@ func moneyFrame(pl *Player) ([]byte, error) {
 func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 	s := e.srv
 	if len(fields) < 2 {
-		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|mail|scene|save> <who> [args]\r>end\r")
+		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|mail|dummy|scene|save> <who> [args]\r>end\r")
 		return
 	}
 	sub, who := fields[0], fields[1]
@@ -293,6 +293,9 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 			return
 		}
 		fmt.Fprintf(nc, ">gm mail %s: letter %q delivered (0x11, saved)\r", who, letter.Serial)
+	case "dummy":
+		// gm dummy <who> [血量|clear] [数量]：面前生成训练木桩 / 清除（gmdummy.go）。
+		s.gmDummyCommand(nc, pl, who, fields)
 	case "scene":
 		s.gmSceneCommand(nc, pl, who, fields)
 	case "save":

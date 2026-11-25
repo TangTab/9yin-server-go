@@ -108,6 +108,7 @@ var (
 // （可见集/场景/巡逻首拍时刻）。场景键经 resolveSceneDir 解析为权威摆放
 // 目录（变体目录字典序陷阱见其注释），npcScene 存目录名。
 func (s *Server) sceneNPCEnter(pl *Player, scene string, origin [4]float64) [][]byte {
+	s.releasePlayerDummies(pl) // 旧场景的木桩随场景消失（gmdummy.go）
 	dir := s.resolveSceneDir(pl.roleState.Scene, scene)
 	frames, visible := s.sceneNPCViewFrames(dir, origin)
 	pl.npcMu.Lock()
@@ -416,6 +417,7 @@ func (s *Server) npcReconcile(pl *Player, pos [4]float64) {
 	catalog := s.sceneNPCCatalog(scene)
 	nowMs := time.Now().UnixMilli()
 	adds, removes, nowVisible := npcViewportDiff(catalog, pos, nowMs, visible, radius)
+	removes = s.pinDynamics(pl, removes, nowVisible)
 	pl.npcMu.Lock()
 	pl.npcVisible = nowVisible
 	pl.npcMu.Unlock()

@@ -7,6 +7,7 @@ package fssoloworld
 // 目录的对象号。
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
@@ -60,9 +62,10 @@ var taskTestSchema = map[uint16][]byte{
 	29: mustTaskHex("03030703070703030304030107070703070707070707070103070304"),
 	30: mustTaskHex("030303030303070707030704030307"),
 	31: {3},
+	44: {7, 3, 3}, // Repute_Record：声望名、数值、标志
 }
 
-var taskTestNames = map[uint16]string{29: "Accepted", 30: "Record", 31: "Completed"}
+var taskTestNames = map[uint16]string{29: "Accepted", 30: "Record", 31: "Completed", 44: "Repute"}
 
 func mustTaskHex(s string) []byte {
 	raw, err := hex.DecodeString(s)
@@ -114,6 +117,8 @@ func taskRecordLine(frame []byte) string {
 		case 30:
 			return fmt.Sprintf("11 Record row=%d id=%s sub=%s idx=%s order=%s cur=%s max=%s key=%s scene=%s track=%s flags=%s link=%s",
 				row, c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9], c[10])
+		case 44:
+			return fmt.Sprintf("11 Repute row=%d %s %s %s", row, c[0], c[1], c[2])
 		default:
 			return fmt.Sprintf("11 Completed row=%d val=%d", row, binary.LittleEndian.Uint32(frame[len(frame)-4:]))
 		}
@@ -166,9 +171,37 @@ func taskMessageLine(t *testing.T, frame []byte) string {
 	return "m" + strings.Join(parts, " ")
 }
 
-// taskSyncLines 任务同步相关帧的摘要序列：三张任务记录帧 + 任务通知/收尾
-// 消息（m1、m8、m18、m24、m209）；完成位图的连续零值加行折成一行，NPC
-// 标记（m209 15）、选中帧、对话窗不计。
+// taskPropertyLine 玩家单属性帧（0x10）摘要："10 <属性名>=<值>"（值按属性表
+// 列型读：byte/int32/int64）。非玩家对象或多属性帧返回空串。
+func taskPropertyLine(frame []byte) string {
+	if len(frame) < 14 || frame[1] != 0 || binary.LittleEndian.Uint16(frame[10:]) != 1 {
+		return ""
+	}
+	if binary.LittleEndian.Uint32(frame[2:]) != 0x350000F3 || binary.LittleEndian.Uint32(frame[6:]) != 0x0000102A {
+		return ""
+	}
+	entry, ok := clientdata.PropertyByIndex(int(binary.LittleEndian.Uint16(frame[12:])))
+	if !ok {
+		return ""
+	}
+	var value string
+	switch entry.TypeCode {
+	case 1:
+		value = strconv.Itoa(int(frame[14]))
+	case 3:
+		value = strconv.FormatInt(int64(int32(binary.LittleEndian.Uint32(frame[14:]))), 10)
+	case 4:
+		value = strconv.FormatInt(int64(binary.LittleEndian.Uint64(frame[14:])), 10)
+	default:
+		return ""
+	}
+	return fmt.Sprintf("10 %s=%s", entry.Name, value)
+}
+
+// taskSyncLines 任务同步相关帧的摘要序列：三张任务记录帧 + 声望记录行 +
+// 玩家单属性帧（碎银/历练/冻结标志）+ 背包行帧（0x18 加行/0x19 清行）+
+// 任务通知/收尾消息（m1、m8、m18、m24、m104、m107、m209）；完成位图的连续
+// 零值加行折成一行，NPC 标记（m209 15）、选中帧、对话窗不计。
 func taskSyncLines(t *testing.T, frames [][]byte) []string {
 	t.Helper()
 	var out []string
@@ -194,13 +227,21 @@ func taskSyncLines(t *testing.T, frames [][]byte) []string {
 			if rec := binary.LittleEndian.Uint16(f[10:]); taskTestNames[rec] != "" {
 				out = append(out, taskRecordLine(f))
 			}
+		case 0x10:
+			if line := taskPropertyLine(f); line != "" {
+				out = append(out, line)
+			}
+		case 0x18:
+			out = append(out, fmt.Sprintf("18 view=%d idx=%d", binary.LittleEndian.Uint16(f[1:]), binary.LittleEndian.Uint16(f[3:])))
+		case 0x19:
+			out = append(out, fmt.Sprintf("19 view=%d idx=%d", binary.LittleEndian.Uint16(f[1:]), binary.LittleEndian.Uint16(f[3:])))
 		case 0x1E:
 			line := taskMessageLine(t, f)
 			id := line
 			if sp := strings.IndexByte(line, ' '); sp >= 0 {
 				id = line[:sp]
 			}
-			if id == "m1" || id == "m8" || id == "m18" || id == "m24" ||
+			if id == "m1" || id == "m8" || id == "m18" || id == "m24" || id == "m104" || id == "m107" ||
 				(id == "m209" && !strings.HasPrefix(line, "m209 15 ")) {
 				out = append(out, line)
 			}
@@ -233,6 +274,32 @@ func talkWindows(t *testing.T, frames [][]byte) []string {
 		}
 	}
 	return windows
+}
+
+// withItemSlot 把期望里的入包行占位（@view@/@slot@）填成背包末行的视图号与
+// 槽位（入包链按物品目录决定分类页与槽位，用例只断言「先清行再加行」）。
+func withItemSlot(t *testing.T, pl *Player, want, got []string) []string {
+	t.Helper()
+	if len(pl.roleState.BagItems) == 0 {
+		return got
+	}
+	row := pl.roleState.BagItems[len(pl.roleState.BagItems)-1]
+	view, slot := strconv.Itoa(int(entergen.BagViewOf(row.ViewID))), strconv.Itoa(row.Slot)
+	for i := range want {
+		want[i] = strings.ReplaceAll(strings.ReplaceAll(want[i], "@view@", view), "@slot@", slot)
+	}
+	return got
+}
+
+// countBagItems 背包里某物品的总件数。
+func countBagItems(pl *Player, configID string) int {
+	n := 0
+	for _, item := range pl.roleState.BagItems {
+		if item.ConfigID == configID {
+			n += item.Amount
+		}
+	}
+	return n
 }
 
 // assertLines 帧摘要序列逐行相等。
@@ -336,11 +403,18 @@ func TestTaskSyncOfficialOrder(t *testing.T) {
 	}
 	// 剧情窗五段：点剧情行开窗 1，续行 50N 开窗 N+1（官服 100.097..101.530s）。
 	last := storyWindows(t, s, pl, guide, 1340, 482, 5, frames)
-	// 末窗续行（505）：剧情步完成，末步自动提交——完成簇（官服 101.701s，
-	// 奖励提示与 NPC 标记不计）。
+	// 末窗续行（505）：剧情步完成，末步自动提交——完成簇（官服 101.701s：
+	// 奖励在完成位图之前——碎银 #1931/#1932 → 声望加行 #1933/#1935 → 历练
+	// #1938/#1939；NPC 标记不计）。
 	taskTestClick(t, s, pl, guide, last, frames)
 	assertLines(t, taskSyncLines(t, *frames), []string{
 		"13 Record row=0 c4=1",
+		"10 CapitalType1=100999", // 建号碎银 99999 + 奖励 1000（官服帧型 #1931）
+		`m1 1 "1303" 1000`,
+		`11 Repute row=0 "repute_jianghu" 10 1`, // 首次获得江湖声望：加行（官服 #1933）
+		`m1 1 "9693" "repute_jianghu" 10`,
+		"10 LiveGroove_5=5000", // 奖励串 LiveGroove=5 / LiveGrooveCount=5000（官服 #1938 写 LiveGroove_5）
+		`m1 1 "8055" 5`,
 		"11 Completed rows=0..41 val=0",
 		"13 Completed row=41 c0=268435456",
 		"12 DEL Record row=0",
@@ -370,27 +444,41 @@ func TestTaskSyncOfficialOrder(t *testing.T) {
 		got[1] != `DialogID_558 | 500001347 "okmenu_558" ; 600000000 "ui_form_talk_leave"` {
 		t.Fatalf("武学 NPC 对话窗 = %q", got)
 	}
-	// 四个交互步逐一确认（官服 104.697/112.279/124.171/136.631s）。
+	// 四个交互步逐一确认（官服 104.697/112.279/124.171/136.631s）：前三步
+	// 带步骤奖励（InteractiveList GetItems 武学书），入包帧 + m1 9645 在目标行
+	// 写入之前（官服 #2089..#2092）。
+	stepBooks := map[int]string{558: "tbook_CS_jh_cqgf03", 559: "tbook_CS_jh_cqgf02", 560: "tbook_CS_jh_cqgf05"}
 	for i, step := range []int{558, 559, 560, 561} {
 		last := i == 3
 		transition := fmt.Sprintf("13 Accepted row=0 c8=%d", i+2)
 		if last {
 			transition = "13 Accepted row=0 c6=2"
 		}
-		want := []string{
+		var want []string
+		if book := stepBooks[step]; book != "" {
+			want = append(want, "19 view=@view@ idx=@slot@", "18 view=@view@ idx=@slot@",
+				fmt.Sprintf("m1 1 %q %q 1", "9645", book))
+		}
+		want = append(want,
 			fmt.Sprintf("13 Record row=%d c4=1", i),
 			transition,
 			fmt.Sprintf("13 Record row=%d c9=32", i),
 			fmt.Sprintf("13 Record row=%d c9=48", i),
-			"m24 " + taskTestPlayer + ` 40 "task_ok"`,
+			"m24 "+taskTestPlayer+` 40 "task_ok"`,
 			fmt.Sprintf("m18 %s \"\"", wushuIdent),
-		}
+		)
 		if last {
 			// 末步非自动提交：紧接提交窗参数（官服 1342/1597 的末步同此）。
 			want = append(want, fmt.Sprintf(`m209 2 %s 201001347 1347 "complete_1347" "submit_1347" 0 "" 9`, wushuIdent))
 		}
 		want = append(want, "m8")
-		assertLines(t, taskSyncLines(t, taskTestClick(t, s, pl, wushu, taskMarkfunc(500, 1347), frames)), want, fmt.Sprintf("1347 交互步 %d", step))
+		assertLines(t, withItemSlot(t, pl, want, taskSyncLines(t, taskTestClick(t, s, pl, wushu, taskMarkfunc(500, 1347), frames))), want, fmt.Sprintf("1347 交互步 %d", step))
+		if book := stepBooks[step]; book != "" {
+			// 奖励书进了背包（叠堆/新行由入包链决定）。
+			if n := countBagItems(pl, book); n != 1 {
+				t.Fatalf("交互步 %d 奖励 %s 入包 %d 件, want 1", step, book, n)
+			}
+		}
 		if !last {
 			// 下一步的确认窗：重新点 NPC 才开（官服 111.247/122.873/135.711s）。
 			if got := talkWindows(t, taskTestClick(t, s, pl, wushu, 0, frames)); len(got) != 2 ||
@@ -413,6 +501,12 @@ func TestTaskSyncOfficialOrder(t *testing.T) {
 	}
 	// 窗内确认（201）：完成簇 + 链推 1341（官服 148.094s）。
 	assertLines(t, taskSyncLines(t, taskTestClick(t, s, pl, wushu, taskMarkfunc(201, 1347), frames)), []string{
+		"10 CapitalType1=101999",
+		`m1 1 "1303" 1000`,
+		"13 Repute row=0 c1=30", // 已有江湖声望：逐格写数值（官服 #2409）
+		`m1 1 "9693" "repute_jianghu" 20`,
+		"10 LiveGroove_5=15000",
+		`m1 1 "8055" 10`,
 		"11 Completed rows=42..42 val=0", // 位图行 42 客户端还没有：先加零值行再写格（官服 #2413/#2414）
 		"13 Completed row=42 c0=8",
 		"12 DEL Record row=0", "12 DEL Record row=0", "12 DEL Record row=0", "12 DEL Record row=0",
@@ -450,6 +544,12 @@ func TestTaskSyncOfficialOrder(t *testing.T) {
 	s.npcTaskStubTick(pl, 1341)
 	assertLines(t, taskSyncLines(t, *frames), []string{
 		"13 Record row=1 c4=1",
+		"10 CapitalType1=106999",
+		`m1 1 "1303" 5000`,
+		"13 Repute row=0 c1=110",
+		`m1 1 "9693" "repute_jianghu" 80`,
+		"10 LiveGroove_4=5000", // 1341 奖励串 LiveGroove=4（官服 #3567 写 LiveGroove_4）
+		`m1 1 "8055" 5`,
 		"13 Completed row=41 c0=805306368",
 		"12 DEL Record row=0", "12 DEL Record row=0",
 		"12 DEL Accepted row=0",
@@ -675,6 +775,12 @@ func TestTaskSyncGuideChainToEnd(t *testing.T) {
 	s.npcTaskStubTick(pl, 1343)
 	assertLines(t, maskTimes(taskSyncLines(t, *frames)), []string{
 		fmt.Sprintf("13 Record row=%d c4=1", start1343+3),
+		"10 CapitalType1=113999",
+		`m1 1 "1303" 5000`,
+		"13 Repute row=0 c1=400",
+		`m1 1 "9693" "repute_jianghu" 250`,
+		"10 LiveGroove_2=5000", // 1343 奖励串 LiveGroove=2（官服 #5620 写 LiveGroove_2）
+		`m1 1 "8055" 5`,
 		fmt.Sprintf("13 Completed row=41 c0=%d", completedMask(pl, 41)),
 		"12 DEL Record row=0", "12 DEL Record row=0", "12 DEL Record row=0", "12 DEL Record row=0",
 		fmt.Sprintf("12 DEL Accepted row=%d", row1343),
@@ -772,13 +878,23 @@ func TestTaskSyncGuideChainToEnd(t *testing.T) {
 		fmt.Sprintf(`m209 2 %s 201001346 1346 "complete_1346" "submit_1346" 0 "" 9`, zhaoIdent),
 		"m8",
 	}, "1346 末步（剧情）")
-	// 提交确认：链尾（1346 无后继）。
+	// 提交确认：链尾（1346 无后继）。完成奖励带物品（官服 830.822s：入包帧 →
+	// m1 9645 逐件 → m1 8 清单 → 碎银 → 历练，全部在完成位图之前）。
 	row1346 := acceptedRow(1346)
 	*frames = nil
 	if !s.completeNPCTask(pl, 1346, npcTaskCompleteTail{closeTalk: true}) {
 		t.Fatal("1346 提交未受理")
 	}
-	assertLines(t, taskSyncLines(t, *frames), []string{
+	want := []string{
+		"19 view=@view:additem_0011@ idx=@slot:additem_0011@", "18 view=@view:additem_0011@ idx=@slot:additem_0011@",
+		`m1 1 "9645" "additem_0011" 1`,
+		"19 view=@view:box_cdjh_001@ idx=@slot:box_cdjh_001@", "18 view=@view:box_cdjh_001@ idx=@slot:box_cdjh_001@",
+		`m1 1 "9645" "box_cdjh_001" 1`,
+		`m1 8 "10012,additem_0011,1|10012,box_cdjh_001,1|"`,
+		"10 CapitalType1=146999", // 引导链各环完成奖励的碎银累计
+		`m1 1 "1303" 20000`,
+		"10 LiveGroove_5=32000", // 1340/1347/1345/1346 的历练累计（都记在 LiveGroove_5）
+		`m1 1 "8055" 10`,
 		fmt.Sprintf("13 Completed row=42 c0=%d", completedMask(pl, 42)),
 		"12 DEL Record row=0", "12 DEL Record row=0", "12 DEL Record row=0",
 		fmt.Sprintf("12 DEL Accepted row=%d", row1346),
@@ -786,7 +902,16 @@ func TestTaskSyncGuideChainToEnd(t *testing.T) {
 		`m1 1 "9631" "title_1346"`,
 		"m24 " + taskTestPlayer + ` 40 "task_complete"`,
 		"m8",
-	}, "1346 完成簇（链尾）")
+	}
+	for _, item := range pl.roleState.BagItems {
+		if item.ConfigID == "additem_0011" || item.ConfigID == "box_cdjh_001" {
+			for i := range want {
+				want[i] = strings.ReplaceAll(want[i], "@view:"+item.ConfigID+"@", strconv.Itoa(int(entergen.BagViewOf(item.ViewID))))
+				want[i] = strings.ReplaceAll(want[i], "@slot:"+item.ConfigID+"@", strconv.Itoa(item.Slot))
+			}
+		}
+	}
+	assertLines(t, taskSyncLines(t, *frames), want, "1346 完成簇（链尾）")
 	// 种子里的 1344 已接行随它真正交掉而离开已接表：其余种子行原样留下。
 	if len(pl.roleState.TaskAccepted) != seedAccepted-1 || pl.taskAcceptedContains(1344) || len(pl.roleState.TaskTracks) != 0 {
 		t.Fatalf("引导链走完后已接表应只剩种子行（去掉已交的 1344）、无进度行: %+v / %+v", pl.roleState.TaskAccepted, pl.roleState.TaskTracks)
@@ -908,5 +1033,62 @@ func TestTaskNormalizeTracksAndSceneRoots(t *testing.T) {
 	s.npcAcceptSceneGuideRoots(fresh)
 	if len(fresh.roleState.TaskAccepted) != 1 {
 		t.Fatalf("重复进场接取应幂等: %+v", fresh.roleState.TaskAccepted)
+	}
+}
+
+// TestTaskRewardPersistedInEnterCluster 任务奖励落进角色态后，重登簇整推
+// 声望记录行与历练属性（重登不丢）。
+func TestTaskRewardPersistedInEnterCluster(t *testing.T) {
+	s := newNpcTestServer(t)
+	catalog := s.npcTaskCatalogOf()
+	if catalog == nil {
+		t.Fatal("任务目录缺席")
+	}
+	pl := newTaskTestPlayer(t, 38)
+	blankTasks(pl)
+	taskTestNoTimers(t)
+	money := pl.roleState.Money
+	s.acceptNPCTask(pl, 1340, "进场")
+	s.npcTaskLocked(pl, func() {
+		s.npcTaskStepDone(pl, 1340, npcTaskDialogTail(entergen.Identity{}, catalogTask(catalog, 1340), 0))
+	})
+	if len(pl.roleState.Reputes) != 1 || pl.roleState.Reputes[0].Name != "repute_jianghu" || pl.roleState.Reputes[0].Count != 10 {
+		t.Fatalf("1340 完成后声望记录 = %+v", pl.roleState.Reputes)
+	}
+	if pl.roleState.LiveGrooves[5] != 5000 || pl.roleState.Money != money+1000 {
+		t.Fatalf("1340 完成后历练/碎银 = %v / %d", pl.roleState.LiveGrooves, pl.roleState.Money)
+	}
+	ctx := s.enterContext(pl, false)
+	rows, err := entergen.MountSequenceFrames(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	repute := `11 Repute row=0 "repute_jianghu" 10 1`
+	found := false
+	for _, line := range taskSyncLines(t, rows) {
+		if line == repute {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("重登簇缺声望记录行 %q", repute)
+	}
+	vital, err := entergen.PlayerVitalBatchFrame(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	appearance, err := entergen.AppearanceFrame(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 属性批按 [下标 u16][值] 排布：找 LiveGroove_5（下标 810）的 int32 值。
+	live := 0
+	for _, f := range [][]byte{vital, appearance} {
+		if bytes.Contains(f, []byte{0x2a, 0x03, 0x88, 0x13, 0x00, 0x00}) {
+			live++
+		}
+	}
+	if live != 2 {
+		t.Fatalf("人物数据批/化身帧里带 LiveGroove_5=5000 的帧数 = %d, want 2", live)
 	}
 }

@@ -236,16 +236,24 @@ func (s *Server) handleShopBuy(pl *Player, message entergen.CustomInbound) {
 		shopID, listing.ConfigID, count, listing.Price, pl.roleState.Money, pl.Conn1)
 }
 
-// grantShopItemUnits 发放 total 件：同 configID 同分类页的未满行先叠堆
+// grantShopItemUnits 商店购货入包（行变化即时推送）。
+func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bool {
+	return s.grantItemUnits(pl, configID, int(total), "npc shop buy", func(item rolestate.BagItem, id string) {
+		s.pushBagRow(pl, item, id)
+	})
+}
+
+// grantItemUnits 发放 total 件：同 configID 同分类页的未满行先叠堆
 // （上限 = 模板行 MaxAmount；目录缺席/未标不设限），满了开新行——不可堆叠
 // 物（MaxAmount=1）逐件成行；新行查物品目录取 ItemType 真值、页标与
 // MaxAmount 入档。先做容量预检：放不下整单则一件不发、返回 false（调用方
-// 据此不扣款——避免「部分入包不收费」）。
-func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bool {
+// 据此不扣款——避免「部分入包不收费」）。每条变化的背包行交给 sink（what
+// 是日志前缀）：购销链即时推送，任务奖励链先攒帧、按官服帧序下发。
+func (s *Server) grantItemUnits(pl *Player, configID string, total int, what string, sink func(rolestate.BagItem, string)) bool {
 	st := &pl.roleState
 	entry, ok := s.itemCatalogOf().Lookup(configID)
 	if !ok {
-		s.trace("npc shop buy: 物品 %s 无目录条目拒发", configID)
+		s.trace("%s: 物品 %s 无目录条目拒发", what, configID)
 		return false
 	}
 	// 预检：现有行还能叠多少、余量要开几个新行。
@@ -273,8 +281,8 @@ func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bo
 		}
 	}
 	if free := st.FreeBagSlots(entry.ViewID); free < newRows {
-		s.trace("npc shop buy: %s x%d 分类页 %d 空位不足（需 %d 行，余 %d）",
-			configID, total, entry.ViewID, newRows, free)
+		s.trace("%s: %s x%d 分类页 %d 空位不足（需 %d 行，余 %d）",
+			what, configID, total, entry.ViewID, newRows, free)
 		return false
 	}
 	// 落包：先补未满行，再开新行。
@@ -292,7 +300,7 @@ func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bo
 		row.MaxAmount = entry.MaxAmount
 		remaining -= take
 		if take > 0 {
-			s.pushBagRow(pl, *row, configID)
+			sink(*row, configID)
 		}
 	}
 	for remaining > 0 {
@@ -314,7 +322,7 @@ func (s *Server) grantShopItemUnits(pl *Player, configID string, total int32) bo
 		}
 		st.BagItems = append(st.BagItems, item)
 		remaining -= take
-		s.pushBagRow(pl, item, configID)
+		sink(item, configID)
 	}
 	return true
 }

@@ -61,6 +61,11 @@ type RoleState struct {
 	// Money 碎银（GM/经济测试位；对拍 2433 线 CapitalType1，0x10 属性
 	// 帧按名寻址下发）。官银/黄金（CapitalType0/2）留多币种扩展。
 	Money int64 `json:"money,omitempty"`
+	// LiveGrooves 历练累计（玩家属性 LiveGroove_1..5，下标 1..5；任务完成
+	// 奖励 prize_base 的 LiveGroove/LiveGrooveCount 累加进来）。0＝无。
+	LiveGrooves [6]int32 `json:"liveGrooves"`
+	// Reputes 声望记录（Repute_Record 行：名称、数值；任务完成奖励累加）。
+	Reputes []Repute `json:"reputes,omitempty"`
 
 	// ---- 自定义配置域（fork 客户端本地不落盘，登录全靠服务端回推；
 	// 参考端 cmd/protocol-probe custom_config.go/shortcut_records.go 同源
@@ -133,6 +138,12 @@ type Letter struct {
 	Appendix  string `json:"appendix,omitempty"`
 	DateUnix  int64  `json:"dateUnix"`
 	Read      bool   `json:"read,omitempty"`
+}
+
+// Repute 一条声望记录（Repute_Record 行：名称、数值）。
+type Repute struct {
+	Name  string `json:"name"`
+	Count int32  `json:"count"`
 }
 
 // BagItem 背包行（2433 线 bagRow 精简口径）：ViewID 分类页 1 道具/2 装备/

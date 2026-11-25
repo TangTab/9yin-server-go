@@ -71,8 +71,7 @@ func (s *Server) applyDamage(attacker, defender script.Handle, result script.Hit
 			if hitSpecOf(src.skill).deathMark {
 				sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(13))
 			}
-			s.after(corpseKeep, func() { s.npcCorpseRemove(f) })
-			s.after(corpseKeep+npcRespawnDelay, func() { s.npcRespawn(f) })
+			s.afterNpcDeath(f)
 		}
 		sink.flush()
 		if !killed && attackerPlayer != nil {

@@ -86,6 +86,9 @@ type Player struct {
 	// taskMarks 已下发的 NPC 任务标记（taskrecord.go；objectID → state，
 	// npcMu 保护）：只发与上次不同的 NPC；换场景时清空。
 	taskMarks map[uint32]uint32
+	// taskMovie 在途的任务影像（taskmovie.go；taskMu 保护）：nil＝没有影像。
+	// 影像是一场客户端剧情副本，期间位移上报不收编、自动步不推进。
+	taskMovie *taskMovieState
 	// sceneSwitch 切图在途态（sceneswitch.go；nil=不在切换）：0x0C 已发
 	// 到目标场景 0x09 就绪屏障之间，位移上报全丢弃（旧场景过期 0x0A）。
 	sceneSwitchMu sync.Mutex

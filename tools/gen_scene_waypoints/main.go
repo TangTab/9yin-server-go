@@ -7,7 +7,9 @@
 //	share\rule\homepoint.ini      驿站表 [HomePoint<resource><字母>]
 //	share\relive\sencerelive.ini  各场景复活点行（同址驿站，带朝向）
 //	share\relive\relive_info.ini  默认 / 门派复活点行
-//	text\chineses\*.idres         文案（scene_<resource>=场景名、ui_<驿站名>）
+//	text\chineses\*.idres         文案（scene_<resource>=场景名、ui_<驿站名>；
+//	                               stringname.idres 另有按场景配置目录登记的
+//	                               ini\scene\<目录名>=场景名）
 //
 // 源（服务端数据根，资源仓）：
 //
@@ -59,6 +61,10 @@ const (
 	kindHome = "home" // 驿站 / 复活点（客户端表）
 	kindDoor = "door" // 传送门路线目标
 	kindNPC  = "npc"  // 摆放档功能 NPC 旁
+
+	// configKeyPrefix 场景配置目录键前缀（stringname.idres：
+	// ini\scene\<目录名>=场景名；键不分大小写）。
+	configKeyPrefix = "ini" + `\` + "scene" + `\`
 
 	// npcLandingOffset NPC 落点 X 偏移（米）——落在 NPC 正中与模型重叠。
 	npcLandingOffset = 2.0
@@ -306,7 +312,7 @@ func generate(client, data string, doorsXML []byte) (*docXML, []string, error) {
 			notes = append(notes, "警告: "+note)
 		}
 		category := worldSceneRe.FindStringSubmatch(r)[1]
-		scene := sceneXML{Resource: r, Config: config, Name: names["scene_"+r], Category: category}
+		scene := sceneXML{Resource: r, Config: config, Name: sceneName(r, config, names), Category: category}
 		built := buildWaypoints(homesBy[r], revivesBy[r], names)
 		if len(built) == 0 {
 			built = fallbackWaypoints(r, doorTarget[r], dir, data)
@@ -760,8 +766,18 @@ func serverSceneDirs(data string) ([]string, error) {
 	return dirs, nil
 }
 
-// loadNames 文案表（text\chineses\*.idres，UTF-8 BOM，个别 GBK）：scene_* 与
-// ui_* 键（键小写、首见优先）。
+// sceneName 场景中文名：scene_<resource> 键；缺席时取 stringname.idres 按
+// 场景配置目录登记的 ini\scene\<目录名> 键（school21_shenjiying=神机营、
+// scene36=星垂城——这两个场景只有后一种键）。都没有 = 空。
+func sceneName(resource, config string, names map[string]string) string {
+	if name := names["scene_"+resource]; name != "" {
+		return name
+	}
+	return names[configKeyPrefix+strings.ToLower(lastSegment(config))]
+}
+
+// loadNames 文案表（text\chineses\*.idres，UTF-8 BOM，个别 GBK）：scene_* /
+// ui_* / ini\scene\* 键（键小写、首见优先）。
 func loadNames(dir string) (map[string]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -790,7 +806,7 @@ func loadNames(dir string) (map[string]string, error) {
 				continue
 			}
 			key := strings.ToLower(strings.TrimSpace(line[:i]))
-			if !strings.HasPrefix(key, "scene_") && !strings.HasPrefix(key, "ui_") {
+			if !strings.HasPrefix(key, "scene_") && !strings.HasPrefix(key, "ui_") && !strings.HasPrefix(key, configKeyPrefix) {
 				continue
 			}
 			if _, dup := names[key]; !dup {

@@ -34,7 +34,9 @@ func TestTableAnchors(t *testing.T) {
 		},
 		// 此前 GM 列表完全没有的场景。
 		"school24": {config: `ini\scene\school24_kunlun`, name: "昆仑派"},
+		"school21": {config: `ini\scene\school21_shenjiying`, name: "神机营"},
 		"scene11":  {config: `ini\scene\scene11_kuaihuodao`, name: "快活岛"},
+		"scene36":  {config: `ini\scene\scene36`, name: "星垂城"},
 		"scene38":  {config: `ini\scene\scene38`, name: "金乌岛"},
 	}
 	for resource, w := range want {
@@ -71,14 +73,26 @@ func TestFind(t *testing.T) {
 	if sc, ok := FindByName("移花宫"); !ok || sc.Resource != "school09" {
 		t.Fatalf("FindByName 移花宫 = %+v ok=%v", sc, ok)
 	}
-	// 重名不收录：凌霄城（scene06 / scene25）、念萝坝（school15 / scene05）。
-	for _, name := range []string{"凌霄城", "念萝坝"} {
+	// 重名不收录：凌霄城（scene06 / scene25）、念萝坝（school15 / scene05）、
+	// 星垂城（scene35 / scene36）。
+	for _, name := range []string{"凌霄城", "念萝坝", "星垂城"} {
 		if _, ok := FindByName(name); ok {
 			t.Errorf("FindByName(%q) must be ambiguous", name)
 		}
 	}
 	if _, ok := FindByName("不存在场景"); ok {
 		t.Fatal("unknown name must not resolve")
+	}
+}
+
+// TestAllScenesNamed 全表有中文名守卫：面板下拉 / `gm scene` 清单不回退资源名。
+// 新场景无名 = 生成器没在文案表找到键（资源键 scene_<resource> 或场景配置
+// 目录键 ini\scene\<目录名>）——重跑 gen_scene_waypoints 看它的告警。
+func TestAllScenesNamed(t *testing.T) {
+	for _, sc := range Scenes() {
+		if sc.Name == "" {
+			t.Errorf("%s has no Chinese name（面板显示回退资源名）", sc.Resource)
+		}
 	}
 }
 

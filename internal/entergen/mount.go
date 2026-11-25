@@ -38,7 +38,22 @@ var rowGenerators = map[string]mountRowGenerator{
 	"Task_Completed": taskCompletedRows,
 	"Task_Accepted":  taskAcceptedRows,
 	"Task_Record":    taskRecordRows,
+	"Repute_Record":  reputeRows,
 	"QingGongRec":    qingGongRows,
+}
+
+// reputeRows Repute_Record 声望行：角色态的声望记录逐行显式行号加（行序
+// 即累加序，与运行期 AddRepute 返回的行下标一致）。
+func reputeRows(ctx Context, recordIndex uint16) ([][]byte, error) {
+	frames := make([][]byte, 0, len(ctx.State.Reputes))
+	for i, repute := range ctx.State.Reputes {
+		frame, err := TaskReputeRowFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, uint16(i), repute.Name, repute.Count)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+	}
+	return frames, nil
 }
 
 // MountSequenceFrames 按官方顺序生成挂载计划的行推族。

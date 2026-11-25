@@ -28,6 +28,14 @@ type Spawn struct {
 	Template   map[string]string // NpcConfig 模板行（非 nil）
 	Combat     *CombatRow        // 战斗行（FightID 未命中为 nil）
 	Schedule   *Schedule         // 巡逻时间表（BindPatrol 绑定；nil=站立）
+
+	// 以下两项只对运行时生成的对象有意义（runtime.go SpawnFromTemplate）；
+	// 摆放表里的静态 NPC 保持零值。
+	// MaxHP 自定义血量上限（>0 生效）：战斗体血量与物化帧的 MaxHP/HP 同取
+	// 此值；0 = 战斗行 MaxLife，帧不带——客户端按本地表。
+	MaxHP int32
+	// Once 一次性对象：死亡后尸体消失即注销，不重生。
+	Once bool
 }
 
 // Stats 目录装载统计（诊断/测试面）。

@@ -290,7 +290,8 @@ func (s *Server) skillTargets(pl *Player, def skilldata.Definition, cast skillCa
 	}
 	origin := pl.roleState.Position
 	var out []*npcFighter
-	for _, spawn := range s.sceneNPCCatalog(scene).spawns {
+	// 摆放表 + 本人生成的运行时对象（GM 训练木桩）一并索敌（gmdummy.go）。
+	for _, spawn := range s.skillTargetSpawns(pl, scene) {
 		if !attackable(spawn) {
 			continue
 		}
@@ -468,8 +469,7 @@ func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hur
 		if spec.deathMark {
 			sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(13))
 		}
-		s.after(corpseKeep, func() { s.npcCorpseRemove(f) })
-		s.after(corpseKeep+npcRespawnDelay, func() { s.npcRespawn(f) })
+		s.afterNpcDeath(f)
 	}
 	if hook := s.combatLua().vm.Function(def.LuaScript, "skill_after_hit"); hook != nil {
 		hook.Call(script.Ref(playerHandle(pl)),

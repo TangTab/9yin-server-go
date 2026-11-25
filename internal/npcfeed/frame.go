@@ -337,6 +337,13 @@ func (s Spawn) Frame0x28() []byte {
 	if _, ok := clientdata.SceneProperty("NpcNickName"); ok {
 		putSceneWStr("NpcNickName", "") // 头顶昵称行（空=只显名字）
 	}
+	// 运行时生成对象的追加段（SpawnFromTemplate）：自定义血量——客户端本地
+	// 表对不上这个值，不带则血条口径错。NINEYIN_RUNTIME_EXTRAS=off 关停
+	//（真机 A/B）。
+	if s.MaxHP > 0 && extrasEnabled() {
+		putInt("MaxHP", s.MaxHP)
+		putInt("HP", s.MaxHP)
+	}
 	binary.LittleEndian.PutUint16(body[countAt:], uint16(count))
 
 	frame := make([]byte, 0, len(body)+10)

@@ -23,7 +23,8 @@ function registerComponents() {
 }
 
 /* ---- 面板注册表（懒加载；children = 二级目录，分组语义对齐 2433
-   gm-panel 的 panels/registry.js GROUPS） ---- */
+   gm-panel 的 panels/registry.js GROUPS）。children 与子页自己那份清单
+   （panels/test.js 的 SUBS）是两份手写表，须同项同序——nav_test.go 守卫 ---- */
 
 const SECTIONS = [
   { id: "overview", title: "总览", load: () => import("./panels/overview.js") },
@@ -37,7 +38,9 @@ const SECTIONS = [
     children: [
       { id: "role", title: "角色状态" },
       { id: "item", title: "货币与物品" },
+      { id: "mail", title: "邮件" },
       { id: "skill", title: "武学与修炼" },
+      { id: "dummy", title: "训练木桩" },
       { id: "scene", title: "传送与场景" },
       { id: "debug", title: "调试工具" },
       { id: "archive", title: "存档管理" },

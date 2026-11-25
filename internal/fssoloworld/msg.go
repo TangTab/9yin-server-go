@@ -158,7 +158,7 @@ func (s *Server) entryClientIllegal(id1 uint32, p []byte) bool {
 	clientID := binary.LittleEndian.Uint32(p[0:])
 	serial := binary.LittleEndian.Uint32(p[4:])
 	if pl := s.players.FindByConnect(clientID, serial); pl != nil {
-		s.players.RemovePlayer(clientID, serial)
+		s.playerLeave(pl)
 	}
 	return true
 }

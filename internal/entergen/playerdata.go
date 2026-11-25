@@ -170,12 +170,13 @@ func PlayerVitalBatchFrame(ctx Context) ([]byte, error) {
 		ap("TotalFillValue", Int32Value(int32(book.Total))),
 		ap("CurLevel", Int32Value(int32(book.Level))),
 		ap("FillSpeed", Int32Value(0)),
-		// 历练层 5 条 + 转化加成 + 潜能存量（建号全零）。
-		ap("LiveGroove_1", Int32Value(0)),
-		ap("LiveGroove_2", Int32Value(0)),
-		ap("LiveGroove_3", Int32Value(0)),
-		ap("LiveGroove_4", Int32Value(0)),
-		ap("LiveGroove_5", Int32Value(0)),
+		// 历练层 5 条（角色态累计，任务完成奖励累加；建号全零）+ 转化加成
+		// + 潜能存量。
+		ap("LiveGroove_1", Int32Value(state.LiveGrooves[1])),
+		ap("LiveGroove_2", Int32Value(state.LiveGrooves[2])),
+		ap("LiveGroove_3", Int32Value(state.LiveGrooves[3])),
+		ap("LiveGroove_4", Int32Value(state.LiveGrooves[4])),
+		ap("LiveGroove_5", Int32Value(state.LiveGrooves[5])),
 		ap("LiveSpeedPower", Int32Value(0)),
 		ap("HoldFaculty", Int32Value(0)),
 		// 团练疲劳层。

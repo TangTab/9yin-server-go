@@ -137,6 +137,10 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		s.handleDashLanding(pl, message)
 	case clientCustomTaskMsg:
 		s.handleTaskMsg(pl, message)
+	case clientCustomBeforeEndMovie, clientCustomEndMovie, clientCustomAgreeMovie:
+		// 影像消息（m805 将结束/m806 结束/m807 同意播放）：接取影像是一场
+		// 客户端剧情副本，m806 结束上报触发收尾簇（taskmovie.go）。
+		s.handleMovieMsg(pl, message, id)
 	case clientCustomPostRead:
 		s.handleReadLetter(pl, message)
 	case clientCustomPostGetAppendix:

@@ -208,6 +208,12 @@ func attackable(spawn npcfeed.Spawn) bool {
 	return combatClass(spawn.Script) && strings.TrimSpace(spawn.Template["CantBeAttack"]) != "1"
 }
 
+// passive 不还手的 NPC（模板 CantAttack=1）：被击不进战斗 AI，脱战也不
+// 归位回血（训练木桩）。
+func passive(spawn npcfeed.Spawn) bool {
+	return strings.TrimSpace(spawn.Template["CantAttack"]) == "1"
+}
+
 // fighterFor 取/建场景 NPC 的战斗体（同场景共享；scene = 摆放目录名）。
 func (s *Server) fighterFor(scene string, spawn npcfeed.Spawn) *npcFighter {
 	catalog := s.sceneNPCCatalog(scene)
@@ -235,8 +241,12 @@ func (s *Server) fighterFor(scene string, spawn npcfeed.Spawn) *npcFighter {
 	return f
 }
 
-// npcCombatMaxHP 战斗行 MaxLife（模板层兜底 1）。
+// npcCombatMaxHP 血量上限：运行时生成对象的自定义血量（Spawn.MaxHP）>
+// 战斗行 MaxLife > 模板层兜底 1。
 func npcCombatMaxHP(spawn npcfeed.Spawn) float64 {
+	if spawn.MaxHP > 0 {
+		return float64(spawn.MaxHP)
+	}
 	if spawn.Combat != nil {
 		if life := spawn.Combat.Int("MaxLife"); life > 0 {
 			return float64(life)

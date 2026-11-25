@@ -48,6 +48,10 @@ type Step struct {
 	TrackInfo string // 目标文案键（hunterinfo_…／interactinfo_…／storyinfo_…）
 	OkMenu    string // 交互步确认行文案键（InteractiveList.OkMenu，okmenu_<步骤号>）
 	HasLink   bool   // 带超链接串 "<任务号>_<子类型>_<Key>"（无则空串）
+	// 步骤奖励／扣除（InteractiveList.GetItems / LostItems；"物品-数量|…"
+	// 或 "物品;物品"，见 ParseItemSpec）。交互步记满时发放。
+	GetItems  string
+	LostItems string
 }
 
 // Task 是目录里的一个任务（任务主表行）。

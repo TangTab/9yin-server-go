@@ -146,6 +146,7 @@ func buildStep(typ, typeID string, row, story map[string]string) (Step, bool) {
 		if npc.OkMenu == "" {
 			npc.OkMenu = "okmenu_" + typeID
 		}
+		npc.GetItems, npc.LostItems = cell("GetItems"), cell("LostItems")
 		return npc, true
 	case "question":
 		if row == nil {

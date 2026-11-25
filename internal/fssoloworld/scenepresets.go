@@ -13,18 +13,18 @@ import (
 )
 
 // sceneAliases 中文别名 → resource 短名。别名先行于场景表：显式别名可消歧
-// （凌霄城 = scene06；场景表里 scene25 同名）。向阳坡 / 念萝坝的旧写法
-//（襄阳坡 / 捻罗坝）保留兼容。
+// （凌霄城 = scene06、星垂城 = scene35——场景表里 scene25 / scene36 各有同名
+// 场景）。向阳坡 / 念萝坝的旧写法（襄阳坡 / 捻罗坝）保留兼容。
 var sceneAliases = map[string]string{
 	"燕京": "city01", "苏州": "city02", "金陵": "city03", "洛阳": "city04", "成都": "city05",
 	"鸡鸣驿": "born01", "烟雨庄": "born03", "千灯镇": "born04", "恶人谷": "born02",
 	"新手引导": "born_single_01",
-	"锦衣卫": "school01", "丐帮": "school02", "君子堂": "school03", "极乐谷": "school04",
+	"锦衣卫":  "school01", "丐帮": "school02", "君子堂": "school03", "极乐谷": "school04",
 	"唐门": "school05", "峨眉": "school06", "武当": "school07", "少林": "school08",
 	"移花宫":   "school09",
 	"幽云十六州": "scene01", "蓬莱仙境": "scene02", "泛黄平原": "scene03", "襄阳坡": "scene04", "向阳坡": "scene04",
 	"捻罗坝": "scene05", "凌霄城": "scene06", "梅花岭": "scene07", "塞外大漠": "scene08",
-	"塞北草原": "scene09",
+	"塞北草原": "scene09", "星垂城": "scene35",
 }
 
 // sceneDestination 切换目的地（config 全路径 + resource 短名 + 落点）。
@@ -48,7 +48,7 @@ var extraSceneDestinations = map[string]sceneDestination{
 	"born_single_01": {
 		Config:   `ini\scene\born_single_01`,
 		Resource: "born_single_01",
-		Position: [4]float64{192.5, 5.598, -113.0, -1.491},
+		Position: [4]float64{197.626, 4.746, -108.829, -2.746},
 	},
 }
 
@@ -124,6 +124,6 @@ func scenePresetKeys() string {
 		}
 		b.WriteString("\n")
 	}
-	b.WriteString("aliases: 上述场景的唯一中文名或 resource 短名；重名（凌霄城/念萝坝）用短名；或 config|resource 直填")
+	b.WriteString("aliases: 上述场景的唯一中文名或 resource 短名；重名（凌霄城/念萝坝/星垂城）用短名；或 config|resource 直填")
 	return b.String()
 }

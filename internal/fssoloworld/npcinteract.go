@@ -409,7 +409,8 @@ func (s *Server) clearNPCMenu(pl *Player) {
 	}
 }
 
-// findNPCSpawn 场景目录内按 objectID 查（点击频度低，线性可接受）。
+// findNPCSpawn 场景目录内按 objectID 查（点击频度低，线性可接受）；摆放
+// 表没有再查运行时对象登记表（GM 训练木桩，gmdummy.go）。
 func (s *Server) findNPCSpawn(scene string, objectID uint32) (npcfeed.Spawn, bool) {
 	if scene == "" {
 		return npcfeed.Spawn{}, false
@@ -419,7 +420,7 @@ func (s *Server) findNPCSpawn(scene string, objectID uint32) (npcfeed.Spawn, boo
 			return spawn, true
 		}
 	}
-	return npcfeed.Spawn{}, false
+	return s.dynamic.spawnOf(scene, objectID)
 }
 
 // npcCinematicTalkMenu talk 数据帧族（npc.pcapng #2377-2382 + 女号官服

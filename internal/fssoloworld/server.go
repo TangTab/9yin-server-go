@@ -88,6 +88,10 @@ type Server struct {
 	fighters   map[uint64]*npcFighter // NPC 战斗体（按句柄）
 	aux        map[uint64]*auxObject  // 技能/buff 辅助对象
 	nextHandle uint64
+
+	// dynamic 运行时生成的场景对象登记表（GM 训练木桩；gmdummy.go）。零值
+	// 可用，不经 New 装配。
+	dynamic dynamicRegistry
 }
 
 // New 创建 Server（ctor 缺省对齐 DefaultConfig）。
@@ -544,6 +548,7 @@ func (s *Server) clearSceneBatch() {
 
 // playerLeave 官方离线链（Offline 态清理语义）。
 func (s *Server) playerLeave(p *Player) {
+	s.releasePlayerDummies(p)
 	s.players.RemovePlayer(p.Conn1, p.Conn2)
 }
 

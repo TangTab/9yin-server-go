@@ -184,7 +184,7 @@
     <Waypoint name="HomePointschool20A" title="明教百草堂" x="-140.371" y="93.089" z="162.732" orient="3.18" kind="home" safe="true" source="school20_01"></Waypoint>
     <Waypoint name="HomePointschool20B" title="乱石原百草堂" x="237.095" y="29.438" z="-289.862" orient="0.13" kind="home" source="school20_02"></Waypoint>
   </Scene>
-  <Scene resource="school21" config="ini\scene\school21_shenjiying" category="school" landing="HomePointschool21A">
+  <Scene resource="school21" config="ini\scene\school21_shenjiying" name="神机营" category="school" landing="HomePointschool21A">
     <Waypoint name="HomePointschool21A" title="神机营百草堂" x="-45.4" y="18.6" z="-46.9" orient="0.1" kind="home" safe="true" source="school21_01"></Waypoint>
     <Waypoint name="HomePointschool21B" title="左路军营百草堂" x="150.799" y="15.852" z="222.334" orient="2.51" kind="home" source="school21_02"></Waypoint>
     <Waypoint name="HomePointschool21C" title="落锤之地百草堂" x="67.42" y="16.571" z="-417.349" orient="0" kind="home" source="school21_03"></Waypoint>
@@ -346,7 +346,7 @@
   <Scene resource="scene35" config="ini\scene\scene35" name="星垂城" category="scene" landing="npc:newworld_xcc_031">
     <Waypoint name="npc:newworld_xcc_031" title="倭寇1" x="-374.052" y="201.81" z="226.712" orient="0" kind="npc" source="commonnpc.xml"></Waypoint>
   </Scene>
-  <Scene resource="scene36" config="ini\scene\scene36" category="scene" landing="npc:Event_2021byzyb_006">
+  <Scene resource="scene36" config="ini\scene\scene36" name="星垂城" category="scene" landing="npc:Event_2021byzyb_006">
     <Waypoint name="npc:Event_2021byzyb_006" title="前往星垂城" x="-624.542" y="108.521" z="252.962" orient="0" kind="npc" source="funcnpc.xml"></Waypoint>
   </Scene>
   <Scene resource="scene38" config="ini\scene\scene38" name="金乌岛" category="scene" landing="npc:Relive_Fhjiangyou">

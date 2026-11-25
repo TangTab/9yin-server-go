@@ -73,8 +73,8 @@ var (
 		}
 		return out
 	}()
-	// byName 中文名 → 场景；重名（凌霄城 ×2、念萝坝 ×2）不收录——按名
-	// 解析有歧义，须用 resource 短名。
+	// byName 中文名 → 场景；重名（凌霄城 ×2、念萝坝 ×2、星垂城 ×2）不收录——
+	// 按名解析有歧义，须用 resource 短名。
 	byName = func() map[string]Scene {
 		out, dup := map[string]Scene{}, map[string]bool{}
 		for _, sc := range scenes {

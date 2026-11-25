@@ -1,5 +1,6 @@
 // api.js —— 面板全部网络访问的唯一出口。本地面板（127.0.0.1）免鉴权；
-// GET 走 no-store，POST 返回 {ok, message} 语义（失败也绝不抛异常到 UI 层）。
+// GET 走 no-store，POST 返回 {ok, message} 语义（失败也绝不抛异常到 UI 层；
+// 应答体自带的 lines 原样透传——/api/gm/raw 回 {lines}，测试台逐行显示）。
 
 async function getJSON(url) {
   const response = await fetch(url, { cache: "no-store", headers: { Accept: "application/json" } });
@@ -20,7 +21,7 @@ async function postJSON(url, payload = {}) {
   if (!response.ok) {
     return { ok: false, message: body.error || "操作失败（" + response.status + "）" };
   }
-  return { ok: true, message: (body.messages || [body.message]).filter(Boolean).join("；") };
+  return { ok: true, message: (body.messages || [body.message]).filter(Boolean).join("；"), lines: body.lines };
 }
 
 export const overview = () => getJSON("/api/overview");

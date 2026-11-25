@@ -75,9 +75,12 @@ func TestResolveNewSceneSamples(t *testing.T) {
 		{"SCHOOL10", "school10", `ini\scene\school10_taohuadao`},
 		{"快活岛", "scene11", `ini\scene\scene11_kuaihuodao`},
 		{"scene38", "scene38", `ini\scene\scene38`},
-		{"向阳坡", "scene04", `ini\scene\scene04_XiangYangPo`},   // 官方写法
-		{"襄阳坡", "scene04", `ini\scene\scene04_XiangYangPo`},   // 旧写法兼容
-		{"凌霄城", "scene06", `ini\scene\scene06_LingXiaoCheng`}, // 重名：别名定 scene06 非 scene25
+		{"向阳坡", "scene04", `ini\scene\scene04_XiangYangPo`},       // 官方写法
+		{"襄阳坡", "scene04", `ini\scene\scene04_XiangYangPo`},       // 旧写法兼容
+		{"凌霄城", "scene06", `ini\scene\scene06_LingXiaoCheng`},     // 重名：别名定 scene06 非 scene25
+		{"school21", "school21", `ini\scene\school21_shenjiying`}, // 场景名只在文案表的场景配置目录键
+		{"scene36", "scene36", `ini\scene\scene36`},
+		{"星垂城", "scene35", `ini\scene\scene35`}, // 重名：别名定 scene35 非 scene36
 	}
 	for _, c := range cases {
 		dest, ok := resolveSceneDestination(c.key)

@@ -12,6 +12,7 @@ const SUBS = [
   { id: "item", title: "货币与物品", desc: "碎银 CapitalType1（2433 线同名对拍）" },
   { id: "mail", title: "邮件", desc: "GM 系统邮件（文本+物品附件，RecvLetterRec 319 行）" },
   { id: "skill", title: "武学与修炼", desc: "重发武学 View40 / 内功 View43 / 轻功 View46" },
+  { id: "dummy", title: "训练木桩", desc: "面前生成不还手的木桩（新手村官方练习木桩，血量自定义）" },
   { id: "scene", title: "传送与场景", desc: "场景内瞬移（0x1F）+ 跨场景切换（0x0C→0x0B→0x0D→0x09）" },
   { id: "debug", title: "调试工具", desc: "mXXX 自定义帧探针 + ReadyFrames 重放" },
   { id: "archive", title: "存档管理", desc: "0x04 存档（role_state_json 落 nx_roles，重登 RST1 回灌）" },
@@ -77,6 +78,23 @@ const PROPS = [
   ["parry", "招架 Parry"],
 ];
 
+// 当前坐标读数（传送与场景子页）的四项：gm state 的 pos 字段 ↔ 标签。
+const POS_KEYS = [["x", "x"], ["y", "y"], ["z", "z"], ["orient", "朝向"]];
+
+/** gm state 应答行 → {scene, x, y, z, orient, degrees}（world gmcmd.go 的
+ *  `scene=<场景键> pos=x,y,z,orient` 行；orient 弧度，atan2(dx,dz) 口径，
+ *  degrees = 折到 [0,360) 的角度串）。无坐标行（目标不存在/world 报错）
+ *  回 null；未进场 = scene 空串。纯函数。 */
+export function parsePos(lines) {
+  for (const line of lines || []) {
+    const m = /(?:^|\s)scene=(\S*)\s+pos=(-?[\d.]+),(-?[\d.]+),(-?[\d.]+),(-?[\d.]+)(?:\s|$)/.exec(line);
+    if (!m) continue;
+    const degrees = ((((Number(m[5]) * 180) / Math.PI) % 360) + 360) % 360;
+    return { scene: m[1], x: m[2], y: m[3], z: m[4], orient: m[5], degrees: degrees.toFixed(1) };
+  }
+  return null;
+}
+
 // 应答历史（模块级：子页切换不丢，上限 200 条滚动清）
 const HISTORY_MAX = 200;
 let history = [];
@@ -90,6 +108,14 @@ function opBtn(label, theme, fn) {
 
 function field(placeholder, width) {
   return h("input", { type: "text", placeholder, style: "width:" + (width || 120) + "px" });
+}
+
+// 行内小按钮（坐标读数行用）：样式见 app.css .pos-line .inline-btn——
+// ax-btn 35px / 框架 button 34px 高，都会把那一行撑起来。
+function inlineBtn(label, fn) {
+  const btn = h("button", { type: "button", class: "inline-btn" }, [label]);
+  btn.addEventListener("click", fn);
+  return btn;
 }
 
 export function mount(view, sub) {
@@ -136,6 +162,44 @@ export function mount(view, sub) {
       ]));
     }
     if (!kv.length) stateBox.appendChild(h("div", { class: "panel-desc" }, ["（无状态数据——world 不可达或玩家未进场）"]));
+  }
+
+  /* ---- 当前坐标（传送与场景子页）：gm state 静默读取，不进应答历史。
+   * 选角色即读；瞬移/切图后与玩家名单轮询（5s）同步刷新。 ---- */
+
+  // 读数节点（subScene 装配；其它子页为 null）
+  let posUI = null;
+  let posSeq = 0; // 最新一次请求序：换目标后迟到的旧应答丢弃
+
+  // 有坐标 = 场景键 + 四项数值；否则收起数值，说明行给原因（未进场 /
+  // 目标不存在 / world 不可达）。
+  function renderPos(pos, lines) {
+    const ok = !!(pos && pos.scene);
+    posUI.items.style.display = ok ? "" : "none";
+    posUI.scene.textContent = ok ? pos.scene : "";
+    posUI.note.textContent = ok ? "" : pos ? "未进场" : (lines && lines[0]) || "（无应答）";
+    if (!ok) return;
+    for (const [key] of POS_KEYS) posUI.val[key].textContent = pos[key];
+    posUI.val.orient.textContent = pos.orient + " ≈ " + pos.degrees + "°"; // 弧度原值 + 角度换算
+  }
+
+  async function refreshPos() {
+    if (!posUI) return;
+    if (!who()) {
+      posSeq += 1;
+      renderPos(null, ["world 不可达或未选择目标"]);
+      return;
+    }
+    const seq = ++posSeq;
+    let result;
+    try {
+      result = await api.gmRaw("gm state " + who());
+    } catch (err) {
+      result = { lines: [String((err && err.message) || err)] };
+    }
+    if (seq !== posSeq) return; // 已换目标：旧应答丢弃
+    const lines = result.lines || [result.message]; // 接口失败：错误信息作说明行
+    renderPos(parsePos(lines), lines);
   }
 
   /* ---- 子页渲染 ---- */
@@ -207,14 +271,53 @@ export function mount(view, sub) {
     ]));
   }
 
+  function subDummy(box) {
+    const hp = field("血量（≥1）", 120);
+    hp.value = "100000";
+    const count = field("数量", 60);
+    count.value = "1";
+    box.appendChild(h("div", { class: "toolbar" }, [
+      hp, count,
+      opBtn("生成木桩", "info", async () => {
+        if (!who() || !hp.value) return;
+        await send("gm dummy " + who() + " " + hp.value + " " + (count.value || "1"));
+      }),
+      opBtn("100 万血木桩", "", () => who() && send("gm dummy " + who() + " 1000000")),
+      opBtn("清除全部木桩", "warning", () => who() && send("gm dummy " + who() + " clear")),
+    ]));
+    box.appendChild(h("div", { class: "panel-desc" }, [
+      "新手村官方练习木桩（funnpcborn003043）：不还手、不移动、脱战不回血，血量打空即死（尸体 5s 后消失，不重生）。",
+      "单只 = 面朝方向前 1.8 米（普攻射程内），多只环绕 3 米；每人场上上限 20 只，切场景 / 下线自动清除。",
+      "木桩只对生成它的玩家可见；命中、伤害、击杀帧与普通战斗 NPC 同一条链",
+      "（NINEYIN_COMBAT=off 时只物化、不掉血）。",
+    ]));
+  }
+
   function subScene(box) {
+    // 当前坐标读数：选中角色的 x/y/z/朝向（场景键随行），一行排开，先看位置再传送。
+    const posVal = {};
+    const posItems = POS_KEYS.map(([key, label]) => {
+      posVal[key] = h("span", { class: "pos-v" }, ["-"]);
+      return h("span", { class: "pos-item" }, [h("span", { class: "pos-k" }, [label]), posVal[key]]);
+    });
+    posUI = {
+      scene: h("span", { class: "pos-scene" }),
+      items: h("span", { class: "pos-items", style: "display:none" }, posItems), // 读到坐标才展开
+      note: h("span", { class: "pos-note" }),
+      val: posVal,
+    };
+    box.appendChild(h("div", { class: "toolbar pos-line" }, [
+      h("span", { class: "pos-k" }, ["当前坐标"]), posUI.scene, posUI.items, posUI.note,
+      inlineBtn("刷新坐标", refreshPos),
+    ]));
+
     const tx = field("x"), ty = field("y"), tz = field("z"), to = field("orient（默认1）", 120);
     box.appendChild(h("div", { class: "toolbar" }, [
       tx, ty, tz, to,
       opBtn("gm tp（0x1F 瞬移）", "warning", async () => {
         if (!who() || !tx.value || !ty.value || !tz.value) return;
         await send(["gm tp", who(), tx.value, ty.value, tz.value, to.value || "1"].join(" "));
-        refreshState();
+        refreshPos();
       }),
     ]));
     // 跨场景切换：场景下拉（接口数据，按类分组）+ 可选驿站（选中即以其坐标
@@ -264,7 +367,7 @@ export function mount(view, sub) {
           if (so.value !== "") parts.push(so.value);
         }
         await send(parts.join(" "));
-        refreshState();
+        refreshPos();
       }),
     ]));
     box.appendChild(h("div", { class: "panel-desc" }, [
@@ -317,7 +420,7 @@ export function mount(view, sub) {
   view.appendChild(body);
   view.appendChild(h("section", { class: "panel" }, [h("h2", {}, ["应答输出"]), out]));
 
-  ({ role: subRole, item: subItem, mail: subMail, skill: subSkill, scene: subScene, debug: subDebug, archive: subArchive }[sub])(body);
+  ({ role: subRole, item: subItem, mail: subMail, skill: subSkill, dummy: subDummy, scene: subScene, debug: subDebug, archive: subArchive }[sub])(body);
   if (sub === "role" || sub === "item" || sub === "archive") refreshState();
   renderOut();
 
@@ -335,7 +438,12 @@ export function mount(view, sub) {
       target.innerHTML = "";
       target.appendChild(h("option", {}, ["（world 不可达）"]));
     }
+    if (sub === "scene") refreshPos();
   }
+
+  target.addEventListener("change", () => {
+    if (sub === "scene") refreshPos();
+  });
 
   refreshPlayers();
   // 应答历史重建后滚底；玩家名单自轮询 5s

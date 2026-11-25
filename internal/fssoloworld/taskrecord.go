@@ -400,9 +400,11 @@ func (s *Server) npcTaskAccept(pl *Player, taskID int, how string) bool {
 }
 
 // npcTaskScheduleMovie 接取引导影像（主表 AcceptMovie）：官服在接取约半秒
-// 后先 m8 再 m104。到点时任务已不在进度中／玩家已离线则不发。
+// 后先 m8 再 m104。到点时任务已不在进度中／玩家已离线则不发；影像是一场
+// 客户端剧情副本，开始后的视口重发与结束收尾见 taskmovie.go。调用方持
+// taskMu。
 func (s *Server) npcTaskScheduleMovie(pl *Player, task taskdata.Task) {
-	if task.AcceptMovie <= 0 {
+	if task.AcceptMovie <= 0 || !npcTaskMovieEnabled() {
 		return
 	}
 	movie, taskID := task.AcceptMovie, uint32(task.ID)
@@ -411,15 +413,10 @@ func (s *Server) npcTaskScheduleMovie(pl *Player, task taskdata.Task) {
 			return
 		}
 		s.npcTaskLocked(pl, func() {
-			if pl.State != PlOnline || pl.roleState.TaskTrackOf(taskID) == nil {
+			if pl.State != PlOnline || pl.roleState.TaskTrackOf(taskID) == nil || pl.taskMovie != nil {
 				return
 			}
-			if closeTalk, err := entergen.TalkCloseFrame(); err == nil {
-				s.sendToClient(pl, closeTalk)
-			}
-			if frame, err := entergen.TaskAcceptMovieFrame(movie); err == nil {
-				s.sendToClient(pl, frame)
-			}
+			s.npcTaskStartMovie(pl, taskdata.Task{ID: int(taskID), AcceptMovie: movie})
 		})
 	})
 }
@@ -460,9 +457,15 @@ func (s *Server) npcTaskAdvanceStep(pl *Player, taskID uint32, tail npcTaskStepT
 	rowA, _ := npcTaskAcceptedRow(pl, taskID)
 	id := pl.entergenIdentity()
 	out := s.taskFrameSink(pl)
+	full := track.Cur[k] >= npcTaskStepMax(step)
+	if full {
+		// 一步记满：步骤奖励（InteractiveList GetItems/LostItems）在目标行
+		// 写入之前发放（官服 1347 步骤 558：入包帧 + m1 9645 → 0x13 curnum）。
+		s.npcTaskStepReward(pl, out, step)
+	}
 	out.add(entergen.TaskRecordGridFrame(id.ObjectID, id.OwnerID, start+uint16(k),
 		entergen.GridInt(entergen.RecordColCurNum, uint32(track.Cur[k]))))
-	if track.Cur[k] < npcTaskStepMax(step) {
+	if !full {
 		s.sendTaskFrames(pl, out)
 		return true
 	}
@@ -568,6 +571,9 @@ func (s *Server) npcTaskCompleteFrames(pl *Player, taskID uint32, tail npcTaskCo
 	}
 
 	out := s.taskFrameSink(pl)
+	// 完成奖励（Prize 域奖励串：物品、碎银、声望、历练）在完成位图之前发放
+	// （官服完成簇开头）。
+	s.npcTaskCompleteReward(pl, out, task)
 	out.addAll(entergen.TaskCompletedSetFrames(id.ObjectID, id.OwnerID, taskID, completedBefore))
 	out.extend(entergen.TaskRecordDeleteFrames(id.ObjectID, id.OwnerID, start, count))
 	out.add(entergen.TaskAcceptedDeleteFrame(id.ObjectID, id.OwnerID, rowA), nil)
@@ -686,6 +692,9 @@ func (s *Server) npcTaskAutoSteps(pl *Player, taskID uint32) {
 			return // 末步已记满、等玩家提交：没有可自动推进的步
 		}
 		immediate, scheduled := npcTaskAutoStepKind(task, step)
+		if (immediate || scheduled) && s.npcTaskMovieDefer(pl, taskID) {
+			return // 接取影像（剧情副本）在播：影像结束后接着推
+		}
 		if scheduled {
 			s.npcTaskScheduleStub(pl, taskID)
 			return
@@ -723,6 +732,10 @@ func (s *Server) npcTaskStubTick(pl *Player, taskID uint32) {
 			return
 		}
 		if _, scheduled := npcTaskAutoStepKind(task, step); !scheduled {
+			return
+		}
+		if pl.taskMovie != nil {
+			s.npcTaskScheduleStub(pl, taskID) // 影像在播：这一拍顺延（结束后由收尾接上）
 			return
 		}
 		s.trace("npc task: 占位推进 %d step=%d（%s）client=%d", taskID, step.Order, step.TrackInfo, pl.Conn1)
