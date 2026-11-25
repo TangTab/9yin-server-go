@@ -53,6 +53,8 @@ const (
 	useSkillResultOtherSkillHitting = 33 // 其他技能正在使用中
 	// useSkillStateStaged 暂存受理确认（m707[15]，抓包 206.558）。
 	useSkillStateStaged = 15
+	// useSkillResultDodged 目标闪避（抓包 226.276：锁定技被闪后的 m707[14]）。
+	useSkillResultDodged = 14
 )
 
 // 出招锁缺省时长（抓包实测：普攻 473ms 收招；其余技能取流程包
@@ -90,6 +92,12 @@ type combatState struct {
 	// normalSteps 技能 ID → 连招动作轮转下标（流程包 HitAction 列表；按
 	// 技能各自轮转——别的技能施放不推进普攻的连招序号）。
 	normalSteps map[string]int
+	// live 战斗生存态 + 当前技能的脚本对象句柄（combat.go）。
+	live        playerLive
+	skillObj    uint64
+	targetSkill uint64
+	// calmAt 已排的脱战检查时刻（零值 = 无；combatcore.go armCalmLocked）。
+	calmAt time.Time
 }
 
 // skillCast m211 解码结果。
@@ -502,6 +510,8 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	st.castSeq++
 	seq := st.castSeq
 
+	// m20 动作名 = 招式表查表键（连招段按技能各自轮转）。
+	action := skillAction(st, def)
 	orient := cast.orient
 	if cast.hasTarget {
 		orient = towardOrient(float64(cast.x), float64(cast.z), target.pos[0], target.pos[2])
@@ -518,14 +528,6 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		b.location(cast.x, cast.y, cast.z, orient)
 		b.custom(337, b.selfValue(), entergen.CustomFloat32(cast.x), entergen.CustomFloat32(cast.y),
 			entergen.CustomFloat32(cast.z), entergen.CustomFloat32(orient), entergen.CustomInt(0))
-		action := def.ID
-		if count := len(def.Flow.HitActions); count > 0 {
-			if st.normalSteps == nil {
-				st.normalSteps = map[string]int{}
-			}
-			action = def.Flow.HitActions[st.normalSteps[def.ID]%count]
-			st.normalSteps[def.ID]++
-		}
 		aim := entergen.CustomObject(0, 0)
 		if cast.hasTarget {
 			aim = targetValue(cast.targetKey())
@@ -535,8 +537,26 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	locked := st.locked
 	s.trace("skill %s accepted dist=%.2f mp=%d client=%d", def.ID, distance, st.mp, pl.Conn1)
 	return b.frames, func() {
-		time.AfterFunc(castLockMS(def), func() { s.finishCast(pl, seq, locked) })
+		// 命中计划在受理帧落地后登记（帧编码失败时不登记）；出招锁至少
+		// 撑到末击（抓包：CurSkillID 在末击帧之后才清）。
+		lastHit := s.scheduleSkillHits(pl, def, cast, action, 0)
+		s.scheduleFinish(pl, def, seq, locked, lastHit)
 	}
+}
+
+// combatAfterFunc 收招定时器的排定入口：线上恒为真实时钟；战斗夹具把它
+// 换到战斗时钟上，收招与命中同钟，用例不随真实时间与机器负载漂移。
+var combatAfterFunc = time.AfterFunc
+
+// scheduleFinish 排收招定时器：castLockMS 与「末击 + 余量」取长者。余量
+// 须盖过战斗泵的节拍抖动——命中由泵按 combatPumpStep 放行，可能晚于名义
+// 时刻；收招一旦抢到末击前面，此刻受理的新施放会顶掉序号，末击被丢。
+func (s *Server) scheduleFinish(pl *Player, def skilldata.Definition, seq int, locked bool, lastHit time.Duration) {
+	lock := castLockMS(def)
+	if lastHit+finishMargin > lock {
+		lock = lastHit + finishMargin
+	}
+	combatAfterFunc(lock, func() { s.finishCast(pl, seq, locked) })
 }
 
 // skillTarget CurSkillTarget 帧——仅当目标变化时发（抓包：值变才推）。
@@ -590,7 +610,7 @@ func skillLockMessageValues(ident wireIdent, def skilldata.Definition, cast skil
 func (s *Server) finishCast(pl *Player, seq int, locked bool) {
 	st := &pl.combat
 	st.mu.Lock()
-	if st.castSeq != seq || st.curSkill == "" {
+	if st.castSeq != seq {
 		st.mu.Unlock()
 		return
 	}
@@ -599,7 +619,11 @@ func (s *Server) finishCast(pl *Player, seq int, locked bool) {
 		b.prop("CantMove", entergen.ByteValue(0))
 		b.prop("CantParry", entergen.Int32Value(0))
 	}
-	b.prop("CurSkillID", entergen.StringValue(""))
+	// CurSkillID 可能已由命中引擎在末击/闪避时清掉（combat.go）：只清
+	// 尚未清的，出招锁位照常释放。
+	if st.curSkill != "" {
+		b.prop("CurSkillID", entergen.StringValue(""))
+	}
 	st.curSkill, st.locked = "", false
 	st.mu.Unlock()
 	s.sendFrames(pl, b.frames)
@@ -629,6 +653,10 @@ func (s *Server) combatTick() {
 		st.mu.Unlock()
 		if mp != before {
 			s.sendFrames(pl, mpFrame(pl.wireIdent(), mp))
+		}
+		// 招架耐力回复（combatcore.go；抓包 226.834 起每秒 +1 回到上限）。
+		if frames := s.parryRegen(pl); len(frames) > 0 {
+			s.sendFrames(pl, frames)
 		}
 	}
 }

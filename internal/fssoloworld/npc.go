@@ -85,6 +85,10 @@ type npcCatalog struct {
 	// owners obj → own（0x0E 移除帧取 own：官服形态 own 是独立序列号，
 	// 不可由 obj 反推）。
 	owners map[uint32]uint32
+	// combat 场景 NPC 战斗体（combat.go；按 objectID，首次进入战斗时懒建，
+	// 同场景全部玩家共享）。
+	combatMu sync.Mutex
+	combat   map[uint32]*npcFighter
 }
 
 // ownerOf 对象的 own（目录外对象回落固定段公式）。

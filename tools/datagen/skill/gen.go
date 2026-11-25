@@ -24,6 +24,15 @@ type columnReport struct {
 	Note string `json:"note,omitempty"`
 }
 
+// fixReport 审定修正报告条目。
+type fixReport struct {
+	ID     string `json:"id"`
+	Key    string `json:"key"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Reason string `json:"reason"`
+}
+
 // tableBuild 一张源表的转换结果。
 type tableBuild struct {
 	Spec            tableSpec
@@ -35,6 +44,7 @@ type tableBuild struct {
 	DuplicateKeys   int      // 节内重复键出现次数（输出为 _2/_3 序号）
 	DuplicateIDs    int      // 同一输出文件内重复的节名个数
 	Dropped         []columnReport
+	Fixed           []fixReport // 命中的审定修正（源表已自愈的也记，From == To）
 	Warnings        []string
 }
 
@@ -206,6 +216,12 @@ func convertTable(t *iniTable, spec tableSpec, vocab *vocabulary) *tableBuild {
 				name = fmt.Sprintf("%s_%d", attr, occurrence[attr])
 			}
 			rowVals[name] = section.Vals[i]
+		}
+		// 审定修正：按节名命中才改写（未命中不记，源表日后自愈时 From == To）。
+		if fix, ok := spec.Fixups[section.Name]; ok {
+			b.Fixed = append(b.Fixed, fixReport{ID: section.Name, Key: fix.Key,
+				From: rowVals[fix.Key], To: fix.Value, Reason: fix.Reason})
+			rowVals[fix.Key] = fix.Value
 		}
 		attrs := make([][2]string, 0, len(order)+4)
 		attrs = append(attrs, [2]string{"ID", section.Name})

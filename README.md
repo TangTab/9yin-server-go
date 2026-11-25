@@ -77,7 +77,7 @@ internal/
   scene/                场景生命周期（含 Clonable 副本语义）
   net/                  TCP、封包帧、编码/校验/加密
   proto/                消息号 + 序列化（protogen 产物 + 手写部分）
-  script/               Lua 行为层（gopher-lua，nx_* API 句柄化）
+  script/               Lua 宿主（gopher-lua）：官方 nx_* API、技能/buff 钩子、伤害公式引擎
   config/               Object/Property XML、struct XML 加载（GBK）
   persist/              MySQL 存取队列、存档 blob 序列化
   proc/                 进程拓扑：Bus 接口（inproc ↔ TCP 可换）

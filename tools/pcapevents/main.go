@@ -2,10 +2,13 @@
 // pcapng → 8032 端口 TCP 双向重组（带每字节到达时间戳）→ EE+XOR 帧解码 →
 // C2S 0x0A 自定义消息（m54 格挡为主）/ S2C 0x09 表 + 0x10 属性帧事件流。
 //
-// 用法: go run ./tools/pcapevents <file.pcapng> [server-port] [dumpall]
+// 用法: go run ./tools/pcapevents <file.pcapng> [server-port] [dumpall|dumprec]
 //
 //	dumpall = 全事件一行一帧（属性名解码/自定义消息值表），供同目录
 //	rushband.py / staged.py / m337check.py 文本分析
+//	dumprec = dumpall 同款全事件，另把记录族帧（0x11/0x12/0x13/0x14）按
+//	官方 0x0A schema 解成「记录名 行 列=值」（战斗簇 fight_relation_rec /
+//	attack_back_rec / cooldown_rec 逐格取证用；dumpall 行格式不变）
 package main
 
 import (
@@ -17,6 +20,7 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 	net "github.com/lizhanyin/9yin-server-go/internal/net"
@@ -249,7 +253,12 @@ func main() {
 	fmt.Fprintf(os.Stderr, "prop table: %d entries\n", len(entries))
 
 	// dumpall 模式：全部事件打一行（S2C 0x10 解属性、0x1E 打原始 hex 头 48B）。
-	if len(os.Args) > 3 && os.Args[3] == "dumpall" {
+	// dumprec 同款，记录族帧另按 schema 解码（见 decodeRecordFrame）。
+	mode := ""
+	if len(os.Args) > 3 {
+		mode = os.Args[3]
+	}
+	if mode == "dumpall" || mode == "dumprec" {
 		for _, ev := range events {
 			d := "C2S"
 			if ev.dir == 1 {
@@ -298,6 +307,12 @@ func main() {
 					fmt.Printf("A t=%9.3f %s #%d op=0x%02X len=%d hex=% x\n", ev.ts, d, ev.idx, ev.op, len(ev.frame), ev.frame[:hl])
 				}
 			default:
+				if mode == "dumprec" && ev.dir == 1 {
+					if desc, ok := decodeRecordFrame(ev.frame); ok {
+						fmt.Printf("A t=%9.3f %s #%d rec op=0x%02X len=%d %s\n", ev.ts, d, ev.idx, ev.op, len(ev.frame), desc)
+						continue
+					}
+				}
 				fmt.Printf("A t=%9.3f %s #%d op=0x%02X len=%d\n", ev.ts, d, ev.idx, ev.op, len(ev.frame))
 			}
 		}
@@ -459,6 +474,91 @@ func decodeValue(b []byte, off int, wt int) (string, int) {
 		return fmt.Sprintf("obj(%08x/%08x)", uint32(v), uint32(v>>32)), 8
 	}
 	return fmt.Sprintf("<code%d raw % x>", wt, b[off:min(off+8, len(b))]), min(8, len(b)-off)
+}
+
+// decodeRecordFrame 记录族帧按官方 0x0A schema 解码（entergen frames.go
+// 行加/删行/逐格/挂载四种布局的逆）：
+//
+//	0x11 [obj][own][rec u16][行 u16][行数 u16]{行内各列按列型}
+//	0x12 [obj][own][rec u16][行 u16]
+//	0x13 [obj][own][rec u16][格数 u16][行 u16]{[列 u8][按列型]}
+//	0x14 [sub][obj][own][rec u16]
+//
+// 列值借用 decodeValue（线型码同源）。非记录族/畸形帧返回 false。
+func decodeRecordFrame(b []byte) (string, bool) {
+	if len(b) < 14 {
+		return "", false
+	}
+	obj, own := binary.LittleEndian.Uint32(b[2:]), binary.LittleEndian.Uint32(b[6:])
+	rec := int(binary.LittleEndian.Uint16(b[10:]))
+	schema, known := clientdata.RecordSchemaByIndex(rec)
+	name := fmt.Sprintf("rec%d", rec)
+	if known {
+		name = schema.Name
+	}
+	head := fmt.Sprintf("obj=%08x/%04x %s", obj, own, name)
+	cell := func(o int, colType int) (string, int) {
+		if colType == 0 || o >= len(b) {
+			return "<short>", 0
+		}
+		return decodeValue(b, o, colType)
+	}
+	switch b[0] {
+	case 0x11:
+		if len(b) < 16 || !known {
+			return "", false
+		}
+		row, rows := int(binary.LittleEndian.Uint16(b[12:])), int(binary.LittleEndian.Uint16(b[14:]))
+		out := ""
+		o := 16
+		for r := 0; r < rows; r++ {
+			out += fmt.Sprintf(" row=%d{", row+r)
+			for col, ct := range schema.ColumnTypes {
+				val, width := cell(o, int(ct))
+				if width == 0 {
+					return head + out + " <short>}", true
+				}
+				o += width
+				out += fmt.Sprintf(" c%d=%s", col, val)
+			}
+			out += "}"
+		}
+		return head + fmt.Sprintf(" add%s", out), true
+	case 0x12:
+		return fmt.Sprintf("%s del row=%d", head, binary.LittleEndian.Uint16(b[12:])), true
+	case 0x13:
+		if len(b) < 16 || !known {
+			return "", false
+		}
+		count, row := int(binary.LittleEndian.Uint16(b[12:])), int(binary.LittleEndian.Uint16(b[14:]))
+		out := ""
+		o := 16
+		for i := 0; i < count; i++ {
+			if o >= len(b) {
+				break
+			}
+			col := int(b[o])
+			o++
+			ct := 0
+			if col < len(schema.ColumnTypes) {
+				ct = int(schema.ColumnTypes[col])
+			}
+			val, width := cell(o, ct)
+			if width == 0 {
+				out += fmt.Sprintf(" c%d=<short>", col)
+				break
+			}
+			o += width
+			out += fmt.Sprintf(" c%d=%s", col, val)
+		}
+		return fmt.Sprintf("%s grid row=%d%s", head, row, out), true
+	case 0x14:
+		if len(b) < 12 {
+			return "", false
+		}
+		return fmt.Sprintf("sub=%d obj=%08x/%04x %s mount", b[1], obj, own, name), true
+	}
+	return "", false
 }
 
 func valStr(v entergen.CustomInboundValue) string {

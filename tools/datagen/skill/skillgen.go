@@ -25,6 +25,13 @@
 //	                                     Skill_Flow / Skill_LockData /
 //	                                     Skill_UseLimit / Skill_RushRange.xml
 //
+// 命中结算（2026-11-25 战斗接入）沿同一模型再加三件：
+//
+//	逐级行 DamageCalculate（数值 ID）→ Skill_DamageCalculate.xml（r= 列表）
+//	    → Skill_Formula.xml（Src/Prop 参数来源 + Formula 表达式）
+//	buff_new → Buff_New/<逻辑类>.xml → buff_static.xml（ID=StaticData）
+//	    → Buff_VarProp/Buffer.xml（ID=VarPropNo）
+//
 // 规范位归九阴产物：黑金原档只作属性词汇对照与 internal/fsgame 的测试
 // 夹具（fsgame readResource 规范位缺席时回退参考资源根取同名黑金样本），
 // 不再拷进输出目录。本项目是九阴服务端复刻而非黑金复刻。
@@ -34,6 +41,8 @@
 //   - skill_new.ini / skill_static.ini / skill_{normal,lock}_varprop.ini
 //   - skill_consume.ini / attack_targetshape.ini / attack_hitshape.ini
 //   - skill_lock_data.ini / skill_use_limit.ini / rush_range.ini
+//   - damage_calculate.ini / formula.ini（伤害计算包与公式）
+//   - buff_new.ini / buff_static.ini / buff_varprop.ini（buff 族）
 //
 // 输入（Options.Rule = 客户端资源根下的 share/rule）：rule/flow_config.ini
 // 流程包。
@@ -113,6 +122,7 @@ type tableReport struct {
 	InvalidKeys     []string       `json:"invalid_keys,omitempty"`
 	DuplicateKeys   int            `json:"duplicate_keys"`
 	DuplicateIDs    int            `json:"duplicate_ids"`
+	Fixed           []fixReport    `json:"fixed,omitempty"`
 	Note            string         `json:"note,omitempty"`
 	Warnings        []string       `json:"warnings,omitempty"`
 }
@@ -186,7 +196,7 @@ func run(in, rule, out, structRoot, heijin, luaDefine, reportPath string, verify
 			Title: spec.Title, Source: source, Rows: build.Rows, Note: spec.Note,
 			HeadersDropped: build.HeadersDropped, ConflictMarkers: build.ConflictMarkers,
 			InvalidKeys: build.InvalidKeys, DuplicateKeys: build.DuplicateKeys,
-			DuplicateIDs: build.DuplicateIDs, Dropped: build.Dropped, Warnings: build.Warnings,
+			DuplicateIDs: build.DuplicateIDs, Dropped: build.Dropped, Fixed: build.Fixed, Warnings: build.Warnings,
 		}
 		for _, file := range build.Files {
 			path := filepath.Join(out, filepath.FromSlash(file.RelPath))
@@ -244,6 +254,9 @@ func run(in, rule, out, structRoot, heijin, luaDefine, reportPath string, verify
 		}
 		if tr.DuplicateIDs > 0 {
 			fmt.Printf("      重复节名 %d 个\n", tr.DuplicateIDs)
+		}
+		for _, fix := range tr.Fixed {
+			fmt.Printf("      审定修正 [%s] %s：%q → %q（%s）\n", fix.ID, fix.Key, fix.From, fix.To, fix.Reason)
 		}
 	}
 	for _, w := range report.Warnings {

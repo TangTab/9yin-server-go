@@ -8,6 +8,7 @@
 //	patrol  NPC 巡逻路线 mappath
 //	item    物品配置 ini/Item
 //	skill   技能配置 ini/Skill
+//	action  招式判定节拍 ini/Action
 //
 // 2026-11-25 起只有 item / skill 必须构建（模型重建）。NPC、任务域、任务文案、
 // 巡逻路线的装载器可以直接读数据根里的客户端 share 树（开关
@@ -34,6 +35,7 @@ import (
 	"strings"
 
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
+	"github.com/lizhanyin/9yin-server-go/tools/datagen/action"
 	"github.com/lizhanyin/9yin-server-go/tools/datagen/item"
 	"github.com/lizhanyin/9yin-server-go/tools/datagen/npc"
 	"github.com/lizhanyin/9yin-server-go/tools/datagen/patrol"
@@ -64,6 +66,7 @@ var builders = []builder{
 	{"patrol", "NPC 巡逻路线 mappath", buildPatrol},
 	{"item", "物品配置 ini/Item", buildItem},
 	{"skill", "技能配置 ini/Skill", buildSkill},
+	{"action", "招式判定节拍 ini/Action", buildAction},
 }
 
 func main() {
@@ -254,6 +257,17 @@ func buildSkill(in inputs) error {
 		Heijin:     in.Heijin,
 		LuaDefine:  filepath.Join(in.Client, "lua64", "share", "skill_static_data_define.lua"),
 		ReportPath: filepath.Join(in.Repo, "artifacts", "local", "skillgen-report.json"),
+		Verify:     in.Verify,
+	})
+}
+
+// buildAction ini/Action：客户端招式表（ini/action/zhaoshi_*.ini）离线编译为
+// 判定节拍产物——战斗链每击结算的时刻表。
+func buildAction(in inputs) error {
+	return action.Run(action.Options{
+		Client:     in.Client,
+		Out:        in.Out,
+		ReportPath: filepath.Join(in.Repo, "artifacts", "local", "actiongen-report.json"),
 		Verify:     in.Verify,
 	})
 }

@@ -78,6 +78,15 @@ func indexOfProperty(raw []byte, offset int) int {
 	return offset + at + len(propertyOpen)
 }
 
+// ids 全部行 ID（索引序无定义）。
+func (t *xmlTable) ids() []string {
+	out := make([]string, 0, len(t.index))
+	for id := range t.index {
+		out = append(out, id)
+	}
+	return out
+}
+
 // lookup 取一行（ID 精确匹配；同 ID 首行胜出）。行属性在此解析。
 func (t *xmlTable) lookup(id string) (row, bool) {
 	if t.missing {
@@ -290,4 +299,10 @@ func (r row) text(key string) string {
 func (r row) ref(key string) string {
 	value, _ := r.str(key)
 	return strings.TrimSpace(value)
+}
+
+// has 列是否存在（空值列也算存在）。
+func (r row) has(key string) bool {
+	_, ok := r.str(key)
+	return ok
 }

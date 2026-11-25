@@ -7,4 +7,7 @@ require (
 	golang.org/x/text v0.44.0
 )
 
-require filippo.io/edwards25519 v1.2.0 // indirect
+require (
+	filippo.io/edwards25519 v1.2.0 // indirect
+	github.com/yuin/gopher-lua v1.1.2 // indirect
+)

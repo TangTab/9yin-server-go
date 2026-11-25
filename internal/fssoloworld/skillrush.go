@@ -252,11 +252,19 @@ func (s *Server) handleDashLanding(pl *Player, message entergen.CustomInbound) {
 		s.trace("skill %s rush landing encode failed client=%d: %v", stage.def.ID, pl.Conn1, b.err)
 		return
 	}
-	def, seq := stage.def, settleRushLanding(st, stage)
+	def, target, seq := stage.def, stage.target, settleRushLanding(st, stage)
 	st.mu.Unlock()
 	s.sendFrames(pl, b.frames)
-	time.AfterFunc(castLockMS(def), func() { s.finishCast(pl, seq, true) })
+	// 命中计划自落地起算（抓包：m19@207.777 → 判定 208.229/208.459/208.741）。
+	lastHit := s.scheduleSkillHits(pl, def, rushCast(def, pos, target), def.ID, 0)
+	s.scheduleFinish(pl, def, seq, true, lastHit)
 	s.trace("skill %s rush landed seq=%d client=%d", def.ID, seq, pl.Conn1)
+}
+
+// rushCast 落地后的施放参数（命中计划的目标与出招位取自落地帧）。
+func rushCast(def skilldata.Definition, pos [4]float32, target uint64) skillCast {
+	return skillCast{skill: def.ID, x: pos[0], y: pos[1], z: pos[2], orient: pos[3],
+		targetID: uint32(target), targetOwner: uint32(target >> 32), hasTarget: true}
 }
 
 // rushLandingFallback 授予后 rushLandingWatch 内未收到 m212：在玩家当前
@@ -276,10 +284,11 @@ func (s *Server) rushLandingFallback(pl *Player, seq int) {
 		st.mu.Unlock()
 		return
 	}
-	def, landed := stage.def, settleRushLanding(st, stage)
+	def, target, landed := stage.def, stage.target, settleRushLanding(st, stage)
 	st.mu.Unlock()
 	s.sendFrames(pl, b.frames)
-	time.AfterFunc(castLockMS(def), func() { s.finishCast(pl, landed, true) })
+	lastHit := s.scheduleSkillHits(pl, def, rushCast(def, pos, target), def.ID, 0)
+	s.scheduleFinish(pl, def, landed, true, lastHit)
 	s.trace("skill %s rush landing fallback seq=%d client=%d", def.ID, landed, pl.Conn1)
 }
 

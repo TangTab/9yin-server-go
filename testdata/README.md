@@ -4,7 +4,7 @@
 
 ## 存储形态（2026-11-24 起）
 
-本目录是一个**多层资源仓**的数据根：绝大部分内容在层文件 `b001.rep` 里，散文件
+本目录是一个**多层资源仓**的数据根：绝大部分内容在层文件 `b001.rep`～`b003.rep` 里，散文件
 盖在层之上。读取顺序固定为
 
 ```
@@ -28,7 +28,7 @@
 `filepath.*` 完全相同。直接用 `os.ReadFile` 之类读本目录的代码，在散文件并入层
 之后就找不到文件了。散文件改完即生效；层文件的内容要重新打开才更新。
 
-**构建数据**：只有 `item`（物品配置）、`skill`（技能配置）**必须**经统一构建器
+**构建数据**：只有 `item`（物品配置）、`skill`（技能配置）、`action`（招式判定节拍）**必须**经统一构建器
 `tools/datagen` 离线构建——它们是模型重建。NPC（模板 / 摆放 / 战斗）、任务域、
 任务文案的装载器从 2026-11-25 起可以直接读层里的客户端 `share` 树，不必先转
 XML（开关与保险见 `docs/official/NPC与任务数据来源直读落地.md`）；`tools/datagen
@@ -39,13 +39,13 @@ npc` 与 `patrol` 仍可运行，产物（`ini/Npc`、`ini/Scene`、`ini/Quest`�
 
 ```bash
 go run ./tools/datagen                      # 构建全部
-go run ./tools/datagen item skill           # 只构建指定的（npc / patrol / item / skill）
+go run ./tools/datagen item skill action    # 只构建指定的（npc / patrol / item / skill / action）
 go run ./tools/datagen -client <解压根>     # 别的机器：指定客户端资源根
 ```
 
 生成物先以**散文件**落在对应目录（`ini/Npc`、`ini/Scene`、`ini/Quest`、
-`ini/Text`、`ini/Item`、`ini/Skill`、`share/creator/mappath`），验证无误后再并入
-资源层。
+`ini/Text`、`ini/Item`、`ini/Skill`、`ini/Action`、
+`share/creator/mappath`），验证无误后再并入资源层。
 写出时行尾跟随层里的同名现有文件，所以内容没变的文件重建后与层里逐字节相同，
 并入时会被去重（`patrol` 是字节透传，本就与源逐字节相同）。
 
@@ -56,8 +56,12 @@ go run ./tools/datagen -client <解压根>     # 别的机器：指定客户端�
 **更新**：改动的文件先以散文件形式放在本目录，跑完验证后并入新的增量层：
 
 ```bash
-# 只收与下层内容不同的文件 → b002（及之后的层），并清掉已并入的散文件
-go run ./cmd/mpq store pack testdata -prefix b -prune -exclude mpq -exclude README.md
+# 只收与下层内容不同的文件 → 下一个增量层，并清掉已并入的散文件。
+# config-bootstrap / lua-bootstrap / mysql / share.7z 是受 git 跟踪的散文件，须排除，
+# 否则会被吞进层并从工作区删掉。
+go run ./cmd/mpq store pack testdata -prefix b -prune \
+  -exclude mpq -exclude README.md \
+  -exclude config-bootstrap -exclude lua-bootstrap -exclude mysql -exclude share.7z
 ```
 
 **查看**：
@@ -117,6 +121,23 @@ structgen 的容错链（剥非法注释 / 补裸数字属性）保留未删—�
   `internal/fsgame` 测试夹具与属性词汇对照，`fsgame` 的 `readResource`
   在规范位缺席时回退到那里取同名黑金样本。
 
+- 命中结算包（2026-11-25 战斗接入，同一构建器）：`Skill_DamageCalculate.xml`、
+  `Skill_Formula.xml`、`Buff_New/`、`buff_static.xml`、`Buff_VarProp/`、
+  `Skill_StaticToId.xml`（伤害计算包 → 公式 → buff 族，装载面
+  `internal/skilldata/{damage,buff}.go`）。源表脏数据的**审定修正**在构建期
+  改写（`tools/datagen/skill/mapping.go` 的 `Fixups`，入审计报告）：产物是层里的
+  生成物，手改会被下次重建覆盖，手修定版一律落 `Fixups`。
+
+## ini/Action/ — 招式判定节拍（九阴构建产物）
+
+`tools/datagen action` 把客户端招式表 `ini/action/zhaoshi_*.ini` 离线编译为
+`ini/Action/zhaoshi_hits.xml`（一招一行：`Actions` 各段动作名 / `Frames` 各段帧长 /
+`Hits` 判定时刻毫秒 / `Length` 总时长）。判定帧 = `trigger_hitbreak ∪ hitback`（同刻
+去重），30fps，按 `trigger_action_speed` 变速折算；12,770 招、1.3MB。服务端只读
+产物（装载器 `internal/actiondata`）——战斗链按技能的 `HitAction` 取判定时刻调度
+每击结算；产物缺席时全部查询落空，按流程包 `HitTime` 回退。再生命令：
+`go run ./tools/datagen action`。
+
 ## ini/Item/ — 物品配置（九阴构建产物，黑金物品配置格式）
 
 `tools/datagen item` 把客户端设计态表 `share/item/*.ini` 离线构建为服务端 XML
@@ -171,8 +192,11 @@ item_prop_modify_static/item_seed_static.xml` + `ItemTypeList.xml`；22 文件�
   `SERVER_CUSTOMMSG_*` 表、`define.lua`、`command_define.lua`——
   protogen 规格的第三线索源（另两个：FsGame.pdb 符号、probe 抓包）
 
-这些脚本是**开发参考与测试夹具**，不是运行时资源——本项目自己的脚本
-（移植/重写后）另行存放，不从 testdata 加载。
+2026-11-25 起这些脚本同时是**运行时脚本根**：Lua 宿主（`internal/script`）
+缺省从本目录 `lua/` 装载技能 / buff 的钩子脚本（技能表 `LuaScript` 列按路径
+指到这里；`NINEYIN_LUA_DIR=<目录>` 可改指别处）。每份钩子脚本有独立的函数
+环境，`require` 进来的模块全局各归各；内置的伤害公式引擎不在这里。详见
+`docs/official/战斗接入与技能Lua宿主.md`。
 
 ## lua-bootstrap/ — 各进程引导脚本
 

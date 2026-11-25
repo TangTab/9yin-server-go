@@ -78,6 +78,16 @@ type Server struct {
 
 	watchStop chan struct{} // 发现监督器停口（startDiscoveryWatch 建）
 	watchOnce sync.Once
+
+	// 战斗接入层（combat.go）：事件队列与泵、Lua 宿主懒建、对象注册表。
+	combatQ    combatQueue
+	pumpDone   chan struct{}
+	luaOnce    sync.Once
+	lua        *combatLua
+	combatMu   sync.Mutex
+	fighters   map[uint64]*npcFighter // NPC 战斗体（按句柄）
+	aux        map[uint64]*auxObject  // 技能/buff 辅助对象
+	nextHandle uint64
 }
 
 // New 创建 Server（ctor 缺省对齐 DefaultConfig）。
@@ -98,6 +108,9 @@ func New(opt Options) *Server {
 		roleLocks:     map[string]time.Time{},
 		accountLocks:  map[string]time.Time{},
 		tickDone:      make(chan struct{}),
+		pumpDone:      make(chan struct{}),
+		fighters:      map[uint64]*npcFighter{},
+		aux:           map[uint64]*auxObject{},
 		session:       uint32(time.Now().Unix()), // 本实例会话号（dc_accounts.logged 域）
 	}
 	for _, sc := range opt.Scenes {
@@ -186,6 +199,9 @@ func (s *Server) Start() error {
 	if !s.opt.ManualTick {
 		s.ticker = time.NewTicker(time.Second)
 		go s.tickLoop()
+		if combatEnabled() {
+			go s.combatPumpLoop()
+		}
 	}
 	s.startDiscoveryWatch()
 	s.trace("game server %d starting...", s.cfg.ServerID)
@@ -263,8 +279,10 @@ func (s *Server) timerCheck() {
 	// NPC 巡逻广播（0x21 批量 + State 翻转）
 	s.npcPatrolTick(time.Now())
 
-	// 战斗会话每秒驱动（MP 回复；skill.go）
+	// 战斗会话每秒驱动（MP 回复、招架耐力回复；skill.go）+ NPC 主动索敌
+	// （combatnpc.go）
 	s.combatTick()
+	s.npcAggroTick()
 }
 
 // checkQueue CheckQueue/CheckVipQueue：排队者放行进 Logging。

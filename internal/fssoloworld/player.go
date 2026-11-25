@@ -103,6 +103,9 @@ type Player struct {
 	// combat 技能/冷却会话态（skill.go；连接生命周期，不落库）：冷却表
 	// 行镜像、进行中技能、MP、冲锋暂存。
 	combat combatState
+	// panel 登录面板数值属性视图（combatcore.go playerPanel 懒建；公式与
+	// 脚本按属性名取值）。
+	panel map[string]float64
 	// itemUse 使用读条流（itemuse.go；连接生命周期，不落库）：nil=无进行中
 	// 的 msg31 读条；读条期间再按静默（官服连点零应答）。
 	itemUseMu sync.Mutex

@@ -43,15 +43,16 @@ var (
 
 // 产物文件名（相对 ini/Skill）。
 const (
-	fileStatic    = "skill_static.xml"
-	fileConsume   = "Skill_Consume.xml"
-	fileTarget    = "Skill_TargetShape.xml"
-	fileHit       = "Skill_HitShape.xml"
-	fileFlow      = "Skill_Flow.xml"
-	fileLock      = "Skill_LockData.xml"
-	fileRushRange = "Skill_RushRange.xml"
-	dirNew        = "Skill_New"
-	dirVarProp    = "Skill_VarProp"
+	fileStatic     = "skill_static.xml"
+	fileConsume    = "Skill_Consume.xml"
+	fileTarget     = "Skill_TargetShape.xml"
+	fileHit        = "Skill_HitShape.xml"
+	fileFlow       = "Skill_Flow.xml"
+	fileLock       = "Skill_LockData.xml"
+	fileRushRange  = "Skill_RushRange.xml"
+	fileStaticToID = "Skill_StaticToId.xml"
+	dirNew         = "Skill_New"
+	dirVarProp     = "Skill_VarProp"
 )
 
 // varPropSpanLimit 逐级行扫描跨度上限（防脏数据把 Min/Max 配成巨区间）。
@@ -178,6 +179,8 @@ type Catalog struct {
 	classes  []Script // Skill_New 下实有的逻辑类
 	defsMu   sync.Mutex
 	defs     map[defKey]defEntry
+	buffsMu  sync.Mutex
+	buffs    map[buffKey]buffEntry
 }
 
 type defKey struct {
@@ -216,6 +219,7 @@ func LoadDir(dir string) (*Catalog, error) {
 		tables:  map[string]*xmlTable{},
 		classes: classes,
 		defs:    map[defKey]defEntry{},
+		buffs:   map[buffKey]buffEntry{},
 	}, nil
 }
 
@@ -291,6 +295,17 @@ func (c *Catalog) RushRange() RushRange {
 		Ground: config.float("GRushRange", 0), Air: config.float("ARushRange", 0), Water: config.float("WRushRange", 0),
 		GroundAdd: config.float("GRushRangeAdd", 0), AirAdd: config.float("ARushRangeAdd", 0), WaterAdd: config.float("WRushRangeAdd", 0),
 	}
+}
+
+// SkillIDByStaticData 静态包号 → 技能 ConfigID（NPC 战斗行的技能列记静态包
+// 号；映射表缺席返回 false）。
+func (c *Catalog) SkillIDByStaticData(staticData int) (string, bool) {
+	row, ok := c.table(fileStaticToID).lookup(strconv.Itoa(staticData))
+	if !ok {
+		return "", false
+	}
+	id := strings.TrimSpace(row.text("SkillId"))
+	return id, id != ""
 }
 
 // compile 四层联查：技能对象行 → 静态包行 → 逐级可变属性行 → 引用包。
