@@ -163,6 +163,9 @@ type RecordCell struct {
 	Double   *float64
 	Text     *string
 	IsObject bool
+	// NullText 长度为 0 的窄串（区别于「长度 1、仅 NUL」的空串）：官服
+	// Task_Record 行里缺席的串列是 0 长度（task_record.go）。
+	NullText bool
 }
 
 func RecordInt(v uint32) RecordCell     { return RecordCell{Int: &v} }
@@ -170,12 +173,21 @@ func RecordInt64(v int64) RecordCell    { return RecordCell{Int64: &v} }
 func RecordByte(v uint32) RecordCell    { return RecordCell{Byte: &v} }
 func RecordDouble(v float64) RecordCell { return RecordCell{Double: &v} }
 func RecordString(v string) RecordCell  { return RecordCell{Text: &v} }
+func RecordNullString() RecordCell      { return RecordCell{NullText: true} }
 
 // RecordAddCellsFrame 0x11 整行加（按官方 schema 列型写满；缺尾列补零/
 // 空串，超宽报错——b-line serverRecordAddCells 语义）。行号恒 0；要在
-// 指定行号插入用 RecordInsertRowFrame。
+// 指定行号加一行（带值）用 RecordAddRowFrame，只插空行用
+// RecordInsertRowFrame。
 func RecordAddCellsFrame(objectID, ownerID uint32, recordIndex uint16, cells []RecordCell) ([]byte, error) {
 	return recordAddRowFrame(objectID, ownerID, recordIndex, 0, cells)
+}
+
+// RecordAddRowFrame 0x11 在 row 处加一行并写入各列（按官方 schema 列型
+// 写满；缺尾列补零/空串，超宽报错）。官服任务记录方言：已接表/目标表按
+// 下标逐行加（引导抓包 Task_Record row=0..3、Task_Accepted row=1）。
+func RecordAddRowFrame(objectID, ownerID uint32, recordIndex, row uint16, cells []RecordCell) ([]byte, error) {
+	return recordAddRowFrame(objectID, ownerID, recordIndex, row, cells)
 }
 
 // RecordInsertRowFrame 0x11 在 row 处插入一行（各列按官方 schema 线型写
@@ -245,6 +257,9 @@ func appendRecordCell(msg []byte, colType byte, cell *RecordCell) []byte {
 		}
 		return binary.LittleEndian.AppendUint64(msg, math.Float64bits(*cell.Double))
 	case 7: // 窄串
+		if cell != nil && cell.NullText {
+			return binary.LittleEndian.AppendUint32(msg, 0)
+		}
 		if cell == nil || cell.Text == nil {
 			msg = binary.LittleEndian.AppendUint32(msg, 1)
 			return append(msg, 0)

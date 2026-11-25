@@ -19,6 +19,7 @@ package entergen
 
 import (
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
+	"github.com/lizhanyin/9yin-server-go/internal/taskdata"
 )
 
 // Identity 会话身份（每次进场由调用方注入，见 fssoloworld/ident.go）。
@@ -49,11 +50,16 @@ type Session struct {
 
 // Context 一次进场生成的全部输入。
 type Context struct {
-	Identity  Identity
-	Session   Session
-	RoleName  string // 角色名（m607 宽串）
-	State     rolestate.RoleState
-	Keybind   string   // 存档键位串（0x28 档案 ShortcutKey；空=省略）
-	NPCFrames [][]byte // 场景 NPC 物化帧族（npcfeed 预生成；0x28 官方言默认）
-	SceneIndex int     // 客户端 scenes.ini 全局段号（开图位图/迷雾行；-1=表缺席降级）
+	Identity   Identity
+	Session    Session
+	RoleName   string // 角色名（m607 宽串）
+	State      rolestate.RoleState
+	Keybind    string   // 存档键位串（0x28 档案 ShortcutKey；空=省略）
+	NPCFrames  [][]byte // 场景 NPC 物化帧族（npcfeed 预生成；0x28 官方言默认）
+	SceneIndex int      // 客户端 scenes.ini 全局段号（开图位图/迷雾行；-1=表缺席降级）
+	// Tasks 任务目录（Task_Accepted / Task_Record 行的任务主表列来源）；
+	// nil＝没有任务目录，已接行除任务号外各列为空、不下发目标行。
+	Tasks *taskdata.Catalog
+	// Stamp 任务目标行 stamp 列的计时戳（0＝当前时间；测试面注入定值）。
+	Stamp int64
 }

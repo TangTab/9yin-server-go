@@ -80,10 +80,12 @@ type Player struct {
 	npcScene      string
 	patrolReadyAt time.Time
 	npcMoveState  map[uint32]string
-	// taskStoryDone 剧情对话已走完任务集（npctask.go；连接生命周期，
-	// 不落库——最小进度态：剧情段链尾点击后置位，任务行 500→200 翻转；
-	// 重登重走剧情可接受）。
-	taskStoryDone map[uint32]bool
+	// taskMu 串行化任务进度变更（taskrecord.go：消息线程与占位/影像定时
+	// 器都会写 roleState 的任务字段）。
+	taskMu sync.Mutex
+	// taskMarks 已下发的 NPC 任务标记（taskrecord.go；objectID → state，
+	// npcMu 保护）：只发与上次不同的 NPC；换场景时清空。
+	taskMarks map[uint32]uint32
 	// sceneSwitch 切图在途态（sceneswitch.go；nil=不在切换）：0x0C 已发
 	// 到目标场景 0x09 就绪屏障之间，位移上报全丢弃（旧场景过期 0x0A）。
 	sceneSwitchMu sync.Mutex

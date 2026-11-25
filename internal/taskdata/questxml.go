@@ -44,57 +44,90 @@ func QuestSourceOf(root string) sharedata.Source { return sharedata.QuestSource(
 // LoadQuest 任务目录（root=数据根；来源见文件头）。两路的错误语义相同：
 // 主表缺席或无有效任务行报错（调用方视为没有任务目录）。
 func LoadQuest(root string) (*Catalog, error) {
-	if sharedata.QuestSource(root) == sharedata.SourceShare {
-		return loadQuestShare(root)
+	dir := filepath.Join(root, "ini", "Quest")
+	source := sharedata.QuestSource(root)
+	domain := func(server string) []map[string]string {
+		rows, err := questDomainRows(root, dir, source, server)
+		if err != nil {
+			return nil // 步骤/剧情域缺档：对应行不出（增强下发）
+		}
+		return rows
 	}
-	return LoadQuestXMLDir(filepath.Join(root, "ini", "Quest"))
+	var rows []map[string]string
+	var err error
+	if source == sharedata.SourceShare {
+		texts, _, _, terr := sharedata.ReadTaskText(root)
+		if terr != nil {
+			return nil, terr
+		}
+		taskDomain, _ := sharedata.QuestDomainOf("Task")
+		rows, _, err = sharedata.ReadQuestDomain(root, taskDomain, texts)
+	} else {
+		rows, err = loadQuestPropRows(filepath.Join(dir, "Task", "Task.xml"))
+	}
+	if err != nil {
+		return nil, err
+	}
+	return buildCatalog(root, rows, domain("StoryTaskList"), domain("SubFunction"), stepTables{
+		"hunter":   domain("HuntList"),
+		"collect":  domain("CollectList"),
+		"useitem":  domain("UseItemList"),
+		"interact": domain("InteractiveList"),
+		"question": domain("Question"),
+		"convoy":   domain("Convoy"),
+		"special":  domain("Special"),
+		"story":    domain("StoryTaskList"),
+		"prize":    domain("Prize"),
+	})
 }
 
-// LoadQuestXMLDir 从服务端任务域 XML 目录（<root>/ini/Quest）构建目录。
-// Task.xml 缺席或无有效任务行报错（调用方视为没有任务目录）；剧情链
-// （SubFunction × StoryTaskList）缺档降级为无剧情绑定——剧情行是增强
-// 下发，缺数据不阻塞任务行。
+// LoadQuestXMLDir 从服务端任务域 XML 目录（<root>/ini/Quest）构建目录
+// （只用 XML 产物这一路）。Task.xml 缺席或无有效任务行报错（调用方视为
+// 没有任务目录）；剧情链（SubFunction × StoryTaskList）缺档降级为无剧情
+// 绑定——剧情行是增强下发，缺数据不阻塞任务行。
 func LoadQuestXMLDir(dir string) (*Catalog, error) {
 	rows, err := loadQuestPropRows(filepath.Join(dir, "Task", "Task.xml"))
 	if err != nil {
 		return nil, err
 	}
-	story, storyErr := loadQuestPropRows(filepath.Join(dir, "StoryTaskList", "StoryTaskList.xml"))
-	sub, subErr := loadQuestPropRows(filepath.Join(dir, "SubFunction", "SubFunction.xml"))
-	var storyRows, subRows []map[string]string
-	if storyErr == nil && subErr == nil {
-		storyRows, subRows = story, sub
+	domain := func(server string) []map[string]string {
+		found, derr := loadQuestPropRows(filepath.Join(dir, server, server+".xml"))
+		if derr != nil {
+			return nil
+		}
+		return found
 	}
-	return buildCatalog(dir, rows, storyRows, subRows)
+	return buildCatalog(dir, rows, domain("StoryTaskList"), domain("SubFunction"), stepTables{
+		"hunter":   domain("HuntList"),
+		"collect":  domain("CollectList"),
+		"useitem":  domain("UseItemList"),
+		"interact": domain("InteractiveList"),
+		"question": domain("Question"),
+		"convoy":   domain("Convoy"),
+		"special":  domain("Special"),
+		"story":    domain("StoryTaskList"),
+		"prize":    domain("Prize"),
+	})
 }
 
-// loadQuestShare 直读：主表 Title 用文案档解析；剧情链缺档同样降级为无
-// 剧情绑定。
-func loadQuestShare(root string) (*Catalog, error) {
-	domain := func(server string) sharedata.QuestDomain {
-		d, _ := sharedata.QuestDomainOf(server)
-		return d
+// questDomainRows 任务域某一域的行（两路来源同一行方言）：share 源直读
+// 客户端表，否则读 XML 产物。
+func questDomainRows(root, dir string, source sharedata.Source, server string) ([]map[string]string, error) {
+	if source != sharedata.SourceShare {
+		return loadQuestPropRows(filepath.Join(dir, server, server+".xml"))
 	}
-	texts, _, _, err := sharedata.ReadTaskText(root)
-	if err != nil {
-		return nil, err
+	domain, ok := sharedata.QuestDomainOf(server)
+	if !ok {
+		return nil, fmt.Errorf("taskdata: 未知任务域 %q", server)
 	}
-	rows, _, err := sharedata.ReadQuestDomain(root, domain("Task"), texts)
-	if err != nil {
-		return nil, err
-	}
-	story, _, storyErr := sharedata.ReadQuestDomain(root, domain("StoryTaskList"), nil)
-	sub, _, subErr := sharedata.ReadQuestDomain(root, domain("SubFunction"), nil)
-	var storyRows, subRows []map[string]string
-	if storyErr == nil && subErr == nil {
-		storyRows, subRows = story, sub
-	}
-	return buildCatalog(filepath.Join(root, filepath.FromSlash(sharedata.QuestDomainDir)), rows, storyRows, subRows)
+	rows, _, err := sharedata.ReadQuestDomain(root, domain, nil)
+	return rows, err
 }
 
 // buildCatalog 主表行 + 剧情段行 + 接线行 → 目录。storyRows / subRows 为
-// nil 即没有剧情链（不下发剧情段绑定）。
-func buildCatalog(dir string, rows, storyRows, subRows []map[string]string) (*Catalog, error) {
+// nil 即没有剧情链（不下发剧情段绑定）；tables 缺某域即该域步骤不成行、
+// 奖励串留空。
+func buildCatalog(dir string, rows, storyRows, subRows []map[string]string, tables stepTables) (*Catalog, error) {
 	tasks := make(map[int]Task)
 	var bindings []Binding
 	// 链式接取目标集：被某任务 AutoAcceptID 指向的任务只随前序任务完成
@@ -105,6 +138,8 @@ func buildCatalog(dir string, rows, storyRows, subRows []map[string]string) (*Ca
 			chainDriven[next] = true
 		}
 	}
+	steps := buildSteps(subRows, tables)
+	prizes := prizeStrings(tables["prize"])
 	for _, row := range rows {
 		id, err := strconv.Atoi(strings.TrimSpace(row["ID"]))
 		if err != nil || id <= 0 {
@@ -114,12 +149,31 @@ func buildCatalog(dir string, rows, storyRows, subRows []map[string]string) (*Ca
 		if title == "" {
 			continue
 		}
+		titleKey := strings.TrimSpace(row["TitleId"])
+		if titleKey == "" {
+			titleKey = "title_" + strconv.Itoa(id)
+		}
 		tasks[id] = Task{
 			ID: id, Title: title,
-			AcceptMenuKey: strings.TrimSpace(row["CanAcceptMenu"]),
-			ChainRoot:     strings.TrimSpace(row["PreTaskLimit"]) == "" && !chainDriven[id],
-			AutoAcceptID:  iniInt(row["AutoAcceptID"]),
-			AutoSubmit:    strings.TrimSpace(row["AutoSubmit"]) == "1",
+			Line:           iniInt(row["Line"]),
+			SearchID:       strings.TrimSpace(row["SearchID"]),
+			TitleKey:       titleKey,
+			TargetKey:      strings.TrimSpace(row["TaskTargetId"]),
+			ContextKey:     strings.TrimSpace(row["ContextId"]),
+			AcceptNpc:      strings.TrimSpace(row["AcceptNpc"]),
+			SubmitNpc:      strings.TrimSpace(row["SubmitNpc"]),
+			AcceptScene:    iniInt(row["AcceptSceneID"]),
+			SubmitScene:    iniInt(row["SubmitSceneID"]),
+			SubmitNpcEx:    strings.TrimSpace(row["SubmitNpcEx"]),
+			CompleteDialog: strings.TrimSpace(row["CompleteDialogId"]),
+			Prize:          prizes[id],
+			Steps:          steps[id],
+			AcceptMovie:    iniInt(row["AcceptMovie"]),
+			IsGuide:        strings.TrimSpace(row["SearchID"]) == GuideSearchID,
+			AcceptMenuKey:  strings.TrimSpace(row["CanAcceptMenu"]),
+			ChainRoot:      strings.TrimSpace(row["PreTaskLimit"]) == "" && !chainDriven[id],
+			AutoAcceptID:   iniInt(row["AutoAcceptID"]),
+			AutoSubmit:     strings.TrimSpace(row["AutoSubmit"]) == "1",
 		}
 		for _, side := range []struct{ npc, scene, source string }{
 			{row["AcceptNpc"], row["AcceptSceneID"], "quest-accept"},

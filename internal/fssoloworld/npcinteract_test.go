@@ -8,12 +8,14 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"unicode/utf16"
 
 	"github.com/lizhanyin/9yin-server-go/internal/config"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 	"github.com/lizhanyin/9yin-server-go/internal/taskdata"
 )
 
@@ -263,22 +265,28 @@ var officialGuideMenu = []string{
 
 func TestNPCGuideDialogMatchesOfficial(t *testing.T) {
 	// 引导 NPC 首次对话：1340 是链根（无前置/无接取文案/非链式目标）——
-	// 服务端直接接取，主窗即进行中行；既无接取行也无通用行。整组帧与
-	// 官服抓包逐字节一致（任务目录走 testdata/ini/Quest 真档）。
+	// 服务端直接接取（带进度行：追踪、步序 1），主窗即进行中行；既无接取
+	// 行也无通用行。整组帧与官服抓包逐字节一致（任务目录走真档）。
 	s := newNpcTestServer(t)
 	catalog := s.npcTaskCatalogOf()
 	if catalog == nil {
 		t.Fatal("任务目录缺席（ini/Quest XML）")
 	}
-	pl := &Player{Conn1: 11, State: PlOnline}
-	if added := s.autoAcceptChainStarts(catalog, pl, "funnpcborn003031"); len(added) != 1 || added[0] != 1340 {
-		t.Fatalf("链根首谈即接 = %v, want [1340]", added)
-	}
+	pl := newTaskTestPlayer(t, 11)
+	pl.roleState.TaskAccepted, pl.roleState.TaskCompleted, pl.roleState.TaskTracks = nil, nil, nil
+	s.npcTaskLocked(pl, func() {
+		if added := s.autoAcceptChainStarts(catalog, pl, "funnpcborn003031"); len(added) != 1 || added[0] != 1340 {
+			t.Fatalf("链根首谈即接 = %v, want [1340]", added)
+		}
+		if again := s.autoAcceptChainStarts(catalog, pl, "funnpcborn003031"); len(again) != 0 {
+			t.Fatalf("链根接取应幂等: %v", again)
+		}
+	})
 	if !pl.taskAcceptedContains(1340) {
 		t.Fatalf("1340 未入已接: %+v", pl.roleState.TaskAccepted)
 	}
-	if again := s.autoAcceptChainStarts(catalog, pl, "funnpcborn003031"); len(again) != 0 {
-		t.Fatalf("链根接取应幂等: %v", again)
+	if track := pl.roleState.TaskTrackOf(1340); track == nil || track.Step != 1 || !track.Tracked {
+		t.Fatalf("1340 应带进度行（追踪、步序 1）: %+v", track)
 	}
 	lines := s.npcTaskLines(catalog, pl, "funnpcborn003031", 8)
 	if len(lines) != 1 || lines[0].TaskID != 1340 || lines[0].StoryID != "482" || lines[0].Submit {
@@ -357,45 +365,94 @@ func TestNPCKarmaDialogRule(t *testing.T) {
 	}
 }
 
+// taskStepDone 测试用：对话窗内完成任务的当前步（持锁）。
+func taskStepDone(s *Server, pl *Player, taskID int, npc entergen.Identity) bool {
+	done := false
+	s.npcTaskLocked(pl, func() {
+		catalog := s.npcTaskCatalogOf()
+		task, track, _, ok := npcTaskCurrent(catalog, pl, uint32(taskID))
+		if !ok {
+			return
+		}
+		done = s.npcTaskAdvanceStep(pl, uint32(taskID), npcTaskDialogTail(npc, task, track.Step-1))
+		s.npcTaskAutoSteps(pl, uint32(taskID))
+	})
+	return done
+}
+
 func TestNPCTaskChainProgression(t *testing.T) {
-	// 提交受理 = 移出已接 + 记已交 + 按AutoAcceptID 链式接取；链根任务
-	// 交过之后不再「首谈即接」；链式目标只随前序任务接入。
+	// 提交受理 = 移出已接 + 记已交 + 完成簇内按 AutoAcceptID 链式接取下一环；
+	// 链根任务交过之后不再「首谈即接」；目标未完成的提交被拒；重复提交不
+	// 重复记已交。
 	s := newNpcTestServer(t)
 	catalog := s.npcTaskCatalogOf()
 	if catalog == nil {
 		t.Fatal("任务目录缺席（ini/Quest XML）")
 	}
-	pl := &Player{Conn1: 12, State: PlOnline}
-	// 引导链：1340（剧情走完自动提交）→ 1347 → 1341。
-	s.completeNPCTask(pl, 1340, "剧情走完自动提交")
-	if pl.taskAcceptedContains(1340) || !npcCompletedSet(pl)[1340] || !pl.taskAcceptedContains(1347) {
-		t.Fatalf("1340 提交后状态异常: accepted=%+v completed=%+v", pl.roleState.TaskAccepted, pl.roleState.TaskCompleted)
+	pl := newTaskTestPlayer(t, 12)
+	pl.roleState.TaskAccepted, pl.roleState.TaskCompleted, pl.roleState.TaskTracks = nil, nil, nil
+	npc := entergen.Identity{}
+	// 引导链：1340（单剧情步，走完自动提交）→ 1347 → 1341。
+	s.acceptNPCTask(pl, 1340, "进场")
+	if done := taskStepDone(s, pl, 1340, npc); !done {
+		t.Fatal("1340 剧情步未推进")
 	}
-	s.completeNPCTask(pl, 1347, "提交")
-	if !pl.taskAcceptedContains(1341) || len(pl.roleState.TaskAccepted) != 1 {
-		t.Fatalf("1347 提交后链推进异常: %+v", pl.roleState.TaskAccepted)
+	if pl.taskAcceptedContains(1340) || !pl.taskCompletedContains(1340) || !pl.taskAcceptedContains(1347) {
+		t.Fatalf("1340 自动提交后状态异常: accepted=%+v completed=%+v", pl.roleState.TaskAccepted, pl.roleState.TaskCompleted)
 	}
-	// 已交的链根不再自动接取；重复提交不重复记已交。
-	if added := s.autoAcceptChainStarts(catalog, pl, "funnpcborn003031"); len(added) != 0 {
-		t.Fatalf("已交链根不应再接: %v", added)
+	if track := pl.roleState.TaskTrackOf(1347); track == nil || track.Step != 1 {
+		t.Fatalf("1347 应由 1340 完成簇链式接取（步序 1）: %+v", track)
 	}
-	s.completeNPCTask(pl, 1340, "重复提交")
-	if n := len(pl.roleState.TaskCompleted); n != 2 {
-		t.Fatalf("已交记录应去重（1340/1347 各一条）: %+v", pl.roleState.TaskCompleted)
+	// 1347 四个交互步：目标未完成时提交被拒。
+	if s.completeNPCTask(pl, 1347, npcTaskCompleteTail{closeTalk: true}) {
+		t.Fatal("目标未完成的提交不应受理")
 	}
-	// 车夫：1648 是链根（首谈即接）；27509/27510 无接取文案，只随前序
-	// 任务提交链式接入（提交前不出行）——官服车夫窗进行中行只有 1648。
-	// 50 有接取文案但前置 27510 未交：前置门未建模（已交历史不可追溯），
-	// 仍出接取行，属已知偏差。
-	driver := &Player{Conn1: 13, State: PlOnline}
-	if added := s.autoAcceptChainStarts(catalog, driver, "Transcity05D"); len(added) != 1 || added[0] != 1648 {
-		t.Fatalf("车夫链根接取 = %v, want [1648]", added)
+	for i := 0; i < 4; i++ {
+		if !taskStepDone(s, pl, 1347, npc) {
+			t.Fatalf("1347 交互步 %d 未推进", i+1)
+		}
 	}
+	if track := pl.roleState.TaskTrackOf(1347); !entergen.TaskSubmittable(track, catalogTask(catalog, 1347).Steps) {
+		t.Fatalf("1347 四步走完应可提交: %+v", track)
+	}
+	if !s.completeNPCTask(pl, 1347, npcTaskCompleteTail{closeTalk: true}) {
+		t.Fatal("1347 提交未受理")
+	}
+	if !pl.taskAcceptedContains(1341) || len(pl.roleState.TaskAccepted) != 1 || len(pl.roleState.TaskCompleted) != 2 {
+		t.Fatalf("1347 提交后链推进异常: accepted=%+v completed=%+v", pl.roleState.TaskAccepted, pl.roleState.TaskCompleted)
+	}
+	// 已交的链根不再自动接取；重复提交不受理、不重复记已交。
+	s.npcTaskLocked(pl, func() {
+		if added := s.autoAcceptChainStarts(catalog, pl, "funnpcborn003031"); len(added) != 0 {
+			t.Fatalf("已交链根不应再接: %v", added)
+		}
+	})
+	if s.completeNPCTask(pl, 1340, npcTaskCompleteTail{}) || len(pl.roleState.TaskCompleted) != 2 {
+		t.Fatalf("重复提交不应受理/不重复记已交: %+v", pl.roleState.TaskCompleted)
+	}
+	// 车夫：1648 是链根（首谈即接）；27509/27510 无接取文案，只随前序任务
+	// 提交链式接入（提交前不出行）——官服车夫窗进行中行只有 1648。
+	driver := newTaskTestPlayer(t, 13)
+	driver.roleState.TaskAccepted, driver.roleState.TaskCompleted, driver.roleState.TaskTracks = nil, nil, nil
+	s.npcTaskLocked(driver, func() {
+		if added := s.autoAcceptChainStarts(catalog, driver, "Transcity05D"); len(added) != 1 || added[0] != 1648 {
+			t.Fatalf("车夫链根接取 = %v, want [1648]", added)
+		}
+	})
 	if lines := s.npcTaskLines(catalog, driver, "Transcity05D", 8); taskLineOf(lines, 1648) == nil || taskLineOf(lines, 1648).StoryID != "244" ||
 		taskLineOf(lines, 27509) != nil || taskLineOf(lines, 27510) != nil {
 		t.Fatalf("车夫任务行 = %+v, want 1648 进行中且无 27509/27510 行", lines)
 	}
-	s.completeNPCTask(driver, 1648, "提交")
+	if !taskStepDone(s, driver, 1648, npc) {
+		t.Fatal("1648 剧情步未推进")
+	}
+	// 1648 非自动提交：走完剧情后主窗翻提交行。
+	if lines := s.npcTaskLines(catalog, driver, "Transcity05D", 8); taskLineOf(lines, 1648) == nil || !taskLineOf(lines, 1648).Submit {
+		t.Fatalf("1648 剧情走完应发提交行: %+v", lines)
+	}
+	if !s.completeNPCTask(driver, 1648, npcTaskCompleteTail{closeTalk: true}) {
+		t.Fatal("1648 提交未受理")
+	}
 	if !driver.taskAcceptedContains(27509) {
 		t.Fatalf("1648 提交后应链式接取 27509: %+v", driver.roleState.TaskAccepted)
 	}
@@ -403,10 +460,21 @@ func TestNPCTaskChainProgression(t *testing.T) {
 		taskLineOf(lines, 27509) == nil || taskLineOf(lines, 27509).StoryID != "604" {
 		t.Fatalf("1648 交后 27509 应发进行中行（剧情组 604）: %+v", lines)
 	}
-	s.completeNPCTask(driver, 27509, "提交")
+	if !taskStepDone(s, driver, 27509, npc) || !s.completeNPCTask(driver, 27509, npcTaskCompleteTail{closeTalk: true}) {
+		t.Fatal("27509 推进/提交未受理")
+	}
 	if !driver.taskAcceptedContains(27510) {
 		t.Fatalf("27509 提交后应链式接取 27510: %+v", driver.roleState.TaskAccepted)
 	}
+}
+
+// catalogTask 目录里的任务（测试断言用；缺席即 Fatal）。
+func catalogTask(catalog *taskdata.Catalog, taskID int) taskdata.Task {
+	task, ok := catalog.TaskByID(taskID)
+	if !ok {
+		panic("任务不在目录: " + strconv.Itoa(taskID))
+	}
+	return task
 }
 
 // taskLineOf 任务行集里指定任务的行（无则 nil）。
@@ -438,31 +506,41 @@ func TestNPCTaskMenuLines(t *testing.T) {
 			{TaskID: 105, NPCConfigID: "WorldNpc00009"},
 		})
 	s := newNpcTestServer(t)
-	pl := &Player{Conn1: 3, State: PlOnline}
+	pl := newTaskTestPlayer(t, 3)
 	pl.roleState.TaskAccepted = []uint32{101}
+	// 没有步骤数据的已接任务：没有可达成的目标，接取即可提交。
+	pl.roleState.TaskTracks = []rolestate.TaskTrack{{TaskID: 101, Tracked: true, Step: 1}}
 	lines := s.npcTaskLines(catalog, pl, "WorldNpc00009", 8)
 	if len(lines) != 2 {
 		t.Fatalf("任务行 = %d, want 2（103/104 不在目录、105 无接取键不计）: %+v", len(lines), lines)
 	}
 	if lines[0].TaskID != 101 || !lines[0].Submit {
-		t.Fatalf("行 0 = %+v, want {101 Submit 无剧情段直发提交行}", lines[0])
+		t.Fatalf("行 0 = %+v, want {101 Submit 无步骤数据直发提交行}", lines[0])
 	}
 	if lines[1].TaskID != 102 || lines[1].Submit || lines[1].StoryID != "" {
 		t.Fatalf("行 1 = %+v, want {102 接取}", lines[1])
 	}
-	// 有剧情段：已接未走完=500 行；走完=200 行。
-	storyTasks := map[int]taskdata.Task{205: {ID: 205, Title: "剧情任务"}}
+	// 有剧情步：当前步是本 NPC 的剧情步=500 行；记满进度=200 行。
+	storyTasks := map[int]taskdata.Task{205: {ID: 205, Title: "剧情任务", Steps: []taskdata.Step{
+		{Subtype: taskdata.StepStory, Index: 482, Order: 1, MaxNum: 1, Key: "F"},
+	}}}
 	story2 := taskdata.NewCatalog(storyTasks, []taskdata.Binding{
 		{TaskID: 205, NPCConfigID: "F", StoryID: "482", ContextID: "story_482_1", TitleID: "storymenu_482_1"},
 		{TaskID: 205, NPCConfigID: "F", StoryID: "482", ContextID: "story_482_2", TitleID: "storymenu_482_2"},
 	})
-	pl2 := &Player{Conn1: 4, State: PlOnline}
+	pl2 := newTaskTestPlayer(t, 4)
 	pl2.roleState.TaskAccepted = []uint32{205}
+	pl2.roleState.TaskTracks = []rolestate.TaskTrack{{TaskID: 205, Tracked: true, Step: 1}}
 	got := s.npcTaskLines(story2, pl2, "F", 8)
 	if len(got) != 1 || got[0].StoryID != "482" || got[0].Submit {
 		t.Fatalf("剧情未走完 = %+v, want {205 StoryID=482}", got)
 	}
-	pl2.taskStoryDone = map[uint32]bool{205: true}
+	// 没有进度行的已接任务（建号种子的功能门行）不是玩家接的任务：不出行。
+	pl2.roleState.TaskTracks = nil
+	if got = s.npcTaskLines(story2, pl2, "F", 8); len(got) != 0 {
+		t.Fatalf("无进度行的已接任务不应出行: %+v", got)
+	}
+	pl2.roleState.TaskTracks = []rolestate.TaskTrack{{TaskID: 205, Tracked: true, Step: 1, Cur: []int{1}}}
 	got = s.npcTaskLines(story2, pl2, "F", 8)
 	if len(got) != 1 || !got[0].Submit {
 		t.Fatalf("剧情走完 = %+v, want {205 Submit}", got)
@@ -501,7 +579,7 @@ func TestNPCTaskMenuLines(t *testing.T) {
 		t.Fatalf("接取行 funcid = %d, want 100000102", funcid)
 	}
 	// 上限截断与关停；已交任务不再出行。
-	fresh := &Player{Conn1: 5, State: PlOnline}
+	fresh := newTaskTestPlayer(t, 5)
 	if got := len(s.npcTaskLines(catalog, fresh, "WorldNpc00009", 1)); got != 1 {
 		t.Fatalf("截断后 = %d, want 1", got)
 	}
@@ -536,10 +614,9 @@ func TestNPCTaskMarkSplit(t *testing.T) {
 }
 
 func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
-	// 接取→已接列表增长+菜单刷新；提交→移出已接+记已交。0x29 重放走
-	// haveRoleState 门（无角色态静默跳过，不 panic）。任务目录走服务端
-	// XML 配置（testdata/ini/Quest）：取有接取文案且无链式后继的真实
-	// 绑定任务，首点 100 走接取窗路径，不落「无文案直接接取」回退。
+	// 接取→已接列表增长+进度行+菜单刷新；200 只回提交窗参数（目标未完成时
+	// 不回）；201 提交确认=完成。任务目录走真档：取有接取文案且无链式后继
+	// 的真实绑定任务。
 	s := newNpcTestServer(t)
 	catalog := s.npcTaskCatalogOf()
 	if catalog == nil {
@@ -555,7 +632,8 @@ func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
 	if tid == 0 {
 		t.Fatal("WorldNpc00009 无可手动接取的绑定任务（XML 数据异常）")
 	}
-	pl := &Player{Conn1: 9, State: PlOnline}
+	pl := newTaskTestPlayer(t, 9)
+	blankTasks(pl)
 	menu := &npcActiveMenu{objectID: 5, ownerID: 6}
 	// 接取状态机：首次 100=推接取窗（不写已接），同 TID 二次=真接取。
 	s.handleNPCTaskMark(pl, menu, npcTaskFlagAccept*npcTaskFuncBase+int32(tid))
@@ -566,20 +644,31 @@ func TestNPCTaskMarkAcceptSubmit(t *testing.T) {
 	if !pl.taskAcceptedContains(uint32(tid)) || len(pl.roleState.TaskAccepted) != 1 {
 		t.Fatalf("二次确认后已接 = %+v", pl.roleState.TaskAccepted)
 	}
+	track := pl.roleState.TaskTrackOf(uint32(tid))
+	if track == nil || !track.Tracked || track.Step != 1 {
+		t.Fatalf("接取后应有进度行（追踪、步序 1）: %+v", track)
+	}
 	// 幂等：重复接取不重复追加。
 	s.handleNPCTaskMark(pl, menu, npcTaskFlagAccept*npcTaskFuncBase+int32(tid))
 	if len(pl.roleState.TaskAccepted) != 1 {
 		t.Fatalf("重复接取后已接 = %d, want 1", len(pl.roleState.TaskAccepted))
 	}
+	// 目标未完成：200 不回提交窗、201 提交被拒，状态不变。
 	s.handleNPCTaskMark(pl, menu, npcTaskFlagSubmit*npcTaskFuncBase+int32(tid))
-	if pl.taskAcceptedContains(uint32(tid)) || len(pl.roleState.TaskAccepted) != 0 || !npcCompletedSet(pl)[uint32(tid)] {
-		t.Fatalf("提交后 accepted=%+v completed=%+v（应移出已接并记已交）", pl.roleState.TaskAccepted, pl.roleState.TaskCompleted)
-	}
-	// 201 域（奖励单选二次确认）同样按提交受理。
-	pl.roleState.TaskAccepted = append(pl.roleState.TaskAccepted, uint32(tid))
 	s.handleNPCTaskMark(pl, menu, npcTaskFlagSubmitChoice*npcTaskFuncBase+int32(tid))
-	if pl.taskAcceptedContains(uint32(tid)) {
-		t.Fatalf("201 提交后已接 = %+v", pl.roleState.TaskAccepted)
+	if !pl.taskAcceptedContains(uint32(tid)) || len(pl.roleState.TaskCompleted) != 0 {
+		t.Fatalf("目标未完成的提交不应受理: accepted=%+v completed=%+v", pl.roleState.TaskAccepted, pl.roleState.TaskCompleted)
+	}
+	// 目标记满：201 提交受理。
+	task := catalogTask(catalog, tid)
+	track.Cur = make([]int, len(task.Steps))
+	for i := range track.Cur {
+		track.Cur[i] = task.Steps[i].MaxNum
+	}
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagSubmit*npcTaskFuncBase+int32(tid))
+	s.handleNPCTaskMark(pl, menu, npcTaskFlagSubmitChoice*npcTaskFuncBase+int32(tid))
+	if pl.taskAcceptedContains(uint32(tid)) || len(pl.roleState.TaskAccepted) != 0 || !pl.taskCompletedContains(uint32(tid)) {
+		t.Fatalf("提交后 accepted=%+v completed=%+v（应移出已接并记已交）", pl.roleState.TaskAccepted, pl.roleState.TaskCompleted)
 	}
 	// 未受理任务域（300 放弃）不改状态。
 	s.handleNPCTaskMark(pl, menu, 300*npcTaskFuncBase+int32(tid))

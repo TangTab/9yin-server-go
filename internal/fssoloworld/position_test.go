@@ -1,15 +1,15 @@
 package fssoloworld
 
 // 位置写回链测试：msg15 移动上传（走/停双态朝向口径）、界值拒收、
-// 2s 节流存档水位、m327 任务列表同步。下行帧正确性由 entergen
-// TaskAcceptedBatchFrame/MapRecords 字节级测试覆盖（nil inner 下
-// sendToClient 静默）。
+// 2s 节流存档水位、m327 追踪列表回置。下行帧正确性由 entergen
+// 任务记录字节级测试与 taskrecord_test.go 的官服帧序对拍覆盖。
 
 import (
 	"testing"
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 func customFloat32(v float32) entergen.CustomInboundValue {
@@ -96,11 +96,34 @@ func TestAbsorbPositionThrottleSave(t *testing.T) {
 	}
 }
 
-// TestTaskMsgSyncRepush m327 sub6 幂等重放（帧内容 entergen 侧覆盖）；
-// 未接子命令静默不崩。
-func TestTaskMsgSyncRepush(t *testing.T) {
+// TestTaskMsgTraceList m327 sub6 客户端追踪列表回置追踪标志（官服：列表内
+// 的已接行连写 track=0、track=1；原先追踪而不在列表里的写 0；没有进度行
+// 的种子行不动）；未接子命令静默不崩。
+func TestTaskMsgTraceList(t *testing.T) {
 	s, pl := newCustomTestServer(t)
-	pl.roleState.TaskAccepted = []uint32{1069}
-	s.handleTaskMsg(pl, customMsg(327, customInt(6), customStr("1069")))
+	taskTestNoTimers(t)
+	pl.roleState.TaskAccepted = []uint32{1069, 1340}
+	pl.roleState.TaskTracks = []rolestate.TaskTrack{{TaskID: 1340, Tracked: true, Step: 1}}
+	frames := captureFrames(t)
+	s.handleTaskMsg(pl, customMsg(327, customInt(6), customStr("0,1340")))
+	assertLines(t, taskSyncLines(t, *frames), []string{
+		"13 Accepted row=1 c7=0",
+		"13 Accepted row=1 c7=1",
+	}, "列表内的追踪行")
+	if track := pl.roleState.TaskTrackOf(1340); track == nil || !track.Tracked {
+		t.Fatal("列表内的任务应保持追踪")
+	}
+	*frames = nil
+	s.handleTaskMsg(pl, customMsg(327, customInt(6), customStr("0")))
+	assertLines(t, taskSyncLines(t, *frames), []string{"13 Accepted row=1 c7=0"}, "列表外的追踪行")
+	if track := pl.roleState.TaskTrackOf(1340); track == nil || track.Tracked {
+		t.Fatal("不在列表里的任务应取消追踪")
+	}
+	*frames = nil
+	s.handleTaskMsg(pl, customMsg(327, customInt(6), customStr("0")))
+	if len(taskSyncLines(t, *frames)) != 0 {
+		t.Fatalf("追踪标志未变化不应重发: %v", taskSyncLines(t, *frames))
+	}
 	s.handleTaskMsg(pl, customMsg(327, customInt(1)))
+	s.handleTaskMsg(pl, customMsg(327, customInt(6)))
 }

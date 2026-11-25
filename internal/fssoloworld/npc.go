@@ -112,6 +112,7 @@ func (s *Server) sceneNPCEnter(pl *Player, scene string, origin [4]float64) [][]
 	pl.npcVisible = visible
 	pl.patrolReadyAt = time.Now().Add(patrolFirstBroadcastDelay)
 	pl.npcMoveState = nil
+	pl.taskMarks = nil // 对象号随场景变：任务标记缓存（taskrecord.go）重置
 	pl.npcMu.Unlock()
 	return frames
 }
@@ -423,9 +424,15 @@ func (s *Server) npcReconcile(pl *Player, pos [4]float64) {
 	}
 	for _, id := range removes {
 		s.sendToClient(pl, entergen.SceneRemoveObjectFrame(id, catalog.ownerOf(id)))
+		pl.npcMu.Lock()
+		delete(pl.taskMarks, id)
+		pl.npcMu.Unlock()
 	}
 	if len(adds)+len(removes) > 0 {
 		s.trace("npc viewport reconcile: client=%d +%d -%d visible=%d", pl.Conn1, len(adds), len(removes), len(nowVisible))
+	}
+	if len(adds) > 0 {
+		s.pushNPCTaskMarks(pl) // 新进视口的 NPC 补发任务标记（taskrecord.go）
 	}
 }
 

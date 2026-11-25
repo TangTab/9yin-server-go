@@ -30,6 +30,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
+	"github.com/lizhanyin/9yin-server-go/internal/taskdata"
 )
 
 // ---- C2S op0x07 object request（33B 定长，2433 client_object_request 同构） ----
@@ -193,6 +194,7 @@ func (s *Server) npcMaterializeSend(pl *Player, trigger string) {
 		s.sendToClient(pl, frame)
 	}
 	s.trace("npc materialize (%s): %d frames client=%d", trigger, len(npcFrames), pl.Conn1)
+	s.npcTaskEnterScene(pl)
 }
 
 // ---- 主入口 ----
@@ -234,17 +236,24 @@ func (s *Server) handleNPCObjectRequest(pl *Player, req npcObjectRequest) bool {
 }
 
 // sendNPCTalkMenu talk 帧族下发（m4/m5/m6×N/m7）：服务行 + 任务行 +（业报
-// NPC 的）通用行。任务行来自任务目录绑定（npctask.go——客户端不自行生成
-// 任务行，服务端不发即无任务入口）；链首自动任务在算行之前先由服务端
-// 接取并重放 0x29（官服引导链首次点击即进行中行）。services 由调用方
+// NPC 的）通用行；任务当前步是本 NPC 的交互步时，主窗之后追加步骤确认窗
+// （官服引导抓包：主窗只有 ui_exit，紧接第二窗 DialogID_<步骤号>）。任务行
+// 来自任务目录绑定（npctask.go——客户端不自行生成任务行，服务端不发即无
+// 任务入口）；链根任务首谈即接（接取簇先于主窗下发）。services 由调用方
 // 计算（菜单簿记共用一份，npcshop.go mark 路由取绑定值）。
 func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn, services []npcService) {
 	catalog := s.npcTaskCatalogOf()
-	if added := s.autoAcceptChainStarts(catalog, pl, spawn.ConfigID); len(added) > 0 {
-		s.trace("npc task: 链首自动接取 %v@%s client=%d", added, spawn.ConfigID, pl.Conn1)
-		s.replayTaskAccepted(pl)
-	}
-	tasks := s.npcTaskLines(catalog, pl, spawn.ConfigID, npcTaskMenuLimit())
+	var tasks []npcTaskLine
+	var stepTask taskdata.Task
+	var step taskdata.Step
+	var stepWindow bool
+	s.npcTaskLocked(pl, func() {
+		if added := s.autoAcceptChainStarts(catalog, pl, spawn.ConfigID); len(added) > 0 {
+			s.trace("npc task: 链根首谈接取 %v@%s client=%d", added, spawn.ConfigID, pl.Conn1)
+		}
+		tasks = s.npcTaskLines(catalog, pl, spawn.ConfigID, npcTaskMenuLimit())
+		stepTask, step, stepWindow = s.npcTaskStepWindow(catalog, pl, spawn.ConfigID)
+	})
 	karma := npcKarmaDialog(spawn.Template)
 	if frames, err := npcCinematicTalkMenu(spawn.ObjectID, spawn.OwnerID, spawn.ConfigID, services, tasks, karma); err == nil {
 		for _, frame := range frames {
@@ -253,8 +262,16 @@ func (s *Server) sendNPCTalkMenu(pl *Player, spawn npcfeed.Spawn, services []npc
 	} else {
 		s.trace("npc interact: talk 数据编码失败 %s: %v", spawn.ConfigID, err)
 	}
-	s.trace("npc interact: %s (%s) 菜单 %d 项（任务行 %d）client=%d",
-		spawn.ConfigID, spawn.Script, len(services)+btoi(karma)*2+1, len(tasks), pl.Conn1)
+	if stepWindow {
+		// 步骤确认窗（主窗之后；确认行 funcid=500×10⁶+TID）。
+		if frames, err := npcTaskStepWindowFrames(spawn.ObjectID, spawn.OwnerID, stepTask.ID, step); err == nil {
+			for _, frame := range frames {
+				s.sendToClient(pl, frame)
+			}
+		}
+	}
+	s.trace("npc interact: %s (%s) 菜单 %d 项（任务行 %d，步骤窗 %v）client=%d",
+		spawn.ConfigID, spawn.Script, len(services)+btoi(karma)*2+1, len(tasks), stepWindow, pl.Conn1)
 }
 
 // npcKarmaDialog 模板业报列决定是否发「赠送物品/侠恶查询」两行（官服三份

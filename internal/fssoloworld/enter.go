@@ -107,6 +107,7 @@ func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context 
 		},
 		RoleName:   pl.Name,
 		State:      pl.roleState,
+		Tasks:      s.npcTaskCatalogOf(),                        // 任务三表行推的任务目录（taskrecords.go）
 		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
 	}
 }
@@ -155,7 +156,8 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 			s.trace("role state unmarshal failed client=%d: %v", clientID, err)
 		} else {
 			pl.roleState, pl.haveRoleState = state, true
-			pl.entryReady = false // 新一次进场：0x09 之前的 107 转储不落库
+			pl.entryReady = false     // 新一次进场：0x09 之前的 107 转储不落库
+			s.normalizeTaskTracks(pl) // 旧流程只记了任务号的已接任务补进度行（taskrecord.go）
 		}
 	}
 	if nativeEnterEnabled() && pl.haveRoleState {

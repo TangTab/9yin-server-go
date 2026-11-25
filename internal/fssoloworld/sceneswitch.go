@@ -275,6 +275,7 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 		s.sendToClient(pl, frame)
 		sent++
 	}
+	s.npcTaskEnterScene(pl) // NPC 任务标记 + 本场景引导链根的延时自动接取
 	// 表帧（0x09 属性/记录全表）与 0x28 化身/物理流不重发（连接级存活，
 	// 61036#8499 实证无表重发）；705 每次进场重发（已在 0x0B 前）。挂玩家
 	// 对象的域已由上方清场重建簇整推。

@@ -92,9 +92,9 @@ func (s *Server) handleMovementUpload(pl *Player, message entergen.CustomInbound
 	s.absorbPlayerPosition(pl, pos)
 }
 
-// handleTaskMsg C2S 327 任务消息：sub 6=已接任务列表同步 → 幂等重放
-// Task_Accepted 0x29 批量帧（与进场挂载行推同源编码）；其余子命令仅
-// 簿记——接/交任务受理链未落地（2433 线同样仅 GM 写入口）。
+// handleTaskMsg C2S 327 任务消息：sub 6=客户端追踪列表 → 回置已接行的追踪
+// 标志（taskrecord.go，官服：列表内各行连写 track=0、track=1）；其余子命令
+// 仅留痕。
 func (s *Server) handleTaskMsg(pl *Player, message entergen.CustomInbound) {
 	if len(message.Values) < 2 {
 		return
@@ -107,20 +107,11 @@ func (s *Server) handleTaskMsg(pl *Player, message entergen.CustomInbound) {
 		s.trace("task msg sub=%d client=%d (unhandled)", sub, pl.Conn1)
 		return
 	}
-	if !pl.haveRoleState {
-		return
+	list := ""
+	if len(message.Values) >= 3 && message.Values[2].Type == 6 {
+		list = message.Values[2].Text
 	}
-	frame, err := entergen.TaskAcceptedBatchFrame(entergen.Context{
-		Identity: pl.entergenIdentity(),
-		State:    pl.roleState,
-	})
-	if err != nil {
-		s.trace("task repush failed client=%d: %v", pl.Conn1, err)
-		return
-	}
-	if frame != nil {
-		s.sendToClient(pl, frame)
-	}
+	s.handleTaskTraceList(pl, list)
 }
 
 // customFloat TVarList 数值取 float（f32/f64 双型；int 型不取——坐标域

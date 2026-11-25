@@ -94,6 +94,13 @@ type RoleState struct {
 	// 2433 线无玩家级开图持久化（基线+当前场景每次重派生），本仓自建。
 	OpenMaps []uint32 `json:"openMaps,omitempty"`
 
+	// TaskTracks 流程接取的任务（NPC 任务链接取/步骤推进/提交受理维护）：
+	// 接取时刻、追踪标志、当前步序与各步进度。区别于建号种子的
+	// TaskAccepted / TaskCompleted 功能门行——那些不代表玩家接过任务。
+	// 客户端追踪栏只显示追踪标志为 1 的已接行，目标行（Task_Record）也
+	// 只给这些任务下发（官服引导抓包方言；见 tasktrack.go）。
+	TaskTracks []TaskTrack `json:"taskTracks,omitempty"`
+
 	// ---- 物品域（2433 线 bagRow/equipRow 口径建模；下发帧/C2S 操作链
 	// （30 移动穿戴/31 使用/34 丢弃/36 整理）后续接入）----
 
@@ -692,26 +699,11 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 
 	// 任务门：Task_Accepted 行集（guide + alt + schoolLead + act + actAlt）
 	// 与 Task_Completed 位图集（unlock + openGate + funcGate）——b-line
-	// facultyAcceptedTaskIDs/grantFunctionUnlock 同口径展开。
-	g := starter.TaskGates
-	for id := atou32(g.Guide.First); id != 0 && id <= atou32(g.Guide.Last); id++ {
-		state.TaskAccepted = append(state.TaskAccepted, id)
-	}
-	if v := atou32(g.Unlock.FacultyAlt); v != 0 {
-		state.TaskAccepted = append(state.TaskAccepted, v)
-	}
-	for id := atou32(g.SchoolLead.First); id != 0 && id <= atou32(g.SchoolLead.Last); id++ {
-		state.TaskAccepted = append(state.TaskAccepted, id)
-	}
-	for id := atou32(g.Act.First); id != 0 && id <= atou32(g.Act.Last); id++ {
-		state.TaskAccepted = append(state.TaskAccepted, id)
-	}
-	if v := atou32(g.Unlock.FacultyActAlt); v != 0 {
-		state.TaskAccepted = append(state.TaskAccepted, v)
-	}
-	state.TaskCompleted = append(state.TaskCompleted,
-		atou32(g.Unlock.FunctionUnlock), atou32(g.Unlock.OpenGate))
-	state.TaskCompleted = append(state.TaskCompleted, splitU32(g.FuncGate.IDs)...)
+	// facultyAcceptedTaskIDs/grantFunctionUnlock 同口径展开（SeedTaskIDs
+	// 是同一集合的查询面，任务链推进用它区分种子门行与玩家进度）。
+	seedAccepted, seedCompleted := SeedTaskIDs()
+	state.TaskAccepted = append(state.TaskAccepted, seedAccepted...)
+	state.TaskCompleted = append(state.TaskCompleted, seedCompleted...)
 
 	return state, nil
 }
