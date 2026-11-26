@@ -211,3 +211,51 @@ func TestPreReadyVitalOrder(t *testing.T) {
 		t.Fatalf("vital batch n = %d", n)
 	}
 }
+
+// TestSPIsSessionValue 当前怒气（SP）取 Context.SP（会话值），不取存档
+// State.SP；上限 MaxSP 恒 baseMaxSP，与两者都无关。0x0D / 人物数据大批 /
+// 基础属性批三处同源。此前 SP 跟着建号初值 80 下发，而服务端战斗态从 0
+// 起——登录后客户端满怒、放怒招却回「战意不足」（2026-11-26 定案：初始 0）。
+func TestSPIsSessionValue(t *testing.T) {
+	for _, tc := range []struct {
+		name             string
+		archive, session int
+	}{
+		{name: "旧档存着建号初值 80，登录从 0 起", archive: 80, session: 0},
+		{name: "新建号", archive: 0, session: 0},
+		{name: "切场景重入带当前怒气", archive: 80, session: 30},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := testContext(t)
+			ctx.State.SP, ctx.SP = tc.archive, tc.session
+			want := strconv.Itoa(tc.session)
+
+			appearance, err := AppearanceFrame(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := decodeAppearanceProps(t, appearance)["SP"]; got != want {
+				t.Errorf("0x0D SP = %q, want %q", got, want)
+			}
+			for name, build := range map[string]func(Context) ([][]byte, error){
+				"人物数据大批": func(c Context) ([][]byte, error) {
+					frame, err := PlayerVitalBatchFrame(c)
+					return [][]byte{frame}, err
+				},
+				"基础属性批": BasePropertyFrames,
+			} {
+				frames, err := build(ctx)
+				if err != nil || len(frames) != 1 {
+					t.Fatalf("%s: %d 帧, err=%v", name, len(frames), err)
+				}
+				props, _ := decodeVitalProps(t, frames[0])
+				if props["SP"] != want {
+					t.Errorf("%s SP = %q, want %q", name, props["SP"], want)
+				}
+				if props["MaxSP"] != strconv.Itoa(int(baseMaxSP)) {
+					t.Errorf("%s MaxSP = %q, want %d（上限与存档 SP 无关）", name, props["MaxSP"], baseMaxSP)
+				}
+			}
+		})
+	}
+}

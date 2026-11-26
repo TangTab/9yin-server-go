@@ -1,7 +1,7 @@
 // scene_subpage.mjs —— GM 测试台「传送与场景」子页逻辑回归（由 Go 测试
 // jstest_test.go 在 Node 可用时调起；场景数据取自真起的面板测试服务）。
 //
-// 最小假 DOM + fetch 桩，真跑 panels/test.js 的 mount(view, "scene")：加载
+// 最小假 DOM（fakedom.mjs）+ fetch 桩，真跑 panels/test.js 的 mount(view, "scene")：加载
 // 场景表 → 填充下拉（分组/重名/回退键）→ 选驿站填坐标 → 生成 gm scene
 // 命令行 → 接口失败回退静态预设。环境变量：
 //
@@ -13,6 +13,7 @@ import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
 import assert from "node:assert/strict";
+import { El, installDOM } from "./fakedom.mjs";
 
 const appDir = process.env.GM_JS_APP;
 const scenesFile = process.env.GM_JS_SCENES;
@@ -22,118 +23,7 @@ if (!appDir || !scenesFile) {
 const scenes = JSON.parse(readFileSync(scenesFile, "utf8")).scenes;
 const STATIC_PRESETS = 23; // panels/test.js 的 SCENE_PRESETS 条数（回退表）
 
-class Text {
-  constructor(text) {
-    this.nodeType = 3;
-    this.text = String(text);
-  }
-}
-
-class El {
-  constructor(tag) {
-    this.nodeType = 1;
-    this.tagName = tag.toUpperCase();
-    this.children = [];
-    this.attrs = {};
-    this.listeners = {};
-    this.style = {};
-    this._text = "";
-    this._class = "";
-    this._props = {};
-    this._forcedValue = undefined;
-  }
-  get className() {
-    return this._class;
-  }
-  set className(v) {
-    this._class = v;
-  }
-  setAttribute(k, v) {
-    this.attrs[k] = String(v);
-  }
-  getAttribute(k) {
-    return this.attrs[k];
-  }
-  appendChild(child) {
-    this.children.push(child);
-    child.parent = this;
-    return child;
-  }
-  get textContent() {
-    return this._text + this.children.map((c) => (c.nodeType === 3 ? c.text : c.textContent)).join("");
-  }
-  set textContent(v) {
-    this._text = String(v);
-    this.children = [];
-    this._forcedValue = undefined;
-  }
-  set innerHTML(v) {
-    this.textContent = v;
-  }
-  addEventListener(type, fn) {
-    (this.listeners[type] ||= []).push(fn);
-  }
-  fire(type) {
-    for (const fn of this.listeners[type] || []) fn({ target: this });
-  }
-  // <select>：显式设值则选中匹配 option（无匹配清空），否则跟随首个 option。
-  get value() {
-    if (this.tagName !== "SELECT") return this._props.value ?? this.attrs.value ?? "";
-    if (this._forcedValue !== undefined) return this._forcedValue;
-    const first = this.options()[0];
-    return first ? first.attrs.value : "";
-  }
-  set value(v) {
-    if (this.tagName === "SELECT") {
-      const has = this.options().some((o) => o.attrs.value === String(v));
-      this._forcedValue = has ? String(v) : "";
-      return;
-    }
-    this._props.value = String(v);
-  }
-  options() {
-    const out = [];
-    const walk = (n) => {
-      for (const c of n.children) {
-        if (c.nodeType === 3) continue;
-        if (c.tagName === "OPTION") out.push(c);
-        walk(c);
-      }
-    };
-    walk(this);
-    return out;
-  }
-  find(pred) {
-    let hit = null;
-    const walk = (n) => {
-      for (const c of n.children) {
-        if (c.nodeType === 3 || hit) continue;
-        if (pred(c)) hit = c;
-        walk(c);
-      }
-    };
-    walk(this);
-    return hit;
-  }
-  collect(tag, out = []) {
-    const walk = (n) => {
-      for (const c of n.children) {
-        if (c.nodeType === 3) continue;
-        if (c.tagName === tag) out.push(c);
-        walk(c);
-      }
-    };
-    walk(this);
-    return out;
-  }
-}
-
-globalThis.document = {
-  createElement: (tag) => new El(tag),
-  createTextNode: (text) => new Text(text),
-  querySelector: () => null,
-  contains: () => true,
-};
+installDOM();
 
 const reply = (body) => ({ ok: true, status: 200, json: async () => body });
 const fail = () => ({ ok: false, status: 404, json: async () => ({}) });

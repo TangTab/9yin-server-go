@@ -868,12 +868,18 @@ func (s *Server) npcAcceptSceneGuideRoots(pl *Player) {
 
 // npcTaskEnterScene 进场景（NPC 物化之后）：补发 NPC 任务标记；延时接取本
 // 场景的新手引导链根（官服 1340 在进场约 15 秒后自动接取；到点时按玩家
-// 当时所在场景判定）。
+// 当时所在场景判定）。待选态（guide.go：等客户端黑幕窗点初出茅庐／再战
+// 江湖）不排自动接取——点选后由 guideBeginSingle 接手。
 func (s *Server) npcTaskEnterScene(pl *Player) {
 	if pl.State != PlOnline || !pl.haveRoleState {
 		return
 	}
+	pending := false
+	s.npcTaskLocked(pl, func() { pending = pl.guidePending })
 	s.pushNPCTaskMarks(pl)
+	if pending {
+		return
+	}
 	time.AfterFunc(npcTaskGuideRootDelay, func() {
 		if pl.State != PlOnline {
 			return

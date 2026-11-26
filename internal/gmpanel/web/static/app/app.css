@@ -216,6 +216,9 @@ ax-btn { font-size: 13px !important; }
 
 .toolbar .grow { flex: 1; }
 
+/* 工具行行首的分组标签（调试工具：怒气 / 移动参数）——同坐标读数的 12px 灰标签 */
+.toolbar .group-label { font-size: 12px; opacity: 0.65; white-space: nowrap; }
+
 /* ---- 日志 ---- */
 
 .log-box {

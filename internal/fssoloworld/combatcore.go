@@ -111,7 +111,9 @@ func (s *Server) playerPanel(pl *Player) map[string]float64 {
 		return pl.panel
 	}
 	panel := map[string]float64{}
-	ctx := s.enterContext(pl, false)
+	// roleContext 而非 enterContext：ensureLiveLocked 持 combatState.mu 调到这里，
+	// 进不了那把锁。面板里的 SP 无人消费（生存值一律读 live），取不到会话怒气无妨。
+	ctx := s.roleContext(pl)
 	if frame, err := entergen.AppearanceFrame(ctx); err == nil {
 		for name, value := range decodePropertyFrame(frame, 61) {
 			panel[name] = value
@@ -164,6 +166,14 @@ func decodePropertyFrame(frame []byte, countOffset int) map[string]float64 {
 			}
 			value = float64(int32(binary.LittleEndian.Uint32(frame[offset:])))
 			offset += 4
+		case clientdata.WireInt64:
+			// 登录大批的 CapitalType1 是 int64：漏掉这一线型会在它处收尾，
+			// 排在其后的 MaxSP 等全解不出来（怒气上限曾因此回退 50）。
+			if offset+8 > len(frame) {
+				return out
+			}
+			value = float64(int64(binary.LittleEndian.Uint64(frame[offset:])))
+			offset += 8
 		case clientdata.WireFloat32:
 			if offset+4 > len(frame) {
 				return out

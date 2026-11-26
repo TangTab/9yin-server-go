@@ -436,8 +436,11 @@ func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hur
 	st.mu.Unlock()
 	sink.engageFrames(f, first, entered, added, row, key, now)
 	sink.subject(f)
+	// m24 17 的第 5 值是技能静态包的 DamageType（五个抓包 36 个技能逐一吻合：
+	// 锦衣 hyjf 系 = 2、逍遥 / 清风 = 3、外功 = 0）；第 4 值官服偶有非零
+	//（挑战包 hyjf08 的 204 / 598），语义未定，恒 0。
 	sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(17), entergen.CustomInt(int32(dealt)),
-		entergen.CustomInt(0), entergen.CustomInt(0), entergen.CustomString(def.ID),
+		entergen.CustomInt(0), entergen.CustomInt(int32(def.DamageType)), entergen.CustomString(def.ID),
 		entergen.CustomString(string(def.Script)), entergen.CustomString(targetName),
 		entergen.CustomString(pl.Name), entergen.CustomInt(int32(btoi(result.Crit))))
 	for _, frame := range removals {
@@ -449,7 +452,11 @@ func (s *Server) hitNPC(pl *Player, def skilldata.Definition, f *npcFighter, hur
 	if killed {
 		sink.pubCustom(24, sink.npcValue(f), entergen.CustomInt(29), sink.playerObject(),
 			entergen.CustomString(targetName), entergen.CustomString(pl.Name))
-		sink.pubCustom(18, sink.npcValue(f), entergen.CustomString("hurt_half"), entergen.CustomInt(0), sink.playerObject())
+		// 受击动作由技能自己的帧序先行下发的（闪击通道波，skillflash.go）这里
+		// 不再补发。
+		if !spec.hurtSent {
+			sink.pubCustom(18, sink.npcValue(f), entergen.CustomString("hurt_half"), entergen.CustomInt(0), sink.playerObject())
+		}
 	} else if stagger && !(spec.firstOnly && !first) {
 		// 受击动作：首次交手必发（把 NPC 从出生姿态里拉出来）；其余按技能
 		// 事件包——每击发，或只靠 m24 40 的受击特效。

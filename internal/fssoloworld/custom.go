@@ -16,7 +16,10 @@ package fssoloworld
 //	200/201 快捷栏设置/删除（按可见栏位索引；应答走整表重建方言：
 //	    倒序 0x12 清空 + 0x11 整表重放——增量「旧行 DEL+尾行 ADD」在
 //	    本客户端上行号口径会漂，真机实证拖出不移除/图标重叠）；
-//	240 原生打坐切换（逻辑态机未落地，暂只记日志）。
+//	240 原生打坐切换（逻辑态机未落地，暂只记日志）；
+//	972 单机引导步骤 [972, 4|5]（新手副本黑幕窗点选：初出茅庐／再战江湖，
+//	    guide.go）；
+//	950 新手帮助步骤完成 [950, 0, "<下一步>"]（回写 HelpStepID，guide.go）。
 //
 // 帧下发与内存态优先于持久化：写 roleState 后尽力 sendRoleSave
 //（store 0x04），失败仅告警不断会话。
@@ -41,6 +44,8 @@ const (
 	clientCustomSitCross        int32 = 240
 	clientCustomMoveItem        int32 = 30
 	clientCustomUseItem         int32 = 31
+	clientCustomSingleStep      int32 = 972
+	clientCustomHelpStep        int32 = 950
 )
 
 // customizingConfigLimit / keybindValueLimit 引擎侧串宽上限（Java
@@ -135,12 +140,21 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 	case clientCustomDashLanding:
 		// msg212 冲锋到位申报：落地释放簇（skillrush.go）。
 		s.handleDashLanding(pl, message)
+	case clientCustomZhaoshiEnd:
+		// msg914 招式位移结束位置回报：位置收编 + 0x21 成对停帧（skillflash.go）。
+		s.handleZhaoshiEnd(pl, message)
 	case clientCustomTaskMsg:
 		s.handleTaskMsg(pl, message)
 	case clientCustomBeforeEndMovie, clientCustomEndMovie, clientCustomAgreeMovie:
 		// 影像消息（m805 将结束/m806 结束/m807 同意播放）：接取影像是一场
 		// 客户端剧情副本，m806 结束上报触发收尾簇（taskmovie.go）。
 		s.handleMovieMsg(pl, message, id)
+	case clientCustomSingleStep:
+		// m972 单机引导步骤：黑幕窗点选 [4] 初出茅庐 / [5] 再战江湖（guide.go）。
+		s.handleGuideChoice(pl, message)
+	case clientCustomHelpStep:
+		// m950 新手帮助步骤完成：回写 HelpStepID（guide.go）。
+		s.handleHelpStep(pl, message)
 	case clientCustomPostRead:
 		s.handleReadLetter(pl, message)
 	case clientCustomPostGetAppendix:

@@ -9,7 +9,9 @@
        HP = 2×Str + 7×Sta = 27        （五维派生 Add 分量；基础位与运行
                                         内功 pack 运行期另计，官服基础位待抓包）
        MP = 4×Ing + 1×Spi = 15        （同上；旧攻略"内息×3"为旧版口径）
-       SP(怒气) = 80 基础 + 运行内功档位（登录即满；轻功值初值待考）
+       SP(怒气) = 0     怒气是会话值：每次登录从 0 起，进场帧下发的是战斗
+                        会话态、不随档（官服建号档为 80、登录即满；2026-11-26
+                        定案改 0）。上限 MaxSP 固定 80，见 entergen baseMaxSP。
        Parry(招架上限) = 100 白板
        轻功 = 150
        体力 = 120
@@ -27,10 +29,10 @@
      
      完整规则与字段映射见 docs/official/九阴建角初始数据归纳.md -->
 <Object>
-	<Property ID="11" Scene="born03" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="22001" BaishiTask="49"/>
-	<Property ID="12" Scene="born03" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="22001" BaishiTask="49"/>
-	<Property ID="21" Scene="born04" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="24001" BaishiTask="40"/>
-	<Property ID="22" Scene="born04" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="24001" BaishiTask="40"/>
-	<Property ID="31" Scene="city02" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="1" BaishiTask="50"/>
-	<Property ID="32" Scene="city02" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="80" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="1" BaishiTask="50"/>
+	<Property ID="11" Scene="born03" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="0" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="22001" BaishiTask="49"/>
+	<Property ID="12" Scene="born03" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="0" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="22001" BaishiTask="49"/>
+	<Property ID="21" Scene="born04" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="0" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="24001" BaishiTask="40"/>
+	<Property ID="22" Scene="born04" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="0" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="24001" BaishiTask="40"/>
+	<Property ID="31" Scene="city02" Sex="1" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="0" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="1" BaishiTask="50"/>
+	<Property ID="32" Scene="city02" Sex="2" Str="3" Dex="3" Ing="3" Spi="3" Sta="3" HP="70" MP="40" SP="0" Parry="100" NewbieSkill="1" School="" SchoolList="school_shaolin,school_wudang,school_emei,school_gaibang,school_tangmen,school_junzi,school_jinyi,school_jile" InitTask="1" BaishiTask="50"/>
 </Object>

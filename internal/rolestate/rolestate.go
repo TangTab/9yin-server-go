@@ -106,6 +106,19 @@ type RoleState struct {
 	// 只给这些任务下发（官服引导抓包方言；见 tasktrack.go）。
 	TaskTracks []TaskTrack `json:"taskTracks,omitempty"`
 
+	// GameStep 新手引导阶段（客户端 SwitchManager 主步：官服登录 m414
+	// ["gamestep", 主步, 5]，新手副本黑幕「初出茅庐／再战江湖」点选后 C2S
+	// m972 回传同一值）：0＝未定；4＝初出茅庐（单机引导）；5＝再战江湖
+	// （跳过引导、直接入江湖）。旧档缺省 0——只有身在新手副本且引导链
+	// 未开始的角色才处于待选态（fssoloworld/guide.go）。
+	GameStep int `json:"gameStep,omitempty"`
+	// HelpStepID 新手帮助步骤链（freshmanhelp.ini 节名：客户端 C2S m950 上报
+	// 下一步，服务端回写同名属性）。空＝未入链（档案取外服常量）。
+	HelpStepID string `json:"helpStepID,omitempty"`
+	// RelivePositon 复活点串（"<场景>,<x>,<y>,<z>,<朝向>,<键>"；跳过引导
+	// 进江湖时落到鸡鸣驿）。空＝未设（档案取外服常量）。
+	RelivePositon string `json:"relivePositon,omitempty"`
+
 	// ---- 物品域（2433 线 bagRow/equipRow 口径建模；下发帧/C2S 操作链
 	// （30 移动穿戴/31 使用/34 丢弃/36 整理）后续接入）----
 

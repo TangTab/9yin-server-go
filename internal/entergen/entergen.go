@@ -62,4 +62,9 @@ type Context struct {
 	Tasks *taskdata.Catalog
 	// Stamp 任务目标行 stamp 列的计时戳（0＝当前时间；测试面注入定值）。
 	Stamp int64
+	// SP 本次进场下发的当前怒气（SP 属性）：会话值——world 传战斗会话态的
+	// 当前怒气，没进过战斗 = 0。不取存档 State.SP：怒气每次登录从 0 起
+	//（2026-11-26 定案；此前下发建号初值 80，而服务端战斗态从 0 起，两端
+	// 对不上）。上限另走 baseMaxSP。
+	SP int
 }

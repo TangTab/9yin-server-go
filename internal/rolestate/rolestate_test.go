@@ -6,8 +6,9 @@ import (
 )
 
 // TestBuildRoleStateBorn03 钉死默认建号状态（官方口径：born03 烟雨庄 +
-// RoleBaseProp 五维=3/HP70/MP40/SP80 + StarterSet 授予集 + location.ini
-// BornCJ000003 出生点）。
+// RoleBaseProp 五维=3/HP70/MP40 + StarterSet 授予集 + location.ini
+// BornCJ000003 出生点）。SP（怒气）例外：官服建号档 80、登录即满，本线
+// 2026-11-26 定案改 0——怒气是会话值，不随档。
 func TestBuildRoleStateBorn03(t *testing.T) {
 	state, err := BuildRoleState(DefaultBirthScene, 1, "icon\\players\\boy01_create.png,obj\\char\\b_hair\\b_hair1", 0)
 	if err != nil {
@@ -16,8 +17,8 @@ func TestBuildRoleStateBorn03(t *testing.T) {
 	if state.Sex != 1 || state.Str != 3 || state.Dex != 3 || state.Ing != 3 || state.Spi != 3 || state.Sta != 3 {
 		t.Fatalf("五维官方口径 =3（初始号实证）： %+v", state)
 	}
-	if state.HP != 70 || state.MP != 40 || state.SP != 80 || state.Parry != 100 {
-		t.Fatalf("资源初值 HP70/MP40/SP80/Parry100： %+v", state)
+	if state.HP != 70 || state.MP != 40 || state.SP != 0 || state.Parry != 100 {
+		t.Fatalf("资源初值 HP70/MP40/SP0/Parry100： %+v", state)
 	}
 	if state.Scene != `ini\scene\born03_YanYuZhuang` || state.Resource != "born03" {
 		t.Fatalf("出生场景 = %q resource = %q", state.Scene, state.Resource)

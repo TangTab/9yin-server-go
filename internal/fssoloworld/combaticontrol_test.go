@@ -56,14 +56,14 @@ func TestItemSkillCastNormalSkillHasNoPositionFrames(t *testing.T) {
 	hp := f.hp()
 	got = wantText(f.pump(533 * time.Millisecond))
 	want = wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=2", f.aggro(),
-		hit17("skill_musejuben_2", "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
+		f.hit17("skill_musejuben_2", "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
 		"m205(me,s:skill_musejuben_2,npc)"})
 	if got != want {
 		t.Fatalf("m270 首击帧序不符:\n got: %s\nwant: %s", got, want)
 	}
 	hp = f.hp()
 	got = wantText(f.pump(434 * time.Millisecond))
-	want = wantText([]string{"me:FP=4", "me:SP=4", "me:rec114[0.1]=T", hit17("skill_musejuben_2", "SkillNormal", hp-f.hp()),
+	want = wantText([]string{"me:FP=4", "me:SP=4", "me:rec114[0.1]=T", f.hit17("skill_musejuben_2", "SkillNormal", hp-f.hp()),
 		"m18(npc,s:hurt_half,i:0,me)", "m24(me,i:10,i:2)", "me:MaxHits=2", "m205(me,s:skill_musejuben_2,npc)",
 		"me:CurSkillID="})
 	if got != want {
@@ -96,7 +96,7 @@ func TestItemSkillCastLockSkillUsesLockPackageAction(t *testing.T) {
 	hp := f.hp()
 	got = wantText(f.pump(1634 * time.Millisecond))
 	want = wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=36", f.aggro(),
-		hit17("skill_musejuben_8", "SkillLock", hp-f.hp()), "me:MaxHits=1", "m205(me,s:skill_musejuben_8,npc)"})
+		f.hit17("skill_musejuben_8", "SkillLock", hp-f.hp()), "me:MaxHits=1", "m205(me,s:skill_musejuben_8,npc)"})
 	if got != want {
 		t.Fatalf("m270 锁定技首击帧序不符:\n got: %s\nwant: %s", got, want)
 	}
@@ -192,7 +192,7 @@ func TestQuestPushPullSkillControl(t *testing.T) {
 	hp := f.hp()
 	got = hit(1)
 	want = wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=11", f.aggro(),
-		hit17(def.ID, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
+		f.hit17(def.ID, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
 		"m169(i:0,s:buf_skill_musejuben_41,npc,me,s:test_monster,s:,i:T64,i:134225921)",
 		"m169(i:0,s:buf_skill_musejuben_42,npc,me,s:test_monster,s:,i:T64,i:4198405)",
 		"npc:State=hurt_stun_2",
@@ -204,7 +204,7 @@ func TestQuestPushPullSkillControl(t *testing.T) {
 
 	hp = f.hp()
 	got = hit(2)
-	want = wantText([]string{"me:FP=4", "me:SP=13", "me:rec114[0.1]=T", hit17(def.ID, "SkillNormal", hp-f.hp()),
+	want = wantText([]string{"me:FP=4", "me:SP=13", "me:rec114[0.1]=T", f.hit17(def.ID, "SkillNormal", hp-f.hp()),
 		"m18(npc,s:hurt_half,i:0,me)", "m24(me,i:10,i:2)", "me:MaxHits=2",
 		"m169(i:0,s:buf_skill_musejuben_41,npc,me,s:test_monster,s:,i:T64,i:134225921)",
 		"m169(i:1,s:buf_skill_musejuben_42,npc,me,s:test_monster,s:,i:T64,i:4198405)",
@@ -228,7 +228,7 @@ func TestQuestPushPullSkillControl(t *testing.T) {
 
 	hp = f.hp()
 	got = hit(3)
-	want = wantText([]string{"me:FP=6", "me:SP=15", "me:rec114[0.1]=T", hit17(def.ID, "SkillNormal", hp-f.hp()),
+	want = wantText([]string{"me:FP=6", "me:SP=15", "me:rec114[0.1]=T", f.hit17(def.ID, "SkillNormal", hp-f.hp()),
 		"m18(npc,s:hurt_half,i:0,me)", "m24(me,i:10,i:3)", "me:MaxHits=3",
 		"m169(i:0,s:buf_skill_musejuben_41,npc,me,s:test_monster,s:,i:T64,i:134225921)",
 		"m169(i:1,s:buf_skill_musejuben_42,npc,me,s:test_monster,s:,i:T64,i:4198405)",

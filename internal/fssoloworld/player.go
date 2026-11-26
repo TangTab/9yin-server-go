@@ -89,6 +89,10 @@ type Player struct {
 	// taskMovie 在途的任务影像（taskmovie.go；taskMu 保护）：nil＝没有影像。
 	// 影像是一场客户端剧情副本，期间位移上报不收编、自动步不推进。
 	taskMovie *taskMovieState
+	// guidePending 新手引导待选态（guide.go；taskMu 保护）：身在新手副本、
+	// 引导阶段未定且引导链未开始——已锁输入，等客户端 m972 点选（或兜底
+	// 计时到期）。
+	guidePending bool
 	// sceneSwitch 切图在途态（sceneswitch.go；nil=不在切换）：0x0C 已发
 	// 到目标场景 0x09 就绪屏障之间，位移上报全丢弃（旧场景过期 0x0A）。
 	sceneSwitchMu sync.Mutex
@@ -109,6 +113,9 @@ type Player struct {
 	// panel 登录面板数值属性视图（combatcore.go playerPanel 懒建；公式与
 	// 脚本按属性名取值）。
 	panel map[string]float64
+	// gmMotion GM 调试移动参数（gmdebug.go；连接生命周期，不落库）：gm move
+	// 的会话覆写，零值 = 进场缺省。
+	gmMotion gmMotionState
 	// itemUse 使用读条流（itemuse.go；连接生命周期，不落库）：nil=无进行中
 	// 的 msg31 读条；读条期间再按静默（官服连点零应答）。
 	itemUseMu sync.Mutex

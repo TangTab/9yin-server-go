@@ -14,7 +14,7 @@ import (
 
 // gmPropWhiteList gm set 白名单：字段名 → roleState 落点 + 热发属性
 // （与 entergen.basePropertyFrames 同名同型；money 对拍 2433 线
-// CapitalType1）。HP/MP/SP 同时刷新 Max 语义（0x10 两属性一帧）。
+// CapitalType1）。HP/MP 同时刷新 Max 语义（0x10 两属性一帧）。
 type gmPropSpec struct {
 	apply func(pl *Player, v int64)
 	frame func(pl *Player) ([]byte, error)
@@ -30,16 +30,18 @@ var gmPropWhiteList = map[string]gmPropSpec{
 	"money": {apply: func(pl *Player, v int64) { pl.roleState.Money = v }, frame: moneyFrame},
 }
 
-// hp/mp/sp：值与 Max 同步（0x10 一帧两属性）。
+// hp/mp：值与 Max 同步（0x10 一帧两属性）。怒气（sp）不在这里：它是会话值
+// （combatState.live.sp，不落 roleState），设怒气走 gm rage（gmdebug.go）——
+// 旧的白名单项只写存档字段、却把客户端 SP 与 MaxSP 一并改成所填值，而
+// 服务端的怒气没变。
 func init() {
 	for name, both := range map[string][2]string{
-		"hp": {"HP", "MaxHP"}, "mp": {"MP", "MaxMP"}, "sp": {"SP", "MaxSP"},
+		"hp": {"HP", "MaxHP"}, "mp": {"MP", "MaxMP"},
 	} {
 		cur, max := both[0], both[1]
 		field := map[string]func(pl *Player) *int{
 			"hp": func(pl *Player) *int { return &pl.roleState.HP },
 			"mp": func(pl *Player) *int { return &pl.roleState.MP },
-			"sp": func(pl *Player) *int { return &pl.roleState.SP },
 		}[name]
 		gmPropWhiteList[name] = gmPropSpec{
 			apply: func(pl *Player, v int64) { *field(pl) = int(v) },
@@ -73,7 +75,7 @@ func moneyFrame(pl *Player) ([]byte, error) {
 func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 	s := e.srv
 	if len(fields) < 2 {
-		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|mail|dummy|scene|save> <who> [args]\r>end\r")
+		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|mail|dummy|scene|rage|move|save> <who> [args]\r>end\r")
 		return
 	}
 	sub, who := fields[0], fields[1]
@@ -118,7 +120,8 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		st := pl.roleState
 		fmt.Fprintf(nc, ">account=%s name=%s state=%s\r", pl.Account, pl.Name, pl.State)
 		fmt.Fprintf(nc, ">str=%d dex=%d ing=%d spi=%d sta=%d\r", st.Str, st.Dex, st.Ing, st.Spi, st.Sta)
-		fmt.Fprintf(nc, ">hp=%d mp=%d sp=%d parry=%d money=%d\r", st.HP, st.MP, st.SP, st.Parry, st.Money)
+		// 资源行不含怒气：那是会话值（gm rage 读）。
+		fmt.Fprintf(nc, ">hp=%d mp=%d parry=%d money=%d\r", st.HP, st.MP, st.Parry, st.Money)
 		fmt.Fprintf(nc, ">scene=%s pos=%.3f,%.3f,%.3f,%.3f\r", st.Scene,
 			st.Position[0], st.Position[1], st.Position[2], st.Position[3])
 		fmt.Fprintf(nc, ">skills=%d neigong=%d cur=%s facultySeed=%d\r",
@@ -131,7 +134,7 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		prop := strings.ToLower(fields[2])
 		spec, ok := gmPropWhiteList[prop]
 		if !ok {
-			fmt.Fprintf(nc, ">gm set: unknown prop %q (whitelist: str dex ing spi sta hp mp sp parry money)\r", fields[2])
+			fmt.Fprintf(nc, ">gm set: unknown prop %q (whitelist: str dex ing spi sta hp mp parry money)\r", fields[2])
 			return
 		}
 		v, err := strconv.ParseInt(fields[3], 10, 64)
@@ -298,6 +301,18 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		s.gmDummyCommand(nc, pl, who, fields)
 	case "scene":
 		s.gmSceneCommand(nc, pl, who, fields)
+	case "guide":
+		// gm guide <who> <start|skip>：不等客户端黑幕窗，直接走初出茅庐 /
+		// 再战江湖（guide.go）。
+		s.gmGuideCommand(nc, pl, who, fields)
+	case "rage":
+		// gm rage <who> [怒气|max [自动回复/秒]] | regen <自动回复/秒>：设置
+		// 怒气与怒气自动回复（gmdebug.go）。
+		s.gmRageCommand(nc, pl, who, fields)
+	case "move":
+		// gm move <who> [speed|gravity <值> | reset]：移动速度 / 下落重力
+		//（gmdebug.go）。
+		s.gmMoveCommand(nc, pl, who, fields)
 	case "save":
 		if !s.sendRoleSave(pl) {
 			fmt.Fprint(nc, ">gm save: store not connected, save not sent\r")

@@ -14,7 +14,7 @@ const SUBS = [
   { id: "skill", title: "武学与修炼", desc: "重发武学 View40 / 内功 View43 / 轻功 View46" },
   { id: "dummy", title: "训练木桩", desc: "面前生成不还手的木桩（新手村官方练习木桩，血量自定义）" },
   { id: "scene", title: "传送与场景", desc: "场景内瞬移（0x1F）+ 跨场景切换（0x0C→0x0B→0x0D→0x09）" },
-  { id: "debug", title: "调试工具", desc: "mXXX 自定义帧探针 + ReadyFrames 重放" },
+  { id: "debug", title: "调试工具", desc: "mXXX 自定义帧探针 + ReadyFrames 重放 + 怒气 / 移动参数" },
   { id: "archive", title: "存档管理", desc: "0x04 存档（role_state_json 落 nx_roles，重登 RST1 回灌）" },
 ];
 
@@ -74,7 +74,8 @@ export function groupScenes(scenes, extra = []) {
 const PROPS = [
   ["str", "臂力 Str"], ["dex", "身法 Dex"], ["ing", "内息 Ing"],
   ["spi", "气血 Spi"], ["sta", "体魄 Sta"],
-  ["hp", "HP(含Max)"], ["mp", "MP(含Max)"], ["sp", "SP(含Max)"],
+  // 怒气不在此列：它是会话值，走调试工具页的「设置怒气」（gm rage）。
+  ["hp", "HP(含Max)"], ["mp", "MP(含Max)"],
   ["parry", "招架 Parry"],
 ];
 
@@ -393,6 +394,50 @@ export function mount(view, sub) {
     ]));
     box.appendChild(h("div", { class: "panel-desc" }, [
       "msg 对应 2433 的 custom_probe（数值寻址 mXXX）；flush 用于帧对拍与客户端卡死恢复。",
+    ]));
+
+    // 怒气 = SP（0x10 热发），每次登录从 0 起。上限取服务端的 MaxSP，面板
+    // 不持有：设值超出由服务端钳顶，「回满」走服务端上限。自动回复/秒 不设
+    // 上限，留空 = 不动当前速率。
+    const rage = field("怒气 0~上限", 110);
+    rage.value = "100";
+    const regen = field("自动回复/秒 ≥0", 125);
+    regen.value = "0";
+    box.appendChild(h("div", { class: "toolbar" }, [
+      h("span", { class: "group-label" }, ["怒气"]), rage, regen,
+      opBtn("设置怒气", "info", async () => {
+        if (!who() || !rage.value) return;
+        const parts = ["gm rage", who(), rage.value];
+        if (regen.value) parts.push(regen.value);
+        await send(parts.join(" "));
+      }),
+      opBtn("回满", "", () => {
+        if (!who()) return;
+        send(["gm rage", who(), "max"].concat(regen.value ? [regen.value] : []).join(" "));
+      }),
+      opBtn("读取", "", () => who() && send("gm rage " + who())),
+    ]));
+    box.appendChild(h("div", { class: "panel-desc" }, [
+      "怒气即 SP，每次登录从 0 起，0x10 热发，技能消耗读的是同一个值；",
+      "上限 = 登录下发的 MaxSP（当前固定 80），超出按上限。",
+      "自动回复/秒（0=关闭；会话级，重登归零；不设上限，官方满档为 5）：服务端每秒 +N 回到上限。",
+    ]));
+
+    // 移动参数：纯客户端物理（0x10 单属性帧热发）；缺省 3.9 / 9.8 = 进场值。
+    const speed = field("移动速度 0.1–100", 130);
+    speed.value = "3.9";
+    const gravity = field("下落重力 0.1–100", 130);
+    gravity.value = "9.8";
+    box.appendChild(h("div", { class: "toolbar" }, [
+      h("span", { class: "group-label" }, ["移动参数"]), speed,
+      opBtn("应用移动速度", "info", () => who() && speed.value && send("gm move " + who() + " speed " + speed.value)),
+      gravity,
+      opBtn("应用下落重力", "info", () => who() && gravity.value && send("gm move " + who() + " gravity " + gravity.value)),
+      opBtn("恢复默认", "", () => who() && send("gm move " + who() + " reset")),
+    ]));
+    box.appendChild(h("div", { class: "panel-desc" }, [
+      "移动速度同时更新 MoveSpeed 与 RunSpeed；下落重力更新 Gravity，数值越大下落越快，",
+      "下一次起跳生效（数值范围 0.1–100）。会话内切场景保持，重登回默认（3.9 / 9.8）。",
     ]));
   }
 

@@ -28,6 +28,11 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
+// baseMaxSP 怒气上限（MaxSP）的基础位：建号无内功档加成（官方全程零下发
+// MaxSPAdd，档位加成未建模）。登录人物数据大批尾追声明一次，建号基础属性批
+// 同值。与当前怒气无关——那是会话值，走 Context.SP。
+const baseMaxSP int32 = 80
+
 // vitalBook 解析当前装备内功（缺席回退零书——与 AppearanceFrame 同法）。
 func vitalBook(ctx Context) rolestate.NeiGongBook {
 	state := ctx.State
@@ -185,7 +190,7 @@ func PlayerVitalBatchFrame(ctx Context) ([]byte, error) {
 		ap("TeamFacultyLast", Int32Value(0)),
 		ap("PowerValue", Int32Value(int32(book.Power))),
 		ap("MaxPowerValue", Int32Value(int32(book.MaxPower))),
-		ap("SP", Int32Value(int32(state.SP))),
+		ap("SP", Int32Value(int32(ctx.SP))),
 		// 五维面板（白板 + 书）。
 		ap("Str", Int32Value(str)),
 		ap("Sta", Int32Value(sta)),
@@ -240,7 +245,7 @@ func PlayerVitalBatchFrame(ctx Context) ([]byte, error) {
 	)
 
 	// ---- 尾追：MaxSP 全量批一次声明（官方全程零下发 MaxSPAdd）----
-	props = append(props, ap("MaxSP", Int32Value(80))) // 基础 80（建号无内功档加成）
+	props = append(props, ap("MaxSP", Int32Value(baseMaxSP)))
 
 	return ObjectPropertyFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, 0, props)
 }

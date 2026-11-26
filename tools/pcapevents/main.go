@@ -11,6 +11,14 @@
 //	dumprec = dumpall 同款全事件，另把记录族帧（0x11/0x12/0x13/0x14）按
 //	官方 0x0A schema 解成「记录名 行 列=值」（战斗簇 fight_relation_rec /
 //	attack_back_rec / cooldown_rec 逐格取证用；dumpall 行格式不变）
+//
+// 环境开关：
+//
+//	NINEYIN_PCAP_HEX=<字节数>   未解码帧与 0x21/0x2C 追加原始 hex 头（既有）
+//	NINEYIN_PCAP_HEXALL=1       每帧另打一行 `H t=… op=… len=… hex=<整帧明文>`：
+//	                            自定义消息的逐字节取证（TVarList 值个数、槽位）
+//	NINEYIN_PCAP_STREAMDIR=<目录> 把重组后的两方向原始线路流落盘为
+//	                            stream_dir0.bin（C2S）/ stream_dir1.bin（S2C）
 package main
 
 import (
@@ -114,7 +122,7 @@ func main() {
 			}
 			if len(ip) >= 20 && ip[0]>>4 == 4 && ip[9] == 6 {
 				ihl := int(ip[0]&0xf) * 4
-				tcp := ip[ihl:]
+				tcp := trimIPTotal(ip, ihl)
 				if len(tcp) >= 20 {
 					sp := binary.BigEndian.Uint16(tcp[0:])
 					dp := binary.BigEndian.Uint16(tcp[2:])
@@ -195,6 +203,9 @@ func main() {
 		// §六）。标准帧器读到标记尾部的非法转义对会硬停，其后整段流丢失
 		//（女号抓包 600~624s 的战斗段此前因此未解出）。分析工具侧剥离标记，
 		// 仓库 net 包的 EscapeFramer 保持协议忠实不改。
+		if sd := os.Getenv("NINEYIN_PCAP_STREAMDIR"); sd != "" {
+			_ = os.WriteFile(fmt.Sprintf("%s/stream_dir%d.bin", sd, sk.dir), stream, 0o644)
+		}
 		if removed := stripOutOfBandMarkers(stream, tsArr); removed > 0 {
 			fmt.Fprintf(os.Stderr, "dir=%d stripped %d out-of-band marker(s)\n", dir, removed)
 		}
@@ -293,11 +304,15 @@ func main() {
 	if v, e := strconv.Atoi(os.Getenv("NINEYIN_PCAP_HEX")); e == nil {
 		hexMax = v
 	}
+	hexAll := os.Getenv("NINEYIN_PCAP_HEXALL") != ""
 	if mode == "dumpall" || mode == "dumprec" {
 		for _, ev := range events {
 			d := "C2S"
 			if ev.dir == 1 {
 				d = "S2C"
+			}
+			if hexAll {
+				fmt.Printf("H t=%9.3f %s #%d op=0x%02X len=%d hex=% x\n", ev.ts, d, ev.idx, ev.op, len(ev.frame), ev.frame)
 			}
 			switch {
 			case ev.op == 0x10 && len(ev.frame) >= 12:
@@ -708,6 +723,19 @@ func stripOutOfBandMarkers(stream []byte, ts []float64) int {
 		i = at // 从下一帧首字节继续扫
 	}
 	return removed
+}
+
+// trimIPTotal 取 IPv4 包的 TCP 段（按 IP 头总长截断）。以太网最小帧填充
+// 不属于 IP 包：纯 ACK 等短包的捕获长度带尾随零填充，不截断会被当成
+// 6 字节零载荷——与紧随其后的真数据同 seq，真数据被当重传砍掉头部。这是
+// 官服女号/男号引导抓包 m390、m681 帧首 6 字节解成零的直接成因；
+// stripOutOfBandMarkers 剥的「00×6+EE 标记」也是同一填充的伪影（截断后
+// 不再出现）。
+func trimIPTotal(ip []byte, ihl int) []byte {
+	if total := int(binary.BigEndian.Uint16(ip[2:])); total >= ihl && total <= len(ip) {
+		return ip[ihl:total]
+	}
+	return ip[ihl:]
 }
 
 func seqDelta(a, b uint32) int32 {

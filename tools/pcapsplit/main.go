@@ -135,7 +135,13 @@ func parsePacket(pkt []byte, linkType int) (dir int, clientPort uint16, seq uint
 	if len(ip) < ihl+20 {
 		return -1, 0, 0, nil
 	}
+	// 以太网最小帧填充不属于 IP 包：按 IP 头总长截断，否则纯 ACK 的零
+	// 填充被当成 6 字节载荷，同 seq 的后续真数据被当重传砍头。同
+	// pcapevents 的 trimIPTotal。
 	tcp := ip[ihl:]
+	if total := int(binary.BigEndian.Uint16(ip[2:])); total >= ihl && total <= len(ip) {
+		tcp = ip[ihl:total]
+	}
 	srcPort := binary.BigEndian.Uint16(tcp[0:])
 	dstPort := binary.BigEndian.Uint16(tcp[2:])
 	switch {

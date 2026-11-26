@@ -276,7 +276,9 @@ func BasePropertyFrames(ctx Context) ([][]byte, error) {
 	state := ctx.State
 	props := []IndexedProperty{
 		NamedProperty("Level", ByteValue(1)),
-		NamedProperty("CurLevel", ByteValue(1)),
+		// 属性表 CurLevel（idx 765）是 int32：按字节发会让其后的属性在按表
+		// 解码时错位（0x0D 与人物数据大批同属性也走 Int32）。
+		NamedProperty("CurLevel", Int32Value(1)),
 		NamedProperty("Str", Int32Value(int32(state.Str))),
 		NamedProperty("Dex", Int32Value(int32(state.Dex))),
 		NamedProperty("Ing", Int32Value(int32(state.Ing))),
@@ -284,10 +286,10 @@ func BasePropertyFrames(ctx Context) ([][]byte, error) {
 		NamedProperty("Sta", Int32Value(int32(state.Sta))),
 		NamedProperty("MaxHP", Int32Value(int32(state.HP))),
 		NamedProperty("MaxMP", Int32Value(int32(state.MP))),
-		NamedProperty("MaxSP", Int32Value(int32(state.SP))),
+		NamedProperty("MaxSP", Int32Value(baseMaxSP)),
 		NamedProperty("HP", Int32Value(int32(state.HP))),
 		NamedProperty("MP", Int32Value(int32(state.MP))),
-		NamedProperty("SP", Int32Value(int32(state.SP))),
+		NamedProperty("SP", Int32Value(int32(ctx.SP))),
 		NamedProperty("MaxParry", Int32Value(int32(state.Parry))),
 		// 碎银（CapitalType1，2433 线 silverUpdate 同名同型 Int64）。
 		NamedProperty("CapitalType1", Int64Value(state.Money)),

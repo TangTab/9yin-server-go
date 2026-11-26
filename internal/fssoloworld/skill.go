@@ -14,10 +14,13 @@ package fssoloworld
 //	                          m24 目标 40 → m19 → CantMove/CantParry=1
 //	锁定冲锋技超直收带         暂存簇（skillrush.go）：CurSkillID →
 //	                          CurSkillTarget → m25 → PauseSkill → m707[15]
+//	闪击通道技（skillflash.go） [清扫] → CurSkillID → CurSkillTarget → 锁态链 →
+//	                          冷却行 → 0x1F → m337 → m20（怒气不预扣，逐波扣）
 //	超距（非冲锋）             [清扫] → m24 目标 80 [目标位 + 朝向]
 //
 // 闸门（顺序即官服语义）：
 //	  - 出招进行中再按 → m707[9000+33]（其他技能正在使用中）；
+//	  - 闪击通道技怒气不够扣一次 → 零应答（连清扫帧都没有）；
 //	  - 冷却中 → 零应答（skillcooldown.go；客户端按冷却表自行拦键）；
 //	  - MP 不足 → m707[9000+21]；
 //	  - 需目标而无目标 → m707[9000+30]。
@@ -95,6 +98,8 @@ type combatState struct {
 	castSeq   int    // 施放序号（收招定时器防串）
 	locked    bool   // CantMove/CantParry 置位中（锁定义簇 / 冲锋在途）
 	staged    *stagedRush
+	// channel 进行中的闪击通道（skillflash.go；nil = 无）。
+	channel *channelState
 	// selected 最近一次选靶（msg431）；m211 不带目标时回落。
 	selected uint64
 	// mpCredit 回复小数累积；qinggong 轻功点。
@@ -102,6 +107,8 @@ type combatState struct {
 	mpReady  bool
 	mpCredit float64
 	qinggong int
+	// rageRegen 怒气自动回复/秒（gmdebug.go gm rage；0 = 关闭）。
+	rageRegen int
 	// selfBuff 施放期间挂在玩家身上的自身 buff（技能事件包；收招时摘）。
 	selfBuff *activeSelfBuff
 	// normalSteps 技能 ID → 连招动作轮转下标（流程包 HitAction 列表；按
@@ -467,6 +474,11 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	if st.staged != nil {
 		b.frames = append(b.frames, s.clearStagedLocked(b.ident, st)...)
 	}
+	// 进行中的闪击通道被新按键覆盖（只在通道被脚本打断、出招态已清后才会
+	// 走到）：先收束它的锁态链，再按新技能分流。
+	if st.channel != nil {
+		b.frames = append(b.frames, s.closeChannelLocked(pl, st, st.channel)...)
+	}
 	// m270 的冷却闸门先于出招闸门：施放途中再按同技能，官服回的是冷却提示
 	// 而不是 9033（抓包 722.139 受理 → 722.286 再按 → 722.324 m1[2,"9009"]，
 	// 其前没有清扫帧）。
@@ -481,6 +493,16 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	if st.curSkill != "" {
 		b.custom(707, entergen.CustomInt(useSkillResultBase+useSkillResultOtherSkillHitting))
 		return b.done()
+	}
+	// 闪击通道技：怒气不够扣一次的整条静默吞（挑战包 102~104s 怒气 0 四连按：
+	// 零回帧，连冷却清扫都没有）。
+	channel, isChannel := channelSpecs[def.ID]
+	if isChannel {
+		s.ensureLiveLocked(st, pl)
+		if st.live.sp < channel.spPerWave {
+			s.trace("skill %s channel swallowed sp=%d client=%d", def.ID, st.live.sp, pl.Conn1)
+			return b.done()
+		}
 	}
 	// 目标回落：需目标的技能在 m211 不带目标时取最近选靶（客户端先 m431
 	// 再 m211）。自身范围技不回落——抓包里它们的 m20 目标恒为空、朝向取
@@ -588,6 +610,10 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	if def.Script == skilldata.ScriptLock {
 		b.custom(284)
 	}
+	if isChannel {
+		// 锁态链紧跟 CurSkillTarget（挑战包受理簇）。
+		s.grantChannelLockLocked(b, st, pl, channel)
+	}
 	b.frames = append(b.frames, rowFrames...)
 	st.cooldowns = rows
 	if def.Consume.MP > 0 {
@@ -599,20 +625,25 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 		st.qinggong = max(st.qinggong-def.Consume.QingGong, 0)
 		b.prop("QingGongPoint", entergen.Int32Value(int32(st.qinggong)))
 	}
-	if def.Consume.SP > 0 {
+	// 闪击通道技的怒气逐波扣（skillflash.go），受理时不预扣。
+	if def.Consume.SP > 0 && !isChannel {
 		st.live.sp = max(st.live.sp-def.Consume.SP, 0)
 		b.prop("SP", entergen.Int32Value(int32(st.live.sp)))
 	}
 	// 施放期间的自身 buff（技能事件包）：属性位 → buff 槽串 → m169 挂载。
-	if spec := hitSpecOf(def.ID).selfBuff; spec != nil {
+	if spec := hitSpecOf(def.ID).selfBuff; spec != nil && !isChannel {
 		s.grantSelfBuffLocked(b, st, pl, *spec)
 	}
 	st.lastTaoLu, st.curSkill, st.curTarget = def.TaoLu, def.ID, cast.targetKey()
 	st.castSeq++
 	seq := st.castSeq
 
-	// m20 动作名 = 招式表查表键（连招段按技能各自轮转）。
+	// m20 动作名 = 招式表查表键（连招段按技能各自轮转）；闪击通道技取招式
+	// 表该招的首段动作（qzj_07_1，与技能 id 不同名）。
 	action := skillAction(st, def)
+	if isChannel {
+		action = s.channelAction(def)
+	}
 	orient := cast.orient
 	if cast.hasTarget {
 		orient = towardOrient(float64(cast.x), float64(cast.z), target.pos[0], target.pos[2])
@@ -644,6 +675,11 @@ func (s *Server) planSkillCast(pl *Player, def skilldata.Definition, cast skillC
 	locked := st.locked
 	s.trace("skill %s accepted dist=%.2f mp=%d client=%d", def.ID, distance, st.mp, pl.Conn1)
 	return b.frames, func() {
+		// 闪击通道技：波次由通道引擎驱动（逐波索敌 + c71），不走招式表判定帧。
+		if isChannel {
+			s.launchChannel(pl, def, cast, action, seq)
+			return
+		}
 		// 命中计划在受理帧落地后登记（帧编码失败时不登记）；出招锁至少
 		// 撑到末击（抓包：CurSkillID 在末击帧之后才清）。
 		lastHit := s.scheduleSkillHits(pl, def, cast, action, 0)
@@ -749,8 +785,12 @@ func (s *Server) combatTick() {
 		}
 		st := &pl.combat
 		st.mu.Lock()
+		// 怒气自动回复（gm rage 的会话级速率；未开 = 零帧。不挂在 MP 会话
+		// 态上：只开回复不放过技能的玩家也要走这一拍）。
+		rage := s.rageRegenLocked(pl, st)
 		if !st.mpReady {
 			st.mu.Unlock()
+			s.sendFrames(pl, rage)
 			continue
 		}
 		maxMP := playerMaxMP(pl)
@@ -762,6 +802,7 @@ func (s *Server) combatTick() {
 		}
 		st.mpCredit, st.mp = credit, mp
 		st.mu.Unlock()
+		s.sendFrames(pl, rage)
 		if mp != before {
 			s.sendFrames(pl, mpFrame(pl.wireIdent(), mp))
 		}

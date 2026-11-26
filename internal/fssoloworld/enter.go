@@ -88,16 +88,17 @@ func (s *Server) replayGoldenFrames(pl *Player, blob []byte) int {
 	return sent
 }
 
-// enterContext 组装原生生成上下文（身份/会话/角色状态/场景 NPC 目录）。
-// 身份只读自会话（ident.go：obj/own=进场分配的 wire ident，Sequence=登录
-// 会话 serial）——本函数一次进场会被调用多次，不得在此分配。
+// roleContext 进场生成上下文的存档侧输入（身份/会话/角色状态/场景 NPC 目录）
+// ——不含会话怒气（SP 恒 0）。身份只读自会话（ident.go：obj/own=进场分配的
+// wire ident，Sequence=登录会话 serial）——本函数一次进场会被调用多次，不得
+// 在此分配。playerPanel 在持 combatState.mu 时取它解码面板，所以这里不能进
+// 那把锁（会话怒气在 enterContext 里取）。
 // NPC 物化不再走 PreReady（2026-11-22 晚定案：客户端 stage_main lua
 // scene_obj:RegisterCallBack 注册前收到的对象只建视觉层（game_visual）、
 // 不进逻辑层（game_client）——form_talk.open_npc_talk 的 GetSceneObj 与
 // 点击判定全在逻辑层，PreReady 物化=看得见点不中）；改由 clientReady
 // 后延迟下发（npcEnterDefer，见 clientReady）。
-func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context {
-	_ = materializeNPC // 兼容参数：物化时机已挪 clientReady 后
+func (s *Server) roleContext(pl *Player) entergen.Context {
 	return entergen.Context{
 		Identity: pl.entergenIdentity(),
 		Session: entergen.Session{
@@ -110,6 +111,23 @@ func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context 
 		Tasks:      s.npcTaskCatalogOf(),                        // 任务三表行推的任务目录（taskrecords.go）
 		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
 	}
+}
+
+// enterContext 发帧用的进场生成上下文 = 存档侧输入 + 会话怒气（SP：战斗
+// 会话态的当前值，没进过战斗 = 0）。切场景重入时人物数据大批、基础属性批
+// 与 0x0D 带的都是当前怒气，客户端怒气条不会闪回 0。调用方不得持
+// combatState.mu（持锁的路径用 roleContext）。materializeNPC 是兼容参数：
+// 物化时机已挪 clientReady 后。
+func (s *Server) enterContext(pl *Player, materializeNPC bool) entergen.Context {
+	_ = materializeNPC
+	ctx := s.roleContext(pl)
+	st := &pl.combat
+	st.mu.Lock()
+	if st.live.ready {
+		ctx.SP = st.live.sp
+	}
+	st.mu.Unlock()
+	return ctx
 }
 
 // sceneGlobalIndexOf 场景 resource → 客户端 scenes.ini 全局段号（npcdata
@@ -155,6 +173,9 @@ func (s *Server) storeLoadEnter(id1 uint32, p []byte) bool {
 		if state, err := rolestate.UnmarshalRoleState(*rest); err != nil {
 			s.trace("role state unmarshal failed client=%d: %v", clientID, err)
 		} else {
+			// 怒气是会话值：旧档里存的建号初值（80）不再随档，进场帧下发
+			// 的是战斗会话态（enterContext），没进过战斗 = 0。
+			state.SP = 0
 			pl.roleState, pl.haveRoleState = state, true
 			pl.entryReady = false     // 新一次进场：0x09 之前的 107 转储不落库
 			s.normalizeTaskTracks(pl) // 旧流程只记了任务号的已接任务补进度行（taskrecord.go）
@@ -225,6 +246,9 @@ func (s *Server) clientReady(pl *Player) {
 		for _, frame := range frames {
 			s.sendToClient(pl, frame)
 		}
+		// 就绪簇收尾：新手副本的引导阶段（待选态锁输入）+ 刷新任务追踪栏
+		// m390（guide.go）。
+		s.readyTail(pl)
 		// 邮箱整表重放（2433 线 ClientReady 后、View43/40 前窗口；空表零帧）。
 		letters := s.pushLetterRows(pl)
 		s.trace("ready native %d frames client=%d letters=%d", len(frames), pl.Conn1, letters)

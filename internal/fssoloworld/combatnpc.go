@@ -249,6 +249,7 @@ func (s *Server) npcResolveHit(f *npcFighter, seq int, ref npcSkillRef, plan hit
 	}
 	props["HP"], props["MaxHP"] = float64(st.live.hp), float64(st.live.maxHP)
 	props["MP"], props["MaxMP"] = float64(st.mp), float64(playerMaxMP(pl))
+	props["SP"], props["MaxSP"] = float64(st.live.sp), float64(st.live.maxSP) // 面板里的 SP 是进场值，怒气读会话态
 	if level := s.playerPanel(pl)["Level"]; level > 0 {
 		props["Level"] = level
 	}

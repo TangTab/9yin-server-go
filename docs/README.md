@@ -49,7 +49,8 @@
 | 文档 | 内容 | 状态 |
 |---|---|---|
 | [冲锋与打坐外服方言总集](combat/冲锋与打坐外服方言总集.md) | 冲锋+移动+打坐四文档合并定版：c61 逐技窗口授予协议、武器系 flag/anim、受理簇 9 帧、四桶模型、fork 自走差集终局、打坐回复帧、22 条开放项、11 条勘误索引 | 现行权威（冲锋终局） |
-| [寒心恨雪与太极剑舞引导机制](combat/寒心恨雪与太极剑舞引导机制.md) | 引导技三形态定版（怒招预扣/逐跳索敌/演出锁死）、通道引擎、脚本化 | 现行权威 |
+| [寒心恨雪与太极剑舞引导机制](combat/寒心恨雪与太极剑舞引导机制.md) | 引导技三形态定版（怒招预扣/逐跳索敌/演出锁死）、通道引擎、脚本化；2026-11-26 复核（§九～§十二）：修正 TCP 重组后逐帧定版 34 跳位移（31.7 m/s ≈ tm_speed 30、落点恒为目标实位）、c71 两种线路形态与客户端取值槽位（动作名在 tm_action 槽，旧「第 11 值」错位更正）、m914 类型/计数语义与 39/39 回显、逐波帧序（m169 值 0 挂 1 摘、CantParry 为来源数置 1 清 0、m205 仅波 1）、零头帧/0xCC 伪影成因；`official` 分支实现 `skillflash.go` 与官服差异清单；工具 `tools/pcapflash` | 现行权威（`official` 分支接入见 §十一；真机未验） |
+| [客户端逆向数据附录-玩家状态机与m24子码](combat/客户端逆向数据附录-玩家状态机与m24子码.md) | 外服 dump 与本地 DLL 的逆向数据表：玩家状态机状态注册表 141 项（123 = player_flash_attack / 124 = player_flash_stop）、m24 子码 → 处理函数两版对拍（98 / 95 个子码，6 处差异）、子码 71 处理函数取值下标、`IsFlashAttack=1` 的 12 个技能；`tools/clientbin`（pe / mempe / mdmp / subtab / stateconst）再生成命令 | 现行参考（数据由工具导出） |
 | [combat-rewrite-hardcoded-audit](combat/combat-rewrite-hardcoded-audit.md) | 战斗硬编码三分审计（A 已替/B 对齐保留/C 本地占位） | 历史记录（属性索引为 fork 表位，见文首横幅） |
 | [record-table-official-and-qinggong-economy](combat/record-table-official-and-qinggong-economy.md) | 0x0A 记录表官方化（447 schema）+ 轻功经济对齐 | 历史记录（记录表侧索引不受 0x09 切换影响） |
 | [jingmai-cd-qinggong](combat/jingmai-cd-qinggong.md) | CD 不下发根因（记录表方言）+ 经脉 + 滑翔 buff | 历史记录（部分被上行文档覆盖） |

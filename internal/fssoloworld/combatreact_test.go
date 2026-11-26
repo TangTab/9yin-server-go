@@ -34,9 +34,14 @@ func (f *combatFixture) castAs(t *testing.T, skill string) (skilldata.Definition
 		targetOwner: f.monster.spawn.OwnerID, hasTarget: true}, seq
 }
 
-// hit17 对怪物的 m24 17 帧（伤害取怪物实际掉血）。
-func hit17(skill, class string, dealt int) string {
-	return fmt.Sprintf("m24(npc,i:17,i:%d,i:0,i:0,s:%s,s:%s,s:test_monster,s:,i:0)", dealt, skill, class)
+// hit17 对怪物的 m24 17 帧：伤害取怪物实际掉血，第 5 值 = 技能静态包的
+// DamageType（五个抓包 36 个技能逐一吻合：任务技能 musejuben 族 = 3、外功 = 0）。
+func (f *combatFixture) hit17(skill, class string, dealt int) string {
+	damageType := 0
+	if def, ok := f.s.skillDefinition(f.pl, skill); ok {
+		damageType = def.DamageType
+	}
+	return fmt.Sprintf("m24(npc,i:17,i:%d,i:0,i:%d,s:%s,s:%s,s:test_monster,s:,i:0)", dealt, damageType, skill, class)
 }
 
 func wantText(parts []string) string { return strings.Join(parts, " | ") }
@@ -55,7 +60,7 @@ func TestCombatStaggerBeatHitReaction(t *testing.T) {
 	hp := f.hp()
 	got := f.pump(1280 * time.Millisecond)
 	want := wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=2", f.aggro(),
-		hit17(areaSkill, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
+		f.hit17(areaSkill, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
 		"m24(npc,i:40,s:body_hit_3_self,me)", "m205(me,s:" + areaSkill + ",npc)", "me:CurSkillID="})
 	if wantText(got) != want {
 		t.Fatalf("首次交手的受击帧序不符:\n got: %s\nwant: %s", wantText(got), want)
@@ -66,7 +71,7 @@ func TestCombatStaggerBeatHitReaction(t *testing.T) {
 	hp = f.hp()
 	got = f.pump(1280 * time.Millisecond)
 	want = wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=2", "me:rec114[0.1]=T", "me:LogicState=1",
-		hit17(areaSkill, "SkillNormal", hp-f.hp()), "m24(npc,i:40,s:body_hit_3_self,me)", "m205(me,s:" + areaSkill + ",npc)", "me:CurSkillID="})
+		f.hit17(areaSkill, "SkillNormal", hp-f.hp()), "m24(npc,i:40,s:body_hit_3_self,me)", "m205(me,s:" + areaSkill + ",npc)", "me:CurSkillID="})
 	if wantText(got) != want {
 		t.Fatalf("再次命中的受击帧序不符:\n got: %s\nwant: %s", wantText(got), want)
 	}
@@ -83,7 +88,7 @@ func TestCombatDefaultStaggerSendsHurtActionEveryHit(t *testing.T) {
 	f.s.resolveSkillHit(f.pl, def, cast, plan, 1, seq)
 	got := combatText(f.s, f.pl, f.monster, f.take())
 	want := wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=2", f.aggro(),
-		hit17(skill, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
+		f.hit17(skill, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1",
 		"m205(me,s:" + skill + ",npc)"})
 	if wantText(got) != want {
 		t.Fatalf("第 1 击帧序不符:\n got: %s\nwant: %s", wantText(got), want)
@@ -92,7 +97,7 @@ func TestCombatDefaultStaggerSendsHurtActionEveryHit(t *testing.T) {
 	f.s.resolveSkillHit(f.pl, def, cast, plan, 2, seq)
 	got = combatText(f.s, f.pl, f.monster, f.take())
 	want = wantText([]string{"me:FP=4", "me:SP=4", "me:rec114[0.1]=T",
-		hit17(skill, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "m24(me,i:10,i:2)", "me:MaxHits=2",
+		f.hit17(skill, "SkillNormal", hp-f.hp()), "m18(npc,s:hurt_half,i:0,me)", "m24(me,i:10,i:2)", "me:MaxHits=2",
 		"m205(me,s:" + skill + ",npc)", "me:CurSkillID="})
 	if wantText(got) != want {
 		t.Fatalf("第 2 击帧序不符:\n got: %s\nwant: %s", wantText(got), want)
@@ -192,7 +197,7 @@ func TestCombatDodgeBreaksCombo(t *testing.T) {
 	f.s.resolveSkillHit(f.pl, def, cast, one, 1, seq)
 	got = wantText(combatText(f.s, f.pl, f.monster, f.take()))
 	want := wantText([]string{"view41.1:CurTargetCount=1", "me:FP=6", "me:SP=6", "me:rec114[0.1]=T",
-		hit17(basicAttack, "SkillNormal", hp-f.hp()), "m24(me,i:10,i:2)", "me:MaxHits=2",
+		f.hit17(basicAttack, "SkillNormal", hp-f.hp()), "m24(me,i:10,i:2)", "me:MaxHits=2",
 		"m205(me,s:zs_normal_00,npc)", "me:CurSkillID="})
 	if got != want {
 		t.Fatalf("被闪避后的第 2 次命中帧序不符:\n got: %s\nwant: %s", got, want)
@@ -216,7 +221,7 @@ func TestCombatKillStripsBuffs(t *testing.T) {
 	hp := f.hp()
 	got := f.pump(467 * time.Millisecond)
 	want := wantText([]string{"view41.1:CurTargetCount=1", "me:FP=8", "me:SP=8", "me:rec114[0.1]=T",
-		hit17(basicAttack, "SkillNormal", hp-f.hp()),
+		f.hit17(basicAttack, "SkillNormal", hp-f.hp()),
 		"m169(i:1,s:buf_CS_jh_cqgf01,npc,me,s:test_monster,s:,i:T64,i:73)", "me:rec114-row0",
 		"m24(npc,i:29,me,s:test_monster,s:)", "m18(npc,s:hurt_half,i:0,me)", "m205(me,s:zs_normal_00,npc)"})
 	if wantText(got) != want {
@@ -243,7 +248,7 @@ func TestCombatDeathMarkSkillEmitsCorpseState(t *testing.T) {
 	f.s.resolveSkillHit(f.pl, def, cast, hitPlan{times: []time.Duration{0}, hurt: 50}, 1, seq)
 	got := wantText(combatText(f.s, f.pl, f.monster, f.take()))
 	want := wantText([]string{"view41.1:CurTargetCount=1", "me:FP=2", "me:SP=2", f.aggro(),
-		hit17(skill, "SkillLock", 50), "me:rec114-row0", "m24(npc,i:29,me,s:test_monster,s:)",
+		f.hit17(skill, "SkillLock", 50), "me:rec114-row0", "m24(npc,i:29,me,s:test_monster,s:)",
 		"m18(npc,s:hurt_half,i:0,me)", "me:MaxHits=1", "m24(npc,i:13)", "m205(me,s:" + skill + ",npc)",
 		"me:CurSkillID=", "me:CurSkillTarget=o:0/0", "m189(me)"})
 	if got != want {
@@ -270,7 +275,7 @@ func TestCombatMultiTargetRageAndComboPerTarget(t *testing.T) {
 	const o = "o:234881281/4096"
 	want := wantText([]string{"view41.1:CurTargetCount=2",
 		"me:FP=2", "me:SP=2", "npc:LogicState=1", "me:rec114+row0{c0=obj(234881280/4096),c1=T}", "me:LogicState=1",
-		"m24(npc,i:37,s:npc_foundplayer)", hit17(areaSkill, "SkillNormal", 63), "m18(npc,s:hurt_half,i:0,me)",
+		"m24(npc,i:37,s:npc_foundplayer)", f.hit17(areaSkill, "SkillNormal", 63), "m18(npc,s:hurt_half,i:0,me)",
 		"me:MaxHits=1", "m24(npc,i:40,s:body_hit_3_self,me)",
 		"me:FP=4", "me:SP=4", o + ":LogicState=1", "me:rec114+row1{c0=obj(234881281/4096),c1=T}",
 		"m24(" + o + ",i:37,s:npc_foundplayer)", "m24(" + o + ",i:17,i:63,i:0,i:0,s:" + areaSkill + ",s:SkillNormal,s:test_monster,s:,i:0)",

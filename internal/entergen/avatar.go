@@ -193,6 +193,15 @@ func AvatarFrame(ctx Context, literal47 bool) ([]byte, int) {
 			if v := apSlot(4); v != "" {
 				raw = append([]byte(v), 0)
 			}
+		case "HelpStepID":
+			// 入过新手帮助链的角色取存档步骤（未入链保持外服常量）。
+			if state.HelpStepID != "" {
+				raw = append([]byte(state.HelpStepID), 0)
+			}
+		case "RelivePositon":
+			if state.RelivePositon != "" {
+				raw = append([]byte(state.RelivePositon), 0)
+			}
 		}
 		body = binary.LittleEndian.AppendUint16(body, entry.Index)
 		if raw != nil {

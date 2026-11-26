@@ -270,6 +270,17 @@ func (s *Server) reentryReady(pl *Player, pending *sceneSwitchState) {
 	} else {
 		s.trace("reentry player config failed client=%d: %v", pl.Conn1, err)
 	}
+	// GM 调试移动参数（gmdebug.go）会话内跨场景保持：本次进场的 0x0D 与上面
+	// 的人物数据大批带的都是进场缺省值（后者含 Gravity），这里重推覆写
+	//（未改 = 零帧）。
+	for _, frame := range s.gmMoveFrames(pl) {
+		s.sendToClient(pl, frame)
+		sent++
+	}
+	// 就绪簇收尾：引导阶段（新手副本待选态锁输入）+ 刷新任务追踪栏 m390
+	//（guide.go；官服每次进场就绪簇末尾都发）——须在任务记录行之后，客户端
+	// 按已接表的追踪标志重建追踪列表。
+	s.readyTail(pl)
 	// NPC AOI 首拍：视口/巡逻簿记重置（patrolReadyAt+5s 首拍缓冲）。
 	for _, frame := range s.sceneNPCEnter(pl, pl.roleState.Resource, pos) {
 		s.sendToClient(pl, frame)

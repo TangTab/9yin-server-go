@@ -281,7 +281,7 @@ func AppearanceFrame(ctx Context) ([]byte, error) {
 		ap("TeamFacultyLast", Int32Value(0)),
 		ap("PowerValue", Int32Value(int32(book.Power))),
 		ap("MaxPowerValue", Int32Value(int32(book.MaxPower))),
-		ap("SP", Int32Value(int32(state.SP))),
+		ap("SP", Int32Value(int32(ctx.SP))),
 		ap("Str", Int32Value(int32(str))),
 		ap("Sta", Int32Value(int32(sta))),
 		ap("Dex", Int32Value(int32(dex))),

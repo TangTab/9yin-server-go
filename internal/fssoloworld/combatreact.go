@@ -27,6 +27,7 @@ type hitSpec struct {
 	effect    string        // 每击挂到受击者身上的特效（m24 40）
 	firstOnly bool          // 受击动作 m18 hurt_half 只在首次交手发；缺省每击都发
 	deathMark bool          // 击杀时另发 m24 13
+	hurtSent  bool          // 受击动作由技能自己的帧序先行下发：击杀簇不再补发 m18
 	selfBuff  *selfBuffSpec // 施放期间挂在玩家身上的自身 buff
 	control   *hitControl   // 命中附带的受控（combatcontrol.go）
 }
@@ -50,6 +51,10 @@ type selfBuffSpec struct {
 //	CS_jh_hyjf07                          820.649 / 挑战包 483.077）；两包其余
 //	                                      26 次击杀都不带
 //
+//	CS_jh_hyjf08                          闪击通道技：每波的受击动作是两值的
+//	                                      m18[目标,"hurt_f_1_l_half"]，由波次
+//	                                      引擎在结算帧之前下发（skillflash.go）
+//
 // 不在表里的技能：Stagger 拍每击 m18 hurt_half（群战包常规武学的多数形态：
 // yydf03/04、lyfh07、xhmdl08、jgjf05、txd08、lzs03、ywt07），无特效。
 var hitSpecs = map[string]hitSpec{
@@ -60,6 +65,7 @@ var hitSpecs = map[string]hitSpec{
 		control:  &hitControl{buffs: []string{"buf_skill_musejuben_41", "buf_skill_musejuben_42"}, knock: true}},
 	"skill_musejuben_7": {deathMark: true},
 	"CS_jh_hyjf07":      {deathMark: true},
+	"CS_jh_hyjf08":      {hurtSent: true},
 }
 
 func hitSpecOf(skill string) hitSpec {
