@@ -40,8 +40,8 @@ const (
 	// guideStepSub m414 ["gamestep", 主步, 子步] 的子步（官服两号同为 5）。
 	guideStepSub int32 = 5
 
-	// guideScene 新手副本（单机引导场景）resource。
-	guideScene = "born_single_01"
+	// guideScene 新手副本（单机引导场景）resource；新号默认出生地。
+	guideScene = rolestate.GuideScene
 	// guideHelpStepGuide / guideHelpStepSkip 新手帮助链起点（freshmanhelp.ini
 	// 节名）：女号 "chengdu_00"（引导线）、男号 "jimingyi_00"（跳过 → 鸡鸣驿）。
 	guideHelpStepGuide = "chengdu_00"

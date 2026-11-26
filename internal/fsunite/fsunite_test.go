@@ -16,6 +16,9 @@ import (
 	"github.com/lizhanyin/9yin-server-go/internal/fssolostore"
 	"github.com/lizhanyin/9yin-server-go/internal/fssoloworld"
 	fsnet "github.com/lizhanyin/9yin-server-go/internal/net"
+	"github.com/lizhanyin/9yin-server-go/internal/npcdata"
+	"github.com/lizhanyin/9yin-server-go/internal/npcfeed"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // testINI 覆盖 game_unite.ini 全方言（含五库节/[Logic]/[Outer]）。
@@ -575,14 +578,17 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	if f := readFrame(0x0B); binary.LittleEndian.Uint16(f[13:]) != 5 {
 		t.Fatalf("native entry attrs=%d", binary.LittleEndian.Uint16(f[13:]))
 	}
+	// 迷雾行 [段号, resource, 1] 只在场景表登了该场景时下发（缺席走开图
+	// 降级，只发位图）；仓内 testdata 的场景表没登新手副本。
+	maskIndex, maskWanted := npcdata.SceneGlobalIndex(npcfeed.ResolveRoot(), rolestate.GuideScene)
 	openMapSeen, mapMaskSeen := false, false
 	checkMapFrame := func(f []byte) {
 		if f[0] == 0x11 && len(f) >= 16 {
 			switch binary.LittleEndian.Uint16(f[10:]) {
 			case 51: // OpenMapRec 24 行开图位图（外服 112B 形）
 				openMapSeen = len(f) == 112 && binary.LittleEndian.Uint16(f[14:]) == 24
-			case 56: // MapMaskRec 迷雾行 [段号, resource, 1]
-				mapMaskSeen = binary.LittleEndian.Uint32(f[16:]) == 3
+			case 56: // MapMaskRec 迷雾行 [段号, born_single_01, 1]
+				mapMaskSeen = binary.LittleEndian.Uint32(f[16:]) == maskIndex
 			}
 		}
 	}
@@ -601,8 +607,8 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	time.Sleep(200 * time.Millisecond)
 	writeActivity()
 	// NPC 物化族（npcfeed 链，真档在仓根 testdata，cwd 探测命中）：进场段
-	// 尾部 NPC 0x28 mode=0x46 物化 ×1674（官方 0x0E 段 obj；摆放 1907 联查
-	// 1674——闸门拦 85 条 EventNpc/TaskSubId/SubSceneNo）。m229 已退役。
+	// 尾部 NPC 0x28 mode=0x46 物化 ×84（新号出生在新手副本 born_single_01：
+	// 摆放 156 联查 84，闸拦 48；官方 0x0E 段 obj）。m229 已退役。
 	isNpcM229 := func(f []byte) bool {
 		return len(f) > 12 && f[0] == 0x1E && f[3] == 2 &&
 			binary.LittleEndian.Uint32(f[4:]) == 229 &&
@@ -652,8 +658,8 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	if !openMapSeen {
 		t.Errorf("进场段未见 OpenMapRec 位图帧（大地图城市标签/点击寻路数据源）logs: %s", logs)
 	}
-	if mapMaskSeen {
-		t.Errorf("副本进场不应有 MapMaskRec 迷雾行（scenes.ini 无全局段号，开图降级）logs: %s", logs)
+	if maskWanted && !mapMaskSeen {
+		t.Errorf("进场段未见 MapMaskRec 迷雾行（born_single_01=%d）logs: %s", maskIndex, logs)
 	}
 	if mark229 != 0 {
 		t.Errorf("m229 默认关仍下发 %d 帧", mark229)

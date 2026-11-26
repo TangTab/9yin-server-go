@@ -50,9 +50,7 @@ func TestResourceOfConfig(t *testing.T) {
 
 func TestCheckPortalTriggersTransfer(t *testing.T) {
 	s, pl := newCustomTestServer(t)
-	// 建号默认已进新手副本；本用例测 born03 的走近传送门——显式落
-	// born03 模拟存量号。
-	pl.roleState.Scene, pl.roleState.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
+	pinSceneBorn03(t, pl) // 路线取自 born03
 	prevGap := sceneSwitchGap
 	sceneSwitchGap = time.Millisecond
 	t.Cleanup(func() { sceneSwitchGap = prevGap })

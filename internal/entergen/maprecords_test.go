@@ -48,6 +48,7 @@ func TestOpenMapRecFrameShape(t *testing.T) {
 // 已进新手副本（scenes.ini 无全局段号），本用例显式取 born03 口径。
 func TestMapRecordsFramesOrderAndOverlay(t *testing.T) {
 	ctx := testContext(t)
+	// 用例断言的是 born03 场景数据：把角色钉在烟雨庄（与默认出生场景无关）。
 	ctx.State.Scene, ctx.State.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
 	ctx.SceneIndex = 3 // born03_YanYuZhuang 全局段号（scenes.ini [3]）
 	frames, err := MapRecordsFrames(ctx, ctx.SceneIndex)

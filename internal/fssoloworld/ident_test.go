@@ -129,9 +129,7 @@ func TestEnterChainIdentConsistency(t *testing.T) {
 			resetNpcCatalog(t)
 			t.Setenv("NINEYIN_PLAYER_IDENT", tc.env)
 			s, pl := newCustomTestServer(t)
-			// 建号默认已进新手副本，本用例对拍 born03 进场链 ident
-			//（段号 3）——显式落 born03 模拟存量号。
-			pl.roleState.Scene, pl.roleState.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
+			pinSceneBorn03(t, pl) // 用例按 born03=scenes.ini [3] 推 ident
 			n := s.sceneSpawnCount("born03")
 			if tc.scene && n == 0 {
 				t.Skip("数据根缺席（testdata/ini）")

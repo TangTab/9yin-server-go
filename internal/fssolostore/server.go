@@ -510,12 +510,13 @@ func newRoleUID() string {
 }
 
 // 建角首登场景缺省（官服建号.pcapng：首登 0x0B=ini\scene\born_single_01
-// 新手副本；SceneID=scenes.ini born_single_01 段号 300。RoleMeta.SceneID/
-// Location 只落库，无运行时消费方——world 端权威是 role_state_json 的
-// scene/resource）。
+// 新手副本；SceneID=scenes.ini born_single_01 首现段号 300——非 17，17
+// 是 scene_name_017 串键口径的误植。落点见 rolestate.GuideSceneLanding。
+// RoleMeta.SceneID/Location 只落库，无运行时消费方——world 端权威是
+// role_state_json 的 scene/resource）。
 const (
 	birthSceneID       = 300
-	birthSceneLocation = `ini\scene\born_single_01`
+	birthSceneLocation = rolestate.GuideScenePath
 
 	// defaultFacultySeed 建号修为种子（b-line facultySeed 口径：外服私服
 	// 修为由历练转化供给，新角色种子可配）。

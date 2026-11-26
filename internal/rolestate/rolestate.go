@@ -644,6 +644,14 @@ func InferSexFromPara(para string) int {
 // 是副本首登锚。
 const GuideScene = "born_single_01"
 
+// GuideScenePath / GuideSceneLanding 新手副本的场景全名与建号落点。
+// GuideLanding() 数据驱动（location.ini BornCJ000100）缺席时的回落锚
+// =此二值；GM「新手引导」传送预设（fssoloworld/scenepresets.go）同源
+// 引用。落点取引导起点 NPC funnpcborn003031（沙滩的赵子亟）旁偏移 2m。
+const GuideScenePath = `ini\scene\born_single_01`
+
+var GuideSceneLanding = [4]float64{197.626, 4.746, -108.829, -2.746}
+
 // DefaultBook 缺省剧本（外观串无剧本线索的旧档/补建）：book2 烟雨庄——
 // 与旧出生地默认 born03 同义（官服抓包建号即 book2）。
 const DefaultBook = "book2"
@@ -859,8 +867,9 @@ func resourceOfScene(scene string) string {
 }
 
 // GuideLanding 副本首登落点（location.ini BornCJ000100；数据缺席回落
-// 硬编码锚——赵子亟旁偏移 2m，与 extraSceneDestinations 同值）。注意不
-// 能经 resourceOfScene 匹配：born_single_01 自身含 '_'，会被截成 "born"。
+// GuideScenePath/GuideSceneLanding 锚——赵子亟旁偏移 2m，与
+// extraSceneDestinations 同值）。注意不能经 resourceOfScene 匹配：
+// born_single_01 自身含 '_'，会被截成 "born"。
 func GuideLanding() (scene string, pos [4]float64) {
 	birth := roleStateAssets.birth
 	for key, val := range birth {
@@ -873,7 +882,7 @@ func GuideLanding() (scene string, pos [4]float64) {
 			return val, parseLocation(birth[strings.TrimSuffix(key, ".Scene")+".Location"])
 		}
 	}
-	return `ini\scene\born_single_01`, [4]float64{197.626, 4.746, -108.829, -2.746}
+	return GuideScenePath, GuideSceneLanding
 }
 
 // SceneOption location.ini BornCJ 节导出的一个可选场景目的地
