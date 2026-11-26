@@ -545,8 +545,25 @@ func InferSexFromPara(para string) int {
 	return 1
 }
 
-// DefaultBirthScene 默认出生场景（官方默认烟雨庄 born03）。
-const DefaultBirthScene = "born03"
+// DefaultBirthScene 默认出生场景：新手副本 born_single_01（官服新号首次
+// 登录进的单机引导场景，2026-11-26 起；此前是烟雨庄 born03）。
+const DefaultBirthScene = GuideScene
+
+// GuideScene 新手副本（单机引导场景）的 resource。
+const GuideScene = "born_single_01"
+
+// GuideScenePath / GuideSceneLanding 新手副本的场景全名与建号落点。它不在
+// location.ini 的 BornCJ 表里（单场景克隆态）；落点取引导起点 NPC
+// funnpcborn003031（沙滩的赵子亟）旁偏移 2m——GM「新手引导」传送预设
+// （fssoloworld/scenepresets.go）同此一值。
+const GuideScenePath = `ini\scene\born_single_01`
+
+var GuideSceneLanding = [4]float64{197.626, 4.746, -108.829, -2.746}
+
+// birthStatSceneFallback 建号属性行的回落：场景在 RoleBaseProp.xml 没有
+// 专属行时取哪个场景的行。新手副本不在官方建角表里，五维/资源与烟雨庄
+// 新号同值。
+var birthStatSceneFallback = map[string]string{GuideScene: "born03"}
 
 // SceneOption location.ini BornCJ 节导出的一个可选场景目的地
 // （GM 场景切换/传送门共用）：Key=场景 resource 短名（born03/city01…），
@@ -630,9 +647,13 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 		appearance = append(appearance, strings.Split(para, ",")...)
 	}
 
+	rowScene := scene
+	if fallback, ok := birthStatSceneFallback[scene]; ok {
+		rowScene = fallback
+	}
 	var row *roleBasePropRow
 	for i := range base {
-		if base[i].Scene == scene && base[i].Sex == strconv.Itoa(sex) {
+		if base[i].Scene == rowScene && base[i].Sex == strconv.Itoa(sex) {
 			r := base[i]
 			row = &r
 			break
@@ -689,7 +710,11 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 			break
 		}
 	}
-	if state.Scene == "" {
+	switch {
+	case state.Scene != "":
+	case scene == GuideScene:
+		state.Scene, state.Position = GuideScenePath, GuideSceneLanding
+	default:
 		state.Scene = `ini\scene\born03_YanYuZhuang`
 	}
 	// Resource = 地形资源键 = 参数 scene 本身（born03/school01/born_single_01

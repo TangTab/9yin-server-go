@@ -5,11 +5,12 @@ import (
 	"testing"
 )
 
-// TestBuildRoleStateBorn03 钉死默认建号状态（官方口径：born03 烟雨庄 +
-// RoleBaseProp 五维=3/HP70/MP40 + StarterSet 授予集 + location.ini
-// BornCJ000003 出生点）。SP（怒气）例外：官服建号档 80、登录即满，本线
-// 2026-11-26 定案改 0——怒气是会话值，不随档。
-func TestBuildRoleStateBorn03(t *testing.T) {
+// TestBuildRoleStateDefaultBirthScene 钉死默认建号状态：新手副本
+// born_single_01（官服新号首次登录进的单机引导场景，2026-11-26 起）+ 落点
+// GuideSceneLanding；五维/资源取烟雨庄属性行（副本不在官方建角表里）
+// =3/HP70/MP40 + StarterSet 授予集。SP（怒气）例外：官服建号档 80、登录
+// 即满，本线 2026-11-26 定案改 0——怒气是会话值，不随档。
+func TestBuildRoleStateDefaultBirthScene(t *testing.T) {
 	state, err := BuildRoleState(DefaultBirthScene, 1, "icon\\players\\boy01_create.png,obj\\char\\b_hair\\b_hair1", 0)
 	if err != nil {
 		t.Fatalf("build: %v", err)
@@ -20,11 +21,16 @@ func TestBuildRoleStateBorn03(t *testing.T) {
 	if state.HP != 70 || state.MP != 40 || state.SP != 0 || state.Parry != 100 {
 		t.Fatalf("资源初值 HP70/MP40/SP0/Parry100： %+v", state)
 	}
-	if state.Scene != `ini\scene\born03_YanYuZhuang` || state.Resource != "born03" {
+	if state.Scene != GuideScenePath || state.Resource != GuideScene {
 		t.Fatalf("出生场景 = %q resource = %q", state.Scene, state.Resource)
 	}
-	if state.Position != [4]float64{482.5, 13.7, 1008, 1.56} {
-		t.Fatalf("BornCJ000003 出生点 = %v", state.Position)
+	if state.Position != GuideSceneLanding {
+		t.Fatalf("新手副本落点 = %v", state.Position)
+	}
+	// 显式烟雨庄：仍是 location.ini BornCJ000003 出生点。
+	if st, err := BuildRoleState("born03", 1, "", 0); err != nil ||
+		st.Scene != `ini\scene\born03_YanYuZhuang` || st.Position != [4]float64{482.5, 13.7, 1008, 1.56} {
+		t.Fatalf("烟雨庄建号 = %q %v（err %v）", st.Scene, st.Position, err)
 	}
 	if state.NewbieSkill != 1 || state.InitTask != 22001 || state.BaishiTask != 49 {
 		t.Fatalf("NewbieSkill/InitTask/BaishiTask = %d/%d/%d", state.NewbieSkill, state.InitTask, state.BaishiTask)

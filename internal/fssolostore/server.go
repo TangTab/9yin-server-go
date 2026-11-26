@@ -509,12 +509,12 @@ func newRoleUID() string {
 	return hex.EncodeToString(b[:])
 }
 
-// 建角出生场景缺省（官方口径：默认烟雨庄；testdata/location.ini
-// BornCJ000003 + rolePara f24 scene_name_017 互证，world 端
-// fssoloworld/roles.go 同源）。
+// 建角出生场景缺省：新手副本 born_single_01（官服新号首次登录进的单机
+// 引导场景，2026-11-26 起；落点见 rolestate.GuideSceneLanding）。world 端
+// fssoloworld/roles.go 同源。
 const (
 	birthSceneID       = 17
-	birthSceneLocation = `ini\scene\born03_YanYuZhuang`
+	birthSceneLocation = rolestate.GuideScenePath
 
 	// defaultFacultySeed 建号修为种子（b-line facultySeed 口径：外服私服
 	// 修为由历练转化供给，新角色种子可配）。

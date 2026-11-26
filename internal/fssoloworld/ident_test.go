@@ -129,6 +129,7 @@ func TestEnterChainIdentConsistency(t *testing.T) {
 			resetNpcCatalog(t)
 			t.Setenv("NINEYIN_PLAYER_IDENT", tc.env)
 			s, pl := newCustomTestServer(t)
+			pinSceneBorn03(t, pl) // 用例按 born03=scenes.ini [3] 推 ident
 			n := s.sceneSpawnCount("born03")
 			if tc.scene && n == 0 {
 				t.Skip("数据根缺席（testdata/ini）")

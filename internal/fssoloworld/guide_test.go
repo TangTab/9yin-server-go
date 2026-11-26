@@ -18,6 +18,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // 官服客户端上行原字节（0x0A 活动信封）：黑幕窗点选与新手帮助步骤。
@@ -26,6 +27,13 @@ var (
 	guideC2SSkip   = guideHex("0a 5e 70 81 55 62 ca 9d 86 57 30 34 d0 64 1d b3 3c 6e 01 00 00 02 00 02 cc 03 00 00 05 00 00 00 00 00 00 14 40")
 	guideC2SHelp   = guideHex("0a d1 01 73 2b 28 b3 cb 61 bc 6f 33 8b 46 cf c8 3d 58 00 00 00 03 00 02 b6 03 00 00 02 00 00 00 00 06 0b 00 00 00 63 68 65 6e 67 64 75 5f 30 32 00")
 )
+
+// pinSceneBorn03 把用例角色钉在烟雨庄：用例本身是 born03 场景数据专属，
+// 与默认出生场景无关。
+func pinSceneBorn03(t *testing.T, pl *Player) {
+	t.Helper()
+	pl.roleState.Scene, pl.roleState.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
+}
 
 func guideHex(s string) []byte {
 	var out []byte
@@ -220,12 +228,29 @@ func guidePropertyLine(frame []byte) string {
 	return "10 " + entry.Name + "=" + value
 }
 
+// TestNewRoleBornInGuideScene 新号默认出生在新手副本，落点与 GM「新手引导」
+// 传送预设是同一个值（rolestate.GuideSceneLanding，scenepresets.go）。
+func TestNewRoleBornInGuideScene(t *testing.T) {
+	pl := newTaskTestPlayer(t, 40)
+	if pl.roleState.Resource != rolestate.GuideScene || pl.roleState.Scene != rolestate.GuideScenePath {
+		t.Fatalf("新号出生场景 = %q / %q", pl.roleState.Scene, pl.roleState.Resource)
+	}
+	if pl.roleState.Position != rolestate.GuideSceneLanding {
+		t.Fatalf("新号落点 = %v, want %v", pl.roleState.Position, rolestate.GuideSceneLanding)
+	}
+	dest, ok := resolveSceneDestination("新手引导")
+	if !ok || dest.Resource != rolestate.GuideScene || dest.Position != rolestate.GuideSceneLanding {
+		t.Fatalf("GM 新手引导预设 = %+v（ok=%v）", dest, ok)
+	}
+}
+
 // TestGuideReadyTailRefreshesTrackerForEveryone 任务追踪栏刷新 m390 [5, 0]
 // 对所有角色下发（官服每次进场就绪簇末尾都发）；从没进过引导流的角色
 // 不下发引导阶段。
 func TestGuideReadyTailRefreshesTrackerForEveryone(t *testing.T) {
 	s := newNpcTestServer(t)
 	pl := newTaskTestPlayer(t, 41)
+	pinSceneBorn03(t, pl) // 用例要的是「从没进过引导流」的普通角色
 	frames := captureFrames(t)
 	s.readyTail(pl)
 	assertLines(t, guideLines(t, *frames), []string{"m390 5 0"}, "普通角色就绪收尾")
@@ -474,6 +499,7 @@ func TestGuideChoiceOutsidePendingIgnored(t *testing.T) {
 	s := newNpcTestServer(t)
 	// 新手副本之外（烟雨庄新号）。
 	pl := newTaskTestPlayer(t, 46)
+	pinSceneBorn03(t, pl) // 新手副本之外（烟雨庄新号）
 	frames := captureFrames(t)
 	s.clientActivity(pl, guideC2SSkip)
 	s.clientActivity(pl, guideC2SSingle)

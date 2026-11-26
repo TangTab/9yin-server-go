@@ -45,10 +45,10 @@ type sceneDestination struct {
 // 驿站 / 复活点表生成（移花宫 = HomePointschool09A，340.16,47.979,657.284，
 // 与 relive_info.ini force_yihua 同值）。
 var extraSceneDestinations = map[string]sceneDestination{
-	"born_single_01": {
-		Config:   `ini\scene\born_single_01`,
-		Resource: "born_single_01",
-		Position: [4]float64{197.626, 4.746, -108.829, -2.746},
+	rolestate.GuideScene: {
+		Config:   rolestate.GuideScenePath,
+		Resource: rolestate.GuideScene,
+		Position: rolestate.GuideSceneLanding,
 	},
 }
 

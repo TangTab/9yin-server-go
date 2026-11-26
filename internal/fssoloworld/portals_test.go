@@ -50,6 +50,7 @@ func TestResourceOfConfig(t *testing.T) {
 
 func TestCheckPortalTriggersTransfer(t *testing.T) {
 	s, pl := newCustomTestServer(t)
+	pinSceneBorn03(t, pl) // 路线取自 born03
 	prevGap := sceneSwitchGap
 	sceneSwitchGap = time.Millisecond
 	t.Cleanup(func() { sceneSwitchGap = prevGap })

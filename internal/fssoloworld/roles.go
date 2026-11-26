@@ -10,13 +10,14 @@ package fssoloworld
 // scene_name_017 与 rolePara f24 回退值互证。
 
 import (
-	"math"
 	"encoding/binary"
+	"math"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/proto"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // createReq 建角在途请求（pendingCreate 值；store 回执前暂存外观，
@@ -26,11 +27,12 @@ type createReq struct {
 	appearance []string
 }
 
-// 出生场景（官方口径：建角维度 出生地×性别，默认烟雨庄；归纳文档 §2）。
+// 出生场景（建角维度 出生地×性别）：默认新手副本 born_single_01（官服新号
+// 首次登录进的单机引导场景，2026-11-26 起；落点与属性行见 rolestate）。
 const (
 	birthSceneID       = 17 // scene_name_017（rolePara f24 互证）
-	birthScenePath     = `ini\scene\born03_YanYuZhuang`
-	birthSceneResource = "born03"
+	birthScenePath     = rolestate.GuideScenePath
+	birthSceneResource = rolestate.GuideScene
 )
 
 // parseCreateRoleBody 解析 op05 建角帧载荷（msgtype 字节之后的 body）。
@@ -323,7 +325,7 @@ var bookIntroKeys = map[string]string{
 // "移花宫"，非 stringname 键；客户端原样显示）。建号态角色恒在出生
 // 场景；归纳文档 §2/§5 出生地表。
 var birthSceneDisplayName = map[string]string{
-	"born03": "烟雨庄",
+	"born03": "烟雨庄", rolestate.GuideScene: "暮色之村",
 	"born04": "千灯镇",
 	"city02": "苏州",
 }
@@ -369,7 +371,7 @@ func roleParaFields(appearance []string) []string {
 	fields[7] = visual.hair
 	fields[9], fields[10], fields[11] = visual.cloth, visual.pants, visual.shoes
 	fields[21], fields[22] = "stand", "127.0.0.1"
-	fields[23] = "title001"                           // 新手实力档（faculty 接入后按实力阶梯；b-line title027 为 151 实力私服口径）
+	fields[23] = "title001"                       // 新手实力档（faculty 接入后按实力阶梯；b-line title027 为 151 实力私服口径）
 	fields[24] = sceneDisplayName(birthScenePath) // 所在场景中文显示名（建号态=出生场景）
 	fields[25] = intro
 	fields[31] = "0"
