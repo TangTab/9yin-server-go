@@ -7,6 +7,7 @@ package fssoloworld
 // 帧收集器带锁。
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"net"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // 官服客户端上行原字节（0x0A 活动信封）：黑幕窗点选与新手帮助步骤。
@@ -64,6 +66,30 @@ func (g *guideSink) reset() {
 	g.mu.Lock()
 	g.frames = nil
 	g.mu.Unlock()
+}
+
+// TestGuideBirthStateEntersPending 建号链默认产物直接待选（2026-11-26
+// 官服建号.pcapng 定版：首登 0x0B=ini\scene\born_single_01、剧本 book2 →
+// 出生地烟雨庄入档；不再需要 gm scene 手工进副本）。
+func TestGuideBirthStateEntersPending(t *testing.T) {
+	s, pl, sink := newGuideTestPlayer(t, 49)
+	// newGuideTestPlayer 手工设的副本场景只是显式化——建号档本身就该
+	// 是副本+出生地字段齐备。
+	if pl.roleState.Scene != `ini\scene\born_single_01` || pl.roleState.Resource != guideScene {
+		t.Fatalf("建号首登档 = %q/%q", pl.roleState.Scene, pl.roleState.Resource)
+	}
+	if pl.roleState.Book != rolestate.DefaultBook || pl.roleState.BirthSection != "ChushengCJ000002" ||
+		pl.roleState.BirthScene != `ini\scene\born03_YanYuZhuang` || pl.roleState.BirthPosition != [4]float64{371.67, 23.57, 1058.48, 2.23} {
+		t.Fatalf("出生地字段 = %+v", pl.roleState)
+	}
+	s.readyTail(pl)
+	assertLines(t, sink.lines(t), []string{
+		"10 CanntOperator=1",
+		"m390 5 0",
+	}, "建号档待选态")
+	if !guidePendingFlag(pl) {
+		t.Fatal("建号档应处于待选态")
+	}
 }
 
 // newGuideTestPlayer 新手副本里的新号：任务三表清空（行号与官服一致）、
@@ -226,6 +252,8 @@ func guidePropertyLine(frame []byte) string {
 func TestGuideReadyTailRefreshesTrackerForEveryone(t *testing.T) {
 	s := newNpcTestServer(t)
 	pl := newTaskTestPlayer(t, 41)
+	// 副本外普通角色（建号默认已是副本，模拟存量号/已完成引导形态）。
+	pl.roleState.Scene, pl.roleState.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
 	frames := captureFrames(t)
 	s.readyTail(pl)
 	assertLines(t, guideLines(t, *frames), []string{"m390 5 0"}, "普通角色就绪收尾")
@@ -234,40 +262,44 @@ func TestGuideReadyTailRefreshesTrackerForEveryone(t *testing.T) {
 	}
 }
 
-// TestGuideReadyTailPendingLocksInput 新手副本待选态：引导阶段 m414 4/5、
-// 出生阶段 45、帮助链 chengdu_00、锁输入，最后刷新追踪栏（官服女号登录：
-// #183 BornServerGameStep → #437 m414 → #466 HelpStepID → #881
-// CanntOperator=1 → … → #1508 m390）。
+// TestGuideReadyTailPendingLocksInput 新手副本待选态：就绪收尾只剩锁输入
+// +m390——引导阶段簇（m414/BornServerGameStep/HelpStepID）已在进场簇
+// 0x0B 前下发（entergen.GuideEntryFrames；官服女号 #183→#437→#466 在
+// 进场段，#881 锁与 #1508 m390 在物化后就绪簇）。
 func TestGuideReadyTailPendingLocksInput(t *testing.T) {
 	s, pl, sink := newGuideTestPlayer(t, 42)
+	// 进场簇引导帧（GuideEntryFrames）：待选态门控属性（FinishFreshmanRecStr
+	// 初值——黑幕窗本地弹出条件，2026-11-27 dump+建号.pcapng #134 定版）
+	// + 性别默认主步 + 属地帮助链。
+	entry, err := entergen.GuideEntryFrames(s.enterContext(pl, false))
+	if err != nil || len(entry) != 4 {
+		t.Fatalf("GuideEntryFrames = %v err=%v", len(entry), err)
+	}
+	if rec, rerr := entergen.FreshmanRecFrame(pl.entergenIdentity()); rerr != nil || !bytes.Equal(entry[0], rec) {
+		t.Fatalf("待选态进场簇首帧应为 FinishFreshmanRecStr 门控属性:\n got  % x\n want % x", entry[0], rec)
+	}
+	sink.reset()
 	s.readyTail(pl)
 	assertLines(t, sink.lines(t), []string{
-		"10 BornServerGameStep=45",
-		`m414 "gamestep" 4 5`,
-		`10 HelpStepID="chengdu_00"`,
 		"10 CanntOperator=1",
 		"m390 5 0",
 	}, "待选态就绪收尾")
 	if !guidePendingFlag(pl) || pl.roleState.GameStep != guideStepNone {
 		t.Fatalf("应处于待选态: pending=%v step=%d", guidePendingFlag(pl), pl.roleState.GameStep)
 	}
-	// 玩家档案帧（重登 0x28）带存档的帮助步骤。
+	// 玩家档案帧（重登 0x28）带存档的帮助步骤（属地链——官服男号 book2
+	// 实证 yanyuzhuang_00）。
 	avatar, _ := entergen.AvatarFrame(s.enterContext(pl, false), false)
-	if !strings.Contains(string(avatar), "chengdu_00\x00") {
-		t.Error("玩家档案 0x28 应带存档的 HelpStepID chengdu_00")
+	if !strings.Contains(string(avatar), "yanyuzhuang_00\x00") {
+		t.Error("玩家档案 0x28 应带存档的 HelpStepID yanyuzhuang_00")
 	}
-	// 已点选过的角色再进场：下发落定的阶段，不再锁输入。
+	// 已点选过的角色再进场：就绪收尾不再锁输入。
 	pl.taskMu.Lock()
 	pl.roleState.GameStep, pl.guidePending = guideStepSingle, false
 	pl.taskMu.Unlock()
 	sink.reset()
 	s.readyTail(pl)
-	assertLines(t, sink.lines(t), []string{
-		"10 BornServerGameStep=45",
-		`m414 "gamestep" 4 5`,
-		`10 HelpStepID="chengdu_00"`,
-		"m390 5 0",
-	}, "非待选态就绪收尾")
+	assertLines(t, sink.lines(t), []string{"m390 5 0"}, "非待选态就绪收尾")
 }
 
 // TestGuideEnterSceneDefersAutoAcceptWhenPending 待选态不排链根的延时自动
@@ -355,14 +387,16 @@ func TestGuideChoiceSkipOfficialOrder(t *testing.T) {
 		"m209 9 1647",
 		"m24 " + player + ` 40 "task_accept"`,
 		`m1 1 "9628" "title_1647"`,
+		"m390 5 0", // 我方方言：接取簇尾补 m390 刷追踪栏（fork 客户端不走 m209[9] 自动追踪链）
 		recordRow(1, 28111, 3, 1086, 1, 0, 1, "event_jmyzyb_001", `"DialogID_1086"`, "interactinfo_1086", 0, "28111_3_event_jmyzyb_001"),
 		`11 Accepted row=1 id=28111 status=0 track=1 step=0 accept="" submit=""`,
 		"13 Accepted row=1 c8=1",
 		"m209 9 28111",
 		"m24 " + player + ` 40 "task_accept"`,
 		`m1 1 "9628" "title_28111"`,
+		"m390 5 0", // 同上：我方接取簇尾方言
 		// 2. 复活点 → 鸡鸣驿（#1631）
-		`10 RelivePositon="4,693.908,24.694,404.35,3.611,ui_pos_ReliveCJ100101"`,
+		`10 RelivePositon="4,511.7,2.4,996.6,1.56,ui_pos_ReliveCJ100301"`, // book2 出生地烟雨庄（属地复活点节表组串）
 		// 3. 引导链逐个置完成位（#1674..#1694）
 		"11 Completed rows=0..41 val=0",
 		"13 Completed row=41 c0=134217728",
@@ -408,12 +442,12 @@ func TestGuideChoiceSkipOfficialOrder(t *testing.T) {
 		`m142 "life_freshmanhelp_wenhua"`,
 		`m142 "life_freshmanhelp_shijing"`,
 		"m98 712",
-		// 5. 入江湖（#1946..#1948）
-		`10 HelpStepID="jimingyi_00"`,
+		// 5. 入江湖（#1946..#1948；测试号 Book 空 → book2 烟雨庄属地链）
+		`10 HelpStepID="yanyuzhuang_00"`,
 		"10 PowerLevel=1",
 		"10 YinLevel=1",
 		"10 CanntOperator=0",
-		// 切出新手副本
+		// 切出新手副本 → 出生地（烟雨庄）
 		"0C",
 	)
 	assertLines(t, withItemSlot(t, pl, want, sink.lines(t)), want, "再战江湖跳过簇")
@@ -440,11 +474,14 @@ func TestGuideChoiceSkipOfficialOrder(t *testing.T) {
 	if countBagItems(pl, "item_skipsp_001") != 1 {
 		t.Errorf("再战江湖物品未入包: %+v", st.BagItems)
 	}
-	if st.RelivePositon != guideSkipRelive || st.HelpStepID != guideHelpStepSkip || st.Resource != guideSkipScene {
+	// 入江湖落点 = 出生地（book2 → ChushengCJ000002 烟雨庄：复活点/帮助链/
+	// 落位属地化，官服男号抓包的鸡鸣驿只是 book5 个案）。
+	wantRelive := "4,511.7,2.4,996.6,1.56,ui_pos_ReliveCJ100301"
+	if st.RelivePositon != wantRelive || st.HelpStepID != "yanyuzhuang_00" || st.Resource != "born03" {
 		t.Errorf("入江湖落点异常: relive=%q help=%q resource=%q", st.RelivePositon, st.HelpStepID, st.Resource)
 	}
-	if pos := st.Position; pos != guideSkipLanding {
-		t.Errorf("落点 = %v, want %v", pos, guideSkipLanding)
+	if pos := st.Position; pos != [4]float64{371.67, 23.57, 1058.48, 2.23} {
+		t.Errorf("落点 = %v, want ChushengCJ000002 %v", pos, [4]float64{371.67, 23.57, 1058.48, 2.23})
 	}
 
 	// 再点一次再战江湖：已办过，零帧。
@@ -452,18 +489,19 @@ func TestGuideChoiceSkipOfficialOrder(t *testing.T) {
 	s.clientActivity(pl, guideC2SSkip)
 	assertLines(t, sink.lines(t), nil, "重复点选")
 
-	// 鸡鸣驿就绪（切图重入）：引导阶段 5/5、帮助链 jimingyi_00、刷新追踪栏。
+	// 出生地就绪（切图重入）：引导阶段簇随切图流在 0x0B 前下发
+	//（GuideEntryFrames：官服切景序 m705→m414→0x0B），就绪收尾 m390。
+	// sink 不 reset——切图流与重入收尾都在累计里。
 	guideWaitSwitch(t, s, pl)
-	sink.reset()
 	s.clientReady(pl)
 	lines := sink.lines(t)
-	for _, need := range []string{`m414 "gamestep" 5 5`, "10 BornServerGameStep=55", `10 HelpStepID="jimingyi_00"`, "m390 5 0"} {
+	for _, need := range []string{`m414 "gamestep" 5 5`, "10 BornServerGameStep=55", `10 HelpStepID="yanyuzhuang_00"`, "m390 5 0"} {
 		found := false
 		for _, line := range lines {
 			found = found || line == need
 		}
 		if !found {
-			t.Errorf("鸡鸣驿就绪簇缺 %q:\n%s", need, strings.Join(lines, "\n"))
+			t.Errorf("出生地切图流缺 %q:\n%s", need, strings.Join(lines, "\n"))
 		}
 	}
 }
@@ -472,8 +510,10 @@ func TestGuideChoiceSkipOfficialOrder(t *testing.T) {
 // 变（新手副本之外／引导链已在进行）。
 func TestGuideChoiceOutsidePendingIgnored(t *testing.T) {
 	s := newNpcTestServer(t)
-	// 新手副本之外（烟雨庄新号）。
+	// 新手副本之外（显式烟雨庄——建号默认已是副本，这里模拟存量号/
+	// 已完成引导的号形态）。
 	pl := newTaskTestPlayer(t, 46)
+	pl.roleState.Scene, pl.roleState.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
 	frames := captureFrames(t)
 	s.clientActivity(pl, guideC2SSkip)
 	s.clientActivity(pl, guideC2SSingle)

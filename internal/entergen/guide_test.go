@@ -14,6 +14,9 @@ import (
 
 var officialMale = Identity{ObjectID: 0x3D0000F3, OwnerID: 0x00000611}
 
+// officialCreate 建号.pcapng（端口 7111）男号 book2 的进场身份。
+var officialCreate = Identity{ObjectID: 0x3B0000F3, OwnerID: 0x000000F8}
+
 // spacedHex 解带空格的官服帧明文（同包的 mustHex 只收无空格形态，便于逐字段读）。
 func spacedHex(t *testing.T, s string) []byte {
 	t.Helper()
@@ -166,6 +169,57 @@ func TestTaskCompletedSetFramesSkipOfficial(t *testing.T) {
 		completed = append(completed, id)
 	}
 	assertOfficialFrames(t, grid, nil, want, "完成位图逐格写")
+}
+
+// TestFreshmanRecFrameOfficial 黑幕窗门控属性 FinishFreshmanRecStr 初值：
+// 建号.pcapng 男号 #134（进场簇、0x0B 前）——idx225、串线型携裸字节
+// 45×0x01 尾 09 00、无 NUL。引擎按此属性本地弹「初出茅庐/再战江湖」
+// 选择窗（form_single_blackback），缺发＝待选态窗不弹。
+func TestFreshmanRecFrameOfficial(t *testing.T) {
+	frame, err := FreshmanRecFrame(officialCreate)
+	assertOfficial(t, frame, err,
+		"10 00 f3 00 00 3b f8 00 00 00 01 00 e1 00 2f 00 00 00 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 09 00",
+		"FinishFreshmanRecStr 初值")
+}
+
+// TestGuideEntryFramesFreshmanGate 待选态在引导阶段帧之前补门控属性；
+// 已定档/存量号不加。
+func TestGuideEntryFramesFreshmanGate(t *testing.T) {
+	ctx := Context{
+		Identity:           officialCreate,
+		GuideStep:          5, // 待选性别默认（男）
+		GuideChoicePending: true,
+		HelpStep:           "yanyuzhuang_00",
+	}
+	frames, err := GuideEntryFrames(ctx)
+	if err != nil {
+		t.Fatalf("GuideEntryFrames: %v", err)
+	}
+	if len(frames) != 4 {
+		t.Fatalf("待选态帧数 = %d, want 4（门控+Born+m414+HelpStep）", len(frames))
+	}
+	want, err := FreshmanRecFrame(officialCreate)
+	if err != nil || !bytes.Equal(frames[0], want) {
+		t.Fatalf("待选态首帧不是 FinishFreshmanRecStr:\n got  % x\n want % x", frames[0], want)
+	}
+
+	ctx.GuideChoicePending = false
+	frames, err = GuideEntryFrames(ctx)
+	if err != nil {
+		t.Fatalf("GuideEntryFrames: %v", err)
+	}
+	if len(frames) != 3 {
+		t.Fatalf("已定档帧数 = %d, want 3", len(frames))
+	}
+
+	ctx.GuideStep, ctx.HelpStep = 0, ""
+	frames, err = GuideEntryFrames(ctx)
+	if err != nil {
+		t.Fatalf("GuideEntryFrames: %v", err)
+	}
+	if len(frames) != 0 {
+		t.Fatalf("存量号帧数 = %d, want 0", len(frames))
+	}
 }
 
 // TestGuideChoiceInboundOfficial 客户端上行：黑幕窗点选 m972 [4]（女号

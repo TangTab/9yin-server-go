@@ -123,9 +123,10 @@ func TestPlayerVitalBatchFrame(t *testing.T) {
 		t.Fatalf("MPUpSpeedAdd = %q (spi=%d)", props["MPUpSpeedAdd"], wantSpi)
 	}
 
-	// MaxSP 全量批一次声明（基础 80）；MaxSPAdd 不出帧。
-	if props["MaxSP"] != "80" {
-		t.Fatalf("MaxSP = %q", props["MaxSP"])
+	// MaxSP 全量批一次声明（基础 80 + 运行内功档位加成：首本书 ng_wd_001 是
+	// 武当一内，+10）；MaxSPAdd 不出帧。
+	if want := strconv.Itoa(int(RageCap(ctx))); props["MaxSP"] != want || want != "90" {
+		t.Fatalf("MaxSP = %q, want %s", props["MaxSP"], want)
 	}
 	if counts["MaxSP"] != 1 {
 		t.Fatalf("MaxSP appears %d times", counts["MaxSP"])
@@ -213,8 +214,8 @@ func TestPreReadyVitalOrder(t *testing.T) {
 }
 
 // TestSPIsSessionValue 当前怒气（SP）取 Context.SP（会话值），不取存档
-// State.SP；上限 MaxSP 恒 baseMaxSP，与两者都无关。0x0D / 人物数据大批 /
-// 基础属性批三处同源。此前 SP 跟着建号初值 80 下发，而服务端战斗态从 0
+// State.SP；上限 MaxSP 恒为运行内功的 RageCap，与两者都无关。0x0D / 人物数据
+// 大批 / 基础属性批三处同源。此前 SP 跟着建号初值 80 下发，而服务端战斗态从 0
 // 起——登录后客户端满怒、放怒招却回「战意不足」（2026-11-26 定案：初始 0）。
 func TestSPIsSessionValue(t *testing.T) {
 	for _, tc := range []struct {
@@ -252,8 +253,8 @@ func TestSPIsSessionValue(t *testing.T) {
 				if props["SP"] != want {
 					t.Errorf("%s SP = %q, want %q", name, props["SP"], want)
 				}
-				if props["MaxSP"] != strconv.Itoa(int(baseMaxSP)) {
-					t.Errorf("%s MaxSP = %q, want %d（上限与存档 SP 无关）", name, props["MaxSP"], baseMaxSP)
+				if props["MaxSP"] != strconv.Itoa(int(RageCap(ctx))) {
+					t.Errorf("%s MaxSP = %q, want %d（上限与存档 SP 无关）", name, props["MaxSP"], RageCap(ctx))
 				}
 			}
 		})

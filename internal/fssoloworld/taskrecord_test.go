@@ -27,7 +27,7 @@ import (
 // 别的用例里发帧。
 func newTaskTestPlayer(t *testing.T, conn uint32) *Player {
 	t.Helper()
-	state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, 1, "", 0)
+	state, err := rolestate.BuildRoleState(rolestate.DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatalf("build role state: %v", err)
 	}
@@ -1033,6 +1033,16 @@ func TestTaskNormalizeTracksAndSceneRoots(t *testing.T) {
 	s.npcAcceptSceneGuideRoots(fresh)
 	if len(fresh.roleState.TaskAccepted) != 1 {
 		t.Fatalf("重复进场接取应幂等: %+v", fresh.roleState.TaskAccepted)
+	}
+	// 断档追踪标志：有进度行但 tracked=false（旧版接取时客户端回报链未
+	// 闭合），进场补 true——m390 重建追踪栏才有任务可显示。
+	breaked := newTaskTestPlayer(t, 26)
+	breaked.roleState.TaskAccepted = append(breaked.roleState.TaskAccepted, 1347)
+	track := breaked.roleState.EnsureTaskTrack(1347, 0)
+	track.Step = 1
+	s.normalizeTaskTracks(breaked)
+	if track := breaked.roleState.TaskTrackOf(1347); track == nil || !track.Tracked {
+		t.Fatalf("断档的 1347 追踪标志应补回 true: %+v", track)
 	}
 }
 

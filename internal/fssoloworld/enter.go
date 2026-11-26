@@ -110,6 +110,14 @@ func (s *Server) roleContext(pl *Player) entergen.Context {
 		State:      pl.roleState,
 		Tasks:      s.npcTaskCatalogOf(),                        // 任务三表行推的任务目录（taskrecords.go）
 		SceneIndex: s.sceneGlobalIndexOf(pl.roleState.Resource), // 开图位图/迷雾行（-1=scenes.ini 缺席）
+		// 引导阶段簇（guide.go）：m655 后、0x0B 前下发——黑幕窗弹出时机，
+		// 迟到不弹（真机实证）。值=已定档值或待选性别默认。
+		GuideStep: guideEntryStep(pl),
+		// 待选态补黑幕窗门控属性（FinishFreshmanRecStr 初值——引擎本地
+		// 弹窗条件，缺发＝待选卡死）。guideEntryStep 同判据的无锁形；完整
+		// 引导链核查在 readyTail（guideChoicePending）。
+		GuideChoicePending: guideEntryChoicePending(pl),
+		HelpStep:          guideEntryHelpStep(pl),
 	}
 }
 

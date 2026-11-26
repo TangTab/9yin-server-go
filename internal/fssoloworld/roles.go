@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/proto"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // createReq 建角在途请求（pendingCreate 值；store 回执前暂存外观，
@@ -26,12 +27,9 @@ type createReq struct {
 	appearance []string
 }
 
-// 出生场景（官方口径：建角维度 出生地×性别，默认烟雨庄；归纳文档 §2）。
-const (
-	birthSceneID       = 17 // scene_name_017（rolePara f24 互证）
-	birthScenePath     = `ini\scene\born03_YanYuZhuang`
-	birthSceneResource = "born03"
-)
+// 出生场景常量已上收 rolestate（2026-11-26 建号剧本化）：首登场景=
+// rolestate.GuideScene（新手副本），出生地=books.ini 剧本表数据驱动
+//（DefaultBook/DefaultBirthSection），选人 0x04 的 f24 发出生地节名。
 
 // parseCreateRoleBody 解析 op05 建角帧载荷（msgtype 字节之后的 body）。
 // 双读法兼容两种形态，**裸扫 NUL 优先**（fork 线真机实证读法，且天然
@@ -209,7 +207,9 @@ func splitAppearance(s string) []string {
 	if s == "" {
 		return nil
 	}
-	return strings.Split(s, ",")
+	// 槽位归位：捏脸串可能含逗号（para join/split 碎片化，2026-11-27 真机
+	// 「没头发」根因），未知段并回捏脸槽。
+	return rolestate.NormalizeAppearance(strings.Split(s, ","))
 }
 
 // roleVisual 建角外观的展示形态（移植 internal/login/role.go）。衣裤鞋
@@ -318,36 +318,17 @@ var bookIntroKeys = map[string]string{
 	"book8": "introduction_wmp01_title",
 }
 
-// birthSceneDisplayName 出生场景 → 选人界面「所在场景」显示名（中文
-// 直接量——52626 会话 rolePara f24 实证：该档玩家在移花宫场景时 f24=
-// "移花宫"，非 stringname 键；客户端原样显示）。建号态角色恒在出生
-// 场景；归纳文档 §2/§5 出生地表。
-var birthSceneDisplayName = map[string]string{
-	"born03": "烟雨庄",
-	"born04": "千灯镇",
-	"city02": "苏州",
-}
-
-// sceneDisplayName 按场景配置路径取显示名（未知场景回退资源名）。
-func sceneDisplayName(scenePath string) string {
-	seg := scenePath
-	if i := strings.LastIndexAny(seg, `\/`); i >= 0 {
-		seg = seg[i+1:]
-	}
-	for key, name := range birthSceneDisplayName {
-		if strings.HasPrefix(strings.ToLower(seg), key+"_") || strings.EqualFold(seg, key) {
-			return name
-		}
-	}
-	return seg
-}
+// birthSceneDisplayName/sceneDisplayName 已随出生地节名口径（建号.pcapng
+// f24=ChushengCJ000002）移除：选人界面不再发场景中文直接量。
 
 // roleParaFields 组装 36 字段逗号串（选人界面展示；52626 会话真机
-// rolePara 36 字段对拍：f6=0、f9/f10/f11=布衣三件模型路径、f24=场景
-// 中文显示名）。官方口径：f1 门派空串（School=""，归纳文档 §2——不走
-// fork 线移花宫出家号 faction 口径）；f25 剧本标题映射客户端本地化键
-// （b-line 同源，未知 book 回退原值）。
-func roleParaFields(appearance []string) []string {
+// rolePara 36 字段对拍：f6=0、f9/f10/f11=布衣三件模型路径、f24 位为
+// 场景/出生地段）。官方口径（2026-11-26 建号.pcapng 0x04 实证）：出生地
+// 段发**节名**（ChushengCJ000002）非场景中文名、剧本段发 book key
+//（book2）。f1 门派空串（School=""，归纳文档 §2）；f25 剧本标题映射客户
+// 端本地化键（b-line 同源，未知 book 回退原值）。位次沿用 52626 抓包
+//（fork/official 方言位次差异待真机专项对拍，勿轻改）。
+func roleParaFields(appearance []string, book, birthSection string) []string {
 	get := func(index int, fallback string) string {
 		if index >= 0 && index < len(appearance) && appearance[index] != "" {
 			return appearance[index]
@@ -355,10 +336,15 @@ func roleParaFields(appearance []string) []string {
 		return fallback
 	}
 	visual := roleVisualOf(appearance)
-	book := get(0, "book1")
+	if book == "" {
+		book = get(0, rolestate.DefaultBook)
+	}
 	intro := book
 	if key, ok := bookIntroKeys[book]; ok {
 		intro = key
+	}
+	if birthSection == "" {
+		birthSection = rolestate.DefaultBirthSection
 	}
 	fields := make([]string, 36)
 	fields[0] = strconv.Itoa(int(visual.sex))
@@ -369,8 +355,8 @@ func roleParaFields(appearance []string) []string {
 	fields[7] = visual.hair
 	fields[9], fields[10], fields[11] = visual.cloth, visual.pants, visual.shoes
 	fields[21], fields[22] = "stand", "127.0.0.1"
-	fields[23] = "title001"                           // 新手实力档（faculty 接入后按实力阶梯；b-line title027 为 151 实力私服口径）
-	fields[24] = sceneDisplayName(birthScenePath) // 所在场景中文显示名（建号态=出生场景）
+	fields[23] = "title001"      // 新手实力档（faculty 接入后按实力阶梯；b-line title027 为 151 实力私服口径）
+	fields[24] = birthSection    // 出生地节名（官服口径 ChushengCJ000002；建号态角色恒在出生地语义下）
 	fields[25] = intro
 	fields[31] = "0"
 	fields[32] = book
@@ -405,11 +391,14 @@ func rolesFrame(serial uint32, now time.Time, roles []roleEntry) []byte {
 	put(0x21, serial)
 	put(0x25, uint32(len(roles)))
 	for _, r := range roles {
+		// 剧本/出生地从存档外观串推导（0x04 是未进场名册帧，档未载入；
+		// 建号态外观串含 book key，官服 0x04 实证 f24=出生地节名）。
+		book := rolestate.InferBookFromPara(strings.Join(r.appearance, ","))
 		body := (&proto.VarList{}).
 			AddInt32(0).
 			AddInt32(0).
 			AddWide(r.name).
-			AddWide(strings.Join(roleParaFields(r.appearance), ",")).
+			AddWide(strings.Join(roleParaFields(r.appearance, book, rolestate.BirthSectionOf(book)), ",")).
 			AddInt32(0).
 			AddDouble(0)
 		msg = append(msg, body.Encode()...)

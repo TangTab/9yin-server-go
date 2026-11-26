@@ -44,9 +44,11 @@ func TestOpenMapRecFrameShape(t *testing.T) {
 }
 
 // TestMapRecordsFramesOrderAndOverlay sceneIndex≥0：迷雾行先、位图后；
-// 位图叠加当前场景位（born03=3 → 行 0 bit3）；-1 降级只发位图。
+// 位图叠加当前场景位（born03=3 → 行 0 bit3）；-1 降级只发位图。建号默认
+// 已进新手副本（scenes.ini 无全局段号），本用例显式取 born03 口径。
 func TestMapRecordsFramesOrderAndOverlay(t *testing.T) {
 	ctx := testContext(t)
+	ctx.State.Scene, ctx.State.Resource = `ini\scene\born03_YanYuZhuang`, "born03"
 	ctx.SceneIndex = 3 // born03_YanYuZhuang 全局段号（scenes.ini [3]）
 	frames, err := MapRecordsFrames(ctx, ctx.SceneIndex)
 	if err != nil {

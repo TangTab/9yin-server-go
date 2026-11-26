@@ -141,6 +141,14 @@ func (s *Server) transferPlayer(pl *Player, dest sceneDestination, source string
 		if customizing, cerr := entergen.CustomizingFrame(pl.roleState); cerr == nil && customizing != nil {
 			s.sendToClient(pl, customizing)
 		}
+		// 新手引导阶段簇（m705 后、0x0B 前——上方官服切景序实证；建号
+		// 首登同位，见 entergen.GuideEntryFrames。黑幕窗弹出时机，缺发/
+		// 迟到客户端已入正常场景态不再弹）。
+		if guide, gerr := entergen.GuideEntryFrames(ctx); gerr == nil {
+			for _, frame := range guide {
+				s.sendToClient(pl, frame)
+			}
+		}
 		s.sendToClient(pl, entry)      // 0x0B
 		s.sendToClient(pl, appearance) // 0x0D（0x1F 推迟到 0x09 后）
 		pl.sceneSwitchMu.Lock()

@@ -25,7 +25,7 @@ func newCustomTestServer(t *testing.T) (*Server, *Player) {
 		t.Fatal(err)
 	}
 	t.Cleanup(s.Stop)
-	state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, 1, "", 0)
+	state, err := rolestate.BuildRoleState(rolestate.DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatalf("build role state: %v", err)
 	}
@@ -236,7 +236,7 @@ func TestCustomizingPoisonedUploadRejected(t *testing.T) {
 		t.Fatalf("clean dump after poison rejected: %q", pl.roleState.Customizing)
 	}
 
-	state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, 1, "", 0)
+	state, err := rolestate.BuildRoleState(rolestate.DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatal(err)
 	}

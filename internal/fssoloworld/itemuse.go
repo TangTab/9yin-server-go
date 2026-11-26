@@ -19,8 +19,8 @@ package fssoloworld
 //	0x19(view, slot)                                 扣 1 件；行有余量再推 0x18
 //
 // 拒绝方言：读条进行中/出招锁定中/冷却中/不可使用 → 零应答（官服 #11~#14
-// 移动中连点无任何下行）。官服对打坐中的使用回 m1[2,"9402"]（「正在打坐，
-// 不能执行该操作。」）——打坐态机未落地，本链暂无此门。
+// 移动中连点无任何下行）；打坐中 → m1[2,"9402"]（「正在打坐，不能执行该
+// 操作。」，sitcross.go 态机）。
 //
 // 状态变更在受理时同步落定（学会/入账/扣件/冷却行），读条定时器只补发
 // 尾段帧：roleState 的写只发生在收包协程，定时器不碰状态（与技能链
@@ -56,6 +56,8 @@ const (
 	// tipsLearnedSkill 系统提示文案键：「你学会了{@0:某项技能}！」（参数是
 	// 技能 ConfigID，客户端按名取技能显示名）。
 	tipsLearnedSkill = "9491"
+	// tipsSitting 系统提示文案键：「正在打坐，不能执行该操作。」。
+	tipsSitting = "9402"
 	// capitalTypeSilver 碎银币种（roleState.Money；0/2 未建模）。
 	capitalTypeSilver = 1
 	// scriptCapitalItem 钱袋逻辑类（CapitalType/CapitalValue 入账）。
@@ -122,6 +124,14 @@ func (s *Server) handleUseItem(pl *Player, message entergen.CustomInbound) {
 	pl.combat.mu.Unlock()
 	if casting {
 		s.trace("item use: %s 出招进行中忽略 client=%d", item.ConfigID, pl.Conn1)
+		return
+	}
+	// 打坐中：m1[2,"9402"]，坐姿不动。
+	if pl.sitting() {
+		b := newFrameBuilder(pl)
+		b.custom(1, entergen.CustomInt(2), entergen.CustomString(tipsSitting))
+		s.sendFrames(pl, b.frames)
+		s.trace("item use: %s 打坐中拒绝 client=%d", item.ConfigID, pl.Conn1)
 		return
 	}
 	funcPack, ok := def.FuncPack()

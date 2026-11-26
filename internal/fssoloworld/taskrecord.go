@@ -365,6 +365,13 @@ func (s *Server) npcTaskAcceptFrames(pl *Player, out *taskFrames, taskID int) bo
 	}
 	s.npcTaskMarkFrames(pl, out)
 	out.addAll(entergen.TaskAcceptNoticeFrames(id, taskID))
+	// 接取簇尾补发 m390 追踪栏刷新：官服客户端在 m209[9]（on_task_add →
+	// update_trace_info → m327）后自动把新任务纳入追踪，我方 fork 客户端
+	// 不走这条链（2026-11-26 真机：接取簇逐字节同官服、客户端不报 m327、
+	// 追踪栏空）——用 m390 触发 on_ready → load_trace_by_server 重读本地
+	// 表（新行 track=1）→ 上报 m327 → handleTaskTraceList 回写 0→1，整链
+	// 走已验证通路，效果等价官服（on_ready 链真机实证可通：进场空 m327）。
+	out.add(entergen.TaskTrackRefreshFrame())
 	return true
 }
 
@@ -799,10 +806,12 @@ func (s *Server) handleTaskTraceList(pl *Player, list string) {
 
 // ---- 进场整理与链根接取 ----
 
-// normalizeTaskTracks 进场时给「已接但没有进度行」的流程任务补进度行：
-// 旧流程只往已接表追加了任务号（没有目标行/追踪标志，任务行也不出），
-// 补行后对话行与追踪栏恢复。建号种子的功能门行（SeedTaskIDs）不是玩家
-// 接的任务，不补。
+// normalizeTaskTracks 进场时给「已接但没有进度行」的流程任务补进度行，并
+// 把在身任务的断档追踪标志补回 true：旧流程只往已接表追加了任务号（没有
+// 目标行/追踪标志，任务行也不出），且旧版接取时客户端回报链未闭合（追踪
+// 栏窗体 m390 从未发过 → 客户端不上报 m327 → track 留 0），m390 重建追踪
+// 栏后也没任务可显示。建号种子的功能门行（SeedTaskIDs）不是玩家接的任务，
+// 不补。
 func (s *Server) normalizeTaskTracks(pl *Player) {
 	if !pl.haveRoleState {
 		return
@@ -819,18 +828,24 @@ func (s *Server) normalizeTaskTracks(pl *Player) {
 		}
 		fixed := 0
 		for _, id := range pl.roleState.TaskAccepted {
-			if gate[id] || pl.roleState.TaskTrackOf(id) != nil {
+			if gate[id] {
 				continue
 			}
-			if _, ok := catalog.TaskByID(int(id)); !ok {
-				continue
+			track := pl.roleState.TaskTrackOf(id)
+			if track == nil {
+				if _, ok := catalog.TaskByID(int(id)); !ok {
+					continue
+				}
+				track = pl.roleState.EnsureTaskTrack(id, 0)
+				track.Tracked, track.Step = true, 1
+				fixed++
+			} else if !track.Tracked {
+				track.Tracked = true
+				fixed++
 			}
-			track := pl.roleState.EnsureTaskTrack(id, 0)
-			track.Tracked, track.Step = true, 1
-			fixed++
 		}
 		if fixed > 0 {
-			s.trace("npc task: 进场补任务进度行 %d 条 client=%d", fixed, pl.Conn1)
+			s.trace("npc task: 进场补任务进度行/追踪标志 %d 条 client=%d", fixed, pl.Conn1)
 		}
 	})
 }

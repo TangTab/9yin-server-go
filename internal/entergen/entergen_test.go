@@ -12,7 +12,7 @@ import (
 
 func testContext(t *testing.T) Context {
 	t.Helper()
-	state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, 1, "icon\\players\\boy01_create.png", 0)
+	state, err := rolestate.BuildRoleState(rolestate.DefaultBook, 1, "icon\\players\\boy01_create.png", 0)
 	if err != nil {
 		t.Fatalf("build role state: %v", err)
 	}

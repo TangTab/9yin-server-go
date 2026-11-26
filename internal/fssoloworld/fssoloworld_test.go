@@ -932,7 +932,7 @@ func TestCreateRoleEndToEnd(t *testing.T) {
 	}
 	fields := strings.Split(vl.Values[3].Text, ",")
 	if len(fields) != 36 || fields[0] != "1" || fields[1] != "" ||
-		fields[32] != "book1" || fields[24] != "烟雨庄" ||
+		fields[32] != "book1" || fields[24] != "ChushengCJ000001" ||
 		fields[25] != "introduction_qdz01_title" {
 		t.Fatalf("rolePara %q", vl.Values[3].Text)
 	}
@@ -1176,8 +1176,8 @@ func TestRolesFrameGolden(t *testing.T) {
 	fields := strings.Split(vl.Values[3].Text, ",")
 	if len(fields) != 36 || fields[0] != "0" || fields[1] != "" ||
 		fields[9] != `obj\char\b_jianghu001\b_cloth001` || fields[10] != `obj\char\b_jianghu003\b_pants003` || fields[11] != `obj\char\b_jianghu003\b_shoes003` ||
-		fields[23] != "title001" || fields[24] != "烟雨庄" || fields[32] != "book1" ||
-		fields[25] != "introduction_qdz01_title" || fields[6] != "0" {
+		fields[23] != "title001" || fields[24] != "ChushengCJ000002" || fields[32] != "book2" ||
+		fields[25] != "introduction_yyz01_title" || fields[6] != "0" {
 		t.Fatalf("rolePara %q", vl.Values[3].Text)
 	}
 }

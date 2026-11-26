@@ -137,7 +137,7 @@ func TestMailBoxCap(t *testing.T) {
 
 func TestOfflineMailReplyPatchesRST1(t *testing.T) {
 	s, _ := newCustomTestServer(t)
-	state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, 1, "", 0)
+	state, err := rolestate.BuildRoleState(rolestate.DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatal(err)
 	}

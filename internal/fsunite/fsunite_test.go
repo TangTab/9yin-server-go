@@ -505,7 +505,11 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 		t.Fatalf("world info len=%d", len(f))
 	}
 
-	// op05 建角（真机方言：4B 保留 + 裸 UTF-16 名 + 0x48 起 tag6 外观）
+	// op05 建角（真机方言：4B 保留 + 裸 UTF-16 名 + 0x48 起 tag6 外观）。
+	// 外观串带 book1——官服建号.pcapng 实证剧本随建号上行；首登落新手
+	// 副本（guideSceneNpcCount=副本摆放闸后全量物化数；官服抓包静态目录
+	// 可见窗口 48 块是视口内子集）。
+	const guideSceneNpcCount = 84
 	body := make([]byte, 0x48)
 	for i, u16 := range utf16.Encode([]rune("王五")) {
 		binary.LittleEndian.PutUint16(body[4+i*2:], u16)
@@ -556,6 +560,15 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 	}
 	readFrame(0x09) // 属性表（大帧过真传输面；2433 口径：进场直发表，无 0x0C/0x32/0x0E 前导）
 	readFrame(0x0A) // 记录表镜像
+	// 新手引导阶段簇（官服位 705 后、0x0B 前——黑幕窗时机）：测试号
+	// appearance 无性别证据（book1/girl 图标不在推断位）→ 默认男 5/5、
+	// book1 出生地千灯镇链 qiandengzhen_00。四帧 idx225 门控属性
+	// FinishFreshmanRecStr 初值(0x10,65B——黑幕窗本地弹出条件,建号.pcapng
+	// #134)→idx1309(0x10)→m414(0x1E)→idx129(0x10)；705 无档零帧。
+	readFrame(0x10)
+	readFrame(0x10)
+	readFrame(0x1E)
+	readFrame(0x10)
 	// 进场段（默认 native：2433 方言 5 属性 0x0B——entgegenert from
 	// role_state_json；帧数随建号数据可变，读完直到 ClientReady 窗口）。
 	// golden 回退（NINEYIN_ENTER_MODE=replay）同为 5 属性 + 272 帧。
@@ -568,7 +581,7 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 			switch binary.LittleEndian.Uint16(f[10:]) {
 			case 51: // OpenMapRec 24 行开图位图（外服 112B 形）
 				openMapSeen = len(f) == 112 && binary.LittleEndian.Uint16(f[14:]) == 24
-			case 56: // MapMaskRec 迷雾行 [段号, born03, 1]
+			case 56: // MapMaskRec 迷雾行 [段号, resource, 1]
 				mapMaskSeen = binary.LittleEndian.Uint32(f[16:]) == 3
 			}
 		}
@@ -596,29 +609,51 @@ func TestUniteClientLoginRoleFlow(t *testing.T) {
 			f[8] == 2 && binary.LittleEndian.Uint32(f[9:]) == 130
 	}
 	npc0D, mark229 := 0, 0
-	for i := 0; i < 9000; i++ { // 进场余帧（千级）+ NPC 0x28 全量 1674 + 就绪段尾部
-		f := readAny()
-		checkMapFrame(f) // 开图双记录（记录簇尾、NPC 物化前）
+	// 建号默认已进新手副本（官服建号.pcapng 定版）：物化族是副本可见
+	// 静态 NPC（约 48 量级，非 born03 全量 1674）——帧流尽即收（readSoft）。
+	readSoft := func() []byte {
+		type res struct {
+			b   []byte
+			err error
+		}
+		ch := make(chan res, 1)
+		go func() {
+			b, err := conn.ReadMsg()
+			ch <- res{b, err}
+		}()
+		select {
+		case r := <-ch:
+			if r.err != nil {
+				t.Fatalf("read soft: %v logs: %s", r.err, logs)
+			}
+			return r.b
+		case <-time.After(3 * time.Second):
+			return nil // 帧流尽
+		}
+	}
+	for i := 0; i < 9000; i++ { // 进场余帧 + NPC 0x28 物化族 + 就绪段尾部
+		f := readSoft()
+		if f == nil {
+			break
+		}
+		checkMapFrame(f) // 开图记录（记录簇尾、NPC 物化前）
 		if isNpcM229(f) {
 			mark229++
 			continue
 		}
 		if f[0] == 0x28 && f[1] == 0x46 && len(f) > 60 && f[13] == 0x0E {
 			npc0D++ // NPC 0x28 物化（全量一次物化——PreReady 尾）
-			if npc0D >= 1674 {
-				break
-			}
 			continue
 		}
 	}
-	if npc0D != 1674 {
-		t.Errorf("NPC 0x28 帧数 = %d, want 1674（born03 闸后全量物化）logs: %s", npc0D, logs)
+	if npc0D != guideSceneNpcCount {
+		t.Errorf("NPC 0x28 帧数 = %d, want %d（born_single_01 副本可见静态 NPC）logs: %s", npc0D, guideSceneNpcCount, logs)
 	}
 	if !openMapSeen {
 		t.Errorf("进场段未见 OpenMapRec 位图帧（大地图城市标签/点击寻路数据源）logs: %s", logs)
 	}
-	if !mapMaskSeen {
-		t.Errorf("进场段未见 MapMaskRec 迷雾行（born03=3）logs: %s", logs)
+	if mapMaskSeen {
+		t.Errorf("副本进场不应有 MapMaskRec 迷雾行（scenes.ini 无全局段号，开图降级）logs: %s", logs)
 	}
 	if mark229 != 0 {
 		t.Errorf("m229 默认关仍下发 %d 帧", mark229)

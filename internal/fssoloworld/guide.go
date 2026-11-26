@@ -47,9 +47,9 @@ const (
 	guideHelpStepGuide = "chengdu_00"
 	guideHelpStepSkip  = "jimingyi_00"
 
-	// 再战江湖：进入鸡鸣驿 born01。落点与复活点串取男号抓包原值
-	// （#2185 0x1F、#1631 RelivePositon）。
-	guideSkipScene  = "born01"
+	// 再战江湖落位：出生地（books.ini 剧本 → location.ini 节，2026-11-26
+	// 建号.pcapng 定版）。guideSkipRelive 是男号抓包保底值（#1631
+	// RelivePositon；属地复活点走 rolestate.ReliveOfScene）。
 	guideSkipRelive = "4,693.908,24.694,404.35,3.611,ui_pos_ReliveCJ100101"
 
 	guideSkipItem       = "item_skipsp_001" // 再战江湖奖励物品（#1695..#1698）
@@ -57,8 +57,24 @@ const (
 	guideSkipReputeFlag = int32(2)          // 跳过奖励的声望行标志列（任务完成奖励是 1）
 )
 
-// guideSkipLanding 再战江湖落点（鸡鸣驿，官服 0x1F 原值）。
-var guideSkipLanding = [4]float64{728.968, 23.951818, 354.622, 2.828}
+// guideHelpStepOf 出生地 resource → freshmanhelp 帮助链名（归纳文档 §5
+// 表 + 官服抓包：男号鸡鸣驿 jimingyi_00 / 女号成都线 chengdu_00）。
+// 未收录出生地（洛阳/悟明坡等）→ Freshman_End 直接结链。
+func guideHelpStepOf(resource string) string {
+	switch resource {
+	case "born03":
+		return "yanyuzhuang_00"
+	case "born04":
+		return "qiandengzhen_00"
+	case "born01":
+		return guideHelpStepSkip // jimingyi_00（官服男号实证）
+	case "city05":
+		return guideHelpStepGuide // chengdu_00（官服女号线）
+	case "city02":
+		return "suzhou_00"
+	}
+	return "Freshman_End"
+}
 
 // guideSkipReputeCount 江湖声望奖励值。
 const guideSkipReputeCount int32 = 700
@@ -80,10 +96,11 @@ var (
 	// guideStartDelay m972 [4] 之后到引导链根接取簇的间隔（女号 31.924s 点选
 	// → 32.969s 接取簇）。
 	guideStartDelay = time.Second
-	// guideChoiceTimeoutDefault 待选态兜底：客户端一直不上报 m972 时视同
-	// 初出茅庐。官服没有兜底（黑幕窗必弹）；本服黑幕窗的弹出条件在引擎
-	// 里，留一道出口免得输入锁死。
-	guideChoiceTimeoutDefault = 300 * time.Second
+	// guideChoiceTimeoutDefault 待选兜底：客户端一直不上报 m972 时按性别
+	// 焦点线自动选（男=再战江湖、女=初出茅庐）。官服没有兜底（黑幕窗必
+	// 弹）；本服黑幕窗弹不出来（弹出条件在引擎里），20 秒兜底让新号零操
+	// 作也能进游戏。
+	guideChoiceTimeoutDefault = 20 * time.Second
 )
 
 // guideChoiceTimeout 待选兜底时长（NINEYIN_GUIDE_CHOICE_TIMEOUT 秒，0＝一直等）。
@@ -97,6 +114,56 @@ func guideChoiceTimeout() time.Duration {
 // guideSceneOf 玩家是否身在新手副本。
 func guideSceneOf(pl *Player) bool {
 	return strings.EqualFold(strings.TrimSpace(pl.roleState.Resource), guideScene)
+}
+
+// guideDefaultStep 待选态的引导阶段（黑幕窗默认焦点）：官服女号 #437 发
+// 4/5（初出茅庐）、男号（建号.pcapng 42.43s，book2）发 5/5（再战江湖）
+// ——两样本与剧本无关、随性别。点选 m972 仍按玩家实际点的受理。
+func guideDefaultStep(sex int) int {
+	if sex == 2 {
+		return guideStepSingle
+	}
+	return guideStepSkip
+}
+
+// guideEntryStep 进场簇下发的引导阶段（entergen.GuideEntryFrames 输入）：
+// 已定＝存档 GameStep（重登落定态，官服重登同发）；待选且身在新手副本
+// ＝性别默认；其余（副本外的存量号）0＝不进场面簇。
+func guideEntryStep(pl *Player) int {
+	if !pl.haveRoleState {
+		return 0
+	}
+	if pl.roleState.GameStep != guideStepNone {
+		return pl.roleState.GameStep
+	}
+	if guideSceneOf(pl) {
+		return guideDefaultStep(pl.roleState.Sex)
+	}
+	return 0
+}
+
+// guideEntryChoicePending 进场簇的待选判据（guideEntryStep「待选」分支的
+// 原条件，无锁——roleContext 的调用链有持 combatState.mu 的路径，进不了
+// taskMu 做完整 guideChoicePending 核查）：身在新手副本且引导阶段未定。
+// 已定档（含选过初出茅庐/再战江湖）不再发门控属性，避免重登重弹黑幕窗。
+func guideEntryChoicePending(pl *Player) bool {
+	return pl.haveRoleState && pl.roleState.GameStep == guideStepNone && guideSceneOf(pl)
+}
+
+// guideEntryHelpStep 进场簇的 HelpStepID：已入链用存档值（m950 推进过）；
+// 待选副本号用出生地属地链（官服男号 book2 实证 idx129="yanyuzhuang_00"）。
+// 旧档 Birth 字段缺席回落 guideHelpStepOf 的烟雨庄默认。
+func guideEntryHelpStep(pl *Player) string {
+	if !pl.haveRoleState {
+		return ""
+	}
+	if pl.roleState.HelpStepID != "" {
+		return pl.roleState.HelpStepID
+	}
+	if guideSceneOf(pl) {
+		return guideHelpStepOf(pl.roleState.BirthResource)
+	}
+	return ""
 }
 
 // guideChoicePending 待选态：身在新手副本、引导阶段未定、引导链未开始
@@ -139,9 +206,11 @@ func (s *Server) guideIsPending(pl *Player) bool {
 	return pending
 }
 
-// readyTail 就绪簇收尾（首次进场与切图重入共用）：新手副本角色下发引导
-// 阶段——待选态锁输入并起兜底；最后给所有角色发 m390 刷新任务追踪栏
-// （客户端追踪栏窗体进场预载后是隐藏的，只在它之后显示）。
+// readyTail 就绪簇收尾（首次进场与切图重入共用）：引导阶段簇（m414/
+// BornServerGameStep/HelpStepID）已在进场簇下发（entergen.GuideEntryFrames，
+// m655 后、0x0B 前——黑幕窗时机），此处只剩待选态锁输入（官服 49.62s
+// idx249=1，NPC 物化之后的就绪簇）+ 所有角色 m390 刷新任务追踪栏（追踪栏
+// 窗体进场预载后是隐藏的，只在它之后显示；官服 50.24s）。
 func (s *Server) readyTail(pl *Player) {
 	defer func() {
 		if frame, err := entergen.TaskTrackRefreshFrame(); err != nil {
@@ -153,35 +222,21 @@ func (s *Server) readyTail(pl *Player) {
 	if !pl.haveRoleState {
 		return
 	}
-	step, pending := pl.roleState.GameStep, false
+	pending := false
 	s.npcTaskLocked(pl, func() {
-		if guideSceneOf(pl) && step == guideStepNone {
-			// 未定的引导阶段按初出茅庐下发（官服女号登录 4/5）；是否待选
-			// 另按引导链进度判。
-			step = guideStepSingle
+		if guideSceneOf(pl) && pl.roleState.GameStep == guideStepNone {
 			pending = s.guideChoicePending(pl)
 			if pending && pl.roleState.HelpStepID == "" {
-				pl.roleState.HelpStepID = guideHelpStepGuide
+				pl.roleState.HelpStepID = guideHelpStepOf(pl.roleState.BirthResource)
 			}
 		}
 		pl.guidePending = pending
 	})
-	if step == guideStepNone {
-		return // 从没进过引导流的角色：不下发引导阶段
-	}
-	id := pl.entergenIdentity()
-	out := s.taskFrameSink(pl)
-	out.add(entergen.BornGameStepFrame(id, int32(step)*10+guideStepSub))
-	out.add(entergen.GameStepFrame(int32(step), guideStepSub))
-	if pl.roleState.HelpStepID != "" {
-		out.add(entergen.HelpStepFrame(id, pl.roleState.HelpStepID))
-	}
-	if pending {
-		out.add(entergen.InputLockFrame(id, true))
-	}
-	s.sendTaskFrames(pl, out)
 	if !pending {
 		return
+	}
+	if frame, err := entergen.InputLockFrame(pl.entergenIdentity(), true); err == nil {
+		s.sendToClient(pl, frame)
 	}
 	timeout := guideChoiceTimeout()
 	s.trace("npc task guide: 待选态 client=%d scene=%s（锁输入，等 m972 [4]/[5]；兜底 %s）",
@@ -189,12 +244,19 @@ func (s *Server) readyTail(pl *Player) {
 	if timeout <= 0 {
 		return
 	}
+	sex := pl.roleState.Sex
 	time.AfterFunc(timeout, func() {
 		if pl.State != PlOnline || !s.guideIsPending(pl) {
 			return
 		}
-		s.trace("npc task guide: 待选态 %s 未收到 m972，按初出茅庐推进 client=%d", timeout, pl.Conn1)
-		s.guideChoose(pl, guideStepSingle)
+		// 2026-11-27：黑幕窗（form_single_blackback，引擎按号弹）在本服
+		// 客户端弹不出来，玩家面对锁死的场景（真机「NPC 不物化、任务列
+		// 表空」实为待选态卡住）——兜底从 300s 降为 20s，且按性别焦点线
+		// 自动选（与 m414 下发的默认焦点一致：男=再战江湖切出副本、女=
+		// 初出茅庐进引导），玩家零操作也能进游戏。
+		s.trace("npc task guide: 待选态 %s 未收到 m972，按性别焦点（sex=%d → step=%d）推进 client=%d",
+			timeout, sex, guideDefaultStep(sex), pl.Conn1)
+		s.guideChoose(pl, guideDefaultStep(sex))
 	})
 }
 
@@ -241,10 +303,23 @@ func (s *Server) guideBeginSingle(pl *Player) {
 	})
 }
 
-// guideSkip 再战江湖：跳过簇 + 切出新手副本进鸡鸣驿。
+// guideSkip 再战江湖：跳过簇 + 切出新手副本进出生地（books.ini 剧本 →
+// location.ini 出生地节；官服男号抓包 → 鸡鸣驿只是 book5 个案）。
 func (s *Server) guideSkip(pl *Player) {
 	if !pl.haveRoleState {
 		return
+	}
+	// 出生地：优先档内 Birth 字段（BuildRoleState 建档写入）；旧档缺席
+	// 按剧本（外观串）重解析；链尽头回落默认烟雨庄。
+	place := rolestate.Birthplace{}
+	if pl.roleState.BirthScene != "" {
+		place.Section, place.Scene = pl.roleState.BirthSection, pl.roleState.BirthScene
+		place.Resource, place.Position = pl.roleState.BirthResource, pl.roleState.BirthPosition
+	} else {
+		place = rolestate.BirthplaceOf(pl.roleState.Book)
+	}
+	if place.Scene == "" {
+		place = rolestate.BirthplaceOf(rolestate.DefaultBook)
 	}
 	done := false
 	s.npcTaskLocked(pl, func() {
@@ -255,7 +330,7 @@ func (s *Server) guideSkip(pl *Player) {
 			s.trace("npc task guide: 再战江湖未受理（不在待选态）client=%d step=%d 引导进度 %d 条",
 				pl.Conn1, pl.roleState.GameStep, len(pl.roleState.TaskTracks))
 		default:
-			s.guideSkipFrames(pl)
+			s.guideSkipFrames(pl, place)
 			pl.roleState.GameStep, pl.guidePending = guideStepSkip, false
 			done = true
 		}
@@ -263,13 +338,10 @@ func (s *Server) guideSkip(pl *Player) {
 	if !done {
 		return
 	}
-	s.trace("npc task guide: 再战江湖 client=%d → %s", pl.Conn1, guideSkipScene)
+	s.trace("npc task guide: 再战江湖 client=%d → 出生地 %s", pl.Conn1, place.Section)
 	s.sendRoleSave(pl)
-	dest, ok := resolveSceneDestination(guideSkipScene)
-	if !ok {
-		dest = sceneDestination{Config: `ini\scene\born01_MoHeZhen`, Resource: guideSkipScene}
-	}
-	dest.Position = guideSkipLanding
+	dest := sceneDestination{Config: place.Scene, Resource: place.Resource}
+	dest.Position = place.Position
 	if err := s.transferPlayer(pl, dest, "guide skip"); err != nil {
 		s.trace("npc task guide: 切出新手副本失败 client=%d: %v", pl.Conn1, err)
 	}
@@ -277,16 +349,21 @@ func (s *Server) guideSkip(pl *Player) {
 
 // guideSkipFrames 跳过簇（改状态、下发；调用方持 taskMu）。帧序按男号抓包：
 // 后续任务接取 → 复活点 → 引导链逐个置完成位 → 奖励 → 入江湖属性。
-func (s *Server) guideSkipFrames(pl *Player) {
+func (s *Server) guideSkipFrames(pl *Player, place rolestate.Birthplace) {
 	id := pl.entergenIdentity()
 	out := s.taskFrameSink(pl)
 	// 1. 后续任务接取（行 + 接取通知，男号 #1612..#1630）。
 	for _, taskID := range guideSkipTasks {
 		s.npcTaskAcceptFrames(pl, out, taskID)
 	}
-	// 2. 复活点 → 鸡鸣驿（#1631）。
-	pl.roleState.RelivePositon = guideSkipRelive
-	out.add(entergen.ReliveFrame(id, guideSkipRelive))
+	// 2. 复活点 → 出生地（#1631 官服男号=鸡鸣驿 ui_pos_ReliveCJ100101；
+	//    属地化按 location.ini 同场景 ReliveCJ 节组串，缺席保底抓包值）。
+	relive := guideSkipRelive
+	if r, ok := rolestate.ReliveOfScene(place.Scene); ok {
+		relive = r
+	}
+	pl.roleState.RelivePositon = relive
+	out.add(entergen.ReliveFrame(id, relive))
 	// 3. 引导链逐个置完成位（#1674..#1694；1346 置位后官服插一帧 m543）。
 	completed := append([]uint32(nil), pl.roleState.TaskCompleted...)
 	for n, taskID := range guideSkipDoneTasks {
@@ -317,10 +394,13 @@ func (s *Server) guideSkipFrames(pl *Player) {
 	out.add(entergen.FunctionOpenNoticeFrame(177))
 	out.add(entergen.TaskReputeNotice(guideSkipRepute, guideSkipReputeCount))
 	out.addAll(entergen.LifeHelpUnlockFrames())
-	// 5. 入江湖：帮助链切到鸡鸣驿 → PowerLevel/YinLevel → 解锁输入
-	//    （#1946..#1948）。
-	pl.roleState.HelpStepID = guideHelpStepSkip
-	out.add(entergen.HelpStepFrame(id, guideHelpStepSkip))
+	// 5. 入江湖：帮助链切到出生地对应 freshmanhelp 链 → PowerLevel/
+	//    YinLevel → 解锁输入（#1946..#1948；官服男号=鸡鸣驿 jimingyi_00，
+	//    链名按出生地 resource 映射，未收录的出生地直接结链 Freshman_End
+	//    ——归纳文档 §5「非出生场景进入则置 Freshman_End」同义）。
+	step := guideHelpStepOf(place.Resource)
+	pl.roleState.HelpStepID = step
+	out.add(entergen.HelpStepFrame(id, step))
 	out.addAll(entergen.EnterWorldFrames(id))
 	out.add(entergen.InputLockFrame(id, false))
 	s.sendTaskFrames(pl, out)

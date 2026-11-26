@@ -8,7 +8,7 @@ package fssoloworld
 // 怒招消耗读写的都是战斗会话态 live.sp（combatcore.go ensureLiveLocked），
 // 所以这里落的也是它——GM 设的值与玩家实际能用的怒气是同一份；客户端经
 // 0x10 SP 单属性帧热发。上限 = live.maxSP（登录面板 MaxSP，与登录批下发
-// 给客户端的上限同源；内功档加成 MaxSPAdd 未建模，登录批固定 80）。
+// 给客户端的上限同源：基础 80 + 运行内功档位加成，见 entergen/ragecap.go）。
 // 参考端的怒气是写死的常量 100，本线上限取面板值，故不照搬。怒气每次
 // 登录从 0 起（进场帧取会话态，enterContext），不随档。
 //

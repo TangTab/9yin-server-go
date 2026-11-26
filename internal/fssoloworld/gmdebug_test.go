@@ -369,19 +369,26 @@ func TestDecodePropertyFrameInt64(t *testing.T) {
 	}
 }
 
+// starterRageCap 建号运行武当一内（ng_wd_001）的怒气上限：基础 80 + 一内档 10
+//（entergen/ragecap.go 分档表）。
+const starterRageCap = 90
+
 // 怒气上限 = 登录批下发给客户端的 MaxSP（同源）：GM「回满」回到的就是
 // 客户端血条的上限，而不是回退值。
 func TestGmRageCapIsPanelMaxSP(t *testing.T) {
 	s, pl, _, gm := newGmDebugFixture(t)
+	if cap := entergen.RageCap(s.enterContext(pl, false)); cap != starterRageCap {
+		t.Fatalf("建号怒气上限 = %d, want %d", cap, starterRageCap)
+	}
 	vital, err := entergen.PlayerVitalBatchFrame(s.enterContext(pl, false))
 	if err != nil {
 		t.Fatal(err)
 	}
 	sent := decodePropertyFrame(vital, 10)["MaxSP"]
-	if sent != 80 {
-		t.Fatalf("登录批 MaxSP = %v, want 80", sent)
+	if sent != starterRageCap {
+		t.Fatalf("登录批 MaxSP = %v, want %d", sent, starterRageCap)
 	}
-	if got := gm("rage", "acct", "max"); !strings.HasPrefix(got, ">gm rage acct: sp=80/80 ") {
+	if got := gm("rage", "acct", "max"); !strings.HasPrefix(got, ">gm rage acct: sp=90/90 ") {
 		t.Fatalf("回满应到登录批的 MaxSP: %q", got)
 	}
 	st := &pl.combat
@@ -415,7 +422,7 @@ func rageProps(frames [][]byte) (sp, maxSP []float64) {
 }
 
 // assertRage 帧序里的 SP 全为 want（至少出现一次）；出现的 MaxSP 全为登录批
-// 上限 80（0x0D 不带 MaxSP，不强求出现）。
+// 上限 starterRageCap（0x0D 不带 MaxSP，不强求出现）。
 func assertRage(t *testing.T, frames [][]byte, want int) {
 	t.Helper()
 	sp, maxSP := rageProps(frames)
@@ -429,8 +436,8 @@ func assertRage(t *testing.T, frames [][]byte, want int) {
 		}
 	}
 	for _, v := range maxSP {
-		if v != 80 {
-			t.Errorf("MaxSP = %v, want 80（全部 MaxSP: %v）", v, maxSP)
+		if v != starterRageCap {
+			t.Errorf("MaxSP = %v, want %d（全部 MaxSP: %v）", v, starterRageCap, maxSP)
 			break
 		}
 	}

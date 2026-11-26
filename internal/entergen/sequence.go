@@ -42,6 +42,17 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 		frames = append(frames, customizing)
 	}
 
+	// 新手引导阶段簇（官服位：m705 后、**0x0B 场景帧前**——2026-11-26
+	// 建号.pcapng 男号实证 m414 [gamestep,5,5] 与 idx129 HelpStepID 均在
+	// 0x0B 之前（0x27 族夹在中间）；11-24 切景抓包同序「m705→m414→0x0B」。
+	// 迟到（0x0B 之后）客户端已入正常场景态，黑幕窗不再弹出——真机两轮
+	// 实证。GuideStep=0 的角色零帧。
+	guide, err := GuideEntryFrames(ctx)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, guide...)
+
 	// 0x0B 进场（idx178/1468/1447/1448 按存档场景）。
 	entry, err := EntrySceneFrame(ctx.Identity, ctx.State.Scene, ctx.State.Resource)
 	if err != nil {
@@ -69,7 +80,8 @@ func PreReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, vital)
 
-	// 登录信息帧簇 m366/m623/m655（外服 0.1s 位：0x0A 表后）。
+	// 登录信息帧簇 m366/m623/m655（外服 0.1s 位：0x0A 表后；官服在 0x0B
+	// 之前，本方言排 0x0B 后——fork/外服双验证位置不敏感）。
 	info, err := LoginInfoFrames(ctx)
 	if err != nil {
 		return nil, err
@@ -286,7 +298,7 @@ func BasePropertyFrames(ctx Context) ([][]byte, error) {
 		NamedProperty("Sta", Int32Value(int32(state.Sta))),
 		NamedProperty("MaxHP", Int32Value(int32(state.HP))),
 		NamedProperty("MaxMP", Int32Value(int32(state.MP))),
-		NamedProperty("MaxSP", Int32Value(baseMaxSP)),
+		NamedProperty("MaxSP", Int32Value(RageCap(ctx))),
 		NamedProperty("HP", Int32Value(int32(state.HP))),
 		NamedProperty("MP", Int32Value(int32(state.MP))),
 		NamedProperty("SP", Int32Value(int32(ctx.SP))),

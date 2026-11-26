@@ -47,6 +47,9 @@ const (
 	logicNormal   = 0 // LS_NORMAL
 	logicFighting = 1 // LS_FIGHTING
 	logicWarning  = 2 // LS_WARNING（脱战过渡）
+	// logicSitcross LS_SITCROSS 原生打坐（sitcross.go）：坐姿动画由客户端
+	// 负责，何时允许进入由服务端决定。
+	logicSitcross = 102
 )
 
 // 战斗节拍常量（抓包观测；标注推断处无直接帧证）。时长一律是

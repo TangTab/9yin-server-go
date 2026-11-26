@@ -65,6 +65,23 @@ type Context struct {
 	// SP 本次进场下发的当前怒气（SP 属性）：会话值——world 传战斗会话态的
 	// 当前怒气，没进过战斗 = 0。不取存档 State.SP：怒气每次登录从 0 起
 	//（2026-11-26 定案；此前下发建号初值 80，而服务端战斗态从 0 起，两端
-	// 对不上）。上限另走 baseMaxSP。
+	// 对不上）。上限另走 RageCap（ragecap.go）。
 	SP int
+
+	// GuideStep 引导阶段（黑幕窗「初出茅庐/再战江湖」的 SwitchManager
+	// 主步）。0＝不进场面簇（从未进过引导流的角色）。已定＝存档 GameStep；
+	// 待选＝性别默认（官服两抓包：女号 4/男号 5——黑幕窗默认焦点，2026-11-26
+	// 建号.pcapng 男号 book2 实证首登 m414 [5,5]）。**必须在 0x0B 之前的
+	// 进场簇下发**（官服位 m655 后、0x0B 前）——迟到客户端已入正常场景，
+	// 黑幕窗不再弹（真机实证）。
+	GuideStep int
+	// GuideChoicePending 待选态（GameStep 未定且身在新手副本——guideEntryStep
+	// 同判据的无锁形）：进场簇在引导阶段帧之前补发黑幕窗门控属性
+	// FinishFreshmanRecStr 初值。已定档（GameStep≠0）不发——该属性值随
+	// 引导进度变化、官方按存档下发，本服只复现新号初值。
+	GuideChoicePending bool
+	// HelpStep 新手帮助步骤链（freshmanhelp.ini 节名：待选态按出生地属地
+	// 链——官服男号 book2 实证 idx129="yanyuzhuang_00"；已入链用存档值）。
+	// 空＝不发。
+	HelpStep string
 }

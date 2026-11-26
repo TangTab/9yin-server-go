@@ -52,7 +52,7 @@ rem Optional client-line wire capture: any non-empty NINEYIN_CAPTURE_DIR
 rem dumps both directions of every client session to
 rem <dir>\{ip-dashes}-{port}_c2s.bin / _s2c.bin (raw wire bytes, same
 rem layout as the reference captures\local). CAPTURE=1 picks that dir here.
-if /i "%CAPTURE%"=="1" if not defined NINEYIN_CAPTURE_DIR set "NINEYIN_CAPTURE_DIR=%~dp0..\captures\local"
+if /i "%CAPTURE%"=="1" if not defined NINEYIN_CAPTURE_DIR set "NINEYIN_CAPTURE_DIR=%~dp0logs\capture"
 if defined NINEYIN_CAPTURE_DIR echo Capture: %NINEYIN_CAPTURE_DIR%
 
 rem  -capture-dir "%~dp0logs\capture"

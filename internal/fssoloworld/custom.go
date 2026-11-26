@@ -16,7 +16,8 @@ package fssoloworld
 //	200/201 快捷栏设置/删除（按可见栏位索引；应答走整表重建方言：
 //	    倒序 0x12 清空 + 0x11 整表重放——增量「旧行 DEL+尾行 ADD」在
 //	    本客户端上行号口径会漂，真机实证拖出不移除/图标重叠）；
-//	240 原生打坐切换（逻辑态机未落地，暂只记日志）；
+//	240 原生打坐切换 [240, 1 进/0·2 出]（LogicState=102 + dazuo_old 动作帧，
+//	    每秒回复结算；sitcross.go）；
 //	972 单机引导步骤 [972, 4|5]（新手副本黑幕窗点选：初出茅庐／再战江湖，
 //	    guide.go）；
 //	950 新手帮助步骤完成 [950, 0, "<下一步>"]（回写 HelpStepID，guide.go）。
@@ -536,17 +537,4 @@ func (s *Server) handleMoveType(pl *Player, message entergen.CustomInbound) {
 		return
 	}
 	s.trace("move type change -> %d client=%d (walk/run toggle; polarity pending)", mode, pl.Conn1)
-}
-
-// handleSitcross C2S 240 原生打坐切换 [240, int startOrStop]。逻辑态机
-// （LS_SITCROSS/vital 0x10 + dazuo_old 动作飘字）未落地，暂只记日志。
-func (s *Server) handleSitcross(pl *Player, message entergen.CustomInbound) {
-	if len(message.Values) < 2 {
-		return
-	}
-	state, ok := message.Values[1].ExactInt32()
-	if !ok {
-		return
-	}
-	s.trace("sitcross native toggle -> %d client=%d (logic state pending)", state, pl.Conn1)
 }

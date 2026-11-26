@@ -11,7 +11,8 @@ package entergen
 //
 // 关键口径（b-line 注释定版）：
 //   - MaxSP(580) 只由此登录全量批携带一次，官方全程零下发 MaxSPAdd(583)
-//     ——加成折进 580；把上限塞进 0x0D 归档或周期批会让客户端进世界崩溃；
+//     ——加成折进 580（值 = RageCap：基础 80 + 运行内功档位加成，ragecap.go）；
+//     把上限塞进 0x0D 归档或周期批会让客户端进世界崩溃；
 //   - *UpSpeedAdd 位是五维分数系数分量（round(0.07·Sta)/round(0.2·Spi)，
 //     12173/55866 抓包），*UpSpeed 基础位 = ceil(总上限/10)；
 //   - 格挡族登录补位：CantParry=0/ParryRatio=100/ParryType=0/
@@ -27,11 +28,6 @@ import (
 
 	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
-
-// baseMaxSP 怒气上限（MaxSP）的基础位：建号无内功档加成（官方全程零下发
-// MaxSPAdd，档位加成未建模）。登录人物数据大批尾追声明一次，建号基础属性批
-// 同值。与当前怒气无关——那是会话值，走 Context.SP。
-const baseMaxSP int32 = 80
 
 // vitalBook 解析当前装备内功（缺席回退零书——与 AppearanceFrame 同法）。
 func vitalBook(ctx Context) rolestate.NeiGongBook {
@@ -245,7 +241,7 @@ func PlayerVitalBatchFrame(ctx Context) ([]byte, error) {
 	)
 
 	// ---- 尾追：MaxSP 全量批一次声明（官方全程零下发 MaxSPAdd）----
-	props = append(props, ap("MaxSP", Int32Value(baseMaxSP)))
+	props = append(props, ap("MaxSP", Int32Value(RageCap(ctx))))
 
 	return ObjectPropertyFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, 0, props)
 }

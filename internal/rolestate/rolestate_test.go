@@ -5,12 +5,13 @@ import (
 	"testing"
 )
 
-// TestBuildRoleStateBorn03 钉死默认建号状态（官方口径：born03 烟雨庄 +
-// RoleBaseProp 五维=3/HP70/MP40 + StarterSet 授予集 + location.ini
-// BornCJ000003 出生点）。SP（怒气）例外：官服建号档 80、登录即满，本线
-// 2026-11-26 定案改 0——怒气是会话值，不随档。
+// TestBuildRoleStateBorn03 钉死默认建号状态（官方口径 2026-11-26 建号.pcapng：
+// 首登新手副本 born_single_01（BornCJ000100 锚）+ book2 出生地烟雨庄
+// ChushengCJ000002；RoleBaseProp 五维=3/HP70/MP40 + StarterSet 授予集）。
+// SP（怒气）例外：官服建号档 80、登录即满，本线 2026-11-26 定案改 0——
+// 怒气是会话值，不随档。
 func TestBuildRoleStateBorn03(t *testing.T) {
-	state, err := BuildRoleState(DefaultBirthScene, 1, "icon\\players\\boy01_create.png,obj\\char\\b_hair\\b_hair1", 0)
+	state, err := BuildRoleState(DefaultBook, 1, "icon\\players\\boy01_create.png,obj\\char\\b_hair\\b_hair1", 0)
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
@@ -20,11 +21,19 @@ func TestBuildRoleStateBorn03(t *testing.T) {
 	if state.HP != 70 || state.MP != 40 || state.SP != 0 || state.Parry != 100 {
 		t.Fatalf("资源初值 HP70/MP40/SP0/Parry100： %+v", state)
 	}
-	if state.Scene != `ini\scene\born03_YanYuZhuang` || state.Resource != "born03" {
-		t.Fatalf("出生场景 = %q resource = %q", state.Scene, state.Resource)
+	// 首登场景 = 新手副本（官服首帧 0x0B 实证）；出生地入 Birth 字段。
+	if state.Scene != `ini\scene\born_single_01` || state.Resource != GuideScene {
+		t.Fatalf("首登场景 = %q resource = %q", state.Scene, state.Resource)
 	}
-	if state.Position != [4]float64{482.5, 13.7, 1008, 1.56} {
-		t.Fatalf("BornCJ000003 出生点 = %v", state.Position)
+	if state.Position != [4]float64{197.626, 4.746, -108.829, -2.746} {
+		t.Fatalf("副本首登锚（BornCJ000100） = %v", state.Position)
+	}
+	if state.Book != DefaultBook || state.BirthSection != "ChushengCJ000002" ||
+		state.BirthScene != `ini\scene\born03_YanYuZhuang` || state.BirthResource != "born03" {
+		t.Fatalf("出生地字段： %+v", state)
+	}
+	if state.BirthPosition != [4]float64{371.67, 23.57, 1058.48, 2.23} {
+		t.Fatalf("ChushengCJ000002 出生点 = %v", state.BirthPosition)
 	}
 	if state.NewbieSkill != 1 || state.InitTask != 22001 || state.BaishiTask != 49 {
 		t.Fatalf("NewbieSkill/InitTask/BaishiTask = %d/%d/%d", state.NewbieSkill, state.InitTask, state.BaishiTask)
@@ -55,9 +64,69 @@ func TestBuildRoleStateBorn03(t *testing.T) {
 	}
 }
 
+// TestBuildRoleStateBooks 全剧本 → 出生地（books.ini + location.ini 数据
+// 驱动；四出生地用户口径 + 缺节/零坐标回落链）。
+func TestBuildRoleStateBooks(t *testing.T) {
+	cases := []struct {
+		book     string
+		section  string
+		resource string
+		scene    string
+		pos      [4]float64
+	}{
+		// 直取：ChushengCJ 节坐标非 0。
+		{"book1", "ChushengCJ000001", "born04", `ini\scene\born04_QianDengZhen`, [4]float64{888, -23.68, 623, 0}},
+		{"book2", "ChushengCJ000002", "born03", `ini\scene\born03_YanYuZhuang`, [4]float64{371.67, 23.57, 1058.48, 2.23}},
+		// 坐标 0：同场景 BornCJ 节回落（裸目录/带后缀 resource 等价匹配）。
+		{"book4", "ChushengCJ000009", "city05", `ini\scene\city05`, [4]float64{418, 22.98, 607, 1.59}},
+		{"book5", "ChushengCJ000003", "born01", `ini\scene\born01`, [4]float64{990, 6.66, 532, 4.7}},
+		{"book6", "ChushengCJ000008", "city04", `ini\scene\city04`, [4]float64{1209.7, -17.06, 705.26, 4.75}},
+		// 节缺席：FallbackBornName 显式回落。
+		{"book3", "ChushengCJ000001", "born04", `ini\scene\born04_QianDengZhen`, [4]float64{888, -23.68, 623, 0}},
+		{"book8", "ChushengCJ000002", "born03", `ini\scene\born03_YanYuZhuang`, [4]float64{371.67, 23.57, 1058.48, 2.23}},
+		// 空剧本/未知剧本 → DefaultBook。
+		{"", "ChushengCJ000002", "born03", `ini\scene\born03_YanYuZhuang`, [4]float64{371.67, 23.57, 1058.48, 2.23}},
+		{"book99", "ChushengCJ000002", "born03", `ini\scene\born03_YanYuZhuang`, [4]float64{371.67, 23.57, 1058.48, 2.23}},
+	}
+	for _, c := range cases {
+		place := BirthplaceOf(c.book)
+		if place.Section != c.section || place.Resource != c.resource ||
+			place.Scene != c.scene || place.Position != c.pos {
+			t.Fatalf("BirthplaceOf(%q) = %+v，want %+v", c.book, place, c)
+		}
+	}
+	// 首登恒副本：任意剧本的 Scene/Resource 都是 born_single_01。
+	for _, book := range []string{"book1", "book4", "book5", ""} {
+		state, err := BuildRoleState(book, 1, "", 0)
+		if err != nil {
+			t.Fatalf("BuildRoleState(%q): %v", book, err)
+		}
+		if state.Resource != GuideScene || state.Scene != `ini\scene\born_single_01` {
+			t.Fatalf("book %q 首登应落副本： %q/%q", book, state.Scene, state.Resource)
+		}
+	}
+	// 剧本/出生地查询面。
+	if got := BirthSectionOf("book1"); got != "ChushengCJ000001" {
+		t.Fatalf("BirthSectionOf(book1) = %q", got)
+	}
+	if got := InferBookFromPara("icon\\players\\boy01_create.png,book2,obj\\char\\b_hair\\b_hair1,school_kunlun"); got != "book2" {
+		t.Fatalf("InferBookFromPara = %q", got)
+	}
+	if got := InferBookFromPara("school_kunlun,bookmark"); got != "" {
+		t.Fatalf("非剧本词不得误判： %q", got)
+	}
+	// 属地复活点（ReliveCJ 节表组串；鸡鸣驿=官服男号 ui 键）。
+	if got, ok := ReliveOfScene(`ini\scene\born01_MoHeZhen`); !ok || got != "4,584.97,24.57,298.65,0.6,ui_pos_ReliveCJ100101" {
+		t.Fatalf("ReliveOfScene(born01) = %q ok=%v", got, ok)
+	}
+	if _, ok := ReliveOfScene(`ini\scene\no_such_scene`); ok {
+		t.Fatal("未知场景不应有复活点")
+	}
+}
+
 // TestRoleStateJSONRoundTrip JSON 序列化回读（nx_roles.role_state_json 通道）。
 func TestRoleStateJSONRoundTrip(t *testing.T) {
-	state, err := BuildRoleState(DefaultBirthScene, 2, "icon\\players\\girl01_create.png", 0)
+	state, err := BuildRoleState(DefaultBook, 2, "icon\\players\\girl01_create.png", 0)
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
@@ -132,7 +201,7 @@ func TestMoneyRoundTrip(t *testing.T) {
 // （BagItems/Equips，2433 线 bagRow/equipRow 口径）JSON 往返 + 槽位/行号
 // 分配助手。
 func TestProgressAndItemDomainRoundTrip(t *testing.T) {
-	state, err := BuildRoleState(DefaultBirthScene, 1, "", 0)
+	state, err := BuildRoleState(DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatalf("build: %v", err)
 	}
@@ -173,7 +242,7 @@ func TestProgressAndItemDomainRoundTrip(t *testing.T) {
 	}
 
 	// omitempty：空进度域不落 JSON（旧档兼容）。
-	fresh, err := BuildRoleState(DefaultBirthScene, 1, "", 0)
+	fresh, err := BuildRoleState(DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -192,7 +261,7 @@ func TestProgressAndItemDomainRoundTrip(t *testing.T) {
 func TestCustomizingBinaryRoundTrip(t *testing.T) {
 	// 11-22 真机首传的尾部形态：161/129/145/229 等取值。
 	config := "\x01e\x01\x01\x01\x10\x02\x02\x02\xa1\x02\x02\x01\x02\xe5\x02\x81\x01"
-	state, err := BuildRoleState(DefaultBirthScene, 1, "", 0)
+	state, err := BuildRoleState(DefaultBook, 1, "", 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,5 +299,35 @@ func TestCustomizingBinaryRoundTrip(t *testing.T) {
 	}
 	if !ValidCustomizing(config) || ValidCustomizing("a\ufffdb") {
 		t.Fatal("ValidCustomizing 口径")
+	}
+}
+
+// TestNormalizeAppearance 捏脸串含逗号的槽位归位（2026-11-27 真机「没头发」
+// 根因：para 逗号往返把捏脸炸碎、Hair/Face 属性缺席）。
+func TestNormalizeAppearance(t *testing.T) {
+	fields := strings.Split("book5,icon\\players\\boy02_create.png,\x0c===/=2=6I/@64.6'\x1f5//6,0\x02J\x02V,1,obj\\char\\b_hair\\b_hair4,cloth_b0001,pants_b0001,shoes_b0003,school_wudang,", ",")
+	got := NormalizeAppearance(fields)
+	want := []string{
+		"book5",
+		"icon\\players\\boy02_create.png",
+		"\x0c===/=2=6I/@64.6'\x1f5//6,0\x02J\x02V", // 捏脸碎片并回一槽
+		"1",
+		"obj\\char\\b_hair\\b_hair4",
+		"cloth_b0001", "pants_b0001", "shoes_b0003",
+		"school_wudang",
+		"",
+	}
+	if len(got) != len(want) {
+		t.Fatalf("槽位数 = %d want %d: %q", len(got), len(want), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("槽 %d = %q want %q", i, got[i], want[i])
+		}
+	}
+	// 无逗号捏脸（官服样本形态）不受影响。
+	plain := NormalizeAppearance(strings.Split("book2,icon\\players\\boy01_create.png,333333X38,1,obj\\char\\b_hair\\b_hair1,cloth_b0001,", ","))
+	if plain[2] != "333333X38" || plain[4] != "obj\\char\\b_hair\\b_hair1" {
+		t.Fatalf("无逗号捏脸被改写: %q", plain)
 	}
 }

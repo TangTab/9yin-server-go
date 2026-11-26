@@ -509,12 +509,13 @@ func newRoleUID() string {
 	return hex.EncodeToString(b[:])
 }
 
-// 建角出生场景缺省（官方口径：默认烟雨庄；testdata/location.ini
-// BornCJ000003 + rolePara f24 scene_name_017 互证，world 端
-// fssoloworld/roles.go 同源）。
+// 建角首登场景缺省（官服建号.pcapng：首登 0x0B=ini\scene\born_single_01
+// 新手副本；SceneID=scenes.ini born_single_01 段号 300。RoleMeta.SceneID/
+// Location 只落库，无运行时消费方——world 端权威是 role_state_json 的
+// scene/resource）。
 const (
-	birthSceneID       = 17
-	birthSceneLocation = `ini\scene\born03_YanYuZhuang`
+	birthSceneID       = 300
+	birthSceneLocation = `ini\scene\born_single_01`
 
 	// defaultFacultySeed 建号修为种子（b-line facultySeed 口径：外服私服
 	// 修为由历练转化供给，新角色种子可配）。
@@ -697,7 +698,7 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			// 按存档外观推性别即时重建并回写——否则 world 回落 golden
 			// replay（2086 方言帧在 2433 客户端上 ConfigID 语义错位 →
 			// 场景加载 ter0 失败）。
-			if st, berr := rolestate.BuildRoleState(rolestate.DefaultBirthScene,
+			if st, berr := rolestate.BuildRoleState(rolestate.InferBookFromPara(meta.SavePara1),
 				rolestate.InferSexFromPara(meta.SavePara1), meta.SavePara1, defaultFacultySeed); berr == nil {
 				st.Equips = rolestate.StarterEquips(st.Sex, meta.UID, time.Now().Unix())
 				st.EquipsSeeded = true
@@ -804,11 +805,12 @@ func (s *Server) dispatch(serial, msg uint32, payload []byte) {
 			para = wideNulStr(payload[0x71:])
 		}
 		existing, _ := b.QueryAccount(account, serverID)
-		// 建号初始状态（rolestate.go：RoleBaseProp.xml 五维/资源初值 +
-		// StarterSet.xml 授予集 + location.ini 出生点；初始布衣三件穿着
-		// 进场——官服初始号 view1 口径）→ role_state_json。
+		// 建号初始状态（rolestate.go：剧本 → 出生地属性行 + 首登新手副本
+		// GuideScene；剧本 key 从建号外观串解出（官服 op05 携带 book2，
+		// 建号.pcapng 实证），Initial 布衣三件穿着进场——官服初始号 view1
+		// 口径）→ role_state_json。
 		uid := newRoleUID()
-		state, err := rolestate.BuildRoleState(rolestate.DefaultBirthScene, rolestate.InferSexFromPara(para), para, defaultFacultySeed)
+		state, err := rolestate.BuildRoleState(rolestate.InferBookFromPara(para), rolestate.InferSexFromPara(para), para, defaultFacultySeed)
 		if err != nil {
 			s.logf("(CAccess::MessageCreate)build role state: %v", err)
 			return

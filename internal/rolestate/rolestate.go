@@ -4,12 +4,18 @@ package rolestate
 // nx_roles.role_state_json 的 JSON 投影；fssolostore 持久化与
 // entergen 进场生成共用本包单一事实源。
 //
-// 数据源（go:embed，运行时零路径依赖）：
-//   - roledata/RoleBaseProp.xml      官方口径五维/资源初值/NewbieSkill/InitTask
-//     （ID = 出生地×10 + 性别；docs/official/九阴建角初始数据归纳.md）
-//   - roledata/StarterSet.xml        starter 授予集（b-line 常量提取，
-//     tools/gen_starter_set.py 生成：25 武学/18+51 轻功/任务门/204 采集/6 内功）
-//   - roledata/birth_locations.ini   出生点坐标（testdata/location.ini 镜像）
+// 数据源（2026-11-26 起 res 层数据源，散文件 > 高层 rep > 低层 rep；
+// 开发测试用 testdata 散文件直接改，部署入 rep 包）：
+//   - ini\CreateRole\RoleBaseProp.xml  官方口径五维/资源初值/NewbieSkill/
+//     InitTask（ID = 出生地×10 + 性别；行 Scene=出生地场景——首登一律
+//     副本 GuideScene，见 BuildRoleState）
+//   - location.ini                     出生点坐标（BornCJ/ChushengCJ/
+//     ReliveCJ 全节；副本首登锚=BornCJ000100）
+//   - ini\selectbook\books.ini         剧本表（客户端权威抄录：book →
+//     BornName 出生地节；建号.pcapng 实证 op05 外观序列携带 book2）
+//   - roledata/StarterSet.xml          starter 授予集（b-line 常量提取，
+//     tools/gen_starter_set.py 生成：25 武学/18+51 轻功/任务门/204 采集/6 内功；
+//     rep 层无对应物，仍 embed）
 //
 // 数值权威 = 客户端资源 ini（wuxuelevelinfo/neigong/skill_new）；本表为
 // 无资源目录时的建号兜底口径（与 b-line newPlayerProgress 同源）。
@@ -21,12 +27,16 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
 
-//go:embed roledata/RoleBaseProp.xml roledata/StarterSet.xml roledata/birth_locations.ini
+//go:embed roledata/StarterSet.xml
 var roledataFS embed.FS
 
 // RoleState 建号初始状态（JSON 落 nx_roles.role_state_json）。
@@ -118,6 +128,21 @@ type RoleState struct {
 	// RelivePositon 复活点串（"<场景>,<x>,<y>,<z>,<朝向>,<键>"；跳过引导
 	// 进江湖时落到鸡鸣驿）。空＝未设（档案取外服常量）。
 	RelivePositon string `json:"relivePositon,omitempty"`
+
+	// ---- 建号剧本与出生地（2026-11-26 官服建号.pcapng 定版：建号首登一律
+	// 新手副本 GuideScene，引导完成/再战江湖后按剧本落出生地）----
+
+	// Book 建号剧本 key（book1..book8；客户端 ini\selectbook\books.ini →
+	// BornName 出生地节）。rolePara f26 下发；空＝旧档（回落 DefaultBook）。
+	Book string `json:"book,omitempty"`
+	// BirthSection 出生地节名（ChushengCJ000002 等；rolePara f24 官服口径
+	// 下发的就是节名——非场景中文名）。空＝旧档（回落烟雨庄节）。
+	BirthSection string `json:"birthSection,omitempty"`
+	// BirthScene/BirthResource/BirthPosition 出生地落点（引导完成/再战
+	// 江湖 transferPlayer 的目的地）。空＝旧档（同上回落）。
+	BirthScene    string     `json:"birthScene,omitempty"`
+	BirthResource string     `json:"birthResource,omitempty"`
+	BirthPosition [4]float64 `json:"birthPosition,omitempty"`
 
 	// ---- 物品域（2433 线 bagRow/equipRow 口径建模；下发帧/C2S 操作链
 	// （30 移动穿戴/31 使用/34 丢弃/36 整理）后续接入）----
@@ -474,38 +499,78 @@ func splitU32(s string) []uint32 {
 	return out
 }
 
-// roleStateData 三份内嵌资产的进程内单次装载结果。
+// roleStateData 建号资产的进程内单次装载结果。
 type roleStateData struct {
 	base    []roleBasePropRow
 	starter starterSetXML
 	birth   map[string]string
+	books   map[string]bookEntry
 }
 
-// loadRoleStateData 装载三份内嵌资产（进程内单次）。
+// bookEntry 剧本表一行（books.ini）。
+type bookEntry struct {
+	BornName         string // 出生地节名（ChushengCJ000002）
+	FallbackBornName string // 节缺席时的显式回落节（book3→千灯镇、book8→烟雨庄）
+	ShowTextID       string // 客户端介绍文案键（地域后缀=出生地线索）
+}
+
+// 建号资产在数据根 rep 层的仓内名（反斜杠是 rep 路径方言）。
+const (
+	roleBasePropResName = `ini\CreateRole\RoleBaseProp.xml`
+	locationResName     = `location.ini`
+	booksResName        = `ini\selectbook\books.ini`
+)
+
+// readRoleAsset 读一份建号资产：一律走 res 层数据源（散文件 > 高层 rep >
+// 低层 rep；NINEYIN_DATA_ROOT / 部署 Res / 仓内 testdata 候选，npcfeed.
+// ResolveRoot 同款规则的自包含版——本包不依赖 npcfeed）。开发测试用
+// testdata 散文件直接改，部署入 rep 包（同名散文件优先覆盖）。
+func readRoleAsset(resName string) []byte {
+	for _, root := range roleDataRoots() {
+		if raw, err := res.ReadFile(filepath.Join(root, resName)); err == nil {
+			return raw
+		}
+	}
+	return nil
+}
+
+// roleDataRoots 数据根候选（按优先序）。
+func roleDataRoots() []string {
+	var out []string
+	if v := strings.TrimSpace(os.Getenv("NINEYIN_DATA_ROOT")); v != "" {
+		out = append(out, v)
+	}
+	return append(out, "Res", "../Res", "../../Res", ".", "..", "../..",
+		"testdata", "../testdata", "../../testdata")
+}
+
+// loadRoleStateData 装载建号资产（进程内单次）。
 var roleStateAssets = func() (out roleStateData) {
-	raw, err := roledataFS.ReadFile("roledata/RoleBaseProp.xml")
-	if err != nil {
-		panic("fssolostore: roledata/RoleBaseProp.xml missing: " + err.Error())
+	raw := readRoleAsset(roleBasePropResName)
+	if raw == nil {
+		panic("rolestate: ini\\CreateRole\\RoleBaseProp.xml missing (data root)")
 	}
 	var bx roleBasePropXML
 	if err := xml.Unmarshal(raw, &bx); err != nil {
-		panic("fssolostore: RoleBaseProp.xml parse: " + err.Error())
+		panic("rolestate: RoleBaseProp.xml parse: " + err.Error())
 	}
 	out.base = bx.Property
 
-	raw, err = roledataFS.ReadFile("roledata/StarterSet.xml")
+	raw, err := roledataFS.ReadFile("roledata/StarterSet.xml")
 	if err != nil {
-		panic("fssolostore: roledata/StarterSet.xml missing: " + err.Error())
+		panic("rolestate: roledata/StarterSet.xml missing: " + err.Error())
 	}
 	var sx starterSetXML
 	if err := xml.Unmarshal(raw, &sx); err != nil {
-		panic("fssolostore: StarterSet.xml parse: " + err.Error())
+		panic("rolestate: StarterSet.xml parse: " + err.Error())
 	}
 	out.starter = sx
 
-	raw, err = roledataFS.ReadFile("roledata/birth_locations.ini")
-	if err != nil {
-		panic("fssolostore: birth_locations.ini missing: " + err.Error())
+	// location.ini：出生点（BornCJ）/ 出生地（ChushengCJ）/ 复活点
+	//（ReliveCJ，出生地复活点属地化备用）全节入 map（"节名.键"→值）。
+	raw = readRoleAsset(locationResName)
+	if raw == nil {
+		panic("rolestate: location.ini missing (data root)")
 	}
 	out.birth = map[string]string{}
 	section := ""
@@ -515,8 +580,36 @@ var roleStateAssets = func() (out roleStateData) {
 			section = line[1 : len(line)-1]
 			continue
 		}
-		if i := strings.Index(line, "="); i > 0 && strings.HasPrefix(section, "BornCJ") {
+		if i := strings.Index(line, "="); i > 0 &&
+			(strings.HasPrefix(section, "BornCJ") || strings.HasPrefix(section, "ChushengCJ") || strings.HasPrefix(section, "ReliveCJ")) {
 			out.birth[section+"."+line[:i]] = strings.TrimSpace(line[i+1:])
+		}
+	}
+
+	// books.ini：剧本表（客户端 ini\selectbook\books.ini 权威抄录）。
+	raw = readRoleAsset(booksResName)
+	if raw == nil {
+		panic("rolestate: ini\\selectbook\\books.ini missing (data root)")
+	}
+	out.books = map[string]bookEntry{}
+	section = ""
+	for _, line := range strings.Split(string(raw), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+			section = line[1 : len(line)-1]
+			continue
+		}
+		if i := strings.Index(line, "="); i > 0 && strings.HasPrefix(section, "book") {
+			e := out.books[section]
+			switch line[:i] {
+			case "BornName":
+				e.BornName = strings.TrimSpace(line[i+1:])
+			case "FallbackBornName":
+				e.FallbackBornName = strings.TrimSpace(line[i+1:])
+			case "ShowTextID":
+				e.ShowTextID = strings.TrimSpace(line[i+1:])
+			}
+			out.books[section] = e
 		}
 	}
 	return out
@@ -545,8 +638,243 @@ func InferSexFromPara(para string) int {
 	return 1
 }
 
-// DefaultBirthScene 默认出生场景（官方默认烟雨庄 born03）。
-const DefaultBirthScene = "born03"
+// GuideScene 新手副本（单机引导场景）resource：建号首登一律落此（官服
+// 建号.pcapng 首帧 0x0B=ini\scene\born_single_01 实证），引导完成/再战
+// 江湖后切出生地（fssoloworld/guide.go）。location.ini BornCJ000100 节
+// 是副本首登锚。
+const GuideScene = "born_single_01"
+
+// DefaultBook 缺省剧本（外观串无剧本线索的旧档/补建）：book2 烟雨庄——
+// 与旧出生地默认 born03 同义（官服抓包建号即 book2）。
+const DefaultBook = "book2"
+
+// DefaultBirthSection 默认出生地节（books.ini/坐标链尽头的兜底）：烟雨庄。
+const DefaultBirthSection = "ChushengCJ000002"
+
+// InferBookFromPara 从建角外观串（save_para1）解析剧本 key：官服 op05
+// 外观序列携带 "book2"（建号.pcapng 实证，rolePara f26 同值回显）。
+// 缺证据回空（BuildRoleState 回落 DefaultBook）。
+func InferBookFromPara(para string) string {
+	for _, f := range strings.Split(para, ",") {
+		if len(f) > 4 && strings.HasPrefix(f, "book") {
+			if _, err := strconv.Atoi(f[4:]); err == nil {
+				return f
+			}
+		}
+	}
+	return ""
+}
+
+// appearanceKnownSlot 已知外观槽的值形态（icon\ photo / obj\char\ 发型 /
+// cloth_/pants_/shoes_ 三件 / book\d 剧本 / school_\w 心仪门派 / 短数字 /
+// 空串）。捏脸槽是自由二进制串——**可能含逗号**（简单捏脸 3333..X38 恰无
+// 逗号，复杂捏脸含 0x2C），经 para 逗号 join/split 往返即被炸碎、后续槽
+// 位整体错位（真机 2026-11-27 实证：0x0D 的 Hair/Face 属性缺席=没头发）。
+func appearanceKnownSlot(s string) bool {
+	if s == "" {
+		return true
+	}
+	if strings.HasPrefix(s, `icon\`) || strings.HasPrefix(s, "icon/") {
+		return true
+	}
+	if strings.HasPrefix(s, `obj\`) || strings.HasPrefix(s, "obj/") {
+		return true
+	}
+	if strings.HasPrefix(s, "cloth_") || strings.HasPrefix(s, "pants_") || strings.HasPrefix(s, "shoes_") {
+		return true
+	}
+	if len(s) >= 5 && strings.HasPrefix(s, "book") {
+		if _, err := strconv.Atoi(s[4:]); err == nil {
+			return true
+		}
+	}
+	if strings.HasPrefix(s, "school_") {
+		return true
+	}
+	if len(s) <= 2 {
+		if _, err := strconv.Atoi(s); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// NormalizeAppearance 把 para 逗号拆出的段归位回外观槽：连续未知段合并为
+// 一个捏脸槽项（碎片按原序用逗号接回）。已知形态段各占一槽。
+func NormalizeAppearance(fields []string) []string {
+	out := make([]string, 0, len(fields))
+	face := make([]string, 0, 4)
+	flush := func() {
+		if len(face) > 0 {
+			out = append(out, strings.Join(face, ","))
+			face = face[:0]
+		}
+	}
+	for _, f := range fields {
+		if appearanceKnownSlot(f) {
+			flush()
+			out = append(out, f)
+			continue
+		}
+		face = append(face, f)
+	}
+	flush()
+	return out
+}
+
+// Birthplace 剧本解析出的出生地（BuildRoleState 建档与引导落位共用）。
+type Birthplace struct {
+	Section  string     // location.ini 节名（ChushengCJ000002；rolePara f24）
+	Scene    string     // 场景配置路径（ini\scene\born03_YanYuZhuang）
+	Resource string     // 场景 resource 短名（born03；属性行匹配键）
+	Position [4]float64 // 落点坐标
+}
+
+// BirthplaceOf 剧本 key → 出生地。取值序（books.ini + location.ini 数据
+// 驱动，2026-11-26 四出生地用户口径全命中）：
+//
+//	book 空/查无 → DefaultBook；
+//	BornName 节在且坐标非 0 → 直取（book1 千灯镇 / book2 烟雨庄）；
+//	节在但坐标全 0 → 同场景 BornCJ 节首个非 0 坐标（book5 鸡鸣驿
+//	  ChushengCJ000003→BornCJ000001、book4 成都 000009→000017、
+//	  book6 洛阳 000008→000016）；
+//	节缺席（books.ini 比数据新）→ FallbackBornName 显式回落
+//	  （book3→千灯镇、book8→烟雨庄）；
+//	链尽头 → DefaultBirthSection。
+func BirthplaceOf(book string) Birthplace {
+	assets := roleStateAssets
+	entry, ok := assets.books[book]
+	if !ok {
+		entry = assets.books[DefaultBook]
+	}
+	for _, section := range []string{entry.BornName, entry.FallbackBornName, DefaultBirthSection} {
+		if section == "" {
+			continue
+		}
+		scene, pos, found := sectionLanding(section)
+		if !found {
+			continue
+		}
+		return Birthplace{Section: section, Scene: scene, Resource: resourceOfScene(scene), Position: pos}
+	}
+	return Birthplace{}
+}
+
+// BirthSectionOf 剧本 key → 出生地节名（world 端选人 0x04 的 f24 用，
+// 官服口径下发节名如 ChushengCJ000002；链尽头回落 DefaultBirthSection）。
+func BirthSectionOf(book string) string {
+	if b := BirthplaceOf(book); b.Section != "" {
+		return b.Section
+	}
+	return DefaultBirthSection
+}
+
+// ReliveOfScene 场景配置路径 → 复活点串（location.ini 同场景首个
+// ReliveCJ 节；串方言 "4,x,y,z,朝向,ui_pos_<节名>"——首段 4 与键名形态
+// 对官服男号抓包串 4,693.908,...,ui_pos_ReliveCJ100101，坐标是节表值
+//（与抓包值有偏差，节表口径先发、真机对拍后校）。缺席 false（调用方
+// 保底）。
+func ReliveOfScene(scene string) (string, bool) {
+	birth := roleStateAssets.birth
+	res := resourceOfScene(scene) // 场景等价按 resource：裸目录/带后缀两写法互认
+	names := make([]string, 0, 4)
+	for key := range birth {
+		if strings.HasPrefix(key, "ReliveCJ") && strings.HasSuffix(key, ".Scene") &&
+			strings.EqualFold(resourceOfScene(birth[key]), res) {
+			names = append(names, strings.TrimSuffix(key, ".Scene"))
+		}
+	}
+	if len(names) == 0 {
+		return "", false
+	}
+	sort.Strings(names)
+	name := names[0]
+	pos := parseLocation(birth[name+".Location"])
+	return fmt.Sprintf("4,%g,%g,%g,%g,ui_pos_%s", pos[0], pos[1], pos[2], pos[3], name), true
+}
+
+// sectionLanding 出生点/出生地节 → 场景与坐标。found=false 表示节缺席
+// （或场景缺席）；坐标全 0 时单独降级（hasZeroPos）由调用方走同场景
+// BornCJ 回落。
+func sectionLanding(section string) (scene string, pos [4]float64, found bool) {
+	birth := roleStateAssets.birth
+	scene, found = birth[section+".Scene"]
+	if !found || scene == "" {
+		return "", pos, false
+	}
+	pos = parseLocation(birth[section+".Location"])
+	zero := true
+	for _, v := range pos {
+		if v != 0 {
+			zero = false
+			break
+		}
+	}
+	if zero { // 坐标全 0：同场景 BornCJ 节首个非 0 坐标。场景等价按
+		// resource 短名比对——ChushengCJ 节常写裸目录（ini\scene\city05），
+		// BornCJ 节带地名后缀（city05_ChengDu），全等永远不中。
+		res := resourceOfScene(scene)
+		keys := make([]string, 0, 8)
+		for key := range birth {
+			if strings.HasPrefix(key, "BornCJ") && strings.HasSuffix(key, ".Scene") &&
+				strings.EqualFold(resourceOfScene(birth[key]), res) {
+				keys = append(keys, key)
+			}
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			alt := parseLocation(birth[strings.TrimSuffix(key, ".Scene")+".Location"])
+			if alt != ([4]float64{}) {
+				return scene, alt, true
+			}
+		}
+	}
+	return scene, pos, true
+}
+
+// parseLocation "x,y,z,orient" 四段解析（缺段零值）。
+func parseLocation(loc string) (pos [4]float64) {
+	parts := strings.Split(loc, ",")
+	if len(parts) != 4 {
+		return pos
+	}
+	for i := 0; i < 4; i++ {
+		pos[i], _ = strconv.ParseFloat(strings.TrimSpace(parts[i]), 64)
+	}
+	return pos
+}
+
+// resourceOfScene 场景配置路径 → resource 短名：末段截到首个 '_'
+//（born03_YanYuZhuang → born03；无 '_' 保持全名 born_single_01）。
+// 与 BirthSceneOptions 的 Key 推导同口径。
+func resourceOfScene(scene string) string {
+	seg := scene
+	if i := strings.LastIndexAny(scene, `\/`); i >= 0 {
+		seg = scene[i+1:]
+	}
+	if i := strings.Index(seg, "_"); i > 0 {
+		return seg[:i]
+	}
+	return seg
+}
+
+// GuideLanding 副本首登落点（location.ini BornCJ000100；数据缺席回落
+// 硬编码锚——赵子亟旁偏移 2m，与 extraSceneDestinations 同值）。注意不
+// 能经 resourceOfScene 匹配：born_single_01 自身含 '_'，会被截成 "born"。
+func GuideLanding() (scene string, pos [4]float64) {
+	birth := roleStateAssets.birth
+	for key, val := range birth {
+		seg := val
+		if i := strings.LastIndexAny(val, `\/`); i >= 0 {
+			seg = val[i+1:]
+		}
+		if strings.HasPrefix(key, "BornCJ") && strings.HasSuffix(key, ".Scene") &&
+			strings.EqualFold(seg, GuideScene) {
+			return val, parseLocation(birth[strings.TrimSuffix(key, ".Scene")+".Location"])
+		}
+	}
+	return `ini\scene\born_single_01`, [4]float64{197.626, 4.746, -108.829, -2.746}
+}
 
 // SceneOption location.ini BornCJ 节导出的一个可选场景目的地
 // （GM 场景切换/传送门共用）：Key=场景 resource 短名（born03/city01…），
@@ -558,14 +886,16 @@ type SceneOption struct {
 }
 
 // BirthSceneOptions 全部 BornCJ 出生态场景选项（按节序稳定输出；同
-// resource 只保留首见节）。Key 推导与 BuildRoleState 的 Resource 同口径：
-// Scene 路径末段截到首个 '_'（born03_YanYuZhuang → born03，无 '_' 保持
-// 全名 clone001）。
+// resource 只保留首见节）。Key 推导口径：Scene 路径末段截到首个 '_'
+//（born03_YanYuZhuang → born03，无 '_' 保持全名 clone001）。只收 BornCJ
+// 节（ChushengCJ 是出生地表、ReliveCJ 是复活点表，不进 GM 目的地域）；
+// 新手副本 born_single_01 节也跳过——'_' 截断会产生坏键 "born"，GM 传送
+// 走 fssoloworld extraSceneDestinations（别名「新手引导」）。
 func BirthSceneOptions() []SceneOption {
 	birth := roleStateAssets.birth
 	keys := make([]string, 0, len(birth))
 	for key := range birth {
-		if strings.HasSuffix(key, ".Scene") {
+		if strings.HasPrefix(key, "BornCJ") && strings.HasSuffix(key, ".Scene") {
 			keys = append(keys, key)
 		}
 	}
@@ -577,6 +907,9 @@ func BirthSceneOptions() []SceneOption {
 		seg := scenePath
 		if i := strings.LastIndexAny(scenePath, `\/`); i >= 0 {
 			seg = scenePath[i+1:]
+		}
+		if strings.EqualFold(seg, GuideScene) {
+			continue
 		}
 		resourceKey := seg
 		if i := strings.Index(seg, "_"); i > 0 {
@@ -612,34 +945,42 @@ func FindSceneOption(key string) (SceneOption, bool) {
 	return SceneOption{}, false
 }
 
-// BuildRoleState 按（出生场景 resource, 性别, 外观串）构建建号初始状态。
-// scene 传空回落 DefaultBirthScene；facultySeed 为修为种子（b-line
-// facultySeed 口径，可配）。
-func BuildRoleState(scene string, sex int, para string, facultySeed int64) (RoleState, error) {
-	if scene == "" {
-		scene = DefaultBirthScene
+// BuildRoleState 按（剧本 key, 性别, 外观串）构建建号初始状态。
+// book 经 books.ini → 出生地节 → 属性行（行 Scene=出生地场景）；首登
+// 场景一律新手副本 GuideScene（官服建号.pcapng：首登 0x0B=
+// ini\scene\born_single_01，引导完成/再战江湖后按 Birth* 落位）。book
+// 空/查无回落 DefaultBook；facultySeed 为修为种子（b-line 口径，可配）。
+func BuildRoleState(book string, sex int, para string, facultySeed int64) (RoleState, error) {
+	if book == "" {
+		book = DefaultBook
 	}
 	if sex == 0 {
 		sex = InferSexFromPara(para)
 	}
-	base, starter, birth := roleStateAssets.base, roleStateAssets.starter, roleStateAssets.birth
-	// 建角自定义外观（save_para1 逗号拆原样保留——发型/照片/捏脸属玩家
-	// 自定义数据，进场渲染按槽位取，档内缺席回退默认）
+	base, starter := roleStateAssets.base, roleStateAssets.starter
+	// 建角自定义外观（save_para1 逗号拆+槽位归位 NormalizeAppearance——
+	// 捏脸串可能含逗号，裸拆会碎片化错位；发型/照片/捏脸属玩家自定义数据，
+	// 进场渲染按槽位取，档内缺席回退默认）
 	var appearance []string
 	if para != "" {
-		appearance = append(appearance, strings.Split(para, ",")...)
+		appearance = NormalizeAppearance(strings.Split(para, ","))
 	}
 
+	// 剧本 → 出生地（books.ini + location.ini 数据驱动）。
+	place := BirthplaceOf(book)
+	if place.Scene == "" {
+		return RoleState{}, fmt.Errorf("rolestate: book %s 出生地解析失败（books.ini/location.ini）", book)
+	}
 	var row *roleBasePropRow
 	for i := range base {
-		if base[i].Scene == scene && base[i].Sex == strconv.Itoa(sex) {
+		if base[i].Scene == place.Resource && base[i].Sex == strconv.Itoa(sex) {
 			r := base[i]
 			row = &r
 			break
 		}
 	}
 	if row == nil {
-		return RoleState{}, fmt.Errorf("fssolostore: RoleBaseProp.xml has no row for scene=%s sex=%d", scene, sex)
+		return RoleState{}, fmt.Errorf("rolestate: RoleBaseProp.xml has no row for scene=%s sex=%d", place.Resource, sex)
 	}
 
 	state := RoleState{
@@ -664,39 +1005,14 @@ func BuildRoleState(scene string, sex int, para string, facultySeed int64) (Role
 		// 碎银初值对拍 2433 线 starter-silver 测试口径（CapitalType1）。
 		Money: starterMoney,
 	}
-	// 场景全名/坐标：location.ini BornCJ 节的 Scene 路径末段以 scene 为
-	// 前缀（born03 → ini\scene\born03_YanYuZhuang）即命中。
-	for key, val := range birth {
-		if !strings.HasSuffix(key, ".Scene") {
-			continue
-		}
-		seg := val
-		if i := strings.LastIndexAny(val, `\/`); i >= 0 {
-			seg = val[i+1:]
-		}
-		if strings.HasPrefix(strings.ToLower(seg), strings.ToLower(scene)+"_") ||
-			strings.EqualFold(seg, scene) {
-			name := strings.TrimSuffix(key, ".Scene")
-			if loc, ok := birth[name+".Location"]; ok {
-				parts := strings.Split(loc, ",")
-				if len(parts) == 4 {
-					for i := 0; i < 4; i++ {
-						state.Position[i], _ = strconv.ParseFloat(strings.TrimSpace(parts[i]), 64)
-					}
-				}
-			}
-			state.Scene = val
-			break
-		}
-	}
-	if state.Scene == "" {
-		state.Scene = `ini\scene\born03_YanYuZhuang`
-	}
-	// Resource = 地形资源键 = 参数 scene 本身（born03/school01/born_single_01
-	// ——对应 map\map_ter_born\<born03> 等目录）。真机 0x0B 帧 Resource 实证
-	// 值 "born03"；旧按 Scene 尾段切片得 "YanYuZhuang"，客户端开图即报
-	// 「找不到地图相关的文件」。
-	state.Resource = scene
+	// 首登场景 = 新手副本（Scene 配置路径与落点取 GuideLanding；Resource
+	// = GuideScene——0x0B 帧 Resource 用 resource 短名，真机实证 born03
+	// 口径；副本名含 '_' 本身即 resource 全名）。出生地记入 Birth* 字段，
+	// 引导完成/再战江湖 transferPlayer 落位（fssoloworld/guide.go）。
+	guideScene, guidePos := GuideLanding()
+	state.Scene, state.Resource, state.Position = guideScene, GuideScene, guidePos
+	state.Book, state.BirthSection = book, place.Section
+	state.BirthScene, state.BirthResource, state.BirthPosition = place.Scene, place.Resource, place.Position
 
 	for _, sk := range starter.Skills.Skill {
 		state.Skills = append(state.Skills, StarterSkill{

@@ -29,7 +29,8 @@ type PropertyValue struct {
 	Text     string
 	WideText string
 	Obj      uint64
-	kind     byte // 1=byte 2=word 3=int32 4=int64 5=f32 6=f64 7=str 8=wide 9=obj
+	Raw      []byte
+	kind     byte // 1=byte 2=word 3=int32 4=int64 5=f32 6=f64 7=str 8=wide 9=obj 10=raw
 }
 
 func ByteValue(v byte) PropertyValue       { return PropertyValue{kind: 1, Byte: v} }
@@ -43,6 +44,12 @@ func WideValue(v string) PropertyValue     { return PropertyValue{kind: 8, WideT
 func ObjectValue(obj, own uint32) PropertyValue {
 	return PropertyValue{kind: 9, Obj: uint64(obj) | uint64(own)<<32}
 }
+
+// BytesValue 裸字节串：u32 长度 + 原样字节、无 NUL 尾（区别于 StringValue
+// 的「长度含 NUL」）。串线型（型 7）属性携带标志位数组时用——官服
+// FinishFreshmanRecStr 初值即此形（建号.pcapng 男号 #134：2f 00 00 00 +
+// 45×0x01 09 00，尾无 NUL）。
+func BytesValue(v []byte) PropertyValue { return PropertyValue{kind: 10, Raw: v} }
 
 // appendProperty 按表线型追加 [idx u16][值]。kind 与表型不符时按表型
 // 取对应字段（调用方保证一致——Must*Property 按名解析后直接赋 kind）。
@@ -75,6 +82,9 @@ func appendProperty(msg []byte, prop IndexedProperty) []byte {
 		return binary.LittleEndian.AppendUint16(msg, 0)
 	case 9:
 		return binary.LittleEndian.AppendUint64(msg, prop.Value.Obj)
+	case 10:
+		msg = binary.LittleEndian.AppendUint32(msg, uint32(len(prop.Value.Raw)))
+		return append(msg, prop.Value.Raw...)
 	}
 	return msg
 }

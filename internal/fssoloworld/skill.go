@@ -777,7 +777,8 @@ func (s *Server) finishCast(pl *Player, seq int, locked bool) {
 }
 
 // combatTick 每秒 MP 回复（站立：登录面板 MPUpSpeed = ceil(上限/10) 每 2 秒
-// 一档）。变化即推 MP 单属性帧（抓包 386.537/391.570/396.562 同形）。
+// 一档）。变化即推 MP 单属性帧（抓包 386.537/391.570/396.562 同形）。打坐中
+// 改走打坐回复（sitcross.go：HP/MP 各 ceil(上限/10)）。
 func (s *Server) combatTick() {
 	for _, pl := range s.players.Snapshot() {
 		if pl.State != PlOnline {
@@ -794,18 +795,29 @@ func (s *Server) combatTick() {
 			continue
 		}
 		maxMP := playerMaxMP(pl)
-		before, mp := st.mp, st.mp
-		credit := st.mpCredit + mpRegenPerSecond(maxMP)
-		for credit >= 1 && mp < maxMP {
-			credit--
-			mp++
+		var regen [][]byte
+		if st.live.logic == logicSitcross {
+			// 打坐回复接管本拍：站立 MP 回复的小数累积不参与。
+			regen, st.mpCredit = s.sitTickLocked(pl, st, maxMP), 0
+		} else {
+			before, mp := st.mp, st.mp
+			credit := st.mpCredit + mpRegenPerSecond(maxMP)
+			for credit >= 1 && mp < maxMP {
+				credit--
+				mp++
+			}
+			if mp >= maxMP {
+				// 满蓝不蓄小数：否则站久了之后花掉的蓝会一拍回满。
+				credit = 0
+			}
+			st.mpCredit, st.mp = credit, mp
+			if mp != before {
+				regen = mpFrame(pl.wireIdent(), mp)
+			}
 		}
-		st.mpCredit, st.mp = credit, mp
 		st.mu.Unlock()
 		s.sendFrames(pl, rage)
-		if mp != before {
-			s.sendFrames(pl, mpFrame(pl.wireIdent(), mp))
-		}
+		s.sendFrames(pl, regen)
 		// 招架耐力回复（combatcore.go；抓包 226.834 起每秒 +1 回到上限）。
 		if frames := s.parryRegen(pl); len(frames) > 0 {
 			s.sendFrames(pl, frames)
