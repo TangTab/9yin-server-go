@@ -9,7 +9,7 @@ import * as api from "../api.js";
 
 const SUBS = [
   { id: "role", title: "角色状态", desc: "gm state 快照 + 五维/资源热更（0x10）" },
-  { id: "item", title: "货币与物品", desc: "碎银 CapitalType1（2433 线同名对拍）" },
+  { id: "item", title: "货币与物品", desc: "三币设置 + 物品目录检索发放（gm items / gm item）" },
   { id: "mail", title: "邮件", desc: "GM 系统邮件（文本+物品附件，RecvLetterRec 319 行）" },
   { id: "skill", title: "武学与修炼", desc: "重发武学 View40 / 内功 View43 / 轻功 View46" },
   { id: "dummy", title: "训练木桩", desc: "面前生成不还手的木桩（新手村官方练习木桩，血量自定义）" },
@@ -249,6 +249,48 @@ export function mount(view, sub) {
     ]));
     box.appendChild(h("div", { class: "panel-desc" }, [
       "三币各一帧 0x10 单属性 Int64（碎银 CapitalType1 / 官银 CapitalType2 / 黄金 CapitalType0，2433 线 currenciesUpdate 口径）；设置后 gm save / 下线自动存。",
+    ]));
+
+    /* ---- 物品检索发放（gm items 行协议 configID|name|view|equipType|maxAmount） ---- */
+    const keyword = field("关键字（名称/ID 子串）", 160);
+    const viewSel = h("select", {}, [
+      h("option", { value: "0" }, ["全部页"]),
+      h("option", { value: "1" }, ["道具 1"]), h("option", { value: "2" }, ["装备 2"]),
+      h("option", { value: "3" }, ["材料 3"]), h("option", { value: "4" }, ["任务 4"]),
+    ]);
+    const resultSel = h("select", { size: 8, style: "min-width:360px" }, []);
+    const amount = field("数量", 60); amount.value = "1";
+    const itemBox = h("div", { class: "panel-desc" }, ["先搜索，选中一行后发放。"]);
+    box.appendChild(h("section", { class: "panel" }, [
+      h("h2", {}, ["发放物品"]),
+      h("div", { class: "toolbar" }, [
+        keyword, viewSel,
+        opBtn("搜索（gm items）", "info", async () => {
+          const q = (keyword.value || "").trim();
+          if (!q) { itemBox.replaceChildren("关键字不能为空。"); return; }
+          let result;
+          try { result = await api.gmRaw("gm items " + q + " " + viewSel.value + " 50"); }
+          catch (err) { result = { lines: [String((err && err.message) || err)] }; }
+          // echo 客户端行已剥 > 前缀（echocli.go），结果行按 | 列数识别；
+          // 回执/用法行无 | 自然排除。
+          const rows = (result.lines || []).filter((l) => l.split("|").length >= 5);
+          resultSel.replaceChildren(...rows.map((l) => {
+            const [configID, name, view, equipType, maxAmount] = l.split("|");
+            const label = (name || configID) + "  ·  " + configID + "  ·  页" + view + (equipType ? "  ·  " + equipType : "") + (maxAmount ? "  ·  叠" + maxAmount : "");
+            return h("option", { value: configID }, [label]);
+          }));
+          const tail = (result.lines || []).filter((l) => l.includes("gm items:"))[0] || "";
+          itemBox.replaceChildren(rows.length ? tail : ("没有找到匹配项。" + (tail ? " " + tail : "")));
+        }),
+      ]),
+      h("div", { class: "toolbar" }, [resultSel, amount,
+        opBtn("发放（gm item）", "info", async () => {
+          const configID = resultSel.value;
+          if (!who() || !configID || !amount.value) return;
+          await send("gm item " + who() + " " + configID + " " + amount.value);
+        }),
+      ]),
+      itemBox,
     ]));
     box.appendChild(h("section", { class: "panel" }, [h("h2", {}, ["状态快照"]), stateBox]));
   }

@@ -327,7 +327,7 @@ func (s *Server) apiGM(w http.ResponseWriter, r *http.Request) {
 	switch action {
 	case "raw":
 		// GM 测试台透传：仅放行 world echo 的 `gm ` 前缀命令族
-		//（gmcmd.go：state/set/money/tp/msg/view/flush/save）。
+		//（gmcmd.go：state/set/items/item/money/tp/msg/view/flush/save…）。
 		line := strings.TrimSpace(body["line"])
 		if line == "" || !strings.HasPrefix(line, "gm ") {
 			writeErr(w, http.StatusBadRequest, fmt.Errorf("仅允许 gm 前缀命令（gm state/set/money/tp/msg/view/flush/save …）"))

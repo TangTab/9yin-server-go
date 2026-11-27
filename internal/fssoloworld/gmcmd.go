@@ -78,10 +78,15 @@ func moneyFrame(pl *Player) ([]byte, error) {
 func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 	s := e.srv
 	if len(fields) < 2 {
-		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|mail|dummy|scene|rage|move|save> <who> [args]\r>end\r")
+		fmt.Fprint(nc, ">usage: gm <state|set|money|tp|msg|view|flush|item|items|mail|dummy|scene|rage|move|save> <who> [args]\r>end\r")
 		return
 	}
 	sub, who := fields[0], fields[1]
+	// gm items 是纯目录查询（无目标玩家）：分流在目标解析之前。
+	if sub == "items" {
+		e.gmItemsCommand(nc, fields)
+		return
+	}
 	pl := s.players.FindByName(who)
 	if pl == nil {
 		pl = s.players.FindByAccount(who)
@@ -284,6 +289,33 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		s.sendRoleSave(pl)
 		fmt.Fprintf(nc, ">gm item %s: %s x%d → view %d slot %d (0x19+0x18, saved)\r",
 			who, configID, amount, viewID, item.Slot)
+	case "items":
+		// 物品目录检索：gm items <query> [viewID 0-4] [limit]——面板「货币
+		// 与物品」子页的发放搜索共用。行协议 `>configID|name|view|
+		// equipType|maxAmount`（参考 2433 线 /api/items 行形态裁剪），
+		// 末行回执命中数；空 query = 全量前 limit 行。
+		if len(fields) < 2 {
+			fmt.Fprint(nc, ">usage: gm items <query> [viewID 0-4] [limit 1-300]\r")
+			return
+		}
+		query := fields[1]
+		viewID, limit := 0, 50
+		if len(fields) >= 3 {
+			if v, err := strconv.Atoi(fields[2]); err == nil && v >= 0 && v <= 4 {
+				viewID = v
+			}
+		}
+		if len(fields) >= 4 {
+			if v, err := strconv.Atoi(fields[3]); err == nil && v > 0 && v <= 300 {
+				limit = v
+			}
+		}
+		rows := gmItemSearch(s.gmItemSearchIndex(), query, viewID, limit)
+		for _, row := range rows {
+			fmt.Fprintf(nc, ">%s|%s|%d|%s|%d\r", row.ConfigID, row.Name, row.ViewID, row.EquipType, row.MaxAmount)
+		}
+		fmt.Fprintf(nc, ">gm items: %d 行（query=%q view=%d limit=%d；发放走 gm item <who> <configID> [amount]）\r",
+			len(rows), query, viewID, limit)
 	case "mail":
 		// gm mail <who> <title> <content> [itemConfig[:amount]]——下划线转
 		// 空格；在线直推+落档（离线分支在玩家查找失败处）。
@@ -350,4 +382,35 @@ func parseGMMailLetter(fields []string) (letter rolestate.Letter, problem string
 		appendix = entergen.AppendixXML(configID, amount)
 	}
 	return NewGMLetter(title, content, appendix), ""
+}
+
+// gmItemsCommand 物品目录检索：gm items <query> [viewID 0-4] [limit
+// 1-300]——面板「货币与物品」子页的发放搜索共用（无目标玩家，分流在
+// gmCommand 目标解析之前）。行协议 `>configID|name|view|equipType|
+// maxAmount`（参考 2433 线 /api/items 行形态裁剪），末行回执命中数；
+// 空 query = 全量前 limit 行。
+func (e *EchoConsole) gmItemsCommand(nc net.Conn, fields []string) {
+	query := fields[1]
+	viewID, limit := 0, 50
+	if len(fields) >= 3 {
+		if v, err := strconv.Atoi(fields[2]); err == nil && v >= 0 && v <= 4 {
+			viewID = v
+		}
+	}
+	if len(fields) >= 4 {
+		if v, err := strconv.Atoi(fields[3]); err == nil && v > 0 && v <= 300 {
+			limit = v
+		}
+	}
+	index := e.srv.gmItemSearchIndex()
+	rows := gmItemSearch(index, query, viewID, limit)
+	for _, row := range rows {
+		fmt.Fprintf(nc, ">%s|%s|%d|%s|%d\r", row.ConfigID, row.Name, row.ViewID, row.EquipType, row.MaxAmount)
+	}
+	if len(index) == 0 {
+		fmt.Fprintf(nc, ">gm items: 目录空（数据根缺 share/item——world 控制台应有 gm item search catalog unavailable 留痕）\r>end\r")
+		return
+	}
+	fmt.Fprintf(nc, ">gm items: %d 行（query=%q view=%d limit=%d；发放走 gm item <who> <configID> [amount]）\r>end\r",
+		len(rows), query, viewID, limit)
 }

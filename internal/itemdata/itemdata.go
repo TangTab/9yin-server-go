@@ -81,6 +81,25 @@ func (c *Catalog) Count() int {
 	return len(c.entries)
 }
 
+// Each 遍历目录全部条目（GM 检索等批处理面）。ini 来源＝全量 map 直出；
+// XML 构建产物来源按索引逐行回读（10 万行级重量面，热路径走 Lookup）。
+func (c *Catalog) Each(visit func(Entry)) {
+	if c == nil {
+		return
+	}
+	if c.xml != nil {
+		for configID := range c.xml.index {
+			if entry, ok := c.Lookup(configID); ok {
+				visit(entry)
+			}
+		}
+		return
+	}
+	for _, entry := range c.entries {
+		visit(entry)
+	}
+}
+
 // FromXML 是否构建产物来源。
 func (c *Catalog) FromXML() bool { return c != nil && c.xml != nil }
 
