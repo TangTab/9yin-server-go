@@ -113,6 +113,10 @@ func (s *Server) roleContext(pl *Player) entergen.Context {
 		// 引导阶段簇（guide.go）：m655 后、0x0B 前下发——黑幕窗弹出时机，
 		// 迟到不弹（真机实证）。值=已定档值或待选性别默认。
 		GuideStep: guideEntryStep(pl),
+		// 装备内功 buff 槽串（appearance.go BufferInfo4；215 换书运行时
+		// 同源合成，neigonguse.go equipBuffInfo4）。
+		BuffInfo4: equipBuffInfo4(s.neiGongCatalogOf(), pl.entergenIdentity(),
+			equipBookOf(&pl.roleState, pl.roleState.CurNeiGong)),
 		// 待选态补黑幕窗门控属性（FinishFreshmanRecStr 初值——引擎本地
 		// 弹窗条件，缺发＝待选卡死）。guideEntryStep 同判据的无锁形；完整
 		// 引导链核查在 readyTail（guideChoicePending）。

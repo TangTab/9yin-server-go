@@ -103,16 +103,19 @@ func PlayerVitalBatchFrame(ctx Context) ([]byte, error) {
 		ap("CurSkillID", StringValue("")),
 		ap("CurSkillTarget", ObjectValue(0, 0)),
 		ap("ModifySkillLockTime", Int32Value(200)), // 官方口径 200（Java #2014）
-		ap("HPHeartSpeed", Int32Value(5000)),
+		ap("HPHeartSpeed", Int32Value(1000)),
 		ap("HPHeartSpeedAdd", Int32Value(0)),
-		ap("MPHeartSpeed", Int32Value(5000)),
+		ap("MPHeartSpeed", Int32Value(1000)),
 		ap("MPHeartSpeedAdd", Int32Value(0)),
 		ap("HPUpSpeed", Int32Value(hpUpSpeed)),
 		ap("HPUpSpeedAdd", Int32Value(hpUpSpeedAdd)),
 		ap("MPUpSpeed", Int32Value(mpUpSpeed)),
 		ap("MPUpSpeedAdd", Int32Value(mpUpSpeedAdd)),
 		ap("Name", WideValue(ctx.RoleName)),
+		// 货币三币（2433 线 currenciesUpdate 口径：碎银 1 / 官银 2 / 黄金 0）。
 		ap("CapitalType1", Int64Value(state.Money)),
+		ap("CapitalType2", Int64Value(state.OfficialSilver)),
+		ap("CapitalType0", Int64Value(state.Gold)),
 	)
 
 	// BufferListStr：2433 表在名（fork 线外服表无此名停发——方言门控按

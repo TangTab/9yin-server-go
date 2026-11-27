@@ -334,7 +334,9 @@ func (s *Server) moveEquip(pl *Player, srcView, srcSlot, dstSlot int32) {
 	} else {
 		st.BagItems = append(st.BagItems[:index], st.BagItems[index+1:]...)
 	}
-	s.sendToClient(pl, entergen.ViewRemoveFrame(uint16(srcView), uint16(srcSlot)))
+	for _, frame := range entergen.BagRowRemoveFrames(uint16(srcView), uint16(srcSlot)) {
+		s.sendToClient(pl, frame)
+	}
 	if stacked {
 		if push, err := entergen.BagItemPushFrames(st.BagItems[index]); err == nil {
 			for _, frame := range push {
@@ -417,7 +419,9 @@ func (s *Server) moveInsideBag(pl *Player, srcView, srcSlot, dstView, dstSlot in
 				st.BagItems[i].ConfigID == item.ConfigID && s.bagRowCanAbsorb(&st.BagItems[i], item.Amount) {
 				st.BagItems[i].Amount += item.Amount
 				st.BagItems = append(st.BagItems[:index], st.BagItems[index+1:]...)
-				s.sendToClient(pl, entergen.ViewRemoveFrame(uint16(srcView), uint16(srcSlot)))
+				for _, frame := range entergen.BagRowRemoveFrames(uint16(srcView), uint16(srcSlot)) {
+					s.sendToClient(pl, frame)
+				}
 				if push, err := entergen.BagItemPushFrames(st.BagItems[i]); err == nil {
 					for _, frame := range push {
 						s.sendToClient(pl, frame)
@@ -436,7 +440,9 @@ func (s *Server) moveInsideBag(pl *Player, srcView, srcSlot, dstView, dstSlot in
 	}
 	st.BagItems[index].ViewID = dstPage
 	st.BagItems[index].Slot = slot
-	s.sendToClient(pl, entergen.ViewRemoveFrame(uint16(srcView), uint16(srcSlot)))
+	for _, frame := range entergen.BagRowRemoveFrames(uint16(srcView), uint16(srcSlot)) {
+		s.sendToClient(pl, frame)
+	}
 	if push, err := entergen.BagItemPushFrames(st.BagItems[index]); err == nil {
 		for _, frame := range push {
 			s.sendToClient(pl, frame)

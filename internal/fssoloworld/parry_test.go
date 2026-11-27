@@ -209,3 +209,57 @@ func TestParryValueTotalFallback(t *testing.T) {
 	}
 	_ = binary.LittleEndian
 }
+
+// TestParryCombatCluster 战斗上下文官服簇序（docs/official/初始女号抓包
+// m54手动格挡全解.md §四）：按压 = MoveSpeed → RunSpeedAdd → InParry →
+// ParryUpSpeedAdd → BufferInfo2 槽串 → m169(0,"BuffInParry") →
+// InManualParry；松开 = m169(1) 簇首 → BufferInfo2 清空 → 全清零。
+func TestParryCombatCluster(t *testing.T) {
+	s, pl, frames := newParryTestServer(t)
+	pl.Name = "格挡侠"
+	// 战斗上下文：live.ready + logicFighting。
+	pl.combat.mu.Lock()
+	pl.combat.live.ready = true
+	pl.combat.live.logic = logicFighting
+	pl.combat.mu.Unlock()
+
+	sendM54(s, pl, 3, 1)                    // 基调采集（零帧）
+	sendM54(s, pl, 3, 1+parryTokenDelta)    // 按压
+	if len(*frames) != 7 {
+		t.Fatalf("按压簇应 7 帧，实发 %d: ops=% x", len(*frames), opOf(*frames))
+	}
+	press := *frames
+	for i := 0; i < 5; i++ { // 前五帧单属性，m169 在下标 5、簇尾 6
+		if press[i][0] != 0x10 {
+			t.Fatalf("按压簇第 %d 帧应单属性 0x10: % x", i, press[i])
+		}
+	}
+	if !frameContains(press[4:5], []byte("11CE,")) {
+		t.Fatalf("BufferInfo2 槽串应携 11CE 前缀: % x", press[4])
+	}
+	if press[6][0] != 0x10 {
+		t.Fatalf("簇尾应 InManualParry 0x10: % x", press[6])
+	}
+	if press[5][0] != 0x1E || !frameContains(press[5:6], []byte("BuffInParry")) ||
+		!frameContains(press[5:6], []byte("格挡侠")) {
+		t.Fatalf("m169 挂帧异常: % x", press[5])
+	}
+
+	*frames = nil
+	sendM54(s, pl, 3, 1) // 松开
+	release := *frames
+	if len(release) != 7 {
+		t.Fatalf("松开簇应 7 帧，实发 %d: ops=% x", len(release), opOf(release))
+	}
+	if release[0][0] != 0x1E || !frameContains(release[0:1], []byte("BuffInParry")) {
+		t.Fatalf("松开簇首应 m169 撤帧: % x", release[0])
+	}
+	for i := 1; i < 7; i++ {
+		if release[i][0] != 0x10 {
+			t.Fatalf("松开簇第 %d 帧应 0x10: % x", i, release[i])
+		}
+	}
+	if !frameContains(release[1:2], mustHex(t, "0100000000")) {
+		t.Fatalf("BufferInfo2 应清空（空串 len=1）: % x", release[1])
+	}
+}

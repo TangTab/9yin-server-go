@@ -158,18 +158,64 @@ func QingGongViewFrames(state rolestate.RoleState) ([][]byte, error) {
 }
 
 // emptyContainerViews 官方登录簇的空容器视图（初始账号 30 视图集减
-// 40/43/44/45/46 数据视图——44/45 经脉穴位建号态为空容器）。
+// 40/43/44/45/46 数据视图与背包视图族——44/45 经脉穴位建号态为空容器，
+// 背包族见 BagViewCreateFrames）。
 var emptyContainerViews = []struct {
 	ID  uint16
 	Cap uint16
 }{
 	{165, 6}, {128, 5}, {41, 20}, {47, 32}, {48, 32}, {44, 128}, {45, 32},
-	{170, 8}, {1, 60}, {64, 32}, {174, 32}, {175, 32}, {176, 32}, {177, 32},
-	{178, 32}, {179, 32}, {180, 32}, {181, 32}, {2, 128}, {159, 16}, {3, 128},
-	{121, 32}, {122, 32}, {123, 32}, {124, 32}, {125, 32}, {126, 32},
+	{170, 8}, {64, 32}, {159, 16},
 }
 
-// EmptyViewFrames 空容器视图族（7B 建视图帧）。
+// 背包视图族容量（官服初始账号登陆-完整引导-女.pcapng 8032 线
+// #1232/#1347..#1381 定版）：8 主页（4 分类页 + 4 时装镜像页）cap=90 且
+// 携 BaseCap=18——客户端按基础容量渲染页格行数（3 行×6 格），缺发该
+// 属性时除装备页外其余页行数萎缩（2026-11-27 真机：装备 3 行、其余 1 行）；
+// 8 扩展页 cap=2；纸娃娃 View1 cap=52。
+const (
+	bagMainViewCapacity = 90
+	bagExtViewCapacity  = 2
+	bagViewBaseCap      = 18
+	dollViewCapacity    = 52
+)
+
+// bagMainViews / bagExtViews 背包主页与扩展页（官服建视图序：纸娃娃 →
+// 镜像族 → 分类页 → 扩展页；扩展页 3/122/124/126 与镜像扩展页
+// 175/177/179/181 是扩容锚点行容器，见 2433 线 bagExtPages）。
+var (
+	bagMainViews = []uint16{174, 176, 178, 180, 2, 121, 123, 125}
+	bagExtViews  = []uint16{175, 177, 179, 181, 3, 122, 124, 126}
+)
+
+// BagViewCreateFrames 背包视图族建视图帧（17 视图；行推送前建好——
+// 官服登录簇序）。
+func BagViewCreateFrames() ([][]byte, error) {
+	frames := make([][]byte, 0, 1+len(bagMainViews)+len(bagExtViews))
+	doll, err := CreateViewFrame(equipDollView, dollViewCapacity, nil)
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, doll)
+	baseCap := []ViewProperty{{playerIdx("BaseCap"), Int32Value(bagViewBaseCap)}}
+	for _, viewID := range bagMainViews {
+		frame, err := CreateViewFrame(viewID, bagMainViewCapacity, baseCap)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+	}
+	for _, viewID := range bagExtViews {
+		frame, err := CreateViewFrame(viewID, bagExtViewCapacity, nil)
+		if err != nil {
+			return nil, err
+		}
+		frames = append(frames, frame)
+	}
+	return frames, nil
+}
+
+// EmptyViewFrames 空容器视图族（7B 建视图帧；背包族之外）。
 func EmptyViewFrames() ([][]byte, error) {
 	frames := make([][]byte, 0, len(emptyContainerViews))
 	for _, v := range emptyContainerViews {

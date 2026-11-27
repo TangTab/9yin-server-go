@@ -39,6 +39,19 @@ func (t Task) PrizeMoney() int64 {
 	return n
 }
 
+// PrizeOfficialSilver 完成奖励的官银（prize_base[1] CapitalType2）。
+func (t Task) PrizeOfficialSilver() int64 {
+	fields := strings.Split(t.Prize, ",")
+	if len(fields) < 2 {
+		return 0
+	}
+	n, err := strconv.ParseInt(strings.TrimSpace(fields[1]), 10, 64)
+	if err != nil || n <= 0 {
+		return 0
+	}
+	return n
+}
+
 // PrizeItems 完成奖励的物品（prize_base[10..17] Item1,Num1 … Item4,Num4）。
 func (t Task) PrizeItems() []PrizeItem {
 	fields := strings.Split(t.Prize, ",")

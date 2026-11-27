@@ -440,6 +440,7 @@ func TestGuideChoiceSkipOfficialOrder(t *testing.T) {
 		`11 GiveItem row=0 "item_skipsp_001" 1`,
 		"19 view=@view@ idx=@slot@",
 		"18 view=@view@ idx=@slot@",
+		"19 view=@mirror@ idx=@slot@",
 		`m1 1 "9645" "item_skipsp_001" 1`,
 	}
 	// 各档余额独立（本服建号基线 0：余额＝本档累加值）。

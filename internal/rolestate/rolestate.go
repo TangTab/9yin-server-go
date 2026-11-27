@@ -32,6 +32,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/mpq/res"
 )
@@ -68,12 +69,27 @@ type RoleState struct {
 	NeiGong            []NeiGongBook  `json:"neigong"`
 	CurNeiGong         string         `json:"curNeiGong"`
 	FacultySeed        int64          `json:"facultySeed"`
-	// Money 碎银（GM/经济测试位；对拍 2433 线 CapitalType1，0x10 属性
-	// 帧按名寻址下发）。官银/黄金（CapitalType0/2）留多币种扩展。
-	Money int64 `json:"money,omitempty"`
+	// 货币三币（0x10 属性按名寻址下发，各一帧 Int64 单属性——2433 线
+	// currenciesUpdate 口径）：碎银 CapitalType1（商店购销/任务奖励）、
+	// 官银 CapitalType2（任务奖励 prize_base[1]）、黄金 CapitalType0
+	//（235 潜能赎回的支付币）。
+	Money           int64 `json:"money,omitempty"`           // 碎银（CapitalType1）
+	OfficialSilver  int64 `json:"officialSilver,omitempty"`  // 官银（CapitalType2）
+	Gold            int64 `json:"gold,omitempty"`            // 黄金（CapitalType0）
 	// LiveGrooves 历练累计（玩家属性 LiveGroove_1..5，下标 1..5；任务完成
-	// 奖励 prize_base 的 LiveGroove/LiveGrooveCount 累加进来）。0＝无。
+	// 奖励 prize_base 的 LiveGroove/LiveGrooveCount 累加进来；内修历练层
+	// 100s 步进累积/转化也写这里，槽上限 999000 毫）。0＝无。
 	LiveGrooves [6]int32 `json:"liveGrooves"`
+	// ---- 修炼/内修域（C2S 1006/235 族；fssoloworld/faculty.go）----
+	FacultyName        string    `json:"facultyName,omitempty"`      // 所选修炼书
+	FacultyState       int32     `json:"facultyState,omitempty"`     // 0 空闲 / 2 转换中
+	FacultyStyle       int32     `json:"facultyStyle,omitempty"`     // 1 普通内修 / 2 演武
+	FacultyFillSpeed   int32     `json:"facultyFillSpeed,omitempty"` // 每分钟修炼度（普通 200；演武 0）
+	Faculty            int32     `json:"faculty"`                    // 修为余额（Faculty 属性）
+	HoldFaculty        int32     `json:"holdFaculty,omitempty"`      // 潜能修为（235 黄金赎回，支付币=黄金 CapitalType0）
+	LiveSpeedPower     int32     `json:"liveSpeedPower,omitempty"`   // 历练转化速度加成 %
+	FacultyLastAdvance time.Time `json:"facultyLastAdvance,omitempty"` // 整分钟结算余数
+	LivepointLast      time.Time `json:"livepointLast,omitempty"`      // 100s 步进余数
 	// Reputes 声望记录（Repute_Record 行：名称、数值；任务完成奖励累加）。
 	Reputes []Repute `json:"reputes,omitempty"`
 
@@ -336,6 +352,7 @@ type StarterSkill struct {
 // NeiGongBook 初始内功书（View43 行 + 修为/五维加成来源）。
 type NeiGongBook struct {
 	ConfigID       string `json:"configID"`
+	Fill           int    `json:"fill,omitempty"` // 本层已积累修炼度（CurFillValue；修炼/演武结算写）
 	StaticData     int    `json:"staticData"`
 	ItemType       int    `json:"itemType"`
 	Level          int    `json:"level"`
@@ -1011,6 +1028,7 @@ func BuildRoleState(book string, sex int, para string, facultySeed int64) (RoleS
 		QingGongSkills:     splitIDs(starter.QingGong.Instance.IDs),
 		CollectSkills:      splitIDs(starter.CollectSkills.IDs),
 		FacultySeed:        facultySeed,
+		Faculty:            int32(facultySeed), // 修为初值 = 种子（b-line initialFaculty 口径）
 		// 碎银初值对拍 2433 线 starter-silver 测试口径（CapitalType1）。
 		Money: starterMoney,
 	}

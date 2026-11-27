@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/lizhanyin/9yin-server-go/internal/clientdata"
+	"github.com/lizhanyin/9yin-server-go/internal/rolestate"
 )
 
 // PreReadyFrames 进场段全量帧（表下发之后、ClientReady 之前）。
@@ -169,13 +170,19 @@ func ReadyFrames(ctx Context, now time.Time) ([][]byte, error) {
 	}
 	frames = append(frames, buffs...)
 
-	// 视图簇：空容器族 + View40 武学 + View43 内功 + View46 轻功。
+	// 视图簇：空容器族 + 背包视图族（17 视图，主页携 BaseCap=18）+
+	// View40 武学 + View43 内功 + View46 轻功。
 	empty, err := EmptyViewFrames()
 	if err != nil {
 		return nil, err
 	}
 	frames = append(frames, empty...)
-	// 纸娃娃行 + 背包物品行（空容器族建视图之后逐行推送；2433 线
+	bagViews, err := BagViewCreateFrames()
+	if err != nil {
+		return nil, err
+	}
+	frames = append(frames, bagViews...)
+	// 纸娃娃行 + 背包物品行（视图族建视图之后逐行推送；2433 线
 	// inventoryFrames 进场整推序：纸娃娃行先于背包行；空装备/空背包零帧）。
 	dollRows, err := EquipViewFrames(ctx.State)
 	if err != nil {
@@ -313,40 +320,54 @@ func BasePropertyFrames(ctx Context) ([][]byte, error) {
 	return [][]byte{frame}, nil
 }
 
-// CombatAttributeFrames 战斗面板单帧族（外服形态：单属性 0x10 逐帧；
-// 建号可计算子集——等级内功加成后面板值）。
-func CombatAttributeFrames(ctx Context) ([][]byte, error) {
-	state := ctx.State
+// CombatAttributeValues 战斗面板可计算子集（等级内功加成后面板值）：
+// 五维 = 基础 + 当前运行书的 varprop 加成（b-line combatPanelProperties
+// 口径），资源/招架 Add 跟当前运行书（无运行书回退首本——建号档只有
+// 一本时同值）。登录整推与 215 换书运行时共用同一取值面。
+func CombatAttributeValues(state rolestate.RoleState) []NamedValue {
 	str := int32(state.Str)
 	sta := int32(state.Sta)
 	dex := int32(state.Dex)
 	ing := int32(state.Ing)
 	spi := int32(state.Spi)
-	// 首本内功 varprop 加成叠加（b-line combatPanelProperties 口径）。
-	for i := range state.NeiGong {
-		if state.NeiGong[i].ConfigID == state.CurNeiGong {
-			b := &state.NeiGong[i]
-			str += int32(b.StrAdd)
-			sta += int32(b.StaAdd)
-			dex += int32(b.DexAdd)
-			ing += int32(b.IngAdd)
-			spi += int32(b.SpiAdd)
-			break
+	var maxHPAdd, maxMPAdd, maxParryAdd int32
+	if len(state.NeiGong) > 0 {
+		book := &state.NeiGong[0]
+		for i := range state.NeiGong {
+			if state.NeiGong[i].ConfigID == state.CurNeiGong {
+				book = &state.NeiGong[i]
+				break
+			}
 		}
+		str += int32(book.StrAdd)
+		sta += int32(book.StaAdd)
+		dex += int32(book.DexAdd)
+		ing += int32(book.IngAdd)
+		spi += int32(book.SpiAdd)
+		maxHPAdd = int32(book.MaxHPAdd)
+		maxMPAdd = int32(book.MaxMPAdd)
+		maxParryAdd = int32(book.MaxParryAdd)
 	}
-	specs := []struct {
-		name  string
-		value int32
-	}{
+	return []NamedValue{
 		{"Str", str}, {"Sta", sta}, {"Dex", dex}, {"Ing", ing}, {"Spi", spi},
-		{"MaxHPAdd", int32(state.NeiGong[0].MaxHPAdd)},
-		{"MaxMPAdd", int32(state.NeiGong[0].MaxMPAdd)},
-		{"MaxParryAdd", int32(state.NeiGong[0].MaxParryAdd)},
+		{"MaxHPAdd", maxHPAdd},
+		{"MaxMPAdd", maxMPAdd},
+		{"MaxParryAdd", maxParryAdd},
 	}
-	frames := make([][]byte, 0, len(specs))
-	for _, spec := range specs {
+}
+
+// NamedValue 单属性名值对（战斗面板逐帧下发用）。
+type NamedValue struct {
+	Name  string
+	Value int32
+}
+
+// CombatAttributeFrames 战斗面板单帧族（外服形态：单属性 0x10 逐帧）。
+func CombatAttributeFrames(ctx Context) ([][]byte, error) {
+	frames := make([][]byte, 0, 8)
+	for _, spec := range CombatAttributeValues(ctx.State) {
 		frame, err := ObjectPropertyFrame(ctx.Identity.ObjectID, ctx.Identity.OwnerID, 0,
-			[]IndexedProperty{NamedProperty(spec.name, Int32Value(spec.value))})
+			[]IndexedProperty{NamedProperty(spec.Name, Int32Value(spec.Value))})
 		if err != nil {
 			return nil, err
 		}

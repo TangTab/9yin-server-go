@@ -75,6 +75,10 @@ type Context struct {
 	// 进场簇下发**（官服位 m655 后、0x0B 前）——迟到客户端已入正常场景，
 	// 黑幕窗不再弹（真机实证）。
 	GuideStep int
+	// BuffInfo4 装备内功 buff 的 BufferInfo4 槽串（"staticHex,obj,own,
+	// level,0,0"；空＝无 buff/缺 StaticData）。fssoloworld 按 CurNeiGong
+	// 书与 neigongdata 目录合成（215 换书运行时同源，neigonguse.go）。
+	BuffInfo4 string
 	// GuideChoicePending 待选态（GameStep 未定且身在新手副本——guideEntryStep
 	// 同判据的无锁形）：进场簇在引导阶段帧之前补发黑幕窗门控属性
 	// FinishFreshmanRecStr 初值。已定档（GameStep≠0）不发——该属性值随

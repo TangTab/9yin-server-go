@@ -239,7 +239,8 @@ func AppearanceFrame(ctx Context) ([]byte, error) {
 		ap("BufferInfo1", StringValue(fmt.Sprintf("6747,%s,%s,1,0,0", objHex, ownHex))),
 		ap("BufferInfo2", StringValue(fmt.Sprintf("1E37,%s,%s,0,0,0", objHex, ownHex))),
 		ap("BufferInfo3", StringValue("")),
-		ap("BufferInfo4", StringValue(fmt.Sprintf("1742,%s,%s,3,C39342C7231,1", objHex, ownHex))),
+		// 装备内功 buff 槽（fssoloworld 按 CurNeiGong 书合成；空＝无 buff）。
+		ap("BufferInfo4", StringValue(ctx.BuffInfo4)),
 		ap("BufferInfo5", StringValue("")),
 		ap("BufferInfo6", StringValue("")),
 		ap("BufferInfo7", StringValue("")),

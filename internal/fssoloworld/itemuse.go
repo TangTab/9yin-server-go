@@ -321,25 +321,26 @@ func (s *Server) startItemCooldown(pl *Player, category, coolDownMS int, nowMS i
 	return w.frames
 }
 
-// consumeItemFrame 扣 1 件并给出扣件帧：行有余量 → 0x19 + 0x18（减堆，
-// 购销同方言）；空行 → 0x19（官服书类单件样本：`19 02 00 05 00`）。
+// consumeItemFrame 扣 1 件并给出扣件帧：行有余量 → 入包三元组（0x19
+// 预清 + 0x18 减堆行 + 0x19 镜像清位，购销同方言）；空行 → 删行对
+// （0x19 + 镜像 0x19；官服书类单件样本：`19 02 00 05 00`）。
 func (s *Server) consumeItemFrame(pl *Player, index int, view, slot int32) [][]byte {
 	st := &pl.roleState
 	if index < 0 || index >= len(st.BagItems) {
 		return nil
 	}
 	wire := uint16(view)
-	remove := entergen.ViewRemoveFrame(wire, uint16(slot))
+	remove := entergen.BagRowRemoveFrames(wire, uint16(slot))
 	if st.BagItems[index].Amount > 1 {
 		st.BagItems[index].Amount--
 		push, err := entergen.BagItemPushFrames(st.BagItems[index])
 		if err != nil {
-			return [][]byte{remove}
+			return remove
 		}
-		return append([][]byte{remove}, push...)
+		return push // 三元组自带预清，无需再前缀删行对
 	}
 	st.BagItems = append(st.BagItems[:index], st.BagItems[index+1:]...)
-	return [][]byte{remove}
+	return remove
 }
 
 // useItemLockFrame 使用中的行上锁/解锁：0x10 视图对象帧（isViewObject=1，

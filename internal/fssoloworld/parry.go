@@ -34,8 +34,24 @@ package fssoloworld
 //     战斗架势——开关勾选后架势由客户端自己维持，撑持已撤。
 
 import (
+	"fmt"
+
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 )
+
+// parryMoveSpeedBase / parrySlowFactor / parryRunAddFactor / parryUpSpeedDelta
+// 格挡减速参数（2026-11-24 官服抓包：MoveSpeed 3.9→1.17 = ×0.3、
+// RunSpeedAdd 0→-2.73 = ×-0.7、ParryUpSpeedAdd 0→-1；松开全回基值）。
+const (
+	parryMoveSpeedBase = 3.9
+	parrySlowFactor    = 0.3
+	parryRunAddFactor  = -0.7
+	parryUpSpeedDelta  = -1
+)
+
+// parryBuffName 格挡 buff（StaticData 4558=0x11CE，BufferInfo2 槽串首列；
+// 无时长租约——挂/撤全走 m169 事件对与槽串登记）。
+const parryBuffName = "BuffInParry"
 
 // clientCustomParryState C2S msg54 格挡状态 [54, numeric]。
 const clientCustomParryState int32 = 54
@@ -117,22 +133,79 @@ func (s *Server) parryStateReport(pl *Player, value int64) bool {
 	return false
 }
 
-// sendParryStateFrame 三属性权威帧（InParry/InManualParry/ParryValue）。
+// sendParryStateFrame 官服应答簇（逐属性单帧，docs/official/初始女号
+// 抓包m54手动格挡全解.md §四 逐帧钉死）：非战斗只置/清 InManualParry
+//（输入状态；官服簇尾方言）；战斗上下文按压 = MoveSpeed 减速 →
+// RunSpeedAdd → InParry → ParryUpSpeedAdd → BufferInfo2 槽串 →
+// m169(0,"BuffInParry") → InManualParry；松开 m169(1) 簇首 →
+// BufferInfo2 清空 → 减速族与三标志全清零。ParryValue 是按值变更推送
+// 的耐力 meter（parryRegen），不入簇；全程不碰 LogicState。
 func (s *Server) sendParryStateFrame(pl *Player) {
 	pl.parryMu.Lock()
 	parrying := pl.parrying
 	pl.parryMu.Unlock()
-	value := s.parryValueTotal(pl)
-	active := int32(0)
-	if parrying && value > 0 {
-		active = 1
+	st := &pl.combat
+	st.mu.Lock()
+	inCombat := st.live.ready && st.live.logic == logicFighting
+	st.mu.Unlock()
+	if !inCombat {
+		s.sendParryProp(pl, entergen.NamedProperty("InManualParry",
+			entergen.Int32Value(boolToInt(parrying))))
+		return
 	}
-	frame, err := playerPropertyFrame(pl,
-		entergen.NamedProperty("InParry", entergen.Int32Value(active)),
-		entergen.NamedProperty("InManualParry", entergen.Int32Value(active)),
-		entergen.NamedProperty("ParryValue", entergen.Int32Value(value)))
+	id := pl.wireIdent()
+	if parrying {
+		s.sendParryProp(pl, entergen.NamedProperty("MoveSpeed",
+			entergen.Float32Value(float32(parryMoveSpeedBase*parrySlowFactor))))
+		s.sendParryProp(pl, entergen.NamedProperty("RunSpeedAdd",
+			entergen.Float32Value(float32(parryMoveSpeedBase*parryRunAddFactor))))
+		s.sendParryProp(pl, entergen.NamedProperty("InParry", entergen.Int32Value(1)))
+		s.sendParryProp(pl, entergen.NamedProperty("ParryUpSpeedAdd",
+			entergen.Int32Value(parryUpSpeedDelta)))
+		s.sendParryProp(pl, entergen.NamedProperty("BufferInfo2", entergen.StringValue(
+			fmt.Sprintf("11CE,%X,%X,1,0,0", id.objectID, id.ownerID))))
+		s.sendParryBuffNotice(pl, true)
+		s.sendParryProp(pl, entergen.NamedProperty("InManualParry", entergen.Int32Value(1)))
+		return
+	}
+	s.sendParryBuffNotice(pl, false)
+	s.sendParryProp(pl, entergen.NamedProperty("BufferInfo2", entergen.StringValue("")))
+	s.sendParryProp(pl, entergen.NamedProperty("MoveSpeed",
+		entergen.Float32Value(parryMoveSpeedBase)))
+	s.sendParryProp(pl, entergen.NamedProperty("RunSpeedAdd", entergen.Float32Value(0)))
+	s.sendParryProp(pl, entergen.NamedProperty("InParry", entergen.Int32Value(0)))
+	s.sendParryProp(pl, entergen.NamedProperty("ParryUpSpeedAdd", entergen.Int32Value(0)))
+	s.sendParryProp(pl, entergen.NamedProperty("InManualParry", entergen.Int32Value(0)))
+}
+
+// sendParryProp 单属性 0x10 帧（官服簇逐属性方言）。
+func (s *Server) sendParryProp(pl *Player, prop entergen.IndexedProperty) {
+	if frame, err := playerPropertyFrame(pl, prop); err == nil {
+		s.sendToClient(pl, frame)
+	} else {
+		s.trace("parry prop frame encode failed client=%d: %v", pl.Conn1, err)
+	}
+}
+
+// sendParryBuffNotice m169 格挡 buff 挂/撤（BuffInParry=StaticData 4558
+// 无时长租约：到期段恒 0；目标/施法者=本人，名字对=角色名）。
+func (s *Server) sendParryBuffNotice(pl *Player, add bool) {
+	id := pl.wireIdent()
+	flag := int32(1)
+	if add {
+		flag = 0
+	}
+	frame, err := entergen.CustomMessageFrame(entergen.MsgBuff,
+		entergen.CustomInt(flag),
+		entergen.CustomString(parryBuffName),
+		entergen.CustomObject(id.objectID, id.ownerID),
+		entergen.CustomObject(id.objectID, id.ownerID),
+		entergen.CustomString(pl.Name),
+		entergen.CustomString(pl.Name),
+		entergen.CustomInt64(0),
+		entergen.CustomInt(0))
 	if err != nil {
-		s.trace("parry state frame encode failed client=%d: %v", pl.Conn1, err)
+		s.trace("parry buff notice encode failed client=%d: %v", pl.Conn1, err)
 		return
 	}
 	s.sendToClient(pl, frame)

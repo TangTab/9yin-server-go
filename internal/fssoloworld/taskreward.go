@@ -14,8 +14,8 @@ package fssoloworld
 //	                                                  （#1931..#1939 / #6827..#6852）
 //
 // 入包走 npcshop 的同一条链（叠堆/新行/容量预检）；目录里没有的物品或背包
-// 放不下时那一件不发也不提示。官服奖励串里的官银（CapitalType2）等其余
-// 字段未建模，不发。
+// 放不下时那一件不发也不提示。官银（CapitalType2，prize_base[1]）入账并
+// 推余额帧；奖励串其余字段未建模，不发。
 
 import (
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
@@ -70,7 +70,7 @@ func (s *Server) npcTaskTakeItems(pl *Player, out *taskFrames, items []taskdata.
 			row.Amount -= take
 			remaining -= take
 			if row.Amount == 0 {
-				out.add(entergen.ViewRemoveFrame(entergen.BagViewOf(row.ViewID), uint16(row.Slot)), nil)
+				out.addAll(entergen.BagRowRemoveFrames(entergen.BagViewOf(row.ViewID), uint16(row.Slot)), nil)
 				pl.roleState.BagItems = append(pl.roleState.BagItems[:i], pl.roleState.BagItems[i+1:]...)
 				continue
 			}
@@ -109,6 +109,10 @@ func (s *Server) npcTaskCompleteReward(pl *Player, out *taskFrames, task taskdat
 		pl.roleState.Money += n
 		out.add(entergen.TaskMoneyFrame(id, pl.roleState.Money))
 		out.add(entergen.TaskMoneyNotice(n))
+	}
+	if n := task.PrizeOfficialSilver(); n > 0 {
+		pl.roleState.OfficialSilver += n
+		out.add(entergen.TaskOfficialSilverFrame(id, pl.roleState.OfficialSilver))
 	}
 	if name, count := task.PrizeRepute(); count > 0 {
 		row, total, added := pl.roleState.AddRepute(name, count)

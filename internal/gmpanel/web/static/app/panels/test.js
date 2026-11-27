@@ -77,6 +77,8 @@ const PROPS = [
   // 怒气不在此列：它是会话值，走调试工具页的「设置怒气」（gm rage）。
   ["hp", "HP(含Max)"], ["mp", "MP(含Max)"],
   ["parry", "招架 Parry"],
+  // 货币三币（currency.go：碎银 1 / 官银 2 / 黄金 0 各一帧 CapitalTypeN）。
+  ["money", "碎银 Money(C1)"], ["official", "官银 Official(C2)"], ["gold", "黄金 Gold(C0)"],
 ];
 
 // 当前坐标读数（传送与场景子页）的四项：gm state 的 pos 字段 ↔ 标签。
@@ -221,18 +223,32 @@ export function mount(view, sub) {
   }
 
   function subItem(box) {
-    const val = field("碎银数额（≥0）", 140);
+    const money = field("碎银数额（≥0）", 130);
+    const official = field("官银数额（≥0）", 130);
+    const gold = field("黄金数额（≥0）", 130);
     box.appendChild(h("div", { class: "toolbar" }, [
-      val,
-      opBtn("gm money（CapitalType1 热发）", "info", async () => {
-        if (!who() || !val.value) return;
-        await send("gm money " + who() + " " + val.value);
+      money,
+      opBtn("gm money（CapitalType1）", "info", async () => {
+        if (!who() || !money.value) return;
+        await send("gm money " + who() + " " + money.value);
+        refreshState();
+      }),
+      official,
+      opBtn("gm set official（CapitalType2）", "info", async () => {
+        if (!who() || !official.value) return;
+        await send("gm set " + who() + " official " + official.value);
+        refreshState();
+      }),
+      gold,
+      opBtn("gm set gold（CapitalType0）", "info", async () => {
+        if (!who() || !gold.value) return;
+        await send("gm set " + who() + " gold " + gold.value);
         refreshState();
       }),
       opBtn("读余额", "", refreshState),
     ]));
     box.appendChild(h("div", { class: "panel-desc" }, [
-      "官银/黄金（CapitalType0/2）留多币种扩展；建号初值 99999（2433 线 starter 口径）。",
+      "三币各一帧 0x10 单属性 Int64（碎银 CapitalType1 / 官银 CapitalType2 / 黄金 CapitalType0，2433 线 currenciesUpdate 口径）；设置后 gm save / 下线自动存。",
     ]));
     box.appendChild(h("section", { class: "panel" }, [h("h2", {}, ["状态快照"]), stateBox]));
   }

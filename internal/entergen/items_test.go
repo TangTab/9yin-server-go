@@ -1,9 +1,9 @@
 package entergen
 
-// 背包物品视图行测试：0x19/0x18 成对方言、分类页视图路由
-//（bagViewOf）、行属性集名寻址（ConfigID/ItemType/Amount/MaxAmount/
-// BindStatus/UniqueID——2433 表 idx 由 clientdata 解析）、Ready 编排
-// 空容器族后逐行推送。
+// 背包物品视图行测试：0x19/0x18/0x19 三元组方言（预清→行→镜像页清位）、
+// 分类页视图路由（bagViewOf）、行属性集名寻址（ConfigID/ItemType/Amount/
+// MaxAmount/BindStatus/UniqueID——2433 表 idx 由 clientdata 解析）、
+// 背包视图族官服口径（主页 cap=90+BaseCap=18）、Ready 编排视图族后逐行推送。
 
 import (
 	"encoding/binary"
@@ -25,20 +25,23 @@ func TestViewRemoveFrameShape(t *testing.T) {
 	}
 }
 
-// TestBagItemPushFramesPair 成对方言：预清 0x19 + 行 0x18 同视图同槽位；
-// 分类页路由 ViewID 2→121/3→123/4→125/1→2。
-func TestBagItemPushFramesPair(t *testing.T) {
-	cases := map[int]uint16{1: 2, 2: 121, 3: 123, 4: 125}
-	for viewID, wantView := range cases {
+// TestBagItemPushFramesTriple 三元组方言：预清 0x19 + 行 0x18 + 镜像页
+// 清位 0x19 同槽位；分类页路由 ViewID 2→121/3→123/4→125/1→2，镜像
+// 174/176/178/180 对应。
+func TestBagItemPushFramesTriple(t *testing.T) {
+	cases := map[int][2]uint16{1: {2, 174}, 2: {121, 176}, 3: {123, 178}, 4: {125, 180}}
+	for viewID, want := range cases {
+		wantView, wantMirror := want[0], want[1]
 		item := rolestate.BagItem{Slot: 5, ConfigID: "yaopin_00100", ItemType: 8, Amount: 3, ViewID: viewID}
 		frames, err := BagItemPushFrames(item)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(frames) != 2 || frames[0][0] != 0x19 || frames[1][0] != 0x18 {
-			t.Fatalf("viewID=%d frames=%d/%#x/%#x, want 0x19+0x18", viewID, len(frames), frames[0][0], frames[1][0])
+		if len(frames) != 3 || frames[0][0] != 0x19 || frames[1][0] != 0x18 || frames[2][0] != 0x19 {
+			t.Fatalf("viewID=%d frames=%d/%#x/%#x/%#x, want 0x19+0x18+0x19",
+				viewID, len(frames), frames[0][0], frames[1][0], frames[2][0])
 		}
-		clear, row := frames[0], frames[1]
+		clear, row, mirrorClear := frames[0], frames[1], frames[2]
 		if got := binary.LittleEndian.Uint16(clear[1:]); got != wantView {
 			t.Fatalf("viewID=%d 清帧视图=%d, want %d", viewID, got, wantView)
 		}
@@ -48,6 +51,63 @@ func TestBagItemPushFramesPair(t *testing.T) {
 		if got := binary.LittleEndian.Uint16(row[3:]); got != 5 {
 			t.Fatalf("行 objectIndex=%d, want 5（槽位）", got)
 		}
+		if got := binary.LittleEndian.Uint16(mirrorClear[1:]); got != wantMirror {
+			t.Fatalf("viewID=%d 镜像清帧视图=%d, want %d", viewID, got, wantMirror)
+		}
+		if got := binary.LittleEndian.Uint16(mirrorClear[3:]); got != 5 {
+			t.Fatalf("镜像清帧槽位=%d, want 5", got)
+		}
+	}
+}
+
+// TestBagViewCreateFramesOfficial 背包视图族官服口径：8 主页 cap=90 且携
+// BaseCap=18（初始账号登陆-完整引导-女.pcapng #1347..#1381：`15 <vid>
+// 5a 00 01 00 ae 08 12 00 00 00`）、8 扩展页 cap=2、纸娃娃 cap=52。
+func TestBagViewCreateFramesOfficial(t *testing.T) {
+	frames, err := BagViewCreateFrames()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(frames) != 17 {
+		t.Fatalf("背包视图族帧数=%d, want 17", len(frames))
+	}
+	baseCapIdx := clientdata.MustPlayerProperty("BaseCap").Index
+	if baseCapIdx != 2222 {
+		t.Fatalf("BaseCap idx=%d, want 2222（官服抓包 ae 08）", baseCapIdx)
+	}
+	mains := map[uint16]bool{}
+	for _, frame := range frames {
+		if frame[0] != 0x15 {
+			t.Fatalf("非建视图帧 %#x", frame[0])
+		}
+		vid, cap, n := binary.LittleEndian.Uint16(frame[1:]),
+			binary.LittleEndian.Uint16(frame[3:]), binary.LittleEndian.Uint16(frame[5:])
+		switch vid {
+		case equipDollView:
+			if cap != 52 || n != 0 {
+				t.Fatalf("纸娃娃 cap=%d n=%d, want 52/0", cap, n)
+			}
+		case 174, 176, 178, 180, 2, 121, 123, 125:
+			mains[vid] = true
+			if cap != 90 || n != 1 {
+				t.Fatalf("主页 %d cap=%d n=%d, want 90/1", vid, cap, n)
+			}
+			if idx := binary.LittleEndian.Uint16(frame[7:]); idx != baseCapIdx {
+				t.Fatalf("主页 %d 属性 idx=%d, want BaseCap %d", vid, idx, baseCapIdx)
+			}
+			if got := binary.LittleEndian.Uint32(frame[9:]); got != 18 {
+				t.Fatalf("主页 %d BaseCap=%d, want 18", vid, got)
+			}
+		case 175, 177, 179, 181, 3, 122, 124, 126:
+			if cap != 2 || n != 0 {
+				t.Fatalf("扩展页 %d cap=%d n=%d, want 2/0", vid, cap, n)
+			}
+		default:
+			t.Fatalf("背包族外的视图 %d", vid)
+		}
+	}
+	if len(mains) != 8 {
+		t.Fatalf("主页数=%d, want 8", len(mains))
 	}
 }
 
@@ -139,11 +199,12 @@ func TestReadyFramesContainBagItems(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(withItems) != len(bare)+4 { // 每件 0x19+0x18 两帧
-		t.Fatalf("物品行未编排: bare=%d withItems=%d, want +4", len(bare), len(withItems))
+	if len(withItems) != len(bare)+6 { // 每件 0x19+0x18+0x19（镜像清位）三帧
+		t.Fatalf("物品行未编排: bare=%d withItems=%d, want +6", len(bare), len(withItems))
 	}
-	// 编排位：空容器族尾（0x15 vid=126）之后、武学视图（0x15 vid=40）
-	// 之前；两件成对 = 0x19/0x18 view2槽1 + 0x19/0x18 view121槽2。
+	// 编排位：背包视图族尾（0x15 vid=126）之后、武学视图（0x15 vid=40）
+	// 之前；两件三元组 = 0x19/0x18/0x19 view2槽1+174槽1 +
+	// 0x19/0x18/0x19 view121槽2+176槽2。
 	lastEmpty, firstSkill, firstClear := -1, -1, -1
 	for i, f := range withItems {
 		switch f[0] {
@@ -162,7 +223,7 @@ func TestReadyFramesContainBagItems(t *testing.T) {
 			}
 		}
 	}
-	if lastEmpty < 0 || firstSkill < 0 || firstClear != lastEmpty+1 || firstClear+4 > firstSkill {
+	if lastEmpty < 0 || firstSkill < 0 || firstClear != lastEmpty+1 || firstClear+6 > firstSkill {
 		t.Fatalf("物品行编排位错: lastEmpty=%d firstClear=%d firstSkill=%d", lastEmpty, firstClear, firstSkill)
 	}
 	want := []struct {
@@ -170,7 +231,8 @@ func TestReadyFramesContainBagItems(t *testing.T) {
 		vid  uint16
 		slot uint16
 	}{
-		{0x19, 2, 1}, {0x18, 2, 1}, {0x19, 121, 2}, {0x18, 121, 2},
+		{0x19, 2, 1}, {0x18, 2, 1}, {0x19, 174, 1},
+		{0x19, 121, 2}, {0x18, 121, 2}, {0x19, 176, 2},
 	}
 	for k, w := range want {
 		f := withItems[firstClear+k]

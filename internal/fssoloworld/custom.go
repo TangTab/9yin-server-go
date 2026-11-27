@@ -47,6 +47,7 @@ const (
 	clientCustomUseItem         int32 = 31
 	clientCustomSingleStep      int32 = 972
 	clientCustomHelpStep        int32 = 950
+	clientCustomUseNeiGong      int32 = 215
 )
 
 // customizingConfigLimit / keybindValueLimit 引擎侧串宽上限（Java
@@ -184,6 +185,17 @@ func (s *Server) dispatchCustom(pl *Player, message entergen.CustomInbound) {
 		// msg54 手动格挡（含非战斗态）：三属性权威帧，不碰 LogicState
 		//（parry.go；2026-11-24 官服抓包逐帧复核）。
 		s.handleParryState(pl, message)
+	case clientCustomUseNeiGong:
+		// msg215 运行内功切换：MaxSP 专帧 → 资源批 → 战斗面板 → m169
+		// 新书 buff（neigonguse.go，2433 线定版）。
+		s.handleUseNeiGong(pl, message)
+	case clientCustomFaculty:
+		// msg1006 修炼族：选书/普通内修/演武/选卡/重开脉冲 + 行级增量帧
+		//（faculty.go，2433 线状态机定版）。
+		s.handleFaculty(pl, message)
+	case clientCustomLivepoint:
+		// msg235 潜能赎回：询价/黄金赎回（faculty.go 历练层）。
+		s.handleLivepoint(pl, message)
 	default:
 		s.trace("custom message unhandled client=%d id=%d values=%d", pl.Conn1, id, len(message.Values))
 	}

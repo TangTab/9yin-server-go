@@ -287,6 +287,11 @@ func (s *Server) timerCheck() {
 	// （combatnpc.go）
 	s.combatTick()
 	s.npcAggroTick()
+
+	// 修炼结算（普通内修整分钟推进；faculty.go）+ 内修历练层（100s 步进
+	// 累积/转化）。
+	s.facultyTick()
+	s.livepointTick()
 }
 
 // checkQueue CheckQueue/CheckVipQueue：排队者放行进 Logging。

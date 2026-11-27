@@ -5,11 +5,14 @@ package fssoloworld
 // sitcrossTick·sitcrossRecoveryFrames、sim.Vitals.RestoreWhileSit）。
 //
 //	进入  客户端把已学的 zs_default_01 识别为原生动作，按快捷键即发
-//	      [240, 1]（不走 211 战斗路线）→ LogicState=102 + m24[自己,40,
-//	      "dazuo_old"] 同拍成对。按住按键期间客户端重发 start：同态
-//	      请求空转（不当切换开关，也不拿重复帧淹没客户端）。
+//	      [240, 1]（不走 211 战斗路线）→ BufferInfo2 槽串（buf_baosd_02,
+//	      StaticData 1E37）+ m169(0,"buf_baosd_02") 挂 buff——官方客户端
+//	      的打坐态键控在这对帧上（男号线 #1293/#1294 实证；旧 fork 方言
+//	      LogicState=102 + m24 dazuo_old 官方全程不发，真机打坐不生效
+//	      根因，2026-11-27 撤）。按住按键期间客户端重发 start：同态请求
+//	      空转（不当切换开关，也不拿重复帧淹没客户端）。
 //	退出  [240, 0] 正常起立 / [240, 2] 本地被打断（含被敌方命中）→
-//	      LogicState=0 + m24[自己,41,"dazuo_old"]。
+//	      m169(1) 撤簇首 + BufferInfo2 清空（登录清理 #79/#80 同形）。
 //	回复  combatTick 每秒一跳：HP/MP 各 +ceil(上限/10)——存活角色十秒
 //	      回满，不看装备/内功推导出的总量。帧序 HPRatio → HP → m24
 //	      治疗/回蓝飘字（c1=16/18），MP 同形。回复帧簇不带 LogicState：
@@ -20,6 +23,8 @@ package fssoloworld
 //	      角色顶回常态。
 
 import (
+	"fmt"
+
 	"github.com/lizhanyin/9yin-server-go/internal/entergen"
 )
 
@@ -28,11 +33,9 @@ const (
 	sitcrossFullRecoverySeconds = 10
 	// sitcrossSkillID 原生打坐技能（starter 快捷栏条目；飘字来源位）。
 	sitcrossSkillID = "zs_default_01"
-	// sitcrossAction 打坐进出动作名（m24 c1=40 进 / 41 出）。
-	sitcrossAction = "dazuo_old"
-	// m24 子码：16 治疗飘字、18 回蓝飘字；40 进坐、41 出坐。
-	msg24HealHP, msg24HealMP                    = 16, 18
-	msg24SitcrossEnter, msg24SitcrossExit int32 = 40, 41
+	// m24 子码：16 治疗飘字、18 回蓝飘字（回复 tick 用；进出簇不发
+	// m24——官服方言走 buff 注册对）。
+	msg24HealHP, msg24HealMP = 16, 18
 )
 
 // sitting 玩家是否在打坐。
@@ -80,18 +83,56 @@ func (s *Server) handleSitcross(pl *Player, message entergen.CustomInbound) {
 		s.trace("sitcross: 战斗/脱战过渡中拒绝进入 client=%d", pl.Conn1)
 		return
 	}
-	to, action := byte(logicNormal), msg24SitcrossExit
+	to := byte(logicNormal)
 	if enter {
-		to, action = logicSitcross, msg24SitcrossEnter
+		to = logicSitcross
 	}
 	st.live.logic = int(to)
+	// 官服进入/退出簇（男号线 #1293/#1294 与登录清理 #79/#80 实证）：
+	// 进入 = BufferInfo 槽 CSV（打坐 buff buf_baosd_02，StaticData 1E37）
+	// → m169(0,"buf_baosd_02")；退出 = m169(1) 簇首 → 槽清空。官方客户端
+	// 的打坐态/回血显示键控在这对帧上；LogicState=102 + m24 dazuo_old
+	// 是 fork 线方言（官方全程不发 LogicState，真机 2026-11-27 打坐不生
+	// 效根因）。逻辑位 logicSitcross 仍是服务端回复 tick 的内部闸门。
+	id := pl.wireIdent()
 	b := newFrameBuilder(pl)
-	b.prop("LogicState", entergen.ByteValue(to))
-	b.custom(24, b.selfValue(), entergen.CustomInt(action), entergen.CustomString(sitcrossAction))
+	if enter {
+		b.prop("BufferInfo2", entergen.StringValue(
+			fmt.Sprintf("%s,%X,%X,0,0,0", sitcrossBuffStatic, id.objectID, id.ownerID)))
+		b.buffNotice(true, pl.Name)
+	} else {
+		b.buffNotice(false, pl.Name)
+		b.prop("BufferInfo2", entergen.StringValue(""))
+	}
 	frames := b.frames
 	st.mu.Unlock()
 	s.sendFrames(pl, frames)
-	s.trace("sitcross: native state %d -> %d via LogicState + dazuo_old action client=%d", from, to, pl.Conn1)
+	s.trace("sitcross: native state %d -> %d via buf_baosd_02 registration client=%d", from, to, pl.Conn1)
+}
+
+// sitcrossBuffName / sitcrossBuffStatic 打坐 buff（StaticData 0x1E37；
+// BufferInfo2 槽串首列，登录基线同源）。
+const (
+	sitcrossBuffName   = "buf_baosd_02"
+	sitcrossBuffStatic = "1E37"
+)
+
+// buffNotice m169 打坐 buff 挂/撤（无时长：到期段 0；目标/施法者=本人，
+// 名字对=角色名——男号线 #1294 九值同形）。
+func (b *frameBuilder) buffNotice(add bool, name string) {
+	flag := int32(1)
+	if add {
+		flag = 0
+	}
+	b.custom(entergen.MsgBuff,
+		entergen.CustomInt(flag),
+		entergen.CustomString(sitcrossBuffName),
+		b.selfValue(),
+		b.selfValue(),
+		entergen.CustomString(name),
+		entergen.CustomString(name),
+		entergen.CustomInt64(0),
+		entergen.CustomInt(0))
 }
 
 // sitTickLocked 打坐回复一跳（combatTick 每秒调，调用方持 combatState.mu）。

@@ -32,6 +32,14 @@ func TaskMoneyFrame(player Identity, money int64) ([]byte, error) {
 	})
 }
 
+// TaskOfficialSilverFrame 官银余额帧 0x10 CapitalType2=<余额>（任务奖励
+// prize_base[1]；获得提示码未实证，只推余额）。
+func TaskOfficialSilverFrame(player Identity, officialSilver int64) ([]byte, error) {
+	return ObjectPropertyFrame(player.ObjectID, player.OwnerID, 0, []IndexedProperty{
+		NamedProperty("CapitalType2", Int64Value(officialSilver)),
+	})
+}
+
 // TaskReputeRowFrame 新声望加行 0x11 Repute_Record row=<行>。
 func TaskReputeRowFrame(objectID, ownerID uint32, row uint16, name string, count int32) ([]byte, error) {
 	return RecordAddRowFrame(objectID, ownerID, recordRepute, row, []RecordCell{

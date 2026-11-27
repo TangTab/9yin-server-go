@@ -13,8 +13,9 @@ import (
 )
 
 // gmPropWhiteList gm set 白名单：字段名 → roleState 落点 + 热发属性
-// （与 entergen.basePropertyFrames 同名同型；money 对拍 2433 线
-// CapitalType1）。HP/MP 同时刷新 Max 语义（0x10 两属性一帧）。
+// （与 entergen.basePropertyFrames 同名同型；货币三币 money/official/
+// gold 对拍 2433 线 CapitalType1/2/0）。HP/MP 同时刷新 Max 语义
+//（0x10 两属性一帧）。
 type gmPropSpec struct {
 	apply func(pl *Player, v int64)
 	frame func(pl *Player) ([]byte, error)
@@ -27,7 +28,9 @@ var gmPropWhiteList = map[string]gmPropSpec{
 	"spi":   {apply: func(pl *Player, v int64) { pl.roleState.Spi = int(v) }, frame: propFrameInt32("Spi", func(pl *Player) int32 { return int32(pl.roleState.Spi) })},
 	"sta":   {apply: func(pl *Player, v int64) { pl.roleState.Sta = int(v) }, frame: propFrameInt32("Sta", func(pl *Player) int32 { return int32(pl.roleState.Sta) })},
 	"parry": {apply: func(pl *Player, v int64) { pl.roleState.Parry = int(v) }, frame: propFrameInt32("MaxParry", func(pl *Player) int32 { return int32(pl.roleState.Parry) })},
-	"money": {apply: func(pl *Player, v int64) { pl.roleState.Money = v }, frame: moneyFrame},
+	"money":    {apply: func(pl *Player, v int64) { pl.roleState.Money = v }, frame: moneyFrame},
+	"official": {apply: func(pl *Player, v int64) { pl.roleState.OfficialSilver = v }, frame: officialSilverFrame},
+	"gold":     {apply: func(pl *Player, v int64) { pl.roleState.Gold = v }, frame: goldFrame},
 }
 
 // hp/mp：值与 Max 同步（0x10 一帧两属性）。怒气（sp）不在这里：它是会话值
@@ -120,8 +123,10 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		st := pl.roleState
 		fmt.Fprintf(nc, ">account=%s name=%s state=%s\r", pl.Account, pl.Name, pl.State)
 		fmt.Fprintf(nc, ">str=%d dex=%d ing=%d spi=%d sta=%d\r", st.Str, st.Dex, st.Ing, st.Spi, st.Sta)
-		// 资源行不含怒气：那是会话值（gm rage 读）。
-		fmt.Fprintf(nc, ">hp=%d mp=%d parry=%d money=%d\r", st.HP, st.MP, st.Parry, st.Money)
+		// 资源行不含怒气：那是会话值（gm rage 读）。货币三币各占一段
+		//（碎银/官银/黄金——currency.go）。
+		fmt.Fprintf(nc, ">hp=%d mp=%d parry=%d\r", st.HP, st.MP, st.Parry)
+		fmt.Fprintf(nc, ">money=%d official=%d gold=%d\r", st.Money, st.OfficialSilver, st.Gold)
 		fmt.Fprintf(nc, ">scene=%s pos=%.3f,%.3f,%.3f,%.3f\r", st.Scene,
 			st.Position[0], st.Position[1], st.Position[2], st.Position[3])
 		fmt.Fprintf(nc, ">skills=%d neigong=%d cur=%s facultySeed=%d\r",
@@ -134,7 +139,7 @@ func (e *EchoConsole) gmCommand(nc net.Conn, fields []string) {
 		prop := strings.ToLower(fields[2])
 		spec, ok := gmPropWhiteList[prop]
 		if !ok {
-			fmt.Fprintf(nc, ">gm set: unknown prop %q (whitelist: str dex ing spi sta hp mp parry money)\r", fields[2])
+			fmt.Fprintf(nc, ">gm set: unknown prop %q (whitelist: str dex ing spi sta hp mp parry money official gold)\r", fields[2])
 			return
 		}
 		v, err := strconv.ParseInt(fields[3], 10, 64)

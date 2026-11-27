@@ -146,8 +146,8 @@ func TestUseItemSkillBookOfficialDialect(t *testing.T) {
 	}
 	f.finish(t)
 	tail := f.take()
-	if len(tail) != 9 {
-		t.Fatalf("尾段帧数 %d want 9: % x", len(tail), tail)
+	if len(tail) != 10 {
+		t.Fatalf("尾段帧数 %d want 10: % x", len(tail), tail)
 	}
 	if !bytes.Equal(tail[0], mustHex(t, officialFlowEnd)) {
 		t.Errorf("m26 不符官服: % x", tail[0])
@@ -186,6 +186,10 @@ func TestUseItemSkillBookOfficialDialect(t *testing.T) {
 	}
 	if !bytes.Equal(tail[8], mustHex(t, officialConsume)) {
 		t.Errorf("扣件帧不符官服: % x", tail[8])
+	}
+	// 镜像页清位（ViewID 1 → 镜像页 174=0xAE 同槽位）。
+	if !bytes.Equal(tail[9], mustHex(t, "19ae000500")) {
+		t.Errorf("扣件镜像清位帧异常: % x", tail[9])
 	}
 	if f.busy() {
 		t.Error("读条结束后应清读条态")
@@ -264,12 +268,12 @@ func TestUseItemMoneyBagAndCooldown(t *testing.T) {
 	f.finish(t)
 	tail := f.take()
 	// 尾段：m26 → 清态 → 解锁 → 碎银帧 → 冷却行（0x11 空行 + 4×0x13 逐格）
-	// → 扣件。
-	if len(tail) != 10 || !bytes.Equal(tail[0], mustHex(t, officialFlowEnd)) ||
+	// → 扣件对（页清位 + 镜像页清位）。
+	if len(tail) != 11 || !bytes.Equal(tail[0], mustHex(t, officialFlowEnd)) ||
 		!bytes.Equal(tail[2], mustHex(t, "100102000000030000000100720700000000")) ||
 		tail[3][0] != 0x10 || !bytes.Equal(tail[3], playerPropFrame(t, "CapitalType1", entergen.Int64Value(500))) ||
 		tail[4][0] != 0x11 || tail[5][0] != 0x13 || tail[8][0] != 0x13 ||
-		!bytes.Equal(tail[9], mustHex(t, "1902000300")) {
+		!bytes.Equal(tail[9], mustHex(t, "1902000300")) || !bytes.Equal(tail[10], mustHex(t, "19ae000300")) {
 		t.Fatalf("钱袋尾段帧异常（%d 帧）: % x", len(tail), tail)
 	}
 	// 冷却行四格：类别 24001（int 格）→ 起 → 止（i64）→ 队 0xFFFF。
@@ -304,12 +308,13 @@ func TestUseItemMoneyBagAndCooldown(t *testing.T) {
 		t.Fatalf("拒绝面应零应答不动状态: frames=%d money=%d bag=%d busy=%t", len(extra), st.Money, len(st.BagItems), f.busy())
 	}
 
-	// 瞬时使用（功能包无 PrepareTime）：无读条流，入账帧 + 扣件即发。
+	// 瞬时使用（功能包无 PrepareTime）：无读条流，入账帧 + 扣件对即发。
 	st.BagItems = append(st.BagItems, rolestate.BagItem{Slot: 7, ConfigID: "inst_money", ItemType: 37, ViewID: 1, Amount: 1, Seq: 9})
 	f.s.dispatchCustom(f.pl, useMsg(2, 7, 1))
 	instant := f.take()
-	if len(instant) != 2 || !bytes.Equal(instant[0], playerPropFrame(t, "CapitalType1", entergen.Int64Value(1050))) ||
-		!bytes.Equal(instant[1], mustHex(t, "1902000700")) || st.Money != 1050 || f.busy() {
+	if len(instant) != 3 || !bytes.Equal(instant[0], playerPropFrame(t, "CapitalType1", entergen.Int64Value(1050))) ||
+		!bytes.Equal(instant[1], mustHex(t, "1902000700")) || !bytes.Equal(instant[2], mustHex(t, "19ae000700")) ||
+		st.Money != 1050 || f.busy() {
 		t.Fatalf("瞬时使用异常（%d 帧）: % x money=%d busy=%t", len(instant), instant, st.Money, f.busy())
 	}
 }
@@ -322,12 +327,16 @@ func TestUseItemStackConsume(t *testing.T) {
 	st.BagItems = []rolestate.BagItem{{Slot: 2, ConfigID: "inst_money", ItemType: 37, ViewID: 1, Amount: 3, MaxAmount: 99, Seq: 1}}
 	f.s.dispatchCustom(f.pl, useMsg(2, 2, 1))
 	frames := f.take()
-	// 瞬时使用：碎银帧 → 扣件（0x19）→ 减堆行成对（0x19 + 0x18）。
-	if len(frames) != 4 || frames[0][0] != 0x10 || frames[1][0] != 0x19 || frames[2][0] != 0x19 ||
-		frames[3][0] != 0x18 {
+	// 瞬时使用：碎银帧 → 减堆入包三元组（0x19 预清 + 0x18 行 + 0x19 镜像
+	// 清位，购销同方言）。
+	if len(frames) != 4 || frames[0][0] != 0x10 || frames[1][0] != 0x19 || frames[2][0] != 0x18 ||
+		frames[3][0] != 0x19 {
 		t.Fatalf("减堆帧序异常: % x", frames)
 	}
-	row := frames[3]
+	if !bytes.Equal(frames[3], mustHex(t, "19ae000200")) {
+		t.Fatalf("减堆镜像清位帧异常: % x", frames[3])
+	}
+	row := frames[2]
 	if !frameContains([][]byte{row}, []byte("inst_money")) || uint16(row[3])|uint16(row[4])<<8 != 2 {
 		t.Fatalf("减堆行帧异常: % x", row)
 	}
@@ -397,7 +406,7 @@ func TestGrantBagItemCarriesTemplate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if item.ItemType != 37 || item.MaxAmount != 1 || st.BagItems[0].ItemType != 37 || len(push) != 2 {
+	if item.ItemType != 37 || item.MaxAmount != 1 || st.BagItems[0].ItemType != 37 || len(push) != 3 {
 		t.Fatalf("入包行应携模板行数据: %+v push=%d", item, len(push))
 	}
 	bare, _, err := f.s.grantBagItem(f.pl, "unknown_item", 2, 4)

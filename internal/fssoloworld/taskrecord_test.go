@@ -276,17 +276,20 @@ func talkWindows(t *testing.T, frames [][]byte) []string {
 	return windows
 }
 
-// withItemSlot 把期望里的入包行占位（@view@/@slot@）填成背包末行的视图号与
-// 槽位（入包链按物品目录决定分类页与槽位，用例只断言「先清行再加行」）。
+// withItemSlot 把期望里的入包行占位（@view@/@mirror@/@slot@）填成背包末行
+// 的视图号、镜像页号与槽位（入包链按物品目录决定分类页与槽位，用例只
+// 断言「先清行再加行再镜像清位」）。
 func withItemSlot(t *testing.T, pl *Player, want, got []string) []string {
 	t.Helper()
 	if len(pl.roleState.BagItems) == 0 {
 		return got
 	}
 	row := pl.roleState.BagItems[len(pl.roleState.BagItems)-1]
-	view, slot := strconv.Itoa(int(entergen.BagViewOf(row.ViewID))), strconv.Itoa(row.Slot)
+	view := strconv.Itoa(int(entergen.BagViewOf(row.ViewID)))
+	mirror := strconv.Itoa(int(entergen.BagMirrorOf(entergen.BagViewOf(row.ViewID))))
+	slot := strconv.Itoa(row.Slot)
 	for i := range want {
-		want[i] = strings.ReplaceAll(strings.ReplaceAll(want[i], "@view@", view), "@slot@", slot)
+		want[i] = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(want[i], "@view@", view), "@mirror@", mirror), "@slot@", slot)
 	}
 	return got
 }
@@ -456,7 +459,7 @@ func TestTaskSyncOfficialOrder(t *testing.T) {
 		}
 		var want []string
 		if book := stepBooks[step]; book != "" {
-			want = append(want, "19 view=@view@ idx=@slot@", "18 view=@view@ idx=@slot@",
+			want = append(want, "19 view=@view@ idx=@slot@", "18 view=@view@ idx=@slot@", "19 view=@mirror@ idx=@slot@",
 				fmt.Sprintf("m1 1 %q %q 1", "9645", book))
 		}
 		want = append(want,
@@ -887,8 +890,10 @@ func TestTaskSyncGuideChainToEnd(t *testing.T) {
 	}
 	want := []string{
 		"19 view=@view:additem_0011@ idx=@slot:additem_0011@", "18 view=@view:additem_0011@ idx=@slot:additem_0011@",
+		"19 view=@mirror:additem_0011@ idx=@slot:additem_0011@",
 		`m1 1 "9645" "additem_0011" 1`,
 		"19 view=@view:box_cdjh_001@ idx=@slot:box_cdjh_001@", "18 view=@view:box_cdjh_001@ idx=@slot:box_cdjh_001@",
+		"19 view=@mirror:box_cdjh_001@ idx=@slot:box_cdjh_001@",
 		`m1 1 "9645" "box_cdjh_001" 1`,
 		`m1 8 "10012,additem_0011,1|10012,box_cdjh_001,1|"`,
 		"10 CapitalType1=146999", // 引导链各环完成奖励的碎银累计
@@ -907,6 +912,8 @@ func TestTaskSyncGuideChainToEnd(t *testing.T) {
 		if item.ConfigID == "additem_0011" || item.ConfigID == "box_cdjh_001" {
 			for i := range want {
 				want[i] = strings.ReplaceAll(want[i], "@view:"+item.ConfigID+"@", strconv.Itoa(int(entergen.BagViewOf(item.ViewID))))
+				want[i] = strings.ReplaceAll(want[i], "@mirror:"+item.ConfigID+"@",
+					strconv.Itoa(int(entergen.BagMirrorOf(entergen.BagViewOf(item.ViewID)))))
 				want[i] = strings.ReplaceAll(want[i], "@slot:"+item.ConfigID+"@", strconv.Itoa(item.Slot))
 			}
 		}

@@ -96,11 +96,12 @@ func TestClaimAppendixGrantsBagItem(t *testing.T) {
 	frames := captureFrames(t)
 	s.handleGetAppendix(pl, customMsg(clientCustomPostGetAppendix, customStr(letter.Serial)))
 
-	// 帧序钉死：0x19（入包预清）→0x18（行）→0x12（删行）→0x11（重推）。
-	if len(*frames) != 4 {
-		t.Fatalf("claim frames = %d ops % x, want 4 (0x19 0x18 0x12 0x11)", len(*frames), opOf(*frames))
+	// 帧序钉死：0x19（入包预清）→0x18（行）→0x19（镜像页清位）→0x12
+	// （删行）→0x11（重推）。
+	if len(*frames) != 5 {
+		t.Fatalf("claim frames = %d ops % x, want 5 (0x19 0x18 0x19 0x12 0x11)", len(*frames), opOf(*frames))
 	}
-	for i, want := range []byte{0x19, 0x18, 0x12, 0x11} {
+	for i, want := range []byte{0x19, 0x18, 0x19, 0x12, 0x11} {
 		if (*frames)[i][0] != want {
 			t.Fatalf("claim frame[%d] op=%#x want %#x (all: % x)", i, (*frames)[i][0], want, opOf(*frames))
 		}

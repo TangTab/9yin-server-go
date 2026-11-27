@@ -383,7 +383,9 @@ func (s *Server) handleShopSell(pl *Player, message entergen.CustomInbound) {
 	wire := entergen.BagViewOf(int(category))
 	if row.Amount == 0 {
 		st.BagItems = append(st.BagItems[:rowIdx], st.BagItems[rowIdx+1:]...)
-		s.sendToClient(pl, entergen.ViewRemoveFrame(wire, uint16(idx)))
+		for _, frame := range entergen.BagRowRemoveFrames(wire, uint16(idx)) {
+			s.sendToClient(pl, frame)
+		}
 	} else {
 		push, err := entergen.BagItemPushFrames(*row)
 		if err != nil {

@@ -34,6 +34,25 @@ func bagViewOf(viewID int) uint16 {
 // 服务端业务共用）。
 func BagViewOf(viewID int) uint16 { return bagViewOf(viewID) }
 
+// bagViewMirror 背包页视图 → 时装镜像页（2433 线 fashionMirror 同表）：
+// 分类页 2/121/123/125 与扩展页 3/122/124/126 各有镜像；行推送成对清位
+// 防客户端计数器误删 add 行。
+var bagViewMirror = map[uint16]uint16{
+	2: 174, 3: 175, 121: 176, 122: 177, 123: 178, 124: 179, 125: 180, 126: 181,
+}
+
+// bagMirrorOf 背包页视图 → 时装镜像页（无镜像页返回原视图）。
+func bagMirrorOf(view uint16) uint16 {
+	if mirror, ok := bagViewMirror[view]; ok {
+		return mirror
+	}
+	return view
+}
+
+// BagMirrorOf 背包页视图 → 时装镜像页（导出面：服务端删行链镜像清位
+// 共用；无镜像页返回原视图）。
+func BagMirrorOf(view uint16) uint16 { return bagMirrorOf(view) }
+
 // ViewRemoveFrame 0x19 视图删行：[19][u16 vid][u16 idx]（5B；行推送
 // 预清/删除共用）。
 func ViewRemoveFrame(viewID, objectIndex uint16) []byte {
@@ -42,6 +61,12 @@ func ViewRemoveFrame(viewID, objectIndex uint16) []byte {
 	putU16(msg, 1, viewID)
 	putU16(msg, 3, objectIndex)
 	return msg
+}
+
+// BagRowRemoveFrames 背包行删行帧组（页清位 + 镜像页清位成对——2433
+// 线 pushBagItemFrames 同款防回归形态；wire 视图号）。
+func BagRowRemoveFrames(view, slot uint16) [][]byte {
+	return [][]byte{ViewRemoveFrame(view, slot), ViewRemoveFrame(bagMirrorOf(view), slot)}
 }
 
 // bagItemViewRow 背包行属性集（itemCommonProps 六项；Amount 下发实际
@@ -105,8 +130,9 @@ func maxAmountOf(item rolestate.BagItem) int {
 	return 1
 }
 
-// BagItemPushFrames 单件入包推送（0x19 预清 + 0x18 行成对——GM 发放/
-// 后续拾取链共用；slot=行 objectIndex）。
+// BagItemPushFrames 单件入包推送（三元组：0x19 预清 + 0x18 行 + 0x19
+// 镜像页清位——2433 线 pushBagItemFrames 同款，镜像清位防客户端计数器
+// 误删 add 行；GM 发放/后续拾取链共用；slot=行 objectIndex）。
 func BagItemPushFrames(item rolestate.BagItem) ([][]byte, error) {
 	view := bagViewOf(item.ViewID)
 	slot := uint16(item.Slot)
@@ -114,7 +140,7 @@ func BagItemPushFrames(item rolestate.BagItem) ([][]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return [][]byte{ViewRemoveFrame(view, slot), row}, nil
+	return [][]byte{ViewRemoveFrame(view, slot), row, ViewRemoveFrame(bagMirrorOf(view), slot)}, nil
 }
 
 // BagItemViewFrames 全背包行推送（Ready 段空容器族之后；空背包零帧）。
